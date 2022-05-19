@@ -1,6 +1,8 @@
 // Copyright 2019-2022 @subwallet/extension-koni-base authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
+import { assetFromToken } from '@equilab/api';
+import { SignedBalance } from '@equilab/api/genshiro/interfaces';
 import { APIItemState, ApiProps, BalanceChildItem, BalanceItem, TokenBalanceRaw, TokenInfo } from '@subwallet/extension-base/background/KoniTypes';
 import { ethereumChains, moonbeamBaseChains } from '@subwallet/extension-koni-base/api/dotsama/api-helper';
 import { getRegistry, getTokenInfo } from '@subwallet/extension-koni-base/api/dotsama/registry';
@@ -13,13 +15,10 @@ import { Observable } from 'rxjs';
 import { Contract } from 'web3-eth-contract';
 
 import { ApiPromise } from '@polkadot/api';
-import { UnsubscribePromise } from '@polkadot/api/types';
 import { DeriveBalancesAll } from '@polkadot/api-derive/types';
 import { AccountInfo } from '@polkadot/types/interfaces';
 import { BN } from '@polkadot/util';
 import { isEthereumAddress } from '@polkadot/util-crypto';
-import { assetFromToken } from '@equilab/api';
-import { SignedBalance } from "@equilab/api/genshiro/interfaces";
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 // @ts-ignore
@@ -109,226 +108,182 @@ function subscribeERC20Interval (addresses: string[], networkKey: string, api: A
   };
 }
 
-function subscribeGenshiroTokenBalance (addresses: string[], networkKey: string, api: ApiPromise, originBalanceItem: BalanceItem, callback: (rs: BalanceItem) => void, includeMainToken?: boolean): () => void {
-  let forceStop = false;
-
-  let unsubAll = () => {
-    forceStop = true;
-  };
-
+async function subscribeGenshiroTokenBalance (addresses: string[], networkKey: string, api: ApiPromise, originBalanceItem: BalanceItem, callback: (rs: BalanceItem) => void, includeMainToken?: boolean): Promise<() => void> {
   originBalanceItem.children = originBalanceItem.children || {};
 
-  getRegistry(networkKey, api)
-    .then(({tokenMap}) => {
-      if (forceStop) {
-        return;
-      }
+  const { tokenMap } = await getRegistry(networkKey, api);
 
-      let tokenList = Object.values(tokenMap);
+  let tokenList = Object.values(tokenMap);
 
-      if (!includeMainToken) {
-        tokenList = tokenList.filter((t) => !t.isMainToken);
-      }
+  if (!includeMainToken) {
+    tokenList = tokenList.filter((t) => !t.isMainToken);
+  }
 
-      if (tokenList.length > 0) {
-        console.log('Get tokens balance of', networkKey, tokenList);
-      }
+  if (tokenList.length > 0) {
+    console.log('Get tokens balance of', networkKey, tokenList);
+  }
 
-      const unsubList = tokenList.map(({symbol, decimals}) => {
-        const asset = networkKey === 'equilibrium_parachain' ? assetFromToken(symbol)[0] : assetFromToken(symbol);
-        const observable = new Observable<BalanceChildItem>((subscriber) => {
-          // Get Token Balance
-          // @ts-ignore
-          const apiCall = api.query.eqBalances.account.multi(addresses.map((address) => [address, asset]), (balances: SignedBalance[]) => {
+  const unsubList = tokenList.map(({ decimals, symbol }) => {
+    const asset = networkKey === 'equilibrium_parachain' ? assetFromToken(symbol)[0] : assetFromToken(symbol);
+    const observable = new Observable<BalanceChildItem>((subscriber) => {
+      // Get Token Balance
+      // @ts-ignore
+      const apiCall = api.query.eqBalances.account.multi(addresses.map((address) => [address, asset]), (balances: SignedBalance[]) => {
+        const tokenBalance = {
+          reserved: '0',
+          frozen: '0',
+          free: sumBN(balances.map((b) => (b.asPositive))).toString(),
+          decimals
+        };
 
-            const tokenBalance = {
-              reserved: '0',
-              frozen: '0',
-              free: sumBN(balances.map((b) => (b.asPositive))).toString(),
-              decimals
-            };
-
-            subscriber.next(tokenBalance);
-          });
-        });
-
-        return observable.subscribe({
-          next: (childBalance) => {
-            if (includeMainToken && tokenMap[symbol].isMainToken) {
-              originBalanceItem.state = APIItemState.READY;
-              originBalanceItem.free = childBalance.free;
-            } else {
-              // @ts-ignore
-              originBalanceItem.children[symbol] = childBalance;
-            }
-            callback(originBalanceItem);
-          }
-        });
-      })
-
-      unsubAll = () => {
-        unsubList.forEach((unsub) => {
-          unsub && unsub.unsubscribe();
-        });
-      };
-    })
-    .catch(console.error);
-  return unsubAll;
-}
-
-function subscribeTokensBalance (addresses: string[], networkKey: string, api: ApiPromise, originBalanceItem: BalanceItem, callback: (rs: BalanceItem) => void, includeMainToken?: boolean) {
-  let forceStop = false;
-
-  let unsubAll = () => {
-    forceStop = true;
-  };
-
-  originBalanceItem.children = originBalanceItem.children || {};
-
-  getRegistry(networkKey, api)
-    .then(({ tokenMap }) => {
-      if (forceStop) {
-        return;
-      }
-
-      let tokenList = Object.values(tokenMap);
-
-      if (!includeMainToken) {
-        tokenList = tokenList.filter((t) => !t.isMainToken);
-      }
-
-      if (tokenList.length > 0) {
-        console.log('Get tokens balance of', networkKey, tokenList);
-      }
-
-      const unsubList = tokenList.map(({ decimals, specialOption, symbol }) => {
-        const observable = new Observable<BalanceChildItem>((subscriber) => {
-          // Get Token Balance
-          // @ts-ignore
-          const apiCall = api.query.tokens.accounts.multi(addresses.map((address) => [address, options]), (balances: TokenBalanceRaw[]) => {
-            const tokenBalance = {
-              reserved: sumBN(balances.map((b) => (b.reserved || new BN(0)))).toString(),
-              frozen: sumBN(balances.map((b) => (b.frozen || new BN(0)))).toString(),
-              free: sumBN(balances.map((b) => (b.free || new BN(0)))).toString(),
-              decimals
-            };
-
-            subscriber.next(tokenBalance);
-          });
-        });
-        const options = specialOption || { Token: symbol };
-
-        return observable.subscribe({
-          next: (childBalance) => {
-            if (includeMainToken && tokenMap[symbol].isMainToken) {
-              originBalanceItem.state = APIItemState.READY;
-              originBalanceItem.free = childBalance.free;
-              originBalanceItem.reserved = childBalance.reserved;
-              originBalanceItem.feeFrozen = childBalance.frozen;
-            } else {
-              // @ts-ignore
-              originBalanceItem.children[symbol] = childBalance;
-            }
-
-            callback(originBalanceItem);
-          }
-        });
+        subscriber.next(tokenBalance);
       });
+    });
 
-      unsubAll = () => {
-        unsubList.forEach((unsub) => {
-          unsub && unsub.unsubscribe();
-        });
-      };
-    })
-    .catch(console.error);
+    return observable.subscribe({
+      next: (childBalance) => {
+        if (includeMainToken && tokenMap[symbol].isMainToken) {
+          originBalanceItem.state = APIItemState.READY;
+          originBalanceItem.free = childBalance.free;
+        } else {
+          // @ts-ignore
+          originBalanceItem.children[symbol] = childBalance;
+        }
 
-  return unsubAll;
+        callback(originBalanceItem);
+      }
+    });
+  });
+
+  return () => {
+    unsubList.forEach((unsub) => {
+      unsub && unsub.unsubscribe();
+    });
+  };
 }
 
-function subscribeAssetsBalance (addresses: string[], networkKey: string, api: ApiPromise, originBalanceItem: BalanceItem, callback: (rs: BalanceItem) => void) {
-  let forceStop = false;
-
-  let unsubAll = () => {
-    forceStop = true;
-  };
-
+async function subscribeTokensBalance (addresses: string[], networkKey: string, api: ApiPromise, originBalanceItem: BalanceItem, callback: (rs: BalanceItem) => void, includeMainToken?: boolean) {
   originBalanceItem.children = originBalanceItem.children || {};
 
-  getRegistry(networkKey, api)
-    .then(({ tokenMap }) => {
-      if (forceStop) {
-        return;
-      }
+  const { tokenMap } = await getRegistry(networkKey, api);
+  let tokenList = Object.values(tokenMap);
 
-      let tokenList = Object.values(tokenMap);
+  if (!includeMainToken) {
+    tokenList = tokenList.filter((t) => !t.isMainToken);
+  }
 
-      tokenList = tokenList.filter((t) => !t.isMainToken && t.assetIndex);
+  if (tokenList.length > 0) {
+    console.log('Get tokens balance of', networkKey, tokenList);
+  }
 
-      if (tokenList.length > 0) {
-        console.log('Get tokens assets of', networkKey, tokenList);
-      }
+  const unsubList = tokenList.map(({ decimals, specialOption, symbol }) => {
+    const observable = new Observable<BalanceChildItem>((subscriber) => {
+      // Get Token Balance
+      // @ts-ignore
+      const apiCall = api.query.tokens.accounts.multi(addresses.map((address) => [address, options]), (balances: TokenBalanceRaw[]) => {
+        const tokenBalance = {
+          reserved: sumBN(balances.map((b) => (b.reserved || new BN(0)))).toString(),
+          frozen: sumBN(balances.map((b) => (b.frozen || new BN(0)))).toString(),
+          free: sumBN(balances.map((b) => (b.free || new BN(0)))).toString(),
+          decimals
+        };
 
-      const unsubList = tokenList.map(({ assetIndex, decimals, symbol }) => {
-        const observable = new Observable<BalanceChildItem>((subscriber) => {
-          // Get Token Balance
+        subscriber.next(tokenBalance);
+      });
+    });
+    const options = specialOption || { Token: symbol };
+
+    return observable.subscribe({
+      next: (childBalance) => {
+        if (includeMainToken && tokenMap[symbol].isMainToken) {
+          originBalanceItem.state = APIItemState.READY;
+          originBalanceItem.free = childBalance.free;
+          originBalanceItem.reserved = childBalance.reserved;
+          originBalanceItem.feeFrozen = childBalance.frozen;
+        } else {
           // @ts-ignore
-          const apiCall = api.query.assets.account.multi(addresses.map((address) => [assetIndex, address]), (balances) => {
-            let free = new BN(0);
-            let frozen = new BN(0);
+          originBalanceItem.children[symbol] = childBalance;
+        }
 
-            balances.forEach((b) => {
-              // @ts-ignore
-              // eslint-disable-next-line @typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-assignment
-              const bdata = b?.toJSON();
+        callback(originBalanceItem);
+      }
+    });
+  });
 
-              if (bdata) {
-                // @ts-ignore
-                // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access,@typescript-eslint/no-unsafe-argument
-                const addressBalance = new BN(String(bdata?.balance) || '0');
+  return () => {
+    unsubList.forEach((unsub) => {
+      unsub && unsub.unsubscribe();
+    });
+  };
+}
 
-                // @ts-ignore
-                if (bdata?.isFrozen) {
-                  frozen = frozen.add(addressBalance);
-                } else {
-                  free = free.add(addressBalance);
-                }
-              }
-            });
+async function subscribeAssetsBalance (addresses: string[], networkKey: string, api: ApiPromise, originBalanceItem: BalanceItem, callback: (rs: BalanceItem) => void) {
+  originBalanceItem.children = originBalanceItem.children || {};
+  const { tokenMap } = await getRegistry(networkKey, api);
+  let tokenList = Object.values(tokenMap);
 
-            const tokenBalance = {
-              reserved: '0',
-              frozen: frozen.toString(),
-              free: free.toString(),
-              decimals
-            };
+  tokenList = tokenList.filter((t) => !t.isMainToken && t.assetIndex);
 
-            subscriber.next(tokenBalance);
-          });
-        });
+  if (tokenList.length > 0) {
+    console.log('Get tokens assets of', networkKey, tokenList);
+  }
 
-        return observable.subscribe({
-          next: (childBalance) => {
+  const unsubList = tokenList.map(({ assetIndex, decimals, symbol }) => {
+    const observable = new Observable<BalanceChildItem>((subscriber) => {
+      // Get Token Balance
+      // @ts-ignore
+      const apiCall = api.query.assets.account.multi(addresses.map((address) => [assetIndex, address]), (balances) => {
+        let free = new BN(0);
+        let frozen = new BN(0);
+
+        balances.forEach((b) => {
+          // @ts-ignore
+          // eslint-disable-next-line @typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-assignment
+          const bdata = b?.toJSON();
+
+          if (bdata) {
             // @ts-ignore
-            originBalanceItem.children[symbol] = childBalance;
+            // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access,@typescript-eslint/no-unsafe-argument
+            const addressBalance = new BN(String(bdata?.balance) || '0');
 
-            callback(originBalanceItem);
+            // @ts-ignore
+            if (bdata?.isFrozen) {
+              frozen = frozen.add(addressBalance);
+            } else {
+              free = free.add(addressBalance);
+            }
           }
         });
+
+        const tokenBalance = {
+          reserved: '0',
+          frozen: frozen.toString(),
+          free: free.toString(),
+          decimals
+        };
+
+        subscriber.next(tokenBalance);
       });
+    });
 
-      unsubAll = () => {
-        unsubList.forEach((unsub) => {
-          unsub && unsub.unsubscribe();
-        });
-      };
-    })
-    .catch(console.error);
+    return observable.subscribe({
+      next: (childBalance) => {
+        // @ts-ignore
+        originBalanceItem.children[symbol] = childBalance;
 
-  return unsubAll;
+        callback(originBalanceItem);
+      }
+    });
+  });
+
+  return () => {
+    unsubList.forEach((unsub) => {
+      unsub && unsub.unsubscribe();
+    });
+  };
 }
 
-function subscribeWithAccountMulti (addresses: string[], networkKey: string, networkAPI: ApiProps, callback: (networkKey: string, rs: BalanceItem) => void) {
+async function subscribeWithAccountMulti (addresses: string[], networkKey: string, networkAPI: ApiProps, callback: (networkKey: string, rs: BalanceItem) => void) {
   const balanceItem: BalanceItem = {
     state: APIItemState.PENDING,
     free: '0',
@@ -339,11 +294,12 @@ function subscribeWithAccountMulti (addresses: string[], networkKey: string, net
   };
 
   // @ts-ignore
-  let unsub: UnsubscribePromise;
+  let unsub;
 
   if (!['kintsugi', 'interlay', 'kintsugi_test', 'genshiro_testnet', 'genshiro', 'equilibrium_parachain'].includes(networkKey)) {
-    unsub = networkAPI.api.query.system.account.multi(addresses, (balances: AccountInfo[]) => {
+    unsub = await networkAPI.api.query.system.account.multi(addresses, (balances: AccountInfo[]) => {
       let [free, reserved, miscFrozen, feeFrozen] = [new BN(0), new BN(0), new BN(0), new BN(0)];
+
       balances.forEach((balance: AccountInfo) => {
         free = free.add(balance.data?.free?.toBn() || new BN(0));
         reserved = reserved.add(balance.data?.reserved?.toBn() || new BN(0));
@@ -364,28 +320,29 @@ function subscribeWithAccountMulti (addresses: string[], networkKey: string, net
   let unsub2: () => void;
 
   if (['bifrost', 'acala', 'karura', 'acala_testnet'].includes(networkKey)) {
-    unsub2 = subscribeTokensBalance(addresses, networkKey, networkAPI.api, balanceItem, (balanceItem) => {
+    unsub2 = await subscribeTokensBalance(addresses, networkKey, networkAPI.api, balanceItem, (balanceItem) => {
       callback(networkKey, balanceItem);
     });
   } else if (['kintsugi', 'interlay', 'kintsugi_test'].includes(networkKey)) {
-    unsub2 = subscribeTokensBalance(addresses, networkKey, networkAPI.api, balanceItem, (balanceItem) => {
+    unsub2 = await subscribeTokensBalance(addresses, networkKey, networkAPI.api, balanceItem, (balanceItem) => {
       callback(networkKey, balanceItem);
     }, true);
   } else if (['statemine'].indexOf(networkKey) > -1) {
-    unsub2 = subscribeAssetsBalance(addresses, networkKey, networkAPI.api, balanceItem, (balanceItem) => {
+    unsub2 = await subscribeAssetsBalance(addresses, networkKey, networkAPI.api, balanceItem, (balanceItem) => {
       callback(networkKey, balanceItem);
     });
   } else if (moonbeamBaseChains.indexOf(networkKey) > -1) {
     unsub2 = subscribeERC20Interval(addresses, networkKey, networkAPI.api, balanceItem, callback);
   } else if (['genshiro_testnet', 'genshiro', 'equilibrium_parachain'].includes(networkKey)) {
-    unsub2 = subscribeGenshiroTokenBalance(addresses, networkKey, networkAPI.api, balanceItem, (balanceItem) => {
+    unsub2 = await subscribeGenshiroTokenBalance(addresses, networkKey, networkAPI.api, balanceItem, (balanceItem) => {
       callback(networkKey, balanceItem);
     }, true);
   }
 
-  return async () => {
-    // eslint-disable-next-line @typescript-eslint/no-misused-promises
-    unsub && (await unsub)();
+  return () => {
+    // @ts-ignore
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-call
+    unsub && unsub();
     unsub2 && unsub2();
   };
 }
@@ -446,7 +403,7 @@ export function subscribeBalance (addresses: string[], dotSamaAPIMap: Record<str
     }
 
     // eslint-disable-next-line @typescript-eslint/no-misused-promises
-    return subscribeWithAccountMulti(useAddresses, networkKey, networkAPI, callback);
+    return await subscribeWithAccountMulti(useAddresses, networkKey, networkAPI, callback);
   });
 }
 
@@ -471,7 +428,9 @@ export async function getFreeBalance (networkKey: string, address: string, token
       if (['genshiro_testnet', 'genshiro', 'equilibrium_parachain'].includes(networkKey)) {
         const asset = networkKey === 'equilibrium_parachain' ? assetFromToken(token)[0] : assetFromToken(token);
         const balance = await api.query.eqBalances.account(address, asset);
+
         // @ts-ignore
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-member-access,@typescript-eslint/no-unsafe-return
         return balance.asPositive?.toString() || '0';
       } else if (!isMainToken || ['kintsugi', 'kintsugi_test', 'interlay'].includes(networkKey)) {
         // @ts-ignore

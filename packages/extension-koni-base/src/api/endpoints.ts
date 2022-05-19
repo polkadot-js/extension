@@ -573,7 +573,7 @@ const NETWORKS: Record<string, NetWorkInfo> = {
     genesisHash: '0xdec164ef73b27c5b7e404114305102018a2b5a4ddda665bb510ce896ad5ba78d',
     ss58Format: 67,
     provider: 'wss://testnet.genshiro.io',
-    groups: ['TEST_NET'],
+    groups: ['TEST_NET']
   },
   subsocial_x: {
     chain: 'SubsocialX',

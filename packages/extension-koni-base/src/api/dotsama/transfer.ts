@@ -224,8 +224,8 @@ function updateResponseTxResult (
     } else if (['genshiro_testnet', 'genshiro', 'equilibrium_parachain'].includes(networkKey) && tokenInfo) {
       if (record.event.section === 'eqBalances' &&
         record.event.method.toLowerCase() === 'transfer') {
-          response.txResult.change = record.event.data[3]?.toString() || '0';
-          response.txResult.changeSymbol = tokenInfo.symbol;
+        response.txResult.change = record.event.data[3]?.toString() || '0';
+        response.txResult.changeSymbol = tokenInfo.symbol;
       }
     } else {
       if ((record.event.section === 'balances' &&
@@ -255,10 +255,14 @@ export async function makeTransfer (
   const apiProps = await dotSamaAPIMap[networkKey].isReady;
   const api = apiProps.api;
   const fromAddress = fromKeypair.address;
-  // @ts-ignore
-  let nonce = await api.query.system.account(fromAddress).nonce;
+  let nonce;
+
   if (['genshiro_testnet', 'genshiro', 'equilibrium_parachain'].includes(networkKey)) {
     nonce = -1;
+  } else {
+    // @ts-ignore
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+    nonce = await api.query.system.account(fromAddress).nonce;
   }
 
   // @ts-ignore

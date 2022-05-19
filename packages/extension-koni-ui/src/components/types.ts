@@ -6,10 +6,12 @@ export type OmitProps<T, K> = Pick<T, Exclude<keyof T, K>>;
 export type SubtractProps<T, K> = OmitProps<T, keyof K>;
 
 export type BitLength = 8 | 16 | 32 | 64 | 128 | 256;
+export type BalanceFormatType = [number, string, string | undefined];
 
 export interface TokenItemType {
   networkKey: string;
   token: string;
+  tokenAlt?: string; // only for showing purpose
   decimals: number;
   isMainToken: boolean;
   specialOption?: object;

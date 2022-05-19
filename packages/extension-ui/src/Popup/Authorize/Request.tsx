@@ -4,14 +4,13 @@
 import type { RequestAuthorizeTab } from '@polkadot/extension-base/background/types';
 import type { ThemeProps } from '../../types';
 
-import React, { useCallback, useContext, useEffect, useMemo, useState } from 'react';
-import { Trans } from 'react-i18next';
+import React, { useCallback, useContext, useEffect } from 'react';
 import styled from 'styled-components';
 
-import { AccountContext, ActionBar, ActionContext, Button, Checkbox, Link, Warning } from '../../components';
+import { AccountContext, ActionBar, ActionContext, Button, Link } from '../../components';
 import useTranslation from '../../hooks/useTranslation';
 import { approveAuthRequest, rejectAuthRequest } from '../../messaging';
-import AccountsTree from '../Accounts/AccountsTree';
+import { AccountSelection, Header } from '../../partials';
 import NoAccount from './NoAccount';
 
 interface Props extends ThemeProps {
@@ -23,21 +22,13 @@ interface Props extends ThemeProps {
 }
 
 function Request ({ authId, className, isFirst, request: { origin }, url }: Props): React.ReactElement<Props> {
-  const { accounts, hierarchy } = useContext(AccountContext);
+  const { accounts, selectedAccounts = [], setSelectedAccounts } = useContext(AccountContext);
   const { t } = useTranslation();
   const onAction = useContext(ActionContext);
-  const { selectedAccounts = [], setSelectedAccounts } = useContext(AccountContext);
-  const [isIndeterminate, setIsIndeterminate] = useState(false);
-  const allVisibleAccounts = useMemo(() => accounts.filter(({ isHidden }) => !isHidden), [accounts]);
-  const areAllAccountsSelected = useMemo(() => selectedAccounts.length === allVisibleAccounts.length, [allVisibleAccounts.length, selectedAccounts.length]);
-  const noAccountSelected = useMemo(() => selectedAccounts.length === 0, [selectedAccounts.length]);
 
-  console.log('accounts', accounts);
   useEffect(() => {
-    const nextIndeterminateState = !noAccountSelected && !areAllAccountsSelected;
-
-    setIsIndeterminate(nextIndeterminateState);
-  }, [areAllAccountsSelected, noAccountSelected]);
+    setSelectedAccounts && setSelectedAccounts([]);
+  }, [setSelectedAccounts]);
 
   const _onApprove = useCallback(
     (): void => {
@@ -57,64 +48,24 @@ function Request ({ authId, className, isFirst, request: { origin }, url }: Prop
     [authId, onAction]
   );
 
-  const _onSelectAllToggle = useCallback(() => {
-    if (areAllAccountsSelected) {
-      setSelectedAccounts && setSelectedAccounts([]);
-
-      return;
-    }
-
-    const allVisibleAddresses = allVisibleAccounts
-      .map(({ address }) => address);
-
-    setSelectedAccounts && setSelectedAccounts(allVisibleAddresses);
-  }, [allVisibleAccounts, areAllAccountsSelected, setSelectedAccounts]
-  );
-
   if (!accounts.length) {
     return <NoAccount authId={authId} />;
   }
 
   return (
     <div className={className}>
-      <Warning className='warningMargin'>
-        <Trans key='accessRequest'>An application, self-identifying as <span className='tab-name'>{origin}</span> is requesting access from{' '}
-          <a
-            href={url}
-            rel='noopener noreferrer'
-            target='_blank'
-          >
-            <span className='tab-url'>{url}</span>
-          </a>
-        </Trans>
-      </Warning>
-      <Checkbox
-        checked={areAllAccountsSelected}
-        className='accountTree-checkbox'
-        indeterminate={isIndeterminate}
-        label={t('Select all')}
-        onChange={_onSelectAllToggle}
+      <AccountSelection
+        origin={origin}
+        url={url}
       />
-      <div className='accountList'>
-        {
-          hierarchy
-            .filter(({ isHidden }) => !isHidden)
-            .map((json, index): React.ReactNode => (
-              <AccountsTree
-                {...json}
-                key={`${index}:${json.address}`}
-                showHidden={false}
-                withCheckbox={true}
-                withMenu={false}
-              />
-            ))}
-      </div>
       {isFirst && (
         <Button
           className='acceptButton'
           onClick={_onApprove}
         >
-          {t<string>('Connect selected accounts')}
+          {t<string>('Connect {{total}} account(s)', { replace: {
+            total: selectedAccounts.length
+          } })}
         </Button>
       )}
       <ActionBar className='rejectionButton'>
@@ -123,47 +74,17 @@ function Request ({ authId, className, isFirst, request: { origin }, url }: Prop
           isDanger
           onClick={_onReject}
         >
-            Reject
+          {t<string>('Reject')}
         </Link>
       </ActionBar>
     </div>
   );
 }
 
-export default styled(Request)(({ theme }: Props) => `
-  .accountList {
-    overflow-y: auto;
-    margin-top: 5px;
-    height: 270px;
-  }
-
-  .tab-name,
-  .tab-url {
-    color: ${theme.textColor};
-    display: inline-block;
-    max-height: 10rem;
-    width: 100%;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    vertical-align: top;
-    cursor: pointer;
-    text-decoration: underline;
-    white-space: nowrap;
-  }
-
-
+export default styled(Request)`
   .acceptButton {
     width: 90%;
     margin: 25px auto 0;
-  }
-
-  .warningMargin {
-    margin: 0 24px 0 1.45rem;
-
-    .warning-message {
-      display: block;
-      width: 100%
-    }
   }
 
   .rejectionButton {
@@ -174,4 +95,4 @@ export default styled(Request)(({ theme }: Props) => `
       margin: auto;
     }
   }
-`);
+`;

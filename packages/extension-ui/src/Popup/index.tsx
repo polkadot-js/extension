@@ -16,6 +16,7 @@ import { AccountContext, ActionContext, AuthorizeReqContext, MediaContext, Metad
 import ToastProvider from '../components/Toast/ToastProvider';
 import { subscribeAccounts, subscribeAuthorizeRequests, subscribeMetadataRequests, subscribeSigningRequests } from '../messaging';
 import { buildHierarchy } from '../util/buildHierarchy';
+import AccountManagement from './AuthManagement/AccountManagement';
 import Accounts from './Accounts';
 import AuthList from './AuthManagement';
 import Authorize from './Authorize';
@@ -151,6 +152,7 @@ export default function Popup (): React.ReactElement {
                         <Route path='/account/restore-json'>{wrapWithErrorBoundary(<RestoreJson />, 'restore-json')}</Route>
                         <Route path='/account/derive/:address/locked'>{wrapWithErrorBoundary(<Derive isLocked />, 'derived-address-locked')}</Route>
                         <Route path='/account/derive/:address'>{wrapWithErrorBoundary(<Derive />, 'derive-address')}</Route>
+                        <Route path='/url/manage/:url'>{wrapWithErrorBoundary(<AccountManagement />, 'manage-url')}</Route>
                         <Route path={`${PHISHING_PAGE_REDIRECT}/:website`}>{wrapWithErrorBoundary(<PhishingDetected />, 'phishing-page-redirect')}</Route>
                         <Route
                           exact

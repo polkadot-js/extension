@@ -4,6 +4,7 @@
 import type { ThemeProps } from '../../types';
 
 import React, { useCallback } from 'react';
+import { Link } from 'react-router-dom';
 import styled from 'styled-components';
 
 import { AuthUrlInfo } from '@polkadot/extension-base/background/handlers/State';
@@ -29,13 +30,16 @@ function WebsiteEntry ({ className = '', info, removeAuth, url }: Props): React.
       <div className='url'>
         {url}
       </div>
-      <div className='connectedAccounts'>{
-        t('{{total}} accounts', {
-          replace: {
-            total: info.authorizedAccounts.length
-          }
-        })
-      }</div>
+      <Link
+        className='connectedAccounts'
+        to={`/url/manage/${url}`}
+      >{
+          t('{{total}} accounts', {
+            replace: {
+              total: info.authorizedAccounts.length
+            }
+          })
+        }</Link>
     </div>
   );
 }
@@ -56,5 +60,6 @@ export default styled(WebsiteEntry)(({ theme }: Props) => `
     cursor: pointer;
     padding: 0 0.5rem;
     border-radius: 4px;
+    text-decoration: none;
   }
 `);

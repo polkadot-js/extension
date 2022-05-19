@@ -96,6 +96,7 @@ export interface RequestSignatures {
   'pri(authorize.requests)': [RequestAuthorizeSubscribe, boolean, AuthorizeRequest[]];
   'pri(authorize.remove)': [string, ResponseAuthorizeList];
   'pri(authorize.delete.request)': [string, void];
+  'pri(authorize.update)': [RequestUpdateAuthorizedAccounts, void]
   'pri(derivation.create)': [RequestDeriveCreate, boolean];
   'pri(derivation.validate)': [RequestDeriveValidate, ResponseDeriveValidate];
   'pri(json.restore)': [RequestJsonRestore, void];
@@ -155,6 +156,11 @@ export interface RequestAuthorizeTab {
 
 export interface RequestAuthorizeApprove {
   id: string;
+  authorizedAccounts: string[]
+}
+
+export interface RequestUpdateAuthorizedAccounts {
+  url: string;
   authorizedAccounts: string[]
 }
 

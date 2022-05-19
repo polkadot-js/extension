@@ -362,6 +362,14 @@ export default class State {
     this.updateIcon(shouldClose);
   }
 
+  public updateAuthorizedAccounts (authorizedAccounts: string[], url: string): void {
+    // this url was seen in the past
+    assert(this.#authUrls[url].authorizedAccounts, `The source ${url} has never been authorized to interact with this extension`);
+
+    this.#authUrls[url].authorizedAccounts = authorizedAccounts;
+    this.saveCurrentAuthList();
+  }
+
   public async authorizeUrl (url: string, request: RequestAuthorizeTab): Promise<AuthRes> {
     const idStr = this.stripUrl(url);
 
@@ -370,6 +378,16 @@ export default class State {
       .some((request) => request.idStr === idStr);
 
     assert(!isDuplicate, `The source ${url} has a pending authorization request`);
+
+    if (this.#authUrls[idStr]) {
+      // this url was seen in the past
+      assert(this.#authUrls[idStr].authorizedAccounts, `The source ${url} is not allowed to interact with this extension`);
+
+      return ({
+        authorizedAccounts: [],
+        result: false
+      });
+    }
 
     return new Promise((resolve, reject): void => {
       const id = getId();

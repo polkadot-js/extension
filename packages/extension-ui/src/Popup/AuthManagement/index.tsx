@@ -87,7 +87,7 @@ export default styled(AuthManagement)`
   }
 
   .inputFilter{
-    margin-bottom: 0.5rem;
+    margin-bottom: 0.8rem;
     padding: 0 !important;
   }
 `;

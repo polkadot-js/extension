@@ -196,6 +196,10 @@ export async function removeAuthorization (url: string): Promise<ResponseAuthori
   return sendMessage('pri(authorize.remove)', url);
 }
 
+export async function updateAuthorization (authorizedAccounts: string[], url: string): Promise<void> {
+  return sendMessage('pri(authorize.update)', { authorizedAccounts, url });
+}
+
 export async function deleteAuthRequest (requestId: string): Promise<void> {
   return sendMessage('pri(authorize.delete.request)', requestId);
 }

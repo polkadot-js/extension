@@ -3,8 +3,6 @@
 
 import { RMRK_VER } from '@subwallet/extension-base/background/KoniTypes';
 
-import { SubmittableExtrinsic } from '@polkadot/api/types';
-
 // For rendering purposes only
 export interface _NftItem {
   id?: string;
@@ -39,14 +37,13 @@ export interface Web3TransferParams {
 }
 
 export interface SubstrateTransferParams {
-  extrinsic: SubmittableExtrinsic<'promise'>;
+  params: Record<string, any>;
   estimatedFee?: string;
 }
 
 export interface TransferResponse {
   // substrate
   estimatedFee?: string;
-  extrinsic?: SubmittableExtrinsic<'promise'>;
   // eth
   web3RawTx?: Record<string, any>;
   estimatedGas?: string

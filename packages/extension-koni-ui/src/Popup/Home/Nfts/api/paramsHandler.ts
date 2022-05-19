@@ -13,7 +13,8 @@ function acalaParser (nftItem: NftItem) {
 
   return {
     collectionId,
-    itemId
+    itemId,
+    networkKey: SUPPORTED_TRANSFER_CHAIN_NAME.acala
   };
 }
 
@@ -25,7 +26,10 @@ function rmrkParser (nftItem: NftItem) {
   // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
   const remark = `${RMRK_PREFIX}::${RMRK_OP_TYPE}::${nftItem.rmrk_ver}::${nftItem.id}::`;
 
-  return { remark };
+  return {
+    remark,
+    networkKey: SUPPORTED_TRANSFER_CHAIN_NAME.kusama
+  };
 }
 
 function uniqueParser (nftItem: NftItem) {
@@ -34,7 +38,8 @@ function uniqueParser (nftItem: NftItem) {
 
   return {
     collectionId,
-    itemId
+    itemId,
+    networkKey: SUPPORTED_TRANSFER_CHAIN_NAME.uniqueNft
   };
 }
 
@@ -44,7 +49,8 @@ function statemineParser (nftItem: NftItem) {
 
   return {
     collectionId,
-    itemId
+    itemId,
+    networkKey: SUPPORTED_TRANSFER_CHAIN_NAME.statemine
   };
 }
 

@@ -1,26 +1,21 @@
 // Copyright 2019-2022 @subwallet/extension-koni authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { BackgroundWindow, RequestNftForceUpdate } from '@subwallet/extension-base/background/KoniTypes';
+import { RequestNftForceUpdate } from '@subwallet/extension-base/background/KoniTypes';
 import { AccountJson } from '@subwallet/extension-base/background/types';
-import { reformatAddress } from '@subwallet/extension-koni-base/utils/utils';
 import { Spinner } from '@subwallet/extension-koni-ui/components';
 import Modal from '@subwallet/extension-koni-ui/components/Modal';
 import Output from '@subwallet/extension-koni-ui/components/Output';
 import useToast from '@subwallet/extension-koni-ui/hooks/useToast';
-import { evmNftSubmitTransaction, nftForceUpdate } from '@subwallet/extension-koni-ui/messaging';
+import { evmNftSubmitTransaction, nftForceUpdate, substrateNftSubmitTransaction } from '@subwallet/extension-koni-ui/messaging';
 import Address from '@subwallet/extension-koni-ui/Popup/Home/Nfts/transfer/components/Address';
 import { AddressProxy } from '@subwallet/extension-koni-ui/Popup/Home/Nfts/transfer/components/types';
-import { cacheUnlock } from '@subwallet/extension-koni-ui/Popup/Home/Nfts/transfer/components/util';
 import { _NftItem, SubstrateTransferParams, Web3TransferParams } from '@subwallet/extension-koni-ui/Popup/Home/Nfts/types';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import React, { useCallback, useEffect, useState } from 'react';
 import { useSelector } from 'react-redux';
 import styled from 'styled-components';
-
-const bWindow = chrome.extension.getBackgroundPage() as BackgroundWindow;
-const { keyring } = bWindow.pdotApi;
 
 interface Props extends ThemeProps {
   className?: string;
@@ -38,36 +33,7 @@ interface Props extends ThemeProps {
   web3TransferParams: Web3TransferParams;
 }
 
-function unlockAccount ({ isUnlockCached, signAddress, signPassword }: AddressProxy): string | null {
-  let publicKey;
-
-  try {
-    publicKey = keyring.decodeAddress(signAddress as string);
-  } catch (error) {
-    console.error(error);
-
-    return 'unable to decode address';
-  }
-
-  const pair = keyring.getPair(publicKey);
-
-  try {
-    pair.decodePkcs8(signPassword);
-    isUnlockCached && cacheUnlock(pair);
-  } catch (error) {
-    console.error(error);
-
-    return (error as Error).message;
-  }
-
-  return null;
-}
-
-function isRecipientSelf (currentAddress: string, recipientAddress: string) {
-  return reformatAddress(currentAddress, 1) === reformatAddress(recipientAddress, 1);
-}
 // TODO: migrate api to background and use new UI components
-
 function AuthTransfer ({ chain, className, collectionId, nftItem, recipientAddress, senderAccount, setExtrinsicHash, setIsTxSuccess, setShowConfirm, setShowResult, setTxError, substrateTransferParams, web3TransferParams }: Props): React.ReactElement<Props> {
   const [passwordError, setPasswordError] = useState<string | null>(null);
   const [callHash, setCallHash] = useState<string | null>(null);
@@ -76,7 +42,7 @@ function AuthTransfer ({ chain, className, collectionId, nftItem, recipientAddre
   const [balanceError, setBalanceError] = useState(false);
   const [senderInfoSubstrate, setSenderInfoSubstrate] = useState<AddressProxy>(() => ({ isUnlockCached: false, signAddress: senderAccount.address, signPassword: '' }));
 
-  const extrinsic = substrateTransferParams !== null ? substrateTransferParams.extrinsic : null;
+  const substrateParams = substrateTransferParams !== null ? substrateTransferParams.params : null;
   const substrateGas = substrateTransferParams !== null ? substrateTransferParams.estimatedFee : null;
 
   const web3Tx = web3TransferParams !== null ? web3TransferParams.rawTx : null;
@@ -90,18 +56,6 @@ function AuthTransfer ({ chain, className, collectionId, nftItem, recipientAddre
     setPasswordError(null);
   }, [senderInfoSubstrate]);
 
-  const unlockSubstrate = useCallback(() => {
-    let passwordError: string | null = null;
-
-    if (senderInfoSubstrate.signAddress) {
-      passwordError = unlockAccount(senderInfoSubstrate);
-    }
-
-    setPasswordError(passwordError);
-
-    return passwordError;
-  }, [senderInfoSubstrate]);
-
   const onSendEvm = useCallback(async () => {
     if (web3Tx) {
       await evmNftSubmitTransaction({
@@ -111,7 +65,7 @@ function AuthTransfer ({ chain, className, collectionId, nftItem, recipientAddre
         networkKey: chain,
         rawTransaction: web3Tx
       }, (data) => {
-        if (data.passwordError) {
+        if (data.passwordError && data.passwordError) {
           setPasswordError(data.passwordError);
           setLoading(false);
         }
@@ -120,7 +74,7 @@ function AuthTransfer ({ chain, className, collectionId, nftItem, recipientAddre
           setCallHash(data.callHash);
         }
 
-        if (data.txError) {
+        if (data.txError && data.txError) {
           show('Encountered an error, please try again.');
           setLoading(false);
 
@@ -152,55 +106,52 @@ function AuthTransfer ({ chain, className, collectionId, nftItem, recipientAddre
   }, [account?.account?.address, chain, collectionId, nftItem, recipientAddress, senderInfoSubstrate.signPassword, setExtrinsicHash, setIsTxSuccess, setShowConfirm, setShowResult, setTxError, show, web3Tx]);
 
   const onSendSubstrate = useCallback(async () => {
-    if (extrinsic !== null && unlockSubstrate() === null) {
-      const pair = keyring.getPair(senderAccount.address);
-
-      try {
-        const isSendingSelf = isRecipientSelf(account?.account?.address as string, recipientAddress);
-        const unsubscribe = await extrinsic.signAndSend(pair, (result) => {
-          if (!result || !result.status) {
-            return;
-          }
-
-          if (result.status.isInBlock || result.status.isFinalized) {
-            result.events
-              .filter(({ event: { section } }) => section === 'system')
-              .forEach(({ event: { method } }): void => {
-                setExtrinsicHash(extrinsic.hash.toHex());
-
-                if (method === 'ExtrinsicFailed') {
-                  setIsTxSuccess(false);
-                  setTxError(method);
-                  setShowConfirm(false);
-                  setShowResult(true);
-                } else if (method === 'ExtrinsicSuccess') {
-                  setIsTxSuccess(true);
-                  setShowConfirm(false);
-                  setShowResult(true);
-
-                  nftForceUpdate({ nft: nftItem, collectionId, isSendingSelf, chain } as RequestNftForceUpdate)
-                    .catch(console.error);
-                }
-              });
-          } else if (result.isError) {
-            setLoading(false);
-          }
-
-          if (result.isCompleted) {
-            setLoading(false);
-            unsubscribe();
-          }
-        });
-      } catch (e) {
-        show('Encountered an error, please try again.');
-        setBalanceError(true);
+    await substrateNftSubmitTransaction({
+      params: substrateParams,
+      password: senderInfoSubstrate.signPassword,
+      senderAddress: senderAccount.address,
+      recipientAddress
+    }, (data) => {
+      if (data.passwordError && data.passwordError) {
+        setPasswordError(data.passwordError);
         setLoading(false);
       }
-    } else {
-      console.log('unlock account failed');
-      setLoading(false);
-    }
-  }, [account?.account?.address, chain, collectionId, extrinsic, nftItem, recipientAddress, senderAccount.address, setExtrinsicHash, setIsTxSuccess, setShowConfirm, setShowResult, setTxError, show, unlockSubstrate]);
+
+      if (data.callHash) {
+        setCallHash(data.callHash);
+      }
+
+      if (data.txError && data.txError) {
+        show('Encountered an error, please try again.');
+        setLoading(false);
+
+        return;
+      }
+
+      if (data.balanceError && data.balanceError) {
+        setBalanceError(true);
+      }
+
+      if (data.status) {
+        setLoading(false);
+
+        if (data.status) {
+          setIsTxSuccess(true);
+          setShowConfirm(false);
+          setShowResult(true);
+          setExtrinsicHash(data.transactionHash as string);
+          nftForceUpdate({ nft: nftItem, collectionId, isSendingSelf: data.isSendingSelf, chain } as RequestNftForceUpdate)
+            .catch(console.error);
+        } else {
+          setIsTxSuccess(false);
+          setTxError('Error submitting transaction');
+          setShowConfirm(false);
+          setShowResult(true);
+          setExtrinsicHash(data.transactionHash as string);
+        }
+      }
+    });
+  }, [chain, collectionId, nftItem, substrateParams, recipientAddress, senderAccount.address, senderInfoSubstrate.signPassword, setExtrinsicHash, setIsTxSuccess, setShowConfirm, setShowResult, setTxError, show]);
 
   const handleSignAndSubmit = useCallback(() => {
     if (loading) {
@@ -217,21 +168,13 @@ function AuthTransfer ({ chain, className, collectionId, nftItem, recipientAddre
 
     // eslint-disable-next-line @typescript-eslint/no-misused-promises
     setTimeout(async () => {
-      if (extrinsic !== null) {
+      if (substrateParams !== null) {
         await onSendSubstrate();
       } else if (web3Tx !== null) {
         await onSendEvm();
       }
     }, 1);
-  }, [chain, currentNetwork.networkKey, extrinsic, loading, onSendEvm, onSendSubstrate, show, web3Tx]);
-
-  useEffect((): void => {
-    if (extrinsic) {
-      const method = extrinsic.method;
-
-      setCallHash((method && method.hash.toHex()) || null);
-    }
-  }, [extrinsic]);
+  }, [chain, currentNetwork.networkKey, loading, onSendEvm, onSendSubstrate, substrateParams, show, web3Tx]);
 
   const hideConfirm = useCallback(() => {
     if (!loading) {

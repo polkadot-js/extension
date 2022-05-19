@@ -8,7 +8,6 @@ import Web3 from 'web3';
 
 import { ApiPromise } from '@polkadot/api';
 import { SubmittableExtrinsicFunction } from '@polkadot/api/promise/types';
-import { SubmittableExtrinsic } from '@polkadot/api/types';
 import { KeyringPair$Json } from '@polkadot/keyring/types';
 import { Registry } from '@polkadot/types/types';
 import { Keyring } from '@polkadot/ui-keyring';
@@ -616,12 +615,13 @@ export interface EvmNftSubmitTransaction {
   rawTransaction: Record<string, any>
 }
 
-export interface EvmNftTransactionResponse {
+export interface NftTransactionResponse {
   passwordError?: string | null,
   callHash?: string,
   status?: boolean,
   transactionHash?: string,
   txError?: boolean,
+  balanceError?: boolean,
   isSendingSelf: boolean
 }
 
@@ -736,19 +736,17 @@ export interface SubstrateNftTransactionRequest {
 export interface SubstrateNftTransaction {
   error: boolean;
   estimatedFee?: string;
-  extrinsic?: SubmittableExtrinsic<'promise'>;
 }
 
 export interface SubstrateNftSubmitTransaction {
-  extrinsic: SubmittableExtrinsic<'promise'>;
-}
-
-export interface SubstrateNftTransactionResponse {
-
+  params: Record<string, any> | null;
+  password: string;
+  senderAddress: string;
+  recipientAddress: string;
 }
 
 export interface KoniRequestSignatures {
-  'pri(substrateNft.submitTransaction)': [SubstrateNftSubmitTransaction, SubstrateNftTransactionResponse, SubstrateNftTransactionResponse]
+  'pri(substrateNft.submitTransaction)': [SubstrateNftSubmitTransaction, NftTransactionResponse, NftTransactionResponse]
   'pri(substrateNft.getTransaction)': [SubstrateNftTransactionRequest, SubstrateNftTransaction];
   'pri(networkMap.disableAll)': [null, boolean];
   'pri(networkMap.enableAll)': [null, boolean];
@@ -765,7 +763,7 @@ export interface KoniRequestSignatures {
   'pri(evmTokenState.upsertEvmTokenState)': [CustomEvmToken, boolean];
   'pri(evmTokenState.getEvmTokenState)': [null, EvmTokenJson];
   'pri(evmTokenState.getSubscription)': [null, EvmTokenJson, EvmTokenJson];
-  'pri(evmNft.submitTransaction)': [EvmNftSubmitTransaction, EvmNftTransactionResponse, EvmNftTransactionResponse];
+  'pri(evmNft.submitTransaction)': [EvmNftSubmitTransaction, NftTransactionResponse, NftTransactionResponse];
   'pri(evmNft.getTransaction)': [EvmNftTransactionRequest, EvmNftTransaction];
   'pri(nftTransfer.setNftTransfer)': [NftTransferExtra, boolean];
   'pri(nftTransfer.getNftTransfer)': [null, NftTransferExtra];

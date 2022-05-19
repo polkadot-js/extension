@@ -17,7 +17,6 @@ async function substrateTransferHandler (networkKey: string, senderAddress: stri
       return null;
     } else {
       return {
-        extrinsic: resp.extrinsic,
         estimatedFee: resp.estimatedFee
       } as TransferResponse;
     }

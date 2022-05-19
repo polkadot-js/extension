@@ -137,8 +137,7 @@ function TransferNftContainer ({ className, collectionId, collectionImage, nftIt
       // @ts-ignore
       if (SUPPORTED_TRANSFER_SUBSTRATE_CHAIN.indexOf(networkKey) > -1) {
         setSubstrateTransferParams({
-          // @ts-ignore
-          extrinsic: transferMeta.extrinsic,
+          params,
           estimatedFee: transferMeta.estimatedFee
         } as SubstrateTransferParams);
         // @ts-ignore

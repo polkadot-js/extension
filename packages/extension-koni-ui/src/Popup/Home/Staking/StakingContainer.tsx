@@ -36,9 +36,9 @@ function StakingContainer ({ className, data, loading, priceMap }: Props): React
             const item = stakingDataType.staking;
             const reward = stakingDataType?.reward;
 
-            const name = item?.chainId;
-            const icon = LogosMap[name] || LogosMap.default;
-            const price = priceMap[name];
+            const name = item.name || item.chainId;
+            const icon = LogosMap[item.chainId] || LogosMap.default;
+            const price = priceMap[item.chainId];
 
             return <StakingRow
               amount={item.balance}

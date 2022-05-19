@@ -275,7 +275,8 @@ const NETWORKS: Record<string, NetWorkInfo> = {
     ss58Format: 42,
     provider: 'wss://ws.azero.dev/',
     groups: ['MAIN_NET'],
-    nativeToken: 'AZERO'
+    nativeToken: 'AZERO',
+    decimals: 12
   },
   alephTest: {
     chain: 'Aleph Zero Testnet',
@@ -400,7 +401,8 @@ const NETWORKS: Record<string, NetWorkInfo> = {
     paraId: 2023,
     isEthereum: true,
     nativeToken: 'MOVR',
-    crowdloanUrl: 'https://polkadot.js.org/apps/#/parachains/crowdloan'
+    crowdloanUrl: 'https://polkadot.js.org/apps/#/parachains/crowdloan',
+    decimals: 18
   },
   shiden: {
     chain: 'Shiden',

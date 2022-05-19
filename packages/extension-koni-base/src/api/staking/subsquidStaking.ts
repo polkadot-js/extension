@@ -43,6 +43,19 @@ const getSubsquidQuery = (account: string, chain: string) => {
     }`;
   }
 
+  if (chain === 'moonbeam' || chain === 'moonriver') {
+    return `
+    query MyQuery {
+      accountById(id: "${account}") {
+        totalReward
+        totalBond
+        rewards(limit: 1, orderBy: blockNumber_DESC) {
+          amount
+        }
+      }
+    }`;
+  }
+
   return `
   query MyQuery {
     accountById(id: "${account}") {

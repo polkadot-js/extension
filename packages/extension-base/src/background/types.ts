@@ -14,7 +14,7 @@ import type { KeypairType } from '@polkadot/util-crypto/types';
 import { TypeRegistry } from '@polkadot/types';
 
 import { ALLOWED_PATH } from '../defaults';
-import { AuthRes, AuthUrls } from './handlers/State';
+import { AuthResponse, AuthUrls } from './handlers/State';
 
 type KeysWithDefinedValues<T> = {
   [K in keyof T]: T[K] extends undefined ? never : K
@@ -92,7 +92,6 @@ export interface RequestSignatures {
   'pri(accounts.changePassword)': [RequestAccountChangePassword, boolean];
   'pri(authorize.approve)': [RequestAuthorizeApprove, boolean];
   'pri(authorize.list)': [null, ResponseAuthorizeList];
-  'pri(authorize.reject)': [RequestAuthorizeReject, boolean];
   'pri(authorize.requests)': [RequestAuthorizeSubscribe, boolean, AuthorizeRequest[]];
   'pri(authorize.remove)': [string, ResponseAuthorizeList];
   'pri(authorize.delete.request)': [string, void];
@@ -119,7 +118,7 @@ export interface RequestSignatures {
   // public/external requests, i.e. from a page
   'pub(accounts.listAuthorized)': [RequestAccountList, InjectedAccount[]];
   'pub(accounts.subscribeAuthorized)': [RequestAccountSubscribe, boolean, InjectedAccount[]];
-  'pub(authorize.tab)': [RequestAuthorizeTab, Promise<AuthRes>];
+  'pub(authorize.tab)': [RequestAuthorizeTab, Promise<AuthResponse>];
   'pub(bytes.sign)': [SignerPayloadRaw, ResponseSigning];
   'pub(extrinsic.sign)': [SignerPayloadJSON, ResponseSigning];
   'pub(metadata.list)': [null, InjectedMetadataKnown[]];

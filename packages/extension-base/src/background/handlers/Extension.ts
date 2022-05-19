@@ -200,18 +200,6 @@ export default class Extension {
     return { list: this.#state.authUrls };
   }
 
-  private authorizeReject ({ id }: RequestAuthorizeReject): boolean {
-    const queued = this.#state.getAuthRequest(id);
-
-    assert(queued, 'Unable to find request');
-
-    const { reject } = queued;
-
-    reject(new Error('Rejected'));
-
-    return true;
-  }
-
   // FIXME This looks very much like what we have in accounts
   private authorizeSubscribe (id: string, port: chrome.runtime.Port): boolean {
     const cb = createSubscription<'pri(authorize.requests)'>(id, port);
@@ -520,9 +508,6 @@ export default class Extension {
 
       case 'pri(authorize.list)':
         return this.getAuthList();
-
-      case 'pri(authorize.reject)':
-        return this.authorizeReject(request as RequestAuthorizeReject);
 
       case 'pri(authorize.remove)':
         return this.removeAuthorization(request as string);

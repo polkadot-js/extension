@@ -88,7 +88,6 @@ function AccounSelection ({ className, origin, url, withWarning = true }: Props)
 export default styled(AccounSelection)(({ theme }: Props) => `
   .accountList {
     overflow-y: auto;
-    margin-top: 5px;
     height: 270px;
   }
 

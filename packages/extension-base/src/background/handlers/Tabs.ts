@@ -18,7 +18,7 @@ import { assert, isNumber } from '@polkadot/util';
 import RequestBytesSign from '../RequestBytesSign';
 import RequestExtrinsicSign from '../RequestExtrinsicSign';
 import { withErrorLog } from './helpers';
-import State, { AuthRes } from './State';
+import State, { AuthResponse } from './State';
 import { createSubscription, unsubscribe } from './subscriptions';
 
 function transformAccounts (accounts: SubjectInfo, anyType = false): InjectedAccount[] {
@@ -50,7 +50,7 @@ export default class Tabs {
     );
   }
 
-  private authorize (url: string, request: RequestAuthorizeTab): Promise<AuthRes> {
+  private authorize (url: string, request: RequestAuthorizeTab): Promise<AuthResponse> {
     return this.#state.authorizeUrl(url, request);
   }
 

@@ -21,7 +21,7 @@ interface Resolver <T> {
   resolve: (result: T) => void;
 }
 
-interface AuthRequest extends Resolver<AuthRes> {
+interface AuthRequest extends Resolver<AuthResponse> {
   id: string;
   idStr: string;
   request: RequestAuthorizeTab;
@@ -44,7 +44,7 @@ interface MetaRequest extends Resolver<boolean> {
   url: string;
 }
 
-export interface AuthRes {
+export interface AuthResponse {
   result: boolean;
   authorizedAccounts: string[];
 }
@@ -224,7 +224,7 @@ export default class State {
         });
   }
 
-  private authComplete = (id: string, resolve: (resValue: AuthRes) => void, reject: (error: Error) => void): Resolver<AuthRes> => {
+  private authComplete = (id: string, resolve: (resValue: AuthResponse) => void, reject: (error: Error) => void): Resolver<AuthResponse> => {
     const complete = (authorizedAccounts: string[] = []) => {
       const { idStr, request: { origin }, url } = this.#authRequests[id];
 
@@ -246,7 +246,7 @@ export default class State {
         complete();
         reject(error);
       },
-      resolve: ({ authorizedAccounts, result }: {result: boolean, authorizedAccounts: string[]}): void => {
+      resolve: ({ authorizedAccounts, result }: AuthResponse): void => {
         complete(authorizedAccounts);
         resolve({ authorizedAccounts, result });
       }
@@ -325,17 +325,6 @@ export default class State {
     }
   }
 
-  // public toggleAuthorization (url: string): AuthUrls {
-  //   const entry = this.#authUrls[url];
-
-  //   assert(entry, `The source ${url} is not known`);
-
-  //   this.#authUrls[url].isAllowed = !entry.isAllowed;
-  //   this.saveCurrentAuthList();
-
-  //   return this.#authUrls;
-  // }
-
   public removeAuthorization (url: string): AuthUrls {
     const entry = this.#authUrls[url];
 
@@ -370,7 +359,7 @@ export default class State {
     this.saveCurrentAuthList();
   }
 
-  public async authorizeUrl (url: string, request: RequestAuthorizeTab): Promise<AuthRes> {
+  public async authorizeUrl (url: string, request: RequestAuthorizeTab): Promise<AuthResponse> {
     const idStr = this.stripUrl(url);
 
     // Do not enqueue duplicate authorization requests.

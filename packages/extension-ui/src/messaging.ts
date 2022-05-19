@@ -172,10 +172,6 @@ export async function getMetadata (genesisHash?: string | null, isPartial = fals
   return null;
 }
 
-export async function rejectAuthRequest (id: string): Promise<boolean> {
-  return sendMessage('pri(authorize.reject)', { id });
-}
-
 export async function rejectMetaRequest (id: string): Promise<boolean> {
   return sendMessage('pri(metadata.reject)', { id });
 }

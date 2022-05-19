@@ -52,6 +52,7 @@ function AccountManagement ({ className }: Props): React.ReactElement<Props> {
       />
       <div className={className}>
         <AccountSelection
+          className='accountSelection'
           origin={origin}
           url={url}
           withWarning={false}
@@ -70,17 +71,13 @@ function AccountManagement ({ className }: Props): React.ReactElement<Props> {
 }
 
 export default styled(AccountManagement)`
+  .accountSelection{
+    .accountList{
+      height: 390px;
+    }
+  }
   .acceptButton {
     width: 90%;
-    margin: 25px auto 0;
-  }
-
-  .rejectionButton {
-    margin: 8px 0 15px 0;
-    text-decoration: underline;
-
-    .rejectionLink {
-      margin: auto;
-    }
+    margin: 0.5rem auto 0;
   }
 `;

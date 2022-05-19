@@ -9,7 +9,7 @@ import styled from 'styled-components';
 
 import { AccountContext, ActionBar, ActionContext, Button, Link } from '../../components';
 import useTranslation from '../../hooks/useTranslation';
-import { approveAuthRequest, rejectAuthRequest } from '../../messaging';
+import { approveAuthRequest, deleteAuthRequest } from '../../messaging';
 import { AccountSelection } from '../../partials';
 import NoAccount from './NoAccount';
 
@@ -39,9 +39,9 @@ function Request ({ authId, className, isFirst, request: { origin }, url }: Prop
     [authId, onAction, selectedAccounts]
   );
 
-  const _onReject = useCallback(
+  const _onClose = useCallback(
     (): void => {
-      rejectAuthRequest(authId)
+      deleteAuthRequest(authId)
         .then(() => onAction())
         .catch((error: Error) => console.error(error));
     },
@@ -70,11 +70,11 @@ function Request ({ authId, className, isFirst, request: { origin }, url }: Prop
       )}
       <ActionBar className='rejectionButton'>
         <Link
-          className='rejectionLink'
+          className='closeLink'
           isDanger
-          onClick={_onReject}
+          onClick={_onClose}
         >
-          {t<string>('Reject')}
+          {t<string>('Ask again later')}
         </Link>
       </ActionBar>
     </div>
@@ -84,14 +84,14 @@ function Request ({ authId, className, isFirst, request: { origin }, url }: Prop
 export default styled(Request)`
   .acceptButton {
     width: 90%;
-    margin: 25px auto 0;
+    margin: 1rem auto 0;
   }
 
   .rejectionButton {
     margin: 8px 0 15px 0;
     text-decoration: underline;
 
-    .rejectionLink {
+    .closeLink {
       margin: auto;
     }
   }

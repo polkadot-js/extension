@@ -33,7 +33,6 @@ export type AuthUrls = Record<string, AuthUrlInfo>;
 export interface AuthUrlInfo {
   count: number;
   id: string;
-  isAllowed: boolean;
   origin: string;
   url: string;
   authorizedAccounts: string[];
@@ -226,15 +225,13 @@ export default class State {
   }
 
   private authComplete = (id: string, resolve: (resValue: AuthRes) => void, reject: (error: Error) => void): Resolver<AuthRes> => {
-    const complete = ({ authorizedAccounts = [], result }: {authorizedAccounts: string[], result: boolean | Error}) => {
-      const isAllowed = result === true;
+    const complete = (authorizedAccounts: string[] = []) => {
       const { idStr, request: { origin }, url } = this.#authRequests[id];
 
       this.#authUrls[this.stripUrl(url)] = {
         authorizedAccounts,
         count: 0,
         id: idStr,
-        isAllowed,
         origin,
         url
       };
@@ -246,11 +243,11 @@ export default class State {
 
     return {
       reject: (error: Error): void => {
-        complete({ authorizedAccounts: [], result: error });
+        complete();
         reject(error);
       },
       resolve: ({ authorizedAccounts, result }: {result: boolean, authorizedAccounts: string[]}): void => {
-        complete({ authorizedAccounts, result });
+        complete(authorizedAccounts);
         resolve({ authorizedAccounts, result });
       }
     };
@@ -328,16 +325,16 @@ export default class State {
     }
   }
 
-  public toggleAuthorization (url: string): AuthUrls {
-    const entry = this.#authUrls[url];
+  // public toggleAuthorization (url: string): AuthUrls {
+  //   const entry = this.#authUrls[url];
 
-    assert(entry, `The source ${url} is not known`);
+  //   assert(entry, `The source ${url} is not known`);
 
-    this.#authUrls[url].isAllowed = !entry.isAllowed;
-    this.saveCurrentAuthList();
+  //   this.#authUrls[url].isAllowed = !entry.isAllowed;
+  //   this.saveCurrentAuthList();
 
-    return this.#authUrls;
-  }
+  //   return this.#authUrls;
+  // }
 
   public removeAuthorization (url: string): AuthUrls {
     const entry = this.#authUrls[url];
@@ -374,13 +371,6 @@ export default class State {
 
     assert(!isDuplicate, `The source ${url} has a pending authorization request`);
 
-    if (this.#authUrls[idStr]) {
-      // this url was seen in the past
-      assert(this.#authUrls[idStr].isAllowed, `The source ${url} is not allowed to interact with this extension`);
-
-      return { authorizedAccounts: [], result: false };
-    }
-
     return new Promise((resolve, reject): void => {
       const id = getId();
 
@@ -401,7 +391,6 @@ export default class State {
     const entry = this.#authUrls[this.stripUrl(url)];
 
     assert(entry, `The source ${url} has not been enabled yet`);
-    assert(entry.isAllowed, `The source ${url} is not allowed to interact with this extension`);
 
     return true;
   }

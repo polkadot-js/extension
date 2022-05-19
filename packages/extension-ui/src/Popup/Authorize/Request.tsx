@@ -32,6 +32,7 @@ function Request ({ authId, className, isFirst, request: { origin }, url }: Prop
   const areAllAccountsSelected = useMemo(() => selectedAccounts.length === allVisibleAccounts.length, [allVisibleAccounts.length, selectedAccounts.length]);
   const noAccountSelected = useMemo(() => selectedAccounts.length === 0, [selectedAccounts.length]);
 
+  console.log('accounts', accounts);
   useEffect(() => {
     const nextIndeterminateState = !noAccountSelected && !areAllAccountsSelected;
 
@@ -102,6 +103,7 @@ function Request ({ authId, className, isFirst, request: { origin }, url }: Prop
               <AccountsTree
                 {...json}
                 key={`${index}:${json.address}`}
+                showHidden={false}
                 withCheckbox={true}
                 withMenu={false}
               />
@@ -156,7 +158,7 @@ export default styled(Request)(({ theme }: Props) => `
   }
 
   .warningMargin {
-    margin: -19px 24px 0 1.45rem;
+    margin: 0 24px 0 1.45rem;
 
     .warning-message {
       display: block;

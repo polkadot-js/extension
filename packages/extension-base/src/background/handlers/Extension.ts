@@ -499,10 +499,6 @@ export default class Extension {
     return true;
   }
 
-  private toggleAuthorization (url: string): ResponseAuthorizeList {
-    return { list: this.#state.toggleAuthorization(url) };
-  }
-
   private removeAuthorization (url: string): ResponseAuthorizeList {
     return { list: this.#state.removeAuthorization(url) };
   }
@@ -523,9 +519,6 @@ export default class Extension {
 
       case 'pri(authorize.reject)':
         return this.authorizeReject(request as RequestAuthorizeReject);
-
-      case 'pri(authorize.toggle)':
-        return this.toggleAuthorization(request as string);
 
       case 'pri(authorize.remove)':
         return this.removeAuthorization(request as string);

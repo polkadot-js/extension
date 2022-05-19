@@ -13,25 +13,28 @@ interface Props extends AccountWithChildren {
   parentName?: string;
   withCheckbox?: boolean
   withMenu?: boolean
+  showHidden?: boolean
 }
 
-function AccountsTree ({ className, parentName, suri, withCheckbox = false, withMenu = true, ...account }: Props): React.ReactElement<Props> {
+function AccountsTree ({ className, parentName, showHidden = true, suri, withCheckbox = false, withMenu = true, ...account }: Props): React.ReactElement<Props> {
   return (
     <div className={className}>
-
-      <Account
-        {...account}
-        className={withCheckbox ? 'accountWichCheckbox' : ''}
-        parentName={parentName}
-        suri={suri}
-        withCheckbox={withCheckbox}
-        withMenu={withMenu}
-      />
+      { (showHidden || !account.isHidden) && (
+        <Account
+          {...account}
+          className={withCheckbox ? 'accountWichCheckbox' : ''}
+          parentName={parentName}
+          suri={suri}
+          withCheckbox={withCheckbox}
+          withMenu={withMenu}
+        />
+      )}
       {account?.children?.map((child, index) => (
         <AccountsTree
           key={`${index}:${child.address}`}
           {...child}
           parentName={account.name}
+          showHidden={showHidden}
           withCheckbox={withCheckbox}
           withMenu={withMenu}
         />

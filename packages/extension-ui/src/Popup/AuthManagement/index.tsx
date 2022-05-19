@@ -10,7 +10,7 @@ import { AuthUrlInfo, AuthUrls } from '@polkadot/extension-base/background/handl
 import { InputFilter } from '@polkadot/extension-ui/components';
 
 import useTranslation from '../../hooks/useTranslation';
-import { getAuthList, removeAuthorization, toggleAuthorization } from '../../messaging';
+import { getAuthList, removeAuthorization } from '../../messaging';
 import { Header } from '../../partials';
 import WebsiteEntry from './WebsiteEntry';
 
@@ -31,12 +31,6 @@ function AuthManagement ({ className }: Props): React.ReactElement<Props> {
 
   const _onChangeFilter = useCallback((filter: string) => {
     setFilter(filter);
-  }, []);
-
-  const toggleAuth = useCallback((url: string) => {
-    toggleAuthorization(url)
-      .then(({ list }) => setAuthList(list))
-      .catch(console.error);
   }, []);
 
   const removeAuth = useCallback((url: string) => {
@@ -73,7 +67,6 @@ function AuthManagement ({ className }: Props): React.ReactElement<Props> {
                           info={info}
                           key={url}
                           removeAuth={removeAuth}
-                          toggleAuth={toggleAuth}
                           url={url}
                         />
                     )}

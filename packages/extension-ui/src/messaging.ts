@@ -192,10 +192,6 @@ export async function getAuthList (): Promise<ResponseAuthorizeList> {
   return sendMessage('pri(authorize.list)');
 }
 
-export async function toggleAuthorization (url: string): Promise<ResponseAuthorizeList> {
-  return sendMessage('pri(authorize.toggle)', url);
-}
-
 export async function removeAuthorization (url: string): Promise<ResponseAuthorizeList> {
   return sendMessage('pri(authorize.remove)', url);
 }

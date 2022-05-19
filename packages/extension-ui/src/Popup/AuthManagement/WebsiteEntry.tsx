@@ -7,47 +7,35 @@ import React, { useCallback } from 'react';
 import styled from 'styled-components';
 
 import { AuthUrlInfo } from '@polkadot/extension-base/background/handlers/State';
-import { RemoveAuth, Switch } from '@polkadot/extension-ui/components';
-
-import useTranslation from '../../hooks/useTranslation';
+import { RemoveAuth } from '@polkadot/extension-ui/components';
+import { useTranslation } from '@polkadot/extension-ui/components/translate';
 
 interface Props extends ThemeProps {
   className?: string;
   info: AuthUrlInfo;
-  toggleAuth: (url: string) => void;
   removeAuth: (url: string) => void;
   url: string;
 }
 
-function WebsiteEntry ({ className = '', info, removeAuth, toggleAuth, url }: Props): React.ReactElement<Props> {
+function WebsiteEntry ({ className = '', info, removeAuth, url }: Props): React.ReactElement<Props> {
   const { t } = useTranslation();
-
-  const switchAccess = useCallback(() => {
-    toggleAuth(url);
-  }, [toggleAuth, url]);
-
   const _removeAuth = useCallback(() => {
     removeAuth(url);
   }, [removeAuth, url]);
 
   return (
-    <div className={`${className} ${info.isAllowed ? 'allowed' : 'denied'}`}>
+    <div className={className}>
       <div className='url'>
         {url}
       </div>
-      <Switch
-        checked={info.isAllowed}
-        checkedLabel={t<string>('allowed')}
-        className='info'
-        onChange={switchAccess}
-        uncheckedLabel={t<string>('denied')}
-      />
-      <div
-        className='removeAuth'
-        onClick={_removeAuth}
-      >
-        <RemoveAuth />
-      </div>
+      <div className='connectedAccounts'>{
+        t('{{total}} accounts', {
+          replace: {
+            total: info.authorizedAccounts.length
+          }
+        })
+      }</div>
+      <RemoveAuth onRemove={_removeAuth} />
     </div>
   );
 }
@@ -55,14 +43,18 @@ function WebsiteEntry ({ className = '', info, removeAuth, toggleAuth, url }: Pr
 export default styled(WebsiteEntry)(({ theme }: Props) => `
   display: flex;
   align-items: center;
+  margin-top: .2rem;
 
   .url{
     flex: 1;
   }
 
-  &.denied {
-    .slider::before {
-        background-color: ${theme.backButtonBackground};
-      }
+  .connectedAccounts{
+    margin-right: 1rem;
+    background-color: ${theme.primaryColor};
+    color: white;
+    cursor: pointer;
+    padding: 0 0.5rem;
+    border-radius: 4px;
   }
 `);

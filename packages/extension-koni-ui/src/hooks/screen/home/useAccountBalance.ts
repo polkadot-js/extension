@@ -1,7 +1,7 @@
 // Copyright 2019-2022 @polkadot/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { APIItemState, ChainRegistry, NetWorkGroup } from '@subwallet/extension-base/background/KoniTypes';
+import { APIItemState, ChainRegistry, NetWorkGroup, TokenInfo } from '@subwallet/extension-base/background/KoniTypes';
 import { AccountBalanceType, CrowdloanContributeValueType } from '@subwallet/extension-koni-ui/hooks/screen/home/types';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { BN_ZERO, getBalances, parseBalancesInfo } from '@subwallet/extension-koni-ui/util';
@@ -31,6 +31,11 @@ function getGroupNetworkKey (groups: NetWorkGroup[]): string {
   }
 
   return '';
+}
+
+function getMainTokenInfo (chainRegistry: ChainRegistry): TokenInfo {
+  // chainRegistryMap always has main token
+  return Object.values(chainRegistry.tokenMap).find((t) => t.isMainToken) as TokenInfo;
 }
 
 export default function useAccountBalance (currentNetworkKey: string,
@@ -75,10 +80,21 @@ export default function useAccountBalance (currentNetworkKey: string,
       return;
     }
 
+    const mainTokenInfo = getMainTokenInfo(registry);
+    let tokenDecimals, tokenSymbols;
+
+    if (['genshiro_testnet', 'genshiro', 'equilibrium_parachain'].includes(networkKey)) {
+      tokenDecimals = [mainTokenInfo.decimals];
+      tokenSymbols = [mainTokenInfo.symbol];
+    } else {
+      tokenDecimals = registry.chainDecimals;
+      tokenSymbols = registry.chainTokens;
+    }
+
     const balanceInfo = parseBalancesInfo(priceMap, tokenPriceMap, {
       networkKey,
-      tokenDecimals: registry.chainDecimals,
-      tokenSymbols: registry.chainTokens,
+      tokenDecimals,
+      tokenSymbols,
       balanceItem
     });
 

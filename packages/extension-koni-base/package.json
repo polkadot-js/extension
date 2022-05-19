@@ -27,6 +27,7 @@
     "@digitalnative/type-definitions": "1.1.27",
     "@docknetwork/node-types": "0.6.0",
     "@edgeware/node-types": "3.6.2-wako",
+    "@equilab/api": "^1.11.2",
     "@equilab/definitions": "1.4.11",
     "@ethereumjs/common": "^2.6.3",
     "@interlay/interbtc-types": "1.5.10",

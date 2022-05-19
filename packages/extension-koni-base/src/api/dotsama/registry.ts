@@ -83,14 +83,16 @@ export const getRegistry = async (networkKey: string, api: ApiPromise, customErc
   // Build token map
   const tokenMap = {} as Record<string, TokenInfo>;
 
-  chainTokens.forEach((token, index) => {
-    tokenMap[token] = {
-      isMainToken: index === 0,
-      name: token,
-      symbol: token,
-      decimals: chainDecimals[index]
-    };
-  });
+  if (!['genshiro_testnet', 'genshiro', 'equilibrium_parachain'].includes(networkKey)) {
+    chainTokens.forEach((token, index) => {
+      tokenMap[token] = {
+        isMainToken: index === 0,
+        name: token,
+        symbol: token,
+        decimals: chainDecimals[index]
+      };
+    });
+  }
 
   const predefineTokenMap = PREDEFINE_TOKEN_DATA_MAP[networkKey];
 

@@ -62,6 +62,9 @@ export class KoniCron {
         this.addCron('refreshNft', this.refreshNft(currentAccountInfo.address, state.getApiMap(), state.getErc721Tokens()), CRON_REFRESH_NFT_INTERVAL);
         this.addCron('refreshStakingReward', this.refreshStakingReward(currentAccountInfo.address), CRON_REFRESH_STAKING_REWARD_INTERVAL);
         this.addCron('refreshHistory', this.refreshHistory(currentAccountInfo.address, state.getNetworkMap()), CRON_REFRESH_HISTORY_INTERVAL);
+      } else {
+        this.setNftReady();
+        this.setStakingRewardReady();
       }
 
       state.subscribeServiceInfo().subscribe({
@@ -88,6 +91,9 @@ export class KoniCron {
             this.addCron('refreshNft', this.refreshNft(address, serviceInfo.apiMap, serviceInfo.customErc721Registry), CRON_REFRESH_NFT_INTERVAL);
             this.addCron('refreshStakingReward', this.refreshStakingReward(address), CRON_REFRESH_STAKING_REWARD_INTERVAL);
             this.addCron('refreshHistory', this.refreshHistory(address, serviceInfo.networkMap), CRON_REFRESH_HISTORY_INTERVAL);
+          } else {
+            this.setNftReady();
+            this.setStakingRewardReady();
           }
         }
       });
@@ -192,6 +198,7 @@ export class KoniCron {
   resetStakingReward () {
     state.resetStakingMap();
     state.setStakingReward({
+      ready: false,
       details: []
     } as StakingRewardJson);
     // console.log('Reset Staking reward state');
@@ -213,6 +220,14 @@ export class KoniCron {
         state.setHistory(historyMap);
       });
     };
+  }
+
+  setNftReady () {
+    state.updateNftReady(true);
+  }
+
+  setStakingRewardReady () {
+    state.updateStakingRewardReady(true);
   }
 
   resetHistory () {

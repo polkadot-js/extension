@@ -16,7 +16,7 @@ export default function useFetchStaking (networkKey: string): StakingType {
   const stakingRewardList = stakingRewardReducer.details;
   const readyStakingItems: StakingItem[] = [];
   const stakingData: StakingDataType[] = [];
-  let loading = true;
+  let loading = !stakingRewardReducer.ready;
 
   const showAll = networkKey.toLowerCase() === ALL_ACCOUNT_KEY.toLowerCase();
 

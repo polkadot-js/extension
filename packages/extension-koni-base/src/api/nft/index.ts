@@ -217,6 +217,8 @@ export class NftHandler {
         },
         updateReady);
     }));
+
+    updateReady(true);
   }
 
   public parseAssetId (id: string) {

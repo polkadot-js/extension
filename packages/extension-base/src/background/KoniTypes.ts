@@ -81,7 +81,8 @@ export interface StakingRewardItem {
 }
 
 export interface StakingRewardJson {
-  details: Array<StakingRewardItem>
+  ready: boolean;
+  details: Array<StakingRewardItem>;
 }
 
 export interface StakingItem {

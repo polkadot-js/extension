@@ -137,7 +137,6 @@ export default class KoniState extends State {
 
         for (const [key, storedNetwork] of Object.entries(storedNetworkMap)) {
           if (key in PREDEFINED_NETWORKS) {
-            // TODO: fields to merge
             // check change and override custom providers if exist
             if ('customProviders' in storedNetwork) {
               mergedNetworkMap[key].customProviders = storedNetwork.customProviders;
@@ -178,8 +177,8 @@ export default class KoniState extends State {
         }
       }
 
-      this.initEvmTokenState();
       this.initChainRegistry();
+      this.initEvmTokenState();
     });
   }
 
@@ -237,11 +236,6 @@ export default class KoniState extends State {
 
   private evmTokenState: EvmTokenJson = { erc20: [], erc721: [] };
   private evmTokenSubject = new Subject<EvmTokenJson>();
-
-  // private nftStoreReady = false;
-  // private stakingStoreReady = false;
-  // Todo: Persist data to balanceStore later
-  // private readonly balanceStore = new BalanceStore();
   private balanceMap: Record<string, BalanceItem> = generateDefaultBalanceMap();
   private balanceSubject = new Subject<BalanceJson>();
   private nftState: NftJson = {
@@ -262,6 +256,7 @@ export default class KoniState extends State {
 
   private stakingMap: Record<string, StakingItem> = generateDefaultStakingMap();
   private stakingRewardState: StakingRewardJson = {
+    ready: false,
     details: []
   } as StakingRewardJson;
 
@@ -605,6 +600,11 @@ export default class KoniState extends State {
     }
 
     this.stakingRewardSubject.next(stakingRewardData);
+  }
+
+  public updateStakingRewardReady (ready: boolean) {
+    this.stakingRewardState.ready = ready;
+    this.stakingRewardSubject.next(this.stakingRewardState);
   }
 
   public getAccountRefMap (callback: (refMap: Record<string, Array<string>>) => void) {

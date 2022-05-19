@@ -5,7 +5,8 @@ import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 import { StakingRewardJson } from '@subwallet/extension-base/background/KoniTypes';
 
 const initialState = {
-  details: {}
+  details: {},
+  ready: false
 } as StakingRewardJson;
 
 const stakingRewardSlice = createSlice({
@@ -16,6 +17,7 @@ const stakingRewardSlice = createSlice({
       const payload = action.payload;
 
       state.details = payload.details;
+      state.ready = payload.ready;
     }
   }
 });

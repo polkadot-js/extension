@@ -176,8 +176,10 @@ function NetworkEdit ({ className }: Props): React.ReactElement {
   }, [data, isCurrentEndpoint, isEthereum, needValidate, networkInfo, provider, show]);
 
   useEffect(() => {
-    setNeedValidate(true);
-  }, [isEthereum]);
+    if (mode === 'create') {
+      setNeedValidate(true);
+    }
+  }, [isEthereum, mode]);
 
   const handleCreateProvider = useCallback(async (newProvider: string) => { // handle add provider for network edit
     if (!isValidProvider(newProvider)) {

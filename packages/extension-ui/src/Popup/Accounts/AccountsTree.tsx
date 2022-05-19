@@ -24,6 +24,7 @@ function AccountsTree ({ className, parentName, showHidden = true, suri, withChe
           {...account}
           className={withCheckbox ? 'accountWichCheckbox' : ''}
           parentName={parentName}
+          showVisibilityAction={showHidden}
           suri={suri}
           withCheckbox={withCheckbox}
           withMenu={withMenu}

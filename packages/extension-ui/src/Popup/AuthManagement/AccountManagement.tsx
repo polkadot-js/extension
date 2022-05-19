@@ -54,6 +54,7 @@ function AccountManagement ({ className }: Props): React.ReactElement<Props> {
         <AccountSelection
           className='accountSelection'
           origin={origin}
+          showHidden={true}
           url={url}
           withWarning={false}
         />

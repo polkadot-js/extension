@@ -15,16 +15,26 @@ interface Props extends ThemeProps {
   className?: string;
   url: string;
   origin: string;
+  showHidden?: boolean;
   withWarning?: boolean;
 }
 
-function AccounSelection ({ className, origin, url, withWarning = true }: Props): React.ReactElement<Props> {
+function AccounSelection ({ className, origin, showHidden = false, url, withWarning = true }: Props): React.ReactElement<Props> {
   const { t } = useTranslation();
   const { accounts, hierarchy, selectedAccounts = [], setSelectedAccounts } = useContext(AccountContext);
   const [isIndeterminate, setIsIndeterminate] = useState(false);
   const allVisibleAccounts = useMemo(() => accounts.filter(({ isHidden }) => !isHidden), [accounts]);
-  const areAllAccountsSelected = useMemo(() => selectedAccounts.length === allVisibleAccounts.length, [allVisibleAccounts.length, selectedAccounts.length]);
   const noAccountSelected = useMemo(() => selectedAccounts.length === 0, [selectedAccounts.length]);
+  const allDisplayedAddresses = useMemo(
+    () => showHidden
+      ? accounts.map(({ address }) => address)
+      : allVisibleAccounts.map(({ address }) => address)
+    , [accounts, allVisibleAccounts, showHidden]
+  );
+  const areAllAccountsSelected = useMemo(
+    () => selectedAccounts.length === allDisplayedAddresses.length
+    , [allDisplayedAddresses.length, selectedAccounts.length]
+  );
 
   useEffect(() => {
     const nextIndeterminateState = !noAccountSelected && !areAllAccountsSelected;
@@ -39,11 +49,8 @@ function AccounSelection ({ className, origin, url, withWarning = true }: Props)
       return;
     }
 
-    const allVisibleAddresses = allVisibleAccounts
-      .map(({ address }) => address);
-
-    setSelectedAccounts && setSelectedAccounts(allVisibleAddresses);
-  }, [allVisibleAccounts, areAllAccountsSelected, setSelectedAccounts]
+    setSelectedAccounts && setSelectedAccounts(allDisplayedAddresses);
+  }, [allDisplayedAddresses, areAllAccountsSelected, setSelectedAccounts]
   );
 
   return (
@@ -75,7 +82,7 @@ function AccounSelection ({ className, origin, url, withWarning = true }: Props)
               <AccountsTree
                 {...json}
                 key={`${index}:${json.address}`}
-                showHidden={false}
+                showHidden={showHidden}
                 withCheckbox={true}
                 withMenu={false}
               />

@@ -18,6 +18,7 @@ import { Name } from '../../partials';
 interface Props extends AccountJson {
   className?: string;
   parentName?: string;
+  showVisibilityAction?: boolean;
   withCheckbox?: boolean;
   withMenu?: boolean
 }
@@ -27,7 +28,7 @@ interface EditState {
   toggleActions: number;
 }
 
-function Account ({ address, className, genesisHash, isExternal, isHardware, isHidden, name, parentName, suri, type, withCheckbox = false, withMenu = true }: Props): React.ReactElement<Props> {
+function Account ({ address, className, genesisHash, isExternal, isHardware, isHidden, name, parentName, showVisibilityAction, suri, type, withCheckbox = false, withMenu = true }: Props): React.ReactElement<Props> {
   const { t } = useTranslation();
   const [{ isEditing, toggleActions }, setEditing] = useState<EditState>({ isEditing: false, toggleActions: 0 });
   const [editedName, setName] = useState<string | undefined | null>(name);
@@ -141,6 +142,7 @@ function Account ({ address, className, genesisHash, isExternal, isHardware, isH
         isHidden={isHidden}
         name={editedName}
         parentName={parentName}
+        showVisibilityAction={showVisibilityAction}
         suri={suri}
         toggleActions={toggleActions}
       >

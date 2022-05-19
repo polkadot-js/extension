@@ -178,6 +178,7 @@ export default class KoniState extends State {
         }
       }
 
+      this.initEvmTokenState();
       this.initChainRegistry();
     });
   }

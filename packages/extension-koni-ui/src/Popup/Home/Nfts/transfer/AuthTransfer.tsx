@@ -8,14 +8,19 @@ import Modal from '@subwallet/extension-koni-ui/components/Modal';
 import Output from '@subwallet/extension-koni-ui/components/Output';
 import useToast from '@subwallet/extension-koni-ui/hooks/useToast';
 import { evmNftSubmitTransaction, nftForceUpdate, substrateNftSubmitTransaction } from '@subwallet/extension-koni-ui/messaging';
-import Address from '@subwallet/extension-koni-ui/Popup/Home/Nfts/transfer/components/Address';
-import { AddressProxy } from '@subwallet/extension-koni-ui/Popup/Home/Nfts/transfer/components/types';
 import { _NftItem, SubstrateTransferParams, Web3TransferParams } from '@subwallet/extension-koni-ui/Popup/Home/Nfts/types';
+import Address from '@subwallet/extension-koni-ui/Popup/Sending/parts/Address';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import React, { useCallback, useEffect, useState } from 'react';
 import { useSelector } from 'react-redux';
 import styled from 'styled-components';
+
+interface AddressProxy {
+  isUnlockCached: boolean;
+  signAddress: string | null;
+  signPassword: string;
+}
 
 interface Props extends ThemeProps {
   className?: string;

@@ -2,7 +2,6 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import Identicon from '@subwallet/extension-koni-ui/components/Identicon';
-import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import reformatAddress from '@subwallet/extension-koni-ui/util/reformatAddress';
 import React from 'react';

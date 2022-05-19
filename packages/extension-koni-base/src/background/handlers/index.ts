@@ -15,7 +15,6 @@ import { assert } from '@polkadot/util';
 export const state = new KoniState();
 
 state.initNetworkStates();
-state.initEvmTokenState(); // TODO: move this into initNetwork
 
 export const extension = new KoniExtension(state);
 export const tabs = new KoniTabs(state);

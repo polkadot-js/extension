@@ -909,6 +909,7 @@ export default class KoniExtension extends Extension {
     return this.getStaking();
   }
 
+  // TODO: remove this
   private apiInit ({ networkKey }: RequestApi): ApiInitStatus {
     const { apisMap } = bWindow.pdotApi;
 

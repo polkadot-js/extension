@@ -25,6 +25,7 @@ function WebsiteEntry ({ className = '', info, removeAuth, url }: Props): React.
 
   return (
     <div className={className}>
+      <RemoveAuth onRemove={_removeAuth} />
       <div className='url'>
         {url}
       </div>
@@ -35,7 +36,6 @@ function WebsiteEntry ({ className = '', info, removeAuth, url }: Props): React.
           }
         })
       }</div>
-      <RemoveAuth onRemove={_removeAuth} />
     </div>
   );
 }
@@ -50,7 +50,7 @@ export default styled(WebsiteEntry)(({ theme }: Props) => `
   }
 
   .connectedAccounts{
-    margin-right: 1rem;
+    margin-left: .5rem;
     background-color: ${theme.primaryColor};
     color: white;
     cursor: pointer;

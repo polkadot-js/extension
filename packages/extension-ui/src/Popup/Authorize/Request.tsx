@@ -10,7 +10,7 @@ import styled from 'styled-components';
 import { AccountContext, ActionBar, ActionContext, Button, Link } from '../../components';
 import useTranslation from '../../hooks/useTranslation';
 import { approveAuthRequest, rejectAuthRequest } from '../../messaging';
-import { AccountSelection, Header } from '../../partials';
+import { AccountSelection } from '../../partials';
 import NoAccount from './NoAccount';
 
 interface Props extends ThemeProps {

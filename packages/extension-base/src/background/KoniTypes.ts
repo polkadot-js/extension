@@ -10,7 +10,6 @@ import { ApiPromise } from '@polkadot/api';
 import { SubmittableExtrinsicFunction } from '@polkadot/api/promise/types';
 import { KeyringPair$Json } from '@polkadot/keyring/types';
 import { Registry } from '@polkadot/types/types';
-import { Keyring } from '@polkadot/ui-keyring';
 import { SingleAddress } from '@polkadot/ui-keyring/observable/types';
 import { KeyringOptions } from '@polkadot/ui-keyring/options/types';
 import { KeyringPairs$Json } from '@polkadot/ui-keyring/types';
@@ -384,15 +383,6 @@ export interface RandomTestRequest {
   end: number;
 }
 
-export type PdotApi = {
-  keyring: Keyring;
-  apisMap: Record<string, ApiProps>;
-}
-
-export interface BackgroundWindow extends Window {
-  pdotApi: PdotApi;
-}
-
 export interface TransactionHistoryItemType {
   time: number;
   networkKey: string;
@@ -671,12 +661,6 @@ export interface EvmTokenJson {
   erc721: CustomEvmToken[]
 }
 
-export interface _ServiceInfo {
-  currentAccount: string,
-  chainRegistry: Record<string, ChainRegistry>;
-  customErc721Registry: CustomEvmToken[];
-}
-
 export interface DeleteEvmTokenParams {
   smartContract: string,
   chain: 'astarEvm' | 'moonbeam' | 'moonriver' | 'moonbase' | 'shidenEvm',
@@ -769,7 +753,6 @@ export interface KoniRequestSignatures {
   'pri(nftTransfer.getNftTransfer)': [null, NftTransferExtra];
   'pri(nftTransfer.getSubscription)': [null, NftTransferExtra, NftTransferExtra];
   'pri(nft.forceUpdate)': [RequestNftForceUpdate, boolean];
-  'pri(api.init)': [RequestApi, ApiInitStatus];
   'pri(staking.getStaking)': [null, StakingJson];
   'pri(staking.getSubscription)': [RequestSubscribeStaking, StakingJson, StakingJson];
   'pri(stakingReward.getStakingReward)': [null, StakingRewardJson];

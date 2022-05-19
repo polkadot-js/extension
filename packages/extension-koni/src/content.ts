@@ -1,4 +1,4 @@
-// Copyright 2019-2022 @subwallet/extension-koni authors & contributors
+// Copyright 2019-2022 @polkadot/extension authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
 import type { Message } from '@subwallet/extension-base/types';

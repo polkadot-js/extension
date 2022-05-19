@@ -1,4 +1,4 @@
-// Copyright 2019-2022 @subwallet/extension-koni-ui authors & contributors
+// Copyright 2019-2022 @polkadot/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
 import cloneIconLight from '@subwallet/extension-koni-ui/assets/clone--color-2.svg';

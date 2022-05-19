@@ -21,7 +21,9 @@ function getDefaultToken (networkKey: string, chainRegistryMap: Record<string, C
     return null;
   }
 
-  const token = networkKey === 'all' ? chainRegistryMap[firstNetworkKey].chainTokens[0] : chainRegistryMap[networkKey].chainTokens[0];
+  const token = networkKey === 'all' ?
+    getMainTokenInfo(firstNetworkKey, chainRegistryMap).symbol :
+    getMainTokenInfo(networkKey, chainRegistryMap).symbol;
 
   return networkKey === 'all' ? [firstNetworkKey, token] : [networkKey, token];
 }

@@ -1,6 +1,7 @@
 // Copyright 2019-2022 @subwallet/extension-koni-base authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
+import { assetFromToken } from '@equilab/api';
 import { ResponseTransfer, SupportTransferResponse, TokenInfo, TransferErrorCode, TransferStep } from '@subwallet/extension-base/background/KoniTypes';
 import { ethereumChains } from '@subwallet/extension-koni-base/api/dotsama/api-helper';
 import { getTokenInfo } from '@subwallet/extension-koni-base/api/dotsama/registry';
@@ -20,6 +21,8 @@ export async function getExistentialDeposit (networkKey: string, token: string):
   if (tokenInfo && tokenInfo.isMainToken) {
     if (api?.consts?.balances?.existentialDeposit) {
       return api.consts.balances.existentialDeposit.toString();
+    } else if (api?.consts?.eqBalances?.existentialDeposit) {
+      return api.consts.eqBalances.existentialDeposit.toString();
     }
   }
 
@@ -63,12 +66,13 @@ export async function checkSupportTransfer (networkKey: string, token: string): 
   const isTxCurrenciesSupported = !!api && !!api.tx && !!api.tx.currencies;
   const isTxBalancesSupported = !!api && !!api.tx && !!api.tx.balances;
   const isTxTokensSupported = !!api && !!api.tx && !!api.tx.tokens;
+  const isTxEqBalancesSupported = !!api && !!api.tx && !!api.tx.eqBalances;
   const result: SupportTransferResponse = {
     supportTransfer: false,
     supportTransferAll: false
   };
 
-  if (!(isTxCurrenciesSupported || isTxBalancesSupported || isTxTokensSupported)) {
+  if (!(isTxCurrenciesSupported || isTxBalancesSupported || isTxTokensSupported || isTxEqBalancesSupported)) {
     return result;
   }
 
@@ -80,6 +84,9 @@ export async function checkSupportTransfer (networkKey: string, token: string): 
   } else if (['kintsugi', 'kintsugi_test', 'interlay'].includes(networkKey) && tokenInfo && isTxTokensSupported) {
     result.supportTransfer = true;
     result.supportTransferAll = true;
+  } else if (['genshiro_testnet', 'genshiro', 'equilibrium_parachain'].includes(networkKey) && tokenInfo && isTxEqBalancesSupported) {
+    result.supportTransfer = true;
+    result.supportTransferAll = false;
   } else if (isTxBalancesSupported && (!tokenInfo || tokenInfo.isMainToken)) {
     result.supportTransfer = true;
     result.supportTransferAll = true;
@@ -108,6 +115,7 @@ export async function estimateFee (
   const isTxCurrenciesSupported = !!api && !!api.tx && !!api.tx.currencies;
   const isTxBalancesSupported = !!api && !!api.tx && !!api.tx.balances;
   const isTxTokensSupported = !!api && !!api.tx && !!api.tx.tokens;
+  const isTxEqBalancesSupported = !!api && !!api.tx && !!api.tx.eqBalances;
 
   if (['karura', 'acala', 'acala_testnet'].includes(networkKey) && tokenInfo && !tokenInfo.isMainToken && isTxCurrenciesSupported) {
     // Note: currently 'karura', 'acala', 'acala_testnet' do not support transfer all
@@ -137,6 +145,16 @@ export async function estimateFee (
       const paymentInfo = await api.tx.tokens
         .transfer(to, tokenInfo.specialOption || { Token: tokenInfo.symbol }, new BN(value))
         .paymentInfo(fromKeypair);
+
+      fee = paymentInfo.partialFee.toString();
+    }
+  } else if (['genshiro_testnet', 'genshiro', 'equilibrium_parachain'].includes(networkKey) && tokenInfo && isTxEqBalancesSupported) {
+    if (transferAll) {
+      // currently genshiro_testnet, genshiro, equilibrium_parachain do not have transfer all method for tokens
+    } else if (value) {
+      const asset = networkKey === 'equilibrium_parachain' ? assetFromToken(tokenInfo.symbol)[0] : assetFromToken(tokenInfo.symbol);
+      const paymentInfo = await api.tx.eqBalances.transfer(asset, to, value)
+        .paymentInfo(fromKeypair.address, { nonce: -1 });
 
       fee = paymentInfo.partialFee.toString();
     }
@@ -203,6 +221,12 @@ function updateResponseTxResult (
         response.txResult.change = record.event.data[3]?.toString() || '0';
         response.txResult.changeSymbol = tokenInfo.symbol;
       }
+    } else if (['genshiro_testnet', 'genshiro', 'equilibrium_parachain'].includes(networkKey) && tokenInfo) {
+      if (record.event.section === 'eqBalances' &&
+        record.event.method.toLowerCase() === 'transfer') {
+          response.txResult.change = record.event.data[3]?.toString() || '0';
+          response.txResult.changeSymbol = tokenInfo.symbol;
+      }
     } else {
       if ((record.event.section === 'balances' &&
         record.event.method.toLowerCase() === 'transfer')) {
@@ -232,13 +256,17 @@ export async function makeTransfer (
   const api = apiProps.api;
   const fromAddress = fromKeypair.address;
   // @ts-ignore
-  const { nonce } = await api.query.system.account(fromAddress);
+  let nonce = await api.query.system.account(fromAddress).nonce;
+  if (['genshiro_testnet', 'genshiro', 'equilibrium_parachain'].includes(networkKey)) {
+    nonce = -1;
+  }
 
   // @ts-ignore
   let transfer;
   const isTxCurrenciesSupported = !!api && !!api.tx && !!api.tx.currencies;
   const isTxBalancesSupported = !!api && !!api.tx && !!api.tx.balances;
   const isTxTokensSupported = !!api && !!api.tx && !!api.tx.tokens;
+  const isTxEqBalancesSupported = !!api && !!api.tx && !!api.tx.eqBalances;
 
   if (['karura', 'acala', 'acala_testnet'].includes(networkKey) && tokenInfo && !tokenInfo.isMainToken && isTxCurrenciesSupported) {
     if (transferAll) {
@@ -254,6 +282,14 @@ export async function makeTransfer (
     } else if (value) {
       transfer = api.tx.tokens
         .transfer(to, tokenInfo.specialOption || { Token: tokenInfo.symbol }, new BN(value));
+    }
+  } else if (['genshiro_testnet', 'genshiro', 'equilibrium_parachain'].includes(networkKey) && tokenInfo && isTxEqBalancesSupported) {
+    if (transferAll) {
+      // currently genshiro_testnet, genshiro, equilibrium_parachain do not have transfer all method for tokens
+    } else if (value) {
+      const asset = networkKey === 'equilibrium_parachain' ? assetFromToken(tokenInfo.symbol)[0] : assetFromToken(tokenInfo.symbol);
+
+      transfer = api.tx.eqBalances.transfer(asset, to, value);
     }
   } else if (isTxBalancesSupported && (!tokenInfo || tokenInfo.isMainToken)) {
     if (transferAll) {

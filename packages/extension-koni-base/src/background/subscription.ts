@@ -113,23 +113,14 @@ export class KoniSubscription {
   }
 
   initStakingOnChainSubscription (addresses: string[], dotSamaApiMap: Record<string, ApiProps>) {
-    const subscriptionPromises = stakingOnChainApi(['5CK2GZvpmKYxJQXMQzHa2vvHLf5cibuWK4qkcCem2p9PXYx1'], dotSamaApiMap, (networkKey, rs) => {
+    const subscriptionPromises = stakingOnChainApi(addresses, dotSamaApiMap, (networkKey, rs) => {
       state.setStakingItem(networkKey, rs);
     }, state.getNetworkMap());
 
-    console.log('subscriptionPromises', subscriptionPromises);
-
     return () => {
-      // @ts-ignore
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-call
-      subscriptionPromises.forEach((subProm) => {
-        // @ts-ignore
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-member-access
-        subProm.then((unsub) => {
-          // eslint-disable-next-line @typescript-eslint/no-unsafe-call
-          unsub && unsub();
-        }).catch(console.error);
-      });
+      subscriptionPromises.then((unsubs) => {
+        unsubs.forEach(unsubs => unsubs());
+      }).catch(console.error);
     };
   }
 

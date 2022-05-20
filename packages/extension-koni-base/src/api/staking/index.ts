@@ -42,16 +42,12 @@ export async function stakingOnChainApi (addresses: string[], dotSamaAPIMap: Rec
   const [substrateAddresses, evmAddresses] = categoryAddresses(addresses);
 
   Object.entries(networks).forEach(([networkKey, networkInfo]) => {
-    console.log('iterating network', networkKey, networkInfo);
     if (IGNORE_GET_SUBSTRATE_FEATURES_LIST.indexOf(networkKey) < 0 && (networkInfo.getStakingOnChain && networkInfo.getStakingOnChain)) {
       allApiPromise.push({ chain: networkKey, api: dotSamaAPIMap[networkKey] });
-      console.log('allApiPromise', allApiPromise, dotSamaAPIMap[networkKey]);
     }
   });
 
-
-
-  const unsubPromises = await Promise.all(allApiPromise.map(async ({ api: apiPromise, chain }) => {
+  return await Promise.all(allApiPromise.map(async ({ api: apiPromise, chain }) => {
     const parentApi = await apiPromise.isReady;
     const useAddresses = apiPromise.isEthereum ? evmAddresses : substrateAddresses;
 
@@ -102,12 +98,4 @@ export async function stakingOnChainApi (addresses: string[], dotSamaAPIMap: Rec
       }
     });
   }));
-
-  return async () => {
-    const unsubs = await Promise.all(unsubPromises);
-
-    unsubs.forEach((unsub) => {
-      unsub && unsub();
-    });
-  };
 }

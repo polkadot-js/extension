@@ -1,8 +1,8 @@
      465	Jaco                          	0.42.5 (#969)
-     238	Nam Phạm                      	update validate evm token
-     202	AnhMTV                        	Fix wrong copyright header
-     131	quangdo                       	Fix some GUI bug in ImportPrivateKey screen
-     103	lw-cdm                        	Remove duplicated logo referent
+     245	Nam Phạm                      	
+     206	AnhMTV                        	
+     132	quangdo                       	Integrate Genshiro & Equilibrium
+     110	lw-cdm                        	Fix import issue
       82	Thibaut Sardan                	Add account filtering feature (#832)
       55	leewong                       	#118: update balance logic for Kintsugi testnet
       52	lw-cdm                        	

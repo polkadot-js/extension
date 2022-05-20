@@ -147,7 +147,7 @@ function EvmTokenEdit ({ className }: Props): React.ReactElement {
         <InputWithLabel
           disabled={true}
           label={t<string>('Chain')}
-          value={networkJson.chain || ''}
+          value={networkJson?.chain || ''}
         />
 
         <InputWithLabel

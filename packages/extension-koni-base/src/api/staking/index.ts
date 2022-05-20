@@ -18,8 +18,8 @@ export const DEFAULT_STAKING_NETWORKS = {
   // polkadot: PREDEFINED_NETWORKS.polkadot,
   // kusama: PREDEFINED_NETWORKS.kusama,
   // hydradx: PREDEFINED_NETWORKS.hydradx,
-  acala: PREDEFINED_NETWORKS.acala,
-  // aleph: PREDEFINED_NETWORKS.aleph
+  // acala: PREDEFINED_NETWORKS.acala,
+  aleph: PREDEFINED_NETWORKS.aleph
   // astar: NETWORKS.astar,
   // moonbeam: NETWORKS.moonbeam
 };

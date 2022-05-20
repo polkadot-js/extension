@@ -462,24 +462,24 @@ export const PREDEFINED_NETWORKS: Record<string, NetworkJson> = {
     crowdloanUrl: 'https://www.polkadex.trade/crowdloans',
     decimals: 12
   },
-  // aleph: {
-  //   key: 'aleph',
-  //   chain: 'Aleph Zero',
-  //   genesisHash: '0x70255b4d28de0fc4e1a193d7e175ad1ccef431598211c55538f1018651a0344e',
-  //   ss58Format: 42,
-  //   providers: {
-  //     'Aleph Zero Foundation': 'wss://ws.azero.dev'
-  //   },
-  //   active: false,
-  //   currentProviderMode: 'ws',
-  //   currentProvider: 'Aleph Zero Foundation',
-  //   groups: ['MAIN_NET'],
-  //   nativeToken: 'AZERO',
-  //   crowdloanUrl: 'https://contribute.alephzero.org/',
-  //   decimals: 12,
-  //   coinGeckoKey: 'aleph-zero',
-  //   getStakingOnChain: true
-  // },
+  aleph: {
+    key: 'aleph',
+    chain: 'Aleph Zero',
+    genesisHash: '0x70255b4d28de0fc4e1a193d7e175ad1ccef431598211c55538f1018651a0344e',
+    ss58Format: 42,
+    providers: {
+      'Aleph Zero Foundation': 'wss://ws.azero.dev'
+    },
+    active: false,
+    currentProviderMode: 'ws',
+    currentProvider: 'Aleph Zero Foundation',
+    groups: ['MAIN_NET'],
+    nativeToken: 'AZERO',
+    crowdloanUrl: 'https://contribute.alephzero.org/',
+    decimals: 12,
+    coinGeckoKey: 'aleph-zero',
+    getStakingOnChain: true
+  },
   alephTest: {
     key: 'alephTest',
     chain: 'Aleph Zero Testnet',
@@ -510,24 +510,24 @@ export const PREDEFINED_NETWORKS: Record<string, NetworkJson> = {
     nativeToken: 'OPL',
     decimals: 18
   },
-  // moonbase: {
-  //   key: 'moonbase',
-  //   chain: 'Moonbase Alpha',
-  //   genesisHash: '0x91bc6e169807aaa54802737e1c504b2577d4fafedd5a02c10293b1cd60e39527',
-  //   ss58Format: 1287,
-  //   providers: {
-  //     'Moonbeam Foundation': 'wss://wss.api.moonbase.moonbeam.network',
-  //     OnFinality: 'wss://moonbeam-alpha.api.onfinality.io/public-ws'
-  //     // Pinknode: 'wss://rpc.pinknode.io/alphanet/explorer' // https://github.com/polkadot-js/apps/issues/7058
-  //   },
-  //   active: false,
-  //   currentProviderMode: 'ws',
-  //   currentProvider: 'OnFinality',
-  //   groups: ['TEST_NET'],
-  //   nativeToken: 'DEV',
-  //   isEthereum: true,
-  //   decimals: 18
-  // },
+  moonbase: {
+    key: 'moonbase',
+    chain: 'Moonbase Alpha',
+    genesisHash: '0x91bc6e169807aaa54802737e1c504b2577d4fafedd5a02c10293b1cd60e39527',
+    ss58Format: 1287,
+    providers: {
+      'Moonbeam Foundation': 'wss://wss.api.moonbase.moonbeam.network',
+      OnFinality: 'wss://moonbeam-alpha.api.onfinality.io/public-ws'
+      // Pinknode: 'wss://rpc.pinknode.io/alphanet/explorer' // https://github.com/polkadot-js/apps/issues/7058
+    },
+    active: false,
+    currentProviderMode: 'ws',
+    currentProvider: 'OnFinality',
+    groups: ['TEST_NET'],
+    nativeToken: 'DEV',
+    isEthereum: true,
+    decimals: 18
+  },
   efinity: {
     key: 'efinity',
     chain: 'Efinity',
@@ -1164,10 +1164,10 @@ export const PREDEFINED_GENESIS_HASHES = {
   '0xe6343cef9167c43305c6f197bbd90d55bf93efc561b3d698845398cd864f6eb3': 'subgame',
   '0x52097bd7416205228bf13ac3eda6f16de56c19cac3476866b8b8a9c00d515870': 'odyssey',
   '0x3920bcb4960a1eef5580cd5367ff3f430eef052774f78468852f7b9cb39f8a3c': 'polkadex',
-  // '0x70255b4d28de0fc4e1a193d7e175ad1ccef431598211c55538f1018651a0344e': 'aleph',
+  '0x70255b4d28de0fc4e1a193d7e175ad1ccef431598211c55538f1018651a0344e': 'aleph',
   '0x49574664f45654c043c2690b76b5bf4a05c49160e112d32b8b71b0dfb023169c': 'alephTest',
   '0x3fa374fbc8d0a9077356aefe327c88f447ce7f1fda905b1d4b4a2680a7b5cefa': 'opal',
-  // '0x91bc6e169807aaa54802737e1c504b2577d4fafedd5a02c10293b1cd60e39527': 'moonbase',
+  '0x91bc6e169807aaa54802737e1c504b2577d4fafedd5a02c10293b1cd60e39527': 'moonbase',
   '0x335369975fced3fc22e23498da306a712f4fd964c957364d53c49cea9db8bc2f': 'efinity',
   '0x1bb969d85965e4bb5a651abbedf21a54b6b31a21f66b5401cc3f1e286268d736': 'phala',
   '0x8b404e7ed8789d813982b9cb4c8b664c05b3fbf433309f603af014ec9ce56a8c': 'crust',

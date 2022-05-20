@@ -146,6 +146,7 @@ export default class KoniState extends State {
             mergedNetworkMap[key].currentProvider = storedNetwork.currentProvider;
             mergedNetworkMap[key].currentProviderMode = mergedNetworkMap[key].currentProvider.startsWith('http') ? 'http' : 'ws';
           } else {
+            // TODO: merge networkKey in customTokenMap as well
             if (Object.keys(PREDEFINED_GENESIS_HASHES).includes(storedNetwork.genesisHash)) { // merge networks with same genesis hash
               // @ts-ignore
               const targetKey = PREDEFINED_GENESIS_HASHES[storedNetwork.genesisHash] as string;

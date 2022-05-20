@@ -174,8 +174,6 @@ export class NftHandler {
     this.setupApi();
     this.setEvmContracts(evmContracts);
 
-    console.log('nft', this.handlers);
-
     await Promise.all(this.handlers.map(async (handler) => {
       await handler.fetchNfts(
         (data: NftItem) => {

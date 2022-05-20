@@ -11,7 +11,7 @@ import axios from 'axios';
 import { DeriveOwnContributions } from '@polkadot/api-derive/types';
 import { BN } from '@polkadot/util';
 
-function getRPCCrowndloan (parentAPI: ApiProps, paraId: number, hexAddresses: string[], callback: (rs: CrowdloanItem) => void) {
+function getRPCCrowdloan (parentAPI: ApiProps, paraId: number, hexAddresses: string[], callback: (rs: CrowdloanItem) => void) {
   const unsubPromise = parentAPI.api.derive.crowdloan.ownContributions(paraId, hexAddresses, (result: DeriveOwnContributions) => {
     let contribute = new BN(0);
 
@@ -36,7 +36,7 @@ function getRPCCrowndloan (parentAPI: ApiProps, paraId: number, hexAddresses: st
   };
 }
 
-export const subcribleAcalaContributeInterval = (polkadotAddresses: string[], callback: (rs: CrowdloanItem) => void) => {
+export const subscribeAcalaContributeInterval = (polkadotAddresses: string[], callback: (rs: CrowdloanItem) => void) => {
   const acalaContributionApi = 'https://api.polkawallet.io/acala-distribution-v2/crowdloan?account=';
 
   const getContributeInfo = () => {
@@ -95,12 +95,13 @@ export async function subscribeCrowdloan (addresses: string[], dotSamaAPIMap: Re
         return;
       }
 
+      // TODO: check group of custom network
       if (networkKey === 'acala') {
-        unsubMap.acala = subcribleAcalaContributeInterval(substrateAddresses.map((address) => reformatAddress(address, networkInfo.ss58Format, networkInfo.isEthereum)), crowdloanCb);
+        unsubMap.acala = subscribeAcalaContributeInterval(substrateAddresses.map((address) => reformatAddress(address, networkInfo.ss58Format, networkInfo.isEthereum)), crowdloanCb);
       } else if (networkInfo.groups.includes('POLKADOT_PARACHAIN')) {
-        unsubMap[networkKey] = getRPCCrowndloan(polkadotAPI, networkInfo.paraId, hexAddresses, crowdloanCb);
+        unsubMap[networkKey] = getRPCCrowdloan(polkadotAPI, networkInfo.paraId, hexAddresses, crowdloanCb);
       } else if (networkInfo.groups.includes('KUSAMA_PARACHAIN')) {
-        unsubMap[networkKey] = getRPCCrowndloan(kusamaAPI, networkInfo.paraId, hexAddresses, crowdloanCb);
+        unsubMap[networkKey] = getRPCCrowdloan(kusamaAPI, networkInfo.paraId, hexAddresses, crowdloanCb);
       }
     });
   }

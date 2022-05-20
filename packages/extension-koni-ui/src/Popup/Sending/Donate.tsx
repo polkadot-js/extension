@@ -393,6 +393,7 @@ function Donate ({ chainRegistryMap, className, defaultValue, networkMap }: Cont
             fee, feeDecimal, feeSymbol, mainTokenInfo, chainRegistryMap[selectedNetworkKey].tokenMap
           )}
           isDonation
+          networkMap={networkMap}
           onCancel={_onCancelTx}
           onChangeResult={_onChangeResult}
           requestPayload={{

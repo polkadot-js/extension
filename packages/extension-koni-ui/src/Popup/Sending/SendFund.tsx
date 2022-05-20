@@ -423,6 +423,7 @@ function SendFund ({ chainRegistryMap, className, defaultValue, networkMap }: Co
           feeInfo={getAuthTransactionFeeInfo(
             fee, feeDecimal, feeSymbol, mainTokenInfo, chainRegistryMap[selectedNetworkKey].tokenMap
           )}
+          networkMap={networkMap}
           onCancel={_onCancelTx}
           onChangeResult={_onChangeResult}
           requestPayload={{

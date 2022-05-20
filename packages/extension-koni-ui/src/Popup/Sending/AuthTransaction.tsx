@@ -1,16 +1,13 @@
 // Copyright 2019-2022 @polkadot/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { RequestCheckTransfer, TransferStep } from '@subwallet/extension-base/background/KoniTypes';
-import { PREDEFINED_NETWORKS } from '@subwallet/extension-koni-base/api/predefinedNetworks';
+import { NetworkJson, RequestCheckTransfer, TransferStep } from '@subwallet/extension-base/background/KoniTypes';
 import { InputWithLabel, Warning } from '@subwallet/extension-koni-ui/components';
 import Button from '@subwallet/extension-koni-ui/components/Button';
 import DonateInputAddress from '@subwallet/extension-koni-ui/components/DonateInputAddress';
 import FormatBalance from '@subwallet/extension-koni-ui/components/FormatBalance';
 import InputAddress from '@subwallet/extension-koni-ui/components/InputAddress';
-import InputWithLabel from '@subwallet/extension-koni-ui/components/InputWithLabel';
 import Modal from '@subwallet/extension-koni-ui/components/Modal';
-import Warning from '@subwallet/extension-koni-ui/components/Warning';
 import { BalanceFormatType } from '@subwallet/extension-koni-ui/components/types';
 import useTranslation from '@subwallet/extension-koni-ui/hooks/useTranslation';
 import { makeTransfer } from '@subwallet/extension-koni-ui/messaging';
@@ -26,6 +23,7 @@ interface Props extends ThemeProps {
   requestPayload: RequestCheckTransfer;
   feeInfo: [string | null, number, string]; // fee, fee decimal, fee symbol
   balanceFormat: BalanceFormatType; // decimal, symbol
+  networkMap: Record<string, NetworkJson>;
   onChangeResult: (txResult: TransferResultType) => void;
   isDonation?: boolean;
 }
@@ -66,13 +64,13 @@ function renderTotal (arg: RenderTotalArg) {
   );
 }
 
-function AuthTransaction ({ className, isDonation, feeInfo: [fee, feeDecimals, feeSymbol], balanceFormat, onCancel, onChangeResult, requestPayload }: Props): React.ReactElement<Props> | null {
+function AuthTransaction ({ className, isDonation, feeInfo: [fee, feeDecimals, feeSymbol], balanceFormat, networkMap, onCancel, onChangeResult, requestPayload }: Props): React.ReactElement<Props> | null {
   const { t } = useTranslation();
   const [isBusy, setBusy] = useState(false);
   const [password, setPassword] = useState<string>('');
   const [isKeyringErr, setKeyringErr] = useState<boolean>(false);
   const [errorArr, setErrorArr] = useState<string[]>([]);
-  const networkPrefix = PREDEFINED_NETWORKS[requestPayload.networkKey].ss58Format;
+  const networkPrefix = networkMap[requestPayload.networkKey].ss58Format;
 
   const _onCancel = useCallback(() => {
     onCancel();

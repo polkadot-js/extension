@@ -58,7 +58,7 @@ function subscribeWithDerive (addresses: string[], networkKey: string, networkAP
   };
 }
 
-function subscribeERC20Interval (addresses: string[], networkKey: string, api: ApiPromise, originBalanceItem: BalanceItem, callback: (networkKey: string, rs: BalanceItem) => void, web3ApiMap: Record<string, Web3>): () => void {
+function subscribeERC20Interval (addresses: string[], networkKey: string, api: ApiPromise, originBalanceItem: BalanceItem, web3ApiMap: Record<string, Web3>, callback: (networkKey: string, rs: BalanceItem) => void): () => void {
   let tokenList = {} as TokenInfo[];
   const ERC20ContractMap = {} as Record<string, Contract>;
   const tokenBalanceMap = {} as Record<string, BalanceChildItem>;
@@ -284,7 +284,7 @@ async function subscribeAssetsBalance (addresses: string[], networkKey: string, 
   };
 }
 
-function subscribeWithAccountMulti (addresses: string[], networkKey: string, networkAPI: ApiProps, callback: (networkKey: string, rs: BalanceItem) => void, web3ApiMap: Record<string, Web3>) {
+async function subscribeWithAccountMulti (addresses: string[], networkKey: string, networkAPI: ApiProps, web3ApiMap: Record<string, Web3>, callback: (networkKey: string, rs: BalanceItem) => void) {
   const balanceItem: BalanceItem = {
     state: APIItemState.PENDING,
     free: '0',
@@ -333,7 +333,7 @@ function subscribeWithAccountMulti (addresses: string[], networkKey: string, net
       callback(networkKey, balanceItem);
     });
   } else if (moonbeamBaseChains.indexOf(networkKey) > -1) {
-    unsub2 = subscribeERC20Interval(addresses, networkKey, networkAPI.api, balanceItem, callback);
+    unsub2 = subscribeERC20Interval(addresses, networkKey, networkAPI.api, balanceItem, web3ApiMap, callback);
   } else if (['genshiro_testnet', 'genshiro', 'equilibrium_parachain'].includes(networkKey)) {
     unsub2 = await subscribeGenshiroTokenBalance(addresses, networkKey, networkAPI.api, balanceItem, (balanceItem) => {
       callback(networkKey, balanceItem);
@@ -369,7 +369,7 @@ export function subscribeEVMBalance (networkKey: string, api: ApiPromise, addres
 
   getBalance();
   const interval = setInterval(getBalance, ASTAR_REFRESH_BALANCE_INTERVAL);
-  const unsub2 = subscribeERC20Interval(addresses, networkKey, api, balanceItem, callback, web3ApiMap);
+  const unsub2 = subscribeERC20Interval(addresses, networkKey, api, balanceItem, web3ApiMap, callback);
 
   return () => {
     clearInterval(interval);
@@ -404,7 +404,7 @@ export function subscribeBalance (addresses: string[], dotSamaAPIMap: Record<str
     }
 
     // eslint-disable-next-line @typescript-eslint/no-misused-promises
-    return subscribeWithAccountMulti(useAddresses, networkKey, networkAPI, callback, web3ApiMap);
+    return subscribeWithAccountMulti(useAddresses, networkKey, networkAPI, web3ApiMap, callback);
   });
 }
 

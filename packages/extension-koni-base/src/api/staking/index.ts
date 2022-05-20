@@ -29,11 +29,11 @@ interface PromiseMapping {
   chain: string
 }
 
-function parseStakingBalance (balance: number, chain: string): number {
+function parseStakingBalance (balance: number, chain: string, network: Record<string, NetworkJson>): number {
   if (chain === 'hydradx') {
     return balance;
   } else {
-    return toUnit(balance, PREDEFINED_NETWORKS[chain].decimals as number);
+    return toUnit(balance, network[chain].decimals as number);
   }
 }
 
@@ -72,7 +72,7 @@ export async function stakingOnChainApi (addresses: string[], dotSamaAPIMap: Rec
           }
         }
 
-        const parsedTotal = parseStakingBalance(totalBalance, chain);
+        const parsedTotal = parseStakingBalance(totalBalance, chain, networks);
 
         if (totalBalance > 0) {
           stakingItem = {

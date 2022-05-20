@@ -11,7 +11,7 @@ import { initApi } from '@subwallet/extension-koni-base/api/dotsama';
 import { getFreeBalance, subscribeFreeBalance } from '@subwallet/extension-koni-base/api/dotsama/balance';
 import { getTokenInfo } from '@subwallet/extension-koni-base/api/dotsama/registry';
 import { checkReferenceCount, checkSupportTransfer, estimateFee, getExistentialDeposit, makeTransfer } from '@subwallet/extension-koni-base/api/dotsama/transfer';
-import { SUPPORTED_TRANSFER_SUBSTRATE_CHAIN_NAME, TRANSFER_CHAIN_ID } from '@subwallet/extension-koni-base/api/nft/config';
+import { SUPPORTED_TRANSFER_SUBSTRATE_CHAIN_NAME } from '@subwallet/extension-koni-base/api/nft/config';
 import { acalaTransferHandler, getNftTransferExtrinsic, isRecipientSelf, quartzTransferHandler, rmrkTransferHandler, statemineTransferHandler, uniqueTransferHandler, unlockAccount } from '@subwallet/extension-koni-base/api/nft/transfer';
 import { getERC20TransactionObject, getEVMTransactionObject, makeERC20Transfer, makeEVMTransfer } from '@subwallet/extension-koni-base/api/web3/transfer';
 import { ERC721Contract, getERC20Contract, getERC721Contract, initWeb3Api } from '@subwallet/extension-koni-base/api/web3/web3';
@@ -1281,6 +1281,7 @@ export default class KoniExtension extends Extension {
   private async evmNftSubmitTransaction (id: string, port: chrome.runtime.Port, { networkKey, password, rawTransaction, recipientAddress, senderAddress }: EvmNftSubmitTransaction): Promise<NftTransactionResponse> {
     const updateState = createSubscription<'pri(evmNft.submitTransaction)'>(id, port);
     let parsedPrivateKey = '';
+    const network = state.getNetworkMapByKey(networkKey);
     const txState = {
       isSendingSelf: reformatAddress(senderAddress, 1) === reformatAddress(recipientAddress, 1)
     } as NftTransactionResponse;
@@ -1308,8 +1309,8 @@ export default class KoniExtension extends Extension {
 
       const common = Common.forCustomChain('mainnet', {
         name: networkKey,
-        networkId: TRANSFER_CHAIN_ID[networkKey],
-        chainId: TRANSFER_CHAIN_ID[networkKey] // TODO: update chainID from networkMap
+        networkId: network.evmChainId as number,
+        chainId: network.evmChainId as number
       }, 'petersburg');
       // @ts-ignore
       const tx = new Transaction(rawTransaction, { common });
@@ -1526,7 +1527,7 @@ export default class KoniExtension extends Extension {
             chain = _chain.toString();
             ethChainId = _ethChainId;
 
-            if (existedNetwork && existedNetwork.ethChainId && existedNetwork.ethChainId !== ethChainId) {
+            if (existedNetwork && existedNetwork.evmChainId && existedNetwork.evmChainId !== ethChainId) {
               result.error = NETWORK_ERROR.PROVIDER_NOT_SAME_NETWORK;
 
               return result;

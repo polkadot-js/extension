@@ -10,7 +10,7 @@ import Spinner from '@subwallet/extension-koni-ui/components/Spinner';
 import useGetNetworkMetadata from '@subwallet/extension-koni-ui/hooks/screen/home/useGetNetworkMetadata';
 import useToast from '@subwallet/extension-koni-ui/hooks/useToast';
 import { tieAccount } from '@subwallet/extension-koni-ui/messaging';
-import { _NftItem, SUPPORTED_TRANSFER_EVM_CHAIN, SUPPORTED_TRANSFER_SUBSTRATE_CHAIN } from '@subwallet/extension-koni-ui/Popup/Home/Nfts/types';
+import { _NftItem, SUPPORTED_TRANSFER_SUBSTRATE_CHAIN } from '@subwallet/extension-koni-ui/Popup/Home/Nfts/types';
 import { RootState, store } from '@subwallet/extension-koni-ui/stores';
 import { TransferNftParams } from '@subwallet/extension-koni-ui/stores/types';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
@@ -20,6 +20,7 @@ import { useSelector } from 'react-redux';
 import styled from 'styled-components';
 
 import logo from '../../../../assets/sub-wallet-logo.svg';
+import useGetNetworkJson from "@subwallet/extension-koni-ui/hooks/screen/home/useGetNetworkJson";
 
 interface Props {
   className?: string;
@@ -51,6 +52,7 @@ function NftItem ({ className, collectionId, collectionImage, data, onClickBack 
   const [imageError, setImageError] = useState(false);
   const { currentAccount: account, currentNetwork } = useSelector((state: RootState) => state);
   const networkMetadata = useGetNetworkMetadata();
+  const networkJson = useGetNetworkJson(data.chain as string);
 
   const navigate = useContext(ActionContext);
   const { show } = useToast();
@@ -89,7 +91,7 @@ function NftItem ({ className, collectionId, collectionImage, data, onClickBack 
       return;
     }
 
-    if (SUPPORTED_TRANSFER_SUBSTRATE_CHAIN.indexOf(data.chain) <= -1 && SUPPORTED_TRANSFER_EVM_CHAIN.indexOf(data.chain) <= -1) {
+    if (SUPPORTED_TRANSFER_SUBSTRATE_CHAIN.indexOf(data.chain) <= -1 && !networkJson.isEthereum) {
       show(`Transferring is not supported for ${data.chain.toUpperCase()} network`);
 
       return;

@@ -3,6 +3,7 @@
 
 import { evmNftGetTransaction, substrateNftGetTransaction } from '@subwallet/extension-koni-ui/messaging';
 import { SUPPORTED_TRANSFER_CHAIN_NAME, TransferResponse } from '@subwallet/extension-koni-ui/Popup/Home/Nfts/types';
+import {NetworkJson} from "@subwallet/extension-base/background/KoniTypes";
 
 async function substrateTransferHandler (networkKey: string, senderAddress: string, recipientAddress: string, params: Record<string, any>) {
   try {
@@ -45,35 +46,30 @@ async function web3TransferHandler (networkKey: string, senderAddress: string, r
   } as TransferResponse;
 }
 
-export default async function transferHandler (networkKey: string, senderAddress: string, recipientAddress: string, params: Record<string, any>): Promise<TransferResponse | null> {
-  switch (networkKey) {
-    case SUPPORTED_TRANSFER_CHAIN_NAME.acala:
-      return await substrateTransferHandler(SUPPORTED_TRANSFER_CHAIN_NAME.acala, senderAddress, recipientAddress, params);
-    case SUPPORTED_TRANSFER_CHAIN_NAME.karura:
-      return await substrateTransferHandler(SUPPORTED_TRANSFER_CHAIN_NAME.acala, senderAddress, recipientAddress, params);
-    case SUPPORTED_TRANSFER_CHAIN_NAME.kusama:
-      return await substrateTransferHandler(SUPPORTED_TRANSFER_CHAIN_NAME.acala, senderAddress, recipientAddress, params);
-    case SUPPORTED_TRANSFER_CHAIN_NAME.uniqueNft:
-      return await substrateTransferHandler(SUPPORTED_TRANSFER_CHAIN_NAME.acala, senderAddress, recipientAddress, params);
-    case SUPPORTED_TRANSFER_CHAIN_NAME.quartz:
-      return await substrateTransferHandler(SUPPORTED_TRANSFER_CHAIN_NAME.acala, senderAddress, recipientAddress, params);
-    case SUPPORTED_TRANSFER_CHAIN_NAME.opal:
-      return await substrateTransferHandler(SUPPORTED_TRANSFER_CHAIN_NAME.acala, senderAddress, recipientAddress, params);
-    case SUPPORTED_TRANSFER_CHAIN_NAME.statemine:
-      return await substrateTransferHandler(SUPPORTED_TRANSFER_CHAIN_NAME.acala, senderAddress, recipientAddress, params);
-    case SUPPORTED_TRANSFER_CHAIN_NAME.statemint:
-      return await substrateTransferHandler(SUPPORTED_TRANSFER_CHAIN_NAME.acala, senderAddress, recipientAddress, params);
-    case SUPPORTED_TRANSFER_CHAIN_NAME.moonbase:
-      return await web3TransferHandler(networkKey, senderAddress, recipientAddress, params);
-    case SUPPORTED_TRANSFER_CHAIN_NAME.moonbeam:
-      return await web3TransferHandler(networkKey, senderAddress, recipientAddress, params);
-    case SUPPORTED_TRANSFER_CHAIN_NAME.moonriver:
-      return await web3TransferHandler(networkKey, senderAddress, recipientAddress, params);
-    case SUPPORTED_TRANSFER_CHAIN_NAME.astarEvm:
-      return await web3TransferHandler(networkKey, senderAddress, recipientAddress, params);
-    case SUPPORTED_TRANSFER_CHAIN_NAME.bitcountry:
-      return await substrateTransferHandler(SUPPORTED_TRANSFER_CHAIN_NAME.acala, senderAddress, recipientAddress, params);
+export default async function transferHandler (networkKey: string, senderAddress: string, recipientAddress: string, params: Record<string, any>, networkJson: NetworkJson): Promise<TransferResponse | null> {
+  if (networkJson.isEthereum && networkJson.isEthereum) {
+    return await web3TransferHandler(networkKey, senderAddress, recipientAddress, params);
+  } else {
+    switch (networkKey) {
+      case SUPPORTED_TRANSFER_CHAIN_NAME.acala:
+        return await substrateTransferHandler(SUPPORTED_TRANSFER_CHAIN_NAME.acala, senderAddress, recipientAddress, params);
+      case SUPPORTED_TRANSFER_CHAIN_NAME.karura:
+        return await substrateTransferHandler(SUPPORTED_TRANSFER_CHAIN_NAME.acala, senderAddress, recipientAddress, params);
+      case SUPPORTED_TRANSFER_CHAIN_NAME.kusama:
+        return await substrateTransferHandler(SUPPORTED_TRANSFER_CHAIN_NAME.acala, senderAddress, recipientAddress, params);
+      case SUPPORTED_TRANSFER_CHAIN_NAME.uniqueNft:
+        return await substrateTransferHandler(SUPPORTED_TRANSFER_CHAIN_NAME.acala, senderAddress, recipientAddress, params);
+      case SUPPORTED_TRANSFER_CHAIN_NAME.quartz:
+        return await substrateTransferHandler(SUPPORTED_TRANSFER_CHAIN_NAME.acala, senderAddress, recipientAddress, params);
+      case SUPPORTED_TRANSFER_CHAIN_NAME.opal:
+        return await substrateTransferHandler(SUPPORTED_TRANSFER_CHAIN_NAME.acala, senderAddress, recipientAddress, params);
+      case SUPPORTED_TRANSFER_CHAIN_NAME.statemine:
+        return await substrateTransferHandler(SUPPORTED_TRANSFER_CHAIN_NAME.acala, senderAddress, recipientAddress, params);
+      case SUPPORTED_TRANSFER_CHAIN_NAME.statemint:
+        return await substrateTransferHandler(SUPPORTED_TRANSFER_CHAIN_NAME.acala, senderAddress, recipientAddress, params);
+      case SUPPORTED_TRANSFER_CHAIN_NAME.bitcountry:
+        return await substrateTransferHandler(SUPPORTED_TRANSFER_CHAIN_NAME.acala, senderAddress, recipientAddress, params);
+    }
   }
-
   return null;
 }

@@ -282,7 +282,7 @@ export interface NetworkJson {
 
   // Ethereum informations for predefine network only
   isEthereum?: boolean; // Only show network with isEthereum=true when select one EVM account // user input
-  ethChainId?: number;
+  evmChainId?: number;
 
   isHybrid?: boolean;
 
@@ -655,7 +655,7 @@ export interface CustomEvmToken {
   smartContract: string,
   symbol?: string,
   decimals?: number,
-  chain: 'astarEvm' | 'moonbeam' | 'moonriver' | 'moonbase' | 'shidenEvm',
+  chain: string,
   type: 'erc20' | 'erc721'
 }
 

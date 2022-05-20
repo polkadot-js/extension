@@ -1,8 +1,6 @@
 // Copyright 2019-2022 @subwallet/extension-koni authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { CustomEvmToken } from '@subwallet/extension-base/background/KoniTypes';
-
 export const SINGULAR_V1_ENDPOINT = 'https://singular.rmrk.app/api/rmrk1/account/';
 
 export const SINGULAR_V2_ENDPOINT = 'https://singular.app/api/rmrk2/account/';
@@ -76,14 +74,6 @@ export const TRANSFER_CHAIN_ID = {
   [SUPPORTED_TRANSFER_EVM_CHAIN_NAME.shibuya as string]: 81
 };
 
-export interface EvmContracts {
-  astarEvm: CustomEvmToken[];
-  moonbeam: CustomEvmToken[];
-  moonriver: CustomEvmToken[];
-  moonbase: CustomEvmToken[];
-  shidenEvm: CustomEvmToken[];
-}
-
 export enum SUPPORTED_TRANSFER_SUBSTRATE_CHAIN_NAME {
   statemine = 'statemine',
   acala = 'acala',
@@ -93,11 +83,5 @@ export enum SUPPORTED_TRANSFER_SUBSTRATE_CHAIN_NAME {
   quartz = 'quartz',
   opal = 'opal',
   statemint = 'statemint',
-  bitcountry = 'bitcountry',
-  moonbeam = 'moonbeam',
-  moonbase = 'moonbase',
-  astarEvm = 'astarEvm',
-  moonriver = 'moonriver',
-  shiden = 'shiden',
-  shibuya = 'shibuya'
+  bitcountry = 'bitcountry'
 }

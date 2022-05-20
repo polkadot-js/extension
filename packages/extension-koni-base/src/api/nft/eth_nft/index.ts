@@ -16,7 +16,7 @@ export class Web3NftApi extends BaseNftApi {
   evmContracts: CustomEvmToken[] = [];
 
   constructor (web3: Web3 | null, addresses: string[], chain: string) {
-    super(undefined, addresses, chain);
+    super(chain, undefined, addresses);
 
     this.web3 = web3;
     this.isEthereum = true;

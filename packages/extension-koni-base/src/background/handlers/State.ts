@@ -1043,6 +1043,10 @@ export default class KoniState extends State {
     return this.networkMap;
   }
 
+  public getNetworkMapByKey (key: string) {
+    return this.networkMap[key];
+  }
+
   public getEthereumChains (): string[] {
     const result: string[] = [];
 

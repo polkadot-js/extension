@@ -1,18 +1,18 @@
 // Copyright 2019-2022 @subwallet/extension-koni authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { ApiProps, CustomEvmToken, NftCollection, NftItem } from '@subwallet/extension-base/background/KoniTypes';
-import { AcalaNftApi } from '@subwallet/extension-koni-base/api/nft/acala_nft';
-import { BitCountryNftApi } from '@subwallet/extension-koni-base/api/nft/bit.country';
-import { EvmContracts, SUPPORTED_NFT_NETWORKS } from '@subwallet/extension-koni-base/api/nft/config';
-import { Web3NftApi } from '@subwallet/extension-koni-base/api/nft/eth_nft';
-import { KaruraNftApi } from '@subwallet/extension-koni-base/api/nft/karura_nft';
-import { BaseNftApi } from '@subwallet/extension-koni-base/api/nft/nft';
-import { RmrkNftApi } from '@subwallet/extension-koni-base/api/nft/rmrk_nft';
+import {ApiProps, CustomEvmToken, NftCollection, NftItem} from '@subwallet/extension-base/background/KoniTypes';
+import {AcalaNftApi} from '@subwallet/extension-koni-base/api/nft/acala_nft';
+import {BitCountryNftApi} from '@subwallet/extension-koni-base/api/nft/bit.country';
+import {SUPPORTED_NFT_NETWORKS} from '@subwallet/extension-koni-base/api/nft/config';
+import {Web3NftApi} from '@subwallet/extension-koni-base/api/nft/eth_nft';
+import {KaruraNftApi} from '@subwallet/extension-koni-base/api/nft/karura_nft';
+import {BaseNftApi} from '@subwallet/extension-koni-base/api/nft/nft';
+import {RmrkNftApi} from '@subwallet/extension-koni-base/api/nft/rmrk_nft';
 import StatemineNftApi from '@subwallet/extension-koni-base/api/nft/statemine_nft';
 import UniqueNftApi from '@subwallet/extension-koni-base/api/nft/unique_nft';
-import { state } from '@subwallet/extension-koni-base/background/handlers';
-import { categoryAddresses } from '@subwallet/extension-koni-base/utils/utils';
+import {state} from '@subwallet/extension-koni-base/background/handlers';
+import {categoryAddresses} from '@subwallet/extension-koni-base/utils/utils';
 import Web3 from 'web3';
 
 function createSubstrateNftApi (chain: string, apiProps: ApiProps | null, addresses: string[]): BaseNftApi | null {
@@ -49,20 +49,7 @@ function createSubstrateNftApi (chain: string, apiProps: ApiProps | null, addres
 function createWeb3NftApi (chain: string, web3: Web3 | null, addresses: string[]): BaseNftApi | null {
   // @ts-ignore
   const [substrateAddresses, evmAddresses] = categoryAddresses(addresses);
-  const useAddresses = evmAddresses;
-
-  switch (chain) {
-    case SUPPORTED_NFT_NETWORKS.moonbeam:
-      return new Web3NftApi(web3, useAddresses, chain);
-    case SUPPORTED_NFT_NETWORKS.moonriver:
-      return new Web3NftApi(web3, useAddresses, chain);
-    case SUPPORTED_NFT_NETWORKS.astarEvm:
-      return new Web3NftApi(web3, useAddresses, chain);
-    case SUPPORTED_NFT_NETWORKS.moonbase:
-      return new Web3NftApi(web3, useAddresses, chain);
-  }
-
-  return null;
+  return new Web3NftApi(web3, evmAddresses, chain);
 }
 
 // TODO: able to get NFTs when adding custom EVM network + EVM token
@@ -74,13 +61,7 @@ export class NftHandler {
   addresses: string[] = [];
   total = 0;
   needSetupApi = true;
-  evmContracts: EvmContracts = {
-    astarEvm: [],
-    moonbase: [],
-    moonbeam: [],
-    moonriver: [],
-    shidenEvm: []
-  };
+  evmContracts: Record<string, CustomEvmToken[]> = {};
 
   constructor (dotSamaAPIMap: Record<string, ApiProps>, addresses?: string[], web3ApiMap?: Record<string, Web3>) {
     if (addresses) {
@@ -128,27 +109,19 @@ export class NftHandler {
   }
 
   private setEvmContracts (evmContracts: CustomEvmToken[]) {
-    this.evmContracts = {
-      astarEvm: [],
-      moonbase: [],
-      moonbeam: [],
-      moonriver: [],
-      shidenEvm: []
-    };
+    this.evmContracts = {};
 
     for (const contract of evmContracts) {
-      this.evmContracts[contract.chain].push(contract);
+      if (contract.chain in this.evmContracts) {
+        this.evmContracts[contract.chain].push(contract);
+      } else {
+        this.evmContracts[contract.chain] = [];
+      }
     }
 
     for (const handler of this.handlers) {
-      if (handler instanceof Web3NftApi && handler.chain === 'astarEvm') {
-        handler.setEvmContracts(this.evmContracts.astarEvm);
-      } else if (handler instanceof Web3NftApi && handler.chain === 'moonbeam') {
-        handler.setEvmContracts(this.evmContracts.moonbeam);
-      } else if (handler instanceof Web3NftApi && handler.chain === 'moonriver') {
-        handler.setEvmContracts(this.evmContracts.moonriver);
-      } else if (handler instanceof Web3NftApi && handler.chain === 'moonbase') {
-        handler.setEvmContracts(this.evmContracts.moonbase);
+      if (handler instanceof Web3NftApi) {
+        handler.setEvmContracts(this.evmContracts[handler.chain]);
       }
     }
   }

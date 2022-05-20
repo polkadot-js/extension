@@ -132,7 +132,7 @@ function TransferNftContainer ({ className, collectionId, collectionImage, nftIt
     setLoading(true);
     // @ts-ignore
     const senderAddress = currentAccount.account.address;
-    const params = paramsHandler(nftItem, networkKey);
+    const params = paramsHandler(nftItem, networkKey, networkJson);
     const transferMeta = await transferHandler(networkKey, senderAddress, recipientAddress as string, params, networkJson);
 
     if (transferMeta !== null) {
@@ -230,7 +230,7 @@ function TransferNftContainer ({ className, collectionId, collectionImage, nftIt
             <div className={'meta-value'}>
               {/* eslint-disable-next-line @typescript-eslint/restrict-plus-operands */}
               <div>{nftItem.name ? nftItem.name : '#' + nftItem.id}</div>
-              <div style={{ textTransform: 'uppercase' }}>{nftItem?.chain}</div>
+              <div style={{ textTransform: 'capitalize' }}>{networkJson?.chain}</div>
             </div>
           </div>
 

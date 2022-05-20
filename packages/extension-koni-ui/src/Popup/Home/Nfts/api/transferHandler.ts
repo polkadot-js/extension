@@ -71,5 +71,6 @@ export default async function transferHandler (networkKey: string, senderAddress
         return await substrateTransferHandler(SUPPORTED_TRANSFER_CHAIN_NAME.acala, senderAddress, recipientAddress, params);
     }
   }
+
   return null;
 }

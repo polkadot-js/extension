@@ -146,7 +146,6 @@ export default class KoniState extends State {
             mergedNetworkMap[key].currentProvider = storedNetwork.currentProvider;
             mergedNetworkMap[key].currentProviderMode = mergedNetworkMap[key].currentProvider.startsWith('http') ? 'http' : 'ws';
           } else {
-            // TODO: merge networkKey in customTokenMap as well
             if (Object.keys(PREDEFINED_GENESIS_HASHES).includes(storedNetwork.genesisHash)) { // merge networks with same genesis hash
               // @ts-ignore
               const targetKey = PREDEFINED_GENESIS_HASHES[storedNetwork.genesisHash] as string;
@@ -224,6 +223,37 @@ export default class KoniState extends State {
 
           if (!exist) {
             _evmTokenState.erc721.push(storedToken);
+          }
+        }
+
+        // Update networkKey in case networkMap change
+        for (const token of _evmTokenState.erc20) {
+          if (!(token.chain in this.networkMap)) {
+            let newKey = '';
+            const genesisHash = token.chain.split('custom_')[1]; // token from custom network has key with prefix custom_
+            for (const [key, network] of Object.entries(this.networkMap)) {
+              if (network.genesisHash.toLowerCase() === genesisHash.toLowerCase()) {
+                newKey = key;
+                break;
+              }
+            }
+
+            token.chain = newKey;
+          }
+        }
+
+        for (const token of _evmTokenState.erc721) {
+          if (!(token.chain in this.networkMap)) {
+            let newKey = '';
+            const genesisHash = token.chain.split('custom_')[1]; // token from custom network has key with prefix custom_
+            for (const [key, network] of Object.entries(this.networkMap)) {
+              if (network.genesisHash.toLowerCase() === genesisHash.toLowerCase()) {
+                newKey = key;
+                break;
+              }
+            }
+
+            token.chain = newKey;
           }
         }
 

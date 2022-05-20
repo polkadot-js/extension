@@ -52,8 +52,6 @@ function createWeb3NftApi (chain: string, web3: Web3 | null, addresses: string[]
   return new Web3NftApi(web3, evmAddresses, chain);
 }
 
-// TODO: able to get NFTs when adding custom EVM network + EVM token
-
 export class NftHandler {
   apiProps: Record<string, any>[] = [];
   web3ApiMap: Record<string, Web3> = {};
@@ -115,7 +113,7 @@ export class NftHandler {
       if (contract.chain in this.evmContracts) {
         this.evmContracts[contract.chain].push(contract);
       } else {
-        this.evmContracts[contract.chain] = [];
+        this.evmContracts[contract.chain] = [contract];
       }
     }
 
@@ -175,6 +173,8 @@ export class NftHandler {
   public async handleNfts (evmContracts: CustomEvmToken[], updateItem: (data: NftItem) => void, updateCollection: (data: NftCollection) => void, updateReady: (ready: boolean) => void) {
     this.setupApi();
     this.setEvmContracts(evmContracts);
+
+    console.log('nft', this.handlers);
 
     await Promise.all(this.handlers.map(async (handler) => {
       await handler.fetchNfts(

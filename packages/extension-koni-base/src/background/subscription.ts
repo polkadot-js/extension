@@ -119,7 +119,7 @@ export class KoniSubscription {
 
     return () => {
       subscriptionPromises.then((unsubs) => {
-        unsubs.forEach(unsubs => unsubs());
+        unsubs.forEach(unsubs => unsubs && unsubs());
       }).catch(console.error);
     };
   }

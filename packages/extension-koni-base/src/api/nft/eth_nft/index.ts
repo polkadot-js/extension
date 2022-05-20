@@ -83,6 +83,8 @@ export class Web3NftApi extends BaseNftApi {
       return;
     }
 
+    console.log('get nft', smartContract, collectionName);
+
     // eslint-disable-next-line @typescript-eslint/no-unsafe-argument,@typescript-eslint/no-unsafe-member-access,@typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-assignment
     const contract = new this.web3.eth.Contract(ERC721Contract, smartContract);
     let ownItem = false;
@@ -96,6 +98,8 @@ export class Web3NftApi extends BaseNftApi {
 
       // eslint-disable-next-line @typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-member-access
       const balance = (await contract.methods.balanceOf(address).call()) as unknown as number;
+
+      console.log(balance);
 
       if (Number(balance) === 0) {
         updateReady(true);

@@ -3,6 +3,8 @@
 
 import { TokenInfo } from '@subwallet/extension-base/background/KoniTypes';
 
+// Type: Record<networkKey, Record<tokenKey, TokenInfo>>
+// Note: tokenKey and TokenInfo.symbol must be the same value to prevent unwanted problem
 export const PREDEFINE_TOKEN_DATA_MAP: Record<string, Record<string, TokenInfo>> = {
   statemine: {
     USDT: {
@@ -63,12 +65,13 @@ export const PREDEFINE_TOKEN_DATA_MAP: Record<string, Record<string, TokenInfo>>
     }
   },
   acala: {
-    // AUSD: {
-    //   isMainToken: false,
-    //   symbol: 'aUSD',
-    //   name: 'aUSD',
-    //   decimals: 12
-    // },
+    AUSD: {
+      isMainToken: false,
+      symbol: 'AUSD',
+      symbolAlt: 'aUSD',
+      name: 'aUSD',
+      decimals: 12
+    },
     DOT: {
       isMainToken: false,
       symbol: 'DOT',

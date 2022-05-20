@@ -3,7 +3,7 @@
 
 import { ChainRegistry, TokenInfo } from '@subwallet/extension-base/background/KoniTypes';
 import { AccountJson } from '@subwallet/extension-base/background/types';
-import { SenderInputAddressType } from '@subwallet/extension-koni-ui/components/types';
+import { BalanceFormatType, SenderInputAddressType } from '@subwallet/extension-koni-ui/components/types';
 import { isAccountAll } from '@subwallet/extension-koni-ui/util';
 
 import { BN, BN_HUNDRED } from '@polkadot/util';
@@ -47,10 +47,10 @@ function getPartialFee (fee: string | null, feeSymbol: string | null | undefined
   return new BN(fee);
 }
 
-export function getBalanceFormat (networkKey: string, token: string, chainRegistryMap: Record<string, ChainRegistry>): [number, string] {
+export function getBalanceFormat (networkKey: string, token: string, chainRegistryMap: Record<string, ChainRegistry>): BalanceFormatType {
   const tokenInfo = chainRegistryMap[networkKey].tokenMap[token];
 
-  return [tokenInfo.decimals, tokenInfo.symbol];
+  return [tokenInfo.decimals, tokenInfo.symbol, tokenInfo.symbolAlt];
 }
 
 export function getMaxTransferAndNoFees (
@@ -99,4 +99,26 @@ export function getDefaultValue (
 
 export function isContainGasRequiredExceedsError (message: string): boolean {
   return message.toLowerCase().includes('gas required exceeds');
+}
+
+export function getAuthTransactionFeeInfo (
+  fee: string | null,
+  feeDecimal: number | null,
+  feeSymbol: string | null | undefined,
+  mainTokenInfo: TokenInfo,
+  tokenMap: Record<string, TokenInfo>): [string | null, number, string] {
+  const decimal = feeDecimal || mainTokenInfo.decimals;
+  let symbol;
+
+  if (feeSymbol) {
+    symbol = tokenMap[feeSymbol].symbolAlt || feeSymbol;
+  } else {
+    symbol = mainTokenInfo.symbol;
+  }
+
+  return [
+    fee,
+    decimal,
+    symbol
+  ];
 }

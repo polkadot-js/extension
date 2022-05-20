@@ -19,8 +19,8 @@
         "@subwallet/extension-koni-base/*": ["extension-koni-base/src/*"],
         "@subwallet/extension-koni-ui": ["extension-koni-ui/src"],
         "@subwallet/extension-koni-ui/*": ["extension-koni-ui/src/*"],
-        "@subwallet/web-runner": ["extension-koni-ui/src"],
-        "@subwallet/web-runner/*": ["extension-koni-ui/src/*"]
+        "@subwallet/web-runner": ["web-runner/src"],
+        "@subwallet/web-runner/*": ["web-runner/src/*"]
     },
     "skipLibCheck": true
 	}

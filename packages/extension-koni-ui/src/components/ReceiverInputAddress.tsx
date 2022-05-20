@@ -4,6 +4,7 @@
 import NETWORKS from '@subwallet/extension-koni-base/api/endpoints';
 import FormatBalance from '@subwallet/extension-koni-ui/components/FormatBalance';
 import { useTranslation } from '@subwallet/extension-koni-ui/components/translate';
+import { BalanceFormatType } from '@subwallet/extension-koni-ui/components/types';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { toShort } from '@subwallet/extension-koni-ui/util';
 import reformatAddress from '@subwallet/extension-koni-ui/util/reformatAddress';
@@ -17,7 +18,7 @@ interface Props {
   className: string;
   onchange: (address: string) => void;
   balance: string;
-  balanceFormat: [number, string];
+  balanceFormat: BalanceFormatType;
 }
 
 function ReceiverInputAddress ({ balance, balanceFormat, className = '', networkKey, onchange }: Props): React.ReactElement {

@@ -60,7 +60,7 @@ export class KoniSubscription {
         const { address } = currentAccountInfo;
 
         this.subscribeBalancesAndCrowdloans(address, state.getDotSamaApiMap(), state.getWeb3ApiMap());
-        this.subscribeStakingOnChain(address);
+        this.subscribeStakingOnChain(address, state.getDotSamaApiMap());
       }
 
       state.subscribeServiceInfo().subscribe({
@@ -70,7 +70,7 @@ export class KoniSubscription {
 
           state.initChainRegistry();
           this.subscribeBalancesAndCrowdloans(address, serviceInfo.apiMap.dotSama, serviceInfo.apiMap.web3);
-          this.subscribeStakingOnChain(address);
+          this.subscribeStakingOnChain(address, serviceInfo.apiMap.dotSama);
         }
       });
     });
@@ -102,19 +102,19 @@ export class KoniSubscription {
       .catch(console.error);
   }
 
-  subscribeStakingOnChain (address: string) {
+  subscribeStakingOnChain (address: string, dotSamaApiMap: Record<string, ApiProps>) {
     this.unsubStakingOnChain && this.unsubStakingOnChain();
     this.detectAddresses(address)
       .then((addresses) => {
-        this.unsubStakingOnChain = this.initStakingOnChainSubscription(addresses);
+        this.unsubStakingOnChain = this.initStakingOnChainSubscription(addresses, dotSamaApiMap);
       })
       .catch(console.error);
   }
 
-  initStakingOnChainSubscription (addresses: string[]) {
-    const subscriptionPromises = stakingOnChainApi(addresses, dotSamaAPIMap, (networkKey, rs) => {
+  initStakingOnChainSubscription (addresses: string[], dotSamaApiMap: Record<string, ApiProps>) {
+    const subscriptionPromises = stakingOnChainApi(addresses, dotSamaApiMap, (networkKey, rs) => {
       state.setStakingItem(networkKey, rs);
-    });
+    }, state.getNetworkMap());
 
     return () => {
       // @ts-ignore
@@ -130,8 +130,6 @@ export class KoniSubscription {
     };
   }
 
-  initBalanceSubscription (addresses: string[]) {
-    const subscriptionPromises = subscribeBalance(addresses, dotSamaAPIMap, (networkKey, rs) => {
   initBalanceSubscription (addresses: string[], dotSamaApiMap: Record<string, ApiProps>, web3ApiMap: Record<string, Web3>) {
     const subscriptionPromises = subscribeBalance(addresses, dotSamaApiMap, web3ApiMap, (networkKey, rs) => {
       state.setBalanceItem(networkKey, rs);

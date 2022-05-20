@@ -477,7 +477,8 @@ export const PREDEFINED_NETWORKS: Record<string, NetworkJson> = {
     nativeToken: 'AZERO',
     crowdloanUrl: 'https://contribute.alephzero.org/',
     decimals: 12,
-    coinGeckoKey: 'aleph-zero'
+    coinGeckoKey: 'aleph-zero',
+    getStakingOnChain: true
   },
   alephTest: {
     key: 'alephTest',

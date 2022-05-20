@@ -42,7 +42,7 @@ export async function stakingOnChainApi (addresses: string[], dotSamaAPIMap: Rec
   const [substrateAddresses, evmAddresses] = categoryAddresses(addresses);
 
   Object.entries(networks).forEach(([networkKey, networkInfo]) => {
-    if (IGNORE_GET_SUBSTRATE_FEATURES_LIST.indexOf(networkKey) < 0) {
+    if (IGNORE_GET_SUBSTRATE_FEATURES_LIST.indexOf(networkKey) < 0 && (networkInfo.getStakingOnChain && networkInfo.getStakingOnChain)) {
       allApiPromise.push({ chain: networkKey, api: dotSamaAPIMap[networkKey] });
     }
   });
@@ -76,20 +76,20 @@ export async function stakingOnChainApi (addresses: string[], dotSamaAPIMap: Rec
 
         if (totalBalance > 0) {
           stakingItem = {
-            name: PREDEFINED_NETWORKS[chain].chain,
+            name: networks[chain].chain,
             chainId: chain,
             balance: parsedTotal.toString(),
-            nativeToken: PREDEFINED_NETWORKS[chain].nativeToken,
-            unit: unit || PREDEFINED_NETWORKS[chain].nativeToken,
+            nativeToken: networks[chain].nativeToken,
+            unit: unit || networks[chain].nativeToken,
             state: APIItemState.READY
           } as StakingItem;
         } else {
           stakingItem = {
-            name: PREDEFINED_NETWORKS[chain].chain,
+            name: networks[chain].chain,
             chainId: chain,
             balance: parsedTotal.toString(),
-            nativeToken: PREDEFINED_NETWORKS[chain].nativeToken,
-            unit: unit || PREDEFINED_NETWORKS[chain].nativeToken,
+            nativeToken: networks[chain].nativeToken,
+            unit: unit || networks[chain].nativeToken,
             state: APIItemState.READY
           } as StakingItem;
         }

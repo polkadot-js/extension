@@ -30,6 +30,8 @@ interface AuthRequest extends Resolver<AuthResponse> {
 
 export type AuthUrls = Record<string, AuthUrlInfo>;
 
+export type AuthorizedAccountsDiff = [url: string, authorizedAccounts: AuthUrlInfo['authorizedAccounts']][]
+
 export interface AuthUrlInfo {
   count: number;
   id: string;
@@ -351,11 +353,14 @@ export default class State {
     this.updateIcon(shouldClose);
   }
 
-  public updateAuthorizedAccounts (authorizedAccounts: string[], url: string): void {
-    // this url was seen in the past
-    assert(this.#authUrls[url].authorizedAccounts, `The source ${url} has never been authorized to interact with this extension`);
+  public updateAuthorizedAccounts (authorizedAccountDiff: AuthorizedAccountsDiff): void {
+    authorizedAccountDiff.forEach(([url, authorizedAccountDiff]) => {
+      // this url was never seen in the past
+      assert(this.#authUrls[url].authorizedAccounts, `The source ${url} has never been authorized to interact with this extension`);
 
-    this.#authUrls[url].authorizedAccounts = authorizedAccounts;
+      this.#authUrls[url].authorizedAccounts = authorizedAccountDiff;
+    });
+
     this.saveCurrentAuthList();
   }
 

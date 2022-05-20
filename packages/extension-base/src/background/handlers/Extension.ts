@@ -16,7 +16,7 @@ import { assert, isHex } from '@polkadot/util';
 import { keyExtractSuri, mnemonicGenerate, mnemonicValidate } from '@polkadot/util-crypto';
 
 import { withErrorLog } from './helpers';
-import State from './State';
+import State, { AuthorizedAccountsDiff } from './State';
 import { createSubscription, unsubscribe } from './subscriptions';
 
 type CachedUnlocks = Record<string, number>;
@@ -115,6 +115,18 @@ export default class Extension {
   }
 
   private accountsForget ({ address }: RequestAccountForget): boolean {
+    const authorizedAccountsDiff: AuthorizedAccountsDiff = [];
+
+    // cycle through authUrls and prepare the array of diff
+    Object.entries(this.#state.authUrls).forEach(([url, urlInfo]) => {
+      if (!urlInfo.authorizedAccounts.includes(address)) {
+        return;
+      }
+
+      authorizedAccountsDiff.push([url, urlInfo.authorizedAccounts.filter((previousAddress) => previousAddress !== address)]);
+    });
+
+    this.#state.updateAuthorizedAccounts(authorizedAccountsDiff);
     keyring.forgetAccount(address);
 
     return true;
@@ -193,7 +205,7 @@ export default class Extension {
   }
 
   private authorizeUpdate ({ authorizedAccounts, url }: RequestUpdateAuthorizedAccounts): void {
-    return this.#state.updateAuthorizedAccounts(authorizedAccounts, url);
+    return this.#state.updateAuthorizedAccounts([[url, authorizedAccounts]]);
   }
 
   private getAuthList (): ResponseAuthorizeList {

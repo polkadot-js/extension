@@ -1,7 +1,7 @@
 // Copyright 2019-2022 @polkadot/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { APIItemState, ChainRegistry, NetWorkGroup } from '@subwallet/extension-base/background/KoniTypes';
+import { APIItemState, ChainRegistry, NetWorkGroup, TokenInfo } from '@subwallet/extension-base/background/KoniTypes';
 import { AccountBalanceType, CrowdloanContributeValueType } from '@subwallet/extension-koni-ui/hooks/screen/home/types';
 import useGetNetworkMetadata from '@subwallet/extension-koni-ui/hooks/screen/home/useGetNetworkMetadata';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
@@ -32,6 +32,26 @@ function getGroupNetworkKey (groups: NetWorkGroup[]): string {
   }
 
   return '';
+}
+
+function getMainTokenInfo (chainRegistry: ChainRegistry): TokenInfo {
+  // chainRegistryMap always has main token
+  return Object.values(chainRegistry.tokenMap).find((t) => t.isMainToken) as TokenInfo;
+}
+
+function getTokenSymbols (chainRegistry: ChainRegistry): string [] {
+  const { tokenMap } = chainRegistry;
+  const result: string[] = [];
+
+  chainRegistry.chainTokens.forEach((t) => {
+    if (!tokenMap[t]) {
+      return;
+    }
+
+    result.push(tokenMap[t].symbolAlt || tokenMap[t].symbol);
+  });
+
+  return result;
 }
 
 export default function useAccountBalance (currentNetworkKey: string,
@@ -77,12 +97,23 @@ export default function useAccountBalance (currentNetworkKey: string,
       return;
     }
 
+    const mainTokenInfo = getMainTokenInfo(registry);
+    let tokenDecimals, tokenSymbols;
+
+    if (['genshiro_testnet', 'genshiro', 'equilibrium_parachain'].includes(networkKey)) {
+      tokenDecimals = [mainTokenInfo.decimals];
+      tokenSymbols = [mainTokenInfo.symbolAlt || mainTokenInfo.symbol];
+    } else {
+      tokenDecimals = registry.chainDecimals;
+      tokenSymbols = getTokenSymbols(registry);
+    }
+
     const balanceInfo = parseBalancesInfo(priceMap, tokenPriceMap, {
       networkKey,
-      tokenDecimals: registry.chainDecimals,
-      tokenSymbols: registry.chainTokens,
+      tokenDecimals,
+      tokenSymbols,
       balanceItem
-    });
+    }, registry.tokenMap);
 
     networkBalanceMaps[networkKey] = balanceInfo;
     totalBalanceValue = totalBalanceValue.plus(balanceInfo.convertedBalanceValue);

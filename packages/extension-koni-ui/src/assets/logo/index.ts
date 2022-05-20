@@ -51,6 +51,10 @@ const LogosMap: Record<string, string> = {
   // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
   equilibrium: require('./equilibrium.svg'),
   // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+  equilibrium_parachain: require('./equilibrium.svg'),
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+  genshiro_testnet: require('./genshiro.svg'),
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
   genshiro: require('./genshiro.svg'),
   // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
   heiko: require('./heiko.png'),

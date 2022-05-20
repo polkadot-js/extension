@@ -3,6 +3,8 @@
 
 import { TokenInfo } from '@subwallet/extension-base/background/KoniTypes';
 
+// Type: Record<networkKey, Record<tokenKey, TokenInfo>>
+// Note: tokenKey and TokenInfo.symbol must be the same value to prevent unwanted problem
 export const PREDEFINE_TOKEN_DATA_MAP: Record<string, Record<string, TokenInfo>> = {
   statemine: {
     USDT: {
@@ -65,7 +67,8 @@ export const PREDEFINE_TOKEN_DATA_MAP: Record<string, Record<string, TokenInfo>>
   acala: {
     AUSD: {
       isMainToken: false,
-      symbol: 'aUSD',
+      symbol: 'AUSD',
+      symbolAlt: 'aUSD',
       name: 'aUSD',
       decimals: 12
     },
@@ -756,6 +759,336 @@ export const PREDEFINE_TOKEN_DATA_MAP: Record<string, Record<string, TokenInfo>>
       erc20Address: '0xa9b79AAB9d60e8e6d08D2cbAd56ff0De58ff8d41',
       decimals: 18,
       name: 'Kwikswap'
+    }
+  },
+  genshiro: {
+    EQD: {
+      isMainToken: false,
+      symbol: 'EQD',
+      name: 'EQD',
+      decimals: 9
+    },
+    BTC: {
+      isMainToken: false,
+      symbol: 'BTC',
+      name: 'BTC',
+      decimals: 9
+    },
+    ETH: {
+      isMainToken: false,
+      symbol: 'ETH',
+      name: 'ETH',
+      decimals: 9
+    },
+    DOT: {
+      isMainToken: false,
+      symbol: 'DOT',
+      name: 'DOT',
+      decimals: 9
+    },
+    EOS: {
+      isMainToken: false,
+      symbol: 'EOS',
+      name: 'EOS',
+      decimals: 9
+    },
+    KSM: {
+      isMainToken: false,
+      symbol: 'KSM',
+      name: 'KSM',
+      decimals: 9
+    },
+    CRV: {
+      isMainToken: false,
+      symbol: 'CRV',
+      name: 'CRV',
+      decimals: 9
+    },
+    EQ: {
+      isMainToken: false,
+      symbol: 'EQ',
+      name: 'EQ',
+      decimals: 9
+    },
+    GENS: {
+      isMainToken: true,
+      symbol: 'GENS',
+      name: 'GENS',
+      decimals: 9
+    },
+    DAI: {
+      isMainToken: false,
+      symbol: 'DAI',
+      name: 'DAI',
+      decimals: 9
+    },
+    USDT: {
+      isMainToken: false,
+      symbol: 'USDT',
+      name: 'USDT',
+      decimals: 9
+    },
+    BUSD: {
+      isMainToken: false,
+      symbol: 'BUSD',
+      name: 'BUSD',
+      decimals: 9
+    },
+    USDC: {
+      isMainToken: false,
+      symbol: 'USDC',
+      name: 'USDC',
+      decimals: 9
+    },
+    BNB: {
+      isMainToken: false,
+      symbol: 'BNB',
+      name: 'BNB',
+      decimals: 9
+    },
+    WBTC: {
+      isMainToken: false,
+      symbol: 'WBTC',
+      name: 'WBTC',
+      decimals: 9
+    },
+    HDOT: {
+      isMainToken: false,
+      symbol: 'HDOT',
+      name: 'HDOT',
+      decimals: 9
+    },
+    XDOT: {
+      isMainToken: false,
+      symbol: 'XDOT',
+      name: 'XDOT',
+      decimals: 9
+    },
+    XDOT2: {
+      isMainToken: false,
+      symbol: 'XDOT2',
+      name: 'XDOT2',
+      decimals: 9
+    }
+  },
+  genshiro_testnet: {
+    EQD: {
+      isMainToken: false,
+      symbol: 'EQD',
+      name: 'EQD',
+      decimals: 9
+    },
+    BTC: {
+      isMainToken: false,
+      symbol: 'BTC',
+      name: 'BTC',
+      decimals: 9
+    },
+    ETH: {
+      isMainToken: false,
+      symbol: 'ETH',
+      name: 'ETH',
+      decimals: 9
+    },
+    DOT: {
+      isMainToken: false,
+      symbol: 'DOT',
+      name: 'DOT',
+      decimals: 9
+    },
+    EOS: {
+      isMainToken: false,
+      symbol: 'EOS',
+      name: 'EOS',
+      decimals: 9
+    },
+    KSM: {
+      isMainToken: false,
+      symbol: 'KSM',
+      name: 'KSM',
+      decimals: 9
+    },
+    CRV: {
+      isMainToken: false,
+      symbol: 'CRV',
+      name: 'CRV',
+      decimals: 9
+    },
+    EQ: {
+      isMainToken: false,
+      symbol: 'EQ',
+      name: 'EQ',
+      decimals: 9
+    },
+    GENS: {
+      isMainToken: true,
+      symbol: 'GENS',
+      name: 'GENS',
+      decimals: 9
+    },
+    DAI: {
+      isMainToken: false,
+      symbol: 'DAI',
+      name: 'DAI',
+      decimals: 9
+    },
+    USDT: {
+      isMainToken: false,
+      symbol: 'USDT',
+      name: 'USDT',
+      decimals: 9
+    },
+    BUSD: {
+      isMainToken: false,
+      symbol: 'BUSD',
+      name: 'BUSD',
+      decimals: 9
+    },
+    USDC: {
+      isMainToken: false,
+      symbol: 'USDC',
+      name: 'USDC',
+      decimals: 9
+    },
+    BNB: {
+      isMainToken: false,
+      symbol: 'BNB',
+      name: 'BNB',
+      decimals: 9
+    },
+    WBTC: {
+      isMainToken: false,
+      symbol: 'WBTC',
+      name: 'WBTC',
+      decimals: 9
+    },
+    HDOT: {
+      isMainToken: false,
+      symbol: 'HDOT',
+      name: 'HDOT',
+      decimals: 9
+    },
+    XDOT: {
+      isMainToken: false,
+      symbol: 'XDOT',
+      name: 'XDOT',
+      decimals: 9
+    },
+    XDOT2: {
+      isMainToken: false,
+      symbol: 'XDOT2',
+      name: 'XDOT2',
+      decimals: 9
+    }
+  },
+  equilibrium_parachain: {
+    EQD: {
+      isMainToken: false,
+      symbol: 'EQD',
+      name: 'EQD',
+      decimals: 9
+    },
+    BTC: {
+      isMainToken: false,
+      symbol: 'BTC',
+      name: 'BTC',
+      decimals: 9
+    },
+    ETH: {
+      isMainToken: false,
+      symbol: 'ETH',
+      name: 'ETH',
+      decimals: 9
+    },
+    DOT: {
+      isMainToken: false,
+      symbol: 'DOT',
+      name: 'DOT',
+      decimals: 9
+    },
+    EOS: {
+      isMainToken: false,
+      symbol: 'EOS',
+      name: 'EOS',
+      decimals: 9
+    },
+    KSM: {
+      isMainToken: false,
+      symbol: 'KSM',
+      name: 'KSM',
+      decimals: 9
+    },
+    CRV: {
+      isMainToken: false,
+      symbol: 'CRV',
+      name: 'CRV',
+      decimals: 9
+    },
+    EQ: {
+      isMainToken: true,
+      symbol: 'EQ',
+      name: 'EQ',
+      decimals: 9
+    },
+    GENS: {
+      isMainToken: false,
+      symbol: 'GENS',
+      name: 'GENS',
+      decimals: 9
+    },
+    DAI: {
+      isMainToken: false,
+      symbol: 'DAI',
+      name: 'DAI',
+      decimals: 9
+    },
+    USDT: {
+      isMainToken: false,
+      symbol: 'USDT',
+      name: 'USDT',
+      decimals: 9
+    },
+    BUSD: {
+      isMainToken: false,
+      symbol: 'BUSD',
+      name: 'BUSD',
+      decimals: 9
+    },
+    USDC: {
+      isMainToken: false,
+      symbol: 'USDC',
+      name: 'USDC',
+      decimals: 9
+    },
+    BNB: {
+      isMainToken: false,
+      symbol: 'BNB',
+      name: 'BNB',
+      decimals: 9
+    },
+    WBTC: {
+      isMainToken: false,
+      symbol: 'WBTC',
+      name: 'WBTC',
+      decimals: 9
+    },
+    HDOT: {
+      isMainToken: false,
+      symbol: 'HDOT',
+      name: 'HDOT',
+      decimals: 9
+    },
+    XDOT: {
+      isMainToken: false,
+      symbol: 'XDOT',
+      name: 'XDOT',
+      decimals: 9
+    },
+    XDOT2: {
+      isMainToken: false,
+      symbol: 'XDOT2',
+      name: 'XDOT2',
+      decimals: 9
     }
   }
 };

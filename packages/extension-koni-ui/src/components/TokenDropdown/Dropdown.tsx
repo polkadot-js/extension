@@ -93,7 +93,7 @@ function DropdownWrapper ({ className, formatOptLabel, networkMap, onChange, opt
 
 function Dropdown ({ className, getFormatOptLabel, label, networkMap, onChange, options, value }: Props): React.ReactElement<Props> {
   const transformOptions: TokenTransformOptionType[] = options.map((t) => ({
-    label: t.token,
+    label: t.token || t.token,
     value: `${t.token}|${t.networkKey}`,
     networkKey: t.networkKey,
     networkName: networkMap[t.networkKey].chain

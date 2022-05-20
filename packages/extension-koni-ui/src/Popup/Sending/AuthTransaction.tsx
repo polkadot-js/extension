@@ -13,6 +13,7 @@ import Warning from '@subwallet/extension-koni-ui/components/Warning';
 import useTranslation from '@subwallet/extension-koni-ui/hooks/useTranslation';
 import { makeTransfer } from '@subwallet/extension-koni-ui/messaging';
 import { ThemeProps, TransferResultType } from '@subwallet/extension-koni-ui/types';
+import { BalanceFormatType } from '@subwallet/web-runner/components/types';
 import React, { useCallback, useState } from 'react';
 import styled from 'styled-components';
 
@@ -23,7 +24,7 @@ interface Props extends ThemeProps {
   onCancel: () => void;
   requestPayload: RequestCheckTransfer;
   feeInfo: [string | null, number, string]; // fee, fee decimal, fee symbol
-  balanceFormat: [number, string]; // decimal, symbol
+  balanceFormat: BalanceFormatType; // decimal, symbol
   onChangeResult: (txResult: TransferResultType) => void;
   isDonation?: boolean;
 }
@@ -246,7 +247,7 @@ function AuthTransaction ({ className, isDonation, feeInfo: [fee, feeDecimals, f
                 feeSymbol,
                 amount: requestPayload.value,
                 amountDecimals: balanceFormat[0],
-                amountSymbol: balanceFormat[1]
+                amountSymbol: balanceFormat[2] || balanceFormat[1]
               })}
             </div>
           </div>

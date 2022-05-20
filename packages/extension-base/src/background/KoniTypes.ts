@@ -343,6 +343,7 @@ export type CurrentNetworkInfo = {
 export type TokenInfo = {
   isMainToken: boolean,
   symbol: string,
+  symbolAlt?: string, // Alternate display for symbol
   erc20Address?: string,
   assetIndex?: number,
   decimals: number,

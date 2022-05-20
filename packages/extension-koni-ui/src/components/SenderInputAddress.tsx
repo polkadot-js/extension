@@ -4,7 +4,7 @@
 import { ChainRegistry, NetworkJson } from '@subwallet/extension-base/background/KoniTypes';
 import FormatBalance from '@subwallet/extension-koni-ui/components/FormatBalance';
 import { useTranslation } from '@subwallet/extension-koni-ui/components/translate';
-import { SenderInputAddressType, TokenItemType } from '@subwallet/extension-koni-ui/components/types';
+import { BalanceFormatType, SenderInputAddressType, TokenItemType } from '@subwallet/extension-koni-ui/components/types';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { toShort } from '@subwallet/extension-koni-ui/util';
 import reformatAddress from '@subwallet/extension-koni-ui/util/reformatAddress';
@@ -20,7 +20,7 @@ interface Props {
   initValue: SenderInputAddressType;
   chainRegistryMap: Record<string, ChainRegistry>;
   balance: string;
-  balanceFormat: [number, string];
+  balanceFormat: BalanceFormatType;
   isDonation?: boolean;
   networkMap: Record<string, NetworkJson>;
 }
@@ -35,6 +35,7 @@ function getOptions (chainRegistryMap: Record<string, ChainRegistry>): TokenItem
       options.push({
         networkKey: networkKey,
         token: tokenInfo.symbol,
+        tokenAlt: tokenInfo.symbolAlt,
         decimals: tokenInfo.decimals,
         isMainToken: tokenInfo.isMainToken,
         specialOption: tokenInfo?.specialOption

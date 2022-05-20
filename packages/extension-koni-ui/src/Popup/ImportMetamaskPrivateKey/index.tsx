@@ -1,8 +1,6 @@
-/* eslint-disable react-hooks/exhaustive-deps */
 // Copyright 2019-2022 @polkadot/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-// eslint-disable-next-line header/header
 import { Header } from '@subwallet/extension-koni-ui/partials';
 import { EVM_ACCOUNT_TYPE } from '@subwallet/extension-koni-ui/Popup/CreateAccount';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
@@ -72,6 +70,7 @@ function ImportMetamaskPrivateKey ({ className = '' }: Props): React.ReactElemen
       <MetamaskPrivateKeyImport
         account={account}
         className='import-seed-content-wrapper'
+        isBusy={isBusy}
         keyTypes={KEYTYPES}
         name={name}
         onAccountChange={setAccount}

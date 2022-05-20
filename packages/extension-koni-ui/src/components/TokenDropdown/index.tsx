@@ -5,6 +5,7 @@ import { NetworkJson } from '@subwallet/extension-base/background/KoniTypes';
 import { TokenTransformOptionType } from '@subwallet/extension-koni-ui/components/TokenDropdown/types';
 import { TokenItemType } from '@subwallet/extension-koni-ui/components/types';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
+import { TokenTransformOptionType } from '@subwallet/web-runner/components/TokenDropdown/types';
 import React, { useCallback } from 'react';
 import styled from 'styled-components';
 

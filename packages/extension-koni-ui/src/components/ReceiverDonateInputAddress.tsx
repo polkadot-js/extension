@@ -7,6 +7,7 @@ import { useTranslation } from '@subwallet/extension-koni-ui/components/translat
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { toShort } from '@subwallet/extension-koni-ui/util';
 import reformatAddress from '@subwallet/extension-koni-ui/util/reformatAddress';
+import { BalanceFormatType } from '@subwallet/web-runner/components/types';
 import React, { useCallback, useMemo, useState } from 'react';
 import styled from 'styled-components';
 
@@ -17,7 +18,7 @@ interface Props {
   className: string;
   onchange: (address: string) => void;
   balance: string;
-  balanceFormat: [number, string];
+  balanceFormat: BalanceFormatType;
   networkMap: Record<string, NetworkJson>;
 }
 

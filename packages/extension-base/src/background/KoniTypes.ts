@@ -294,6 +294,7 @@ export interface NetworkJson {
   coinGeckoKey?: string; // Provider key to get token price from CoinGecko // user input
   blockExplorer?: string; // Link to block scanner to check transaction with extrinsic hash // user input
   dependencies?: string[]; // Auto active network in dependencies if current network is activated
+  getStakingOnChain?: boolean; // support get bonded on chain
 
   apiStatus?: NETWORK_STATUS;
 }

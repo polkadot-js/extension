@@ -1097,6 +1097,7 @@ export default class KoniState extends State {
       }
     } else { // insert
       this.networkMap[data.key] = data;
+      this.networkMap[data.key].getStakingOnChain = true; // try to fetch staking on chain for custom network by default
     }
 
     if (this.networkMap[data.key].active) { // update API map if network is active

@@ -4,10 +4,10 @@
 import NETWORKS from '@subwallet/extension-koni-base/api/endpoints';
 import FormatBalance from '@subwallet/extension-koni-ui/components/FormatBalance';
 import { useTranslation } from '@subwallet/extension-koni-ui/components/translate';
+import { BalanceFormatType } from '@subwallet/extension-koni-ui/components/types';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { toShort } from '@subwallet/extension-koni-ui/util';
 import reformatAddress from '@subwallet/extension-koni-ui/util/reformatAddress';
-import { BalanceFormatType } from '@subwallet/web-runner/components/types';
 import React, { useCallback, useMemo, useState } from 'react';
 import styled from 'styled-components';
 

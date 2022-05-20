@@ -104,6 +104,7 @@ export class KoniSubscription {
 
   subscribeStakingOnChain (address: string, dotSamaApiMap: Record<string, ApiProps>) {
     this.unsubStakingOnChain && this.unsubStakingOnChain();
+    state.resetStakingMap();
     this.detectAddresses(address)
       .then((addresses) => {
         this.unsubStakingOnChain = this.initStakingOnChainSubscription(addresses, dotSamaApiMap);
@@ -112,9 +113,11 @@ export class KoniSubscription {
   }
 
   initStakingOnChainSubscription (addresses: string[], dotSamaApiMap: Record<string, ApiProps>) {
-    const subscriptionPromises = stakingOnChainApi(addresses, dotSamaApiMap, (networkKey, rs) => {
+    const subscriptionPromises = stakingOnChainApi(['5CK2GZvpmKYxJQXMQzHa2vvHLf5cibuWK4qkcCem2p9PXYx1'], dotSamaApiMap, (networkKey, rs) => {
       state.setStakingItem(networkKey, rs);
     }, state.getNetworkMap());
+
+    console.log('subscriptionPromises', subscriptionPromises);
 
     return () => {
       // @ts-ignore

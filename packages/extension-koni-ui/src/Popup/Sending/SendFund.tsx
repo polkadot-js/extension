@@ -10,13 +10,13 @@ import ReceiverInputAddress from '@subwallet/extension-koni-ui/components/Receiv
 import SenderInputAddress from '@subwallet/extension-koni-ui/components/SenderInputAddress';
 import Toggle from '@subwallet/extension-koni-ui/components/Toggle';
 import { useTranslation } from '@subwallet/extension-koni-ui/components/translate';
-import { SenderInputAddressType } from '@subwallet/extension-koni-ui/components/types';
+import { BalanceFormatType, SenderInputAddressType } from '@subwallet/extension-koni-ui/components/types';
 import useFreeBalance from '@subwallet/extension-koni-ui/hooks/screen/sending/useFreeBalance';
 import { checkTransfer, transferCheckReferenceCount, transferCheckSupporting, transferGetExistentialDeposit } from '@subwallet/extension-koni-ui/messaging';
 import Header from '@subwallet/extension-koni-ui/partials/Header';
 import AuthTransaction from '@subwallet/extension-koni-ui/Popup/Sending/AuthTransaction';
 import SendFundResult from '@subwallet/extension-koni-ui/Popup/Sending/SendFundResult';
-import { getBalanceFormat, getDefaultValue, getMainTokenInfo, getMaxTransferAndNoFees, isContainGasRequiredExceedsError } from '@subwallet/extension-koni-ui/Popup/Sending/utils';
+import { getAuthTransactionFeeInfo, getBalanceFormat, getDefaultValue, getMainTokenInfo, getMaxTransferAndNoFees, isContainGasRequiredExceedsError } from '@subwallet/extension-koni-ui/Popup/Sending/utils';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { ThemeProps, TransferResultType } from '@subwallet/extension-koni-ui/types';
 import React, { useCallback, useContext, useEffect, useState } from 'react';
@@ -92,7 +92,7 @@ function SendFund ({ className, defaultValue }: ContentProps): React.ReactElemen
   const { isShowTxResult } = txResult;
   const senderFreeBalance = useFreeBalance(selectedNetworkKey, senderId, selectedToken);
   const recipientFreeBalance = useFreeBalance(selectedNetworkKey, recipientId, selectedToken);
-  const balanceFormat: [number, string] = getBalanceFormat(selectedNetworkKey, selectedToken, chainRegistryMap);
+  const balanceFormat: BalanceFormatType = getBalanceFormat(selectedNetworkKey, selectedToken, chainRegistryMap);
   const mainTokenInfo = getMainTokenInfo(selectedNetworkKey, chainRegistryMap);
   const [[fee, feeSymbol], setFeeInfo] = useState<[string | null, string | null | undefined]>([null, null]);
   const feeDecimal: number | null = feeSymbol
@@ -285,7 +285,7 @@ function SendFund ({ className, defaultValue }: ContentProps): React.ReactElemen
                   key={maxTransfer?.toString()}
                   label={t<string>('transferable minus fees')}
                   siDecimals={balanceFormat[0]}
-                  siSymbol={balanceFormat[1]}
+                  siSymbol={balanceFormat[2] || balanceFormat[1]}
                 />
               )
               : (
@@ -299,7 +299,7 @@ function SendFund ({ className, defaultValue }: ContentProps): React.ReactElemen
                   label={t<string>('amount')}
                   onChange={setAmount}
                   placeholder={'0'}
-                  siSymbol={balanceFormat[1]}
+                  siSymbol={balanceFormat[2] || balanceFormat[1]}
                 />
               )
             }
@@ -412,11 +412,9 @@ function SendFund ({ className, defaultValue }: ContentProps): React.ReactElemen
       {isShowTxModal && (
         <AuthTransaction
           balanceFormat={balanceFormat}
-          feeInfo={[
-            fee,
-            feeDecimal || mainTokenInfo.decimals,
-            feeSymbol || mainTokenInfo.symbol
-          ]}
+          feeInfo={getAuthTransactionFeeInfo(
+            fee, feeDecimal, feeSymbol, mainTokenInfo, chainRegistryMap[selectedNetworkKey].tokenMap
+          )}
           onCancel={_onCancelTx}
           onChangeResult={_onChangeResult}
           requestPayload={{

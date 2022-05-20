@@ -38,6 +38,21 @@ function getMainTokenInfo (chainRegistry: ChainRegistry): TokenInfo {
   return Object.values(chainRegistry.tokenMap).find((t) => t.isMainToken) as TokenInfo;
 }
 
+function getTokenSymbols (chainRegistry: ChainRegistry): string [] {
+  const { tokenMap } = chainRegistry;
+  const result: string[] = [];
+
+  chainRegistry.chainTokens.forEach((t) => {
+    if (!tokenMap[t]) {
+      return;
+    }
+
+    result.push(tokenMap[t].symbolAlt || tokenMap[t].symbol);
+  });
+
+  return result;
+}
+
 export default function useAccountBalance (currentNetworkKey: string,
   showedNetworks: string[],
   crowdloanNetworks: string[]
@@ -85,10 +100,10 @@ export default function useAccountBalance (currentNetworkKey: string,
 
     if (['genshiro_testnet', 'genshiro', 'equilibrium_parachain'].includes(networkKey)) {
       tokenDecimals = [mainTokenInfo.decimals];
-      tokenSymbols = [mainTokenInfo.symbol];
+      tokenSymbols = [mainTokenInfo.symbolAlt || mainTokenInfo.symbol];
     } else {
       tokenDecimals = registry.chainDecimals;
-      tokenSymbols = registry.chainTokens;
+      tokenSymbols = getTokenSymbols(registry);
     }
 
     const balanceInfo = parseBalancesInfo(priceMap, tokenPriceMap, {
@@ -96,7 +111,7 @@ export default function useAccountBalance (currentNetworkKey: string,
       tokenDecimals,
       tokenSymbols,
       balanceItem
-    });
+    }, registry.tokenMap);
 
     networkBalanceMaps[networkKey] = balanceInfo;
     totalBalanceValue = totalBalanceValue.plus(balanceInfo.convertedBalanceValue);

@@ -16,7 +16,7 @@ import styled, { ThemeContext } from 'styled-components';
 
 interface WrapperProps {
   className?: string;
-  formatOptLabel?: (label: string, value: string, networkKey: string) => React.ReactNode;
+  formatOptLabel?: (option: TokenTransformOptionType) => React.ReactNode;
   onChange?: (token: string) => void;
   value: string;
   options: TokenItemType[];
@@ -27,7 +27,7 @@ interface WrapperProps {
 interface Props {
   className?: string;
   label: string;
-  getFormatOptLabel?: (label: string, value: string, networkKey: string) => React.ReactNode;
+  getFormatOptLabel?: (option: TokenTransformOptionType) => React.ReactNode;
   onChange?: any;
   options: TokenItemType[];
   value?: string;
@@ -89,7 +89,12 @@ function DropdownWrapper ({ className, formatOptLabel, onChange, options, value 
 }
 
 function Dropdown ({ className, getFormatOptLabel, label, onChange, options, value }: Props): React.ReactElement<Props> {
-  const transformOptions: TokenTransformOptionType[] = options.map((t) => ({ label: t.token, value: `${t.token}|${t.networkKey}`, networkKey: t.networkKey, networkName: NETWORKS[t.networkKey].chain }));
+  const transformOptions: TokenTransformOptionType[] = options.map((t) => ({
+    label: t.tokenAlt || t.token,
+    value: `${t.token}|${t.networkKey}`,
+    networkKey: t.networkKey,
+    networkName: NETWORKS[t.networkKey].chain
+  }));
   const [selectedValue, setSelectedValue] = useState(value);
   const themeContext = useContext(ThemeContext as React.Context<Theme>);
 
@@ -104,8 +109,8 @@ function Dropdown ({ className, getFormatOptLabel, label, onChange, options, val
     }, [onChange]
   );
 
-  const formatOptionLabel = useCallback(({ label, networkKey, value }: {label: string, value: string, networkKey: string}) => {
-    return getFormatOptLabel && getFormatOptLabel(label, value, networkKey);
+  const formatOptionLabel = useCallback((option: TokenTransformOptionType) => {
+    return getFormatOptLabel && getFormatOptLabel(option);
   }, [getFormatOptLabel]);
 
   const filterOption = useCallback((candidate: { label: string; value: string, data: TokenTransformOptionType }, input: string) => {

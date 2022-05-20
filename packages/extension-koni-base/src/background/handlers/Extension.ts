@@ -1481,7 +1481,7 @@ export default class KoniExtension extends Extension {
       ss58Prefix: '',
       networkGroup: [],
       chain: '',
-      ethChainId: -1
+      evmChainId: -1
     };
 
     try {
@@ -1567,7 +1567,7 @@ export default class KoniExtension extends Extension {
                 ss58Prefix,
                 networkGroup: [parsedChainType],
                 chain: chain ? chain.toString() : '',
-                ethChainId,
+                evmChainId: ethChainId,
                 nativeToken: defaultToken,
                 decimal: defaultDecimal
               };
@@ -1583,7 +1583,7 @@ export default class KoniExtension extends Extension {
                 ss58Prefix,
                 networkGroup: [parsedChainType],
                 chain: chain ? chain.toString() : '',
-                ethChainId,
+                evmChainId: ethChainId,
                 nativeToken: defaultToken,
                 decimal: defaultDecimal
               };

@@ -148,7 +148,7 @@ function NetworkEdit ({ className }: Props): React.ReactElement {
                   ss58Format: -1,
                   chain: resp.chain,
                   isEthereum,
-                  ethChainId: resp.ethChainId,
+                  evmChainId: resp.evmChainId,
                   nativeToken: resp.nativeToken,
                   decimals: resp.decimal
                 });
@@ -316,7 +316,7 @@ function NetworkEdit ({ className }: Props): React.ReactElement {
   const onChangeEthChainId = useCallback((val: string) => {
     setNetworkInfo({
       ...networkInfo,
-      ethChainId: parseInt(val)
+      evmChainId: parseInt(val)
     });
   }, [networkInfo]);
 
@@ -428,7 +428,7 @@ function NetworkEdit ({ className }: Props): React.ReactElement {
             disabled
             label={t<string>('Ethereum Chain ID')}
             onChange={onChangeEthChainId}
-            value={networkInfo?.ethChainId?.toString() || ''}
+            value={networkInfo?.evmChainId?.toString() || ''}
           />
         }
 

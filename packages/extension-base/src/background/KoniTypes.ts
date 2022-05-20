@@ -625,7 +625,7 @@ export interface ValidateNetworkResponse {
   ss58Prefix: string,
   networkGroup: NetWorkGroup[],
   chain: string,
-  ethChainId: number,
+  evmChainId: number,
   nativeToken?: string,
   decimal?: number
 

@@ -11,38 +11,17 @@ import React, { useCallback, useContext, useEffect, useState } from 'react';
 import styled from 'styled-components';
 
 import { isEthereumAddress } from '@polkadot/util-crypto';
+import useGetEvmChains from "@subwallet/extension-koni-ui/hooks/screen/import/useGetEvmChains";
 
 interface Props extends ThemeProps {
   className?: string;
 }
 
-const CHAIN_OPTIONS = [
-  {
-    text: 'Astar',
-    value: 'astarEvm'
-  },
-  {
-    text: 'Moonbeam',
-    value: 'moonbeam'
-  },
-  {
-    text: 'Moonriver',
-    value: 'moonriver'
-  },
-  {
-    text: 'Moonbase Alpha',
-    value: 'moonbase'
-  },
-  {
-    text: 'Shiden',
-    value: 'shidenEvm'
-  }
-];
-
 function ImportEvmNft ({ className = '' }: Props): React.ReactElement<Props> {
   const [contractAddress, setContractAddress] = useState('');
   const [name, setName] = useState('');
-  const [chain, setChain] = useState(CHAIN_OPTIONS[0].value);
+  const chainOptions = useGetEvmChains();
+  const [chain, setChain] = useState(chainOptions[0].value);
 
   const [isValidContract, setIsValidContract] = useState(true);
   const [isValidName, setIsValidName] = useState(true);
@@ -151,7 +130,7 @@ function ImportEvmNft ({ className = '' }: Props): React.ReactElement<Props> {
           <Dropdown
             label={'Chain (*)'}
             onChange={onSelectChain}
-            options={CHAIN_OPTIONS}
+            options={chainOptions}
             value={chain}
           />
         </div>

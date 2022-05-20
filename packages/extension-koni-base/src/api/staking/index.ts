@@ -42,7 +42,7 @@ export async function stakingOnChainApi (addresses: string[], dotSamaAPIMap: Rec
   const [substrateAddresses, evmAddresses] = categoryAddresses(addresses);
 
   Object.entries(networks).forEach(([networkKey, networkInfo]) => {
-    if (IGNORE_GET_SUBSTRATE_FEATURES_LIST.indexOf(networkKey) < 0 && (networkInfo.getStakingOnChain && networkInfo.getStakingOnChain)) {
+    if (IGNORE_GET_SUBSTRATE_FEATURES_LIST.indexOf(networkKey) < 0 && (networkInfo.getStakingOnChain && networkInfo.getStakingOnChain) && networkInfo.active) {
       allApiPromise.push({ chain: networkKey, api: dotSamaAPIMap[networkKey] });
     }
   });

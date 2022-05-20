@@ -10,10 +10,10 @@ import DonateInputAddress from '@subwallet/extension-koni-ui/components/DonateIn
 import FormatBalance from '@subwallet/extension-koni-ui/components/FormatBalance';
 import InputAddress from '@subwallet/extension-koni-ui/components/InputAddress';
 import Modal from '@subwallet/extension-koni-ui/components/Modal';
+import { BalanceFormatType } from '@subwallet/extension-koni-ui/components/types';
 import useTranslation from '@subwallet/extension-koni-ui/hooks/useTranslation';
 import { makeTransfer } from '@subwallet/extension-koni-ui/messaging';
 import { ThemeProps, TransferResultType } from '@subwallet/extension-koni-ui/types';
-import { BalanceFormatType } from '@subwallet/web-runner/components/types';
 import React, { useCallback, useState } from 'react';
 import styled from 'styled-components';
 

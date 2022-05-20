@@ -3,6 +3,7 @@
 
 import { RequestCheckTransfer, TransferStep } from '@subwallet/extension-base/background/KoniTypes';
 import { PREDEFINED_NETWORKS } from '@subwallet/extension-koni-base/api/predefinedNetworks';
+import { InputWithLabel, Warning } from '@subwallet/extension-koni-ui/components';
 import Button from '@subwallet/extension-koni-ui/components/Button';
 import DonateInputAddress from '@subwallet/extension-koni-ui/components/DonateInputAddress';
 import FormatBalance from '@subwallet/extension-koni-ui/components/FormatBalance';
@@ -10,10 +11,10 @@ import InputAddress from '@subwallet/extension-koni-ui/components/InputAddress';
 import InputWithLabel from '@subwallet/extension-koni-ui/components/InputWithLabel';
 import Modal from '@subwallet/extension-koni-ui/components/Modal';
 import Warning from '@subwallet/extension-koni-ui/components/Warning';
+import { BalanceFormatType } from '@subwallet/extension-koni-ui/components/types';
 import useTranslation from '@subwallet/extension-koni-ui/hooks/useTranslation';
 import { makeTransfer } from '@subwallet/extension-koni-ui/messaging';
 import { ThemeProps, TransferResultType } from '@subwallet/extension-koni-ui/types';
-import { BalanceFormatType } from '@subwallet/web-runner/components/types';
 import React, { useCallback, useState } from 'react';
 import styled from 'styled-components';
 

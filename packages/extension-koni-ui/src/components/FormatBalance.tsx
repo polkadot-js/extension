@@ -3,7 +3,7 @@
 
 import type { Compact } from '@polkadot/types';
 
-import { BalanceFormatType } from '@subwallet/web-runner/components/types';
+import { BalanceFormatType } from '@subwallet/extension-koni-ui/components/types';
 import React from 'react';
 import styled from 'styled-components';
 

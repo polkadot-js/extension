@@ -20,6 +20,7 @@ import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import React, { useCallback, useContext, useEffect, useState } from 'react';
 import { useSelector } from 'react-redux';
 import styled from 'styled-components';
+import {isEthereumAddress} from "@polkadot/util-crypto";
 
 interface Props extends ThemeProps {
   className?: string;
@@ -30,6 +31,14 @@ interface ContentProps {
   nftItem: _NftItem;
   collectionImage?: string;
   collectionId: string;
+}
+
+const isValidRecipient = (address: string, isEthereum: boolean) => {
+  if (isEthereum) {
+    return isEthereumAddress(address);
+  } else {
+    return isValidAddress(address);
+  }
 }
 
 function Wrapper ({ className = '' }: Props): React.ReactElement<Props> {
@@ -107,7 +116,11 @@ function TransferNftContainer ({ className, collectionId, collectionImage, nftIt
   }, [networkJson.isEthereum]);
 
   useEffect(() => {
-    setAddressError(!isValidAddress(recipientAddress as string) && !isEthereumAddress());
+    if (networkJson.isEthereum && networkJson.isEthereum) {
+      setAddressError(!isValidRecipient(recipientAddress as string, true));
+    } else {
+      setAddressError(!isValidRecipient(recipientAddress as string, false));
+    }
   }, [isEthereumAddress, recipientAddress]);
 
   const handleSend = useCallback(async () => {

@@ -319,7 +319,7 @@ export const PREDEFINED_NETWORKS: Record<string, NetworkJson> = {
     decimals: 10
   },
   equilibrium_parachain: {
-    key: 'equilibrium',
+    key: 'equilibrium_parachain',
     chain: 'Equilibrium Parachain',
     genesisHash: '0x89d3ec46d2fb43ef5a9713833373d5ea666b092fa8fd68fbc34596036571b907',
     ss58Format: 68,
@@ -743,7 +743,7 @@ export const PREDEFINED_NETWORKS: Record<string, NetworkJson> = {
   shidenEvm: {
     key: 'shidenEvm',
     chain: 'Shiden - EVM',
-    active: true,
+    active: false,
     genesisHash: '0xf1cf9022c7ebb34b162d5b5e34e705a5a740b2d0ecc1009fb89023e62a488108___EVM',
     ss58Format: 5,
     providers: {

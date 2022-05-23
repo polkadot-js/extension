@@ -50,7 +50,7 @@ function getPartialFee (fee: string | null, feeSymbol: string | null | undefined
 export function getBalanceFormat (networkKey: string, token: string, chainRegistryMap: Record<string, ChainRegistry>): BalanceFormatType {
   const tokenInfo = chainRegistryMap[networkKey].tokenMap[token];
 
-  return [tokenInfo.decimals, tokenInfo.symbol, tokenInfo.symbolAlt];
+  return [tokenInfo?.decimals, tokenInfo?.symbol, tokenInfo?.symbolAlt];
 }
 
 export function getMaxTransferAndNoFees (

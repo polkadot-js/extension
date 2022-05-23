@@ -38,6 +38,8 @@ function ImportEvmToken ({ className = '' }: Props): React.ReactElement<Props> {
     if (contractAddress !== '') {
       if (!isEthereumAddress(contractAddress)) {
         setIsValidContract(false);
+        setSymbol('');
+        setDecimals('');
         show('Invalid EVM contract address');
       } else {
         validateEvmToken({
@@ -57,6 +59,8 @@ function ImportEvmToken ({ className = '' }: Props): React.ReactElement<Props> {
                 setDecimals(resp.decimals.toString());
               }
 
+              setIsValidSymbol(true);
+              setIsValidDecimals(true);
               setIsValidContract(true);
             }
           })
@@ -159,12 +163,14 @@ function ImportEvmToken ({ className = '' }: Props): React.ReactElement<Props> {
         </div>
 
         <InputWithLabel
+          disabled={true}
           label={'Token Symbol (*)'}
           onChange={onChangeSymbol}
           value={symbol}
         />
 
         <InputWithLabel
+          disabled={true}
           label={'Token Decimals (*)'}
           onChange={onChangeDecimals}
           value={decimals}

@@ -1020,6 +1020,8 @@ export default class KoniState extends State {
       });
     }
 
+    console.log('upsert evm token')
+
     if (data.type === 'erc20') {
       this.upsertChainRegistry(data);
     }

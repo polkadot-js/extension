@@ -99,13 +99,15 @@ function EvmTokenSetting ({ className }: Props): React.ReactElement {
         subHeaderName={t<string>('Custom EVM tokens')}
         to='/account/settings'
       >
-        <InputFilter
-          className='networks__input-filter'
-          onChange={_onChangeFilter}
-          placeholder={t<string>('Search token...')}
-          value={searchString}
-          withReset
-        />
+        <div className={'networks-input-filter-container'}>
+          <InputFilter
+            className='networks__input-filter'
+            onChange={_onChangeFilter}
+            placeholder={t<string>('Search token...')}
+            value={searchString}
+            withReset
+          />
+        </div>
       </Header>
 
       <div className='networks__button-area'>
@@ -132,7 +134,16 @@ function EvmTokenSetting ({ className }: Props): React.ReactElement {
           className={'confirm-delete-modal'}
         >
           <div>
-            <span className={'delete-title'}>Confirm deletion ?</span>
+            <div className={'delete-modal-title'}>
+              <div className={'delete-title'}>Confirm deletion ?</div>
+              <div
+                className={'close-btn'}
+                onClick={handleHideModal}
+              >
+                x
+              </div>
+            </div>
+
             <ButtonArea
               className={'delete-button-area'}
             >
@@ -161,6 +172,20 @@ export default styled(EvmTokenSetting)(({ theme }: Props) => `
   flex-direction: column;
   height: 100%;
 
+  .networks-input-filter-container {
+    padding: 0 15px 12px;
+  }
+
+  .close-btn {
+    font-size: 20px;
+    cursor: pointer;
+  }
+
+  .delete-modal-title {
+    display: flex;
+    justify-content: space-between;
+  }
+
   .delete-button-area {
     margin-top: 20px;
   }
@@ -168,6 +193,7 @@ export default styled(EvmTokenSetting)(({ theme }: Props) => `
   .network-edit-button:first-child {
     margin-right: 8px;
     background-color: ${theme.buttonBackground1};
+    font-size: 15px;
 
     span {
       color: ${theme.buttonTextColor2};
@@ -180,14 +206,9 @@ export default styled(EvmTokenSetting)(({ theme }: Props) => `
   }
 
   .confirm-delete-modal .subwallet-modal {
-    max-width: 460px;
+    width: 320px;
     padding: 20px;
-  }
-
-  .networks__input-filter {
-    margin-bottom: 15px;
-    margin-left: 15px;
-    margin-right: 15px;
+    top: 30%;
   }
 
   .networks__btn {

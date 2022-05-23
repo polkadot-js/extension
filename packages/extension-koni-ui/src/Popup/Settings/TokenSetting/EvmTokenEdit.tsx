@@ -129,6 +129,7 @@ function EvmTokenEdit ({ className }: Props): React.ReactElement {
         {
           tokenInfo.type === 'erc20' &&
           <InputWithLabel
+            disabled={true}
             label={t<string>('Symbol (*)')}
             onChange={onChangeSymbol}
             value={tokenInfo.symbol || ''}
@@ -138,6 +139,7 @@ function EvmTokenEdit ({ className }: Props): React.ReactElement {
         {
           tokenInfo.type === 'erc20' &&
           <InputWithLabel
+            disabled={true}
             label={t<string>('Decimals (*)')}
             onChange={onChangeDecimals}
             value={tokenInfo?.decimals?.toString() || ''}

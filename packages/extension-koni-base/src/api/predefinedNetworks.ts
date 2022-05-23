@@ -893,6 +893,21 @@ export const PREDEFINED_NETWORKS: Record<string, NetworkJson> = {
     decimals: 12,
     coinGeckoKey: 'kintsugi'
   },
+  kintsugi_test: {
+    key: 'kintsugi_test',
+    chain: 'Kintsugi Testnet',
+    genesisHash: '0x364dd762ee3fa02f63548f579f185e64932fc1a29052d7d9a588d2a57b191abf',
+    ss58Format: 42,
+    active: false,
+    providers: {
+      testnet: 'wss://api-testnet.interlay.io:443/parachain'
+    },
+    currentProviderMode: 'ws',
+    currentProvider: 'testnet',
+    groups: ['TEST_NET'],
+    nativeToken: 'KINT',
+    decimals: 12
+  },
   picasso: {
     key: 'picasso',
     chain: 'Picasso',
@@ -967,6 +982,21 @@ export const PREDEFINED_NETWORKS: Record<string, NetworkJson> = {
     crowdloanUrl: 'https://genshiro.equilibrium.io/en',
     decimals: 10,
     coinGeckoKey: 'genshiro'
+  },
+  genshiro_testnet: {
+    key: 'genshiro_testnet',
+    chain: 'Genshiro Testnet',
+    genesisHash: '0xdec164ef73b27c5b7e404114305102018a2b5a4ddda665bb510ce896ad5ba78d',
+    ss58Format: 67,
+    providers: {
+      testnet: 'wss://testnet.genshiro.io'
+    },
+    decimals: 9,
+    nativeToken: 'TOKEN',
+    active: false,
+    currentProviderMode: 'ws',
+    currentProvider: 'Equilibrium',
+    groups: ['TEST_NET']
   },
   subsocial: {
     key: 'subsocial',
@@ -1128,11 +1158,11 @@ export const PREDEFINED_NETWORKS: Record<string, NetworkJson> = {
   },
   bitcountry: {
     key: 'bitcountry',
-    chain: 'Bit.Country - Testnet',
+    chain: 'Bit.Country - Alpha Net',
     genesisHash: '0xfff6fd94251f570d4c9cdf25a0475da0d7ad35160290da19dad8f9caf8bf31b5',
     ss58Format: 42,
     providers: {
-      'Metaverse Foundation': 'wss://tewai-rpc.bit.country'
+      'Metaverse Foundation': 'wss://alphanet-rpc.bit.country'
     },
     active: false,
     currentProviderMode: 'ws',

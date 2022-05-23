@@ -151,7 +151,7 @@ export default class KoniState extends State {
           } else {
             if (Object.keys(PREDEFINED_GENESIS_HASHES).includes(storedNetwork.genesisHash)) { // merge networks with same genesis hash
               // @ts-ignore
-              const targetKey = PREDEFINED_GENESIS_HASHES[storedNetwork.genesisHash] as string;
+              const targetKey = PREDEFINED_GENESIS_HASHES[storedNetwork.genesisHash];
 
               const { currentProviderMethod, parsedCustomProviders, parsedProviderKey } = mergeNetworkProviders(storedNetwork, PREDEFINED_NETWORKS[targetKey]);
 

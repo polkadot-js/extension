@@ -79,8 +79,13 @@ function Wrapper ({ className, historyMap, networkKey, registryMap }: Props): Re
 function TransactionHistory ({ className, items, registryMap }: ContentProp): React.ReactElement<ContentProp> {
   const renderChainBalanceItem = (item: TransactionHistoryItemType, registryMap: Record<string, ChainRegistry>) => {
     const { networkKey } = item;
-
     const { extrinsicHash } = item;
+    const registry = registryMap[networkKey];
+
+    if ((item.changeSymbol && !registry.tokenMap[item.changeSymbol]) ||
+      (item.feeSymbol && !registry.tokenMap[item.feeSymbol])) {
+      return null;
+    }
 
     if (isSupportScanExplorer(networkKey)) {
       return (
@@ -94,7 +99,7 @@ function TransactionHistory ({ className, items, registryMap }: ContentProp): Re
           <TransactionHistoryItem
             isSupportScanExplorer={true}
             item={item}
-            registry={registryMap[networkKey]}
+            registry={registry}
           />
         </a>
       );
@@ -105,7 +110,7 @@ function TransactionHistory ({ className, items, registryMap }: ContentProp): Re
         <TransactionHistoryItem
           isSupportScanExplorer={false}
           item={item}
-          registry={registryMap[networkKey]}
+          registry={registry}
         />
       </div>
     );

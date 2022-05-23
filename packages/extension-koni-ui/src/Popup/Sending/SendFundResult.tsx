@@ -8,9 +8,10 @@ import { ActionContext } from '@subwallet/extension-koni-ui/components';
 import Button from '@subwallet/extension-koni-ui/components/Button';
 import useTranslation from '@subwallet/extension-koni-ui/hooks/useTranslation';
 import { ThemeProps, TransferResultType } from '@subwallet/extension-koni-ui/types';
-import { getScanExplorerTransactionHistoryUrl, isSupportScanExplorer } from '@subwallet/extension-koni-ui/util';
 import React, { useCallback, useContext } from 'react';
 import styled from 'styled-components';
+import useSupportScanExplorer from "@subwallet/extension-koni-ui/hooks/screen/home/useSupportScanExplorer";
+import useScanExplorerTxUrl from "@subwallet/extension-koni-ui/hooks/screen/home/useScanExplorerTxUrl";
 
 export interface Props extends ThemeProps {
   className?: string;
@@ -30,11 +31,11 @@ function SendFundResult ({ className = '', networkKey, onResend, txResult: { ext
   );
 
   const viewTransactionBtn = (networkKey: string, extrinsicHash: string) => {
-    if (isSupportScanExplorer(networkKey)) {
+    if (useSupportScanExplorer(networkKey)) {
       return (
         <a
           className='send-fund-result__stt-btn send-fund-result__view-history-btn'
-          href={getScanExplorerTransactionHistoryUrl(networkKey, extrinsicHash)}
+          href={useScanExplorerTxUrl(networkKey, extrinsicHash)}
           rel='noreferrer'
           target={'_blank'}
         >

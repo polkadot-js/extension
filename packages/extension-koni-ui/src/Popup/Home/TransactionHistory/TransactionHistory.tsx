@@ -3,9 +3,10 @@
 
 import { ChainRegistry, TransactionHistoryItemType } from '@subwallet/extension-base/background/KoniTypes';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
-import { getScanExplorerTransactionHistoryUrl, isSupportScanExplorer } from '@subwallet/extension-koni-ui/util';
 import React from 'react';
 import styled from 'styled-components';
+import useSupportScanExplorer from "@subwallet/extension-koni-ui/hooks/screen/home/useSupportScanExplorer";
+import useScanExplorerTxUrl from "@subwallet/extension-koni-ui/hooks/screen/home/useScanExplorerTxUrl";
 
 const TransactionHistoryItem = React.lazy(() => import('./TransactionHistoryItem'));
 const TransactionHistoryEmptyList = React.lazy(() => import('./EmptyList'));
@@ -87,11 +88,11 @@ function TransactionHistory ({ className, items, registryMap }: ContentProp): Re
       return null;
     }
 
-    if (isSupportScanExplorer(networkKey)) {
+    if (useSupportScanExplorer(networkKey)) {
       return (
         <a
           className={'transaction-item-wrapper'}
-          href={getScanExplorerTransactionHistoryUrl(networkKey, extrinsicHash)}
+          href={useScanExplorerTxUrl(networkKey, extrinsicHash)}
           key={extrinsicHash}
           rel='noreferrer'
           target={'_blank'}

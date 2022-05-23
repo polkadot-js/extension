@@ -1,7 +1,7 @@
 // Copyright 2019-2022 @polkadot/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { TokenInfo } from '@subwallet/extension-base/background/KoniTypes';
+import {NetworkJson, TokenInfo} from '@subwallet/extension-base/background/KoniTypes';
 import { isEmptyArray } from '@subwallet/extension-koni-ui/util/common';
 import axios from 'axios';
 import BigN from 'bignumber.js';
@@ -139,7 +139,7 @@ function getTokenPrice (tokenPriceMap: Record<string, number>, token: string): n
   return tokenPriceMap[token.toLowerCase()] || 0;
 }
 
-export const parseBalancesInfo = (priceMap: Record<string, number>, tokenPriceMap: Record<string, number>, balanceInfo: AccountInfoItem, tokenMap: Record<string, TokenInfo>): BalanceInfo => {
+export const parseBalancesInfo = (priceMap: Record<string, number>, tokenPriceMap: Record<string, number>, balanceInfo: AccountInfoItem, tokenMap: Record<string, TokenInfo>, networkJson: NetworkJson): BalanceInfo => {
   const { balanceItem, networkKey, tokenDecimals, tokenSymbols } = balanceInfo;
 
   const decimals = tokenDecimals && !isEmptyArray(tokenDecimals) ? tokenDecimals[0] : 0;
@@ -165,7 +165,7 @@ export const parseBalancesInfo = (priceMap: Record<string, number>, tokenPriceMa
       balance: value,
       decimals,
       symbol,
-      price: priceMap[networkKey]
+      price: priceMap[networkJson.coinGeckoKey || networkKey]
     });
 
     if (['free', 'reserved', 'locked'].includes(key)) {

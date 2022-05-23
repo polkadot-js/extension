@@ -262,6 +262,8 @@ function NetworkEdit ({ className }: Props): React.ReactElement {
       return;
     }
 
+    console.log(networkInfo);
+
     upsertNetworkMap(networkInfo).then((resp) => {
       if (resp) {
         show('Your changes are saved successfully');

@@ -61,7 +61,8 @@ export default function useAccountBalance (currentNetworkKey: string,
   const { balance: balanceReducer,
     chainRegistry: chainRegistryMap,
     crowdloan: crowdloanReducer,
-    price: priceReducer } = useSelector((state: RootState) => state);
+    price: priceReducer,
+    networkMap } = useSelector((state: RootState) => state);
 
   const networkMetadataMap = useGetNetworkMetadata();
 
@@ -113,7 +114,7 @@ export default function useAccountBalance (currentNetworkKey: string,
       tokenDecimals,
       tokenSymbols,
       balanceItem
-    }, registry.tokenMap);
+    }, registry.tokenMap, networkMap[networkKey]);
 
     networkBalanceMaps[networkKey] = balanceInfo;
     totalBalanceValue = totalBalanceValue.plus(balanceInfo.convertedBalanceValue);

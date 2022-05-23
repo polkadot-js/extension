@@ -5,9 +5,9 @@ import failStatus from '@subwallet/extension-koni-ui/assets/fail-status.svg';
 import successStatus from '@subwallet/extension-koni-ui/assets/success-status.svg';
 import useTranslation from '@subwallet/extension-koni-ui/hooks/useTranslation';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
-import { getScanExplorerTransactionHistoryUrl } from '@subwallet/extension-koni-ui/util';
 import React from 'react';
 import styled from 'styled-components';
+import useScanExplorerTxUrl from "@subwallet/extension-koni-ui/hooks/screen/home/useScanExplorerTxUrl";
 
 interface Props extends ThemeProps {
   className?: string;
@@ -46,7 +46,7 @@ function TransferResult ({ backToHome, className, extrinsicHash, handleResend, i
               </div>
               <a
                 className={'history-button'}
-                href={getScanExplorerTransactionHistoryUrl(networkKey, extrinsicHash)}
+                href={useScanExplorerTxUrl(networkKey, extrinsicHash)}
                 rel='noreferrer'
                 target={'_blank'}
               >

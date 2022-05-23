@@ -1101,6 +1101,7 @@ export default class KoniState extends State {
 
   public async upsertNetworkMap (data: NetworkJson): Promise<void> {
     if (data.key in this.networkMap) { // update provider for existed network
+      console.log('key', data.coinGeckoKey);
       if (data.customProviders) {
         this.networkMap[data.key].customProviders = data.customProviders;
       }
@@ -1120,21 +1121,13 @@ export default class KoniState extends State {
         this.networkMap[data.key].decimals = data.decimals;
       }
 
-      if (data.crowdloanUrl) {
-        this.networkMap[data.key].crowdloanUrl = data.crowdloanUrl;
-      }
+      this.networkMap[data.key].crowdloanUrl = data.crowdloanUrl;
 
-      if (data.coinGeckoKey) {
-        this.networkMap[data.key].coinGeckoKey = data.coinGeckoKey;
-      }
+      this.networkMap[data.key].coinGeckoKey = data.coinGeckoKey;
 
-      if (data.paraId) {
-        this.networkMap[data.key].paraId = data.paraId;
-      }
+      this.networkMap[data.key].paraId = data.paraId;
 
-      if (data.blockExplorer) {
-        this.networkMap[data.key].blockExplorer = data.blockExplorer;
-      }
+      this.networkMap[data.key].blockExplorer = data.blockExplorer;
     } else { // insert
       this.networkMap[data.key] = data;
       this.networkMap[data.key].getStakingOnChain = true; // try to fetch staking on chain for custom network by default

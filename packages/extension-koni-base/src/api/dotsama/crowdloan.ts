@@ -95,7 +95,6 @@ export async function subscribeCrowdloan (addresses: string[], dotSamaAPIMap: Re
         return;
       }
 
-      // TODO: check group of custom network
       if (networkKey === 'acala') {
         unsubMap.acala = subscribeAcalaContributeInterval(substrateAddresses.map((address) => reformatAddress(address, networkInfo.ss58Format, networkInfo.isEthereum)), crowdloanCb);
       } else if (networkInfo.groups.includes('POLKADOT_PARACHAIN')) {

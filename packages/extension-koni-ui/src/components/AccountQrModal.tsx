@@ -12,7 +12,7 @@ import { editAccount } from '@subwallet/extension-koni-ui/messaging';
 import HeaderEditName from '@subwallet/extension-koni-ui/partials/HeaderEditName';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
-import { getLogoByNetworkKey, getScanExplorerAddressInfoUrl, isSupportScanExplorer, toShort } from '@subwallet/extension-koni-ui/util';
+import { getLogoByNetworkKey, toShort } from '@subwallet/extension-koni-ui/util';
 import reformatAddress from '@subwallet/extension-koni-ui/util/reformatAddress';
 import React, { useCallback, useMemo, useState } from 'react';
 import CopyToClipboard from 'react-copy-to-clipboard';
@@ -24,6 +24,8 @@ import { IconTheme } from '@polkadot/react-identicon/types';
 
 import cloneLogo from '../assets/clone.svg';
 import pencil from '../assets/pencil.svg';
+import useSupportScanExplorer from "@subwallet/extension-koni-ui/hooks/screen/home/useSupportScanExplorer";
+import useScanExplorerAddressUrl from "@subwallet/extension-koni-ui/hooks/screen/home/useScanExplorerAddressUrl";
 
 interface Props extends ThemeProps {
   className?: string;
@@ -151,11 +153,11 @@ function AccountQrModal ({ accountName, address, className,
             </div>
           </CopyToClipboard>
 
-          {isSupportScanExplorer(networkKey)
+          {useSupportScanExplorer(networkKey)
             ? (
               <a
                 className='account-qr-modal-button'
-                href={getScanExplorerAddressInfoUrl(networkKey, formatted)}
+                href={useScanExplorerAddressUrl(networkKey, formatted)}
                 rel='noreferrer'
                 target='_blank'
               >

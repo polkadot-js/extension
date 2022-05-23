@@ -1101,7 +1101,6 @@ export default class KoniState extends State {
 
   public async upsertNetworkMap (data: NetworkJson): Promise<void> {
     if (data.key in this.networkMap) { // update provider for existed network
-      console.log('key', data.coinGeckoKey);
       if (data.customProviders) {
         this.networkMap[data.key].customProviders = data.customProviders;
       }

@@ -236,6 +236,10 @@ export function getScanExplorerTransactionHistoryUrl (networkKey: string, hash: 
     return `${moonbaseScanUrl}/tx/${hash}`;
   }
 
+  if (!subscanByNetworkKey[networkKey]) {
+    return '';
+  }
+
   return `${subscanByNetworkKey[networkKey]}/extrinsic/${hash}`;
 }
 
@@ -250,6 +254,10 @@ export function getScanExplorerAddressInfoUrl (networkKey: string, address: stri
 
   if (networkKey === 'moonbase') {
     return `${moonbaseScanUrl}/address/${address}`;
+  }
+
+  if (!subscanByNetworkKey[networkKey]) {
+    return '';
   }
 
   return `${subscanByNetworkKey[networkKey]}/account/${address}`;

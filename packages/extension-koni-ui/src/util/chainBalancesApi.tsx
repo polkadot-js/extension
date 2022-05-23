@@ -1,7 +1,7 @@
 // Copyright 2019-2022 @polkadot/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import {NetworkJson, TokenInfo} from '@subwallet/extension-base/background/KoniTypes';
+import { NetworkJson, TokenInfo } from '@subwallet/extension-base/background/KoniTypes';
 import { isEmptyArray } from '@subwallet/extension-koni-ui/util/common';
 import axios from 'axios';
 import BigN from 'bignumber.js';

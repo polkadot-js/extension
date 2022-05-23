@@ -1214,7 +1214,7 @@ export const PREDEFINED_NETWORKS: Record<string, NetworkJson> = {
     groups: ['TEST_NET'],
     nativeToken: 'ACA',
     decimals: 12
-  },
+  }
 };
 
 export const PREDEFINED_GENESIS_HASHES = {

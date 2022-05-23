@@ -73,7 +73,7 @@ export const PREDEFINED_NETWORKS: Record<string, NetworkJson> = {
   rococo: {
     key: 'rococo',
     chain: 'Rococo Relay Chain',
-    genesisHash: '0x27b0e1604364f6a7309d31ad60cdfb820666c3095b9f948c4a7d7894b6b3c184',
+    genesisHash: '0x6408de7737c59c238890533af25896a2c20608d8b380bb01029acb392781063e',
     icon: 'polkadot',
     ss58Format: 42,
     providers: {
@@ -602,7 +602,7 @@ export const PREDEFINED_NETWORKS: Record<string, NetworkJson> = {
     key: 'phala',
     chain: 'Phala Network',
     genesisHash: '0x1bb969d85965e4bb5a651abbedf21a54b6b31a21f66b5401cc3f1e286268d736',
-    ss58Format: -1,
+    ss58Format: 30,
     providers: {
       Phala: 'wss://api.phala.network/ws'
     },
@@ -739,6 +739,21 @@ export const PREDEFINED_NETWORKS: Record<string, NetworkJson> = {
     crowdloanUrl: 'https://polkadot.js.org/apps/#/parachains/crowdloan',
     decimals: 18,
     coinGeckoKey: 'shiden'
+  },
+  shidenEvm: {
+    key: 'shidenEvm',
+    chain: 'Shiden - EVM',
+    active: true,
+    genesisHash: '0xf1cf9022c7ebb34b162d5b5e34e705a5a740b2d0ecc1009fb89023e62a488108___EVM',
+    ss58Format: 5,
+    providers: {
+      astar: 'wss://rpc.shiden.astar.network'
+    },
+    currentProviderMode: 'ws',
+    currentProvider: 'astar',
+    groups: ['KUSAMA_PARACHAIN'],
+    nativeToken: 'SDN',
+    isEthereum: true
   },
   khala: {
     key: 'khala',
@@ -979,6 +994,21 @@ export const PREDEFINED_NETWORKS: Record<string, NetworkJson> = {
     decimals: 18,
     coinGeckoKey: 'quartz'
   },
+  unique_network: {
+    key: 'unique_network',
+    chain: 'UNIQUE NETWORK',
+    active: false,
+    genesisHash: '0x84322d9cddbf35088f1e54e9a85c967a41a56a4f43445768125e61af166c7d31',
+    ss58Format: 7391,
+    providers: {
+      unique: 'wss://ws.unique.network/'
+    },
+    currentProvider: 'unique',
+    currentProviderMode: 'ws',
+    groups: ['POLKADOT_PARACHAIN'],
+    paraId: 2037,
+    nativeToken: 'UNQ'
+  },
   genshiro: {
     key: 'genshiro',
     chain: 'Genshiro',
@@ -1012,13 +1042,29 @@ export const PREDEFINED_NETWORKS: Record<string, NetworkJson> = {
     currentProvider: 'Equilibrium',
     groups: ['TEST_NET']
   },
+  subsocial_x: {
+    key: 'subsocial_x',
+    active: false,
+    chain: 'SubsocialX',
+    genesisHash: '0x4a12be580bb959937a1c7a61d5cf24428ed67fa571974b4007645d1886e7c89f',
+    ss58Format: 28,
+    providers: {
+      subsocialx: 'wss://para.subsocial.network'
+    },
+    currentProviderMode: 'ws',
+    currentProvider: 'subsocialx',
+    groups: ['KUSAMA_PARACHAIN'],
+    paraId: 2100,
+    nativeToken: 'SUB',
+    crowdloanUrl: 'https://app.subsocial.network/crowdloan'
+  },
   subsocial: {
     key: 'subsocial',
     chain: 'Subsocial',
     genesisHash: '0x0bd72c1c305172e1275278aaeb3f161e02eccb7a819e63f62d47bd53a28189f8',
     ss58Format: 28,
     providers: {
-      Dappforce: 'wss://para.subsocial.network'
+      Dappforce: 'wss://rpc.subsocial.network'
     },
     active: false,
     currentProviderMode: 'ws',
@@ -1152,24 +1198,6 @@ export const PREDEFINED_NETWORKS: Record<string, NetworkJson> = {
     decimals: 18,
     coinGeckoKey: 'darwinia-crab-network'
   },
-  pichiu: {
-    key: 'pichiu',
-    chain: 'Pichiu',
-    // genesisHash: '0xb14149220320bdc127278f8055b96c1d27750337694e920c4b8053c15145d3b1',
-    genesisHash: 'UNKNOWN', // temple disable this network
-    ss58Format: 42,
-    providers: {
-      'Kylin Network': 'wss://kusama.kylin-node.co.uk'
-    },
-    active: false,
-    currentProviderMode: 'ws',
-    currentProvider: 'Kylin Network',
-    groups: ['KUSAMA_PARACHAIN'],
-    paraId: 2102,
-    nativeToken: 'PCHU',
-    crowdloanUrl: 'https://polkadot.js.org/apps/#/parachains/crowdloan',
-    decimals: 10
-  },
   bitcountry: {
     key: 'bitcountry',
     chain: 'Bit.Country - Alpha Net',
@@ -1214,8 +1242,110 @@ export const PREDEFINED_NETWORKS: Record<string, NetworkJson> = {
     groups: ['TEST_NET'],
     nativeToken: 'ACA',
     decimals: 12
+  },
+  neumann: {
+    chain: 'Neumann Network',
+    genesisHash: '0x68577f68a47847fb974c220189333c46e83a899b6e375abf50b9a615d9019c20',
+    ss58Format: 51,
+    providers: {
+      neumann: 'wss://neumann.api.onfinality.io/public-ws'
+    },
+    currentProvider: 'neumann',
+    currentProviderMode: 'ws',
+    active: false,
+    key: 'neumann',
+    groups: ['TEST_NET'],
+    nativeToken: 'NEU'
+  },
+  turing: {
+    chain: 'Turing Network',
+    genesisHash: '0x0f62b701fb12d02237a33b84818c11f621653d2b1614c777973babf4652b535d',
+    ss58Format: 51,
+    providers: {
+      turing: 'wss://rpc.turing.oak.tech'
+    },
+    currentProviderMode: 'ws',
+    currentProvider: 'turing',
+    key: 'turing',
+    active: false,
+    groups: ['KUSAMA_PARACHAIN'],
+    paraId: 2114,
+    nativeToken: 'TUR',
+    crowdloanUrl: 'https://crowdloan.zeitgeist.pm/'
+  },
+  mangatax: {
+    chain: 'MangataX Public Testnet',
+    genesisHash: '0x8032ad7a75a2b9732315592c672ec6d0ddf95308de03a19878ed8627ae8796cc',
+    ss58Format: 42,
+    providers: {
+      mangatax: 'wss://v4-prod-collator-01.mangatafinance.cloud'
+    },
+    currentProvider: 'mangatax',
+    currentProviderMode: 'ws',
+    active: false,
+    key: 'mangatax',
+    groups: ['TEST_NET'],
+    paraId: 2110,
+    nativeToken: 'MGAT'
+  },
+  mangatax_para: {
+    chain: 'MangataX',
+    genesisHash: 'UNKNOWN',
+    ss58Format: 42,
+    providers: {
+      mangata: 'wss://v4-prod-collator-01.mangatafinance.cloud'
+    },
+    currentProviderMode: 'ws',
+    currentProvider: 'mangata',
+    key: 'mangatax_para',
+    active: false,
+    groups: ['KUSAMA_PARACHAIN'],
+    paraId: 2110,
+    nativeToken: 'MGAT'
+  },
+  encointer: {
+    chain: 'Encointer Network',
+    genesisHash: '0x7dd99936c1e9e6d1ce7d90eb6f33bea8393b4bf87677d675aa63c9cb3e8c5b5b',
+    ss58Format: 42,
+    providers: {
+      OnFinality: 'wss://encointer.api.onfinality.io/public-ws'
+    },
+    currentProvider: 'OnFinality',
+    currentProviderMode: 'ws',
+    active: false,
+    key: 'encointer',
+    groups: ['KUSAMA_PARACHAIN'],
+    paraId: 1001,
+    nativeToken: 'KSM'
+  },
+  litmus: {
+    chain: 'Litmus',
+    genesisHash: '0xda5831fbc8570e3c6336d0d72b8c08f8738beefec812df21ef2afc2982ede09c',
+    ss58Format: 131,
+    providers: {
+      litmus: 'wss://rpc.litmus-parachain.litentry.io'
+    },
+    currentProviderMode: 'ws',
+    currentProvider: 'litmus',
+    key: 'litmus',
+    active: false,
+    groups: ['KUSAMA_PARACHAIN'],
+    paraId: 2106,
+    nativeToken: 'LIT',
+    crowdloanUrl: 'https://kusama-crowdloan.litentry.com/'
   }
 };
 
-export const PREDEFINED_GENESIS_HASHES = {
-};
+function getGenesisHashes () {
+  const result: Record<string, string> = {};
+
+  for (const [key, networkJson] of Object.entries(PREDEFINED_NETWORKS)) {
+    if (networkJson.genesisHash !== 'UNKNOWN' && networkJson.genesisHash !== 'UPDATING') {
+      result[networkJson.genesisHash] = key;
+    }
+  }
+
+  return result;
+}
+
+export const PREDEFINED_GENESIS_HASHES = getGenesisHashes();

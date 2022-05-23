@@ -17,7 +17,7 @@ export class UniqueNftApiV2 extends BaseNftApi {
 
   // eslint-disable-next-line no-useless-constructor
   constructor () {
-    super();
+    super('');
   }
 
   private static parseNftRequest (address: string) {

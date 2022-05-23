@@ -6,12 +6,12 @@ import failStatus from '@subwallet/extension-koni-ui/assets/fail-status.svg';
 import successStatus from '@subwallet/extension-koni-ui/assets/success-status.svg';
 import { ActionContext } from '@subwallet/extension-koni-ui/components';
 import Button from '@subwallet/extension-koni-ui/components/Button';
+import useScanExplorerTxUrl from '@subwallet/extension-koni-ui/hooks/screen/home/useScanExplorerTxUrl';
+import useSupportScanExplorer from '@subwallet/extension-koni-ui/hooks/screen/home/useSupportScanExplorer';
 import useTranslation from '@subwallet/extension-koni-ui/hooks/useTranslation';
 import { ThemeProps, TransferResultType } from '@subwallet/extension-koni-ui/types';
 import React, { useCallback, useContext } from 'react';
 import styled from 'styled-components';
-import useSupportScanExplorer from "@subwallet/extension-koni-ui/hooks/screen/home/useSupportScanExplorer";
-import useScanExplorerTxUrl from "@subwallet/extension-koni-ui/hooks/screen/home/useScanExplorerTxUrl";
 
 export interface Props extends ThemeProps {
   className?: string;
@@ -23,6 +23,8 @@ export interface Props extends ThemeProps {
 function SendFundResult ({ className = '', networkKey, onResend, txResult: { extrinsicHash, isTxSuccess, txError } }: Props): React.ReactElement<Props> {
   const { t } = useTranslation();
   const navigate = useContext(ActionContext);
+  const isSupportScanExplorer = useSupportScanExplorer(networkKey);
+  const isScanExplorerTxUrl = useScanExplorerTxUrl(networkKey, extrinsicHash);
   const _backToHome = useCallback(
     () => {
       navigate('/');
@@ -30,12 +32,16 @@ function SendFundResult ({ className = '', networkKey, onResend, txResult: { ext
     [navigate]
   );
 
-  const viewTransactionBtn = (networkKey: string, extrinsicHash: string) => {
-    if (useSupportScanExplorer(networkKey)) {
+  const viewTransactionBtn = (extrinsicHash?: string) => {
+    if (!extrinsicHash) {
+      return null;
+    }
+
+    if (isSupportScanExplorer && isScanExplorerTxUrl) {
       return (
         <a
           className='send-fund-result__stt-btn send-fund-result__view-history-btn'
-          href={useScanExplorerTxUrl(networkKey, extrinsicHash)}
+          href={isScanExplorerTxUrl}
           rel='noreferrer'
           target={'_blank'}
         >
@@ -82,7 +88,7 @@ function SendFundResult ({ className = '', networkKey, onResend, txResult: { ext
             {t<string>('Back To Home')}
           </Button>
 
-          {extrinsicHash && viewTransactionBtn(networkKey, extrinsicHash)}
+          {viewTransactionBtn(extrinsicHash)}
         </div>
         : <div className='send-fund-result'>
           <img
@@ -109,7 +115,7 @@ function SendFundResult ({ className = '', networkKey, onResend, txResult: { ext
             {t<string>('Resend')}
           </Button>
 
-          {extrinsicHash && viewTransactionBtn(networkKey, extrinsicHash)}
+          {viewTransactionBtn(extrinsicHash)}
         </div>
       }
     </div>

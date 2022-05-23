@@ -6,6 +6,8 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import Identicon from '@subwallet/extension-koni-ui/components/Identicon';
 import Link from '@subwallet/extension-koni-ui/components/Link';
 import Modal from '@subwallet/extension-koni-ui/components/Modal';
+import useScanExplorerAddressUrl from '@subwallet/extension-koni-ui/hooks/screen/home/useScanExplorerAddressUrl';
+import useSupportScanExplorer from '@subwallet/extension-koni-ui/hooks/screen/home/useSupportScanExplorer';
 import useToast from '@subwallet/extension-koni-ui/hooks/useToast';
 import useTranslation from '@subwallet/extension-koni-ui/hooks/useTranslation';
 import { editAccount } from '@subwallet/extension-koni-ui/messaging';
@@ -24,8 +26,6 @@ import { IconTheme } from '@polkadot/react-identicon/types';
 
 import cloneLogo from '../assets/clone.svg';
 import pencil from '../assets/pencil.svg';
-import useSupportScanExplorer from "@subwallet/extension-koni-ui/hooks/screen/home/useSupportScanExplorer";
-import useScanExplorerAddressUrl from "@subwallet/extension-koni-ui/hooks/screen/home/useScanExplorerAddressUrl";
 
 interface Props extends ThemeProps {
   className?: string;
@@ -54,6 +54,13 @@ function AccountQrModal ({ accountName, address, className,
   const [editedName, setName] = useState<string | undefined | null>(accountName);
   const [{ isEditing }, setEditing] = useState<EditState>({ isEditing: false, toggleActions: 0 });
   const networkMap = useSelector((state: RootState) => state.networkMap);
+  const formatted = useMemo(() => {
+    const networkInfo = networkMap[networkKey];
+
+    return reformatAddress(address, networkPrefix, networkInfo?.isEthereum);
+  }, [networkMap, networkKey, address, networkPrefix]);
+  const isSupportScanExplorer = useSupportScanExplorer(networkKey);
+  const scanExplorerAddressUrl = useScanExplorerAddressUrl(networkKey, formatted);
 
   const _toggleEdit = useCallback(
     (): void => {
@@ -76,12 +83,6 @@ function AccountQrModal ({ accountName, address, className,
     () => show(t('Copied')),
     [show, t]
   );
-
-  const formatted = useMemo(() => {
-    const networkInfo = networkMap[networkKey];
-
-    return reformatAddress(address, networkPrefix, networkInfo?.isEthereum);
-  }, [networkMap, networkKey, address, networkPrefix]);
 
   return (
     <Modal className={className}>
@@ -153,11 +154,11 @@ function AccountQrModal ({ accountName, address, className,
             </div>
           </CopyToClipboard>
 
-          {useSupportScanExplorer(networkKey)
+          {isSupportScanExplorer
             ? (
               <a
                 className='account-qr-modal-button'
-                href={useScanExplorerAddressUrl(networkKey, formatted)}
+                href={scanExplorerAddressUrl}
                 rel='noreferrer'
                 target='_blank'
               >

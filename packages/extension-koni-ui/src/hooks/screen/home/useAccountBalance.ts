@@ -61,8 +61,8 @@ export default function useAccountBalance (currentNetworkKey: string,
   const { balance: balanceReducer,
     chainRegistry: chainRegistryMap,
     crowdloan: crowdloanReducer,
-    price: priceReducer,
-    networkMap } = useSelector((state: RootState) => state);
+    networkMap,
+    price: priceReducer } = useSelector((state: RootState) => state);
 
   const networkMetadataMap = useGetNetworkMetadata();
 

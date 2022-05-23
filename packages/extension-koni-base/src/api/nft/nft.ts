@@ -7,7 +7,7 @@ import { isUrl } from '@subwallet/extension-koni-base/utils/utils';
 import Web3 from 'web3';
 
 export abstract class BaseNftApi {
-  chain: string = '';
+  chain = '';
   dotSamaApi: ApiProps | null = null;
   web3: Web3 | null = null;
   data: NftCollection[] = [];

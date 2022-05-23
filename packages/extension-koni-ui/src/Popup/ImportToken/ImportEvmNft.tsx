@@ -3,6 +3,7 @@
 
 import { CustomEvmToken } from '@subwallet/extension-base/background/KoniTypes';
 import { ActionContext, Button, Dropdown, InputWithLabel } from '@subwallet/extension-koni-ui/components';
+import useGetEvmChains from '@subwallet/extension-koni-ui/hooks/screen/import/useGetEvmChains';
 import useToast from '@subwallet/extension-koni-ui/hooks/useToast';
 import { upsertEvmToken, validateEvmToken } from '@subwallet/extension-koni-ui/messaging';
 import { Header } from '@subwallet/extension-koni-ui/partials';
@@ -11,7 +12,6 @@ import React, { useCallback, useContext, useEffect, useState } from 'react';
 import styled from 'styled-components';
 
 import { isEthereumAddress } from '@polkadot/util-crypto';
-import useGetEvmChains from "@subwallet/extension-koni-ui/hooks/screen/import/useGetEvmChains";
 
 interface Props extends ThemeProps {
   className?: string;

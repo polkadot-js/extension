@@ -93,6 +93,7 @@ export async function stakingOnChainApi (addresses: string[], dotSamaAPIMap: Rec
             state: APIItemState.READY
           } as StakingItem;
         }
+
         // eslint-disable-next-line node/no-callback-literal
         callback(chain, stakingItem);
       }

@@ -234,6 +234,7 @@ export default class KoniState extends State {
           if (!(token.chain in this.networkMap)) {
             let newKey = '';
             const genesisHash = token.chain.split('custom_')[1]; // token from custom network has key with prefix custom_
+
             for (const [key, network] of Object.entries(this.networkMap)) {
               if (network.genesisHash.toLowerCase() === genesisHash.toLowerCase()) {
                 newKey = key;
@@ -249,6 +250,7 @@ export default class KoniState extends State {
           if (!(token.chain in this.networkMap)) {
             let newKey = '';
             const genesisHash = token.chain.split('custom_')[1]; // token from custom network has key with prefix custom_
+
             for (const [key, network] of Object.entries(this.networkMap)) {
               if (network.genesisHash.toLowerCase() === genesisHash.toLowerCase()) {
                 newKey = key;

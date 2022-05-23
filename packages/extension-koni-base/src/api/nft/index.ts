@@ -1,18 +1,18 @@
 // Copyright 2019-2022 @subwallet/extension-koni authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import {ApiProps, CustomEvmToken, NftCollection, NftItem} from '@subwallet/extension-base/background/KoniTypes';
-import {AcalaNftApi} from '@subwallet/extension-koni-base/api/nft/acala_nft';
-import {BitCountryNftApi} from '@subwallet/extension-koni-base/api/nft/bit.country';
-import {SUPPORTED_NFT_NETWORKS} from '@subwallet/extension-koni-base/api/nft/config';
-import {Web3NftApi} from '@subwallet/extension-koni-base/api/nft/eth_nft';
-import {KaruraNftApi} from '@subwallet/extension-koni-base/api/nft/karura_nft';
-import {BaseNftApi} from '@subwallet/extension-koni-base/api/nft/nft';
-import {RmrkNftApi} from '@subwallet/extension-koni-base/api/nft/rmrk_nft';
+import { ApiProps, CustomEvmToken, NftCollection, NftItem } from '@subwallet/extension-base/background/KoniTypes';
+import { AcalaNftApi } from '@subwallet/extension-koni-base/api/nft/acala_nft';
+import { BitCountryNftApi } from '@subwallet/extension-koni-base/api/nft/bit.country';
+import { SUPPORTED_NFT_NETWORKS } from '@subwallet/extension-koni-base/api/nft/config';
+import { Web3NftApi } from '@subwallet/extension-koni-base/api/nft/eth_nft';
+import { KaruraNftApi } from '@subwallet/extension-koni-base/api/nft/karura_nft';
+import { BaseNftApi } from '@subwallet/extension-koni-base/api/nft/nft';
+import { RmrkNftApi } from '@subwallet/extension-koni-base/api/nft/rmrk_nft';
 import StatemineNftApi from '@subwallet/extension-koni-base/api/nft/statemine_nft';
 import UniqueNftApi from '@subwallet/extension-koni-base/api/nft/unique_nft';
-import {state} from '@subwallet/extension-koni-base/background/handlers';
-import {categoryAddresses} from '@subwallet/extension-koni-base/utils/utils';
+import { state } from '@subwallet/extension-koni-base/background/handlers';
+import { categoryAddresses } from '@subwallet/extension-koni-base/utils/utils';
 import Web3 from 'web3';
 
 function createSubstrateNftApi (chain: string, apiProps: ApiProps | null, addresses: string[]): BaseNftApi | null {
@@ -49,6 +49,7 @@ function createSubstrateNftApi (chain: string, apiProps: ApiProps | null, addres
 function createWeb3NftApi (chain: string, web3: Web3 | null, addresses: string[]): BaseNftApi | null {
   // @ts-ignore
   const [substrateAddresses, evmAddresses] = categoryAddresses(addresses);
+
   return new Web3NftApi(web3, evmAddresses, chain);
 }
 

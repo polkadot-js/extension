@@ -7,6 +7,7 @@ import { CurrentNetworkInfo, NetWorkMetadataDef } from '@subwallet/extension-bas
 import { ALL_ACCOUNT_KEY } from '@subwallet/extension-koni-base/constants';
 import { ActionContext } from '@subwallet/extension-koni-ui/components';
 import Spinner from '@subwallet/extension-koni-ui/components/Spinner';
+import useGetNetworkJson from '@subwallet/extension-koni-ui/hooks/screen/home/useGetNetworkJson';
 import useGetNetworkMetadata from '@subwallet/extension-koni-ui/hooks/screen/home/useGetNetworkMetadata';
 import useToast from '@subwallet/extension-koni-ui/hooks/useToast';
 import { tieAccount } from '@subwallet/extension-koni-ui/messaging';
@@ -20,7 +21,6 @@ import { useSelector } from 'react-redux';
 import styled from 'styled-components';
 
 import logo from '../../../../assets/sub-wallet-logo.svg';
-import useGetNetworkJson from "@subwallet/extension-koni-ui/hooks/screen/home/useGetNetworkJson";
 
 interface Props {
   className?: string;
@@ -111,7 +111,7 @@ function NftItem ({ className, collectionId, collectionImage, data, onClickBack 
 
     updateTransferNftParams(data, collectionImage, collectionId);
     navigate('/account/send-nft');
-  }, [account.account, collectionId, collectionImage, currentNetwork.networkKey, data, navigate, networkMetadata, show]);
+  }, [account.account, collectionId, collectionImage, currentNetwork.networkKey, data, navigate, networkJson.isEthereum, networkMetadata, show]);
 
   const handleClickBack = useCallback(() => {
     onClickBack();

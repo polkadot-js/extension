@@ -1,5 +1,8 @@
-import {useSelector} from "react-redux";
-import {RootState} from "@subwallet/extension-koni-ui/stores";
+// Copyright 2019-2022 @polkadot/extension-ui authors & contributors
+// SPDX-License-Identifier: Apache-2.0
+
+import { RootState } from '@subwallet/extension-koni-ui/stores';
+import { useSelector } from 'react-redux';
 
 export interface ChainOptions {
   text: string;
@@ -15,7 +18,7 @@ export default function useGetEvmChains () {
       result.push({
         text: network.chain,
         value: key
-      })
+      });
     }
   }
 

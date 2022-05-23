@@ -6,6 +6,7 @@ import { isValidAddress } from '@subwallet/extension-koni-base/utils/utils';
 import logo from '@subwallet/extension-koni-ui/assets/sub-wallet-logo.svg';
 import { ActionContext, Spinner } from '@subwallet/extension-koni-ui/components';
 import InputAddress from '@subwallet/extension-koni-ui/components/InputAddress';
+import useGetNetworkJson from '@subwallet/extension-koni-ui/hooks/screen/home/useGetNetworkJson';
 import useToast from '@subwallet/extension-koni-ui/hooks/useToast';
 import Header from '@subwallet/extension-koni-ui/partials/Header';
 import paramsHandler from '@subwallet/extension-koni-ui/Popup/Home/Nfts/api/paramsHandler';
@@ -19,7 +20,6 @@ import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import React, { useCallback, useContext, useEffect, useState } from 'react';
 import { useSelector } from 'react-redux';
 import styled from 'styled-components';
-import useGetNetworkJson from "@subwallet/extension-koni-ui/hooks/screen/home/useGetNetworkJson";
 
 interface Props extends ThemeProps {
   className?: string;
@@ -104,14 +104,14 @@ function TransferNftContainer ({ className, collectionId, collectionImage, nftIt
   const isEthereumAddress = useCallback((): boolean => {
     // @ts-ignore
     return networkJson.isEthereum && networkJson.isEthereum;
-  }, [networkKey]);
+  }, [networkJson.isEthereum]);
 
   useEffect(() => {
     setAddressError(!isValidAddress(recipientAddress as string) && !isEthereumAddress());
   }, [isEthereumAddress, recipientAddress]);
 
   const handleSend = useCallback(async () => {
-    if (addressError) {
+    if (addressError || !currentAccount.account?.address) {
       return;
     }
 
@@ -130,7 +130,6 @@ function TransferNftContainer ({ className, collectionId, collectionImage, nftIt
     }
 
     setLoading(true);
-    // @ts-ignore
     const senderAddress = currentAccount.account.address;
     const params = paramsHandler(nftItem, networkKey, networkJson);
     const transferMeta = await transferHandler(networkKey, senderAddress, recipientAddress as string, params, networkJson);
@@ -156,7 +155,7 @@ function TransferNftContainer ({ className, collectionId, collectionImage, nftIt
     }
 
     setLoading(false);
-  }, [addressError, currentAccount.account?.address, currentNetwork.networkKey, networkKey, nftItem, recipientAddress, show]);
+  }, [addressError, currentAccount.account?.address, currentNetwork.networkKey, networkJson, networkKey, nftItem, recipientAddress, show]);
 
   const handleImageError = useCallback(() => {
     setLoading(false);

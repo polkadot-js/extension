@@ -1,7 +1,7 @@
 // Copyright 2019-2022 @subwallet/extension-koni authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import {NetworkJson, NftItem} from '@subwallet/extension-base/background/KoniTypes';
+import { NetworkJson, NftItem } from '@subwallet/extension-base/background/KoniTypes';
 import { SUPPORTED_TRANSFER_CHAIN_NAME } from '@subwallet/extension-koni-ui/Popup/Home/Nfts/types';
 
 const RMRK_PREFIX = 'RMRK';

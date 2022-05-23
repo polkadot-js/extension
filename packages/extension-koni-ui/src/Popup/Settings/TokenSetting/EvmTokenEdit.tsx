@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { ActionContext, Button, ButtonArea, InputWithLabel } from '@subwallet/extension-koni-ui/components';
+import useGetNetworkJson from '@subwallet/extension-koni-ui/hooks/screen/home/useGetNetworkJson';
 import useToast from '@subwallet/extension-koni-ui/hooks/useToast';
 import useTranslation from '@subwallet/extension-koni-ui/hooks/useTranslation';
 import { upsertEvmToken } from '@subwallet/extension-koni-ui/messaging';
@@ -11,7 +12,6 @@ import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import React, { useCallback, useContext, useEffect, useState } from 'react';
 import { useSelector } from 'react-redux';
 import styled from 'styled-components';
-import useGetNetworkJson from "@subwallet/extension-koni-ui/hooks/screen/home/useGetNetworkJson";
 
 interface Props extends ThemeProps {
   className?: string;
@@ -34,7 +34,7 @@ function EvmTokenEdit ({ className }: Props): React.ReactElement {
   const [isValidSymbol, setIsValidSymbol] = useState(true);
   const [isValidDecimals, setIsValidDecimals] = useState(true);
   const [isValidName, setIsValidName] = useState(true);
-  const networkJson = useGetNetworkJson(tokenInfo?.chain as string);
+  const networkJson = useGetNetworkJson(tokenInfo?.chain);
 
   useEffect(() => {
     if (!_tokenInfo.smartContract) {

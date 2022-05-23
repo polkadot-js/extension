@@ -136,7 +136,7 @@ export class Web3NftApi extends BaseNftApi {
                 ownItem = true;
               }
             } catch (e) {
-              console.error(`error parsing item for ${this.chain as string} nft`, e);
+              console.error(`error parsing item for ${this.chain} nft`, e);
             }
           }
         }));

@@ -87,10 +87,6 @@ export default class KoniTabs extends Tabs {
       return this.redirectIfPhishing(url);
     }
 
-    if (type !== 'pub(authorize.tab)') {
-      this.#koniState.ensureUrlAuthorizedV2(url);
-    }
-
     if (type !== 'pub(authorize.tabV2)') {
       this.#koniState.ensureUrlAuthorizedV2(url);
     }

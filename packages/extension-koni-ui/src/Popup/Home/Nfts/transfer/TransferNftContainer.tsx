@@ -209,7 +209,7 @@ function TransferNftContainer ({ className, collectionId, collectionImage, nftIt
           </div>
 
           <InputAddress
-            autoPrefill={false}
+            autoPrefill={true}
             className={'kn-field -field-2'}
             help={'Select a contact or paste the address you want to send nft to.'}
             isEtherium={isEthereumAddress()}

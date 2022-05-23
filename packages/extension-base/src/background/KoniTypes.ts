@@ -666,13 +666,13 @@ export interface EvmTokenJson {
 
 export interface DeleteEvmTokenParams {
   smartContract: string,
-  chain: 'astarEvm' | 'moonbeam' | 'moonriver' | 'moonbase' | 'shidenEvm',
+  chain: string,
   type: 'erc20' | 'erc721'
 }
 
 export interface ValidateEvmTokenRequest {
   smartContract: string,
-  chain: 'astarEvm' | 'moonbeam' | 'moonriver' | 'moonbase' | 'shidenEvm',
+  chain: string,
   type: 'erc20' | 'erc721'
 }
 

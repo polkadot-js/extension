@@ -3,12 +3,12 @@
 
 import Toggle from '@subwallet/extension-koni-ui/components/Toggle';
 import useTranslation from '@subwallet/extension-koni-ui/hooks/useTranslation';
-import InputBalance from '@subwallet/extension-koni-ui/Popup/Sending/old/component/InputBalance';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import React, { useEffect, useState } from 'react';
 import styled from 'styled-components';
 
 import { BN, BN_ZERO } from '@polkadot/util';
+import InputBalance from "@subwallet/extension-koni-ui/components/InputBalance";
 
 interface Props extends ThemeProps {
   className?: string;

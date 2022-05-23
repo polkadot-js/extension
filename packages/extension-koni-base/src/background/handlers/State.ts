@@ -436,18 +436,18 @@ export default class KoniState extends State {
   };
 
   public async authorizeUrlV2 (url: string, request: RequestAuthorizeTab): Promise<boolean> {
+    let authList = await this.getAuthList();
+
+    if (!authList) {
+      authList = {};
+    }
+
     const idStr = this.stripUrl(url);
     // Do not enqueue duplicate authorization requests.
     const isDuplicate = Object.values(this.#authRequestsV2)
       .some((request) => request.idStr === idStr);
 
     assert(!isDuplicate, `The source ${url} has a pending authorization request`);
-
-    let authList = await this.getAuthList();
-
-    if (!authList) {
-      authList = {};
-    }
 
     if (authList[idStr]) {
       // this url was seen in the past

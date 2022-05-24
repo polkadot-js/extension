@@ -1164,7 +1164,7 @@ export default class KoniState extends State {
     return true;
   }
 
-  public async removeNetworkMap (networkKey: string): Promise<boolean> {
+  public removeNetworkMap (networkKey: string): boolean {
     if (this.lockNetworkMap) {
       return false;
     }

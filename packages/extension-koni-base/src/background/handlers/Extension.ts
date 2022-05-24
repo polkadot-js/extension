@@ -1431,7 +1431,7 @@ export default class KoniExtension extends Extension {
     }
   }
 
-  private async removeNetworkMap (networkKey: string): Promise<boolean> {
+  private removeNetworkMap (networkKey: string): boolean {
     const currentNetworkMap = this.getNetworkMap();
 
     if (!(networkKey in currentNetworkMap)) {
@@ -1442,7 +1442,7 @@ export default class KoniExtension extends Extension {
       return false;
     }
 
-    return await state.removeNetworkMap(networkKey);
+    return state.removeNetworkMap(networkKey);
   }
 
   private async disableNetworkMap (networkKey: string): Promise<DisableNetworkResponse> {
@@ -1965,7 +1965,7 @@ export default class KoniExtension extends Extension {
       case 'pri(networkMap.disableOne)':
         return await this.disableNetworkMap(request as string);
       case 'pri(networkMap.removeOne)':
-        return await this.removeNetworkMap(request as string);
+        return this.removeNetworkMap(request as string);
       case 'pri(networkMap.enableOne)':
         return this.enableNetworkMap(request as string);
       case 'pri(apiMap.validate)':

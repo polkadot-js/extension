@@ -115,7 +115,6 @@ function ChainBalanceItem ({ accountInfo,
             className='chain-balance-item__logo'
             src={accountInfo.networkLogo}
           />
-
           <div className='chain-balance-item__meta-wrapper'>
             <div className='chain-balance-item__chain-name'>{accountInfo.networkDisplayName}</div>
 

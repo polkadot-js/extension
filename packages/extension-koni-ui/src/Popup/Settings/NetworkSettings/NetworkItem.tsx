@@ -73,7 +73,7 @@ function NetworkItem ({ className, item }: Props): React.ReactElement {
       .then((result) => handleShowDeleteConfirm(result))
       .catch(console.error);
     handleHideModal();
-  }, []);
+  }, [item]);
 
   const handleMouseEnterChain = useCallback(() => {
     setIsHover(true);

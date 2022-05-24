@@ -6,7 +6,7 @@ import { InputFilter, Link } from '@subwallet/extension-koni-ui/components';
 import useFetchNetworkMap from '@subwallet/extension-koni-ui/hooks/screen/setting/useFetchNetworkMap';
 import useToast from '@subwallet/extension-koni-ui/hooks/useToast';
 import useTranslation from '@subwallet/extension-koni-ui/hooks/useTranslation';
-import { disableAllNetwork, enableAllNetwork, resetDefaultNetwork } from '@subwallet/extension-koni-ui/messaging';
+import { disableAllNetwork, resetDefaultNetwork } from '@subwallet/extension-koni-ui/messaging';
 import Header from '@subwallet/extension-koni-ui/partials/Header';
 import NetworkItem from '@subwallet/extension-koni-ui/Popup/Settings/NetworkSettings/NetworkItem';
 import { store } from '@subwallet/extension-koni-ui/stores';
@@ -73,17 +73,17 @@ function Networks ({ className }: Props): React.ReactElement {
       .catch(console.error);
   }, [show]);
 
-  const handleEnableAll = useCallback(() => {
-    enableAllNetwork()
-      .then((resp) => {
-        if (resp) {
-          show('All networks are enabled');
-        } else {
-          show('Please wait a moment for the networks to update');
-        }
-      })
-      .catch(console.error);
-  }, [show]);
+  // const handleEnableAll = useCallback(() => {
+  //   enableAllNetwork()
+  //     .then((resp) => {
+  //       if (resp) {
+  //         show('All networks are enabled');
+  //       } else {
+  //         show('Please wait a moment for the networks to update');
+  //       }
+  //     })
+  //     .catch(console.error);
+  // }, [show]);
 
   const handleResetDefault = useCallback(() => {
     resetDefaultNetwork()
@@ -123,12 +123,12 @@ function Networks ({ className }: Props): React.ReactElement {
         >
           {t<string>('Disconnect all')}
         </div>
-        <div
-          className='networks__btn networks__connect-btn'
-          onClick={handleEnableAll}
-        >
-          {t<string>('Connect all')}
-        </div>
+        {/*<div*/}
+        {/*  className='networks__btn networks__connect-btn'*/}
+        {/*  onClick={handleEnableAll}*/}
+        {/*>*/}
+        {/*  {t<string>('Connect all')}*/}
+        {/*</div>*/}
         <div
           className='networks__btn networks__connect-btn'
           onClick={handleResetDefault}

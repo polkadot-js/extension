@@ -1,19 +1,19 @@
 // Copyright 2019-2022 @polkadot/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
+import { faTrashAlt } from '@fortawesome/free-solid-svg-icons';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { NetworkJson } from '@subwallet/extension-base/background/KoniTypes';
-import {ActionContext, Button, ButtonArea, HorizontalLabelToggle} from '@subwallet/extension-koni-ui/components';
+import { ActionContext, Button, ButtonArea, HorizontalLabelToggle } from '@subwallet/extension-koni-ui/components';
+import Modal from '@subwallet/extension-koni-ui/components/Modal';
 import useToast from '@subwallet/extension-koni-ui/hooks/useToast';
-import {disableNetworkMap, enableNetworkMap, removeNetworkMap} from '@subwallet/extension-koni-ui/messaging';
+import useTranslation from '@subwallet/extension-koni-ui/hooks/useTranslation';
+import { disableNetworkMap, enableNetworkMap, removeNetworkMap } from '@subwallet/extension-koni-ui/messaging';
 import { store } from '@subwallet/extension-koni-ui/stores';
 import { NetworkConfigParams } from '@subwallet/extension-koni-ui/stores/types';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
-import React, {useCallback, useContext, useState} from 'react';
+import React, { useCallback, useContext, useState } from 'react';
 import styled from 'styled-components';
-import { faTrashAlt } from "@fortawesome/free-solid-svg-icons";
-import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
-import Modal from "@subwallet/extension-koni-ui/components/Modal";
-import useTranslation from "@subwallet/extension-koni-ui/hooks/useTranslation";
 
 interface Props extends ThemeProps {
   className?: string;
@@ -110,9 +110,9 @@ function NetworkItem ({ className, item }: Props): React.ReactElement {
           <div className={'network-icon-container'}>
             <FontAwesomeIcon
               className='network-delete-icon'
-              onClick={handleShowModal}
-              // @ts-ignore
               icon={faTrashAlt}
+              // @ts-ignore
+              onClick={handleShowModal}
               size='sm'
             />
 

@@ -1619,7 +1619,7 @@ export default class KoniExtension extends Extension {
   }
 
   private async resetDefaultNetwork (): Promise<boolean> {
-    return await state.resetDefaultNetwork();;
+    return await state.resetDefaultNetwork();
   }
 
   private subscribeEvmTokenState (id: string, port: chrome.runtime.Port): EvmTokenJson {

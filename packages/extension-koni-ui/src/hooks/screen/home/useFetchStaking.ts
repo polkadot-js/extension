@@ -8,7 +8,7 @@ import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { useSelector } from 'react-redux';
 
 export default function useFetchStaking (networkKey: string): StakingType {
-  const { price: priceReducer, staking: stakingReducer, stakingReward: stakingRewardReducer, networkMap } = useSelector((state: RootState) => state);
+  const { networkMap, price: priceReducer, staking: stakingReducer, stakingReward: stakingRewardReducer } = useSelector((state: RootState) => state);
 
   const { priceMap } = priceReducer;
   const parsedPriceMap: Record<string, number> = {};

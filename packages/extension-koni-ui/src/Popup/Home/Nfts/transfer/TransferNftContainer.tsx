@@ -20,7 +20,8 @@ import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import React, { useCallback, useContext, useEffect, useState } from 'react';
 import { useSelector } from 'react-redux';
 import styled from 'styled-components';
-import {isEthereumAddress} from "@polkadot/util-crypto";
+
+import { isEthereumAddress } from '@polkadot/util-crypto';
 
 interface Props extends ThemeProps {
   className?: string;
@@ -39,7 +40,7 @@ const isValidRecipient = (address: string, isEthereum: boolean) => {
   } else {
     return isValidAddress(address);
   }
-}
+};
 
 function Wrapper ({ className = '' }: Props): React.ReactElement<Props> {
   const { transferNftParams } = useSelector((state: RootState) => state);

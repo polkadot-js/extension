@@ -1210,6 +1210,7 @@ export default class KoniState extends State {
 
     this.lockNetworkMap = true;
     const targetNetworkKeys: string[] = [];
+
     for (const [key, network] of Object.entries(this.networkMap)) {
       if (network.active) {
         targetNetworkKeys.push(key);
@@ -1265,6 +1266,7 @@ export default class KoniState extends State {
 
     this.lockNetworkMap = true;
     const targetNetworkKeys: string[] = [];
+
     for (const [key, network] of Object.entries(this.networkMap)) {
       if (!network.active) {
         targetNetworkKeys.push(key);
@@ -1296,6 +1298,7 @@ export default class KoniState extends State {
 
     this.lockNetworkMap = true;
     const targetNetworkKeys: string[] = [];
+
     for (const [key, network] of Object.entries(this.networkMap)) {
       if (!network.active) {
         if (key === 'polkadot' || key === 'kusama') {

@@ -1622,6 +1622,15 @@ export default class KoniExtension extends Extension {
     return await state.resetDefaultNetwork();
   }
 
+  private recoverDotSamaApi (networkKey: string): boolean {
+    try {
+      return state.refreshDotSamaApi(networkKey);
+    } catch (e) {
+      console.error('error recovering dotsama api', e);
+      return false;
+    }
+  }
+
   private subscribeEvmTokenState (id: string, port: chrome.runtime.Port): EvmTokenJson {
     const cb = createSubscription<'pri(evmTokenState.getSubscription)'>(id, port);
 
@@ -2000,6 +2009,8 @@ export default class KoniExtension extends Extension {
         return await this.substrateNftGetTransaction(request as SubstrateNftTransactionRequest);
       case 'pri(substrateNft.submitTransaction)':
         return this.substrateNftSubmitTransaction(id, port, request as SubstrateNftSubmitTransaction);
+      case 'pri(networkMap.recoverDotSama)':
+        return this.recoverDotSamaApi(request as string);
       default:
         return super.handle(id, type, request, port);
     }

@@ -83,7 +83,6 @@ function NetworkItem ({ className, item }: Props): React.ReactElement {
     setIsHover(false);
   }, []);
 
-  // @ts-ignore
   return (
     <div
       // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
@@ -113,7 +112,6 @@ function NetworkItem ({ className, item }: Props): React.ReactElement {
               className='network-delete-icon'
               // @ts-ignore
               icon={faTrashAlt}
-              // @ts-ignore
               onClick={handleShowModal}
               size='sm'
             />

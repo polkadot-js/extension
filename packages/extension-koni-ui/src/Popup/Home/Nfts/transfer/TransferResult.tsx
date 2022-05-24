@@ -8,6 +8,7 @@ import useTranslation from '@subwallet/extension-koni-ui/hooks/useTranslation';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import React from 'react';
 import styled from 'styled-components';
+import useSupportScanExplorer from "@subwallet/extension-koni-ui/hooks/screen/home/useSupportScanExplorer";
 
 interface Props extends ThemeProps {
   className?: string;
@@ -22,6 +23,7 @@ interface Props extends ThemeProps {
 function TransferResult ({ backToHome, className, extrinsicHash, handleResend, isTxSuccess, networkKey, txError }: Props): React.ReactElement<Props> {
   const { t } = useTranslation();
   const scanExplorerTxUrl = useScanExplorerTxUrl(networkKey, extrinsicHash);
+  const isSupportScanExplorer = useSupportScanExplorer(networkKey);
 
   return (
     <div className={className}>
@@ -46,7 +48,7 @@ function TransferResult ({ backToHome, className, extrinsicHash, handleResend, i
                 {t<string>('Back To Home')}
               </div>
               <a
-                className={'history-button'}
+                className={`history-button ${(!isSupportScanExplorer || !scanExplorerTxUrl) && '-disabled'}`}
                 href={scanExplorerTxUrl}
                 rel='noreferrer'
                 target={'_blank'}
@@ -156,5 +158,11 @@ export default React.memo(styled(TransferResult)(({ theme }: Props) => `
     cursor: pointer;
     color: #FFFFFF;
     font-weight: 500;
+  }
+
+  .-disabled {
+    cursor: not-allowed;
+    pointer-events: none;
+    opacity: 0.5;
   }
 `));

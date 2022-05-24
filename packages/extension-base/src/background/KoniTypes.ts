@@ -733,6 +733,7 @@ export interface SubstrateNftSubmitTransaction {
 }
 
 export interface KoniRequestSignatures {
+  'pri(networkMap.recoverDotSama)': [string, boolean];
   'pri(substrateNft.submitTransaction)': [SubstrateNftSubmitTransaction, NftTransactionResponse, NftTransactionResponse]
   'pri(substrateNft.getTransaction)': [SubstrateNftTransactionRequest, SubstrateNftTransaction];
   'pri(networkMap.disableAll)': [null, boolean];

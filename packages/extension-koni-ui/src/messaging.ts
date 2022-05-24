@@ -533,3 +533,7 @@ export async function substrateNftGetTransaction (request: SubstrateNftTransacti
 export async function substrateNftSubmitTransaction (request: SubstrateNftSubmitTransaction, callback: (data: NftTransactionResponse) => void): Promise<NftTransactionResponse> {
   return sendMessage('pri(substrateNft.submitTransaction)', request, callback);
 }
+
+export async function recoverDotSamaApi (request: string): Promise<boolean> {
+  return sendMessage('pri(networkMap.recoverDotSama)', request);
+}

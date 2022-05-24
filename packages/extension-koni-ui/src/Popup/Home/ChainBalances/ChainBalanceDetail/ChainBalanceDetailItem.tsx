@@ -17,6 +17,7 @@ import CopyToClipboard from 'react-copy-to-clipboard';
 import styled from 'styled-components';
 
 import { Loading } from '../../../../components';
+import NetworkTools from "@subwallet/extension-koni-ui/components/NetworkTools";
 
 interface Props extends ThemeProps {
   className?: string;
@@ -121,6 +122,10 @@ function ChainBalanceDetailItem ({ accountInfo,
                     {accountInfo.networkDisplayName}
                   </span>
                 </div>
+              )}
+
+              {isLoading && (
+                <NetworkTools networkKey={networkKey}/>
               )}
             </div>
           </div>

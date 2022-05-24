@@ -1356,6 +1356,17 @@ export default class KoniState extends State {
     return this.apiMap;
   }
 
+  public refreshDotSamaApi (key: string) {
+    const apiProps = this.apiMap.dotSama[key];
+    if (key in this.apiMap.dotSama) {
+      if (!apiProps.isApiConnected) {
+        apiProps.recoverConnect && apiProps.recoverConnect();
+      }
+    }
+
+    return true;
+  }
+
   public refreshWeb3Api (key: string) {
     this.apiMap.web3[key] = initWeb3Api(getCurrentProvider(this.networkMap[key]));
   }

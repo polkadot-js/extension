@@ -110,8 +110,8 @@ function NetworkItem ({ className, item }: Props): React.ReactElement {
           <div className={'network-icon-container'}>
             <FontAwesomeIcon
               className='network-delete-icon'
-              icon={faTrashAlt}
               // @ts-ignore
+              icon={faTrashAlt}
               onClick={handleShowModal}
               size='sm'
             />

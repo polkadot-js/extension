@@ -23,8 +23,9 @@ function getCurrentEndpoint (data: NetworkJson) {
     return null;
   }
 
-  if (data.currentProvider === 'custom') {
-    return data?.customProviders?.custom as string;
+  if (data.currentProvider.includes('custom')) {
+    // @ts-ignore
+    return data?.customProviders[data.currentProvider] as string;
   } else {
     return data.providers[data.currentProvider];
   }
@@ -354,6 +355,10 @@ function NetworkEdit ({ className }: Props): React.ReactElement {
       blockExplorer: val
     });
   }, [networkInfo, show]);
+
+  useEffect(() => {
+
+  }, []);
 
   const isDisableSave = useCallback((): boolean => {
     if (mode === 'create') {

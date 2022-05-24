@@ -1425,9 +1425,7 @@ export default class KoniExtension extends Extension {
 
   private async upsertNetworkMap (data: NetworkJson): Promise<boolean> {
     try {
-      await state.upsertNetworkMap(data);
-
-      return true;
+      return await state.upsertNetworkMap(data);
     } catch (e) {
       return false;
     }
@@ -1440,9 +1438,11 @@ export default class KoniExtension extends Extension {
       return false;
     }
 
-    await state.removeNetworkMap(networkKey);
+    if (currentNetworkMap[networkKey].active) {
+      return false;
+    }
 
-    return true;
+    return await state.removeNetworkMap(networkKey);
   }
 
   private async disableNetworkMap (networkKey: string): Promise<DisableNetworkResponse> {
@@ -1454,10 +1454,10 @@ export default class KoniExtension extends Extension {
       };
     }
 
-    await state.disableNetworkMap(networkKey);
+    const success = await state.disableNetworkMap(networkKey);
 
     return {
-      success: true
+      success
     };
   }
 
@@ -1468,9 +1468,7 @@ export default class KoniExtension extends Extension {
       return false;
     }
 
-    state.enableNetworkMap(networkKey);
-
-    return true;
+    return state.enableNetworkMap(networkKey);
   }
 
   private async validateNetwork ({ existedNetwork, isEthereum, provider }: ValidateNetworkRequest): Promise<ValidateNetworkResponse> {
@@ -1613,21 +1611,15 @@ export default class KoniExtension extends Extension {
   }
 
   private enableAllNetwork (): boolean {
-    state.enableAllNetworks();
-
-    return true;
+    return state.enableAllNetworks();
   }
 
   private async disableAllNetwork (): Promise<boolean> {
-    await state.disableAllNetworks();
-
-    return true;
+    return await state.disableAllNetworks();
   }
 
   private async resetDefaultNetwork (): Promise<boolean> {
-    await state.resetDefaultNetwork();
-
-    return true;
+    return await state.resetDefaultNetwork();;
   }
 
   private subscribeEvmTokenState (id: string, port: chrome.runtime.Port): EvmTokenJson {

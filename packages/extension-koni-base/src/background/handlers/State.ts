@@ -187,6 +187,7 @@ export default class KoniState extends State {
 
   private networkMap: Record<string, NetworkJson> = {}; // mapping to networkMapStore, for uses in background
   private networkMapSubject = new Subject<Record<string, NetworkJson>>();
+  private lockNetworkMap = false;
 
   private apiMap: ApiMap = { dotSama: {}, web3: {} };
 
@@ -1020,8 +1021,6 @@ export default class KoniState extends State {
       });
     }
 
-    console.log('upsert evm token')
-
     if (data.type === 'erc20') {
       this.upsertChainRegistry(data);
     }
@@ -1101,7 +1100,13 @@ export default class KoniState extends State {
     return this.networkMapStore.getSubject();
   }
 
-  public async upsertNetworkMap (data: NetworkJson): Promise<void> {
+  public async upsertNetworkMap (data: NetworkJson): Promise<boolean> {
+    if (this.lockNetworkMap) {
+      return false;
+    }
+
+    this.lockNetworkMap = true;
+
     if (data.key in this.networkMap) { // update provider for existed network
       if (data.customProviders) {
         this.networkMap[data.key].customProviders = data.customProviders;
@@ -1154,18 +1159,33 @@ export default class KoniState extends State {
     this.networkMapSubject.next(this.networkMap);
     this.networkMapStore.set('NetworkMap', this.networkMap);
     this.updateServiceInfo();
+    this.lockNetworkMap = false;
+
+    return true;
   }
 
-  public async removeNetworkMap (networkKey: string) {
-    await this.disableNetworkMap(networkKey);
+  public async removeNetworkMap (networkKey: string): Promise<boolean> {
+    if (this.lockNetworkMap) {
+      return false;
+    }
+
+    this.lockNetworkMap = true;
     delete this.networkMap[networkKey];
 
     this.networkMapSubject.next(this.networkMap);
     this.networkMapStore.set('NetworkMap', this.networkMap);
     this.updateServiceInfo();
+    this.lockNetworkMap = false;
+
+    return true;
   }
 
-  public async disableNetworkMap (networkKey: string) {
+  public async disableNetworkMap (networkKey: string): Promise<boolean> {
+    if (this.lockNetworkMap) {
+      return false;
+    }
+
+    this.lockNetworkMap = true;
     await this.apiMap.dotSama[networkKey].api.disconnect();
     delete this.apiMap.dotSama[networkKey];
 
@@ -1178,29 +1198,51 @@ export default class KoniState extends State {
     this.networkMapSubject.next(this.networkMap);
     this.networkMapStore.set('NetworkMap', this.networkMap);
     this.updateServiceInfo();
+    this.lockNetworkMap = false;
+
+    return true;
   }
 
-  public async disableAllNetworks () {
+  public async disableAllNetworks (): Promise<boolean> {
+    if (this.lockNetworkMap) {
+      return false;
+    }
+
+    this.lockNetworkMap = true;
+    const targetNetworkKeys: string[] = [];
     for (const [key, network] of Object.entries(this.networkMap)) {
       if (network.active) {
-        await this.apiMap.dotSama[key].api.disconnect();
-        delete this.apiMap.dotSama[key];
-
-        if (this.networkMap[key].isEthereum && this.networkMap[key].isEthereum) {
-          delete this.apiMap.web3[key];
-        }
-
+        targetNetworkKeys.push(key);
         this.networkMap[key].active = false;
-        this.networkMap[key].apiStatus = NETWORK_STATUS.DISCONNECTED;
       }
     }
 
     this.networkMapSubject.next(this.networkMap);
     this.networkMapStore.set('NetworkMap', this.networkMap);
+
+    for (const key of targetNetworkKeys) {
+      await this.apiMap.dotSama[key].api.disconnect();
+      delete this.apiMap.dotSama[key];
+
+      if (this.networkMap[key].isEthereum && this.networkMap[key].isEthereum) {
+        delete this.apiMap.web3[key];
+      }
+
+      this.networkMap[key].apiStatus = NETWORK_STATUS.DISCONNECTED;
+    }
+
     this.updateServiceInfo();
+    this.lockNetworkMap = false;
+
+    return true;
   }
 
   public enableNetworkMap (networkKey: string) {
+    if (this.lockNetworkMap) {
+      return false;
+    }
+
+    this.lockNetworkMap = true;
     this.apiMap.dotSama[networkKey] = initApi(networkKey, getCurrentProvider(this.networkMap[networkKey]), this.networkMap[networkKey].isEthereum);
 
     if (this.networkMap[networkKey].isEthereum && this.networkMap[networkKey].isEthereum) {
@@ -1211,27 +1253,49 @@ export default class KoniState extends State {
     this.networkMapSubject.next(this.networkMap);
     this.networkMapStore.set('NetworkMap', this.networkMap);
     this.updateServiceInfo();
+    this.lockNetworkMap = false;
+
+    return true;
   }
 
   public enableAllNetworks () {
+    if (this.lockNetworkMap) {
+      return false;
+    }
+
+    this.lockNetworkMap = true;
+    const targetNetworkKeys: string[] = [];
     for (const [key, network] of Object.entries(this.networkMap)) {
       if (!network.active) {
-        this.apiMap.dotSama[key] = initApi(key, getCurrentProvider(this.networkMap[key]), this.networkMap[key].isEthereum);
-
-        if (this.networkMap[key].isEthereum && this.networkMap[key].isEthereum) {
-          this.apiMap.web3[key] = initWeb3Api(getCurrentProvider(this.networkMap[key]));
-        }
-
+        targetNetworkKeys.push(key);
         this.networkMap[key].active = true;
       }
     }
 
     this.networkMapSubject.next(this.networkMap);
     this.networkMapStore.set('NetworkMap', this.networkMap);
+
+    for (const key of targetNetworkKeys) {
+      this.apiMap.dotSama[key] = initApi(key, getCurrentProvider(this.networkMap[key]), this.networkMap[key].isEthereum);
+
+      if (this.networkMap[key].isEthereum && this.networkMap[key].isEthereum) {
+        this.apiMap.web3[key] = initWeb3Api(getCurrentProvider(this.networkMap[key]));
+      }
+    }
+
     this.updateServiceInfo();
+    this.lockNetworkMap = false;
+
+    return true;
   }
 
   public async resetDefaultNetwork () {
+    if (this.lockNetworkMap) {
+      return false;
+    }
+
+    this.lockNetworkMap = true;
+    const targetNetworkKeys: string[] = [];
     for (const [key, network] of Object.entries(this.networkMap)) {
       if (!network.active) {
         if (key === 'polkadot' || key === 'kusama') {
@@ -1240,12 +1304,7 @@ export default class KoniState extends State {
         }
       } else {
         if (key !== 'polkadot' && key !== 'kusama') {
-          await this.apiMap.dotSama[key].api.disconnect();
-          delete this.apiMap.dotSama[key];
-
-          if (this.networkMap[key].isEthereum && this.networkMap[key].isEthereum) {
-            delete this.apiMap.web3[key];
-          }
+          targetNetworkKeys.push(key);
 
           this.networkMap[key].active = false;
           this.networkMap[key].apiStatus = NETWORK_STATUS.DISCONNECTED;
@@ -1255,7 +1314,20 @@ export default class KoniState extends State {
 
     this.networkMapSubject.next(this.networkMap);
     this.networkMapStore.set('NetworkMap', this.networkMap);
+
+    for (const key of targetNetworkKeys) {
+      await this.apiMap.dotSama[key].api.disconnect();
+      delete this.apiMap.dotSama[key];
+
+      if (this.networkMap[key].isEthereum && this.networkMap[key].isEthereum) {
+        delete this.apiMap.web3[key];
+      }
+    }
+
     this.updateServiceInfo();
+    this.lockNetworkMap = false;
+
+    return true;
   }
 
   public updateNetworkStatus (networkKey: string, status: NETWORK_STATUS) {
@@ -1290,6 +1362,7 @@ export default class KoniState extends State {
   }
 
   public updateServiceInfo () {
+    console.log('<---Update serviceInfo--->');
     this.currentAccountStore.get('CurrentAccountInfo', (value) => {
       this.serviceInfoSubject.next({
         networkMap: this.networkMap,

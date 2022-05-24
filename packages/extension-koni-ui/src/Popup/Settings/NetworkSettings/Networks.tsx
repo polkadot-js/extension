@@ -67,7 +67,7 @@ function Networks ({ className }: Props): React.ReactElement {
         if (resp) {
           show('All networks are disabled');
         } else {
-          show('An error has occurred. Please try again later');
+          show('Please wait a moment for the networks to update');
         }
       })
       .catch(console.error);
@@ -79,7 +79,7 @@ function Networks ({ className }: Props): React.ReactElement {
         if (resp) {
           show('All networks are enabled');
         } else {
-          show('An error has occurred. Please try again later');
+          show('Please wait a moment for the networks to update');
         }
       })
       .catch(console.error);
@@ -91,7 +91,7 @@ function Networks ({ className }: Props): React.ReactElement {
         if (resp) {
           show('Networks have been reset to default setting');
         } else {
-          show('An error has occurred. Please try again later');
+          show('Please wait a moment for the networks to update');
         }
       })
       .catch(console.error);
@@ -121,13 +121,13 @@ function Networks ({ className }: Props): React.ReactElement {
           className='networks__btn networks__disconnect-btn'
           onClick={handleDisableAll}
         >
-          {t<string>('Disconnect All')}
+          {t<string>('Disconnect all')}
         </div>
         <div
           className='networks__btn networks__connect-btn'
           onClick={handleEnableAll}
         >
-          {t<string>('Connect All')}
+          {t<string>('Connect all')}
         </div>
         <div
           className='networks__btn networks__connect-btn'
@@ -232,24 +232,6 @@ export default styled(Networks)(({ theme }: Props) => `
     align-items: center;
     padding-top: 12px;
     padding-bottom: 12px;
-  }
-
-  .network-item__text {
-    font-size: 15px;
-    line-height: 26px;
-    font-weight: 500;
-    color: ${theme.textColor2};
-  }
-
-  .network-item__toggle {
-    position: absolute;
-    border-style: solid;
-    border-width: 0 2px 2px 0;
-    display: inline-block;
-    padding: 3.5px;
-    transform: rotate(-45deg);
-    right: 18px;
-    color: ${theme.textColor2};
   }
 
   .network-item__separator {

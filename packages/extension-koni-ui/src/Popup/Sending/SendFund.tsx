@@ -131,7 +131,7 @@ function SendFund ({ chainRegistryMap, className, defaultValue, networkMap }: Co
     if (balanceFormat[0] === undefined && balanceFormat[1] === undefined) { // go back if token is deleted
       navigate('/');
     }
-  }, [balanceFormat]);
+  }, [balanceFormat, navigate]);
 
   useEffect(() => {
     let isSync = true;

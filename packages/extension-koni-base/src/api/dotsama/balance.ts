@@ -332,12 +332,12 @@ async function subscribeWithAccountMulti (addresses: string[], networkKey: strin
     unsub2 = await subscribeAssetsBalance(addresses, networkKey, networkAPI.api, balanceItem, (balanceItem) => {
       callback(networkKey, balanceItem);
     });
-  } else if (moonbeamBaseChains.indexOf(networkKey) > -1) {
-    unsub2 = subscribeERC20Interval(addresses, networkKey, networkAPI.api, balanceItem, web3ApiMap, callback);
   } else if (['genshiro_testnet', 'genshiro', 'equilibrium_parachain'].includes(networkKey)) {
     unsub2 = await subscribeGenshiroTokenBalance(addresses, networkKey, networkAPI.api, balanceItem, (balanceItem) => {
       callback(networkKey, balanceItem);
     }, true);
+  } else if (moonbeamBaseChains.includes(networkKey) || networkAPI.isEthereum) {
+    unsub2 = subscribeERC20Interval(addresses, networkKey, networkAPI.api, balanceItem, web3ApiMap, callback);
   }
 
   return () => {

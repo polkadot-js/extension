@@ -49,7 +49,7 @@ function NetworkItem ({ className, item }: Props): React.ReactElement {
     } else {
       show('Cannot remove an active network');
     }
-  }, [item, show]);
+  }, [show]);
 
   const toggleActive = useCallback((val: boolean) => {
     if (!val) {
@@ -66,14 +66,14 @@ function NetworkItem ({ className, item }: Props): React.ReactElement {
   const handleNetworkEdit = useCallback(() => {
     store.dispatch({ type: 'networkConfigParams/update', payload: { data: item, mode: 'edit' } as NetworkConfigParams });
     navigate('/account/config-network');
-  }, [item]);
+  }, [item, navigate]);
 
   const handleDeleteNetwork = useCallback(() => {
     removeNetworkMap(item.key)
       .then((result) => handleShowDeleteConfirm(result))
       .catch(console.error);
     handleHideModal();
-  }, [item]);
+  }, [handleHideModal, handleShowDeleteConfirm, item.key]);
 
   const handleMouseEnterChain = useCallback(() => {
     setIsHover(true);
@@ -83,6 +83,7 @@ function NetworkItem ({ className, item }: Props): React.ReactElement {
     setIsHover(false);
   }, []);
 
+  // @ts-ignore
   return (
     <div
       // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
@@ -110,6 +111,7 @@ function NetworkItem ({ className, item }: Props): React.ReactElement {
           <div className={'network-icon-container'}>
             <FontAwesomeIcon
               className='network-delete-icon'
+              // @ts-ignore
               icon={faTrashAlt}
               // @ts-ignore
               onClick={handleShowModal}

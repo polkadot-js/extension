@@ -123,12 +123,12 @@ function Networks ({ className }: Props): React.ReactElement {
         >
           {t<string>('Disconnect all')}
         </div>
-        {/*<div*/}
-        {/*  className='networks__btn networks__connect-btn'*/}
-        {/*  onClick={handleEnableAll}*/}
-        {/*>*/}
-        {/*  {t<string>('Connect all')}*/}
-        {/*</div>*/}
+        {/* <div */}
+        {/*  className='networks__btn networks__connect-btn' */}
+        {/*  onClick={handleEnableAll} */}
+        {/* > */}
+        {/*  {t<string>('Connect all')} */}
+        {/* </div> */}
         <div
           className='networks__btn networks__connect-btn'
           onClick={handleResetDefault}

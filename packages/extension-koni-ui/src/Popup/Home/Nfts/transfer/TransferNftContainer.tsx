@@ -112,17 +112,16 @@ function TransferNftContainer ({ className, collectionId, collectionImage, nftIt
   }, [navigate]);
 
   const isEthereumAddress = useCallback((): boolean => {
-    // @ts-ignore
-    return networkJson.isEthereum && networkJson.isEthereum;
+    return !!networkJson.isEthereum;
   }, [networkJson.isEthereum]);
 
   useEffect(() => {
-    if (networkJson.isEthereum && networkJson.isEthereum) {
+    if (networkJson.isEthereum) {
       setAddressError(!isValidRecipient(recipientAddress as string, true));
     } else {
       setAddressError(!isValidRecipient(recipientAddress as string, false));
     }
-  }, [isEthereumAddress, recipientAddress]);
+  }, [isEthereumAddress, networkJson.isEthereum, recipientAddress]);
 
   const handleSend = useCallback(async () => {
     if (addressError || !currentAccount.account?.address) {

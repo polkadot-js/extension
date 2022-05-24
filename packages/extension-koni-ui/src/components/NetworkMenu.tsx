@@ -12,8 +12,9 @@ import useGenesisHashOptions, { NetworkSelectOption } from '@subwallet/extension
 import useTranslation from '@subwallet/extension-koni-ui/hooks/useTranslation';
 import { triggerAccountsSubscription } from '@subwallet/extension-koni-ui/messaging';
 import { getLogoByGenesisHash } from '@subwallet/extension-koni-ui/util/logoByGenesisHashMap';
-import React, { useCallback, useEffect, useState } from 'react';
+import React, {useCallback, useContext, useEffect, useState} from 'react';
 import styled from 'styled-components';
+import {ActionContext} from "@subwallet/extension-koni-ui/components/contexts";
 
 interface Props extends ThemeProps {
   className?: string;
@@ -32,6 +33,7 @@ function NetworkMenu ({ className, currentNetwork, genesisOptions, isNotHaveAcco
   const [filteredGenesisOptions, setFilteredGenesisOption] = useState<NetworkSelectOption[]>(genesisOptions);
   const [filteredNetwork, setFilteredNetwork] = useState('');
   const [selectedGroup, setSelectedGroup] = useState('');
+  const navigate = useContext(ActionContext);
   const filterCategories: {text: string, type: NetWorkGroup | string}[] = [
     {
       text: 'All',
@@ -118,6 +120,10 @@ function NetworkMenu ({ className, currentNetwork, genesisOptions, isNotHaveAcco
     };
   }, [selectNetwork]);
 
+  const handleClickCustomNetworks = useCallback(() => {
+    navigate('/account/config-network');
+  }, [navigate]);
+
   return (
     <Menu
       className={className}
@@ -188,6 +194,14 @@ function NetworkMenu ({ className, currentNetwork, genesisOptions, isNotHaveAcco
             : <div className='kn-no-result'>No results</div>
         }
       </div>
+      <div className={'custom-network-container'}>
+        <div
+          className={'custom-network-btn'}
+          onClick={handleClickCustomNetworks}
+        >
+          Custom Networks
+        </div>
+      </div>
     </Menu>
   );
 }
@@ -197,6 +211,27 @@ export default React.memo(styled(NetworkMenu)(({ theme }: Props) => `
   right: 15px;
   user-select: none;
   border-radius: 8px;
+
+  .custom-network-btn {
+    color: ${theme.buttonTextColor2};
+    background-color: ${theme.backgroundAccountAddress};
+    padding: 10px;
+    width: 80%;
+    font-weight: 500;
+    font-size: 15px;
+    line-height: 26px;
+    text-align: center;
+    border-radius: 8px;
+    cursor: pointer;
+  }
+
+  .custom-network-container {
+    margin-top: 15px;
+    margin-bottom: 15px;
+    width: 100%;
+    display: flex;
+    justify-content: center;
+  }
 
   .confirm-button {
     cursor: pointer;
@@ -283,7 +318,7 @@ export default React.memo(styled(NetworkMenu)(({ theme }: Props) => `
   }
 
   .network-item-list {
-    max-height: 275px;
+    max-height: 200px;
     overflow-y: auto;
     padding: 10px 10px 10px;
   }

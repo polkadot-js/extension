@@ -199,7 +199,6 @@ export default styled(NetworkItem)(({ theme }: Props) => `
   }
 
   .network-edit-button:nth-child(2) {
-    margin-right: 8px;
     background-color: ${theme.buttonBackgroundDanger};
     font-size: 15px;
 

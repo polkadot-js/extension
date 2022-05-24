@@ -200,6 +200,15 @@ export default styled(EvmTokenSetting)(({ theme }: Props) => `
     }
   }
 
+  .network-edit-button:nth-child(2) {
+    background-color: ${theme.buttonBackgroundDanger};
+    font-size: 15px;
+
+    span {
+      color: ${theme.buttonTextColor};
+    }
+  }
+
   .delete-title {
     font-size: 20px;
     font-weight: 500;

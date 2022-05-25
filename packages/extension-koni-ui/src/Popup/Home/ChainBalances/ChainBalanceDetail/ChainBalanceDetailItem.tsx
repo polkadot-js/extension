@@ -4,6 +4,7 @@
 import cloneIcon from '@subwallet/extension-koni-ui/assets/clone.svg';
 import receivedIcon from '@subwallet/extension-koni-ui/assets/receive-icon.svg';
 import { BalanceVal } from '@subwallet/extension-koni-ui/components/balance';
+import NetworkTools from '@subwallet/extension-koni-ui/components/NetworkTools';
 import useToast from '@subwallet/extension-koni-ui/hooks/useToast';
 import useTranslation from '@subwallet/extension-koni-ui/hooks/useTranslation';
 import ChainBalanceItemRow from '@subwallet/extension-koni-ui/Popup/Home/ChainBalances/ChainBalanceItemRow';
@@ -17,7 +18,6 @@ import CopyToClipboard from 'react-copy-to-clipboard';
 import styled from 'styled-components';
 
 import { Loading } from '../../../../components';
-import NetworkTools from "@subwallet/extension-koni-ui/components/NetworkTools";
 
 interface Props extends ThemeProps {
   className?: string;
@@ -125,7 +125,7 @@ function ChainBalanceDetailItem ({ accountInfo,
               )}
 
               {isLoading && (
-                <NetworkTools networkKey={networkKey}/>
+                <NetworkTools networkKey={networkKey} />
               )}
             </div>
           </div>

@@ -1627,6 +1627,7 @@ export default class KoniExtension extends Extension {
       return state.refreshDotSamaApi(networkKey);
     } catch (e) {
       console.error('error recovering dotsama api', e);
+
       return false;
     }
   }

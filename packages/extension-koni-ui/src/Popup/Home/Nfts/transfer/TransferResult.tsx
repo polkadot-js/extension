@@ -4,11 +4,11 @@
 import failStatus from '@subwallet/extension-koni-ui/assets/fail-status.svg';
 import successStatus from '@subwallet/extension-koni-ui/assets/success-status.svg';
 import useScanExplorerTxUrl from '@subwallet/extension-koni-ui/hooks/screen/home/useScanExplorerTxUrl';
+import useSupportScanExplorer from '@subwallet/extension-koni-ui/hooks/screen/home/useSupportScanExplorer';
 import useTranslation from '@subwallet/extension-koni-ui/hooks/useTranslation';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import React from 'react';
 import styled from 'styled-components';
-import useSupportScanExplorer from "@subwallet/extension-koni-ui/hooks/screen/home/useSupportScanExplorer";
 
 interface Props extends ThemeProps {
   className?: string;
@@ -48,7 +48,7 @@ function TransferResult ({ backToHome, className, extrinsicHash, handleResend, i
                 {t<string>('Back To Home')}
               </div>
               <a
-                className={`history-button ${(!isSupportScanExplorer || !scanExplorerTxUrl) && '-disabled'}`}
+                className={`history-button ${(!isSupportScanExplorer || !scanExplorerTxUrl) ? '-disabled' : ''}`}
                 href={scanExplorerTxUrl}
                 rel='noreferrer'
                 target={'_blank'}

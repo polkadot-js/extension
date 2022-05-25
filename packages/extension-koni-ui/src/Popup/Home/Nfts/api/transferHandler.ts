@@ -54,21 +54,21 @@ export default async function transferHandler (networkKey: string, senderAddress
       case SUPPORTED_TRANSFER_CHAIN_NAME.acala:
         return await substrateTransferHandler(SUPPORTED_TRANSFER_CHAIN_NAME.acala, senderAddress, recipientAddress, params);
       case SUPPORTED_TRANSFER_CHAIN_NAME.karura:
-        return await substrateTransferHandler(SUPPORTED_TRANSFER_CHAIN_NAME.acala, senderAddress, recipientAddress, params);
+        return await substrateTransferHandler(SUPPORTED_TRANSFER_CHAIN_NAME.karura, senderAddress, recipientAddress, params);
       case SUPPORTED_TRANSFER_CHAIN_NAME.kusama:
-        return await substrateTransferHandler(SUPPORTED_TRANSFER_CHAIN_NAME.acala, senderAddress, recipientAddress, params);
+        return await substrateTransferHandler(SUPPORTED_TRANSFER_CHAIN_NAME.kusama, senderAddress, recipientAddress, params);
       case SUPPORTED_TRANSFER_CHAIN_NAME.uniqueNft:
-        return await substrateTransferHandler(SUPPORTED_TRANSFER_CHAIN_NAME.acala, senderAddress, recipientAddress, params);
+        return await substrateTransferHandler(SUPPORTED_TRANSFER_CHAIN_NAME.uniqueNft, senderAddress, recipientAddress, params);
       case SUPPORTED_TRANSFER_CHAIN_NAME.quartz:
-        return await substrateTransferHandler(SUPPORTED_TRANSFER_CHAIN_NAME.acala, senderAddress, recipientAddress, params);
+        return await substrateTransferHandler(SUPPORTED_TRANSFER_CHAIN_NAME.quartz, senderAddress, recipientAddress, params);
       case SUPPORTED_TRANSFER_CHAIN_NAME.opal:
-        return await substrateTransferHandler(SUPPORTED_TRANSFER_CHAIN_NAME.acala, senderAddress, recipientAddress, params);
+        return await substrateTransferHandler(SUPPORTED_TRANSFER_CHAIN_NAME.opal, senderAddress, recipientAddress, params);
       case SUPPORTED_TRANSFER_CHAIN_NAME.statemine:
-        return await substrateTransferHandler(SUPPORTED_TRANSFER_CHAIN_NAME.acala, senderAddress, recipientAddress, params);
+        return await substrateTransferHandler(SUPPORTED_TRANSFER_CHAIN_NAME.statemine, senderAddress, recipientAddress, params);
       case SUPPORTED_TRANSFER_CHAIN_NAME.statemint:
-        return await substrateTransferHandler(SUPPORTED_TRANSFER_CHAIN_NAME.acala, senderAddress, recipientAddress, params);
+        return await substrateTransferHandler(SUPPORTED_TRANSFER_CHAIN_NAME.statemint, senderAddress, recipientAddress, params);
       case SUPPORTED_TRANSFER_CHAIN_NAME.bitcountry:
-        return await substrateTransferHandler(SUPPORTED_TRANSFER_CHAIN_NAME.acala, senderAddress, recipientAddress, params);
+        return await substrateTransferHandler(SUPPORTED_TRANSFER_CHAIN_NAME.bitcountry, senderAddress, recipientAddress, params);
     }
   }
 

@@ -135,6 +135,7 @@ function AuthTransfer ({ chain, className, collectionId, nftItem, recipientAddre
 
       if (data.balanceError && data.balanceError) {
         setBalanceError(true);
+        show('Your balance is too low to cover fees');
       }
 
       if (data.status) {
@@ -163,6 +164,12 @@ function AuthTransfer ({ chain, className, collectionId, nftItem, recipientAddre
       return;
     }
 
+    if (balanceError) {
+      show('Your balance is too low to cover fees');
+
+      return;
+    }
+
     if (chain !== currentNetwork.networkKey) {
       show('Incorrect network');
 
@@ -179,7 +186,7 @@ function AuthTransfer ({ chain, className, collectionId, nftItem, recipientAddre
         await onSendEvm();
       }
     }, 1);
-  }, [chain, currentNetwork.networkKey, loading, onSendEvm, onSendSubstrate, substrateParams, show, web3Tx]);
+  }, [loading, balanceError, chain, currentNetwork.networkKey, show, substrateParams, web3Tx, onSendSubstrate, onSendEvm]);
 
   const hideConfirm = useCallback(() => {
     if (!loading) {
@@ -231,21 +238,11 @@ function AuthTransfer ({ chain, className, collectionId, nftItem, recipientAddre
               />
             }
 
-            {
-              balanceError &&
-              <div
-                className={'password-error'}
-                style={{ marginTop: balanceError ? '40px' : '0' }}
-              >
-                Your balance is too low to cover fees.
-              </div>
-            }
-
             <div
               className={'submit-btn'}
               // eslint-disable-next-line @typescript-eslint/no-misused-promises
               onClick={handleSignAndSubmit}
-              style={{ marginTop: !balanceError ? '40px' : '0', background: loading ? 'rgba(0, 75, 255, 0.25)' : '#004BFF', cursor: loading ? 'default' : 'pointer' }}
+              style={{ marginTop: '40px', background: loading ? 'rgba(0, 75, 255, 0.25)' : '#004BFF', cursor: loading ? 'default' : 'pointer' }}
             >
               {
                 !loading

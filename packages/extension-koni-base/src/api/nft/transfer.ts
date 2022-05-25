@@ -2,37 +2,49 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { ApiProps, SubstrateNftTransaction } from '@subwallet/extension-base/background/KoniTypes';
+import { getFreeBalance } from '@subwallet/extension-koni-base/api/dotsama/balance';
 import { SUPPORTED_TRANSFER_SUBSTRATE_CHAIN_NAME } from '@subwallet/extension-koni-base/api/nft/config';
 import { reformatAddress } from '@subwallet/extension-koni-base/utils/utils';
+import Web3 from 'web3';
 
 import { keyring } from '@polkadot/ui-keyring';
+import { BN } from '@polkadot/util';
 
-export async function acalaTransferHandler (apiProp: ApiProps, senderAddress: string, recipientAddress: string, params: Record<string, any>) {
+export async function acalaTransferHandler (networkKey: string, dotSamaApiMap: Record<string, ApiProps>, web3ApiMap: Record<string, Web3>, senderAddress: string, recipientAddress: string, params: Record<string, any>) {
   try {
+    const apiProp = dotSamaApiMap[networkKey];
     const itemId = params.itemId as number;
     const collectionId = params.collectionId as number;
+    const [info, balance] = await Promise.all([
+      apiProp.api.tx.nft.transfer(recipientAddress, [collectionId, itemId]).paymentInfo(senderAddress),
+      getFreeBalance(networkKey, senderAddress, dotSamaApiMap, web3ApiMap)
+    ]);
 
-    const info = await apiProp.api.tx.nft.transfer(recipientAddress, [collectionId, itemId]).paymentInfo(senderAddress);
+    const binaryBalance = new BN(balance);
+    const balanceError = info.partialFee.gt(binaryBalance);
 
     return {
       error: false,
-      estimatedFee: info.partialFee.toHuman()
+      estimatedFee: info.partialFee.toHuman(),
+      balanceError
     } as SubstrateNftTransaction;
   } catch (e) {
     console.error('error handling acala transfer nft', e);
 
     return {
-      error: true
+      error: true,
+      balanceError: false
     };
   }
 }
 
-export async function rmrkTransferHandler (apiProp: ApiProps, senderAddress: string, recipientAddress: string, params: Record<string, any>) {
+export async function rmrkTransferHandler (networkKey: string, dotSamaApiMap: Record<string, ApiProps>, web3ApiMap: Record<string, Web3>, senderAddress: string, recipientAddress: string, params: Record<string, any>) {
   try {
+    const apiProp = dotSamaApiMap[networkKey];
     const remark = params.remark as string;
 
     if (!remark) {
-      return { error: true };
+      return { error: true, balanceError: false };
     }
 
     const parsedRemark = remark.concat(recipientAddress.replace(
@@ -40,77 +52,112 @@ export async function rmrkTransferHandler (apiProp: ApiProps, senderAddress: str
       ''
     ));
 
-    const info = await apiProp.api.tx.system.remark(parsedRemark).paymentInfo(senderAddress);
+    const [info, balance] = await Promise.all([
+      await apiProp.api.tx.system.remark(parsedRemark).paymentInfo(senderAddress),
+      getFreeBalance(networkKey, senderAddress, dotSamaApiMap, web3ApiMap)
+    ]);
+
+    const binaryBalance = new BN(balance);
+    const balanceError = info.partialFee.gt(binaryBalance);
 
     return {
       error: false,
-      estimatedFee: info.partialFee.toHuman()
+      estimatedFee: info.partialFee.toHuman(),
+      balanceError
     } as SubstrateNftTransaction;
   } catch (e) {
     console.error('error handling rmrk transfer nft', e);
 
     return {
-      error: true
+      error: true,
+      balanceError: false
     };
   }
 }
 
-export async function uniqueTransferHandler (apiProp: ApiProps, senderAddress: string, recipientAddress: string, params: Record<string, any>) {
+export async function uniqueTransferHandler (networkKey: string, dotSamaApiMap: Record<string, ApiProps>, web3ApiMap: Record<string, Web3>, senderAddress: string, recipientAddress: string, params: Record<string, any>) {
   try {
+    const apiProp = dotSamaApiMap[networkKey];
     const itemId = params.itemId as number;
     const collectionId = params.collectionId as number;
 
-    const info = await apiProp.api.tx.nft.transfer({ Substrate: recipientAddress }, collectionId, itemId, 1).paymentInfo(senderAddress); // 1 is amount
+    const [info, balance] = await Promise.all([
+      apiProp.api.tx.nft.transfer({ Substrate: recipientAddress }, collectionId, itemId, 1).paymentInfo(senderAddress), // 1 is amount
+      getFreeBalance(networkKey, senderAddress, dotSamaApiMap, web3ApiMap)
+    ]);
+
+    const binaryBalance = new BN(balance);
+    const balanceError = info.partialFee.gt(binaryBalance);
 
     return {
       error: false,
-      estimatedFee: info.partialFee.toHuman()
+      estimatedFee: info.partialFee.toHuman(),
+      balanceError
     } as SubstrateNftTransaction;
   } catch (e) {
     console.error('error handling unique transfer nft', e);
 
     return {
-      error: true
+      error: true,
+      balanceError: false
     };
   }
 }
 
-export async function quartzTransferHandler (apiProp: ApiProps, senderAddress: string, recipientAddress: string, params: Record<string, any>) {
+export async function quartzTransferHandler (networkKey: string, dotSamaApiMap: Record<string, ApiProps>, web3ApiMap: Record<string, Web3>, senderAddress: string, recipientAddress: string, params: Record<string, any>) {
   try {
+    const apiProp = dotSamaApiMap[networkKey];
     const itemId = params.itemId as number;
     const collectionId = params.collectionId as number;
 
-    const info = await apiProp.api.tx.unique.transfer({ Substrate: recipientAddress }, collectionId, itemId, 1).paymentInfo(senderAddress);
+    const [info, balance] = await Promise.all([
+      apiProp.api.tx.unique.transfer({ Substrate: recipientAddress }, collectionId, itemId, 1).paymentInfo(senderAddress),
+      getFreeBalance(networkKey, senderAddress, dotSamaApiMap, web3ApiMap)
+    ]);
+
+    const binaryBalance = new BN(balance);
+    const balanceError = info.partialFee.gt(binaryBalance);
 
     return {
       error: false,
-      estimatedFee: info.partialFee.toHuman()
+      estimatedFee: info.partialFee.toHuman(),
+      balanceError
     } as SubstrateNftTransaction;
   } catch (e) {
     console.error('error handling quartz transfer nft', e);
 
     return {
-      error: true
+      error: true,
+      balanceError: false
     };
   }
 }
 
-export async function statemineTransferHandler (apiProp: ApiProps, senderAddress: string, recipientAddress: string, params: Record<string, any>) {
+export async function statemineTransferHandler (networkKey: string, dotSamaApiMap: Record<string, ApiProps>, web3ApiMap: Record<string, Web3>, senderAddress: string, recipientAddress: string, params: Record<string, any>) {
   try {
+    const apiProp = dotSamaApiMap[networkKey];
     const itemId = params.itemId as number;
     const collectionId = params.collectionId as number;
 
-    const info = await apiProp.api.tx.uniques.transfer(collectionId, itemId, recipientAddress).paymentInfo(senderAddress);
+    const [info, balance] = await Promise.all([
+      apiProp.api.tx.uniques.transfer(collectionId, itemId, recipientAddress).paymentInfo(senderAddress),
+      getFreeBalance(networkKey, senderAddress, dotSamaApiMap, web3ApiMap)
+    ]);
+
+    const binaryBalance = new BN(balance);
+    const balanceError = info.partialFee.gt(binaryBalance);
 
     return {
       error: false,
-      estimatedFee: info.partialFee.toHuman()
+      estimatedFee: info.partialFee.toHuman(),
+      balanceError
     } as SubstrateNftTransaction;
   } catch (e) {
     console.error('error handling statemine transfer nft', e);
 
     return {
-      error: true
+      error: true,
+      balanceError: false
     };
   }
 }

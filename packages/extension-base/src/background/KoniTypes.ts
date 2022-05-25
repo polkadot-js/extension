@@ -723,6 +723,7 @@ export interface SubstrateNftTransactionRequest {
 export interface SubstrateNftTransaction {
   error: boolean;
   estimatedFee?: string;
+  balanceError: boolean;
 }
 
 export interface SubstrateNftSubmitTransaction {

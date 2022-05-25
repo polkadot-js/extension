@@ -1,5 +1,23 @@
 # CHANGELOG
 
+## 0.4.2 (Koni)
+Build date: May 20, 2022.
+
+Update:
+- Add Moonbeam and Moonriver staking data (#104)
+- Integrate Genshiro & Equilibrium (#174)
+- Integrate new cross-chain tokens on Karura (RMRK, ARIS, QTZ, ...) (#184)
+- Add more Astar EVM tokens (#186)
+- Improve import Private key feature (#208)
+
+Bug Fixed:
+- Fix when select aUSD (Acala) to transfer (#282)
+- Fix the balance display incorrect after transfer Sub-token successfully (#283)
+- Fix can't connect account in case user created account successfully while popup connect wallet is displaying (#231)
+- Fix some style bug in (#258)
+- Fix display multi popup connect wallet (#227)
+- Fix tooltip not showing on the popup view on firefox browser (#224)
+
 ## 0.4.1 (Koni)
 Build date: May 11, 2022.
 

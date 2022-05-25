@@ -54,7 +54,10 @@ async function uploadBuild() {
     const rs = await axios.put(uploadUrl, file, {
       auth: {
         username: nextCloudUsername, password: nextCloudPassword
-      }, headers: {'Content-Type': 'text/octet-stream'}
+      },
+      headers: {'Content-Type': 'text/octet-stream'},
+      maxContentLength: Infinity,
+      maxBodyLength: Infinity
     })
 
     if (rs.statusText === 'Created') {

@@ -25,10 +25,21 @@ interface Props {
   networkMap: Record<string, NetworkJson>;
 }
 
-function getOptions (chainRegistryMap: Record<string, ChainRegistry>): TokenItemType[] {
+function getOptions (chainRegistryMap: Record<string, ChainRegistry>, networkMap: Record<string, NetworkJson>): TokenItemType[] {
   const options: TokenItemType[] = [];
+  const activatedNetworks: string[] = [];
+
+  Object.keys(networkMap).forEach((networkKey) => {
+    if (networkMap[networkKey].active) {
+      activatedNetworks.push(networkKey);
+    }
+  });
 
   Object.keys(chainRegistryMap).forEach((networkKey) => {
+    if (!activatedNetworks.includes(networkKey)) {
+      return;
+    }
+
     Object.keys(chainRegistryMap[networkKey].tokenMap).forEach((token) => {
       const tokenInfo = chainRegistryMap[networkKey].tokenMap[token];
 
@@ -56,7 +67,7 @@ function SenderInputAddress ({ balance, balanceFormat, chainRegistryMap, classNa
     return reformatAddress(address, networkPrefix);
   }, [address, networkPrefix]);
 
-  const options: TokenItemType[] = getOptions(chainRegistryMap);
+  const options: TokenItemType[] = getOptions(chainRegistryMap, networkMap);
 
   const onChangeInputAddress = useCallback((address: string | null) => {
     if (address) {

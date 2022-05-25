@@ -1358,6 +1358,7 @@ export default class KoniState extends State {
 
   public refreshDotSamaApi (key: string) {
     const apiProps = this.apiMap.dotSama[key];
+
     if (key in this.apiMap.dotSama) {
       if (!apiProps.isApiConnected) {
         apiProps.recoverConnect && apiProps.recoverConnect();

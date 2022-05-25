@@ -1,15 +1,18 @@
-import React, {useCallback, useContext} from "react";
-import {ThemeProps} from "@subwallet/extension-koni-ui/types";
-import arrowCounterClockWise from "@subwallet/extension-koni-ui/assets/arrow-counter-clockwise.svg";
-import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
-import {faPen} from "@fortawesome/free-solid-svg-icons";
-import styled from "styled-components";
-import useGetNetworkJson from "@subwallet/extension-koni-ui/hooks/screen/home/useGetNetworkJson";
-import {store} from "@subwallet/extension-koni-ui/stores";
-import {NetworkConfigParams} from "@subwallet/extension-koni-ui/stores/types";
-import {ActionContext} from "@subwallet/extension-koni-ui/components/contexts";
-import {recoverDotSamaApi} from "@subwallet/extension-koni-ui/messaging";
-import useToast from "@subwallet/extension-koni-ui/hooks/useToast";
+// Copyright 2019-2022 @polkadot/extension-ui authors & contributors
+// SPDX-License-Identifier: Apache-2.0
+
+import { faPen } from '@fortawesome/free-solid-svg-icons';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import arrowCounterClockWise from '@subwallet/extension-koni-ui/assets/arrow-counter-clockwise.svg';
+import { ActionContext } from '@subwallet/extension-koni-ui/components/contexts';
+import useGetNetworkJson from '@subwallet/extension-koni-ui/hooks/screen/home/useGetNetworkJson';
+import useToast from '@subwallet/extension-koni-ui/hooks/useToast';
+import { recoverDotSamaApi } from '@subwallet/extension-koni-ui/messaging';
+import { store } from '@subwallet/extension-koni-ui/stores';
+import { NetworkConfigParams } from '@subwallet/extension-koni-ui/stores/types';
+import { ThemeProps } from '@subwallet/extension-koni-ui/types';
+import React, { useCallback, useContext } from 'react';
+import styled from 'styled-components';
 
 interface Props extends ThemeProps {
   className?: string;
@@ -30,12 +33,12 @@ function NetworkTools ({ className, networkKey }: Props): React.ReactElement<Pro
         }
       })
       .catch(console.error);
-  }, []);
+  }, [networkKey, show]);
 
   const handleClickEdit = useCallback(() => {
     store.dispatch({ type: 'networkConfigParams/update', payload: { data: networkJson, mode: 'edit' } as NetworkConfigParams });
     navigate('/account/config-network');
-  }, []);
+  }, [navigate, networkJson]);
 
   return (
     <div className={className}>
@@ -55,7 +58,7 @@ function NetworkTools ({ className, networkKey }: Props): React.ReactElement<Pro
         />
       </div>
     </div>
-  )
+  );
 }
 
 export default React.memo(styled(NetworkTools)(({ theme }: Props) => `

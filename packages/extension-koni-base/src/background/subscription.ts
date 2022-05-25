@@ -2,19 +2,20 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { AuthUrls } from '@subwallet/extension-base/background/handlers/State';
-import { CustomEvmToken, NftTransferExtra } from '@subwallet/extension-base/background/KoniTypes';
+import { ApiProps, CustomEvmToken, NftTransferExtra } from '@subwallet/extension-base/background/KoniTypes';
 import { subscribeBalance } from '@subwallet/extension-koni-base/api/dotsama/balance';
 import { subscribeCrowdloan } from '@subwallet/extension-koni-base/api/dotsama/crowdloan';
 import { stakingOnChainApi } from '@subwallet/extension-koni-base/api/staking';
 import { getAllSubsquidStaking } from '@subwallet/extension-koni-base/api/staking/subsquidStaking';
-import { dotSamaAPIMap, nftHandler, state } from '@subwallet/extension-koni-base/background/handlers';
+import { nftHandler, state } from '@subwallet/extension-koni-base/background/handlers';
 import { ALL_ACCOUNT_KEY } from '@subwallet/extension-koni-base/constants';
 import { take } from 'rxjs';
+import Web3 from 'web3';
 
 import { accounts as accountsObservable } from '@polkadot/ui-keyring/observable/accounts';
 import { SubjectInfo } from '@polkadot/ui-keyring/observable/types';
 
-export class KoniSubcription {
+export class KoniSubscription {
   private subscriptionMap: Record<string, any> = {};
   // @ts-ignore
   unsubBalances: () => void | undefined;
@@ -58,14 +59,18 @@ export class KoniSubcription {
       if (currentAccountInfo) {
         const { address } = currentAccountInfo;
 
-        this.subscribeBalancesAndCrowdloans(address);
-        this.subscribeStakingOnChain(address);
+        this.subscribeBalancesAndCrowdloans(address, state.getDotSamaApiMap(), state.getWeb3ApiMap());
+        this.subscribeStakingOnChain(address, state.getDotSamaApiMap());
       }
 
-      state.subscribeServiceInfo_().subscribe({
-        next: ({ currentAccount: address }) => {
-          this.subscribeBalancesAndCrowdloans(address);
-          this.subscribeStakingOnChain(address);
+      state.subscribeServiceInfo().subscribe({
+        next: (serviceInfo) => {
+          console.log('serviceInfo update', serviceInfo);
+          const { address } = serviceInfo.currentAccountInfo;
+
+          state.initChainRegistry();
+          this.subscribeBalancesAndCrowdloans(address, serviceInfo.apiMap.dotSama, serviceInfo.apiMap.web3);
+          this.subscribeStakingOnChain(address, serviceInfo.apiMap.dotSama);
         }
       });
     });
@@ -84,49 +89,43 @@ export class KoniSubcription {
     });
   }
 
-  subscribeBalancesAndCrowdloans (address: string) {
+  subscribeBalancesAndCrowdloans (address: string, dotSamaApiMap: Record<string, ApiProps>, web3ApiMap: Record<string, Web3>) {
     this.unsubBalances && this.unsubBalances();
     this.unsubCrowdloans && this.unsubCrowdloans();
     state.resetBalanceMap();
     state.resetCrowdloanMap();
     this.detectAddresses(address)
       .then((addresses) => {
-        this.unsubBalances = this.initBalanceSubscription(addresses);
-        this.unsubCrowdloans = this.initCrowdloanSubscription(addresses);
+        this.unsubBalances = this.initBalanceSubscription(addresses, dotSamaApiMap, web3ApiMap);
+        this.unsubCrowdloans = this.initCrowdloanSubscription(addresses, dotSamaApiMap);
       })
       .catch(console.error);
   }
 
-  subscribeStakingOnChain (address: string) {
+  subscribeStakingOnChain (address: string, dotSamaApiMap: Record<string, ApiProps>) {
     this.unsubStakingOnChain && this.unsubStakingOnChain();
+    state.resetStakingMap();
     this.detectAddresses(address)
       .then((addresses) => {
-        this.unsubStakingOnChain = this.initStakingOnChainSubscription(addresses);
+        this.unsubStakingOnChain = this.initStakingOnChainSubscription(addresses, dotSamaApiMap);
       })
       .catch(console.error);
   }
 
-  initStakingOnChainSubscription (addresses: string[]) {
-    const subscriptionPromises = stakingOnChainApi(addresses, dotSamaAPIMap, (networkKey, rs) => {
+  initStakingOnChainSubscription (addresses: string[], dotSamaApiMap: Record<string, ApiProps>) {
+    const subscriptionPromises = stakingOnChainApi(addresses, dotSamaApiMap, (networkKey, rs) => {
       state.setStakingItem(networkKey, rs);
-    });
+    }, state.getNetworkMap());
 
     return () => {
-      // @ts-ignore
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-call
-      subscriptionPromises.forEach((subProm) => {
-        // @ts-ignore
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-member-access
-        subProm.then((unsub) => {
-          // eslint-disable-next-line @typescript-eslint/no-unsafe-call
-          unsub && unsub();
-        }).catch(console.error);
-      });
+      subscriptionPromises.then((unsubs) => {
+        unsubs.forEach((unsubs) => unsubs && unsubs());
+      }).catch(console.error);
     };
   }
 
-  initBalanceSubscription (addresses: string[]) {
-    const subscriptionPromises = subscribeBalance(addresses, dotSamaAPIMap, (networkKey, rs) => {
+  initBalanceSubscription (addresses: string[], dotSamaApiMap: Record<string, ApiProps>, web3ApiMap: Record<string, Web3>) {
+    const subscriptionPromises = subscribeBalance(addresses, dotSamaApiMap, web3ApiMap, (networkKey, rs) => {
       state.setBalanceItem(networkKey, rs);
     });
 
@@ -139,8 +138,8 @@ export class KoniSubcription {
     };
   }
 
-  initCrowdloanSubscription (addresses: string[]) {
-    const subscriptionPromise = subscribeCrowdloan(addresses, dotSamaAPIMap, (networkKey, rs) => {
+  initCrowdloanSubscription (addresses: string[], dotSamaApiMap: Record<string, ApiProps>) {
+    const subscriptionPromise = subscribeCrowdloan(addresses, dotSamaApiMap, (networkKey, rs) => {
       state.setCrowdloanItem(networkKey, rs);
     });
 
@@ -154,15 +153,15 @@ export class KoniSubcription {
     };
   }
 
-  subscribeNft (address: string, customErc721Registry: CustomEvmToken[]) {
+  subscribeNft (address: string, dotSamaApiMap: Record<string, ApiProps>, web3ApiMap: Record<string, Web3>, customErc721Registry: CustomEvmToken[]) {
     this.detectAddresses(address)
       .then((addresses) => {
-        this.initNftSubscription(addresses, customErc721Registry);
+        this.initNftSubscription(addresses, dotSamaApiMap, web3ApiMap, customErc721Registry);
       })
       .catch(console.error);
   }
 
-  initNftSubscription (addresses: string[], customErc721Registry: CustomEvmToken[]) {
+  initNftSubscription (addresses: string[], dotSamaApiMap: Record<string, ApiProps>, web3ApiMap: Record<string, Web3>, customErc721Registry: CustomEvmToken[]) {
     const { cronUpdate, forceUpdate, selectedNftCollection } = state.getNftTransfer();
 
     if (forceUpdate && !cronUpdate) {
@@ -178,6 +177,8 @@ export class KoniSubcription {
         forceUpdate: false,
         selectedNftCollection
       } as NftTransferExtra);
+      nftHandler.setApiProps(dotSamaApiMap);
+      nftHandler.setWeb3ApiMap(web3ApiMap);
       nftHandler.setAddresses(addresses);
       nftHandler.handleNfts(
         customErc721Registry,
@@ -201,10 +202,17 @@ export class KoniSubcription {
 
   async subscribeStakingReward (address: string) {
     const addresses = await this.detectAddresses(address);
+    const networkMap = state.getNetworkMap();
+    const activeNetworks: string[] = [];
 
-    await getAllSubsquidStaking(addresses, (networkKey, rs) => {
+    Object.entries(networkMap).forEach(([key, network]) => {
+      if (network.active) {
+        activeNetworks.push(key);
+      }
+    });
+
+    await getAllSubsquidStaking(addresses, activeNetworks, (networkKey, rs) => {
       state.setStakingItem(networkKey, rs);
-      console.log('set staking item', rs);
     })
       .then((result) => {
         state.setStakingReward(result);

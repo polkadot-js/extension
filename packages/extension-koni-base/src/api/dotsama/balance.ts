@@ -4,14 +4,15 @@
 import { assetFromToken } from '@equilab/api';
 import { SignedBalance } from '@equilab/api/genshiro/interfaces';
 import { APIItemState, ApiProps, BalanceChildItem, BalanceItem, TokenBalanceRaw, TokenInfo } from '@subwallet/extension-base/background/KoniTypes';
-import { ethereumChains, moonbeamBaseChains } from '@subwallet/extension-koni-base/api/dotsama/api-helper';
+import { moonbeamBaseChains } from '@subwallet/extension-koni-base/api/dotsama/api-helper';
 import { getRegistry, getTokenInfo } from '@subwallet/extension-koni-base/api/dotsama/registry';
 import { getEVMBalance } from '@subwallet/extension-koni-base/api/web3/balance';
 import { getERC20Contract } from '@subwallet/extension-koni-base/api/web3/web3';
-import { dotSamaAPIMap, state } from '@subwallet/extension-koni-base/background/handlers';
+import { state } from '@subwallet/extension-koni-base/background/handlers';
 import { ASTAR_REFRESH_BALANCE_INTERVAL, IGNORE_GET_SUBSTRATE_FEATURES_LIST, MOONBEAM_REFRESH_BALANCE_INTERVAL } from '@subwallet/extension-koni-base/constants';
 import { categoryAddresses, sumBN } from '@subwallet/extension-koni-base/utils/utils';
 import { Observable } from 'rxjs';
+import Web3 from 'web3';
 import { Contract } from 'web3-eth-contract';
 
 import { ApiPromise } from '@polkadot/api';
@@ -57,7 +58,7 @@ function subscribeWithDerive (addresses: string[], networkKey: string, networkAP
   };
 }
 
-function subscribeERC20Interval (addresses: string[], networkKey: string, api: ApiPromise, originBalanceItem: BalanceItem, callback: (networkKey: string, rs: BalanceItem) => void): () => void {
+function subscribeERC20Interval (addresses: string[], networkKey: string, api: ApiPromise, originBalanceItem: BalanceItem, web3ApiMap: Record<string, Web3>, callback: (networkKey: string, rs: BalanceItem) => void): () => void {
   let tokenList = {} as TokenInfo[];
   const ERC20ContractMap = {} as Record<string, Contract>;
   const tokenBalanceMap = {} as Record<string, BalanceChildItem>;
@@ -95,7 +96,7 @@ function subscribeERC20Interval (addresses: string[], networkKey: string, api: A
     tokenList = Object.values(tokenMap).filter(({ erc20Address }) => (!!erc20Address));
     tokenList.forEach(({ erc20Address, symbol }) => {
       if (erc20Address) {
-        ERC20ContractMap[symbol] = getERC20Contract(networkKey, erc20Address);
+        ERC20ContractMap[symbol] = getERC20Contract(networkKey, erc20Address, web3ApiMap);
       }
     });
     getTokenBalances();
@@ -283,7 +284,7 @@ async function subscribeAssetsBalance (addresses: string[], networkKey: string, 
   };
 }
 
-async function subscribeWithAccountMulti (addresses: string[], networkKey: string, networkAPI: ApiProps, callback: (networkKey: string, rs: BalanceItem) => void) {
+async function subscribeWithAccountMulti (addresses: string[], networkKey: string, networkAPI: ApiProps, web3ApiMap: Record<string, Web3>, callback: (networkKey: string, rs: BalanceItem) => void) {
   const balanceItem: BalanceItem = {
     state: APIItemState.PENDING,
     free: '0',
@@ -331,12 +332,12 @@ async function subscribeWithAccountMulti (addresses: string[], networkKey: strin
     unsub2 = await subscribeAssetsBalance(addresses, networkKey, networkAPI.api, balanceItem, (balanceItem) => {
       callback(networkKey, balanceItem);
     });
-  } else if (moonbeamBaseChains.indexOf(networkKey) > -1) {
-    unsub2 = subscribeERC20Interval(addresses, networkKey, networkAPI.api, balanceItem, callback);
   } else if (['genshiro_testnet', 'genshiro', 'equilibrium_parachain'].includes(networkKey)) {
     unsub2 = await subscribeGenshiroTokenBalance(addresses, networkKey, networkAPI.api, balanceItem, (balanceItem) => {
       callback(networkKey, balanceItem);
     }, true);
+  } else if (moonbeamBaseChains.includes(networkKey) || networkAPI.isEthereum) {
+    unsub2 = subscribeERC20Interval(addresses, networkKey, networkAPI.api, balanceItem, web3ApiMap, callback);
   }
 
   return () => {
@@ -347,7 +348,7 @@ async function subscribeWithAccountMulti (addresses: string[], networkKey: strin
   };
 }
 
-export function subscribeEVMBalance (networkKey: string, api: ApiPromise, addresses: string[], callback: (networkKey: string, rs: BalanceItem) => void) {
+export function subscribeEVMBalance (networkKey: string, api: ApiPromise, addresses: string[], web3ApiMap: Record<string, Web3>, callback: (networkKey: string, rs: BalanceItem) => void) {
   const balanceItem = {
     state: APIItemState.PENDING,
     free: '0',
@@ -357,7 +358,7 @@ export function subscribeEVMBalance (networkKey: string, api: ApiPromise, addres
   } as BalanceItem;
 
   function getBalance () {
-    getEVMBalance(networkKey, addresses)
+    getEVMBalance(networkKey, addresses, web3ApiMap)
       .then((balances) => {
         balanceItem.free = sumBN(balances.map((b) => (new BN(b || '0')))).toString();
         balanceItem.state = APIItemState.READY;
@@ -368,7 +369,7 @@ export function subscribeEVMBalance (networkKey: string, api: ApiPromise, addres
 
   getBalance();
   const interval = setInterval(getBalance, ASTAR_REFRESH_BALANCE_INTERVAL);
-  const unsub2 = subscribeERC20Interval(addresses, networkKey, api, balanceItem, callback);
+  const unsub2 = subscribeERC20Interval(addresses, networkKey, api, balanceItem, web3ApiMap, callback);
 
   return () => {
     clearInterval(interval);
@@ -376,15 +377,15 @@ export function subscribeEVMBalance (networkKey: string, api: ApiPromise, addres
   };
 }
 
-export function subscribeBalance (addresses: string[], dotSamaAPIMap: Record<string, ApiProps>, callback: (networkKey: string, rs: BalanceItem) => void) {
+export function subscribeBalance (addresses: string[], dotSamaAPIMap: Record<string, ApiProps>, web3ApiMap: Record<string, Web3>, callback: (networkKey: string, rs: BalanceItem) => void) {
   const [substrateAddresses, evmAddresses] = categoryAddresses(addresses);
 
   return Object.entries(dotSamaAPIMap).map(async ([networkKey, apiProps]) => {
     const networkAPI = await apiProps.isReady;
-    const useAddresses = ethereumChains.indexOf(networkKey) > -1 ? evmAddresses : substrateAddresses;
+    const useAddresses = apiProps.isEthereum ? evmAddresses : substrateAddresses;
 
     if (networkKey === 'astarEvm' || networkKey === 'shidenEvm') {
-      return subscribeEVMBalance(networkKey, networkAPI.api, useAddresses, callback);
+      return subscribeEVMBalance(networkKey, networkAPI.api, useAddresses, web3ApiMap, callback);
     }
 
     if (!useAddresses || useAddresses.length === 0 || IGNORE_GET_SUBSTRATE_FEATURES_LIST.indexOf(networkKey) > -1) {
@@ -403,21 +404,21 @@ export function subscribeBalance (addresses: string[], dotSamaAPIMap: Record<str
     }
 
     // eslint-disable-next-line @typescript-eslint/no-misused-promises
-    return await subscribeWithAccountMulti(useAddresses, networkKey, networkAPI, callback);
+    return subscribeWithAccountMulti(useAddresses, networkKey, networkAPI, web3ApiMap, callback);
   });
 }
 
-export async function getFreeBalance (networkKey: string, address: string, token?: string): Promise<string> {
-  const apiProps = await dotSamaAPIMap[networkKey].isReady;
+export async function getFreeBalance (networkKey: string, address: string, dotSamaApiMap: Record<string, ApiProps>, web3ApiMap: Record<string, Web3>, token?: string): Promise<string> {
+  const apiProps = await dotSamaApiMap[networkKey].isReady;
   const api = apiProps.api;
 
   if (token) {
     const tokenInfo = await getTokenInfo(networkKey, api, token);
     const isMainToken = !!(tokenInfo?.isMainToken);
 
-    if (ethereumChains.includes(networkKey) && tokenInfo?.erc20Address) {
+    if (apiProps.isEthereum && tokenInfo?.erc20Address) {
       if (!isMainToken) {
-        const contract = getERC20Contract(networkKey, tokenInfo.erc20Address);
+        const contract = getERC20Contract(networkKey, tokenInfo.erc20Address, web3ApiMap);
         // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment,@typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-member-access
         const free = await contract.methods.balanceOf(address).call();
 
@@ -446,12 +447,17 @@ export async function getFreeBalance (networkKey: string, address: string, token
   return balance.data?.free?.toString() || '0';
 }
 
-export async function subscribeFreeBalance (networkKey: string, address: string, token: string | undefined, update: (balance: string) => void): Promise<() => void> {
-  const apiProps = await dotSamaAPIMap[networkKey].isReady;
+export async function subscribeFreeBalance (
+  networkKey: string,
+  address: string,
+  dotSamaApiMap: Record<string, ApiProps>,
+  web3ApiMap: Record<string, Web3>,
+  token: string | undefined,
+  update: (balance: string) => void): Promise<() => void> {
+  const apiProps = await dotSamaApiMap[networkKey].isReady;
   const api = apiProps.api;
 
-  // todo: Need update the condition if the way to get ethereum chains is dynamic
-  if (ethereumChains.includes(networkKey)) {
+  if (apiProps.isEthereum) {
     if (!isEthereumAddress(address)) {
       update('0');
 
@@ -469,14 +475,14 @@ export async function subscribeFreeBalance (networkKey: string, address: string,
     const tokenInfo = await getTokenInfo(networkKey, api, token);
     const isMainToken = !!(tokenInfo?.isMainToken);
 
-    if (ethereumChains.includes(networkKey) && tokenInfo?.erc20Address) {
+    if (apiProps.isEthereum && tokenInfo?.erc20Address) {
       if (!isMainToken) {
         const getFreeBalance = () => {
           if (!tokenInfo?.erc20Address) {
             return;
           }
 
-          const contract = getERC20Contract(networkKey, tokenInfo.erc20Address);
+          const contract = getERC20Contract(networkKey, tokenInfo.erc20Address, web3ApiMap);
 
           // @ts-ignore
           // eslint-disable-next-line @typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-member-access

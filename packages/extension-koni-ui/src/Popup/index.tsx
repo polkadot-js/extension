@@ -8,8 +8,7 @@ import { AccountsWithCurrentAddress, CurrentAccountInfo } from '@subwallet/exten
 import { PHISHING_PAGE_REDIRECT } from '@subwallet/extension-base/defaults';
 import { canDerive } from '@subwallet/extension-base/utils';
 import useSetupStore from '@subwallet/extension-koni-ui/hooks/store/useSetupStore';
-import Rendering from '@subwallet/extension-koni-ui/Popup/Rendering';
-import Donate from '@subwallet/extension-koni-ui/Popup/Sending/Donate';
+import Home from '@subwallet/extension-koni-ui/Popup/Home';
 import { updateCurrentAccount } from '@subwallet/extension-koni-ui/stores/updater';
 import * as Bowser from 'bowser';
 import React, { useCallback, useEffect, useState } from 'react';
@@ -18,15 +17,12 @@ import { Route, Switch } from 'react-router';
 
 import uiSettings from '@polkadot/ui-settings';
 
-import { ErrorBoundary } from '../components';
 import { AccountContext, ActionContext, AuthorizeReqContext, MediaContext, MetadataReqContext, SettingsContext, SigningReqContext } from '../components/contexts';
 import ToastProvider from '../components/Toast/ToastProvider';
 import { saveCurrentAccountAddress, subscribeAccountsWithCurrentAddress, subscribeAuthorizeRequestsV2, subscribeMetadataRequests, subscribeSigningRequests } from '../messaging';
 import { store } from '../stores';
 import { buildHierarchy } from '../util/buildHierarchy';
-// import Home from './Home';
 
-const Home = React.lazy(() => import('./Home'));
 const EvmTokenEdit = React.lazy(() => import('@subwallet/extension-koni-ui/Popup/Settings/TokenSetting/EvmTokenEdit'));
 const EvmTokenSetting = React.lazy(() => import('@subwallet/extension-koni-ui/Popup/Settings/TokenSetting/EvmTokenSetting'));
 const Welcome = React.lazy(() => import('./Welcome'));
@@ -43,7 +39,6 @@ const Derive = React.lazy(() => import('./Derive'));
 const CreateAccount = React.lazy(() => import('./CreateAccount'));
 const Authorize = React.lazy(() => import('./Authorize'));
 const AuthList = React.lazy(() => import('./AuthManagement'));
-const Networks = React.lazy(() => import('@subwallet/extension-koni-ui/Popup/Settings/Networks'));
 const LoadingContainer = React.lazy(() => import('@subwallet/extension-koni-ui/components/LoadingContainer'));
 const TransferNftContainer = React.lazy(() => import('@subwallet/extension-koni-ui/Popup/Home/Nfts/transfer/TransferNftContainer'));
 const ImportLedger = React.lazy(() => import('@subwallet/extension-koni-ui/Popup/ImportLedger'));
@@ -52,7 +47,11 @@ const ImportEvmToken = React.lazy(() => import('@subwallet/extension-koni-ui/Pop
 const SendFund = React.lazy(() => import('@subwallet/extension-koni-ui/Popup/Sending/SendFund'));
 const Settings = React.lazy(() => import('@subwallet/extension-koni-ui/Popup/Settings'));
 const GeneralSetting = React.lazy(() => import('@subwallet/extension-koni-ui/Popup/Settings/GeneralSetting'));
-const NetworkEdit = React.lazy(() => import('@subwallet/extension-koni-ui/Popup/Settings/NetworkEdit'));
+const NetworkCreate = React.lazy(() => import('@subwallet/extension-koni-ui/Popup/Settings/NetworkSettings/NetworkEdit'));
+const Networks = React.lazy(() => import('@subwallet/extension-koni-ui/Popup/Settings/NetworkSettings/Networks'));
+const Rendering = React.lazy(() => import('@subwallet/extension-koni-ui/Popup/Rendering'));
+const Donate = React.lazy(() => import('@subwallet/extension-koni-ui/Popup/Sending/Donate'));
+const ErrorBoundary = React.lazy(() => import('../components/ErrorBoundary'));
 
 const startSettings = uiSettings.get();
 
@@ -237,7 +236,7 @@ export default function Popup (): React.ReactElement {
                           <Route path='/account/settings'>{wrapWithErrorBoundary(<Settings />, 'account-settings')}</Route>
                           <Route path='/account/general-setting'>{wrapWithErrorBoundary(<GeneralSetting />, 'account-general-settings')}</Route>
                           <Route path='/account/networks'>{wrapWithErrorBoundary(<Networks />, 'account-networks')}</Route>
-                          <Route path='/account/network-edit'>{wrapWithErrorBoundary(<NetworkEdit />, 'account-network-edit')}</Route>
+                          <Route path='/account/config-network'>{wrapWithErrorBoundary(<NetworkCreate />, 'account-network-edit')}</Route>
                           <Route path='/account/send-fund'>{wrapWithErrorBoundary(<SendFund />, 'send-fund')}</Route>
                           <Route path='/account/donate'>{wrapWithErrorBoundary(<Donate />, 'donate')}</Route>
                           <Route path='/account/send-nft'>{wrapWithErrorBoundary(<TransferNftContainer />, 'send-nft')}</Route>

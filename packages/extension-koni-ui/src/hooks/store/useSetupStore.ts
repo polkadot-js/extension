@@ -5,7 +5,7 @@ import useSetupBalance from '@subwallet/extension-koni-ui/hooks/store/useSetupBa
 import useSetupChainRegistry from '@subwallet/extension-koni-ui/hooks/store/useSetupChainRegistry';
 import useSetupCrowdloan from '@subwallet/extension-koni-ui/hooks/store/useSetupCrowdloan';
 import useSetupEvmToken from '@subwallet/extension-koni-ui/hooks/store/useSetupEvmToken';
-import useSetupNetworkMetadata from '@subwallet/extension-koni-ui/hooks/store/useSetupNetworkMetadata';
+import useSetupNetworkMap from '@subwallet/extension-koni-ui/hooks/store/useSetupNetworkMap';
 import useSetupNft from '@subwallet/extension-koni-ui/hooks/store/useSetupNft';
 import useSetupNftCollection from '@subwallet/extension-koni-ui/hooks/store/useSetupNftCollection';
 import useSetupNftTransfer from '@subwallet/extension-koni-ui/hooks/store/useSetupNftTransfer';
@@ -16,7 +16,7 @@ import useSetupStakingReward from '@subwallet/extension-koni-ui/hooks/store/useS
 import useSetupTransactionHistory from '@subwallet/extension-koni-ui/hooks/store/useSetupTransactionHistory';
 
 export default function useSetupStore (): void {
-  useSetupNetworkMetadata();
+  useSetupNetworkMap();
   useSetupChainRegistry();
   useSetupPrice();
   useSetupBalance();

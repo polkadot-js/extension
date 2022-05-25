@@ -1,11 +1,11 @@
 // Copyright 2019-2022 @polkadot/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { NetWorkInfo } from '@subwallet/extension-base/background/KoniTypes';
+import { NetworkJson } from '@subwallet/extension-base/background/KoniTypes';
 import { AccountJson, AccountWithChildren } from '@subwallet/extension-base/background/types';
 import { ALL_ACCOUNT_KEY } from '@subwallet/extension-koni-base/constants';
 import LogosMap from '@subwallet/extension-koni-ui/assets/logo';
-import { networkSelectOption } from '@subwallet/extension-koni-ui/hooks/useGenesisHashOptions';
+import { NetworkSelectOption } from '@subwallet/extension-koni-ui/hooks/useGenesisHashOptions';
 import { Recoded } from '@subwallet/extension-koni-ui/types';
 import { isAccountAll } from '@subwallet/extension-koni-ui/util/accountAll';
 import reformatAddress from '@subwallet/extension-koni-ui/util/reformatAddress';
@@ -33,7 +33,19 @@ export function findAccountByAddress (accounts: AccountJson[], _address: string)
   ) || null;
 }
 
-export function recodeAddress (address: string, accounts: AccountWithChildren[], networkInfo: NetWorkInfo | null, type?: KeypairType): Recoded {
+export function getEthereumChains (networkMap: Record<string, NetworkJson>): string[] {
+  const result: string[] = [];
+
+  Object.keys(networkMap).forEach((k) => {
+    if (networkMap[k].isEthereum) {
+      result.push(k);
+    }
+  });
+
+  return result;
+}
+
+export function recodeAddress (address: string, accounts: AccountWithChildren[], networkInfo: NetworkJson | null, type?: KeypairType): Recoded {
   const publicKey = decodeAddress(address);
   const account = findAccountByAddress(accounts, address) || findSubstrateAccount(accounts, publicKey);
   const prefix = networkInfo ? networkInfo.ss58Format : 42;
@@ -74,12 +86,12 @@ function analysisAccounts (accounts: AccountJson[]): [boolean, boolean] {
   ];
 }
 
-export function getGenesisOptionsByAddressType (address: string | null | undefined, accounts: AccountJson[], genesisOptions: networkSelectOption[]): networkSelectOption[] {
+export function getGenesisOptionsByAddressType (address: string | null | undefined, accounts: AccountJson[], genesisOptions: NetworkSelectOption[]): NetworkSelectOption[] {
   if (!address || !accounts.length) {
     return genesisOptions.filter((o) => !o.isEthereum);
   }
 
-  const result: networkSelectOption[] = [];
+  const result: NetworkSelectOption[] = [];
 
   if (isAccountAll(address)) {
     const [isContainOnlySubstrate, isContainOnlyEtherum] = analysisAccounts(accounts);
@@ -224,6 +236,10 @@ export function getScanExplorerTransactionHistoryUrl (networkKey: string, hash: 
     return `${moonbaseScanUrl}/tx/${hash}`;
   }
 
+  if (!subscanByNetworkKey[networkKey]) {
+    return '';
+  }
+
   return `${subscanByNetworkKey[networkKey]}/extrinsic/${hash}`;
 }
 
@@ -238,6 +254,10 @@ export function getScanExplorerAddressInfoUrl (networkKey: string, address: stri
 
   if (networkKey === 'moonbase') {
     return `${moonbaseScanUrl}/address/${address}`;
+  }
+
+  if (!subscanByNetworkKey[networkKey]) {
+    return '';
   }
 
   return `${subscanByNetworkKey[networkKey]}/account/${address}`;

@@ -3,9 +3,11 @@
 
 import failStatus from '@subwallet/extension-koni-ui/assets/fail-status.svg';
 import successStatus from '@subwallet/extension-koni-ui/assets/success-status.svg';
+import useScanExplorerTxUrl from '@subwallet/extension-koni-ui/hooks/screen/home/useScanExplorerTxUrl';
+import useSupportScanExplorer from '@subwallet/extension-koni-ui/hooks/screen/home/useSupportScanExplorer';
 import useTranslation from '@subwallet/extension-koni-ui/hooks/useTranslation';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
-import { getScanExplorerTransactionHistoryUrl } from '@subwallet/extension-koni-ui/util';
+import CN from 'classnames';
 import React from 'react';
 import styled from 'styled-components';
 
@@ -21,6 +23,8 @@ interface Props extends ThemeProps {
 
 function TransferResult ({ backToHome, className, extrinsicHash, handleResend, isTxSuccess, networkKey, txError }: Props): React.ReactElement<Props> {
   const { t } = useTranslation();
+  const scanExplorerTxUrl = useScanExplorerTxUrl(networkKey, extrinsicHash);
+  const isSupportScanExplorer = useSupportScanExplorer(networkKey);
 
   return (
     <div className={className}>
@@ -45,8 +49,8 @@ function TransferResult ({ backToHome, className, extrinsicHash, handleResend, i
                 {t<string>('Back To Home')}
               </div>
               <a
-                className={'history-button'}
-                href={getScanExplorerTransactionHistoryUrl(networkKey, extrinsicHash)}
+                className={CN('history-button', { '-disabled': !isSupportScanExplorer || !scanExplorerTxUrl })}
+                href={scanExplorerTxUrl}
                 rel='noreferrer'
                 target={'_blank'}
               >
@@ -155,5 +159,11 @@ export default React.memo(styled(TransferResult)(({ theme }: Props) => `
     cursor: pointer;
     color: #FFFFFF;
     font-weight: 500;
+  }
+
+  .-disabled {
+    cursor: not-allowed;
+    pointer-events: none;
+    opacity: 0.5;
   }
 `));

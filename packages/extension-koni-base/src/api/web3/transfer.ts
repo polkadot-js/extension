@@ -2,13 +2,20 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { ResponseTransfer, TransferErrorCode, TransferStep } from '@subwallet/extension-base/background/KoniTypes';
-import { getERC20Contract, getWeb3Api } from '@subwallet/extension-koni-base/api/web3/web3';
+import { getERC20Contract } from '@subwallet/extension-koni-base/api/web3/web3';
+import Web3 from 'web3';
 import { TransactionConfig, TransactionReceipt } from 'web3-core';
 
 import { BN } from '@polkadot/util';
 
-export async function handleTransfer (transactionObject: TransactionConfig, changeValue: string, networkKey: string, privateKey: string, callback: (data: ResponseTransfer) => void) {
-  const web3Api = getWeb3Api(networkKey);
+export async function handleTransfer (
+  transactionObject: TransactionConfig,
+  changeValue: string,
+  networkKey: string,
+  privateKey: string,
+  web3ApiMap: Record<string, Web3>,
+  callback: (data: ResponseTransfer) => void) {
+  const web3Api = web3ApiMap[networkKey];
   const signedTransaction = await web3Api.eth.accounts.signTransaction(transactionObject, privateKey);
   const response: ResponseTransfer = {
     step: TransferStep.READY,
@@ -59,8 +66,14 @@ export async function handleTransfer (transactionObject: TransactionConfig, chan
   }
 }
 
-export async function getEVMTransactionObject (networkKey: string, to: string, value: string, transferAll: boolean): Promise<[TransactionConfig, string, string]> {
-  const web3Api = getWeb3Api(networkKey);
+export async function getEVMTransactionObject (
+  networkKey: string,
+  to: string,
+  value: string,
+  transferAll: boolean,
+  web3ApiMap: Record<string, Web3>
+): Promise<[TransactionConfig, string, string]> {
+  const web3Api = web3ApiMap[networkKey];
   const gasPrice = await web3Api.eth.getGasPrice();
   const transactionObject = {
     gasPrice: gasPrice,
@@ -77,15 +90,30 @@ export async function getEVMTransactionObject (networkKey: string, to: string, v
   return [transactionObject, transactionObject.value.toString(), estimateFee.toString()];
 }
 
-export async function makeEVMTransfer (networkKey: string, to: string, privateKey: string, value: string, transferAll: boolean, callback: (data: ResponseTransfer) => void): Promise<void> {
-  const [transactionObject, changeValue] = await getEVMTransactionObject(networkKey, to, value, transferAll);
+export async function makeEVMTransfer (
+  networkKey: string,
+  to: string,
+  privateKey: string,
+  value: string,
+  transferAll: boolean,
+  web3ApiMap: Record<string, Web3>,
+  callback: (data: ResponseTransfer) => void): Promise<void> {
+  const [transactionObject, changeValue] = await getEVMTransactionObject(networkKey, to, value, transferAll, web3ApiMap);
 
-  await handleTransfer(transactionObject, changeValue, networkKey, privateKey, callback);
+  await handleTransfer(transactionObject, changeValue, networkKey, privateKey, web3ApiMap, callback);
 }
 
-export async function getERC20TransactionObject (assetAddress: string, networkKey: string, from: string, to: string, value: string, transferAll: boolean): Promise<[TransactionConfig, string, string]> {
-  const web3Api = getWeb3Api(networkKey);
-  const erc20Contract = getERC20Contract(networkKey, assetAddress);
+export async function getERC20TransactionObject (
+  assetAddress: string,
+  networkKey: string,
+  from: string,
+  to: string,
+  value: string,
+  transferAll: boolean,
+  web3ApiMap: Record<string, Web3>
+): Promise<[TransactionConfig, string, string]> {
+  const web3Api = web3ApiMap[networkKey];
+  const erc20Contract = getERC20Contract(networkKey, assetAddress, web3ApiMap);
 
   let freeAmount = new BN(0);
   let transferValue = value;
@@ -126,8 +154,17 @@ export async function getERC20TransactionObject (assetAddress: string, networkKe
   return [transactionObject, transferValue, estimateFee.toString()];
 }
 
-export async function makeERC20Transfer (assetAddress: string, networkKey: string, from: string, to: string, privateKey: string, value: string, transferAll: boolean, callback: (data: ResponseTransfer) => void) {
-  const [transactionObject, changeValue] = await getERC20TransactionObject(assetAddress, networkKey, from, to, value, transferAll);
+export async function makeERC20Transfer (
+  assetAddress: string,
+  networkKey: string,
+  from: string,
+  to: string,
+  privateKey: string,
+  value: string,
+  transferAll: boolean,
+  web3ApiMap: Record<string, Web3>,
+  callback: (data: ResponseTransfer) => void) {
+  const [transactionObject, changeValue] = await getERC20TransactionObject(assetAddress, networkKey, from, to, value, transferAll, web3ApiMap);
 
-  await handleTransfer(transactionObject, changeValue, networkKey, privateKey, callback);
+  await handleTransfer(transactionObject, changeValue, networkKey, privateKey, web3ApiMap, callback);
 }

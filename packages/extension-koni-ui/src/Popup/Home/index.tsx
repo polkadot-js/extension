@@ -13,16 +13,14 @@ import staking from '@subwallet/extension-koni-ui/assets/home-tab-icon/staking.s
 import stakingActive from '@subwallet/extension-koni-ui/assets/home-tab-icon/staking-active.svg';
 import transfers from '@subwallet/extension-koni-ui/assets/home-tab-icon/transfers.svg';
 import transfersActive from '@subwallet/extension-koni-ui/assets/home-tab-icon/transfers-active.svg';
-import { AccountContext, AccountQrModal, Link } from '@subwallet/extension-koni-ui/components';
+import { AccountContext } from '@subwallet/extension-koni-ui/components';
 import useAccountBalance from '@subwallet/extension-koni-ui/hooks/screen/home/useAccountBalance';
 import useCrowdloanNetworks from '@subwallet/extension-koni-ui/hooks/screen/home/useCrowdloanNetworks';
 import useFetchNft from '@subwallet/extension-koni-ui/hooks/screen/home/useFetchNft';
 import useFetchStaking from '@subwallet/extension-koni-ui/hooks/screen/home/useFetchStaking';
+import useGetNetworkMetadata from '@subwallet/extension-koni-ui/hooks/screen/home/useGetNetworkMetadata';
 import useShowedNetworks from '@subwallet/extension-koni-ui/hooks/screen/home/useShowedNetworks';
 import useTranslation from '@subwallet/extension-koni-ui/hooks/useTranslation';
-import { Header } from '@subwallet/extension-koni-ui/partials';
-import AddAccount from '@subwallet/extension-koni-ui/Popup/Accounts/AddAccount';
-import BalancesVisibility from '@subwallet/extension-koni-ui/Popup/Home/BalancesVisibility';
 // Containers should not be imported lazily
 import ChainBalances from '@subwallet/extension-koni-ui/Popup/Home/ChainBalances/ChainBalances';
 import Crowdloans from '@subwallet/extension-koni-ui/Popup/Home/Crowdloans/Crowdloans';
@@ -46,6 +44,11 @@ import sendIcon from '../../assets/send-icon.svg';
 // import swapIcon from '../../assets/swap-icon.svg';
 
 const ActionButton = React.lazy(() => import('./ActionButton'));
+const AddAccount = React.lazy(() => import('@subwallet/extension-koni-ui/Popup/Accounts/AddAccount'));
+const BalancesVisibility = React.lazy(() => import('@subwallet/extension-koni-ui/Popup/Home/BalancesVisibility'));
+const AccountQrModal = React.lazy(() => import('@subwallet/extension-koni-ui/components/AccountQrModal'));
+const Link = React.lazy(() => import('@subwallet/extension-koni-ui/components/Link'));
+const Header = React.lazy(() => import('@subwallet/extension-koni-ui/partials/Header'));
 
 interface WrapperProps extends ThemeProps {
   className?: string;
@@ -165,7 +168,7 @@ function Home ({ chainRegistryMap, className = '', currentAccount, historyMap, n
     showExportButton: true
   });
   const { accounts } = useContext(AccountContext);
-  const { networkMetadata: networkMetadataMap } = useSelector((state: RootState) => state);
+  const networkMetadataMap = useGetNetworkMetadata();
   const showedNetworks = useShowedNetworks(networkKey, address, accounts);
   const crowdloanNetworks = useCrowdloanNetworks(networkKey);
 

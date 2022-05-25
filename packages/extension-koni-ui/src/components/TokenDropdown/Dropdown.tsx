@@ -3,7 +3,7 @@
 
 import { faChevronDown } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import NETWORKS from '@subwallet/extension-koni-base/api/endpoints';
+import { NetworkJson } from '@subwallet/extension-base/background/KoniTypes';
 import { Label, Theme } from '@subwallet/extension-koni-ui/components';
 import { TokenTransformOptionType } from '@subwallet/extension-koni-ui/components/TokenDropdown/types';
 import { TokenItemType } from '@subwallet/extension-koni-ui/components/types';
@@ -22,6 +22,7 @@ interface WrapperProps {
   options: TokenItemType[];
   ci?: React.ReactNode;
   filterOptions?: (candidate: {label: string, value: string}, input: string) => boolean;
+  networkMap: Record<string, NetworkJson>;
 }
 
 interface Props {
@@ -32,9 +33,10 @@ interface Props {
   options: TokenItemType[];
   value?: string;
   ci?: React.ReactNode;
+  networkMap: Record<string, NetworkJson>;
 }
 
-function DropdownWrapper ({ className, formatOptLabel, onChange, options, value }: WrapperProps): React.ReactElement<WrapperProps> {
+function DropdownWrapper ({ className, formatOptLabel, networkMap, onChange, options, value }: WrapperProps): React.ReactElement<WrapperProps> {
   const [isDropdownOpen, setDropdownOpen] = useState(false);
   const tokenValueArr = value.split('|');
   const dropdownRef = useRef(null);
@@ -79,6 +81,7 @@ function DropdownWrapper ({ className, formatOptLabel, onChange, options, value 
           className='token-dropdown__dropdown'
           getFormatOptLabel={formatOptLabel}
           label={''}
+          networkMap={networkMap}
           onChange={_onChange}
           options={options}
           value={value}
@@ -88,12 +91,12 @@ function DropdownWrapper ({ className, formatOptLabel, onChange, options, value 
   );
 }
 
-function Dropdown ({ className, getFormatOptLabel, label, onChange, options, value }: Props): React.ReactElement<Props> {
+function Dropdown ({ className, getFormatOptLabel, label, networkMap, onChange, options, value }: Props): React.ReactElement<Props> {
   const transformOptions: TokenTransformOptionType[] = options.map((t) => ({
-    label: t.tokenAlt || t.token,
+    label: t.token || t.token,
     value: `${t.token}|${t.networkKey}`,
     networkKey: t.networkKey,
-    networkName: NETWORKS[t.networkKey].chain
+    networkName: networkMap[t.networkKey].chain
   }));
   const [selectedValue, setSelectedValue] = useState(value);
   const themeContext = useContext(ThemeContext as React.Context<Theme>);

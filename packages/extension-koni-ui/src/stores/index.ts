@@ -10,7 +10,8 @@ import CrowdloanReducer from './Crowdloan';
 import CurrentAccountReducer from './CurrentAccount';
 import CurrentNetworkReducer from './CurrentNetwork';
 import EvmTokenReducer from './EvmToken';
-import NetworkMetadataReducer from './NetworkMetadata';
+import NetworkConfigParamsReducer from './NetworkConfigParams';
+import NetworkMapReducer from './NetworkMap';
 import NftReducer from './Nft';
 import NftCollectionReducer from './NftCollection';
 import PriceReducer from './Price';
@@ -23,6 +24,8 @@ import TransferNftExtraReducer from './TransferNftExtra';
 import TransferNftParamsReducer from './TransferNftParams';
 
 const reducers = {
+  networkConfigParams: NetworkConfigParamsReducer,
+  networkMap: NetworkMapReducer,
   tokenConfigParams: TokenConfigReducer,
   evmToken: EvmTokenReducer,
   transferNftExtra: TransferNftExtraReducer,
@@ -38,7 +41,6 @@ const reducers = {
   currentAccount: CurrentAccountReducer,
   currentNetwork: CurrentNetworkReducer,
   chainRegistry: ChainRegistryReducer,
-  networkMetadata: NetworkMetadataReducer,
   allAccount: AllAccountReducer,
   settings: SettingsReducer
 };

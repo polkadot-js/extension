@@ -3,15 +3,17 @@
 
 import type { ThemeProps } from '../types';
 
-import { NetWorkGroup } from '@subwallet/extension-base/background/KoniTypes';
+import { NETWORK_STATUS, NetWorkGroup } from '@subwallet/extension-base/background/KoniTypes';
+import { ALL_ACCOUNT_KEY } from '@subwallet/extension-koni-base/constants';
 import check from '@subwallet/extension-koni-ui/assets/check.svg';
+import { ActionContext } from '@subwallet/extension-koni-ui/components/contexts';
 import InputFilter from '@subwallet/extension-koni-ui/components/InputFilter';
 import Menu from '@subwallet/extension-koni-ui/components/Menu';
-import useGenesisHashOptions, { networkSelectOption } from '@subwallet/extension-koni-ui/hooks/useGenesisHashOptions';
+import useGenesisHashOptions, { NetworkSelectOption } from '@subwallet/extension-koni-ui/hooks/useGenesisHashOptions';
 import useTranslation from '@subwallet/extension-koni-ui/hooks/useTranslation';
 import { triggerAccountsSubscription } from '@subwallet/extension-koni-ui/messaging';
 import { getLogoByGenesisHash } from '@subwallet/extension-koni-ui/util/logoByGenesisHashMap';
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useContext, useEffect, useState } from 'react';
 import styled from 'styled-components';
 
 interface Props extends ThemeProps {
@@ -20,16 +22,18 @@ interface Props extends ThemeProps {
   onFilter?: (filter: string) => void;
   closeSetting?: () => void;
   currentNetwork?: string;
-  genesisOptions: networkSelectOption[];
+  genesisOptions: NetworkSelectOption[];
   selectNetwork: (genesisHash: string, networkPrefix: number, icon: string, networkKey: string) => void;
   isNotHaveAccount?: boolean;
 }
 
 function NetworkMenu ({ className, currentNetwork, genesisOptions, isNotHaveAccount, onFilter, reference, selectNetwork }: Props): React.ReactElement<Props> {
   const { t } = useTranslation();
-  const [filteredGenesisOptions, setFilteredGenesisOption] = useState(genesisOptions);
+
+  const [filteredGenesisOptions, setFilteredGenesisOption] = useState<NetworkSelectOption[]>(genesisOptions);
   const [filteredNetwork, setFilteredNetwork] = useState('');
   const [selectedGroup, setSelectedGroup] = useState('');
+  const navigate = useContext(ActionContext);
   const filterCategories: {text: string, type: NetWorkGroup | string}[] = [
     {
       text: 'All',
@@ -116,6 +120,10 @@ function NetworkMenu ({ className, currentNetwork, genesisOptions, isNotHaveAcco
     };
   }, [selectNetwork]);
 
+  const handleClickCustomNetworks = useCallback(() => {
+    navigate('/account/config-network');
+  }, [navigate]);
+
   return (
     <Menu
       className={className}
@@ -146,19 +154,29 @@ function NetworkMenu ({ className, currentNetwork, genesisOptions, isNotHaveAcco
       <div className='network-item-list'>
         {
           filteredGenesisOptions && filteredGenesisOptions.length
-            ? filteredGenesisOptions.map(({ icon, networkKey, networkPrefix, text, value }): React.ReactNode => (
+            ? filteredGenesisOptions.map(({ apiStatus, icon, networkKey, networkPrefix, text, value }): React.ReactNode => (
               <div
                 className='network-item-container'
                 key={value}
                 onClick={_selectNetwork(value, networkPrefix, icon, networkKey)}
               >
-                <img
-                  alt='logo'
-                  className={'network-logo'}
-                  src={getLogoByGenesisHash(value)}
-                />
+                <div className={'network-item'}>
+                  <img
+                    alt='logo'
+                    className={'network-logo'}
+                    src={getLogoByGenesisHash(value)}
+                  />
 
-                <span className={value === currentNetwork ? 'network-text__selected' : 'network-text'}>{text}</span>
+                  <span className={value === currentNetwork ? 'network-text__selected' : 'network-text'}>{text}</span>
+                  {
+                    networkKey.toLowerCase() !== ALL_ACCOUNT_KEY.toLowerCase() &&
+                    <span
+                      className={'status-dot'}
+                      style={{ backgroundColor: apiStatus === NETWORK_STATUS.CONNECTED ? 'green' : 'red' }}
+                    />
+                  }
+                </div>
+
                 {value === currentNetwork
                   ? (
                     <img
@@ -176,6 +194,14 @@ function NetworkMenu ({ className, currentNetwork, genesisOptions, isNotHaveAcco
             : <div className='kn-no-result'>No results</div>
         }
       </div>
+      <div className={'custom-network-container'}>
+        <div
+          className={'custom-network-btn'}
+          onClick={handleClickCustomNetworks}
+        >
+          Custom Networks
+        </div>
+      </div>
     </Menu>
   );
 }
@@ -185,6 +211,73 @@ export default React.memo(styled(NetworkMenu)(({ theme }: Props) => `
   right: 15px;
   user-select: none;
   border-radius: 8px;
+
+  .custom-network-btn {
+    color: ${theme.buttonTextColor2};
+    background-color: ${theme.backgroundAccountAddress};
+    padding: 10px;
+    width: 80%;
+    font-weight: 500;
+    font-size: 15px;
+    line-height: 26px;
+    text-align: center;
+    border-radius: 8px;
+    cursor: pointer;
+  }
+
+  .custom-network-container {
+    margin-top: 15px;
+    margin-bottom: 15px;
+    width: 100%;
+    display: flex;
+    justify-content: center;
+  }
+
+  .confirm-button {
+    cursor: pointer;
+    background: #004BFF;
+    border-radius: 8px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 10px;
+    color: #FFFFFF;
+  }
+
+  .cancel-button {
+    cursor: pointer;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-color: #181E42;
+    border-radius: 8px;
+    color: #42C59A;
+    padding: 10px;
+  }
+
+  .confirm-modal-btn-container {
+    display: flex;
+    justify-content: flex-end;
+    gap: 20px;
+  }
+
+  .confirm-modal-title {
+    font-size: 20px;
+    margin-bottom: 50px;
+  }
+
+  .network-item {
+    display: flex;
+    align-items: center;
+  }
+
+  .status-dot {
+    height: 7px;
+    width: 7px;
+    border-radius: 50%;
+    display: inline-block;
+    margin-left: 10px;
+  }
 
   .network-item-list-header {
     padding: 10px;
@@ -225,7 +318,7 @@ export default React.memo(styled(NetworkMenu)(({ theme }: Props) => `
   }
 
   .network-item-list {
-    max-height: 275px;
+    max-height: 200px;
     overflow-y: auto;
     padding: 10px 10px 10px;
   }
@@ -234,6 +327,7 @@ export default React.memo(styled(NetworkMenu)(({ theme }: Props) => `
     padding: 5px 0;
     cursor: pointer;
     display: flex;
+    justify-content: space-between;
     align-items: center;
 
     &:hover {

@@ -1,7 +1,14 @@
 // Copyright 2019-2022 @polkadot/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { faCog, faCoins, faExpand, faInfoCircle, faList, faLock, faQrcode } from '@fortawesome/free-solid-svg-icons';
+import { faCog } from '@fortawesome/free-solid-svg-icons/faCog';
+import { faCoins } from '@fortawesome/free-solid-svg-icons/faCoins';
+import { faExpand } from '@fortawesome/free-solid-svg-icons/faExpand';
+import { faInfoCircle } from '@fortawesome/free-solid-svg-icons/faInfoCircle';
+import { faList } from '@fortawesome/free-solid-svg-icons/faList';
+import { faLock } from '@fortawesome/free-solid-svg-icons/faLock';
+import { faPlug } from '@fortawesome/free-solid-svg-icons/faPlug';
+import { faQrcode } from '@fortawesome/free-solid-svg-icons/faQrcode';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import check from '@subwallet/extension-koni-ui/assets/check.svg';
 import { Link } from '@subwallet/extension-koni-ui/components';
@@ -68,16 +75,15 @@ function Settings ({ className }: Props): React.ReactElement {
           <div className='menu-setting-item__toggle' />
         </Link>
 
-        {/* <Link */}
-        {/*  className='menu-setting-item' */}
-        {/*  isDisabled */}
-        {/*  to='/account/networks' */}
-        {/* > */}
-        {/*  /!* @ts-ignore *!/ */}
-        {/*  <FontAwesomeIcon icon={faPlug} /> */}
-        {/*  <div className='menu-setting-item__text'>{t<string>('Networks')}</div> */}
-        {/*  <div className='menu-setting-item__toggle' /> */}
-        {/* </Link> */}
+        <Link
+          className='menu-setting-item'
+          to='/account/networks'
+        >
+          {/* @ts-ignore */}
+          <FontAwesomeIcon icon={faPlug} />
+          <div className='menu-setting-item__text'>{t<string>('Networks')}</div>
+          <div className='menu-setting-item__toggle' />
+        </Link>
 
         <Link
           className='menu-setting-item'

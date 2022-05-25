@@ -20,6 +20,8 @@ export default function useFetchNft (page: number, networkKey: string, gridSize:
   const rawItems = nftReducer?.nftList;
   const rawCollections = nftCollectionReducer.nftCollectionList;
 
+  let totalItems = 0;
+
   for (const collection of rawCollections) {
     const parsedCollection: _NftCollection = {
       collectionId: collection.collectionId,
@@ -31,14 +33,13 @@ export default function useFetchNft (page: number, networkKey: string, gridSize:
 
     for (const item of rawItems) {
       if (item.collectionId === collection.collectionId && item.chain === collection.chain) {
+        totalItems += 1;
         parsedCollection.nftItems.push(item);
       }
     }
 
     nftCollections.push(parsedCollection);
   }
-
-  let totalItems = rawItems.length;
 
   if (!showAll) {
     totalItems = 0;

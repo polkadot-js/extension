@@ -36,7 +36,7 @@ interface NFTResource {
 export class RmrkNftApi extends BaseNftApi {
   // eslint-disable-next-line no-useless-constructor
   constructor () {
-    super();
+    super('');
   }
 
   override setAddresses (addresses: string[]) {

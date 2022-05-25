@@ -4,22 +4,32 @@
 import { AuthUrls, Resolver } from '@subwallet/extension-base/background/handlers/State';
 import { AccountJson, AuthorizeRequest, RequestAccountList, RequestAccountSubscribe, RequestAuthorizeReject, RequestAuthorizeSubscribe, RequestAuthorizeTab, RequestCurrentAccountAddress, ResponseAuthorizeList, ResponseJsonGetAccountInfo, SeedLengths } from '@subwallet/extension-base/background/types';
 import { InjectedAccount, MetadataDefBase } from '@subwallet/extension-inject/types';
+import Web3 from 'web3';
 
 import { ApiPromise } from '@polkadot/api';
 import { SubmittableExtrinsicFunction } from '@polkadot/api/promise/types';
 import { KeyringPair$Json } from '@polkadot/keyring/types';
 import { Registry } from '@polkadot/types/types';
-import { Keyring } from '@polkadot/ui-keyring';
 import { SingleAddress } from '@polkadot/ui-keyring/observable/types';
 import { KeyringOptions } from '@polkadot/ui-keyring/options/types';
 import { KeyringPairs$Json } from '@polkadot/ui-keyring/types';
 import { BN } from '@polkadot/util';
 import { KeypairType } from '@polkadot/util-crypto/types';
 
+export interface ServiceInfo {
+  networkMap: Record<string, NetworkJson>;
+  apiMap: ApiMap;
+  isLock?: boolean;
+  currentAccountInfo: CurrentAccountInfo;
+  chainRegistry: Record<string, ChainRegistry>;
+  customErc721Registry: CustomEvmToken[];
+}
+
 export enum ApiInitStatus {
   SUCCESS,
   ALREADY_EXIST,
-  NOT_SUPPORT
+  NOT_SUPPORT,
+  NOT_EXIST
 }
 
 export interface AuthRequestV2 extends Resolver<ResultResolver> {
@@ -71,7 +81,8 @@ export interface StakingRewardItem {
 }
 
 export interface StakingRewardJson {
-  details: Array<StakingRewardItem>
+  ready: boolean;
+  details: Array<StakingRewardItem>;
 }
 
 export interface StakingItem {
@@ -247,6 +258,47 @@ export interface NetWorkInfo {
   decimals?: number;
 }
 
+export interface NetworkJson {
+  // General Informations
+  key: string; // Key of network in NetworkMap
+  chain: string; // Name of the network
+  icon?: string; // Icon name, available with known network
+  active: boolean; // Network is active or not
+
+  // Provider Informations
+  providers: Record<string, string>; // Predefined provider map
+  currentProvider: string; // Current provider key
+  currentProviderMode: 'http' | 'ws'; // Current provider mode, compute depend on provider protocol. the feature need to know this to decide use subscribe or cronjob to use this features.
+  customProviders?: Record<string, string>; // Custom provider map, provider name same with provider map
+  nftProvider?: string;
+
+  // Metadata get after connect to provider
+  genesisHash: string; // identifier for network
+  groups: NetWorkGroup[];
+  ss58Format: number;
+  paraId?: number;
+  chainType?: 'substrate' | 'ethereum';
+  crowdloanUrl?: string;
+
+  // Ethereum informations for predefine network only
+  isEthereum?: boolean; // Only show network with isEthereum=true when select one EVM account // user input
+  evmChainId?: number;
+
+  isHybrid?: boolean;
+
+  // Native token information
+  nativeToken?: string;
+  decimals?: number;
+
+  // Other informations
+  coinGeckoKey?: string; // Provider key to get token price from CoinGecko // user input
+  blockExplorer?: string; // Link to block scanner to check transaction with extrinsic hash // user input
+  dependencies?: string[]; // Auto active network in dependencies if current network is activated
+  getStakingOnChain?: boolean; // support get bonded on chain
+
+  apiStatus?: NETWORK_STATUS;
+}
+
 export interface DonateInfo {
   key: string;
   name: string;
@@ -276,6 +328,8 @@ export interface NetWorkMetadataDef extends MetadataDefBase {
   isEthereum: boolean;
   paraId?: number;
   isAvailable: boolean;
+  active: boolean;
+  apiStatus: NETWORK_STATUS;
 }
 
 export type CurrentNetworkInfo = {
@@ -330,15 +384,6 @@ export interface ResponseSettingsType {
 export interface RandomTestRequest {
   start: number;
   end: number;
-}
-
-export type PdotApi = {
-  keyring: Keyring;
-  apisMap: Record<string, ApiProps>;
-}
-
-export interface BackgroundWindow extends Window {
-  pdotApi: PdotApi;
 }
 
 export interface TransactionHistoryItemType {
@@ -474,6 +519,24 @@ export type RequestNftForceUpdate = {
   chain: string
 }
 
+export enum NETWORK_ERROR {
+  INVALID_INFO_TYPE = 'invalidInfoType',
+  INJECT_SCRIPT_DETECTED = 'injectScriptDetected',
+  EXISTED_NETWORK = 'existedNetwork',
+  EXISTED_PROVIDER = 'existedProvider',
+  INVALID_PROVIDER = 'invalidProvider',
+  NONE = 'none',
+  CONNECTION_FAILURE = 'connectionFailure',
+  PROVIDER_NOT_SAME_NETWORK = 'providerNotSameNetwork'
+}
+
+export enum NETWORK_STATUS {
+  CONNECTED = 'connected',
+  CONNECTING = 'connecting',
+  DISCONNECTED = 'disconnected',
+  PENDING = 'pending'
+}
+
 export enum TransferErrorCode {
   INVALID_FROM_ADDRESS = 'invalidFromAccount',
   INVALID_TO_ADDRESS = 'invalidToAccount',
@@ -545,13 +608,46 @@ export interface EvmNftSubmitTransaction {
   rawTransaction: Record<string, any>
 }
 
-export interface EvmNftTransactionResponse {
+export interface NftTransactionResponse {
   passwordError?: string | null,
   callHash?: string,
   status?: boolean,
   transactionHash?: string,
   txError?: boolean,
+  balanceError?: boolean,
   isSendingSelf: boolean
+}
+
+export interface ValidateNetworkResponse {
+  success: boolean,
+  key: string,
+  genesisHash: string,
+  ss58Prefix: string,
+  networkGroup: NetWorkGroup[],
+  chain: string,
+  evmChainId: number,
+  nativeToken?: string,
+  decimal?: number
+
+  error?: NETWORK_ERROR,
+  conflictChain?: string,
+  conflictKey?: string,
+}
+
+export interface ValidateNetworkRequest {
+  provider: string,
+  isEthereum: boolean,
+  existedNetwork?: NetworkJson
+}
+
+export interface ApiMap {
+  dotSama: Record<string, ApiProps>;
+  web3: Record<string, Web3>;
+}
+
+export interface DisableNetworkResponse {
+  success: boolean,
+  activeNetworkCount?: number
 }
 
 export interface CustomEvmToken {
@@ -559,7 +655,7 @@ export interface CustomEvmToken {
   smartContract: string,
   symbol?: string,
   decimals?: number,
-  chain: 'astarEvm' | 'moonbeam' | 'moonriver' | 'moonbase' | 'shidenEvm',
+  chain: string,
   type: 'erc20' | 'erc721'
 }
 
@@ -568,21 +664,15 @@ export interface EvmTokenJson {
   erc721: CustomEvmToken[]
 }
 
-export interface _ServiceInfo {
-  currentAccount: string,
-  chainRegistry: Record<string, ChainRegistry>;
-  customErc721Registry: CustomEvmToken[];
-}
-
 export interface DeleteEvmTokenParams {
   smartContract: string,
-  chain: 'astarEvm' | 'moonbeam' | 'moonriver' | 'moonbase' | 'shidenEvm',
+  chain: string,
   type: 'erc20' | 'erc721'
 }
 
 export interface ValidateEvmTokenRequest {
   smartContract: string,
-  chain: 'astarEvm' | 'moonbeam' | 'moonriver' | 'moonbase' | 'shidenEvm',
+  chain: string,
   type: 'erc20' | 'erc721'
 }
 
@@ -623,19 +713,50 @@ export interface RequestSaveRecentAccount {
   accountId: string;
 }
 
+export interface SubstrateNftTransactionRequest {
+  params: Record<string, any>;
+  senderAddress: string;
+  recipientAddress: string;
+  networkKey: string;
+}
+
+export interface SubstrateNftTransaction {
+  error: boolean;
+  estimatedFee?: string;
+}
+
+export interface SubstrateNftSubmitTransaction {
+  params: Record<string, any> | null;
+  password: string;
+  senderAddress: string;
+  recipientAddress: string;
+}
+
 export interface KoniRequestSignatures {
+  'pri(networkMap.recoverDotSama)': [string, boolean];
+  'pri(substrateNft.submitTransaction)': [SubstrateNftSubmitTransaction, NftTransactionResponse, NftTransactionResponse]
+  'pri(substrateNft.getTransaction)': [SubstrateNftTransactionRequest, SubstrateNftTransaction];
+  'pri(networkMap.disableAll)': [null, boolean];
+  'pri(networkMap.enableAll)': [null, boolean];
+  'pri(networkMap.resetDefault)': [null, boolean];
+  'pri(apiMap.validate)': [ValidateNetworkRequest, ValidateNetworkResponse];
+  'pri(networkMap.enableOne)': [string, boolean];
+  'pri(networkMap.disableOne)': [string, DisableNetworkResponse];
+  'pri(networkMap.removeOne)': [string, boolean];
+  'pri(networkMap.upsert)': [NetworkJson, boolean];
+  'pri(networkMap.getNetworkMap)': [null, Record<string, NetworkJson>];
+  'pri(networkMap.getSubscription)': [null, Record<string, NetworkJson>, Record<string, NetworkJson>];
   'pri(evmTokenState.validateEvmToken)': [ValidateEvmTokenRequest, ValidateEvmTokenResponse];
   'pri(evmTokenState.deleteMany)': [DeleteEvmTokenParams[], boolean];
   'pri(evmTokenState.upsertEvmTokenState)': [CustomEvmToken, boolean];
   'pri(evmTokenState.getEvmTokenState)': [null, EvmTokenJson];
   'pri(evmTokenState.getSubscription)': [null, EvmTokenJson, EvmTokenJson];
-  'pri(evmNft.submitTransaction)': [EvmNftSubmitTransaction, EvmNftTransactionResponse, EvmNftTransactionResponse];
+  'pri(evmNft.submitTransaction)': [EvmNftSubmitTransaction, NftTransactionResponse, NftTransactionResponse];
   'pri(evmNft.getTransaction)': [EvmNftTransactionRequest, EvmNftTransaction];
   'pri(nftTransfer.setNftTransfer)': [NftTransferExtra, boolean];
   'pri(nftTransfer.getNftTransfer)': [null, NftTransferExtra];
   'pri(nftTransfer.getSubscription)': [null, NftTransferExtra, NftTransferExtra];
   'pri(nft.forceUpdate)': [RequestNftForceUpdate, boolean];
-  'pri(api.init)': [RequestApi, ApiInitStatus];
   'pri(staking.getStaking)': [null, StakingJson];
   'pri(staking.getSubscription)': [RequestSubscribeStaking, StakingJson, StakingJson];
   'pri(stakingReward.getStakingReward)': [null, StakingRewardJson];
@@ -678,7 +799,6 @@ export interface KoniRequestSignatures {
   'pri(currentAccount.subscribeSettings)': [null, ResponseSettingsType, ResponseSettingsType];
   'pri(currentAccount.saveAccountAllLogo)': [string, boolean, ResponseSettingsType];
   'pri(currentAccount.saveTheme)': [ThemeTypes, boolean, ResponseSettingsType];
-  'pri(networkMetadata.list)': [null, NetWorkMetadataDef[]];
   'pri(chainRegistry.getSubscription)': [null, Record<string, ChainRegistry>, Record<string, ChainRegistry>];
   'pri(transaction.history.getSubscription)': [null, Record<string, TransactionHistoryItemType[]>, Record<string, TransactionHistoryItemType[]>];
   'pri(transaction.history.add)': [RequestTransactionHistoryAdd, boolean, TransactionHistoryItemType[]];

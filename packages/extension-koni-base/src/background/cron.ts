@@ -1,19 +1,18 @@
 // Copyright 2019-2022 @subwallet/extension-koni authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { CustomEvmToken, NftTransferExtra, StakingRewardJson } from '@subwallet/extension-base/background/KoniTypes';
+import { ApiMap, CustomEvmToken, NETWORK_STATUS, NetworkJson, NftTransferExtra, StakingRewardJson } from '@subwallet/extension-base/background/KoniTypes';
 import { getTokenPrice } from '@subwallet/extension-koni-base/api/coingecko';
 import { fetchDotSamaHistory } from '@subwallet/extension-koni-base/api/subquery/history';
-import { recoverWeb3Api, web3Map } from '@subwallet/extension-koni-base/api/web3/web3';
-import { dotSamaAPIMap, state } from '@subwallet/extension-koni-base/background/handlers';
-import { KoniSubcription } from '@subwallet/extension-koni-base/background/subscription';
-import { CRON_AUTO_RECOVER_DOTSAMA_INTERVAL, CRON_AUTO_RECOVER_WEB3_INTERVAL, CRON_REFRESH_HISTORY_INTERVAL, CRON_REFRESH_NFT_INTERVAL, CRON_REFRESH_PRICE_INTERVAL, CRON_REFRESH_STAKING_REWARD_INTERVAL, DOTSAMA_MAX_CONTINUE_RETRY } from '@subwallet/extension-koni-base/constants';
+import { state } from '@subwallet/extension-koni-base/background/handlers';
+import { KoniSubscription } from '@subwallet/extension-koni-base/background/subscription';
+import { CRON_AUTO_RECOVER_DOTSAMA_INTERVAL, CRON_GET_API_MAP_STATUS, CRON_REFRESH_HISTORY_INTERVAL, CRON_REFRESH_NFT_INTERVAL, CRON_REFRESH_PRICE_INTERVAL, CRON_REFRESH_STAKING_REWARD_INTERVAL } from '@subwallet/extension-koni-base/constants';
 import { Subject } from 'rxjs';
 
 export class KoniCron {
-  subscriptions: KoniSubcription;
+  subscriptions: KoniSubscription;
 
-  constructor (subscriptions: KoniSubcription) {
+  constructor (subscriptions: KoniSubscription) {
     this.subscriptions = subscriptions;
   }
 
@@ -54,19 +53,24 @@ export class KoniCron {
   }
 
   init () {
-    this.addCron('refreshPrice', this.refreshPrice, CRON_REFRESH_PRICE_INTERVAL);
-    this.addCron('recoverAPI', this.recoverAPI, CRON_AUTO_RECOVER_DOTSAMA_INTERVAL, false);
-    this.addCron('recoverWeb3', this.recoverWeb3Api, CRON_AUTO_RECOVER_WEB3_INTERVAL, false);
-
     state.getCurrentAccount((currentAccountInfo) => {
-      if (currentAccountInfo) {
-        this.addCron('refreshNft', this.refreshNft(currentAccountInfo.address, state.getErc721Tokens()), CRON_REFRESH_NFT_INTERVAL);
+      if (currentAccountInfo && (Object.keys(state.getDotSamaApiMap()).length !== 0 || Object.keys(state.getWeb3ApiMap()).length !== 0)) {
+        this.addCron('refreshPrice', this.refreshPrice, CRON_REFRESH_PRICE_INTERVAL);
+        this.addCron('checkStatusApiMap', this.updateApiMapStatus, CRON_GET_API_MAP_STATUS);
+        this.addCron('recoverApiMap', this.recoverApiMap, CRON_AUTO_RECOVER_DOTSAMA_INTERVAL, false);
+
+        this.addCron('refreshNft', this.refreshNft(currentAccountInfo.address, state.getApiMap(), state.getErc721Tokens()), CRON_REFRESH_NFT_INTERVAL);
         this.addCron('refreshStakingReward', this.refreshStakingReward(currentAccountInfo.address), CRON_REFRESH_STAKING_REWARD_INTERVAL);
-        this.addCron('refreshHistory', this.refreshHistory(currentAccountInfo.address), CRON_REFRESH_HISTORY_INTERVAL);
+        this.addCron('refreshHistory', this.refreshHistory(currentAccountInfo.address, state.getNetworkMap()), CRON_REFRESH_HISTORY_INTERVAL);
+      } else {
+        this.setNftReady();
+        this.setStakingRewardReady();
       }
 
-      state.subscribeServiceInfo_().subscribe({
-        next: ({ currentAccount: address, customErc721Registry }) => {
+      state.subscribeServiceInfo().subscribe({
+        next: (serviceInfo) => {
+          const { address } = serviceInfo.currentAccountInfo;
+
           this.resetNft();
           this.resetNftTransferMeta();
           this.resetStakingReward();
@@ -75,43 +79,94 @@ export class KoniCron {
           this.removeCron('refreshStakingReward');
           this.removeCron('refreshHistory');
 
-          this.addCron('refreshNft', this.refreshNft(address, customErc721Registry), CRON_REFRESH_NFT_INTERVAL);
-          this.addCron('refreshStakingReward', this.refreshStakingReward(address), CRON_REFRESH_STAKING_REWARD_INTERVAL);
-          this.addCron('refreshHistory', this.refreshHistory(address), CRON_REFRESH_HISTORY_INTERVAL);
+          this.removeCron('refreshPrice');
+          this.removeCron('checkStatusApiMap');
+          this.removeCron('recoverApiMap');
+
+          if (Object.keys(serviceInfo.apiMap.dotSama).length !== 0 || Object.keys(serviceInfo.apiMap.web3).length !== 0) { // only add cron job if there's at least 1 active network
+            this.addCron('refreshPrice', this.refreshPrice, CRON_REFRESH_PRICE_INTERVAL);
+            this.addCron('checkStatusApiMap', this.updateApiMapStatus, CRON_GET_API_MAP_STATUS);
+            this.addCron('recoverApiMap', this.recoverApiMap, CRON_AUTO_RECOVER_DOTSAMA_INTERVAL, false);
+
+            this.addCron('refreshNft', this.refreshNft(address, serviceInfo.apiMap, serviceInfo.customErc721Registry), CRON_REFRESH_NFT_INTERVAL);
+            this.addCron('refreshStakingReward', this.refreshStakingReward(address), CRON_REFRESH_STAKING_REWARD_INTERVAL);
+            this.addCron('refreshHistory', this.refreshHistory(address, serviceInfo.networkMap), CRON_REFRESH_HISTORY_INTERVAL);
+          } else {
+            this.setNftReady();
+            this.setStakingRewardReady();
+          }
         }
       });
     });
   }
 
-  recoverAPI () {
-    state.getCurrentAccount(({ address }) => {
-      console.log('Auto recovering API');
-      Object.values(dotSamaAPIMap).forEach((apiProp) => {
-        if (apiProp.apiRetry && apiProp.apiRetry > DOTSAMA_MAX_CONTINUE_RETRY) {
-          apiProp.recoverConnect && apiProp.recoverConnect();
-        }
-      });
+  recoverApiMap () {
+    const apiMap = state.getApiMap();
 
-      this.subscriptions?.subscribeBalancesAndCrowdloans && this.subscriptions.subscribeBalancesAndCrowdloans(address);
-    });
-  }
+    for (const apiProp of Object.values(apiMap.dotSama)) {
+      if (!apiProp.isApiConnected) {
+        apiProp.recoverConnect && apiProp.recoverConnect();
+      }
+    }
 
-  recoverWeb3Api () {
-    console.log('check web3 connection');
-
-    for (const [key, web3] of Object.entries(web3Map)) {
+    for (const [key, web3] of Object.entries(apiMap.web3)) {
       web3.eth.net.isListening()
         .catch(() => {
-          console.log('web3 disconnected', key);
-          recoverWeb3Api(key);
+          state.refreshWeb3Api(key);
         });
     }
 
-    console.log('check web3 connection done');
+    state.getCurrentAccount(({ address }) => {
+      this.subscriptions?.subscribeBalancesAndCrowdloans && this.subscriptions.subscribeBalancesAndCrowdloans(address, state.getDotSamaApiMap(), state.getWeb3ApiMap());
+    });
+  }
+
+  updateApiMapStatus () {
+    const apiMap = state.getApiMap();
+    const networkMap = state.getNetworkMap();
+
+    for (const [key, apiProp] of Object.entries(apiMap.dotSama)) {
+      let status: NETWORK_STATUS = NETWORK_STATUS.CONNECTING;
+
+      if (apiProp.isApiConnected) {
+        status = NETWORK_STATUS.CONNECTED;
+      }
+
+      if (!networkMap[key].apiStatus) {
+        state.updateNetworkStatus(key, status);
+      } else if (networkMap[key].apiStatus && networkMap[key].apiStatus !== status) {
+        state.updateNetworkStatus(key, status);
+      }
+    }
+
+    for (const [key, web3] of Object.entries(apiMap.web3)) {
+      web3.eth.net.isListening()
+        .then(() => {
+          if (!networkMap[key].apiStatus) {
+            state.updateNetworkStatus(key, NETWORK_STATUS.CONNECTED);
+          } else if (networkMap[key].apiStatus && networkMap[key].apiStatus !== NETWORK_STATUS.CONNECTED) {
+            state.updateNetworkStatus(key, NETWORK_STATUS.CONNECTED);
+          }
+        })
+        .catch(() => {
+          if (!networkMap[key].apiStatus) {
+            state.updateNetworkStatus(key, NETWORK_STATUS.CONNECTING);
+          } else if (networkMap[key].apiStatus && networkMap[key].apiStatus !== NETWORK_STATUS.CONNECTING) {
+            state.updateNetworkStatus(key, NETWORK_STATUS.CONNECTING);
+          }
+        });
+    }
   }
 
   refreshPrice () {
-    getTokenPrice()
+    const activeNetworks: string[] = [];
+
+    Object.values(state.getNetworkMap()).forEach((network) => {
+      if (network.active && network.coinGeckoKey) {
+        activeNetworks.push(network.coinGeckoKey);
+      }
+    });
+    getTokenPrice(activeNetworks)
       .then((rs) => {
         state.setPrice(rs, () => {
           console.log('Get Token Price From CoinGecko');
@@ -120,10 +175,10 @@ export class KoniCron {
       .catch((err) => console.log(err));
   }
 
-  refreshNft (address: string, customErc721Registry: CustomEvmToken[]) {
+  refreshNft (address: string, apiMap: ApiMap, customErc721Registry: CustomEvmToken[]) {
     return () => {
       console.log('Refresh Nft state');
-      this.subscriptions.subscribeNft(address, customErc721Registry);
+      this.subscriptions.subscribeNft(address, apiMap.dotSama, apiMap.web3, customErc721Registry);
     };
   }
 
@@ -143,6 +198,7 @@ export class KoniCron {
   resetStakingReward () {
     state.resetStakingMap();
     state.setStakingReward({
+      ready: false,
       details: []
     } as StakingRewardJson);
     // console.log('Reset Staking reward state');
@@ -156,14 +212,22 @@ export class KoniCron {
     };
   }
 
-  refreshHistory (address: string) {
+  refreshHistory (address: string, networkMap: Record<string, NetworkJson>) {
     return () => {
       console.log('Refresh History state');
-      fetchDotSamaHistory(address, (historyMap) => {
+      fetchDotSamaHistory(address, networkMap, (historyMap) => {
         console.log('--- historyMap ---', historyMap);
         state.setHistory(historyMap);
       });
     };
+  }
+
+  setNftReady () {
+    state.updateNftReady(true);
+  }
+
+  setStakingRewardReady () {
+    state.updateStakingRewardReady(true);
   }
 
   resetHistory () {

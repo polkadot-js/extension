@@ -114,7 +114,6 @@ function ImportSeed ({ className = '' }: Props): React.ReactElement {
             onCreate={_onCreate}
             selectedGenesis={selectedGenesis}
           />
-
         )
       }
     </>

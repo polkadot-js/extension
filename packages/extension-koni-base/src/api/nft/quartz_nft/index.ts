@@ -24,7 +24,7 @@ interface CollectionProperties {
 export default class QuartzNftApi extends BaseNftApi {
   // eslint-disable-next-line no-useless-constructor
   constructor (api: ApiProps | null, addresses: string[], chain: string) {
-    super(api, addresses, chain);
+    super(chain, api, addresses);
   }
 
   /**

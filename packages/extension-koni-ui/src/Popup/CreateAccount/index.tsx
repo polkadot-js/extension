@@ -1,6 +1,7 @@
 // Copyright 2019-2022 @polkadot/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
+// eslint-disable-next-line header/header
 import LoadingContainer from '@subwallet/extension-koni-ui/components/LoadingContainer';
 import HeaderWithSteps from '@subwallet/extension-koni-ui/partials/HeaderWithSteps';
 import React, { useCallback, useContext, useEffect, useState } from 'react';

@@ -1,8 +1,8 @@
 // Copyright 2019-2022 @polkadot/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { ethereumChains } from '@subwallet/extension-koni-base/api/dotsama/api-helper';
-import { AccountContext, Warning } from '@subwallet/extension-koni-ui/components';
+import { ChainRegistry, NetworkJson } from '@subwallet/extension-base/background/KoniTypes';
+import { AccountContext, ActionContext, Warning } from '@subwallet/extension-koni-ui/components';
 import Button from '@subwallet/extension-koni-ui/components/Button';
 import InputBalance from '@subwallet/extension-koni-ui/components/InputBalance';
 import LoadingContainer from '@subwallet/extension-koni-ui/components/LoadingContainer';
@@ -18,6 +18,7 @@ import SendFundResult from '@subwallet/extension-koni-ui/Popup/Sending/SendFundR
 import { getAuthTransactionFeeInfo, getBalanceFormat, getDefaultValue, getMainTokenInfo, getMaxTransferAndNoFees, isContainGasRequiredExceedsError } from '@subwallet/extension-koni-ui/Popup/Sending/utils';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { ThemeProps, TransferResultType } from '@subwallet/extension-koni-ui/types';
+import { getEthereumChains } from '@subwallet/extension-koni-ui/util';
 import React, { useCallback, useContext, useEffect, useState } from 'react';
 import { useSelector } from 'react-redux';
 import styled from 'styled-components';
@@ -33,6 +34,8 @@ interface Props extends ThemeProps {
 interface ContentProps extends ThemeProps {
   className?: string;
   defaultValue: SenderInputAddressType;
+  networkMap: Record<string, NetworkJson>;
+  chainRegistryMap: Record<string, ChainRegistry>;
 }
 
 function Wrapper ({ className = '', theme }: Props): React.ReactElement<Props> {
@@ -40,7 +43,8 @@ function Wrapper ({ className = '', theme }: Props): React.ReactElement<Props> {
   const { accounts } = useContext(AccountContext);
   const { chainRegistry: chainRegistryMap,
     currentAccount: { account },
-    currentNetwork: { isReady: isCurrentNetworkInfoReady, networkKey } } = useSelector((state: RootState) => state);
+    currentNetwork: { isReady: isCurrentNetworkInfoReady, networkKey },
+    networkMap } = useSelector((state: RootState) => state);
 
   const defaultValue = getDefaultValue(networkKey, !!isCurrentNetworkInfoReady, account?.address, chainRegistryMap, accounts);
 
@@ -58,8 +62,10 @@ function Wrapper ({ className = '', theme }: Props): React.ReactElement<Props> {
       {accounts && accounts.length && account && defaultValue
         ? (
           <Donate
+            chainRegistryMap={chainRegistryMap}
             className='send-fund-container'
             defaultValue={defaultValue}
+            networkMap={networkMap}
             theme={theme}
           />
         )
@@ -69,10 +75,9 @@ function Wrapper ({ className = '', theme }: Props): React.ReactElement<Props> {
   );
 }
 
-function Donate ({ className, defaultValue }: ContentProps): React.ReactElement {
+function Donate ({ chainRegistryMap, className, defaultValue, networkMap }: ContentProps): React.ReactElement {
   const { t } = useTranslation();
   const [amount, setAmount] = useState<BN | undefined>(BN_ZERO);
-  const { chainRegistry: chainRegistryMap } = useSelector((state: RootState) => state);
   const [recipientId, setRecipientId] = useState<string | null>(null);
   const [isShowTxModal, setShowTxModal] = useState<boolean>(false);
   const [{ address: senderId,
@@ -98,6 +103,7 @@ function Donate ({ className, defaultValue }: ContentProps): React.ReactElement 
       ? balanceFormat[0]
       : getBalanceFormat(selectedNetworkKey, feeSymbol, chainRegistryMap)[0]
     : null;
+  const ethereumChains = getEthereumChains(networkMap);
   const isSameAddress = !!recipientId && !!senderId && (recipientId === senderId);
   const isNotSameAddressAndTokenType = (isEthereumAddress(senderId) && !ethereumChains.includes(selectedNetworkKey)) ||
     (!isEthereumAddress(senderId) && ethereumChains.includes(selectedNetworkKey));
@@ -115,6 +121,14 @@ function Donate ({ className, defaultValue }: ContentProps): React.ReactElement 
     !isNotSameAddressAndTokenType &&
     !isNotSameAddressType &&
     !amountGtAvailableBalance;
+
+  const navigate = useContext(ActionContext);
+
+  useEffect(() => {
+    if (balanceFormat[0] === undefined && balanceFormat[1] === undefined) { // go back if token is deleted
+      navigate('/');
+    }
+  }, [balanceFormat, navigate]);
 
   useEffect(() => {
     let isSync = true;
@@ -260,6 +274,7 @@ function Donate ({ className, defaultValue }: ContentProps): React.ReactElement 
               className=''
               initValue={defaultValue}
               isDonation
+              networkMap={networkMap}
               onChange={setSenderValue}
             />
 
@@ -268,6 +283,7 @@ function Donate ({ className, defaultValue }: ContentProps): React.ReactElement 
               balanceFormat={balanceFormat}
               className={''}
               networkKey={selectedNetworkKey}
+              networkMap={networkMap}
               onchange={setRecipientId}
             />
 
@@ -385,6 +401,7 @@ function Donate ({ className, defaultValue }: ContentProps): React.ReactElement 
             fee, feeDecimal, feeSymbol, mainTokenInfo, chainRegistryMap[selectedNetworkKey].tokenMap
           )}
           isDonation
+          networkMap={networkMap}
           onCancel={_onCancelTx}
           onChangeResult={_onChangeResult}
           requestPayload={{

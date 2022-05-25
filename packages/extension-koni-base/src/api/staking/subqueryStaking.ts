@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { APIItemState, StakingRewardItem, StakingRewardJson } from '@subwallet/extension-base/background/KoniTypes';
-import NETWORKS from '@subwallet/extension-koni-base/api/endpoints';
+import { PREDEFINED_NETWORKS } from '@subwallet/extension-koni-base/api/predefinedNetworks';
 import { SUBQUERY_ENDPOINTS, SUPPORTED_STAKING_CHAINS } from '@subwallet/extension-koni-base/api/staking/config';
 import { reformatAddress, toUnit } from '@subwallet/extension-koni-base/utils/utils';
 import axios from 'axios';
@@ -14,7 +14,7 @@ interface StakingResponseItem {
 
 const getSubqueryStakingReward = async (accounts: string[], chain: string): Promise<StakingRewardItem> => {
   const amounts = await Promise.all(accounts.map(async (account) => {
-    const parsedAccount = reformatAddress(account, NETWORKS[chain].ss58Format);
+    const parsedAccount = reformatAddress(account, PREDEFINED_NETWORKS[chain].ss58Format);
     const resp = await axios({
       url: SUBQUERY_ENDPOINTS[chain],
       method: 'post',
@@ -55,10 +55,10 @@ const getSubqueryStakingReward = async (accounts: string[], chain: string): Prom
   }
 
   // @ts-ignore
-  parsedAmount = toUnit(parsedAmount, NETWORKS[chain].decimals);
+  parsedAmount = toUnit(parsedAmount, PREDEFINED_NETWORKS[chain].decimals);
 
   return {
-    name: NETWORKS[chain].chain,
+    name: PREDEFINED_NETWORKS[chain].chain,
     chainId: chain,
     totalReward: parsedAmount.toString(),
     state: APIItemState.READY

@@ -3,13 +3,14 @@
 
 import { APIItemState, ChainRegistry, NetWorkGroup, TokenInfo } from '@subwallet/extension-base/background/KoniTypes';
 import { AccountBalanceType, CrowdloanContributeValueType } from '@subwallet/extension-koni-ui/hooks/screen/home/types';
+import useGetNetworkMetadata from '@subwallet/extension-koni-ui/hooks/screen/home/useGetNetworkMetadata';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { BN_ZERO, getBalances, parseBalancesInfo } from '@subwallet/extension-koni-ui/util';
 import { BalanceInfo } from '@subwallet/extension-koni-ui/util/types';
 import BigN from 'bignumber.js';
 import { useSelector } from 'react-redux';
 
-function getCrowdloadChainRegistry (groups: NetWorkGroup[], chainRegistryMap: Record<string, ChainRegistry>): ChainRegistry | null {
+function getCrowdloanChainRegistry (groups: NetWorkGroup[], chainRegistryMap: Record<string, ChainRegistry>): ChainRegistry | null {
   if (groups.includes('POLKADOT_PARACHAIN') && chainRegistryMap.polkadot) {
     return chainRegistryMap.polkadot;
   }
@@ -60,8 +61,10 @@ export default function useAccountBalance (currentNetworkKey: string,
   const { balance: balanceReducer,
     chainRegistry: chainRegistryMap,
     crowdloan: crowdloanReducer,
-    networkMetadata: networkMetadataMap,
+    networkMap,
     price: priceReducer } = useSelector((state: RootState) => state);
+
+  const networkMetadataMap = useGetNetworkMetadata();
 
   const balanceMap = balanceReducer.details;
   const crowdLoanMap = crowdloanReducer.details;
@@ -111,7 +114,7 @@ export default function useAccountBalance (currentNetworkKey: string,
       tokenDecimals,
       tokenSymbols,
       balanceItem
-    }, registry.tokenMap);
+    }, registry.tokenMap, networkMap[networkKey]);
 
     networkBalanceMaps[networkKey] = balanceInfo;
     totalBalanceValue = totalBalanceValue.plus(balanceInfo.convertedBalanceValue);
@@ -131,7 +134,7 @@ export default function useAccountBalance (currentNetworkKey: string,
       return;
     }
 
-    const registry = getCrowdloadChainRegistry(networkMetadata.groups, chainRegistryMap);
+    const registry = getCrowdloanChainRegistry(networkMetadata.groups, chainRegistryMap);
     const crowdLoanItem = crowdLoanMap[networkKey];
 
     if (!registry ||

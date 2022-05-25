@@ -1,14 +1,15 @@
 // Copyright 2019-2022 @polkadot/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { NetWorkGroup } from '@subwallet/extension-base/background/KoniTypes';
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { NETWORK_STATUS, NetWorkGroup } from '@subwallet/extension-base/background/KoniTypes';
+import { RootState } from '@subwallet/extension-koni-ui/stores';
+import { useMemo } from 'react';
+import { useSelector } from 'react-redux';
 
-import { getAllNetworkMetadata } from '../messaging';
-import chains from '../util/chains';
+import { _getKnownHashes } from '../util/defaultChains';
 import useTranslation from './useTranslation';
 
-export interface networkSelectOption {
+export interface NetworkSelectOption {
   text: string;
   value: string;
   networkKey: string;
@@ -16,43 +17,20 @@ export interface networkSelectOption {
   icon: string;
   groups: NetWorkGroup[];
   isEthereum: boolean;
+  active: boolean;
+  apiStatus: NETWORK_STATUS;
 }
 
 const RELAY_CHAIN = 'Relay Chain';
 
-const availableChain = chains.filter((c) => c.isAvailable);
-
-export default function (): networkSelectOption[] {
+export default function (): NetworkSelectOption[] {
   const { t } = useTranslation();
-  const [metadataChains, setMetadataChains] = useState<networkSelectOption[]>([]);
-  const mounted = useRef(false);
+  const { networkMap } = useSelector((state: RootState) => state);
+  const parsedChains = _getKnownHashes(networkMap);
 
-  useEffect(() => {
-    mounted.current = true;
+  const availableChains = parsedChains.filter((c) => c.isAvailable);
 
-    getAllNetworkMetadata().then((metadataDefs) => {
-      if (mounted.current) {
-        const res = metadataDefs.filter((c) => c.isAvailable).map((metadata) => (
-          {
-            text: metadata.chain,
-            value: metadata.genesisHash,
-            networkKey: metadata.networkKey,
-            networkPrefix: metadata.ss58Format,
-            icon: metadata.icon,
-            groups: metadata.groups,
-            isEthereum: metadata.isEthereum
-          }));
-
-        setMetadataChains(res);
-      }
-    }).catch(console.error);
-
-    return () => {
-      mounted.current = false;
-    };
-  }, []);
-
-  const hashes = useMemo(() => [
+  return useMemo(() => [
     {
       text: t('Allow use on any chain'),
       value: '',
@@ -60,40 +38,36 @@ export default function (): networkSelectOption[] {
       networkPrefix: -1,
       icon: 'polkadot',
       groups: ['UNKNOWN'] as NetWorkGroup[],
-      isEthereum: false
+      isEthereum: false,
+      active: true,
+      apiStatus: NETWORK_STATUS.DISCONNECTED
     },
     // put the relay chains at the top
-    ...availableChain.filter(({ chain }) => chain.includes(RELAY_CHAIN))
-      .map(({ chain, genesisHash, groups, icon, isEthereum, networkKey, ss58Format }) => ({
+    ...availableChains.filter(({ chain }) => chain.includes(RELAY_CHAIN))
+      .map(({ active, apiStatus, chain, genesisHash, groups, icon, isEthereum, networkKey, ss58Format }) => ({
         text: chain,
         value: genesisHash,
         networkPrefix: ss58Format,
         networkKey,
         icon,
         groups,
-        isEthereum
+        isEthereum,
+        active,
+        apiStatus
       })),
-    ...availableChain.map(({ chain, genesisHash, groups, icon, isEthereum, networkKey, ss58Format }) => ({
+    ...availableChains.map(({ active, apiStatus, chain, genesisHash, groups, icon, isEthereum, networkKey, ss58Format }) => ({
       text: chain,
       value: genesisHash,
       networkPrefix: ss58Format,
       networkKey,
       icon,
       groups,
-      isEthereum
+      isEthereum,
+      active,
+      apiStatus
     }))
       // remove the relay chains, they are at the top already
       .filter(({ text }) => !text.includes(RELAY_CHAIN))
-      .concat(
-        // get any chain present in the metadata and not already part of chains
-        ...metadataChains.filter(
-          ({ value }) => {
-            return !availableChain.find(
-              ({ genesisHash }) => genesisHash === value);
-          }
-        ))
       .sort((a, b) => a.text.localeCompare(b.text))
-  ], [metadataChains, t]);
-
-  return hashes;
+  ], [availableChains, t]);
 }

@@ -8,7 +8,7 @@ import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { useSelector } from 'react-redux';
 
 export default function useFetchStaking (networkKey: string): StakingType {
-  const { price: priceReducer, staking: stakingReducer, stakingReward: stakingRewardReducer } = useSelector((state: RootState) => state);
+  const { networkMap, price: priceReducer, staking: stakingReducer, stakingReward: stakingRewardReducer } = useSelector((state: RootState) => state);
 
   const { priceMap } = priceReducer;
   const parsedPriceMap: Record<string, number> = {};
@@ -16,7 +16,7 @@ export default function useFetchStaking (networkKey: string): StakingType {
   const stakingRewardList = stakingRewardReducer.details;
   const readyStakingItems: StakingItem[] = [];
   const stakingData: StakingDataType[] = [];
-  let loading = true;
+  let loading = !stakingRewardReducer.ready;
 
   const showAll = networkKey.toLowerCase() === ALL_ACCOUNT_KEY.toLowerCase();
 
@@ -27,7 +27,7 @@ export default function useFetchStaking (networkKey: string): StakingType {
       loading = false;
 
       if (stakingItem.balance !== '0' && (Math.round(parseFloat(stakingItem.balance as string) * 100) / 100) !== 0) {
-        parsedPriceMap[stakingItem.chainId] = priceMap[stakingItem.chainId];
+        parsedPriceMap[stakingItem.chainId] = priceMap[networkMap[key]?.coinGeckoKey || stakingItem.chainId];
         readyStakingItems.push(stakingItem);
       }
     }

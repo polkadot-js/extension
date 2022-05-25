@@ -2,18 +2,17 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { assetFromToken } from '@equilab/api';
-import { ResponseTransfer, SupportTransferResponse, TokenInfo, TransferErrorCode, TransferStep } from '@subwallet/extension-base/background/KoniTypes';
-import { ethereumChains } from '@subwallet/extension-koni-base/api/dotsama/api-helper';
+import { ApiProps, ResponseTransfer, SupportTransferResponse, TokenInfo, TransferErrorCode, TransferStep } from '@subwallet/extension-base/background/KoniTypes';
 import { getTokenInfo } from '@subwallet/extension-koni-base/api/dotsama/registry';
-// import { getFreeBalance } from '@subwallet/extension-koni-base/api/dotsama/balance';
-import { dotSamaAPIMap } from '@subwallet/extension-koni-base/background/handlers';
 
 import { KeyringPair } from '@polkadot/keyring/types';
 import { AccountInfoWithProviders, AccountInfoWithRefCount, EventRecord } from '@polkadot/types/interfaces';
 import { BN } from '@polkadot/util';
 
-export async function getExistentialDeposit (networkKey: string, token: string): Promise<string> {
-  const apiProps = await dotSamaAPIMap[networkKey].isReady;
+// TODO: consider pass state.getApiMap() as a param
+
+export async function getExistentialDeposit (networkKey: string, token: string, dotSamaApiMap: Record<string, ApiProps>): Promise<string> {
+  const apiProps = await dotSamaApiMap[networkKey].isReady;
   const api = apiProps.api;
 
   const tokenInfo = await getTokenInfo(networkKey, api, token);
@@ -33,14 +32,13 @@ function isRefCount (accountInfo: AccountInfoWithProviders | AccountInfoWithRefC
   return !!(accountInfo as AccountInfoWithRefCount).refcount;
 }
 
-export async function checkReferenceCount (networkKey: string, address: string): Promise<boolean> {
-  // todo: need update if ethereumChains is dynamic
-  if (ethereumChains.includes(networkKey)) {
+export async function checkReferenceCount (networkKey: string, address: string, dotSamaApiMap: Record<string, ApiProps>): Promise<boolean> {
+  const apiProps = await dotSamaApiMap[networkKey].isReady;
+  const api = apiProps.api;
+
+  if (apiProps.isEthereum) {
     return false;
   }
-
-  const apiProps = await dotSamaAPIMap[networkKey].isReady;
-  const api = apiProps.api;
 
   // @ts-ignore
   const accountInfo: AccountInfoWithProviders | AccountInfoWithRefCount = await api.query.system.account(address);
@@ -52,16 +50,16 @@ export async function checkReferenceCount (networkKey: string, address: string):
     : false;
 }
 
-export async function checkSupportTransfer (networkKey: string, token: string): Promise<SupportTransferResponse> {
-  // todo: need update if ethereumChains is dynamic
-  if (ethereumChains.includes(networkKey)) {
+export async function checkSupportTransfer (networkKey: string, token: string, dotSamaApiMap: Record<string, ApiProps>): Promise<SupportTransferResponse> {
+  const apiProps = await dotSamaApiMap[networkKey].isReady;
+
+  if (apiProps.isEthereum) {
     return {
       supportTransfer: true,
       supportTransferAll: true
     };
   }
 
-  const apiProps = await dotSamaAPIMap[networkKey].isReady;
   const api = apiProps.api;
   const isTxCurrenciesSupported = !!api && !!api.tx && !!api.tx.currencies;
   const isTxBalancesSupported = !!api && !!api.tx && !!api.tx.balances;
@@ -100,6 +98,7 @@ export async function estimateFee (
   fromKeypair: KeyringPair | undefined,
   to: string, value: string | undefined,
   transferAll: boolean,
+  dotSamaApiMap: Record<string, ApiProps>,
   tokenInfo?: TokenInfo
 ): Promise<[string, string | undefined]> {
   let fee = '0';
@@ -110,7 +109,7 @@ export async function estimateFee (
     return [fee, feeSymbol];
   }
 
-  const apiProps = await dotSamaAPIMap[networkKey].isReady;
+  const apiProps = await dotSamaApiMap[networkKey].isReady;
   const api = apiProps.api;
   const isTxCurrenciesSupported = !!api && !!api.tx && !!api.tx.currencies;
   const isTxBalancesSupported = !!api && !!api.tx && !!api.tx.balances;
@@ -249,10 +248,11 @@ export async function makeTransfer (
   fromKeypair: KeyringPair,
   value: string,
   transferAll: boolean,
+  dotSamaApiMap: Record<string, ApiProps>,
   tokenInfo: undefined | TokenInfo,
   callback: (data: ResponseTransfer) => void
 ): Promise<void> {
-  const apiProps = await dotSamaAPIMap[networkKey].isReady;
+  const apiProps = await dotSamaApiMap[networkKey].isReady;
   const api = apiProps.api;
   const fromAddress = fromKeypair.address;
   let nonce;

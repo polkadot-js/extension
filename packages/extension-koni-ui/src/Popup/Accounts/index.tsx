@@ -24,6 +24,7 @@ function Accounts ({ className }: Props): React.ReactElement {
   const [filter, setFilter] = useState('');
   const [filteredAccount, setFilteredAccount] = useState<AccountWithChildren[]>([]);
   const { hierarchy } = useContext(AccountContext);
+  // TODO: write a new hook
   const networkMap = useMemo(() => getNetworkMap(), []);
 
   useEffect(() => {

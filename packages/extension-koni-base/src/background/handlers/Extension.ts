@@ -1849,7 +1849,6 @@ export default class KoniExtension extends Extension {
       } catch (e) {
         console.error('error transferring nft', e);
         txState.txError = true;
-        txState.balanceError = true;
         updateState(txState);
       }
     } else {

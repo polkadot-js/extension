@@ -38,21 +38,21 @@ interface Props extends ThemeProps {
   web3TransferParams: Web3TransferParams;
 }
 
-// TODO: migrate api to background and use new UI components
 function AuthTransfer ({ chain, className, collectionId, nftItem, recipientAddress, senderAccount, setExtrinsicHash, setIsTxSuccess, setShowConfirm, setShowResult, setTxError, substrateTransferParams, web3TransferParams }: Props): React.ReactElement<Props> {
   const [passwordError, setPasswordError] = useState<string | null>(null);
   const [callHash, setCallHash] = useState<string | null>(null);
 
   const [loading, setLoading] = useState(false);
-  const [balanceError, setBalanceError] = useState(false);
   const [senderInfoSubstrate, setSenderInfoSubstrate] = useState<AddressProxy>(() => ({ isUnlockCached: false, signAddress: senderAccount.address, signPassword: '' }));
 
   const substrateParams = substrateTransferParams !== null ? substrateTransferParams.params : null;
   const substrateGas = substrateTransferParams !== null ? substrateTransferParams.estimatedFee : null;
+  const substrateBalanceError = substrateTransferParams !== null ? substrateTransferParams.balanceError : false;
 
   const web3Tx = web3TransferParams !== null ? web3TransferParams.rawTx : null;
   const web3Gas = web3TransferParams !== null ? web3TransferParams.estimatedGas : null;
 
+  const [balanceError, setBalanceError] = useState(substrateBalanceError);
   const { currentAccount: account, currentNetwork } = useSelector((state: RootState) => state);
 
   const { show } = useToast();
@@ -164,12 +164,6 @@ function AuthTransfer ({ chain, className, collectionId, nftItem, recipientAddre
       return;
     }
 
-    if (balanceError) {
-      show('Your balance is too low to cover fees');
-
-      return;
-    }
-
     if (chain !== currentNetwork.networkKey) {
       show('Incorrect network');
 
@@ -177,6 +171,15 @@ function AuthTransfer ({ chain, className, collectionId, nftItem, recipientAddre
     }
 
     setLoading(true);
+
+    if (balanceError) {
+      setTimeout(() => {
+        setLoading(false);
+        show('Your balance is too low to cover fees');
+      }, 1000);
+
+      return;
+    }
 
     // eslint-disable-next-line @typescript-eslint/no-misused-promises
     setTimeout(async () => {

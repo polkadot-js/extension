@@ -18,7 +18,8 @@ async function substrateTransferHandler (networkKey: string, senderAddress: stri
       return null;
     } else {
       return {
-        estimatedFee: resp.estimatedFee
+        estimatedFee: resp.estimatedFee,
+        balanceError: resp.balanceError
       } as TransferResponse;
     }
   } catch (e) {

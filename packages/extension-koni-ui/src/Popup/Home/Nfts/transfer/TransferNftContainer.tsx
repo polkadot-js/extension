@@ -152,7 +152,8 @@ function TransferNftContainer ({ className, collectionId, collectionImage, nftIt
       if (SUPPORTED_TRANSFER_SUBSTRATE_CHAIN.indexOf(networkKey) > -1) {
         setSubstrateTransferParams({
           params,
-          estimatedFee: transferMeta.estimatedFee
+          estimatedFee: transferMeta.estimatedFee,
+          balanceError: transferMeta.balanceError
         } as SubstrateTransferParams);
         // @ts-ignore
       } else if (networkJson.isEthereum && networkJson.isEthereum) {

@@ -186,7 +186,7 @@ export interface BalanceItem {
 }
 
 export interface BalanceJson {
-  details: Record<string, BalanceItem>;
+  details: Record<string, BalanceItem>
 }
 
 export interface CrowdloanItem {
@@ -196,13 +196,13 @@ export interface CrowdloanItem {
 }
 
 export interface CrowdloanJson {
-  details: Record<string, CrowdloanItem>;
+  details: Record<string, CrowdloanItem>
 }
 
 export interface ChainRegistry {
   chainDecimals: number[];
   chainTokens: string[];
-  tokenMap: Record<string, TokenInfo>;
+  tokenMap: Record<string, TokenInfo>
 }
 
 export interface DefaultFormatBalance {
@@ -238,16 +238,10 @@ export interface ApiProps extends ApiState {
   isReady: Promise<ApiProps>;
   apiRetry?: number;
   recoverConnect?: () => void;
-  useEvmAddress?: boolean;
+  useEvmAddress?: boolean
 }
 
-export type NetWorkGroup =
-  'RELAY_CHAIN'
-  | 'POLKADOT_PARACHAIN'
-  | 'KUSAMA_PARACHAIN'
-  | 'MAIN_NET'
-  | 'TEST_NET'
-  | 'UNKNOWN';
+export type NetWorkGroup = 'RELAY_CHAIN' | 'POLKADOT_PARACHAIN' | 'KUSAMA_PARACHAIN' | 'MAIN_NET' | 'TEST_NET' | 'UNKNOWN';
 
 export interface NetWorkInfo {
   chain: string;
@@ -403,7 +397,7 @@ export interface TransactionHistoryItemType {
   // ex: sub token (DOT, AUSD, KSM, ...) of Acala, Karaura uses main token to pay fee
   isSuccess: boolean;
   action: 'send' | 'received';
-  extrinsicHash: string;
+  extrinsicHash: string
 }
 
 export interface RequestTransactionHistoryGet {
@@ -729,6 +723,7 @@ export interface SubstrateNftTransactionRequest {
 export interface SubstrateNftTransaction {
   error: boolean;
   estimatedFee?: string;
+  balanceError: boolean;
 }
 
 export interface SubstrateNftSubmitTransaction {
@@ -813,10 +808,10 @@ export interface KoniRequestSignatures {
   'pri(transfer.getExistentialDeposit)': [RequestTransferExistentialDeposit, string];
   'pri(subscription.cancel)': [string, boolean];
   'pri(freeBalance.subscribe)': [RequestFreeBalance, string, string];
-  'pri(registry.getRegistry)': [RequestGetRegistry, ResponseGetRegistry];
-  'pri(qr.isLocked)': [RequestQRIsLocked, ResponseQRIsLocked];
-  'pri(qr.sign)': [RequestQRSign, ResponseQRSign];
   'pub(utils.getRandom)': [RandomTestRequest, number];
   'pub(accounts.listV2)': [RequestAccountList, InjectedAccount[]];
   'pub(accounts.subscribeV2)': [RequestAccountSubscribe, boolean, InjectedAccount[]];
+  'pri(registry.getRegistry)': [RequestGetRegistry, ResponseGetRegistry];
+  'pri(qr.isLocked)': [RequestQRIsLocked, ResponseQRIsLocked];
+  'pri(qr.sign)': [RequestQRSign, ResponseQRSign];
 }

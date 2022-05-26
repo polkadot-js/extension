@@ -2,12 +2,12 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { AccountContext } from '@subwallet/extension-koni-ui/components';
-import { ScannerContext } from '@subwallet/extension-koni-ui/contexts/ScannerContext';
 import { SCANNER_QR_STEP } from '@subwallet/extension-koni-ui/constants/scanner';
+import strings from '@subwallet/extension-koni-ui/constants/strings';
+import { ScannerContext } from '@subwallet/extension-koni-ui/contexts/ScannerContext';
 import { CompletedParsedData, EthereumParsedData, NetworkParsedData, ParsedData, SubstrateCompletedParsedData, SubstrateParsedData } from '@subwallet/extension-koni-ui/types/scanner';
 import { constructDataFromBytes, isAddressString, isJsonString, rawDataToU8A } from '@subwallet/extension-koni-ui/util/decoders';
 import { isMultiFramesInfo, isMultipartData, isNetworkParsedData } from '@subwallet/extension-koni-ui/util/scanner';
-import strings from '@subwallet/extension-koni-ui/constants/strings';
 import { Result as TxRequestData } from '@zxing/library';
 import { useCallback, useContext } from 'react';
 

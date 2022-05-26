@@ -42,4 +42,4 @@ export const getNetworkKeyByGenesisHash = (hash?: string | null): string | null 
   }
 
   return null;
-}
+};

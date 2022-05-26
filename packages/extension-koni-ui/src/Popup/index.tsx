@@ -9,6 +9,7 @@ import { PHISHING_PAGE_REDIRECT } from '@subwallet/extension-base/defaults';
 import { canDerive } from '@subwallet/extension-base/utils';
 import { AccountContext, ActionContext, AuthorizeReqContext, MediaContext, MetadataReqContext, SettingsContext, SigningReqContext } from '@subwallet/extension-koni-ui/contexts';
 import useSetupStore from '@subwallet/extension-koni-ui/hooks/store/useSetupStore';
+import ExternalRequest from '@subwallet/extension-koni-ui/Popup/ExternalRequest';
 import Home from '@subwallet/extension-koni-ui/Popup/Home';
 import { updateCurrentAccount } from '@subwallet/extension-koni-ui/stores/updater';
 import * as Bowser from 'bowser';
@@ -18,14 +19,12 @@ import { Route, Switch } from 'react-router';
 
 import uiSettings from '@polkadot/ui-settings';
 
-import { ErrorBoundary } from '../components';
-import { ScannerContextProvider } from '../contexts/ScannerContext';
 import ToastProvider from '../components/Toast/ToastProvider';
+import { ScannerContextProvider } from '../contexts/ScannerContext';
 import { saveCurrentAccountAddress, subscribeAccountsWithCurrentAddress, subscribeAuthorizeRequestsV2, subscribeMetadataRequests, subscribeSigningRequests } from '../messaging';
 import { store } from '../stores';
 import { buildHierarchy } from '../util/buildHierarchy';
 import { createFindAccountHandler } from '../util/findAccount';
-import ExternalRequest from '@subwallet/extension-koni-ui/Popup/ExternalRequest';
 // import Home from './Home';
 
 const EvmTokenEdit = React.lazy(() => import('@subwallet/extension-koni-ui/Popup/Settings/TokenSetting/EvmTokenEdit'));

@@ -37,14 +37,14 @@ interface Props extends ThemeProps {
 }
 
 function ChainBalanceItem ({ accountInfo,
-                             balanceInfo,
-                             className,
-                             isLoading,
-                             setIsExportModalOpen,
-                             setQrModalOpen,
-                             setQrModalProps,
-                             setSelectedNetworkBalance,
-                             showBalanceDetail }: Props): React.ReactElement<Props> {
+  balanceInfo,
+  className,
+  isLoading,
+  setIsExportModalOpen,
+  setQrModalOpen,
+  setQrModalProps,
+  setSelectedNetworkBalance,
+  showBalanceDetail }: Props): React.ReactElement<Props> {
   const { address, formattedAddress, networkIconTheme, networkKey, networkPrefix } = accountInfo;
   const _isAccountAll = useMemo((): boolean => {
     return isAccountAll(address);

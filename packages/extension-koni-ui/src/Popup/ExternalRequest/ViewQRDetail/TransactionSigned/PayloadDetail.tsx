@@ -75,7 +75,7 @@ const PayloadDetail = (props: Props) => {
 
     if (isString(method)) {
       return (
-        <div>
+        <div className={'raw-method'}>
           {method}
         </div>
       );
@@ -192,6 +192,10 @@ export default React.memo(styled(PayloadDetail)(({ theme }: Props) => `
 
   &::-webkit-scrollbar{
     display: none;
+  }
+
+  .raw-method{
+    word-break: break-all;
   }
 
   .call-detail {

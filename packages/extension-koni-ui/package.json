@@ -18,7 +18,6 @@
   "dependencies": {
     "@babel/runtime": "^7.16.7",
     "@ethereumjs/common": "^2.6.3",
-    "@ethereumjs/tx": "^3.5.1",
     "@fortawesome/fontawesome-svg-core": "^1.2.36",
     "@fortawesome/free-brands-svg-icons": "^5.15.4",
     "@fortawesome/free-regular-svg-icons": "^5.15.4",

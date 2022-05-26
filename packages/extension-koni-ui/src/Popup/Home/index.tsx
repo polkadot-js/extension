@@ -14,6 +14,7 @@ import stakingActive from '@subwallet/extension-koni-ui/assets/home-tab-icon/sta
 import transfers from '@subwallet/extension-koni-ui/assets/home-tab-icon/transfers.svg';
 import transfersActive from '@subwallet/extension-koni-ui/assets/home-tab-icon/transfers-active.svg';
 import { AccountContext } from '@subwallet/extension-koni-ui/components';
+import ExportAccountQrModal from '@subwallet/extension-koni-ui/components/ExportAccountQrModal';
 import useAccountBalance from '@subwallet/extension-koni-ui/hooks/screen/home/useAccountBalance';
 import useCrowdloanNetworks from '@subwallet/extension-koni-ui/hooks/screen/home/useCrowdloanNetworks';
 import useFetchNft from '@subwallet/extension-koni-ui/hooks/screen/home/useFetchNft';
@@ -41,7 +42,6 @@ import styled from 'styled-components';
 import buyIcon from '../../assets/buy-icon.svg';
 import donateIcon from '../../assets/donate-icon.svg';
 import sendIcon from '../../assets/send-icon.svg';
-import ExportAccountQrModal from '@subwallet/extension-koni-ui/components/ExportAccountQrModal';
 // import swapIcon from '../../assets/swap-icon.svg';
 
 const ActionButton = React.lazy(() => import('./ActionButton'));

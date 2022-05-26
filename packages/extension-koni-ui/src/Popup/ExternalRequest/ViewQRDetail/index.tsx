@@ -3,8 +3,8 @@
 
 import { NetWorkInfo } from '@subwallet/extension-base/background/KoniTypes';
 import { Button, Spinner } from '@subwallet/extension-koni-ui/components';
-import { ScannerContext, ScannerContextType } from '@subwallet/extension-koni-ui/contexts/ScannerContext';
 import { SCANNER_QR_STEP } from '@subwallet/extension-koni-ui/constants/scanner';
+import { ScannerContext, ScannerContextType } from '@subwallet/extension-koni-ui/contexts/ScannerContext';
 import useTranslation from '@subwallet/extension-koni-ui/hooks/useTranslation';
 import AccountInfo from '@subwallet/extension-koni-ui/Popup/ExternalRequest/Shared/AccountInfo';
 import NetworkInfo from '@subwallet/extension-koni-ui/Popup/ExternalRequest/Shared/NetworkInfo';

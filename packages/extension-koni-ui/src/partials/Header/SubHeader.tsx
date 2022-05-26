@@ -22,11 +22,11 @@ interface Props extends ThemeProps {
 
 function SubHeader ({ className = '',
   isBusy,
+  onBack,
+  onCancel,
   showBackArrow,
   showCancelButton,
   subHeaderName,
-  onCancel,
-  onBack,
   to = '/' }: Props): React.ReactElement {
   const { t } = useTranslation();
 

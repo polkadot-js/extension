@@ -3,15 +3,15 @@
 
 import type { Call } from '@polkadot/types/interfaces';
 
+import { ApiProps } from '@subwallet/extension-base/background/KoniTypes';
 import { ArgInfo, EraInfo, FormattedMethod, ResponseGetRegistry } from '@subwallet/extension-base/background/types';
 import NETWORKS from '@subwallet/extension-koni-base/api/endpoints';
-import { dotSamaAPIMap } from '@subwallet/extension-koni-base/background/handlers';
 
 import { TypeRegistry } from '@polkadot/types';
 import { Registry } from '@polkadot/types/types';
 import { hexToU8a } from '@polkadot/util';
 
-export const getRegistry = (genesisHash: string, rawPayload: string, specVersion: number): ResponseGetRegistry => {
+export const getRegistry = (dotSamaAPIMap: Record<string, ApiProps>, genesisHash: string, rawPayload: string, specVersion: number): ResponseGetRegistry => {
   let networkKey = '';
 
   for (const _networkKey of Object.keys(NETWORKS)) {
@@ -35,10 +35,6 @@ export const getRegistry = (genesisHash: string, rawPayload: string, specVersion
   const nonce = payload.nonce.toString();
   const tip = payload.tip.toString();
   const _era = payload.era;
-  const method = payload.method;
-  const call = registry.createType('Call', method);
-  const sectionMethod = `${call.section}.${call.method}`;
-
   let era: string | EraInfo = _era.toString();
 
   if (_era.isMortalEra) {
@@ -48,22 +44,36 @@ export const getRegistry = (genesisHash: string, rawPayload: string, specVersion
     };
   }
 
-  const formatted: FormattedMethod[] = [];
-  const firstArg = call.args[0];
+  const method = payload.method;
 
-  // that's a batch
-  if (firstArg?.toRawType().startsWith('Vec<Call>')) {
-    formatted.push({ args: undefined, method: sectionMethod });
+  let _method: string | FormattedMethod[];
 
-    (firstArg as unknown as Call[]).forEach((c: Call) => {
-      registry.createType('Call', c);
-      formatted.push({ args: formatArgs(c), method: `${c.section}.${c.method}` });
-    });
-  } else {
-    formatted.push({ args: formatArgs(call as unknown as Call), method: sectionMethod });
+  try {
+    const call = registry.createType('Call', method);
+    const sectionMethod = `${call.section}.${call.method}`;
+
+    const formatted: FormattedMethod[] = [];
+    const firstArg = call.args[0];
+
+    // that's a batch
+    if (firstArg?.toRawType().startsWith('Vec<Call>')) {
+      formatted.push({ args: undefined, method: sectionMethod });
+
+      (firstArg as unknown as Call[]).forEach((c: Call) => {
+        registry.createType('Call', c);
+        formatted.push({ args: formatArgs(c), method: `${c.section}.${c.method}` });
+      });
+    } else {
+      formatted.push({ args: formatArgs(call as unknown as Call), method: sectionMethod });
+    }
+
+    _method = formatted;
+  } catch (e) {
+    console.log((e as Error).message);
+    _method = method.toString();
   }
 
-  return { era: era, tip: tip, method: formatted, nonce: nonce };
+  return { era: era, tip: tip, method: _method, nonce: nonce };
 };
 
 const formatArgs = (callInstance: Call): ArgInfo[] => {

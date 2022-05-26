@@ -3,7 +3,7 @@
 
 import { CustomEvmToken } from '@subwallet/extension-base/background/KoniTypes';
 import { ActionContext, Button, Dropdown, InputWithLabel } from '@subwallet/extension-koni-ui/components';
-import useGetEvmChains from '@subwallet/extension-koni-ui/hooks/screen/import/useGetEvmChains';
+import useGetActiveEvmChains from '@subwallet/extension-koni-ui/hooks/screen/import/useGetActiveEvmChains';
 import useToast from '@subwallet/extension-koni-ui/hooks/useToast';
 import { upsertEvmToken, validateEvmToken } from '@subwallet/extension-koni-ui/messaging';
 import { Header } from '@subwallet/extension-koni-ui/partials';
@@ -20,7 +20,7 @@ interface Props extends ThemeProps {
 function ImportEvmNft ({ className = '' }: Props): React.ReactElement<Props> {
   const [contractAddress, setContractAddress] = useState('');
   const [name, setName] = useState('');
-  const chainOptions = useGetEvmChains();
+  const chainOptions = useGetActiveEvmChains();
   const [chain, setChain] = useState(chainOptions[0].value);
 
   const [isValidContract, setIsValidContract] = useState(true);
@@ -144,7 +144,7 @@ function ImportEvmNft ({ className = '' }: Props): React.ReactElement<Props> {
         <div className={'add-token-container'}>
           <Button
             className={'add-token-button'}
-            isDisabled={!isValidContract || !isValidName || contractAddress === '' || name === ''}
+            isDisabled={!isValidContract || !isValidName || contractAddress === '' || name === '' || chainOptions.length === 0}
             onClick={handleAddToken}
           >
             Add NFT collection

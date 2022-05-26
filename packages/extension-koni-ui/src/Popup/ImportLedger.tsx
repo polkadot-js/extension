@@ -3,7 +3,7 @@
 
 import { faSync } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { useGetSupportedLedger } from '@subwallet/extension-koni-ui/util/legerChains';
+import { useGetSupportedLedger } from '@subwallet/extension-koni-ui/util/ledgerChains';
 import React, { useCallback, useContext, useEffect, useRef, useState } from 'react';
 import styled from 'styled-components';
 

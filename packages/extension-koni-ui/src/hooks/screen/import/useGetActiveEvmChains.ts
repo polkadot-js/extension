@@ -9,17 +9,24 @@ export interface ChainOptions {
   value: string;
 }
 
-export default function useGetEvmChains () {
+export default function useGetActiveEvmChains () {
   const { networkMap } = useSelector((state: RootState) => state);
   const result: ChainOptions[] = [];
 
   for (const [key, network] of Object.entries(networkMap)) {
-    if (network.isEthereum && network.isEthereum) {
+    if (network.isEthereum && network.active) {
       result.push({
         text: network.chain,
         value: key
       });
     }
+  }
+
+  if (result.length === 0) {
+    return [{
+      text: 'Please activate at least 1 EVM compatible network',
+      value: ''
+    }];
   }
 
   return result;

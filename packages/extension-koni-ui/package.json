@@ -18,6 +18,7 @@
   "dependencies": {
     "@babel/runtime": "^7.16.7",
     "@ethereumjs/common": "^2.6.3",
+    "@ethereumjs/tx": "^3.5.1",
     "@fortawesome/fontawesome-svg-core": "^1.2.36",
     "@fortawesome/free-brands-svg-icons": "^5.15.4",
     "@fortawesome/free-regular-svg-icons": "^5.15.4",
@@ -46,6 +47,7 @@
     "bowser": "^2.11.0",
     "classnames": "^2.3.1",
     "ethereumjs-tx": "^2.1.2",
+    "ethereumjs-util": "^7.1.4",
     "ethers": "^5.6.1",
     "file-saver": "^2.0.5",
     "i18next": "^21.6.5",
@@ -65,6 +67,7 @@
     "react-tooltip": "^4.2.21",
     "redux": "^4.1.2",
     "redux-toolkit": "^1.1.2",
+    "rlp": "^3.0.0",
     "semantic-ui-react": "^2.0.4",
     "styled-components": "^5.3.3",
     "web3": "^1.7.1"

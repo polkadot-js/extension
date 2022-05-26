@@ -23,3 +23,23 @@ export default function getNetworkInfoByGenesisHash (hash?: string | null): NetW
 
   return null;
 }
+
+export const getNetworkKeyByGenesisHash = (hash?: string | null): string | null => {
+  if (!hash) {
+    return null;
+  }
+
+  for (const n in NETWORKS) {
+    if (!Object.prototype.hasOwnProperty.call(NETWORKS, n)) {
+      continue;
+    }
+
+    const networkInfo = NETWORKS[n];
+
+    if (networkInfo.genesisHash === hash) {
+      return n;
+    }
+  }
+
+  return null;
+}

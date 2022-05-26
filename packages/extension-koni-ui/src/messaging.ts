@@ -1,7 +1,26 @@
 // Copyright 2019-2022 @subwallet/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import type { AccountJson, AllowedPath, AuthorizeRequest, MessageTypes, MessageTypesWithNoSubscriptions, MessageTypesWithNullRequest, MessageTypesWithSubscriptions, MetadataRequest, RequestTypes, ResponseAuthorizeList, ResponseDeriveValidate, ResponseJsonGetAccountInfo, ResponseSigningIsLocked, ResponseTypes, SeedLengths, SigningRequest, SubscriptionMessageTypes } from '@subwallet/extension-base/background/types';
+import type {
+  AccountJson,
+  AllowedPath,
+  AuthorizeRequest,
+  MessageTypes,
+  MessageTypesWithNoSubscriptions,
+  MessageTypesWithNullRequest,
+  MessageTypesWithSubscriptions,
+  MetadataRequest,
+  RequestTypes,
+  ResponseAuthorizeList,
+  ResponseDeriveValidate,
+  ResponseGetRegistry,
+  ResponseJsonGetAccountInfo,
+  ResponseSigningIsLocked,
+  ResponseTypes,
+  SeedLengths,
+  SigningRequest,
+  SubscriptionMessageTypes
+} from '@subwallet/extension-base/background/types';
 import type { Message } from '@subwallet/extension-base/types';
 import type { Chain } from '@subwallet/extension-chains/types';
 import type { KeyringPair$Json } from '@polkadot/keyring/types';
@@ -11,7 +30,11 @@ import type { KeypairType } from '@polkadot/util-crypto/types';
 
 import { AuthUrls } from '@subwallet/extension-base/background/handlers/State';
 import { AccountsWithCurrentAddress, ApiInitStatus, BalanceJson, ChainRegistry, CrowdloanJson, CurrentAccountInfo, CustomEvmToken, DeleteEvmTokenParams, EvmNftSubmitTransaction, EvmNftTransaction, EvmNftTransactionRequest, EvmNftTransactionResponse, EvmTokenJson, NetWorkMetadataDef, NftCollectionJson, NftJson, NftTransferExtra, OptionInputAddress, PriceJson, RequestCheckTransfer, RequestFreeBalance, RequestNftForceUpdate, RequestSettingsType, RequestSubscribeBalance, RequestSubscribeBalancesVisibility, RequestSubscribeCrowdloan, RequestSubscribeNft, RequestSubscribePrice, RequestSubscribeStaking, RequestSubscribeStakingReward, RequestTransfer, RequestTransferCheckReferenceCount, RequestTransferCheckSupporting, RequestTransferExistentialDeposit, ResponseAccountCreateSuriV2, ResponseCheckTransfer, ResponseSeedCreateV2, ResponseSeedValidateV2, ResponseSettingsType, ResponseTransfer, StakingJson, StakingRewardJson, SupportTransferResponse, ThemeTypes, TransactionHistoryItemType, TransferError, ValidateEvmTokenRequest } from '@subwallet/extension-base/background/KoniTypes';
-import { RequestCurrentAccountAddress } from '@subwallet/extension-base/background/types';
+import {
+  RequestCurrentAccountAddress,
+  ResponseQRIsLocked,
+  ResponseQRSign
+} from '@subwallet/extension-base/background/types';
 import { PORT_EXTENSION } from '@subwallet/extension-base/defaults';
 import { getId } from '@subwallet/extension-base/utils/getId';
 import { metadataExpand } from '@subwallet/extension-chains';
@@ -140,6 +163,14 @@ export async function cancelSignRequest (id: string): Promise<boolean> {
   return sendMessage('pri(signing.cancel)', { id });
 }
 
+export async function qrIsLocked (address: string): Promise<ResponseQRIsLocked> {
+  return sendMessage('pri(qr.isLocked)', { address });
+}
+
+export async function qrSign (address: string, message: string, savePass: boolean, password?: string): Promise<ResponseQRSign> {
+  return sendMessage('pri(qr.sign)', { address, password, message, savePass });
+}
+
 export async function isSignLocked (id: string): Promise<ResponseSigningIsLocked> {
   return sendMessage('pri(signing.isLocked)', { id });
 }
@@ -251,6 +282,10 @@ export async function subscribeAuthorizeRequests (cb: (accounts: AuthorizeReques
 
 export async function subscribeAuthorizeRequestsV2 (cb: (accounts: AuthorizeRequest[]) => void): Promise<boolean> {
   return sendMessage('pri(authorize.requestsV2)', null, cb);
+}
+
+export async function getRegistry (genesisHash: string, rawPayload: string, specVersion: number): Promise<ResponseGetRegistry> {
+  return sendMessage('pri(registry.getRegistry)', { genesisHash: genesisHash, rawPayload: rawPayload, specVersion: specVersion });
 }
 
 export async function getAuthList (): Promise<ResponseAuthorizeList> {

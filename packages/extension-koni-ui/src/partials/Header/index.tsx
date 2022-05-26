@@ -35,29 +35,48 @@ import useOutsideClick from '../../hooks/useOutsideClick';
 import { Theme } from '../../types';
 
 interface Props extends ThemeProps {
+  changeAccountCallback?: (address: string) => void;
   children?: React.ReactNode;
   className?: string;
-  showAdd?: boolean;
-  showBackArrow?: boolean;
-  showSearch?: boolean;
-  showSettings?: boolean;
-  smallMargin?: boolean;
-  text?: React.ReactNode;
+  isBusy?: boolean;
   isContainDetailHeader: boolean;
-  showSubHeader?: boolean;
-  subHeaderName?: string;
-  showCancelButton?: boolean;
-  isWelcomeScreen?: boolean;
   isShowNetworkSelect?: boolean;
   isShowZeroBalances?: boolean;
-  toggleZeroBalances?: () => void;
-  changeAccountCallback?: (address: string) => void;
-  isBusy?: boolean;
+  isWelcomeScreen?: boolean;
+  onBack?: () => void;
+  onCancel?: () => void;
   setShowBalanceDetail?: (isShowBalanceDetail: boolean) => void;
+  showAdd?: boolean;
+  showBackArrow?: boolean;
+  showCancelButton?: boolean;
+  showSearch?: boolean;
+  showSettings?: boolean;
+  showSubHeader?: boolean;
+  smallMargin?: boolean;
+  subHeaderName?: string;
+  text?: React.ReactNode;
   to?: string;
+  toggleZeroBalances?: () => void;
 }
 
-function Header ({ changeAccountCallback, children, className = '', isBusy, isContainDetailHeader, isShowNetworkSelect = true, isShowZeroBalances, isWelcomeScreen, setShowBalanceDetail, showBackArrow, showCancelButton, showSubHeader, smallMargin = false, subHeaderName, to, toggleZeroBalances }: Props): React.ReactElement<Props> {
+function Header ({ changeAccountCallback,
+  children,
+  className = '',
+  isBusy,
+  isContainDetailHeader,
+  isShowNetworkSelect = true,
+  isShowZeroBalances,
+  isWelcomeScreen,
+  onBack,
+  onCancel,
+  setShowBalanceDetail,
+  showBackArrow,
+  showCancelButton,
+  showSubHeader,
+  smallMargin = false,
+  subHeaderName,
+  to,
+  toggleZeroBalances }: Props): React.ReactElement<Props> {
   const [isSettingsOpen, setShowSettings] = useState(false);
   const [isActionOpen, setShowAccountAction] = useState(false);
   const [isNetworkSelectOpen, setShowNetworkSelect] = useState(false);
@@ -346,6 +365,8 @@ function Header ({ changeAccountCallback, children, className = '', isBusy, isCo
         {showSubHeader &&
           <SubHeader
             isBusy={isBusy}
+            onBack={onBack}
+            onCancel={onCancel}
             showBackArrow={showBackArrow}
             showCancelButton={showCancelButton}
             subHeaderName={subHeaderName}

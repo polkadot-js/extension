@@ -22,7 +22,7 @@ import styled from 'styled-components';
 import useToast from '../hooks/useToast';
 import useTranslation from '../hooks/useTranslation';
 import getParentNameSuri from '../util/getParentNameSuri';
-import { AccountContext } from './contexts';
+import { AccountContext } from '../contexts';
 
 export interface Props {
   address?: string | null;

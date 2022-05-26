@@ -229,7 +229,25 @@ function AccountMenuSettings ({ changeAccountCallback, className, closeSetting, 
             }
           </MenuSettingItem>
         </div>
+        <div className='account-menu-settings-items-wrapper'>
+          <MenuSettingItem className='account-menu-settings__menu-item'>
+            <Link
+              className='account-menu-settings__menu-item-text'
+              isDisabled={!mediaAllowed}
+              title={!mediaAllowed
+                ? t<string>('Camera access must be first enabled in the settings')
+                : ''
+              }
+              to='/account/scan-qr'
+            >
+              {/* @ts-ignore */}
+              <FontAwesomeIcon icon={faQrcode} />
+              <span>{t<string>('Scan QR')}</span>
+            </Link>
+          </MenuSettingItem>
+        </div>
       </div>
+
       <div className='koni-menu-items-container'>
         <MenuSettingItem className='account-menu-settings__menu-item'>
           <Link
@@ -366,10 +384,16 @@ export default React.memo(styled(AccountMenuSettings)(({ theme }: Props) => `
 
   .koni-menu-items-container {
     padding: 0 15px;
+    max-height: 260px;
+    overflow-y: auto;
 
     &:last-child {
       padding: 0 27px;
       margin: 8px 0
+    }
+
+    &::-webkit-scrollbar {
+      display: none;
     }
   }
 

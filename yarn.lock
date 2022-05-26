@@ -1859,7 +1859,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@ethereumjs/tx@npm:^3.3.2":
+"@ethereumjs/tx@npm:^3.3.2, @ethereumjs/tx@npm:^3.5.1":
   version: 3.5.1
   resolution: "@ethereumjs/tx@npm:3.5.1"
   dependencies:
@@ -4839,6 +4839,7 @@ __metadata:
   dependencies:
     "@babel/runtime": ^7.16.7
     "@ethereumjs/common": ^2.6.3
+    "@ethereumjs/tx": ^3.5.1
     "@fortawesome/fontawesome-svg-core": ^1.2.36
     "@fortawesome/free-brands-svg-icons": ^5.15.4
     "@fortawesome/free-regular-svg-icons": ^5.15.4
@@ -4882,6 +4883,7 @@ __metadata:
     enzyme: ^3.11.0
     enzyme-adapter-react-16: ^1.15.6
     ethereumjs-tx: ^2.1.2
+    ethereumjs-util: ^7.1.4
     ethers: ^5.6.1
     file-saver: ^2.0.5
     i18next: ^21.6.5
@@ -4901,6 +4903,7 @@ __metadata:
     react-tooltip: ^4.2.21
     redux: ^4.1.2
     redux-toolkit: ^1.1.2
+    rlp: ^3.0.0
     semantic-ui-react: ^2.0.4
     sinon-chrome: ^3.0.1
     styled-components: ^5.3.3
@@ -19407,6 +19410,15 @@ __metadata:
   languageName: node
   linkType: hard
 
+"rlp@npm:^3.0.0":
+  version: 3.0.0
+  resolution: "rlp@npm:3.0.0"
+  bin:
+    rlp: bin/rlp
+  checksum: d1d8003b2be0b25083d842571c0cdc3f2ed4f8b6cc2edf46239e240ba7f73b57ca419cea544394c38bd6b0125e728945af5b167370385d9462e04559b2332e69
+  languageName: node
+  linkType: hard
+
 "roarr@npm:^2.15.3":
   version: 2.15.4
   resolution: "roarr@npm:2.15.4"
@@ -19443,8 +19455,8 @@ __metadata:
   linkType: hard
 
 "rollup@npm:^2.67.2":
-  version: 2.72.1
-  resolution: "rollup@npm:2.72.1"
+  version: 2.73.0
+  resolution: "rollup@npm:2.73.0"
   dependencies:
     fsevents: ~2.3.2
   dependenciesMeta:
@@ -19452,7 +19464,7 @@ __metadata:
       optional: true
   bin:
     rollup: dist/bin/rollup
-  checksum: 3dca122129f560acc3c54dd5bd5f9470dd562d74f61c652c57b6a4355a963c0828640382ebff544f1b0e71387733a51fb963d6f761ae1f05a84f5923bbde883c
+  checksum: 38b12cecc59eaa8f32fe0df456e4585d35997572de185eaeb0c97df7fd6db56711842011c6e8ef5601613024fd8074b2d73a65dbdc90baa781090ba99e75d174
   languageName: node
   linkType: hard
 

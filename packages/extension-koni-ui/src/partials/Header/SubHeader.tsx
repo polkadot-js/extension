@@ -10,15 +10,24 @@ import React from 'react';
 import styled from 'styled-components';
 
 interface Props extends ThemeProps {
-  className?: string,
-  showBackArrow?: boolean,
-  subHeaderName?: string,
-  showCancelButton?: boolean,
-  isBusy?: boolean,
-  to?: string
+  className?: string;
+  isBusy?: boolean;
+  onBack?: () => void;
+  onCancel?: () => void;
+  showBackArrow?: boolean;
+  showCancelButton?: boolean;
+  subHeaderName?: string;
+  to?: string;
 }
 
-function SubHeader ({ className = '', isBusy, showBackArrow, showCancelButton, subHeaderName, to = '/' }: Props): React.ReactElement {
+function SubHeader ({ className = '',
+  isBusy,
+  showBackArrow,
+  showCancelButton,
+  subHeaderName,
+  onCancel,
+  onBack,
+  to = '/' }: Props): React.ReactElement {
   const { t } = useTranslation();
 
   return (
@@ -33,6 +42,7 @@ function SubHeader ({ className = '', isBusy, showBackArrow, showCancelButton, s
               className={`arrowLeftIcon ${isBusy ? 'disabled-btn' : ''}`}
               // @ts-ignore
               icon={faArrowLeft}
+              onClick={onBack}
             />
           </Link>
         )
@@ -49,7 +59,7 @@ function SubHeader ({ className = '', isBusy, showBackArrow, showCancelButton, s
             className='sub-header__cancel-btn'
             to='/'
           >
-            <span>{t<string>('Cancel')}</span>
+            <span onClick={onCancel}>{t<string>('Cancel')}</span>
           </Link>
         )
         }

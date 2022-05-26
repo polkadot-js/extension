@@ -3,8 +3,9 @@
 
 import type { AccountsContext, AuthorizeRequest, MetadataRequest, SigningRequest } from '@subwallet/extension-base/background/types';
 import type { SettingsStruct } from '@polkadot/ui-settings/types';
-import type { AvailableThemes } from './themes';
+import type { AvailableThemes } from '../components/themes';
 
+import { createFindAccountHandler } from '@subwallet/extension-koni-ui/util/findAccount';
 import React from 'react';
 
 import settings from '@polkadot/ui-settings';
@@ -12,7 +13,7 @@ import settings from '@polkadot/ui-settings';
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 const noop = (): void => undefined;
 
-const AccountContext = React.createContext<AccountsContext>({ accounts: [], hierarchy: [], master: undefined });
+const AccountContext = React.createContext<AccountsContext>({ accounts: [], hierarchy: [], master: undefined, getAccountByAddress: createFindAccountHandler([]) });
 const ActionContext = React.createContext<(to?: string) => void>(noop);
 const AuthorizeReqContext = React.createContext<AuthorizeRequest[]>([]);
 const MediaContext = React.createContext<boolean>(false);

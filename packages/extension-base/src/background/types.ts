@@ -59,10 +59,15 @@ export type AccountWithChildren = AccountJson & {
   children?: AccountWithChildren[];
 }
 
+export interface FindAccountFunction{
+  (address: string, genesisHash?: string): AccountJson | undefined;
+}
+
 export type AccountsContext = {
   accounts: AccountJson[];
   hierarchy: AccountWithChildren[];
   master?: AccountJson;
+  getAccountByAddress: FindAccountFunction;
 }
 
 export type CurrentAccContext = {
@@ -334,6 +339,23 @@ export interface RequestSeedValidate {
   type?: KeypairType;
 }
 
+export interface RequestGetRegistry {
+  genesisHash: string;
+  rawPayload: string;
+  specVersion: number
+}
+
+export interface RequestQRIsLocked{
+  address: string;
+}
+
+export interface RequestQRSign{
+  address: string;
+  message: string;
+  savePass: boolean;
+  password?: string;
+}
+
 // Responses
 
 export type ResponseTypes = {
@@ -434,4 +456,35 @@ export interface ResponseJsonGetAccountInfo {
 
 export interface ResponseAuthorizeList {
   list: AuthUrls;
+}
+
+export interface FormattedMethod {
+  args?: ArgInfo[];
+  method: string;
+}
+
+export interface ArgInfo {
+  argName: string;
+  argValue: string | string[];
+}
+
+export interface EraInfo{
+  period: string;
+  phase: string;
+}
+
+export interface ResponseGetRegistry {
+  era: EraInfo | string,
+  nonce: string,
+  method: FormattedMethod[] | string
+  tip: string
+}
+
+export interface ResponseQRIsLocked{
+  isLocked: boolean;
+  remainingTime: number;
+}
+
+export interface ResponseQRSign{
+  signature: string;
 }

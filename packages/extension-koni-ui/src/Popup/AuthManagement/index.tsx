@@ -9,9 +9,9 @@ import Header from '@subwallet/extension-koni-ui/partials/Header';
 import React, { useCallback, useEffect, useState } from 'react';
 import styled from 'styled-components';
 
+import { InputFilter } from '../../components';
 import useTranslation from '../../hooks/useTranslation';
 import { changeAuthorization, changeAuthorizationAll, forgetAllSite, getAuthListV2 } from '../../messaging';
-import { InputFilter } from './../../components';
 import WebsiteEntry from './WebsiteEntry';
 
 interface Props extends ThemeProps {

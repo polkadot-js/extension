@@ -1,6 +1,8 @@
 // Copyright 2019-2022 @polkadot/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
+import useScanner from '@subwallet/extension-koni-ui/hooks/useScanner';
+import useToast from '@subwallet/extension-koni-ui/hooks/useToast';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { Result } from '@zxing/library';
 import CN from 'classnames';
@@ -8,45 +10,36 @@ import React, { useCallback } from 'react';
 import { QrReader } from 'react-qr-reader';
 import styled from 'styled-components';
 
-import { hexStripPrefix, u8aToHex } from '@polkadot/util';
-import { blake2AsU8a } from '@polkadot/util-crypto';
-
 interface Props extends ThemeProps{
   className?: string;
   onError?: (error: Error) => void;
-  onScan: (data: string) => void;
   size?: string | number;
   style?: React.CSSProperties;
 }
 
-export function decodeString (value: Uint8Array): string {
-  return value.reduce((str, code): string => {
-    return str + String.fromCharCode(code);
-  }, '');
-}
+const QRScanner = (props: Props) => {
+  const { className, onError } = props;
+  const { show } = useToast();
 
-const QrScanner = (props: Props) => {
-  const { className, onError, onScan } = props;
+  const handlerAlertMessage = useCallback((message: string, isSuccess = false) => {
+    show(message, isSuccess);
+  }, [show]);
+
+  const handlerOnProcessQrCode = useScanner(handlerAlertMessage);
 
   const handlerOnResult = useCallback((result: Result | undefined | null, error: Error | undefined | null) => {
     if (result) {
-      console.log(result);
-      const bytes = result.getRawBytes();
-      const frameInfo = hexStripPrefix(u8aToHex(bytes.slice(0, 5)));
-      const frameCount = parseInt(frameInfo.substr(2, 4), 16);
-      const isMultipart = frameCount > 1; // for simplicity, even single frame payloads are marked as multipart.
+      try {
+        handlerOnProcessQrCode(result);
+      } catch (e) {
 
-      console.log(frameInfo, frameCount, isMultipart);
-      console.log(blake2AsU8a(bytes));
-      console.log(u8aToHex(bytes));
-
-      onScan && onScan('text');
+      }
     }
 
     if (error) {
       onError && onError(error);
     }
-  }, [onError, onScan]);
+  }, [handlerOnProcessQrCode, onError]);
 
   return (
     <div className={CN(className)}>
@@ -59,7 +52,7 @@ const QrScanner = (props: Props) => {
   );
 };
 
-export default React.memo(styled(QrScanner)(({ theme }: Props) => `
+export default React.memo(styled(QRScanner)(({ theme }: Props) => `
   display:inline-block;
   height:100%;
   transform:matrix(-1,0,0,1,0,0);

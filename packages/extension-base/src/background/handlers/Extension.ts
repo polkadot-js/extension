@@ -13,9 +13,10 @@ import { ALLOWED_PATH, PASSWORD_EXPIRY_MS } from '@subwallet/extension-base/defa
 import { TypeRegistry } from '@polkadot/types';
 import keyring from '@polkadot/ui-keyring';
 import { accounts as accountsObservable } from '@polkadot/ui-keyring/observable/accounts';
-import { assert, isHex } from '@polkadot/util';
+import { assert, isHex, u8aToHex } from '@polkadot/util';
 import { keyExtractSuri, mnemonicGenerate, mnemonicValidate } from '@polkadot/util-crypto';
 
+import { RequestQRIsLocked, RequestQRSign, ResponseQRIsLocked, ResponseQRSign } from '../types';
 import { withErrorLog } from './helpers';
 import State from './State';
 import { createSubscription, unsubscribe } from './subscriptions';
@@ -435,6 +436,49 @@ export default class Extension {
     };
   }
 
+  private qrIsLocked ({ address }: RequestQRIsLocked): ResponseQRIsLocked {
+    const pair = keyring.getPair(address);
+
+    assert(pair, 'Unable to find pair');
+
+    const remainingTime = this.refreshAccountPasswordCache(pair);
+
+    return {
+      isLocked: pair.isLocked,
+      remainingTime
+    };
+  }
+
+  private qrSign ({ address, message, password, savePass }: RequestQRSign): ResponseQRSign {
+    const pair = keyring.getPair(address);
+
+    assert(pair, 'Unable to find pair');
+
+    if (pair.isLocked && !password) {
+      throw new Error('Password needed to unlock the account');
+    }
+
+    if (pair.isLocked) {
+      try {
+        pair.decodePkcs8(password);
+      } catch (e) {
+        throw new Error('invalid password');
+      }
+    }
+
+    const signed: string = u8aToHex(pair.sign(message));
+
+    if (savePass) {
+      this.#cachedUnlocks[address] = Date.now() + PASSWORD_EXPIRY_MS;
+    } else {
+      pair.lock();
+    }
+
+    return {
+      signature: signed
+    };
+  }
+
   // FIXME This looks very much like what we have in authorization
   private signingSubscribe (id: string, port: chrome.runtime.Port): boolean {
     const cb = createSubscription<'pri(signing.requests)'>(id, port);
@@ -613,6 +657,12 @@ export default class Extension {
 
       case 'pri(signing.isLocked)':
         return this.signingIsLocked(request as RequestSigningIsLocked);
+
+      case 'pri(qr.isLocked)':
+        return this.qrIsLocked(request as RequestQRIsLocked);
+
+      case 'pri(qr.sign)':
+        return this.qrSign(request as RequestQRSign);
 
       case 'pri(signing.requests)':
         return this.signingSubscribe(id, port);

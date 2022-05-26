@@ -470,6 +470,10 @@ export async function enableNetworkMap (networkKey: string): Promise<boolean> {
   return sendMessage('pri(networkMap.enableOne)', networkKey);
 }
 
+export async function enableNetworks (targetKeys: string[]): Promise<boolean> {
+  return sendMessage('pri(networkMap.enableMany)', targetKeys);
+}
+
 export async function validateNetwork (provider: string, isEthereum: boolean, existedNetwork?: NetworkJson): Promise<ValidateNetworkResponse> {
   return sendMessage('pri(apiMap.validate)', { provider, isEthereum, existedNetwork });
 }

@@ -24,6 +24,7 @@ import useTranslation from '@subwallet/extension-koni-ui/hooks/useTranslation';
 // Containers should not be imported lazily
 import ChainBalances from '@subwallet/extension-koni-ui/Popup/Home/ChainBalances/ChainBalances';
 import Crowdloans from '@subwallet/extension-koni-ui/Popup/Home/Crowdloans/Crowdloans';
+import NetworkSelection from '@subwallet/extension-koni-ui/Popup/Home/NetworkSelection/NetworkSelection';
 import NftContainer from '@subwallet/extension-koni-ui/Popup/Home/Nfts/render/NftContainer';
 import StakingContainer from '@subwallet/extension-koni-ui/Popup/Home/Staking/StakingContainer';
 import TabHeaders from '@subwallet/extension-koni-ui/Popup/Home/Tabs/TabHeaders';
@@ -182,6 +183,8 @@ function Home ({ chainRegistryMap, className = '', currentAccount, historyMap, n
 
   const [showTransferredCollection, setShowTransferredCollection] = useState(false);
   const [showForcedCollection, setShowForcedCollection] = useState(false);
+
+  const [showNetworkSelection, setShowNetworkSelection] = useState(true);
 
   const parseNftGridSize = useCallback(() => {
     if (window.innerHeight > NFT_GRID_HEIGHT_THRESHOLD) {
@@ -397,6 +400,12 @@ function Home ({ chainRegistryMap, className = '', currentAccount, historyMap, n
           showExportButton={qrModalShowExportButton}
         />
       )}
+
+      {
+        showNetworkSelection && <NetworkSelection
+          handleShow={setShowNetworkSelection}
+        />
+      }
     </div>
   );
 }

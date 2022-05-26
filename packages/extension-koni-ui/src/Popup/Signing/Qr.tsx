@@ -86,7 +86,7 @@ function Qr ({ address, className, cmd, genesisHash, onSignature, payload }: Pro
 }
 
 export default styled(Qr)`
-  height: 100%;
+  //height: 100%;
 
   .qr-container {
     margin: 5px auto 10px auto;

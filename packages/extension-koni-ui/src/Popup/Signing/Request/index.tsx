@@ -75,13 +75,14 @@ function Request ({ account: { isExternal, isHardware }, buttonText, className, 
   }, [request]);
 
   const _onSignature = useCallback(
-    ({ signature }: { signature: HexString }): Promise<void> =>
-      approveSignSignature(signId, signature)
+    ({ signature }: { signature: HexString }): Promise<void> => {
+      return approveSignSignature(signId, signature)
         .then(() => onAction())
         .catch((error: Error): void => {
           setError(error.message);
           console.error(error);
-        }),
+        });
+    },
     [onAction, signId]
   );
 
@@ -135,6 +136,12 @@ function Request ({ account: { isExternal, isHardware }, buttonText, className, 
   const account = accounts
     .filter((a) => !isAccountAll(a.address))
     .find((account) => decodeAddress(account.address).toString() === decodeAddress(address).toString());
+
+  useEffect(() => {
+    if (payload !== null && isExternal && !isHardware) {
+      setShowDetails(true);
+    }
+  }, [isExternal, isHardware, payload]);
 
   return (
     <div className={className}>

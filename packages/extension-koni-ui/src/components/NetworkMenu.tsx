@@ -123,7 +123,7 @@ function NetworkMenu ({ className, currentNetwork, genesisOptions, isNotHaveAcco
   }, [selectNetwork]);
 
   const handleClickCustomNetworks = useCallback(() => {
-    navigate('/account/config-network');
+    navigate('/account/networks');
   }, [navigate]);
 
   const handleStatusText = useCallback((apiStatus: NETWORK_STATUS) => {

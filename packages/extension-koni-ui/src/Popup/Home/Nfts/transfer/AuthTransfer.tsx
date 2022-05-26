@@ -70,7 +70,7 @@ function AuthTransfer ({ chain, className, collectionId, nftItem, recipientAddre
         networkKey: chain,
         rawTransaction: web3Tx
       }, (data) => {
-        if (data.passwordError && data.passwordError) {
+        if (data.passwordError) {
           setPasswordError(data.passwordError);
           setLoading(false);
         }
@@ -79,7 +79,13 @@ function AuthTransfer ({ chain, className, collectionId, nftItem, recipientAddre
           setCallHash(data.callHash);
         }
 
-        if (data.txError && data.txError) {
+        if (data.balanceError && data.balanceError) {
+          setBalanceError(true);
+          setLoading(false);
+          show('Your balance is too low to cover fees');
+        }
+
+        if (data.txError) {
           show('Encountered an error, please try again.');
           setLoading(false);
 

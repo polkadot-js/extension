@@ -87,23 +87,6 @@ export const PREDEFINED_NETWORKS: Record<string, NetworkJson> = {
     nativeToken: 'ROC',
     decimals: 12
   },
-  rmrk: {
-    key: 'rmrk',
-    chain: 'RMRK Devnet',
-    genesisHash: '0x6c7ae90ef70a31fe9f0f2329007ff4b4c4fe62fe71cd2b753ee37c1aa1070fef',
-    icon: 'polkadot',
-    ss58Format: 0,
-    providers: {
-      rmrk: 'wss://staging.node.rmrk.app'
-    },
-    active: false,
-    currentProvider: 'rmrk',
-    currentProviderMode: 'ws',
-    nativeToken: 'UNIT',
-    groups: ['TEST_NET'],
-    decimals: 12,
-    coinGeckoKey: 'rmrk'
-  },
   statemint: {
     key: 'statemint',
     chain: 'Statemint',
@@ -388,20 +371,6 @@ export const PREDEFINED_NETWORKS: Record<string, NetworkJson> = {
     crowdloanUrl: 'https://crowdloan.manta.network/',
     decimals: 10
   },
-  dolphin: {
-    key: 'dolphin',
-    chain: 'Dolphin Testnet',
-    active: false,
-    genesisHash: '0xa3e43f6bb8cc5767147764709d6353f8654a7ef31d0577758c0e8ced0bb43087',
-    ss58Format: 42,
-    providers: {
-      dolphin: 'wss://trillian.dolphin.red'
-    },
-    currentProvider: 'dolphin',
-    currentProviderMode: 'ws',
-    groups: ['TEST_NET'],
-    nativeToken: 'DOL'
-  },
   'sora-substrate': {
     key: 'sora-substrate',
     chain: 'SORA',
@@ -493,6 +462,37 @@ export const PREDEFINED_NETWORKS: Record<string, NetworkJson> = {
     coinGeckoKey: 'aleph-zero',
     getStakingOnChain: true
   },
+  rmrk: {
+    key: 'rmrk',
+    chain: 'RMRK Devnet',
+    genesisHash: '0x6c7ae90ef70a31fe9f0f2329007ff4b4c4fe62fe71cd2b753ee37c1aa1070fef',
+    icon: 'polkadot',
+    ss58Format: 0,
+    providers: {
+      rmrk: 'wss://staging.node.rmrk.app'
+    },
+    active: false,
+    currentProvider: 'rmrk',
+    currentProviderMode: 'ws',
+    nativeToken: 'UNIT',
+    groups: ['TEST_NET'],
+    decimals: 12,
+    coinGeckoKey: 'rmrk'
+  },
+  dolphin: {
+    key: 'dolphin',
+    chain: 'Dolphin Testnet',
+    active: false,
+    genesisHash: '0xa3e43f6bb8cc5767147764709d6353f8654a7ef31d0577758c0e8ced0bb43087',
+    ss58Format: 42,
+    providers: {
+      dolphin: 'wss://trillian.dolphin.red'
+    },
+    currentProvider: 'dolphin',
+    currentProviderMode: 'ws',
+    groups: ['TEST_NET'],
+    nativeToken: 'DOL'
+  },
   alephTest: {
     key: 'alephTest',
     chain: 'Aleph Zero Testnet',
@@ -563,8 +563,8 @@ export const PREDEFINED_NETWORKS: Record<string, NetworkJson> = {
   composableFinance: {
     key: 'composableFinance',
     chain: 'Composable Finance',
-    genesisHash: 'UNKNOWN',
-    ss58Format: -1,
+    genesisHash: '0xdaab8df776eb52ec604a5df5d388bb62a050a0aaec4556a64265b9d42755552d',
+    ss58Format: 49,
     providers: {
       Composable: 'wss://rpc.composable.finance'
     },
@@ -575,25 +575,7 @@ export const PREDEFINED_NETWORKS: Record<string, NetworkJson> = {
     paraId: 2019,
     nativeToken: 'LAYR',
     crowdloanUrl: 'https://crowdloan.composable.finance/',
-    decimals: 10
-  },
-  litentry: {
-    key: 'litentry',
-    chain: 'Litentry',
-    genesisHash: 'UNKNOWN',
-    ss58Format: -1,
-    providers: {
-      Litentry: 'wss://parachain.litentry.io'
-    },
-    active: false, // to be active
-    currentProviderMode: 'ws',
-    currentProvider: 'Litentry',
-    groups: ['POLKADOT_PARACHAIN'],
-    paraId: 2013,
-    nativeToken: 'LIT',
-    crowdloanUrl: 'https://crowdloan.litentry.com/',
-    decimals: 10,
-    coinGeckoKey: 'litentry'
+    decimals: 12
   },
   phala: {
     key: 'phala',
@@ -1331,6 +1313,24 @@ export const PREDEFINED_NETWORKS: Record<string, NetworkJson> = {
     paraId: 2106,
     nativeToken: 'LIT',
     crowdloanUrl: 'https://kusama-crowdloan.litentry.com/'
+  },
+  litentry: {
+    key: 'litentry',
+    chain: 'Litentry',
+    genesisHash: 'UNKNOWN',
+    ss58Format: -1,
+    providers: {
+      Litentry: 'wss://parachain.litentry.io'
+    },
+    active: false, // to be active
+    currentProviderMode: 'ws',
+    currentProvider: 'Litentry',
+    groups: ['POLKADOT_PARACHAIN'],
+    paraId: 2013,
+    nativeToken: 'LIT',
+    crowdloanUrl: 'https://crowdloan.litentry.com/',
+    decimals: 10,
+    coinGeckoKey: 'litentry'
   }
 };
 

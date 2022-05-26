@@ -1334,8 +1334,14 @@ export default class KoniExtension extends Extension {
           updateState(txState);
         });
     } catch (e) {
-      console.error('transfer nft error', e);
-      txState.txError = true;
+      // @ts-ignore
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-member-access
+      if (e.toString().includes('Error: Returned error: insufficient funds for gas * price + value')) {
+        txState.balanceError = true;
+      } else {
+        txState.txError = true;
+      }
+
       updateState(txState);
     }
 

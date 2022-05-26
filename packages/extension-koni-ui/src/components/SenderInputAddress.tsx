@@ -1,11 +1,10 @@
-// Copyright 2019-2022 @subwallet/extension-koni-ui authors & contributors
+// Copyright 2019-2022 @polkadot/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { ChainRegistry } from '@subwallet/extension-base/background/KoniTypes';
-import NETWORKS from '@subwallet/extension-koni-base/api/endpoints';
+import { ChainRegistry, NetworkJson } from '@subwallet/extension-base/background/KoniTypes';
 import FormatBalance from '@subwallet/extension-koni-ui/components/FormatBalance';
 import { useTranslation } from '@subwallet/extension-koni-ui/components/translate';
-import { SenderInputAddressType, TokenItemType } from '@subwallet/extension-koni-ui/components/types';
+import { BalanceFormatType, SenderInputAddressType, TokenItemType } from '@subwallet/extension-koni-ui/components/types';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { toShort } from '@subwallet/extension-koni-ui/util';
 import reformatAddress from '@subwallet/extension-koni-ui/util/reformatAddress';
@@ -21,20 +20,33 @@ interface Props {
   initValue: SenderInputAddressType;
   chainRegistryMap: Record<string, ChainRegistry>;
   balance: string;
-  balanceFormat: [number, string];
-  isDonation?: boolean
+  balanceFormat: BalanceFormatType;
+  isDonation?: boolean;
+  networkMap: Record<string, NetworkJson>;
 }
 
-function getOptions (chainRegistryMap: Record<string, ChainRegistry>): TokenItemType[] {
+function getOptions (chainRegistryMap: Record<string, ChainRegistry>, networkMap: Record<string, NetworkJson>): TokenItemType[] {
   const options: TokenItemType[] = [];
+  const activatedNetworks: string[] = [];
+
+  Object.keys(networkMap).forEach((networkKey) => {
+    if (networkMap[networkKey].active) {
+      activatedNetworks.push(networkKey);
+    }
+  });
 
   Object.keys(chainRegistryMap).forEach((networkKey) => {
+    if (!activatedNetworks.includes(networkKey)) {
+      return;
+    }
+
     Object.keys(chainRegistryMap[networkKey].tokenMap).forEach((token) => {
       const tokenInfo = chainRegistryMap[networkKey].tokenMap[token];
 
       options.push({
         networkKey: networkKey,
         token: tokenInfo.symbol,
+        tokenAlt: tokenInfo.symbolAlt,
         decimals: tokenInfo.decimals,
         isMainToken: tokenInfo.isMainToken,
         specialOption: tokenInfo?.specialOption
@@ -45,17 +57,17 @@ function getOptions (chainRegistryMap: Record<string, ChainRegistry>): TokenItem
   return options;
 }
 
-function SenderInputAddress ({ balance, balanceFormat, chainRegistryMap, className = '', initValue, isDonation, onChange }: Props): React.ReactElement {
+function SenderInputAddress ({ balance, balanceFormat, chainRegistryMap, className = '', initValue, isDonation, networkMap, onChange }: Props): React.ReactElement {
   const { t } = useTranslation();
   const [{ address, networkKey, token }, setValue] = useState<SenderInputAddressType>(initValue);
 
-  const networkPrefix = NETWORKS[networkKey].ss58Format;
+  const networkPrefix = networkMap[networkKey].ss58Format;
 
   const formattedAddress = useMemo<string>(() => {
     return reformatAddress(address, networkPrefix);
   }, [address, networkPrefix]);
 
-  const options: TokenItemType[] = getOptions(chainRegistryMap);
+  const options: TokenItemType[] = getOptions(chainRegistryMap, networkMap);
 
   const onChangeInputAddress = useCallback((address: string | null) => {
     if (address) {
@@ -117,6 +129,7 @@ function SenderInputAddress ({ balance, balanceFormat, chainRegistryMap, classNa
 
       <TokenDropdown
         className='sender-input-address__token-dropdown'
+        networkMap={networkMap}
         onChangeTokenValue={onChangeTokenValue}
         options={options}
         value={`${token}|${networkKey}`}

@@ -1,7 +1,6 @@
-// Copyright 2019-2022 @subwallet/extension-koni-ui authors & contributors
+// Copyright 2019-2022 @polkadot/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import NETWORKS from '@subwallet/extension-koni-base/api/endpoints';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { getLogoByNetworkKey } from '@subwallet/extension-koni-ui/util';
 import React from 'react';
@@ -11,9 +10,10 @@ interface Props {
   className: string;
   networkKey: string;
   symbol: string;
+  networkName: string;
 }
 
-function TokenItem ({ className = '', networkKey, symbol }: Props): React.ReactElement<Props> {
+function TokenItem ({ className = '', networkKey, networkName, symbol }: Props): React.ReactElement<Props> {
   return (
     <div className={className}>
       <img
@@ -23,7 +23,7 @@ function TokenItem ({ className = '', networkKey, symbol }: Props): React.ReactE
       />
       <div className='token-item-right-content'>
         <div className='token-item__symbol'>{symbol}</div>
-        <div className='token-item__chain'>{NETWORKS[networkKey].chain}</div>
+        <div className='token-item__chain'>{networkName}</div>
       </div>
     </div>
   );

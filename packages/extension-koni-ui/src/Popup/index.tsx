@@ -1,4 +1,4 @@
-// Copyright 2019-2022 @subwallet/extension-koni-ui authors & contributors
+// Copyright 2019-2022 @polkadot/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
 import type { AccountJson, AccountsContext, AuthorizeRequest, MetadataRequest, SigningRequest } from '@subwallet/extension-base/background/types';
@@ -9,8 +9,7 @@ import { PHISHING_PAGE_REDIRECT } from '@subwallet/extension-base/defaults';
 import { canDerive } from '@subwallet/extension-base/utils';
 import { AccountContext, ActionContext, AuthorizeReqContext, MediaContext, MetadataReqContext, SettingsContext, SigningReqContext } from '@subwallet/extension-koni-ui/contexts';
 import useSetupStore from '@subwallet/extension-koni-ui/hooks/store/useSetupStore';
-import Rendering from '@subwallet/extension-koni-ui/Popup/Rendering';
-import Donate from '@subwallet/extension-koni-ui/Popup/Sending/Donate';
+import Home from '@subwallet/extension-koni-ui/Popup/Home';
 import { updateCurrentAccount } from '@subwallet/extension-koni-ui/stores/updater';
 import * as Bowser from 'bowser';
 import React, { useCallback, useEffect, useState } from 'react';
@@ -29,7 +28,6 @@ import { createFindAccountHandler } from '../util/findAccount';
 import ExternalRequest from '@subwallet/extension-koni-ui/Popup/ExternalRequest';
 // import Home from './Home';
 
-const Home = React.lazy(() => import('./Home'));
 const EvmTokenEdit = React.lazy(() => import('@subwallet/extension-koni-ui/Popup/Settings/TokenSetting/EvmTokenEdit'));
 const EvmTokenSetting = React.lazy(() => import('@subwallet/extension-koni-ui/Popup/Settings/TokenSetting/EvmTokenSetting'));
 const Welcome = React.lazy(() => import('./Welcome'));
@@ -46,7 +44,6 @@ const Derive = React.lazy(() => import('./Derive'));
 const CreateAccount = React.lazy(() => import('./CreateAccount'));
 const Authorize = React.lazy(() => import('./Authorize'));
 const AuthList = React.lazy(() => import('./AuthManagement'));
-const Networks = React.lazy(() => import('@subwallet/extension-koni-ui/Popup/Settings/Networks'));
 const LoadingContainer = React.lazy(() => import('@subwallet/extension-koni-ui/components/LoadingContainer'));
 const TransferNftContainer = React.lazy(() => import('@subwallet/extension-koni-ui/Popup/Home/Nfts/transfer/TransferNftContainer'));
 const ImportLedger = React.lazy(() => import('@subwallet/extension-koni-ui/Popup/ImportLedger'));
@@ -55,7 +52,11 @@ const ImportEvmToken = React.lazy(() => import('@subwallet/extension-koni-ui/Pop
 const SendFund = React.lazy(() => import('@subwallet/extension-koni-ui/Popup/Sending/SendFund'));
 const Settings = React.lazy(() => import('@subwallet/extension-koni-ui/Popup/Settings'));
 const GeneralSetting = React.lazy(() => import('@subwallet/extension-koni-ui/Popup/Settings/GeneralSetting'));
-const NetworkEdit = React.lazy(() => import('@subwallet/extension-koni-ui/Popup/Settings/NetworkEdit'));
+const NetworkCreate = React.lazy(() => import('@subwallet/extension-koni-ui/Popup/Settings/NetworkSettings/NetworkEdit'));
+const Networks = React.lazy(() => import('@subwallet/extension-koni-ui/Popup/Settings/NetworkSettings/Networks'));
+const Rendering = React.lazy(() => import('@subwallet/extension-koni-ui/Popup/Rendering'));
+const Donate = React.lazy(() => import('@subwallet/extension-koni-ui/Popup/Sending/Donate'));
+const ErrorBoundary = React.lazy(() => import('../components/ErrorBoundary'));
 
 const startSettings = uiSettings.get();
 
@@ -235,49 +236,30 @@ export default function Popup (): React.ReactElement {
                           <Rendering />
                           <Switch>
                             <Route path='/auth-list'>{wrapWithErrorBoundary(<AuthList />, 'auth-list')}</Route>
-                            <Route path='/account/create'>{wrapWithErrorBoundary(
-                              <CreateAccount />, 'account-creation')}</Route>
-                            <Route path='/account/forget/:address'>{wrapWithErrorBoundary(
-                              <Forget />, 'forget-address')}</Route>
-                            <Route path='/account/export/:address'>{wrapWithErrorBoundary(
-                              <Export />, 'export-address')}</Route>
+                            <Route path='/account/create'>{wrapWithErrorBoundary(<CreateAccount />, 'account-creation')}</Route>
+                            <Route path='/account/forget/:address'>{wrapWithErrorBoundary(<Forget />, 'forget-address')}</Route>
+                            <Route path='/account/export/:address'>{wrapWithErrorBoundary(<Export />, 'export-address')}</Route>
                             {/* <Route path='/account/export-all'>{wrapWithErrorBoundary(<ExportAll />, 'export-all-address')}</Route> */}
-                            <Route path='/account/import-ledger'>{wrapWithErrorBoundary(
-                              <ImportLedger />, 'import-ledger')}</Route>
+                            <Route path='/account/import-ledger'>{wrapWithErrorBoundary(<ImportLedger />, 'import-ledger')}</Route>
                             <Route path='/account/import-qr'>{wrapWithErrorBoundary(<ImportQr />, 'import-qr')}</Route>
                             <Route path='/account/scan-qr'>{wrapWithErrorBoundary(<ExternalRequest />, 'scan-qr')}</Route>
-                            <Route path='/account/import-seed'>{wrapWithErrorBoundary(
-                              <ImportSeed />, 'import-seed')}</Route>
-                            <Route path='/account/import-metamask-private-key'>{wrapWithErrorBoundary(
-                              <ImportMetamaskPrivateKey />, 'import-metamask-private-key')}</Route>
-                            <Route path='/account/restore-json'>{wrapWithErrorBoundary(
-                              <RestoreJson />, 'restore-json')}</Route>
-                            <Route path='/account/derive/:address/locked'>{wrapWithErrorBoundary(<Derive
-                              isLocked />, 'derived-address-locked')}</Route>
-                            <Route path='/account/derive/:address'>{wrapWithErrorBoundary(
-                              <Derive />, 'derive-address')}</Route>
-                            <Route path='/account/settings'>{wrapWithErrorBoundary(
-                              <Settings />, 'account-settings')}</Route>
-                            <Route path='/account/general-setting'>{wrapWithErrorBoundary(
-                              <GeneralSetting />, 'account-general-settings')}</Route>
-                            <Route path='/account/networks'>{wrapWithErrorBoundary(
-                              <Networks />, 'account-networks')}</Route>
-                            <Route path='/account/network-edit'>{wrapWithErrorBoundary(
-                              <NetworkEdit />, 'account-network-edit')}</Route>
+                            <Route path='/account/import-seed'>{wrapWithErrorBoundary(<ImportSeed />, 'import-seed')}</Route>
+                            <Route path='/account/import-metamask-private-key'>{wrapWithErrorBoundary(<ImportMetamaskPrivateKey />, 'import-metamask-private-key')}</Route>
+                            <Route path='/account/restore-json'>{wrapWithErrorBoundary(<RestoreJson />, 'restore-json')}</Route>
+                            <Route path='/account/derive/:address/locked'>{wrapWithErrorBoundary(<Derive isLocked />, 'derived-address-locked')}</Route>
+                            <Route path='/account/derive/:address'>{wrapWithErrorBoundary(<Derive />, 'derive-address')}</Route>
+                            <Route path='/account/settings'>{wrapWithErrorBoundary(<Settings />, 'account-settings')}</Route>
+                            <Route path='/account/general-setting'>{wrapWithErrorBoundary(<GeneralSetting />, 'account-general-settings')}</Route>
+                            <Route path='/account/networks'>{wrapWithErrorBoundary(<Networks />, 'account-networks')}</Route>
+                            <Route path='/account/config-network'>{wrapWithErrorBoundary(<NetworkCreate />, 'account-network-edit')}</Route>
                             <Route path='/account/send-fund'>{wrapWithErrorBoundary(<SendFund />, 'send-fund')}</Route>
                             <Route path='/account/donate'>{wrapWithErrorBoundary(<Donate />, 'donate')}</Route>
-                            <Route path='/account/send-nft'>{wrapWithErrorBoundary(
-                              <TransferNftContainer />, 'send-nft')}</Route>
-                            <Route path='/account/import-evm-token'>{wrapWithErrorBoundary(
-                              <ImportEvmToken />, 'import-evm-token')}</Route>
-                            <Route path='/account/import-evm-nft'>{wrapWithErrorBoundary(
-                              <ImportEvmNft />, 'import-evm-nft')}</Route>
-                            <Route path='/account/evm-token-setting'>{wrapWithErrorBoundary(
-                              <EvmTokenSetting />, 'evm-token-setting')}</Route>
-                            <Route path='/account/evm-token-edit'>{wrapWithErrorBoundary(
-                              <EvmTokenEdit />, 'evm-token-edit')}</Route>
-                            <Route path={`${PHISHING_PAGE_REDIRECT}/:website`}>{wrapWithErrorBoundary(
-                              <PhishingDetected />, 'phishing-page-redirect')}</Route>
+                            <Route path='/account/send-nft'>{wrapWithErrorBoundary(<TransferNftContainer />, 'send-nft')}</Route>
+                            <Route path='/account/import-evm-token'>{wrapWithErrorBoundary(<ImportEvmToken />, 'import-evm-token')}</Route>
+                            <Route path='/account/import-evm-nft'>{wrapWithErrorBoundary(<ImportEvmNft />, 'import-evm-nft')}</Route>
+                            <Route path='/account/evm-token-setting'>{wrapWithErrorBoundary(<EvmTokenSetting />, 'evm-token-setting')}</Route>
+                            <Route path='/account/evm-token-edit'>{wrapWithErrorBoundary(<EvmTokenEdit />, 'evm-token-edit')}</Route>
+                            <Route path={`${PHISHING_PAGE_REDIRECT}/:website`}>{wrapWithErrorBoundary(<PhishingDetected />, 'phishing-page-redirect')}</Route>
                             <Route
                               exact
                               path='/'

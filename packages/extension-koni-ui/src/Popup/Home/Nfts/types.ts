@@ -3,9 +3,6 @@
 
 import { RMRK_VER } from '@subwallet/extension-base/background/KoniTypes';
 
-import { SubmittableExtrinsic } from '@polkadot/api/types';
-import { RuntimeDispatchInfo } from '@polkadot/types/interfaces';
-
 // For rendering purposes only
 export interface _NftItem {
   id?: string;
@@ -40,13 +37,14 @@ export interface Web3TransferParams {
 }
 
 export interface SubstrateTransferParams {
-  extrinsic: SubmittableExtrinsic<'promise'>;
-  txInfo?: RuntimeDispatchInfo;
+  params: Record<string, any>;
+  estimatedFee?: string;
 }
 
 export interface TransferResponse {
-  info?: RuntimeDispatchInfo;
-  extrinsic?: SubmittableExtrinsic<'promise'>;
+  // substrate
+  estimatedFee?: string;
+  // eth
   web3RawTx?: Record<string, any>;
   estimatedGas?: string
 }
@@ -61,12 +59,6 @@ export enum SUPPORTED_TRANSFER_CHAIN_NAME {
   opal = 'opal',
   statemint = 'statemint',
   bitcountry = 'bitcountry',
-  moonbeam = 'moonbeam',
-  moonbase = 'moonbase',
-  astarEvm = 'astarEvm',
-  moonriver = 'moonriver',
-  shiden = 'shiden',
-  shibuya = 'shibuya'
 }
 
 export const SUPPORTED_TRANSFER_SUBSTRATE_CHAIN = [
@@ -79,13 +71,4 @@ export const SUPPORTED_TRANSFER_SUBSTRATE_CHAIN = [
   SUPPORTED_TRANSFER_CHAIN_NAME.opal as string,
   SUPPORTED_TRANSFER_CHAIN_NAME.statemint as string,
   SUPPORTED_TRANSFER_CHAIN_NAME.bitcountry as string
-];
-
-export const SUPPORTED_TRANSFER_EVM_CHAIN = [
-  SUPPORTED_TRANSFER_CHAIN_NAME.moonbase as string,
-  SUPPORTED_TRANSFER_CHAIN_NAME.moonbeam as string,
-  SUPPORTED_TRANSFER_CHAIN_NAME.moonriver as string,
-  SUPPORTED_TRANSFER_CHAIN_NAME.astarEvm as string,
-  SUPPORTED_TRANSFER_CHAIN_NAME.shiden as string,
-  SUPPORTED_TRANSFER_CHAIN_NAME.shibuya as string
 ];

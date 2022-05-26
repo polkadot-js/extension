@@ -1,7 +1,8 @@
-// Copyright 2019-2022 @subwallet/extension-koni-ui authors & contributors
+// Copyright 2019-2022 @polkadot/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
 import { ActionContext, Button, ButtonArea, InputWithLabel } from '@subwallet/extension-koni-ui/components';
+import useGetNetworkJson from '@subwallet/extension-koni-ui/hooks/screen/home/useGetNetworkJson';
 import useToast from '@subwallet/extension-koni-ui/hooks/useToast';
 import useTranslation from '@subwallet/extension-koni-ui/hooks/useTranslation';
 import { upsertEvmToken } from '@subwallet/extension-koni-ui/messaging';
@@ -33,6 +34,7 @@ function EvmTokenEdit ({ className }: Props): React.ReactElement {
   const [isValidSymbol, setIsValidSymbol] = useState(true);
   const [isValidDecimals, setIsValidDecimals] = useState(true);
   const [isValidName, setIsValidName] = useState(true);
+  const networkJson = useGetNetworkJson(tokenInfo?.chain);
 
   useEffect(() => {
     if (!_tokenInfo.smartContract) {
@@ -127,6 +129,7 @@ function EvmTokenEdit ({ className }: Props): React.ReactElement {
         {
           tokenInfo.type === 'erc20' &&
           <InputWithLabel
+            disabled={true}
             label={t<string>('Symbol (*)')}
             onChange={onChangeSymbol}
             value={tokenInfo.symbol || ''}
@@ -136,6 +139,7 @@ function EvmTokenEdit ({ className }: Props): React.ReactElement {
         {
           tokenInfo.type === 'erc20' &&
           <InputWithLabel
+            disabled={true}
             label={t<string>('Decimals (*)')}
             onChange={onChangeDecimals}
             value={tokenInfo?.decimals?.toString() || ''}
@@ -145,7 +149,7 @@ function EvmTokenEdit ({ className }: Props): React.ReactElement {
         <InputWithLabel
           disabled={true}
           label={t<string>('Chain')}
-          value={tokenInfo?.chain?.toUpperCase() || ''}
+          value={networkJson?.chain || ''}
         />
 
         <InputWithLabel

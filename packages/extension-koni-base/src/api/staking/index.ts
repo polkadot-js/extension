@@ -1,12 +1,10 @@
 // Copyright 2019-2022 @subwallet/extension-koni authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { APIItemState, ApiProps, NetWorkInfo, StakingItem } from '@subwallet/extension-base/background/KoniTypes';
-import NETWORKS from '@subwallet/extension-koni-base/api/endpoints';
+import { APIItemState, ApiProps, NetworkJson, StakingItem } from '@subwallet/extension-base/background/KoniTypes';
+import { PREDEFINED_NETWORKS } from '@subwallet/extension-koni-base/api/predefinedNetworks';
 import { IGNORE_GET_SUBSTRATE_FEATURES_LIST } from '@subwallet/extension-koni-base/constants';
 import { categoryAddresses, toUnit } from '@subwallet/extension-koni-base/utils/utils';
-
-import { ethereumChains } from '../dotsama/api-helper';
 
 interface LedgerData {
   active: string,
@@ -17,10 +15,11 @@ interface LedgerData {
 }
 
 export const DEFAULT_STAKING_NETWORKS = {
-  polkadot: NETWORKS.polkadot,
-  kusama: NETWORKS.kusama,
-  hydradx: NETWORKS.hydradx,
-  acala: NETWORKS.acala
+  // polkadot: PREDEFINED_NETWORKS.polkadot,
+  // kusama: PREDEFINED_NETWORKS.kusama,
+  // hydradx: PREDEFINED_NETWORKS.hydradx,
+  // acala: PREDEFINED_NETWORKS.acala,
+  aleph: PREDEFINED_NETWORKS.aleph
   // astar: NETWORKS.astar,
   // moonbeam: NETWORKS.moonbeam
 };
@@ -30,27 +29,27 @@ interface PromiseMapping {
   chain: string
 }
 
-function parseStakingBalance (balance: number, chain: string): number {
+function parseStakingBalance (balance: number, chain: string, network: Record<string, NetworkJson>): number {
   if (chain === 'hydradx') {
     return balance;
   } else {
-    return toUnit(balance, NETWORKS[chain].decimals as number);
+    return toUnit(balance, network[chain].decimals as number);
   }
 }
 
-export async function subscribeStaking (addresses: string[], dotSamaAPIMap: Record<string, ApiProps>, callback: (networkKey: string, rs: StakingItem) => void, networks: Record<string, NetWorkInfo> = DEFAULT_STAKING_NETWORKS) {
+export async function stakingOnChainApi (addresses: string[], dotSamaAPIMap: Record<string, ApiProps>, callback: (networkKey: string, rs: StakingItem) => void, networks: Record<string, NetworkJson> = DEFAULT_STAKING_NETWORKS) {
   const allApiPromise: PromiseMapping[] = [];
   const [substrateAddresses, evmAddresses] = categoryAddresses(addresses);
 
   Object.entries(networks).forEach(([networkKey, networkInfo]) => {
-    if (IGNORE_GET_SUBSTRATE_FEATURES_LIST.indexOf(networkKey) < 0) {
+    if (IGNORE_GET_SUBSTRATE_FEATURES_LIST.indexOf(networkKey) < 0 && (networkInfo.getStakingOnChain && networkInfo.getStakingOnChain) && networkInfo.active) {
       allApiPromise.push({ chain: networkKey, api: dotSamaAPIMap[networkKey] });
     }
   });
 
-  const unsubPromises = await Promise.all(allApiPromise.map(async ({ api: apiPromise, chain }) => {
+  return await Promise.all(allApiPromise.map(async ({ api: apiPromise, chain }) => {
     const parentApi = await apiPromise.isReady;
-    const useAddresses = ethereumChains.indexOf(chain) > -1 ? evmAddresses : substrateAddresses;
+    const useAddresses = apiPromise.isEthereum ? evmAddresses : substrateAddresses;
 
     return parentApi.api.query.staking?.ledger.multi(useAddresses, (ledgers: any[]) => {
       let totalBalance = 0;
@@ -73,24 +72,24 @@ export async function subscribeStaking (addresses: string[], dotSamaAPIMap: Reco
           }
         }
 
-        const parsedTotal = parseStakingBalance(totalBalance, chain);
+        const parsedTotal = parseStakingBalance(totalBalance, chain, networks);
 
         if (totalBalance > 0) {
           stakingItem = {
-            name: NETWORKS[chain].chain,
+            name: networks[chain].chain,
             chainId: chain,
             balance: parsedTotal.toString(),
-            nativeToken: NETWORKS[chain].nativeToken,
-            unit: unit || NETWORKS[chain].nativeToken,
+            nativeToken: networks[chain].nativeToken,
+            unit: unit || networks[chain].nativeToken,
             state: APIItemState.READY
           } as StakingItem;
         } else {
           stakingItem = {
-            name: NETWORKS[chain].chain,
+            name: networks[chain].chain,
             chainId: chain,
             balance: parsedTotal.toString(),
-            nativeToken: NETWORKS[chain].nativeToken,
-            unit: unit || NETWORKS[chain].nativeToken,
+            nativeToken: networks[chain].nativeToken,
+            unit: unit || networks[chain].nativeToken,
             state: APIItemState.READY
           } as StakingItem;
         }
@@ -100,12 +99,4 @@ export async function subscribeStaking (addresses: string[], dotSamaAPIMap: Reco
       }
     });
   }));
-
-  return async () => {
-    const unsubs = await Promise.all(unsubPromises);
-
-    unsubs.forEach((unsub) => {
-      unsub && unsub();
-    });
-  };
 }

@@ -1,4 +1,4 @@
-// Copyright 2019-2022 @subwallet/extension-koni-ui authors & contributors
+// Copyright 2019-2022 @polkadot/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
 import Toggle from '@subwallet/extension-koni-ui/components/Toggle';
@@ -12,14 +12,16 @@ interface Props {
   value: boolean;
   uncheckedLabel: string;
   checkedLabel: string;
+  isDisable?: boolean;
 }
 
-function HorizontalLabelToggle ({ checkedLabel, className, toggleFunc, uncheckedLabel, value }: Props): React.ReactElement<Props> {
+function HorizontalLabelToggle ({ checkedLabel, className, isDisable, toggleFunc, uncheckedLabel, value }: Props): React.ReactElement<Props> {
   return (
     <div className={className}>
       <span className={!value ? 'horizontal-label' : 'horizontal-label unselected-label'}>{uncheckedLabel}</span>
       <Toggle
         className='horizontal-label-toggle'
+        isDisabled={isDisable}
         onChange={toggleFunc}
         value={value}
       />

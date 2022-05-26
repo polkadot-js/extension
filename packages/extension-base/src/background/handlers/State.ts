@@ -1,4 +1,4 @@
-// Copyright 2019-2022 @subwallet/extension-bg authors & contributors
+// Copyright 2019-2022 @polkadot/extension-bg authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
 import type { MetadataDef, ProviderMeta } from '@subwallet/extension-inject/types';

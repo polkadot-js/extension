@@ -12,6 +12,7 @@
     { "path": "./packages/extension-dapp/tsconfig.build.json" },
     { "path": "./packages/extension-inject/tsconfig.build.json" },
     { "path": "./packages/extension-mocks/tsconfig.build.json" },
-    { "path": "./packages/extension-koni-ui/tsconfig.build.json" }
+    { "path": "./packages/extension-koni-ui/tsconfig.build.json" },
+    { "path": "./packages/web-runner/tsconfig.build.json" }
   ]
 }

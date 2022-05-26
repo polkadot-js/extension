@@ -1,4 +1,4 @@
-// Copyright 2019-2022 @subwallet/extension-koni-ui authors & contributors
+// Copyright 2019-2022 @polkadot/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
 import { faArrowLeft } from '@fortawesome/free-solid-svg-icons';
@@ -7,9 +7,11 @@ import { CurrentNetworkInfo, NetWorkMetadataDef } from '@subwallet/extension-bas
 import { ALL_ACCOUNT_KEY } from '@subwallet/extension-koni-base/constants';
 import { ActionContext } from '@subwallet/extension-koni-ui/components';
 import Spinner from '@subwallet/extension-koni-ui/components/Spinner';
+import useGetNetworkJson from '@subwallet/extension-koni-ui/hooks/screen/home/useGetNetworkJson';
+import useGetNetworkMetadata from '@subwallet/extension-koni-ui/hooks/screen/home/useGetNetworkMetadata';
 import useToast from '@subwallet/extension-koni-ui/hooks/useToast';
 import { tieAccount } from '@subwallet/extension-koni-ui/messaging';
-import { _NftItem, SUPPORTED_TRANSFER_EVM_CHAIN, SUPPORTED_TRANSFER_SUBSTRATE_CHAIN } from '@subwallet/extension-koni-ui/Popup/Home/Nfts/types';
+import { _NftItem, SUPPORTED_TRANSFER_SUBSTRATE_CHAIN } from '@subwallet/extension-koni-ui/Popup/Home/Nfts/types';
 import { RootState, store } from '@subwallet/extension-koni-ui/stores';
 import { TransferNftParams } from '@subwallet/extension-koni-ui/stores/types';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
@@ -48,7 +50,9 @@ function NftItem ({ className, collectionId, collectionImage, data, onClickBack 
   const [loading, setLoading] = useState(true);
   const [showImage, setShowImage] = useState(true);
   const [imageError, setImageError] = useState(false);
-  const { currentAccount: account, currentNetwork, networkMetadata } = useSelector((state: RootState) => state);
+  const { currentAccount: account, currentNetwork } = useSelector((state: RootState) => state);
+  const networkMetadata = useGetNetworkMetadata();
+  const networkJson = useGetNetworkJson(data.chain as string);
 
   const navigate = useContext(ActionContext);
   const { show } = useToast();
@@ -87,7 +91,7 @@ function NftItem ({ className, collectionId, collectionImage, data, onClickBack 
       return;
     }
 
-    if (SUPPORTED_TRANSFER_SUBSTRATE_CHAIN.indexOf(data.chain) <= -1 && SUPPORTED_TRANSFER_EVM_CHAIN.indexOf(data.chain) <= -1) {
+    if (SUPPORTED_TRANSFER_SUBSTRATE_CHAIN.indexOf(data.chain) <= -1 && !networkJson.isEthereum) {
       show(`Transferring is not supported for ${data.chain.toUpperCase()} network`);
 
       return;
@@ -107,7 +111,7 @@ function NftItem ({ className, collectionId, collectionImage, data, onClickBack 
 
     updateTransferNftParams(data, collectionImage, collectionId);
     navigate('/account/send-nft');
-  }, [account.account, collectionId, collectionImage, currentNetwork.networkKey, data, navigate, networkMetadata, show]);
+  }, [account.account, collectionId, collectionImage, currentNetwork.networkKey, data, navigate, networkJson.isEthereum, networkMetadata, show]);
 
   const handleClickBack = useCallback(() => {
     onClickBack();

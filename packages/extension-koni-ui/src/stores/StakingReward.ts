@@ -1,11 +1,12 @@
-// Copyright 2019-2022 @subwallet/extension-koni-ui authors & contributors
+// Copyright 2019-2022 @polkadot/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 import { StakingRewardJson } from '@subwallet/extension-base/background/KoniTypes';
 
 const initialState = {
-  details: {}
+  details: {},
+  ready: false
 } as StakingRewardJson;
 
 const stakingRewardSlice = createSlice({
@@ -16,6 +17,7 @@ const stakingRewardSlice = createSlice({
       const payload = action.payload;
 
       state.details = payload.details;
+      state.ready = payload.ready;
     }
   }
 });

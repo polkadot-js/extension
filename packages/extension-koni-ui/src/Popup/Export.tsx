@@ -1,4 +1,4 @@
-// Copyright 2019-2022 @subwallet/extension-koni-ui authors & contributors
+// Copyright 2019-2022 @polkadot/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
 import type { Theme, ThemeProps } from '../types';
@@ -178,15 +178,16 @@ function ExportAccount ({ className, match: { params: { address } } }: Props): R
               >
                 <span>{t<string>('Cancel')}</span>
               </Button>
-              {!privateKey && <Button
-                className='export-button'
-                data-export-button
-                isBusy={isBusy && buttonId === 'exportPrivate'}
-                isDisabled={pass.length === 0 || !!error || isBusy}
-                onClick={_onExportPrivateButtonClick}
-              >
-                {t<string>('Private Key')}
-              </Button>}
+              {!privateKey &&
+                <Button
+                  className='export-button'
+                  data-export-button
+                  isBusy={isBusy && buttonId === 'exportPrivate'}
+                  isDisabled={pass.length === 0 || !!error || isBusy}
+                  onClick={_onExportPrivateButtonClick}
+                >
+                  {t<string>('Private Key')}
+                </Button>}
               <Button
                 className='export-button'
                 data-export-button

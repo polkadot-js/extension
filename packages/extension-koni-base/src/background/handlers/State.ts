@@ -3,24 +3,26 @@
 
 import { withErrorLog } from '@subwallet/extension-base/background/handlers/helpers';
 import State, { AuthUrls, Resolver } from '@subwallet/extension-base/background/handlers/State';
-import { _ServiceInfo, AccountRefMap, APIItemState, AuthRequestV2, BalanceItem, BalanceJson, ChainRegistry, CrowdloanItem, CrowdloanJson, CurrentAccountInfo, CustomEvmToken, DeleteEvmTokenParams, EvmTokenJson, NftCollection, NftCollectionJson, NftItem, NftJson, NftTransferExtra, PriceJson, RequestSettingsType, ResultResolver, StakingItem, StakingJson, StakingRewardJson, TokenInfo, TransactionHistoryItemType } from '@subwallet/extension-base/background/KoniTypes';
+import { AccountRefMap, APIItemState, ApiMap, AuthRequestV2, BalanceItem, BalanceJson, ChainRegistry, CrowdloanItem, CrowdloanJson, CurrentAccountInfo, CustomEvmToken, DeleteEvmTokenParams, EvmTokenJson, NETWORK_STATUS, NetworkJson, NftCollection, NftCollectionJson, NftItem, NftJson, NftTransferExtra, PriceJson, RequestSettingsType, ResultResolver, ServiceInfo, StakingItem, StakingJson, StakingRewardJson, TokenInfo, TransactionHistoryItemType } from '@subwallet/extension-base/background/KoniTypes';
 import { AuthorizeRequest, RequestAuthorizeTab } from '@subwallet/extension-base/background/types';
 import { getId } from '@subwallet/extension-base/utils/getId';
 import { getTokenPrice } from '@subwallet/extension-koni-base/api/coingecko';
-import { cacheRegistryMap } from '@subwallet/extension-koni-base/api/dotsama/registry';
-import NETWORKS from '@subwallet/extension-koni-base/api/endpoints';
+import { initApi } from '@subwallet/extension-koni-base/api/dotsama';
+import { cacheRegistryMap, getRegistry } from '@subwallet/extension-koni-base/api/dotsama/registry';
+import { PREDEFINED_GENESIS_HASHES, PREDEFINED_NETWORKS } from '@subwallet/extension-koni-base/api/predefinedNetworks';
 import { DEFAULT_STAKING_NETWORKS } from '@subwallet/extension-koni-base/api/staking';
 // eslint-disable-next-line camelcase
 import { DotSamaCrowdloan_crowdloans_nodes } from '@subwallet/extension-koni-base/api/subquery/__generated__/DotSamaCrowdloan';
 import { fetchDotSamaCrowdloan } from '@subwallet/extension-koni-base/api/subquery/crowdloan';
 import { DEFAULT_EVM_TOKENS } from '@subwallet/extension-koni-base/api/web3/defaultEvmToken';
-import { CurrentAccountStore, PriceStore } from '@subwallet/extension-koni-base/stores';
+import { initWeb3Api } from '@subwallet/extension-koni-base/api/web3/web3';
+import { CurrentAccountStore, NetworkMapStore, PriceStore } from '@subwallet/extension-koni-base/stores';
 import AccountRefStore from '@subwallet/extension-koni-base/stores/AccountRef';
 import AuthorizeStore from '@subwallet/extension-koni-base/stores/Authorize';
 import CustomEvmTokenStore from '@subwallet/extension-koni-base/stores/CustomEvmToken';
 import SettingsStore from '@subwallet/extension-koni-base/stores/Settings';
 import TransactionHistoryStore from '@subwallet/extension-koni-base/stores/TransactionHistory';
-import { convertFundStatus } from '@subwallet/extension-koni-base/utils/utils';
+import { convertFundStatus, getCurrentProvider } from '@subwallet/extension-koni-base/utils/utils';
 import { BehaviorSubject, Subject } from 'rxjs';
 
 import { accounts } from '@polkadot/ui-keyring/observable/accounts';
@@ -29,7 +31,7 @@ import { assert } from '@polkadot/util';
 function generateDefaultBalanceMap () {
   const balanceMap: Record<string, BalanceItem> = {};
 
-  Object.keys(NETWORKS).forEach((networkKey) => {
+  Object.keys(PREDEFINED_NETWORKS).forEach((networkKey) => {
     balanceMap[networkKey] = {
       state: APIItemState.PENDING,
       free: '0',
@@ -47,9 +49,9 @@ function generateDefaultStakingMap () {
 
   Object.keys(DEFAULT_STAKING_NETWORKS).forEach((networkKey) => {
     stakingMap[networkKey] = {
-      name: NETWORKS[networkKey].chain,
+      name: PREDEFINED_NETWORKS[networkKey].chain,
       chainId: networkKey,
-      nativeToken: NETWORKS[networkKey].nativeToken,
+      nativeToken: PREDEFINED_NETWORKS[networkKey].nativeToken,
       state: APIItemState.PENDING
     } as StakingItem;
   });
@@ -60,7 +62,7 @@ function generateDefaultStakingMap () {
 function generateDefaultCrowdloanMap () {
   const crowdloanMap: Record<string, CrowdloanItem> = {};
 
-  Object.keys(NETWORKS).forEach((networkKey) => {
+  Object.keys(PREDEFINED_NETWORKS).forEach((networkKey) => {
     crowdloanMap[networkKey] = {
       state: APIItemState.PENDING,
       contribute: '0'
@@ -70,9 +72,50 @@ function generateDefaultCrowdloanMap () {
   return crowdloanMap;
 }
 
+export function mergeNetworkProviders (customNetwork: NetworkJson, predefinedNetwork: NetworkJson) { // merge providers for 2 networks with the same genesisHash
+  if (customNetwork.customProviders) {
+    const parsedCustomProviders: Record<string, string> = {};
+    const currentProvider = customNetwork.customProviders[customNetwork.currentProvider];
+    const currentProviderMethod = currentProvider.startsWith('http') ? 'http' : 'ws';
+    let parsedProviderKey = '';
+
+    for (const customProvider of Object.values(customNetwork.customProviders)) {
+      let exist = false;
+
+      for (const [key, provider] of Object.entries(predefinedNetwork.providers)) {
+        if (currentProvider === provider) { // point currentProvider to predefined
+          parsedProviderKey = key;
+        }
+
+        if (provider === customProvider) {
+          exist = true;
+          break;
+        }
+      }
+
+      if (!exist) {
+        const index = Object.values(parsedCustomProviders).length;
+
+        parsedCustomProviders[`custom_${index}`] = customProvider;
+      }
+    }
+
+    for (const [key, parsedProvider] of Object.entries(parsedCustomProviders)) {
+      if (currentProvider === parsedProvider) {
+        parsedProviderKey = key;
+      }
+    }
+
+    return { currentProviderMethod, parsedProviderKey, parsedCustomProviders };
+  } else {
+    return { currentProviderMethod: '', parsedProviderKey: '', parsedCustomProviders: {} };
+  }
+}
+
 export default class KoniState extends State {
   public readonly authSubjectV2: BehaviorSubject<AuthorizeRequest[]> = new BehaviorSubject<AuthorizeRequest[]>([]);
 
+  private readonly networkMapStore = new NetworkMapStore(); // persist custom networkMap by user
   private readonly customEvmTokenStore = new CustomEvmTokenStore();
   private readonly priceStore = new PriceStore();
   private readonly currentAccountStore = new CurrentAccountStore();
@@ -80,10 +123,75 @@ export default class KoniState extends State {
   private readonly accountRefStore = new AccountRefStore();
   private readonly authorizeStore = new AuthorizeStore();
   readonly #authRequestsV2: Record<string, AuthRequestV2> = {};
-  // private readonly nftStore = new NftStore();
-  // private readonly stakingStore = new StakingStore();
   private priceStoreReady = false;
   private readonly transactionHistoryStore = new TransactionHistoryStore();
+
+  // init networkMap, apiMap and chainRegistry (first time only)
+  public initNetworkStates () {
+    this.networkMapStore.get('NetworkMap', (storedNetworkMap) => {
+      if (!storedNetworkMap) { // first time init extension
+        this.networkMapStore.set('NetworkMap', PREDEFINED_NETWORKS);
+        this.networkMap = PREDEFINED_NETWORKS;
+      } else { // merge custom providers in stored data with predefined data
+        const mergedNetworkMap: Record<string, NetworkJson> = PREDEFINED_NETWORKS;
+
+        for (const [key, storedNetwork] of Object.entries(storedNetworkMap)) {
+          if (key in PREDEFINED_NETWORKS) {
+            // check change and override custom providers if exist
+            if ('customProviders' in storedNetwork) {
+              mergedNetworkMap[key].customProviders = storedNetwork.customProviders;
+            }
+
+            mergedNetworkMap[key].active = storedNetwork.active;
+            mergedNetworkMap[key].currentProvider = storedNetwork.currentProvider;
+            mergedNetworkMap[key].coinGeckoKey = storedNetwork.coinGeckoKey;
+            mergedNetworkMap[key].crowdloanUrl = storedNetwork.crowdloanUrl;
+            mergedNetworkMap[key].blockExplorer = storedNetwork.blockExplorer;
+            mergedNetworkMap[key].currentProviderMode = mergedNetworkMap[key].currentProvider.startsWith('http') ? 'http' : 'ws';
+          } else {
+            if (Object.keys(PREDEFINED_GENESIS_HASHES).includes(storedNetwork.genesisHash)) { // merge networks with same genesis hash
+              // @ts-ignore
+              const targetKey = PREDEFINED_GENESIS_HASHES[storedNetwork.genesisHash];
+
+              const { currentProviderMethod, parsedCustomProviders, parsedProviderKey } = mergeNetworkProviders(storedNetwork, PREDEFINED_NETWORKS[targetKey]);
+
+              mergedNetworkMap[targetKey].customProviders = parsedCustomProviders;
+              mergedNetworkMap[targetKey].currentProvider = parsedProviderKey;
+              mergedNetworkMap[targetKey].active = storedNetwork.active;
+              // @ts-ignore
+              mergedNetworkMap[targetKey].currentProviderMode = currentProviderMethod;
+            } else {
+              mergedNetworkMap[key] = storedNetwork;
+            }
+          }
+        }
+
+        this.networkMapStore.set('NetworkMap', mergedNetworkMap);
+        this.networkMap = mergedNetworkMap; // init networkMap state
+      }
+
+      for (const [key, network] of Object.entries(this.networkMap)) {
+        if (network.active) {
+          this.apiMap.dotSama[key] = initApi(key, getCurrentProvider(network), network.isEthereum);
+
+          if (network.isEthereum && network.isEthereum) {
+            this.apiMap.web3[key] = initWeb3Api(getCurrentProvider(network));
+          }
+        }
+      }
+
+      this.initChainRegistry();
+      this.initEvmTokenState();
+    });
+  }
+
+  private networkMap: Record<string, NetworkJson> = {}; // mapping to networkMapStore, for uses in background
+  private networkMapSubject = new Subject<Record<string, NetworkJson>>();
+  private lockNetworkMap = false;
+
+  private apiMap: ApiMap = { dotSama: {}, web3: {} };
+
+  private serviceInfoSubject = new Subject<ServiceInfo>();
 
   public initEvmTokenState () {
     this.customEvmTokenStore.get('EvmToken', (storedEvmTokens) => {
@@ -122,6 +230,39 @@ export default class KoniState extends State {
           }
         }
 
+        // Update networkKey in case networkMap change
+        for (const token of _evmTokenState.erc20) {
+          if (!(token.chain in this.networkMap)) {
+            let newKey = '';
+            const genesisHash = token.chain.split('custom_')[1]; // token from custom network has key with prefix custom_
+
+            for (const [key, network] of Object.entries(this.networkMap)) {
+              if (network.genesisHash.toLowerCase() === genesisHash.toLowerCase()) {
+                newKey = key;
+                break;
+              }
+            }
+
+            token.chain = newKey;
+          }
+        }
+
+        for (const token of _evmTokenState.erc721) {
+          if (!(token.chain in this.networkMap)) {
+            let newKey = '';
+            const genesisHash = token.chain.split('custom_')[1]; // token from custom network has key with prefix custom_
+
+            for (const [key, network] of Object.entries(this.networkMap)) {
+              if (network.genesisHash.toLowerCase() === genesisHash.toLowerCase()) {
+                newKey = key;
+                break;
+              }
+            }
+
+            token.chain = newKey;
+          }
+        }
+
         this.evmTokenState = _evmTokenState;
       }
 
@@ -132,11 +273,6 @@ export default class KoniState extends State {
 
   private evmTokenState: EvmTokenJson = { erc20: [], erc721: [] };
   private evmTokenSubject = new Subject<EvmTokenJson>();
-
-  // private nftStoreReady = false;
-  // private stakingStoreReady = false;
-  // Todo: Persist data to balanceStore later
-  // private readonly balanceStore = new BalanceStore();
   private balanceMap: Record<string, BalanceItem> = generateDefaultBalanceMap();
   private balanceSubject = new Subject<BalanceJson>();
   private nftState: NftJson = {
@@ -157,6 +293,7 @@ export default class KoniState extends State {
 
   private stakingMap: Record<string, StakingItem> = generateDefaultStakingMap();
   private stakingRewardState: StakingRewardJson = {
+    ready: false,
     details: []
   } as StakingRewardJson;
 
@@ -171,7 +308,6 @@ export default class KoniState extends State {
   private stakingRewardSubject = new Subject<StakingRewardJson>();
   private historyMap: Record<string, TransactionHistoryItemType[]> = {};
   private historySubject = new Subject<Record<string, TransactionHistoryItemType[]>>();
-  private _serviceInfoSubject = new Subject<_ServiceInfo>();
 
   // Todo: persist data to store later
   private chainRegistryMap: Record<string, ChainRegistry> = {};
@@ -303,18 +439,18 @@ export default class KoniState extends State {
   };
 
   public async authorizeUrlV2 (url: string, request: RequestAuthorizeTab): Promise<boolean> {
+    let authList = await this.getAuthList();
+
+    if (!authList) {
+      authList = {};
+    }
+
     const idStr = this.stripUrl(url);
     // Do not enqueue duplicate authorization requests.
     const isDuplicate = Object.values(this.#authRequestsV2)
       .some((request) => request.idStr === idStr);
 
     assert(!isDuplicate, `The source ${url} has a pending authorization request`);
-
-    let authList = await this.getAuthList();
-
-    if (!authList) {
-      authList = {};
-    }
 
     if (authList[idStr]) {
       // this url was seen in the past
@@ -338,7 +474,10 @@ export default class KoniState extends State {
       };
 
       this.updateIconAuthV2();
-      this.popupOpen();
+
+      if (Object.keys(this.#authRequestsV2).length < 2) {
+        this.popupOpen();
+      }
     });
   }
 
@@ -500,6 +639,11 @@ export default class KoniState extends State {
     this.stakingRewardSubject.next(stakingRewardData);
   }
 
+  public updateStakingRewardReady (ready: boolean) {
+    this.stakingRewardState.ready = ready;
+    this.stakingRewardSubject.next(this.stakingRewardState);
+  }
+
   public getAccountRefMap (callback: (refMap: Record<string, Array<string>>) => void) {
     const refMap: AccountRefMap = {};
 
@@ -569,7 +713,7 @@ export default class KoniState extends State {
   public setCurrentAccount (data: CurrentAccountInfo, callback?: () => void): void {
     this.currentAccountStore.set('CurrentAccountInfo', data, callback);
 
-    this.updateServiceInfo_(this.chainRegistryMap, this.getErc721Tokens());
+    this.updateServiceInfo();
   }
 
   public getSettings (update: (value: RequestSettingsType) => void): void {
@@ -714,6 +858,28 @@ export default class KoniState extends State {
     this.chainRegistrySubject.next(this.getChainRegistryMap());
   }
 
+  public initChainRegistry () {
+    this.chainRegistryMap = {};
+    this.getEvmTokenStore((evmTokens) => {
+      const erc20Tokens = evmTokens ? evmTokens.erc20 : [];
+
+      Object.entries(this.apiMap.dotSama).forEach(([networkKey, { api }]) => {
+        getRegistry(networkKey, api, erc20Tokens)
+          .then((rs) => {
+            this.setChainRegistryItem(networkKey, rs);
+          })
+          .catch(console.error);
+      });
+    });
+    Object.entries(this.apiMap.dotSama).forEach(([networkKey, { api }]) => {
+      getRegistry(networkKey, api)
+        .then((rs) => {
+          this.setChainRegistryItem(networkKey, rs);
+        })
+        .catch(console.error);
+    });
+  }
+
   public subscribeChainRegistryMap () {
     return this.chainRegistrySubject;
   }
@@ -768,6 +934,10 @@ export default class KoniState extends State {
     });
   }
 
+  public setTransactionHistoryV2 (address: string, networkKey: string, items: TransactionHistoryItemType[]) {
+    this.transactionHistoryStore.set(this.getTransactionKey(address, networkKey), items);
+  }
+
   public setPrice (priceData: PriceJson, callback?: (priceData: PriceJson) => void): void {
     this.priceStore.set('PriceData', priceData, () => {
       if (callback) {
@@ -782,7 +952,15 @@ export default class KoniState extends State {
       if (this.priceStoreReady) {
         update(rs);
       } else {
-        getTokenPrice()
+        const activeNetworks: string[] = [];
+
+        Object.values(this.networkMap).forEach((network) => {
+          if (network.active && network.coinGeckoKey) {
+            activeNetworks.push(network.coinGeckoKey);
+          }
+        });
+
+        getTokenPrice(activeNetworks)
           .then((rs) => {
             this.setPrice(rs);
             update(rs);
@@ -849,7 +1027,7 @@ export default class KoniState extends State {
 
     this.evmTokenSubject.next(this.evmTokenState);
     this.customEvmTokenStore.set('EvmToken', this.evmTokenState);
-    this.updateServiceInfo_(this.chainRegistryMap, this.getErc721Tokens());
+    this.updateServiceInfo();
   }
 
   public deleteEvmTokens (targetTokens: DeleteEvmTokenParams[]) {
@@ -895,19 +1073,318 @@ export default class KoniState extends State {
     this.evmTokenSubject.next(this.evmTokenState);
     this.chainRegistrySubject.next(this.getChainRegistryMap());
     this.customEvmTokenStore.set('EvmToken', this.evmTokenState);
-    this.updateServiceInfo_(this.chainRegistryMap, this.getErc721Tokens());
+    this.updateServiceInfo();
   }
 
-  public subscribeServiceInfo_ () {
-    return this._serviceInfoSubject;
+  public getNetworkMap () {
+    return this.networkMap;
   }
 
-  public updateServiceInfo_ (chainRegistry: Record<string, ChainRegistry>, customErc721Registry: CustomEvmToken[]) {
+  public getNetworkMapByKey (key: string) {
+    return this.networkMap[key];
+  }
+
+  public getEthereumChains (): string[] {
+    const result: string[] = [];
+
+    Object.keys(this.networkMap).forEach((k) => {
+      if (this.networkMap[k].isEthereum) {
+        result.push(k);
+      }
+    });
+
+    return result;
+  }
+
+  public subscribeNetworkMap () {
+    return this.networkMapStore.getSubject();
+  }
+
+  public async upsertNetworkMap (data: NetworkJson): Promise<boolean> {
+    if (this.lockNetworkMap) {
+      return false;
+    }
+
+    this.lockNetworkMap = true;
+
+    if (data.key in this.networkMap) { // update provider for existed network
+      if (data.customProviders) {
+        this.networkMap[data.key].customProviders = data.customProviders;
+      }
+
+      if (data.currentProvider !== this.networkMap[data.key].currentProvider) {
+        this.networkMap[data.key].currentProvider = data.currentProvider;
+        this.networkMap[data.key].currentProviderMode = data.currentProvider.startsWith('ws') ? 'ws' : 'http';
+      }
+
+      this.networkMap[data.key].chain = data.chain;
+
+      if (data.nativeToken) {
+        this.networkMap[data.key].nativeToken = data.nativeToken;
+      }
+
+      if (data.decimals) {
+        this.networkMap[data.key].decimals = data.decimals;
+      }
+
+      this.networkMap[data.key].crowdloanUrl = data.crowdloanUrl;
+
+      this.networkMap[data.key].coinGeckoKey = data.coinGeckoKey;
+
+      this.networkMap[data.key].paraId = data.paraId;
+
+      this.networkMap[data.key].blockExplorer = data.blockExplorer;
+    } else { // insert
+      this.networkMap[data.key] = data;
+      this.networkMap[data.key].getStakingOnChain = true; // try to fetch staking on chain for custom network by default
+    }
+
+    if (this.networkMap[data.key].active) { // update API map if network is active
+      if (data.key in this.apiMap.dotSama) {
+        await this.apiMap.dotSama[data.key].api.disconnect();
+        delete this.apiMap.dotSama[data.key];
+      }
+
+      if (data.isEthereum && data.key in this.apiMap.web3) {
+        delete this.apiMap.web3[data.key];
+      }
+
+      this.apiMap.dotSama[data.key] = initApi(data.key, getCurrentProvider(data), data.isEthereum);
+
+      if (data.isEthereum && data.isEthereum) {
+        this.apiMap.web3[data.key] = initWeb3Api(getCurrentProvider(data));
+      }
+    }
+
+    this.networkMapSubject.next(this.networkMap);
+    this.networkMapStore.set('NetworkMap', this.networkMap);
+    this.updateServiceInfo();
+    this.lockNetworkMap = false;
+
+    return true;
+  }
+
+  public removeNetworkMap (networkKey: string): boolean {
+    if (this.lockNetworkMap) {
+      return false;
+    }
+
+    this.lockNetworkMap = true;
+    delete this.networkMap[networkKey];
+
+    this.networkMapSubject.next(this.networkMap);
+    this.networkMapStore.set('NetworkMap', this.networkMap);
+    this.updateServiceInfo();
+    this.lockNetworkMap = false;
+
+    return true;
+  }
+
+  public async disableNetworkMap (networkKey: string): Promise<boolean> {
+    if (this.lockNetworkMap) {
+      return false;
+    }
+
+    this.lockNetworkMap = true;
+    await this.apiMap.dotSama[networkKey].api.disconnect();
+    delete this.apiMap.dotSama[networkKey];
+
+    if (this.networkMap[networkKey].isEthereum && this.networkMap[networkKey].isEthereum) {
+      delete this.apiMap.web3[networkKey];
+    }
+
+    this.networkMap[networkKey].active = false;
+    this.networkMap[networkKey].apiStatus = NETWORK_STATUS.DISCONNECTED;
+    this.networkMapSubject.next(this.networkMap);
+    this.networkMapStore.set('NetworkMap', this.networkMap);
+    this.updateServiceInfo();
+    this.lockNetworkMap = false;
+
+    return true;
+  }
+
+  public async disableAllNetworks (): Promise<boolean> {
+    if (this.lockNetworkMap) {
+      return false;
+    }
+
+    this.lockNetworkMap = true;
+    const targetNetworkKeys: string[] = [];
+
+    for (const [key, network] of Object.entries(this.networkMap)) {
+      if (network.active) {
+        targetNetworkKeys.push(key);
+        this.networkMap[key].active = false;
+      }
+    }
+
+    this.networkMapSubject.next(this.networkMap);
+    this.networkMapStore.set('NetworkMap', this.networkMap);
+
+    for (const key of targetNetworkKeys) {
+      await this.apiMap.dotSama[key].api.disconnect();
+      delete this.apiMap.dotSama[key];
+
+      if (this.networkMap[key].isEthereum && this.networkMap[key].isEthereum) {
+        delete this.apiMap.web3[key];
+      }
+
+      this.networkMap[key].apiStatus = NETWORK_STATUS.DISCONNECTED;
+    }
+
+    this.updateServiceInfo();
+    this.lockNetworkMap = false;
+
+    return true;
+  }
+
+  public enableNetworkMap (networkKey: string) {
+    if (this.lockNetworkMap) {
+      return false;
+    }
+
+    this.lockNetworkMap = true;
+    this.apiMap.dotSama[networkKey] = initApi(networkKey, getCurrentProvider(this.networkMap[networkKey]), this.networkMap[networkKey].isEthereum);
+
+    if (this.networkMap[networkKey].isEthereum && this.networkMap[networkKey].isEthereum) {
+      this.apiMap.web3[networkKey] = initWeb3Api(getCurrentProvider(this.networkMap[networkKey]));
+    }
+
+    this.networkMap[networkKey].active = true;
+    this.networkMapSubject.next(this.networkMap);
+    this.networkMapStore.set('NetworkMap', this.networkMap);
+    this.updateServiceInfo();
+    this.lockNetworkMap = false;
+
+    return true;
+  }
+
+  public enableAllNetworks () {
+    if (this.lockNetworkMap) {
+      return false;
+    }
+
+    this.lockNetworkMap = true;
+    const targetNetworkKeys: string[] = [];
+
+    for (const [key, network] of Object.entries(this.networkMap)) {
+      if (!network.active) {
+        targetNetworkKeys.push(key);
+        this.networkMap[key].active = true;
+      }
+    }
+
+    this.networkMapSubject.next(this.networkMap);
+    this.networkMapStore.set('NetworkMap', this.networkMap);
+
+    for (const key of targetNetworkKeys) {
+      this.apiMap.dotSama[key] = initApi(key, getCurrentProvider(this.networkMap[key]), this.networkMap[key].isEthereum);
+
+      if (this.networkMap[key].isEthereum && this.networkMap[key].isEthereum) {
+        this.apiMap.web3[key] = initWeb3Api(getCurrentProvider(this.networkMap[key]));
+      }
+    }
+
+    this.updateServiceInfo();
+    this.lockNetworkMap = false;
+
+    return true;
+  }
+
+  public async resetDefaultNetwork () {
+    if (this.lockNetworkMap) {
+      return false;
+    }
+
+    this.lockNetworkMap = true;
+    const targetNetworkKeys: string[] = [];
+
+    for (const [key, network] of Object.entries(this.networkMap)) {
+      if (!network.active) {
+        if (key === 'polkadot' || key === 'kusama') {
+          this.apiMap.dotSama[key] = initApi(key, getCurrentProvider(this.networkMap[key]), this.networkMap[key].isEthereum);
+          this.networkMap[key].active = true;
+        }
+      } else {
+        if (key !== 'polkadot' && key !== 'kusama') {
+          targetNetworkKeys.push(key);
+
+          this.networkMap[key].active = false;
+          this.networkMap[key].apiStatus = NETWORK_STATUS.DISCONNECTED;
+        }
+      }
+    }
+
+    this.networkMapSubject.next(this.networkMap);
+    this.networkMapStore.set('NetworkMap', this.networkMap);
+
+    for (const key of targetNetworkKeys) {
+      await this.apiMap.dotSama[key].api.disconnect();
+      delete this.apiMap.dotSama[key];
+
+      if (this.networkMap[key].isEthereum && this.networkMap[key].isEthereum) {
+        delete this.apiMap.web3[key];
+      }
+    }
+
+    this.updateServiceInfo();
+    this.lockNetworkMap = false;
+
+    return true;
+  }
+
+  public updateNetworkStatus (networkKey: string, status: NETWORK_STATUS) {
+    this.networkMap[networkKey].apiStatus = status;
+
+    this.networkMapSubject.next(this.networkMap);
+    this.networkMapStore.set('NetworkMap', this.networkMap);
+  }
+
+  public getDotSamaApiMap () {
+    return this.apiMap.dotSama;
+  }
+
+  public getDotSamaApi (networkKey: string) {
+    return this.apiMap.dotSama[networkKey];
+  }
+
+  public getWeb3ApiMap () {
+    return this.apiMap.web3;
+  }
+
+  public getApiMap () {
+    return this.apiMap;
+  }
+
+  public refreshDotSamaApi (key: string) {
+    const apiProps = this.apiMap.dotSama[key];
+
+    if (key in this.apiMap.dotSama) {
+      if (!apiProps.isApiConnected) {
+        apiProps.recoverConnect && apiProps.recoverConnect();
+      }
+    }
+
+    return true;
+  }
+
+  public refreshWeb3Api (key: string) {
+    this.apiMap.web3[key] = initWeb3Api(getCurrentProvider(this.networkMap[key]));
+  }
+
+  public subscribeServiceInfo () {
+    return this.serviceInfoSubject;
+  }
+
+  public updateServiceInfo () {
+    console.log('<---Update serviceInfo--->');
     this.currentAccountStore.get('CurrentAccountInfo', (value) => {
-      this._serviceInfoSubject.next({
-        currentAccount: value.address,
-        chainRegistry,
-        customErc721Registry
+      this.serviceInfoSubject.next({
+        networkMap: this.networkMap,
+        apiMap: this.apiMap,
+        currentAccountInfo: value,
+        chainRegistry: this.chainRegistryMap,
+        customErc721Registry: this.getErc721Tokens()
       });
     });
   }

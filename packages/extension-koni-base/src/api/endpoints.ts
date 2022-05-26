@@ -4,6 +4,7 @@
 import { NetWorkInfo } from '@subwallet/extension-base/background/KoniTypes';
 import { ethereumChains } from '@subwallet/extension-koni-base/api/dotsama/api-helper';
 
+// deprecated
 const NETWORKS: Record<string, NetWorkInfo> = {
   acala_testnet: {
     chain: 'Acala Mandala TC7',
@@ -182,11 +183,11 @@ const NETWORKS: Record<string, NetWorkInfo> = {
     nativeToken: 'DOT',
     crowdloanUrl: 'https://crowdloan.interlay.io/'
   },
-  equilibrium: {
-    chain: 'Equilibrium',
+  equilibrium_parachain: {
+    chain: 'Equilibrium Parachain',
     genesisHash: '0x89d3ec46d2fb43ef5a9713833373d5ea666b092fa8fd68fbc34596036571b907',
     ss58Format: 67,
-    provider: 'wss://node.pol.equilibrium.io/',
+    provider: 'wss://node.pol.equilibrium.io',
     groups: ['POLKADOT_PARACHAIN'],
     paraId: 2011,
     nativeToken: 'TOKEN',
@@ -275,7 +276,8 @@ const NETWORKS: Record<string, NetWorkInfo> = {
     ss58Format: 42,
     provider: 'wss://ws.azero.dev/',
     groups: ['MAIN_NET'],
-    nativeToken: 'AZERO'
+    nativeToken: 'AZERO',
+    decimals: 12
   },
   alephTest: {
     chain: 'Aleph Zero Testnet',
@@ -400,7 +402,8 @@ const NETWORKS: Record<string, NetWorkInfo> = {
     paraId: 2023,
     isEthereum: true,
     nativeToken: 'MOVR',
-    crowdloanUrl: 'https://polkadot.js.org/apps/#/parachains/crowdloan'
+    crowdloanUrl: 'https://polkadot.js.org/apps/#/parachains/crowdloan',
+    decimals: 18
   },
   shiden: {
     chain: 'Shiden',
@@ -565,6 +568,13 @@ const NETWORKS: Record<string, NetWorkInfo> = {
     paraId: 2024,
     nativeToken: 'GENS',
     crowdloanUrl: 'https://genshiro.equilibrium.io/en'
+  },
+  genshiro_testnet: {
+    chain: 'Genshiro Testnet',
+    genesisHash: '0xdec164ef73b27c5b7e404114305102018a2b5a4ddda665bb510ce896ad5ba78d',
+    ss58Format: 67,
+    provider: 'wss://testnet.genshiro.io',
+    groups: ['TEST_NET']
   },
   subsocial_x: {
     chain: 'SubsocialX',

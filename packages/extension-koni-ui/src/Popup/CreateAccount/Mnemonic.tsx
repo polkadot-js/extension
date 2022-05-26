@@ -1,4 +1,4 @@
-// Copyright 2019-2022 @subwallet/extension-koni-ui authors & contributors
+// Copyright 2019-2022 @polkadot/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
 import { AccountInfoEl, ButtonArea, Checkbox, MnemonicSeed, NextStepButton } from '@subwallet/extension-koni-ui/components';

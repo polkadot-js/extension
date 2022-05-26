@@ -1,9 +1,9 @@
-// Copyright 2019-2022 @subwallet/extension-koni-ui authors & contributors
+// Copyright 2019-2022 @polkadot/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
 import { faChevronDown } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import NETWORKS from '@subwallet/extension-koni-base/api/endpoints';
+import { NetworkJson } from '@subwallet/extension-base/background/KoniTypes';
 import { Label, Theme } from '@subwallet/extension-koni-ui/components';
 import { TokenTransformOptionType } from '@subwallet/extension-koni-ui/components/TokenDropdown/types';
 import { TokenItemType } from '@subwallet/extension-koni-ui/components/types';
@@ -16,25 +16,27 @@ import styled, { ThemeContext } from 'styled-components';
 
 interface WrapperProps {
   className?: string;
-  formatOptLabel?: (label: string, value: string, networkKey: string) => React.ReactNode;
+  formatOptLabel?: (option: TokenTransformOptionType) => React.ReactNode;
   onChange?: (token: string) => void;
   value: string;
   options: TokenItemType[];
   ci?: React.ReactNode;
   filterOptions?: (candidate: {label: string, value: string}, input: string) => boolean;
+  networkMap: Record<string, NetworkJson>;
 }
 
 interface Props {
   className?: string;
   label: string;
-  getFormatOptLabel?: (label: string, value: string, networkKey: string) => React.ReactNode;
+  getFormatOptLabel?: (option: TokenTransformOptionType) => React.ReactNode;
   onChange?: any;
   options: TokenItemType[];
   value?: string;
   ci?: React.ReactNode;
+  networkMap: Record<string, NetworkJson>;
 }
 
-function DropdownWrapper ({ className, formatOptLabel, onChange, options, value }: WrapperProps): React.ReactElement<WrapperProps> {
+function DropdownWrapper ({ className, formatOptLabel, networkMap, onChange, options, value }: WrapperProps): React.ReactElement<WrapperProps> {
   const [isDropdownOpen, setDropdownOpen] = useState(false);
   const tokenValueArr = value.split('|');
   const dropdownRef = useRef(null);
@@ -79,6 +81,7 @@ function DropdownWrapper ({ className, formatOptLabel, onChange, options, value 
           className='token-dropdown__dropdown'
           getFormatOptLabel={formatOptLabel}
           label={''}
+          networkMap={networkMap}
           onChange={_onChange}
           options={options}
           value={value}
@@ -88,8 +91,13 @@ function DropdownWrapper ({ className, formatOptLabel, onChange, options, value 
   );
 }
 
-function Dropdown ({ className, getFormatOptLabel, label, onChange, options, value }: Props): React.ReactElement<Props> {
-  const transformOptions: TokenTransformOptionType[] = options.map((t) => ({ label: t.token, value: `${t.token}|${t.networkKey}`, networkKey: t.networkKey, networkName: NETWORKS[t.networkKey].chain }));
+function Dropdown ({ className, getFormatOptLabel, label, networkMap, onChange, options, value }: Props): React.ReactElement<Props> {
+  const transformOptions: TokenTransformOptionType[] = options.map((t) => ({
+    label: t.token || t.token,
+    value: `${t.token}|${t.networkKey}`,
+    networkKey: t.networkKey,
+    networkName: networkMap[t.networkKey].chain
+  }));
   const [selectedValue, setSelectedValue] = useState(value);
   const themeContext = useContext(ThemeContext as React.Context<Theme>);
 
@@ -104,8 +112,8 @@ function Dropdown ({ className, getFormatOptLabel, label, onChange, options, val
     }, [onChange]
   );
 
-  const formatOptionLabel = useCallback(({ label, networkKey, value }: {label: string, value: string, networkKey: string}) => {
-    return getFormatOptLabel && getFormatOptLabel(label, value, networkKey);
+  const formatOptionLabel = useCallback((option: TokenTransformOptionType) => {
+    return getFormatOptLabel && getFormatOptLabel(option);
   }, [getFormatOptLabel]);
 
   const filterOption = useCallback((candidate: { label: string; value: string, data: TokenTransformOptionType }, input: string) => {

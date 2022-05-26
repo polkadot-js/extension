@@ -1,4 +1,4 @@
-// Copyright 2019-2022 @subwallet/extension-koni-ui authors & contributors
+// Copyright 2019-2022 @polkadot/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
 import type { IconTheme } from '@polkadot/react-identicon/types';
@@ -8,11 +8,11 @@ import type { Recoded, ThemeProps } from '../types';
 import { faUsb } from '@fortawesome/free-brands-svg-icons';
 import { faCodeBranch, faQrcode } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { NetworkJson } from '@subwallet/extension-base/background/KoniTypes';
 import cloneLogo from '@subwallet/extension-koni-ui/assets/clone.svg';
 import Identicon from '@subwallet/extension-koni-ui/components/Identicon';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { accountAllRecoded, defaultRecoded, isAccountAll, recodeAddress } from '@subwallet/extension-koni-ui/util';
-import getNetworkInfoByGenesisHash from '@subwallet/extension-koni-ui/util/getNetworkInfoByGenesisHash';
 import Avatar from 'boring-avatars';
 import React, { useCallback, useContext, useEffect, useState } from 'react';
 import CopyToClipboard from 'react-copy-to-clipboard';
@@ -48,7 +48,7 @@ function AccountInfo ({ address, className, genesisHash, iconSize = 32, isExtern
     genesisHash: recodedGenesis,
     isEthereum,
     prefix }, setRecoded] = useState<Recoded>(defaultRecoded);
-  const networkInfo = getNetworkInfoByGenesisHash(genesisHash || recodedGenesis);
+  const networkMap = useSelector((state: RootState) => state.networkMap);
   const { show } = useToast();
   const accountName = name || account?.name;
   const displayName = accountName || t('<unknown>');
@@ -56,6 +56,28 @@ function AccountInfo ({ address, className, genesisHash, iconSize = 32, isExtern
   const randomVariant = window.localStorage.getItem('randomVariant') as 'beam' | 'marble' | 'pixel' | 'sunset' | 'ring';
   const randomNameForLogo = window.localStorage.getItem('randomNameForLogo') as string;
   const _isAccountAll = address && isAccountAll(address);
+
+  const getNetworkInfoByGenesisHash = useCallback((hash?: string | null): NetworkJson | null => {
+    if (!hash) {
+      return null;
+    }
+
+    for (const n in networkMap) {
+      if (!Object.prototype.hasOwnProperty.call(networkMap, n)) {
+        continue;
+      }
+
+      const networkInfo = networkMap[n];
+
+      if (networkInfo.genesisHash === hash) {
+        return networkInfo;
+      }
+    }
+
+    return null;
+  }, [networkMap]);
+
+  const networkInfo = getNetworkInfoByGenesisHash(genesisHash || recodedGenesis);
 
   useEffect((): void => {
     if (!address) {

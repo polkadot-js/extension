@@ -1,8 +1,9 @@
-// Copyright 2019-2022 @subwallet/extension-koni-ui authors & contributors
+// Copyright 2019-2022 @polkadot/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
 import type { Compact } from '@polkadot/types';
 
+import { BalanceFormatType } from '@subwallet/extension-koni-ui/components/types';
 import React from 'react';
 import styled from 'styled-components';
 
@@ -11,7 +12,7 @@ import { BN, BN_ZERO, formatBalance } from '@polkadot/util';
 interface Props {
   children?: React.ReactNode;
   className?: string;
-  format: [number, string];
+  format: BalanceFormatType; // decimals | symbol | symbol Alt
   isShort?: boolean;
   label?: React.ReactNode;
   labelPost?: LabelPost;
@@ -33,10 +34,10 @@ function createElement (prefix: string, postfix: string, unit: string, label: La
   > {unit}</span>{label}</>;
 }
 
-function applyFormat (value: Compact<any> | BN | string, [decimals, token]: [number, string], withCurrency = true, withSi?: boolean, _isShort?: boolean, labelPost?: LabelPost): React.ReactNode {
+function applyFormat (value: Compact<any> | BN | string, [decimals, symbol, symbolAlt]: BalanceFormatType, withCurrency = true, withSi?: boolean, _isShort?: boolean, labelPost?: LabelPost): React.ReactNode {
   const [prefix, postfix] = formatBalance(value, { decimals, forceUnit: '-', withSi: false }).split('.');
   const isShort = _isShort || (withSi && prefix.length >= K_LENGTH);
-  const unitPost = withCurrency ? token : '';
+  const unitPost = withCurrency ? (symbolAlt || symbol) : '';
 
   if (prefix.length > M_LENGTH) {
     const [major, rest] = formatBalance(value, { decimals, withUnit: false }).split('.');

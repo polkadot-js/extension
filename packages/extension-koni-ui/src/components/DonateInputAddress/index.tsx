@@ -1,4 +1,4 @@
-// Copyright 2019-2022 @subwallet/extension-koni-ui authors & contributors
+// Copyright 2019-2022 @polkadot/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
 // eslint-disable-next-line header/header
@@ -8,10 +8,10 @@ import type { DonateTransformOptionType, Option } from './types';
 import { DropdownTransformGroupOptionType, DropdownTransformOptionType, OptionInputAddress } from '@subwallet/extension-base/background/KoniTypes';
 import DONATEINFOS from '@subwallet/extension-koni-base/api/donate';
 import DonateReceiveItem from '@subwallet/extension-koni-ui/components/DonateInputAddress/DonateReceiveItem';
+import createItem from '@subwallet/extension-koni-ui/components/InputAddress/createItem';
 import Dropdown from '@subwallet/extension-koni-ui/components/InputAddress/Dropdown';
+import LabelHelp from '@subwallet/extension-koni-ui/components/LabelHelp';
 import { cancelSubscription, saveRecentAccountId, subscribeAccountsInputAddress } from '@subwallet/extension-koni-ui/messaging';
-import createItem from '@subwallet/extension-koni-ui/Popup/Sending/old/component/InputAddress/createItem';
-import LabelHelp from '@subwallet/extension-koni-ui/Popup/Sending/old/component/LabelHelp';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { toAddress } from '@subwallet/extension-koni-ui/util';
 import React, { useCallback, useEffect, useRef, useState } from 'react';

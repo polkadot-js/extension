@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { gql } from '@apollo/client';
-import NETWORKS from '@subwallet/extension-koni-base/api/endpoints';
+import { PREDEFINED_NETWORKS } from '@subwallet/extension-koni-base/api/predefinedNetworks';
 // eslint-disable-next-line camelcase
 import { DotSamaCrowdloan, DotSamaCrowdloan_crowdloans_nodes, DotSamaCrowdloanVariables } from '@subwallet/extension-koni-base/api/subquery/__generated__/DotSamaCrowdloan';
 import { newApolloClient } from '@subwallet/extension-koni-base/api/subquery/subquery';
@@ -41,7 +41,7 @@ export const DOTSAMA_CROWDLOAN_QUERY = gql`
 export const fetchDotSamaCrowdloan = async () => {
   const paraMap: Record<string, string> = {};
 
-  Object.entries(NETWORKS).forEach(([networkKey, network]) => {
+  Object.entries(PREDEFINED_NETWORKS).forEach(([networkKey, network]) => {
     let prefix = '';
 
     if (network.groups.indexOf('POLKADOT_PARACHAIN') > -1) {

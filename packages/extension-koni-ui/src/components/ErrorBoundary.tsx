@@ -1,4 +1,4 @@
-// Copyright 2019-2022 @subwallet/extension-koni-ui authors & contributor
+// Copyright 2019-2022 @polkadot/extension-ui authors & contributor
 // SPDX-License-Identifier: Apache-2.0
 
 import React from 'react';

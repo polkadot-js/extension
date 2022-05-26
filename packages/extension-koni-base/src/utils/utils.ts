@@ -1,9 +1,8 @@
 // Copyright 2019-2022 @subwallet/extension-koni authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { CrowdloanParaState } from '@subwallet/extension-base/background/KoniTypes';
-import { ethereumChains } from '@subwallet/extension-koni-base/api/dotsama/api-helper';
-import { PINATA_IPFS_GATEWAY } from '@subwallet/extension-koni-base/api/nft/config';
+import { CrowdloanParaState, NetworkJson } from '@subwallet/extension-base/background/KoniTypes';
+import { CLOUDFLARE_PINATA_SERVER } from '@subwallet/extension-koni-base/api/nft/config';
 import { ALL_ACCOUNT_KEY } from '@subwallet/extension-koni-base/constants';
 
 import { BN, hexToU8a, isHex } from '@polkadot/util';
@@ -40,8 +39,8 @@ export function reformatAddress (address: string, networkPrefix: number, isEther
   return encodeAddress(publicKey, networkPrefix);
 }
 
-export function filterAddressByNetworkKey (addresses: string[], networkKey: string) {
-  if (ethereumChains.indexOf(networkKey) > -1) {
+export function filterAddressByNetworkKey (addresses: string[], networkKey: string, isEthereum?: boolean) {
+  if (isEthereum) {
     return addresses.filter((address) => {
       return isEthereumAddress(address);
     });
@@ -94,7 +93,7 @@ export const parseIpfsLink = (ipfsLink: string) => {
     return ipfsLink;
   }
 
-  return PINATA_IPFS_GATEWAY + ipfsLink.split('ipfs://ipfs/')[1];
+  return CLOUDFLARE_PINATA_SERVER + ipfsLink.split('ipfs://ipfs/')[1];
 };
 
 export function hexToStr (buf: string): string {
@@ -210,4 +209,30 @@ export const isAddressesEqual = (addresses: string[], prevAddresses: string[]) =
   }
 
   return true;
+};
+
+export const isValidProvider = (provider: string) => {
+  if (isUrl(provider)) {
+    return true;
+  } else if (provider.startsWith('wss://') || provider.startsWith('light://')) {
+    return true;
+  }
+
+  return false;
+};
+
+export const getCurrentProvider = (data: NetworkJson) => {
+  if (data.currentProvider.startsWith('custom') && data.customProviders) {
+    return data.customProviders[data.currentProvider];
+  } else {
+    return data.providers[data.currentProvider];
+  }
+};
+
+export const getNftProvider = (data: NetworkJson) => {
+  if (data.nftProvider) {
+    return data.providers[data.nftProvider];
+  }
+
+  return '';
 };

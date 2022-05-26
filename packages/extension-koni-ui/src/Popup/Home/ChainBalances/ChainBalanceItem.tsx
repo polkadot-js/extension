@@ -1,10 +1,11 @@
-// Copyright 2019-2022 @subwallet/extension-koni-ui authors & contributors
+// Copyright 2019-2022 @polkadot/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
 import cloneIcon from '@subwallet/extension-koni-ui/assets/clone.svg';
 import uploadIcon from '@subwallet/extension-koni-ui/assets/icon/upload.svg';
 import receivedIcon from '@subwallet/extension-koni-ui/assets/receive-icon.svg';
 import { BalanceVal } from '@subwallet/extension-koni-ui/components/balance';
+import NetworkTools from '@subwallet/extension-koni-ui/components/NetworkTools';
 import useToast from '@subwallet/extension-koni-ui/hooks/useToast';
 import useTranslation from '@subwallet/extension-koni-ui/hooks/useTranslation';
 import { getTotalConvertedBalanceValue, hasAnyChildTokenBalance } from '@subwallet/extension-koni-ui/Popup/Home/ChainBalances/utils';
@@ -130,7 +131,6 @@ function ChainBalanceItem ({ accountInfo,
             className='chain-balance-item__logo'
             src={accountInfo.networkLogo}
           />
-
           <div className='chain-balance-item__meta-wrapper'>
             <div className='chain-balance-item__chain-name'>{accountInfo.networkDisplayName}</div>
 
@@ -171,6 +171,10 @@ function ChainBalanceItem ({ accountInfo,
                     {accountInfo.networkDisplayName}
                   </span>
                 </div>
+              )}
+
+              {isLoading && (
+                <NetworkTools networkKey={networkKey} />
               )}
             </div>
           </div>

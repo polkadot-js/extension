@@ -325,5 +325,7 @@
   "Custom EVM tokens": "",
   "Search token...": "",
   "Delete Tokens": "",
-  "Confirm": ""
+  "Confirm": "",
+  "Not a valid private key": "",
+  "Private key cannot be empty": ""
 }

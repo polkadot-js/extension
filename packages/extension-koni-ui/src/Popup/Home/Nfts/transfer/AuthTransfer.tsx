@@ -38,21 +38,21 @@ interface Props extends ThemeProps {
   web3TransferParams: Web3TransferParams;
 }
 
-// TODO: migrate api to background and use new UI components
 function AuthTransfer ({ chain, className, collectionId, nftItem, recipientAddress, senderAccount, setExtrinsicHash, setIsTxSuccess, setShowConfirm, setShowResult, setTxError, substrateTransferParams, web3TransferParams }: Props): React.ReactElement<Props> {
   const [passwordError, setPasswordError] = useState<string | null>(null);
   const [callHash, setCallHash] = useState<string | null>(null);
 
   const [loading, setLoading] = useState(false);
-  const [balanceError, setBalanceError] = useState(false);
   const [senderInfoSubstrate, setSenderInfoSubstrate] = useState<AddressProxy>(() => ({ isUnlockCached: false, signAddress: senderAccount.address, signPassword: '' }));
 
   const substrateParams = substrateTransferParams !== null ? substrateTransferParams.params : null;
   const substrateGas = substrateTransferParams !== null ? substrateTransferParams.estimatedFee : null;
+  const substrateBalanceError = substrateTransferParams !== null ? substrateTransferParams.balanceError : false;
 
   const web3Tx = web3TransferParams !== null ? web3TransferParams.rawTx : null;
   const web3Gas = web3TransferParams !== null ? web3TransferParams.estimatedGas : null;
 
+  const [balanceError, setBalanceError] = useState(substrateBalanceError);
   const { currentAccount: account, currentNetwork } = useSelector((state: RootState) => state);
 
   const { show } = useToast();
@@ -70,7 +70,7 @@ function AuthTransfer ({ chain, className, collectionId, nftItem, recipientAddre
         networkKey: chain,
         rawTransaction: web3Tx
       }, (data) => {
-        if (data.passwordError && data.passwordError) {
+        if (data.passwordError) {
           setPasswordError(data.passwordError);
           setLoading(false);
         }
@@ -79,7 +79,13 @@ function AuthTransfer ({ chain, className, collectionId, nftItem, recipientAddre
           setCallHash(data.callHash);
         }
 
-        if (data.txError && data.txError) {
+        if (data.balanceError && data.balanceError) {
+          setBalanceError(true);
+          setLoading(false);
+          show('Your balance is too low to cover fees');
+        }
+
+        if (data.txError) {
           show('Encountered an error, please try again.');
           setLoading(false);
 
@@ -135,6 +141,7 @@ function AuthTransfer ({ chain, className, collectionId, nftItem, recipientAddre
 
       if (data.balanceError && data.balanceError) {
         setBalanceError(true);
+        show('Your balance is too low to cover fees');
       }
 
       if (data.status) {
@@ -171,6 +178,15 @@ function AuthTransfer ({ chain, className, collectionId, nftItem, recipientAddre
 
     setLoading(true);
 
+    if (balanceError) {
+      setTimeout(() => {
+        setLoading(false);
+        show('Your balance is too low to cover fees');
+      }, 1000);
+
+      return;
+    }
+
     // eslint-disable-next-line @typescript-eslint/no-misused-promises
     setTimeout(async () => {
       if (substrateParams !== null) {
@@ -179,7 +195,7 @@ function AuthTransfer ({ chain, className, collectionId, nftItem, recipientAddre
         await onSendEvm();
       }
     }, 1);
-  }, [chain, currentNetwork.networkKey, loading, onSendEvm, onSendSubstrate, substrateParams, show, web3Tx]);
+  }, [loading, balanceError, chain, currentNetwork.networkKey, show, substrateParams, web3Tx, onSendSubstrate, onSendEvm]);
 
   const hideConfirm = useCallback(() => {
     if (!loading) {
@@ -231,21 +247,11 @@ function AuthTransfer ({ chain, className, collectionId, nftItem, recipientAddre
               />
             }
 
-            {
-              balanceError &&
-              <div
-                className={'password-error'}
-                style={{ marginTop: balanceError ? '40px' : '0' }}
-              >
-                Your balance is too low to cover fees.
-              </div>
-            }
-
             <div
               className={'submit-btn'}
               // eslint-disable-next-line @typescript-eslint/no-misused-promises
               onClick={handleSignAndSubmit}
-              style={{ marginTop: !balanceError ? '40px' : '0', background: loading ? 'rgba(0, 75, 255, 0.25)' : '#004BFF', cursor: loading ? 'default' : 'pointer' }}
+              style={{ marginTop: '40px', background: loading ? 'rgba(0, 75, 255, 0.25)' : '#004BFF', cursor: loading ? 'default' : 'pointer' }}
             >
               {
                 !loading

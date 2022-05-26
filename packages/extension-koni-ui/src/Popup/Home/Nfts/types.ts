@@ -39,11 +39,13 @@ export interface Web3TransferParams {
 export interface SubstrateTransferParams {
   params: Record<string, any>;
   estimatedFee?: string;
+  balanceError?: boolean;
 }
 
 export interface TransferResponse {
   // substrate
   estimatedFee?: string;
+  balanceError?: boolean;
   // eth
   web3RawTx?: Record<string, any>;
   estimatedGas?: string

@@ -434,7 +434,7 @@ function NetworkEdit ({ className }: Props): React.ReactElement {
         }
 
         <div className={'option-toggle-container'}>
-          <div>More options</div>
+          <div>Advanced options</div>
           <HorizontalLabelToggle
             checkedLabel={''}
             className='info'

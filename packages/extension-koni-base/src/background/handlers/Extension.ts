@@ -1334,8 +1334,14 @@ export default class KoniExtension extends Extension {
           updateState(txState);
         });
     } catch (e) {
-      console.error('transfer nft error', e);
-      txState.txError = true;
+      // @ts-ignore
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-member-access
+      if (e.toString().includes('Error: Returned error: insufficient funds for gas * price + value')) {
+        txState.balanceError = true;
+      } else {
+        txState.txError = true;
+      }
+
       updateState(txState);
     }
 
@@ -1770,27 +1776,28 @@ export default class KoniExtension extends Extension {
   private async substrateNftGetTransaction ({ networkKey, params, recipientAddress, senderAddress }: SubstrateNftTransactionRequest): Promise<SubstrateNftTransaction> {
     switch (networkKey) {
       case SUPPORTED_TRANSFER_SUBSTRATE_CHAIN_NAME.acala:
-        return await acalaTransferHandler(state.getDotSamaApi(networkKey), senderAddress, recipientAddress, params);
+        return await acalaTransferHandler(networkKey, state.getDotSamaApiMap(), state.getWeb3ApiMap(), senderAddress, recipientAddress, params);
       case SUPPORTED_TRANSFER_SUBSTRATE_CHAIN_NAME.karura:
-        return await acalaTransferHandler(state.getDotSamaApi(networkKey), senderAddress, recipientAddress, params);
+        return await acalaTransferHandler(networkKey, state.getDotSamaApiMap(), state.getWeb3ApiMap(), senderAddress, recipientAddress, params);
       case SUPPORTED_TRANSFER_SUBSTRATE_CHAIN_NAME.kusama:
-        return await rmrkTransferHandler(state.getDotSamaApi(networkKey), senderAddress, recipientAddress, params);
+        return await rmrkTransferHandler(networkKey, state.getDotSamaApiMap(), state.getWeb3ApiMap(), senderAddress, recipientAddress, params);
       case SUPPORTED_TRANSFER_SUBSTRATE_CHAIN_NAME.uniqueNft:
-        return await uniqueTransferHandler(state.getDotSamaApi(networkKey), senderAddress, recipientAddress, params);
+        return await uniqueTransferHandler(networkKey, state.getDotSamaApiMap(), state.getWeb3ApiMap(), senderAddress, recipientAddress, params);
       case SUPPORTED_TRANSFER_SUBSTRATE_CHAIN_NAME.quartz:
-        return await quartzTransferHandler(state.getDotSamaApi(networkKey), senderAddress, recipientAddress, params);
+        return await quartzTransferHandler(networkKey, state.getDotSamaApiMap(), state.getWeb3ApiMap(), senderAddress, recipientAddress, params);
       case SUPPORTED_TRANSFER_SUBSTRATE_CHAIN_NAME.opal:
-        return await quartzTransferHandler(state.getDotSamaApi(networkKey), senderAddress, recipientAddress, params);
+        return await quartzTransferHandler(networkKey, state.getDotSamaApiMap(), state.getWeb3ApiMap(), senderAddress, recipientAddress, params);
       case SUPPORTED_TRANSFER_SUBSTRATE_CHAIN_NAME.statemine:
-        return await statemineTransferHandler(state.getDotSamaApi(networkKey), senderAddress, recipientAddress, params);
+        return await statemineTransferHandler(networkKey, state.getDotSamaApiMap(), state.getWeb3ApiMap(), senderAddress, recipientAddress, params);
       case SUPPORTED_TRANSFER_SUBSTRATE_CHAIN_NAME.statemint:
-        return await statemineTransferHandler(state.getDotSamaApi(networkKey), senderAddress, recipientAddress, params);
+        return await statemineTransferHandler(networkKey, state.getDotSamaApiMap(), state.getWeb3ApiMap(), senderAddress, recipientAddress, params);
       case SUPPORTED_TRANSFER_SUBSTRATE_CHAIN_NAME.bitcountry:
-        return await acalaTransferHandler(state.getDotSamaApi(networkKey), senderAddress, recipientAddress, params);
+        return await acalaTransferHandler(networkKey, state.getDotSamaApiMap(), state.getWeb3ApiMap(), senderAddress, recipientAddress, params);
     }
 
     return {
-      error: true
+      error: true,
+      balanceError: false
     };
   }
 
@@ -1848,7 +1855,6 @@ export default class KoniExtension extends Extension {
       } catch (e) {
         console.error('error transferring nft', e);
         txState.txError = true;
-        txState.balanceError = true;
         updateState(txState);
       }
     } else {

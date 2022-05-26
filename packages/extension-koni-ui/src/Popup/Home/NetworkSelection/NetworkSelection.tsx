@@ -85,13 +85,14 @@ function NetworkSelection ({ className, handleShow }: Props): React.ReactElement
     enableNetworks(selected)
       .then((result) => {
         if (result) {
-          show(`${selected.length} networks have been activated`);
+          show('Your setting has been saved');
         } else {
           show('Encountered an error. Please try again later');
         }
       })
       .catch(console.error);
 
+    window.localStorage.setItem('isSetNetwork', 'ok');
     handleShow(false);
   }, [handleShow, selected, show]);
 

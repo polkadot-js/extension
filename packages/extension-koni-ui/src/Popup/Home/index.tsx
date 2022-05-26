@@ -21,14 +21,6 @@ import useFetchStaking from '@subwallet/extension-koni-ui/hooks/screen/home/useF
 import useGetNetworkMetadata from '@subwallet/extension-koni-ui/hooks/screen/home/useGetNetworkMetadata';
 import useShowedNetworks from '@subwallet/extension-koni-ui/hooks/screen/home/useShowedNetworks';
 import useTranslation from '@subwallet/extension-koni-ui/hooks/useTranslation';
-// Containers should not be imported lazily
-import ChainBalances from '@subwallet/extension-koni-ui/Popup/Home/ChainBalances/ChainBalances';
-import Crowdloans from '@subwallet/extension-koni-ui/Popup/Home/Crowdloans/Crowdloans';
-import NetworkSelection from '@subwallet/extension-koni-ui/Popup/Home/NetworkSelection/NetworkSelection';
-import NftContainer from '@subwallet/extension-koni-ui/Popup/Home/Nfts/render/NftContainer';
-import StakingContainer from '@subwallet/extension-koni-ui/Popup/Home/Staking/StakingContainer';
-import TabHeaders from '@subwallet/extension-koni-ui/Popup/Home/Tabs/TabHeaders';
-import TransactionHistory from '@subwallet/extension-koni-ui/Popup/Home/TransactionHistory/TransactionHistory';
 import { TabHeaderItemType } from '@subwallet/extension-koni-ui/Popup/Home/types';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
@@ -44,6 +36,13 @@ import donateIcon from '../../assets/donate-icon.svg';
 import sendIcon from '../../assets/send-icon.svg';
 // import swapIcon from '../../assets/swap-icon.svg';
 
+const Crowdloans = React.lazy(() => import('@subwallet/extension-koni-ui/Popup/Home/Crowdloans/Crowdloans'));
+const NetworkSelection = React.lazy(() => import('@subwallet/extension-koni-ui/Popup/Home/NetworkSelection/NetworkSelection'));
+const NftContainer = React.lazy(() => import('@subwallet/extension-koni-ui/Popup/Home/Nfts/render/NftContainer'));
+const StakingContainer = React.lazy(() => import('@subwallet/extension-koni-ui/Popup/Home/Staking/StakingContainer'));
+const TabHeaders = React.lazy(() => import('@subwallet/extension-koni-ui/Popup/Home/Tabs/TabHeaders'));
+const TransactionHistory = React.lazy(() => import('@subwallet/extension-koni-ui/Popup/Home/TransactionHistory/TransactionHistory'));
+const ChainBalances = React.lazy(() => import('@subwallet/extension-koni-ui/Popup/Home/ChainBalances/ChainBalances'));
 const ActionButton = React.lazy(() => import('./ActionButton'));
 const AddAccount = React.lazy(() => import('@subwallet/extension-koni-ui/Popup/Accounts/AddAccount'));
 const BalancesVisibility = React.lazy(() => import('@subwallet/extension-koni-ui/Popup/Home/BalancesVisibility'));
@@ -184,7 +183,8 @@ function Home ({ chainRegistryMap, className = '', currentAccount, historyMap, n
   const [showTransferredCollection, setShowTransferredCollection] = useState(false);
   const [showForcedCollection, setShowForcedCollection] = useState(false);
 
-  const [showNetworkSelection, setShowNetworkSelection] = useState(true);
+  const isSetNetwork = window.localStorage.getItem('isSetNetwork') !== 'ok';
+  const [showNetworkSelection, setShowNetworkSelection] = useState(isSetNetwork);
 
   const parseNftGridSize = useCallback(() => {
     if (window.innerHeight > NFT_GRID_HEIGHT_THRESHOLD) {

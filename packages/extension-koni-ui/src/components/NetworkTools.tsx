@@ -1,10 +1,9 @@
 // Copyright 2019-2022 @polkadot/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { faPen } from '@fortawesome/free-solid-svg-icons';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import arrowCounterClockWise from '@subwallet/extension-koni-ui/assets/arrow-counter-clockwise.svg';
 import { ActionContext } from '@subwallet/extension-koni-ui/contexts';
+import pencilIcon from '@subwallet/extension-koni-ui/assets/pencil.svg';
 import useGetNetworkJson from '@subwallet/extension-koni-ui/hooks/screen/home/useGetNetworkJson';
 import useToast from '@subwallet/extension-koni-ui/hooks/useToast';
 import { recoverDotSamaApi } from '@subwallet/extension-koni-ui/messaging';
@@ -44,17 +43,17 @@ function NetworkTools ({ className, networkKey }: Props): React.ReactElement<Pro
     <div className={className}>
       <div className={'network-action-container'}>
         <img
-          alt='reload'
+          alt='reload-network'
           className={'reload-network-btn'}
           onClick={handleClickReload}
           src={arrowCounterClockWise}
         />
 
-        <FontAwesomeIcon
-          className='network-edit-icon'
-          // @ts-ignore
-          icon={faPen}
+        <img
+          alt='edit-network'
+          className={'network-edit-icon'}
           onClick={handleClickEdit}
+          src={pencilIcon}
         />
       </div>
     </div>

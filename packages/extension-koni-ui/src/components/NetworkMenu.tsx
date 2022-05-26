@@ -6,9 +6,12 @@ import type { ThemeProps } from '../types';
 import { NETWORK_STATUS, NetWorkGroup } from '@subwallet/extension-base/background/KoniTypes';
 import { ALL_ACCOUNT_KEY } from '@subwallet/extension-koni-base/constants';
 import check from '@subwallet/extension-koni-ui/assets/check.svg';
+import { ActionContext } from '@subwallet/extension-koni-ui/contexts';
+import signalSlashIcon from '@subwallet/extension-koni-ui/assets/signal-stream-slash-solid.svg';
+import signalIcon from '@subwallet/extension-koni-ui/assets/signal-stream-solid.svg';
 import InputFilter from '@subwallet/extension-koni-ui/components/InputFilter';
 import Menu from '@subwallet/extension-koni-ui/components/Menu';
-import { ActionContext } from '@subwallet/extension-koni-ui/contexts';
+import Tooltip from '@subwallet/extension-koni-ui/components/Tooltip';
 import useGenesisHashOptions, { NetworkSelectOption } from '@subwallet/extension-koni-ui/hooks/useGenesisHashOptions';
 import useTranslation from '@subwallet/extension-koni-ui/hooks/useTranslation';
 import { triggerAccountsSubscription } from '@subwallet/extension-koni-ui/messaging';
@@ -29,7 +32,6 @@ interface Props extends ThemeProps {
 
 function NetworkMenu ({ className, currentNetwork, genesisOptions, isNotHaveAccount, onFilter, reference, selectNetwork }: Props): React.ReactElement<Props> {
   const { t } = useTranslation();
-
   const [filteredGenesisOptions, setFilteredGenesisOption] = useState<NetworkSelectOption[]>(genesisOptions);
   const [filteredNetwork, setFilteredNetwork] = useState('');
   const [selectedGroup, setSelectedGroup] = useState('');
@@ -121,8 +123,36 @@ function NetworkMenu ({ className, currentNetwork, genesisOptions, isNotHaveAcco
   }, [selectNetwork]);
 
   const handleClickCustomNetworks = useCallback(() => {
-    navigate('/account/config-network');
+    navigate('/account/networks');
   }, [navigate]);
+
+  const handleStatusText = useCallback((apiStatus: NETWORK_STATUS) => {
+    if (apiStatus === NETWORK_STATUS.CONNECTED) {
+      return 'Connected';
+    } else {
+      return 'Unable to connect';
+    }
+  }, []);
+
+  const handleStatusIcon = useCallback((apiStatus: NETWORK_STATUS, index: number) => {
+    if (apiStatus === NETWORK_STATUS.CONNECTED) {
+      return <img
+        alt='network-status'
+        className={'network-status network-status-icon'}
+        data-for={`network-status-icon-${index}`}
+        data-tip={true}
+        src={signalIcon}
+      />;
+    } else {
+      return <img
+        alt='network-status'
+        className={'network-status network-status-icon'}
+        data-for={`network-status-icon-${index}`}
+        data-tip={true}
+        src={signalSlashIcon}
+      />;
+    }
+  }, []);
 
   return (
     <Menu
@@ -154,7 +184,7 @@ function NetworkMenu ({ className, currentNetwork, genesisOptions, isNotHaveAcco
       <div className='network-item-list'>
         {
           filteredGenesisOptions && filteredGenesisOptions.length
-            ? filteredGenesisOptions.map(({ apiStatus, icon, networkKey, networkPrefix, text, value }): React.ReactNode => (
+            ? filteredGenesisOptions.map(({ apiStatus, icon, networkKey, networkPrefix, text, value }, index): React.ReactNode => (
               <div
                 className='network-item-container'
                 key={value}
@@ -168,27 +198,30 @@ function NetworkMenu ({ className, currentNetwork, genesisOptions, isNotHaveAcco
                   />
 
                   <span className={value === currentNetwork ? 'network-text__selected' : 'network-text'}>{text}</span>
-                  {
-                    networkKey.toLowerCase() !== ALL_ACCOUNT_KEY.toLowerCase() &&
-                    <span
-                      className={'status-dot'}
-                      style={{ backgroundColor: apiStatus === NETWORK_STATUS.CONNECTED ? 'green' : 'red' }}
-                    />
-                  }
                 </div>
 
-                {value === currentNetwork
-                  ? (
-                    <img
-                      alt='check'
-                      className='checkIcon'
-                      src={check}
-                    />
-                  )
-                  : (
-                    <div className='uncheckedItem' />
-                  )
-                }
+                <div className={'icon-container'}>
+                  {value === currentNetwork
+                    ? (
+                      <img
+                        alt='check'
+                        className='checkIcon'
+                        src={check}
+                      />
+                    )
+                    : (
+                      <div className='uncheckedItem' />
+                    )
+                  }
+                  {
+                    networkKey.toLowerCase() !== ALL_ACCOUNT_KEY.toLowerCase() && handleStatusIcon(apiStatus, index)
+                  }
+
+                  <Tooltip
+                    text={handleStatusText(apiStatus)}
+                    trigger={`network-status-icon-${index}`}
+                  />
+                </div>
               </div>
             ))
             : <div className='kn-no-result'>No results</div>
@@ -211,6 +244,12 @@ export default React.memo(styled(NetworkMenu)(({ theme }: Props) => `
   right: 15px;
   user-select: none;
   border-radius: 8px;
+
+  .icon-container {
+    display: flex;
+    gap: 15px;
+    justify-content: flex-end;
+  }
 
   .custom-network-btn {
     color: ${theme.buttonTextColor2};
@@ -271,12 +310,9 @@ export default React.memo(styled(NetworkMenu)(({ theme }: Props) => `
     align-items: center;
   }
 
-  .status-dot {
-    height: 7px;
-    width: 7px;
-    border-radius: 50%;
-    display: inline-block;
-    margin-left: 10px;
+  .network-status {
+    height: 16px;
+    width: 16px;
   }
 
   .network-item-list-header {
@@ -361,13 +397,13 @@ export default React.memo(styled(NetworkMenu)(({ theme }: Props) => `
   }
 
   .checkIcon {
-    margin-left: 4px;
+    height: 16px;
+    width: 16px;
   }
 
   .uncheckedItem {
     width: 14px;
     height: 100%;
-    margin-left: 14px;
   }
 
   .check-radio-wrapper {

@@ -108,13 +108,16 @@ function NetworkItem ({ className, item }: Props): React.ReactElement {
             {item.chain}
           </div>
           <div className={'network-icon-container'}>
-            <FontAwesomeIcon
-              className='network-delete-icon'
-              // @ts-ignore
-              icon={faTrashAlt}
-              onClick={handleShowModal}
-              size='sm'
-            />
+            {
+              item.key.startsWith('custom_') &&
+              <FontAwesomeIcon
+                className='network-delete-icon'
+                // @ts-ignore
+                icon={faTrashAlt}
+                onClick={handleShowModal}
+                size='sm'
+              />
+            }
 
             <div
               onClick={handleNetworkEdit}

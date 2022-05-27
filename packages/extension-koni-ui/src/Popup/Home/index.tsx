@@ -37,7 +37,7 @@ import sendIcon from '../../assets/send-icon.svg';
 // import swapIcon from '../../assets/swap-icon.svg';
 
 const Crowdloans = React.lazy(() => import('@subwallet/extension-koni-ui/Popup/Home/Crowdloans/Crowdloans'));
-const NetworkSelection = React.lazy(() => import('@subwallet/extension-koni-ui/Popup/Home/NetworkSelection/NetworkSelection'));
+const NetworkSelection = React.lazy(() => import('@subwallet/extension-koni-ui/components/NetworkSelection/NetworkSelection'));
 const NftContainer = React.lazy(() => import('@subwallet/extension-koni-ui/Popup/Home/Nfts/render/NftContainer'));
 const StakingContainer = React.lazy(() => import('@subwallet/extension-koni-ui/Popup/Home/Staking/StakingContainer'));
 const TabHeaders = React.lazy(() => import('@subwallet/extension-koni-ui/Popup/Home/Tabs/TabHeaders'));

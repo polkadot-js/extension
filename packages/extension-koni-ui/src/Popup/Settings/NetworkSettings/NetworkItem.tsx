@@ -133,7 +133,7 @@ function NetworkItem ({ className, item }: Props): React.ReactElement {
         >
           <div>
             <div className={'delete-modal-title'}>
-              <div className={'delete-title'}>Confirm deletion ?</div>
+              <div className={'delete-title'}>Remove this network ?</div>
               <div
                 className={'close-btn'}
                 onClick={handleHideModal}

@@ -6,18 +6,18 @@ import QuestionIcon from '@subwallet/extension-koni-ui/assets/Question.svg';
 import { InputFilter } from '@subwallet/extension-koni-ui/components';
 import Button from '@subwallet/extension-koni-ui/components/Button';
 import Modal from '@subwallet/extension-koni-ui/components/Modal';
+import NetworkSelectionItem from '@subwallet/extension-koni-ui/components/NetworkSelection/NetworkSelectionItem';
 import Tooltip from '@subwallet/extension-koni-ui/components/Tooltip';
 import useToast from '@subwallet/extension-koni-ui/hooks/useToast';
 import useTranslation from '@subwallet/extension-koni-ui/hooks/useTranslation';
 import { enableNetworks } from '@subwallet/extension-koni-ui/messaging';
-import NetworkSelectionItem from '@subwallet/extension-koni-ui/Popup/Home/NetworkSelection/NetworkSelectionItem';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import React, { useCallback, useState } from 'react';
 import { useSelector } from 'react-redux';
 import styled from 'styled-components';
 
-import LogosMap from '../../../assets/logo';
+import LogosMap from '../../assets/logo';
 
 interface Props extends ThemeProps {
   className?: string;

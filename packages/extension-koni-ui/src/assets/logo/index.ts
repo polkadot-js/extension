@@ -291,6 +291,10 @@ const LogosMap: Record<string, string> = {
   // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
   lay: require('./starlay.png'),
   // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+  subspace: require('./subspace.png'),
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+  subspace_test: require('./subspace.png'),
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
   default: require('./default.svg')
 };
 

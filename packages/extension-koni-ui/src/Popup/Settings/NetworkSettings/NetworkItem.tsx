@@ -107,24 +107,31 @@ function NetworkItem ({ className, item }: Props): React.ReactElement {
           >
             {item.chain}
           </div>
-          <div className={'network-icon-container'}>
-            {
-              item.key.startsWith('custom_') &&
-              <FontAwesomeIcon
-                className='network-delete-icon'
-                // @ts-ignore
-                icon={faTrashAlt}
-                onClick={handleShowModal}
-                size='sm'
-              />
-            }
+          {
+            item.key.startsWith('custom_')
+              ? <div className={'network-icon-container'}>
+                <FontAwesomeIcon
+                  className='network-delete-icon'
+                  // @ts-ignore
+                  icon={faTrashAlt}
+                  onClick={handleShowModal}
+                  size='sm'
+                />
 
-            <div
-              onClick={handleNetworkEdit}
-            >
-              <div className={`${isHover ? 'hover-toggle' : 'unhover-toggle'} network-item__toggle`} />
-            </div>
-          </div>
+                <div
+                  onClick={handleNetworkEdit}
+                >
+                  <div className={`${isHover ? 'hover-toggle' : 'unhover-toggle'} network-item__toggle`} />
+                </div>
+              </div>
+              : <div className={'default-network-icon-container'}>
+                <div
+                  onClick={handleNetworkEdit}
+                >
+                  <div className={`${isHover ? 'hover-toggle' : 'unhover-toggle'} network-item__toggle`} />
+                </div>
+              </div>
+          }
         </div>
       </div>
       <div className='network-item__separator' />
@@ -169,6 +176,13 @@ function NetworkItem ({ className, item }: Props): React.ReactElement {
 }
 
 export default styled(NetworkItem)(({ theme }: Props) => `
+  .default-network-icon-container {
+    width: 10%;
+    display: flex;
+    justify-content: end;
+    align-items: center;
+  }
+
   .close-btn {
     font-size: 20px;
     cursor: pointer;
@@ -230,9 +244,9 @@ export default styled(NetworkItem)(({ theme }: Props) => `
   }
 
   .network-icon-container {
-    width: 20%;
+    width: 10%;
     display: flex;
-    justify-content: center;
+    justify-content: space-between;
     align-items: center;
     gap: 20px;
   }

@@ -1004,8 +1004,6 @@ export default class KoniExtension extends Extension {
       nftItems: remainedItems
     });
 
-    console.log('force update nft state done');
-
     return true;
   }
 
@@ -1704,45 +1702,54 @@ export default class KoniExtension extends Extension {
       };
     }
 
-    let tokenContract: Contract;
-    let name: string;
-    let decimals: number | undefined;
-    let symbol: string;
+    try {
+      let tokenContract: Contract;
+      let name: string;
+      let decimals: number | undefined;
+      let symbol: string;
 
-    if (data.type === 'erc721') {
-      tokenContract = getERC721Contract(data.chain, data.smartContract, state.getWeb3ApiMap());
+      if (data.type === 'erc721') {
+        tokenContract = getERC721Contract(data.chain, data.smartContract, state.getWeb3ApiMap());
 
-      const [_name, _symbol] = await Promise.all([
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-member-access
-        tokenContract.methods.name().call() as string,
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-member-access
-        tokenContract.methods.symbol().call() as string
-      ]);
+        const [_name, _symbol] = await Promise.all([
+          // eslint-disable-next-line @typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-member-access
+          tokenContract.methods.name().call() as string,
+          // eslint-disable-next-line @typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-member-access
+          tokenContract.methods.symbol().call() as string
+        ]);
 
-      name = _name;
-      symbol = _symbol;
-    } else {
-      tokenContract = getERC20Contract(data.chain, data.smartContract, state.getWeb3ApiMap());
-      const [_name, _decimals, _symbol] = await Promise.all([
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-member-access
-        tokenContract.methods.name().call() as string,
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-member-access
-        tokenContract.methods.decimals().call() as number,
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-member-access
-        tokenContract.methods.symbol().call() as string
-      ]);
+        name = _name;
+        symbol = _symbol;
+      } else {
+        tokenContract = getERC20Contract(data.chain, data.smartContract, state.getWeb3ApiMap());
+        const [_name, _decimals, _symbol] = await Promise.all([
+          // eslint-disable-next-line @typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-member-access
+          tokenContract.methods.name().call() as string,
+          // eslint-disable-next-line @typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-member-access
+          tokenContract.methods.decimals().call() as number,
+          // eslint-disable-next-line @typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-member-access
+          tokenContract.methods.symbol().call() as string
+        ]);
 
-      name = _name;
-      decimals = _decimals;
-      symbol = _symbol;
+        name = _name;
+        decimals = _decimals;
+        symbol = _symbol;
+      }
+
+      return {
+        name,
+        decimals,
+        symbol,
+        isExist
+      };
+    } catch (e) {
+      return {
+        name: '',
+        symbol: '',
+        isExist,
+        error: true
+      };
     }
-
-    return {
-      name,
-      decimals,
-      symbol,
-      isExist
-    };
   }
 
   private async subscribeAddressFreeBalance ({ address, networkKey, token }: RequestFreeBalance, id: string, port: chrome.runtime.Port): Promise<string> {

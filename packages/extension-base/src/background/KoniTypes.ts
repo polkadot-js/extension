@@ -680,7 +680,8 @@ export interface ValidateEvmTokenResponse {
   name: string,
   symbol: string,
   decimals?: number,
-  isExist: boolean
+  isExist: boolean,
+  error?: boolean
 }
 
 export interface SupportTransferResponse {

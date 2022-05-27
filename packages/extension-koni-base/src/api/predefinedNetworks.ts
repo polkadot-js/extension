@@ -1361,22 +1361,22 @@ export const PREDEFINED_NETWORKS: Record<string, NetworkJson> = {
     groups: ['TEST_NET'],
     nativeToken: 'tSSC',
     decimals: 18
+  },
+  metaverse_dev: {
+    key: 'metaverse_dev',
+    chain: 'Metaverse Dev',
+    genesisHash: '0x56854b19e50b40fb81be2cfda9cba5b43556854258b0fae8af170abbb1c700d1',
+    ss58Format: 42,
+    decimals: 18,
+    providers: {
+      test: 'wss://dev-chain.bit.country'
+    },
+    active: false,
+    currentProvider: 'test',
+    currentProviderMode: 'ws',
+    groups: ['TEST_NET'],
+    nativeToken: 'NUUM'
   }
-  // metaverse_dev: {
-  //   key: 'metaverse_dev',
-  //   chain: 'Metaverse Dev',
-  //   genesisHash: '0x56854b19e50b40fb81be2cfda9cba5b43556854258b0fae8af170abbb1c700d1',
-  //   ss58Format: 42,
-  //   decimals: 18,
-  //   providers: {
-  //     test: 'wss://dev-chain.bit.country'
-  //   },
-  //   active: false,
-  //   currentProvider: 'test',
-  //   currentProviderMode: 'ws',
-  //   groups: ['TEST_NET'],
-  //   nativeToken: 'NUUM'
-  // }
 };
 
 function getGenesisHashes () {

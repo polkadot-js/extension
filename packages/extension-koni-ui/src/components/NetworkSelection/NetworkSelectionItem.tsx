@@ -13,10 +13,11 @@ interface Props extends ThemeProps {
   networkJson: NetworkJson;
   handleSelect: (val: string, active: boolean) => void;
   logo: string;
+  isSelected: boolean;
 }
 
-function NetworkSelectionItem ({ className, handleSelect, logo, networkJson, networkKey }: Props): React.ReactElement {
-  const [active, setActive] = useState(networkJson.active);
+function NetworkSelectionItem ({ className, handleSelect, isSelected, logo, networkJson, networkKey }: Props): React.ReactElement {
+  const [active, setActive] = useState(isSelected);
 
   const toggleActive = useCallback((val: boolean) => {
     if (!val) {
@@ -28,9 +29,16 @@ function NetworkSelectionItem ({ className, handleSelect, logo, networkJson, net
     }
   }, [handleSelect, networkKey]);
 
+  const handleClickOnRow = useCallback(() => {
+    toggleActive(!active);
+  }, [active, toggleActive]);
+
   return (
     <div className={`${className || ''}`}>
-      <div className={'network-selection-item-wrapper'}>
+      <div
+        className={'network-selection-item-wrapper'}
+        onClick={handleClickOnRow}
+      >
         <div className={'network-selection-item-container'}>
           <img
             alt='logo'
@@ -58,16 +66,17 @@ export default styled(NetworkSelectionItem)(({ theme }: Props) => `
     width: 100%;
     display: flex;
     justify-content: space-between;
+    color: ${theme.textColor2};
+    cursor: pointer;
   }
 
   .network-selection-chain {
     font-weight: 500;
     font-size: 15px;
     line-height: 40px;
-    color: ${theme.textColor2};
   }
 
-  .network-selection-chain:hover {
+  .network-selection-item-wrapper:hover {
     color: ${theme.textColor};
   }
 

@@ -98,6 +98,10 @@ function NetworkSelection ({ className, handleShow }: Props): React.ReactElement
 
   const filteredNetworkMap = filterNetwork();
 
+  const isSelected = useCallback((networkKey: string) => {
+    return selected.includes(networkKey);
+  }, [selected]);
+
   return (
     <div className={className}>
       <Modal className={'network-selection-container'}>
@@ -136,12 +140,13 @@ function NetworkSelection ({ className, handleShow }: Props): React.ReactElement
 
         <div className={'network-selection-content-container'}>
           {
-            Object.entries(filteredNetworkMap).map(([networkKey, networkJson], index) => {
+            Object.entries(filteredNetworkMap).map(([networkKey, networkJson]) => {
               const logo = LogosMap[networkKey] || LogosMap.default;
 
               return <NetworkSelectionItem
                 handleSelect={handleSelect}
-                key={index}
+                isSelected={isSelected(networkKey)}
+                key={networkKey}
                 logo={logo}
                 networkJson={networkJson}
                 networkKey={networkKey}
@@ -194,6 +199,7 @@ export default styled(NetworkSelection)(({ theme }: Props) => `
     line-height: 26px;
     width: 100%;
     text-align: center;
+    margin-bottom: 10px;
   }
 
   .network-selection-highlight {

@@ -715,6 +715,22 @@ const NETWORKS: Record<string, NetWorkInfo> = {
     paraId: 2106,
     nativeToken: 'LIT',
     crowdloanUrl: 'https://kusama-crowdloan.litentry.com/'
+  },
+  subspace: {
+    chain: 'SubSpace',
+    genesisHash: '0x332ef6e751e25426e38996c51299dfc53bcd56f40b53dce2b2fc8442ae9c4a74_1',
+    ss58Format: 2254,
+    provider: 'wss://farm-rpc.subspace.network/ws',
+    groups: ['MAIN_NET'],
+    nativeToken: 'tSSC'
+  },
+  subspace_test: {
+    chain: 'SubSpace Testnet',
+    genesisHash: '0x332ef6e751e25426e38996c51299dfc53bcd56f40b53dce2b2fc8442ae9c4a74_2',
+    ss58Format: 2254,
+    provider: 'wss://farm-rpc.subspace.network/ws',
+    groups: ['TEST_NET'],
+    nativeToken: 'tSSC'
   }
 };
 

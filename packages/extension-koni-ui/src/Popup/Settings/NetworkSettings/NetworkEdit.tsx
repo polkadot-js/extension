@@ -127,12 +127,13 @@ function NetworkEdit ({ className }: Props): React.ReactElement {
           setLoading(true);
 
           validateNetwork(provider, isEthereum).then((resp) => {
+            setLoading(false);
+
             if (resp.error) {
               setValidateError(resp.error);
             }
 
             setNeedValidate(false);
-            setLoading(false);
             setIsProviderConnected(resp.success);
 
             if (resp.success) {
@@ -192,13 +193,14 @@ function NetworkEdit ({ className }: Props): React.ReactElement {
     setLoading(true);
     const resp = await validateNetwork(newProvider, isEthereum, networkInfo);
 
+    setLoading(false);
+
     if (resp.error) {
       show(getValidateErrorMessage(resp.error));
 
       return '';
     }
 
-    setLoading(false);
     setIsProviderConnected(resp.success);
 
     if (resp.success) {
@@ -360,9 +362,9 @@ function NetworkEdit ({ className }: Props): React.ReactElement {
     if (mode === 'create') {
       return !isValidChain || needValidate || !isProviderConnected || !_isValidProvider || !isValidBlockExplorer || !isValidCrowdloanUrl || !networkInfo.chain || networkInfo.chain === '';
     } else {
-      return !_isValidProvider || !isValidChain || needValidate || (!isProviderPredefined && !isProviderConnected) || !isValidBlockExplorer || !isValidCrowdloanUrl || !networkInfo.chain || networkInfo.chain === '';
+      return !_isValidProvider || !isValidChain || needValidate || (!isProviderPredefined && !isProviderConnected) || !isValidBlockExplorer || !isValidCrowdloanUrl || !networkInfo.chain || networkInfo.chain === '' || loading;
     }
-  }, [_isValidProvider, isProviderConnected, isProviderPredefined, isValidBlockExplorer, isValidChain, isValidCrowdloanUrl, mode, needValidate, networkInfo.chain]);
+  }, [_isValidProvider, isProviderConnected, isProviderPredefined, isValidBlockExplorer, isValidChain, isValidCrowdloanUrl, loading, mode, needValidate, networkInfo.chain]);
 
   return (
     <>

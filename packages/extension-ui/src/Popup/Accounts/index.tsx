@@ -43,7 +43,7 @@ function Accounts ({ className }: Props): React.ReactElement {
 
   return (
     <>
-      {(hierarchy.length === 0)
+      {(hierarchy?.length === 0)
         ? <AddAccount />
         : (
           <>

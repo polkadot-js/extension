@@ -10,7 +10,7 @@ import { AccountJson, AuthorizeRequest, MessageTypes, RequestAccountForget, Requ
 import { initApi } from '@subwallet/extension-koni-base/api/dotsama';
 import { getFreeBalance, subscribeFreeBalance } from '@subwallet/extension-koni-base/api/dotsama/balance';
 import { getTokenInfo } from '@subwallet/extension-koni-base/api/dotsama/registry';
-import { checkReferenceCount, checkSupportTransfer, estimateFee, getExistentialDeposit, makeTransfer } from '@subwallet/extension-koni-base/api/dotsama/transfer';
+import { checkReferenceCount, checkSupportTransfer, estimateCrossChainFee, estimateFee, getExistentialDeposit, makeTransfer } from '@subwallet/extension-koni-base/api/dotsama/transfer';
 import { SUPPORTED_TRANSFER_SUBSTRATE_CHAIN_NAME } from '@subwallet/extension-koni-base/api/nft/config';
 import { acalaTransferHandler, getNftTransferExtrinsic, isRecipientSelf, quartzTransferHandler, rmrkTransferHandler, statemineTransferHandler, uniqueTransferHandler, unlockAccount } from '@subwallet/extension-koni-base/api/nft/transfer';
 import { getERC20TransactionObject, getEVMTransactionObject, makeERC20Transfer, makeEVMTransfer } from '@subwallet/extension-koni-base/api/web3/transfer';
@@ -1176,8 +1176,48 @@ export default class KoniExtension extends Extension {
     value }: RequestCheckCrossChainTransfer): Promise<ResponseCheckCrossChainTransfer> {
     const [errors, fromKeyPair, valueNumber, tokenInfo] =
       await this.validateCrossChainTransfer(originalNetworkKey, destinationNetworkKey, token, from, to, undefined, value);
+    const dotSamaApiMap = state.getDotSamaApiMap();
+    const web3ApiMap = state.getApiMap().web3;
+    let fee = '0';
+    let feeSymbol;
+    let fromAccountFree = '0';
 
-    return {} as ResponseCheckCrossChainTransfer;
+    // todo: Case ETH using web3 js
+
+    if (tokenInfo && fromKeyPair) {
+      [[fee, feeSymbol], fromAccountFree] = await Promise.all([
+        estimateCrossChainFee(
+          originalNetworkKey,
+          destinationNetworkKey,
+          to,
+          fromKeyPair,
+          value,
+          dotSamaApiMap,
+          tokenInfo,
+          state.getNetworkMap()
+        ),
+        getFreeBalance(originalNetworkKey, from, dotSamaApiMap, web3ApiMap, token)
+      ]);
+    }
+
+    const fromAccountFreeNumber = new BN(fromAccountFree);
+    const feeNumber = fee ? new BN(fee) : undefined;
+
+    if (value && feeNumber && valueNumber) {
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-call
+      if (fromAccountFreeNumber.lt(feeNumber.add(valueNumber))) {
+        errors.push({
+          code: TransferErrorCode.NOT_ENOUGH_VALUE,
+          message: 'Not enough balance free to make transfer'
+        });
+      }
+    }
+
+    return {
+      errors,
+      estimateFee: fee,
+      feeSymbol
+    };
   }
 
   private makeTransferCallback (

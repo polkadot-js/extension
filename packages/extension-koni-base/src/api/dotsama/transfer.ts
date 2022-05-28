@@ -2,8 +2,9 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { assetFromToken } from '@equilab/api';
-import { ApiProps, ResponseTransfer, SupportTransferResponse, TokenInfo, TransferErrorCode, TransferStep } from '@subwallet/extension-base/background/KoniTypes';
+import { ApiProps, NetworkJson, ResponseTransfer, SupportTransferResponse, TokenInfo, TransferErrorCode, TransferStep } from '@subwallet/extension-base/background/KoniTypes';
 import { getTokenInfo } from '@subwallet/extension-koni-base/api/dotsama/registry';
+import { SupportedCrossChainsMap } from '@subwallet/extension-koni-base/api/supportedCrossChains';
 
 import { KeyringPair } from '@polkadot/keyring/types';
 import { AccountInfoWithProviders, AccountInfoWithRefCount, EventRecord } from '@polkadot/types/interfaces';
@@ -420,4 +421,94 @@ export async function makeTransfer (
       callback(response);
     }
   });
+}
+
+function isAbleToTransferCrossChain (
+  originalNetworkKey: string,
+  destinationNetworkKey: string,
+  token: string,
+  networkMap: Record<string, NetworkJson>
+): boolean {
+  // todo: Check ParaChain vs RelayChain, RelayChain vs ParaChain
+  if (!SupportedCrossChainsMap[originalNetworkKey] ||
+  !SupportedCrossChainsMap[originalNetworkKey].relationMap[destinationNetworkKey] ||
+  !SupportedCrossChainsMap[originalNetworkKey].relationMap[destinationNetworkKey].supportedToken.includes(token)) {
+    return false;
+  }
+
+  if (!(networkMap[destinationNetworkKey] && networkMap[destinationNetworkKey].paraId)) {
+    return false;
+  }
+
+  // todo: There may have further conditions
+
+  return true;
+}
+
+function getCrossChainTransferDest (paraId: number, toAddress: string) {
+  // todo: Case ParaChain vs RelayChain
+  // todo: Case RelayChain vs ParaChain
+
+  // Case ParaChain vs ParaChain
+  return ({
+    V1: {
+      parents: 1,
+      interior: {
+        X2: [
+          {
+            Parachain: paraId
+          },
+          {
+            AccountKey20: {
+              network: 'Any',
+              key: toAddress
+            }
+          }
+        ]
+      }
+    }
+  });
+}
+
+export async function estimateCrossChainFee (
+  originalNetworkKey: string,
+  destinationNetworkKey: string,
+  to: string,
+  fromKeypair: KeyringPair,
+  value: string,
+  dotSamaApiMap: Record<string, ApiProps>,
+  tokenInfo: TokenInfo,
+  networkMap: Record<string, NetworkJson>
+): Promise<[string, string | undefined]> {
+  if (!isAbleToTransferCrossChain(originalNetworkKey, destinationNetworkKey, tokenInfo.symbol, networkMap)) {
+    return ['0', tokenInfo.symbol];
+  }
+
+  const apiProps = await dotSamaApiMap[originalNetworkKey].isReady;
+  const api = apiProps.api;
+  const isTxXTokensSupported = !!api && !!api.tx && !!api.tx.xTokens;
+  let fee = '0';
+  // eslint-disable-next-line prefer-const
+  let feeSymbol = tokenInfo.symbol;
+
+  if (isTxXTokensSupported) {
+    // todo: Case ParaChain vs RelayChain
+    // todo: Case RelayChain vs ParaChain
+
+    const paraId = networkMap[destinationNetworkKey].paraId as number;
+
+    // Case ParaChain vs ParaChain
+    const paymentInfo = await api.tx.xTokens.transfer(
+      {
+        Token: tokenInfo.symbol
+      },
+      +value,
+      getCrossChainTransferDest(paraId, to),
+      4000000000
+    ).paymentInfo(fromKeypair);
+
+    fee = paymentInfo.partialFee.toString();
+  }
+
+  return [fee, feeSymbol];
 }

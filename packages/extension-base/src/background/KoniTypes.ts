@@ -501,6 +501,25 @@ export interface RequestTransfer extends RequestCheckTransfer {
   password: string;
 }
 
+export interface RequestCheckCrossChainTransfer {
+  originalNetworkKey: string,
+  destinationNetworkKey: string,
+  from: string,
+  to: string,
+  value: string,
+  token: string
+}
+
+export interface RequestCrossChainTransfer extends RequestCheckCrossChainTransfer {
+  password: string;
+}
+
+export interface ResponseCheckCrossChainTransfer {
+  errors?: Array<TransferError>,
+  estimateFee?: string,
+  feeSymbol?: string // if undefined => use main token
+}
+
 export interface ResponsePrivateKeyValidateV2 {
   addressMap: Record<KeypairType, string>,
   autoAddPrefix: boolean
@@ -743,6 +762,18 @@ export interface SubstrateNftSubmitTransaction {
   recipientAddress: string;
 }
 
+export type ChainRelationType = 'p' | 'r'; // parachain | relaychain
+
+export interface ChainRelationInfo {
+  type: ChainRelationType;
+  supportedToken: string[];
+}
+
+export interface CrossChainRelation {
+  type: ChainRelationType;
+  relationMap: Record<string, ChainRelationInfo>;
+}
+
 export interface KoniRequestSignatures {
   'pri(networkMap.recoverDotSama)': [string, boolean];
   'pri(substrateNft.submitTransaction)': [SubstrateNftSubmitTransaction, NftTransactionResponse, NftTransactionResponse]
@@ -796,6 +827,7 @@ export interface KoniRequestSignatures {
   'pri(privateKey.validateV2)': [RequestSeedValidateV2, ResponsePrivateKeyValidateV2];
   'pri(accounts.create.suriV2)': [RequestAccountCreateSuriV2, ResponseAccountCreateSuriV2];
   'pri(accounts.checkTransfer)': [RequestCheckTransfer, ResponseCheckTransfer];
+  'pri(accounts.checkCrossChainTransfer)': [RequestCheckCrossChainTransfer, ResponseCheckCrossChainTransfer];
   'pri(accounts.transfer)': [RequestTransfer, Array<TransferError>, ResponseTransfer];
   'pri(derivation.createV2)': [RequestDeriveCreateV2, boolean];
   'pri(json.restoreV2)': [RequestJsonRestoreV2, void];

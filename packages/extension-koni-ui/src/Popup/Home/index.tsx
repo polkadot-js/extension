@@ -291,6 +291,16 @@ function Home ({ chainRegistryMap, className = '', currentAccount, historyMap, n
 
           <Link
             className={'action-button-wrapper'}
+            to={'/account/bridge'}
+          >
+            <ActionButton
+              iconSrc={sendIcon}
+              tooltipContent={t<string>('Bridge')}
+            />
+          </Link>
+
+          <Link
+            className={'action-button-wrapper'}
             to={'/account/send-fund'}
           >
             <ActionButton

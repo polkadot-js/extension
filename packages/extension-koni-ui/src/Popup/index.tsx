@@ -22,6 +22,7 @@ import ToastProvider from '../components/Toast/ToastProvider';
 import { saveCurrentAccountAddress, subscribeAccountsWithCurrentAddress, subscribeAuthorizeRequestsV2, subscribeMetadataRequests, subscribeSigningRequests } from '../messaging';
 import { store } from '../stores';
 import { buildHierarchy } from '../util/buildHierarchy';
+import Bridge from '@subwallet/extension-koni-ui/Popup/Bridge/Bridge';
 
 const EvmTokenEdit = React.lazy(() => import('@subwallet/extension-koni-ui/Popup/Settings/TokenSetting/EvmTokenEdit'));
 const EvmTokenSetting = React.lazy(() => import('@subwallet/extension-koni-ui/Popup/Settings/TokenSetting/EvmTokenSetting'));
@@ -237,6 +238,7 @@ export default function Popup (): React.ReactElement {
                           <Route path='/account/general-setting'>{wrapWithErrorBoundary(<GeneralSetting />, 'account-general-settings')}</Route>
                           <Route path='/account/networks'>{wrapWithErrorBoundary(<Networks />, 'account-networks')}</Route>
                           <Route path='/account/config-network'>{wrapWithErrorBoundary(<NetworkCreate />, 'account-network-edit')}</Route>
+                          <Route path='/account/bridge'>{wrapWithErrorBoundary(<Bridge />, 'bridge')}</Route>
                           <Route path='/account/send-fund'>{wrapWithErrorBoundary(<SendFund />, 'send-fund')}</Route>
                           <Route path='/account/donate'>{wrapWithErrorBoundary(<Donate />, 'donate')}</Route>
                           <Route path='/account/send-nft'>{wrapWithErrorBoundary(<TransferNftContainer />, 'send-nft')}</Route>

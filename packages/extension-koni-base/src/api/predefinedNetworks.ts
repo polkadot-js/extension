@@ -1353,7 +1353,7 @@ export const PREDEFINED_NETWORKS: Record<string, NetworkJson> = {
     genesisHash: '0x332ef6e751e25426e38996c51299dfc53bcd56f40b53dce2b2fc8442ae9c4a74_2',
     ss58Format: 2254,
     providers: {
-      testnet: 'wss://farm-rpc.subspace.network/ws'
+      testnet: 'wss://test-rpc.subspace.network/ws'
     },
     active: false,
     currentProviderMode: 'ws',

@@ -24,7 +24,7 @@ export default function useGetActiveEvmChains () {
 
   if (result.length === 0) {
     return [{
-      text: 'Please activate at least 1 EVM compatible network',
+      text: 'Please enable at least 1 Ethereum compatible network',
       value: ''
     }];
   }

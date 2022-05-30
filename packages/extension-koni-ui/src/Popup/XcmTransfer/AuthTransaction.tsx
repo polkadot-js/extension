@@ -1,7 +1,11 @@
 // Copyright 2019-2022 @polkadot/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { NetworkJson, RequestCheckXcmTransfer } from '@subwallet/extension-base/background/KoniTypes';
+import {
+  DropdownTransformOptionType,
+  NetworkJson,
+  RequestCheckCrossChainTransfer
+} from '@subwallet/extension-base/background/KoniTypes';
 import arrowRight from '@subwallet/extension-koni-ui/assets/arrow-right.svg';
 import { InputWithLabel, Warning } from '@subwallet/extension-koni-ui/components';
 import Button from '@subwallet/extension-koni-ui/components/Button';
@@ -17,20 +21,23 @@ import styled from 'styled-components';
 interface Props extends ThemeProps {
   className?: string;
   onCancel: () => void;
-  requestPayload: RequestCheckXcmTransfer;
+  requestPayload: RequestCheckCrossChainTransfer;
   feeInfo: [string | null, number, string]; // fee, fee decimal, fee symbol
   balanceFormat: BalanceFormatType; // decimal, symbol
   networkMap: Record<string, NetworkJson>;
   onChangeResult: (txResult: TransferResultType) => void;
+  originChainOptions: DropdownTransformOptionType[];
+  destinationChainOptions: DropdownTransformOptionType[];
 }
 
-function AuthTransaction ({ className, networkMap, onCancel, onChangeResult, requestPayload }: Props): React.ReactElement<Props> | null {
+function AuthTransaction ({ className, networkMap, onCancel, onChangeResult, requestPayload, originChainOptions, destinationChainOptions }: Props): React.ReactElement<Props> | null {
   const { t } = useTranslation();
   const [isBusy, setBusy] = useState(false);
   const [password, setPassword] = useState<string>('');
   const [isKeyringErr, setKeyringErr] = useState<boolean>(false);
   const [errorArr, setErrorArr] = useState<string[]>([]);
-  const networkPrefix = networkMap[requestPayload.networkKey].ss58Format;
+  const originNetworkPrefix = networkMap[requestPayload.originalNetworkKey].ss58Format;
+  const destinationNetworkPrefix = networkMap[requestPayload.destinationNetworkKey].ss58Format;
 
   const _onCancel = useCallback(() => {
     onCancel();
@@ -96,8 +103,9 @@ function AuthTransaction ({ className, networkMap, onCancel, onChangeResult, req
             <Dropdown
               className='bridge__chain-selector'
               isDisabled={true}
+              options={originChainOptions}
               label={'Original Chain'}
-              value={requestPayload.originChain}
+              value={requestPayload.originalNetworkKey}
             />
 
             <div className='bridge__chain-swap'>
@@ -110,8 +118,9 @@ function AuthTransaction ({ className, networkMap, onCancel, onChangeResult, req
             <Dropdown
               className='bridge__chain-selector'
               isDisabled={true}
+              options={destinationChainOptions}
               label={'Destination Chain'}
-              value={requestPayload.destinationChain}
+              value={requestPayload.destinationNetworkKey}
             />
           </div>
 
@@ -122,7 +131,7 @@ function AuthTransaction ({ className, networkMap, onCancel, onChangeResult, req
             isDisabled={true}
             isSetDefaultValue={true}
             label={t<string>('Send from account')}
-            networkPrefix={networkPrefix}
+            networkPrefix={originNetworkPrefix}
             type='account'
             withEllipsis
           />
@@ -134,7 +143,7 @@ function AuthTransaction ({ className, networkMap, onCancel, onChangeResult, req
             isDisabled={true}
             isSetDefaultValue={true}
             label={t<string>('Send to address')}
-            networkPrefix={networkPrefix}
+            networkPrefix={destinationNetworkPrefix}
             type='allPlus'
             withEllipsis
           />

@@ -228,13 +228,15 @@ function XcmTransfer ({ chainRegistryMap, className, defaultValue, networkMap, d
             onCancel={_onCancelTx}
             onChangeResult={_onChangeResult}
             requestPayload={{
-              networkKey: selectedNetworkKey,
               from: senderId,
               to: recipientId,
-              originChain: originChain,
-              destinationChain: destinationChain,
-              value: valueToTransfer
+              originalNetworkKey: originChain,
+              destinationNetworkKey: destinationChain,
+              value: valueToTransfer,
+              token: selectedToken
             }}
+            originChainOptions={originChainOptions}
+            destinationChainOptions={destinationChainOptions}
           />
         )}
       </div>

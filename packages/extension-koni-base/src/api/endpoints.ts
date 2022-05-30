@@ -717,7 +717,7 @@ const NETWORKS: Record<string, NetWorkInfo> = {
     crowdloanUrl: 'https://kusama-crowdloan.litentry.com/'
   },
   subspace: {
-    chain: 'SubSpace',
+    chain: 'Subspace',
     genesisHash: '0x332ef6e751e25426e38996c51299dfc53bcd56f40b53dce2b2fc8442ae9c4a74',
     ss58Format: 2254,
     provider: 'wss://farm-rpc.subspace.network/ws',
@@ -725,7 +725,7 @@ const NETWORKS: Record<string, NetWorkInfo> = {
     nativeToken: 'tSSC'
   },
   subspace_test: {
-    chain: 'SubSpace Testnet',
+    chain: 'Subspace Testnet',
     genesisHash: '0x332ef6e751e25426e38996c51299dfc53bcd56f40b53dce2b2fc8442ae9c4a74_2',
     ss58Format: 2254,
     provider: 'wss://test-rpc.subspace.network/ws',

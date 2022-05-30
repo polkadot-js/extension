@@ -248,7 +248,6 @@ export default styled(NetworkItem)(({ theme }: Props) => `
     display: flex;
     justify-content: space-between;
     align-items: center;
-    gap: 20px;
   }
 
   .network-item__text {

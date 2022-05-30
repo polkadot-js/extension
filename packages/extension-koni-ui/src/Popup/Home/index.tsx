@@ -186,6 +186,12 @@ function Home ({ chainRegistryMap, className = '', currentAccount, historyMap, n
   const isSetNetwork = window.localStorage.getItem('isSetNetwork') !== 'ok';
   const [showNetworkSelection, setShowNetworkSelection] = useState(isSetNetwork);
 
+  useEffect(() => {
+    if (window.localStorage.getItem('isSetNetwork') === 'ok' && showNetworkSelection) {
+      setShowNetworkSelection(false);
+    }
+  }, [networkMetadataMap, showNetworkSelection]);
+
   const parseNftGridSize = useCallback(() => {
     if (window.innerHeight > NFT_GRID_HEIGHT_THRESHOLD) {
       const nftContainerHeight = window.innerHeight - NFT_HEADER_HEIGHT;

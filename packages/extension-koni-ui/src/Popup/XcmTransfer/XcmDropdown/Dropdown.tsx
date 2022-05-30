@@ -3,7 +3,7 @@
 
 import { DropdownTransformOptionType, NetworkJson } from '@subwallet/extension-base/background/KoniTypes';
 import { Label, Theme } from '@subwallet/extension-koni-ui/components';
-import XcmItem from '@subwallet/extension-koni-ui/Popup/Bridge/XcmDropdown/XcmItem';
+import XcmItem from '@subwallet/extension-koni-ui/Popup/XcmTransfer/XcmDropdown/XcmItem';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import React, { useCallback, useContext, useState } from 'react';
 import Select, { ActionMeta, SingleValue } from 'react-select';

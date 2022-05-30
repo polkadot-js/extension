@@ -291,11 +291,11 @@ function Home ({ chainRegistryMap, className = '', currentAccount, historyMap, n
 
           <Link
             className={'action-button-wrapper'}
-            to={'/account/bridge'}
+            to={'/account/xcm-transfer'}
           >
             <ActionButton
               iconSrc={sendIcon}
-              tooltipContent={t<string>('Bridge')}
+              tooltipContent={t<string>('XCM Transfer')}
             />
           </Link>
 

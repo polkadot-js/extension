@@ -5,8 +5,7 @@ import { faChevronDown } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { NetworkJson } from '@subwallet/extension-base/background/KoniTypes';
 import { Label, Theme } from '@subwallet/extension-koni-ui/components';
-import { TokenTransformOptionType } from '@subwallet/extension-koni-ui/components/XcmTokenDropdown/types';
-import { TokenItemType } from '@subwallet/extension-koni-ui/components/types';
+import { TokenTransformOptionType } from '@subwallet/extension-koni-ui/components/TokenDropdown/types';
 import useOutsideClick from '@subwallet/extension-koni-ui/hooks/useOutsideClick';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { getLogoByNetworkKey } from '@subwallet/extension-koni-ui/util';
@@ -19,7 +18,7 @@ interface WrapperProps {
   formatOptLabel?: (option: TokenTransformOptionType) => React.ReactNode;
   onChange?: (token: string) => void;
   value: string;
-  options: TokenItemType[];
+  options: TokenTransformOptionType[];
   ci?: React.ReactNode;
   filterOptions?: (candidate: {label: string, value: string}, input: string) => boolean;
   networkMap: Record<string, NetworkJson>;
@@ -30,7 +29,7 @@ interface Props {
   label: string;
   getFormatOptLabel?: (option: TokenTransformOptionType) => React.ReactNode;
   onChange?: any;
-  options: TokenItemType[];
+  options: TokenTransformOptionType[];
   value?: string;
   ci?: React.ReactNode;
   networkMap: Record<string, NetworkJson>;
@@ -92,10 +91,6 @@ function DropdownWrapper ({ className, formatOptLabel, networkMap, onChange, opt
 }
 
 function Dropdown ({ className, getFormatOptLabel, label, networkMap, onChange, options, value }: Props): React.ReactElement<Props> {
-  const transformOptions: TokenTransformOptionType[] = options.map((t) => ({
-    label: t.token,
-    value: t.token
-  }));
   const [selectedValue, setSelectedValue] = useState(value);
   const themeContext = useContext(ThemeContext as React.Context<Theme>);
 
@@ -118,7 +113,8 @@ function Dropdown ({ className, getFormatOptLabel, label, networkMap, onChange, 
     if (input) {
       const query = input.trim();
       const queryLower = query.toLowerCase();
-      const isMatches = (candidate.label.toLowerCase() && candidate.label.toLowerCase().includes(queryLower));
+      const isMatches = (candidate.label.toLowerCase() && candidate.label.toLowerCase().includes(queryLower)) ||
+        (candidate.data.networkName.toLowerCase() && candidate.data.networkName.toLowerCase().includes(queryLower));
 
       return !!isMatches;
     }
@@ -196,10 +192,10 @@ function Dropdown ({ className, getFormatOptLabel, label, networkMap, onChange, 
           menuPortalTarget={document.querySelector('main')}
           menuPosition='fixed'
           onChange={handleChange}
-          options={transformOptions}
+          options={options}
           placeholder='Search...'
           styles={customStyles}
-          value={transformOptions.filter((obj: { value: string }) => obj.value === selectedValue)}
+          value={options.filter((obj: { value: string }) => obj.value === selectedValue)}
         />
       </Label>
     </>

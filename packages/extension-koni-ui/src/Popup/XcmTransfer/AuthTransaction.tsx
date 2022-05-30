@@ -9,7 +9,7 @@ import InputAddress from '@subwallet/extension-koni-ui/components/InputAddress';
 import Modal from '@subwallet/extension-koni-ui/components/Modal';
 import { BalanceFormatType } from '@subwallet/extension-koni-ui/components/types';
 import useTranslation from '@subwallet/extension-koni-ui/hooks/useTranslation';
-import Dropdown from '@subwallet/extension-koni-ui/Popup/Bridge/XcmDropdown/Dropdown';
+import Dropdown from '@subwallet/extension-koni-ui/Popup/XcmTransfer/XcmDropdown/Dropdown';
 import { ThemeProps, TransferResultType } from '@subwallet/extension-koni-ui/types';
 import React, { useCallback, useState } from 'react';
 import styled from 'styled-components';
@@ -41,6 +41,7 @@ function AuthTransaction ({ className, networkMap, onCancel, onChangeResult, req
   const _doStart = useCallback(
     (): void => {
       console.log('123');
+      setBusy(true);
     },
     []);
 
@@ -179,17 +180,17 @@ function AuthTransaction ({ className, networkMap, onCancel, onChangeResult, req
               onClick={_onCancel}
             >
             <span>
-              {t<string>('Cancel')}
+              {t<string>('Reject')}
             </span>
             </Button>
 
             <Button
               className='bridge-button'
               isDisabled={false}
-              onClick={_onTransfer}
+              onClick={_doStart}
             >
             <span>
-              {t<string>('Transfer')}
+              {t<string>('Confirm')}
             </span>
             </Button>
           </div>

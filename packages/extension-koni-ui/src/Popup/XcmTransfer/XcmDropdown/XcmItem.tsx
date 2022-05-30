@@ -10,7 +10,6 @@ interface Props {
   className: string;
   networkKey: string;
   networkName: string;
-  symbol: string;
 }
 
 function XcmItem ({ className = '', networkKey, networkName }: Props): React.ReactElement<Props> {
@@ -22,7 +21,6 @@ function XcmItem ({ className = '', networkKey, networkName }: Props): React.Rea
         src={getLogoByNetworkKey(networkKey)}
       />
       <div className='token-item-right-content'>
-        <div className='token-item__symbol'>{symbol}</div>
         <div className='token-item__chain'>{networkName}</div>
       </div>
     </div>

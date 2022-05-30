@@ -3,5 +3,7 @@
 
 export interface TokenTransformOptionType {
   label: string,
-  value: string
+  value: string,
+  networkKey: string,
+  networkName: string
 }

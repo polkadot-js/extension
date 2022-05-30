@@ -1,22 +1,25 @@
 // Copyright 2019-2022 @polkadot/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { ChainRegistry, NetworkJson } from '@subwallet/extension-base/background/KoniTypes';
+import {
+  ChainRegistry,
+  DropdownTransformOptionType,
+  NetworkJson
+} from '@subwallet/extension-base/background/KoniTypes';
 import { SupportedCrossChainsMap } from '@subwallet/extension-koni-base/api/supportedCrossChains';
 import { AccountContext, Button } from '@subwallet/extension-koni-ui/components';
 import InputBalance from '@subwallet/extension-koni-ui/components/InputBalance';
 import LoadingContainer from '@subwallet/extension-koni-ui/components/LoadingContainer';
 import ReceiverInputAddress from '@subwallet/extension-koni-ui/components/ReceiverInputAddress';
-import Toggle from '@subwallet/extension-koni-ui/components/Toggle';
 import { useTranslation } from '@subwallet/extension-koni-ui/components/translate';
 import { BalanceFormatType, SenderInputAddressType } from '@subwallet/extension-koni-ui/components/types';
 import useFreeBalance from '@subwallet/extension-koni-ui/hooks/screen/sending/useFreeBalance';
 import { transferCheckSupporting } from '@subwallet/extension-koni-ui/messaging';
 import Header from '@subwallet/extension-koni-ui/partials/Header';
-import AuthTransaction from '@subwallet/extension-koni-ui/Popup/Bridge/AuthTransaction';
-import BridgeInputAddress from '@subwallet/extension-koni-ui/Popup/Bridge/BridgeInputAddress';
-import Dropdown from '@subwallet/extension-koni-ui/Popup/Bridge/XcmDropdown/Dropdown';
-import { getBalanceFormat, getDefaultValue, getMainTokenInfo, getMaxTransferAndNoFees } from '@subwallet/extension-koni-ui/Popup/Sending/utils';
+import AuthTransaction from '@subwallet/extension-koni-ui/Popup/XcmTransfer/AuthTransaction';
+import BridgeInputAddress from '@subwallet/extension-koni-ui/Popup/XcmTransfer/BridgeInputAddress';
+import Dropdown from '@subwallet/extension-koni-ui/Popup/XcmTransfer/XcmDropdown/Dropdown';
+import { getBalanceFormat, getDefaultAddress } from '@subwallet/extension-koni-ui/Popup/Sending/utils';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import React, { useCallback, useContext, useEffect, useState } from 'react';
@@ -36,6 +39,8 @@ interface ContentProps extends ThemeProps {
   defaultValue: SenderInputAddressType;
   networkMap: Record<string, NetworkJson>;
   chainRegistryMap: Record<string, ChainRegistry>;
+  originChainOptions: DropdownTransformOptionType[];
+  destinationChainOptions: DropdownTransformOptionType[];
 }
 
 function Wrapper ({ className = '', theme }: Props): React.ReactElement<Props> {
@@ -43,10 +48,21 @@ function Wrapper ({ className = '', theme }: Props): React.ReactElement<Props> {
   const { accounts } = useContext(AccountContext);
   const { chainRegistry: chainRegistryMap,
     currentAccount: { account },
-    currentNetwork: { isReady: isCurrentNetworkInfoReady, networkKey },
     networkMap } = useSelector((state: RootState) => state);
+  const originChainOptions = Object.keys(SupportedCrossChainsMap).map((key) => ({ label: networkMap[key].chain, value: key }));
+  const firstOriginChain = originChainOptions[0].value;
+  const destinationChainOptions = Object.keys(SupportedCrossChainsMap[firstOriginChain].relationMap).map((key) => ({ label: networkMap[key].chain, value: key }));
+  let defaultValue;
+  if (account) {
+    defaultValue = {
+      address: getDefaultAddress(account.address, accounts),
+      networkKey: firstOriginChain,
+      token: SupportedCrossChainsMap[firstOriginChain].relationMap[destinationChainOptions[0].value].supportedToken[0]
+    };
+  } else {
+    defaultValue = null;
+  }
 
-  const defaultValue = getDefaultValue(networkKey, !!isCurrentNetworkInfoReady, account?.address, chainRegistryMap, accounts);
 
   return (
     <div className={className}>
@@ -57,15 +73,17 @@ function Wrapper ({ className = '', theme }: Props): React.ReactElement<Props> {
         showSearch
         showSettings
         showSubHeader
-        subHeaderName={t<string>('Send fund')}
+        subHeaderName={t<string>('XCM Transfer')}
       />
       {accounts && accounts.length && account && defaultValue
         ? (
-          <Bridge
+          <XcmTransfer
             chainRegistryMap={chainRegistryMap}
             className='bridge-container'
             defaultValue={defaultValue}
             networkMap={networkMap}
+            originChainOptions={originChainOptions}
+            destinationChainOptions={destinationChainOptions}
             theme={theme}
           />
         )
@@ -75,49 +93,36 @@ function Wrapper ({ className = '', theme }: Props): React.ReactElement<Props> {
   );
 }
 
-function Bridge ({ chainRegistryMap, className, defaultValue, networkMap }: ContentProps): React.ReactElement {
+function XcmTransfer ({ chainRegistryMap, className, defaultValue, networkMap, destinationChainOptions, originChainOptions }: ContentProps): React.ReactElement {
   const { t } = useTranslation();
   const [isShowTxModal, setShowTxModal] = useState<boolean>(false);
-  const [[isSupportTransferAll], setTransferSupport] =
-    useState<[boolean, boolean] | [null, null]>([null, null]);
   const [recipientId, setRecipientId] = useState<string | null>(null);
   const [amount, setAmount] = useState<BN | undefined>(BN_ZERO);
-  const [isAll, setIsAll] = useState(false);
-  const [[fee, feeSymbol], setFeeInfo] = useState<[string | null, string | null | undefined]>([null, null]);
   const [{ address: senderId,
     networkKey: selectedNetworkKey,
     token: selectedToken }, setSenderValue] = useState<SenderInputAddressType>(defaultValue);
-  const mainTokenInfo = getMainTokenInfo(selectedNetworkKey, chainRegistryMap);
   const senderFreeBalance = useFreeBalance(selectedNetworkKey, senderId, selectedToken);
   const recipientFreeBalance = useFreeBalance(selectedNetworkKey, recipientId, selectedToken);
   const balanceFormat: BalanceFormatType = getBalanceFormat(selectedNetworkKey, selectedToken, chainRegistryMap);
-  const [existentialDeposit, setExistentialDeposit] = useState<string>('0');
-
-  console.log('networkMap', networkMap);
-
-  const [maxTransfer] = getMaxTransferAndNoFees(fee, feeSymbol, selectedToken, mainTokenInfo.symbol, senderFreeBalance, existentialDeposit);
-  const canToggleAll = !!isSupportTransferAll && !!maxTransfer;
-  const valueToTransfer = canToggleAll && isAll ? maxTransfer.toString() : (amount?.toString() || '0');
-  const originChainOptions = Object.keys(SupportedCrossChainsMap).map((key) => ({ label: networkMap[key].chain, value: key }));
-  const firstOriginChain = originChainOptions[0].value;
-  const destinationChainOptions = Object.keys(SupportedCrossChainsMap[firstOriginChain].relationMap).map((key) => ({ label: networkMap[key].chain, value: key }));
-  const [originChain, setOriginChain] = useState<string>(firstOriginChain);
+  const valueToTransfer = amount?.toString() || '0';
+  const [originChain, setOriginChain] = useState<string>(originChainOptions[0].value);
   const [destinationChain, setDestinationChain] = useState<string>(destinationChainOptions[0].value);
-  const tokenList = SupportedCrossChainsMap[originChain].relationMap[destinationChain].supportedToken.map((token) => ({ label: token, value: token }));
+  const tokenList = SupportedCrossChainsMap[originChain].relationMap[destinationChain].supportedToken.map((token) => (
+    {
+      label: token,
+      value: token,
+      networkKey: originChain,
+      networkName: networkMap[originChain].chain
+    }
+  ));
+  const a = {
+    address: senderId,
+    token: tokenList[0].value,
+    networkKey: originChain
+  }
 
   useEffect(() => {
-    let isSync = true;
-
-    transferCheckSupporting({ networkKey: selectedNetworkKey, token: selectedToken }).then((res) => {
-      if (isSync) {
-        setTransferSupport([res.supportTransfer, res.supportTransferAll]);
-      }
-    }).catch((e) => console.log(e));
-
-    return () => {
-      isSync = false;
-      setTransferSupport([null, null]);
-    };
+    transferCheckSupporting({ networkKey: selectedNetworkKey, token: selectedToken }).catch((e) => console.log(e));
   }, [selectedNetworkKey, selectedToken]);
 
   const _onCancel = useCallback(() => {}, []);
@@ -135,13 +140,14 @@ function Bridge ({ chainRegistryMap, className, defaultValue, networkMap }: Cont
     <>
       <div className={className}>
         <div className='bridge__chain-selector-area'>
-          {/*<Dropdown*/}
-          {/*  className='bridge__chain-selector'*/}
-          {/*  isDisabled={false}*/}
-          {/*  label={'Original Chain'}*/}
-          {/*  onChange={setOriginChain}*/}
-          {/*  options={originChainOptions}*/}
-          {/*/>*/}
+          <Dropdown
+            className='bridge__chain-selector'
+            isDisabled={false}
+            label={'Original Chain'}
+            onChange={setOriginChain}
+            options={originChainOptions}
+            value={originChain}
+          />
 
           <div className='bridge__chain-swap'>
             <img
@@ -150,20 +156,22 @@ function Bridge ({ chainRegistryMap, className, defaultValue, networkMap }: Cont
             />
           </div>
 
-          {/*<Dropdown*/}
-          {/*  className='bridge__chain-selector'*/}
-          {/*  isDisabled={false}*/}
-          {/*  label={'Destination Chain'}*/}
-          {/*  onChange={setDestinationChain}*/}
-          {/*  options={destinationChain}*/}
-          {/*/>*/}
+          <Dropdown
+            className='bridge__chain-selector'
+            isDisabled={false}
+            label={'Destination Chain'}
+            onChange={setDestinationChain}
+            options={destinationChainOptions}
+            value={destinationChain}
+          />
         </div>
 
         <BridgeInputAddress
           balance={senderFreeBalance}
+          chainRegistryMap={chainRegistryMap}
           balanceFormat={balanceFormat}
           className=''
-          initValue={defaultValue}
+          initValue={a}
           networkMap={networkMap}
           onChange={setSenderValue}
           options={tokenList}
@@ -178,45 +186,18 @@ function Bridge ({ chainRegistryMap, className, defaultValue, networkMap }: Cont
           onchange={setRecipientId}
         />
 
-        {canToggleAll && isAll
-          ? (
-            <InputBalance
-              autoFocus
-              className={'bridge-amount-input'}
-              decimals={balanceFormat[0]}
-              defaultValue={maxTransfer}
-              help={t<string>('The full account balance to be transferred, minus the transaction fees')}
-              isDisabled
-              key={maxTransfer?.toString()}
-              label={t<string>('transferable minus fees')}
-              siDecimals={balanceFormat[0]}
-              siSymbol={balanceFormat[2] || balanceFormat[1]}
-            />
-          )
-          : (
-            <InputBalance
-              autoFocus
-              className={'bridge-amount-input'}
-              decimals={balanceFormat[0]}
-              help={t<string>('Type the amount you want to transfer. Note that you can select the unit on the right e.g sending 1 milli is equivalent to sending 0.001.')}
-              isError={false}
-              isZeroable
-              label={t<string>('amount')}
-              onChange={setAmount}
-              placeholder={'0'}
-              siSymbol={balanceFormat[2] || balanceFormat[1]}
-            />
-          )
-        }
-
-        <div className={'send-fund-toggle'}>
-          <Toggle
-            className='typeToggle'
-            label={t<string>('Transfer the full account balance, reap the sender')}
-            onChange={setIsAll}
-            value={isAll}
-          />
-        </div>
+        <InputBalance
+          autoFocus
+          className={'bridge-amount-input'}
+          decimals={balanceFormat[0]}
+          help={t<string>('Type the amount you want to transfer. Note that you can select the unit on the right e.g sending 1 milli is equivalent to sending 0.001.')}
+          isError={false}
+          isZeroable
+          label={t<string>('amount')}
+          onChange={setAmount}
+          placeholder={'0'}
+          siSymbol={balanceFormat[2] || balanceFormat[1]}
+        />
 
         <div className='bridge-button-container'>
           <Button
@@ -273,26 +254,9 @@ export default React.memo(styled(Wrapper)(({ theme }: Props) => `
     overflow-y: auto;
   }
 
-  .send-fund-warning {
-    margin-bottom: 10px;
-  }
-
-  .send-fund-item {
-    margin-bottom: 10px;
-  }
-
-  .static-container {
-    display: block;
-  }
-
   .bridge-amount-input {
     margin-bottom: 10px;
     margin-top: 15px;
-  }
-
-  .send-fund-toggle {
-    margin-top: 20px;
-    margin-bottom: 20px;
   }
 
   .bridge__chain-selector-area {

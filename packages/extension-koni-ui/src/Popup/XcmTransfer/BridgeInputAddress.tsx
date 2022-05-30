@@ -1,7 +1,7 @@
 // Copyright 2019-2022 @polkadot/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { DropdownTransformOptionType, NetworkJson } from '@subwallet/extension-base/background/KoniTypes';
+import {ChainRegistry, NetworkJson} from '@subwallet/extension-base/background/KoniTypes';
 import FormatBalance from '@subwallet/extension-koni-ui/components/FormatBalance';
 import InputAddress from '@subwallet/extension-koni-ui/components/InputAddress';
 import { useTranslation } from '@subwallet/extension-koni-ui/components/translate';
@@ -12,15 +12,17 @@ import { toShort } from '@subwallet/extension-koni-ui/util';
 import reformatAddress from '@subwallet/extension-koni-ui/util/reformatAddress';
 import React, { useCallback, useMemo, useState } from 'react';
 import styled from 'styled-components';
+import { TokenTransformOptionType } from "@subwallet/extension-koni-ui/components/XcmTokenDropdown/types";
 
 interface Props {
   className: string;
   onChange: (value: SenderInputAddressType) => void;
   initValue: SenderInputAddressType;
   balance: string;
+  chainRegistryMap: Record<string, ChainRegistry>;
   balanceFormat: BalanceFormatType;
   networkMap: Record<string, NetworkJson>;
-  options: DropdownTransformOptionType[];
+  options: TokenTransformOptionType[];
 }
 
 function BridgeInputAddress ({ balance, balanceFormat, className = '', initValue, networkMap, onChange, options }: Props): React.ReactElement {
@@ -51,13 +53,11 @@ function BridgeInputAddress ({ balance, balanceFormat, className = '', initValue
   }, [onChange]);
 
   const onChangeTokenValue = useCallback((tokenValueStr: string) => {
-    const tokenVal = tokenValueStr.split('|');
-
+    console.log('tokenValueStr', tokenValueStr);
     setValue((prev) => {
       const newVal = {
         ...prev,
-        token: tokenVal[0],
-        networkKey: tokenVal[1]
+        token: tokenValueStr,
       };
 
       onChange(newVal);

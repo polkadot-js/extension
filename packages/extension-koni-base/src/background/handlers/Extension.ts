@@ -1004,8 +1004,6 @@ export default class KoniExtension extends Extension {
       nftItems: remainedItems
     });
 
-    console.log('force update nft state done');
-
     return true;
   }
 
@@ -2017,6 +2015,18 @@ export default class KoniExtension extends Extension {
     return txState;
   }
 
+  private enableNetworks (targetKeys: string[]) {
+    try {
+      for (const networkKey of targetKeys) {
+        this.enableNetworkMap(networkKey);
+      }
+    } catch (e) {
+      return false;
+    }
+
+    return true;
+  }
+
   // eslint-disable-next-line @typescript-eslint/require-await
   public override async handle<TMessageType extends MessageTypes> (id: string, type: TMessageType, request: RequestTypes[TMessageType], port: chrome.runtime.Port): Promise<ResponseType<TMessageType>> {
     switch (type) {
@@ -2174,6 +2184,8 @@ export default class KoniExtension extends Extension {
         return this.substrateNftSubmitTransaction(id, port, request as SubstrateNftSubmitTransaction);
       case 'pri(networkMap.recoverDotSama)':
         return this.recoverDotSamaApi(request as string);
+      case 'pri(networkMap.enableMany)':
+        return this.enableNetworks(request as string[]);
       default:
         return super.handle(id, type, request, port);
     }

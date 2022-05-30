@@ -63,7 +63,13 @@ function getSupportedLedger (networkMap: Record<string, NetworkJson>) {
   const supportedLedgerNetwork = selectableNetworks
     .filter((network) => network.hasLedgerSupport);
 
-  const networkInfoItems = Object.values(networkMap);
+  const networkInfoItems: NetworkJson[] = [];
+
+  Object.values(networkMap).forEach((networkJson) => {
+    if (networkJson.active) {
+      networkInfoItems.push(networkJson);
+    }
+  });
 
   supportedLedgerNetwork.forEach((n) => {
     const counterPathInfo = networkInfoItems.find((ni) => n.genesisHash.includes(ni.genesisHash));

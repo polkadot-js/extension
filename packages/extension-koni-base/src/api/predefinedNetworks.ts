@@ -18,7 +18,7 @@ export const PREDEFINED_NETWORKS: Record<string, NetworkJson> = {
       'light client': 'light://substrate-connect/polkadot'
       // Pinknode: 'wss://rpc.pinknode.io/polkadot/explorer' // https://github.com/polkadot-js/apps/issues/5721
     },
-    active: true,
+    active: false,
     currentProvider: 'OnFinality',
     currentProviderMode: 'ws',
     groups: ['RELAY_CHAIN'],
@@ -40,7 +40,7 @@ export const PREDEFINED_NETWORKS: Record<string, NetworkJson> = {
       'light client': 'light://substrate-connect/kusama'
       // Pinknode: 'wss://rpc.pinknode.io/kusama/explorer' // https://github.com/polkadot-js/apps/issues/5721
     },
-    active: true,
+    active: false,
     currentProvider: 'OnFinality',
     currentProviderMode: 'ws',
     groups: ['RELAY_CHAIN'],
@@ -98,7 +98,7 @@ export const PREDEFINED_NETWORKS: Record<string, NetworkJson> = {
       OnFinality: 'wss://statemint.api.onfinality.io/public-ws',
       Dwellir: 'wss://statemint-rpc.dwellir.com'
     },
-    active: false, // to be active
+    active: false,
     currentProvider: 'OnFinality',
     currentProviderMode: 'ws',
     groups: ['POLKADOT_PARACHAIN'],
@@ -120,7 +120,7 @@ export const PREDEFINED_NETWORKS: Record<string, NetworkJson> = {
       OnFinality: 'wss://acala-polkadot.api.onfinality.io/public-ws',
       Dwellir: 'wss://acala-rpc.dwellir.com'
     },
-    active: false, // to be active
+    active: false,
     currentProviderMode: 'ws',
     currentProvider: 'OnFinality',
     groups: ['POLKADOT_PARACHAIN'],
@@ -140,7 +140,7 @@ export const PREDEFINED_NETWORKS: Record<string, NetworkJson> = {
       OnFinality: 'wss://moonbeam.api.onfinality.io/public-ws',
       Dwellir: 'wss://moonbeam-rpc.dwellir.com'
     },
-    active: false, // to be active
+    active: false,
     currentProviderMode: 'ws',
     currentProvider: 'OnFinality',
     groups: ['POLKADOT_PARACHAIN'],
@@ -161,7 +161,7 @@ export const PREDEFINED_NETWORKS: Record<string, NetworkJson> = {
       OnFinality: 'wss://astar.api.onfinality.io/public-ws',
       Dwellir: 'wss://astar-rpc.dwellir.com'
     },
-    active: false, // to be active
+    active: false,
     currentProviderMode: 'ws',
     currentProvider: 'OnFinality',
     groups: ['POLKADOT_PARACHAIN'],
@@ -180,7 +180,7 @@ export const PREDEFINED_NETWORKS: Record<string, NetworkJson> = {
       Astar: 'wss://rpc.astar.network'
     },
     isEthereum: true,
-    active: false, // to be active
+    active: false,
     currentProviderMode: 'ws',
     currentProvider: 'Astar',
     groups: ['POLKADOT_PARACHAIN'],
@@ -200,7 +200,7 @@ export const PREDEFINED_NETWORKS: Record<string, NetworkJson> = {
       OnFinality: 'wss://parallel.api.onfinality.io/public-ws',
       Parallel: 'wss://rpc.parallel.fi'
     },
-    active: false, // to be active
+    active: false,
     currentProviderMode: 'ws',
     currentProvider: 'OnFinality',
     groups: ['POLKADOT_PARACHAIN'],
@@ -218,7 +218,7 @@ export const PREDEFINED_NETWORKS: Record<string, NetworkJson> = {
       Clover: 'wss://rpc-para.clover.finance',
       OnFinality: 'wss://clover.api.onfinality.io/public-ws'
     },
-    active: false, // to be active
+    active: false,
     currentProviderMode: 'ws',
     currentProvider: 'OnFinality',
     groups: ['POLKADOT_PARACHAIN'],
@@ -236,7 +236,7 @@ export const PREDEFINED_NETWORKS: Record<string, NetworkJson> = {
     providers: {
       'Galactic Council': 'wss://rpc-02.snakenet.hydradx.io'
     },
-    active: false, // to be active
+    active: false,
     currentProviderMode: 'ws',
     currentProvider: 'Galactic Council',
     groups: ['POLKADOT_PARACHAIN'],
@@ -254,7 +254,7 @@ export const PREDEFINED_NETWORKS: Record<string, NetworkJson> = {
       'Commonwealth Labs': 'wss://mainnet.edgewa.re',
       OnFinality: 'wss://edgeware.api.onfinality.io/public-ws'
     },
-    active: false, // to be active
+    active: false,
     currentProviderMode: 'ws',
     currentProvider: 'OnFinality',
     groups: ['MAIN_NET'],
@@ -270,7 +270,7 @@ export const PREDEFINED_NETWORKS: Record<string, NetworkJson> = {
     providers: {
       Centrifuge: 'wss://fullnode.parachain.centrifuge.io'
     },
-    active: false, // to be active
+    active: false,
     currentProviderMode: 'ws',
     currentProvider: 'Centrifuge',
     groups: ['POLKADOT_PARACHAIN'],
@@ -289,7 +289,7 @@ export const PREDEFINED_NETWORKS: Record<string, NetworkJson> = {
       'Kintsugi Labs': 'wss://api.interlay.io/parachain',
       OnFinality: 'wss://interlay.api.onfinality.io/public-ws'
     },
-    active: false, // to be active
+    active: false,
     currentProviderMode: 'ws',
     currentProvider: 'Kintsugi Labs',
     groups: ['POLKADOT_PARACHAIN'],
@@ -306,7 +306,7 @@ export const PREDEFINED_NETWORKS: Record<string, NetworkJson> = {
     providers: {
       Equilibrium: 'wss://node.pol.equilibrium.io'
     },
-    active: false, // to be active
+    active: false,
     currentProviderMode: 'ws',
     currentProvider: 'Equilibrium',
     groups: ['POLKADOT_PARACHAIN'],
@@ -325,7 +325,7 @@ export const PREDEFINED_NETWORKS: Record<string, NetworkJson> = {
       OnFinality: 'wss://nodle-parachain.api.onfinality.io/public-ws',
       Dwellir: 'wss://eden-rpc.dwellir.com'
     },
-    active: false, // to be active
+    active: false,
     currentProviderMode: 'ws',
     currentProvider: 'OnFinality',
     groups: ['POLKADOT_PARACHAIN'],
@@ -342,7 +342,7 @@ export const PREDEFINED_NETWORKS: Record<string, NetworkJson> = {
     providers: {
       'Darwinia Network': 'wss://rpc.darwinia.network'
     },
-    active: false, // to be active
+    active: false,
     currentProviderMode: 'ws',
     currentProvider: 'Darwinia Network',
     groups: ['POLKADOT_PARACHAIN'],
@@ -362,7 +362,7 @@ export const PREDEFINED_NETWORKS: Record<string, NetworkJson> = {
       // 'Manta Munkiana': 'wss://munkiana.manta.systems', // https://github.com/polkadot-js/apps/issues/6871
       // 'Manta Pectinata': 'wss://pectinata.manta.systems' // https://github.com/polkadot-js/apps/issues/7018
     },
-    active: false, // to be active
+    active: false,
     currentProviderMode: 'ws',
     currentProvider: 'Manta Kuhlii',
     groups: ['POLKADOT_PARACHAIN'],
@@ -384,7 +384,7 @@ export const PREDEFINED_NETWORKS: Record<string, NetworkJson> = {
       OnFinality: 'wss://sora.api.onfinality.io/public-ws'
       // 'SORA Community (Lux8)': 'wss://sora.lux8.net' // https://github.com/polkadot-js/apps/issues/6195
     },
-    active: false, // to be active
+    active: false,
     currentProviderMode: 'ws',
     currentProvider: 'OnFinality',
     groups: ['KUSAMA_PARACHAIN'],
@@ -400,7 +400,7 @@ export const PREDEFINED_NETWORKS: Record<string, NetworkJson> = {
     providers: {
       SubGame: 'wss://mainnet.subgame.org/'
     },
-    active: false, // to be active
+    active: false,
     currentProviderMode: 'ws',
     currentProvider: 'SubGame',
     groups: ['POLKADOT_PARACHAIN'],
@@ -417,7 +417,7 @@ export const PREDEFINED_NETWORKS: Record<string, NetworkJson> = {
     providers: {
       AresProtocol: 'wss://wss.odyssey.aresprotocol.io'
     },
-    active: false, // to be active
+    active: false,
     currentProviderMode: 'ws',
     currentProvider: 'AresProtocol',
     groups: ['POLKADOT_PARACHAIN'],
@@ -435,7 +435,7 @@ export const PREDEFINED_NETWORKS: Record<string, NetworkJson> = {
       'Polkadex Team': 'wss://mainnet.polkadex.trade/',
       OnFinality: 'wss://polkadex.api.onfinality.io/public-ws'
     },
-    active: false, // to be active
+    active: false,
     currentProviderMode: 'ws',
     currentProvider: 'OnFinality',
     groups: ['POLKADOT_PARACHAIN'],
@@ -452,7 +452,7 @@ export const PREDEFINED_NETWORKS: Record<string, NetworkJson> = {
     providers: {
       'Aleph Zero Foundation': 'wss://ws.azero.dev'
     },
-    active: false, // to be active
+    active: false,
     currentProviderMode: 'ws',
     currentProvider: 'Aleph Zero Foundation',
     groups: ['MAIN_NET'],
@@ -550,7 +550,7 @@ export const PREDEFINED_NETWORKS: Record<string, NetworkJson> = {
     providers: {
       Efinity: 'wss://rpc.efinity.io'
     },
-    active: false, // to be active
+    active: false,
     currentProviderMode: 'ws',
     currentProvider: 'Efinity',
     groups: ['POLKADOT_PARACHAIN'],
@@ -568,7 +568,7 @@ export const PREDEFINED_NETWORKS: Record<string, NetworkJson> = {
     providers: {
       Composable: 'wss://rpc.composable.finance'
     },
-    active: false, // to be active
+    active: false,
     currentProviderMode: 'ws',
     currentProvider: 'Composable',
     groups: ['POLKADOT_PARACHAIN'],
@@ -585,7 +585,7 @@ export const PREDEFINED_NETWORKS: Record<string, NetworkJson> = {
     providers: {
       Phala: 'wss://api.phala.network/ws'
     },
-    active: false, // to be active
+    active: false,
     currentProviderMode: 'ws',
     currentProvider: 'Phala',
     groups: ['POLKADOT_PARACHAIN'],
@@ -604,7 +604,7 @@ export const PREDEFINED_NETWORKS: Record<string, NetworkJson> = {
       'Crust Network': 'wss://rpc.crust.network',
       OnFinality: 'wss://crust.api.onfinality.io/public-ws'
     },
-    active: false, // to be active
+    active: false,
     currentProviderMode: 'ws',
     currentProvider: 'Crust Network',
     groups: ['POLKADOT_PARACHAIN'],
@@ -622,7 +622,7 @@ export const PREDEFINED_NETWORKS: Record<string, NetworkJson> = {
     providers: {
       Coinversation: 'wss://rpc.coinversation.io/'
     },
-    active: false, // to be active
+    active: false,
     currentProviderMode: 'ws',
     currentProvider: 'Coinversation',
     groups: ['POLKADOT_PARACHAIN'],
@@ -643,7 +643,7 @@ export const PREDEFINED_NETWORKS: Record<string, NetworkJson> = {
       OnFinality: 'wss://statemine.api.onfinality.io/public-ws',
       Dwellir: 'wss://statemine-rpc.dwellir.com'
     },
-    active: false, // to be active
+    active: false,
     currentProviderMode: 'ws',
     currentProvider: 'OnFinality',
     groups: ['KUSAMA_PARACHAIN'],
@@ -665,7 +665,7 @@ export const PREDEFINED_NETWORKS: Record<string, NetworkJson> = {
       OnFinality: 'wss://karura.api.onfinality.io/public-ws',
       Dwellir: 'wss://karura-rpc.dwellir.com'
     },
-    active: false, // to be active
+    active: false,
     currentProviderMode: 'ws',
     currentProvider: 'OnFinality',
     groups: ['KUSAMA_PARACHAIN'],
@@ -686,7 +686,7 @@ export const PREDEFINED_NETWORKS: Record<string, NetworkJson> = {
       Dwellir: 'wss://moonriver-rpc.dwellir.com'
       // Pinknode: 'wss://rpc.pinknode.io/moonriver/explorer' // https://github.com/polkadot-js/apps/issues/7058
     },
-    active: false, // to be active
+    active: false,
     currentProviderMode: 'ws',
     currentProvider: 'OnFinality',
     groups: ['KUSAMA_PARACHAIN'],
@@ -709,7 +709,7 @@ export const PREDEFINED_NETWORKS: Record<string, NetworkJson> = {
       Pinknode: 'wss://rpc.pinknode.io/shiden/explorer',
       Dwellir: 'wss://shiden-rpc.dwellir.com'
     },
-    active: false, // to be active
+    active: false,
     currentProviderMode: 'ws',
     currentProvider: 'OnFinality',
     groups: ['KUSAMA_PARACHAIN'],
@@ -722,7 +722,7 @@ export const PREDEFINED_NETWORKS: Record<string, NetworkJson> = {
   shidenEvm: {
     key: 'shidenEvm',
     chain: 'Shiden - EVM',
-    active: false, // to be active
+    active: false,
     genesisHash: '0xf1cf9022c7ebb34b162d5b5e34e705a5a740b2d0ecc1009fb89023e62a488108___EVM',
     ss58Format: 5,
     providers: {
@@ -743,7 +743,7 @@ export const PREDEFINED_NETWORKS: Record<string, NetworkJson> = {
       Phala: 'wss://khala-api.phala.network/ws',
       OnFinality: 'wss://khala.api.onfinality.io/public-ws'
     },
-    active: false, // to be active
+    active: false,
     currentProviderMode: 'ws',
     currentProvider: 'OnFinality',
     groups: ['KUSAMA_PARACHAIN'],
@@ -763,7 +763,7 @@ export const PREDEFINED_NETWORKS: Record<string, NetworkJson> = {
       'Liebi 2': 'wss://eu.bifrost-rpc.liebi.com/ws',
       OnFinality: 'wss://bifrost-parachain.api.onfinality.io/public-ws'
     },
-    active: false, // to be active
+    active: false,
     currentProviderMode: 'ws',
     currentProvider: 'OnFinality',
     groups: ['KUSAMA_PARACHAIN'],
@@ -798,7 +798,7 @@ export const PREDEFINED_NETWORKS: Record<string, NetworkJson> = {
       OnFinality: 'wss://spiritnet.api.onfinality.io/public-ws',
       Dwellir: 'wss://kilt-rpc.dwellir.com'
     },
-    active: false, // to be active
+    active: false,
     currentProviderMode: 'ws',
     currentProvider: 'OnFinality',
     groups: ['KUSAMA_PARACHAIN'],
@@ -817,7 +817,7 @@ export const PREDEFINED_NETWORKS: Record<string, NetworkJson> = {
       'Manta Network': 'wss://ws.calamari.systems/',
       OnFinality: 'wss://calamari.api.onfinality.io/public-ws'
     },
-    active: false, // to be active
+    active: false,
     currentProviderMode: 'ws',
     currentProvider: 'OnFinality',
     groups: ['KUSAMA_PARACHAIN'],
@@ -836,7 +836,7 @@ export const PREDEFINED_NETWORKS: Record<string, NetworkJson> = {
       HydraDX: 'wss://rpc-01.basilisk.hydradx.io',
       OnFinality: 'wss://basilisk.api.onfinality.io/public-ws'
     },
-    active: false, // to be active
+    active: false,
     currentProviderMode: 'ws',
     currentProvider: 'OnFinality',
     groups: ['KUSAMA_PARACHAIN'],
@@ -854,7 +854,7 @@ export const PREDEFINED_NETWORKS: Record<string, NetworkJson> = {
       Centrifuge: 'wss://fullnode.altair.centrifuge.io',
       OnFinality: 'wss://altair.api.onfinality.io/public-ws'
     },
-    active: false, // to be active
+    active: false,
     currentProviderMode: 'ws',
     currentProvider: 'OnFinality',
     groups: ['KUSAMA_PARACHAIN'],
@@ -873,7 +873,7 @@ export const PREDEFINED_NETWORKS: Record<string, NetworkJson> = {
       OnFinality: 'wss://parallel-heiko.api.onfinality.io/public-ws',
       Parallel: 'wss://heiko-rpc.parallel.fi'
     },
-    active: false, // to be active
+    active: false,
     currentProviderMode: 'ws',
     currentProvider: 'OnFinality',
     groups: ['KUSAMA_PARACHAIN'],
@@ -891,7 +891,7 @@ export const PREDEFINED_NETWORKS: Record<string, NetworkJson> = {
       'Kintsugi Labs': 'wss://api-kusama.interlay.io/parachain',
       OnFinality: 'wss://kintsugi.api.onfinality.io/public-ws'
     },
-    active: false, // to be active
+    active: false,
     currentProviderMode: 'ws',
     currentProvider: 'OnFinality',
     groups: ['KUSAMA_PARACHAIN'],
@@ -924,7 +924,7 @@ export const PREDEFINED_NETWORKS: Record<string, NetworkJson> = {
     providers: {
       Composable: 'wss://picasso-rpc.composable.finance'
     },
-    active: false, // to be active
+    active: false,
     currentProviderMode: 'ws',
     currentProvider: 'Composable',
     groups: ['KUSAMA_PARACHAIN'],
@@ -943,7 +943,7 @@ export const PREDEFINED_NETWORKS: Record<string, NetworkJson> = {
       'Bit.Country': 'wss://pioneer-1-rpc.bit.country',
       OnFinality: 'wss://pioneer.api.onfinality.io/public-ws'
     },
-    active: false, // to be active
+    active: false,
     currentProviderMode: 'ws',
     currentProvider: 'OnFinality',
     groups: ['KUSAMA_PARACHAIN'],
@@ -963,7 +963,7 @@ export const PREDEFINED_NETWORKS: Record<string, NetworkJson> = {
       'Unique Europe': 'wss://eu-ws-quartz.unique.network',
       'Unique US': 'wss://us-ws-quartz.unique.network'
     },
-    active: false, // to be active
+    active: false,
     currentProviderMode: 'ws',
     currentProvider: 'OnFinality',
     groups: ['KUSAMA_PARACHAIN'],
@@ -976,7 +976,7 @@ export const PREDEFINED_NETWORKS: Record<string, NetworkJson> = {
   unique_network: {
     key: 'unique_network',
     chain: 'UNIQUE NETWORK',
-    active: false, // to be active
+    active: false,
     genesisHash: '0x84322d9cddbf35088f1e54e9a85c967a41a56a4f43445768125e61af166c7d31',
     ss58Format: 7391,
     providers: {
@@ -996,7 +996,7 @@ export const PREDEFINED_NETWORKS: Record<string, NetworkJson> = {
     providers: {
       Equilibrium: 'wss://node.genshiro.io'
     },
-    active: false, // to be active
+    active: false,
     currentProviderMode: 'ws',
     currentProvider: 'Equilibrium',
     groups: ['KUSAMA_PARACHAIN'],
@@ -1023,7 +1023,7 @@ export const PREDEFINED_NETWORKS: Record<string, NetworkJson> = {
   },
   subsocial_x: {
     key: 'subsocial_x',
-    active: false, // to be active
+    active: false,
     chain: 'SubsocialX',
     genesisHash: '0x4a12be580bb959937a1c7a61d5cf24428ed67fa571974b4007645d1886e7c89f',
     ss58Format: 28,
@@ -1045,7 +1045,7 @@ export const PREDEFINED_NETWORKS: Record<string, NetworkJson> = {
     providers: {
       Dappforce: 'wss://rpc.subsocial.network'
     },
-    active: false, // to be active
+    active: false,
     currentProviderMode: 'ws',
     currentProvider: 'Dappforce',
     groups: ['KUSAMA_PARACHAIN'],
@@ -1062,7 +1062,7 @@ export const PREDEFINED_NETWORKS: Record<string, NetworkJson> = {
     providers: {
       ZeitgeistPM: 'wss://rpc-0.zeitgeist.pm'
     },
-    active: false, // to be active
+    active: false,
     currentProviderMode: 'ws',
     currentProvider: 'ZeitgeistPM',
     groups: ['KUSAMA_PARACHAIN'],
@@ -1079,7 +1079,7 @@ export const PREDEFINED_NETWORKS: Record<string, NetworkJson> = {
     providers: {
       Clover: 'wss://rpc.sakura.clover.finance'
     },
-    active: false, // to be active
+    active: false,
     currentProviderMode: 'ws',
     currentProvider: 'Clover',
     groups: ['KUSAMA_PARACHAIN'],
@@ -1097,7 +1097,7 @@ export const PREDEFINED_NETWORKS: Record<string, NetworkJson> = {
     providers: {
       Crust: 'wss://rpc-shadow.crust.network/'
     },
-    active: false, // to be active
+    active: false,
     currentProviderMode: 'ws',
     currentProvider: 'Crust',
     groups: ['KUSAMA_PARACHAIN'],
@@ -1131,7 +1131,7 @@ export const PREDEFINED_NETWORKS: Record<string, NetworkJson> = {
     providers: {
       Airalab: 'wss://kusama.rpc.robonomics.network/'
     },
-    active: false, // to be active
+    active: false,
     currentProviderMode: 'ws',
     currentProvider: 'Airalab',
     groups: ['KUSAMA_PARACHAIN'],
@@ -1149,7 +1149,7 @@ export const PREDEFINED_NETWORKS: Record<string, NetworkJson> = {
     providers: {
       Integritee: 'wss://kusama.api.integritee.network'
     },
-    active: false, // to be active
+    active: false,
     currentProviderMode: 'ws',
     currentProvider: 'Integritee',
     groups: ['KUSAMA_PARACHAIN'],
@@ -1167,7 +1167,7 @@ export const PREDEFINED_NETWORKS: Record<string, NetworkJson> = {
     providers: {
       Crab: 'wss://crab-parachain-rpc.darwinia.network/'
     },
-    active: false, // to be active
+    active: false,
     currentProviderMode: 'ws',
     currentProvider: 'Crab',
     groups: ['KUSAMA_PARACHAIN'],
@@ -1195,7 +1195,7 @@ export const PREDEFINED_NETWORKS: Record<string, NetworkJson> = {
   chainx: {
     key: 'chainx',
     chain: 'Chain X',
-    active: false, // to be active
+    active: false,
     genesisHash: '0x6ac13efb5b368b97b4934cef6edfdd99c2af51ba5109bfb8dacc116f9c584c10',
     ss58Format: 44,
     providers: {
@@ -1246,7 +1246,7 @@ export const PREDEFINED_NETWORKS: Record<string, NetworkJson> = {
     currentProviderMode: 'ws',
     currentProvider: 'turing',
     key: 'turing',
-    active: false, // to be active
+    active: false,
     groups: ['KUSAMA_PARACHAIN'],
     paraId: 2114,
     nativeToken: 'TUR',
@@ -1278,7 +1278,7 @@ export const PREDEFINED_NETWORKS: Record<string, NetworkJson> = {
     currentProviderMode: 'ws',
     currentProvider: 'mangata',
     key: 'mangatax_para',
-    active: false, // to be active
+    active: false,
     groups: ['KUSAMA_PARACHAIN'],
     paraId: 2110,
     nativeToken: 'MGX'
@@ -1292,7 +1292,7 @@ export const PREDEFINED_NETWORKS: Record<string, NetworkJson> = {
     },
     currentProvider: 'OnFinality',
     currentProviderMode: 'ws',
-    active: false, // to be active
+    active: false,
     key: 'encointer',
     groups: ['KUSAMA_PARACHAIN'],
     paraId: 1001,
@@ -1308,7 +1308,7 @@ export const PREDEFINED_NETWORKS: Record<string, NetworkJson> = {
     currentProviderMode: 'ws',
     currentProvider: 'litmus',
     key: 'litmus',
-    active: false, // to be active
+    active: false,
     groups: ['KUSAMA_PARACHAIN'],
     paraId: 2106,
     nativeToken: 'LIT',
@@ -1322,7 +1322,7 @@ export const PREDEFINED_NETWORKS: Record<string, NetworkJson> = {
     providers: {
       Litentry: 'wss://parachain.litentry.io'
     },
-    active: false, // to be active
+    active: false,
     currentProviderMode: 'ws',
     currentProvider: 'Litentry',
     groups: ['POLKADOT_PARACHAIN'],

@@ -135,7 +135,7 @@ function EvmTokenSetting ({ className }: Props): React.ReactElement {
         >
           <div>
             <div className={'delete-modal-title'}>
-              <div className={'delete-title'}>Confirm deletion ?</div>
+              <div className={'delete-title'}>Remove selected tokens ?</div>
               <div
                 className={'close-btn'}
                 onClick={handleHideModal}

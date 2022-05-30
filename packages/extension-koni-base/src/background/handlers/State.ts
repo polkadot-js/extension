@@ -180,7 +180,6 @@ export default class KoniState extends State {
         }
       }
 
-      this.initChainRegistry();
       this.initEvmTokenState();
     });
   }
@@ -268,6 +267,8 @@ export default class KoniState extends State {
 
       this.customEvmTokenStore.set('EvmToken', this.evmTokenState);
       this.evmTokenSubject.next(this.evmTokenState);
+
+      this.initChainRegistry();
     });
   }
 
@@ -871,6 +872,7 @@ export default class KoniState extends State {
           .catch(console.error);
       });
     });
+
     Object.entries(this.apiMap.dotSama).forEach(([networkKey, { api }]) => {
       getRegistry(networkKey, api)
         .then((rs) => {

@@ -2,11 +2,11 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { ChainRegistry, NetworkJson } from '@subwallet/extension-base/background/KoniTypes';
+import { SupportedCrossChainsMap } from '@subwallet/extension-koni-base/api/supportedCrossChains';
 import { AccountContext, Button } from '@subwallet/extension-koni-ui/components';
 import InputBalance from '@subwallet/extension-koni-ui/components/InputBalance';
 import LoadingContainer from '@subwallet/extension-koni-ui/components/LoadingContainer';
 import ReceiverInputAddress from '@subwallet/extension-koni-ui/components/ReceiverInputAddress';
-import SenderInputAddress from '@subwallet/extension-koni-ui/components/SenderInputAddress';
 import Toggle from '@subwallet/extension-koni-ui/components/Toggle';
 import { useTranslation } from '@subwallet/extension-koni-ui/components/translate';
 import { BalanceFormatType, SenderInputAddressType } from '@subwallet/extension-koni-ui/components/types';
@@ -14,6 +14,7 @@ import useFreeBalance from '@subwallet/extension-koni-ui/hooks/screen/sending/us
 import { transferCheckSupporting } from '@subwallet/extension-koni-ui/messaging';
 import Header from '@subwallet/extension-koni-ui/partials/Header';
 import AuthTransaction from '@subwallet/extension-koni-ui/Popup/Bridge/AuthTransaction';
+import BridgeInputAddress from '@subwallet/extension-koni-ui/Popup/Bridge/BridgeInputAddress';
 import Dropdown from '@subwallet/extension-koni-ui/Popup/Bridge/XcmDropdown/Dropdown';
 import { getBalanceFormat, getDefaultValue, getMainTokenInfo, getMaxTransferAndNoFees } from '@subwallet/extension-koni-ui/Popup/Sending/utils';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
@@ -91,11 +92,18 @@ function Bridge ({ chainRegistryMap, className, defaultValue, networkMap }: Cont
   const recipientFreeBalance = useFreeBalance(selectedNetworkKey, recipientId, selectedToken);
   const balanceFormat: BalanceFormatType = getBalanceFormat(selectedNetworkKey, selectedToken, chainRegistryMap);
   const [existentialDeposit, setExistentialDeposit] = useState<string>('0');
+
+  console.log('networkMap', networkMap);
+
   const [maxTransfer] = getMaxTransferAndNoFees(fee, feeSymbol, selectedToken, mainTokenInfo.symbol, senderFreeBalance, existentialDeposit);
   const canToggleAll = !!isSupportTransferAll && !!maxTransfer;
   const valueToTransfer = canToggleAll && isAll ? maxTransfer.toString() : (amount?.toString() || '0');
-  const [originChain, setOriginChain] = useState('');
-  const [destinationChain, setDestinationChain] = useState('');
+  const originChainOptions = Object.keys(SupportedCrossChainsMap).map((key) => ({ label: networkMap[key].chain, value: key }));
+  const firstOriginChain = originChainOptions[0].value;
+  const destinationChainOptions = Object.keys(SupportedCrossChainsMap[firstOriginChain].relationMap).map((key) => ({ label: networkMap[key].chain, value: key }));
+  const [originChain, setOriginChain] = useState<string>(firstOriginChain);
+  const [destinationChain, setDestinationChain] = useState<string>(destinationChainOptions[0].value);
+  const tokenList = SupportedCrossChainsMap[originChain].relationMap[destinationChain].supportedToken.map((token) => ({ label: token, value: token }));
 
   useEffect(() => {
     let isSync = true;
@@ -127,12 +135,13 @@ function Bridge ({ chainRegistryMap, className, defaultValue, networkMap }: Cont
     <>
       <div className={className}>
         <div className='bridge__chain-selector-area'>
-          <Dropdown
-            className='bridge__chain-selector'
-            isDisabled={false}
-            label={'Original Chain'}
-            onChange={setOriginChain}
-          />
+          {/*<Dropdown*/}
+          {/*  className='bridge__chain-selector'*/}
+          {/*  isDisabled={false}*/}
+          {/*  label={'Original Chain'}*/}
+          {/*  onChange={setOriginChain}*/}
+          {/*  options={originChainOptions}*/}
+          {/*/>*/}
 
           <div className='bridge__chain-swap'>
             <img
@@ -141,22 +150,23 @@ function Bridge ({ chainRegistryMap, className, defaultValue, networkMap }: Cont
             />
           </div>
 
-          <Dropdown
-            className='bridge__chain-selector'
-            isDisabled={false}
-            label={'Destination Chain'}
-            onChange={setDestinationChain}
-          />
+          {/*<Dropdown*/}
+          {/*  className='bridge__chain-selector'*/}
+          {/*  isDisabled={false}*/}
+          {/*  label={'Destination Chain'}*/}
+          {/*  onChange={setDestinationChain}*/}
+          {/*  options={destinationChain}*/}
+          {/*/>*/}
         </div>
 
-        <SenderInputAddress
+        <BridgeInputAddress
           balance={senderFreeBalance}
           balanceFormat={balanceFormat}
-          chainRegistryMap={chainRegistryMap}
           className=''
           initValue={defaultValue}
           networkMap={networkMap}
           onChange={setSenderValue}
+          options={tokenList}
         />
 
         <ReceiverInputAddress

@@ -1,27 +1,101 @@
 // Copyright 2019-2022 @polkadot/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { DropdownTransformOptionType, NetworkJson } from '@subwallet/extension-base/background/KoniTypes';
+import { faChevronDown } from '@fortawesome/free-solid-svg-icons';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { NetworkJson } from '@subwallet/extension-base/background/KoniTypes';
 import { Label, Theme } from '@subwallet/extension-koni-ui/components';
-import XcmItem from '@subwallet/extension-koni-ui/Popup/Bridge/XcmDropdown/XcmItem';
+import { TokenTransformOptionType } from '@subwallet/extension-koni-ui/components/XcmTokenDropdown/types';
+import { TokenItemType } from '@subwallet/extension-koni-ui/components/types';
+import useOutsideClick from '@subwallet/extension-koni-ui/hooks/useOutsideClick';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
-import React, { useCallback, useContext, useState } from 'react';
+import { getLogoByNetworkKey } from '@subwallet/extension-koni-ui/util';
+import React, { useCallback, useContext, useRef, useState } from 'react';
 import Select, { ActionMeta, SingleValue } from 'react-select';
 import styled, { ThemeContext } from 'styled-components';
+
+interface WrapperProps {
+  className?: string;
+  formatOptLabel?: (option: TokenTransformOptionType) => React.ReactNode;
+  onChange?: (token: string) => void;
+  value: string;
+  options: TokenItemType[];
+  ci?: React.ReactNode;
+  filterOptions?: (candidate: {label: string, value: string}, input: string) => boolean;
+  networkMap: Record<string, NetworkJson>;
+}
 
 interface Props {
   className?: string;
   label: string;
+  getFormatOptLabel?: (option: TokenTransformOptionType) => React.ReactNode;
   onChange?: any;
-  options: DropdownTransformOptionType[];
+  options: TokenItemType[];
   value?: string;
   ci?: React.ReactNode;
   networkMap: Record<string, NetworkJson>;
-  isDisabled: boolean;
 }
 
-function Dropdown ({ className, isDisabled, label, onChange, options, value }: Props): React.ReactElement<Props> {
+function DropdownWrapper ({ className, formatOptLabel, networkMap, onChange, options, value }: WrapperProps): React.ReactElement<WrapperProps> {
+  const [isDropdownOpen, setDropdownOpen] = useState(false);
+  const tokenValueArr = value.split('|');
+  const dropdownRef = useRef(null);
 
+  const toggleDropdownWrapper = useCallback(() => {
+    setDropdownOpen(!isDropdownOpen);
+  }, [isDropdownOpen]);
+
+  useOutsideClick(dropdownRef, (): void => {
+    setDropdownOpen(false);
+  });
+
+  const _onChange = useCallback((value: string) => {
+    onChange && onChange(value);
+    setDropdownOpen(false);
+  }, [onChange]);
+
+  return (
+    <div
+      className={className}
+      ref={dropdownRef}
+    >
+      <div
+        className='dropdown-wrapper-item'
+        onClick={toggleDropdownWrapper}
+      >
+        <img
+          alt={tokenValueArr[1]}
+          className='dropdown-wrapper-selected-logo'
+          src={getLogoByNetworkKey(tokenValueArr[1])}
+        />
+        <FontAwesomeIcon
+          className='dropdown-wrapper-item__icon'
+          // @ts-ignore
+          icon={faChevronDown}
+          size='sm'
+        />
+      </div>
+
+      {isDropdownOpen && (
+        <Dropdown
+          className='token-dropdown__dropdown'
+          getFormatOptLabel={formatOptLabel}
+          label={''}
+          networkMap={networkMap}
+          onChange={_onChange}
+          options={options}
+          value={value}
+        />
+      )}
+    </div>
+  );
+}
+
+function Dropdown ({ className, getFormatOptLabel, label, networkMap, onChange, options, value }: Props): React.ReactElement<Props> {
+  const transformOptions: TokenTransformOptionType[] = options.map((t) => ({
+    label: t.token,
+    value: t.token
+  }));
   const [selectedValue, setSelectedValue] = useState(value);
   const themeContext = useContext(ThemeContext as React.Context<Theme>);
 
@@ -36,13 +110,20 @@ function Dropdown ({ className, isDisabled, label, onChange, options, value }: P
     }, [onChange]
   );
 
-  const formatOptionLabel = useCallback((option: DropdownTransformOptionType) => {
-    return (
-      <XcmItem
-        networkKey={option.value}
-        networkName={option.label}
-      />
-    );
+  const formatOptionLabel = useCallback((option: TokenTransformOptionType) => {
+    return getFormatOptLabel && getFormatOptLabel(option);
+  }, [getFormatOptLabel]);
+
+  const filterOption = useCallback((candidate: { label: string; value: string, data: TokenTransformOptionType }, input: string) => {
+    if (input) {
+      const query = input.trim();
+      const queryLower = query.toLowerCase();
+      const isMatches = (candidate.label.toLowerCase() && candidate.label.toLowerCase().includes(queryLower));
+
+      return !!isMatches;
+    }
+
+    return true;
   }, []);
 
   const customStyles = {
@@ -53,7 +134,7 @@ function Dropdown ({ className, isDisabled, label, onChange, options, value }: P
         textAlign: 'left',
         fontFamily: 'Lexend',
         fontSize: '15px',
-        color: isSelected ? themeContext.textColor : themeContext.textColor2,
+        color: themeContext.textColor2,
         cursor: 'pointer',
         backgroundColor: isSelected ? themeContext.backgroundAccountAddress : 'transparent',
         ':hover': {
@@ -74,7 +155,8 @@ function Dropdown ({ className, isDisabled, label, onChange, options, value }: P
         width: '100%',
         right: 0,
         marginTop: '0',
-        borderRadius: '8px'
+        borderBottomLeftRadius: '8px',
+        borderBottomRightRadius: '8px'
       };
     },
     // eslint-disable-next-line @typescript-eslint/no-unsafe-return
@@ -86,7 +168,8 @@ function Dropdown ({ className, isDisabled, label, onChange, options, value }: P
         zIndex: 15,
         boxShadow: themeContext.boxShadow2,
         backgroundColor: themeContext.background,
-        borderRadius: '8px'
+        borderBottomLeftRadius: '8px',
+        borderBottomRightRadius: '8px'
       };
     },
     // eslint-disable-next-line @typescript-eslint/no-unsafe-return
@@ -105,31 +188,28 @@ function Dropdown ({ className, isDisabled, label, onChange, options, value }: P
           autoFocus
           className='token-dropdown-dropdown-wrapper'
           classNamePrefix='token-dropdown-dropdown'
-          // filterOption={filterOption}
-          formatOptionLabel={formatOptionLabel}
-          isDisabled={isDisabled}
-          isSearchable={false}
+          filterOption={filterOption}
+          formatOptionLabel={getFormatOptLabel && formatOptionLabel}
+          isSearchable
+          menuIsOpen
           menuPlacement={'auto'}
           menuPortalTarget={document.querySelector('main')}
           menuPosition='fixed'
           onChange={handleChange}
-          options={options}
+          options={transformOptions}
+          placeholder='Search...'
           styles={customStyles}
-          value={options.filter((obj: { value: string }) => obj.value === selectedValue)}
+          value={transformOptions.filter((obj: { value: string }) => obj.value === selectedValue)}
         />
       </Label>
     </>
   );
 }
 
-export default React.memo(styled(Dropdown)(({ theme }: ThemeProps) => `
+export default React.memo(styled(DropdownWrapper)(({ theme }: ThemeProps) => `
   font-weight: 500;
   color: ${theme.textColor2};
   position: relative;
-
-  > label {
-    font-size: 18px;
-  }
 
   .dropdown-wrapper-item {
     height: 72px;
@@ -160,31 +240,27 @@ export default React.memo(styled(Dropdown)(({ theme }: ThemeProps) => `
     z-index: 100;
   }
 
-  .token-dropdown-dropdown__indicator-separator {
+  .token-dropdown-dropdown__indicators {
     display: none;
   }
 
   .token-dropdown-dropdown__control {
     align-items: center;
-    background-color: ${theme.backgroundAccountAddress};
+    background-color: ${theme.background};
+    // border: 2px solid ${theme.boxBorderColor};
     border: none;
-    border-radius: 8px;
+    border-top-left-radius: 8px;
+    border-top-right-radius: 8px;
+    border-bottom-left-radius: 0;
+    border-bottom-right-radius: 0;
     cursor: default;
     display: flex;
     flex-wrap: wrap;
     justify-content: space-between;
     min-height: 48px;
     position: relative;
-    min-width: 176px;
-    box-shadow: none;
-  }
-
-  .token-dropdown-dropdown__control:hover {
-    box-shadow: none;
-  }
-
-  .token-dropdown-dropdown__single-value {
-    color: ${theme.textColor};
+    min-width: 240px;
+    box-shadow: ${theme.boxShadow2};
   }
 
   .token-dropdown-dropdown__input-container {
@@ -197,6 +273,10 @@ export default React.memo(styled(Dropdown)(({ theme }: ThemeProps) => `
   .token-dropdown-dropdown__input {
     min-width: 100% !important;
     width: auto !important;
+  }
+
+  .token-dropdown-dropdown__single-value {
+    display: none;
   }
 
 `));

@@ -9,11 +9,11 @@ import styled from 'styled-components';
 interface Props {
   className: string;
   networkKey: string;
-  networkName: string;
   symbol: string;
+  networkName: string;
 }
 
-function XcmItem ({ className = '', networkKey, networkName }: Props): React.ReactElement<Props> {
+function TokenItem ({ className = '', networkKey, networkName, symbol }: Props): React.ReactElement<Props> {
   return (
     <div className={className}>
       <img
@@ -29,7 +29,7 @@ function XcmItem ({ className = '', networkKey, networkName }: Props): React.Rea
   );
 }
 
-export default React.memo(styled(XcmItem)(({ theme }: ThemeProps) => `
+export default React.memo(styled(TokenItem)(({ theme }: ThemeProps) => `
   display: flex;
   align-items: center;
 
@@ -40,14 +40,9 @@ export default React.memo(styled(XcmItem)(({ theme }: ThemeProps) => `
     font-weight: 500;
   }
 
-
   .token-item__chain {
-    font-size: 15px;
-    line-height: 26px;
-    max-width: 100px;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-    overflow: hidden;
+    font-size: 12px;
+    line-height: 20px;
   }
 
   .token-item-logo {

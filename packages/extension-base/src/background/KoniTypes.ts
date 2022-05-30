@@ -829,6 +829,7 @@ export interface KoniRequestSignatures {
   'pri(accounts.checkTransfer)': [RequestCheckTransfer, ResponseCheckTransfer];
   'pri(accounts.checkCrossChainTransfer)': [RequestCheckCrossChainTransfer, ResponseCheckCrossChainTransfer];
   'pri(accounts.transfer)': [RequestTransfer, Array<TransferError>, ResponseTransfer];
+  'pri(accounts.crossChainTransfer)': [RequestCrossChainTransfer, Array<TransferError>, ResponseTransfer];
   'pri(derivation.createV2)': [RequestDeriveCreateV2, boolean];
   'pri(json.restoreV2)': [RequestJsonRestoreV2, void];
   'pri(json.batchRestoreV2)': [RequestBatchRestoreV2, void];

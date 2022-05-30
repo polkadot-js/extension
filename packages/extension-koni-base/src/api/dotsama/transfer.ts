@@ -6,6 +6,8 @@ import { ApiProps, NetworkJson, ResponseTransfer, SupportTransferResponse, Token
 import { getTokenInfo } from '@subwallet/extension-koni-base/api/dotsama/registry';
 import { SupportedCrossChainsMap } from '@subwallet/extension-koni-base/api/supportedCrossChains';
 
+import { ApiPromise } from '@polkadot/api';
+import { SubmittableExtrinsic } from '@polkadot/api/promise/types';
 import { KeyringPair } from '@polkadot/keyring/types';
 import { AccountInfoWithProviders, AccountInfoWithRefCount, EventRecord } from '@polkadot/types/interfaces';
 import { BN } from '@polkadot/util';
@@ -243,18 +245,18 @@ function updateResponseTxResult (
   }
 }
 
-export async function makeTransfer (
+async function doSignAndSend (
+  api: ApiPromise,
   networkKey: string,
-  to: string,
+  tokenInfo: TokenInfo | undefined,
+  transfer: SubmittableExtrinsic,
   fromKeypair: KeyringPair,
-  value: string,
-  transferAll: boolean,
-  dotSamaApiMap: Record<string, ApiProps>,
-  tokenInfo: undefined | TokenInfo,
-  callback: (data: ResponseTransfer) => void
-): Promise<void> {
-  const apiProps = await dotSamaApiMap[networkKey].isReady;
-  const api = apiProps.api;
+  _updateResponseTxResult: (
+    networkKey: string,
+    tokenInfo: undefined | TokenInfo,
+    response: ResponseTransfer,
+    records: EventRecord[]) => void,
+  callback: (data: ResponseTransfer) => void) {
   const fromAddress = fromKeypair.address;
   let nonce;
 
@@ -264,50 +266,6 @@ export async function makeTransfer (
     // @ts-ignore
     // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
     nonce = await api.query.system.account(fromAddress).nonce;
-  }
-
-  // @ts-ignore
-  let transfer;
-  const isTxCurrenciesSupported = !!api && !!api.tx && !!api.tx.currencies;
-  const isTxBalancesSupported = !!api && !!api.tx && !!api.tx.balances;
-  const isTxTokensSupported = !!api && !!api.tx && !!api.tx.tokens;
-  const isTxEqBalancesSupported = !!api && !!api.tx && !!api.tx.eqBalances;
-
-  if (['karura', 'acala', 'acala_testnet'].includes(networkKey) && tokenInfo && !tokenInfo.isMainToken && isTxCurrenciesSupported) {
-    if (transferAll) {
-      // currently Acala, Karura, Acala testnet do not have transfer all method for sub token
-    } else if (value) {
-      transfer = api.tx.currencies
-        .transfer(to, tokenInfo.specialOption || { Token: tokenInfo.symbol }, value);
-    }
-  } else if (['kintsugi', 'kintsugi_test', 'interlay'].includes(networkKey) && tokenInfo && isTxTokensSupported) {
-    if (transferAll) {
-      transfer = api.tx.tokens
-        .transferAll(to, tokenInfo.specialOption || { Token: tokenInfo.symbol }, false);
-    } else if (value) {
-      transfer = api.tx.tokens
-        .transfer(to, tokenInfo.specialOption || { Token: tokenInfo.symbol }, new BN(value));
-    }
-  } else if (['genshiro_testnet', 'genshiro', 'equilibrium_parachain'].includes(networkKey) && tokenInfo && isTxEqBalancesSupported) {
-    if (transferAll) {
-      // currently genshiro_testnet, genshiro, equilibrium_parachain do not have transfer all method for tokens
-    } else if (value) {
-      const asset = networkKey === 'equilibrium_parachain' ? assetFromToken(tokenInfo.symbol)[0] : assetFromToken(tokenInfo.symbol);
-
-      transfer = api.tx.eqBalances.transfer(asset, to, value);
-    }
-  } else if (isTxBalancesSupported && (!tokenInfo || tokenInfo.isMainToken)) {
-    if (transferAll) {
-      transfer = api.tx.balances.transferAll(to, false);
-    } else if (value) {
-      transfer = api.tx.balances.transfer(to, new BN(value));
-    }
-  }
-
-  if (!transfer) {
-    callback(getUnsupportedResponse());
-
-    return;
   }
 
   const response: ResponseTransfer = {
@@ -363,7 +321,7 @@ export async function makeTransfer (
       }
     });
 
-    updateResponseTxResult(networkKey, tokenInfo, response, records);
+    _updateResponseTxResult(networkKey, tokenInfo, response, records);
   }
 
   // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
@@ -423,7 +381,67 @@ export async function makeTransfer (
   });
 }
 
-function isAbleToTransferCrossChain (
+export async function makeTransfer (
+  networkKey: string,
+  to: string,
+  fromKeypair: KeyringPair,
+  value: string,
+  transferAll: boolean,
+  dotSamaApiMap: Record<string, ApiProps>,
+  tokenInfo: undefined | TokenInfo,
+  callback: (data: ResponseTransfer) => void
+): Promise<void> {
+  const apiProps = await dotSamaApiMap[networkKey].isReady;
+  const api = apiProps.api;
+
+  // @ts-ignore
+  let transfer;
+  const isTxCurrenciesSupported = !!api && !!api.tx && !!api.tx.currencies;
+  const isTxBalancesSupported = !!api && !!api.tx && !!api.tx.balances;
+  const isTxTokensSupported = !!api && !!api.tx && !!api.tx.tokens;
+  const isTxEqBalancesSupported = !!api && !!api.tx && !!api.tx.eqBalances;
+
+  if (['karura', 'acala', 'acala_testnet'].includes(networkKey) && tokenInfo && !tokenInfo.isMainToken && isTxCurrenciesSupported) {
+    if (transferAll) {
+      // currently Acala, Karura, Acala testnet do not have transfer all method for sub token
+    } else if (value) {
+      transfer = api.tx.currencies
+        .transfer(to, tokenInfo.specialOption || { Token: tokenInfo.symbol }, value);
+    }
+  } else if (['kintsugi', 'kintsugi_test', 'interlay'].includes(networkKey) && tokenInfo && isTxTokensSupported) {
+    if (transferAll) {
+      transfer = api.tx.tokens
+        .transferAll(to, tokenInfo.specialOption || { Token: tokenInfo.symbol }, false);
+    } else if (value) {
+      transfer = api.tx.tokens
+        .transfer(to, tokenInfo.specialOption || { Token: tokenInfo.symbol }, new BN(value));
+    }
+  } else if (['genshiro_testnet', 'genshiro', 'equilibrium_parachain'].includes(networkKey) && tokenInfo && isTxEqBalancesSupported) {
+    if (transferAll) {
+      // currently genshiro_testnet, genshiro, equilibrium_parachain do not have transfer all method for tokens
+    } else if (value) {
+      const asset = networkKey === 'equilibrium_parachain' ? assetFromToken(tokenInfo.symbol)[0] : assetFromToken(tokenInfo.symbol);
+
+      transfer = api.tx.eqBalances.transfer(asset, to, value);
+    }
+  } else if (isTxBalancesSupported && (!tokenInfo || tokenInfo.isMainToken)) {
+    if (transferAll) {
+      transfer = api.tx.balances.transferAll(to, false);
+    } else if (value) {
+      transfer = api.tx.balances.transfer(to, new BN(value));
+    }
+  }
+
+  if (!transfer) {
+    callback(getUnsupportedResponse());
+
+    return;
+  }
+
+  await doSignAndSend(api, networkKey, tokenInfo, transfer, fromKeypair, updateResponseTxResult, callback);
+}
+
+export function isNetworksPairSupportedTransferCrossChain (
   originalNetworkKey: string,
   destinationNetworkKey: string,
   token: string,
@@ -480,7 +498,7 @@ export async function estimateCrossChainFee (
   tokenInfo: TokenInfo,
   networkMap: Record<string, NetworkJson>
 ): Promise<[string, string | undefined]> {
-  if (!isAbleToTransferCrossChain(originalNetworkKey, destinationNetworkKey, tokenInfo.symbol, networkMap)) {
+  if (!isNetworksPairSupportedTransferCrossChain(originalNetworkKey, destinationNetworkKey, tokenInfo.symbol, networkMap)) {
     return ['0', tokenInfo.symbol];
   }
 
@@ -511,4 +529,48 @@ export async function estimateCrossChainFee (
   }
 
   return [fee, feeSymbol];
+}
+
+export async function makeCrossChainTransfer (
+  originalNetworkKey: string,
+  destinationNetworkKey: string,
+  to: string,
+  fromKeypair: KeyringPair,
+  value: string,
+  dotSamaApiMap: Record<string, ApiProps>,
+  tokenInfo: TokenInfo,
+  networkMap: Record<string, NetworkJson>,
+  callback: (data: ResponseTransfer) => void
+): Promise<void> {
+  if (!isNetworksPairSupportedTransferCrossChain(originalNetworkKey, destinationNetworkKey, tokenInfo.symbol, networkMap)) {
+    callback(getUnsupportedResponse());
+
+    return;
+  }
+
+  const apiProps = await dotSamaApiMap[originalNetworkKey].isReady;
+  const api = apiProps.api;
+  const isTxXTokensSupported = !!api && !!api.tx && !!api.tx.xTokens;
+
+  if (!isTxXTokensSupported) {
+    callback(getUnsupportedResponse());
+
+    return;
+  }
+
+  // todo: Case ParaChain vs RelayChain
+  // todo: Case RelayChain vs ParaChain
+
+  const paraId = networkMap[destinationNetworkKey].paraId as number;
+
+  const transfer = api.tx.xTokens.transfer(
+    {
+      Token: tokenInfo.symbol
+    },
+    +value,
+    getCrossChainTransferDest(paraId, to),
+    4000000000
+  );
+
+  await doSignAndSend(api, originalNetworkKey, tokenInfo, transfer, fromKeypair, updateResponseTxResult, callback);
 }

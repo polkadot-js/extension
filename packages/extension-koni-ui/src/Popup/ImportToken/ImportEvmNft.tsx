@@ -53,16 +53,12 @@ function ImportEvmNft ({ className = '' }: Props): React.ReactElement<Props> {
           type: 'erc721'
         })
           .then((resp) => {
-            if (resp.error) {
-              show('Encountered an error. Please try again later');
+            if (resp.isExist) {
+              show('This token has already been added');
+              setIsValidContract(false);
             } else {
-              if (resp.isExist) {
-                show('This token has already been added');
-                setIsValidContract(false);
-              } else {
-                setName(resp.name);
-                setIsValidContract(true);
-              }
+              setName(resp.name);
+              setIsValidContract(true);
             }
           })
           .catch(() => {

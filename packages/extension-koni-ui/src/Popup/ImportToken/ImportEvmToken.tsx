@@ -49,27 +49,23 @@ function ImportEvmToken ({ className = '' }: Props): React.ReactElement<Props> {
           type: 'erc20'
         })
           .then((resp) => {
-            if (resp.error) {
-              show('Encountered an error. Please try again later');
+            if (resp.isExist) {
+              show('This token has already been added');
+              setIsValidContract(false);
             } else {
               if (resp.isExist) {
                 show('This token has already been added');
                 setIsValidContract(false);
               } else {
-                if (resp.isExist) {
-                  show('This token has already been added');
-                  setIsValidContract(false);
-                } else {
-                  setSymbol(resp.symbol);
+                setSymbol(resp.symbol);
 
-                  if (resp.decimals) {
-                    setDecimals(resp.decimals.toString());
-                  }
-
-                  setIsValidSymbol(true);
-                  setIsValidDecimals(true);
-                  setIsValidContract(true);
+                if (resp.decimals) {
+                  setDecimals(resp.decimals.toString());
                 }
+
+                setIsValidSymbol(true);
+                setIsValidDecimals(true);
+                setIsValidContract(true);
               }
             }
           })

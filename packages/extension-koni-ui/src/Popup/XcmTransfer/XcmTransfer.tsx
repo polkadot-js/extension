@@ -100,7 +100,7 @@ function Wrapper ({ className = '', theme }: Props): React.ReactElement<Props> {
 
 function XcmTransfer ({ chainRegistryMap, className, defaultValue, networkMap, destinationChainOptions, originChainOptions }: ContentProps): React.ReactElement {
   const { t } = useTranslation();
-  const [isShowTxModal, setShowTxModal] = useState<boolean>(false);
+  const [isShowTxModal, setShowTxModal] = useState<boolean>(true);
   const [recipientId, setRecipientId] = useState<string | null>(null);
   const [amount, setAmount] = useState<BN | undefined>(BN_ZERO);
   const [{ address: senderId,
@@ -319,6 +319,10 @@ export default React.memo(styled(Wrapper)(({ theme }: Props) => `
   flex: 1;
   overflow-y: auto;
   flex-direction: column;
+
+  .sub-header__cancel-btn {
+    display: none;
+  }
 
   .bridge-container {
     padding: 15px;

@@ -212,22 +212,22 @@ function AuthTransaction ({ balanceFormat,
           <InputAddress
             className={'auth-transaction__input-address'}
             defaultValue={requestPayload.from}
-            help={t<string>('The account you will send funds from.')}
+            help={t<string>('The account you will transfer from.')}
             isDisabled={true}
             isSetDefaultValue={true}
-            label={t<string>('Send from account')}
+            label={t<string>('Original Account')}
             networkPrefix={originNetworkPrefix}
             type='account'
             withEllipsis
           />
 
           <InputAddress
-            className={'auth-transaction__input-address'}
+            className={'auth-transaction__input-address auth-transaction__destination-account'}
             defaultValue={requestPayload.to}
-            help={t<string>('The address you want to send funds to.')}
+            help={t<string>('The account you want to transfer to.')}
             isDisabled={true}
             isSetDefaultValue={true}
-            label={t<string>('Send to address')}
+            label={t<string>('Destination Account')}
             networkPrefix={destinationNetworkPrefix}
             type='allPlus'
             withEllipsis
@@ -272,6 +272,7 @@ function AuthTransaction ({ balanceFormat,
           <div className='auth-transaction__separator' />
 
           <InputWithLabel
+            className='auth-transaction__password-area'
             isError={isKeyringErr}
             label={t<string>('Unlock account with password')}
             onChange={_onChangePass}
@@ -341,7 +342,20 @@ export default React.memo(styled(AuthTransaction)(({ theme }: ThemeProps) => `
     overflow-y: auto;
   }
 
-    .auth-transaction-header__part-1 {
+  .auth-transaction__password-area {
+    margin-top: 8px;
+    margin-bottom: 2px;
+
+    .label-wrapper {
+      margin-bottom: 6px;
+    }
+  }
+
+  .auth-transaction__separator + .auth-transaction__info {
+    margin-top: 10px;
+  }
+
+  .auth-transaction-header__part-1 {
     flex: 1;
   }
 
@@ -360,16 +374,12 @@ export default React.memo(styled(AuthTransaction)(({ theme }: ThemeProps) => `
   .auth-transaction-header__close-btn {
     padding-left: 16px;
     padding-right: 16px;
+    font-size: 14px;
     height: 40px;
     display: flex;
     align-items: center;
     color: ${theme.buttonTextColor2};
     cursor: pointer;
-    opacity: 0.85;
-  }
-
-  .auth-transaction-header__close-btn:hover {
-    opacity: 1;
   }
 
   .auth-transaction-header__close-btn.-disabled {
@@ -388,13 +398,43 @@ export default React.memo(styled(AuthTransaction)(({ theme }: ThemeProps) => `
   }
 
   .auth-transaction__input-address {
-    margin-bottom: 14px;
+    .input-address__dropdown {
+      border: 0;
+      height: auto;
+    }
+
+    .key-pair__icon {
+      display: none;
+    }
+
+    > label {
+      left: 0;
+    }
+
+    .key-pair__name {
+      padding-left: 0;
+      font-size: 15px;
+    }
+
+    .input-address-dropdown__value-container {
+      padding-left: 0;
+      padding-right: 0;
+    }
+
+    .input-address-dropdown__single-value {
+      margin-left: 0;
+      margin-right: 0;
+    }
+  }
+
+  .auth-transaction__destination-account {
+    margin-top: -5px;
   }
 
   .auth-transaction__info {
     display: flex;
     width: 100%;
-    padding: 4px 0;
+    padding: 2px 0;
     flex-wrap: wrap;
   }
 
@@ -413,6 +453,7 @@ export default React.memo(styled(AuthTransaction)(({ theme }: ThemeProps) => `
     color: ${theme.textColor};
     flex: 1;
     text-align: right;
+    font-weight: 500;
   }
 
   .auth-transaction__info-value .format-balance__front-part {
@@ -426,7 +467,6 @@ export default React.memo(styled(AuthTransaction)(({ theme }: ThemeProps) => `
 
   .auth-transaction__separator {
     padding-top: 10px;
-    margin-bottom: 10px;
     border-bottom: 1px solid ${theme.menuItemsBorder};
   }
 
@@ -438,11 +478,11 @@ export default React.memo(styled(AuthTransaction)(({ theme }: ThemeProps) => `
     display: inline-block;
   }
 
-  .bridge__chain-selector-area {
+  .bridge__chain-selector-area.bridge__chain-selector-area {
     display: flex;
     align-items: center;
     flex-wrap: nowrap;
-    margin-bottom: 15px;
+    margin-bottom: 9px;
   }
 
   .bridge__chain-selector {

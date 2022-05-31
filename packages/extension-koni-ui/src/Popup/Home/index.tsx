@@ -32,9 +32,8 @@ import { useSelector } from 'react-redux';
 import styled from 'styled-components';
 
 import buyIcon from '../../assets/buy-icon.svg';
-import donateIcon from '../../assets/donate-icon.svg';
 import sendIcon from '../../assets/send-icon.svg';
-// import swapIcon from '../../assets/swap-icon.svg';
+import swapIcon from '../../assets/swap-icon.svg';
 
 const Crowdloans = React.lazy(() => import('@subwallet/extension-koni-ui/Popup/Home/Crowdloans/Crowdloans'));
 const NetworkSelection = React.lazy(() => import('@subwallet/extension-koni-ui/components/NetworkSelection/NetworkSelection'));
@@ -303,7 +302,7 @@ function Home ({ chainRegistryMap, className = '', currentAccount, historyMap, n
             to={'/account/xcm-transfer'}
           >
             <ActionButton
-              iconSrc={sendIcon}
+              iconSrc={swapIcon}
               tooltipContent={t<string>('XCM Transfer')}
             />
           </Link>
@@ -318,15 +317,15 @@ function Home ({ chainRegistryMap, className = '', currentAccount, historyMap, n
             />
           </Link>
 
-          <Link
-            className={'action-button-wrapper'}
-            to={'/account/donate'}
-          >
-            <ActionButton
-              iconSrc={donateIcon}
-              tooltipContent={t<string>('Donate')}
-            />
-          </Link>
+          {/*<Link*/}
+          {/*  className={'action-button-wrapper'}*/}
+          {/*  to={'/account/donate'}*/}
+          {/*>*/}
+          {/*  <ActionButton*/}
+          {/*    iconSrc={donateIcon}*/}
+          {/*    tooltipContent={t<string>('Donate')}*/}
+          {/*  />*/}
+          {/*</Link>*/}
         </div>
       </div>
 

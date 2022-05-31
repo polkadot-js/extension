@@ -9,7 +9,7 @@ import { TokenTransformOptionType } from '@subwallet/extension-koni-ui/component
 import useOutsideClick from '@subwallet/extension-koni-ui/hooks/useOutsideClick';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { getLogoByNetworkKey } from '@subwallet/extension-koni-ui/util';
-import React, { useCallback, useContext, useRef, useState } from 'react';
+import React, {useCallback, useContext, useEffect, useRef, useState} from 'react';
 import Select, { ActionMeta, SingleValue } from 'react-select';
 import styled, { ThemeContext } from 'styled-components';
 
@@ -37,7 +37,6 @@ interface Props {
 
 function DropdownWrapper ({ className, formatOptLabel, networkMap, onChange, options, value }: WrapperProps): React.ReactElement<WrapperProps> {
   const [isDropdownOpen, setDropdownOpen] = useState(false);
-  const tokenValueArr = value.split('|');
   const dropdownRef = useRef(null);
 
   const toggleDropdownWrapper = useCallback(() => {
@@ -47,6 +46,8 @@ function DropdownWrapper ({ className, formatOptLabel, networkMap, onChange, opt
   useOutsideClick(dropdownRef, (): void => {
     setDropdownOpen(false);
   });
+
+  const networkKey = options.find((opt) => opt.value === value)?.networkKey;
 
   const _onChange = useCallback((value: string) => {
     onChange && onChange(value);
@@ -63,9 +64,9 @@ function DropdownWrapper ({ className, formatOptLabel, networkMap, onChange, opt
         onClick={toggleDropdownWrapper}
       >
         <img
-          alt={tokenValueArr[1]}
+          alt={value}
           className='dropdown-wrapper-selected-logo'
-          src={getLogoByNetworkKey(tokenValueArr[1])}
+          src={networkKey ? getLogoByNetworkKey(networkKey) : ''}
         />
         <FontAwesomeIcon
           className='dropdown-wrapper-item__icon'
@@ -93,6 +94,14 @@ function DropdownWrapper ({ className, formatOptLabel, networkMap, onChange, opt
 function Dropdown ({ className, getFormatOptLabel, label, networkMap, onChange, options, value }: Props): React.ReactElement<Props> {
   const [selectedValue, setSelectedValue] = useState(value);
   const themeContext = useContext(ThemeContext as React.Context<Theme>);
+
+  useEffect(() => {
+    let isSync = true;
+
+    if (isSync) {
+      setSelectedValue(value);
+    }
+  }, [value]);
 
   const handleChange = useCallback(
     (newValue: SingleValue<{ label: string; value: string; }>, actionMeta: ActionMeta<{ label: string; value: string; }>): void => {

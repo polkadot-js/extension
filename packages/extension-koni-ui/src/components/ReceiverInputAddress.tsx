@@ -21,12 +21,13 @@ interface Props {
   isDisabled?: boolean;
   onchange?: (address: string) => void;
   balance: string;
-  label?: string;
   balanceFormat: BalanceFormatType;
   networkMap: Record<string, NetworkJson>;
+  inputAddressHelp: string;
+  inputAddressLabel: string;
 }
 
-function ReceiverInputAddress ({ balance, balanceFormat, className = '', defaultAddress, isDisabled = false, isSetDefaultValue = false, label, networkKey, networkMap, onchange }: Props): React.ReactElement {
+function ReceiverInputAddress ({ balance, balanceFormat, className = '', defaultAddress, isDisabled = false, isSetDefaultValue = false, networkKey, networkMap, onchange, inputAddressHelp, inputAddressLabel }: Props): React.ReactElement {
   const { t } = useTranslation();
   const networkPrefix = networkMap[networkKey].ss58Format;
   const [receiveAddress, setReceiveAddress] = useState<string>(defaultAddress || '');
@@ -49,10 +50,10 @@ function ReceiverInputAddress ({ balance, balanceFormat, className = '', default
       <InputAddress
         autoPrefill={false}
         className={'receive-input-address'}
-        help={t<string>('Select a contact or paste the address you want to send funds to.')}
+        help={inputAddressHelp || t<string>('Select a contact or paste the address you want to send funds to.')}
         isDisabled={isDisabled}
         isSetDefaultValue={isSetDefaultValue}
-        label={label || t<string>('Send to address')}
+        label={inputAddressLabel || t<string>('Send to address')}
         networkPrefix={networkPrefix}
         onChange={onChangeReceiveAddress}
         type='allPlus'

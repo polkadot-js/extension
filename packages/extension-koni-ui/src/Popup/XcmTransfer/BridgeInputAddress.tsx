@@ -5,35 +5,49 @@ import {ChainRegistry, NetworkJson} from '@subwallet/extension-base/background/K
 import FormatBalance from '@subwallet/extension-koni-ui/components/FormatBalance';
 import InputAddress from '@subwallet/extension-koni-ui/components/InputAddress';
 import { useTranslation } from '@subwallet/extension-koni-ui/components/translate';
-import { BalanceFormatType, SenderInputAddressType } from '@subwallet/extension-koni-ui/components/types';
+import {
+  BalanceFormatType,
+  XcmTransferInputAddressType
+} from '@subwallet/extension-koni-ui/components/types';
 import XcmTokenDropdown from '@subwallet/extension-koni-ui/components/XcmTokenDropdown';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { toShort } from '@subwallet/extension-koni-ui/util';
 import reformatAddress from '@subwallet/extension-koni-ui/util/reformatAddress';
-import React, { useCallback, useMemo, useState } from 'react';
+import React, {useCallback, useEffect, useMemo, useState} from 'react';
 import styled from 'styled-components';
 import { TokenTransformOptionType } from "@subwallet/extension-koni-ui/components/XcmTokenDropdown/types";
 
 interface Props {
   className: string;
-  onChange: (value: SenderInputAddressType) => void;
-  initValue: SenderInputAddressType;
+  onChange: (value: XcmTransferInputAddressType) => void;
+  initValue: XcmTransferInputAddressType;
   balance: string;
   chainRegistryMap: Record<string, ChainRegistry>;
   balanceFormat: BalanceFormatType;
   networkMap: Record<string, NetworkJson>;
   options: TokenTransformOptionType[];
+  networkKey: string;
 }
 
-function BridgeInputAddress ({ balance, balanceFormat, className = '', initValue, networkMap, onChange, options }: Props): React.ReactElement {
+function BridgeInputAddress ({ balance, balanceFormat, className = '', initValue, networkMap, onChange, options, networkKey }: Props): React.ReactElement {
   const { t } = useTranslation();
-  const [{ address, networkKey, token }, setValue] = useState<SenderInputAddressType>(initValue);
+  const [{ address, token }, setValue] = useState<XcmTransferInputAddressType>(initValue);
 
   const networkPrefix = networkMap[networkKey].ss58Format;
 
   const formattedAddress = useMemo<string>(() => {
     return reformatAddress(address, networkPrefix);
   }, [address, networkPrefix]);
+
+  useEffect(() => {
+    let isSync = true;
+
+    if (isSync) {
+      setValue({
+        ...initValue
+      });
+    }
+  }, [initValue.token, initValue.address]);
 
   const onChangeInputAddress = useCallback((address: string | null) => {
     if (address) {
@@ -71,9 +85,9 @@ function BridgeInputAddress ({ balance, balanceFormat, className = '', initValue
       <InputAddress
         className={'sender-input-address'}
         defaultValue={initValue.address}
-        help={t<string>('The account you will send funds from.')}
+        help={t<string>('The account you will transfer from.')}
         isSetDefaultValue={true}
-        label={t<string>('Send from account')}
+        label={t<string>('Original Account')}
         networkPrefix={networkPrefix}
         onChange={onChangeInputAddress}
         type='account'

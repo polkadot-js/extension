@@ -294,7 +294,7 @@ function AuthTransaction ({ balanceFormat,
 
             <Button
               className='bridge-button'
-              isDisabled={false}
+              isDisabled={!password}
               onClick={_doStart}
             >
               <span>

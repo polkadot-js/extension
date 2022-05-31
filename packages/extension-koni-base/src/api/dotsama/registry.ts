@@ -4,7 +4,6 @@
 import { ChainRegistry, CustomEvmToken, TokenInfo } from '@subwallet/extension-base/background/KoniTypes';
 import { moonbeamBaseChains } from '@subwallet/extension-koni-base/api/dotsama/api-helper';
 import { PREDEFINE_TOKEN_DATA_MAP } from '@subwallet/extension-koni-base/api/predefineChainTokens';
-import { dotSamaAPIMap, state } from '@subwallet/extension-koni-base/background/handlers';
 
 import { ApiPromise } from '@polkadot/api';
 import { BN, bnToHex } from '@polkadot/util';
@@ -83,14 +82,16 @@ export const getRegistry = async (networkKey: string, api: ApiPromise, customErc
   // Build token map
   const tokenMap = {} as Record<string, TokenInfo>;
 
-  chainTokens.forEach((token, index) => {
-    tokenMap[token] = {
-      isMainToken: index === 0,
-      name: token,
-      symbol: token,
-      decimals: chainDecimals[index]
-    };
-  });
+  if (!['genshiro_testnet', 'genshiro', 'equilibrium_parachain'].includes(networkKey)) {
+    chainTokens.forEach((token, index) => {
+      tokenMap[token] = {
+        isMainToken: index === 0,
+        name: token,
+        symbol: token,
+        decimals: chainDecimals[index]
+      };
+    });
+  }
 
   const predefineTokenMap = PREDEFINE_TOKEN_DATA_MAP[networkKey];
 
@@ -140,18 +141,4 @@ export async function getTokenInfo (networkKey: string, api: ApiPromise, token: 
   const { tokenMap } = await getRegistry(networkKey, api);
 
   return tokenMap[token];
-}
-
-export function initChainRegistrySubscription () {
-  state.getEvmTokenStore((evmTokens) => {
-    const erc20Tokens = evmTokens ? evmTokens.erc20 : [];
-
-    Object.entries(dotSamaAPIMap).forEach(([networkKey, { api }]) => {
-      getRegistry(networkKey, api, erc20Tokens)
-        .then((rs) => {
-          state.setChainRegistryItem(networkKey, rs);
-        })
-        .catch(console.error);
-    });
-  });
 }

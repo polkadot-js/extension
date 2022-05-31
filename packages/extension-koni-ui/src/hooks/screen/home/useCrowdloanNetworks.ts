@@ -1,11 +1,10 @@
-// Copyright 2019-2022 @subwallet/extension-koni-ui authors & contributors
+// Copyright 2019-2022 @polkadot/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
 import { NetWorkMetadataDef } from '@subwallet/extension-base/background/KoniTypes';
-import { RootState } from '@subwallet/extension-koni-ui/stores';
-import { useSelector } from 'react-redux';
+import useGetNetworkMetadata from '@subwallet/extension-koni-ui/hooks/screen/home/useGetNetworkMetadata';
 
-function getCrowdloadNetworksMap (source: Record<string, NetWorkMetadataDef>): Record<string, string[]> {
+function getCrowdloanNetworksMap (source: Record<string, NetWorkMetadataDef>): Record<string, string[]> {
   const result: Record<string, string[]> = {};
 
   result.all = [];
@@ -38,25 +37,25 @@ function getCrowdloadNetworksMap (source: Record<string, NetWorkMetadataDef>): R
 }
 
 function getCrowdloanNetworks (networkMetadata: Record<string, NetWorkMetadataDef>, currentNetworkKey: string): string[] {
-  const crowdloadNetworksMap = getCrowdloadNetworksMap(networkMetadata);
+  const crowdloanNetworksMap = getCrowdloanNetworksMap(networkMetadata);
 
   if (currentNetworkKey === 'all') {
-    return [...crowdloadNetworksMap.all];
+    return [...crowdloanNetworksMap.all];
   }
 
   if (currentNetworkKey === 'polkadot') {
-    return [...crowdloadNetworksMap.polkadot];
+    return [...crowdloanNetworksMap.polkadot];
   }
 
   if (currentNetworkKey === 'kusama') {
-    return [...crowdloadNetworksMap.kusama];
+    return [...crowdloanNetworksMap.kusama];
   }
 
   return [currentNetworkKey];
 }
 
 export default function useCrowdloanNetworks (currentNetworkKey: string): string[] {
-  const networkMetadata = useSelector((state: RootState) => state.networkMetadata);
+  const networkMetadata = useGetNetworkMetadata();
 
   return getCrowdloanNetworks(networkMetadata, currentNetworkKey);
 }

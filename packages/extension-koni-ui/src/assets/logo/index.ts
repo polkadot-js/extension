@@ -51,6 +51,10 @@ const LogosMap: Record<string, string> = {
   // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
   equilibrium: require('./equilibrium.svg'),
   // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+  equilibrium_parachain: require('./equilibrium.svg'),
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+  genshiro_testnet: require('./genshiro.svg'),
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
   genshiro: require('./genshiro.svg'),
   // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
   heiko: require('./heiko.png'),
@@ -286,6 +290,10 @@ const LogosMap: Record<string, string> = {
   atid: require('./astrid_dao.svg'),
   // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
   lay: require('./starlay.png'),
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+  subspace: require('./subspace.png'),
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+  subspace_test: require('./subspace.png'),
   // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
   default: require('./default.svg')
 };

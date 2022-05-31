@@ -1,13 +1,13 @@
      465	Jaco                          	0.42.5 (#969)
-     238	Nam Phạm                      	update validate evm token
-     198	AnhMTV                        	Enable publish packages to npm (#169). Add discord hook to notify actions on branch master.
-     122	quangdo                       	fix bug hide account in Create screen
-     102	lw-cdm                        	Remove unused logo referent
+     245	Nam Phạm                      	
+     207	AnhMTV                        	Release version 0.4.2
+     132	quangdo                       	Integrate Genshiro & Equilibrium
+     110	lw-cdm                        	Fix import issue
       82	Thibaut Sardan                	Add account filtering feature (#832)
       55	leewong                       	#118: update balance logic for Kintsugi testnet
+      52	lw-cdm                        	
       50	Dominhquangdev                	Update Settings screen, Update Restore Json
-      40	lw-cdm                        	
-      37	Hieu Dao                      	Update Sakura Parachain
+      44	Hieu Dao                      	Update astar token issue #186
       10	Trang Trịnh                   	api get karura and acala nfts
        9	Minh Le                       	
        9	minhld1029                    	[#115] [ForgetAccount] catch exception refList undefined
@@ -15,6 +15,7 @@
        6	unknown                       	refactor code
        4	Amaury Martiny                	PostMessageProvider with on('connected' | 'disconnected') (#279)
        4	namph                         	update UI for nft
+       4	Quangdm-cdm                   	
        4	S2kael                        	[Issue-156] [Account] [Text] Change text
        3	Antoine Estienne              	Add eth test for extension signature (#909)
        3	quangdm                       	Update style for Auth Transaction Screen, Export Screen, Derive Screen
@@ -39,7 +40,6 @@
        1	Minh Ha                       	✨ allows background handler to handle custom extention port name (#685)
        1	murat onur                    	tr language support added (#681)
        1	Nikos Kontakis                	Fix issue that was breaking extension ui (height collapsed and non-visible); Fixes #720 (#731)
-       1	Quangdm-cdm                   	
        1	Stéphane P                    	README Fix typo (#700)
        1	Tore19                        	Add Stafi network (#454)
        1	Vlad Proshchavaiev            	Update extension with Subsocial SS58 included (#416)

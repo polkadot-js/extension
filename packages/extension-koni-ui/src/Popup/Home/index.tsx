@@ -1,4 +1,4 @@
-// Copyright 2019-2022 @subwallet/extension-koni-ui authors & contributors
+// Copyright 2019-2022 @polkadot/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
 import { ChainRegistry, CurrentNetworkInfo, NftCollection as _NftCollection, NftItem as _NftItem, TransactionHistoryItemType } from '@subwallet/extension-base/background/KoniTypes';
@@ -13,21 +13,14 @@ import staking from '@subwallet/extension-koni-ui/assets/home-tab-icon/staking.s
 import stakingActive from '@subwallet/extension-koni-ui/assets/home-tab-icon/staking-active.svg';
 import transfers from '@subwallet/extension-koni-ui/assets/home-tab-icon/transfers.svg';
 import transfersActive from '@subwallet/extension-koni-ui/assets/home-tab-icon/transfers-active.svg';
-import { AccountContext } from '@subwallet/extension-koni-ui/components/contexts';
-import Link from '@subwallet/extension-koni-ui/components/Link';
+import { AccountContext } from '@subwallet/extension-koni-ui/components';
 import useAccountBalance from '@subwallet/extension-koni-ui/hooks/screen/home/useAccountBalance';
 import useCrowdloanNetworks from '@subwallet/extension-koni-ui/hooks/screen/home/useCrowdloanNetworks';
 import useFetchNft from '@subwallet/extension-koni-ui/hooks/screen/home/useFetchNft';
 import useFetchStaking from '@subwallet/extension-koni-ui/hooks/screen/home/useFetchStaking';
+import useGetNetworkMetadata from '@subwallet/extension-koni-ui/hooks/screen/home/useGetNetworkMetadata';
 import useShowedNetworks from '@subwallet/extension-koni-ui/hooks/screen/home/useShowedNetworks';
 import useTranslation from '@subwallet/extension-koni-ui/hooks/useTranslation';
-// Containers should not be imported lazily
-import ChainBalances from '@subwallet/extension-koni-ui/Popup/Home/ChainBalances/ChainBalances';
-import Crowdloans from '@subwallet/extension-koni-ui/Popup/Home/Crowdloans/Crowdloans';
-import NftContainer from '@subwallet/extension-koni-ui/Popup/Home/Nfts/render/NftContainer';
-import StakingContainer from '@subwallet/extension-koni-ui/Popup/Home/Staking/StakingContainer';
-import TabHeaders from '@subwallet/extension-koni-ui/Popup/Home/Tabs/TabHeaders';
-import TransactionHistory from '@subwallet/extension-koni-ui/Popup/Home/TransactionHistory/TransactionHistory';
 import { TabHeaderItemType } from '@subwallet/extension-koni-ui/Popup/Home/types';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
@@ -43,12 +36,19 @@ import donateIcon from '../../assets/donate-icon.svg';
 import sendIcon from '../../assets/send-icon.svg';
 // import swapIcon from '../../assets/swap-icon.svg';
 
-const AddAccount = React.lazy(() => import('@subwallet/extension-koni-ui/Popup/Accounts/AddAccount'));
+const Crowdloans = React.lazy(() => import('@subwallet/extension-koni-ui/Popup/Home/Crowdloans/Crowdloans'));
+const NetworkSelection = React.lazy(() => import('@subwallet/extension-koni-ui/components/NetworkSelection/NetworkSelection'));
+const NftContainer = React.lazy(() => import('@subwallet/extension-koni-ui/Popup/Home/Nfts/render/NftContainer'));
+const StakingContainer = React.lazy(() => import('@subwallet/extension-koni-ui/Popup/Home/Staking/StakingContainer'));
+const TabHeaders = React.lazy(() => import('@subwallet/extension-koni-ui/Popup/Home/Tabs/TabHeaders'));
+const TransactionHistory = React.lazy(() => import('@subwallet/extension-koni-ui/Popup/Home/TransactionHistory/TransactionHistory'));
+const ChainBalances = React.lazy(() => import('@subwallet/extension-koni-ui/Popup/Home/ChainBalances/ChainBalances'));
 const ActionButton = React.lazy(() => import('./ActionButton'));
-const Tooltip = React.lazy(() => import('@subwallet/extension-koni-ui/components/Tooltip'));
-const AccountQrModal = React.lazy(() => import('@subwallet/extension-koni-ui/components/AccountQrModal'));
-const Header = React.lazy(() => import('@subwallet/extension-koni-ui/partials/Header'));
+const AddAccount = React.lazy(() => import('@subwallet/extension-koni-ui/Popup/Accounts/AddAccount'));
 const BalancesVisibility = React.lazy(() => import('@subwallet/extension-koni-ui/Popup/Home/BalancesVisibility'));
+const AccountQrModal = React.lazy(() => import('@subwallet/extension-koni-ui/components/AccountQrModal'));
+const Link = React.lazy(() => import('@subwallet/extension-koni-ui/components/Link'));
+const Header = React.lazy(() => import('@subwallet/extension-koni-ui/partials/Header'));
 
 interface WrapperProps extends ThemeProps {
   className?: string;
@@ -138,8 +138,6 @@ function Wrapper ({ className, theme }: WrapperProps): React.ReactElement {
   );
 }
 
-let tooltipId = 0;
-
 function Home ({ chainRegistryMap, className = '', currentAccount, historyMap, network }: Props): React.ReactElement {
   const { icon: iconTheme,
     networkKey,
@@ -159,7 +157,6 @@ function Home ({ chainRegistryMap, className = '', currentAccount, historyMap, n
   );
   const [isQrModalOpen, setQrModalOpen] = useState<boolean>(false);
   const [selectedNetworkBalance, setSelectedNetworkBalance] = useState<BigN>(BN_ZERO);
-  const [trigger] = useState(() => `home-balances-${++tooltipId}`);
   const [
     { iconTheme: qrModalIconTheme,
       networkKey: qrModalNetworkKey,
@@ -171,7 +168,7 @@ function Home ({ chainRegistryMap, className = '', currentAccount, historyMap, n
     showExportButton: true
   });
   const { accounts } = useContext(AccountContext);
-  const { networkMetadata: networkMetadataMap, settings: { isShowBalance } } = useSelector((state: RootState) => state);
+  const networkMetadataMap = useGetNetworkMetadata();
   const showedNetworks = useShowedNetworks(networkKey, address, accounts);
   const crowdloanNetworks = useCrowdloanNetworks(networkKey);
 
@@ -185,6 +182,15 @@ function Home ({ chainRegistryMap, className = '', currentAccount, historyMap, n
 
   const [showTransferredCollection, setShowTransferredCollection] = useState(false);
   const [showForcedCollection, setShowForcedCollection] = useState(false);
+
+  const isSetNetwork = window.localStorage.getItem('isSetNetwork') !== 'ok';
+  const [showNetworkSelection, setShowNetworkSelection] = useState(isSetNetwork);
+
+  useEffect(() => {
+    if (window.localStorage.getItem('isSetNetwork') === 'ok' && showNetworkSelection) {
+      setShowNetworkSelection(false);
+    }
+  }, [networkMetadataMap, showNetworkSelection]);
 
   const parseNftGridSize = useCallback(() => {
     if (window.innerHeight > NFT_GRID_HEIGHT_THRESHOLD) {
@@ -401,11 +407,11 @@ function Home ({ chainRegistryMap, className = '', currentAccount, historyMap, n
         />
       )}
 
-      <Tooltip
-        offset={{ top: 8 }}
-        text={isShowBalance ? 'Hide balance' : 'Show balance'}
-        trigger={trigger}
-      />
+      {
+        showNetworkSelection && <NetworkSelection
+          handleShow={setShowNetworkSelection}
+        />
+      }
     </div>
   );
 }

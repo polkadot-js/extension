@@ -3,6 +3,7 @@
 
 import { CustomEvmToken } from '@subwallet/extension-base/background/KoniTypes';
 import { ActionContext, Button, Dropdown, InputWithLabel } from '@subwallet/extension-koni-ui/components';
+import useGetActiveEvmChains from '@subwallet/extension-koni-ui/hooks/screen/import/useGetActiveEvmChains';
 import useToast from '@subwallet/extension-koni-ui/hooks/useToast';
 import { upsertEvmToken, validateEvmToken } from '@subwallet/extension-koni-ui/messaging';
 import { Header } from '@subwallet/extension-koni-ui/partials';
@@ -16,34 +17,12 @@ interface Props extends ThemeProps {
   className?: string;
 }
 
-const CHAIN_OPTIONS = [
-  {
-    text: 'Astar',
-    value: 'astarEvm'
-  },
-  {
-    text: 'Moonbeam',
-    value: 'moonbeam'
-  },
-  {
-    text: 'Moonriver',
-    value: 'moonriver'
-  },
-  {
-    text: 'Moonbase Alpha',
-    value: 'moonbase'
-  },
-  {
-    text: 'Shiden',
-    value: 'shidenEvm'
-  }
-];
-
 function ImportEvmToken ({ className = '' }: Props): React.ReactElement<Props> {
   const [contractAddress, setContractAddress] = useState('');
   const [symbol, setSymbol] = useState('');
   const [decimals, setDecimals] = useState('');
-  const [chain, setChain] = useState(CHAIN_OPTIONS[0].value);
+  const chainOptions = useGetActiveEvmChains();
+  const [chain, setChain] = useState(chainOptions[0].value);
 
   const [isValidDecimals, setIsValidDecimals] = useState(true);
   const [isValidContract, setIsValidContract] = useState(true);
@@ -59,6 +38,8 @@ function ImportEvmToken ({ className = '' }: Props): React.ReactElement<Props> {
     if (contractAddress !== '') {
       if (!isEthereumAddress(contractAddress)) {
         setIsValidContract(false);
+        setSymbol('');
+        setDecimals('');
         show('Invalid EVM contract address');
       } else {
         validateEvmToken({
@@ -72,13 +53,20 @@ function ImportEvmToken ({ className = '' }: Props): React.ReactElement<Props> {
               show('This token has already been added');
               setIsValidContract(false);
             } else {
-              setSymbol(resp.symbol);
+              if (resp.isExist) {
+                show('This token has already been added');
+                setIsValidContract(false);
+              } else {
+                setSymbol(resp.symbol);
 
-              if (resp.decimals) {
-                setDecimals(resp.decimals.toString());
+                if (resp.decimals) {
+                  setDecimals(resp.decimals.toString());
+                }
+
+                setIsValidSymbol(true);
+                setIsValidDecimals(true);
+                setIsValidContract(true);
               }
-
-              setIsValidContract(true);
             }
           })
           .catch(() => {
@@ -174,18 +162,20 @@ function ImportEvmToken ({ className = '' }: Props): React.ReactElement<Props> {
           <Dropdown
             label={'Chain (*)'}
             onChange={onSelectChain}
-            options={CHAIN_OPTIONS}
+            options={chainOptions}
             value={chain}
           />
         </div>
 
         <InputWithLabel
+          disabled={true}
           label={'Token Symbol (*)'}
           onChange={onChangeSymbol}
           value={symbol}
         />
 
         <InputWithLabel
+          disabled={true}
           label={'Token Decimals (*)'}
           onChange={onChangeDecimals}
           value={decimals}
@@ -194,7 +184,7 @@ function ImportEvmToken ({ className = '' }: Props): React.ReactElement<Props> {
         <div className={'add-token-container'}>
           <Button
             className={'add-token-button'}
-            isDisabled={!isValidSymbol || !isValidDecimals || !isValidContract || contractAddress === '' || symbol === ''}
+            isDisabled={!isValidSymbol || !isValidDecimals || !isValidContract || contractAddress === '' || symbol === '' || chainOptions.length === 0}
             onClick={handleAddToken}
           >
             Add Custom Token

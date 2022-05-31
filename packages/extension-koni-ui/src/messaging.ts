@@ -1,4 +1,4 @@
-// Copyright 2019-2022 @subwallet/extension-koni-ui authors & contributors
+// Copyright 2019-2022 @polkadot/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
 import type { AccountJson, AllowedPath, AuthorizeRequest, MessageTypes, MessageTypesWithNoSubscriptions, MessageTypesWithNullRequest, MessageTypesWithSubscriptions, MetadataRequest, RequestTypes, ResponseAuthorizeList, ResponseDeriveValidate, ResponseJsonGetAccountInfo, ResponseSigningIsLocked, ResponseTypes, SeedLengths, SigningRequest, SubscriptionMessageTypes } from '@subwallet/extension-base/background/types';
@@ -10,7 +10,7 @@ import type { HexString } from '@polkadot/util/types';
 import type { KeypairType } from '@polkadot/util-crypto/types';
 
 import { AuthUrls } from '@subwallet/extension-base/background/handlers/State';
-import { AccountsWithCurrentAddress, ApiInitStatus, BalanceJson, ChainRegistry, CrowdloanJson, CurrentAccountInfo, CustomEvmToken, DeleteEvmTokenParams, EvmNftSubmitTransaction, EvmNftTransaction, EvmNftTransactionRequest, EvmNftTransactionResponse, EvmTokenJson, NetWorkMetadataDef, NftCollectionJson, NftJson, NftTransferExtra, OptionInputAddress, PriceJson, RequestCheckTransfer, RequestFreeBalance, RequestNftForceUpdate, RequestSettingsType, RequestSubscribeBalance, RequestSubscribeBalancesVisibility, RequestSubscribeCrowdloan, RequestSubscribeNft, RequestSubscribePrice, RequestSubscribeStaking, RequestSubscribeStakingReward, RequestTransfer, RequestTransferCheckReferenceCount, RequestTransferCheckSupporting, RequestTransferExistentialDeposit, ResponseAccountCreateSuriV2, ResponseCheckTransfer, ResponseSeedCreateV2, ResponseSeedValidateV2, ResponseSettingsType, ResponseTransfer, StakingJson, StakingRewardJson, SupportTransferResponse, ThemeTypes, TransactionHistoryItemType, TransferError, ValidateEvmTokenRequest } from '@subwallet/extension-base/background/KoniTypes';
+import { AccountsWithCurrentAddress, BalanceJson, ChainRegistry, CrowdloanJson, CurrentAccountInfo, CustomEvmToken, DeleteEvmTokenParams, DisableNetworkResponse, EvmNftSubmitTransaction, EvmNftTransaction, EvmNftTransactionRequest, EvmTokenJson, NetworkJson, NftCollectionJson, NftJson, NftTransactionResponse, NftTransferExtra, OptionInputAddress, PriceJson, RequestCheckTransfer, RequestFreeBalance, RequestNftForceUpdate, RequestSettingsType, RequestSubscribeBalance, RequestSubscribeBalancesVisibility, RequestSubscribeCrowdloan, RequestSubscribeNft, RequestSubscribePrice, RequestSubscribeStaking, RequestSubscribeStakingReward, RequestTransfer, RequestTransferCheckReferenceCount, RequestTransferCheckSupporting, RequestTransferExistentialDeposit, ResponseAccountCreateSuriV2, ResponseCheckTransfer, ResponsePrivateKeyValidateV2, ResponseSeedCreateV2, ResponseSeedValidateV2, ResponseSettingsType, ResponseTransfer, StakingJson, StakingRewardJson, SubstrateNftSubmitTransaction, SubstrateNftTransaction, SubstrateNftTransactionRequest, SupportTransferResponse, ThemeTypes, TransactionHistoryItemType, TransferError, ValidateEvmTokenRequest, ValidateNetworkResponse } from '@subwallet/extension-base/background/KoniTypes';
 import { RequestCurrentAccountAddress } from '@subwallet/extension-base/background/types';
 import { PORT_EXTENSION } from '@subwallet/extension-base/defaults';
 import { getId } from '@subwallet/extension-base/utils/getId';
@@ -19,7 +19,7 @@ import { MetadataDef } from '@subwallet/extension-inject/types';
 
 import { SingleAddress } from '@polkadot/ui-keyring/observable/types';
 
-import allChains from './util/chains';
+import { _getKnownHashes } from './util/defaultChains';
 import { getSavedMeta, setSavedMeta } from './MetadataCache';
 
 interface Handler {
@@ -185,6 +185,9 @@ export async function getMetadata (genesisHash?: string | null, isPartial = fals
     return null;
   }
 
+  const chains = await getNetworkMap();
+  const parsedChains = _getKnownHashes(chains);
+
   let request = getSavedMeta(genesisHash);
 
   if (!request) {
@@ -197,7 +200,7 @@ export async function getMetadata (genesisHash?: string | null, isPartial = fals
   if (def) {
     return metadataExpand(def, isPartial);
   } else if (isPartial) {
-    const chain = allChains.find((chain) => chain.genesisHash === genesisHash);
+    const chain = parsedChains.find((chain) => chain.genesisHash === genesisHash);
 
     if (chain) {
       return metadataExpand({
@@ -301,6 +304,10 @@ export async function validateSeedV2 (suri: string, types: Array<KeypairType>): 
   return sendMessage('pri(seed.validateV2)', { suri, types });
 }
 
+export async function validateMetamaskPrivateKeyV2 (suri: string, types: Array<KeypairType>): Promise<ResponsePrivateKeyValidateV2> {
+  return sendMessage('pri(privateKey.validateV2)', { suri, types });
+}
+
 export async function validateDerivationPath (parentAddress: string, suri: string, parentPassword: string): Promise<ResponseDeriveValidate> {
   return sendMessage('pri(derivation.validate)', { parentAddress, parentPassword, suri });
 }
@@ -369,20 +376,12 @@ export async function subscribeChainRegistry (callback: (map: Record<string, Cha
   return sendMessage('pri(chainRegistry.getSubscription)', null, callback);
 }
 
-export async function getAllNetworkMetadata (): Promise<NetWorkMetadataDef[]> {
-  return sendMessage('pri(networkMetadata.list)');
-}
-
 export async function subscribeHistory (callback: (historyMap: Record<string, TransactionHistoryItemType[]>) => void): Promise<Record<string, TransactionHistoryItemType[]>> {
   return sendMessage('pri(transaction.history.getSubscription)', null, callback);
 }
 
 export async function updateTransactionHistory (address: string, networkKey: string, item: TransactionHistoryItemType, callback: (items: TransactionHistoryItemType[]) => void): Promise<boolean> {
   return sendMessage('pri(transaction.history.add)', { address, networkKey, item }, callback);
-}
-
-export async function initApi (networkKey: string): Promise<ApiInitStatus> {
-  return sendMessage('pri(api.init)', { networkKey });
 }
 
 export async function getNft (account: string): Promise<NftJson> {
@@ -443,8 +442,52 @@ export async function evmNftGetTransaction (request: EvmNftTransactionRequest): 
   return sendMessage('pri(evmNft.getTransaction)', request);
 }
 
-export async function evmNftSubmitTransaction (request: EvmNftSubmitTransaction, callback: (data: EvmNftTransactionResponse) => void): Promise<EvmNftTransactionResponse> {
+export async function evmNftSubmitTransaction (request: EvmNftSubmitTransaction, callback: (data: NftTransactionResponse) => void): Promise<NftTransactionResponse> {
   return sendMessage('pri(evmNft.submitTransaction)', request, callback);
+}
+
+export async function subscribeNetworkMap (callback: (data: Record<string, NetworkJson>) => void): Promise<Record<string, NetworkJson>> {
+  return sendMessage('pri(networkMap.getSubscription)', null, callback);
+}
+
+export async function upsertNetworkMap (data: NetworkJson): Promise<boolean> {
+  return sendMessage('pri(networkMap.upsert)', data);
+}
+
+export async function getNetworkMap (): Promise<Record<string, NetworkJson>> {
+  return sendMessage('pri(networkMap.getNetworkMap)');
+}
+
+export async function removeNetworkMap (networkKey: string): Promise<boolean> {
+  return sendMessage('pri(networkMap.removeOne)', networkKey);
+}
+
+export async function disableNetworkMap (networkKey: string): Promise<DisableNetworkResponse> {
+  return sendMessage('pri(networkMap.disableOne)', networkKey);
+}
+
+export async function enableNetworkMap (networkKey: string): Promise<boolean> {
+  return sendMessage('pri(networkMap.enableOne)', networkKey);
+}
+
+export async function enableNetworks (targetKeys: string[]): Promise<boolean> {
+  return sendMessage('pri(networkMap.enableMany)', targetKeys);
+}
+
+export async function validateNetwork (provider: string, isEthereum: boolean, existedNetwork?: NetworkJson): Promise<ValidateNetworkResponse> {
+  return sendMessage('pri(apiMap.validate)', { provider, isEthereum, existedNetwork });
+}
+
+export async function disableAllNetwork (): Promise<boolean> {
+  return sendMessage('pri(networkMap.disableAll)', null);
+}
+
+export async function enableAllNetwork (): Promise<boolean> {
+  return sendMessage('pri(networkMap.enableAll)', null);
+}
+
+export async function resetDefaultNetwork (): Promise<boolean> {
+  return sendMessage('pri(networkMap.resetDefault)', null);
 }
 
 export async function subscribeEvmToken (callback: (data: EvmTokenJson) => void): Promise<EvmTokenJson> {
@@ -485,4 +528,16 @@ export async function cancelSubscription (request: string): Promise<boolean> {
 
 export async function subscribeFreeBalance (request: RequestFreeBalance, callback: (balance: string) => void): Promise<string> {
   return sendMessage('pri(freeBalance.subscribe)', request, callback);
+}
+
+export async function substrateNftGetTransaction (request: SubstrateNftTransactionRequest): Promise<SubstrateNftTransaction> {
+  return sendMessage('pri(substrateNft.getTransaction)', request);
+}
+
+export async function substrateNftSubmitTransaction (request: SubstrateNftSubmitTransaction, callback: (data: NftTransactionResponse) => void): Promise<NftTransactionResponse> {
+  return sendMessage('pri(substrateNft.submitTransaction)', request, callback);
+}
+
+export async function recoverDotSamaApi (request: string): Promise<boolean> {
+  return sendMessage('pri(networkMap.recoverDotSama)', request);
 }

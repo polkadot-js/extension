@@ -1,15 +1,14 @@
-// Copyright 2019-2022 @subwallet/extension-koni-ui authors & contributors
+// Copyright 2019-2022 @polkadot/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-// eslint-disable-next-line header/header
-import { RequestCheckTransfer, TransferStep } from '@subwallet/extension-base/background/KoniTypes';
-import NETWORKS from '@subwallet/extension-koni-base/api/endpoints';
+import { NetworkJson, RequestCheckTransfer, TransferStep } from '@subwallet/extension-base/background/KoniTypes';
 import { InputWithLabel, Warning } from '@subwallet/extension-koni-ui/components';
 import Button from '@subwallet/extension-koni-ui/components/Button';
 import DonateInputAddress from '@subwallet/extension-koni-ui/components/DonateInputAddress';
 import FormatBalance from '@subwallet/extension-koni-ui/components/FormatBalance';
 import InputAddress from '@subwallet/extension-koni-ui/components/InputAddress';
 import Modal from '@subwallet/extension-koni-ui/components/Modal';
+import { BalanceFormatType } from '@subwallet/extension-koni-ui/components/types';
 import useTranslation from '@subwallet/extension-koni-ui/hooks/useTranslation';
 import { makeTransfer } from '@subwallet/extension-koni-ui/messaging';
 import { ThemeProps, TransferResultType } from '@subwallet/extension-koni-ui/types';
@@ -23,7 +22,8 @@ interface Props extends ThemeProps {
   onCancel: () => void;
   requestPayload: RequestCheckTransfer;
   feeInfo: [string | null, number, string]; // fee, fee decimal, fee symbol
-  balanceFormat: [number, string]; // decimal, symbol
+  balanceFormat: BalanceFormatType; // decimal, symbol
+  networkMap: Record<string, NetworkJson>;
   onChangeResult: (txResult: TransferResultType) => void;
   isDonation?: boolean;
 }
@@ -64,13 +64,13 @@ function renderTotal (arg: RenderTotalArg) {
   );
 }
 
-function AuthTransaction ({ className, isDonation, feeInfo: [fee, feeDecimals, feeSymbol], balanceFormat, onCancel, onChangeResult, requestPayload }: Props): React.ReactElement<Props> | null {
+function AuthTransaction ({ className, isDonation, feeInfo: [fee, feeDecimals, feeSymbol], balanceFormat, networkMap, onCancel, onChangeResult, requestPayload }: Props): React.ReactElement<Props> | null {
   const { t } = useTranslation();
   const [isBusy, setBusy] = useState(false);
   const [password, setPassword] = useState<string>('');
   const [isKeyringErr, setKeyringErr] = useState<boolean>(false);
   const [errorArr, setErrorArr] = useState<string[]>([]);
-  const networkPrefix = NETWORKS[requestPayload.networkKey].ss58Format;
+  const networkPrefix = networkMap[requestPayload.networkKey].ss58Format;
 
   const _onCancel = useCallback(() => {
     onCancel();
@@ -246,7 +246,7 @@ function AuthTransaction ({ className, isDonation, feeInfo: [fee, feeDecimals, f
                 feeSymbol,
                 amount: requestPayload.value,
                 amountDecimals: balanceFormat[0],
-                amountSymbol: balanceFormat[1]
+                amountSymbol: balanceFormat[2] || balanceFormat[1]
               })}
             </div>
           </div>

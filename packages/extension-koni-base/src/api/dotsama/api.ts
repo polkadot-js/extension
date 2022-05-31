@@ -3,11 +3,12 @@
 
 import { options } from '@acala-network/api';
 import { ApiProps, ApiState } from '@subwallet/extension-base/background/KoniTypes';
-import { ethereumChains, typesBundle, typesChain } from '@subwallet/extension-koni-base/api/dotsama/api-helper';
+import { typesBundle, typesChain } from '@subwallet/extension-koni-base/api/dotsama/api-helper';
 import { DOTSAMA_AUTO_CONNECT_MS, DOTSAMA_MAX_CONTINUE_RETRY } from '@subwallet/extension-koni-base/constants';
 import { inJestTest } from '@subwallet/extension-koni-base/utils/utils';
 
-import { ApiPromise, HttpProvider, WsProvider } from '@polkadot/api';
+import { ApiPromise, WsProvider } from '@polkadot/api';
+import { ScProvider, WellKnownChain } from '@polkadot/rpc-provider/substrate-connect';
 import { TypeRegistry } from '@polkadot/types/create';
 import { ChainProperties, ChainType } from '@polkadot/types/interfaces';
 import { Registry } from '@polkadot/types/types';
@@ -78,7 +79,6 @@ async function loadOnReady (registry: Registry, api: ApiPromise): Promise<ApiSta
     unit: tokenSymbol[0].toString()
   };
 
-  const isEthereum = ethereumChains.includes(api.runtimeVersion.specName.toString());
   const defaultSection = Object.keys(api.tx)[0];
   const defaultMethod = Object.keys(api.tx[defaultSection])[0];
   const apiDefaultTx = api.tx[defaultSection][defaultMethod];
@@ -91,7 +91,6 @@ async function loadOnReady (registry: Registry, api: ApiPromise): Promise<ApiSta
     apiDefaultTxSudo,
     isApiReady: true,
     isApiReadyOnce: true,
-    isEthereum,
     isDevelopment: isDevelopment,
     specName: api.runtimeVersion.specName.toString(),
     specVersion: api.runtimeVersion.specVersion.toString(),
@@ -101,10 +100,27 @@ async function loadOnReady (registry: Registry, api: ApiPromise): Promise<ApiSta
   };
 }
 
-export function initApi (networkKey: string, apiUrl: string): ApiProps {
+function getWellKnownChain (chain = 'polkadot') {
+  switch (chain) {
+    case 'kusama':
+      return WellKnownChain.ksmcc3;
+    case 'polkadot':
+      return WellKnownChain.polkadot;
+    case 'rococo':
+      return WellKnownChain.rococo_v2_1;
+    case 'westend':
+      return WellKnownChain.westend2;
+    default:
+      return chain;
+  }
+}
+
+export function initApi (networkKey: string, apiUrl: string, isEthereum?: boolean): ApiProps {
   const registry = new TypeRegistry();
 
-  const provider = apiUrl.startsWith('http') ? new HttpProvider(apiUrl) : new WsProvider(apiUrl, DOTSAMA_AUTO_CONNECT_MS);
+  const provider = apiUrl.startsWith('light://')
+    ? new ScProvider(getWellKnownChain(apiUrl.replace('light://substrate-connect/', '')))
+    : new WsProvider(apiUrl, DOTSAMA_AUTO_CONNECT_MS);
 
   const apiOption = { provider, typesBundle, typesChain: typesChain };
 
@@ -132,7 +148,7 @@ export function initApi (networkKey: string, apiUrl: string): ApiProps {
     isApiReadyOnce: false,
     isApiInitialized: true,
     isApiReady: false,
-    isEthereum: false,
+    isEthereum,
     registry,
     specName: '',
     specVersion: '',

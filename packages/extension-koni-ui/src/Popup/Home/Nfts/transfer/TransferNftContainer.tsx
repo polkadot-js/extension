@@ -5,16 +5,15 @@ import { ALL_ACCOUNT_KEY } from '@subwallet/extension-koni-base/constants';
 import { isValidAddress } from '@subwallet/extension-koni-base/utils/utils';
 import logo from '@subwallet/extension-koni-ui/assets/sub-wallet-logo.svg';
 import { ActionContext, Spinner } from '@subwallet/extension-koni-ui/components';
-import LoadingContainer from '@subwallet/extension-koni-ui/components/LoadingContainer';
+import InputAddress from '@subwallet/extension-koni-ui/components/InputAddress';
+import useGetNetworkJson from '@subwallet/extension-koni-ui/hooks/screen/home/useGetNetworkJson';
 import useToast from '@subwallet/extension-koni-ui/hooks/useToast';
-import { Header } from '@subwallet/extension-koni-ui/partials';
+import Header from '@subwallet/extension-koni-ui/partials/Header';
 import paramsHandler from '@subwallet/extension-koni-ui/Popup/Home/Nfts/api/paramsHandler';
 import transferHandler from '@subwallet/extension-koni-ui/Popup/Home/Nfts/api/transferHandler';
 import AuthTransfer from '@subwallet/extension-koni-ui/Popup/Home/Nfts/transfer/AuthTransfer';
 import TransferResult from '@subwallet/extension-koni-ui/Popup/Home/Nfts/transfer/TransferResult';
-import { _NftItem, SubstrateTransferParams, SUPPORTED_TRANSFER_EVM_CHAIN, SUPPORTED_TRANSFER_SUBSTRATE_CHAIN, Web3TransferParams } from '@subwallet/extension-koni-ui/Popup/Home/Nfts/types';
-import InputAddress from '@subwallet/extension-koni-ui/Popup/Sending/old/component/InputAddress';
-import useApi from '@subwallet/extension-koni-ui/Popup/Sending/old/hook/useApi';
+import { _NftItem, SubstrateTransferParams, SUPPORTED_TRANSFER_SUBSTRATE_CHAIN, Web3TransferParams } from '@subwallet/extension-koni-ui/Popup/Home/Nfts/types';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { CurrentAccountType } from '@subwallet/extension-koni-ui/stores/types';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
@@ -22,7 +21,7 @@ import React, { useCallback, useContext, useEffect, useState } from 'react';
 import { useSelector } from 'react-redux';
 import styled from 'styled-components';
 
-import { ApiPromise } from '@polkadot/api';
+import { isEthereumAddress } from '@polkadot/util-crypto';
 
 interface Props extends ThemeProps {
   className?: string;
@@ -31,15 +30,20 @@ interface Props extends ThemeProps {
 interface ContentProps {
   className?: string;
   nftItem: _NftItem;
-  api: ApiPromise;
-  isApiReady: boolean;
   collectionImage?: string;
   collectionId: string;
 }
 
+const isValidRecipient = (address: string, isEthereum: boolean) => {
+  if (isEthereum) {
+    return isEthereumAddress(address);
+  } else {
+    return isValidAddress(address);
+  }
+};
+
 function Wrapper ({ className = '' }: Props): React.ReactElement<Props> {
-  const { currentNetwork, transferNftParams } = useSelector((state: RootState) => state);
-  const { api, isApiReady } = useApi(currentNetwork.networkKey);
+  const { transferNftParams } = useSelector((state: RootState) => state);
 
   return (
     <div className={className}>
@@ -52,31 +56,22 @@ function Wrapper ({ className = '' }: Props): React.ReactElement<Props> {
         subHeaderName={'Send NFT'}
       />
 
-      {
-        isApiReady || currentNetwork.isEthereum || currentNetwork.networkKey.toLowerCase() === ALL_ACCOUNT_KEY.toLowerCase()
-          ? (
-            <TransferNftContainer
-              api={api}
-              collectionId={transferNftParams.collectionId}
-              collectionImage={transferNftParams.collectionImage}
-              isApiReady={isApiReady}
-              nftItem={transferNftParams.nftItem}
-            />
-          )
-          : (
-            <LoadingContainer />
-          )
-      }
+      <TransferNftContainer
+        collectionId={transferNftParams.collectionId}
+        collectionImage={transferNftParams.collectionImage}
+        nftItem={transferNftParams.nftItem}
+      />
     </div>
   );
 }
 
-function TransferNftContainer ({ api, className, collectionId, collectionImage, isApiReady, nftItem }: ContentProps): React.ReactElement<ContentProps> {
+function TransferNftContainer ({ className, collectionId, collectionImage, nftItem }: ContentProps): React.ReactElement<ContentProps> {
   const [recipientAddress, setRecipientAddress] = useState<string | null>('');
   const [addressError, setAddressError] = useState(true);
   const { currentAccount: account, currentNetwork } = useSelector((state: RootState) => state);
   const [currentAccount] = useState<CurrentAccountType>(account);
   const networkKey = nftItem.chain as string;
+  const networkJson = useGetNetworkJson(networkKey);
 
   // for substrate-based chains
   const [substrateTransferParams, setSubstrateTransferParams] = useState<SubstrateTransferParams | null>(null);
@@ -117,49 +112,51 @@ function TransferNftContainer ({ api, className, collectionId, collectionImage, 
   }, [navigate]);
 
   const isEthereumAddress = useCallback((): boolean => {
-    // @ts-ignore
-    return SUPPORTED_TRANSFER_EVM_CHAIN.indexOf(networkKey) > -1;
-  }, [networkKey]);
+    return !!networkJson.isEthereum;
+  }, [networkJson.isEthereum]);
 
   useEffect(() => {
-    setAddressError(!isValidAddress(recipientAddress as string) && !isEthereumAddress());
-  }, [isEthereumAddress, recipientAddress]);
+    if (networkJson.isEthereum) {
+      setAddressError(!isValidRecipient(recipientAddress as string, true));
+    } else {
+      setAddressError(!isValidRecipient(recipientAddress as string, false));
+    }
+  }, [isEthereumAddress, networkJson.isEthereum, recipientAddress]);
 
   const handleSend = useCallback(async () => {
-    if (addressError) {
+    if (addressError || !currentAccount.account?.address) {
       return;
     }
 
-    if (!isApiReady || !networkKey) {
+    if (!networkKey) {
       if (currentNetwork.networkKey.toLowerCase() === ALL_ACCOUNT_KEY.toLowerCase()) {
-        show(`Please change to ${networkKey.toUpperCase()} network.`);
+        show(`Please change to ${networkJson.chain.toUpperCase()}`);
       }
 
       return;
     }
 
     if (networkKey !== currentNetwork.networkKey) {
-      show(`Please change to ${networkKey.toUpperCase()} network.`);
+      show(`Please change to ${networkJson.chain.toUpperCase()}`);
 
       return;
     }
 
     setLoading(true);
-    // @ts-ignore
     const senderAddress = currentAccount.account.address;
-    const params = paramsHandler(nftItem, networkKey);
-    const transferMeta = await transferHandler(api, networkKey, senderAddress, recipientAddress as string, params);
+    const params = paramsHandler(nftItem, networkKey, networkJson);
+    const transferMeta = await transferHandler(networkKey, senderAddress, recipientAddress as string, params, networkJson);
 
     if (transferMeta !== null) {
       // @ts-ignore
       if (SUPPORTED_TRANSFER_SUBSTRATE_CHAIN.indexOf(networkKey) > -1) {
         setSubstrateTransferParams({
-          // @ts-ignore
-          extrinsic: transferMeta.extrinsic,
-          txInfo: transferMeta.info
-        });
+          params,
+          estimatedFee: transferMeta.estimatedFee,
+          balanceError: transferMeta.balanceError
+        } as SubstrateTransferParams);
         // @ts-ignore
-      } else if (SUPPORTED_TRANSFER_EVM_CHAIN.indexOf(networkKey) > -1) {
+      } else if (networkJson.isEthereum && networkJson.isEthereum) {
         setWeb3TransferParams({
           rawTx: transferMeta.web3RawTx,
           estimatedGas: transferMeta.estimatedGas
@@ -172,7 +169,7 @@ function TransferNftContainer ({ api, className, collectionId, collectionImage, 
     }
 
     setLoading(false);
-  }, [addressError, api, currentAccount.account?.address, currentNetwork.networkKey, isApiReady, networkKey, nftItem, recipientAddress, show]);
+  }, [addressError, currentAccount.account?.address, currentNetwork.networkKey, networkJson, networkKey, nftItem, recipientAddress, show]);
 
   const handleImageError = useCallback(() => {
     setLoading(false);
@@ -226,7 +223,7 @@ function TransferNftContainer ({ api, className, collectionId, collectionImage, 
           </div>
 
           <InputAddress
-            autoPrefill={false}
+            autoPrefill={true}
             className={'kn-field -field-2'}
             help={'Select a contact or paste the address you want to send nft to.'}
             isEtherium={isEthereumAddress()}
@@ -246,7 +243,7 @@ function TransferNftContainer ({ api, className, collectionId, collectionImage, 
             <div className={'meta-value'}>
               {/* eslint-disable-next-line @typescript-eslint/restrict-plus-operands */}
               <div>{nftItem.name ? nftItem.name : '#' + nftItem.id}</div>
-              <div style={{ textTransform: 'uppercase' }}>{nftItem?.chain}</div>
+              <div style={{ textTransform: 'capitalize' }}>{networkJson?.chain}</div>
             </div>
           </div>
 
@@ -265,7 +262,7 @@ function TransferNftContainer ({ api, className, collectionId, collectionImage, 
       }
 
       {
-        showConfirm && isApiReady && (substrateTransferParams || web3TransferParams) &&
+        showConfirm && (substrateTransferParams || web3TransferParams) &&
           <AuthTransfer
             chain={nftItem.chain}
             collectionId={collectionId}

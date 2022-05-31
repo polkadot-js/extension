@@ -1,9 +1,10 @@
-// Copyright 2019-2022 @subwallet/extension-koni-ui authors & contributors
+// Copyright 2019-2022 @polkadot/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
 import { ChainRegistry, TransactionHistoryItemType } from '@subwallet/extension-base/background/KoniTypes';
+import useScanExplorerTxUrl from '@subwallet/extension-koni-ui/hooks/screen/home/useScanExplorerTxUrl';
+import useSupportScanExplorer from '@subwallet/extension-koni-ui/hooks/screen/home/useSupportScanExplorer';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
-import { getScanExplorerTransactionHistoryUrl, isSupportScanExplorer } from '@subwallet/extension-koni-ui/util';
 import React from 'react';
 import styled from 'styled-components';
 
@@ -21,6 +22,11 @@ interface ContentProp {
   className?: string;
   registryMap: Record<string, ChainRegistry>;
   items: TransactionHistoryItemType[];
+}
+
+interface ItemWrapperProp {
+  item: TransactionHistoryItemType;
+  registryMap: Record<string, ChainRegistry>;
 }
 
 function getReadyNetwork (registryMap: Record<string, ChainRegistry>): string[] {
@@ -76,44 +82,57 @@ function Wrapper ({ className, historyMap, networkKey, registryMap }: Props): Re
   );
 }
 
-function TransactionHistory ({ className, items, registryMap }: ContentProp): React.ReactElement<ContentProp> {
-  const renderChainBalanceItem = (item: TransactionHistoryItemType, registryMap: Record<string, ChainRegistry>) => {
-    const { networkKey } = item;
+function TransactionHistoryItemWrapper ({ item, registryMap }: ItemWrapperProp) {
+  const { networkKey } = item;
+  const { extrinsicHash } = item;
+  const registry = registryMap[networkKey];
+  const isSupportScanExplorer = useSupportScanExplorer(networkKey);
+  const isScanExplorerTxUrl = useScanExplorerTxUrl(networkKey, extrinsicHash);
 
-    const { extrinsicHash } = item;
+  if ((item.changeSymbol && !registry.tokenMap[item.changeSymbol]) ||
+    (item.feeSymbol && !registry.tokenMap[item.feeSymbol])) {
+    return null;
+  }
 
-    if (isSupportScanExplorer(networkKey)) {
-      return (
-        <a
-          className={'transaction-item-wrapper'}
-          href={getScanExplorerTransactionHistoryUrl(networkKey, extrinsicHash)}
-          key={extrinsicHash}
-          rel='noreferrer'
-          target={'_blank'}
-        >
-          <TransactionHistoryItem
-            isSupportScanExplorer={true}
-            item={item}
-            registry={registryMap[networkKey]}
-          />
-        </a>
-      );
-    }
-
+  if (isSupportScanExplorer) {
     return (
-      <div key={extrinsicHash}>
+      <a
+        className={'transaction-item-wrapper'}
+        href={isScanExplorerTxUrl}
+        key={extrinsicHash}
+        rel='noreferrer'
+        target={'_blank'}
+      >
         <TransactionHistoryItem
-          isSupportScanExplorer={false}
+          isSupportScanExplorer={true}
           item={item}
-          registry={registryMap[networkKey]}
+          registry={registry}
         />
-      </div>
+      </a>
     );
-  };
+  }
 
   return (
+    <div key={extrinsicHash}>
+      <TransactionHistoryItem
+        isSupportScanExplorer={false}
+        item={item}
+        registry={registry}
+      />
+    </div>
+  );
+}
+
+function TransactionHistory ({ className, items, registryMap }: ContentProp): React.ReactElement<ContentProp> {
+  return (
     <div className={`transaction-history ${className || ''}`}>
-      {items.map((item) => renderChainBalanceItem(item, registryMap))}
+      {items.map((item) => (
+        <TransactionHistoryItemWrapper
+          item={item}
+          key={item.extrinsicHash}
+          registryMap={registryMap}
+        />
+      ))}
     </div>
   );
 }

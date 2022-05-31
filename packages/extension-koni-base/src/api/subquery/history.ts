@@ -2,8 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { gql } from '@apollo/client';
-import { TransactionHistoryItemType } from '@subwallet/extension-base/background/KoniTypes';
-import NETWORKS from '@subwallet/extension-koni-base/api/endpoints';
+import { NetworkJson, TransactionHistoryItemType } from '@subwallet/extension-base/background/KoniTypes';
 // eslint-disable-next-line import-newlines/enforce
 import { DotSamaHistory,
 // eslint-disable-next-line camelcase
@@ -75,7 +74,7 @@ function isHistoryChange (networkKey: string, items: TransactionHistoryItemType[
   return originLength !== items.length;
 }
 
-export const fetchDotSamaHistory = (address: string, callBack: (historyMap: Record<string, TransactionHistoryItemType[]>) => void) => {
+export const fetchDotSamaHistory = (address: string, networkMap: Record<string, NetworkJson>, callBack: (historyMap: Record<string, TransactionHistoryItemType[]>) => void) => {
   if (isAccountAll(address)) {
     callBack({});
 
@@ -84,64 +83,67 @@ export const fetchDotSamaHistory = (address: string, callBack: (historyMap: Reco
 
   const historyMap: Record<string, TransactionHistoryItemType[]> = {};
 
-  Object.entries(NETWORKS).forEach(([networkKey, networkInfo]) => {
-    if (!HistoryApiMap[networkKey]) {
-      state.getTransactionHistory(address, networkKey, (items) => {
-        if (isHistoryChange(networkKey, items)) {
-          historyMap[networkKey] = items;
-          callBack(historyMap);
-        }
-      });
+  Object.entries(networkMap).forEach(([networkKey, networkInfo]) => {
+    if (networkInfo.active) {
+      if (!HistoryApiMap[networkKey]) {
+        state.getTransactionHistory(address, networkKey, (items) => {
+          if (isHistoryChange(networkKey, items)) {
+            historyMap[networkKey] = items;
+            callBack(historyMap);
+          }
+        });
 
-      return;
-    }
-
-    const formattedAddress = reformatAddress(address, networkInfo.ss58Format, networkInfo.isEthereum);
-
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-member-access
-    // @ts-ignore
-    getApolloClient(networkKey).query<DotSamaHistory, DotSamaHistoryVariables>({
-      query: DOTSAMA_HISTORY_QUERY,
-      variables: {
-        first: 0,
-        address: formattedAddress
-      }
-    }).then((rs) => {
-      if (!rs?.data?.historyElements?.nodes) {
         return;
       }
 
-      const items: TransactionHistoryItemType[] = [];
+      const formattedAddress = reformatAddress(address, networkInfo.ss58Format, networkInfo.isEthereum);
 
-      rs?.data?.historyElements?.nodes.filter((n) => !!n).forEach((n) => {
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-        if (!n?.transfer || !n.extrinsicHash) {
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-member-access
+      // @ts-ignore
+      getApolloClient(networkKey).query<DotSamaHistory, DotSamaHistoryVariables>({
+        query: DOTSAMA_HISTORY_QUERY,
+        variables: {
+          first: 0,
+          address: formattedAddress
+        }
+      }).then((rs) => {
+        if (!rs?.data?.historyElements?.nodes) {
           return;
         }
 
-        items.push({
-          // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
-          action: getHistoryAction(formattedAddress, n),
-          // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment,@typescript-eslint/no-unsafe-member-access
-          change: n.transfer.success ? n.transfer.amount : '0',
-          // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment,@typescript-eslint/no-unsafe-member-access
-          extrinsicHash: n.extrinsicHash,
-          // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment,@typescript-eslint/no-unsafe-member-access
-          fee: n.transfer.fee,
-          // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment,@typescript-eslint/no-unsafe-member-access
-          isSuccess: n.transfer.success,
-          networkKey,
-          // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment,@typescript-eslint/no-unsafe-member-access
-          time: (+n.timestamp) * 1000
-        });
-      });
+        const items: TransactionHistoryItemType[] = [];
 
-      if (isHistoryChange(networkKey, items)) {
-        historyMap[networkKey] = items;
-        callBack(historyMap);
-      }
-    }).catch((e: any) => {
-      console.log(`History API of ${networkKey} is error`, e);
-    });
+        rs?.data?.historyElements?.nodes.filter((n) => !!n).forEach((n) => {
+          // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+          if (!n?.transfer || !n.extrinsicHash) {
+            return;
+          }
+
+          items.push({
+            // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
+            action: getHistoryAction(formattedAddress, n),
+            // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment,@typescript-eslint/no-unsafe-member-access
+            change: n.transfer.success ? n.transfer.amount : '0',
+            // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment,@typescript-eslint/no-unsafe-member-access
+            extrinsicHash: n.extrinsicHash,
+            // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment,@typescript-eslint/no-unsafe-member-access
+            fee: n.transfer.fee,
+            // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment,@typescript-eslint/no-unsafe-member-access
+            isSuccess: n.transfer.success,
+            networkKey,
+            // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment,@typescript-eslint/no-unsafe-member-access
+            time: (+n.timestamp) * 1000
+          });
+        });
+
+        if (isHistoryChange(networkKey, items)) {
+          state.setTransactionHistoryV2(address, networkKey, items);
+          historyMap[networkKey] = items;
+          callBack(historyMap);
+        }
+      }).catch((e: any) => {
+        console.log(`History API of ${networkKey} is error`, e);
+      });
+    }
   });
 };

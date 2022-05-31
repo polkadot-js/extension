@@ -1,26 +1,26 @@
 // Copyright 2019-2022 @subwallet/extension-koni authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { BackgroundWindow, RequestNftForceUpdate } from '@subwallet/extension-base/background/KoniTypes';
+import { RequestNftForceUpdate } from '@subwallet/extension-base/background/KoniTypes';
 import { AccountJson } from '@subwallet/extension-base/background/types';
-import { reformatAddress } from '@subwallet/extension-koni-base/utils/utils';
 import { Spinner } from '@subwallet/extension-koni-ui/components';
 import Modal from '@subwallet/extension-koni-ui/components/Modal';
 import Output from '@subwallet/extension-koni-ui/components/Output';
 import useToast from '@subwallet/extension-koni-ui/hooks/useToast';
-import { evmNftSubmitTransaction, nftForceUpdate } from '@subwallet/extension-koni-ui/messaging';
+import { evmNftSubmitTransaction, nftForceUpdate, substrateNftSubmitTransaction } from '@subwallet/extension-koni-ui/messaging';
 import { _NftItem, SubstrateTransferParams, Web3TransferParams } from '@subwallet/extension-koni-ui/Popup/Home/Nfts/types';
-import Address from '@subwallet/extension-koni-ui/Popup/Sending/old/parts/Address';
-import { AddressProxy } from '@subwallet/extension-koni-ui/Popup/Sending/old/types';
-import { cacheUnlock } from '@subwallet/extension-koni-ui/Popup/Sending/old/util';
+import Address from '@subwallet/extension-koni-ui/Popup/Sending/parts/Address';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import React, { useCallback, useEffect, useState } from 'react';
 import { useSelector } from 'react-redux';
 import styled from 'styled-components';
 
-const bWindow = chrome.extension.getBackgroundPage() as BackgroundWindow;
-const { keyring } = bWindow.pdotApi;
+interface AddressProxy {
+  isUnlockCached: boolean;
+  signAddress: string | null;
+  signPassword: string;
+}
 
 interface Props extends ThemeProps {
   className?: string;
@@ -38,67 +38,27 @@ interface Props extends ThemeProps {
   web3TransferParams: Web3TransferParams;
 }
 
-function unlockAccount ({ isUnlockCached, signAddress, signPassword }: AddressProxy): string | null {
-  let publicKey;
-
-  try {
-    publicKey = keyring.decodeAddress(signAddress as string);
-  } catch (error) {
-    console.error(error);
-
-    return 'unable to decode address';
-  }
-
-  const pair = keyring.getPair(publicKey);
-
-  try {
-    pair.decodePkcs8(signPassword);
-    isUnlockCached && cacheUnlock(pair);
-  } catch (error) {
-    console.error(error);
-
-    return (error as Error).message;
-  }
-
-  return null;
-}
-
-function isRecipientSelf (currentAddress: string, recipientAddress: string) {
-  return reformatAddress(currentAddress, 1) === reformatAddress(recipientAddress, 1);
-}
-
 function AuthTransfer ({ chain, className, collectionId, nftItem, recipientAddress, senderAccount, setExtrinsicHash, setIsTxSuccess, setShowConfirm, setShowResult, setTxError, substrateTransferParams, web3TransferParams }: Props): React.ReactElement<Props> {
   const [passwordError, setPasswordError] = useState<string | null>(null);
   const [callHash, setCallHash] = useState<string | null>(null);
 
   const [loading, setLoading] = useState(false);
-  const [balanceError, setBalanceError] = useState(false);
   const [senderInfoSubstrate, setSenderInfoSubstrate] = useState<AddressProxy>(() => ({ isUnlockCached: false, signAddress: senderAccount.address, signPassword: '' }));
 
-  const extrinsic = substrateTransferParams !== null ? substrateTransferParams.extrinsic : null;
-  const txInfo = substrateTransferParams !== null ? substrateTransferParams.txInfo : null;
+  const substrateParams = substrateTransferParams !== null ? substrateTransferParams.params : null;
+  const substrateGas = substrateTransferParams !== null ? substrateTransferParams.estimatedFee : null;
+  const substrateBalanceError = substrateTransferParams !== null ? substrateTransferParams.balanceError : false;
 
   const web3Tx = web3TransferParams !== null ? web3TransferParams.rawTx : null;
   const web3Gas = web3TransferParams !== null ? web3TransferParams.estimatedGas : null;
 
+  const [balanceError, setBalanceError] = useState(substrateBalanceError);
   const { currentAccount: account, currentNetwork } = useSelector((state: RootState) => state);
 
   const { show } = useToast();
 
   useEffect((): void => {
     setPasswordError(null);
-  }, [senderInfoSubstrate]);
-
-  const unlockSubstrate = useCallback(() => {
-    let passwordError: string | null = null;
-
-    if (senderInfoSubstrate.signAddress) {
-      passwordError = unlockAccount(senderInfoSubstrate);
-    }
-
-    setPasswordError(passwordError);
-
-    return passwordError;
   }, [senderInfoSubstrate]);
 
   const onSendEvm = useCallback(async () => {
@@ -117,6 +77,12 @@ function AuthTransfer ({ chain, className, collectionId, nftItem, recipientAddre
 
         if (data.callHash) {
           setCallHash(data.callHash);
+        }
+
+        if (data.balanceError && data.balanceError) {
+          setBalanceError(true);
+          setLoading(false);
+          show('Your balance is too low to cover fees');
         }
 
         if (data.txError) {
@@ -151,60 +117,53 @@ function AuthTransfer ({ chain, className, collectionId, nftItem, recipientAddre
   }, [account?.account?.address, chain, collectionId, nftItem, recipientAddress, senderInfoSubstrate.signPassword, setExtrinsicHash, setIsTxSuccess, setShowConfirm, setShowResult, setTxError, show, web3Tx]);
 
   const onSendSubstrate = useCallback(async () => {
-    if (extrinsic !== null && unlockSubstrate() === null) {
-      const pair = keyring.getPair(senderAccount.address);
-
-      try {
-        const isSendingSelf = isRecipientSelf(account?.account?.address as string, recipientAddress);
-        const unsubscribe = await extrinsic.signAndSend(pair, (result) => {
-          console.log('sending tx');
-
-          if (!result || !result.status) {
-            return;
-          }
-
-          if (result.status.isInBlock || result.status.isFinalized) {
-            console.log('tx in block');
-            result.events
-              .filter(({ event: { section } }) => section === 'system')
-              .forEach(({ event: { method } }): void => {
-                setExtrinsicHash(extrinsic.hash.toHex());
-
-                if (method === 'ExtrinsicFailed') {
-                  console.log('tx fail');
-                  setIsTxSuccess(false);
-                  setTxError(method);
-                  setShowConfirm(false);
-                  setShowResult(true);
-                } else if (method === 'ExtrinsicSuccess') {
-                  console.log('tx success');
-                  setIsTxSuccess(true);
-                  setShowConfirm(false);
-                  setShowResult(true);
-
-                  nftForceUpdate({ nft: nftItem, collectionId, isSendingSelf, chain } as RequestNftForceUpdate)
-                    .catch(console.error);
-                }
-              });
-          } else if (result.isError) {
-            setLoading(false);
-          }
-
-          if (result.isCompleted) {
-            setLoading(false);
-            unsubscribe();
-          }
-        });
-      } catch (e) {
-        show('Encountered an error, please try again.');
-        setBalanceError(true);
+    await substrateNftSubmitTransaction({
+      params: substrateParams,
+      password: senderInfoSubstrate.signPassword,
+      senderAddress: senderAccount.address,
+      recipientAddress
+    }, (data) => {
+      if (data.passwordError && data.passwordError) {
+        setPasswordError(data.passwordError);
         setLoading(false);
       }
-    } else {
-      console.log('unlock account failed');
-      setLoading(false);
-    }
-  }, [account?.account?.address, chain, collectionId, extrinsic, nftItem, recipientAddress, senderAccount.address, setExtrinsicHash, setIsTxSuccess, setShowConfirm, setShowResult, setTxError, show, unlockSubstrate]);
+
+      if (data.callHash) {
+        setCallHash(data.callHash);
+      }
+
+      if (data.txError && data.txError) {
+        show('Encountered an error, please try again.');
+        setLoading(false);
+
+        return;
+      }
+
+      if (data.balanceError && data.balanceError) {
+        setBalanceError(true);
+        show('Your balance is too low to cover fees');
+      }
+
+      if (data.status) {
+        setLoading(false);
+
+        if (data.status) {
+          setIsTxSuccess(true);
+          setShowConfirm(false);
+          setShowResult(true);
+          setExtrinsicHash(data.transactionHash as string);
+          nftForceUpdate({ nft: nftItem, collectionId, isSendingSelf: data.isSendingSelf, chain } as RequestNftForceUpdate)
+            .catch(console.error);
+        } else {
+          setIsTxSuccess(false);
+          setTxError('Error submitting transaction');
+          setShowConfirm(false);
+          setShowResult(true);
+          setExtrinsicHash(data.transactionHash as string);
+        }
+      }
+    });
+  }, [chain, collectionId, nftItem, substrateParams, recipientAddress, senderAccount.address, senderInfoSubstrate.signPassword, setExtrinsicHash, setIsTxSuccess, setShowConfirm, setShowResult, setTxError, show]);
 
   const handleSignAndSubmit = useCallback(() => {
     if (loading) {
@@ -219,23 +178,24 @@ function AuthTransfer ({ chain, className, collectionId, nftItem, recipientAddre
 
     setLoading(true);
 
+    if (balanceError) {
+      setTimeout(() => {
+        setLoading(false);
+        show('Your balance is too low to cover fees');
+      }, 1000);
+
+      return;
+    }
+
     // eslint-disable-next-line @typescript-eslint/no-misused-promises
     setTimeout(async () => {
-      if (extrinsic !== null) {
+      if (substrateParams !== null) {
         await onSendSubstrate();
       } else if (web3Tx !== null) {
         await onSendEvm();
       }
     }, 1);
-  }, [chain, currentNetwork.networkKey, extrinsic, loading, onSendEvm, onSendSubstrate, show, web3Tx]);
-
-  useEffect((): void => {
-    if (extrinsic) {
-      const method = extrinsic.method;
-
-      setCallHash((method && method.hash.toHex()) || null);
-    }
-  }, [extrinsic]);
+  }, [loading, balanceError, chain, currentNetwork.networkKey, show, substrateParams, web3Tx, onSendSubstrate, onSendEvm]);
 
   const hideConfirm = useCallback(() => {
     if (!loading) {
@@ -265,7 +225,7 @@ function AuthTransfer ({ chain, className, collectionId, nftItem, recipientAddre
           <div
             className={'auth-container'}
           >
-            <div className={'fee'}>Fees of {txInfo?.partialFee.toHuman() || web3Gas} will be applied to the submission</div>
+            <div className={'fee'}>Fees of {substrateGas || web3Gas} will be applied to the submission</div>
 
             <Address
               className={'sender-container'}
@@ -287,21 +247,11 @@ function AuthTransfer ({ chain, className, collectionId, nftItem, recipientAddre
               />
             }
 
-            {
-              balanceError &&
-              <div
-                className={'password-error'}
-                style={{ marginTop: balanceError ? '40px' : '0' }}
-              >
-                Your balance is too low to cover fees.
-              </div>
-            }
-
             <div
               className={'submit-btn'}
               // eslint-disable-next-line @typescript-eslint/no-misused-promises
               onClick={handleSignAndSubmit}
-              style={{ marginTop: !balanceError ? '40px' : '0', background: loading ? 'rgba(0, 75, 255, 0.25)' : '#004BFF', cursor: loading ? 'default' : 'pointer' }}
+              style={{ marginTop: '40px', background: loading ? 'rgba(0, 75, 255, 0.25)' : '#004BFF', cursor: loading ? 'default' : 'pointer' }}
             >
               {
                 !loading

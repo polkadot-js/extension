@@ -1,4 +1,4 @@
-// Copyright 2019-2022 @subwallet/extension-koni-ui authors & contributors
+// Copyright 2019-2022 @polkadot/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
 import type { ThemeProps } from '../../types';
@@ -11,6 +11,7 @@ import { AccountContext, Link } from '@subwallet/extension-koni-ui/components';
 import useGenesisHashOptions from '@subwallet/extension-koni-ui/hooks/useGenesisHashOptions';
 import useIsPopup from '@subwallet/extension-koni-ui/hooks/useIsPopup';
 import { showAccount, tieAccount, windowOpen } from '@subwallet/extension-koni-ui/messaging';
+import AccountMenuSettings from '@subwallet/extension-koni-ui/partials/AccountMenuSettings';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { updateCurrentNetwork } from '@subwallet/extension-koni-ui/stores/updater';
 import { accountAllRecoded, getGenesisOptionsByAddressType, isAccountAll } from '@subwallet/extension-koni-ui/util';
@@ -28,12 +29,11 @@ import logo from '../../assets/sub-wallet-logo.svg';
 import useOutsideClick from '../../hooks/useOutsideClick';
 import { Theme } from '../../types';
 
-const NetworkMenu = React.lazy(() => import('@subwallet/extension-koni-ui/components/NetworkMenu'));
-const Identicon = React.lazy(() => import('@subwallet/extension-koni-ui/components/Identicon'));
 const ConfirmModal = React.lazy(() => import('@subwallet/extension-koni-ui/components/ConfirmModal'));
-const SubHeader = React.lazy(() => import('@subwallet/extension-koni-ui/partials/Header/SubHeader'));
+const Identicon = React.lazy(() => import('@subwallet/extension-koni-ui/components/Identicon'));
+const NetworkMenu = React.lazy(() => import('@subwallet/extension-koni-ui/components/NetworkMenu'));
 const DetailHeader = React.lazy(() => import('@subwallet/extension-koni-ui/partials/Header/DetailHeader'));
-const AccountMenuSettings = React.lazy(() => import('@subwallet/extension-koni-ui/partials/AccountMenuSettings'));
+const SubHeader = React.lazy(() => import('@subwallet/extension-koni-ui/partials/Header/SubHeader'));
 
 interface Props extends ThemeProps {
   children?: React.ReactNode;
@@ -58,7 +58,7 @@ interface Props extends ThemeProps {
   to?: string;
 }
 
-export function Header ({ changeAccountCallback, children, className = '', isBusy, isContainDetailHeader, isShowNetworkSelect = true, isShowZeroBalances, isWelcomeScreen, setShowBalanceDetail, showBackArrow, showCancelButton, showSubHeader, smallMargin = false, subHeaderName, to, toggleZeroBalances }: Props): React.ReactElement<Props> {
+function Header ({ changeAccountCallback, children, className = '', isBusy, isContainDetailHeader, isShowNetworkSelect = true, isShowZeroBalances, isWelcomeScreen, setShowBalanceDetail, showBackArrow, showCancelButton, showSubHeader, smallMargin = false, subHeaderName, to, toggleZeroBalances }: Props): React.ReactElement<Props> {
   const [isSettingsOpen, setShowSettings] = useState(false);
   const [isActionOpen, setShowAccountAction] = useState(false);
   const [isNetworkSelectOpen, setShowNetworkSelect] = useState(false);

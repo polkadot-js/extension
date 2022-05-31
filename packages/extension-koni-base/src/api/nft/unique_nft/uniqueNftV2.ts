@@ -17,7 +17,7 @@ export class UniqueNftApiV2 extends BaseNftApi {
 
   // eslint-disable-next-line no-useless-constructor
   constructor () {
-    super();
+    super('');
   }
 
   private static parseNftRequest (address: string) {
@@ -61,7 +61,7 @@ export class UniqueNftApiV2 extends BaseNftApi {
 
       console.log('allNfts', allNfts);
     } catch (e) {
-      console.error(`Failed to fetch ${this.chain as string} nft`, e);
+      console.error(`Failed to fetch ${this.chain} nft`, e);
     }
   }
 

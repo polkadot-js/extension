@@ -1,4 +1,4 @@
-// Copyright 2019-2022 @subwallet/extension-koni-ui authors & contributors
+// Copyright 2019-2022 @polkadot/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
 const colors = {
@@ -16,7 +16,7 @@ const darkTheme = {
   backDropColor: 'rgba(255, 255, 255, 0.5)',
   background: '#010414',
   backgroundAccountAddress: '#262C4A',
-  backgroundDropdownSeclection: 'rgba(0, 7, 45, .7)',
+  backgroundDropdownSelection: 'rgba(0, 7, 45, .7)',
   bodyColor: '#20222A',
   borderRadius: '3px',
   boxBorderColor: '#212845',
@@ -66,7 +66,7 @@ const darkTheme = {
   popupBackground: '#181E42',
   accountHoverBackground: 'rgba(255, 255, 255, 0.05)',
   primaryColor: colors.primary2,
-  readonlyInputBackground: '#1A1B20',
+  readonlyInputBackground: 'rgba(38, 44, 74, 0.4)',
   warningBackgroundColor: 'rgba(231, 185, 23, 0.2)',
   dangerBackgroundColor: 'rgba(175, 17, 17, 0.25)',
   subTextColor: '#DDD',
@@ -111,7 +111,7 @@ const lightTheme: Theme = {
   backDropColor: 'rgba(0, 0, 0, 0.5)',
   background: '#FFFFFF',
   backgroundAccountAddress: '#F5F5F5',
-  backgroundDropdownSeclection: 'rgba(0,0,0,.03)',
+  backgroundDropdownSelection: 'rgba(0,0,0,.03)',
   bodyColor: '#FFFFFF',
   borderColor2: '#EEEEEE',
   boxBorderColor: '#EEEEEE',
@@ -139,7 +139,7 @@ const lightTheme: Theme = {
   parentLabelColor: '#215B4F',
   popupBackground: '#FFFFFF',
   accountHoverBackground: '#f2f3f4',
-  readonlyInputBackground: '#FFF',
+  readonlyInputBackground: '#DDD',
   subTextColor: '#454545',
   textColor: '#00072D',
   textColor2: '#888888',

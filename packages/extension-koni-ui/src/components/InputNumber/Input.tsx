@@ -1,12 +1,11 @@
-// Copyright 2019-2022 @subwallet/extension-koni-ui authors & contributors
+// Copyright 2019-2022 @polkadot/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
+import Labelled from '@subwallet/extension-koni-ui/components/Labelled';
 import React, { useCallback, useState } from 'react';
 import { Input as SUIInput } from 'semantic-ui-react';
 
 import { isFunction, isUndefined } from '@polkadot/util';
-
-import Labelled from '../../Popup/Sending/old/component/Labelled';
 
 type Input$Type = 'number' | 'password' | 'text';
 

@@ -1,7 +1,7 @@
-// Copyright 2019-2022 @subwallet/extension-koni-ui authors & contributors
+// Copyright 2019-2022 @polkadot/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { CustomEvmToken, NftItem, TransactionHistoryItemType } from '@subwallet/extension-base/background/KoniTypes';
+import { CustomEvmToken, NetworkJson, NftItem, TransactionHistoryItemType } from '@subwallet/extension-base/background/KoniTypes';
 import { AccountJson } from '@subwallet/extension-base/background/types';
 
 export type CurrentAccountType = {
@@ -20,4 +20,9 @@ export type TransferNftParams = {
 
 export type TokenConfigParams = {
   data: CustomEvmToken
+}
+
+export type NetworkConfigParams = {
+  mode: 'create' | 'edit' | 'init',
+  data: NetworkJson;
 }

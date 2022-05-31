@@ -1,4 +1,4 @@
-// Copyright 2019-2022 @subwallet/extension-koni-ui authors & contributors
+// Copyright 2019-2022 @polkadot/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
 import { Header } from '@subwallet/extension-koni-ui/partials';
@@ -25,14 +25,14 @@ interface Props extends ThemeProps {
   className?: string;
 }
 
+const KEYTYPES: KeypairType[] = [EVM_ACCOUNT_TYPE];
+
 function ImportMetamaskPrivateKey ({ className = '' }: Props): React.ReactElement {
   const { t } = useTranslation();
   const { accounts } = useContext(AccountContext);
   const onAction = useContext(ActionContext);
   const [isBusy, setIsBusy] = useState(false);
   const [account, setAccount] = useState<AccountInfo | null>(null);
-  const keyTypes: KeypairType[] = [EVM_ACCOUNT_TYPE];
-  const dep = keyTypes.toString();
   const accountsWithoutAll = accounts.filter((acc: { address: string; }) => acc.address !== 'ALL');
   const name = `Account ${accountsWithoutAll.length + 1}`;
   const type = DEFAULT_TYPE;
@@ -46,7 +46,7 @@ function ImportMetamaskPrivateKey ({ className = '' }: Props): React.ReactElemen
     if (name && password && account) {
       setIsBusy(true);
 
-      createAccountSuriV2(name, password, account.suri, false, keyTypes)
+      createAccountSuriV2(name, password, account.suri, false, KEYTYPES)
         .then(() => {
           window.localStorage.setItem('popupNavigation', '/');
           onAction('/');
@@ -57,7 +57,7 @@ function ImportMetamaskPrivateKey ({ className = '' }: Props): React.ReactElemen
         });
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [account, onAction, dep]);
+  }, [account, onAction]);
 
   return (
     <>
@@ -70,7 +70,8 @@ function ImportMetamaskPrivateKey ({ className = '' }: Props): React.ReactElemen
       <MetamaskPrivateKeyImport
         account={account}
         className='import-seed-content-wrapper'
-        keyTypes={keyTypes}
+        isBusy={isBusy}
+        keyTypes={KEYTYPES}
         name={name}
         onAccountChange={setAccount}
         onCreate={_onCreate}

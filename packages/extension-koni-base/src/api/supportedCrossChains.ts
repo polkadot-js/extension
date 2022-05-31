@@ -12,5 +12,50 @@ export const SupportedCrossChainsMap: Record<string, CrossChainRelation> = {
         supportedToken: ['KAR']
       }
     }
+  },
+  // interlay: {
+  //   type: 'p',
+  //   relationMap: {
+  //     moonbeam: {
+  //       type: 'p',
+  //       supportedToken: ['KAR']
+  //     }
+  //   }
+  // },
+  karura: {
+    type: 'p',
+    relationMap: {
+      moonriver: {
+        type: 'p',
+        supportedToken: ['KAR']
+      }
+    }
+  },
+  kintsugi: {
+    type: 'p',
+    relationMap: {
+      moonriver: {
+        type: 'p',
+        supportedToken: ['KINT']
+      }
+    }
+  },
+  bifrost: {
+    type: 'p',
+    relationMap: {
+      moonriver: {
+        type: 'p',
+        supportedToken: ['BNC']
+      }
+    }
+  },
+  acala: {
+    type: 'p',
+    relationMap: {
+      moonbeam: {
+        type: 'p',
+        supportedToken: ['ACA']
+      }
+    }
   }
 };

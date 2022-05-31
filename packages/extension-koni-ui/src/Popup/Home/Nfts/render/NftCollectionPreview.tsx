@@ -43,7 +43,7 @@ function NftCollectionPreview ({ className, data, onClick }: Props): React.React
         <div className={'img-container'}>
           {
             loading &&
-            <div style={{ height: '124px' }}>
+            <div>
               <Spinner className={'img-spinner'} />
             </div>
           }

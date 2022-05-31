@@ -202,6 +202,7 @@ export const getAllSubsquidStaking = async (accounts: string[], activeNetworks: 
   rewardList = rewardList.concat(rewardItems);
 
   return {
+    ready: true,
     details: rewardList
   } as StakingRewardJson;
 };

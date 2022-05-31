@@ -27,6 +27,7 @@ import { BehaviorSubject, Subject } from 'rxjs';
 
 import { accounts } from '@polkadot/ui-keyring/observable/accounts';
 import { assert } from '@polkadot/util';
+import BalanceStore from "@subwallet/extension-koni-base/stores/Balance";
 
 function generateDefaultBalanceMap () {
   const balanceMap: Record<string, BalanceItem> = {};
@@ -115,6 +116,7 @@ export function mergeNetworkProviders (customNetwork: NetworkJson, predefinedNet
 export default class KoniState extends State {
   public readonly authSubjectV2: BehaviorSubject<AuthorizeRequest[]> = new BehaviorSubject<AuthorizeRequest[]>([]);
 
+  private readonly balanceStore = new BalanceStore();
   private readonly networkMapStore = new NetworkMapStore(); // persist custom networkMap by user
   private readonly customEvmTokenStore = new CustomEvmTokenStore();
   private readonly priceStore = new PriceStore();
@@ -126,7 +128,64 @@ export default class KoniState extends State {
   private priceStoreReady = false;
   private readonly transactionHistoryStore = new TransactionHistoryStore();
 
+  private networkMap: Record<string, NetworkJson> = {}; // mapping to networkMapStore, for uses in background
+  private networkMapSubject = new Subject<Record<string, NetworkJson>>();
+  private lockNetworkMap = false;
+
+  private apiMap: ApiMap = { dotSama: {}, web3: {} };
+
+  private serviceInfoSubject = new Subject<ServiceInfo>();
+
+  private evmTokenState: EvmTokenJson = { erc20: [], erc721: [] };
+  private evmTokenSubject = new Subject<EvmTokenJson>();
+
+  private balanceMap: Record<string, BalanceItem> = generateDefaultBalanceMap();
+  private balanceSubject = new Subject<BalanceJson>();
+
+  // eslint-disable-next-line camelcase
+  private crowdloanFundMap: Record<string, DotSamaCrowdloan_crowdloans_nodes> = {};
+  private crowdloanMap: Record<string, CrowdloanItem> = generateDefaultCrowdloanMap();
+  private crowdloanSubject = new Subject<CrowdloanJson>();
+
+  private nftTransferSubject = new Subject<NftTransferExtra>();
+  // Only for rendering nft after transfer
+  private nftTransferState: NftTransferExtra = {
+    cronUpdate: false,
+    forceUpdate: false
+  };
+
+  private nftState: NftJson = {
+    total: 0,
+    nftList: []
+  };
+
+  private nftCollectionState: NftCollectionJson = {
+    ready: false,
+    nftCollectionList: []
+  };
+
+  private nftSubject = new Subject<NftJson>();
+  private nftCollectionSubject = new Subject<NftCollectionJson>();
+
+  private stakingSubject = new Subject<StakingJson>();
+  private stakingRewardSubject = new Subject<StakingRewardJson>();
+  private stakingMap: Record<string, StakingItem> = generateDefaultStakingMap();
+  private stakingRewardState: StakingRewardJson = {
+    ready: false,
+    details: []
+  } as StakingRewardJson;
+
+  private historyMap: Record<string, TransactionHistoryItemType[]> = {};
+  private historySubject = new Subject<Record<string, TransactionHistoryItemType[]>>();
+
+  // Todo: persist data to store later
+  private chainRegistryMap: Record<string, ChainRegistry> = {};
+  private chainRegistrySubject = new Subject<Record<string, ChainRegistry>>();
+
+  private lazyMap: Record<string, unknown> = {};
+
   // init networkMap, apiMap and chainRegistry (first time only)
+  // TODO: merge transactionHistory when custom network -> predefined network
   public initNetworkStates () {
     this.networkMapStore.get('NetworkMap', (storedNetworkMap) => {
       if (!storedNetworkMap) { // first time init extension
@@ -183,14 +242,6 @@ export default class KoniState extends State {
       this.initEvmTokenState();
     });
   }
-
-  private networkMap: Record<string, NetworkJson> = {}; // mapping to networkMapStore, for uses in background
-  private networkMapSubject = new Subject<Record<string, NetworkJson>>();
-  private lockNetworkMap = false;
-
-  private apiMap: ApiMap = { dotSama: {}, web3: {} };
-
-  private serviceInfoSubject = new Subject<ServiceInfo>();
 
   public initEvmTokenState () {
     this.customEvmTokenStore.get('EvmToken', (storedEvmTokens) => {
@@ -271,50 +322,6 @@ export default class KoniState extends State {
       this.initChainRegistry();
     });
   }
-
-  private evmTokenState: EvmTokenJson = { erc20: [], erc721: [] };
-  private evmTokenSubject = new Subject<EvmTokenJson>();
-  private balanceMap: Record<string, BalanceItem> = generateDefaultBalanceMap();
-  private balanceSubject = new Subject<BalanceJson>();
-  private nftState: NftJson = {
-    total: 0,
-    nftList: []
-  };
-
-  private nftCollectionState: NftCollectionJson = {
-    ready: false,
-    nftCollectionList: []
-  };
-
-  // Only for rendering nft after transfer
-  private nftTransferState: NftTransferExtra = {
-    cronUpdate: false,
-    forceUpdate: false
-  };
-
-  private stakingMap: Record<string, StakingItem> = generateDefaultStakingMap();
-  private stakingRewardState: StakingRewardJson = {
-    ready: false,
-    details: []
-  } as StakingRewardJson;
-
-  // eslint-disable-next-line camelcase
-  private crowdloanFundmap: Record<string, DotSamaCrowdloan_crowdloans_nodes> = {};
-  private crowdloanMap: Record<string, CrowdloanItem> = generateDefaultCrowdloanMap();
-  private crowdloanSubject = new Subject<CrowdloanJson>();
-  private nftTransferSubject = new Subject<NftTransferExtra>();
-  private nftSubject = new Subject<NftJson>();
-  private nftCollectionSubject = new Subject<NftCollectionJson>();
-  private stakingSubject = new Subject<StakingJson>();
-  private stakingRewardSubject = new Subject<StakingRewardJson>();
-  private historyMap: Record<string, TransactionHistoryItemType[]> = {};
-  private historySubject = new Subject<Record<string, TransactionHistoryItemType[]>>();
-
-  // Todo: persist data to store later
-  private chainRegistryMap: Record<string, ChainRegistry> = {};
-  private chainRegistrySubject = new Subject<Record<string, ChainRegistry>>();
-
-  private lazyMap: Record<string, unknown> = {};
 
   private lazyNext = (key: string, callback: () => void) => {
     if (this.lazyMap[key]) {
@@ -778,6 +785,7 @@ export default class KoniState extends State {
 
   public setBalanceItem (networkKey: string, item: BalanceItem) {
     this.balanceMap[networkKey] = item;
+    this.balanceStore.set()
     this.lazyNext('setBalanceItem', () => {
       this.balanceSubject.next(this.getBalance());
     });
@@ -788,7 +796,7 @@ export default class KoniState extends State {
   }
 
   public async fetchCrowdloanFundMap () {
-    this.crowdloanFundmap = await fetchDotSamaCrowdloan();
+    this.crowdloanFundMap = await fetchDotSamaCrowdloan();
   }
 
   public getCrowdloan (): CrowdloanJson {
@@ -797,7 +805,7 @@ export default class KoniState extends State {
 
   public setCrowdloanItem (networkKey: string, item: CrowdloanItem) {
     // Fill para state
-    const crowdloanFundNode = this.crowdloanFundmap[networkKey];
+    const crowdloanFundNode = this.crowdloanFundMap[networkKey];
 
     if (crowdloanFundNode) {
       item.paraState = convertFundStatus(crowdloanFundNode.status);

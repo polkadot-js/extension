@@ -53,6 +53,7 @@ function createWeb3NftApi (chain: string, web3: Web3 | null, addresses: string[]
   return new Web3NftApi(web3, evmAddresses, chain);
 }
 
+// TODO: race apiProps.isReady against a timeout, if timeout then read data from store (to be done after implementing light client and migrate use of full node connection)
 export class NftHandler {
   apiProps: Record<string, any>[] = [];
   web3ApiMap: Record<string, Web3> = {};

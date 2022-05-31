@@ -4,15 +4,15 @@
 import { CrossChainRelation } from '@subwallet/extension-base/background/KoniTypes';
 
 export const SupportedCrossChainsMap: Record<string, CrossChainRelation> = {
-  karura_testnet: {
-    type: 'p',
-    relationMap: {
-      moonbase: {
-        type: 'p',
-        supportedToken: ['KAR']
-      }
-    }
-  },
+  // karura_testnet: {
+  //   type: 'p',
+  //   relationMap: {
+  //     moonbase: {
+  //       type: 'p',
+  //       supportedToken: ['KAR']
+  //     }
+  //   }
+  // },
   // interlay: {
   //   type: 'p',
   //   relationMap: {

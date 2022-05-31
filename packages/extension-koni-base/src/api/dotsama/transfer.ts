@@ -239,8 +239,10 @@ function updateResponseTxResult (
 
     if (isFeeUseMainTokenSymbol && record.event.section === 'balances' &&
       record.event.method.toLowerCase() === 'withdraw') {
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-      response.txResult.fee = record.event.data[1]?.toString() || '0';
+      if (!response.txResult.fee) {
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+        response.txResult.fee = record.event.data[1]?.toString() || '0';
+      }
     }
   }
 }

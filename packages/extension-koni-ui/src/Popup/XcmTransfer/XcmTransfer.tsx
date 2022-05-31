@@ -1,43 +1,32 @@
 // Copyright 2019-2022 @polkadot/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import {
-  ChainRegistry,
-  DropdownTransformOptionType,
-  NetworkJson
-} from '@subwallet/extension-base/background/KoniTypes';
+import { ChainRegistry, DropdownTransformOptionType, NetworkJson } from '@subwallet/extension-base/background/KoniTypes';
 import { SupportedCrossChainsMap } from '@subwallet/extension-koni-base/api/supportedCrossChains';
-import {AccountContext, ActionContext, Button, Warning} from '@subwallet/extension-koni-ui/components';
+import { AccountContext, ActionContext, Button, Warning } from '@subwallet/extension-koni-ui/components';
 import InputBalance from '@subwallet/extension-koni-ui/components/InputBalance';
 import LoadingContainer from '@subwallet/extension-koni-ui/components/LoadingContainer';
 import ReceiverInputAddress from '@subwallet/extension-koni-ui/components/ReceiverInputAddress';
 import { useTranslation } from '@subwallet/extension-koni-ui/components/translate';
-import {
-  BalanceFormatType,
-  XcmTransferInputAddressType
-} from '@subwallet/extension-koni-ui/components/types';
+import { BalanceFormatType, XcmTransferInputAddressType } from '@subwallet/extension-koni-ui/components/types';
 import useFreeBalance from '@subwallet/extension-koni-ui/hooks/screen/sending/useFreeBalance';
+import { checkCrossChainTransfer } from '@subwallet/extension-koni-ui/messaging';
 import Header from '@subwallet/extension-koni-ui/partials/Header';
+import SendFundResult from '@subwallet/extension-koni-ui/Popup/Sending/SendFundResult';
+import { getAuthTransactionFeeInfo, getBalanceFormat, getDefaultAddress, getMainTokenInfo } from '@subwallet/extension-koni-ui/Popup/Sending/utils';
 import AuthTransaction from '@subwallet/extension-koni-ui/Popup/XcmTransfer/AuthTransaction';
 import BridgeInputAddress from '@subwallet/extension-koni-ui/Popup/XcmTransfer/BridgeInputAddress';
 import Dropdown from '@subwallet/extension-koni-ui/Popup/XcmTransfer/XcmDropdown/Dropdown';
-import {
-  getAuthTransactionFeeInfo,
-  getBalanceFormat,
-  getDefaultAddress, getMainTokenInfo
-} from '@subwallet/extension-koni-ui/Popup/Sending/utils';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
-import {ThemeProps, TransferResultType} from '@subwallet/extension-koni-ui/types';
-import React, {useCallback, useContext, useEffect, useState} from 'react';
+import { ThemeProps, TransferResultType } from '@subwallet/extension-koni-ui/types';
+import React, { useCallback, useContext, useEffect, useState } from 'react';
 import { useSelector } from 'react-redux';
 import styled from 'styled-components';
 
 import { BN, BN_ZERO } from '@polkadot/util';
+import { isEthereumAddress } from '@polkadot/util-crypto';
 
 import arrowRight from '../../assets/arrow-right.svg';
-import {checkCrossChainTransfer} from "@subwallet/extension-koni-ui/messaging";
-import {isEthereumAddress} from "@polkadot/util-crypto";
-import SendFundResult from "@subwallet/extension-koni-ui/Popup/Sending/SendFundResult";
 
 interface Props extends ThemeProps {
   className?: string,
@@ -70,6 +59,7 @@ function Wrapper ({ className = '', theme }: Props): React.ReactElement<Props> {
   const firstOriginChain = originChainOptions[0].value;
   const destinationChainList = Object.keys(SupportedCrossChainsMap[firstOriginChain].relationMap);
   let defaultValue;
+
   if (account) {
     defaultValue = {
       address: getDefaultAddress(account.address, accounts),
@@ -78,7 +68,6 @@ function Wrapper ({ className = '', theme }: Props): React.ReactElement<Props> {
   } else {
     defaultValue = null;
   }
-
 
   return (
     <div className={className}>
@@ -97,9 +86,9 @@ function Wrapper ({ className = '', theme }: Props): React.ReactElement<Props> {
             chainRegistryMap={chainRegistryMap}
             className='bridge-container'
             defaultValue={defaultValue}
+            firstOriginChain={firstOriginChain}
             networkMap={networkMap}
             originChainOptions={originChainOptions}
-            firstOriginChain={firstOriginChain}
             theme={theme}
           />
         )
@@ -122,8 +111,9 @@ function XcmTransfer ({ chainRegistryMap, className, defaultValue, firstOriginCh
   const recipientFreeBalance = useFreeBalance(originChain, recipientId, selectedToken);
   const [txResult, setTxResult] = useState<TransferResultType>({ isShowTxResult: false, isTxSuccess: false });
   const { isShowTxResult } = txResult;
-  const balanceFormat: BalanceFormatType | null = chainRegistryMap[originChain] && networkMap[originChain].active ?
-    getBalanceFormat(originChain, selectedToken, chainRegistryMap) : null;
+  const balanceFormat: BalanceFormatType | null = chainRegistryMap[originChain] && networkMap[originChain].active
+    ? getBalanceFormat(originChain, selectedToken, chainRegistryMap)
+    : null;
   const mainTokenInfo = chainRegistryMap[originChain] && networkMap[originChain].active ? getMainTokenInfo(originChain, chainRegistryMap) : null;
   const feeDecimal: number | null = feeSymbol && (chainRegistryMap[originChain] && networkMap[originChain].active)
     ? feeSymbol === selectedToken && balanceFormat
@@ -149,7 +139,7 @@ function XcmTransfer ({ chainRegistryMap, className, defaultValue, firstOriginCh
     checkDestinationChainAndReceiverIdType ||
     !valueToTransfer ||
     !recipientId ||
-    !!amountGtAvailableBalance
+    !!amountGtAvailableBalance;
 
   useEffect(() => {
     let isSync = true;
@@ -198,28 +188,29 @@ function XcmTransfer ({ chainRegistryMap, className, defaultValue, firstOriginCh
   }, []);
 
   const _onResend = useCallback(() => {
-      setTxResult({
-        isTxSuccess: false,
-        isShowTxResult: false,
-        txError: undefined
-      });
-      setSenderValue(defaultValue);
-      setRecipientId(null);
-    },
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [
-      defaultValue.address,
-      defaultValue.token
-    ]);
+    setTxResult({
+      isTxSuccess: false,
+      isShowTxResult: false,
+      txError: undefined
+    });
+    setSenderValue(defaultValue);
+    setRecipientId(null);
+  },
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  [
+    defaultValue.address,
+    defaultValue.token
+  ]);
 
   const _onChangeOriginChain = useCallback((originChain: string) => {
     const destinationChainOptions = getDestinationChainOptions(originChain, networkMap);
+
     setOriginChain(originChain);
     setDestinationChain([destinationChainOptions[0].value, destinationChainOptions]);
     setSenderValue((prev) => {
       const newVal = {
         ...prev,
-        token: getSupportedTokens(originChain, destinationChainOptions[0].value)[0],
+        token: getSupportedTokens(originChain, destinationChainOptions[0].value)[0]
       };
 
       return newVal;
@@ -258,32 +249,32 @@ function XcmTransfer ({ chainRegistryMap, className, defaultValue, firstOriginCh
               />
             </div>
 
-            {!!balanceFormat ?
-              <>
+            {balanceFormat
+              ? <>
                 <BridgeInputAddress
                   balance={senderFreeBalance}
-                  chainRegistryMap={chainRegistryMap}
                   balanceFormat={balanceFormat}
+                  chainRegistryMap={chainRegistryMap}
                   className=''
                   initValue={{
                     address: senderId,
                     token: selectedToken
                   }}
+                  networkKey={originChain}
                   networkMap={networkMap}
                   onChange={setSenderValue}
                   options={tokenList}
-                  networkKey={originChain}
                 />
 
                 <ReceiverInputAddress
                   balance={recipientFreeBalance}
                   balanceFormat={balanceFormat}
                   className={''}
+                  inputAddressHelp={t<string>('The account you want to transfer to.')}
+                  inputAddressLabel={t<string>('Destination Account')}
                   networkKey={originChain}
                   networkMap={networkMap}
                   onchange={setRecipientId}
-                  inputAddressHelp={t<string>('The account you want to transfer to.')}
-                  inputAddressLabel={t<string>('Destination Account')}
                 />
 
                 <InputBalance
@@ -346,8 +337,8 @@ function XcmTransfer ({ chainRegistryMap, className, defaultValue, firstOriginCh
                     </span>
                   </Button>
                 </div>
-              </> :
-              <Warning className='xcm-transfer-warning'>
+              </>
+              : <Warning className='xcm-transfer-warning'>
                 {t<string>('To perform the transaction, please make sure the selected network in Original Chain is activated first.')}
               </Warning>
             }
@@ -355,10 +346,12 @@ function XcmTransfer ({ chainRegistryMap, className, defaultValue, firstOriginCh
             {isShowTxModal && mainTokenInfo && (
               <AuthTransaction
                 balanceFormat={balanceFormat}
+                destinationChainOptions={destinationChainOptions}
                 feeInfo={getAuthTransactionFeeInfo(fee, feeDecimal, feeSymbol, mainTokenInfo, chainRegistryMap[originChain].tokenMap)}
                 networkMap={networkMap}
                 onCancel={_onCancelTx}
                 onChangeResult={_onChangeResult}
+                originChainOptions={originChainOptions}
                 requestPayload={{
                   from: senderId,
                   to: recipientId,
@@ -367,8 +360,6 @@ function XcmTransfer ({ chainRegistryMap, className, defaultValue, firstOriginCh
                   value: valueToTransfer,
                   token: selectedToken
                 }}
-                originChainOptions={originChainOptions}
-                destinationChainOptions={destinationChainOptions}
               />
             )}
           </div>

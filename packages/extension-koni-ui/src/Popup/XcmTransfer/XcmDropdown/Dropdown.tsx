@@ -5,7 +5,7 @@ import { DropdownTransformOptionType, NetworkJson } from '@subwallet/extension-b
 import { Label, Theme } from '@subwallet/extension-koni-ui/components';
 import XcmItem from '@subwallet/extension-koni-ui/Popup/XcmTransfer/XcmDropdown/XcmItem';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
-import React, {useCallback, useContext, useEffect, useState} from 'react';
+import React, { useCallback, useContext, useEffect, useState } from 'react';
 import Select, { ActionMeta, SingleValue } from 'react-select';
 import styled, { ThemeContext } from 'styled-components';
 
@@ -21,15 +21,14 @@ interface Props {
 }
 
 function Dropdown ({ className, isDisabled, label, onChange, options, value }: Props): React.ReactElement<Props> {
-
   const [selectedValue, setSelectedValue] = useState(value);
   const themeContext = useContext(ThemeContext as React.Context<Theme>);
 
   useEffect(() => {
-    let isSync = true;
+    const isSync = true;
 
     if (isSync) {
-      setSelectedValue(value)
+      setSelectedValue(value);
     }
   }, [value]);
 

@@ -27,7 +27,7 @@ interface Props {
   inputAddressLabel: string;
 }
 
-function ReceiverInputAddress ({ balance, balanceFormat, className = '', defaultAddress, isDisabled = false, isSetDefaultValue = false, networkKey, networkMap, onchange, inputAddressHelp, inputAddressLabel }: Props): React.ReactElement {
+function ReceiverInputAddress ({ balance, balanceFormat, className = '', defaultAddress, inputAddressHelp, inputAddressLabel, isDisabled = false, isSetDefaultValue = false, networkKey, networkMap, onchange }: Props): React.ReactElement {
   const { t } = useTranslation();
   const networkPrefix = networkMap[networkKey].ss58Format;
   const [receiveAddress, setReceiveAddress] = useState<string>(defaultAddress || '');

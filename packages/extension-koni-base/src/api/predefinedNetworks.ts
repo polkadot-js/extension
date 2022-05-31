@@ -539,6 +539,7 @@ export const PREDEFINED_NETWORKS: Record<string, NetworkJson> = {
     groups: ['TEST_NET'],
     nativeToken: 'DEV',
     isEthereum: true,
+    paraId: 1000,
     decimals: 18,
     evmChainId: 1287
   },

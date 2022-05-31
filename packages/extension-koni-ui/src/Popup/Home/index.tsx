@@ -317,15 +317,15 @@ function Home ({ chainRegistryMap, className = '', currentAccount, historyMap, n
             />
           </Link>
 
-          {/*<Link*/}
-          {/*  className={'action-button-wrapper'}*/}
-          {/*  to={'/account/donate'}*/}
-          {/*>*/}
-          {/*  <ActionButton*/}
-          {/*    iconSrc={donateIcon}*/}
-          {/*    tooltipContent={t<string>('Donate')}*/}
-          {/*  />*/}
-          {/*</Link>*/}
+          {/* <Link */}
+          {/*  className={'action-button-wrapper'} */}
+          {/*  to={'/account/donate'} */}
+          {/* > */}
+          {/*  <ActionButton */}
+          {/*    iconSrc={donateIcon} */}
+          {/*    tooltipContent={t<string>('Donate')} */}
+          {/*  /> */}
+          {/* </Link> */}
         </div>
       </div>
 

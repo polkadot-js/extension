@@ -9,7 +9,7 @@ import { TokenTransformOptionType } from '@subwallet/extension-koni-ui/component
 import useOutsideClick from '@subwallet/extension-koni-ui/hooks/useOutsideClick';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { getLogoByNetworkKey } from '@subwallet/extension-koni-ui/util';
-import React, {useCallback, useContext, useEffect, useRef, useState} from 'react';
+import React, { useCallback, useContext, useEffect, useRef, useState } from 'react';
 import Select, { ActionMeta, SingleValue } from 'react-select';
 import styled, { ThemeContext } from 'styled-components';
 
@@ -96,7 +96,7 @@ function Dropdown ({ className, getFormatOptLabel, label, networkMap, onChange, 
   const themeContext = useContext(ThemeContext as React.Context<Theme>);
 
   useEffect(() => {
-    let isSync = true;
+    const isSync = true;
 
     if (isSync) {
       setSelectedValue(value);

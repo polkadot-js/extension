@@ -1,21 +1,18 @@
 // Copyright 2019-2022 @polkadot/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import {ChainRegistry, NetworkJson} from '@subwallet/extension-base/background/KoniTypes';
+import { ChainRegistry, NetworkJson } from '@subwallet/extension-base/background/KoniTypes';
 import FormatBalance from '@subwallet/extension-koni-ui/components/FormatBalance';
 import InputAddress from '@subwallet/extension-koni-ui/components/InputAddress';
 import { useTranslation } from '@subwallet/extension-koni-ui/components/translate';
-import {
-  BalanceFormatType,
-  XcmTransferInputAddressType
-} from '@subwallet/extension-koni-ui/components/types';
+import { BalanceFormatType, XcmTransferInputAddressType } from '@subwallet/extension-koni-ui/components/types';
 import XcmTokenDropdown from '@subwallet/extension-koni-ui/components/XcmTokenDropdown';
+import { TokenTransformOptionType } from '@subwallet/extension-koni-ui/components/XcmTokenDropdown/types';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { toShort } from '@subwallet/extension-koni-ui/util';
 import reformatAddress from '@subwallet/extension-koni-ui/util/reformatAddress';
-import React, {useCallback, useEffect, useMemo, useState} from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import styled from 'styled-components';
-import { TokenTransformOptionType } from "@subwallet/extension-koni-ui/components/XcmTokenDropdown/types";
 
 interface Props {
   className: string;
@@ -29,7 +26,7 @@ interface Props {
   networkKey: string;
 }
 
-function BridgeInputAddress ({ balance, balanceFormat, className = '', initValue, networkMap, onChange, options, networkKey }: Props): React.ReactElement {
+function BridgeInputAddress ({ balance, balanceFormat, className = '', initValue, networkKey, networkMap, onChange, options }: Props): React.ReactElement {
   const { t } = useTranslation();
   const [{ address, token }, setValue] = useState<XcmTransferInputAddressType>(initValue);
 
@@ -40,13 +37,14 @@ function BridgeInputAddress ({ balance, balanceFormat, className = '', initValue
   }, [address, networkPrefix]);
 
   useEffect(() => {
-    let isSync = true;
+    const isSync = true;
 
     if (isSync) {
       setValue({
         ...initValue
       });
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [initValue.token, initValue.address]);
 
   const onChangeInputAddress = useCallback((address: string | null) => {
@@ -71,7 +69,7 @@ function BridgeInputAddress ({ balance, balanceFormat, className = '', initValue
     setValue((prev) => {
       const newVal = {
         ...prev,
-        token: tokenValueStr,
+        token: tokenValueStr
       };
 
       onChange(newVal);

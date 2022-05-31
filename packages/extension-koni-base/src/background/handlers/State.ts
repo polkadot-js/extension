@@ -19,6 +19,7 @@ import { initWeb3Api } from '@subwallet/extension-koni-base/api/web3/web3';
 import { CurrentAccountStore, NetworkMapStore, PriceStore } from '@subwallet/extension-koni-base/stores';
 import AccountRefStore from '@subwallet/extension-koni-base/stores/AccountRef';
 import AuthorizeStore from '@subwallet/extension-koni-base/stores/Authorize';
+import BalanceStore from '@subwallet/extension-koni-base/stores/Balance';
 import CustomEvmTokenStore from '@subwallet/extension-koni-base/stores/CustomEvmToken';
 import SettingsStore from '@subwallet/extension-koni-base/stores/Settings';
 import TransactionHistoryStore from '@subwallet/extension-koni-base/stores/TransactionHistory';
@@ -27,7 +28,6 @@ import { BehaviorSubject, Subject } from 'rxjs';
 
 import { accounts } from '@polkadot/ui-keyring/observable/accounts';
 import { assert } from '@polkadot/util';
-import BalanceStore from "@subwallet/extension-koni-base/stores/Balance";
 
 function generateDefaultBalanceMap () {
   const balanceMap: Record<string, BalanceItem> = {};
@@ -785,8 +785,12 @@ export default class KoniState extends State {
 
   public setBalanceItem (networkKey: string, item: BalanceItem) {
     this.balanceMap[networkKey] = item;
-    this.balanceStore.set()
+
     this.lazyNext('setBalanceItem', () => {
+      this.getCurrentAccount((currentAccountInfo) => {
+        // TODO: only save the ready state, not pending ones
+        this.balanceStore.set(this.getStorageKey('balance', currentAccountInfo.address), this.balanceMap);
+      });
       this.balanceSubject.next(this.getBalance());
     });
   }
@@ -896,6 +900,10 @@ export default class KoniState extends State {
 
   private getTransactionKey (address: string, networkKey: string): string {
     return `${address}_${networkKey}`;
+  }
+
+  private getStorageKey (prefix: string, address: string): string {
+    return `${prefix}_${address}`;
   }
 
   public getTransactionHistory (address: string, networkKey: string, update: (items: TransactionHistoryItemType[]) => void): void {

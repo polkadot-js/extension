@@ -1,13 +1,13 @@
      465	Jaco                          	0.42.5 (#969)
-     245	Nam Phạm                      	
-     207	AnhMTV                        	Release version 0.4.2
+     397	Nam Phạm                      	minor bug on loading NFT collection preview
+     221	AnhMTV                        	
+     132	lw-cdm                        	Update predefinedNetworks
      132	quangdo                       	Integrate Genshiro & Equilibrium
-     110	lw-cdm                        	Fix import issue
       82	Thibaut Sardan                	Add account filtering feature (#832)
+      56	lw-cdm                        	
       55	leewong                       	#118: update balance logic for Kintsugi testnet
-      52	lw-cdm                        	
-      50	Dominhquangdev                	Update Settings screen, Update Restore Json
-      44	Hieu Dao                      	Update astar token issue #186
+      51	Dominhquangdev                	Fix bug display 2 popup connect
+      48	Hieu Dao                      	update Subspace name
       10	Trang Trịnh                   	api get karura and acala nfts
        9	Minh Le                       	
        9	minhld1029                    	[#115] [ForgetAccount] catch exception refList undefined

@@ -327,5 +327,17 @@
   "Delete Tokens": "",
   "Confirm": "",
   "Not a valid private key": "",
-  "Private key cannot be empty": ""
+  "Private key cannot be empty": "",
+  "Please only select networks that you need to optimize resource consumption. You can always turn them on later if needed": "",
+  "Please enable at least 1 network": "",
+  "Configure network": "",
+  "Provider URL (*)": "",
+  "Network name (*)": "",
+  "paraId": "",
+  "Ethereum Chain ID": "",
+  "Crowdloan Url (Optional)": "",
+  "Coingecko key (Optional)": "",
+  "Network Settings": "",
+  "Disconnect all": "",
+  "Reset to default": ""
 }

@@ -1,22 +1,22 @@
 // Copyright 2019-2022 @polkadot/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import {
-  DropdownTransformOptionType,
-  NetworkJson,
-  RequestCheckCrossChainTransfer
-} from '@subwallet/extension-base/background/KoniTypes';
+import { DropdownTransformOptionType, NetworkJson, RequestCheckCrossChainTransfer, TransferStep } from '@subwallet/extension-base/background/KoniTypes';
 import arrowRight from '@subwallet/extension-koni-ui/assets/arrow-right.svg';
 import { InputWithLabel, Warning } from '@subwallet/extension-koni-ui/components';
 import Button from '@subwallet/extension-koni-ui/components/Button';
+import FormatBalance from '@subwallet/extension-koni-ui/components/FormatBalance';
 import InputAddress from '@subwallet/extension-koni-ui/components/InputAddress';
 import Modal from '@subwallet/extension-koni-ui/components/Modal';
 import { BalanceFormatType } from '@subwallet/extension-koni-ui/components/types';
 import useTranslation from '@subwallet/extension-koni-ui/hooks/useTranslation';
+import { makeCrossChainTransfer } from '@subwallet/extension-koni-ui/messaging';
 import Dropdown from '@subwallet/extension-koni-ui/Popup/XcmTransfer/XcmDropdown/Dropdown';
 import { ThemeProps, TransferResultType } from '@subwallet/extension-koni-ui/types';
 import React, { useCallback, useState } from 'react';
 import styled from 'styled-components';
+
+import { BN } from '@polkadot/util';
 
 interface Props extends ThemeProps {
   className?: string;
@@ -30,7 +30,48 @@ interface Props extends ThemeProps {
   destinationChainOptions: DropdownTransformOptionType[];
 }
 
-function AuthTransaction ({ className, networkMap, onCancel, onChangeResult, requestPayload, originChainOptions, destinationChainOptions }: Props): React.ReactElement<Props> | null {
+type RenderTotalArg = {
+  fee: string | null,
+  feeDecimals: number,
+  feeSymbol: string,
+  amount?: string,
+  amountDecimals: number,
+  amountSymbol: string
+}
+
+function renderTotal (arg: RenderTotalArg) {
+  const { amount, amountDecimals, amountSymbol, fee, feeDecimals, feeSymbol } = arg;
+
+  if (feeDecimals === amountDecimals && feeSymbol === amountSymbol) {
+    return (
+      <FormatBalance
+        format={[feeDecimals, feeSymbol]}
+        value={new BN(fee || '0').add(new BN(amount || '0'))}
+      />
+    );
+  }
+
+  return (
+    <>
+      <FormatBalance
+        format={[amountDecimals, amountSymbol]}
+        value={new BN(amount || '0')}
+      />
+      <span className={'value-separator'}>+</span>
+      <FormatBalance
+        format={[feeDecimals, feeSymbol]}
+        value={new BN(fee || '0')}
+      />
+    </>
+  );
+}
+
+function AuthTransaction ({ balanceFormat,
+  className,
+  destinationChainOptions,
+  feeInfo: [fee, feeDecimals, feeSymbol],
+  networkMap, onCancel,
+  onChangeResult, originChainOptions, requestPayload }: Props): React.ReactElement<Props> | null {
   const { t } = useTranslation();
   const [isBusy, setBusy] = useState(false);
   const [password, setPassword] = useState<string>('');
@@ -47,10 +88,54 @@ function AuthTransaction ({ className, networkMap, onCancel, onChangeResult, req
 
   const _doStart = useCallback(
     (): void => {
-      console.log('123');
       setBusy(true);
+
+      makeCrossChainTransfer({
+        ...requestPayload,
+        password
+      }, (rs) => {
+        if (!rs.isFinalized) {
+          if (rs.step === TransferStep.SUCCESS.valueOf()) {
+            onChangeResult({
+              isShowTxResult: true,
+              isTxSuccess: rs.step === TransferStep.SUCCESS.valueOf(),
+              extrinsicHash: rs.extrinsicHash
+            });
+          } else if (rs.step === TransferStep.ERROR.valueOf()) {
+            onChangeResult({
+              isShowTxResult: true,
+              isTxSuccess: rs.step === TransferStep.SUCCESS.valueOf(),
+              extrinsicHash: rs.extrinsicHash,
+              txError: rs.errors
+            });
+          }
+        }
+      }).then((errors) => {
+        const errorMessage = errors.map((err) => err.message);
+
+        if (errors.find((err) => err.code === 'keyringError')) {
+          setKeyringErr(true);
+        }
+
+        setErrorArr(errorMessage);
+
+        if (errorMessage && errorMessage.length) {
+          setBusy(false);
+        }
+      })
+        .catch((e) => console.log('There is problem when makeTransfer', e));
     },
-    []);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [
+      password, onChangeResult,
+      requestPayload.originalNetworkKey,
+      requestPayload.destinationNetworkKey,
+      requestPayload.from,
+      requestPayload.to,
+      requestPayload.value,
+      requestPayload.token
+    ]
+  );
 
   const _onChangePass = useCallback(
     (value: string): void => {
@@ -103,8 +188,8 @@ function AuthTransaction ({ className, networkMap, onCancel, onChangeResult, req
             <Dropdown
               className='bridge__chain-selector'
               isDisabled={true}
-              options={originChainOptions}
               label={'Original Chain'}
+              options={originChainOptions}
               value={requestPayload.originalNetworkKey}
             />
 
@@ -118,8 +203,8 @@ function AuthTransaction ({ className, networkMap, onCancel, onChangeResult, req
             <Dropdown
               className='bridge__chain-selector'
               isDisabled={true}
-              options={destinationChainOptions}
               label={'Destination Chain'}
+              options={destinationChainOptions}
               value={requestPayload.destinationNetworkKey}
             />
           </div>
@@ -153,21 +238,34 @@ function AuthTransaction ({ className, networkMap, onCancel, onChangeResult, req
           <div className='auth-transaction__info'>
             <div className='auth-transaction__info-text'>Amount</div>
             <div className='auth-transaction__info-value'>
-              0.0000 DOT
+              <FormatBalance
+                format={balanceFormat}
+                value={requestPayload.value}
+              />
             </div>
           </div>
 
           <div className='auth-transaction__info'>
             <div className='auth-transaction__info-text'>Origin Chain Fee</div>
             <div className='auth-transaction__info-value'>
-              0.0000 DOT
+              <FormatBalance
+                format={[feeDecimals, feeSymbol]}
+                value={fee}
+              />
             </div>
           </div>
 
           <div className='auth-transaction__info'>
             <div className='auth-transaction__info-text'>Destination Chain Fee</div>
             <div className='auth-transaction__info-value'>
-              0.0000 DOT
+              {renderTotal({
+                fee,
+                feeDecimals,
+                feeSymbol,
+                amount: requestPayload.value,
+                amountDecimals: balanceFormat[0],
+                amountSymbol: balanceFormat[2] || balanceFormat[1]
+              })}
             </div>
           </div>
 
@@ -188,9 +286,9 @@ function AuthTransaction ({ className, networkMap, onCancel, onChangeResult, req
               className='bridge-button'
               onClick={_onCancel}
             >
-            <span>
-              {t<string>('Reject')}
-            </span>
+              <span>
+                {t<string>('Reject')}
+              </span>
             </Button>
 
             <Button
@@ -198,9 +296,9 @@ function AuthTransaction ({ className, networkMap, onCancel, onChangeResult, req
               isDisabled={false}
               onClick={_doStart}
             >
-            <span>
-              {t<string>('Confirm')}
-            </span>
+              <span>
+                {t<string>('Confirm')}
+              </span>
             </Button>
           </div>
         </div>

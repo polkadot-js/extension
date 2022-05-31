@@ -7,28 +7,33 @@ import {
   NetworkJson
 } from '@subwallet/extension-base/background/KoniTypes';
 import { SupportedCrossChainsMap } from '@subwallet/extension-koni-base/api/supportedCrossChains';
-import { AccountContext, Button } from '@subwallet/extension-koni-ui/components';
+import {AccountContext, Button, Warning} from '@subwallet/extension-koni-ui/components';
 import InputBalance from '@subwallet/extension-koni-ui/components/InputBalance';
 import LoadingContainer from '@subwallet/extension-koni-ui/components/LoadingContainer';
 import ReceiverInputAddress from '@subwallet/extension-koni-ui/components/ReceiverInputAddress';
 import { useTranslation } from '@subwallet/extension-koni-ui/components/translate';
 import { BalanceFormatType, SenderInputAddressType } from '@subwallet/extension-koni-ui/components/types';
 import useFreeBalance from '@subwallet/extension-koni-ui/hooks/screen/sending/useFreeBalance';
-import { transferCheckSupporting } from '@subwallet/extension-koni-ui/messaging';
 import Header from '@subwallet/extension-koni-ui/partials/Header';
 import AuthTransaction from '@subwallet/extension-koni-ui/Popup/XcmTransfer/AuthTransaction';
 import BridgeInputAddress from '@subwallet/extension-koni-ui/Popup/XcmTransfer/BridgeInputAddress';
 import Dropdown from '@subwallet/extension-koni-ui/Popup/XcmTransfer/XcmDropdown/Dropdown';
-import { getBalanceFormat, getDefaultAddress } from '@subwallet/extension-koni-ui/Popup/Sending/utils';
+import {
+  getAuthTransactionFeeInfo,
+  getBalanceFormat,
+  getDefaultAddress, getMainTokenInfo
+} from '@subwallet/extension-koni-ui/Popup/Sending/utils';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
-import React, { useCallback, useContext, useEffect, useState } from 'react';
+import React, {useCallback, useContext, useEffect, useState} from 'react';
 import { useSelector } from 'react-redux';
 import styled from 'styled-components';
 
 import { BN, BN_ZERO } from '@polkadot/util';
 
 import arrowRight from '../../assets/arrow-right.svg';
+import {checkCrossChainTransfer} from "@subwallet/extension-koni-ui/messaging";
+import {isEthereumAddress} from "@polkadot/util-crypto";
 
 interface Props extends ThemeProps {
   className?: string,
@@ -101,9 +106,17 @@ function XcmTransfer ({ chainRegistryMap, className, defaultValue, networkMap, d
   const [{ address: senderId,
     networkKey: selectedNetworkKey,
     token: selectedToken }, setSenderValue] = useState<SenderInputAddressType>(defaultValue);
+  const [[fee, feeSymbol, errors], setFeeInfo] = useState<[string | null, string | null | undefined, string[]]>([null, null, []]);
   const senderFreeBalance = useFreeBalance(selectedNetworkKey, senderId, selectedToken);
   const recipientFreeBalance = useFreeBalance(selectedNetworkKey, recipientId, selectedToken);
-  const balanceFormat: BalanceFormatType = getBalanceFormat(selectedNetworkKey, selectedToken, chainRegistryMap);
+  const balanceFormat: BalanceFormatType | null = chainRegistryMap[selectedNetworkKey] || networkMap[selectedNetworkKey].active ?
+    getBalanceFormat(selectedNetworkKey, selectedToken, chainRegistryMap) : null;
+  const mainTokenInfo = chainRegistryMap[selectedNetworkKey] || networkMap[selectedNetworkKey].active ? getMainTokenInfo(selectedNetworkKey, chainRegistryMap) : null;
+  const feeDecimal: number | null = feeSymbol && (chainRegistryMap[selectedNetworkKey] || networkMap[selectedNetworkKey].active)
+    ? feeSymbol === selectedToken && balanceFormat
+      ? balanceFormat[0]
+      : getBalanceFormat(selectedNetworkKey, feeSymbol, chainRegistryMap)[0]
+    : null;
   const valueToTransfer = amount?.toString() || '0';
   const [originChain, setOriginChain] = useState<string>(originChainOptions[0].value);
   const [destinationChain, setDestinationChain] = useState<string>(destinationChainOptions[0].value);
@@ -115,15 +128,37 @@ function XcmTransfer ({ chainRegistryMap, className, defaultValue, networkMap, d
       networkName: networkMap[originChain].chain
     }
   ));
-  const a = {
-    address: senderId,
-    token: tokenList[0].value,
-    networkKey: originChain
-  }
 
   useEffect(() => {
-    transferCheckSupporting({ networkKey: selectedNetworkKey, token: selectedToken }).catch((e) => console.log(e));
-  }, [selectedNetworkKey, selectedToken]);
+    let isSync = true;
+
+    if (recipientId) {
+      checkCrossChainTransfer({
+        originalNetworkKey: originChain,
+        destinationNetworkKey: destinationChain,
+        from: senderId,
+        to: recipientId,
+        token: selectedToken,
+        value: valueToTransfer
+      }).then((value) => {
+        if (isSync) {
+          if (value.errors && value.errors.length) {
+            if (value.estimateFee) {
+              setFeeInfo([value.estimateFee, value.feeSymbol, value.errors.map((err) => err.message)]);
+            } else {
+              setFeeInfo([null, value.feeSymbol, value.errors.map((err) => err.message)]);
+            }
+          } else {
+            setFeeInfo([null, value.feeSymbol, []]);
+          }
+        }
+      }).catch(console.error);
+    }
+
+    return () => {
+      isSync = false;
+    };
+  }, [recipientId, valueToTransfer, selectedToken, recipientId, senderId, destinationChain, originChain]);
 
   const _onCancel = useCallback(() => {}, []);
   const _onTransfer = useCallback(() => {
@@ -135,6 +170,20 @@ function XcmTransfer ({ chainRegistryMap, className, defaultValue, networkMap, d
   const _onCancelTx = useCallback(() => {
     setShowTxModal(false);
   }, []);
+
+  const renderError = () => {
+    return errors.map((err) =>
+      (
+        <Warning
+          className='auth-transaction-error'
+          isDanger
+          key={err}
+        >
+          {t<string>(err)}
+        </Warning>
+      )
+    );
+  };
 
   return (
     <>
@@ -166,64 +215,85 @@ function XcmTransfer ({ chainRegistryMap, className, defaultValue, networkMap, d
           />
         </div>
 
-        <BridgeInputAddress
-          balance={senderFreeBalance}
-          chainRegistryMap={chainRegistryMap}
-          balanceFormat={balanceFormat}
-          className=''
-          initValue={a}
-          networkMap={networkMap}
-          onChange={setSenderValue}
-          options={tokenList}
-        />
+        {!!balanceFormat ?
+          <>
+            <BridgeInputAddress
+              balance={senderFreeBalance}
+              chainRegistryMap={chainRegistryMap}
+              balanceFormat={balanceFormat}
+              className=''
+              initValue={defaultValue}
+              networkMap={networkMap}
+              onChange={setSenderValue}
+              options={tokenList}
+            />
 
-        <ReceiverInputAddress
-          balance={recipientFreeBalance}
-          balanceFormat={balanceFormat}
-          className={''}
-          networkKey={selectedNetworkKey}
-          networkMap={networkMap}
-          onchange={setRecipientId}
-        />
+            <ReceiverInputAddress
+              balance={recipientFreeBalance}
+              balanceFormat={balanceFormat}
+              className={''}
+              networkKey={selectedNetworkKey}
+              networkMap={networkMap}
+              onchange={setRecipientId}
+            />
 
-        <InputBalance
-          autoFocus
-          className={'bridge-amount-input'}
-          decimals={balanceFormat[0]}
-          help={t<string>('Type the amount you want to transfer. Note that you can select the unit on the right e.g sending 1 milli is equivalent to sending 0.001.')}
-          isError={false}
-          isZeroable
-          label={t<string>('amount')}
-          onChange={setAmount}
-          placeholder={'0'}
-          siSymbol={balanceFormat[2] || balanceFormat[1]}
-        />
+            <InputBalance
+              autoFocus
+              className={'bridge-amount-input'}
+              decimals={balanceFormat[0]}
+              help={t<string>('Type the amount you want to transfer. Note that you can select the unit on the right e.g sending 1 milli is equivalent to sending 0.001.')}
+              isError={false}
+              isZeroable
+              label={t<string>('amount')}
+              onChange={setAmount}
+              placeholder={'0'}
+              siSymbol={balanceFormat[2] || balanceFormat[1]}
+            />
 
-        <div className='bridge-button-container'>
-          <Button
-            className='bridge-button'
-            onClick={_onCancel}
-          >
+            {!!(errors && errors.length) && renderError()}
+
+            {!!networkMap[originChain].isEthereum !== isEthereumAddress(senderId) &&
+              <Warning className='xcm-transfer-warning'>
+                {t<string>(`Sender address must be ${networkMap[originChain].isEthereum ? 'EVM' : 'substrate'} type`)}
+              </Warning>
+            }
+
+            {recipientId && !!networkMap[destinationChain].isEthereum !== isEthereumAddress(recipientId) &&
+              <Warning className='xcm-transfer-warning'>
+                {t<string>(`Receiver address must be ${networkMap[originChain].isEthereum ? 'EVM' : 'substrate'} type`)}
+              </Warning>
+            }
+
+            <div className='bridge-button-container'>
+              <Button
+                className='bridge-button'
+                onClick={_onCancel}
+              >
             <span>
               {t<string>('Cancel')}
             </span>
-          </Button>
+              </Button>
 
-          <Button
-            className='bridge-button'
-            isDisabled={false}
-            onClick={_onTransfer}
-          >
+              <Button
+                className='bridge-button'
+                isDisabled={false}
+                onClick={_onTransfer}
+              >
             <span>
               {t<string>('Transfer')}
             </span>
-          </Button>
-        </div>
+              </Button>
+            </div>
+          </> :
+          <Warning className='xcm-transfer-warning'>
+            {t<string>('Current original chain is disable. Please enable to continue this action')}
+          </Warning>
+        }
 
-        {isShowTxModal && (
+        {isShowTxModal && mainTokenInfo && (
           <AuthTransaction
             balanceFormat={balanceFormat}
-            feeInfo={['0.1', 10, 'DOT']}
+            feeInfo={getAuthTransactionFeeInfo(fee, feeDecimal, feeSymbol, mainTokenInfo, chainRegistryMap[selectedNetworkKey].tokenMap)}
             networkMap={networkMap}
             onCancel={_onCancelTx}
             onChangeResult={_onChangeResult}

@@ -54,6 +54,7 @@ function EvmTokenRow ({ className, handleSelected, handleUnselected, item }: Pro
           label={''}
           onChange={handleCheck}
         />
+
         <Link
           className={'link-edit'}
           onClick={updateTokenEditParams}

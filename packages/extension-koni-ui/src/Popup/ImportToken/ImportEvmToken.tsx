@@ -121,7 +121,8 @@ function ImportEvmToken ({ className = '' }: Props): React.ReactElement<Props> {
       smartContract: contractAddress,
       chain,
       decimals: parseInt(decimals),
-      type: 'erc20'
+      type: 'erc20',
+      isCustom: true
     } as CustomEvmToken;
 
     if (symbol) {

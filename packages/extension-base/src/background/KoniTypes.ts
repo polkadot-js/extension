@@ -685,7 +685,9 @@ export interface CustomEvmToken {
   symbol?: string,
   decimals?: number,
   chain: string,
-  type: 'erc20' | 'erc721'
+  type: 'erc20' | 'erc721',
+  isCustom?: boolean,
+  inUse?: boolean
 }
 
 export interface EvmTokenJson {

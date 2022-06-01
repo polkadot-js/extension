@@ -106,6 +106,7 @@ function XcmTransfer ({ chainRegistryMap, className, defaultValue, firstOriginCh
   const [originChain, setOriginChain] = useState<string>(firstOriginChain);
   const [{ address: senderId,
     token: selectedToken }, setSenderValue] = useState<XcmTransferInputAddressType>(defaultValue);
+  const onAction = useContext(ActionContext);
   const [[fee, feeSymbol], setFeeInfo] = useState<[string | null, string | null | undefined]>([null, null]);
   const senderFreeBalance = useFreeBalance(originChain, senderId, selectedToken);
   const recipientFreeBalance = useFreeBalance(originChain, recipientId, selectedToken);
@@ -120,7 +121,6 @@ function XcmTransfer ({ chainRegistryMap, className, defaultValue, firstOriginCh
       ? balanceFormat[0]
       : getBalanceFormat(originChain, feeSymbol, chainRegistryMap)[0]
     : null;
-  const navigate = useContext(ActionContext);
   const valueToTransfer = amount?.toString() || '0';
   const defaultDestinationChainOptions = getDestinationChainOptions(firstOriginChain, networkMap);
   const [[selectedDestinationChain, destinationChainOptions], setDestinationChain] = useState<[string, DropdownTransformOptionType[]]>([defaultDestinationChainOptions[0].value, defaultDestinationChainOptions]);
@@ -170,9 +170,10 @@ function XcmTransfer ({ chainRegistryMap, className, defaultValue, firstOriginCh
 
   const _onCancel = useCallback(
     () => {
-      navigate('/');
+      window.localStorage.setItem('popupNavigation', '/');
+      onAction('/');
     },
-    [navigate]
+    [onAction]
   );
   const _onTransfer = useCallback(() => {
     setShowTxModal(true);

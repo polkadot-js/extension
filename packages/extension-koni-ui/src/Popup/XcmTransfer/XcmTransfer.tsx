@@ -193,13 +193,14 @@ function XcmTransfer ({ chainRegistryMap, className, defaultValue, firstOriginCh
       isShowTxResult: false,
       txError: undefined
     });
-    setSenderValue(defaultValue);
+    setSenderValue({ address: senderId, token: selectedToken });
     setRecipientId(null);
   },
   // eslint-disable-next-line react-hooks/exhaustive-deps
   [
-    defaultValue.address,
-    defaultValue.token
+    originChain,
+    selectedToken,
+    senderId
   ]);
 
   const _onChangeOriginChain = useCallback((originChain: string) => {
@@ -295,7 +296,7 @@ function XcmTransfer ({ chainRegistryMap, className, defaultValue, firstOriginCh
                   className='xcm-transfer-warning'
                   isDanger
                 >
-                  {t<string>(`Sender address must be ${networkMap[originChain].isEthereum ? 'EVM' : 'substrate'} type`)}
+                  {t<string>(`Original account must be ${networkMap[originChain].isEthereum ? 'EVM' : 'substrate'} type`)}
                 </Warning>
                 }
 
@@ -304,7 +305,7 @@ function XcmTransfer ({ chainRegistryMap, className, defaultValue, firstOriginCh
                   className='xcm-transfer-warning'
                   isDanger
                 >
-                  {t<string>(`Receiver address must be ${networkMap[selectedDestinationChain].isEthereum ? 'EVM' : 'substrate'} type`)}
+                  {t<string>(`Destination account must be ${networkMap[selectedDestinationChain].isEthereum ? 'EVM' : 'substrate'} type`)}
                 </Warning>
                 }
 
@@ -316,32 +317,32 @@ function XcmTransfer ({ chainRegistryMap, className, defaultValue, firstOriginCh
                     {t<string>('The amount you want to transfer is greater than your available balance.')}
                   </Warning>
                 )}
-
-                <div className='bridge-button-container'>
-                  <Button
-                    className='bridge-button'
-                    onClick={_onCancel}
-                  >
-                    <span>
-                      {t<string>('Cancel')}
-                    </span>
-                  </Button>
-
-                  <Button
-                    className='bridge-button'
-                    isDisabled={canMakeTransfer}
-                    onClick={_onTransfer}
-                  >
-                    <span>
-                      {t<string>('Transfer')}
-                    </span>
-                  </Button>
-                </div>
               </>
               : <Warning className='xcm-transfer-warning'>
                 {t<string>('To perform the transaction, please make sure the selected network in Original Chain is activated first.')}
               </Warning>
             }
+
+            <div className='bridge-button-container'>
+              <Button
+                className='bridge-button'
+                onClick={_onCancel}
+              >
+                    <span>
+                      {t<string>('Cancel')}
+                    </span>
+              </Button>
+
+              <Button
+                className='bridge-button'
+                isDisabled={canMakeTransfer}
+                onClick={_onTransfer}
+              >
+                    <span>
+                      {t<string>('Transfer')}
+                    </span>
+              </Button>
+            </div>
 
             {isShowTxModal && mainTokenInfo && (
               <AuthTransaction
@@ -387,7 +388,7 @@ export default React.memo(styled(Wrapper)(({ theme }: Props) => `
   }
 
   .bridge-container {
-    padding: 15px;
+    padding: 10px 22px 15px;
     flex: 1;
     overflow-y: auto;
   }
@@ -413,22 +414,26 @@ export default React.memo(styled(Wrapper)(({ theme }: Props) => `
     display: flex;
     justify-content: center;
     align-items: center;
-    margin: 24px 12px 0;
+    margin: 30px 12px 0;
   }
 
   .bridge-button-container {
     display: flex;
     position: sticky;
     bottom: -15px;
-    padding: 15px;
-    margin-left: -15px;
+    padding: 15px 22px;
+    margin-left: -22px;
     margin-bottom: -15px;
-    margin-right: -15px;
+    margin-right: -22px;
     background-color: ${theme.background};
   }
 
   .bridge__chain-selector {
     flex: 1;
+  }
+
+  .bridge__chain-selector .label-wrapper {
+    margin-bottom: 5px;
   }
 
   .bridge__chain-selector label {

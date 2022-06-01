@@ -218,6 +218,12 @@ function XcmTransfer ({ chainRegistryMap, className, defaultValue, firstOriginCh
     });
   }, [networkMap]);
 
+  const _onChangeDestinationChain = useCallback((chain: string) => {
+    setDestinationChain((prev) => {
+      return [chain, prev[1]];
+    });
+  }, []);
+
   return (
     <>
       {!isShowTxResult
@@ -244,7 +250,7 @@ function XcmTransfer ({ chainRegistryMap, className, defaultValue, firstOriginCh
                 className='bridge__chain-selector'
                 isDisabled={false}
                 label={'Destination Chain'}
-                onChange={setDestinationChain}
+                onChange={_onChangeDestinationChain}
                 options={destinationChainOptions}
                 value={selectedDestinationChain}
               />
@@ -328,9 +334,9 @@ function XcmTransfer ({ chainRegistryMap, className, defaultValue, firstOriginCh
                 className='bridge-button'
                 onClick={_onCancel}
               >
-                    <span>
-                      {t<string>('Cancel')}
-                    </span>
+                <span>
+                  {t<string>('Cancel')}
+                </span>
               </Button>
 
               <Button
@@ -338,9 +344,9 @@ function XcmTransfer ({ chainRegistryMap, className, defaultValue, firstOriginCh
                 isDisabled={canMakeTransfer}
                 onClick={_onTransfer}
               >
-                    <span>
-                      {t<string>('Transfer')}
-                    </span>
+                <span>
+                  {t<string>('Transfer')}
+                </span>
               </Button>
             </div>
 

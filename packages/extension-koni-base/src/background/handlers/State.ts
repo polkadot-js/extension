@@ -197,12 +197,12 @@ export default class KoniState extends State {
       if (!storedEvmTokens) {
         this.evmTokenState = DEFAULT_EVM_TOKENS;
       } else {
-        const _evmTokenState = DEFAULT_EVM_TOKENS;
+        const _evmTokenState = storedEvmTokens;
 
-        for (const storedToken of storedEvmTokens.erc20) {
+        for (const storedToken of DEFAULT_EVM_TOKENS.erc20) {
           let exist = false;
 
-          for (const defaultToken of DEFAULT_EVM_TOKENS.erc20) {
+          for (const defaultToken of storedEvmTokens.erc20) {
             if (defaultToken.smartContract === storedToken.smartContract && defaultToken.chain === storedToken.chain) {
               exist = true;
               break;
@@ -214,10 +214,10 @@ export default class KoniState extends State {
           }
         }
 
-        for (const storedToken of storedEvmTokens.erc721) {
+        for (const storedToken of DEFAULT_EVM_TOKENS.erc721) {
           let exist = false;
 
-          for (const defaultToken of DEFAULT_EVM_TOKENS.erc721) {
+          for (const defaultToken of storedEvmTokens.erc721) {
             if (defaultToken.smartContract === storedToken.smartContract && defaultToken.chain === storedToken.chain) {
               exist = true;
               break;
@@ -862,7 +862,15 @@ export default class KoniState extends State {
   public initChainRegistry () {
     this.chainRegistryMap = {};
     this.getEvmTokenStore((evmTokens) => {
-      const erc20Tokens = evmTokens ? evmTokens.erc20 : [];
+      const erc20Tokens: CustomEvmToken[] = evmTokens ? evmTokens.erc20 : [];
+
+      if (evmTokens) {
+        evmTokens.erc20.forEach((token) => {
+          if (!token.isDeleted) {
+            erc20Tokens.push(token);
+          }
+        });
+      }
 
       Object.entries(this.apiMap.dotSama).forEach(([networkKey, { api }]) => {
         getRegistry(networkKey, api, erc20Tokens)
@@ -987,12 +995,28 @@ export default class KoniState extends State {
     return this.evmTokenState;
   }
 
-  public getErc20Tokens () {
-    return this.evmTokenState.erc20;
+  public getActiveErc20Tokens () {
+    const filteredErc20Tokens: CustomEvmToken[] = [];
+
+    this.evmTokenState.erc20.forEach((token) => {
+      if (!token.isDeleted) {
+        filteredErc20Tokens.push(token);
+      }
+    });
+
+    return filteredErc20Tokens;
   }
 
-  public getErc721Tokens () {
-    return this.evmTokenState.erc721;
+  public getActiveErc721Tokens () {
+    const filteredErc721Tokens: CustomEvmToken[] = [];
+
+    this.evmTokenState.erc721.forEach((token) => {
+      if (!token.isDeleted) {
+        filteredErc721Tokens.push(token);
+      }
+    });
+
+    return filteredErc721Tokens;
   }
 
   public getEvmTokenStore (callback: (data: EvmTokenJson) => void) {
@@ -1039,7 +1063,12 @@ export default class KoniState extends State {
     for (const targetToken of targetTokens) {
       for (let index = 0; index < _evmTokenState.erc20.length; index++) {
         if (_evmTokenState.erc20[index].smartContract === targetToken.smartContract && _evmTokenState.erc20[index].chain === targetToken.chain && targetToken.type === 'erc20') {
-          _evmTokenState.erc20.splice(index, 1);
+          if (_evmTokenState.erc20[index].isCustom) {
+            _evmTokenState.erc20.splice(index, 1);
+          } else {
+            _evmTokenState.erc20[index].isDeleted = true;
+          }
+
           needUpdateChainRegistry = true;
         }
       }
@@ -1065,8 +1094,11 @@ export default class KoniState extends State {
     for (const targetToken of targetTokens) {
       for (let index = 0; index < _evmTokenState.erc721.length; index++) {
         if (_evmTokenState.erc721[index].smartContract === targetToken.smartContract && _evmTokenState.erc721[index].chain === targetToken.chain && targetToken.type === 'erc721') {
-          _evmTokenState.erc721.splice(index, 1);
-          needUpdateChainRegistry = true;
+          if (_evmTokenState.erc721[index].isCustom) {
+            _evmTokenState.erc721.splice(index, 1);
+          } else {
+            _evmTokenState.erc721[index].isDeleted = true;
+          }
         }
       }
     }
@@ -1386,7 +1418,7 @@ export default class KoniState extends State {
         apiMap: this.apiMap,
         currentAccountInfo: value,
         chainRegistry: this.chainRegistryMap,
-        customErc721Registry: this.getErc721Tokens()
+        customErc721Registry: this.getActiveErc721Tokens()
       });
     });
   }

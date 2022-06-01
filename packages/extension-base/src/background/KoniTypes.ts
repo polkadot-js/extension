@@ -687,7 +687,7 @@ export interface CustomEvmToken {
   chain: string,
   type: 'erc20' | 'erc721',
   isCustom?: boolean,
-  inUse?: boolean
+  isDeleted?: boolean
 }
 
 export interface EvmTokenJson {

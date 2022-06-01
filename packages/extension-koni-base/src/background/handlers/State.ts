@@ -29,22 +29,6 @@ import { BehaviorSubject, Subject } from 'rxjs';
 import { accounts } from '@polkadot/ui-keyring/observable/accounts';
 import { assert } from '@polkadot/util';
 
-function generateDefaultBalanceMap () {
-  const balanceMap: Record<string, BalanceItem> = {};
-
-  Object.keys(PREDEFINED_NETWORKS).forEach((networkKey) => {
-    balanceMap[networkKey] = {
-      state: APIItemState.PENDING,
-      free: '0',
-      reserved: '0',
-      miscFrozen: '0',
-      feeFrozen: '0'
-    };
-  });
-
-  return balanceMap;
-}
-
 function generateDefaultStakingMap () {
   const stakingMap: Record<string, StakingItem> = {};
 
@@ -139,7 +123,7 @@ export default class KoniState extends State {
   private evmTokenState: EvmTokenJson = { erc20: [], erc721: [] };
   private evmTokenSubject = new Subject<EvmTokenJson>();
 
-  private balanceMap: Record<string, BalanceItem> = generateDefaultBalanceMap();
+  private balanceMap: Record<string, BalanceItem> = this.generateDefaultBalanceMap();
   private balanceSubject = new Subject<BalanceJson>();
 
   // eslint-disable-next-line camelcase
@@ -178,11 +162,28 @@ export default class KoniState extends State {
   private historyMap: Record<string, TransactionHistoryItemType[]> = {};
   private historySubject = new Subject<Record<string, TransactionHistoryItemType[]>>();
 
-  // Todo: persist data to store later
   private chainRegistryMap: Record<string, ChainRegistry> = {};
   private chainRegistrySubject = new Subject<Record<string, ChainRegistry>>();
 
   private lazyMap: Record<string, unknown> = {};
+
+  public generateDefaultBalanceMap () {
+    const balanceMap: Record<string, BalanceItem> = {};
+
+    Object.values(this.networkMap).forEach((networkJson) => {
+      if (networkJson.active) {
+        balanceMap[networkJson.key] = {
+          state: APIItemState.PENDING,
+          free: '0',
+          reserved: '0',
+          miscFrozen: '0',
+          feeFrozen: '0'
+        };
+      }
+    });
+
+    return balanceMap;
+  }
 
   // init networkMap, apiMap and chainRegistry (first time only)
   // TODO: merge transactionHistory when custom network -> predefined network
@@ -784,14 +785,25 @@ export default class KoniState extends State {
   }
 
   public setBalanceItem (networkKey: string, item: BalanceItem) {
-    this.balanceMap[networkKey] = item;
+    this.balanceMap[networkKey] = { ...item, timestamp: +new Date() };
 
     this.lazyNext('setBalanceItem', () => {
-      this.getCurrentAccount((currentAccountInfo) => {
-        // TODO: only save the ready state, not pending ones
-        this.balanceStore.set(this.getStorageKey('balance', currentAccountInfo.address), this.balanceMap);
-      });
+      this.updateBalanceStore();
       this.balanceSubject.next(this.getBalance());
+    });
+  }
+
+  private updateBalanceStore () {
+    const readyBalanceMap: Record<string, BalanceItem> = {};
+
+    Object.entries(this.balanceMap).forEach(([key, balanceItem]) => {
+      if (balanceItem.state === APIItemState.READY) {
+        readyBalanceMap[key] = balanceItem;
+      }
+    });
+
+    this.getCurrentAccount((currentAccountInfo) => {
+      this.balanceStore.set(this.getStorageKey('balance', currentAccountInfo.address), readyBalanceMap);
     });
   }
 

@@ -192,7 +192,8 @@ export interface BalanceItem {
   reserved: string,
   miscFrozen: string,
   feeFrozen: string,
-  children?: Record<string, BalanceChildItem>
+  children?: Record<string, BalanceChildItem>,
+  timestamp?: number
 }
 
 export interface BalanceJson {

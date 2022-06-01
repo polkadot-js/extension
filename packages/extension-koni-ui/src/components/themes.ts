@@ -28,6 +28,7 @@ const darkTheme = {
   boxShadow2: '0px 0px 7px rgba(4, 193, 183, 0.4)',
   buttonBackground: colors.primary1,
   buttonBackground2: colors.primary2,
+  buttonBorderColor: 'rgb(66, 197, 154, 0.2)',
   buttonBackgroundDanger: '#AF1111',
   buttonBackground1: '#181E42',
   buttonBackgroundDangerHover: '#D93B3B',

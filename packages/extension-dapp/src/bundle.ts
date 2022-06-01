@@ -30,15 +30,13 @@ function throwError (method: string): never {
 
 // internal helper to map from Array<InjectedAccount> -> Array<InjectedAccountWithMeta>
 function mapAccounts (source: string, list: InjectedAccount[], ss58Format?: number): InjectedAccountWithMeta[] {
-  return list.map(({ address, genesisHash, name, type }): InjectedAccountWithMeta => {
-    const encodedAddress = address.length === 42 ? address : encodeAddress(decodeAddress(address), ss58Format);
-
-    return ({
-      address: encodedAddress,
-      meta: { genesisHash, name, source },
-      type
-    });
-  });
+  return list.map(({ address, genesisHash, name, type }): InjectedAccountWithMeta => ({
+    address: address.length === 42
+      ? address
+      : encodeAddress(decodeAddress(address), ss58Format),
+    meta: { genesisHash, name, source },
+    type
+  }));
 }
 
 // have we found a properly constructed window.injectedWeb3
@@ -49,9 +47,9 @@ let web3EnablePromise: Promise<InjectedExtension[]> | null = null;
 
 export { isWeb3Injected, web3EnablePromise };
 
-function getWindowExtension (originName: string, extensionName: string): Promise<[InjectedExtensionInfo, Injected | void][]> {
+function getWindowExtension (originName: string, extensionName?: string): Promise<[InjectedExtensionInfo, Injected | void][]> {
   return Promise.all(
-    Object.entries(win.injectedWeb3).filter(() => win.injectedWeb3[extensionName]).map(
+    Object.entries(win.injectedWeb3).filter(() => extensionName ? win.injectedWeb3[extensionName] : true).map(
       ([name, { enable, version }]): Promise<[InjectedExtensionInfo, Injected | void]> =>
         Promise.all([
           Promise.resolve({ name, version }),
@@ -63,8 +61,8 @@ function getWindowExtension (originName: string, extensionName: string): Promise
   );
 }
 
-// enables all the providers found on the injected window interface
-export function web3Enable (originName: string, extensionName: string, compatInits: (() => Promise<boolean>)[] = []): Promise<InjectedExtension[]> {
+// enables all the providers found on the injected window interface, or just the named one
+export function web3Enable (originName: string, extensionName?: string, compatInits: (() => Promise<boolean>)[] = []): Promise<InjectedExtension[]> {
   if (!originName) {
     throw new Error('You must pass a name for your app to the web3Enable function');
   }
@@ -87,7 +85,7 @@ export function web3Enable (originName: string, extensionName: string, compatIni
                     ext.accounts.get().then(cb).catch(console.error);
 
                     return (): void => {
-                      // no ubsubscribe needed, this is a single-shot
+                      // no unsubscribe needed, this is a single-shot
                     };
                   };
                 }

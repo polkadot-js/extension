@@ -23,8 +23,8 @@ interface Props {
   balance: string;
   balanceFormat: BalanceFormatType;
   networkMap: Record<string, NetworkJson>;
-  inputAddressHelp: string;
-  inputAddressLabel: string;
+  inputAddressHelp?: string;
+  inputAddressLabel?: string;
 }
 
 function ReceiverInputAddress ({ balance, balanceFormat, className = '', defaultAddress, inputAddressHelp, inputAddressLabel, isDisabled = false, isSetDefaultValue = false, networkKey, networkMap, onchange }: Props): React.ReactElement {

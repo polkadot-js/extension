@@ -100,7 +100,9 @@ function Networks ({ className }: Props): React.ReactElement {
   return (
     <div className={className}>
       <Header
+        cancelButtonText={'Done'}
         showBackArrow
+        showCancelButton
         showSubHeader
         subHeaderName={t<string>('Network Settings')}
         to='/account/settings'

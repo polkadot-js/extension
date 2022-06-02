@@ -132,14 +132,15 @@ function XcmTransfer ({ chainRegistryMap, className, defaultValue, firstOriginCh
       networkName: networkMap[originChain].chain
     }
   ));
-  const checkOriginalChainAndSenderIdType = !!networkMap[originChain].isEthereum !== isEthereumAddress(senderId);
-  const checkDestinationChainAndReceiverIdType = recipientId && !!networkMap[selectedDestinationChain].isEthereum !== isEthereumAddress(recipientId);
+  const checkOriginalChainAndSenderIdType = !!networkMap[originChain].isEthereum === isEthereumAddress(senderId);
+  const checkDestinationChainAndReceiverIdType = !!recipientId && !!networkMap[selectedDestinationChain].isEthereum === isEthereumAddress(recipientId);
   const amountGtAvailableBalance = amount && senderFreeBalance && amount.gt(new BN(senderFreeBalance));
-  const canMakeTransfer = checkOriginalChainAndSenderIdType ||
-    checkDestinationChainAndReceiverIdType ||
-    !valueToTransfer ||
-    !recipientId ||
-    !!amountGtAvailableBalance;
+  const canMakeTransfer = checkOriginalChainAndSenderIdType &&
+    checkDestinationChainAndReceiverIdType &&
+    !!valueToTransfer &&
+    !!recipientId &&
+    !amountGtAvailableBalance &&
+    !!balanceFormat;
 
   useEffect(() => {
     let isSync = true;
@@ -298,7 +299,7 @@ function XcmTransfer ({ chainRegistryMap, className, defaultValue, firstOriginCh
                   siSymbol={balanceFormat[2] || balanceFormat[1]}
                 />
 
-                {checkOriginalChainAndSenderIdType &&
+                {!checkOriginalChainAndSenderIdType &&
                 <Warning
                   className='xcm-transfer-warning'
                   isDanger
@@ -307,7 +308,7 @@ function XcmTransfer ({ chainRegistryMap, className, defaultValue, firstOriginCh
                 </Warning>
                 }
 
-                {checkDestinationChainAndReceiverIdType &&
+                {!checkDestinationChainAndReceiverIdType &&
                 <Warning
                   className='xcm-transfer-warning'
                   isDanger
@@ -342,7 +343,7 @@ function XcmTransfer ({ chainRegistryMap, className, defaultValue, firstOriginCh
 
               <Button
                 className='bridge-button'
-                isDisabled={canMakeTransfer}
+                isDisabled={!canMakeTransfer}
                 onClick={_onTransfer}
               >
                 <span>

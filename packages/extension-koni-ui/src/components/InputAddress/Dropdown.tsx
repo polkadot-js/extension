@@ -94,11 +94,11 @@ function Dropdown ({ className, defaultOptions, defaultValue, getFormatOptLabel,
       // eslint-disable-next-line @typescript-eslint/no-unsafe-return
       return {
         ...base,
-        width: '428px',
-        left: '-2px',
+        width: '100%',
         boxShadow: themeContext.boxShadow2,
         background: themeContext.background,
-        borderRadius: '8px'
+        borderRadius: '8px',
+        outline: `2px solid ${themeContext.background}`
       };
     },
     // eslint-disable-next-line @typescript-eslint/no-unsafe-return

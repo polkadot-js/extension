@@ -51,8 +51,9 @@ function AuthTransfer ({ chain, className, collectionId, nftItem, recipientAddre
 
   const web3Tx = web3TransferParams !== null ? web3TransferParams.rawTx : null;
   const web3Gas = web3TransferParams !== null ? web3TransferParams.estimatedGas : null;
+  const web3BalanceError = web3TransferParams !== null ? web3TransferParams.balanceError : false;
 
-  const [balanceError, setBalanceError] = useState(substrateBalanceError);
+  const [balanceError] = useState(substrateTransferParams !== null ? substrateBalanceError : web3BalanceError);
   const { currentAccount: account, currentNetwork } = useSelector((state: RootState) => state);
 
   const { show } = useToast();
@@ -77,12 +78,6 @@ function AuthTransfer ({ chain, className, collectionId, nftItem, recipientAddre
 
         if (data.callHash) {
           setCallHash(data.callHash);
-        }
-
-        if (data.balanceError && data.balanceError) {
-          setBalanceError(true);
-          setLoading(false);
-          show('Your balance is too low to cover fees');
         }
 
         if (data.txError) {
@@ -137,11 +132,6 @@ function AuthTransfer ({ chain, className, collectionId, nftItem, recipientAddre
         setLoading(false);
 
         return;
-      }
-
-      if (data.balanceError && data.balanceError) {
-        setBalanceError(true);
-        show('Your balance is too low to cover fees');
       }
 
       if (data.status) {

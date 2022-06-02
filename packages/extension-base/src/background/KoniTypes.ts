@@ -626,7 +626,8 @@ export interface EvmNftTransactionRequest {
 
 export interface EvmNftTransaction {
   tx: Record<string, any> | null,
-  estimatedFee: string | null
+  estimatedFee: string | null,
+  balanceError: boolean
 }
 
 export interface EvmNftSubmitTransaction {
@@ -643,7 +644,6 @@ export interface NftTransactionResponse {
   status?: boolean,
   transactionHash?: string,
   txError?: boolean,
-  balanceError?: boolean,
   isSendingSelf: boolean
 }
 

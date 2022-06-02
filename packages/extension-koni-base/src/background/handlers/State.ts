@@ -126,6 +126,57 @@ export default class KoniState extends State {
   private priceStoreReady = false;
   private readonly transactionHistoryStore = new TransactionHistoryStore();
 
+  private networkMap: Record<string, NetworkJson> = {}; // mapping to networkMapStore, for uses in background
+  private networkMapSubject = new Subject<Record<string, NetworkJson>>();
+  private lockNetworkMap = false;
+
+  private apiMap: ApiMap = { dotSama: {}, web3: {} };
+
+  private serviceInfoSubject = new Subject<ServiceInfo>();
+  private evmTokenState: EvmTokenJson = { erc20: [], erc721: [] };
+  private evmTokenSubject = new Subject<EvmTokenJson>();
+  private balanceMap: Record<string, BalanceItem> = generateDefaultBalanceMap();
+  private balanceSubject = new Subject<BalanceJson>();
+  private nftState: NftJson = {
+    total: 0,
+    nftList: []
+  };
+
+  private nftCollectionState: NftCollectionJson = {
+    ready: false,
+    nftCollectionList: []
+  };
+
+  // Only for rendering nft after transfer
+  private nftTransferState: NftTransferExtra = {
+    cronUpdate: false,
+    forceUpdate: false
+  };
+
+  private stakingMap: Record<string, StakingItem> = generateDefaultStakingMap();
+  private stakingRewardState: StakingRewardJson = {
+    ready: false,
+    details: []
+  } as StakingRewardJson;
+
+  // eslint-disable-next-line camelcase
+  private crowdloanFundMap: Record<string, DotSamaCrowdloan_crowdloans_nodes> = {};
+  private crowdloanMap: Record<string, CrowdloanItem> = generateDefaultCrowdloanMap();
+  private crowdloanSubject = new Subject<CrowdloanJson>();
+  private nftTransferSubject = new Subject<NftTransferExtra>();
+  private nftSubject = new Subject<NftJson>();
+  private nftCollectionSubject = new Subject<NftCollectionJson>();
+  private stakingSubject = new Subject<StakingJson>();
+  private stakingRewardSubject = new Subject<StakingRewardJson>();
+  private historyMap: Record<string, TransactionHistoryItemType[]> = {};
+  private historySubject = new Subject<Record<string, TransactionHistoryItemType[]>>();
+
+  // Todo: persist data to store later
+  private chainRegistryMap: Record<string, ChainRegistry> = {};
+  private chainRegistrySubject = new Subject<Record<string, ChainRegistry>>();
+
+  private lazyMap: Record<string, unknown> = {};
+
   // init networkMap, apiMap and chainRegistry (first time only)
   public initNetworkStates () {
     this.networkMapStore.get('NetworkMap', (storedNetworkMap) => {
@@ -184,13 +235,40 @@ export default class KoniState extends State {
     });
   }
 
-  private networkMap: Record<string, NetworkJson> = {}; // mapping to networkMapStore, for uses in background
-  private networkMapSubject = new Subject<Record<string, NetworkJson>>();
-  private lockNetworkMap = false;
+  public mergeTransactionHistory () {
+    setTimeout(() => {
+      const addressList = Object.keys(accounts.subject.value);
 
-  private apiMap: ApiMap = { dotSama: {}, web3: {} };
+      for (const address of addressList) {
+        for (const networkJson of Object.values(this.networkMap)) {
+          if (!networkJson.key.includes('custom_')) {
+            this.transactionHistoryStore.get(`${address}_custom_${networkJson.genesisHash}`, (txHistory) => {
+              if (txHistory) {
+                const parsedTxHistory: TransactionHistoryItemType[] = txHistory.map((item) => {
+                  return {
+                    time: item.time,
+                    networkKey: networkJson.key,
+                    change: item.change,
+                    changeSymbol: item.changeSymbol,
+                    fee: item.fee,
+                    feeSymbol: item.feeSymbol,
+                    isSuccess: item.isSuccess,
+                    action: item.action,
+                    extrinsicHash: item.extrinsicHash
+                  };
+                });
 
-  private serviceInfoSubject = new Subject<ServiceInfo>();
+                this.transactionHistoryStore.set(this.getTransactionKey(address, networkJson.key), parsedTxHistory);
+                this.historyMap[networkJson.key] = parsedTxHistory;
+                this.historySubject.next(this.historyMap);
+                this.transactionHistoryStore.remove(`${address}_custom_${networkJson.genesisHash}`);
+              }
+            });
+          }
+        }
+      }
+    }, 5000); // had to use timeout because keyring doesn't return immediately
+  }
 
   public initEvmTokenState () {
     this.customEvmTokenStore.get('EvmToken', (storedEvmTokens) => {
@@ -271,50 +349,6 @@ export default class KoniState extends State {
       this.initChainRegistry();
     });
   }
-
-  private evmTokenState: EvmTokenJson = { erc20: [], erc721: [] };
-  private evmTokenSubject = new Subject<EvmTokenJson>();
-  private balanceMap: Record<string, BalanceItem> = generateDefaultBalanceMap();
-  private balanceSubject = new Subject<BalanceJson>();
-  private nftState: NftJson = {
-    total: 0,
-    nftList: []
-  };
-
-  private nftCollectionState: NftCollectionJson = {
-    ready: false,
-    nftCollectionList: []
-  };
-
-  // Only for rendering nft after transfer
-  private nftTransferState: NftTransferExtra = {
-    cronUpdate: false,
-    forceUpdate: false
-  };
-
-  private stakingMap: Record<string, StakingItem> = generateDefaultStakingMap();
-  private stakingRewardState: StakingRewardJson = {
-    ready: false,
-    details: []
-  } as StakingRewardJson;
-
-  // eslint-disable-next-line camelcase
-  private crowdloanFundmap: Record<string, DotSamaCrowdloan_crowdloans_nodes> = {};
-  private crowdloanMap: Record<string, CrowdloanItem> = generateDefaultCrowdloanMap();
-  private crowdloanSubject = new Subject<CrowdloanJson>();
-  private nftTransferSubject = new Subject<NftTransferExtra>();
-  private nftSubject = new Subject<NftJson>();
-  private nftCollectionSubject = new Subject<NftCollectionJson>();
-  private stakingSubject = new Subject<StakingJson>();
-  private stakingRewardSubject = new Subject<StakingRewardJson>();
-  private historyMap: Record<string, TransactionHistoryItemType[]> = {};
-  private historySubject = new Subject<Record<string, TransactionHistoryItemType[]>>();
-
-  // Todo: persist data to store later
-  private chainRegistryMap: Record<string, ChainRegistry> = {};
-  private chainRegistrySubject = new Subject<Record<string, ChainRegistry>>();
-
-  private lazyMap: Record<string, unknown> = {};
 
   private lazyNext = (key: string, callback: () => void) => {
     if (this.lazyMap[key]) {
@@ -788,7 +822,7 @@ export default class KoniState extends State {
   }
 
   public async fetchCrowdloanFundMap () {
-    this.crowdloanFundmap = await fetchDotSamaCrowdloan();
+    this.crowdloanFundMap = await fetchDotSamaCrowdloan();
   }
 
   public getCrowdloan (): CrowdloanJson {
@@ -797,7 +831,7 @@ export default class KoniState extends State {
 
   public setCrowdloanItem (networkKey: string, item: CrowdloanItem) {
     // Fill para state
-    const crowdloanFundNode = this.crowdloanFundmap[networkKey];
+    const crowdloanFundNode = this.crowdloanFundMap[networkKey];
 
     if (crowdloanFundNode) {
       item.paraState = convertFundStatus(crowdloanFundNode.status);

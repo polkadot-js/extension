@@ -3,7 +3,7 @@
 
 import { CustomEvmToken } from '@subwallet/extension-base/background/KoniTypes';
 import { ActionContext, Button, Dropdown, InputWithLabel } from '@subwallet/extension-koni-ui/components';
-import useGetEvmChains from '@subwallet/extension-koni-ui/hooks/screen/import/useGetEvmChains';
+import useGetActiveEvmChains from '@subwallet/extension-koni-ui/hooks/screen/import/useGetActiveEvmChains';
 import useToast from '@subwallet/extension-koni-ui/hooks/useToast';
 import { upsertEvmToken, validateEvmToken } from '@subwallet/extension-koni-ui/messaging';
 import { Header } from '@subwallet/extension-koni-ui/partials';
@@ -21,7 +21,7 @@ function ImportEvmToken ({ className = '' }: Props): React.ReactElement<Props> {
   const [contractAddress, setContractAddress] = useState('');
   const [symbol, setSymbol] = useState('');
   const [decimals, setDecimals] = useState('');
-  const chainOptions = useGetEvmChains();
+  const chainOptions = useGetActiveEvmChains();
   const [chain, setChain] = useState(chainOptions[0].value);
 
   const [isValidDecimals, setIsValidDecimals] = useState(true);
@@ -53,15 +53,20 @@ function ImportEvmToken ({ className = '' }: Props): React.ReactElement<Props> {
               show('This token has already been added');
               setIsValidContract(false);
             } else {
-              setSymbol(resp.symbol);
+              if (resp.isExist) {
+                show('This token has already been added');
+                setIsValidContract(false);
+              } else {
+                setSymbol(resp.symbol);
 
-              if (resp.decimals) {
-                setDecimals(resp.decimals.toString());
+                if (resp.decimals) {
+                  setDecimals(resp.decimals.toString());
+                }
+
+                setIsValidSymbol(true);
+                setIsValidDecimals(true);
+                setIsValidContract(true);
               }
-
-              setIsValidSymbol(true);
-              setIsValidDecimals(true);
-              setIsValidContract(true);
             }
           })
           .catch(() => {
@@ -179,7 +184,7 @@ function ImportEvmToken ({ className = '' }: Props): React.ReactElement<Props> {
         <div className={'add-token-container'}>
           <Button
             className={'add-token-button'}
-            isDisabled={!isValidSymbol || !isValidDecimals || !isValidContract || contractAddress === '' || symbol === ''}
+            isDisabled={!isValidSymbol || !isValidDecimals || !isValidContract || contractAddress === '' || symbol === '' || chainOptions.length === 0}
             onClick={handleAddToken}
           >
             Add Custom Token

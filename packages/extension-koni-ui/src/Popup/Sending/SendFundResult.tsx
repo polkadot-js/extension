@@ -77,7 +77,7 @@ function SendFundResult ({ className = '', networkKey, onResend, txResult: { ext
             className='send-fund-result__status-img'
             src={successStatus}
           />
-          <div className='send-fund-result__stt-text'>{t<string>('Send Fund Successful')}</div>
+          <div className='send-fund-result__stt-text'>{t<string>('Transaction Successful')}</div>
           <div
             className='send-fund-result__stt-subtext'
           >{t<string>('Your request has been confirmed. You can track its progress on the Transaction History page.')}</div>
@@ -96,7 +96,7 @@ function SendFundResult ({ className = '', networkKey, onResend, txResult: { ext
             className='send-fund-result__status-img'
             src={failStatus}
           />
-          <div className='send-fund-result__stt-text'>{t<string>('Send Fund Fail')}</div>
+          <div className='send-fund-result__stt-text'>{t<string>('Transaction Fail')}</div>
           <div className='send-fund-result__stt-subtext'>
             {extrinsicHash
               ? (t<string>('There was a problem with your request. You can track its progress on the Transaction History page.'))

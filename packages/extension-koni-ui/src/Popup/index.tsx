@@ -11,6 +11,7 @@ import { AccountContext, ActionContext, AuthorizeReqContext, MediaContext, Metad
 import useSetupStore from '@subwallet/extension-koni-ui/hooks/store/useSetupStore';
 import ExternalRequest from '@subwallet/extension-koni-ui/Popup/ExternalRequest';
 import Home from '@subwallet/extension-koni-ui/Popup/Home';
+import XcmTransfer from '@subwallet/extension-koni-ui/Popup/XcmTransfer/XcmTransfer';
 import { updateCurrentAccount } from '@subwallet/extension-koni-ui/stores/updater';
 import * as Bowser from 'bowser';
 import React, { useCallback, useEffect, useState } from 'react';
@@ -251,6 +252,7 @@ export default function Popup (): React.ReactElement {
                             <Route path='/account/general-setting'>{wrapWithErrorBoundary(<GeneralSetting />, 'account-general-settings')}</Route>
                             <Route path='/account/networks'>{wrapWithErrorBoundary(<Networks />, 'account-networks')}</Route>
                             <Route path='/account/config-network'>{wrapWithErrorBoundary(<NetworkCreate />, 'account-network-edit')}</Route>
+                            <Route path='/account/xcm-transfer'>{wrapWithErrorBoundary(<XcmTransfer />, 'xcm-transfer')}</Route>
                             <Route path='/account/send-fund'>{wrapWithErrorBoundary(<SendFund />, 'send-fund')}</Route>
                             <Route path='/account/donate'>{wrapWithErrorBoundary(<Donate />, 'donate')}</Route>
                             <Route path='/account/send-nft'>{wrapWithErrorBoundary(<TransferNftContainer />, 'send-nft')}</Route>

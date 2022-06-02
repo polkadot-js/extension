@@ -61,7 +61,7 @@ function Dropdown ({ className, isDisabled, onChange, options, value }: Props): 
       // eslint-disable-next-line @typescript-eslint/no-unsafe-return
       return {
         ...base,
-        maxHeight: '150px',
+        maxHeight: '120px',
         zIndex: 15,
         paddingTop: 0,
         paddingBottom: 0

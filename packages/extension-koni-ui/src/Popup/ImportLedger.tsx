@@ -3,7 +3,7 @@
 
 import { faSync } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { useGetSupportedLedger } from '@subwallet/extension-koni-ui/util/legerChains';
+import { useGetSupportedLedger } from '@subwallet/extension-koni-ui/util/ledgerChains';
 import React, { useCallback, useContext, useEffect, useRef, useState } from 'react';
 import styled from 'styled-components';
 
@@ -62,7 +62,7 @@ function ImportLedger ({ className }: Props): React.ReactElement {
 
   const networkOps = useRef(
     [{
-      text: t('Select network'),
+      text: ledgerChains.length > 0 ? t('Select network') : t('Please enable at least 1 network'),
       value: ''
     },
     ...ledgerChains.map(({ displayName, genesisHash }): NetworkOption => ({

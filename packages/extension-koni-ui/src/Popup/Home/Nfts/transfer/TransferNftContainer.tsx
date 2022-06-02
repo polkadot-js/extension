@@ -130,14 +130,14 @@ function TransferNftContainer ({ className, collectionId, collectionImage, nftIt
 
     if (!networkKey) {
       if (currentNetwork.networkKey.toLowerCase() === ALL_ACCOUNT_KEY.toLowerCase()) {
-        show(`Please change to ${networkKey.toUpperCase()} network.`);
+        show(`Please change to ${networkJson.chain.toUpperCase()}`);
       }
 
       return;
     }
 
     if (networkKey !== currentNetwork.networkKey) {
-      show(`Please change to ${networkKey.toUpperCase()} network.`);
+      show(`Please change to ${networkJson.chain.toUpperCase()}`);
 
       return;
     }

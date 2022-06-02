@@ -487,8 +487,37 @@ export interface RequestCheckTransfer {
   token?: string
 }
 
+export interface RequestCheckXcmTransfer {
+  networkKey: string,
+  from: string,
+  to: string,
+  value?: string,
+  transferAll?: boolean
+  originChain: string,
+  destinationChain: string,
+}
+
 export interface RequestTransfer extends RequestCheckTransfer {
   password: string;
+}
+
+export interface RequestCheckCrossChainTransfer {
+  originalNetworkKey: string,
+  destinationNetworkKey: string,
+  from: string,
+  to: string,
+  value: string,
+  token: string
+}
+
+export interface RequestCrossChainTransfer extends RequestCheckCrossChainTransfer {
+  password: string;
+}
+
+export interface ResponseCheckCrossChainTransfer {
+  errors?: Array<TransferError>,
+  estimateFee?: string,
+  feeSymbol?: string // if undefined => use main token
 }
 
 export interface ResponsePrivateKeyValidateV2 {
@@ -733,6 +762,18 @@ export interface SubstrateNftSubmitTransaction {
   recipientAddress: string;
 }
 
+export type ChainRelationType = 'p' | 'r'; // parachain | relaychain
+
+export interface ChainRelationInfo {
+  type: ChainRelationType;
+  supportedToken: string[];
+}
+
+export interface CrossChainRelation {
+  type: ChainRelationType;
+  relationMap: Record<string, ChainRelationInfo>;
+}
+
 export interface KoniRequestSignatures {
   'pri(networkMap.recoverDotSama)': [string, boolean];
   'pri(substrateNft.submitTransaction)': [SubstrateNftSubmitTransaction, NftTransactionResponse, NftTransactionResponse]
@@ -741,6 +782,7 @@ export interface KoniRequestSignatures {
   'pri(networkMap.enableAll)': [null, boolean];
   'pri(networkMap.resetDefault)': [null, boolean];
   'pri(apiMap.validate)': [ValidateNetworkRequest, ValidateNetworkResponse];
+  'pri(networkMap.enableMany)': [string[], boolean];
   'pri(networkMap.enableOne)': [string, boolean];
   'pri(networkMap.disableOne)': [string, DisableNetworkResponse];
   'pri(networkMap.removeOne)': [string, boolean];
@@ -786,7 +828,9 @@ export interface KoniRequestSignatures {
   'pri(privateKey.validateV2)': [RequestSeedValidateV2, ResponsePrivateKeyValidateV2];
   'pri(accounts.create.suriV2)': [RequestAccountCreateSuriV2, ResponseAccountCreateSuriV2];
   'pri(accounts.checkTransfer)': [RequestCheckTransfer, ResponseCheckTransfer];
+  'pri(accounts.checkCrossChainTransfer)': [RequestCheckCrossChainTransfer, ResponseCheckCrossChainTransfer];
   'pri(accounts.transfer)': [RequestTransfer, Array<TransferError>, ResponseTransfer];
+  'pri(accounts.crossChainTransfer)': [RequestCrossChainTransfer, Array<TransferError>, ResponseTransfer];
   'pri(derivation.createV2)': [RequestDeriveCreateV2, boolean];
   'pri(json.restoreV2)': [RequestJsonRestoreV2, void];
   'pri(json.batchRestoreV2)': [RequestBatchRestoreV2, void];

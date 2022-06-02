@@ -211,12 +211,10 @@ function XcmTransfer ({ chainRegistryMap, className, defaultValue, firstOriginCh
     setOriginChain(originChain);
     setDestinationChain([destinationChainOptions[0].value, destinationChainOptions]);
     setSenderValue((prev) => {
-      const newVal = {
+      return {
         ...prev,
         token: getSupportedTokens(originChain, destinationChainOptions[0].value)[0]
       };
-
-      return newVal;
     });
   }, [networkMap]);
 
@@ -308,7 +306,7 @@ function XcmTransfer ({ chainRegistryMap, className, defaultValue, firstOriginCh
                 </Warning>
                 }
 
-                {!checkDestinationChainAndReceiverIdType &&
+                {!!recipientId && !checkDestinationChainAndReceiverIdType &&
                 <Warning
                   className='xcm-transfer-warning'
                   isDanger

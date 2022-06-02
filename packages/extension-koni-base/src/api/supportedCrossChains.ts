@@ -31,15 +31,15 @@ export const SupportedCrossChainsMap: Record<string, CrossChainRelation> = {
       }
     }
   },
-  kintsugi: {
-    type: 'p',
-    relationMap: {
-      moonriver: {
-        type: 'p',
-        supportedToken: ['KINT']
-      }
-    }
-  },
+  // kintsugi: {
+  //   type: 'p',
+  //   relationMap: {
+  //     moonriver: {
+  //       type: 'p',
+  //       supportedToken: ['KINT']
+  //     }
+  //   }
+  // },
   bifrost: {
     type: 'p',
     relationMap: {

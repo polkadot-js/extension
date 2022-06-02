@@ -230,8 +230,12 @@ function updateResponseTxResult (
         response.txResult.changeSymbol = tokenInfo.symbol;
       }
     } else {
-      if ((record.event.section === 'balances' &&
-        record.event.method.toLowerCase() === 'transfer')) {
+      if (record.event.section === 'balances' &&
+        record.event.method.toLowerCase() === 'transfer') {
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+        response.txResult.change = record.event.data[2]?.toString() || '0';
+      } else if (record.event.section === 'xTokens' &&
+        record.event.method.toLowerCase() === 'transferred') {
         // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
         response.txResult.change = record.event.data[2]?.toString() || '0';
       }

@@ -776,7 +776,21 @@ export interface CrossChainRelation {
   relationMap: Record<string, ChainRelationInfo>;
 }
 
+export interface ValidatorInfo {
+  address: string;
+  totalStake: number;
+  ownStake: number;
+  nominatorCount: number;
+  commission: string;
+}
+
+export interface BondingOptionInfo {
+  era: number,
+  validators: ValidatorInfo[]
+}
+
 export interface KoniRequestSignatures {
+  'pri(bonding.getBondingOptions)': [null, BondingOptionInfo];
   'pri(networkMap.recoverDotSama)': [string, boolean];
   'pri(substrateNft.submitTransaction)': [SubstrateNftSubmitTransaction, NftTransactionResponse, NftTransactionResponse]
   'pri(substrateNft.getTransaction)': [SubstrateNftTransactionRequest, SubstrateNftTransaction];

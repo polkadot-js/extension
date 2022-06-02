@@ -2,9 +2,11 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import LogosMap from '@subwallet/extension-koni-ui/assets/logo';
+import { ActionContext } from '@subwallet/extension-koni-ui/components';
+import Button from '@subwallet/extension-koni-ui/components/Button';
 import { StakingDataType } from '@subwallet/extension-koni-ui/hooks/screen/home/types';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
-import React from 'react';
+import React, { useCallback, useContext } from 'react';
 import styled from 'styled-components';
 
 const StakingRow = React.lazy(() => import('./StakingRow'));
@@ -19,6 +21,13 @@ interface Props extends ThemeProps {
 }
 
 function StakingContainer ({ className, data, loading, priceMap }: Props): React.ReactElement<Props> {
+  const navigate = useContext(ActionContext);
+
+  const handleNavigateBonding = useCallback(() => {
+    navigate('/account/bonding');
+    window.localStorage.setItem('popupNavigation', '/account/bonding');
+  }, [navigate]);
+
   return (
     <div className={className}>
       <div className={'staking-container'}>
@@ -52,6 +61,12 @@ function StakingContainer ({ className, data, loading, priceMap }: Props): React
             />;
           })
         }
+
+        <Button
+          onClick={handleNavigateBonding}
+        >
+          Start staking
+        </Button>
       </div>
     </div>
   );

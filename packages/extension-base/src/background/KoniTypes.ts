@@ -786,6 +786,7 @@ export interface ValidatorInfo {
 
 export interface BondingOptionInfo {
   era: number,
+  minimumBond: number,
   validators: ValidatorInfo[]
 }
 

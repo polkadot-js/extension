@@ -2031,11 +2031,10 @@ export default class KoniExtension extends Extension {
   }
 
   private getBondingOption (): BondingOptionInfo {
-    console.log('ok');
-
     return {
       era: 0,
-      validators: []
+      validators: [],
+      minimumBond: 0
     };
   }
 

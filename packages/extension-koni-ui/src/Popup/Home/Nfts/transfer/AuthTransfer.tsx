@@ -76,6 +76,13 @@ function AuthTransfer ({ chain, className, collectionId, nftItem, recipientAddre
           setLoading(false);
         }
 
+        if (balanceError && !data.passwordError) {
+          setLoading(false);
+          show('Your balance is too low to cover fees');
+
+          return;
+        }
+
         if (data.callHash) {
           setCallHash(data.callHash);
         }
@@ -109,7 +116,7 @@ function AuthTransfer ({ chain, className, collectionId, nftItem, recipientAddre
     } else {
       show('Encountered an error, please try again.');
     }
-  }, [account?.account?.address, chain, collectionId, nftItem, recipientAddress, senderInfoSubstrate.signPassword, setExtrinsicHash, setIsTxSuccess, setShowConfirm, setShowResult, setTxError, show, web3Tx]);
+  }, [account?.account?.address, balanceError, chain, collectionId, nftItem, recipientAddress, senderInfoSubstrate.signPassword, setExtrinsicHash, setIsTxSuccess, setShowConfirm, setShowResult, setTxError, show, web3Tx]);
 
   const onSendSubstrate = useCallback(async () => {
     await substrateNftSubmitTransaction({
@@ -121,6 +128,13 @@ function AuthTransfer ({ chain, className, collectionId, nftItem, recipientAddre
       if (data.passwordError && data.passwordError) {
         setPasswordError(data.passwordError);
         setLoading(false);
+      }
+
+      if (balanceError && !data.passwordError) {
+        setLoading(false);
+        show('Your balance is too low to cover fees');
+
+        return;
       }
 
       if (data.callHash) {
@@ -153,7 +167,7 @@ function AuthTransfer ({ chain, className, collectionId, nftItem, recipientAddre
         }
       }
     });
-  }, [chain, collectionId, nftItem, substrateParams, recipientAddress, senderAccount.address, senderInfoSubstrate.signPassword, setExtrinsicHash, setIsTxSuccess, setShowConfirm, setShowResult, setTxError, show]);
+  }, [substrateParams, senderInfoSubstrate.signPassword, senderAccount.address, recipientAddress, balanceError, show, setIsTxSuccess, setShowConfirm, setShowResult, setExtrinsicHash, nftItem, collectionId, chain, setTxError]);
 
   const handleSignAndSubmit = useCallback(() => {
     if (loading) {
@@ -168,15 +182,6 @@ function AuthTransfer ({ chain, className, collectionId, nftItem, recipientAddre
 
     setLoading(true);
 
-    if (balanceError) {
-      setTimeout(() => {
-        setLoading(false);
-        show('Your balance is too low to cover fees');
-      }, 1000);
-
-      return;
-    }
-
     // eslint-disable-next-line @typescript-eslint/no-misused-promises
     setTimeout(async () => {
       if (substrateParams !== null) {
@@ -184,8 +189,8 @@ function AuthTransfer ({ chain, className, collectionId, nftItem, recipientAddre
       } else if (web3Tx !== null) {
         await onSendEvm();
       }
-    }, 1);
-  }, [loading, balanceError, chain, currentNetwork.networkKey, show, substrateParams, web3Tx, onSendSubstrate, onSendEvm]);
+    }, 10);
+  }, [loading, chain, currentNetwork.networkKey, show, substrateParams, web3Tx, onSendSubstrate, onSendEvm]);
 
   const hideConfirm = useCallback(() => {
     if (!loading) {

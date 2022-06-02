@@ -285,7 +285,7 @@ function AuthTransaction ({ balanceFormat,
           <div className='bridge-button-container'>
             <Button
               className='bridge-button'
-              isBusy={isBusy}
+              isDisabled={isBusy}
               onClick={_onCancel}
             >
               <span>

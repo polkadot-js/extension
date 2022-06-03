@@ -487,16 +487,6 @@ export interface RequestCheckTransfer {
   token?: string
 }
 
-export interface RequestCheckXcmTransfer {
-  networkKey: string,
-  from: string,
-  to: string,
-  value?: string,
-  transferAll?: boolean
-  originChain: string,
-  destinationChain: string,
-}
-
 export interface RequestTransfer extends RequestCheckTransfer {
   password: string;
 }
@@ -506,6 +496,7 @@ export interface RequestCheckCrossChainTransfer {
   destinationNetworkKey: string,
   from: string,
   to: string,
+  transferAll?: boolean,
   value: string,
   token: string
 }

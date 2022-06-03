@@ -22,14 +22,15 @@ export interface Props extends ThemeProps {
 
 function SendFundResult ({ className = '', networkKey, onResend, txResult: { extrinsicHash, isTxSuccess, txError } }: Props): React.ReactElement<Props> {
   const { t } = useTranslation();
-  const navigate = useContext(ActionContext);
+  const onAction = useContext(ActionContext);
   const isSupportScanExplorer = useSupportScanExplorer(networkKey);
   const isScanExplorerTxUrl = useScanExplorerTxUrl(networkKey, extrinsicHash);
   const _backToHome = useCallback(
     () => {
-      navigate('/');
+      window.localStorage.setItem('popupNavigation', '/');
+      onAction('/');
     },
-    [navigate]
+    [onAction]
   );
 
   const viewTransactionBtn = (extrinsicHash?: string) => {

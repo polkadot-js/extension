@@ -31,24 +31,25 @@ export const SupportedCrossChainsMap: Record<string, CrossChainRelation> = {
       }
     }
   },
-  kintsugi: {
-    type: 'p',
-    relationMap: {
-      moonriver: {
-        type: 'p',
-        supportedToken: ['KINT']
-      }
-    }
-  },
-  bifrost: {
-    type: 'p',
-    relationMap: {
-      moonriver: {
-        type: 'p',
-        supportedToken: ['BNC']
-      }
-    }
-  },
+  // kintsugi: {
+  //   type: 'p',
+  //   relationMap: {
+  //     moonriver: {
+  //       type: 'p',
+  //       supportedToken: ['KINT']
+  //     }
+  //   }
+  // },
+  // todo: will support Bifrost later
+  // bifrost: {
+  //   type: 'p',
+  //   relationMap: {
+  //     moonriver: {
+  //       type: 'p',
+  //       supportedToken: ['BNC']
+  //     }
+  //   }
+  // },
   acala: {
     type: 'p',
     relationMap: {

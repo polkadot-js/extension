@@ -65,7 +65,6 @@ function BridgeInputAddress ({ balance, balanceFormat, className = '', initValue
   }, [onChange]);
 
   const onChangeTokenValue = useCallback((tokenValueStr: string) => {
-    console.log('tokenValueStr', tokenValueStr);
     setValue((prev) => {
       const newVal = {
         ...prev,

@@ -182,7 +182,7 @@ export default React.memo(styled(Dropdown)(({ theme }: ThemeProps) => `
     justify-content: space-between;
     min-height: 48px;
     position: relative;
-    min-width: 176px;
+    min-width: 172px;
     box-shadow: none;
   }
 

@@ -7,6 +7,6 @@ import SubscribableStore from '@subwallet/extension-koni-base/stores/Subscribabl
 
 export default class BalanceStore extends SubscribableStore<Record<string, BalanceItem>> {
   constructor () {
-    super(EXTENSION_PREFIX ? `${EXTENSION_PREFIX}balance` : null);
+    super(`${EXTENSION_PREFIX}balance`);
   }
 }

@@ -17,4 +17,10 @@ export default abstract class SubscribableStore<T> extends BaseStore<T> {
       update && update();
     });
   }
+
+  public asyncGet = async (key: string) => {
+    return new Promise((resolve) => {
+      this.get(key, resolve);
+    });
+  };
 }

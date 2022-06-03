@@ -800,11 +800,20 @@ export default class KoniState extends State {
     return { details: this.balanceMap } as BalanceJson;
   }
 
-  public resetBalanceMap () {
-    Object.values(this.balanceMap).forEach((balance) => {
-      balance.state = APIItemState.PENDING;
-    });
-    this.balanceSubject.next(this.getBalance());
+  public async getStoredBalance (address: string) {
+    const items = await this.balanceStore.asyncGet(address) as Record<string, BalanceItem>;
+
+    return items || {};
+  }
+
+  public async switchAccount (newAddress: string) {
+    this.balanceMap = {};
+    const defaultBalance = this.generateDefaultBalanceMap();
+    const storedBalance = await this.getStoredBalance(newAddress);
+
+    const merge = { ...defaultBalance, ...storedBalance } as Record<string, BalanceItem>;
+
+    this.balanceSubject.next({ details: merge });
   }
 
   public resetStakingMap () {
@@ -822,8 +831,7 @@ export default class KoniState extends State {
   }
 
   public setBalanceItem (networkKey: string, item: BalanceItem) {
-    this.balanceMap[networkKey] = { ...item, timestamp: +new Date() };
-
+    this.balanceMap[networkKey] = item;
     this.lazyNext('setBalanceItem', () => {
       this.updateBalanceStore();
       this.balanceSubject.next(this.getBalance());
@@ -838,9 +846,8 @@ export default class KoniState extends State {
         readyBalanceMap[key] = balanceItem;
       }
     });
-
     this.getCurrentAccount((currentAccountInfo) => {
-      this.balanceStore.set(this.getStorageKey('balance', currentAccountInfo.address), readyBalanceMap);
+      this.balanceStore.set(currentAccountInfo.address, readyBalanceMap);
     });
   }
 

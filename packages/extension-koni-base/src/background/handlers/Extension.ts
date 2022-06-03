@@ -1452,7 +1452,7 @@ export default class KoniExtension extends Extension {
       txState.passwordError = null;
       updateState(txState);
     } catch (e) {
-      txState.passwordError = 'Error unlocking account with password';
+      txState.passwordError = 'Unable to decode using the supplied passphrase';
       updateState(txState);
 
       port.onDisconnect.addListener((): void => {

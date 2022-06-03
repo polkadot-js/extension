@@ -94,7 +94,7 @@ export default function useAccountBalance (currentNetworkKey: string,
       return;
     }
 
-    if (balanceItem.state.valueOf() !== APIItemState.READY.valueOf()) {
+    if (balanceItem.free === undefined) {
       return;
     }
 

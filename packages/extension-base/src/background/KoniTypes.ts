@@ -188,10 +188,10 @@ export interface BalanceChildItem {
 
 export interface BalanceItem {
   state: APIItemState,
-  free: string,
-  reserved: string,
-  miscFrozen: string,
-  feeFrozen: string,
+  free?: string,
+  reserved?: string,
+  miscFrozen?: string,
+  feeFrozen?: string,
   children?: Record<string, BalanceChildItem>,
   timestamp?: number
 }

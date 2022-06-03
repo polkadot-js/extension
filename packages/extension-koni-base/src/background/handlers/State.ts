@@ -173,11 +173,7 @@ export default class KoniState extends State {
     Object.values(this.networkMap).forEach((networkJson) => {
       if (networkJson.active) {
         balanceMap[networkJson.key] = {
-          state: APIItemState.PENDING,
-          free: '0',
-          reserved: '0',
-          miscFrozen: '0',
-          feeFrozen: '0'
+          state: APIItemState.PENDING
         };
       }
     });
@@ -831,7 +827,7 @@ export default class KoniState extends State {
   }
 
   public setBalanceItem (networkKey: string, item: BalanceItem) {
-    this.balanceMap[networkKey] = item;
+    this.balanceMap[networkKey] = { ...item, timestamp: +new Date() };
     this.lazyNext('setBalanceItem', () => {
       this.updateBalanceStore();
       this.balanceSubject.next(this.getBalance());

@@ -617,7 +617,8 @@ export interface EvmNftTransactionRequest {
 
 export interface EvmNftTransaction {
   tx: Record<string, any> | null,
-  estimatedFee: string | null
+  estimatedFee: string | null,
+  balanceError: boolean
 }
 
 export interface EvmNftSubmitTransaction {
@@ -634,7 +635,6 @@ export interface NftTransactionResponse {
   status?: boolean,
   transactionHash?: string,
   txError?: boolean,
-  balanceError?: boolean,
   isSendingSelf: boolean
 }
 
@@ -676,7 +676,9 @@ export interface CustomEvmToken {
   symbol?: string,
   decimals?: number,
   chain: string,
-  type: 'erc20' | 'erc721'
+  type: 'erc20' | 'erc721',
+  isCustom?: boolean,
+  isDeleted?: boolean
 }
 
 export interface EvmTokenJson {

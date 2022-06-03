@@ -34,6 +34,7 @@ export interface _NftJson {
 export interface Web3TransferParams {
   rawTx: Record<string, any>;
   estimatedGas: string;
+  balanceError: boolean;
 }
 
 export interface SubstrateTransferParams {
@@ -45,10 +46,11 @@ export interface SubstrateTransferParams {
 export interface TransferResponse {
   // substrate
   estimatedFee?: string;
-  balanceError?: boolean;
   // eth
   web3RawTx?: Record<string, any>;
   estimatedGas?: string
+  // common
+  balanceError?: boolean;
 }
 
 export enum SUPPORTED_TRANSFER_CHAIN_NAME {

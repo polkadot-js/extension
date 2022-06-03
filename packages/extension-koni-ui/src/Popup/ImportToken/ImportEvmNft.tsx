@@ -89,7 +89,8 @@ function ImportEvmNft ({ className = '' }: Props): React.ReactElement<Props> {
     const evmToken = {
       smartContract: contractAddress,
       chain,
-      type: 'erc721'
+      type: 'erc721',
+      isCustom: true
     } as CustomEvmToken;
 
     if (name) {

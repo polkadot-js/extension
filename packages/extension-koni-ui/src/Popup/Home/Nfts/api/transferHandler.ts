@@ -30,7 +30,7 @@ async function substrateTransferHandler (networkKey: string, senderAddress: stri
 }
 
 async function web3TransferHandler (networkKey: string, senderAddress: string, recipientAddress: string, params: Record<string, any>) {
-  const { estimatedFee, tx } = await evmNftGetTransaction({
+  const { balanceError, estimatedFee, tx } = await evmNftGetTransaction({
     networkKey,
     senderAddress,
     recipientAddress,
@@ -43,7 +43,8 @@ async function web3TransferHandler (networkKey: string, senderAddress: string, r
 
   return {
     web3RawTx: tx,
-    estimatedGas: estimatedFee
+    estimatedGas: estimatedFee,
+    balanceError
   } as TransferResponse;
 }
 

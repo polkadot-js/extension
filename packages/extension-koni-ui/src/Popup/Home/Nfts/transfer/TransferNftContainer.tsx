@@ -159,7 +159,8 @@ function TransferNftContainer ({ className, collectionId, collectionImage, nftIt
       } else if (networkJson.isEthereum && networkJson.isEthereum) {
         setWeb3TransferParams({
           rawTx: transferMeta.web3RawTx,
-          estimatedGas: transferMeta.estimatedGas
+          estimatedGas: transferMeta.estimatedGas,
+          balanceError: transferMeta.balanceError
         } as Web3TransferParams);
       }
 

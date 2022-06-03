@@ -31,7 +31,8 @@ function NetworkItem ({ className, item }: Props): React.ReactElement {
     setShowModal(false);
   }, []);
 
-  const handleShowModal = useCallback(() => {
+  const handleShowModal = useCallback((e: MouseEvent) => {
+    e.stopPropagation();
     setShowModal(true);
   }, []);
 
@@ -98,12 +99,12 @@ function NetworkItem ({ className, item }: Props): React.ReactElement {
         />
         <div
           className={'link-edit'}
+          onClick={handleNetworkEdit}
+          onMouseEnter={handleMouseEnterChain}
+          onMouseLeave={handleMouseLeaveChain}
         >
           <div
-            className='network-item__text'
-            onClick={handleNetworkEdit}
-            onMouseEnter={handleMouseEnterChain}
-            onMouseLeave={handleMouseLeaveChain}
+            className={`${isHover ? 'hover-toggle' : 'unhover-toggle'} network-item__text`}
           >
             {item.chain}
           </div>
@@ -114,6 +115,7 @@ function NetworkItem ({ className, item }: Props): React.ReactElement {
                   className='network-delete-icon'
                   // @ts-ignore
                   icon={faTrashAlt}
+                  // @ts-ignore
                   onClick={handleShowModal}
                   size='sm'
                 />
@@ -241,6 +243,8 @@ export default styled(NetworkItem)(({ theme }: Props) => `
     cursor: pointer;
     width: 100%;
     gap: 10px;
+    padding-top: 12px;
+    padding-bottom: 12px;
   }
 
   .network-icon-container {
@@ -255,11 +259,6 @@ export default styled(NetworkItem)(({ theme }: Props) => `
     font-size: 15px;
     line-height: 26px;
     font-weight: 500;
-    color: ${theme.textColor2};
-  }
-
-  .network-item__text:hover {
-    color: ${theme.textColor};
   }
 
   .network-delete-icon {

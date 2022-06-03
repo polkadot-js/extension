@@ -5,6 +5,7 @@ import { configureStore } from '@reduxjs/toolkit/dist';
 
 import AllAccountReducer from './AllAccount';
 import BalanceReducer from './Balance';
+import BondingParamsReducer from './BondingParams';
 import ChainRegistryReducer from './ChainRegistry';
 import CrowdloanReducer from './Crowdloan';
 import CurrentAccountReducer from './CurrentAccount';
@@ -24,6 +25,7 @@ import TransferNftExtraReducer from './TransferNftExtra';
 import TransferNftParamsReducer from './TransferNftParams';
 
 const reducers = {
+  bondingParams: BondingParamsReducer,
   networkConfigParams: NetworkConfigParamsReducer,
   networkMap: NetworkMapReducer,
   tokenConfigParams: TokenConfigReducer,

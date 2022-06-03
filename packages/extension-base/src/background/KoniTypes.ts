@@ -783,6 +783,7 @@ export interface ValidatorInfo {
   ownStake: number;
   nominatorCount: number;
   commission: string;
+  expectedReturn: number;
 }
 
 export interface BondingOptionInfo {

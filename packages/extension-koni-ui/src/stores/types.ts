@@ -26,3 +26,8 @@ export type NetworkConfigParams = {
   mode: 'create' | 'edit' | 'init',
   data: NetworkJson;
 }
+
+export type BondingParams = {
+  selectedNetwork: string | null;
+  selectedValidator: string | null;
+}

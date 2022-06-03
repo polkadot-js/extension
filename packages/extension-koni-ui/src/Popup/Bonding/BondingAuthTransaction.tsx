@@ -2,10 +2,9 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import useTranslation from '@subwallet/extension-koni-ui/hooks/useTranslation';
-import { getBondingOptions } from '@subwallet/extension-koni-ui/messaging';
 import Header from '@subwallet/extension-koni-ui/partials/Header';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
-import React, { useEffect } from 'react';
+import React from 'react';
 import styled from 'styled-components';
 
 interface Props extends ThemeProps {
@@ -14,14 +13,6 @@ interface Props extends ThemeProps {
 
 function BondingAuthTransaction ({ className }: Props): React.ReactElement<Props> {
   const { t } = useTranslation();
-
-  useEffect(() => {
-    getBondingOptions()
-      .then((bondingOptionInfo) => {
-        console.log(bondingOptionInfo);
-      })
-      .catch(console.error);
-  }, []);
 
   return (
     <div className={className}>

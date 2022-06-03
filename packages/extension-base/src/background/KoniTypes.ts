@@ -295,6 +295,7 @@ export interface NetworkJson {
   blockExplorer?: string; // Link to block scanner to check transaction with extrinsic hash // user input
   dependencies?: string[]; // Auto active network in dependencies if current network is activated
   getStakingOnChain?: boolean; // support get bonded on chain
+  supportBonding?: boolean;
 
   apiStatus?: NETWORK_STATUS;
 }

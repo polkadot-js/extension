@@ -24,7 +24,8 @@ export const PREDEFINED_NETWORKS: Record<string, NetworkJson> = {
     groups: ['RELAY_CHAIN'],
     nativeToken: 'DOT',
     decimals: 10,
-    coinGeckoKey: 'polkadot'
+    coinGeckoKey: 'polkadot',
+    supportBonding: true
   },
   kusama: {
     key: 'kusama',
@@ -46,7 +47,8 @@ export const PREDEFINED_NETWORKS: Record<string, NetworkJson> = {
     groups: ['RELAY_CHAIN'],
     nativeToken: 'KSM',
     decimals: 12,
-    coinGeckoKey: 'kusama'
+    coinGeckoKey: 'kusama',
+    supportBonding: true
   },
   westend: {
     key: 'westend',
@@ -65,7 +67,8 @@ export const PREDEFINED_NETWORKS: Record<string, NetworkJson> = {
     currentProviderMode: 'ws',
     groups: ['RELAY_CHAIN', 'TEST_NET'],
     nativeToken: 'WND',
-    decimals: 12
+    decimals: 12,
+    supportBonding: true
   },
   rococo: {
     key: 'rococo',
@@ -150,7 +153,8 @@ export const PREDEFINED_NETWORKS: Record<string, NetworkJson> = {
     crowdloanUrl: 'https://moonbeam.foundation/moonbeam-crowdloan/',
     decimals: 18,
     coinGeckoKey: 'moonbeam',
-    evmChainId: 1284
+    evmChainId: 1284,
+    supportBonding: true
   },
   astar: {
     key: 'astar',
@@ -169,7 +173,8 @@ export const PREDEFINED_NETWORKS: Record<string, NetworkJson> = {
     nativeToken: 'ASTR',
     crowdloanUrl: 'https://crowdloan.astar.network/#/',
     decimals: 18,
-    coinGeckoKey: 'astar'
+    coinGeckoKey: 'astar',
+    supportBonding: true
   },
   astarEvm: {
     key: 'astarEvm',
@@ -243,7 +248,8 @@ export const PREDEFINED_NETWORKS: Record<string, NetworkJson> = {
     paraId: 2034,
     nativeToken: 'HDX',
     crowdloanUrl: 'https://loan.hydradx.io/',
-    decimals: 12
+    decimals: 12,
+    supportBonding: true
   },
   edgeware: {
     key: 'edgeware',
@@ -460,7 +466,8 @@ export const PREDEFINED_NETWORKS: Record<string, NetworkJson> = {
     crowdloanUrl: 'https://contribute.alephzero.org/',
     decimals: 12,
     coinGeckoKey: 'aleph-zero',
-    getStakingOnChain: true
+    getStakingOnChain: true,
+    supportBonding: true
   },
   rmrk: {
     key: 'rmrk',
@@ -541,7 +548,8 @@ export const PREDEFINED_NETWORKS: Record<string, NetworkJson> = {
     isEthereum: true,
     paraId: 1000,
     decimals: 18,
-    evmChainId: 1287
+    evmChainId: 1287,
+    supportBonding: true
   },
   efinity: {
     key: 'efinity',
@@ -697,7 +705,8 @@ export const PREDEFINED_NETWORKS: Record<string, NetworkJson> = {
     crowdloanUrl: 'https://polkadot.js.org/apps/#/parachains/crowdloan',
     decimals: 18,
     coinGeckoKey: 'moonriver',
-    evmChainId: 1285
+    evmChainId: 1285,
+    supportBonding: true
   },
   shiden: {
     key: 'shiden',

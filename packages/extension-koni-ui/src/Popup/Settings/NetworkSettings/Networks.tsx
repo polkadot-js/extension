@@ -232,8 +232,6 @@ export default styled(Networks)(({ theme }: Props) => `
   .network-item__top-content {
     display: flex;
     align-items: center;
-    padding-top: 12px;
-    padding-bottom: 12px;
   }
 
   .network-item__separator {

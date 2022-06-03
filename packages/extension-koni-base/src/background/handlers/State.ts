@@ -259,8 +259,10 @@ export default class KoniState extends State {
                 });
 
                 this.transactionHistoryStore.set(this.getTransactionKey(address, networkJson.key), parsedTxHistory);
+                // TODO: update historyMap state correctly according to address
                 this.historyMap[networkJson.key] = parsedTxHistory;
                 this.historySubject.next(this.historyMap);
+
                 this.transactionHistoryStore.remove(`${address}_custom_${networkJson.genesisHash}`);
               }
             });

@@ -92,7 +92,7 @@ function subscribeERC20Interval (addresses: string[], networkKey: string, api: A
     callback && callback(networkKey, originBalanceItem);
   };
 
-  getRegistry(networkKey, api, state.getErc20Tokens()).then(({ tokenMap }) => {
+  getRegistry(networkKey, api, state.getActiveErc20Tokens()).then(({ tokenMap }) => {
     tokenList = Object.values(tokenMap).filter(({ erc20Address }) => (!!erc20Address));
     tokenList.forEach(({ erc20Address, symbol }) => {
       if (erc20Address) {

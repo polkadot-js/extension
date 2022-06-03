@@ -24,8 +24,8 @@ function StakingContainer ({ className, data, loading, priceMap }: Props): React
   const navigate = useContext(ActionContext);
 
   const handleNavigateBonding = useCallback(() => {
-    navigate('/account/bonding');
-    window.localStorage.setItem('popupNavigation', '/account/bonding');
+    navigate('/account/select-bonding-network');
+    window.localStorage.setItem('popupNavigation', '/account/select-bonding-network');
   }, [navigate]);
 
   return (

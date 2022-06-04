@@ -1,5 +1,21 @@
 # CHANGELOG
 
+## 0.43.3 Jun 4, 2022
+
+- **Important** Not published to the stores, aligns with latest released packages.
+
+Contributed:
+
+- Adjust nvm version (Thanks to https://github.com/pedroapfilho)
+- Add filtered account subscriptions (Thanks to https://github.com/hamidra)
+
+Changes:
+
+- Gracefully handle promise rejections
+- Upgrade to `@polkadot/api` 8.7.1
+- Updated to `@polkadot/util` 9.4.1
+
+
 ## 0.43.2 May 15, 2022
 
 - **Important** Not published to the stores, aligns with latest released packages.

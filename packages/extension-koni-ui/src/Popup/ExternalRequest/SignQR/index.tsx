@@ -1,7 +1,7 @@
 // Copyright 2019-2022 @polkadot/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { NetWorkInfo } from '@subwallet/extension-base/background/KoniTypes';
+import { NetworkJson } from '@subwallet/extension-base/background/KoniTypes';
 import { PASSWORD_EXPIRY_MIN } from '@subwallet/extension-base/defaults';
 import { Button, Checkbox, Spinner } from '@subwallet/extension-koni-ui/components';
 import { SCANNER_QR_STEP } from '@subwallet/extension-koni-ui/constants/scanner';
@@ -11,10 +11,12 @@ import { qrIsLocked } from '@subwallet/extension-koni-ui/messaging';
 import AccountInfo from '@subwallet/extension-koni-ui/Popup/ExternalRequest/Shared/AccountInfo';
 import NetworkInfo from '@subwallet/extension-koni-ui/Popup/ExternalRequest/Shared/NetworkInfo';
 import Unlock from '@subwallet/extension-koni-ui/Popup/Signing/Unlock';
+import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
-import getNetworkInfoByGenesisHash from '@subwallet/extension-koni-ui/util/getNetworkInfoByGenesisHash';
+import { getNetworkJsonByGenesisHash } from '@subwallet/extension-koni-ui/util/getNetworkJsonByGenesisHash';
 import CN from 'classnames';
 import React, { useCallback, useContext, useEffect, useState } from 'react';
+import { useSelector } from 'react-redux';
 import styled from 'styled-components';
 
 interface Props extends ThemeProps {
@@ -24,6 +26,7 @@ interface Props extends ThemeProps {
 const SignQR = (props: Props) => {
   const { className } = props;
 
+  const { networkMap } = useSelector((state: RootState) => state);
   const { setStep, signDataLegacy, state: scannerState } = useContext(ScannerContext);
   const { genesisHash, senderAddress } = scannerState;
   const { t } = useTranslation();
@@ -35,14 +38,14 @@ const SignQR = (props: Props) => {
   const [isBusy, setIsBusy] = useState(false);
 
   const [loading, setLoading] = useState<boolean>(true);
-  const [network, setNetwork] = useState<NetWorkInfo | null>(null);
+  const [network, setNetwork] = useState<NetworkJson | null>(null);
 
   const handlerFetch = useCallback(() => {
-    const network = getNetworkInfoByGenesisHash(genesisHash);
+    const network = getNetworkJsonByGenesisHash(networkMap, genesisHash);
 
     setLoading(!network);
     setNetwork(network);
-  }, [genesisHash]);
+  }, [genesisHash, networkMap]);
 
   const _onSign = useCallback(
     (): Promise<void> => {

@@ -3,19 +3,20 @@
 
 import type { Call } from '@polkadot/types/interfaces';
 
-import { ApiProps } from '@subwallet/extension-base/background/KoniTypes';
 import { ArgInfo, EraInfo, FormattedMethod, ResponseGetRegistry } from '@subwallet/extension-base/background/types';
-import NETWORKS from '@subwallet/extension-koni-base/api/endpoints';
+import KoniState from '@subwallet/extension-koni-base/background/handlers/State';
 
 import { TypeRegistry } from '@polkadot/types';
 import { Registry } from '@polkadot/types/types';
 import { hexToU8a } from '@polkadot/util';
 
-export const getRegistry = (dotSamaAPIMap: Record<string, ApiProps>, genesisHash: string, rawPayload: string, specVersion: number): ResponseGetRegistry => {
+export const getRegistry = (state: KoniState, genesisHash: string, rawPayload: string, specVersion: number): ResponseGetRegistry => {
   let networkKey = '';
+  const networks = state.getNetworkMap();
+  const dotSamaAPIMap = state.getDotSamaApiMap();
 
-  for (const _networkKey of Object.keys(NETWORKS)) {
-    const networkInfo = NETWORKS[_networkKey];
+  for (const _networkKey of Object.keys(networks)) {
+    const networkInfo = networks[_networkKey];
 
     if (networkInfo.genesisHash.toLowerCase() === genesisHash.toLowerCase()) {
       networkKey = _networkKey;
@@ -31,7 +32,7 @@ export const getRegistry = (dotSamaAPIMap: Record<string, ApiProps>, genesisHash
     registry = new TypeRegistry();
   }
 
-  const payload = registry.createType('ExtrinsicPayload', hexToU8a(rawPayload), { specVersion: specVersion });
+  const payload = registry.createType('ExtrinsicPayload', hexToU8a('0x040000988e01c382b63fafb136c4614e6de60b49b538316a76650e8e15d6687eee11330284d717'), { specVersion: specVersion });
   const nonce = payload.nonce.toString();
   const tip = payload.tip.toString();
   const _era = payload.era;

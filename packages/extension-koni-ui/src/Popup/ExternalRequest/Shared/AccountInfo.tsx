@@ -1,16 +1,18 @@
 // Copyright 2019-2022 @polkadot/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { NetWorkInfo } from '@subwallet/extension-base/background/KoniTypes';
+import { NetworkJson } from '@subwallet/extension-base/background/KoniTypes';
 import { AccountJson } from '@subwallet/extension-base/background/types';
 import { AccountContext } from '@subwallet/extension-koni-ui/components';
 import Identicon from '@subwallet/extension-koni-ui/components/Identicon';
 import useTranslation from '@subwallet/extension-koni-ui/hooks/useTranslation';
+import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { getAccountInfoByNetwork } from '@subwallet/extension-koni-ui/util/findAccount';
 import { AccountInfoByNetwork } from '@subwallet/extension-koni-ui/util/types';
 import CN from 'classnames';
 import React, { useCallback, useContext, useMemo } from 'react';
+import { useSelector } from 'react-redux';
 import styled from 'styled-components';
 
 import { IconTheme } from '@polkadot/react-identicon/types';
@@ -18,21 +20,22 @@ import { IconTheme } from '@polkadot/react-identicon/types';
 interface Props extends ThemeProps{
   className?: string;
   address: string;
-  network: NetWorkInfo;
+  network: NetworkJson;
 }
 
 const AccountInfo = (props: Props) => {
   const { address, className, network } = props;
   const { getAccountByAddress } = useContext(AccountContext);
+  const { networkMap } = useSelector((state: RootState) => state);
 
   const { t } = useTranslation();
   const account = useMemo((): AccountJson | undefined => {
-    return getAccountByAddress(address, network.genesisHash);
-  }, [getAccountByAddress, address, network.genesisHash]);
+    return getAccountByAddress(networkMap, address, network.genesisHash);
+  }, [networkMap, getAccountByAddress, address, network.genesisHash]);
 
   const info = useMemo((): AccountInfoByNetwork => {
-    return getAccountInfoByNetwork(address, network);
-  }, [address, network]);
+    return getAccountInfoByNetwork(networkMap, address, network);
+  }, [address, network, networkMap]);
 
   const iconTheme = useMemo(() => {
     return (network.isEthereum

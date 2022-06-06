@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { NetworkJson, RequestCheckTransfer, TransferStep } from '@subwallet/extension-base/background/KoniTypes';
+import { QrState } from '@subwallet/extension-base/signers/types';
 import { InputWithLabel, Warning } from '@subwallet/extension-koni-ui/components';
 import Button from '@subwallet/extension-koni-ui/components/Button';
 import DonateInputAddress from '@subwallet/extension-koni-ui/components/DonateInputAddress';
@@ -9,12 +10,15 @@ import FormatBalance from '@subwallet/extension-koni-ui/components/FormatBalance
 import InputAddress from '@subwallet/extension-koni-ui/components/InputAddress';
 import Modal from '@subwallet/extension-koni-ui/components/Modal';
 import { BalanceFormatType } from '@subwallet/extension-koni-ui/components/types';
+import { QRContext } from '@subwallet/extension-koni-ui/contexts/QRContext';
 import useTranslation from '@subwallet/extension-koni-ui/hooks/useTranslation';
-import { makeTransfer } from '@subwallet/extension-koni-ui/messaging';
+import { getAccountMeta, makeTransfer, makeTransferQr, rejectTransferQr } from '@subwallet/extension-koni-ui/messaging';
 import { ThemeProps, TransferResultType } from '@subwallet/extension-koni-ui/types';
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import styled from 'styled-components';
 
+import { KeyringPair$Meta } from '@polkadot/keyring/types';
+import { QrDisplayPayload } from '@polkadot/react-qr';
 import { BN } from '@polkadot/util';
 
 interface Props extends ThemeProps {
@@ -64,13 +68,62 @@ function renderTotal (arg: RenderTotalArg) {
   );
 }
 
+const reNewQrPayload = (payload: Record<string, number>): Uint8Array => {
+  if (!payload) {
+    return new Uint8Array();
+  }
+
+  const result: Uint8Array = new Uint8Array(Object.keys(payload).length);
+
+  for (const [key, value] of Object.entries(payload)) {
+    const index = parseInt(key);
+
+    result[index] = value;
+  }
+
+  return result;
+};
+
 function AuthTransaction ({ className, isDonation, feeInfo: [fee, feeDecimals, feeSymbol], balanceFormat, networkMap, onCancel, onChangeResult, requestPayload }: Props): React.ReactElement<Props> | null {
   const { t } = useTranslation();
+
+  const { QRState, updateQRState } = useContext(QRContext);
+
   const [isBusy, setBusy] = useState(false);
   const [password, setPassword] = useState<string>('');
   const [isKeyringErr, setKeyringErr] = useState<boolean>(false);
   const [errorArr, setErrorArr] = useState<string[]>([]);
+  const [accountMeta, setAccountMeta] = useState<KeyringPair$Meta>({});
   const networkPrefix = networkMap[requestPayload.networkKey].ss58Format;
+  const genesisHash = networkMap[requestPayload.networkKey].genesisHash;
+  const { isQrHashed, qrAddress, qrId, qrPayload } = QRState;
+
+  const isQr = useMemo((): boolean => {
+    if (accountMeta.isExternal !== undefined) {
+      return !!accountMeta.isExternal;
+    } else {
+      return false;
+    }
+  }, [accountMeta.isExternal]);
+
+  useEffect(() => {
+    let unmount = false;
+
+    const handler = async () => {
+      const { meta } = await getAccountMeta({ address: requestPayload.from });
+
+      if (!unmount) {
+        setAccountMeta(meta);
+      }
+    };
+
+    // eslint-disable-next-line no-void
+    void handler();
+
+    return () => {
+      unmount = true;
+    };
+  }, [requestPayload.from]);
 
   const _onCancel = useCallback(() => {
     onCancel();
@@ -82,40 +135,86 @@ function AuthTransaction ({ className, isDonation, feeInfo: [fee, feeDecimals, f
     (): void => {
       setBusy(true);
 
-      makeTransfer({
-        ...requestPayload,
-        password
-      }, (rs) => {
-        if (!rs.isFinalized) {
-          if (rs.step === TransferStep.SUCCESS.valueOf()) {
-            onChangeResult({
-              isShowTxResult: true,
-              isTxSuccess: rs.step === TransferStep.SUCCESS.valueOf(),
-              extrinsicHash: rs.extrinsicHash
-            });
-          } else if (rs.step === TransferStep.ERROR.valueOf()) {
-            onChangeResult({
-              isShowTxResult: true,
-              isTxSuccess: rs.step === TransferStep.SUCCESS.valueOf(),
-              extrinsicHash: rs.extrinsicHash,
-              txError: rs.errors
-            });
+      if (!isQr) {
+        makeTransfer({
+          ...requestPayload,
+          password
+        }, (rs) => {
+          if (!rs.isFinalized) {
+            if (rs.step === TransferStep.SUCCESS.valueOf()) {
+              onChangeResult({
+                isShowTxResult: true,
+                isTxSuccess: rs.step === TransferStep.SUCCESS.valueOf(),
+                extrinsicHash: rs.extrinsicHash
+              });
+            } else if (rs.step === TransferStep.ERROR.valueOf()) {
+              onChangeResult({
+                isShowTxResult: true,
+                isTxSuccess: rs.step === TransferStep.SUCCESS.valueOf(),
+                extrinsicHash: rs.extrinsicHash,
+                txError: rs.errors
+              });
+            }
           }
-        }
-      }).then((errors) => {
-        const errorMessage = errors.map((err) => err.message);
+        }).then((errors) => {
+          const errorMessage = errors.map((err) => err.message);
 
-        if (errors.find((err) => err.code === 'keyringError')) {
-          setKeyringErr(true);
-        }
+          if (errors.find((err) => err.code === 'keyringError')) {
+            setKeyringErr(true);
+          }
 
-        setErrorArr(errorMessage);
+          setErrorArr(errorMessage);
 
-        if (errorMessage && errorMessage.length) {
-          setBusy(false);
-        }
-      })
-        .catch((e) => console.log('There is problem when makeTransfer', e));
+          if (errorMessage && errorMessage.length) {
+            setBusy(false);
+          }
+        })
+          .catch((e) => console.log('There is problem when makeTransfer', e));
+      } else {
+        makeTransferQr({
+          ...requestPayload
+        }, (rs) => {
+          if (rs.qrState) {
+            const state: QrState = {
+              ...rs.qrState
+            };
+
+            state.qrPayload = reNewQrPayload(state.qrPayload as unknown as Record<string, number>);
+
+            updateQRState(state);
+          }
+
+          if (!rs.isFinalized) {
+            if (rs.step === TransferStep.SUCCESS.valueOf()) {
+              onChangeResult({
+                isShowTxResult: true,
+                isTxSuccess: rs.step === TransferStep.SUCCESS.valueOf(),
+                extrinsicHash: rs.extrinsicHash
+              });
+            } else if (rs.step === TransferStep.ERROR.valueOf()) {
+              onChangeResult({
+                isShowTxResult: true,
+                isTxSuccess: rs.step === TransferStep.SUCCESS.valueOf(),
+                extrinsicHash: rs.extrinsicHash,
+                txError: rs.errors
+              });
+            }
+          }
+        }).then((errors) => {
+          const errorMessage = errors.map((err) => err.message);
+
+          if (errors.find((err) => err.code === 'keyringError')) {
+            setKeyringErr(true);
+          }
+
+          setErrorArr(errorMessage);
+
+          if (errorMessage && errorMessage.length) {
+            setBusy(false);
+          }
+        })
+          .catch((e) => console.log('There is problem when makeTransfer', e));
+      }
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [
@@ -125,9 +224,15 @@ function AuthTransaction ({ className, isDonation, feeInfo: [fee, feeDecimals, f
       requestPayload.to,
       requestPayload.value,
       requestPayload.transferAll,
-      requestPayload.token
+      requestPayload.token,
+      isQr,
+      updateQRState
     ]
   );
+
+  const reject = useCallback(async () => {
+    await rejectTransferQr({ id: qrId });
+  }, [qrId]);
 
   const _onChangePass = useCallback(
     (value: string): void => {
@@ -253,26 +358,47 @@ function AuthTransaction ({ className, isDonation, feeInfo: [fee, feeDecimals, f
 
           <div className='auth-transaction__separator' />
 
-          <InputWithLabel
-            isError={isKeyringErr}
-            label={t<string>('Unlock account with password')}
-            onChange={_onChangePass}
-            type='password'
-            value={password}
-          />
+          {
+            !isQr &&
+              (
+                <InputWithLabel
+                  isError={isKeyringErr}
+                  label={t<string>('Unlock account with password')}
+                  onChange={_onChangePass}
+                  type='password'
+                  value={password}
+                />
+              )
+          }
+
+          {
+            isQr && qrPayload && qrAddress && (
+              <div>
+                <QrDisplayPayload
+                  address={qrAddress}
+                  cmd={ isQrHashed
+                    ? 1
+                    : 2}
+                  genesisHash={genesisHash}
+                  payload={qrPayload}
+                />
+              </div>
+            )
+          }
 
           {!!(errorArr && errorArr.length) && renderError()}
 
           <div className='auth-transaction__submit-wrapper'>
             <Button
               className={'auth-transaction__submit-btn'}
-              isBusy={isBusy}
-              isDisabled={!password || !!(errorArr && errorArr.length)}
-              onClick={_doStart}
+              // isBusy={isBusy}
+              // isDisabled={!isQr ? (!password || !!(errorArr && errorArr.length)) : false}
+              onClick={isBusy ? reject : _doStart}
             >
-              {t<string>('Sign and Submit')}
+              {!isQr ? t<string>('Sign and Submit') : t<string>('Sign via QR')}
             </Button>
           </div>
+
         </div>
       </Modal>
     </div>

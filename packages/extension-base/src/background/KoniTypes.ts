@@ -3,18 +3,20 @@
 
 import { AuthUrls, Resolver } from '@subwallet/extension-base/background/handlers/State';
 import { AccountJson, AuthorizeRequest, RequestAccountList, RequestAccountSubscribe, RequestAuthorizeReject, RequestAuthorizeSubscribe, RequestAuthorizeTab, RequestCurrentAccountAddress, RequestGetRegistry, RequestQRIsLocked, RequestQRSign, ResponseAuthorizeList, ResponseGetRegistry, ResponseJsonGetAccountInfo, ResponseQRIsLocked, ResponseQRSign, SeedLengths } from '@subwallet/extension-base/background/types';
+import { QrState } from '@subwallet/extension-base/signers/types';
 import { InjectedAccount, MetadataDefBase } from '@subwallet/extension-inject/types';
 import Web3 from 'web3';
 
 import { ApiPromise } from '@polkadot/api';
 import { SubmittableExtrinsicFunction } from '@polkadot/api/promise/types';
-import { KeyringPair$Json } from '@polkadot/keyring/types';
+import { KeyringPair$Json, KeyringPair$Meta } from '@polkadot/keyring/types';
 import { Registry } from '@polkadot/types/types';
 import { SingleAddress } from '@polkadot/ui-keyring/observable/types';
 import { KeyringOptions } from '@polkadot/ui-keyring/options/types';
 import { KeyringPairs$Json } from '@polkadot/ui-keyring/types';
 import { BN } from '@polkadot/util';
 import { KeypairType } from '@polkadot/util-crypto/types';
+import {SignerResult} from '@polkadot/types/types/extrinsic';
 
 export interface ServiceInfo {
   networkMap: Record<string, NetworkJson>;
@@ -520,6 +522,17 @@ export interface ResponseCheckCrossChainTransfer {
   feeSymbol?: string // if undefined => use main token
 }
 
+export type RequestTransferQR = RequestCheckTransfer
+
+export interface RequestRejectQRTransfer {
+  id: number;
+}
+
+export interface RequestResolveQRTransfer {
+  id: number;
+  data: SignerResult;
+}
+
 export interface ResponsePrivateKeyValidateV2 {
   addressMap: Record<KeypairType, string>,
   autoAddPrefix: boolean
@@ -615,6 +628,10 @@ export interface ResponseTransfer {
   data?: object,
   txResult?: TxResultType,
   isFinalized?: boolean
+}
+
+export interface ResponseTransferQr extends ResponseTransfer{
+  qrState?: QrState;
 }
 
 export interface EvmNftTransactionRequest {
@@ -774,6 +791,23 @@ export interface CrossChainRelation {
   relationMap: Record<string, ChainRelationInfo>;
 }
 
+export interface RequestAccountMeta{
+  address: string | Uint8Array;
+}
+
+export interface ResponseAccountMeta{
+  meta: KeyringPair$Meta;
+}
+
+export type ResponseRejectQRTransfer = void
+
+export type ResponseResolveQRTransfer = void
+
+export interface QRRequestPromise {
+  resolve: (result: SignerResult) => void,
+  reject: () => void
+}
+
 export interface KoniRequestSignatures {
   'pri(networkMap.recoverDotSama)': [string, boolean];
   'pri(substrateNft.submitTransaction)': [SubstrateNftSubmitTransaction, NftTransactionResponse, NftTransactionResponse]
@@ -831,6 +865,9 @@ export interface KoniRequestSignatures {
   'pri(accounts.checkCrossChainTransfer)': [RequestCheckCrossChainTransfer, ResponseCheckCrossChainTransfer];
   'pri(accounts.transfer)': [RequestTransfer, Array<TransferError>, ResponseTransfer];
   'pri(accounts.crossChainTransfer)': [RequestCrossChainTransfer, Array<TransferError>, ResponseTransfer];
+  'pri(accounts.transfer.qr.create)': [RequestTransferQR, Array<TransferError>, ResponseTransferQr];
+  'pri(accounts.transfer.qr.reject)': [RequestRejectQRTransfer, ResponseRejectQRTransfer];
+  'pri(accounts.transfer.qr.resolve)': [RequestResolveQRTransfer, ResponseResolveQRTransfer];
   'pri(derivation.createV2)': [RequestDeriveCreateV2, boolean];
   'pri(json.restoreV2)': [RequestJsonRestoreV2, void];
   'pri(json.batchRestoreV2)': [RequestBatchRestoreV2, void];
@@ -839,6 +876,7 @@ export interface KoniRequestSignatures {
   'pri(accounts.subscribeAccountsInputAddress)': [RequestAccountSubscribe, string, OptionInputAddress];
   'pri(accounts.saveRecent)': [RequestSaveRecentAccount, SingleAddress];
   'pri(accounts.triggerSubscription)': [null, boolean];
+  'pri(accounts.get.meta)': [RequestAccountMeta, ResponseAccountMeta];
   'pri(currentAccount.saveAddress)': [RequestCurrentAccountAddress, boolean, CurrentAccountInfo];
   'pri(currentAccount.changeBalancesVisibility)': [null, boolean, ResponseSettingsType];
   'pri(currentAccount.subscribeSettings)': [null, ResponseSettingsType, ResponseSettingsType];

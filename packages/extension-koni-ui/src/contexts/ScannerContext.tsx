@@ -4,14 +4,16 @@
 import { SCANNER_QR_STEP } from '@subwallet/extension-koni-ui/constants/scanner';
 import { AccountContext } from '@subwallet/extension-koni-ui/contexts/index';
 import { qrSign } from '@subwallet/extension-koni-ui/messaging';
+import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { CompletedParsedData, EthereumParsedData, MessageQRInfo, MultiFramesInfo, QrInfo, SubstrateCompletedParsedData, SubstrateMessageParsedData, SubstrateTransactionParsedData, TxQRInfo } from '@subwallet/extension-koni-ui/types/scanner';
 import { Transaction } from '@subwallet/extension-koni-ui/types/transaction';
 import { constructDataFromBytes, encodeNumber } from '@subwallet/extension-koni-ui/util/decoders';
 import { ethSign } from '@subwallet/extension-koni-ui/util/eth';
-import getNetworkInfoByGenesisHash from '@subwallet/extension-koni-ui/util/getNetworkInfoByGenesisHash';
+import { getNetworkJsonByGenesisHash } from '@subwallet/extension-koni-ui/util/getNetworkJsonByGenesisHash';
 import { isEthereumCompletedParsedData, isSubstrateMessageParsedData } from '@subwallet/extension-koni-ui/util/scanner';
 import transaction from '@subwallet/extension-koni-ui/util/transaction';
 import React, { useCallback, useContext, useReducer } from 'react';
+import { useSelector } from 'react-redux';
 
 import { GenericExtrinsicPayload } from '@polkadot/types';
 import { compactFromU8a, hexToU8a, isAscii, isU8a, u8aConcat, u8aToHex } from '@polkadot/util';
@@ -89,6 +91,7 @@ interface ScannerContextProviderProps {
 
 export function ScannerContextProvider ({ children }: ScannerContextProviderProps): React.ReactElement {
   const { getAccountByAddress } = useContext(AccountContext);
+  const { networkMap } = useSelector((state: RootState) => state);
 
   const initialState = DEFAULT_STATE;
 
@@ -130,8 +133,8 @@ export function ScannerContextProvider ({ children }: ScannerContextProviderProp
 
     concatMultipartData = u8aConcat(frameInfo, concatMultipartData);
 
-    return (constructDataFromBytes(concatMultipartData, true)) as SubstrateCompletedParsedData;
-  }, []);
+    return (constructDataFromBytes(concatMultipartData, true, networkMap)) as SubstrateCompletedParsedData;
+  }, [networkMap]);
 
   const setPartData = useCallback((currentFrame: number, frameCount: number, partData: string): MultiFramesInfo | SubstrateCompletedParsedData => {
     const newArray = Array.from({ length: frameCount }, () => null);
@@ -243,7 +246,7 @@ export function ScannerContextProvider ({ children }: ScannerContextProviderProp
 
     const genesisHash = txRequest.data.genesisHash;
 
-    const sender = getAccountByAddress(txRequest.data.account, genesisHash);
+    const sender = getAccountByAddress(networkMap, txRequest.data.account, genesisHash);
 
     if (!sender) {
       throw new Error(`No private key found for account ${txRequest.data.account}.`);
@@ -264,7 +267,7 @@ export function ScannerContextProvider ({ children }: ScannerContextProviderProp
     setState({ ...qrInfo, rawPayload: (txRequest as SubstrateTransactionParsedData)?.data.rawPayload, specVersion, genesisHash: genesisHash });
 
     return qrInfo;
-  }, [getAccountByAddress, setBusy]);
+  }, [networkMap, getAccountByAddress, setBusy]);
 
   const _setDataToSign = useCallback((signRequest: SubstrateMessageParsedData | EthereumParsedData): MessageQRInfo => {
     setBusy();
@@ -291,7 +294,7 @@ export function ScannerContextProvider ({ children }: ScannerContextProviderProp
       dataToSign = ethSign(message);
     }
 
-    const sender = getAccountByAddress(address);
+    const sender = getAccountByAddress(networkMap, address);
 
     if (!sender) {
       throw new Error(`No account found in Stylo for: ${address}.`);
@@ -309,7 +312,7 @@ export function ScannerContextProvider ({ children }: ScannerContextProviderProp
     setState(qrInfo);
 
     return qrInfo;
-  }, [getAccountByAddress, setBusy]);
+  }, [networkMap, getAccountByAddress, setBusy]);
 
   const setData = useCallback((unsignedData: CompletedParsedData): QrInfo => {
     if (unsignedData !== null) {
@@ -329,13 +332,13 @@ export function ScannerContextProvider ({ children }: ScannerContextProviderProp
   // signing data with legacy account.
   const signDataLegacy = useCallback(async (savePass: boolean, password = ''): Promise<void> => {
     const { dataToSign, genesisHash, isHash, senderAddress } = state;
-    const sender = !!senderAddress && getAccountByAddress(senderAddress, genesisHash);
+    const sender = !!senderAddress && getAccountByAddress(networkMap, senderAddress, genesisHash);
 
     if (!sender) {
       throw new Error('Signing Error: sender could not be found.');
     }
 
-    const senderNetwork = getNetworkInfoByGenesisHash(genesisHash);
+    const senderNetwork = getNetworkJsonByGenesisHash(networkMap, genesisHash);
     const isEthereum = senderNetwork && (senderNetwork.isEthereum);
 
     let signedData;
@@ -379,7 +382,7 @@ export function ScannerContextProvider ({ children }: ScannerContextProviderProp
     }
 
     setState({ signedData, step: SCANNER_QR_STEP.FINAL_STEP });
-  }, [getAccountByAddress, state]);
+  }, [getAccountByAddress, networkMap, state]);
 
   const clearMultipartProgress = useCallback((): void => {
     setState({

@@ -1,15 +1,15 @@
 // Copyright 2019-2022 @subwallet/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { NetWorkInfo } from '@subwallet/extension-base/background/KoniTypes';
+import { NetworkJson } from '@subwallet/extension-base/background/KoniTypes';
 import { AccountJson, FindAccountFunction } from '@subwallet/extension-base/background/types';
-import getNetworkInfoByGenesisHash, { getNetworkKeyByGenesisHash } from '@subwallet/extension-koni-ui/util/getNetworkInfoByGenesisHash';
+import { getNetworkJsonByGenesisHash, getNetworkKeyByGenesisHash } from '@subwallet/extension-koni-ui/util/getNetworkJsonByGenesisHash';
 import { getLogoByNetworkKey } from '@subwallet/extension-koni-ui/util/index';
 import reformatAddress from '@subwallet/extension-koni-ui/util/reformatAddress';
 import { AccountInfoByNetwork } from '@subwallet/extension-koni-ui/util/types';
 
 export const createFindAccountHandler = (accounts: AccountJson[]): FindAccountFunction => {
-  return (address: string, genesisHash?: string): AccountJson | undefined => {
+  return (networkMap: Record<string, NetworkJson>, address: string, genesisHash?: string): AccountJson | undefined => {
     if (!genesisHash) {
       return accounts.find((account) => {
         const formattedAddress = reformatAddress(account.address, 0, true);
@@ -18,7 +18,7 @@ export const createFindAccountHandler = (accounts: AccountJson[]): FindAccountFu
       });
     }
 
-    const network: NetWorkInfo | null = getNetworkInfoByGenesisHash(genesisHash);
+    const network: NetworkJson | null = getNetworkJsonByGenesisHash(networkMap, genesisHash);
 
     if (network) {
       for (const account of accounts) {
@@ -37,8 +37,8 @@ export const createFindAccountHandler = (accounts: AccountJson[]): FindAccountFu
   };
 };
 
-export const getAccountInfoByNetwork = (address: string, network: NetWorkInfo): AccountInfoByNetwork => {
-  const networkKey = getNetworkKeyByGenesisHash(network.genesisHash) || '';
+export const getAccountInfoByNetwork = (networkMap: Record<string, NetworkJson>, address: string, network: NetworkJson): AccountInfoByNetwork => {
+  const networkKey = getNetworkKeyByGenesisHash(networkMap, network.genesisHash) || '';
 
   return {
     address,

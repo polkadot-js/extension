@@ -11,7 +11,7 @@ import type { KeyringPairs$Json } from '@polkadot/ui-keyring/types';
 import type { HexString } from '@polkadot/util/types';
 import type { KeypairType } from '@polkadot/util-crypto/types';
 
-import { CurrentNetworkInfo, KoniRequestSignatures } from '@subwallet/extension-base/background/KoniTypes';
+import { CurrentNetworkInfo, KoniRequestSignatures, NetworkJson } from '@subwallet/extension-base/background/KoniTypes';
 
 import { TypeRegistry } from '@polkadot/types';
 
@@ -60,7 +60,7 @@ export type AccountWithChildren = AccountJson & {
 }
 
 export interface FindAccountFunction{
-  (address: string, genesisHash?: string): AccountJson | undefined;
+  (networkMap: Record<string, NetworkJson>, address: string, genesisHash?: string): AccountJson | undefined;
 }
 
 export type AccountsContext = {

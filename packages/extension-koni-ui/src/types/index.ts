@@ -4,7 +4,7 @@
 import { TransferError } from '@subwallet/extension-base/background/KoniTypes';
 import { AccountJson } from '@subwallet/extension-base/background/types';
 
-import { Theme } from './components/themes';
+import { Theme } from '../components/themes';
 
 export { Theme };
 

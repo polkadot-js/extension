@@ -2,8 +2,8 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import arrowCounterClockWise from '@subwallet/extension-koni-ui/assets/arrow-counter-clockwise.svg';
-import { ActionContext } from '@subwallet/extension-koni-ui/contexts';
 import pencilIcon from '@subwallet/extension-koni-ui/assets/pencil.svg';
+import { ActionContext } from '@subwallet/extension-koni-ui/contexts';
 import useGetNetworkJson from '@subwallet/extension-koni-ui/hooks/screen/home/useGetNetworkJson';
 import useToast from '@subwallet/extension-koni-ui/hooks/useToast';
 import { recoverDotSamaApi } from '@subwallet/extension-koni-ui/messaging';

@@ -1,9 +1,9 @@
 // Copyright 2019-2022 @polkadot/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { NetWorkInfo } from '@subwallet/extension-base/background/KoniTypes';
+import { NetworkJson } from '@subwallet/extension-base/background/KoniTypes';
 import { EthereumParsedData, ParsedData, SubstrateCompletedParsedData, SubstrateMultiParsedData } from '@subwallet/extension-koni-ui/types/scanner';
-import getNetworkInfoByGenesisHash from '@subwallet/extension-koni-ui/util/getNetworkInfoByGenesisHash';
+import { getNetworkJsonByGenesisHash } from '@subwallet/extension-koni-ui/util/getNetworkJsonByGenesisHash';
 import { MAX_INTEGER } from 'ethereumjs-util';
 
 import { TypeRegistry } from '@polkadot/types';
@@ -74,7 +74,7 @@ export const rawDataToU8A = (rawData: string): Uint8Array | null => {
   return bytes;
 };
 
-export const constructDataFromBytes = (bytes: Uint8Array, multipartComplete = false): ParsedData => {
+export const constructDataFromBytes = (bytes: Uint8Array, multipartComplete = false, networkMap: Record<string, NetworkJson>): ParsedData => {
   const frameInfo = hexStripPrefix(u8aToHex(bytes.slice(0, 5)));
   const frameCount = parseInt(frameInfo.substr(2, 4), 16);
   const isMultipart = frameCount > 1; // for simplicity, even single frame payloads are marked as multipart.
@@ -176,7 +176,9 @@ export const constructDataFromBytes = (bytes: Uint8Array, multipartComplete = fa
 
           const isOversized = rawPayload.length > 256;
 
-          const network: NetWorkInfo | null = getNetworkInfoByGenesisHash(genesisHash);
+          console.log(genesisHash);
+
+          const network: NetworkJson | null = getNetworkJsonByGenesisHash(networkMap, genesisHash);
 
           if (!network) {
             console.error(strings.ERROR_NO_NETWORK);

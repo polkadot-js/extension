@@ -5,11 +5,13 @@ import { AccountContext } from '@subwallet/extension-koni-ui/components';
 import { SCANNER_QR_STEP } from '@subwallet/extension-koni-ui/constants/scanner';
 import strings from '@subwallet/extension-koni-ui/constants/strings';
 import { ScannerContext } from '@subwallet/extension-koni-ui/contexts/ScannerContext';
+import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { CompletedParsedData, EthereumParsedData, NetworkParsedData, ParsedData, SubstrateCompletedParsedData, SubstrateParsedData } from '@subwallet/extension-koni-ui/types/scanner';
 import { constructDataFromBytes, isAddressString, isJsonString, rawDataToU8A } from '@subwallet/extension-koni-ui/util/decoders';
 import { isMultiFramesInfo, isMultipartData, isNetworkParsedData } from '@subwallet/extension-koni-ui/util/scanner';
 import { Result as TxRequestData } from '@zxing/library';
 import { useCallback, useContext } from 'react';
+import { useSelector } from 'react-redux';
 
 import { hexStripPrefix, u8aToHex } from '@polkadot/util';
 
@@ -20,6 +22,8 @@ interface ProcessBarcodeFunction {
 const useScanner = (showAlertMessage: (message: string, isSuccess?: boolean) => void): ProcessBarcodeFunction => {
   const { getAccountByAddress } = useContext(AccountContext);
   const scannerStore = useContext(ScannerContext);
+
+  const { networkMap } = useSelector((state: RootState) => state);
 
   const parseQrData = useCallback((txRequestData: TxRequestData): ParsedData => {
     if (isAddressString(txRequestData.getText())) {
@@ -50,11 +54,11 @@ const useScanner = (showAlertMessage: (message: string, isSuccess?: boolean) => 
         throw new Error(strings.ERROR_NO_RAW_DATA);
       }
 
-      return constructDataFromBytes(strippedData, false);
+      return constructDataFromBytes(strippedData, false, networkMap);
     } else {
       throw new Error(strings.ERROR_NO_RAW_DATA);
     }
-  }, [scannerStore.state.multipartComplete]);
+  }, [scannerStore.state.multipartComplete, networkMap]);
 
   const checkMultiFramesData = useCallback((parsedData: SubstrateParsedData | EthereumParsedData): null | CompletedParsedData => {
     if (isMultipartData(parsedData)) {
@@ -96,7 +100,7 @@ const useScanner = (showAlertMessage: (message: string, isSuccess?: boolean) => 
       scannerStore.clearMultipartProgress();
 
       const { senderAddress } = qrInfo;
-      const senderAccount = getAccountByAddress(senderAddress, genesisHash);
+      const senderAccount = getAccountByAddress(networkMap, senderAddress, genesisHash);
 
       if (!senderAccount) {
         return showAlertMessage(strings.ERROR_NO_SENDER_FOUND);
@@ -109,7 +113,7 @@ const useScanner = (showAlertMessage: (message: string, isSuccess?: boolean) => 
 
       return showAlertMessage(message);
     }
-  }, [checkMultiFramesData, getAccountByAddress, parseQrData, scannerStore, showAlertMessage]);
+  }, [networkMap, checkMultiFramesData, getAccountByAddress, parseQrData, scannerStore, showAlertMessage]);
 
   return processBarCode;
 };

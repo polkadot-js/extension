@@ -779,8 +779,9 @@ export interface CrossChainRelation {
 
 export interface ValidatorInfo {
   address: string;
-  totalStake: number;
-  ownStake: number;
+  totalStake: string;
+  ownStake: string;
+  otherStake: string;
   nominatorCount: number;
   commission: string;
   expectedReturn: number;

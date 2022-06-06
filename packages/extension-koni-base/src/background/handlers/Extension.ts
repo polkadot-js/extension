@@ -2030,7 +2030,13 @@ export default class KoniExtension extends Extension {
     return true;
   }
 
-  private getBondingOption (): BondingOptionInfo {
+  private async getBondingOption (networkKey: string): Promise<BondingOptionInfo> {
+    const apiProps = state.getDotSamaApi(networkKey);
+
+    const era = await apiProps.api.query.staking.currentEra();
+
+    console.log('era', era);
+
     return {
       era: 0,
       validators: [],
@@ -2198,7 +2204,7 @@ export default class KoniExtension extends Extension {
       case 'pri(networkMap.enableMany)':
         return this.enableNetworks(request as string[]);
       case 'pri(bonding.getBondingOptions)':
-        return this.getBondingOption();
+        return await this.getBondingOption(request as string);
       default:
         return super.handle(id, type, request, port);
     }

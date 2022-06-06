@@ -793,7 +793,7 @@ export interface BondingOptionInfo {
 }
 
 export interface KoniRequestSignatures {
-  'pri(bonding.getBondingOptions)': [null, BondingOptionInfo];
+  'pri(bonding.getBondingOptions)': [string, BondingOptionInfo];
   'pri(networkMap.recoverDotSama)': [string, boolean];
   'pri(substrateNft.submitTransaction)': [SubstrateNftSubmitTransaction, NftTransactionResponse, NftTransactionResponse]
   'pri(substrateNft.getTransaction)': [SubstrateNftTransactionRequest, SubstrateNftTransaction];

@@ -3,13 +3,13 @@
 
 import { ActionContext, InputFilter } from '@subwallet/extension-koni-ui/components';
 import useTranslation from '@subwallet/extension-koni-ui/hooks/useTranslation';
+import { getBondingOptions } from '@subwallet/extension-koni-ui/messaging';
 import Header from '@subwallet/extension-koni-ui/partials/Header';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import React, { useCallback, useContext, useEffect, useState } from 'react';
 import { useSelector } from 'react-redux';
 import styled from 'styled-components';
-import {getBondingOptions} from "@subwallet/extension-koni-ui/messaging";
 
 interface Props extends ThemeProps {
   className?: string;
@@ -28,13 +28,13 @@ function BondingValidatorSelection ({ className }: Props): React.ReactElement<Pr
   useEffect(() => {
     if (bondingParams.selectedNetwork === null) {
       navigate('/account/select-bonding-network');
+    } else {
+      getBondingOptions(bondingParams.selectedNetwork)
+        .then((bondingOptionInfo) => {
+          console.log('ok', bondingOptionInfo);
+        })
+        .catch(console.error);
     }
-
-    getBondingOptions()
-      .then((bondingOptionInfo) => {
-        console.log('ok', bondingOptionInfo);
-      })
-      .catch(console.error);
   }, [bondingParams.selectedNetwork, navigate]);
 
   return (

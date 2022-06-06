@@ -15,7 +15,7 @@ const balanceSlice = createSlice({
     update (state, action: PayloadAction<BalanceJson>) {
       const payload = action.payload;
 
-      state.details = payload.details;
+      state.details = { ...state.details, ...payload.details };
     }
   }
 });

@@ -827,10 +827,12 @@ export default class KoniState extends State {
   }
 
   public setBalanceItem (networkKey: string, item: BalanceItem) {
-    this.balanceMap[networkKey] = { ...item, timestamp: +new Date() };
+    const itemData = { ...item, timestamp: +new Date() };
+
+    this.balanceMap[networkKey] = itemData;
     this.lazyNext('setBalanceItem', () => {
       this.updateBalanceStore();
-      this.balanceSubject.next(this.getBalance());
+      this.balanceSubject.next({ details: { [networkKey]: itemData } });
     });
   }
 
@@ -1489,5 +1491,11 @@ export default class KoniState extends State {
         customErc721Registry: this.getActiveErc721Tokens()
       });
     });
+  }
+
+  public getNetworkGenesisHashByKey (key: string) {
+    const network = this.networkMap[key];
+
+    return network && network.genesisHash;
   }
 }

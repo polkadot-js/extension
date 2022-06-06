@@ -20,6 +20,7 @@ import { CurrentAccountStore, NetworkMapStore, PriceStore } from '@subwallet/ext
 import AccountRefStore from '@subwallet/extension-koni-base/stores/AccountRef';
 import AuthorizeStore from '@subwallet/extension-koni-base/stores/Authorize';
 import BalanceStore from '@subwallet/extension-koni-base/stores/Balance';
+import CrowdloanStore from '@subwallet/extension-koni-base/stores/Crowdloan';
 import CustomEvmTokenStore from '@subwallet/extension-koni-base/stores/CustomEvmToken';
 import SettingsStore from '@subwallet/extension-koni-base/stores/Settings';
 import TransactionHistoryStore from '@subwallet/extension-koni-base/stores/TransactionHistory';
@@ -101,6 +102,7 @@ export default class KoniState extends State {
   public readonly authSubjectV2: BehaviorSubject<AuthorizeRequest[]> = new BehaviorSubject<AuthorizeRequest[]>([]);
 
   private readonly balanceStore = new BalanceStore();
+  private readonly crowdloanStore = new CrowdloanStore();
   private readonly networkMapStore = new NetworkMapStore(); // persist custom networkMap by user
   private readonly customEvmTokenStore = new CustomEvmTokenStore();
   private readonly priceStore = new PriceStore();
@@ -803,13 +805,30 @@ export default class KoniState extends State {
   }
 
   public async switchAccount (newAddress: string) {
-    this.balanceMap = {};
-    const defaultBalance = this.generateDefaultBalanceMap();
-    const storedBalance = await this.getStoredBalance(newAddress);
+    await Promise.all([
+      this.resetBalanceMap(newAddress),
+      this.resetCrowdloanMap(newAddress)
+    ]);
+  }
 
-    const merge = { ...defaultBalance, ...storedBalance } as Record<string, BalanceItem>;
+  public async resetBalanceMap (newAddress: string) {
+    this.balanceMap = {};
+    const defaultData = this.generateDefaultBalanceMap();
+    const storedData = await this.getStoredBalance(newAddress);
+
+    const merge = { ...defaultData, ...storedData } as Record<string, BalanceItem>;
 
     this.balanceSubject.next({ details: merge });
+  }
+
+  public async resetCrowdloanMap (newAddress: string) {
+    this.crowdloanMap = {};
+    const defaultData = generateDefaultCrowdloanMap();
+    const storedData = await this.getStoredCrowdloan(newAddress);
+
+    const merge = { ...defaultData, ...storedData } as Record<string, CrowdloanItem>;
+
+    this.crowdloanSubject.next({ details: merge });
   }
 
   public resetStakingMap () {
@@ -817,13 +836,6 @@ export default class KoniState extends State {
       staking.state = APIItemState.PENDING;
     });
     this.stakingSubject.next(this.getStaking());
-  }
-
-  public resetCrowdloanMap () {
-    Object.values(this.crowdloanMap).forEach((item) => {
-      item.state = APIItemState.PENDING;
-    });
-    this.crowdloanSubject.next(this.getCrowdloan());
   }
 
   public setBalanceItem (networkKey: string, item: BalanceItem) {
@@ -861,18 +873,39 @@ export default class KoniState extends State {
     return { details: this.crowdloanMap } as CrowdloanJson;
   }
 
+  public async getStoredCrowdloan (address: string) {
+    const items = await this.crowdloanStore.asyncGet(address) as Record<string, CrowdloanItem>;
+
+    return items || {};
+  }
+
   public setCrowdloanItem (networkKey: string, item: CrowdloanItem) {
+    const itemData = { ...item, timestamp: +new Date() };
     // Fill para state
     const crowdloanFundNode = this.crowdloanFundMap[networkKey];
 
     if (crowdloanFundNode) {
-      item.paraState = convertFundStatus(crowdloanFundNode.status);
+      itemData.paraState = convertFundStatus(crowdloanFundNode.status);
     }
 
     // Update crowdloan map
-    this.crowdloanMap[networkKey] = item;
+    this.crowdloanMap[networkKey] = itemData;
     this.lazyNext('setCrowdloanItem', () => {
-      this.crowdloanSubject.next(this.getCrowdloan());
+      this.updateCrowdloanStore();
+      this.crowdloanSubject.next({ details: { [networkKey]: itemData } });
+    });
+  }
+
+  private updateCrowdloanStore () {
+    const readyMap: Record<string, CrowdloanItem> = {};
+
+    Object.entries(this.crowdloanMap).forEach(([key, item]) => {
+      if (item.state === APIItemState.READY) {
+        readyMap[key] = item;
+      }
+    });
+    this.getCurrentAccount((currentAccountInfo) => {
+      this.crowdloanStore.set(currentAccountInfo.address, readyMap);
     });
   }
 

@@ -94,8 +94,7 @@ export class KoniSubscription {
   subscribeBalancesAndCrowdloans (address: string, dotSamaApiMap: Record<string, ApiProps>, web3ApiMap: Record<string, Web3>) {
     this.unsubBalances && this.unsubBalances();
     this.unsubCrowdloans && this.unsubCrowdloans();
-    state.switchAccount(address).catch((err) => console.log(err));
-    state.resetCrowdloanMap();
+    state.switchAccount(address).catch((err) => console.warn(err));
     this.detectAddresses(address)
       .then((addresses) => {
         this.unsubBalances = this.initBalanceSubscription(addresses, dotSamaApiMap, web3ApiMap);

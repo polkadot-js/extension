@@ -1387,10 +1387,13 @@ export default class KoniExtension extends Extension {
       // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
       const contract = new web3.eth.Contract(ERC721Contract, contractAddress);
 
-      const [fromAccountTxCount, gasPriceGwei] = await Promise.all([
+      const [fromAccountTxCount, gasPriceGwei, freeBalance] = await Promise.all([
         web3.eth.getTransactionCount(senderAddress),
-        web3.eth.getGasPrice()
+        web3.eth.getGasPrice(),
+        getFreeBalance(networkKey, senderAddress, state.getDotSamaApiMap(), state.getWeb3ApiMap())
       ]);
+
+      const binaryFreeBalance = new BN(freeBalance);
 
       // eslint-disable-next-line @typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-assignment,@typescript-eslint/no-unsafe-member-access
       const gasLimit = await contract.methods.safeTransferFrom(
@@ -1411,21 +1414,27 @@ export default class KoniExtension extends Extension {
         // eslint-disable-next-line @typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-member-access,@typescript-eslint/no-unsafe-assignment
         data: contract.methods.safeTransferFrom(senderAddress, recipientAddress, tokenId).encodeABI()
       };
+      const rawFee = gasLimit * parseFloat(gasPriceGwei);
       // @ts-ignore
-      const estimatedFee = (gasLimit * parseFloat(gasPriceGwei)) / (10 ** networkMap[networkKey].decimals);
+      const estimatedFee = rawFee / (10 ** networkMap[networkKey].decimals);
       // eslint-disable-next-line @typescript-eslint/restrict-plus-operands
       const feeString = estimatedFee.toString() + ' ' + networkMap[networkKey].nativeToken;
 
+      const binaryFee = new BN(rawFee.toString());
+      const balanceError = binaryFee.gt(binaryFreeBalance);
+
       return {
         tx: rawTransaction,
-        estimatedFee: feeString
+        estimatedFee: feeString,
+        balanceError
       };
     } catch (e) {
       console.error('error handling web3 transfer nft', e);
 
       return {
         tx: null,
-        estimatedFee: null
+        estimatedFee: null,
+        balanceError: false
       };
     }
   }
@@ -1445,7 +1454,7 @@ export default class KoniExtension extends Extension {
       txState.passwordError = null;
       updateState(txState);
     } catch (e) {
-      txState.passwordError = 'Error unlocking account with password';
+      txState.passwordError = 'Unable to decode using the supplied passphrase';
       updateState(txState);
 
       port.onDisconnect.addListener((): void => {
@@ -1486,13 +1495,7 @@ export default class KoniExtension extends Extension {
           updateState(txState);
         });
     } catch (e) {
-      // @ts-ignore
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-member-access
-      if (e.toString().includes('Error: Returned error: insufficient funds for gas * price + value')) {
-        txState.balanceError = true;
-      } else {
-        txState.txError = true;
-      }
+      txState.txError = true;
 
       updateState(txState);
     }

@@ -256,7 +256,7 @@ function AuthTransaction ({ balanceFormat,
           </div>
 
           <div className='auth-transaction__info'>
-            <div className='auth-transaction__info-text'>Destination Chain Fee</div>
+            <div className='auth-transaction__info-text'>Total</div>
             <div className='auth-transaction__info-value'>
               {renderTotal({
                 fee,
@@ -285,6 +285,7 @@ function AuthTransaction ({ balanceFormat,
           <div className='bridge-button-container'>
             <Button
               className='bridge-button'
+              isDisabled={isBusy}
               onClick={_onCancel}
             >
               <span>
@@ -294,6 +295,7 @@ function AuthTransaction ({ balanceFormat,
 
             <Button
               className='bridge-button'
+              isBusy={isBusy}
               isDisabled={!password}
               onClick={_doStart}
             >
@@ -335,8 +337,8 @@ export default React.memo(styled(AuthTransaction)(({ theme }: ThemeProps) => `
 
   .auth-transaction-body {
     flex: 1;
-    padding-left: 15px;
-    padding-right: 15px;
+    padding-left: 22px;
+    padding-right: 22px;
     padding-bottom: 15px;
     padding-top: 25px;
     overflow-y: auto;
@@ -374,7 +376,6 @@ export default React.memo(styled(AuthTransaction)(({ theme }: ThemeProps) => `
   .auth-transaction-header__close-btn {
     padding-left: 16px;
     padding-right: 16px;
-    font-size: 14px;
     height: 40px;
     display: flex;
     align-items: center;

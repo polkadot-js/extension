@@ -39,7 +39,7 @@ cryptoWaitReady()
     // load all the keyring data
     keyring.loadAll({ store: new AccountsStore(), type: 'sr25519' });
 
-    // Init subcription
+    // Init subscription
     const subscriptions = new KoniSubscription();
 
     subscriptions.init();

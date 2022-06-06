@@ -255,29 +255,23 @@ export default styled(EvmTokenSetting)(({ theme }: Props) => `
     margin: auto 0;
   }
 
-  .network-item__top-content {
+  .token-item__top-content {
     display: flex;
     align-items: center;
-    padding-top: 12px;
-    padding-bottom: 12px;
   }
 
-  .network-item__text {
+  .token-item__text {
     font-size: 15px;
     line-height: 26px;
     font-weight: 500;
-    color: ${theme.textColor2};
   }
 
-  .network-item__toggle {
-    position: absolute;
+  .token-item__toggle {
     border-style: solid;
     border-width: 0 2px 2px 0;
     display: inline-block;
     padding: 3.5px;
     transform: rotate(-45deg);
-    right: 18px;
-    color: ${theme.textColor2};
   }
 
   .network-item__separator {

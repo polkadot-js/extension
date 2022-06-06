@@ -56,28 +56,12 @@ interface Props extends ThemeProps {
   smallMargin?: boolean;
   subHeaderName?: string;
   text?: React.ReactNode;
+  cancelButtonText?: string;
   to?: string;
   toggleZeroBalances?: () => void;
 }
 
-function Header ({ changeAccountCallback,
-  children,
-  className = '',
-  isBusy,
-  isContainDetailHeader,
-  isShowNetworkSelect = true,
-  isShowZeroBalances,
-  isWelcomeScreen,
-  onBack,
-  onCancel,
-  setShowBalanceDetail,
-  showBackArrow,
-  showCancelButton,
-  showSubHeader,
-  smallMargin = false,
-  subHeaderName,
-  to,
-  toggleZeroBalances }: Props): React.ReactElement<Props> {
+function Header ({ cancelButtonText, changeAccountCallback, children, className = '', isBusy, isContainDetailHeader, isShowNetworkSelect = true, isShowZeroBalances, isWelcomeScreen, setShowBalanceDetail, showBackArrow, showCancelButton, showSubHeader, smallMargin = false, subHeaderName, to, toggleZeroBalances, onBack, onCancel }: Props): React.ReactElement<Props> {
   const [isSettingsOpen, setShowSettings] = useState(false);
   const [isActionOpen, setShowAccountAction] = useState(false);
   const [isNetworkSelectOpen, setShowNetworkSelect] = useState(false);
@@ -365,6 +349,7 @@ function Header ({ changeAccountCallback,
 
         {showSubHeader &&
           <SubHeader
+            cancelButtonText={cancelButtonText}
             isBusy={isBusy}
             onBack={onBack}
             onCancel={onCancel}

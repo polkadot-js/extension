@@ -8,15 +8,17 @@ import type { HexString } from '@polkadot/util/types';
 
 import useTranslation from '@subwallet/extension-koni-ui/hooks/useTranslation';
 import Qr from '@subwallet/extension-koni-ui/Popup/Signing/Qr';
+import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { isAccountAll } from '@subwallet/extension-koni-ui/util';
 import React, { useCallback, useContext, useEffect, useState } from 'react';
+import { useSelector } from 'react-redux';
 import styled from 'styled-components';
 
 import { TypeRegistry } from '@polkadot/types';
-import { decodeAddress } from '@polkadot/util-crypto';
+import { decodeAddress, encodeAddress } from '@polkadot/util-crypto';
 
-import { AccountContext, AccountInfoEl, ActionContext } from '../../../components';
+import { AccountContext, AccountInfoEl, ActionContext, VerticalSpace, Warning } from '../../../components';
 import { approveSignSignature } from '../../../messaging';
 import Bytes from '../Bytes';
 import Extrinsic from '../Extrinsic';
@@ -55,6 +57,10 @@ function Request ({ account: { isExternal, isHardware }, buttonText, className, 
   const [isShowDetails, setShowDetails] = useState<boolean>(false);
   const { accounts } = useContext(AccountContext);
   const { hostname } = new URL(url);
+
+  const { networkMap } = useSelector((state: RootState) => state);
+
+  const { address } = request.payload as SignerPayloadRaw;
 
   useEffect((): void => {
     const payload = request.payload;
@@ -117,11 +123,43 @@ function Request ({ account: { isExternal, isHardware }, buttonText, className, 
     } else if (hexBytes !== null) {
       const { data } = request.payload as SignerPayloadRaw;
 
+      let genesisHash = '';
+
+      for (const network of Object.values(networkMap)) {
+        const condition = encodeAddress(address, network.ss58Format) === encodeAddress(address);
+
+        if (condition) {
+          genesisHash = network.genesisHash;
+          break;
+        }
+      }
+
       return (
-        <Bytes
-          bytes={data}
-          url={url}
-        />
+        <>
+          {isExternal && !isHardware && genesisHash
+            ? (
+              <Qr
+                address={address}
+                cmd={CMD_SIGN_MESSAGE}
+                genesisHash={genesisHash}
+                // eslint-disable-next-line @typescript-eslint/no-misused-promises
+                onSignature={_onSignature}
+                payload={data}
+              />
+            )
+            : (
+              <Bytes
+                bytes={data}
+                url={url}
+              />
+            )
+          }
+          <VerticalSpace />
+          {isHardware && <>
+            <Warning>{t('Message signing is not supported for hardware wallets.')}</Warning>
+            <VerticalSpace />
+          </>}
+        </>
       );
     }
 
@@ -132,16 +170,15 @@ function Request ({ account: { isExternal, isHardware }, buttonText, className, 
     setShowDetails(!isShowDetails);
   }, [isShowDetails]);
 
-  const { address } = request.payload as SignerPayloadRaw;
   const account = accounts
     .filter((a) => !isAccountAll(a.address))
     .find((account) => decodeAddress(account.address).toString() === decodeAddress(address).toString());
 
   useEffect(() => {
-    if (payload !== null && isExternal && !isHardware) {
+    if (isExternal && !isHardware) {
       setShowDetails(true);
     }
-  }, [isExternal, isHardware, payload]);
+  }, [isExternal, isHardware]);
 
   return (
     <div className={className}>

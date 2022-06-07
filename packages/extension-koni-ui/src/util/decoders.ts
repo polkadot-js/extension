@@ -4,7 +4,6 @@
 import { NetworkJson } from '@subwallet/extension-base/background/KoniTypes';
 import { EthereumParsedData, ParsedData, SubstrateCompletedParsedData, SubstrateMultiParsedData } from '@subwallet/extension-koni-ui/types/scanner';
 import { getNetworkJsonByGenesisHash } from '@subwallet/extension-koni-ui/util/getNetworkJsonByGenesisHash';
-import { MAX_INTEGER } from 'ethereumjs-util';
 
 import { TypeRegistry } from '@polkadot/types';
 import { compactFromU8a, hexStripPrefix, hexToU8a, u8aToHex } from '@polkadot/util';
@@ -162,21 +161,22 @@ export const constructDataFromBytes = (bytes: Uint8Array, multipartComplete = fa
           const hexEncodedData = '0x' + uosAfterFrames.slice(70);
           const hexPayload = hexEncodedData.slice(0, -64);
 
-          // Not sure
           const genesisHash = `0x${hexEncodedData.substr(-64)}`;
           const rawPayload = hexToU8a(hexPayload);
 
-          const registry = new TypeRegistry();
-          const raw = registry.createType('ExtrinsicPayload', rawPayload).toHuman();
+          try {
+            const registry = new TypeRegistry();
+            const raw = registry.createType('ExtrinsicPayload', rawPayload).toHuman();
 
-          // @ts-ignore
-          data.data.specVersion = raw?.specVersion ? intFromStringWithCommas(raw.specVersion as string) : MAX_INTEGER;
+            // @ts-ignore
+            data.data.specVersion = raw?.specVersion ? intFromStringWithCommas(raw.specVersion as string) : Number.MAX_SAFE_INTEGER;
+          } catch (e) {
+            data.data.specVersion = Number.MAX_SAFE_INTEGER;
+          }
 
           data.data.genesisHash = genesisHash;
 
           const isOversized = rawPayload.length > 256;
-
-          console.log(genesisHash);
 
           const network: NetworkJson | null = getNetworkJsonByGenesisHash(networkMap, genesisHash);
 

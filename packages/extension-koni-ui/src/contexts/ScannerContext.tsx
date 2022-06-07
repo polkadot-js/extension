@@ -273,6 +273,7 @@ export function ScannerContextProvider ({ children }: ScannerContextProviderProp
     setBusy();
 
     const address = signRequest.data.account;
+    const genesisHash = signRequest.data.genesisHash;
     let message = '';
     let isHash = false;
     let isOversized = false;
@@ -294,7 +295,7 @@ export function ScannerContextProvider ({ children }: ScannerContextProviderProp
       dataToSign = ethSign(message);
     }
 
-    const sender = getAccountByAddress(networkMap, address);
+    const sender = getAccountByAddress(networkMap, address, genesisHash);
 
     if (!sender) {
       throw new Error(`No account found in Stylo for: ${address}.`);
@@ -309,7 +310,7 @@ export function ScannerContextProvider ({ children }: ScannerContextProviderProp
       type: 'message'
     };
 
-    setState(qrInfo);
+    setState({ ...qrInfo, genesisHash: genesisHash });
 
     return qrInfo;
   }, [networkMap, getAccountByAddress, setBusy]);

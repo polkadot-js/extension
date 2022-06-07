@@ -263,17 +263,6 @@ async function doSignAndSend (
     response: ResponseTransfer,
     records: EventRecord[]) => void,
   callback: (data: ResponseTransfer) => void) {
-  const fromAddress = fromKeypair.address;
-  let nonce;
-
-  if (['genshiro_testnet', 'genshiro', 'equilibrium_parachain'].includes(networkKey)) {
-    nonce = -1;
-  } else {
-    // @ts-ignore
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-    nonce = await api.query.system.account(fromAddress).nonce;
-  }
-
   const response: ResponseTransfer = {
     step: TransferStep.READY,
     errors: [],
@@ -330,8 +319,9 @@ async function doSignAndSend (
     _updateResponseTxResult(networkKey, tokenInfo, response, records);
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-  await transfer.signAndSend(fromKeypair, { nonce }, ({ events = [], status }) => {
+  await transfer.signAsync(fromKeypair, { nonce: -1 });
+
+  await transfer.send(({ events = [], status }) => {
     console.log('Transaction status:', status.type, status.hash.toHex());
     response.extrinsicStatus = status.type;
 

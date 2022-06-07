@@ -5,8 +5,9 @@ import Common from '@ethereumjs/common';
 import Extension, { SEED_DEFAULT_LENGTH, SEED_LENGTHS } from '@subwallet/extension-base/background/handlers/Extension';
 import { AuthUrls } from '@subwallet/extension-base/background/handlers/State';
 import { createSubscription, isSubscriptionRunning, unsubscribe } from '@subwallet/extension-base/background/handlers/subscriptions';
-import { AccountsWithCurrentAddress, ApiProps, BalanceJson, ChainRegistry, CrowdloanJson, CustomEvmToken, DeleteEvmTokenParams, DisableNetworkResponse, EvmNftSubmitTransaction, EvmNftTransaction, EvmNftTransactionRequest, EvmTokenJson, NETWORK_ERROR, NetWorkGroup, NetworkJson, NftCollection, NftCollectionJson, NftItem, NftJson, NftTransactionResponse, NftTransferExtra, OptionInputAddress, PriceJson, RequestAccountCreateSuriV2, RequestAccountExportPrivateKey, RequestAccountMeta, RequestAuthorization, RequestAuthorizationPerAccount, RequestAuthorizeApproveV2, RequestBatchRestoreV2, RequestCheckCrossChainTransfer, RequestCheckTransfer, RequestCrossChainTransfer, RequestDeriveCreateV2, RequestForgetSite, RequestFreeBalance, RequestJsonRestoreV2, RequestNftForceUpdate, RequestRejectQRTransfer, RequestSaveRecentAccount, RequestSeedCreateV2, RequestSeedValidateV2, RequestSettingsType, RequestTransactionHistoryAdd, RequestTransfer, RequestTransferCheckReferenceCount, RequestTransferCheckSupporting, RequestTransferExistentialDeposit, RequestTransferQR, ResponseAccountCreateSuriV2, ResponseAccountExportPrivateKey, ResponseAccountMeta, ResponseCheckCrossChainTransfer, ResponseCheckTransfer, ResponsePrivateKeyValidateV2, ResponseRejectQRTransfer, ResponseSeedCreateV2, ResponseSeedValidateV2, ResponseTransfer, ResponseTransferQr, StakingJson, StakingRewardJson, SubstrateNftSubmitTransaction, SubstrateNftTransaction, SubstrateNftTransactionRequest, SupportTransferResponse, ThemeTypes, TokenInfo, TransactionHistoryItemType, TransferError, TransferErrorCode, TransferStep, ValidateEvmTokenRequest, ValidateEvmTokenResponse, ValidateNetworkRequest, ValidateNetworkResponse } from '@subwallet/extension-base/background/KoniTypes';
+import { AccountsWithCurrentAddress, ApiProps, BalanceJson, ChainRegistry, CrowdloanJson, CustomEvmToken, DeleteEvmTokenParams, DisableNetworkResponse, EvmNftSubmitTransaction, EvmNftTransaction, EvmNftTransactionRequest, EvmTokenJson, NETWORK_ERROR, NetWorkGroup, NetworkJson, NftCollection, NftCollectionJson, NftItem, NftJson, NftTransactionResponse, NftTransferExtra, OptionInputAddress, PriceJson, QRRequestPromise, QRRequestPromiseStatus, RequestAccountCreateSuriV2, RequestAccountExportPrivateKey, RequestAccountMeta, RequestAuthorization, RequestAuthorizationPerAccount, RequestAuthorizeApproveV2, RequestBatchRestoreV2, RequestCheckCrossChainTransfer, RequestCheckTransfer, RequestCrossChainTransfer, RequestDeriveCreateV2, RequestForgetSite, RequestFreeBalance, RequestJsonRestoreV2, RequestNftForceUpdate, RequestRejectQRTransfer, RequestResolveQRTransfer, RequestSaveRecentAccount, RequestSeedCreateV2, RequestSeedValidateV2, RequestSettingsType, RequestTransactionHistoryAdd, RequestTransfer, RequestTransferCheckReferenceCount, RequestTransferCheckSupporting, RequestTransferExistentialDeposit, RequestTransferQR, ResponseAccountCreateSuriV2, ResponseAccountExportPrivateKey, ResponseAccountMeta, ResponseCheckCrossChainTransfer, ResponseCheckTransfer, ResponsePrivateKeyValidateV2, ResponseRejectQRTransfer, ResponseResolveQRTransfer, ResponseSeedCreateV2, ResponseSeedValidateV2, ResponseTransfer, ResponseTransferQr, StakingJson, StakingRewardJson, SubstrateNftSubmitTransaction, SubstrateNftTransaction, SubstrateNftTransactionRequest, SupportTransferResponse, ThemeTypes, TokenInfo, TransactionHistoryItemType, TransferError, TransferErrorCode, TransferStep, ValidateEvmTokenRequest, ValidateEvmTokenResponse, ValidateNetworkRequest, ValidateNetworkResponse } from '@subwallet/extension-base/background/KoniTypes';
 import { AccountJson, AuthorizeRequest, MessageTypes, RequestAccountForget, RequestAuthorizeReject, RequestCurrentAccountAddress, RequestGetRegistry, RequestTypes, ResponseAuthorizeList, ResponseGetRegistry, ResponseType } from '@subwallet/extension-base/background/types';
+import { getId } from '@subwallet/extension-base/utils/getId';
 import { initApi } from '@subwallet/extension-koni-base/api/dotsama';
 import { getFreeBalance, subscribeFreeBalance } from '@subwallet/extension-koni-base/api/dotsama/balance';
 import { getTokenInfo } from '@subwallet/extension-koni-base/api/dotsama/registry';
@@ -2150,6 +2151,18 @@ export default class KoniExtension extends Extension {
 
     if (fromKeyPair) {
       // Make transfer with Dotsama API
+      const id: string = getId();
+
+      state.cleanQrRequest();
+
+      const setState = (promise: QRRequestPromise) => {
+        state.setQrRequestMap(id, promise);
+      };
+
+      const updateState = (promise: Partial<QRRequestPromise>) => {
+        state.updateQrRequest(id, promise);
+      };
+
       const transferProm: Promise<void> = makeTransferQR(
         networkKey,
         to,
@@ -2158,7 +2171,9 @@ export default class KoniExtension extends Extension {
         !!transferAll,
         state.getDotSamaApiMap(),
         tokenInfo,
-        state.setQrRequestMap,
+        id,
+        setState,
+        updateState,
         this.makeTransferQrCallback(from, networkKey, token, cb)
       );
 
@@ -2167,9 +2182,12 @@ export default class KoniExtension extends Extension {
         console.log(`Start transfer ${transferAll ? 'all' : value} from ${from} to ${to}`);
       })
         .catch((e) => {
-          // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment,node/no-callback-literal,@typescript-eslint/no-unsafe-member-access
-          cb({ step: TransferStep.ERROR, errors: [({ code: TransferErrorCode.TRANSFER_ERROR, message: e.message })] });
-          console.error('Transfer error', e);
+          if (e) {
+            // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment,node/no-callback-literal,@typescript-eslint/no-unsafe-member-access
+            cb({ step: TransferStep.ERROR, errors: [({ code: TransferErrorCode.TRANSFER_ERROR, message: e.message })] });
+            console.error('Transfer error', e);
+          }
+
           setTimeout(() => {
             unsubscribe(id);
           }, 500);
@@ -2192,6 +2210,16 @@ export default class KoniExtension extends Extension {
     const promise = state.getQrRequest(id);
 
     promise.reject();
+
+    state.updateQrRequest(id, { status: QRRequestPromiseStatus.REJECTED });
+  }
+
+  private resolveQrTransfer (request: RequestResolveQRTransfer): ResponseResolveQRTransfer {
+    const { data, id } = request;
+
+    const promise = state.getQrRequest(id);
+
+    promise.resolve(data);
   }
 
   // eslint-disable-next-line @typescript-eslint/require-await
@@ -2361,6 +2389,8 @@ export default class KoniExtension extends Extension {
         return await this.makeTransferQR(id, port, request as RequestTransferQR);
       case 'pri(accounts.transfer.qr.reject)':
         return this.rejectQrTransfer(request as RequestRejectQRTransfer);
+      case 'pri(accounts.transfer.qr.resolve)':
+        return this.resolveQrTransfer(request as RequestResolveQRTransfer);
       default:
         return super.handle(id, type, request, port);
     }

@@ -11,12 +11,12 @@ import { ApiPromise } from '@polkadot/api';
 import { SubmittableExtrinsicFunction } from '@polkadot/api/promise/types';
 import { KeyringPair$Json, KeyringPair$Meta } from '@polkadot/keyring/types';
 import { Registry } from '@polkadot/types/types';
+import { SignerResult } from '@polkadot/types/types/extrinsic';
 import { SingleAddress } from '@polkadot/ui-keyring/observable/types';
 import { KeyringOptions } from '@polkadot/ui-keyring/options/types';
 import { KeyringPairs$Json } from '@polkadot/ui-keyring/types';
 import { BN } from '@polkadot/util';
 import { KeypairType } from '@polkadot/util-crypto/types';
-import {SignerResult} from '@polkadot/types/types/extrinsic';
 
 export interface ServiceInfo {
   networkMap: Record<string, NetworkJson>;
@@ -516,11 +516,11 @@ export interface ResponseCheckCrossChainTransfer {
 export type RequestTransferQR = RequestCheckTransfer
 
 export interface RequestRejectQRTransfer {
-  id: number;
+  id: string;
 }
 
 export interface RequestResolveQRTransfer {
-  id: number;
+  id: string;
   data: SignerResult;
 }
 
@@ -623,6 +623,7 @@ export interface ResponseTransfer {
 
 export interface ResponseTransferQr extends ResponseTransfer{
   qrState?: QrState;
+  isBusy?: boolean;
 }
 
 export interface EvmNftTransactionRequest {
@@ -796,9 +797,18 @@ export type ResponseRejectQRTransfer = void
 
 export type ResponseResolveQRTransfer = void
 
+export enum QRRequestPromiseStatus {
+  PENDING,
+  REJECTED,
+  FAILED,
+  COMPLETED
+}
+
 export interface QRRequestPromise {
   resolve: (result: SignerResult) => void,
-  reject: () => void
+  reject: () => void,
+  status: QRRequestPromiseStatus,
+  createdAt: number
 }
 
 export interface KoniRequestSignatures {

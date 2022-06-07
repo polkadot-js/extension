@@ -61,7 +61,7 @@ interface Props extends ThemeProps {
   toggleZeroBalances?: () => void;
 }
 
-function Header ({ cancelButtonText, changeAccountCallback, children, className = '', isBusy, isContainDetailHeader, isShowNetworkSelect = true, isShowZeroBalances, isWelcomeScreen, setShowBalanceDetail, showBackArrow, showCancelButton, showSubHeader, smallMargin = false, subHeaderName, to, toggleZeroBalances, onBack, onCancel }: Props): React.ReactElement<Props> {
+function Header ({ cancelButtonText, changeAccountCallback, children, className = '', isBusy, isContainDetailHeader, isShowNetworkSelect = true, isShowZeroBalances, isWelcomeScreen, onBack, onCancel, setShowBalanceDetail, showBackArrow, showCancelButton, showSubHeader, smallMargin = false, subHeaderName, to, toggleZeroBalances }: Props): React.ReactElement<Props> {
   const [isSettingsOpen, setShowSettings] = useState(false);
   const [isActionOpen, setShowAccountAction] = useState(false);
   const [isNetworkSelectOpen, setShowNetworkSelect] = useState(false);

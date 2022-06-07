@@ -2,11 +2,12 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { assetFromToken } from '@equilab/api';
-import { ApiProps, QRRequestPromise, ResponseTransfer, ResponseTransferQr, TokenInfo, TransferErrorCode, TransferStep } from '@subwallet/extension-base/background/KoniTypes';
+import { ApiProps, QRRequestPromise, QRRequestPromiseStatus, ResponseTransfer, ResponseTransferQr, TokenInfo, TransferErrorCode, TransferStep } from '@subwallet/extension-base/background/KoniTypes';
 import QrSigner from '@subwallet/extension-base/signers/QrSigner';
 
 import { KeyringPair } from '@polkadot/keyring/types';
 import { EventRecord } from '@polkadot/types/interfaces';
+import { AnyNumber } from '@polkadot/types/types';
 import { BN } from '@polkadot/util';
 
 // TODO: consider pass state.getApiMap() as a param
@@ -89,13 +90,15 @@ export async function makeTransferQR (
   transferAll: boolean,
   dotSamaApiMap: Record<string, ApiProps>,
   tokenInfo: undefined | TokenInfo,
-  setState: (id: number, promise: QRRequestPromise) => void,
+  qrId: string,
+  setState: (promise: QRRequestPromise) => void,
+  updateState: (promise: Partial<QRRequestPromise>) => void,
   callback: (data: ResponseTransferQr) => void
 ): Promise<void> {
   const apiProps = await dotSamaApiMap[networkKey].isReady;
   const api = apiProps.api;
   const fromAddress = fromKeypair.address;
-  let nonce;
+  let nonce: AnyNumber;
 
   if (['genshiro_testnet', 'genshiro', 'equilibrium_parachain'].includes(networkKey)) {
     nonce = -1;
@@ -205,7 +208,7 @@ export async function makeTransferQR (
     updateResponseTxResult(networkKey, tokenInfo, response, records);
   }
 
-  await transfer.signAsync(fromAddress, { nonce, signer: new QrSigner(api.registry, callback, setState) });
+  await transfer.signAsync(fromAddress, { nonce, signer: new QrSigner(api.registry, callback, qrId, setState) });
 
   await transfer.send(({ events, status }) => {
     console.log('Transaction status:', status.type, status.hash.toHex());
@@ -213,6 +216,7 @@ export async function makeTransferQR (
 
     if (status.isBroadcast) {
       response.step = TransferStep.START;
+      response.isBusy = true;
     }
 
     if (status.isInBlock) {
@@ -223,7 +227,6 @@ export async function makeTransferQR (
         block: blockHash,
         status: status.type
       };
-
       callback(response);
 
       updateResponseByEvents(response, events);
@@ -231,6 +234,12 @@ export async function makeTransferQR (
       // eslint-disable-next-line @typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-member-access,@typescript-eslint/no-unsafe-assignment
       response.extrinsicHash = transfer.hash.toHex();
       callback(response);
+
+      if (response.step === TransferStep.SUCCESS.valueOf()) {
+        updateState({ status: QRRequestPromiseStatus.COMPLETED });
+      } else if (response.step === TransferStep.ERROR.valueOf()) {
+        updateState({ status: QRRequestPromiseStatus.FAILED });
+      }
     } else if (status.isFinalized) {
       const blockHash = status.asFinalized.toHex();
 

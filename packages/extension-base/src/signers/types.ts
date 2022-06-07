@@ -5,5 +5,5 @@ export interface QrState {
   isQrHashed: boolean;
   qrAddress: string;
   qrPayload: Uint8Array;
-  qrId: number;
+  qrId: string;
 }

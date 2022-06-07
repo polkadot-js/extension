@@ -8,7 +8,7 @@ import { AccountsWithCurrentAddress, CurrentAccountInfo } from '@subwallet/exten
 import { PHISHING_PAGE_REDIRECT } from '@subwallet/extension-base/defaults';
 import { canDerive } from '@subwallet/extension-base/utils';
 import { AccountContext, ActionContext, AuthorizeReqContext, MediaContext, MetadataReqContext, SettingsContext, SigningReqContext } from '@subwallet/extension-koni-ui/contexts';
-import { QRContextProvider } from '@subwallet/extension-koni-ui/contexts/QRContext';
+import { QRContextProvider } from '@subwallet/extension-koni-ui/contexts/QrContext';
 import useSetupStore from '@subwallet/extension-koni-ui/hooks/store/useSetupStore';
 import ExternalRequest from '@subwallet/extension-koni-ui/Popup/ExternalRequest';
 import Home from '@subwallet/extension-koni-ui/Popup/Home';

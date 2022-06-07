@@ -32,7 +32,7 @@ export const getRegistry = (state: KoniState, genesisHash: string, rawPayload: s
     registry = new TypeRegistry();
   }
 
-  const payload = registry.createType('ExtrinsicPayload', hexToU8a('0x040000988e01c382b63fafb136c4614e6de60b49b538316a76650e8e15d6687eee11330284d717'), { specVersion: specVersion });
+  const payload = registry.createType('ExtrinsicPayload', hexToU8a(rawPayload), { specVersion: specVersion });
   const nonce = payload.nonce.toString();
   const tip = payload.tip.toString();
   const _era = payload.era;

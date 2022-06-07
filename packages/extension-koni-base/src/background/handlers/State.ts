@@ -3,7 +3,7 @@
 
 import { withErrorLog } from '@subwallet/extension-base/background/handlers/helpers';
 import State, { AuthUrls, Resolver } from '@subwallet/extension-base/background/handlers/State';
-import { AccountRefMap, APIItemState, ApiMap, AuthRequestV2, BalanceItem, BalanceJson, ChainRegistry, CrowdloanItem, CrowdloanJson, CurrentAccountInfo, CustomEvmToken, DeleteEvmTokenParams, EvmTokenJson, NETWORK_STATUS, NetworkJson, NftCollection, NftCollectionJson, NftItem, NftJson, NftTransferExtra, PriceJson, QRRequestPromise, RequestSettingsType, ResultResolver, ServiceInfo, StakingItem, StakingJson, StakingRewardJson, TokenInfo, TransactionHistoryItemType } from '@subwallet/extension-base/background/KoniTypes';
+import { AccountRefMap, APIItemState, ApiMap, AuthRequestV2, BalanceItem, BalanceJson, ChainRegistry, CrowdloanItem, CrowdloanJson, CurrentAccountInfo, CustomEvmToken, DeleteEvmTokenParams, EvmTokenJson, NETWORK_STATUS, NetworkJson, NftCollection, NftCollectionJson, NftItem, NftJson, NftTransferExtra, PriceJson, QRRequestPromise, QRRequestPromiseStatus, RequestSettingsType, ResultResolver, ServiceInfo, StakingItem, StakingJson, StakingRewardJson, TokenInfo, TransactionHistoryItemType } from '@subwallet/extension-base/background/KoniTypes';
 import { AuthorizeRequest, RequestAuthorizeTab } from '@subwallet/extension-base/background/types';
 import { getId } from '@subwallet/extension-base/utils/getId';
 import { getTokenPrice } from '@subwallet/extension-koni-base/api/coingecko';
@@ -125,7 +125,7 @@ export default class KoniState extends State {
   readonly #authRequestsV2: Record<string, AuthRequestV2> = {};
   private priceStoreReady = false;
   private readonly transactionHistoryStore = new TransactionHistoryStore();
-  private qrRequest: Record<number, QRRequestPromise> = {};
+  private qrRequest: Record<string, QRRequestPromise> = {};
 
   private networkMap: Record<string, NetworkJson> = {}; // mapping to networkMapStore, for uses in background
   private networkMapSubject = new Subject<Record<string, NetworkJson>>();
@@ -1460,16 +1460,47 @@ export default class KoniState extends State {
     });
   }
 
-  public getQrRequestMap (): Record<number, QRRequestPromise> {
+  public getQrRequestMap (): Record<string, QRRequestPromise> {
     return this.qrRequest;
   }
 
-  public setQrRequestMap (id: number, value: QRRequestPromise) {
-    console.log(this);
+  public setQrRequestMap (id: string, value: QRRequestPromise) {
     this.qrRequest[id] = value;
   }
 
-  public getQrRequest (id: number): QRRequestPromise {
+  public getQrRequest (id: string): QRRequestPromise {
     return this.qrRequest[id];
+  }
+
+  public updateQrRequest (id: string, value: Partial<QRRequestPromise>): void {
+    const rs = this.qrRequest[id];
+
+    if (rs) {
+      for (const [_key, _value] of Object.entries(value)) {
+        // @ts-ignore
+        rs[_key] = _value;
+      }
+    }
+  }
+
+  public cleanQrRequest (): void {
+    const now = new Date().getTime();
+    const map = this.qrRequest;
+
+    const arr: string[] = [];
+
+    for (const [key, value] of Object.entries(map)) {
+      if (value.status === QRRequestPromiseStatus.COMPLETED || value.status === QRRequestPromiseStatus.REJECTED) {
+        arr.push(key);
+      } else {
+        if (now - value.createdAt > 15 * 60 * 60) {
+          arr.push(key);
+        }
+      }
+    }
+
+    for (const key of arr) {
+      delete map[key];
+    }
   }
 }

@@ -3,6 +3,8 @@
 
 import { ChainBondingBasics, NetworkJson } from '@subwallet/extension-base/background/KoniTypes';
 import { ActionContext } from '@subwallet/extension-koni-ui/components';
+import Tooltip from '@subwallet/extension-koni-ui/components/Tooltip';
+import useTranslation from '@subwallet/extension-koni-ui/hooks/useTranslation';
 import { store } from '@subwallet/extension-koni-ui/stores';
 import { BondingParams } from '@subwallet/extension-koni-ui/stores/types';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
@@ -18,6 +20,7 @@ interface Props extends ThemeProps {
 
 function BondingNetworkSelection ({ chainBondingMeta, className, icon, network }: Props): React.ReactElement<Props> {
   const navigate = useContext(ActionContext);
+  const { t } = useTranslation();
 
   const handleOnClick = useCallback(() => {
     store.dispatch({ type: 'bondingParams/update', payload: { selectedNetwork: network.key, selectedValidator: '' } as BondingParams });
@@ -45,9 +48,20 @@ function BondingNetworkSelection ({ chainBondingMeta, className, icon, network }
         </div>
 
         <div className={'footer-container'}>
-          {/* eslint-disable-next-line @typescript-eslint/restrict-plus-operands */}
-          <div className={'min-bond'}>{chainBondingMeta ? chainBondingMeta.minBond.toString() + ' ' + network.nativeToken : 0}</div>
-          <div>
+          <div
+            className={'min-bond'}
+            data-for={'min-bond-tooltip'}
+            data-tip={true}
+          >
+            {/* eslint-disable-next-line @typescript-eslint/restrict-plus-operands */}
+            {chainBondingMeta ? chainBondingMeta.minBond.toString() + ' ' + network.nativeToken : 0}
+          </div>
+          <Tooltip
+            place={'top'}
+            text={t<string>('The minimum amount required to stake')}
+            trigger={'min-bond-tooltip'}
+          />
+          <div className={'bonding-item-toggle-container'}>
             <div className={'bonding-item-toggle'} />
           </div>
         </div>
@@ -57,10 +71,16 @@ function BondingNetworkSelection ({ chainBondingMeta, className, icon, network }
 }
 
 export default React.memo(styled(BondingNetworkSelection)(({ theme }: Props) => `
-  .footer-container {
-    width: 20%;
+  .bonding-item-toggle-container {
     display: flex;
-    justify-content: space-between;
+    align-items: center;
+  }
+
+  .footer-container {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    align-items: center;
   }
 
   .min-bond {

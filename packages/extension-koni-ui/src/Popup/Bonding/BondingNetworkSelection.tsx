@@ -3,6 +3,7 @@
 
 import { ChainBondingBasics, NetworkJson } from '@subwallet/extension-base/background/KoniTypes';
 import { InputFilter } from '@subwallet/extension-koni-ui/components';
+import Spinner from '@subwallet/extension-koni-ui/components/Spinner';
 import useGetStakingNetworks from '@subwallet/extension-koni-ui/hooks/screen/bonding/useGetStakingNetworks';
 import useTranslation from '@subwallet/extension-koni-ui/hooks/useTranslation';
 import { getChainBondingBasics } from '@subwallet/extension-koni-ui/messaging';
@@ -13,7 +14,6 @@ import React, { useCallback, useEffect, useState } from 'react';
 import styled from 'styled-components';
 
 import LogosMap from '../../assets/logo';
-import Spinner from "@subwallet/extension-koni-ui/components/Spinner";
 
 interface Props extends ThemeProps {
   className?: string;
@@ -34,9 +34,10 @@ function BondingNetworkSelection ({ className }: Props): React.ReactElement<Prop
     getChainBondingBasics(availableNetworks)
       .then((result) => {
         setChainBondingBasics(result);
+        setLoading(false);
       })
       .catch(console.error);
-    setLoading(false);
+    // @ts-ignore
   }, []);
 
   const filterNetwork = useCallback(() => {

@@ -1,20 +1,6 @@
 // Copyright 2019-2022 @subwallet/extension-koni authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-export interface ValidatorInfo {
-  rawTotalStake: number;
-  address: string;
-  totalStake: string;
-  ownStake: string;
-  otherStake: string;
-  nominatorCount: number;
-  commission: string;
-  expectedReturn: number;
-  blocked: boolean;
-  identity?: string;
-  isVerified: boolean;
-}
-
 export interface ValidatorExtraInfo {
   commission: string,
   blocked: false,

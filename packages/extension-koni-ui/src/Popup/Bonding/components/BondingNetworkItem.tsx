@@ -86,6 +86,7 @@ export default React.memo(styled(BondingNetworkSelection)(({ theme }: Props) => 
   .min-bond {
     font-size: 14px;
     display: inline-block;
+    color: ${theme.textColor3};
   }
 
   .network-item-row {

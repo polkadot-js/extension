@@ -1,8 +1,8 @@
 // Copyright 2019-2022 @subwallet/extension-koni authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { ApiProps, ChainBondingBasics } from '@subwallet/extension-base/background/KoniTypes';
-import { calculateChainStakedReturn, calculateInflation, calculateValidatorStakedReturn, getCommission, parseBalanceString, ValidatorExtraInfo, ValidatorInfo } from '@subwallet/extension-koni-base/api/bonding/utils';
+import { ApiProps, ChainBondingBasics, ValidatorInfo } from '@subwallet/extension-base/background/KoniTypes';
+import { calculateChainStakedReturn, calculateInflation, calculateValidatorStakedReturn, getCommission, parseBalanceString, ValidatorExtraInfo } from '@subwallet/extension-koni-base/api/bonding/utils';
 
 export async function getChainBondingBasics (networkKey: string, dotSamaApi: ApiProps, decimals: number) {
   const apiProps = await dotSamaApi.isReady;
@@ -107,11 +107,11 @@ export async function getValidatorsInfo (networkKey: string, dotSamaApi: ApiProp
     // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
     const [_commissionInfo, _identityInfo] = await Promise.all([
       apiProps.api.query.staking.validators(address),
-      apiProps.api.query.identity.identityOf(address)
+      apiProps.api.query?.identity?.identityOf(address)
     ]);
 
     const commissionInfo = _commissionInfo.toHuman() as Record<string, any>;
-    const identityInfo = _identityInfo.toHuman() as Record<string, any> | null;
+    const identityInfo = _identityInfo ? (_identityInfo.toHuman() as Record<string, any> | null) : null;
     let isReasonable = false;
     let identity;
 
@@ -166,5 +166,8 @@ export async function getValidatorsInfo (networkKey: string, dotSamaApi: ApiProp
     validator.isVerified = extraInfoMap[validator.address].isVerified;
   }
 
-  return result;
+  return {
+    era: parseInt(currentEra),
+    validatorsInfo: result
+  };
 }

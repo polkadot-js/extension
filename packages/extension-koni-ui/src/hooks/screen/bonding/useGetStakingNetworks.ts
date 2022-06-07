@@ -14,11 +14,11 @@ export default function useGetStakingNetworks () {
 
   for (const network of Object.values(networkMap)) {
     if (isEthAccount) {
-      if (network.supportBonding && network.isEthereum) {
+      if (network.supportBonding && network.isEthereum && network.active) {
         result.push(network);
       }
     } else {
-      if (network.supportBonding && !network.isEthereum) {
+      if (network.supportBonding && !network.isEthereum && network.active) {
         result.push(network);
       }
     }

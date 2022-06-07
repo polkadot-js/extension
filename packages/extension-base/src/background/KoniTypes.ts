@@ -793,7 +793,13 @@ export interface BondingOptionInfo {
   validators: ValidatorInfo[]
 }
 
+export interface ChainBondingBasics {
+  stakedReturn?: number,
+  minBond: number
+}
+
 export interface KoniRequestSignatures {
+  'pri(bonding.getChainBondingBasics)': [NetworkJson[], Record<string, ChainBondingBasics>];
   'pri(bonding.getBondingOptions)': [string, BondingOptionInfo];
   'pri(networkMap.recoverDotSama)': [string, boolean];
   'pri(substrateNft.submitTransaction)': [SubstrateNftSubmitTransaction, NftTransactionResponse, NftTransactionResponse]

@@ -153,8 +153,7 @@ export const PREDEFINED_NETWORKS: Record<string, NetworkJson> = {
     crowdloanUrl: 'https://moonbeam.foundation/moonbeam-crowdloan/',
     decimals: 18,
     coinGeckoKey: 'moonbeam',
-    evmChainId: 1284,
-    supportBonding: true
+    evmChainId: 1284
   },
   astar: {
     key: 'astar',
@@ -173,8 +172,7 @@ export const PREDEFINED_NETWORKS: Record<string, NetworkJson> = {
     nativeToken: 'ASTR',
     crowdloanUrl: 'https://crowdloan.astar.network/#/',
     decimals: 18,
-    coinGeckoKey: 'astar',
-    supportBonding: true
+    coinGeckoKey: 'astar'
   },
   astarEvm: {
     key: 'astarEvm',
@@ -548,8 +546,7 @@ export const PREDEFINED_NETWORKS: Record<string, NetworkJson> = {
     isEthereum: true,
     paraId: 1000,
     decimals: 18,
-    evmChainId: 1287,
-    supportBonding: true
+    evmChainId: 1287
   },
   efinity: {
     key: 'efinity',
@@ -705,8 +702,7 @@ export const PREDEFINED_NETWORKS: Record<string, NetworkJson> = {
     crowdloanUrl: 'https://polkadot.js.org/apps/#/parachains/crowdloan',
     decimals: 18,
     coinGeckoKey: 'moonriver',
-    evmChainId: 1285,
-    supportBonding: true
+    evmChainId: 1285
   },
   shiden: {
     key: 'shiden',

@@ -1,7 +1,7 @@
 // Copyright 2019-2022 @subwallet/extension-koni authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { NetworkJson } from '@subwallet/extension-base/background/KoniTypes';
+import { ChainBondingBasics, NetworkJson } from '@subwallet/extension-base/background/KoniTypes';
 import { ActionContext } from '@subwallet/extension-koni-ui/components';
 import { store } from '@subwallet/extension-koni-ui/stores';
 import { BondingParams } from '@subwallet/extension-koni-ui/stores/types';
@@ -13,9 +13,10 @@ interface Props extends ThemeProps {
   className?: string;
   icon: string;
   network: NetworkJson;
+  chainBondingMeta: ChainBondingBasics | undefined
 }
 
-function BondingNetworkSelection ({ className, icon, network }: Props): React.ReactElement<Props> {
+function BondingNetworkSelection ({ chainBondingMeta, className, icon, network }: Props): React.ReactElement<Props> {
   const navigate = useContext(ActionContext);
 
   const handleOnClick = useCallback(() => {
@@ -43,13 +44,30 @@ function BondingNetworkSelection ({ className, icon, network }: Props): React.Re
           </div>
         </div>
 
-        <div className={'bonding-item-toggle'} />
+        <div className={'footer-container'}>
+          {/* eslint-disable-next-line @typescript-eslint/restrict-plus-operands */}
+          <div className={'min-bond'}>{chainBondingMeta ? chainBondingMeta.minBond.toString() + ' ' + network.nativeToken : 0}</div>
+          <div>
+            <div className={'bonding-item-toggle'} />
+          </div>
+        </div>
       </div>
     </div>
   );
 }
 
 export default React.memo(styled(BondingNetworkSelection)(({ theme }: Props) => `
+  .footer-container {
+    width: 20%;
+    display: flex;
+    justify-content: space-between;
+  }
+
+  .min-bond {
+    font-size: 14px;
+    display: inline-block;
+  }
+
   .network-item-row {
     cursor: pointer;
     display: flex;

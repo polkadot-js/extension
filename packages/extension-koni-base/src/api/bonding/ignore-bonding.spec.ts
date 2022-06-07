@@ -6,9 +6,11 @@ import { DOTSAMA_AUTO_CONNECT_MS } from '@subwallet/extension-koni-base/constant
 import { getCurrentProvider } from '@subwallet/extension-koni-base/utils/utils';
 
 import { ApiPromise, WsProvider } from '@polkadot/api';
-import { BN, BN_ZERO } from '@polkadot/util';
+
+jest.setTimeout(50000);
 
 interface ValidatorInfo {
+  rawTotalStake: number;
   address: string;
   totalStake: string;
   ownStake: string;
@@ -17,14 +19,16 @@ interface ValidatorInfo {
   commission: string;
   expectedReturn: number;
   blocked: boolean;
+  identity?: string;
+  isVerified: boolean;
 }
 
 interface ValidatorExtraInfo {
   commission: string,
-  blocked: false
+  blocked: false,
+  identity?: string,
+  isVerified: boolean
 }
-
-jest.setTimeout(50000);
 
 function parseBalanceString (decimals: number, balance: number, unit: string) {
   const unitThreshold = 1000000;
@@ -113,15 +117,34 @@ function calculateInflation (totalEraStake: number, totalIssuance: number, numAu
         : calcInflationRewardCurve(minInflation, stakedFraction, idealStake, idealInterest, falloff)
     ));
   }
+}
 
-  console.log('stakedFraction', stakedFraction);
-  console.log('idealStake', idealStake);
-  console.log('stakeReturn', stakeReturn);
+function calculateChainStakedReturn (inflation: number, totalEraStake: number, totalIssuance: number, networkKey: string) {
+  const stakedFraction = totalEraStake / totalIssuance;
+  let stakedReturn = inflation / stakedFraction;
+
+  if (networkKey === 'aleph') {
+    stakedReturn *= 0.9; // 10% goes to treasury
+  }
+
+  return stakedReturn;
+}
+
+function calculateValidatorStakedReturn (chainStakedReturn: number, totalValidatorStake: number, avgStake: number, commission: number) {
+  const adjusted = (avgStake * 100 * chainStakedReturn) / totalValidatorStake;
+
+  const stakedReturn = (adjusted > Number.MAX_SAFE_INTEGER ? Number.MAX_SAFE_INTEGER : adjusted) / 100;
+
+  return stakedReturn * (100 - commission) / 100; // Deduct commission
+}
+
+function getCommission (commissionString: string) {
+  return parseFloat(commissionString.split('%')[0]); // Example: 12%
 }
 
 describe('test DotSama APIs', () => {
   test('test get Validator', async () => {
-    const provider = new WsProvider(getCurrentProvider(PREDEFINED_NETWORKS.aleph), DOTSAMA_AUTO_CONNECT_MS);
+    const provider = new WsProvider(getCurrentProvider(PREDEFINED_NETWORKS.westend), DOTSAMA_AUTO_CONNECT_MS);
     const api = new ApiPromise({ provider });
     const apiPromise = await api.isReady;
 
@@ -157,9 +180,9 @@ describe('test DotSama APIs', () => {
       const parsedOwnStake = parseFloat(rawOwnStake.replaceAll(',', ''));
       const otherStake = parsedTotalStake - parsedOwnStake;
 
-      const totalStakeString = parseBalanceString(PREDEFINED_NETWORKS.polkadot.decimals, parsedTotalStake, PREDEFINED_NETWORKS.polkadot.nativeToken);
-      const ownStakeString = parseBalanceString(PREDEFINED_NETWORKS.polkadot.decimals, parsedOwnStake, PREDEFINED_NETWORKS.polkadot.nativeToken);
-      const otherStakeString = parseBalanceString(PREDEFINED_NETWORKS.polkadot.decimals, otherStake, PREDEFINED_NETWORKS.polkadot.nativeToken);
+      const totalStakeString = parseBalanceString(PREDEFINED_NETWORKS.westend.decimals, parsedTotalStake, PREDEFINED_NETWORKS.westend.nativeToken);
+      const ownStakeString = parseBalanceString(PREDEFINED_NETWORKS.westend.decimals, parsedOwnStake, PREDEFINED_NETWORKS.westend.nativeToken);
+      const otherStakeString = parseBalanceString(PREDEFINED_NETWORKS.westend.decimals, otherStake, PREDEFINED_NETWORKS.westend.nativeToken);
 
       let nominatorCount = 0;
 
@@ -172,60 +195,79 @@ describe('test DotSama APIs', () => {
       allValidators.push(validatorAddress);
 
       result.push({
+        rawTotalStake: parsedTotalStake,
         address: validatorAddress,
         totalStake: totalStakeString,
         ownStake: ownStakeString,
         otherStake: otherStakeString,
         nominatorCount,
+        // added later
         commission: '',
-        expectedReturn: 12,
-        blocked: false
+        expectedReturn: 0,
+        blocked: false,
+        isVerified: false
       });
     }
 
     const extraInfoMap: Record<string, ValidatorExtraInfo> = {};
 
     await Promise.all(allValidators.map(async (address) => {
-      extraInfoMap[address] = (await apiPromise.query.staking.validators(address)).toHuman() as unknown as ValidatorExtraInfo;
+      const [_commissionInfo, _identityInfo] = await Promise.all([
+        apiPromise.query.staking.validators(address),
+        apiPromise.query.identity.identityOf(address)
+      ]);
+
+      const commissionInfo = _commissionInfo.toHuman() as Record<string, any>;
+      const identityInfo = _identityInfo.toHuman() as Record<string, any> | null;
+      let isReasonable = false;
+      let identity;
+
+      if (identityInfo !== null) {
+        // Check if identity is eth address
+        const _judgements = identityInfo.judgements as any[];
+
+        if (_judgements.length > 0) {
+          isReasonable = true;
+        }
+
+        const displayName = identityInfo?.info?.display?.Raw as string;
+        const legal = identityInfo?.info?.legal?.Raw as string;
+        const web = identityInfo?.info?.web?.Raw as string;
+        const riot = identityInfo?.info?.riot?.Raw as string;
+        const email = identityInfo?.info?.email?.Raw as string;
+        const twitter = identityInfo?.info?.twitter?.Raw as string;
+
+        if (!displayName.startsWith('0x')) {
+          identity = identityInfo?.info?.display?.Raw as string;
+        } else {
+          identity = legal || twitter || web || email || riot;
+        }
+      }
+
+      extraInfoMap[address] = {
+        commission: commissionInfo.commission as string,
+        blocked: commissionInfo.blocked as boolean,
+        identity,
+        isVerified: isReasonable
+      } as ValidatorExtraInfo;
     }));
 
-    const inflation = calculateInflation(totalEraStake, parsedTotalIssuance, numAuctions, 'aleph');
-    const stakeReturn = inflation / stakedFraction;
-    // minInflation
-    // maxInflation
-    // idealStake
-    //
-    // Expected returns = inflation / (totalStaked / totalIssuance)
-  });
+    const inflation = calculateInflation(totalEraStake, parsedTotalIssuance, numAuctions, 'westend');
+    const stakedReturn = calculateChainStakedReturn(inflation, totalEraStake, parsedTotalIssuance, 'westend');
+    const avgStake = totalEraStake / result.length;
 
-  test('test get Returns', async () => {
-    const provider = new WsProvider(getCurrentProvider(PREDEFINED_NETWORKS.polkadot), DOTSAMA_AUTO_CONNECT_MS);
-    const api = new ApiPromise({ provider });
-    const apiProps = await api.isReady;
+    for (const validator of result) {
+      const commission = extraInfoMap[validator.address].commission;
 
-    const electedInfo = await apiProps.derive.staking.electedInfo({ withController: true, withExposure: true, withPrefs: true });
-    const emptyExposure = api.createType('Exposure');
-    // console.log(electedInfo);
-    const count = 0;
-    const list = electedInfo.info.map(({ accountId, exposure = emptyExposure, stakingLedger, validatorPrefs }): ValidatorInfo => {
-      console.log(exposure.total.unwrap().toHuman());
-      // some overrides (e.g. Darwinia Crab) does not have the own/total field in Exposure
-      // let [bondOwn, bondTotal] = exposure.total
-      //   ? [exposure.own.unwrap(), exposure.total.unwrap()]
-      //   : [BN_ZERO, BN_ZERO];
-      // const skipRewards = bondTotal.isZero();
-      // // some overrides (e.g. Darwinia Crab) does not have the value field in IndividualExposure
-      // const minNominated = (exposure.others || []).reduce((min: BN, {value = api.createType('Compact<Balance>')}): BN => {
-      //   const actual = value.unwrap();
-      //
-      //   return min.isZero() || actual.lt(min)
-      //     ? actual
-      //     : min;
-      // }, BN_ZERO);
-      //
-      // if (bondTotal.isZero()) {
-      //   bondTotal = bondOwn = stakingLedger.total?.unwrap() || BN_ZERO;
-      // }
-    });
+      validator.expectedReturn = calculateValidatorStakedReturn(stakedReturn, validator.rawTotalStake, avgStake, getCommission(commission));
+      validator.commission = commission;
+      validator.blocked = extraInfoMap[validator.address].blocked;
+      validator.identity = extraInfoMap[validator.address].identity;
+      validator.isVerified = extraInfoMap[validator.address].isVerified;
+    }
+
+    console.log(parsedEra);
+    console.log(totalEraStake);
+    console.log(result);
   });
 });

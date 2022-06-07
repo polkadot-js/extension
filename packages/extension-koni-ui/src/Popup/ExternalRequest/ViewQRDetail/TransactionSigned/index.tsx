@@ -18,12 +18,12 @@ interface Props extends ThemeProps{
 const TransactionSigned = (props: Props) => {
   const { className, network, setButtonLoading } = props;
   // eslint-disable-next-line no-empty-pattern
-  const { state: { } } = useContext<ScannerContextType>(ScannerContext);
+  const { state: { isEthereum } } = useContext<ScannerContextType>(ScannerContext);
 
   return (
     <div className={CN(className)}>
       {
-        network.isEthereum
+        isEthereum
           ? (
             <></>
           )

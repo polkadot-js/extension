@@ -156,12 +156,25 @@ export const constructDataFromBytes = (bytes: Uint8Array, multipartComplete = fa
               : firstByte === CRYPTO_SR25519
                 ? 'sr25519'
                 : null;
-          const pubKeyHex = uosAfterFrames.substr(6, 64);
+          const genesisHash = `0x${uosAfterFrames.substr(-64)}`;
+
+          const network: NetworkJson | null = getNetworkJsonByGenesisHash(networkMap, genesisHash);
+
+          if (!network) {
+            console.error(strings.ERROR_NO_NETWORK);
+            throw new Error(strings.ERROR_NO_NETWORK);
+          }
+
+          const isEthereum = !!network.isEthereum;
+
+          const addressLength = isEthereum ? 40 : 64;
+
+          const pubKeyHex = uosAfterFrames.substr(6, addressLength);
+
           const publicKeyAsBytes = hexToU8a('0x' + pubKeyHex);
-          const hexEncodedData = '0x' + uosAfterFrames.slice(70);
+          const hexEncodedData = '0x' + uosAfterFrames.slice(6 + addressLength);
           const hexPayload = hexEncodedData.slice(0, -64);
 
-          const genesisHash = `0x${hexEncodedData.substr(-64)}`;
           const rawPayload = hexToU8a(hexPayload);
 
           try {
@@ -177,13 +190,6 @@ export const constructDataFromBytes = (bytes: Uint8Array, multipartComplete = fa
           data.data.genesisHash = genesisHash;
 
           const isOversized = rawPayload.length > 256;
-
-          const network: NetworkJson | null = getNetworkJsonByGenesisHash(networkMap, genesisHash);
-
-          if (!network) {
-            console.error(strings.ERROR_NO_NETWORK);
-            throw new Error();
-          }
 
           switch (secondByte) {
             case CMD_SIGN_MORTAL:
@@ -201,7 +207,6 @@ export const constructDataFromBytes = (bytes: Uint8Array, multipartComplete = fa
                 ? blake2AsHex(u8aToHex(payload, -1, false))
                 : rawPayload;
               // encode to the prefix;
-              data.data.account = encodeAddress(publicKeyAsBytes, network.ss58Format);
 
               break;
             case CMD_SIGN_HASH:
@@ -210,11 +215,12 @@ export const constructDataFromBytes = (bytes: Uint8Array, multipartComplete = fa
               data.oversized = false;
               data.isHash = secondByte === CMD_SIGN_HASH;
               data.data.data = hexPayload;
-              data.data.account = encodeAddress(publicKeyAsBytes, network.ss58Format); // default to Kusama
               break;
             default:
               break;
           }
+
+          data.data.account = isEthereum ? ('0x' + pubKeyHex) : encodeAddress(publicKeyAsBytes, network.ss58Format);
         } catch (e) {
           console.log(e);
           throw new Error('Something went wrong decoding the Substrate UOS payload: ' + uosAfterFrames);

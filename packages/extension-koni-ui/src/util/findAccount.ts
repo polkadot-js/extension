@@ -24,7 +24,7 @@ export const createFindAccountHandler = (accounts: AccountJson[]): FindAccountFu
       for (const account of accounts) {
         const formattedAddress = reformatAddress(account.address, network.ss58Format, network.isEthereum);
 
-        if (formattedAddress === address) {
+        if (formattedAddress.toLowerCase() === address.toLowerCase()) {
           return account;
         }
       }

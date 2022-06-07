@@ -40,6 +40,7 @@ type ScannerStoreState = {
   tx: Transaction | GenericExtrinsicPayload | string | Uint8Array | null;
   type: 'transaction' | 'message' | null;
   step: number;
+  isEthereum: boolean;
 };
 
 export type ScannerContextType = {
@@ -73,7 +74,8 @@ const DEFAULT_STATE: ScannerStoreState = {
   totalFrameCount: 0,
   tx: null,
   type: null,
-  step: SCANNER_QR_STEP.SCAN_STEP
+  step: SCANNER_QR_STEP.SCAN_STEP,
+  isEthereum: false
 };
 
 export const ScannerContext = React.createContext({} as ScannerContextType);
@@ -264,7 +266,7 @@ export function ScannerContextProvider ({ children }: ScannerContextProviderProp
 
     const specVersion = (txRequest as SubstrateTransactionParsedData).data.specVersion || Number.MAX_SAFE_INTEGER;
 
-    setState({ ...qrInfo, rawPayload: (txRequest as SubstrateTransactionParsedData)?.data.rawPayload, specVersion, genesisHash: genesisHash });
+    setState({ ...qrInfo, rawPayload: (txRequest as SubstrateTransactionParsedData)?.data.rawPayload, specVersion, genesisHash: genesisHash, isEthereum });
 
     return qrInfo;
   }, [networkMap, getAccountByAddress, setBusy]);
@@ -278,6 +280,7 @@ export function ScannerContextProvider ({ children }: ScannerContextProviderProp
     let isHash = false;
     let isOversized = false;
     let dataToSign = '';
+    let isEthereum = false;
 
     if (isSubstrateMessageParsedData(signRequest)) {
       if (signRequest.data.crypto !== 'sr25519') {
@@ -290,6 +293,7 @@ export function ScannerContextProvider ({ children }: ScannerContextProviderProp
       message = dataToSign;
     } else {
       message = signRequest.data.data;
+      isEthereum = true;
 
       /// need check
       dataToSign = ethSign(message);
@@ -310,7 +314,7 @@ export function ScannerContextProvider ({ children }: ScannerContextProviderProp
       type: 'message'
     };
 
-    setState({ ...qrInfo, genesisHash: genesisHash });
+    setState({ ...qrInfo, genesisHash: genesisHash, isEthereum });
 
     return qrInfo;
   }, [networkMap, getAccountByAddress, setBusy]);
@@ -332,7 +336,7 @@ export function ScannerContextProvider ({ children }: ScannerContextProviderProp
 
   // signing data with legacy account.
   const signDataLegacy = useCallback(async (savePass: boolean, password = ''): Promise<void> => {
-    const { dataToSign, genesisHash, isHash, senderAddress } = state;
+    const { dataToSign, genesisHash, isEthereum, isHash, senderAddress } = state;
     const sender = !!senderAddress && getAccountByAddress(networkMap, senderAddress, genesisHash);
 
     if (!sender) {
@@ -340,7 +344,7 @@ export function ScannerContextProvider ({ children }: ScannerContextProviderProp
     }
 
     const senderNetwork = getNetworkJsonByGenesisHash(networkMap, genesisHash);
-    const isEthereum = senderNetwork && (senderNetwork.isEthereum);
+    const networkIsEthereum = senderNetwork && (senderNetwork.isEthereum);
 
     let signedData;
 
@@ -376,8 +380,8 @@ export function ScannerContextProvider ({ children }: ScannerContextProviderProp
         throw new Error((e as Error).message);
       }
 
-      // TODO: tweak the first byte if and when sig type is not sr25519
-      const sig = u8aConcat(SIG_TYPE_SR25519, hexToU8a(signed));
+      // Tweak the first byte if and when network is evm
+      const sig = networkIsEthereum ? u8aConcat(hexToU8a(signed)) : u8aConcat(SIG_TYPE_SR25519, hexToU8a(signed));
 
       signedData = u8aToHex(sig, -1, false); // the false doesn't add 0x
     }

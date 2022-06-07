@@ -160,7 +160,7 @@ export default class KoniExtension extends Extension {
     return new Promise<AuthUrls>((resolve, reject) => {
       state.getAuthorize((rs: AuthUrls) => {
         const accounts = accountsObservable.subject.getValue();
-        const addressList = Object.keys(accounts).filter((address) => accounts[address].type !== 'ethereum');
+        const addressList = Object.keys(accounts);
         const urlList = Object.keys(rs);
 
         if (Object.keys(rs[urlList[0]].isAllowedMap).toString() !== addressList.toString()) {
@@ -325,6 +325,9 @@ export default class KoniExtension extends Extension {
       assert(value, 'The source is not known');
 
       value[url].isAllowedMap[address] = connectValue;
+
+      console.log('Devbu: ', value);
+
       state.setAuthorize(value, () => {
         callBack && callBack(value);
       });

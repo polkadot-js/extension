@@ -22,7 +22,8 @@
     "@polkadot/types": "^7.3.1",
     "@polkadot/util": "^8.3.1",
     "@polkadot/util-crypto": "^8.3.1",
-    "@polkadot/x-global": "^8.3.1"
+    "@polkadot/x-global": "^8.3.1",
+    "web3-core": "^1.7.3"
   },
   "devDependencies": {
     "@types/chrome": "^0.0.175",

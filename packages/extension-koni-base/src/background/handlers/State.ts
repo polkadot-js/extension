@@ -412,11 +412,9 @@ export default class KoniState extends State {
   }
 
   getAddressList (value = false): Record<string, boolean> {
-    const addressList = Object.keys(accounts.subject.value)
-      .filter((address) => accounts.subject.value[address].type !== 'ethereum');
-    const addressListMap = addressList.reduce((addressList, v) => ({ ...addressList, [v]: value }), {});
+    const addressList = Object.keys(accounts.subject.value);
 
-    return addressListMap;
+    return addressList.reduce((addressList, v) => ({ ...addressList, [v]: value }), {});
   }
 
   private updateIconAuthV2 (shouldClose?: boolean): void {
@@ -439,7 +437,7 @@ export default class KoniState extends State {
         Object.keys(isAllowedMap).forEach((address) => isAllowedMap[address] = false);
       }
 
-      const { idStr, request: { origin }, url } = this.#authRequestsV2[id];
+      const { accountAuthType, idStr, request: { origin }, url } = this.#authRequestsV2[id];
 
       this.getAuthorize((value) => {
         let authorizeList = {} as AuthUrls;
@@ -454,7 +452,8 @@ export default class KoniState extends State {
           isAllowed,
           isAllowedMap,
           origin,
-          url
+          url,
+          accountAuthType
         };
 
         this.setAuthorize(authorizeList);
@@ -477,6 +476,7 @@ export default class KoniState extends State {
 
   public async authorizeUrlV2 (url: string, request: RequestAuthorizeTab): Promise<boolean> {
     let authList = await this.getAuthList();
+    let accountAuthType = request.accountAuthType || 'substrate';
 
     if (!authList) {
       authList = {};
@@ -489,10 +489,14 @@ export default class KoniState extends State {
 
     assert(!isDuplicate, `The source ${url} has a pending authorization request`);
 
-    if (authList[idStr]) {
+    const existedAuth = authList[idStr];
+    const existedAccountAuthType = existedAuth?.accountAuthType || 'substrate';
+    const reConfirm = existedAuth?.accountAuthType !== 'both' && existedAccountAuthType !== accountAuthType;
+
+    if (existedAuth && !reConfirm) {
       // this url was seen in the past
-      const isConnected = Object.keys(authList[idStr].isAllowedMap)
-        .some((address) => authList[idStr].isAllowedMap[address]);
+      const isConnected = Object.keys(existedAuth.isAllowedMap)
+        .some((address) => existedAuth.isAllowedMap[address]);
 
       assert(isConnected, `The source ${url} is not allowed to interact with this extension`);
 
@@ -501,13 +505,23 @@ export default class KoniState extends State {
 
     return new Promise((resolve, reject): void => {
       const id = getId();
+      const differentAccountType = existedAccountAuthType !== accountAuthType;
+
+      if (existedAuth && differentAccountType) {
+        accountAuthType = 'both';
+        request.accountAuthType = accountAuthType;
+        request.allowedAccounts = Object.entries(existedAuth.isAllowedMap)
+          .map(([address, allowed]) => (allowed ? address : ''))
+          .filter((item) => (item !== ''));
+      }
 
       this.#authRequestsV2[id] = {
         ...this.authCompleteV2(id, resolve, reject),
         id,
         idStr,
         request,
-        url
+        url,
+        accountAuthType: differentAccountType ? 'both' : accountAuthType
       };
 
       this.updateIconAuthV2();

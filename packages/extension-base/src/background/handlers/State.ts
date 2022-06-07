@@ -3,7 +3,7 @@
 
 import type { MetadataDef, ProviderMeta } from '@subwallet/extension-inject/types';
 import type { JsonRpcResponse, ProviderInterface, ProviderInterfaceCallback } from '@polkadot/rpc-provider/types';
-import type { AccountJson, AuthorizeRequest, MetadataRequest, RequestAuthorizeTab, RequestRpcSend, RequestRpcSubscribe, RequestRpcUnsubscribe, RequestSign, ResponseRpcListProviders, ResponseSigning, SigningRequest } from '../types';
+import type { AccountAuthType, AccountJson, AuthorizeRequest, MetadataRequest, RequestAuthorizeTab, RequestRpcSend, RequestRpcSubscribe, RequestRpcUnsubscribe, RequestSign, ResponseRpcListProviders, ResponseSigning, SigningRequest } from '../types';
 
 import { getId } from '@subwallet/extension-base/utils/getId';
 import { addMetadata, knownMetadata } from '@subwallet/extension-chains';
@@ -36,6 +36,7 @@ export interface AuthUrlInfo {
   isAllowed: boolean;
   origin: string;
   url: string;
+  accountAuthType?: AccountAuthType,
   isAllowedMap: Record<string, boolean>
 }
 

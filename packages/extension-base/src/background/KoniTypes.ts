@@ -2,9 +2,10 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { AuthUrls, Resolver } from '@subwallet/extension-base/background/handlers/State';
-import { AccountJson, AuthorizeRequest, RequestAccountList, RequestAccountSubscribe, RequestAuthorizeReject, RequestAuthorizeSubscribe, RequestAuthorizeTab, RequestCurrentAccountAddress, ResponseAuthorizeList, ResponseJsonGetAccountInfo, SeedLengths } from '@subwallet/extension-base/background/types';
+import { AccountAuthType, AccountJson, AuthorizeRequest, RequestAccountList, RequestAccountSubscribe, RequestAuthorizeReject, RequestAuthorizeSubscribe, RequestAuthorizeTab, RequestCurrentAccountAddress, ResponseAuthorizeList, ResponseJsonGetAccountInfo, SeedLengths } from '@subwallet/extension-base/background/types';
 import { InjectedAccount, MetadataDefBase } from '@subwallet/extension-inject/types';
 import Web3 from 'web3';
+import { RequestArguments } from 'web3-core';
 
 import { ApiPromise } from '@polkadot/api';
 import { SubmittableExtrinsicFunction } from '@polkadot/api/promise/types';
@@ -37,6 +38,7 @@ export interface AuthRequestV2 extends Resolver<ResultResolver> {
   idStr: string;
   request: RequestAuthorizeTab;
   url: string;
+  accountAuthType: AccountAuthType
 }
 
 export interface RequestAuthorizeApproveV2 {
@@ -848,4 +850,7 @@ export interface KoniRequestSignatures {
   'pub(utils.getRandom)': [RandomTestRequest, number];
   'pub(accounts.listV2)': [RequestAccountList, InjectedAccount[]];
   'pub(accounts.subscribeV2)': [RequestAccountSubscribe, boolean, InjectedAccount[]];
+
+  // EVM inject request
+  'evm(request)': [RequestArguments, unknown, unknown];
 }

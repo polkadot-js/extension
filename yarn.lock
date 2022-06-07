@@ -2813,6 +2813,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@metamask/safe-event-emitter@npm:^2.0.0":
+  version: 2.0.0
+  resolution: "@metamask/safe-event-emitter@npm:2.0.0"
+  checksum: 8b717ac5d53df0027c05509f03d0534700b5898dd1c3a53fb2dc4c0499ca5971b14aae67f522d09eb9f509e77f50afa95fdb3eda1afbff8b071c18a3d2905e93
+  languageName: node
+  linkType: hard
+
 "@metaverse-network-sdk/type-definitions@npm:^0.0.1-6":
   version: 0.0.1-13
   resolution: "@metaverse-network-sdk/type-definitions@npm:0.0.1-13"
@@ -4385,6 +4392,7 @@ __metadata:
   dependencies:
     "@babel/runtime": ^7.16.7
     "@ethereumjs/common": ^2.6.3
+    "@metamask/safe-event-emitter": ^2.0.0
     "@polkadot/api": ^7.3.1
     "@polkadot/keyring": ^8.3.1
     "@polkadot/networks": ^8.3.1
@@ -4402,7 +4410,8 @@ __metadata:
     ethereumjs-tx: ^2.1.2
     eventemitter3: ^4.0.7
     rxjs: ^7.5.1
-    web3: ^1.7.1
+    web3: ^1.7.3
+    web3-core: ^1.7.3
   languageName: unknown
   linkType: soft
 
@@ -4463,6 +4472,7 @@ __metadata:
     "@polkadot/x-global": ^8.3.1
     "@types/chrome": ^0.0.175
     "@types/firefox-webext-browser": ^94.0.1
+    web3-core: ^1.7.3
   peerDependencies:
     "@polkadot/api": "*"
   languageName: unknown
@@ -21612,7 +21622,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"web3-core@npm:1.7.3, web3-core@npm:^1.7.1":
+"web3-core@npm:1.7.3, web3-core@npm:^1.7.1, web3-core@npm:^1.7.3":
   version: 1.7.3
   resolution: "web3-core@npm:1.7.3"
   dependencies:
@@ -21801,7 +21811,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"web3@npm:^1.6.1, web3@npm:^1.7.1":
+"web3@npm:^1.6.1, web3@npm:^1.7.1, web3@npm:^1.7.3":
   version: 1.7.3
   resolution: "web3@npm:1.7.3"
   dependencies:

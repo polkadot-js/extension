@@ -3,6 +3,8 @@
 
 import type { Injected, InjectedWindow, InjectOptions } from './types';
 
+import { EvmProvider } from './types';
+
 export { packageInfo } from './packageInfo';
 
 // It is recommended to always use the function below to shield the extension and dapp from
@@ -21,4 +23,17 @@ export function injectExtension (enable: (origin: string) => Promise<Injected>, 
       enable(origin),
     version
   };
+}
+
+// Inject EVM Provider
+export function injectEvmExtension (evmProvider: EvmProvider): void {
+  // small helper with the typescript types, just cast window
+  const windowInject = window as Window & InjectedWindow;
+
+  // add our enable function
+  windowInject.subWalletEthereum = evmProvider;
+
+  windowInject.dispatchEvent(new Event('ethereum#initialized'));
+
+  // Todo: need more discuss to set it global and not conflict with MetaMask
 }

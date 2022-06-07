@@ -169,8 +169,12 @@ export interface TransportRequestMessage<TMessageType extends MessageTypes> {
   request: RequestTypes[TMessageType];
 }
 
+export type AccountAuthType = 'substrate' | 'evm' | 'both';
+
 export interface RequestAuthorizeTab {
   origin: string;
+  accountAuthType?: AccountAuthType;
+  allowedAccounts?: string[]
 }
 
 export interface RequestAuthorizeApprove {
@@ -278,9 +282,12 @@ export interface RequestAccountBatchExport {
 
 export interface RequestAccountList {
   anyType?: boolean;
+  accountAuthType?: AccountAuthType
 }
 
-export type RequestAccountSubscribe = null;
+export interface RequestAccountSubscribe {
+  accountAuthType?: AccountAuthType
+}
 
 export interface RequestRpcSend {
   method: string;

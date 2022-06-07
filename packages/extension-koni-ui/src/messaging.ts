@@ -229,15 +229,15 @@ export async function rejectMetaRequest (id: string): Promise<boolean> {
 }
 
 export async function subscribeAccounts (cb: (accounts: AccountJson[]) => void): Promise<boolean> {
-  return sendMessage('pri(accounts.subscribe)', null, cb);
+  return sendMessage('pri(accounts.subscribe)', {}, cb);
 }
 
 export async function subscribeAccountsWithCurrentAddress (cb: (data: AccountsWithCurrentAddress) => void): Promise<boolean> {
-  return sendMessage('pri(accounts.subscribeWithCurrentAddress)', null, cb);
+  return sendMessage('pri(accounts.subscribeWithCurrentAddress)', {}, cb);
 }
 
 export async function subscribeAccountsInputAddress (cb: (data: OptionInputAddress) => void): Promise<string> {
-  return sendMessage('pri(accounts.subscribeAccountsInputAddress)', null, cb);
+  return sendMessage('pri(accounts.subscribeAccountsInputAddress)', {}, cb);
 }
 
 export async function saveRecentAccountId (accountId: string): Promise<SingleAddress> {

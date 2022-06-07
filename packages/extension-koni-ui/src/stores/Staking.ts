@@ -16,8 +16,15 @@ const stakingSlice = createSlice({
     update (state, action: PayloadAction<StakingJson>) {
       const payload = action.payload;
 
-      state.details = payload.details;
-      state.ready = payload.ready;
+      if (payload.ready !== undefined) {
+        state.ready = payload.ready;
+      }
+
+      if (payload.ready === false) {
+        state.details = payload.details;
+      } else {
+        state.details = { ...state.details, ...payload.details };
+      }
     }
   }
 });

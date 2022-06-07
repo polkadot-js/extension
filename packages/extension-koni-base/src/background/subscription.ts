@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { AuthUrls } from '@subwallet/extension-base/background/handlers/State';
-import { ApiProps, CustomEvmToken, NftTransferExtra } from '@subwallet/extension-base/background/KoniTypes';
+import { ApiProps, CustomEvmToken, NftTransferExtra, StakingRewardJson } from '@subwallet/extension-base/background/KoniTypes';
 import { subscribeBalance } from '@subwallet/extension-koni-base/api/dotsama/balance';
 import { subscribeCrowdloan } from '@subwallet/extension-koni-base/api/dotsama/crowdloan';
 import { stakingOnChainApi } from '@subwallet/extension-koni-base/api/staking';
@@ -105,15 +105,20 @@ export class KoniSubscription {
 
   subscribeStakingOnChain (address: string, dotSamaApiMap: Record<string, ApiProps>) {
     this.unsubStakingOnChain && this.unsubStakingOnChain();
-    state.resetStakingMap();
-    this.detectAddresses(address)
-      .then((addresses) => {
-        this.unsubStakingOnChain = this.initStakingOnChainSubscription(addresses, dotSamaApiMap);
-      })
-      .catch(console.error);
+    state.resetStakingMap(address).then(() => {
+      this.detectAddresses(address)
+        .then((addresses) => {
+          this.unsubStakingOnChain = this.initStakingOnChainSubscription(addresses, dotSamaApiMap);
+        })
+        .catch(console.error);
+    }).catch((err) => console.warn(err));
   }
 
   initStakingOnChainSubscription (addresses: string[], dotSamaApiMap: Record<string, ApiProps>) {
+    state.setStakingReward({
+      ready: false,
+      details: []
+    } as StakingRewardJson);
     const subscriptionPromises = stakingOnChainApi(addresses, dotSamaApiMap, (networkKey, rs) => {
       state.setStakingItem(networkKey, rs);
     }, state.getNetworkMap());

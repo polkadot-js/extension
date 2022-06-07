@@ -73,7 +73,7 @@ export class KoniCron {
 
           this.resetNft();
           this.resetNftTransferMeta();
-          this.resetStakingReward();
+          // this.resetStakingReward(address);
           this.resetHistory();
           this.removeCron('refreshNft');
           this.removeCron('refreshStakingReward');
@@ -195,8 +195,8 @@ export class KoniCron {
     } as NftTransferExtra);
   }
 
-  resetStakingReward () {
-    state.resetStakingMap();
+  resetStakingReward (address: string) {
+    state.resetStakingMap(address).catch((err) => console.warn(err));
     state.setStakingReward({
       ready: false,
       details: []

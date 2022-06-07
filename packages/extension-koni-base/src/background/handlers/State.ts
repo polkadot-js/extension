@@ -23,6 +23,7 @@ import BalanceStore from '@subwallet/extension-koni-base/stores/Balance';
 import CrowdloanStore from '@subwallet/extension-koni-base/stores/Crowdloan';
 import CustomEvmTokenStore from '@subwallet/extension-koni-base/stores/CustomEvmToken';
 import SettingsStore from '@subwallet/extension-koni-base/stores/Settings';
+import StakingStore from '@subwallet/extension-koni-base/stores/Staking';
 import TransactionHistoryStore from '@subwallet/extension-koni-base/stores/TransactionHistory';
 import { convertFundStatus, getCurrentProvider } from '@subwallet/extension-koni-base/utils/utils';
 import { BehaviorSubject, Subject } from 'rxjs';
@@ -103,6 +104,7 @@ export default class KoniState extends State {
 
   private readonly balanceStore = new BalanceStore();
   private readonly crowdloanStore = new CrowdloanStore();
+  private readonly stakingStore = new StakingStore();
   private readonly networkMapStore = new NetworkMapStore(); // persist custom networkMap by user
   private readonly customEvmTokenStore = new CustomEvmTokenStore();
   private readonly priceStore = new PriceStore();
@@ -529,6 +531,12 @@ export default class KoniState extends State {
     return { ready: true, details: this.stakingMap } as StakingJson;
   }
 
+  public async getStoredStaking (address: string) {
+    const items = await this.stakingStore.asyncGet(address) as Record<string, StakingItem>;
+
+    return items || {};
+  }
+
   public subscribeStaking () {
     return this.stakingSubject;
   }
@@ -552,11 +560,44 @@ export default class KoniState extends State {
     return true;
   }
 
+  private hasUpdateStakingItem (networkKey: string, item: StakingItem): boolean {
+    if (item.state !== APIItemState.READY) {
+      return false;
+    }
+
+    const oldItem = this.stakingMap[networkKey];
+
+    return oldItem?.balance !== item?.balance || !oldItem || oldItem?.state === APIItemState.PENDING;
+  }
+
   public setStakingItem (networkKey: string, item: StakingItem): void {
-    this.stakingMap[networkKey] = item;
-    this.lazyNext('setStakingItem', () => {
-      this.stakingSubject.next(this.getStaking());
+    const itemData = { ...item, timestamp: +new Date() };
+
+    if (this.hasUpdateStakingItem(networkKey, item)) {
+      // Update staking map
+      this.stakingMap[networkKey] = itemData;
+
+      this.lazyNext('setStakingItem', () => {
+        this.updateStakingStore();
+        this.stakingSubject.next(this.getStaking());
+      });
+    }
+  }
+
+  private updateStakingStore () {
+    const readyMap: Record<string, StakingItem> = {};
+
+    Object.entries(this.stakingMap).forEach(([key, item]) => {
+      if (item.state === APIItemState.READY) {
+        readyMap[key] = item;
+      }
     });
+
+    if (Object.keys(readyMap).length > 0) {
+      this.getCurrentAccount((currentAccountInfo) => {
+        this.stakingStore.set(currentAccountInfo.address, readyMap);
+      });
+    }
   }
 
   public setNftTransfer (data: NftTransferExtra, callback?: (data: NftTransferExtra) => void): void {
@@ -831,20 +872,24 @@ export default class KoniState extends State {
     this.crowdloanSubject.next({ details: merge });
   }
 
-  public resetStakingMap () {
-    Object.values(this.stakingMap).forEach((staking) => {
-      staking.state = APIItemState.PENDING;
-    });
-    this.stakingSubject.next(this.getStaking());
+  public async resetStakingMap (newAddress: string) {
+    this.stakingMap = {};
+    const defaultData = generateDefaultStakingMap();
+    const storedData = await this.getStoredStaking(newAddress);
+
+    const merge = { ...defaultData, ...storedData } as Record<string, StakingItem>;
+
+    this.stakingSubject.next({ ready: false, details: merge });
   }
 
   public setBalanceItem (networkKey: string, item: BalanceItem) {
     const itemData = { ...item, timestamp: +new Date() };
 
     this.balanceMap[networkKey] = itemData;
+
     this.lazyNext('setBalanceItem', () => {
       this.updateBalanceStore();
-      this.balanceSubject.next({ details: { [networkKey]: itemData } });
+      this.balanceSubject.next(this.getBalance());
     });
   }
 
@@ -890,9 +935,10 @@ export default class KoniState extends State {
 
     // Update crowdloan map
     this.crowdloanMap[networkKey] = itemData;
+
     this.lazyNext('setCrowdloanItem', () => {
       this.updateCrowdloanStore();
-      this.crowdloanSubject.next({ details: { [networkKey]: itemData } });
+      this.crowdloanSubject.next(this.getCrowdloan());
     });
   }
 

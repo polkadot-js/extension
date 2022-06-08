@@ -847,10 +847,10 @@ export interface KoniRequestSignatures {
   'pri(accounts.saveRecent)': [RequestSaveRecentAccount, SingleAddress];
   'pri(accounts.triggerSubscription)': [null, boolean];
   'pri(currentAccount.saveAddress)': [RequestCurrentAccountAddress, boolean, CurrentAccountInfo];
-  'pri(currentAccount.changeBalancesVisibility)': [null, boolean, ResponseSettingsType];
-  'pri(currentAccount.subscribeSettings)': [null, ResponseSettingsType, ResponseSettingsType];
-  'pri(currentAccount.saveAccountAllLogo)': [string, boolean, ResponseSettingsType];
-  'pri(currentAccount.saveTheme)': [ThemeTypes, boolean, ResponseSettingsType];
+  'pri(settings.changeBalancesVisibility)': [null, boolean, ResponseSettingsType];
+  'pri(settings.subscribe)': [null, ResponseSettingsType, ResponseSettingsType];
+  'pri(settings.saveAccountAllLogo)': [string, boolean, ResponseSettingsType];
+  'pri(settings.saveTheme)': [ThemeTypes, boolean, ResponseSettingsType];
   'pri(chainRegistry.getSubscription)': [null, Record<string, ChainRegistry>, Record<string, ChainRegistry>];
   'pri(transaction.history.getSubscription)': [null, Record<string, TransactionHistoryItemType[]>, Record<string, TransactionHistoryItemType[]>];
   'pri(transaction.history.add)': [RequestTransactionHistoryAdd, boolean, TransactionHistoryItemType[]];

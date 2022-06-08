@@ -353,7 +353,7 @@ export default class KoniExtension extends Extension {
   }
 
   private toggleBalancesVisibility (id: string, port: chrome.runtime.Port) {
-    const cb = createSubscription<'pri(currentAccount.changeBalancesVisibility)'>(id, port);
+    const cb = createSubscription<'pri(settings.changeBalancesVisibility)'>(id, port);
 
     state.getSettings((value) => {
       const updateValue = {
@@ -375,7 +375,7 @@ export default class KoniExtension extends Extension {
   }
 
   private saveAccountAllLogo (data: string, id: string, port: chrome.runtime.Port) {
-    const cb = createSubscription<'pri(currentAccount.saveAccountAllLogo)'>(id, port);
+    const cb = createSubscription<'pri(settings.saveAccountAllLogo)'>(id, port);
 
     state.getSettings((value) => {
       const updateValue = {
@@ -397,7 +397,7 @@ export default class KoniExtension extends Extension {
   }
 
   private saveTheme (data: ThemeTypes, id: string, port: chrome.runtime.Port) {
-    const cb = createSubscription<'pri(currentAccount.saveTheme)'>(id, port);
+    const cb = createSubscription<'pri(settings.saveTheme)'>(id, port);
 
     state.getSettings((value) => {
       const updateValue = {
@@ -419,7 +419,7 @@ export default class KoniExtension extends Extension {
   }
 
   private async subscribeSettings (id: string, port: chrome.runtime.Port) {
-    const cb = createSubscription<'pri(currentAccount.subscribeSettings)'>(id, port);
+    const cb = createSubscription<'pri(settings.subscribe)'>(id, port);
 
     const balancesVisibilitySubscription = state.subscribeSettingsSubject().subscribe({
       next: (rs) => {
@@ -2076,13 +2076,13 @@ export default class KoniExtension extends Extension {
         return this.triggerAccountsSubscription();
       case 'pri(currentAccount.saveAddress)':
         return this.saveCurrentAccountAddress(request as RequestCurrentAccountAddress, id, port);
-      case 'pri(currentAccount.changeBalancesVisibility)':
+      case 'pri(settings.changeBalancesVisibility)':
         return this.toggleBalancesVisibility(id, port);
-      case 'pri(currentAccount.subscribeSettings)':
+      case 'pri(settings.subscribe)':
         return await this.subscribeSettings(id, port);
-      case 'pri(currentAccount.saveAccountAllLogo)':
+      case 'pri(settings.saveAccountAllLogo)':
         return this.saveAccountAllLogo(request as string, id, port);
-      case 'pri(currentAccount.saveTheme)':
+      case 'pri(settings.saveTheme)':
         return this.saveTheme(request as ThemeTypes, id, port);
       case 'pri(price.getPrice)':
         return await this.getPrice();

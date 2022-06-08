@@ -85,19 +85,19 @@ export async function saveCurrentAccountAddress (data: RequestCurrentAccountAddr
 }
 
 export async function toggleBalancesVisibility (callback: (data: RequestSettingsType) => void): Promise<boolean> {
-  return sendMessage('pri(currentAccount.changeBalancesVisibility)', null, callback);
+  return sendMessage('pri(settings.changeBalancesVisibility)', null, callback);
 }
 
 export async function saveAccountAllLogo (accountAllLogo: string, callback: (data: RequestSettingsType) => void): Promise<boolean> {
-  return sendMessage('pri(currentAccount.saveAccountAllLogo)', accountAllLogo, callback);
+  return sendMessage('pri(settings.saveAccountAllLogo)', accountAllLogo, callback);
 }
 
 export async function saveTheme (theme: ThemeTypes, callback: (data: RequestSettingsType) => void): Promise<boolean> {
-  return sendMessage('pri(currentAccount.saveTheme)', theme, callback);
+  return sendMessage('pri(settings.saveTheme)', theme, callback);
 }
 
 export async function subscribeSettings (data: RequestSubscribeBalancesVisibility, callback: (data: ResponseSettingsType) => void): Promise<ResponseSettingsType> {
-  return sendMessage('pri(currentAccount.subscribeSettings)', data, callback);
+  return sendMessage('pri(settings.subscribe)', data, callback);
 }
 
 export async function tieAccount (address: string, genesisHash: string | null): Promise<boolean> {

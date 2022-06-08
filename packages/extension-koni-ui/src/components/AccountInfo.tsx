@@ -38,15 +38,16 @@ export interface Props {
   isShowAddress?: boolean;
   isShowBanner?: boolean;
   iconSize?: number;
+  isEthereum?: boolean;
 }
 
-function AccountInfo ({ address, className, genesisHash, iconSize = 32, isExternal, isHardware, isShowAddress = true, isShowBanner = true, name, parentName, showCopyBtn = true, suri, type: givenType }: Props): React.ReactElement<Props> {
+function AccountInfo ({ address, className, genesisHash, iconSize = 32, isEthereum, isExternal, isHardware, isShowAddress = true, isShowBanner = true, name, parentName, showCopyBtn = true, suri, type: givenType }: Props): React.ReactElement<Props> {
   const { t } = useTranslation();
   const { accounts } = useContext(AccountContext);
   const [{ account,
     formatted,
     genesisHash: recodedGenesis,
-    isEthereum,
+    isEthereum: _isEthereum,
     prefix }, setRecoded] = useState<Recoded>(defaultRecoded);
   const networkMap = useSelector((state: RootState) => state.networkMap);
   const { show } = useToast();
@@ -95,11 +96,7 @@ function AccountInfo ({ address, className, genesisHash, iconSize = 32, isExtern
     setRecoded(recodeAddress(address, accounts, networkInfo, givenType));
   }, [accounts, _isAccountAll, address, networkInfo, givenType]);
 
-  const iconTheme = (
-    isEthereum
-      ? 'ethereum'
-      : (networkInfo?.icon || 'polkadot')
-  ) as IconTheme;
+  const iconTheme = ((!!isEthereum || _isEthereum) ? 'ethereum' : (networkInfo?.icon || 'polkadot')) as IconTheme;
 
   const _onCopy = useCallback(
     () => show(t('Copied')),

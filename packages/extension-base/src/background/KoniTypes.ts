@@ -811,6 +811,13 @@ export interface QRRequestPromise {
   createdAt: number
 }
 
+export interface RequestAccountCreateExternalV2 {
+  address: string;
+  genesisHash?: string | null;
+  name: string;
+  isEthereum: boolean;
+}
+
 export interface KoniRequestSignatures {
   'pri(networkMap.recoverDotSama)': [string, boolean];
   'pri(substrateNft.submitTransaction)': [SubstrateNftSubmitTransaction, NftTransactionResponse, NftTransactionResponse]
@@ -864,6 +871,7 @@ export interface KoniRequestSignatures {
   'pri(seed.validateV2)': [RequestSeedValidateV2, ResponseSeedValidateV2];
   'pri(privateKey.validateV2)': [RequestSeedValidateV2, ResponsePrivateKeyValidateV2];
   'pri(accounts.create.suriV2)': [RequestAccountCreateSuriV2, ResponseAccountCreateSuriV2];
+  'pri(accounts.create.externalV2)': [RequestAccountCreateExternalV2, boolean];
   'pri(accounts.checkTransfer)': [RequestCheckTransfer, ResponseCheckTransfer];
   'pri(accounts.checkCrossChainTransfer)': [RequestCheckCrossChainTransfer, ResponseCheckCrossChainTransfer];
   'pri(accounts.transfer)': [RequestTransfer, Array<TransferError>, ResponseTransfer];

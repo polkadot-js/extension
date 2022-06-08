@@ -164,6 +164,10 @@ export async function createAccountExternal (name: string, address: string, gene
   return sendMessage('pri(accounts.create.external)', { address, genesisHash, name });
 }
 
+export async function createAccountExternalV2 (name: string, address: string, genesisHash: string, isEthereum: boolean): Promise<boolean> {
+  return sendMessage('pri(accounts.create.externalV2)', { address, genesisHash, name, isEthereum });
+}
+
 export async function createAccountHardware (address: string, hardwareType: string, accountIndex: number, addressOffset: number, name: string, genesisHash: string): Promise<boolean> {
   return sendMessage('pri(accounts.create.hardware)', { accountIndex, address, addressOffset, genesisHash, hardwareType, name });
 }

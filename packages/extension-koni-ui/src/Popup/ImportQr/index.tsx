@@ -2,22 +2,22 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { SUBSTRATE_ACCOUNT_TYPE } from '@subwallet/extension-koni-ui/Popup/CreateAccount';
+import Scanner from '@subwallet/extension-koni-ui/Popup/ImportQr/Scanner';
 import React, { useCallback, useContext, useState } from 'react';
 import styled, { ThemeContext } from 'styled-components';
 
-import { QrScanAddress } from '@polkadot/react-qr';
-
-import { AccountContext, AccountInfoEl, ActionContext, ButtonArea, NextStepButton, Theme } from '../components';
-import AccountNamePasswordCreation from '../components/AccountNamePasswordCreation';
-import useTranslation from '../hooks/useTranslation';
-import { createAccountExternal, createAccountSuri, createSeed } from '../messaging';
-import { Header, Name } from '../partials';
+import { AccountContext, AccountInfoEl, ActionContext, ButtonArea, NextStepButton, Theme } from '../../components';
+import AccountNamePasswordCreation from '../../components/AccountNamePasswordCreation';
+import useTranslation from '../../hooks/useTranslation';
+import { createAccountExternalV2, createAccountSuri, createSeed } from '../../messaging';
+import { Header, Name } from '../../partials';
 
 interface QrAccount {
   content: string;
   genesisHash: string;
   isAddress: boolean;
   name?: string;
+  isEthereum: boolean;
 }
 
 interface Props {
@@ -56,7 +56,7 @@ function ImportQr ({ className }: Props): React.ReactElement<Props> {
     (): void => {
       if (account && name) {
         if (account.isAddress) {
-          createAccountExternal(name, account.content, account.genesisHash)
+          createAccountExternalV2(name, account.content, account.genesisHash, account.isEthereum)
             .then(() => {
               window.localStorage.setItem('popupNavigation', '/');
               onAction('/');
@@ -85,7 +85,7 @@ function ImportQr ({ className }: Props): React.ReactElement<Props> {
       <div className={account && account.isAddress ? 'import-qr-content -with-padding' : 'import-qr-content'}>
         {!account && (
           <div>
-            <QrScanAddress onScan={_setAccount} />
+            <Scanner onScan={_setAccount} />
           </div>
         )}
         {account && (
@@ -93,6 +93,7 @@ function ImportQr ({ className }: Props): React.ReactElement<Props> {
             {account.isAddress && (<div className={`account-info-container ${themeContext.id === 'dark' ? '-dark' : '-light'}`}>
               <AccountInfoEl
                 address={address}
+                isEthereum={account.isEthereum}
                 isExternal={true}
                 name={name}
               />

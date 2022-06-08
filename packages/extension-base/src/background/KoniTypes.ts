@@ -769,6 +769,18 @@ export interface CrossChainRelation {
   relationMap: Record<string, ChainRelationInfo>;
 }
 
+export type RequestEvmEvents = null;
+export type EvmEventType = 'connect' | 'disconnect' | 'accountsChanged' | 'chainChanged' | 'message';
+export type EvmAccountsChangedPayload = string [];
+export type EvmChainChangedPayload = string;
+export type EvmConnectPayload = {chainId: EvmChainChangedPayload}
+export type EvmDisconnectPayload = unknown
+
+export interface EvmEvent {
+  type: EvmEventType,
+  payload: EvmAccountsChangedPayload | EvmChainChangedPayload | EvmConnectPayload | EvmDisconnectPayload;
+}
+
 export interface KoniRequestSignatures {
   'pri(networkMap.recoverDotSama)': [string, boolean];
   'pri(substrateNft.submitTransaction)': [SubstrateNftSubmitTransaction, NftTransactionResponse, NftTransactionResponse]
@@ -852,5 +864,6 @@ export interface KoniRequestSignatures {
   'pub(accounts.subscribeV2)': [RequestAccountSubscribe, boolean, InjectedAccount[]];
 
   // EVM inject request
-  'evm(request)': [RequestArguments, unknown, unknown];
+  'evm(events.subscribe)': [RequestEvmEvents, boolean, EvmEvent];
+  'evm(request)': [RequestArguments, unknown];
 }

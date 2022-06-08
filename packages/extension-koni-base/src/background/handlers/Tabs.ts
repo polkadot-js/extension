@@ -9,6 +9,8 @@ import Tabs from '@subwallet/extension-base/background/handlers/Tabs';
 import { AccountAuthType, MessageTypes, RequestAccountList, RequestAccountSubscribe, RequestAuthorizeTab, RequestTypes, ResponseTypes } from '@subwallet/extension-base/background/types';
 import { canDerive } from '@subwallet/extension-base/utils';
 import KoniState from '@subwallet/extension-koni-base/background/handlers/State';
+import { ALL_ACCOUNT_KEY } from '@subwallet/extension-koni-base/constants';
+import { RequestArguments } from 'web3-core';
 
 import { accounts as accountsObservable } from '@polkadot/ui-keyring/observable/accounts';
 import { SingleAddress, SubjectInfo } from '@polkadot/ui-keyring/observable/types';
@@ -34,8 +36,6 @@ function transformAccountsV2 (accounts: SubjectInfo, anyType = false, url: strin
   } else if (accountAuthType === 'evm') {
     authTypeFilter = ({ type }: SingleAddress) => (type === 'ethereum');
   }
-
-  console.log(accountAuthType);
 
   return Object
     .values(accounts)
@@ -87,6 +87,75 @@ export default class KoniTabs extends Tabs {
     return this.#koniState.authorizeUrlV2(url, request);
   }
 
+  private async getEvmCurrentAccount (url: string): Promise<string[]> {
+    return await new Promise((resolve) => {
+      this.#koniState.getAuthorize((authUrls) => {
+        const allAccounts = accountsObservable.subject.getValue();
+        const accountList = transformAccountsV2(allAccounts, false, url, authUrls, 'evm').map((a) => a.address);
+
+        this.#koniState.getCurrentAccount(({ address }) => {
+          if (address === ALL_ACCOUNT_KEY) {
+            resolve(accountList);
+          } else if (address && accountList.includes(address)) {
+            resolve([address]);
+          } else {
+            resolve([]);
+          }
+        });
+      });
+    });
+  }
+
+  private async evmSubscribeEvents (url: string, id: string, port: chrome.runtime.Port) {
+    const cb = createSubscription<'evm(events.subscribe)'>(id, port);
+    let accountList = await this.getEvmCurrentAccount(url);
+
+    const checkAndTriggerChange = async () => {
+      const newAccountList = await this.getEvmCurrentAccount(url);
+
+      // Compare to void looping reload
+      if (JSON.stringify(accountList) !== JSON.stringify(newAccountList)) {
+        // eslint-disable-next-line node/no-callback-literal
+        cb({ type: 'accountsChanged', payload: newAccountList });
+        accountList = newAccountList;
+      }
+    };
+
+    const accountListSubscription = accountsObservable.subject
+      .subscribe((accounts: SubjectInfo): void => {
+        checkAndTriggerChange().catch(console.error);
+      });
+
+    const accountSubscription = this.#koniState.subscribeCurrentAccount()
+      .subscribe(({ address }) => {
+        checkAndTriggerChange().catch(console.error);
+      });
+
+    // Todo: Subscribe network changes
+    // Todo: Subscribe network connection (connect or disconnected)
+
+    port.onDisconnect.addListener((): void => {
+      unsubscribe(id);
+      accountSubscription.unsubscribe();
+      accountListSubscription.unsubscribe();
+    });
+
+    return true;
+  }
+
+  private async handleEvmRequest (url: string, { method, params }: RequestArguments) {
+    console.log('Handle evm request', method);
+
+    switch (method) {
+      case 'eth_accounts':
+        return await this.getEvmCurrentAccount(url);
+      default:
+        console.warn('Can not handle evm request', method, params, url);
+
+        return Promise.resolve(null);
+    }
+  }
+
   public override async handle<TMessageType extends MessageTypes> (id: string, type: TMessageType, request: RequestTypes[TMessageType], url: string, port: chrome.runtime.Port): Promise<ResponseTypes[keyof ResponseTypes]> {
     if (type === 'pub(phishing.redirectIfDenied)') {
       return this.redirectIfPhishing(url);
@@ -103,6 +172,10 @@ export default class KoniTabs extends Tabs {
         return this.accountsListV2(url, request as RequestAccountList);
       case 'pub(accounts.subscribeV2)':
         return this.accountsSubscribeV2(url, request as RequestAccountSubscribe, id, port);
+      case 'evm(events.subscribe)':
+        return await this.evmSubscribeEvents(url, id, port);
+      case 'evm(request)':
+        return await this.handleEvmRequest(url, request as RequestArguments);
       default:
         return super.handle(id, type, request, url, port);
     }

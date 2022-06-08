@@ -31,32 +31,51 @@ export class SubWalletEvmProvider extends SafeEventEmitter implements EvmProvide
     return this.connected;
   }
 
-  request ({ method, params }: RequestArguments): Promise<any> {
+  protected subscribeExtensionEvents () {
+    this.sendMessage('evm(events.subscribe)', null, ({ payload, type }) => {
+      if (['connect', 'disconnect', 'accountsChanged', 'chainChanged', 'message'].includes(type)) {
+        console.log(type, payload);
+        this.emit(type, payload);
+      } else {
+        console.error('Can not handle event', type, payload);
+      }
+    })
+      .then((done) => {
+        console.log('Start subscribe events from SubWallet');
+      }).catch(console.error);
+  }
+
+  request<T> ({ method, params }: RequestArguments): Promise<T> {
     switch (method) {
       case 'eth_requestAccounts':
         return new Promise((resolve) => {
           this.sendMessage('pub(authorize.tabV2)', { origin: 'eth_requestAccounts', accountAuthType: 'evm' })
             .then(() => {
-              // Todo: Chain this to subscribe account and emit accountsChanged events
-              this.sendMessage('pub(accounts.listV2)', { accountAuthType: 'evm' })
+              // Subscribe event
+              this.subscribeExtensionEvents();
+
+              // Return account list
+              this.request<string[]>({ method: 'eth_accounts' })
                 .then((accounts) => {
-                  return resolve(accounts.map((acc) => (acc.address)));
-                })
-                .catch(console.error);
+                  // @ts-ignore
+                  resolve(accounts);
+                }
+                ).catch(console.error);
             })
             .catch(console.error);
         });
-      case 'eth_accounts':
-        return new Promise((resolve) => {
-          this.sendMessage('pub(accounts.listV2)', { accountAuthType: 'evm' })
-            .then((accounts) => {
-              const accList = accounts.map((acc) => acc.address);
-
-              accList.length > 0 ? resolve([accList[0]]) : resolve([]);
-            }).catch(console.error);
-        });
       default:
-        return Promise.resolve(undefined);
+        return new Promise((resolve, reject) => {
+          // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+          this.sendMessage('evm(request)', { params, method })
+            .then((result) => {
+              resolve(result as T);
+            })
+            .catch((e) => {
+              console.error(e);
+              reject(e);
+            });
+        });
     }
   }
 

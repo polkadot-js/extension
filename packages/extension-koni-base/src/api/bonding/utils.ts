@@ -8,21 +8,6 @@ export interface ValidatorExtraInfo {
   isVerified: boolean
 }
 
-const formatLocaleNumber = (number: number): string => {
-  return number.toLocaleString('en-UK', { maximumFractionDigits: 4 });
-};
-
-export function parseBalanceString (decimals: number, balance: number, unit: string) {
-  const milThreshold = 1000000;
-  const parsedBalance = (balance / 10 ** decimals);
-
-  if (parsedBalance > milThreshold) {
-    return formatLocaleNumber(Math.round((parsedBalance / milThreshold) * 100) / 100) + ' ' + `M${unit}`;
-  } else {
-    return formatLocaleNumber(Math.round(parsedBalance * 100) / 100) + ' ' + unit;
-  }
-}
-
 export interface InflationParams {
   auctionAdjust: number;
   auctionMax: number;

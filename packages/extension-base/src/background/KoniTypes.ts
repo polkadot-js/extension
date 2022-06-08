@@ -778,13 +778,12 @@ export interface CrossChainRelation {
 }
 
 export interface ValidatorInfo {
-  rawTotalStake: number;
   address: string;
-  totalStake: string;
-  ownStake: string;
-  otherStake: string;
+  totalStake: number;
+  ownStake: number;
+  otherStake: number;
   nominatorCount: number;
-  commission: string;
+  commission: number;
   expectedReturn: number;
   blocked: boolean;
   identity?: string;
@@ -794,6 +793,7 @@ export interface ValidatorInfo {
 
 export interface BondingOptionInfo {
   era: number,
+  maxNominatorPerValidator: number,
   validators: ValidatorInfo[]
 }
 

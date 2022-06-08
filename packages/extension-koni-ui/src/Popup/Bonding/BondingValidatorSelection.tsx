@@ -24,8 +24,13 @@ function BondingValidatorSelection ({ className }: Props): React.ReactElement<Pr
   const navigate = useContext(ActionContext);
   const [searchString, setSearchString] = useState('');
   const [loading, setLoading] = useState(true);
+  const [maxNominatorPerValidator, setMaxNominatorPerValidator] = useState(0);
   const [allValidators, setAllValidators] = useState<ValidatorInfo[]>([]);
   const _height = window.innerHeight > 600 ? 650 : 300;
+
+  const filterValidators = useCallback(() => {
+
+  }, []);
 
   const _onChangeFilter = useCallback((val: string) => {
     setSearchString(val);
@@ -37,6 +42,7 @@ function BondingValidatorSelection ({ className }: Props): React.ReactElement<Pr
     } else {
       getBondingOptions(bondingParams.selectedNetwork)
         .then((bondingOptionInfo) => {
+          setMaxNominatorPerValidator(bondingOptionInfo.maxNominatorPerValidator);
           setAllValidators(bondingOptionInfo.validators);
           setLoading(false);
         })
@@ -96,6 +102,7 @@ function BondingValidatorSelection ({ className }: Props): React.ReactElement<Pr
           !loading && allValidators.map((validator, index) => {
             return <ValidatorItem
               key={index}
+              maxNominatorPerValidator={maxNominatorPerValidator}
               networkKey={bondingParams.selectedNetwork}
               validatorInfo={validator}
             />;

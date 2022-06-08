@@ -2044,9 +2044,10 @@ export default class KoniExtension extends Extension {
   private async getBondingOption (networkKey: string): Promise<BondingOptionInfo> {
     const apiProps = state.getDotSamaApi(networkKey);
     const networkJson = state.getNetworkMapByKey(networkKey);
-    const { era, validatorsInfo } = await getValidatorsInfo(networkKey, apiProps, networkJson.decimals as number, networkJson.nativeToken as string);
+    const { era, maxNominatorPerValidator, validatorsInfo } = await getValidatorsInfo(networkKey, apiProps, networkJson.decimals as number);
 
     return {
+      maxNominatorPerValidator,
       era,
       validators: validatorsInfo
     };

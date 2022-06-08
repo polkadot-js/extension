@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { ApiProps, ChainBondingBasics, ValidatorInfo } from '@subwallet/extension-base/background/KoniTypes';
-import { calculateChainStakedReturn, calculateInflation, calculateValidatorStakedReturn, getCommission, parseBalanceString, ValidatorExtraInfo } from '@subwallet/extension-koni-base/api/bonding/utils';
+import { calculateChainStakedReturn, calculateInflation, calculateValidatorStakedReturn, getCommission, ValidatorExtraInfo } from '@subwallet/extension-koni-base/api/bonding/utils';
 
 export async function getChainBondingBasics (networkKey: string, dotSamaApi: ApiProps, decimals: number) {
   const apiProps = await dotSamaApi.isReady;
@@ -34,7 +34,7 @@ export async function getChainBondingBasics (networkKey: string, dotSamaApi: Api
   } as ChainBondingBasics;
 }
 
-export async function getValidatorsInfo (networkKey: string, dotSamaApi: ApiProps, decimals: number, nativeToken: string) {
+export async function getValidatorsInfo (networkKey: string, dotSamaApi: ApiProps, decimals: number) {
   const apiProps = await dotSamaApi.isReady;
 
   const _era = await apiProps.api.query.staking.currentEra();
@@ -44,16 +44,25 @@ export async function getValidatorsInfo (networkKey: string, dotSamaApi: ApiProp
   const result: ValidatorInfo[] = [];
   let totalEraStake = 0;
 
-  const [_eraStakers, _totalIssuance, _auctionCounter] = await Promise.all([
+  const [_eraStakers, _totalIssuance, _auctionCounter, _minBond] = await Promise.all([
     apiProps.api.query.staking.erasStakers.entries(parseInt(currentEra)),
     apiProps.api.query.balances.totalIssuance(),
-    apiProps.api.query.auctions?.auctionCounter()
+    apiProps.api.query.auctions?.auctionCounter(),
+    apiProps.api.query.staking.minNominatorBond()
   ]);
+
+  const rawMaxNominatorPerValidator = (apiProps.api.consts.staking.maxNominatorRewardedPerValidator).toHuman() as string;
+  const maxNominatorPerValidator = parseFloat(rawMaxNominatorPerValidator.replaceAll(',', ''));
 
   const eraStakers = _eraStakers as any[];
   const totalIssuance = _totalIssuance.toHuman() as string;
   const numAuctions = _auctionCounter ? _auctionCounter.toHuman() as number : 0;
   const parsedTotalIssuance = parseFloat(totalIssuance.replaceAll(',', ''));
+
+  const rawMinBond = _minBond.toHuman() as string;
+  const minBond = parseFloat(rawMinBond.replaceAll(',', ''));
+
+  const totalStakeMap: Record<string, number> = {};
 
   for (const item of eraStakers) {
     // eslint-disable-next-line @typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-member-access
@@ -67,13 +76,11 @@ export async function getValidatorsInfo (networkKey: string, dotSamaApi: ApiProp
 
     const parsedTotalStake = parseFloat(rawTotalStake.replaceAll(',', ''));
 
+    totalStakeMap[validatorAddress] = parsedTotalStake;
+
     totalEraStake += parsedTotalStake;
     const parsedOwnStake = parseFloat(rawOwnStake.replaceAll(',', ''));
     const otherStake = parsedTotalStake - parsedOwnStake;
-
-    const totalStakeString = parseBalanceString(decimals, parsedTotalStake, nativeToken);
-    const ownStakeString = parseBalanceString(decimals, parsedOwnStake, nativeToken);
-    const otherStakeString = parseBalanceString(decimals, otherStake, nativeToken);
 
     let nominatorCount = 0;
 
@@ -86,18 +93,18 @@ export async function getValidatorsInfo (networkKey: string, dotSamaApi: ApiProp
     allValidators.push(validatorAddress);
 
     result.push({
-      rawTotalStake: parsedTotalStake,
       address: validatorAddress,
-      totalStake: totalStakeString,
-      ownStake: ownStakeString,
-      otherStake: otherStakeString,
+      totalStake: parsedTotalStake / 10 ** decimals,
+      ownStake: parsedOwnStake / 10 ** decimals,
+      otherStake: otherStake / 10 ** decimals,
       nominatorCount,
       // to be added later
-      commission: '',
+      commission: 0,
       expectedReturn: 0,
       blocked: false,
-      isVerified: false
-    });
+      isVerified: false,
+      minBond: (minBond / 10 ** decimals)
+    } as ValidatorInfo);
   }
 
   const extraInfoMap: Record<string, ValidatorExtraInfo> = {};
@@ -158,14 +165,15 @@ export async function getValidatorsInfo (networkKey: string, dotSamaApi: ApiProp
   for (const validator of result) {
     const commission = extraInfoMap[validator.address].commission;
 
-    validator.expectedReturn = calculateValidatorStakedReturn(stakedReturn, validator.rawTotalStake, avgStake, getCommission(commission));
-    validator.commission = commission;
+    validator.expectedReturn = calculateValidatorStakedReturn(stakedReturn, totalStakeMap[validator.address], avgStake, getCommission(commission));
+    validator.commission = parseFloat(commission.split('%')[0]);
     validator.blocked = extraInfoMap[validator.address].blocked;
     validator.identity = extraInfoMap[validator.address].identity;
     validator.isVerified = extraInfoMap[validator.address].isVerified;
   }
 
   return {
+    maxNominatorPerValidator,
     era: parseInt(currentEra),
     validatorsInfo: result
   };

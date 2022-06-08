@@ -789,6 +789,7 @@ export interface ValidatorInfo {
   blocked: boolean;
   identity?: string;
   isVerified: boolean;
+  minBond: number;
 }
 
 export interface BondingOptionInfo {
@@ -797,8 +798,8 @@ export interface BondingOptionInfo {
 }
 
 export interface ChainBondingBasics {
-  stakedReturn?: number,
-  minBond: number
+  stakedReturn: number,
+  minBond?: number
 }
 
 export interface KoniRequestSignatures {

@@ -50,7 +50,7 @@ function BondingNetworkSelection ({ chainBondingMeta, className, icon, network }
         <div className={'footer-container'}>
           <div
             className={'min-bond'}
-            data-for={'min-bond-tooltip'}
+            data-for={`min-bond-tooltip-${network.key}`}
             data-tip={true}
           >
             {/* eslint-disable-next-line @typescript-eslint/restrict-plus-operands */}
@@ -59,7 +59,7 @@ function BondingNetworkSelection ({ chainBondingMeta, className, icon, network }
           <Tooltip
             place={'top'}
             text={t<string>('The minimum amount required to stake')}
-            trigger={'min-bond-tooltip'}
+            trigger={`min-bond-tooltip-${network.key}`}
           />
           <div className={'bonding-item-toggle-container'}>
             <div className={'bonding-item-toggle'} />

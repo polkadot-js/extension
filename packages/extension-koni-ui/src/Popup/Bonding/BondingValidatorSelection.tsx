@@ -25,6 +25,7 @@ function BondingValidatorSelection ({ className }: Props): React.ReactElement<Pr
   const [searchString, setSearchString] = useState('');
   const [loading, setLoading] = useState(true);
   const [allValidators, setAllValidators] = useState<ValidatorInfo[]>([]);
+  const _height = window.innerHeight > 600 ? 650 : 300;
 
   const _onChangeFilter = useCallback((val: string) => {
     setSearchString(val);
@@ -41,6 +42,11 @@ function BondingValidatorSelection ({ className }: Props): React.ReactElement<Pr
         })
         .catch(console.error);
     }
+  }, []);
+
+  const handleClickHelper = useCallback(() => {
+    // eslint-disable-next-line no-void
+    void chrome.tabs.create({ url: 'https://support.polkadot.network/support/solutions/articles/65000150130-how-do-i-know-which-validators-to-choose-', active: true }).then(() => console.log('redirecting'));
   }, []);
 
   return (
@@ -79,7 +85,10 @@ function BondingValidatorSelection ({ className }: Props): React.ReactElement<Pr
         </div>
       </div>
 
-      <div className={'validator-list'}>
+      <div
+        className={'validator-list'}
+        style={{ height: `${_height}px` }}
+      >
         {
           loading && <Spinner />
         }
@@ -93,11 +102,30 @@ function BondingValidatorSelection ({ className }: Props): React.ReactElement<Pr
           })
         }
       </div>
+
+      <div
+        className={'validator-selection-helper'}
+        onClick={handleClickHelper}
+      >
+        How do I know which validators to choose?
+      </div>
     </div>
   );
 }
 
 export default React.memo(styled(BondingValidatorSelection)(({ theme }: Props) => `
+  .validator-selection-helper {
+    margin-left: 15px;
+    margin-top: 15px;
+    cursor: pointer;
+    font-size: 14px;
+    color: ${theme.textColor3};
+  }
+
+  .validator-selection-helper:hover {
+    text-decoration: underline;
+  }
+
   .bonding__btn {
     cursor: pointer;
     position: relative;
@@ -121,13 +149,14 @@ export default React.memo(styled(BondingValidatorSelection)(({ theme }: Props) =
   }
 
   .validator-list {
-    margin-top: 20px;
+    margin-top: 10px;
+    padding-top: 5px;
+    padding-bottom: 5px;
     display: flex;
     flex-direction: column;
     gap: 10px;
     padding-left: 15px;
     padding-right: 15px;
-    height: 300px;
     overflow-y: scroll;
   }
 `));

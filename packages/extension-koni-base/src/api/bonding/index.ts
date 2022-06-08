@@ -7,31 +7,32 @@ import { calculateChainStakedReturn, calculateInflation, calculateValidatorStake
 export async function getChainBondingBasics (networkKey: string, dotSamaApi: ApiProps, decimals: number) {
   const apiProps = await dotSamaApi.isReady;
 
-  // const _era = await apiProps.api.query.staking.currentEra();
-  // const currentEra = _era.toString();
-  //
-  // const [_totalEraStake, _totalIssuance, _auctionCounter, _minBond] = await Promise.all([
-  //   apiProps.api.query.staking.erasTotalStake(parseInt(currentEra)),
-  //   apiProps.api.query.balances.totalIssuance(),
-  //   apiProps.api.query.auctions?.auctionCounter(),
-  //   apiProps.api.query.staking.minNominatorBond()
-  // ]);
-  //
-  // const rawTotalEraStake = _totalEraStake.toHuman() as string;
-  // const rawTotalIssuance = _totalIssuance.toHuman() as string;
-  // const numAuctions = _auctionCounter ? _auctionCounter.toHuman() as number : 0;
-  // const totalIssuance = parseFloat(rawTotalIssuance.replaceAll(',', ''));
-  // const totalEraStake = parseFloat(rawTotalEraStake.replaceAll(',', ''));
-  //
-  // const inflation = calculateInflation(totalEraStake, totalIssuance, numAuctions, networkKey);
-  // const stakedReturn = calculateChainStakedReturn(inflation, totalEraStake, totalIssuance, networkKey);
+  const _era = await apiProps.api.query.staking.currentEra();
+  const currentEra = _era.toString();
 
-  const _minBond = await apiProps.api.query.staking.minNominatorBond();
-  const rawMinBond = _minBond.toHuman() as string;
-  const minBond = parseFloat(rawMinBond.replaceAll(',', ''));
+  const [_totalEraStake, _totalIssuance, _auctionCounter] = await Promise.all([
+    apiProps.api.query.staking.erasTotalStake(parseInt(currentEra)),
+    apiProps.api.query.balances.totalIssuance(),
+    apiProps.api.query.auctions?.auctionCounter(),
+    // apiProps.api.query.staking.minNominatorBond()
+  ]);
+
+  const rawTotalEraStake = _totalEraStake.toHuman() as string;
+  const rawTotalIssuance = _totalIssuance.toHuman() as string;
+  const numAuctions = _auctionCounter ? _auctionCounter.toHuman() as number : 0;
+  const totalIssuance = parseFloat(rawTotalIssuance.replaceAll(',', ''));
+  const totalEraStake = parseFloat(rawTotalEraStake.replaceAll(',', ''));
+
+  const inflation = calculateInflation(totalEraStake, totalIssuance, numAuctions, networkKey);
+  const stakedReturn = calculateChainStakedReturn(inflation, totalEraStake, totalIssuance, networkKey);
+
+  // const _minBond = await apiProps.api.query.staking.minNominatorBond();
+  // const rawMinBond = _minBond.toHuman() as string;
+  // const minBond = parseFloat(rawMinBond.replaceAll(',', ''));
 
   return {
-    minBond: (minBond / 10 ** decimals)
+    minBond: (minBond / 10 ** decimals),
+    stakedReturn
   } as ChainBondingBasics;
 }
 

@@ -8,14 +8,18 @@ export interface ValidatorExtraInfo {
   isVerified: boolean
 }
 
+const formatLocaleNumber = (number: number): string => {
+  return number.toLocaleString('en-UK', { maximumFractionDigits: 4 });
+};
+
 export function parseBalanceString (decimals: number, balance: number, unit: string) {
-  const unitThreshold = 1000000;
+  const milThreshold = 1000000;
   const parsedBalance = (balance / 10 ** decimals);
 
-  if (parsedBalance > unitThreshold) {
-    return (parsedBalance / unitThreshold).toFixed(2).toString() + ' ' + `M${unit}`;
+  if (parsedBalance > milThreshold) {
+    return formatLocaleNumber(Math.round((parsedBalance / milThreshold) * 100) / 100) + ' ' + `M${unit}`;
   } else {
-    return parsedBalance.toString() + ' ' + unit;
+    return formatLocaleNumber(Math.round(parsedBalance * 100) / 100) + ' ' + unit;
   }
 }
 

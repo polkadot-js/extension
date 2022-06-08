@@ -799,7 +799,7 @@ export interface BondingOptionInfo {
 
 export interface ChainBondingBasics {
   stakedReturn: number,
-  minBond?: number
+  minBond: number
 }
 
 export interface KoniRequestSignatures {

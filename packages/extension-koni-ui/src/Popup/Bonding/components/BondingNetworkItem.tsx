@@ -1,10 +1,12 @@
 // Copyright 2019-2022 @subwallet/extension-koni authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
+import { faCircleExclamation } from '@fortawesome/free-solid-svg-icons';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { ChainBondingBasics, NetworkJson } from '@subwallet/extension-base/background/KoniTypes';
 import { ActionContext } from '@subwallet/extension-koni-ui/components';
 import Tooltip from '@subwallet/extension-koni-ui/components/Tooltip';
-import useTranslation from '@subwallet/extension-koni-ui/hooks/useTranslation';
+import useIsSufficientBalance from '@subwallet/extension-koni-ui/hooks/screen/bonding/useIsSufficientBalance';
 import { store } from '@subwallet/extension-koni-ui/stores';
 import { BondingParams } from '@subwallet/extension-koni-ui/stores/types';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
@@ -18,9 +20,9 @@ interface Props extends ThemeProps {
   chainBondingMeta: ChainBondingBasics | undefined
 }
 
-function BondingNetworkSelection ({ chainBondingMeta, className, icon, network }: Props): React.ReactElement<Props> {
+function BondingNetworkItem ({ chainBondingMeta, className, icon, network }: Props): React.ReactElement<Props> {
   const navigate = useContext(ActionContext);
-  const { t } = useTranslation();
+  const isSufficientFund = useIsSufficientBalance(network.key, chainBondingMeta?.minBond);
 
   const handleOnClick = useCallback(() => {
     store.dispatch({ type: 'bondingParams/update', payload: { selectedNetwork: network.key, selectedValidator: '' } as BondingParams });
@@ -48,19 +50,35 @@ function BondingNetworkSelection ({ chainBondingMeta, className, icon, network }
         </div>
 
         <div className={'footer-container'}>
+          {
+            !isSufficientFund && <FontAwesomeIcon
+              className={'insufficient-fund'}
+              data-for={`insufficient-fund-tooltip-${network.key}`}
+              data-tip={true}
+              icon={faCircleExclamation}
+            />
+          }
+          <Tooltip
+            place={'top'}
+            // eslint-disable-next-line @typescript-eslint/restrict-plus-operands
+            text={`Your balance needs to be at least ${chainBondingMeta ? chainBondingMeta.minBond.toString() + ' ' + network.nativeToken : 0}`}
+            trigger={`insufficient-fund-tooltip-${network.key}`}
+          />
+
           <div
-            className={'min-bond'}
-            data-for={`min-bond-tooltip-${network.key}`}
+            className={'chain-return'}
+            data-for={`chain-return-tooltip-${network.key}`}
             data-tip={true}
           >
-            {/* eslint-disable-next-line @typescript-eslint/restrict-plus-operands */}
-            {chainBondingMeta ? chainBondingMeta.minBond.toString() + ' ' + network.nativeToken : 0}
+            {chainBondingMeta ? chainBondingMeta.stakedReturn.toFixed(1) + '%' : ''}
           </div>
           <Tooltip
             place={'top'}
-            text={t<string>('The minimum amount required to stake')}
-            trigger={`min-bond-tooltip-${network.key}`}
+            // eslint-disable-next-line @typescript-eslint/restrict-plus-operands
+            text={'Expected returns'}
+            trigger={`chain-return-tooltip-${network.key}`}
           />
+
           <div className={'bonding-item-toggle-container'}>
             <div className={'bonding-item-toggle'} />
           </div>
@@ -70,7 +88,12 @@ function BondingNetworkSelection ({ chainBondingMeta, className, icon, network }
   );
 }
 
-export default React.memo(styled(BondingNetworkSelection)(({ theme }: Props) => `
+export default React.memo(styled(BondingNetworkItem)(({ theme }: Props) => `
+  .insufficient-fund {
+    font-size: 13px;
+    color: ${theme.errorColor};
+  }
+
   .bonding-item-toggle-container {
     display: flex;
     align-items: center;
@@ -83,7 +106,7 @@ export default React.memo(styled(BondingNetworkSelection)(({ theme }: Props) => 
     align-items: center;
   }
 
-  .min-bond {
+  .chain-return {
     font-size: 14px;
     display: inline-block;
     color: ${theme.textColor3};

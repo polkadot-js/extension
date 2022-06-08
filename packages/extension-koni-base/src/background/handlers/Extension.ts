@@ -2031,7 +2031,7 @@ export default class KoniExtension extends Extension {
     return true;
   }
 
-  private async getMinBond (networkJsons: NetworkJson[]) {
+  private async getChainBondingBasics (networkJsons: NetworkJson[]) {
     const result: Record<string, ChainBondingBasics> = {};
 
     await Promise.all(networkJsons.map(async (networkJson) => {
@@ -2214,7 +2214,7 @@ export default class KoniExtension extends Extension {
       case 'pri(bonding.getBondingOptions)':
         return await this.getBondingOption(request as string);
       case 'pri(bonding.getChainBondingBasics)':
-        return await this.getMinBond(request as NetworkJson[]);
+        return await this.getChainBondingBasics(request as NetworkJson[]);
       default:
         return super.handle(id, type, request, port);
     }

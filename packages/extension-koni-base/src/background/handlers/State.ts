@@ -1472,4 +1472,18 @@ export default class KoniState extends State {
       });
     });
   }
+
+  findNetworkKeyByGenesisHash (genesisHash?: string): string |undefined {
+    let networkKey: string | undefined;
+
+    if (genesisHash) {
+      Object.entries(this.networkMap).forEach(([key, value]) => {
+        if (genesisHash === value.genesisHash) {
+          networkKey = key;
+        }
+      });
+    }
+
+    return networkKey;
+  }
 }

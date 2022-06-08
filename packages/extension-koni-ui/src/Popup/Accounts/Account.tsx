@@ -60,7 +60,7 @@ function Account ({ address, changeAccountCallback, className, closeSetting, gen
           } as CurrentAccountInfo;
 
           saveCurrentAccountAddress(accountInfo, () => {
-            window.localStorage.removeItem('accountAllNetworkGenesisHash');
+            // window.localStorage.removeItem('accountAllNetworkGenesisHash');
             triggerAccountsSubscription().catch((e) => {
               console.error('There is a problem when trigger Accounts Subscription', e);
             });

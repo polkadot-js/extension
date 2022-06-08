@@ -17,6 +17,7 @@ export class SubWalletEvmProvider extends SafeEventEmitter implements EvmProvide
   protected sendMessage: SendRequest;
 
   constructor (sendMessage: SendRequest, version: string) {
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-call
     super();
     this.version = version;
     this.sendMessage = sendMessage;
@@ -35,6 +36,7 @@ export class SubWalletEvmProvider extends SafeEventEmitter implements EvmProvide
     this.sendMessage('evm(events.subscribe)', null, ({ payload, type }) => {
       if (['connect', 'disconnect', 'accountsChanged', 'chainChanged', 'message'].includes(type)) {
         console.log(type, payload);
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-call
         this.emit(type, payload);
       } else {
         console.error('Can not handle event', type, payload);

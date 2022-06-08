@@ -51,10 +51,6 @@ export interface AccountsWithCurrentAddress {
   currentAddress?: string;
 }
 
-export interface CurrentAccountInfo {
-  address: string;
-}
-
 export type AccountWithChildren = AccountJson & {
   children?: AccountWithChildren[];
 }

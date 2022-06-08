@@ -129,7 +129,9 @@ export default function Popup (): React.ReactElement {
 
   // @ts-ignore
   const handleGetAccountsWithCurrentAddress = (data: AccountsWithCurrentAddress) => {
-    const { accounts, currentAddress } = data;
+    const { accounts, currentAddress, currentGenesisHash } = data;
+
+    console.log(currentAddress, currentGenesisHash);
 
     setAccounts(accounts);
 
@@ -138,8 +140,11 @@ export default function Popup (): React.ReactElement {
 
       if (!selectedAcc) {
         selectedAcc = accounts[0];
+        selectedAcc.genesisHash = currentGenesisHash;
+
         const accountInfo = {
-          address: selectedAcc.address
+          address: selectedAcc.address,
+          currentGenesisHash
         } as CurrentAccountInfo;
 
         saveCurrentAccountAddress(accountInfo, () => {
@@ -148,6 +153,7 @@ export default function Popup (): React.ReactElement {
           console.error('There is a problem when set Current Account', e);
         });
       } else {
+        selectedAcc.genesisHash = currentGenesisHash;
         updateCurrentAccount(selectedAcc);
       }
     }

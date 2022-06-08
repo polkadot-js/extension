@@ -5,8 +5,8 @@ import Common from '@ethereumjs/common';
 import Extension, { SEED_DEFAULT_LENGTH, SEED_LENGTHS } from '@subwallet/extension-base/background/handlers/Extension';
 import { AuthUrls } from '@subwallet/extension-base/background/handlers/State';
 import { createSubscription, isSubscriptionRunning, unsubscribe } from '@subwallet/extension-base/background/handlers/subscriptions';
-import { AccountsWithCurrentAddress, ApiProps, BalanceJson, ChainRegistry, CrowdloanJson, CustomEvmToken, DeleteEvmTokenParams, DisableNetworkResponse, EvmNftSubmitTransaction, EvmNftTransaction, EvmNftTransactionRequest, EvmTokenJson, NETWORK_ERROR, NetWorkGroup, NetworkJson, NftCollection, NftCollectionJson, NftItem, NftJson, NftTransactionResponse, NftTransferExtra, OptionInputAddress, PriceJson, RequestAccountCreateSuriV2, RequestAccountExportPrivateKey, RequestAuthorization, RequestAuthorizationPerAccount, RequestAuthorizeApproveV2, RequestBatchRestoreV2, RequestCheckCrossChainTransfer, RequestCheckTransfer, RequestCrossChainTransfer, RequestDeriveCreateV2, RequestForgetSite, RequestFreeBalance, RequestJsonRestoreV2, RequestNftForceUpdate, RequestSaveRecentAccount, RequestSeedCreateV2, RequestSeedValidateV2, RequestSettingsType, RequestTransactionHistoryAdd, RequestTransfer, RequestTransferCheckReferenceCount, RequestTransferCheckSupporting, RequestTransferExistentialDeposit, ResponseAccountCreateSuriV2, ResponseAccountExportPrivateKey, ResponseCheckCrossChainTransfer, ResponseCheckTransfer, ResponsePrivateKeyValidateV2, ResponseSeedCreateV2, ResponseSeedValidateV2, ResponseTransfer, StakingJson, StakingRewardJson, SubstrateNftSubmitTransaction, SubstrateNftTransaction, SubstrateNftTransactionRequest, SupportTransferResponse, ThemeTypes, TokenInfo, TransactionHistoryItemType, TransferError, TransferErrorCode, TransferStep, ValidateEvmTokenRequest, ValidateEvmTokenResponse, ValidateNetworkRequest, ValidateNetworkResponse } from '@subwallet/extension-base/background/KoniTypes';
-import { AccountJson, AuthorizeRequest, MessageTypes, RequestAccountForget, RequestAuthorizeReject, RequestCurrentAccountAddress, RequestTypes, ResponseAuthorizeList, ResponseType } from '@subwallet/extension-base/background/types';
+import { AccountsWithCurrentAddress, ApiProps, BalanceJson, ChainRegistry, CrowdloanJson, CurrentAccountInfo, CustomEvmToken, DeleteEvmTokenParams, DisableNetworkResponse, EvmNftSubmitTransaction, EvmNftTransaction, EvmNftTransactionRequest, EvmTokenJson, NETWORK_ERROR, NetWorkGroup, NetworkJson, NftCollection, NftCollectionJson, NftItem, NftJson, NftTransactionResponse, NftTransferExtra, OptionInputAddress, PriceJson, RequestAccountCreateSuriV2, RequestAccountExportPrivateKey, RequestAuthorization, RequestAuthorizationPerAccount, RequestAuthorizeApproveV2, RequestBatchRestoreV2, RequestCheckCrossChainTransfer, RequestCheckTransfer, RequestCrossChainTransfer, RequestDeriveCreateV2, RequestForgetSite, RequestFreeBalance, RequestJsonRestoreV2, RequestNftForceUpdate, RequestSaveRecentAccount, RequestSeedCreateV2, RequestSeedValidateV2, RequestSettingsType, RequestTransactionHistoryAdd, RequestTransfer, RequestTransferCheckReferenceCount, RequestTransferCheckSupporting, RequestTransferExistentialDeposit, ResponseAccountCreateSuriV2, ResponseAccountExportPrivateKey, ResponseCheckCrossChainTransfer, ResponseCheckTransfer, ResponsePrivateKeyValidateV2, ResponseSeedCreateV2, ResponseSeedValidateV2, ResponseTransfer, StakingJson, StakingRewardJson, SubstrateNftSubmitTransaction, SubstrateNftTransaction, SubstrateNftTransactionRequest, SupportTransferResponse, ThemeTypes, TokenInfo, TransactionHistoryItemType, TransferError, TransferErrorCode, TransferStep, ValidateEvmTokenRequest, ValidateEvmTokenResponse, ValidateNetworkRequest, ValidateNetworkResponse } from '@subwallet/extension-base/background/KoniTypes';
+import { AccountJson, AuthorizeRequest, MessageTypes, RequestAccountForget, RequestAccountTie, RequestAuthorizeReject, RequestCurrentAccountAddress, RequestTypes, ResponseAuthorizeList, ResponseType } from '@subwallet/extension-base/background/types';
 import { initApi } from '@subwallet/extension-koni-base/api/dotsama';
 import { getFreeBalance, subscribeFreeBalance } from '@subwallet/extension-koni-base/api/dotsama/balance';
 import { getTokenInfo } from '@subwallet/extension-koni-base/api/dotsama/registry';
@@ -16,7 +16,7 @@ import { acalaTransferHandler, getNftTransferExtrinsic, isRecipientSelf, quartzT
 import { getERC20TransactionObject, getEVMTransactionObject, makeERC20Transfer, makeEVMTransfer } from '@subwallet/extension-koni-base/api/web3/transfer';
 import { ERC721Contract, getERC20Contract, getERC721Contract, initWeb3Api } from '@subwallet/extension-koni-base/api/web3/web3';
 import { state } from '@subwallet/extension-koni-base/background/handlers/index';
-import { ALL_ACCOUNT_KEY } from '@subwallet/extension-koni-base/constants';
+import { ALL_ACCOUNT_KEY, ALL_GENESIS_HASH } from '@subwallet/extension-koni-base/constants';
 import { isValidProvider, reformatAddress } from '@subwallet/extension-koni-base/utils/utils';
 import { Transaction } from 'ethereumjs-tx';
 import { Contract } from 'web3-eth-contract';
@@ -92,6 +92,7 @@ export default class KoniExtension extends Extension {
 
   private accountsGetAllWithCurrentAddress (id: string, port: chrome.runtime.Port): boolean {
     const cb = createSubscription<'pri(accounts.subscribeWithCurrentAddress)'>(id, port);
+
     const subscription = accountsObservable.subject.subscribe((storedAccounts: SubjectInfo): void => {
       const transformedAccounts = transformAccounts(storedAccounts);
 
@@ -108,13 +109,23 @@ export default class KoniExtension extends Extension {
         accounts
       };
 
-      state.getCurrentAccount((accountInfo) => {
-        if (accountInfo) {
-          accountsWithCurrentAddress.currentAddress = accountInfo.address;
-        }
+      setTimeout(() => {
+        state.getCurrentAccount((accountInfo) => {
+          if (accountInfo) {
+            accountsWithCurrentAddress.currentAddress = accountInfo.address;
 
-        cb(accountsWithCurrentAddress);
-      });
+            if (accountInfo.address === ALL_ACCOUNT_KEY) {
+              accountsWithCurrentAddress.currentGenesisHash = accountInfo.currentGenesisHash;
+            } else {
+              const acc = accounts.find((a) => (a.address === accountInfo.address));
+
+              accountsWithCurrentAddress.currentGenesisHash = acc?.genesisHash || ALL_GENESIS_HASH;
+            }
+          }
+
+          cb(accountsWithCurrentAddress);
+        });
+      }, 100);
     });
 
     port.onDisconnect.addListener((): void => {
@@ -435,26 +446,34 @@ export default class KoniExtension extends Extension {
     return await this.getSettings();
   }
 
-  private _saveCurrentAccountAddress (address: string, callback?: () => void) {
+  private _saveCurrentAccountAddress (address: string, callback?: (data: CurrentAccountInfo) => void) {
     state.getCurrentAccount((accountInfo) => {
       if (!accountInfo) {
         accountInfo = {
-          address
+          address,
+          currentGenesisHash: ALL_GENESIS_HASH
         };
       } else {
         accountInfo.address = address;
       }
 
-      state.setCurrentAccount(accountInfo, callback);
+      // Detect current account of selected account
+      if (!accountInfo.currentGenesisHash) {
+        const currentKeyPair = keyring.getAccount(address);
+
+        accountInfo.currentGenesisHash = currentKeyPair?.meta.genesisHash as string || ALL_GENESIS_HASH;
+      }
+
+      state.setCurrentAccount(accountInfo, () => {
+        callback && callback(accountInfo);
+      });
     });
   }
 
   private saveCurrentAccountAddress (data: RequestCurrentAccountAddress, id: string, port: chrome.runtime.Port): boolean {
     const cb = createSubscription<'pri(currentAccount.saveAddress)'>(id, port);
 
-    this._saveCurrentAccountAddress(data.address, () => {
-      cb(data);
-    });
+    this._saveCurrentAccountAddress(data.address, cb);
 
     port.onDisconnect.addListener((): void => {
       unsubscribe(id);
@@ -1094,9 +1113,9 @@ export default class KoniExtension extends Extension {
 
       // Estimate with EVM API
       if (tokenInfo && !tokenInfo.isMainToken && tokenInfo.erc20Address) {
-        [,, fee] = await getERC20TransactionObject(tokenInfo.erc20Address, networkKey, from, to, txVal, !!transferAll, web3ApiMap);
+        [, , fee] = await getERC20TransactionObject(tokenInfo.erc20Address, networkKey, from, to, txVal, !!transferAll, web3ApiMap);
       } else {
-        [,, fee] = await getEVMTransactionObject(networkKey, to, txVal, !!transferAll, web3ApiMap);
+        [, , fee] = await getEVMTransactionObject(networkKey, to, txVal, !!transferAll, web3ApiMap);
       }
     } else {
       // Estimate with DotSama API
@@ -2033,6 +2052,26 @@ export default class KoniExtension extends Extension {
     return true;
   }
 
+  private accountsTie2 ({ address, genesisHash }: RequestAccountTie): boolean {
+    if (address !== ALL_ACCOUNT_KEY) {
+      const pair = keyring.getPair(address);
+
+      assert(pair, 'Unable to find pair');
+
+      keyring.saveAccountMeta(pair, { ...pair.meta, genesisHash });
+    }
+
+    state.getCurrentAccount((accountInfo) => {
+      if (address === accountInfo.address) {
+        accountInfo.currentGenesisHash = genesisHash as string || ALL_GENESIS_HASH;
+
+        state.setCurrentAccount(accountInfo);
+      }
+    });
+
+    return true;
+  }
+
   // eslint-disable-next-line @typescript-eslint/require-await
   public override async handle<TMessageType extends MessageTypes> (id: string, type: TMessageType, request: RequestTypes[TMessageType], port: chrome.runtime.Port): Promise<ResponseType<TMessageType>> {
     switch (type) {
@@ -2192,6 +2231,8 @@ export default class KoniExtension extends Extension {
         return this.recoverDotSamaApi(request as string);
       case 'pri(networkMap.enableMany)':
         return this.enableNetworks(request as string[]);
+      case 'pri(accounts.tie)':
+        return this.accountsTie2(request as RequestAccountTie);
       default:
         return super.handle(id, type, request, port);
     }

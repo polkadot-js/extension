@@ -15,7 +15,6 @@ import { _NftItem, SUPPORTED_TRANSFER_SUBSTRATE_CHAIN } from '@subwallet/extensi
 import { RootState, store } from '@subwallet/extension-koni-ui/stores';
 import { TransferNftParams } from '@subwallet/extension-koni-ui/stores/types';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
-import { isAccountAll } from '@subwallet/extension-koni-ui/util';
 import React, { useCallback, useContext, useState } from 'react';
 import { useSelector } from 'react-redux';
 import styled from 'styled-components';
@@ -100,11 +99,7 @@ function NftItem ({ className, collectionId, collectionImage, data, onClickBack 
     if (data.chain !== currentNetwork.networkKey) {
       const targetNetwork = networkMetadata[data?.chain];
 
-      if (!isAccountAll(account.account.address)) {
-        await tieAccount(account.account.address, targetNetwork.genesisHash);
-      } else {
-        window.localStorage.setItem('accountAllNetworkGenesisHash', targetNetwork.genesisHash);
-      }
+      await tieAccount(account.account.address, targetNetwork.genesisHash);
 
       updateCurrentNetwork(targetNetwork);
     }

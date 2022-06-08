@@ -359,6 +359,7 @@ export type TokenInfo = {
 export interface AccountsWithCurrentAddress {
   accounts: AccountJson[];
   currentAddress?: string;
+  currentGenesisHash?: string | null;
   isShowBalance?: boolean;
   allAccountLogo?: string;
 }
@@ -369,6 +370,7 @@ export interface OptionInputAddress {
 
 export interface CurrentAccountInfo {
   address: string;
+  currentGenesisHash: string | null;
 }
 
 export interface RequestSettingsType {

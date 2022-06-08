@@ -1,5 +1,17 @@
 # CHANGELOG
 
+## 0.4.4 (Koni)
+Build date: Jun 08, 2022.
+
+Update:
+- Support Send / Receive cross-chain assets (#35)
+
+Bug Fixed:
+- Fix bug display incorrect transferable balance in the Send Fund/Donate/XCM Transfer screen (#303)
+- Fix bug happens when user delete all custom tokens & predefined tokens (#314)
+- Fix bug "Encountered an error, please try again" when Send NFT (#321)
+- Fix bug can not send fund/XCM transfer of the Kintsugi Chain (#332)
+
 ## 0.4.3 (Koni)
 Build date: May 31, 2022.
 

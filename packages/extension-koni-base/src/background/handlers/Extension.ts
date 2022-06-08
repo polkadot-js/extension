@@ -973,7 +973,7 @@ export default class KoniExtension extends Extension {
         }
       }
 
-      state.setNft({
+      state.setNft(request.senderAddress, {
         nftList: filteredItems
       } as NftJson);
 
@@ -984,11 +984,13 @@ export default class KoniExtension extends Extension {
           }
         }
 
-        state.setNftCollection({
+        state.setNftCollection(request.senderAddress, {
           ready: true,
           nftCollectionList: filteredCollections
         } as NftCollectionJson);
       }
+
+      state.resetMasterNftStore();
     } else {
       for (const item of nftJson.nftList) {
         if (item.chain === request.chain && item.collectionId === request.collectionId) {

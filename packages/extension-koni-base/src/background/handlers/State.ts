@@ -16,12 +16,15 @@ import { DotSamaCrowdloan_crowdloans_nodes } from '@subwallet/extension-koni-bas
 import { fetchDotSamaCrowdloan } from '@subwallet/extension-koni-base/api/subquery/crowdloan';
 import { DEFAULT_EVM_TOKENS } from '@subwallet/extension-koni-base/api/web3/defaultEvmToken';
 import { initWeb3Api } from '@subwallet/extension-koni-base/api/web3/web3';
+import { ALL_ACCOUNT_KEY } from '@subwallet/extension-koni-base/constants';
 import { CurrentAccountStore, NetworkMapStore, PriceStore } from '@subwallet/extension-koni-base/stores';
 import AccountRefStore from '@subwallet/extension-koni-base/stores/AccountRef';
 import AuthorizeStore from '@subwallet/extension-koni-base/stores/Authorize';
 import BalanceStore from '@subwallet/extension-koni-base/stores/Balance';
 import CrowdloanStore from '@subwallet/extension-koni-base/stores/Crowdloan';
 import CustomEvmTokenStore from '@subwallet/extension-koni-base/stores/CustomEvmToken';
+import NftStore from '@subwallet/extension-koni-base/stores/Nft';
+import NftCollectionStore from '@subwallet/extension-koni-base/stores/NftCollection';
 import SettingsStore from '@subwallet/extension-koni-base/stores/Settings';
 import StakingStore from '@subwallet/extension-koni-base/stores/Staking';
 import TransactionHistoryStore from '@subwallet/extension-koni-base/stores/TransactionHistory';
@@ -105,6 +108,8 @@ export default class KoniState extends State {
   private readonly balanceStore = new BalanceStore();
   private readonly crowdloanStore = new CrowdloanStore();
   private readonly stakingStore = new StakingStore();
+  private readonly nftStore = new NftStore();
+  private readonly nftCollectionStore = new NftCollectionStore();
   private readonly networkMapStore = new NetworkMapStore(); // persist custom networkMap by user
   private readonly customEvmTokenStore = new CustomEvmTokenStore();
   private readonly priceStore = new PriceStore();
@@ -532,7 +537,7 @@ export default class KoniState extends State {
   }
 
   public async getStoredStaking (address: string) {
-    const items = await this.stakingStore.asyncGet(address) as Record<string, StakingItem>;
+    const items = await this.stakingStore.asyncGet(address);
 
     return items || {};
   }
@@ -622,47 +627,89 @@ export default class KoniState extends State {
     return this.nftTransferSubject;
   }
 
-  public setNftCollection (data: NftCollectionJson, callback?: (data: NftCollectionJson) => void): void {
-    this.nftCollectionState = data;
+  public setNftCollection (address: string, data: NftCollectionJson, callback?: (data: NftCollectionJson) => void): void {
+    this.getCurrentAccount((currentAccountInfo) => {
+      if (currentAccountInfo.address === address) {
+        this.nftCollectionState = data;
 
-    if (callback) {
-      callback(data);
-    }
+        if (callback) {
+          callback(data);
+        }
 
-    this.nftCollectionSubject.next(this.nftCollectionState);
+        this.publishNftCollectionChanged(address);
+      }
+    });
   }
 
-  public updateNftCollection (data: NftCollection, callback?: (data: NftCollection) => void): void {
-    this.nftCollectionState.nftCollectionList.push(data);
+  public updateNftCollection (address: string, data: NftCollection, callback?: (data: NftCollection) => void): void {
+    this.getCurrentAccount((currentAccountInfo) => {
+      if (currentAccountInfo.address === address) {
+        this.nftCollectionState.nftCollectionList.push(data);
 
-    if (callback) {
-      callback(data);
-    }
+        if (callback) {
+          callback(data);
+        }
 
-    this.nftCollectionSubject.next(this.nftCollectionState);
+        this.publishNftCollectionChanged(address);
+      }
+    });
   }
 
-  public updateNftReady (ready: boolean, callback?: (ready: boolean) => void): void {
-    this.nftCollectionState.ready = ready;
+  public updateNftReady (address: string, ready: boolean, callback?: (ready: boolean) => void): void {
+    this.getCurrentAccount((currentAccountInfo) => {
+      if (currentAccountInfo.address === address) {
+        if (callback) {
+          callback(ready);
+        }
 
-    if (callback) {
-      callback(ready);
-    }
+        if (this.nftCollectionState.ready !== ready) {
+          this.nftCollectionState.ready = ready;
 
-    this.nftCollectionSubject.next(this.nftCollectionState);
+          this.publishNftCollectionChanged(address);
+        }
+      }
+    });
   }
 
-  public resetNftCollection (): void {
+  private publishNftCollectionChanged (address: string) {
+    this.lazyNext('saveNftCollection', () => {
+      this.saveNftCollection(address);
+      this.nftCollectionSubject.next(this.nftCollectionState);
+    });
+  }
+
+  private saveNftCollection (address: string, clear = false) {
+    if (clear) {
+      this.nftCollectionStore.remove(address);
+    } else if (this.nftCollectionState.ready && this.nftCollectionState.nftCollectionList) {
+      this.nftCollectionStore.set(address, this.nftCollectionState.nftCollectionList);
+    }
+  }
+
+  public async resetNftCollection (newAddress: string): Promise<void> {
     this.nftCollectionState = {
       ready: false,
       nftCollectionList: []
     } as NftCollectionJson;
+
+    const storedData = await this.getStoredNftCollection(newAddress);
+
+    if (storedData) {
+      this.nftCollectionState.ready = true;
+      this.nftCollectionState.nftCollectionList = storedData;
+    }
 
     this.nftCollectionSubject.next(this.nftCollectionState);
   }
 
   public getNftCollection () {
     return this.nftCollectionState;
+  }
+
+  public async getStoredNftCollection (address: string) {
+    const items = await this.nftCollectionStore.asyncGet(address);
+
+    return items;
   }
 
   public getNftCollectionSubscription (update: (value: NftCollectionJson) => void): void {
@@ -673,37 +720,78 @@ export default class KoniState extends State {
     return this.nftCollectionSubject;
   }
 
-  public resetNft (): void {
+  public async resetNft (newAddress: string): Promise<void> {
     this.nftState = {
       total: 0,
       nftList: []
     } as NftJson;
 
-    this.nftSubject.next(this.nftState);
-  }
+    const storedData = await this.getStoredNft(newAddress);
 
-  public setNft (data: NftJson, callback?: (nftData: NftJson) => void): void {
-    this.nftState = data;
-
-    if (callback) {
-      callback(data);
+    if (storedData) {
+      this.nftState = storedData;
     }
 
     this.nftSubject.next(this.nftState);
   }
 
-  public updateNft (nftData: NftItem, callback?: (nftData: NftItem) => void): void {
-    this.nftState.nftList.push(nftData);
+  // For NFT transfer
+  public setNft (address: string, data: NftJson, callback?: (nftData: NftJson) => void): void {
+    this.getCurrentAccount((currentAccountInfo) => {
+      if (currentAccountInfo.address === address) {
+        this.nftState = data;
 
-    if (callback) {
-      callback(nftData);
+        if (callback) {
+          callback(data);
+        }
+
+        this.publishNftChanged(address);
+      }
+    });
+  }
+
+  public updateNft (address: string, nftData: NftItem, callback?: (nftData: NftItem) => void): void {
+    this.getCurrentAccount((currentAccountInfo) => {
+      if (currentAccountInfo.address === address) {
+        this.nftState.nftList.push(nftData);
+
+        if (callback) {
+          callback(nftData);
+        }
+
+        this.publishNftChanged(address);
+      }
+    });
+  }
+
+  public resetMasterNftStore (): void {
+    this.saveNft(ALL_ACCOUNT_KEY, true);
+    this.saveNftCollection(ALL_ACCOUNT_KEY, true);
+  }
+
+  private publishNftChanged (address: string) {
+    this.lazyNext('saveNft', () => {
+      this.saveNft(address);
+      this.nftSubject.next(this.nftState);
+    });
+  }
+
+  private saveNft (address: string, clear = false) {
+    if (clear) {
+      this.nftStore.remove(address);
+    } else if (this.nftState && this.nftState.nftList) {
+      this.nftStore.set(address, this.nftState);
     }
-
-    this.nftSubject.next(this.nftState);
   }
 
   public getNft () {
     return this.nftState;
+  }
+
+  public async getStoredNft (address: string) {
+    const items = await this.nftStore.asyncGet(address) as NftJson;
+
+    return items;
   }
 
   public getNftSubscription (update: (value: NftJson) => void): void {
@@ -840,7 +928,7 @@ export default class KoniState extends State {
   }
 
   public async getStoredBalance (address: string) {
-    const items = await this.balanceStore.asyncGet(address) as Record<string, BalanceItem>;
+    const items = await this.balanceStore.asyncGet(address);
 
     return items || {};
   }
@@ -919,7 +1007,7 @@ export default class KoniState extends State {
   }
 
   public async getStoredCrowdloan (address: string) {
-    const items = await this.crowdloanStore.asyncGet(address) as Record<string, CrowdloanItem>;
+    const items = await this.crowdloanStore.asyncGet(address);
 
     return items || {};
   }

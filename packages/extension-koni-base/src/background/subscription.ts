@@ -162,12 +162,12 @@ export class KoniSubscription {
   subscribeNft (address: string, dotSamaApiMap: Record<string, ApiProps>, web3ApiMap: Record<string, Web3>, customErc721Registry: CustomEvmToken[]) {
     this.detectAddresses(address)
       .then((addresses) => {
-        this.initNftSubscription(addresses, dotSamaApiMap, web3ApiMap, customErc721Registry);
+        this.initNftSubscription(addresses, dotSamaApiMap, web3ApiMap, customErc721Registry, address);
       })
       .catch(console.error);
   }
 
-  initNftSubscription (addresses: string[], dotSamaApiMap: Record<string, ApiProps>, web3ApiMap: Record<string, Web3>, customErc721Registry: CustomEvmToken[]) {
+  initNftSubscription (addresses: string[], dotSamaApiMap: Record<string, ApiProps>, web3ApiMap: Record<string, Web3>, customErc721Registry: CustomEvmToken[], addressKey: string) {
     const { cronUpdate, forceUpdate, selectedNftCollection } = state.getNftTransfer();
 
     if (forceUpdate && !cronUpdate) {
@@ -189,15 +189,15 @@ export class KoniSubscription {
       nftHandler.handleNfts(
         customErc721Registry,
         (data) => {
-          state.updateNft(data);
+          state.updateNft(addressKey, data);
         },
         (data) => {
           if (data !== null) {
-            state.updateNftCollection(data);
+            state.updateNftCollection(addressKey, data);
           }
         },
         (ready) => {
-          state.updateNftReady(ready);
+          state.updateNftReady(addressKey, ready);
         })
         .then(() => {
           console.log('nft state updated');

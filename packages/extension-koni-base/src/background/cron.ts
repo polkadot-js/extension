@@ -63,7 +63,7 @@ export class KoniCron {
         this.addCron('refreshStakingReward', this.refreshStakingReward(currentAccountInfo.address), CRON_REFRESH_STAKING_REWARD_INTERVAL);
         this.addCron('refreshHistory', this.refreshHistory(currentAccountInfo.address, state.getNetworkMap()), CRON_REFRESH_HISTORY_INTERVAL);
       } else {
-        this.setNftReady();
+        this.setNftReady(currentAccountInfo.address);
         this.setStakingRewardReady();
       }
 
@@ -71,11 +71,17 @@ export class KoniCron {
         next: (serviceInfo) => {
           const { address } = serviceInfo.currentAccountInfo;
 
-          this.resetNft();
-          this.resetNftTransferMeta();
+          this.resetNft(address).then(() => {
+            this.resetNftTransferMeta();
+            this.removeCron('refreshNft');
+
+            if (Object.keys(serviceInfo.apiMap.dotSama).length !== 0 || Object.keys(serviceInfo.apiMap.web3).length !== 0) { // only add cron job if there's at least 1 active network
+              this.addCron('refreshNft', this.refreshNft(address, serviceInfo.apiMap, serviceInfo.customErc721Registry), CRON_REFRESH_NFT_INTERVAL);
+            }
+          }).catch((err) => console.warn(err));
+
           // this.resetStakingReward(address);
           this.resetHistory();
-          this.removeCron('refreshNft');
           this.removeCron('refreshStakingReward');
           this.removeCron('refreshHistory');
 
@@ -88,11 +94,10 @@ export class KoniCron {
             this.addCron('checkStatusApiMap', this.updateApiMapStatus, CRON_GET_API_MAP_STATUS);
             this.addCron('recoverApiMap', this.recoverApiMap, CRON_AUTO_RECOVER_DOTSAMA_INTERVAL, false);
 
-            this.addCron('refreshNft', this.refreshNft(address, serviceInfo.apiMap, serviceInfo.customErc721Registry), CRON_REFRESH_NFT_INTERVAL);
             this.addCron('refreshStakingReward', this.refreshStakingReward(address), CRON_REFRESH_STAKING_REWARD_INTERVAL);
             this.addCron('refreshHistory', this.refreshHistory(address, serviceInfo.networkMap), CRON_REFRESH_HISTORY_INTERVAL);
           } else {
-            this.setNftReady();
+            this.setNftReady(address);
             this.setStakingRewardReady();
           }
         }
@@ -182,10 +187,12 @@ export class KoniCron {
     };
   }
 
-  resetNft () {
-    state.resetNft();
-    state.resetNftCollection();
+  async resetNft (newAddress: string) {
     console.log('Reset Nft state');
+    await Promise.all([
+      state.resetNft(newAddress),
+      state.resetNftCollection(newAddress)
+    ]);
   }
 
   resetNftTransferMeta () {
@@ -222,8 +229,8 @@ export class KoniCron {
     };
   }
 
-  setNftReady () {
-    state.updateNftReady(true);
+  setNftReady (address: string) {
+    state.updateNftReady(address, true);
   }
 
   setStakingRewardReady () {

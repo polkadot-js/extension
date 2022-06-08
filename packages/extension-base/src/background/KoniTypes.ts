@@ -547,7 +547,8 @@ export type RequestNftForceUpdate = {
   collectionId: string,
   nft: NftItem,
   isSendingSelf: boolean,
-  chain: string
+  chain: string,
+  senderAddress: string
 }
 
 export enum NETWORK_ERROR {

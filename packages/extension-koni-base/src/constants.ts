@@ -17,4 +17,5 @@ export const CRON_REFRESH_HISTORY_INTERVAL = 90000;
 export const CRON_GET_API_MAP_STATUS = 5000;
 
 export const ALL_ACCOUNT_KEY = 'ALL';
+export const ALL_NETWORK_KEY = 'all';
 export const IGNORE_GET_SUBSTRATE_FEATURES_LIST: string[] = ['astarEvm'];

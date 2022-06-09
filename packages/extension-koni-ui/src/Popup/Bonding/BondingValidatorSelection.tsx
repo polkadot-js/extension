@@ -146,7 +146,7 @@ function BondingValidatorSelection ({ className }: Props): React.ReactElement<Pr
           {t<string>('Lowest commission')}
         </div>
         <div
-          className={`${sortByReturn ? 'active-bonding__btn' : 'bonding__btn'}`}
+          className={`${sortByReturn ? 'active-bonding__btn' : 'bonding__btn'} sort-return-btn`}
           onClick={handleSortByReturn}
         >
           {t<string>('Highest return')}
@@ -183,6 +183,23 @@ function BondingValidatorSelection ({ className }: Props): React.ReactElement<Pr
 }
 
 export default React.memo(styled(BondingValidatorSelection)(({ theme }: Props) => `
+  .sort-return-btn:before {
+    content: '';
+    position: absolute;
+    width: 4px;
+    height: 4px;
+    border-radius: 50%;
+    background-color: ${theme.textColor2};
+    top: 0;
+    bottom: 0;
+    left: 7px;
+    margin: auto 0;
+  }
+
+  .sort-return-btn {
+    padding-left: 20px;
+  }
+
   .validator-selection-helper {
     margin-left: 15px;
     margin-top: 15px;
@@ -217,7 +234,6 @@ export default React.memo(styled(BondingValidatorSelection)(({ theme }: Props) =
     display: flex;
     justify-content: flex-end;
     padding: 10px 15px;
-    gap: 20px;
   }
 
   .bonding-input-filter-container {

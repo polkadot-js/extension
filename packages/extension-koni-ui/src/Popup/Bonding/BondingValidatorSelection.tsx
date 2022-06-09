@@ -1,7 +1,7 @@
 // Copyright 2019-2022 @subwallet/extension-koni authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import {NetworkJson, ValidatorInfo} from '@subwallet/extension-base/background/KoniTypes';
+import { ValidatorInfo } from '@subwallet/extension-base/background/KoniTypes';
 import { ActionContext, InputFilter } from '@subwallet/extension-koni-ui/components';
 import Spinner from '@subwallet/extension-koni-ui/components/Spinner';
 import useTranslation from '@subwallet/extension-koni-ui/hooks/useTranslation';
@@ -28,7 +28,6 @@ function BondingValidatorSelection ({ className }: Props): React.ReactElement<Pr
   const [allValidators, setAllValidators] = useState<ValidatorInfo[]>([]);
 
   const [sortByCommission, setSortByCommission] = useState(false);
-  const [showVerifiedValidators, setShowVerifiedValidator] = useState(false);
   const [sortByReturn, setSortByReturn] = useState(false);
 
   const _height = window.innerHeight > 600 ? 650 : 300;
@@ -36,10 +35,6 @@ function BondingValidatorSelection ({ className }: Props): React.ReactElement<Pr
   const handleSortByCommission = useCallback(() => {
     setSortByCommission(!sortByCommission);
   }, [sortByCommission]);
-
-  const handleShowVerifiedValidators = useCallback(() => {
-    setShowVerifiedValidator(!showVerifiedValidators);
-  }, [showVerifiedValidators]);
 
   const handleSortByReturn = useCallback(() => {
     setSortByReturn(!sortByReturn);
@@ -70,8 +65,8 @@ function BondingValidatorSelection ({ className }: Props): React.ReactElement<Pr
       getBondingOptions(bondingParams.selectedNetwork)
         .then((bondingOptionInfo) => {
           setMaxNominatorPerValidator(bondingOptionInfo.maxNominatorPerValidator);
-          const sorted = bondingOptionInfo.validators
-            .sort((validator, _validator) => {
+          const sortedValidators = bondingOptionInfo.validators
+            .sort((validator: ValidatorInfo, _validator: ValidatorInfo) => {
               if (validator.isVerified && !_validator.isVerified) {
                 return -1;
               } else if (!validator.isVerified && _validator.isVerified) {
@@ -79,9 +74,9 @@ function BondingValidatorSelection ({ className }: Props): React.ReactElement<Pr
               }
 
               return 0;
-            })
-            .reduce((r, [k, v]) => ({ ...r, [k]: v }), {}) as Record<string, NetworkJson>;
-          setAllValidators(bondingOptionInfo.validators);
+            });
+
+          setAllValidators(sortedValidators);
           setLoading(false);
         })
         .catch(console.error);
@@ -112,12 +107,6 @@ function BondingValidatorSelection ({ className }: Props): React.ReactElement<Pr
       </Header>
 
       <div className='bonding__button-area'>
-        <div
-          className={`${showVerifiedValidators ? 'active-bonding__btn' : 'bonding__btn'}`}
-          onClick={handleShowVerifiedValidators}
-        >
-          {t<string>('Verified validators')}
-        </div>
         <div
           className={`${sortByCommission ? 'active-bonding__btn' : 'bonding__btn'}`}
           onClick={handleSortByCommission}
@@ -177,7 +166,7 @@ export default React.memo(styled(BondingValidatorSelection)(({ theme }: Props) =
   .bonding__btn {
     cursor: pointer;
     position: relative;
-    font-size: 12px;
+    font-size: 14px;
     color: ${theme.textColor2};
   }
 
@@ -196,7 +185,7 @@ export default React.memo(styled(BondingValidatorSelection)(({ theme }: Props) =
     display: flex;
     justify-content: flex-end;
     padding: 10px 15px;
-    gap: 10px;
+    gap: 20px;
   }
 
   .bonding-input-filter-container {

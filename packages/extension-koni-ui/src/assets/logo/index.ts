@@ -301,6 +301,12 @@ const LogosMap: Record<string, string> = {
   // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
   xcaca: require('./acala.svg'),
   // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+  xchko: require('./heiko.png'),
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+  xcpha: require('./phala.svg'),
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+  xcusdt: require('./usdt.svg'),
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
   default: require('./default.svg')
 };
 

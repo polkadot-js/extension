@@ -1,7 +1,7 @@
 // Copyright 2019-2022 @subwallet/extension-koni authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { ValidatorInfo } from '@subwallet/extension-base/background/KoniTypes';
+import {NetworkJson, ValidatorInfo} from '@subwallet/extension-base/background/KoniTypes';
 import { ActionContext, InputFilter } from '@subwallet/extension-koni-ui/components';
 import Spinner from '@subwallet/extension-koni-ui/components/Spinner';
 import useTranslation from '@subwallet/extension-koni-ui/hooks/useTranslation';
@@ -26,11 +26,38 @@ function BondingValidatorSelection ({ className }: Props): React.ReactElement<Pr
   const [loading, setLoading] = useState(true);
   const [maxNominatorPerValidator, setMaxNominatorPerValidator] = useState(0);
   const [allValidators, setAllValidators] = useState<ValidatorInfo[]>([]);
+
+  const [sortByCommission, setSortByCommission] = useState(false);
+  const [showVerifiedValidators, setShowVerifiedValidator] = useState(false);
+  const [sortByReturn, setSortByReturn] = useState(false);
+
   const _height = window.innerHeight > 600 ? 650 : 300;
 
-  const filterValidators = useCallback(() => {
+  const handleSortByCommission = useCallback(() => {
+    setSortByCommission(!sortByCommission);
+  }, [sortByCommission]);
 
-  }, []);
+  const handleShowVerifiedValidators = useCallback(() => {
+    setShowVerifiedValidator(!showVerifiedValidators);
+  }, [showVerifiedValidators]);
+
+  const handleSortByReturn = useCallback(() => {
+    setSortByReturn(!sortByReturn);
+  }, [sortByReturn]);
+
+  const filterValidators = useCallback(() => {
+    const _filteredValidators: ValidatorInfo[] = [];
+
+    allValidators.forEach((validator) => {
+      if (validator.address.toLowerCase().includes(searchString.toLowerCase()) || (validator.identity && validator.identity.toLowerCase().includes(searchString.toLowerCase()))) {
+        _filteredValidators.push(validator);
+      }
+    });
+
+    return _filteredValidators;
+  }, [allValidators, searchString]);
+
+  const filteredValidators = filterValidators();
 
   const _onChangeFilter = useCallback((val: string) => {
     setSearchString(val);
@@ -43,6 +70,17 @@ function BondingValidatorSelection ({ className }: Props): React.ReactElement<Pr
       getBondingOptions(bondingParams.selectedNetwork)
         .then((bondingOptionInfo) => {
           setMaxNominatorPerValidator(bondingOptionInfo.maxNominatorPerValidator);
+          const sorted = bondingOptionInfo.validators
+            .sort((validator, _validator) => {
+              if (validator.isVerified && !_validator.isVerified) {
+                return -1;
+              } else if (!validator.isVerified && _validator.isVerified) {
+                return 1;
+              }
+
+              return 0;
+            })
+            .reduce((r, [k, v]) => ({ ...r, [k]: v }), {}) as Record<string, NetworkJson>;
           setAllValidators(bondingOptionInfo.validators);
           setLoading(false);
         })
@@ -75,19 +113,22 @@ function BondingValidatorSelection ({ className }: Props): React.ReactElement<Pr
 
       <div className='bonding__button-area'>
         <div
-          className='bonding__btn'
+          className={`${showVerifiedValidators ? 'active-bonding__btn' : 'bonding__btn'}`}
+          onClick={handleShowVerifiedValidators}
         >
           {t<string>('Verified validators')}
         </div>
         <div
-          className='bonding__btn'
+          className={`${sortByCommission ? 'active-bonding__btn' : 'bonding__btn'}`}
+          onClick={handleSortByCommission}
         >
-          {t<string>('Sort by lowest commission')}
+          {t<string>('Lowest commission')}
         </div>
         <div
-          className='bonding__btn'
+          className={`${sortByReturn ? 'active-bonding__btn' : 'bonding__btn'}`}
+          onClick={handleSortByReturn}
         >
-          {t<string>('Sort by highest own stake')}
+          {t<string>('Highest return')}
         </div>
       </div>
 
@@ -99,9 +140,9 @@ function BondingValidatorSelection ({ className }: Props): React.ReactElement<Pr
           loading && <Spinner />
         }
         {
-          !loading && allValidators.map((validator, index) => {
+          !loading && filteredValidators.map((validator, index) => {
             return <ValidatorItem
-              key={index}
+              key={`${index}-${validator.address}`}
               maxNominatorPerValidator={maxNominatorPerValidator}
               networkKey={bondingParams.selectedNetwork}
               validatorInfo={validator}
@@ -138,6 +179,13 @@ export default React.memo(styled(BondingValidatorSelection)(({ theme }: Props) =
     position: relative;
     font-size: 12px;
     color: ${theme.textColor2};
+  }
+
+  .active-bonding__btn {
+    cursor: pointer;
+    position: relative;
+    font-size: 12px;
+    color: ${theme.textColor3};
   }
 
   .bonding__btn:hover {

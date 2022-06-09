@@ -21,7 +21,7 @@ export class SubWalletEvmProvider extends SafeEventEmitter implements EvmProvide
     super();
     this.version = version;
     this.sendMessage = sendMessage;
-    // Todo: only connect and really start provider if have at least on request
+    window.dispatchEvent(new Event('subwallet#initialized'));
   }
 
   get connected () {

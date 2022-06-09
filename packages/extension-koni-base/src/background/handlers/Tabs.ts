@@ -6,15 +6,16 @@ import type { InjectedAccount } from '@subwallet/extension-inject/types';
 import { AuthUrls } from '@subwallet/extension-base/background/handlers/State';
 import { createSubscription, unsubscribe } from '@subwallet/extension-base/background/handlers/subscriptions';
 import Tabs from '@subwallet/extension-base/background/handlers/Tabs';
+import { EvmAppState } from '@subwallet/extension-base/background/KoniTypes';
 import { AccountAuthType, MessageTypes, RequestAccountList, RequestAccountSubscribe, RequestAuthorizeTab, RequestTypes, ResponseTypes } from '@subwallet/extension-base/background/types';
 import { canDerive } from '@subwallet/extension-base/utils';
 import KoniState from '@subwallet/extension-koni-base/background/handlers/State';
 import { ALL_ACCOUNT_KEY } from '@subwallet/extension-koni-base/constants';
-import { RequestArguments } from 'web3-core';
+import { BlockNumber, RequestArguments } from 'web3-core';
 
 import { accounts as accountsObservable } from '@polkadot/ui-keyring/observable/accounts';
 import { SingleAddress, SubjectInfo } from '@polkadot/ui-keyring/observable/types';
-import { assert } from '@polkadot/util';
+import { assert, BN, nToHex } from '@polkadot/util';
 
 function stripUrl (url: string): string {
   assert(url && (url.startsWith('http:') || url.startsWith('https:') || url.startsWith('ipfs:') || url.startsWith('ipns:')), `Invalid url ${url}, expected to start with http: or https: or ipfs: or ipns:`);
@@ -54,10 +55,12 @@ function transformAccountsV2 (accounts: SubjectInfo, anyType = false, url: strin
 
 export default class KoniTabs extends Tabs {
   readonly #koniState: KoniState;
+  private evmState: EvmAppState;
 
   constructor (koniState: KoniState) {
     super(koniState);
     this.#koniState = koniState;
+    this.evmState = {};
   }
 
   private async accountsListV2 (url: string, { accountAuthType, anyType }: RequestAccountList): Promise<InjectedAccount[]> {
@@ -92,55 +95,91 @@ export default class KoniTabs extends Tabs {
       this.#koniState.getAuthorize((authUrls) => {
         const allAccounts = accountsObservable.subject.getValue();
         const accountList = transformAccountsV2(allAccounts, false, url, authUrls, 'evm').map((a) => a.address);
+        let accounts: string[] = [];
 
         this.#koniState.getCurrentAccount(({ address }) => {
           if (address === ALL_ACCOUNT_KEY) {
-            resolve(accountList);
+            accounts = (accountList);
           } else if (address && accountList.includes(address)) {
-            resolve([address]);
-          } else {
-            resolve([]);
+            accounts = ([address]);
           }
+
+          resolve(accounts);
         });
       });
     });
   }
 
+  private async getEvmCurrentChainId (): Promise<string | undefined> {
+    return await new Promise((resolve) => {
+      this.#koniState.getCurrentAccount(({ currentGenesisHash }) => {
+        const [networkKey, currentNetwork] = this.#koniState.findNetworkKeyByGenesisHash(currentGenesisHash);
+        const chainId = currentNetwork?.evmChainId;
+
+        if (chainId) {
+          this.evmState.chainId = chainId.toString(16);
+          this.evmState.networkKey = networkKey;
+          // @ts-ignore
+          // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+          this.evmState.web3 = this.#koniState.getWeb3ApiMap()[networkKey];
+        } else {
+          this.evmState.chainId = undefined;
+          this.evmState.networkKey = undefined;
+          this.evmState.web3 = undefined;
+        }
+
+        resolve(this.evmState.chainId);
+      });
+    });
+  }
+
   private async evmSubscribeEvents (url: string, id: string, port: chrome.runtime.Port) {
+    // This method will be called after DApp request connect to extension
     const cb = createSubscription<'evm(events.subscribe)'>(id, port);
-    let accountList = await this.getEvmCurrentAccount(url);
+    let currentAccountList = await this.getEvmCurrentAccount(url);
+    let currentChainId = this.evmState.chainId;
 
     const checkAndTriggerChange = async () => {
       const newAccountList = await this.getEvmCurrentAccount(url);
 
       // Compare to void looping reload
-      if (JSON.stringify(accountList) !== JSON.stringify(newAccountList)) {
+      if (JSON.stringify(currentAccountList) !== JSON.stringify(newAccountList)) {
         // eslint-disable-next-line node/no-callback-literal
         cb({ type: 'accountsChanged', payload: newAccountList });
-        accountList = newAccountList;
+        currentAccountList = newAccountList;
+      }
+
+      const newChainId = await this.getEvmCurrentChainId();
+
+      if (currentChainId !== newChainId) {
+        // eslint-disable-next-line node/no-callback-literal
+        cb({ type: 'chainChanged', payload: newChainId });
+        currentChainId = newChainId;
       }
     };
 
     const accountListSubscription = accountsObservable.subject
       .subscribe((accounts: SubjectInfo): void => {
-        checkAndTriggerChange().catch(console.error);
+        setTimeout(() => {
+          checkAndTriggerChange().catch(console.error);
+        }, 50);
       });
 
-    const accountSubscription = this.#koniState.subscribeCurrentAccount()
-      .subscribe(({ address }) => {
-        checkAndTriggerChange().catch(console.error);
-      });
-
-    // Todo: Subscribe network changes
     // Todo: Subscribe network connection (connect or disconnected)
 
     port.onDisconnect.addListener((): void => {
       unsubscribe(id);
-      accountSubscription.unsubscribe();
+      // accountSubscription.unsubscribe();
       accountListSubscription.unsubscribe();
     });
 
     return true;
+  }
+
+  private async getEvmBalance (params: string[]): Promise<string> {
+    const balance = await this.evmState.web3?.eth.getBalance(params[0], params[1] as BlockNumber) || 0;
+
+    return nToHex(new BN(balance));
   }
 
   private async handleEvmRequest (url: string, { method, params }: RequestArguments) {
@@ -149,6 +188,10 @@ export default class KoniTabs extends Tabs {
     switch (method) {
       case 'eth_accounts':
         return await this.getEvmCurrentAccount(url);
+      case 'eth_chainId':
+        return await this.getEvmCurrentChainId();
+      case 'eth_getBalance':
+        return await this.getEvmBalance(params as string[]);
       default:
         console.warn('Can not handle evm request', method, params, url);
 

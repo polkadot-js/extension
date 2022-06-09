@@ -783,6 +783,13 @@ export interface EvmEvent {
   payload: EvmAccountsChangedPayload | EvmChainChangedPayload | EvmConnectPayload | EvmDisconnectPayload;
 }
 
+export interface EvmAppState {
+  networkKey?: string,
+  chainId?: string,
+  isConnected?: boolean,
+  web3?: Web3
+}
+
 export interface KoniRequestSignatures {
   'pri(networkMap.recoverDotSama)': [string, boolean];
   'pri(substrateNft.submitTransaction)': [SubstrateNftSubmitTransaction, NftTransactionResponse, NftTransactionResponse]

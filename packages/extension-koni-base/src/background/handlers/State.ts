@@ -24,6 +24,7 @@ import SettingsStore from '@subwallet/extension-koni-base/stores/Settings';
 import TransactionHistoryStore from '@subwallet/extension-koni-base/stores/TransactionHistory';
 import { convertFundStatus, getCurrentProvider } from '@subwallet/extension-koni-base/utils/utils';
 import { BehaviorSubject, Subject } from 'rxjs';
+import Web3 from 'web3';
 
 import { accounts } from '@polkadot/ui-keyring/observable/accounts';
 import { assert } from '@polkadot/util';
@@ -1432,7 +1433,7 @@ export default class KoniState extends State {
     return this.apiMap.dotSama[networkKey];
   }
 
-  public getWeb3ApiMap () {
+  public getWeb3ApiMap (): Record<string, Web3> {
     return this.apiMap.web3;
   }
 
@@ -1473,17 +1474,17 @@ export default class KoniState extends State {
     });
   }
 
-  findNetworkKeyByGenesisHash (genesisHash?: string): string |undefined {
-    let networkKey: string | undefined;
-
-    if (genesisHash) {
-      Object.entries(this.networkMap).forEach(([key, value]) => {
-        if (genesisHash === value.genesisHash) {
-          networkKey = key;
-        }
-      });
+  findNetworkKeyByGenesisHash (genesisHash?: string | null): [string | undefined, NetworkJson |undefined] {
+    if (!genesisHash) {
+      return [undefined, undefined];
     }
 
-    return networkKey;
+    const rs = Object.entries(this.networkMap).find(([networkKey, value]) => (value.genesisHash === genesisHash));
+
+    if (rs) {
+      return rs;
+    } else {
+      return [undefined, undefined];
+    }
   }
 }

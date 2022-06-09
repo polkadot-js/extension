@@ -13,6 +13,7 @@ import { QrContext, QrContextState, QrStep } from '@subwallet/extension-koni-ui/
 import useTranslation from '@subwallet/extension-koni-ui/hooks/useTranslation';
 import { getAccountMeta, makeTransfer, makeTransferQr, rejectTransferQr, resolveTransferQr } from '@subwallet/extension-koni-ui/messaging';
 import { ThemeProps, TransferResultType } from '@subwallet/extension-koni-ui/types';
+import { reNewQrPayload } from '@subwallet/extension-koni-ui/util/scanner';
 import React, { useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import styled from 'styled-components';
 
@@ -74,22 +75,6 @@ function renderTotal (arg: RenderTotalArg) {
     </>
   );
 }
-
-const reNewQrPayload = (payload: Record<string, number>): Uint8Array => {
-  if (!payload) {
-    return new Uint8Array();
-  }
-
-  const result: Uint8Array = new Uint8Array(Object.keys(payload).length);
-
-  for (const [key, value] of Object.entries(payload)) {
-    const index = parseInt(key);
-
-    result[index] = value;
-  }
-
-  return result;
-};
 
 let id = 1;
 
@@ -176,8 +161,7 @@ function AuthTransaction ({ className, isDonation, feeInfo: [fee, feeDecimals, f
           isTxSuccess: rs.step === TransferStep.SUCCESS.valueOf(),
           extrinsicHash: rs.extrinsicHash
         });
-        console.log('cleanQrState');
-        cleanQrState && cleanQrState();
+        cleanQrState();
         setBusy(false);
       } else if (rs.step === TransferStep.ERROR.valueOf()) {
         onChangeResult({
@@ -422,7 +406,7 @@ function AuthTransaction ({ className, isDonation, feeInfo: [fee, feeDecimals, f
                     cmd={isQrHashed ? CMD_HASH : CMD_MORTAL}
                     genesisHash={genesisHash}
                     payload={qrPayload}
-                    size={250}
+                    size={320}
                   />
                 </div>
               </div>
@@ -458,26 +442,7 @@ function AuthTransaction ({ className, isDonation, feeInfo: [fee, feeDecimals, f
           );
       }
     }
-  }, [
-    _doStart,
-    _onChangePass,
-    errorArr,
-    genesisHash,
-    handlerChangeToDisplayQr,
-    handlerChangeToScan,
-    handlerRenderInfo,
-    handlerScanSignature,
-    isBusy,
-    isKeyringErr,
-    isQr,
-    isQrHashed,
-    password,
-    qrAddress,
-    qrPayload,
-    renderError,
-    step,
-    t
-  ]);
+  }, [_doStart, _onChangePass, errorArr, genesisHash, handlerChangeToDisplayQr, handlerChangeToScan, handlerRenderInfo, handlerScanSignature, isBusy, isKeyringErr, isQr, isQrHashed, password, qrAddress, qrPayload, renderError, step, t]);
 
   return (
     <div className={className}>
@@ -530,14 +495,14 @@ export default React.memo(styled(AuthTransaction)(({ theme }: ThemeProps) => `
     align-items: center;
 
     .qr-content {
-      height: 254px;
-      width: 254px;
+      height: 324px;
+      width: 324px;
       border: 2px solid ${theme.textColor};
     }
   }
 
   .scan-qr {
-    margin: 0 30px;
+    margin: 0 20px;
   }
 
   .auth-transaction-error {

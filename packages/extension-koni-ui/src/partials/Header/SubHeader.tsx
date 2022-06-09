@@ -10,6 +10,7 @@ import React from 'react';
 import styled from 'styled-components';
 
 interface Props extends ThemeProps {
+  cancelButtonText?: string;
   className?: string;
   isBusy?: boolean;
   onBack?: () => void;
@@ -20,7 +21,8 @@ interface Props extends ThemeProps {
   to?: string;
 }
 
-function SubHeader ({ className = '',
+function SubHeader ({ cancelButtonText,
+  className = '',
   isBusy,
   onBack,
   onCancel,
@@ -59,7 +61,7 @@ function SubHeader ({ className = '',
             className='sub-header__cancel-btn'
             to='/'
           >
-            <span onClick={onCancel}>{t<string>('Cancel')}</span>
+            <span onClick={onCancel}>{cancelButtonText ? t<string>(cancelButtonText) : t<string>('Cancel')}</span>
           </Link>
         )
         }

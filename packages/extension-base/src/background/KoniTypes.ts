@@ -515,6 +515,8 @@ export interface ResponseCheckCrossChainTransfer {
 
 export type RequestTransferQR = RequestCheckTransfer
 
+export type RequestCrossChainTransferQR = RequestCheckCrossChainTransfer
+
 export interface RequestRejectQRTransfer {
   id: string;
 }
@@ -877,6 +879,7 @@ export interface KoniRequestSignatures {
   'pri(accounts.transfer)': [RequestTransfer, Array<TransferError>, ResponseTransfer];
   'pri(accounts.crossChainTransfer)': [RequestCrossChainTransfer, Array<TransferError>, ResponseTransfer];
   'pri(accounts.transfer.qr.create)': [RequestTransferQR, Array<TransferError>, ResponseTransferQr];
+  'pri(accounts.cross.transfer.qr.create)': [RequestCrossChainTransferQR, Array<TransferError>, ResponseTransferQr];
   'pri(accounts.transfer.qr.reject)': [RequestRejectQRTransfer, ResponseRejectQRTransfer];
   'pri(accounts.transfer.qr.resolve)': [RequestResolveQRTransfer, ResponseResolveQRTransfer];
   'pri(derivation.createV2)': [RequestDeriveCreateV2, boolean];

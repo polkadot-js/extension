@@ -46,3 +46,19 @@ export function isMultipartData (parsedData: ParsedData | null): parsedData is S
 export function isNetworkParsedData (parsedData: ParsedData | null): parsedData is NetworkParsedData {
   return (parsedData as NetworkParsedData).action === 'addNetwork';
 }
+
+export const reNewQrPayload = (payload: Record<string, number>): Uint8Array => {
+  if (!payload) {
+    return new Uint8Array();
+  }
+
+  const result: Uint8Array = new Uint8Array(Object.keys(payload).length);
+
+  for (const [key, value] of Object.entries(payload)) {
+    const index = parseInt(key);
+
+    result[index] = value;
+  }
+
+  return result;
+};

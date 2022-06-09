@@ -2,9 +2,12 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { assetFromToken } from '@equilab/api';
-import { ApiProps, QRRequestPromise, QRRequestPromiseStatus, ResponseTransfer, ResponseTransferQr, TokenInfo, TransferErrorCode, TransferStep } from '@subwallet/extension-base/background/KoniTypes';
+import { ApiProps, NetworkJson, QRRequestPromise, QRRequestPromiseStatus, ResponseTransfer, ResponseTransferQr, TokenInfo, TransferErrorCode, TransferStep } from '@subwallet/extension-base/background/KoniTypes';
 import QrSigner from '@subwallet/extension-base/signers/QrSigner';
+import { getCrossChainTransferDest, isNetworksPairSupportedTransferCrossChain } from '@subwallet/extension-koni-base/api/dotsama/transfer';
 
+import { ApiPromise } from '@polkadot/api';
+import { SubmittableExtrinsic } from '@polkadot/api/promise/types';
 import { KeyringPair } from '@polkadot/keyring/types';
 import { EventRecord } from '@polkadot/types/interfaces';
 import { AnyNumber } from '@polkadot/types/types';
@@ -82,82 +85,25 @@ function updateResponseTxResult (
   }
 }
 
-export async function makeTransferQR (
+const doSignAndSend = async (
+  api: ApiPromise,
   networkKey: string,
-  to: string,
+  tokenInfo: TokenInfo | undefined,
+  nonce: AnyNumber,
+  transfer: SubmittableExtrinsic,
   fromKeypair: KeyringPair,
-  value: string,
-  transferAll: boolean,
-  dotSamaApiMap: Record<string, ApiProps>,
-  tokenInfo: undefined | TokenInfo,
   qrId: string,
   setState: (promise: QRRequestPromise) => void,
   updateState: (promise: Partial<QRRequestPromise>) => void,
   callback: (data: ResponseTransferQr) => void
-): Promise<void> {
-  const apiProps = await dotSamaApiMap[networkKey].isReady;
-  const api = apiProps.api;
-  const fromAddress = fromKeypair.address;
-  let nonce: AnyNumber;
-
-  if (['genshiro_testnet', 'genshiro', 'equilibrium_parachain'].includes(networkKey)) {
-    nonce = -1;
-  } else {
-    // @ts-ignore
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-    nonce = await api.query.system.account(fromAddress).nonce;
-  }
-
-  // @ts-ignore
-  let transfer;
-  const isTxCurrenciesSupported = !!api && !!api.tx && !!api.tx.currencies;
-  const isTxBalancesSupported = !!api && !!api.tx && !!api.tx.balances;
-  const isTxTokensSupported = !!api && !!api.tx && !!api.tx.tokens;
-  const isTxEqBalancesSupported = !!api && !!api.tx && !!api.tx.eqBalances;
-
-  if (['karura', 'acala', 'acala_testnet'].includes(networkKey) && tokenInfo && !tokenInfo.isMainToken && isTxCurrenciesSupported) {
-    if (transferAll) {
-      // currently Acala, Karura, Acala testnet do not have transfer all method for sub token
-    } else if (value) {
-      transfer = api.tx.currencies
-        .transfer(to, tokenInfo.specialOption || { Token: tokenInfo.symbol }, value);
-    }
-  } else if (['kintsugi', 'kintsugi_test', 'interlay'].includes(networkKey) && tokenInfo && isTxTokensSupported) {
-    if (transferAll) {
-      transfer = api.tx.tokens
-        .transferAll(to, tokenInfo.specialOption || { Token: tokenInfo.symbol }, false);
-    } else if (value) {
-      transfer = api.tx.tokens
-        .transferKeepAlive(to, tokenInfo.specialOption || { Token: tokenInfo.symbol }, new BN(value));
-    }
-  } else if (['genshiro_testnet', 'genshiro', 'equilibrium_parachain'].includes(networkKey) && tokenInfo && isTxEqBalancesSupported) {
-    if (transferAll) {
-      // currently genshiro_testnet, genshiro, equilibrium_parachain do not have transfer all method for tokens
-    } else if (value) {
-      const asset = networkKey === 'equilibrium_parachain' ? assetFromToken(tokenInfo.symbol)[0] : assetFromToken(tokenInfo.symbol);
-
-      transfer = api.tx.eqBalances.transferKeepAlive(asset, to, value);
-    }
-  } else if (isTxBalancesSupported && (!tokenInfo || tokenInfo.isMainToken)) {
-    if (transferAll) {
-      transfer = api.tx.balances.transferAll(to, false);
-    } else if (value) {
-      transfer = api.tx.balances.transferKeepAlive(to, new BN(value));
-    }
-  }
-
-  if (!transfer) {
-    callback(getUnsupportedResponse());
-
-    return;
-  }
-
+): Promise<void> => {
   const response: ResponseTransferQr = {
     step: TransferStep.READY,
     errors: [],
     extrinsicStatus: undefined,
     data: {}
   };
+  const fromAddress = fromKeypair.address;
 
   function updateResponseByEvents (response: ResponseTransfer, records: EventRecord[]) {
     records.forEach((record) => {
@@ -255,4 +201,136 @@ export async function makeTransferQR (
       callback(response);
     }
   });
+};
+
+export async function makeTransferQr (
+  networkKey: string,
+  to: string,
+  fromKeypair: KeyringPair,
+  value: string,
+  transferAll: boolean,
+  dotSamaApiMap: Record<string, ApiProps>,
+  tokenInfo: undefined | TokenInfo,
+  qrId: string,
+  setState: (promise: QRRequestPromise) => void,
+  updateState: (promise: Partial<QRRequestPromise>) => void,
+  callback: (data: ResponseTransferQr) => void
+): Promise<void> {
+  const apiProps = await dotSamaApiMap[networkKey].isReady;
+  const api = apiProps.api;
+  const fromAddress = fromKeypair.address;
+  let nonce: AnyNumber;
+
+  if (['genshiro_testnet', 'genshiro', 'equilibrium_parachain'].includes(networkKey)) {
+    nonce = -1;
+  } else {
+    // @ts-ignore
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+    nonce = await api.query.system.account(fromAddress).nonce;
+  }
+
+  // @ts-ignore
+  let transfer;
+  const isTxCurrenciesSupported = !!api && !!api.tx && !!api.tx.currencies;
+  const isTxBalancesSupported = !!api && !!api.tx && !!api.tx.balances;
+  const isTxTokensSupported = !!api && !!api.tx && !!api.tx.tokens;
+  const isTxEqBalancesSupported = !!api && !!api.tx && !!api.tx.eqBalances;
+
+  if (['karura', 'acala', 'acala_testnet'].includes(networkKey) && tokenInfo && !tokenInfo.isMainToken && isTxCurrenciesSupported) {
+    if (transferAll) {
+      // currently Acala, Karura, Acala testnet do not have transfer all method for sub token
+    } else if (value) {
+      transfer = api.tx.currencies
+        .transfer(to, tokenInfo.specialOption || { Token: tokenInfo.symbol }, value);
+    }
+  } else if (['kintsugi', 'kintsugi_test', 'interlay'].includes(networkKey) && tokenInfo && isTxTokensSupported) {
+    if (transferAll) {
+      transfer = api.tx.tokens
+        .transferAll(to, tokenInfo.specialOption || { Token: tokenInfo.symbol }, false);
+    } else if (value) {
+      transfer = api.tx.tokens
+        .transferKeepAlive(to, tokenInfo.specialOption || { Token: tokenInfo.symbol }, new BN(value));
+    }
+  } else if (['genshiro_testnet', 'genshiro', 'equilibrium_parachain'].includes(networkKey) && tokenInfo && isTxEqBalancesSupported) {
+    if (transferAll) {
+      // currently genshiro_testnet, genshiro, equilibrium_parachain do not have transfer all method for tokens
+    } else if (value) {
+      const asset = networkKey === 'equilibrium_parachain' ? assetFromToken(tokenInfo.symbol)[0] : assetFromToken(tokenInfo.symbol);
+
+      transfer = api.tx.eqBalances.transferKeepAlive(asset, to, value);
+    }
+  } else if (isTxBalancesSupported && (!tokenInfo || tokenInfo.isMainToken)) {
+    if (transferAll) {
+      transfer = api.tx.balances.transferAll(to, false);
+    } else if (value) {
+      transfer = api.tx.balances.transferKeepAlive(to, new BN(value));
+    }
+  }
+
+  if (!transfer) {
+    callback(getUnsupportedResponse());
+
+    return;
+  }
+
+  await doSignAndSend(api, networkKey, tokenInfo, nonce, transfer, fromKeypair, qrId, setState, updateState, callback);
+}
+
+export async function makeCrossChainTransferQr (
+  originalNetworkKey: string,
+  destinationNetworkKey: string,
+  to: string,
+  fromKeypair: KeyringPair,
+  value: string,
+  dotSamaApiMap: Record<string, ApiProps>,
+  tokenInfo: TokenInfo,
+  networkMap: Record<string, NetworkJson>,
+  qrId: string,
+  setState: (promise: QRRequestPromise) => void,
+  updateState: (promise: Partial<QRRequestPromise>) => void,
+  callback: (data: ResponseTransferQr) => void
+): Promise<void> {
+  if (!isNetworksPairSupportedTransferCrossChain(originalNetworkKey, destinationNetworkKey, tokenInfo.symbol, networkMap)) {
+    callback(getUnsupportedResponse());
+
+    return;
+  }
+
+  let nonce: AnyNumber;
+
+  const fromAddress = fromKeypair.address;
+
+  const apiProps = await dotSamaApiMap[originalNetworkKey].isReady;
+  const api = apiProps.api;
+  const isTxXTokensSupported = !!api && !!api.tx && !!api.tx.xTokens;
+
+  if (['genshiro_testnet', 'genshiro', 'equilibrium_parachain'].includes(originalNetworkKey)) {
+    nonce = -1;
+  } else {
+    // @ts-ignore
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+    nonce = await api.query.system.account(fromAddress).nonce;
+  }
+
+  if (!isTxXTokensSupported) {
+    callback(getUnsupportedResponse());
+
+    return;
+  }
+
+  // todo: Case ParaChain vs RelayChain
+  // todo: Case RelayChain vs ParaChain
+
+  const paraId = networkMap[destinationNetworkKey].paraId as number;
+
+  const transfer = api.tx.xTokens.transfer(
+    {
+      Token: tokenInfo.symbol
+    },
+    +value,
+    getCrossChainTransferDest(paraId, to),
+    4000000000
+  );
+
+  await doSignAndSend(api, originalNetworkKey, tokenInfo, nonce, transfer, fromKeypair, qrId, setState, updateState, callback);
 }

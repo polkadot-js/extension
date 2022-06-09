@@ -259,7 +259,7 @@ export function ScannerContextProvider ({ children }: ScannerContextProviderProp
       isHash: (txRequest as SubstrateTransactionParsedData)?.isHash || false,
       isOversized,
       recipientAddress,
-      senderAddress: sender.address,
+      senderAddress: txRequest.data.account,
       tx,
       type: 'transaction'
     };

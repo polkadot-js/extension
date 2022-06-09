@@ -459,7 +459,7 @@ export function isNetworksPairSupportedTransferCrossChain (
   return true;
 }
 
-function getCrossChainTransferDest (paraId: number, toAddress: string) {
+export function getCrossChainTransferDest (paraId: number, toAddress: string) {
   // todo: Case ParaChain vs RelayChain
   // todo: Case RelayChain vs ParaChain
 

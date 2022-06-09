@@ -33,7 +33,8 @@ export function injectEvmExtension (evmProvider: EvmProvider): void {
   // add our enable function
   windowInject.subWalletEthereum = evmProvider;
 
-  windowInject.dispatchEvent(new Event('ethereum#initialized'));
+  windowInject.dispatchEvent(new Event('subwallet#initialized'));
 
   // Todo: need more discuss to set it global and not conflict with MetaMask
+  // windowInject.dispatchEvent(new Event('ethereum#initialized'));
 }

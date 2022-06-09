@@ -790,6 +790,12 @@ export interface EvmAppState {
   web3?: Web3
 }
 
+export interface EvmProviderRpcError extends Error {
+  message: string;
+  code: number;
+  data?: unknown;
+}
+
 export interface KoniRequestSignatures {
   'pri(networkMap.recoverDotSama)': [string, boolean];
   'pri(substrateNft.submitTransaction)': [SubstrateNftSubmitTransaction, NftTransactionResponse, NftTransactionResponse]

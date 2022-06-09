@@ -20,3 +20,11 @@ export const ALL_ACCOUNT_KEY = 'ALL';
 export const ALL_NETWORK_KEY = 'all';
 export const ALL_GENESIS_HASH = null;
 export const IGNORE_GET_SUBSTRATE_FEATURES_LIST: string[] = ['astarEvm'];
+
+export const EVM_PROVIDER_RPC_ERRORS: Record<string, [number, string, string]> = {
+  USER_REJECTED_REQUEST: [4001, 'User Rejected Request', 'The user rejected the request.'],
+  UNAUTHORIZED: [4100, 'Unauthorized', 'The requested method and/or account has not been authorized by the user.'],
+  UNSUPPORTED_METHOD: [4200, 'Unsupported Method', 'The Provider does not support the requested method.'],
+  DISCONNECTED: [4900, 'Disconnected', 'The Provider is disconnected from all chains.'],
+  CHAIN_DISCONNECTED: [4901, 'Chain Disconnected', 'The Provider is not connected to the requested chain.']
+};

@@ -6,12 +6,12 @@ import type { InjectedAccount } from '@subwallet/extension-inject/types';
 import { AuthUrls } from '@subwallet/extension-base/background/handlers/State';
 import { createSubscription, unsubscribe } from '@subwallet/extension-base/background/handlers/subscriptions';
 import Tabs from '@subwallet/extension-base/background/handlers/Tabs';
-import { EvmAppState } from '@subwallet/extension-base/background/KoniTypes';
+import { EvmAppState, EvmEventType, EvmProviderRpcError } from '@subwallet/extension-base/background/KoniTypes';
 import { AccountAuthType, MessageTypes, RequestAccountList, RequestAccountSubscribe, RequestAuthorizeTab, RequestTypes, ResponseTypes } from '@subwallet/extension-base/background/types';
 import { canDerive } from '@subwallet/extension-base/utils';
 import KoniState from '@subwallet/extension-koni-base/background/handlers/State';
-import { ALL_ACCOUNT_KEY } from '@subwallet/extension-koni-base/constants';
-import { BlockNumber, RequestArguments } from 'web3-core';
+import { ALL_ACCOUNT_KEY, CRON_AUTO_RECOVER_WEB3_INTERVAL, CRON_GET_API_MAP_STATUS, EVM_PROVIDER_RPC_ERRORS } from '@subwallet/extension-koni-base/constants';
+import { BlockNumber, RequestArguments, WebsocketProvider } from 'web3-core';
 
 import { accounts as accountsObservable } from '@polkadot/ui-keyring/observable/accounts';
 import { SingleAddress, SubjectInfo } from '@polkadot/ui-keyring/observable/types';
@@ -133,11 +133,25 @@ export default class KoniTabs extends Tabs {
     });
   }
 
+  private createEvmProviderRpcError ([code, name, description]: [number, string, string], data?: unknown) {
+    return {
+      message: description,
+      code: code,
+      data: data || name
+    } as EvmProviderRpcError;
+  }
+
   private async evmSubscribeEvents (url: string, id: string, port: chrome.runtime.Port) {
     // This method will be called after DApp request connect to extension
     const cb = createSubscription<'evm(events.subscribe)'>(id, port);
+    let isConnected = false;
+
+    const emitEvent = (eventName: EvmEventType, payload: any) => {
+      // eslint-disable-next-line node/no-callback-literal
+      cb({ type: eventName, payload: payload });
+    };
+
     let currentAccountList = await this.getEvmCurrentAccount(url);
-    let currentChainId = this.evmState.chainId;
 
     const checkAndTriggerChange = async () => {
       const newAccountList = await this.getEvmCurrentAccount(url);
@@ -145,16 +159,15 @@ export default class KoniTabs extends Tabs {
       // Compare to void looping reload
       if (JSON.stringify(currentAccountList) !== JSON.stringify(newAccountList)) {
         // eslint-disable-next-line node/no-callback-literal
-        cb({ type: 'accountsChanged', payload: newAccountList });
+        emitEvent('accountsChanged', newAccountList);
         currentAccountList = newAccountList;
       }
 
+      const currentChainId = this.evmState.chainId;
       const newChainId = await this.getEvmCurrentChainId();
 
       if (currentChainId !== newChainId) {
-        // eslint-disable-next-line node/no-callback-literal
-        cb({ type: 'chainChanged', payload: newChainId });
-        currentChainId = newChainId;
+        emitEvent('chainChanged', newChainId);
       }
     };
 
@@ -165,21 +178,36 @@ export default class KoniTabs extends Tabs {
         }, 50);
       });
 
-    // Todo: Subscribe network connection (connect or disconnected)
+    const networkCheck = () => {
+      this.evmState.web3?.eth.net.isListening()
+        .then((connecting) => {
+          if (connecting && !isConnected) {
+            emitEvent('connect', { chainId: this.evmState.chainId });
+          } else if (!connecting && isConnected) {
+            emitEvent('disconnect', this.createEvmProviderRpcError(EVM_PROVIDER_RPC_ERRORS.CHAIN_DISCONNECTED));
+          }
 
-    port.onDisconnect.addListener((): void => {
-      unsubscribe(id);
-      // accountSubscription.unsubscribe();
-      accountListSubscription.unsubscribe();
-    });
+          isConnected = connecting;
+        })
+        .catch(console.log);
 
-    return true;
+      const networkCheckInterval = setInterval(networkCheck, CRON_GET_API_MAP_STATUS);
+
+      port.onDisconnect.addListener((): void => {
+        unsubscribe(id);
+        accountListSubscription.unsubscribe();
+        clearInterval(networkCheckInterval);
+      });
+
+      return true;
+    };
   }
 
   private async getEvmBalance (params: string[]): Promise<string> {
     const balance = await this.evmState.web3?.eth.getBalance(params[0], params[1] as BlockNumber) || 0;
+    const balanceResult = nToHex(new BN(balance));
 
-    return nToHex(new BN(balance));
+    return balanceResult === '0x' ? '0x0' : balanceResult;
   }
 
   private async handleEvmRequest (url: string, { method, params }: RequestArguments) {

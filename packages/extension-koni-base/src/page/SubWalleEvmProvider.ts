@@ -15,35 +15,37 @@ export class SubWalletEvmProvider extends SafeEventEmitter implements EvmProvide
   public readonly isMetaMask = false;
   public readonly version;
   protected sendMessage: SendRequest;
+  protected _connected = false;
 
   constructor (sendMessage: SendRequest, version: string) {
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-call
     super();
     this.version = version;
     this.sendMessage = sendMessage;
-    window.dispatchEvent(new Event('subwallet#initialized'));
-  }
-
-  get connected () {
-    return true;
+    this._connected = true;
   }
 
   public isConnected () {
-    return this.connected;
+    return this._connected;
   }
 
   protected subscribeExtensionEvents () {
     this.sendMessage('evm(events.subscribe)', null, ({ payload, type }) => {
       if (['connect', 'disconnect', 'accountsChanged', 'chainChanged', 'message'].includes(type)) {
-        console.log(type, payload);
+        if (type === 'connect') {
+          this._connected = true;
+        } else if (type === 'disconnect') {
+          this._connected = false;
+        }
+
+        console.debug('EVM Events', type, payload);
         // eslint-disable-next-line @typescript-eslint/no-unsafe-call
         this.emit(type, payload);
       } else {
-        console.error('Can not handle event', type, payload);
+        console.warn('Can not handle event', type, payload);
       }
     })
       .then((done) => {
-        console.log('Start subscribe events from SubWallet');
+        console.debug('Start subscribe events from SubWallet');
       }).catch(console.error);
   }
 

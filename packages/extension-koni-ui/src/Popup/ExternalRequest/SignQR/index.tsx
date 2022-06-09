@@ -57,6 +57,7 @@ const SignQR = (props: Props) => {
         })
         .catch((error: Error): void => {
           setIsBusy(false);
+          setError(error.message);
           console.error(error);
         });
     },

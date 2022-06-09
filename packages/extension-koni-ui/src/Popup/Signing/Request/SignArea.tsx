@@ -132,7 +132,21 @@ function SignArea ({ buttonText, children, className, error, isExternal, isFirst
           </div>
         </>
       )}
+      {
+        isFirst && isExternal && (
+          <div className='sign-button-container'>
+            <Button
+              className='sign-button'
+              onClick={_onCancel}
+            >
+              <span>
+                {t<string>('Cancel')}
+              </span>
 
+            </Button>
+          </div>
+        )
+      }
     </div>
   );
 }

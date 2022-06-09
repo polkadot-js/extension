@@ -412,7 +412,7 @@ function Home ({ chainRegistryMap, className = '', currentAccount, historyMap, n
 
       {isQrModalOpen && (
         <AccountQrModal
-          accountName={currentAccount.name}
+          account={currentAccount}
           address={address}
           className='home__account-qr-modal'
           closeModal={_closeQrModal}

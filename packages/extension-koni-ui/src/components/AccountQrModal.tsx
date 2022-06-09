@@ -3,6 +3,7 @@
 
 import { faTimes } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { AccountJson } from '@subwallet/extension-base/background/types';
 import Identicon from '@subwallet/extension-koni-ui/components/Identicon';
 import Link from '@subwallet/extension-koni-ui/components/Link';
 import Modal from '@subwallet/extension-koni-ui/components/Modal';
@@ -30,7 +31,7 @@ import pencil from '../assets/pencil.svg';
 interface Props extends ThemeProps {
   className?: string;
   closeModal?: () => void;
-  accountName: string | undefined;
+  account: AccountJson;
   address: string;
   networkPrefix: number;
   networkKey: string;
@@ -43,7 +44,7 @@ interface EditState {
   toggleActions: number;
 }
 
-function AccountQrModal ({ accountName, address, className,
+function AccountQrModal ({ account, address, className,
   closeModal,
   iconTheme,
   networkKey,
@@ -51,6 +52,7 @@ function AccountQrModal ({ accountName, address, className,
   showExportButton }: Props): React.ReactElement<Props> {
   const { t } = useTranslation();
   const { show } = useToast();
+  const { isExternal, name: accountName } = account;
   const [editedName, setName] = useState<string | undefined | null>(accountName);
   const [{ isEditing }, setEditing] = useState<EditState>({ isEditing: false, toggleActions: 0 });
   const networkMap = useSelector((state: RootState) => state.networkMap);
@@ -119,7 +121,7 @@ function AccountQrModal ({ accountName, address, className,
             {isEditing && (
               <HeaderEditName
                 className='account-qr-modal__edit-name'
-                defaultValue={accountName}
+                defaultValue={account.name}
                 isFocused
                 label={' '}
                 onBlur={_saveChanges}
@@ -175,7 +177,7 @@ function AccountQrModal ({ accountName, address, className,
               </span>
             )}
 
-          {showExportButton && (
+          {(showExportButton && !isExternal) && (
             <Link
               className='account-qr-modal-button'
               to={`/account/export/${formatted}`}

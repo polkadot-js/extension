@@ -62,11 +62,14 @@ function StakingContainer ({ className, data, loading, priceMap }: Props): React
           })
         }
 
-        <Button
-          onClick={handleNavigateBonding}
-        >
-          Start staking
-        </Button>
+        <div className={'staking-button-container'}>
+          <Button
+            className={'staking-button'}
+            onClick={handleNavigateBonding}
+          >
+            Start staking
+          </Button>
+        </div>
       </div>
     </div>
   );
@@ -79,5 +82,17 @@ export default React.memo(styled(StakingContainer)(({ theme }: Props) => `
   .staking-container {
     display: flex;
     flex-direction: column;
+  }
+
+  .staking-button-container {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    margin-top: 20px;
+    align-items: center;
+  }
+
+  .staking-button {
+    width: 65%;
   }
 `));

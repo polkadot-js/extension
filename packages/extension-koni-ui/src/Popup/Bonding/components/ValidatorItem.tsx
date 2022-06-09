@@ -5,15 +5,18 @@ import { faCircleCheck } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { ValidatorInfo } from '@subwallet/extension-base/background/KoniTypes';
 import NeutralQuestion from '@subwallet/extension-koni-ui/assets/NeutralQuestion.svg';
+import { ActionContext } from '@subwallet/extension-koni-ui/components';
 import Button from '@subwallet/extension-koni-ui/components/Button';
 import Identicon from '@subwallet/extension-koni-ui/components/Identicon';
 import Tooltip from '@subwallet/extension-koni-ui/components/Tooltip';
 import useIsSufficientBalance from '@subwallet/extension-koni-ui/hooks/screen/bonding/useIsSufficientBalance';
 import useGetNetworkJson from '@subwallet/extension-koni-ui/hooks/screen/home/useGetNetworkJson';
 import { parseBalanceString } from '@subwallet/extension-koni-ui/Popup/Bonding/utils';
+import { store } from '@subwallet/extension-koni-ui/stores';
+import { BondingParams } from '@subwallet/extension-koni-ui/stores/types';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { toShort } from '@subwallet/extension-koni-ui/util';
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useContext, useState } from 'react';
 import styled from 'styled-components';
 
 interface Props extends ThemeProps {
@@ -32,9 +35,17 @@ function ValidatorItem ({ className, maxNominatorPerValidator, networkKey, valid
   const hasOwnStake = validatorInfo.ownStake > 0;
   const isMaxCommission = validatorInfo.commission === 100;
 
+  const navigate = useContext(ActionContext);
+
   const handleOnClick = useCallback(() => {
     setShowDetail(!showDetail);
   }, [showDetail]);
+
+  const handleOnSelect = useCallback(() => {
+    window.localStorage.setItem('popupNavigation', '/account/bonding-auth');
+    store.dispatch({ type: 'bondingParams/update', payload: { selectedNetwork: networkKey, selectedValidator: validatorInfo } as BondingParams });
+    navigate('/account/bonding-auth');
+  }, [navigate, networkKey, validatorInfo]);
 
   return (
     <div className={className}>
@@ -203,7 +214,10 @@ function ValidatorItem ({ className, maxNominatorPerValidator, networkKey, valid
             </div>
           </div>
 
-          <Button className={'staking-button'}>
+          <Button
+            className={'staking-button'}
+            onClick={handleOnSelect}
+          >
             Start staking
           </Button>
         </div>
@@ -270,6 +284,7 @@ export default React.memo(styled(ValidatorItem)(({ theme }: Props) => `
     align-items: center;
     border-radius: 0 0 8px 8px;
   }
+
   .validator-expected-return {
     font-size: 14px;
     color: ${theme.textColor3};

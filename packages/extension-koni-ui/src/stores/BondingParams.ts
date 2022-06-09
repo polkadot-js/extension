@@ -6,7 +6,7 @@ import { BondingParams } from '@subwallet/extension-koni-ui/stores/types';
 
 const initialState = {
   selectedNetwork: '',
-  selectedValidator: ''
+  selectedValidator: null
 } as BondingParams;
 
 const bondingParamsSlice = createSlice({

@@ -4,54 +4,101 @@
 import { faCircleCheck } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { ValidatorInfo } from '@subwallet/extension-base/background/KoniTypes';
+import Button from '@subwallet/extension-koni-ui/components/Button';
 import Identicon from '@subwallet/extension-koni-ui/components/Identicon';
+import InputBalance from '@subwallet/extension-koni-ui/components/InputBalance';
+import ReceiverInputAddress from '@subwallet/extension-koni-ui/components/ReceiverInputAddress';
 import Tooltip from '@subwallet/extension-koni-ui/components/Tooltip';
+import { BalanceFormatType } from '@subwallet/extension-koni-ui/components/types';
+import useGetFreeBalance from '@subwallet/extension-koni-ui/hooks/screen/bonding/useGetFreeBalance';
 import useGetNetworkJson from '@subwallet/extension-koni-ui/hooks/screen/home/useGetNetworkJson';
+import useToast from '@subwallet/extension-koni-ui/hooks/useToast';
 import useTranslation from '@subwallet/extension-koni-ui/hooks/useTranslation';
 import Header from '@subwallet/extension-koni-ui/partials/Header';
+import BondingAuthTransaction from '@subwallet/extension-koni-ui/Popup/Bonding/components/BondingAuthTransaction';
+import BondingResult from '@subwallet/extension-koni-ui/Popup/Bonding/components/BondingResult';
 import { parseBalanceString } from '@subwallet/extension-koni-ui/Popup/Bonding/utils';
+import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { toShort } from '@subwallet/extension-koni-ui/util';
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
+import { useSelector } from 'react-redux';
 import styled from 'styled-components';
+
+import { BN } from '@polkadot/util';
 
 interface Props extends ThemeProps {
   className?: string;
 }
 
-const validatorInfo: ValidatorInfo = {
-  address: '5GTD7ZeD823BjpmZBCSzBQp7cvHR1Gunq7oDkurZr9zUev2n',
-  blocked: true,
-  commission: 0,
-  expectedReturn: 22.56074522099225,
-  identity: 'Parity Westend validator 6',
-  isVerified: false,
-  minBond: 1,
-  nominatorCount: 2,
-  otherStake: 54635.096605487954,
-  ownStake: 11555.529114384852,
-  totalStake: 66190.6257198728
-};
-
-function BondingAuthTransaction ({ className }: Props): React.ReactElement<Props> {
+function BondingSubmitTransaction ({ className }: Props): React.ReactElement<Props> {
   const { t } = useTranslation();
-  const networkJson = useGetNetworkJson('westend');
+  const { bondingParams, currentAccount: { account }, networkMap } = useSelector((state: RootState) => state);
+  const selectedNetwork = bondingParams.selectedNetwork as string;
+  const validatorInfo = bondingParams.selectedValidator as ValidatorInfo;
+  const networkJson = useGetNetworkJson(selectedNetwork);
   const [showDetail, setShowDetail] = useState(false);
+  const [amount, setAmount] = useState(-1);
+  const freeBalance = useGetFreeBalance(selectedNetwork);
+  const balanceFormat: BalanceFormatType = [networkJson.decimals as number, networkJson.nativeToken as string, undefined];
+  const [isReadySubmit, setIsReadySubmit] = useState(false);
+  const { show } = useToast();
+
+  const [showAuth, setShowAuth] = useState(false);
+  const [showResult, setShowResult] = useState(false);
+
+  const _height = window.innerHeight > 600 ? 650 : 450;
+
+  useEffect(() => {
+    if (amount >= validatorInfo.minBond) {
+      setIsReadySubmit(true);
+    } else {
+      if (amount >= 0) {
+        show(`You must bond at least ${validatorInfo.minBond} ${networkJson.nativeToken as string}`);
+      }
+
+      setIsReadySubmit(false);
+    }
+  }, [amount, networkJson.nativeToken, show, validatorInfo.minBond]);
 
   const handleOnClick = useCallback(() => {
     setShowDetail(!showDetail);
   }, [showDetail]);
 
+  const handleChangeAmount = useCallback((value: BN | string) => {
+    let parsedValue;
+
+    if (value instanceof BN) {
+      parsedValue = parseFloat(value.toString()) / (10 ** (networkJson.decimals as number));
+    } else {
+      parsedValue = parseFloat(value) / (10 ** (networkJson.decimals as number));
+    }
+
+    if (isNaN(parsedValue)) {
+      setAmount(-1);
+    } else {
+      setAmount(parsedValue);
+    }
+  }, [networkJson.decimals]);
+
+  const handleConfirm = useCallback(() => {
+    setShowAuth(true);
+    setShowResult(false);
+  }, []);
+
   return (
     <div className={className}>
       <Header
-        showBackArrow
+        showCancelButton={true}
         showSubHeader
         subHeaderName={t<string>('Staking action')}
         to='/'
       />
 
-      <div className={'bonding-auth-container'}>
+      <div
+        className={'bonding-auth-container'}
+        style={{ height: `${_height}px` }}
+      >
         <div className={'selected-validator'}>Selected Validator</div>
 
         <div className={'selected-validator-view'}>
@@ -164,14 +211,107 @@ function BondingAuthTransaction ({ className }: Props): React.ReactElement<Props
           }
         </div>
 
+        <ReceiverInputAddress
+          balance={freeBalance}
+          balanceFormat={balanceFormat}
+          className={'auth-bonding__input-address'}
+          defaultAddress={account?.address}
+          inputAddressHelp={'The account which you will stake with'}
+          inputAddressLabel={'Stake with account'}
+          isDisabled={true}
+          isSetDefaultValue={true}
+          networkKey={selectedNetwork}
+          networkMap={networkMap}
+        />
+
+        <InputBalance
+          autoFocus
+          className={'submit-bond-amount-input'}
+          decimals={networkJson.decimals}
+          help={`Type the amount you want to bond. The minimum amount is ${validatorInfo.minBond} ${networkJson.nativeToken as string}`}
+          inputAddressHelp={''}
+          isError={false}
+          isZeroable={false}
+          label={t<string>('Amount')}
+          onChange={handleChangeAmount}
+          placeholder={'0'}
+          siSymbol={networkJson.nativeToken}
+        />
+
+        <div className='bonding-auth__separator' />
+
+        <div className={'bonding-btn-container'}>
+          <Button className={'bonding-cancel-button'}>
+            Cancel
+          </Button>
+          <Button
+            isDisabled={!isReadySubmit}
+            onClick={handleConfirm}
+          >
+            Next
+          </Button>
+        </div>
       </div>
+
+      {showAuth &&
+        <BondingAuthTransaction />
+      }
+
+      {!showAuth && showResult &&
+        <BondingResult />
+      }
     </div>
   );
 }
 
-export default React.memo(styled(BondingAuthTransaction)(({ theme }: Props) => `
+export default React.memo(styled(BondingSubmitTransaction)(({ theme }: Props) => `
+  .validator-att-title {
+    color: ${theme.textColor2};
+    font-size: 14px;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+  }
+
+  .validator-verified {
+    color: ${theme.textColor3};
+    font-size: 12px;
+  }
+
+  .bonding-cancel-button {
+    color: ${theme.textColor3};
+    background: ${theme.buttonBackground1};
+  }
+
+  .bonding-btn-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 20px;
+  }
+
+  .bonding-auth__separator {
+    margin-top: 30px;
+    margin-bottom: 30px;
+  }
+
+  .bonding-auth__separator:before {
+    content: "";
+    height: 1px;
+    display: block;
+    background: ${theme.boxBorderColor};
+  }
+
+  .submit-bond-amount-input {
+    margin-top: 15px;
+  }
+
+  .auth-bonding__input-address {
+    margin-top: 25px;
+  }
+
   .selected-validator-view {
-    margin-top: 20px;
+    margin-top: 10px;
     background: ${theme.accountAuthorizeRequest};
     border-radius: 8px;
   }
@@ -269,11 +409,12 @@ export default React.memo(styled(BondingAuthTransaction)(({ theme }: Props) => `
   }
 
   .bonding-auth-container {
+    overflow-y: scroll;
     margin-top: 20px;
     display: flex;
     flex-direction: column;
-    gap: 10px;
-    margin-left: 15px;
-    margin-right: 15px;
+    padding-left: 15px;
+    padding-right: 15px;
+    padding-bottom: 10px;
   }
 `));

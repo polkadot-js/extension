@@ -42,7 +42,6 @@ function ValidatorItem ({ className, maxNominatorPerValidator, networkKey, valid
   }, [showDetail]);
 
   const handleOnSelect = useCallback(() => {
-    window.localStorage.setItem('popupNavigation', '/account/bonding-auth');
     store.dispatch({ type: 'bondingParams/update', payload: { selectedNetwork: networkKey, selectedValidator: validatorInfo } as BondingParams });
     navigate('/account/bonding-auth');
   }, [navigate, networkKey, validatorInfo]);

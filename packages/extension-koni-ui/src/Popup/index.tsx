@@ -24,7 +24,7 @@ import { saveCurrentAccountAddress, subscribeAccountsWithCurrentAddress, subscri
 import { store } from '../stores';
 import { buildHierarchy } from '../util/buildHierarchy';
 
-const BondingAuthTransaction = React.lazy(() => import('@subwallet/extension-koni-ui/Popup/Bonding/BondingAuthTransaction'));
+const BondingAuthTransaction = React.lazy(() => import('@subwallet/extension-koni-ui/Popup/Bonding/BondingSubmitTransaction'));
 const BondingValidatorSelection = React.lazy(() => import('@subwallet/extension-koni-ui/Popup/Bonding/BondingValidatorSelection'));
 const BondingNetworkSelection = React.lazy(() => import('@subwallet/extension-koni-ui/Popup/Bonding/BondingNetworkSelection'));
 const EvmTokenEdit = React.lazy(() => import('@subwallet/extension-koni-ui/Popup/Settings/TokenSetting/EvmTokenEdit'));

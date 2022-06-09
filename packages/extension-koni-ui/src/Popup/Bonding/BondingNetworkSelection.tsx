@@ -8,6 +8,7 @@ import useGetStakingNetworks from '@subwallet/extension-koni-ui/hooks/screen/bon
 import useTranslation from '@subwallet/extension-koni-ui/hooks/useTranslation';
 import { getChainBondingBasics } from '@subwallet/extension-koni-ui/messaging';
 import Header from '@subwallet/extension-koni-ui/partials/Header';
+import BondingAuthTransaction from '@subwallet/extension-koni-ui/Popup/Bonding/components/BondingAuthTransaction';
 import BondingNetworkItem from '@subwallet/extension-koni-ui/Popup/Bonding/components/BondingNetworkItem';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import React, { useCallback, useEffect, useState } from 'react';
@@ -90,6 +91,8 @@ function BondingNetworkSelection ({ className }: Props): React.ReactElement<Prop
           })
         }
       </div>
+
+      <BondingAuthTransaction />
     </div>
   );
 }

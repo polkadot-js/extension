@@ -5,8 +5,8 @@ import { TransactionHistoryItemType } from '@subwallet/extension-base/background
 import { EXTENSION_PREFIX } from '@subwallet/extension-base/defaults';
 import SubscribableStore from '@subwallet/extension-koni-base/stores/SubscribableStore';
 
-export default class TransactionHistoryStoreV2 extends SubscribableStore<TransactionHistoryItemType[]> {
+export default class TransactionHistoryStoreV2 extends SubscribableStore<Record<string, TransactionHistoryItemType[]>> {
   constructor () {
-    super(EXTENSION_PREFIX ? `${EXTENSION_PREFIX}transaction_history_v2` : null);
+    super(`${EXTENSION_PREFIX}transaction`);
   }
 }

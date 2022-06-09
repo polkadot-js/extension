@@ -861,3 +861,7 @@ export interface KoniRequestSignatures {
   'pub(accounts.listV2)': [RequestAccountList, InjectedAccount[]];
   'pub(accounts.subscribeV2)': [RequestAccountSubscribe, boolean, InjectedAccount[]];
 }
+
+export interface ApplicationMetadataType {
+  version: string;
+}

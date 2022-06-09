@@ -789,7 +789,7 @@ export default class KoniState extends State {
   }
 
   public async getStoredNft (address: string) {
-    const items = await this.nftStore.asyncGet(address) as NftJson;
+    const items = await this.nftStore.asyncGet(address);
 
     return items;
   }

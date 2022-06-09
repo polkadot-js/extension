@@ -295,6 +295,12 @@ const LogosMap: Record<string, string> = {
   // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
   subspace_test: require('./subspace.png'),
   // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+  xcpara: require('./parallel.svg'),
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+  xcdot: require('./polkadot.svg'),
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+  xcaca: require('./acala.svg'),
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
   default: require('./default.svg')
 };
 

@@ -92,9 +92,9 @@ function AuthTransaction ({ balanceFormat,
 
   const { isQrHashed, qrAddress, qrId, qrPayload, step } = QrState;
 
-  const originNetworkPrefix = networkMap[requestPayload.originalNetworkKey].ss58Format;
+  const originNetworkPrefix = networkMap[requestPayload.originNetworkKey].ss58Format;
   const destinationNetworkPrefix = networkMap[requestPayload.destinationNetworkKey].ss58Format;
-  const genesisHash = networkMap[requestPayload.originalNetworkKey].genesisHash;
+  const genesisHash = networkMap[requestPayload.originNetworkKey].genesisHash;
 
   const [isBusy, setBusy] = useState(false);
   const [password, setPassword] = useState<string>('');
@@ -259,7 +259,7 @@ function AuthTransaction ({ balanceFormat,
             isDisabled={true}
             label={'Original Chain'}
             options={originChainOptions}
-            value={requestPayload.originalNetworkKey}
+            value={requestPayload.originNetworkKey}
           />
 
           <div className='bridge__chain-swap'>
@@ -284,7 +284,7 @@ function AuthTransaction ({ balanceFormat,
           help={t<string>('The account you will transfer from.')}
           isDisabled={true}
           isSetDefaultValue={true}
-          label={t<string>('Original Account')}
+          label={t<string>('Origin Account')}
           networkPrefix={originNetworkPrefix}
           type='account'
           withEllipsis

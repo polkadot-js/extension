@@ -2210,10 +2210,10 @@ export default class KoniExtension extends Extension {
     return errors;
   }
 
-  private async makeCrossChainTransferQr (id: string, port: chrome.runtime.Port, { destinationNetworkKey, from, originalNetworkKey, to, token, value }: RequestCrossChainTransferQR): Promise<Array<TransferError>> {
+  private async makeCrossChainTransferQr (id: string, port: chrome.runtime.Port, { destinationNetworkKey, from, originNetworkKey, to, token, value }: RequestCrossChainTransferQR): Promise<Array<TransferError>> {
     const cb = createSubscription<'pri(accounts.cross.transfer.qr.create)'>(id, port);
     const [errors, fromKeyPair, , tokenInfo] = await this.validateCrossChainTransfer(
-      originalNetworkKey,
+      originNetworkKey,
       destinationNetworkKey,
       token, from, to, undefined, value);
 
@@ -2239,7 +2239,7 @@ export default class KoniExtension extends Extension {
       };
 
       const transferProm = makeCrossChainTransferQr(
-        originalNetworkKey,
+        originNetworkKey,
         destinationNetworkKey,
         to,
         fromKeyPair,
@@ -2250,7 +2250,7 @@ export default class KoniExtension extends Extension {
         id,
         setState,
         updateState,
-        this.makeTransferCallback(from, originalNetworkKey, token, cb)
+        this.makeTransferCallback(from, originNetworkKey, token, cb)
       );
 
       transferProm.then(() => {

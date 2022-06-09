@@ -348,5 +348,7 @@
   "The account you want to transfer to.": "",
   "Destination Account": "",
   "To perform the transaction, please make sure the selected network in Original Chain is activated first.": "",
-  "Transfer": ""
+  "Transfer": "",
+  "Origin Account": "",
+  "To perform the transaction, please make sure the selected network in Origin Chain is activated first.": ""
 }

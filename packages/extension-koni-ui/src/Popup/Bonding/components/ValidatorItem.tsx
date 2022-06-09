@@ -90,7 +90,7 @@ function ValidatorItem ({ className, maxNominatorPerValidator, networkKey, valid
           </div>
           <Tooltip
             place={'top'}
-            text={'Expected returns'}
+            text={'Expected return'}
             trigger={`validator-return-tooltip-${validatorInfo.address}`}
           />
 

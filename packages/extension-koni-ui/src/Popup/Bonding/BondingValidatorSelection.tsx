@@ -33,10 +33,18 @@ function BondingValidatorSelection ({ className }: Props): React.ReactElement<Pr
   const _height = window.innerHeight > 600 ? 650 : 300;
 
   const handleSortByCommission = useCallback(() => {
+    if (!sortByCommission) {
+      setSortByReturn(false);
+    }
+
     setSortByCommission(!sortByCommission);
   }, [sortByCommission]);
 
   const handleSortByReturn = useCallback(() => {
+    if (!sortByReturn) {
+      setSortByCommission(false);
+    }
+
     setSortByReturn(!sortByReturn);
   }, [sortByReturn]);
 
@@ -49,8 +57,32 @@ function BondingValidatorSelection ({ className }: Props): React.ReactElement<Pr
       }
     });
 
+    if (sortByReturn) {
+      return _filteredValidators
+        .sort((validator: ValidatorInfo, _validator: ValidatorInfo) => {
+          if (validator.expectedReturn > _validator.expectedReturn) {
+            return -1;
+          } else if (validator.expectedReturn <= _validator.expectedReturn) {
+            return 1;
+          }
+
+          return 0;
+        });
+    } else if (sortByCommission) {
+      return _filteredValidators
+        .sort((validator: ValidatorInfo, _validator: ValidatorInfo) => {
+          if (validator.commission <= _validator.commission) {
+            return -1;
+          } else if (validator.commission > _validator.commission) {
+            return 1;
+          }
+
+          return 0;
+        });
+    }
+
     return _filteredValidators;
-  }, [allValidators, searchString]);
+  }, [allValidators, searchString, sortByCommission, sortByReturn]);
 
   const filteredValidators = filterValidators();
 
@@ -173,7 +205,7 @@ export default React.memo(styled(BondingValidatorSelection)(({ theme }: Props) =
   .active-bonding__btn {
     cursor: pointer;
     position: relative;
-    font-size: 12px;
+    font-size: 14px;
     color: ${theme.textColor3};
   }
 

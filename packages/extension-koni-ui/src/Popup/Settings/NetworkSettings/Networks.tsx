@@ -100,7 +100,9 @@ function Networks ({ className }: Props): React.ReactElement {
   return (
     <div className={className}>
       <Header
+        cancelButtonText={'Done'}
         showBackArrow
+        showCancelButton
         showSubHeader
         subHeaderName={t<string>('Network Settings')}
         to='/account/settings'
@@ -230,8 +232,6 @@ export default styled(Networks)(({ theme }: Props) => `
   .network-item__top-content {
     display: flex;
     align-items: center;
-    padding-top: 12px;
-    padding-bottom: 12px;
   }
 
   .network-item__separator {

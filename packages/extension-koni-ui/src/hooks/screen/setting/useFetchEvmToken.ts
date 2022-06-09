@@ -7,6 +7,20 @@ import { useSelector } from 'react-redux';
 
 export default function useFetchEvmToken (): CustomEvmToken[] {
   const { evmToken } = useSelector((state: RootState) => state);
+  const filteredErc20Token: CustomEvmToken[] = [];
+  const filteredErc721Token: CustomEvmToken[] = [];
 
-  return [...evmToken.erc20, ...evmToken.erc721];
+  for (const token of evmToken.erc20) {
+    if (!token.isDeleted) {
+      filteredErc20Token.push(token);
+    }
+  }
+
+  for (const token of evmToken.erc721) {
+    if (!token.isDeleted) {
+      filteredErc721Token.push(token);
+    }
+  }
+
+  return [...filteredErc20Token, ...filteredErc721Token];
 }

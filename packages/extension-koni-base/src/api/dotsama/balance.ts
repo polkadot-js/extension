@@ -92,7 +92,7 @@ function subscribeERC20Interval (addresses: string[], networkKey: string, api: A
     callback && callback(networkKey, originBalanceItem);
   };
 
-  getRegistry(networkKey, api, state.getErc20Tokens()).then(({ tokenMap }) => {
+  getRegistry(networkKey, api, state.getActiveErc20Tokens()).then(({ tokenMap }) => {
     tokenList = Object.values(tokenMap).filter(({ erc20Address }) => (!!erc20Address));
     tokenList.forEach(({ erc20Address, symbol }) => {
       if (erc20Address) {
@@ -528,9 +528,9 @@ export async function subscribeFreeBalance (
   }
 
   // @ts-ignore
-  const unsub = await api.query.system.account(address, (balance) => {
+  const unsub = await api.derive.balances?.all(address, (balance: DeriveBalancesAll) => {
     // eslint-disable-next-line node/no-callback-literal,@typescript-eslint/no-unsafe-argument,@typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-member-access
-    update(balance.data?.free?.toString() || '0');
+    update(balance.availableBalance?.toBn()?.toString() || '0');
   });
 
   return () => {

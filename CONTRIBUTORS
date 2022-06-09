@@ -1,13 +1,13 @@
      465	Jaco                          	0.42.5 (#969)
-     245	Nam Phạm                      	
-     207	AnhMTV                        	Release version 0.4.2
-     132	quangdo                       	Integrate Genshiro & Equilibrium
-     110	lw-cdm                        	Fix import issue
+     410	Nam Phạm                      	comment to be resolved later
+     231	AnhMTV                        	Release version 4.4.4
+     149	lw-cdm                        	Fix issue causes user cannot perform send fund/XCM transfer on Kintsugi Chain
+     141	quangdo                       	update AuthTransaction Button
       82	Thibaut Sardan                	Add account filtering feature (#832)
+      56	lw-cdm                        	
       55	leewong                       	#118: update balance logic for Kintsugi testnet
-      52	lw-cdm                        	
-      50	Dominhquangdev                	Update Settings screen, Update Restore Json
-      44	Hieu Dao                      	Update astar token issue #186
+      53	Dominhquangdev                	update Bridge code
+      48	Hieu Dao                      	update Subspace name
       10	Trang Trịnh                   	api get karura and acala nfts
        9	Minh Le                       	
        9	minhld1029                    	[#115] [ForgetAccount] catch exception refList undefined

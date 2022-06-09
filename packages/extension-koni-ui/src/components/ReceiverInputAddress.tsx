@@ -16,16 +16,21 @@ import InputAddress from './InputAddress';
 interface Props {
   networkKey: string;
   className: string;
-  onchange: (address: string) => void;
+  defaultAddress?: string;
+  isSetDefaultValue?: boolean;
+  isDisabled?: boolean;
+  onchange?: (address: string) => void;
   balance: string;
   balanceFormat: BalanceFormatType;
   networkMap: Record<string, NetworkJson>;
+  inputAddressHelp?: string;
+  inputAddressLabel?: string;
 }
 
-function ReceiverInputAddress ({ balance, balanceFormat, className = '', networkKey, networkMap, onchange }: Props): React.ReactElement {
+function ReceiverInputAddress ({ balance, balanceFormat, className = '', defaultAddress, inputAddressHelp, inputAddressLabel, isDisabled = false, isSetDefaultValue = false, networkKey, networkMap, onchange }: Props): React.ReactElement {
   const { t } = useTranslation();
   const networkPrefix = networkMap[networkKey].ss58Format;
-  const [receiveAddress, setReceiveAddress] = useState<string>('');
+  const [receiveAddress, setReceiveAddress] = useState<string>(defaultAddress || '');
 
   const formattedAddress = useMemo<string>(() => {
     if (receiveAddress) {
@@ -36,7 +41,7 @@ function ReceiverInputAddress ({ balance, balanceFormat, className = '', network
   }, [receiveAddress, networkPrefix]);
 
   const onChangeReceiveAddress = useCallback((address: string) => {
-    onchange(address);
+    onchange && onchange(address);
     setReceiveAddress(address);
   }, [onchange]);
 
@@ -45,10 +50,10 @@ function ReceiverInputAddress ({ balance, balanceFormat, className = '', network
       <InputAddress
         autoPrefill={false}
         className={'receive-input-address'}
-        help={t<string>('Select a contact or paste the address you want to send funds to.')}
-        isSetDefaultValue={false}
-        label={t<string>('Send to address')}
-        // isDisabled={!!propRecipientId}
+        help={inputAddressHelp || t<string>('Select a contact or paste the address you want to send funds to.')}
+        isDisabled={isDisabled}
+        isSetDefaultValue={isSetDefaultValue}
+        label={inputAddressLabel || t<string>('Send to address')}
         networkPrefix={networkPrefix}
         onChange={onChangeReceiveAddress}
         type='allPlus'

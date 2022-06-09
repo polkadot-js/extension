@@ -175,7 +175,6 @@ export class NftHandler {
   public async handleNfts (evmContracts: CustomEvmToken[], updateItem: (data: NftItem) => void, updateCollection: (data: NftCollection) => void, updateReady: (ready: boolean) => void) {
     this.setupApi();
     this.setEvmContracts(evmContracts);
-
     await Promise.all(this.handlers.map(async (handler) => {
       await handler.fetchNfts(
         (data: NftItem) => {

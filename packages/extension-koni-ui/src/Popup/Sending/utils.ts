@@ -8,7 +8,7 @@ import { isAccountAll } from '@subwallet/extension-koni-ui/util';
 
 import { BN, BN_HUNDRED } from '@polkadot/util';
 
-function getDefaultAddress (address: string, accounts: AccountJson[]): string {
+export function getDefaultAddress (address: string, accounts: AccountJson[]): string {
   return isAccountAll(address) ? accounts[1].address : address;
 }
 

@@ -1,5 +1,30 @@
 # CHANGELOG
 
+## 0.4.4 (Koni)
+Build date: Jun 08, 2022.
+
+Update:
+- Support Send / Receive cross-chain assets (#35)
+
+Bug Fixed:
+- Fix bug display incorrect transferable balance in the Send Fund/Donate/XCM Transfer screen (#303)
+- Fix bug happens when user delete all custom tokens & predefined tokens (#314)
+- Fix bug "Encountered an error, please try again" when Send NFT (#321)
+- Fix bug can not send fund/XCM transfer of the Kintsugi Chain (#332)
+
+## 0.4.3 (Koni)
+Build date: May 31, 2022.
+
+Update:
+- Custom network, Custom Endpoint (#36)
+- Integrate SubSpace Token (#301)
+
+Bug Fixed:
+- Display 2 popup connect when connect to https://portal.astar.network... (#285)
+- Bug happens when viewing Transaction History after Delete token (#296)
+- Other defects related to Import EVM Tokens (#266)
+- Bug Send NFT when balance is too low (#265)
+
 ## 0.4.2 (Koni)
 Build date: May 20, 2022.
 

@@ -22,3 +22,8 @@ export interface SenderInputAddressType {
   networkKey: string;
   token: string;
 }
+
+export interface XcmTransferInputAddressType {
+  address: string;
+  token: string;
+}

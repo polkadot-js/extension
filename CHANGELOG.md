@@ -4,7 +4,7 @@
 Build date: Jun 09, 2022.
 
 Update:
-- Support Send / Receive cross-chain assets (update some label and variable) (#35)
+- Support Send / Receive cross-chain assets (update some label and variablea and xc logo) (#35)
 
 ## 0.4.4 (Koni)
 Build date: Jun 08, 2022.

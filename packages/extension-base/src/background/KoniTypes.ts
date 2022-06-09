@@ -492,7 +492,7 @@ export interface RequestTransfer extends RequestCheckTransfer {
 }
 
 export interface RequestCheckCrossChainTransfer {
-  originalNetworkKey: string,
+  originNetworkKey: string,
   destinationNetworkKey: string,
   from: string,
   to: string,

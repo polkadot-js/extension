@@ -77,7 +77,7 @@ function AuthTransaction ({ balanceFormat,
   const [password, setPassword] = useState<string>('');
   const [isKeyringErr, setKeyringErr] = useState<boolean>(false);
   const [errorArr, setErrorArr] = useState<string[]>([]);
-  const originNetworkPrefix = networkMap[requestPayload.originalNetworkKey].ss58Format;
+  const originNetworkPrefix = networkMap[requestPayload.originNetworkKey].ss58Format;
   const destinationNetworkPrefix = networkMap[requestPayload.destinationNetworkKey].ss58Format;
 
   const _onCancel = useCallback(() => {
@@ -128,7 +128,7 @@ function AuthTransaction ({ balanceFormat,
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [
       password, onChangeResult,
-      requestPayload.originalNetworkKey,
+      requestPayload.originNetworkKey,
       requestPayload.destinationNetworkKey,
       requestPayload.from,
       requestPayload.to,
@@ -188,9 +188,9 @@ function AuthTransaction ({ balanceFormat,
             <Dropdown
               className='bridge__chain-selector'
               isDisabled={true}
-              label={'Original Chain'}
+              label={'Origin Chain'}
               options={originChainOptions}
-              value={requestPayload.originalNetworkKey}
+              value={requestPayload.originNetworkKey}
             />
 
             <div className='bridge__chain-swap'>
@@ -215,7 +215,7 @@ function AuthTransaction ({ balanceFormat,
             help={t<string>('The account you will transfer from.')}
             isDisabled={true}
             isSetDefaultValue={true}
-            label={t<string>('Original Account')}
+            label={t<string>('Origin Account')}
             networkPrefix={originNetworkPrefix}
             type='account'
             withEllipsis

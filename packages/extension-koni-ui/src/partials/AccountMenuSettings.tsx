@@ -163,7 +163,7 @@ function AccountMenuSettings ({ changeAccountCallback, className, closeSetting, 
             >
               {/* @ts-ignore */}
               <FontAwesomeIcon icon={faKey} />
-              <span>{t<string>('Import private key from Metamask')}</span>
+              <span>{t<string>('Import private key from MetaMask')}</span>
             </Link>
           </MenuSettingItem>
           <MenuSettingItem className='account-menu-settings__menu-item'>

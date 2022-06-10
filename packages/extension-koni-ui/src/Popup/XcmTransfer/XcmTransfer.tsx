@@ -132,10 +132,10 @@ function XcmTransfer ({ chainRegistryMap, className, defaultValue, firstOriginCh
       networkName: networkMap[originChain].chain
     }
   ));
-  const checkOriginalChainAndSenderIdType = !!networkMap[originChain].isEthereum === isEthereumAddress(senderId);
+  const checkOriginChainAndSenderIdType = !!networkMap[originChain].isEthereum === isEthereumAddress(senderId);
   const checkDestinationChainAndReceiverIdType = !!recipientId && !!networkMap[selectedDestinationChain].isEthereum === isEthereumAddress(recipientId);
   const amountGtAvailableBalance = amount && senderFreeBalance && amount.gt(new BN(senderFreeBalance));
-  const canMakeTransfer = checkOriginalChainAndSenderIdType &&
+  const canMakeTransfer = checkOriginChainAndSenderIdType &&
     checkDestinationChainAndReceiverIdType &&
     !!valueToTransfer &&
     !!recipientId &&
@@ -147,7 +147,7 @@ function XcmTransfer ({ chainRegistryMap, className, defaultValue, firstOriginCh
 
     if (recipientId) {
       checkCrossChainTransfer({
-        originalNetworkKey: originChain,
+        originNetworkKey: originChain,
         destinationNetworkKey: selectedDestinationChain,
         from: senderId,
         to: recipientId,
@@ -233,7 +233,7 @@ function XcmTransfer ({ chainRegistryMap, className, defaultValue, firstOriginCh
               <Dropdown
                 className='bridge__chain-selector'
                 isDisabled={false}
-                label={'Original Chain'}
+                label={'Origin Chain'}
                 onChange={_onChangeOriginChain}
                 options={originChainOptions}
                 value={originChain}
@@ -297,12 +297,12 @@ function XcmTransfer ({ chainRegistryMap, className, defaultValue, firstOriginCh
                   siSymbol={balanceFormat[2] || balanceFormat[1]}
                 />
 
-                {!checkOriginalChainAndSenderIdType &&
+                {!checkOriginChainAndSenderIdType &&
                 <Warning
                   className='xcm-transfer-warning'
                   isDanger
                 >
-                  {t<string>(`Original account must be ${networkMap[originChain].isEthereum ? 'EVM' : 'substrate'} type`)}
+                  {t<string>(`Origin account must be ${networkMap[originChain].isEthereum ? 'EVM' : 'substrate'} type`)}
                 </Warning>
                 }
 
@@ -325,7 +325,7 @@ function XcmTransfer ({ chainRegistryMap, className, defaultValue, firstOriginCh
                 )}
               </>
               : <Warning className='xcm-transfer-warning'>
-                {t<string>('To perform the transaction, please make sure the selected network in Original Chain is activated first.')}
+                {t<string>('To perform the transaction, please make sure the selected network in Origin Chain is activated first.')}
               </Warning>
             }
 
@@ -362,7 +362,7 @@ function XcmTransfer ({ chainRegistryMap, className, defaultValue, firstOriginCh
                 requestPayload={{
                   from: senderId,
                   to: recipientId,
-                  originalNetworkKey: originChain,
+                  originNetworkKey: originChain,
                   destinationNetworkKey: selectedDestinationChain,
                   value: valueToTransfer,
                   token: selectedToken

@@ -24,7 +24,7 @@ import { saveCurrentAccountAddress, subscribeAccountsWithCurrentAddress, subscri
 import { store } from '../stores';
 import { buildHierarchy } from '../util/buildHierarchy';
 
-const BondingAuthTransaction = React.lazy(() => import('@subwallet/extension-koni-ui/Popup/Bonding/BondingSubmitTransaction'));
+const BondingSubmitTransaction = React.lazy(() => import('@subwallet/extension-koni-ui/Popup/Bonding/BondingSubmitTransaction'));
 const BondingValidatorSelection = React.lazy(() => import('@subwallet/extension-koni-ui/Popup/Bonding/BondingValidatorSelection'));
 const BondingNetworkSelection = React.lazy(() => import('@subwallet/extension-koni-ui/Popup/Bonding/BondingNetworkSelection'));
 const EvmTokenEdit = React.lazy(() => import('@subwallet/extension-koni-ui/Popup/Settings/TokenSetting/EvmTokenEdit'));
@@ -251,7 +251,7 @@ export default function Popup (): React.ReactElement {
                           <Route path='/account/evm-token-edit'>{wrapWithErrorBoundary(<EvmTokenEdit />, 'evm-token-edit')}</Route>
                           <Route path='/account/select-bonding-network'>{wrapWithErrorBoundary(<BondingNetworkSelection />, 'bonding-network')}</Route>
                           <Route path='/account/select-bonding-validator'>{wrapWithErrorBoundary(<BondingValidatorSelection />, 'bonding-validator')}</Route>
-                          <Route path='/account/bonding-auth'>{wrapWithErrorBoundary(<BondingAuthTransaction />, 'bonding-auth')}</Route>
+                          <Route path='/account/bonding-auth'>{wrapWithErrorBoundary(<BondingSubmitTransaction />, 'bonding-auth')}</Route>
                           <Route path={`${PHISHING_PAGE_REDIRECT}/:website`}>{wrapWithErrorBoundary(<PhishingDetected />, 'phishing-page-redirect')}</Route>
                           <Route
                             exact

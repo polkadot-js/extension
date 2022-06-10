@@ -511,7 +511,8 @@ export const PREDEFINED_NETWORKS: Record<string, NetworkJson> = {
     currentProvider: 'Aleph Zero Foundation',
     groups: ['TEST_NET'],
     nativeToken: 'TZERO',
-    decimals: 12
+    decimals: 12,
+    supportBonding: true
   },
   opal: {
     key: 'opal',

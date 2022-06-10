@@ -4,12 +4,13 @@
 import type { AccountJson, AccountsContext, AuthorizeRequest, MetadataRequest, SigningRequest } from '@subwallet/extension-base/background/types';
 import type { SettingsStruct } from '@polkadot/ui-settings/types';
 
-import { AccountsWithCurrentAddress, CurrentAccountInfo } from '@subwallet/extension-base/background/KoniTypes';
+import { AccountsWithCurrentAddress, CurrentAccountInfo, NetworkJson } from '@subwallet/extension-base/background/KoniTypes';
 import { PHISHING_PAGE_REDIRECT } from '@subwallet/extension-base/defaults';
 import { canDerive } from '@subwallet/extension-base/utils';
 import useSetupStore from '@subwallet/extension-koni-ui/hooks/store/useSetupStore';
 import Home from '@subwallet/extension-koni-ui/Popup/Home';
 import XcmTransfer from '@subwallet/extension-koni-ui/Popup/XcmTransfer/XcmTransfer';
+import { NetworkConfigParams } from '@subwallet/extension-koni-ui/stores/types';
 import { updateCurrentAccount } from '@subwallet/extension-koni-ui/stores/updater';
 import * as Bowser from 'bowser';
 import React, { useCallback, useEffect, useState } from 'react';
@@ -20,7 +21,7 @@ import uiSettings from '@polkadot/ui-settings';
 
 import { AccountContext, ActionContext, AuthorizeReqContext, MediaContext, MetadataReqContext, SettingsContext, SigningReqContext } from '../components/contexts';
 import ToastProvider from '../components/Toast/ToastProvider';
-import { saveCurrentAccountAddress, subscribeAccountsWithCurrentAddress, subscribeAuthorizeRequestsV2, subscribeMetadataRequests, subscribeSigningRequests } from '../messaging';
+import { saveCurrentAccountAddress, subscribeAccountsWithCurrentAddress, subscribeAddNetworkRequests, subscribeAuthorizeRequestsV2, subscribeMetadataRequests, subscribeSigningRequests } from '../messaging';
 import { store } from '../stores';
 import { buildHierarchy } from '../util/buildHierarchy';
 
@@ -100,6 +101,7 @@ export default function Popup (): React.ReactElement {
   const [mediaAllowed, setMediaAllowed] = useState(false);
   const [metaRequests, setMetaRequests] = useState<null | MetadataRequest[]>(null);
   const [signRequests, setSignRequests] = useState<null | SigningRequest[]>(null);
+  const [addNetworkRequests, setAddNetworkRequests] = useState<null | NetworkJson[]>(null);
   const [isWelcomeDone, setWelcomeDone] = useState(false);
   const [settingsCtx, setSettingsCtx] = useState<SettingsStruct>(startSettings);
   const browser = Bowser.getParser(window.navigator.userAgent);
@@ -131,8 +133,6 @@ export default function Popup (): React.ReactElement {
   const handleGetAccountsWithCurrentAddress = (data: AccountsWithCurrentAddress) => {
     const { accounts, currentAddress, currentGenesisHash } = data;
 
-    console.log(currentAddress, currentGenesisHash);
-
     setAccounts(accounts);
 
     if (accounts && accounts.length) {
@@ -159,20 +159,28 @@ export default function Popup (): React.ReactElement {
     }
   };
 
+  useEffect(() => {
+    const handleAddNetwork = (rs: NetworkJson[]) => {
+      setAddNetworkRequests(rs);
+
+      if (rs?.length) {
+        store.dispatch({ type: 'networkConfigParams/update', payload: { data: rs[0], mode: 'create' } as NetworkConfigParams });
+      }
+    };
+
+    subscribeAddNetworkRequests(handleAddNetwork).then(handleAddNetwork).catch(console.error);
+  }, []);
+
   useEffect((): void => {
     setWelcomeDone(window.localStorage.getItem('welcome_read') === 'ok');
     const beforeNav = window.localStorage.getItem('popupNavigation');
 
-    if (beforeNav) {
-      if ((authRequests && authRequests.length) ||
-        (metaRequests && metaRequests.length) ||
-        (signRequests && signRequests.length)) {
-        window.location.hash = '/';
-      } else {
-        window.location.hash = beforeNav;
-      }
+    if (authRequests?.length || metaRequests?.length || signRequests?.length || addNetworkRequests?.length) {
+      window.location.hash = '/';
+    } else if (beforeNav) {
+      window.location.hash = beforeNav;
     }
-  }, [authRequests, metaRequests, signRequests]);
+  }, [addNetworkRequests, authRequests, metaRequests, signRequests]);
 
   useEffect((): void => {
     Promise.all([
@@ -212,7 +220,9 @@ export default function Popup (): React.ReactElement {
         ? wrapWithErrorBoundary(<Metadata />, 'metadata')
         : signRequests && signRequests.length
           ? wrapWithErrorBoundary(<Signing />, 'signing')
-          : wrapWithErrorBoundary(<Home />, 'Home')
+          : addNetworkRequests && addNetworkRequests.length
+            ? wrapWithErrorBoundary(<NetworkCreate />, 'account-network-edit')
+            : wrapWithErrorBoundary(<Home />, 'Home')
     : wrapWithErrorBoundary(<Welcome />, 'welcome');
 
   return (

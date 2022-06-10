@@ -300,7 +300,19 @@ export interface NetworkJson {
   getStakingOnChain?: boolean; // support get bonded on chain
 
   apiStatus?: NETWORK_STATUS;
+  requestId?: string;
 }
+
+export interface RequestCompleteAddNetwork{
+  id: string,
+  approval: boolean
+}
+
+export interface AddNetworkData {
+  networkInfo: NetworkJson,
+}
+
+export interface AddNetworkRequestResolver extends AddNetworkData, Resolver<boolean>{}
 
 export interface DonateInfo {
   key: string;
@@ -812,6 +824,8 @@ export interface KoniRequestSignatures {
   'pri(networkMap.enableAll)': [null, boolean];
   'pri(networkMap.resetDefault)': [null, boolean];
   'pri(apiMap.validate)': [ValidateNetworkRequest, ValidateNetworkResponse];
+  'pri(networkMap.addRequestSubscription)': [null, NetworkJson[], NetworkJson[]];
+  'pri(networkMap.completeAddRequest)': [RequestCompleteAddNetwork, boolean];
   'pri(networkMap.enableMany)': [string[], boolean];
   'pri(networkMap.enableOne)': [string, boolean];
   'pri(networkMap.disableOne)': [string, DisableNetworkResponse];

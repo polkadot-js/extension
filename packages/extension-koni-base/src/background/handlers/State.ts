@@ -3,7 +3,7 @@
 
 import { withErrorLog } from '@subwallet/extension-base/background/handlers/helpers';
 import State, { AuthUrls, Resolver } from '@subwallet/extension-base/background/handlers/State';
-import { AccountRefMap, APIItemState, ApiMap, AuthRequestV2, BalanceItem, BalanceJson, ChainRegistry, CrowdloanItem, CrowdloanJson, CurrentAccountInfo, CustomEvmToken, DeleteEvmTokenParams, EvmTokenJson, NETWORK_STATUS, NetworkJson, NftCollection, NftCollectionJson, NftItem, NftJson, NftTransferExtra, PriceJson, RequestSettingsType, ResultResolver, ServiceInfo, StakingItem, StakingJson, StakingRewardJson, TokenInfo, TransactionHistoryItemType } from '@subwallet/extension-base/background/KoniTypes';
+import { AccountRefMap, AddNetworkRequestResolver, APIItemState, ApiMap, AuthRequestV2, BalanceItem, BalanceJson, ChainRegistry, CrowdloanItem, CrowdloanJson, CurrentAccountInfo, CustomEvmToken, DeleteEvmTokenParams, EvmTokenJson, NETWORK_STATUS, NetworkJson, NftCollection, NftCollectionJson, NftItem, NftJson, NftTransferExtra, PriceJson, RequestSettingsType, ResultResolver, ServiceInfo, StakingItem, StakingJson, StakingRewardJson, TokenInfo, TransactionHistoryItemType } from '@subwallet/extension-base/background/KoniTypes';
 import { AuthorizeRequest, RequestAuthorizeTab } from '@subwallet/extension-base/background/types';
 import { getId } from '@subwallet/extension-base/utils/getId';
 import { getTokenPrice } from '@subwallet/extension-koni-base/api/coingecko';
@@ -16,6 +16,7 @@ import { DotSamaCrowdloan_crowdloans_nodes } from '@subwallet/extension-koni-bas
 import { fetchDotSamaCrowdloan } from '@subwallet/extension-koni-base/api/subquery/crowdloan';
 import { DEFAULT_EVM_TOKENS } from '@subwallet/extension-koni-base/api/web3/defaultEvmToken';
 import { initWeb3Api } from '@subwallet/extension-koni-base/api/web3/web3';
+import { ALL_ACCOUNT_KEY, ALL_GENESIS_HASH } from '@subwallet/extension-koni-base/constants';
 import { CurrentAccountStore, NetworkMapStore, PriceStore } from '@subwallet/extension-koni-base/stores';
 import AccountRefStore from '@subwallet/extension-koni-base/stores/AccountRef';
 import AuthorizeStore from '@subwallet/extension-koni-base/stores/Authorize';
@@ -26,6 +27,7 @@ import { convertFundStatus, getCurrentProvider } from '@subwallet/extension-koni
 import { BehaviorSubject, Subject } from 'rxjs';
 import Web3 from 'web3';
 
+import { keyring } from '@polkadot/ui-keyring';
 import { accounts } from '@polkadot/ui-keyring/observable/accounts';
 import { assert } from '@polkadot/util';
 
@@ -126,6 +128,8 @@ export default class KoniState extends State {
   readonly #authRequestsV2: Record<string, AuthRequestV2> = {};
   private priceStoreReady = false;
   private readonly transactionHistoryStore = new TransactionHistoryStore();
+  readonly #addNetworkRequest: Record<string, AddNetworkRequestResolver> = {};
+  private addNetworkSubject = new Subject<NetworkJson[]>();
 
   private networkMap: Record<string, NetworkJson> = {}; // mapping to networkMapStore, for uses in background
   private networkMapSubject = new Subject<Record<string, NetworkJson>>();
@@ -766,6 +770,116 @@ export default class KoniState extends State {
     this.currentAccountStore.set('CurrentAccountInfo', data, callback);
 
     this.updateServiceInfo();
+  }
+
+  public setAccountTie (address: string, genesisHash: string | null): boolean {
+    if (address !== ALL_ACCOUNT_KEY) {
+      const pair = keyring.getPair(address);
+
+      assert(pair, 'Unable to find pair');
+
+      keyring.saveAccountMeta(pair, { ...pair.meta, genesisHash });
+    }
+
+    this.getCurrentAccount((accountInfo) => {
+      if (address === accountInfo.address) {
+        accountInfo.currentGenesisHash = genesisHash as string || ALL_GENESIS_HASH;
+
+        this.setCurrentAccount(accountInfo);
+      }
+    });
+
+    return true;
+  }
+
+  public async switchNetworkAccount (networkKey: string, changeAddress?: string) {
+    const selectNetwork = this.getNetworkMap()[networkKey];
+
+    if (!selectNetwork) {
+      return false;
+    }
+
+    const { address, currentGenesisHash } = await new Promise<CurrentAccountInfo>((resolve) => {
+      this.getCurrentAccount(resolve);
+    });
+
+    const useAddress = changeAddress || address;
+
+    if (useAddress !== ALL_ACCOUNT_KEY) {
+      const pair = keyring.getPair(useAddress);
+
+      assert(pair, 'Unable to find pair');
+
+      keyring.saveAccountMeta(pair, { ...pair.meta, genesisHash: selectNetwork?.genesisHash });
+    }
+
+    if (address !== changeAddress || selectNetwork?.genesisHash !== currentGenesisHash) {
+      this.setCurrentAccount({
+        address: useAddress,
+        currentGenesisHash: selectNetwork?.genesisHash
+      });
+    }
+
+    return true;
+  }
+
+  public getAddNetworkRequestData () {
+    return Object.values(this.#addNetworkRequest).map((request) => request.networkInfo);
+  }
+
+  public getAddNetworkSubject (): Subject<NetworkJson[]> {
+    return this.addNetworkSubject;
+  }
+
+  public countAddNetworkRequest () {
+    return Object.keys(this.#addNetworkRequest).length;
+  }
+
+  private _completeAddNetwork (id: string, resolve: (result: boolean) => void, reject: (error: Error) => void): Resolver<boolean> {
+    const complete = () => {
+      this.#addNetworkRequest[id] && delete this.#addNetworkRequest[id];
+      this.addNetworkSubject.next(this.getAddNetworkRequestData());
+      this.updateIconV2(true);
+    };
+
+    return {
+      resolve: (result) => {
+        complete();
+
+        resolve(result);
+      },
+      reject: (e) => {
+        complete();
+
+        reject(e);
+      }
+    };
+  }
+
+  public async addNetworkConfirm (id: string, networkData: NetworkJson) {
+    networkData.requestId = id;
+
+    return new Promise((resolve, reject) => {
+      this.#addNetworkRequest[id] = {
+        ...this._completeAddNetwork(id, resolve, reject),
+        networkInfo: networkData
+      };
+
+      this.addNetworkSubject.next(this.getAddNetworkRequestData());
+
+      this.updateIconV2(false);
+      this.popupOpen();
+    });
+  }
+
+  public completeAddNetworkRequest (id: string, approval: boolean) {
+    const request = this.#addNetworkRequest[id];
+
+    if (request) {
+      approval ? request.resolve(true) : request.reject(new Error('User Cancel'));
+    }
+
+    return true;
   }
 
   public getSettings (update: (value: RequestSettingsType) => void): void {
@@ -1480,6 +1594,20 @@ export default class KoniState extends State {
     }
 
     const rs = Object.entries(this.networkMap).find(([networkKey, value]) => (value.genesisHash === genesisHash));
+
+    if (rs) {
+      return rs;
+    } else {
+      return [undefined, undefined];
+    }
+  }
+
+  findNetworkKeyByChainId (chainId?: number | null): [string | undefined, NetworkJson |undefined] {
+    if (!chainId) {
+      return [undefined, undefined];
+    }
+
+    const rs = Object.entries(this.networkMap).find(([networkKey, value]) => (value.evmChainId === chainId));
 
     if (rs) {
       return rs;

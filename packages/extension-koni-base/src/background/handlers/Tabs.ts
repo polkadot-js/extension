@@ -91,7 +91,7 @@ export default class KoniTabs extends Tabs {
     return this.#koniState.authorizeUrlV2(url, request);
   }
 
-  private async getEvmCurrentAccount (url: string): Promise<string[]> {
+  private async getEvmCurrentAccount (url: string, getAll = false): Promise<string[]> {
     return await new Promise((resolve) => {
       this.#koniState.getAuthorize((authUrls) => {
         const allAccounts = accountsObservable.subject.getValue();
@@ -99,7 +99,7 @@ export default class KoniTabs extends Tabs {
         let accounts: string[] = [];
 
         this.#koniState.getCurrentAccount(({ address }) => {
-          if (address === ALL_ACCOUNT_KEY) {
+          if (address === ALL_ACCOUNT_KEY || getAll) {
             accounts = (accountList);
           } else if (address && accountList.includes(address)) {
             accounts = ([address]);
@@ -111,10 +111,72 @@ export default class KoniTabs extends Tabs {
     });
   }
 
-  private async getEvmPermission (url: string, id: string, request: RequestArguments) {
-    const accounts = await this.getEvmCurrentAccount(url);
+  private async getEvmPermission (url: string, id: string) {
+    const accounts = await this.getEvmCurrentAccount(url, true);
 
-    return [{ id: id, invoker: url, parentCapability: 'eth_accounts', caveats: { type: 'restrictReturnedAccounts', value: accounts }, date: new Date().getTime() }];
+    return [{ id: id, invoker: url, parentCapability: 'eth_accounts', caveats: [{ type: 'restrictReturnedAccounts', value: accounts }], date: new Date().getTime() }];
+  }
+
+  private async switchEvmChain (url: string, { params }: RequestArguments) {
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+    const chainId = params[0].chainId as string;
+
+    const [networkKey] = this.#koniState.findNetworkKeyByChainId(parseInt(chainId, 16));
+
+    if (networkKey) {
+      const accounts = await this.getEvmCurrentAccount(url);
+
+      await this.#koniState.switchNetworkAccount(networkKey, accounts[0] || ALL_ACCOUNT_KEY);
+    }
+
+    return null;
+  }
+
+  private async addEvmChain (id: string, url: string, { params }: RequestArguments) {
+    const input = params as {
+      chainId: string,
+      rpcUrls: string[],
+      chainName: string,
+      blockExplorerUrls?: string[]
+    }[];
+
+    if (input && input.length > 0) {
+      const { blockExplorerUrls, chainId, chainName, rpcUrls } = input[0];
+
+      if (chainId) {
+        const chainIdNum = parseInt(chainId, 16);
+        const [networkKey] = this.#koniState.findNetworkKeyByChainId(chainIdNum);
+
+        if (networkKey) {
+          return await this.switchEvmChain(url, { method: 'wallet_switchEthereumChain', params: [{ chainId }] });
+        }
+
+        if (rpcUrls && chainName) {
+          const providers: Record<string, string> = {};
+
+          rpcUrls.forEach((url) => {
+            providers[url] = url;
+          });
+
+          await this.#koniState.addNetworkConfirm(id, {
+            key: '',
+            genesisHash: '',
+            groups: [],
+            ss58Format: 0,
+            isEthereum: true,
+            chain: chainName,
+            evmChainId: chainIdNum,
+            active: true,
+            providers,
+            currentProvider: rpcUrls[0],
+            currentProviderMode: 'ws',
+            blockExplorer: blockExplorerUrls && blockExplorerUrls[0]
+          });
+        }
+      }
+    }
+
+    return null;
   }
 
   private async getEvmCurrentChainId (): Promise<string | undefined> {
@@ -282,9 +344,13 @@ export default class KoniTabs extends Tabs {
       case 'wallet_requestPermissions':
         await this.authorizeV2(url, { origin: 'eth_accounts', accountAuthType: 'evm', reOpen: true });
 
-        return await this.getEvmPermission(url, id, request);
+        return await this.getEvmPermission(url, id);
       case 'wallet_getPermissions':
-        return await this.getEvmPermission(url, id, request);
+        return await this.getEvmPermission(url, id);
+      case 'wallet_addEthereumChain':
+        return await this.addEvmChain(id, url, request);
+      case 'wallet_switchEthereumChain':
+        return await this.switchEvmChain(url, request);
 
       default:
         return this.performWeb3Method(id, request);

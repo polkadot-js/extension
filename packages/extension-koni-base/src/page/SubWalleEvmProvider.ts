@@ -72,11 +72,11 @@ export class SubWalletEvmProvider extends SafeEventEmitter implements EvmProvide
             .catch(reject);
         });
       default:
-        // Todo: Detect and support subscription
         return new Promise((resolve, reject) => {
           // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
           this.sendMessage('evm(request)', { params, method })
             .then((result) => {
+              console.log(method, params, result);
               resolve(result as T);
             })
             .catch((e) => {

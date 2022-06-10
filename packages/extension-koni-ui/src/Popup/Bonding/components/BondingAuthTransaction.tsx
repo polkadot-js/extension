@@ -4,53 +4,84 @@
 import { faCircleCheck } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { ValidatorInfo } from '@subwallet/extension-base/background/KoniTypes';
+import { InputWithLabel, Warning } from '@subwallet/extension-koni-ui/components';
+import Button from '@subwallet/extension-koni-ui/components/Button';
 import Identicon from '@subwallet/extension-koni-ui/components/Identicon';
 import Modal from '@subwallet/extension-koni-ui/components/Modal';
+import ReceiverInputAddress from '@subwallet/extension-koni-ui/components/ReceiverInputAddress';
 import Tooltip from '@subwallet/extension-koni-ui/components/Tooltip';
+import { BalanceFormatType } from '@subwallet/extension-koni-ui/components/types';
+import useGetFreeBalance from '@subwallet/extension-koni-ui/hooks/screen/bonding/useGetFreeBalance';
 import useGetNetworkJson from '@subwallet/extension-koni-ui/hooks/screen/home/useGetNetworkJson';
+import useTranslation from '@subwallet/extension-koni-ui/hooks/useTranslation';
+import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { toShort } from '@subwallet/extension-koni-ui/util';
 import React, { useCallback, useState } from 'react';
+import { useSelector } from 'react-redux';
 import styled from 'styled-components';
-import ReceiverInputAddress from "@subwallet/extension-koni-ui/components/ReceiverInputAddress";
-import useGetFreeBalance from "@subwallet/extension-koni-ui/hooks/screen/bonding/useGetFreeBalance";
-import {BalanceFormatType} from "@subwallet/extension-koni-ui/components/types";
-import {useSelector} from "react-redux";
-import {RootState} from "@subwallet/extension-koni-ui/stores";
 
 interface Props extends ThemeProps {
   className?: string;
   setShowConfirm: (val: boolean) => void;
+  validatorInfo: ValidatorInfo,
+  selectedNetwork: string
 }
 
-const validatorInfo: ValidatorInfo = {
-  address: '5GTD7ZeD823BjpmZBCSzBQp7cvHR1Gunq7oDkurZr9zUev2n',
-  blocked: true,
-  commission: 0,
-  expectedReturn: 22.56074522099225,
-  identity: 'Parity Westend validator 6',
-  isVerified: false,
-  minBond: 1,
-  nominatorCount: 2,
-  otherStake: 54635.096605487954,
-  ownStake: 11555.529114384852,
-  totalStake: 66190.6257198728
-};
+// const validatorInfo: ValidatorInfo = {
+//   address: '5GTD7ZeD823BjpmZBCSzBQp7cvHR1Gunq7oDkurZr9zUev2n',
+//   blocked: true,
+//   commission: 0,
+//   expectedReturn: 22.56074522099225,
+//   identity: 'Parity Westend validator 6',
+//   isVerified: false,
+//   minBond: 1,
+//   nominatorCount: 2,
+//   otherStake: 54635.096605487954,
+//   ownStake: 11555.529114384852,
+//   totalStake: 66190.6257198728
+// };
+//
+// const selectedNetwork = 'westend';
 
-const selectedNetwork = 'westend';
-
-function BondingAuthTransaction ({ className, setShowConfirm }: Props): React.ReactElement<Props> {
-  const [loading, setLoading] = useState(false);
+function BondingAuthTransaction ({ className, selectedNetwork, setShowConfirm, validatorInfo }: Props): React.ReactElement<Props> {
+  const { t } = useTranslation();
   const networkJson = useGetNetworkJson(selectedNetwork);
   const freeBalance = useGetFreeBalance(selectedNetwork);
   const balanceFormat: BalanceFormatType = [networkJson.decimals as number, networkJson.nativeToken as string, undefined];
-  const { bondingParams, currentAccount: { account }, networkMap } = useSelector((state: RootState) => state);
+  const { currentAccount: { account }, networkMap } = useSelector((state: RootState) => state);
+
+  const [password, setPassword] = useState('');
+  const [isKeyringErr, setKeyringErr] = useState<boolean>(false);
+  const [errorArr, setErrorArr] = useState<string[]>([]);
+
+  const renderError = () => {
+    return errorArr.map((err) =>
+      (
+        <Warning
+          className='auth-transaction-error'
+          isDanger
+          key={err}
+        >
+          {t<string>(err)}
+        </Warning>
+      )
+    );
+  };
+
+  const _onChangePass = useCallback((value: string) => {
+    setPassword(value);
+    setErrorArr([]);
+    setKeyringErr(false);
+  }, []);
 
   const hideConfirm = useCallback(() => {
-    if (!loading) {
-      setShowConfirm(false);
-    }
-  }, [loading, setShowConfirm]);
+    setShowConfirm(false);
+  }, [setShowConfirm]);
+
+  const handleConfirm = useCallback(() => {
+    console.log('ok');
+  }, []);
 
   return (
     <div className={className}>
@@ -126,12 +157,6 @@ function BondingAuthTransaction ({ className, setShowConfirm }: Props): React.Re
                 text={'Expected return'}
                 trigger={`validator-return-tooltip-${validatorInfo.address}`}
               />
-
-              <div className={'validator-item-toggle-container'}>
-                <div
-                  className={'validator-item-toggle'}
-                />
-              </div>
             </div>
           </div>
 
@@ -164,6 +189,32 @@ function BondingAuthTransaction ({ className, setShowConfirm }: Props): React.Re
               <div className={'transaction-info-value'}>20 DOT + 0.00156 DOT</div>
             </div>
           </div>
+
+          <div className='bonding-auth__separator' />
+
+          <InputWithLabel
+            isError={isKeyringErr}
+            label={t<string>('Unlock account with password')}
+            onChange={_onChangePass}
+            type='password'
+            value={password}
+          />
+
+          {!!(errorArr && errorArr.length) && renderError()}
+
+          <div className={'bonding-auth-btn-container'}>
+            <Button
+              className={'bonding-auth-cancel-button'}
+              onClick={hideConfirm}
+            >
+              Reject
+            </Button>
+            <Button
+              onClick={handleConfirm}
+            >
+              Confirm
+            </Button>
+          </div>
         </div>
 
       </Modal>
@@ -172,11 +223,34 @@ function BondingAuthTransaction ({ className, setShowConfirm }: Props): React.Re
 }
 
 export default React.memo(styled(BondingAuthTransaction)(({ theme }: Props) => `
-  .transaction-info-container {
-    width: 100%;
+  .bonding-auth-cancel-button {
+    color: ${theme.textColor3};
+    background: ${theme.buttonBackground1};
+  }
+
+  .bonding-auth-btn-container {
+    margin-top: 20px;
     display: flex;
-    flex-direction: column;
-    gap: 10px;
+    justify-content: center;
+    align-items: center;
+    gap: 20px;
+  }
+
+  .bonding-auth__separator {
+    margin-top: 30px;
+    margin-bottom: 18px;
+  }
+
+  .bonding-auth__separator:before {
+    content: "";
+    height: 1px;
+    display: block;
+    background: ${theme.boxBorderColor};
+  }
+
+  .transaction-info-container {
+    margin-top: 20px;
+    width: 100%;
   }
 
   .transaction-info-row {
@@ -203,13 +277,10 @@ export default React.memo(styled(BondingAuthTransaction)(({ theme }: Props) => `
     font-weight: 500;
     font-size: 18px;
     line-height: 28px;
-    margin-top: 20px;
+    margin-top: 5px;
   }
 
   .bonding-auth-container {
-    display: flex;
-    flex-direction: column;
-
     padding-left: 15px;
     padding-right: 15px;
   }
@@ -217,19 +288,6 @@ export default React.memo(styled(BondingAuthTransaction)(({ theme }: Props) => `
   .validator-expected-return {
     font-size: 14px;
     color: ${theme.textColor3};
-  }
-
-  .validator-item-toggle {
-    border-style: solid;
-    border-width: 0 2px 2px 0;
-    display: inline-block;
-    padding: 2.5px;
-    transform: rotate(-45deg);
-  }
-
-  .validator-item-toggle-container {
-    display: flex;
-    align-items: center;
   }
 
   .validator-footer {
@@ -250,7 +308,8 @@ export default React.memo(styled(BondingAuthTransaction)(({ theme }: Props) => `
     border: 2px solid ${theme.checkDotColor};
   }
   .validator-item-container {
-    cursor: pointer;
+    margin-top: 10px;
+    margin-bottom: 28px;
     display: flex;
     align-items: center;
     justify-content: space-between;

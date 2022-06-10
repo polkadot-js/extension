@@ -88,7 +88,7 @@ export default React.memo(styled(StakingContainer)(({ theme }: Props) => `
     width: 100%;
     display: flex;
     justify-content: center;
-    margin-top: 20px;
+    margin-top: 10px;
     align-items: center;
   }
 

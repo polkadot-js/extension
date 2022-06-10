@@ -30,6 +30,8 @@ function BondingValidatorSelection ({ className }: Props): React.ReactElement<Pr
   const [sortByCommission, setSortByCommission] = useState(false);
   const [sortByReturn, setSortByReturn] = useState(false);
 
+  const [filteredValidators, setFilteredValidators] = useState(allValidators);
+
   const _height = window.innerHeight > 600 ? 650 : 300;
 
   const handleSortByCommission = useCallback(() => {
@@ -49,6 +51,10 @@ function BondingValidatorSelection ({ className }: Props): React.ReactElement<Pr
   }, [sortByReturn]);
 
   const filterValidators = useCallback(() => {
+    if (searchString === '') {
+      return allValidators;
+    }
+
     const _filteredValidators: ValidatorInfo[] = [];
 
     allValidators.forEach((validator) => {
@@ -84,7 +90,15 @@ function BondingValidatorSelection ({ className }: Props): React.ReactElement<Pr
     return _filteredValidators;
   }, [allValidators, searchString, sortByCommission, sortByReturn]);
 
-  const filteredValidators = filterValidators();
+  useEffect(() => {
+    const delayDebounceFn = setTimeout(() => {
+      const _filteredValidators = filterValidators();
+
+      setFilteredValidators(_filteredValidators);
+    }, 300);
+
+    return () => clearTimeout(delayDebounceFn);
+  }, [filterValidators]);
 
   const _onChangeFilter = useCallback((val: string) => {
     setSearchString(val);

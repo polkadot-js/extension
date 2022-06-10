@@ -36,6 +36,7 @@ function BondingSubmitTransaction ({ className }: Props): React.ReactElement<Pro
   const { bondingParams, currentAccount: { account }, networkMap } = useSelector((state: RootState) => state);
   const selectedNetwork = bondingParams.selectedNetwork as string;
   const validatorInfo = bondingParams.selectedValidator as ValidatorInfo;
+
   const networkJson = useGetNetworkJson(selectedNetwork);
   const [showDetail, setShowDetail] = useState(false);
   const [amount, setAmount] = useState(-1);
@@ -96,7 +97,7 @@ function BondingSubmitTransaction ({ className }: Props): React.ReactElement<Pro
       />
 
       <div
-        className={'bonding-auth-container'}
+        className={'bonding-submit-container'}
         style={{ height: `${_height}px` }}
       >
         <div className={'selected-validator'}>Selected Validator</div>
@@ -238,7 +239,7 @@ function BondingSubmitTransaction ({ className }: Props): React.ReactElement<Pro
           siSymbol={networkJson.nativeToken}
         />
 
-        <div className='bonding-auth__separator' />
+        <div className='bonding-submit__separator' />
 
         <div className={'bonding-btn-container'}>
           <Button className={'bonding-cancel-button'}>
@@ -254,7 +255,11 @@ function BondingSubmitTransaction ({ className }: Props): React.ReactElement<Pro
       </div>
 
       {showAuth &&
-        <BondingAuthTransaction />
+        <BondingAuthTransaction
+          selectedNetwork={selectedNetwork}
+          setShowConfirm={setShowAuth}
+          validatorInfo={validatorInfo}
+        />
       }
 
       {!showAuth && showResult &&
@@ -290,12 +295,12 @@ export default React.memo(styled(BondingSubmitTransaction)(({ theme }: Props) =>
     gap: 20px;
   }
 
-  .bonding-auth__separator {
+  .bonding-submit__separator {
     margin-top: 30px;
     margin-bottom: 30px;
   }
 
-  .bonding-auth__separator:before {
+  .bonding-submit__separator:before {
     content: "";
     height: 1px;
     display: block;
@@ -408,7 +413,7 @@ export default React.memo(styled(BondingSubmitTransaction)(({ theme }: Props) =>
     padding: 0 15px 12px;
   }
 
-  .bonding-auth-container {
+  .bonding-submit-container {
     overflow-y: scroll;
     margin-top: 20px;
     display: flex;

@@ -13,21 +13,14 @@ function RemoveAuth (): React.ReactElement {
     <FontAwesomeIcon
       className='trashIcon'
       icon={faTrash}
-      size='lg'
+      size='sm'
     />
   );
 }
 
 export default styled(RemoveAuth)(({ theme }: ThemeProps) => `
-  label {
-    position: relative;
-    display: inline-block;
-    width: 48px;
-    height: 24px;
-    margin: 8px;
-  }
-
   .trashIcon {
+    cursor: pointer;
     color: ${theme.iconNeutralColor};
     margin-left: 8px;
 

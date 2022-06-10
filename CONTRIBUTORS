@@ -28,6 +28,7 @@
        1	murat onur                    	tr language support added (#681)
        1	Nikos Kontakis                	Fix issue that was breaking extension ui (height collapsed and non-visible); Fixes #720 (#731)
        1	Pedro Filho                   	adding correct nvm version (#1075)
+       1	roiLeo                        	fix(RemoveAuth): icon cursor & size (#1082)
        1	Stéphane P                    	README Fix typo (#700)
        1	Tore19                        	Add Stafi network (#454)
        1	Vlad Proshchavaiev            	Update extension with Subsocial SS58 included (#416)

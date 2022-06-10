@@ -36,4 +36,5 @@ export type NetworkConfigParams = {
 export type BondingParams = {
   selectedNetwork: string | null;
   selectedValidator: ValidatorInfo | null;
+  maxNominatorPerValidator: number | null;
 }

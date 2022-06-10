@@ -11,12 +11,15 @@ import ValidatorItem from '@subwallet/extension-koni-ui/Popup/Bonding/components
 import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import React, { useCallback, useContext, useEffect, useState } from 'react';
+import InfiniteScroll from 'react-infinite-scroll-component';
 import { useSelector } from 'react-redux';
 import styled from 'styled-components';
 
 interface Props extends ThemeProps {
   className?: string;
 }
+
+const INFINITE_SCROLL_PER_PAGE = window.innerHeight > 600 ? 15 : 10;
 
 function BondingValidatorSelection ({ className }: Props): React.ReactElement<Props> {
   const { t } = useTranslation();
@@ -30,7 +33,10 @@ function BondingValidatorSelection ({ className }: Props): React.ReactElement<Pr
   const [sortByCommission, setSortByCommission] = useState(false);
   const [sortByReturn, setSortByReturn] = useState(false);
 
-  const [filteredValidators, setFilteredValidators] = useState(allValidators);
+  const [filteredValidators, setFilteredValidators] = useState<ValidatorInfo[]>([]);
+
+  const [sliceIndex, setSliceIndex] = useState(INFINITE_SCROLL_PER_PAGE);
+  const [showedValidators, setShowedValidators] = useState<ValidatorInfo[]>([]);
 
   const _height = window.innerHeight > 600 ? 650 : 300;
 
@@ -51,10 +57,6 @@ function BondingValidatorSelection ({ className }: Props): React.ReactElement<Pr
   }, [sortByReturn]);
 
   const filterValidators = useCallback(() => {
-    if (searchString === '') {
-      return allValidators;
-    }
-
     const _filteredValidators: ValidatorInfo[] = [];
 
     allValidators.forEach((validator) => {
@@ -95,10 +97,12 @@ function BondingValidatorSelection ({ className }: Props): React.ReactElement<Pr
       const _filteredValidators = filterValidators();
 
       setFilteredValidators(_filteredValidators);
-    }, 300);
+      setShowedValidators(_filteredValidators.slice(0, INFINITE_SCROLL_PER_PAGE));
+      setSliceIndex(INFINITE_SCROLL_PER_PAGE);
+    }, 100);
 
     return () => clearTimeout(delayDebounceFn);
-  }, [filterValidators]);
+  }, [searchString, sortByReturn, sortByCommission, filterValidators]);
 
   const _onChangeFilter = useCallback((val: string) => {
     setSearchString(val);
@@ -123,6 +127,8 @@ function BondingValidatorSelection ({ className }: Props): React.ReactElement<Pr
             });
 
           setAllValidators(sortedValidators);
+          setFilteredValidators(sortedValidators);
+          setShowedValidators(sortedValidators.slice(0, sliceIndex + 1));
           setLoading(false);
         })
         .catch(console.error);
@@ -133,6 +139,13 @@ function BondingValidatorSelection ({ className }: Props): React.ReactElement<Pr
     // eslint-disable-next-line no-void
     void chrome.tabs.create({ url: 'https://support.polkadot.network/support/solutions/articles/65000150130-how-do-i-know-which-validators-to-choose-', active: true }).then(() => console.log('redirecting'));
   }, []);
+
+  const handleLoadOnScroll = useCallback(() => {
+    const _sliceIndex = sliceIndex;
+
+    setShowedValidators(filteredValidators.slice(0, _sliceIndex + INFINITE_SCROLL_PER_PAGE + 1));
+    setSliceIndex(_sliceIndex + INFINITE_SCROLL_PER_PAGE);
+  }, [filteredValidators, sliceIndex]);
 
   return (
     <div className={className}>
@@ -169,20 +182,32 @@ function BondingValidatorSelection ({ className }: Props): React.ReactElement<Pr
 
       <div
         className={'validator-list'}
+        id='scrollableDiv'
         style={{ height: `${_height}px` }}
       >
         {
           loading && <Spinner />
         }
         {
-          !loading && filteredValidators.map((validator, index) => {
-            return <ValidatorItem
-              key={`${index}-${validator.address}`}
-              maxNominatorPerValidator={maxNominatorPerValidator}
-              networkKey={bondingParams.selectedNetwork}
-              validatorInfo={validator}
-            />;
-          })
+          !loading && <InfiniteScroll
+            className={'scroll-container'}
+            dataLength={showedValidators.length}
+            hasMore={showedValidators.length < filteredValidators.length}
+            loader={<div />}
+            next={handleLoadOnScroll}
+            scrollableTarget='scrollableDiv'
+          >
+            {
+              showedValidators.map((validator, index) => {
+                return <ValidatorItem
+                  key={`${index}-${validator.address}`}
+                  maxNominatorPerValidator={maxNominatorPerValidator}
+                  networkKey={bondingParams.selectedNetwork}
+                  validatorInfo={validator}
+                />;
+              })
+            }
+          </InfiniteScroll>
         }
       </div>
 
@@ -258,11 +283,14 @@ export default React.memo(styled(BondingValidatorSelection)(({ theme }: Props) =
     margin-top: 10px;
     padding-top: 5px;
     padding-bottom: 5px;
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
     padding-left: 15px;
     padding-right: 15px;
     overflow-y: scroll;
+  }
+
+  .scroll-container {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
   }
 `));

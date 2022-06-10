@@ -4,6 +4,7 @@
 import { faCircleCheck } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { ValidatorInfo } from '@subwallet/extension-base/background/KoniTypes';
+import NeutralQuestion from '@subwallet/extension-koni-ui/assets/NeutralQuestion.svg';
 import Button from '@subwallet/extension-koni-ui/components/Button';
 import Identicon from '@subwallet/extension-koni-ui/components/Identicon';
 import InputBalance from '@subwallet/extension-koni-ui/components/InputBalance';
@@ -11,6 +12,7 @@ import ReceiverInputAddress from '@subwallet/extension-koni-ui/components/Receiv
 import Tooltip from '@subwallet/extension-koni-ui/components/Tooltip';
 import { BalanceFormatType } from '@subwallet/extension-koni-ui/components/types';
 import useGetFreeBalance from '@subwallet/extension-koni-ui/hooks/screen/bonding/useGetFreeBalance';
+import useIsSufficientBalance from '@subwallet/extension-koni-ui/hooks/screen/bonding/useIsSufficientBalance';
 import useGetNetworkJson from '@subwallet/extension-koni-ui/hooks/screen/home/useGetNetworkJson';
 import useToast from '@subwallet/extension-koni-ui/hooks/useToast';
 import useTranslation from '@subwallet/extension-koni-ui/hooks/useTranslation';
@@ -36,6 +38,7 @@ function BondingSubmitTransaction ({ className }: Props): React.ReactElement<Pro
   const { bondingParams, currentAccount: { account }, networkMap } = useSelector((state: RootState) => state);
   const selectedNetwork = bondingParams.selectedNetwork as string;
   const validatorInfo = bondingParams.selectedValidator as ValidatorInfo;
+  const maxNominatorPerValidator = bondingParams.maxNominatorPerValidator as number;
 
   const networkJson = useGetNetworkJson(selectedNetwork);
   const [showDetail, setShowDetail] = useState(false);
@@ -47,6 +50,11 @@ function BondingSubmitTransaction ({ className }: Props): React.ReactElement<Pro
 
   const [showAuth, setShowAuth] = useState(false);
   const [showResult, setShowResult] = useState(false);
+
+  const isOversubscribed = validatorInfo.nominatorCount >= maxNominatorPerValidator;
+  const isSufficientFund = useIsSufficientBalance(selectedNetwork, validatorInfo.minBond);
+  const hasOwnStake = validatorInfo.ownStake > 0;
+  const isMaxCommission = validatorInfo.commission === 100;
 
   const _height = window.innerHeight > 600 ? 650 : 450;
 
@@ -179,8 +187,23 @@ function BondingSubmitTransaction ({ className }: Props): React.ReactElement<Pro
                 <div className={'validator-att'}>
                   <div className={'validator-att-title'}>
                     Own stake
+                    {
+                      !hasOwnStake && <img
+                        data-for={`validator-has-no-stake-tooltip-${selectedNetwork}`}
+                        data-tip={true}
+                        height={15}
+                        src={NeutralQuestion}
+                        width={15}
+                      />
+                    }
+                    <Tooltip
+                      place={'top'}
+                      // eslint-disable-next-line @typescript-eslint/restrict-plus-operands
+                      text={'Validators should have their own stake.'}
+                      trigger={`validator-has-no-stake-tooltip-${selectedNetwork}`}
+                    />
                   </div>
-                  <div className={'validator-att-value'}>{parseBalanceString(validatorInfo.ownStake, networkJson.nativeToken as string)}</div>
+                  <div className={`${hasOwnStake ? 'validator-att-value' : 'validator-att-value-warning'}`}>{parseBalanceString(validatorInfo.ownStake, networkJson.nativeToken as string)}</div>
                 </div>
               </div>
 
@@ -188,15 +211,44 @@ function BondingSubmitTransaction ({ className }: Props): React.ReactElement<Pro
                 <div className={'validator-att'}>
                   <div className={'validator-att-title'}>
                     Nominators count
+                    {
+                      isOversubscribed && <img
+                        data-for={`validator-oversubscribed-tooltip-${selectedNetwork}`}
+                        data-tip={true}
+                        height={15}
+                        src={NeutralQuestion}
+                        width={15}
+                      />
+                    }
+                    <Tooltip
+                      place={'top'}
+                      // eslint-disable-next-line @typescript-eslint/restrict-plus-operands
+                      text={'Oversubscribed. You will not be able to receive reward.'}
+                      trigger={`validator-oversubscribed-tooltip-${selectedNetwork}`}
+                    />
                   </div>
-                  <div className={'validator-att-value'}>{validatorInfo.nominatorCount}</div>
+                  <div className={`${!isOversubscribed ? 'validator-att-value' : 'validator-att-value-error'}`}>{validatorInfo.nominatorCount}</div>
                 </div>
 
                 <div className={'validator-att'}>
                   <div className={'validator-att-title'}>
                     Commission
+                    {
+                      isMaxCommission && <img
+                        data-for={`commission-max-tooltip-${selectedNetwork}`}
+                        data-tip={true}
+                        height={15}
+                        src={NeutralQuestion}
+                        width={15}
+                      />
+                    }
+                    <Tooltip
+                      place={'top'}
+                      text={'You will not be able to receive reward.'}
+                      trigger={`commission-max-tooltip-${selectedNetwork}`}
+                    />
                   </div>
-                  <div className={'validator-att-value'}>{validatorInfo.commission}%</div>
+                  <div className={`${!isMaxCommission ? 'validator-att-value' : 'validator-att-value-error'}`}>{validatorInfo.commission}%</div>
                 </div>
               </div>
 
@@ -204,8 +256,23 @@ function BondingSubmitTransaction ({ className }: Props): React.ReactElement<Pro
                 <div className={'validator-att'}>
                   <div className={'validator-att-title'}>
                     Minimum bonding
+                    {
+                      !isSufficientFund && <img
+                        data-for={`insufficient-fund-tooltip-${selectedNetwork}`}
+                        data-tip={true}
+                        height={15}
+                        src={NeutralQuestion}
+                        width={15}
+                      />
+                    }
+                    <Tooltip
+                      place={'top'}
+                      // eslint-disable-next-line @typescript-eslint/restrict-plus-operands
+                      text={`Your balance needs to be at least ${parseBalanceString(validatorInfo.minBond, networkJson.nativeToken as string)}.`}
+                      trigger={`insufficient-fund-tooltip-${selectedNetwork}`}
+                    />
                   </div>
-                  <div className={'validator-att-value'}>{parseBalanceString(validatorInfo.minBond, networkJson.nativeToken as string)}</div>
+                  <div className={`${isSufficientFund ? 'validator-att-value' : 'validator-att-value-error'}`}>{parseBalanceString(validatorInfo.minBond, networkJson.nativeToken as string)}</div>
                 </div>
               </div>
             </div>

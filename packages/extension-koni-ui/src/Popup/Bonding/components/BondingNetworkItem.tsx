@@ -21,7 +21,7 @@ function BondingNetworkItem ({ chainBondingMeta, className, icon, network }: Pro
   const navigate = useContext(ActionContext);
 
   const handleOnClick = useCallback(() => {
-    store.dispatch({ type: 'bondingParams/update', payload: { selectedNetwork: network.key, selectedValidator: null } as BondingParams });
+    store.dispatch({ type: 'bondingParams/update', payload: { selectedNetwork: network.key, selectedValidator: null, maxNominatorPerValidator: null } as BondingParams });
     navigate('/account/select-bonding-validator');
   }, [navigate, network.key]);
 

@@ -93,6 +93,6 @@ export default React.memo(styled(StakingContainer)(({ theme }: Props) => `
   }
 
   .staking-button {
-    width: 65%;
+    width: 60%;
   }
 `));

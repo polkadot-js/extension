@@ -230,8 +230,12 @@ function updateResponseTxResult (
         response.txResult.changeSymbol = tokenInfo.symbol;
       }
     } else {
-      if ((record.event.section === 'balances' &&
-        record.event.method.toLowerCase() === 'transfer')) {
+      if (record.event.section === 'balances' &&
+        record.event.method.toLowerCase() === 'transfer') {
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+        response.txResult.change = record.event.data[2]?.toString() || '0';
+      } else if (record.event.section === 'xTokens' &&
+        record.event.method.toLowerCase() === 'transferred') {
         // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
         response.txResult.change = record.event.data[2]?.toString() || '0';
       }
@@ -259,17 +263,6 @@ async function doSignAndSend (
     response: ResponseTransfer,
     records: EventRecord[]) => void,
   callback: (data: ResponseTransfer) => void) {
-  const fromAddress = fromKeypair.address;
-  let nonce;
-
-  if (['genshiro_testnet', 'genshiro', 'equilibrium_parachain'].includes(networkKey)) {
-    nonce = -1;
-  } else {
-    // @ts-ignore
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-    nonce = await api.query.system.account(fromAddress).nonce;
-  }
-
   const response: ResponseTransfer = {
     step: TransferStep.READY,
     errors: [],
@@ -326,8 +319,9 @@ async function doSignAndSend (
     _updateResponseTxResult(networkKey, tokenInfo, response, records);
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-  await transfer.signAndSend(fromKeypair, { nonce }, ({ events = [], status }) => {
+  await transfer.signAsync(fromKeypair, { nonce: -1 });
+
+  await transfer.send(({ events = [], status }) => {
     console.log('Transaction status:', status.type, status.hash.toHex());
     response.extrinsicStatus = status.type;
 
@@ -444,15 +438,15 @@ export async function makeTransfer (
 }
 
 export function isNetworksPairSupportedTransferCrossChain (
-  originalNetworkKey: string,
+  originNetworkKey: string,
   destinationNetworkKey: string,
   token: string,
   networkMap: Record<string, NetworkJson>
 ): boolean {
   // todo: Check ParaChain vs RelayChain, RelayChain vs ParaChain
-  if (!SupportedCrossChainsMap[originalNetworkKey] ||
-  !SupportedCrossChainsMap[originalNetworkKey].relationMap[destinationNetworkKey] ||
-  !SupportedCrossChainsMap[originalNetworkKey].relationMap[destinationNetworkKey].supportedToken.includes(token)) {
+  if (!SupportedCrossChainsMap[originNetworkKey] ||
+  !SupportedCrossChainsMap[originNetworkKey].relationMap[destinationNetworkKey] ||
+  !SupportedCrossChainsMap[originNetworkKey].relationMap[destinationNetworkKey].supportedToken.includes(token)) {
     return false;
   }
 
@@ -491,7 +485,7 @@ function getCrossChainTransferDest (paraId: number, toAddress: string) {
 }
 
 export async function estimateCrossChainFee (
-  originalNetworkKey: string,
+  originNetworkKey: string,
   destinationNetworkKey: string,
   to: string,
   fromKeypair: KeyringPair,
@@ -500,11 +494,11 @@ export async function estimateCrossChainFee (
   tokenInfo: TokenInfo,
   networkMap: Record<string, NetworkJson>
 ): Promise<[string, string | undefined]> {
-  if (!isNetworksPairSupportedTransferCrossChain(originalNetworkKey, destinationNetworkKey, tokenInfo.symbol, networkMap)) {
+  if (!isNetworksPairSupportedTransferCrossChain(originNetworkKey, destinationNetworkKey, tokenInfo.symbol, networkMap)) {
     return ['0', tokenInfo.symbol];
   }
 
-  const apiProps = await dotSamaApiMap[originalNetworkKey].isReady;
+  const apiProps = await dotSamaApiMap[originNetworkKey].isReady;
   const api = apiProps.api;
   const isTxXTokensSupported = !!api && !!api.tx && !!api.tx.xTokens;
   let fee = '0';
@@ -534,7 +528,7 @@ export async function estimateCrossChainFee (
 }
 
 export async function makeCrossChainTransfer (
-  originalNetworkKey: string,
+  originNetworkKey: string,
   destinationNetworkKey: string,
   to: string,
   fromKeypair: KeyringPair,
@@ -544,13 +538,13 @@ export async function makeCrossChainTransfer (
   networkMap: Record<string, NetworkJson>,
   callback: (data: ResponseTransfer) => void
 ): Promise<void> {
-  if (!isNetworksPairSupportedTransferCrossChain(originalNetworkKey, destinationNetworkKey, tokenInfo.symbol, networkMap)) {
+  if (!isNetworksPairSupportedTransferCrossChain(originNetworkKey, destinationNetworkKey, tokenInfo.symbol, networkMap)) {
     callback(getUnsupportedResponse());
 
     return;
   }
 
-  const apiProps = await dotSamaApiMap[originalNetworkKey].isReady;
+  const apiProps = await dotSamaApiMap[originNetworkKey].isReady;
   const api = apiProps.api;
   const isTxXTokensSupported = !!api && !!api.tx && !!api.tx.xTokens;
 
@@ -574,5 +568,5 @@ export async function makeCrossChainTransfer (
     4000000000
   );
 
-  await doSignAndSend(api, originalNetworkKey, tokenInfo, transfer, fromKeypair, updateResponseTxResult, callback);
+  await doSignAndSend(api, originNetworkKey, tokenInfo, transfer, fromKeypair, updateResponseTxResult, callback);
 }

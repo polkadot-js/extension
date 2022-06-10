@@ -77,7 +77,7 @@ function AuthTransaction ({ balanceFormat,
   const [password, setPassword] = useState<string>('');
   const [isKeyringErr, setKeyringErr] = useState<boolean>(false);
   const [errorArr, setErrorArr] = useState<string[]>([]);
-  const originNetworkPrefix = networkMap[requestPayload.originalNetworkKey].ss58Format;
+  const originNetworkPrefix = networkMap[requestPayload.originNetworkKey].ss58Format;
   const destinationNetworkPrefix = networkMap[requestPayload.destinationNetworkKey].ss58Format;
 
   const _onCancel = useCallback(() => {
@@ -128,7 +128,7 @@ function AuthTransaction ({ balanceFormat,
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [
       password, onChangeResult,
-      requestPayload.originalNetworkKey,
+      requestPayload.originNetworkKey,
       requestPayload.destinationNetworkKey,
       requestPayload.from,
       requestPayload.to,
@@ -188,9 +188,9 @@ function AuthTransaction ({ balanceFormat,
             <Dropdown
               className='bridge__chain-selector'
               isDisabled={true}
-              label={'Original Chain'}
+              label={'Origin Chain'}
               options={originChainOptions}
-              value={requestPayload.originalNetworkKey}
+              value={requestPayload.originNetworkKey}
             />
 
             <div className='bridge__chain-swap'>
@@ -215,7 +215,7 @@ function AuthTransaction ({ balanceFormat,
             help={t<string>('The account you will transfer from.')}
             isDisabled={true}
             isSetDefaultValue={true}
-            label={t<string>('Original Account')}
+            label={t<string>('Origin Account')}
             networkPrefix={originNetworkPrefix}
             type='account'
             withEllipsis
@@ -256,7 +256,7 @@ function AuthTransaction ({ balanceFormat,
           </div>
 
           <div className='auth-transaction__info'>
-            <div className='auth-transaction__info-text'>Destination Chain Fee</div>
+            <div className='auth-transaction__info-text'>Total</div>
             <div className='auth-transaction__info-value'>
               {renderTotal({
                 fee,
@@ -285,6 +285,7 @@ function AuthTransaction ({ balanceFormat,
           <div className='bridge-button-container'>
             <Button
               className='bridge-button'
+              isDisabled={isBusy}
               onClick={_onCancel}
             >
               <span>
@@ -294,6 +295,7 @@ function AuthTransaction ({ balanceFormat,
 
             <Button
               className='bridge-button'
+              isBusy={isBusy}
               isDisabled={!password}
               onClick={_doStart}
             >
@@ -335,8 +337,8 @@ export default React.memo(styled(AuthTransaction)(({ theme }: ThemeProps) => `
 
   .auth-transaction-body {
     flex: 1;
-    padding-left: 15px;
-    padding-right: 15px;
+    padding-left: 22px;
+    padding-right: 22px;
     padding-bottom: 15px;
     padding-top: 25px;
     overflow-y: auto;
@@ -374,7 +376,6 @@ export default React.memo(styled(AuthTransaction)(({ theme }: ThemeProps) => `
   .auth-transaction-header__close-btn {
     padding-left: 16px;
     padding-right: 16px;
-    font-size: 14px;
     height: 40px;
     display: flex;
     align-items: center;

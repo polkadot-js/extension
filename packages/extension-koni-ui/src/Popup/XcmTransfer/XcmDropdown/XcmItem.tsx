@@ -42,7 +42,7 @@ export default React.memo(styled(XcmItem)(({ theme }: ThemeProps) => `
   .token-item__chain {
     font-size: 15px;
     line-height: 26px;
-    max-width: 100px;
+    max-width: 85px;
     text-overflow: ellipsis;
     white-space: nowrap;
     overflow: hidden;

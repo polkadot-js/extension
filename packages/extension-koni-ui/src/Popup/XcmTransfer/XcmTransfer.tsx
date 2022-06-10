@@ -106,6 +106,7 @@ function XcmTransfer ({ chainRegistryMap, className, defaultValue, firstOriginCh
   const [originChain, setOriginChain] = useState<string>(firstOriginChain);
   const [{ address: senderId,
     token: selectedToken }, setSenderValue] = useState<XcmTransferInputAddressType>(defaultValue);
+  const onAction = useContext(ActionContext);
   const [[fee, feeSymbol], setFeeInfo] = useState<[string | null, string | null | undefined]>([null, null]);
   const senderFreeBalance = useFreeBalance(originChain, senderId, selectedToken);
   const recipientFreeBalance = useFreeBalance(originChain, recipientId, selectedToken);
@@ -120,7 +121,6 @@ function XcmTransfer ({ chainRegistryMap, className, defaultValue, firstOriginCh
       ? balanceFormat[0]
       : getBalanceFormat(originChain, feeSymbol, chainRegistryMap)[0]
     : null;
-  const navigate = useContext(ActionContext);
   const valueToTransfer = amount?.toString() || '0';
   const defaultDestinationChainOptions = getDestinationChainOptions(firstOriginChain, networkMap);
   const [[selectedDestinationChain, destinationChainOptions], setDestinationChain] = useState<[string, DropdownTransformOptionType[]]>([defaultDestinationChainOptions[0].value, defaultDestinationChainOptions]);
@@ -132,21 +132,22 @@ function XcmTransfer ({ chainRegistryMap, className, defaultValue, firstOriginCh
       networkName: networkMap[originChain].chain
     }
   ));
-  const checkOriginalChainAndSenderIdType = !!networkMap[originChain].isEthereum !== isEthereumAddress(senderId);
-  const checkDestinationChainAndReceiverIdType = recipientId && !!networkMap[selectedDestinationChain].isEthereum !== isEthereumAddress(recipientId);
+  const checkOriginChainAndSenderIdType = !!networkMap[originChain].isEthereum === isEthereumAddress(senderId);
+  const checkDestinationChainAndReceiverIdType = !!recipientId && !!networkMap[selectedDestinationChain].isEthereum === isEthereumAddress(recipientId);
   const amountGtAvailableBalance = amount && senderFreeBalance && amount.gt(new BN(senderFreeBalance));
-  const canMakeTransfer = checkOriginalChainAndSenderIdType ||
-    checkDestinationChainAndReceiverIdType ||
-    !valueToTransfer ||
-    !recipientId ||
-    !!amountGtAvailableBalance;
+  const canMakeTransfer = checkOriginChainAndSenderIdType &&
+    checkDestinationChainAndReceiverIdType &&
+    !!valueToTransfer &&
+    !!recipientId &&
+    !amountGtAvailableBalance &&
+    !!balanceFormat;
 
   useEffect(() => {
     let isSync = true;
 
     if (recipientId) {
       checkCrossChainTransfer({
-        originalNetworkKey: originChain,
+        originNetworkKey: originChain,
         destinationNetworkKey: selectedDestinationChain,
         from: senderId,
         to: recipientId,
@@ -170,9 +171,10 @@ function XcmTransfer ({ chainRegistryMap, className, defaultValue, firstOriginCh
 
   const _onCancel = useCallback(
     () => {
-      navigate('/');
+      window.localStorage.setItem('popupNavigation', '/');
+      onAction('/');
     },
-    [navigate]
+    [onAction]
   );
   const _onTransfer = useCallback(() => {
     setShowTxModal(true);
@@ -193,13 +195,14 @@ function XcmTransfer ({ chainRegistryMap, className, defaultValue, firstOriginCh
       isShowTxResult: false,
       txError: undefined
     });
-    setSenderValue(defaultValue);
+    setSenderValue({ address: senderId, token: selectedToken });
     setRecipientId(null);
   },
   // eslint-disable-next-line react-hooks/exhaustive-deps
   [
-    defaultValue.address,
-    defaultValue.token
+    originChain,
+    selectedToken,
+    senderId
   ]);
 
   const _onChangeOriginChain = useCallback((originChain: string) => {
@@ -208,14 +211,18 @@ function XcmTransfer ({ chainRegistryMap, className, defaultValue, firstOriginCh
     setOriginChain(originChain);
     setDestinationChain([destinationChainOptions[0].value, destinationChainOptions]);
     setSenderValue((prev) => {
-      const newVal = {
+      return {
         ...prev,
         token: getSupportedTokens(originChain, destinationChainOptions[0].value)[0]
       };
-
-      return newVal;
     });
   }, [networkMap]);
+
+  const _onChangeDestinationChain = useCallback((chain: string) => {
+    setDestinationChain((prev) => {
+      return [chain, prev[1]];
+    });
+  }, []);
 
   return (
     <>
@@ -226,7 +233,7 @@ function XcmTransfer ({ chainRegistryMap, className, defaultValue, firstOriginCh
               <Dropdown
                 className='bridge__chain-selector'
                 isDisabled={false}
-                label={'Original Chain'}
+                label={'Origin Chain'}
                 onChange={_onChangeOriginChain}
                 options={originChainOptions}
                 value={originChain}
@@ -243,7 +250,7 @@ function XcmTransfer ({ chainRegistryMap, className, defaultValue, firstOriginCh
                 className='bridge__chain-selector'
                 isDisabled={false}
                 label={'Destination Chain'}
-                onChange={setDestinationChain}
+                onChange={_onChangeDestinationChain}
                 options={destinationChainOptions}
                 value={selectedDestinationChain}
               />
@@ -290,21 +297,21 @@ function XcmTransfer ({ chainRegistryMap, className, defaultValue, firstOriginCh
                   siSymbol={balanceFormat[2] || balanceFormat[1]}
                 />
 
-                {checkOriginalChainAndSenderIdType &&
+                {!checkOriginChainAndSenderIdType &&
                 <Warning
                   className='xcm-transfer-warning'
                   isDanger
                 >
-                  {t<string>(`Sender address must be ${networkMap[originChain].isEthereum ? 'EVM' : 'substrate'} type`)}
+                  {t<string>(`Origin account must be ${networkMap[originChain].isEthereum ? 'EVM' : 'substrate'} type`)}
                 </Warning>
                 }
 
-                {checkDestinationChainAndReceiverIdType &&
+                {!!recipientId && !checkDestinationChainAndReceiverIdType &&
                 <Warning
                   className='xcm-transfer-warning'
                   isDanger
                 >
-                  {t<string>(`Receiver address must be ${networkMap[selectedDestinationChain].isEthereum ? 'EVM' : 'substrate'} type`)}
+                  {t<string>(`Destination account must be ${networkMap[selectedDestinationChain].isEthereum ? 'EVM' : 'substrate'} type`)}
                 </Warning>
                 }
 
@@ -316,32 +323,32 @@ function XcmTransfer ({ chainRegistryMap, className, defaultValue, firstOriginCh
                     {t<string>('The amount you want to transfer is greater than your available balance.')}
                   </Warning>
                 )}
-
-                <div className='bridge-button-container'>
-                  <Button
-                    className='bridge-button'
-                    onClick={_onCancel}
-                  >
-                    <span>
-                      {t<string>('Cancel')}
-                    </span>
-                  </Button>
-
-                  <Button
-                    className='bridge-button'
-                    isDisabled={canMakeTransfer}
-                    onClick={_onTransfer}
-                  >
-                    <span>
-                      {t<string>('Transfer')}
-                    </span>
-                  </Button>
-                </div>
               </>
               : <Warning className='xcm-transfer-warning'>
-                {t<string>('To perform the transaction, please make sure the selected network in Original Chain is activated first.')}
+                {t<string>('To perform the transaction, please make sure the selected network in Origin Chain is activated first.')}
               </Warning>
             }
+
+            <div className='bridge-button-container'>
+              <Button
+                className='bridge-button'
+                onClick={_onCancel}
+              >
+                <span>
+                  {t<string>('Cancel')}
+                </span>
+              </Button>
+
+              <Button
+                className='bridge-button'
+                isDisabled={!canMakeTransfer}
+                onClick={_onTransfer}
+              >
+                <span>
+                  {t<string>('Transfer')}
+                </span>
+              </Button>
+            </div>
 
             {isShowTxModal && mainTokenInfo && (
               <AuthTransaction
@@ -355,7 +362,7 @@ function XcmTransfer ({ chainRegistryMap, className, defaultValue, firstOriginCh
                 requestPayload={{
                   from: senderId,
                   to: recipientId,
-                  originalNetworkKey: originChain,
+                  originNetworkKey: originChain,
                   destinationNetworkKey: selectedDestinationChain,
                   value: valueToTransfer,
                   token: selectedToken
@@ -387,7 +394,7 @@ export default React.memo(styled(Wrapper)(({ theme }: Props) => `
   }
 
   .bridge-container {
-    padding: 15px;
+    padding: 10px 22px 15px;
     flex: 1;
     overflow-y: auto;
   }
@@ -413,22 +420,26 @@ export default React.memo(styled(Wrapper)(({ theme }: Props) => `
     display: flex;
     justify-content: center;
     align-items: center;
-    margin: 24px 12px 0;
+    margin: 30px 12px 0;
   }
 
   .bridge-button-container {
     display: flex;
     position: sticky;
     bottom: -15px;
-    padding: 15px;
-    margin-left: -15px;
+    padding: 15px 22px;
+    margin-left: -22px;
     margin-bottom: -15px;
-    margin-right: -15px;
+    margin-right: -22px;
     background-color: ${theme.background};
   }
 
   .bridge__chain-selector {
     flex: 1;
+  }
+
+  .bridge__chain-selector .label-wrapper {
+    margin-bottom: 5px;
   }
 
   .bridge__chain-selector label {

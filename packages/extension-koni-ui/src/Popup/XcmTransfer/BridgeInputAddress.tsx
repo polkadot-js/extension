@@ -65,7 +65,6 @@ function BridgeInputAddress ({ balance, balanceFormat, className = '', initValue
   }, [onChange]);
 
   const onChangeTokenValue = useCallback((tokenValueStr: string) => {
-    console.log('tokenValueStr', tokenValueStr);
     setValue((prev) => {
       const newVal = {
         ...prev,
@@ -85,7 +84,7 @@ function BridgeInputAddress ({ balance, balanceFormat, className = '', initValue
         defaultValue={initValue.address}
         help={t<string>('The account you will transfer from.')}
         isSetDefaultValue={true}
-        label={t<string>('Original Account')}
+        label={t<string>('Origin Account')}
         networkPrefix={networkPrefix}
         onChange={onChangeInputAddress}
         type='account'

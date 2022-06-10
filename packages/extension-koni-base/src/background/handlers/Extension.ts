@@ -1130,7 +1130,7 @@ export default class KoniExtension extends Extension {
   }
 
   private async validateCrossChainTransfer (
-    originalNetworkKey: string,
+    originNetworkKey: string,
     destinationNetworkKey: string,
     token: string,
     from: string, to: string,
@@ -1155,7 +1155,7 @@ export default class KoniExtension extends Extension {
       });
     }
 
-    const tokenInfo: TokenInfo | undefined = await getTokenInfo(originalNetworkKey, dotSamaApiMap[originalNetworkKey].api, token);
+    const tokenInfo: TokenInfo | undefined = await getTokenInfo(originNetworkKey, dotSamaApiMap[originNetworkKey].api, token);
 
     if (!tokenInfo) {
       errors.push({
@@ -1169,12 +1169,12 @@ export default class KoniExtension extends Extension {
 
   private async checkCrossChainTransfer ({ destinationNetworkKey,
     from,
-    originalNetworkKey,
+    originNetworkKey,
     to,
     token,
     value }: RequestCheckCrossChainTransfer): Promise<ResponseCheckCrossChainTransfer> {
     const [errors, fromKeyPair, valueNumber, tokenInfo] =
-      await this.validateCrossChainTransfer(originalNetworkKey, destinationNetworkKey, token, from, to, undefined, value);
+      await this.validateCrossChainTransfer(originNetworkKey, destinationNetworkKey, token, from, to, undefined, value);
     const dotSamaApiMap = state.getDotSamaApiMap();
     const web3ApiMap = state.getApiMap().web3;
     let fee = '0';
@@ -1186,7 +1186,7 @@ export default class KoniExtension extends Extension {
     if (tokenInfo && fromKeyPair) {
       [[fee, feeSymbol], fromAccountFree] = await Promise.all([
         estimateCrossChainFee(
-          originalNetworkKey,
+          originNetworkKey,
           destinationNetworkKey,
           to,
           fromKeyPair,
@@ -1195,7 +1195,7 @@ export default class KoniExtension extends Extension {
           tokenInfo,
           state.getNetworkMap()
         ),
-        getFreeBalance(originalNetworkKey, from, dotSamaApiMap, web3ApiMap, token)
+        getFreeBalance(originNetworkKey, from, dotSamaApiMap, web3ApiMap, token)
       ]);
     }
 
@@ -1314,10 +1314,10 @@ export default class KoniExtension extends Extension {
   }
 
   private async makeCrossChainTransfer (id: string, port: chrome.runtime.Port,
-    { destinationNetworkKey, from, originalNetworkKey, password, to, token, value }: RequestCrossChainTransfer): Promise<Array<TransferError>> {
+    { destinationNetworkKey, from, originNetworkKey, password, to, token, value }: RequestCrossChainTransfer): Promise<Array<TransferError>> {
     const cb = createSubscription<'pri(accounts.crossChainTransfer)'>(id, port);
     const [errors, fromKeyPair, , tokenInfo] = await this.validateCrossChainTransfer(
-      originalNetworkKey,
+      originNetworkKey,
       destinationNetworkKey,
       token, from, to, password, value);
 
@@ -1339,13 +1339,13 @@ export default class KoniExtension extends Extension {
 
       // eslint-disable-next-line prefer-const
       transferProm = makeCrossChainTransfer(
-        originalNetworkKey, destinationNetworkKey,
+        originNetworkKey, destinationNetworkKey,
         to, fromKeyPair,
         value || '0',
         state.getDotSamaApiMap(),
         tokenInfo,
         state.getNetworkMap(),
-        this.makeTransferCallback(from, originalNetworkKey, token, cb)
+        this.makeTransferCallback(from, originNetworkKey, token, cb)
       );
 
       transferProm.then(() => {
@@ -1453,7 +1453,7 @@ export default class KoniExtension extends Extension {
       txState.passwordError = null;
       updateState(txState);
     } catch (e) {
-      txState.passwordError = 'Error unlocking account with password';
+      txState.passwordError = 'Unable to decode using the supplied passphrase';
       updateState(txState);
 
       port.onDisconnect.addListener((): void => {

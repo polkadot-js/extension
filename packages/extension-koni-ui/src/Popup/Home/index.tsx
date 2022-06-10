@@ -299,21 +299,21 @@ function Home ({ chainRegistryMap, className = '', currentAccount, historyMap, n
 
           <Link
             className={'action-button-wrapper'}
-            to={'/account/xcm-transfer'}
-          >
-            <ActionButton
-              iconSrc={swapIcon}
-              tooltipContent={t<string>('XCM Transfer')}
-            />
-          </Link>
-
-          <Link
-            className={'action-button-wrapper'}
             to={'/account/send-fund'}
           >
             <ActionButton
               iconSrc={sendIcon}
               tooltipContent={t<string>('Send')}
+            />
+          </Link>
+
+          <Link
+            className={'action-button-wrapper'}
+            to={'/account/xcm-transfer'}
+          >
+            <ActionButton
+              iconSrc={swapIcon}
+              tooltipContent={t<string>('XCM Transfer')}
             />
           </Link>
 

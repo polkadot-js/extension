@@ -6,6 +6,7 @@ import { AccountAuthType, AccountJson, AuthorizeRequest, RequestAccountList, Req
 import { InjectedAccount, MetadataDefBase } from '@subwallet/extension-inject/types';
 import Web3 from 'web3';
 import { RequestArguments } from 'web3-core';
+import { JsonRpcPayload, JsonRpcResponse } from 'web3-core-helpers';
 
 import { ApiPromise } from '@polkadot/api';
 import { SubmittableExtrinsicFunction } from '@polkadot/api/promise/types';
@@ -772,7 +773,7 @@ export interface CrossChainRelation {
 }
 
 export type RequestEvmEvents = null;
-export type EvmEventType = 'connect' | 'disconnect' | 'accountsChanged' | 'chainChanged' | 'message';
+export type EvmEventType = 'connect' | 'disconnect' | 'accountsChanged' | 'chainChanged' | 'message' | 'data' | 'reconnect' | 'error';
 export type EvmAccountsChangedPayload = string [];
 export type EvmChainChangedPayload = string;
 export type EvmConnectPayload = {chainId: EvmChainChangedPayload}
@@ -787,7 +788,14 @@ export interface EvmAppState {
   networkKey?: string,
   chainId?: string,
   isConnected?: boolean,
-  web3?: Web3
+  web3?: Web3,
+  listenEvents?: string[]
+}
+
+export type RequestEvmProviderSend = JsonRpcPayload;
+export interface ResponseEvmProviderSend {
+  error: (Error | null);
+  result?: JsonRpcResponse;
 }
 
 export interface EvmProviderRpcError extends Error {
@@ -881,4 +889,5 @@ export interface KoniRequestSignatures {
   // EVM inject request
   'evm(events.subscribe)': [RequestEvmEvents, boolean, EvmEvent];
   'evm(request)': [RequestArguments, unknown];
+  'evm(provider.send)': [RequestEvmProviderSend, string | number, ResponseEvmProviderSend]
 }

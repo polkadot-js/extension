@@ -6,9 +6,7 @@ import type { EvmProvider } from '@subwallet/extension-inject/types';
 import SafeEventEmitter from '@metamask/safe-event-emitter';
 import { SendRequest } from '@subwallet/extension-base/page/types';
 import { RequestArguments } from 'web3-core';
-import { JsonRpcPayload } from 'web3-core-helpers';
-
-import { JsonRpcResponse } from '@polkadot/rpc-provider/types';
+import { JsonRpcPayload, JsonRpcResponse } from 'web3-core-helpers';
 
 export class SubWalletEvmProvider extends SafeEventEmitter implements EvmProvider {
   public readonly isSubWallet = true;
@@ -24,22 +22,34 @@ export class SubWalletEvmProvider extends SafeEventEmitter implements EvmProvide
     this._connected = true;
   }
 
+  get connected () {
+    return this._connected;
+  }
+
   public isConnected () {
     return this._connected;
   }
 
+  public override on (eventName: string | symbol, listener: (...args: any[]) => void): this {
+    console.log('Listen', eventName);
+    super.on(eventName, listener);
+
+    return this;
+  }
+
   protected subscribeExtensionEvents () {
     this.sendMessage('evm(events.subscribe)', null, ({ payload, type }) => {
-      if (['connect', 'disconnect', 'accountsChanged', 'chainChanged', 'message'].includes(type)) {
+      if (['connect', 'disconnect', 'accountsChanged', 'chainChanged', 'message', 'data', 'reconnect', 'error'].includes(type)) {
         if (type === 'connect') {
           this._connected = true;
         } else if (type === 'disconnect') {
           this._connected = false;
         }
 
-        console.debug('EVM Events', type, payload);
+        const finalType = type === 'data' ? 'message' : type;
+
         // eslint-disable-next-line @typescript-eslint/no-unsafe-call
-        this.emit(type, payload);
+        this.emit(finalType, payload);
       } else {
         console.warn('Can not handle event', type, payload);
       }
@@ -52,7 +62,7 @@ export class SubWalletEvmProvider extends SafeEventEmitter implements EvmProvide
   request<T> ({ method, params }: RequestArguments): Promise<T> {
     switch (method) {
       case 'eth_requestAccounts':
-        return new Promise((resolve) => {
+        return new Promise((resolve, reject) => {
           this.sendMessage('pub(authorize.tabV2)', { origin: 'eth_requestAccounts', accountAuthType: 'evm' })
             .then(() => {
               // Subscribe event
@@ -64,19 +74,20 @@ export class SubWalletEvmProvider extends SafeEventEmitter implements EvmProvide
                   // @ts-ignore
                   resolve(accounts);
                 }
-                ).catch(console.error);
+                ).catch(reject);
             })
-            .catch(console.error);
+            .catch(reject);
         });
       default:
+        // Todo: Detect and support subscription
         return new Promise((resolve, reject) => {
           // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
           this.sendMessage('evm(request)', { params, method })
             .then((result) => {
               resolve(result as T);
+              console.debug('Request', method, params, result);
             })
             .catch((e) => {
-              console.error(e);
               reject(e);
             });
         });
@@ -84,10 +95,14 @@ export class SubWalletEvmProvider extends SafeEventEmitter implements EvmProvide
   }
 
   send (payload: JsonRpcPayload, callback: (error: (Error | null), result?: JsonRpcResponse) => void): void {
-    console.log(payload, callback);
+    this.sendMessage('evm(provider.send)', payload, ({ error, result }) => {
+      callback(error, result);
+    }).then(console.log).catch(console.error);
   }
 
   sendAsync (payload: JsonRpcPayload, callback: (error: (Error | null), result?: JsonRpcResponse) => void): void {
-    console.log(payload, callback);
+    this.sendMessage('evm(provider.send)', payload, ({ error, result }) => {
+      callback(error, result);
+    }).then(console.log).catch(console.error);
   }
 }

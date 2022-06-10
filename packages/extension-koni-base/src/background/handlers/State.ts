@@ -494,7 +494,7 @@ export default class KoniState extends State {
     const existedAccountAuthType = existedAuth?.accountAuthType || 'substrate';
     const reConfirm = existedAuth?.accountAuthType !== 'both' && existedAccountAuthType !== accountAuthType;
 
-    if (existedAuth && !reConfirm) {
+    if (existedAuth && !reConfirm && !request.reOpen) {
       // this url was seen in the past
       const isConnected = Object.keys(existedAuth.isAllowedMap)
         .some((address) => existedAuth.isAllowedMap[address]);

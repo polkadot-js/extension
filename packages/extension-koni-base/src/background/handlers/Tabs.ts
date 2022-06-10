@@ -111,6 +111,12 @@ export default class KoniTabs extends Tabs {
     });
   }
 
+  private async getEvmPermission (url: string, id: string, request: RequestArguments) {
+    const accounts = await this.getEvmCurrentAccount(url);
+
+    return [{ id: id, invoker: url, parentCapability: 'eth_accounts', caveats: { type: 'restrictReturnedAccounts', value: accounts }, date: new Date().getTime() }];
+  }
+
   private async getEvmCurrentChainId (): Promise<string | undefined> {
     return await new Promise((resolve) => {
       this.#koniState.getCurrentAccount(({ currentGenesisHash }) => {
@@ -270,11 +276,15 @@ export default class KoniTabs extends Tabs {
   private async handleEvmRequest (id: string, url: string, request: RequestArguments): Promise<unknown> {
     const { method } = request;
 
-    console.debug('Handle evm request', method);
-
     switch (method) {
       case 'eth_accounts':
         return await this.getEvmCurrentAccount(url);
+      case 'wallet_requestPermissions':
+        await this.authorizeV2(url, { origin: 'eth_accounts', accountAuthType: 'evm', reOpen: true });
+
+        return await this.getEvmPermission(url, id, request);
+      case 'wallet_getPermissions':
+        return await this.getEvmPermission(url, id, request);
 
       default:
         return this.performWeb3Method(id, request);

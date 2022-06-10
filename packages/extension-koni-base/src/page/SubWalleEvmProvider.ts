@@ -30,13 +30,6 @@ export class SubWalletEvmProvider extends SafeEventEmitter implements EvmProvide
     return this._connected;
   }
 
-  public override on (eventName: string | symbol, listener: (...args: any[]) => void): this {
-    console.log('Listen', eventName);
-    super.on(eventName, listener);
-
-    return this;
-  }
-
   protected subscribeExtensionEvents () {
     this.sendMessage('evm(events.subscribe)', null, ({ payload, type }) => {
       if (['connect', 'disconnect', 'accountsChanged', 'chainChanged', 'message', 'data', 'reconnect', 'error'].includes(type)) {
@@ -63,7 +56,7 @@ export class SubWalletEvmProvider extends SafeEventEmitter implements EvmProvide
     switch (method) {
       case 'eth_requestAccounts':
         return new Promise((resolve, reject) => {
-          this.sendMessage('pub(authorize.tabV2)', { origin: 'eth_requestAccounts', accountAuthType: 'evm' })
+          this.sendMessage('pub(authorize.tabV2)', { origin: 'eth_accounts', accountAuthType: 'evm' })
             .then(() => {
               // Subscribe event
               this.subscribeExtensionEvents();
@@ -85,7 +78,6 @@ export class SubWalletEvmProvider extends SafeEventEmitter implements EvmProvide
           this.sendMessage('evm(request)', { params, method })
             .then((result) => {
               resolve(result as T);
-              console.debug('Request', method, params, result);
             })
             .catch((e) => {
               reject(e);

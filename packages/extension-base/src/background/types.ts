@@ -171,6 +171,7 @@ export interface RequestAuthorizeTab {
   origin: string;
   accountAuthType?: AccountAuthType;
   allowedAccounts?: string[]
+  reOpen?: boolean
 }
 
 export interface RequestAuthorizeApprove {

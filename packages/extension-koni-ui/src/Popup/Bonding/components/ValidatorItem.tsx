@@ -44,7 +44,7 @@ function ValidatorItem ({ className, maxNominatorPerValidator, networkKey, valid
   const handleOnSelect = useCallback(() => {
     store.dispatch({ type: 'bondingParams/update', payload: { selectedNetwork: networkKey, selectedValidator: validatorInfo, maxNominatorPerValidator } as BondingParams });
     navigate('/account/bonding-auth');
-  }, [navigate, networkKey, validatorInfo]);
+  }, [maxNominatorPerValidator, navigate, networkKey, validatorInfo]);
 
   return (
     <div className={className}>

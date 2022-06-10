@@ -133,6 +133,7 @@ function BondingValidatorSelection ({ className }: Props): React.ReactElement<Pr
         })
         .catch(console.error);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const handleClickHelper = useCallback(() => {

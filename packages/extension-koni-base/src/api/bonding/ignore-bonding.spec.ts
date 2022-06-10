@@ -167,7 +167,9 @@ describe('test DotSama APIs', () => {
     const parsedTotalIssuance = parseFloat(totalIssuance.replaceAll(',', ''));
 
     for (const item of eraStakers) {
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-member-access
       const rawValidatorInfo = item[0].toHuman() as any[];
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-member-access
       const rawValidatorStat = item[1].toHuman() as Record<string, any>;
 
       const validatorAddress = rawValidatorInfo[1] as string;
@@ -180,8 +182,11 @@ describe('test DotSama APIs', () => {
       const parsedOwnStake = parseFloat(rawOwnStake.replaceAll(',', ''));
       const otherStake = parsedTotalStake - parsedOwnStake;
 
+      // @ts-ignore
       const totalStakeString = parseBalanceString(PREDEFINED_NETWORKS.westend.decimals, parsedTotalStake, PREDEFINED_NETWORKS.westend.nativeToken);
+      // @ts-ignore
       const ownStakeString = parseBalanceString(PREDEFINED_NETWORKS.westend.decimals, parsedOwnStake, PREDEFINED_NETWORKS.westend.nativeToken);
+      // @ts-ignore
       const otherStakeString = parseBalanceString(PREDEFINED_NETWORKS.westend.decimals, otherStake, PREDEFINED_NETWORKS.westend.nativeToken);
 
       let nominatorCount = 0;
@@ -230,14 +235,21 @@ describe('test DotSama APIs', () => {
           isReasonable = true;
         }
 
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
         const displayName = identityInfo?.info?.display?.Raw as string;
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
         const legal = identityInfo?.info?.legal?.Raw as string;
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
         const web = identityInfo?.info?.web?.Raw as string;
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
         const riot = identityInfo?.info?.riot?.Raw as string;
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
         const email = identityInfo?.info?.email?.Raw as string;
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
         const twitter = identityInfo?.info?.twitter?.Raw as string;
 
         if (!displayName.startsWith('0x')) {
+          // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
           identity = identityInfo?.info?.display?.Raw as string;
         } else {
           identity = legal || twitter || web || email || riot;

@@ -14,4 +14,3 @@ export function parseBalanceString (balance: number, unit: string) {
     return formatLocaleNumber(Math.round(balance * 100) / 100) + ' ' + unit;
   }
 }
-

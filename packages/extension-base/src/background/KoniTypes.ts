@@ -408,7 +408,8 @@ export interface TransactionHistoryItemType {
   // ex: sub token (DOT, AUSD, KSM, ...) of Acala, Karaura uses main token to pay fee
   isSuccess: boolean;
   action: 'send' | 'received';
-  extrinsicHash: string
+  extrinsicHash: string;
+  origin?: 'app' | 'network';
 }
 
 export interface RequestTransactionHistoryGet {

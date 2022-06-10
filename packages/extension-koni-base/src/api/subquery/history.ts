@@ -9,7 +9,6 @@ import { DotSamaHistory,
   DotSamaHistory_historyElements_nodes,
   DotSamaHistoryVariables } from '@subwallet/extension-koni-base/api/subquery/__generated__/DotSamaHistory';
 import { newApolloClient } from '@subwallet/extension-koni-base/api/subquery/subquery';
-import { state } from '@subwallet/extension-koni-base/background/handlers';
 import { isAccountAll, reformatAddress } from '@subwallet/extension-koni-base/utils/utils';
 
 export const HistoryApiMap: Record<string, string> = {
@@ -67,35 +66,13 @@ function getHistoryAction (address: string, node: DotSamaHistory_historyElements
   return address === node?.transfer.from ? 'send' : 'received';
 }
 
-function isHistoryChange (networkKey: string, items: TransactionHistoryItemType[]): boolean {
-  const historyMap = state.getHistoryMap();
-  const originLength = (!!historyMap[networkKey] && historyMap[networkKey].length) || 0;
-
-  return originLength !== items.length;
-}
-
-export const fetchDotSamaHistory = (address: string, networkMap: Record<string, NetworkJson>, callBack: (historyMap: Record<string, TransactionHistoryItemType[]>) => void) => {
+export const fetchDotSamaHistory = (address: string, networkMap: Record<string, NetworkJson>, callBack: (network: string, items: TransactionHistoryItemType[]) => void) => {
   if (isAccountAll(address)) {
-    callBack({});
-
     return;
   }
 
-  const historyMap: Record<string, TransactionHistoryItemType[]> = {};
-
   Object.entries(networkMap).forEach(([networkKey, networkInfo]) => {
-    if (networkInfo.active) {
-      if (!HistoryApiMap[networkKey]) {
-        state.getTransactionHistory(address, networkKey, (items) => {
-          if (isHistoryChange(networkKey, items)) {
-            historyMap[networkKey] = items;
-            callBack(historyMap);
-          }
-        });
-
-        return;
-      }
-
+    if (networkInfo.active && HistoryApiMap[networkKey]) {
       const formattedAddress = reformatAddress(address, networkInfo.ss58Format, networkInfo.isEthereum);
 
       // eslint-disable-next-line @typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-member-access
@@ -132,15 +109,12 @@ export const fetchDotSamaHistory = (address: string, networkMap: Record<string, 
             isSuccess: n.transfer.success,
             networkKey,
             // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment,@typescript-eslint/no-unsafe-member-access
-            time: (+n.timestamp) * 1000
+            time: (+n.timestamp) * 1000,
+            origin: 'network'
           });
         });
 
-        if (isHistoryChange(networkKey, items)) {
-          state.setTransactionHistoryV2(address, networkKey, items);
-          historyMap[networkKey] = items;
-          callBack(historyMap);
-        }
+        callBack(networkKey, items);
       }).catch((e: any) => {
         console.log(`History API of ${networkKey} is error`, e);
       });

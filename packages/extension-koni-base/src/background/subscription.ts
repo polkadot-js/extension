@@ -33,8 +33,6 @@ export class KoniSubscription {
   }
 
   init () {
-    state.mergeTransactionHistory();
-
     state.getAuthorize((value) => {
       const authString = localStorage.getItem('authUrls') || '{}';
       const previousAuth = JSON.parse(authString) as AuthUrls;

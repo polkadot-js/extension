@@ -1,7 +1,7 @@
 // Copyright 2019-2022 @subwallet/extension-koni authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { ApiMap, CustomEvmToken, NETWORK_STATUS, NetworkJson, NftTransferExtra, StakingRewardJson } from '@subwallet/extension-base/background/KoniTypes';
+import { ApiMap, CustomEvmToken, NETWORK_STATUS, NetworkJson, NftTransferExtra, ServiceInfo, StakingRewardJson } from '@subwallet/extension-base/background/KoniTypes';
 import { getTokenPrice } from '@subwallet/extension-koni-base/api/coingecko';
 import { fetchDotSamaHistory } from '@subwallet/extension-koni-base/api/subquery/history';
 import { state } from '@subwallet/extension-koni-base/background/handlers';
@@ -61,7 +61,10 @@ export class KoniCron {
 
         this.addCron('refreshNft', this.refreshNft(currentAccountInfo.address, state.getApiMap(), state.getActiveErc721Tokens()), CRON_REFRESH_NFT_INTERVAL);
         this.addCron('refreshStakingReward', this.refreshStakingReward(currentAccountInfo.address), CRON_REFRESH_STAKING_REWARD_INTERVAL);
-        this.addCron('refreshHistory', this.refreshHistory(currentAccountInfo.address, state.getNetworkMap()), CRON_REFRESH_HISTORY_INTERVAL);
+
+        this.resetHistory(currentAccountInfo.address).then(() => {
+          this.addCron('refreshHistory', this.refreshHistory(currentAccountInfo.address, state.getNetworkMap()), CRON_REFRESH_HISTORY_INTERVAL);
+        }).catch((err) => console.warn(err));
       } else {
         this.setNftReady(currentAccountInfo.address);
         this.setStakingRewardReady();
@@ -75,27 +78,31 @@ export class KoniCron {
             this.resetNftTransferMeta();
             this.removeCron('refreshNft');
 
-            if (Object.keys(serviceInfo.apiMap.dotSama).length !== 0 || Object.keys(serviceInfo.apiMap.web3).length !== 0) { // only add cron job if there's at least 1 active network
+            if (this.checkNetworkAvailable(serviceInfo)) { // only add cron job if there's at least 1 active network
               this.addCron('refreshNft', this.refreshNft(address, serviceInfo.apiMap, serviceInfo.customErc721Registry), CRON_REFRESH_NFT_INTERVAL);
             }
           }).catch((err) => console.warn(err));
 
           // this.resetStakingReward(address);
-          this.resetHistory();
-          this.removeCron('refreshStakingReward');
-          this.removeCron('refreshHistory');
+          this.resetHistory(address).then(() => {
+            this.removeCron('refreshHistory');
 
+            if (this.checkNetworkAvailable(serviceInfo)) { // only add cron job if there's at least 1 active network
+              this.addCron('refreshHistory', this.refreshHistory(address, serviceInfo.networkMap), CRON_REFRESH_HISTORY_INTERVAL);
+            }
+          }).catch((err) => console.warn(err));
+
+          this.removeCron('refreshStakingReward');
           this.removeCron('refreshPrice');
           this.removeCron('checkStatusApiMap');
           this.removeCron('recoverApiMap');
 
-          if (Object.keys(serviceInfo.apiMap.dotSama).length !== 0 || Object.keys(serviceInfo.apiMap.web3).length !== 0) { // only add cron job if there's at least 1 active network
+          if (this.checkNetworkAvailable(serviceInfo)) { // only add cron job if there's at least 1 active network
             this.addCron('refreshPrice', this.refreshPrice, CRON_REFRESH_PRICE_INTERVAL);
             this.addCron('checkStatusApiMap', this.updateApiMapStatus, CRON_GET_API_MAP_STATUS);
             this.addCron('recoverApiMap', this.recoverApiMap, CRON_AUTO_RECOVER_DOTSAMA_INTERVAL, false);
 
             this.addCron('refreshStakingReward', this.refreshStakingReward(address), CRON_REFRESH_STAKING_REWARD_INTERVAL);
-            this.addCron('refreshHistory', this.refreshHistory(address, serviceInfo.networkMap), CRON_REFRESH_HISTORY_INTERVAL);
           } else {
             this.setNftReady(address);
             this.setStakingRewardReady();
@@ -222,9 +229,9 @@ export class KoniCron {
   refreshHistory (address: string, networkMap: Record<string, NetworkJson>) {
     return () => {
       console.log('Refresh History state');
-      fetchDotSamaHistory(address, networkMap, (historyMap) => {
+      fetchDotSamaHistory(address, networkMap, (network, historyMap) => {
         console.log('--- historyMap ---', historyMap);
-        state.setHistory(historyMap);
+        state.setHistory(address, network, historyMap);
       });
     };
   }
@@ -237,7 +244,11 @@ export class KoniCron {
     state.updateStakingRewardReady(true);
   }
 
-  resetHistory () {
-    state.setHistory({});
+  resetHistory (address: string) {
+    return state.resetHistoryMap(address).catch((err) => console.warn(err));
+  }
+
+  checkNetworkAvailable (serviceInfo: ServiceInfo): boolean {
+    return Object.keys(serviceInfo.apiMap.dotSama).length > 0 || Object.keys(serviceInfo.apiMap.web3).length > 0;
   }
 }

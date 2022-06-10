@@ -27,7 +27,7 @@ import NftStore from '@subwallet/extension-koni-base/stores/Nft';
 import NftCollectionStore from '@subwallet/extension-koni-base/stores/NftCollection';
 import SettingsStore from '@subwallet/extension-koni-base/stores/Settings';
 import StakingStore from '@subwallet/extension-koni-base/stores/Staking';
-import TransactionHistoryStore from '@subwallet/extension-koni-base/stores/TransactionHistory';
+import TransactionHistoryStore from '@subwallet/extension-koni-base/stores/TransactionHistoryV2';
 import { convertFundStatus, getCurrentProvider } from '@subwallet/extension-koni-base/utils/utils';
 import { BehaviorSubject, Subject } from 'rxjs';
 
@@ -124,6 +124,7 @@ export default class KoniState extends State {
   private networkMap: Record<string, NetworkJson> = {}; // mapping to networkMapStore, for uses in background
   private networkMapSubject = new Subject<Record<string, NetworkJson>>();
   private lockNetworkMap = false;
+  private networkHashMap: Record<string, string> = {}; // mapping hash to network key
 
   private apiMap: ApiMap = { dotSama: {}, web3: {} };
 
@@ -233,6 +234,12 @@ export default class KoniState extends State {
 
         this.networkMapStore.set('NetworkMap', mergedNetworkMap);
         this.networkMap = mergedNetworkMap; // init networkMap state
+
+        this.networkHashMap = Object.values(this.networkMap).reduce((data: Record<string, string>, cur) => {
+          data[cur.genesisHash] = cur.key;
+
+          return data;
+        }, {});
       }
 
       for (const [key, network] of Object.entries(this.networkMap)) {
@@ -247,43 +254,6 @@ export default class KoniState extends State {
 
       this.initEvmTokenState();
     });
-  }
-
-  public mergeTransactionHistory () {
-    setTimeout(() => {
-      const addressList = Object.keys(accounts.subject.value);
-
-      for (const address of addressList) {
-        for (const networkJson of Object.values(this.networkMap)) {
-          if (!networkJson.key.includes('custom_')) {
-            this.transactionHistoryStore.get(`${address}_custom_${networkJson.genesisHash}`, (txHistory) => {
-              if (txHistory) {
-                const parsedTxHistory: TransactionHistoryItemType[] = txHistory.map((item) => {
-                  return {
-                    time: item.time,
-                    networkKey: networkJson.key,
-                    change: item.change,
-                    changeSymbol: item.changeSymbol,
-                    fee: item.fee,
-                    feeSymbol: item.feeSymbol,
-                    isSuccess: item.isSuccess,
-                    action: item.action,
-                    extrinsicHash: item.extrinsicHash
-                  };
-                });
-
-                this.transactionHistoryStore.set(this.getTransactionKey(address, networkJson.key), parsedTxHistory);
-                // TODO: update historyMap state correctly according to address
-                this.historyMap[networkJson.key] = parsedTxHistory;
-                this.historySubject.next(this.historyMap);
-
-                this.transactionHistoryStore.remove(`${address}_custom_${networkJson.genesisHash}`);
-              }
-            });
-          }
-        }
-      }
-    }, 5000); // had to use timeout because keyring doesn't return immediately
   }
 
   public initEvmTokenState () {
@@ -873,10 +843,18 @@ export default class KoniState extends State {
     return this.stakingRewardSubject;
   }
 
-  public setHistory (historyMap: Record<string, TransactionHistoryItemType[]>) {
-    this.historyMap = historyMap;
+  public setHistory (address: string, network: string, histories: TransactionHistoryItemType[]) {
+    const oldItems = this.historyMap[network] || [];
 
-    this.historySubject.next(this.historyMap);
+    const comnbinedHistories = this.combineHistories(oldItems, histories);
+
+    this.historyMap[network] = comnbinedHistories;
+
+    this.lazyNext('setHistory', () => {
+      // Save to storage
+      this.saveHistoryToStorage(address);
+      this.historySubject.next(this.getHistoryMap());
+    });
   }
 
   public getCurrentAccount (update: (value: CurrentAccountInfo) => void): void {
@@ -1136,27 +1114,13 @@ export default class KoniState extends State {
   }
 
   public getTransactionHistory (address: string, networkKey: string, update: (items: TransactionHistoryItemType[]) => void): void {
-    this.transactionHistoryStore.get(this.getTransactionKey(address, networkKey), (items) => {
-      if (!items) {
-        update([]);
-      } else {
-        update(items);
-      }
-    });
-  }
+    const items = this.historyMap[networkKey];
 
-  public getTransactionHistoryByMultiNetworks (address: string, networkKeys: string[], update: (items: TransactionHistoryItemType[]) => void): void {
-    const keys: string[] = networkKeys.map((n) => this.getTransactionKey(address, n));
-
-    this.transactionHistoryStore.getByMultiKeys(keys, (items) => {
-      if (!items) {
-        update([]);
-      } else {
-        items.sort((a, b) => b.time - a.time);
-
-        update(items);
-      }
-    });
+    if (!items) {
+      update([]);
+    } else {
+      update(items);
+    }
   }
 
   public subscribeHistory () {
@@ -1168,21 +1132,18 @@ export default class KoniState extends State {
   }
 
   public setTransactionHistory (address: string, networkKey: string, item: TransactionHistoryItemType, callback?: (items: TransactionHistoryItemType[]) => void): void {
-    this.getTransactionHistory(address, networkKey, (items) => {
-      if (!items || !items.length) {
-        items = [item];
-      } else {
-        items.unshift(item);
-      }
+    const items = this.historyMap[networkKey] || [];
 
-      this.transactionHistoryStore.set(this.getTransactionKey(address, networkKey), items, () => {
-        callback && callback(items);
-      });
-    });
-  }
+    item.origin = 'app';
 
-  public setTransactionHistoryV2 (address: string, networkKey: string, items: TransactionHistoryItemType[]) {
-    this.transactionHistoryStore.set(this.getTransactionKey(address, networkKey), items);
+    items.unshift(item);
+    this.historyMap[networkKey] = items;
+
+    // Save to storage
+    this.saveHistoryToStorage(address);
+
+    this.historySubject.next(this.getHistoryMap());
+    callback && callback(items);
   }
 
   public setPrice (priceData: PriceJson, callback?: (priceData: PriceJson) => void): void {
@@ -1408,6 +1369,7 @@ export default class KoniState extends State {
     } else { // insert
       this.networkMap[data.key] = data;
       this.networkMap[data.key].getStakingOnChain = true; // try to fetch staking on chain for custom network by default
+      this.networkHashMap[data.genesisHash] = data.key;
     }
 
     if (this.networkMap[data.key].active) { // update API map if network is active
@@ -1664,5 +1626,75 @@ export default class KoniState extends State {
     const network = this.networkMap[key];
 
     return network && network.genesisHash;
+  }
+
+  public getNetworkKeyByGenesisHash (hash: string) {
+    return this.networkHashMap[hash];
+  }
+
+  public async resetHistoryMap (newAddress: string): Promise<void> {
+    this.historyMap = {};
+
+    const storedData = await this.getStoredHistories(newAddress);
+
+    if (storedData) {
+      this.historyMap = storedData;
+    }
+
+    this.historySubject.next(this.getHistoryMap());
+  }
+
+  public async getStoredHistories (address: string) {
+    const data = await this.transactionHistoryStore.asyncGet(address);
+
+    if (data) {
+      return this.convertHashKeyToNetworkKey(data);
+    }
+
+    return undefined;
+  }
+
+  private saveHistoryToStorage (address: string) {
+    const newestHistoryMap = this.convertNetworkKeyToHashKey(this.historyMap) as Record<string, TransactionHistoryItemType[]>;
+
+    Object.entries(newestHistoryMap).forEach(([key, items]) => {
+      if (!Array.isArray(items) || !items.length) {
+        delete newestHistoryMap[key];
+      }
+    });
+
+    this.transactionHistoryStore.set(address, newestHistoryMap);
+  }
+
+  private convertNetworkKeyToHashKey (object: Record<string, any> = {}) {
+    return Object.entries(object).reduce((newObj: Record<string, any>, [key, data]) => {
+      const hash = this.getNetworkGenesisHashByKey(key);
+
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+      newObj[hash] = data;
+
+      return newObj;
+    }, {});
+  }
+
+  private convertHashKeyToNetworkKey (object: Record<string, any> = {}) {
+    return Object.entries(object).reduce((newObj: Record<string, any>, [hash, data]) => {
+      const key = this.getNetworkKeyByGenesisHash(hash);
+
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+      newObj[key] = data;
+
+      return newObj;
+    }, {});
+  }
+
+  private combineHistories (oldItems: TransactionHistoryItemType[], newItems: TransactionHistoryItemType[]): TransactionHistoryItemType[] {
+    const newHistories = newItems.filter((item) => !oldItems.some((old) => this.isSameHistory(old, item)));
+
+    return [...oldItems, ...newHistories].sort((a, b) => b.time - a.time);
+  }
+
+  public isSameHistory (oldItem: TransactionHistoryItemType, newItem: TransactionHistoryItemType): boolean {
+    return oldItem.extrinsicHash === newItem.extrinsicHash;
   }
 }

@@ -23,11 +23,29 @@ export default class ChangeTransactionHistoryStore extends BaseMigrationJob {
       const transactions: Record<string, TransactionHistoryItemType[]> = {};
 
       for (const networkJson of Object.values(this.state.getNetworkMap())) {
-        const histories = await oldStore.asyncGet(getOldKey(address, networkJson.key));
+        let histories = await oldStore.asyncGet(getOldKey(address, networkJson.key));
         const hash = this.state.getNetworkGenesisHashByKey(networkJson.key);
 
+        // For custom network
+        if (!networkJson.key.includes('custom_')) {
+          const customStoreKey = `${address}_custom_${networkJson.genesisHash}`;
+          const customHistories = await oldStore.asyncGet(customStoreKey);
+
+          if (Array.isArray(customHistories) && customHistories.length) {
+            if (!Array.isArray(histories) || !histories.length) {
+              histories = customHistories;
+            } else {
+              const newHistories = customHistories.filter((item) => !histories.some((old) => this.state.isSameHistory(old, item)));
+
+              histories = [...histories, ...newHistories];
+            }
+          }
+        }
+
         if (histories && histories.length) {
-          transactions[hash] = histories;
+          const newHistories = histories.map((item) => ({ ...item, origin: 'app' } as TransactionHistoryItemType)).sort((a, b) => b.time - a.time);
+
+          transactions[hash] = newHistories;
         }
       }
 

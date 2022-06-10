@@ -13,7 +13,6 @@ function RemoveAuth (): React.ReactElement {
     <FontAwesomeIcon
       className='trashIcon'
       icon={faTrash}
-      size='sm'
     />
   );
 }
@@ -23,6 +22,7 @@ export default styled(RemoveAuth)(({ theme }: ThemeProps) => `
     cursor: pointer;
     color: ${theme.iconNeutralColor};
     margin-left: 8px;
+    vertical-align: middle;
 
     &.selected {
       color: ${theme.primaryColor};

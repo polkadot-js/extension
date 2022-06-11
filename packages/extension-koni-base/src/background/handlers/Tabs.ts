@@ -335,12 +335,34 @@ export default class KoniTabs extends Tabs {
     });
   }
 
+  private async evmSign (id: string, url: string, { method, params }: RequestArguments) {
+    const signResult = await this.#koniState.evmSign(id, url, method, params);
+
+    if (signResult) {
+      return signResult;
+    } else {
+      throw this.createEvmProviderRpcError(EVM_PROVIDER_RPC_ERRORS.INTERNAL_ERROR);
+    }
+  }
+
   private async handleEvmRequest (id: string, url: string, request: RequestArguments): Promise<unknown> {
     const { method } = request;
 
     switch (method) {
       case 'eth_accounts':
         return await this.getEvmCurrentAccount(url);
+      case 'eth_sign':
+        return await this.evmSign(id, url, request);
+      case 'personal_sign':
+        return await this.evmSign(id, url, request);
+      case 'eth_signTypedData':
+        return await this.evmSign(id, url, request);
+      case 'eth_signTypedData_v1':
+        return await this.evmSign(id, url, request);
+      case 'eth_signTypedData_v3':
+        return await this.evmSign(id, url, request);
+      case 'eth_signTypedData_v4':
+        return await this.evmSign(id, url, request);
       case 'wallet_requestPermissions':
         await this.authorizeV2(url, { origin: 'eth_accounts', accountAuthType: 'evm', reOpen: true });
 

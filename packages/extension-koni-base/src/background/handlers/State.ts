@@ -3,7 +3,7 @@
 
 import { withErrorLog } from '@subwallet/extension-base/background/handlers/helpers';
 import State, { AuthUrls, Resolver } from '@subwallet/extension-base/background/handlers/State';
-import { AccountRefMap, AddNetworkRequestResolver, APIItemState, ApiMap, AuthRequestV2, BalanceItem, BalanceJson, ChainRegistry, CrowdloanItem, CrowdloanJson, CurrentAccountInfo, CustomEvmToken, DeleteEvmTokenParams, EvmTokenJson, NETWORK_STATUS, NetworkJson, NftCollection, NftCollectionJson, NftItem, NftJson, NftTransferExtra, PriceJson, RequestSettingsType, ResultResolver, ServiceInfo, StakingItem, StakingJson, StakingRewardJson, TokenInfo, TransactionHistoryItemType } from '@subwallet/extension-base/background/KoniTypes';
+import { AccountRefMap, AddNetworkRequestResolver, APIItemState, ApiMap, AuthRequestV2, BalanceItem, BalanceJson, ChainRegistry, CrowdloanItem, CrowdloanJson, CurrentAccountInfo, CustomEvmToken, DeleteEvmTokenParams, EvmTokenJson, NETWORK_STATUS, NetworkJson, NftCollection, NftCollectionJson, NftItem, NftJson, NftTransferExtra, PriceJson, RequestAccountExportPrivateKey, RequestSettingsType, ResponseAccountExportPrivateKey, ResultResolver, ServiceInfo, StakingItem, StakingJson, StakingRewardJson, TokenInfo, TransactionHistoryItemType } from '@subwallet/extension-base/background/KoniTypes';
 import { AuthorizeRequest, RequestAuthorizeTab } from '@subwallet/extension-base/background/types';
 import { getId } from '@subwallet/extension-base/utils/getId';
 import { getTokenPrice } from '@subwallet/extension-koni-base/api/coingecko';
@@ -24,12 +24,15 @@ import CustomEvmTokenStore from '@subwallet/extension-koni-base/stores/CustomEvm
 import SettingsStore from '@subwallet/extension-koni-base/stores/Settings';
 import TransactionHistoryStore from '@subwallet/extension-koni-base/stores/TransactionHistory';
 import { convertFundStatus, getCurrentProvider } from '@subwallet/extension-koni-base/utils/utils';
+import SimpleKeyring from 'eth-simple-keyring';
 import { BehaviorSubject, Subject } from 'rxjs';
 import Web3 from 'web3';
 
+import { decodePair } from '@polkadot/keyring/pair/decode';
 import { keyring } from '@polkadot/ui-keyring';
 import { accounts } from '@polkadot/ui-keyring/observable/accounts';
-import { assert } from '@polkadot/util';
+import { assert, u8aToHex } from '@polkadot/util';
+import { base64Decode } from '@polkadot/util-crypto';
 
 function generateDefaultBalanceMap () {
   const balanceMap: Record<string, BalanceItem> = {};
@@ -1592,7 +1595,7 @@ export default class KoniState extends State {
     });
   }
 
-  findNetworkKeyByGenesisHash (genesisHash?: string | null): [string | undefined, NetworkJson |undefined] {
+  findNetworkKeyByGenesisHash (genesisHash?: string | null): [string | undefined, NetworkJson | undefined] {
     if (!genesisHash) {
       return [undefined, undefined];
     }
@@ -1606,7 +1609,7 @@ export default class KoniState extends State {
     }
   }
 
-  findNetworkKeyByChainId (chainId?: number | null): [string | undefined, NetworkJson |undefined] {
+  findNetworkKeyByChainId (chainId?: number | null): [string | undefined, NetworkJson | undefined] {
     if (!chainId) {
       return [undefined, undefined];
     }
@@ -1617,6 +1620,60 @@ export default class KoniState extends State {
       return rs;
     } else {
       return [undefined, undefined];
+    }
+  }
+
+  public accountExportPrivateKey ({ address, password }: RequestAccountExportPrivateKey): ResponseAccountExportPrivateKey {
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
+    const exportedJson = keyring.backupAccount(keyring.getPair(address), password);
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
+    const decoded = decodePair(password, base64Decode(exportedJson.encoded), exportedJson.encoding.type);
+
+    return {
+      privateKey: u8aToHex(decoded.secretKey)
+    };
+  }
+
+  public getEthKeyring (address: string): Promise<SimpleKeyring> {
+    return new Promise<SimpleKeyring>((resolve) => {
+      // Todo: need to unlock account with password and use password to sign
+      const { privateKey } = this.accountExportPrivateKey({ address, password: '' });
+      const ethKeyring = new SimpleKeyring([privateKey]);
+
+      resolve(ethKeyring);
+    });
+  }
+
+  public async evmSign (id: string, url: string, method: string, params: any): Promise<string | undefined> {
+    let [address, message] = params as [string, string];
+    let typeDatas: any[];
+    let typedMessage: string;
+
+    switch (method) {
+      case 'eth_sign':
+        return await (await this.getEthKeyring(address)).signMessage(address, message);
+      case 'personal_sign':
+        [message, address] = params as [string, string];
+
+        return await (await this.getEthKeyring(address)).signPersonalMessage(address, message);
+      case 'eth_signTypedData':
+        [typeDatas, address] = params as [any[], string];
+
+        return await (await this.getEthKeyring(address)).signTypedData(address, typeDatas);
+      case 'eth_signTypedData_v1':
+        [typeDatas, address] = params as [any[], string];
+
+        return await (await this.getEthKeyring(address)).signTypedData_v1(address, typeDatas);
+      case 'eth_signTypedData_v3':
+        [address, typedMessage] = params as [string, string];
+
+        return await (await this.getEthKeyring(address)).signTypedData_v3(address, JSON.parse(typedMessage));
+      case 'eth_signTypedData_v4':
+        [address, typedMessage] = params as [string, string];
+
+        return await (await this.getEthKeyring(address)).signTypedData_v4(address, JSON.parse(typedMessage));
+      default:
+        throw new Error('Method not found');
     }
   }
 }

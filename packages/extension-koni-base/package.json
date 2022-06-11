@@ -73,6 +73,7 @@
     "web3-eth-contract": "^1.7.1"
   },
   "devDependencies": {
-    "@subwallet/extension-mocks": "^0.4.4-0"
+    "@subwallet/extension-mocks": "^0.4.4-0",
+    "eth-simple-keyring": "^4.2.0"
   }
 }

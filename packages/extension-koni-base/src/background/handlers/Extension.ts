@@ -22,13 +22,12 @@ import { Transaction } from 'ethereumjs-tx';
 import { Contract } from 'web3-eth-contract';
 
 import { createPair } from '@polkadot/keyring';
-import { decodePair } from '@polkadot/keyring/pair/decode';
 import { KeyringPair, KeyringPair$Json, KeyringPair$Meta } from '@polkadot/keyring/types';
 import { ChainType } from '@polkadot/types/interfaces';
 import { keyring } from '@polkadot/ui-keyring';
 import { accounts as accountsObservable } from '@polkadot/ui-keyring/observable/accounts';
 import { SingleAddress, SubjectInfo } from '@polkadot/ui-keyring/observable/types';
-import { assert, BN, hexToU8a, isHex, u8aToHex, u8aToString } from '@polkadot/util';
+import { assert, BN, hexToU8a, isHex, u8aToString } from '@polkadot/util';
 import { base64Decode, isEthereumAddress, jsonDecrypt, keyExtractSuri, mnemonicGenerate, mnemonicValidate } from '@polkadot/util-crypto';
 import { EncryptedJson, KeypairType, Prefix } from '@polkadot/util-crypto/types';
 
@@ -80,14 +79,7 @@ export default class KoniExtension extends Extension {
   };
 
   private accountExportPrivateKey ({ address, password }: RequestAccountExportPrivateKey): ResponseAccountExportPrivateKey {
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
-    const exportedJson = keyring.backupAccount(keyring.getPair(address), password);
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
-    const decoded = decodePair(password, base64Decode(exportedJson.encoded), exportedJson.encoding.type);
-
-    return {
-      privateKey: u8aToHex(decoded.secretKey)
-    };
+    return state.accountExportPrivateKey({ address, password });
   }
 
   private accountsGetAllWithCurrentAddress (id: string, port: chrome.runtime.Port): boolean {

@@ -303,7 +303,7 @@ export interface NetworkJson {
   requestId?: string;
 }
 
-export interface RequestCompleteAddNetwork{
+export interface RequestCompleteAddNetwork {
   id: string,
   approval: boolean
 }
@@ -312,7 +312,8 @@ export interface AddNetworkData {
   networkInfo: NetworkJson,
 }
 
-export interface AddNetworkRequestResolver extends AddNetworkData, Resolver<boolean>{}
+export interface AddNetworkRequestResolver extends AddNetworkData, Resolver<boolean> {
+}
 
 export interface DonateInfo {
   key: string;
@@ -788,7 +789,7 @@ export type RequestEvmEvents = null;
 export type EvmEventType = 'connect' | 'disconnect' | 'accountsChanged' | 'chainChanged' | 'message' | 'data' | 'reconnect' | 'error';
 export type EvmAccountsChangedPayload = string [];
 export type EvmChainChangedPayload = string;
-export type EvmConnectPayload = {chainId: EvmChainChangedPayload}
+export type EvmConnectPayload = { chainId: EvmChainChangedPayload }
 export type EvmDisconnectPayload = unknown
 
 export interface EvmEvent {
@@ -805,6 +806,7 @@ export interface EvmAppState {
 }
 
 export type RequestEvmProviderSend = JsonRpcPayload;
+
 export interface ResponseEvmProviderSend {
   error: (Error | null);
   result?: JsonRpcResponse;
@@ -814,6 +816,17 @@ export interface EvmProviderRpcError extends Error {
   message: string;
   code: number;
   data?: unknown;
+}
+
+export interface EvmSendTransactionParams {
+  from: string;
+  to?: string;
+  value?: string | number;
+  gasLimit?: string | number;
+  maxPriorityFeePerGas?: string | number;
+  maxFeePerGas?: string | number;
+  gasPrice?: string | number;
+  data?: string
 }
 
 export interface KoniRequestSignatures {

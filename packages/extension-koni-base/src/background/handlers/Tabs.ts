@@ -6,7 +6,7 @@ import type { InjectedAccount } from '@subwallet/extension-inject/types';
 import { AuthUrls } from '@subwallet/extension-base/background/handlers/State';
 import { createSubscription, unsubscribe } from '@subwallet/extension-base/background/handlers/subscriptions';
 import Tabs from '@subwallet/extension-base/background/handlers/Tabs';
-import { EvmAppState, EvmEventType, EvmProviderRpcError, RequestEvmProviderSend } from '@subwallet/extension-base/background/KoniTypes';
+import { EvmAppState, EvmEventType, EvmProviderRpcError, EvmSendTransactionParams, RequestEvmProviderSend } from '@subwallet/extension-base/background/KoniTypes';
 import { AccountAuthType, MessageTypes, RequestAccountList, RequestAccountSubscribe, RequestAuthorizeTab, RequestTypes, ResponseTypes } from '@subwallet/extension-base/background/types';
 import { canDerive } from '@subwallet/extension-base/utils';
 import KoniState from '@subwallet/extension-koni-base/background/handlers/State';
@@ -335,8 +335,15 @@ export default class KoniTabs extends Tabs {
     });
   }
 
+  public async canUseAccount (address: string, url: string) {
+    const allowedAccounts = await this.getEvmCurrentAccount(url, true);
+
+    return !!allowedAccounts.find((acc) => (acc.toLowerCase() === address.toLowerCase()));
+  }
+
   private async evmSign (id: string, url: string, { method, params }: RequestArguments) {
-    const signResult = await this.#koniState.evmSign(id, url, method, params);
+    const allowedAccounts = await this.getEvmCurrentAccount(url, true);
+    const signResult = await this.#koniState.evmSign(id, url, method, params, allowedAccounts);
 
     if (signResult) {
       return signResult;
@@ -345,12 +352,30 @@ export default class KoniTabs extends Tabs {
     }
   }
 
+  public async evmSendTransaction (id: string, url: string, { params }: RequestArguments) {
+    const transactionParams = (params as EvmSendTransactionParams[])[0];
+    const canUseAccount = transactionParams.from && this.canUseAccount(transactionParams.from, url);
+    const networkKey = this.evmState.networkKey;
+
+    if (!canUseAccount) {
+      throw new Error('Account ' + (transactionParams.from) + ' not in allowed list');
+    }
+
+    if (!networkKey) {
+      throw new Error('Empty current network key');
+    }
+
+    return await this.#koniState.evmSendTransaction(id, url, networkKey, transactionParams);
+  }
+
   private async handleEvmRequest (id: string, url: string, request: RequestArguments): Promise<unknown> {
     const { method } = request;
 
     switch (method) {
       case 'eth_accounts':
         return await this.getEvmCurrentAccount(url);
+      case 'eth_sendTransaction':
+        return await this.evmSendTransaction(id, url, request);
       case 'eth_sign':
         return await this.evmSign(id, url, request);
       case 'personal_sign':

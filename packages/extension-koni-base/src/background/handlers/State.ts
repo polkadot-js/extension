@@ -3,7 +3,7 @@
 
 import { withErrorLog } from '@subwallet/extension-base/background/handlers/helpers';
 import State, { AuthUrls, Resolver } from '@subwallet/extension-base/background/handlers/State';
-import { AccountRefMap, AddNetworkRequestResolver, APIItemState, ApiMap, AuthRequestV2, BalanceItem, BalanceJson, ChainRegistry, CrowdloanItem, CrowdloanJson, CurrentAccountInfo, CustomEvmToken, DeleteEvmTokenParams, EvmTokenJson, NETWORK_STATUS, NetworkJson, NftCollection, NftCollectionJson, NftItem, NftJson, NftTransferExtra, PriceJson, RequestAccountExportPrivateKey, RequestSettingsType, ResponseAccountExportPrivateKey, ResultResolver, ServiceInfo, StakingItem, StakingJson, StakingRewardJson, TokenInfo, TransactionHistoryItemType } from '@subwallet/extension-base/background/KoniTypes';
+import { AccountRefMap, AddNetworkRequestResolver, APIItemState, ApiMap, AuthRequestV2, BalanceItem, BalanceJson, ChainRegistry, CrowdloanItem, CrowdloanJson, CurrentAccountInfo, CustomEvmToken, DeleteEvmTokenParams, EvmSendTransactionParams, EvmTokenJson, NETWORK_STATUS, NetworkJson, NftCollection, NftCollectionJson, NftItem, NftJson, NftTransferExtra, PriceJson, RequestAccountExportPrivateKey, RequestSettingsType, ResponseAccountExportPrivateKey, ResultResolver, ServiceInfo, StakingItem, StakingJson, StakingRewardJson, TokenInfo, TransactionHistoryItemType } from '@subwallet/extension-base/background/KoniTypes';
 import { AuthorizeRequest, RequestAuthorizeTab } from '@subwallet/extension-base/background/types';
 import { getId } from '@subwallet/extension-base/utils/getId';
 import { getTokenPrice } from '@subwallet/extension-koni-base/api/coingecko';
@@ -27,11 +27,12 @@ import { convertFundStatus, getCurrentProvider } from '@subwallet/extension-koni
 import SimpleKeyring from 'eth-simple-keyring';
 import { BehaviorSubject, Subject } from 'rxjs';
 import Web3 from 'web3';
+import { TransactionConfig } from 'web3-core';
 
 import { decodePair } from '@polkadot/keyring/pair/decode';
 import { keyring } from '@polkadot/ui-keyring';
 import { accounts } from '@polkadot/ui-keyring/observable/accounts';
-import { assert, u8aToHex } from '@polkadot/util';
+import { assert, BN, u8aToHex } from '@polkadot/util';
 import { base64Decode } from '@polkadot/util-crypto';
 
 function generateDefaultBalanceMap () {
@@ -1644,36 +1645,88 @@ export default class KoniState extends State {
     });
   }
 
-  public async evmSign (id: string, url: string, method: string, params: any): Promise<string | undefined> {
+  public async evmSign (id: string, url: string, method: string, params: any, allowedAccounts: string[]): Promise<string | undefined> {
     let [address, message] = params as [string, string];
     let typeDatas: any[];
     let typedMessage: string;
 
+    const canSign = (checkAcc: string) => {
+      if (!allowedAccounts.find((acc) => (acc.toLowerCase() === checkAcc.toLowerCase()))) {
+        throw Error('Account ' + checkAcc + ' not in allowed list');
+      }
+    };
+
     switch (method) {
       case 'eth_sign':
+        canSign(address);
+
         return await (await this.getEthKeyring(address)).signMessage(address, message);
       case 'personal_sign':
         [message, address] = params as [string, string];
+        canSign(address);
 
         return await (await this.getEthKeyring(address)).signPersonalMessage(address, message);
       case 'eth_signTypedData':
         [typeDatas, address] = params as [any[], string];
+        canSign(address);
 
         return await (await this.getEthKeyring(address)).signTypedData(address, typeDatas);
       case 'eth_signTypedData_v1':
         [typeDatas, address] = params as [any[], string];
+        canSign(address);
 
         return await (await this.getEthKeyring(address)).signTypedData_v1(address, typeDatas);
       case 'eth_signTypedData_v3':
         [address, typedMessage] = params as [string, string];
+        canSign(address);
 
         return await (await this.getEthKeyring(address)).signTypedData_v3(address, JSON.parse(typedMessage));
       case 'eth_signTypedData_v4':
         [address, typedMessage] = params as [string, string];
+        canSign(address);
 
         return await (await this.getEthKeyring(address)).signTypedData_v4(address, JSON.parse(typedMessage));
       default:
-        throw new Error('Method not found');
+        throw new Error('Not found sign method');
     }
+  }
+
+  public async evmSendTransaction (id: string, url: string, networkKey: string, transactionParams: EvmSendTransactionParams): Promise<string | undefined> {
+    const web3 = this.getWeb3ApiMap()[networkKey];
+
+    // Todo: need to unlock account with password and use password to sign
+    const { privateKey } = this.accountExportPrivateKey({ address: transactionParams.from, password: '' });
+
+    const toBn = (val?: string | number) => {
+      if (typeof val === 'string' && val.startsWith('0x')) {
+        return new BN(val.replace('0x', ''), 16);
+      }
+
+      return val && new BN(val);
+    };
+
+    const transactionConfigs: TransactionConfig = {
+      from: transactionParams.from,
+      to: transactionParams.to,
+      value: toBn(transactionParams.value),
+      gasPrice: toBn(transactionParams.gasPrice),
+      maxPriorityFeePerGas: toBn(transactionParams.maxPriorityFeePerGas),
+      maxFeePerGas: toBn(transactionParams.maxFeePerGas),
+      data: transactionParams.data
+    };
+
+    const gasLimit = toBn(transactionParams.gasLimit);
+
+    transactionConfigs.gas = gasLimit?.toString() || (await web3.eth.estimateGas(transactionConfigs));
+
+    console.log(123, transactionConfigs);
+
+    const signTransaction = await web3.eth.accounts.signTransaction(transactionConfigs, privateKey);
+
+    return new Promise<string>((resolve, reject) => {
+      signTransaction.rawTransaction && web3.eth.sendSignedTransaction(signTransaction.rawTransaction)
+        .on('transactionHash', resolve)
+        .on('error', reject);
+    });
   }
 }

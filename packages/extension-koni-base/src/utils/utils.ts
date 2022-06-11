@@ -246,7 +246,7 @@ export const filterAndSortingAccountByAuthType = (accounts: AccountJson[], accou
   if (accountAuthType === 'substrate') {
     rs = rs.filter((acc) => (acc.type !== 'ethereum'));
   } else if (accountAuthType === 'evm') {
-    rs = rs.filter((acc) => (acc.type !== 'ethereum'));
+    rs = rs.filter((acc) => (acc.type === 'ethereum'));
   } else {
     if (sorting) {
       rs.sort((acc, acc2) => {

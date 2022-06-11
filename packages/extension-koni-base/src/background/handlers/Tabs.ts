@@ -371,12 +371,20 @@ export default class KoniTabs extends Tabs {
     return true;
   }
 
+  public isEvmPublicRequest (type: string, { method }: RequestArguments) {
+    if (type === 'evm(request)' && ['eth_chainId'].includes(method)) {
+      return true;
+    } else {
+      return false;
+    }
+  }
+
   public override async handle<TMessageType extends MessageTypes> (id: string, type: TMessageType, request: RequestTypes[TMessageType], url: string, port: chrome.runtime.Port): Promise<ResponseTypes[keyof ResponseTypes]> {
     if (type === 'pub(phishing.redirectIfDenied)') {
       return this.redirectIfPhishing(url);
     }
 
-    if (type !== 'pub(authorize.tabV2)') {
+    if (type !== 'pub(authorize.tabV2)' || !this.isEvmPublicRequest(type, request as RequestArguments)) {
       this.#koniState.ensureUrlAuthorizedV2(url);
     }
 

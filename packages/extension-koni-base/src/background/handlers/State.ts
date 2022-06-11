@@ -430,7 +430,7 @@ export default class KoniState extends State {
   private authCompleteV2 = (id: string, resolve: (result: boolean) => void, reject: (error: Error) => void): Resolver<ResultResolver> => {
     const isAllowedMap = this.getAddressList();
 
-    const complete = (result: boolean | Error, accounts?: string[]) => {
+    const complete = (result: boolean | Error, cb: () => void, accounts?: string[]) => {
       const isAllowed = result === true;
 
       if (accounts && accounts.length) {
@@ -461,20 +461,24 @@ export default class KoniState extends State {
           accountAuthType
         };
 
-        this.setAuthorize(authorizeList);
-        delete this.#authRequestsV2[id];
-        this.updateIconAuthV2(true);
+        this.setAuthorize(authorizeList, () => {
+          cb();
+          delete this.#authRequestsV2[id];
+          this.updateIconAuthV2(true);
+        });
       });
     };
 
     return {
       reject: (error: Error): void => {
-        complete(error);
-        reject(error);
+        complete(error, () => {
+          reject(error);
+        });
       },
       resolve: ({ accounts, result }: ResultResolver): void => {
-        complete(result, accounts);
-        resolve(result);
+        complete(result, () => {
+          resolve(result);
+        }, accounts);
       }
     };
   };

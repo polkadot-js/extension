@@ -28,4 +28,8 @@ export default styled(RemoveAuth)(({ theme }: ThemeProps) => `
   cursor: pointer;
   color: ${theme.labelColor};
   margin-right: 1rem;
+
+  &.selected {
+    color: ${theme.primaryColor};
+  }
 `);

@@ -10,7 +10,7 @@ import type { HexString } from '@polkadot/util/types';
 import type { KeypairType } from '@polkadot/util-crypto/types';
 
 import { AuthUrls } from '@subwallet/extension-base/background/handlers/State';
-import { AccountsWithCurrentAddress, BalanceJson, BondingOptionInfo, ChainBondingBasics, ChainRegistry, CrowdloanJson, CurrentAccountInfo, CustomEvmToken, DeleteEvmTokenParams, DisableNetworkResponse, EvmNftSubmitTransaction, EvmNftTransaction, EvmNftTransactionRequest, EvmTokenJson, NetworkJson, NftCollectionJson, NftJson, NftTransactionResponse, NftTransferExtra, OptionInputAddress, PriceJson, RequestCheckCrossChainTransfer, RequestCheckTransfer, RequestCrossChainTransfer, RequestFreeBalance, RequestNftForceUpdate, RequestSettingsType, RequestSubscribeBalance, RequestSubscribeBalancesVisibility, RequestSubscribeCrowdloan, RequestSubscribeNft, RequestSubscribePrice, RequestSubscribeStaking, RequestSubscribeStakingReward, RequestTransfer, RequestTransferCheckReferenceCount, RequestTransferCheckSupporting, RequestTransferExistentialDeposit, ResponseAccountCreateSuriV2, ResponseCheckCrossChainTransfer, ResponseCheckTransfer, ResponsePrivateKeyValidateV2, ResponseSeedCreateV2, ResponseSeedValidateV2, ResponseSettingsType, ResponseTransfer, StakingJson, StakingRewardJson, SubstrateNftSubmitTransaction, SubstrateNftTransaction, SubstrateNftTransactionRequest, SupportTransferResponse, ThemeTypes, TransactionHistoryItemType, TransferError, ValidateEvmTokenRequest, ValidateNetworkResponse } from '@subwallet/extension-base/background/KoniTypes';
+import { AccountsWithCurrentAddress, BalanceJson, BondingOptionInfo, BondingSubmitParams, BondingTxInfo, BondingTxResponse, ChainBondingBasics, ChainRegistry, CrowdloanJson, CurrentAccountInfo, CustomEvmToken, DeleteEvmTokenParams, DisableNetworkResponse, EvmNftSubmitTransaction, EvmNftTransaction, EvmNftTransactionRequest, EvmTokenJson, NetworkJson, NftCollectionJson, NftJson, NftTransactionResponse, NftTransferExtra, OptionInputAddress, PriceJson, RequestCheckCrossChainTransfer, RequestCheckTransfer, RequestCrossChainTransfer, RequestFreeBalance, RequestNftForceUpdate, RequestSettingsType, RequestSubscribeBalance, RequestSubscribeBalancesVisibility, RequestSubscribeCrowdloan, RequestSubscribeNft, RequestSubscribePrice, RequestSubscribeStaking, RequestSubscribeStakingReward, RequestTransfer, RequestTransferCheckReferenceCount, RequestTransferCheckSupporting, RequestTransferExistentialDeposit, ResponseAccountCreateSuriV2, ResponseCheckCrossChainTransfer, ResponseCheckTransfer, ResponsePrivateKeyValidateV2, ResponseSeedCreateV2, ResponseSeedValidateV2, ResponseSettingsType, ResponseTransfer, StakingJson, StakingRewardJson, SubstrateNftSubmitTransaction, SubstrateNftTransaction, SubstrateNftTransactionRequest, SupportTransferResponse, ThemeTypes, TransactionHistoryItemType, TransferError, ValidateEvmTokenRequest, ValidateNetworkResponse } from '@subwallet/extension-base/background/KoniTypes';
 import { RequestCurrentAccountAddress } from '@subwallet/extension-base/background/types';
 import { PORT_EXTENSION } from '@subwallet/extension-base/defaults';
 import { getId } from '@subwallet/extension-base/utils/getId';
@@ -556,4 +556,12 @@ export async function getBondingOptions (networkKey: string): Promise<BondingOpt
 
 export async function getChainBondingBasics (networkJsons: NetworkJson[]): Promise<Record<string, ChainBondingBasics>> {
   return sendMessage('pri(bonding.getChainBondingBasics)', networkJsons);
+}
+
+export async function submitBonding (bondingSubmitParams: BondingSubmitParams, callback: (data: BondingTxResponse) => void): Promise<BondingTxResponse> {
+  return sendMessage('pri(bonding.submitTransaction)', bondingSubmitParams, callback);
+}
+
+export async function getBondingTxInfo (bondingSubmitParams: BondingSubmitParams): Promise<BondingTxInfo> {
+  return sendMessage('pri(bonding.txInfo)', bondingSubmitParams);
 }

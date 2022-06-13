@@ -5,9 +5,9 @@ import Common from '@ethereumjs/common';
 import Extension, { SEED_DEFAULT_LENGTH, SEED_LENGTHS } from '@subwallet/extension-base/background/handlers/Extension';
 import { AuthUrls } from '@subwallet/extension-base/background/handlers/State';
 import { createSubscription, isSubscriptionRunning, unsubscribe } from '@subwallet/extension-base/background/handlers/subscriptions';
-import { AccountsWithCurrentAddress, ApiProps, BalanceJson, BondingOptionInfo, ChainBondingBasics, ChainRegistry, CrowdloanJson, CustomEvmToken, DeleteEvmTokenParams, DisableNetworkResponse, EvmNftSubmitTransaction, EvmNftTransaction, EvmNftTransactionRequest, EvmTokenJson, NETWORK_ERROR, NetWorkGroup, NetworkJson, NftCollection, NftCollectionJson, NftItem, NftJson, NftTransactionResponse, NftTransferExtra, OptionInputAddress, PriceJson, RequestAccountCreateSuriV2, RequestAccountExportPrivateKey, RequestAuthorization, RequestAuthorizationPerAccount, RequestAuthorizeApproveV2, RequestBatchRestoreV2, RequestCheckCrossChainTransfer, RequestCheckTransfer, RequestCrossChainTransfer, RequestDeriveCreateV2, RequestForgetSite, RequestFreeBalance, RequestJsonRestoreV2, RequestNftForceUpdate, RequestSaveRecentAccount, RequestSeedCreateV2, RequestSeedValidateV2, RequestSettingsType, RequestTransactionHistoryAdd, RequestTransfer, RequestTransferCheckReferenceCount, RequestTransferCheckSupporting, RequestTransferExistentialDeposit, ResponseAccountCreateSuriV2, ResponseAccountExportPrivateKey, ResponseCheckCrossChainTransfer, ResponseCheckTransfer, ResponsePrivateKeyValidateV2, ResponseSeedCreateV2, ResponseSeedValidateV2, ResponseTransfer, StakingJson, StakingRewardJson, SubstrateNftSubmitTransaction, SubstrateNftTransaction, SubstrateNftTransactionRequest, SupportTransferResponse, ThemeTypes, TokenInfo, TransactionHistoryItemType, TransferError, TransferErrorCode, TransferStep, ValidateEvmTokenRequest, ValidateEvmTokenResponse, ValidateNetworkRequest, ValidateNetworkResponse } from '@subwallet/extension-base/background/KoniTypes';
+import { AccountsWithCurrentAddress, ApiProps, BalanceJson, BondingOptionInfo, BondingSubmitParams, BondingTxInfo, BondingTxResponse, ChainBondingBasics, ChainRegistry, CrowdloanJson, CustomEvmToken, DeleteEvmTokenParams, DisableNetworkResponse, EvmNftSubmitTransaction, EvmNftTransaction, EvmNftTransactionRequest, EvmTokenJson, NETWORK_ERROR, NetWorkGroup, NetworkJson, NftCollection, NftCollectionJson, NftItem, NftJson, NftTransactionResponse, NftTransferExtra, OptionInputAddress, PriceJson, RequestAccountCreateSuriV2, RequestAccountExportPrivateKey, RequestAuthorization, RequestAuthorizationPerAccount, RequestAuthorizeApproveV2, RequestBatchRestoreV2, RequestCheckCrossChainTransfer, RequestCheckTransfer, RequestCrossChainTransfer, RequestDeriveCreateV2, RequestForgetSite, RequestFreeBalance, RequestJsonRestoreV2, RequestNftForceUpdate, RequestSaveRecentAccount, RequestSeedCreateV2, RequestSeedValidateV2, RequestSettingsType, RequestTransactionHistoryAdd, RequestTransfer, RequestTransferCheckReferenceCount, RequestTransferCheckSupporting, RequestTransferExistentialDeposit, ResponseAccountCreateSuriV2, ResponseAccountExportPrivateKey, ResponseCheckCrossChainTransfer, ResponseCheckTransfer, ResponsePrivateKeyValidateV2, ResponseSeedCreateV2, ResponseSeedValidateV2, ResponseTransfer, StakingJson, StakingRewardJson, SubstrateNftSubmitTransaction, SubstrateNftTransaction, SubstrateNftTransactionRequest, SupportTransferResponse, ThemeTypes, TokenInfo, TransactionHistoryItemType, TransferError, TransferErrorCode, TransferStep, ValidateEvmTokenRequest, ValidateEvmTokenResponse, ValidateNetworkRequest, ValidateNetworkResponse } from '@subwallet/extension-base/background/KoniTypes';
 import { AccountJson, AuthorizeRequest, MessageTypes, RequestAccountForget, RequestAuthorizeReject, RequestCurrentAccountAddress, RequestTypes, ResponseAuthorizeList, ResponseType } from '@subwallet/extension-base/background/types';
-import { getChainBondingBasics, getValidatorsInfo } from '@subwallet/extension-koni-base/api/bonding';
+import { getBondingTxInfo, getChainBondingBasics, getValidatorsInfo } from '@subwallet/extension-koni-base/api/bonding';
 import { initApi } from '@subwallet/extension-koni-base/api/dotsama';
 import { getFreeBalance, subscribeFreeBalance } from '@subwallet/extension-koni-base/api/dotsama/balance';
 import { getTokenInfo } from '@subwallet/extension-koni-base/api/dotsama/registry';
@@ -2053,6 +2053,34 @@ export default class KoniExtension extends Extension {
     };
   }
 
+  private async getBondingTxInfo ({ amount, controllerId, networkKey, validatorInfo }: BondingSubmitParams): Promise<BondingTxInfo> {
+    const dotSamaApi = state.getDotSamaApi(networkKey);
+    const networkJson = state.getNetworkMap()[networkKey];
+
+    const [txInfo, balance] = await Promise.all([
+      getBondingTxInfo(dotSamaApi, controllerId, amount, validatorInfo.address),
+      getFreeBalance(networkKey, controllerId, state.getDotSamaApiMap(), state.getWeb3ApiMap())
+    ]);
+
+    const parsedAmount = amount * (10 ** (networkJson.decimals as number));
+    const feeString = txInfo.partialFee.toHuman();
+    const binaryBalance = new BN(balance);
+    const binaryAmount = new BN(parsedAmount);
+    const sumAmount = binaryAmount.add(txInfo.partialFee);
+    const balanceError = sumAmount.gt(binaryBalance);
+
+    return {
+      fee: feeString,
+      balanceError
+    };
+  }
+
+  private async submitBonding (id: string, port: chrome.runtime.Port, { amount, controllerId, validatorInfo }: BondingSubmitParams): Promise<BondingTxResponse> {
+    const txState: BondingTxResponse = {};
+
+    return txState;
+  }
+
   // eslint-disable-next-line @typescript-eslint/require-await
   public override async handle<TMessageType extends MessageTypes> (id: string, type: TMessageType, request: RequestTypes[TMessageType], port: chrome.runtime.Port): Promise<ResponseType<TMessageType>> {
     switch (type) {
@@ -2216,6 +2244,10 @@ export default class KoniExtension extends Extension {
         return await this.getBondingOption(request as string);
       case 'pri(bonding.getChainBondingBasics)':
         return await this.getChainBondingBasics(request as NetworkJson[]);
+      case 'pri(bonding.submitTransaction)':
+        return await this.submitBonding(id, port, request as BondingSubmitParams);
+      case 'pri(bonding.txInfo)':
+        return await this.getBondingTxInfo(request as BondingSubmitParams);
       default:
         return super.handle(id, type, request, port);
     }

@@ -5,11 +5,11 @@ import { faCircleCheck } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { ValidatorInfo } from '@subwallet/extension-base/background/KoniTypes';
 import { InputWithLabel, Warning } from '@subwallet/extension-koni-ui/components';
-import Button from '@subwallet/extension-koni-ui/components/Button';
-import Identicon from '@subwallet/extension-koni-ui/components/Identicon';
-import Modal from '@subwallet/extension-koni-ui/components/Modal';
-import ReceiverInputAddress from '@subwallet/extension-koni-ui/components/ReceiverInputAddress';
-import Tooltip from '@subwallet/extension-koni-ui/components/Tooltip';
+// import Button from '@subwallet/extension-koni-ui/components/Button';
+// import Identicon from '@subwallet/extension-koni-ui/components/Identicon';
+// import Modal from '@subwallet/extension-koni-ui/components/Modal';
+// import ReceiverInputAddress from '@subwallet/extension-koni-ui/components/ReceiverInputAddress';
+// import Tooltip from '@subwallet/extension-koni-ui/components/Tooltip';
 import { BalanceFormatType } from '@subwallet/extension-koni-ui/components/types';
 import useGetFreeBalance from '@subwallet/extension-koni-ui/hooks/screen/bonding/useGetFreeBalance';
 import useGetNetworkJson from '@subwallet/extension-koni-ui/hooks/screen/home/useGetNetworkJson';
@@ -21,11 +21,20 @@ import React, { useCallback, useState } from 'react';
 import { useSelector } from 'react-redux';
 import styled from 'styled-components';
 
+const Identicon = React.lazy(() => import('@subwallet/extension-koni-ui/components/Identicon'));
+const Button = React.lazy(() => import('@subwallet/extension-koni-ui/components/Button'));
+const Modal = React.lazy(() => import('@subwallet/extension-koni-ui/components/Modal'));
+const ReceiverInputAddress = React.lazy(() => import('@subwallet/extension-koni-ui/components/ReceiverInputAddress'));
+const Tooltip = React.lazy(() => import('@subwallet/extension-koni-ui/components/Tooltip'));
+
 interface Props extends ThemeProps {
-  className?: string;
-  setShowConfirm: (val: boolean) => void;
+  amount: number,
+  className?: string,
+  setShowConfirm: (val: boolean) => void,
   validatorInfo: ValidatorInfo,
-  selectedNetwork: string
+  selectedNetwork: string,
+  fee: string,
+  balanceError: boolean
 }
 
 // const validatorInfo: ValidatorInfo = {
@@ -44,7 +53,7 @@ interface Props extends ThemeProps {
 //
 // const selectedNetwork = 'westend';
 
-function BondingAuthTransaction ({ className, selectedNetwork, setShowConfirm, validatorInfo }: Props): React.ReactElement<Props> {
+function BondingAuthTransaction ({ amount, balanceError, className, fee, selectedNetwork, setShowConfirm, validatorInfo }: Props): React.ReactElement<Props> {
   const { t } = useTranslation();
   const networkJson = useGetNetworkJson(selectedNetwork);
   const freeBalance = useGetFreeBalance(selectedNetwork);
@@ -87,8 +96,7 @@ function BondingAuthTransaction ({ className, selectedNetwork, setShowConfirm, v
     <div className={className}>
       <Modal>
         <div className={'header-confirm'}>
-          {/* for alignment */}
-          <div />
+          <div /> {/* for alignment */}
           <div
             className={'header-title-confirm'}
           >
@@ -176,17 +184,17 @@ function BondingAuthTransaction ({ className, selectedNetwork, setShowConfirm, v
           <div className={'transaction-info-container'}>
             <div className={'transaction-info-row'}>
               <div className={'transaction-info-title'}>Staking amount</div>
-              <div className={'transaction-info-value'}>20 DOT</div>
+              <div className={'transaction-info-value'}>{amount} {networkJson.nativeToken}</div>
             </div>
 
             <div className={'transaction-info-row'}>
               <div className={'transaction-info-title'}>Staking fee</div>
-              <div className={'transaction-info-value'}>0.00156 DOT</div>
+              <div className={'transaction-info-value'}>{fee}</div>
             </div>
 
             <div className={'transaction-info-row'}>
               <div className={'transaction-info-title'}>Total</div>
-              <div className={'transaction-info-value'}>20 DOT + 0.00156 DOT</div>
+              <div className={'transaction-info-value'}>{amount} {networkJson.nativeToken} + {fee}</div>
             </div>
           </div>
 
@@ -210,13 +218,13 @@ function BondingAuthTransaction ({ className, selectedNetwork, setShowConfirm, v
               Reject
             </Button>
             <Button
+              isDisabled={password === '' || errorArr.length > 0}
               onClick={handleConfirm}
             >
               Confirm
             </Button>
           </div>
         </div>
-
       </Modal>
     </div>
   );

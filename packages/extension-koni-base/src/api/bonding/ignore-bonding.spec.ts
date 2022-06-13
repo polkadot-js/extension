@@ -6,6 +6,7 @@ import { DOTSAMA_AUTO_CONNECT_MS } from '@subwallet/extension-koni-base/constant
 import { getCurrentProvider } from '@subwallet/extension-koni-base/utils/utils';
 
 import { ApiPromise, WsProvider } from '@polkadot/api';
+import {BN} from "@polkadot/util";
 
 jest.setTimeout(50000);
 
@@ -281,5 +282,28 @@ describe('test DotSama APIs', () => {
     console.log(parsedEra);
     console.log(totalEraStake);
     console.log(result);
+  });
+
+  test('test bonding + nominating', async () => {
+    const provider = new WsProvider(getCurrentProvider(PREDEFINED_NETWORKS.westend), DOTSAMA_AUTO_CONNECT_MS);
+    const api = new ApiPromise({ provider });
+    const apiPromise = await api.isReady;
+
+    const controllerId = '5EsmjvZBNDjdTLGvCbr4CpUbxoQXi8meqZ83nEh1y9BBJ3ZG';
+    const amount = new BN(1);
+    const bondDest = 'Staked'; // pay into the stash account, increasing the amount at stake
+
+    const bondTx = apiPromise.tx.staking.bond(controllerId, amount, bondDest);
+
+    console.log(bondTx.toHuman());
+
+    const nominateTx = api.tx.staking.nominate(['5GNy7frYA4BwWpKwxKAFWt4eBsZ9oAvXrp9SyDj6qzJAaNzB']);
+
+    console.log(nominateTx.toHuman());
+
+    const extrinsic = apiPromise.tx.utility.batchAll([bondTx, nominateTx]);
+    const info = await extrinsic.paymentInfo('5EsmjvZBNDjdTLGvCbr4CpUbxoQXi8meqZ83nEh1y9BBJ3ZG');
+
+    console.log(info.partialFee.toHuman());
   });
 });

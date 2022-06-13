@@ -178,3 +178,13 @@ export async function getValidatorsInfo (networkKey: string, dotSamaApi: ApiProp
     validatorsInfo: result
   };
 }
+
+export async function getBondingTxInfo (dotSamaApi: ApiProps, controllerId: string, amount: number, validatorAddress: string, bondDest = 'Staked') {
+  const apiPromise = await dotSamaApi.isReady;
+
+  const bondTx = apiPromise.api.tx.staking.bond(controllerId, amount, bondDest);
+  const nominateTx = apiPromise.api.tx.staking.nominate([validatorAddress]);
+  const extrinsic = apiPromise.api.tx.utility.batchAll([bondTx, nominateTx]);
+
+  return extrinsic.paymentInfo(controllerId);
+}

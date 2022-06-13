@@ -9,6 +9,7 @@ import Button from '@subwallet/extension-koni-ui/components/Button';
 import Identicon from '@subwallet/extension-koni-ui/components/Identicon';
 import InputBalance from '@subwallet/extension-koni-ui/components/InputBalance';
 import ReceiverInputAddress from '@subwallet/extension-koni-ui/components/ReceiverInputAddress';
+import Spinner from '@subwallet/extension-koni-ui/components/Spinner';
 import Tooltip from '@subwallet/extension-koni-ui/components/Tooltip';
 import { BalanceFormatType } from '@subwallet/extension-koni-ui/components/types';
 import useGetFreeBalance from '@subwallet/extension-koni-ui/hooks/screen/bonding/useGetFreeBalance';
@@ -16,6 +17,7 @@ import useIsSufficientBalance from '@subwallet/extension-koni-ui/hooks/screen/bo
 import useGetNetworkJson from '@subwallet/extension-koni-ui/hooks/screen/home/useGetNetworkJson';
 import useToast from '@subwallet/extension-koni-ui/hooks/useToast';
 import useTranslation from '@subwallet/extension-koni-ui/hooks/useTranslation';
+import { getBondingTxInfo } from '@subwallet/extension-koni-ui/messaging';
 import Header from '@subwallet/extension-koni-ui/partials/Header';
 import BondingAuthTransaction from '@subwallet/extension-koni-ui/Popup/Bonding/components/BondingAuthTransaction';
 import BondingResult from '@subwallet/extension-koni-ui/Popup/Bonding/components/BondingResult';
@@ -51,6 +53,10 @@ function BondingSubmitTransaction ({ className }: Props): React.ReactElement<Pro
   const [showAuth, setShowAuth] = useState(false);
   const [showResult, setShowResult] = useState(false);
 
+  const [fee, setFee] = useState('');
+  const [balanceError, setBalanceError] = useState(false);
+  const [loading, setLoading] = useState(false);
+
   const isOversubscribed = validatorInfo.nominatorCount >= maxNominatorPerValidator;
   const isSufficientFund = useIsSufficientBalance(selectedNetwork, validatorInfo.minBond);
   const hasOwnStake = validatorInfo.ownStake > 0;
@@ -59,16 +65,22 @@ function BondingSubmitTransaction ({ className }: Props): React.ReactElement<Pro
   const _height = window.innerHeight > 600 ? 650 : 450;
 
   useEffect(() => {
-    if (amount >= validatorInfo.minBond) {
+    const parsedFreeBalance = parseFloat(freeBalance) / (10 ** (networkJson.decimals as number));
+
+    if (amount >= validatorInfo.minBond && Number.isSafeInteger(amount) && amount <= parsedFreeBalance) {
       setIsReadySubmit(true);
     } else {
-      if (amount >= 0) {
+      if (!Number.isSafeInteger(amount)) {
+        show('The bonding amount must be an integer');
+      } else if (amount > parsedFreeBalance) {
+        show('Insufficient balance');
+      } else if (amount >= 0) {
         show(`You must bond at least ${validatorInfo.minBond} ${networkJson.nativeToken as string}`);
       }
 
       setIsReadySubmit(false);
     }
-  }, [amount, networkJson.nativeToken, show, validatorInfo.minBond]);
+  }, [amount, freeBalance, networkJson.decimals, networkJson.nativeToken, show, validatorInfo.minBond]);
 
   const handleOnClick = useCallback(() => {
     setShowDetail(!showDetail);
@@ -91,9 +103,22 @@ function BondingSubmitTransaction ({ className }: Props): React.ReactElement<Pro
   }, [networkJson.decimals]);
 
   const handleConfirm = useCallback(() => {
-    setShowAuth(true);
-    setShowResult(false);
-  }, []);
+    setLoading(true);
+    getBondingTxInfo({
+      networkKey: selectedNetwork,
+      controllerId: account?.address as string,
+      amount,
+      validatorInfo
+    })
+      .then((resp) => {
+        setLoading(false);
+        setFee(resp.fee);
+        setBalanceError(resp.balanceError);
+        setShowAuth(true);
+        setShowResult(false);
+      })
+      .catch(console.error);
+  }, [account?.address, amount, selectedNetwork, validatorInfo]);
 
   return (
     <div className={className}>
@@ -316,13 +341,20 @@ function BondingSubmitTransaction ({ className }: Props): React.ReactElement<Pro
             isDisabled={!isReadySubmit}
             onClick={handleConfirm}
           >
-            Next
+            {
+              loading
+                ? <Spinner />
+                : <span>Next</span>
+            }
           </Button>
         </div>
       </div>
 
       {showAuth &&
         <BondingAuthTransaction
+          amount={amount}
+          balanceError={balanceError}
+          fee={fee}
           selectedNetwork={selectedNetwork}
           setShowConfirm={setShowAuth}
           validatorInfo={validatorInfo}

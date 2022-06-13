@@ -793,7 +793,29 @@ export interface ChainBondingBasics {
   minBond: number
 }
 
+export interface BondingTxInfo {
+  fee: string,
+  balanceError: boolean
+}
+
+export interface BondingSubmitParams {
+  networkKey: string,
+  controllerId: string,
+  amount: number,
+  validatorInfo: ValidatorInfo,
+}
+
+export interface BondingTxResponse {
+  passwordError?: string | null,
+  callHash?: string,
+  status?: boolean,
+  transactionHash?: string,
+  txError?: boolean,
+}
+
 export interface KoniRequestSignatures {
+  'pri(bonding.txInfo)': [BondingSubmitParams, BondingTxInfo];
+  'pri(bonding.submitTransaction)': [BondingSubmitParams, BondingTxResponse, BondingTxResponse];
   'pri(bonding.getChainBondingBasics)': [NetworkJson[], Record<string, ChainBondingBasics>];
   'pri(bonding.getBondingOptions)': [string, BondingOptionInfo];
   'pri(networkMap.recoverDotSama)': [string, boolean];

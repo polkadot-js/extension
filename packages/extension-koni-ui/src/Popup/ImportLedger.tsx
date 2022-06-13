@@ -62,7 +62,7 @@ function ImportLedger ({ className }: Props): React.ReactElement {
 
   const networkOps = useRef(
     [{
-      text: ledgerChains.length > 0 ? t('Select network') : t('Please enable at least 1 network'),
+      text: ledgerChains.length > 0 ? t('Select network') : t('Please enable at least 1 network that supports Ledger'),
       value: ''
     },
     ...ledgerChains.map(({ displayName, genesisHash }): NetworkOption => ({

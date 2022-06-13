@@ -5,6 +5,7 @@ import { faCircleCheck } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { ValidatorInfo } from '@subwallet/extension-base/background/KoniTypes';
 import NeutralQuestion from '@subwallet/extension-koni-ui/assets/NeutralQuestion.svg';
+import { ActionContext } from '@subwallet/extension-koni-ui/components';
 import Button from '@subwallet/extension-koni-ui/components/Button';
 import Identicon from '@subwallet/extension-koni-ui/components/Identicon';
 import InputBalance from '@subwallet/extension-koni-ui/components/InputBalance';
@@ -25,7 +26,7 @@ import { parseBalanceString } from '@subwallet/extension-koni-ui/Popup/Bonding/u
 import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { toShort } from '@subwallet/extension-koni-ui/util';
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useContext, useEffect, useState } from 'react';
 import { useSelector } from 'react-redux';
 import styled from 'styled-components';
 
@@ -62,6 +63,7 @@ function BondingSubmitTransaction ({ className }: Props): React.ReactElement<Pro
   const hasOwnStake = validatorInfo.ownStake > 0;
   const isMaxCommission = validatorInfo.commission === 100;
 
+  const navigate = useContext(ActionContext);
   const _height = window.innerHeight > 600 ? 650 : 450;
 
   useEffect(() => {
@@ -85,6 +87,14 @@ function BondingSubmitTransaction ({ className }: Props): React.ReactElement<Pro
   const handleOnClick = useCallback(() => {
     setShowDetail(!showDetail);
   }, [showDetail]);
+
+  const handleResend = useCallback(() => {
+    console.log('resend');
+  }, []);
+
+  const goHome = useCallback(() => {
+    navigate('/');
+  }, [navigate]);
 
   const handleChangeAmount = useCallback((value: BN | string) => {
     let parsedValue;
@@ -129,7 +139,7 @@ function BondingSubmitTransaction ({ className }: Props): React.ReactElement<Pro
         to='/'
       />
 
-      <div
+      {!showResult && <div
         className={'bonding-submit-container'}
         style={{ height: `${_height}px` }}
       >
@@ -348,7 +358,7 @@ function BondingSubmitTransaction ({ className }: Props): React.ReactElement<Pro
             }
           </Button>
         </div>
-      </div>
+      </div>}
 
       {showAuth &&
         <BondingAuthTransaction
@@ -362,7 +372,14 @@ function BondingSubmitTransaction ({ className }: Props): React.ReactElement<Pro
       }
 
       {!showAuth && showResult &&
-        <BondingResult />
+        <BondingResult
+          backToHome={goHome}
+          extrinsicHash={''}
+          handleResend={handleResend}
+          isTxSuccess={true}
+          networkKey={selectedNetwork}
+          txError={''}
+        />
       }
     </div>
   );

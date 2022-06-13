@@ -57,6 +57,9 @@ function BondingSubmitTransaction ({ className }: Props): React.ReactElement<Pro
   const [fee, setFee] = useState('');
   const [balanceError, setBalanceError] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [extrinsicHash, setExtrinsicHash] = useState('');
+  const [isTxSuccess, setIsTxSuccess] = useState(false);
+  const [txError, setTxError] = useState('');
 
   const isOversubscribed = validatorInfo.nominatorCount >= maxNominatorPerValidator;
   const isSufficientFund = useIsSufficientBalance(selectedNetwork, validatorInfo.minBond);
@@ -366,7 +369,11 @@ function BondingSubmitTransaction ({ className }: Props): React.ReactElement<Pro
           balanceError={balanceError}
           fee={fee}
           selectedNetwork={selectedNetwork}
+          setExtrinsicHash={setExtrinsicHash}
+          setIsTxSuccess={setIsTxSuccess}
           setShowConfirm={setShowAuth}
+          setShowResult={setShowResult}
+          setTxError={setTxError}
           validatorInfo={validatorInfo}
         />
       }
@@ -374,11 +381,11 @@ function BondingSubmitTransaction ({ className }: Props): React.ReactElement<Pro
       {!showAuth && showResult &&
         <BondingResult
           backToHome={goHome}
-          extrinsicHash={''}
+          extrinsicHash={extrinsicHash}
           handleResend={handleResend}
-          isTxSuccess={true}
+          isTxSuccess={isTxSuccess}
           networkKey={selectedNetwork}
-          txError={''}
+          txError={txError}
         />
       }
     </div>

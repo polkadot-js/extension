@@ -5,6 +5,7 @@ import { faCircleCheck } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { ValidatorInfo } from '@subwallet/extension-base/background/KoniTypes';
 import { InputWithLabel, Warning } from '@subwallet/extension-koni-ui/components';
+import Spinner from '@subwallet/extension-koni-ui/components/Spinner';
 // import Button from '@subwallet/extension-koni-ui/components/Button';
 // import Identicon from '@subwallet/extension-koni-ui/components/Identicon';
 // import Modal from '@subwallet/extension-koni-ui/components/Modal';
@@ -14,6 +15,7 @@ import { BalanceFormatType } from '@subwallet/extension-koni-ui/components/types
 import useGetFreeBalance from '@subwallet/extension-koni-ui/hooks/screen/bonding/useGetFreeBalance';
 import useGetNetworkJson from '@subwallet/extension-koni-ui/hooks/screen/home/useGetNetworkJson';
 import useTranslation from '@subwallet/extension-koni-ui/hooks/useTranslation';
+import { submitBonding } from '@subwallet/extension-koni-ui/messaging';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { toShort } from '@subwallet/extension-koni-ui/util';
@@ -63,6 +65,7 @@ function BondingAuthTransaction ({ amount, balanceError, className, fee, selecte
   const [password, setPassword] = useState('');
   const [isKeyringErr, setKeyringErr] = useState<boolean>(false);
   const [errorArr, setErrorArr] = useState<string[]>([]);
+  const [loading, setLoading] = useState(false);
 
   const renderError = () => {
     return errorArr.map((err) =>
@@ -88,9 +91,25 @@ function BondingAuthTransaction ({ amount, balanceError, className, fee, selecte
     setShowConfirm(false);
   }, [setShowConfirm]);
 
+  const handleOnSubmit = useCallback(async () => {
+    await submitBonding({
+      networkKey: selectedNetwork,
+      controllerId: account?.address as string,
+      amount,
+      validatorInfo
+    }, (data) => {
+      console.log(data);
+    });
+  }, [account?.address, amount, selectedNetwork, validatorInfo]);
+
   const handleConfirm = useCallback(() => {
-    console.log('ok');
-  }, []);
+    setLoading(true);
+
+    // eslint-disable-next-line @typescript-eslint/no-misused-promises
+    setTimeout(async () => {
+      await handleOnSubmit();
+    }, 10);
+  }, [handleOnSubmit]);
 
   return (
     <div className={className}>
@@ -221,7 +240,11 @@ function BondingAuthTransaction ({ amount, balanceError, className, fee, selecte
               isDisabled={password === '' || errorArr.length > 0}
               onClick={handleConfirm}
             >
-              Confirm
+              {
+                loading
+                  ? <Spinner />
+                  : <span>Confirm</span>
+              }
             </Button>
           </div>
         </div>

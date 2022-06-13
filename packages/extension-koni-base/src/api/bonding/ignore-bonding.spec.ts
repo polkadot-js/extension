@@ -290,7 +290,7 @@ describe('test DotSama APIs', () => {
     const apiPromise = await api.isReady;
 
     const controllerId = '5EsmjvZBNDjdTLGvCbr4CpUbxoQXi8meqZ83nEh1y9BBJ3ZG';
-    const amount = new BN(1);
+    const amount = new BN(1.1);
     const bondDest = 'Staked'; // pay into the stash account, increasing the amount at stake
 
     const bondTx = apiPromise.tx.staking.bond(controllerId, amount, bondDest);
@@ -302,8 +302,7 @@ describe('test DotSama APIs', () => {
     console.log(nominateTx.toHuman());
 
     const extrinsic = apiPromise.tx.utility.batchAll([bondTx, nominateTx]);
-    const info = await extrinsic.paymentInfo('5EsmjvZBNDjdTLGvCbr4CpUbxoQXi8meqZ83nEh1y9BBJ3ZG');
 
-    console.log(info.partialFee.toHuman());
+    console.log(extrinsic.toString());
   });
 });

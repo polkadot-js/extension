@@ -67,12 +67,10 @@ function BondingSubmitTransaction ({ className }: Props): React.ReactElement<Pro
   useEffect(() => {
     const parsedFreeBalance = parseFloat(freeBalance) / (10 ** (networkJson.decimals as number));
 
-    if (amount >= validatorInfo.minBond && Number.isSafeInteger(amount) && amount <= parsedFreeBalance) {
+    if (amount >= validatorInfo.minBond && amount <= parsedFreeBalance) {
       setIsReadySubmit(true);
     } else {
-      if (!Number.isSafeInteger(amount)) {
-        show('The bonding amount must be an integer');
-      } else if (amount > parsedFreeBalance) {
+      if (amount > parsedFreeBalance) {
         show('Insufficient balance');
       } else if (amount >= 0) {
         show(`You must bond at least ${validatorInfo.minBond} ${networkJson.nativeToken as string}`);

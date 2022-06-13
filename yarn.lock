@@ -4409,8 +4409,8 @@ __metadata:
     ethereumjs-tx: ^2.1.2
     eventemitter3: ^4.0.7
     rxjs: ^7.5.1
-    web3: ^1.7.1
-    web3-core: ^1.7.1
+    web3: ^1.7.3
+    web3-core: ^1.7.3
     web3-core-helpers: ^1.7.3
   languageName: unknown
   linkType: soft
@@ -4535,9 +4535,10 @@ __metadata:
     pontem-types-bundle: 1.0.15
     protobufjs: ^6.11.2
     rxjs: ^7.5.1
-    web3: ^1.7.1
-    web3-core: ^1.7.1
+    web3: ^1.7.3
+    web3-core: ^1.7.3
     web3-core-helpers: ^1.7.3
+    web3-eth-contract: ^1.7.3
   languageName: unknown
   linkType: soft
 
@@ -4610,7 +4611,7 @@ __metadata:
     semantic-ui-react: ^2.0.4
     sinon-chrome: ^3.0.1
     styled-components: ^5.3.3
-    web3: ^1.7.1
+    web3: ^1.7.3
   languageName: unknown
   linkType: soft
 
@@ -21723,7 +21724,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"web3-core@npm:1.7.3, web3-core@npm:^1.7.1, web3-core@npm:^1.7.3":
+"web3-core@npm:1.7.3, web3-core@npm:^1.7.3":
   version: 1.7.3
   resolution: "web3-core@npm:1.7.3"
   dependencies:
@@ -21767,7 +21768,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"web3-eth-contract@npm:1.7.3":
+"web3-eth-contract@npm:1.7.3, web3-eth-contract@npm:^1.7.3":
   version: 1.7.3
   resolution: "web3-eth-contract@npm:1.7.3"
   dependencies:
@@ -21912,7 +21913,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"web3@npm:^1.6.1, web3@npm:^1.7.1":
+"web3@npm:^1.6.1, web3@npm:^1.7.3":
   version: 1.7.3
   resolution: "web3@npm:1.7.3"
   dependencies:

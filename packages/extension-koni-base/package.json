@@ -14,7 +14,7 @@
   },
   "sideEffects": false,
   "type": "module",
-  "version": "0.4.4-0",
+  "version": "0.4.5-0",
   "main": "index.js",
   "dependencies": {
     "@acala-network/api": "4.0.2-20",
@@ -52,16 +52,17 @@
     "@snowfork/snowbridge-types": "0.2.7",
     "@sora-substrate/type-definitions": "1.7.48",
     "@subsocial/types": "0.6.5",
-    "@subwallet/extension-base": "^0.4.4-0",
-    "@subwallet/extension-chains": "^0.4.4-0",
-    "@subwallet/extension-dapp": "^0.4.4-0",
-    "@subwallet/extension-inject": "^0.4.4-0",
+    "@subwallet/extension-base": "^0.4.5-0",
+    "@subwallet/extension-chains": "^0.4.5-0",
+    "@subwallet/extension-dapp": "^0.4.5-0",
+    "@subwallet/extension-inject": "^0.4.5-0",
     "@unique-nft/types": "0.3.1",
     "@zeitgeistpm/type-defs": "0.4.5",
     "@zeroio/type-definitions": "0.0.14",
     "axios": "^0.24.0",
     "cross-fetch": "^3.1.5",
     "ethereumjs-tx": "^2.1.2",
+    "eth-simple-keyring": "^4.2.0"
     "eventemitter3": "^4.0.7",
     "graphql": "^16.3.0",
     "moonbeam-types-bundle": "2.0.3",
@@ -73,7 +74,6 @@
     "web3-eth-contract": "^1.7.1"
   },
   "devDependencies": {
-    "@subwallet/extension-mocks": "^0.4.4-0",
-    "eth-simple-keyring": "^4.2.0"
+    "@subwallet/extension-mocks": "^0.4.5-0"
   }
 }

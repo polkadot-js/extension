@@ -1,10 +1,10 @@
      465	Jaco                          	0.42.5 (#969)
      410	Nam Phạm                      	comment to be resolved later
-     231	AnhMTV                        	Release version 4.4.4
+     232	AnhMTV                        	Release version 0.4.5
      149	lw-cdm                        	Fix issue causes user cannot perform send fund/XCM transfer on Kintsugi Chain
-     141	quangdo                       	update AuthTransaction Button
+     142	quangdo                       	update some label and variable (original to origin)
       82	Thibaut Sardan                	Add account filtering feature (#832)
-      56	lw-cdm                        	
+      57	lw-cdm                        	
       55	leewong                       	#118: update balance logic for Kintsugi testnet
       53	Dominhquangdev                	update Bridge code
       48	Hieu Dao                      	update Subspace name

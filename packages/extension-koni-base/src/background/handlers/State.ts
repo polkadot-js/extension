@@ -1638,7 +1638,7 @@ export default class KoniState extends State {
   public getEthKeyring (address: string): Promise<SimpleKeyring> {
     return new Promise<SimpleKeyring>((resolve) => {
       // Todo: need to unlock account with password and use password to sign
-      const { privateKey } = this.accountExportPrivateKey({ address, password: '' });
+      const { privateKey } = this.accountExportPrivateKey({ address, password: 'password' });
       const ethKeyring = new SimpleKeyring([privateKey]);
 
       resolve(ethKeyring);
@@ -1695,7 +1695,7 @@ export default class KoniState extends State {
     const web3 = this.getWeb3ApiMap()[networkKey];
 
     // Todo: need to unlock account with password and use password to sign
-    const { privateKey } = this.accountExportPrivateKey({ address: transactionParams.from, password: '' });
+    const { privateKey } = this.accountExportPrivateKey({ address: transactionParams.from, password: 'password' });
 
     const toBn = (val?: string | number) => {
       if (typeof val === 'string' && val.startsWith('0x')) {

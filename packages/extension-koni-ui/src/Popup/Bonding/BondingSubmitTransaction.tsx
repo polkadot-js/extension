@@ -65,20 +65,22 @@ function BondingSubmitTransaction ({ className }: Props): React.ReactElement<Pro
   const _height = window.innerHeight > 600 ? 650 : 450;
 
   useEffect(() => {
-    const parsedFreeBalance = parseFloat(freeBalance) / (10 ** (networkJson.decimals as number));
+    if (!showAuth && !showResult) {
+      const parsedFreeBalance = parseFloat(freeBalance) / (10 ** (networkJson.decimals as number));
 
-    if (amount >= validatorInfo.minBond && amount <= parsedFreeBalance) {
-      setIsReadySubmit(true);
-    } else {
-      if (amount > parsedFreeBalance) {
-        show('Insufficient balance');
-      } else if (amount >= 0) {
-        show(`You must bond at least ${validatorInfo.minBond} ${networkJson.nativeToken as string}`);
+      if (amount >= validatorInfo.minBond && amount <= parsedFreeBalance) {
+        setIsReadySubmit(true);
+      } else {
+        if (amount > parsedFreeBalance) {
+          show('Insufficient balance');
+        } else if (amount >= 0) {
+          show(`You must bond at least ${validatorInfo.minBond} ${networkJson.nativeToken as string}`);
+        }
+
+        setIsReadySubmit(false);
       }
-
-      setIsReadySubmit(false);
     }
-  }, [amount, freeBalance, networkJson.decimals, networkJson.nativeToken, show, validatorInfo.minBond]);
+  }, [amount, freeBalance, networkJson.decimals, networkJson.nativeToken, show, showAuth, showResult, validatorInfo.minBond]);
 
   const handleOnClick = useCallback(() => {
     setShowDetail(!showDetail);

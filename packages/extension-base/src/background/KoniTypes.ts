@@ -803,6 +803,7 @@ export interface BondingSubmitParams {
   controllerId: string,
   amount: number,
   validatorInfo: ValidatorInfo,
+  password?: string
 }
 
 export interface BondingTxResponse {

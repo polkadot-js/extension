@@ -2076,20 +2076,65 @@ export default class KoniExtension extends Extension {
     };
   }
 
-  private async submitBonding (id: string, port: chrome.runtime.Port, { amount, controllerId, networkKey, validatorInfo }: BondingSubmitParams): Promise<BondingTxResponse> {
+  private async submitBonding (id: string, port: chrome.runtime.Port, { amount, controllerId, networkKey, password, validatorInfo }: BondingSubmitParams): Promise<BondingTxResponse> {
     const txState: BondingTxResponse = {};
+    const networkJson = state.getNetworkMap()[networkKey];
+    const parsedAmount = amount * (10 ** (networkJson.decimals as number));
+    const binaryAmount = new BN(parsedAmount);
 
-    if (!amount || !controllerId || !validatorInfo) {
+    if (!amount || !controllerId || !validatorInfo || !password) {
       txState.txError = true;
 
       return txState;
     }
 
-    const updateState = createSubscription<'pri(bonding.submitTransaction)'>(id, port);
+    const callback = createSubscription<'pri(bonding.submitTransaction)'>(id, port);
     const dotSamaApi = state.getDotSamaApi(networkKey);
-    const extrinsic = await getBondingExtrinsic(dotSamaApi);
+    const extrinsic = await getBondingExtrinsic(dotSamaApi, controllerId, binaryAmount, validatorInfo.address);
+    const passwordError: string | null = unlockAccount(controllerId, password);
 
-    cons;
+    if (extrinsic !== null && passwordError === null) {
+      const pair = keyring.getPair(controllerId);
+
+      try {
+        const unsubscribe = await extrinsic.signAndSend(pair, (result) => {
+          if (!result || !result.status) {
+            return;
+          }
+
+          if (result.status.isInBlock || result.status.isFinalized) {
+            result.events
+              .filter(({ event: { section } }) => section === 'system')
+              .forEach(({ event: { method } }): void => {
+                txState.transactionHash = extrinsic.hash.toHex();
+                callback(txState);
+
+                if (method === 'ExtrinsicFailed') {
+                  txState.status = false;
+                  callback(txState);
+                } else if (method === 'ExtrinsicSuccess') {
+                  txState.status = true;
+                  callback(txState);
+                }
+              });
+          } else if (result.isError) {
+            txState.txError = true;
+            callback(txState);
+          }
+
+          if (result.isCompleted) {
+            unsubscribe();
+          }
+        });
+      } catch (e) {
+        console.error('error bonding', e);
+        txState.txError = true;
+        callback(txState);
+      }
+    } else {
+      txState.passwordError = passwordError;
+      callback(txState);
+    }
 
     return txState;
   }

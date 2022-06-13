@@ -4,16 +4,11 @@
 import { faCircleCheck } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { ValidatorInfo } from '@subwallet/extension-base/background/KoniTypes';
-import { InputWithLabel, Warning } from '@subwallet/extension-koni-ui/components';
-import Spinner from '@subwallet/extension-koni-ui/components/Spinner';
-// import Button from '@subwallet/extension-koni-ui/components/Button';
-// import Identicon from '@subwallet/extension-koni-ui/components/Identicon';
-// import Modal from '@subwallet/extension-koni-ui/components/Modal';
-// import ReceiverInputAddress from '@subwallet/extension-koni-ui/components/ReceiverInputAddress';
-// import Tooltip from '@subwallet/extension-koni-ui/components/Tooltip';
+import { InputWithLabel } from '@subwallet/extension-koni-ui/components';
 import { BalanceFormatType } from '@subwallet/extension-koni-ui/components/types';
 import useGetFreeBalance from '@subwallet/extension-koni-ui/hooks/screen/bonding/useGetFreeBalance';
 import useGetNetworkJson from '@subwallet/extension-koni-ui/hooks/screen/home/useGetNetworkJson';
+import useToast from '@subwallet/extension-koni-ui/hooks/useToast';
 import useTranslation from '@subwallet/extension-koni-ui/hooks/useTranslation';
 import { submitBonding } from '@subwallet/extension-koni-ui/messaging';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
@@ -23,6 +18,7 @@ import React, { useCallback, useState } from 'react';
 import { useSelector } from 'react-redux';
 import styled from 'styled-components';
 
+const Spinner = React.lazy(() => import('@subwallet/extension-koni-ui/components/Spinner'));
 const Identicon = React.lazy(() => import('@subwallet/extension-koni-ui/components/Identicon'));
 const Button = React.lazy(() => import('@subwallet/extension-koni-ui/components/Button'));
 const Modal = React.lazy(() => import('@subwallet/extension-koni-ui/components/Modal'));
@@ -36,7 +32,11 @@ interface Props extends ThemeProps {
   validatorInfo: ValidatorInfo,
   selectedNetwork: string,
   fee: string,
-  balanceError: boolean
+  balanceError: boolean,
+  setShowResult: (val: boolean) => void,
+  setExtrinsicHash: (val: string) => void,
+  setIsTxSuccess: (val: boolean) => void,
+  setTxError: (val: string) => void,
 }
 
 // const validatorInfo: ValidatorInfo = {
@@ -55,36 +55,21 @@ interface Props extends ThemeProps {
 //
 // const selectedNetwork = 'westend';
 
-function BondingAuthTransaction ({ amount, balanceError, className, fee, selectedNetwork, setShowConfirm, validatorInfo }: Props): React.ReactElement<Props> {
+function BondingAuthTransaction ({ amount, balanceError, className, fee, selectedNetwork, setExtrinsicHash, setIsTxSuccess, setShowConfirm, setShowResult, setTxError, validatorInfo }: Props): React.ReactElement<Props> {
   const { t } = useTranslation();
   const networkJson = useGetNetworkJson(selectedNetwork);
   const freeBalance = useGetFreeBalance(selectedNetwork);
   const balanceFormat: BalanceFormatType = [networkJson.decimals as number, networkJson.nativeToken as string, undefined];
   const { currentAccount: { account }, networkMap } = useSelector((state: RootState) => state);
 
-  const [password, setPassword] = useState('');
-  const [isKeyringErr, setKeyringErr] = useState<boolean>(false);
-  const [errorArr, setErrorArr] = useState<string[]>([]);
+  const [password, setPassword] = useState<string>('');
   const [loading, setLoading] = useState(false);
-
-  const renderError = () => {
-    return errorArr.map((err) =>
-      (
-        <Warning
-          className='auth-transaction-error'
-          isDanger
-          key={err}
-        >
-          {t<string>(err)}
-        </Warning>
-      )
-    );
-  };
+  const [passwordError, setPasswordError] = useState<string | null>('');
+  const { show } = useToast();
 
   const _onChangePass = useCallback((value: string) => {
     setPassword(value);
-    setErrorArr([]);
-    setKeyringErr(false);
+    setPasswordError(null);
   }, []);
 
   const hideConfirm = useCallback(() => {
@@ -96,11 +81,47 @@ function BondingAuthTransaction ({ amount, balanceError, className, fee, selecte
       networkKey: selectedNetwork,
       controllerId: account?.address as string,
       amount,
-      validatorInfo
+      validatorInfo,
+      password
     }, (data) => {
-      console.log(data);
+      if (data.passwordError) {
+        show(data.passwordError);
+        setPasswordError(data.passwordError);
+        setLoading(false);
+      }
+
+      if (balanceError && !data.passwordError) {
+        setLoading(false);
+        show('Your balance is too low to cover fees');
+
+        return;
+      }
+
+      if (data.txError && data.txError) {
+        show('Encountered an error, please try again.');
+        setLoading(false);
+
+        return;
+      }
+
+      if (data.status) {
+        setLoading(false);
+
+        if (data.status) {
+          setIsTxSuccess(true);
+          setShowConfirm(false);
+          setShowResult(true);
+          setExtrinsicHash(data.transactionHash as string);
+        } else {
+          setIsTxSuccess(false);
+          setTxError('Error submitting transaction');
+          setShowConfirm(false);
+          setShowResult(true);
+          setExtrinsicHash(data.transactionHash as string);
+        }
+      }
     });
-  }, [account?.address, amount, selectedNetwork, validatorInfo]);
+  }, [account?.address, amount, balanceError, password, selectedNetwork, setExtrinsicHash, setIsTxSuccess, setShowConfirm, setShowResult, setTxError, show, validatorInfo]);
 
   const handleConfirm = useCallback(() => {
     setLoading(true);
@@ -220,14 +241,12 @@ function BondingAuthTransaction ({ amount, balanceError, className, fee, selecte
           <div className='bonding-auth__separator' />
 
           <InputWithLabel
-            isError={isKeyringErr}
+            isError={passwordError !== null}
             label={t<string>('Unlock account with password')}
             onChange={_onChangePass}
             type='password'
             value={password}
           />
-
-          {!!(errorArr && errorArr.length) && renderError()}
 
           <div className={'bonding-auth-btn-container'}>
             <Button
@@ -237,7 +256,7 @@ function BondingAuthTransaction ({ amount, balanceError, className, fee, selecte
               Reject
             </Button>
             <Button
-              isDisabled={password === '' || errorArr.length > 0}
+              isDisabled={password === ''}
               onClick={handleConfirm}
             >
               {

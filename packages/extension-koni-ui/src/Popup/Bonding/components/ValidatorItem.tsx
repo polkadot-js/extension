@@ -12,6 +12,7 @@ import Identicon from '@subwallet/extension-koni-ui/components/Identicon';
 import Tooltip from '@subwallet/extension-koni-ui/components/Tooltip';
 import useIsSufficientBalance from '@subwallet/extension-koni-ui/hooks/screen/bonding/useIsSufficientBalance';
 import useGetNetworkJson from '@subwallet/extension-koni-ui/hooks/screen/home/useGetNetworkJson';
+import useToast from '@subwallet/extension-koni-ui/hooks/useToast';
 import { parseBalanceString } from '@subwallet/extension-koni-ui/Popup/Bonding/utils';
 import { store } from '@subwallet/extension-koni-ui/stores';
 import { BondingParams } from '@subwallet/extension-koni-ui/stores/types';
@@ -26,12 +27,14 @@ interface Props extends ThemeProps {
   networkKey: string,
   maxNominatorPerValidator: number,
   isBondedBefore: boolean,
-  bondedValidators: string[]
+  bondedValidators: string[],
+  maxNominations: number
 }
 
-function ValidatorItem ({ bondedValidators, className, isBondedBefore, maxNominatorPerValidator, networkKey, validatorInfo }: Props): React.ReactElement<Props> {
+function ValidatorItem ({ bondedValidators, className, isBondedBefore, maxNominations, maxNominatorPerValidator, networkKey, validatorInfo }: Props): React.ReactElement<Props> {
   const networkJson = useGetNetworkJson(networkKey);
   const [showDetail, setShowDetail] = useState(false);
+  const { show } = useToast();
 
   const isOversubscribed = validatorInfo.nominatorCount >= maxNominatorPerValidator;
   const isSufficientFund = useIsSufficientBalance(networkKey, validatorInfo.minBond);
@@ -45,8 +48,12 @@ function ValidatorItem ({ bondedValidators, className, isBondedBefore, maxNomina
   }, [showDetail]);
 
   const handleOnSelect = useCallback(() => {
-    store.dispatch({ type: 'bondingParams/update', payload: { selectedNetwork: networkKey, selectedValidator: validatorInfo, maxNominatorPerValidator, isBondedBefore, bondedValidators } as BondingParams });
-    navigate('/account/bonding-auth');
+    if (bondedValidators.length >= maxNominations && !bondedValidators.includes(validatorInfo.address)) {
+      show('Please choose among the nominating validators only');
+    } else {
+      store.dispatch({ type: 'bondingParams/update', payload: { selectedNetwork: networkKey, selectedValidator: validatorInfo, maxNominatorPerValidator, isBondedBefore, bondedValidators } as BondingParams });
+      navigate('/account/bonding-auth');
+    }
   }, [bondedValidators, isBondedBefore, maxNominatorPerValidator, navigate, networkKey, validatorInfo]);
 
   return (

@@ -2035,7 +2035,7 @@ export default class KoniExtension extends Extension {
     const result: Record<string, ChainBondingBasics> = {};
 
     await Promise.all(networkJsons.map(async (networkJson) => {
-      result[networkJson.key] = await getChainBondingBasics(networkJson.key, state.getDotSamaApi(networkJson.key), networkJson.decimals as number);
+      result[networkJson.key] = await getChainBondingBasics(networkJson.key, state.getDotSamaApi(networkJson.key));
     }));
 
     return result;
@@ -2044,14 +2044,15 @@ export default class KoniExtension extends Extension {
   private async getBondingOption ({ address, networkKey }: BondingOptionParams): Promise<BondingOptionInfo> {
     const apiProps = state.getDotSamaApi(networkKey);
     const networkJson = state.getNetworkMapByKey(networkKey);
-    const { bondedValidators, era, isBondedBefore, maxNominatorPerValidator, validatorsInfo } = await getValidatorsInfo(networkKey, apiProps, networkJson.decimals as number, address);
+    const { bondedValidators, era, isBondedBefore, maxNominations, maxNominatorPerValidator, validatorsInfo } = await getValidatorsInfo(networkKey, apiProps, networkJson.decimals as number, address);
 
     return {
       maxNominatorPerValidator,
       era,
       validators: validatorsInfo,
       isBondedBefore,
-      bondedValidators
+      bondedValidators,
+      maxNominations
     } as BondingOptionInfo;
   }
 

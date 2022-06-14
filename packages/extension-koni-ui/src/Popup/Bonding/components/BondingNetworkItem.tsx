@@ -1,6 +1,8 @@
 // Copyright 2019-2022 @subwallet/extension-koni authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
+import { faCircleExclamation } from '@fortawesome/free-solid-svg-icons';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { ChainBondingBasics, NetworkJson } from '@subwallet/extension-base/background/KoniTypes';
 import { ActionContext } from '@subwallet/extension-koni-ui/components';
 import Tooltip from '@subwallet/extension-koni-ui/components/Tooltip';
@@ -21,9 +23,11 @@ function BondingNetworkItem ({ chainBondingMeta, className, icon, network }: Pro
   const navigate = useContext(ActionContext);
 
   const handleOnClick = useCallback(() => {
-    store.dispatch({ type: 'bondingParams/update', payload: { selectedNetwork: network.key, selectedValidator: null, maxNominatorPerValidator: null } as BondingParams });
-    navigate('/account/select-bonding-validator');
-  }, [navigate, network.key]);
+    if (!chainBondingMeta?.isMaxNominators) {
+      store.dispatch({ type: 'bondingParams/update', payload: { selectedNetwork: network.key, selectedValidator: null, maxNominatorPerValidator: null } as BondingParams });
+      navigate('/account/select-bonding-validator');
+    }
+  }, [chainBondingMeta?.isMaxNominators, navigate, network.key]);
 
   return (
     <div
@@ -46,6 +50,21 @@ function BondingNetworkItem ({ chainBondingMeta, className, icon, network }: Pro
         </div>
 
         <div className={'footer-container'}>
+          {
+            chainBondingMeta?.isMaxNominators && <FontAwesomeIcon
+              className={'max-nominator'}
+              data-for={`max-nominator-tooltip-${network.key}`}
+              data-tip={true}
+              icon={faCircleExclamation}
+            />
+          }
+          <Tooltip
+            place={'top'}
+            // eslint-disable-next-line @typescript-eslint/restrict-plus-operands
+            text={'Too many nominators. You cannot stake on this network'}
+            trigger={`max-nominator-tooltip-${network.key}`}
+          />
+
           <div
             className={'chain-return'}
             data-for={`chain-return-tooltip-${network.key}`}
@@ -70,9 +89,9 @@ function BondingNetworkItem ({ chainBondingMeta, className, icon, network }: Pro
 }
 
 export default React.memo(styled(BondingNetworkItem)(({ theme }: Props) => `
-  .insufficient-fund {
-    font-size: 13px;
+  .max-nominator {
     color: ${theme.errorColor};
+    font-size: 13px;
   }
 
   .bonding-item-toggle-container {

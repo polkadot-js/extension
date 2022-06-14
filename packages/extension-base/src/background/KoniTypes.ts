@@ -786,6 +786,7 @@ export interface ValidatorInfo {
 export interface BondingOptionInfo {
   isBondedBefore: boolean,
   era: number,
+  maxNominations: number,
   maxNominatorPerValidator: number,
   validators: ValidatorInfo[],
   bondedValidators: string[]
@@ -793,7 +794,8 @@ export interface BondingOptionInfo {
 
 export interface ChainBondingBasics {
   stakedReturn: number,
-  minBond: number
+  // minBond: number,
+  isMaxNominators: boolean
 }
 
 export interface BondingTxInfo {

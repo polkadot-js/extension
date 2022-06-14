@@ -31,6 +31,7 @@ function BondingValidatorSelection ({ className }: Props): React.ReactElement<Pr
   const [allValidators, setAllValidators] = useState<ValidatorInfo[]>([]);
   const [isBondedBefore, setIsBondedBefore] = useState(false);
   const [bondedValidators, setBondedValidators] = useState<string[]>([]);
+  const [maxNominations, setMaxNominations] = useState(1);
 
   const [sortByCommission, setSortByCommission] = useState(false);
   const [sortByReturn, setSortByReturn] = useState(false);
@@ -119,6 +120,7 @@ function BondingValidatorSelection ({ className }: Props): React.ReactElement<Pr
           setMaxNominatorPerValidator(bondingOptionInfo.maxNominatorPerValidator);
           setIsBondedBefore(bondingOptionInfo.isBondedBefore);
           setBondedValidators(bondingOptionInfo.bondedValidators);
+          setMaxNominations(bondingOptionInfo.maxNominations);
 
           const sortedValidators = bondingOptionInfo.validators
             .sort((validator: ValidatorInfo, _validator: ValidatorInfo) => {
@@ -209,6 +211,7 @@ function BondingValidatorSelection ({ className }: Props): React.ReactElement<Pr
                   bondedValidators={bondedValidators}
                   isBondedBefore={isBondedBefore}
                   key={`${index}-${validator.address}`}
+                  maxNominations={maxNominations}
                   maxNominatorPerValidator={maxNominatorPerValidator}
                   networkKey={bondingParams.selectedNetwork}
                   validatorInfo={validator}

@@ -6,32 +6,35 @@ import { calculateChainStakedReturn, calculateInflation, calculateValidatorStake
 
 import { BN } from '@polkadot/util';
 
-export async function getChainBondingBasics (networkKey: string, dotSamaApi: ApiProps, decimals: number) {
+export async function getChainBondingBasics (networkKey: string, dotSamaApi: ApiProps) {
   const apiProps = await dotSamaApi.isReady;
 
   const _era = await apiProps.api.query.staking.currentEra();
   const currentEra = _era.toString();
 
-  const [_totalEraStake, _totalIssuance, _auctionCounter, _minBond] = await Promise.all([
+  const [_totalEraStake, _totalIssuance, _auctionCounter, _maxNominator, _nominatorCount] = await Promise.all([
     apiProps.api.query.staking.erasTotalStake(parseInt(currentEra)),
     apiProps.api.query.balances.totalIssuance(),
     apiProps.api.query.auctions?.auctionCounter(),
-    apiProps.api.query.staking.minNominatorBond()
+    apiProps.api.query.staking.maxNominatorsCount(),
+    apiProps.api.query.staking.counterForNominators()
   ]);
 
+  const rawMaxNominator = _maxNominator.toHuman() as string;
+  const rawNominatorCount = _nominatorCount.toHuman() as string;
   const rawTotalEraStake = _totalEraStake.toHuman() as string;
   const rawTotalIssuance = _totalIssuance.toHuman() as string;
-  const rawMinBond = _minBond.toHuman() as string;
   const numAuctions = _auctionCounter ? _auctionCounter.toHuman() as number : 0;
   const totalIssuance = parseFloat(rawTotalIssuance.replaceAll(',', ''));
   const totalEraStake = parseFloat(rawTotalEraStake.replaceAll(',', ''));
+  const maxNominator = parseFloat(rawMaxNominator.replaceAll(',', ''));
+  const nominatorCount = parseFloat(rawNominatorCount.replaceAll(',', ''));
 
   const inflation = calculateInflation(totalEraStake, totalIssuance, numAuctions, networkKey);
   const stakedReturn = calculateChainStakedReturn(inflation, totalEraStake, totalIssuance, networkKey);
-  const minBond = parseFloat(rawMinBond.replaceAll(',', ''));
 
   return {
-    minBond: (minBond / 10 ** decimals),
+    isMaxNominators: nominatorCount >= maxNominator,
     stakedReturn
   } as ChainBondingBasics;
 }
@@ -53,7 +56,8 @@ export async function getValidatorsInfo (networkKey: string, dotSamaApi: ApiProp
     apiProps.api.query.staking.minNominatorBond(),
     apiProps.api.query.staking.nominators(address)
   ]);
-
+  const rawMaxNominations = (apiProps.api.consts.staking.maxNominations).toHuman() as string;
+  const maxNominations = parseFloat(rawMaxNominations.replaceAll(',', ''));
   const rawMaxNominatorPerValidator = (apiProps.api.consts.staking.maxNominatorRewardedPerValidator).toHuman() as string;
   const maxNominatorPerValidator = parseFloat(rawMaxNominatorPerValidator.replaceAll(',', ''));
 
@@ -183,7 +187,8 @@ export async function getValidatorsInfo (networkKey: string, dotSamaApi: ApiProp
     era: parseInt(currentEra),
     validatorsInfo: result,
     isBondedBefore: bondedValidators.length > 0,
-    bondedValidators
+    bondedValidators,
+    maxNominations
   };
 }
 

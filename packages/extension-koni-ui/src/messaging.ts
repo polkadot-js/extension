@@ -550,8 +550,8 @@ export async function recoverDotSamaApi (request: string): Promise<boolean> {
   return sendMessage('pri(networkMap.recoverDotSama)', request);
 }
 
-export async function getBondingOptions (networkKey: string): Promise<BondingOptionInfo> {
-  return sendMessage('pri(bonding.getBondingOptions)', networkKey);
+export async function getBondingOptions (networkKey: string, address: string): Promise<BondingOptionInfo> {
+  return sendMessage('pri(bonding.getBondingOptions)', { networkKey, address });
 }
 
 export async function getChainBondingBasics (networkJsons: NetworkJson[]): Promise<Record<string, ChainBondingBasics>> {

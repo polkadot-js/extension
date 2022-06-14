@@ -780,12 +780,15 @@ export interface ValidatorInfo {
   identity?: string;
   isVerified: boolean;
   minBond: number;
+  isNominated: boolean; // this validator has been staked to before
 }
 
 export interface BondingOptionInfo {
+  isBondedBefore: boolean,
   era: number,
   maxNominatorPerValidator: number,
-  validators: ValidatorInfo[]
+  validators: ValidatorInfo[],
+  bondedValidators: string[]
 }
 
 export interface ChainBondingBasics {
@@ -803,7 +806,9 @@ export interface BondingSubmitParams {
   nominatorAddress: string,
   amount: number,
   validatorInfo: ValidatorInfo,
-  password?: string
+  password?: string,
+  isBondedBefore: boolean,
+  bondedValidators: string[]
 }
 
 export interface BondingTxResponse {
@@ -814,11 +819,16 @@ export interface BondingTxResponse {
   txError?: boolean,
 }
 
+export interface BondingOptionParams {
+  networkKey: string;
+  address: string;
+}
+
 export interface KoniRequestSignatures {
   'pri(bonding.txInfo)': [BondingSubmitParams, BondingTxInfo];
   'pri(bonding.submitTransaction)': [BondingSubmitParams, BondingTxResponse, BondingTxResponse];
   'pri(bonding.getChainBondingBasics)': [NetworkJson[], Record<string, ChainBondingBasics>];
-  'pri(bonding.getBondingOptions)': [string, BondingOptionInfo];
+  'pri(bonding.getBondingOptions)': [BondingOptionParams, BondingOptionInfo];
   'pri(networkMap.recoverDotSama)': [string, boolean];
   'pri(substrateNft.submitTransaction)': [SubstrateNftSubmitTransaction, NftTransactionResponse, NftTransactionResponse]
   'pri(substrateNft.getTransaction)': [SubstrateNftTransactionRequest, SubstrateNftTransaction];

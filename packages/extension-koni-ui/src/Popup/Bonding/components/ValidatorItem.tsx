@@ -5,6 +5,7 @@ import { faCircleCheck } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { ValidatorInfo } from '@subwallet/extension-base/background/KoniTypes';
 import NeutralQuestion from '@subwallet/extension-koni-ui/assets/NeutralQuestion.svg';
+import TrophyGreen from '@subwallet/extension-koni-ui/assets/trophy-green.svg';
 import { ActionContext } from '@subwallet/extension-koni-ui/components';
 import Button from '@subwallet/extension-koni-ui/components/Button';
 import Identicon from '@subwallet/extension-koni-ui/components/Identicon';
@@ -23,10 +24,12 @@ interface Props extends ThemeProps {
   className?: string;
   validatorInfo: ValidatorInfo,
   networkKey: string,
-  maxNominatorPerValidator: number
+  maxNominatorPerValidator: number,
+  isBondedBefore: boolean,
+  bondedValidators: string[]
 }
 
-function ValidatorItem ({ className, maxNominatorPerValidator, networkKey, validatorInfo }: Props): React.ReactElement<Props> {
+function ValidatorItem ({ bondedValidators, className, isBondedBefore, maxNominatorPerValidator, networkKey, validatorInfo }: Props): React.ReactElement<Props> {
   const networkJson = useGetNetworkJson(networkKey);
   const [showDetail, setShowDetail] = useState(false);
 
@@ -42,9 +45,9 @@ function ValidatorItem ({ className, maxNominatorPerValidator, networkKey, valid
   }, [showDetail]);
 
   const handleOnSelect = useCallback(() => {
-    store.dispatch({ type: 'bondingParams/update', payload: { selectedNetwork: networkKey, selectedValidator: validatorInfo, maxNominatorPerValidator } as BondingParams });
+    store.dispatch({ type: 'bondingParams/update', payload: { selectedNetwork: networkKey, selectedValidator: validatorInfo, maxNominatorPerValidator, isBondedBefore, bondedValidators } as BondingParams });
     navigate('/account/bonding-auth');
-  }, [maxNominatorPerValidator, navigate, networkKey, validatorInfo]);
+  }, [bondedValidators, isBondedBefore, maxNominatorPerValidator, navigate, networkKey, validatorInfo]);
 
   return (
     <div className={className}>
@@ -87,6 +90,23 @@ function ValidatorItem ({ className, maxNominatorPerValidator, networkKey, valid
               place={'top'}
               text={'Verified'}
               trigger={`verify-tooltip-${validatorInfo.address}`}
+            />
+          }
+
+          {
+            validatorInfo.isNominated && <img
+              data-for={`nominated-tooltip-${validatorInfo.address}`}
+              data-tip={true}
+              height={15}
+              src={TrophyGreen}
+              width={15}
+            />
+          }
+          {
+            validatorInfo.isNominated && <Tooltip
+              place={'top'}
+              text={'Nominating'}
+              trigger={`nominated-tooltip-${validatorInfo.address}`}
             />
           }
         </div>

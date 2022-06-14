@@ -512,6 +512,7 @@ export const PREDEFINED_NETWORKS: Record<string, NetworkJson> = {
     groups: ['TEST_NET'],
     nativeToken: 'TZERO',
     decimals: 12,
+    getStakingOnChain: true,
     supportBonding: true
   },
   opal: {

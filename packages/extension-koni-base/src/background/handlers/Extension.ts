@@ -5,9 +5,9 @@ import Common from '@ethereumjs/common';
 import Extension, { SEED_DEFAULT_LENGTH, SEED_LENGTHS } from '@subwallet/extension-base/background/handlers/Extension';
 import { AuthUrls } from '@subwallet/extension-base/background/handlers/State';
 import { createSubscription, isSubscriptionRunning, unsubscribe } from '@subwallet/extension-base/background/handlers/subscriptions';
-import { AccountsWithCurrentAddress, ApiProps, BalanceJson, BondingOptionInfo, BondingSubmitParams, BondingTxInfo, BondingTxResponse, ChainBondingBasics, ChainRegistry, CrowdloanJson, CustomEvmToken, DeleteEvmTokenParams, DisableNetworkResponse, EvmNftSubmitTransaction, EvmNftTransaction, EvmNftTransactionRequest, EvmTokenJson, NETWORK_ERROR, NetWorkGroup, NetworkJson, NftCollection, NftCollectionJson, NftItem, NftJson, NftTransactionResponse, NftTransferExtra, OptionInputAddress, PriceJson, RequestAccountCreateSuriV2, RequestAccountExportPrivateKey, RequestAuthorization, RequestAuthorizationPerAccount, RequestAuthorizeApproveV2, RequestBatchRestoreV2, RequestCheckCrossChainTransfer, RequestCheckTransfer, RequestCrossChainTransfer, RequestDeriveCreateV2, RequestForgetSite, RequestFreeBalance, RequestJsonRestoreV2, RequestNftForceUpdate, RequestSaveRecentAccount, RequestSeedCreateV2, RequestSeedValidateV2, RequestSettingsType, RequestTransactionHistoryAdd, RequestTransfer, RequestTransferCheckReferenceCount, RequestTransferCheckSupporting, RequestTransferExistentialDeposit, ResponseAccountCreateSuriV2, ResponseAccountExportPrivateKey, ResponseCheckCrossChainTransfer, ResponseCheckTransfer, ResponsePrivateKeyValidateV2, ResponseSeedCreateV2, ResponseSeedValidateV2, ResponseTransfer, StakingJson, StakingRewardJson, SubstrateNftSubmitTransaction, SubstrateNftTransaction, SubstrateNftTransactionRequest, SupportTransferResponse, ThemeTypes, TokenInfo, TransactionHistoryItemType, TransferError, TransferErrorCode, TransferStep, ValidateEvmTokenRequest, ValidateEvmTokenResponse, ValidateNetworkRequest, ValidateNetworkResponse } from '@subwallet/extension-base/background/KoniTypes';
+import { AccountsWithCurrentAddress, ApiProps, BalanceJson, BondingOptionInfo, BondingOptionParams, BondingSubmitParams, BondingTxInfo, BondingTxResponse, ChainBondingBasics, ChainRegistry, CrowdloanJson, CustomEvmToken, DeleteEvmTokenParams, DisableNetworkResponse, EvmNftSubmitTransaction, EvmNftTransaction, EvmNftTransactionRequest, EvmTokenJson, NETWORK_ERROR, NetWorkGroup, NetworkJson, NftCollection, NftCollectionJson, NftItem, NftJson, NftTransactionResponse, NftTransferExtra, OptionInputAddress, PriceJson, RequestAccountCreateSuriV2, RequestAccountExportPrivateKey, RequestAuthorization, RequestAuthorizationPerAccount, RequestAuthorizeApproveV2, RequestBatchRestoreV2, RequestCheckCrossChainTransfer, RequestCheckTransfer, RequestCrossChainTransfer, RequestDeriveCreateV2, RequestForgetSite, RequestFreeBalance, RequestJsonRestoreV2, RequestNftForceUpdate, RequestSaveRecentAccount, RequestSeedCreateV2, RequestSeedValidateV2, RequestSettingsType, RequestTransactionHistoryAdd, RequestTransfer, RequestTransferCheckReferenceCount, RequestTransferCheckSupporting, RequestTransferExistentialDeposit, ResponseAccountCreateSuriV2, ResponseAccountExportPrivateKey, ResponseCheckCrossChainTransfer, ResponseCheckTransfer, ResponsePrivateKeyValidateV2, ResponseSeedCreateV2, ResponseSeedValidateV2, ResponseTransfer, StakingJson, StakingRewardJson, SubstrateNftSubmitTransaction, SubstrateNftTransaction, SubstrateNftTransactionRequest, SupportTransferResponse, ThemeTypes, TokenInfo, TransactionHistoryItemType, TransferError, TransferErrorCode, TransferStep, ValidateEvmTokenRequest, ValidateEvmTokenResponse, ValidateNetworkRequest, ValidateNetworkResponse } from '@subwallet/extension-base/background/KoniTypes';
 import { AccountJson, AuthorizeRequest, MessageTypes, RequestAccountForget, RequestAuthorizeReject, RequestCurrentAccountAddress, RequestTypes, ResponseAuthorizeList, ResponseType } from '@subwallet/extension-base/background/types';
-import { getBondingExtrinsic, getBondingTxInfo, getChainBondingBasics, getValidatorsInfo } from '@subwallet/extension-koni-base/api/bonding';
+import { getBondingExtrinsic, getBondingTxInfo, getChainBondingBasics, getTargetValidators, getValidatorsInfo } from '@subwallet/extension-koni-base/api/bonding';
 import { initApi } from '@subwallet/extension-koni-base/api/dotsama';
 import { getFreeBalance, subscribeFreeBalance } from '@subwallet/extension-koni-base/api/dotsama/balance';
 import { getTokenInfo } from '@subwallet/extension-koni-base/api/dotsama/registry';
@@ -2041,26 +2041,29 @@ export default class KoniExtension extends Extension {
     return result;
   }
 
-  private async getBondingOption (networkKey: string): Promise<BondingOptionInfo> {
+  private async getBondingOption ({ address, networkKey }: BondingOptionParams): Promise<BondingOptionInfo> {
     const apiProps = state.getDotSamaApi(networkKey);
     const networkJson = state.getNetworkMapByKey(networkKey);
-    const { era, maxNominatorPerValidator, validatorsInfo } = await getValidatorsInfo(networkKey, apiProps, networkJson.decimals as number);
+    const { bondedValidators, era, isBondedBefore, maxNominatorPerValidator, validatorsInfo } = await getValidatorsInfo(networkKey, apiProps, networkJson.decimals as number, address);
 
     return {
       maxNominatorPerValidator,
       era,
-      validators: validatorsInfo
-    };
+      validators: validatorsInfo,
+      isBondedBefore,
+      bondedValidators
+    } as BondingOptionInfo;
   }
 
-  private async getBondingTxInfo ({ amount, networkKey, nominatorAddress, validatorInfo }: BondingSubmitParams): Promise<BondingTxInfo> {
+  private async getBondingTxInfo ({ amount, bondedValidators, isBondedBefore, networkKey, nominatorAddress, validatorInfo }: BondingSubmitParams): Promise<BondingTxInfo> {
     const dotSamaApi = state.getDotSamaApi(networkKey);
     const networkJson = state.getNetworkMap()[networkKey];
     const parsedAmount = amount * (10 ** (networkJson.decimals as number));
     const binaryAmount = new BN(parsedAmount);
+    const targetValidators: string[] = getTargetValidators(bondedValidators, validatorInfo.address);
 
     const [txInfo, balance] = await Promise.all([
-      getBondingTxInfo(dotSamaApi, nominatorAddress, binaryAmount, validatorInfo.address),
+      getBondingTxInfo(dotSamaApi, nominatorAddress, binaryAmount, targetValidators, isBondedBefore),
       getFreeBalance(networkKey, nominatorAddress, state.getDotSamaApiMap(), state.getWeb3ApiMap())
     ]);
 
@@ -2076,11 +2079,12 @@ export default class KoniExtension extends Extension {
     };
   }
 
-  private async submitBonding (id: string, port: chrome.runtime.Port, { amount, networkKey, nominatorAddress, password, validatorInfo }: BondingSubmitParams): Promise<BondingTxResponse> {
+  private async submitBonding (id: string, port: chrome.runtime.Port, { amount, bondedValidators, isBondedBefore, networkKey, nominatorAddress, password, validatorInfo }: BondingSubmitParams): Promise<BondingTxResponse> {
     const txState: BondingTxResponse = {};
     const networkJson = state.getNetworkMap()[networkKey];
     const parsedAmount = amount * (10 ** (networkJson.decimals as number));
     const binaryAmount = new BN(parsedAmount);
+    const targetValidators: string[] = getTargetValidators(bondedValidators, validatorInfo.address);
 
     if (!amount || !nominatorAddress || !validatorInfo || !password) {
       txState.txError = true;
@@ -2090,7 +2094,7 @@ export default class KoniExtension extends Extension {
 
     const callback = createSubscription<'pri(bonding.submitTransaction)'>(id, port);
     const dotSamaApi = state.getDotSamaApi(networkKey);
-    const extrinsic = await getBondingExtrinsic(dotSamaApi, nominatorAddress, binaryAmount, validatorInfo.address);
+    const extrinsic = await getBondingExtrinsic(dotSamaApi, nominatorAddress, binaryAmount, targetValidators, isBondedBefore);
     const passwordError: string | null = unlockAccount(nominatorAddress, password);
 
     if (extrinsic !== null && passwordError === null) {
@@ -2110,11 +2114,9 @@ export default class KoniExtension extends Extension {
                 callback(txState);
 
                 if (method === 'ExtrinsicFailed') {
-                  console.log(result.events);
                   txState.status = false;
                   callback(txState);
                 } else if (method === 'ExtrinsicSuccess') {
-                  console.log(result.events);
                   txState.status = true;
                   callback(txState);
                 }
@@ -2301,7 +2303,7 @@ export default class KoniExtension extends Extension {
       case 'pri(networkMap.enableMany)':
         return this.enableNetworks(request as string[]);
       case 'pri(bonding.getBondingOptions)':
-        return await this.getBondingOption(request as string);
+        return await this.getBondingOption(request as BondingOptionParams);
       case 'pri(bonding.getChainBondingBasics)':
         return await this.getChainBondingBasics(request as NetworkJson[]);
       case 'pri(bonding.submitTransaction)':

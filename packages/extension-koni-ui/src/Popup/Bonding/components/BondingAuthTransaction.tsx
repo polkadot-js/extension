@@ -37,6 +37,8 @@ interface Props extends ThemeProps {
   setExtrinsicHash: (val: string) => void,
   setIsTxSuccess: (val: boolean) => void,
   setTxError: (val: string) => void,
+  isBondedBefore: boolean,
+  bondedValidators: string[]
 }
 
 // const validatorInfo: ValidatorInfo = {
@@ -55,7 +57,7 @@ interface Props extends ThemeProps {
 //
 // const selectedNetwork = 'westend';
 
-function BondingAuthTransaction ({ amount, balanceError, className, fee, selectedNetwork, setExtrinsicHash, setIsTxSuccess, setShowConfirm, setShowResult, setTxError, validatorInfo }: Props): React.ReactElement<Props> {
+function BondingAuthTransaction ({ amount, balanceError, bondedValidators, className, fee, isBondedBefore, selectedNetwork, setExtrinsicHash, setIsTxSuccess, setShowConfirm, setShowResult, setTxError, validatorInfo }: Props): React.ReactElement<Props> {
   const { t } = useTranslation();
   const networkJson = useGetNetworkJson(selectedNetwork);
   const freeBalance = useGetFreeBalance(selectedNetwork);
@@ -82,7 +84,9 @@ function BondingAuthTransaction ({ amount, balanceError, className, fee, selecte
       nominatorAddress: account?.address as string,
       amount,
       validatorInfo,
-      password
+      password,
+      isBondedBefore,
+      bondedValidators
     }, (data) => {
       if (data.passwordError) {
         show(data.passwordError);
@@ -121,7 +125,7 @@ function BondingAuthTransaction ({ amount, balanceError, className, fee, selecte
         }
       }
     });
-  }, [account?.address, amount, balanceError, password, selectedNetwork, setExtrinsicHash, setIsTxSuccess, setShowConfirm, setShowResult, setTxError, show, validatorInfo]);
+  }, [account?.address, amount, balanceError, bondedValidators, isBondedBefore, password, selectedNetwork, setExtrinsicHash, setIsTxSuccess, setShowConfirm, setShowResult, setTxError, show, validatorInfo]);
 
   const handleConfirm = useCallback(() => {
     setLoading(true);

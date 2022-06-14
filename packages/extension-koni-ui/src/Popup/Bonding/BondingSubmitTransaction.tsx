@@ -41,6 +41,8 @@ function BondingSubmitTransaction ({ className }: Props): React.ReactElement<Pro
   const { bondingParams, currentAccount: { account }, networkMap } = useSelector((state: RootState) => state);
   const selectedNetwork = bondingParams.selectedNetwork as string;
   const validatorInfo = bondingParams.selectedValidator as ValidatorInfo;
+  const isBondedBefore = bondingParams.isBondedBefore as boolean;
+  const bondedValidators = bondingParams.bondedValidators as string[];
   const maxNominatorPerValidator = bondingParams.maxNominatorPerValidator as number;
 
   const networkJson = useGetNetworkJson(selectedNetwork);
@@ -92,7 +94,11 @@ function BondingSubmitTransaction ({ className }: Props): React.ReactElement<Pro
   }, [showDetail]);
 
   const handleResend = useCallback(() => {
-    console.log('resend');
+    setExtrinsicHash('');
+    setIsTxSuccess(false);
+    setTxError('');
+    setShowResult(false);
+    setShowAuth(true);
   }, []);
 
   const goHome = useCallback(() => {
@@ -121,7 +127,9 @@ function BondingSubmitTransaction ({ className }: Props): React.ReactElement<Pro
       networkKey: selectedNetwork,
       nominatorAddress: account?.address as string,
       amount,
-      validatorInfo
+      validatorInfo,
+      isBondedBefore,
+      bondedValidators
     })
       .then((resp) => {
         setLoading(false);
@@ -131,7 +139,7 @@ function BondingSubmitTransaction ({ className }: Props): React.ReactElement<Pro
         setShowResult(false);
       })
       .catch(console.error);
-  }, [account?.address, amount, selectedNetwork, validatorInfo]);
+  }, [account?.address, amount, bondedValidators, isBondedBefore, selectedNetwork, validatorInfo]);
 
   return (
     <div className={className}>
@@ -367,7 +375,9 @@ function BondingSubmitTransaction ({ className }: Props): React.ReactElement<Pro
         <BondingAuthTransaction
           amount={amount}
           balanceError={balanceError}
+          bondedValidators={bondedValidators}
           fee={fee}
+          isBondedBefore={isBondedBefore}
           selectedNetwork={selectedNetwork}
           setExtrinsicHash={setExtrinsicHash}
           setIsTxSuccess={setIsTxSuccess}

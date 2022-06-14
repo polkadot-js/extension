@@ -7,7 +7,9 @@ import { BondingParams } from '@subwallet/extension-koni-ui/stores/types';
 const initialState = {
   selectedNetwork: '',
   selectedValidator: null,
-  maxNominatorPerValidator: null
+  maxNominatorPerValidator: null,
+  isBondedBefore: null,
+  bondedValidators: null
 } as BondingParams;
 
 const bondingParamsSlice = createSlice({
@@ -20,6 +22,8 @@ const bondingParamsSlice = createSlice({
       state.selectedNetwork = payload.selectedNetwork;
       state.selectedValidator = payload.selectedValidator;
       state.maxNominatorPerValidator = payload.maxNominatorPerValidator;
+      state.isBondedBefore = payload.isBondedBefore;
+      state.bondedValidators = payload.bondedValidators;
     }
   }
 });

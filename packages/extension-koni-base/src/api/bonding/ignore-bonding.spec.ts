@@ -305,4 +305,14 @@ describe('test DotSama APIs', () => {
 
     console.log(extrinsic.toString());
   });
+
+  test('get validators of nominator', async () => {
+    const provider = new WsProvider(getCurrentProvider(PREDEFINED_NETWORKS.alephTest), DOTSAMA_AUTO_CONNECT_MS);
+    const api = new ApiPromise({ provider });
+    const apiPromise = await api.isReady;
+
+    const resp = await apiPromise.query.staking.nominators('5GNy7frYA4BwWpKwxKAFWt4eBsZ9oAvXrp9SyDj6qzJAaNzB');
+    const parsed = resp.toHuman() as Record<string, any>;
+    console.log(parsed?.targets);
+  });
 });

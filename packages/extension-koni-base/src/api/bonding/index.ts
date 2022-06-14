@@ -36,7 +36,7 @@ export async function getChainBondingBasics (networkKey: string, dotSamaApi: Api
   } as ChainBondingBasics;
 }
 
-export async function getValidatorsInfo (networkKey: string, dotSamaApi: ApiProps, decimals: number) {
+export async function getValidatorsInfo (networkKey: string, dotSamaApi: ApiProps, decimals: number, address: string) {
   const apiProps = await dotSamaApi.isReady;
 
   const _era = await apiProps.api.query.staking.currentEra();
@@ -46,16 +46,19 @@ export async function getValidatorsInfo (networkKey: string, dotSamaApi: ApiProp
   const result: ValidatorInfo[] = [];
   let totalEraStake = 0;
 
-  const [_eraStakers, _totalIssuance, _auctionCounter, _minBond] = await Promise.all([
+  const [_eraStakers, _totalIssuance, _auctionCounter, _minBond, _existedValidators] = await Promise.all([
     apiProps.api.query.staking.erasStakers.entries(parseInt(currentEra)),
     apiProps.api.query.balances.totalIssuance(),
     apiProps.api.query.auctions?.auctionCounter(),
-    apiProps.api.query.staking.minNominatorBond()
+    apiProps.api.query.staking.minNominatorBond(),
+    apiProps.api.query.staking.nominators(address)
   ]);
 
   const rawMaxNominatorPerValidator = (apiProps.api.consts.staking.maxNominatorRewardedPerValidator).toHuman() as string;
   const maxNominatorPerValidator = parseFloat(rawMaxNominatorPerValidator.replaceAll(',', ''));
 
+  const rawExistedValidators = _existedValidators.toHuman() as Record<string, any>;
+  const bondedValidators = rawExistedValidators ? rawExistedValidators.targets as string[] : [];
   const eraStakers = _eraStakers as any[];
   const totalIssuance = _totalIssuance.toHuman() as string;
   const numAuctions = _auctionCounter ? _auctionCounter.toHuman() as number : 0;
@@ -105,7 +108,8 @@ export async function getValidatorsInfo (networkKey: string, dotSamaApi: ApiProp
       expectedReturn: 0,
       blocked: false,
       isVerified: false,
-      minBond: (minBond / 10 ** decimals)
+      minBond: (minBond / 10 ** decimals),
+      isNominated: bondedValidators.includes(validatorAddress)
     } as ValidatorInfo);
   }
 
@@ -177,25 +181,53 @@ export async function getValidatorsInfo (networkKey: string, dotSamaApi: ApiProp
   return {
     maxNominatorPerValidator,
     era: parseInt(currentEra),
-    validatorsInfo: result
+    validatorsInfo: result,
+    isBondedBefore: bondedValidators.length > 0,
+    bondedValidators
   };
 }
 
-export async function getBondingTxInfo (dotSamaApi: ApiProps, controllerId: string, amount: BN, validatorAddress: string, bondDest = 'Staked') {
+export async function getBondingTxInfo (dotSamaApi: ApiProps, controllerId: string, amount: BN, validators: string[], isBondedBefore: boolean, bondDest = 'Staked') {
   const apiPromise = await dotSamaApi.isReady;
 
-  const bondTx = apiPromise.api.tx.staking.bond(controllerId, amount, bondDest);
-  const nominateTx = apiPromise.api.tx.staking.nominate([validatorAddress]);
-  const extrinsic = apiPromise.api.tx.utility.batchAll([bondTx, nominateTx]);
+  if (!isBondedBefore) {
+    const bondTx = apiPromise.api.tx.staking.bond(controllerId, amount, bondDest);
+    const nominateTx = apiPromise.api.tx.staking.nominate(validators);
+    const extrinsic = apiPromise.api.tx.utility.batchAll([bondTx, nominateTx]);
 
-  return extrinsic.paymentInfo(controllerId);
+    return extrinsic.paymentInfo(controllerId);
+  } else {
+    const bondTx = apiPromise.api.tx.staking.bondExtra(amount);
+    const nominateTx = apiPromise.api.tx.staking.nominate(validators);
+    const extrinsic = apiPromise.api.tx.utility.batchAll([bondTx, nominateTx]);
+
+    return extrinsic.paymentInfo(controllerId);
+  }
 }
 
-export async function getBondingExtrinsic (dotSamaApi: ApiProps, controllerId: string, amount: BN, validatorAddress: string, bondDest = 'Staked') {
+export async function getBondingExtrinsic (dotSamaApi: ApiProps, controllerId: string, amount: BN, validators: string[], isBondedBefore: boolean, bondDest = 'Staked') {
   const apiPromise = await dotSamaApi.isReady;
 
-  const bondTx = apiPromise.api.tx.staking.bond(controllerId, amount, bondDest);
-  const nominateTx = apiPromise.api.tx.staking.nominate([validatorAddress]);
+  let bondTx;
+  const nominateTx = apiPromise.api.tx.staking.nominate(validators);
+
+  if (!isBondedBefore) {
+    bondTx = apiPromise.api.tx.staking.bond(controllerId, amount, bondDest);
+  } else {
+    bondTx = apiPromise.api.tx.staking.bondExtra(amount);
+  }
 
   return apiPromise.api.tx.utility.batchAll([bondTx, nominateTx]);
+}
+
+export function getTargetValidators (bondedValidators: string[], selectedValidator: string) {
+  if (bondedValidators.length === 0) {
+    return [selectedValidator];
+  } else {
+    if (bondedValidators.includes(selectedValidator)) {
+      return bondedValidators;
+    } else {
+      return [selectedValidator, ...bondedValidators];
+    }
+  }
 }

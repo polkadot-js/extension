@@ -23,12 +23,14 @@ const INFINITE_SCROLL_PER_PAGE = window.innerHeight > 600 ? 15 : 10;
 
 function BondingValidatorSelection ({ className }: Props): React.ReactElement<Props> {
   const { t } = useTranslation();
-  const { bondingParams } = useSelector((state: RootState) => state);
+  const { bondingParams, currentAccount: { account } } = useSelector((state: RootState) => state);
   const navigate = useContext(ActionContext);
   const [searchString, setSearchString] = useState('');
   const [loading, setLoading] = useState(true);
   const [maxNominatorPerValidator, setMaxNominatorPerValidator] = useState(0);
   const [allValidators, setAllValidators] = useState<ValidatorInfo[]>([]);
+  const [isBondedBefore, setIsBondedBefore] = useState(false);
+  const [bondedValidators, setBondedValidators] = useState<string[]>([]);
 
   const [sortByCommission, setSortByCommission] = useState(false);
   const [sortByReturn, setSortByReturn] = useState(false);
@@ -112,9 +114,12 @@ function BondingValidatorSelection ({ className }: Props): React.ReactElement<Pr
     if (bondingParams.selectedNetwork === null) {
       navigate('/account/select-bonding-network');
     } else {
-      getBondingOptions(bondingParams.selectedNetwork)
+      getBondingOptions(bondingParams.selectedNetwork, account?.address as string)
         .then((bondingOptionInfo) => {
           setMaxNominatorPerValidator(bondingOptionInfo.maxNominatorPerValidator);
+          setIsBondedBefore(bondingOptionInfo.isBondedBefore);
+          setBondedValidators(bondingOptionInfo.bondedValidators);
+
           const sortedValidators = bondingOptionInfo.validators
             .sort((validator: ValidatorInfo, _validator: ValidatorInfo) => {
               if (validator.isVerified && !_validator.isVerified) {
@@ -201,6 +206,8 @@ function BondingValidatorSelection ({ className }: Props): React.ReactElement<Pr
             {
               showedValidators.map((validator, index) => {
                 return <ValidatorItem
+                  bondedValidators={bondedValidators}
+                  isBondedBefore={isBondedBefore}
                   key={`${index}-${validator.address}`}
                   maxNominatorPerValidator={maxNominatorPerValidator}
                   networkKey={bondingParams.selectedNetwork}

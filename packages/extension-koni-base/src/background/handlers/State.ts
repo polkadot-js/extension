@@ -3,7 +3,7 @@
 
 import { withErrorLog } from '@subwallet/extension-base/background/handlers/helpers';
 import State, { AuthUrls, Resolver } from '@subwallet/extension-base/background/handlers/State';
-import { AccountRefMap, AddNetworkRequestResolver, APIItemState, ApiMap, AuthRequestV2, BalanceItem, BalanceJson, ChainRegistry, CrowdloanItem, CrowdloanJson, CurrentAccountInfo, CustomEvmToken, DeleteEvmTokenParams, EvmSendTransactionParams, EvmTokenJson, NETWORK_STATUS, NetworkJson, NftCollection, NftCollectionJson, NftItem, NftJson, NftTransferExtra, PriceJson, RequestAccountExportPrivateKey, RequestSettingsType, ResponseAccountExportPrivateKey, ResultResolver, ServiceInfo, StakingItem, StakingJson, StakingRewardJson, TokenInfo, TransactionHistoryItemType } from '@subwallet/extension-base/background/KoniTypes';
+import { AccountRefMap, APIItemState, ApiMap, AuthRequestV2, BalanceItem, BalanceJson, ChainRegistry, ConfirmationDefinitions, ConfirmationsQueue, ConfirmationType, CrowdloanItem, CrowdloanJson, CurrentAccountInfo, CustomEvmToken, DeleteEvmTokenParams, EvmSendTransactionParams, EvmTokenJson, NETWORK_STATUS, NetworkJson, NftCollection, NftCollectionJson, NftItem, NftJson, NftTransferExtra, PriceJson, RequestAccountExportPrivateKey, RequestConfirmationComplete, RequestSettingsType, ResponseAccountExportPrivateKey, ResultResolver, ServiceInfo, StakingItem, StakingJson, StakingRewardJson, TokenInfo, TransactionHistoryItemType } from '@subwallet/extension-base/background/KoniTypes';
 import { AuthorizeRequest, RequestAuthorizeTab } from '@subwallet/extension-base/background/types';
 import { getId } from '@subwallet/extension-base/utils/getId';
 import { getTokenPrice } from '@subwallet/extension-koni-base/api/coingecko';
@@ -132,8 +132,15 @@ export default class KoniState extends State {
   readonly #authRequestsV2: Record<string, AuthRequestV2> = {};
   private priceStoreReady = false;
   private readonly transactionHistoryStore = new TransactionHistoryStore();
-  readonly #addNetworkRequest: Record<string, AddNetworkRequestResolver> = {};
-  private addNetworkSubject = new Subject<NetworkJson[]>();
+
+  private readonly confirmationsQueueSubject = new BehaviorSubject<ConfirmationsQueue>({
+    addNetworkRequest: {},
+    switchNetworkRequest: {},
+    evmSignatureRequest: {},
+    evmSendTransactionRequest: {}
+  });
+
+  private readonly confirmationsPromiseMap: Record<string, Resolver<any>> = {};
 
   private networkMap: Record<string, NetworkJson> = {}; // mapping to networkMapStore, for uses in background
   private networkMapSubject = new Subject<Record<string, NetworkJson>>();
@@ -800,94 +807,45 @@ export default class KoniState extends State {
     return true;
   }
 
-  public async switchNetworkAccount (networkKey: string, changeAddress?: string) {
+  public async switchNetworkAccount (id: string, url: string, networkKey: string, changeAddress?: string): Promise<boolean> {
     const selectNetwork = this.getNetworkMap()[networkKey];
-
-    if (!selectNetwork) {
-      return false;
-    }
 
     const { address, currentGenesisHash } = await new Promise<CurrentAccountInfo>((resolve) => {
       this.getCurrentAccount(resolve);
     });
 
-    const useAddress = changeAddress || address;
+    return this.addConfirmation(id, url, 'switchNetworkRequest', { networkKey, address: changeAddress })
+      .then(({ isApproved }) => {
+        if (isApproved) {
+          const useAddress = changeAddress || address;
 
-    if (useAddress !== ALL_ACCOUNT_KEY) {
-      const pair = keyring.getPair(useAddress);
+          if (useAddress !== ALL_ACCOUNT_KEY) {
+            const pair = keyring.getPair(useAddress);
 
-      assert(pair, 'Unable to find pair');
+            assert(pair, 'Unable to find pair');
 
-      keyring.saveAccountMeta(pair, { ...pair.meta, genesisHash: selectNetwork?.genesisHash });
-    }
+            keyring.saveAccountMeta(pair, { ...pair.meta, genesisHash: selectNetwork?.genesisHash });
+          }
 
-    if (address !== changeAddress || selectNetwork?.genesisHash !== currentGenesisHash) {
-      this.setCurrentAccount({
-        address: useAddress,
-        currentGenesisHash: selectNetwork?.genesisHash
+          if (address !== changeAddress || selectNetwork?.genesisHash !== currentGenesisHash || isApproved) {
+            this.setCurrentAccount({
+              address: useAddress,
+              currentGenesisHash: selectNetwork?.genesisHash
+            });
+          }
+        }
+
+        return isApproved;
       });
-    }
-
-    return true;
   }
 
-  public getAddNetworkRequestData () {
-    return Object.values(this.#addNetworkRequest).map((request) => request.networkInfo);
-  }
-
-  public getAddNetworkSubject (): Subject<NetworkJson[]> {
-    return this.addNetworkSubject;
-  }
-
-  public countAddNetworkRequest () {
-    return Object.keys(this.#addNetworkRequest).length;
-  }
-
-  private _completeAddNetwork (id: string, resolve: (result: boolean) => void, reject: (error: Error) => void): Resolver<boolean> {
-    const complete = () => {
-      this.#addNetworkRequest[id] && delete this.#addNetworkRequest[id];
-      this.addNetworkSubject.next(this.getAddNetworkRequestData());
-      this.updateIconV2(true);
-    };
-
-    return {
-      resolve: (result) => {
-        complete();
-
-        resolve(result);
-      },
-      reject: (e) => {
-        complete();
-
-        reject(e);
-      }
-    };
-  }
-
-  public async addNetworkConfirm (id: string, networkData: NetworkJson) {
+  public async addNetworkConfirm (id: string, url: string, networkData: NetworkJson) {
     networkData.requestId = id;
 
-    return new Promise((resolve, reject) => {
-      this.#addNetworkRequest[id] = {
-        ...this._completeAddNetwork(id, resolve, reject),
-        networkInfo: networkData
-      };
-
-      this.addNetworkSubject.next(this.getAddNetworkRequestData());
-
-      this.updateIconV2(false);
-      this.popupOpen();
-    });
-  }
-
-  public completeAddNetworkRequest (id: string, approval: boolean) {
-    const request = this.#addNetworkRequest[id];
-
-    if (request) {
-      approval ? request.resolve(true) : request.reject(new Error('User Cancel'));
-    }
-
-    return true;
+    return this.addConfirmation(id, url, 'addNetworkRequest', networkData)
+      .then(({ isApproved }) => {
+        return isApproved;
+      });
   }
 
   public getSettings (update: (value: RequestSettingsType) => void): void {
@@ -1719,8 +1677,6 @@ export default class KoniState extends State {
 
     transactionConfigs.gas = gasLimit?.toString() || (await web3.eth.estimateGas(transactionConfigs));
 
-    console.log(123, transactionConfigs);
-
     const signTransaction = await web3.eth.accounts.signTransaction(transactionConfigs, privateKey);
 
     return new Promise<string>((resolve, reject) => {
@@ -1728,5 +1684,67 @@ export default class KoniState extends State {
         .on('transactionHash', resolve)
         .on('error', reject);
     });
+  }
+
+  public getConfirmationsQueueSubject () {
+    return this.confirmationsQueueSubject;
+  }
+
+  public addConfirmation<CT extends ConfirmationType> (id: string, url: string, type: CT, payload: ConfirmationDefinitions[CT][0]['payload']) {
+    const confirmations = this.confirmationsQueueSubject.getValue();
+    const confirmationType = confirmations[type] as Record<string, ConfirmationDefinitions[CT][0]>;
+
+    confirmationType[id] = {
+      id,
+      url,
+      payload: payload
+    };
+
+    const promise = new Promise<ConfirmationDefinitions[CT][1]>((resolve, reject) => {
+      this.confirmationsPromiseMap[id] = {
+        resolve: resolve,
+        reject: reject
+      };
+    });
+
+    this.confirmationsQueueSubject.next(confirmations);
+
+    this.popupOpen();
+
+    return promise;
+  }
+
+  public completeConfirmation (request: RequestConfirmationComplete) {
+    const confirmations = this.confirmationsQueueSubject.getValue();
+
+    const _completeConfirmation = <T extends ConfirmationType> (type: T, result: ConfirmationDefinitions[T][1]) => {
+      const { id } = result;
+      const promise = this.confirmationsPromiseMap[id];
+
+      if (!promise || !(confirmations[type][id])) {
+        throw new Error('Not found promise for confirmation');
+      }
+
+      delete this.confirmationsPromiseMap[id];
+      delete confirmations[type][id];
+      this.confirmationsQueueSubject.next(confirmations);
+
+      this.updateIconV2(false);
+      promise.resolve(result);
+    };
+
+    Object.entries(request).forEach(([type, result]) => {
+      if (type === 'addNetworkRequest') {
+        _completeConfirmation(type, result as ConfirmationDefinitions['addNetworkRequest'][1]);
+      } else if (type === 'switchNetworkRequest') {
+        _completeConfirmation(type, result as ConfirmationDefinitions['switchNetworkRequest'][1]);
+      } else if (type === 'evmSignatureRequest') {
+        _completeConfirmation(type, result as ConfirmationDefinitions['evmSignatureRequest'][1]);
+      } else if (type === 'evmSendTransactionRequest') {
+        _completeConfirmation(type, result as ConfirmationDefinitions['evmSendTransactionRequest'][1]);
+      }
+    });
+
+    return true;
   }
 }

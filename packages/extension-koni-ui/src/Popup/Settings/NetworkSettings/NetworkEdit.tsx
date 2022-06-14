@@ -6,7 +6,7 @@ import { isUrl, isValidProvider } from '@subwallet/extension-koni-base/utils/uti
 import { ActionContext, Button, ButtonArea, Dropdown, HorizontalLabelToggle, InputWithLabel } from '@subwallet/extension-koni-ui/components';
 import useToast from '@subwallet/extension-koni-ui/hooks/useToast';
 import useTranslation from '@subwallet/extension-koni-ui/hooks/useTranslation';
-import { completeAddNetworkRequest, upsertNetworkMap, validateNetwork } from '@subwallet/extension-koni-ui/messaging';
+import { completeConfirmation, upsertNetworkMap, validateNetwork } from '@subwallet/extension-koni-ui/messaging';
 import Header from '@subwallet/extension-koni-ui/partials/Header';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
@@ -92,7 +92,7 @@ function NetworkEdit ({ className }: Props): React.ReactElement {
   const _goBack = useCallback(
     () => {
       if (networkInfo.requestId) {
-        completeAddNetworkRequest({ id: networkInfo.requestId, approval: true }).catch(console.error);
+        completeConfirmation('addNetworkRequest', { id: networkInfo.requestId, isApproved: true }).catch(console.error);
       }
 
       window.localStorage.setItem('popupNavigation', '/account/networks');
@@ -272,7 +272,7 @@ function NetworkEdit ({ className }: Props): React.ReactElement {
     upsertNetworkMap(networkInfo).then((resp) => {
       if (resp) {
         if (networkInfo.requestId) {
-          completeAddNetworkRequest({ id: networkInfo.requestId, approval: true }).catch(console.error);
+          completeConfirmation('addNetworkRequest', { id: networkInfo.requestId, isApproved: true }).catch(console.error);
         }
 
         show('Your changes are saved successfully');

@@ -6,9 +6,10 @@ import type { InjectedAccount } from '@subwallet/extension-inject/types';
 import { AuthUrls } from '@subwallet/extension-base/background/handlers/State';
 import { createSubscription, unsubscribe } from '@subwallet/extension-base/background/handlers/subscriptions';
 import Tabs from '@subwallet/extension-base/background/handlers/Tabs';
-import { EvmAppState, EvmEventType, EvmProviderRpcError, EvmSendTransactionParams, RequestEvmProviderSend } from '@subwallet/extension-base/background/KoniTypes';
+import { EvmAppState, EvmEventType, EvmProviderRpcErrorInterface, EvmSendTransactionParams, RequestEvmProviderSend } from '@subwallet/extension-base/background/KoniTypes';
 import { AccountAuthType, MessageTypes, RequestAccountList, RequestAccountSubscribe, RequestAuthorizeTab, RequestTypes, ResponseTypes } from '@subwallet/extension-base/background/types';
 import { canDerive } from '@subwallet/extension-base/utils';
+import { EvmRpcError } from '@subwallet/extension-koni-base/background/errors/EvmRpcError';
 import KoniState from '@subwallet/extension-koni-base/background/handlers/State';
 import { ALL_ACCOUNT_KEY, CRON_GET_API_MAP_STATUS, EVM_PROVIDER_RPC_ERRORS } from '@subwallet/extension-koni-base/constants';
 import { RequestArguments, WebsocketProvider } from 'web3-core';
@@ -117,7 +118,7 @@ export default class KoniTabs extends Tabs {
     return [{ id: id, invoker: url, parentCapability: 'eth_accounts', caveats: [{ type: 'restrictReturnedAccounts', value: accounts }], date: new Date().getTime() }];
   }
 
-  private async switchEvmChain (url: string, { params }: RequestArguments) {
+  private async switchEvmChain (id: string, url: string, { params }: RequestArguments) {
     // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
     const chainId = params[0].chainId as string;
 
@@ -126,7 +127,11 @@ export default class KoniTabs extends Tabs {
     if (networkKey) {
       const accounts = await this.getEvmCurrentAccount(url);
 
-      await this.#koniState.switchNetworkAccount(networkKey, accounts[0] || ALL_ACCOUNT_KEY);
+      const ok = await this.#koniState.switchNetworkAccount(id, url, networkKey, accounts[0] || ALL_ACCOUNT_KEY);
+
+      if (!ok) {
+        throw new EvmRpcError('USER_REJECTED_REQUEST');
+      }
     }
 
     return null;
@@ -148,7 +153,7 @@ export default class KoniTabs extends Tabs {
         const [networkKey] = this.#koniState.findNetworkKeyByChainId(chainIdNum);
 
         if (networkKey) {
-          return await this.switchEvmChain(url, { method: 'wallet_switchEthereumChain', params: [{ chainId }] });
+          return await this.switchEvmChain(id, url, { method: 'wallet_switchEthereumChain', params: [{ chainId }] });
         }
 
         if (rpcUrls && chainName) {
@@ -158,7 +163,7 @@ export default class KoniTabs extends Tabs {
             providers[url] = url;
           });
 
-          await this.#koniState.addNetworkConfirm(id, {
+          const ok = await this.#koniState.addNetworkConfirm(id, url, {
             key: '',
             genesisHash: '',
             groups: [],
@@ -172,6 +177,10 @@ export default class KoniTabs extends Tabs {
             currentProviderMode: 'ws',
             blockExplorer: blockExplorerUrls && blockExplorerUrls[0]
           });
+
+          if (!ok) {
+            throw new EvmRpcError('USER_REJECTED_REQUEST');
+          }
         }
       }
     }
@@ -207,7 +216,7 @@ export default class KoniTabs extends Tabs {
       message: description,
       code: code,
       data: data || name
-    } as EvmProviderRpcError;
+    } as EvmProviderRpcErrorInterface;
   }
 
   private async evmSubscribeEvents (url: string, id: string, port: chrome.runtime.Port) {
@@ -397,7 +406,7 @@ export default class KoniTabs extends Tabs {
       case 'wallet_addEthereumChain':
         return await this.addEvmChain(id, url, request);
       case 'wallet_switchEthereumChain':
-        return await this.switchEvmChain(url, request);
+        return await this.switchEvmChain(id, url, request);
 
       default:
         return this.performWeb3Method(id, request);

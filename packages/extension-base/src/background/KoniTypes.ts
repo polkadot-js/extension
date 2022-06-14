@@ -303,18 +303,6 @@ export interface NetworkJson {
   requestId?: string;
 }
 
-export interface RequestCompleteAddNetwork {
-  id: string,
-  approval: boolean
-}
-
-export interface AddNetworkData {
-  networkInfo: NetworkJson,
-}
-
-export interface AddNetworkRequestResolver extends AddNetworkData, Resolver<boolean> {
-}
-
 export interface DonateInfo {
   key: string;
   name: string;
@@ -812,11 +800,13 @@ export interface ResponseEvmProviderSend {
   result?: JsonRpcResponse;
 }
 
-export interface EvmProviderRpcError extends Error {
+export interface EvmProviderRpcErrorInterface extends Error{
   message: string;
   code: number;
   data?: unknown;
 }
+
+export type EvmRpcErrorHelperMap = Record<'USER_REJECTED_REQUEST'| 'UNAUTHORIZED'| 'UNSUPPORTED_METHOD'| 'DISCONNECTED'| 'CHAIN_DISCONNECTED'| 'INVALID_PARAMS'| 'INTERNAL_ERROR', [number, string]>;
 
 export interface EvmSendTransactionParams {
   from: string;
@@ -829,6 +819,49 @@ export interface EvmSendTransactionParams {
   data?: string
 }
 
+export interface SwitchNetworkRequest {
+  networkKey: string;
+  address?: string;
+}
+
+export interface EvmSignatureRequest {
+  type: string;
+  payload: any
+}
+
+export interface ConfirmationsQueueItem<T> {
+  id: string;
+  url: string;
+  payload: T
+}
+
+export interface ConfirmationResult<T> {
+  id: string;
+  isApproved: boolean;
+  url?: string;
+  payload?: T
+}
+
+export interface ConfirmationDefinitions {
+  addNetworkRequest: [ConfirmationsQueueItem<NetworkJson>, ConfirmationResult<NetworkJson>],
+  switchNetworkRequest: [ConfirmationsQueueItem<SwitchNetworkRequest>, ConfirmationResult<boolean>],
+  evmSignatureRequest: [ConfirmationsQueueItem<EvmSignatureRequest>, ConfirmationResult<string>],
+  evmSendTransactionRequest: [ConfirmationsQueueItem<any>, ConfirmationResult<any>]
+}
+
+export type ConfirmationType = keyof ConfirmationDefinitions;
+
+export type ConfirmationsQueue = {
+  [ConfirmationType in keyof ConfirmationDefinitions]: Record<string, ConfirmationDefinitions[ConfirmationType][0]>;
+}
+
+export type RequestConfirmationsSubscribe = null;
+
+// Design to use only one confirmation
+export type RequestConfirmationComplete = {
+  [ConfirmationType in keyof ConfirmationDefinitions]?: ConfirmationDefinitions[ConfirmationType][1];
+}
+
 export interface KoniRequestSignatures {
   'pri(networkMap.recoverDotSama)': [string, boolean];
   'pri(substrateNft.submitTransaction)': [SubstrateNftSubmitTransaction, NftTransactionResponse, NftTransactionResponse]
@@ -837,8 +870,6 @@ export interface KoniRequestSignatures {
   'pri(networkMap.enableAll)': [null, boolean];
   'pri(networkMap.resetDefault)': [null, boolean];
   'pri(apiMap.validate)': [ValidateNetworkRequest, ValidateNetworkResponse];
-  'pri(networkMap.addRequestSubscription)': [null, NetworkJson[], NetworkJson[]];
-  'pri(networkMap.completeAddRequest)': [RequestCompleteAddNetwork, boolean];
   'pri(networkMap.enableMany)': [string[], boolean];
   'pri(networkMap.enableOne)': [string, boolean];
   'pri(networkMap.disableOne)': [string, DisableNetworkResponse];
@@ -909,6 +940,10 @@ export interface KoniRequestSignatures {
   'pri(transfer.getExistentialDeposit)': [RequestTransferExistentialDeposit, string];
   'pri(subscription.cancel)': [string, boolean];
   'pri(freeBalance.subscribe)': [RequestFreeBalance, string, string];
+  // Confirmation Queues
+  'pri(confirmations.subscribe)': [RequestConfirmationsSubscribe, ConfirmationsQueue, ConfirmationsQueue],
+  'pri(confirmations.complete)': [RequestConfirmationComplete, boolean]
+
   'pub(utils.getRandom)': [RandomTestRequest, number];
   'pub(accounts.listV2)': [RequestAccountList, InjectedAccount[]];
   'pub(accounts.subscribeV2)': [RequestAccountSubscribe, boolean, InjectedAccount[]];

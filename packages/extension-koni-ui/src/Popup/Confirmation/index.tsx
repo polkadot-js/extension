@@ -144,13 +144,13 @@ function Confirmation ({ className, match: { params: { address } } }: Props): Re
         {informationBlock}
       </div>
       <div className='action-area'>
-        <InputWithLabel
+        {requirePassword && (<InputWithLabel
           className='password'
           label={''}
           onChange={_onPasswordChange}
           placeholder={t<string>('Password')}
           type='password'
-        />
+        />)}
         {error && (<div className={'error'}>{error}</div>)}
         <ButtonArea className='button-area'>
           <Button

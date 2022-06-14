@@ -5,7 +5,7 @@ import Common from '@ethereumjs/common';
 import Extension, { SEED_DEFAULT_LENGTH, SEED_LENGTHS } from '@subwallet/extension-base/background/handlers/Extension';
 import { AuthUrls } from '@subwallet/extension-base/background/handlers/State';
 import { createSubscription, isSubscriptionRunning, unsubscribe } from '@subwallet/extension-base/background/handlers/subscriptions';
-import { AccountsWithCurrentAddress, ApiProps, BalanceJson, ChainRegistry, CrowdloanJson, CustomEvmToken, DeleteEvmTokenParams, DisableNetworkResponse, EvmNftSubmitTransaction, EvmNftTransaction, EvmNftTransactionRequest, EvmTokenJson, NETWORK_ERROR, NetWorkGroup, NetworkJson, NftCollection, NftCollectionJson, NftItem, NftJson, NftTransactionResponse, NftTransferExtra, OptionInputAddress, PriceJson, QRRequestPromise, QRRequestPromiseStatus, RequestAccountCreateExternalV2, RequestAccountCreateSuriV2, RequestAccountExportPrivateKey, RequestAccountMeta, RequestAuthorization, RequestAuthorizationPerAccount, RequestAuthorizeApproveV2, RequestBatchRestoreV2, RequestCheckCrossChainTransfer, RequestCheckTransfer, RequestCrossChainTransfer, RequestCrossChainTransferQR, RequestDeriveCreateV2, RequestForgetSite, RequestFreeBalance, RequestJsonRestoreV2, RequestNftForceUpdate, RequestRejectQRTransfer, RequestResolveQRTransfer, RequestSaveRecentAccount, RequestSeedCreateV2, RequestSeedValidateV2, RequestSettingsType, RequestTransactionHistoryAdd, RequestTransfer, RequestTransferCheckReferenceCount, RequestTransferCheckSupporting, RequestTransferExistentialDeposit, RequestTransferQR, ResponseAccountCreateSuriV2, ResponseAccountExportPrivateKey, ResponseAccountMeta, ResponseCheckCrossChainTransfer, ResponseCheckTransfer, ResponsePrivateKeyValidateV2, ResponseRejectQRTransfer, ResponseResolveQRTransfer, ResponseSeedCreateV2, ResponseSeedValidateV2, ResponseTransfer, ResponseTransferQr, StakingJson, StakingRewardJson, SubstrateNftSubmitTransaction, SubstrateNftTransaction, SubstrateNftTransactionRequest, SupportTransferResponse, ThemeTypes, TokenInfo, TransactionHistoryItemType, TransferError, TransferErrorCode, TransferStep, ValidateEvmTokenRequest, ValidateEvmTokenResponse, ValidateNetworkRequest, ValidateNetworkResponse } from '@subwallet/extension-base/background/KoniTypes';
+import { AccountExternalError, AccountExternalErrorCode, AccountsWithCurrentAddress, ApiProps, BalanceJson, ChainRegistry, CrowdloanJson, CustomEvmToken, DeleteEvmTokenParams, DisableNetworkResponse, EvmNftSubmitTransaction, EvmNftTransaction, EvmNftTransactionRequest, EvmTokenJson, NETWORK_ERROR, NetWorkGroup, NetworkJson, NftCollection, NftCollectionJson, NftItem, NftJson, NftTransactionResponse, NftTransferExtra, OptionInputAddress, PriceJson, QRRequestPromise, QRRequestPromiseStatus, RequestAccountCreateExternalV2, RequestAccountCreateSuriV2, RequestAccountExportPrivateKey, RequestAccountMeta, RequestAuthorization, RequestAuthorizationPerAccount, RequestAuthorizeApproveV2, RequestBatchRestoreV2, RequestCheckCrossChainTransfer, RequestCheckTransfer, RequestCrossChainTransfer, RequestCrossChainTransferQR, RequestDeriveCreateV2, RequestForgetSite, RequestFreeBalance, RequestJsonRestoreV2, RequestNftForceUpdate, RequestRejectQRTransfer, RequestResolveQRTransfer, RequestSaveRecentAccount, RequestSeedCreateV2, RequestSeedValidateV2, RequestSettingsType, RequestTransactionHistoryAdd, RequestTransfer, RequestTransferCheckReferenceCount, RequestTransferCheckSupporting, RequestTransferExistentialDeposit, RequestTransferQR, ResponseAccountCreateSuriV2, ResponseAccountExportPrivateKey, ResponseAccountMeta, ResponseCheckCrossChainTransfer, ResponseCheckTransfer, ResponsePrivateKeyValidateV2, ResponseRejectQRTransfer, ResponseResolveQRTransfer, ResponseSeedCreateV2, ResponseSeedValidateV2, ResponseTransfer, ResponseTransferQr, StakingJson, StakingRewardJson, SubstrateNftSubmitTransaction, SubstrateNftTransaction, SubstrateNftTransactionRequest, SupportTransferResponse, ThemeTypes, TokenInfo, TransactionHistoryItemType, TransferError, TransferErrorCode, TransferStep, ValidateEvmTokenRequest, ValidateEvmTokenResponse, ValidateNetworkRequest, ValidateNetworkResponse } from '@subwallet/extension-base/background/KoniTypes';
 import { AccountJson, AuthorizeRequest, MessageTypes, RequestAccountForget, RequestAuthorizeReject, RequestCurrentAccountAddress, RequestGetRegistry, RequestTypes, ResponseAuthorizeList, ResponseGetRegistry, ResponseType } from '@subwallet/extension-base/background/types';
 import { getId } from '@subwallet/extension-base/utils/getId';
 import { initApi } from '@subwallet/extension-koni-base/api/dotsama';
@@ -82,7 +82,8 @@ export default class KoniExtension extends Extension {
     return keyring.encodeAddress(key, ss58Format);
   };
 
-  private accountExportPrivateKey ({ address, password }: RequestAccountExportPrivateKey): ResponseAccountExportPrivateKey {
+  private accountExportPrivateKey ({ address,
+    password }: RequestAccountExportPrivateKey): ResponseAccountExportPrivateKey {
     // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
     const exportedJson = keyring.backupAccount(keyring.getPair(address), password);
     // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
@@ -611,7 +612,12 @@ export default class KoniExtension extends Extension {
     });
   }
 
-  private async accountsCreateSuriV2 ({ genesisHash, isAllowed, name, password, suri: _suri, types }: RequestAccountCreateSuriV2): Promise<ResponseAccountCreateSuriV2> {
+  private async accountsCreateSuriV2 ({ genesisHash,
+    isAllowed,
+    name,
+    password,
+    suri: _suri,
+    types }: RequestAccountCreateSuriV2): Promise<ResponseAccountCreateSuriV2> {
     const addressDict = {} as Record<KeypairType, string>;
 
     types?.forEach((type) => {
@@ -694,7 +700,8 @@ export default class KoniExtension extends Extension {
     return rs;
   }
 
-  private _checkValidatePrivateKey ({ suri, types }: RequestSeedValidateV2, autoAddPrefix = false): ResponsePrivateKeyValidateV2 {
+  private _checkValidatePrivateKey ({ suri,
+    types }: RequestSeedValidateV2, autoAddPrefix = false): ResponsePrivateKeyValidateV2 {
     const { phrase } = keyExtractSuri(suri);
     const rs = { autoAddPrefix: autoAddPrefix, addressMap: {} } as ResponsePrivateKeyValidateV2;
 
@@ -741,7 +748,13 @@ export default class KoniExtension extends Extension {
     }
   }
 
-  private derivationCreateV2 ({ genesisHash, isAllowed, name, parentAddress, parentPassword, password, suri }: RequestDeriveCreateV2): boolean {
+  private derivationCreateV2 ({ genesisHash,
+    isAllowed,
+    name,
+    parentAddress,
+    parentPassword,
+    password,
+    suri }: RequestDeriveCreateV2): boolean {
     const childPair = this.deriveV2(parentAddress, suri, parentPassword, {
       genesisHash,
       name,
@@ -927,7 +940,9 @@ export default class KoniExtension extends Extension {
     return state.getHistoryMap();
   }
 
-  private updateTransactionHistory ({ address, item, networkKey }: RequestTransactionHistoryAdd, id: string, port: chrome.runtime.Port): boolean {
+  private updateTransactionHistory ({ address,
+    item,
+    networkKey }: RequestTransactionHistoryAdd, id: string, port: chrome.runtime.Port): boolean {
     const cb = createSubscription<'pri(transaction.history.add)'>(id, port);
 
     state.setTransactionHistory(address, networkKey, item, (items) => {
@@ -1074,7 +1089,12 @@ export default class KoniExtension extends Extension {
     return [errors, keypair, transferValue, tokenInfo];
   }
 
-  private async checkTransfer ({ from, networkKey, to, token, transferAll, value }: RequestCheckTransfer): Promise<ResponseCheckTransfer> {
+  private async checkTransfer ({ from,
+    networkKey,
+    to,
+    token,
+    transferAll,
+    value }: RequestCheckTransfer): Promise<ResponseCheckTransfer> {
     const [errors, fromKeyPair, valueNumber, tokenInfo] = await this.validateTransfer(networkKey, token, from, to, undefined, value, transferAll);
     const dotSamaApiMap = state.getDotSamaApiMap();
     const web3ApiMap = state.getApiMap().web3;
@@ -1094,9 +1114,9 @@ export default class KoniExtension extends Extension {
 
       // Estimate with EVM API
       if (tokenInfo && !tokenInfo.isMainToken && tokenInfo.erc20Address) {
-        [,, fee] = await getERC20TransactionObject(tokenInfo.erc20Address, networkKey, from, to, txVal, !!transferAll, web3ApiMap);
+        [, , fee] = await getERC20TransactionObject(tokenInfo.erc20Address, networkKey, from, to, txVal, !!transferAll, web3ApiMap);
       } else {
-        [,, fee] = await getEVMTransactionObject(networkKey, to, txVal, !!transferAll, web3ApiMap);
+        [, , fee] = await getEVMTransactionObject(networkKey, to, txVal, !!transferAll, web3ApiMap);
       }
     } else {
       // Estimate with DotSama API
@@ -1246,7 +1266,13 @@ export default class KoniExtension extends Extension {
     };
   }
 
-  private async makeTransfer (id: string, port: chrome.runtime.Port, { from, networkKey, password, to, token, transferAll, value }: RequestTransfer): Promise<Array<TransferError>> {
+  private async makeTransfer (id: string, port: chrome.runtime.Port, { from,
+    networkKey,
+    password,
+    to,
+    token,
+    transferAll,
+    value }: RequestTransfer): Promise<Array<TransferError>> {
     const cb = createSubscription<'pri(accounts.transfer)'>(id, port);
     const [errors, fromKeyPair, , tokenInfo] = await this.validateTransfer(networkKey, token, from, to, password, value, transferAll);
 
@@ -1316,7 +1342,13 @@ export default class KoniExtension extends Extension {
   }
 
   private async makeCrossChainTransfer (id: string, port: chrome.runtime.Port,
-    { destinationNetworkKey, from, originNetworkKey, password, to, token, value }: RequestCrossChainTransfer): Promise<Array<TransferError>> {
+    { destinationNetworkKey,
+      from,
+      originNetworkKey,
+      password,
+      to,
+      token,
+      value }: RequestCrossChainTransfer): Promise<Array<TransferError>> {
     const cb = createSubscription<'pri(accounts.crossChainTransfer)'>(id, port);
     const [errors, fromKeyPair, , tokenInfo] = await this.validateCrossChainTransfer(
       originNetworkKey,
@@ -1377,7 +1409,10 @@ export default class KoniExtension extends Extension {
     return errors;
   }
 
-  private async evmNftGetTransaction ({ networkKey, params, recipientAddress, senderAddress }: EvmNftTransactionRequest): Promise<EvmNftTransaction> {
+  private async evmNftGetTransaction ({ networkKey,
+    params,
+    recipientAddress,
+    senderAddress }: EvmNftTransactionRequest): Promise<EvmNftTransaction> {
     const contractAddress = params.contractAddress as string;
     const tokenId = params.tokenId as string;
     const networkMap = state.getNetworkMap();
@@ -1440,7 +1475,11 @@ export default class KoniExtension extends Extension {
     }
   }
 
-  private async evmNftSubmitTransaction (id: string, port: chrome.runtime.Port, { networkKey, password, rawTransaction, recipientAddress, senderAddress }: EvmNftSubmitTransaction): Promise<NftTransactionResponse> {
+  private async evmNftSubmitTransaction (id: string, port: chrome.runtime.Port, { networkKey,
+    password,
+    rawTransaction,
+    recipientAddress,
+    senderAddress }: EvmNftSubmitTransaction): Promise<NftTransactionResponse> {
     const updateState = createSubscription<'pri(evmNft.submitTransaction)'>(id, port);
     let parsedPrivateKey = '';
     const network = state.getNetworkMapByKey(networkKey);
@@ -1633,7 +1672,9 @@ export default class KoniExtension extends Extension {
     return state.enableNetworkMap(networkKey);
   }
 
-  private async validateNetwork ({ existedNetwork, isEthereum, provider }: ValidateNetworkRequest): Promise<ValidateNetworkResponse> {
+  private async validateNetwork ({ existedNetwork,
+    isEthereum,
+    provider }: ValidateNetworkRequest): Promise<ValidateNetworkResponse> {
     let result: ValidateNetworkResponse = {
       success: false,
       key: '',
@@ -1645,7 +1686,9 @@ export default class KoniExtension extends Extension {
     };
 
     try {
-      const { conflictChain: providerConflictChain, conflictKey: providerConflictKey, error: providerError } = this.validateProvider([provider], false);
+      const { conflictChain: providerConflictChain,
+        conflictKey: providerConflictKey,
+        error: providerError } = this.validateProvider([provider], false);
 
       if (providerError === NETWORK_ERROR.NONE) { // provider not duplicate
         let networkKey = '';
@@ -1733,7 +1776,9 @@ export default class KoniExtension extends Extension {
               };
             }
           } else {
-            const { conflictChain: genesisConflictChain, conflictKey: genesisConflictKey, error: genesisError } = this.validateGenesisHash(genesisHash);
+            const { conflictChain: genesisConflictChain,
+              conflictKey: genesisConflictKey,
+              error: genesisError } = this.validateGenesisHash(genesisHash);
 
             if (genesisError === NETWORK_ERROR.NONE) { // check genesisHash ok
               result = {
@@ -1901,7 +1946,9 @@ export default class KoniExtension extends Extension {
     };
   }
 
-  private async subscribeAddressFreeBalance ({ address, networkKey, token }: RequestFreeBalance, id: string, port: chrome.runtime.Port): Promise<string> {
+  private async subscribeAddressFreeBalance ({ address,
+    networkKey,
+    token }: RequestFreeBalance, id: string, port: chrome.runtime.Port): Promise<string> {
     const cb = createSubscription<'pri(freeBalance.subscribe)'>(id, port);
 
     // eslint-disable-next-line @typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-assignment
@@ -1914,12 +1961,14 @@ export default class KoniExtension extends Extension {
     return id;
   }
 
-  private async transferCheckReferenceCount ({ address, networkKey }: RequestTransferCheckReferenceCount): Promise<boolean> {
+  private async transferCheckReferenceCount ({ address,
+    networkKey }: RequestTransferCheckReferenceCount): Promise<boolean> {
     // eslint-disable-next-line @typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-return
     return await checkReferenceCount(networkKey, address, state.getDotSamaApiMap());
   }
 
-  private async transferCheckSupporting ({ networkKey, token }: RequestTransferCheckSupporting): Promise<SupportTransferResponse> {
+  private async transferCheckSupporting ({ networkKey,
+    token }: RequestTransferCheckSupporting): Promise<SupportTransferResponse> {
     // eslint-disable-next-line @typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-return
     return await checkSupportTransfer(networkKey, token, state.getDotSamaApiMap());
   }
@@ -1929,7 +1978,10 @@ export default class KoniExtension extends Extension {
     return await getExistentialDeposit(networkKey, token, state.getDotSamaApiMap());
   }
 
-  private async substrateNftGetTransaction ({ networkKey, params, recipientAddress, senderAddress }: SubstrateNftTransactionRequest): Promise<SubstrateNftTransaction> {
+  private async substrateNftGetTransaction ({ networkKey,
+    params,
+    recipientAddress,
+    senderAddress }: SubstrateNftTransactionRequest): Promise<SubstrateNftTransaction> {
     switch (networkKey) {
       case SUPPORTED_TRANSFER_SUBSTRATE_CHAIN_NAME.acala:
         return await acalaTransferHandler(networkKey, state.getDotSamaApiMap(), state.getWeb3ApiMap(), senderAddress, recipientAddress, params);
@@ -1957,7 +2009,10 @@ export default class KoniExtension extends Extension {
     };
   }
 
-  private async substrateNftSubmitTransaction (id: string, port: chrome.runtime.Port, { params, password, recipientAddress, senderAddress }: SubstrateNftSubmitTransaction): Promise<NftTransactionResponse> {
+  private async substrateNftSubmitTransaction (id: string, port: chrome.runtime.Port, { params,
+    password,
+    recipientAddress,
+    senderAddress }: SubstrateNftSubmitTransaction): Promise<NftTransactionResponse> {
     const txState: NftTransactionResponse = { isSendingSelf: false };
 
     if (params === null) {
@@ -2047,16 +2102,29 @@ export default class KoniExtension extends Extension {
     };
   }
 
-  private accountsCreateExternalV2 ({ address, genesisHash, isEthereum, name }: RequestAccountCreateExternalV2): boolean {
-    if (isEthereum) {
-      const pair = keyring.keyring.addFromAddress(address, { name, isExternal: true }, null, 'ethereum');
+  private accountsCreateExternalV2 ({ address,
+    genesisHash,
+    isEthereum,
+    name }: RequestAccountCreateExternalV2): AccountExternalError[] {
+    try {
+      const exists = keyring.getPair(address);
 
-      keyring.saveAccount(pair);
-    } else {
-      keyring.addExternal(address, { genesisHash, name });
+      if (exists) {
+        return [{ code: AccountExternalErrorCode.INVALID_ADDRESS, message: 'Account exists' }];
+      }
+
+      if (isEthereum) {
+        const pair = keyring.keyring.addFromAddress(address, { name, isExternal: true }, null, 'ethereum');
+
+        keyring.saveAccount(pair);
+      } else {
+        keyring.addExternal(address, { genesisHash, name });
+      }
+
+      return [];
+    } catch (e) {
+      return [{ code: AccountExternalErrorCode.KEYRING_ERROR, message: (e as Error).message }];
     }
-
-    return true;
   }
 
   // QR transfer
@@ -2146,7 +2214,12 @@ export default class KoniExtension extends Extension {
     };
   }
 
-  private async makeTransferQR (id: string, port: chrome.runtime.Port, { from, networkKey, to, token, transferAll, value }: RequestTransferQR): Promise<Array<TransferError>> {
+  private async makeTransferQR (id: string, port: chrome.runtime.Port, { from,
+    networkKey,
+    to,
+    token,
+    transferAll,
+    value }: RequestTransferQR): Promise<Array<TransferError>> {
     const cb = createSubscription<'pri(accounts.transfer)'>(id, port);
     const [errors, fromKeyPair, , tokenInfo] = await this.validateTransferQR(networkKey, token, from, to, value, transferAll);
 
@@ -2210,7 +2283,12 @@ export default class KoniExtension extends Extension {
     return errors;
   }
 
-  private async makeCrossChainTransferQr (id: string, port: chrome.runtime.Port, { destinationNetworkKey, from, originNetworkKey, to, token, value }: RequestCrossChainTransferQR): Promise<Array<TransferError>> {
+  private async makeCrossChainTransferQr (id: string, port: chrome.runtime.Port, { destinationNetworkKey,
+    from,
+    originNetworkKey,
+    to,
+    token,
+    value }: RequestCrossChainTransferQR): Promise<Array<TransferError>> {
     const cb = createSubscription<'pri(accounts.cross.transfer.qr.create)'>(id, port);
     const [errors, fromKeyPair, , tokenInfo] = await this.validateCrossChainTransfer(
       originNetworkKey,

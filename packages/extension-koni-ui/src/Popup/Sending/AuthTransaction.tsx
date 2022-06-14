@@ -170,6 +170,7 @@ function AuthTransaction ({ className, isDonation, feeInfo: [fee, feeDecimals, f
           extrinsicHash: rs.extrinsicHash,
           txError: rs.errors
         });
+        cleanQrState();
         setBusy(false);
       }
     }

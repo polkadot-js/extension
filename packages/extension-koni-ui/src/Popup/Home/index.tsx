@@ -432,7 +432,6 @@ function Home ({ chainRegistryMap, className = '', currentAccount, historyMap, n
           iconTheme={qrModalIconTheme}
           networkKey={qrModalNetworkKey}
           networkPrefix={qrModalNetworkPrefix}
-          publicKey={currentAccount.genesisHash}
         />
       )}
       {

@@ -25,7 +25,6 @@ interface Props extends ThemeProps {
   className?: string;
   closeModal?: () => void;
   accountName: string | undefined;
-  publicKey: string | undefined | null;
   address: string;
   networkPrefix: number;
   networkKey: string;
@@ -36,8 +35,7 @@ function ExportAccountQrModal ({ accountName, address, className,
   closeModal,
   iconTheme,
   networkKey,
-  networkPrefix,
-  publicKey }: Props): React.ReactElement<Props> {
+  networkPrefix }: Props): React.ReactElement<Props> {
   const { t } = useTranslation();
   const { show } = useToast();
   const { networkMap } = useSelector((state: RootState) => state);
@@ -51,13 +49,14 @@ function ExportAccountQrModal ({ accountName, address, className,
     const networkInfo = networkMap[networkKey];
     const isEthereum = networkInfo?.isEthereum;
     const formattedAddress = reformatAddress(address, networkPrefix, isEthereum);
+    const genesisHash = networkInfo.genesisHash;
     const accountType = isEthereum ? 'ethereum' : 'substrate';
     const result: string[] = [accountType];
 
     if (isEthereum) {
       result.push(`${formattedAddress}@${networkInfo.evmChainId || '1'}`);
     } else {
-      result.push(formattedAddress, publicKey as string);
+      result.push(formattedAddress, genesisHash);
     }
 
     if (accountName) {
@@ -65,7 +64,7 @@ function ExportAccountQrModal ({ accountName, address, className,
     }
 
     return result.join(':');
-  }, [networkMap, networkKey, address, networkPrefix, accountName, publicKey]);
+  }, [networkMap, networkKey, address, networkPrefix, accountName]);
 
   const formattedAddress = useMemo(() => {
     const networkInfo = networkMap[networkKey];

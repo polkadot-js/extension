@@ -468,8 +468,10 @@ export default class Extension {
 
     const signed: string = u8aToHex(pair.sign(message));
 
+    const _address = pair.address;
+
     if (savePass) {
-      this.#cachedUnlocks[address] = Date.now() + PASSWORD_EXPIRY_MS;
+      this.#cachedUnlocks[_address] = Date.now() + PASSWORD_EXPIRY_MS;
     } else {
       pair.lock();
     }

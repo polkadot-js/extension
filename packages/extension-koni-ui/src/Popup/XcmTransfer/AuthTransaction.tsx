@@ -149,6 +149,7 @@ function AuthTransaction ({ balanceFormat,
           extrinsicHash: rs.extrinsicHash,
           txError: rs.errors
         });
+        cleanQrState();
         setBusy(false);
       }
     }
@@ -314,7 +315,7 @@ function AuthTransaction ({ balanceFormat,
           </div>
         </div>
 
-        <div className='auth-transaction__info'>AccountContext
+        <div className='auth-transaction__info'>
           <div className='auth-transaction__info-text'>Origin Chain Fee</div>
           <div className='auth-transaction__info-value'>
             <FormatBalance

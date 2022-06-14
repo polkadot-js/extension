@@ -20,7 +20,7 @@ interface ScanType {
 
 interface Props extends ThemeProps{
   className?: string;
-  onError?: (error: Error) => void;
+  onError?: (error?: Error) => void;
   onScan: (scanned: ScanType) => void;
 }
 
@@ -51,6 +51,8 @@ const Scanner = (props: Props) => {
           content = content.substring(0, 42);
           isEthereum = true;
         } else {
+          onError && onError(new Error(`Invalid prefix received, expected '${SUBSTRATE_PREFIX} or ${SECRET_PREFIX} or ${ETHEREUM_PREFIX}' , found '${prefix}'`));
+
           throw Error(`Invalid prefix received, expected '${SUBSTRATE_PREFIX} or ${SECRET_PREFIX} or ${ETHEREUM_PREFIX}' , found '${prefix}'`);
         }
 
@@ -60,6 +62,7 @@ const Scanner = (props: Props) => {
           decodeAddress(content);
         }
 
+        onError && onError();
         onScan({
           content,
           genesisHash,
@@ -71,11 +74,11 @@ const Scanner = (props: Props) => {
         onError && onError(error as Error);
         console.error('@subwallet/extension-koni-ui/ImportQr/Scanner', (error as Error).message, result.getText());
       }
+    }
 
-      if (error) {
-        onError && onError(error);
-        console.error('@subwallet/extension-koni-ui/ImportQr/Scanner', error.message);
-      }
+    if (error) {
+      error.message && onError && onError(error);
+      error.message && console.error('@subwallet/extension-koni-ui/ImportQr/Scanner', error.message);
     }
   }, [onScan, onError]);
 
@@ -83,7 +86,7 @@ const Scanner = (props: Props) => {
     <div className={CN(className)}>
       <QrReader
         className={'qr-scanner-container'}
-        constraints={{}}
+        constraints={{ facingMode: 'user' }}
         onResult={_onScan}
       />
     </div>
@@ -93,7 +96,7 @@ const Scanner = (props: Props) => {
 export default React.memo(styled(Scanner)(({ theme }: Props) => `
   display:inline-block;
   height:100%;
-  transform:matrix(-1,0,0,1,0,0);
+  transform:matrix(1,0,0,1,0,0);
   width:100%;
   video{
     margin:0;

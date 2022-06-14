@@ -820,6 +820,17 @@ export interface RequestAccountCreateExternalV2 {
   isEthereum: boolean;
 }
 
+export enum AccountExternalErrorCode {
+  INVALID_ADDRESS = 'invalidToAccount',
+  KEYRING_ERROR = 'keyringError',
+  UNKNOWN_ERROR = 'unknownError'
+}
+
+export interface AccountExternalError{
+  code: AccountExternalErrorCode;
+  message: string;
+}
+
 export interface KoniRequestSignatures {
   'pri(networkMap.recoverDotSama)': [string, boolean];
   'pri(substrateNft.submitTransaction)': [SubstrateNftSubmitTransaction, NftTransactionResponse, NftTransactionResponse]
@@ -873,7 +884,7 @@ export interface KoniRequestSignatures {
   'pri(seed.validateV2)': [RequestSeedValidateV2, ResponseSeedValidateV2];
   'pri(privateKey.validateV2)': [RequestSeedValidateV2, ResponsePrivateKeyValidateV2];
   'pri(accounts.create.suriV2)': [RequestAccountCreateSuriV2, ResponseAccountCreateSuriV2];
-  'pri(accounts.create.externalV2)': [RequestAccountCreateExternalV2, boolean];
+  'pri(accounts.create.externalV2)': [RequestAccountCreateExternalV2, AccountExternalError[]];
   'pri(accounts.checkTransfer)': [RequestCheckTransfer, ResponseCheckTransfer];
   'pri(accounts.checkCrossChainTransfer)': [RequestCheckCrossChainTransfer, ResponseCheckCrossChainTransfer];
   'pri(accounts.transfer)': [RequestTransfer, Array<TransferError>, ResponseTransfer];

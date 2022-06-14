@@ -1,10 +1,9 @@
 // Copyright 2019-2022 @subwallet/extension-koni authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { faCircleCheck } from '@fortawesome/free-solid-svg-icons';
+import { faCircleCheck, faCircleExclamation } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { ValidatorInfo } from '@subwallet/extension-base/background/KoniTypes';
-import NeutralQuestion from '@subwallet/extension-koni-ui/assets/NeutralQuestion.svg';
 import TrophyGreen from '@subwallet/extension-koni-ui/assets/trophy-green.svg';
 import { ActionContext } from '@subwallet/extension-koni-ui/components';
 import Button from '@subwallet/extension-koni-ui/components/Button';
@@ -48,13 +47,21 @@ function ValidatorItem ({ bondedValidators, className, isBondedBefore, maxNomina
   }, [showDetail]);
 
   const handleOnSelect = useCallback(() => {
+    if (!isSufficientFund) {
+      show('Your balance is not enough to stake');
+
+      return;
+    }
+
     if (bondedValidators.length >= maxNominations && !bondedValidators.includes(validatorInfo.address)) {
       show('Please choose among the nominating validators only');
-    } else {
-      store.dispatch({ type: 'bondingParams/update', payload: { selectedNetwork: networkKey, selectedValidator: validatorInfo, maxNominatorPerValidator, isBondedBefore, bondedValidators } as BondingParams });
-      navigate('/account/bonding-auth');
+
+      return;
     }
-  }, [bondedValidators, isBondedBefore, maxNominatorPerValidator, navigate, networkKey, validatorInfo]);
+
+    store.dispatch({ type: 'bondingParams/update', payload: { selectedNetwork: networkKey, selectedValidator: validatorInfo, maxNominatorPerValidator, isBondedBefore, bondedValidators } as BondingParams });
+    navigate('/account/bonding-auth');
+  }, [bondedValidators, isBondedBefore, maxNominations, maxNominatorPerValidator, navigate, networkKey, show, validatorInfo]);
 
   return (
     <div className={className}>
@@ -152,12 +159,11 @@ function ValidatorItem ({ bondedValidators, className, isBondedBefore, maxNomina
               <div className={'validator-att-title'}>
                 Own stake
                 {
-                  !hasOwnStake && <img
+                  !hasOwnStake && <FontAwesomeIcon
+                    className={'warning-tooltip'}
                     data-for={`validator-has-no-stake-tooltip-${networkKey}`}
                     data-tip={true}
-                    height={15}
-                    src={NeutralQuestion}
-                    width={15}
+                    icon={faCircleExclamation}
                   />
                 }
                 <Tooltip
@@ -176,12 +182,11 @@ function ValidatorItem ({ bondedValidators, className, isBondedBefore, maxNomina
               <div className={'validator-att-title'}>
                 Nominators count
                 {
-                  isOversubscribed && <img
+                  isOversubscribed && <FontAwesomeIcon
+                    className={'error-tooltip'}
                     data-for={`validator-oversubscribed-tooltip-${networkKey}`}
                     data-tip={true}
-                    height={15}
-                    src={NeutralQuestion}
-                    width={15}
+                    icon={faCircleExclamation}
                   />
                 }
                 <Tooltip
@@ -198,12 +203,11 @@ function ValidatorItem ({ bondedValidators, className, isBondedBefore, maxNomina
               <div className={'validator-att-title'}>
                 Commission
                 {
-                  isMaxCommission && <img
+                  isMaxCommission && <FontAwesomeIcon
+                    className={'error-tooltip'}
                     data-for={`commission-max-tooltip-${networkKey}`}
                     data-tip={true}
-                    height={15}
-                    src={NeutralQuestion}
-                    width={15}
+                    icon={faCircleExclamation}
                   />
                 }
                 <Tooltip
@@ -221,12 +225,11 @@ function ValidatorItem ({ bondedValidators, className, isBondedBefore, maxNomina
               <div className={'validator-att-title'}>
                 Minimum bonding
                 {
-                  !isSufficientFund && <img
+                  !isSufficientFund && <FontAwesomeIcon
+                    className={'error-tooltip'}
                     data-for={`insufficient-fund-tooltip-${networkKey}`}
                     data-tip={true}
-                    height={15}
-                    src={NeutralQuestion}
-                    width={15}
+                    icon={faCircleExclamation}
                   />
                 }
                 <Tooltip
@@ -255,6 +258,16 @@ function ValidatorItem ({ bondedValidators, className, isBondedBefore, maxNomina
 export default React.memo(styled(ValidatorItem)(({ theme }: Props) => `
   background: ${theme.accountAuthorizeRequest};
   border-radius: 8px;
+
+  .warning-tooltip {
+    color: ${theme.iconWarningColor};
+    font-size: 12px;
+  }
+
+  .error-tooltip {
+    color: ${theme.errorColor};
+    font-size: 12px;
+  }
 
   .validator-verified {
     color: ${theme.textColor3};

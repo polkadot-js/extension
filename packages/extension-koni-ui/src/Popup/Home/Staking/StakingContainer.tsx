@@ -39,37 +39,41 @@ function StakingContainer ({ className, data, loading, priceMap }: Props): React
           <EmptyList />
         }
 
-        {data.length > 0 && !loading &&
-          // @ts-ignore
-          data.map((stakingDataType: StakingDataType, index: number) => {
-            const item = stakingDataType.staking;
-            const reward = stakingDataType?.reward;
+        <div className={'staking-item-container'}>
+          {data.length > 0 && !loading &&
+            // @ts-ignore
+            data.map((stakingDataType: StakingDataType, index: number) => {
+              const item = stakingDataType.staking;
+              const reward = stakingDataType?.reward;
 
-            const name = item.name || item.chainId;
-            const icon = LogosMap[item.chainId] || LogosMap.default;
-            const price = priceMap[item.chainId];
+              const name = item.name || item.chainId;
+              const icon = LogosMap[item.chainId] || LogosMap.default;
+              const price = priceMap[item.chainId];
 
-            return <StakingRow
-              amount={item.balance}
-              chainName={name}
-              index={index}
-              key={index}
-              logo={icon}
-              price={price}
-              reward={reward}
-              unit={item.unit}
-            />;
-          })
-        }
-
-        <div className={'staking-button-container'}>
-          <Button
-            className={'staking-button'}
-            onClick={handleNavigateBonding}
-          >
-            Start staking
-          </Button>
+              return <StakingRow
+                amount={item.balance}
+                chainName={name}
+                index={index}
+                key={index}
+                logo={icon}
+                price={price}
+                reward={reward}
+                unit={item.unit}
+              />;
+            })
+          }
         </div>
+
+        {
+          !loading && <div className={'staking-button-container'}>
+            <Button
+              className={'staking-button'}
+              onClick={handleNavigateBonding}
+            >
+              Start staking
+            </Button>
+          </div>
+        }
       </div>
     </div>
   );
@@ -78,6 +82,10 @@ function StakingContainer ({ className, data, loading, priceMap }: Props): React
 export default React.memo(styled(StakingContainer)(({ theme }: Props) => `
   width: 100%;
   padding: 0 25px;
+
+  .staking-item-container {
+    margin-bottom: 20px;
+  }
 
   .staking-container {
     display: flex;

@@ -79,7 +79,7 @@ function BondingAuthTransaction ({ amount, balanceError, className, fee, selecte
   const handleOnSubmit = useCallback(async () => {
     await submitBonding({
       networkKey: selectedNetwork,
-      controllerId: account?.address as string,
+      nominatorAddress: account?.address as string,
       amount,
       validatorInfo,
       password

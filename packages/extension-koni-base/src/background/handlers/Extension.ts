@@ -2053,21 +2053,21 @@ export default class KoniExtension extends Extension {
     };
   }
 
-  private async getBondingTxInfo ({ amount, controllerId, networkKey, validatorInfo }: BondingSubmitParams): Promise<BondingTxInfo> {
+  private async getBondingTxInfo ({ amount, networkKey, nominatorAddress, validatorInfo }: BondingSubmitParams): Promise<BondingTxInfo> {
     const dotSamaApi = state.getDotSamaApi(networkKey);
     const networkJson = state.getNetworkMap()[networkKey];
     const parsedAmount = amount * (10 ** (networkJson.decimals as number));
     const binaryAmount = new BN(parsedAmount);
 
     const [txInfo, balance] = await Promise.all([
-      getBondingTxInfo(dotSamaApi, controllerId, binaryAmount, validatorInfo.address),
-      getFreeBalance(networkKey, controllerId, state.getDotSamaApiMap(), state.getWeb3ApiMap())
+      getBondingTxInfo(dotSamaApi, nominatorAddress, binaryAmount, validatorInfo.address),
+      getFreeBalance(networkKey, nominatorAddress, state.getDotSamaApiMap(), state.getWeb3ApiMap())
     ]);
 
     const feeString = txInfo.partialFee.toHuman();
     const binaryBalance = new BN(balance);
 
-    const sumAmount = binaryAmount.add(txInfo.partialFee);
+    const sumAmount = txInfo.partialFee.add(binaryAmount);
     const balanceError = sumAmount.gt(binaryBalance);
 
     return {
@@ -2076,13 +2076,13 @@ export default class KoniExtension extends Extension {
     };
   }
 
-  private async submitBonding (id: string, port: chrome.runtime.Port, { amount, controllerId, networkKey, password, validatorInfo }: BondingSubmitParams): Promise<BondingTxResponse> {
+  private async submitBonding (id: string, port: chrome.runtime.Port, { amount, networkKey, nominatorAddress, password, validatorInfo }: BondingSubmitParams): Promise<BondingTxResponse> {
     const txState: BondingTxResponse = {};
     const networkJson = state.getNetworkMap()[networkKey];
     const parsedAmount = amount * (10 ** (networkJson.decimals as number));
     const binaryAmount = new BN(parsedAmount);
 
-    if (!amount || !controllerId || !validatorInfo || !password) {
+    if (!amount || !nominatorAddress || !validatorInfo || !password) {
       txState.txError = true;
 
       return txState;
@@ -2090,11 +2090,11 @@ export default class KoniExtension extends Extension {
 
     const callback = createSubscription<'pri(bonding.submitTransaction)'>(id, port);
     const dotSamaApi = state.getDotSamaApi(networkKey);
-    const extrinsic = await getBondingExtrinsic(dotSamaApi, controllerId, binaryAmount, validatorInfo.address);
-    const passwordError: string | null = unlockAccount(controllerId, password);
+    const extrinsic = await getBondingExtrinsic(dotSamaApi, nominatorAddress, binaryAmount, validatorInfo.address);
+    const passwordError: string | null = unlockAccount(nominatorAddress, password);
 
     if (extrinsic !== null && passwordError === null) {
-      const pair = keyring.getPair(controllerId);
+      const pair = keyring.getPair(nominatorAddress);
 
       try {
         const unsubscribe = await extrinsic.signAndSend(pair, (result) => {
@@ -2110,9 +2110,11 @@ export default class KoniExtension extends Extension {
                 callback(txState);
 
                 if (method === 'ExtrinsicFailed') {
+                  console.log(result.events);
                   txState.status = false;
                   callback(txState);
                 } else if (method === 'ExtrinsicSuccess') {
+                  console.log(result.events);
                   txState.status = true;
                   callback(txState);
                 }

@@ -800,7 +800,7 @@ export interface BondingTxInfo {
 
 export interface BondingSubmitParams {
   networkKey: string,
-  controllerId: string,
+  nominatorAddress: string,
   amount: number,
   validatorInfo: ValidatorInfo,
   password?: string

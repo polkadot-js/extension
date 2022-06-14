@@ -119,7 +119,7 @@ function BondingSubmitTransaction ({ className }: Props): React.ReactElement<Pro
     setLoading(true);
     getBondingTxInfo({
       networkKey: selectedNetwork,
-      controllerId: account?.address as string,
+      nominatorAddress: account?.address as string,
       amount,
       validatorInfo
     })
@@ -363,7 +363,7 @@ function BondingSubmitTransaction ({ className }: Props): React.ReactElement<Pro
         </div>
       </div>}
 
-      {showAuth &&
+      {showAuth && !showResult &&
         <BondingAuthTransaction
           amount={amount}
           balanceError={balanceError}

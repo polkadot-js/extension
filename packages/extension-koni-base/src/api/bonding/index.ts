@@ -3,7 +3,8 @@
 
 import { ApiProps, ChainBondingBasics, ValidatorInfo } from '@subwallet/extension-base/background/KoniTypes';
 import { calculateChainStakedReturn, calculateInflation, calculateValidatorStakedReturn, getCommission, ValidatorExtraInfo } from '@subwallet/extension-koni-base/api/bonding/utils';
-import {BN} from "@polkadot/util";
+
+import { BN } from '@polkadot/util';
 
 export async function getChainBondingBasics (networkKey: string, dotSamaApi: ApiProps, decimals: number) {
   const apiProps = await dotSamaApi.isReady;

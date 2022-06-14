@@ -5,7 +5,7 @@ import { AuthUrls, Resolver } from '@subwallet/extension-base/background/handler
 import { AccountAuthType, AccountJson, AuthorizeRequest, RequestAccountList, RequestAccountSubscribe, RequestAuthorizeReject, RequestAuthorizeSubscribe, RequestAuthorizeTab, RequestCurrentAccountAddress, ResponseAuthorizeList, ResponseJsonGetAccountInfo, SeedLengths } from '@subwallet/extension-base/background/types';
 import { InjectedAccount, MetadataDefBase } from '@subwallet/extension-inject/types';
 import Web3 from 'web3';
-import { RequestArguments } from 'web3-core';
+import { RequestArguments, TransactionConfig } from 'web3-core';
 import { JsonRpcPayload, JsonRpcResponse } from 'web3-core-helpers';
 
 import { ApiPromise } from '@polkadot/api';
@@ -825,13 +825,15 @@ export interface SwitchNetworkRequest {
 }
 
 export interface EvmSignatureRequest {
+  address: string,
   type: string;
-  payload: any
+  payload: unknown
 }
 
 export interface ConfirmationsQueueItem<T> {
   id: string;
   url: string;
+  requiredPassword: boolean;
   payload: T
 }
 
@@ -840,13 +842,14 @@ export interface ConfirmationResult<T> {
   isApproved: boolean;
   url?: string;
   payload?: T
+  password?: string
 }
 
 export interface ConfirmationDefinitions {
   addNetworkRequest: [ConfirmationsQueueItem<NetworkJson>, ConfirmationResult<NetworkJson>],
   switchNetworkRequest: [ConfirmationsQueueItem<SwitchNetworkRequest>, ConfirmationResult<boolean>],
   evmSignatureRequest: [ConfirmationsQueueItem<EvmSignatureRequest>, ConfirmationResult<string>],
-  evmSendTransactionRequest: [ConfirmationsQueueItem<any>, ConfirmationResult<any>]
+  evmSendTransactionRequest: [ConfirmationsQueueItem<TransactionConfig>, ConfirmationResult<boolean>]
 }
 
 export type ConfirmationType = keyof ConfirmationDefinitions;
@@ -940,6 +943,7 @@ export interface KoniRequestSignatures {
   'pri(transfer.getExistentialDeposit)': [RequestTransferExistentialDeposit, string];
   'pri(subscription.cancel)': [string, boolean];
   'pri(freeBalance.subscribe)': [RequestFreeBalance, string, string];
+
   // Confirmation Queues
   'pri(confirmations.subscribe)': [RequestConfirmationsSubscribe, ConfirmationsQueue, ConfirmationsQueue],
   'pri(confirmations.complete)': [RequestConfirmationComplete, boolean]

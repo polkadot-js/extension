@@ -16,6 +16,7 @@ import { DotSamaCrowdloan_crowdloans_nodes } from '@subwallet/extension-koni-bas
 import { fetchDotSamaCrowdloan } from '@subwallet/extension-koni-base/api/subquery/crowdloan';
 import { DEFAULT_EVM_TOKENS } from '@subwallet/extension-koni-base/api/web3/defaultEvmToken';
 import { initWeb3Api } from '@subwallet/extension-koni-base/api/web3/web3';
+import { EvmRpcError } from '@subwallet/extension-koni-base/background/errors/EvmRpcError';
 import { ALL_ACCOUNT_KEY, ALL_GENESIS_HASH } from '@subwallet/extension-koni-base/constants';
 import { CurrentAccountStore, NetworkMapStore, PriceStore } from '@subwallet/extension-koni-base/stores';
 import AccountRefStore from '@subwallet/extension-koni-base/stores/AccountRef';
@@ -140,7 +141,7 @@ export default class KoniState extends State {
     evmSendTransactionRequest: {}
   });
 
-  private readonly confirmationsPromiseMap: Record<string, Resolver<any>> = {};
+  private readonly confirmationsPromiseMap: Record<string, { resolver: Resolver<any>, validator?: (rs: any) => Error | undefined }> = {};
 
   private networkMap: Record<string, NetworkJson> = {}; // mapping to networkMapStore, for uses in background
   private networkMapSubject = new Subject<Record<string, NetworkJson>>();
@@ -1593,10 +1594,9 @@ export default class KoniState extends State {
     };
   }
 
-  public getEthKeyring (address: string): Promise<SimpleKeyring> {
+  public getEthKeyring (address: string, password: string): Promise<SimpleKeyring> {
     return new Promise<SimpleKeyring>((resolve) => {
-      // Todo: need to unlock account with password and use password to sign
-      const { privateKey } = this.accountExportPrivateKey({ address, password: 'password' });
+      const { privateKey } = this.accountExportPrivateKey({ address, password: password });
       const ethKeyring = new SimpleKeyring([privateKey]);
 
       resolve(ethKeyring);
@@ -1604,46 +1604,80 @@ export default class KoniState extends State {
   }
 
   public async evmSign (id: string, url: string, method: string, params: any, allowedAccounts: string[]): Promise<string | undefined> {
-    let [address, message] = params as [string, string];
-    let typeDatas: any[];
-    let typedMessage: string;
+    let address: string;
+    let payload: any;
 
-    const canSign = (checkAcc: string) => {
-      if (!allowedAccounts.find((acc) => (acc.toLowerCase() === checkAcc.toLowerCase()))) {
-        throw Error('Account ' + checkAcc + ' not in allowed list');
+    // Detech params
+    if (method === 'eth_sign') {
+      [address, payload] = params as [string, string];
+    } else if (['eth_signTypedData_v3', 'eth_signTypedData_v4'].indexOf(method) > -1) {
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+      [address, payload] = params as [string, any];
+
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-argument,@typescript-eslint/no-unsafe-assignment
+      payload = JSON.parse(payload);
+    } else if (['personal_sign', 'eth_signTypedData', 'eth_signTypedData'].indexOf(method) > -1) {
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+      [payload, address] = params as [any, string];
+    } else {
+      throw new EvmRpcError('INVALID_PARAMS', 'Not found sign method');
+    }
+
+    // Check sign abiblity
+    if (!allowedAccounts.find((acc) => (acc.toLowerCase() === address.toLowerCase()))) {
+      throw new EvmRpcError('INVALID_PARAMS', 'Account ' + address + ' not in allowed list');
+    }
+
+    const requiredPassword = true;
+    let privateKey = '';
+
+    const validateConfirmationResponsePayload = (result: ConfirmationDefinitions['evmSignatureRequest'][1]) => {
+      if (result.isApproved) {
+        if (requiredPassword && !result?.password) {
+          return Error('Password is required');
+        }
+
+        privateKey = (result?.password && this.accountExportPrivateKey({ address: address, password: result.password }).privateKey) || '';
+
+        if (privateKey === '') {
+          return Error('Cannot export private key');
+        }
       }
+
+      return undefined;
     };
+
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+    const signPayload = { address, type: method, payload };
+
+    await this.addConfirmation(id, url, 'evmSignatureRequest', signPayload, true, validateConfirmationResponsePayload)
+      .then(({ isApproved, password }) => {
+        if (isApproved && password) {
+          return password;
+        }
+
+        throw new EvmRpcError('USER_REJECTED_REQUEST');
+      });
+
+    if (privateKey === '') {
+      throw Error('Cannot export private key');
+    }
+
+    const simpleKeyring = new SimpleKeyring([privateKey]);
 
     switch (method) {
       case 'eth_sign':
-        canSign(address);
-
-        return await (await this.getEthKeyring(address)).signMessage(address, message);
+        return await simpleKeyring.signMessage(address, payload as string);
       case 'personal_sign':
-        [message, address] = params as [string, string];
-        canSign(address);
-
-        return await (await this.getEthKeyring(address)).signPersonalMessage(address, message);
+        return await simpleKeyring.signPersonalMessage(address, payload as string);
       case 'eth_signTypedData':
-        [typeDatas, address] = params as [any[], string];
-        canSign(address);
-
-        return await (await this.getEthKeyring(address)).signTypedData(address, typeDatas);
+        return await simpleKeyring.signTypedData(address, payload as any[]);
       case 'eth_signTypedData_v1':
-        [typeDatas, address] = params as [any[], string];
-        canSign(address);
-
-        return await (await this.getEthKeyring(address)).signTypedData_v1(address, typeDatas);
+        return await simpleKeyring.signTypedData_v1(address, payload as any[]);
       case 'eth_signTypedData_v3':
-        [address, typedMessage] = params as [string, string];
-        canSign(address);
-
-        return await (await this.getEthKeyring(address)).signTypedData_v3(address, JSON.parse(typedMessage));
+        return await simpleKeyring.signTypedData_v3(address, payload);
       case 'eth_signTypedData_v4':
-        [address, typedMessage] = params as [string, string];
-        canSign(address);
-
-        return await (await this.getEthKeyring(address)).signTypedData_v4(address, JSON.parse(typedMessage));
+        return await simpleKeyring.signTypedData_v4(address, payload);
       default:
         throw new Error('Not found sign method');
     }
@@ -1652,58 +1686,90 @@ export default class KoniState extends State {
   public async evmSendTransaction (id: string, url: string, networkKey: string, transactionParams: EvmSendTransactionParams): Promise<string | undefined> {
     const web3 = this.getWeb3ApiMap()[networkKey];
 
-    // Todo: need to unlock account with password and use password to sign
-    const { privateKey } = this.accountExportPrivateKey({ address: transactionParams.from, password: 'password' });
-
-    const toBn = (val?: string | number) => {
+    const autoFormatNumber = (val?: string | number) => {
       if (typeof val === 'string' && val.startsWith('0x')) {
-        return new BN(val.replace('0x', ''), 16);
+        return new BN(val.replace('0x', ''), 16).toString();
+      } else if (typeof val === 'number') {
+        return val.toString();
       }
 
-      return val && new BN(val);
+      return val;
     };
 
-    const transactionConfigs: TransactionConfig = {
+    const transaction: TransactionConfig = {
       from: transactionParams.from,
       to: transactionParams.to,
-      value: toBn(transactionParams.value),
-      gasPrice: toBn(transactionParams.gasPrice),
-      maxPriorityFeePerGas: toBn(transactionParams.maxPriorityFeePerGas),
-      maxFeePerGas: toBn(transactionParams.maxFeePerGas),
+      value: autoFormatNumber(transactionParams.value),
+      gasPrice: autoFormatNumber(transactionParams.gasPrice),
+      maxPriorityFeePerGas: autoFormatNumber(transactionParams.maxPriorityFeePerGas),
+      maxFeePerGas: autoFormatNumber(transactionParams.maxFeePerGas),
       data: transactionParams.data
     };
 
-    const gasLimit = toBn(transactionParams.gasLimit);
+    transaction.gasPrice = transaction.gasPrice || await web3.eth.getGasPrice();
+    transaction.gas = await web3.eth.estimateGas({ ...transaction });
 
-    transactionConfigs.gas = gasLimit?.toString() || (await web3.eth.estimateGas(transactionConfigs));
+    const fromAddress = transaction.from as string; // Address is validated in before step
+    const requiredPassword = true; // password is always required for to export private, we have planning to save password 15 min like sign keypair.isLocked;
 
-    const signTransaction = await web3.eth.accounts.signTransaction(transactionConfigs, privateKey);
+    let privateKey = '';
 
-    return new Promise<string>((resolve, reject) => {
-      signTransaction.rawTransaction && web3.eth.sendSignedTransaction(signTransaction.rawTransaction)
-        .on('transactionHash', resolve)
-        .on('error', reject);
-    });
+    const validateConfirmationResponsePayload = (result: ConfirmationDefinitions['evmSendTransactionRequest'][1]) => {
+      if (result.isApproved) {
+        if (requiredPassword && !result?.password) {
+          return Error('Password is required');
+        }
+
+        privateKey = (result?.password && this.accountExportPrivateKey({ address: fromAddress, password: result.password }).privateKey) || '';
+
+        if (privateKey === '') {
+          return Error('Cannot export private key');
+        }
+      }
+
+      return undefined;
+    };
+
+    console.log('789', transaction);
+
+    return this.addConfirmation(id, url, 'evmSendTransactionRequest', transaction, true, validateConfirmationResponsePayload)
+      .then(async ({ isApproved }) => {
+        if (isApproved) {
+          const signTransaction = await web3.eth.accounts.signTransaction(transaction, privateKey);
+
+          return new Promise<string>((resolve, reject) => {
+            signTransaction.rawTransaction && web3.eth.sendSignedTransaction(signTransaction.rawTransaction)
+              .on('transactionHash', resolve)
+              .on('error', reject);
+          });
+        } else {
+          return Promise.resolve(undefined);
+        }
+      });
   }
 
   public getConfirmationsQueueSubject () {
     return this.confirmationsQueueSubject;
   }
 
-  public addConfirmation<CT extends ConfirmationType> (id: string, url: string, type: CT, payload: ConfirmationDefinitions[CT][0]['payload']) {
+  public addConfirmation<CT extends ConfirmationType> (id: string, url: string, type: CT, payload: ConfirmationDefinitions[CT][0]['payload'], requiredPassword = false, validator?: (input: ConfirmationDefinitions[CT][1]) => Error | undefined) {
     const confirmations = this.confirmationsQueueSubject.getValue();
     const confirmationType = confirmations[type] as Record<string, ConfirmationDefinitions[CT][0]>;
 
     confirmationType[id] = {
       id,
       url,
+      requiredPassword,
       payload: payload
-    };
+    } as ConfirmationDefinitions[CT][0];
 
     const promise = new Promise<ConfirmationDefinitions[CT][1]>((resolve, reject) => {
       this.confirmationsPromiseMap[id] = {
-        resolve: resolve,
-        reject: reject
+        validator: validator,
+        resolver: {
+          resolve: resolve,
+          reject: reject
+        }
       };
     });
 
@@ -1719,18 +1785,27 @@ export default class KoniState extends State {
 
     const _completeConfirmation = <T extends ConfirmationType> (type: T, result: ConfirmationDefinitions[T][1]) => {
       const { id } = result;
-      const promise = this.confirmationsPromiseMap[id];
+      const { resolver, validator } = this.confirmationsPromiseMap[id];
 
-      if (!promise || !(confirmations[type][id])) {
+      if (!resolver || !(confirmations[type][id])) {
         throw new Error('Not found promise for confirmation');
       }
 
+      // Validate response from confirmation popup some info like password, response format....
+      const error = validator && validator(result);
+
+      if (error) {
+        resolver.reject(error);
+      }
+
+      // Delete confirmations from queue
       delete this.confirmationsPromiseMap[id];
       delete confirmations[type][id];
       this.confirmationsQueueSubject.next(confirmations);
 
-      this.updateIconV2(false);
-      promise.resolve(result);
+      // Update icon, and close queue
+      this.updateIconV2(true);
+      resolver.resolve(result);
     };
 
     Object.entries(request).forEach(([type, result]) => {

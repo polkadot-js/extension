@@ -2,13 +2,15 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { StakingRewardItem } from '@subwallet/extension-base/background/KoniTypes';
+import DotsThree from '@subwallet/extension-koni-ui//assets/DotsThree.svg';
 import cloneIconLight from '@subwallet/extension-koni-ui/assets/clone--color-2.svg';
 import cloneIconDark from '@subwallet/extension-koni-ui/assets/clone--color-3.svg';
 import useToast from '@subwallet/extension-koni-ui/hooks/useToast';
 import useTranslation from '@subwallet/extension-koni-ui/hooks/useTranslation';
+import StakingMenu from '@subwallet/extension-koni-ui/Popup/Home/Staking/StakingMenu';
 import { Theme, ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { formatLocaleNumber } from '@subwallet/extension-koni-ui/util/formatNumber';
-import React, { useCallback, useContext, useState } from 'react';
+import React, { useCallback, useContext, useRef, useState } from 'react';
 import CopyToClipboard from 'react-copy-to-clipboard';
 import styled, { ThemeContext } from 'styled-components';
 
@@ -26,10 +28,17 @@ interface Props extends ThemeProps {
 
 function StakingRow ({ amount, chainName, className, index, logo, price, reward, unit }: Props): React.ReactElement<Props> {
   const [showReward, setShowReward] = useState(false);
+  const [showStakingMenu, setShowStakingMenu] = useState(false);
 
   const handleToggleReward = useCallback(() => {
     setShowReward(!showReward);
   }, [showReward]);
+
+  const stakingMenuRef = useRef(null);
+
+  const handleToggleBondingMenu = useCallback(() => {
+    setShowStakingMenu(!showStakingMenu);
+  }, [showStakingMenu]);
 
   const editBalance = (balance: string) => {
     if (parseFloat(balance) === 0) {
@@ -76,6 +85,11 @@ function StakingRow ({ amount, chainName, className, index, logo, price, reward,
     [show, t]
   );
 
+  const handleClickBondingMenu = useCallback((e: MouseEvent) => {
+    e.stopPropagation();
+    handleToggleBondingMenu();
+  }, [handleToggleBondingMenu]);
+
   return (
     <div className={`${className || ''} ${showReward ? '-show-detail' : ''}`}>
       <div
@@ -96,7 +110,26 @@ function StakingRow ({ amount, chainName, className, index, logo, price, reward,
           >
             <div className={'meta-container'}>
               <div className={'chain-name'}>{chainName}</div>
-              <div className={'balance-description'}>Staking balance</div>
+              <div className={'balance-description'}>
+                <div>Total stake</div>
+                <div
+                  className={'bonding-menu-btn'}
+                  // @ts-ignore
+                  onClick={handleClickBondingMenu}
+                >
+                  <img
+                    alt={'dots'}
+                    height={28}
+                    src={DotsThree}
+                    width={28}
+                  />
+                </div>
+                {
+                  showStakingMenu && <StakingMenu
+                    reference={stakingMenuRef}
+                  />
+                }
+              </div>
             </div>
 
             <div className={'balance-container'}>
@@ -218,9 +251,17 @@ export default React.memo(styled(StakingRow)(({ theme }: Props) => `
     flex-direction: column;
   }
 
+  .bonding-menu-btn {
+    display: flex;
+    align-items: center;
+  }
+
   .balance-description {
     font-size: 14px;
     color: #7B8098;
+    display: flex;
+    gap: 5px;
+    align-items: center;
   }
 
   .staking-balance {

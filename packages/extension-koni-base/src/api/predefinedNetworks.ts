@@ -68,7 +68,8 @@ export const PREDEFINED_NETWORKS: Record<string, NetworkJson> = {
     groups: ['RELAY_CHAIN', 'TEST_NET'],
     nativeToken: 'WND',
     decimals: 12,
-    supportBonding: true
+    supportBonding: true,
+    getStakingOnChain: true
   },
   rococo: {
     key: 'rococo',

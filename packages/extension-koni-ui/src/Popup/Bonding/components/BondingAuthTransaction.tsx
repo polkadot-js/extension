@@ -59,8 +59,10 @@ function BondingAuthTransaction ({ amount, balanceError, bondedValidators, class
   }, []);
 
   const hideConfirm = useCallback(() => {
-    setShowConfirm(false);
-  }, [setShowConfirm]);
+    if (!loading) {
+      setShowConfirm(false);
+    }
+  }, [loading, setShowConfirm]);
 
   const handleOnSubmit = useCallback(async () => {
     await submitBonding({
@@ -239,6 +241,7 @@ function BondingAuthTransaction ({ amount, balanceError, bondedValidators, class
           <div className={'bonding-auth-btn-container'}>
             <Button
               className={'bonding-auth-cancel-button'}
+              isDisabled={loading}
               onClick={hideConfirm}
             >
               Reject

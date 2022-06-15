@@ -41,7 +41,7 @@ function BondingValidatorSelection ({ className }: Props): React.ReactElement<Pr
   const [sliceIndex, setSliceIndex] = useState(INFINITE_SCROLL_PER_PAGE);
   const [showedValidators, setShowedValidators] = useState<ValidatorInfo[]>([]);
 
-  const _height = window.innerHeight > 600 ? 650 : 300;
+  const _height = window.innerHeight > 600 ? 500 : 300;
 
   const handleSortByCommission = useCallback(() => {
     if (!sortByCommission) {
@@ -158,7 +158,9 @@ function BondingValidatorSelection ({ className }: Props): React.ReactElement<Pr
   return (
     <div className={className}>
       <Header
+        cancelButtonText={'x'}
         showBackArrow
+        showCancelButton={true}
         showSubHeader
         subHeaderName={t<string>('Nominate a validator')}
         to='/account/select-bonding-network'

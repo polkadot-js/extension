@@ -23,7 +23,8 @@ import Header from '@subwallet/extension-koni-ui/partials/Header';
 import BondingAuthTransaction from '@subwallet/extension-koni-ui/Popup/Bonding/components/BondingAuthTransaction';
 import BondingResult from '@subwallet/extension-koni-ui/Popup/Bonding/components/BondingResult';
 import { parseBalanceString } from '@subwallet/extension-koni-ui/Popup/Bonding/utils';
-import { RootState } from '@subwallet/extension-koni-ui/stores';
+import { RootState, store } from '@subwallet/extension-koni-ui/stores';
+import { BondingParams } from '@subwallet/extension-koni-ui/stores/types';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { toShort } from '@subwallet/extension-koni-ui/util';
 import React, { useCallback, useContext, useEffect, useState } from 'react';
@@ -107,6 +108,11 @@ function BondingSubmitTransaction ({ className }: Props): React.ReactElement<Pro
     navigate('/');
   }, [navigate]);
 
+  const handleClickCancel = useCallback(() => {
+    store.dispatch({ type: 'bondingParams/update', payload: { selectedNetwork, selectedValidator: validatorInfo, maxNominatorPerValidator: null } as BondingParams });
+    navigate('/account/select-bonding-validator');
+  }, [navigate, selectedNetwork, validatorInfo]);
+
   const handleChangeAmount = useCallback((value: BN | string) => {
     let parsedValue;
 
@@ -147,10 +153,10 @@ function BondingSubmitTransaction ({ className }: Props): React.ReactElement<Pro
   return (
     <div className={className}>
       <Header
-        showCancelButton={true}
+        cancelButtonText={'x'}
+        showCancelButton={!loading}
         showSubHeader
         subHeaderName={t<string>('Staking action')}
-        to='/'
       />
 
       {!showResult && <div
@@ -358,7 +364,11 @@ function BondingSubmitTransaction ({ className }: Props): React.ReactElement<Pro
         <div className='bonding-submit__separator' />
 
         <div className={'bonding-btn-container'}>
-          <Button className={'bonding-cancel-button'}>
+          <Button
+            className={'bonding-cancel-button'}
+            isDisabled={loading}
+            onClick={handleClickCancel}
+          >
             Cancel
           </Button>
           <Button

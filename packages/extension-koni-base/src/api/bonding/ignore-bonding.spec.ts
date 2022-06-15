@@ -6,7 +6,7 @@ import { DOTSAMA_AUTO_CONNECT_MS } from '@subwallet/extension-koni-base/constant
 import { getCurrentProvider } from '@subwallet/extension-koni-base/utils/utils';
 
 import { ApiPromise, WsProvider } from '@polkadot/api';
-import {BN} from "@polkadot/util";
+import { BN } from '@polkadot/util';
 
 jest.setTimeout(50000);
 
@@ -313,6 +313,7 @@ describe('test DotSama APIs', () => {
 
     const resp = await apiPromise.query.staking.nominators('5GNy7frYA4BwWpKwxKAFWt4eBsZ9oAvXrp9SyDj6qzJAaNzB');
     const parsed = resp.toHuman() as Record<string, any>;
+
     console.log(parsed?.targets);
   });
 });

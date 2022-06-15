@@ -22,9 +22,6 @@ function EvmSignConfirmationInfo ({ className, confirmation: { payload } }: Prop
         <span className='label'>{t<string>('Type')}</span><span className='value'>{transaction.type}</span>
       </div>
       <div>
-        <span className='label'>{t<string>('Address')}</span><span className='value'>{transaction.address}</span>
-      </div>
-      <div>
         <span className='label'>{t<string>('Raw')}</span><span className='pre-wrap'>
           {typeof transaction.payload === 'string' ? transaction.payload : JSON.stringify(transaction.payload, null, 2)}
         </span>
@@ -33,12 +30,7 @@ function EvmSignConfirmationInfo ({ className, confirmation: { payload } }: Prop
   </div>;
 }
 
-export default styled(EvmSignConfirmationInfo)(({ theme }: Props) => `
-  height: 100%;
-  display: flex;
-  flex-direction: row;
-  position: relative;
-  
+export default styled(EvmSignConfirmationInfo)(({ theme }: Props) => `  
   .signature-wrapper {
     width: 100%;  
   }

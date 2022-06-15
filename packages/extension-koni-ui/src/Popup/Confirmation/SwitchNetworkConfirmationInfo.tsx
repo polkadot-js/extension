@@ -1,14 +1,16 @@
 // Copyright 2019-2022 @subwallet/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
+import { faRightLong } from '@fortawesome/free-solid-svg-icons';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { ConfirmationsQueue } from '@subwallet/extension-base/background/KoniTypes';
 import useFetchNetworkMap from '@subwallet/extension-koni-ui/hooks/screen/setting/useFetchNetworkMap';
-import useTranslation from '@subwallet/extension-koni-ui/hooks/useTranslation';
+import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
+import { getLogoByNetworkKey } from '@subwallet/extension-koni-ui/util';
 import React from 'react';
+import { useSelector } from 'react-redux';
 import styled from 'styled-components';
-
-import LogosMap from '../../assets/logo';
 
 interface Props extends ThemeProps {
   className?: string;
@@ -16,36 +18,66 @@ interface Props extends ThemeProps {
 }
 
 function SwitchNetworkConfirmationInfo ({ className, confirmation }: Props): React.ReactElement {
-  const { t } = useTranslation();
   const { parsedNetworkMap: networkMap } = useFetchNetworkMap();
-  const { payload: { networkKey } } = confirmation;
-  const icon = LogosMap[networkKey] || LogosMap.default;
-  const { chain } = networkMap[networkKey];
+  const { payload } = confirmation;
+  const newNetwork = networkMap[payload.networkKey];
+  const { networkKey } = useSelector((state: RootState) => state.currentNetwork);
+  const currentNetwork = networkMap[networkKey];
 
   return <div className={className}>
     <div className='network-wrapper'>
-      <div className='img-wrapper'>
-        <img
-          className='img-circle'
-          src={icon}
-          width={128}
-        />
+      <div className='from-network'>
+        <div className='img-wrapper'>
+          <img
+            className='img-circle'
+            src={getLogoByNetworkKey(networkKey)}
+            width={64}
+          />
+        </div>
+        <div>{currentNetwork.chain}</div>
+
       </div>
-      <div>{t<string>('Switch current network to ')}{chain}?</div>
+      <div className='swap-icon'>
+        <FontAwesomeIcon icon={faRightLong} />
+      </div>
+      <div className='to-network'>
+        <div className='img-wrapper'>
+          <img
+            className='img-circle'
+            src={getLogoByNetworkKey(payload.networkKey)}
+            width={64}
+          />
+        </div>
+        <div>{newNetwork.chain}</div>
+      </div>
     </div>
   </div>;
 }
 
 export default styled(SwitchNetworkConfirmationInfo)(({ theme }: Props) => `
   text-align: center;
-  height: 100%;
   display: flex;
+  flex: 1;
   flex-direction: row;
   align-items: center;
   position: relative;
+  padding-top: 16px;
+  padding-botom: 16px;
   
   .network-wrapper {
     width: 100%;  
+    display: flex;
+    justify-content: space-evenly;
+    align-items: center;
+  }
+  
+  .swap-icon {
+    padding-bottom: 40px;
+    font-size: 32px;
+  }
+  
+  .from-network, .to-network {
+    flex: 1;  
   }
   
   .img-wrapper {
@@ -55,7 +87,8 @@ export default styled(SwitchNetworkConfirmationInfo)(({ theme }: Props) => `
   .img-circle {
     overflow: hidden;
     border-radius: 50%;
-    margin-bottom: 16px;
+    margin-top: 8px;
+    margin-bottom: 8px;
     border: 2px solid #fff;
   }
 `);

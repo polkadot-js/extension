@@ -830,10 +830,15 @@ export interface EvmSignatureRequest {
   payload: unknown
 }
 
-export interface ConfirmationsQueueItem<T> {
+export interface ConfirmationsQueueItemOptions {
+  requiredPassword?: boolean;
+  address?: string;
+  networkKey?: string;
+}
+
+export interface ConfirmationsQueueItem<T> extends ConfirmationsQueueItemOptions{
   id: string;
   url: string;
-  requiredPassword: boolean;
   payload: T
 }
 

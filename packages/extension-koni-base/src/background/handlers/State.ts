@@ -3,7 +3,7 @@
 
 import { withErrorLog } from '@subwallet/extension-base/background/handlers/helpers';
 import State, { AuthUrls, Resolver } from '@subwallet/extension-base/background/handlers/State';
-import { AccountRefMap, APIItemState, ApiMap, AuthRequestV2, BalanceItem, BalanceJson, ChainRegistry, ConfirmationDefinitions, ConfirmationsQueue, ConfirmationType, CrowdloanItem, CrowdloanJson, CurrentAccountInfo, CustomEvmToken, DeleteEvmTokenParams, EvmSendTransactionParams, EvmTokenJson, NETWORK_STATUS, NetworkJson, NftCollection, NftCollectionJson, NftItem, NftJson, NftTransferExtra, PriceJson, RequestAccountExportPrivateKey, RequestConfirmationComplete, RequestSettingsType, ResponseAccountExportPrivateKey, ResultResolver, ServiceInfo, StakingItem, StakingJson, StakingRewardJson, TokenInfo, TransactionHistoryItemType } from '@subwallet/extension-base/background/KoniTypes';
+import { AccountRefMap, APIItemState, ApiMap, AuthRequestV2, BalanceItem, BalanceJson, ChainRegistry, ConfirmationDefinitions, ConfirmationsQueue, ConfirmationsQueueItemOptions, ConfirmationType, CrowdloanItem, CrowdloanJson, CurrentAccountInfo, CustomEvmToken, DeleteEvmTokenParams, EvmSendTransactionParams, EvmTokenJson, NETWORK_STATUS, NetworkJson, NftCollection, NftCollectionJson, NftItem, NftJson, NftTransferExtra, PriceJson, RequestAccountExportPrivateKey, RequestConfirmationComplete, RequestSettingsType, ResponseAccountExportPrivateKey, ResultResolver, ServiceInfo, StakingItem, StakingJson, StakingRewardJson, TokenInfo, TransactionHistoryItemType } from '@subwallet/extension-base/background/KoniTypes';
 import { AuthorizeRequest, RequestAuthorizeTab } from '@subwallet/extension-base/background/types';
 import { getId } from '@subwallet/extension-base/utils/getId';
 import { getTokenPrice } from '@subwallet/extension-koni-base/api/coingecko';
@@ -838,7 +838,7 @@ export default class KoniState extends State {
       this.getCurrentAccount(resolve);
     });
 
-    return this.addConfirmation(id, url, 'switchNetworkRequest', { networkKey, address: changeAddress })
+    return this.addConfirmation(id, url, 'switchNetworkRequest', { networkKey, address: changeAddress }, { address: changeAddress })
       .then(({ isApproved }) => {
         if (isApproved) {
           const useAddress = changeAddress || address;
@@ -1681,7 +1681,7 @@ export default class KoniState extends State {
     // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
     const signPayload = { address, type: method, payload };
 
-    await this.addConfirmation(id, url, 'evmSignatureRequest', signPayload, true, validateConfirmationResponsePayload)
+    await this.addConfirmation(id, url, 'evmSignatureRequest', signPayload, { requiredPassword: true, address }, validateConfirmationResponsePayload)
       .then(({ isApproved, password }) => {
         if (isApproved && password) {
           return password;
@@ -1760,7 +1760,7 @@ export default class KoniState extends State {
       return undefined;
     };
 
-    return this.addConfirmation(id, url, 'evmSendTransactionRequest', transaction, true, validateConfirmationResponsePayload)
+    return this.addConfirmation(id, url, 'evmSendTransactionRequest', transaction, { requiredPassword: true, address: fromAddress, networkKey }, validateConfirmationResponsePayload)
       .then(async ({ isApproved }) => {
         if (isApproved) {
           const signTransaction = await web3.eth.accounts.signTransaction(transaction, privateKey);
@@ -1780,15 +1780,15 @@ export default class KoniState extends State {
     return this.confirmationsQueueSubject;
   }
 
-  public addConfirmation<CT extends ConfirmationType> (id: string, url: string, type: CT, payload: ConfirmationDefinitions[CT][0]['payload'], requiredPassword = false, validator?: (input: ConfirmationDefinitions[CT][1]) => Error | undefined) {
+  public addConfirmation<CT extends ConfirmationType> (id: string, url: string, type: CT, payload: ConfirmationDefinitions[CT][0]['payload'], options: ConfirmationsQueueItemOptions = {}, validator?: (input: ConfirmationDefinitions[CT][1]) => Error | undefined) {
     const confirmations = this.confirmationsQueueSubject.getValue();
     const confirmationType = confirmations[type] as Record<string, ConfirmationDefinitions[CT][0]>;
 
     confirmationType[id] = {
       id,
       url,
-      requiredPassword,
-      payload: payload
+      payload,
+      ...options
     } as ConfirmationDefinitions[CT][0];
 
     const promise = new Promise<ConfirmationDefinitions[CT][1]>((resolve, reject) => {

@@ -44,7 +44,10 @@ export class KoniSubscription {
     this.unsubCrowdloans && promises.push(this.unsubCrowdloans());
     this.unsubStakingOnChain && promises.push(this.unsubStakingOnChain());
 
-    return Promise.all(promises);
+    await Promise.all(promises);
+    this.unsubBalances = undefined;
+    this.unsubCrowdloans = undefined;
+    this.unsubStakingOnChain = undefined;
   }
 
   start () {

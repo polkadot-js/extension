@@ -1732,9 +1732,9 @@ export default class KoniState extends State {
     }));
   }
 
-  private compareNfts(originNft: NftItem, destinationNft: NftItem) {
-    return originNft.chain === destinationNft.chain
-      && originNft.collectionId === destinationNft.collectionId
-      && originNft.id === destinationNft.id
+  private compareNfts (originNft: NftItem, destinationNft: NftItem) {
+    return originNft.chain === destinationNft.chain &&
+      originNft.collectionId === destinationNft.collectionId &&
+      originNft.id === destinationNft.id;
   }
 }

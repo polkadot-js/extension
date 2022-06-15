@@ -1737,7 +1737,10 @@ export default class KoniState extends State {
       data: transactionParams.data
     };
 
+    transaction.gasPrice = transaction.gasPrice || await web3.eth.getGasPrice();
     transaction.gas = await web3.eth.estimateGas({ ...transaction });
+
+    const estimateGas = new BN(transaction.gasPrice.toString()).mul(new BN(transaction.gas)).toString();
 
     const fromAddress = transaction.from as string; // Address is validated in before step
     const requiredPassword = true; // password is always required for to export private, we have planning to save password 15 min like sign keypair.isLocked;
@@ -1760,7 +1763,9 @@ export default class KoniState extends State {
       return undefined;
     };
 
-    return this.addConfirmation(id, url, 'evmSendTransactionRequest', transaction, { requiredPassword: true, address: fromAddress, networkKey }, validateConfirmationResponsePayload)
+    const requestPayload = { ...transaction, estimateGas };
+
+    return this.addConfirmation(id, url, 'evmSendTransactionRequest', requestPayload, { requiredPassword: true, address: fromAddress, networkKey }, validateConfirmationResponsePayload)
       .then(async ({ isApproved }) => {
         if (isApproved) {
           const signTransaction = await web3.eth.accounts.signTransaction(transaction, privateKey);

@@ -46,6 +46,14 @@ function SendEvmTransactionConfirmationInfo ({ className, confirmation: { payloa
       {transaction?.data && <div>
         <span className='label'>{t<string>('Data')}</span><span className='value'>{transaction?.data}</span>
       </div>}
+      {transaction?.estimateGas && <div>
+        <span className='label'>{t<string>('Estimate Gas')}</span><span className='value'>
+          <FormatBalance
+            format={[(network?.decimals || 18) - 3, '']}
+            value={new BN(transaction?.estimateGas || '0')}
+          />&nbsp;{network?.nativeToken && `mili${network?.nativeToken}`}
+        </span>
+      </div>}
     </div>
   </div>;
 }
@@ -58,6 +66,11 @@ export default styled(SendEvmTransactionConfirmationInfo)(({ theme }: Props) => 
   .from-account, .to-account {
     .account-info-full-address, .account-info__name {
       max-width: none;
+    }
+    
+    .account-info-row {
+      height: 54px;
+      margin-bottom: 8px;
     }  
   }
   

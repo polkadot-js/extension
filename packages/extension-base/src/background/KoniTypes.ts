@@ -850,11 +850,15 @@ export interface ConfirmationResult<T> {
   password?: string
 }
 
+export interface EvmSendTransactionRequest extends TransactionConfig {
+  estimateGas: string;
+}
+
 export interface ConfirmationDefinitions {
   addNetworkRequest: [ConfirmationsQueueItem<NetworkJson>, ConfirmationResult<NetworkJson>],
   switchNetworkRequest: [ConfirmationsQueueItem<SwitchNetworkRequest>, ConfirmationResult<boolean>],
   evmSignatureRequest: [ConfirmationsQueueItem<EvmSignatureRequest>, ConfirmationResult<string>],
-  evmSendTransactionRequest: [ConfirmationsQueueItem<TransactionConfig>, ConfirmationResult<boolean>]
+  evmSendTransactionRequest: [ConfirmationsQueueItem<EvmSendTransactionRequest>, ConfirmationResult<boolean>]
 }
 
 export type ConfirmationType = keyof ConfirmationDefinitions;

@@ -86,8 +86,8 @@ function NftCollection ({ chosenItem, className, currentNetwork, data, onClickBa
               // @ts-ignore
               data?.nftItems.length > 0 &&
               // @ts-ignore
-              data?.nftItems.map((item: _NftItem, index: React.Key | null | undefined) => {
-                return <div key={index}>
+              data?.nftItems.map((item: _NftItem, index: React.Key) => {
+                return <div key={`${item.chain || index}/${item.id || ''}`}>
                   <NftItemPreview
                     collectionImage={data?.image}
                     data={item}

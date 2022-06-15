@@ -990,7 +990,14 @@ export default class KoniExtension extends Extension {
         } as NftCollectionJson);
       }
 
-      state.resetMasterNftStore();
+      this.isInWalletAccount(request.recipientAddress).then((res) => {
+        if (res) {
+          state.updateNft(request.recipientAddress, request.nft);
+          state.updateNftCollection(request.recipientAddress, selectedNftCollection);
+        } else {
+          state.removeNftFromMasterStore(request.nft);
+        }
+      }).catch((err) => console.warn(err));
     } else {
       for (const item of nftJson.nftList) {
         if (item.chain === request.chain && item.collectionId === request.collectionId) {
@@ -2030,6 +2037,22 @@ export default class KoniExtension extends Extension {
     }
 
     return true;
+  }
+
+  private async isInWalletAccount (address?: string) {
+    return new Promise((resolve) => {
+      if (address) {
+        accountsObservable.subject.subscribe((storedAccounts: SubjectInfo): void => {
+          if (storedAccounts[address]) {
+            resolve(true);
+          }
+
+          resolve(false);
+        });
+      } else {
+        resolve(false);
+      }
+    });
   }
 
   // eslint-disable-next-line @typescript-eslint/require-await

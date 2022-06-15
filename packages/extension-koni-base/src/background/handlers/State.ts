@@ -575,13 +575,22 @@ export default class KoniState extends State {
   public updateNftCollection (address: string, data: NftCollection, callback?: (data: NftCollection) => void): void {
     this.getCurrentAccount((currentAccountInfo) => {
       if (currentAccountInfo.address === address) {
-        this.nftCollectionState.nftCollectionList.push(data);
+        if (!this.nftCollectionState.nftCollectionList.some((col) => col.chain === data.chain && col.collectionId === data.collectionId)) {
+          this.nftCollectionState.nftCollectionList.push(data);
+        }
 
         if (callback) {
           callback(data);
         }
 
         this.publishNftCollectionChanged(address);
+      } else {
+        this.nftCollectionStore.asyncGet(address).then((storedData: NftCollection[]) => {
+          if (!storedData.some((col) => col.chain === data.chain && col.collectionId === data.collectionId)) {
+            storedData.push(data);
+            this.nftCollectionStore.set(address, storedData);
+          }
+        }).catch((err) => console.warn(err));
       }
     });
   }
@@ -684,13 +693,24 @@ export default class KoniState extends State {
   public updateNft (address: string, nftData: NftItem, callback?: (nftData: NftItem) => void): void {
     this.getCurrentAccount((currentAccountInfo) => {
       if (currentAccountInfo.address === address) {
-        this.nftState.nftList.push(nftData);
+        if (!this.nftState.nftList.some((nft) => nft.id === nftData.id)) {
+          this.nftState.nftList.push(nftData);
+        }
 
         if (callback) {
           callback(nftData);
         }
 
         this.publishNftChanged(address);
+      } else {
+        this.nftStore.asyncGet(address).then((data: NftJson) => {
+          if (!data.nftList.some((nft) => nft.id === nftData.id)) {
+            data.total += 1;
+            data.nftList.push(nftData);
+
+            this.nftStore.set(address, data);
+          }
+        }).catch((err) => console.warn(err));
       }
     });
   }
@@ -700,8 +720,24 @@ export default class KoniState extends State {
     this.saveNftCollection(ALL_ACCOUNT_KEY, true);
   }
 
+  public removeNftFromMasterStore (nftData: NftItem): void {
+    this.nftStore.asyncGet(ALL_ACCOUNT_KEY).then((data: NftJson) => {
+      if (data.nftList.some((nft) => nft.id === nftData.id)) {
+        data.nftList = data.nftList.filter((nft) => nft.id !== nftData.id);
+        data.total = data.nftList.length;
+        this.nftStore.set(ALL_ACCOUNT_KEY, data);
+      }
+    }).catch((err) => console.warn(err));
+  }
+
   private publishNftChanged (address: string) {
     this.lazyNext('saveNft', () => {
+      if (this.nftState.nftList.length) {
+        this.nftState.nftList = this.nftState.nftList.filter((item, index) => {
+          return this.nftState.nftList.indexOf(item) === index;
+        });
+      }
+
       this.saveNft(address);
       this.nftSubject.next(this.nftState);
     });
@@ -711,6 +747,7 @@ export default class KoniState extends State {
     if (clear) {
       this.nftStore.remove(address);
     } else if (this.nftState && this.nftState.nftList) {
+      this.nftState.total = this.nftState.nftList.length;
       this.nftStore.set(address, this.nftState);
     }
   }

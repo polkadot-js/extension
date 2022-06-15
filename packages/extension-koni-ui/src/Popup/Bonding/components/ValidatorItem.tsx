@@ -247,7 +247,7 @@ function ValidatorItem ({ bondedValidators, className, isBondedBefore, maxNomina
             className={'staking-button'}
             onClick={handleOnSelect}
           >
-            Nominate
+            Start staking
           </Button>
         </div>
       }

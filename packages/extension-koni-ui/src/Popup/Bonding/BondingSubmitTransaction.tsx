@@ -304,7 +304,7 @@ function BondingSubmitTransaction ({ className }: Props): React.ReactElement<Pro
               <div className={'validator-att-container'}>
                 <div className={'validator-att'}>
                   <div className={'validator-att-title'}>
-                    Minimum bonding
+                    Minimum stake
                     {
                       !isSufficientFund && <img
                         data-for={`insufficient-fund-tooltip-${selectedNetwork}`}
@@ -317,7 +317,7 @@ function BondingSubmitTransaction ({ className }: Props): React.ReactElement<Pro
                     <Tooltip
                       place={'top'}
                       // eslint-disable-next-line @typescript-eslint/restrict-plus-operands
-                      text={`Your balance needs to be at least ${parseBalanceString(validatorInfo.minBond, networkJson.nativeToken as string)}.`}
+                      text={`Your free balance needs to be at least ${parseBalanceString(validatorInfo.minBond, networkJson.nativeToken as string)}.`}
                       trigger={`insufficient-fund-tooltip-${selectedNetwork}`}
                     />
                   </div>

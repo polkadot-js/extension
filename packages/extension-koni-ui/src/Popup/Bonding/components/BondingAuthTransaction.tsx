@@ -41,22 +41,6 @@ interface Props extends ThemeProps {
   bondedValidators: string[]
 }
 
-// const validatorInfo: ValidatorInfo = {
-//   address: '5GTD7ZeD823BjpmZBCSzBQp7cvHR1Gunq7oDkurZr9zUev2n',
-//   blocked: true,
-//   commission: 0,
-//   expectedReturn: 22.56074522099225,
-//   identity: 'Parity Westend validator 6',
-//   isVerified: false,
-//   minBond: 1,
-//   nominatorCount: 2,
-//   otherStake: 54635.096605487954,
-//   ownStake: 11555.529114384852,
-//   totalStake: 66190.6257198728
-// };
-//
-// const selectedNetwork = 'westend';
-
 function BondingAuthTransaction ({ amount, balanceError, bondedValidators, className, fee, isBondedBefore, selectedNetwork, setExtrinsicHash, setIsTxSuccess, setShowConfirm, setShowResult, setTxError, validatorInfo }: Props): React.ReactElement<Props> {
   const { t } = useTranslation();
   const networkJson = useGetNetworkJson(selectedNetwork);

@@ -48,7 +48,7 @@ function ValidatorItem ({ bondedValidators, className, isBondedBefore, maxNomina
 
   const handleOnSelect = useCallback(() => {
     if (!isSufficientFund) {
-      show('Your balance is not enough to stake');
+      show('Your free balance is not enough to stake');
 
       return;
     }
@@ -61,7 +61,7 @@ function ValidatorItem ({ bondedValidators, className, isBondedBefore, maxNomina
 
     store.dispatch({ type: 'bondingParams/update', payload: { selectedNetwork: networkKey, selectedValidator: validatorInfo, maxNominatorPerValidator, isBondedBefore, bondedValidators } as BondingParams });
     navigate('/account/bonding-auth');
-  }, [bondedValidators, isBondedBefore, maxNominations, maxNominatorPerValidator, navigate, networkKey, show, validatorInfo]);
+  }, [bondedValidators, isBondedBefore, isSufficientFund, maxNominations, maxNominatorPerValidator, navigate, networkKey, show, validatorInfo]);
 
   return (
     <div className={className}>
@@ -223,7 +223,7 @@ function ValidatorItem ({ bondedValidators, className, isBondedBefore, maxNomina
           <div className={'validator-att-container'}>
             <div className={'validator-att'}>
               <div className={'validator-att-title'}>
-                Minimum bonding
+                Minimum stake
                 {
                   !isSufficientFund && <FontAwesomeIcon
                     className={'error-tooltip'}
@@ -235,7 +235,7 @@ function ValidatorItem ({ bondedValidators, className, isBondedBefore, maxNomina
                 <Tooltip
                   place={'top'}
                   // eslint-disable-next-line @typescript-eslint/restrict-plus-operands
-                  text={`Your balance needs to be at least ${parseBalanceString(validatorInfo.minBond, networkJson.nativeToken as string)}.`}
+                  text={`Your free balance needs to be at least ${parseBalanceString(validatorInfo.minBond, networkJson.nativeToken as string)}.`}
                   trigger={`insufficient-fund-tooltip-${networkKey}`}
                 />
               </div>
@@ -247,7 +247,7 @@ function ValidatorItem ({ bondedValidators, className, isBondedBefore, maxNomina
             className={'staking-button'}
             onClick={handleOnSelect}
           >
-            Start staking
+            Nominate
           </Button>
         </div>
       }

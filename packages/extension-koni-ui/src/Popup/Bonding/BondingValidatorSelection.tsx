@@ -160,7 +160,7 @@ function BondingValidatorSelection ({ className }: Props): React.ReactElement<Pr
       <Header
         showBackArrow
         showSubHeader
-        subHeaderName={t<string>('Select a validator')}
+        subHeaderName={t<string>('Nominate a validator')}
         to='/account/select-bonding-network'
       >
         <div className={'bonding-input-filter-container'}>

@@ -2,7 +2,6 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { StakingRewardItem } from '@subwallet/extension-base/background/KoniTypes';
-import DotsThree from '@subwallet/extension-koni-ui//assets/DotsThree.svg';
 import cloneIconLight from '@subwallet/extension-koni-ui/assets/clone--color-2.svg';
 import cloneIconDark from '@subwallet/extension-koni-ui/assets/clone--color-3.svg';
 import useToast from '@subwallet/extension-koni-ui/hooks/useToast';
@@ -10,7 +9,7 @@ import useTranslation from '@subwallet/extension-koni-ui/hooks/useTranslation';
 import StakingMenu from '@subwallet/extension-koni-ui/Popup/Home/Staking/StakingMenu';
 import { Theme, ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { formatLocaleNumber } from '@subwallet/extension-koni-ui/util/formatNumber';
-import React, { useCallback, useContext, useRef, useState } from 'react';
+import React, { useCallback, useContext, useState } from 'react';
 import CopyToClipboard from 'react-copy-to-clipboard';
 import styled, { ThemeContext } from 'styled-components';
 
@@ -33,8 +32,6 @@ function StakingRow ({ amount, chainName, className, index, logo, price, reward,
   const handleToggleReward = useCallback(() => {
     setShowReward(!showReward);
   }, [showReward]);
-
-  const stakingMenuRef = useRef(null);
 
   const handleToggleBondingMenu = useCallback(() => {
     setShowStakingMenu(!showStakingMenu);
@@ -85,11 +82,6 @@ function StakingRow ({ amount, chainName, className, index, logo, price, reward,
     [show, t]
   );
 
-  const handleClickBondingMenu = useCallback((e: MouseEvent) => {
-    e.stopPropagation();
-    handleToggleBondingMenu();
-  }, [handleToggleBondingMenu]);
-
   return (
     <div className={`${className || ''} ${showReward ? '-show-detail' : ''}`}>
       <div
@@ -112,23 +104,11 @@ function StakingRow ({ amount, chainName, className, index, logo, price, reward,
               <div className={'chain-name'}>{chainName}</div>
               <div className={'balance-description'}>
                 <div>Total stake</div>
-                <div
-                  className={'bonding-menu-btn'}
-                  // @ts-ignore
-                  onClick={handleClickBondingMenu}
-                >
-                  <img
-                    alt={'dots'}
-                    height={28}
-                    src={DotsThree}
-                    width={28}
-                  />
-                </div>
-                {
-                  showStakingMenu && <StakingMenu
-                    reference={stakingMenuRef}
-                  />
-                }
+                <StakingMenu
+                  key={chainName}
+                  showMenu={showStakingMenu}
+                  toggleMenu={handleToggleBondingMenu}
+                />
               </div>
             </div>
 
@@ -249,11 +229,6 @@ export default React.memo(styled(StakingRow)(({ theme }: Props) => `
     width: 100%;
     display: flex;
     flex-direction: column;
-  }
-
-  .bonding-menu-btn {
-    display: flex;
-    align-items: center;
   }
 
   .balance-description {

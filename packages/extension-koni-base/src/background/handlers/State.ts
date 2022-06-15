@@ -28,8 +28,9 @@ import NftCollectionStore from '@subwallet/extension-koni-base/stores/NftCollect
 import SettingsStore from '@subwallet/extension-koni-base/stores/Settings';
 import StakingStore from '@subwallet/extension-koni-base/stores/Staking';
 import TransactionHistoryStore from '@subwallet/extension-koni-base/stores/TransactionHistoryV2';
-import { convertFundStatus, getCurrentProvider } from '@subwallet/extension-koni-base/utils/utils';
+import { convertFundStatus, getCurrentProvider, mergeNetworkProviders } from '@subwallet/extension-koni-base/utils/utils';
 import { BehaviorSubject, Subject } from 'rxjs';
+import Web3 from 'web3';
 
 import { accounts } from '@polkadot/ui-keyring/observable/accounts';
 import { assert } from '@polkadot/util';
@@ -60,46 +61,6 @@ function generateDefaultCrowdloanMap () {
   });
 
   return crowdloanMap;
-}
-
-export function mergeNetworkProviders (customNetwork: NetworkJson, predefinedNetwork: NetworkJson) { // merge providers for 2 networks with the same genesisHash
-  if (customNetwork.customProviders) {
-    const parsedCustomProviders: Record<string, string> = {};
-    const currentProvider = customNetwork.customProviders[customNetwork.currentProvider];
-    const currentProviderMethod = currentProvider.startsWith('http') ? 'http' : 'ws';
-    let parsedProviderKey = '';
-
-    for (const customProvider of Object.values(customNetwork.customProviders)) {
-      let exist = false;
-
-      for (const [key, provider] of Object.entries(predefinedNetwork.providers)) {
-        if (currentProvider === provider) { // point currentProvider to predefined
-          parsedProviderKey = key;
-        }
-
-        if (provider === customProvider) {
-          exist = true;
-          break;
-        }
-      }
-
-      if (!exist) {
-        const index = Object.values(parsedCustomProviders).length;
-
-        parsedCustomProviders[`custom_${index}`] = customProvider;
-      }
-    }
-
-    for (const [key, parsedProvider] of Object.entries(parsedCustomProviders)) {
-      if (currentProvider === parsedProvider) {
-        parsedProviderKey = key;
-      }
-    }
-
-    return { currentProviderMethod, parsedProviderKey, parsedCustomProviders };
-  } else {
-    return { currentProviderMethod: '', parsedProviderKey: '', parsedCustomProviders: {} };
-  }
 }
 
 export default class KoniState extends State {
@@ -1696,5 +1657,49 @@ export default class KoniState extends State {
 
   public isSameHistory (oldItem: TransactionHistoryItemType, newItem: TransactionHistoryItemType): boolean {
     return oldItem.extrinsicHash === newItem.extrinsicHash;
+  }
+
+  public pauseAllNetworks (code?: number, reason?: string) {
+    // Disconnect web3 networks
+    // Object.entries(this.apiMap.web3).forEach(([key, network]) => {
+    //   if (network.currentProvider instanceof Web3.providers.WebsocketProvider) {
+    //     if (network.currentProvider?.connected) {
+    //       console.log(`[Web3] ${key} is conected`);
+    //       network.currentProvider?.disconnect(code, reason);
+    //       console.log(`[Web3] ${key} is ${network.currentProvider.connected ? 'connected' : 'disconnected'} now`);
+    //     }
+    //   }
+    // });
+
+    // Disconnect dotsama networks
+    return Promise.all(Object.values(this.apiMap.dotSama).map(async (network) => {
+      if (network.api.isConnected) {
+        console.log(`[Dotsama] Stopping network [${network.specName}]`);
+        await network.api.disconnect();
+      }
+    }));
+  }
+
+  async resumeAllNetworks () {
+    // Reconnect web3 networks
+    // Object.entries(this.apiMap.web3).forEach(([key, network]) => {
+    //   const currentProvider = network.currentProvider;
+
+    //   if (currentProvider instanceof Web3.providers.WebsocketProvider) {
+    //     if (!currentProvider.connected) {
+    //       console.log(`[Web3] ${key} is disconected`);
+    //       currentProvider?.connect();
+    //       setTimeout(() => console.log(`[Web3] ${key} is ${currentProvider.connected ? 'connected' : 'disconnected'} now`), 500);
+    //     }
+    //   }
+    // });
+
+    // Reconnect dotsama networks
+    return Promise.all(Object.values(this.apiMap.dotSama).map(async (network) => {
+      if (!network.api.isConnected) {
+        console.log(`[Dotsama] Resumming network [${network.specName}]`);
+        await network.api.connect();
+      }
+    }));
   }
 }

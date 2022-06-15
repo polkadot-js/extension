@@ -236,3 +236,43 @@ export const getNftProvider = (data: NetworkJson) => {
 
   return '';
 };
+
+export function mergeNetworkProviders (customNetwork: NetworkJson, predefinedNetwork: NetworkJson) { // merge providers for 2 networks with the same genesisHash
+  if (customNetwork.customProviders) {
+    const parsedCustomProviders: Record<string, string> = {};
+    const currentProvider = customNetwork.customProviders[customNetwork.currentProvider];
+    const currentProviderMethod = currentProvider.startsWith('http') ? 'http' : 'ws';
+    let parsedProviderKey = '';
+
+    for (const customProvider of Object.values(customNetwork.customProviders)) {
+      let exist = false;
+
+      for (const [key, provider] of Object.entries(predefinedNetwork.providers)) {
+        if (currentProvider === provider) { // point currentProvider to predefined
+          parsedProviderKey = key;
+        }
+
+        if (provider === customProvider) {
+          exist = true;
+          break;
+        }
+      }
+
+      if (!exist) {
+        const index = Object.values(parsedCustomProviders).length;
+
+        parsedCustomProviders[`custom_${index}`] = customProvider;
+      }
+    }
+
+    for (const [key, parsedProvider] of Object.entries(parsedCustomProviders)) {
+      if (currentProvider === parsedProvider) {
+        parsedProviderKey = key;
+      }
+    }
+
+    return { currentProviderMethod, parsedProviderKey, parsedCustomProviders };
+  } else {
+    return { currentProviderMethod: '', parsedProviderKey: '', parsedCustomProviders: {} };
+  }
+}

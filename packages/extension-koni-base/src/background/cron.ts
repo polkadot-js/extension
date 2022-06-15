@@ -7,13 +7,16 @@ import { fetchDotSamaHistory } from '@subwallet/extension-koni-base/api/subquery
 import { state } from '@subwallet/extension-koni-base/background/handlers';
 import { KoniSubscription } from '@subwallet/extension-koni-base/background/subscription';
 import { CRON_AUTO_RECOVER_DOTSAMA_INTERVAL, CRON_GET_API_MAP_STATUS, CRON_REFRESH_HISTORY_INTERVAL, CRON_REFRESH_NFT_INTERVAL, CRON_REFRESH_PRICE_INTERVAL, CRON_REFRESH_STAKING_REWARD_INTERVAL } from '@subwallet/extension-koni-base/constants';
-import { Subject } from 'rxjs';
+import { Subject, Subscription } from 'rxjs';
 
 export class KoniCron {
   subscriptions: KoniSubscription;
+  public status: 'pending' | 'running' | 'stoped' = 'pending';
+  private serviceSubscription: Subscription | undefined;
 
   constructor (subscriptions: KoniSubscription) {
     this.subscriptions = subscriptions;
+    this.init();
   }
 
   private cronMap: Record<string, any> = {};
@@ -52,7 +55,36 @@ export class KoniCron {
     }
   }
 
+  removeAllCrons () {
+    Object.entries(this.cronMap).forEach(([key, interval]) => {
+      clearInterval(interval as number);
+      delete this.cronMap[key];
+    });
+  }
+
   init () {
+    state.getCurrentAccount((currentAccountInfo) => {
+      if (currentAccountInfo && (Object.keys(state.getDotSamaApiMap()).length !== 0 || Object.keys(state.getWeb3ApiMap()).length !== 0)) {
+        this.refreshPrice();
+        this.updateApiMapStatus();
+        this.refreshNft(currentAccountInfo.address, state.getApiMap(), state.getActiveErc721Tokens())();
+        this.refreshStakingReward(currentAccountInfo.address)();
+        this.resetHistory(currentAccountInfo.address).then(() => {
+          this.refreshHistory(currentAccountInfo.address, state.getNetworkMap())();
+        }).catch((err) => console.warn(err));
+      } else {
+        this.setNftReady(currentAccountInfo.address);
+        this.setStakingRewardReady();
+      }
+    });
+  }
+
+  start () {
+    if (this.status === 'running') {
+      return;
+    }
+
+    console.log('Stating cron jobs');
     state.getCurrentAccount((currentAccountInfo) => {
       if (currentAccountInfo && (Object.keys(state.getDotSamaApiMap()).length !== 0 || Object.keys(state.getWeb3ApiMap()).length !== 0)) {
         this.addCron('refreshPrice', this.refreshPrice, CRON_REFRESH_PRICE_INTERVAL);
@@ -70,7 +102,7 @@ export class KoniCron {
         this.setStakingRewardReady();
       }
 
-      state.subscribeServiceInfo().subscribe({
+      this.serviceSubscription = state.subscribeServiceInfo().subscribe({
         next: (serviceInfo) => {
           const { address } = serviceInfo.currentAccountInfo;
 
@@ -109,7 +141,21 @@ export class KoniCron {
           }
         }
       });
+
+      this.status = 'running';
     });
+  }
+
+  stop () {
+    if (this.status === 'stoped') {
+      return;
+    }
+
+    this.serviceSubscription && this.serviceSubscription.unsubscribe();
+    console.log('Stopping cron jobs');
+    this.removeAllCrons();
+
+    this.status = 'stoped';
   }
 
   recoverApiMap () {

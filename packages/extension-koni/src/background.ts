@@ -19,6 +19,13 @@ import keyring from '@polkadot/ui-keyring';
 import { assert } from '@polkadot/util';
 import { cryptoWaitReady } from '@polkadot/util-crypto';
 
+const IDLE_TIME = 60000 * 5; // 5 minutes
+
+let cron: KoniCron;
+let subscriptions: KoniSubscription;
+let timer: NodeJS.Timeout;
+let waitingToStop = false;
+
 // setup the notification (same a FF default background, white text)
 withErrorLog(() => chrome.browserAction.setBadgeBackgroundColor({ color: '#d90000' }));
 
@@ -27,9 +34,36 @@ chrome.runtime.onConnect.addListener((port): void => {
   // shouldn't happen, however... only listen to what we know about
   assert([PORT_CONTENT, PORT_EXTENSION].includes(port.name), `Unknown connection from ${port.name}`);
 
+  if (PORT_EXTENSION === port.name) {
+    if (waitingToStop) {
+      clearTimeout(timer);
+      waitingToStop = false;
+    } else {
+      state.resumeAllNetworks().then(() => {
+        cron && cron.start();
+        subscriptions && subscriptions.start();
+        waitingToStop = false;
+      }).catch((err) => console.warn(err));
+    }
+  }
+
   // message and disconnect handlers
   port.onMessage.addListener((data: TransportRequestMessage<keyof RequestSignatures>) => handlers(data, port));
-  port.onDisconnect.addListener(() => console.log(`Disconnected from ${port.name}`));
+  port.onDisconnect.addListener(() => {
+    if (PORT_EXTENSION === port.name) {
+      waitingToStop = true;
+      timer = setTimeout(() => {
+        cron && cron.stop();
+        subscriptions.stop().then(() => {
+          state.pauseAllNetworks(undefined, 'IDLE mode').then(() => {
+            waitingToStop = false;
+          }).catch((err) => console.warn(err));
+        }).catch((err) => console.warn(err));
+      }, IDLE_TIME);
+    }
+
+    console.warn(`Disconnected from ${port.name}`);
+  });
 });
 
 // initial setup
@@ -46,12 +80,10 @@ cryptoWaitReady()
     migration.run().catch((err) => console.warn(err));
 
     // Init subscription
-    const subscriptions = new KoniSubscription();
-
-    subscriptions.init();
+    subscriptions = new KoniSubscription();
 
     // Init cron
-    (new KoniCron(subscriptions)).init();
+    cron = new KoniCron(subscriptions);
 
     console.log('initialization completed');
   })

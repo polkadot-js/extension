@@ -447,13 +447,12 @@ export default class KoniExtension extends Extension {
         };
       } else {
         accountInfo.address = address;
-      }
 
-      // Detect current account of selected account
-      if (!accountInfo.currentGenesisHash) {
-        const currentKeyPair = keyring.getAccount(address);
+        if (address !== ALL_ACCOUNT_KEY) {
+          const currentKeyPair = keyring.getAccount(address);
 
-        accountInfo.currentGenesisHash = currentKeyPair?.meta.genesisHash as string || ALL_GENESIS_HASH;
+          accountInfo.currentGenesisHash = currentKeyPair?.meta.genesisHash as string || ALL_GENESIS_HASH;
+        }
       }
 
       state.setCurrentAccount(accountInfo, () => {

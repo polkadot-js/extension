@@ -5,10 +5,10 @@ import LogosMap from '@subwallet/extension-koni-ui/assets/logo';
 import { ActionContext } from '@subwallet/extension-koni-ui/components';
 import Button from '@subwallet/extension-koni-ui/components/Button';
 import { StakingDataType } from '@subwallet/extension-koni-ui/hooks/screen/home/types';
+import useIsAccountAll from '@subwallet/extension-koni-ui/hooks/screen/home/useIsAccountAll';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import React, { useCallback, useContext } from 'react';
 import styled from 'styled-components';
-import useIsAccountAll from "@subwallet/extension-koni-ui/hooks/screen/home/useIsAccountAll";
 
 const StakingRow = React.lazy(() => import('./StakingRow'));
 const Spinner = React.lazy(() => import('@subwallet/extension-koni-ui/components/Spinner'));
@@ -42,8 +42,8 @@ function StakingContainer ({ className, data, loading, priceMap }: Props): React
           <EmptyList />
         }
 
-        <div className={'staking-item-container'}>
-          {data.length > 0 && !loading &&
+        {data.length > 0 && !loading && <div className={'staking-item-container'}>
+          {
             // @ts-ignore
             data.map((stakingDataType: StakingDataType, index: number) => {
               const item = stakingDataType.staking;
@@ -66,6 +66,7 @@ function StakingContainer ({ className, data, loading, priceMap }: Props): React
             })
           }
         </div>
+        }
 
         {
           !loading && !isAccountAll && <div className={'staking-button-container'}>

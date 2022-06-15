@@ -190,9 +190,12 @@ export default class KoniTabs extends Tabs {
 
   private async getEvmCurrentChainId (): Promise<string | undefined> {
     return await new Promise((resolve) => {
-      this.#koniState.getCurrentAccount(({ currentGenesisHash }) => {
+      this.#koniState.getCurrentAccount(({ address, currentGenesisHash }) => {
         const [networkKey, currentNetwork] = this.#koniState.findNetworkKeyByGenesisHash(currentGenesisHash);
+
         const chainId = currentNetwork?.evmChainId;
+
+        console.log(address, currentGenesisHash, chainId, networkKey);
 
         if (chainId) {
           this.evmState.chainId = chainId.toString(16);
@@ -387,6 +390,8 @@ export default class KoniTabs extends Tabs {
     const { method } = request;
 
     switch (method) {
+      case 'eth_chainId':
+        return await this.getEvmCurrentChainId();
       case 'eth_accounts':
         return await this.getEvmCurrentAccount(url);
       case 'eth_sendTransaction':
@@ -404,7 +409,7 @@ export default class KoniTabs extends Tabs {
       case 'eth_signTypedData_v4':
         return await this.evmSign(id, url, request);
       case 'wallet_requestPermissions':
-        await this.authorizeV2(url, { origin: 'eth_accounts', accountAuthType: 'evm', reOpen: true });
+        await this.authorizeV2(url, { origin: 'eth_accounts', accountAuthType: 'evm', reConfirm: true });
 
         return await this.getEvmPermission(url, id);
       case 'wallet_getPermissions':

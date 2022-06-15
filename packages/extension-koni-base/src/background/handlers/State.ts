@@ -34,7 +34,7 @@ import { decodePair } from '@polkadot/keyring/pair/decode';
 import { keyring } from '@polkadot/ui-keyring';
 import { accounts } from '@polkadot/ui-keyring/observable/accounts';
 import { assert, BN, u8aToHex } from '@polkadot/util';
-import { base64Decode } from '@polkadot/util-crypto';
+import { base64Decode, isEthereumAddress } from '@polkadot/util-crypto';
 
 function generateDefaultBalanceMap () {
   const balanceMap: Record<string, BalanceItem> = {};
@@ -454,7 +454,21 @@ export default class KoniState extends State {
         Object.keys(isAllowedMap).forEach((address) => isAllowedMap[address] = false);
       }
 
-      const { accountAuthType, idStr, request: { origin }, url } = this.#authRequestsV2[id];
+      const { accountAuthType, idStr, request: { allowedAccounts, origin }, url } = this.#authRequestsV2[id];
+
+      if (accountAuthType !== 'both') {
+        const isEvmType = accountAuthType === 'evm';
+
+        const backupAllowed = [...(allowedAccounts || [])].filter((a) => {
+          const isEth = isEthereumAddress(a);
+
+          return isEvmType ? !isEth : isEth;
+        });
+
+        backupAllowed.forEach((acc) => {
+          isAllowedMap[acc] = true;
+        });
+      }
 
       this.getAuthorize((value) => {
         let authorizeList = {} as AuthUrls;
@@ -463,6 +477,8 @@ export default class KoniState extends State {
           authorizeList = value;
         }
 
+        const existed = authorizeList[this.stripUrl(url)];
+
         authorizeList[this.stripUrl(url)] = {
           count: 0,
           id: idStr,
@@ -470,7 +486,7 @@ export default class KoniState extends State {
           isAllowedMap,
           origin,
           url,
-          accountAuthType
+          accountAuthType: (existed && existed.accountAuthType !== accountAuthType) ? 'both' : accountAuthType
         };
 
         this.setAuthorize(authorizeList, () => {
@@ -497,7 +513,9 @@ export default class KoniState extends State {
 
   public async authorizeUrlV2 (url: string, request: RequestAuthorizeTab): Promise<boolean> {
     let authList = await this.getAuthList();
-    let accountAuthType = request.accountAuthType || 'substrate';
+    const accountAuthType = request.accountAuthType || 'substrate';
+
+    request.accountAuthType = accountAuthType;
 
     if (!authList) {
       authList = {};
@@ -511,10 +529,10 @@ export default class KoniState extends State {
     assert(!isDuplicate, `The source ${url} has a pending authorization request`);
 
     const existedAuth = authList[idStr];
-    const existedAccountAuthType = existedAuth?.accountAuthType || 'substrate';
-    const reConfirm = existedAuth?.accountAuthType !== 'both' && existedAccountAuthType !== accountAuthType;
+    const existedAccountAuthType = existedAuth?.accountAuthType;
+    const confirmAnotherType = existedAccountAuthType !== 'both' && existedAccountAuthType !== request.accountAuthType;
 
-    if (existedAuth && !reConfirm && !request.reOpen) {
+    if (existedAuth && !confirmAnotherType && !request.reConfirm) {
       // this url was seen in the past
       const isConnected = Object.keys(existedAuth.isAllowedMap)
         .some((address) => existedAuth.isAllowedMap[address]);
@@ -526,11 +544,8 @@ export default class KoniState extends State {
 
     return new Promise((resolve, reject): void => {
       const id = getId();
-      const differentAccountType = existedAccountAuthType !== accountAuthType;
 
-      if (existedAuth && differentAccountType) {
-        accountAuthType = 'both';
-        request.accountAuthType = accountAuthType;
+      if (existedAuth) {
         request.allowedAccounts = Object.entries(existedAuth.isAllowedMap)
           .map(([address, allowed]) => (allowed ? address : ''))
           .filter((item) => (item !== ''));
@@ -542,7 +557,7 @@ export default class KoniState extends State {
         idStr,
         request,
         url,
-        accountAuthType: differentAccountType ? 'both' : accountAuthType
+        accountAuthType: accountAuthType
       };
 
       this.updateIconAuthV2();
@@ -1544,7 +1559,7 @@ export default class KoniState extends State {
 
   public updateServiceInfo () {
     console.log('<---Update serviceInfo--->');
-    this.currentAccountStore.get('CurrentAccountInfo', (value) => {
+    this.getCurrentAccount((value) => {
       this.serviceInfoSubject.next({
         networkMap: this.networkMap,
         apiMap: this.apiMap,
@@ -1567,6 +1582,10 @@ export default class KoniState extends State {
     } else {
       return [undefined, undefined];
     }
+  }
+
+  findChainIdGenesisHash (genesisHash?: string | null): number | undefined {
+    return this.findNetworkKeyByGenesisHash(genesisHash)[1]?.evmChainId;
   }
 
   findNetworkKeyByChainId (chainId?: number | null): [string | undefined, NetworkJson | undefined] {
@@ -1706,7 +1725,6 @@ export default class KoniState extends State {
       data: transactionParams.data
     };
 
-    transaction.gasPrice = transaction.gasPrice || await web3.eth.getGasPrice();
     transaction.gas = await web3.eth.estimateGas({ ...transaction });
 
     const fromAddress = transaction.from as string; // Address is validated in before step
@@ -1729,8 +1747,6 @@ export default class KoniState extends State {
 
       return undefined;
     };
-
-    console.log('789', transaction);
 
     return this.addConfirmation(id, url, 'evmSendTransactionRequest', transaction, true, validateConfirmationResponsePayload)
       .then(async ({ isApproved }) => {

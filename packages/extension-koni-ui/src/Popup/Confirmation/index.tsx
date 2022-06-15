@@ -138,7 +138,7 @@ function Confirmation ({ className, match: { params: { address } } }: Props): Re
         subHeaderName={header}
       />
       {currentConfirmation && <div className='requester-info'>
-        Request from: <span className='address'>{currentConfirmation?.url}</span>
+        <img src={currentConfirmation.url} /> <span className='address'>{currentConfirmation.url}</span>
       </div>}
       <div className='confirmation-info'>
         {informationBlock}

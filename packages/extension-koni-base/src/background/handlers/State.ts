@@ -479,6 +479,14 @@ export default class KoniState extends State {
 
         const existed = authorizeList[this.stripUrl(url)];
 
+        // On cancel existed auth not save anything
+        if (existed && !isAllowed) {
+          delete this.#authRequestsV2[id];
+          this.updateIconAuthV2(true);
+
+          return;
+        }
+
         authorizeList[this.stripUrl(url)] = {
           count: 0,
           id: idStr,

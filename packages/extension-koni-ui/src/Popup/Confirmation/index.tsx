@@ -110,7 +110,7 @@ function Confirmation ({ className, match: { params: { address } } }: Props): Re
       const confirmation = Object.values(confirmations.switchNetworkRequest)[0];
 
       setConfirmation(confirmation);
-      setCurrentConfirmationType('evmSendTransactionRequest');
+      setCurrentConfirmationType('switchNetworkRequest');
       setHeader(t<string>('Switch network'));
       setRequestActionText(t<string>('request to switch network of'));
       setConfirmLabel(t<string>('Switch'));

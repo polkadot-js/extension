@@ -1821,6 +1821,7 @@ export default class KoniState extends State {
       const { resolver, validator } = this.confirmationsPromiseMap[id];
 
       if (!resolver || !(confirmations[type][id])) {
+        console.error('Not found confirmation', type, id);
         throw new Error('Not found promise for confirmation');
       }
 

@@ -55,6 +55,7 @@ function BondingSubmitTransaction ({ className }: Props): React.ReactElement<Pro
 
   const [showAuth, setShowAuth] = useState(false);
   const [showResult, setShowResult] = useState(false);
+  const [isClickNext, setIsClickNext] = useState(false);
 
   const [fee, setFee] = useState('');
   const [balanceError, setBalanceError] = useState(false);
@@ -72,22 +73,22 @@ function BondingSubmitTransaction ({ className }: Props): React.ReactElement<Pro
   const _height = window.innerHeight > 600 ? 650 : 450;
 
   useEffect(() => {
-    if (!showAuth && !showResult) {
+    if (!isClickNext) {
       const parsedFreeBalance = parseFloat(freeBalance) / (10 ** (networkJson.decimals as number));
 
       if (amount >= validatorInfo.minBond && amount <= parsedFreeBalance) {
         setIsReadySubmit(true);
       } else {
+        setIsReadySubmit(false);
+
         if (amount > parsedFreeBalance) {
-          show('Insufficient balance');
+          show('You do not have enough balance');
         } else if (amount >= 0) {
           show(`You must bond at least ${validatorInfo.minBond} ${networkJson.nativeToken as string}`);
         }
-
-        setIsReadySubmit(false);
       }
     }
-  }, [amount, freeBalance, networkJson.decimals, networkJson.nativeToken, show, showAuth, showResult, validatorInfo.minBond]);
+  }, [amount, freeBalance, isClickNext, networkJson.decimals, networkJson.nativeToken, show, showAuth, showResult, validatorInfo.minBond]);
 
   const handleOnClick = useCallback(() => {
     setShowDetail(!showDetail);
@@ -99,6 +100,7 @@ function BondingSubmitTransaction ({ className }: Props): React.ReactElement<Pro
     setTxError('');
     setShowResult(false);
     setShowAuth(true);
+    setIsClickNext(false);
   }, []);
 
   const goHome = useCallback(() => {
@@ -133,6 +135,7 @@ function BondingSubmitTransaction ({ className }: Props): React.ReactElement<Pro
     })
       .then((resp) => {
         setLoading(false);
+        setIsClickNext(true);
         setFee(resp.fee);
         setBalanceError(resp.balanceError);
         setShowAuth(true);

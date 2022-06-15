@@ -843,6 +843,10 @@ export default class KoniState extends State {
         if (isApproved) {
           const useAddress = changeAddress || address;
 
+          if (this.networkMap[networkKey] && !this.networkMap[networkKey].active) {
+            this.enableNetworkMap(networkKey);
+          }
+
           if (useAddress !== ALL_ACCOUNT_KEY) {
             const pair = keyring.getPair(useAddress);
 

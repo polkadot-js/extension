@@ -154,6 +154,7 @@ function BondingSubmitTransaction ({ className }: Props): React.ReactElement<Pro
     <div className={className}>
       <Header
         cancelButtonText={'x'}
+        isShowNetworkSelect={false}
         showCancelButton={!loading}
         showSubHeader
         subHeaderName={t<string>('Staking action')}

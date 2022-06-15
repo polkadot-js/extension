@@ -159,6 +159,7 @@ function BondingValidatorSelection ({ className }: Props): React.ReactElement<Pr
     <div className={className}>
       <Header
         cancelButtonText={'x'}
+        isShowNetworkSelect={false}
         showBackArrow
         showCancelButton={true}
         showSubHeader

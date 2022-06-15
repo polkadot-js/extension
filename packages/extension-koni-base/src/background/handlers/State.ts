@@ -693,7 +693,7 @@ export default class KoniState extends State {
   public updateNft (address: string, nftData: NftItem, callback?: (nftData: NftItem) => void): void {
     this.getCurrentAccount((currentAccountInfo) => {
       if (currentAccountInfo.address === address) {
-        if (!this.nftState.nftList.some((nft) => this.compareNfts(nft, nftData))) {
+        if (!this.nftState.nftList.some((nft) => this.isSameNft(nft, nftData))) {
           this.nftState.nftList.push(nftData);
         }
 
@@ -704,7 +704,7 @@ export default class KoniState extends State {
         this.publishNftChanged(address);
       } else {
         this.nftStore.asyncGet(address).then((data: NftJson) => {
-          if (!data.nftList.some((nft) => this.compareNfts(nft, nftData))) {
+          if (!data.nftList.some((nft) => this.isSameNft(nft, nftData))) {
             data.total += 1;
             data.nftList.push(nftData);
 
@@ -722,7 +722,7 @@ export default class KoniState extends State {
 
   public removeNftFromMasterStore (nftData: NftItem): void {
     this.nftStore.asyncGet(ALL_ACCOUNT_KEY).then((data: NftJson) => {
-      if (data.nftList.some((nft) => this.compareNfts(nft, nftData))) {
+      if (data.nftList.some((nft) => this.isSameNft(nft, nftData))) {
         data.nftList = data.nftList.filter((nft) => nft.id !== nftData.id);
         data.total = data.nftList.length;
         this.nftStore.set(ALL_ACCOUNT_KEY, data);
@@ -1732,7 +1732,7 @@ export default class KoniState extends State {
     }));
   }
 
-  private compareNfts (originNft: NftItem, destinationNft: NftItem) {
+  private isSameNft (originNft: NftItem, destinationNft: NftItem) {
     return originNft.chain === destinationNft.chain &&
       originNft.collectionId === destinationNft.collectionId &&
       originNft.id === destinationNft.id;

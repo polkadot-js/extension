@@ -39,6 +39,7 @@ cryptoWaitReady()
 
     // Init cron
     cron = new KoniCron(subscriptions);
+    setTimeout(() => cron.start(), 5000);
 
     responseMessage({ id: '0', response: { status: 'crypto_ready' } } as PageStatus);
 

@@ -151,9 +151,9 @@ function NftContainer (
           {
             !loading && nftList.length > 0 &&
             // @ts-ignore
-            nftList.map((item: _NftCollection) => {
+            nftList.map((item: _NftCollection, index: React.Key) => {
               // @ts-ignore
-              return <div key={item.chain}>
+              return <div key={`${item.chain || index}/${item.collectionId}`}>
                 <NftCollectionPreview
                   data={item}
                   onClick={handleShowCollectionDetail}

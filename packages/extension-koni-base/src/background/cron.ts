@@ -101,49 +101,49 @@ export class KoniCron {
         this.setNftReady(currentAccountInfo.address);
         this.setStakingRewardReady();
       }
+    });
 
-      this.serviceSubscription = state.subscribeServiceInfo().subscribe({
-        next: (serviceInfo) => {
-          const { address } = serviceInfo.currentAccountInfo;
+    this.serviceSubscription = state.subscribeServiceInfo().subscribe({
+      next: (serviceInfo) => {
+        const { address } = serviceInfo.currentAccountInfo;
 
-          this.resetNft(address).then(() => {
-            this.resetNftTransferMeta();
-            this.removeCron('refreshNft');
-
-            if (this.checkNetworkAvailable(serviceInfo)) { // only add cron job if there's at least 1 active network
-              this.addCron('refreshNft', this.refreshNft(address, serviceInfo.apiMap, serviceInfo.customErc721Registry), CRON_REFRESH_NFT_INTERVAL);
-            }
-          }).catch((err) => console.warn(err));
-
-          // this.resetStakingReward(address);
-          this.resetHistory(address).then(() => {
-            this.removeCron('refreshHistory');
-
-            if (this.checkNetworkAvailable(serviceInfo)) { // only add cron job if there's at least 1 active network
-              this.addCron('refreshHistory', this.refreshHistory(address, serviceInfo.networkMap), CRON_REFRESH_HISTORY_INTERVAL);
-            }
-          }).catch((err) => console.warn(err));
-
-          this.removeCron('refreshStakingReward');
-          this.removeCron('refreshPrice');
-          this.removeCron('checkStatusApiMap');
-          this.removeCron('recoverApiMap');
+        this.resetNft(address).then(() => {
+          this.resetNftTransferMeta();
+          this.removeCron('refreshNft');
 
           if (this.checkNetworkAvailable(serviceInfo)) { // only add cron job if there's at least 1 active network
-            this.addCron('refreshPrice', this.refreshPrice, CRON_REFRESH_PRICE_INTERVAL);
-            this.addCron('checkStatusApiMap', this.updateApiMapStatus, CRON_GET_API_MAP_STATUS);
-            this.addCron('recoverApiMap', this.recoverApiMap, CRON_AUTO_RECOVER_DOTSAMA_INTERVAL, false);
-
-            this.addCron('refreshStakingReward', this.refreshStakingReward(address), CRON_REFRESH_STAKING_REWARD_INTERVAL);
-          } else {
-            this.setNftReady(address);
-            this.setStakingRewardReady();
+            this.addCron('refreshNft', this.refreshNft(address, serviceInfo.apiMap, serviceInfo.customErc721Registry), CRON_REFRESH_NFT_INTERVAL);
           }
-        }
-      });
+        }).catch((err) => console.warn(err));
 
-      this.status = 'running';
+        // this.resetStakingReward(address);
+        this.resetHistory(address).then(() => {
+          this.removeCron('refreshHistory');
+
+          if (this.checkNetworkAvailable(serviceInfo)) { // only add cron job if there's at least 1 active network
+            this.addCron('refreshHistory', this.refreshHistory(address, serviceInfo.networkMap), CRON_REFRESH_HISTORY_INTERVAL);
+          }
+        }).catch((err) => console.warn(err));
+
+        this.removeCron('refreshStakingReward');
+        this.removeCron('refreshPrice');
+        this.removeCron('checkStatusApiMap');
+        this.removeCron('recoverApiMap');
+
+        if (this.checkNetworkAvailable(serviceInfo)) { // only add cron job if there's at least 1 active network
+          this.addCron('refreshPrice', this.refreshPrice, CRON_REFRESH_PRICE_INTERVAL);
+          this.addCron('checkStatusApiMap', this.updateApiMapStatus, CRON_GET_API_MAP_STATUS);
+          this.addCron('recoverApiMap', this.recoverApiMap, CRON_AUTO_RECOVER_DOTSAMA_INTERVAL, false);
+
+          this.addCron('refreshStakingReward', this.refreshStakingReward(address), CRON_REFRESH_STAKING_REWARD_INTERVAL);
+        } else {
+          this.setNftReady(address);
+          this.setStakingRewardReady();
+        }
+      }
     });
+
+    this.status = 'running';
   }
 
   stop () {
@@ -151,7 +151,11 @@ export class KoniCron {
       return;
     }
 
-    this.serviceSubscription && this.serviceSubscription.unsubscribe();
+    if (this.serviceSubscription) {
+      this.serviceSubscription.unsubscribe();
+      this.serviceSubscription = undefined;
+    }
+
     console.log('Stopping cron jobs');
     this.removeAllCrons();
 

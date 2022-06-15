@@ -9,7 +9,7 @@ import { stakingOnChainApi } from '@subwallet/extension-koni-base/api/staking';
 import { getAllSubsquidStaking } from '@subwallet/extension-koni-base/api/staking/subsquidStaking';
 import { nftHandler, state } from '@subwallet/extension-koni-base/background/handlers';
 import { ALL_ACCOUNT_KEY } from '@subwallet/extension-koni-base/constants';
-import { take } from 'rxjs';
+import { Subscription, take } from 'rxjs';
 import Web3 from 'web3';
 
 import { accounts as accountsObservable } from '@polkadot/ui-keyring/observable/accounts';
@@ -17,6 +17,7 @@ import { SubjectInfo } from '@polkadot/ui-keyring/observable/types';
 
 export class KoniSubscription {
   public status: 'pending' | 'running' | 'stoped' = 'pending';
+  private serviceSubscription: Subscription | undefined;
   private subscriptionMap: Record<string, any> = {};
   // @ts-ignore
   unsubBalances: (() => void) | undefined;
@@ -63,17 +64,17 @@ export class KoniSubscription {
         this.subscribeBalancesAndCrowdloans(address, state.getDotSamaApiMap(), state.getWeb3ApiMap());
         this.subscribeStakingOnChain(address, state.getDotSamaApiMap());
       }
+    });
 
-      state.subscribeServiceInfo().subscribe({
-        next: (serviceInfo) => {
-          console.log('serviceInfo update', serviceInfo);
-          const { address } = serviceInfo.currentAccountInfo;
+    this.serviceSubscription = state.subscribeServiceInfo().subscribe({
+      next: (serviceInfo) => {
+        console.log('serviceInfo update', serviceInfo);
+        const { address } = serviceInfo.currentAccountInfo;
 
-          state.initChainRegistry();
-          this.subscribeBalancesAndCrowdloans(address, serviceInfo.apiMap.dotSama, serviceInfo.apiMap.web3);
-          this.subscribeStakingOnChain(address, serviceInfo.apiMap.dotSama);
-        }
-      });
+        state.initChainRegistry();
+        this.subscribeBalancesAndCrowdloans(address, serviceInfo.apiMap.dotSama, serviceInfo.apiMap.web3);
+        this.subscribeStakingOnChain(address, serviceInfo.apiMap.dotSama);
+      }
     });
 
     this.status = 'running';
@@ -82,6 +83,11 @@ export class KoniSubscription {
   async stop () {
     if (this.status === 'stoped') {
       return;
+    }
+
+    if (this.serviceSubscription) {
+      this.serviceSubscription.unsubscribe();
+      this.serviceSubscription = undefined;
     }
 
     console.log('Stopping subscrition');

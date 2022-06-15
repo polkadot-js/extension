@@ -59,6 +59,7 @@ function StakingContainer ({ className, data, loading, priceMap }: Props): React
                 index={index}
                 key={index}
                 logo={icon}
+                networkKey={item.chainId}
                 price={price}
                 reward={reward}
                 unit={item.unit}

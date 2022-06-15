@@ -23,9 +23,10 @@ interface Props extends ThemeProps {
   index: number;
   reward: StakingRewardItem;
   price: number;
+  networkKey: string;
 }
 
-function StakingRow ({ amount, chainName, className, index, logo, price, reward, unit }: Props): React.ReactElement<Props> {
+function StakingRow ({ amount, chainName, className, index, logo, networkKey, price, reward, unit }: Props): React.ReactElement<Props> {
   const [showReward, setShowReward] = useState(false);
   const [showStakingMenu, setShowStakingMenu] = useState(false);
 
@@ -105,7 +106,7 @@ function StakingRow ({ amount, chainName, className, index, logo, price, reward,
               <div className={'balance-description'}>
                 <div>Total stake</div>
                 <StakingMenu
-                  key={chainName}
+                  networkKey={networkKey}
                   showMenu={showStakingMenu}
                   toggleMenu={handleToggleBondingMenu}
                 />

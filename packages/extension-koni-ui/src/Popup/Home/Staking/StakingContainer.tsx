@@ -8,6 +8,7 @@ import { StakingDataType } from '@subwallet/extension-koni-ui/hooks/screen/home/
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import React, { useCallback, useContext } from 'react';
 import styled from 'styled-components';
+import useIsAccountAll from "@subwallet/extension-koni-ui/hooks/screen/home/useIsAccountAll";
 
 const StakingRow = React.lazy(() => import('./StakingRow'));
 const Spinner = React.lazy(() => import('@subwallet/extension-koni-ui/components/Spinner'));
@@ -27,6 +28,8 @@ function StakingContainer ({ className, data, loading, priceMap }: Props): React
     navigate('/account/select-bonding-network');
     window.localStorage.setItem('popupNavigation', '/account/select-bonding-network');
   }, [navigate]);
+
+  const isAccountAll = useIsAccountAll();
 
   return (
     <div className={className}>
@@ -65,7 +68,7 @@ function StakingContainer ({ className, data, loading, priceMap }: Props): React
         </div>
 
         {
-          !loading && <div className={'staking-button-container'}>
+          !loading && !isAccountAll && <div className={'staking-button-container'}>
             <Button
               className={'staking-button'}
               onClick={handleNavigateBonding}

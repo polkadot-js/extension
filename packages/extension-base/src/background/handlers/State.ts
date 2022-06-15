@@ -67,8 +67,6 @@ const NOTIFICATION_URL = chrome.extension.getURL('notification.html');
 const POPUP_WINDOW_OPTS: chrome.windows.CreateData = {
   focused: true,
   height: 621,
-  left: 150,
-  top: 150,
   type: 'popup',
   url: NOTIFICATION_URL,
   width: 460
@@ -199,6 +197,10 @@ export default class State {
 
   public get authUrls (): AuthUrls {
     return this.#authUrls;
+  }
+
+  protected getPopup () {
+    return this.#windows;
   }
 
   protected popupClose (): void {

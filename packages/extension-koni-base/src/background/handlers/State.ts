@@ -407,10 +407,11 @@ export default class KoniState extends State {
 
   private updateIconV2 (shouldClose?: boolean): void {
     const authCount = this.numAuthRequestsV2;
+    const confirmCount = this.countConfirmationNumber();
     const text = (
       authCount
         ? 'Auth'
-        : ''
+        : confirmCount > 0 ? confirmCount.toString() : ''
     );
 
     withErrorLog(() => chrome.browserAction.setBadgeText({ text }));
@@ -1785,6 +1786,20 @@ export default class KoniState extends State {
     return this.confirmationsQueueSubject;
   }
 
+  public countConfirmationNumber () {
+    let count = 0;
+
+    count += this.allAuthRequests.length;
+    count += this.allMetaRequests.length;
+    count += this.allSignRequests.length;
+    count += this.allAuthRequestsV2.length;
+    Object.values(this.confirmationsQueueSubject.getValue()).forEach((x) => {
+      count += Object.keys(x).length;
+    });
+
+    return count;
+  }
+
   public addConfirmation<CT extends ConfirmationType> (id: string, url: string, type: CT, payload: ConfirmationDefinitions[CT][0]['payload'], options: ConfirmationsQueueItemOptions = {}, validator?: (input: ConfirmationDefinitions[CT][1]) => Error | undefined) {
     const confirmations = this.confirmationsQueueSubject.getValue();
     const confirmationType = confirmations[type] as Record<string, ConfirmationDefinitions[CT][0]>;
@@ -1808,7 +1823,17 @@ export default class KoniState extends State {
 
     this.confirmationsQueueSubject.next(confirmations);
 
-    this.popupOpen();
+    // Not open new popup and use existed
+    const popupList = this.getPopup();
+
+    if (this.getPopup().length > 0) {
+      // eslint-disable-next-line no-void
+      void chrome.windows.update(popupList[0], { focused: true });
+    } else {
+      this.popupOpen();
+    }
+
+    this.updateIconV2();
 
     return promise;
   }
@@ -1838,7 +1863,7 @@ export default class KoniState extends State {
       this.confirmationsQueueSubject.next(confirmations);
 
       // Update icon, and close queue
-      this.updateIconV2(true);
+      this.updateIconV2(this.countConfirmationNumber() === 0);
       resolver.resolve(result);
     };
 

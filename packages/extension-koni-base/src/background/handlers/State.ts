@@ -849,17 +849,19 @@ export default class KoniState extends State {
   }
 
   public setHistory (address: string, network: string, histories: TransactionHistoryItemType[]) {
-    const oldItems = this.historyMap[network] || [];
+    if (histories.length) {
+      const oldItems = this.historyMap[network] || [];
 
-    const comnbinedHistories = this.combineHistories(oldItems, histories);
+      const comnbinedHistories = this.combineHistories(oldItems, histories);
 
-    this.historyMap[network] = comnbinedHistories;
+      this.historyMap[network] = comnbinedHistories;
 
-    this.lazyNext('setHistory', () => {
-      // Save to storage
-      this.saveHistoryToStorage(address);
-      this.publishHistory(this.getHistoryMap());
-    });
+      this.lazyNext('setHistory', () => {
+        // Save to storage
+        this.saveHistoryToStorage(address);
+        this.publishHistory(this.getHistoryMap());
+      });
+    }
   }
 
   public getCurrentAccount (update: (value: CurrentAccountInfo) => void): void {
@@ -1642,6 +1644,10 @@ export default class KoniState extends State {
   }
 
   public async getStoredHistories (address: string) {
+    if (Object.keys(this.networkMap).length === 0) {
+      return;
+    }
+
     const data = await this.transactionHistoryStore.asyncGet(address);
 
     if (data) {
@@ -1652,7 +1658,11 @@ export default class KoniState extends State {
   }
 
   private saveHistoryToStorage (address: string) {
-    const newestHistoryMap = this.convertNetworkKeyToHashKey(this.historyMap) as Record<string, TransactionHistoryItemType[]>;
+    if (Object.keys(this.networkMap).length === 0) {
+      return;
+    }
+
+    const newestHistoryMap = this.convertNetworkKeyToHashKey(this.historyMap);
 
     Object.entries(newestHistoryMap).forEach(([key, items]) => {
       if (!Array.isArray(items) || !items.length) {
@@ -1663,23 +1673,25 @@ export default class KoniState extends State {
     this.transactionHistoryStore.set(address, newestHistoryMap);
   }
 
-  private convertNetworkKeyToHashKey (object: Record<string, any> = {}) {
-    return Object.entries(object).reduce((newObj: Record<string, any>, [key, data]) => {
+  private convertNetworkKeyToHashKey<T> (object: Record<string, T> = {}) {
+    return Object.entries(object).reduce((newObj: Record<string, T>, [key, data]) => {
       const hash = this.getNetworkGenesisHashByKey(key);
 
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-      newObj[hash] = data;
+      if (hash) {
+        newObj[hash] = data;
+      }
 
       return newObj;
     }, {});
   }
 
-  private convertHashKeyToNetworkKey (object: Record<string, any> = {}) {
-    return Object.entries(object).reduce((newObj: Record<string, any>, [hash, data]) => {
+  private convertHashKeyToNetworkKey<T> (object: Record<string, T> = {}) {
+    return Object.entries(object).reduce((newObj: Record<string, T>, [hash, data]) => {
       const key = this.getNetworkKeyByGenesisHash(hash);
 
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-      newObj[key] = data;
+      if (key) {
+        newObj[key] = data;
+      }
 
       return newObj;
     }, {});
@@ -1773,7 +1785,7 @@ export default class KoniState extends State {
     const activeData: Record<string, T> = {};
 
     Object.entries(data).forEach(([networkKey, items]) => {
-      if (this.networkMap[networkKey].active) {
+      if (this.networkMap[networkKey]?.active) {
         activeData[networkKey] = items;
       }
     });

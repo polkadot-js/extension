@@ -281,7 +281,7 @@ export class KoniCron {
     return () => {
       console.log('Refresh History state');
       fetchDotSamaHistory(address, networkMap, (network, historyMap) => {
-        console.log('--- historyMap ---', historyMap);
+        console.log(`[${network}] historyMap: `, historyMap);
         state.setHistory(address, network, historyMap);
       });
     };

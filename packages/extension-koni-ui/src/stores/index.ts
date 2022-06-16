@@ -23,8 +23,10 @@ import TokenConfigReducer from './TokenConfigParams';
 import TransactionHistoryReducer from './TransactionHistory';
 import TransferNftExtraReducer from './TransferNftExtra';
 import TransferNftParamsReducer from './TransferNftParams';
+import UnbondingParamsReducer from './UnbondingParams';
 
 const reducers = {
+  unbondingParams: UnbondingParamsReducer,
   bondingParams: BondingParamsReducer,
   networkConfigParams: NetworkConfigParamsReducer,
   networkMap: NetworkMapReducer,

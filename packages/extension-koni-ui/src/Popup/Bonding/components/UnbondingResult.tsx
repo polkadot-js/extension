@@ -21,7 +21,7 @@ interface Props extends ThemeProps {
   handleResend: () => void;
 }
 
-function BondingResult ({ backToHome, className, extrinsicHash, handleResend, isTxSuccess, networkKey, txError }: Props): React.ReactElement<Props> {
+function UnbondingResult ({ backToHome, className, extrinsicHash, handleResend, isTxSuccess, networkKey, txError }: Props): React.ReactElement<Props> {
   const { t } = useTranslation();
   const scanExplorerTxUrl = useScanExplorerTxUrl(networkKey, extrinsicHash);
   const isSupportScanExplorer = useSupportScanExplorer(networkKey);
@@ -37,9 +37,9 @@ function BondingResult ({ backToHome, className, extrinsicHash, handleResend, is
               src={successStatus}
             />
 
-            <div className={'bonding-result-title'}>Staked Successfully</div>
+            <div className={'bonding-result-title'}>Unstaked Successfully</div>
 
-            <div className={'bonding-result-subtext'}>Your staking request has been confirmed. It might take a minute to see changes in your wallet.</div>
+            <div className={'bonding-result-subtext'}>Your unstaking request has been confirmed. It might take a minute to see changes in your wallet.</div>
 
             <div className={'bonding-action-container'}>
               <div
@@ -65,7 +65,7 @@ function BondingResult ({ backToHome, className, extrinsicHash, handleResend, is
               src={failStatus}
             />
 
-            <div className={'bonding-result-title'}>Staking Failed</div>
+            <div className={'bonding-result-title'}>Unstaking Failed</div>
 
             <div className={'bonding-result-subtext'}>There was a problem with your request. You can try again.</div>
 
@@ -91,7 +91,7 @@ function BondingResult ({ backToHome, className, extrinsicHash, handleResend, is
   );
 }
 
-export default React.memo(styled(BondingResult)(({ theme }: Props) => `
+export default React.memo(styled(UnbondingResult)(({ theme }: Props) => `
   padding-left: 45px;
   padding-right: 45px;
 

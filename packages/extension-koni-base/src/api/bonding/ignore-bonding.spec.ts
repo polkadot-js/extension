@@ -316,4 +316,17 @@ describe('test DotSama APIs', () => {
 
     console.log(parsed?.targets);
   });
+
+  test('get unbonding', async () => {
+    const provider = new WsProvider(getCurrentProvider(PREDEFINED_NETWORKS.alephTest), DOTSAMA_AUTO_CONNECT_MS);
+    const api = new ApiPromise({ provider });
+    const apiPromise = await api.isReady;
+
+    const chillTx = apiPromise.tx.staking.chill();
+    const unbondTx = apiPromise.tx.staking.unbond(new BN(100));
+
+    const resp = apiPromise.tx.utility.batchAll([chillTx, unbondTx]);
+
+    console.log(resp.toHuman());
+  });
 });

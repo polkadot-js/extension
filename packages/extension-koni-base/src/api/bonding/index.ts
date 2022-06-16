@@ -236,3 +236,23 @@ export function getTargetValidators (bondedValidators: string[], selectedValidat
     }
   }
 }
+
+export async function getUnbondingTxInfo (dotSamaApi: ApiProps, amount: BN, address: string) {
+  const apiPromise = await dotSamaApi.isReady;
+
+  const chillTx = apiPromise.api.tx.staking.chill();
+  const unbondTx = apiPromise.api.tx.staking.unbond(amount);
+
+  const extrinsic = apiPromise.api.tx.utility.batchAll([chillTx, unbondTx]);
+
+  return extrinsic.paymentInfo(address);
+}
+
+export async function getUnbondingExtrinsic (dotSamaApi: ApiProps, amount: BN) {
+  const apiPromise = await dotSamaApi.isReady;
+
+  const chillTx = apiPromise.api.tx.staking.chill();
+  const unbondTx = apiPromise.api.tx.staking.unbond(amount);
+
+  return apiPromise.api.tx.utility.batchAll([chillTx, unbondTx]);
+}

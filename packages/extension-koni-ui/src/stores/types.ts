@@ -34,3 +34,8 @@ export type BondingParams = {
   isBondedBefore: boolean | null;
   bondedValidators: string[] | null;
 }
+
+export type UnbondingParams = {
+  selectedNetwork: string | null;
+  bondedAmount: number | null;
+}

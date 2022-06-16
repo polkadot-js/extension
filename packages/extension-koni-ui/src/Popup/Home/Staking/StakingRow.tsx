@@ -106,6 +106,7 @@ function StakingRow ({ amount, chainName, className, index, logo, networkKey, pr
               <div className={'balance-description'}>
                 <div>Total stake</div>
                 <StakingMenu
+                  bondedAmount={amount as string}
                   networkKey={networkKey}
                   showMenu={showStakingMenu}
                   toggleMenu={handleToggleBondingMenu}

@@ -352,7 +352,7 @@ function BondingSubmitTransaction ({ className }: Props): React.ReactElement<Pro
           autoFocus
           className={'submit-bond-amount-input'}
           decimals={networkJson.decimals}
-          help={`Type the amount you want to bond. The minimum amount is ${validatorInfo.minBond} ${networkJson.nativeToken as string}`}
+          help={`Type the amount you want to stake. The minimum amount is ${validatorInfo.minBond} ${networkJson.nativeToken as string}`}
           inputAddressHelp={''}
           isError={false}
           isZeroable={false}

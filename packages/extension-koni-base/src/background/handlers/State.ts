@@ -1718,7 +1718,7 @@ export default class KoniState extends State {
   public async evmSendTransaction (id: string, url: string, networkKey: string, transactionParams: EvmSendTransactionParams): Promise<string | undefined> {
     const web3 = this.getWeb3ApiMap()[networkKey];
 
-    const autoFormatNumber = (val?: string | number) => {
+    const autoFormatNumber = (val?: string | number): string | undefined => {
       if (typeof val === 'string' && val.startsWith('0x')) {
         return new BN(val.replace('0x', ''), 16).toString();
       } else if (typeof val === 'number') {
@@ -1727,6 +1727,10 @@ export default class KoniState extends State {
 
       return val;
     };
+
+    if (transactionParams.from === transactionParams.to) {
+      throw new EvmRpcError('INVALID_PARAMS', 'From address and to address must not be the same');
+    }
 
     const transaction: TransactionConfig = {
       from: transactionParams.from,
@@ -1738,12 +1742,27 @@ export default class KoniState extends State {
       data: transactionParams.data
     };
 
-    transaction.gas = await web3.eth.estimateGas({ ...transaction });
+    // Calculate transaction data
+    try {
+      transaction.gas = await web3.eth.estimateGas({ ...transaction });
+    } catch (e) {
+      // @ts-ignore
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
+      throw new EvmRpcError('INVALID_PARAMS', e?.message);
+    }
+
     const gasPrice = await web3.eth.getGasPrice();
 
     const estimateGas = new BN(gasPrice.toString()).mul(new BN(transaction.gas)).toString();
 
     const fromAddress = transaction.from as string; // Address is validated in before step
+    // Validate balance
+    const balance = new BN(await web3.eth.getBalance(fromAddress) || 0);
+
+    if (balance.lt(new BN(gasPrice.toString()).mul(new BN(transaction.gas)).add(new BN(autoFormatNumber(transactionParams.value) || '0')))) {
+      throw new EvmRpcError('INVALID_PARAMS', 'Balance can be not enough to send transaction');
+    }
+
     const requiredPassword = true; // password is always required for to export private, we have planning to save password 15 min like sign keypair.isLocked;
 
     let privateKey = '';

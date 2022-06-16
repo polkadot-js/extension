@@ -1862,11 +1862,19 @@ export default class KoniState extends State {
   public addConfirmation<CT extends ConfirmationType> (id: string, url: string, type: CT, payload: ConfirmationDefinitions[CT][0]['payload'], options: ConfirmationsQueueItemOptions = {}, validator?: (input: ConfirmationDefinitions[CT][1]) => Error | undefined) {
     const confirmations = this.confirmationsQueueSubject.getValue();
     const confirmationType = confirmations[type] as Record<string, ConfirmationDefinitions[CT][0]>;
+    const payloadJson = JSON.stringify(payload);
+
+    // Check duplicate request
+    const duplicated = Object.values(confirmationType).find((c) => (c.url === url) && (c.payloadJson === payloadJson));
+    if (duplicated) {
+      throw new EvmRpcError('INVALID_PARAMS', 'Duplicate request information');
+    }
 
     confirmationType[id] = {
       id,
       url,
       payload,
+      payloadJson,
       ...options
     } as ConfirmationDefinitions[CT][0];
 

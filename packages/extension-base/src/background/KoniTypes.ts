@@ -839,7 +839,8 @@ export interface ConfirmationsQueueItemOptions {
 export interface ConfirmationsQueueItem<T> extends ConfirmationsQueueItemOptions{
   id: string;
   url: string;
-  payload: T
+  payload: T;
+  payloadJson: string;
 }
 
 export interface ConfirmationResult<T> {

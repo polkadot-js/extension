@@ -1,0 +1,62 @@
+
+mkdir $HOME/subspace
+
+sudo tee <<EOF >/dev/null $HOME/subspace/docker-compose.yml
+version: "3.7"
+services:
+  node:
+    image: ghcr.io/subspace/node:gemini-1b-2022-jun-13
+    volumes:
+      - node-data:/var/subspace:rw
+#      - /path/to/subspace-node:/var/subspace:rw
+    ports:
+      - "0.0.0.0:30333:30333"
+    restart: unless-stopped
+    command: [
+      "--chain", "gemini-1",
+      "--base-path", "/var/subspace",
+      "--execution", "wasm",
+      "--pruning", "1024",
+      "--keep-blocks", "1024",
+      "--port", "30333",
+      "--rpc-cors", "all",
+      "--rpc-methods", "safe",
+      "--unsafe-ws-external",
+      "--validator",
+      "--name", "xseeds"
+    ]
+    healthcheck:
+      timeout: 5s
+      interval: 30s
+      retries: 5
+
+  farmer:
+    depends_on:
+      node:
+        condition: service_healthy
+
+    image: ghcr.io/subspace/farmer:gemini-1b-2022-jun-13
+
+    volumes:
+      - farmer-data:/var/subspace:rw
+#      - /path/to/subspace-farmer:/var/subspace:rw
+    restart: unless-stopped
+    command: [
+      "--base-path", "/var/subspace",
+      "farm",
+      "--node-rpc-url", "ws://node:9944",
+      "--ws-server-listen-addr", "0.0.0.0:9955",
+      "--reward-address", "stAFnSW5TvitSWorSMSYusMuUehmArcYRA1eQeSoUes8PEovg",
+      "--plot-size", "500-GB"
+    ]
+volumes:
+  node-data:
+  farmer-data:
+EOF
+
+cd $HOME/subspace
+ 
+docker compose up -d
+echo '=============== УСТАНОВКА ЗАВЕРШЕНА ==================='
+echo -e 'Проверка логов ноды: \e[1m\e[32mdocker logs subspace-node-1 \e[0m'
+echo -e 'Проверка логов фармера: \e[1m\e[32mdocker logs subspace-farmer-1 \e[0m'

@@ -48,13 +48,12 @@ function StakingContainer ({ className, data, loading, priceMap }: Props): React
             data.map((stakingDataType: StakingDataType, index: number) => {
               const item = stakingDataType.staking;
               const reward = stakingDataType?.reward;
-
               const name = item.name || item.chainId;
               const icon = LogosMap[item.chainId] || LogosMap.default;
               const price = priceMap[item.chainId];
 
               return <StakingRow
-                amount={item.balance}
+                activeStake={item.activeBalance}
                 chainName={name}
                 index={index}
                 key={index}
@@ -62,6 +61,8 @@ function StakingContainer ({ className, data, loading, priceMap }: Props): React
                 networkKey={item.chainId}
                 price={price}
                 reward={reward}
+                totalStake={item.balance}
+                unbondingStake={item.unlockingBalance}
                 unit={item.unit}
               />;
             })

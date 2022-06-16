@@ -9,7 +9,6 @@ import { ActionContext } from '@subwallet/extension-koni-ui/components';
 import Menu from '@subwallet/extension-koni-ui/components/Menu';
 import Tooltip from '@subwallet/extension-koni-ui/components/Tooltip';
 import useOutsideClick from '@subwallet/extension-koni-ui/hooks/useOutsideClick';
-import useTranslation from '@subwallet/extension-koni-ui/hooks/useTranslation';
 import { store } from '@subwallet/extension-koni-ui/stores';
 import { BondingParams, UnbondingParams } from '@subwallet/extension-koni-ui/stores/types';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';

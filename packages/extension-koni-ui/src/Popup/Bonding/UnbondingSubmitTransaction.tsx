@@ -9,12 +9,13 @@ import Spinner from '@subwallet/extension-koni-ui/components/Spinner';
 import useGetNetworkJson from '@subwallet/extension-koni-ui/hooks/screen/home/useGetNetworkJson';
 import useToast from '@subwallet/extension-koni-ui/hooks/useToast';
 import useTranslation from '@subwallet/extension-koni-ui/hooks/useTranslation';
+import { getUnbondingTxInfo } from '@subwallet/extension-koni-ui/messaging';
 import Header from '@subwallet/extension-koni-ui/partials/Header';
 import UnbondingAuthTransaction from '@subwallet/extension-koni-ui/Popup/Bonding/components/UnbondingAuthTransaction';
 import UnbondingResult from '@subwallet/extension-koni-ui/Popup/Bonding/components/UnbondingResult';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
-import React, { useCallback, useContext, useState } from 'react';
+import React, { useCallback, useContext, useEffect, useState } from 'react';
 import { useSelector } from 'react-redux';
 import styled from 'styled-components';
 
@@ -50,6 +51,20 @@ function UnbondingSubmitTransaction ({ className }: Props): React.ReactElement<P
     navigate('/');
   }, [navigate]);
 
+  useEffect(() => {
+    if (!isClickNext) {
+      if (amount > 0 && amount <= bondedAmount) {
+        setIsReadySubmit(true);
+      } else {
+        setIsReadySubmit(false);
+
+        if (amount > bondedAmount) {
+          show(`Your total stake is ${bondedAmount} ${networkJson.nativeToken as string}`);
+        }
+      }
+    }
+  }, [amount, bondedAmount, isClickNext, networkJson.decimals, networkJson.nativeToken, show, showAuth, showResult]);
+
   const handleResend = useCallback(() => {
     setExtrinsicHash('');
     setIsTxSuccess(false);
@@ -81,13 +96,21 @@ function UnbondingSubmitTransaction ({ className }: Props): React.ReactElement<P
 
   const handleConfirm = useCallback(() => {
     setLoading(true);
-    setLoading(false);
-    setIsClickNext(true);
-    setFee('');
-    setBalanceError(false);
-    setShowAuth(true);
-    setShowResult(false);
-  }, []);
+    getUnbondingTxInfo({
+      address: account?.address as string,
+      amount,
+      networkKey: selectedNetwork
+    })
+      .then((resp) => {
+        setLoading(false);
+        setIsClickNext(true);
+        setFee(resp.fee);
+        setBalanceError(resp.balanceError);
+        setShowAuth(true);
+        setShowResult(false);
+      })
+      .catch(console.error);
+  }, [account?.address, amount, selectedNetwork]);
 
   return (
     <div className={className}>

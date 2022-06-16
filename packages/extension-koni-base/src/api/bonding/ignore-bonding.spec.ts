@@ -6,7 +6,9 @@ import { DOTSAMA_AUTO_CONNECT_MS } from '@subwallet/extension-koni-base/constant
 import { getCurrentProvider } from '@subwallet/extension-koni-base/utils/utils';
 
 import { ApiPromise, WsProvider } from '@polkadot/api';
-import { BN } from '@polkadot/util';
+import { Option } from '@polkadot/types';
+import { SlashingSpans } from '@polkadot/types/interfaces';
+import { BN, BN_ONE, BN_ZERO, bnMin, formatNumber } from '@polkadot/util';
 
 jest.setTimeout(50000);
 
@@ -22,6 +24,11 @@ interface ValidatorInfo {
   blocked: boolean;
   identity?: string;
   isVerified: boolean;
+}
+
+interface Unlocking {
+  remainingEras: BN;
+  value: BN;
 }
 
 interface ValidatorExtraInfo {
@@ -328,5 +335,67 @@ describe('test DotSama APIs', () => {
     const resp = apiPromise.tx.utility.batchAll([chillTx, unbondTx]);
 
     console.log(resp.toHuman());
+  });
+
+  test('get withdraw', async () => {
+    const provider = new WsProvider(getCurrentProvider(PREDEFINED_NETWORKS.alephTest), DOTSAMA_AUTO_CONNECT_MS);
+    const api = new ApiPromise({ provider });
+    const apiPromise = await api.isReady;
+
+    const stakingInfo = await apiPromise.derive.staking.account('5CXR5cKUySBJGksuLn2hbUTUMxm2uT9z3QWaU8Nmm4DG9Jhe');
+    const slashingSpans = await apiPromise.query.staking.slashingSpans('5CXR5cKUySBJGksuLn2hbUTUMxm2uT9z3QWaU8Nmm4DG9Jhe');
+    const progress = await apiPromise.derive.session.progress();
+
+    console.log('slashingSpans', slashingSpans.toHuman());
+
+    console.log('active', stakingInfo?.stakingLedger?.active.unwrap());
+    console.log('redeemable', stakingInfo.redeemable);
+
+    const mapped = stakingInfo?.unlocking
+      .filter(({ remainingEras, value }) => value.gt(BN_ZERO) && remainingEras.gt(BN_ZERO))
+      .map((unlock): [Unlocking, BN, BN] => [
+        unlock,
+        unlock.remainingEras,
+        unlock.remainingEras
+          .sub(BN_ONE)
+          .imul(progress.eraLength)
+          .iadd(progress.eraLength)
+          .isub(progress.eraProgress)
+      ]);
+    const total = mapped.reduce((total, [{ value }]) => total.iadd(value), new BN(0));
+
+    mapped.forEach(([{ value }, eras, blocks]) => {
+      console.log(formatNumber(value));
+      console.log(eras.toString());
+      console.log(formatNumber(blocks));
+    });
+
+    // console.log(eraLength.mul(bondingDuration).toString());
+  });
+
+  test('withdraw', async () => {
+    const provider = new WsProvider(getCurrentProvider(PREDEFINED_NETWORKS.alephTest), DOTSAMA_AUTO_CONNECT_MS);
+    const api = new ApiPromise({ provider });
+    const apiPromise = await api.isReady;
+
+    console.log(apiPromise.tx.staking.withdrawUnbonded.meta.args.length === 1); // if true, then require slashingSpans
+
+    const slashingSpans = await apiPromise.query.staking.slashingSpans('5CXR5cKUySBJGksuLn2hbUTUMxm2uT9z3QWaU8Nmm4DG9Jhe');
+
+    console.log(slashingSpans.toHuman());
+
+    const tx = apiPromise.tx.staking.withdrawUnbonded(slashingSpans.toHuman());
+
+    console.log(tx.toHuman());
+  });
+
+  test('get staking', async () => {
+    const provider = new WsProvider(getCurrentProvider(PREDEFINED_NETWORKS.alephTest), DOTSAMA_AUTO_CONNECT_MS);
+    const api = new ApiPromise({ provider });
+    const apiPromise = await api.isReady;
+
+    const resp = await apiPromise.query.staking?.ledger.multi(['5CXR5cKUySBJGksuLn2hbUTUMxm2uT9z3QWaU8Nmm4DG9Jhe']);
+
+    console.log(resp[0].toHuman());
   });
 });

@@ -18,15 +18,17 @@ interface Props extends ThemeProps {
   logo: string;
   chainName: string;
   symbol: string;
-  amount: string | undefined;
+  totalStake: string | undefined;
   unit: string | undefined;
   index: number;
   reward: StakingRewardItem;
   price: number;
   networkKey: string;
+  activeStake: string | undefined;
+  unbondingStake: string | undefined;
 }
 
-function StakingRow ({ amount, chainName, className, index, logo, networkKey, price, reward, unit }: Props): React.ReactElement<Props> {
+function StakingRow ({ activeStake, chainName, className, index, logo, networkKey, price, reward, totalStake, unbondingStake, unit }: Props): React.ReactElement<Props> {
   const [showReward, setShowReward] = useState(false);
   const [showStakingMenu, setShowStakingMenu] = useState(false);
 
@@ -106,7 +108,7 @@ function StakingRow ({ amount, chainName, className, index, logo, networkKey, pr
               <div className={'balance-description'}>
                 <div>Total stake</div>
                 <StakingMenu
-                  bondedAmount={amount as string}
+                  bondedAmount={totalStake as string}
                   networkKey={networkKey}
                   showMenu={showStakingMenu}
                   toggleMenu={handleToggleBondingMenu}
@@ -117,10 +119,10 @@ function StakingRow ({ amount, chainName, className, index, logo, networkKey, pr
             <div className={'balance-container'}>
               <div className={'meta-container'}>
                 <div className={'staking-amount'}>
-                  <span className={'staking-balance'}>{editBalance(amount || '')}</span>
+                  <span className={'staking-balance'}>{editBalance(totalStake || '')}</span>
                   {unit}
                 </div>
-                <div className={'price-container'}>${parsePrice(price, amount as string)}</div>
+                <div className={'price-container'}>${parsePrice(price, totalStake as string)}</div>
               </div>
 
               <div>
@@ -134,6 +136,22 @@ function StakingRow ({ amount, chainName, className, index, logo, networkKey, pr
           {
             showReward &&
             <div className={'extra-container'}>
+              <div className={'reward-container'}>
+                <div className={'reward-title'}>Active stake</div>
+                <div className={'reward-amount'}>
+                  <div>{editBalance(activeStake || '')}</div>
+                  <div className={'chain-unit'}>{unit}</div>
+                </div>
+              </div>
+
+              <div className={'reward-container'}>
+                <div className={'reward-title'}>Unlocking stake</div>
+                <div className={'reward-amount'}>
+                  <div>{editBalance(unbondingStake || '')}</div>
+                  <div className={'chain-unit'}>{unit}</div>
+                </div>
+              </div>
+
               <div className={'reward-container'}>
                 <div className={'reward-title'}>Total reward</div>
                 <div className={'reward-amount'}>

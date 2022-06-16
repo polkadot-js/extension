@@ -6,11 +6,10 @@ import Button from '@subwallet/extension-koni-ui/components/Button';
 import InputAddress from '@subwallet/extension-koni-ui/components/InputAddress';
 import Modal from '@subwallet/extension-koni-ui/components/Modal';
 import Spinner from '@subwallet/extension-koni-ui/components/Spinner';
-import { BalanceFormatType } from '@subwallet/extension-koni-ui/components/types';
-import useGetFreeBalance from '@subwallet/extension-koni-ui/hooks/screen/bonding/useGetFreeBalance';
 import useGetNetworkJson from '@subwallet/extension-koni-ui/hooks/screen/home/useGetNetworkJson';
 import useToast from '@subwallet/extension-koni-ui/hooks/useToast';
 import useTranslation from '@subwallet/extension-koni-ui/hooks/useTranslation';
+import { submitUnbonding } from '@subwallet/extension-koni-ui/messaging';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import React, { useCallback, useState } from 'react';
@@ -32,13 +31,13 @@ interface Props extends ThemeProps {
 
 function BondingAuthTransaction ({ amount, balanceError, className, fee, selectedNetwork, setExtrinsicHash, setIsTxSuccess, setShowConfirm, setShowResult, setTxError }: Props): React.ReactElement<Props> {
   const { t } = useTranslation();
+  const { show } = useToast();
   const networkJson = useGetNetworkJson(selectedNetwork);
   const { currentAccount: { account } } = useSelector((state: RootState) => state);
 
-  const [password, setPassword] = useState<string>('');
   const [loading, setLoading] = useState(false);
+  const [password, setPassword] = useState<string>('');
   const [passwordError, setPasswordError] = useState<string | null>('');
-  const { show } = useToast();
 
   const _onChangePass = useCallback((value: string) => {
     setPassword(value);
@@ -52,8 +51,50 @@ function BondingAuthTransaction ({ amount, balanceError, className, fee, selecte
   }, [loading, setShowConfirm]);
 
   const handleOnSubmit = useCallback(async () => {
-    console.log('submit');
-  }, []);
+    await submitUnbonding({
+      networkKey: selectedNetwork,
+      address: account?.address as string,
+      amount,
+      password
+    }, (resp) => {
+      if (resp.passwordError) {
+        show(resp.passwordError);
+        setPasswordError(resp.passwordError);
+        setLoading(false);
+      }
+
+      if (balanceError && !resp.passwordError) {
+        setLoading(false);
+        show('Your balance is too low to cover fees');
+
+        return;
+      }
+
+      if (resp.txError && resp.txError) {
+        show('Encountered an error, please try again.');
+        setLoading(false);
+
+        return;
+      }
+
+      if (resp.status) {
+        setLoading(false);
+
+        if (resp.status) {
+          setIsTxSuccess(true);
+          setShowConfirm(false);
+          setShowResult(true);
+          setExtrinsicHash(resp.transactionHash as string);
+        } else {
+          setIsTxSuccess(false);
+          setTxError('Error submitting transaction');
+          setShowConfirm(false);
+          setShowResult(true);
+          setExtrinsicHash(resp.transactionHash as string);
+        }
+      }
+    });
+  }, [account?.address, amount, balanceError, password, selectedNetwork, setExtrinsicHash, setIsTxSuccess, setShowConfirm, setShowResult, setTxError, show]);
 
   const handleConfirm = useCallback(() => {
     setLoading(true);

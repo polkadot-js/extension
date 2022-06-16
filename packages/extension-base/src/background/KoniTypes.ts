@@ -89,6 +89,8 @@ export interface StakingItem {
   name: string,
   chainId: string,
   balance?: string,
+  activeBalance?: string,
+  unlockingBalance?: string
   nativeToken: string,
   unit?: string,
   state: APIItemState
@@ -826,7 +828,16 @@ export interface BondingOptionParams {
   address: string;
 }
 
+export interface UnbondingSubmitParams {
+  amount: number,
+  networkKey: string,
+  address: string,
+  password?: string
+}
+
 export interface KoniRequestSignatures {
+  'pri(unbonding.submitTransaction)': [UnbondingSubmitParams, BondingTxResponse, BondingTxResponse];
+  'pri(unbonding.txInfo)': [UnbondingSubmitParams, BondingTxInfo];
   'pri(bonding.txInfo)': [BondingSubmitParams, BondingTxInfo];
   'pri(bonding.submitTransaction)': [BondingSubmitParams, BondingTxResponse, BondingTxResponse];
   'pri(bonding.getChainBondingBasics)': [NetworkJson[], Record<string, ChainBondingBasics>];

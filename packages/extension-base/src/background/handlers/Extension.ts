@@ -232,10 +232,6 @@ export default class Extension {
     const { request, resolve } = queued;
 
     this.#state.saveMetadata(request);
-    request.metaCalls &&
-      registry.setMetadata(
-        new Metadata(registry, base64Decode(request.metaCalls)), undefined, request.userExtensions
-      );
 
     resolve(true);
 
@@ -376,6 +372,12 @@ export default class Extension {
 
       if (currentMetadata) {
         registry.register(currentMetadata?.types);
+        currentMetadata.metaCalls &&
+          registry.setMetadata(
+            new Metadata(registry, base64Decode(currentMetadata.metaCalls)),
+            undefined,
+            currentMetadata.userExtensions
+          );
       }
     }
 

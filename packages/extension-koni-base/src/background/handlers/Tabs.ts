@@ -6,8 +6,8 @@ import type { InjectedAccount } from '@subwallet/extension-inject/types';
 import { AuthUrls } from '@subwallet/extension-base/background/handlers/State';
 import { createSubscription, unsubscribe } from '@subwallet/extension-base/background/handlers/subscriptions';
 import Tabs from '@subwallet/extension-base/background/handlers/Tabs';
-import { EvmAppState, EvmEventEmiter, EvmEventType, EvmSendTransactionParams, RequestEvmProviderSend } from '@subwallet/extension-base/background/KoniTypes';
-import { AccountAuthType, MessageTypes, RequestAccountList, RequestAccountSubscribe, RequestAuthorizeTab, RequestTypes, ResponseTypes, SubscriptionMessageTypes } from '@subwallet/extension-base/background/types';
+import { EvmAppState, EvmEventType, EvmSendTransactionParams, RequestEvmProviderSend } from '@subwallet/extension-base/background/KoniTypes';
+import { AccountAuthType, MessageTypes, RequestAccountList, RequestAccountSubscribe, RequestAuthorizeTab, RequestTypes, ResponseTypes } from '@subwallet/extension-base/background/types';
 import { canDerive } from '@subwallet/extension-base/utils';
 import { EvmRpcError } from '@subwallet/extension-koni-base/background/errors/EvmRpcError';
 import KoniState from '@subwallet/extension-koni-base/background/handlers/State';
@@ -18,7 +18,6 @@ import { JsonRpcPayload } from 'web3-core-helpers';
 import { accounts as accountsObservable } from '@polkadot/ui-keyring/observable/accounts';
 import { SingleAddress, SubjectInfo } from '@polkadot/ui-keyring/observable/types';
 import { assert } from '@polkadot/util';
-import { BehaviorSubject } from 'rxjs/internal/BehaviorSubject';
 
 function stripUrl (url: string): string {
   assert(url && (url.startsWith('http:') || url.startsWith('https:') || url.startsWith('ipfs:') || url.startsWith('ipns:')), `Invalid url ${url}, expected to start with http: or https: or ipfs: or ipns:`);
@@ -295,12 +294,14 @@ export default class KoniTabs extends Tabs {
     if (!this.evmEventEmiterMap[url]) {
       this.evmEventEmiterMap[url] = {};
     }
+
     this.evmEventEmiterMap[url][id] = emitEvent;
 
     port.onDisconnect.addListener((): void => {
       if (this.evmEventEmiterMap[url][id]) {
         delete this.evmEventEmiterMap[url][id];
       }
+
       Object.entries(eventMap).forEach(([event, callback]) => {
       // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
         provider?.removeListener(event, callback);
@@ -313,13 +314,13 @@ export default class KoniTabs extends Tabs {
     return true;
   }
 
-  private checkAndHandleProviderStatus(provider: WebsocketProvider | undefined) {
+  private checkAndHandleProviderStatus (provider: WebsocketProvider | undefined) {
     if (!provider || !provider?.connected) {
       Object.values(this.evmEventEmiterMap).forEach((m) => {
         Object.values(m).forEach((emitter) => {
-          emitter('disconnect', new EvmRpcError('CHAIN_DISCONNECTED'))
-        })
-      })
+          emitter('disconnect', new EvmRpcError('CHAIN_DISCONNECTED'));
+        });
+      });
       throw new EvmRpcError('CHAIN_DISCONNECTED');
     }
   }

@@ -9,6 +9,7 @@ import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { getLogoByNetworkKey } from '@subwallet/extension-koni-ui/util';
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import { useSelector } from 'react-redux';
 import styled from 'styled-components';
 
@@ -18,6 +19,7 @@ interface Props extends ThemeProps {
 }
 
 function SwitchNetworkConfirmationInfo ({ className, confirmation }: Props): React.ReactElement {
+  const { t } = useTranslation();
   const { parsedNetworkMap: networkMap } = useFetchNetworkMap();
   const { payload } = confirmation;
   const newNetwork = networkMap[payload.networkKey];
@@ -32,9 +34,10 @@ function SwitchNetworkConfirmationInfo ({ className, confirmation }: Props): Rea
             className='img-circle'
             src={getLogoByNetworkKey(networkKey)}
             width={64}
+            height={64}
           />
         </div>
-        <div>{currentNetwork.chain}</div>
+        <div>{currentNetwork?.chain || t<string>('Any chain')}</div>
 
       </div>
       <div className='swap-icon'>

@@ -425,7 +425,7 @@ export default class KoniTabs extends Tabs {
         case 'eth_signTypedData_v4':
           return await this.evmSign(id, url, request);
         case 'wallet_requestPermissions':
-          await this.authorizeV2(url, { origin: 'eth_accounts', accountAuthType: 'evm', reConfirm: true });
+          await this.authorizeV2(url, { origin: '', accountAuthType: 'evm', reConfirm: true });
 
           return await this.getEvmPermission(url, id);
         case 'wallet_getPermissions':

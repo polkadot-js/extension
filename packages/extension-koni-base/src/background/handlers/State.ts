@@ -541,6 +541,10 @@ export default class KoniState extends State {
     const existedAccountAuthType = existedAuth?.accountAuthType;
     const confirmAnotherType = existedAccountAuthType !== 'both' && existedAccountAuthType !== request.accountAuthType;
 
+    if (request.reConfirm && existedAuth) {
+      request.origin = existedAuth.origin;
+    }
+
     if (existedAuth && !confirmAnotherType && !request.reConfirm) {
       // this url was seen in the past
       const isConnected = Object.keys(existedAuth.isAllowedMap)

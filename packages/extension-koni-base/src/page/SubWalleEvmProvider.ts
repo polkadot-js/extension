@@ -56,7 +56,9 @@ export class SubWalletEvmProvider extends SafeEventEmitter implements EvmProvide
     switch (method) {
       case 'eth_requestAccounts':
         return new Promise((resolve, reject) => {
-          this.sendMessage('pub(authorize.tabV2)', { origin: 'eth_accounts', accountAuthType: 'evm' })
+          const origin = document.title !== '' ? document.title : window.location.hostname;
+
+          this.sendMessage('pub(authorize.tabV2)', { origin, accountAuthType: 'evm' })
             .then(() => {
               // Subscribe event
               this.subscribeExtensionEvents();
@@ -76,7 +78,6 @@ export class SubWalletEvmProvider extends SafeEventEmitter implements EvmProvide
           // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
           this.sendMessage('evm(request)', { params, method })
             .then((result) => {
-              console.log(method, params, result);
               resolve(result as T);
             })
             .catch((e) => {
@@ -89,12 +90,12 @@ export class SubWalletEvmProvider extends SafeEventEmitter implements EvmProvide
   send (payload: JsonRpcPayload, callback: (error: (Error | null), result?: JsonRpcResponse) => void): void {
     this.sendMessage('evm(provider.send)', payload, ({ error, result }) => {
       callback(error, result);
-    }).then(console.log).catch(console.error);
+    }).catch(console.error);
   }
 
   sendAsync (payload: JsonRpcPayload, callback: (error: (Error | null), result?: JsonRpcResponse) => void): void {
     this.sendMessage('evm(provider.send)', payload, ({ error, result }) => {
       callback(error, result);
-    }).then(console.log).catch(console.error);
+    }).catch(console.error);
   }
 }

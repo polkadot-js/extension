@@ -1866,6 +1866,7 @@ export default class KoniState extends State {
 
     // Check duplicate request
     const duplicated = Object.values(confirmationType).find((c) => (c.url === url) && (c.payloadJson === payloadJson));
+
     if (duplicated) {
       throw new EvmRpcError('INVALID_PARAMS', 'Duplicate request information');
     }

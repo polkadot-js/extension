@@ -1836,7 +1836,7 @@ export default class KoniState extends State {
               });
           });
         } else {
-          return Promise.resolve(undefined);
+          return Promise.reject(new EvmRpcError('USER_REJECTED_REQUEST'));
         }
       });
   }

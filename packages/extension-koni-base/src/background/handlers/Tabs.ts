@@ -6,12 +6,12 @@ import type { InjectedAccount } from '@subwallet/extension-inject/types';
 import { AuthUrls } from '@subwallet/extension-base/background/handlers/State';
 import { createSubscription, unsubscribe } from '@subwallet/extension-base/background/handlers/subscriptions';
 import Tabs from '@subwallet/extension-base/background/handlers/Tabs';
-import { EvmAppState, EvmEventType, EvmProviderRpcErrorInterface, EvmSendTransactionParams, RequestEvmProviderSend } from '@subwallet/extension-base/background/KoniTypes';
+import { EvmAppState, EvmEventType, EvmSendTransactionParams, RequestEvmProviderSend } from '@subwallet/extension-base/background/KoniTypes';
 import { AccountAuthType, MessageTypes, RequestAccountList, RequestAccountSubscribe, RequestAuthorizeTab, RequestTypes, ResponseTypes } from '@subwallet/extension-base/background/types';
 import { canDerive } from '@subwallet/extension-base/utils';
 import { EvmRpcError } from '@subwallet/extension-koni-base/background/errors/EvmRpcError';
 import KoniState from '@subwallet/extension-koni-base/background/handlers/State';
-import { ALL_ACCOUNT_KEY, CRON_GET_API_MAP_STATUS, EVM_PROVIDER_RPC_ERRORS } from '@subwallet/extension-koni-base/constants';
+import { ALL_ACCOUNT_KEY, CRON_GET_API_MAP_STATUS } from '@subwallet/extension-koni-base/constants';
 import { RequestArguments, WebsocketProvider } from 'web3-core';
 import { JsonRpcPayload } from 'web3-core-helpers';
 
@@ -132,6 +132,8 @@ export default class KoniTabs extends Tabs {
       if (!ok) {
         throw new EvmRpcError('USER_REJECTED_REQUEST');
       }
+    } else {
+      throw new EvmRpcError('INVALID_PARAMS', `Not found chainId ${chainId} in wallet`);
     }
 
     return null;
@@ -214,14 +216,6 @@ export default class KoniTabs extends Tabs {
     });
   }
 
-  private createEvmProviderRpcError ([code, name, description]: [number, string, string], data?: unknown) {
-    return {
-      message: description,
-      code: code,
-      data: data || name
-    } as EvmProviderRpcErrorInterface;
-  }
-
   private async evmSubscribeEvents (url: string, id: string, port: chrome.runtime.Port) {
     // This method will be called after DApp request connect to extension
     const cb = createSubscription<'evm(events.subscribe)'>(id, port);
@@ -265,7 +259,7 @@ export default class KoniTabs extends Tabs {
           if (connecting && !isConnected) {
             emitEvent('connect', { chainId: this.evmState.chainId });
           } else if (!connecting && isConnected) {
-            emitEvent('disconnect', this.createEvmProviderRpcError(EVM_PROVIDER_RPC_ERRORS.CHAIN_DISCONNECTED));
+            emitEvent('disconnect', new EvmRpcError('CHAIN_DISCONNECTED'));
           }
 
           isConnected = connecting;
@@ -322,8 +316,8 @@ export default class KoniTabs extends Tabs {
   private async performWeb3Method (id: string, { method, params }: RequestArguments, callback?: (result?: any) => void) {
     const provider = await this.getEvmProvider();
 
-    if (!provider) {
-      return Promise.reject(this.createEvmProviderRpcError(EVM_PROVIDER_RPC_ERRORS.CHAIN_DISCONNECTED));
+    if (!provider || !provider?.connected) {
+      throw new EvmRpcError('CHAIN_DISCONNECTED');
     }
 
     return new Promise((resolve, reject) => {
@@ -360,7 +354,7 @@ export default class KoniTabs extends Tabs {
     if (signResult) {
       return signResult;
     } else {
-      throw this.createEvmProviderRpcError(EVM_PROVIDER_RPC_ERRORS.INTERNAL_ERROR);
+      throw new EvmRpcError('INVALID_PARAMS', 'Have something wrong to sign message');
     }
   }
 
@@ -389,38 +383,49 @@ export default class KoniTabs extends Tabs {
   private async handleEvmRequest (id: string, url: string, request: RequestArguments): Promise<unknown> {
     const { method } = request;
 
-    switch (method) {
-      case 'eth_chainId':
-        return await this.getEvmCurrentChainId();
-      case 'eth_accounts':
-        return await this.getEvmCurrentAccount(url);
-      case 'eth_sendTransaction':
-        return await this.evmSendTransaction(id, url, request);
-      case 'eth_sign':
-        return await this.evmSign(id, url, request);
-      case 'personal_sign':
-        return await this.evmSign(id, url, request);
-      case 'eth_signTypedData':
-        return await this.evmSign(id, url, request);
-      case 'eth_signTypedData_v1':
-        return await this.evmSign(id, url, request);
-      case 'eth_signTypedData_v3':
-        return await this.evmSign(id, url, request);
-      case 'eth_signTypedData_v4':
-        return await this.evmSign(id, url, request);
-      case 'wallet_requestPermissions':
-        await this.authorizeV2(url, { origin: 'eth_accounts', accountAuthType: 'evm', reConfirm: true });
+    try {
+      switch (method) {
+        case 'eth_chainId':
+          return await this.getEvmCurrentChainId();
+        case 'eth_accounts':
+          return await this.getEvmCurrentAccount(url);
+        case 'eth_sendTransaction':
+          return await this.evmSendTransaction(id, url, request);
+        case 'eth_sign':
+          return await this.evmSign(id, url, request);
+        case 'personal_sign':
+          return await this.evmSign(id, url, request);
+        case 'eth_signTypedData':
+          return await this.evmSign(id, url, request);
+        case 'eth_signTypedData_v1':
+          return await this.evmSign(id, url, request);
+        case 'eth_signTypedData_v3':
+          return await this.evmSign(id, url, request);
+        case 'eth_signTypedData_v4':
+          return await this.evmSign(id, url, request);
+        case 'wallet_requestPermissions':
+          await this.authorizeV2(url, { origin: 'eth_accounts', accountAuthType: 'evm', reConfirm: true });
 
-        return await this.getEvmPermission(url, id);
-      case 'wallet_getPermissions':
-        return await this.getEvmPermission(url, id);
-      case 'wallet_addEthereumChain':
-        return await this.addEvmChain(id, url, request);
-      case 'wallet_switchEthereumChain':
-        return await this.switchEvmChain(id, url, request);
+          return await this.getEvmPermission(url, id);
+        case 'wallet_getPermissions':
+          return await this.getEvmPermission(url, id);
+        case 'wallet_addEthereumChain':
+          return await this.addEvmChain(id, url, request);
+        case 'wallet_switchEthereumChain':
+          return await this.switchEvmChain(id, url, request);
 
-      default:
-        return this.performWeb3Method(id, request);
+        default:
+          return this.performWeb3Method(id, request);
+      }
+    } catch (e) {
+      // @ts-ignore
+      if (e.code) {
+        throw e;
+      } else {
+        // @ts-ignore
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
+        throw new EvmRpcError('INTERNAL_ERROR', e.message);
+      }
     }
   }
 

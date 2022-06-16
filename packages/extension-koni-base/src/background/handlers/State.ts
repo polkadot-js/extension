@@ -85,7 +85,6 @@ export default class KoniState extends State {
   private networkMap: Record<string, NetworkJson> = {}; // mapping to networkMapStore, for uses in background
   private networkMapSubject = new Subject<Record<string, NetworkJson>>();
   private lockNetworkMap = false;
-  private networkHashMap: Record<string, string> = {}; // mapping hash to network key
 
   private apiMap: ApiMap = { dotSama: {}, web3: {} };
 
@@ -195,12 +194,6 @@ export default class KoniState extends State {
 
         this.networkMapStore.set('NetworkMap', mergedNetworkMap);
         this.networkMap = mergedNetworkMap; // init networkMap state
-
-        this.networkHashMap = Object.values(this.networkMap).reduce((data: Record<string, string>, cur) => {
-          data[cur.genesisHash] = cur.key;
-
-          return data;
-        }, {});
       }
 
       for (const [key, network] of Object.entries(this.networkMap)) {
@@ -1368,7 +1361,6 @@ export default class KoniState extends State {
     } else { // insert
       this.networkMap[data.key] = data;
       this.networkMap[data.key].getStakingOnChain = true; // try to fetch staking on chain for custom network by default
-      this.networkHashMap[data.genesisHash] = data.key;
     }
 
     if (this.networkMap[data.key].active) { // update API map if network is active
@@ -1628,7 +1620,7 @@ export default class KoniState extends State {
   }
 
   public getNetworkKeyByGenesisHash (hash: string) {
-    return this.networkHashMap[hash];
+    return Object.values(this.networkMap).find((network) => network.genesisHash === hash)?.key;
   }
 
   public async resetHistoryMap (newAddress: string): Promise<void> {

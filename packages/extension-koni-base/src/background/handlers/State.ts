@@ -28,7 +28,7 @@ import { convertFundStatus, getCurrentProvider } from '@subwallet/extension-koni
 import SimpleKeyring from 'eth-simple-keyring';
 import { BehaviorSubject, Subject } from 'rxjs';
 import Web3 from 'web3';
-import { TransactionConfig } from 'web3-core';
+import { TransactionConfig, TransactionReceipt } from 'web3-core';
 
 import { decodePair } from '@polkadot/keyring/pair/decode';
 import { keyring } from '@polkadot/ui-keyring';
@@ -1738,10 +1738,10 @@ export default class KoniState extends State {
       data: transactionParams.data
     };
 
-    transaction.gasPrice = transaction.gasPrice || await web3.eth.getGasPrice();
     transaction.gas = await web3.eth.estimateGas({ ...transaction });
+    const gasPrice = await web3.eth.getGasPrice();
 
-    const estimateGas = new BN(transaction.gasPrice.toString()).mul(new BN(transaction.gas)).toString();
+    const estimateGas = new BN(gasPrice.toString()).mul(new BN(transaction.gas)).toString();
 
     const fromAddress = transaction.from as string; // Address is validated in before step
     const requiredPassword = true; // password is always required for to export private, we have planning to save password 15 min like sign keypair.isLocked;
@@ -1766,15 +1766,55 @@ export default class KoniState extends State {
 
     const requestPayload = { ...transaction, estimateGas };
 
+    const setTransactionHistory = (receipt: TransactionReceipt) => {
+      const network = this.getNetworkMapByKey(networkKey);
+
+      this.setTransactionHistory(fromAddress, networkKey, {
+        isSuccess: true,
+        time: Date.now(),
+        networkKey,
+        change: transaction.value?.toString() || '0',
+        changeSymbol: undefined,
+        fee: receipt.effectiveGasPrice.toString(),
+        feeSymbol: network?.nativeToken,
+        action: 'send',
+        extrinsicHash: receipt.transactionHash
+      });
+    };
+
+    const setFailedHistory = (transactionHash: string) => {
+      const network = this.getNetworkMapByKey(networkKey);
+
+      this.setTransactionHistory(fromAddress, networkKey, {
+        isSuccess: false,
+        time: Date.now(),
+        networkKey,
+        change: transaction.value?.toString() || '0',
+        changeSymbol: undefined,
+        fee: undefined,
+        feeSymbol: network?.nativeToken,
+        action: 'send',
+        extrinsicHash: transactionHash
+      });
+    };
+
     return this.addConfirmation(id, url, 'evmSendTransactionRequest', requestPayload, { requiredPassword: true, address: fromAddress, networkKey }, validateConfirmationResponsePayload)
       .then(async ({ isApproved }) => {
         if (isApproved) {
           const signTransaction = await web3.eth.accounts.signTransaction(transaction, privateKey);
+          let transactionHash = '';
 
           return new Promise<string>((resolve, reject) => {
             signTransaction.rawTransaction && web3.eth.sendSignedTransaction(signTransaction.rawTransaction)
-              .on('transactionHash', resolve)
-              .on('error', reject);
+              .on('transactionHash', (hash) => {
+                transactionHash = hash;
+                resolve(hash);
+              })
+              .once('receipt', setTransactionHistory)
+              .on('error', (e) => {
+                setFailedHistory(transactionHash);
+                reject(e);
+              });
           });
         } else {
           return Promise.resolve(undefined);

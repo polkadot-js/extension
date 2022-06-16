@@ -5,17 +5,17 @@ import { faMinus, faPlus } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import ClockAfternoon from '@subwallet/extension-koni-ui/assets/ClockAfternoon.svg';
 import DotsThree from '@subwallet/extension-koni-ui/assets/DotsThree.svg';
-import {ActionContext, Button, ButtonArea} from '@subwallet/extension-koni-ui/components';
+import { ActionContext, Button, ButtonArea } from '@subwallet/extension-koni-ui/components';
 import Menu from '@subwallet/extension-koni-ui/components/Menu';
 import Modal from '@subwallet/extension-koni-ui/components/Modal';
 import Tooltip from '@subwallet/extension-koni-ui/components/Tooltip';
 import useOutsideClick from '@subwallet/extension-koni-ui/hooks/useOutsideClick';
+import useTranslation from '@subwallet/extension-koni-ui/hooks/useTranslation';
 import { store } from '@subwallet/extension-koni-ui/stores';
 import { BondingParams } from '@subwallet/extension-koni-ui/stores/types';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import React, { useCallback, useContext, useRef, useState } from 'react';
 import styled from 'styled-components';
-import useTranslation from "@subwallet/extension-koni-ui/hooks/useTranslation";
 // import ClockAfternoonGreen from '@subwallet/extension-koni-ui/assets/ClockAfternoonGreen.svg';
 
 interface Props extends ThemeProps {

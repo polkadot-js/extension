@@ -87,11 +87,13 @@ export class KoniCron {
     console.log('Stating cron jobs');
     state.getCurrentAccount((currentAccountInfo) => {
       if (currentAccountInfo && (Object.keys(state.getDotSamaApiMap()).length !== 0 || Object.keys(state.getWeb3ApiMap()).length !== 0)) {
+        this.resetNft(currentAccountInfo.address).then(() => {
+          this.addCron('refreshNft', this.refreshNft(currentAccountInfo.address, state.getApiMap(), state.getActiveErc721Tokens()), CRON_REFRESH_NFT_INTERVAL);
+        }).catch((err) => console.warn(err));
+
         this.addCron('refreshPrice', this.refreshPrice, CRON_REFRESH_PRICE_INTERVAL);
         this.addCron('checkStatusApiMap', this.updateApiMapStatus, CRON_GET_API_MAP_STATUS);
         this.addCron('recoverApiMap', this.recoverApiMap, CRON_AUTO_RECOVER_DOTSAMA_INTERVAL, false);
-
-        this.addCron('refreshNft', this.refreshNft(currentAccountInfo.address, state.getApiMap(), state.getActiveErc721Tokens()), CRON_REFRESH_NFT_INTERVAL);
         this.addCron('refreshStakingReward', this.refreshStakingReward(currentAccountInfo.address), CRON_REFRESH_STAKING_REWARD_INTERVAL);
 
         this.resetHistory(currentAccountInfo.address).then(() => {
@@ -134,7 +136,6 @@ export class KoniCron {
           this.addCron('refreshPrice', this.refreshPrice, CRON_REFRESH_PRICE_INTERVAL);
           this.addCron('checkStatusApiMap', this.updateApiMapStatus, CRON_GET_API_MAP_STATUS);
           this.addCron('recoverApiMap', this.recoverApiMap, CRON_AUTO_RECOVER_DOTSAMA_INTERVAL, false);
-
           this.addCron('refreshStakingReward', this.refreshStakingReward(address), CRON_REFRESH_STAKING_REWARD_INTERVAL);
         } else {
           this.setNftReady(address);

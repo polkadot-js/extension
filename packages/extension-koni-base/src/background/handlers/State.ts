@@ -515,7 +515,7 @@ export default class KoniState extends State {
 
       this.lazyNext('setStakingItem', () => {
         this.updateStakingStore();
-        this.stakingSubject.next(this.getStaking());
+        this.publishStaking(this.stakingMap);
       });
     }
   }
@@ -614,6 +614,8 @@ export default class KoniState extends State {
   private publishNftCollectionChanged (address: string) {
     this.lazyNext('saveNftCollection', () => {
       this.saveNftCollection(address);
+      this.nftCollectionState.nftCollectionList = this.nftCollectionState.nftCollectionList.filter((item) => item.chain && this.networkMap[item.chain]?.active);
+
       this.nftCollectionSubject.next(this.nftCollectionState);
     });
   }
@@ -669,6 +671,8 @@ export default class KoniState extends State {
     const storedData = await this.getStoredNft(newAddress);
 
     if (storedData) {
+      storedData.nftList = storedData.nftList.filter((item) => item.chain && this.networkMap[item.chain]?.active);
+      storedData.total = storedData.nftList.length;
       this.nftState = storedData;
     }
 
@@ -739,6 +743,9 @@ export default class KoniState extends State {
       }
 
       this.saveNft(address);
+      this.nftState.nftList = this.nftState.nftList.filter((item) => item.chain && this.networkMap[item.chain]?.active);
+      this.nftState.total = this.nftState.nftList.length;
+
       this.nftSubject.next(this.nftState);
     });
   }
@@ -851,7 +858,7 @@ export default class KoniState extends State {
     this.lazyNext('setHistory', () => {
       // Save to storage
       this.saveHistoryToStorage(address);
-      this.historySubject.next(this.getHistoryMap());
+      this.publishHistory(this.getHistoryMap());
     });
   }
 
@@ -923,7 +930,7 @@ export default class KoniState extends State {
 
     const merge = { ...defaultData, ...storedData } as Record<string, BalanceItem>;
 
-    this.balanceSubject.next({ details: merge });
+    this.publishBalance(merge);
   }
 
   public async resetCrowdloanMap (newAddress: string) {
@@ -933,7 +940,7 @@ export default class KoniState extends State {
 
     const merge = { ...defaultData, ...storedData } as Record<string, CrowdloanItem>;
 
-    this.crowdloanSubject.next({ details: merge });
+    this.publishCrowdloan(merge);
   }
 
   public async resetStakingMap (newAddress: string) {
@@ -943,7 +950,7 @@ export default class KoniState extends State {
 
     const merge = { ...defaultData, ...storedData } as Record<string, StakingItem>;
 
-    this.stakingSubject.next({ ready: false, details: merge });
+    this.publishStaking(merge);
   }
 
   public setBalanceItem (networkKey: string, item: BalanceItem) {
@@ -953,7 +960,7 @@ export default class KoniState extends State {
 
     this.lazyNext('setBalanceItem', () => {
       this.updateBalanceStore();
-      this.balanceSubject.next(this.getBalance());
+      this.publishBalance(this.balanceMap);
     });
   }
 
@@ -1002,7 +1009,7 @@ export default class KoniState extends State {
 
     this.lazyNext('setCrowdloanItem', () => {
       this.updateCrowdloanStore();
-      this.crowdloanSubject.next(this.getCrowdloan());
+      this.publishCrowdloan(this.crowdloanMap);
     });
   }
 
@@ -1132,7 +1139,7 @@ export default class KoniState extends State {
     // Save to storage
     this.saveHistoryToStorage(address);
 
-    this.historySubject.next(this.getHistoryMap());
+    this.publishHistory(this.getHistoryMap());
     callback && callback(items);
   }
 
@@ -1631,7 +1638,7 @@ export default class KoniState extends State {
       this.historyMap = storedData;
     }
 
-    this.historySubject.next(this.getHistoryMap());
+    this.publishHistory(this.getHistoryMap());
   }
 
   public async getStoredHistories (address: string) {
@@ -1736,5 +1743,41 @@ export default class KoniState extends State {
     return originNft.chain === destinationNft.chain &&
       originNft.collectionId === destinationNft.collectionId &&
       originNft.id === destinationNft.id;
+  }
+
+  private publishBalance (data: Record<string, BalanceItem>) {
+    const activeData = this.removeInactiveNetworkData(data);
+
+    this.balanceSubject.next({ details: activeData });
+  }
+
+  private publishCrowdloan (data: Record<string, CrowdloanItem>) {
+    const activeData = this.removeInactiveNetworkData(data);
+
+    this.crowdloanSubject.next({ details: activeData });
+  }
+
+  private publishStaking (data: Record<string, StakingItem>) {
+    const activeData = this.removeInactiveNetworkData(data);
+
+    this.stakingSubject.next({ ready: false, details: activeData });
+  }
+
+  private publishHistory (data: Record<string, TransactionHistoryItemType[]>) {
+    const activeData = this.removeInactiveNetworkData(data);
+
+    this.historySubject.next(activeData);
+  }
+
+  private removeInactiveNetworkData<T> (data: Record<string, T>) {
+    const activeData: Record<string, T> = {};
+
+    Object.entries(data).forEach(([networkKey, items]) => {
+      if (this.networkMap[networkKey].active) {
+        activeData[networkKey] = items;
+      }
+    });
+
+    return activeData;
   }
 }

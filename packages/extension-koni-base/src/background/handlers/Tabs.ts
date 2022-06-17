@@ -128,7 +128,7 @@ export default class KoniTabs extends Tabs {
     if (networkKey) {
       const accounts = await this.getEvmCurrentAccount(url);
 
-      const ok = await this.#koniState.switchNetworkAccount(id, url, networkKey, accounts[0] || ALL_ACCOUNT_KEY);
+      const ok = await this.#koniState.switchNetworkAccount(id, url, networkKey, accounts.length === 1 ? accounts[0] : ALL_ACCOUNT_KEY);
 
       if (!ok) {
         throw new EvmRpcError('USER_REJECTED_REQUEST');
@@ -228,6 +228,7 @@ export default class KoniTabs extends Tabs {
     let currentAccountList = await this.getEvmCurrentAccount(url);
 
     const checkAndTriggerChange = async () => {
+      const currentChainId = this.evmState.chainId;
       const newAccountList = await this.getEvmCurrentAccount(url);
 
       // Compare to void looping reload
@@ -237,7 +238,6 @@ export default class KoniTabs extends Tabs {
         currentAccountList = newAccountList;
       }
 
-      const currentChainId = this.evmState.chainId;
       const newChainId = await this.getEvmCurrentChainId();
 
       if (currentChainId !== newChainId) {
@@ -245,11 +245,9 @@ export default class KoniTabs extends Tabs {
       }
     };
 
-    const accountListSubscription = accountsObservable.subject
-      .subscribe((accounts: SubjectInfo): void => {
-        setTimeout(() => {
-          checkAndTriggerChange().catch(console.error);
-        }, 50);
+    const accountListSubscription = this.#koniState.subscribeCurrentAccount()
+      .subscribe(() => {
+        checkAndTriggerChange().catch(console.error);
       });
 
     const networkCheck = () => {

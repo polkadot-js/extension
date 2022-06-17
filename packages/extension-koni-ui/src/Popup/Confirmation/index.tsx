@@ -228,10 +228,7 @@ export default withRouter(styled(Confirmation)(({ theme }: Props) => `
   .cancel-button {
     margin-right: 8px;
     background-color: ${theme.buttonBackground1};
-
-    span {
-      color: ${theme.buttonTextColor2};
-    }
+    color: ${theme.buttonTextColor2};
   }
   
   .confirm-button {

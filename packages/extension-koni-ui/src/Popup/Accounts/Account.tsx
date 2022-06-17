@@ -141,6 +141,7 @@ function Account ({ address, changeAccountCallback, className, closeSetting, gen
         address={address}
         className='account__account-item'
         genesisHash={genesisHash}
+        isShowBanner={!_isAllAccount}
         name={name}
         parentName={parentName}
         showCopyBtn={false}

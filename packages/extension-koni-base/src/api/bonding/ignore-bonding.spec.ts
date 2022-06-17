@@ -406,4 +406,14 @@ describe('test DotSama APIs', () => {
 
     console.log(resp.toHuman());
   });
+
+  test('check bonded before', async () => {
+    const provider = new WsProvider(getCurrentProvider(PREDEFINED_NETWORKS.alephTest), DOTSAMA_AUTO_CONNECT_MS);
+    const api = new ApiPromise({ provider });
+    const apiPromise = await api.isReady;
+
+    const resp = await apiPromise.query.staking.bonded('5CFWZcRb5xbKQqtWRTsijz3RVrR6Gx2oQksNhoGuDdpc5G42');
+
+    console.log(resp.toHuman());
+  });
 });

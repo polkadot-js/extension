@@ -49,18 +49,20 @@ export async function getValidatorsInfo (networkKey: string, dotSamaApi: ApiProp
   const result: ValidatorInfo[] = [];
   let totalEraStake = 0;
 
-  const [_eraStakers, _totalIssuance, _auctionCounter, _minBond, _existedValidators] = await Promise.all([
+  const [_eraStakers, _totalIssuance, _auctionCounter, _minBond, _existedValidators, _bondedInfo] = await Promise.all([
     apiProps.api.query.staking.erasStakers.entries(parseInt(currentEra)),
     apiProps.api.query.balances.totalIssuance(),
     apiProps.api.query.auctions?.auctionCounter(),
     apiProps.api.query.staking.minNominatorBond(),
-    apiProps.api.query.staking.nominators(address)
+    apiProps.api.query.staking.nominators(address),
+    apiProps.api.query.staking.bonded(address)
   ]);
   const rawMaxNominations = (apiProps.api.consts.staking.maxNominations).toHuman() as string;
   const maxNominations = parseFloat(rawMaxNominations.replaceAll(',', ''));
   const rawMaxNominatorPerValidator = (apiProps.api.consts.staking.maxNominatorRewardedPerValidator).toHuman() as string;
   const maxNominatorPerValidator = parseFloat(rawMaxNominatorPerValidator.replaceAll(',', ''));
 
+  const bondedInfo = _bondedInfo.toHuman();
   const rawExistedValidators = _existedValidators.toHuman() as Record<string, any>;
   const bondedValidators = rawExistedValidators ? rawExistedValidators.targets as string[] : [];
   const eraStakers = _eraStakers as any[];
@@ -186,7 +188,7 @@ export async function getValidatorsInfo (networkKey: string, dotSamaApi: ApiProp
     maxNominatorPerValidator,
     era: parseInt(currentEra),
     validatorsInfo: result,
-    isBondedBefore: bondedValidators.length > 0,
+    isBondedBefore: bondedInfo !== null,
     bondedValidators,
     maxNominations
   };

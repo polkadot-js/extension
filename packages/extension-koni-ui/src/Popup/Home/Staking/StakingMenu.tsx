@@ -70,11 +70,10 @@ function StakingMenu ({ bondedAmount, className, networkKey, nextWithdrawal, nex
   }, [networkJson.nativeToken, nextWithdrawal, nextWithdrawalAmount, redeemable]);
 
   const handleClickWithdraw = useCallback(() => {
-    showWithdrawalModal();
-    // if (redeemable > 0) {
-    //
-    // }
-  }, [showWithdrawalModal]);
+    if (redeemable > 0) {
+      showWithdrawalModal();
+    }
+  }, [redeemable, showWithdrawalModal]);
 
   return (
     <div className={className}>

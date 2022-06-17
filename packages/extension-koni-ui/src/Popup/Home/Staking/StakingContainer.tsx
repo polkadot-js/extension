@@ -56,6 +56,7 @@ function StakingContainer ({ className, data, loading, priceMap }: Props): React
                 activeStake={item.activeBalance}
                 chainName={name}
                 index={index}
+                isAccountAll={isAccountAll}
                 key={index}
                 logo={icon}
                 networkKey={item.chainId}

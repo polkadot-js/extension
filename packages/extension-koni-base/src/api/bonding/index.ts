@@ -2,9 +2,9 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { ApiProps, ChainBondingBasics, ValidatorInfo } from '@subwallet/extension-base/background/KoniTypes';
-import { calculateChainStakedReturn, calculateInflation, calculateValidatorStakedReturn, getCommission, ValidatorExtraInfo } from '@subwallet/extension-koni-base/api/bonding/utils';
+import { calculateChainStakedReturn, calculateInflation, calculateValidatorStakedReturn, ERA_LENGTH_MAP, getCommission, Unlocking, ValidatorExtraInfo } from '@subwallet/extension-koni-base/api/bonding/utils';
 
-import { BN } from '@polkadot/util';
+import { BN, BN_ONE, BN_ZERO } from '@polkadot/util';
 
 export async function getChainBondingBasics (networkKey: string, dotSamaApi: ApiProps) {
   const apiProps = await dotSamaApi.isReady;
@@ -255,4 +255,47 @@ export async function getUnbondingExtrinsic (dotSamaApi: ApiProps, amount: BN) {
   const unbondTx = apiPromise.api.tx.staking.unbond(amount);
 
   return apiPromise.api.tx.utility.batchAll([chillTx, unbondTx]);
+}
+
+export async function getUnlockingInfo (dotSamaApi: ApiProps, address: string, networkKey: string) {
+  const apiPromise = await dotSamaApi.isReady;
+
+  const [stakingInfo, progress] = await Promise.all([
+    apiPromise.api.derive.staking.account(address),
+    apiPromise.api.derive.session.progress()
+  ]);
+
+  // @ts-ignore
+  const mapped = stakingInfo?.unlocking
+    .filter(({ remainingEras, value }) => value.gt(BN_ZERO) && remainingEras.gt(BN_ZERO))
+    .map((unlock): [Unlocking, BN, BN] => [
+      unlock,
+      unlock.remainingEras,
+      unlock.remainingEras
+        .sub(BN_ONE)
+        .imul(progress.eraLength)
+        .iadd(progress.eraLength)
+        .isub(progress.eraProgress)
+    ]);
+
+  // Only get the nearest redeemable
+  let minRemainingEra = BN_ZERO;
+  let nextWithdrawalAmount = BN_ZERO;
+
+  mapped.forEach(([{ value }, eras]) => {
+    if (minRemainingEra === BN_ZERO) {
+      minRemainingEra = eras;
+      nextWithdrawalAmount = value;
+    } else if (eras.lt(minRemainingEra)) {
+      minRemainingEra = eras;
+      nextWithdrawalAmount = value;
+    } else if (eras.eq(minRemainingEra)) {
+      nextWithdrawalAmount = nextWithdrawalAmount.add(value);
+    }
+  });
+
+  return {
+    nextWithdrawal: minRemainingEra.muln(ERA_LENGTH_MAP[networkKey] | ERA_LENGTH_MAP.default),
+    redeemable: nextWithdrawalAmount
+  };
 }

@@ -22,11 +22,15 @@ interface Props extends ThemeProps {
   showMenu: boolean;
   networkKey: string;
   bondedAmount: string;
+  redeemable: number;
+  nextWithdrawal: number;
 }
 
-function StakingMenu ({ bondedAmount, className, networkKey, showMenu, toggleMenu }: Props): React.ReactElement<Props> {
+function StakingMenu ({ bondedAmount, className, networkKey, nextWithdrawal, redeemable, showMenu, toggleMenu }: Props): React.ReactElement<Props> {
   const stakingMenuRef = useRef(null);
   const navigate = useContext(ActionContext);
+
+  console.log(redeemable);
 
   const handleClickBondingMenu = useCallback((e: MouseEvent) => {
     e.stopPropagation();
@@ -43,8 +47,10 @@ function StakingMenu ({ bondedAmount, className, networkKey, showMenu, toggleMen
   }, [navigate, networkKey]);
 
   const handleUnstake = useCallback(() => {
-    store.dispatch({ type: 'unbondingParams/update', payload: { selectedNetwork: networkKey, bondedAmount: parseFloat(bondedAmount) } as UnbondingParams });
-    navigate('/account/unbonding-auth');
+    if (parseFloat(bondedAmount) > 0) {
+      store.dispatch({ type: 'unbondingParams/update', payload: { selectedNetwork: networkKey, bondedAmount: parseFloat(bondedAmount) } as UnbondingParams });
+      navigate('/account/unbonding-auth');
+    }
   }, [bondedAmount, navigate, networkKey]);
 
   return (
@@ -76,7 +82,7 @@ function StakingMenu ({ bondedAmount, className, networkKey, showMenu, toggleMen
             </div>
 
             <div
-              className={'bonding-menu-item'}
+              className={`${parseFloat(bondedAmount) > 0 ? 'bonding-menu-item' : 'disabled-menu-item'}`}
               onClick={handleUnstake}
             >
               <FontAwesomeIcon
@@ -94,7 +100,7 @@ function StakingMenu ({ bondedAmount, className, networkKey, showMenu, toggleMen
               Withdraw
               <Tooltip
                 place={'top'}
-                text={'3 days remaining'}
+                text={`${nextWithdrawal} hours remaining`}
                 trigger={`bonding-menu-tooltip-${networkKey}`}
               />
             </div>

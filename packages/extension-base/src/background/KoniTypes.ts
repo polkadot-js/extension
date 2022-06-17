@@ -835,7 +835,18 @@ export interface UnbondingSubmitParams {
   password?: string
 }
 
+export interface UnlockingStakeParams {
+  address: string,
+  networkKey: string
+}
+
+export interface UnlockingStakeInfo {
+  nextWithdrawal: number,
+  redeemable: number
+}
+
 export interface KoniRequestSignatures {
+  'pri(unbonding.unlockingInfo)': [UnlockingStakeParams, UnlockingStakeInfo];
   'pri(unbonding.submitTransaction)': [UnbondingSubmitParams, BondingTxResponse, BondingTxResponse];
   'pri(unbonding.txInfo)': [UnbondingSubmitParams, BondingTxInfo];
   'pri(bonding.txInfo)': [BondingSubmitParams, BondingTxInfo];

@@ -1,6 +1,8 @@
 // Copyright 2019-2022 @subwallet/extension-koni authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
+import {BN} from "@polkadot/util";
+
 export interface ValidatorExtraInfo {
   commission: string,
   blocked: false,
@@ -17,6 +19,10 @@ export interface InflationParams {
   stakeTarget: number;
   yearlyInflationInTokens?: number;
 }
+export interface Unlocking {
+  remainingEras: BN;
+  value: BN;
+}
 
 export interface UniformEraPayoutInflationParams extends InflationParams {
   yearlyInflationInTokens: number;
@@ -29,6 +35,15 @@ const DEFAULT_PARAMS: InflationParams = {
   maxInflation: 0.1,
   minInflation: 0.025,
   stakeTarget: 0.5
+};
+
+export const ERA_LENGTH_MAP: Record<string, number> = {
+  alephTest: 24,
+  aleph: 24,
+  polkadot: 24,
+  kusama: 6,
+  westend: 24,
+  default: 24
 };
 
 const ALEPH_DEFAULT_UNIFORM_ERA_PAYOUT_PARAMS: UniformEraPayoutInflationParams = {

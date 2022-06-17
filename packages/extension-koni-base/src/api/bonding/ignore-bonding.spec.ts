@@ -6,9 +6,7 @@ import { DOTSAMA_AUTO_CONNECT_MS } from '@subwallet/extension-koni-base/constant
 import { getCurrentProvider } from '@subwallet/extension-koni-base/utils/utils';
 
 import { ApiPromise, WsProvider } from '@polkadot/api';
-import { Option } from '@polkadot/types';
-import { SlashingSpans } from '@polkadot/types/interfaces';
-import { BN, BN_ONE, BN_ZERO, bnMin, formatNumber } from '@polkadot/util';
+import { BN, BN_ONE, BN_ZERO } from '@polkadot/util';
 
 jest.setTimeout(50000);
 
@@ -342,15 +340,13 @@ describe('test DotSama APIs', () => {
     const api = new ApiPromise({ provider });
     const apiPromise = await api.isReady;
 
-    const stakingInfo = await apiPromise.derive.staking.account('5CXR5cKUySBJGksuLn2hbUTUMxm2uT9z3QWaU8Nmm4DG9Jhe');
-    const slashingSpans = await apiPromise.query.staking.slashingSpans('5CXR5cKUySBJGksuLn2hbUTUMxm2uT9z3QWaU8Nmm4DG9Jhe');
+    const stakingInfo = await apiPromise.derive.staking.account('5EsmjvZBNDjdTLGvCbr4CpUbxoQXi8meqZ83nEh1y9BBJ3ZG');
     const progress = await apiPromise.derive.session.progress();
-
-    console.log('slashingSpans', slashingSpans.toHuman());
 
     console.log('active', stakingInfo?.stakingLedger?.active.unwrap());
     console.log('redeemable', stakingInfo.redeemable);
 
+    // @ts-ignore
     const mapped = stakingInfo?.unlocking
       .filter(({ remainingEras, value }) => value.gt(BN_ZERO) && remainingEras.gt(BN_ZERO))
       .map((unlock): [Unlocking, BN, BN] => [
@@ -364,13 +360,25 @@ describe('test DotSama APIs', () => {
       ]);
     const total = mapped.reduce((total, [{ value }]) => total.iadd(value), new BN(0));
 
-    mapped.forEach(([{ value }, eras, blocks]) => {
-      console.log(formatNumber(value));
-      console.log(eras.toString());
-      console.log(formatNumber(blocks));
+    let minRemainingEra = BN_ZERO;
+    let nextWithdrawalAmount = BN_ZERO;
+
+    mapped.forEach(([{ value }, eras]) => {
+      if (minRemainingEra === BN_ZERO) {
+        minRemainingEra = eras;
+        nextWithdrawalAmount = value;
+      } else if (eras.lt(minRemainingEra)) {
+        minRemainingEra = eras;
+        nextWithdrawalAmount = value;
+      } else if (eras.eq(minRemainingEra)) {
+        nextWithdrawalAmount = nextWithdrawalAmount.add(value);
+      }
     });
 
-    // console.log(eraLength.mul(bondingDuration).toString());
+    console.log(nextWithdrawalAmount);
+    console.log(minRemainingEra);
+
+    console.log(total);
   });
 
   test('withdraw', async () => {
@@ -387,15 +395,5 @@ describe('test DotSama APIs', () => {
     const tx = apiPromise.tx.staking.withdrawUnbonded(slashingSpans.toHuman());
 
     console.log(tx.toHuman());
-  });
-
-  test('get staking', async () => {
-    const provider = new WsProvider(getCurrentProvider(PREDEFINED_NETWORKS.alephTest), DOTSAMA_AUTO_CONNECT_MS);
-    const api = new ApiPromise({ provider });
-    const apiPromise = await api.isReady;
-
-    const resp = await apiPromise.query.staking?.ledger.multi(['5CXR5cKUySBJGksuLn2hbUTUMxm2uT9z3QWaU8Nmm4DG9Jhe']);
-
-    console.log(resp[0].toHuman());
   });
 });

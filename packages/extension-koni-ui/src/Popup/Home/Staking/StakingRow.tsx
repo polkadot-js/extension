@@ -6,11 +6,14 @@ import cloneIconLight from '@subwallet/extension-koni-ui/assets/clone--color-2.s
 import cloneIconDark from '@subwallet/extension-koni-ui/assets/clone--color-3.svg';
 import useToast from '@subwallet/extension-koni-ui/hooks/useToast';
 import useTranslation from '@subwallet/extension-koni-ui/hooks/useTranslation';
+import { getUnlockingStakeInfo } from '@subwallet/extension-koni-ui/messaging';
 import StakingMenu from '@subwallet/extension-koni-ui/Popup/Home/Staking/StakingMenu';
+import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { Theme, ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { formatLocaleNumber } from '@subwallet/extension-koni-ui/util/formatNumber';
 import React, { useCallback, useContext, useState } from 'react';
 import CopyToClipboard from 'react-copy-to-clipboard';
+import { useSelector } from 'react-redux';
 import styled, { ThemeContext } from 'styled-components';
 
 interface Props extends ThemeProps {
@@ -26,11 +29,15 @@ interface Props extends ThemeProps {
   networkKey: string;
   activeStake: string | undefined;
   unbondingStake: string | undefined;
+  isAccountAll: boolean;
 }
 
-function StakingRow ({ activeStake, chainName, className, index, logo, networkKey, price, reward, totalStake, unbondingStake, unit }: Props): React.ReactElement<Props> {
+function StakingRow ({ activeStake, chainName, className, index, isAccountAll, logo, networkKey, price, reward, totalStake, unbondingStake, unit }: Props): React.ReactElement<Props> {
   const [showReward, setShowReward] = useState(false);
   const [showStakingMenu, setShowStakingMenu] = useState(false);
+  const { currentAccount: { account } } = useSelector((state: RootState) => state);
+  const [redeemable, setRedeemable] = useState(-1);
+  const [nextWithdrawal, setNextWithdrawal] = useState(-1);
 
   const handleToggleReward = useCallback(() => {
     setShowReward(!showReward);
@@ -38,7 +45,19 @@ function StakingRow ({ activeStake, chainName, className, index, logo, networkKe
 
   const handleToggleBondingMenu = useCallback(() => {
     setShowStakingMenu(!showStakingMenu);
-  }, [showStakingMenu]);
+
+    if (!showStakingMenu) {
+      getUnlockingStakeInfo({
+        networkKey,
+        address: account?.address as string
+      })
+        .then((resp) => {
+          setRedeemable(resp.redeemable);
+          setNextWithdrawal(resp.nextWithdrawal);
+        })
+        .catch(console.error);
+    }
+  }, [account?.address, networkKey, showStakingMenu]);
 
   const editBalance = (balance: string) => {
     if (parseFloat(balance) === 0) {
@@ -107,12 +126,16 @@ function StakingRow ({ activeStake, chainName, className, index, logo, networkKe
               <div className={'chain-name'}>{chainName}</div>
               <div className={'balance-description'}>
                 <div>Total stake</div>
-                <StakingMenu
-                  bondedAmount={totalStake as string}
-                  networkKey={networkKey}
-                  showMenu={showStakingMenu}
-                  toggleMenu={handleToggleBondingMenu}
-                />
+                {
+                  !isAccountAll && <StakingMenu
+                    bondedAmount={activeStake as string}
+                    networkKey={networkKey}
+                    nextWithdrawal={nextWithdrawal}
+                    redeemable={redeemable}
+                    showMenu={showStakingMenu}
+                    toggleMenu={handleToggleBondingMenu}
+                  />
+                }
               </div>
             </div>
 

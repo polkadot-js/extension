@@ -396,4 +396,14 @@ describe('test DotSama APIs', () => {
 
     console.log(tx.toHuman());
   });
+
+  test('get staking', async () => {
+    const provider = new WsProvider(getCurrentProvider(PREDEFINED_NETWORKS.alephTest), DOTSAMA_AUTO_CONNECT_MS);
+    const api = new ApiPromise({ provider });
+    const apiPromise = await api.isReady;
+
+    const resp = await apiPromise.query.staking?.ledger('5CXR5cKUySBJGksuLn2hbUTUMxm2uT9z3QWaU8Nmm4DG9Jhe');
+
+    console.log(resp.toHuman());
+  });
 });

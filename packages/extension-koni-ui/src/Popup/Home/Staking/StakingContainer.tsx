@@ -6,8 +6,10 @@ import { ActionContext } from '@subwallet/extension-koni-ui/components';
 import Button from '@subwallet/extension-koni-ui/components/Button';
 import { StakingDataType } from '@subwallet/extension-koni-ui/hooks/screen/home/types';
 import useIsAccountAll from '@subwallet/extension-koni-ui/hooks/screen/home/useIsAccountAll';
+import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import React, { useCallback, useContext } from 'react';
+import { useSelector } from 'react-redux';
 import styled from 'styled-components';
 
 const StakingRow = React.lazy(() => import('./StakingRow'));
@@ -23,6 +25,7 @@ interface Props extends ThemeProps {
 
 function StakingContainer ({ className, data, loading, priceMap }: Props): React.ReactElement<Props> {
   const navigate = useContext(ActionContext);
+  const { currentAccount: { account } } = useSelector((state: RootState) => state);
 
   const handleNavigateBonding = useCallback(() => {
     navigate('/account/select-bonding-network');
@@ -51,9 +54,11 @@ function StakingContainer ({ className, data, loading, priceMap }: Props): React
               const name = item.name || item.chainId;
               const icon = LogosMap[item.chainId] || LogosMap.default;
               const price = priceMap[item.chainId];
+              const address = account?.address as string;
 
               return <StakingRow
                 activeStake={item.activeBalance}
+                address={address}
                 chainName={name}
                 index={index}
                 isAccountAll={isAccountAll}

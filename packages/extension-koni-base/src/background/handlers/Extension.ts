@@ -2233,13 +2233,15 @@ export default class KoniExtension extends Extension {
   private async getUnlockingStakeInfo ({ address, networkKey }: UnlockingStakeParams) {
     const dotSamaApi = state.getDotSamaApi(networkKey);
     const networkJson = state.getNetworkMapByKey(networkKey);
-    const { nextWithdrawal, redeemable } = await getUnlockingInfo(dotSamaApi, address, networkKey);
+    const { nextWithdrawal, nextWithdrawalAmount, redeemable } = await getUnlockingInfo(dotSamaApi, address, networkKey);
 
-    const parsedRedeemable = parseFloat(redeemable.toString()) / (10 ** (networkJson.decimals as number));
+    const parsedRedeemable = redeemable ? parseFloat(redeemable.toString()) / (10 ** (networkJson.decimals as number)) : 0;
+    const parsedNextWithdrawalAmount = parseFloat(nextWithdrawalAmount.toString()) / (10 ** (networkJson.decimals as number));
 
     return {
       nextWithdrawal: parseFloat(nextWithdrawal.toString()),
-      redeemable: parsedRedeemable
+      redeemable: parsedRedeemable,
+      nextWithdrawalAmount: parsedNextWithdrawalAmount
     } as UnlockingStakeInfo;
   }
 

@@ -842,7 +842,8 @@ export interface UnlockingStakeParams {
 
 export interface UnlockingStakeInfo {
   nextWithdrawal: number,
-  redeemable: number
+  redeemable: number,
+  nextWithdrawalAmount: number
 }
 
 export interface KoniRequestSignatures {

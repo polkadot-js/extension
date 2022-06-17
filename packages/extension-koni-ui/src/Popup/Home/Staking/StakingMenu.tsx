@@ -4,17 +4,19 @@
 import { faMinus, faPlus } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import ClockAfternoon from '@subwallet/extension-koni-ui/assets/ClockAfternoon.svg';
+import ClockAfternoonGreen from '@subwallet/extension-koni-ui/assets/ClockAfternoonGreen.svg';
 import DotsThree from '@subwallet/extension-koni-ui/assets/DotsThree.svg';
 import { ActionContext } from '@subwallet/extension-koni-ui/components';
 import Menu from '@subwallet/extension-koni-ui/components/Menu';
 import Tooltip from '@subwallet/extension-koni-ui/components/Tooltip';
+import useGetNetworkJson from '@subwallet/extension-koni-ui/hooks/screen/home/useGetNetworkJson';
 import useOutsideClick from '@subwallet/extension-koni-ui/hooks/useOutsideClick';
 import { store } from '@subwallet/extension-koni-ui/stores';
 import { BondingParams, UnbondingParams } from '@subwallet/extension-koni-ui/stores/types';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
+import moment from 'moment';
 import React, { useCallback, useContext, useRef } from 'react';
 import styled from 'styled-components';
-// import ClockAfternoonGreen from '@subwallet/extension-koni-ui/assets/ClockAfternoonGreen.svg';
 
 interface Props extends ThemeProps {
   className?: string;
@@ -24,13 +26,15 @@ interface Props extends ThemeProps {
   bondedAmount: string;
   redeemable: number;
   nextWithdrawal: number;
+  nextWithdrawalAmount: number;
+  unbondingStake: string | undefined;
+  showWithdrawalModal: () => void;
 }
 
-function StakingMenu ({ bondedAmount, className, networkKey, nextWithdrawal, redeemable, showMenu, toggleMenu }: Props): React.ReactElement<Props> {
+function StakingMenu ({ bondedAmount, className, networkKey, nextWithdrawal, nextWithdrawalAmount, redeemable, showMenu, showWithdrawalModal, toggleMenu, unbondingStake }: Props): React.ReactElement<Props> {
   const stakingMenuRef = useRef(null);
   const navigate = useContext(ActionContext);
-
-  console.log(redeemable);
+  const networkJson = useGetNetworkJson(networkKey);
 
   const handleClickBondingMenu = useCallback((e: MouseEvent) => {
     e.stopPropagation();
@@ -52,6 +56,25 @@ function StakingMenu ({ bondedAmount, className, networkKey, nextWithdrawal, red
       navigate('/account/unbonding-auth');
     }
   }, [bondedAmount, navigate, networkKey]);
+
+  const getTooltipText = useCallback(() => {
+    if (nextWithdrawalAmount === -1) {
+      return 'Loading...';
+    }
+
+    if (redeemable > 0) {
+      return `${redeemable} ${networkJson.nativeToken as string} can be withdrawn now`;
+    } else {
+      return `${nextWithdrawalAmount} ${networkJson.nativeToken as string} can be withdrawn in ${moment.duration(nextWithdrawal, 'hours').humanize()}`;
+    }
+  }, [networkJson.nativeToken, nextWithdrawal, nextWithdrawalAmount, redeemable]);
+
+  const handleClickWithdraw = useCallback(() => {
+    showWithdrawalModal();
+    // if (redeemable > 0) {
+    //
+    // }
+  }, [showWithdrawalModal]);
 
   return (
     <div className={className}>
@@ -76,6 +99,7 @@ function StakingMenu ({ bondedAmount, className, networkKey, nextWithdrawal, red
               onClick={handleClickStakeMore}
             >
               <FontAwesomeIcon
+                className={'staking-menu-icon'}
                 icon={faPlus}
               />
               Stake more
@@ -86,23 +110,31 @@ function StakingMenu ({ bondedAmount, className, networkKey, nextWithdrawal, red
               onClick={handleUnstake}
             >
               <FontAwesomeIcon
+                className={'staking-menu-icon'}
                 icon={faMinus}
               />
               Unstake funds
             </div>
 
-            <div className={'disabled-menu-item'}>
+            <div
+              className={`${redeemable > 0 ? 'bonding-menu-item' : 'disabled-menu-item'}`}
+              onClick={handleClickWithdraw}
+            >
               <img
                 data-for={`bonding-menu-tooltip-${networkKey}`}
                 data-tip={true}
-                src={ClockAfternoon}
+                height={18}
+                src={nextWithdrawal > 0 && parseFloat(unbondingStake as string) > 0 ? ClockAfternoonGreen : ClockAfternoon}
+                width={18}
               />
               Withdraw
-              <Tooltip
-                place={'top'}
-                text={`${nextWithdrawal} hours remaining`}
-                trigger={`bonding-menu-tooltip-${networkKey}`}
-              />
+              {
+                unbondingStake && parseFloat(unbondingStake) !== 0 && <Tooltip
+                  place={'top'}
+                  text={getTooltipText()}
+                  trigger={`bonding-menu-tooltip-${networkKey}`}
+                />
+              }
             </div>
           </Menu>
         }
@@ -113,6 +145,10 @@ function StakingMenu ({ bondedAmount, className, networkKey, nextWithdrawal, red
 
 export default React.memo(styled(StakingMenu)(({ theme }: Props) => `
   position: relative;
+
+  .staking-menu-icon {
+    font-size: 18px;
+  }
 
   .unstake-edit-button:first-child {
     margin-right: 8px;

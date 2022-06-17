@@ -7,13 +7,12 @@ import cloneIconDark from '@subwallet/extension-koni-ui/assets/clone--color-3.sv
 import useToast from '@subwallet/extension-koni-ui/hooks/useToast';
 import useTranslation from '@subwallet/extension-koni-ui/hooks/useTranslation';
 import { getUnlockingStakeInfo } from '@subwallet/extension-koni-ui/messaging';
+import StakeAuthWithdrawal from '@subwallet/extension-koni-ui/Popup/Home/Staking/StakeAuthWithdrawal';
 import StakingMenu from '@subwallet/extension-koni-ui/Popup/Home/Staking/StakingMenu';
-import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { Theme, ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { formatLocaleNumber } from '@subwallet/extension-koni-ui/util/formatNumber';
-import React, { useCallback, useContext, useState } from 'react';
+import React, { useCallback, useContext, useEffect, useState } from 'react';
 import CopyToClipboard from 'react-copy-to-clipboard';
-import { useSelector } from 'react-redux';
 import styled, { ThemeContext } from 'styled-components';
 
 interface Props extends ThemeProps {
@@ -30,34 +29,47 @@ interface Props extends ThemeProps {
   activeStake: string | undefined;
   unbondingStake: string | undefined;
   isAccountAll: boolean;
+  address: string;
 }
 
-function StakingRow ({ activeStake, chainName, className, index, isAccountAll, logo, networkKey, price, reward, totalStake, unbondingStake, unit }: Props): React.ReactElement<Props> {
+function StakingRow ({ activeStake, address, chainName, className, index, isAccountAll, logo, networkKey, price, reward, totalStake, unbondingStake, unit }: Props): React.ReactElement<Props> {
   const [showReward, setShowReward] = useState(false);
   const [showStakingMenu, setShowStakingMenu] = useState(false);
-  const { currentAccount: { account } } = useSelector((state: RootState) => state);
-  const [redeemable, setRedeemable] = useState(-1);
+  const [redeemable, setRedeemable] = useState(0);
   const [nextWithdrawal, setNextWithdrawal] = useState(-1);
+  const [nextWithdrawalAmount, setNextWithdrawalAmount] = useState(-1);
+  const [showWithdrawalModal, setShowWithdrawalModal] = useState(false);
 
   const handleToggleReward = useCallback(() => {
     setShowReward(!showReward);
   }, [showReward]);
 
+  const handleShowWithdrawalModal = useCallback(() => {
+    setShowWithdrawalModal(true);
+  }, []);
+
+  const handleHideWithdrawalModal = useCallback(() => {
+    setShowWithdrawalModal(false);
+  }, []);
+
   const handleToggleBondingMenu = useCallback(() => {
     setShowStakingMenu(!showStakingMenu);
+  }, [showStakingMenu]);
 
-    if (!showStakingMenu) {
+  useEffect(() => {
+    if (parseFloat(unbondingStake as string) > 0) {
       getUnlockingStakeInfo({
         networkKey,
-        address: account?.address as string
+        address
       })
         .then((resp) => {
           setRedeemable(resp.redeemable);
           setNextWithdrawal(resp.nextWithdrawal);
+          setNextWithdrawalAmount(resp.nextWithdrawalAmount);
         })
         .catch(console.error);
     }
-  }, [account?.address, networkKey, showStakingMenu]);
+  }, [address, networkKey, unbondingStake]);
 
   const editBalance = (balance: string) => {
     if (parseFloat(balance) === 0) {
@@ -131,9 +143,12 @@ function StakingRow ({ activeStake, chainName, className, index, isAccountAll, l
                     bondedAmount={activeStake as string}
                     networkKey={networkKey}
                     nextWithdrawal={nextWithdrawal}
+                    nextWithdrawalAmount={nextWithdrawalAmount}
                     redeemable={redeemable}
                     showMenu={showStakingMenu}
+                    showWithdrawalModal={handleShowWithdrawalModal}
                     toggleMenu={handleToggleBondingMenu}
+                    unbondingStake={unbondingStake}
                   />
                 }
               </div>
@@ -241,6 +256,15 @@ function StakingRow ({ activeStake, chainName, className, index, isAccountAll, l
           }
         </div>
       </div>
+
+      {
+        showWithdrawalModal && <StakeAuthWithdrawal
+          address={address}
+          amount={redeemable}
+          hideModal={handleHideWithdrawalModal}
+          networkKey={networkKey}
+        />
+      }
     </div>
   );
 }

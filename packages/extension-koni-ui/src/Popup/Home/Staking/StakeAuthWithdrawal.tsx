@@ -9,8 +9,10 @@ import Spinner from '@subwallet/extension-koni-ui/components/Spinner';
 import useGetNetworkJson from '@subwallet/extension-koni-ui/hooks/screen/home/useGetNetworkJson';
 import useToast from '@subwallet/extension-koni-ui/hooks/useToast';
 import useTranslation from '@subwallet/extension-koni-ui/hooks/useTranslation';
+import { getStakeWithdrawalTxInfo, submitStakeWithdrawal } from '@subwallet/extension-koni-ui/messaging';
+import StakeWithdrawalResult from '@subwallet/extension-koni-ui/Popup/Home/Staking/StakeWithdrawalResult';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import styled from 'styled-components';
 
 interface Props extends ThemeProps {
@@ -29,20 +31,94 @@ function StakeAuthWithdrawal ({ address, amount, className, hideModal, networkKe
   const [loading, setLoading] = useState(false);
   const [password, setPassword] = useState<string>('');
   const [passwordError, setPasswordError] = useState<string | null>('');
+  const [isTxReady, setIsTxReady] = useState(false);
 
   const [balanceError, setBalanceError] = useState(false);
   const [fee, setFee] = useState('');
+
+  const [extrinsicHash, setExtrinsicHash] = useState('');
+  const [isTxSuccess, setIsTxSuccess] = useState(false);
+  const [txError, setTxError] = useState('');
+  const [showResult, setShowResult] = useState(false);
+
+  useEffect(() => {
+    getStakeWithdrawalTxInfo({
+      address,
+      networkKey
+    })
+      .then((resp) => {
+        setIsTxReady(true);
+        setBalanceError(resp.balanceError);
+        setFee(resp.fee);
+      })
+      .catch(console.error);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const _onChangePass = useCallback((value: string) => {
     setPassword(value);
     setPasswordError(null);
   }, []);
 
+  const handleOnSubmit = useCallback(async () => {
+    setLoading(true);
+    await submitStakeWithdrawal({
+      address,
+      networkKey,
+      password
+    }, (cbData) => {
+      if (cbData.passwordError) {
+        show(cbData.passwordError);
+        setPasswordError(cbData.passwordError);
+        setLoading(false);
+      }
+
+      if (balanceError && !cbData.passwordError) {
+        setLoading(false);
+        show('Your balance is too low to cover fees');
+
+        return;
+      }
+
+      if (cbData.txError && cbData.txError) {
+        show('Encountered an error, please try again.');
+        setLoading(false);
+
+        return;
+      }
+
+      if (cbData.status) {
+        setLoading(false);
+
+        if (cbData.status) {
+          setIsTxSuccess(true);
+          setShowResult(true);
+          setExtrinsicHash(cbData.transactionHash as string);
+        } else {
+          setIsTxSuccess(false);
+          setTxError('Error submitting transaction');
+          setShowResult(true);
+          setExtrinsicHash(cbData.transactionHash as string);
+        }
+      }
+    });
+  }, [address, balanceError, networkKey, password, show]);
+
   const handleConfirm = useCallback(() => {
     setLoading(true);
-    show('puff');
-    console.log('ok');
-  }, [show]);
+
+    // eslint-disable-next-line @typescript-eslint/no-misused-promises
+    setTimeout(async () => {
+      await handleOnSubmit();
+    }, 10);
+  }, [handleOnSubmit]);
+
+  const handleResend = useCallback(() => {
+    setExtrinsicHash('');
+    setIsTxSuccess(false);
+    setTxError('');
+    setShowResult(false);
+  }, []);
 
   return (
     <div className={className}>
@@ -61,74 +137,95 @@ function StakeAuthWithdrawal ({ address, amount, className, hideModal, networkKe
             x
           </div>
         </div>
-
-        <div className={'withdrawal-auth-container'}>
-          <InputAddress
-            autoPrefill={false}
-            className={'receive-input-address'}
-            defaultValue={address}
-            help={t<string>('The account which you will unstake')}
-            isDisabled={true}
-            isSetDefaultValue={true}
-            label={t<string>('Unstake from account')}
-            networkPrefix={networkJson.ss58Format}
-            type='allPlus'
-            withEllipsis
-          />
-
-          <div className={'transaction-info-container'}>
-            <div className={'transaction-info-row'}>
-              <div className={'transaction-info-title'}>Unstaking amount</div>
-              <div className={'transaction-info-value'}>{amount} {networkJson.nativeToken}</div>
-            </div>
-
-            <div className={'transaction-info-row'}>
-              <div className={'transaction-info-title'}>Unstaking fee</div>
-              <div className={'transaction-info-value'}>{fee}</div>
-            </div>
-
-            <div className={'transaction-info-row'}>
-              <div className={'transaction-info-title'}>Total</div>
-              <div className={'transaction-info-value'}>{amount} {networkJson.nativeToken} + {fee}</div>
-            </div>
-          </div>
-
-          <div className='withdrawal-auth__separator' />
-
-          <InputWithLabel
-            isError={passwordError !== null}
-            label={t<string>('Unlock account with password')}
-            onChange={_onChangePass}
-            type='password'
-            value={password}
-          />
-
-          <div className={'withdrawal-auth-btn-container'}>
-            <Button
-              className={'withdrawal-auth-cancel-button'}
-              isDisabled={loading}
-              onClick={hideModal}
-            >
-              Reject
-            </Button>
-            <Button
-              isDisabled={password === ''}
-              onClick={handleConfirm}
-            >
+        {
+          !showResult
+            ? <div>
               {
-                loading
-                  ? <Spinner />
-                  : <span>Confirm</span>
+                isTxReady
+                  ? <div className={'withdrawal-auth-container'}>
+                    <InputAddress
+                      autoPrefill={false}
+                      className={'receive-input-address'}
+                      defaultValue={address}
+                      help={t<string>('The account which you will withdraw stake')}
+                      isDisabled={true}
+                      isSetDefaultValue={true}
+                      label={t<string>('Withdraw stake from account')}
+                      networkPrefix={networkJson.ss58Format}
+                      type='allPlus'
+                      withEllipsis
+                    />
+
+                    <div className={'transaction-info-container'}>
+                      <div className={'transaction-info-row'}>
+                        <div className={'transaction-info-title'}>Withdrawal amount</div>
+                        <div className={'transaction-info-value'}>{amount} {networkJson.nativeToken}</div>
+                      </div>
+
+                      <div className={'transaction-info-row'}>
+                        <div className={'transaction-info-title'}>Withdrawal fee</div>
+                        <div className={'transaction-info-value'}>{fee}</div>
+                      </div>
+
+                      <div className={'transaction-info-row'}>
+                        <div className={'transaction-info-title'}>Total</div>
+                        <div className={'transaction-info-value'}>{amount} {networkJson.nativeToken} + {fee}</div>
+                      </div>
+                    </div>
+
+                    <div className='withdrawal-auth__separator' />
+
+                    <InputWithLabel
+                      isError={passwordError !== null}
+                      label={t<string>('Unlock account with password')}
+                      onChange={_onChangePass}
+                      type='password'
+                      value={password}
+                    />
+
+                    <div className={'withdrawal-auth-btn-container'}>
+                      <Button
+                        className={'withdrawal-auth-cancel-button'}
+                        isDisabled={loading}
+                        onClick={hideModal}
+                      >
+                        Reject
+                      </Button>
+                      <Button
+                        isDisabled={password === ''}
+                        onClick={handleConfirm}
+                      >
+                        {
+                          loading
+                            ? <Spinner />
+                            : <span>Confirm</span>
+                        }
+                      </Button>
+                    </div>
+                  </div>
+                  : <Spinner className={'container-spinner'} />
               }
-            </Button>
-          </div>
-        </div>
+            </div>
+            : <StakeWithdrawalResult
+              backToHome={hideModal}
+              extrinsicHash={extrinsicHash}
+              handleResend={handleResend}
+              isTxSuccess={isTxSuccess}
+              networkKey={networkKey}
+              txError={txError}
+            />
+        }
       </Modal>
     </div>
   );
 }
 
 export default React.memo(styled(StakeAuthWithdrawal)(({ theme }: Props) => `
+  .container-spinner {
+    height: 65px;
+    width: 65px;
+  }
+
   .withdrawal-auth-cancel-button {
     color: ${theme.textColor3};
     background: ${theme.buttonBackground1};

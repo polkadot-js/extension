@@ -21,7 +21,7 @@ interface Props extends ThemeProps {
   handleResend: () => void;
 }
 
-function UnbondingResult ({ backToHome, className, extrinsicHash, handleResend, isTxSuccess, networkKey, txError }: Props): React.ReactElement<Props> {
+function StakeWithdrawalResult ({ backToHome, className, extrinsicHash, handleResend, isTxSuccess, networkKey, txError }: Props): React.ReactElement<Props> {
   const { t } = useTranslation();
   const scanExplorerTxUrl = useScanExplorerTxUrl(networkKey, extrinsicHash);
   const isSupportScanExplorer = useSupportScanExplorer(networkKey);
@@ -30,26 +30,26 @@ function UnbondingResult ({ backToHome, className, extrinsicHash, handleResend, 
     <div className={className}>
       {
         isTxSuccess
-          ? <div className={'bonding-result-container'}>
+          ? <div className={'withdrawal-result-container'}>
             <img
               alt={'fail'}
-              className={'bonding-result-img'}
+              className={'withdrawal-result-img'}
               src={successStatus}
             />
 
-            <div className={'bonding-result-title'}>Unstake Successfully</div>
+            <div className={'withdrawal-result-title'}>Withdraw Successfully</div>
 
-            <div className={'bonding-result-subtext'}>Your unstaking request has been confirmed. It might take a minute to see changes in your wallet.</div>
+            <div className={'withdrawal-result-subtext'}>Your withdrawal request has been confirmed. It might take a minute to see changes in your wallet.</div>
 
-            <div className={'bonding-action-container'}>
+            <div className={'withdrawal-action-container'}>
               <div
-                className={'bonding-resend-button'}
+                className={'withdrawal-resend-button'}
                 onClick={backToHome}
               >
                 {t<string>('Back To Home')}
               </div>
               <a
-                className={CN('bonding-history-button', { '-disabled': !isSupportScanExplorer || !scanExplorerTxUrl })}
+                className={CN('withdrawal-history-button', { '-disabled': !isSupportScanExplorer || !scanExplorerTxUrl })}
                 href={scanExplorerTxUrl}
                 rel='noreferrer'
                 target={'_blank'}
@@ -58,28 +58,28 @@ function UnbondingResult ({ backToHome, className, extrinsicHash, handleResend, 
               </a>
             </div>
           </div>
-          : <div className={'bonding-result-container'}>
+          : <div className={'withdrawal-result-container'}>
             <img
               alt={'fail'}
-              className={'bonding-result-img'}
+              className={'withdrawal-result-img'}
               src={failStatus}
             />
 
-            <div className={'bonding-result-title'}>Unstaking Failed</div>
+            <div className={'withdrawal-result-title'}>Withdrawal Failed</div>
 
-            <div className={'bonding-result-subtext'}>There was a problem with your request. You can try again.</div>
+            <div className={'withdrawal-result-subtext'}>There was a problem with your request. You can try again.</div>
 
-            <div className={'bonding-error-text'}>{txError}</div>
+            <div className={'withdrawal-error-text'}>{txError}</div>
 
-            <div className={'bonding-action-container'}>
+            <div className={'withdrawal-action-container'}>
               <div
-                className={'bonding-resend-button'}
+                className={'withdrawal-resend-button'}
                 onClick={backToHome}
               >
                 {t<string>('Back To Home')}
               </div>
               <div
-                className={'bonding-history-button'}
+                className={'withdrawal-history-button'}
                 onClick={handleResend}
               >
                 {t<string>('Retry')}
@@ -91,11 +91,11 @@ function UnbondingResult ({ backToHome, className, extrinsicHash, handleResend, 
   );
 }
 
-export default React.memo(styled(UnbondingResult)(({ theme }: Props) => `
+export default React.memo(styled(StakeWithdrawalResult)(({ theme }: Props) => `
   padding-left: 45px;
   padding-right: 45px;
 
-  .bonding-history-button {
+  .withdrawal-history-button {
     width: 100%;
     padding: 10px;
     text-align: center;
@@ -108,7 +108,7 @@ export default React.memo(styled(UnbondingResult)(({ theme }: Props) => `
     line-height: 26px;
   }
 
-  .bonding-action-container {
+  .withdrawal-action-container {
     width: 100%;
     display: flex;
     flex-direction: column;
@@ -116,21 +116,21 @@ export default React.memo(styled(UnbondingResult)(({ theme }: Props) => `
     gap: 15px;
   }
 
-  .bonding-result-subtext {
+  .withdrawal-result-subtext {
     color: ${theme.textColor};
     text-align: center;
     font-size: 14px;
     margin-bottom: 10px;
   }
 
-  .bonding-error-text {
+  .withdrawal-error-text {
     color: ${theme.errorColor};
     margin-bottom: 30px;
     text-align: center;
     font-size: 14px;
   }
 
-  .bonding-result-title {
+  .withdrawal-result-title {
     font-size: 20px;
     line-height: 36px;
     color: ${theme.textColor};
@@ -138,19 +138,19 @@ export default React.memo(styled(UnbondingResult)(({ theme }: Props) => `
     text-align: center;
   }
 
-  .bonding-result-img {
+  .withdrawal-result-img {
     width: 120px;
     margin-top: 10px;
     margin-bottom: 32px;
   }
 
-  .bonding-result-container {
+  .withdrawal-result-container {
     display: flex;
     flex-direction: column;
     align-items: center;
   }
 
-  .bonding-resend-button {
+  .withdrawal-resend-button {
     width: 100%;
     padding: 10px;
     text-align: center;

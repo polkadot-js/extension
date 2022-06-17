@@ -137,7 +137,7 @@ function StakingRow ({ activeStake, address, chainName, className, index, isAcco
             <div className={'meta-container'}>
               <div className={'chain-name'}>{chainName}</div>
               <div className={'balance-description'}>
-                <div>Total stake</div>
+                <div>Staking balance</div>
                 {
                   !isAccountAll && <StakingMenu
                     bondedAmount={activeStake as string}
@@ -170,92 +170,94 @@ function StakingRow ({ activeStake, address, chainName, className, index, isAcco
               </div>
             </div>
           </div>
-
-          {
-            showReward &&
-            <div className={'extra-container'}>
-              <div className={'reward-container'}>
-                <div className={'reward-title'}>Active stake</div>
-                <div className={'reward-amount'}>
-                  <div>{editBalance(activeStake || '')}</div>
-                  <div className={'chain-unit'}>{unit}</div>
-                </div>
-              </div>
-
-              <div className={'reward-container'}>
-                <div className={'reward-title'}>Unlocking stake</div>
-                <div className={'reward-amount'}>
-                  <div>{editBalance(unbondingStake || '')}</div>
-                  <div className={'chain-unit'}>{unit}</div>
-                </div>
-              </div>
-
-              <div className={'reward-container'}>
-                <div className={'reward-title'}>Total reward</div>
-                <div className={'reward-amount'}>
-                  <div>{editBalance(reward?.totalReward || '')}</div>
-                  <div className={'chain-unit'}>{unit}</div>
-                </div>
-              </div>
-
-              <div className={'reward-container'}>
-                <div className={'reward-title'}>Latest reward</div>
-                <div className={'reward-amount'}>
-                  <div>{editBalance(reward?.latestReward || '')}</div>
-                  <div className={'chain-unit'}>{unit}</div>
-                </div>
-              </div>
-
-              <div className={'reward-container'}>
-                <div className={'reward-title'}>Total slash</div>
-                <div className={'reward-amount'}>
-                  <div>{editBalance(reward?.totalSlash || '')}</div>
-                  <div className={'chain-unit'}>{unit}</div>
-                </div>
-              </div>
-
-              {
-                chainName === 'astar' &&
-                <div className={'reward-container'}>
-                  <div className={'reward-title'}>Smart contract</div>
-                  <div className={'smart-contract-field'}>
-                    <div className={'smart-contract-value'}>
-                      {reward?.smartContract?.slice(0, 6)}...{reward?.smartContract?.slice(-6)}
-                    </div>
-                    <CopyToClipboard text={(reward.smartContract && reward.smartContract) || ''}>
-                      <div
-                        className={'kn-copy-btn'}
-                        onClick={_onCopy}
-                      >
-                        {theme === 'dark'
-                          ? (
-                            <img
-                              alt='copy'
-                              src={cloneIconDark}
-                            />
-                          )
-                          : (
-                            <img
-                              alt='copy'
-                              src={cloneIconLight}
-                            />
-                          )
-                        }
-                      </div>
-                    </CopyToClipboard>
-                  </div>
-                </div>
-              }
-              {/* <div className={'reward-container'}> */}
-              {/*  <div className={'reward-title'}>APR</div> */}
-              {/*  <div className={'reward-amount'}> */}
-              {/*    14% */}
-              {/*  </div> */}
-              {/* </div> */}
-            </div>
-          }
         </div>
       </div>
+      {
+        showReward &&
+        <div className={'extra-info'}>
+          <div className={'filler-div'}></div>
+          <div className={'extra-container'}>
+            <div className={'reward-container'}>
+              <div className={'reward-title'}>Active stake</div>
+              <div className={'reward-amount'}>
+                <div>{editBalance(activeStake || '')}</div>
+                <div className={'chain-unit'}>{unit}</div>
+              </div>
+            </div>
+
+            <div className={'reward-container'}>
+              <div className={'reward-title'}>Unlocking stake</div>
+              <div className={'reward-amount'}>
+                <div>{editBalance(unbondingStake || '')}</div>
+                <div className={'chain-unit'}>{unit}</div>
+              </div>
+            </div>
+
+            <div className={'reward-container'}>
+              <div className={'reward-title'}>Total reward</div>
+              <div className={'reward-amount'}>
+                <div>{editBalance(reward?.totalReward || '')}</div>
+                <div className={'chain-unit'}>{unit}</div>
+              </div>
+            </div>
+
+            <div className={'reward-container'}>
+              <div className={'reward-title'}>Latest reward</div>
+              <div className={'reward-amount'}>
+                <div>{editBalance(reward?.latestReward || '')}</div>
+                <div className={'chain-unit'}>{unit}</div>
+              </div>
+            </div>
+
+            <div className={'reward-container'}>
+              <div className={'reward-title'}>Total slash</div>
+              <div className={'reward-amount'}>
+                <div>{editBalance(reward?.totalSlash || '')}</div>
+                <div className={'chain-unit'}>{unit}</div>
+              </div>
+            </div>
+
+            {
+              chainName === 'astar' &&
+              <div className={'reward-container'}>
+                <div className={'reward-title'}>Smart contract</div>
+                <div className={'smart-contract-field'}>
+                  <div className={'smart-contract-value'}>
+                    {reward?.smartContract?.slice(0, 6)}...{reward?.smartContract?.slice(-6)}
+                  </div>
+                  <CopyToClipboard text={(reward.smartContract && reward.smartContract) || ''}>
+                    <div
+                      className={'kn-copy-btn'}
+                      onClick={_onCopy}
+                    >
+                      {theme === 'dark'
+                        ? (
+                          <img
+                            alt='copy'
+                            src={cloneIconDark}
+                          />
+                        )
+                        : (
+                          <img
+                            alt='copy'
+                            src={cloneIconLight}
+                          />
+                        )
+                      }
+                    </div>
+                  </CopyToClipboard>
+                </div>
+              </div>
+            }
+            {/* <div className={'reward-container'}> */}
+            {/*  <div className={'reward-title'}>APR</div> */}
+            {/*  <div className={'reward-amount'}> */}
+            {/*    14% */}
+            {/*  </div> */}
+            {/* </div> */}
+          </div>
+        </div>
+      }
 
       {
         showWithdrawalModal && <StakeAuthWithdrawal
@@ -270,6 +272,15 @@ function StakingRow ({ activeStake, address, chainName, className, index, isAcco
 }
 
 export default React.memo(styled(StakingRow)(({ theme }: Props) => `
+  .extra-info {
+    display: flex;
+    gap: 12px;
+  }
+
+  .filler-div {
+    min-width: 32px;
+  }
+
   .kn-copy-btn {
     width: 15px;
     height: 15px;
@@ -337,6 +348,7 @@ export default React.memo(styled(StakingRow)(({ theme }: Props) => `
     width: 100%;
     display: flex;
     gap: 12px;
+    align-items: center;
   }
 
   .toggle-container {
@@ -362,10 +374,8 @@ export default React.memo(styled(StakingRow)(({ theme }: Props) => `
     height: 32px;
     border-radius: 100%;
     overflow: hidden;
-    margin-right: 12px;
     background-color: #fff;
     border: 1px solid #fff;
-    margin-top:10px;
     cursor: pointer;
   }
 

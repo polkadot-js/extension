@@ -110,6 +110,7 @@ export default React.memo(styled(StakingContainer)(({ theme }: Props) => `
     justify-content: center;
     margin-top: 10px;
     align-items: center;
+    margin-bottom: 20px;
   }
 
   .staking-button {

@@ -300,3 +300,30 @@ export async function getUnlockingInfo (dotSamaApi: ApiProps, address: string, n
     nextWithdrawalAmount
   };
 }
+
+export async function getWithdrawalTxInfo (dotSamaAPi: ApiProps, address: string) {
+  const apiPromise = await dotSamaAPi.isReady;
+
+  if (apiPromise.api.tx.staking.withdrawUnbonded.meta.args.length === 1) {
+    const slashingSpans = await apiPromise.api.query.staking.slashingSpans(address);
+    const extrinsic = apiPromise.api.tx.staking.withdrawUnbonded(slashingSpans.toHuman());
+
+    return extrinsic.paymentInfo(address);
+  } else {
+    const extrinsic = apiPromise.api.tx.staking.withdrawUnbonded();
+
+    return extrinsic.paymentInfo(address);
+  }
+}
+
+export async function getWithdrawalExtrinsic (dotSamaAPi: ApiProps, address: string) {
+  const apiPromise = await dotSamaAPi.isReady;
+
+  if (apiPromise.api.tx.staking.withdrawUnbonded.meta.args.length === 1) {
+    const slashingSpans = await apiPromise.api.query.staking.slashingSpans(address);
+
+    return apiPromise.api.tx.staking.withdrawUnbonded(slashingSpans.toHuman());
+  } else {
+    return apiPromise.api.tx.staking.withdrawUnbonded();
+  }
+}

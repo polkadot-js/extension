@@ -800,7 +800,7 @@ export interface ChainBondingBasics {
   isMaxNominators: boolean
 }
 
-export interface BondingTxInfo {
+export interface BasicTxInfo {
   fee: string,
   balanceError: boolean
 }
@@ -815,7 +815,7 @@ export interface BondingSubmitParams {
   bondedValidators: string[]
 }
 
-export interface BondingTxResponse {
+export interface BasicTxResponse {
   passwordError?: string | null,
   callHash?: string,
   status?: boolean,
@@ -846,12 +846,20 @@ export interface UnlockingStakeInfo {
   nextWithdrawalAmount: number
 }
 
+export interface StakeWithdrawalParams {
+  address: string,
+  networkKey: string,
+  password?: string
+}
+
 export interface KoniRequestSignatures {
+  'pri(unbonding.submitWithdrawal)': [StakeWithdrawalParams, BasicTxResponse, BasicTxResponse]
+  'pri(unbonding.withdrawalTxInfo)': [StakeWithdrawalParams, BasicTxInfo];
   'pri(unbonding.unlockingInfo)': [UnlockingStakeParams, UnlockingStakeInfo];
-  'pri(unbonding.submitTransaction)': [UnbondingSubmitParams, BondingTxResponse, BondingTxResponse];
-  'pri(unbonding.txInfo)': [UnbondingSubmitParams, BondingTxInfo];
-  'pri(bonding.txInfo)': [BondingSubmitParams, BondingTxInfo];
-  'pri(bonding.submitTransaction)': [BondingSubmitParams, BondingTxResponse, BondingTxResponse];
+  'pri(unbonding.submitTransaction)': [UnbondingSubmitParams, BasicTxResponse, BasicTxResponse];
+  'pri(unbonding.txInfo)': [UnbondingSubmitParams, BasicTxInfo];
+  'pri(bonding.txInfo)': [BondingSubmitParams, BasicTxInfo];
+  'pri(bonding.submitTransaction)': [BondingSubmitParams, BasicTxResponse, BasicTxResponse];
   'pri(bonding.getChainBondingBasics)': [NetworkJson[], Record<string, ChainBondingBasics>];
   'pri(bonding.getBondingOptions)': [BondingOptionParams, BondingOptionInfo];
   'pri(networkMap.recoverDotSama)': [string, boolean];

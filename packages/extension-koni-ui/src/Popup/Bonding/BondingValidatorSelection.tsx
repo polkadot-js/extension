@@ -2,8 +2,10 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { ValidatorInfo } from '@subwallet/extension-base/background/KoniTypes';
+import QuestionIcon from '@subwallet/extension-koni-ui/assets/Question.svg';
 import { ActionContext, InputFilter } from '@subwallet/extension-koni-ui/components';
 import Spinner from '@subwallet/extension-koni-ui/components/Spinner';
+import Tooltip from '@subwallet/extension-koni-ui/components/Tooltip';
 import useTranslation from '@subwallet/extension-koni-ui/hooks/useTranslation';
 import { getBondingOptions } from '@subwallet/extension-koni-ui/messaging';
 import Header from '@subwallet/extension-koni-ui/partials/Header';
@@ -41,7 +43,7 @@ function BondingValidatorSelection ({ className }: Props): React.ReactElement<Pr
   const [sliceIndex, setSliceIndex] = useState(INFINITE_SCROLL_PER_PAGE);
   const [showedValidators, setShowedValidators] = useState<ValidatorInfo[]>([]);
 
-  const _height = window.innerHeight > 600 ? (window.innerHeight * 0.68) : 300;
+  const _height = window.innerHeight > 600 ? (window.innerHeight * 0.68) : 330;
 
   const handleSortByCommission = useCallback(() => {
     if (!sortByCommission) {
@@ -178,16 +180,37 @@ function BondingValidatorSelection ({ className }: Props): React.ReactElement<Pr
 
       <div className='bonding__button-area'>
         <div
-          className={`${sortByCommission ? 'active-bonding__btn' : 'bonding__btn'}`}
-          onClick={handleSortByCommission}
+          className={'staking-help'}
+          onClick={handleClickHelper}
         >
-          {t<string>('Lowest commission')}
+          <img
+            data-for={'staking-helper'}
+            data-tip={true}
+            height={24}
+            src={QuestionIcon}
+            width={24}
+          />
+          <Tooltip
+            place={'top'}
+            // eslint-disable-next-line @typescript-eslint/restrict-plus-operands
+            text={'How do I know which validators to choose ?'}
+            trigger={'staking-helper'}
+          />
         </div>
-        <div
-          className={`${sortByReturn ? 'active-bonding__btn' : 'bonding__btn'} sort-return-btn`}
-          onClick={handleSortByReturn}
-        >
-          {t<string>('Highest return')}
+
+        <div className={'filter-container'}>
+          <div
+            className={`${sortByCommission ? 'active-bonding__btn' : 'bonding__btn'}`}
+            onClick={handleSortByCommission}
+          >
+            {t<string>('Lowest commission')}
+          </div>
+          <div
+            className={`${sortByReturn ? 'active-bonding__btn' : 'bonding__btn'} sort-return-btn`}
+            onClick={handleSortByReturn}
+          >
+            {t<string>('Highest return')}
+          </div>
         </div>
       </div>
 
@@ -224,18 +247,24 @@ function BondingValidatorSelection ({ className }: Props): React.ReactElement<Pr
           </InfiniteScroll>
         }
       </div>
-
-      <div
-        className={'validator-selection-helper'}
-        onClick={handleClickHelper}
-      >
-        How do I know which validators to choose?
-      </div>
     </div>
   );
 }
 
 export default React.memo(styled(BondingValidatorSelection)(({ theme }: Props) => `
+  .staking-help {
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+  }
+
+  .filter-container {
+    width: 70%;
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+  }
+
   .sort-return-btn:before {
     content: '';
     position: absolute;
@@ -285,8 +314,9 @@ export default React.memo(styled(BondingValidatorSelection)(({ theme }: Props) =
 
   .bonding__button-area {
     display: flex;
-    justify-content: flex-end;
+    justify-content: space-between;
     padding: 10px 15px;
+    align-items: center;
   }
 
   .bonding-input-filter-container {

@@ -1124,18 +1124,29 @@ export default class KoniState extends State {
   }
 
   public setTransactionHistory (address: string, networkKey: string, item: TransactionHistoryItemType, callback?: (items: TransactionHistoryItemType[]) => void): void {
-    const items = this.historyMap[networkKey] || [];
+    this.getCurrentAccount((currentAccountInfo) => {
+      if (currentAccountInfo.address === address) {
+        const items = this.historyMap[networkKey] || [];
 
-    item.origin = 'app';
+        item.origin = 'app';
+        items.unshift(item);
+        this.historyMap[networkKey] = items;
+        // Save to storage
+        this.saveHistoryToStorage(address);
+        this.publishHistory(this.getHistoryMap());
+        callback && callback(items);
+      } else {
+        this.transactionHistoryStore.asyncGet(address).then((data: Record<string, TransactionHistoryItemType[]>) => {
+          const hash = this.getNetworkGenesisHashByKey(networkKey);
+          const items = data[hash] || [];
 
-    items.unshift(item);
-    this.historyMap[networkKey] = items;
-
-    // Save to storage
-    this.saveHistoryToStorage(address);
-
-    this.publishHistory(this.getHistoryMap());
-    callback && callback(items);
+          item.origin = 'app';
+          items.unshift(item);
+          data[hash] = items;
+          this.transactionHistoryStore.set(address, data);
+        }).catch((err) => console.warn(err));
+      }
+    });
   }
 
   public setPrice (priceData: PriceJson, callback?: (priceData: PriceJson) => void): void {

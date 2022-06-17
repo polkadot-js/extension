@@ -1229,13 +1229,14 @@ export default class KoniExtension extends Extension {
 
   private makeTransferCallback (
     address: string,
+    recipientAddress: string,
     networkKey: string,
     token: string | undefined,
     portCallback: (res: ResponseTransfer) => void): (res: ResponseTransfer) => void {
     return (res: ResponseTransfer) => {
       // !res.isFinalized to prevent duplicate action
       if (!res.isFinalized && res.txResult && res.extrinsicHash) {
-        state.setTransactionHistory(address, networkKey, {
+        const transaction = {
           time: Date.now(),
           networkKey,
           change: res.txResult.change,
@@ -1243,9 +1244,18 @@ export default class KoniExtension extends Extension {
           fee: res.txResult.fee,
           feeSymbol: res.txResult.feeSymbol,
           isSuccess: res.step.valueOf() === TransferStep.SUCCESS.valueOf(),
-          action: 'send',
           extrinsicHash: res.extrinsicHash
-        });
+        } as TransactionHistoryItemType;
+
+        state.setTransactionHistory(address, networkKey, { ...transaction, action: 'send' });
+
+        this.isInWalletAccount(recipientAddress).then((isValid) => {
+          if (isValid) {
+            state.setTransactionHistory(recipientAddress, networkKey, { ...transaction, action: 'received' });
+          } else {
+            console.log(`The recipient address [${recipientAddress}] is not in wallet.`);
+          }
+        }).catch((err) => console.warn(err));
       }
 
       portCallback(res);
@@ -1278,19 +1288,19 @@ export default class KoniExtension extends Extension {
         if (tokenInfo && !tokenInfo.isMainToken && tokenInfo.erc20Address) {
           transferProm = makeERC20Transfer(
             tokenInfo.erc20Address, networkKey, from, to, privateKey, value || '0', !!transferAll, web3ApiMap,
-            this.makeTransferCallback(from, networkKey, token, cb)
+            this.makeTransferCallback(from, to, networkKey, token, cb)
           );
         } else {
           transferProm = makeEVMTransfer(
             networkKey, to, privateKey, value || '0', !!transferAll, web3ApiMap,
-            this.makeTransferCallback(from, networkKey, token, cb)
+            this.makeTransferCallback(from, to, networkKey, token, cb)
           );
         }
       } else {
         // Make transfer with Dotsama API
         transferProm = makeTransfer(
           networkKey, to, fromKeyPair, value || '0', !!transferAll, state.getDotSamaApiMap(), tokenInfo,
-          this.makeTransferCallback(from, networkKey, token, cb)
+          this.makeTransferCallback(from, to, networkKey, token, cb)
         );
       }
 
@@ -1353,7 +1363,7 @@ export default class KoniExtension extends Extension {
         state.getDotSamaApiMap(),
         tokenInfo,
         state.getNetworkMap(),
-        this.makeTransferCallback(from, originNetworkKey, token, cb)
+        this.makeTransferCallback(from, to, originNetworkKey, token, cb)
       );
 
       transferProm.then(() => {

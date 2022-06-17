@@ -198,8 +198,6 @@ export default class KoniTabs extends Tabs {
 
         const chainId = currentNetwork?.evmChainId;
 
-        console.log(address, currentGenesisHash, chainId, networkKey);
-
         if (chainId) {
           this.evmState.chainId = chainId.toString(16);
           this.evmState.networkKey = networkKey;

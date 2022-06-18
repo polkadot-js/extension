@@ -5,6 +5,7 @@ import type { AccountsContext, AuthorizeRequest, MetadataRequest, SigningRequest
 import type { SettingsStruct } from '@polkadot/ui-settings/types';
 import type { AvailableThemes } from './themes';
 
+import { ConfirmationsQueue } from '@subwallet/extension-base/background/KoniTypes';
 import React from 'react';
 
 import settings from '@polkadot/ui-settings';
@@ -19,6 +20,12 @@ const MediaContext = React.createContext<boolean>(false);
 const MetadataReqContext = React.createContext<MetadataRequest[]>([]);
 const SettingsContext = React.createContext<SettingsStruct>(settings.get());
 const SigningReqContext = React.createContext<SigningRequest[]>([]);
+const ConfirmationsQueueContext = React.createContext<ConfirmationsQueue>({
+  addNetworkRequest: {},
+  switchNetworkRequest: {},
+  evmSignatureRequest: {},
+  evmSendTransactionRequest: {}
+});
 const ThemeSwitchContext = React.createContext<(theme: AvailableThemes) => void>(noop);
 const ToastContext = React.createContext<({show: (message: string, isError?: boolean) => void})>({ show: noop });
 
@@ -30,6 +37,7 @@ export {
   MetadataReqContext,
   SettingsContext,
   SigningReqContext,
+  ConfirmationsQueueContext,
   ThemeSwitchContext,
   ToastContext
 };

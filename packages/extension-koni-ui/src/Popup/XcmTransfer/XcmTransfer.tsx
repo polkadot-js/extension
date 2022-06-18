@@ -135,8 +135,14 @@ function XcmTransfer ({ chainRegistryMap, className, defaultValue, firstOriginCh
   const checkOriginChainAndSenderIdType = !!networkMap[originChain].isEthereum === isEthereumAddress(senderId);
   const checkDestinationChainAndReceiverIdType = !!recipientId && !!networkMap[selectedDestinationChain].isEthereum === isEthereumAddress(recipientId);
   const amountGtAvailableBalance = amount && senderFreeBalance && amount.gt(new BN(senderFreeBalance));
+  const feeInfoReady = feeSymbol &&
+    !!chainRegistryMap[originChain] &&
+    !!chainRegistryMap[originChain].tokenMap &&
+    !!chainRegistryMap[originChain].tokenMap[feeSymbol]
+  ;
   const canMakeTransfer = checkOriginChainAndSenderIdType &&
     checkDestinationChainAndReceiverIdType &&
+    feeInfoReady &&
     !!valueToTransfer &&
     !!recipientId &&
     !amountGtAvailableBalance &&
@@ -161,7 +167,12 @@ function XcmTransfer ({ chainRegistryMap, className, defaultValue, firstOriginCh
             setFeeInfo([null, value.feeSymbol]);
           }
         }
-      }).catch((e) => console.log('err--------', e));
+      }).catch((e) => {
+        console.log('err--------', e);
+
+        // todo: find better way to handle the error
+        setFeeInfo([null, selectedToken]);
+      });
     }
 
     return () => {

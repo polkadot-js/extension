@@ -38,7 +38,9 @@
     "ethereumjs-tx": "^2.1.2",
     "eventemitter3": "^4.0.7",
     "rxjs": "^7.5.1",
-    "web3": "^1.7.1"
+    "web3": "^1.7.3",
+    "web3-core": "^1.7.3",
+    "web3-core-helpers": "^1.7.3"
   },
   "devDependencies": {
     "@subwallet/extension-mocks": "^0.4.5-0"

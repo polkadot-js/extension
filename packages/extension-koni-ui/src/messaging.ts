@@ -10,7 +10,7 @@ import type { HexString } from '@polkadot/util/types';
 import type { KeypairType } from '@polkadot/util-crypto/types';
 
 import { AuthUrls } from '@subwallet/extension-base/background/handlers/State';
-import { AccountsWithCurrentAddress, BalanceJson, ChainRegistry, CrowdloanJson, CurrentAccountInfo, CustomEvmToken, DeleteEvmTokenParams, DisableNetworkResponse, EvmNftSubmitTransaction, EvmNftTransaction, EvmNftTransactionRequest, EvmTokenJson, NetworkJson, NftCollectionJson, NftJson, NftTransactionResponse, NftTransferExtra, OptionInputAddress, PriceJson, RequestCheckCrossChainTransfer, RequestCheckTransfer, RequestCrossChainTransfer, RequestFreeBalance, RequestNftForceUpdate, RequestSettingsType, RequestSubscribeBalance, RequestSubscribeBalancesVisibility, RequestSubscribeCrowdloan, RequestSubscribeNft, RequestSubscribePrice, RequestSubscribeStaking, RequestSubscribeStakingReward, RequestTransfer, RequestTransferCheckReferenceCount, RequestTransferCheckSupporting, RequestTransferExistentialDeposit, ResponseAccountCreateSuriV2, ResponseCheckCrossChainTransfer, ResponseCheckTransfer, ResponsePrivateKeyValidateV2, ResponseSeedCreateV2, ResponseSeedValidateV2, ResponseSettingsType, ResponseTransfer, StakingJson, StakingRewardJson, SubstrateNftSubmitTransaction, SubstrateNftTransaction, SubstrateNftTransactionRequest, SupportTransferResponse, ThemeTypes, TransactionHistoryItemType, TransferError, ValidateEvmTokenRequest, ValidateNetworkResponse } from '@subwallet/extension-base/background/KoniTypes';
+import { AccountsWithCurrentAddress, BalanceJson, ChainRegistry, ConfirmationDefinitions, ConfirmationsQueue, ConfirmationType, CrowdloanJson, CurrentAccountInfo, CustomEvmToken, DeleteEvmTokenParams, DisableNetworkResponse, EvmNftSubmitTransaction, EvmNftTransaction, EvmNftTransactionRequest, EvmTokenJson, NetworkJson, NftCollectionJson, NftJson, NftTransactionResponse, NftTransferExtra, OptionInputAddress, PriceJson, RequestCheckCrossChainTransfer, RequestCheckTransfer, RequestCrossChainTransfer, RequestFreeBalance, RequestNftForceUpdate, RequestSettingsType, RequestSubscribeBalance, RequestSubscribeBalancesVisibility, RequestSubscribeCrowdloan, RequestSubscribeNft, RequestSubscribePrice, RequestSubscribeStaking, RequestSubscribeStakingReward, RequestTransfer, RequestTransferCheckReferenceCount, RequestTransferCheckSupporting, RequestTransferExistentialDeposit, ResponseAccountCreateSuriV2, ResponseCheckCrossChainTransfer, ResponseCheckTransfer, ResponsePrivateKeyValidateV2, ResponseSeedCreateV2, ResponseSeedValidateV2, ResponseSettingsType, ResponseTransfer, StakingJson, StakingRewardJson, SubstrateNftSubmitTransaction, SubstrateNftTransaction, SubstrateNftTransactionRequest, SupportTransferResponse, ThemeTypes, TransactionHistoryItemType, TransferError, ValidateEvmTokenRequest, ValidateNetworkResponse } from '@subwallet/extension-base/background/KoniTypes';
 import { RequestCurrentAccountAddress } from '@subwallet/extension-base/background/types';
 import { PORT_EXTENSION } from '@subwallet/extension-base/defaults';
 import { getId } from '@subwallet/extension-base/utils/getId';
@@ -85,19 +85,19 @@ export async function saveCurrentAccountAddress (data: RequestCurrentAccountAddr
 }
 
 export async function toggleBalancesVisibility (callback: (data: RequestSettingsType) => void): Promise<boolean> {
-  return sendMessage('pri(currentAccount.changeBalancesVisibility)', null, callback);
+  return sendMessage('pri(settings.changeBalancesVisibility)', null, callback);
 }
 
 export async function saveAccountAllLogo (accountAllLogo: string, callback: (data: RequestSettingsType) => void): Promise<boolean> {
-  return sendMessage('pri(currentAccount.saveAccountAllLogo)', accountAllLogo, callback);
+  return sendMessage('pri(settings.saveAccountAllLogo)', accountAllLogo, callback);
 }
 
 export async function saveTheme (theme: ThemeTypes, callback: (data: RequestSettingsType) => void): Promise<boolean> {
-  return sendMessage('pri(currentAccount.saveTheme)', theme, callback);
+  return sendMessage('pri(settings.saveTheme)', theme, callback);
 }
 
 export async function subscribeSettings (data: RequestSubscribeBalancesVisibility, callback: (data: ResponseSettingsType) => void): Promise<ResponseSettingsType> {
-  return sendMessage('pri(currentAccount.subscribeSettings)', data, callback);
+  return sendMessage('pri(settings.subscribe)', data, callback);
 }
 
 export async function tieAccount (address: string, genesisHash: string | null): Promise<boolean> {
@@ -229,15 +229,15 @@ export async function rejectMetaRequest (id: string): Promise<boolean> {
 }
 
 export async function subscribeAccounts (cb: (accounts: AccountJson[]) => void): Promise<boolean> {
-  return sendMessage('pri(accounts.subscribe)', null, cb);
+  return sendMessage('pri(accounts.subscribe)', {}, cb);
 }
 
 export async function subscribeAccountsWithCurrentAddress (cb: (data: AccountsWithCurrentAddress) => void): Promise<boolean> {
-  return sendMessage('pri(accounts.subscribeWithCurrentAddress)', null, cb);
+  return sendMessage('pri(accounts.subscribeWithCurrentAddress)', {}, cb);
 }
 
 export async function subscribeAccountsInputAddress (cb: (data: OptionInputAddress) => void): Promise<string> {
-  return sendMessage('pri(accounts.subscribeAccountsInputAddress)', null, cb);
+  return sendMessage('pri(accounts.subscribeAccountsInputAddress)', {}, cb);
 }
 
 export async function saveRecentAccountId (accountId: string): Promise<SingleAddress> {
@@ -548,4 +548,12 @@ export async function substrateNftSubmitTransaction (request: SubstrateNftSubmit
 
 export async function recoverDotSamaApi (request: string): Promise<boolean> {
   return sendMessage('pri(networkMap.recoverDotSama)', request);
+}
+
+export async function subscribeConfirmations (callback: (data: ConfirmationsQueue) => void): Promise<ConfirmationsQueue> {
+  return sendMessage('pri(confirmations.subscribe)', null, callback);
+}
+
+export async function completeConfirmation<CT extends ConfirmationType> (type: CT, payload: ConfirmationDefinitions[CT][1]): Promise<boolean> {
+  return sendMessage('pri(confirmations.complete)', { [type]: payload });
 }

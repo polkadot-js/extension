@@ -65,7 +65,7 @@
     "redux-toolkit": "^1.1.2",
     "semantic-ui-react": "^2.0.4",
     "styled-components": "^5.3.3",
-    "web3": "^1.7.1"
+    "web3": "^1.7.3"
   },
   "devDependencies": {
     "@subwallet/extension-mocks": "^0.4.5-0",

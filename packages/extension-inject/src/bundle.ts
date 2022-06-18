@@ -31,7 +31,7 @@ export function injectEvmExtension (evmProvider: EvmProvider): void {
   const windowInject = window as Window & InjectedWindow;
 
   // add our enable function
-  windowInject.subWalletEthereum = evmProvider;
+  windowInject.SubWallet = evmProvider;
 
   windowInject.dispatchEvent(new Event('subwallet#initialized'));
 

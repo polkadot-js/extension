@@ -113,7 +113,7 @@ export interface InjectedWindowProvider {
 
 export interface InjectedWindow extends This {
   injectedWeb3: Record<string, InjectedWindowProvider>;
-  subWalletEthereum: EvmProvider;
+  SubWallet: EvmProvider;
 }
 
 export type InjectedExtension = InjectedExtensionInfo & Injected;

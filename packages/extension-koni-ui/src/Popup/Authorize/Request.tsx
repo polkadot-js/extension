@@ -4,6 +4,7 @@
 import type { RequestAuthorizeTab } from '@subwallet/extension-base/background/types';
 import type { ThemeProps } from '../../types';
 
+import { filterAndSortingAccountByAuthType } from '@subwallet/extension-koni-base/utils/utils';
 import ConnectAccount from '@subwallet/extension-koni-ui/Popup/Authorize/ConnectAccount';
 import React, { useCallback, useContext, useState } from 'react';
 import styled from 'styled-components';
@@ -30,13 +31,14 @@ function stripUrl (url: string): string {
   return url;
 }
 
-function Request ({ authId, className, request: { origin }, url }: Props): React.ReactElement<Props> {
+function Request ({ authId, className, request: { accountAuthType, allowedAccounts, origin }, url }: Props): React.ReactElement<Props> {
   const { t } = useTranslation();
   const onAction = useContext(ActionContext);
   const { accounts } = useContext(AccountContext);
-  const filteredAccounts = accounts.filter((acc) => acc.address !== 'ALL' && acc.type !== 'ethereum');
+  const accountList = filterAndSortingAccountByAuthType(accounts, accountAuthType || 'substrate', true);
+
   const { hostname } = new URL(url);
-  const [selectedAccounts, setSelectedAccounts] = useState<string[]>([]);
+  const [selectedAccounts, setSelectedAccounts] = useState<string[]>(allowedAccounts || []);
 
   const _onApprove = useCallback(
     () => approveAuthRequestV2(authId, selectedAccounts)
@@ -74,14 +76,14 @@ function Request ({ authId, className, request: { origin }, url }: Props): React
           <span className='tab-url'>{stripUrl(url)}</span>
         </a>
       </div>
-      {filteredAccounts && filteredAccounts.length
+      {accountList && accountList.length
         ? (
           <>
             <div className='request-info-choose-account'>
               {t<string>('Choose the account(s) you’d like to connect')}
             </div>
             <div className='request__accounts'>
-              {filteredAccounts.map((acc) => (
+              {accountList.map((acc) => (
                 <ConnectAccount
                   address={acc.address}
                   genesisHash={acc.genesisHash}
@@ -99,7 +101,7 @@ function Request ({ authId, className, request: { origin }, url }: Props): React
           </>
         )
         : <Warning>
-          {t<string>('You don\'t have any substrate account. Please create, import or restore an account to continue')}
+          {accountAuthType === 'evm' ? t<string>('You don\'t have any evm account. Please create, import or restore an account to continue') : t<string>('You don\'t have any substrate account. Please create, import or restore an account to continue')}
         </Warning>
       }
       <div className='authorize-request-bottom-content'>

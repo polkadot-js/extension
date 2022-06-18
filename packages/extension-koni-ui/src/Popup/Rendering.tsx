@@ -20,36 +20,6 @@ function Rendering (): React.ReactElement {
   useEffect(() => {
     let isSync = true;
 
-    if (_isAccountAll) {
-      let networkSelected;
-      // console.log('genesisOption', genesisOptions);
-      const accountAllNetworkGenesisHash = window.localStorage.getItem('accountAllNetworkGenesisHash');
-
-      if (!accountAllNetworkGenesisHash) {
-        networkSelected = genesisOptions[0];
-      } else {
-        networkSelected = genesisOptions.find((opt) => opt.value === accountAllNetworkGenesisHash);
-
-        if (!networkSelected) {
-          window.localStorage.setItem('accountAllNetworkGenesisHash', '');
-          networkSelected = genesisOptions[0];
-        }
-      }
-
-      if (networkSelected) {
-        // console.log('networkSelected')
-        updateCurrentNetwork({
-          networkPrefix: networkSelected.networkPrefix,
-          icon: networkSelected.icon,
-          genesisHash: networkSelected.value,
-          networkKey: networkSelected.networkKey,
-          isEthereum: networkSelected.isEthereum
-        });
-      }
-
-      return;
-    }
-
     (async () => {
       let networkSelected;
 

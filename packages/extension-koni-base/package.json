@@ -33,6 +33,7 @@
     "@interlay/interbtc-types": "1.5.10",
     "@kiltprotocol/type-definitions": "0.1.23",
     "@laminar/type-definitions": "0.3.1",
+    "@metamask/safe-event-emitter": "^2.0.0",
     "@metaverse-network-sdk/type-definitions": "^0.0.1-6",
     "@parallel-finance/type-definitions": "1.5.4",
     "@phala/typedefs": "0.2.30",
@@ -60,6 +61,7 @@
     "@zeroio/type-definitions": "0.0.14",
     "axios": "^0.24.0",
     "cross-fetch": "^3.1.5",
+    "eth-simple-keyring": "^4.2.0",
     "ethereumjs-tx": "^2.1.2",
     "eventemitter3": "^4.0.7",
     "graphql": "^16.3.0",
@@ -67,9 +69,10 @@
     "pontem-types-bundle": "1.0.15",
     "protobufjs": "^6.11.2",
     "rxjs": "^7.5.1",
-    "web3": "^1.7.1",
-    "web3-core": "^1.7.1",
-    "web3-eth-contract": "^1.7.1"
+    "web3": "^1.7.3",
+    "web3-core": "^1.7.3",
+    "web3-core-helpers": "^1.7.3",
+    "web3-eth-contract": "^1.7.3"
   },
   "devDependencies": {
     "@subwallet/extension-mocks": "^0.4.5-0"

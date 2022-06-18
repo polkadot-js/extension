@@ -1,5 +1,12 @@
 # CHANGELOG
 
+## 0.4.6 (Koni)
+Build date: Jun 18, 2022.
+
+Update:
+- Support EVM DApp, demo can be found at https://connect.subwallet.app/
+
+
 ## 0.4.5 (Koni)
 Build date: Jun 09, 2022.
 

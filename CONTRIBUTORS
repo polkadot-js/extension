@@ -1,4 +1,4 @@
-     518	Jaco                          	Update issue template (#1085)
+     519	Jaco                          	Bump @polkadot/{api, util} (#1092)
       82	Thibaut Sardan                	Add account filtering feature (#832)
        7	Ivan Rukhavets                	Mention derivation in FAQ (#334)
        4	Amaury Martiny                	PostMessageProvider with on('connected' | 'disconnected') (#279)

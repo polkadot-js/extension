@@ -17,11 +17,11 @@
     "./detectPackage.cjs"
   ],
   "type": "module",
-  "version": "0.44.2-2",
+  "version": "0.44.2-3",
   "main": "index.js",
   "dependencies": {
     "@babel/runtime": "^7.18.3",
-    "@polkadot/extension-inject": "^0.44.2-2",
+    "@polkadot/extension-inject": "^0.44.2-3",
     "@polkadot/networks": "^9.5.1",
     "@polkadot/util": "^9.5.1",
     "@polkadot/util-crypto": "^9.5.1"

@@ -43,6 +43,7 @@ export const ERA_LENGTH_MAP: Record<string, number> = {
   polkadot: 24,
   kusama: 6,
   westend: 24,
+  hydradx: 24,
   default: 24
 };
 

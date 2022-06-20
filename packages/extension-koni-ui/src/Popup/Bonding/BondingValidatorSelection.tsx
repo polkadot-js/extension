@@ -43,7 +43,9 @@ function BondingValidatorSelection ({ className }: Props): React.ReactElement<Pr
   const [sliceIndex, setSliceIndex] = useState(INFINITE_SCROLL_PER_PAGE);
   const [showedValidators, setShowedValidators] = useState<ValidatorInfo[]>([]);
 
-  const _height = window.innerHeight > 600 ? (window.innerHeight * 0.68) : 330;
+  const _height = window.innerHeight !== 600 ? (window.innerHeight * 0.68) : 330;
+
+  console.log(window.innerHeight);
 
   const handleSortByCommission = useCallback(() => {
     if (!sortByCommission) {

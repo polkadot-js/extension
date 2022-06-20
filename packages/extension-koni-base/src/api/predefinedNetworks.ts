@@ -153,7 +153,7 @@ export const PREDEFINED_NETWORKS: Record<string, NetworkJson> = {
     nativeToken: 'GLMR',
     crowdloanUrl: 'https://moonbeam.foundation/moonbeam-crowdloan/',
     decimals: 18,
-    coinGeckoKey: 'moonbeam',
+    coinGeckoKey: 'Moonbeam Foundation',
     evmChainId: 1284
   },
   astar: {
@@ -542,7 +542,7 @@ export const PREDEFINED_NETWORKS: Record<string, NetworkJson> = {
     },
     active: false,
     currentProviderMode: 'ws',
-    currentProvider: 'OnFinality',
+    currentProvider: 'Moonbeam Foundation',
     groups: ['TEST_NET'],
     nativeToken: 'DEV',
     isEthereum: true,
@@ -696,7 +696,7 @@ export const PREDEFINED_NETWORKS: Record<string, NetworkJson> = {
     },
     active: false,
     currentProviderMode: 'ws',
-    currentProvider: 'OnFinality',
+    currentProvider: 'Moonbeam Foundation',
     groups: ['KUSAMA_PARACHAIN'],
     paraId: 2023,
     isEthereum: true,
@@ -740,6 +740,7 @@ export const PREDEFINED_NETWORKS: Record<string, NetworkJson> = {
     currentProvider: 'astar',
     groups: ['KUSAMA_PARACHAIN'],
     nativeToken: 'SDN',
+    evmChainId: 336,
     isEthereum: true
   },
   khala: {

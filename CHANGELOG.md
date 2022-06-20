@@ -1,10 +1,17 @@
 # CHANGELOG
 
+## 0.4.6 (Koni)
+Build date: Jun 18, 2022.
+
+Update:
+- Support EVM DApp, demo can be found at https://connect.subwallet.app/
+
+
 ## 0.4.5 (Koni)
 Build date: Jun 09, 2022.
 
 Update:
-- Support Send / Receive cross-chain assets (update some label and variable) (#35)
+- Support Send / Receive cross-chain assets (update some label and variablea and xc logo) (#35)
 
 ## 0.4.4 (Koni)
 Build date: Jun 08, 2022.

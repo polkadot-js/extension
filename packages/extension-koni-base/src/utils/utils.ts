@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { CrowdloanParaState, NetworkJson } from '@subwallet/extension-base/background/KoniTypes';
+import { AccountAuthType, AccountJson } from '@subwallet/extension-base/background/types';
 import { CLOUDFLARE_PINATA_SERVER } from '@subwallet/extension-koni-base/api/nft/config';
 import { ALL_ACCOUNT_KEY } from '@subwallet/extension-koni-base/constants';
 
@@ -235,4 +236,28 @@ export const getNftProvider = (data: NetworkJson) => {
   }
 
   return '';
+};
+
+export const filterAndSortingAccountByAuthType = (accounts: AccountJson[], accountAuthType: AccountAuthType, sorting = false) => {
+  let rs = [...accounts];
+
+  rs = rs.filter((acc) => acc.address !== 'ALL');
+
+  if (accountAuthType === 'substrate') {
+    rs = rs.filter((acc) => (acc.type !== 'ethereum'));
+  } else if (accountAuthType === 'evm') {
+    rs = rs.filter((acc) => (acc.type === 'ethereum'));
+  } else {
+    if (sorting) {
+      rs.sort((acc, acc2) => {
+        if ((acc.type === 'ethereum' && acc2.type === 'ethereum') || (acc.type !== 'ethereum' && acc2.type !== 'ethereum')) {
+          return 0;
+        } else {
+          return acc.type === 'ethereum' ? 1 : -1;
+        }
+      });
+    }
+  }
+
+  return rs;
 };

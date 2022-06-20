@@ -4,6 +4,7 @@
 import type { ThemeProps } from '../../types';
 
 import { AuthUrlInfo, AuthUrls } from '@subwallet/extension-base/background/handlers/State';
+import { filterAndSortingAccountByAuthType } from '@subwallet/extension-koni-base/utils/utils';
 import { AccountContext } from '@subwallet/extension-koni-ui/components';
 import { forgetSite } from '@subwallet/extension-koni-ui/messaging';
 import WebsiteEntryAccount from '@subwallet/extension-koni-ui/Popup/AuthManagement/WebsiteEntryAccount';
@@ -26,7 +27,8 @@ function WebsiteEntry ({ changeConnectSite, className = '', info, setList, url }
   const [isShowDetail, setShowDetail] = useState<boolean>(false);
   const { hostname } = new URL(info.url);
   const { accounts } = useContext(AccountContext);
-  const accountsWithoutAllAndEth = accounts.filter((acc) => acc.address !== 'ALL' && acc.type !== 'ethereum');
+  const accountList = filterAndSortingAccountByAuthType(accounts, info?.accountAuthType || 'substrate', true);
+
   const transformId = info.id.replace(/\./g, '-');
 
   const connectAll = useCallback(() => {
@@ -104,7 +106,7 @@ function WebsiteEntry ({ changeConnectSite, className = '', info, setList, url }
               {t<string>('Connect All')}
             </div>
           </div>
-          {accountsWithoutAllAndEth.map((acc) =>
+          {accountList.map((acc) =>
             <WebsiteEntryAccount
               address={acc.address}
               isConnected={info.isAllowedMap[acc.address]}

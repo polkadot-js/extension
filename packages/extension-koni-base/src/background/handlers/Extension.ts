@@ -5,8 +5,8 @@ import Common from '@ethereumjs/common';
 import Extension, { SEED_DEFAULT_LENGTH, SEED_LENGTHS } from '@subwallet/extension-base/background/handlers/Extension';
 import { AuthUrls } from '@subwallet/extension-base/background/handlers/State';
 import { createSubscription, isSubscriptionRunning, unsubscribe } from '@subwallet/extension-base/background/handlers/subscriptions';
-import { AccountsWithCurrentAddress, ApiProps, BalanceJson, BasicTxInfo, BasicTxResponse, BondingOptionInfo, BondingOptionParams, BondingSubmitParams, ChainBondingBasics, ChainRegistry, CrowdloanJson, CustomEvmToken, DeleteEvmTokenParams, DisableNetworkResponse, EvmNftSubmitTransaction, EvmNftTransaction, EvmNftTransactionRequest, EvmTokenJson, NETWORK_ERROR, NetWorkGroup, NetworkJson, NftCollection, NftCollectionJson, NftItem, NftJson, NftTransactionResponse, NftTransferExtra, OptionInputAddress, PriceJson, RequestAccountCreateSuriV2, RequestAccountExportPrivateKey, RequestAuthorization, RequestAuthorizationPerAccount, RequestAuthorizeApproveV2, RequestBatchRestoreV2, RequestCheckCrossChainTransfer, RequestCheckTransfer, RequestCrossChainTransfer, RequestDeriveCreateV2, RequestForgetSite, RequestFreeBalance, RequestJsonRestoreV2, RequestNftForceUpdate, RequestSaveRecentAccount, RequestSeedCreateV2, RequestSeedValidateV2, RequestSettingsType, RequestTransactionHistoryAdd, RequestTransfer, RequestTransferCheckReferenceCount, RequestTransferCheckSupporting, RequestTransferExistentialDeposit, ResponseAccountCreateSuriV2, ResponseAccountExportPrivateKey, ResponseCheckCrossChainTransfer, ResponseCheckTransfer, ResponsePrivateKeyValidateV2, ResponseSeedCreateV2, ResponseSeedValidateV2, ResponseTransfer, StakeWithdrawalParams, StakingJson, StakingRewardJson, SubstrateNftSubmitTransaction, SubstrateNftTransaction, SubstrateNftTransactionRequest, SupportTransferResponse, ThemeTypes, TokenInfo, TransactionHistoryItemType, TransferError, TransferErrorCode, TransferStep, UnbondingSubmitParams, UnlockingStakeInfo, UnlockingStakeParams, ValidateEvmTokenRequest, ValidateEvmTokenResponse, ValidateNetworkRequest, ValidateNetworkResponse } from '@subwallet/extension-base/background/KoniTypes';
-import { AccountJson, AuthorizeRequest, MessageTypes, RequestAccountForget, RequestAuthorizeReject, RequestCurrentAccountAddress, RequestTypes, ResponseAuthorizeList, ResponseType } from '@subwallet/extension-base/background/types';
+import { AccountsWithCurrentAddress, ApiProps, BalanceJson, ChainRegistry, CrowdloanJson, CurrentAccountInfo, CustomEvmToken, DeleteEvmTokenParams, DisableNetworkResponse, EvmNftSubmitTransaction, EvmNftTransaction, EvmNftTransactionRequest, EvmTokenJson, NETWORK_ERROR, NetWorkGroup, NetworkJson, NftCollection, NftCollectionJson, NftItem, NftJson, NftTransactionResponse, NftTransferExtra, OptionInputAddress, PriceJson, RequestAccountCreateSuriV2, RequestAccountExportPrivateKey, RequestAuthorization, RequestAuthorizationPerAccount, RequestAuthorizeApproveV2, RequestBatchRestoreV2, RequestCheckCrossChainTransfer, RequestCheckTransfer, RequestConfirmationComplete, RequestCrossChainTransfer, RequestDeriveCreateV2, RequestForgetSite, RequestFreeBalance, RequestJsonRestoreV2, RequestNftForceUpdate, RequestSaveRecentAccount, RequestSeedCreateV2, RequestSeedValidateV2, RequestSettingsType, RequestTransactionHistoryAdd, RequestTransfer, RequestTransferCheckReferenceCount, RequestTransferCheckSupporting, RequestTransferExistentialDeposit, ResponseAccountCreateSuriV2, ResponseAccountExportPrivateKey, ResponseCheckCrossChainTransfer, ResponseCheckTransfer, ResponsePrivateKeyValidateV2, ResponseSeedCreateV2, ResponseSeedValidateV2, ResponseTransfer, StakingJson, StakingRewardJson, SubstrateNftSubmitTransaction, SubstrateNftTransaction, SubstrateNftTransactionRequest, SupportTransferResponse, ThemeTypes, TokenInfo, TransactionHistoryItemType, TransferError, TransferErrorCode, TransferStep, ValidateEvmTokenRequest, ValidateEvmTokenResponse, ValidateNetworkRequest, ValidateNetworkResponse } from '@subwallet/extension-base/background/KoniTypes';
+import { AccountJson, AuthorizeRequest, MessageTypes, RequestAccountForget, RequestAccountTie, RequestAuthorizeReject, RequestCurrentAccountAddress, RequestTypes, ResponseAuthorizeList, ResponseType } from '@subwallet/extension-base/background/types';
 import { getBondingExtrinsic, getBondingTxInfo, getChainBondingBasics, getTargetValidators, getUnbondingExtrinsic, getUnbondingTxInfo, getUnlockingInfo, getValidatorsInfo, getWithdrawalExtrinsic, getWithdrawalTxInfo } from '@subwallet/extension-koni-base/api/bonding';
 import { initApi } from '@subwallet/extension-koni-base/api/dotsama';
 import { getFreeBalance, subscribeFreeBalance } from '@subwallet/extension-koni-base/api/dotsama/balance';
@@ -17,19 +17,18 @@ import { acalaTransferHandler, getNftTransferExtrinsic, isRecipientSelf, quartzT
 import { getERC20TransactionObject, getEVMTransactionObject, makeERC20Transfer, makeEVMTransfer } from '@subwallet/extension-koni-base/api/web3/transfer';
 import { ERC721Contract, getERC20Contract, getERC721Contract, initWeb3Api } from '@subwallet/extension-koni-base/api/web3/web3';
 import { state } from '@subwallet/extension-koni-base/background/handlers/index';
-import { ALL_ACCOUNT_KEY } from '@subwallet/extension-koni-base/constants';
+import { ALL_ACCOUNT_KEY, ALL_GENESIS_HASH } from '@subwallet/extension-koni-base/constants';
 import { isValidProvider, reformatAddress } from '@subwallet/extension-koni-base/utils/utils';
 import { Transaction } from 'ethereumjs-tx';
 import { Contract } from 'web3-eth-contract';
 
 import { createPair } from '@polkadot/keyring';
-import { decodePair } from '@polkadot/keyring/pair/decode';
 import { KeyringPair, KeyringPair$Json, KeyringPair$Meta } from '@polkadot/keyring/types';
 import { ChainType } from '@polkadot/types/interfaces';
 import { keyring } from '@polkadot/ui-keyring';
 import { accounts as accountsObservable } from '@polkadot/ui-keyring/observable/accounts';
 import { SingleAddress, SubjectInfo } from '@polkadot/ui-keyring/observable/types';
-import { assert, BN, hexToU8a, isHex, u8aToHex, u8aToString } from '@polkadot/util';
+import { assert, BN, hexToU8a, isHex, u8aToString } from '@polkadot/util';
 import { base64Decode, isEthereumAddress, jsonDecrypt, keyExtractSuri, mnemonicGenerate, mnemonicValidate } from '@polkadot/util-crypto';
 import { EncryptedJson, KeypairType, Prefix } from '@polkadot/util-crypto/types';
 
@@ -81,18 +80,12 @@ export default class KoniExtension extends Extension {
   };
 
   private accountExportPrivateKey ({ address, password }: RequestAccountExportPrivateKey): ResponseAccountExportPrivateKey {
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
-    const exportedJson = keyring.backupAccount(keyring.getPair(address), password);
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
-    const decoded = decodePair(password, base64Decode(exportedJson.encoded), exportedJson.encoding.type);
-
-    return {
-      privateKey: u8aToHex(decoded.secretKey)
-    };
+    return state.accountExportPrivateKey({ address, password });
   }
 
   private accountsGetAllWithCurrentAddress (id: string, port: chrome.runtime.Port): boolean {
     const cb = createSubscription<'pri(accounts.subscribeWithCurrentAddress)'>(id, port);
+
     const subscription = accountsObservable.subject.subscribe((storedAccounts: SubjectInfo): void => {
       const transformedAccounts = transformAccounts(storedAccounts);
 
@@ -109,13 +102,23 @@ export default class KoniExtension extends Extension {
         accounts
       };
 
-      state.getCurrentAccount((accountInfo) => {
-        if (accountInfo) {
-          accountsWithCurrentAddress.currentAddress = accountInfo.address;
-        }
+      setTimeout(() => {
+        state.getCurrentAccount((accountInfo) => {
+          if (accountInfo) {
+            accountsWithCurrentAddress.currentAddress = accountInfo.address;
 
-        cb(accountsWithCurrentAddress);
-      });
+            if (accountInfo.address === ALL_ACCOUNT_KEY) {
+              accountsWithCurrentAddress.currentGenesisHash = accountInfo.currentGenesisHash;
+            } else {
+              const acc = accounts.find((a) => (a.address === accountInfo.address));
+
+              accountsWithCurrentAddress.currentGenesisHash = acc?.genesisHash || ALL_GENESIS_HASH;
+            }
+          }
+
+          cb(accountsWithCurrentAddress);
+        });
+      }, 100);
     });
 
     port.onDisconnect.addListener((): void => {
@@ -161,7 +164,7 @@ export default class KoniExtension extends Extension {
     return new Promise<AuthUrls>((resolve, reject) => {
       state.getAuthorize((rs: AuthUrls) => {
         const accounts = accountsObservable.subject.getValue();
-        const addressList = Object.keys(accounts).filter((address) => accounts[address].type !== 'ethereum');
+        const addressList = Object.keys(accounts);
         const urlList = Object.keys(rs);
 
         if (Object.keys(rs[urlList[0]].isAllowedMap).toString() !== addressList.toString()) {
@@ -326,6 +329,9 @@ export default class KoniExtension extends Extension {
       assert(value, 'The source is not known');
 
       value[url].isAllowedMap[address] = connectValue;
+
+      console.log('Devbu: ', value);
+
       state.setAuthorize(value, () => {
         callBack && callBack(value);
       });
@@ -351,7 +357,7 @@ export default class KoniExtension extends Extension {
   }
 
   private toggleBalancesVisibility (id: string, port: chrome.runtime.Port) {
-    const cb = createSubscription<'pri(currentAccount.changeBalancesVisibility)'>(id, port);
+    const cb = createSubscription<'pri(settings.changeBalancesVisibility)'>(id, port);
 
     state.getSettings((value) => {
       const updateValue = {
@@ -373,7 +379,7 @@ export default class KoniExtension extends Extension {
   }
 
   private saveAccountAllLogo (data: string, id: string, port: chrome.runtime.Port) {
-    const cb = createSubscription<'pri(currentAccount.saveAccountAllLogo)'>(id, port);
+    const cb = createSubscription<'pri(settings.saveAccountAllLogo)'>(id, port);
 
     state.getSettings((value) => {
       const updateValue = {
@@ -395,7 +401,7 @@ export default class KoniExtension extends Extension {
   }
 
   private saveTheme (data: ThemeTypes, id: string, port: chrome.runtime.Port) {
-    const cb = createSubscription<'pri(currentAccount.saveTheme)'>(id, port);
+    const cb = createSubscription<'pri(settings.saveTheme)'>(id, port);
 
     state.getSettings((value) => {
       const updateValue = {
@@ -417,7 +423,7 @@ export default class KoniExtension extends Extension {
   }
 
   private async subscribeSettings (id: string, port: chrome.runtime.Port) {
-    const cb = createSubscription<'pri(currentAccount.subscribeSettings)'>(id, port);
+    const cb = createSubscription<'pri(settings.subscribe)'>(id, port);
 
     const balancesVisibilitySubscription = state.subscribeSettingsSubject().subscribe({
       next: (rs) => {
@@ -433,26 +439,33 @@ export default class KoniExtension extends Extension {
     return await this.getSettings();
   }
 
-  private _saveCurrentAccountAddress (address: string, callback?: () => void) {
+  private _saveCurrentAccountAddress (address: string, callback?: (data: CurrentAccountInfo) => void) {
     state.getCurrentAccount((accountInfo) => {
       if (!accountInfo) {
         accountInfo = {
-          address
+          address,
+          currentGenesisHash: ALL_GENESIS_HASH
         };
       } else {
         accountInfo.address = address;
+
+        if (address !== ALL_ACCOUNT_KEY) {
+          const currentKeyPair = keyring.getAccount(address);
+
+          accountInfo.currentGenesisHash = currentKeyPair?.meta.genesisHash as string || ALL_GENESIS_HASH;
+        }
       }
 
-      state.setCurrentAccount(accountInfo, callback);
+      state.setCurrentAccount(accountInfo, () => {
+        callback && callback(accountInfo);
+      });
     });
   }
 
   private saveCurrentAccountAddress (data: RequestCurrentAccountAddress, id: string, port: chrome.runtime.Port): boolean {
     const cb = createSubscription<'pri(currentAccount.saveAddress)'>(id, port);
 
-    this._saveCurrentAccountAddress(data.address, () => {
-      cb(data);
-    });
+    this._saveCurrentAccountAddress(data.address, cb);
 
     port.onDisconnect.addListener((): void => {
       unsubscribe(id);
@@ -1092,9 +1105,9 @@ export default class KoniExtension extends Extension {
 
       // Estimate with EVM API
       if (tokenInfo && !tokenInfo.isMainToken && tokenInfo.erc20Address) {
-        [,, fee] = await getERC20TransactionObject(tokenInfo.erc20Address, networkKey, from, to, txVal, !!transferAll, web3ApiMap);
+        [, , fee] = await getERC20TransactionObject(tokenInfo.erc20Address, networkKey, from, to, txVal, !!transferAll, web3ApiMap);
       } else {
-        [,, fee] = await getEVMTransactionObject(networkKey, to, txVal, !!transferAll, web3ApiMap);
+        [, , fee] = await getEVMTransactionObject(networkKey, to, txVal, !!transferAll, web3ApiMap);
       }
     } else {
       // Estimate with DotSama API
@@ -2031,6 +2044,25 @@ export default class KoniExtension extends Extension {
     return true;
   }
 
+  private accountsTie2 ({ address, genesisHash }: RequestAccountTie): boolean {
+    return state.setAccountTie(address, genesisHash);
+  }
+
+  private subscribeConfirmations (id: string, port: chrome.runtime.Port) {
+    const cb = createSubscription<'pri(confirmations.subscribe)'>(id, port);
+
+    port.onDisconnect.addListener((): void => {
+      this.cancelSubscription(id);
+    });
+    state.getConfirmationsQueueSubject().subscribe(cb);
+
+    return state.getConfirmationsQueueSubject().getValue();
+  }
+
+  private completeConfirmation (request: RequestConfirmationComplete) {
+    return state.completeConfirmation(request);
+  }
+
   private async getChainBondingBasics (networkJsons: NetworkJson[]) {
     const result: Record<string, ChainBondingBasics> = {};
 
@@ -2366,13 +2398,13 @@ export default class KoniExtension extends Extension {
         return this.triggerAccountsSubscription();
       case 'pri(currentAccount.saveAddress)':
         return this.saveCurrentAccountAddress(request as RequestCurrentAccountAddress, id, port);
-      case 'pri(currentAccount.changeBalancesVisibility)':
+      case 'pri(settings.changeBalancesVisibility)':
         return this.toggleBalancesVisibility(id, port);
-      case 'pri(currentAccount.subscribeSettings)':
+      case 'pri(settings.subscribe)':
         return await this.subscribeSettings(id, port);
-      case 'pri(currentAccount.saveAccountAllLogo)':
+      case 'pri(settings.saveAccountAllLogo)':
         return this.saveAccountAllLogo(request as string, id, port);
-      case 'pri(currentAccount.saveTheme)':
+      case 'pri(settings.saveTheme)':
         return this.saveTheme(request as ThemeTypes, id, port);
       case 'pri(price.getPrice)':
         return await this.getPrice();
@@ -2482,6 +2514,12 @@ export default class KoniExtension extends Extension {
         return this.recoverDotSamaApi(request as string);
       case 'pri(networkMap.enableMany)':
         return this.enableNetworks(request as string[]);
+      case 'pri(accounts.tie)':
+        return this.accountsTie2(request as RequestAccountTie);
+      case 'pri(confirmations.subscribe)':
+        return this.subscribeConfirmations(id, port);
+      case 'pri(confirmations.complete)':
+        return this.completeConfirmation(request as RequestConfirmationComplete);
       case 'pri(bonding.getBondingOptions)':
         return await this.getBondingOption(request as BondingOptionParams);
       case 'pri(bonding.getChainBondingBasics)':

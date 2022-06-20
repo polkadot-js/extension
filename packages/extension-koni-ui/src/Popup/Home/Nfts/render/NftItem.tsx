@@ -105,6 +105,7 @@ function NftItem ({ className, collectionId, collectionImage, data, onClickBack 
       } else {
         window.localStorage.setItem('accountAllNetworkGenesisHash', targetNetwork.genesisHash);
       }
+      await tieAccount(account.account.address, targetNetwork.genesisHash);
 
       updateCurrentNetwork(targetNetwork);
     }

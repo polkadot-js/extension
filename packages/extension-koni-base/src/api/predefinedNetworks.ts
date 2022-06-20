@@ -25,7 +25,8 @@ export const PREDEFINED_NETWORKS: Record<string, NetworkJson> = {
     nativeToken: 'DOT',
     decimals: 10,
     coinGeckoKey: 'polkadot',
-    supportBonding: true
+    supportBonding: true,
+    getStakingOnChain: true
   },
   kusama: {
     key: 'kusama',
@@ -48,7 +49,8 @@ export const PREDEFINED_NETWORKS: Record<string, NetworkJson> = {
     nativeToken: 'KSM',
     decimals: 12,
     coinGeckoKey: 'kusama',
-    supportBonding: true
+    supportBonding: true,
+    getStakingOnChain: true
   },
   westend: {
     key: 'westend',

@@ -8,7 +8,6 @@ import { BN, BN_ONE, BN_ZERO } from '@polkadot/util';
 
 export async function getChainBondingBasics (networkKey: string, dotSamaApi: ApiProps) {
   const apiProps = await dotSamaApi.isReady;
-
   const _era = await apiProps.api.query.staking.currentEra();
   const currentEra = _era.toString();
 
@@ -25,16 +24,17 @@ export async function getChainBondingBasics (networkKey: string, dotSamaApi: Api
   const rawTotalEraStake = _totalEraStake.toHuman() as string;
   const rawTotalIssuance = _totalIssuance.toHuman() as string;
   const numAuctions = _auctionCounter ? _auctionCounter.toHuman() as number : 0;
+
   const totalIssuance = parseFloat(rawTotalIssuance.replaceAll(',', ''));
   const totalEraStake = parseFloat(rawTotalEraStake.replaceAll(',', ''));
-  const maxNominator = parseFloat(rawMaxNominator.replaceAll(',', ''));
+  const maxNominator = rawMaxNominator !== null ? parseFloat(rawMaxNominator.replaceAll(',', '')) : -1;
   const nominatorCount = parseFloat(rawNominatorCount.replaceAll(',', ''));
 
   const inflation = calculateInflation(totalEraStake, totalIssuance, numAuctions, networkKey);
   const stakedReturn = calculateChainStakedReturn(inflation, totalEraStake, totalIssuance, networkKey);
 
   return {
-    isMaxNominators: nominatorCount >= maxNominator,
+    isMaxNominators: maxNominator !== -1 ? nominatorCount >= maxNominator : false,
     stakedReturn
   } as ChainBondingBasics;
 }

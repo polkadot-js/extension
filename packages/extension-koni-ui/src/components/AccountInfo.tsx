@@ -39,9 +39,10 @@ export interface Props {
   isShowBanner?: boolean;
   iconSize?: number;
   isEthereum?: boolean;
+  addressHalfLength?: number;
 }
 
-function AccountInfo ({ address, className, genesisHash, iconSize = 32, isEthereum, isExternal, isHardware, isShowAddress = true, isShowBanner = true, name, parentName, showCopyBtn = true, suri, type: givenType }: Props): React.ReactElement<Props> {
+function AccountInfo ({ address, className, genesisHash, iconSize = 32, isEthereum, isExternal, isHardware, isShowAddress = true, isShowBanner = true, name, parentName, showCopyBtn = true, suri, type: givenType, addressHalfLength }: Props): React.ReactElement<Props> {
   const { t } = useTranslation();
   const { accounts } = useContext(AccountContext);
   const [{ account,
@@ -107,6 +108,10 @@ function AccountInfo ({ address, className, genesisHash, iconSize = 32, isEthere
     const address = (_address || '').toString();
 
     const addressLength = halfLength || 7;
+
+    if (address.length > addressLength * 2) {
+      return address;
+    }
 
     return address.length > 13 ? `${address.slice(0, addressLength)}…${address.slice(-addressLength)}` : address;
   };
@@ -211,7 +216,7 @@ function AccountInfo ({ address, className, genesisHash, iconSize = 32, isEthere
               className='account-info-full-address'
               data-field='address'
             >
-              {_isAccountAll ? t<string>('All Accounts') : toShortAddress(formatted || address || t('<unknown>'), 10)}
+              {_isAccountAll ? t<string>('All Accounts') : toShortAddress(formatted || address || t('<unknown>'), addressHalfLength)}
             </div>}
             {showCopyBtn && <CopyToClipboard text={(formatted && formatted) || ''}>
               <img

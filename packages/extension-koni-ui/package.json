@@ -14,7 +14,7 @@
   },
   "sideEffects": true,
   "type": "module",
-  "version": "0.4.5-0",
+  "version": "0.4.6-1",
   "dependencies": {
     "@babel/runtime": "^7.16.7",
     "@ethereumjs/common": "^2.6.3",
@@ -37,11 +37,11 @@
     "@polkadot/util": "^8.3.1",
     "@polkadot/util-crypto": "^8.3.1",
     "@reduxjs/toolkit": "^1.7.1",
-    "@subwallet/extension-base": "^0.4.5-0",
-    "@subwallet/extension-chains": "^0.4.5-0",
-    "@subwallet/extension-dapp": "^0.4.5-0",
-    "@subwallet/extension-inject": "^0.4.5-0",
-    "@subwallet/extension-koni-base": "^0.4.5-0",
+    "@subwallet/extension-base": "^0.4.6-1",
+    "@subwallet/extension-chains": "^0.4.6-1",
+    "@subwallet/extension-dapp": "^0.4.6-1",
+    "@subwallet/extension-inject": "^0.4.6-1",
+    "@subwallet/extension-koni-base": "^0.4.6-1",
     "boring-avatars": "^1.6.3",
     "bowser": "^2.11.0",
     "classnames": "^2.3.1",
@@ -69,10 +69,10 @@
     "rlp": "^3.0.0",
     "semantic-ui-react": "^2.0.4",
     "styled-components": "^5.3.3",
-    "web3": "^1.7.1"
+    "web3": "^1.7.3"
   },
   "devDependencies": {
-    "@subwallet/extension-mocks": "^0.4.5-0",
+    "@subwallet/extension-mocks": "^0.4.6-1",
     "@types/bn.js": "^4.11.6",
     "@types/enzyme": "^3.10.11",
     "@types/enzyme-adapter-react-16": "^1.0.6",

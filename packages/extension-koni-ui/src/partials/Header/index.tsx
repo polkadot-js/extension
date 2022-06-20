@@ -141,11 +141,7 @@ function Header ({ cancelButtonText, changeAccountCallback, children, className 
   const _onChangeGenesis = useCallback(
     async (genesisHash: string, networkPrefix: number, icon: string, networkKey: string, isEthereum: boolean): Promise<void> => {
       if (account) {
-        if (!isAccountAll(account.address)) {
-          await tieAccount(account.address, genesisHash || null);
-        } else {
-          window.localStorage.setItem('accountAllNetworkGenesisHash', genesisHash);
-        }
+        await tieAccount(account.address, genesisHash || null);
 
         updateCurrentNetwork({
           networkPrefix,

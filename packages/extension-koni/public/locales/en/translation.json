@@ -360,5 +360,22 @@
   "To perform the transaction, please make sure the selected network in Original Chain is activated first.": "",
   "Transfer": "",
   "Origin Account": "",
-  "To perform the transaction, please make sure the selected network in Origin Chain is activated first.": ""
+  "To perform the transaction, please make sure the selected network in Origin Chain is activated first.": "",
+  "You don't have any evm account. Please create, import or restore an account to continue": "",
+  "on": "",
+  "Sign Method": "",
+  "Raw Data": "",
+  "Sign Message": "",
+  "Sign": "",
+  "Send Transaction": "",
+  "request to send transaction from": "",
+  "Switch network": "",
+  "request to switch network of": "",
+  "Switch": "",
+  "Password": "",
+  "Received Account / Contract Address": "",
+  "Amount": "",
+  "Data": "",
+  "Estimate Gas": "",
+  "Any chain": ""
 }

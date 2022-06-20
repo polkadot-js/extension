@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { NetWorkMetadataDef } from '@subwallet/extension-base/background/KoniTypes';
+import { ALL_NETWORK_KEY } from '@subwallet/extension-koni-base/constants';
 import { Link } from '@subwallet/extension-koni-ui/components';
 import useTranslation from '@subwallet/extension-koni-ui/hooks/useTranslation';
 import { hasAnyChildTokenBalance } from '@subwallet/extension-koni-ui/Popup/Home/ChainBalances/utils';
@@ -48,7 +49,7 @@ function isAllowToShow (
   currentNetworkKey: string,
   networkKey: string,
   balanceInfo?: BalanceInfo): boolean {
-  if (currentNetworkKey !== 'all' || ['polkadot', 'kusama'].includes(networkKey)) {
+  if (currentNetworkKey !== ALL_NETWORK_KEY || ['polkadot', 'kusama'].includes(networkKey)) {
     return true;
   }
 

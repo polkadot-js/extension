@@ -45,8 +45,6 @@ function BondingValidatorSelection ({ className }: Props): React.ReactElement<Pr
 
   const _height = window.innerHeight !== 600 ? (window.innerHeight * 0.68) : 330;
 
-  console.log(window.innerHeight);
-
   const handleSortByCommission = useCallback(() => {
     if (!sortByCommission) {
       setSortByReturn(false);

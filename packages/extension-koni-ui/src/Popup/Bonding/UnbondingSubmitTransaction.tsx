@@ -65,6 +65,12 @@ function UnbondingSubmitTransaction ({ className }: Props): React.ReactElement<P
     }
   }, [amount, bondedAmount, isClickNext, networkJson.decimals, networkJson.nativeToken, show, showAuth, showResult]);
 
+  const convertToBN = useCallback(() => {
+    const stringValue = (parseFloat(bondedAmount.toString()) * (10 ** (networkJson.decimals as number))).toString();
+
+    return new BN(stringValue);
+  }, [bondedAmount, networkJson.decimals]);
+
   const handleResend = useCallback(() => {
     setExtrinsicHash('');
     setIsTxSuccess(false);
@@ -142,7 +148,7 @@ function UnbondingSubmitTransaction ({ className }: Props): React.ReactElement<P
             autoFocus
             className={'submit-bond-amount-input'}
             decimals={networkJson.decimals}
-            defaultValue={bondedAmount.toString()}
+            defaultValue={convertToBN()}
             help={`Type the amount you want to unstake. The maximum amount is ${bondedAmount} ${networkJson.nativeToken as string}`}
             inputAddressHelp={''}
             isError={false}
@@ -150,6 +156,7 @@ function UnbondingSubmitTransaction ({ className }: Props): React.ReactElement<P
             label={t<string>('Amount')}
             onChange={handleChangeAmount}
             placeholder={'0'}
+            siDecimals={networkJson.decimals}
             siSymbol={networkJson.nativeToken}
           />
         </div>

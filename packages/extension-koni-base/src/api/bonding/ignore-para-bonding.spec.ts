@@ -9,6 +9,11 @@ import { ApiPromise, WsProvider } from '@polkadot/api';
 
 jest.setTimeout(50000);
 
+interface CollatorInfo {
+  owner: string;
+  amount: string;
+}
+
 function calculateChainStakedReturn (inflation: number, totalEraStake: number, totalIssuance: number, networkKey: string) {
   const stakedFraction = totalEraStake / totalIssuance;
   let stakedReturn = inflation / stakedFraction;
@@ -20,23 +25,155 @@ function calculateChainStakedReturn (inflation: number, totalEraStake: number, t
   return stakedReturn;
 }
 
+interface ValidatorInfo {
+  address: string;
+  totalStake: number;
+  ownStake: number;
+  otherStake: number;
+  nominatorCount: number;
+  commission: number;
+  expectedReturn: number;
+  blocked: boolean;
+  identity?: string;
+  isVerified: boolean;
+  minBond: number;
+  isNominated: boolean; // this validator has been staked to before
+}
+
+interface CollatorExtraInfo {
+  active: boolean,
+  identity?: string,
+  isVerified: boolean,
+  delegationCount: number,
+  bond: number,
+  minDelegation: number
+}
+
+function parseRawNumber (value: string) {
+  return parseFloat(value.replaceAll(',', ''));
+}
+
 describe('test DotSama APIs', () => {
   test('test get Validator', async () => {
     const provider = new WsProvider(getCurrentProvider(PREDEFINED_NETWORKS.moonbeam), DOTSAMA_AUTO_CONNECT_MS);
     const api = new ApiPromise({ provider });
     const apiPromise = await api.isReady;
+    const decimals = PREDEFINED_NETWORKS.moonbeam.decimals as number;
+    const address = '0xf71C6143917BD7DaC2572BCF2bd456B0AaE3Fb2c';
 
-    const resp = await apiPromise.query.parachainStaking.candidatePool();
+    const allValidators: ValidatorInfo[] = [];
 
-    console.log(resp.toHuman());
+    const [_allCollators, _delegatorState] = await Promise.all([
+      apiPromise.query.parachainStaking.candidatePool(),
+      apiPromise.query.parachainStaking.delegatorState(address)
+    ]);
 
-    const validatorInfo = await apiPromise.query.parachainStaking.candidateInfo('0x10023fA70Ed528E4F28915bf210f6e87b057c08E');
+    const rawDelegatorState = _delegatorState.toHuman() as Record<string, any> | null;
+    const rawAllCollators = _allCollators.toHuman() as unknown as CollatorInfo[];
 
-    console.log(validatorInfo.toHuman());
+    for (const collator of rawAllCollators) {
+      allValidators.push({
+        address: collator.owner,
+        totalStake: parseRawNumber(collator.amount) / 10 ** decimals,
+        ownStake: 0,
+        otherStake: 0,
+        nominatorCount: 0,
+        commission: -1,
+        expectedReturn: 0,
+        blocked: false,
+        isVerified: false,
+        minBond: 0,
+        isNominated: false
+      });
+    }
+
+    const bondedValidators: string[] = [];
+
+    if (rawDelegatorState !== null) {
+      const validatorList = rawDelegatorState.delegations as Record<string, any>[];
+
+      for (const _validator of validatorList) {
+        bondedValidators.push(_validator.owner as string);
+      }
+    }
+
+    const extraInfoMap: Record<string, CollatorExtraInfo> = {};
+
+    await Promise.all(allValidators.map(async (validator) => {
+      const [_info, _identity] = await Promise.all([
+        apiPromise.query.parachainStaking.candidateInfo(validator.address),
+        apiPromise.query.identity.identityOf(validator.address)
+      ]);
+
+      const rawInfo = _info.toHuman() as Record<string, any>;
+      const rawIdentity = _identity.toHuman() as Record<string, any> | null;
+
+      const bond = parseRawNumber(rawInfo?.bond as string);
+      const delegationCount = parseRawNumber(rawInfo?.delegationCount as string);
+      const minDelegation = parseRawNumber(rawInfo?.lowestTopDelegationAmount as string);
+      const active = rawInfo?.status === 'Active';
+
+      let isReasonable = false;
+      let identity;
+
+      if (rawIdentity !== null) {
+        // Check if identity is eth address
+        const _judgements = rawIdentity.judgements as any[];
+
+        if (_judgements.length > 0) {
+          isReasonable = true;
+        }
+
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+        const displayName = rawIdentity?.info?.display?.Raw as string;
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+        const legal = rawIdentity?.info?.legal?.Raw as string;
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+        const web = rawIdentity?.info?.web?.Raw as string;
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+        const riot = rawIdentity?.info?.riot?.Raw as string;
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+        const email = rawIdentity?.info?.email?.Raw as string;
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+        const twitter = rawIdentity?.info?.twitter?.Raw as string;
+
+        if (!displayName.startsWith('0x')) {
+          // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+          identity = rawIdentity?.info?.display?.Raw as string;
+        } else {
+          identity = legal || twitter || web || email || riot;
+        }
+      }
+
+      extraInfoMap[validator.address] = {
+        identity,
+        isVerified: isReasonable,
+        bond: bond / 10 ** decimals,
+        minDelegation: minDelegation / 10 ** decimals,
+        delegationCount,
+        active
+      } as CollatorExtraInfo;
+    }));
+
+    for (const validator of allValidators) {
+      if (bondedValidators.includes(validator.address)) {
+        validator.isNominated = true;
+      }
+
+      validator.minBond = extraInfoMap[validator.address].minDelegation;
+      validator.ownStake = extraInfoMap[validator.address].bond;
+      validator.blocked = !extraInfoMap[validator.address].active;
+      validator.identity = extraInfoMap[validator.address].identity;
+      validator.isVerified = extraInfoMap[validator.address].isVerified;
+      validator.otherStake = validator.totalStake - validator.ownStake;
+      validator.nominatorCount = extraInfoMap[validator.address].delegationCount;
+    }
+
+    console.log(allValidators);
   });
 
   test('get chain APY', async () => {
-    const provider = new WsProvider(getCurrentProvider(PREDEFINED_NETWORKS.hydradx), DOTSAMA_AUTO_CONNECT_MS);
+    const provider = new WsProvider(getCurrentProvider(PREDEFINED_NETWORKS.moonbeam), DOTSAMA_AUTO_CONNECT_MS);
     const api = new ApiPromise({ provider });
     const apiPromise = await api.isReady;
 
@@ -48,7 +185,7 @@ describe('test DotSama APIs', () => {
     const _totalIssuance = totalIssuance.toHuman() as string;
     const parsedTotalIssuance = parseFloat(_totalIssuance.replaceAll(',', ''));
 
-    const stakedReturn = calculateChainStakedReturn(0.025, parsedTotalStake, parsedTotalIssuance, 'moonbeam');
+    const stakedReturn = calculateChainStakedReturn(2.5, parsedTotalStake, parsedTotalIssuance, 'moonbeam');
 
     console.log(stakedReturn); // might or might not be right
   });

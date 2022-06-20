@@ -3,14 +3,27 @@
 
 import stackingEmptyData from '@subwallet/extension-koni-ui/assets/stacking-empty-list.png';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
-import React from 'react';
+import React, { useCallback } from 'react';
 import styled from 'styled-components';
 
 interface Props extends ThemeProps {
   className?: string;
+  isExternalAccount: boolean;
+  isHardwareAccount: boolean;
+  isAccountAll: boolean;
 }
 
-function StakingEmptyList ({ className }: Props): React.ReactElement {
+function StakingEmptyList ({ className, isAccountAll, isExternalAccount, isHardwareAccount }: Props): React.ReactElement {
+  const getText = useCallback(() => {
+    if (isAccountAll) {
+      return 'No staking data was recorded';
+    } else if (isHardwareAccount || isExternalAccount) {
+      return 'Staking from this account is not supported yet';
+    }
+
+    return '';
+  }, [isAccountAll, isExternalAccount, isHardwareAccount]);
+
   return (
     <div className={`${className || ''} empty-list stacking-empty-list`}>
       <img
@@ -18,6 +31,9 @@ function StakingEmptyList ({ className }: Props): React.ReactElement {
         className='empty-list__img'
         src={stackingEmptyData}
       />
+      {
+        (isAccountAll || (isHardwareAccount || isExternalAccount)) && <div className={'empty-list__text'}>{getText()}</div>
+      }
     </div>
   );
 }
@@ -38,7 +54,7 @@ export default styled(StakingEmptyList)`
   }
 
   .empty-list__text {
-    padding: 215px 15px 0;
+    padding: 15px 15px 0;
     font-size: 15px;
     line-height: 26px;
     text-align: center;

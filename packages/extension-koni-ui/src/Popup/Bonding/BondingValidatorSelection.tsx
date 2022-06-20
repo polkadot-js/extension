@@ -330,6 +330,7 @@ export default React.memo(styled(BondingValidatorSelection)(({ theme }: Props) =
     padding-left: 15px;
     padding-right: 15px;
     overflow-y: scroll;
+    scrollbar-width: thin;
   }
 
   .scroll-container {

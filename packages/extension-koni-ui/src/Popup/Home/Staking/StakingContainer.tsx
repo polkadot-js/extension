@@ -33,6 +33,8 @@ function StakingContainer ({ className, data, loading, priceMap }: Props): React
   }, [navigate]);
 
   const isAccountAll = useIsAccountAll();
+  const isExternalAccount = account?.isExternal;
+  const isHardwareAccount = account?.isHardware;
 
   return (
     <div className={className}>
@@ -42,7 +44,11 @@ function StakingContainer ({ className, data, loading, priceMap }: Props): React
 
         {/* @ts-ignore */}
         {data.length === 0 && !loading &&
-          <EmptyList />
+          <EmptyList
+            isAccountAll={isAccountAll}
+            isExternalAccount={isExternalAccount}
+            isHardwareAccount={isHardwareAccount}
+          />
         }
 
         {data.length > 0 && !loading && <div className={'staking-item-container'}>
@@ -77,7 +83,7 @@ function StakingContainer ({ className, data, loading, priceMap }: Props): React
         }
 
         {
-          !loading && !isAccountAll && <div className={'staking-button-container'}>
+          !loading && !isAccountAll && !isHardwareAccount && !isExternalAccount && <div className={'staking-button-container'}>
             <Button
               className={'staking-button'}
               onClick={handleNavigateBonding}

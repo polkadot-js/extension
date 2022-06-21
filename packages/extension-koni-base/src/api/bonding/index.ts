@@ -154,11 +154,13 @@ export async function getValidatorsInfo (networkKey: string, dotSamaApi: ApiProp
       // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
       const twitter = identityInfo?.info?.twitter?.Raw as string;
 
-      if (!displayName.startsWith('0x')) {
+      if (displayName && !displayName.startsWith('0x')) {
         // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-        identity = identityInfo?.info?.display?.Raw as string;
+        identity = displayName;
+      } else if (legal && !legal.startsWith('0x')) {
+        identity = legal;
       } else {
-        identity = legal || twitter || web || email || riot;
+        identity = twitter || web || email || riot;
       }
     }
 

@@ -68,6 +68,12 @@ describe('test DotSama APIs', () => {
       apiPromise.query.parachainStaking.delegatorState(address)
     ]);
 
+    const _maxDelegatorPerCandidate = apiPromise.consts.parachainStaking.maxTopDelegationsPerCandidate.toHuman() as string;
+    const maxDelegatorPerCandidate = parseRawNumber(_maxDelegatorPerCandidate);
+
+    const _maxDelegation = apiPromise.consts.parachainStaking.maxDelegationsPerDelegator.toHuman() as string;
+    const maxDelegations = parseRawNumber(_maxDelegation);
+
     const rawDelegatorState = _delegatorState.toHuman() as Record<string, any> | null;
     const rawAllCollators = _allCollators.toHuman() as unknown as CollatorInfo[];
 
@@ -137,11 +143,13 @@ describe('test DotSama APIs', () => {
         // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
         const twitter = rawIdentity?.info?.twitter?.Raw as string;
 
-        if (!displayName.startsWith('0x')) {
+        if (displayName && !displayName.startsWith('0x')) {
           // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-          identity = rawIdentity?.info?.display?.Raw as string;
+          identity = displayName;
+        } else if (legal && !legal.startsWith('0x')) {
+          identity = legal;
         } else {
-          identity = legal || twitter || web || email || riot;
+          identity = twitter || web || email || riot;
         }
       }
 
@@ -169,6 +177,11 @@ describe('test DotSama APIs', () => {
       validator.nominatorCount = extraInfoMap[validator.address].delegationCount;
     }
 
+    // TODO: calculate validator returns
+    // TODO: get maxNominator per validator
+
+    console.log(maxDelegations);
+    console.log(maxDelegatorPerCandidate);
     console.log(allValidators);
   });
 

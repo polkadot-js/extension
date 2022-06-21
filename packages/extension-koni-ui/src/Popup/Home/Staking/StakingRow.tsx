@@ -29,10 +29,12 @@ interface Props extends ThemeProps {
   activeStake: string | undefined;
   unbondingStake: string | undefined;
   isAccountAll: boolean;
+  isExternalAccount: boolean;
+  isHardwareAccount: boolean;
   address: string;
 }
 
-function StakingRow ({ activeStake, address, chainName, className, index, isAccountAll, logo, networkKey, price, reward, totalStake, unbondingStake, unit }: Props): React.ReactElement<Props> {
+function StakingRow ({ activeStake, address, chainName, className, index, isAccountAll, isExternalAccount, isHardwareAccount, logo, networkKey, price, reward, totalStake, unbondingStake, unit }: Props): React.ReactElement<Props> {
   const [showReward, setShowReward] = useState(false);
   const [showStakingMenu, setShowStakingMenu] = useState(false);
   const [redeemable, setRedeemable] = useState(0);
@@ -139,7 +141,7 @@ function StakingRow ({ activeStake, address, chainName, className, index, isAcco
               <div className={'balance-description'}>
                 <div>Staking balance</div>
                 {
-                  !isAccountAll && <StakingMenu
+                  !isAccountAll && !isHardwareAccount && !isExternalAccount && <StakingMenu
                     bondedAmount={activeStake as string}
                     networkKey={networkKey}
                     nextWithdrawal={nextWithdrawal}

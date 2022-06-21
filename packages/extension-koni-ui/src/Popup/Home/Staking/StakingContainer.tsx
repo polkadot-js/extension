@@ -115,6 +115,8 @@ function StakingContainer ({ className, data, loading, priceMap }: Props): React
                 chainName={name}
                 index={index}
                 isAccountAll={isAccountAll}
+                isExternalAccount={isExternalAccount}
+                isHardwareAccount={isHardwareAccount}
                 key={index}
                 logo={icon}
                 networkKey={item.chainId}

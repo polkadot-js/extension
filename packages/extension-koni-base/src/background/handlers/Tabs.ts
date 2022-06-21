@@ -29,8 +29,10 @@ function stripUrl (url: string): string {
 
 function transformAccountsV2 (accounts: SubjectInfo, anyType = false, url: string, authList: AuthUrls, accountAuthType?: AccountAuthType): InjectedAccount[] {
   const shortenUrl = stripUrl(url);
-  const accountSelected = Object.keys(authList[shortenUrl].isAllowedMap)
-    .filter((address) => authList[shortenUrl].isAllowedMap[address]);
+  const accountSelected = authList[shortenUrl]
+    ? Object.keys(authList[shortenUrl].isAllowedMap)
+      .filter((address) => authList[shortenUrl].isAllowedMap[address])
+    : [];
 
   let authTypeFilter = ({ type }: SingleAddress) => true;
 
@@ -476,7 +478,14 @@ export default class KoniTabs extends Tabs {
     }
 
     if (type !== 'pub(authorize.tabV2)' || !this.isEvmPublicRequest(type, request as RequestArguments)) {
-      this.#koniState.ensureUrlAuthorizedV2(url);
+      await this.#koniState.ensureUrlAuthorizedV2(url)
+        .catch((e: Error) => {
+          if (type.startsWith('evm')) {
+            throw new EvmRpcError('INTERNAL_ERROR', e.message);
+          } else {
+            throw e;
+          }
+        });
     }
 
     switch (type) {

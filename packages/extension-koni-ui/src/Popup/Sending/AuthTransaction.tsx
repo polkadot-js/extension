@@ -139,7 +139,6 @@ function AuthTransaction ({ className, isDonation, feeInfo: [fee, feeDecimals, f
   );
 
   const handlerResolve = useCallback(async (result: SignerResult) => {
-    console.log(result);
     if (qrId) {
       await resolveTransferQr({ id: qrId, data: result });
     }

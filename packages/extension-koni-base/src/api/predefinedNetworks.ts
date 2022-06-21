@@ -69,9 +69,7 @@ export const PREDEFINED_NETWORKS: Record<string, NetworkJson> = {
     currentProviderMode: 'ws',
     groups: ['RELAY_CHAIN', 'TEST_NET'],
     nativeToken: 'WND',
-    decimals: 12,
-    supportBonding: true,
-    getStakingOnChain: true
+    decimals: 12
   },
   rococo: {
     key: 'rococo',
@@ -515,9 +513,7 @@ export const PREDEFINED_NETWORKS: Record<string, NetworkJson> = {
     currentProvider: 'Aleph Zero Foundation',
     groups: ['TEST_NET'],
     nativeToken: 'TZERO',
-    decimals: 12,
-    getStakingOnChain: true,
-    supportBonding: true
+    decimals: 12
   },
   opal: {
     key: 'opal',

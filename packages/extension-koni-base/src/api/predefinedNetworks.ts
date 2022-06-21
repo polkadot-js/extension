@@ -762,9 +762,9 @@ export const PREDEFINED_NETWORKS: Record<string, NetworkJson> = {
     crowdloanUrl: 'https://polkadot.js.org/apps/#/parachains/crowdloan',
     decimals: 12
   },
-  bifrost: {
+  bifrost_ksm: {
     key: 'bifrost',
-    chain: 'Bifrost',
+    chain: 'Bifrost Kusama',
     genesisHash: '0x9f28c6a68e0fc9646eff64935684f6eeeece527e37bbe1f213d22caa1d9d6bed',
     ss58Format: 6,
     providers: {
@@ -778,6 +778,24 @@ export const PREDEFINED_NETWORKS: Record<string, NetworkJson> = {
     currentProvider: 'OnFinality',
     groups: ['KUSAMA_PARACHAIN'],
     paraId: 2001,
+    nativeToken: 'BNC',
+    crowdloanUrl: 'https://bifrost.app/vcrowdloan',
+    decimals: 12,
+    coinGeckoKey: 'bifrost-native-coin'
+  },
+  bifrost_dot: {
+    key: 'bifrost_dot',
+    chain: 'Bifrost Polkadot',
+    genesisHash: '0x262e1b2ad728475fd6fe88e62d34c200abe6fd693931ddad144059b1eb884e5b',
+    ss58Format: 6,
+    providers: {
+      Liebi: 'wss://hk.p.bifrost-rpc.liebi.com/ws'
+    },
+    active: false,
+    currentProviderMode: 'ws',
+    currentProvider: 'Liebi',
+    groups: ['KUSAMA_PARACHAIN'],
+    paraId: 2030,
     nativeToken: 'BNC',
     crowdloanUrl: 'https://bifrost.app/vcrowdloan',
     decimals: 12,
@@ -1182,7 +1200,7 @@ export const PREDEFINED_NETWORKS: Record<string, NetworkJson> = {
     },
     active: false,
     currentProviderMode: 'ws',
-    currentProvider: 'Crab',
+    currentProvider: 'Dwellir',
     groups: ['KUSAMA_PARACHAIN'],
     paraId: 2105,
     nativeToken: 'CRAB',

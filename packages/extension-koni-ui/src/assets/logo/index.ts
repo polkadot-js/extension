@@ -25,7 +25,9 @@ const LogosMap: Record<string, string> = {
   // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
   basilisk: require('./basilisk.png'),
   // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-  bifrost: require('./bifrost.svg'),
+  bifrost_ksm: require('./bifrost.svg'),
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+  bifrost_dot: require('./bifrost.svg'),
   // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
   bifrost_testnet: require('./bifrost.svg'),
   // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment

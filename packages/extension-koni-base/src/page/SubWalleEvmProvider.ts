@@ -53,7 +53,7 @@ export class SubWalletEvmProvider extends SafeEventEmitter implements EvmProvide
       }
     })
       .then((done) => {
-        this._subscribed = done;
+        this._subscribed = true;
       }).catch(console.error);
   }
 
@@ -73,8 +73,7 @@ export class SubWalletEvmProvider extends SafeEventEmitter implements EvmProvide
                 .then((accounts) => {
                   // @ts-ignore
                   resolve(accounts);
-                }
-                ).catch(reject);
+                }).catch(reject);
             })
             .catch(reject);
         });

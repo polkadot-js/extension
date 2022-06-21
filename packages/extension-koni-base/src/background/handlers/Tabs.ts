@@ -464,8 +464,8 @@ export default class KoniTabs extends Tabs {
     return true;
   }
 
-  public isEvmPublicRequest (type: string, { method }: RequestArguments) {
-    if (type === 'evm(request)' && ['eth_chainId'].includes(method)) {
+  public isEvmPublicRequest (type: string, request: RequestArguments) {
+    if (type === 'evm(request)' && ['eth_chainId'].includes(request?.method)) {
       return true;
     } else {
       return false;
@@ -477,7 +477,7 @@ export default class KoniTabs extends Tabs {
       return this.redirectIfPhishing(url);
     }
 
-    if (type !== 'pub(authorize.tabV2)' || !this.isEvmPublicRequest(type, request as RequestArguments)) {
+    if (type !== 'pub(authorize.tabV2)' && !this.isEvmPublicRequest(type, request as RequestArguments)) {
       await this.#koniState.ensureUrlAuthorizedV2(url)
         .catch((e: Error) => {
           if (type.startsWith('evm')) {

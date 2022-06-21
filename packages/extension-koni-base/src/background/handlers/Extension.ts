@@ -5,7 +5,7 @@ import Common from '@ethereumjs/common';
 import Extension, { SEED_DEFAULT_LENGTH, SEED_LENGTHS } from '@subwallet/extension-base/background/handlers/Extension';
 import { AuthUrls } from '@subwallet/extension-base/background/handlers/State';
 import { createSubscription, isSubscriptionRunning, unsubscribe } from '@subwallet/extension-base/background/handlers/subscriptions';
-import { AccountExternalError, AccountExternalErrorCode, AccountsWithCurrentAddress, ApiProps, BalanceJson, BasicTxInfo, BasicTxResponse, BondingOptionInfo, BondingOptionParams, BondingSubmitParams, ChainBondingBasics, ChainRegistry, CrowdloanJson, CurrentAccountInfo, CustomEvmToken, DeleteEvmTokenParams, DisableNetworkResponse, EvmNftSubmitTransaction, EvmNftTransaction, EvmNftTransactionRequest, EvmTokenJson, NETWORK_ERROR, NetWorkGroup, NetworkJson, NftCollection, NftCollectionJson, NftItem, NftJson, NftTransactionResponse, NftTransferExtra, OptionInputAddress, PriceJson, QRRequestPromise, QRRequestPromiseStatus, RequestAccountCreateExternalV2, RequestAccountCreateSuriV2, RequestAccountExportPrivateKey, RequestAccountMeta, RequestAuthorization, RequestAuthorizationPerAccount, RequestAuthorizeApproveV2, RequestBatchRestoreV2, RequestCheckCrossChainTransfer, RequestCheckTransfer, RequestConfirmationComplete, RequestCrossChainTransfer, RequestCrossChainTransferQR, RequestDeriveCreateV2, RequestForgetSite, RequestFreeBalance, RequestJsonRestoreV2, RequestNftForceUpdate, RequestParseTransactionEVM, RequestQrSignEVM, RequestRejectQRTransfer, RequestResolveQRTransfer, RequestSaveRecentAccount, RequestSeedCreateV2, RequestSeedValidateV2, RequestSettingsType, RequestTransactionHistoryAdd, RequestTransfer, RequestTransferCheckReferenceCount, RequestTransferCheckSupporting, RequestTransferExistentialDeposit, RequestTransferQR, ResponseAccountCreateSuriV2, ResponseAccountExportPrivateKey, ResponseAccountMeta, ResponseCheckCrossChainTransfer, ResponseCheckTransfer, ResponseParseTransactionEVM, ResponsePrivateKeyValidateV2, ResponseQrSignEVM, ResponseRejectQRTransfer, ResponseResolveQRTransfer, ResponseSeedCreateV2, ResponseSeedValidateV2, ResponseTransfer, ResponseTransferQr, StakeWithdrawalParams, StakingJson, StakingRewardJson, SubstrateNftSubmitTransaction, SubstrateNftTransaction, SubstrateNftTransactionRequest, SupportTransferResponse, ThemeTypes, TokenInfo, TransactionHistoryItemType, TransferError, TransferErrorCode, TransferStep, UnbondingSubmitParams, UnlockingStakeInfo, UnlockingStakeParams, ValidateEvmTokenRequest, ValidateEvmTokenResponse, ValidateNetworkRequest, ValidateNetworkResponse } from '@subwallet/extension-base/background/KoniTypes';
+import { AccountExternalError, AccountExternalErrorCode, AccountsWithCurrentAddress, ApiProps, BalanceJson, BasicTxInfo, BasicTxResponse, BondingOptionInfo, BondingOptionParams, BondingSubmitParams, ChainBondingBasics, ChainRegistry, CrowdloanJson, CurrentAccountInfo, CustomEvmToken, DeleteEvmTokenParams, DisableNetworkResponse, EvmNftSubmitTransaction, EvmNftTransaction, EvmNftTransactionRequest, EvmTokenJson, NETWORK_ERROR, NetWorkGroup, NetworkJson, NftCollection, NftCollectionJson, NftItem, NftJson, NftTransactionResponse, NftTransferExtra, OptionInputAddress, PriceJson, QRRequestPromise, QRRequestPromiseStatus, RequestAccountCreateExternalV2, RequestAccountCreateSuriV2, RequestAccountExportPrivateKey, RequestAccountMeta, RequestAuthorization, RequestAuthorizationPerAccount, RequestAuthorizeApproveV2, RequestBatchRestoreV2, RequestCheckCrossChainTransfer, RequestCheckTransfer, RequestConfirmationComplete, RequestCrossChainTransfer, RequestCrossChainTransferQR, RequestDeriveCreateV2, RequestForgetSite, RequestFreeBalance, RequestJsonRestoreV2, RequestNftForceUpdate, RequestNftTransferQrEVM, RequestNftTransferQrSubstrate, RequestParseTransactionEVM, RequestQrSignEVM, RequestRejectQRTransfer, RequestResolveQRTransfer, RequestSaveRecentAccount, RequestSeedCreateV2, RequestSeedValidateV2, RequestSettingsType, RequestTransactionHistoryAdd, RequestTransfer, RequestTransferCheckReferenceCount, RequestTransferCheckSupporting, RequestTransferExistentialDeposit, RequestTransferQR, ResponseAccountCreateSuriV2, ResponseAccountExportPrivateKey, ResponseAccountMeta, ResponseCheckCrossChainTransfer, ResponseCheckTransfer, ResponseParseTransactionEVM, ResponsePrivateKeyValidateV2, ResponseQrSignEVM, ResponseRejectQRTransfer, ResponseResolveQRTransfer, ResponseSeedCreateV2, ResponseSeedValidateV2, ResponseTransfer, ResponseTransferQr, StakeWithdrawalParams, StakingJson, StakingRewardJson, SubstrateNftSubmitTransaction, SubstrateNftTransaction, SubstrateNftTransactionRequest, SupportTransferResponse, ThemeTypes, TokenInfo, TransactionHistoryItemType, TransferError, TransferErrorCode, TransferNftError, TransferStep, UnbondingSubmitParams, UnlockingStakeInfo, UnlockingStakeParams, ValidateEvmTokenRequest, ValidateEvmTokenResponse, ValidateNetworkRequest, ValidateNetworkResponse } from '@subwallet/extension-base/background/KoniTypes';
 import { AccountJson, AuthorizeRequest, MessageTypes, RequestAccountForget, RequestAccountTie, RequestAuthorizeReject, RequestCurrentAccountAddress, RequestParseTransactionSubstrate, RequestTypes, ResponseAuthorizeList, ResponseParseTransactionSubstrate, ResponseType } from '@subwallet/extension-base/background/types';
 import { getId } from '@subwallet/extension-base/utils/getId';
 import { getBondingExtrinsic, getBondingTxInfo, getChainBondingBasics, getTargetValidators, getUnbondingExtrinsic, getUnbondingTxInfo, getUnlockingInfo, getValidatorsInfo, getWithdrawalExtrinsic, getWithdrawalTxInfo } from '@subwallet/extension-koni-base/api/bonding';
@@ -14,17 +14,17 @@ import { getFreeBalance, subscribeFreeBalance } from '@subwallet/extension-koni-
 import { parseSubstratePayload } from '@subwallet/extension-koni-base/api/dotsama/parseSubstratePayload';
 import { getTokenInfo } from '@subwallet/extension-koni-base/api/dotsama/registry';
 import { checkReferenceCount, checkSupportTransfer, estimateCrossChainFee, estimateFee, getExistentialDeposit, makeCrossChainTransfer, makeTransfer } from '@subwallet/extension-koni-base/api/dotsama/transfer';
-import { makeCrossChainTransferQr, makeTransferQr } from '@subwallet/extension-koni-base/api/dotsama/transferQr';
+import { makeCrossChainTransferQr, makeNftTransferQr, makeTransferQr } from '@subwallet/extension-koni-base/api/dotsama/transferQr';
 import { SUPPORTED_TRANSFER_SUBSTRATE_CHAIN_NAME } from '@subwallet/extension-koni-base/api/nft/config';
 import { acalaTransferHandler, getNftTransferExtrinsic, isRecipientSelf, quartzTransferHandler, rmrkTransferHandler, statemineTransferHandler, uniqueTransferHandler, unlockAccount } from '@subwallet/extension-koni-base/api/nft/transfer';
 import { parseEVMTransaction } from '@subwallet/extension-koni-base/api/web3/parseEVMTransaction';
 import { getERC20TransactionObject, getEVMTransactionObject, makeERC20Transfer, makeEVMTransfer } from '@subwallet/extension-koni-base/api/web3/transfer';
-import { makeERC20TransferQr, makeEVMTransferQr } from '@subwallet/extension-koni-base/api/web3/transferQr';
+import { handleTransferNftQr, makeERC20TransferQr, makeEVMTransferQr } from '@subwallet/extension-koni-base/api/web3/transferQr';
 import { ERC721Contract, getERC20Contract, getERC721Contract, initWeb3Api } from '@subwallet/extension-koni-base/api/web3/web3';
 import { state } from '@subwallet/extension-koni-base/background/handlers/index';
 import { ALL_ACCOUNT_KEY, ALL_GENESIS_HASH } from '@subwallet/extension-koni-base/constants';
 import { isValidProvider, reformatAddress } from '@subwallet/extension-koni-base/utils';
-import { createTransactionFromRLP, Transaction as QrTransaction } from '@subwallet/extension-koni-base/utils/eth';
+import { createTransactionFromRLP, signatureToHex, Transaction as QrTransaction } from '@subwallet/extension-koni-base/utils/eth';
 import BigN from 'bignumber.js';
 import { Transaction } from 'ethereumjs-tx';
 import { SignedTransaction as Web3SignedTransaction, TransactionConfig } from 'web3-core';
@@ -36,7 +36,7 @@ import { ChainType } from '@polkadot/types/interfaces';
 import { keyring } from '@polkadot/ui-keyring';
 import { accounts as accountsObservable } from '@polkadot/ui-keyring/observable/accounts';
 import { SingleAddress, SubjectInfo } from '@polkadot/ui-keyring/observable/types';
-import { assert, BN, hexStripPrefix, hexToU8a, isHex, numberToHex, u8aToString } from '@polkadot/util';
+import { assert, BN, hexToU8a, isHex, u8aToString } from '@polkadot/util';
 import { base64Decode, isEthereumAddress, jsonDecrypt, keyExtractSuri, mnemonicGenerate, mnemonicValidate } from '@polkadot/util-crypto';
 import { EncryptedJson, KeypairType, Prefix } from '@polkadot/util-crypto/types';
 
@@ -87,7 +87,8 @@ export default class KoniExtension extends Extension {
     return keyring.encodeAddress(key, ss58Format);
   };
 
-  private accountExportPrivateKey ({ address, password }: RequestAccountExportPrivateKey): ResponseAccountExportPrivateKey {
+  private accountExportPrivateKey ({ address,
+    password }: RequestAccountExportPrivateKey): ResponseAccountExportPrivateKey {
     return state.accountExportPrivateKey({ address, password });
   }
 
@@ -2094,7 +2095,9 @@ export default class KoniExtension extends Extension {
     return txState;
   }
 
-  private parseSubstrateTransaction ({ genesisHash, rawPayload, specVersion }: RequestParseTransactionSubstrate): ResponseParseTransactionSubstrate {
+  private parseSubstrateTransaction ({ genesisHash,
+    rawPayload,
+    specVersion }: RequestParseTransactionSubstrate): ResponseParseTransactionSubstrate {
     return parseSubstratePayload(state, genesisHash, rawPayload, specVersion);
   }
 
@@ -2242,6 +2245,23 @@ export default class KoniExtension extends Extension {
     };
   }
 
+  private validateAccountQr (address: string): [Array<TransferNftError>, KeyringPair | undefined] {
+    const errors = [] as Array<TransferNftError>;
+    let keypair: KeyringPair | undefined;
+
+    try {
+      keypair = keyring.getPair(address);
+    } catch (e) {
+      errors.push({
+        code: TransferErrorCode.KEYRING_ERROR,
+        // @ts-ignore
+        message: String(e.message)
+      });
+    }
+
+    return [errors, keypair];
+  }
+
   private async makeTransferQR (id: string, port: chrome.runtime.Port, { from,
     networkKey,
     to,
@@ -2291,6 +2311,7 @@ export default class KoniExtension extends Extension {
               id,
               networkKey,
               setState,
+              updateState,
               to,
               transferAll: !!transferAll,
               value: value || '0',
@@ -2306,6 +2327,7 @@ export default class KoniExtension extends Extension {
             networkKey,
             setState,
             to,
+            updateState,
             transferAll: !!transferAll,
             value: value || '0',
             web3ApiMap
@@ -2420,6 +2442,138 @@ export default class KoniExtension extends Extension {
     return errors;
   }
 
+  private nftTransferCreateQrSubstrate (id: string,
+    port: chrome.runtime.Port,
+    { params,
+      recipientAddress,
+      senderAddress }: RequestNftTransferQrSubstrate): Array<TransferNftError> {
+    const callback = createSubscription<'pri(nft.transfer.qr.create.substrate)'>(id, port);
+    const [errors, fromKeyPair] = this.validateAccountQr(senderAddress);
+
+    if (errors.length) {
+      setTimeout(() => {
+        this.cancelSubscription(id);
+      }, 500);
+
+      return errors;
+    }
+
+    if (params === null) {
+      return [{ code: TransferErrorCode.INVALID_PARAM, message: 'Invalid transfer param' }];
+    }
+
+    if (fromKeyPair) {
+      const id: string = getId();
+
+      state.cleanQrRequest();
+
+      const setState = (promise: QRRequestPromise) => {
+        state.setQrRequestMap(id, promise);
+      };
+
+      const updateState = (promise: Partial<QRRequestPromise>) => {
+        state.updateQrRequest(id, promise);
+      };
+
+      const networkKey = params.networkKey as string;
+      const apiProp = state.getDotSamaApi(networkKey);
+
+      const transferProm = makeNftTransferQr({
+        callback,
+        fromKeypair: fromKeyPair,
+        qrId: id,
+        setState,
+        updateState,
+        apiProp,
+        recipientAddress,
+        params,
+        networkKey
+      });
+
+      transferProm.then(() => {
+        // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
+        console.log(`Start transfer nft from ${senderAddress} to ${recipientAddress}`);
+      })
+        .catch((e) => {
+          // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment,node/no-callback-literal,@typescript-eslint/no-unsafe-member-access
+          callback({ txError: true, isSendingSelf: false });
+          console.error('Error transferring nft', e);
+          setTimeout(() => {
+            unsubscribe(id);
+          }, 500);
+        });
+    }
+
+    port.onDisconnect.addListener((): void => {
+      unsubscribe(id);
+    });
+
+    return errors;
+  }
+
+  private nftTransferCreateQrEvm (
+    id: string,
+    port: chrome.runtime.Port,
+    { networkKey,
+      rawTransaction,
+      recipientAddress,
+      senderAddress }: RequestNftTransferQrEVM
+  ): Array<TransferNftError> {
+    const callback = createSubscription<'pri(nft.transfer.qr.create.evm)'>(id, port);
+    const network = state.getNetworkMapByKey(networkKey);
+    const isSendingSelf = reformatAddress(senderAddress, 1) === reformatAddress(recipientAddress, 1);
+
+    try {
+      const web3ApiMap = state.getWeb3ApiMap();
+
+      const id: string = getId();
+
+      state.cleanQrRequest();
+
+      const setState = (promise: QRRequestPromise) => {
+        state.setQrRequestMap(id, promise);
+      };
+
+      const updateState = (promise: Partial<QRRequestPromise>) => {
+        state.updateQrRequest(id, promise);
+      };
+
+      const transferProm = handleTransferNftQr({
+        callback,
+        chainId: network.evmChainId || 1,
+        isSendingSelf: isSendingSelf,
+        id: id,
+        setState,
+        updateState,
+        web3ApiMap,
+        rawTransaction,
+        networkKey,
+        from: senderAddress
+      });
+
+      transferProm.then(() => {
+        // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
+        console.log(`Start transfer nft from ${senderAddress} to ${recipientAddress}`);
+      })
+        .catch((e) => {
+          // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment,node/no-callback-literal,@typescript-eslint/no-unsafe-member-access
+          callback({ txError: true, isSendingSelf: false });
+          console.error('Error transferring nft', e);
+          setTimeout(() => {
+            unsubscribe(id);
+          }, 500);
+        });
+    } catch (e) {
+      return [{ code: TransferErrorCode.TRANSFER_ERROR, message: (e as Error).message }];
+    }
+
+    port.onDisconnect.addListener((): void => {
+      unsubscribe(id);
+    });
+
+    return [];
+  }
+
   private rejectQrTransfer (request: RequestRejectQRTransfer): ResponseRejectQRTransfer {
     const { id } = request;
 
@@ -2527,12 +2681,8 @@ export default class KoniExtension extends Extension {
       signed = await web3.eth.accounts.signTransaction(txObject, parsedPrivateKey);
     }
 
-    const v = parseInt(signed.v);
-
-    const result = hexStripPrefix(signed.r) + hexStripPrefix(signed.s) + hexStripPrefix(numberToHex(v));
-
     return {
-      signature: result
+      signature: signatureToHex(signed)
     };
   }
 
@@ -2549,7 +2699,12 @@ export default class KoniExtension extends Extension {
   private async getBondingOption ({ address, networkKey }: BondingOptionParams): Promise<BondingOptionInfo> {
     const apiProps = state.getDotSamaApi(networkKey);
     const networkJson = state.getNetworkMapByKey(networkKey);
-    const { bondedValidators, era, isBondedBefore, maxNominations, maxNominatorPerValidator, validatorsInfo } = await getValidatorsInfo(networkKey, apiProps, networkJson.decimals as number, address);
+    const { bondedValidators,
+      era,
+      isBondedBefore,
+      maxNominations,
+      maxNominatorPerValidator,
+      validatorsInfo } = await getValidatorsInfo(networkKey, apiProps, networkJson.decimals as number, address);
 
     return {
       maxNominatorPerValidator,
@@ -2561,7 +2716,12 @@ export default class KoniExtension extends Extension {
     } as BondingOptionInfo;
   }
 
-  private async getBondingTxInfo ({ amount, bondedValidators, isBondedBefore, networkKey, nominatorAddress, validatorInfo }: BondingSubmitParams): Promise<BasicTxInfo> {
+  private async getBondingTxInfo ({ amount,
+    bondedValidators,
+    isBondedBefore,
+    networkKey,
+    nominatorAddress,
+    validatorInfo }: BondingSubmitParams): Promise<BasicTxInfo> {
     const dotSamaApi = state.getDotSamaApi(networkKey);
     const networkJson = state.getNetworkMapByKey(networkKey);
     const parsedAmount = amount * (10 ** (networkJson.decimals as number));
@@ -2585,7 +2745,13 @@ export default class KoniExtension extends Extension {
     };
   }
 
-  private async submitBonding (id: string, port: chrome.runtime.Port, { amount, bondedValidators, isBondedBefore, networkKey, nominatorAddress, password, validatorInfo }: BondingSubmitParams): Promise<BasicTxResponse> {
+  private async submitBonding (id: string, port: chrome.runtime.Port, { amount,
+    bondedValidators,
+    isBondedBefore,
+    networkKey,
+    nominatorAddress,
+    password,
+    validatorInfo }: BondingSubmitParams): Promise<BasicTxResponse> {
     const txState: BasicTxResponse = {};
     const networkJson = state.getNetworkMapByKey(networkKey);
     const parsedAmount = amount * (10 ** (networkJson.decimals as number));
@@ -2672,7 +2838,10 @@ export default class KoniExtension extends Extension {
     };
   }
 
-  private async submitUnbonding (id: string, port: chrome.runtime.Port, { address, amount, networkKey, password }: UnbondingSubmitParams): Promise<BasicTxResponse> {
+  private async submitUnbonding (id: string, port: chrome.runtime.Port, { address,
+    amount,
+    networkKey,
+    password }: UnbondingSubmitParams): Promise<BasicTxResponse> {
     const txState: BasicTxResponse = {};
     const networkJson = state.getNetworkMapByKey(networkKey);
     const parsedAmount = amount * (10 ** (networkJson.decimals as number));
@@ -2768,7 +2937,9 @@ export default class KoniExtension extends Extension {
     };
   }
 
-  private async submitStakeWithdrawal (id: string, port: chrome.runtime.Port, { address, networkKey, password }: StakeWithdrawalParams): Promise<BasicTxResponse> {
+  private async submitStakeWithdrawal (id: string, port: chrome.runtime.Port, { address,
+    networkKey,
+    password }: StakeWithdrawalParams): Promise<BasicTxResponse> {
     const txState: BasicTxResponse = {};
 
     if (!address || !password) {
@@ -3001,6 +3172,10 @@ export default class KoniExtension extends Extension {
         return await this.makeCrossChainTransferQr(id, port, request as RequestCrossChainTransferQR);
       case 'pri(accounts.transfer.qr.create)':
         return await this.makeTransferQR(id, port, request as RequestTransferQR);
+      case 'pri(nft.transfer.qr.create.substrate)':
+        return this.nftTransferCreateQrSubstrate(id, port, request as RequestNftTransferQrSubstrate);
+      case 'pri(nft.transfer.qr.create.evm)':
+        return this.nftTransferCreateQrEvm(id, port, request as RequestNftTransferQrEVM);
       case 'pri(qr.reject)':
         return this.rejectQrTransfer(request as RequestRejectQRTransfer);
       case 'pri(qr.resolve)':

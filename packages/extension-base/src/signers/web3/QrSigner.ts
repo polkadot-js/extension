@@ -1,19 +1,23 @@
 // Copyright 2019-2022 @subwallet/extension-base authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { QRRequestPromise, QRRequestPromiseStatus, ResponseTransferQr, TransferStep } from '@subwallet/extension-base/background/KoniTypes';
-import { Web3Transaction } from '@subwallet/extension-base/signers/types';
+import { QRRequestPromise, QRRequestPromiseStatus } from '@subwallet/extension-base/background/KoniTypes';
+import { QrState, Web3Transaction } from '@subwallet/extension-base/signers/types';
 import RLP, { Input } from 'rlp';
 
 import { SignerResult } from '@polkadot/api/types';
 import { u8aToHex } from '@polkadot/util';
 
+interface CallbackProps {
+  qrState: QrState
+}
+
 export default class QrSigner {
-  readonly #callback: (state: ResponseTransferQr) => void;
+  readonly #callback: (state: CallbackProps) => void;
   readonly #setState: (promise: QRRequestPromise) => void;
   readonly #id: string;
 
-  constructor (callback: (state: ResponseTransferQr) => void, id: string, setState: (promise: QRRequestPromise) => void) {
+  constructor (callback: (state: CallbackProps) => void, id: string, setState: (promise: QRRequestPromise) => void) {
     this.#callback = callback;
     this.#id = id;
 
@@ -39,10 +43,6 @@ export default class QrSigner {
       this.#setState({ reject: reject, resolve: resolve, status: QRRequestPromiseStatus.PENDING, createdAt: new Date().getTime() });
 
       this.#callback({
-        step: TransferStep.READY,
-        errors: [],
-        extrinsicStatus: undefined,
-        data: {},
         qrState: {
           isQrHashed: false,
           qrAddress: tx.from,

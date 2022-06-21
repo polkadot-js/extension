@@ -13,7 +13,7 @@ import { decodeAddress } from '@polkadot/util-crypto';
 interface Props extends ThemeProps{
   address: string;
   className?: string;
-  cmd: number;
+  isHash: boolean;
   genesisHash: Uint8Array | string;
   payload: Uint8Array;
   isEthereum: boolean;
@@ -24,8 +24,13 @@ interface Props extends ThemeProps{
 const ETHEREUM_ID = new Uint8Array([0x45]);
 const ETHEREUM_TX_CMD = new Uint8Array([0x01]);
 
+const CMD_HASH = 1;
+const CMD_MORTAL = 2;
+
 const DisplayPayload = (props: Props) => {
-  const { address, className, cmd, genesisHash, isEthereum, payload, size, style } = props;
+  const { address, className, genesisHash, isEthereum, isHash, payload, size, style } = props;
+
+  const cmd = useMemo(() => isHash ? CMD_HASH : CMD_MORTAL, [isHash]);
 
   const data = useMemo(() => {
     if (isEthereum) {

@@ -2,9 +2,11 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { assetFromToken } from '@equilab/api';
-import { ApiProps, NetworkJson, QRRequestPromise, QRRequestPromiseStatus, ResponseTransfer, ResponseTransferQr, TokenInfo, TransferErrorCode, TransferStep } from '@subwallet/extension-base/background/KoniTypes';
+import { ApiProps, NetworkJson, QRRequestPromise, QRRequestPromiseStatus, ResponseNftTransferQr, ResponseTransfer, ResponseTransferQr, TokenInfo, TransferErrorCode, TransferStep } from '@subwallet/extension-base/background/KoniTypes';
 import QrSigner from '@subwallet/extension-base/signers/substrates/QrSigner';
+import { QrState } from '@subwallet/extension-base/signers/types';
 import { getCrossChainTransferDest, isNetworksPairSupportedTransferCrossChain } from '@subwallet/extension-koni-base/api/dotsama/transfer';
+import { getNftTransferExtrinsic } from '@subwallet/extension-koni-base/api/nft/transfer';
 
 import { ApiPromise } from '@polkadot/api';
 import { SubmittableExtrinsic } from '@polkadot/api/promise/types';
@@ -154,7 +156,18 @@ const doSignAndSend = async (
     updateResponseTxResult(networkKey, tokenInfo, response, records);
   }
 
-  await transfer.signAsync(fromAddress, { nonce, signer: new QrSigner(api.registry, callback, qrId, setState) });
+  const qrCallback = ({ qrState }: {qrState: QrState}) => {
+    // eslint-disable-next-line node/no-callback-literal
+    callback({
+      step: TransferStep.READY,
+      errors: [],
+      extrinsicStatus: undefined,
+      data: {},
+      qrState: qrState
+    });
+  };
+
+  await transfer.signAsync(fromAddress, { nonce, signer: new QrSigner(api.registry, qrCallback, qrId, setState) });
 
   await transfer.send(({ events, status }) => {
     console.log('Transaction status:', status.type, status.hash.toHex());
@@ -333,4 +346,81 @@ export async function makeCrossChainTransferQr (
   );
 
   await doSignAndSend(api, originalNetworkKey, tokenInfo, nonce, transfer, fromKeypair, qrId, setState, updateState, callback);
+}
+
+interface TransferNFTQrProps {
+  networkKey: string;
+  apiProp: ApiProps;
+  recipientAddress: string;
+  params: Record<string, any>;
+  fromKeypair: KeyringPair;
+  qrId: string;
+  setState: (promise: QRRequestPromise) => void;
+  updateState: (promise: Partial<QRRequestPromise>) => void;
+  callback: (data: ResponseNftTransferQr) => void;
+}
+
+export async function makeNftTransferQr ({ apiProp,
+  callback,
+  fromKeypair,
+  networkKey,
+  params,
+  qrId,
+  recipientAddress,
+  setState,
+  updateState }: TransferNFTQrProps): Promise<void> {
+  const txState: ResponseNftTransferQr = { isSendingSelf: false };
+  const senderAddress = fromKeypair.address;
+
+  const extrinsic = getNftTransferExtrinsic(networkKey, apiProp, senderAddress, recipientAddress, params);
+
+  if (!extrinsic) {
+    // eslint-disable-next-line node/no-callback-literal
+    callback({ isSendingSelf: false, txError: true });
+
+    return;
+  }
+
+  const qrCallback = ({ qrState }: {qrState: QrState}) => {
+    // eslint-disable-next-line node/no-callback-literal
+    callback({ isSendingSelf: false, qrState: qrState });
+  };
+
+  await extrinsic.signAsync(senderAddress, { signer: new QrSigner(apiProp.registry, qrCallback, qrId, setState) });
+
+  const unsubscribe = await extrinsic.send((result) => {
+    if (!result || !result.status) {
+      return;
+    }
+
+    if (result.status.isBroadcast) {
+      txState.isBusy = true;
+    }
+
+    if (result.status.isInBlock || result.status.isFinalized) {
+      result.events
+        .filter(({ event: { section } }) => section === 'system')
+        .forEach(({ event: { method } }): void => {
+          txState.transactionHash = extrinsic.hash.toHex();
+          callback(txState);
+
+          if (method === 'ExtrinsicFailed') {
+            txState.status = false;
+            callback(txState);
+            updateState({ status: QRRequestPromiseStatus.FAILED });
+          } else if (method === 'ExtrinsicSuccess') {
+            txState.status = true;
+            callback(txState);
+            updateState({ status: QRRequestPromiseStatus.COMPLETED });
+          }
+        });
+    } else if (result.isError) {
+      txState.txError = true;
+      callback(txState);
+    }
+
+    if (result.isCompleted) {
+      unsubscribe();
+    }
+  });
 }

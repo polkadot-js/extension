@@ -1,8 +1,8 @@
 // Copyright 2019-2022 @subwallet/extension-koni-base authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { QRRequestPromise, ResponseTransferQr, TransferErrorCode, TransferStep } from '@subwallet/extension-base/background/KoniTypes';
-import { Web3Transaction } from '@subwallet/extension-base/signers/types';
+import { QRRequestPromise, QRRequestPromiseStatus, ResponseNftTransferQr, ResponseTransferQr, TransferErrorCode, TransferStep } from '@subwallet/extension-base/background/KoniTypes';
+import { QrState, Web3Transaction } from '@subwallet/extension-base/signers/types';
 import QrSigner from '@subwallet/extension-base/signers/web3/QrSigner';
 import { getERC20Contract } from '@subwallet/extension-koni-base/api/web3/web3';
 import { anyNumberToBN } from '@subwallet/extension-koni-base/utils/eth';
@@ -19,6 +19,7 @@ interface BaseArg {
   networkKey: string;
   web3ApiMap: Record<string, Web3>;
   setState: (promise: QRRequestPromise) => void;
+  updateState: (promise: Partial<QRRequestPromise>) => void;
   callback: (data: ResponseTransferQr) => void;
 }
 
@@ -56,6 +57,7 @@ export async function handleTransferQr ({ callback,
   networkKey,
   setState,
   transactionObject,
+  updateState,
   web3ApiMap }: TransferQrArg) {
   const web3Api = web3ApiMap[networkKey];
   const response: ResponseTransferQr = {
@@ -78,7 +80,18 @@ export async function handleTransferQr ({ callback,
     chainId: chainId
   };
 
-  const signer = new QrSigner(callback, id, setState);
+  const qrCallback = ({ qrState }: {qrState: QrState}) => {
+    // eslint-disable-next-line node/no-callback-literal
+    callback({
+      step: TransferStep.READY,
+      errors: [],
+      extrinsicStatus: undefined,
+      data: {},
+      qrState: qrState
+    });
+  };
+
+  const signer = new QrSigner(qrCallback, id, setState);
 
   const { signature } = await signer.signTransaction(txObject);
 
@@ -94,12 +107,13 @@ export async function handleTransferQr ({ callback,
         callback(response);
       })
       .on('receipt', function (receipt: TransactionReceipt) {
-        response.step = TransferStep.SUCCESS;
+        response.step = receipt.status ? TransferStep.SUCCESS : TransferStep.ERROR;
         response.txResult = {
           change: changeValue || '0',
           fee: (receipt.gasUsed * receipt.effectiveGasPrice).toString()
         };
         response.isBusy = false;
+        updateState({ status: receipt.status ? QRRequestPromiseStatus.COMPLETED : QRRequestPromiseStatus.FAILED });
         callback(response);
       }).catch((e) => {
         response.step = TransferStep.ERROR;
@@ -109,6 +123,7 @@ export async function handleTransferQr ({ callback,
           // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access,@typescript-eslint/no-unsafe-assignment
           message: e.message
         });
+        updateState({ status: QRRequestPromiseStatus.FAILED });
         callback(response);
       });
   } catch (error) {
@@ -120,6 +135,7 @@ export async function handleTransferQr ({ callback,
       message: error.message
     });
     response.isBusy = false;
+    updateState({ status: QRRequestPromiseStatus.FAILED });
     callback(response);
   }
 }
@@ -164,6 +180,7 @@ export async function makeEVMTransferQr ({ callback,
   setState,
   to,
   transferAll,
+  updateState,
   value,
   web3ApiMap }: EVMTransferArg): Promise<void> {
   const [transactionObject, changeValue] = await getEVMTransactionObject(networkKey, to, value, transferAll, web3ApiMap);
@@ -177,6 +194,7 @@ export async function makeEVMTransferQr ({ callback,
     id,
     setState,
     chainId,
+    updateState,
     from
   });
 }
@@ -245,6 +263,7 @@ export async function makeERC20TransferQr ({ assetAddress,
   setState,
   to,
   transferAll,
+  updateState,
   value,
   web3ApiMap }: ERC20TransferArg) {
   const [transactionObject, changeValue] = await getERC20TransactionObject(assetAddress, networkKey, from, to, value, transferAll, web3ApiMap);
@@ -258,6 +277,83 @@ export async function makeERC20TransferQr ({ assetAddress,
     web3ApiMap,
     changeValue,
     networkKey,
-    transactionObject
+    transactionObject,
+    updateState
   });
+}
+
+interface TransferNftQrArg extends Omit<BaseArg, 'callback'>{
+  rawTransaction: Record<string, any>;
+  callback: (data: ResponseNftTransferQr) => void;
+  isSendingSelf: boolean;
+}
+
+export async function handleTransferNftQr ({ callback,
+  chainId,
+  from,
+  id,
+  isSendingSelf,
+  networkKey,
+  rawTransaction,
+  setState,
+  updateState,
+  web3ApiMap }: TransferNftQrArg) {
+  const web3 = web3ApiMap[networkKey];
+  const response: ResponseNftTransferQr = {
+    isSendingSelf: isSendingSelf
+  };
+
+  const nonce = await web3.eth.getTransactionCount(from);
+
+  const txObject: Web3Transaction = {
+    nonce: nonce,
+    from: from,
+    gasPrice: anyNumberToBN(rawTransaction.gasPrice as string).toNumber(),
+    gasLimit: anyNumberToBN(rawTransaction.gasLimit as string).toNumber(),
+    to: rawTransaction.to !== undefined ? rawTransaction.to as string : '',
+    value: anyNumberToBN(rawTransaction.value as string).toNumber(),
+    data: rawTransaction.data ? rawTransaction.data as string : '',
+    chainId: chainId
+  };
+
+  const qrCallback = ({ qrState }: {qrState: QrState}) => {
+    // eslint-disable-next-line node/no-callback-literal
+    callback({
+      isSendingSelf: isSendingSelf,
+      qrState: qrState
+    });
+  };
+
+  const signer = new QrSigner(qrCallback, id, setState);
+
+  const { signature } = await signer.signTransaction(txObject);
+
+  try {
+    const signed = parseTxAndSignature(txObject, signature);
+
+    web3.eth.sendSignedTransaction(signed)
+      .on('transactionHash', function (hash: string) {
+        console.log('transactionHash', hash);
+        response.callHash = signed;
+        response.isBusy = true;
+        callback(response);
+      })
+      .on('receipt', function (receipt: TransactionReceipt) {
+        response.status = receipt.status;
+        response.isBusy = true;
+        response.transactionHash = receipt.transactionHash;
+        updateState({ status: receipt.status ? QRRequestPromiseStatus.COMPLETED : QRRequestPromiseStatus.FAILED });
+        callback(response);
+      }).catch((e) => {
+        console.log('Error on transfer nft', (e as Error).message);
+        response.txError = true;
+        updateState({ status: QRRequestPromiseStatus.FAILED });
+        callback(response);
+      });
+  } catch (error) {
+    response.txError = true;
+    response.isBusy = false;
+    console.log('Error on transfer nft', (error as Error).message);
+    callback(response);
+  }
 }

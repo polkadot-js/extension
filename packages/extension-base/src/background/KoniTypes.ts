@@ -587,6 +587,7 @@ export enum TransferErrorCode {
   NOT_ENOUGH_VALUE = 'notEnoughValue',
   INVALID_VALUE = 'invalidValue',
   INVALID_TOKEN = 'invalidToken',
+  INVALID_PARAM = 'invalidParam',
   KEYRING_ERROR = 'keyringError',
   TRANSFER_ERROR = 'transferError',
   TIMEOUT = 'timeout',
@@ -597,6 +598,11 @@ export type TransferError = {
   code: TransferErrorCode,
   data?: object,
   message: string
+}
+
+export interface TransferNftError {
+  code: TransferErrorCode;
+  message: string;
 }
 
 export interface ResponseCheckTransfer {
@@ -1060,6 +1066,15 @@ export interface StakeWithdrawalParams {
   password?: string
 }
 
+export interface ResponseNftTransferQr extends NftTransactionResponse{
+  qrState?: QrState;
+  isBusy?: boolean;
+}
+
+export type RequestNftTransferQrSubstrate = Omit<SubstrateNftSubmitTransaction, 'password'>
+
+export type RequestNftTransferQrEVM = Omit<EvmNftSubmitTransaction, 'password'>
+
 export interface KoniRequestSignatures {
   'pri(unbonding.submitWithdrawal)': [StakeWithdrawalParams, BasicTxResponse, BasicTxResponse]
   'pri(unbonding.withdrawalTxInfo)': [StakeWithdrawalParams, BasicTxInfo];
@@ -1170,5 +1185,6 @@ export interface KoniRequestSignatures {
 
   'pri(accounts.transfer.qr.create)': [RequestTransferQR, Array<TransferError>, ResponseTransferQr];
   'pri(accounts.cross.transfer.qr.create)': [RequestCrossChainTransferQR, Array<TransferError>, ResponseTransferQr];
-  'pri(nft.transfer.qr.create.evm)': [EvmNftSubmitTransaction, NftTransactionResponse, NftTransactionResponse];
+  'pri(nft.transfer.qr.create.substrate)': [RequestNftTransferQrSubstrate, Array<TransferError>, ResponseNftTransferQr];
+  'pri(nft.transfer.qr.create.evm)': [RequestNftTransferQrEVM, Array<TransferError>, ResponseNftTransferQr];
 }

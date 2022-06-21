@@ -143,7 +143,8 @@ const SignQR = (props: Props) => {
           setPassword={setPassword}
         />
       )}
-      <RememberPasswordCheckbox />
+
+      {!isEthereum ? <RememberPasswordCheckbox /> : <div className={'separator'} />}
 
       <div className={CN('sign-button-container')}>
         <Button
@@ -174,6 +175,10 @@ export default React.memo(styled(SignQR)(({ theme }: Props) => `
   bottom: 0;
   padding: 0 15px 15px;
   background-color: ${theme.background};
+
+  .separator{
+    margin: ${theme.boxMargin};
+  }
 
   .loading{
     position: relative;

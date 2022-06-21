@@ -46,9 +46,6 @@ interface SigData {
   signature: string;
 }
 
-const CMD_HASH = 1;
-const CMD_MORTAL = 2;
-
 function renderTotal (arg: RenderTotalArg) {
   const { amount, amountDecimals, amountSymbol, fee, feeDecimals, feeSymbol } = arg;
 
@@ -402,9 +399,9 @@ function AuthTransaction ({ className, isDonation, feeInfo: [fee, feeDecimals, f
                 <div className='qr-content'>
                   <DisplayPayload
                     address={qrAddress}
-                    cmd={isQrHashed ? CMD_HASH : CMD_MORTAL}
                     genesisHash={genesisHash}
                     isEthereum={isEthereum}
+                    isHash={isQrHashed}
                     payload={hexToU8a(qrPayload)}
                     size={320}
                   />

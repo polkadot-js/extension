@@ -10,6 +10,7 @@ const strings = {
     'SubWallet does not currently support EVM payload',
   ERROR_NO_RAW_DATA: 'There is no raw data from the request',
   ERROR_NO_SENDER_FOUND: 'There is no related account in the app',
+  ERROR_NO_EXTERNAL_ACCOUNT: 'There is external account',
   ERROR_NO_SENDER_IDENTITY: 'There is no related identity in the app',
   ERROR_TITLE: 'Unable to parse QR data',
   ERROR_WRONG_RAW:

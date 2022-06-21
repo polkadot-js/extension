@@ -51,6 +51,10 @@ export interface AccountsWithCurrentAddress {
   currentAddress?: string;
 }
 
+export interface CurrentAccountInfo {
+  address: string;
+}
+
 export type AccountWithChildren = AccountJson & {
   children?: AccountWithChildren[];
 }
@@ -343,17 +347,17 @@ export interface RequestSeedValidate {
   type?: KeypairType;
 }
 
-export interface RequestGetRegistry {
+export interface RequestParseTransactionSubstrate {
   genesisHash: string;
   rawPayload: string;
-  specVersion: number
+  specVersion: number;
 }
 
 export interface RequestQRIsLocked{
   address: string;
 }
 
-export interface RequestQRSign{
+export interface RequestQrSignSubstrate {
   address: string;
   message: string;
   savePass: boolean;
@@ -477,7 +481,7 @@ export interface EraInfo{
   phase: string;
 }
 
-export interface ResponseGetRegistry {
+export interface ResponseParseTransactionSubstrate {
   era: EraInfo | string,
   nonce: string,
   method: FormattedMethod[] | string
@@ -489,6 +493,6 @@ export interface ResponseQRIsLocked{
   remainingTime: number;
 }
 
-export interface ResponseQRSign{
+export interface ResponseQrSignSubstrate {
   signature: string;
 }

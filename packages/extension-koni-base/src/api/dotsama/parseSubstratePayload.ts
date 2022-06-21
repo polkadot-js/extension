@@ -3,14 +3,14 @@
 
 import type { Call } from '@polkadot/types/interfaces';
 
-import { ArgInfo, EraInfo, FormattedMethod, ResponseGetRegistry } from '@subwallet/extension-base/background/types';
+import { ArgInfo, EraInfo, FormattedMethod, ResponseParseTransactionSubstrate } from '@subwallet/extension-base/background/types';
 import KoniState from '@subwallet/extension-koni-base/background/handlers/State';
 
 import { TypeRegistry } from '@polkadot/types';
 import { Registry } from '@polkadot/types/types';
 import { hexToU8a } from '@polkadot/util';
 
-export const getRegistry = (state: KoniState, genesisHash: string, rawPayload: string, specVersion: number): ResponseGetRegistry => {
+export const parseSubstratePayload = (state: KoniState, genesisHash: string, rawPayload: string, specVersion: number): ResponseParseTransactionSubstrate => {
   let networkKey = '';
   const networks = state.getNetworkMap();
   const dotSamaAPIMap = state.getDotSamaApiMap();

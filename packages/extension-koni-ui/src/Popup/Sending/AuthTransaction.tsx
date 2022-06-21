@@ -8,19 +8,19 @@ import DonateInputAddress from '@subwallet/extension-koni-ui/components/DonateIn
 import FormatBalance from '@subwallet/extension-koni-ui/components/FormatBalance';
 import InputAddress from '@subwallet/extension-koni-ui/components/InputAddress';
 import Modal from '@subwallet/extension-koni-ui/components/Modal';
+import DisplayPayload from '@subwallet/extension-koni-ui/components/Qr/DisplayPayload';
 import { BalanceFormatType } from '@subwallet/extension-koni-ui/components/types';
 import { QrContext, QrContextState, QrStep } from '@subwallet/extension-koni-ui/contexts/QrContext';
 import useTranslation from '@subwallet/extension-koni-ui/hooks/useTranslation';
 import { getAccountMeta, makeTransfer, makeTransferQr, rejectTransferQr, resolveTransferQr } from '@subwallet/extension-koni-ui/messaging';
 import { ThemeProps, TransferResultType } from '@subwallet/extension-koni-ui/types';
-import { reNewQrPayload } from '@subwallet/extension-koni-ui/util/scanner';
 import React, { useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import styled from 'styled-components';
 
 import { KeyringPair$Meta } from '@polkadot/keyring/types';
-import { QrDisplayPayload, QrScanSignature } from '@polkadot/react-qr';
+import { QrScanSignature } from '@polkadot/react-qr';
 import { SignerResult } from '@polkadot/types/types';
-import { BN, isHex } from '@polkadot/util';
+import { BN, hexToU8a, isHex } from '@polkadot/util';
 
 interface Props extends ThemeProps {
   className?: string;
@@ -83,7 +83,7 @@ function AuthTransaction ({ className, isDonation, feeInfo: [fee, feeDecimals, f
 
   const { QrState, cleanQrState, updateQrState } = useContext(QrContext);
 
-  const { isQrHashed, qrAddress, qrId, qrPayload, step } = QrState;
+  const { isEthereum, isQrHashed, qrAddress, qrId, qrPayload, step } = QrState;
 
   const [isBusy, setBusy] = useState(false);
   const [password, setPassword] = useState<string>('');
@@ -139,6 +139,7 @@ function AuthTransaction ({ className, isDonation, feeInfo: [fee, feeDecimals, f
   );
 
   const handlerResolve = useCallback(async (result: SignerResult) => {
+    console.log(result);
     if (qrId) {
       await resolveTransferQr({ id: qrId, data: result });
     }
@@ -209,8 +210,6 @@ function AuthTransaction ({ className, isDonation, feeInfo: [fee, feeDecimals, f
               ...rs.qrState,
               step: QrStep.DISPLAY_PAYLOAD
             };
-
-            state.qrPayload = reNewQrPayload(state.qrPayload as unknown as Record<string, number>);
 
             updateQrState(state);
             setBusy(false);
@@ -402,11 +401,12 @@ function AuthTransaction ({ className, isDonation, feeInfo: [fee, feeDecimals, f
             <div className='auth-transaction-body'>
               <div className='display-qr'>
                 <div className='qr-content'>
-                  <QrDisplayPayload
+                  <DisplayPayload
                     address={qrAddress}
                     cmd={isQrHashed ? CMD_HASH : CMD_MORTAL}
                     genesisHash={genesisHash}
-                    payload={qrPayload}
+                    isEthereum={isEthereum}
+                    payload={hexToU8a(qrPayload)}
                     size={320}
                   />
                 </div>
@@ -443,7 +443,7 @@ function AuthTransaction ({ className, isDonation, feeInfo: [fee, feeDecimals, f
           );
       }
     }
-  }, [_doStart, _onChangePass, errorArr, genesisHash, handlerChangeToDisplayQr, handlerChangeToScan, handlerRenderInfo, handlerScanSignature, isBusy, isKeyringErr, isQr, isQrHashed, password, qrAddress, qrPayload, renderError, step, t]);
+  }, [_doStart, _onChangePass, errorArr, genesisHash, handlerChangeToDisplayQr, handlerChangeToScan, handlerRenderInfo, handlerScanSignature, isBusy, isEthereum, isKeyringErr, isQr, isQrHashed, password, qrAddress, qrPayload, renderError, step, t]);
 
   return (
     <div className={className}>

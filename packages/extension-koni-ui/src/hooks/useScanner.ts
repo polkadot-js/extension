@@ -19,11 +19,13 @@ interface ProcessBarcodeFunction {
   (txRequestData: TxRequestData): void
 }
 
-const useScanner = (showAlertMessage: (message: string, isSuccess?: boolean) => void): ProcessBarcodeFunction => {
+const useScanner = (showAlertMessage: (message: string) => void): ProcessBarcodeFunction => {
   const { getAccountByAddress } = useContext(AccountContext);
   const scannerStore = useContext(ScannerContext);
 
   const { networkMap } = useSelector((state: RootState) => state);
+
+  const { cleanup, clearMultipartProgress, setData, setStep } = scannerStore;
 
   const parseQrData = useCallback((txRequestData: TxRequestData): ParsedData => {
     if (isAddressString(txRequestData.getText())) {
@@ -82,38 +84,44 @@ const useScanner = (showAlertMessage: (message: string, isSuccess?: boolean) => 
       const genesisHash = (parsedData as SubstrateCompletedParsedData)?.data?.genesisHash;
 
       if (isNetworkParsedData(parsedData)) {
-        return showAlertMessage(
-          'Adding a network is not supported in this screen',
-          false);
+        return showAlertMessage('Adding a network is not supported in this screen');
       }
 
       const unsignedData = checkMultiFramesData(parsedData);
 
       if (unsignedData === null) {
-        return showAlertMessage(
-          'Unsigned data is null',
-          false);
+        return showAlertMessage('Unsigned data is null');
       }
 
-      const qrInfo = scannerStore.setData(unsignedData);
+      const qrInfo = setData(unsignedData);
 
-      scannerStore.clearMultipartProgress();
+      clearMultipartProgress();
 
       const { senderAddress } = qrInfo;
       const senderAccount = getAccountByAddress(networkMap, senderAddress, genesisHash);
 
       if (!senderAccount) {
+        cleanup();
+
         return showAlertMessage(strings.ERROR_NO_SENDER_FOUND);
       }
 
-      scannerStore.setStep(SCANNER_QR_STEP.VIEW_DETAIL_STEP);
+      if (senderAccount.isExternal) {
+        cleanup();
+
+        return showAlertMessage(strings.ERROR_NO_EXTERNAL_ACCOUNT);
+      }
+
+      setStep(SCANNER_QR_STEP.VIEW_DETAIL_STEP);
+
+      return showAlertMessage('');
     } catch (e) {
       console.error(e);
       const message = e instanceof Error ? e.message : 'unknown error :(';
 
       return showAlertMessage(message);
     }
-  }, [networkMap, checkMultiFramesData, getAccountByAddress, parseQrData, scannerStore, showAlertMessage]);
+  }, [parseQrData, checkMultiFramesData, setData, clearMultipartProgress, getAccountByAddress, networkMap, setStep, showAlertMessage, cleanup]);
 
   return processBarCode;
 };

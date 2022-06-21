@@ -3,7 +3,7 @@
 
 import { assetFromToken } from '@equilab/api';
 import { ApiProps, NetworkJson, QRRequestPromise, QRRequestPromiseStatus, ResponseTransfer, ResponseTransferQr, TokenInfo, TransferErrorCode, TransferStep } from '@subwallet/extension-base/background/KoniTypes';
-import QrSigner from '@subwallet/extension-base/signers/QrSigner';
+import QrSigner from '@subwallet/extension-base/signers/substrates/QrSigner';
 import { getCrossChainTransferDest, isNetworksPairSupportedTransferCrossChain } from '@subwallet/extension-koni-base/api/dotsama/transfer';
 
 import { ApiPromise } from '@polkadot/api';

@@ -24,7 +24,7 @@ import AuthorizeStore from '@subwallet/extension-koni-base/stores/Authorize';
 import CustomEvmTokenStore from '@subwallet/extension-koni-base/stores/CustomEvmToken';
 import SettingsStore from '@subwallet/extension-koni-base/stores/Settings';
 import TransactionHistoryStore from '@subwallet/extension-koni-base/stores/TransactionHistory';
-import { convertFundStatus, getCurrentProvider } from '@subwallet/extension-koni-base/utils/utils';
+import { convertFundStatus, getCurrentProvider } from '@subwallet/extension-koni-base/utils';
 import SimpleKeyring from 'eth-simple-keyring';
 import { BehaviorSubject, Subject } from 'rxjs';
 import Web3 from 'web3';

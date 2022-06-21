@@ -13,7 +13,7 @@ import NetworkInfo from '@subwallet/extension-koni-ui/Popup/ExternalRequest/Shar
 import Unlock from '@subwallet/extension-koni-ui/Popup/Signing/Unlock';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
-import { getNetworkJsonByGenesisHash } from '@subwallet/extension-koni-ui/util/getNetworkJsonByGenesisHash';
+import { getNetworkJsonByInfo } from '@subwallet/extension-koni-ui/util/getNetworkJsonByGenesisHash';
 import CN from 'classnames';
 import React, { useCallback, useContext, useEffect, useState } from 'react';
 import { useSelector } from 'react-redux';
@@ -28,7 +28,7 @@ const SignQR = (props: Props) => {
 
   const { networkMap } = useSelector((state: RootState) => state);
   const { setStep, signDataLegacy, state: scannerState } = useContext(ScannerContext);
-  const { genesisHash, senderAddress } = scannerState;
+  const { evmChainId, genesisHash, isEthereum, senderAddress } = scannerState;
   const { t } = useTranslation();
 
   const [error, setError] = useState<string | null>(null);
@@ -41,11 +41,12 @@ const SignQR = (props: Props) => {
   const [network, setNetwork] = useState<NetworkJson | null>(null);
 
   const handlerFetch = useCallback(() => {
-    const network = getNetworkJsonByGenesisHash(networkMap, genesisHash);
+    const info: undefined | number | string = isEthereum ? evmChainId : genesisHash;
+    const network = getNetworkJsonByInfo(networkMap, isEthereum, info);
 
     setLoading(!network);
     setNetwork(network);
-  }, [genesisHash, networkMap]);
+  }, [isEthereum, evmChainId, genesisHash, networkMap]);
 
   const _onSign = useCallback(
     (): Promise<void> => {

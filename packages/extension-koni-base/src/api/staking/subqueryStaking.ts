@@ -4,7 +4,7 @@
 import { APIItemState, StakingRewardItem, StakingRewardJson } from '@subwallet/extension-base/background/KoniTypes';
 import { PREDEFINED_NETWORKS } from '@subwallet/extension-koni-base/api/predefinedNetworks';
 import { SUBQUERY_ENDPOINTS, SUPPORTED_STAKING_CHAINS } from '@subwallet/extension-koni-base/api/staking/config';
-import { reformatAddress, toUnit } from '@subwallet/extension-koni-base/utils/utils';
+import { reformatAddress, toUnit } from '@subwallet/extension-koni-base/utils';
 import axios from 'axios';
 
 interface StakingResponseItem {

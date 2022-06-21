@@ -1,7 +1,7 @@
 // Copyright 2019-2022 @polkadot/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { Transaction } from '@subwallet/extension-koni-ui/types/transaction';
+import { Transaction } from '@subwallet/extension-koni-base/utils/eth';
 
 import { GenericExtrinsicPayload } from '@polkadot/types';
 
@@ -39,8 +39,8 @@ export interface EthereumParsedData {
     data: string;
     account: string;
     rlp: string;
-    genesisHash: string;
   };
+  isHash: boolean;
   action: string | null; // "signTransaction"
 }
 

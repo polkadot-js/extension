@@ -5,8 +5,8 @@ import type { AccountsContext, AuthorizeRequest, MetadataRequest, SigningRequest
 import type { SettingsStruct } from '@polkadot/ui-settings/types';
 import type { AvailableThemes } from '../components/themes';
 
-import { createFindAccountHandler } from '@subwallet/extension-koni-ui/util/findAccount';
 import { ConfirmationsQueue } from '@subwallet/extension-base/background/KoniTypes';
+import { createFindAccountHandler } from '@subwallet/extension-koni-ui/util/findAccount';
 import React from 'react';
 
 import settings from '@polkadot/ui-settings';

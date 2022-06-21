@@ -4,7 +4,7 @@
 import type { ThemeProps } from '../../types';
 
 import { AuthUrlInfo, AuthUrls } from '@subwallet/extension-base/background/handlers/State';
-import { filterAndSortingAccountByAuthType } from '@subwallet/extension-koni-base/utils/utils';
+import { filterAndSortingAccountByAuthType } from '@subwallet/extension-koni-base/utils';
 import { AccountContext } from '@subwallet/extension-koni-ui/components';
 import { forgetSite } from '@subwallet/extension-koni-ui/messaging';
 import WebsiteEntryAccount from '@subwallet/extension-koni-ui/Popup/AuthManagement/WebsiteEntryAccount';

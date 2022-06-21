@@ -6,6 +6,7 @@ import type { Registry, SignerPayloadJSON } from '@polkadot/types/types';
 
 import { QRRequestPromise, QRRequestPromiseStatus, ResponseTransferQr, TransferStep } from '@subwallet/extension-base/background/KoniTypes';
 
+import { u8aToHex } from '@polkadot/util';
 import { blake2AsU8a } from '@polkadot/util-crypto';
 
 export default class QrSigner implements Signer {
@@ -41,8 +42,9 @@ export default class QrSigner implements Signer {
         qrState: {
           isQrHashed,
           qrAddress: payload.address,
-          qrPayload,
-          qrId: this.#id
+          qrPayload: u8aToHex(qrPayload),
+          qrId: this.#id,
+          isEthereum: false
         }
       });
     });

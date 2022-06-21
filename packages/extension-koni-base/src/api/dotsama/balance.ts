@@ -10,7 +10,7 @@ import { getEVMBalance } from '@subwallet/extension-koni-base/api/web3/balance';
 import { getERC20Contract } from '@subwallet/extension-koni-base/api/web3/web3';
 import { state } from '@subwallet/extension-koni-base/background/handlers';
 import { ASTAR_REFRESH_BALANCE_INTERVAL, IGNORE_GET_SUBSTRATE_FEATURES_LIST, MOONBEAM_REFRESH_BALANCE_INTERVAL } from '@subwallet/extension-koni-base/constants';
-import { categoryAddresses, sumBN } from '@subwallet/extension-koni-base/utils/utils';
+import { categoryAddresses, sumBN } from '@subwallet/extension-koni-base/utils';
 import { Observable } from 'rxjs';
 import Web3 from 'web3';
 import { Contract } from 'web3-eth-contract';

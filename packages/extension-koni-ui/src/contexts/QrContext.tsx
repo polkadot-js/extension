@@ -24,7 +24,8 @@ interface QrContextType {
 const DEFAULT_STATE: QrContextState = {
   isQrHashed: false,
   qrAddress: '',
-  qrPayload: new Uint8Array([]),
+  qrPayload: '0x',
+  isEthereum: false,
   qrId: '',
   step: QrStep.TRANSACTION_INFO
 };

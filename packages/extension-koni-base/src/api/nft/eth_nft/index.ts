@@ -5,7 +5,7 @@ import { CustomEvmToken, NftCollection, NftItem } from '@subwallet/extension-bas
 import { PINATA_IPFS_GATEWAY } from '@subwallet/extension-koni-base/api/nft/config';
 import { BaseNftApi } from '@subwallet/extension-koni-base/api/nft/nft';
 import { ERC721Contract } from '@subwallet/extension-koni-base/api/web3/web3';
-import { isUrl } from '@subwallet/extension-koni-base/utils/utils';
+import { isUrl } from '@subwallet/extension-koni-base/utils';
 import fetch from 'cross-fetch';
 import Web3 from 'web3';
 

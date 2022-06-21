@@ -106,7 +106,7 @@ export const constructDataFromBytes = (bytes: Uint8Array, multipartComplete = fa
         // Ethereum UOS payload
         // for consistency with legacy data format.
 
-        const data = { data: {} } as EthereumParsedData;
+        const data = { data: {}, isHash: false } as EthereumParsedData;
 
         const action =
           firstByte === EVM_SIGN_HASH || firstByte === EVM_SIGN_MESSAGE
@@ -114,15 +114,19 @@ export const constructDataFromBytes = (bytes: Uint8Array, multipartComplete = fa
             : firstByte === EVM_SIGN_TRANSACTION
               ? 'signTransaction'
               : null;
-        const address = uosAfterFrames.substr(4, 44);
+        const address = '0x' + uosAfterFrames.substr(4, 40);
 
         data.action = action;
         data.data.account = address;
 
-        if (action === 'signData') {
-          data.data.rlp = uosAfterFrames.slice(46);
-        } else if (action === 'signTransaction') {
-          data.data.data = uosAfterFrames.slice(46);
+        if (action === 'signTransaction') {
+          data.data.rlp = '0x' + uosAfterFrames.slice(44);
+        } else if (action === 'signData') {
+          if (firstByte === EVM_SIGN_HASH) {
+            data.isHash = true;
+          }
+
+          data.data.data = uosAfterFrames.slice(44);
         } else {
           console.error('Could not determine action type.');
           throw new Error();

@@ -37,6 +37,7 @@
     "@subwallet/extension-inject": "^0.4.6-1",
     "ethereumjs-tx": "^2.1.2",
     "eventemitter3": "^4.0.7",
+    "rlp": "^3.0.0",
     "rxjs": "^7.5.1",
     "web3": "^1.7.3",
     "web3-core": "^1.7.3",

@@ -14,14 +14,13 @@ import useTranslation from '@subwallet/extension-koni-ui/hooks/useTranslation';
 import { getAccountMeta, makeCrossChainTransfer, makeCrossChainTransferQr, rejectTransferQr, resolveTransferQr } from '@subwallet/extension-koni-ui/messaging';
 import Dropdown from '@subwallet/extension-koni-ui/Popup/XcmTransfer/XcmDropdown/Dropdown';
 import { ThemeProps, TransferResultType } from '@subwallet/extension-koni-ui/types';
-import { reNewQrPayload } from '@subwallet/extension-koni-ui/util/scanner';
 import React, { useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import styled from 'styled-components';
 
 import { KeyringPair$Meta } from '@polkadot/keyring/types';
 import { QrDisplayPayload, QrScanSignature } from '@polkadot/react-qr';
 import { SignerResult } from '@polkadot/types/types';
-import { BN, isHex } from '@polkadot/util';
+import { BN, hexToU8a, isHex } from '@polkadot/util';
 
 interface Props extends ThemeProps {
   className?: string;
@@ -178,8 +177,6 @@ function AuthTransaction ({ balanceFormat,
     }
   }, [handlerResolve]);
 
-  console.log(isQr);
-
   const _doStart = useCallback((): void => {
     setBusy(true);
 
@@ -198,8 +195,6 @@ function AuthTransaction ({ balanceFormat,
             ...rs.qrState,
             step: QrStep.DISPLAY_PAYLOAD
           };
-
-          state.qrPayload = reNewQrPayload(state.qrPayload as unknown as Record<string, number>);
 
           updateQrState(state);
           setBusy(false);
@@ -422,7 +417,7 @@ function AuthTransaction ({ balanceFormat,
                     address={qrAddress}
                     cmd={isQrHashed ? CMD_HASH : CMD_MORTAL}
                     genesisHash={genesisHash}
-                    payload={qrPayload}
+                    payload={hexToU8a(qrPayload)}
                     size={320}
                   />
                 </div>

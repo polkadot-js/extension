@@ -20,7 +20,7 @@ export function isMultiFramesInfo (data: MultiFramesInfo | SubstrateCompletedPar
 }
 
 export function isEthereumCompletedParsedData (parsedData: ParsedData): parsedData is EthereumParsedData {
-  return (parsedData as EthereumParsedData).data.rlp !== undefined;
+  return (parsedData as SubstrateCompletedParsedData).data.genesisHash === undefined;
 }
 
 export function isSubstrateCompletedParsedData (parsedData: ParsedData | null): parsedData is SubstrateCompletedParsedData {

@@ -14,7 +14,7 @@ export const createFindAccountHandler = (accounts: AccountJson[]): FindAccountFu
       return accounts.find((account) => {
         const formattedAddress = reformatAddress(account.address, 0, true);
 
-        return formattedAddress === address;
+        return formattedAddress.toLowerCase() === address.toLowerCase();
       });
     }
 
@@ -29,7 +29,7 @@ export const createFindAccountHandler = (accounts: AccountJson[]): FindAccountFu
         }
       }
     } else {
-      return accounts.find((account) => account.address === address);
+      return accounts.find((account) => account.address.toLowerCase() === address.toLowerCase());
     }
 
     // eslint-disable-next-line no-useless-return

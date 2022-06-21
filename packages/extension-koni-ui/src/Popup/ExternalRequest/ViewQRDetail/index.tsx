@@ -12,7 +12,7 @@ import MessageSigned from '@subwallet/extension-koni-ui/Popup/ExternalRequest/Vi
 import TransactionSigned from '@subwallet/extension-koni-ui/Popup/ExternalRequest/ViewQRDetail/TransactionSigned';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
-import { getNetworkJsonByGenesisHash } from '@subwallet/extension-koni-ui/util/getNetworkJsonByGenesisHash';
+import { getNetworkJsonByInfo } from '@subwallet/extension-koni-ui/util/getNetworkJsonByGenesisHash';
 import CN from 'classnames';
 import React, { useCallback, useContext, useEffect, useState } from 'react';
 import { useSelector } from 'react-redux';
@@ -29,7 +29,7 @@ const ViewQRDetail = (props: Props) => {
 
   const scannerStore = useContext<ScannerContextType>(ScannerContext);
   const { setStep, state } = scannerStore;
-  const { genesisHash, senderAddress, type } = state;
+  const { evmChainId, genesisHash, isEthereum, senderAddress, type } = state;
   const { networkMap } = useSelector((state: RootState) => state);
 
   const [loading, setLoading] = useState<boolean>(true);
@@ -37,11 +37,12 @@ const ViewQRDetail = (props: Props) => {
   const [network, setNetwork] = useState<NetworkJson | null>(null);
 
   const handlerFetch = useCallback(() => {
-    const network = getNetworkJsonByGenesisHash(networkMap, genesisHash);
+    const info: undefined | number | string = isEthereum ? evmChainId : genesisHash;
+    const network = getNetworkJsonByInfo(networkMap, isEthereum, info);
 
     setLoading(!network);
     setNetwork(network);
-  }, [networkMap, genesisHash]);
+  }, [isEthereum, evmChainId, genesisHash, networkMap]);
 
   useEffect(() => {
     handlerFetch();
@@ -105,7 +106,10 @@ const ViewQRDetail = (props: Props) => {
       {
         (!loading && network) && (
           <>
-            <NetworkInfo network={network} />
+            <NetworkInfo
+              forceEthereum={isEthereum && !evmChainId}
+              network={network}
+            />
             <AccountInfo
               address={senderAddress}
               network={network}

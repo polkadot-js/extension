@@ -3,19 +3,28 @@
 
 import { NetworkJson } from '@subwallet/extension-base/background/KoniTypes';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
-import { getLogoByGenesisHash } from '@subwallet/extension-koni-ui/util/logoByGenesisHashMap';
+import { getLogoByGenesisHash, getLogoEthereum } from '@subwallet/extension-koni-ui/util/logoByGenesisHashMap';
 import CN from 'classnames';
-import React from 'react';
+import React, { useMemo } from 'react';
 import styled from 'styled-components';
 
 interface Props extends ThemeProps{
   className?: string;
-  network: NetworkJson
+  network: NetworkJson;
+  forceEthereum?: boolean;
 }
 
 const NetworkInfo = (props: Props) => {
-  const { className, network } = props;
-  const { chain: text, genesisHash } = network;
+  const { className, forceEthereum, network } = props;
+  const { chain, genesisHash } = network;
+
+  const text = useMemo(() => {
+    return forceEthereum ? 'EVM' : chain;
+  }, [chain, forceEthereum]);
+
+  const logo = useMemo(() => {
+    return forceEthereum ? getLogoEthereum() : getLogoByGenesisHash(genesisHash);
+  }, [genesisHash, forceEthereum]);
 
   return (
     <div className={CN(className)}>
@@ -25,7 +34,7 @@ const NetworkInfo = (props: Props) => {
         <img
           alt='logo'
           className={'network-logo'}
-          src={getLogoByGenesisHash(genesisHash)}
+          src={logo}
         />
 
         <span className={'network-text'}>{text}</span>

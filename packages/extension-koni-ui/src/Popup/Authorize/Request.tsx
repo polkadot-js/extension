@@ -4,7 +4,7 @@
 import type { RequestAuthorizeTab } from '@subwallet/extension-base/background/types';
 import type { ThemeProps } from '../../types';
 
-import { filterAndSortingAccountByAuthType } from '@subwallet/extension-koni-base/utils/utils';
+import { filterAndSortingAccountByAuthType } from '@subwallet/extension-koni-base/utils';
 import ConnectAccount from '@subwallet/extension-koni-ui/Popup/Authorize/ConnectAccount';
 import React, { useCallback, useContext, useState } from 'react';
 import styled from 'styled-components';

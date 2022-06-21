@@ -9,6 +9,8 @@ import CN from 'classnames';
 import React, { useContext } from 'react';
 import styled from 'styled-components';
 
+import TransactionDetail from './TransactionDetail';
+
 interface Props extends ThemeProps{
   className?: string;
   network: NetworkJson;
@@ -25,7 +27,7 @@ const TransactionSigned = (props: Props) => {
       {
         isEthereum
           ? (
-            <></>
+            <TransactionDetail setButtonLoading={setButtonLoading} />
           )
           : (
             <PayloadDetail

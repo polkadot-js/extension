@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { ALL_ACCOUNT_KEY } from '@subwallet/extension-koni-base/constants';
-import { isValidAddress } from '@subwallet/extension-koni-base/utils/utils';
+import { isValidAddress } from '@subwallet/extension-koni-base/utils';
 import logo from '@subwallet/extension-koni-ui/assets/sub-wallet-logo.svg';
 import { ActionContext, Spinner } from '@subwallet/extension-koni-ui/components';
 import InputAddress from '@subwallet/extension-koni-ui/components/InputAddress';

@@ -16,7 +16,7 @@ import { accounts as accountsObservable } from '@polkadot/ui-keyring/observable/
 import { assert, isHex, u8aToHex } from '@polkadot/util';
 import { keyExtractSuri, mnemonicGenerate, mnemonicValidate } from '@polkadot/util-crypto';
 
-import { RequestQRIsLocked, RequestQRSign, ResponseQRIsLocked, ResponseQRSign } from '../types';
+import { RequestQRIsLocked, RequestQrSignSubstrate, ResponseQRIsLocked, ResponseQrSignSubstrate } from '../types';
 import { withErrorLog } from './helpers';
 import State from './State';
 import { createSubscription, unsubscribe } from './subscriptions';
@@ -449,7 +449,7 @@ export default class Extension {
     };
   }
 
-  private qrSign ({ address, message, password, savePass }: RequestQRSign): ResponseQRSign {
+  private qrSignSubstrate ({ address, message, password, savePass }: RequestQrSignSubstrate): ResponseQrSignSubstrate {
     const pair = keyring.getPair(address);
 
     assert(pair, 'Unable to find pair');
@@ -663,8 +663,8 @@ export default class Extension {
       case 'pri(qr.isLocked)':
         return this.qrIsLocked(request as RequestQRIsLocked);
 
-      case 'pri(qr.sign)':
-        return this.qrSign(request as RequestQRSign);
+      case 'pri(qr.sign.substrate)':
+        return this.qrSignSubstrate(request as RequestQrSignSubstrate);
 
       case 'pri(signing.requests)':
         return this.signingSubscribe(id, port);

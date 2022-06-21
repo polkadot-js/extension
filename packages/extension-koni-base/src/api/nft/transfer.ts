@@ -4,7 +4,7 @@
 import { ApiProps, SubstrateNftTransaction } from '@subwallet/extension-base/background/KoniTypes';
 import { getFreeBalance } from '@subwallet/extension-koni-base/api/dotsama/balance';
 import { SUPPORTED_TRANSFER_SUBSTRATE_CHAIN_NAME } from '@subwallet/extension-koni-base/api/nft/config';
-import { reformatAddress } from '@subwallet/extension-koni-base/utils/utils';
+import { reformatAddress } from '@subwallet/extension-koni-base/utils';
 import Web3 from 'web3';
 
 import { keyring } from '@polkadot/ui-keyring';

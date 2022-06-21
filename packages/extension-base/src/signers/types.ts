@@ -4,6 +4,21 @@
 export interface QrState {
   isQrHashed: boolean;
   qrAddress: string;
-  qrPayload: Uint8Array;
+  qrPayload: `0x${string}`;
   qrId: string;
+  isEthereum: boolean;
+}
+
+export interface Web3TransactionBase {
+  to: string;
+  gasPrice: number;
+  gasLimit: number;
+  nonce: number;
+  chainId: number;
+  data: string;
+  value: number;
+}
+
+export interface Web3Transaction extends Web3TransactionBase{
+  from: string;
 }

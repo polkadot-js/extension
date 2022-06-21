@@ -3,7 +3,7 @@
 
 import { NftCollection, NftItem, RMRK_VER } from '@subwallet/extension-base/background/KoniTypes';
 import { BaseNftApi } from '@subwallet/extension-koni-base/api/nft/nft';
-import { isUrl, reformatAddress } from '@subwallet/extension-koni-base/utils/utils';
+import { isUrl, reformatAddress } from '@subwallet/extension-koni-base/utils';
 import fetch from 'cross-fetch';
 
 import { KANARIA_ENDPOINT, KANARIA_EXTERNAL_SERVER, RMRK_PINATA_SERVER, SINGULAR_V1_COLLECTION_ENDPOINT, SINGULAR_V1_ENDPOINT, SINGULAR_V1_EXTERNAL_SERVER, SINGULAR_V2_COLLECTION_ENDPOINT, SINGULAR_V2_ENDPOINT, SINGULAR_V2_EXTERNAL_SERVER } from '../config';

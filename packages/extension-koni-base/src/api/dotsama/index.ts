@@ -4,7 +4,7 @@
 import { ApiProps, NetworkJson } from '@subwallet/extension-base/background/KoniTypes';
 import { initApi } from '@subwallet/extension-koni-base/api/dotsama/api';
 import { PREDEFINED_NETWORKS } from '@subwallet/extension-koni-base/api/predefinedNetworks';
-import { getCurrentProvider } from '@subwallet/extension-koni-base/utils/utils';
+import { getCurrentProvider } from '@subwallet/extension-koni-base/utils';
 
 export * from './api';
 

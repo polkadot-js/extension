@@ -12,7 +12,7 @@ import { RmrkNftApi } from '@subwallet/extension-koni-base/api/nft/rmrk_nft';
 import StatemineNftApi from '@subwallet/extension-koni-base/api/nft/statemine_nft';
 import UniqueNftApi from '@subwallet/extension-koni-base/api/nft/unique_nft';
 import { state } from '@subwallet/extension-koni-base/background/handlers';
-import { categoryAddresses } from '@subwallet/extension-koni-base/utils/utils';
+import { categoryAddresses } from '@subwallet/extension-koni-base/utils';
 import Web3 from 'web3';
 
 function createSubstrateNftApi (chain: string, apiProps: ApiProps | null, addresses: string[]): BaseNftApi | null {

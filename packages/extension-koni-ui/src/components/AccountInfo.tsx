@@ -42,7 +42,7 @@ export interface Props {
   addressHalfLength?: number;
 }
 
-function AccountInfo ({ address, className, genesisHash, iconSize = 32, isEthereum, isExternal, isHardware, isShowAddress = true, isShowBanner = true, name, parentName, showCopyBtn = true, suri, type: givenType, addressHalfLength }: Props): React.ReactElement<Props> {
+function AccountInfo ({ address, addressHalfLength, className, genesisHash, iconSize = 32, isEthereum, isExternal, isHardware, isShowAddress = true, isShowBanner = true, name, parentName, showCopyBtn = true, suri, type: givenType }: Props): React.ReactElement<Props> {
   const { t } = useTranslation();
   const { accounts } = useContext(AccountContext);
   const [{ account,

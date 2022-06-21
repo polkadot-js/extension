@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { AuthUrls, Resolver } from '@subwallet/extension-base/background/handlers/State';
-import { AccountAuthType, AccountJson, AuthorizeRequest, RequestAccountList, RequestAccountSubscribe, RequestAuthorizeReject, RequestAuthorizeSubscribe, RequestAuthorizeTab, RequestCurrentAccountAddress, RequestGetRegistry, RequestQRIsLocked, RequestQRSign, ResponseAuthorizeList, ResponseGetRegistry, ResponseJsonGetAccountInfo, ResponseQRIsLocked, ResponseQRSign, SeedLengths } from '@subwallet/extension-base/background/types';
+import { AccountAuthType, AccountJson, AuthorizeRequest, RequestAccountList, RequestAccountSubscribe, RequestAuthorizeReject, RequestAuthorizeSubscribe, RequestAuthorizeTab, RequestCurrentAccountAddress, RequestParseTransactionSubstrate, RequestQRIsLocked, RequestQrSignSubstrate, ResponseAuthorizeList, ResponseJsonGetAccountInfo, ResponseParseTransactionSubstrate, ResponseQRIsLocked, ResponseQrSignSubstrate, SeedLengths } from '@subwallet/extension-base/background/types';
 import { QrState } from '@subwallet/extension-base/signers/types';
 import { InjectedAccount, MetadataDefBase } from '@subwallet/extension-inject/types';
 import Web3 from 'web3';
@@ -926,6 +926,42 @@ export interface ConfirmationDefinitions {
   evmSendTransactionRequest: [ConfirmationsQueueItem<EvmSendTransactionRequest>, ConfirmationResult<boolean>]
 }
 
+export interface EVMTransactionArg {
+  name: string;
+  type: string;
+  value: string;
+}
+
+export interface ParseEVMTransactionData{
+  method: string;
+  args: EVMTransactionArg[];
+}
+
+export interface RequestParseTransactionEVM {
+  data: string;
+}
+
+export interface ResponseParseTransactionEVM {
+  data: ParseEVMTransactionData | string;
+  nonce: number;
+  to: string;
+  gas: number;
+  gasPrice: number;
+  value: number;
+}
+
+export interface RequestQrSignEVM {
+  address: string;
+  message: string;
+  type: 'message' | 'transaction'
+  chainId?: number;
+  password: string;
+}
+
+export interface ResponseQrSignEVM {
+  signature: string;
+}
+
 export type ConfirmationType = keyof ConfirmationDefinitions;
 
 export type ConfirmationsQueue = {
@@ -999,8 +1035,6 @@ export interface KoniRequestSignatures {
   'pri(accounts.crossChainTransfer)': [RequestCrossChainTransfer, Array<TransferError>, ResponseTransfer];
   'pri(accounts.transfer.qr.create)': [RequestTransferQR, Array<TransferError>, ResponseTransferQr];
   'pri(accounts.cross.transfer.qr.create)': [RequestCrossChainTransferQR, Array<TransferError>, ResponseTransferQr];
-  'pri(accounts.transfer.qr.reject)': [RequestRejectQRTransfer, ResponseRejectQRTransfer];
-  'pri(accounts.transfer.qr.resolve)': [RequestResolveQRTransfer, ResponseResolveQRTransfer];
   'pri(derivation.createV2)': [RequestDeriveCreateV2, boolean];
   'pri(json.restoreV2)': [RequestJsonRestoreV2, void];
   'pri(json.batchRestoreV2)': [RequestBatchRestoreV2, void];
@@ -1031,12 +1065,15 @@ export interface KoniRequestSignatures {
   'pub(utils.getRandom)': [RandomTestRequest, number];
   'pub(accounts.listV2)': [RequestAccountList, InjectedAccount[]];
   'pub(accounts.subscribeV2)': [RequestAccountSubscribe, boolean, InjectedAccount[]];
-  'pri(registry.getRegistry)': [RequestGetRegistry, ResponseGetRegistry];
+  'pri(qr.transaction.parse.substrate)': [RequestParseTransactionSubstrate, ResponseParseTransactionSubstrate];
+  'pri(qr.transaction.parse.evm)': [RequestParseTransactionEVM, ResponseParseTransactionEVM];
   'pri(qr.isLocked)': [RequestQRIsLocked, ResponseQRIsLocked];
-  'pri(qr.sign)': [RequestQRSign, ResponseQRSign];
-
-  // EVM inject request
+  'pri(qr.sign.substrate)': [RequestQrSignSubstrate, ResponseQrSignSubstrate];
+  'pri(qr.sign.evm)': [RequestQrSignEVM, ResponseQrSignEVM];
+  'pri(qr.reject)': [RequestRejectQRTransfer, ResponseRejectQRTransfer];
+  'pri(qr.resolve)': [RequestResolveQRTransfer, ResponseResolveQRTransfer];
   'evm(events.subscribe)': [RequestEvmEvents, boolean, EvmEvent];
   'evm(request)': [RequestArguments, unknown];
   'evm(provider.send)': [RequestEvmProviderSend, string | number, ResponseEvmProviderSend]
+
 }

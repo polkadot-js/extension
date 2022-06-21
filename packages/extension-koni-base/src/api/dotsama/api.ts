@@ -5,7 +5,7 @@ import { options } from '@acala-network/api';
 import { ApiProps, ApiState } from '@subwallet/extension-base/background/KoniTypes';
 import { typesBundle, typesChain } from '@subwallet/extension-koni-base/api/dotsama/api-helper';
 import { DOTSAMA_AUTO_CONNECT_MS, DOTSAMA_MAX_CONTINUE_RETRY } from '@subwallet/extension-koni-base/constants';
-import { inJestTest } from '@subwallet/extension-koni-base/utils/utils';
+import { inJestTest } from '@subwallet/extension-koni-base/utils';
 
 import { ApiPromise, WsProvider } from '@polkadot/api';
 import { ScProvider, WellKnownChain } from '@polkadot/rpc-provider/substrate-connect';

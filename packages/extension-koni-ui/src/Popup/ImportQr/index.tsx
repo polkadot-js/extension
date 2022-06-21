@@ -2,8 +2,8 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { AccountExternalError, AccountExternalErrorCode } from '@subwallet/extension-base/background/KoniTypes';
+import ScanAddress from '@subwallet/extension-koni-ui/components/Qr/ScanAddress';
 import { SUBSTRATE_ACCOUNT_TYPE } from '@subwallet/extension-koni-ui/Popup/CreateAccount';
-import Scanner from '@subwallet/extension-koni-ui/Popup/ImportQr/Scanner';
 import React, { useCallback, useContext, useState } from 'react';
 import styled, { ThemeContext } from 'styled-components';
 
@@ -124,7 +124,7 @@ function ImportQr ({ className }: Props): React.ReactElement<Props> {
         {!account && (
           <>
             <div>
-              <Scanner
+              <ScanAddress
                 onError={handlerScanError}
                 onScan={_setAccount}
               />

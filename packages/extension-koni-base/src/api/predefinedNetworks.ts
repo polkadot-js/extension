@@ -117,6 +117,7 @@ export const PREDEFINED_NETWORKS: Record<string, NetworkJson> = {
       // 'Acala Foundation 2': 'wss://acala-rpc-2.aca-api.network/ws', // https://github.com/polkadot-js/apps/issues/6965
       'Acala Foundation 3': 'wss://acala-rpc-3.aca-api.network/ws',
       'Polkawallet 0': 'wss://acala.polkawallet.io',
+      Testnet: 'wss://node-6870830370282213376.rz.onfinality.io/ws?apikey=0f273197-e4d5-45e2-b23e-03b015cb7000',
       OnFinality: 'wss://acala-polkadot.api.onfinality.io/public-ws',
       Dwellir: 'wss://acala-rpc.dwellir.com'
     },

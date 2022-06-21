@@ -5,23 +5,117 @@ import Common from '@ethereumjs/common';
 import Extension, { SEED_DEFAULT_LENGTH, SEED_LENGTHS } from '@subwallet/extension-base/background/handlers/Extension';
 import { AuthUrls } from '@subwallet/extension-base/background/handlers/State';
 import { createSubscription, isSubscriptionRunning, unsubscribe } from '@subwallet/extension-base/background/handlers/subscriptions';
-import { AccountExternalError, AccountExternalErrorCode, AccountsWithCurrentAddress, ApiProps, BalanceJson, ChainRegistry, CrowdloanJson, CurrentAccountInfo, CustomEvmToken, DeleteEvmTokenParams, DisableNetworkResponse, EvmNftSubmitTransaction, EvmNftTransaction, EvmNftTransactionRequest, EvmTokenJson, NETWORK_ERROR, NetWorkGroup, NetworkJson, NftCollection, NftCollectionJson, NftItem, NftJson, NftTransactionResponse, NftTransferExtra, OptionInputAddress, PriceJson, QRRequestPromise, QRRequestPromiseStatus, RequestAccountCreateExternalV2, RequestAccountCreateSuriV2, RequestAccountExportPrivateKey, RequestAccountMeta, RequestAuthorization, RequestAuthorizationPerAccount, RequestAuthorizeApproveV2, RequestBatchRestoreV2, RequestCheckCrossChainTransfer, RequestCheckTransfer, RequestConfirmationComplete, RequestCrossChainTransfer, RequestCrossChainTransferQR, RequestDeriveCreateV2, RequestForgetSite, RequestFreeBalance, RequestJsonRestoreV2, RequestNftForceUpdate, RequestRejectQRTransfer, RequestResolveQRTransfer, RequestSaveRecentAccount, RequestSeedCreateV2, RequestSeedValidateV2, RequestSettingsType, RequestTransactionHistoryAdd, RequestTransfer, RequestTransferCheckReferenceCount, RequestTransferCheckSupporting, RequestTransferExistentialDeposit, RequestTransferQR, ResponseAccountCreateSuriV2, ResponseAccountExportPrivateKey, ResponseAccountMeta, ResponseCheckCrossChainTransfer, ResponseCheckTransfer, ResponsePrivateKeyValidateV2, ResponseRejectQRTransfer, ResponseResolveQRTransfer, ResponseSeedCreateV2, ResponseSeedValidateV2, ResponseTransfer, ResponseTransferQr, StakingJson, StakingRewardJson, SubstrateNftSubmitTransaction, SubstrateNftTransaction, SubstrateNftTransactionRequest, SupportTransferResponse, ThemeTypes, TokenInfo, TransactionHistoryItemType, TransferError, TransferErrorCode, TransferStep, ValidateEvmTokenRequest, ValidateEvmTokenResponse, ValidateNetworkRequest, ValidateNetworkResponse } from '@subwallet/extension-base/background/KoniTypes';
-import { AccountJson, AuthorizeRequest, MessageTypes, RequestAccountForget, RequestAccountTie, RequestAuthorizeReject, RequestCurrentAccountAddress, RequestGetRegistry, RequestTypes, ResponseAuthorizeList, ResponseGetRegistry, ResponseType } from '@subwallet/extension-base/background/types';
+import {
+  AccountExternalError,
+  AccountExternalErrorCode,
+  AccountsWithCurrentAddress,
+  ApiProps,
+  BalanceJson,
+  ChainRegistry,
+  CrowdloanJson,
+  CurrentAccountInfo,
+  CustomEvmToken,
+  DeleteEvmTokenParams,
+  DisableNetworkResponse,
+  EvmNftSubmitTransaction,
+  EvmNftTransaction,
+  EvmNftTransactionRequest,
+  EvmTokenJson,
+  NETWORK_ERROR,
+  NetWorkGroup,
+  NetworkJson,
+  NftCollection,
+  NftCollectionJson,
+  NftItem,
+  NftJson,
+  NftTransactionResponse,
+  NftTransferExtra,
+  OptionInputAddress,
+  PriceJson,
+  QRRequestPromise,
+  QRRequestPromiseStatus,
+  RequestAccountCreateExternalV2,
+  RequestAccountCreateSuriV2,
+  RequestAccountExportPrivateKey,
+  RequestAccountMeta,
+  RequestAuthorization,
+  RequestAuthorizationPerAccount,
+  RequestAuthorizeApproveV2,
+  RequestBatchRestoreV2,
+  RequestCheckCrossChainTransfer,
+  RequestCheckTransfer,
+  RequestConfirmationComplete,
+  RequestCrossChainTransfer,
+  RequestCrossChainTransferQR,
+  RequestDeriveCreateV2,
+  RequestForgetSite,
+  RequestFreeBalance,
+  RequestJsonRestoreV2,
+  RequestNftForceUpdate,
+  RequestParseTransactionEVM,
+  RequestQrSignEVM,
+  RequestRejectQRTransfer,
+  RequestResolveQRTransfer,
+  RequestSaveRecentAccount,
+  RequestSeedCreateV2,
+  RequestSeedValidateV2,
+  RequestSettingsType,
+  RequestTransactionHistoryAdd,
+  RequestTransfer,
+  RequestTransferCheckReferenceCount,
+  RequestTransferCheckSupporting,
+  RequestTransferExistentialDeposit,
+  RequestTransferQR,
+  ResponseAccountCreateSuriV2,
+  ResponseAccountExportPrivateKey,
+  ResponseAccountMeta,
+  ResponseCheckCrossChainTransfer,
+  ResponseCheckTransfer, ResponseParseTransactionEVM,
+  ResponsePrivateKeyValidateV2,
+  ResponseQrSignEVM,
+  ResponseRejectQRTransfer,
+  ResponseResolveQRTransfer,
+  ResponseSeedCreateV2,
+  ResponseSeedValidateV2,
+  ResponseTransfer,
+  ResponseTransferQr,
+  StakingJson,
+  StakingRewardJson,
+  SubstrateNftSubmitTransaction,
+  SubstrateNftTransaction,
+  SubstrateNftTransactionRequest,
+  SupportTransferResponse,
+  ThemeTypes,
+  TokenInfo,
+  TransactionHistoryItemType,
+  TransferError,
+  TransferErrorCode,
+  TransferStep,
+  ValidateEvmTokenRequest,
+  ValidateEvmTokenResponse,
+  ValidateNetworkRequest,
+  ValidateNetworkResponse
+} from '@subwallet/extension-base/background/KoniTypes';
+import { AccountJson, AuthorizeRequest, MessageTypes, RequestAccountForget, RequestAccountTie, RequestAuthorizeReject, RequestCurrentAccountAddress, RequestParseTransactionSubstrate, RequestTypes, ResponseAuthorizeList, ResponseParseTransactionSubstrate, ResponseType } from '@subwallet/extension-base/background/types';
 import { getId } from '@subwallet/extension-base/utils/getId';
 import { initApi } from '@subwallet/extension-koni-base/api/dotsama';
 import { getFreeBalance, subscribeFreeBalance } from '@subwallet/extension-koni-base/api/dotsama/balance';
+import { parseSubstratePayload } from '@subwallet/extension-koni-base/api/dotsama/parseSubstratePayload';
 import { getTokenInfo } from '@subwallet/extension-koni-base/api/dotsama/registry';
 import { checkReferenceCount, checkSupportTransfer, estimateCrossChainFee, estimateFee, getExistentialDeposit, makeCrossChainTransfer, makeTransfer } from '@subwallet/extension-koni-base/api/dotsama/transfer';
 import { makeCrossChainTransferQr, makeTransferQr } from '@subwallet/extension-koni-base/api/dotsama/transferQr';
 import { SUPPORTED_TRANSFER_SUBSTRATE_CHAIN_NAME } from '@subwallet/extension-koni-base/api/nft/config';
 import { acalaTransferHandler, getNftTransferExtrinsic, isRecipientSelf, quartzTransferHandler, rmrkTransferHandler, statemineTransferHandler, uniqueTransferHandler, unlockAccount } from '@subwallet/extension-koni-base/api/nft/transfer';
-import { getRegistry } from '@subwallet/extension-koni-base/api/registry';
 import { getERC20TransactionObject, getEVMTransactionObject, makeERC20Transfer, makeEVMTransfer } from '@subwallet/extension-koni-base/api/web3/transfer';
+import { makeERC20TransferQr, makeEVMTransferQr } from '@subwallet/extension-koni-base/api/web3/transferQr';
 import { ERC721Contract, getERC20Contract, getERC721Contract, initWeb3Api } from '@subwallet/extension-koni-base/api/web3/web3';
 import { state } from '@subwallet/extension-koni-base/background/handlers/index';
 import { ALL_ACCOUNT_KEY, ALL_GENESIS_HASH } from '@subwallet/extension-koni-base/constants';
-import { isValidProvider, reformatAddress } from '@subwallet/extension-koni-base/utils/utils';
+import { isValidProvider, reformatAddress } from '@subwallet/extension-koni-base/utils';
+import { createTransactionFromRLP, Transaction as QrTransaction } from '@subwallet/extension-koni-base/utils/eth';
+import BigN from 'bignumber.js';
 import { Transaction } from 'ethereumjs-tx';
+import { SignedTransaction as Web3SignedTransaction, TransactionConfig } from 'web3-core';
 import { Contract } from 'web3-eth-contract';
 
 import { createPair } from '@polkadot/keyring';
@@ -30,9 +124,10 @@ import { ChainType } from '@polkadot/types/interfaces';
 import { keyring } from '@polkadot/ui-keyring';
 import { accounts as accountsObservable } from '@polkadot/ui-keyring/observable/accounts';
 import { SingleAddress, SubjectInfo } from '@polkadot/ui-keyring/observable/types';
-import { assert, BN, hexToU8a, isHex, u8aToString } from '@polkadot/util';
+import { assert, BN, hexStripPrefix, hexToU8a, isHex, numberToHex, u8aToString } from '@polkadot/util';
 import { base64Decode, isEthereumAddress, jsonDecrypt, keyExtractSuri, mnemonicGenerate, mnemonicValidate } from '@polkadot/util-crypto';
 import { EncryptedJson, KeypairType, Prefix } from '@polkadot/util-crypto/types';
+import {parseEVMTransaction} from '@subwallet/extension-koni-base/api/web3/parseEVMTransaction';
 
 const ETH_DERIVE_DEFAULT = '/m/44\'/60\'/0\'/0/0';
 
@@ -2088,8 +2183,12 @@ export default class KoniExtension extends Extension {
     return txState;
   }
 
-  private getRegistryByGenesisHash ({ genesisHash, rawPayload, specVersion }: RequestGetRegistry): ResponseGetRegistry {
-    return getRegistry(state, genesisHash, rawPayload, specVersion);
+  private parseSubstrateTransaction ({ genesisHash, rawPayload, specVersion }: RequestParseTransactionSubstrate): ResponseParseTransactionSubstrate {
+    return parseSubstratePayload(state, genesisHash, rawPayload, specVersion);
+  }
+
+  private parseEVMTransaction ({ data }: RequestParseTransactionEVM): ResponseParseTransactionEVM {
+    return parseEVMTransaction(data)
   }
 
   private enableNetworks (targetKeys: string[]) {
@@ -2119,10 +2218,16 @@ export default class KoniExtension extends Extension {
     isEthereum,
     name }: RequestAccountCreateExternalV2): AccountExternalError[] {
     try {
-      const exists = keyring.getPair(address);
+      try {
+        const exists = keyring.getPair(address);
 
-      if (exists) {
-        return [{ code: AccountExternalErrorCode.INVALID_ADDRESS, message: 'Account exists' }];
+        if (exists) {
+          if (exists.type === (isEthereum ? 'ethereum' : 'sr25519')) {
+            return [{ code: AccountExternalErrorCode.INVALID_ADDRESS, message: 'Account exists' }];
+          }
+        }
+      } catch (e) {
+
       }
 
       if (isEthereum) {
@@ -2232,7 +2337,7 @@ export default class KoniExtension extends Extension {
     token,
     transferAll,
     value }: RequestTransferQR): Promise<Array<TransferError>> {
-    const cb = createSubscription<'pri(accounts.transfer)'>(id, port);
+    const cb = createSubscription<'pri(accounts.transfer.qr.create)'>(id, port);
     const [errors, fromKeyPair, , tokenInfo] = await this.validateTransferQR(networkKey, token, from, to, value, transferAll);
 
     if (errors.length) {
@@ -2257,19 +2362,59 @@ export default class KoniExtension extends Extension {
         state.updateQrRequest(id, promise);
       };
 
-      const transferProm: Promise<void> = makeTransferQr(
-        networkKey,
-        to,
-        fromKeyPair,
-        value || '0',
-        !!transferAll,
-        state.getDotSamaApiMap(),
-        tokenInfo,
-        id,
-        setState,
-        updateState,
-        this.makeTransferQrCallback(from, networkKey, token, cb)
-      );
+      const callback = this.makeTransferQrCallback(from, networkKey, token, cb);
+
+      let transferProm: Promise<void>;
+
+      if (isEthereumAddress(from) && isEthereumAddress(to)) {
+        const web3ApiMap = state.getApiMap().web3;
+        const chainId = state.getNetworkMap()[networkKey].evmChainId || 1;
+
+        if (tokenInfo && !tokenInfo.isMainToken && tokenInfo.erc20Address) {
+          transferProm = makeERC20TransferQr(
+            {
+              assetAddress: tokenInfo.erc20Address,
+              callback,
+              chainId,
+              from,
+              id,
+              networkKey,
+              setState,
+              to,
+              transferAll: !!transferAll,
+              value: value || '0',
+              web3ApiMap
+            }
+          );
+        } else {
+          transferProm = makeEVMTransferQr({
+            callback,
+            chainId,
+            from,
+            id,
+            networkKey,
+            setState,
+            to,
+            transferAll: !!transferAll,
+            value: value || '0',
+            web3ApiMap
+          });
+        }
+      } else {
+        transferProm = makeTransferQr(
+          networkKey,
+          to,
+          fromKeyPair,
+          value || '0',
+          !!transferAll,
+          state.getDotSamaApiMap(),
+          tokenInfo,
+          id,
+          setState,
+          updateState,
+          callback
+        );
+      }
 
       transferProm.then(() => {
         // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
@@ -2381,7 +2526,7 @@ export default class KoniExtension extends Extension {
 
     promise.resolve(data);
   }
-  
+
   private accountsTie2 ({ address, genesisHash }: RequestAccountTie): boolean {
     return state.setAccountTie(address, genesisHash);
   }
@@ -2399,6 +2544,85 @@ export default class KoniExtension extends Extension {
 
   private completeConfirmation (request: RequestConfirmationComplete) {
     return state.completeConfirmation(request);
+  }
+
+  private getNetworkJsonByChainId (chainId?: number): NetworkJson | null {
+    const networkMap = state.getNetworkMap();
+
+    if (!chainId) {
+      for (const n in networkMap) {
+        if (!Object.prototype.hasOwnProperty.call(networkMap, n)) {
+          continue;
+        }
+
+        const networkInfo = networkMap[n];
+
+        if (networkInfo.isEthereum) {
+          return networkInfo;
+        }
+      }
+
+      return null;
+    }
+
+    for (const n in networkMap) {
+      if (!Object.prototype.hasOwnProperty.call(networkMap, n)) {
+        continue;
+      }
+
+      const networkInfo = networkMap[n];
+
+      if (networkInfo.evmChainId === chainId) {
+        return networkInfo;
+      }
+    }
+
+    return null;
+  }
+
+  private async qrSignEVM ({ address, chainId, message, password, type }: RequestQrSignEVM): Promise<ResponseQrSignEVM> {
+    let parsedPrivateKey = '';
+    let signed: Web3SignedTransaction;
+    const { privateKey } = this.accountExportPrivateKey({ address: address, password });
+
+    parsedPrivateKey = privateKey.slice(2);
+    const network: NetworkJson | null = this.getNetworkJsonByChainId(chainId);
+
+    if (!network) {
+      throw new Error('Cannot find network');
+    }
+
+    const web3ApiMap = state.getWeb3ApiMap();
+    const web3 = web3ApiMap[network.key];
+
+    if (type === 'message') {
+      signed = web3.eth.accounts.sign(message, parsedPrivateKey);
+    } else {
+      const tx: QrTransaction | null = createTransactionFromRLP(message);
+
+      if (!tx) {
+        throw new Error(`Cannot create tx from ${message}`);
+      }
+
+      const txObject: TransactionConfig = {
+        gasPrice: new BigN(tx.gasPrice).toNumber(),
+        to: tx.action,
+        value: new BigN(tx.value).toNumber(),
+        data: tx.data,
+        nonce: new BigN(tx.nonce).toNumber(),
+        gas: new BigN(tx.gas).toNumber()
+      };
+
+      signed = await web3.eth.accounts.signTransaction(txObject, parsedPrivateKey);
+    }
+
+    const v = parseInt(signed.v);
+
+    const result = hexStripPrefix(signed.r) + hexStripPrefix(signed.s) + hexStripPrefix(numberToHex(v));
+
+    return {
+      signature: result
+    };
   }
 
   // eslint-disable-next-line @typescript-eslint/require-await
@@ -2560,8 +2784,12 @@ export default class KoniExtension extends Extension {
         return this.substrateNftSubmitTransaction(id, port, request as SubstrateNftSubmitTransaction);
       case 'pri(networkMap.recoverDotSama)':
         return this.recoverDotSamaApi(request as string);
-      case 'pri(registry.getRegistry)':
-        return this.getRegistryByGenesisHash(request as RequestGetRegistry);
+      case 'pri(qr.transaction.parse.substrate)':
+        return this.parseSubstrateTransaction(request as RequestParseTransactionSubstrate);
+      case 'pri(qr.transaction.parse.evm)':
+        return this.parseEVMTransaction(request as RequestParseTransactionEVM);
+      case 'pri(qr.sign.evm)':
+        return this.qrSignEVM(request as RequestQrSignEVM);
       case 'pri(networkMap.enableMany)':
         return this.enableNetworks(request as string[]);
       case 'pri(accounts.get.meta)':
@@ -2570,9 +2798,9 @@ export default class KoniExtension extends Extension {
         return await this.makeCrossChainTransferQr(id, port, request as RequestCrossChainTransferQR);
       case 'pri(accounts.transfer.qr.create)':
         return await this.makeTransferQR(id, port, request as RequestTransferQR);
-      case 'pri(accounts.transfer.qr.reject)':
+      case 'pri(qr.reject)':
         return this.rejectQrTransfer(request as RequestRejectQRTransfer);
-      case 'pri(accounts.transfer.qr.resolve)':
+      case 'pri(qr.resolve)':
         return this.resolveQrTransfer(request as RequestResolveQRTransfer);
       case 'pri(accounts.tie)':
         return this.accountsTie2(request as RequestAccountTie);

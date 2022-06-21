@@ -28,7 +28,7 @@ const SUBSTRATE_PREFIX = 'substrate';
 const ETHEREUM_PREFIX = 'ethereum';
 const SECRET_PREFIX = 'secret';
 
-const Scanner = (props: Props) => {
+const ScanAddress = (props: Props) => {
   const { className, onError, onScan } = props;
 
   const _onScan = useCallback((result: Result | undefined | null, error: Error | undefined | null) => {
@@ -93,7 +93,7 @@ const Scanner = (props: Props) => {
   );
 };
 
-export default React.memo(styled(Scanner)(({ theme }: Props) => `
+export default React.memo(styled(ScanAddress)(({ theme }: Props) => `
   display:inline-block;
   height:100%;
   transform:matrix(1,0,0,1,0,0);

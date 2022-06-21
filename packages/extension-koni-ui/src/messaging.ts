@@ -1,7 +1,7 @@
 // Copyright 2019-2022 @polkadot/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import type { AccountJson, AllowedPath, AuthorizeRequest, MessageTypes, MessageTypesWithNoSubscriptions, MessageTypesWithNullRequest, MessageTypesWithSubscriptions, MetadataRequest, RequestTypes, ResponseAuthorizeList, ResponseDeriveValidate, ResponseGetRegistry, ResponseJsonGetAccountInfo, ResponseSigningIsLocked, ResponseTypes, SeedLengths, SigningRequest, SubscriptionMessageTypes } from '@subwallet/extension-base/background/types';
+import type { AccountJson, AllowedPath, AuthorizeRequest, MessageTypes, MessageTypesWithNoSubscriptions, MessageTypesWithNullRequest, MessageTypesWithSubscriptions, MetadataRequest, RequestTypes, ResponseAuthorizeList, ResponseDeriveValidate, ResponseJsonGetAccountInfo, ResponseParseTransactionSubstrate, ResponseSigningIsLocked, ResponseTypes, SeedLengths, SigningRequest, SubscriptionMessageTypes } from '@subwallet/extension-base/background/types';
 import type { Message } from '@subwallet/extension-base/types';
 import type { Chain } from '@subwallet/extension-chains/types';
 import type { KeyringPair$Json } from '@polkadot/keyring/types';
@@ -10,8 +10,79 @@ import type { HexString } from '@polkadot/util/types';
 import type { KeypairType } from '@polkadot/util-crypto/types';
 
 import { AuthUrls } from '@subwallet/extension-base/background/handlers/State';
-import { AccountExternalError, AccountsWithCurrentAddress, BalanceJson, ChainRegistry, ConfirmationDefinitions, ConfirmationsQueue, ConfirmationType, CrowdloanJson, CurrentAccountInfo, CustomEvmToken, DeleteEvmTokenParams, DisableNetworkResponse, EvmNftSubmitTransaction, EvmNftTransaction, EvmNftTransactionRequest, EvmTokenJson, NetworkJson, NftCollectionJson, NftJson, NftTransactionResponse, NftTransferExtra, OptionInputAddress, PriceJson, RequestAccountMeta, RequestCheckCrossChainTransfer, RequestCheckTransfer, RequestCrossChainTransfer, RequestCrossChainTransferQR, RequestFreeBalance, RequestNftForceUpdate, RequestRejectQRTransfer, RequestResolveQRTransfer, RequestSettingsType, RequestSubscribeBalance, RequestSubscribeBalancesVisibility, RequestSubscribeCrowdloan, RequestSubscribeNft, RequestSubscribePrice, RequestSubscribeStaking, RequestSubscribeStakingReward, RequestTransfer, RequestTransferCheckReferenceCount, RequestTransferCheckSupporting, RequestTransferExistentialDeposit, RequestTransferQR, ResponseAccountCreateSuriV2, ResponseAccountMeta, ResponseCheckCrossChainTransfer, ResponseCheckTransfer, ResponsePrivateKeyValidateV2, ResponseRejectQRTransfer, ResponseResolveQRTransfer, ResponseSeedCreateV2, ResponseSeedValidateV2, ResponseSettingsType, ResponseTransfer, ResponseTransferQr, StakingJson, StakingRewardJson, SubstrateNftSubmitTransaction, SubstrateNftTransaction, SubstrateNftTransactionRequest, SupportTransferResponse, ThemeTypes, TransactionHistoryItemType, TransferError, ValidateEvmTokenRequest, ValidateNetworkResponse } from '@subwallet/extension-base/background/KoniTypes';
-import { RequestCurrentAccountAddress, ResponseQRIsLocked, ResponseQRSign } from '@subwallet/extension-base/background/types';
+import {
+  AccountExternalError,
+  AccountsWithCurrentAddress,
+  BalanceJson,
+  ChainRegistry,
+  ConfirmationDefinitions,
+  ConfirmationsQueue,
+  ConfirmationType,
+  CrowdloanJson,
+  CurrentAccountInfo,
+  CustomEvmToken,
+  DeleteEvmTokenParams,
+  DisableNetworkResponse,
+  EvmNftSubmitTransaction,
+  EvmNftTransaction,
+  EvmNftTransactionRequest,
+  EvmTokenJson,
+  NetworkJson,
+  NftCollectionJson,
+  NftJson,
+  NftTransactionResponse,
+  NftTransferExtra,
+  OptionInputAddress,
+  PriceJson,
+  RequestAccountMeta,
+  RequestCheckCrossChainTransfer,
+  RequestCheckTransfer,
+  RequestCrossChainTransfer,
+  RequestCrossChainTransferQR,
+  RequestFreeBalance,
+  RequestNftForceUpdate,
+  RequestRejectQRTransfer,
+  RequestResolveQRTransfer,
+  RequestSettingsType,
+  RequestSubscribeBalance,
+  RequestSubscribeBalancesVisibility,
+  RequestSubscribeCrowdloan,
+  RequestSubscribeNft,
+  RequestSubscribePrice,
+  RequestSubscribeStaking,
+  RequestSubscribeStakingReward,
+  RequestTransfer,
+  RequestTransferCheckReferenceCount,
+  RequestTransferCheckSupporting,
+  RequestTransferExistentialDeposit,
+  RequestTransferQR,
+  ResponseAccountCreateSuriV2,
+  ResponseAccountMeta,
+  ResponseCheckCrossChainTransfer,
+  ResponseCheckTransfer,
+  ResponseParseTransactionEVM,
+  ResponsePrivateKeyValidateV2,
+  ResponseQrSignEVM,
+  ResponseRejectQRTransfer,
+  ResponseResolveQRTransfer,
+  ResponseSeedCreateV2,
+  ResponseSeedValidateV2,
+  ResponseSettingsType,
+  ResponseTransfer,
+  ResponseTransferQr,
+  StakingJson,
+  StakingRewardJson,
+  SubstrateNftSubmitTransaction,
+  SubstrateNftTransaction,
+  SubstrateNftTransactionRequest,
+  SupportTransferResponse,
+  ThemeTypes,
+  TransactionHistoryItemType,
+  TransferError,
+  ValidateEvmTokenRequest,
+  ValidateNetworkResponse
+} from '@subwallet/extension-base/background/KoniTypes';
+import { RequestCurrentAccountAddress, ResponseQRIsLocked, ResponseQrSignSubstrate } from '@subwallet/extension-base/background/types';
 import { PORT_EXTENSION } from '@subwallet/extension-base/defaults';
 import { getId } from '@subwallet/extension-base/utils/getId';
 import { metadataExpand } from '@subwallet/extension-chains';
@@ -144,8 +215,12 @@ export async function qrIsLocked (address: string): Promise<ResponseQRIsLocked> 
   return sendMessage('pri(qr.isLocked)', { address });
 }
 
-export async function qrSign (address: string, message: string, savePass: boolean, password?: string): Promise<ResponseQRSign> {
-  return sendMessage('pri(qr.sign)', { address, password, message, savePass });
+export async function qrSignSubstrate (address: string, message: string, savePass: boolean, password?: string): Promise<ResponseQrSignSubstrate> {
+  return sendMessage('pri(qr.sign.substrate)', { address, password, message, savePass });
+}
+
+export async function qrSignEvm (address: string, password: string, message: string, type: 'message' | 'transaction', chainId?: number): Promise<ResponseQrSignEVM> {
+  return sendMessage('pri(qr.sign.evm)', { address, password, message, chainId, type });
 }
 
 export async function isSignLocked (id: string): Promise<ResponseSigningIsLocked> {
@@ -266,10 +341,6 @@ export async function subscribeAuthorizeRequests (cb: (accounts: AuthorizeReques
 
 export async function subscribeAuthorizeRequestsV2 (cb: (accounts: AuthorizeRequest[]) => void): Promise<boolean> {
   return sendMessage('pri(authorize.requestsV2)', null, cb);
-}
-
-export async function getRegistry (genesisHash: string, rawPayload: string, specVersion: number): Promise<ResponseGetRegistry> {
-  return sendMessage('pri(registry.getRegistry)', { genesisHash: genesisHash, rawPayload: rawPayload, specVersion: specVersion });
 }
 
 export async function getAuthList (): Promise<ResponseAuthorizeList> {
@@ -566,6 +637,14 @@ export async function recoverDotSamaApi (request: string): Promise<boolean> {
   return sendMessage('pri(networkMap.recoverDotSama)', request);
 }
 
+export async function parseSubstrateTransaction (genesisHash: string, rawPayload: string, specVersion: number): Promise<ResponseParseTransactionSubstrate> {
+  return sendMessage('pri(qr.transaction.parse.substrate)', { genesisHash: genesisHash, rawPayload: rawPayload, specVersion: specVersion });
+}
+
+export async function parseEVMTransaction (data: string): Promise<ResponseParseTransactionEVM> {
+  return sendMessage('pri(qr.transaction.parse.evm)', { data });
+}
+
 export async function makeTransferQr (request: RequestTransferQR, callback: (data: ResponseTransferQr) => void): Promise<Array<TransferError>> {
   return sendMessage('pri(accounts.transfer.qr.create)', request, callback);
 }
@@ -575,11 +654,11 @@ export async function makeCrossChainTransferQr (request: RequestCrossChainTransf
 }
 
 export async function rejectTransferQr (request: RequestRejectQRTransfer): Promise<ResponseRejectQRTransfer> {
-  return sendMessage('pri(accounts.transfer.qr.reject)', request);
+  return sendMessage('pri(qr.reject)', request);
 }
 
 export async function resolveTransferQr (request: RequestResolveQRTransfer): Promise<ResponseResolveQRTransfer> {
-  return sendMessage('pri(accounts.transfer.qr.resolve)', request);
+  return sendMessage('pri(qr.resolve)', request);
 }
 
 export async function getAccountMeta (request: RequestAccountMeta): Promise<ResponseAccountMeta> {

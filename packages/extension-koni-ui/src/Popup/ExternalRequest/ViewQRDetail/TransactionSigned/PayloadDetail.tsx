@@ -1,10 +1,10 @@
 // Copyright 2019-2022 @polkadot/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { EraInfo, ResponseGetRegistry } from '@subwallet/extension-base/background/types';
+import { EraInfo, ResponseParseTransactionSubstrate } from '@subwallet/extension-base/background/types';
 import { Spinner } from '@subwallet/extension-koni-ui/components';
 import { ScannerContext, ScannerContextType } from '@subwallet/extension-koni-ui/contexts/ScannerContext';
-import { getRegistry } from '@subwallet/extension-koni-ui/messaging';
+import { parseSubstrateTransaction } from '@subwallet/extension-koni-ui/messaging';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import CN from 'classnames';
 import React, { useCallback, useContext, useEffect, useState } from 'react';
@@ -12,7 +12,7 @@ import styled from 'styled-components';
 
 import { isArray, isString, u8aToHex } from '@polkadot/util';
 
-type TxDetail = ResponseGetRegistry;
+type TxDetail = ResponseParseTransactionSubstrate;
 
 interface Props extends ThemeProps{
   className?: string;
@@ -29,8 +29,8 @@ const PayloadDetail = (props: Props) => {
   const [payloadDetail, setPayloadDetail] = useState<TxDetail | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
 
-  const handlerGetRegistry = useCallback(async (genesisHash: string, rawPayload: string, specVersion: number, mount: boolean) => {
-    const data = await getRegistry(genesisHash, rawPayload, specVersion);
+  const handlerParseTransaction = useCallback(async (genesisHash: string, rawPayload: string, specVersion: number, mount: boolean) => {
+    const data = await parseSubstrateTransaction(genesisHash, rawPayload, specVersion);
 
     if (mount) {
       setPayloadDetail(data);
@@ -133,13 +133,13 @@ const PayloadDetail = (props: Props) => {
       const _rawPayload = isString(rawPayload) ? rawPayload : u8aToHex(rawPayload);
 
       // eslint-disable-next-line no-void
-      void handlerGetRegistry(genesisHash, _rawPayload, specVersion, mount);
+      void handlerParseTransaction(genesisHash, _rawPayload, specVersion, mount);
     }
 
     return () => {
       mount = false;
     };
-  }, [genesisHash, handlerGetRegistry, rawPayload, specVersion]);
+  }, [genesisHash, handlerParseTransaction, rawPayload, specVersion]);
 
   return (
     <div className={CN(className)}>

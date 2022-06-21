@@ -30,4 +30,8 @@ export function getLogoByGenesisHash (hash?: string): string {
   return logoByGenesisHashMap[hash] || LogosMap.default;
 }
 
+export function getLogoEthereum (): string {
+  return LogosMap.eth;
+}
+
 export default logoByGenesisHashMap;

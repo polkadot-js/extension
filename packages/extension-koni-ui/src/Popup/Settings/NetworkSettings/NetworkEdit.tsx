@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { NETWORK_ERROR, NetworkJson } from '@subwallet/extension-base/background/KoniTypes';
-import { isUrl, isValidProvider } from '@subwallet/extension-koni-base/utils/utils';
+import { isUrl, isValidProvider } from '@subwallet/extension-koni-base/utils';
 import { ActionContext, Button, ButtonArea, Dropdown, HorizontalLabelToggle, InputWithLabel } from '@subwallet/extension-koni-ui/components';
 import useToast from '@subwallet/extension-koni-ui/hooks/useToast';
 import useTranslation from '@subwallet/extension-koni-ui/hooks/useTranslation';

@@ -14,6 +14,7 @@ export class SubWalletEvmProvider extends SafeEventEmitter implements EvmProvide
   public readonly version;
   protected sendMessage: SendRequest;
   protected _connected = false;
+  protected _subscribed = false;
 
   constructor (sendMessage: SendRequest, version: string) {
     super();
@@ -31,6 +32,10 @@ export class SubWalletEvmProvider extends SafeEventEmitter implements EvmProvide
   }
 
   protected subscribeExtensionEvents () {
+    if (this._subscribed) {
+      return;
+    }
+
     this.sendMessage('evm(events.subscribe)', null, ({ payload, type }) => {
       if (['connect', 'disconnect', 'accountsChanged', 'chainChanged', 'message', 'data', 'reconnect', 'error'].includes(type)) {
         if (type === 'connect') {
@@ -48,7 +53,7 @@ export class SubWalletEvmProvider extends SafeEventEmitter implements EvmProvide
       }
     })
       .then((done) => {
-        console.debug('Start subscribe events from SubWallet');
+        this._subscribed = done;
       }).catch(console.error);
   }
 

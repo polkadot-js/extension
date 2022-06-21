@@ -159,7 +159,7 @@ export const subscanByNetworkKey: Record<string, string> = {
   astar: 'https://astar.subscan.io',
   // 'basilisk': 'https://basilisk.subscan.io',
   bifrost_dot: 'https://bifrost.subscan.io',
-  bifrost_ksm: 'https://bifrost-kusama.subscan.io/',
+  bifrost: 'https://bifrost-kusama.subscan.io/',
   calamari: 'https://calamari.subscan.io',
   centrifuge: 'https://centrifuge.subscan.io',
   clover: 'https://clover.subscan.io',

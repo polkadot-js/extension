@@ -762,7 +762,7 @@ export const PREDEFINED_NETWORKS: Record<string, NetworkJson> = {
     crowdloanUrl: 'https://polkadot.js.org/apps/#/parachains/crowdloan',
     decimals: 12
   },
-  bifrost_ksm: {
+  bifrost: {
     key: 'bifrost',
     chain: 'Bifrost Kusama',
     genesisHash: '0x9f28c6a68e0fc9646eff64935684f6eeeece527e37bbe1f213d22caa1d9d6bed',

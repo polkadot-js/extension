@@ -28,6 +28,24 @@ export interface UniformEraPayoutInflationParams extends InflationParams {
   yearlyInflationInTokens: number;
 }
 
+export const MOONBEAM_INFLATION_DISTRIBUTION: Record<string, Record<string, number>> = { // https://docs.moonbeam.network/learn/features/staking/#annual-inflation
+  moonbeam: {
+    reward: 0.5,
+    collatorCommission: 0.2,
+    bondReserve: 0.3
+  },
+  moonriver: {
+    reward: 0.5,
+    collatorCommission: 0.2,
+    bondReserve: 0.3
+  },
+  moonbase: {
+    reward: 0.5,
+    collatorCommission: 0.2,
+    bondReserve: 0.3
+  }
+};
+
 const DEFAULT_PARAMS: InflationParams = {
   auctionAdjust: 0,
   auctionMax: 0,
@@ -64,6 +82,10 @@ const KNOWN_PARAMS: Record<string, InflationParams> = {
 
 export function getInflationParams (networkKey: string): InflationParams {
   return KNOWN_PARAMS[networkKey] || DEFAULT_PARAMS;
+}
+
+export function parseRawNumber (value: string) {
+  return parseFloat(value.replaceAll(',', ''));
 }
 
 export function calcInflationUniformEraPayout (totalIssuance: number, yearlyInflationInTokens: number): number {

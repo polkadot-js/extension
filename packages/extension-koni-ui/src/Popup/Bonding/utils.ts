@@ -14,3 +14,15 @@ export function parseBalanceString (balance: number, unit: string) {
     return formatLocaleNumber(Math.round(balance * 100) / 100) + ' ' + unit;
   }
 }
+
+export function getChainType (networkKey: string | null) {
+  if (networkKey === null) {
+    return -1;
+  }
+
+  if (['moonbeam', 'moonriver', 'moonbase'].includes(networkKey)) {
+    return 1;
+  }
+
+  return 0;
+}

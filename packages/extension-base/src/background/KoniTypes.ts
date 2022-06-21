@@ -884,8 +884,8 @@ export interface ValidatorInfo {
   ownStake: number;
   otherStake: number;
   nominatorCount: number;
-  commission: number;
-  expectedReturn: number;
+  commission?: number;
+  expectedReturn?: number;
   blocked: boolean;
   identity?: string;
   isVerified: boolean;

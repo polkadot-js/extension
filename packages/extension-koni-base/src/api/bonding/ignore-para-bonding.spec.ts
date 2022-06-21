@@ -178,7 +178,6 @@ describe('test DotSama APIs', () => {
     }
 
     // TODO: calculate validator returns
-    // TODO: get maxNominator per validator
 
     console.log(maxDelegations);
     console.log(maxDelegatorPerCandidate);
@@ -199,6 +198,12 @@ describe('test DotSama APIs', () => {
     const parsedTotalIssuance = parseFloat(_totalIssuance.replaceAll(',', ''));
 
     const stakedReturn = calculateChainStakedReturn(2.5, parsedTotalStake, parsedTotalIssuance, 'moonbeam');
+
+    const _inflation = (await apiPromise.query.parachainStaking.inflationConfig()).toHuman() as Record<string, Record<string, any>>;
+    const inflationString = _inflation.annual.ideal as string;
+    const inflation = parseFloat(inflationString.split('%')[0]);
+
+    console.log(inflation);
 
     console.log(stakedReturn); // might or might not be right
   });

@@ -1127,8 +1127,6 @@ export interface KoniRequestSignatures {
   'pri(accounts.checkCrossChainTransfer)': [RequestCheckCrossChainTransfer, ResponseCheckCrossChainTransfer];
   'pri(accounts.transfer)': [RequestTransfer, Array<TransferError>, ResponseTransfer];
   'pri(accounts.crossChainTransfer)': [RequestCrossChainTransfer, Array<TransferError>, ResponseTransfer];
-  'pri(accounts.transfer.qr.create)': [RequestTransferQR, Array<TransferError>, ResponseTransferQr];
-  'pri(accounts.cross.transfer.qr.create)': [RequestCrossChainTransferQR, Array<TransferError>, ResponseTransferQr];
   'pri(derivation.createV2)': [RequestDeriveCreateV2, boolean];
   'pri(json.restoreV2)': [RequestJsonRestoreV2, void];
   'pri(json.batchRestoreV2)': [RequestBatchRestoreV2, void];
@@ -1170,4 +1168,7 @@ export interface KoniRequestSignatures {
   'evm(request)': [RequestArguments, unknown];
   'evm(provider.send)': [RequestEvmProviderSend, string | number, ResponseEvmProviderSend]
 
+  'pri(accounts.transfer.qr.create)': [RequestTransferQR, Array<TransferError>, ResponseTransferQr];
+  'pri(accounts.cross.transfer.qr.create)': [RequestCrossChainTransferQR, Array<TransferError>, ResponseTransferQr];
+  'pri(nft.transfer.qr.create.evm)': [EvmNftSubmitTransaction, NftTransactionResponse, NftTransactionResponse];
 }

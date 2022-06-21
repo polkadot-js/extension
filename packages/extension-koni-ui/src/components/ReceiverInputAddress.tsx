@@ -47,18 +47,34 @@ function ReceiverInputAddress ({ balance, balanceFormat, className = '', default
 
   return (
     <div className={className}>
-      <InputAddress
-        autoPrefill={false}
-        className={'receive-input-address'}
-        help={inputAddressHelp || t<string>('Select a contact or paste the address you want to send funds to.')}
-        isDisabled={isDisabled}
-        isSetDefaultValue={isSetDefaultValue}
-        label={inputAddressLabel || t<string>('Send to address')}
-        networkPrefix={networkPrefix}
-        onChange={onChangeReceiveAddress}
-        type='allPlus'
-        withEllipsis
-      />
+      {
+        receiveAddress !== ''
+          ? <InputAddress
+            autoPrefill={false}
+            className={'receive-input-address'}
+            defaultValue={receiveAddress}
+            help={inputAddressHelp || t<string>('Select a contact or paste the address you want to send funds to.')}
+            isDisabled={isDisabled}
+            isSetDefaultValue={isSetDefaultValue}
+            label={inputAddressLabel || t<string>('Send to address')}
+            networkPrefix={networkPrefix}
+            onChange={onChangeReceiveAddress}
+            type='allPlus'
+            withEllipsis
+          />
+          : <InputAddress
+            autoPrefill={false}
+            className={'receive-input-address'}
+            help={inputAddressHelp || t<string>('Select a contact or paste the address you want to send funds to.')}
+            isDisabled={isDisabled}
+            isSetDefaultValue={isSetDefaultValue}
+            label={inputAddressLabel || t<string>('Send to address')}
+            networkPrefix={networkPrefix}
+            onChange={onChangeReceiveAddress}
+            type='allPlus'
+            withEllipsis
+          />
+      }
 
       <div className='receiver-input-address__balance'>
         <FormatBalance

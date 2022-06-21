@@ -94,6 +94,8 @@ export interface StakingItem {
   name: string,
   chainId: string,
   balance?: string,
+  activeBalance?: string,
+  unlockingBalance?: string
   nativeToken: string,
   unit?: string,
   state: APIItemState
@@ -300,6 +302,7 @@ export interface NetworkJson {
   blockExplorer?: string; // Link to block scanner to check transaction with extrinsic hash // user input
   dependencies?: string[]; // Auto active network in dependencies if current network is activated
   getStakingOnChain?: boolean; // support get bonded on chain
+  supportBonding?: boolean;
 
   apiStatus?: NETWORK_STATUS;
   requestId?: string;
@@ -975,7 +978,98 @@ export type RequestConfirmationComplete = {
   [ConfirmationType in keyof ConfirmationDefinitions]?: ConfirmationDefinitions[ConfirmationType][1];
 }
 
+export interface ValidatorInfo {
+  address: string;
+  totalStake: number;
+  ownStake: number;
+  otherStake: number;
+  nominatorCount: number;
+  commission: number;
+  expectedReturn: number;
+  blocked: boolean;
+  identity?: string;
+  isVerified: boolean;
+  minBond: number;
+  isNominated: boolean; // this validator has been staked to before
+}
+
+export interface BondingOptionInfo {
+  isBondedBefore: boolean,
+  era: number,
+  maxNominations: number,
+  maxNominatorPerValidator: number,
+  validators: ValidatorInfo[],
+  bondedValidators: string[]
+}
+
+export interface ChainBondingBasics {
+  stakedReturn: number,
+  // minBond: number,
+  isMaxNominators: boolean
+}
+
+export interface BasicTxInfo {
+  fee: string,
+  balanceError: boolean
+}
+
+export interface BondingSubmitParams {
+  networkKey: string,
+  nominatorAddress: string,
+  amount: number,
+  validatorInfo: ValidatorInfo,
+  password?: string,
+  isBondedBefore: boolean,
+  bondedValidators: string[]
+}
+
+export interface BasicTxResponse {
+  passwordError?: string | null,
+  callHash?: string,
+  status?: boolean,
+  transactionHash?: string,
+  txError?: boolean,
+}
+
+export interface BondingOptionParams {
+  networkKey: string;
+  address: string;
+}
+
+export interface UnbondingSubmitParams {
+  amount: number,
+  networkKey: string,
+  address: string,
+  password?: string
+}
+
+export interface UnlockingStakeParams {
+  address: string,
+  networkKey: string
+}
+
+export interface UnlockingStakeInfo {
+  nextWithdrawal: number,
+  redeemable: number,
+  nextWithdrawalAmount: number
+}
+
+export interface StakeWithdrawalParams {
+  address: string,
+  networkKey: string,
+  password?: string
+}
+
 export interface KoniRequestSignatures {
+  'pri(unbonding.submitWithdrawal)': [StakeWithdrawalParams, BasicTxResponse, BasicTxResponse]
+  'pri(unbonding.withdrawalTxInfo)': [StakeWithdrawalParams, BasicTxInfo];
+  'pri(unbonding.unlockingInfo)': [UnlockingStakeParams, UnlockingStakeInfo];
+  'pri(unbonding.submitTransaction)': [UnbondingSubmitParams, BasicTxResponse, BasicTxResponse];
+  'pri(unbonding.txInfo)': [UnbondingSubmitParams, BasicTxInfo];
+  'pri(bonding.txInfo)': [BondingSubmitParams, BasicTxInfo];
+  'pri(bonding.submitTransaction)': [BondingSubmitParams, BasicTxResponse, BasicTxResponse];
+  'pri(bonding.getChainBondingBasics)': [NetworkJson[], Record<string, ChainBondingBasics>];
+  'pri(bonding.getBondingOptions)': [BondingOptionParams, BondingOptionInfo];
   'pri(networkMap.recoverDotSama)': [string, boolean];
   'pri(substrateNft.submitTransaction)': [SubstrateNftSubmitTransaction, NftTransactionResponse, NftTransactionResponse]
   'pri(substrateNft.getTransaction)': [SubstrateNftTransactionRequest, SubstrateNftTransaction];

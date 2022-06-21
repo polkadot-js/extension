@@ -80,7 +80,8 @@ import {
   TransactionHistoryItemType,
   TransferError,
   ValidateEvmTokenRequest,
-  ValidateNetworkResponse
+  ValidateNetworkResponse, UnbondingSubmitParams, UnlockingStakeInfo, UnlockingStakeParams,
+  BasicTxInfo, BasicTxResponse, BondingOptionInfo, BondingSubmitParams, ChainBondingBasics, StakeWithdrawalParams,
 } from '@subwallet/extension-base/background/KoniTypes';
 import { RequestCurrentAccountAddress, ResponseQRIsLocked, ResponseQrSignSubstrate } from '@subwallet/extension-base/background/types';
 import { PORT_EXTENSION } from '@subwallet/extension-base/defaults';
@@ -671,4 +672,40 @@ export async function subscribeConfirmations (callback: (data: ConfirmationsQueu
 
 export async function completeConfirmation<CT extends ConfirmationType> (type: CT, payload: ConfirmationDefinitions[CT][1]): Promise<boolean> {
   return sendMessage('pri(confirmations.complete)', { [type]: payload });
+}
+
+export async function getBondingOptions (networkKey: string, address: string): Promise<BondingOptionInfo> {
+  return sendMessage('pri(bonding.getBondingOptions)', { networkKey, address });
+}
+
+export async function getChainBondingBasics (networkJsons: NetworkJson[]): Promise<Record<string, ChainBondingBasics>> {
+  return sendMessage('pri(bonding.getChainBondingBasics)', networkJsons);
+}
+
+export async function submitBonding (bondingSubmitParams: BondingSubmitParams, callback: (data: BasicTxResponse) => void): Promise<BasicTxResponse> {
+  return sendMessage('pri(bonding.submitTransaction)', bondingSubmitParams, callback);
+}
+
+export async function getBondingTxInfo (bondingSubmitParams: BondingSubmitParams): Promise<BasicTxInfo> {
+  return sendMessage('pri(bonding.txInfo)', bondingSubmitParams);
+}
+
+export async function getUnbondingTxInfo (unbondingSubmitParams: UnbondingSubmitParams): Promise<BasicTxInfo> {
+  return sendMessage('pri(unbonding.txInfo)', unbondingSubmitParams);
+}
+
+export async function submitUnbonding (unbondingSubmitParams: UnbondingSubmitParams, callback: (data: BasicTxResponse) => void): Promise<BasicTxResponse> {
+  return sendMessage('pri(unbonding.submitTransaction)', unbondingSubmitParams, callback);
+}
+
+export async function getUnlockingStakeInfo (unlockingParams: UnlockingStakeParams): Promise<UnlockingStakeInfo> {
+  return sendMessage('pri(unbonding.unlockingInfo)', unlockingParams);
+}
+
+export async function getStakeWithdrawalTxInfo (params: StakeWithdrawalParams): Promise<BasicTxInfo> {
+  return sendMessage('pri(unbonding.withdrawalTxInfo)', params);
+}
+
+export async function submitStakeWithdrawal (params: StakeWithdrawalParams, callback: (data: BasicTxResponse) => void): Promise<BasicTxResponse> {
+  return sendMessage('pri(unbonding.submitWithdrawal)', params, callback);
 }

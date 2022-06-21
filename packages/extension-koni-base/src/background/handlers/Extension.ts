@@ -5,99 +5,10 @@ import Common from '@ethereumjs/common';
 import Extension, { SEED_DEFAULT_LENGTH, SEED_LENGTHS } from '@subwallet/extension-base/background/handlers/Extension';
 import { AuthUrls } from '@subwallet/extension-base/background/handlers/State';
 import { createSubscription, isSubscriptionRunning, unsubscribe } from '@subwallet/extension-base/background/handlers/subscriptions';
-import {
-  AccountExternalError,
-  AccountExternalErrorCode,
-  AccountsWithCurrentAddress,
-  ApiProps,
-  BalanceJson,
-  ChainRegistry,
-  CrowdloanJson,
-  CurrentAccountInfo,
-  CustomEvmToken,
-  DeleteEvmTokenParams,
-  DisableNetworkResponse,
-  EvmNftSubmitTransaction,
-  EvmNftTransaction,
-  EvmNftTransactionRequest,
-  EvmTokenJson,
-  NETWORK_ERROR,
-  NetWorkGroup,
-  NetworkJson,
-  NftCollection,
-  NftCollectionJson,
-  NftItem,
-  NftJson,
-  NftTransactionResponse,
-  NftTransferExtra,
-  OptionInputAddress,
-  PriceJson,
-  QRRequestPromise,
-  QRRequestPromiseStatus,
-  RequestAccountCreateExternalV2,
-  RequestAccountCreateSuriV2,
-  RequestAccountExportPrivateKey,
-  RequestAccountMeta,
-  RequestAuthorization,
-  RequestAuthorizationPerAccount,
-  RequestAuthorizeApproveV2,
-  RequestBatchRestoreV2,
-  RequestCheckCrossChainTransfer,
-  RequestCheckTransfer,
-  RequestConfirmationComplete,
-  RequestCrossChainTransfer,
-  RequestCrossChainTransferQR,
-  RequestDeriveCreateV2,
-  RequestForgetSite,
-  RequestFreeBalance,
-  RequestJsonRestoreV2,
-  RequestNftForceUpdate,
-  RequestParseTransactionEVM,
-  RequestQrSignEVM,
-  RequestRejectQRTransfer,
-  RequestResolveQRTransfer,
-  RequestSaveRecentAccount,
-  RequestSeedCreateV2,
-  RequestSeedValidateV2,
-  RequestSettingsType,
-  RequestTransactionHistoryAdd,
-  RequestTransfer,
-  RequestTransferCheckReferenceCount,
-  RequestTransferCheckSupporting,
-  RequestTransferExistentialDeposit,
-  RequestTransferQR,
-  ResponseAccountCreateSuriV2,
-  ResponseAccountExportPrivateKey,
-  ResponseAccountMeta,
-  ResponseCheckCrossChainTransfer,
-  ResponseCheckTransfer, ResponseParseTransactionEVM,
-  ResponsePrivateKeyValidateV2,
-  ResponseQrSignEVM,
-  ResponseRejectQRTransfer,
-  ResponseResolveQRTransfer,
-  ResponseSeedCreateV2,
-  ResponseSeedValidateV2,
-  ResponseTransfer,
-  ResponseTransferQr,
-  StakingJson,
-  StakingRewardJson,
-  SubstrateNftSubmitTransaction,
-  SubstrateNftTransaction,
-  SubstrateNftTransactionRequest,
-  SupportTransferResponse,
-  ThemeTypes,
-  TokenInfo,
-  TransactionHistoryItemType,
-  TransferError,
-  TransferErrorCode,
-  TransferStep,
-  ValidateEvmTokenRequest,
-  ValidateEvmTokenResponse,
-  ValidateNetworkRequest,
-  ValidateNetworkResponse
-} from '@subwallet/extension-base/background/KoniTypes';
+import { AccountExternalError, AccountExternalErrorCode, AccountsWithCurrentAddress, ApiProps, BalanceJson, BasicTxInfo, BasicTxResponse, BondingOptionInfo, BondingOptionParams, BondingSubmitParams, ChainBondingBasics, ChainRegistry, CrowdloanJson, CurrentAccountInfo, CustomEvmToken, DeleteEvmTokenParams, DisableNetworkResponse, EvmNftSubmitTransaction, EvmNftTransaction, EvmNftTransactionRequest, EvmTokenJson, NETWORK_ERROR, NetWorkGroup, NetworkJson, NftCollection, NftCollectionJson, NftItem, NftJson, NftTransactionResponse, NftTransferExtra, OptionInputAddress, PriceJson, QRRequestPromise, QRRequestPromiseStatus, RequestAccountCreateExternalV2, RequestAccountCreateSuriV2, RequestAccountExportPrivateKey, RequestAccountMeta, RequestAuthorization, RequestAuthorizationPerAccount, RequestAuthorizeApproveV2, RequestBatchRestoreV2, RequestCheckCrossChainTransfer, RequestCheckTransfer, RequestConfirmationComplete, RequestCrossChainTransfer, RequestCrossChainTransferQR, RequestDeriveCreateV2, RequestForgetSite, RequestFreeBalance, RequestJsonRestoreV2, RequestNftForceUpdate, RequestParseTransactionEVM, RequestQrSignEVM, RequestRejectQRTransfer, RequestResolveQRTransfer, RequestSaveRecentAccount, RequestSeedCreateV2, RequestSeedValidateV2, RequestSettingsType, RequestTransactionHistoryAdd, RequestTransfer, RequestTransferCheckReferenceCount, RequestTransferCheckSupporting, RequestTransferExistentialDeposit, RequestTransferQR, ResponseAccountCreateSuriV2, ResponseAccountExportPrivateKey, ResponseAccountMeta, ResponseCheckCrossChainTransfer, ResponseCheckTransfer, ResponseParseTransactionEVM, ResponsePrivateKeyValidateV2, ResponseQrSignEVM, ResponseRejectQRTransfer, ResponseResolveQRTransfer, ResponseSeedCreateV2, ResponseSeedValidateV2, ResponseTransfer, ResponseTransferQr, StakeWithdrawalParams, StakingJson, StakingRewardJson, SubstrateNftSubmitTransaction, SubstrateNftTransaction, SubstrateNftTransactionRequest, SupportTransferResponse, ThemeTypes, TokenInfo, TransactionHistoryItemType, TransferError, TransferErrorCode, TransferStep, UnbondingSubmitParams, UnlockingStakeInfo, UnlockingStakeParams, ValidateEvmTokenRequest, ValidateEvmTokenResponse, ValidateNetworkRequest, ValidateNetworkResponse } from '@subwallet/extension-base/background/KoniTypes';
 import { AccountJson, AuthorizeRequest, MessageTypes, RequestAccountForget, RequestAccountTie, RequestAuthorizeReject, RequestCurrentAccountAddress, RequestParseTransactionSubstrate, RequestTypes, ResponseAuthorizeList, ResponseParseTransactionSubstrate, ResponseType } from '@subwallet/extension-base/background/types';
 import { getId } from '@subwallet/extension-base/utils/getId';
+import { getBondingExtrinsic, getBondingTxInfo, getChainBondingBasics, getTargetValidators, getUnbondingExtrinsic, getUnbondingTxInfo, getUnlockingInfo, getValidatorsInfo, getWithdrawalExtrinsic, getWithdrawalTxInfo } from '@subwallet/extension-koni-base/api/bonding';
 import { initApi } from '@subwallet/extension-koni-base/api/dotsama';
 import { getFreeBalance, subscribeFreeBalance } from '@subwallet/extension-koni-base/api/dotsama/balance';
 import { parseSubstratePayload } from '@subwallet/extension-koni-base/api/dotsama/parseSubstratePayload';
@@ -106,6 +17,7 @@ import { checkReferenceCount, checkSupportTransfer, estimateCrossChainFee, estim
 import { makeCrossChainTransferQr, makeTransferQr } from '@subwallet/extension-koni-base/api/dotsama/transferQr';
 import { SUPPORTED_TRANSFER_SUBSTRATE_CHAIN_NAME } from '@subwallet/extension-koni-base/api/nft/config';
 import { acalaTransferHandler, getNftTransferExtrinsic, isRecipientSelf, quartzTransferHandler, rmrkTransferHandler, statemineTransferHandler, uniqueTransferHandler, unlockAccount } from '@subwallet/extension-koni-base/api/nft/transfer';
+import { parseEVMTransaction } from '@subwallet/extension-koni-base/api/web3/parseEVMTransaction';
 import { getERC20TransactionObject, getEVMTransactionObject, makeERC20Transfer, makeEVMTransfer } from '@subwallet/extension-koni-base/api/web3/transfer';
 import { makeERC20TransferQr, makeEVMTransferQr } from '@subwallet/extension-koni-base/api/web3/transferQr';
 import { ERC721Contract, getERC20Contract, getERC721Contract, initWeb3Api } from '@subwallet/extension-koni-base/api/web3/web3';
@@ -127,7 +39,6 @@ import { SingleAddress, SubjectInfo } from '@polkadot/ui-keyring/observable/type
 import { assert, BN, hexStripPrefix, hexToU8a, isHex, numberToHex, u8aToString } from '@polkadot/util';
 import { base64Decode, isEthereumAddress, jsonDecrypt, keyExtractSuri, mnemonicGenerate, mnemonicValidate } from '@polkadot/util-crypto';
 import { EncryptedJson, KeypairType, Prefix } from '@polkadot/util-crypto/types';
-import {parseEVMTransaction} from '@subwallet/extension-koni-base/api/web3/parseEVMTransaction';
 
 const ETH_DERIVE_DEFAULT = '/m/44\'/60\'/0\'/0/0';
 
@@ -2188,7 +2099,7 @@ export default class KoniExtension extends Extension {
   }
 
   private parseEVMTransaction ({ data }: RequestParseTransactionEVM): ResponseParseTransactionEVM {
-    return parseEVMTransaction(data)
+    return parseEVMTransaction(data);
   }
 
   private enableNetworks (targetKeys: string[]) {
@@ -2625,6 +2536,298 @@ export default class KoniExtension extends Extension {
     };
   }
 
+  private async getChainBondingBasics (networkJsons: NetworkJson[]) {
+    const result: Record<string, ChainBondingBasics> = {};
+
+    await Promise.all(networkJsons.map(async (networkJson) => {
+      result[networkJson.key] = await getChainBondingBasics(networkJson.key, state.getDotSamaApi(networkJson.key));
+    }));
+
+    return result;
+  }
+
+  private async getBondingOption ({ address, networkKey }: BondingOptionParams): Promise<BondingOptionInfo> {
+    const apiProps = state.getDotSamaApi(networkKey);
+    const networkJson = state.getNetworkMapByKey(networkKey);
+    const { bondedValidators, era, isBondedBefore, maxNominations, maxNominatorPerValidator, validatorsInfo } = await getValidatorsInfo(networkKey, apiProps, networkJson.decimals as number, address);
+
+    return {
+      maxNominatorPerValidator,
+      era,
+      validators: validatorsInfo,
+      isBondedBefore,
+      bondedValidators,
+      maxNominations
+    } as BondingOptionInfo;
+  }
+
+  private async getBondingTxInfo ({ amount, bondedValidators, isBondedBefore, networkKey, nominatorAddress, validatorInfo }: BondingSubmitParams): Promise<BasicTxInfo> {
+    const dotSamaApi = state.getDotSamaApi(networkKey);
+    const networkJson = state.getNetworkMapByKey(networkKey);
+    const parsedAmount = amount * (10 ** (networkJson.decimals as number));
+    const binaryAmount = new BN(parsedAmount);
+    const targetValidators: string[] = getTargetValidators(bondedValidators, validatorInfo.address);
+
+    const [txInfo, balance] = await Promise.all([
+      getBondingTxInfo(dotSamaApi, nominatorAddress, binaryAmount, targetValidators, isBondedBefore),
+      getFreeBalance(networkKey, nominatorAddress, state.getDotSamaApiMap(), state.getWeb3ApiMap())
+    ]);
+
+    const feeString = txInfo.partialFee.toHuman();
+    const binaryBalance = new BN(balance);
+
+    const sumAmount = txInfo.partialFee.add(binaryAmount);
+    const balanceError = sumAmount.gt(binaryBalance);
+
+    return {
+      fee: feeString,
+      balanceError
+    };
+  }
+
+  private async submitBonding (id: string, port: chrome.runtime.Port, { amount, bondedValidators, isBondedBefore, networkKey, nominatorAddress, password, validatorInfo }: BondingSubmitParams): Promise<BasicTxResponse> {
+    const txState: BasicTxResponse = {};
+    const networkJson = state.getNetworkMapByKey(networkKey);
+    const parsedAmount = amount * (10 ** (networkJson.decimals as number));
+    const binaryAmount = new BN(parsedAmount);
+    const targetValidators: string[] = getTargetValidators(bondedValidators, validatorInfo.address);
+
+    if (!amount || !nominatorAddress || !validatorInfo || !password) {
+      txState.txError = true;
+
+      return txState;
+    }
+
+    const callback = createSubscription<'pri(bonding.submitTransaction)'>(id, port);
+    const dotSamaApi = state.getDotSamaApi(networkKey);
+    const extrinsic = await getBondingExtrinsic(dotSamaApi, nominatorAddress, binaryAmount, targetValidators, isBondedBefore);
+    const passwordError: string | null = unlockAccount(nominatorAddress, password);
+
+    if (extrinsic !== null && passwordError === null) {
+      const pair = keyring.getPair(nominatorAddress);
+
+      try {
+        const unsubscribe = await extrinsic.signAndSend(pair, (result) => {
+          if (!result || !result.status) {
+            return;
+          }
+
+          if (result.status.isInBlock || result.status.isFinalized) {
+            result.events
+              .filter(({ event: { section } }) => section === 'system')
+              .forEach(({ event: { method } }): void => {
+                txState.transactionHash = extrinsic.hash.toHex();
+                callback(txState);
+
+                if (method === 'ExtrinsicFailed') {
+                  txState.status = false;
+                  callback(txState);
+                } else if (method === 'ExtrinsicSuccess') {
+                  txState.status = true;
+                  callback(txState);
+                }
+              });
+          } else if (result.isError) {
+            txState.txError = true;
+            callback(txState);
+          }
+
+          if (result.isCompleted) {
+            unsubscribe();
+          }
+        });
+      } catch (e) {
+        console.error('error bonding', e);
+        txState.txError = true;
+        callback(txState);
+      }
+    } else {
+      txState.passwordError = passwordError;
+      callback(txState);
+    }
+
+    return txState;
+  }
+
+  private async getUnbondingTxInfo ({ address, amount, networkKey }: UnbondingSubmitParams): Promise<BasicTxInfo> {
+    const dotSamaApi = state.getDotSamaApi(networkKey);
+    const networkJson = state.getNetworkMapByKey(networkKey);
+    const parsedAmount = amount * (10 ** (networkJson.decimals as number));
+    const binaryAmount = new BN(parsedAmount);
+
+    const [txInfo, balance] = await Promise.all([
+      getUnbondingTxInfo(dotSamaApi, binaryAmount, address),
+      getFreeBalance(networkKey, address, state.getDotSamaApiMap(), state.getWeb3ApiMap())
+    ]);
+
+    const feeString = txInfo.partialFee.toHuman();
+    const binaryBalance = new BN(balance);
+
+    const sumAmount = txInfo.partialFee.add(binaryAmount);
+    const balanceError = sumAmount.gt(binaryBalance);
+
+    return {
+      fee: feeString,
+      balanceError
+    };
+  }
+
+  private async submitUnbonding (id: string, port: chrome.runtime.Port, { address, amount, networkKey, password }: UnbondingSubmitParams): Promise<BasicTxResponse> {
+    const txState: BasicTxResponse = {};
+    const networkJson = state.getNetworkMapByKey(networkKey);
+    const parsedAmount = amount * (10 ** (networkJson.decimals as number));
+    const binaryAmount = new BN(parsedAmount);
+
+    if (!amount || !address || !password) {
+      txState.txError = true;
+
+      return txState;
+    }
+
+    const callback = createSubscription<'pri(unbonding.submitTransaction)'>(id, port);
+    const dotSamaApi = state.getDotSamaApi(networkKey);
+    const extrinsic = await getUnbondingExtrinsic(dotSamaApi, binaryAmount);
+    const passwordError: string | null = unlockAccount(address, password);
+
+    if (extrinsic !== null && passwordError === null) {
+      const pair = keyring.getPair(address);
+
+      try {
+        const unsubscribe = await extrinsic.signAndSend(pair, (result) => {
+          if (!result || !result.status) {
+            return;
+          }
+
+          if (result.status.isInBlock || result.status.isFinalized) {
+            result.events
+              .filter(({ event: { section } }) => section === 'system')
+              .forEach(({ event: { method } }): void => {
+                txState.transactionHash = extrinsic.hash.toHex();
+                callback(txState);
+
+                if (method === 'ExtrinsicFailed') {
+                  txState.status = false;
+                  callback(txState);
+                } else if (method === 'ExtrinsicSuccess') {
+                  txState.status = true;
+                  callback(txState);
+                }
+              });
+          } else if (result.isError) {
+            txState.txError = true;
+            callback(txState);
+          }
+
+          if (result.isCompleted) {
+            unsubscribe();
+          }
+        });
+      } catch (e) {
+        console.error('error unbonding', e);
+        txState.txError = true;
+        callback(txState);
+      }
+    } else {
+      txState.passwordError = passwordError;
+      callback(txState);
+    }
+
+    return txState;
+  }
+
+  private async getUnlockingStakeInfo ({ address, networkKey }: UnlockingStakeParams) {
+    const dotSamaApi = state.getDotSamaApi(networkKey);
+    const networkJson = state.getNetworkMapByKey(networkKey);
+    const { nextWithdrawal, nextWithdrawalAmount, redeemable } = await getUnlockingInfo(dotSamaApi, address, networkKey);
+
+    const parsedRedeemable = redeemable ? parseFloat(redeemable.toString()) / (10 ** (networkJson.decimals as number)) : 0;
+    const parsedNextWithdrawalAmount = parseFloat(nextWithdrawalAmount.toString()) / (10 ** (networkJson.decimals as number));
+
+    return {
+      nextWithdrawal: parseFloat(nextWithdrawal.toString()),
+      redeemable: parsedRedeemable,
+      nextWithdrawalAmount: parsedNextWithdrawalAmount
+    } as UnlockingStakeInfo;
+  }
+
+  private async getStakeWithdrawalTxInfo ({ address, networkKey }: StakeWithdrawalParams): Promise<BasicTxInfo> {
+    const dotSamaApi = state.getDotSamaApi(networkKey);
+
+    const [txInfo, balance] = await Promise.all([
+      getWithdrawalTxInfo(dotSamaApi, address),
+      getFreeBalance(networkKey, address, state.getDotSamaApiMap(), state.getWeb3ApiMap())
+    ]);
+
+    const feeString = txInfo.partialFee.toHuman();
+    const binaryBalance = new BN(balance);
+    const balanceError = txInfo.partialFee.gt(binaryBalance);
+
+    return {
+      fee: feeString,
+      balanceError
+    };
+  }
+
+  private async submitStakeWithdrawal (id: string, port: chrome.runtime.Port, { address, networkKey, password }: StakeWithdrawalParams): Promise<BasicTxResponse> {
+    const txState: BasicTxResponse = {};
+
+    if (!address || !password) {
+      txState.txError = true;
+
+      return txState;
+    }
+
+    const callback = createSubscription<'pri(unbonding.submitWithdrawal)'>(id, port);
+    const dotSamaApi = state.getDotSamaApi(networkKey);
+    const extrinsic = await getWithdrawalExtrinsic(dotSamaApi, address);
+    const passwordError: string | null = unlockAccount(address, password);
+
+    if (extrinsic !== null && passwordError === null) {
+      const pair = keyring.getPair(address);
+
+      try {
+        const unsubscribe = await extrinsic.signAndSend(pair, (result) => {
+          if (!result || !result.status) {
+            return;
+          }
+
+          if (result.status.isInBlock || result.status.isFinalized) {
+            result.events
+              .filter(({ event: { section } }) => section === 'system')
+              .forEach(({ event: { method } }): void => {
+                txState.transactionHash = extrinsic.hash.toHex();
+                callback(txState);
+
+                if (method === 'ExtrinsicFailed') {
+                  txState.status = false;
+                  callback(txState);
+                } else if (method === 'ExtrinsicSuccess') {
+                  txState.status = true;
+                  callback(txState);
+                }
+              });
+          } else if (result.isError) {
+            txState.txError = true;
+            callback(txState);
+          }
+
+          if (result.isCompleted) {
+            unsubscribe();
+          }
+        });
+      } catch (e) {
+        console.error('error withdrawing', e);
+        txState.txError = true;
+        callback(txState);
+      }
+    } else {
+      txState.passwordError = passwordError;
+      callback(txState);
+    }
+
+    return txState;
+  }
+
   // eslint-disable-next-line @typescript-eslint/require-await
   public override async handle<TMessageType extends MessageTypes> (id: string, type: TMessageType, request: RequestTypes[TMessageType], port: chrome.runtime.Port): Promise<ResponseType<TMessageType>> {
     switch (type) {
@@ -2808,6 +3011,24 @@ export default class KoniExtension extends Extension {
         return this.subscribeConfirmations(id, port);
       case 'pri(confirmations.complete)':
         return this.completeConfirmation(request as RequestConfirmationComplete);
+      case 'pri(bonding.getBondingOptions)':
+        return await this.getBondingOption(request as BondingOptionParams);
+      case 'pri(bonding.getChainBondingBasics)':
+        return await this.getChainBondingBasics(request as NetworkJson[]);
+      case 'pri(bonding.submitTransaction)':
+        return await this.submitBonding(id, port, request as BondingSubmitParams);
+      case 'pri(bonding.txInfo)':
+        return await this.getBondingTxInfo(request as BondingSubmitParams);
+      case 'pri(unbonding.txInfo)':
+        return await this.getUnbondingTxInfo(request as UnbondingSubmitParams);
+      case 'pri(unbonding.submitTransaction)':
+        return await this.submitUnbonding(id, port, request as UnbondingSubmitParams);
+      case 'pri(unbonding.unlockingInfo)':
+        return await this.getUnlockingStakeInfo(request as UnlockingStakeParams);
+      case 'pri(unbonding.withdrawalTxInfo)':
+        return await this.getStakeWithdrawalTxInfo(request as StakeWithdrawalParams);
+      case 'pri(unbonding.submitWithdrawal)':
+        return await this.submitStakeWithdrawal(id, port, request as StakeWithdrawalParams);
       default:
         return super.handle(id, type, request, port);
     }

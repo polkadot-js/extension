@@ -8,7 +8,7 @@ import { StakingDataType } from '@subwallet/extension-koni-ui/hooks/screen/home/
 import useIsAccountAll from '@subwallet/extension-koni-ui/hooks/screen/home/useIsAccountAll';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
-import React, { useCallback, useContext } from 'react';
+import React, { useCallback, useContext, useEffect, useState } from 'react';
 import { useSelector } from 'react-redux';
 import styled from 'styled-components';
 
@@ -27,6 +27,50 @@ function StakingContainer ({ className, data, loading, priceMap }: Props): React
   const navigate = useContext(ActionContext);
   const { currentAccount: { account } } = useSelector((state: RootState) => state);
 
+  const [scrollWidth, setScrollWidth] = useState<number>(6);
+  const [containerWidth, setContainerWidth] = useState<number>(458);
+  const [listWidth, setListWidth] = useState<number>(452);
+
+  const handlerResize = () => {
+    const container = document.querySelector('.home-tab-contents') as HTMLElement;
+
+    setContainerWidth(container.offsetWidth);
+  };
+
+  useEffect(() => {
+    handlerResize();
+    window.addEventListener('resize', handlerResize);
+  }, []);
+
+  const getScrollbarWidth = () => {
+    // Creating invisible container
+    const outer = document.createElement('div');
+
+    outer.style.visibility = 'hidden';
+    outer.style.overflow = 'scroll'; // forcing scrollbar to appear
+    // @ts-ignore
+    outer.style.msOverflowStyle = 'scrollbar'; // needed for WinJS apps
+    document.body.appendChild(outer);
+    // Creating inner element and placing it in the container
+    const inner = document.createElement('div');
+
+    outer.appendChild(inner);
+    // Calculating difference between container's full width and the child width
+    const scrollbarWidth = (outer.offsetWidth - inner.offsetWidth);
+
+    // Removing temporary elements from the DOM
+    document.body.removeChild(outer);
+    setScrollWidth(scrollbarWidth);
+  };
+
+  useEffect(() => {
+    getScrollbarWidth();
+  }, []);
+
+  useEffect(() => {
+    setListWidth(containerWidth - scrollWidth);
+  }, [containerWidth, scrollWidth]);
+
   const handleNavigateBonding = useCallback(() => {
     navigate('/account/select-bonding-network');
     window.localStorage.setItem('popupNavigation', '/account/select-bonding-network');
@@ -37,7 +81,10 @@ function StakingContainer ({ className, data, loading, priceMap }: Props): React
   const isHardwareAccount = account?.isHardware;
 
   return (
-    <div className={className}>
+    <div
+      className={className}
+      style={{ width: listWidth }}
+    >
       <div className={'staking-container'}>
 
         {loading && <Spinner />}

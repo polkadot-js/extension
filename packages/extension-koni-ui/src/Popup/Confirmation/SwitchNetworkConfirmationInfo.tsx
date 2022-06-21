@@ -32,9 +32,9 @@ function SwitchNetworkConfirmationInfo ({ className, confirmation }: Props): Rea
         <div className='img-wrapper'>
           <img
             className='img-circle'
+            height={64}
             src={getLogoByNetworkKey(networkKey)}
             width={64}
-            height={64}
           />
         </div>
         <div>{currentNetwork?.chain || t<string>('Any chain')}</div>

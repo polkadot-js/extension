@@ -11,7 +11,7 @@ interface LedgerData {
   claimedRewards: string[],
   stash: string,
   total: string,
-  unlocking: string[]
+  unlocking: Record<string, string>[]
 }
 
 export const DEFAULT_STAKING_NETWORKS = {
@@ -53,6 +53,8 @@ export async function stakingOnChainApi (addresses: string[], dotSamaAPIMap: Rec
 
     return parentApi.api.query.staking?.ledger.multi(useAddresses, (ledgers: any[]) => {
       let totalBalance = 0;
+      let activeBalance = 0;
+      let unlockingBalance = 0;
       let unit = '';
       let stakingItem: StakingItem;
 
@@ -61,17 +63,32 @@ export async function stakingOnChainApi (addresses: string[], dotSamaAPIMap: Rec
           // eslint-disable-next-line @typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-member-access
           const data = ledger.toHuman() as unknown as LedgerData;
 
-          // const currentAddress = addresses[index];
           if (data && data.active) {
-            const balance = data.active;
-            let amount = balance ? balance.split(' ')[0] : '';
+            const _totalBalance = data.total;
+            const _activeBalance = data.active;
+
+            data.unlocking.forEach(({ value }) => {
+              value = value.split(' ')[0];
+              const _unlockingBalance = value.replaceAll(',', '');
+
+              unlockingBalance += parseFloat(_unlockingBalance);
+            });
+
+            let amount = _totalBalance ? _totalBalance.split(' ')[0] : '';
 
             amount = amount.replaceAll(',', '');
-            unit = balance ? balance.split(' ')[1] : '';
+            unit = _totalBalance ? _totalBalance.split(' ')[1] : '';
             totalBalance += parseFloat(amount);
+
+            amount = _activeBalance ? _activeBalance.split(' ')[0] : '';
+            amount = amount.replaceAll(',', '');
+            unit = _activeBalance ? _activeBalance.split(' ')[1] : '';
+            activeBalance += parseFloat(amount);
           }
         }
 
+        const parsedActiveBalance = parseStakingBalance(activeBalance, chain, networks);
+        const parsedUnlockingBalance = parseStakingBalance(unlockingBalance, chain, networks);
         const parsedTotal = parseStakingBalance(totalBalance, chain, networks);
 
         if (totalBalance > 0) {
@@ -79,6 +96,8 @@ export async function stakingOnChainApi (addresses: string[], dotSamaAPIMap: Rec
             name: networks[chain].chain,
             chainId: chain,
             balance: parsedTotal.toString(),
+            activeBalance: parsedActiveBalance.toString(),
+            unlockingBalance: parsedUnlockingBalance.toString(),
             nativeToken: networks[chain].nativeToken,
             unit: unit || networks[chain].nativeToken,
             state: APIItemState.READY
@@ -88,6 +107,8 @@ export async function stakingOnChainApi (addresses: string[], dotSamaAPIMap: Rec
             name: networks[chain].chain,
             chainId: chain,
             balance: parsedTotal.toString(),
+            activeBalance: parsedActiveBalance.toString(),
+            unlockingBalance: parsedUnlockingBalance.toString(),
             nativeToken: networks[chain].nativeToken,
             unit: unit || networks[chain].nativeToken,
             state: APIItemState.READY

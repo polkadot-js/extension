@@ -5,7 +5,6 @@ import { RequestNftForceUpdate } from '@subwallet/extension-base/background/Koni
 import { AccountJson } from '@subwallet/extension-base/background/types';
 import { Spinner } from '@subwallet/extension-koni-ui/components';
 import Modal from '@subwallet/extension-koni-ui/components/Modal';
-import Output from '@subwallet/extension-koni-ui/components/Output';
 import useToast from '@subwallet/extension-koni-ui/hooks/useToast';
 import { evmNftSubmitTransaction, nftForceUpdate, substrateNftSubmitTransaction } from '@subwallet/extension-koni-ui/messaging';
 import { _NftItem, SubstrateTransferParams, Web3TransferParams } from '@subwallet/extension-koni-ui/Popup/Home/Nfts/types';
@@ -40,7 +39,7 @@ interface Props extends ThemeProps {
 
 function AuthTransfer ({ chain, className, collectionId, nftItem, recipientAddress, senderAccount, setExtrinsicHash, setIsTxSuccess, setShowConfirm, setShowResult, setTxError, substrateTransferParams, web3TransferParams }: Props): React.ReactElement<Props> {
   const [passwordError, setPasswordError] = useState<string | null>(null);
-  const [callHash, setCallHash] = useState<string | null>(null);
+  // const [callHash, setCallHash] = useState<string | null>(null);
 
   const [loading, setLoading] = useState(false);
   const [senderInfoSubstrate, setSenderInfoSubstrate] = useState<AddressProxy>(() => ({ isUnlockCached: false, signAddress: senderAccount.address, signPassword: '' }));
@@ -83,9 +82,9 @@ function AuthTransfer ({ chain, className, collectionId, nftItem, recipientAddre
           return;
         }
 
-        if (data.callHash) {
-          setCallHash(data.callHash);
-        }
+        // if (data.callHash) {
+        //   setCallHash(data.callHash);
+        // }
 
         if (data.txError) {
           show('Encountered an error, please try again.');
@@ -137,9 +136,9 @@ function AuthTransfer ({ chain, className, collectionId, nftItem, recipientAddre
         return;
       }
 
-      if (data.callHash) {
-        setCallHash(data.callHash);
-      }
+      // if (data.callHash) {
+      //   setCallHash(data.callHash);
+      // }
 
       if (data.txError && data.txError) {
         show('Encountered an error, please try again.');
@@ -230,17 +229,17 @@ function AuthTransfer ({ chain, className, collectionId, nftItem, recipientAddre
               requestAddress={senderAccount.address}
             />
 
-            {
-              callHash &&
-              <Output
-                className={'call-hash-container'}
-                isDisabled
-                isTrimmed
-                label={'Call hash'}
-                value={callHash}
-                withCopy
-              />
-            }
+            {/* { */}
+            {/*  callHash && */}
+            {/*  <Output */}
+            {/*    className={'call-hash-container'} */}
+            {/*    isDisabled */}
+            {/*    isTrimmed */}
+            {/*    label={'Call hash'} */}
+            {/*    value={callHash} */}
+            {/*    withCopy */}
+            {/*  /> */}
+            {/* } */}
 
             <div
               className={'submit-btn'}

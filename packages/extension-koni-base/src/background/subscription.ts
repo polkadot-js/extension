@@ -214,7 +214,9 @@ export class KoniSubscription {
     });
 
     await getAllSubsquidStaking(addresses, activeNetworks, (networkKey, rs) => {
-      state.setStakingItem(networkKey, rs);
+      if (networkKey !== 'polkadot' && networkKey !== 'kusama') { // TODO: temporary fix because subsquid is not real-time
+        state.setStakingItem(networkKey, rs);
+      }
     })
       .then((result) => {
         state.setStakingReward(result);

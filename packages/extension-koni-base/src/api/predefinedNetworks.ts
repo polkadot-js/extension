@@ -24,7 +24,9 @@ export const PREDEFINED_NETWORKS: Record<string, NetworkJson> = {
     groups: ['RELAY_CHAIN'],
     nativeToken: 'DOT',
     decimals: 10,
-    coinGeckoKey: 'polkadot'
+    coinGeckoKey: 'polkadot',
+    supportBonding: true,
+    getStakingOnChain: true
   },
   kusama: {
     key: 'kusama',
@@ -46,7 +48,9 @@ export const PREDEFINED_NETWORKS: Record<string, NetworkJson> = {
     groups: ['RELAY_CHAIN'],
     nativeToken: 'KSM',
     decimals: 12,
-    coinGeckoKey: 'kusama'
+    coinGeckoKey: 'kusama',
+    supportBonding: true,
+    getStakingOnChain: true
   },
   westend: {
     key: 'westend',
@@ -234,7 +238,7 @@ export const PREDEFINED_NETWORKS: Record<string, NetworkJson> = {
     genesisHash: '0xd2a620c27ec5cbc5621ff9a522689895074f7cca0d08e7134a7804e1a3ba86fc',
     ss58Format: 63,
     providers: {
-      'Galactic Council': 'wss://rpc-02.snakenet.hydradx.io'
+      'Galactic Council': 'wss://rpc-01.snakenet.hydradx.io'
     },
     active: false,
     currentProviderMode: 'ws',
@@ -243,7 +247,9 @@ export const PREDEFINED_NETWORKS: Record<string, NetworkJson> = {
     paraId: 2034,
     nativeToken: 'HDX',
     crowdloanUrl: 'https://loan.hydradx.io/',
-    decimals: 12
+    decimals: 12,
+    supportBonding: true,
+    getStakingOnChain: true
   },
   edgeware: {
     key: 'edgeware',
@@ -460,7 +466,8 @@ export const PREDEFINED_NETWORKS: Record<string, NetworkJson> = {
     crowdloanUrl: 'https://contribute.alephzero.org/',
     decimals: 12,
     coinGeckoKey: 'aleph-zero',
-    getStakingOnChain: true
+    getStakingOnChain: true,
+    supportBonding: true
   },
   rmrk: {
     key: 'rmrk',

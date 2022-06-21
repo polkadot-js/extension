@@ -4,11 +4,11 @@
 import { faArrowLeft } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { CurrentNetworkInfo, NetWorkMetadataDef } from '@subwallet/extension-base/background/KoniTypes';
-import { ALL_ACCOUNT_KEY } from '@subwallet/extension-koni-base/constants';
 import { ActionContext } from '@subwallet/extension-koni-ui/components';
 import Spinner from '@subwallet/extension-koni-ui/components/Spinner';
 import useGetNetworkJson from '@subwallet/extension-koni-ui/hooks/screen/home/useGetNetworkJson';
 import useGetNetworkMetadata from '@subwallet/extension-koni-ui/hooks/screen/home/useGetNetworkMetadata';
+import useIsAccountAll from '@subwallet/extension-koni-ui/hooks/screen/home/useIsAccountAll';
 import useToast from '@subwallet/extension-koni-ui/hooks/useToast';
 import { tieAccount } from '@subwallet/extension-koni-ui/messaging';
 import { _NftItem, SUPPORTED_TRANSFER_SUBSTRATE_CHAIN } from '@subwallet/extension-koni-ui/Popup/Home/Nfts/types';
@@ -52,6 +52,7 @@ function NftItem ({ className, collectionId, collectionImage, data, onClickBack 
   const { currentAccount: account, currentNetwork } = useSelector((state: RootState) => state);
   const networkMetadata = useGetNetworkMetadata();
   const networkJson = useGetNetworkJson(data.chain as string);
+  const _isAccountAll = useIsAccountAll();
 
   const navigate = useContext(ActionContext);
   const { show } = useToast();
@@ -84,7 +85,7 @@ function NftItem ({ className, collectionId, collectionImage, data, onClickBack 
   };
 
   const handleClickTransfer = useCallback(async () => {
-    if (!account.account || account.account.address.toLowerCase() === ALL_ACCOUNT_KEY.toLowerCase() || !data.chain) {
+    if (!account.account || _isAccountAll || !data.chain) {
       show('An error has occurred.');
 
       return;
@@ -99,6 +100,12 @@ function NftItem ({ className, collectionId, collectionImage, data, onClickBack 
     if (data.chain !== currentNetwork.networkKey) {
       const targetNetwork = networkMetadata[data?.chain];
 
+      if (!_isAccountAll) {
+        await tieAccount(account.account.address, targetNetwork.genesisHash);
+      } else {
+        window.localStorage.setItem('accountAllNetworkGenesisHash', targetNetwork.genesisHash);
+      }
+
       await tieAccount(account.account.address, targetNetwork.genesisHash);
 
       updateCurrentNetwork(targetNetwork);
@@ -106,7 +113,7 @@ function NftItem ({ className, collectionId, collectionImage, data, onClickBack 
 
     updateTransferNftParams(data, collectionImage, collectionId);
     navigate('/account/send-nft');
-  }, [account.account, collectionId, collectionImage, currentNetwork.networkKey, data, navigate, networkJson.isEthereum, networkMetadata, show]);
+  }, [_isAccountAll, account.account, collectionId, collectionImage, currentNetwork.networkKey, data, navigate, networkJson.isEthereum, networkMetadata, show]);
 
   const handleClickBack = useCallback(() => {
     onClickBack();
@@ -209,8 +216,7 @@ function NftItem ({ className, collectionId, collectionImage, data, onClickBack 
           </div>
 
           {
-            // @ts-ignore
-            account.account.address !== 'ALL' &&
+            !_isAccountAll &&
             <div className={'send-container'}>
               <div
                 className={'send-button'}

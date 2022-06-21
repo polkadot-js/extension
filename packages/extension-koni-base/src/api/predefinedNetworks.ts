@@ -346,7 +346,8 @@ export const PREDEFINED_NETWORKS: Record<string, NetworkJson> = {
     genesisHash: '0x729cb8f2cf428adcf81fe69610edda32c5711b2ff17de747e8604a3587021db8',
     ss58Format: 18,
     providers: {
-      'Darwinia Network': 'wss://rpc.darwinia.network'
+      'Darwinia Network': 'wss://rpc.darwinia.network',
+      Darwinia: 'wss://darwinia-rpc.dwellir.com'
     },
     active: false,
     currentProviderMode: 'ws',
@@ -1174,7 +1175,10 @@ export const PREDEFINED_NETWORKS: Record<string, NetworkJson> = {
     genesisHash: '0x34f61bfda344b3fad3c3e38832a91448b3c613b199eb23e5110a635d71c13c65',
     ss58Format: 42,
     providers: {
-      Crab: 'wss://crab-parachain-rpc.darwinia.network/'
+      'Darwinia Network': 'wss://darwiniacrab-rpc.dwellir.com',
+      Dwellir: 'wss://darwinia-crab.api.onfinality.io/public-ws',
+      Crab_RPC: 'wss://darwiniacrab-rpc.dwellir.com',
+      Onfinality: 'wss://darwinia-crab.api.onfinality.io/public-ws'
     },
     active: false,
     currentProviderMode: 'ws',

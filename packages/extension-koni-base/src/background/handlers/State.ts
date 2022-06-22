@@ -208,10 +208,10 @@ export default class KoniState extends State {
             // check change and override custom providers if exist
             if ('customProviders' in storedNetwork) {
               mergedNetworkMap[key].customProviders = storedNetwork.customProviders;
+              mergedNetworkMap[key].currentProvider = storedNetwork.currentProvider;
             }
 
             mergedNetworkMap[key].active = storedNetwork.active;
-            mergedNetworkMap[key].currentProvider = storedNetwork.currentProvider;
             mergedNetworkMap[key].coinGeckoKey = storedNetwork.coinGeckoKey;
             mergedNetworkMap[key].crowdloanUrl = storedNetwork.crowdloanUrl;
             mergedNetworkMap[key].blockExplorer = storedNetwork.blockExplorer;

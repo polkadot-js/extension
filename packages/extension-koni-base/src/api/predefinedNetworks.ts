@@ -24,7 +24,9 @@ export const PREDEFINED_NETWORKS: Record<string, NetworkJson> = {
     groups: ['RELAY_CHAIN'],
     nativeToken: 'DOT',
     decimals: 10,
-    coinGeckoKey: 'polkadot'
+    coinGeckoKey: 'polkadot',
+    supportBonding: true,
+    getStakingOnChain: true
   },
   kusama: {
     key: 'kusama',
@@ -46,7 +48,9 @@ export const PREDEFINED_NETWORKS: Record<string, NetworkJson> = {
     groups: ['RELAY_CHAIN'],
     nativeToken: 'KSM',
     decimals: 12,
-    coinGeckoKey: 'kusama'
+    coinGeckoKey: 'kusama',
+    supportBonding: true,
+    getStakingOnChain: true
   },
   westend: {
     key: 'westend',
@@ -149,7 +153,7 @@ export const PREDEFINED_NETWORKS: Record<string, NetworkJson> = {
     nativeToken: 'GLMR',
     crowdloanUrl: 'https://moonbeam.foundation/moonbeam-crowdloan/',
     decimals: 18,
-    coinGeckoKey: 'moonbeam',
+    coinGeckoKey: 'Moonbeam Foundation',
     evmChainId: 1284
   },
   astar: {
@@ -234,7 +238,7 @@ export const PREDEFINED_NETWORKS: Record<string, NetworkJson> = {
     genesisHash: '0xd2a620c27ec5cbc5621ff9a522689895074f7cca0d08e7134a7804e1a3ba86fc',
     ss58Format: 63,
     providers: {
-      'Galactic Council': 'wss://rpc-02.snakenet.hydradx.io'
+      'Galactic Council': 'wss://rpc-01.snakenet.hydradx.io'
     },
     active: false,
     currentProviderMode: 'ws',
@@ -243,7 +247,9 @@ export const PREDEFINED_NETWORKS: Record<string, NetworkJson> = {
     paraId: 2034,
     nativeToken: 'HDX',
     crowdloanUrl: 'https://loan.hydradx.io/',
-    decimals: 12
+    decimals: 12,
+    supportBonding: true,
+    getStakingOnChain: true
   },
   edgeware: {
     key: 'edgeware',
@@ -340,7 +346,8 @@ export const PREDEFINED_NETWORKS: Record<string, NetworkJson> = {
     genesisHash: '0x729cb8f2cf428adcf81fe69610edda32c5711b2ff17de747e8604a3587021db8',
     ss58Format: 18,
     providers: {
-      'Darwinia Network': 'wss://rpc.darwinia.network'
+      'Darwinia Network': 'wss://rpc.darwinia.network',
+      Darwinia: 'wss://darwinia-rpc.dwellir.com'
     },
     active: false,
     currentProviderMode: 'ws',
@@ -460,7 +467,8 @@ export const PREDEFINED_NETWORKS: Record<string, NetworkJson> = {
     crowdloanUrl: 'https://contribute.alephzero.org/',
     decimals: 12,
     coinGeckoKey: 'aleph-zero',
-    getStakingOnChain: true
+    getStakingOnChain: true,
+    supportBonding: true
   },
   rmrk: {
     key: 'rmrk',
@@ -535,7 +543,7 @@ export const PREDEFINED_NETWORKS: Record<string, NetworkJson> = {
     },
     active: false,
     currentProviderMode: 'ws',
-    currentProvider: 'OnFinality',
+    currentProvider: 'Moonbeam Foundation',
     groups: ['TEST_NET'],
     nativeToken: 'DEV',
     isEthereum: true,
@@ -689,7 +697,7 @@ export const PREDEFINED_NETWORKS: Record<string, NetworkJson> = {
     },
     active: false,
     currentProviderMode: 'ws',
-    currentProvider: 'OnFinality',
+    currentProvider: 'Moonbeam Foundation',
     groups: ['KUSAMA_PARACHAIN'],
     paraId: 2023,
     isEthereum: true,
@@ -733,6 +741,7 @@ export const PREDEFINED_NETWORKS: Record<string, NetworkJson> = {
     currentProvider: 'astar',
     groups: ['KUSAMA_PARACHAIN'],
     nativeToken: 'SDN',
+    evmChainId: 336,
     isEthereum: true
   },
   khala: {
@@ -755,7 +764,7 @@ export const PREDEFINED_NETWORKS: Record<string, NetworkJson> = {
   },
   bifrost: {
     key: 'bifrost',
-    chain: 'Bifrost',
+    chain: 'Bifrost Kusama',
     genesisHash: '0x9f28c6a68e0fc9646eff64935684f6eeeece527e37bbe1f213d22caa1d9d6bed',
     ss58Format: 6,
     providers: {
@@ -769,6 +778,24 @@ export const PREDEFINED_NETWORKS: Record<string, NetworkJson> = {
     currentProvider: 'OnFinality',
     groups: ['KUSAMA_PARACHAIN'],
     paraId: 2001,
+    nativeToken: 'BNC',
+    crowdloanUrl: 'https://bifrost.app/vcrowdloan',
+    decimals: 12,
+    coinGeckoKey: 'bifrost-native-coin'
+  },
+  bifrost_dot: {
+    key: 'bifrost_dot',
+    chain: 'Bifrost Polkadot',
+    genesisHash: '0x262e1b2ad728475fd6fe88e62d34c200abe6fd693931ddad144059b1eb884e5b',
+    ss58Format: 6,
+    providers: {
+      Liebi: 'wss://hk.p.bifrost-rpc.liebi.com/ws'
+    },
+    active: false,
+    currentProviderMode: 'ws',
+    currentProvider: 'Liebi',
+    groups: ['KUSAMA_PARACHAIN'],
+    paraId: 2030,
     nativeToken: 'BNC',
     crowdloanUrl: 'https://bifrost.app/vcrowdloan',
     decimals: 12,
@@ -1166,11 +1193,14 @@ export const PREDEFINED_NETWORKS: Record<string, NetworkJson> = {
     genesisHash: '0x34f61bfda344b3fad3c3e38832a91448b3c613b199eb23e5110a635d71c13c65',
     ss58Format: 42,
     providers: {
-      Crab: 'wss://crab-parachain-rpc.darwinia.network/'
+      'Darwinia Network': 'wss://darwiniacrab-rpc.dwellir.com',
+      Dwellir: 'wss://darwinia-crab.api.onfinality.io/public-ws',
+      Crab_RPC: 'wss://darwiniacrab-rpc.dwellir.com',
+      Onfinality: 'wss://darwinia-crab.api.onfinality.io/public-ws'
     },
     active: false,
     currentProviderMode: 'ws',
-    currentProvider: 'Crab',
+    currentProvider: 'Dwellir',
     groups: ['KUSAMA_PARACHAIN'],
     paraId: 2105,
     nativeToken: 'CRAB',

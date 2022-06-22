@@ -25,12 +25,10 @@ interface Props extends ThemeProps {
 }
 
 function ConnectAccount ({ address, className, genesisHash, name, parentName, selectAccountCallBack, selectedAccounts, suri, type }: Props): React.ReactElement<Props> {
-  const [isSelected, setSelected] = useState(false);
+  const [isSelected, setSelected] = useState(selectedAccounts.includes(address));
   const deps = selectedAccounts.toString();
 
   const selectAccounts = useCallback(() => {
-    console.log('isSelected', isSelected);
-
     if (isSelected) {
       selectAccountCallBack && selectAccountCallBack(selectedAccounts.filter((acc) => acc !== address));
     } else {

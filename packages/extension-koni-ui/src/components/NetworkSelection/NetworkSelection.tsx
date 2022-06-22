@@ -226,6 +226,7 @@ export default styled(NetworkSelection)(({ theme }: Props) => `
     margin-top: 20px;
     height: 200px;
     overflow-y: auto;
+    scrollbar-width: thin;
   }
 
   .networks__input-filter {

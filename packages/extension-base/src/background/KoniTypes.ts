@@ -2,9 +2,11 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { AuthUrls, Resolver } from '@subwallet/extension-base/background/handlers/State';
-import { AccountJson, AuthorizeRequest, RequestAccountList, RequestAccountSubscribe, RequestAuthorizeReject, RequestAuthorizeSubscribe, RequestAuthorizeTab, RequestCurrentAccountAddress, ResponseAuthorizeList, ResponseJsonGetAccountInfo, SeedLengths } from '@subwallet/extension-base/background/types';
+import { AccountAuthType, AccountJson, AuthorizeRequest, RequestAccountList, RequestAccountSubscribe, RequestAuthorizeReject, RequestAuthorizeSubscribe, RequestAuthorizeTab, RequestCurrentAccountAddress, ResponseAuthorizeList, ResponseJsonGetAccountInfo, SeedLengths } from '@subwallet/extension-base/background/types';
 import { InjectedAccount, MetadataDefBase } from '@subwallet/extension-inject/types';
 import Web3 from 'web3';
+import { RequestArguments, TransactionConfig } from 'web3-core';
+import { JsonRpcPayload, JsonRpcResponse } from 'web3-core-helpers';
 
 import { ApiPromise } from '@polkadot/api';
 import { SubmittableExtrinsicFunction } from '@polkadot/api/promise/types';
@@ -37,6 +39,7 @@ export interface AuthRequestV2 extends Resolver<ResultResolver> {
   idStr: string;
   request: RequestAuthorizeTab;
   url: string;
+  accountAuthType: AccountAuthType
 }
 
 export interface RequestAuthorizeApproveV2 {
@@ -89,6 +92,8 @@ export interface StakingItem {
   name: string,
   chainId: string,
   balance?: string,
+  activeBalance?: string,
+  unlockingBalance?: string
   nativeToken: string,
   unit?: string,
   state: APIItemState
@@ -306,8 +311,10 @@ export interface NetworkJson {
   blockExplorer?: string; // Link to block scanner to check transaction with extrinsic hash // user input
   dependencies?: string[]; // Auto active network in dependencies if current network is activated
   getStakingOnChain?: boolean; // support get bonded on chain
+  supportBonding?: boolean;
 
   apiStatus?: NETWORK_STATUS;
+  requestId?: string;
 }
 
 export interface DonateInfo {
@@ -368,6 +375,7 @@ export type TokenInfo = {
 export interface AccountsWithCurrentAddress {
   accounts: AccountJson[];
   currentAddress?: string;
+  currentGenesisHash?: string | null;
   isShowBalance?: boolean;
   allAccountLogo?: string;
 }
@@ -378,6 +386,7 @@ export interface OptionInputAddress {
 
 export interface CurrentAccountInfo {
   address: string;
+  currentGenesisHash: string | null;
 }
 
 export interface RequestSettingsType {
@@ -781,7 +790,200 @@ export interface CrossChainRelation {
   relationMap: Record<string, ChainRelationInfo>;
 }
 
+export type RequestEvmEvents = null;
+export type EvmEventType = 'connect' | 'disconnect' | 'accountsChanged' | 'chainChanged' | 'message' | 'data' | 'reconnect' | 'error';
+export type EvmAccountsChangedPayload = string [];
+export type EvmChainChangedPayload = string;
+export type EvmConnectPayload = { chainId: EvmChainChangedPayload }
+export type EvmDisconnectPayload = unknown
+
+export interface EvmEvent {
+  type: EvmEventType,
+  payload: EvmAccountsChangedPayload | EvmChainChangedPayload | EvmConnectPayload | EvmDisconnectPayload;
+}
+
+export interface EvmAppState {
+  networkKey?: string,
+  chainId?: string,
+  isConnected?: boolean,
+  web3?: Web3,
+  listenEvents?: string[]
+}
+
+export type RequestEvmProviderSend = JsonRpcPayload;
+
+export interface ResponseEvmProviderSend {
+  error: (Error | null);
+  result?: JsonRpcResponse;
+}
+
+export interface EvmProviderRpcErrorInterface extends Error{
+  message: string;
+  code: number;
+  data?: unknown;
+}
+
+export type EvmRpcErrorHelperMap = Record<'USER_REJECTED_REQUEST'| 'UNAUTHORIZED'| 'UNSUPPORTED_METHOD'| 'DISCONNECTED'| 'CHAIN_DISCONNECTED'| 'INVALID_PARAMS'| 'INTERNAL_ERROR', [number, string]>;
+
+export interface EvmSendTransactionParams {
+  from: string;
+  to?: string;
+  value?: string | number;
+  gasLimit?: string | number;
+  maxPriorityFeePerGas?: string | number;
+  maxFeePerGas?: string | number;
+  gasPrice?: string | number;
+  data?: string
+}
+
+export interface SwitchNetworkRequest {
+  networkKey: string;
+  address?: string;
+}
+
+export interface EvmSignatureRequest {
+  address: string,
+  type: string;
+  payload: unknown
+}
+
+export interface ConfirmationsQueueItemOptions {
+  requiredPassword?: boolean;
+  address?: string;
+  networkKey?: string;
+}
+
+export interface ConfirmationsQueueItem<T> extends ConfirmationsQueueItemOptions{
+  id: string;
+  url: string;
+  payload: T;
+  payloadJson: string;
+}
+
+export interface ConfirmationResult<T> {
+  id: string;
+  isApproved: boolean;
+  url?: string;
+  payload?: T
+  password?: string
+}
+
+export interface EvmSendTransactionRequest extends TransactionConfig {
+  estimateGas: string;
+}
+
+export interface ConfirmationDefinitions {
+  addNetworkRequest: [ConfirmationsQueueItem<NetworkJson>, ConfirmationResult<NetworkJson>],
+  switchNetworkRequest: [ConfirmationsQueueItem<SwitchNetworkRequest>, ConfirmationResult<boolean>],
+  evmSignatureRequest: [ConfirmationsQueueItem<EvmSignatureRequest>, ConfirmationResult<string>],
+  evmSendTransactionRequest: [ConfirmationsQueueItem<EvmSendTransactionRequest>, ConfirmationResult<boolean>]
+}
+
+export type ConfirmationType = keyof ConfirmationDefinitions;
+
+export type ConfirmationsQueue = {
+  [ConfirmationType in keyof ConfirmationDefinitions]: Record<string, ConfirmationDefinitions[ConfirmationType][0]>;
+}
+
+export type RequestConfirmationsSubscribe = null;
+
+// Design to use only one confirmation
+export type RequestConfirmationComplete = {
+  [ConfirmationType in keyof ConfirmationDefinitions]?: ConfirmationDefinitions[ConfirmationType][1];
+}
+
+export interface ValidatorInfo {
+  address: string;
+  totalStake: number;
+  ownStake: number;
+  otherStake: number;
+  nominatorCount: number;
+  commission: number;
+  expectedReturn: number;
+  blocked: boolean;
+  identity?: string;
+  isVerified: boolean;
+  minBond: number;
+  isNominated: boolean; // this validator has been staked to before
+}
+
+export interface BondingOptionInfo {
+  isBondedBefore: boolean,
+  era: number,
+  maxNominations: number,
+  maxNominatorPerValidator: number,
+  validators: ValidatorInfo[],
+  bondedValidators: string[]
+}
+
+export interface ChainBondingBasics {
+  stakedReturn: number,
+  // minBond: number,
+  isMaxNominators: boolean
+}
+
+export interface BasicTxInfo {
+  fee: string,
+  balanceError: boolean
+}
+
+export interface BondingSubmitParams {
+  networkKey: string,
+  nominatorAddress: string,
+  amount: number,
+  validatorInfo: ValidatorInfo,
+  password?: string,
+  isBondedBefore: boolean,
+  bondedValidators: string[]
+}
+
+export interface BasicTxResponse {
+  passwordError?: string | null,
+  callHash?: string,
+  status?: boolean,
+  transactionHash?: string,
+  txError?: boolean,
+}
+
+export interface BondingOptionParams {
+  networkKey: string;
+  address: string;
+}
+
+export interface UnbondingSubmitParams {
+  amount: number,
+  networkKey: string,
+  address: string,
+  password?: string
+}
+
+export interface UnlockingStakeParams {
+  address: string,
+  networkKey: string
+}
+
+export interface UnlockingStakeInfo {
+  nextWithdrawal: number,
+  redeemable: number,
+  nextWithdrawalAmount: number
+}
+
+export interface StakeWithdrawalParams {
+  address: string,
+  networkKey: string,
+  password?: string
+}
+
 export interface KoniRequestSignatures {
+  'pri(unbonding.submitWithdrawal)': [StakeWithdrawalParams, BasicTxResponse, BasicTxResponse]
+  'pri(unbonding.withdrawalTxInfo)': [StakeWithdrawalParams, BasicTxInfo];
+  'pri(unbonding.unlockingInfo)': [UnlockingStakeParams, UnlockingStakeInfo];
+  'pri(unbonding.submitTransaction)': [UnbondingSubmitParams, BasicTxResponse, BasicTxResponse];
+  'pri(unbonding.txInfo)': [UnbondingSubmitParams, BasicTxInfo];
+  'pri(bonding.txInfo)': [BondingSubmitParams, BasicTxInfo];
+  'pri(bonding.submitTransaction)': [BondingSubmitParams, BasicTxResponse, BasicTxResponse];
+  'pri(bonding.getChainBondingBasics)': [NetworkJson[], Record<string, ChainBondingBasics>];
+  'pri(bonding.getBondingOptions)': [BondingOptionParams, BondingOptionInfo];
   'pri(networkMap.recoverDotSama)': [string, boolean];
   'pri(substrateNft.submitTransaction)': [SubstrateNftSubmitTransaction, NftTransactionResponse, NftTransactionResponse]
   'pri(substrateNft.getTransaction)': [SubstrateNftTransactionRequest, SubstrateNftTransaction];
@@ -847,10 +1049,10 @@ export interface KoniRequestSignatures {
   'pri(accounts.saveRecent)': [RequestSaveRecentAccount, SingleAddress];
   'pri(accounts.triggerSubscription)': [null, boolean];
   'pri(currentAccount.saveAddress)': [RequestCurrentAccountAddress, boolean, CurrentAccountInfo];
-  'pri(currentAccount.changeBalancesVisibility)': [null, boolean, ResponseSettingsType];
-  'pri(currentAccount.subscribeSettings)': [null, ResponseSettingsType, ResponseSettingsType];
-  'pri(currentAccount.saveAccountAllLogo)': [string, boolean, ResponseSettingsType];
-  'pri(currentAccount.saveTheme)': [ThemeTypes, boolean, ResponseSettingsType];
+  'pri(settings.changeBalancesVisibility)': [null, boolean, ResponseSettingsType];
+  'pri(settings.subscribe)': [null, ResponseSettingsType, ResponseSettingsType];
+  'pri(settings.saveAccountAllLogo)': [string, boolean, ResponseSettingsType];
+  'pri(settings.saveTheme)': [ThemeTypes, boolean, ResponseSettingsType];
   'pri(chainRegistry.getSubscription)': [null, Record<string, ChainRegistry>, Record<string, ChainRegistry>];
   'pri(transaction.history.getSubscription)': [null, Record<string, TransactionHistoryItemType[]>, Record<string, TransactionHistoryItemType[]>];
   'pri(transaction.history.add)': [RequestTransactionHistoryAdd, boolean, TransactionHistoryItemType[]];
@@ -859,9 +1061,19 @@ export interface KoniRequestSignatures {
   'pri(transfer.getExistentialDeposit)': [RequestTransferExistentialDeposit, string];
   'pri(subscription.cancel)': [string, boolean];
   'pri(freeBalance.subscribe)': [RequestFreeBalance, string, string];
+
+  // Confirmation Queues
+  'pri(confirmations.subscribe)': [RequestConfirmationsSubscribe, ConfirmationsQueue, ConfirmationsQueue],
+  'pri(confirmations.complete)': [RequestConfirmationComplete, boolean]
+
   'pub(utils.getRandom)': [RandomTestRequest, number];
   'pub(accounts.listV2)': [RequestAccountList, InjectedAccount[]];
   'pub(accounts.subscribeV2)': [RequestAccountSubscribe, boolean, InjectedAccount[]];
+
+  // EVM inject request
+  'evm(events.subscribe)': [RequestEvmEvents, boolean, EvmEvent];
+  'evm(request)': [RequestArguments, unknown];
+  'evm(provider.send)': [RequestEvmProviderSend, string | number, ResponseEvmProviderSend]
 }
 
 export interface ApplicationMetadataType {

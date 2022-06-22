@@ -2813,6 +2813,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@metamask/safe-event-emitter@npm:^2.0.0":
+  version: 2.0.0
+  resolution: "@metamask/safe-event-emitter@npm:2.0.0"
+  checksum: 8b717ac5d53df0027c05509f03d0534700b5898dd1c3a53fb2dc4c0499ca5971b14aae67f522d09eb9f509e77f50afa95fdb3eda1afbff8b071c18a3d2905e93
+  languageName: node
+  linkType: hard
+
 "@metaverse-network-sdk/type-definitions@npm:^0.0.1-6":
   version: 0.0.1-13
   resolution: "@metaverse-network-sdk/type-definitions@npm:0.0.1-13"
@@ -4379,7 +4386,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@subwallet/extension-base@^0.4.5-0, @subwallet/extension-base@workspace:packages/extension-base":
+"@subwallet/extension-base@^0.4.6-1, @subwallet/extension-base@workspace:packages/extension-base":
   version: 0.0.0-use.local
   resolution: "@subwallet/extension-base@workspace:packages/extension-base"
   dependencies:
@@ -4395,18 +4402,20 @@ __metadata:
     "@polkadot/ui-settings": ^0.89.1
     "@polkadot/util": ^8.3.1
     "@polkadot/util-crypto": ^8.3.1
-    "@subwallet/extension-chains": ^0.4.5-0
-    "@subwallet/extension-dapp": ^0.4.5-0
-    "@subwallet/extension-inject": ^0.4.5-0
-    "@subwallet/extension-mocks": ^0.4.5-0
+    "@subwallet/extension-chains": ^0.4.6-1
+    "@subwallet/extension-dapp": ^0.4.6-1
+    "@subwallet/extension-inject": ^0.4.6-1
+    "@subwallet/extension-mocks": ^0.4.6-1
     ethereumjs-tx: ^2.1.2
     eventemitter3: ^4.0.7
     rxjs: ^7.5.1
-    web3: ^1.7.1
+    web3: ^1.7.3
+    web3-core: ^1.7.3
+    web3-core-helpers: ^1.7.3
   languageName: unknown
   linkType: soft
 
-"@subwallet/extension-chains@^0.4.5-0, @subwallet/extension-chains@workspace:packages/extension-chains":
+"@subwallet/extension-chains@^0.4.6-1, @subwallet/extension-chains@workspace:packages/extension-chains":
   version: 0.0.0-use.local
   resolution: "@subwallet/extension-chains@workspace:packages/extension-chains"
   dependencies:
@@ -4414,7 +4423,7 @@ __metadata:
     "@polkadot/networks": ^8.3.1
     "@polkadot/util": ^8.3.1
     "@polkadot/util-crypto": ^8.3.1
-    "@subwallet/extension-inject": ^0.4.5-0
+    "@subwallet/extension-inject": ^0.4.6-1
   peerDependencies:
     "@polkadot/api": "*"
     "@polkadot/types": "*"
@@ -4429,21 +4438,21 @@ __metadata:
     "@metamask/detect-provider": ^1.2.0
     "@polkadot/types": ^7.3.1
     "@polkadot/util": ^8.3.1
-    "@subwallet/extension-inject": ^0.4.5-0
+    "@subwallet/extension-inject": ^0.4.6-1
     web3: ^1.6.1
   peerDependencies:
     "@polkadot/util": "*"
   languageName: unknown
   linkType: soft
 
-"@subwallet/extension-dapp@^0.4.5-0, @subwallet/extension-dapp@workspace:packages/extension-dapp":
+"@subwallet/extension-dapp@^0.4.6-1, @subwallet/extension-dapp@workspace:packages/extension-dapp":
   version: 0.0.0-use.local
   resolution: "@subwallet/extension-dapp@workspace:packages/extension-dapp"
   dependencies:
     "@babel/runtime": ^7.16.7
     "@polkadot/util": ^8.3.1
     "@polkadot/util-crypto": ^8.3.1
-    "@subwallet/extension-inject": ^0.4.5-0
+    "@subwallet/extension-inject": ^0.4.6-1
   peerDependencies:
     "@polkadot/api": "*"
     "@polkadot/util": "*"
@@ -4451,7 +4460,7 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@subwallet/extension-inject@^0.4.5-0, @subwallet/extension-inject@workspace:packages/extension-inject":
+"@subwallet/extension-inject@^0.4.6-1, @subwallet/extension-inject@workspace:packages/extension-inject":
   version: 0.0.0-use.local
   resolution: "@subwallet/extension-inject@workspace:packages/extension-inject"
   dependencies:
@@ -4463,12 +4472,13 @@ __metadata:
     "@polkadot/x-global": ^8.3.1
     "@types/chrome": ^0.0.175
     "@types/firefox-webext-browser": ^94.0.1
+    web3-core: ^1.7.3
   peerDependencies:
     "@polkadot/api": "*"
   languageName: unknown
   linkType: soft
 
-"@subwallet/extension-koni-base@^0.4.5-0, @subwallet/extension-koni-base@workspace:packages/extension-koni-base":
+"@subwallet/extension-koni-base@^0.4.6-1, @subwallet/extension-koni-base@workspace:packages/extension-koni-base":
   version: 0.0.0-use.local
   resolution: "@subwallet/extension-koni-base@workspace:packages/extension-koni-base"
   dependencies:
@@ -4488,6 +4498,7 @@ __metadata:
     "@interlay/interbtc-types": 1.5.10
     "@kiltprotocol/type-definitions": 0.1.23
     "@laminar/type-definitions": 0.3.1
+    "@metamask/safe-event-emitter": ^2.0.0
     "@metaverse-network-sdk/type-definitions": ^0.0.1-6
     "@parallel-finance/type-definitions": 1.5.4
     "@phala/typedefs": 0.2.30
@@ -4506,16 +4517,17 @@ __metadata:
     "@snowfork/snowbridge-types": 0.2.7
     "@sora-substrate/type-definitions": 1.7.48
     "@subsocial/types": 0.6.5
-    "@subwallet/extension-base": ^0.4.5-0
-    "@subwallet/extension-chains": ^0.4.5-0
-    "@subwallet/extension-dapp": ^0.4.5-0
-    "@subwallet/extension-inject": ^0.4.5-0
-    "@subwallet/extension-mocks": ^0.4.5-0
+    "@subwallet/extension-base": ^0.4.6-1
+    "@subwallet/extension-chains": ^0.4.6-1
+    "@subwallet/extension-dapp": ^0.4.6-1
+    "@subwallet/extension-inject": ^0.4.6-1
+    "@subwallet/extension-mocks": ^0.4.6-1
     "@unique-nft/types": 0.3.1
     "@zeitgeistpm/type-defs": 0.4.5
     "@zeroio/type-definitions": 0.0.14
     axios: ^0.24.0
     cross-fetch: ^3.1.5
+    eth-simple-keyring: ^4.2.0
     ethereumjs-tx: ^2.1.2
     eventemitter3: ^4.0.7
     graphql: ^16.3.0
@@ -4523,13 +4535,14 @@ __metadata:
     pontem-types-bundle: 1.0.15
     protobufjs: ^6.11.2
     rxjs: ^7.5.1
-    web3: ^1.7.1
-    web3-core: ^1.7.1
-    web3-eth-contract: ^1.7.1
+    web3: ^1.7.3
+    web3-core: ^1.7.3
+    web3-core-helpers: ^1.7.3
+    web3-eth-contract: ^1.7.3
   languageName: unknown
   linkType: soft
 
-"@subwallet/extension-koni-ui@^0.4.5-0, @subwallet/extension-koni-ui@workspace:packages/extension-koni-ui":
+"@subwallet/extension-koni-ui@^0.4.6-1, @subwallet/extension-koni-ui@workspace:packages/extension-koni-ui":
   version: 0.0.0-use.local
   resolution: "@subwallet/extension-koni-ui@workspace:packages/extension-koni-ui"
   dependencies:
@@ -4553,12 +4566,12 @@ __metadata:
     "@polkadot/util": ^8.3.1
     "@polkadot/util-crypto": ^8.3.1
     "@reduxjs/toolkit": ^1.7.1
-    "@subwallet/extension-base": ^0.4.5-0
-    "@subwallet/extension-chains": ^0.4.5-0
-    "@subwallet/extension-dapp": ^0.4.5-0
-    "@subwallet/extension-inject": ^0.4.5-0
-    "@subwallet/extension-koni-base": ^0.4.5-0
-    "@subwallet/extension-mocks": ^0.4.5-0
+    "@subwallet/extension-base": ^0.4.6-1
+    "@subwallet/extension-chains": ^0.4.6-1
+    "@subwallet/extension-dapp": ^0.4.6-1
+    "@subwallet/extension-inject": ^0.4.6-1
+    "@subwallet/extension-koni-base": ^0.4.6-1
+    "@subwallet/extension-mocks": ^0.4.6-1
     "@types/bn.js": ^4.11.6
     "@types/enzyme": ^3.10.11
     "@types/enzyme-adapter-react-16": ^1.0.6
@@ -4580,10 +4593,12 @@ __metadata:
     ethers: ^5.6.1
     file-saver: ^2.0.5
     i18next: ^21.6.5
+    moment: ^2.29.3
     react: ^17.0.2
     react-dom: ^17.0.2
     react-dropzone: ^11.5.1
     react-i18next: ^11.15.3
+    react-infinite-scroll-component: ^6.1.0
     react-is: ^17.0.2
     react-lazyload: ^3.2.0
     react-loading-skeleton: ^3.0.2
@@ -4598,7 +4613,7 @@ __metadata:
     semantic-ui-react: ^2.0.4
     sinon-chrome: ^3.0.1
     styled-components: ^5.3.3
-    web3: ^1.7.1
+    web3: ^1.7.3
   languageName: unknown
   linkType: soft
 
@@ -4608,10 +4623,10 @@ __metadata:
   dependencies:
     "@babel/runtime": ^7.16.7
     "@polkadot/dev": ^0.65.23
-    "@subwallet/extension-base": ^0.4.5-0
-    "@subwallet/extension-inject": ^0.4.5-0
-    "@subwallet/extension-koni-base": ^0.4.5-0
-    "@subwallet/extension-koni-ui": ^0.4.5-0
+    "@subwallet/extension-base": ^0.4.6-1
+    "@subwallet/extension-inject": ^0.4.6-1
+    "@subwallet/extension-koni-base": ^0.4.6-1
+    "@subwallet/extension-koni-ui": ^0.4.6-1
     assert: ^2.0.0
     babel-loader: ^8.2.3
     browser-resolve: ^2.0.0
@@ -4636,7 +4651,7 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@subwallet/extension-mocks@^0.4.5-0, @subwallet/extension-mocks@workspace:packages/extension-mocks":
+"@subwallet/extension-mocks@^0.4.6-1, @subwallet/extension-mocks@workspace:packages/extension-mocks":
   version: 0.0.0-use.local
   resolution: "@subwallet/extension-mocks@workspace:packages/extension-mocks"
   dependencies:
@@ -4651,10 +4666,10 @@ __metadata:
   dependencies:
     "@babel/runtime": ^7.16.7
     "@polkadot/dev": ^0.65.23
-    "@subwallet/extension-base": ^0.4.5-0
-    "@subwallet/extension-inject": ^0.4.5-0
-    "@subwallet/extension-koni-base": ^0.4.5-0
-    "@subwallet/extension-koni-ui": ^0.4.5-0
+    "@subwallet/extension-base": ^0.4.6-1
+    "@subwallet/extension-inject": ^0.4.6-1
+    "@subwallet/extension-koni-base": ^0.4.6-1
+    "@subwallet/extension-koni-ui": ^0.4.6-1
     assert: ^2.0.0
     babel-loader: ^8.2.3
     browser-resolve: ^2.0.0
@@ -6035,6 +6050,13 @@ __metadata:
   version: 3.0.0
   resolution: "aes-js@npm:3.0.0"
   checksum: 251e26d533cd1a915b44896b17d5ed68c24a02484cfdd2e74ec700a309267db96651ea4eb657bf20aac32a3baa61f6e34edf8e2fec2de440a655da9942d334b8
+  languageName: node
+  linkType: hard
+
+"aes-js@npm:^3.1.2":
+  version: 3.1.2
+  resolution: "aes-js@npm:3.1.2"
+  checksum: 062154d50b1e433cc8c3b8ca7879f3a6375d5e79c2a507b2b6c4ec920b4cd851bf2afa7f65c98761a9da89c0ab618cbe6529e8e9a1c71f93290b53128fb8f712
   languageName: node
   linkType: hard
 
@@ -10850,6 +10872,30 @@ __metadata:
   languageName: node
   linkType: hard
 
+"eth-sig-util@npm:^3.0.1":
+  version: 3.0.1
+  resolution: "eth-sig-util@npm:3.0.1"
+  dependencies:
+    ethereumjs-abi: ^0.6.8
+    ethereumjs-util: ^5.1.1
+    tweetnacl: ^1.0.3
+    tweetnacl-util: ^0.15.0
+  checksum: 614bf7011b30f78c3532f53e3f80919fe5502b0fa7a3656e6e7dae56d26bc9f559c5b6480c2bcc66d63cd9f72b489732df3b7f1daa0ac9a1fe3b6878347ab4c6
+  languageName: node
+  linkType: hard
+
+"eth-simple-keyring@npm:^4.2.0":
+  version: 4.2.0
+  resolution: "eth-simple-keyring@npm:4.2.0"
+  dependencies:
+    eth-sig-util: ^3.0.1
+    ethereumjs-util: ^7.0.9
+    ethereumjs-wallet: ^1.0.1
+    events: ^1.1.1
+  checksum: 5c6e03b2641905c3d58c0343e0d28d1192cdfd7da43ff8924c02ed50ff88cf1c66bb5e7057dec2fba9fe84ec467291e86c9ec0a8c72457214f7fe6a85984a259
+  languageName: node
+  linkType: hard
+
 "ethereum-blockies-base64@npm:^1.0.2":
   version: 1.0.2
   resolution: "ethereum-blockies-base64@npm:1.0.2"
@@ -10891,6 +10937,16 @@ __metadata:
   languageName: node
   linkType: hard
 
+"ethereumjs-abi@npm:^0.6.8":
+  version: 0.6.8
+  resolution: "ethereumjs-abi@npm:0.6.8"
+  dependencies:
+    bn.js: ^4.11.8
+    ethereumjs-util: ^6.0.0
+  checksum: cede2a8ae7c7e04eeaec079c2f925601a25b2ef75cf9230e7c5da63b4ea27883b35447365a47e35c1e831af520973a2252af89022c292c18a09a4607821a366b
+  languageName: node
+  linkType: hard
+
 "ethereumjs-common@npm:^1.5.0":
   version: 1.5.2
   resolution: "ethereumjs-common@npm:1.5.2"
@@ -10905,6 +10961,21 @@ __metadata:
     ethereumjs-common: ^1.5.0
     ethereumjs-util: ^6.0.0
   checksum: a5b607b4e125ed696d76a9e4db8a95e03a967323c66694912d799619b16fa43985336924221f9e7582dc1b09ff88a62116bf2290ee14d952bf7e6715e5728525
+  languageName: node
+  linkType: hard
+
+"ethereumjs-util@npm:^5.1.1":
+  version: 5.2.1
+  resolution: "ethereumjs-util@npm:5.2.1"
+  dependencies:
+    bn.js: ^4.11.0
+    create-hash: ^1.1.2
+    elliptic: ^6.5.2
+    ethereum-cryptography: ^0.1.3
+    ethjs-util: ^0.1.3
+    rlp: ^2.0.0
+    safe-buffer: ^5.1.1
+  checksum: 20db6c639d92b35739fd5f7a71e64a92e85442ea0d176b59b5cd5828265b6cf42bd4868cf81a9b20a83738db1ffa7a2f778f1d850d663627a1a5209f7904b44f
   languageName: node
   linkType: hard
 
@@ -10933,6 +11004,35 @@ __metadata:
     ethereum-cryptography: ^0.1.3
     rlp: ^2.2.4
   checksum: ccfd9208bfe9205af124a9138c5a90db46cd2fcacf4b80f17f67915381c03253aa2fb90ead9e0b53d9a6fcfeed4310e5dfa8dc516ca2846d16baf81d605cd8c2
+  languageName: node
+  linkType: hard
+
+"ethereumjs-util@npm:^7.0.9, ethereumjs-util@npm:^7.1.2":
+  version: 7.1.5
+  resolution: "ethereumjs-util@npm:7.1.5"
+  dependencies:
+    "@types/bn.js": ^5.1.0
+    bn.js: ^5.1.2
+    create-hash: ^1.1.2
+    ethereum-cryptography: ^0.1.3
+    rlp: ^2.2.4
+  checksum: 27a3c79d6e06b2df34b80d478ce465b371c8458b58f5afc14d91c8564c13363ad336e6e83f57eb0bd719fde94d10ee5697ceef78b5aa932087150c5287b286d1
+  languageName: node
+  linkType: hard
+
+"ethereumjs-wallet@npm:^1.0.1":
+  version: 1.0.2
+  resolution: "ethereumjs-wallet@npm:1.0.2"
+  dependencies:
+    aes-js: ^3.1.2
+    bs58check: ^2.1.2
+    ethereum-cryptography: ^0.1.3
+    ethereumjs-util: ^7.1.2
+    randombytes: ^2.1.0
+    scrypt-js: ^3.0.1
+    utf8: ^3.0.0
+    uuid: ^8.3.2
+  checksum: 555effe571c633ca9189e08639928e7bfcb601474f5a37653a3d028b06a10fb8577408c32d425ccecb3ac25d7165322cb9786239fa09ce276532d262206feb8c
   languageName: node
   linkType: hard
 
@@ -10984,7 +11084,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"ethjs-util@npm:0.1.6":
+"ethjs-util@npm:0.1.6, ethjs-util@npm:^0.1.3":
   version: 0.1.6
   resolution: "ethjs-util@npm:0.1.6"
   dependencies:
@@ -11029,6 +11129,13 @@ __metadata:
   version: 4.0.7
   resolution: "eventemitter3@npm:4.0.7"
   checksum: 1875311c42fcfe9c707b2712c32664a245629b42bb0a5a84439762dd0fd637fc54d078155ea83c2af9e0323c9ac13687e03cfba79b03af9f40c89b4960099374
+  languageName: node
+  linkType: hard
+
+"events@npm:^1.1.1":
+  version: 1.1.1
+  resolution: "events@npm:1.1.1"
+  checksum: 40431eb005cc4c57861b93d44c2981a49e7feb99df84cf551baed299ceea4444edf7744733f6a6667e942af687359b1f4a87ec1ec4f21d5127dac48a782039b9
   languageName: node
   linkType: hard
 
@@ -16076,7 +16183,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"moment@npm:2.29.3":
+"moment@npm:2.29.3, moment@npm:^2.29.3":
   version: 2.29.3
   resolution: "moment@npm:2.29.3"
   checksum: 2e780e36d9a1823c08a1b6313cbb08bd01ecbb2a9062095820a34f42c878991ccba53abaa6abb103fd5c01e763724f295162a8c50b7e95b4f1c992ef0772d3f0
@@ -18027,6 +18134,17 @@ __metadata:
   languageName: node
   linkType: hard
 
+"react-infinite-scroll-component@npm:^6.1.0":
+  version: 6.1.0
+  resolution: "react-infinite-scroll-component@npm:6.1.0"
+  dependencies:
+    throttle-debounce: ^2.1.0
+  peerDependencies:
+    react: ">=16.0.0"
+  checksum: 3708398934366df907dbad215247ebc1033221957ce7e32289ea31750cce70aa16513e2d03743e06c8b868ac7c542d12d5dbb6c830fd408433a4762f3cb5ecfb
+  languageName: node
+  linkType: hard
+
 "react-is@npm:^16.12.0 || ^17.0.0 || ^18.0.0":
   version: 18.1.0
   resolution: "react-is@npm:18.1.0"
@@ -18915,7 +19033,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"rlp@npm:^2.2.3, rlp@npm:^2.2.4":
+"rlp@npm:^2.0.0, rlp@npm:^2.2.3, rlp@npm:^2.2.4":
   version: 2.2.7
   resolution: "rlp@npm:2.2.7"
   dependencies:
@@ -20388,6 +20506,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"throttle-debounce@npm:^2.1.0":
+  version: 2.3.0
+  resolution: "throttle-debounce@npm:2.3.0"
+  checksum: 6d90aa2ddb294f8dad13d854a1cfcd88fdb757469669a096a7da10f515ee466857ac1e750649cb9da931165c6f36feb448318e7cb92570f0a3679d20e860a925
+  languageName: node
+  linkType: hard
+
 "through2-filter@npm:^3.0.0":
   version: 3.0.0
   resolution: "through2-filter@npm:3.0.0"
@@ -20706,6 +20831,13 @@ __metadata:
   dependencies:
     safe-buffer: ^5.0.1
   checksum: 05f6510358f8afc62a057b8b692f05d70c1782b70db86d6a1e0d5e28a32389e52fa6e7707b6c5ecccacc031462e4bc35af85ecfe4bbc341767917b7cf6965711
+  languageName: node
+  linkType: hard
+
+"tweetnacl-util@npm:^0.15.0":
+  version: 0.15.1
+  resolution: "tweetnacl-util@npm:0.15.1"
+  checksum: ae6aa8a52cdd21a95103a4cc10657d6a2040b36c7a6da7b9d3ab811c6750a2d5db77e8c36969e75fdee11f511aa2b91c552496c6e8e989b6e490e54aca2864fc
   languageName: node
   linkType: hard
 
@@ -21181,7 +21313,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"utf8@npm:3.0.0":
+"utf8@npm:3.0.0, utf8@npm:^3.0.0":
   version: 3.0.0
   resolution: "utf8@npm:3.0.0"
   checksum: cb89a69ad9ab393e3eae9b25305b3ff08bebca9adc839191a34f90777eb2942f86a96369d2839925fea58f8f722f7e27031d697f10f5f39690f8c5047303e62d
@@ -21557,7 +21689,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"web3-core-helpers@npm:1.7.3":
+"web3-core-helpers@npm:1.7.3, web3-core-helpers@npm:^1.7.3":
   version: 1.7.3
   resolution: "web3-core-helpers@npm:1.7.3"
   dependencies:
@@ -21612,7 +21744,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"web3-core@npm:1.7.3, web3-core@npm:^1.7.1":
+"web3-core@npm:1.7.3, web3-core@npm:^1.7.3":
   version: 1.7.3
   resolution: "web3-core@npm:1.7.3"
   dependencies:
@@ -21656,7 +21788,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"web3-eth-contract@npm:1.7.3, web3-eth-contract@npm:^1.7.1":
+"web3-eth-contract@npm:1.7.3, web3-eth-contract@npm:^1.7.3":
   version: 1.7.3
   resolution: "web3-eth-contract@npm:1.7.3"
   dependencies:
@@ -21801,7 +21933,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"web3@npm:^1.6.1, web3@npm:^1.7.1":
+"web3@npm:^1.6.1, web3@npm:^1.7.3":
   version: 1.7.3
   resolution: "web3@npm:1.7.3"
   dependencies:

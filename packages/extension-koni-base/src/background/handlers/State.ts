@@ -3,7 +3,7 @@
 
 import { withErrorLog } from '@subwallet/extension-base/background/handlers/helpers';
 import State, { AuthUrls, Resolver } from '@subwallet/extension-base/background/handlers/State';
-import { AccountRefMap, APIItemState, ApiMap, AuthRequestV2, BalanceItem, BalanceJson, ChainRegistry, CrowdloanItem, CrowdloanJson, CurrentAccountInfo, CustomEvmToken, DeleteEvmTokenParams, EvmTokenJson, NETWORK_STATUS, NetworkJson, NftCollection, NftCollectionJson, NftItem, NftJson, NftTransferExtra, PriceJson, RequestSettingsType, ResultResolver, ServiceInfo, StakingItem, StakingJson, StakingRewardJson, TokenInfo, TransactionHistoryItemType } from '@subwallet/extension-base/background/KoniTypes';
+import { AccountRefMap, APIItemState, ApiMap, AuthRequestV2, BalanceItem, BalanceJson, ChainRegistry, ConfirmationDefinitions, ConfirmationsQueue, ConfirmationsQueueItemOptions, ConfirmationType, CrowdloanItem, CrowdloanJson, CurrentAccountInfo, CustomEvmToken, DeleteEvmTokenParams, EvmSendTransactionParams, EvmTokenJson, NETWORK_STATUS, NetworkJson, NftCollection, NftCollectionJson, NftItem, NftJson, NftTransferExtra, PriceJson, RequestAccountExportPrivateKey, RequestConfirmationComplete, RequestSettingsType, ResponseAccountExportPrivateKey, ResultResolver, ServiceInfo, StakingItem, StakingJson, StakingRewardJson, TokenInfo, TransactionHistoryItemType } from '@subwallet/extension-base/background/KoniTypes';
 import { AuthorizeRequest, RequestAuthorizeTab } from '@subwallet/extension-base/background/types';
 import { getId } from '@subwallet/extension-base/utils/getId';
 import { getTokenPrice } from '@subwallet/extension-koni-base/api/coingecko';
@@ -16,7 +16,8 @@ import { DotSamaCrowdloan_crowdloans_nodes } from '@subwallet/extension-koni-bas
 import { fetchDotSamaCrowdloan } from '@subwallet/extension-koni-base/api/subquery/crowdloan';
 import { DEFAULT_EVM_TOKENS } from '@subwallet/extension-koni-base/api/web3/defaultEvmToken';
 import { initWeb3Api } from '@subwallet/extension-koni-base/api/web3/web3';
-import { ALL_ACCOUNT_KEY } from '@subwallet/extension-koni-base/constants';
+import { EvmRpcError } from '@subwallet/extension-koni-base/background/errors/EvmRpcError';
+import { ALL_ACCOUNT_KEY, ALL_GENESIS_HASH } from '@subwallet/extension-koni-base/constants';
 import { CurrentAccountStore, NetworkMapStore, PriceStore } from '@subwallet/extension-koni-base/stores';
 import AccountRefStore from '@subwallet/extension-koni-base/stores/AccountRef';
 import AuthorizeStore from '@subwallet/extension-koni-base/stores/Authorize';
@@ -27,13 +28,18 @@ import NftStore from '@subwallet/extension-koni-base/stores/Nft';
 import NftCollectionStore from '@subwallet/extension-koni-base/stores/NftCollection';
 import SettingsStore from '@subwallet/extension-koni-base/stores/Settings';
 import StakingStore from '@subwallet/extension-koni-base/stores/Staking';
-import TransactionHistoryStore from '@subwallet/extension-koni-base/stores/TransactionHistoryV2';
+import TransactionHistoryStore from '@subwallet/extension-koni-base/stores/TransactionHistory';
 import { convertFundStatus, getCurrentProvider, mergeNetworkProviders } from '@subwallet/extension-koni-base/utils/utils';
+import SimpleKeyring from 'eth-simple-keyring';
 import { BehaviorSubject, Subject } from 'rxjs';
 import Web3 from 'web3';
+import { TransactionConfig, TransactionReceipt } from 'web3-core';
 
+import { decodePair } from '@polkadot/keyring/pair/decode';
+import { keyring } from '@polkadot/ui-keyring';
 import { accounts } from '@polkadot/ui-keyring/observable/accounts';
-import { assert } from '@polkadot/util';
+import { assert, BN, u8aToHex } from '@polkadot/util';
+import { base64Decode, isEthereumAddress } from '@polkadot/util-crypto';
 
 function generateDefaultStakingMap () {
   const stakingMap: Record<string, StakingItem> = {};
@@ -81,6 +87,15 @@ export default class KoniState extends State {
   readonly #authRequestsV2: Record<string, AuthRequestV2> = {};
   private priceStoreReady = false;
   private readonly transactionHistoryStore = new TransactionHistoryStore();
+
+  private readonly confirmationsQueueSubject = new BehaviorSubject<ConfirmationsQueue>({
+    addNetworkRequest: {},
+    switchNetworkRequest: {},
+    evmSignatureRequest: {},
+    evmSendTransactionRequest: {}
+  });
+
+  private readonly confirmationsPromiseMap: Record<string, { resolver: Resolver<any>, validator?: (rs: any) => Error | undefined }> = {};
 
   private networkMap: Record<string, NetworkJson> = {}; // mapping to networkMapStore, for uses in background
   private networkMapSubject = new Subject<Record<string, NetworkJson>>();
@@ -328,10 +343,11 @@ export default class KoniState extends State {
 
   private updateIconV2 (shouldClose?: boolean): void {
     const authCount = this.numAuthRequestsV2;
+    const confirmCount = this.countConfirmationNumber();
     const text = (
       authCount
         ? 'Auth'
-        : ''
+        : confirmCount > 0 ? confirmCount.toString() : ''
     );
 
     withErrorLog(() => chrome.browserAction.setBadgeText({ text }));
@@ -350,11 +366,9 @@ export default class KoniState extends State {
   }
 
   getAddressList (value = false): Record<string, boolean> {
-    const addressList = Object.keys(accounts.subject.value)
-      .filter((address) => accounts.subject.value[address].type !== 'ethereum');
-    const addressListMap = addressList.reduce((addressList, v) => ({ ...addressList, [v]: value }), {});
+    const addressList = Object.keys(accounts.subject.value);
 
-    return addressListMap;
+    return addressList.reduce((addressList, v) => ({ ...addressList, [v]: value }), {});
   }
 
   private updateIconAuthV2 (shouldClose?: boolean): void {
@@ -365,7 +379,7 @@ export default class KoniState extends State {
   private authCompleteV2 = (id: string, resolve: (result: boolean) => void, reject: (error: Error) => void): Resolver<ResultResolver> => {
     const isAllowedMap = this.getAddressList();
 
-    const complete = (result: boolean | Error, accounts?: string[]) => {
+    const complete = (result: boolean | Error, cb: () => void, accounts?: string[]) => {
       const isAllowed = result === true;
 
       if (accounts && accounts.length) {
@@ -377,7 +391,21 @@ export default class KoniState extends State {
         Object.keys(isAllowedMap).forEach((address) => isAllowedMap[address] = false);
       }
 
-      const { idStr, request: { origin }, url } = this.#authRequestsV2[id];
+      const { accountAuthType, idStr, request: { allowedAccounts, origin }, url } = this.#authRequestsV2[id];
+
+      if (accountAuthType !== 'both') {
+        const isEvmType = accountAuthType === 'evm';
+
+        const backupAllowed = [...(allowedAccounts || [])].filter((a) => {
+          const isEth = isEthereumAddress(a);
+
+          return isEvmType ? !isEth : isEth;
+        });
+
+        backupAllowed.forEach((acc) => {
+          isAllowedMap[acc] = true;
+        });
+      }
 
       this.getAuthorize((value) => {
         let authorizeList = {} as AuthUrls;
@@ -386,35 +414,53 @@ export default class KoniState extends State {
           authorizeList = value;
         }
 
+        const existed = authorizeList[this.stripUrl(url)];
+
+        // On cancel existed auth not save anything
+        if (existed && !isAllowed) {
+          delete this.#authRequestsV2[id];
+          this.updateIconAuthV2(true);
+
+          return;
+        }
+
         authorizeList[this.stripUrl(url)] = {
           count: 0,
           id: idStr,
           isAllowed,
           isAllowedMap,
           origin,
-          url
+          url,
+          accountAuthType: (existed && existed.accountAuthType !== accountAuthType) ? 'both' : accountAuthType
         };
 
-        this.setAuthorize(authorizeList);
-        delete this.#authRequestsV2[id];
-        this.updateIconAuthV2(true);
+        this.setAuthorize(authorizeList, () => {
+          cb();
+          delete this.#authRequestsV2[id];
+          this.updateIconAuthV2(true);
+        });
       });
     };
 
     return {
       reject: (error: Error): void => {
-        complete(error);
-        reject(error);
+        complete(error, () => {
+          reject(error);
+        });
       },
       resolve: ({ accounts, result }: ResultResolver): void => {
-        complete(result, accounts);
-        resolve(result);
+        complete(result, () => {
+          resolve(result);
+        }, accounts);
       }
     };
   };
 
   public async authorizeUrlV2 (url: string, request: RequestAuthorizeTab): Promise<boolean> {
     let authList = await this.getAuthList();
+    const accountAuthType = request.accountAuthType || 'substrate';
+
+    request.accountAuthType = accountAuthType;
 
     if (!authList) {
       authList = {};
@@ -427,10 +473,18 @@ export default class KoniState extends State {
 
     assert(!isDuplicate, `The source ${url} has a pending authorization request`);
 
-    if (authList[idStr]) {
+    const existedAuth = authList[idStr];
+    const existedAccountAuthType = existedAuth?.accountAuthType;
+    const confirmAnotherType = existedAccountAuthType !== 'both' && existedAccountAuthType !== request.accountAuthType;
+
+    if (request.reConfirm && existedAuth) {
+      request.origin = existedAuth.origin;
+    }
+
+    if (existedAuth && !confirmAnotherType && !request.reConfirm) {
       // this url was seen in the past
-      const isConnected = Object.keys(authList[idStr].isAllowedMap)
-        .some((address) => authList[idStr].isAllowedMap[address]);
+      const isConnected = Object.keys(existedAuth.isAllowedMap)
+        .some((address) => existedAuth.isAllowedMap[address]);
 
       assert(isConnected, `The source ${url} is not allowed to interact with this extension`);
 
@@ -440,12 +494,19 @@ export default class KoniState extends State {
     return new Promise((resolve, reject): void => {
       const id = getId();
 
+      if (existedAuth) {
+        request.allowedAccounts = Object.entries(existedAuth.isAllowedMap)
+          .map(([address, allowed]) => (allowed ? address : ''))
+          .filter((item) => (item !== ''));
+      }
+
       this.#authRequestsV2[id] = {
         ...this.authCompleteV2(id, resolve, reject),
         id,
         idStr,
         request,
-        url
+        url,
+        accountAuthType: accountAuthType
       };
 
       this.updateIconAuthV2();
@@ -470,23 +531,31 @@ export default class KoniState extends State {
     return this.stakingSubject;
   }
 
-  public ensureUrlAuthorizedV2 (url: string): boolean {
+  public ensureUrlAuthorizedV2 (url: string): Promise<boolean> {
     const idStr = this.stripUrl(url);
 
-    this.getAuthorize((value) => {
-      if (!value) {
-        value = {};
-      }
+    return new Promise((resolve, reject) => {
+      this.getAuthorize((value) => {
+        if (!value) {
+          value = {};
+        }
 
-      const isConnected = Object.keys(value[idStr].isAllowedMap)
-        .some((address) => value[idStr].isAllowedMap[address]);
-      const entry = Object.keys(value).includes(idStr);
+        const entry = Object.keys(value).includes(idStr);
 
-      assert(entry, `The source ${url} has not been enabled yet`);
-      assert(isConnected, `The source ${url} is not allowed to interact with this extension`);
+        if (!entry) {
+          reject(new Error(`The source ${url} has not been enabled yet`));
+        }
+
+        const isConnected = value[idStr] && Object.keys(value[idStr].isAllowedMap)
+          .some((address) => value[idStr].isAllowedMap[address]);
+
+        if (!isConnected) {
+          reject(new Error(`The source ${url} is not allowed to interact with this extension`));
+        }
+
+        resolve(true);
+      });
     });
-
-    return true;
   }
 
   private hasUpdateStakingItem (networkKey: string, item: StakingItem): boolean {
@@ -865,6 +934,71 @@ export default class KoniState extends State {
     this.currentAccountStore.set('CurrentAccountInfo', data, callback);
 
     this.updateServiceInfo();
+  }
+
+  public setAccountTie (address: string, genesisHash: string | null): boolean {
+    if (address !== ALL_ACCOUNT_KEY) {
+      const pair = keyring.getPair(address);
+
+      assert(pair, 'Unable to find pair');
+
+      keyring.saveAccountMeta(pair, { ...pair.meta, genesisHash });
+    }
+
+    this.getCurrentAccount((accountInfo) => {
+      if (address === accountInfo.address) {
+        accountInfo.currentGenesisHash = genesisHash as string || ALL_GENESIS_HASH;
+
+        this.setCurrentAccount(accountInfo);
+      }
+    });
+
+    return true;
+  }
+
+  public async switchNetworkAccount (id: string, url: string, networkKey: string, changeAddress?: string): Promise<boolean> {
+    const selectNetwork = this.getNetworkMap()[networkKey];
+
+    const { address, currentGenesisHash } = await new Promise<CurrentAccountInfo>((resolve) => {
+      this.getCurrentAccount(resolve);
+    });
+
+    return this.addConfirmation(id, url, 'switchNetworkRequest', { networkKey, address: changeAddress }, { address: changeAddress })
+      .then(({ isApproved }) => {
+        if (isApproved) {
+          const useAddress = changeAddress || address;
+
+          if (this.networkMap[networkKey] && !this.networkMap[networkKey].active) {
+            this.enableNetworkMap(networkKey);
+          }
+
+          if (useAddress !== ALL_ACCOUNT_KEY) {
+            const pair = keyring.getPair(useAddress);
+
+            assert(pair, 'Unable to find pair');
+
+            keyring.saveAccountMeta(pair, { ...pair.meta, genesisHash: selectNetwork?.genesisHash });
+          }
+
+          if (address !== changeAddress || selectNetwork?.genesisHash !== currentGenesisHash || isApproved) {
+            this.setCurrentAccount({
+              address: useAddress,
+              currentGenesisHash: selectNetwork?.genesisHash
+            });
+          }
+        }
+
+        return isApproved;
+      });
+  }
+
+  public async addNetworkConfirm (id: string, url: string, networkData: NetworkJson) {
+    networkData.requestId = id;
+
+    return this.addConfirmation(id, url, 'addNetworkRequest', networkData)
+      .then(({ isApproved }) => {
+        return isApproved;
+      });
   }
 
   public getSettings (update: (value: RequestSettingsType) => void): void {
@@ -1421,7 +1555,7 @@ export default class KoniState extends State {
     }
 
     this.lockNetworkMap = true;
-    await this.apiMap.dotSama[networkKey].api.disconnect();
+    await this.apiMap.dotSama[networkKey]?.api.disconnect();
     delete this.apiMap.dotSama[networkKey];
 
     if (this.networkMap[networkKey].isEthereum && this.networkMap[networkKey].isEthereum) {
@@ -1583,7 +1717,7 @@ export default class KoniState extends State {
     return this.apiMap.dotSama[networkKey];
   }
 
-  public getWeb3ApiMap () {
+  public getWeb3ApiMap (): Record<string, Web3> {
     return this.apiMap.web3;
   }
 
@@ -1613,7 +1747,7 @@ export default class KoniState extends State {
 
   public updateServiceInfo () {
     console.log('<---Update serviceInfo--->');
-    this.currentAccountStore.get('CurrentAccountInfo', (value) => {
+    this.getCurrentAccount((value) => {
       this.serviceInfoSubject.next({
         networkMap: this.networkMap,
         apiMap: this.apiMap,
@@ -1784,7 +1918,7 @@ export default class KoniState extends State {
     this.historySubject.next(activeData);
   }
 
-  private removeInactiveNetworkData<T> (data: Record<string, T>) {
+  private removeInactiveNetworkData<T>(data: Record<string, T>) {
     const activeData: Record<string, T> = {};
 
     Object.entries(data).forEach(([networkKey, items]) => {
@@ -1794,5 +1928,372 @@ export default class KoniState extends State {
     });
 
     return activeData;
+  }
+
+  findNetworkKeyByGenesisHash (genesisHash?: string | null): [string | undefined, NetworkJson | undefined] {
+    if (!genesisHash) {
+      return [undefined, undefined];
+    }
+
+    const rs = Object.entries(this.networkMap).find(([networkKey, value]) => (value.genesisHash === genesisHash));
+
+    if (rs) {
+      return rs;
+    } else {
+      return [undefined, undefined];
+    }
+  }
+
+  findChainIdGenesisHash (genesisHash?: string | null): number | undefined {
+    return this.findNetworkKeyByGenesisHash(genesisHash)[1]?.evmChainId;
+  }
+
+  findNetworkKeyByChainId (chainId?: number | null): [string | undefined, NetworkJson | undefined] {
+    if (!chainId) {
+      return [undefined, undefined];
+    }
+
+    const rs = Object.entries(this.networkMap).find(([networkKey, value]) => (value.evmChainId === chainId));
+
+    if (rs) {
+      return rs;
+    } else {
+      return [undefined, undefined];
+    }
+  }
+
+  public accountExportPrivateKey ({ address, password }: RequestAccountExportPrivateKey): ResponseAccountExportPrivateKey {
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
+    const exportedJson = keyring.backupAccount(keyring.getPair(address), password);
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
+    const decoded = decodePair(password, base64Decode(exportedJson.encoded), exportedJson.encoding.type);
+
+    return {
+      privateKey: u8aToHex(decoded.secretKey)
+    };
+  }
+
+  public getEthKeyring (address: string, password: string): Promise<SimpleKeyring> {
+    return new Promise<SimpleKeyring>((resolve) => {
+      const { privateKey } = this.accountExportPrivateKey({ address, password: password });
+      const ethKeyring = new SimpleKeyring([privateKey]);
+
+      resolve(ethKeyring);
+    });
+  }
+
+  public async evmSign (id: string, url: string, method: string, params: any, allowedAccounts: string[]): Promise<string | undefined> {
+    let address: string;
+    let payload: any;
+
+    // Detech params
+    if (method === 'eth_sign') {
+      [address, payload] = params as [string, string];
+    } else if (['eth_signTypedData_v3', 'eth_signTypedData_v4'].indexOf(method) > -1) {
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+      [address, payload] = params as [string, any];
+
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-argument,@typescript-eslint/no-unsafe-assignment
+      payload = JSON.parse(payload);
+    } else if (['personal_sign', 'eth_signTypedData', 'eth_signTypedData'].indexOf(method) > -1) {
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+      [payload, address] = params as [any, string];
+    } else {
+      throw new EvmRpcError('INVALID_PARAMS', 'Not found sign method');
+    }
+
+    // Check sign abiblity
+    if (!allowedAccounts.find((acc) => (acc.toLowerCase() === address.toLowerCase()))) {
+      throw new EvmRpcError('INVALID_PARAMS', 'Account ' + address + ' not in allowed list');
+    }
+
+    const requiredPassword = true;
+    let privateKey = '';
+
+    const validateConfirmationResponsePayload = (result: ConfirmationDefinitions['evmSignatureRequest'][1]) => {
+      if (result.isApproved) {
+        if (requiredPassword && !result?.password) {
+          return Error('Password is required');
+        }
+
+        privateKey = (result?.password && this.accountExportPrivateKey({ address: address, password: result.password }).privateKey) || '';
+
+        if (privateKey === '') {
+          return Error('Cannot export private key');
+        }
+      }
+
+      return undefined;
+    };
+
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+    const signPayload = { address, type: method, payload };
+
+    await this.addConfirmation(id, url, 'evmSignatureRequest', signPayload, { requiredPassword: true, address }, validateConfirmationResponsePayload)
+      .then(({ isApproved, password }) => {
+        if (isApproved && password) {
+          return password;
+        }
+
+        throw new EvmRpcError('USER_REJECTED_REQUEST');
+      });
+
+    if (privateKey === '') {
+      throw Error('Cannot export private key');
+    }
+
+    const simpleKeyring = new SimpleKeyring([privateKey]);
+
+    switch (method) {
+      case 'eth_sign':
+        return await simpleKeyring.signMessage(address, payload as string);
+      case 'personal_sign':
+        return await simpleKeyring.signPersonalMessage(address, payload as string);
+      case 'eth_signTypedData':
+        return await simpleKeyring.signTypedData(address, payload as any[]);
+      case 'eth_signTypedData_v1':
+        return await simpleKeyring.signTypedData_v1(address, payload as any[]);
+      case 'eth_signTypedData_v3':
+        return await simpleKeyring.signTypedData_v3(address, payload);
+      case 'eth_signTypedData_v4':
+        return await simpleKeyring.signTypedData_v4(address, payload);
+      default:
+        throw new Error('Not found sign method');
+    }
+  }
+
+  public async evmSendTransaction (id: string, url: string, networkKey: string, transactionParams: EvmSendTransactionParams): Promise<string | undefined> {
+    const web3 = this.getWeb3ApiMap()[networkKey];
+
+    const autoFormatNumber = (val?: string | number): string | undefined => {
+      if (typeof val === 'string' && val.startsWith('0x')) {
+        return new BN(val.replace('0x', ''), 16).toString();
+      } else if (typeof val === 'number') {
+        return val.toString();
+      }
+
+      return val;
+    };
+
+    if (transactionParams.from === transactionParams.to) {
+      throw new EvmRpcError('INVALID_PARAMS', 'From address and to address must not be the same');
+    }
+
+    const transaction: TransactionConfig = {
+      from: transactionParams.from,
+      to: transactionParams.to,
+      value: autoFormatNumber(transactionParams.value),
+      gasPrice: autoFormatNumber(transactionParams.gasPrice),
+      maxPriorityFeePerGas: autoFormatNumber(transactionParams.maxPriorityFeePerGas),
+      maxFeePerGas: autoFormatNumber(transactionParams.maxFeePerGas),
+      data: transactionParams.data
+    };
+
+    // Calculate transaction data
+    try {
+      transaction.gas = await web3.eth.estimateGas({ ...transaction });
+    } catch (e) {
+      // @ts-ignore
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
+      throw new EvmRpcError('INVALID_PARAMS', e?.message);
+    }
+
+    const gasPrice = await web3.eth.getGasPrice();
+
+    const estimateGas = new BN(gasPrice.toString()).mul(new BN(transaction.gas)).toString();
+
+    const fromAddress = transaction.from as string; // Address is validated in before step
+    // Validate balance
+    const balance = new BN(await web3.eth.getBalance(fromAddress) || 0);
+
+    if (balance.lt(new BN(gasPrice.toString()).mul(new BN(transaction.gas)).add(new BN(autoFormatNumber(transactionParams.value) || '0')))) {
+      throw new EvmRpcError('INVALID_PARAMS', 'Balance can be not enough to send transaction');
+    }
+
+    const requiredPassword = true; // password is always required for to export private, we have planning to save password 15 min like sign keypair.isLocked;
+
+    let privateKey = '';
+
+    const validateConfirmationResponsePayload = (result: ConfirmationDefinitions['evmSendTransactionRequest'][1]) => {
+      if (result.isApproved) {
+        if (requiredPassword && !result?.password) {
+          return Error('Password is required');
+        }
+
+        privateKey = (result?.password && this.accountExportPrivateKey({ address: fromAddress, password: result.password }).privateKey) || '';
+
+        if (privateKey === '') {
+          return Error('Cannot export private key');
+        }
+      }
+
+      return undefined;
+    };
+
+    const requestPayload = { ...transaction, estimateGas };
+
+    const setTransactionHistory = (receipt: TransactionReceipt) => {
+      const network = this.getNetworkMapByKey(networkKey);
+
+      this.setTransactionHistory(fromAddress, networkKey, {
+        isSuccess: true,
+        time: Date.now(),
+        networkKey,
+        change: transaction.value?.toString() || '0',
+        changeSymbol: undefined,
+        fee: receipt.effectiveGasPrice.toString(),
+        feeSymbol: network?.nativeToken,
+        action: 'send',
+        extrinsicHash: receipt.transactionHash
+      });
+    };
+
+    const setFailedHistory = (transactionHash: string) => {
+      const network = this.getNetworkMapByKey(networkKey);
+
+      this.setTransactionHistory(fromAddress, networkKey, {
+        isSuccess: false,
+        time: Date.now(),
+        networkKey,
+        change: transaction.value?.toString() || '0',
+        changeSymbol: undefined,
+        fee: undefined,
+        feeSymbol: network?.nativeToken,
+        action: 'send',
+        extrinsicHash: transactionHash
+      });
+    };
+
+    return this.addConfirmation(id, url, 'evmSendTransactionRequest', requestPayload, { requiredPassword: true, address: fromAddress, networkKey }, validateConfirmationResponsePayload)
+      .then(async ({ isApproved }) => {
+        if (isApproved) {
+          const signTransaction = await web3.eth.accounts.signTransaction(transaction, privateKey);
+          let transactionHash = '';
+
+          return new Promise<string>((resolve, reject) => {
+            signTransaction.rawTransaction && web3.eth.sendSignedTransaction(signTransaction.rawTransaction)
+              .on('transactionHash', (hash) => {
+                transactionHash = hash;
+                resolve(hash);
+              })
+              .once('receipt', setTransactionHistory)
+              .on('error', (e) => {
+                setFailedHistory(transactionHash);
+                reject(e);
+              });
+          });
+        } else {
+          return Promise.reject(new EvmRpcError('USER_REJECTED_REQUEST'));
+        }
+      });
+  }
+
+  public getConfirmationsQueueSubject () {
+    return this.confirmationsQueueSubject;
+  }
+
+  public countConfirmationNumber () {
+    let count = 0;
+
+    count += this.allAuthRequests.length;
+    count += this.allMetaRequests.length;
+    count += this.allSignRequests.length;
+    count += this.allAuthRequestsV2.length;
+    Object.values(this.confirmationsQueueSubject.getValue()).forEach((x) => {
+      count += Object.keys(x).length;
+    });
+
+    return count;
+  }
+
+  public addConfirmation<CT extends ConfirmationType> (id: string, url: string, type: CT, payload: ConfirmationDefinitions[CT][0]['payload'], options: ConfirmationsQueueItemOptions = {}, validator?: (input: ConfirmationDefinitions[CT][1]) => Error | undefined) {
+    const confirmations = this.confirmationsQueueSubject.getValue();
+    const confirmationType = confirmations[type] as Record<string, ConfirmationDefinitions[CT][0]>;
+    const payloadJson = JSON.stringify(payload);
+
+    // Check duplicate request
+    const duplicated = Object.values(confirmationType).find((c) => (c.url === url) && (c.payloadJson === payloadJson));
+
+    if (duplicated) {
+      throw new EvmRpcError('INVALID_PARAMS', 'Duplicate request information');
+    }
+
+    confirmationType[id] = {
+      id,
+      url,
+      payload,
+      payloadJson,
+      ...options
+    } as ConfirmationDefinitions[CT][0];
+
+    const promise = new Promise<ConfirmationDefinitions[CT][1]>((resolve, reject) => {
+      this.confirmationsPromiseMap[id] = {
+        validator: validator,
+        resolver: {
+          resolve: resolve,
+          reject: reject
+        }
+      };
+    });
+
+    this.confirmationsQueueSubject.next(confirmations);
+
+    // Not open new popup and use existed
+    const popupList = this.getPopup();
+
+    if (this.getPopup().length > 0) {
+      // eslint-disable-next-line no-void
+      void chrome.windows.update(popupList[0], { focused: true });
+    } else {
+      this.popupOpen();
+    }
+
+    this.updateIconV2();
+
+    return promise;
+  }
+
+  public completeConfirmation (request: RequestConfirmationComplete) {
+    const confirmations = this.confirmationsQueueSubject.getValue();
+
+    const _completeConfirmation = <T extends ConfirmationType> (type: T, result: ConfirmationDefinitions[T][1]) => {
+      const { id } = result;
+      const { resolver, validator } = this.confirmationsPromiseMap[id];
+
+      if (!resolver || !(confirmations[type][id])) {
+        console.error('Not found confirmation', type, id);
+        throw new Error('Not found promise for confirmation');
+      }
+
+      // Validate response from confirmation popup some info like password, response format....
+      const error = validator && validator(result);
+
+      if (error) {
+        resolver.reject(error);
+      }
+
+      // Delete confirmations from queue
+      delete this.confirmationsPromiseMap[id];
+      delete confirmations[type][id];
+      this.confirmationsQueueSubject.next(confirmations);
+
+      // Update icon, and close queue
+      this.updateIconV2(this.countConfirmationNumber() === 0);
+      resolver.resolve(result);
+    };
+
+    Object.entries(request).forEach(([type, result]) => {
+      if (type === 'addNetworkRequest') {
+        _completeConfirmation(type, result as ConfirmationDefinitions['addNetworkRequest'][1]);
+      } else if (type === 'switchNetworkRequest') {
+        _completeConfirmation(type, result as ConfirmationDefinitions['switchNetworkRequest'][1]);
+      } else if (type === 'evmSignatureRequest') {
+        _completeConfirmation(type, result as ConfirmationDefinitions['evmSignatureRequest'][1]);
+      } else if (type === 'evmSendTransactionRequest') {
+        _completeConfirmation(type, result as ConfirmationDefinitions['evmSendTransactionRequest'][1]);
+      }
+    });
+
+    return true;
   }
 }

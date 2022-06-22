@@ -11,7 +11,7 @@ import Modal from '@subwallet/extension-koni-ui/components/Modal';
 import { BalanceFormatType } from '@subwallet/extension-koni-ui/components/types';
 import { QrContext, QrContextState, QrStep } from '@subwallet/extension-koni-ui/contexts/QrContext';
 import useTranslation from '@subwallet/extension-koni-ui/hooks/useTranslation';
-import { getAccountMeta, makeCrossChainTransfer, makeCrossChainTransferQr, rejectTransferQr, resolveTransferQr } from '@subwallet/extension-koni-ui/messaging';
+import { getAccountMeta, makeCrossChainTransfer, makeCrossChainTransferQr, rejectExternalRequest, resolveExternalRequest } from '@subwallet/extension-koni-ui/messaging';
 import Dropdown from '@subwallet/extension-koni-ui/Popup/XcmTransfer/XcmDropdown/Dropdown';
 import { ThemeProps, TransferResultType } from '@subwallet/extension-koni-ui/types';
 import React, { useCallback, useContext, useEffect, useMemo, useState } from 'react';
@@ -111,7 +111,7 @@ function AuthTransaction ({ balanceFormat,
 
   const handlerReject = useCallback(async () => {
     if (qrId) {
-      await rejectTransferQr({ id: qrId });
+      await rejectExternalRequest({ id: qrId });
     }
 
     cleanQrState();
@@ -127,7 +127,7 @@ function AuthTransaction ({ balanceFormat,
 
   const handlerResolve = useCallback(async (result: SignerResult) => {
     if (qrId) {
-      await resolveTransferQr({ id: qrId, data: result });
+      await resolveExternalRequest({ id: qrId, data: result });
     }
   }, [qrId]);
 

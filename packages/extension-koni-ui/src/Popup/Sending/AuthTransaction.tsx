@@ -2,26 +2,24 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { NetworkJson, RequestCheckTransfer, ResponseTransfer, TransferError, TransferStep } from '@subwallet/extension-base/background/KoniTypes';
-import { InputWithLabel, LoadingContainer, Warning } from '@subwallet/extension-koni-ui/components';
+import { InputWithLabel, Warning } from '@subwallet/extension-koni-ui/components';
 import Button from '@subwallet/extension-koni-ui/components/Button';
 import DonateInputAddress from '@subwallet/extension-koni-ui/components/DonateInputAddress';
 import FormatBalance from '@subwallet/extension-koni-ui/components/FormatBalance';
 import InputAddress from '@subwallet/extension-koni-ui/components/InputAddress';
 import Modal from '@subwallet/extension-koni-ui/components/Modal';
-import DisplayPayload from '@subwallet/extension-koni-ui/components/Qr/DisplayPayload';
+import QrRequest from '@subwallet/extension-koni-ui/components/Qr/QrRequest';
 import { BalanceFormatType } from '@subwallet/extension-koni-ui/components/types';
 import { SIGN_MODE } from '@subwallet/extension-koni-ui/constants/signing';
 import { QrContext, QrContextState, QrStep } from '@subwallet/extension-koni-ui/contexts/QrContext';
 import useTranslation from '@subwallet/extension-koni-ui/hooks/useTranslation';
-import { getAccountMeta, makeTransfer, makeTransferQr, rejectTransferQr, resolveTransferQr } from '@subwallet/extension-koni-ui/messaging';
+import { getAccountMeta, makeTransfer, makeTransferLedger, makeTransferQr, rejectExternalRequest } from '@subwallet/extension-koni-ui/messaging';
 import { ThemeProps, TransferResultType } from '@subwallet/extension-koni-ui/types';
 import React, { useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import styled from 'styled-components';
 
 import { KeyringPair$Meta } from '@polkadot/keyring/types';
-import { QrScanSignature } from '@polkadot/react-qr';
-import { SignerResult } from '@polkadot/types/types';
-import { BN, hexToU8a, isHex } from '@polkadot/util';
+import { BN } from '@polkadot/util';
 
 interface Props extends ThemeProps {
   className?: string;
@@ -41,10 +39,6 @@ type RenderTotalArg = {
   amount?: string,
   amountDecimals: number,
   amountSymbol: string
-}
-
-interface SigData {
-  signature: string;
 }
 
 function renderTotal (arg: RenderTotalArg) {
@@ -74,14 +68,12 @@ function renderTotal (arg: RenderTotalArg) {
   );
 }
 
-let id = 1;
-
 function AuthTransaction ({ className, isDonation, feeInfo: [fee, feeDecimals, feeSymbol], balanceFormat, networkMap, onCancel, onChangeResult, requestPayload }: Props): React.ReactElement<Props> | null {
   const { t } = useTranslation();
 
   const { QrState, cleanQrState, updateQrState } = useContext(QrContext);
 
-  const { isEthereum, isQrHashed, qrAddress, qrId, qrPayload, step } = QrState;
+  const { qrId } = QrState;
 
   const [isBusy, setBusy] = useState(false);
   const [password, setPassword] = useState<string>('');
@@ -132,7 +124,7 @@ function AuthTransaction ({ className, isDonation, feeInfo: [fee, feeDecimals, f
 
   const handlerReject = useCallback(async () => {
     if (qrId) {
-      await rejectTransferQr({ id: qrId });
+      await rejectExternalRequest({ id: qrId });
     }
 
     cleanQrState();
@@ -147,21 +139,6 @@ function AuthTransaction ({ className, isDonation, feeInfo: [fee, feeDecimals, f
   },
   [handlerReject, onCancel, qrId]
   );
-
-  const handlerResolve = useCallback(async (result: SignerResult) => {
-    if (qrId) {
-      await resolveTransferQr({ id: qrId, data: result });
-    }
-  }, [qrId]);
-
-  const handlerScanSignature = useCallback(async (data: SigData): Promise<void> => {
-    if (isHex(data.signature)) {
-      await handlerResolve({
-        signature: data.signature,
-        id: id++
-      });
-    }
-  }, [handlerResolve]);
 
   const handlerCallbackResponseResult = useCallback((rs: ResponseTransfer) => {
     if (!rs.isFinalized) {
@@ -203,47 +180,64 @@ function AuthTransaction ({ className, isDonation, feeInfo: [fee, feeDecimals, f
   const _doStart = useCallback(
     (): void => {
       setBusy(true);
-
-      if (!isQr) {
-        makeTransfer({
-          ...requestPayload,
-          password
-        }, handlerCallbackResponseResult).then(handlerResponseError)
-          .catch((e) => console.log('There is problem when makeTransfer', e));
-      } else {
-        makeTransferQr({
-          ...requestPayload
-        }, (rs) => {
-          if (rs.qrState) {
-            const state: QrContextState = {
-              ...rs.qrState,
-              step: QrStep.DISPLAY_PAYLOAD
-            };
-
-            updateQrState(state);
-            setBusy(false);
-          }
-
-          if (rs.isBusy && rs.step !== TransferStep.SUCCESS.valueOf()) {
-            updateQrState({ step: QrStep.SENDING_TX });
-            setBusy(true);
-          }
-
-          handlerCallbackResponseResult(rs);
-        }).then(handlerResponseError)
-          .catch((e) => console.log('There is problem when makeTransferQr', e));
-      }
+      makeTransfer({
+        ...requestPayload,
+        password
+      }, handlerCallbackResponseResult).then(handlerResponseError)
+        .catch((e) => console.log('There is problem when makeTransfer', e));
     },
-    [isQr, requestPayload, password, handlerCallbackResponseResult, handlerResponseError, updateQrState]
+    [requestPayload, password, handlerCallbackResponseResult, handlerResponseError]
   );
 
-  const handlerChangeToScan = useCallback(() => {
-    updateQrState({ step: QrStep.SCAN_QR });
-  }, [updateQrState]);
+  const _doStartQr = useCallback((): void => {
+    setBusy(true);
+    makeTransferQr({
+      ...requestPayload
+    }, (rs) => {
+      if (rs.qrState) {
+        const state: QrContextState = {
+          ...rs.qrState,
+          step: QrStep.DISPLAY_PAYLOAD
+        };
 
-  const handlerChangeToDisplayQr = useCallback(() => {
-    updateQrState({ step: QrStep.DISPLAY_PAYLOAD });
-  }, [updateQrState]);
+        updateQrState(state);
+        setBusy(false);
+      }
+
+      if (rs.isBusy && rs.step !== TransferStep.SUCCESS.valueOf()) {
+        updateQrState({ step: QrStep.SENDING_TX });
+        setBusy(true);
+      }
+
+      handlerCallbackResponseResult(rs);
+    }).then(handlerResponseError)
+      .catch((e) => console.log('There is problem when makeTransferQr', e));
+  }, [requestPayload, handlerCallbackResponseResult, handlerResponseError, updateQrState]);
+
+  // const _doStartLedger = useCallback((): void => {
+  //   setBusy(true);
+  //   makeTransferLedger({
+  //     ...requestPayload
+  //   }, (rs) => {
+  //     if (rs.ledgerState) {
+  //       const state: QrContextState = {
+  //         ...rs.qrState,
+  //         step: QrStep.DISPLAY_PAYLOAD
+  //       };
+  //
+  //       updateQrState(state);
+  //       setBusy(false);
+  //     }
+  //
+  //     if (rs.isBusy && rs.step !== TransferStep.SUCCESS.valueOf()) {
+  //       updateQrState({ step: QrStep.SENDING_TX });
+  //       setBusy(true);
+  //     }
+  //
+  //     handlerCallbackResponseResult(rs);
+  //   }).then(handlerResponseError)
+  //     .catch((e) => console.log('There is problem when makeTransferQr', e));
+  // }, [requestPayload, handlerCallbackResponseResult, handlerResponseError, updateQrState]);
 
   const _onChangePass = useCallback((value: string): void => {
     setPassword(value);
@@ -353,81 +347,16 @@ function AuthTransaction ({ className, isDonation, feeInfo: [fee, feeDecimals, f
   const handlerRenderContent = useCallback(() => {
     switch (signMode) {
       case SIGN_MODE.QR:
-        switch (step) {
-          case QrStep.SENDING_TX:
-            return (
-              <div className='auth-transaction-body'>
-                <LoadingContainer />
-              </div>
-            );
-          case QrStep.SCAN_QR:
-            return (
-              <div className='auth-transaction-body'>
-                <div className='scan-qr'>
-                  <QrScanSignature
-                    // eslint-disable-next-line @typescript-eslint/no-misused-promises
-                    onScan={handlerScanSignature}
-                  />
-                </div>
-                <div className='auth-transaction__separator' />
-                { renderError() }
-                <div className='auth-transaction__submit-wrapper'>
-                  <Button
-                    className={'auth-transaction__submit-btn'}
-                    onClick={handlerChangeToDisplayQr}
-                  >
-                    {t<string>('Back to previous step')}
-                  </Button>
-                </div>
-              </div>
-            );
-          case QrStep.DISPLAY_PAYLOAD:
-            return (
-              <div className='auth-transaction-body'>
-                <div className='display-qr'>
-                  <div className='qr-content'>
-                    <DisplayPayload
-                      address={qrAddress}
-                      genesisHash={genesisHash}
-                      isEthereum={isEthereum}
-                      isHash={isQrHashed}
-                      payload={hexToU8a(qrPayload)}
-                      size={320}
-                    />
-                  </div>
-                </div>
-                <div className='auth-transaction__separator' />
-                { renderError() }
-                <div className='auth-transaction__submit-wrapper'>
-                  <Button
-                    className={'auth-transaction__submit-btn'}
-                    onClick={handlerChangeToScan}
-                  >
-                    {t<string>('Scan QR')}
-                  </Button>
-                </div>
-              </div>
-            );
-          case QrStep.TRANSACTION_INFO:
-          default:
-            return (
-              <div className='auth-transaction-body'>
-                { handlerRenderInfo() }
-                <div className='auth-transaction__separator' />
-                { renderError() }
-                <div className='auth-transaction__submit-wrapper'>
-                  <Button
-                    className={'auth-transaction__submit-btn'}
-                    isBusy={isBusy}
-                    onClick={_doStart}
-                  >
-                    {t<string>('Sign via QR')}
-                  </Button>
-                </div>
-              </div>
-            );
-        }
-
+        return (
+          <QrRequest
+            errorArr={errorArr}
+            genesisHash={genesisHash}
+            handlerStart={_doStartQr}
+            isBusy={isBusy}
+          >
+            { handlerRenderInfo() }
+          </QrRequest>
+        );
       case SIGN_MODE.PASSWORD:
       default:
         return (
@@ -455,7 +384,7 @@ function AuthTransaction ({ className, isDonation, feeInfo: [fee, feeDecimals, f
           </div>
         );
     }
-  }, [_doStart, _onChangePass, errorArr, genesisHash, handlerChangeToDisplayQr, handlerChangeToScan, handlerRenderInfo, handlerScanSignature, isBusy, isEthereum, isKeyringErr, isQrHashed, password, qrAddress, qrPayload, renderError, step, t, signMode]);
+  }, [_doStart, _doStartQr, _onChangePass, errorArr, genesisHash, handlerRenderInfo, isBusy, isKeyringErr, password, renderError, t, signMode]);
 
   return (
     <div className={className}>

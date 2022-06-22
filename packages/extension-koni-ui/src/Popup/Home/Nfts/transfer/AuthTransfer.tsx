@@ -11,7 +11,7 @@ import DisplayPayload from '@subwallet/extension-koni-ui/components/Qr/DisplayPa
 import { QrContext, QrContextState, QrStep } from '@subwallet/extension-koni-ui/contexts/QrContext';
 import useToast from '@subwallet/extension-koni-ui/hooks/useToast';
 import useTranslation from '@subwallet/extension-koni-ui/hooks/useTranslation';
-import { evmNftSubmitTransaction, getAccountMeta, makeTransferNftQrEvm, makeTransferNftQrSubstrate, nftForceUpdate, rejectTransferQr, resolveTransferQr, substrateNftSubmitTransaction } from '@subwallet/extension-koni-ui/messaging';
+import { evmNftSubmitTransaction, getAccountMeta, makeTransferNftQrEvm, makeTransferNftQrSubstrate, nftForceUpdate, rejectExternalRequest, resolveExternalRequest, substrateNftSubmitTransaction } from '@subwallet/extension-koni-ui/messaging';
 import { _NftItem, SubstrateTransferParams, Web3TransferParams } from '@subwallet/extension-koni-ui/Popup/Home/Nfts/types';
 import Address from '@subwallet/extension-koni-ui/Popup/Sending/parts/Address';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
@@ -344,7 +344,7 @@ function AuthTransfer ({ chain, className, collectionId, nftItem, recipientAddre
 
   const handlerReject = useCallback(async () => {
     if (qrId) {
-      await rejectTransferQr({ id: qrId });
+      await rejectExternalRequest({ id: qrId });
     }
 
     cleanQrState();
@@ -352,7 +352,7 @@ function AuthTransfer ({ chain, className, collectionId, nftItem, recipientAddre
 
   const handlerResolve = useCallback(async (result: SignerResult) => {
     if (qrId) {
-      await resolveTransferQr({ id: qrId, data: result });
+      await resolveExternalRequest({ id: qrId, data: result });
     }
   }, [qrId]);
 

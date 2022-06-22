@@ -1,7 +1,7 @@
 // Copyright 2019-2022 @subwallet/extension-koni authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { StakingRewardItem } from '@subwallet/extension-base/background/KoniTypes';
+import { DelegationItem, StakingRewardItem } from '@subwallet/extension-base/background/KoniTypes';
 import cloneIconLight from '@subwallet/extension-koni-ui/assets/clone--color-2.svg';
 import cloneIconDark from '@subwallet/extension-koni-ui/assets/clone--color-3.svg';
 import useToast from '@subwallet/extension-koni-ui/hooks/useToast';
@@ -32,9 +32,10 @@ interface Props extends ThemeProps {
   isExternalAccount: boolean;
   isHardwareAccount: boolean;
   address: string;
+  delegations: DelegationItem[] | undefined
 }
 
-function StakingRow ({ activeStake, address, chainName, className, index, isAccountAll, isExternalAccount, isHardwareAccount, logo, networkKey, price, reward, totalStake, unbondingStake, unit }: Props): React.ReactElement<Props> {
+function StakingRow ({ activeStake, address, chainName, className, delegations, index, isAccountAll, isExternalAccount, isHardwareAccount, logo, networkKey, price, reward, totalStake, unbondingStake, unit }: Props): React.ReactElement<Props> {
   const [showReward, setShowReward] = useState(false);
   const [showStakingMenu, setShowStakingMenu] = useState(false);
   const [redeemable, setRedeemable] = useState(0);
@@ -151,6 +152,7 @@ function StakingRow ({ activeStake, address, chainName, className, index, isAcco
                     showWithdrawalModal={handleShowWithdrawalModal}
                     toggleMenu={handleToggleBondingMenu}
                     unbondingStake={unbondingStake}
+                    delegations={delegations}
                   />
                 }
               </div>

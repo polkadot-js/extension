@@ -3,6 +3,7 @@
 
 import { faMinus, faPlus } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { DelegationItem } from '@subwallet/extension-base/background/KoniTypes';
 import ClockAfternoon from '@subwallet/extension-koni-ui/assets/ClockAfternoon.svg';
 import ClockAfternoonGreen from '@subwallet/extension-koni-ui/assets/ClockAfternoonGreen.svg';
 import DotsThree from '@subwallet/extension-koni-ui/assets/DotsThree.svg';
@@ -29,9 +30,10 @@ interface Props extends ThemeProps {
   nextWithdrawalAmount: number;
   unbondingStake: string | undefined;
   showWithdrawalModal: () => void;
+  delegations: DelegationItem[] | undefined;
 }
 
-function StakingMenu ({ bondedAmount, className, networkKey, nextWithdrawal, nextWithdrawalAmount, redeemable, showMenu, showWithdrawalModal, toggleMenu, unbondingStake }: Props): React.ReactElement<Props> {
+function StakingMenu ({ bondedAmount, className, delegations, networkKey, nextWithdrawal, nextWithdrawalAmount, redeemable, showMenu, showWithdrawalModal, toggleMenu, unbondingStake }: Props): React.ReactElement<Props> {
   const stakingMenuRef = useRef(null);
   const navigate = useContext(ActionContext);
   const networkJson = useGetNetworkJson(networkKey);
@@ -52,7 +54,7 @@ function StakingMenu ({ bondedAmount, className, networkKey, nextWithdrawal, nex
 
   const handleUnstake = useCallback(() => {
     if (parseFloat(bondedAmount) > 0) {
-      store.dispatch({ type: 'unbondingParams/update', payload: { selectedNetwork: networkKey, bondedAmount: parseFloat(bondedAmount) } as UnbondingParams });
+      store.dispatch({ type: 'unbondingParams/update', payload: { selectedNetwork: networkKey, bondedAmount: parseFloat(bondedAmount), delegations } as UnbondingParams });
       navigate('/account/unbonding-auth');
     }
   }, [bondedAmount, navigate, networkKey]);

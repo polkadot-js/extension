@@ -1006,7 +1006,7 @@ export default class KoniExtension extends Extension {
 
       this.isInWalletAccount(request.recipientAddress).then((res) => {
         if (res) {
-          state.updateNft(request.recipientAddress, request.nft);
+          state.updateNftData(request.recipientAddress, request.nft);
           state.updateNftCollection(request.recipientAddress, selectedNftCollection);
         } else {
           state.removeNftFromMasterStore(request.nft);

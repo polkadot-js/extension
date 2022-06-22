@@ -3,7 +3,7 @@
 
 import { ApiProps, NftCollection, NftItem } from '@subwallet/extension-base/background/KoniTypes';
 import { SUPPORTED_NFT_NETWORKS } from '@subwallet/extension-koni-base/api/nft/config';
-import { BaseNftApi } from '@subwallet/extension-koni-base/api/nft/nft';
+import { BaseNftApi, HandleNftParams } from '@subwallet/extension-koni-base/api/nft/nft';
 import { hexToStr, hexToUTF16, parseIpfsLink, utf16ToString } from '@subwallet/extension-koni-base/utils/utils';
 
 import { deserializeNft } from './protobuf';
@@ -132,12 +132,11 @@ export default class UniqueNftApi extends BaseNftApi {
     };
   }
 
-  public async handleNfts (updateItem: (data: NftItem) => void, updateCollection: (data: NftCollection) => void, updateReady: (ready: boolean) => void) {
+  public async handleNfts (params: HandleNftParams) {
     // const start = performance.now();
 
     const collectionCount = await this.getCollectionCount();
     const addressTokenDict: any[] = [];
-    let allNftId: string[] = [];
     const nftMap: Record<string, number> = {};
     const collectionMap: Record<string, Collection> = {};
     const allCollectionId: number[] = [];
@@ -155,8 +154,6 @@ export default class UniqueNftApi extends BaseNftApi {
 
         // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
         if (nftIds && nftIds.length > 0) {
-          allNftId = allNftId.concat(nftIds as string[]);
-
           if (!allCollectionId.includes(item.i as number)) {
             allCollectionId.push(item.i as number);
           }
@@ -167,59 +164,60 @@ export default class UniqueNftApi extends BaseNftApi {
         }
       }));
 
-      if (allNftId.length <= 0) {
-        updateReady(true);
-
-        return;
-      }
-
       await Promise.all(allCollectionId.map(async (collectionId) => {
+        const collectionIdStr = collectionId.toString();
+
         // @ts-ignore
-        collectionMap[collectionId.toString()] = (await this.dotSamaApi.api.query.nft.collectionById(collectionId)).toJSON() as unknown as Collection;
-      }));
+        const collection = (await this.dotSamaApi.api.query.nft.collectionById(collectionId)).toJSON() as unknown as Collection;
 
-      await Promise.all(allNftId.map(async (nft) => {
-        const collectionId = nftMap[nft];
-        const tokenId = nft;
-        const _collection = collectionMap[collectionId];
-        const imageUrl = this.getNftImageUrl(_collection, tokenId);
+        collectionMap[collectionIdStr] = collection;
+        const collectionNftIds = Object.entries(nftMap).filter((item) => item[1] === collectionId).map((item) => item[0]);
 
-        const tokenData = await this.getNftData(_collection, tokenId, 'en', collectionId);
+        params.updateNftIds(SUPPORTED_NFT_NETWORKS.uniqueNft, collectionIdStr, collectionNftIds);
 
-        if (tokenData && imageUrl) {
-          const parsedItem = {
-            id: tokenId,
-            name: tokenData.prefix + '#' + tokenId,
-            image: parseIpfsLink(imageUrl),
-            external_url: `https://unqnft.io/#/market/token-details?collectionId=${collectionId}&tokenId=${tokenId}`,
-            collectionId: collectionId.toString(),
-            properties: tokenData.properties,
-            rarity: '',
-            chain: SUPPORTED_NFT_NETWORKS.uniqueNft
-          } as NftItem;
+        const parsedCollection: NftCollection = {
+          collectionId: collectionIdStr,
+          chain: SUPPORTED_NFT_NETWORKS.uniqueNft
+        };
 
-          updateItem(parsedItem);
+        await Promise.all(collectionNftIds.map(async (nft) => {
+          const tokenId = nft;
+          const imageUrl = this.getNftImageUrl(collection, tokenId);
 
-          const parsedCollection = {
-            collectionId: collectionId.toString(),
-            collectionName: tokenData.collectionName,
-            image: parseIpfsLink(tokenData.image),
-            chain: SUPPORTED_NFT_NETWORKS.uniqueNft
-          } as NftCollection;
+          const tokenData = await this.getNftData(collection, tokenId, 'en', collectionId);
 
-          updateCollection(parsedCollection);
-          updateReady(true);
-        }
+          if (tokenData && imageUrl) {
+            const parsedItem = {
+              id: tokenId,
+              name: tokenData.prefix + '#' + tokenId,
+              image: parseIpfsLink(imageUrl),
+              external_url: `https://unqnft.io/#/market/token-details?collectionId=${collectionId}&tokenId=${tokenId}`,
+              collectionId: collectionIdStr,
+              properties: tokenData.properties,
+              rarity: '',
+              chain: SUPPORTED_NFT_NETWORKS.uniqueNft
+            } as NftItem;
+
+            if (!parsedCollection.collectionName) {
+              parsedCollection.collectionName = tokenData.collectionName;
+              parsedCollection.image = parseIpfsLink(tokenData.image);
+            }
+
+            params.updateItem(parsedItem);
+            params.updateCollection(parsedCollection);
+            params.updateReady(true);
+          }
+        }));
       }));
     } catch (e) {
       console.error('Failed to fetch unique nft', e);
     }
   }
 
-  public async fetchNfts (updateItem: (data: NftItem) => void, updateCollection: (data: NftCollection) => void, updateReady: (ready: boolean) => void): Promise<number> {
+  public async fetchNfts (params: HandleNftParams): Promise<number> {
     try {
       await this.connect();
-      await this.handleNfts(updateItem, updateCollection, updateReady);
+      await this.handleNfts(params);
     } catch (e) {
       return 0;
     }

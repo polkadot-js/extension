@@ -3,7 +3,7 @@
 
 import { CustomEvmToken, NftCollection, NftItem } from '@subwallet/extension-base/background/KoniTypes';
 import { PINATA_IPFS_GATEWAY } from '@subwallet/extension-koni-base/api/nft/config';
-import { BaseNftApi } from '@subwallet/extension-koni-base/api/nft/nft';
+import { BaseNftApi, HandleNftParams } from '@subwallet/extension-koni-base/api/nft/nft';
 import { ERC721Contract } from '@subwallet/extension-koni-base/api/web3/web3';
 import { isUrl } from '@subwallet/extension-koni-base/utils/utils';
 import fetch from 'cross-fetch';
@@ -78,7 +78,9 @@ export class Web3NftApi extends BaseNftApi {
     } as NftItem;
   }
 
-  private async getItemsByCollection (smartContract: string, collectionName: string | undefined, updateItem: (data: NftItem) => void, updateCollection: (data: NftCollection) => void, updateReady: (ready: boolean) => void) {
+  private async getItemsByCollection (smartContract: string, collectionName: string | undefined, nftParams: HandleNftParams) {
+    const nftIds: string[] = [];
+
     if (!this.web3) {
       return;
     }
@@ -98,7 +100,7 @@ export class Web3NftApi extends BaseNftApi {
       const balance = (await contract.methods.balanceOf(address).call()) as unknown as number;
 
       if (Number(balance) === 0) {
-        updateReady(true);
+        nftParams.updateReady(true);
 
         return;
       }
@@ -118,21 +120,32 @@ export class Web3NftApi extends BaseNftApi {
 
           const detailUrl = this.parseUrl(tokenURI);
 
+          const nftId = tokenId.toString();
+
+          nftIds.push(nftId);
+
           if (detailUrl) {
             try {
-              const itemDetail = await fetch(detailUrl)
-                .then((resp) => resp.json()) as Record<string, any>;
+              const resp = await fetch(detailUrl);
+              const itemDetail = (resp && resp.ok && await resp.json() as Record<string, any>);
+
+              if (!itemDetail) {
+                console.warn(resp?.statusText || `Cannot fetch NFT id [${nftId}] from Web3.`);
+
+                return;
+              }
+
               const parsedItem = this.parseMetadata(itemDetail);
 
               parsedItem.collectionId = smartContract;
-              parsedItem.id = tokenId.toString();
+              parsedItem.id = nftId;
 
               if (parsedItem) {
                 if (parsedItem.image) {
                   collectionImage = parsedItem.image;
                 }
 
-                updateItem(parsedItem);
+                nftParams.updateItem(parsedItem);
                 ownItem = true;
               }
             } catch (e) {
@@ -153,24 +166,26 @@ export class Web3NftApi extends BaseNftApi {
         chain: this.chain
       } as NftCollection;
 
-      updateCollection(nftCollection);
-      updateReady(true);
+      nftParams.updateCollection(nftCollection);
+      nftParams.updateReady(true);
     }
+
+    nftParams.updateNftIds(this.chain, smartContract, nftIds);
   }
 
-  async handleNfts (updateItem: (data: NftItem) => void, updateCollection: (data: NftCollection) => void, updateReady: (ready: boolean) => void): Promise<void> {
+  async handleNfts (params: HandleNftParams): Promise<void> {
     if (!this.evmContracts || this.evmContracts.length === 0) {
       return;
     }
 
     await Promise.all(this.evmContracts.map(async ({ name, smartContract }) => {
-      return await this.getItemsByCollection(smartContract, name, updateItem, updateCollection, updateReady);
+      return await this.getItemsByCollection(smartContract, name, params);
     }));
   }
 
-  public async fetchNfts (updateItem: (data: NftItem) => void, updateCollection: (data: NftCollection) => void, updateReady: (ready: boolean) => void): Promise<number> {
+  public async fetchNfts (params: HandleNftParams): Promise<number> {
     try {
-      await this.handleNfts(updateItem, updateCollection, updateReady);
+      await this.handleNfts(params);
     } catch (e) {
       return 0;
     }

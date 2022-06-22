@@ -270,7 +270,7 @@ export class KoniSubscription {
       nftHandler.handleNfts(
         customErc721Registry,
         (data) => {
-          state.updateNft(addressKey, data);
+          state.updateNftData(addressKey, data);
         },
         (data) => {
           if (data !== null) {
@@ -279,6 +279,9 @@ export class KoniSubscription {
         },
         (ready) => {
           state.updateNftReady(addressKey, ready);
+        },
+        (networkKey: string, collectionId?: string, nftIds?: string[]) => {
+          state.updateNftIds(networkKey, addressKey, collectionId, nftIds);
         })
         .then(() => {
           console.log('nft state updated');

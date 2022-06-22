@@ -637,7 +637,14 @@ export default class KoniState extends State {
   public updateNftCollection (address: string, data: NftCollection, callback?: (data: NftCollection) => void): void {
     this.getCurrentAccount((currentAccountInfo) => {
       if (currentAccountInfo.address === address) {
-        if (!this.nftCollectionState.nftCollectionList.some((col) => col.chain === data.chain && col.collectionId === data.collectionId)) {
+        const existedItemIndex = this.nftCollectionState.nftCollectionList.findIndex((col) => col.chain === data.chain && col.collectionId === data.collectionId);
+
+        if (existedItemIndex >= 0) {
+          // Update to existed data
+          if (data.collectionName && data.image) {
+            this.nftCollectionState.nftCollectionList[existedItemIndex] = data;
+          }
+        } else {
           this.nftCollectionState.nftCollectionList.push(data);
         }
 
@@ -756,10 +763,15 @@ export default class KoniState extends State {
     });
   }
 
-  public updateNft (address: string, nftData: NftItem, callback?: (nftData: NftItem) => void): void {
+  public updateNftData (address: string, nftData: NftItem, callback?: (nftData: NftItem) => void): void {
     this.getCurrentAccount((currentAccountInfo) => {
       if (currentAccountInfo.address === address) {
-        if (!this.nftState.nftList.some((nft) => this.isSameNft(nft, nftData))) {
+        const existedItemIndex = this.nftState.nftList.findIndex((nft) => this.isSameNft(nft, nftData));
+
+        if (existedItemIndex >= 0) {
+          // Update to existed data
+          this.nftState.nftList[existedItemIndex] = nftData;
+        } else {
           this.nftState.nftList.push(nftData);
         }
 
@@ -777,6 +789,23 @@ export default class KoniState extends State {
             this.nftStore.set(address, data);
           }
         }).catch((err) => console.warn(err));
+      }
+    });
+  }
+
+  public updateNftIds (chain: string, address: string, collectionId?: string, nftIds?: string[]): void {
+    this.getCurrentAccount((currentAccountInfo) => {
+      if (currentAccountInfo.address === address) {
+        if (!collectionId) {
+          // Clear all nfts from chain
+          this.nftState.nftList = this.nftState.nftList.filter((nft) => nft.chain !== chain);
+        } else {
+          this.nftState.nftList = this.nftState.nftList.filter((nft) => !(nft.chain === chain &&
+          nft.collectionId === collectionId &&
+          !nftIds?.includes(nft?.id || '')));
+        }
+
+        this.publishNftChanged(address);
       }
     });
   }

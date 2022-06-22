@@ -3,7 +3,7 @@
 
 import { ApiProps, NftCollection, NftItem } from '@subwallet/extension-base/background/KoniTypes';
 import { SUPPORTED_NFT_NETWORKS } from '@subwallet/extension-koni-base/api/nft/config';
-import { BaseNftApi } from '@subwallet/extension-koni-base/api/nft/nft';
+import { BaseNftApi, HandleNftParams } from '@subwallet/extension-koni-base/api/nft/nft';
 import { isUrl } from '@subwallet/extension-koni-base/utils/utils';
 import fetch from 'cross-fetch';
 
@@ -119,21 +119,30 @@ export default class StatemineNftApi extends BaseNftApi {
     return this.getMetadata(collectionMetadata?.data);
   }
 
-  public async handleNfts (updateItem: (data: NftItem) => void, updateCollection: (data: NftCollection) => void, updateReady: (ready: boolean) => void) {
+  public async handleNfts (params: HandleNftParams) {
     // const start = performance.now();
 
     const assetIds = await this.getNfts(this.addresses);
 
     try {
       if (!assetIds || assetIds.length === 0) {
-        updateReady(true);
+        params.updateReady(true);
+        params.updateNftIds(SUPPORTED_NFT_NETWORKS.statemine);
 
         return;
       }
 
+      const collectionNftIds: Record<string, string[]> = {};
+
       await Promise.all(assetIds.map(async (assetId) => {
         const parsedClassId = this.parseTokenId(assetId.classId as string);
         const parsedTokenId = this.parseTokenId(assetId.tokenId as string);
+
+        if (collectionNftIds[parsedClassId]) {
+          collectionNftIds[parsedClassId].push(parsedTokenId);
+        } else {
+          collectionNftIds[parsedClassId] = [parsedTokenId];
+        }
 
         const [tokenInfo, collectionMeta] = await Promise.all([
           this.getTokenDetails(assetId),
@@ -149,7 +158,7 @@ export default class StatemineNftApi extends BaseNftApi {
           chain: SUPPORTED_NFT_NETWORKS.statemine
         } as NftItem;
 
-        updateItem(parsedNft);
+        params.updateItem(parsedNft);
 
         const parsedCollection = {
           collectionId: parsedClassId,
@@ -158,18 +167,20 @@ export default class StatemineNftApi extends BaseNftApi {
           image: collectionMeta && collectionMeta.image ? this.parseUrl(collectionMeta?.image) : undefined
         } as NftCollection;
 
-        updateCollection(parsedCollection);
-        updateReady(true);
+        params.updateCollection(parsedCollection);
+        params.updateReady(true);
       }));
+
+      Object.entries(collectionNftIds).forEach(([collectionId, nftIds]) => params.updateNftIds(SUPPORTED_NFT_NETWORKS.statemine, collectionId, nftIds));
     } catch (e) {
       console.error('Failed to fetch statemine nft', e);
     }
   }
 
-  public async fetchNfts (updateItem: (data: NftItem) => void, updateCollection: (data: NftCollection) => void, updateReady: (ready: boolean) => void): Promise<number> {
+  public async fetchNfts (params: HandleNftParams): Promise<number> {
     try {
       await this.connect();
-      await this.handleNfts(updateItem, updateCollection, updateReady);
+      await this.handleNfts(params);
     } catch (e) {
       return 0;
     }

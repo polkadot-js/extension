@@ -157,37 +157,25 @@ export class NftHandler {
     }
   }
 
-  private existCollection (newCollection: NftCollection) {
-    return state.getNftCollection().nftCollectionList.some((collection) =>
-      collection.chain === newCollection.chain &&
-      collection.collectionId === newCollection.collectionId &&
-      collection.collectionName === newCollection.collectionName);
-  }
-
-  private existItem (newItem: NftItem) {
-    return state.getNft().nftList.some((item) =>
-      item.chain === newItem.chain &&
-      item.id === newItem.id &&
-      item.collectionId === newItem.collectionId &&
-      item.name === newItem.name);
-  }
-
-  public async handleNfts (evmContracts: CustomEvmToken[], updateItem: (data: NftItem) => void, updateCollection: (data: NftCollection) => void, updateReady: (ready: boolean) => void) {
+  public async handleNfts (
+    evmContracts: CustomEvmToken[],
+    updateItem: (data: NftItem) => void,
+    updateCollection: (data: NftCollection) => void,
+    updateReady: (ready: boolean) => void,
+    updateIds: (networkKey: string, collectionId?: string, nftIds?: string[]) => void) {
     this.setupApi();
     this.setEvmContracts(evmContracts);
     await Promise.all(this.handlers.map(async (handler) => {
-      await handler.fetchNfts(
-        (data: NftItem) => {
-          if (!this.existItem(data)) {
-            updateItem(data);
-          }
+      await handler.fetchNfts({
+        updateItem: (data: NftItem) => {
+          updateItem(data);
         },
-        (data: NftCollection) => {
-          if (!this.existCollection(data)) {
-            updateCollection(data);
-          }
+        updateCollection: (data: NftCollection) => {
+          updateCollection(data);
         },
-        updateReady);
+        updateReady,
+        updateNftIds: updateIds
+      });
     }));
 
     updateReady(true);

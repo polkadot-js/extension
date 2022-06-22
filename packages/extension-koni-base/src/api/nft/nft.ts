@@ -6,6 +6,13 @@ import { CLOUDFLARE_PINATA_SERVER } from '@subwallet/extension-koni-base/api/nft
 import { isUrl } from '@subwallet/extension-koni-base/utils/utils';
 import Web3 from 'web3';
 
+export interface HandleNftParams {
+  updateItem: (data: NftItem) => void,
+  updateCollection: (data: NftCollection) => void,
+  updateReady: (ready: boolean) => void,
+  updateNftIds: (networkKey: string, collectionId?: string, nftIds?: string[]) => void
+}
+
 export abstract class BaseNftApi {
   chain = '';
   dotSamaApi: ApiProps | null = null;
@@ -96,7 +103,7 @@ export abstract class BaseNftApi {
   }
 
   // Sub-class implements this function to parse data into prop result
-  abstract handleNfts(updateItem: (data: NftItem) => void, updateCollection: (data: NftCollection) => void, updateReady: (ready: boolean) => void): void;
+  abstract handleNfts(params: HandleNftParams): void;
 
-  abstract fetchNfts(updateItem: (data: NftItem) => void, updateCollection: (data: NftCollection) => void, updateReady: (ready: boolean) => void): Promise<number>;
+  abstract fetchNfts(params: HandleNftParams): Promise<number>;
 }

@@ -3,7 +3,7 @@
 
 import { ApiProps, NftCollection, NftItem } from '@subwallet/extension-base/background/KoniTypes';
 import { CLOUDFLARE_PINATA_SERVER, SUPPORTED_NFT_NETWORKS } from '@subwallet/extension-koni-base/api/nft/config';
-import { BaseNftApi } from '@subwallet/extension-koni-base/api/nft/nft';
+import { BaseNftApi, HandleNftParams } from '@subwallet/extension-koni-base/api/nft/nft';
 import { isUrl } from '@subwallet/extension-koni-base/utils/utils';
 import fetch from 'cross-fetch';
 
@@ -105,20 +105,29 @@ export class KaruraNftApi extends BaseNftApi {
     return (await this.dotSamaApi.api.query.ormlNFT.tokens(assetId.classId, assetId.tokenId)).toHuman() as unknown as Token;
   }
 
-  public async handleNfts (updateItem: (data: NftItem) => void, updateCollection: (data: NftCollection) => void, updateReady: (ready: boolean) => void) {
+  public async handleNfts (params: HandleNftParams) {
     // const start = performance.now();
     const assetIds = await this.getNfts(this.addresses);
 
     try {
       if (!assetIds || assetIds.length === 0) {
-        updateReady(true);
+        params.updateReady(true);
+        params.updateNftIds(SUPPORTED_NFT_NETWORKS.karura);
 
         return;
       }
 
+      const collectionNftIds: Record<string, string[]> = {};
+
       await Promise.all(assetIds.map(async (assetId) => {
         const parsedClassId = this.parseTokenId(assetId.classId as string);
         const parsedTokenId = this.parseTokenId(assetId.tokenId as string);
+
+        if (collectionNftIds[parsedClassId]) {
+          collectionNftIds[parsedClassId].push(parsedTokenId);
+        } else {
+          collectionNftIds[parsedClassId] = [parsedTokenId];
+        }
 
         const [tokenInfo, collectionMeta] = await Promise.all([
           this.getTokenDetails(assetId),
@@ -144,19 +153,21 @@ export class KaruraNftApi extends BaseNftApi {
           image: collectionMeta?.image
         } as NftCollection;
 
-        updateItem(parsedNft);
-        updateCollection(parsedCollection);
-        updateReady(true);
+        params.updateItem(parsedNft);
+        params.updateCollection(parsedCollection);
+        params.updateReady(true);
       }));
+
+      Object.entries(collectionNftIds).forEach(([collectionId, nftIds]) => params.updateNftIds(SUPPORTED_NFT_NETWORKS.karura, collectionId, nftIds));
     } catch (e) {
       console.error('Failed to fetch karura nft', e);
     }
   }
 
-  public async fetchNfts (updateItem: (data: NftItem) => void, updateCollection: (data: NftCollection) => void, updateReady: (ready: boolean) => void): Promise<number> {
+  public async fetchNfts (params: HandleNftParams): Promise<number> {
     try {
       await this.connect();
-      await this.handleNfts(updateItem, updateCollection, updateReady);
+      await this.handleNfts(params);
     } catch (e) {
       return 0;
     }

@@ -3,7 +3,7 @@
 
 import { ApiProps, NftCollection, NftItem } from '@subwallet/extension-base/background/KoniTypes';
 import { BIT_COUNTRY_SERVER, SUPPORTED_NFT_NETWORKS } from '@subwallet/extension-koni-base/api/nft/config';
-import { BaseNftApi } from '@subwallet/extension-koni-base/api/nft/nft';
+import { BaseNftApi, HandleNftParams } from '@subwallet/extension-koni-base/api/nft/nft';
 import { isUrl } from '@subwallet/extension-koni-base/utils/utils';
 import fetch from 'cross-fetch';
 
@@ -98,10 +98,10 @@ export class BitCountryNftApi extends BaseNftApi {
       .then((resp) => resp.json()) as Record<string, any>;
   }
 
-  async fetchNfts (updateItem: (data: NftItem) => void, updateCollection: (data: NftCollection) => void, updateReady: (ready: boolean) => void): Promise<number> {
+  async fetchNfts (params: HandleNftParams): Promise<number> {
     try {
       await this.connect();
-      await this.handleNfts(updateItem, updateCollection, updateReady);
+      await this.handleNfts(params);
     } catch (e) {
       return 0;
     }
@@ -109,19 +109,28 @@ export class BitCountryNftApi extends BaseNftApi {
     return 1;
   }
 
-  async handleNfts (updateItem: (data: NftItem) => void, updateCollection: (data: NftCollection) => void, updateReady: (ready: boolean) => void): Promise<void> {
+  async handleNfts (params: HandleNftParams): Promise<void> {
     const assetIds = await this.getNfts(this.addresses);
 
     try {
       if (!assetIds || assetIds.length === 0) {
-        updateReady(true);
+        params.updateReady(true);
+        params.updateNftIds(SUPPORTED_NFT_NETWORKS.bitcountry);
 
         return;
       }
 
+      const collectionNftIds: Record<string, string[]> = {};
+
       await Promise.all(assetIds.map(async (assetId) => {
         const parsedClassId = this.parseTokenId(assetId.classId as string);
         const parsedTokenId = this.parseTokenId(assetId.tokenId as string);
+
+        if (collectionNftIds[parsedClassId]) {
+          collectionNftIds[parsedClassId].push(parsedTokenId);
+        } else {
+          collectionNftIds[parsedClassId] = [parsedTokenId];
+        }
 
         const [tokenInfo, collectionMeta] = await Promise.all([
           this.getTokenDetails(assetId),
@@ -149,10 +158,12 @@ export class BitCountryNftApi extends BaseNftApi {
           image: this.parseUrl(collectionMeta?.image_url as string)
         } as NftCollection;
 
-        updateItem(parsedNft);
-        updateCollection(parsedCollection);
-        updateReady(true);
+        params.updateItem(parsedNft);
+        params.updateCollection(parsedCollection);
+        params.updateReady(true);
       }));
+
+      Object.entries(collectionNftIds).forEach(([collectionId, nftIds]) => params.updateNftIds(SUPPORTED_NFT_NETWORKS.bitcountry, collectionId, nftIds));
     } catch (e) {
       console.error('Failed to fetch bit.country nft', e);
     }

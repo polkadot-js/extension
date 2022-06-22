@@ -2063,7 +2063,7 @@ export default class KoniExtension extends Extension {
     return true;
   }
 
-  private async isInWalletAccount(address?: string) {
+  private async isInWalletAccount (address?: string) {
     return new Promise((resolve) => {
       if (address) {
         accountsObservable.subject.subscribe((storedAccounts: SubjectInfo): void => {

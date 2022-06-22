@@ -28,7 +28,7 @@ import NftStore from '@subwallet/extension-koni-base/stores/Nft';
 import NftCollectionStore from '@subwallet/extension-koni-base/stores/NftCollection';
 import SettingsStore from '@subwallet/extension-koni-base/stores/Settings';
 import StakingStore from '@subwallet/extension-koni-base/stores/Staking';
-import TransactionHistoryStore from '@subwallet/extension-koni-base/stores/TransactionHistory';
+import TransactionHistoryStore from '@subwallet/extension-koni-base/stores/TransactionHistoryV2';
 import { convertFundStatus, getCurrentProvider, mergeNetworkProviders } from '@subwallet/extension-koni-base/utils/utils';
 import SimpleKeyring from 'eth-simple-keyring';
 import { BehaviorSubject, Subject } from 'rxjs';
@@ -1918,7 +1918,7 @@ export default class KoniState extends State {
     this.historySubject.next(activeData);
   }
 
-  private removeInactiveNetworkData<T>(data: Record<string, T>) {
+  private removeInactiveNetworkData<T> (data: Record<string, T>) {
     const activeData: Record<string, T> = {};
 
     Object.entries(data).forEach(([networkKey, items]) => {

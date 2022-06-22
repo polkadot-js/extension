@@ -1,7 +1,7 @@
 // Copyright 2019-2022 @subwallet/extension-koni authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { ApiProps, BasicTxInfo, ChainBondingBasics, ValidatorInfo } from '@subwallet/extension-base/background/KoniTypes';
+import { ApiProps, BasicTxInfo, ChainBondingBasics, NetworkJson, ValidatorInfo } from '@subwallet/extension-base/background/KoniTypes';
 import { calculateChainStakedReturn, MOONBEAM_INFLATION_DISTRIBUTION, parseRawNumber } from '@subwallet/extension-koni-base/api/bonding/utils';
 import { getFreeBalance } from '@subwallet/extension-koni-base/api/dotsama/balance';
 import Web3 from 'web3';
@@ -172,24 +172,24 @@ export async function getMoonbeamCollatorsInfo (networkKey: string, dotSamaApi: 
     era: -1,
     validatorsInfo: allValidators,
     isBondedBefore: rawDelegatorState !== null,
-    bondedValidators: 0,
+    bondedValidators,
     maxNominations: maxDelegations
   };
 }
 
-export async function getMoonbeamBondingTxInfo (dotSamaApi: ApiProps, delegatorAddress: string, amount: number, collatorInfo: ValidatorInfo, currentNominationCount: number) {
+export async function getMoonbeamBondingTxInfo (networkJson: NetworkJson, dotSamaApi: ApiProps, delegatorAddress: string, amount: number, collatorInfo: ValidatorInfo, currentNominationCount: number) {
   const apiPromise = await dotSamaApi.isReady;
+  const parsedAmount = amount * (10 ** (networkJson.decimals as number));
+  const binaryAmount = new BN(parsedAmount.toString());
 
-  const extrinsic = apiPromise.api.tx.parachainStaking.delegate(collatorInfo.address, amount, currentNominationCount, collatorInfo.nominatorCount);
-
-  console.log('got extrinsic', extrinsic);
+  const extrinsic = apiPromise.api.tx.parachainStaking.delegate(collatorInfo.address, binaryAmount, new BN(collatorInfo.nominatorCount), new BN(currentNominationCount));
 
   return extrinsic.paymentInfo(delegatorAddress);
 }
 
-export async function handleMoonbeamBondingTxInfo (amount: number, networkKey: string, nominatorAddress: string, validatorInfo: ValidatorInfo, dotSamaApiMap: Record<string, ApiProps>, web3ApiMap: Record<string, Web3>, currentNominationCount: number) {
+export async function handleMoonbeamBondingTxInfo (networkJson: NetworkJson, amount: number, networkKey: string, nominatorAddress: string, validatorInfo: ValidatorInfo, dotSamaApiMap: Record<string, ApiProps>, web3ApiMap: Record<string, Web3>, currentNominationCount: number) {
   const [txInfo, balance] = await Promise.all([
-    getMoonbeamBondingTxInfo(dotSamaApiMap[networkKey], nominatorAddress, amount, validatorInfo, currentNominationCount),
+    getMoonbeamBondingTxInfo(networkJson, dotSamaApiMap[networkKey], nominatorAddress, amount, validatorInfo, currentNominationCount),
     getFreeBalance(networkKey, nominatorAddress, dotSamaApiMap, web3ApiMap)
   ]);
 
@@ -203,4 +203,12 @@ export async function handleMoonbeamBondingTxInfo (amount: number, networkKey: s
     fee: feeString,
     balanceError
   } as BasicTxInfo;
+}
+
+export async function getMoonbeamBondingExtrinsic (networkJson: NetworkJson, dotSamaApi: ApiProps, delegatorAddress: string, amount: number, collatorInfo: ValidatorInfo, currentNominationCount: number) {
+  const apiPromise = await dotSamaApi.isReady;
+  const parsedAmount = amount * (10 ** (networkJson.decimals as number));
+  const binaryAmount = new BN(parsedAmount.toString());
+
+  return apiPromise.api.tx.parachainStaking.delegate(collatorInfo.address, binaryAmount, new BN(collatorInfo.nominatorCount), new BN(currentNominationCount));
 }

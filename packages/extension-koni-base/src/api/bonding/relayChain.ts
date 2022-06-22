@@ -236,16 +236,18 @@ export async function handleRelayBondingTxInfo (networkJson: NetworkJson, amount
   } as BasicTxInfo;
 }
 
-export async function getBondingExtrinsic (dotSamaApi: ApiProps, controllerId: string, amount: BN, validators: string[], isBondedBefore: boolean, bondDest = 'Staked') {
+export async function getRelayBondingExtrinsic (dotSamaApi: ApiProps, controllerId: string, amount: number, validators: string[], isBondedBefore: boolean, networkJson: NetworkJson, bondDest = 'Staked') {
   const apiPromise = await dotSamaApi.isReady;
+  const parsedAmount = amount * (10 ** (networkJson.decimals as number));
+  const binaryAmount = new BN(parsedAmount);
 
   let bondTx;
   const nominateTx = apiPromise.api.tx.staking.nominate(validators);
 
   if (!isBondedBefore) {
-    bondTx = apiPromise.api.tx.staking.bond(controllerId, amount, bondDest);
+    bondTx = apiPromise.api.tx.staking.bond(controllerId, binaryAmount, bondDest);
   } else {
-    bondTx = apiPromise.api.tx.staking.bondExtra(amount);
+    bondTx = apiPromise.api.tx.staking.bondExtra(binaryAmount);
   }
 
   return apiPromise.api.tx.utility.batchAll([bondTx, nominateTx]);

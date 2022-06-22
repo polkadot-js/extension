@@ -17,7 +17,8 @@ import { toShort } from '@subwallet/extension-koni-ui/util';
 import React, { useCallback, useState } from 'react';
 import { useSelector } from 'react-redux';
 import styled from 'styled-components';
-import {isEthereumAddress} from "@polkadot/util-crypto";
+
+import { isEthereumAddress } from '@polkadot/util-crypto';
 
 const Spinner = React.lazy(() => import('@subwallet/extension-koni-ui/components/Spinner'));
 const Identicon = React.lazy(() => import('@subwallet/extension-koni-ui/components/Identicon'));

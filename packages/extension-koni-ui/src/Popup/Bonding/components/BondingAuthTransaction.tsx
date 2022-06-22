@@ -17,6 +17,7 @@ import { toShort } from '@subwallet/extension-koni-ui/util';
 import React, { useCallback, useState } from 'react';
 import { useSelector } from 'react-redux';
 import styled from 'styled-components';
+import {isEthereumAddress} from "@polkadot/util-crypto";
 
 const Spinner = React.lazy(() => import('@subwallet/extension-koni-ui/components/Spinner'));
 const Identicon = React.lazy(() => import('@subwallet/extension-koni-ui/components/Identicon'));
@@ -148,6 +149,7 @@ function BondingAuthTransaction ({ amount, balanceError, bondedValidators, class
               <Identicon
                 className='identityIcon'
                 genesisHash={networkJson.genesisHash}
+                iconTheme={isEthereumAddress(validatorInfo.address) ? 'ethereum' : 'substrate'}
                 prefix={networkJson.ss58Format}
                 size={20}
                 value={validatorInfo.address}
@@ -183,13 +185,15 @@ function BondingAuthTransaction ({ amount, balanceError, bondedValidators, class
               }
             </div>
             <div className={'validator-footer'}>
-              <div
-                className={'validator-expected-return'}
-                data-for={`validator-return-tooltip-${validatorInfo.address}`}
-                data-tip={true}
-              >
-                {validatorInfo.expectedReturn.toFixed(1)}%
-              </div>
+              {
+                validatorInfo.expectedReturn && <div
+                  className={'validator-expected-return'}
+                  data-for={`validator-return-tooltip-${validatorInfo.address}`}
+                  data-tip={true}
+                >
+                  {validatorInfo.expectedReturn.toFixed(1)}%
+                </div>
+              }
               <Tooltip
                 place={'top'}
                 text={'Expected return'}

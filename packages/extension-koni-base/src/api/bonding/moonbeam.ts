@@ -1,8 +1,12 @@
 // Copyright 2019-2022 @subwallet/extension-koni authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { ApiProps, ChainBondingBasics, ValidatorInfo } from '@subwallet/extension-base/background/KoniTypes';
+import { ApiProps, BasicTxInfo, ChainBondingBasics, ValidatorInfo } from '@subwallet/extension-base/background/KoniTypes';
 import { calculateChainStakedReturn, MOONBEAM_INFLATION_DISTRIBUTION, parseRawNumber } from '@subwallet/extension-koni-base/api/bonding/utils';
+import { getFreeBalance } from '@subwallet/extension-koni-base/api/dotsama/balance';
+import Web3 from 'web3';
+
+import { BN } from '@polkadot/util';
 
 interface CollatorExtraInfo {
   active: boolean,
@@ -167,8 +171,36 @@ export async function getMoonbeamCollatorsInfo (networkKey: string, dotSamaApi: 
     maxNominatorPerValidator: maxDelegatorPerCandidate,
     era: -1,
     validatorsInfo: allValidators,
-    isBondedBefore: false, // TODO: check later
+    isBondedBefore: rawDelegatorState !== null,
     bondedValidators: 0,
     maxNominations: maxDelegations
   };
+}
+
+export async function getMoonbeamBondingTxInfo (dotSamaApi: ApiProps, delegatorAddress: string, amount: number, collatorInfo: ValidatorInfo, currentNominationCount: number) {
+  const apiPromise = await dotSamaApi.isReady;
+
+  const extrinsic = apiPromise.api.tx.parachainStaking.delegate(collatorInfo.address, amount, currentNominationCount, collatorInfo.nominatorCount);
+
+  console.log('got extrinsic', extrinsic);
+
+  return extrinsic.paymentInfo(delegatorAddress);
+}
+
+export async function handleMoonbeamBondingTxInfo (amount: number, networkKey: string, nominatorAddress: string, validatorInfo: ValidatorInfo, dotSamaApiMap: Record<string, ApiProps>, web3ApiMap: Record<string, Web3>, currentNominationCount: number) {
+  const [txInfo, balance] = await Promise.all([
+    getMoonbeamBondingTxInfo(dotSamaApiMap[networkKey], nominatorAddress, amount, validatorInfo, currentNominationCount),
+    getFreeBalance(networkKey, nominatorAddress, dotSamaApiMap, web3ApiMap)
+  ]);
+
+  const feeString = txInfo.partialFee.toHuman();
+  const binaryBalance = new BN(balance);
+
+  const sumAmount = txInfo.partialFee.addn(amount);
+  const balanceError = sumAmount.gt(binaryBalance);
+
+  return {
+    fee: feeString,
+    balanceError
+  } as BasicTxInfo;
 }

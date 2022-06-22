@@ -920,7 +920,7 @@ export interface BondingSubmitParams {
   validatorInfo: ValidatorInfo,
   password?: string,
   isBondedBefore: boolean,
-  bondedValidators: string[]
+  bondedValidators: string[],
 }
 
 export interface BasicTxResponse {

@@ -1,8 +1,10 @@
 // Copyright 2019-2022 @subwallet/extension-koni authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { ApiProps, ChainBondingBasics, ValidatorInfo } from '@subwallet/extension-base/background/KoniTypes';
+import { ApiProps, BasicTxInfo, ChainBondingBasics, NetworkJson, ValidatorInfo } from '@subwallet/extension-base/background/KoniTypes';
 import { calculateChainStakedReturn, calculateInflation, calculateValidatorStakedReturn, ERA_LENGTH_MAP, getCommission, Unlocking, ValidatorExtraInfo } from '@subwallet/extension-koni-base/api/bonding/utils';
+import { getFreeBalance } from '@subwallet/extension-koni-base/api/dotsama/balance';
+import Web3 from 'web3';
 
 import { BN, BN_ONE, BN_ZERO } from '@polkadot/util';
 
@@ -196,7 +198,7 @@ export async function getRelayValidatorsInfo (networkKey: string, dotSamaApi: Ap
   };
 }
 
-export async function getBondingTxInfo (dotSamaApi: ApiProps, controllerId: string, amount: BN, validators: string[], isBondedBefore: boolean, bondDest = 'Staked') {
+export async function getRelayBondingTxInfo (dotSamaApi: ApiProps, controllerId: string, amount: BN, validators: string[], isBondedBefore: boolean, bondDest = 'Staked') {
   const apiPromise = await dotSamaApi.isReady;
 
   if (!isBondedBefore) {
@@ -212,6 +214,26 @@ export async function getBondingTxInfo (dotSamaApi: ApiProps, controllerId: stri
 
     return extrinsic.paymentInfo(controllerId);
   }
+}
+
+export async function handleRelayBondingTxInfo (networkJson: NetworkJson, amount: number, targetValidators: string[], isBondedBefore: boolean, networkKey: string, nominatorAddress: string, dotSamaApiMap: Record<string, ApiProps>, web3ApiMap: Record<string, Web3>) {
+  const parsedAmount = amount * (10 ** (networkJson.decimals as number));
+  const binaryAmount = new BN(parsedAmount);
+  const [txInfo, balance] = await Promise.all([
+    getRelayBondingTxInfo(dotSamaApiMap[networkKey], nominatorAddress, binaryAmount, targetValidators, isBondedBefore),
+    getFreeBalance(networkKey, nominatorAddress, dotSamaApiMap, web3ApiMap)
+  ]);
+
+  const feeString = txInfo.partialFee.toHuman();
+  const binaryBalance = new BN(balance);
+
+  const sumAmount = txInfo.partialFee.add(binaryAmount);
+  const balanceError = sumAmount.gt(binaryBalance);
+
+  return {
+    fee: feeString,
+    balanceError
+  } as BasicTxInfo;
 }
 
 export async function getBondingExtrinsic (dotSamaApi: ApiProps, controllerId: string, amount: BN, validators: string[], isBondedBefore: boolean, bondDest = 'Staked') {

@@ -1648,23 +1648,29 @@ export default class KoniState extends State {
   }
 
   public async evmSign (id: string, url: string, method: string, params: any, allowedAccounts: string[]): Promise<string | undefined> {
-    let address: string;
+    let address = '';
     let payload: any;
+    const [p1, p2] = params as [string, string];
 
-    // Detech params
-    if (method === 'eth_sign') {
-      [address, payload] = params as [string, string];
-    } else if (['eth_signTypedData_v3', 'eth_signTypedData_v4'].indexOf(method) > -1) {
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-      [address, payload] = params as [string, any];
+    if (typeof p1 === 'string' && isEthereumAddress(p1)) {
+      address = p1;
+      payload = p2;
+    } else if (typeof p2 === 'string' && isEthereumAddress(p2)) {
+      address = p2;
+      payload = p1;
+    }
 
+    if (address === '' || !payload) {
+      throw new EvmRpcError('INVALID_PARAMS', 'Not found address or payload to sign');
+    }
+
+    if (['eth_sign', 'personal_sign', 'eth_signTypedData', 'eth_signTypedData_v1', 'eth_signTypedData_v3', 'eth_signTypedData_v4'].indexOf(method) < 0) {
+      throw new EvmRpcError('INVALID_PARAMS', 'Not found sign method');
+    }
+
+    if (['eth_signTypedData_v3', 'eth_signTypedData_v4'].indexOf(method) > -1) {
       // eslint-disable-next-line @typescript-eslint/no-unsafe-argument,@typescript-eslint/no-unsafe-assignment
       payload = JSON.parse(payload);
-    } else if (['personal_sign', 'eth_signTypedData', 'eth_signTypedData'].indexOf(method) > -1) {
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-      [payload, address] = params as [any, string];
-    } else {
-      throw new EvmRpcError('INVALID_PARAMS', 'Not found sign method');
     }
 
     // Check sign abiblity

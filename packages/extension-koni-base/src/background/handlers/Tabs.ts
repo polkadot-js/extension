@@ -103,8 +103,8 @@ export default class KoniTabs extends Tabs {
         let accounts: string[] = [];
 
         this.#koniState.getCurrentAccount(({ address }) => {
-          if (address === ALL_ACCOUNT_KEY || getAll) {
-            accounts = (accountList);
+          if (address === ALL_ACCOUNT_KEY || !accountList.includes(address) || getAll) {
+            accounts = accountList;
           } else if (address && accountList.includes(address)) {
             accounts = ([address]);
           }
@@ -371,7 +371,7 @@ export default class KoniTabs extends Tabs {
   }
 
   private async evmSign (id: string, url: string, { method, params }: RequestArguments) {
-    const allowedAccounts = await this.getEvmCurrentAccount(url, true);
+    const allowedAccounts = (await this.getEvmCurrentAccount(url, true));
     const signResult = await this.#koniState.evmSign(id, url, method, params, allowedAccounts);
 
     if (signResult) {

@@ -221,4 +221,14 @@ describe('test DotSama APIs', () => {
 
     console.log(fee.toHuman());
   });
+
+  test('get staking', async () => {
+    const provider = new WsProvider(getCurrentProvider(PREDEFINED_NETWORKS.moonbase), DOTSAMA_AUTO_CONNECT_MS);
+    const api = new ApiPromise({ provider });
+    const apiPromise = await api.isReady;
+
+    await apiPromise.query.parachainStaking.delegatorState.multi(['0xAF2b4242e766caf5791DA56723a8dE1BeA4e7098'], (resp: any) => {
+      console.log('here', resp);
+    });
+  });
 });

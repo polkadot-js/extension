@@ -15,13 +15,14 @@ interface LedgerData {
 }
 
 export const DEFAULT_STAKING_NETWORKS = {
-  // polkadot: PREDEFINED_NETWORKS.polkadot,
-  // kusama: PREDEFINED_NETWORKS.kusama,
-  // hydradx: PREDEFINED_NETWORKS.hydradx,
+  polkadot: PREDEFINED_NETWORKS.polkadot,
+  kusama: PREDEFINED_NETWORKS.kusama,
+  hydradx: PREDEFINED_NETWORKS.hydradx,
   // acala: PREDEFINED_NETWORKS.acala,
-  aleph: PREDEFINED_NETWORKS.aleph
+  aleph: PREDEFINED_NETWORKS.aleph,
   // astar: NETWORKS.astar,
-  // moonbeam: NETWORKS.moonbeam
+  moonbeam: PREDEFINED_NETWORKS.moonbeam,
+  moonbase: PREDEFINED_NETWORKS.moonbase
 };
 
 interface PromiseMapping {
@@ -50,6 +51,59 @@ export async function stakingOnChainApi (addresses: string[], dotSamaAPIMap: Rec
   return await Promise.all(allApiPromise.map(async ({ api: apiPromise, chain }) => {
     const parentApi = await apiPromise.isReady;
     const useAddresses = apiPromise.isEthereum ? evmAddresses : substrateAddresses;
+
+    if (['moonbeam', 'moonriver', 'moonbase'].includes(chain)) {
+      return parentApi.api.query.parachainStaking.delegatorState.multi(useAddresses, (ledgers: any) => {
+        let totalBalance = 0;
+        // const activeBalance = 0;
+        // const unlockingBalance = 0;
+        let stakingItem: StakingItem;
+
+        if (ledgers) {
+          for (const ledger of ledgers) {
+            // eslint-disable-next-line @typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-member-access
+            const data = ledger.toHuman() as Record<string, any> | null;
+
+            if (data !== null) {
+              let _totalBalance = data.total as string;
+
+              _totalBalance = _totalBalance.replaceAll(',', '');
+
+              totalBalance += parseFloat(_totalBalance);
+            }
+          }
+
+          const parsedTotalBalance = parseStakingBalance(totalBalance, chain, networks);
+
+          if (totalBalance > 0) {
+            stakingItem = {
+              name: networks[chain].chain,
+              chainId: chain,
+              balance: parsedTotalBalance.toString(),
+              activeBalance: parsedTotalBalance.toString(),
+              unlockingBalance: '0',
+              nativeToken: networks[chain].nativeToken,
+              unit: networks[chain].nativeToken,
+              state: APIItemState.READY
+            } as StakingItem;
+          } else {
+            stakingItem = {
+              name: networks[chain].chain,
+              chainId: chain,
+              balance: parsedTotalBalance.toString(),
+              activeBalance: parsedTotalBalance.toString(),
+              unlockingBalance: '0',
+              nativeToken: networks[chain].nativeToken,
+              unit: networks[chain].nativeToken,
+              state: APIItemState.READY
+            } as StakingItem;
+          }
+
+          // eslint-disable-next-line node/no-callback-literal
+          callback(chain, stakingItem);
+        }
+      });
+    }
 
     return parentApi.api.query.staking?.ledger.multi(useAddresses, (ledgers: any[]) => {
       let totalBalance = 0;

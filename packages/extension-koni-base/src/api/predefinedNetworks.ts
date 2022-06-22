@@ -550,7 +550,8 @@ export const PREDEFINED_NETWORKS: Record<string, NetworkJson> = {
     paraId: 1000,
     decimals: 18,
     evmChainId: 1287,
-    supportBonding: true
+    supportBonding: true,
+    getStakingOnChain: true
   },
   efinity: {
     key: 'efinity',

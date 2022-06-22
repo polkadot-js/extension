@@ -13,6 +13,7 @@ import { getUnbondingTxInfo } from '@subwallet/extension-koni-ui/messaging';
 import Header from '@subwallet/extension-koni-ui/partials/Header';
 import UnbondingAuthTransaction from '@subwallet/extension-koni-ui/Popup/Bonding/components/UnbondingAuthTransaction';
 import UnbondingResult from '@subwallet/extension-koni-ui/Popup/Bonding/components/UnbondingResult';
+import ValidatorsDropdown from '@subwallet/extension-koni-ui/Popup/Bonding/components/ValidatorsDropdown';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import React, { useCallback, useContext, useEffect, useState } from 'react';
@@ -142,6 +143,8 @@ function UnbondingSubmitTransaction ({ className }: Props): React.ReactElement<P
           type='allPlus'
           withEllipsis
         />
+
+        {/*<ValidatorsDropdown />*/}
 
         <div className={'unbonding-input'}>
           <InputBalance

@@ -88,6 +88,11 @@ export interface StakingRewardJson {
   details: Array<StakingRewardItem>;
 }
 
+export interface DelegationItem {
+  owner: string,
+  amount: string // raw amount string
+}
+
 export interface StakingItem {
   name: string,
   chainId: string,
@@ -96,6 +101,7 @@ export interface StakingItem {
   unlockingBalance?: string
   nativeToken: string,
   unit?: string,
+  delegation?: DelegationItem[],
   state: APIItemState
 }
 

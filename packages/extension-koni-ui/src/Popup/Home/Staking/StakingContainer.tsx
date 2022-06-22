@@ -37,6 +37,8 @@ function StakingContainer ({ className, data, loading, priceMap }: Props): React
     setContainerWidth(container.offsetWidth);
   };
 
+  console.log(data);
+
   useEffect(() => {
     handlerResize();
     window.addEventListener('resize', handlerResize);

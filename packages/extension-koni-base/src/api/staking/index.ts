@@ -1,7 +1,8 @@
 // Copyright 2019-2022 @subwallet/extension-koni authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { APIItemState, ApiProps, NetworkJson, StakingItem } from '@subwallet/extension-base/background/KoniTypes';
+import { APIItemState, ApiProps, DelegationItem, NetworkJson, StakingItem } from '@subwallet/extension-base/background/KoniTypes';
+import { parseRawNumber } from '@subwallet/extension-koni-base/api/bonding/utils';
 import { PREDEFINED_NETWORKS } from '@subwallet/extension-koni-base/api/predefinedNetworks';
 import { IGNORE_GET_SUBSTRATE_FEATURES_LIST } from '@subwallet/extension-koni-base/constants';
 import { categoryAddresses, toUnit } from '@subwallet/extension-koni-base/utils/utils';
@@ -58,6 +59,7 @@ export async function stakingOnChainApi (addresses: string[], dotSamaAPIMap: Rec
         // const activeBalance = 0;
         // const unlockingBalance = 0;
         let stakingItem: StakingItem;
+        const delegationMap: Record<string, string> = {};
 
         if (ledgers) {
           for (const ledger of ledgers) {
@@ -66,6 +68,15 @@ export async function stakingOnChainApi (addresses: string[], dotSamaAPIMap: Rec
 
             if (data !== null) {
               let _totalBalance = data.total as string;
+              const _delegations = data.delegations as Record<string, string>[];
+
+              for (const item of _delegations) {
+                if (item.owner in delegationMap) {
+                  delegationMap[item.owner] = (parseRawNumber(item.amount) + parseRawNumber(delegationMap[item.owner])).toString();
+                } else {
+                  delegationMap[item.owner] = parseRawNumber(item.amount).toString();
+                }
+              }
 
               _totalBalance = _totalBalance.replaceAll(',', '');
 
@@ -73,6 +84,14 @@ export async function stakingOnChainApi (addresses: string[], dotSamaAPIMap: Rec
             }
           }
 
+          const delegationsList: DelegationItem[] = [];
+
+          Object.entries(delegationMap).forEach(([owner, amount]) => {
+            delegationsList.push({
+              owner,
+              amount
+            });
+          });
           const parsedTotalBalance = parseStakingBalance(totalBalance, chain, networks);
 
           if (totalBalance > 0) {
@@ -84,7 +103,8 @@ export async function stakingOnChainApi (addresses: string[], dotSamaAPIMap: Rec
               unlockingBalance: '0',
               nativeToken: networks[chain].nativeToken,
               unit: networks[chain].nativeToken,
-              state: APIItemState.READY
+              state: APIItemState.READY,
+              delegation: delegationsList
             } as StakingItem;
           } else {
             stakingItem = {

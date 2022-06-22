@@ -18,7 +18,7 @@ import { ThemeProps } from '../types';
 
 interface AccOption {
   text: string;
-  value: number;
+  value: string;
 }
 
 interface NetworkOption {
@@ -52,12 +52,12 @@ function ImportLedger ({ className }: Props): React.ReactElement {
 
   const accOps = useRef(AVAIL.map((value): AccOption => ({
     text: t('Account type {{index}}', { replace: { index: value } }),
-    value
+    value: value.toString()
   })));
 
   const addOps = useRef(AVAIL.map((value): AccOption => ({
     text: t('Address index {{index}}', { replace: { index: value } }),
-    value
+    value: value.toString()
   })));
 
   const networkOps = useRef(

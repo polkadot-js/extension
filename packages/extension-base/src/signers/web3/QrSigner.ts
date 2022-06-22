@@ -1,7 +1,7 @@
 // Copyright 2019-2022 @subwallet/extension-base authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { QRRequestPromise, QRRequestPromiseStatus } from '@subwallet/extension-base/background/KoniTypes';
+import { ExternalRequestPromise, ExternalRequestPromiseStatus } from '@subwallet/extension-base/background/KoniTypes';
 import { QrState, Web3Transaction } from '@subwallet/extension-base/signers/types';
 import RLP, { Input } from 'rlp';
 
@@ -14,10 +14,10 @@ interface CallbackProps {
 
 export default class QrSigner {
   readonly #callback: (state: CallbackProps) => void;
-  readonly #setState: (promise: QRRequestPromise) => void;
+  readonly #setState: (promise: ExternalRequestPromise) => void;
   readonly #id: string;
 
-  constructor (callback: (state: CallbackProps) => void, id: string, setState: (promise: QRRequestPromise) => void) {
+  constructor (callback: (state: CallbackProps) => void, id: string, setState: (promise: ExternalRequestPromise) => void) {
     this.#callback = callback;
     this.#id = id;
 
@@ -40,7 +40,7 @@ export default class QrSigner {
 
       const qrPayload = RLP.encode(data);
 
-      this.#setState({ reject: reject, resolve: resolve, status: QRRequestPromiseStatus.PENDING, createdAt: new Date().getTime() });
+      this.#setState({ reject: reject, resolve: resolve, status: ExternalRequestPromiseStatus.PENDING, createdAt: new Date().getTime() });
 
       this.#callback({
         qrState: {

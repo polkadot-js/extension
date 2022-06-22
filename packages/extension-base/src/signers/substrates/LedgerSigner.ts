@@ -1,20 +1,19 @@
-// Copyright 2017-2022 @polkadot/react-signer authors & contributors
+// Copyright 2019-2022 @subwallet/extension-base authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
 import type { Signer, SignerResult } from '@polkadot/api/types';
 import type { Registry, SignerPayloadJSON } from '@polkadot/types/types';
 
 import { ExternalRequestPromise, ExternalRequestPromiseStatus } from '@subwallet/extension-base/background/KoniTypes';
-import { QrState } from '@subwallet/extension-base/signers/types';
+import { LedgerState } from '@subwallet/extension-base/signers/types';
 
 import { u8aToHex } from '@polkadot/util';
-import { blake2AsU8a } from '@polkadot/util-crypto';
 
 interface CallbackProps {
-  qrState: QrState
+  ledgerState: LedgerState
 }
 
-export default class QrSigner implements Signer {
+export default class LedgerSigner implements Signer {
   readonly #registry: Registry;
   readonly #callback: (state: CallbackProps) => void;
   readonly #setState: (promise: ExternalRequestPromise) => void;
@@ -30,22 +29,15 @@ export default class QrSigner implements Signer {
 
   public async signPayload (payload: SignerPayloadJSON): Promise<SignerResult> {
     return new Promise((resolve, reject): void => {
-      // limit size of the transaction
-      const isQrHashed = (payload.method.length > 5000);
-      const wrapper = this.#registry.createType('ExtrinsicPayload', payload, { version: payload.version });
-      const qrPayload = isQrHashed
-        ? blake2AsU8a(wrapper.toU8a(true))
-        : wrapper.toU8a();
+      const raw = this.#registry.createType('ExtrinsicPayload', payload, { version: payload.version });
+      const ledgerPayload = raw.toU8a(true);
 
       this.#setState({ reject: reject, resolve: resolve, status: ExternalRequestPromiseStatus.PENDING, createdAt: new Date().getTime() });
 
       this.#callback({
-        qrState: {
-          isQrHashed,
-          qrAddress: payload.address,
-          qrPayload: u8aToHex(qrPayload),
-          qrId: this.#id,
-          isEthereum: false
+        ledgerState: {
+          ledgerPayload: u8aToHex(ledgerPayload),
+          ledgerId: this.#id
         }
       });
     });

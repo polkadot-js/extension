@@ -1,7 +1,7 @@
 // Copyright 2019-2022 @subwallet/extension-koni-base authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { QRRequestPromise, QRRequestPromiseStatus, ResponseNftTransferQr, ResponseTransferQr, TransferErrorCode, TransferStep } from '@subwallet/extension-base/background/KoniTypes';
+import { ExternalRequestPromise, ExternalRequestPromiseStatus, ResponseNftTransferQr, ResponseTransferQr, TransferErrorCode, TransferStep } from '@subwallet/extension-base/background/KoniTypes';
 import { QrState, Web3Transaction } from '@subwallet/extension-base/signers/types';
 import QrSigner from '@subwallet/extension-base/signers/web3/QrSigner';
 import { getERC20Contract } from '@subwallet/extension-koni-base/api/web3/web3';
@@ -18,8 +18,8 @@ interface BaseArg {
   chainId: number;
   networkKey: string;
   web3ApiMap: Record<string, Web3>;
-  setState: (promise: QRRequestPromise) => void;
-  updateState: (promise: Partial<QRRequestPromise>) => void;
+  setState: (promise: ExternalRequestPromise) => void;
+  updateState: (promise: Partial<ExternalRequestPromise>) => void;
   callback: (data: ResponseTransferQr) => void;
 }
 
@@ -113,7 +113,7 @@ export async function handleTransferQr ({ callback,
           fee: (receipt.gasUsed * receipt.effectiveGasPrice).toString()
         };
         response.isBusy = false;
-        updateState({ status: receipt.status ? QRRequestPromiseStatus.COMPLETED : QRRequestPromiseStatus.FAILED });
+        updateState({ status: receipt.status ? ExternalRequestPromiseStatus.COMPLETED : ExternalRequestPromiseStatus.FAILED });
         callback(response);
       }).catch((e) => {
         response.step = TransferStep.ERROR;
@@ -123,7 +123,7 @@ export async function handleTransferQr ({ callback,
           // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access,@typescript-eslint/no-unsafe-assignment
           message: e.message
         });
-        updateState({ status: QRRequestPromiseStatus.FAILED });
+        updateState({ status: ExternalRequestPromiseStatus.FAILED });
         callback(response);
       });
   } catch (error) {
@@ -135,7 +135,7 @@ export async function handleTransferQr ({ callback,
       message: error.message
     });
     response.isBusy = false;
-    updateState({ status: QRRequestPromiseStatus.FAILED });
+    updateState({ status: ExternalRequestPromiseStatus.FAILED });
     callback(response);
   }
 }
@@ -342,12 +342,12 @@ export async function handleTransferNftQr ({ callback,
         response.status = receipt.status;
         response.isBusy = true;
         response.transactionHash = receipt.transactionHash;
-        updateState({ status: receipt.status ? QRRequestPromiseStatus.COMPLETED : QRRequestPromiseStatus.FAILED });
+        updateState({ status: receipt.status ? ExternalRequestPromiseStatus.COMPLETED : ExternalRequestPromiseStatus.FAILED });
         callback(response);
       }).catch((e) => {
         console.log('Error on transfer nft', (e as Error).message);
         response.txError = true;
-        updateState({ status: QRRequestPromiseStatus.FAILED });
+        updateState({ status: ExternalRequestPromiseStatus.FAILED });
         callback(response);
       });
   } catch (error) {

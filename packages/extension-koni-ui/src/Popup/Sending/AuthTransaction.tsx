@@ -10,6 +10,7 @@ import InputAddress from '@subwallet/extension-koni-ui/components/InputAddress';
 import Modal from '@subwallet/extension-koni-ui/components/Modal';
 import DisplayPayload from '@subwallet/extension-koni-ui/components/Qr/DisplayPayload';
 import { BalanceFormatType } from '@subwallet/extension-koni-ui/components/types';
+import { SIGN_MODE } from '@subwallet/extension-koni-ui/constants/signing';
 import { QrContext, QrContextState, QrStep } from '@subwallet/extension-koni-ui/contexts/QrContext';
 import useTranslation from '@subwallet/extension-koni-ui/hooks/useTranslation';
 import { getAccountMeta, makeTransfer, makeTransferQr, rejectTransferQr, resolveTransferQr } from '@subwallet/extension-koni-ui/messaging';
@@ -89,6 +90,18 @@ function AuthTransaction ({ className, isDonation, feeInfo: [fee, feeDecimals, f
   const [accountMeta, setAccountMeta] = useState<KeyringPair$Meta>({});
   const networkPrefix = networkMap[requestPayload.networkKey].ss58Format;
   const genesisHash = networkMap[requestPayload.networkKey].genesisHash;
+
+  const signMode = useMemo((): SIGN_MODE => {
+    if (accountMeta.isExternal && !!accountMeta.isExternal) {
+      if (accountMeta.isHardware && !!accountMeta.isHardware) {
+        return SIGN_MODE.LEDGER;
+      }
+
+      return SIGN_MODE.QR;
+    }
+
+    return SIGN_MODE.PASSWORD;
+  }, [accountMeta]);
 
   const isQr = useMemo((): boolean => {
     if (accountMeta.isExternal !== undefined) {
@@ -338,108 +351,111 @@ function AuthTransaction ({ className, isDonation, feeInfo: [fee, feeDecimals, f
   }, [balanceFormat, fee, feeDecimals, feeSymbol, isDonation, networkPrefix, requestPayload, t]);
 
   const handlerRenderContent = useCallback(() => {
-    if (!isQr) {
-      return (
-        <div className='auth-transaction-body'>
-          { handlerRenderInfo() }
-          <div className='auth-transaction__separator' />
-          <InputWithLabel
-            isError={isKeyringErr}
-            label={t<string>('Unlock account with password')}
-            onChange={_onChangePass}
-            type='password'
-            value={password}
-          />
-          { renderError() }
-          <div className='auth-transaction__submit-wrapper'>
-            <Button
-              className={'auth-transaction__submit-btn'}
-              isBusy={isBusy}
-              isDisabled={!password || !!(errorArr && errorArr.length)}
-              onClick={_doStart}
-            >
-              {t<string>('Sign and Submit')}
-            </Button>
-          </div>
-        </div>
-      );
-    } else {
-      switch (step) {
-        case QrStep.SENDING_TX:
-          return (
-            <div className='auth-transaction-body'>
-              <LoadingContainer />
-            </div>
-          );
-        case QrStep.SCAN_QR:
-          return (
-            <div className='auth-transaction-body'>
-              <div className='scan-qr'>
-                <QrScanSignature
-                  // eslint-disable-next-line @typescript-eslint/no-misused-promises
-                  onScan={handlerScanSignature}
-                />
+    switch (signMode) {
+      case SIGN_MODE.QR:
+        switch (step) {
+          case QrStep.SENDING_TX:
+            return (
+              <div className='auth-transaction-body'>
+                <LoadingContainer />
               </div>
-              <div className='auth-transaction__separator' />
-              { renderError() }
-              <div className='auth-transaction__submit-wrapper'>
-                <Button
-                  className={'auth-transaction__submit-btn'}
-                  onClick={handlerChangeToDisplayQr}
-                >
-                  {t<string>('Back to previous step')}
-                </Button>
-              </div>
-            </div>
-          );
-        case QrStep.DISPLAY_PAYLOAD:
-          return (
-            <div className='auth-transaction-body'>
-              <div className='display-qr'>
-                <div className='qr-content'>
-                  <DisplayPayload
-                    address={qrAddress}
-                    genesisHash={genesisHash}
-                    isEthereum={isEthereum}
-                    isHash={isQrHashed}
-                    payload={hexToU8a(qrPayload)}
-                    size={320}
+            );
+          case QrStep.SCAN_QR:
+            return (
+              <div className='auth-transaction-body'>
+                <div className='scan-qr'>
+                  <QrScanSignature
+                    // eslint-disable-next-line @typescript-eslint/no-misused-promises
+                    onScan={handlerScanSignature}
                   />
                 </div>
+                <div className='auth-transaction__separator' />
+                { renderError() }
+                <div className='auth-transaction__submit-wrapper'>
+                  <Button
+                    className={'auth-transaction__submit-btn'}
+                    onClick={handlerChangeToDisplayQr}
+                  >
+                    {t<string>('Back to previous step')}
+                  </Button>
+                </div>
               </div>
-              <div className='auth-transaction__separator' />
-              { renderError() }
-              <div className='auth-transaction__submit-wrapper'>
-                <Button
-                  className={'auth-transaction__submit-btn'}
-                  onClick={handlerChangeToScan}
-                >
-                  {t<string>('Scan QR')}
-                </Button>
+            );
+          case QrStep.DISPLAY_PAYLOAD:
+            return (
+              <div className='auth-transaction-body'>
+                <div className='display-qr'>
+                  <div className='qr-content'>
+                    <DisplayPayload
+                      address={qrAddress}
+                      genesisHash={genesisHash}
+                      isEthereum={isEthereum}
+                      isHash={isQrHashed}
+                      payload={hexToU8a(qrPayload)}
+                      size={320}
+                    />
+                  </div>
+                </div>
+                <div className='auth-transaction__separator' />
+                { renderError() }
+                <div className='auth-transaction__submit-wrapper'>
+                  <Button
+                    className={'auth-transaction__submit-btn'}
+                    onClick={handlerChangeToScan}
+                  >
+                    {t<string>('Scan QR')}
+                  </Button>
+                </div>
               </div>
+            );
+          case QrStep.TRANSACTION_INFO:
+          default:
+            return (
+              <div className='auth-transaction-body'>
+                { handlerRenderInfo() }
+                <div className='auth-transaction__separator' />
+                { renderError() }
+                <div className='auth-transaction__submit-wrapper'>
+                  <Button
+                    className={'auth-transaction__submit-btn'}
+                    isBusy={isBusy}
+                    onClick={_doStart}
+                  >
+                    {t<string>('Sign via QR')}
+                  </Button>
+                </div>
+              </div>
+            );
+        }
+
+      case SIGN_MODE.PASSWORD:
+      default:
+        return (
+          <div className='auth-transaction-body'>
+            { handlerRenderInfo() }
+            <div className='auth-transaction__separator' />
+            <InputWithLabel
+              isError={isKeyringErr}
+              label={t<string>('Unlock account with password')}
+              onChange={_onChangePass}
+              type='password'
+              value={password}
+            />
+            { renderError() }
+            <div className='auth-transaction__submit-wrapper'>
+              <Button
+                className={'auth-transaction__submit-btn'}
+                isBusy={isBusy}
+                isDisabled={!password || !!(errorArr && errorArr.length)}
+                onClick={_doStart}
+              >
+                {t<string>('Sign and Submit')}
+              </Button>
             </div>
-          );
-        case QrStep.TRANSACTION_INFO:
-        default:
-          return (
-            <div className='auth-transaction-body'>
-              { handlerRenderInfo() }
-              <div className='auth-transaction__separator' />
-              { renderError() }
-              <div className='auth-transaction__submit-wrapper'>
-                <Button
-                  className={'auth-transaction__submit-btn'}
-                  isBusy={isBusy}
-                  onClick={_doStart}
-                >
-                  {t<string>('Sign via QR')}
-                </Button>
-              </div>
-            </div>
-          );
-      }
+          </div>
+        );
     }
-  }, [_doStart, _onChangePass, errorArr, genesisHash, handlerChangeToDisplayQr, handlerChangeToScan, handlerRenderInfo, handlerScanSignature, isBusy, isEthereum, isKeyringErr, isQr, isQrHashed, password, qrAddress, qrPayload, renderError, step, t]);
+  }, [_doStart, _onChangePass, errorArr, genesisHash, handlerChangeToDisplayQr, handlerChangeToScan, handlerRenderInfo, handlerScanSignature, isBusy, isEthereum, isKeyringErr, isQrHashed, password, qrAddress, qrPayload, renderError, step, t, signMode]);
 
   return (
     <div className={className}>

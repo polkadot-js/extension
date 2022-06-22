@@ -3,7 +3,7 @@
 
 import { withErrorLog } from '@subwallet/extension-base/background/handlers/helpers';
 import State, { AuthUrls, Resolver } from '@subwallet/extension-base/background/handlers/State';
-import { AccountRefMap, APIItemState, ApiMap, AuthRequestV2, BalanceItem, BalanceJson, ChainRegistry, ConfirmationDefinitions, ConfirmationsQueue, ConfirmationsQueueItemOptions, ConfirmationType, CrowdloanItem, CrowdloanJson, CurrentAccountInfo, CustomEvmToken, DeleteEvmTokenParams, EvmSendTransactionParams, EvmTokenJson, NETWORK_STATUS, NetworkJson, NftCollection, NftCollectionJson, NftItem, NftJson, NftTransferExtra, PriceJson, QRRequestPromise, QRRequestPromiseStatus, RequestAccountExportPrivateKey, RequestConfirmationComplete, RequestSettingsType, ResponseAccountExportPrivateKey, ResultResolver, ServiceInfo, StakingItem, StakingJson, StakingRewardJson, TokenInfo, TransactionHistoryItemType } from '@subwallet/extension-base/background/KoniTypes';
+import { AccountRefMap, APIItemState, ApiMap, AuthRequestV2, BalanceItem, BalanceJson, ChainRegistry, ConfirmationDefinitions, ConfirmationsQueue, ConfirmationsQueueItemOptions, ConfirmationType, CrowdloanItem, CrowdloanJson, CurrentAccountInfo, CustomEvmToken, DeleteEvmTokenParams, EvmSendTransactionParams, EvmTokenJson, ExternalRequestPromise, ExternalRequestPromiseStatus, NETWORK_STATUS, NetworkJson, NftCollection, NftCollectionJson, NftItem, NftJson, NftTransferExtra, PriceJson, RequestAccountExportPrivateKey, RequestConfirmationComplete, RequestSettingsType, ResponseAccountExportPrivateKey, ResultResolver, ServiceInfo, StakingItem, StakingJson, StakingRewardJson, TokenInfo, TransactionHistoryItemType } from '@subwallet/extension-base/background/KoniTypes';
 import { AuthorizeRequest, RequestAuthorizeTab } from '@subwallet/extension-base/background/types';
 import { getId } from '@subwallet/extension-base/utils/getId';
 import { getTokenPrice } from '@subwallet/extension-koni-base/api/coingecko';
@@ -133,7 +133,7 @@ export default class KoniState extends State {
   readonly #authRequestsV2: Record<string, AuthRequestV2> = {};
   private priceStoreReady = false;
   private readonly transactionHistoryStore = new TransactionHistoryStore();
-  private qrRequest: Record<string, QRRequestPromise> = {};
+  private externalRequest: Record<string, ExternalRequestPromise> = {};
 
   private readonly confirmationsQueueSubject = new BehaviorSubject<ConfirmationsQueue>({
     addNetworkRequest: {},
@@ -1588,20 +1588,20 @@ export default class KoniState extends State {
     });
   }
 
-  public getQrRequestMap (): Record<string, QRRequestPromise> {
-    return this.qrRequest;
+  public getExternalRequestMap (): Record<string, ExternalRequestPromise> {
+    return this.externalRequest;
   }
 
-  public setQrRequestMap (id: string, value: QRRequestPromise) {
-    this.qrRequest[id] = value;
+  public setExternalRequestMap (id: string, value: ExternalRequestPromise) {
+    this.externalRequest[id] = value;
   }
 
-  public getQrRequest (id: string): QRRequestPromise {
-    return this.qrRequest[id];
+  public getExternalRequest (id: string): ExternalRequestPromise {
+    return this.externalRequest[id];
   }
 
-  public updateQrRequest (id: string, value: Partial<QRRequestPromise>): void {
-    const rs = this.qrRequest[id];
+  public updateExternalRequest (id: string, value: Partial<ExternalRequestPromise>): void {
+    const rs = this.externalRequest[id];
 
     if (rs) {
       for (const [_key, _value] of Object.entries(value)) {
@@ -1611,14 +1611,14 @@ export default class KoniState extends State {
     }
   }
 
-  public cleanQrRequest (): void {
+  public cleanExternalRequest (): void {
     const now = new Date().getTime();
-    const map = this.qrRequest;
+    const map = this.externalRequest;
 
     const arr: string[] = [];
 
     for (const [key, value] of Object.entries(map)) {
-      if (value.status === QRRequestPromiseStatus.COMPLETED || value.status === QRRequestPromiseStatus.REJECTED) {
+      if (value.status === ExternalRequestPromiseStatus.COMPLETED || value.status === ExternalRequestPromiseStatus.REJECTED) {
         arr.push(key);
       } else {
         if (now - value.createdAt > 15 * 60 * 60) {

@@ -22,3 +22,8 @@ export interface Web3TransactionBase {
 export interface Web3Transaction extends Web3TransactionBase{
   from: string;
 }
+
+export interface LedgerState {
+  ledgerPayload: `0x${string}`;
+  ledgerId: string;
+}

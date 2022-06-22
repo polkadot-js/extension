@@ -3,7 +3,7 @@
 
 import { AuthUrls, Resolver } from '@subwallet/extension-base/background/handlers/State';
 import { AccountAuthType, AccountJson, AuthorizeRequest, RequestAccountList, RequestAccountSubscribe, RequestAuthorizeReject, RequestAuthorizeSubscribe, RequestAuthorizeTab, RequestCurrentAccountAddress, RequestParseTransactionSubstrate, RequestQRIsLocked, RequestQrSignSubstrate, ResponseAuthorizeList, ResponseJsonGetAccountInfo, ResponseParseTransactionSubstrate, ResponseQRIsLocked, ResponseQrSignSubstrate, SeedLengths } from '@subwallet/extension-base/background/types';
-import { QrState } from '@subwallet/extension-base/signers/types';
+import { LedgerState, QrState } from '@subwallet/extension-base/signers/types';
 import { InjectedAccount, MetadataDefBase } from '@subwallet/extension-inject/types';
 import Web3 from 'web3';
 import { RequestArguments, TransactionConfig } from 'web3-core';
@@ -615,6 +615,7 @@ export interface ResponseCheckTransfer {
 
 export enum TransferStep {
   READY = 'ready',
+  SIGNING = 'signing',
   START = 'start',
   PROCESSING = 'processing',
   SUCCESS = 'success',
@@ -641,6 +642,10 @@ export interface ResponseTransfer {
 export interface ResponseTransferQr extends ResponseTransfer{
   qrState?: QrState;
   isBusy?: boolean;
+}
+
+export interface ResponseTransferLedger extends ResponseTransfer{
+  ledgerState?: LedgerState;
 }
 
 export interface EvmNftTransactionRequest {
@@ -814,17 +819,17 @@ export type ResponseRejectQRTransfer = void
 
 export type ResponseResolveQRTransfer = void
 
-export enum QRRequestPromiseStatus {
+export enum ExternalRequestPromiseStatus {
   PENDING,
   REJECTED,
   FAILED,
   COMPLETED
 }
 
-export interface QRRequestPromise {
+export interface ExternalRequestPromise {
   resolve: (result: SignerResult) => void,
   reject: () => void,
-  status: QRRequestPromiseStatus,
+  status: ExternalRequestPromiseStatus,
   createdAt: number
 }
 
@@ -1069,6 +1074,10 @@ export interface StakeWithdrawalParams {
 export interface ResponseNftTransferQr extends NftTransactionResponse{
   qrState?: QrState;
   isBusy?: boolean;
+}
+
+export interface ResponseNftTransferLedger extends NftTransactionResponse{
+  ledgerState?: LedgerState;
 }
 
 export type RequestNftTransferQrSubstrate = Omit<SubstrateNftSubmitTransaction, 'password'>

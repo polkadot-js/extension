@@ -125,6 +125,10 @@ export default class KoniTabs extends Tabs {
     // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
     const chainId = params[0].chainId as string;
 
+    if (this.evmState.chainId === chainId) {
+      return null;
+    }
+
     const [networkKey] = this.#koniState.findNetworkKeyByChainId(parseInt(chainId, 16));
 
     if (networkKey) {

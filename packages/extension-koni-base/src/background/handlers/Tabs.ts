@@ -201,7 +201,7 @@ export default class KoniTabs extends Tabs {
         const chainId = currentNetwork?.evmChainId;
 
         if (chainId) {
-          this.evmState.chainId = chainId.toString(16);
+          this.evmState.chainId = `0x${chainId.toString(16)}`;
           this.evmState.networkKey = networkKey;
           // @ts-ignore
           // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment

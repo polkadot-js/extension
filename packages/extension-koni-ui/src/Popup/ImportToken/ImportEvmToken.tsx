@@ -2,10 +2,10 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { CustomEvmToken } from '@subwallet/extension-base/background/KoniTypes';
-import { ActionContext, Button, Dropdown, InputWithLabel } from '@subwallet/extension-koni-ui/components';
+import { ActionContext, Button, ConfirmationsQueueContext, Dropdown, InputWithLabel } from '@subwallet/extension-koni-ui/components';
 import useGetActiveEvmChains from '@subwallet/extension-koni-ui/hooks/screen/import/useGetActiveEvmChains';
-import useToast from '@subwallet/extension-koni-ui/hooks/useToast';
-import { upsertEvmToken, validateEvmToken } from '@subwallet/extension-koni-ui/messaging';
+import useTranslation from '@subwallet/extension-koni-ui/hooks/useTranslation';
+import { completeConfirmation, upsertEvmToken, validateEvmToken } from '@subwallet/extension-koni-ui/messaging';
 import { Header } from '@subwallet/extension-koni-ui/partials';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import React, { useCallback, useContext, useEffect, useState } from 'react';
@@ -18,19 +18,24 @@ interface Props extends ThemeProps {
 }
 
 function ImportEvmToken ({ className = '' }: Props): React.ReactElement<Props> {
-  const [contractAddress, setContractAddress] = useState('');
-  const [symbol, setSymbol] = useState('');
-  const [decimals, setDecimals] = useState('');
+  const { t } = useTranslation();
+  const addTokenRequest = useContext(ConfirmationsQueueContext).addTokenRequest;
+  const requests = Object.values(addTokenRequest);
+  const currentRequest = requests[0];
+  const tokenInfo = currentRequest?.payload;
   const chainOptions = useGetActiveEvmChains();
-  const [chain, setChain] = useState(chainOptions[0].value);
+  const [contractAddress, setContractAddress] = useState(tokenInfo?.smartContract || '');
+  const [symbol, setSymbol] = useState(tokenInfo?.symbol || '');
+  const [decimals, setDecimals] = useState(String(tokenInfo?.decimals) || '');
+  const [chain, setChain] = useState(tokenInfo?.chain || '');
 
   const [isValidDecimals, setIsValidDecimals] = useState(true);
   const [isValidContract, setIsValidContract] = useState(true);
   const [isValidSymbol, setIsValidSymbol] = useState(true);
-
-  const { show } = useToast();
+  const [warning, setWarning] = useState('');
 
   const onChangeContractAddress = useCallback((val: string) => {
+    setWarning('');
     setContractAddress(val.toLowerCase());
   }, []);
 
@@ -40,7 +45,7 @@ function ImportEvmToken ({ className = '' }: Props): React.ReactElement<Props> {
         setIsValidContract(false);
         setSymbol('');
         setDecimals('');
-        show('Invalid EVM contract address');
+        setWarning('Invalid EVM contract address');
       } else {
         validateEvmToken({
           smartContract: contractAddress,
@@ -50,11 +55,11 @@ function ImportEvmToken ({ className = '' }: Props): React.ReactElement<Props> {
         })
           .then((resp) => {
             if (resp.isExist) {
-              show('This token has already been added');
+              setWarning('This token has already been added');
               setIsValidContract(false);
             } else {
               if (resp.isExist) {
-                show('This token has already been added');
+                setWarning('This token has already been added');
                 setIsValidContract(false);
               } else {
                 setSymbol(resp.symbol);
@@ -70,50 +75,55 @@ function ImportEvmToken ({ className = '' }: Props): React.ReactElement<Props> {
             }
           })
           .catch(() => {
-            show('Invalid contract for the selected chain');
+            setWarning('Invalid contract for the selected chain');
             setIsValidContract(false);
           });
       }
     }
-  }, [contractAddress, chain, show]);
+  }, [contractAddress, chain]);
 
   const onChangeSymbol = useCallback((val: string) => {
     if ((val.length > 11 && val !== '') || (val.split(' ').join('') === '')) {
       setIsValidSymbol(false);
-      show('Symbol cannot exceed 11 characters or contain spaces');
+      setWarning('Symbol cannot exceed 11 characters or contain spaces');
     } else {
       setIsValidSymbol(true);
     }
 
     setSymbol(val);
-  }, [show]);
+  }, []);
 
   const onChangeDecimals = useCallback((val: string) => {
     const _decimals = parseInt(val);
 
     if ((isNaN(_decimals) && val !== '') || (val.split(' ').join('') === '')) {
       setIsValidDecimals(false);
-      show('Invalid token decimals');
+      setWarning('Invalid token decimals');
     } else {
       setIsValidDecimals(true);
     }
 
     setDecimals(val);
-  }, [show]);
+  }, []);
 
   const onSelectChain = useCallback((val: any) => {
     const _chain = val as string;
 
+    setWarning('');
     setChain(_chain);
   }, []);
 
   const onAction = useContext(ActionContext);
   const _goBack = useCallback(
     () => {
+      if (currentRequest) {
+        completeConfirmation('addTokenRequest', { id: currentRequest.id, isApproved: false }).catch(console.error);
+      }
+
       window.localStorage.setItem('popupNavigation', '/');
       onAction('/');
     },
-    [onAction]
+    [currentRequest, onAction]
   );
 
   const handleAddToken = useCallback(() => {
@@ -129,24 +139,30 @@ function ImportEvmToken ({ className = '' }: Props): React.ReactElement<Props> {
       evmToken.symbol = symbol;
     }
 
+    setWarning('');
+
+    if (currentRequest) {
+      completeConfirmation('addTokenRequest', { id: currentRequest.id, isApproved: true }).catch(console.error);
+    }
+
     upsertEvmToken(evmToken)
       .then((resp) => {
         if (resp) {
-          show('Successfully added an EVM token');
+          setWarning('Successfully added an EVM token');
           _goBack();
         } else {
-          show('An error has occurred. Please try again later');
+          setWarning('An error has occurred. Please try again later');
         }
       })
       .catch(() => {
-        show('An error has occurred. Please try again later');
+        setWarning('An error has occurred. Please try again later');
       });
-  }, [_goBack, chain, contractAddress, decimals, show, symbol]);
+  }, [_goBack, chain, contractAddress, currentRequest, decimals, symbol]);
 
   return (
     <div className={className}>
       <Header
-        showCancelButton
+        showCancelButton={false}
         showSettings
         showSubHeader
         subHeaderName={'Import EVM Token'}
@@ -181,24 +197,33 @@ function ImportEvmToken ({ className = '' }: Props): React.ReactElement<Props> {
           onChange={onChangeDecimals}
           value={decimals}
         />
-
-        <div className={'add-token-container'}>
-          <Button
-            className={'add-token-button'}
-            isDisabled={!isValidSymbol || !isValidDecimals || !isValidContract || contractAddress === '' || symbol === '' || chainOptions.length === 0}
-            onClick={handleAddToken}
-          >
-            Add Custom Token
-          </Button>
-        </div>
+      </div>
+      <div className={'add-token-container'}>
+        <div className='warning'>{warning}</div>
+        <Button
+          className={'cancel-button'}
+          onClick={_goBack}
+        >
+          {t<string>('Cancel')}
+        </Button>
+        <Button
+          className={'add-token-button'}
+          isDisabled={!isValidSymbol || !isValidDecimals || !isValidContract || contractAddress === '' || symbol === '' || chainOptions.length === 0}
+          onClick={handleAddToken}
+        >
+          {t<string>('Add Token')}
+        </Button>
       </div>
     </div>
   );
 }
 
 export default React.memo(styled(ImportEvmToken)(({ theme }: Props) => `
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+
   .import-container {
-    height: 472px;
     padding: 0 15px;
     overflow-y: auto;
   }
@@ -206,6 +231,13 @@ export default React.memo(styled(ImportEvmToken)(({ theme }: Props) => `
   .invalid-input {
     color: red;
     font-size: 12px;
+  }
+  
+  .cancel-button {
+    margin-right: 8px;
+    background-color: ${theme.buttonBackground1};
+    color: ${theme.buttonTextColor2};
+    flex: 1 1 40%;
   }
 
   .add-token-button {
@@ -215,6 +247,8 @@ export default React.memo(styled(ImportEvmToken)(({ theme }: Props) => `
     border-radius: 8px;
     background-color: ${theme.buttonBackground};
     opacity: 1;
+    margin-left: 8px;
+    flex: 1 1 40%;
   }
 
   .add-token-container {
@@ -222,7 +256,14 @@ export default React.memo(styled(ImportEvmToken)(({ theme }: Props) => `
     display: flex;
     justify-content: center;
     align-items: center;
-    margin-top: 25px;
-    margin-bottom: 15px;
+    padding: 15px;
+    flex-wrap: wrap;
+  }
+  
+  .warning {
+    color: ${theme.iconWarningColor};
+    margin-bottom: 10px;
+    flex: 1 1 100%;
+    text-align: center;
   }
 `));

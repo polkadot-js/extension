@@ -136,6 +136,7 @@ export default class KoniState extends State {
 
   private readonly confirmationsQueueSubject = new BehaviorSubject<ConfirmationsQueue>({
     addNetworkRequest: {},
+    addTokenRequest: {},
     switchNetworkRequest: {},
     evmSignatureRequest: {},
     evmSendTransactionRequest: {}
@@ -480,8 +481,8 @@ export default class KoniState extends State {
 
         const existed = authorizeList[this.stripUrl(url)];
 
-        // On cancel existed auth not save anything
-        if (existed && !isAllowed) {
+        // On cancel don't save anything
+        if (!isAllowed) {
           delete this.#authRequestsV2[id];
           this.updateIconAuthV2(true);
 
@@ -889,6 +890,13 @@ export default class KoniState extends State {
       });
   }
 
+  public async addTokenConfirm (id: string, url: string, tokenInfo: CustomEvmToken) {
+    return this.addConfirmation(id, url, 'addTokenRequest', tokenInfo)
+      .then(({ isApproved }) => {
+        return isApproved;
+      });
+  }
+
   public getSettings (update: (value: RequestSettingsType) => void): void {
     this.settingsStore.get('Settings', (value) => {
       if (!value) {
@@ -997,7 +1005,7 @@ export default class KoniState extends State {
     });
   }
 
-  public upsertChainRegistry (tokenData: CustomEvmToken) {
+  public checkTokenKey (tokenData: CustomEvmToken): string {
     const chainRegistry = this.chainRegistryMap[tokenData.chain];
     let tokenKey = '';
 
@@ -1007,6 +1015,13 @@ export default class KoniState extends State {
         break;
       }
     }
+
+    return tokenKey;
+  }
+
+  public upsertChainRegistry (tokenData: CustomEvmToken) {
+    const chainRegistry = this.chainRegistryMap[tokenData.chain];
+    const tokenKey = this.checkTokenKey(tokenData);
 
     if (tokenKey !== '') {
       chainRegistry.tokenMap[tokenKey] = {
@@ -1729,7 +1744,7 @@ export default class KoniState extends State {
       case 'eth_signTypedData_v4':
         return await simpleKeyring.signTypedData_v4(address, payload);
       default:
-        throw new Error('Not found sign method');
+        throw new EvmRpcError('INVALID_PARAMS', 'Not found sign method');
     }
   }
 
@@ -1956,6 +1971,8 @@ export default class KoniState extends State {
     Object.entries(request).forEach(([type, result]) => {
       if (type === 'addNetworkRequest') {
         _completeConfirmation(type, result as ConfirmationDefinitions['addNetworkRequest'][1]);
+      } else if (type === 'addTokenRequest') {
+        _completeConfirmation(type, result as ConfirmationDefinitions['addTokenRequest'][1]);
       } else if (type === 'switchNetworkRequest') {
         _completeConfirmation(type, result as ConfirmationDefinitions['switchNetworkRequest'][1]);
       } else if (type === 'evmSignatureRequest') {

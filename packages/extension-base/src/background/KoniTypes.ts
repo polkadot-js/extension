@@ -695,7 +695,8 @@ export interface CustomEvmToken {
   chain: string,
   type: 'erc20' | 'erc721',
   isCustom?: boolean,
-  isDeleted?: boolean
+  isDeleted?: boolean,
+  image?: string
 }
 
 export interface EvmTokenJson {
@@ -868,6 +869,7 @@ export interface EvmSendTransactionRequest extends TransactionConfig {
 
 export interface ConfirmationDefinitions {
   addNetworkRequest: [ConfirmationsQueueItem<NetworkJson>, ConfirmationResult<NetworkJson>],
+  addTokenRequest: [ConfirmationsQueueItem<CustomEvmToken>, ConfirmationResult<boolean>],
   switchNetworkRequest: [ConfirmationsQueueItem<SwitchNetworkRequest>, ConfirmationResult<boolean>],
   evmSignatureRequest: [ConfirmationsQueueItem<EvmSignatureRequest>, ConfirmationResult<string>],
   evmSendTransactionRequest: [ConfirmationsQueueItem<EvmSendTransactionRequest>, ConfirmationResult<boolean>]

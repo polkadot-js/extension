@@ -29,8 +29,10 @@ function stripUrl (url: string): string {
 
 function transformAccountsV2 (accounts: SubjectInfo, anyType = false, url: string, authList: AuthUrls, accountAuthType?: AccountAuthType): InjectedAccount[] {
   const shortenUrl = stripUrl(url);
-  const accountSelected = Object.keys(authList[shortenUrl].isAllowedMap)
-    .filter((address) => authList[shortenUrl].isAllowedMap[address]);
+  const accountSelected = authList[shortenUrl]
+    ? Object.keys(authList[shortenUrl].isAllowedMap)
+      .filter((address) => authList[shortenUrl].isAllowedMap[address])
+    : [];
 
   let authTypeFilter = ({ type }: SingleAddress) => true;
 
@@ -199,7 +201,7 @@ export default class KoniTabs extends Tabs {
         const chainId = currentNetwork?.evmChainId;
 
         if (chainId) {
-          this.evmState.chainId = chainId.toString(16);
+          this.evmState.chainId = `0x${chainId.toString(16)}`;
           this.evmState.networkKey = networkKey;
           // @ts-ignore
           // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
@@ -462,8 +464,8 @@ export default class KoniTabs extends Tabs {
     return true;
   }
 
-  public isEvmPublicRequest (type: string, { method }: RequestArguments) {
-    if (type === 'evm(request)' && ['eth_chainId'].includes(method)) {
+  public isEvmPublicRequest (type: string, request: RequestArguments) {
+    if (type === 'evm(request)' && ['eth_chainId'].includes(request?.method)) {
       return true;
     } else {
       return false;
@@ -475,8 +477,15 @@ export default class KoniTabs extends Tabs {
       return this.redirectIfPhishing(url);
     }
 
-    if (type !== 'pub(authorize.tabV2)' || !this.isEvmPublicRequest(type, request as RequestArguments)) {
-      this.#koniState.ensureUrlAuthorizedV2(url);
+    if (type !== 'pub(authorize.tabV2)' && !this.isEvmPublicRequest(type, request as RequestArguments)) {
+      await this.#koniState.ensureUrlAuthorizedV2(url)
+        .catch((e: Error) => {
+          if (type.startsWith('evm')) {
+            throw new EvmRpcError('INTERNAL_ERROR', e.message);
+          } else {
+            throw e;
+          }
+        });
     }
 
     switch (type) {

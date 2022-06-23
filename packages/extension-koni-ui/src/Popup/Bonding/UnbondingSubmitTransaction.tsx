@@ -38,8 +38,10 @@ function UnbondingSubmitTransaction ({ className }: Props): React.ReactElement<P
   const getDefaultAmount = useCallback(() => {
     if (unbondingParams.delegations) {
       const amountString = unbondingParams.delegations[0].amount;
+      const minBondString = unbondingParams.delegations[0].minBond;
+      const withdrawableAmount = parseFloat(amountString) - parseFloat(minBondString);
 
-      return parseFloat(amountString) / (10 ** (networkJson.decimals as number));
+      return withdrawableAmount / (10 ** (networkJson.decimals as number));
     } else {
       return bondedAmount;
     }
@@ -60,6 +62,7 @@ function UnbondingSubmitTransaction ({ className }: Props): React.ReactElement<P
 
   const [selectedValidator, setSelectedValidator] = useState(unbondingParams.delegations ? unbondingParams.delegations[0].owner : '');
   const [nominatedAmount, setNominatedAmount] = useState(unbondingParams.delegations ? unbondingParams.delegations[0].amount : '0');
+  const [minBond, setMinBond] = useState(unbondingParams.delegations ? unbondingParams.delegations[0].minBond : '0');
 
   const goHome = useCallback(() => {
     navigate('/');
@@ -69,11 +72,13 @@ function UnbondingSubmitTransaction ({ className }: Props): React.ReactElement<P
     if (!isClickNext) {
       if (unbondingParams.delegations) {
         const _nominatedAmount = parseFloat(nominatedAmount) / (10 ** (networkJson.decimals as number));
+        const _minBond = parseFloat(minBond) / (10 ** (networkJson.decimals as number));
 
-        if (amount > 0 && amount <= _nominatedAmount) {
+        if (amount > 0 && amount <= (_nominatedAmount - _minBond)) {
           setIsReadySubmit(true);
         } else {
-          show(`Your total stake is ${_nominatedAmount} ${networkJson.nativeToken as string}`);
+          setIsReadySubmit(false);
+          // show(`You can withdraw a maximum of ${_nominatedAmount - _minBond} ${networkJson.nativeToken as string}`);
         }
       } else {
         if (amount > 0 && amount <= bondedAmount) {
@@ -81,25 +86,27 @@ function UnbondingSubmitTransaction ({ className }: Props): React.ReactElement<P
         } else {
           setIsReadySubmit(false);
 
-          if (amount > bondedAmount) {
-            show(`Your total stake is ${bondedAmount} ${networkJson.nativeToken as string}`);
-          }
+          // if (amount > bondedAmount) {
+          //   show(`Your total stake is ${bondedAmount} ${networkJson.nativeToken as string}`);
+          // }
         }
       }
     }
-  }, [amount, bondedAmount, isClickNext, networkJson.decimals, networkJson.nativeToken, nominatedAmount, show, showAuth, showResult, unbondingParams.delegations]);
+  }, [amount, bondedAmount, isClickNext, minBond, networkJson.decimals, networkJson.nativeToken, nominatedAmount, show, showAuth, showResult, unbondingParams.delegations]);
 
   const convertToBN = useCallback(() => {
     let stringValue;
 
     if (unbondingParams.delegations) {
-      stringValue = nominatedAmount;
+      const withdrawableAmount = parseFloat(nominatedAmount) - parseFloat(minBond);
+
+      stringValue = withdrawableAmount.toString();
     } else {
       stringValue = (parseFloat(bondedAmount.toString()) * (10 ** (networkJson.decimals as number))).toString();
     }
 
     return new BN(stringValue);
-  }, [bondedAmount, networkJson.decimals, nominatedAmount, unbondingParams.delegations]);
+  }, [bondedAmount, minBond, networkJson.decimals, nominatedAmount, unbondingParams.delegations]);
 
   const handleResend = useCallback(() => {
     setExtrinsicHash('');
@@ -156,6 +163,7 @@ function UnbondingSubmitTransaction ({ className }: Props): React.ReactElement<P
       for (const item of unbondingParams.delegations) {
         if (item.owner === val) {
           setNominatedAmount(item.amount);
+          setMinBond(item.minBond);
           const _nominatedAmount = parseFloat(item.amount) / (10 ** (networkJson.decimals as number));
 
           setAmount(_nominatedAmount);
@@ -204,11 +212,11 @@ function UnbondingSubmitTransaction ({ className }: Props): React.ReactElement<P
               className={'submit-bond-amount-input'}
               decimals={networkJson.decimals}
               defaultValue={convertToBN()}
-              help={`Type the amount you want to unstake. The maximum amount is ${parseFloat(nominatedAmount) / (10 ** (networkJson.decimals as number))} ${networkJson.nativeToken as string}`}
+              help={`Type the amount you want to unstake. You can withdraw ${(parseFloat(nominatedAmount) - parseFloat(minBond)) / (10 ** (networkJson.decimals as number))} of ${parseFloat(nominatedAmount) / (10 ** (networkJson.decimals as number))} ${networkJson.nativeToken as string} staked`}
               inputAddressHelp={''}
               isError={false}
               isZeroable={false}
-              label={t<string>('Delegated Amount')}
+              label={t<string>('Amount')}
               onChange={handleChangeAmount}
               placeholder={'0'}
               siDecimals={networkJson.decimals}
@@ -224,7 +232,7 @@ function UnbondingSubmitTransaction ({ className }: Props): React.ReactElement<P
               className={'submit-bond-amount-input'}
               decimals={networkJson.decimals}
               defaultValue={convertToBN()}
-              help={`Type the amount you want to unstake. The maximum amount is ${bondedAmount} ${networkJson.nativeToken as string}`}
+              help={`Type the amount you want to unstake. You can withdraw ${bondedAmount} ${networkJson.nativeToken as string}`}
               inputAddressHelp={''}
               isError={false}
               isZeroable={false}

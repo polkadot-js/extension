@@ -97,10 +97,15 @@ function getMoonBeamStakingOnChain (parentApi: ApiProps, useAddresses: string[],
       const delegationsList: DelegationItem[] = [];
 
       await Promise.all(Object.entries(delegationMap).map(async ([owner, amount]) => {
-        // TODO: get minBond
-        const _identity = await parentApi.api.query.identity.identityOf(owner);
+        const [_info, _identity] = await Promise.all([
+          parentApi.api.query.parachainStaking.candidateInfo(owner),
+          parentApi.api.query.identity.identityOf(owner)
+        ]);
+        const rawInfo = _info.toHuman() as Record<string, any>;
         const rawIdentity = _identity.toHuman() as Record<string, any> | null;
         let identity;
+
+        const minDelegation = (rawInfo?.lowestTopDelegationAmount as string).replaceAll(',', '');
 
         if (rawIdentity !== null) {
           // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
@@ -129,7 +134,8 @@ function getMoonBeamStakingOnChain (parentApi: ApiProps, useAddresses: string[],
         delegationsList.push({
           owner,
           amount,
-          identity
+          identity,
+          minBond: minDelegation
         });
       }));
 

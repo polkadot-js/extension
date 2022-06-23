@@ -91,7 +91,8 @@ export interface StakingRewardJson {
 export interface DelegationItem {
   owner: string,
   amount: string, // raw amount string
-  identity?: string
+  identity?: string,
+  minBond: string
 }
 
 export interface StakingItem {

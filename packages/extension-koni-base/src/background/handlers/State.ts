@@ -211,7 +211,10 @@ export default class KoniState extends State {
               mergedNetworkMap[key].currentProvider = storedNetwork.currentProvider;
             }
 
-            mergedNetworkMap[key].active = storedNetwork.active;
+            if (key !== 'polkadot' && key !== 'kusama') {
+              mergedNetworkMap[key].active = storedNetwork.active;
+            }
+
             mergedNetworkMap[key].coinGeckoKey = storedNetwork.coinGeckoKey;
             mergedNetworkMap[key].crowdloanUrl = storedNetwork.crowdloanUrl;
             mergedNetworkMap[key].blockExplorer = storedNetwork.blockExplorer;

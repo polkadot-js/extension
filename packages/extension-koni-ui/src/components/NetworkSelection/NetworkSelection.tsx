@@ -29,7 +29,7 @@ function NetworkSelection ({ className, handleShow }: Props): React.ReactElement
   const { networkMap } = useSelector((state: RootState) => state);
   const [searchString, setSearchString] = useState('');
   // const [isCheck, setIsChecked] = useState(false);
-  const [selected, setSelected] = useState<string[]>([]);
+  const [selected, setSelected] = useState<string[]>(['polkadot', 'kusama']);
   const { show } = useToast();
 
   const handleSelect = useCallback((networkKey: string, active: boolean) => {

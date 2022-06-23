@@ -6,7 +6,7 @@ import type { InjectedAccount } from '@subwallet/extension-inject/types';
 import { AuthUrls } from '@subwallet/extension-base/background/handlers/State';
 import { createSubscription, unsubscribe } from '@subwallet/extension-base/background/handlers/subscriptions';
 import Tabs from '@subwallet/extension-base/background/handlers/Tabs';
-import { EvmAppState, EvmEventType, EvmSendTransactionParams, RequestEvmProviderSend } from '@subwallet/extension-base/background/KoniTypes';
+import { CustomEvmToken, EvmAppState, EvmEventType, EvmSendTransactionParams, RequestEvmProviderSend } from '@subwallet/extension-base/background/KoniTypes';
 import { AccountAuthType, MessageTypes, RequestAccountList, RequestAccountSubscribe, RequestAuthorizeTab, RequestTypes, ResponseTypes } from '@subwallet/extension-base/background/types';
 import { canDerive } from '@subwallet/extension-base/utils';
 import { EvmRpcError } from '@subwallet/extension-koni-base/background/errors/EvmRpcError';
@@ -103,8 +103,8 @@ export default class KoniTabs extends Tabs {
         let accounts: string[] = [];
 
         this.#koniState.getCurrentAccount(({ address }) => {
-          if (address === ALL_ACCOUNT_KEY || getAll) {
-            accounts = (accountList);
+          if (address === ALL_ACCOUNT_KEY || !accountList.includes(address) || getAll) {
+            accounts = accountList;
           } else if (address && accountList.includes(address)) {
             accounts = ([address]);
           }
@@ -125,6 +125,10 @@ export default class KoniTabs extends Tabs {
     // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
     const chainId = params[0].chainId as string;
 
+    if (this.evmState.chainId === chainId) {
+      return null;
+    }
+
     const [networkKey] = this.#koniState.findNetworkKeyByChainId(parseInt(chainId, 16));
 
     if (networkKey) {
@@ -140,6 +144,49 @@ export default class KoniTabs extends Tabs {
     }
 
     return null;
+  }
+
+  private async addEvmToken (id: string, url: string, { params }: RequestArguments) {
+    const input = params as {
+      type: string
+      options: {
+        address: string
+        decimals: number
+        image: string
+        symbol: string
+      }
+    };
+
+    const tokenType = input?.type?.toLowerCase() || '';
+
+    if (tokenType !== 'erc20' && tokenType !== 'erc721') {
+      throw new EvmRpcError('INVALID_PARAMS', `Assets type ${tokenType} is not supported`);
+    }
+
+    if (!input?.options?.address || !input?.options?.symbol) {
+      throw new EvmRpcError('INVALID_PARAMS', 'Assets params require address and symbol');
+    }
+
+    const chain = this.evmState.networkKey;
+
+    if (!chain) {
+      throw new EvmRpcError('INTERNAL_ERROR', 'Current chain is not available');
+    }
+
+    try {
+      const tokenInfo: CustomEvmToken = {
+        type: tokenType,
+        smartContract: input.options?.address,
+        symbol: input.options?.symbol,
+        decimals: input.options?.decimals,
+        image: input.options?.image,
+        chain
+      };
+
+      return await this.#koniState.addTokenConfirm(id, url, tokenInfo);
+    } catch (e) {
+      throw new EvmRpcError('INVALID_PARAMS', 'Invalid assets params');
+    }
   }
 
   private async addEvmChain (id: string, url: string, { params }: RequestArguments) {
@@ -367,7 +414,7 @@ export default class KoniTabs extends Tabs {
   }
 
   private async evmSign (id: string, url: string, { method, params }: RequestArguments) {
-    const allowedAccounts = await this.getEvmCurrentAccount(url, true);
+    const allowedAccounts = (await this.getEvmCurrentAccount(url, true));
     const signResult = await this.#koniState.evmSign(id, url, method, params, allowedAccounts);
 
     if (signResult) {
@@ -402,6 +449,8 @@ export default class KoniTabs extends Tabs {
   private async handleEvmRequest (id: string, url: string, request: RequestArguments): Promise<unknown> {
     const { method } = request;
 
+    console.log('method: ' + method);
+
     try {
       switch (method) {
         case 'eth_chainId':
@@ -432,6 +481,8 @@ export default class KoniTabs extends Tabs {
           return await this.addEvmChain(id, url, request);
         case 'wallet_switchEthereumChain':
           return await this.switchEvmChain(id, url, request);
+        case 'wallet_watchAsset':
+          return await this.addEvmToken(id, url, request);
 
         default:
           return this.performWeb3Method(id, request);

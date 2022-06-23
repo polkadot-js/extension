@@ -107,6 +107,7 @@ export default function Popup (): React.ReactElement {
   const [signRequests, setSignRequests] = useState<null | SigningRequest[]>(null);
   const [confirmations, setConfirmations] = useState<ConfirmationsQueue>({
     addNetworkRequest: {},
+    addTokenRequest: {},
     switchNetworkRequest: {},
     evmSignatureRequest: {},
     evmSendTransactionRequest: {}

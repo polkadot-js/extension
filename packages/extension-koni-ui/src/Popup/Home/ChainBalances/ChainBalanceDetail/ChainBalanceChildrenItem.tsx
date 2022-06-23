@@ -8,16 +8,17 @@ import { AccountInfoByNetwork, BalanceSubInfo } from '@subwallet/extension-koni-
 import React, { useCallback, useState } from 'react';
 import styled from 'styled-components';
 
-import { Loading } from '../../../../components';
+import { CircleSpinner, Loading } from '../../../../components';
 
 interface Props extends ThemeProps {
   className?: string;
   accountInfo: AccountInfoByNetwork;
   balanceInfo: BalanceSubInfo;
+  isConnecting: boolean;
   isLoading: boolean;
 }
 
-function ChainBalanceChildrenItem ({ accountInfo, balanceInfo, className, isLoading }: Props): React.ReactElement<Props> {
+function ChainBalanceChildrenItem ({ accountInfo, balanceInfo, className, isConnecting, isLoading }: Props): React.ReactElement<Props> {
   const [toggleDetail, setToggleDetail] = useState(false);
 
   const _onToggleDetail = useCallback((e: React.MouseEvent<HTMLElement>) => {
@@ -63,6 +64,12 @@ function ChainBalanceChildrenItem ({ accountInfo, balanceInfo, className, isLoad
                 value={balanceInfo.convertedBalanceValue}
               />
             </div>
+
+            {isConnecting && (
+              <div className='chain-balance-item__spinner'>
+                <CircleSpinner className='chain-balance-item__spinner-image' />
+              </div>
+            )}
 
             {/* {(!!mockDetailData.length || !!mockDetailData.length) && ( */}
             {/*  <div className='chain-balance--children-item__toggle' /> */}
@@ -213,5 +220,18 @@ export default React.memo(styled(ChainBalanceChildrenItem)(({ theme }: Props) =>
   &.-show-detail .chain-balance--children-item__toggle {
     top: 9px;
     transform: rotate(-135deg);
+  }
+
+  .chain-balance-item__spinner {
+    position: absolute;
+    display: inline-block;
+    padding: 3.5px;
+    top: 10px;
+    right: 37px;
+  }
+
+  .chain-balance-item__spinner-image {
+    width: 28px;
+    height: 28px;
   }
 `));

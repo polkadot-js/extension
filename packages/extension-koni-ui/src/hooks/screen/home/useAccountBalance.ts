@@ -78,7 +78,31 @@ export default function useAccountBalance (currentNetworkKey: string,
     const registry = chainRegistryMap[networkKey];
     const balanceItem = balanceMap[networkKey];
 
-    if (!registry || !balanceItem) {
+    if (!registry) {
+      return;
+    }
+
+    const mainTokenInfo = getMainTokenInfo(registry);
+    let tokenDecimals, tokenSymbols;
+
+    if (['genshiro_testnet', 'genshiro', 'equilibrium_parachain'].includes(networkKey)) {
+      tokenDecimals = [mainTokenInfo.decimals];
+      tokenSymbols = [mainTokenInfo.symbolAlt || mainTokenInfo.symbol];
+    } else {
+      tokenDecimals = registry.chainDecimals;
+      tokenSymbols = getTokenSymbols(registry);
+    }
+
+    if (!balanceItem) {
+      networkBalanceMaps[networkKey] = {
+        symbol: tokenSymbols.length ? tokenSymbols[0] : 'Unit',
+        balanceValue: BN_ZERO,
+        convertedBalanceValue: BN_ZERO,
+        detailBalances: [],
+        childrenBalances: [],
+        isLoading: true
+      };
+
       return;
     }
 
@@ -92,21 +116,6 @@ export default function useAccountBalance (currentNetworkKey: string,
       };
 
       return;
-    }
-
-    if (balanceItem.free === undefined) {
-      return;
-    }
-
-    const mainTokenInfo = getMainTokenInfo(registry);
-    let tokenDecimals, tokenSymbols;
-
-    if (['genshiro_testnet', 'genshiro', 'equilibrium_parachain'].includes(networkKey)) {
-      tokenDecimals = [mainTokenInfo.decimals];
-      tokenSymbols = [mainTokenInfo.symbolAlt || mainTokenInfo.symbol];
-    } else {
-      tokenDecimals = registry.chainDecimals;
-      tokenSymbols = getTokenSymbols(registry);
     }
 
     const balanceInfo = parseBalancesInfo(priceMap, tokenPriceMap, {

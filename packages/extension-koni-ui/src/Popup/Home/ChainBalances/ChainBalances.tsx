@@ -1,7 +1,7 @@
 // Copyright 2019-2022 @polkadot/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { NetWorkMetadataDef } from '@subwallet/extension-base/background/KoniTypes';
+import { NETWORK_STATUS, NetWorkMetadataDef } from '@subwallet/extension-base/background/KoniTypes';
 import { ALL_NETWORK_KEY } from '@subwallet/extension-koni-base/constants';
 import { Link } from '@subwallet/extension-koni-ui/components';
 import useTranslation from '@subwallet/extension-koni-ui/hooks/useTranslation';
@@ -111,6 +111,8 @@ function ChainBalances ({ address,
   const selectedInfo = accountInfoByNetworkMap[selectedNetworkKey];
   const selectedBalanceInfo = networkBalanceMaps[selectedNetworkKey];
   const { currentAccount: { account: currentAccount } } = useSelector((state: RootState) => state);
+  const { networkMap } = useSelector((state: RootState) => state);
+  const [connectingList, setConnectingList] = useState<Record<string, boolean>>({});
 
   const isEthAccount = isEthereumAddress(currentAccount?.address);
 
@@ -144,11 +146,14 @@ function ChainBalances ({ address,
       return (<Fragment key={info.key} />);
     }
 
+    const isConnecting = connectingList[networkKey] || (balanceInfo && balanceInfo.isLoading);
+
     if (balanceInfo && balanceInfo.childrenBalances.length === 0) {
       return (
         <ChainBalanceDetailItem
           accountInfo={info}
           balanceInfo={balanceInfo}
+          isConnecting={isConnecting}
           isLoading={!balanceInfo}
           isShowDetail={info.networkKey === selectedNetworkKey}
           key={info.key}
@@ -163,6 +168,7 @@ function ChainBalances ({ address,
       <ChainBalanceItem
         accountInfo={info}
         balanceInfo={balanceInfo}
+        isConnecting={isConnecting}
         isLoading={!balanceInfo}
         key={info.key}
         setQrModalOpen={setQrModalOpen}
@@ -213,6 +219,24 @@ function ChainBalances ({ address,
     setListWidth(containerWidth - scrollWidth);
   }, [containerWidth, scrollWidth]);
 
+  useEffect(() => {
+    const checkData = () => {
+      const newList: Record<string, boolean> = {};
+
+      Object.entries(networkMap).forEach(([key, value]) => {
+        const isDisconnected = value.apiStatus !== NETWORK_STATUS.CONNECTED;
+
+        if (isDisconnected) {
+          newList[key] = true;
+        }
+      });
+
+      setConnectingList(newList);
+    };
+
+    checkData();
+  }, [networkMap]);
+
   return (
     <div className={CN(className, 'chain-balances-container')}>
       {!isShowBalanceDetail || !selectedNetworkKey || !selectedInfo || !selectedBalanceInfo
@@ -252,6 +276,7 @@ function ChainBalances ({ address,
               accountInfo={selectedInfo}
               backToHome={_backToHome}
               balanceInfo={selectedBalanceInfo}
+              isConnecting={connectingList[selectedInfo.networkKey]}
               setQrModalOpen={setQrModalOpen}
               setQrModalProps={setQrModalProps}
             />

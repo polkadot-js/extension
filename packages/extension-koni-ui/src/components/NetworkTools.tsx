@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import arrowCounterClockWise from '@subwallet/extension-koni-ui/assets/arrow-counter-clockwise.svg';
-import pencilIcon from '@subwallet/extension-koni-ui/assets/pencil.svg';
+import pencilIcon from '@subwallet/extension-koni-ui/assets/pencil-gray.svg';
 import { ActionContext } from '@subwallet/extension-koni-ui/components/contexts';
 import useGetNetworkJson from '@subwallet/extension-koni-ui/hooks/screen/home/useGetNetworkJson';
 import useToast from '@subwallet/extension-koni-ui/hooks/useToast';
@@ -22,7 +22,8 @@ function NetworkTools ({ className, networkKey }: Props): React.ReactElement<Pro
   const networkJson = useGetNetworkJson(networkKey);
   const navigate = useContext(ActionContext);
   const { show } = useToast();
-  const handleClickReload = useCallback(() => {
+  const handleClickReload = useCallback((e: React.MouseEvent<HTMLElement>) => {
+    e.stopPropagation();
     recoverDotSamaApi(networkKey)
       .then((result) => {
         if (result) {
@@ -34,7 +35,8 @@ function NetworkTools ({ className, networkKey }: Props): React.ReactElement<Pro
       .catch(console.error);
   }, [networkKey, show]);
 
-  const handleClickEdit = useCallback(() => {
+  const handleClickEdit = useCallback((e: React.MouseEvent<HTMLElement>) => {
+    e.stopPropagation();
     store.dispatch({ type: 'networkConfigParams/update', payload: { data: networkJson, mode: 'edit' } as NetworkConfigParams });
     navigate('/account/config-network');
   }, [navigate, networkJson]);
@@ -60,14 +62,14 @@ function NetworkTools ({ className, networkKey }: Props): React.ReactElement<Pro
   );
 }
 
-export default React.memo(styled(NetworkTools)(({ theme }: Props) => `
+export default React.memo(styled(NetworkTools)(() => `
   .reload-network-btn {
     cursor: pointer;
   }
 
   .network-edit-icon {
-    color: ${theme.primaryColor};
     cursor: pointer;
+    color: '#7B8098'
   }
 
   .network-action-container {

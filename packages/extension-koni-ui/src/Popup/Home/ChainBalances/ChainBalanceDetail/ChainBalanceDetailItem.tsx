@@ -17,13 +17,14 @@ import React, { useCallback } from 'react';
 import CopyToClipboard from 'react-copy-to-clipboard';
 import styled from 'styled-components';
 
-import { Loading } from '../../../../components';
+import { CircleSpinner, Loading } from '../../../../components';
 
 interface Props extends ThemeProps {
   className?: string;
   accountInfo: AccountInfoByNetwork;
   balanceInfo: BalanceInfo;
   isLoading: boolean;
+  isConnecting: boolean;
   setQrModalOpen: (visible: boolean) => void;
   setQrModalProps: (props: {
     networkPrefix: number,
@@ -38,6 +39,7 @@ interface Props extends ThemeProps {
 function ChainBalanceDetailItem ({ accountInfo,
   balanceInfo,
   className,
+  isConnecting,
   isLoading,
   isShowDetail,
   setQrModalOpen,
@@ -124,7 +126,7 @@ function ChainBalanceDetailItem ({ accountInfo,
                 </div>
               )}
 
-              {isLoading && (
+              {(isLoading || isConnecting) && (
                 <NetworkTools networkKey={networkKey} />
               )}
             </div>
@@ -156,7 +158,13 @@ function ChainBalanceDetailItem ({ accountInfo,
               />
             </div>
 
-            {(!!balanceInfo.detailBalances.length || !!balanceInfo.childrenBalances.length) && (
+            {isConnecting && (
+              <div className='chain-balance-item__spinner'>
+                <CircleSpinner className='chain-balance-item__spinner-image' />
+              </div>
+            )}
+
+            {!isConnecting && (!!balanceInfo.detailBalances.length || !!balanceInfo.childrenBalances.length) && (
               <div className='chain-balance-item__toggle' />
             )}
           </div>
@@ -319,5 +327,18 @@ export default React.memo(styled(ChainBalanceDetailItem)(({ theme }: Props) => `
   &.-show-detail .chain-balance-item__toggle {
     top: 9px;
     transform: rotate(-135deg);
+  }
+
+  .chain-balance-item__spinner {
+    position: absolute;
+    display: inline-block;
+    padding: 3.5px;
+    top: 10px;
+    right: 37px;
+  }
+
+  .chain-balance-item__spinner-image {
+    width: 28px;
+    height: 28px;
   }
 `));

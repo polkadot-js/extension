@@ -1112,7 +1112,7 @@ export default class KoniState extends State {
   }
 
   public setBalanceItem (networkKey: string, item: BalanceItem) {
-    const itemData = { ...item, timestamp: +new Date() };
+    const itemData = { timestamp: +new Date(), ...item };
 
     this.balanceMap[networkKey] = itemData;
 

@@ -23,6 +23,10 @@ const LogosMap: Record<string, string> = {
   // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
   astarEvm: require('./astar.png'),
   // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+  shibuya: require('./astar.png'),
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+  shibuyaEvm: require('./astar.png'),
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
   basilisk: require('./basilisk.png'),
   // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
   bifrost: require('./bifrost.svg'),

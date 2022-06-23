@@ -209,10 +209,10 @@ export default class KoniState extends State {
             // check change and override custom providers if exist
             if ('customProviders' in storedNetwork) {
               mergedNetworkMap[key].customProviders = storedNetwork.customProviders;
+              mergedNetworkMap[key].currentProvider = storedNetwork.currentProvider;
             }
 
             mergedNetworkMap[key].active = storedNetwork.active;
-            mergedNetworkMap[key].currentProvider = storedNetwork.currentProvider;
             mergedNetworkMap[key].coinGeckoKey = storedNetwork.coinGeckoKey;
             mergedNetworkMap[key].crowdloanUrl = storedNetwork.crowdloanUrl;
             mergedNetworkMap[key].blockExplorer = storedNetwork.blockExplorer;
@@ -590,23 +590,31 @@ export default class KoniState extends State {
     return this.stakingSubject;
   }
 
-  public ensureUrlAuthorizedV2 (url: string): boolean {
+  public ensureUrlAuthorizedV2 (url: string): Promise<boolean> {
     const idStr = this.stripUrl(url);
 
-    this.getAuthorize((value) => {
-      if (!value) {
-        value = {};
-      }
+    return new Promise((resolve, reject) => {
+      this.getAuthorize((value) => {
+        if (!value) {
+          value = {};
+        }
 
-      const isConnected = Object.keys(value[idStr].isAllowedMap)
-        .some((address) => value[idStr].isAllowedMap[address]);
-      const entry = Object.keys(value).includes(idStr);
+        const entry = Object.keys(value).includes(idStr);
 
-      assert(entry, `The source ${url} has not been enabled yet`);
-      assert(isConnected, `The source ${url} is not allowed to interact with this extension`);
+        if (!entry) {
+          reject(new Error(`The source ${url} has not been enabled yet`));
+        }
+
+        const isConnected = value[idStr] && Object.keys(value[idStr].isAllowedMap)
+          .some((address) => value[idStr].isAllowedMap[address]);
+
+        if (!isConnected) {
+          reject(new Error(`The source ${url} is not allowed to interact with this extension`));
+        }
+
+        resolve(true);
+      });
     });
-
-    return true;
   }
 
   public setStakingItem (networkKey: string, item: StakingItem): void {

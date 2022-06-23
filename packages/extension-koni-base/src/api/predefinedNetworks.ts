@@ -346,11 +346,12 @@ export const PREDEFINED_NETWORKS: Record<string, NetworkJson> = {
     genesisHash: '0x729cb8f2cf428adcf81fe69610edda32c5711b2ff17de747e8604a3587021db8',
     ss58Format: 18,
     providers: {
-      'Darwinia Network': 'wss://rpc.darwinia.network'
+      'Darwinia Network': 'wss://rpc.darwinia.network',
+      Darwinia: 'wss://darwinia-rpc.dwellir.com'
     },
     active: false,
     currentProviderMode: 'ws',
-    currentProvider: 'Darwinia Network',
+    currentProvider: 'Darwinia',
     groups: ['POLKADOT_PARACHAIN'],
     paraId: 2003,
     nativeToken: 'RING',
@@ -763,7 +764,7 @@ export const PREDEFINED_NETWORKS: Record<string, NetworkJson> = {
   },
   bifrost: {
     key: 'bifrost',
-    chain: 'Bifrost',
+    chain: 'Bifrost Kusama',
     genesisHash: '0x9f28c6a68e0fc9646eff64935684f6eeeece527e37bbe1f213d22caa1d9d6bed',
     ss58Format: 6,
     providers: {
@@ -777,6 +778,24 @@ export const PREDEFINED_NETWORKS: Record<string, NetworkJson> = {
     currentProvider: 'OnFinality',
     groups: ['KUSAMA_PARACHAIN'],
     paraId: 2001,
+    nativeToken: 'BNC',
+    crowdloanUrl: 'https://bifrost.app/vcrowdloan',
+    decimals: 12,
+    coinGeckoKey: 'bifrost-native-coin'
+  },
+  bifrost_dot: {
+    key: 'bifrost_dot',
+    chain: 'Bifrost Polkadot',
+    genesisHash: '0x262e1b2ad728475fd6fe88e62d34c200abe6fd693931ddad144059b1eb884e5b',
+    ss58Format: 6,
+    providers: {
+      Liebi: 'wss://hk.p.bifrost-rpc.liebi.com/ws'
+    },
+    active: false,
+    currentProviderMode: 'ws',
+    currentProvider: 'Liebi',
+    groups: ['KUSAMA_PARACHAIN'],
+    paraId: 2030,
     nativeToken: 'BNC',
     crowdloanUrl: 'https://bifrost.app/vcrowdloan',
     decimals: 12,
@@ -1174,12 +1193,14 @@ export const PREDEFINED_NETWORKS: Record<string, NetworkJson> = {
     genesisHash: '0x34f61bfda344b3fad3c3e38832a91448b3c613b199eb23e5110a635d71c13c65',
     ss58Format: 42,
     providers: {
-      Crab: 'wss://crab-parachain-rpc.darwinia.network/'
+      OnFinality: 'wss://darwinia-crab.api.onfinality.io/public-ws',
+      Darwinia_Network: 'wss://crab-rpc.darwinia.network',
+      Dwellir: 'wss://darwiniacrab-rpc.dwellir.com'
     },
     active: false,
     currentProviderMode: 'ws',
-    currentProvider: 'Crab',
-    groups: ['KUSAMA_PARACHAIN'],
+    currentProvider: 'OnFinality',
+    groups: ['MAIN_NET'],
     paraId: 2105,
     nativeToken: 'CRAB',
     crowdloanUrl: 'https://crab.network/plo',

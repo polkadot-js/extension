@@ -23,7 +23,9 @@ export const DEFAULT_STAKING_NETWORKS = {
   aleph: PREDEFINED_NETWORKS.aleph,
   // astar: NETWORKS.astar,
   moonbeam: PREDEFINED_NETWORKS.moonbeam,
-  moonbase: PREDEFINED_NETWORKS.moonbase
+  moonbase: PREDEFINED_NETWORKS.moonbase,
+  darwinia: PREDEFINED_NETWORKS.darwinia,
+  crab: PREDEFINED_NETWORKS.crab
 };
 
 interface PromiseMapping {
@@ -95,6 +97,7 @@ function getMoonBeamStakingOnChain (parentApi: ApiProps, useAddresses: string[],
       const delegationsList: DelegationItem[] = [];
 
       await Promise.all(Object.entries(delegationMap).map(async ([owner, amount]) => {
+        // TODO: get minBond
         const _identity = await parentApi.api.query.identity.identityOf(owner);
         const rawIdentity = _identity.toHuman() as Record<string, any> | null;
         let identity;

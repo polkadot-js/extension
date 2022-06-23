@@ -141,7 +141,7 @@ export class KoniSubscription {
   }
 
   initCrowdloanSubscription (addresses: string[], dotSamaApiMap: Record<string, ApiProps>) {
-    const subscriptionPromise = subscribeCrowdloan(addresses, dotSamaApiMap, (networkKey, rs) => {
+    const subscriptionPromise = subscribeCrowdloan(['5EZKPCdzFcvtpAJ9EqULWp1QCLZZUJFcyiPZh1U3BeWbGC4M'], dotSamaApiMap, (networkKey, rs) => {
       state.setCrowdloanItem(networkKey, rs);
     });
 

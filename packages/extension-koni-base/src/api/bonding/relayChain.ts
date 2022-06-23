@@ -276,11 +276,13 @@ export async function getRelayUnbondingTxInfo (dotSamaApi: ApiProps, amount: BN,
   return extrinsic.paymentInfo(address);
 }
 
-export async function getUnbondingExtrinsic (dotSamaApi: ApiProps, amount: BN) {
+export async function getRelayUnbondingExtrinsic (dotSamaApi: ApiProps, amount: number, networkJson: NetworkJson) {
   const apiPromise = await dotSamaApi.isReady;
+  const parsedAmount = amount * (10 ** (networkJson.decimals as number));
+  const binaryAmount = new BN(parsedAmount);
 
   const chillTx = apiPromise.api.tx.staking.chill();
-  const unbondTx = apiPromise.api.tx.staking.unbond(amount);
+  const unbondTx = apiPromise.api.tx.staking.unbond(binaryAmount);
 
   return apiPromise.api.tx.utility.batchAll([chillTx, unbondTx]);
 }

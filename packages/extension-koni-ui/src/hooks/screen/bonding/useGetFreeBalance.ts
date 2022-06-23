@@ -7,5 +7,5 @@ import { useSelector } from 'react-redux';
 export default function useGetFreeBalance (networkKey: string) {
   const { balance: { details: balanceMap } } = useSelector((state: RootState) => state);
 
-  return (parseFloat(balanceMap[networkKey].free) - parseFloat(balanceMap[networkKey].feeFrozen)).toString();
+  return (parseFloat(balanceMap[networkKey].free || '0') - parseFloat(balanceMap[networkKey].feeFrozen || '0')).toString();
 }

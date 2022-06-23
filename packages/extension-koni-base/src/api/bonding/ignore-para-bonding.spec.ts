@@ -231,4 +231,17 @@ describe('test DotSama APIs', () => {
       console.log('here', resp);
     });
   });
+
+  test('get unbonding extrinsic', async () => {
+    const provider = new WsProvider(getCurrentProvider(PREDEFINED_NETWORKS.moonbeam), DOTSAMA_AUTO_CONNECT_MS);
+    const api = new ApiPromise({ provider });
+    const apiPromise = await api.isReady;
+
+    const extrinsic = apiPromise.tx.parachainStaking.delegate('0x0198D3053a69C3f977bB1943bc95A0fFA7777474', new BN(6), 336, 0);
+
+    // TODO: get delegatorCount and bondedInfo
+    const fee = await extrinsic.paymentInfo('0xAF2b4242e766caf5791DA56723a8dE1BeA4e7098');
+
+    console.log(fee.toHuman());
+  });
 });

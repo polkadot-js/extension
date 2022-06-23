@@ -285,6 +285,28 @@ export async function getUnbondingExtrinsic (dotSamaApi: ApiProps, amount: BN) {
   return apiPromise.api.tx.utility.batchAll([chillTx, unbondTx]);
 }
 
+export async function handleRelayUnbondingTxInfo (address: string, amount: number, networkKey: string, dotSamaApiMap: Record<string, ApiProps>, web3ApiMap: Record<string, Web3>, networkJson: NetworkJson) {
+  const dotSamaApi = dotSamaApiMap[networkKey];
+  const parsedAmount = amount * (10 ** (networkJson.decimals as number));
+  const binaryAmount = new BN(parsedAmount);
+
+  const [txInfo, balance] = await Promise.all([
+    getUnbondingTxInfo(dotSamaApi, binaryAmount, address),
+    getFreeBalance(networkKey, address, dotSamaApiMap, web3ApiMap)
+  ]);
+
+  const feeString = txInfo.partialFee.toHuman();
+  const binaryBalance = new BN(balance);
+
+  const sumAmount = txInfo.partialFee.add(binaryAmount);
+  const balanceError = sumAmount.gt(binaryBalance);
+
+  return {
+    fee: feeString,
+    balanceError
+  } as BasicTxInfo;
+}
+
 export async function getUnlockingInfo (dotSamaApi: ApiProps, address: string, networkKey: string) {
   const apiPromise = await dotSamaApi.isReady;
 

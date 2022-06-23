@@ -2157,7 +2157,7 @@ export default class KoniExtension extends Extension {
     return txState;
   }
 
-  private async getUnbondingTxInfo ({ address, amount, networkKey }: UnbondingSubmitParams): Promise<BasicTxInfo> {
+  private async getUnbondingTxInfo ({ address, amount, networkKey, validatorAddress }: UnbondingSubmitParams): Promise<BasicTxInfo> {
     const dotSamaApi = state.getDotSamaApi(networkKey);
     const networkJson = state.getNetworkMapByKey(networkKey);
     const parsedAmount = amount * (10 ** (networkJson.decimals as number));

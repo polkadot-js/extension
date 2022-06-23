@@ -446,6 +446,11 @@ export default class KoniState extends State {
 
     const complete = (result: boolean | Error, cb: () => void, accounts?: string[]) => {
       const isAllowed = result === true;
+      let isCancelled = false;
+
+      if (!isAllowed && typeof result === 'object' && result.message === 'Cancelled') {
+        isCancelled = true;
+      }
 
       if (accounts && accounts.length) {
         accounts.forEach((acc) => {
@@ -482,7 +487,7 @@ export default class KoniState extends State {
         const existed = authorizeList[this.stripUrl(url)];
 
         // On cancel don't save anything
-        if (!isAllowed) {
+        if (isCancelled) {
           delete this.#authRequestsV2[id];
           this.updateIconAuthV2(true);
 

@@ -11,7 +11,7 @@ import styled from 'styled-components';
 
 import { AccountContext, ActionContext, Button, Warning } from '../../components';
 import useTranslation from '../../hooks/useTranslation';
-import { approveAuthRequestV2, rejectAuthRequestV2 } from '../../messaging';
+import { approveAuthRequestV2, cancelAuthRequestV2, rejectAuthRequestV2 } from '../../messaging';
 
 interface Props extends ThemeProps {
   authId: string;
@@ -36,6 +36,8 @@ function Request ({ authId, className, request: { accountAuthType, allowedAccoun
   const onAction = useContext(ActionContext);
   const { accounts } = useContext(AccountContext);
   const accountList = filterAndSortingAccountByAuthType(accounts, accountAuthType || 'substrate', true);
+  const [warning, setWarning] = useState(t<string>('Make sure you trust this site before connecting'));
+  const [confirmReject, setConfirmReject] = useState(false);
 
   const { hostname } = new URL(url);
   const [selectedAccounts, setSelectedAccounts] = useState<string[]>(allowedAccounts || []);
@@ -47,8 +49,21 @@ function Request ({ authId, className, request: { accountAuthType, allowedAccoun
     [authId, onAction, selectedAccounts]
   );
 
-  const _onReject = useCallback(
-    () => rejectAuthRequestV2(authId)
+  const _onReject = useCallback(() => {
+    if (!confirmReject) {
+      setWarning(t<string>('Reject this request mean you disallow any access from this site to the extension. Click "Reject" again to perform this action. If you want to enable it again, please go to "Settings" > "Manage Website Access"'));
+      setConfirmReject(true);
+    } else {
+      rejectAuthRequestV2(authId)
+        .then(() => onAction())
+        .catch((error: Error) => console.error(error));
+    }
+  },
+  [authId, confirmReject, onAction, t]
+  );
+
+  const _onCancel = useCallback(
+    () => cancelAuthRequestV2(authId)
       .then(() => onAction())
       .catch((error: Error) => console.error(error)),
     [authId, onAction]
@@ -96,7 +111,7 @@ function Request ({ authId, className, request: { accountAuthType, allowedAccoun
               ))}
             </div>
             <div className='authorize-request__warning'>
-              {t<string>('Make sure you trust this site before connecting')}
+              {warning}
             </div>
           </>
         )
@@ -108,6 +123,12 @@ function Request ({ authId, className, request: { accountAuthType, allowedAccoun
         <Button
           className='authorize-request__btn'
           onClick={_onReject}
+        >
+          <span>{t<string>('Reject')}</span>
+        </Button>
+        <Button
+          className='authorize-request__btn'
+          onClick={_onCancel}
         >
           <span>{t<string>('Cancel')}</span>
         </Button>
@@ -183,6 +204,15 @@ export default styled(Request)(({ theme }: Props) => `
   }
 
   .authorize-request__btn:first-child {
+    background-color: ${theme.buttonBackgroundDanger};
+    margin-right: 8px;
+
+    span {
+      color: ${theme.buttonTextColor};
+    }
+  }
+
+  .authorize-request__btn:nth-child(2) {
     background-color: ${theme.buttonBackground1};
     margin-right: 8px;
 
@@ -191,14 +221,10 @@ export default styled(Request)(({ theme }: Props) => `
     }
   }
 
-  .authorize-request__btn:last-child {
-    margin-left: 8px;
-  }
-
   .authorize-request__warning {
     font-size: 15px;
     line-height: 26px;
-    color: ${theme.textColor2};
+    color: ${theme.iconWarningColor};
     text-align: center;
   }
 

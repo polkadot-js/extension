@@ -1421,7 +1421,7 @@ export default class KoniState extends State {
     const targetNetworkKeys: string[] = [];
 
     for (const [key, network] of Object.entries(this.networkMap)) {
-      if (network.active) {
+      if (network.active && key !== 'polkadot' && key !== 'kusama') {
         targetNetworkKeys.push(key);
         this.networkMap[key].active = false;
       }

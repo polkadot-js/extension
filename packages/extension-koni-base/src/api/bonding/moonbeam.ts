@@ -205,9 +205,19 @@ export async function handleMoonbeamBondingTxInfo (networkJson: NetworkJson, amo
   } as BasicTxInfo;
 }
 
-export async function handleMoonbeamUnbondingTxInfo (address: string, amount: number, networkKey: string, dotSamaApiMap: Record<string, ApiProps>, web3ApiMap: Record<string, Web3>, networkJson: NetworkJson, validatorAddress: string) {
+export async function getMoonbeamUnbondingTxInfo (networkJson: NetworkJson, dotSamaApi: ApiProps, address: string, amount: number, collatorAddress: string) {
+  const apiPromise = await dotSamaApi.isReady;
+  const parsedAmount = amount * (10 ** (networkJson.decimals as number));
+  const binaryAmount = new BN(parsedAmount.toString());
+
+  const extrinsic = apiPromise.api.tx.parachainStaking.scheduleDelegatorBondLess(collatorAddress, binaryAmount);
+
+  return extrinsic.paymentInfo(address);
+}
+
+export async function handleMoonbeamUnbondingTxInfo (address: string, amount: number, networkKey: string, dotSamaApiMap: Record<string, ApiProps>, web3ApiMap: Record<string, Web3>, networkJson: NetworkJson, collatorAddress: string) {
   const [txInfo, balance] = await Promise.all([
-    getMoonbeamUnbondingTxInfo(networkJson, dotSamaApiMap[networkKey], nominatorAddress, amount, validatorInfo, currentNominationCount),
+    getMoonbeamUnbondingTxInfo(networkJson, dotSamaApiMap[networkKey], address, amount, collatorAddress),
     getFreeBalance(networkKey, address, dotSamaApiMap, web3ApiMap)
   ]);
 

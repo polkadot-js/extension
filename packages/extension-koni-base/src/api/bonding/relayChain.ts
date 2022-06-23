@@ -265,7 +265,7 @@ export function getTargetValidators (bondedValidators: string[], selectedValidat
   }
 }
 
-export async function getUnbondingTxInfo (dotSamaApi: ApiProps, amount: BN, address: string) {
+export async function getRelayUnbondingTxInfo (dotSamaApi: ApiProps, amount: BN, address: string) {
   const apiPromise = await dotSamaApi.isReady;
 
   const chillTx = apiPromise.api.tx.staking.chill();
@@ -291,7 +291,7 @@ export async function handleRelayUnbondingTxInfo (address: string, amount: numbe
   const binaryAmount = new BN(parsedAmount);
 
   const [txInfo, balance] = await Promise.all([
-    getUnbondingTxInfo(dotSamaApi, binaryAmount, address),
+    getRelayUnbondingTxInfo(dotSamaApi, binaryAmount, address),
     getFreeBalance(networkKey, address, dotSamaApiMap, web3ApiMap)
   ]);
 

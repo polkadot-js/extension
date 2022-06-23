@@ -2,15 +2,8 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { ApiProps, NetworkJson, ValidatorInfo } from '@subwallet/extension-base/background/KoniTypes';
-import { getMoonbeamBondingBasics, getMoonbeamBondingExtrinsic, getMoonbeamCollatorsInfo, handleMoonbeamBondingTxInfo } from '@subwallet/extension-koni-base/api/bonding/moonbeam';
-import {
-  getRelayBondingExtrinsic,
-  getRelayChainBondingBasics,
-  getRelayValidatorsInfo,
-  getTargetValidators,
-  handleRelayBondingTxInfo,
-  handleRelayUnbondingTxInfo
-} from '@subwallet/extension-koni-base/api/bonding/relayChain';
+import { getMoonbeamBondingBasics, getMoonbeamBondingExtrinsic, getMoonbeamCollatorsInfo, handleMoonbeamBondingTxInfo, handleMoonbeamUnbondingTxInfo } from '@subwallet/extension-koni-base/api/bonding/moonbeam';
+import { getRelayBondingExtrinsic, getRelayChainBondingBasics, getRelayValidatorsInfo, getTargetValidators, handleRelayBondingTxInfo, handleRelayUnbondingTxInfo } from '@subwallet/extension-koni-base/api/bonding/relayChain';
 import Web3 from 'web3';
 
 const CHAIN_TYPES: Record<string, string[]> = {
@@ -56,7 +49,7 @@ export async function getBondingExtrinsic (networkJson: NetworkJson, networkKey:
 
 export async function getUnbondingTxInfo (address: string, amount: number, networkKey: string, dotSamaApiMap: Record<string, ApiProps>, web3ApiMap: Record<string, Web3>, networkJson: NetworkJson, validatorAddress?: string) {
   if (CHAIN_TYPES.moonbeam.includes(networkKey)) {
-    return handleMoonbeamUnbondingTxInfo(address, amount, networkKey, dotSamaApiMap, web3ApiMap, networkJson, validatorAddress);
+    return handleMoonbeamUnbondingTxInfo(address, amount, networkKey, dotSamaApiMap, web3ApiMap, networkJson, validatorAddress as string);
   }
 
   return handleRelayUnbondingTxInfo(address, amount, networkKey, dotSamaApiMap, web3ApiMap, networkJson);

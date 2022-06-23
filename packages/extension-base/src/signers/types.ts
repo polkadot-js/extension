@@ -27,3 +27,7 @@ export interface LedgerState {
   ledgerPayload: `0x${string}`;
   ledgerId: string;
 }
+
+export interface ExternalState {
+  externalId: string;
+}

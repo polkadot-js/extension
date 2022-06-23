@@ -2795,13 +2795,19 @@ export default class KoniExtension extends Extension {
   // External account request
 
   private rejectExternalRequest (request: RequestRejectExternalRequest): ResponseRejectExternalRequest {
-    const { id } = request;
+    const { id, message } = request;
 
     const promise = state.getExternalRequest(id);
 
-    promise.reject();
+    if (promise.status === ExternalRequestPromiseStatus.PENDING) {
+      if (message) {
+        promise.reject(new Error(message));
+      } else {
+        promise.reject();
+      }
 
-    state.updateExternalRequest(id, { status: ExternalRequestPromiseStatus.REJECTED });
+      state.updateExternalRequest(id, { status: ExternalRequestPromiseStatus.REJECTED });
+    }
   }
 
   private resolveQrTransfer (request: RequestResolveExternalRequest): ResponseResolveExternalRequest {
@@ -2809,7 +2815,9 @@ export default class KoniExtension extends Extension {
 
     const promise = state.getExternalRequest(id);
 
-    promise.resolve(data);
+    if (promise.status === ExternalRequestPromiseStatus.PENDING) {
+      promise.resolve(data);
+    }
   }
 
   private accountsTie2 ({ address, genesisHash }: RequestAccountTie): boolean {

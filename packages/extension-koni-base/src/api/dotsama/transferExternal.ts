@@ -412,7 +412,10 @@ const doSignAndSendQr = async (
       errors: [],
       extrinsicStatus: undefined,
       data: {},
-      qrState: qrState
+      qrState: qrState,
+      externalState: {
+        externalId: qrState.qrId
+      }
     });
   };
 
@@ -554,7 +557,7 @@ export async function makeNftTransferQr ({ apiProp,
 
   const qrCallback = ({ qrState }: {qrState: QrState}) => {
     // eslint-disable-next-line node/no-callback-literal
-    callback({ isSendingSelf: false, qrState: qrState });
+    callback({ isSendingSelf: false, qrState: qrState, externalState: { externalId: qrState.qrId } });
   };
 
   await extrinsic.signAsync(senderAddress, { nonce, signer: new QrSigner(apiProp.registry, qrCallback, qrId, setState) });
@@ -628,7 +631,8 @@ const doSignAndSendLedger = async ({ api,
       errors: [],
       extrinsicStatus: undefined,
       data: {},
-      ledgerState: ledgerState
+      ledgerState: ledgerState,
+      externalState: { externalId: ledgerState.ledgerId }
     });
   };
 
@@ -770,7 +774,7 @@ export async function makeNftTransferLedger ({ apiProp,
 
   const ledgerCallback = ({ ledgerState }: {ledgerState: LedgerState}) => {
     // eslint-disable-next-line node/no-callback-literal
-    callback({ isSendingSelf: false, ledgerState: ledgerState });
+    callback({ isSendingSelf: false, ledgerState: ledgerState, externalState: { externalId: ledgerState.ledgerId } });
   };
 
   await extrinsic.signAsync(senderAddress, { nonce, signer: new LedgerSigner(apiProp.registry, ledgerCallback, qrId, setState) });

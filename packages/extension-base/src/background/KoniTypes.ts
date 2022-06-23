@@ -3,7 +3,7 @@
 
 import { AuthUrls, Resolver } from '@subwallet/extension-base/background/handlers/State';
 import { AccountAuthType, AccountJson, AuthorizeRequest, RequestAccountList, RequestAccountSubscribe, RequestAuthorizeReject, RequestAuthorizeSubscribe, RequestAuthorizeTab, RequestCurrentAccountAddress, RequestParseTransactionSubstrate, RequestQRIsLocked, RequestQrSignSubstrate, ResponseAuthorizeList, ResponseJsonGetAccountInfo, ResponseParseTransactionSubstrate, ResponseQRIsLocked, ResponseQrSignSubstrate, SeedLengths } from '@subwallet/extension-base/background/types';
-import { LedgerState, QrState } from '@subwallet/extension-base/signers/types';
+import { ExternalState, LedgerState, QrState } from '@subwallet/extension-base/signers/types';
 import { InjectedAccount, MetadataDefBase } from '@subwallet/extension-inject/types';
 import Web3 from 'web3';
 import { RequestArguments, TransactionConfig } from 'web3-core';
@@ -530,6 +530,7 @@ export type RequestCrossChainTransferExternal = RequestCheckCrossChainTransfer
 
 export interface RequestRejectExternalRequest {
   id: string;
+  message?: string;
 }
 
 export interface RequestResolveExternalRequest {
@@ -641,12 +642,16 @@ export interface ResponseTransfer {
   isFinalized?: boolean
 }
 
-export interface ResponseTransferQr extends ResponseTransfer{
+export interface ResponseTransferExternal extends ResponseTransfer{
+  externalState?: ExternalState;
+}
+
+export interface ResponseTransferQr extends ResponseTransferExternal{
   qrState?: QrState;
   isBusy?: boolean;
 }
 
-export interface ResponseTransferLedger extends ResponseTransfer{
+export interface ResponseTransferLedger extends ResponseTransferExternal{
   ledgerState?: LedgerState;
 }
 
@@ -830,7 +835,7 @@ export enum ExternalRequestPromiseStatus {
 
 export interface ExternalRequestPromise {
   resolve: (result: SignerResult) => void,
-  reject: () => void,
+  reject: (error?: Error) => void,
   status: ExternalRequestPromiseStatus,
   createdAt: number
 }
@@ -1073,12 +1078,16 @@ export interface StakeWithdrawalParams {
   password?: string
 }
 
-export interface ResponseNftTransferQr extends NftTransactionResponse{
+export interface ResponseNftTransferExternal extends NftTransactionResponse{
+  externalState?: ExternalState;
+}
+
+export interface ResponseNftTransferQr extends ResponseNftTransferExternal{
   qrState?: QrState;
   isBusy?: boolean;
 }
 
-export interface ResponseNftTransferLedger extends NftTransactionResponse{
+export interface ResponseNftTransferLedger extends ResponseNftTransferExternal{
   ledgerState?: LedgerState;
 }
 

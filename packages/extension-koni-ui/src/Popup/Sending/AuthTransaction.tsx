@@ -74,10 +74,10 @@ function renderTotal (arg: RenderTotalArg) {
 function AuthTransaction ({ className, isDonation, feeInfo: [fee, feeDecimals, feeSymbol], balanceFormat, networkMap, onCancel, onChangeResult, requestPayload }: Props): React.ReactElement<Props> | null {
   const { t } = useTranslation();
 
-  const { QrState, cleanQrState, updateQrState } = useContext(QrContext);
-  const { createResolveExternalRequestData } = useContext(ExternalRequestContext);
+  const { cleanQrState, updateQrState } = useContext(QrContext);
+  const { clearExternalState, createResolveExternalRequestData, externalState, updateExternalState } = useContext(ExternalRequestContext);
 
-  const { qrId } = QrState;
+  const { externalId } = externalState;
 
   const [isBusy, setBusy] = useState(false);
   const [password, setPassword] = useState<string>('');
@@ -101,42 +101,22 @@ function AuthTransaction ({ className, isDonation, feeInfo: [fee, feeDecimals, f
     return SIGN_MODE.PASSWORD;
   }, [accountMeta]);
 
-  useEffect(() => {
-    let unmount = false;
-
-    const handler = async () => {
-      const { meta } = await getAccountMeta({ address: requestPayload.from });
-
-      if (!unmount) {
-        setAccountMeta(meta);
-      }
-    };
-
-    // eslint-disable-next-line no-void
-    void handler();
-
-    return () => {
-      unmount = true;
-    };
-  }, [requestPayload.from]);
-
-  const handlerReject = useCallback(async () => {
-    if (qrId) {
-      await rejectExternalRequest({ id: qrId });
+  const handlerReject = useCallback(async (externalId: string) => {
+    if (externalId) {
+      await rejectExternalRequest({ id: externalId });
     }
 
     cleanQrState();
-  }, [cleanQrState, qrId]);
+    clearExternalState();
+  }, [cleanQrState, clearExternalState]);
 
   const _onCancel = useCallback(async () => {
-    if (qrId) {
-      await handlerReject();
+    if (externalId) {
+      await handlerReject(externalId);
     }
 
     onCancel();
-  },
-  [handlerReject, onCancel, qrId]
-  );
+  }, [handlerReject, onCancel, externalId]);
 
   const handlerCallbackResponseResult = useCallback((rs: ResponseTransfer) => {
     if (!rs.isFinalized) {
@@ -196,6 +176,7 @@ function AuthTransaction ({ className, isDonation, feeInfo: [fee, feeDecimals, f
       } else {
         setErrorArr(['Cannot find ledger']);
       }
+
       rejectExternalRequest({ id: ledgerState.ledgerId })
         .finally(() => setBusy(false));
     }
@@ -225,6 +206,10 @@ function AuthTransaction ({ className, isDonation, feeInfo: [fee, feeDecimals, f
         setBusy(false);
       }
 
+      if (rs.externalState) {
+        updateExternalState(rs.externalState);
+      }
+
       if (rs.isBusy && rs.step !== TransferStep.SUCCESS.valueOf()) {
         updateQrState({ step: QrStep.SENDING_TX });
         setBusy(true);
@@ -233,7 +218,7 @@ function AuthTransaction ({ className, isDonation, feeInfo: [fee, feeDecimals, f
       handlerCallbackResponseResult(rs);
     }).then(handlerResponseError)
       .catch((e) => console.log('There is problem when makeTransferQr', e));
-  }, [requestPayload, handlerCallbackResponseResult, handlerResponseError, updateQrState]);
+  }, [requestPayload, handlerCallbackResponseResult, handlerResponseError, updateQrState, updateExternalState]);
 
   const _doStartLedger = useCallback((): void => {
     setBusy(true);
@@ -244,10 +229,14 @@ function AuthTransaction ({ className, isDonation, feeInfo: [fee, feeDecimals, f
         handlerSignLedger(rs.ledgerState);
       }
 
+      if (rs.externalState) {
+        updateExternalState(rs.externalState);
+      }
+
       handlerCallbackResponseResult(rs);
     }).then(handlerResponseError)
       .catch((e) => console.log('There is problem when makeTransferQr', e));
-  }, [requestPayload, handlerCallbackResponseResult, handlerResponseError, handlerSignLedger]);
+  }, [updateExternalState, requestPayload, handlerCallbackResponseResult, handlerResponseError, handlerSignLedger]);
 
   const _onChangePass = useCallback((value: string): void => {
     setPassword(value);
@@ -413,6 +402,33 @@ function AuthTransaction ({ className, isDonation, feeInfo: [fee, feeDecimals, f
         );
     }
   }, [_doStart, _doStartLedger, _doStartQr, _onChangePass, errorArr, genesisHash, handlerRenderInfo, isBusy, isKeyringErr, password, renderError, t, signMode]);
+
+  useEffect(() => {
+    let unmount = false;
+
+    const handler = async () => {
+      const { meta } = await getAccountMeta({ address: requestPayload.from });
+
+      if (!unmount) {
+        setAccountMeta(meta);
+      }
+    };
+
+    // eslint-disable-next-line no-void
+    void handler();
+
+    return () => {
+      unmount = true;
+    };
+  }, [requestPayload.from]);
+
+  useEffect(() => {
+    return () => {
+      if (externalId) {
+        handlerReject(externalId);
+      }
+    };
+  }, [handlerReject, externalId]);
 
   return (
     <div className={className}>

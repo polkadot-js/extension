@@ -87,7 +87,8 @@ export async function handleTransferQr ({ callback,
       errors: [],
       extrinsicStatus: undefined,
       data: {},
-      qrState: qrState
+      qrState: qrState,
+      externalState: { externalId: qrState.qrId }
     });
   };
 
@@ -320,7 +321,8 @@ export async function handleTransferNftQr ({ callback,
     // eslint-disable-next-line node/no-callback-literal
     callback({
       isSendingSelf: isSendingSelf,
-      qrState: qrState
+      qrState: qrState,
+      externalState: { externalId: qrState.qrId }
     });
   };
 

@@ -9,6 +9,7 @@ import FormatBalance from '@subwallet/extension-koni-ui/components/FormatBalance
 import InputAddress from '@subwallet/extension-koni-ui/components/InputAddress';
 import Modal from '@subwallet/extension-koni-ui/components/Modal';
 import { BalanceFormatType } from '@subwallet/extension-koni-ui/components/types';
+import { SIGN_MODE } from '@subwallet/extension-koni-ui/constants/signing';
 import { QrContext, QrContextState, QrStep } from '@subwallet/extension-koni-ui/contexts/QrContext';
 import useTranslation from '@subwallet/extension-koni-ui/hooks/useTranslation';
 import { getAccountMeta, makeCrossChainTransfer, makeCrossChainTransferQr, rejectExternalRequest, resolveExternalRequest } from '@subwallet/extension-koni-ui/messaging';
@@ -101,13 +102,17 @@ function AuthTransaction ({ balanceFormat,
   const [errorArr, setErrorArr] = useState<string[]>([]);
   const [accountMeta, setAccountMeta] = useState<KeyringPair$Meta>({});
 
-  const isQr = useMemo((): boolean => {
-    if (accountMeta.isExternal !== undefined) {
-      return !!accountMeta.isExternal;
-    } else {
-      return false;
+  const signMode = useMemo((): SIGN_MODE => {
+    if (accountMeta.isExternal && !!accountMeta.isExternal) {
+      if (accountMeta.isHardware && !!accountMeta.isHardware) {
+        return SIGN_MODE.LEDGER;
+      }
+
+      return SIGN_MODE.QR;
     }
-  }, [accountMeta.isExternal]);
+
+    return SIGN_MODE.PASSWORD;
+  }, [accountMeta]);
 
   const handlerReject = useCallback(async () => {
     if (qrId) {

@@ -45,6 +45,7 @@ export async function getBondingTxInfo (networkJson: NetworkJson, amount: number
   return handleRelayBondingTxInfo(networkJson, amount, targetValidators, isBondedBefore, networkKey, nominatorAddress, dotSamaApiMap, web3ApiMap);
 }
 
+// TODO: remove address
 export async function getBondingExtrinsic (networkJson: NetworkJson, networkKey: string, amount: number, bondedValidators: string[], validatorInfo: ValidatorInfo, isBondedBefore: boolean, nominatorAddress: string, dotSamaApi: ApiProps) {
   if (CHAIN_TYPES.moonbeam.includes(networkKey)) {
     return getMoonbeamBondingExtrinsic(networkJson, dotSamaApi, nominatorAddress, amount, validatorInfo, bondedValidators.length);

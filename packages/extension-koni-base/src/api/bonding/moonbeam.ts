@@ -233,10 +233,15 @@ export async function handleMoonbeamUnbondingTxInfo (address: string, amount: nu
   } as BasicTxInfo;
 }
 
+// TODO: remove delegatorAddress
 export async function getMoonbeamBondingExtrinsic (networkJson: NetworkJson, dotSamaApi: ApiProps, delegatorAddress: string, amount: number, collatorInfo: ValidatorInfo, currentNominationCount: number) {
   const apiPromise = await dotSamaApi.isReady;
   const parsedAmount = amount * (10 ** (networkJson.decimals as number));
   const binaryAmount = new BN(parsedAmount.toString());
 
   return apiPromise.api.tx.parachainStaking.delegate(collatorInfo.address, binaryAmount, new BN(collatorInfo.nominatorCount), new BN(currentNominationCount));
+}
+
+export async function getMoonbeamUnbondingExtrinsic(dotSamaApi: ApiProps, amount: number, networkJson: NetworkJson, validatorAddress: string) {
+
 }

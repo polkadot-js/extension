@@ -23,6 +23,7 @@ import { approveSignSignature } from '../../../messaging';
 import Bytes from '../Bytes';
 import Extrinsic from '../Extrinsic';
 import SignArea from './SignArea';
+import LedgerSign from "@subwallet/extension-koni-ui/Popup/Signing/LedgerSign";
 
 interface Props extends ThemeProps {
   account: AccountJson;
@@ -49,7 +50,7 @@ function isRawPayload (payload: SignerPayloadJSON | SignerPayloadRaw): payload i
   return !!(payload as SignerPayloadRaw).data;
 }
 
-function Request ({ account: { isExternal, isHardware }, buttonText, className, isFirst, request, signId, url }: Props): React.ReactElement<Props> | null {
+function Request ({ account: { accountIndex, addressOffset, isExternal, isHardware }, buttonText, className, isFirst, request, signId, url }: Props): React.ReactElement<Props> | null {
   const { t } = useTranslation();
   const onAction = useContext(ActionContext);
   const [{ hexBytes, payload }, setData] = useState<Data>({ hexBytes: null, payload: null });
@@ -117,6 +118,17 @@ function Request ({ account: { isExternal, isHardware }, buttonText, className, 
               />
             )
           }
+          {isHardware && (
+            <LedgerSign
+              accountIndex={accountIndex as number || 0}
+              addressOffset={addressOffset as number || 0}
+              error={error}
+              genesisHash={json.genesisHash}
+              onSignature={_onSignature}
+              payload={payload}
+              setError={setError}
+            />
+          )}
         </>
       )
       ;
@@ -175,10 +187,10 @@ function Request ({ account: { isExternal, isHardware }, buttonText, className, 
     .find((account) => decodeAddress(account.address).toString() === decodeAddress(address).toString());
 
   useEffect(() => {
-    if (isExternal && !isHardware) {
+    if (isExternal) {
       setShowDetails(true);
     }
-  }, [isExternal, isHardware]);
+  }, [isExternal]);
 
   return (
     <div className={className}>
@@ -308,6 +320,7 @@ export default styled(Request)(({ theme }: Props) => `
     width: fit-content;
     align-self: center;
     height: 24px;
+    margin: ${theme.boxMargin};
   }
 
   .signing-request__view-detail-btn:hover {

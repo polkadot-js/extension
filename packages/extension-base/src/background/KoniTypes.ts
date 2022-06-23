@@ -90,7 +90,8 @@ export interface StakingRewardJson {
 
 export interface DelegationItem {
   owner: string,
-  amount: string // raw amount string
+  amount: string, // raw amount string
+  identity?: string
 }
 
 export interface StakingItem {
@@ -946,7 +947,8 @@ export interface UnbondingSubmitParams {
   amount: number,
   networkKey: string,
   address: string,
-  password?: string
+  password?: string,
+  validatorAddress?: string
 }
 
 export interface UnlockingStakeParams {

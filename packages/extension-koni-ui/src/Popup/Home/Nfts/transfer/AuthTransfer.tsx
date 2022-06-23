@@ -212,7 +212,7 @@ function AuthTransfer ({ chain, className, collectionId, nftItem, recipientAddre
               className={'close-button-confirm'}
               onClick={hideConfirm}
             >
-              x
+              Cancel
             </div>
           </div>
 

@@ -4,9 +4,10 @@
 import type { RequestAuthorizeTab } from '@subwallet/extension-base/background/types';
 import type { ThemeProps } from '../../types';
 
+import { ALL_ACCOUNT_KEY } from '@subwallet/extension-koni-base/constants';
 import { filterAndSortingAccountByAuthType } from '@subwallet/extension-koni-base/utils/utils';
 import ConnectAccount from '@subwallet/extension-koni-ui/Popup/Authorize/ConnectAccount';
-import React, { useCallback, useContext, useState } from 'react';
+import React, { useCallback, useContext, useEffect, useState } from 'react';
 import styled from 'styled-components';
 
 import { AccountContext, ActionContext, Button, Warning } from '../../components';
@@ -41,6 +42,7 @@ function Request ({ authId, className, request: { accountAuthType, allowedAccoun
 
   const { hostname } = new URL(url);
   const [selectedAccounts, setSelectedAccounts] = useState<string[]>(allowedAccounts || []);
+  const [isSelectedAll, setIsSelectedAll] = useState(true);
 
   const _onApprove = useCallback(
     () => approveAuthRequestV2(authId, selectedAccounts)
@@ -48,6 +50,12 @@ function Request ({ authId, className, request: { accountAuthType, allowedAccoun
       .catch((error: Error) => console.error(error)),
     [authId, onAction, selectedAccounts]
   );
+
+  useEffect(() => {
+    const notInSelected = accountList.find((acc) => !selectedAccounts.includes(acc.address));
+
+    setIsSelectedAll(!notInSelected);
+  }, [accountList, selectedAccounts]);
 
   const _onReject = useCallback(() => {
     if (!confirmReject) {
@@ -98,10 +106,18 @@ function Request ({ authId, className, request: { accountAuthType, allowedAccoun
               {t<string>('Choose the account(s) you’d like to connect')}
             </div>
             <div className='request__accounts'>
+              <ConnectAccount
+                address={ALL_ACCOUNT_KEY}
+                isSelected={isSelectedAll}
+                name={t<string>('Select all')}
+                selectAccountCallBack={setSelectedAccounts}
+                selectedAccounts={accountList.map((account) => account.address)}
+              />
               {accountList.map((acc) => (
                 <ConnectAccount
                   address={acc.address}
                   genesisHash={acc.genesisHash}
+                  isSelected={selectedAccounts.includes(acc.address)}
                   key={acc.address}
                   name={acc.name}
                   selectAccountCallBack={setSelectedAccounts}

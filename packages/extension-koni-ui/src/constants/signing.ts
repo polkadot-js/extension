@@ -6,3 +6,5 @@ export enum SIGN_MODE {
   QR = 'qr',
   LEDGER = 'ledger',
 }
+
+export const MANUAL_CANCEL_EXTERNAL_REQUEST = 'MANUAL_CANCEL_EXTERNAL_REQUEST';

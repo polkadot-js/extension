@@ -1625,12 +1625,18 @@ export default class KoniState extends State {
 
     const arr: string[] = [];
 
+    const handlerPushToDelete = (key: string, value: ExternalRequestPromise) => {
+      arr.push(key);
+      value.resolve = undefined;
+      value.reject = undefined;
+    };
+
     for (const [key, value] of Object.entries(map)) {
       if (value.status === ExternalRequestPromiseStatus.COMPLETED || value.status === ExternalRequestPromiseStatus.REJECTED) {
-        arr.push(key);
+        handlerPushToDelete(key, value);
       } else {
         if (now - value.createdAt > 15 * 60 * 60) {
-          arr.push(key);
+          handlerPushToDelete(key, value);
         }
       }
     }

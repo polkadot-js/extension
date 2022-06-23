@@ -2,7 +2,6 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { NetworkJson, RequestCheckTransfer, ResponseTransfer, TransferError, TransferStep } from '@subwallet/extension-base/background/KoniTypes';
-import { LedgerState } from '@subwallet/extension-base/signers/types';
 import { InputWithLabel, Warning } from '@subwallet/extension-koni-ui/components';
 import Button from '@subwallet/extension-koni-ui/components/Button';
 import DonateInputAddress from '@subwallet/extension-koni-ui/components/DonateInputAddress';
@@ -11,18 +10,18 @@ import InputAddress from '@subwallet/extension-koni-ui/components/InputAddress';
 import Modal from '@subwallet/extension-koni-ui/components/Modal';
 import QrRequest from '@subwallet/extension-koni-ui/components/Qr/QrRequest';
 import { BalanceFormatType } from '@subwallet/extension-koni-ui/components/types';
-import { SIGN_MODE } from '@subwallet/extension-koni-ui/constants/signing';
+import { MANUAL_CANCEL_EXTERNAL_REQUEST, SIGN_MODE } from '@subwallet/extension-koni-ui/constants/signing';
 import { ExternalRequestContext } from '@subwallet/extension-koni-ui/contexts/ExternalRequestContext';
 import { QrContext, QrContextState, QrStep } from '@subwallet/extension-koni-ui/contexts/QrContext';
-import { useLedger } from '@subwallet/extension-koni-ui/hooks/useLedger';
+import { useSignLedger } from '@subwallet/extension-koni-ui/hooks/useSignLedger';
 import useTranslation from '@subwallet/extension-koni-ui/hooks/useTranslation';
-import { getAccountMeta, makeTransfer, makeTransferLedger, makeTransferQr, rejectExternalRequest, resolveExternalRequest } from '@subwallet/extension-koni-ui/messaging';
+import { getAccountMeta, makeTransfer, makeTransferLedger, makeTransferQr, rejectExternalRequest } from '@subwallet/extension-koni-ui/messaging';
 import { ThemeProps, TransferResultType } from '@subwallet/extension-koni-ui/types';
 import React, { useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import styled from 'styled-components';
 
 import { KeyringPair$Meta } from '@polkadot/keyring/types';
-import { BN, hexToU8a } from '@polkadot/util';
+import { BN } from '@polkadot/util';
 
 interface Props extends ThemeProps {
   className?: string;
@@ -75,7 +74,7 @@ function AuthTransaction ({ className, isDonation, feeInfo: [fee, feeDecimals, f
   const { t } = useTranslation();
 
   const { cleanQrState, updateQrState } = useContext(QrContext);
-  const { clearExternalState, createResolveExternalRequestData, externalState, updateExternalState } = useContext(ExternalRequestContext);
+  const { clearExternalState, externalState, updateExternalState } = useContext(ExternalRequestContext);
 
   const { externalId } = externalState;
 
@@ -86,8 +85,6 @@ function AuthTransaction ({ className, isDonation, feeInfo: [fee, feeDecimals, f
   const [accountMeta, setAccountMeta] = useState<KeyringPair$Meta>({});
   const networkPrefix = networkMap[requestPayload.networkKey].ss58Format;
   const genesisHash = networkMap[requestPayload.networkKey].genesisHash;
-
-  const { error, ledger } = useLedger(genesisHash, accountMeta.accountIndex as number, accountMeta.addressOffset as number);
 
   const signMode = useMemo((): SIGN_MODE => {
     if (accountMeta.isExternal && !!accountMeta.isExternal) {
@@ -103,7 +100,7 @@ function AuthTransaction ({ className, isDonation, feeInfo: [fee, feeDecimals, f
 
   const handlerReject = useCallback(async (externalId: string) => {
     if (externalId) {
-      await rejectExternalRequest({ id: externalId });
+      await rejectExternalRequest({ id: externalId, message: MANUAL_CANCEL_EXTERNAL_REQUEST });
     }
 
     cleanQrState();
@@ -127,6 +124,7 @@ function AuthTransaction ({ className, isDonation, feeInfo: [fee, feeDecimals, f
           extrinsicHash: rs.extrinsicHash
         });
         cleanQrState();
+        clearExternalState();
         setBusy(false);
       } else if (rs.step === TransferStep.ERROR.valueOf()) {
         onChangeResult({
@@ -136,10 +134,11 @@ function AuthTransaction ({ className, isDonation, feeInfo: [fee, feeDecimals, f
           txError: rs.errors
         });
         cleanQrState();
+        clearExternalState();
         setBusy(false);
       }
     }
-  }, [cleanQrState, onChangeResult]);
+  }, [cleanQrState, onChangeResult, clearExternalState]);
 
   const handlerResponseError = useCallback((errors: TransferError[]) => {
     const errorMessage = errors.map((err) => err.message);
@@ -155,32 +154,13 @@ function AuthTransaction ({ className, isDonation, feeInfo: [fee, feeDecimals, f
     }
   }, []);
 
-  const handlerSignLedger = useCallback((ledgerState: LedgerState) => {
-    if (ledger) {
-      ledger
-        .sign(hexToU8a(ledgerState.ledgerPayload), accountMeta.accountIndex as number, accountMeta.accountOffset as number)
-        .then(({ signature }) => {
-          const resolveData = createResolveExternalRequestData({ signature });
+  const handlerOnErrorLedger = useCallback((id: string, error: string) => {
+    setErrorArr([error]);
+    rejectExternalRequest({ id: id, message: error })
+      .finally(() => setBusy(false));
+  }, []);
 
-          // eslint-disable-next-line no-void
-          void resolveExternalRequest({ id: ledgerState.ledgerId, data: resolveData });
-        })
-        .catch((e) => {
-          setErrorArr([(e as Error).message]);
-          rejectExternalRequest({ id: ledgerState.ledgerId })
-            .finally(() => setBusy(false));
-        });
-    } else {
-      if (error) {
-        setErrorArr([error]);
-      } else {
-        setErrorArr(['Cannot find ledger']);
-      }
-
-      rejectExternalRequest({ id: ledgerState.ledgerId })
-        .finally(() => setBusy(false));
-    }
-  }, [accountMeta, createResolveExternalRequestData, ledger, error]);
+  const { signLedger: handlerSignLedger } = useSignLedger({ onError: handlerOnErrorLedger, accountMeta: accountMeta, genesisHash: genesisHash });
 
   const _doStart = useCallback((): void => {
     setBusy(true);
@@ -225,17 +205,17 @@ function AuthTransaction ({ className, isDonation, feeInfo: [fee, feeDecimals, f
     makeTransferLedger({
       ...requestPayload
     }, (rs) => {
-      if (rs.ledgerState) {
-        handlerSignLedger(rs.ledgerState);
-      }
-
       if (rs.externalState) {
         updateExternalState(rs.externalState);
       }
 
+      if (rs.ledgerState) {
+        handlerSignLedger(rs.ledgerState);
+      }
+
       handlerCallbackResponseResult(rs);
     }).then(handlerResponseError)
-      .catch((e) => console.log('There is problem when makeTransferQr', e));
+      .catch((e) => console.log('There is problem when makeTransferLedger', e));
   }, [updateExternalState, requestPayload, handlerCallbackResponseResult, handlerResponseError, handlerSignLedger]);
 
   const _onChangePass = useCallback((value: string): void => {
@@ -421,14 +401,6 @@ function AuthTransaction ({ className, isDonation, feeInfo: [fee, feeDecimals, f
       unmount = true;
     };
   }, [requestPayload.from]);
-
-  useEffect(() => {
-    return () => {
-      if (externalId) {
-        handlerReject(externalId);
-      }
-    };
-  }, [handlerReject, externalId]);
 
   return (
     <div className={className}>

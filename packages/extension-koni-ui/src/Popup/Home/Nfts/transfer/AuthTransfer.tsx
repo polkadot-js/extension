@@ -1,17 +1,19 @@
 // Copyright 2019-2022 @subwallet/extension-koni authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { RequestNftForceUpdate, ResponseNftTransferQr, TransferNftError } from '@subwallet/extension-base/background/KoniTypes';
+import { RequestNftForceUpdate, ResponseNftTransferExternal, ResponseNftTransferLedger, ResponseNftTransferQr, TransferNftError } from '@subwallet/extension-base/background/KoniTypes';
 import { AccountJson } from '@subwallet/extension-base/background/types';
-import { LoadingContainer, Spinner, Warning } from '@subwallet/extension-koni-ui/components';
-import Button from '@subwallet/extension-koni-ui/components/Button';
+import { Spinner } from '@subwallet/extension-koni-ui/components';
 import InputAddress from '@subwallet/extension-koni-ui/components/InputAddress';
 import Modal from '@subwallet/extension-koni-ui/components/Modal';
-import DisplayPayload from '@subwallet/extension-koni-ui/components/Qr/DisplayPayload';
+import QrRequest from '@subwallet/extension-koni-ui/components/Qr/QrRequest';
+import { MANUAL_CANCEL_EXTERNAL_REQUEST, SIGN_MODE } from '@subwallet/extension-koni-ui/constants/signing';
+import { ExternalRequestContext } from '@subwallet/extension-koni-ui/contexts/ExternalRequestContext';
 import { QrContext, QrContextState, QrStep } from '@subwallet/extension-koni-ui/contexts/QrContext';
+import { useSignLedger } from '@subwallet/extension-koni-ui/hooks/useSignLedger';
 import useToast from '@subwallet/extension-koni-ui/hooks/useToast';
 import useTranslation from '@subwallet/extension-koni-ui/hooks/useTranslation';
-import { evmNftSubmitTransaction, getAccountMeta, makeTransferNftQrEvm, makeTransferNftQrSubstrate, nftForceUpdate, rejectExternalRequest, resolveExternalRequest, substrateNftSubmitTransaction } from '@subwallet/extension-koni-ui/messaging';
+import { evmNftSubmitTransaction, getAccountMeta, makeTransferNftLedgerSubstrate, makeTransferNftQrEvm, makeTransferNftQrSubstrate, nftForceUpdate, rejectExternalRequest, substrateNftSubmitTransaction } from '@subwallet/extension-koni-ui/messaging';
 import { _NftItem, SubstrateTransferParams, Web3TransferParams } from '@subwallet/extension-koni-ui/Popup/Home/Nfts/types';
 import Address from '@subwallet/extension-koni-ui/Popup/Sending/parts/Address';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
@@ -21,9 +23,6 @@ import { useSelector } from 'react-redux';
 import styled from 'styled-components';
 
 import { KeyringPair$Meta } from '@polkadot/keyring/types';
-import { QrScanSignature } from '@polkadot/react-qr';
-import { SignerResult } from '@polkadot/types/types';
-import { hexToU8a, isHex } from '@polkadot/util';
 
 interface AddressProxy {
   isUnlockCached: boolean;
@@ -47,18 +46,13 @@ interface Props extends ThemeProps {
   web3TransferParams: Web3TransferParams;
 }
 
-interface SigData {
-  signature: string;
-}
-
-let id = 1;
-
 function AuthTransfer ({ chain, className, collectionId, nftItem, recipientAddress, senderAccount, setExtrinsicHash, setIsTxSuccess, setShowConfirm, setShowResult, setTxError, substrateTransferParams, web3TransferParams }: Props): React.ReactElement<Props> {
   const { t } = useTranslation();
 
-  const { QrState, cleanQrState, updateQrState } = useContext(QrContext);
+  const { cleanQrState, updateQrState } = useContext(QrContext);
+  const { clearExternalState, externalState, updateExternalState } = useContext(ExternalRequestContext);
 
-  const { isEthereum, isQrHashed, qrAddress, qrId, qrPayload, step } = QrState;
+  const { externalId } = externalState;
 
   const [errorArr, setErrorArr] = useState<string[]>([]);
   const [passwordError, setPasswordError] = useState<string | null>(null);
@@ -68,13 +62,17 @@ function AuthTransfer ({ chain, className, collectionId, nftItem, recipientAddre
   const [senderInfoSubstrate, setSenderInfoSubstrate] = useState<AddressProxy>(() => ({ isUnlockCached: false, signAddress: senderAccount.address, signPassword: '' }));
   const [accountMeta, setAccountMeta] = useState<KeyringPair$Meta>({});
 
-  const isQr = useMemo((): boolean => {
-    if (accountMeta.isExternal !== undefined) {
-      return !!accountMeta.isExternal;
-    } else {
-      return false;
+  const signMode = useMemo((): SIGN_MODE => {
+    if (accountMeta.isExternal && !!accountMeta.isExternal) {
+      if (accountMeta.isHardware && !!accountMeta.isHardware) {
+        return SIGN_MODE.LEDGER;
+      }
+
+      return SIGN_MODE.QR;
     }
-  }, [accountMeta.isExternal]);
+
+    return SIGN_MODE.PASSWORD;
+  }, [accountMeta]);
 
   const substrateParams = substrateTransferParams !== null ? substrateTransferParams.params : null;
   const substrateGas = substrateTransferParams !== null ? substrateTransferParams.estimatedFee : null;
@@ -86,6 +84,8 @@ function AuthTransfer ({ chain, className, collectionId, nftItem, recipientAddre
 
   const [balanceError] = useState(substrateTransferParams !== null ? substrateBalanceError : web3BalanceError);
   const { currentAccount: account, currentNetwork } = useSelector((state: RootState) => state);
+
+  const genesisHash = currentNetwork.genesisHash;
 
   const { show } = useToast();
 
@@ -200,21 +200,7 @@ function AuthTransfer ({ chain, className, collectionId, nftItem, recipientAddre
     });
   }, [substrateParams, senderInfoSubstrate.signPassword, senderAccount.address, recipientAddress, balanceError, show, setIsTxSuccess, setShowConfirm, setShowResult, setExtrinsicHash, nftItem, collectionId, chain, setTxError]);
 
-  const handlerCallbackResponseResult = useCallback((data: ResponseNftTransferQr) => {
-    if (data.qrState) {
-      const state: QrContextState = {
-        ...data.qrState,
-        step: QrStep.DISPLAY_PAYLOAD
-      };
-
-      updateQrState(state);
-    }
-
-    if (data.isBusy) {
-      updateQrState({ step: QrStep.SENDING_TX });
-      setLoading(true);
-    }
-
+  const handlerCallbackResponseResult = useCallback((data: ResponseNftTransferExternal) => {
     if (balanceError && !data.passwordError) {
       setLoading(false);
       setErrorArr(['Your balance is too low to cover fees']);
@@ -227,14 +213,15 @@ function AuthTransfer ({ chain, className, collectionId, nftItem, recipientAddre
       return;
     }
 
-    if (data.txError && data.txError) {
+    if (data.txError && data.status === undefined) {
       setErrorArr(['Encountered an error, please try again.']);
       setLoading(false);
       setIsTxSuccess(false);
       setTxError('Encountered an error, please try again.');
       setShowConfirm(false);
-      setShowResult(true);
+      setShowResult(false);
       cleanQrState();
+      clearExternalState();
 
       return;
     }
@@ -258,8 +245,31 @@ function AuthTransfer ({ chain, className, collectionId, nftItem, recipientAddre
       }
 
       cleanQrState();
+      clearExternalState();
     }
-  }, [balanceError, chain, cleanQrState, collectionId, nftItem, setExtrinsicHash, setIsTxSuccess, setShowConfirm, setShowResult, setTxError, updateQrState]);
+  }, [balanceError, chain, cleanQrState, clearExternalState, collectionId, nftItem, setExtrinsicHash, setIsTxSuccess, setShowConfirm, setShowResult, setTxError]);
+
+  const handlerCallbackResponseResultQr = useCallback((data: ResponseNftTransferQr) => {
+    if (data.qrState) {
+      const state: QrContextState = {
+        ...data.qrState,
+        step: QrStep.DISPLAY_PAYLOAD
+      };
+
+      updateQrState(state);
+    }
+
+    if (data.externalState) {
+      updateExternalState(data.externalState);
+    }
+
+    if (data.isBusy) {
+      updateQrState({ step: QrStep.SENDING_TX });
+      setLoading(true);
+    }
+
+    handlerCallbackResponseResult(data);
+  }, [handlerCallbackResponseResult, updateExternalState, updateQrState]);
 
   const handlerResponseError = useCallback((errors: TransferNftError[]) => {
     const errorMessage = errors.map((err) => err.message);
@@ -271,36 +281,90 @@ function AuthTransfer ({ chain, className, collectionId, nftItem, recipientAddre
     }
   }, []);
 
-  const handlerSendQrSubstrate = useCallback(() => {
+  const handlerSendSubstrateQr = useCallback(() => {
     makeTransferNftQrSubstrate({
       recipientAddress: recipientAddress,
       senderAddress: senderAccount.address,
       params: substrateParams
-    }, handlerCallbackResponseResult)
+    }, handlerCallbackResponseResultQr)
       .then(handlerResponseError)
       .catch((e) => console.log('There is problem when makeTransferNftQrSubstrate', e));
-  }, [handlerCallbackResponseResult, handlerResponseError, recipientAddress, senderAccount.address, substrateParams]);
+  }, [handlerCallbackResponseResultQr, handlerResponseError, recipientAddress, senderAccount.address, substrateParams]);
 
-  const handlerSendQrEvm = useCallback(() => {
+  const handlerSendEvmQr = useCallback(() => {
     if (web3Tx) {
       makeTransferNftQrEvm({
         senderAddress: account?.account?.address as string,
         recipientAddress,
         networkKey: chain,
         rawTransaction: web3Tx
-      }, handlerCallbackResponseResult)
+      }, handlerCallbackResponseResultQr)
         .then(handlerResponseError)
         .catch((e) => console.log('There is problem when makeTransferNftQrEvm', e));
     }
-  }, [account?.account?.address, chain, handlerCallbackResponseResult, handlerResponseError, recipientAddress, web3Tx]);
+  }, [account?.account?.address, chain, handlerCallbackResponseResultQr, handlerResponseError, recipientAddress, web3Tx]);
 
   const handlerSendQr = useCallback(() => {
     if (substrateParams !== null) {
-      handlerSendQrSubstrate();
+      handlerSendSubstrateQr();
     } else if (web3Tx !== null) {
-      handlerSendQrEvm();
+      handlerSendEvmQr();
     }
-  }, [handlerSendQrEvm, handlerSendQrSubstrate, substrateParams, web3Tx]);
+  }, [handlerSendEvmQr, handlerSendSubstrateQr, substrateParams, web3Tx]);
+
+  const handlerOnErrorLedger = useCallback((id: string, error: string) => {
+    setErrorArr([error]);
+    rejectExternalRequest({ id: id, message: error })
+      .finally(() => setLoading(false));
+  }, []);
+
+  const { signLedger: handlerSignLedger } = useSignLedger({ accountMeta: accountMeta, onError: handlerOnErrorLedger, genesisHash: genesisHash });
+
+  const handlerCallbackResponseResultLedger = useCallback((data: ResponseNftTransferLedger) => {
+    if (data.ledgerState) {
+      handlerSignLedger(data.ledgerState);
+    }
+
+    if (data.externalState) {
+      updateExternalState(data.externalState);
+    }
+
+    handlerCallbackResponseResult(data);
+  }, [handlerCallbackResponseResult, handlerSignLedger, updateExternalState]);
+
+  const handlerSendLedgerSubstrate = useCallback(() => {
+    makeTransferNftLedgerSubstrate({
+      recipientAddress: recipientAddress,
+      senderAddress: senderAccount.address,
+      params: substrateParams
+    }, handlerCallbackResponseResultLedger)
+      .then(handlerResponseError)
+      .catch((e) => console.log('There is problem when makeTransferNftQrSubstrate', e));
+  }, [handlerCallbackResponseResultLedger, handlerResponseError, recipientAddress, senderAccount.address, substrateParams]);
+
+  const handlerSendLedger = useCallback(() => {
+    if (loading) {
+      return;
+    }
+
+    if (chain !== currentNetwork.networkKey) {
+      setErrorArr(['Incorrect network']);
+
+      return;
+    }
+
+    setLoading(true);
+
+    // eslint-disable-next-line @typescript-eslint/no-misused-promises
+    setTimeout(() => {
+      if (substrateParams !== null) {
+        handlerSendLedgerSubstrate();
+      } else if (web3Tx !== null) {
+        setErrorArr(['We don\'t support transfer NFT with ledger at the moment']);
+        setLoading(false);
+      }
+    }, 10);
+  }, [chain, currentNetwork.networkKey, handlerSendLedgerSubstrate, loading, substrateParams, web3Tx]);
 
   const handleSignAndSubmit = useCallback(() => {
     if (loading) {
@@ -342,184 +406,113 @@ function AuthTransfer ({ chain, className, collectionId, nftItem, recipientAddre
     }, 10);
   }, [loading, chain, currentNetwork.networkKey, handlerSendQr]);
 
-  const handlerReject = useCallback(async () => {
-    if (qrId) {
-      await rejectExternalRequest({ id: qrId });
+  const handlerReject = useCallback(async (externalId: string) => {
+    if (externalId) {
+      await rejectExternalRequest({ id: externalId, message: MANUAL_CANCEL_EXTERNAL_REQUEST });
     }
 
     cleanQrState();
-  }, [cleanQrState, qrId]);
-
-  const handlerResolve = useCallback(async (result: SignerResult) => {
-    if (qrId) {
-      await resolveExternalRequest({ id: qrId, data: result });
-    }
-  }, [qrId]);
+    clearExternalState();
+  }, [cleanQrState, clearExternalState]);
 
   const hideConfirm = useCallback(async () => {
     if (!loading) {
-      await handlerReject();
+      if (externalId) {
+        await handlerReject(externalId);
+      }
+
       setShowConfirm(false);
     }
-  }, [handlerReject, loading, setShowConfirm]);
-
-  const handlerScanSignature = useCallback(async (data: SigData): Promise<void> => {
-    if (isHex(data.signature)) {
-      await handlerResolve({
-        signature: data.signature,
-        id: id++
-      });
-    }
-  }, [handlerResolve]);
-
-  const renderError = useCallback(() => {
-    if (errorArr && errorArr.length) {
-      return errorArr.map((err) =>
-        (
-          <Warning
-            className='auth-transaction-error'
-            isDanger
-            key={err}
-          >
-            {t<string>(err)}
-          </Warning>
-        )
-      );
-    } else {
-      return <></>;
-    }
-  }, [errorArr, t]);
-
-  const handlerChangeToScan = useCallback(() => {
-    updateQrState({ step: QrStep.SCAN_QR });
-  }, [updateQrState]);
-
-  const handlerChangeToDisplayQr = useCallback(() => {
-    updateQrState({ step: QrStep.DISPLAY_PAYLOAD });
-  }, [updateQrState]);
+  }, [externalId, handlerReject, loading, setShowConfirm]);
 
   const handlerRenderContent = useCallback(() => {
-    if (!isQr) {
-      return (
-        <div
-          className={'auth-container'}
-        >
-          <div className={'fee'}>Fees of {substrateGas || web3Gas} will be applied to the submission</div>
-
-          <Address
-            className={'sender-container'}
-            onChange={setSenderInfoSubstrate}
-            onEnter={handleSignAndSubmit}
-            passwordError={passwordError}
-            requestAddress={senderAccount.address}
-          />
-
-          <div
-            className={'submit-btn'}
-            // eslint-disable-next-line @typescript-eslint/no-misused-promises
-            onClick={handleSignAndSubmit}
-            style={{ marginTop: '40px', background: loading ? 'rgba(0, 75, 255, 0.25)' : '#004BFF', cursor: loading ? 'default' : 'pointer' }}
+    switch (signMode) {
+      case SIGN_MODE.QR:
+        return (
+          <QrRequest
+            errorArr={errorArr}
+            genesisHash={genesisHash}
+            handlerStart={handlerCreateQr}
+            isBusy={loading}
           >
-            {
-              !loading
-                ? 'Sign and Submit'
-                : <Spinner className={'spinner-loading'} />
-            }
-          </div>
-        </div>
-      );
-    } else {
-      switch (step) {
-        case QrStep.SENDING_TX:
-          return (
-            <div className='auth-transaction-body'>
-              <LoadingContainer />
-            </div>
-          );
-        case QrStep.SCAN_QR:
-          return (
-            <div className='auth-transaction-body'>
-              <div className='scan-qr'>
-                <QrScanSignature
-                  // eslint-disable-next-line @typescript-eslint/no-misused-promises
-                  onScan={handlerScanSignature}
-                />
-              </div>
-              <div className='auth-transaction__separator' />
-              { renderError() }
-              <div className='auth-transaction__submit-wrapper'>
-                <Button
-                  className={'auth-transaction__submit-btn'}
-                  onClick={handlerChangeToDisplayQr}
-                >
-                  {t<string>('Back to previous step')}
-                </Button>
-              </div>
-            </div>
-          );
-        case QrStep.DISPLAY_PAYLOAD:
-          return (
-            <div className='auth-transaction-body'>
-              <div className='display-qr'>
-                <div className='qr-content'>
-                  <DisplayPayload
-                    address={qrAddress}
-                    genesisHash={currentNetwork.genesisHash}
-                    isEthereum={isEthereum}
-                    isHash={isQrHashed}
-                    payload={hexToU8a(qrPayload)}
-                    size={320}
-                  />
-                </div>
-              </div>
-              <div className='auth-transaction__separator' />
-              { renderError() }
-              <div className='auth-transaction__submit-wrapper'>
-                <Button
-                  className={'auth-transaction__submit-btn'}
-                  onClick={handlerChangeToScan}
-                >
-                  {t<string>('Scan QR')}
-                </Button>
-              </div>
-            </div>
-          );
-        case QrStep.TRANSACTION_INFO:
-        default:
-          return (
+            <div className={'fee'}>Fees of {substrateGas || web3Gas} will be applied to the submission</div>
+            <InputAddress
+              className={'sender-container'}
+              defaultValue={senderAccount.address}
+              help={t<string>('The account you will send NFT from.')}
+              isDisabled={true}
+              isSetDefaultValue={true}
+              label={t<string>('Send from account')}
+              networkPrefix={currentNetwork.networkPrefix}
+              type='account'
+              withEllipsis
+            />
+          </QrRequest>
+        );
+      case SIGN_MODE.LEDGER:
+        return (
+          <div
+            className={'auth-container'}
+          >
+            <div className={'fee'}>Fees of {substrateGas || web3Gas} will be applied to the submission</div>
+            <InputAddress
+              className={'sender-container'}
+              defaultValue={senderAccount.address}
+              help={t<string>('The account you will send NFT from.')}
+              isDisabled={true}
+              isSetDefaultValue={true}
+              label={t<string>('Send from account')}
+              networkPrefix={currentNetwork.networkPrefix}
+              type='account'
+              withEllipsis
+            />
+
             <div
-              className={'auth-container'}
+              className={'submit-btn'}
+              // eslint-disable-next-line @typescript-eslint/no-misused-promises
+              onClick={handlerSendLedger}
+              style={{ marginTop: '40px', background: loading ? 'rgba(0, 75, 255, 0.25)' : '#004BFF', cursor: loading ? 'default' : 'pointer' }}
             >
-              <div className={'fee'}>Fees of {substrateGas || web3Gas} will be applied to the submission</div>
-              <InputAddress
-                className={'sender-container'}
-                defaultValue={senderAccount.address}
-                help={t<string>('The account you will send NFT from.')}
-                isDisabled={true}
-                isSetDefaultValue={true}
-                label={t<string>('Send from account')}
-                networkPrefix={currentNetwork.networkPrefix}
-                type='account'
-                withEllipsis
-              />
-              <div className='auth-transaction__separator' />
-              { renderError() }
-              <div
-                className={'submit-btn'}
-                onClick={handlerCreateQr}
-                style={{ marginTop: '40px', background: loading ? 'rgba(0, 75, 255, 0.25)' : '#004BFF', cursor: loading ? 'default' : 'pointer' }}
-              >
-                {
-                  !loading
-                    ? t('Sign via qr')
-                    : <Spinner className={'spinner-loading'} />
-                }
-              </div>
+              {
+                !loading
+                  ? 'Sign via Ledger'
+                  : <Spinner className={'spinner-loading'} />
+              }
             </div>
-          );
-      }
+          </div>
+        );
+      case SIGN_MODE.PASSWORD:
+      default:
+        return (
+          <div
+            className={'auth-container'}
+          >
+            <div className={'fee'}>Fees of {substrateGas || web3Gas} will be applied to the submission</div>
+
+            <Address
+              className={'sender-container'}
+              onChange={setSenderInfoSubstrate}
+              onEnter={handleSignAndSubmit}
+              passwordError={passwordError}
+              requestAddress={senderAccount.address}
+            />
+
+            <div
+              className={'submit-btn'}
+              // eslint-disable-next-line @typescript-eslint/no-misused-promises
+              onClick={handleSignAndSubmit}
+              style={{ marginTop: '40px', background: loading ? 'rgba(0, 75, 255, 0.25)' : '#004BFF', cursor: loading ? 'default' : 'pointer' }}
+            >
+              {
+                !loading
+                  ? 'Sign and Submit'
+                  : <Spinner className={'spinner-loading'} />
+              }
+            </div>
+          </div>
+        );
     }
-  }, [currentNetwork.genesisHash, currentNetwork.networkPrefix, handleSignAndSubmit, handlerChangeToDisplayQr, handlerChangeToScan, handlerCreateQr, handlerScanSignature, isEthereum, isQr, isQrHashed, loading, passwordError, qrAddress, qrPayload, renderError, senderAccount.address, step, substrateGas, t, web3Gas]);
+  }, [currentNetwork.networkPrefix, errorArr, genesisHash, handleSignAndSubmit, handlerCreateQr, handlerSendLedger, loading, passwordError, senderAccount.address, signMode, substrateGas, t, web3Gas]);
 
   useEffect(() => {
     let unmount = false;
@@ -681,10 +674,12 @@ export default React.memo(styled(AuthTransfer)(({ theme }: Props) => `
   .close-button-confirm {
     font-size: 20px;
     cursor: pointer;
+    position: absolute;
+    right: 15px;
   }
 
   .header-title-confirm {
-    width: 85%;
+    width: 100%;
     text-align: center;
   }
 `));

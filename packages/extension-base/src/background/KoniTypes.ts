@@ -531,6 +531,7 @@ export type RequestCrossChainTransferExternal = RequestCheckCrossChainTransfer
 export interface RequestRejectExternalRequest {
   id: string;
   message?: string;
+  throwError?: boolean;
 }
 
 export interface RequestResolveExternalRequest {
@@ -834,9 +835,10 @@ export enum ExternalRequestPromiseStatus {
 }
 
 export interface ExternalRequestPromise {
-  resolve: (result: SignerResult) => void,
-  reject: (error?: Error) => void,
+  resolve?: (result: SignerResult) => void,
+  reject?: (error?: Error) => void,
   status: ExternalRequestPromiseStatus,
+  message?: string;
   createdAt: number
 }
 

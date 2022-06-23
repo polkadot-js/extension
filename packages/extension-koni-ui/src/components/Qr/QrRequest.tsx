@@ -11,7 +11,7 @@ import { resolveExternalRequest } from '@subwallet/extension-koni-ui/messaging';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { SigData } from '@subwallet/extension-koni-ui/types/accountExternalRequest';
 import CN from 'classnames';
-import React, { useCallback, useContext } from 'react';
+import React, { useCallback, useContext, useState } from 'react';
 import styled from 'styled-components';
 
 import { QrScanSignature } from '@polkadot/react-qr';
@@ -34,6 +34,8 @@ const QrRequest = (props: Props) => {
   const { QrState, updateQrState } = useContext(QrContext);
   const { createResolveExternalRequestData } = useContext(ExternalRequestContext);
 
+  const [loading, setLoading] = useState(false);
+
   const { isEthereum, isQrHashed, qrAddress, qrId, qrPayload, step } = QrState;
 
   const handlerChangeToScan = useCallback(() => {
@@ -46,17 +48,19 @@ const QrRequest = (props: Props) => {
 
   const handlerResolve = useCallback(async (result: SignerResult) => {
     if (qrId) {
+      setLoading(true);
       await resolveExternalRequest({ id: qrId, data: result });
+      setLoading(false);
     }
   }, [qrId]);
 
   const handlerScanSignature = useCallback(async (data: SigData): Promise<void> => {
-    if (isHex(data.signature)) {
+    if (isHex(data.signature) && !loading) {
       const resolveData = createResolveExternalRequestData(data);
 
       await handlerResolve(resolveData);
     }
-  }, [handlerResolve, createResolveExternalRequestData]);
+  }, [handlerResolve, createResolveExternalRequestData, loading]);
 
   const renderError = useCallback(() => {
     if (errorArr && errorArr.length) {
@@ -161,5 +165,52 @@ const QrRequest = (props: Props) => {
 };
 
 export default React.memo(styled(QrRequest)(({ theme }: Props) => `
+  display: flex;
+  flex: 1;
 
+  .auth-transaction-body{
+    flex: 1;
+    padding-left: 15px;
+    padding-right: 15px;
+    padding-bottom: 15px;
+    padding-top: 25px;
+    overflow-y: auto;
+  }
+
+  .auth-transaction__separator {
+    padding-top: 24px;
+    margin-bottom: 24px;
+    border-bottom: 1px solid ${theme.menuItemsBorder};
+  }
+
+  .auth-transaction__submit-wrapper {
+    position: sticky;
+    bottom: -15px;
+    padding: 15px;
+    margin-left: -15px;
+    margin-bottom: -15px;
+    margin-right: -15px;
+    background-color: ${theme.background};
+  }
+
+  .display-qr {
+    margin: 0 30px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    .qr-content {
+      height: 324px;
+      width: 324px;
+      border: 2px solid ${theme.textColor};
+    }
+  }
+
+  .scan-qr {
+    margin: 0 20px;
+  }
+
+  .auth-transaction-error {
+    margin-top: 10px
+  }
 `));

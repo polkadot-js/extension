@@ -2289,7 +2289,7 @@ export default class KoniExtension extends Extension {
       };
 
       const updateState = (promise: Partial<ExternalRequestPromise>) => {
-        state.updateExternalRequest(id, promise);
+        state.updateExternalRequest(id, { ...promise, resolve: undefined, reject: undefined });
       };
 
       const callback = this.makeTransferQrCallback(from, networkKey, token, cb);
@@ -2404,7 +2404,7 @@ export default class KoniExtension extends Extension {
       };
 
       const updateState = (promise: Partial<ExternalRequestPromise>) => {
-        state.updateExternalRequest(id, promise);
+        state.updateExternalRequest(id, { ...promise, resolve: undefined, reject: undefined });
       };
 
       const callback = this.makeTransferCallback(from, originNetworkKey, token, cb);
@@ -2475,7 +2475,7 @@ export default class KoniExtension extends Extension {
       };
 
       const updateState = (promise: Partial<ExternalRequestPromise>) => {
-        state.updateExternalRequest(id, promise);
+        state.updateExternalRequest(id, { ...promise, resolve: undefined, reject: undefined });
       };
 
       const networkKey = params.networkKey as string;
@@ -2538,7 +2538,7 @@ export default class KoniExtension extends Extension {
       };
 
       const updateState = (promise: Partial<ExternalRequestPromise>) => {
-        state.updateExternalRequest(id, promise);
+        state.updateExternalRequest(id, { ...promise, resolve: undefined, reject: undefined });
       };
 
       const transferProm = handleTransferNftQr({
@@ -2607,7 +2607,7 @@ export default class KoniExtension extends Extension {
       };
 
       const updateState = (promise: Partial<ExternalRequestPromise>) => {
-        state.updateExternalRequest(id, promise);
+        state.updateExternalRequest(id, { ...promise, resolve: undefined, reject: undefined });
       };
 
       const callback = this.makeTransferQrCallback(from, networkKey, token, cb);
@@ -2682,7 +2682,7 @@ export default class KoniExtension extends Extension {
       };
 
       const updateState = (promise: Partial<ExternalRequestPromise>) => {
-        state.updateExternalRequest(id, promise);
+        state.updateExternalRequest(id, { ...promise, resolve: undefined, reject: undefined });
       };
 
       const callback = this.makeTransferCallback(from, originNetworkKey, token, cb);
@@ -2753,7 +2753,7 @@ export default class KoniExtension extends Extension {
       };
 
       const updateState = (promise: Partial<ExternalRequestPromise>) => {
-        state.updateExternalRequest(id, promise);
+        state.updateExternalRequest(id, { ...promise, resolve: undefined, reject: undefined });
       };
 
       const networkKey = params.networkKey as string;
@@ -2795,18 +2795,18 @@ export default class KoniExtension extends Extension {
   // External account request
 
   private rejectExternalRequest (request: RequestRejectExternalRequest): ResponseRejectExternalRequest {
-    const { id, message } = request;
+    const { id, message, throwError } = request;
 
     const promise = state.getExternalRequest(id);
 
-    if (promise.status === ExternalRequestPromiseStatus.PENDING) {
-      if (message) {
+    if (promise.status === ExternalRequestPromiseStatus.PENDING && promise.reject) {
+      if (throwError) {
         promise.reject(new Error(message));
       } else {
         promise.reject();
       }
 
-      state.updateExternalRequest(id, { status: ExternalRequestPromiseStatus.REJECTED });
+      state.updateExternalRequest(id, { status: ExternalRequestPromiseStatus.REJECTED, message: message, reject: undefined, resolve: undefined });
     }
   }
 
@@ -2816,7 +2816,7 @@ export default class KoniExtension extends Extension {
     const promise = state.getExternalRequest(id);
 
     if (promise.status === ExternalRequestPromiseStatus.PENDING) {
-      promise.resolve(data);
+      promise.resolve && promise.resolve(data);
     }
   }
 

@@ -4,6 +4,7 @@
 import { LoadingContainer, Warning } from '@subwallet/extension-koni-ui/components';
 import Button from '@subwallet/extension-koni-ui/components/Button';
 import DisplayPayload from '@subwallet/extension-koni-ui/components/Qr/DisplayPayload';
+import { ExternalRequestContext } from '@subwallet/extension-koni-ui/contexts/ExternalRequestContext';
 import { QrContext, QrStep } from '@subwallet/extension-koni-ui/contexts/QrContext';
 import useTranslation from '@subwallet/extension-koni-ui/hooks/useTranslation';
 import { resolveExternalRequest } from '@subwallet/extension-koni-ui/messaging';
@@ -26,13 +27,12 @@ interface Props extends ThemeProps{
   handlerStart: () => void;
 }
 
-let id = 1;
-
 const QrRequest = (props: Props) => {
   const { t } = useTranslation();
   const { children, className, errorArr, genesisHash, handlerStart, isBusy } = props;
 
   const { QrState, updateQrState } = useContext(QrContext);
+  const { createResolveExternalRequestData } = useContext(ExternalRequestContext);
 
   const { isEthereum, isQrHashed, qrAddress, qrId, qrPayload, step } = QrState;
 
@@ -52,12 +52,11 @@ const QrRequest = (props: Props) => {
 
   const handlerScanSignature = useCallback(async (data: SigData): Promise<void> => {
     if (isHex(data.signature)) {
-      await handlerResolve({
-        signature: data.signature,
-        id: id++
-      });
+      const resolveData = createResolveExternalRequestData(data);
+
+      await handlerResolve(resolveData);
     }
-  }, [handlerResolve]);
+  }, [handlerResolve, createResolveExternalRequestData]);
 
   const renderError = useCallback(() => {
     if (errorArr && errorArr.length) {

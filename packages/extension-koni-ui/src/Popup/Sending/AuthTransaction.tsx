@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { NetworkJson, RequestCheckTransfer, ResponseTransfer, TransferError, TransferStep } from '@subwallet/extension-base/background/KoniTypes';
+import { LedgerState } from '@subwallet/extension-base/signers/types';
 import { InputWithLabel, Warning } from '@subwallet/extension-koni-ui/components';
 import Button from '@subwallet/extension-koni-ui/components/Button';
 import DonateInputAddress from '@subwallet/extension-koni-ui/components/DonateInputAddress';
@@ -11,15 +12,17 @@ import Modal from '@subwallet/extension-koni-ui/components/Modal';
 import QrRequest from '@subwallet/extension-koni-ui/components/Qr/QrRequest';
 import { BalanceFormatType } from '@subwallet/extension-koni-ui/components/types';
 import { SIGN_MODE } from '@subwallet/extension-koni-ui/constants/signing';
+import { ExternalRequestContext } from '@subwallet/extension-koni-ui/contexts/ExternalRequestContext';
 import { QrContext, QrContextState, QrStep } from '@subwallet/extension-koni-ui/contexts/QrContext';
+import { useLedger } from '@subwallet/extension-koni-ui/hooks/useLedger';
 import useTranslation from '@subwallet/extension-koni-ui/hooks/useTranslation';
-import { getAccountMeta, makeTransfer, makeTransferLedger, makeTransferQr, rejectExternalRequest } from '@subwallet/extension-koni-ui/messaging';
+import { getAccountMeta, makeTransfer, makeTransferLedger, makeTransferQr, rejectExternalRequest, resolveExternalRequest } from '@subwallet/extension-koni-ui/messaging';
 import { ThemeProps, TransferResultType } from '@subwallet/extension-koni-ui/types';
 import React, { useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import styled from 'styled-components';
 
 import { KeyringPair$Meta } from '@polkadot/keyring/types';
-import { BN } from '@polkadot/util';
+import { BN, hexToU8a } from '@polkadot/util';
 
 interface Props extends ThemeProps {
   className?: string;
@@ -72,6 +75,7 @@ function AuthTransaction ({ className, isDonation, feeInfo: [fee, feeDecimals, f
   const { t } = useTranslation();
 
   const { QrState, cleanQrState, updateQrState } = useContext(QrContext);
+  const { createResolveExternalRequestData } = useContext(ExternalRequestContext);
 
   const { qrId } = QrState;
 
@@ -82,6 +86,8 @@ function AuthTransaction ({ className, isDonation, feeInfo: [fee, feeDecimals, f
   const [accountMeta, setAccountMeta] = useState<KeyringPair$Meta>({});
   const networkPrefix = networkMap[requestPayload.networkKey].ss58Format;
   const genesisHash = networkMap[requestPayload.networkKey].genesisHash;
+
+  const { error, ledger } = useLedger(genesisHash, accountMeta.accountIndex as number, accountMeta.addressOffset as number);
 
   const signMode = useMemo((): SIGN_MODE => {
     if (accountMeta.isExternal && !!accountMeta.isExternal) {
@@ -94,14 +100,6 @@ function AuthTransaction ({ className, isDonation, feeInfo: [fee, feeDecimals, f
 
     return SIGN_MODE.PASSWORD;
   }, [accountMeta]);
-
-  const isQr = useMemo((): boolean => {
-    if (accountMeta.isExternal !== undefined) {
-      return !!accountMeta.isExternal;
-    } else {
-      return false;
-    }
-  }, [accountMeta.isExternal]);
 
   useEffect(() => {
     let unmount = false;
@@ -177,17 +175,40 @@ function AuthTransaction ({ className, isDonation, feeInfo: [fee, feeDecimals, f
     }
   }, []);
 
-  const _doStart = useCallback(
-    (): void => {
-      setBusy(true);
-      makeTransfer({
-        ...requestPayload,
-        password
-      }, handlerCallbackResponseResult).then(handlerResponseError)
-        .catch((e) => console.log('There is problem when makeTransfer', e));
-    },
-    [requestPayload, password, handlerCallbackResponseResult, handlerResponseError]
-  );
+  const handlerSignLedger = useCallback((ledgerState: LedgerState) => {
+    if (ledger) {
+      ledger
+        .sign(hexToU8a(ledgerState.ledgerPayload), accountMeta.accountIndex as number, accountMeta.accountOffset as number)
+        .then(({ signature }) => {
+          const resolveData = createResolveExternalRequestData({ signature });
+
+          // eslint-disable-next-line no-void
+          void resolveExternalRequest({ id: ledgerState.ledgerId, data: resolveData });
+        })
+        .catch((e) => {
+          setErrorArr([(e as Error).message]);
+          rejectExternalRequest({ id: ledgerState.ledgerId })
+            .finally(() => setBusy(false));
+        });
+    } else {
+      if (error) {
+        setErrorArr([error]);
+      } else {
+        setErrorArr(['Cannot find ledger']);
+      }
+      rejectExternalRequest({ id: ledgerState.ledgerId })
+        .finally(() => setBusy(false));
+    }
+  }, [accountMeta, createResolveExternalRequestData, ledger, error]);
+
+  const _doStart = useCallback((): void => {
+    setBusy(true);
+    makeTransfer({
+      ...requestPayload,
+      password
+    }, handlerCallbackResponseResult).then(handlerResponseError)
+      .catch((e) => console.log('There is problem when makeTransfer', e));
+  }, [requestPayload, password, handlerCallbackResponseResult, handlerResponseError]);
 
   const _doStartQr = useCallback((): void => {
     setBusy(true);
@@ -214,30 +235,19 @@ function AuthTransaction ({ className, isDonation, feeInfo: [fee, feeDecimals, f
       .catch((e) => console.log('There is problem when makeTransferQr', e));
   }, [requestPayload, handlerCallbackResponseResult, handlerResponseError, updateQrState]);
 
-  // const _doStartLedger = useCallback((): void => {
-  //   setBusy(true);
-  //   makeTransferLedger({
-  //     ...requestPayload
-  //   }, (rs) => {
-  //     if (rs.ledgerState) {
-  //       const state: QrContextState = {
-  //         ...rs.qrState,
-  //         step: QrStep.DISPLAY_PAYLOAD
-  //       };
-  //
-  //       updateQrState(state);
-  //       setBusy(false);
-  //     }
-  //
-  //     if (rs.isBusy && rs.step !== TransferStep.SUCCESS.valueOf()) {
-  //       updateQrState({ step: QrStep.SENDING_TX });
-  //       setBusy(true);
-  //     }
-  //
-  //     handlerCallbackResponseResult(rs);
-  //   }).then(handlerResponseError)
-  //     .catch((e) => console.log('There is problem when makeTransferQr', e));
-  // }, [requestPayload, handlerCallbackResponseResult, handlerResponseError, updateQrState]);
+  const _doStartLedger = useCallback((): void => {
+    setBusy(true);
+    makeTransferLedger({
+      ...requestPayload
+    }, (rs) => {
+      if (rs.ledgerState) {
+        handlerSignLedger(rs.ledgerState);
+      }
+
+      handlerCallbackResponseResult(rs);
+    }).then(handlerResponseError)
+      .catch((e) => console.log('There is problem when makeTransferQr', e));
+  }, [requestPayload, handlerCallbackResponseResult, handlerResponseError, handlerSignLedger]);
 
   const _onChangePass = useCallback((value: string): void => {
     setPassword(value);
@@ -357,6 +367,24 @@ function AuthTransaction ({ className, isDonation, feeInfo: [fee, feeDecimals, f
             { handlerRenderInfo() }
           </QrRequest>
         );
+
+      case SIGN_MODE.LEDGER:
+        return (
+          <div className='auth-transaction-body'>
+            { handlerRenderInfo() }
+            <div className='auth-transaction__separator' />
+            { renderError() }
+            <div className='auth-transaction__submit-wrapper'>
+              <Button
+                className={'auth-transaction__submit-btn'}
+                isBusy={isBusy}
+                onClick={_doStartLedger}
+              >
+                {t<string>('Sign via Ledger')}
+              </Button>
+            </div>
+          </div>
+        );
       case SIGN_MODE.PASSWORD:
       default:
         return (
@@ -384,7 +412,7 @@ function AuthTransaction ({ className, isDonation, feeInfo: [fee, feeDecimals, f
           </div>
         );
     }
-  }, [_doStart, _doStartQr, _onChangePass, errorArr, genesisHash, handlerRenderInfo, isBusy, isKeyringErr, password, renderError, t, signMode]);
+  }, [_doStart, _doStartLedger, _doStartQr, _onChangePass, errorArr, genesisHash, handlerRenderInfo, isBusy, isKeyringErr, password, renderError, t, signMode]);
 
   return (
     <div className={className}>

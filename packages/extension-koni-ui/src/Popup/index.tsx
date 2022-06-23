@@ -8,6 +8,7 @@ import { AccountsWithCurrentAddress, ConfirmationsQueue, ConfirmationType, Curre
 import { PHISHING_PAGE_REDIRECT } from '@subwallet/extension-base/defaults';
 import { canDerive } from '@subwallet/extension-base/utils';
 import { AccountContext, ActionContext, AuthorizeReqContext, ConfirmationsQueueContext, MediaContext, MetadataReqContext, SettingsContext, SigningReqContext } from '@subwallet/extension-koni-ui/contexts';
+import { ExternalRequestContextProvider } from '@subwallet/extension-koni-ui/contexts/ExternalRequestContext';
 import { QRContextProvider } from '@subwallet/extension-koni-ui/contexts/QrContext';
 import useSetupStore from '@subwallet/extension-koni-ui/hooks/store/useSetupStore';
 import ExternalRequest from '@subwallet/extension-koni-ui/Popup/ExternalRequest';
@@ -267,52 +268,54 @@ export default function Popup (): React.ReactElement {
                   <MetadataReqContext.Provider value={metaRequests}>
                     <SigningReqContext.Provider value={signRequests}>
                       <ConfirmationsQueueContext.Provider value={confirmations}>
-                        <ScannerContextProvider>
-                          <QRContextProvider>
-                            <ToastProvider>
-                              <Rendering />
-                              <Switch>
-                                <Route path='/auth-list'>{wrapWithErrorBoundary(<AuthList />, 'auth-list')}</Route>
-                                <Route path='/confirmation'>{wrapWithErrorBoundary(<AuthList />, 'confirmation')}</Route>
-                                <Route path='/account/create'>{wrapWithErrorBoundary(<CreateAccount />, 'account-creation')}</Route>
-                                <Route path='/account/forget/:address'>{wrapWithErrorBoundary(<Forget />, 'forget-address')}</Route>
-                                <Route path='/account/export/:address'>{wrapWithErrorBoundary(<Export />, 'export-address')}</Route>
-                                {/* <Route path='/account/export-all'>{wrapWithErrorBoundary(<ExportAll />, 'export-all-address')}</Route> */}
-                                <Route path='/account/import-ledger'>{wrapWithErrorBoundary(<ImportLedger />, 'import-ledger')}</Route>
-                                <Route path='/account/import-qr'>{wrapWithErrorBoundary(<ImportQr />, 'import-qr')}</Route>
-                                <Route path='/account/scan-qr'>{wrapWithErrorBoundary(<ExternalRequest />, 'scan-qr')}</Route>
-                                <Route path='/account/import-seed'>{wrapWithErrorBoundary(<ImportSeed />, 'import-seed')}</Route>
-                                <Route path='/account/import-metamask-private-key'>{wrapWithErrorBoundary(<ImportMetamaskPrivateKey />, 'import-metamask-private-key')}</Route>
-                                <Route path='/account/restore-json'>{wrapWithErrorBoundary(<RestoreJson />, 'restore-json')}</Route>
-                                <Route path='/account/derive/:address/locked'>{wrapWithErrorBoundary(<Derive isLocked />, 'derived-address-locked')}</Route>
-                                <Route path='/account/derive/:address'>{wrapWithErrorBoundary(<Derive />, 'derive-address')}</Route>
-                                <Route path='/account/settings'>{wrapWithErrorBoundary(<Settings />, 'account-settings')}</Route>
-                                <Route path='/account/general-setting'>{wrapWithErrorBoundary(<GeneralSetting />, 'account-general-settings')}</Route>
-                                <Route path='/account/networks'>{wrapWithErrorBoundary(<Networks />, 'account-networks')}</Route>
-                                <Route path='/account/config-network'>{wrapWithErrorBoundary(<NetworkCreate />, 'account-network-edit')}</Route>
-                                <Route path='/account/xcm-transfer'>{wrapWithErrorBoundary(<XcmTransfer />, 'xcm-transfer')}</Route>
-                                <Route path='/account/send-fund'>{wrapWithErrorBoundary(<SendFund />, 'send-fund')}</Route>
-                                <Route path='/account/donate'>{wrapWithErrorBoundary(<Donate />, 'donate')}</Route>
-                                <Route path='/account/send-nft'>{wrapWithErrorBoundary(<TransferNftContainer />, 'send-nft')}</Route>
-                                <Route path='/account/import-evm-token'>{wrapWithErrorBoundary(<ImportEvmToken />, 'import-evm-token')}</Route>
-                                <Route path='/account/import-evm-nft'>{wrapWithErrorBoundary(<ImportEvmNft />, 'import-evm-nft')}</Route>
-                                <Route path='/account/evm-token-setting'>{wrapWithErrorBoundary(<EvmTokenSetting />, 'evm-token-setting')}</Route>
-                                <Route path='/account/evm-token-edit'>{wrapWithErrorBoundary(<EvmTokenEdit />, 'evm-token-edit')}</Route>
-                                <Route path='/account/select-bonding-network'>{wrapWithErrorBoundary(<BondingNetworkSelection />, 'bonding-network')}</Route>
-                                <Route path='/account/select-bonding-validator'>{wrapWithErrorBoundary(<BondingValidatorSelection />, 'bonding-validator')}</Route>
-                                <Route path='/account/bonding-auth'>{wrapWithErrorBoundary(<BondingSubmitTransaction />, 'bonding-auth')}</Route>
-                                <Route path='/account/unbonding-auth'>{wrapWithErrorBoundary(<UnbondingSubmitTransaction />, 'unbonding-auth')}</Route>
-                                <Route path={`${PHISHING_PAGE_REDIRECT}/:website`}>{wrapWithErrorBoundary(<PhishingDetected />, 'phishing-page-redirect')}</Route>
-                                <Route
-                                  exact
-                                  path='/'
-                                >
-                                  {Root}
-                                </Route>
-                              </Switch>
-                            </ToastProvider>
-                          </QRContextProvider>
-                        </ScannerContextProvider>
+                        <ExternalRequestContextProvider>
+                          <ScannerContextProvider>
+                            <QRContextProvider>
+                              <ToastProvider>
+                                <Rendering />
+                                <Switch>
+                                  <Route path='/auth-list'>{wrapWithErrorBoundary(<AuthList />, 'auth-list')}</Route>
+                                  <Route path='/confirmation'>{wrapWithErrorBoundary(<AuthList />, 'confirmation')}</Route>
+                                  <Route path='/account/create'>{wrapWithErrorBoundary(<CreateAccount />, 'account-creation')}</Route>
+                                  <Route path='/account/forget/:address'>{wrapWithErrorBoundary(<Forget />, 'forget-address')}</Route>
+                                  <Route path='/account/export/:address'>{wrapWithErrorBoundary(<Export />, 'export-address')}</Route>
+                                  {/* <Route path='/account/export-all'>{wrapWithErrorBoundary(<ExportAll />, 'export-all-address')}</Route> */}
+                                  <Route path='/account/import-ledger'>{wrapWithErrorBoundary(<ImportLedger />, 'import-ledger')}</Route>
+                                  <Route path='/account/import-qr'>{wrapWithErrorBoundary(<ImportQr />, 'import-qr')}</Route>
+                                  <Route path='/account/scan-qr'>{wrapWithErrorBoundary(<ExternalRequest />, 'scan-qr')}</Route>
+                                  <Route path='/account/import-seed'>{wrapWithErrorBoundary(<ImportSeed />, 'import-seed')}</Route>
+                                  <Route path='/account/import-metamask-private-key'>{wrapWithErrorBoundary(<ImportMetamaskPrivateKey />, 'import-metamask-private-key')}</Route>
+                                  <Route path='/account/restore-json'>{wrapWithErrorBoundary(<RestoreJson />, 'restore-json')}</Route>
+                                  <Route path='/account/derive/:address/locked'>{wrapWithErrorBoundary(<Derive isLocked />, 'derived-address-locked')}</Route>
+                                  <Route path='/account/derive/:address'>{wrapWithErrorBoundary(<Derive />, 'derive-address')}</Route>
+                                  <Route path='/account/settings'>{wrapWithErrorBoundary(<Settings />, 'account-settings')}</Route>
+                                  <Route path='/account/general-setting'>{wrapWithErrorBoundary(<GeneralSetting />, 'account-general-settings')}</Route>
+                                  <Route path='/account/networks'>{wrapWithErrorBoundary(<Networks />, 'account-networks')}</Route>
+                                  <Route path='/account/config-network'>{wrapWithErrorBoundary(<NetworkCreate />, 'account-network-edit')}</Route>
+                                  <Route path='/account/xcm-transfer'>{wrapWithErrorBoundary(<XcmTransfer />, 'xcm-transfer')}</Route>
+                                  <Route path='/account/send-fund'>{wrapWithErrorBoundary(<SendFund />, 'send-fund')}</Route>
+                                  <Route path='/account/donate'>{wrapWithErrorBoundary(<Donate />, 'donate')}</Route>
+                                  <Route path='/account/send-nft'>{wrapWithErrorBoundary(<TransferNftContainer />, 'send-nft')}</Route>
+                                  <Route path='/account/import-evm-token'>{wrapWithErrorBoundary(<ImportEvmToken />, 'import-evm-token')}</Route>
+                                  <Route path='/account/import-evm-nft'>{wrapWithErrorBoundary(<ImportEvmNft />, 'import-evm-nft')}</Route>
+                                  <Route path='/account/evm-token-setting'>{wrapWithErrorBoundary(<EvmTokenSetting />, 'evm-token-setting')}</Route>
+                                  <Route path='/account/evm-token-edit'>{wrapWithErrorBoundary(<EvmTokenEdit />, 'evm-token-edit')}</Route>
+                                  <Route path='/account/select-bonding-network'>{wrapWithErrorBoundary(<BondingNetworkSelection />, 'bonding-network')}</Route>
+                                  <Route path='/account/select-bonding-validator'>{wrapWithErrorBoundary(<BondingValidatorSelection />, 'bonding-validator')}</Route>
+                                  <Route path='/account/bonding-auth'>{wrapWithErrorBoundary(<BondingSubmitTransaction />, 'bonding-auth')}</Route>
+                                  <Route path='/account/unbonding-auth'>{wrapWithErrorBoundary(<UnbondingSubmitTransaction />, 'unbonding-auth')}</Route>
+                                  <Route path={`${PHISHING_PAGE_REDIRECT}/:website`}>{wrapWithErrorBoundary(<PhishingDetected />, 'phishing-page-redirect')}</Route>
+                                  <Route
+                                    exact
+                                    path='/'
+                                  >
+                                    {Root}
+                                  </Route>
+                                </Switch>
+                              </ToastProvider>
+                            </QRContextProvider>
+                          </ScannerContextProvider>
+                        </ExternalRequestContextProvider>
                       </ConfirmationsQueueContext.Provider>
                     </SigningReqContext.Provider>
                   </MetadataReqContext.Provider>

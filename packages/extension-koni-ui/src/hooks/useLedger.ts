@@ -85,7 +85,7 @@ function getSupportedLedger (networkMap: Record<string, NetworkJson>) {
   return result;
 }
 
-export function useLedger (genesis?: string | null, accountIndex = 0, addressOffset = 0): State {
+export function useLedger (genesis?: string | null, accountIndex?: number, addressOffset?: number): State {
   const [isLoading, setIsLoading] = useState(false);
   const [isLocked, setIsLocked] = useState(false);
   const [refreshLock, setRefreshLock] = useState(false);

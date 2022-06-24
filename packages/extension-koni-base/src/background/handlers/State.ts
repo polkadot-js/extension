@@ -212,7 +212,10 @@ export default class KoniState extends State {
               mergedNetworkMap[key].currentProvider = storedNetwork.currentProvider;
             }
 
-            mergedNetworkMap[key].active = storedNetwork.active;
+            if (key !== 'polkadot' && key !== 'kusama') {
+              mergedNetworkMap[key].active = storedNetwork.active;
+            }
+
             mergedNetworkMap[key].coinGeckoKey = storedNetwork.coinGeckoKey;
             mergedNetworkMap[key].crowdloanUrl = storedNetwork.crowdloanUrl;
             mergedNetworkMap[key].blockExplorer = storedNetwork.blockExplorer;
@@ -1438,7 +1441,7 @@ export default class KoniState extends State {
     const targetNetworkKeys: string[] = [];
 
     for (const [key, network] of Object.entries(this.networkMap)) {
-      if (network.active) {
+      if (network.active && key !== 'polkadot' && key !== 'kusama') {
         targetNetworkKeys.push(key);
         this.networkMap[key].active = false;
       }

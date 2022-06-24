@@ -553,6 +553,7 @@ function AuthTransfer ({ chain, className, collectionId, nftItem, recipientAddre
           </div>
           <div
             className={'close-button-confirm'}
+            //eslint-disable-next-line @typescript-eslint/no-misused-promises
             onClick={hideConfirm}
           >
             Cancel

@@ -11,7 +11,7 @@ import { Subject, Subscription } from 'rxjs';
 
 export class KoniCron {
   subscriptions: KoniSubscription;
-  public status: 'pending' | 'running' | 'stoped' = 'pending';
+  public status: 'pending' | 'running' | 'stopped' = 'pending';
   private serviceSubscription: Subscription | undefined;
 
   constructor (subscriptions: KoniSubscription) {
@@ -148,7 +148,7 @@ export class KoniCron {
   }
 
   stop () {
-    if (this.status === 'stoped') {
+    if (this.status === 'stopped') {
       return;
     }
 
@@ -160,7 +160,7 @@ export class KoniCron {
     console.log('Stopping cron jobs');
     this.removeAllCrons();
 
-    this.status = 'stoped';
+    this.status = 'stopped';
   }
 
   recoverApiMap () {

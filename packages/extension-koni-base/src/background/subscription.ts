@@ -15,16 +15,15 @@ import Web3 from 'web3';
 import { accounts as accountsObservable } from '@polkadot/ui-keyring/observable/accounts';
 import { SubjectInfo } from '@polkadot/ui-keyring/observable/types';
 
+type SubscriptionName = 'balance' | 'crowdloan' | 'stakingOnChain';
+
 export class KoniSubscription {
-  public status: 'pending' | 'running' | 'stoped' = 'pending';
   private serviceSubscription: Subscription | undefined;
-  private subscriptionMap: Record<string, any> = {};
-  // @ts-ignore
-  unsubBalances: (() => void) | undefined;
-  // @ts-ignore
-  unsubCrowdloans: (() => void) | undefined;
-  // @ts-ignore
-  unsubStakingOnChain: (() => void) | undefined;
+  private subscriptionMap: Record<SubscriptionName, (() => void) | undefined> = {
+    crowdloan: undefined,
+    balance: undefined,
+    stakingOnChain: undefined
+  };
 
   constructor () {
     this.init();
@@ -34,66 +33,69 @@ export class KoniSubscription {
     return this.subscriptionMap;
   }
 
-  getSubscription (name: string): any {
+  getSubscription (name: SubscriptionName): (() => void) | undefined {
     return this.subscriptionMap[name];
   }
 
-  async stopAllSubscription () {
-    const promises = [];
+  updateSubscription (name: SubscriptionName, func: (() => void) | undefined) {
+    const oldFunc = this.subscriptionMap[name];
 
-    this.unsubBalances && promises.push(this.unsubBalances());
-    this.unsubCrowdloans && promises.push(this.unsubCrowdloans());
-    this.unsubStakingOnChain && promises.push(this.unsubStakingOnChain());
+    oldFunc && oldFunc();
+    func && (this.subscriptionMap[name] = func);
+  }
 
-    await Promise.all(promises);
-    this.unsubBalances = undefined;
-    this.unsubCrowdloans = undefined;
-    this.unsubStakingOnChain = undefined;
+  stopAllSubscription () {
+    if (this.subscriptionMap.balance) {
+      this.subscriptionMap.balance();
+      delete this.subscriptionMap.balance;
+    }
+
+    if (this.subscriptionMap.crowdloan) {
+      this.subscriptionMap.crowdloan();
+      delete this.subscriptionMap.crowdloan;
+    }
+
+    if (this.subscriptionMap.stakingOnChain) {
+      this.subscriptionMap.stakingOnChain();
+      delete this.subscriptionMap.stakingOnChain;
+    }
   }
 
   start () {
-    if (this.status === 'running') {
-      return;
-    }
-
     console.log('Stating subscrition');
     state.getCurrentAccount((currentAccountInfo) => {
       if (currentAccountInfo) {
         const { address } = currentAccountInfo;
 
-        this.subscribeBalancesAndCrowdloans(address, state.getDotSamaApiMap(), state.getWeb3ApiMap());
-        this.subscribeStakingOnChain(address, state.getDotSamaApiMap());
+        !(this.subscriptionMap.balance && this.subscriptionMap.crowdloan) &&
+          this.subscribeBalancesAndCrowdloans(address, state.getDotSamaApiMap(), state.getWeb3ApiMap());
+        !this.subscriptionMap.stakingOnChain &&
+          this.subscribeStakingOnChain(address, state.getDotSamaApiMap());
       }
     });
 
-    this.serviceSubscription = state.subscribeServiceInfo().subscribe({
-      next: (serviceInfo) => {
-        console.log('serviceInfo update', serviceInfo);
-        const { address } = serviceInfo.currentAccountInfo;
+    !this.serviceSubscription &&
+      (this.serviceSubscription = state.subscribeServiceInfo().subscribe({
+        next: (serviceInfo) => {
+          console.log('serviceInfo update', serviceInfo);
+          const { address } = serviceInfo.currentAccountInfo;
 
-        state.initChainRegistry();
-        this.subscribeBalancesAndCrowdloans(address, serviceInfo.apiMap.dotSama, serviceInfo.apiMap.web3);
-        this.subscribeStakingOnChain(address, serviceInfo.apiMap.dotSama);
-      }
-    });
-
-    this.status = 'running';
+          state.initChainRegistry();
+          this.subscribeBalancesAndCrowdloans(address, serviceInfo.apiMap.dotSama, serviceInfo.apiMap.web3);
+          this.subscribeStakingOnChain(address, serviceInfo.apiMap.dotSama);
+        }
+      }));
   }
 
-  async stop () {
-    if (this.status === 'stoped') {
-      return;
-    }
+  stop () {
+    console.log('Stopping subscrition');
 
     if (this.serviceSubscription) {
       this.serviceSubscription.unsubscribe();
       this.serviceSubscription = undefined;
     }
 
-    console.log('Stopping subscrition');
-    await this.stopAllSubscription();
-
-    this.status = 'stoped';
+    this.stopAllSubscription();
   }
 
   init () {
@@ -131,7 +133,7 @@ export class KoniSubscription {
   }
 
   detectAddresses (currentAccountAddress: string) {
-    return new Promise<Array<string>>((resolve, reject) => {
+    return new Promise<Array<string>>((resolve) => {
       if (currentAccountAddress === ALL_ACCOUNT_KEY) {
         accountsObservable.subject.pipe(take(1))
           .subscribe((accounts: SubjectInfo): void => {
@@ -144,99 +146,81 @@ export class KoniSubscription {
   }
 
   subscribeBalancesAndCrowdloans (address: string, dotSamaApiMap: Record<string, ApiProps>, web3ApiMap: Record<string, Web3>, onlyRunOnFirstTime?: boolean) {
-    this.unsubBalances && this.unsubBalances();
-    this.unsubCrowdloans && this.unsubCrowdloans();
     state.switchAccount(address).catch((err) => console.warn(err));
     this.detectAddresses(address)
-      .then((addresses) => {
-        this.unsubBalances = this.initBalanceSubscription(addresses, dotSamaApiMap, web3ApiMap, onlyRunOnFirstTime);
-        this.unsubCrowdloans = this.initCrowdloanSubscription(addresses, dotSamaApiMap, onlyRunOnFirstTime);
+      .then(async (addresses) => {
+        const [unsubBalances, unsubCrowdloans] = await Promise.all([
+          this.initBalanceSubscription(addresses, dotSamaApiMap, web3ApiMap, onlyRunOnFirstTime),
+          this.initCrowdloanSubscription(addresses, dotSamaApiMap, onlyRunOnFirstTime)
+        ]);
+
+        this.updateSubscription('balance', unsubBalances);
+        this.updateSubscription('crowdloan', unsubCrowdloans);
       })
       .catch(console.error);
   }
 
   subscribeStakingOnChain (address: string, dotSamaApiMap: Record<string, ApiProps>, onlyRunOnFirstTime?: boolean) {
-    this.unsubStakingOnChain && this.unsubStakingOnChain();
     state.resetStakingMap(address).then(() => {
       this.detectAddresses(address)
-        .then((addresses) => {
-          this.unsubStakingOnChain = this.initStakingOnChainSubscription(addresses, dotSamaApiMap, onlyRunOnFirstTime);
+        .then(async (addresses) => {
+          const unsubStakingOnChain = await this.initStakingOnChainSubscription(addresses, dotSamaApiMap, onlyRunOnFirstTime);
+
+          this.updateSubscription('stakingOnChain', unsubStakingOnChain);
         })
         .catch(console.error);
     }).catch((err) => console.warn(err));
   }
 
-  initStakingOnChainSubscription (addresses: string[], dotSamaApiMap: Record<string, ApiProps>, onlyRunOnFirstTime?: boolean) {
+  async initStakingOnChainSubscription (addresses: string[], dotSamaApiMap: Record<string, ApiProps>, onlyRunOnFirstTime?: boolean) {
     state.setStakingReward({
       ready: false,
       details: []
     } as StakingRewardJson);
-    const subscriptionPromise = stakingOnChainApi(addresses, dotSamaApiMap, (networkKey, rs) => {
+    const unsub = await stakingOnChainApi(addresses, dotSamaApiMap, (networkKey, rs) => {
       state.setStakingItem(networkKey, rs);
     }, state.getNetworkMap());
 
     if (onlyRunOnFirstTime) {
-      subscriptionPromise.then((unsubs) => {
-        unsubs.forEach((unsubs) => unsubs && unsubs());
-      }).catch(console.error);
+      unsub && unsub();
 
-      return undefined;
+      return;
     }
 
-    return async () => {
-      const unsubs = await subscriptionPromise;
-
-      unsubs.forEach((unsubs) => unsubs && unsubs());
+    return () => {
+      unsub && unsub();
     };
   }
 
-  initBalanceSubscription (addresses: string[], dotSamaApiMap: Record<string, ApiProps>, web3ApiMap: Record<string, Web3>, onlyRunOnFirstTime?: boolean) {
-    const subscriptionPromises = subscribeBalance(addresses, dotSamaApiMap, web3ApiMap, (networkKey, rs) => {
+  async initBalanceSubscription (addresses: string[], dotSamaApiMap: Record<string, ApiProps>, web3ApiMap: Record<string, Web3>, onlyRunOnFirstTime?: boolean) {
+    const unsub = await subscribeBalance(addresses, dotSamaApiMap, web3ApiMap, (networkKey, rs) => {
       state.setBalanceItem(networkKey, rs);
     });
 
     if (onlyRunOnFirstTime) {
-      subscriptionPromises.forEach((subProm) => {
-        subProm.then((unsub) => {
-          unsub && unsub();
-        }).catch(console.error);
-      });
+      unsub && unsub();
 
-      return undefined;
+      return;
     }
 
-    return async () => {
-      return Promise.all(subscriptionPromises.map(async (subProm) => {
-        const unsub = await subProm;
-
-        unsub && unsub();
-      }));
+    return () => {
+      unsub && unsub();
     };
   }
 
-  initCrowdloanSubscription (addresses: string[], dotSamaApiMap: Record<string, ApiProps>, onlyRunOnFirstTime?: boolean) {
-    const subscriptionPromise = subscribeCrowdloan(addresses, dotSamaApiMap, (networkKey, rs) => {
+  async initCrowdloanSubscription (addresses: string[], dotSamaApiMap: Record<string, ApiProps>, onlyRunOnFirstTime?: boolean) {
+    const unsub = await subscribeCrowdloan(addresses, dotSamaApiMap, (networkKey, rs) => {
       state.setCrowdloanItem(networkKey, rs);
     });
 
     if (onlyRunOnFirstTime) {
-      subscriptionPromise.then((unsubMap) => {
-        Object.values(unsubMap).forEach((unsub) => {
-          // eslint-disable-next-line @typescript-eslint/no-unsafe-call
-          unsub && unsub();
-        });
-      }).catch(console.error);
+      unsub && unsub();
 
-      return undefined;
+      return;
     }
 
-    return async () => {
-      const unsubMap = await subscriptionPromise;
-
-      Object.values(unsubMap).forEach((unsub) => {
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-call
-        unsub && unsub();
-      });
+    return () => {
+      unsub && unsub();
     };
   }
 

@@ -47,7 +47,7 @@ export async function stakingOnChainApi (addresses: string[], dotSamaAPIMap: Rec
     }
   });
 
-  return await Promise.all(allApiPromise.map(async ({ api: apiPromise, chain }) => {
+  const unsubs = await Promise.all(allApiPromise.map(async ({ api: apiPromise, chain }) => {
     const parentApi = await apiPromise.isReady;
     const useAddresses = apiPromise.isEthereum ? evmAddresses : substrateAddresses;
 
@@ -120,4 +120,8 @@ export async function stakingOnChainApi (addresses: string[], dotSamaAPIMap: Rec
       }
     });
   }));
+
+  return () => {
+    unsubs.forEach((unsub) => unsub && unsub());
+  };
 }

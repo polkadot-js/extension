@@ -25,6 +25,7 @@ let cron: KoniCron;
 let subscriptions: KoniSubscription;
 let timer: NodeJS.Timeout;
 let waitingToStop = false;
+let openCount = 0;
 
 // setup the notification (same a FF default background, white text)
 withErrorLog(() => chrome.browserAction.setBadgeBackgroundColor({ color: '#d90000' }));
@@ -35,6 +36,7 @@ chrome.runtime.onConnect.addListener((port): void => {
   assert([PORT_CONTENT, PORT_EXTENSION].includes(port.name), `Unknown connection from ${port.name}`);
 
   if (PORT_EXTENSION === port.name) {
+    openCount += 1;
     koniState.resumeAllNetworks().then(() => {
       cron && cron.start();
       subscriptions && subscriptions.start();
@@ -50,15 +52,18 @@ chrome.runtime.onConnect.addListener((port): void => {
   port.onMessage.addListener((data: TransportRequestMessage<keyof RequestSignatures>) => handlers(data, port));
   port.onDisconnect.addListener(() => {
     if (PORT_EXTENSION === port.name) {
-      waitingToStop = true;
-      timer = setTimeout(() => {
-        cron && cron.stop();
-        subscriptions.stop().then(() => {
+      openCount -= 1;
+
+      if (openCount <= 0) {
+        waitingToStop = true;
+        timer = setTimeout(() => {
+          cron && cron.stop();
+          subscriptions.stop();
           koniState.pauseAllNetworks(undefined, 'IDLE mode').then(() => {
             waitingToStop = false;
           }).catch((err) => console.warn(err));
-        }).catch((err) => console.warn(err));
-      }, IDLE_TIME);
+        }, IDLE_TIME);
+      }
     }
 
     console.warn(`Disconnected from ${port.name}`);

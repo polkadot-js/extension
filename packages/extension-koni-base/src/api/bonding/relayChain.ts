@@ -397,7 +397,7 @@ export async function handleRelayWithdrawalTxInfo (address: string, networkKey: 
   } as BasicTxInfo;
 }
 
-export async function getWithdrawalExtrinsic (dotSamaAPi: ApiProps, address: string) {
+export async function getRelayWithdrawalExtrinsic (dotSamaAPi: ApiProps, address: string) {
   const apiPromise = await dotSamaAPi.isReady;
 
   if (apiPromise.api.tx.staking.withdrawUnbonded.meta.args.length === 1) {

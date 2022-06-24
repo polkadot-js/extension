@@ -346,3 +346,9 @@ export async function handleMoonbeamWithdrawalTxInfo (networkKey: string, dotSam
     balanceError
   } as BasicTxInfo;
 }
+
+export async function getMoonbeamWithdrawalExtrinsic (dotSamaApi: ApiProps, address: string, collatorAddress: string) {
+  const apiPromise = await dotSamaApi.isReady;
+
+  return apiPromise.api.tx.parachainStaking.executeDelegationRequest(address, collatorAddress);
+}

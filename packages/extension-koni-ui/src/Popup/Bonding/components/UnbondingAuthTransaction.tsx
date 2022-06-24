@@ -30,7 +30,7 @@ interface Props extends ThemeProps {
   selectedValidator?: string
 }
 
-function BondingAuthTransaction ({ amount, balanceError, className, fee, selectedNetwork, selectedValidator, setExtrinsicHash, setIsTxSuccess, setShowConfirm, setShowResult, setTxError }: Props): React.ReactElement<Props> {
+function UnbondingAuthTransaction ({ amount, balanceError, className, fee, selectedNetwork, selectedValidator, setExtrinsicHash, setIsTxSuccess, setShowConfirm, setShowResult, setTxError }: Props): React.ReactElement<Props> {
   const { t } = useTranslation();
   const { show } = useToast();
   const networkJson = useGetNetworkJson(selectedNetwork);
@@ -191,7 +191,7 @@ function BondingAuthTransaction ({ amount, balanceError, className, fee, selecte
   );
 }
 
-export default React.memo(styled(BondingAuthTransaction)(({ theme }: Props) => `
+export default React.memo(styled(UnbondingAuthTransaction)(({ theme }: Props) => `
   .bonding-auth-cancel-button {
     color: ${theme.textColor3};
     background: ${theme.buttonBackground1};

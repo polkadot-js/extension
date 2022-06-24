@@ -299,7 +299,7 @@ export async function getUnlockingInfo (dotSamaApi: ApiProps, address: string, n
   });
 
   return {
-    nextWithdrawal: minRemainingEra.muln(ERA_LENGTH_MAP[networkKey] | ERA_LENGTH_MAP.default),
+    nextWithdrawal: minRemainingEra.muln(ERA_LENGTH_MAP[networkKey] || ERA_LENGTH_MAP.default),
     redeemable: stakingInfo.redeemable,
     nextWithdrawalAmount
   };

@@ -239,7 +239,6 @@ describe('test DotSama APIs', () => {
 
     const extrinsic = apiPromise.tx.parachainStaking.scheduleDelegatorBondLess('0x0198D3053a69C3f977bB1943bc95A0fFA7777474', new BN(6));
 
-    // TODO: get delegatorCount and bondedInfo
     const fee = await extrinsic.paymentInfo('0xAF2b4242e766caf5791DA56723a8dE1BeA4e7098');
 
     console.log(fee.toHuman());

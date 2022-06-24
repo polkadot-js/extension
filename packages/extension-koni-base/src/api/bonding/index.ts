@@ -2,16 +2,8 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { ApiProps, NetworkJson, ValidatorInfo } from '@subwallet/extension-base/background/KoniTypes';
-import { getMoonbeamBondingBasics, getMoonbeamBondingExtrinsic, getMoonbeamCollatorsInfo, handleMoonbeamBondingTxInfo, handleMoonbeamUnbondingTxInfo } from '@subwallet/extension-koni-base/api/bonding/moonbeam';
-import {
-  getRelayBondingExtrinsic,
-  getRelayChainBondingBasics,
-  getRelayUnbondingExtrinsic,
-  getRelayValidatorsInfo,
-  getTargetValidators,
-  handleRelayBondingTxInfo,
-  handleRelayUnbondingTxInfo
-} from '@subwallet/extension-koni-base/api/bonding/relayChain';
+import { getMoonbeamBondingBasics, getMoonbeamBondingExtrinsic, getMoonbeamCollatorsInfo, getMoonbeamUnbondingExtrinsic, handleMoonbeamBondingTxInfo, handleMoonbeamUnbondingTxInfo } from '@subwallet/extension-koni-base/api/bonding/moonbeam';
+import { getRelayBondingExtrinsic, getRelayChainBondingBasics, getRelayUnbondingExtrinsic, getRelayValidatorsInfo, getTargetValidators, handleRelayBondingTxInfo, handleRelayUnbondingTxInfo } from '@subwallet/extension-koni-base/api/bonding/relayChain';
 import Web3 from 'web3';
 
 const CHAIN_TYPES: Record<string, string[]> = {
@@ -48,7 +40,7 @@ export async function getBondingTxInfo (networkJson: NetworkJson, amount: number
 // TODO: remove address
 export async function getBondingExtrinsic (networkJson: NetworkJson, networkKey: string, amount: number, bondedValidators: string[], validatorInfo: ValidatorInfo, isBondedBefore: boolean, nominatorAddress: string, dotSamaApi: ApiProps) {
   if (CHAIN_TYPES.moonbeam.includes(networkKey)) {
-    return getMoonbeamBondingExtrinsic(networkJson, dotSamaApi, nominatorAddress, amount, validatorInfo, bondedValidators.length);
+    return getMoonbeamBondingExtrinsic(networkJson, dotSamaApi, amount, validatorInfo, bondedValidators.length);
   }
 
   const targetValidators: string[] = getTargetValidators(bondedValidators, validatorInfo.address);
@@ -66,7 +58,7 @@ export async function getUnbondingTxInfo (address: string, amount: number, netwo
 
 export async function getUnbondingExtrinsic (address: string, amount: number, networkKey: string, networkJson: NetworkJson, dotSamaApi: ApiProps, validatorAddress?: string) {
   if (CHAIN_TYPES.moonbeam.includes(networkKey)) {
-    return getMoonbeamUnbondingExtrinsic(networkJson, dotSamaApi, nominatorAddress, amount, validatorInfo, bondedValidators.length);
+    return getMoonbeamUnbondingExtrinsic(dotSamaApi, amount, networkJson, validatorAddress as string);
   }
 
   return getRelayUnbondingExtrinsic(dotSamaApi, amount, networkJson);

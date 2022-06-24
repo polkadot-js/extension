@@ -274,6 +274,7 @@ function UnbondingSubmitTransaction ({ className }: Props): React.ReactElement<P
           balanceError={balanceError}
           fee={fee}
           selectedNetwork={selectedNetwork}
+          selectedValidator={selectedValidator}
           setExtrinsicHash={setExtrinsicHash}
           setIsTxSuccess={setIsTxSuccess}
           setShowConfirm={setShowAuth}

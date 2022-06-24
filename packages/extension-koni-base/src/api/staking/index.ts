@@ -66,8 +66,8 @@ export async function stakingOnChainApi (addresses: string[], dotSamaAPIMap: Rec
 function getMoonBeamStakingOnChain (parentApi: ApiProps, useAddresses: string[], networks: Record<string, NetworkJson>, chain: string, callback: (networkKey: string, rs: StakingItem) => void) {
   return parentApi.api.query.parachainStaking.delegatorState.multi(useAddresses, async (ledgers: any) => {
     let totalBalance = 0;
-    // const activeBalance = 0;
-    // const unlockingBalance = 0;
+    let activeBalance = 0;
+    let unlockingBalance = 0;
     let stakingItem: StakingItem;
     const delegationMap: Record<string, string> = {};
 
@@ -78,6 +78,7 @@ function getMoonBeamStakingOnChain (parentApi: ApiProps, useAddresses: string[],
 
         if (data !== null) {
           let _totalBalance = data.total as string;
+          let _unlockingBalance = data.lessTotal as string;
           const _delegations = data.delegations as Record<string, string>[];
 
           for (const item of _delegations) {
@@ -89,8 +90,11 @@ function getMoonBeamStakingOnChain (parentApi: ApiProps, useAddresses: string[],
           }
 
           _totalBalance = _totalBalance.replaceAll(',', '');
+          _unlockingBalance = _unlockingBalance.replaceAll(',', '');
 
           totalBalance += parseFloat(_totalBalance);
+          unlockingBalance += parseFloat(_unlockingBalance);
+          activeBalance = totalBalance - unlockingBalance;
         }
       }
 
@@ -140,14 +144,16 @@ function getMoonBeamStakingOnChain (parentApi: ApiProps, useAddresses: string[],
       }));
 
       const parsedTotalBalance = parseStakingBalance(totalBalance, chain, networks);
+      const parsedUnlockingBalance = parseStakingBalance(unlockingBalance, chain, networks);
+      const parsedActiveBalance = parseStakingBalance(activeBalance, chain, networks);
 
       if (totalBalance > 0) {
         stakingItem = {
           name: networks[chain].chain,
           chainId: chain,
           balance: parsedTotalBalance.toString(),
-          activeBalance: parsedTotalBalance.toString(),
-          unlockingBalance: '0',
+          activeBalance: parsedActiveBalance.toString(),
+          unlockingBalance: parsedUnlockingBalance.toString(),
           nativeToken: networks[chain].nativeToken,
           unit: networks[chain].nativeToken,
           state: APIItemState.READY,
@@ -158,8 +164,8 @@ function getMoonBeamStakingOnChain (parentApi: ApiProps, useAddresses: string[],
           name: networks[chain].chain,
           chainId: chain,
           balance: parsedTotalBalance.toString(),
-          activeBalance: parsedTotalBalance.toString(),
-          unlockingBalance: '0',
+          activeBalance: parsedActiveBalance.toString(),
+          unlockingBalance: parsedUnlockingBalance.toString(),
           nativeToken: networks[chain].nativeToken,
           unit: networks[chain].nativeToken,
           state: APIItemState.READY

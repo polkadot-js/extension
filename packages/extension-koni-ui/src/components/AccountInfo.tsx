@@ -40,9 +40,10 @@ export interface Props {
   iconSize?: number;
   isEthereum?: boolean;
   addressHalfLength?: number;
+  accountSplitPart?: 'both' | 'left' | 'right';
 }
 
-function AccountInfo ({ address, addressHalfLength, className, genesisHash, iconSize = 32, isEthereum, isExternal, isHardware, isShowAddress = true, isShowBanner = true, name, parentName, showCopyBtn = true, suri, type: givenType }: Props): React.ReactElement<Props> {
+function AccountInfo ({ accountSplitPart = 'both', address, addressHalfLength = 10, className, genesisHash, iconSize = 32, isEthereum, isExternal, isHardware, isShowAddress = true, isShowBanner = true, name, parentName, showCopyBtn = true, suri, type: givenType }: Props): React.ReactElement<Props> {
   const { t } = useTranslation();
   const { accounts } = useContext(AccountContext);
   const [{ account,
@@ -109,11 +110,17 @@ function AccountInfo ({ address, addressHalfLength, className, genesisHash, icon
 
     const addressLength = halfLength || 7;
 
-    if (address.length > addressLength * 2) {
+    if (address.length <= addressLength * 2) {
       return address;
+    } else {
+      if (accountSplitPart === 'left') {
+        return `${address.slice(0, addressLength)}…`;
+      } else if (accountSplitPart === 'right') {
+        return `…${address.slice(-addressLength)}`;
+      } else {
+        return `${address.slice(0, addressLength)}…${address.slice(-addressLength)}`;
+      }
     }
-
-    return address.length > 13 ? `${address.slice(0, addressLength)}…${address.slice(-addressLength)}` : address;
   };
 
   const Name = () => {

@@ -3,7 +3,7 @@
 
 import { ApiProps, NetworkJson, ValidatorInfo } from '@subwallet/extension-base/background/KoniTypes';
 import { getMoonbeamBondingBasics, getMoonbeamBondingExtrinsic, getMoonbeamCollatorsInfo, getMoonbeamUnbondingExtrinsic, handleMoonbeamBondingTxInfo, handleMoonbeamUnbondingTxInfo } from '@subwallet/extension-koni-base/api/bonding/moonbeam';
-import { getRelayBondingExtrinsic, getRelayChainBondingBasics, getRelayUnbondingExtrinsic, getRelayValidatorsInfo, getTargetValidators, handleRelayBondingTxInfo, handleRelayUnbondingTxInfo } from '@subwallet/extension-koni-base/api/bonding/relayChain';
+import { getRelayBondingExtrinsic, getRelayChainBondingBasics, getRelayUnbondingExtrinsic, getRelayValidatorsInfo, getTargetValidators, handleRelayBondingTxInfo, handleRelayUnbondingTxInfo, handleRelayUnlockingInfo } from '@subwallet/extension-koni-base/api/bonding/relayChain';
 import Web3 from 'web3';
 
 const CHAIN_TYPES: Record<string, string[]> = {
@@ -37,7 +37,6 @@ export async function getBondingTxInfo (networkJson: NetworkJson, amount: number
   return handleRelayBondingTxInfo(networkJson, amount, targetValidators, isBondedBefore, networkKey, nominatorAddress, dotSamaApiMap, web3ApiMap);
 }
 
-// TODO: remove address
 export async function getBondingExtrinsic (networkJson: NetworkJson, networkKey: string, amount: number, bondedValidators: string[], validatorInfo: ValidatorInfo, isBondedBefore: boolean, nominatorAddress: string, dotSamaApi: ApiProps) {
   if (CHAIN_TYPES.moonbeam.includes(networkKey)) {
     return getMoonbeamBondingExtrinsic(networkJson, dotSamaApi, amount, validatorInfo, bondedValidators.length);
@@ -62,4 +61,12 @@ export async function getUnbondingExtrinsic (address: string, amount: number, ne
   }
 
   return getRelayUnbondingExtrinsic(dotSamaApi, amount, networkJson);
+}
+
+export async function getUnlockingInfo (dotSamaApi: ApiProps, networkJson: NetworkJson, networkKey: string, address: string) {
+  if (CHAIN_TYPES.moonbeam.includes(networkKey)) {
+    return handleMoonbeamUnlockingInfo(dotSamaApi, networkJson, networkKey, address);
+  }
+
+  return handleRelayUnlockingInfo(dotSamaApi, networkJson, networkKey, address);
 }

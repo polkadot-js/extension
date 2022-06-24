@@ -248,3 +248,7 @@ export async function getMoonbeamUnbondingExtrinsic (dotSamaApi: ApiProps, amoun
 
   return apiPromise.api.tx.parachainStaking.scheduleDelegatorBondLess(collatorAddress, binaryAmount);
 }
+
+export async function handleMoonbeamUnlockingInfo (dotSamaApi: ApiProps, networkJson: NetworkJson, networkKey: string, address: string) {
+
+}

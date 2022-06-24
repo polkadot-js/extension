@@ -6,7 +6,7 @@ import { DOTSAMA_AUTO_CONNECT_MS } from '@subwallet/extension-koni-base/constant
 import { getCurrentProvider } from '@subwallet/extension-koni-base/utils/utils';
 
 import { ApiPromise, WsProvider } from '@polkadot/api';
-import {BN} from "@polkadot/util";
+import { BN } from '@polkadot/util';
 
 jest.setTimeout(50000);
 
@@ -242,5 +242,62 @@ describe('test DotSama APIs', () => {
     const fee = await extrinsic.paymentInfo('0xAF2b4242e766caf5791DA56723a8dE1BeA4e7098');
 
     console.log(fee.toHuman());
+  });
+
+  test('get withdrawable amount', async () => {
+    const provider = new WsProvider(getCurrentProvider(PREDEFINED_NETWORKS.moonbase), DOTSAMA_AUTO_CONNECT_MS);
+    const api = new ApiPromise({ provider });
+    const apiPromise = await api.isReady;
+    const collatorList = ['0x0b70688C14297Bb634235a8870a9514c7A85a771'];
+    const allRequests: Record<string, Record<string, any>> = {};
+    const address = '0xAF2b4242e766caf5791DA56723a8dE1BeA4e7098';
+
+    await Promise.all(collatorList.map(async (validator) => {
+      const scheduledRequests = (await apiPromise.query.parachainStaking.delegationScheduledRequests(validator)).toHuman() as Record<string, any>[];
+
+      scheduledRequests.forEach((request) => {
+        if ((request.delegator as string).toLowerCase() === address.toLowerCase()) {
+          const redeemRound = parseRawNumber(request.whenExecutable as string);
+          let amount;
+          let action;
+
+          // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+          if (request.action.Revoke) {
+            action = 'revoke';
+            // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+            amount = parseRawNumber(request.action.Revoke as string);
+          } else {
+            action = 'bondLess';
+            // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+            amount = parseRawNumber(request.action.Decrease as string);
+          }
+
+          allRequests[redeemRound.toString()] = {
+            action,
+            amount
+          };
+        }
+      });
+    }));
+
+    let nextWithdrawalAmount = -1;
+    let nextWithdrawalAction = '';
+    let nextWithdrawalRound = -1;
+
+    Object.entries(allRequests).forEach(([round, data]) => {
+      if (nextWithdrawalRound === -1) {
+        nextWithdrawalRound = parseFloat(round);
+        nextWithdrawalAction = data.action as string;
+        nextWithdrawalAmount = data.amount as number;
+      } else if (nextWithdrawalRound > parseFloat(round)) {
+        nextWithdrawalRound = parseFloat(round);
+        nextWithdrawalAction = data.action as string;
+        nextWithdrawalAmount = data.amount as number;
+      }
+    });
+
+    console.log(nextWithdrawalAmount);
+    console.log(nextWithdrawalAction);
+    console.log(nextWithdrawalRound);
   });
 });

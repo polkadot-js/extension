@@ -57,7 +57,7 @@ function StakingMenu ({ bondedAmount, className, delegations, networkKey, nextWi
       store.dispatch({ type: 'unbondingParams/update', payload: { selectedNetwork: networkKey, bondedAmount: parseFloat(bondedAmount), delegations } as UnbondingParams });
       navigate('/account/unbonding-auth');
     }
-  }, [bondedAmount, navigate, networkKey]);
+  }, [bondedAmount, delegations, navigate, networkKey]);
 
   const getTooltipText = useCallback(() => {
     if (nextWithdrawalAmount === -1) {

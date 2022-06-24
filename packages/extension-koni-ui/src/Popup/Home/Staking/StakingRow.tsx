@@ -144,6 +144,7 @@ function StakingRow ({ activeStake, address, chainName, className, delegations, 
                 {
                   !isAccountAll && !isHardwareAccount && !isExternalAccount && <StakingMenu
                     bondedAmount={activeStake as string}
+                    delegations={delegations}
                     networkKey={networkKey}
                     nextWithdrawal={nextWithdrawal}
                     nextWithdrawalAmount={nextWithdrawalAmount}
@@ -152,7 +153,6 @@ function StakingRow ({ activeStake, address, chainName, className, delegations, 
                     showWithdrawalModal={handleShowWithdrawalModal}
                     toggleMenu={handleToggleBondingMenu}
                     unbondingStake={unbondingStake}
-                    delegations={delegations}
                   />
                 }
               </div>

@@ -1,7 +1,7 @@
 // Copyright 2019-2022 @subwallet/extension-koni authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { ApiProps, BasicTxInfo, ChainBondingBasics, NetworkJson, ValidatorInfo } from '@subwallet/extension-base/background/KoniTypes';
+import { ApiProps, BasicTxInfo, ChainBondingBasics, NetworkJson, UnlockingStakeInfo, ValidatorInfo } from '@subwallet/extension-base/background/KoniTypes';
 import { calculateChainStakedReturn, calculateInflation, calculateValidatorStakedReturn, ERA_LENGTH_MAP, getCommission, Unlocking, ValidatorExtraInfo } from '@subwallet/extension-koni-base/api/bonding/utils';
 import { getFreeBalance } from '@subwallet/extension-koni-base/api/dotsama/balance';
 import Web3 from 'web3';
@@ -309,7 +309,7 @@ export async function handleRelayUnbondingTxInfo (address: string, amount: numbe
   } as BasicTxInfo;
 }
 
-export async function getUnlockingInfo (dotSamaApi: ApiProps, address: string, networkKey: string) {
+export async function getRelayUnlockingInfo (dotSamaApi: ApiProps, address: string, networkKey: string) {
   const apiPromise = await dotSamaApi.isReady;
 
   const [stakingInfo, progress] = await Promise.all([
@@ -351,6 +351,19 @@ export async function getUnlockingInfo (dotSamaApi: ApiProps, address: string, n
     redeemable: stakingInfo.redeemable,
     nextWithdrawalAmount
   };
+}
+
+export async function handleRelayUnlockingInfo (dotSamaApi: ApiProps, networkJson: NetworkJson, networkKey: string, address: string) {
+  const { nextWithdrawal, nextWithdrawalAmount, redeemable } = await getRelayUnlockingInfo(dotSamaApi, address, networkKey);
+
+  const parsedRedeemable = redeemable ? parseFloat(redeemable.toString()) / (10 ** (networkJson.decimals as number)) : 0;
+  const parsedNextWithdrawalAmount = parseFloat(nextWithdrawalAmount.toString()) / (10 ** (networkJson.decimals as number));
+
+  return {
+    nextWithdrawal: parseFloat(nextWithdrawal.toString()),
+    redeemable: parsedRedeemable,
+    nextWithdrawalAmount: parsedNextWithdrawalAmount
+  } as UnlockingStakeInfo;
 }
 
 export async function getWithdrawalTxInfo (dotSamaAPi: ApiProps, address: string) {

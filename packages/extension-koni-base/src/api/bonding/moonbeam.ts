@@ -1,13 +1,8 @@
 // Copyright 2019-2022 @subwallet/extension-koni authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { ApiProps, BasicTxInfo, ChainBondingBasics, NetworkJson, ValidatorInfo } from '@subwallet/extension-base/background/KoniTypes';
-import {
-  calculateChainStakedReturn,
-  ERA_LENGTH_MAP,
-  MOONBEAM_INFLATION_DISTRIBUTION,
-  parseRawNumber
-} from '@subwallet/extension-koni-base/api/bonding/utils';
+import { ApiProps, BasicTxInfo, ChainBondingBasics, NetworkJson, UnlockingStakeInfo, ValidatorInfo } from '@subwallet/extension-base/background/KoniTypes';
+import { calculateChainStakedReturn, ERA_LENGTH_MAP, MOONBEAM_INFLATION_DISTRIBUTION, parseRawNumber } from '@subwallet/extension-koni-base/api/bonding/utils';
 import { getFreeBalance } from '@subwallet/extension-koni-base/api/dotsama/balance';
 import Web3 from 'web3';
 
@@ -286,9 +281,9 @@ export async function getMoonbeamUnlockingInfo (dotSamaApi: ApiProps, address: s
     });
   }));
 
-  let nextWithdrawalAmount = -1;
+  let nextWithdrawalAmount = 0;
   let nextWithdrawalAction = '';
-  let nextWithdrawalRound = -1;
+  let nextWithdrawalRound = 0;
 
   Object.entries(allRequests).forEach(([round, data]) => {
     if (nextWithdrawalRound === -1) {
@@ -304,15 +299,26 @@ export async function getMoonbeamUnlockingInfo (dotSamaApi: ApiProps, address: s
 
   const currentRoundInfo = (await apiPromise.api.query.parachainStaking.round()).toHuman() as Record<string, string>;
   const currentRound = parseRawNumber(currentRoundInfo.current);
+  const nextWithdrawal = (currentRound - nextWithdrawalRound) * ERA_LENGTH_MAP[networkKey];
 
   return {
-    nextWithdrawal: (currentRound - nextWithdrawalRound) * ERA_LENGTH_MAP[networkKey],
-    redeemable: 0,
+    nextWithdrawal,
+    redeemable: nextWithdrawal === 0 ? nextWithdrawalAmount : 0,
     nextWithdrawalAmount,
     nextWithdrawalAction
   };
 }
 
 export async function handleMoonbeamUnlockingInfo (dotSamaApi: ApiProps, networkJson: NetworkJson, networkKey: string, address: string, collatorList: string[]) {
+  const { nextWithdrawal, nextWithdrawalAction, nextWithdrawalAmount, redeemable } = await getMoonbeamUnlockingInfo(dotSamaApi, address, networkKey, collatorList);
 
+  const parsedRedeemable = redeemable / (10 ** (networkJson.decimals as number));
+  const parsedNextWithdrawalAmount = nextWithdrawalAmount / (10 ** (networkJson.decimals as number));
+
+  return {
+    nextWithdrawal,
+    redeemable: parsedRedeemable,
+    nextWithdrawalAmount: parsedNextWithdrawalAmount,
+    nextWithdrawalAction
+  } as UnlockingStakeInfo;
 }

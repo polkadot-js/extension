@@ -304,6 +304,11 @@ describe('test DotSama APIs', () => {
     console.log(nextWithdrawalRound);
 
     const timeLeft = (nextWithdrawalRound - currentRound) * 2;
-    console.log(timeLeft);
+
+    console.log('timeLeft', timeLeft);
+
+    if (timeLeft < 0) {
+      console.log('overtime');
+    }
   });
 });

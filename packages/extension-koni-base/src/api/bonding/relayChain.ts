@@ -347,7 +347,7 @@ export async function getRelayUnlockingInfo (dotSamaApi: ApiProps, address: stri
   });
 
   return {
-    nextWithdrawal: minRemainingEra.muln(ERA_LENGTH_MAP[networkKey] | ERA_LENGTH_MAP.default),
+    nextWithdrawal: minRemainingEra.muln(ERA_LENGTH_MAP[networkKey] || ERA_LENGTH_MAP.default),
     redeemable: stakingInfo.redeemable,
     nextWithdrawalAmount
   };

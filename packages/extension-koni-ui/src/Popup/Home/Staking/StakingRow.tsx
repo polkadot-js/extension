@@ -60,10 +60,15 @@ function StakingRow ({ activeStake, address, chainName, className, delegations, 
   }, [showStakingMenu]);
 
   useEffect(() => {
+    const validatorList = delegations?.map((item) => {
+      return item.owner;
+    });
+
     if (parseFloat(unbondingStake as string) > 0) {
       getUnlockingStakeInfo({
         networkKey,
-        address
+        address,
+        validatorList: validatorList
       })
         .then((resp) => {
           setRedeemable(resp.redeemable);
@@ -72,7 +77,7 @@ function StakingRow ({ activeStake, address, chainName, className, delegations, 
         })
         .catch(console.error);
     }
-  }, [address, networkKey, unbondingStake]);
+  }, [address, delegations, networkKey, unbondingStake]);
 
   const editBalance = (balance: string) => {
     if (parseFloat(balance) === 0) {

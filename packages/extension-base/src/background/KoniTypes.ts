@@ -956,13 +956,15 @@ export interface UnbondingSubmitParams {
 
 export interface UnlockingStakeParams {
   address: string,
-  networkKey: string
+  networkKey: string,
+  validatorList?: string[]
 }
 
 export interface UnlockingStakeInfo {
   nextWithdrawal: number,
   redeemable: number,
-  nextWithdrawalAmount: number
+  nextWithdrawalAmount: number,
+  nextWithdrawalAction?: 'bondLess' | 'revoke'
 }
 
 export interface StakeWithdrawalParams {

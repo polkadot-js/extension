@@ -367,5 +367,20 @@
   "Amount": "",
   "Data": "",
   "Estimate Gas": "",
-  "Any chain": ""
+  "Any chain": "",
+  "Select all": "",
+  "Select a network": "",
+  "Staking action": "",
+  "Select a validator": "",
+  "Search validator...": "",
+  "Lowest commission": "",
+  "Highest return": "",
+  "Retry": "",
+  "The account which you will unstake": "",
+  "Unstake from account": "",
+  "Unstaking action": "",
+  "The account which you will withdraw stake": "",
+  "Withdraw stake from account": "",
+  "Add NFT": "",
+  "Add Token": ""
 }

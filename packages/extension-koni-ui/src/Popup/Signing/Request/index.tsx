@@ -7,6 +7,7 @@ import type { SignerPayloadJSON, SignerPayloadRaw } from '@polkadot/types/types'
 import type { HexString } from '@polkadot/util/types';
 
 import useTranslation from '@subwallet/extension-koni-ui/hooks/useTranslation';
+import LedgerSign from '@subwallet/extension-koni-ui/Popup/Signing/LedgerSign';
 import Qr from '@subwallet/extension-koni-ui/Popup/Signing/Qr';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
@@ -23,7 +24,6 @@ import { approveSignSignature } from '../../../messaging';
 import Bytes from '../Bytes';
 import Extrinsic from '../Extrinsic';
 import SignArea from './SignArea';
-import LedgerSign from "@subwallet/extension-koni-ui/Popup/Signing/LedgerSign";
 
 interface Props extends ThemeProps {
   account: AccountJson;
@@ -124,6 +124,7 @@ function Request ({ account: { accountIndex, addressOffset, isExternal, isHardwa
               addressOffset={addressOffset as number || 0}
               error={error}
               genesisHash={json.genesisHash}
+              // eslint-disable-next-line @typescript-eslint/no-misused-promises
               onSignature={_onSignature}
               payload={payload}
               setError={setError}

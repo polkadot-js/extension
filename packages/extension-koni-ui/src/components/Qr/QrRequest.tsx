@@ -19,12 +19,12 @@ import { SignerResult } from '@polkadot/types/types';
 import { hexToU8a, isHex } from '@polkadot/util';
 
 interface Props extends ThemeProps{
+  children: JSX.Element;
   className?: string;
   errorArr: string[];
-  isBusy: boolean;
   genesisHash: string;
-  children: JSX.Element;
   handlerStart: () => void;
+  isBusy: boolean;
 }
 
 const QrRequest = (props: Props) => {

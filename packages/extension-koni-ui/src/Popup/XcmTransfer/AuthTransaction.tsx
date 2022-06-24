@@ -2,18 +2,19 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { DropdownTransformOptionType, NetworkJson, RequestCheckCrossChainTransfer, ResponseTransfer, TransferError, TransferStep } from '@subwallet/extension-base/background/KoniTypes';
+import { LedgerState } from '@subwallet/extension-base/signers/types';
 import arrowRight from '@subwallet/extension-koni-ui/assets/arrow-right.svg';
 import { InputWithLabel, Warning } from '@subwallet/extension-koni-ui/components';
 import Button from '@subwallet/extension-koni-ui/components/Button';
 import FormatBalance from '@subwallet/extension-koni-ui/components/FormatBalance';
 import InputAddress from '@subwallet/extension-koni-ui/components/InputAddress';
+import LedgerRequest from '@subwallet/extension-koni-ui/components/Ledger/LedgerRequest';
 import Modal from '@subwallet/extension-koni-ui/components/Modal';
 import QrRequest from '@subwallet/extension-koni-ui/components/Qr/QrRequest';
 import { BalanceFormatType } from '@subwallet/extension-koni-ui/components/types';
 import { MANUAL_CANCEL_EXTERNAL_REQUEST, SIGN_MODE } from '@subwallet/extension-koni-ui/constants/signing';
 import { ExternalRequestContext } from '@subwallet/extension-koni-ui/contexts/ExternalRequestContext';
 import { QrContext, QrContextState, QrStep } from '@subwallet/extension-koni-ui/contexts/QrContext';
-import { useSignLedger } from '@subwallet/extension-koni-ui/hooks/useSignLedger';
 import useTranslation from '@subwallet/extension-koni-ui/hooks/useTranslation';
 import { getAccountMeta, makeCrossChainTransfer, makeCrossChainTransferLedger, makeCrossChainTransferQr, rejectExternalRequest } from '@subwallet/extension-koni-ui/messaging';
 import Dropdown from '@subwallet/extension-koni-ui/Popup/XcmTransfer/XcmDropdown/Dropdown';
@@ -164,14 +165,6 @@ function AuthTransaction ({ balanceFormat,
     }
   }, [clearExternalState, cleanQrState, onChangeResult]);
 
-  const handlerOnErrorLedger = useCallback((id: string, error: string) => {
-    setErrorArr([error]);
-    rejectExternalRequest({ id: id, message: error })
-      .finally(() => setBusy(false));
-  }, []);
-
-  const { signLedger: handlerSignLedger } = useSignLedger({ onError: handlerOnErrorLedger, genesisHash: genesisHash, accountMeta: accountMeta });
-
   const _doStart = useCallback((): void => {
     setBusy(true);
     makeCrossChainTransfer({
@@ -206,7 +199,7 @@ function AuthTransaction ({ balanceFormat,
       .catch((e) => console.log('There is problem when makeTransferQr', e));
   }, [handlerCallbackResponseResult, handlerResponseError, requestPayload, updateQrState]);
 
-  const _doStartLedger = useCallback((): void => {
+  const _doStartLedger = useCallback((handlerSignLedger: (ledgerState: LedgerState) => void): void => {
     setBusy(true);
     makeCrossChainTransferLedger({
       ...requestPayload
@@ -222,7 +215,7 @@ function AuthTransaction ({ balanceFormat,
       handlerCallbackResponseResult(rs);
     }).then(handlerResponseError)
       .catch((e) => console.log('There is problem when makeCrossChainTransferLedger', e));
-  }, [updateExternalState, requestPayload, handlerCallbackResponseResult, handlerResponseError, handlerSignLedger]);
+  }, [updateExternalState, requestPayload, handlerCallbackResponseResult, handlerResponseError]);
 
   const _onChangePass = useCallback(
     (value: string): void => {
@@ -357,33 +350,17 @@ function AuthTransaction ({ balanceFormat,
         );
       case SIGN_MODE.LEDGER:
         return (
-          <div className='auth-transaction-body'>
+          <LedgerRequest
+            accountMeta={accountMeta}
+            errorArr={errorArr}
+            genesisHash={genesisHash}
+            handlerSignLedger={_doStartLedger}
+            isBusy={isBusy}
+            setBusy={setBusy}
+            setErrorArr={setErrorArr}
+          >
             { handlerRenderInfo() }
-            <div className='auth-transaction__separator' />
-            {renderError()}
-
-            <div className='bridge-button-container'>
-              <Button
-                className='bridge-button'
-                isDisabled={isBusy}
-                onClick={_onCancel}
-              >
-                <span>
-                  {t<string>('Reject')}
-                </span>
-              </Button>
-
-              <Button
-                className='bridge-button'
-                isBusy={isBusy}
-                onClick={_doStartLedger}
-              >
-                <span>
-                  {t<string>('Sign via Ledger')}
-                </span>
-              </Button>
-            </div>
-          </div>
+          </LedgerRequest>
         );
       case SIGN_MODE.PASSWORD:
       default:
@@ -428,7 +405,23 @@ function AuthTransaction ({ balanceFormat,
           </div>
         );
     }
-  }, [_doStart, _doStartLedger, _doStartQr, _onCancel, _onChangePass, errorArr, genesisHash, handlerRenderInfo, isBusy, isKeyringErr, password, renderError, signMode, t]);
+  }, [
+    _doStart,
+    _doStartLedger,
+    _doStartQr,
+    _onCancel,
+    _onChangePass,
+    accountMeta,
+    errorArr,
+    genesisHash,
+    handlerRenderInfo,
+    isBusy,
+    isKeyringErr,
+    password,
+    renderError,
+    signMode,
+    t
+  ]);
 
   useEffect(() => {
     let unmount = false;

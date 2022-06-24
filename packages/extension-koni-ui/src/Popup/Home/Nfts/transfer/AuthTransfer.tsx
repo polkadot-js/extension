@@ -3,14 +3,15 @@
 
 import { RequestNftForceUpdate, ResponseNftTransferExternal, ResponseNftTransferLedger, ResponseNftTransferQr, TransferNftError } from '@subwallet/extension-base/background/KoniTypes';
 import { AccountJson } from '@subwallet/extension-base/background/types';
+import { LedgerState } from '@subwallet/extension-base/signers/types';
 import { Spinner } from '@subwallet/extension-koni-ui/components';
 import InputAddress from '@subwallet/extension-koni-ui/components/InputAddress';
+import LedgerRequest from '@subwallet/extension-koni-ui/components/Ledger/LedgerRequest';
 import Modal from '@subwallet/extension-koni-ui/components/Modal';
 import QrRequest from '@subwallet/extension-koni-ui/components/Qr/QrRequest';
 import { MANUAL_CANCEL_EXTERNAL_REQUEST, SIGN_MODE } from '@subwallet/extension-koni-ui/constants/signing';
 import { ExternalRequestContext } from '@subwallet/extension-koni-ui/contexts/ExternalRequestContext';
 import { QrContext, QrContextState, QrStep } from '@subwallet/extension-koni-ui/contexts/QrContext';
-import { useSignLedger } from '@subwallet/extension-koni-ui/hooks/useSignLedger';
 import useToast from '@subwallet/extension-koni-ui/hooks/useToast';
 import useTranslation from '@subwallet/extension-koni-ui/hooks/useTranslation';
 import { evmNftSubmitTransaction, getAccountMeta, makeTransferNftLedgerSubstrate, makeTransferNftQrEvm, makeTransferNftQrSubstrate, nftForceUpdate, rejectExternalRequest, substrateNftSubmitTransaction } from '@subwallet/extension-koni-ui/messaging';
@@ -312,15 +313,7 @@ function AuthTransfer ({ chain, className, collectionId, nftItem, recipientAddre
     }
   }, [handlerSendEvmQr, handlerSendSubstrateQr, substrateParams, web3Tx]);
 
-  const handlerOnErrorLedger = useCallback((id: string, error: string) => {
-    setErrorArr([error]);
-    rejectExternalRequest({ id: id, message: error })
-      .finally(() => setLoading(false));
-  }, []);
-
-  const { signLedger: handlerSignLedger } = useSignLedger({ accountMeta: accountMeta, onError: handlerOnErrorLedger, genesisHash: genesisHash });
-
-  const handlerCallbackResponseResultLedger = useCallback((data: ResponseNftTransferLedger) => {
+  const handlerCallbackResponseResultLedger = useCallback((handlerSignLedger: (ledgerState: LedgerState) => void, data: ResponseNftTransferLedger) => {
     if (data.ledgerState) {
       handlerSignLedger(data.ledgerState);
     }
@@ -330,19 +323,23 @@ function AuthTransfer ({ chain, className, collectionId, nftItem, recipientAddre
     }
 
     handlerCallbackResponseResult(data);
-  }, [handlerCallbackResponseResult, handlerSignLedger, updateExternalState]);
+  }, [handlerCallbackResponseResult, updateExternalState]);
 
-  const handlerSendLedgerSubstrate = useCallback(() => {
+  const handlerSendLedgerSubstrate = useCallback((handlerSignLedger: (ledgerState: LedgerState) => void) => {
+    const callback = (data: ResponseNftTransferLedger) => {
+      handlerCallbackResponseResultLedger(handlerSignLedger, data);
+    };
+
     makeTransferNftLedgerSubstrate({
       recipientAddress: recipientAddress,
       senderAddress: senderAccount.address,
       params: substrateParams
-    }, handlerCallbackResponseResultLedger)
+    }, callback)
       .then(handlerResponseError)
       .catch((e) => console.log('There is problem when makeTransferNftQrSubstrate', e));
   }, [handlerCallbackResponseResultLedger, handlerResponseError, recipientAddress, senderAccount.address, substrateParams]);
 
-  const handlerSendLedger = useCallback(() => {
+  const handlerSendLedger = useCallback((handlerSignLedger: (ledgerState: LedgerState) => void) => {
     if (loading) {
       return;
     }
@@ -358,7 +355,11 @@ function AuthTransfer ({ chain, className, collectionId, nftItem, recipientAddre
     // eslint-disable-next-line @typescript-eslint/no-misused-promises
     setTimeout(() => {
       if (substrateParams !== null) {
-        handlerSendLedgerSubstrate();
+        const sendSubstrate = () => {
+          handlerSendLedgerSubstrate(handlerSignLedger);
+        };
+
+        sendSubstrate();
       } else if (web3Tx !== null) {
         setErrorArr(['We don\'t support transfer NFT with ledger at the moment']);
         setLoading(false);
@@ -451,8 +452,14 @@ function AuthTransfer ({ chain, className, collectionId, nftItem, recipientAddre
         );
       case SIGN_MODE.LEDGER:
         return (
-          <div
-            className={'auth-container'}
+          <LedgerRequest
+            accountMeta={accountMeta}
+            errorArr={errorArr}
+            genesisHash={genesisHash}
+            handlerSignLedger={handlerSendLedger}
+            isBusy={loading}
+            setBusy={setLoading}
+            setErrorArr={setErrorArr}
           >
             <div className={'fee'}>Fees of {substrateGas || web3Gas} will be applied to the submission</div>
             <InputAddress
@@ -466,20 +473,7 @@ function AuthTransfer ({ chain, className, collectionId, nftItem, recipientAddre
               type='account'
               withEllipsis
             />
-
-            <div
-              className={'submit-btn'}
-              // eslint-disable-next-line @typescript-eslint/no-misused-promises
-              onClick={handlerSendLedger}
-              style={{ marginTop: '40px', background: loading ? 'rgba(0, 75, 255, 0.25)' : '#004BFF', cursor: loading ? 'default' : 'pointer' }}
-            >
-              {
-                !loading
-                  ? 'Sign via Ledger'
-                  : <Spinner className={'spinner-loading'} />
-              }
-            </div>
-          </div>
+          </LedgerRequest>
         );
       case SIGN_MODE.PASSWORD:
       default:
@@ -512,7 +506,22 @@ function AuthTransfer ({ chain, className, collectionId, nftItem, recipientAddre
           </div>
         );
     }
-  }, [currentNetwork.networkPrefix, errorArr, genesisHash, handleSignAndSubmit, handlerCreateQr, handlerSendLedger, loading, passwordError, senderAccount.address, signMode, substrateGas, t, web3Gas]);
+  }, [
+    accountMeta,
+    currentNetwork.networkPrefix,
+    errorArr,
+    genesisHash,
+    handleSignAndSubmit,
+    handlerCreateQr,
+    handlerSendLedger,
+    loading,
+    passwordError,
+    senderAccount.address,
+    signMode,
+    substrateGas,
+    t,
+    web3Gas
+  ]);
 
   useEffect(() => {
     let unmount = false;

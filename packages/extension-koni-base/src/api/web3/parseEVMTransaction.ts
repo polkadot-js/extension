@@ -40,6 +40,8 @@ export const parseEVMTransaction = (data: string): ResponseParseTransactionEVM =
         // eslint-disable-next-line @typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-member-access,@typescript-eslint/no-unsafe-assignment
         temp.args.push({ type: type, value: raw.inputs[index].toString(), name: raw.names[index].toString() });
       });
+
+      result.data = temp;
     }
   }
 

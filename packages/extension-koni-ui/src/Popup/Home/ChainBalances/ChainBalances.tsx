@@ -262,6 +262,7 @@ function ChainBalances ({ address,
               balanceInfo={selectedBalanceInfo}
               setQrModalOpen={setQrModalOpen}
               setQrModalProps={setQrModalProps}
+              setIsExportModalOpen={setIsExportModalOpen}
             />
           </>
         )

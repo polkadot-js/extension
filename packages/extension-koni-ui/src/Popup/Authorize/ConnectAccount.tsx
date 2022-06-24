@@ -5,9 +5,10 @@
 // eslint-disable-next-line header/header
 import type { ThemeProps } from '../../types';
 
+import { ALL_ACCOUNT_KEY } from '@subwallet/extension-koni-base/constants';
 import check from '@subwallet/extension-koni-ui/assets/check.svg';
 import { AccountInfoEl } from '@subwallet/extension-koni-ui/components';
-import React, { useCallback, useState } from 'react';
+import React, { useCallback } from 'react';
 import styled from 'styled-components';
 
 import { KeypairType } from '@polkadot/util-crypto/types';
@@ -20,22 +21,28 @@ interface Props extends ThemeProps {
   parentName?: string | null;
   type?: KeypairType;
   suri?: string;
+  isSelected: boolean,
   selectedAccounts: string[];
   selectAccountCallBack?: (selectedAccounts: string[]) => void;
 }
 
-function ConnectAccount ({ address, className, genesisHash, name, parentName, selectAccountCallBack, selectedAccounts, suri, type }: Props): React.ReactElement<Props> {
-  const [isSelected, setSelected] = useState(selectedAccounts.includes(address));
+function ConnectAccount ({ address, className, genesisHash, isSelected, name, parentName, selectAccountCallBack, selectedAccounts, suri, type }: Props): React.ReactElement<Props> {
   const deps = selectedAccounts.toString();
 
   const selectAccounts = useCallback(() => {
-    if (isSelected) {
-      selectAccountCallBack && selectAccountCallBack(selectedAccounts.filter((acc) => acc !== address));
-    } else {
-      selectAccountCallBack && selectAccountCallBack(selectedAccounts.concat(address));
+    let newSelectedAccounts = selectedAccounts;
+
+    if (address !== ALL_ACCOUNT_KEY) {
+      if (isSelected) {
+        newSelectedAccounts = selectedAccounts.filter((acc) => acc !== address);
+      } else {
+        newSelectedAccounts = selectedAccounts.concat(address);
+      }
+    } else if (isSelected) {
+      newSelectedAccounts = [];
     }
 
-    setSelected(!isSelected);
+    selectAccountCallBack && selectAccountCallBack(newSelectedAccounts);
   }, [address, isSelected, selectAccountCallBack, deps]);
 
   return (

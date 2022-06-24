@@ -748,6 +748,39 @@ export const PREDEFINED_NETWORKS: Record<string, NetworkJson> = {
     evmChainId: 336,
     isEthereum: true
   },
+  shibuya: {
+    key: 'shibuya',
+    chain: 'Shibuya Testnet',
+    genesisHash: '0xddb89973361a170839f80f152d2e9e38a376a5a7eccefcade763f46a8e567019',
+    ss58Format: 5,
+    providers: {
+      Shibuya: 'wss://rpc.shibuya.astar.network/'
+    },
+    isEthereum: false,
+    active: false,
+    currentProviderMode: 'ws',
+    currentProvider: 'Shibuya',
+    groups: ['TEST_NET'],
+    nativeToken: 'SBY',
+    decimals: 18
+  },
+  shibuyaEvm: {
+    key: 'shibuyaEvm',
+    chain: 'Shibuya Testnet - EVM',
+    genesisHash: '0xddb89973361a170839f80f152d2e9e38a376a5a7eccefcade763f46a8e567019_evm',
+    ss58Format: 5,
+    providers: {
+      Shibuya: 'wss://rpc.shibuya.astar.network/'
+    },
+    isEthereum: true,
+    active: false,
+    currentProviderMode: 'ws',
+    currentProvider: 'Shibuya',
+    groups: ['TEST_NET'],
+    evmChainId: 81,
+    nativeToken: 'SBY',
+    decimals: 18
+  },
   khala: {
     key: 'khala',
     chain: 'Khala',

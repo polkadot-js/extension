@@ -26,7 +26,7 @@ function ImportEvmToken ({ className = '' }: Props): React.ReactElement<Props> {
   const chainOptions = useGetActiveEvmChains();
   const [contractAddress, setContractAddress] = useState(tokenInfo?.smartContract || '');
   const [symbol, setSymbol] = useState(tokenInfo?.symbol || '');
-  const [decimals, setDecimals] = useState(String(tokenInfo?.decimals) || '');
+  const [decimals, setDecimals] = useState(tokenInfo ? String(tokenInfo?.decimals) : '');
   const [chain, setChain] = useState(tokenInfo?.chain || '');
 
   const [isValidDecimals, setIsValidDecimals] = useState(true);
@@ -232,7 +232,7 @@ export default React.memo(styled(ImportEvmToken)(({ theme }: Props) => `
     color: red;
     font-size: 12px;
   }
-  
+
   .cancel-button {
     margin-right: 8px;
     background-color: ${theme.buttonBackground1};
@@ -259,7 +259,7 @@ export default React.memo(styled(ImportEvmToken)(({ theme }: Props) => `
     padding: 15px;
     flex-wrap: wrap;
   }
-  
+
   .warning {
     color: ${theme.iconWarningColor};
     margin-bottom: 10px;

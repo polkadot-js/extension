@@ -23,6 +23,8 @@ const ChainBalanceDetail = React.lazy(() => import('../ChainBalances/ChainBalanc
 const ChainBalanceItem = React.lazy(() => import('@subwallet/extension-koni-ui/Popup/Home/ChainBalances/ChainBalanceItem'));
 const ChainBalanceDetailItem = React.lazy(() => import('@subwallet/extension-koni-ui/Popup/Home/ChainBalances/ChainBalanceDetail/ChainBalanceDetailItem'));
 
+const WAITING_FOR_CONNECTION = 5000;
+
 interface Props extends ThemeProps {
   address: string;
   className?: string;
@@ -41,6 +43,11 @@ interface Props extends ThemeProps {
   }) => void;
   setShowBalanceDetail: (isShowBalanceDetail: boolean) => void;
   setSelectedNetworkBalance?: (networkBalance: BigN) => void;
+}
+
+interface ConnectingState {
+  status: 'pending' | 'done',
+  timestamp: number
 }
 
 function isAllowToShow (
@@ -112,7 +119,7 @@ function ChainBalances ({ address,
   const selectedBalanceInfo = networkBalanceMaps[selectedNetworkKey];
   const { currentAccount: { account: currentAccount } } = useSelector((state: RootState) => state);
   const { networkMap } = useSelector((state: RootState) => state);
-  const [connectingList, setConnectingList] = useState<Record<string, boolean>>({});
+  const [connectingList, setConnectingList] = useState<Record<string, ConnectingState>>({});
 
   const isEthAccount = isEthereumAddress(currentAccount?.address);
 
@@ -146,7 +153,7 @@ function ChainBalances ({ address,
       return (<Fragment key={info.key} />);
     }
 
-    const isConnecting = connectingList[networkKey] || (balanceInfo && balanceInfo.isLoading);
+    const isConnecting = connectingList[networkKey]?.status === 'done' || (balanceInfo && balanceInfo.isLoading);
 
     if (balanceInfo && balanceInfo.childrenBalances.length === 0) {
       return (
@@ -221,21 +228,66 @@ function ChainBalances ({ address,
 
   useEffect(() => {
     const checkData = () => {
-      const newList: Record<string, boolean> = {};
+      setConnectingList((state) => {
+        const timestamp = +new Date();
+        const newList: Record<string, ConnectingState> = {};
 
-      Object.entries(networkMap).forEach(([key, value]) => {
-        const isDisconnected = value.apiStatus !== NETWORK_STATUS.CONNECTED;
+        Object.entries(networkMap).forEach(([key, value]) => {
+          const isDisconnected = value.apiStatus !== NETWORK_STATUS.CONNECTED;
 
-        if (isDisconnected) {
-          newList[key] = true;
-        }
+          if (isDisconnected) {
+            if (state[key]) {
+              newList[key] = state[key];
+            } else {
+              newList[key] = {
+                status: 'pending',
+                timestamp
+              };
+            }
+          }
+        });
+
+        return newList;
       });
-
-      setConnectingList(newList);
     };
 
     checkData();
   }, [networkMap]);
+
+  useEffect(() => {
+    let timer: NodeJS.Timeout;
+
+    const createCounter = () => {
+      const check = Object.values(connectingList).some((item) => item.status === 'pending');
+
+      if (check) {
+        timer = setInterval(() => {
+          const newList: Record<string, ConnectingState> = {};
+          const newTimestamp = +new Date();
+          let changed = false;
+
+          Object.entries(connectingList).forEach(([key, item]) => {
+            if (item.status === 'pending' && newTimestamp - item.timestamp >= WAITING_FOR_CONNECTION) {
+              newList[key] = { ...item, status: 'done' };
+              !changed && (changed = true);
+            } else {
+              newList[key] = item;
+            }
+          });
+
+          if (changed) {
+            setConnectingList(newList);
+          }
+        }, 1000);
+      }
+    };
+
+    createCounter();
+
+    return () => {
+      timer && clearInterval(timer);
+    };
+  }, [connectingList]);
 
   return (
     <div className={CN(className, 'chain-balances-container')}>
@@ -276,7 +328,7 @@ function ChainBalances ({ address,
               accountInfo={selectedInfo}
               backToHome={_backToHome}
               balanceInfo={selectedBalanceInfo}
-              isConnecting={connectingList[selectedInfo.networkKey]}
+              isConnecting={connectingList[selectedInfo.networkKey]?.status === 'done'}
               setQrModalOpen={setQrModalOpen}
               setQrModalProps={setQrModalProps}
             />

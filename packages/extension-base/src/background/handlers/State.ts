@@ -36,8 +36,9 @@ export interface AuthUrlInfo {
   isAllowed: boolean;
   origin: string;
   url: string;
-  accountAuthType?: AccountAuthType,
-  isAllowedMap: Record<string, boolean>
+  accountAuthType?: AccountAuthType;
+  isAllowedMap: Record<string, boolean>;
+  currentEvmNetworkKey?: string;
 }
 
 interface MetaRequest extends Resolver<boolean> {

@@ -74,12 +74,14 @@ function Qr ({ address, className, cmd, genesisHash, onSignature, payload }: Pro
         }
       </div>
       {!isScanning && (
-        <Button
-          className='scanButton'
-          onClick={_onShowQr}
-        >
-          {t<string>('Scan signature via camera')}
-        </Button>
+        <div className='button-wrapper'>
+          <Button
+            className='scanButton'
+            onClick={_onShowQr}
+          >
+            {t<string>('Scan signature via camera')}
+          </Button>
+        </div>
       )}
     </div>
   );
@@ -97,7 +99,11 @@ export default styled(Qr)`
     }
   }
 
-  .scanButton {
-    margin-bottom: 8px;
+  .button-wrapper{
+    padding: 0 10px;
+
+    .scanButton {
+      margin-bottom: 8px;
+    }
   }
 `;

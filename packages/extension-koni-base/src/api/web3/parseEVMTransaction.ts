@@ -42,6 +42,7 @@ export const parseEVMTransaction = (data: string): ResponseParseTransactionEVM =
       });
 
       result.data = temp;
+      break;
     }
   }
 

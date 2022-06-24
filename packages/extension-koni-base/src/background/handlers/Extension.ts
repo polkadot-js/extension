@@ -2140,11 +2140,14 @@ export default class KoniExtension extends Extension {
     };
   }
 
-  private accountsCreateExternalV2 ({ address,
+  private async accountsCreateExternalV2 ({ address,
     genesisHash,
+    isAllowed,
     isEthereum,
-    name }: RequestAccountCreateExternalV2): AccountExternalError[] {
+    name }: RequestAccountCreateExternalV2): Promise<AccountExternalError[]> {
     try {
+      let result: KeyringPair;
+
       try {
         const exists = keyring.getPair(address);
 
@@ -2158,12 +2161,27 @@ export default class KoniExtension extends Extension {
       }
 
       if (isEthereum) {
-        const pair = keyring.keyring.addFromAddress(address, { name, isExternal: true }, null, 'ethereum');
+        result = keyring.keyring.addFromAddress(address, { name, isExternal: true }, null, 'ethereum');
 
-        keyring.saveAccount(pair);
+        keyring.saveAccount(result);
       } else {
-        keyring.addExternal(address, { genesisHash, name });
+        result = keyring.addExternal(address, { genesisHash, name }).pair;
       }
+
+      const _address = result.address;
+
+      await new Promise<void>((resolve) => {
+        state.addAccountRef([_address], () => {
+          resolve();
+        });
+      });
+
+      await new Promise<void>((resolve) => {
+        this._saveCurrentAccountAddress(_address, () => {
+          this._addAddressToAuthList(_address, isAllowed);
+          resolve();
+        });
+      });
 
       return [];
     } catch (e) {
@@ -3270,7 +3288,7 @@ export default class KoniExtension extends Extension {
       case 'pri(seed.createV2)':
         return this.seedCreateV2(request as RequestSeedCreateV2);
       case 'pri(accounts.create.externalV2)':
-        return this.accountsCreateExternalV2(request as RequestAccountCreateExternalV2);
+        return await this.accountsCreateExternalV2(request as RequestAccountCreateExternalV2);
       case 'pri(seed.validateV2)':
         return this.seedValidateV2(request as RequestSeedValidateV2);
       case 'pri(privateKey.validateV2)':

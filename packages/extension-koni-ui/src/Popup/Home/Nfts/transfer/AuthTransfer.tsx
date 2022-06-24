@@ -426,6 +426,10 @@ function AuthTransfer ({ chain, className, collectionId, nftItem, recipientAddre
     }
   }, [externalId, handlerReject, loading, setShowConfirm]);
 
+  const handlerErrorQr = useCallback((error: Error) => {
+    setErrorArr([error.message]);
+  }, []);
+
   const handlerRenderContent = useCallback(() => {
     switch (signMode) {
       case SIGN_MODE.QR:
@@ -435,6 +439,7 @@ function AuthTransfer ({ chain, className, collectionId, nftItem, recipientAddre
             genesisHash={genesisHash}
             handlerStart={handlerCreateQr}
             isBusy={loading}
+            onError={handlerErrorQr}
           >
             <div className={'fee'}>Fees of {substrateGas || web3Gas} will be applied to the submission</div>
             <InputAddress
@@ -506,22 +511,7 @@ function AuthTransfer ({ chain, className, collectionId, nftItem, recipientAddre
           </div>
         );
     }
-  }, [
-    accountMeta,
-    currentNetwork.networkPrefix,
-    errorArr,
-    genesisHash,
-    handleSignAndSubmit,
-    handlerCreateQr,
-    handlerSendLedger,
-    loading,
-    passwordError,
-    senderAccount.address,
-    signMode,
-    substrateGas,
-    t,
-    web3Gas
-  ]);
+  }, [accountMeta, currentNetwork.networkPrefix, errorArr, genesisHash, handleSignAndSubmit, handlerCreateQr, handlerErrorQr, handlerSendLedger, loading, passwordError, senderAccount.address, signMode, substrateGas, t, web3Gas]);
 
   useEffect(() => {
     let unmount = false;

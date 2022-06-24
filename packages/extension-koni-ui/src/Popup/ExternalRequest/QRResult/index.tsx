@@ -2,13 +2,13 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { Button } from '@subwallet/extension-koni-ui/components';
+import { ActionContext } from '@subwallet/extension-koni-ui/contexts';
 import { ScannerContext } from '@subwallet/extension-koni-ui/contexts/ScannerContext';
 import useTranslation from '@subwallet/extension-koni-ui/hooks/useTranslation';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import CN from 'classnames';
 import React, { useCallback, useContext } from 'react';
 import QRCode from 'react-qr-code';
-import { useHistory } from 'react-router';
 import styled from 'styled-components';
 
 interface Props extends ThemeProps{
@@ -19,7 +19,8 @@ const QRResult = (props: Props) => {
   const { className } = props;
 
   const { t } = useTranslation();
-  const history = useHistory();
+
+  const onAction = useContext(ActionContext);
 
   const { cleanup, state: scannerState } = useContext(ScannerContext);
   const { signedData } = scannerState;
@@ -29,8 +30,9 @@ const QRResult = (props: Props) => {
   }, [cleanup]);
 
   const handlerClickHome = useCallback(() => {
-    history.push('/');
-  }, [history]);
+    window.localStorage.setItem('popupNavigation', '/');
+    onAction('/');
+  }, [onAction]);
 
   return (
     <div className={CN(className)}>

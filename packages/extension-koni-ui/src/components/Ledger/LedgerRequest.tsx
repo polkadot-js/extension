@@ -156,6 +156,7 @@ const LedgerSign = (props: Props) => {
 export default React.memo(styled(LedgerSign)(({ theme }: Props) => `
   display: flex;
   flex: 1;
+  position: relative;
 
   .auth-transaction-body {
     flex: 1;

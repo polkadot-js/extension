@@ -57,17 +57,22 @@ const TransactionDetail = (props: Props) => {
     const { args, method } = data;
 
     return (
-      <div>
-        <div>
-          Method: {method}
-        </div>
-        <div>
-          Arguments:
+      <div className={'method-info'}>
+        <div className={'method-description'}>
+          <div>
+            Method: {method}
+          </div>
+          <div>
+            Arguments:
+          </div>
         </div>
         {
           args.map(({ name, type, value }, index) => {
             return (
-              <div key={index}>
+              <div
+                className={'method-arg'}
+                key={index}
+              >
                 <div className={CN('grid-container')}>
                   <div className={CN('info-container')}>
                     <div className={CN('info-title')}>
@@ -88,7 +93,7 @@ const TransactionDetail = (props: Props) => {
                 </div>
                 <div className={CN('info-container')}>
                   <div className={CN('info-title')}>
-                    value:
+                    Value
                   </div>
                   <div className={CN('info-detail')}>
                     {value}
@@ -194,6 +199,7 @@ export default React.memo(styled(TransactionDetail)(({ theme }: Props) => `
 
     .info-title{
       background-color: ${theme.primaryColor};
+      color: ${theme.textColor};
       padding-left: 4px;
       font-weight: 500;
     }
@@ -202,6 +208,30 @@ export default React.memo(styled(TransactionDetail)(({ theme }: Props) => `
       padding-left: 4px;
       margin-bottom: 2px;
       color: ${theme.textColor2};
+      word-break: break-word;
+    }
+  }
+
+  .method-info {
+    margin-left: -4px;
+
+    .method-description {
+      padding-left: 4px;
+    }
+
+    .method-arg {
+      padding-bottom: 4px;
+      position: relative;
+
+      &:after {
+        content: '';
+        width: 100%;
+        background-color: ${theme.textColor2};
+        height: 1px;
+        position: absolute;
+        bottom: 4px;
+        left: 0;
+      }
     }
   }
 

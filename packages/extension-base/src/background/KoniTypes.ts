@@ -848,6 +848,7 @@ export interface RequestAccountCreateExternalV2 {
   genesisHash?: string | null;
   name: string;
   isEthereum: boolean;
+  isAllowed: boolean;
 }
 
 export enum AccountExternalErrorCode {

@@ -25,11 +25,12 @@ interface Props extends ThemeProps{
   genesisHash: string;
   handlerStart: () => void;
   isBusy: boolean;
+  onError: (error: Error) => void;
 }
 
 const QrRequest = (props: Props) => {
   const { t } = useTranslation();
-  const { children, className, errorArr, genesisHash, handlerStart, isBusy } = props;
+  const { children, className, errorArr, genesisHash, handlerStart, isBusy, onError } = props;
 
   const { QrState, updateQrState } = useContext(QrContext);
   const { createResolveExternalRequestData } = useContext(ExternalRequestContext);
@@ -93,6 +94,7 @@ const QrRequest = (props: Props) => {
           <div className='auth-transaction-body'>
             <div className='scan-qr'>
               <QrScanSignature
+                onError={onError}
                 // eslint-disable-next-line @typescript-eslint/no-misused-promises
                 onScan={handlerScanSignature}
               />
@@ -155,7 +157,7 @@ const QrRequest = (props: Props) => {
           </div>
         );
     }
-  }, [genesisHash, handlerChangeToDisplayQr, handlerChangeToScan, handlerScanSignature, isBusy, isEthereum, isQrHashed, qrAddress, qrPayload, renderError, step, t, children, handlerStart]);
+  }, [step, onError, handlerScanSignature, renderError, handlerChangeToDisplayQr, t, qrAddress, genesisHash, isEthereum, isQrHashed, qrPayload, handlerChangeToScan, children, isBusy, handlerStart]);
 
   return (
     <div className={CN(className)}>
@@ -166,6 +168,7 @@ const QrRequest = (props: Props) => {
 
 export default React.memo(styled(QrRequest)(({ theme }: Props) => `
   display: flex;
+  position: relative;
   flex: 1;
 
   .auth-transaction-body{

@@ -7,7 +7,7 @@ import { SUBSTRATE_ACCOUNT_TYPE } from '@subwallet/extension-koni-ui/Popup/Creat
 import React, { useCallback, useContext, useState } from 'react';
 import styled, { ThemeContext } from 'styled-components';
 
-import { AccountContext, AccountInfoEl, ActionContext, ButtonArea, NextStepButton, Theme, Warning } from '../../components';
+import { AccountContext, AccountInfoEl, ActionContext, ButtonArea, Checkbox, NextStepButton, Theme, Warning } from '../../components';
 import AccountNamePasswordCreation from '../../components/AccountNamePasswordCreation';
 import useTranslation from '../../hooks/useTranslation';
 import { createAccountExternalV2, createAccountSuri, createSeed } from '../../messaging';
@@ -36,6 +36,8 @@ function ImportQr ({ className }: Props): React.ReactElement<Props> {
   const [name, setName] = useState<string | null>(defaultName);
   const [password, setPassword] = useState<string | null>(null);
   const [errors, setErrors] = useState<AccountExternalError[]>([]);
+  const [isConnectWhenCreate, setIsConnectWhenCreate] = useState<boolean>(false);
+  const [isBusy, setIsBusy] = useState<boolean>(false);
   const themeContext = useContext(ThemeContext as React.Context<Theme>);
 
   const _setAccount = useCallback(
@@ -56,9 +58,17 @@ function ImportQr ({ className }: Props): React.ReactElement<Props> {
 
   const _onCreate = useCallback(
     (): void => {
+      setIsBusy(true);
+
       if (account && name) {
         if (account.isAddress) {
-          createAccountExternalV2(name, account.content, account.genesisHash, account.isEthereum)
+          createAccountExternalV2({
+            name: name,
+            address: account.content,
+            genesisHash: account.genesisHash,
+            isEthereum: account.isEthereum,
+            isAllowed: isConnectWhenCreate
+          })
             .then((errors) => {
               if (errors.length) {
                 setErrors(errors);
@@ -83,8 +93,10 @@ function ImportQr ({ className }: Props): React.ReactElement<Props> {
             });
         }
       }
+
+      setIsBusy(false);
     },
-    [account, name, onAction, password]
+    [account, isConnectWhenCreate, name, onAction, password]
   );
 
   const renderErrors = useCallback(() => {
@@ -164,11 +176,17 @@ function ImportQr ({ className }: Props): React.ReactElement<Props> {
                 />
               )
             }
+            <Checkbox
+              checked={isConnectWhenCreate}
+              label={t<string>('Auto connect to all DApp after creating')}
+              onChange={setIsConnectWhenCreate}
+            />
             {renderErrors()}
             {
               account.isAddress && <ButtonArea>
                 <NextStepButton
                   className='next-step-btn'
+                  isBusy={isBusy}
                   isDisabled={!name || (!account.isAddress && !password)}
                   onClick={_onCreate}
                 >

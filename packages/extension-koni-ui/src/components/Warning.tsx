@@ -54,6 +54,7 @@ export default React.memo(styled(Warning)<Props>(({ isDanger, theme }: Props) =>
     align-items: center;
     font-weight: 400;
     color: ${theme.textColor};
+    word-break: break-word;
   }
 
   .warning-image {

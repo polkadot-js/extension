@@ -260,9 +260,9 @@ function ChainBalances ({ address,
               accountInfo={selectedInfo}
               backToHome={_backToHome}
               balanceInfo={selectedBalanceInfo}
+              setIsExportModalOpen={setIsExportModalOpen}
               setQrModalOpen={setQrModalOpen}
               setQrModalProps={setQrModalProps}
-              setIsExportModalOpen={setIsExportModalOpen}
             />
           </>
         )

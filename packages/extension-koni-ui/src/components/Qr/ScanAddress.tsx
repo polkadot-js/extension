@@ -84,37 +84,45 @@ const ScanAddress = (props: Props) => {
 
   return (
     <div className={CN(className)}>
-      <QrReader
-        className={'qr-scanner-container'}
-        constraints={{ facingMode: 'user' }}
-        onResult={_onScan}
-      />
+      <div className={'scanner'}>
+        <QrReader
+          className={'qr-scanner-container'}
+          constraints={{ facingMode: 'user' }}
+          onResult={_onScan}
+          scanDelay={150}
+        />
+      </div>
     </div>
   );
 };
 
 export default React.memo(styled(ScanAddress)(({ theme }: Props) => `
-  display:inline-block;
-  height:100%;
-  transform:matrix(1,0,0,1,0,0);
-  width:100%;
-  video{
-    margin:0;
-    object-fit: cover;
-  }
+  position: relative;
+  padding: 5px 40px 0 40px;
 
-  .qr-scanner-container{
-    &::after{
-      width: 100%;
-      content: '';
-      top: 0px;
-      left: 0px;
-      z-index: 1;
-      box-sizing: border-box;
-      border: 50px solid rgba(0, 0, 0, 0.3);
-      box-shadow: rgb(255 0 0 / 50%) 0px 0px 0px 5px inset;
-      position: absolute;
-      height: 100%;
+  .scanner {
+    display:inline-block;
+    height:100%;
+    transform:matrix(1,0,0,1,0,0);
+    width:100%;
+    video{
+      margin:0;
+      object-fit: cover;
+    }
+
+    .qr-scanner-container{
+      &::after{
+        width: 100%;
+        content: '';
+        top: 0px;
+        left: 0px;
+        z-index: 1;
+        box-sizing: border-box;
+        border: 50px solid rgba(0, 0, 0, 0.3);
+        box-shadow: rgb(255 0 0 / 50%) 0px 0px 0px 5px inset;
+        position: absolute;
+        height: 100%;
+      }
     }
   }
 `));

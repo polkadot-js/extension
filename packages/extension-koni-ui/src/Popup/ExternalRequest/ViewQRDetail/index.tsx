@@ -28,7 +28,7 @@ const ViewQRDetail = (props: Props) => {
   const { t } = useTranslation();
 
   const scannerStore = useContext<ScannerContextType>(ScannerContext);
-  const { setStep, state } = scannerStore;
+  const { cleanup, setStep, state } = scannerStore;
   const { evmChainId, genesisHash, isEthereum, senderAddress, type } = state;
   const { networkMap } = useSelector((state: RootState) => state);
 
@@ -75,9 +75,9 @@ const ViewQRDetail = (props: Props) => {
 
   const handlerClickBack = useCallback(() => {
     setButtonLoading(true);
-    setStep(SCANNER_QR_STEP.SCAN_STEP);
+    cleanup();
     setButtonLoading(false);
-  }, [setStep]);
+  }, [cleanup]);
 
   const handlerClickNext = useCallback(() => {
     setButtonLoading(true);

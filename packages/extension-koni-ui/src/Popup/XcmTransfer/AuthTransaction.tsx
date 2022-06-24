@@ -226,6 +226,10 @@ function AuthTransaction ({ balanceFormat,
     []
   );
 
+  const handlerErrorQr = useCallback((error: Error) => {
+    setErrorArr([error.message]);
+  }, []);
+
   const renderError = useCallback(() => {
     if (!!errorArr && errorArr.length) {
       return errorArr.map((err) =>
@@ -344,6 +348,7 @@ function AuthTransaction ({ balanceFormat,
             genesisHash={genesisHash}
             handlerStart={_doStartQr}
             isBusy={isBusy}
+            onError={handlerErrorQr}
           >
             { handlerRenderInfo() }
           </QrRequest>
@@ -405,23 +410,7 @@ function AuthTransaction ({ balanceFormat,
           </div>
         );
     }
-  }, [
-    _doStart,
-    _doStartLedger,
-    _doStartQr,
-    _onCancel,
-    _onChangePass,
-    accountMeta,
-    errorArr,
-    genesisHash,
-    handlerRenderInfo,
-    isBusy,
-    isKeyringErr,
-    password,
-    renderError,
-    signMode,
-    t
-  ]);
+  }, [_doStart, _doStartLedger, _doStartQr, _onCancel, _onChangePass, accountMeta, errorArr, genesisHash, handlerErrorQr, handlerRenderInfo, isBusy, isKeyringErr, password, renderError, signMode, t]);
 
   useEffect(() => {
     let unmount = false;

@@ -48,13 +48,15 @@ const QRScanner = (props: Props) => {
 
   return (
     <div className={CN(className)}>
-      <div className={'scanner'}>
-        <QrReader
-          className={'qr-scanner-container'}
-          constraints={{ facingMode: 'user' }}
-          onResult={handlerOnResult}
-          scanDelay={150}
-        />
+      <div className={'scanner-wrapper'}>
+        <div className={'scanner'}>
+          <QrReader
+            className={'qr-scanner-container'}
+            constraints={{ facingMode: 'user' }}
+            onResult={handlerOnResult}
+            scanDelay={150}
+          />
+        </div>
       </div>
       {
         error && (
@@ -76,28 +78,33 @@ export default React.memo(styled(QRScanner)(({ theme }: Props) => `
     margin-top: 10px;
   }
 
-  .scanner{
-    display:inline-block;
-    height:100%;
-    transform:matrix(1,0,0,1,0,0);
-    width:100%;
-    video{
-      margin:0;
-      object-fit: cover;
-    }
+  .scanner-wrapper {
+    padding: 5px 40px 0 40px;
+    position: relative;
 
-    .qr-scanner-container{
-      &::after{
-        width: 100%;
-        content: '';
-        top: 0px;
-        left: 0px;
-        z-index: 1;
-        box-sizing: border-box;
-        border: 50px solid rgba(0, 0, 0, 0.3);
-        box-shadow: rgb(255 0 0 / 50%) 0px 0px 0px 5px inset;
-        position: absolute;
-        height: 100%;
+    .scanner{
+      display:inline-block;
+      height:100%;
+      transform:matrix(1,0,0,1,0,0);
+      width:100%;
+      video{
+        margin:0;
+        object-fit: cover;
+      }
+
+      .qr-scanner-container{
+        &::after{
+          width: 100%;
+          content: '';
+          top: 0px;
+          left: 0px;
+          z-index: 1;
+          box-sizing: border-box;
+          border: 50px solid rgba(0, 0, 0, 0.3);
+          box-shadow: rgb(255 0 0 / 50%) 0px 0px 0px 5px inset;
+          position: absolute;
+          height: 100%;
+        }
       }
     }
   }

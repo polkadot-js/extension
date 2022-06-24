@@ -275,7 +275,8 @@ export async function getMoonbeamUnlockingInfo (dotSamaApi: ApiProps, address: s
 
         allRequests[redeemRound.toString()] = {
           action,
-          amount
+          amount,
+          validator
         };
       }
     });
@@ -284,16 +285,19 @@ export async function getMoonbeamUnlockingInfo (dotSamaApi: ApiProps, address: s
   let nextWithdrawalAmount = 0;
   let nextWithdrawalAction = '';
   let nextWithdrawalRound = -1;
+  let validatorAddress = '';
 
   Object.entries(allRequests).forEach(([round, data]) => {
     if (nextWithdrawalRound === -1) {
       nextWithdrawalRound = parseFloat(round);
       nextWithdrawalAction = data.action as string;
       nextWithdrawalAmount = data.amount as number;
+      validatorAddress = data.validator as string;
     } else if (nextWithdrawalRound > parseFloat(round)) {
       nextWithdrawalRound = parseFloat(round);
       nextWithdrawalAction = data.action as string;
       nextWithdrawalAmount = data.amount as number;
+      validatorAddress = data.validator as string;
     }
   });
 
@@ -305,12 +309,13 @@ export async function getMoonbeamUnlockingInfo (dotSamaApi: ApiProps, address: s
     nextWithdrawal: nextWithdrawal <= 0 ? nextWithdrawal : 0,
     redeemable: nextWithdrawal <= 0 ? nextWithdrawalAmount : 0,
     nextWithdrawalAmount,
-    nextWithdrawalAction
+    nextWithdrawalAction,
+    validatorAddress
   };
 }
 
 export async function handleMoonbeamUnlockingInfo (dotSamaApi: ApiProps, networkJson: NetworkJson, networkKey: string, address: string, collatorList: string[]) {
-  const { nextWithdrawal, nextWithdrawalAction, nextWithdrawalAmount, redeemable } = await getMoonbeamUnlockingInfo(dotSamaApi, address, networkKey, collatorList);
+  const { nextWithdrawal, nextWithdrawalAction, nextWithdrawalAmount, redeemable, validatorAddress } = await getMoonbeamUnlockingInfo(dotSamaApi, address, networkKey, collatorList);
 
   const parsedRedeemable = redeemable / (10 ** (networkJson.decimals as number));
   const parsedNextWithdrawalAmount = nextWithdrawalAmount / (10 ** (networkJson.decimals as number));
@@ -319,7 +324,8 @@ export async function handleMoonbeamUnlockingInfo (dotSamaApi: ApiProps, network
     nextWithdrawal,
     redeemable: parsedRedeemable,
     nextWithdrawalAmount: parsedNextWithdrawalAmount,
-    nextWithdrawalAction
+    nextWithdrawalAction,
+    validatorAddress
   } as UnlockingStakeInfo;
 }
 

@@ -21,9 +21,10 @@ interface Props extends ThemeProps {
   address: string;
   networkKey: string;
   amount: number;
+  targetValidator: string | undefined;
 }
 
-function StakeAuthWithdrawal ({ address, amount, className, hideModal, networkKey }: Props): React.ReactElement<Props> {
+function StakeAuthWithdrawal ({ address, amount, className, hideModal, networkKey, targetValidator }: Props): React.ReactElement<Props> {
   const networkJson = useGetNetworkJson(networkKey);
   const { t } = useTranslation();
   const { show } = useToast();
@@ -65,7 +66,8 @@ function StakeAuthWithdrawal ({ address, amount, className, hideModal, networkKe
     await submitStakeWithdrawal({
       address,
       networkKey,
-      password
+      password,
+      validatorAddress: targetValidator
     }, (cbData) => {
       if (cbData.passwordError) {
         show(cbData.passwordError);
@@ -102,7 +104,7 @@ function StakeAuthWithdrawal ({ address, amount, className, hideModal, networkKe
         }
       }
     });
-  }, [address, balanceError, networkKey, password, show]);
+  }, [address, balanceError, networkKey, password, show, targetValidator]);
 
   const handleConfirm = useCallback(() => {
     setLoading(true);

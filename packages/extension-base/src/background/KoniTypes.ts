@@ -964,7 +964,8 @@ export interface UnlockingStakeInfo {
   nextWithdrawal: number,
   redeemable: number,
   nextWithdrawalAmount: number,
-  nextWithdrawalAction?: 'bondLess' | 'revoke'
+  nextWithdrawalAction?: 'bondLess' | 'revoke',
+  validatorAddress?: string // validator to unstake from
 }
 
 export interface StakeWithdrawalParams {

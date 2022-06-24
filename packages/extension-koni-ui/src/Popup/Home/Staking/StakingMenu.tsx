@@ -47,10 +47,6 @@ function StakingMenu ({ bondedAmount, className, delegations, networkKey, nextWi
     showMenu && toggleMenu();
   });
 
-  console.log('redeemable', redeemable);
-  console.log('nextWithdrawal', nextWithdrawal);
-  console.log('nextWithdrawalAmount', nextWithdrawalAmount);
-
   const handleClickStakeMore = useCallback(() => {
     store.dispatch({ type: 'bondingParams/update', payload: { selectedNetwork: networkKey, selectedValidator: null, maxNominatorPerValidator: null } as BondingParams });
     navigate('/account/select-bonding-validator');

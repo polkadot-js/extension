@@ -283,7 +283,7 @@ export async function getMoonbeamUnlockingInfo (dotSamaApi: ApiProps, address: s
 
   let nextWithdrawalAmount = 0;
   let nextWithdrawalAction = '';
-  let nextWithdrawalRound = 0;
+  let nextWithdrawalRound = -1;
 
   Object.entries(allRequests).forEach(([round, data]) => {
     if (nextWithdrawalRound === -1) {
@@ -299,11 +299,11 @@ export async function getMoonbeamUnlockingInfo (dotSamaApi: ApiProps, address: s
 
   const currentRoundInfo = (await apiPromise.api.query.parachainStaking.round()).toHuman() as Record<string, string>;
   const currentRound = parseRawNumber(currentRoundInfo.current);
-  const nextWithdrawal = (currentRound - nextWithdrawalRound) * ERA_LENGTH_MAP[networkKey];
+  const nextWithdrawal = (nextWithdrawalRound - currentRound) * ERA_LENGTH_MAP[networkKey];
 
   return {
-    nextWithdrawal,
-    redeemable: nextWithdrawal === 0 ? nextWithdrawalAmount : 0,
+    nextWithdrawal: nextWithdrawal <= 0 ? nextWithdrawal : 0,
+    redeemable: nextWithdrawal <= 0 ? nextWithdrawalAmount : 0,
     nextWithdrawalAmount,
     nextWithdrawalAction
   };

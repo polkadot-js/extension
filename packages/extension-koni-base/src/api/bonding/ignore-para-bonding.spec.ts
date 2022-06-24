@@ -248,7 +248,7 @@ describe('test DotSama APIs', () => {
     const provider = new WsProvider(getCurrentProvider(PREDEFINED_NETWORKS.moonbase), DOTSAMA_AUTO_CONNECT_MS);
     const api = new ApiPromise({ provider });
     const apiPromise = await api.isReady;
-    const collatorList = ['0x0b70688C14297Bb634235a8870a9514c7A85a771'];
+    const collatorList = ['0x043f726A4eB956A19314386049769beC89Dd0F34', '0x0b70688C14297Bb634235a8870a9514c7A85a771'];
     const allRequests: Record<string, Record<string, any>> = {};
     const address = '0xAF2b4242e766caf5791DA56723a8dE1BeA4e7098';
 

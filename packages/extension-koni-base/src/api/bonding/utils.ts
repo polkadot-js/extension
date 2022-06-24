@@ -55,14 +55,17 @@ const DEFAULT_PARAMS: InflationParams = {
   stakeTarget: 0.5
 };
 
-export const ERA_LENGTH_MAP: Record<string, number> = {
+export const ERA_LENGTH_MAP: Record<string, number> = { // in hours
   alephTest: 24,
   aleph: 24,
   polkadot: 24,
   kusama: 6,
   westend: 24,
   hydradx: 24,
-  default: 24
+  default: 24,
+  moonbeam: 6,
+  moonriver: 2,
+  moonbase: 2
 };
 
 const ALEPH_DEFAULT_UNIFORM_ERA_PAYOUT_PARAMS: UniformEraPayoutInflationParams = {

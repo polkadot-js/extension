@@ -2,7 +2,12 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { ApiProps, BasicTxInfo, ChainBondingBasics, NetworkJson, ValidatorInfo } from '@subwallet/extension-base/background/KoniTypes';
-import { calculateChainStakedReturn, MOONBEAM_INFLATION_DISTRIBUTION, parseRawNumber } from '@subwallet/extension-koni-base/api/bonding/utils';
+import {
+  calculateChainStakedReturn,
+  ERA_LENGTH_MAP,
+  MOONBEAM_INFLATION_DISTRIBUTION,
+  parseRawNumber
+} from '@subwallet/extension-koni-base/api/bonding/utils';
 import { getFreeBalance } from '@subwallet/extension-koni-base/api/dotsama/balance';
 import Web3 from 'web3';
 
@@ -249,6 +254,65 @@ export async function getMoonbeamUnbondingExtrinsic (dotSamaApi: ApiProps, amoun
   return apiPromise.api.tx.parachainStaking.scheduleDelegatorBondLess(collatorAddress, binaryAmount);
 }
 
-export async function handleMoonbeamUnlockingInfo (dotSamaApi: ApiProps, networkJson: NetworkJson, networkKey: string, address: string) {
+export async function getMoonbeamUnlockingInfo (dotSamaApi: ApiProps, address: string, networkKey: string, collatorList: string[]) {
+  const apiPromise = await dotSamaApi.isReady;
+  const allRequests: Record<string, Record<string, any>> = {};
+
+  await Promise.all(collatorList.map(async (validator) => {
+    const scheduledRequests = (await apiPromise.api.query.parachainStaking.delegationScheduledRequests(validator)).toHuman() as Record<string, any>[];
+
+    scheduledRequests.forEach((request) => {
+      if ((request.delegator as string).toLowerCase() === address.toLowerCase()) {
+        const redeemRound = parseRawNumber(request.whenExecutable as string);
+        let amount;
+        let action;
+
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+        if (request.action.Revoke) {
+          action = 'revoke';
+          // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+          amount = parseRawNumber(request.action.Revoke as string);
+        } else {
+          action = 'bondLess';
+          // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+          amount = parseRawNumber(request.action.Decrease as string);
+        }
+
+        allRequests[redeemRound.toString()] = {
+          action,
+          amount
+        };
+      }
+    });
+  }));
+
+  let nextWithdrawalAmount = -1;
+  let nextWithdrawalAction = '';
+  let nextWithdrawalRound = -1;
+
+  Object.entries(allRequests).forEach(([round, data]) => {
+    if (nextWithdrawalRound === -1) {
+      nextWithdrawalRound = parseFloat(round);
+      nextWithdrawalAction = data.action as string;
+      nextWithdrawalAmount = data.amount as number;
+    } else if (nextWithdrawalRound > parseFloat(round)) {
+      nextWithdrawalRound = parseFloat(round);
+      nextWithdrawalAction = data.action as string;
+      nextWithdrawalAmount = data.amount as number;
+    }
+  });
+
+  const currentRoundInfo = (await apiPromise.api.query.parachainStaking.round()).toHuman() as Record<string, string>;
+  const currentRound = parseRawNumber(currentRoundInfo.current);
+
+  return {
+    nextWithdrawal: (currentRound - nextWithdrawalRound) * ERA_LENGTH_MAP[networkKey],
+    redeemable: 0,
+    nextWithdrawalAmount,
+    nextWithdrawalAction
+  };
+}
+
+export async function handleMoonbeamUnlockingInfo (dotSamaApi: ApiProps, networkJson: NetworkJson, networkKey: string, address: string, collatorList: string[]) {
 
 }

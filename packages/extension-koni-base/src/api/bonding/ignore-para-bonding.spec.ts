@@ -296,8 +296,14 @@ describe('test DotSama APIs', () => {
       }
     });
 
+    const currentRoundInfo = (await apiPromise.query.parachainStaking.round()).toHuman() as Record<string, string>;
+    const currentRound = parseRawNumber(currentRoundInfo.current);
+
     console.log(nextWithdrawalAmount);
     console.log(nextWithdrawalAction);
     console.log(nextWithdrawalRound);
+
+    const timeLeft = (nextWithdrawalRound - currentRound) * 2;
+    console.log(timeLeft);
   });
 });

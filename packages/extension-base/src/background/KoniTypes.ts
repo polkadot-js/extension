@@ -970,7 +970,8 @@ export interface UnlockingStakeInfo {
 export interface StakeWithdrawalParams {
   address: string,
   networkKey: string,
-  password?: string
+  password?: string,
+  validatorAddress?: string
 }
 
 export interface KoniRequestSignatures {

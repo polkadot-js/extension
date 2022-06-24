@@ -366,7 +366,7 @@ export async function handleRelayUnlockingInfo (dotSamaApi: ApiProps, networkJso
   } as UnlockingStakeInfo;
 }
 
-export async function getWithdrawalTxInfo (dotSamaAPi: ApiProps, address: string) {
+export async function getRelayWithdrawalTxInfo (dotSamaAPi: ApiProps, address: string) {
   const apiPromise = await dotSamaAPi.isReady;
 
   if (apiPromise.api.tx.staking.withdrawUnbonded.meta.args.length === 1) {
@@ -379,6 +379,22 @@ export async function getWithdrawalTxInfo (dotSamaAPi: ApiProps, address: string
 
     return extrinsic.paymentInfo(address);
   }
+}
+
+export async function handleRelayWithdrawalTxInfo (address: string, networkKey: string, dotSamaApiMap: Record<string, ApiProps>, web3ApiMap: Record<string, Web3>) {
+  const [txInfo, balance] = await Promise.all([
+    getRelayWithdrawalTxInfo(dotSamaApiMap[networkKey], address),
+    getFreeBalance(networkKey, address, dotSamaApiMap, web3ApiMap)
+  ]);
+
+  const feeString = txInfo.partialFee.toHuman();
+  const binaryBalance = new BN(balance);
+  const balanceError = txInfo.partialFee.gt(binaryBalance);
+
+  return {
+    fee: feeString,
+    balanceError
+  } as BasicTxInfo;
 }
 
 export async function getWithdrawalExtrinsic (dotSamaAPi: ApiProps, address: string) {

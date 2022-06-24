@@ -311,4 +311,15 @@ describe('test DotSama APIs', () => {
       console.log('overtime');
     }
   });
+
+  test('get withdrawal tx', async () => {
+    const provider = new WsProvider(getCurrentProvider(PREDEFINED_NETWORKS.moonbase), DOTSAMA_AUTO_CONNECT_MS);
+    const api = new ApiPromise({ provider });
+    const apiPromise = await api.isReady;
+
+    const extrinsic = apiPromise.tx.parachainStaking.executeDelegationRequest('0xAF2b4242e766caf5791DA56723a8dE1BeA4e7098', '0x0198D3053a69C3f977bB1943bc95A0fFA7777474');
+    const fee = extrinsic.paymentInfo('0xAF2b4242e766caf5791DA56723a8dE1BeA4e7098');
+
+    console.log(fee);
+  });
 });

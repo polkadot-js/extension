@@ -2,16 +2,8 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { ApiProps, NetworkJson, ValidatorInfo } from '@subwallet/extension-base/background/KoniTypes';
-import {
-  getMoonbeamBondingBasics,
-  getMoonbeamBondingExtrinsic,
-  getMoonbeamCollatorsInfo,
-  getMoonbeamUnbondingExtrinsic,
-  handleMoonbeamBondingTxInfo,
-  handleMoonbeamUnbondingTxInfo,
-  handleMoonbeamUnlockingInfo
-} from '@subwallet/extension-koni-base/api/bonding/moonbeam';
-import { getRelayBondingExtrinsic, getRelayChainBondingBasics, getRelayUnbondingExtrinsic, getRelayValidatorsInfo, getTargetValidators, handleRelayBondingTxInfo, handleRelayUnbondingTxInfo, handleRelayUnlockingInfo } from '@subwallet/extension-koni-base/api/bonding/relayChain';
+import { getMoonbeamBondingBasics, getMoonbeamBondingExtrinsic, getMoonbeamCollatorsInfo, getMoonbeamUnbondingExtrinsic, handleMoonbeamBondingTxInfo, handleMoonbeamUnbondingTxInfo, handleMoonbeamUnlockingInfo, handleMoonbeamWithdrawalTxInfo } from '@subwallet/extension-koni-base/api/bonding/moonbeam';
+import { getRelayBondingExtrinsic, getRelayChainBondingBasics, getRelayUnbondingExtrinsic, getRelayValidatorsInfo, getTargetValidators, handleRelayBondingTxInfo, handleRelayUnbondingTxInfo, handleRelayUnlockingInfo, handleRelayWithdrawalTxInfo } from '@subwallet/extension-koni-base/api/bonding/relayChain';
 import Web3 from 'web3';
 
 const CHAIN_TYPES: Record<string, string[]> = {
@@ -77,4 +69,12 @@ export async function getUnlockingInfo (dotSamaApi: ApiProps, networkJson: Netwo
   }
 
   return handleRelayUnlockingInfo(dotSamaApi, networkJson, networkKey, address);
+}
+
+export async function getWithdrawalTxInfo (address: string, networkKey: string, dotSamaApiMap: Record<string, ApiProps>, web3ApiMap: Record<string, Web3>, validatorAddress?: string) {
+  if (CHAIN_TYPES.moonbeam.includes(networkKey)) {
+    return handleMoonbeamWithdrawalTxInfo(networkKey, dotSamaApiMap, web3ApiMap, address, validatorAddress as string);
+  }
+
+  return handleRelayWithdrawalTxInfo(address, networkKey, dotSamaApiMap, web3ApiMap);
 }

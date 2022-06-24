@@ -322,3 +322,27 @@ export async function handleMoonbeamUnlockingInfo (dotSamaApi: ApiProps, network
     nextWithdrawalAction
   } as UnlockingStakeInfo;
 }
+
+export async function getMoonbeamWithdrawalTxInfo (dotSamaApi: ApiProps, address: string, collatorAddress: string) {
+  const apiPromise = await dotSamaApi.isReady;
+
+  const extrinsic = apiPromise.api.tx.parachainStaking.executeDelegationRequest(address, collatorAddress);
+
+  return extrinsic.paymentInfo(address);
+}
+
+export async function handleMoonbeamWithdrawalTxInfo (networkKey: string, dotSamaApiMap: Record<string, ApiProps>, web3ApiMap: Record<string, Web3>, address: string, collatorAddress: string) {
+  const [txInfo, balance] = await Promise.all([
+    getMoonbeamWithdrawalTxInfo(dotSamaApiMap[networkKey], address, collatorAddress),
+    getFreeBalance(networkKey, address, dotSamaApiMap, web3ApiMap)
+  ]);
+
+  const feeString = txInfo.partialFee.toHuman();
+  const binaryBalance = new BN(balance);
+  const balanceError = txInfo.partialFee.gt(binaryBalance);
+
+  return {
+    fee: feeString,
+    balanceError
+  } as BasicTxInfo;
+}

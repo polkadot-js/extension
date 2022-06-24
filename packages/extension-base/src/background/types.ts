@@ -191,6 +191,10 @@ export interface RequestAuthorizeReject {
   id: string;
 }
 
+export interface RequestAuthorizeCancel {
+  id: string;
+}
+
 export type RequestAuthorizeSubscribe = null;
 
 export interface RequestMetadataApprove {

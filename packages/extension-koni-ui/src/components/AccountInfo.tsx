@@ -139,7 +139,7 @@ function AccountInfo ({ address, addressHalfLength, className, genesisHash, icon
               />
             )
         )}
-        <span title={displayName}>{_isAccountAll ? t<string>('All Accounts') : displayName}</span>
+        <span title={displayName}>{(_isAccountAll && (!name || name === 'All')) ? t<string>('All Accounts') : displayName}</span>
       </>);
   };
 

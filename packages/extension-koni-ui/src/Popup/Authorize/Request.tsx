@@ -4,14 +4,15 @@
 import type { RequestAuthorizeTab } from '@subwallet/extension-base/background/types';
 import type { ThemeProps } from '../../types';
 
+import { ALL_ACCOUNT_KEY } from '@subwallet/extension-koni-base/constants';
 import { filterAndSortingAccountByAuthType } from '@subwallet/extension-koni-base/utils';
 import ConnectAccount from '@subwallet/extension-koni-ui/Popup/Authorize/ConnectAccount';
-import React, { useCallback, useContext, useState } from 'react';
+import React, { useCallback, useContext, useEffect, useState } from 'react';
 import styled from 'styled-components';
 
 import { AccountContext, ActionContext, Button, Warning } from '../../components';
 import useTranslation from '../../hooks/useTranslation';
-import { approveAuthRequestV2, rejectAuthRequestV2 } from '../../messaging';
+import { approveAuthRequestV2, cancelAuthRequestV2, rejectAuthRequestV2 } from '../../messaging';
 
 interface Props extends ThemeProps {
   authId: string;
@@ -36,9 +37,12 @@ function Request ({ authId, className, request: { accountAuthType, allowedAccoun
   const onAction = useContext(ActionContext);
   const { accounts } = useContext(AccountContext);
   const accountList = filterAndSortingAccountByAuthType(accounts, accountAuthType || 'substrate', true);
+  const [warning, setWarning] = useState(t<string>('Make sure you trust this site before connecting'));
+  const [confirmReject, setConfirmReject] = useState(false);
 
   const { hostname } = new URL(url);
   const [selectedAccounts, setSelectedAccounts] = useState<string[]>(allowedAccounts || []);
+  const [isSelectedAll, setIsSelectedAll] = useState(true);
 
   const _onApprove = useCallback(
     () => approveAuthRequestV2(authId, selectedAccounts)
@@ -47,8 +51,27 @@ function Request ({ authId, className, request: { accountAuthType, allowedAccoun
     [authId, onAction, selectedAccounts]
   );
 
-  const _onReject = useCallback(
-    () => rejectAuthRequestV2(authId)
+  useEffect(() => {
+    const notInSelected = accountList.find((acc) => !selectedAccounts.includes(acc.address));
+
+    setIsSelectedAll(!notInSelected);
+  }, [accountList, selectedAccounts]);
+
+  const _onReject = useCallback(() => {
+    if (!confirmReject) {
+      setWarning(t<string>('Reject this request mean you disallow any access from this site to the extension. Click "Reject" again to perform this action. If you want to enable it again, please go to "Settings" > "Manage Website Access"'));
+      setConfirmReject(true);
+    } else {
+      rejectAuthRequestV2(authId)
+        .then(() => onAction())
+        .catch((error: Error) => console.error(error));
+    }
+  },
+  [authId, confirmReject, onAction, t]
+  );
+
+  const _onCancel = useCallback(
+    () => cancelAuthRequestV2(authId)
       .then(() => onAction())
       .catch((error: Error) => console.error(error)),
     [authId, onAction]
@@ -83,10 +106,18 @@ function Request ({ authId, className, request: { accountAuthType, allowedAccoun
               {t<string>('Choose the account(s) you’d like to connect')}
             </div>
             <div className='request__accounts'>
+              <ConnectAccount
+                address={ALL_ACCOUNT_KEY}
+                isSelected={isSelectedAll}
+                name={t<string>('Select all')}
+                selectAccountCallBack={setSelectedAccounts}
+                selectedAccounts={accountList.map((account) => account.address)}
+              />
               {accountList.map((acc) => (
                 <ConnectAccount
                   address={acc.address}
                   genesisHash={acc.genesisHash}
+                  isSelected={selectedAccounts.includes(acc.address)}
                   key={acc.address}
                   name={acc.name}
                   selectAccountCallBack={setSelectedAccounts}
@@ -96,7 +127,7 @@ function Request ({ authId, className, request: { accountAuthType, allowedAccoun
               ))}
             </div>
             <div className='authorize-request__warning'>
-              {t<string>('Make sure you trust this site before connecting')}
+              {warning}
             </div>
           </>
         )
@@ -108,6 +139,12 @@ function Request ({ authId, className, request: { accountAuthType, allowedAccoun
         <Button
           className='authorize-request__btn'
           onClick={_onReject}
+        >
+          <span>{t<string>('Reject')}</span>
+        </Button>
+        <Button
+          className='authorize-request__btn'
+          onClick={_onCancel}
         >
           <span>{t<string>('Cancel')}</span>
         </Button>
@@ -183,6 +220,15 @@ export default styled(Request)(({ theme }: Props) => `
   }
 
   .authorize-request__btn:first-child {
+    background-color: ${theme.buttonBackgroundDanger};
+    margin-right: 8px;
+
+    span {
+      color: ${theme.buttonTextColor};
+    }
+  }
+
+  .authorize-request__btn:nth-child(2) {
     background-color: ${theme.buttonBackground1};
     margin-right: 8px;
 
@@ -191,14 +237,10 @@ export default styled(Request)(({ theme }: Props) => `
     }
   }
 
-  .authorize-request__btn:last-child {
-    margin-left: 8px;
-  }
-
   .authorize-request__warning {
     font-size: 15px;
     line-height: 26px;
-    color: ${theme.textColor2};
+    color: ${theme.iconWarningColor};
     text-align: center;
   }
 

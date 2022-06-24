@@ -3,6 +3,7 @@
 
 import { NetworkJson } from '@subwallet/extension-base/background/KoniTypes';
 import { HorizontalLabelToggle } from '@subwallet/extension-koni-ui/components';
+import useToast from '@subwallet/extension-koni-ui/hooks/useToast';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import React, { useCallback, useState } from 'react';
 import styled from 'styled-components';
@@ -18,8 +19,15 @@ interface Props extends ThemeProps {
 
 function NetworkSelectionItem ({ className, handleSelect, isSelected, logo, networkJson, networkKey }: Props): React.ReactElement {
   const [active, setActive] = useState(isSelected);
+  const { show } = useToast();
 
   const toggleActive = useCallback((val: boolean) => {
+    if (networkKey === 'polkadot' || networkKey === 'kusama') {
+      show('This network is active by default');
+
+      return;
+    }
+
     if (!val) {
       setActive(false);
       handleSelect(networkKey, false);
@@ -27,7 +35,7 @@ function NetworkSelectionItem ({ className, handleSelect, isSelected, logo, netw
       setActive(true);
       handleSelect(networkKey, true);
     }
-  }, [handleSelect, networkKey]);
+  }, [handleSelect, networkKey, show]);
 
   const handleClickOnRow = useCallback(() => {
     toggleActive(!active);

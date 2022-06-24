@@ -23,6 +23,7 @@ const SettingsContext = React.createContext<SettingsStruct>(settings.get());
 const SigningReqContext = React.createContext<SigningRequest[]>([]);
 const ConfirmationsQueueContext = React.createContext<ConfirmationsQueue>({
   addNetworkRequest: {},
+  addTokenRequest: {},
   switchNetworkRequest: {},
   evmSignatureRequest: {},
   evmSendTransactionRequest: {}

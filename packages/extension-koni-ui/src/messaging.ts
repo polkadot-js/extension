@@ -240,6 +240,10 @@ export async function rejectAuthRequestV2 (id: string): Promise<boolean> {
   return sendMessage('pri(authorize.rejectV2)', { id });
 }
 
+export async function cancelAuthRequestV2 (id: string): Promise<boolean> {
+  return sendMessage('pri(authorize.cancelV2)', { id });
+}
+
 export async function rejectMetaRequest (id: string): Promise<boolean> {
   return sendMessage('pri(metadata.reject)', { id });
 }

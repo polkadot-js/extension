@@ -51,10 +51,12 @@ function ConnectAccount ({ address, className, genesisHash, isSelected, name, pa
       onClick={selectAccounts}
     >
       <AccountInfoEl
+        accountSplitPart='right'
         address={address}
+        addressHalfLength={5}
         className='authorize-request__account'
         genesisHash={genesisHash}
-        isShowAddress={false}
+        isShowAddress={address !== ALL_ACCOUNT_KEY}
         isShowBanner={false}
         name={name}
         parentName={parentName}
@@ -80,6 +82,7 @@ function ConnectAccount ({ address, className, genesisHash, isSelected, name, pa
 export default styled(ConnectAccount)(({ theme }: Props) => `
   border-radius: 8px;
   padding: 8px 10px;
+  padding-right: 14px;
   background-color: ${theme.accountAuthorizeRequest};
   margin-bottom: 16px;
   display: flex;
@@ -88,5 +91,27 @@ export default styled(ConnectAccount)(({ theme }: Props) => `
 
   &:last-child {
     margin-bottom: 0;
+  }
+  
+  .authorize-request__account {
+    width: 100%;    
+  }
+  
+  .account-info {
+    position: relative;
+    display: flex;
+  
+    .account-info__name {
+      font-size: 18px;
+      max-width: 200px;
+      margin-right: 8px;
+    }
+    
+    .account-info-full-address {
+      font-size: 18px;
+      font-weight: 600;
+      &:before {content: "("}    
+      &:after {content: ")"}    
+    }
   }
 `);

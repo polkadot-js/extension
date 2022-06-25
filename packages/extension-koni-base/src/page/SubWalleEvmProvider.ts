@@ -5,8 +5,13 @@ import type { EvmProvider } from '@subwallet/extension-inject/types';
 
 import SafeEventEmitter from '@metamask/safe-event-emitter';
 import { SendRequest } from '@subwallet/extension-base/page/types';
+import { JsonRpcRequest, JsonRpcResponse } from 'json-rpc-engine';
+import { JsonRpcSuccess } from 'json-rpc-engine/dist/JsonRpcEngine';
 import { RequestArguments } from 'web3-core';
-import { JsonRpcPayload, JsonRpcResponse } from 'web3-core-helpers';
+
+export interface SendSyncJsonRpcRequest extends JsonRpcRequest<unknown> {
+  method: 'net_version';
+}
 
 export class SubWalletEvmProvider extends SafeEventEmitter implements EvmProvider {
   public readonly isSubWallet = true;
@@ -57,6 +62,10 @@ export class SubWalletEvmProvider extends SafeEventEmitter implements EvmProvide
       }).catch(console.error);
   }
 
+  public async enable () {
+    return this.request({ method: 'eth_requestAccounts' });
+  }
+
   request<T> ({ method, params }: RequestArguments): Promise<T> {
     switch (method) {
       case 'eth_requestAccounts':
@@ -91,15 +100,54 @@ export class SubWalletEvmProvider extends SafeEventEmitter implements EvmProvide
     }
   }
 
-  send (payload: JsonRpcPayload, callback: (error: (Error | null), result?: JsonRpcResponse) => void): void {
-    this.sendMessage('evm(provider.send)', payload, ({ error, result }) => {
-      callback(error, result);
-    }).catch(console.error);
+  private _sendSync (payload: JsonRpcRequest<unknown>): JsonRpcResponse<unknown> {
+    let result: JsonRpcSuccess<unknown>['result'];
+
+    switch (payload.method) {
+      case 'net_version':
+        result = this.version ? `SubWallet v${this.version}` : null;
+        break;
+      default:
+        throw new Error(`Not support ${payload.method}`);
+    }
+
+    return {
+      id: payload.id,
+      jsonrpc: payload.jsonrpc,
+      result
+    };
   }
 
-  sendAsync (payload: JsonRpcPayload, callback: (error: (Error | null), result?: JsonRpcResponse) => void): void {
-    this.sendMessage('evm(provider.send)', payload, ({ error, result }) => {
-      callback(error, result);
-    }).catch(console.error);
+  send<T> (method: string, params?: T[]): Promise<JsonRpcResponse<T>>;
+  send<T> (payload: JsonRpcRequest<unknown>, callback: (error: Error | null, result?: JsonRpcResponse<T>) => void): void;
+  send<T> (payload: SendSyncJsonRpcRequest): JsonRpcResponse<T>;
+  send (methodOrPayload: unknown, callbackOrArgs?: unknown): unknown {
+    if (
+      typeof methodOrPayload === 'string' &&
+      (!callbackOrArgs || Array.isArray(callbackOrArgs))
+    ) {
+      return this.request({ method: methodOrPayload, params: callbackOrArgs });
+    } else if (
+      methodOrPayload &&
+      typeof methodOrPayload === 'object' &&
+      typeof callbackOrArgs === 'function'
+    ) {
+      return this.request(methodOrPayload as JsonRpcRequest<unknown>).then((rs) => {
+        (callbackOrArgs as (...args: unknown[]) => void)(rs);
+      });
+    }
+
+    return this._sendSync(methodOrPayload as SendSyncJsonRpcRequest);
+  }
+
+  sendAsync<T> (payload: JsonRpcRequest<T>, callback: (error: (Error | null), result?: JsonRpcResponse<T>) => void): void {
+    this.request<T>(payload)
+      .then((result) => {
+        // @ts-ignore
+        callback(null, { result });
+      })
+      .catch((e: Error) => {
+        callback(e);
+      });
   }
 }

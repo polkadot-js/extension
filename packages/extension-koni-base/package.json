@@ -65,6 +65,7 @@
     "ethereumjs-tx": "^2.1.2",
     "eventemitter3": "^4.0.7",
     "graphql": "^16.3.0",
+    "json-rpc-engine": "^6.1.0",
     "moonbeam-types-bundle": "2.0.3",
     "pontem-types-bundle": "1.0.15",
     "protobufjs": "^6.11.2",

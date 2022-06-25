@@ -1,10 +1,10 @@
-     488	Nam Phạm                      	fix bug showing incorrect withdrawal time
+     492	Nam Phạm                      	
      465	Jaco                          	0.42.5 (#969)
-     306	AnhMTV                        	Release version 0.4.7
+     316	AnhMTV                        	
      151	lw-cdm                        	Update logo for Moonbeans
      142	quangdo                       	update some label and variable (original to origin)
       82	Thibaut Sardan                	Add account filtering feature (#832)
-      62	lw-cdm                        	
+      63	lw-cdm                        	
       55	Hieu Dao                      	
       55	leewong                       	#118: update balance logic for Kintsugi testnet
       53	Dominhquangdev                	update Bridge code

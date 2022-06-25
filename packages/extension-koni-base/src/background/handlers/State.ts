@@ -1798,7 +1798,7 @@ export default class KoniState extends State {
     }
   }
 
-  public async evmSendTransaction (id: string, url: string, networkKey: string, transactionParams: EvmSendTransactionParams): Promise<string | undefined> {
+  public async evmSendTransaction (id: string, url: string, networkKey: string, allowedAccounts: string[], transactionParams: EvmSendTransactionParams): Promise<string | undefined> {
     const web3 = this.getWeb3ApiMap()[networkKey];
 
     const autoFormatNumber = (val?: string | number): string | undefined => {
@@ -1838,7 +1838,13 @@ export default class KoniState extends State {
 
     const estimateGas = new BN(gasPrice.toString()).mul(new BN(transaction.gas)).toString();
 
-    const fromAddress = transaction.from as string; // Address is validated in before step
+    // Address is validated in before step
+    const fromAddress = allowedAccounts.find((account) => (account.toLowerCase() === (transaction.from as string).toLowerCase()));
+
+    if (!fromAddress) {
+      throw new EvmRpcError('INVALID_PARAMS', 'From address is not in available for ' + url);
+    }
+
     // Validate balance
     const balance = new BN(await web3.eth.getBalance(fromAddress) || 0);
 
@@ -1908,12 +1914,12 @@ export default class KoniState extends State {
 
           return new Promise<string>((resolve, reject) => {
             signTransaction.rawTransaction && web3.eth.sendSignedTransaction(signTransaction.rawTransaction)
-              .on('transactionHash', (hash) => {
+              .once('transactionHash', (hash) => {
                 transactionHash = hash;
                 resolve(hash);
               })
               .once('receipt', setTransactionHistory)
-              .on('error', (e) => {
+              .once('error', (e) => {
                 setFailedHistory(transactionHash);
                 reject(e);
               });

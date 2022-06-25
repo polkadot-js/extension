@@ -131,6 +131,9 @@ export default class KoniState extends State {
   private readonly accountRefStore = new AccountRefStore();
   private readonly authorizeStore = new AuthorizeStore();
   readonly #authRequestsV2: Record<string, AuthRequestV2> = {};
+  private readonly evmChainSubject = new Subject<AuthUrls>();
+  private authorizeCached: AuthUrls | undefined = undefined;
+
   private priceStoreReady = false;
   private readonly transactionHistoryStore = new TransactionHistoryStore();
 
@@ -402,11 +405,27 @@ export default class KoniState extends State {
   }
 
   public setAuthorize (data: AuthUrls, callback?: () => void): void {
-    this.authorizeStore.set('authUrls', data, callback);
+    this.authorizeStore.set('authUrls', data, () => {
+      this.authorizeCached = data;
+      this.evmChainSubject.next(this.authorizeCached);
+      callback && callback();
+    });
   }
 
   public getAuthorize (update: (value: AuthUrls) => void): void {
-    this.authorizeStore.get('authUrls', update);
+    // This action can be use many by DApp interaction => caching it in memory
+    if (this.authorizeCached) {
+      update(this.authorizeCached);
+    } else {
+      this.authorizeStore.get('authUrls', (data) => {
+        this.authorizeCached = data;
+        update(this.authorizeCached);
+      });
+    }
+  }
+
+  public subscribeEvmChainChange (): Subject<AuthUrls> {
+    return this.evmChainSubject;
   }
 
   private updateIconV2 (shouldClose?: boolean): void {
@@ -851,6 +870,21 @@ export default class KoniState extends State {
     });
 
     return true;
+  }
+
+  public async switchEvmNetworkByUrl (shortenUrl: string, networkKey: string): Promise<void> {
+    const authUrls = await this.getAuthList();
+
+    if (authUrls[shortenUrl]) {
+      if (this.networkMap[networkKey] && !this.networkMap[networkKey].active) {
+        this.enableNetworkMap(networkKey);
+      }
+
+      authUrls[shortenUrl].currentEvmNetworkKey = networkKey;
+      this.setAuthorize(authUrls);
+    } else {
+      throw new EvmRpcError('INTERNAL_ERROR', `Not found ${shortenUrl} in auth list`);
+    }
   }
 
   public async switchNetworkAccount (id: string, url: string, networkKey: string, changeAddress?: string): Promise<boolean> {
@@ -1313,18 +1347,6 @@ export default class KoniState extends State {
     return this.networkMap[key];
   }
 
-  public getEthereumChains (): string[] {
-    const result: string[] = [];
-
-    Object.keys(this.networkMap).forEach((k) => {
-      if (this.networkMap[k].isEthereum) {
-        result.push(k);
-      }
-    });
-
-    return result;
-  }
-
   public subscribeNetworkMap () {
     return this.networkMapStore.getSubject();
   }
@@ -1429,6 +1451,12 @@ export default class KoniState extends State {
     this.updateServiceInfo();
     this.lockNetworkMap = false;
 
+    if (this.networkMap[networkKey].isEthereum) {
+      this.getAuthorize((data) => {
+        this.evmChainSubject.next(data);
+      });
+    }
+
     return true;
   }
 
@@ -1464,6 +1492,10 @@ export default class KoniState extends State {
     this.updateServiceInfo();
     this.lockNetworkMap = false;
 
+    this.getAuthorize((data) => {
+      this.evmChainSubject.next(data);
+    });
+
     return true;
   }
 
@@ -1484,6 +1516,12 @@ export default class KoniState extends State {
     this.networkMapStore.set('NetworkMap', this.networkMap);
     this.updateServiceInfo();
     this.lockNetworkMap = false;
+
+    if (this.networkMap[networkKey].isEthereum) {
+      this.getAuthorize((data) => {
+        this.evmChainSubject.next(data);
+      });
+    }
 
     return true;
   }
@@ -1516,6 +1554,10 @@ export default class KoniState extends State {
 
     this.updateServiceInfo();
     this.lockNetworkMap = false;
+
+    this.getAuthorize((data) => {
+      this.evmChainSubject.next(data);
+    });
 
     return true;
   }

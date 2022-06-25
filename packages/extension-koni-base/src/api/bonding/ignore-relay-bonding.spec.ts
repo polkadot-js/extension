@@ -336,15 +336,17 @@ describe('test DotSama APIs', () => {
   });
 
   test('get withdraw', async () => {
-    const provider = new WsProvider(getCurrentProvider(PREDEFINED_NETWORKS.alephTest), DOTSAMA_AUTO_CONNECT_MS);
+    const provider = new WsProvider(getCurrentProvider(PREDEFINED_NETWORKS.westend), DOTSAMA_AUTO_CONNECT_MS);
     const api = new ApiPromise({ provider });
     const apiPromise = await api.isReady;
 
-    const stakingInfo = await apiPromise.derive.staking.account('5EsmjvZBNDjdTLGvCbr4CpUbxoQXi8meqZ83nEh1y9BBJ3ZG');
+    const stakingInfo = await apiPromise.derive.staking.account('5HbcGs2QXVAc6Q6eoTzLYNAJWpN17AkCFRLnWDaHCiGYXvNc');
     const progress = await apiPromise.derive.session.progress();
 
     console.log('active', stakingInfo?.stakingLedger?.active.unwrap());
-    console.log('redeemable', stakingInfo.redeemable);
+    console.log('redeemable', stakingInfo?.redeemable?.toHuman());
+
+    console.log(stakingInfo.unlocking);
 
     // @ts-ignore
     const mapped = stakingInfo?.unlocking

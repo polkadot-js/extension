@@ -32,6 +32,7 @@ export default function TextAreaWithLabel ({ className, isError, isFocused, isRe
     >
       <TextArea
         autoCapitalize='off'
+        autoComplete='off'
         autoCorrect='off'
         autoFocus={isFocused}
         onChange={_onChange}

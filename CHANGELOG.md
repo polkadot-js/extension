@@ -1,5 +1,18 @@
 # CHANGELOG
 
+## 0.4.7 (Koni)
+Build date: Jun 24, 2022.
+
+Update:
+- Staking Button in SubWallet (#42)
+- Support import EVM tokens (#357)
+- Support Shibuya Testnet (#357)
+- Improve request permission screen (#377)
+
+Bug fixes:
+- Some problems with connect with EVM DApp Interface (#359)
+- Not showing crowdloan data properly (#375)
+
 ## 0.4.6 (Koni)
 Build date: Jun 18, 2022.
 

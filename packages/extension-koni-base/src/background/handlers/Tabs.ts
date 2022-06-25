@@ -467,7 +467,8 @@ export default class KoniTabs extends Tabs {
       throw new Error('Empty current network key');
     }
 
-    const transactionHash = await this.#koniState.evmSendTransaction(id, url, networkKey, transactionParams);
+    const allowedAccounts = await this.getEvmCurrentAccount(url, true);
+    const transactionHash = await this.#koniState.evmSendTransaction(id, url, networkKey, allowedAccounts, transactionParams);
 
     if (!transactionHash) {
       throw new EvmRpcError('USER_REJECTED_REQUEST');

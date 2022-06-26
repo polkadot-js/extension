@@ -2561,16 +2561,16 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@polkadot/extension-base@^0.44.2-6-x, @polkadot/extension-base@workspace:packages/extension-base":
+"@polkadot/extension-base@^0.44.2-7-x, @polkadot/extension-base@workspace:packages/extension-base":
   version: 0.0.0-use.local
   resolution: "@polkadot/extension-base@workspace:packages/extension-base"
   dependencies:
     "@babel/runtime": ^7.18.3
     "@polkadot/api": ^8.10.1
-    "@polkadot/extension-chains": ^0.44.2-6-x
-    "@polkadot/extension-dapp": ^0.44.2-6-x
-    "@polkadot/extension-inject": ^0.44.2-6-x
-    "@polkadot/extension-mocks": ^0.44.2-6-x
+    "@polkadot/extension-chains": ^0.44.2-7-x
+    "@polkadot/extension-dapp": ^0.44.2-7-x
+    "@polkadot/extension-inject": ^0.44.2-7-x
+    "@polkadot/extension-mocks": ^0.44.2-7-x
     "@polkadot/keyring": ^9.6.2
     "@polkadot/networks": ^9.6.2
     "@polkadot/phishing": ^0.15.2
@@ -2585,12 +2585,12 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@polkadot/extension-chains@^0.44.2-6-x, @polkadot/extension-chains@workspace:packages/extension-chains":
+"@polkadot/extension-chains@^0.44.2-7-x, @polkadot/extension-chains@workspace:packages/extension-chains":
   version: 0.0.0-use.local
   resolution: "@polkadot/extension-chains@workspace:packages/extension-chains"
   dependencies:
     "@babel/runtime": ^7.18.3
-    "@polkadot/extension-inject": ^0.44.2-6-x
+    "@polkadot/extension-inject": ^0.44.2-7-x
     "@polkadot/networks": ^9.6.2
     "@polkadot/util": ^9.6.2
     "@polkadot/util-crypto": ^9.6.2
@@ -2606,7 +2606,7 @@ __metadata:
   dependencies:
     "@babel/runtime": ^7.18.3
     "@metamask/detect-provider": ^1.2.0
-    "@polkadot/extension-inject": ^0.44.2-6-x
+    "@polkadot/extension-inject": ^0.44.2-7-x
     "@polkadot/types": ^8.10.1
     "@polkadot/util": ^9.6.2
     web3: ^1.7.3
@@ -2615,12 +2615,12 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@polkadot/extension-dapp@^0.44.2-6-x, @polkadot/extension-dapp@workspace:packages/extension-dapp":
+"@polkadot/extension-dapp@^0.44.2-7-x, @polkadot/extension-dapp@workspace:packages/extension-dapp":
   version: 0.0.0-use.local
   resolution: "@polkadot/extension-dapp@workspace:packages/extension-dapp"
   dependencies:
     "@babel/runtime": ^7.18.3
-    "@polkadot/extension-inject": ^0.44.2-6-x
+    "@polkadot/extension-inject": ^0.44.2-7-x
     "@polkadot/util": ^9.6.2
     "@polkadot/util-crypto": ^9.6.2
   peerDependencies:
@@ -2630,7 +2630,7 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@polkadot/extension-inject@^0.44.2-6-x, @polkadot/extension-inject@workspace:packages/extension-inject":
+"@polkadot/extension-inject@^0.44.2-7-x, @polkadot/extension-inject@workspace:packages/extension-inject":
   version: 0.0.0-use.local
   resolution: "@polkadot/extension-inject@workspace:packages/extension-inject"
   dependencies:
@@ -2647,7 +2647,7 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@polkadot/extension-mocks@^0.44.2-6-x, @polkadot/extension-mocks@workspace:packages/extension-mocks":
+"@polkadot/extension-mocks@^0.44.2-7-x, @polkadot/extension-mocks@workspace:packages/extension-mocks":
   version: 0.0.0-use.local
   resolution: "@polkadot/extension-mocks@workspace:packages/extension-mocks"
   dependencies:
@@ -2656,7 +2656,7 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@polkadot/extension-ui@^0.44.2-6-x, @polkadot/extension-ui@workspace:packages/extension-ui":
+"@polkadot/extension-ui@^0.44.2-7-x, @polkadot/extension-ui@workspace:packages/extension-ui":
   version: 0.0.0-use.local
   resolution: "@polkadot/extension-ui@workspace:packages/extension-ui"
   dependencies:
@@ -2666,11 +2666,11 @@ __metadata:
     "@fortawesome/free-regular-svg-icons": ^6.1.1
     "@fortawesome/free-solid-svg-icons": ^6.1.1
     "@fortawesome/react-fontawesome": ^0.1.18
-    "@polkadot/extension-base": ^0.44.2-6-x
-    "@polkadot/extension-chains": ^0.44.2-6-x
-    "@polkadot/extension-dapp": ^0.44.2-6-x
-    "@polkadot/extension-inject": ^0.44.2-6-x
-    "@polkadot/extension-mocks": ^0.44.2-6-x
+    "@polkadot/extension-base": ^0.44.2-7-x
+    "@polkadot/extension-chains": ^0.44.2-7-x
+    "@polkadot/extension-dapp": ^0.44.2-7-x
+    "@polkadot/extension-inject": ^0.44.2-7-x
+    "@polkadot/extension-mocks": ^0.44.2-7-x
     "@polkadot/hw-ledger": ^9.6.2
     "@polkadot/keyring": ^9.6.2
     "@polkadot/networks": ^9.6.2
@@ -2714,9 +2714,9 @@ __metadata:
   dependencies:
     "@babel/runtime": ^7.18.3
     "@polkadot/dev": ^0.67.43
-    "@polkadot/extension-base": ^0.44.2-6-x
-    "@polkadot/extension-inject": ^0.44.2-6-x
-    "@polkadot/extension-ui": ^0.44.2-6-x
+    "@polkadot/extension-base": ^0.44.2-7-x
+    "@polkadot/extension-inject": ^0.44.2-7-x
+    "@polkadot/extension-ui": ^0.44.2-7-x
     babel-loader: ^8.2.5
     browser-resolve: ^2.0.0
     buffer: ^6.0.3

@@ -54,14 +54,14 @@ export async function stakingOnChainApi (addresses: string[], dotSamaAPIMap: Rec
     const useAddresses = apiPromise.isEthereum ? evmAddresses : substrateAddresses;
 
     if (['moonbeam', 'moonriver', 'moonbase', 'turing'].includes(chain)) {
-      return getMoonBeamStakingOnChain(parentApi, useAddresses, networks, chain, callback);
+      return getParaStakingOnChain(parentApi, useAddresses, networks, chain, callback);
     }
 
     return getRelayStakingOnChain(parentApi, useAddresses, networks, chain, callback);
   }));
 }
 
-function getMoonBeamStakingOnChain (parentApi: ApiProps, useAddresses: string[], networks: Record<string, NetworkJson>, chain: string, callback: (networkKey: string, rs: StakingItem) => void) {
+function getParaStakingOnChain (parentApi: ApiProps, useAddresses: string[], networks: Record<string, NetworkJson>, chain: string, callback: (networkKey: string, rs: StakingItem) => void) {
   return parentApi.api.query.parachainStaking.delegatorState.multi(useAddresses, async (ledgers: any) => {
     let totalBalance = 0;
     let activeBalance = 0;

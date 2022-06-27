@@ -93,11 +93,17 @@ function UnbondingSubmitTransaction ({ className }: Props): React.ReactElement<P
 
   const convertToBN = useCallback(() => {
     if (unbondAll) {
-      return new BN(nominatedAmount);
+      if (unbondingParams.delegations) {
+        return new BN(nominatedAmount);
+      } else {
+        const binaryAmount = bondedAmount * (10 ** (networkJson.decimals as number));
+
+        return new BN(binaryAmount.toString());
+      }
     }
 
     return new BN('0');
-  }, [nominatedAmount, unbondAll]);
+  }, [bondedAmount, networkJson.decimals, nominatedAmount, unbondAll, unbondingParams.delegations]);
 
   const handleResend = useCallback(() => {
     setExtrinsicHash('');
@@ -166,16 +172,20 @@ function UnbondingSubmitTransaction ({ className }: Props): React.ReactElement<P
   }, [unbondingParams.delegations]);
 
   const toggleUnbondAll = useCallback((value: boolean) => {
-    const _nominatedAmount = parseFloat(nominatedAmount) / (10 ** (networkJson.decimals as number));
-
     setUnbondAll(value);
 
     if (value) {
-      setAmount(_nominatedAmount);
+      if (unbondingParams.delegations) {
+        const _nominatedAmount = parseFloat(nominatedAmount) / (10 ** (networkJson.decimals as number));
+
+        setAmount(_nominatedAmount);
+      } else {
+        setAmount(bondedAmount);
+      }
     } else {
       setAmount(0);
     }
-  }, [networkJson.decimals, nominatedAmount]);
+  }, [bondedAmount, networkJson.decimals, nominatedAmount, unbondingParams.delegations]);
 
   return (
     <div className={className}>

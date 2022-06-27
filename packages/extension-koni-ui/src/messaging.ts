@@ -19,7 +19,7 @@ import { MetadataDef } from '@subwallet/extension-inject/types';
 
 import { SingleAddress } from '@polkadot/ui-keyring/observable/types';
 
-import { _getKnownHashes } from './util/defaultChains';
+import { _getKnownHashes, _getKnownNetworks } from './util/defaultChains';
 import { getSavedMeta, setSavedMeta } from './MetadataCache';
 
 interface Handler {
@@ -226,6 +226,42 @@ export async function getMetadata (genesisHash?: string | null, isPartial = fals
         tokenSymbol: 'Unit',
         types: {}
       }, isPartial);
+    }
+  }
+
+  return null;
+}
+
+export async function getChainMetadata (genesisHash?: string | null): Promise<Chain | null> {
+  if (!genesisHash) {
+    return null;
+  }
+
+  const chains = await getNetworkMap();
+  const parsedChains = _getKnownNetworks(chains);
+
+  let request = getSavedMeta(genesisHash);
+
+  if (!request) {
+    request = sendMessage('pri(metadata.get)', genesisHash || null);
+    setSavedMeta(genesisHash, request);
+  }
+
+  const def = await request;
+
+  if (def) {
+    return metadataExpand(def, false);
+  } else {
+    const chain = parsedChains.find((chain) => chain.genesisHash === genesisHash);
+
+    if (chain) {
+      return metadataExpand({
+        specVersion: 0,
+        tokenDecimals: 15,
+        tokenSymbol: 'Unit',
+        types: {},
+        ...chain
+      }, false);
     }
   }
 

@@ -488,7 +488,7 @@ export interface EraInfo{
 export interface ResponseParseTransactionSubstrate {
   era: EraInfo | string;
   nonce: number;
-  method: FormattedMethod[] | string;
+  method: string;
   tip: number;
   specVersion: number;
 }

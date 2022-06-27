@@ -1,10 +1,11 @@
 // Copyright 2019-2022 @polkadot/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
+import { NetworkJson } from '@subwallet/extension-base/background/KoniTypes';
 import { EraInfo, ResponseParseTransactionSubstrate } from '@subwallet/extension-base/background/types';
 import { Spinner, Warning } from '@subwallet/extension-koni-ui/components';
 import { ScannerContext, ScannerContextType } from '@subwallet/extension-koni-ui/contexts/ScannerContext';
-import useMetadata from '@subwallet/extension-koni-ui/hooks/useMetadata';
+import useMetadataChain from '@subwallet/extension-koni-ui/hooks/useMetadataChain';
 import { parseSubstrateTransaction } from '@subwallet/extension-koni-ui/messaging';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { DecodedMethod, decodeMethod } from '@subwallet/extension-koni-ui/util/decoders';
@@ -20,26 +21,34 @@ type TxDetail = ResponseParseTransactionSubstrate;
 interface Props extends ThemeProps{
   className?: string;
   setButtonLoading: (value: boolean) => void;
+  network: NetworkJson;
 }
 
 const PayloadDetail = (props: Props) => {
-  const { className, setButtonLoading } = props;
+  const { className, network, setButtonLoading } = props;
 
   const scannerStore = useContext<ScannerContextType>(ScannerContext);
   const { state } = scannerStore;
   const { genesisHash, rawPayload, specVersion } = state;
 
   const [payloadDetail, setPayloadDetail] = useState<TxDetail | null>(null);
+  const [chainLoading, setChainLoading] = useState<boolean>(true);
 
-  const chain = useMetadata(genesisHash, false);
+  const chain = useMetadataChain(genesisHash, setChainLoading);
 
   const decoded = useMemo((): DecodedMethod | null => {
-    if (!chain || !chain.hasMetadata || !payloadDetail) {
+    if (!payloadDetail || chainLoading) {
       return null;
     } else {
-      return decodeMethod(payloadDetail.method as string, chain, new BigN(payloadDetail.specVersion));
+      if (chain && chain.hasMetadata) {
+        return decodeMethod(payloadDetail.method, chain, new BigN(payloadDetail.specVersion));
+      } else {
+        const message = `Error decoding method: chain=${network.chain}, no metadata`;
+
+        return { warning: true, message: message, result: payloadDetail.method };
+      }
     }
-  }, [chain, payloadDetail]);
+  }, [chainLoading, network, chain, payloadDetail]);
 
   const handlerParseTransaction = useCallback(async (genesisHash: string, rawPayload: string, specVersion: number, mount: boolean) => {
     const data = await parseSubstrateTransaction(genesisHash, rawPayload, specVersion);
@@ -58,7 +67,7 @@ const PayloadDetail = (props: Props) => {
 
     if (isString(era)) {
       return (
-        <div className={CN('info-detail grid-container')}>
+        <div className={CN('info-denetworktail grid-container')}>
           {era.toString()}
         </div>
       );
@@ -218,6 +227,10 @@ export default React.memo(styled(PayloadDetail)(({ theme }: Props) => `
 
   .raw-method{
     word-break: break-all;
+  }
+
+  .decode-warning {
+    margin-bottom: 10px;
   }
 
   .call-detail {

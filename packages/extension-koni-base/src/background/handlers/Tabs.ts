@@ -3,10 +3,10 @@
 
 import type { InjectedAccount } from '@subwallet/extension-inject/types';
 
-import { AuthUrls } from '@subwallet/extension-base/background/handlers/State';
+import { AuthUrlInfo } from '@subwallet/extension-base/background/handlers/State';
 import { createSubscription, unsubscribe } from '@subwallet/extension-base/background/handlers/subscriptions';
 import Tabs from '@subwallet/extension-base/background/handlers/Tabs';
-import { CustomEvmToken, EvmAppState, EvmEventType, EvmSendTransactionParams, RequestEvmProviderSend } from '@subwallet/extension-base/background/KoniTypes';
+import { CustomEvmToken, EvmAppState, EvmEventType, EvmSendTransactionParams, NetworkJson, RequestEvmProviderSend } from '@subwallet/extension-base/background/KoniTypes';
 import { AccountAuthType, MessageTypes, RequestAccountList, RequestAccountSubscribe, RequestAuthorizeTab, RequestTypes, ResponseTypes } from '@subwallet/extension-base/background/types';
 import { canDerive } from '@subwallet/extension-base/utils';
 import { EvmRpcError } from '@subwallet/extension-koni-base/background/errors/EvmRpcError';
@@ -27,11 +27,10 @@ function stripUrl (url: string): string {
   return parts[2];
 }
 
-function transformAccountsV2 (accounts: SubjectInfo, anyType = false, url: string, authList: AuthUrls, accountAuthType?: AccountAuthType): InjectedAccount[] {
-  const shortenUrl = stripUrl(url);
-  const accountSelected = authList[shortenUrl]
-    ? Object.keys(authList[shortenUrl].isAllowedMap)
-      .filter((address) => authList[shortenUrl].isAllowedMap[address])
+function transformAccountsV2 (accounts: SubjectInfo, anyType = false, authInfo?: AuthUrlInfo, accountAuthType?: AccountAuthType): InjectedAccount[] {
+  const accountSelected = authInfo
+    ? Object.keys(authInfo.isAllowedMap)
+      .filter((address) => authInfo.isAllowedMap[address])
     : [];
 
   let authTypeFilter = ({ type }: SingleAddress) => true;
@@ -59,27 +58,32 @@ function transformAccountsV2 (accounts: SubjectInfo, anyType = false, url: strin
 
 export default class KoniTabs extends Tabs {
   readonly #koniState: KoniState;
-  private evmState: EvmAppState;
-  private evmEventEmiterMap: Record<string, Record<string, (eventName: EvmEventType, payload: any) => void>> = {};
+  private evmEventEmitterMap: Record<string, Record<string, (eventName: EvmEventType, payload: any) => void>> = {};
 
   constructor (koniState: KoniState) {
     super(koniState);
     this.#koniState = koniState;
-    this.evmState = {};
+  }
+
+  async getAuthInfo (url: string): Promise<AuthUrlInfo | undefined> {
+    const authList = await this.#koniState.getAuthList();
+    const shortenUrl = stripUrl(url);
+
+    return authList[shortenUrl];
   }
 
   private async accountsListV2 (url: string, { accountAuthType, anyType }: RequestAccountList): Promise<InjectedAccount[]> {
-    const authList = await this.#koniState.getAuthList();
+    const authInfo = await this.getAuthInfo(url);
 
-    return transformAccountsV2(accountsObservable.subject.getValue(), anyType, url, authList, accountAuthType);
+    return transformAccountsV2(accountsObservable.subject.getValue(), anyType, authInfo, accountAuthType);
   }
 
   private accountsSubscribeV2 (url: string, { accountAuthType }: RequestAccountSubscribe, id: string, port: chrome.runtime.Port): boolean {
     const cb = createSubscription<'pub(accounts.subscribeV2)'>(id, port);
     const subscription = accountsObservable.subject.subscribe((accounts: SubjectInfo): void => {
-      this.#koniState.getAuthorize((value) => {
-        cb(transformAccountsV2(accounts, false, url, value, accountAuthType));
-      });
+      this.getAuthInfo(url).then((authInfo) => {
+        cb(transformAccountsV2(accounts, false, authInfo, accountAuthType));
+      }).catch(console.error);
     }
     );
 
@@ -97,9 +101,9 @@ export default class KoniTabs extends Tabs {
 
   private async getEvmCurrentAccount (url: string, getAll = false): Promise<string[]> {
     return await new Promise((resolve) => {
-      this.#koniState.getAuthorize((authUrls) => {
+      this.getAuthInfo(url).then((authInfo) => {
         const allAccounts = accountsObservable.subject.getValue();
-        const accountList = transformAccountsV2(allAccounts, false, url, authUrls, 'evm').map((a) => a.address);
+        const accountList = transformAccountsV2(allAccounts, false, authInfo, 'evm').map((a) => a.address);
         let accounts: string[] = [];
 
         this.#koniState.getCurrentAccount(({ address }) => {
@@ -111,8 +115,37 @@ export default class KoniTabs extends Tabs {
 
           resolve(accounts);
         });
-      });
+      }).catch(console.error);
     });
+  }
+
+  private async getEvmState (url?: string): Promise<EvmAppState> {
+    let currentEvmNetworkKey: string | undefined;
+
+    if (url) {
+      const authInfo = await this.getAuthInfo(url);
+
+      currentEvmNetworkKey = authInfo?.currentEvmNetworkKey;
+    }
+
+    let currentEvmNetwork: NetworkJson | undefined = currentEvmNetworkKey ? this.#koniState.getNetworkMap()[currentEvmNetworkKey] : undefined;
+
+    if (!currentEvmNetwork?.active) {
+      currentEvmNetwork = Object.values(this.#koniState.getNetworkMap()).find((network) => (network.isEthereum && network.active));
+    }
+
+    if (currentEvmNetwork) {
+      const { evmChainId, key } = currentEvmNetwork;
+      const web3 = this.#koniState.getWeb3ApiMap()[key];
+
+      return {
+        networkKey: key,
+        chainId: `0x${(evmChainId || 0).toString(16)}`,
+        web3
+      };
+    } else {
+      return {};
+    }
   }
 
   private async getEvmPermission (url: string, id: string) {
@@ -125,20 +158,16 @@ export default class KoniTabs extends Tabs {
     // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
     const chainId = params[0].chainId as string;
 
-    if (this.evmState.chainId === chainId) {
+    const evmState = await this.getEvmState(url);
+
+    if (evmState.chainId === chainId) {
       return null;
     }
 
     const [networkKey] = this.#koniState.findNetworkKeyByChainId(parseInt(chainId, 16));
 
     if (networkKey) {
-      const accounts = await this.getEvmCurrentAccount(url);
-
-      const ok = await this.#koniState.switchNetworkAccount(id, url, networkKey, accounts.length === 1 ? accounts[0] : ALL_ACCOUNT_KEY);
-
-      if (!ok) {
-        throw new EvmRpcError('USER_REJECTED_REQUEST');
-      }
+      await this.#koniState.switchEvmNetworkByUrl(stripUrl(url), networkKey);
     } else {
       throw new EvmRpcError('INVALID_PARAMS', `Not found chainId ${chainId} in wallet`);
     }
@@ -167,7 +196,8 @@ export default class KoniTabs extends Tabs {
       throw new EvmRpcError('INVALID_PARAMS', 'Assets params require address and symbol');
     }
 
-    const chain = this.evmState.networkKey;
+    const evmState = await this.getEvmState(url);
+    const chain = evmState.networkKey;
 
     if (!chain) {
       throw new EvmRpcError('INTERNAL_ERROR', 'Current chain is not available');
@@ -240,28 +270,10 @@ export default class KoniTabs extends Tabs {
     return null;
   }
 
-  private async getEvmCurrentChainId (): Promise<string | undefined> {
-    return await new Promise((resolve) => {
-      this.#koniState.getCurrentAccount(({ address, currentGenesisHash }) => {
-        const [networkKey, currentNetwork] = this.#koniState.findNetworkKeyByGenesisHash(currentGenesisHash);
+  private async getEvmCurrentChainId (url: string): Promise<string | undefined> {
+    const evmState = await this.getEvmState(url);
 
-        const chainId = currentNetwork?.evmChainId;
-
-        if (chainId) {
-          this.evmState.chainId = `0x${chainId.toString(16)}`;
-          this.evmState.networkKey = networkKey;
-          // @ts-ignore
-          // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-          this.evmState.web3 = this.#koniState.getWeb3ApiMap()[networkKey];
-        } else {
-          this.evmState.chainId = undefined;
-          this.evmState.networkKey = undefined;
-          this.evmState.web3 = undefined;
-        }
-
-        resolve(this.evmState.chainId);
-      });
-    });
+    return evmState.chainId;
   }
 
   private async evmSubscribeEvents (url: string, id: string, port: chrome.runtime.Port) {
@@ -274,10 +286,10 @@ export default class KoniTabs extends Tabs {
       cb({ type: eventName, payload: payload });
     };
 
+    // Detect accounts changed
     let currentAccountList = await this.getEvmCurrentAccount(url);
 
-    const checkAndTriggerChange = async () => {
-      const currentChainId = this.evmState.chainId;
+    const onCurrentAccountChanged = async () => {
       const newAccountList = await this.getEvmCurrentAccount(url);
 
       // Compare to void looping reload
@@ -286,36 +298,51 @@ export default class KoniTabs extends Tabs {
         emitEvent('accountsChanged', newAccountList);
         currentAccountList = newAccountList;
       }
-
-      const newChainId = await this.getEvmCurrentChainId();
-
-      if (currentChainId !== newChainId) {
-        emitEvent('chainChanged', newChainId);
-      }
     };
 
     const accountListSubscription = this.#koniState.subscribeCurrentAccount()
       .subscribe(() => {
-        checkAndTriggerChange().catch(console.error);
+        onCurrentAccountChanged().catch(console.error);
       });
 
-    const networkCheck = () => {
-      this.evmState.web3?.eth.net.isListening()
-        .then((connecting) => {
-          if (connecting && !isConnected) {
-            emitEvent('connect', { chainId: this.evmState.chainId });
-          } else if (!connecting && isConnected) {
-            emitEvent('disconnect', new EvmRpcError('CHAIN_DISCONNECTED'));
-          }
+    // Detect network chain
+    const evmState = await this.getEvmState(url);
+    let currentChainId = evmState.chainId;
 
-          isConnected = connecting;
-        })
-        .catch(console.log);
+    const _onAuthChanged = async () => {
+      const { chainId } = await this.getEvmState(url);
+
+      if (chainId !== currentChainId) {
+        emitEvent('chainChanged', chainId);
+        currentChainId = chainId;
+      }
+    };
+
+    const chainChainSubscription = this.#koniState.subscribeEvmChainChange()
+      .subscribe((rs) => {
+        _onAuthChanged().catch(console.error);
+      });
+
+    // Detect network connection
+    const networkCheck = () => {
+      this.getEvmState(url).then((evmState) => {
+        evmState.web3?.eth.net.isListening()
+          .then((connecting) => {
+            if (connecting && !isConnected) {
+              emitEvent('connect', { chainId: evmState.chainId });
+            } else if (!connecting && isConnected) {
+              emitEvent('disconnect', new EvmRpcError('CHAIN_DISCONNECTED'));
+            }
+
+            isConnected = connecting;
+          })
+          .catch(console.error);
+      }).catch(console.error);
     };
 
     const networkCheckInterval = setInterval(networkCheck, CRON_GET_API_MAP_STATUS);
 
-    const provider = await this.getEvmProvider();
+    const provider = await this.getEvmProvider(url);
 
     const eventMap: Record<string, any> = {};
 
@@ -336,23 +363,24 @@ export default class KoniTabs extends Tabs {
     });
 
     // Add event emitter
-    if (!this.evmEventEmiterMap[url]) {
-      this.evmEventEmiterMap[url] = {};
+    if (!this.evmEventEmitterMap[url]) {
+      this.evmEventEmitterMap[url] = {};
     }
 
-    this.evmEventEmiterMap[url][id] = emitEvent;
+    this.evmEventEmitterMap[url][id] = emitEvent;
 
     port.onDisconnect.addListener((): void => {
-      if (this.evmEventEmiterMap[url][id]) {
-        delete this.evmEventEmiterMap[url][id];
+      if (this.evmEventEmitterMap[url][id]) {
+        delete this.evmEventEmitterMap[url][id];
       }
 
       Object.entries(eventMap).forEach(([event, callback]) => {
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
         provider?.removeListener(event, callback);
       });
       unsubscribe(id);
       accountListSubscription.unsubscribe();
+      chainChainSubscription.unsubscribe();
       clearInterval(networkCheckInterval);
     });
 
@@ -361,7 +389,7 @@ export default class KoniTabs extends Tabs {
 
   private checkAndHandleProviderStatus (provider: WebsocketProvider | undefined) {
     if (!provider || !provider?.connected) {
-      Object.values(this.evmEventEmiterMap).forEach((m) => {
+      Object.values(this.evmEventEmitterMap).forEach((m) => {
         Object.values(m).forEach((emitter) => {
           emitter('disconnect', new EvmRpcError('CHAIN_DISCONNECTED'));
         });
@@ -370,19 +398,20 @@ export default class KoniTabs extends Tabs {
     }
   }
 
-  private async getEvmProvider (): Promise<WebsocketProvider | undefined> {
-    let provider = this.evmState.web3?.currentProvider as WebsocketProvider;
+  private async getEvmProvider (url: string): Promise<WebsocketProvider | undefined> {
+    const evmState = await this.getEvmState(url);
+    let provider = evmState.web3?.currentProvider as WebsocketProvider;
 
     if (!provider) {
-      await this.getEvmCurrentChainId();
-      provider = this.evmState.web3?.currentProvider as WebsocketProvider;
+      await this.getEvmCurrentChainId(url);
+      provider = evmState.web3?.currentProvider as WebsocketProvider;
     }
 
     return provider;
   }
 
-  private async performWeb3Method (id: string, { method, params }: RequestArguments, callback?: (result?: any) => void) {
-    const provider = await this.getEvmProvider();
+  private async performWeb3Method (id: string, url: string, { method, params }: RequestArguments, callback?: (result?: any) => void) {
+    const provider = await this.getEvmProvider(url);
 
     this.checkAndHandleProviderStatus(provider);
 
@@ -427,7 +456,8 @@ export default class KoniTabs extends Tabs {
   public async evmSendTransaction (id: string, url: string, { params }: RequestArguments) {
     const transactionParams = (params as EvmSendTransactionParams[])[0];
     const canUseAccount = transactionParams.from && this.canUseAccount(transactionParams.from, url);
-    const networkKey = this.evmState.networkKey;
+    const evmState = await this.getEvmState(url);
+    const networkKey = evmState.networkKey;
 
     if (!canUseAccount) {
       throw new Error('Account ' + (transactionParams.from) + ' not in allowed list');
@@ -437,7 +467,8 @@ export default class KoniTabs extends Tabs {
       throw new Error('Empty current network key');
     }
 
-    const transactionHash = await this.#koniState.evmSendTransaction(id, url, networkKey, transactionParams);
+    const allowedAccounts = await this.getEvmCurrentAccount(url, true);
+    const transactionHash = await this.#koniState.evmSendTransaction(id, url, networkKey, allowedAccounts, transactionParams);
 
     if (!transactionHash) {
       throw new EvmRpcError('USER_REJECTED_REQUEST');
@@ -454,7 +485,7 @@ export default class KoniTabs extends Tabs {
     try {
       switch (method) {
         case 'eth_chainId':
-          return await this.getEvmCurrentChainId();
+          return await this.getEvmCurrentChainId(url);
         case 'eth_accounts':
           return await this.getEvmCurrentAccount(url);
         case 'eth_sendTransaction':
@@ -485,7 +516,7 @@ export default class KoniTabs extends Tabs {
           return await this.addEvmToken(id, url, request);
 
         default:
-          return this.performWeb3Method(id, request);
+          return this.performWeb3Method(id, url, request);
       }
     } catch (e) {
       // @ts-ignore
@@ -499,9 +530,10 @@ export default class KoniTabs extends Tabs {
     }
   }
 
-  private handleEvmSend (id: string, port: chrome.runtime.Port, request: RequestEvmProviderSend) {
+  private async handleEvmSend (id: string, url: string, port: chrome.runtime.Port, request: RequestEvmProviderSend) {
     const cb = createSubscription<'evm(provider.send)'>(id, port);
-    const provider = this.evmState.web3?.currentProvider as WebsocketProvider;
+    const evmState = await this.getEvmState(url);
+    const provider = evmState.web3?.currentProvider as WebsocketProvider;
 
     this.checkAndHandleProviderStatus(provider);
 
@@ -551,7 +583,7 @@ export default class KoniTabs extends Tabs {
       case 'evm(request)':
         return await this.handleEvmRequest(id, url, request as RequestArguments);
       case 'evm(provider.send)':
-        return this.handleEvmSend(id, port, request as RequestEvmProviderSend);
+        return await this.handleEvmSend(id, url, port, request as RequestEvmProviderSend);
       default:
         return super.handle(id, type, request, url, port);
     }

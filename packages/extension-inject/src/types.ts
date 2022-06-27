@@ -6,8 +6,6 @@ import type { ProviderInterface } from '@polkadot/rpc-provider/types';
 import type { ExtDef } from '@polkadot/types/extrinsic/signedExtensions/types';
 import type { KeypairType } from '@polkadot/util-crypto/types';
 
-import { AbstractProvider } from 'web3-core';
-
 // eslint-disable-next-line no-undef
 type This = typeof globalThis;
 
@@ -99,7 +97,7 @@ export interface Injected {
   provider?: InjectedProvider;
   signer: InjectedSigner;
 }
-export interface EvmProvider extends AbstractProvider{
+export interface EvmProvider {
   isMetaMask: boolean,
   isSubWallet: boolean,
   version: string,
@@ -113,6 +111,7 @@ export interface InjectedWindowProvider {
 
 export interface InjectedWindow extends This {
   injectedWeb3: Record<string, InjectedWindowProvider>;
+  ethereum: EvmProvider;
   SubWallet: EvmProvider;
 }
 

@@ -27,10 +27,7 @@ interface EthereumProvider {
   on: (name: string, cb: (value: unknown) => void) => EthRpcSubscription;
 }
 
-interface Web3Window extends InjectedWindow {
-  // this is injected by metaMask
-  ethereum: unknown;
-}
+type Web3Window = InjectedWindow
 
 function isMetaMaskProvider (prov: unknown): EthereumProvider {
   assert(prov && (prov as EthereumProvider).isMetaMask, 'Injected provider is not MetaMask');

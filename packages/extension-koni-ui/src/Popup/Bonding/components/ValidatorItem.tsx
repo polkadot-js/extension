@@ -41,7 +41,6 @@ function ValidatorItem ({ bondedValidators, className, isBondedBefore, maxNomina
   const isSufficientFund = useIsSufficientBalance(networkKey, validatorInfo.minBond);
   const hasOwnStake = validatorInfo.ownStake > 0;
   const isMaxCommission = validatorInfo.commission === 100;
-  const isMinBondZero = validatorInfo.minBond === 0;
 
   const navigate = useContext(ActionContext);
 
@@ -50,20 +49,10 @@ function ValidatorItem ({ bondedValidators, className, isBondedBefore, maxNomina
   }, [showDetail]);
 
   const getMinBondTooltipText = useCallback(() => {
-    if (isMinBondZero) {
-      return 'Invalid minimum stake';
-    }
-
     return `Your free balance needs to be at least ${parseBalanceString(validatorInfo.minBond, networkJson.nativeToken as string)}.`;
-  }, [isMinBondZero, networkJson.nativeToken, validatorInfo.minBond]);
+  }, [networkJson.nativeToken, validatorInfo.minBond]);
 
   const handleOnSelect = useCallback(() => {
-    if (isMinBondZero) {
-      show('This validator has invalid minimum stake');
-
-      return;
-    }
-
     if (!isSufficientFund) {
       show('Your free balance is not enough to stake');
 
@@ -78,7 +67,7 @@ function ValidatorItem ({ bondedValidators, className, isBondedBefore, maxNomina
 
     store.dispatch({ type: 'bondingParams/update', payload: { selectedNetwork: networkKey, selectedValidator: validatorInfo, maxNominatorPerValidator, isBondedBefore, bondedValidators } as BondingParams });
     navigate('/account/bonding-auth');
-  }, [bondedValidators, isBondedBefore, isMinBondZero, isSufficientFund, maxNominations, maxNominatorPerValidator, navigate, networkKey, show, validatorInfo]);
+  }, [bondedValidators, isBondedBefore, isSufficientFund, maxNominations, maxNominatorPerValidator, navigate, networkKey, show, validatorInfo]);
 
   return (
     <div className={className}>

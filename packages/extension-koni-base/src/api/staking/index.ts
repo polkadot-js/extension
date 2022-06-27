@@ -19,13 +19,14 @@ export const DEFAULT_STAKING_NETWORKS = {
   polkadot: PREDEFINED_NETWORKS.polkadot,
   kusama: PREDEFINED_NETWORKS.kusama,
   hydradx: PREDEFINED_NETWORKS.hydradx,
-  // acala: PREDEFINED_NETWORKS.acala,
   aleph: PREDEFINED_NETWORKS.aleph,
-  // astar: NETWORKS.astar,
   moonbeam: PREDEFINED_NETWORKS.moonbeam,
   moonbase: PREDEFINED_NETWORKS.moonbase,
   darwinia: PREDEFINED_NETWORKS.darwinia,
-  crab: PREDEFINED_NETWORKS.crab
+  crab: PREDEFINED_NETWORKS.crab,
+  polkadex: PREDEFINED_NETWORKS.polkadex
+  // astar: NETWORKS.astar,
+  // acala: PREDEFINED_NETWORKS.acala,
 };
 
 interface PromiseMapping {

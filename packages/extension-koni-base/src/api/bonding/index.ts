@@ -7,7 +7,7 @@ import { getRelayBondingExtrinsic, getRelayChainBondingBasics, getRelayUnbonding
 import Web3 from 'web3';
 
 const CHAIN_TYPES: Record<string, string[]> = {
-  relay: ['polkadot', 'kusama', 'hydradx', 'aleph', 'edgeware', 'darwinia', 'crab'],
+  relay: ['polkadot', 'kusama', 'hydradx', 'aleph', 'edgeware', 'darwinia', 'crab', 'polkadex'],
   moonbeam: ['moonbeam', 'moonriver', 'moonbase']
 };
 

@@ -451,8 +451,11 @@ export const PREDEFINED_NETWORKS: Record<string, NetworkJson> = {
     groups: ['POLKADOT_PARACHAIN'],
     paraId: 2040,
     nativeToken: 'PDEX',
+    coinGeckoKey: 'polkadex',
     crowdloanUrl: 'https://www.polkadex.trade/crowdloans',
-    decimals: 12
+    decimals: 12,
+    getStakingOnChain: true,
+    supportBonding: true
   },
   aleph: {
     key: 'aleph',

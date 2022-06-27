@@ -2251,7 +2251,6 @@ export default class KoniExtension extends Extension {
 
     const callback = createSubscription<'pri(unbonding.submitWithdrawal)'>(id, port);
     const dotSamaApi = state.getDotSamaApi(networkKey);
-    console.log('validator', validatorAddress);
     const extrinsic = await getWithdrawalExtrinsic(dotSamaApi, networkKey, address, validatorAddress);
     const passwordError: string | null = unlockAccount(address, password);
 
@@ -2264,8 +2263,6 @@ export default class KoniExtension extends Extension {
             return;
           }
 
-          console.log('result', result);
-
           if (result.status.isInBlock || result.status.isFinalized) {
             result.events
               .filter(({ event: { section } }) => section === 'system')
@@ -2274,17 +2271,14 @@ export default class KoniExtension extends Extension {
                 callback(txState);
 
                 if (method === 'ExtrinsicFailed') {
-                  console.log('ExtrinsicFailed');
                   txState.status = false;
                   callback(txState);
                 } else if (method === 'ExtrinsicSuccess') {
-                  console.log('ExtrinsicSuccess');
                   txState.status = true;
                   callback(txState);
                 }
               });
           } else if (result.isError) {
-            console.log('txError');
             txState.txError = true;
             callback(txState);
           }

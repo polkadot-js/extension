@@ -79,6 +79,15 @@ export default function useAccountBalance (currentNetworkKey: string,
     const balanceItem = balanceMap[networkKey];
 
     if (!registry) {
+      networkBalanceMaps[networkKey] = {
+        symbol: '...',
+        balanceValue: BN_ZERO,
+        convertedBalanceValue: BN_ZERO,
+        detailBalances: [],
+        childrenBalances: [],
+        isLoading: true
+      };
+
       return;
     }
 

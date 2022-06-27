@@ -207,7 +207,11 @@ export const subscanByNetworkKey: Record<string, string> = {
   dolphin: 'https://dolphin.subscan.io/',
   encointer: 'https://encointer.subscan.io/',
   chainx: 'https://chainx.subscan.io/',
-  litmus: 'https://litmus.subscan.io/'
+  litmus: 'https://litmus.subscan.io/',
+  crab: 'https://crab.subscan.io/',
+  mangatax_para: 'https://mangatax.subscan.io/',
+  mangatax: 'https://mangata-testnet.subscan.io/',
+  shibuya: 'https://shibuya.subscan.io/'
 };
 
 export const moonbeamScanUrl = 'https://moonbeam.moonscan.io';

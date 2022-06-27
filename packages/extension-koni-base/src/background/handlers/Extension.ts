@@ -23,7 +23,7 @@ import { handleTransferNftQr, makeERC20TransferQr, makeEVMTransferQr } from '@su
 import { ERC721Contract, getERC20Contract, getERC721Contract, initWeb3Api } from '@subwallet/extension-koni-base/api/web3/web3';
 import { state } from '@subwallet/extension-koni-base/background/handlers/index';
 import { ALL_ACCOUNT_KEY, ALL_GENESIS_HASH } from '@subwallet/extension-koni-base/constants';
-import { isValidProvider, reformatAddress } from '@subwallet/extension-koni-base/utils';
+import { getCurrentProvider, isValidProvider, reformatAddress } from '@subwallet/extension-koni-base/utils';
 import { createTransactionFromRLP, signatureToHex, Transaction as QrTransaction } from '@subwallet/extension-koni-base/utils/eth';
 import BigN from 'bignumber.js';
 import { Transaction } from 'ethereumjs-tx';
@@ -2916,8 +2916,7 @@ export default class KoniExtension extends Extension {
       throw new Error('Cannot find network');
     }
 
-    const web3ApiMap = state.getWeb3ApiMap();
-    const web3 = web3ApiMap[network.key];
+    const web3 = initWeb3Api(getCurrentProvider(network));
 
     if (type === 'message') {
       signed = web3.eth.accounts.sign(message, parsedPrivateKey);

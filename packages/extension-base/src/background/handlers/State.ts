@@ -16,7 +16,7 @@ import { assert } from '@polkadot/util';
 import { MetadataStore } from '../../stores';
 import { withErrorLog } from './helpers';
 
-export interface Resolver <T> {
+export interface Resolver<T> {
   reject: (error: Error) => void;
   resolve: (result: T) => void;
 }
@@ -36,8 +36,9 @@ export interface AuthUrlInfo {
   isAllowed: boolean;
   origin: string;
   url: string;
-  accountAuthType?: AccountAuthType,
-  isAllowedMap: Record<string, boolean>
+  accountAuthType?: AccountAuthType;
+  isAllowedMap: Record<string, boolean>;
+  currentEvmNetworkKey?: string;
 }
 
 interface MetaRequest extends Resolver<boolean> {
@@ -211,16 +212,32 @@ export default class State {
   }
 
   protected popupOpen (): void {
-    this.#notification !== 'extension' &&
-      chrome.windows.create(
-        this.#notification === 'window'
-          ? NORMAL_WINDOW_OPTS
-          : POPUP_WINDOW_OPTS,
-        (window): void => {
+    if (this.#notification !== 'extension') {
+      if (this.#notification === 'window') {
+        chrome.windows.create(NORMAL_WINDOW_OPTS, (window): void => {
           if (window) {
             this.#windows.push(window.id || 0);
           }
         });
+      }
+
+      chrome.windows.getCurrent((win) => {
+        const popupOptions = { ...POPUP_WINDOW_OPTS };
+
+        if (win) {
+          popupOptions.left = (win.left || 0) + (win.width || 0) - (POPUP_WINDOW_OPTS.width || 0) - 20;
+          popupOptions.top = (win.top || 0) + 80;
+        }
+
+        chrome.windows.create(popupOptions
+          , (window): void => {
+            if (window) {
+              this.#windows.push(window.id || 0);
+            }
+          }
+        );
+      });
+    }
   }
 
   private authComplete = (id: string, resolve: (result: boolean) => void, reject: (error: Error) => void): Resolver<boolean> => {

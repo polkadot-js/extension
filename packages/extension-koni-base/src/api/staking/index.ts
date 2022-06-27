@@ -34,11 +34,7 @@ interface PromiseMapping {
 }
 
 function parseStakingBalance (balance: number, chain: string, network: Record<string, NetworkJson>): number {
-  if (chain === 'hydradx') {
-    return balance;
-  } else {
-    return toUnit(balance, network[chain].decimals as number);
-  }
+  return toUnit(balance, network[chain].decimals as number);
 }
 
 export async function stakingOnChainApi (addresses: string[], dotSamaAPIMap: Record<string, ApiProps>, callback: (networkKey: string, rs: StakingItem) => void, networks: Record<string, NetworkJson> = DEFAULT_STAKING_NETWORKS) {

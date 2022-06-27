@@ -5,9 +5,10 @@
 // eslint-disable-next-line header/header
 import type { ThemeProps } from '../../types';
 
+import { ALL_ACCOUNT_KEY } from '@subwallet/extension-koni-base/constants';
 import check from '@subwallet/extension-koni-ui/assets/check.svg';
 import { AccountInfoEl } from '@subwallet/extension-koni-ui/components';
-import React, { useCallback, useState } from 'react';
+import React, { useCallback } from 'react';
 import styled from 'styled-components';
 
 import { KeypairType } from '@polkadot/util-crypto/types';
@@ -20,22 +21,28 @@ interface Props extends ThemeProps {
   parentName?: string | null;
   type?: KeypairType;
   suri?: string;
+  isSelected: boolean,
   selectedAccounts: string[];
   selectAccountCallBack?: (selectedAccounts: string[]) => void;
 }
 
-function ConnectAccount ({ address, className, genesisHash, name, parentName, selectAccountCallBack, selectedAccounts, suri, type }: Props): React.ReactElement<Props> {
-  const [isSelected, setSelected] = useState(selectedAccounts.includes(address));
+function ConnectAccount ({ address, className, genesisHash, isSelected, name, parentName, selectAccountCallBack, selectedAccounts, suri, type }: Props): React.ReactElement<Props> {
   const deps = selectedAccounts.toString();
 
   const selectAccounts = useCallback(() => {
-    if (isSelected) {
-      selectAccountCallBack && selectAccountCallBack(selectedAccounts.filter((acc) => acc !== address));
-    } else {
-      selectAccountCallBack && selectAccountCallBack(selectedAccounts.concat(address));
+    let newSelectedAccounts = selectedAccounts;
+
+    if (address !== ALL_ACCOUNT_KEY) {
+      if (isSelected) {
+        newSelectedAccounts = selectedAccounts.filter((acc) => acc !== address);
+      } else {
+        newSelectedAccounts = selectedAccounts.concat(address);
+      }
+    } else if (isSelected) {
+      newSelectedAccounts = [];
     }
 
-    setSelected(!isSelected);
+    selectAccountCallBack && selectAccountCallBack(newSelectedAccounts);
   }, [address, isSelected, selectAccountCallBack, deps]);
 
   return (
@@ -44,10 +51,12 @@ function ConnectAccount ({ address, className, genesisHash, name, parentName, se
       onClick={selectAccounts}
     >
       <AccountInfoEl
+        accountSplitPart='right'
         address={address}
+        addressHalfLength={5}
         className='authorize-request__account'
         genesisHash={genesisHash}
-        isShowAddress={false}
+        isShowAddress={address !== ALL_ACCOUNT_KEY}
         isShowBanner={false}
         name={name}
         parentName={parentName}
@@ -73,6 +82,7 @@ function ConnectAccount ({ address, className, genesisHash, name, parentName, se
 export default styled(ConnectAccount)(({ theme }: Props) => `
   border-radius: 8px;
   padding: 8px 10px;
+  padding-right: 14px;
   background-color: ${theme.accountAuthorizeRequest};
   margin-bottom: 16px;
   display: flex;
@@ -81,5 +91,27 @@ export default styled(ConnectAccount)(({ theme }: Props) => `
 
   &:last-child {
     margin-bottom: 0;
+  }
+  
+  .authorize-request__account {
+    width: 100%;    
+  }
+  
+  .account-info {
+    position: relative;
+    display: flex;
+  
+    .account-info__name {
+      font-size: 18px;
+      max-width: 200px;
+      margin-right: 8px;
+    }
+    
+    .account-info-full-address {
+      font-size: 18px;
+      font-weight: 600;
+      &:before {content: "("}    
+      &:after {content: ")"}    
+    }
   }
 `);

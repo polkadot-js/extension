@@ -53,6 +53,12 @@ function NetworkItem ({ className, item }: Props): React.ReactElement {
   }, [show]);
 
   const toggleActive = useCallback((val: boolean) => {
+    if (item.key === 'polkadot' || item.key === 'kusama') {
+      show('This network is active by default');
+
+      return;
+    }
+
     if (!val) {
       disableNetworkMap(item.key)
         .then(({ success }) => handleShowStateConfirm(success))
@@ -62,7 +68,7 @@ function NetworkItem ({ className, item }: Props): React.ReactElement {
         .then((resp) => handleShowStateConfirm(resp))
         .catch(console.error);
     }
-  }, [handleShowStateConfirm, item.key]);
+  }, [handleShowStateConfirm, item.key, show]);
 
   const handleNetworkEdit = useCallback(() => {
     store.dispatch({ type: 'networkConfigParams/update', payload: { data: item, mode: 'edit' } as NetworkConfigParams });

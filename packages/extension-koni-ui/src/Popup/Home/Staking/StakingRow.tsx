@@ -86,6 +86,10 @@ function StakingRow ({ activeStake, address, chainName, className, delegations, 
       return <span className={'major-balance'}>{balance}</span>;
     }
 
+    if (parseFloat(balance) <= 0.0001) { // in case the balance is too small
+      return <span className={'major-balance'}>0</span>;
+    }
+
     const balanceSplit = balance.split('.');
 
     if (balanceSplit[0] === '') {

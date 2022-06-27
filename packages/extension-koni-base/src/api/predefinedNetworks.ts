@@ -18,7 +18,7 @@ export const PREDEFINED_NETWORKS: Record<string, NetworkJson> = {
       'light client': 'light://substrate-connect/polkadot'
       // Pinknode: 'wss://rpc.pinknode.io/polkadot/explorer' // https://github.com/polkadot-js/apps/issues/5721
     },
-    active: false,
+    active: true,
     currentProvider: 'OnFinality',
     currentProviderMode: 'ws',
     groups: ['RELAY_CHAIN'],
@@ -42,7 +42,7 @@ export const PREDEFINED_NETWORKS: Record<string, NetworkJson> = {
       'light client': 'light://substrate-connect/kusama'
       // Pinknode: 'wss://rpc.pinknode.io/kusama/explorer' // https://github.com/polkadot-js/apps/issues/5721
     },
-    active: false,
+    active: true,
     currentProvider: 'OnFinality',
     currentProviderMode: 'ws',
     groups: ['RELAY_CHAIN'],
@@ -69,7 +69,9 @@ export const PREDEFINED_NETWORKS: Record<string, NetworkJson> = {
     currentProviderMode: 'ws',
     groups: ['RELAY_CHAIN', 'TEST_NET'],
     nativeToken: 'WND',
-    decimals: 12
+    decimals: 12,
+    supportBonding: true,
+    getStakingOnChain: true
   },
   rococo: {
     key: 'rococo',
@@ -515,7 +517,9 @@ export const PREDEFINED_NETWORKS: Record<string, NetworkJson> = {
     currentProvider: 'Aleph Zero Foundation',
     groups: ['TEST_NET'],
     nativeToken: 'TZERO',
-    decimals: 12
+    decimals: 12,
+    getStakingOnChain: true,
+    supportBonding: true
   },
   opal: {
     key: 'opal',
@@ -747,6 +751,39 @@ export const PREDEFINED_NETWORKS: Record<string, NetworkJson> = {
     nativeToken: 'SDN',
     evmChainId: 336,
     isEthereum: true
+  },
+  shibuya: {
+    key: 'shibuya',
+    chain: 'Shibuya Testnet',
+    genesisHash: '0xddb89973361a170839f80f152d2e9e38a376a5a7eccefcade763f46a8e567019',
+    ss58Format: 5,
+    providers: {
+      Shibuya: 'wss://rpc.shibuya.astar.network/'
+    },
+    isEthereum: false,
+    active: false,
+    currentProviderMode: 'ws',
+    currentProvider: 'Shibuya',
+    groups: ['TEST_NET'],
+    nativeToken: 'SBY',
+    decimals: 18
+  },
+  shibuyaEvm: {
+    key: 'shibuyaEvm',
+    chain: 'Shibuya Testnet - EVM',
+    genesisHash: '0xddb89973361a170839f80f152d2e9e38a376a5a7eccefcade763f46a8e567019_evm',
+    ss58Format: 5,
+    providers: {
+      Shibuya: 'wss://rpc.shibuya.astar.network/'
+    },
+    isEthereum: true,
+    active: false,
+    currentProviderMode: 'ws',
+    currentProvider: 'Shibuya',
+    groups: ['TEST_NET'],
+    evmChainId: 81,
+    nativeToken: 'SBY',
+    decimals: 18
   },
   khala: {
     key: 'khala',

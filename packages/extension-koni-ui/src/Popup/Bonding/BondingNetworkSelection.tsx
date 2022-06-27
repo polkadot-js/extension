@@ -57,7 +57,9 @@ function BondingNetworkSelection ({ className }: Props): React.ReactElement<Prop
   return (
     <div className={className}>
       <Header
+        cancelButtonText={'Close'}
         showBackArrow
+        showCancelButton={true}
         showSubHeader
         subHeaderName={t<string>('Select a network')}
         to='/'

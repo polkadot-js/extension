@@ -70,7 +70,11 @@ function UnbondingSubmitTransaction ({ className }: Props): React.ReactElement<P
           setIsReadySubmit(false);
 
           if (amount > 0) {
-            show(`You can unstake everything or a maximum of ${_nominatedAmount - _minBond} ${networkJson.nativeToken as string}`);
+            if ((_nominatedAmount - _minBond) <= 0) {
+              show('You can only unstake everything');
+            } else {
+              show(`You can unstake everything or a maximum of ${_nominatedAmount - _minBond} ${networkJson.nativeToken as string}`);
+            }
           }
         }
       } else {
@@ -80,7 +84,7 @@ function UnbondingSubmitTransaction ({ className }: Props): React.ReactElement<P
           setIsReadySubmit(false);
 
           if (amount > bondedAmount) {
-            show(`Your total stake is ${bondedAmount} ${networkJson.nativeToken as string}`);
+            show(`You can unstake a maximum of ${bondedAmount} ${networkJson.nativeToken as string}`);
           }
         }
       }

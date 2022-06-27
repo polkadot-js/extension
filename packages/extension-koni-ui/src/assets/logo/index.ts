@@ -313,7 +313,7 @@ const LogosMap: Record<string, string> = {
   // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
   xcusdt: require('./usdt.svg'),
   // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-  imbue_network: require('./imbue.svg'),
+  imbue_network: require('./imbue.png'),
   // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
   tinkernet: require('./tinker.png'),
   // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment

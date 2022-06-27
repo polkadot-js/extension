@@ -360,7 +360,9 @@ export const PREDEFINED_NETWORKS: Record<string, NetworkJson> = {
     nativeToken: 'RING',
     crowdloanUrl: 'https://darwinia.network/plo_contribute',
     decimals: 9,
-    coinGeckoKey: 'darwinia-network-native-token'
+    coinGeckoKey: 'darwinia-network-native-token',
+    getStakingOnChain: true,
+    supportBonding: true
   },
   manta: {
     key: 'manta',
@@ -1249,7 +1251,9 @@ export const PREDEFINED_NETWORKS: Record<string, NetworkJson> = {
     nativeToken: 'CRAB',
     crowdloanUrl: 'https://crab.network/plo',
     decimals: 18,
-    coinGeckoKey: 'darwinia-crab-network'
+    coinGeckoKey: 'darwinia-crab-network',
+    getStakingOnChain: true,
+    supportBonding: true
   },
   bitcountry: {
     key: 'bitcountry',

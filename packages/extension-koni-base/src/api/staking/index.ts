@@ -53,7 +53,9 @@ export async function stakingOnChainApi (addresses: string[], dotSamaAPIMap: Rec
     const parentApi = await apiPromise.isReady;
     const useAddresses = apiPromise.isEthereum ? evmAddresses : substrateAddresses;
 
-    if (['moonbeam', 'moonriver', 'moonbase', 'turing'].includes(chain)) {
+    if (['darwinia', 'crab'].includes(chain)) {
+      return getDarwiniaStakingOnChain(parentApi, useAddresses, networks, chain, callback);
+    } else if (['moonbeam', 'moonriver', 'moonbase', 'turing'].includes(chain)) {
       return getParaStakingOnChain(parentApi, useAddresses, networks, chain, callback);
     }
 
@@ -210,6 +212,76 @@ function getRelayStakingOnChain (parentApi: ApiProps, useAddresses: string[], ne
           amount = amount.replaceAll(',', '');
           unit = _activeBalance ? _activeBalance.split(' ')[1] : '';
           activeBalance += parseFloat(amount);
+        }
+      }
+
+      const parsedActiveBalance = parseStakingBalance(activeBalance, chain, networks);
+      const parsedUnlockingBalance = parseStakingBalance(unlockingBalance, chain, networks);
+      const parsedTotal = parseStakingBalance(totalBalance, chain, networks);
+
+      if (totalBalance > 0) {
+        stakingItem = {
+          name: networks[chain].chain,
+          chainId: chain,
+          balance: parsedTotal.toString(),
+          activeBalance: parsedActiveBalance.toString(),
+          unlockingBalance: parsedUnlockingBalance.toString(),
+          nativeToken: networks[chain].nativeToken,
+          unit: unit || networks[chain].nativeToken,
+          state: APIItemState.READY
+        } as StakingItem;
+      } else {
+        stakingItem = {
+          name: networks[chain].chain,
+          chainId: chain,
+          balance: parsedTotal.toString(),
+          activeBalance: parsedActiveBalance.toString(),
+          unlockingBalance: parsedUnlockingBalance.toString(),
+          nativeToken: networks[chain].nativeToken,
+          unit: unit || networks[chain].nativeToken,
+          state: APIItemState.READY
+        } as StakingItem;
+      }
+
+      // eslint-disable-next-line node/no-callback-literal
+      callback(chain, stakingItem);
+    }
+  });
+}
+
+function getDarwiniaStakingOnChain (parentApi: ApiProps, useAddresses: string[], networks: Record<string, NetworkJson>, chain: string, callback: (networkKey: string, rs: StakingItem) => void) {
+  return parentApi.api.query.staking?.ledger.multi(useAddresses, (ledgers: any[]) => {
+    let totalBalance = 0;
+    let activeBalance = 0;
+    let unlockingBalance = 0;
+    let unit = '';
+    let stakingItem: StakingItem;
+
+    if (ledgers) {
+      for (const ledger of ledgers) {
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-member-access
+        const data = ledger.toHuman() as unknown as Record<string, any>;
+
+        if (data && data.ringStakingLock) {
+          const _ringStaking = data.ringStakingLock as Record<string, any>;
+          const _activeBalance = _ringStaking.stakingAmount as string;
+          const unlocking = _ringStaking.unbondings as Record<string, string>[];
+
+          unlocking.forEach((item) => {
+            const _unlockingBalance = item.amount.replaceAll(',', '');
+
+            unlockingBalance += parseFloat(_unlockingBalance);
+          });
+
+          let amount = _activeBalance ? _activeBalance.split(' ')[0] : '';
+
+          amount = amount.replaceAll(',', '');
+          unit = _activeBalance ? _activeBalance.split(' ')[1] : '';
+          activeBalance += parseFloat(amount);
+
+          const _totalBalance = activeBalance + unlockingBalance;
+
+          totalBalance += _totalBalance;
         }
       }
 

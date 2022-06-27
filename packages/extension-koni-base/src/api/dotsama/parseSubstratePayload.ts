@@ -1,9 +1,7 @@
 // Copyright 2019-2022 @subwallet/extension-koni authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import type { Call } from '@polkadot/types/interfaces';
-
-import { ArgInfo, EraInfo, ResponseParseTransactionSubstrate } from '@subwallet/extension-base/background/types';
+import { EraInfo, ResponseParseTransactionSubstrate } from '@subwallet/extension-base/background/types';
 import KoniState from '@subwallet/extension-koni-base/background/handlers/State';
 
 import { TypeRegistry } from '@polkadot/types';

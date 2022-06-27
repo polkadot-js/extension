@@ -127,7 +127,7 @@ function StakingContainer ({ className, data, loading, priceMap }: Props): React
                 totalStake={item.balance}
                 unbondingStake={item.unlockingBalance}
                 unit={item.unit}
-                     />;
+              />;
             })
           }
         </div>

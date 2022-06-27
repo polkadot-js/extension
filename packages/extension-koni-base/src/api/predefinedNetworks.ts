@@ -1315,7 +1315,9 @@ export const PREDEFINED_NETWORKS: Record<string, NetworkJson> = {
     genesisHash: '0x0f62b701fb12d02237a33b84818c11f621653d2b1614c777973babf4652b535d',
     ss58Format: 51,
     providers: {
-      turing: 'wss://rpc.turing.oak.tech'
+      turing: 'wss://rpc.turing.oak.tech',
+      OnFinality: 'wss://turing.api.onfinality.io/public-ws',
+      Dwellir: 'wss://turing-rpc.dwellir.com'
     },
     currentProviderMode: 'ws',
     currentProvider: 'turing',
@@ -1324,7 +1326,10 @@ export const PREDEFINED_NETWORKS: Record<string, NetworkJson> = {
     groups: ['KUSAMA_PARACHAIN'],
     paraId: 2114,
     nativeToken: 'TUR',
-    crowdloanUrl: 'https://crowdloan.zeitgeist.pm/'
+    decimals: 10,
+    crowdloanUrl: 'https://crowdloan.zeitgeist.pm/',
+    getStakingOnChain: true,
+    supportBonding: true
   },
   mangatax: {
     chain: 'MangataX Public Testnet',

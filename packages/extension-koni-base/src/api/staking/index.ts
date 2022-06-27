@@ -24,7 +24,8 @@ export const DEFAULT_STAKING_NETWORKS = {
   moonbase: PREDEFINED_NETWORKS.moonbase,
   darwinia: PREDEFINED_NETWORKS.darwinia,
   crab: PREDEFINED_NETWORKS.crab,
-  polkadex: PREDEFINED_NETWORKS.polkadex
+  polkadex: PREDEFINED_NETWORKS.polkadex,
+  turing: PREDEFINED_NETWORKS.turing
   // astar: NETWORKS.astar,
   // acala: PREDEFINED_NETWORKS.acala,
 };
@@ -52,7 +53,7 @@ export async function stakingOnChainApi (addresses: string[], dotSamaAPIMap: Rec
     const parentApi = await apiPromise.isReady;
     const useAddresses = apiPromise.isEthereum ? evmAddresses : substrateAddresses;
 
-    if (['moonbeam', 'moonriver', 'moonbase'].includes(chain)) {
+    if (['moonbeam', 'moonriver', 'moonbase', 'turing'].includes(chain)) {
       return getMoonBeamStakingOnChain(parentApi, useAddresses, networks, chain, callback);
     }
 

@@ -2,12 +2,15 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { EraInfo, ResponseParseTransactionSubstrate } from '@subwallet/extension-base/background/types';
-import { Spinner } from '@subwallet/extension-koni-ui/components';
+import { Spinner, Warning } from '@subwallet/extension-koni-ui/components';
 import { ScannerContext, ScannerContextType } from '@subwallet/extension-koni-ui/contexts/ScannerContext';
+import useMetadata from '@subwallet/extension-koni-ui/hooks/useMetadata';
 import { parseSubstrateTransaction } from '@subwallet/extension-koni-ui/messaging';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
+import { DecodedMethod, decodeMethod } from '@subwallet/extension-koni-ui/util/decoders';
+import BigN from 'bignumber.js';
 import CN from 'classnames';
-import React, { useCallback, useContext, useEffect, useState } from 'react';
+import React, { useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import styled from 'styled-components';
 
 import { isArray, isString, u8aToHex } from '@polkadot/util';
@@ -27,17 +30,24 @@ const PayloadDetail = (props: Props) => {
   const { genesisHash, rawPayload, specVersion } = state;
 
   const [payloadDetail, setPayloadDetail] = useState<TxDetail | null>(null);
-  const [loading, setLoading] = useState<boolean>(true);
+
+  const chain = useMetadata(genesisHash, false);
+
+  const decoded = useMemo((): DecodedMethod | null => {
+    if (!chain || !chain.hasMetadata || !payloadDetail) {
+      return null;
+    } else {
+      return decodeMethod(payloadDetail.method as string, chain, new BigN(payloadDetail.specVersion));
+    }
+  }, [chain, payloadDetail]);
 
   const handlerParseTransaction = useCallback(async (genesisHash: string, rawPayload: string, specVersion: number, mount: boolean) => {
     const data = await parseSubstrateTransaction(genesisHash, rawPayload, specVersion);
 
     if (mount) {
       setPayloadDetail(data);
-      setLoading(!data);
-      setButtonLoading(!data);
     }
-  }, [setButtonLoading]);
+  }, []);
 
   const handlerRenderEraDetail = useCallback(() => {
     if (!payloadDetail?.era) {
@@ -67,7 +77,7 @@ const PayloadDetail = (props: Props) => {
   }, [payloadDetail?.era]);
 
   const handlerRenderMethod = useCallback(() => {
-    const method = payloadDetail?.method;
+    const method = decoded?.result;
 
     if (!method) {
       return <></>;
@@ -124,7 +134,7 @@ const PayloadDetail = (props: Props) => {
         </div>
       );
     });
-  }, [payloadDetail?.method]);
+  }, [decoded]);
 
   useEffect(() => {
     let mount = true;
@@ -141,12 +151,23 @@ const PayloadDetail = (props: Props) => {
     };
   }, [genesisHash, handlerParseTransaction, rawPayload, specVersion]);
 
+  useEffect(() => {
+    setButtonLoading(!decoded);
+  }, [setButtonLoading, decoded]);
+
   return (
     <div className={CN(className)}>
-      { loading && <Spinner />}
+      { !decoded && <Spinner />}
       {
-        !loading && payloadDetail && (
+        decoded && payloadDetail && (
           <>
+            {decoded.message && decoded.warning &&
+              (
+                <Warning>
+                  {decoded.message}
+                </Warning>
+              )
+            }
             <div className={CN('info-container')}>
               <div className={CN('info-title')}>
                 Method
@@ -187,8 +208,9 @@ const PayloadDetail = (props: Props) => {
 };
 
 export default React.memo(styled(PayloadDetail)(({ theme }: Props) => `
-  max-height: 240px;
+  height: 240px;
   overflow-y: auto;
+  position: relative;
 
   &::-webkit-scrollbar{
     display: none;

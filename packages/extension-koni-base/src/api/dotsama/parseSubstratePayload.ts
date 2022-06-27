@@ -3,7 +3,7 @@
 
 import type { Call } from '@polkadot/types/interfaces';
 
-import { ArgInfo, EraInfo, FormattedMethod, ResponseParseTransactionSubstrate } from '@subwallet/extension-base/background/types';
+import { ArgInfo, EraInfo, ResponseParseTransactionSubstrate } from '@subwallet/extension-base/background/types';
 import KoniState from '@subwallet/extension-koni-base/background/handlers/State';
 
 import { TypeRegistry } from '@polkadot/types';
@@ -33,76 +33,21 @@ export const parseSubstratePayload = (state: KoniState, genesisHash: string, raw
   }
 
   const payload = registry.createType('ExtrinsicPayload', hexToU8a(rawPayload), { specVersion: specVersion });
-  const nonce = payload.nonce.toString();
-  const tip = payload.tip.toString();
+  const nonce = payload.nonce.toNumber();
+  const tip = payload.tip.toNumber();
+  const specVer = payload.specVersion.toNumber();
+
   const _era = payload.era;
   let era: string | EraInfo = _era.toString();
 
   if (_era.isMortalEra) {
     era = {
-      period: _era.asMortalEra.period.toString(),
-      phase: _era.asMortalEra.phase.toString()
+      period: _era.asMortalEra.period.toNumber(),
+      phase: _era.asMortalEra.phase.toNumber()
     };
   }
 
-  const method = payload.method;
+  const _method = payload.method.toString();
 
-  let _method: string | FormattedMethod[];
-
-  try {
-    const call = registry.createType('Call', method);
-    const sectionMethod = `${call.section}.${call.method}`;
-
-    const formatted: FormattedMethod[] = [];
-    const firstArg = call.args[0];
-
-    // that's a batch
-    if (firstArg?.toRawType().startsWith('Vec<Call>')) {
-      formatted.push({ args: undefined, method: sectionMethod });
-
-      (firstArg as unknown as Call[]).forEach((c: Call) => {
-        registry.createType('Call', c);
-        formatted.push({ args: formatArgs(c), method: `${c.section}.${c.method}` });
-      });
-    } else {
-      formatted.push({ args: formatArgs(call as unknown as Call), method: sectionMethod });
-    }
-
-    _method = formatted;
-  } catch (e) {
-    console.log((e as Error).message);
-    _method = method.toString();
-  }
-
-  return { era: era, tip: tip, method: _method, nonce: nonce };
-};
-
-const formatArgs = (callInstance: Call): ArgInfo[] => {
-  const paramArgKvArray: ArgInfo[] = [];
-  const { args, meta } = callInstance;
-
-  for (let i = 0; i < meta.args.length; i++) {
-    let argument: string;
-
-    if (args[i].toRawType().startsWith('AccountId')) {
-      argument = args[i].toString();
-    } else if (args[i].toRawType().startsWith('Vec<Call>')) {
-      argument = JSON.stringify(args[i].toHuman(false));
-    } else if (args[i].toRawType().startsWith('Vec')) {
-      // toString is nicer than toHuman here because
-      // toHuman tends to concatenate long strings and would hide data
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-assignment,@typescript-eslint/no-unsafe-member-access,@typescript-eslint/no-unsafe-return
-      argument = (args[i] as any).map((v: any) => v.toString());
-    } else {
-      // toHuman takes care of the balance formating
-      // with the right chain unit
-      argument = JSON.stringify(args[i].toHuman());
-    }
-
-    const argName = meta.args[i].name.toHuman();
-
-    paramArgKvArray.push({ argName, argValue: argument } as ArgInfo);
-  }
-
-  return paramArgKvArray;
+  return { era: era, tip: tip, method: _method, nonce: nonce, specVersion: specVer };
 };

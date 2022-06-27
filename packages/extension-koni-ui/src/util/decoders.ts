@@ -2,10 +2,14 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { NetworkJson } from '@subwallet/extension-base/background/KoniTypes';
+import { ArgInfo, FormattedMethod } from '@subwallet/extension-base/background/types';
+import { Chain } from '@subwallet/extension-chains/types';
 import { EthereumParsedData, ParsedData, SubstrateCompletedParsedData, SubstrateMultiParsedData } from '@subwallet/extension-koni-ui/types/scanner';
 import { getNetworkJsonByGenesisHash } from '@subwallet/extension-koni-ui/util/getNetworkJsonByGenesisHash';
+import BigN from 'bignumber.js';
 
 import { TypeRegistry } from '@polkadot/types';
+import { Call } from '@polkadot/types/interfaces';
 import { compactFromU8a, hexStripPrefix, hexToU8a, u8aToHex } from '@polkadot/util';
 import { blake2AsHex, encodeAddress } from '@polkadot/util-crypto';
 
@@ -183,10 +187,10 @@ export const constructDataFromBytes = (bytes: Uint8Array, multipartComplete = fa
 
           try {
             const registry = new TypeRegistry();
-            const raw = registry.createType('ExtrinsicPayload', rawPayload).toHuman();
+            const raw = registry.createType('ExtrinsicPayload', rawPayload);
 
             // @ts-ignore
-            data.data.specVersion = raw?.specVersion ? intFromStringWithCommas(raw.specVersion as string) : Number.MAX_SAFE_INTEGER;
+            data.data.specVersion = raw?.specVersion ? raw.specVersion.toNumber() : Number.MAX_SAFE_INTEGER;
           } catch (e) {
             data.data.specVersion = Number.MAX_SAFE_INTEGER;
           }
@@ -290,4 +294,87 @@ export const isAddressString = (str: string): boolean => {
     str.substr(0, 9) === 'ethereum:' ||
     str.substr(0, 10) === 'substrate:'
   );
+};
+
+export const formatArgs = (callInstance: Call): ArgInfo[] => {
+  const paramArgKvArray: ArgInfo[] = [];
+  const { args, meta } = callInstance;
+
+  for (let i = 0; i < meta.args.length; i++) {
+    let argument: string;
+
+    if (args[i].toRawType().startsWith('AccountId')) {
+      argument = args[i].toString();
+    } else if (args[i].toRawType().startsWith('Vec<Call>')) {
+      argument = JSON.stringify(args[i].toHuman(false));
+    } else if (args[i].toRawType().startsWith('Vec')) {
+      // toString is nicer than toHuman here because
+      // toHuman tends to concatenate long strings and would hide data
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-assignment,@typescript-eslint/no-unsafe-member-access,@typescript-eslint/no-unsafe-return
+      argument = (args[i] as any).map((v: any) => v.toString());
+    } else {
+      // toHuman takes care of the balance formating
+      // with the right chain unit
+      argument = JSON.stringify(args[i].toHuman());
+    }
+
+    const argName = meta.args[i].name.toHuman();
+
+    paramArgKvArray.push({ argName, argValue: argument } as ArgInfo);
+  }
+
+  return paramArgKvArray;
+};
+
+export interface DecodedMethod {
+  result: FormattedMethod[] | string,
+  message: string;
+  warning: boolean;
+}
+
+const displayDecodeVersion = (message: string, chain: Chain, specVersion: BigN): string => {
+  return `${message}: chain=${chain.name}, specVersion=${chain.specVersion.toString()} (request specVersion=${specVersion.toString()})`;
+};
+
+export const decodeMethod = (data: string, chain: Chain, specVersion: BigN): DecodedMethod => {
+  let message = '';
+
+  try {
+    if (specVersion.eq(chain.specVersion)) {
+      const registry = chain.registry;
+      const call = registry.createType('Call', data);
+      const sectionMethod = `${call.section}.${call.method}`;
+
+      const result: FormattedMethod[] = [];
+      const firstArg = call.args[0];
+
+      // that's a batch
+      if (firstArg?.toRawType().startsWith('Vec<Call>')) {
+        result.push({ args: undefined, method: sectionMethod });
+
+        (firstArg as unknown as Call[]).forEach((c: Call) => {
+          registry.createType('Call', c);
+          result.push({ args: formatArgs(c), method: `${c.section}.${c.method}` });
+        });
+      } else {
+        result.push({ args: formatArgs(call as unknown as Call), method: sectionMethod });
+      }
+
+      return {
+        warning: false,
+        message: '',
+        result: result
+      };
+    } else {
+      message = displayDecodeVersion('Outdated metadata to decode', chain, specVersion);
+    }
+  } catch (error) {
+    message = `${displayDecodeVersion('Error decoding method', chain, specVersion)}:: ${(error as Error).message}`;
+  }
+
+  return {
+    result: data,
+    message: message,
+    warning: true
+  };
 };

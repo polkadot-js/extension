@@ -161,9 +161,7 @@ const _updateResponseByEvents = (api: ApiPromise, networkKey: string, tokenInfo:
   records.forEach((record) => {
     const { event: { method, section, data: [error] } } = record;
 
-    // @ts-ignore
     const isFailed = section === 'system' && method === 'ExtrinsicFailed';
-    // @ts-ignore
     const isSuccess = section === 'system' && method === 'ExtrinsicSuccess';
 
     console.log('Transaction final: ', isFailed, isSuccess);
@@ -552,7 +550,7 @@ export async function makeNftTransferQr ({ apiProp,
   } else {
     // @ts-ignore
     // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-    nonce = await apiProp.api.query.system.account(fromAddress).nonce;
+    nonce = await apiProp.api.query.system.account(senderAddress).nonce;
   }
 
   const qrCallback = ({ qrState }: {qrState: QrState}) => {
@@ -669,7 +667,6 @@ export async function makeTransferLedger ({ apiProps,
   value }: MakeTransferLedgerProps): Promise<void> {
   const api = apiProps.api;
 
-  // @ts-ignore
   const transfer = handlerCreateTransferExtrinsic({ transferAll, api, value, tokenInfo, networkKey, recipientAddress });
 
   if (!transfer) {
@@ -769,7 +766,7 @@ export async function makeNftTransferLedger ({ apiProp,
   } else {
     // @ts-ignore
     // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-    nonce = await apiProp.api.query.system.account(fromAddress).nonce;
+    nonce = await apiProp.api.query.system.account(senderAddress).nonce;
   }
 
   const ledgerCallback = ({ ledgerState }: {ledgerState: LedgerState}) => {

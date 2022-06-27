@@ -481,15 +481,16 @@ export interface ArgInfo {
 }
 
 export interface EraInfo{
-  period: string;
-  phase: string;
+  period: number;
+  phase: number;
 }
 
 export interface ResponseParseTransactionSubstrate {
-  era: EraInfo | string,
-  nonce: string,
-  method: FormattedMethod[] | string
-  tip: string
+  era: EraInfo | string;
+  nonce: number;
+  method: FormattedMethod[] | string;
+  tip: number;
+  specVersion: number;
 }
 
 export interface ResponseQRIsLocked{

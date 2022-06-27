@@ -31,8 +31,8 @@ export interface UniformEraPayoutInflationParams extends InflationParams {
   yearlyInflationInTokens: number;
 }
 
-export const MOONBEAM_INFLATION_DISTRIBUTION: Record<string, Record<string, number>> = { // https://docs.moonbeam.network/learn/features/staking/#annual-inflation
-  moonbeam: {
+export const PARACHAIN_INFLATION_DISTRIBUTION: Record<string, Record<string, number>> = {
+  moonbeam: { // https://docs.moonbeam.network/learn/features/staking/#annual-inflation
     reward: 0.5,
     collatorCommission: 0.2,
     bondReserve: 0.3
@@ -46,6 +46,9 @@ export const MOONBEAM_INFLATION_DISTRIBUTION: Record<string, Record<string, numb
     reward: 0.5,
     collatorCommission: 0.2,
     bondReserve: 0.3
+  },
+  turing: { // https://docs.oak.tech/docs/delegators/
+    reward: 0.025
   }
 };
 

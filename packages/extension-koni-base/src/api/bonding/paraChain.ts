@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { ApiProps, BasicTxInfo, ChainBondingBasics, NetworkJson, UnlockingStakeInfo, ValidatorInfo } from '@subwallet/extension-base/background/KoniTypes';
-import { BOND_LESS_ACTION, calculateChainStakedReturn, ERA_LENGTH_MAP, MOONBEAM_INFLATION_DISTRIBUTION, parseRawNumber, REVOKE_ACTION } from '@subwallet/extension-koni-base/api/bonding/utils';
+import { BOND_LESS_ACTION, calculateChainStakedReturn, ERA_LENGTH_MAP, PARACHAIN_INFLATION_DISTRIBUTION, parseRawNumber, REVOKE_ACTION } from '@subwallet/extension-koni-base/api/bonding/utils';
 import { getFreeBalance } from '@subwallet/extension-koni-base/api/dotsama/balance';
 import Web3 from 'web3';
 
@@ -22,7 +22,7 @@ interface CollatorInfo {
   amount: string;
 }
 
-export async function getMoonbeamBondingBasics (networkKey: string, dotSamaApi: ApiProps) {
+export async function getParaBondingBasics (networkKey: string, dotSamaApi: ApiProps) {
   const apiProps = await dotSamaApi.isReady;
 
   const [_totalStake, _totalIssuance, _inflation] = await Promise.all([
@@ -40,7 +40,7 @@ export async function getMoonbeamBondingBasics (networkKey: string, dotSamaApi: 
   const inflation = _inflation.toHuman() as Record<string, Record<string, any>>;
   const inflationString = inflation.annual.ideal as string;
   const parsedInflation = parseFloat(inflationString.split('%')[0]);
-  const rewardPool = parsedInflation * MOONBEAM_INFLATION_DISTRIBUTION[networkKey].reward;
+  const rewardPool = parsedInflation * PARACHAIN_INFLATION_DISTRIBUTION[networkKey].reward;
 
   const stakedReturn = calculateChainStakedReturn(rewardPool, parsedTotalStake, parsedTotalIssuance, networkKey);
 
@@ -50,7 +50,7 @@ export async function getMoonbeamBondingBasics (networkKey: string, dotSamaApi: 
   } as ChainBondingBasics;
 }
 
-export async function getMoonbeamCollatorsInfo (networkKey: string, dotSamaApi: ApiProps, decimals: number, address: string) {
+export async function getParaCollatorsInfo (networkKey: string, dotSamaApi: ApiProps, decimals: number, address: string) {
   const apiProps = await dotSamaApi.isReady;
 
   const allValidators: ValidatorInfo[] = [];
@@ -177,7 +177,7 @@ export async function getMoonbeamCollatorsInfo (networkKey: string, dotSamaApi: 
   };
 }
 
-export async function getMoonbeamBondingTxInfo (networkJson: NetworkJson, dotSamaApi: ApiProps, delegatorAddress: string, amount: number, collatorInfo: ValidatorInfo, currentNominationCount: number) {
+export async function getParaBondingTxInfo (networkJson: NetworkJson, dotSamaApi: ApiProps, delegatorAddress: string, amount: number, collatorInfo: ValidatorInfo, currentNominationCount: number) {
   const apiPromise = await dotSamaApi.isReady;
   const parsedAmount = amount * (10 ** (networkJson.decimals as number));
   const binaryAmount = new BN(parsedAmount.toString());
@@ -204,9 +204,9 @@ export async function getMoonbeamBondingTxInfo (networkJson: NetworkJson, dotSam
   return extrinsic.paymentInfo(delegatorAddress);
 }
 
-export async function handleMoonbeamBondingTxInfo (networkJson: NetworkJson, amount: number, networkKey: string, nominatorAddress: string, validatorInfo: ValidatorInfo, dotSamaApiMap: Record<string, ApiProps>, web3ApiMap: Record<string, Web3>, currentNominationCount: number) {
+export async function handleParaBondingTxInfo (networkJson: NetworkJson, amount: number, networkKey: string, nominatorAddress: string, validatorInfo: ValidatorInfo, dotSamaApiMap: Record<string, ApiProps>, web3ApiMap: Record<string, Web3>, currentNominationCount: number) {
   const [txInfo, balance] = await Promise.all([
-    getMoonbeamBondingTxInfo(networkJson, dotSamaApiMap[networkKey], nominatorAddress, amount, validatorInfo, currentNominationCount),
+    getParaBondingTxInfo(networkJson, dotSamaApiMap[networkKey], nominatorAddress, amount, validatorInfo, currentNominationCount),
     getFreeBalance(networkKey, nominatorAddress, dotSamaApiMap, web3ApiMap)
   ]);
 
@@ -222,7 +222,7 @@ export async function handleMoonbeamBondingTxInfo (networkJson: NetworkJson, amo
   } as BasicTxInfo;
 }
 
-export async function getMoonbeamUnbondingTxInfo (networkJson: NetworkJson, dotSamaApi: ApiProps, address: string, amount: number, collatorAddress: string, unstakeAll: boolean) {
+export async function getParaUnbondingTxInfo (networkJson: NetworkJson, dotSamaApi: ApiProps, address: string, amount: number, collatorAddress: string, unstakeAll: boolean) {
   const apiPromise = await dotSamaApi.isReady;
   const parsedAmount = amount * (10 ** (networkJson.decimals as number));
   const binaryAmount = new BN(parsedAmount.toString());
@@ -238,9 +238,9 @@ export async function getMoonbeamUnbondingTxInfo (networkJson: NetworkJson, dotS
   return extrinsic.paymentInfo(address);
 }
 
-export async function handleMoonbeamUnbondingTxInfo (address: string, amount: number, networkKey: string, dotSamaApiMap: Record<string, ApiProps>, web3ApiMap: Record<string, Web3>, networkJson: NetworkJson, collatorAddress: string, unstakeAll: boolean) {
+export async function handleParaUnbondingTxInfo (address: string, amount: number, networkKey: string, dotSamaApiMap: Record<string, ApiProps>, web3ApiMap: Record<string, Web3>, networkJson: NetworkJson, collatorAddress: string, unstakeAll: boolean) {
   const [txInfo, balance] = await Promise.all([
-    getMoonbeamUnbondingTxInfo(networkJson, dotSamaApiMap[networkKey], address, amount, collatorAddress, unstakeAll),
+    getParaUnbondingTxInfo(networkJson, dotSamaApiMap[networkKey], address, amount, collatorAddress, unstakeAll),
     getFreeBalance(networkKey, address, dotSamaApiMap, web3ApiMap)
   ]);
 
@@ -256,7 +256,7 @@ export async function handleMoonbeamUnbondingTxInfo (address: string, amount: nu
   } as BasicTxInfo;
 }
 
-export async function getMoonbeamBondingExtrinsic (delegatorAddress: string, networkJson: NetworkJson, dotSamaApi: ApiProps, amount: number, collatorInfo: ValidatorInfo, currentNominationCount: number) {
+export async function getParaBondingExtrinsic (delegatorAddress: string, networkJson: NetworkJson, dotSamaApi: ApiProps, amount: number, collatorInfo: ValidatorInfo, currentNominationCount: number) {
   const apiPromise = await dotSamaApi.isReady;
   const parsedAmount = amount * (10 ** (networkJson.decimals as number));
   const binaryAmount = new BN(parsedAmount.toString());
@@ -279,7 +279,7 @@ export async function getMoonbeamBondingExtrinsic (delegatorAddress: string, net
   }
 }
 
-export async function getMoonbeamUnbondingExtrinsic (dotSamaApi: ApiProps, amount: number, networkJson: NetworkJson, collatorAddress: string, unstakeAll: boolean) {
+export async function getParaUnbondingExtrinsic (dotSamaApi: ApiProps, amount: number, networkJson: NetworkJson, collatorAddress: string, unstakeAll: boolean) {
   const apiPromise = await dotSamaApi.isReady;
   const parsedAmount = amount * (10 ** (networkJson.decimals as number));
   const binaryAmount = new BN(parsedAmount.toString());
@@ -291,7 +291,7 @@ export async function getMoonbeamUnbondingExtrinsic (dotSamaApi: ApiProps, amoun
   }
 }
 
-export async function getMoonbeamUnlockingInfo (dotSamaApi: ApiProps, address: string, networkKey: string, collatorList: string[]) {
+export async function getParaUnlockingInfo (dotSamaApi: ApiProps, address: string, networkKey: string, collatorList: string[]) {
   const apiPromise = await dotSamaApi.isReady;
   const allRequests: Record<string, Record<string, any>> = {};
 
@@ -356,8 +356,8 @@ export async function getMoonbeamUnlockingInfo (dotSamaApi: ApiProps, address: s
   };
 }
 
-export async function handleMoonbeamUnlockingInfo (dotSamaApi: ApiProps, networkJson: NetworkJson, networkKey: string, address: string, collatorList: string[]) {
-  const { nextWithdrawal, nextWithdrawalAction, nextWithdrawalAmount, redeemable, validatorAddress } = await getMoonbeamUnlockingInfo(dotSamaApi, address, networkKey, collatorList);
+export async function handleParaUnlockingInfo (dotSamaApi: ApiProps, networkJson: NetworkJson, networkKey: string, address: string, collatorList: string[]) {
+  const { nextWithdrawal, nextWithdrawalAction, nextWithdrawalAmount, redeemable, validatorAddress } = await getParaUnlockingInfo(dotSamaApi, address, networkKey, collatorList);
 
   const parsedRedeemable = redeemable / (10 ** (networkJson.decimals as number));
   const parsedNextWithdrawalAmount = nextWithdrawalAmount / (10 ** (networkJson.decimals as number));
@@ -371,7 +371,7 @@ export async function handleMoonbeamUnlockingInfo (dotSamaApi: ApiProps, network
   } as UnlockingStakeInfo;
 }
 
-export async function getMoonbeamWithdrawalTxInfo (dotSamaApi: ApiProps, address: string, collatorAddress: string, action: string) {
+export async function getParaWithdrawalTxInfo (dotSamaApi: ApiProps, address: string, collatorAddress: string, action: string) {
   const apiPromise = await dotSamaApi.isReady;
 
   console.log(`executing ${action}`);
@@ -380,9 +380,9 @@ export async function getMoonbeamWithdrawalTxInfo (dotSamaApi: ApiProps, address
   return extrinsic.paymentInfo(address);
 }
 
-export async function handleMoonbeamWithdrawalTxInfo (networkKey: string, dotSamaApiMap: Record<string, ApiProps>, web3ApiMap: Record<string, Web3>, address: string, collatorAddress: string, action: string) {
+export async function handleParaWithdrawalTxInfo (networkKey: string, dotSamaApiMap: Record<string, ApiProps>, web3ApiMap: Record<string, Web3>, address: string, collatorAddress: string, action: string) {
   const [txInfo, balance] = await Promise.all([
-    getMoonbeamWithdrawalTxInfo(dotSamaApiMap[networkKey], address, collatorAddress, action),
+    getParaWithdrawalTxInfo(dotSamaApiMap[networkKey], address, collatorAddress, action),
     getFreeBalance(networkKey, address, dotSamaApiMap, web3ApiMap)
   ]);
 
@@ -396,7 +396,7 @@ export async function handleMoonbeamWithdrawalTxInfo (networkKey: string, dotSam
   } as BasicTxInfo;
 }
 
-export async function getMoonbeamWithdrawalExtrinsic (dotSamaApi: ApiProps, address: string, collatorAddress: string, action: string) {
+export async function getParaWithdrawalExtrinsic (dotSamaApi: ApiProps, address: string, collatorAddress: string, action: string) {
   const apiPromise = await dotSamaApi.isReady;
 
   console.log(`executing ${action}`);

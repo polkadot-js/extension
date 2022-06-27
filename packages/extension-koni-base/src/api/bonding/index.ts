@@ -39,7 +39,7 @@ export async function getBondingTxInfo (networkJson: NetworkJson, amount: number
 
 export async function getBondingExtrinsic (networkJson: NetworkJson, networkKey: string, amount: number, bondedValidators: string[], validatorInfo: ValidatorInfo, isBondedBefore: boolean, nominatorAddress: string, dotSamaApi: ApiProps) {
   if (CHAIN_TYPES.moonbeam.includes(networkKey)) {
-    return getMoonbeamBondingExtrinsic(networkJson, dotSamaApi, amount, validatorInfo, bondedValidators.length);
+    return getMoonbeamBondingExtrinsic(nominatorAddress, networkJson, dotSamaApi, amount, validatorInfo, bondedValidators.length);
   }
 
   const targetValidators: string[] = getTargetValidators(bondedValidators, validatorInfo.address);

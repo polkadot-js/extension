@@ -181,15 +181,32 @@ export async function getMoonbeamBondingTxInfo (networkJson: NetworkJson, dotSam
   const apiPromise = await dotSamaApi.isReady;
   const parsedAmount = amount * (10 ** (networkJson.decimals as number));
   const binaryAmount = new BN(parsedAmount.toString());
+  const rawDelegatorState = (await apiPromise.api.query.parachainStaking.delegatorState(delegatorAddress)).toHuman() as Record<string, any> | null;
 
-  const extrinsic = apiPromise.api.tx.parachainStaking.delegate(collatorInfo.address, binaryAmount, new BN(collatorInfo.nominatorCount), new BN(currentNominationCount));
+  const bondedValidators: string[] = [];
+
+  if (rawDelegatorState !== null) {
+    const validatorList = rawDelegatorState.delegations as Record<string, any>[];
+
+    for (const _validator of validatorList) {
+      bondedValidators.push(_validator.owner as string);
+    }
+  }
+
+  let extrinsic;
+
+  if (!bondedValidators.includes(collatorInfo.address)) {
+    extrinsic = apiPromise.api.tx.parachainStaking.delegate(collatorInfo.address, binaryAmount, new BN(collatorInfo.nominatorCount), new BN(currentNominationCount));
+  } else {
+    extrinsic = apiPromise.api.tx.parachainStaking.delegatorBondMore(collatorInfo.address, binaryAmount);
+  }
 
   return extrinsic.paymentInfo(delegatorAddress);
 }
 
 export async function handleMoonbeamBondingTxInfo (networkJson: NetworkJson, amount: number, networkKey: string, nominatorAddress: string, validatorInfo: ValidatorInfo, dotSamaApiMap: Record<string, ApiProps>, web3ApiMap: Record<string, Web3>, currentNominationCount: number) {
   const [txInfo, balance] = await Promise.all([
-    getMoonbeamBondingTxInfo(networkJson, dotSamaApiMap[networkKey], nominatorAddress, amount, validatorInfo, currentNominationCount), // TODO: add bond more tx
+    getMoonbeamBondingTxInfo(networkJson, dotSamaApiMap[networkKey], nominatorAddress, amount, validatorInfo, currentNominationCount),
     getFreeBalance(networkKey, nominatorAddress, dotSamaApiMap, web3ApiMap)
   ]);
 
@@ -239,12 +256,27 @@ export async function handleMoonbeamUnbondingTxInfo (address: string, amount: nu
   } as BasicTxInfo;
 }
 
-export async function getMoonbeamBondingExtrinsic (networkJson: NetworkJson, dotSamaApi: ApiProps, amount: number, collatorInfo: ValidatorInfo, currentNominationCount: number) {
+export async function getMoonbeamBondingExtrinsic (delegatorAddress: string, networkJson: NetworkJson, dotSamaApi: ApiProps, amount: number, collatorInfo: ValidatorInfo, currentNominationCount: number) {
   const apiPromise = await dotSamaApi.isReady;
   const parsedAmount = amount * (10 ** (networkJson.decimals as number));
   const binaryAmount = new BN(parsedAmount.toString());
+  const rawDelegatorState = (await apiPromise.api.query.parachainStaking.delegatorState(delegatorAddress)).toHuman() as Record<string, any> | null;
 
-  return apiPromise.api.tx.parachainStaking.delegate(collatorInfo.address, binaryAmount, new BN(collatorInfo.nominatorCount), new BN(currentNominationCount));
+  const bondedValidators: string[] = [];
+
+  if (rawDelegatorState !== null) {
+    const validatorList = rawDelegatorState.delegations as Record<string, any>[];
+
+    for (const _validator of validatorList) {
+      bondedValidators.push(_validator.owner as string);
+    }
+  }
+
+  if (!bondedValidators.includes(collatorInfo.address)) {
+    return apiPromise.api.tx.parachainStaking.delegate(collatorInfo.address, binaryAmount, new BN(collatorInfo.nominatorCount), new BN(currentNominationCount));
+  } else {
+    return apiPromise.api.tx.parachainStaking.delegatorBondMore(collatorInfo.address, binaryAmount);
+  }
 }
 
 export async function getMoonbeamUnbondingExtrinsic (dotSamaApi: ApiProps, amount: number, networkJson: NetworkJson, collatorAddress: string, unstakeAll: boolean) {

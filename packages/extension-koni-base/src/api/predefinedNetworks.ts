@@ -1426,7 +1426,7 @@ export const PREDEFINED_NETWORKS: Record<string, NetworkJson> = {
     paraId: 2125,
     nativeToken: 'TNKR',
     crowdloanUrl: 'https://invarch.network/tinkernet',
-    decimals: 12,
+    decimals: 12
   },
   imbue_network: {
     key: '  imbue_network',
@@ -1442,7 +1442,7 @@ export const PREDEFINED_NETWORKS: Record<string, NetworkJson> = {
     groups: ['KUSAMA_PARACHAIN'],
     paraId: 2121,
     nativeToken: 'IMBU',
-    decimals: 12,
+    decimals: 12
   },
   subspace: {
     key: 'subspace',

@@ -67,6 +67,10 @@ function StakingMenu ({ bondedAmount, className, delegations, networkKey, nextWi
     if (redeemable > 0) {
       return `${redeemable} ${networkJson.nativeToken as string} can be withdrawn now`;
     } else {
+      if (nextWithdrawal === 0) {
+        return `${nextWithdrawalAmount} ${networkJson.nativeToken as string} can be withdrawn soon`;
+      }
+
       return `${nextWithdrawalAmount} ${networkJson.nativeToken as string} can be withdrawn in ${moment.duration(nextWithdrawal, 'hours').humanize()}`;
     }
   }, [networkJson.nativeToken, nextWithdrawal, nextWithdrawalAmount, redeemable]);

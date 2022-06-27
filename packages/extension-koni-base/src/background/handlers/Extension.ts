@@ -2169,13 +2169,13 @@ export default class KoniExtension extends Extension {
     return txState;
   }
 
-  private async getUnbondingTxInfo ({ address, amount, networkKey, validatorAddress }: UnbondingSubmitParams): Promise<BasicTxInfo> {
+  private async getUnbondingTxInfo ({ address, amount, networkKey, unstakeAll, validatorAddress }: UnbondingSubmitParams): Promise<BasicTxInfo> {
     const networkJson = state.getNetworkMapByKey(networkKey);
 
-    return await getUnbondingTxInfo(address, amount, networkKey, state.getDotSamaApiMap(), state.getWeb3ApiMap(), networkJson, validatorAddress);
+    return await getUnbondingTxInfo(address, amount, networkKey, state.getDotSamaApiMap(), state.getWeb3ApiMap(), networkJson, validatorAddress, unstakeAll);
   }
 
-  private async submitUnbonding (id: string, port: chrome.runtime.Port, { address, amount, networkKey, password, validatorAddress }: UnbondingSubmitParams): Promise<BasicTxResponse> {
+  private async submitUnbonding (id: string, port: chrome.runtime.Port, { address, amount, networkKey, password, unstakeAll, validatorAddress }: UnbondingSubmitParams): Promise<BasicTxResponse> {
     const txState: BasicTxResponse = {};
 
     if (!amount || !address || !password) {
@@ -2187,7 +2187,7 @@ export default class KoniExtension extends Extension {
     const callback = createSubscription<'pri(unbonding.submitTransaction)'>(id, port);
     const dotSamaApi = state.getDotSamaApi(networkKey);
     const networkJson = state.getNetworkMapByKey(networkKey);
-    const extrinsic = await getUnbondingExtrinsic(address, amount, networkKey, networkJson, dotSamaApi, validatorAddress);
+    const extrinsic = await getUnbondingExtrinsic(address, amount, networkKey, networkJson, dotSamaApi, validatorAddress, unstakeAll);
     const passwordError: string | null = unlockAccount(address, password);
 
     if (extrinsic !== null && passwordError === null) {
@@ -2243,11 +2243,11 @@ export default class KoniExtension extends Extension {
     return await getUnlockingInfo(dotSamaApi, networkJson, networkKey, address, validatorList);
   }
 
-  private async getStakeWithdrawalTxInfo ({ address, networkKey, validatorAddress }: StakeWithdrawalParams): Promise<BasicTxInfo> {
-    return await getWithdrawalTxInfo(address, networkKey, state.getDotSamaApiMap(), state.getWeb3ApiMap(), validatorAddress);
+  private async getStakeWithdrawalTxInfo ({ action, address, networkKey, validatorAddress }: StakeWithdrawalParams): Promise<BasicTxInfo> {
+    return await getWithdrawalTxInfo(address, networkKey, state.getDotSamaApiMap(), state.getWeb3ApiMap(), validatorAddress, action);
   }
 
-  private async submitStakeWithdrawal (id: string, port: chrome.runtime.Port, { address, networkKey, password, validatorAddress }: StakeWithdrawalParams): Promise<BasicTxResponse> {
+  private async submitStakeWithdrawal (id: string, port: chrome.runtime.Port, { action, address, networkKey, password, validatorAddress }: StakeWithdrawalParams): Promise<BasicTxResponse> {
     const txState: BasicTxResponse = {};
 
     if (!address || !password) {
@@ -2258,7 +2258,7 @@ export default class KoniExtension extends Extension {
 
     const callback = createSubscription<'pri(unbonding.submitWithdrawal)'>(id, port);
     const dotSamaApi = state.getDotSamaApi(networkKey);
-    const extrinsic = await getWithdrawalExtrinsic(dotSamaApi, networkKey, address, validatorAddress);
+    const extrinsic = await getWithdrawalExtrinsic(dotSamaApi, networkKey, address, validatorAddress, action);
     const passwordError: string | null = unlockAccount(address, password);
 
     if (extrinsic !== null && passwordError === null) {

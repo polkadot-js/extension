@@ -130,7 +130,8 @@ function UnbondingSubmitTransaction ({ className }: Props): React.ReactElement<P
       address: account?.address as string,
       amount,
       networkKey: selectedNetwork,
-      validatorAddress: selectedValidator
+      validatorAddress: selectedValidator,
+      unstakeAll: unbondAll
     })
       .then((resp) => {
         setLoading(false);
@@ -141,7 +142,7 @@ function UnbondingSubmitTransaction ({ className }: Props): React.ReactElement<P
         setShowResult(false);
       })
       .catch(console.error);
-  }, [account?.address, amount, selectedNetwork, selectedValidator]);
+  }, [account?.address, amount, selectedNetwork, selectedValidator, unbondAll]);
 
   const handleSelectValidator = useCallback((val: string) => {
     setSelectedValidator(val);
@@ -290,6 +291,7 @@ function UnbondingSubmitTransaction ({ className }: Props): React.ReactElement<P
           setShowConfirm={setShowAuth}
           setShowResult={setShowResult}
           setTxError={setTxError}
+          unbondAll={unbondAll}
         />
       }
 

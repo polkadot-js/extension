@@ -3,6 +3,9 @@
 
 import { BN } from '@polkadot/util';
 
+export const REVOKE_ACTION = 'revoke';
+export const BOND_LESS_ACTION = 'bondLess';
+
 export interface ValidatorExtraInfo {
   commission: string,
   blocked: false,

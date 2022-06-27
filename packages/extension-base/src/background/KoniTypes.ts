@@ -951,7 +951,9 @@ export interface UnbondingSubmitParams {
   networkKey: string,
   address: string,
   password?: string,
-  validatorAddress?: string
+  // for some chains
+  validatorAddress?: string,
+  unstakeAll?: boolean
 }
 
 export interface UnlockingStakeParams {
@@ -964,7 +966,7 @@ export interface UnlockingStakeInfo {
   nextWithdrawal: number,
   redeemable: number,
   nextWithdrawalAmount: number,
-  nextWithdrawalAction?: 'bondLess' | 'revoke',
+  nextWithdrawalAction?: string,
   validatorAddress?: string // validator to unstake from
 }
 
@@ -972,7 +974,8 @@ export interface StakeWithdrawalParams {
   address: string,
   networkKey: string,
   password?: string,
-  validatorAddress?: string
+  validatorAddress?: string,
+  action?: string
 }
 
 export interface KoniRequestSignatures {

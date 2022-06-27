@@ -47,17 +47,17 @@ export async function getBondingExtrinsic (networkJson: NetworkJson, networkKey:
   return getRelayBondingExtrinsic(dotSamaApi, nominatorAddress, amount, targetValidators, isBondedBefore, networkJson);
 }
 
-export async function getUnbondingTxInfo (address: string, amount: number, networkKey: string, dotSamaApiMap: Record<string, ApiProps>, web3ApiMap: Record<string, Web3>, networkJson: NetworkJson, validatorAddress?: string) {
+export async function getUnbondingTxInfo (address: string, amount: number, networkKey: string, dotSamaApiMap: Record<string, ApiProps>, web3ApiMap: Record<string, Web3>, networkJson: NetworkJson, validatorAddress?: string, unstakeAll?: boolean) {
   if (CHAIN_TYPES.moonbeam.includes(networkKey)) {
-    return handleMoonbeamUnbondingTxInfo(address, amount, networkKey, dotSamaApiMap, web3ApiMap, networkJson, validatorAddress as string);
+    return handleMoonbeamUnbondingTxInfo(address, amount, networkKey, dotSamaApiMap, web3ApiMap, networkJson, validatorAddress as string, unstakeAll as boolean);
   }
 
   return handleRelayUnbondingTxInfo(address, amount, networkKey, dotSamaApiMap, web3ApiMap, networkJson);
 }
 
-export async function getUnbondingExtrinsic (address: string, amount: number, networkKey: string, networkJson: NetworkJson, dotSamaApi: ApiProps, validatorAddress?: string) {
+export async function getUnbondingExtrinsic (address: string, amount: number, networkKey: string, networkJson: NetworkJson, dotSamaApi: ApiProps, validatorAddress?: string, unstakeAll?: boolean) {
   if (CHAIN_TYPES.moonbeam.includes(networkKey)) {
-    return getMoonbeamUnbondingExtrinsic(dotSamaApi, amount, networkJson, validatorAddress as string);
+    return getMoonbeamUnbondingExtrinsic(dotSamaApi, amount, networkJson, validatorAddress as string, unstakeAll as boolean);
   }
 
   return getRelayUnbondingExtrinsic(dotSamaApi, amount, networkJson);
@@ -71,17 +71,17 @@ export async function getUnlockingInfo (dotSamaApi: ApiProps, networkJson: Netwo
   return handleRelayUnlockingInfo(dotSamaApi, networkJson, networkKey, address);
 }
 
-export async function getWithdrawalTxInfo (address: string, networkKey: string, dotSamaApiMap: Record<string, ApiProps>, web3ApiMap: Record<string, Web3>, validatorAddress?: string) {
+export async function getWithdrawalTxInfo (address: string, networkKey: string, dotSamaApiMap: Record<string, ApiProps>, web3ApiMap: Record<string, Web3>, validatorAddress?: string, action?: string) {
   if (CHAIN_TYPES.moonbeam.includes(networkKey)) {
-    return handleMoonbeamWithdrawalTxInfo(networkKey, dotSamaApiMap, web3ApiMap, address, validatorAddress as string);
+    return handleMoonbeamWithdrawalTxInfo(networkKey, dotSamaApiMap, web3ApiMap, address, validatorAddress as string, action as string);
   }
 
   return handleRelayWithdrawalTxInfo(address, networkKey, dotSamaApiMap, web3ApiMap);
 }
 
-export async function getWithdrawalExtrinsic (dotSamaApi: ApiProps, networkKey: string, address: string, validatorAddress?: string) {
+export async function getWithdrawalExtrinsic (dotSamaApi: ApiProps, networkKey: string, address: string, validatorAddress?: string, action?: string) {
   if (CHAIN_TYPES.moonbeam.includes(networkKey)) {
-    return getMoonbeamWithdrawalExtrinsic(dotSamaApi, address, validatorAddress as string);
+    return getMoonbeamWithdrawalExtrinsic(dotSamaApi, address, validatorAddress as string, action as string);
   }
 
   return getRelayWithdrawalExtrinsic(dotSamaApi, address);

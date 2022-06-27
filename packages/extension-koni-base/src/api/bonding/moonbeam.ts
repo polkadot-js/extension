@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { ApiProps, BasicTxInfo, ChainBondingBasics, NetworkJson, UnlockingStakeInfo, ValidatorInfo } from '@subwallet/extension-base/background/KoniTypes';
-import { calculateChainStakedReturn, ERA_LENGTH_MAP, MOONBEAM_INFLATION_DISTRIBUTION, parseRawNumber } from '@subwallet/extension-koni-base/api/bonding/utils';
+import { BOND_LESS_ACTION, calculateChainStakedReturn, ERA_LENGTH_MAP, MOONBEAM_INFLATION_DISTRIBUTION, parseRawNumber, REVOKE_ACTION } from '@subwallet/extension-koni-base/api/bonding/utils';
 import { getFreeBalance } from '@subwallet/extension-koni-base/api/dotsama/balance';
 import Web3 from 'web3';
 
@@ -189,7 +189,7 @@ export async function getMoonbeamBondingTxInfo (networkJson: NetworkJson, dotSam
 
 export async function handleMoonbeamBondingTxInfo (networkJson: NetworkJson, amount: number, networkKey: string, nominatorAddress: string, validatorInfo: ValidatorInfo, dotSamaApiMap: Record<string, ApiProps>, web3ApiMap: Record<string, Web3>, currentNominationCount: number) {
   const [txInfo, balance] = await Promise.all([
-    getMoonbeamBondingTxInfo(networkJson, dotSamaApiMap[networkKey], nominatorAddress, amount, validatorInfo, currentNominationCount),
+    getMoonbeamBondingTxInfo(networkJson, dotSamaApiMap[networkKey], nominatorAddress, amount, validatorInfo, currentNominationCount), // TODO: add bond more tx
     getFreeBalance(networkKey, nominatorAddress, dotSamaApiMap, web3ApiMap)
   ]);
 
@@ -205,19 +205,25 @@ export async function handleMoonbeamBondingTxInfo (networkJson: NetworkJson, amo
   } as BasicTxInfo;
 }
 
-export async function getMoonbeamUnbondingTxInfo (networkJson: NetworkJson, dotSamaApi: ApiProps, address: string, amount: number, collatorAddress: string) {
+export async function getMoonbeamUnbondingTxInfo (networkJson: NetworkJson, dotSamaApi: ApiProps, address: string, amount: number, collatorAddress: string, unstakeAll: boolean) {
   const apiPromise = await dotSamaApi.isReady;
   const parsedAmount = amount * (10 ** (networkJson.decimals as number));
   const binaryAmount = new BN(parsedAmount.toString());
 
-  const extrinsic = apiPromise.api.tx.parachainStaking.scheduleDelegatorBondLess(collatorAddress, binaryAmount);
+  let extrinsic;
+
+  if (!unstakeAll) {
+    extrinsic = apiPromise.api.tx.parachainStaking.scheduleDelegatorBondLess(collatorAddress, binaryAmount);
+  } else {
+    extrinsic = apiPromise.api.tx.parachainStaking.scheduleRevokeDelegation(collatorAddress);
+  }
 
   return extrinsic.paymentInfo(address);
 }
 
-export async function handleMoonbeamUnbondingTxInfo (address: string, amount: number, networkKey: string, dotSamaApiMap: Record<string, ApiProps>, web3ApiMap: Record<string, Web3>, networkJson: NetworkJson, collatorAddress: string) {
+export async function handleMoonbeamUnbondingTxInfo (address: string, amount: number, networkKey: string, dotSamaApiMap: Record<string, ApiProps>, web3ApiMap: Record<string, Web3>, networkJson: NetworkJson, collatorAddress: string, unstakeAll: boolean) {
   const [txInfo, balance] = await Promise.all([
-    getMoonbeamUnbondingTxInfo(networkJson, dotSamaApiMap[networkKey], address, amount, collatorAddress),
+    getMoonbeamUnbondingTxInfo(networkJson, dotSamaApiMap[networkKey], address, amount, collatorAddress, unstakeAll),
     getFreeBalance(networkKey, address, dotSamaApiMap, web3ApiMap)
   ]);
 
@@ -241,12 +247,16 @@ export async function getMoonbeamBondingExtrinsic (networkJson: NetworkJson, dot
   return apiPromise.api.tx.parachainStaking.delegate(collatorInfo.address, binaryAmount, new BN(collatorInfo.nominatorCount), new BN(currentNominationCount));
 }
 
-export async function getMoonbeamUnbondingExtrinsic (dotSamaApi: ApiProps, amount: number, networkJson: NetworkJson, collatorAddress: string) {
+export async function getMoonbeamUnbondingExtrinsic (dotSamaApi: ApiProps, amount: number, networkJson: NetworkJson, collatorAddress: string, unstakeAll: boolean) {
   const apiPromise = await dotSamaApi.isReady;
   const parsedAmount = amount * (10 ** (networkJson.decimals as number));
   const binaryAmount = new BN(parsedAmount.toString());
 
-  return apiPromise.api.tx.parachainStaking.scheduleDelegatorBondLess(collatorAddress, binaryAmount);
+  if (!unstakeAll) {
+    return apiPromise.api.tx.parachainStaking.scheduleDelegatorBondLess(collatorAddress, binaryAmount);
+  } else {
+    return apiPromise.api.tx.parachainStaking.scheduleRevokeDelegation(collatorAddress);
+  }
 }
 
 export async function getMoonbeamUnlockingInfo (dotSamaApi: ApiProps, address: string, networkKey: string, collatorList: string[]) {
@@ -264,11 +274,11 @@ export async function getMoonbeamUnlockingInfo (dotSamaApi: ApiProps, address: s
 
         // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
         if (request.action.Revoke) {
-          action = 'revoke';
+          action = REVOKE_ACTION;
           // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
           amount = parseRawNumber(request.action.Revoke as string);
         } else {
-          action = 'bondLess';
+          action = BOND_LESS_ACTION;
           // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
           amount = parseRawNumber(request.action.Decrease as string);
         }
@@ -329,17 +339,18 @@ export async function handleMoonbeamUnlockingInfo (dotSamaApi: ApiProps, network
   } as UnlockingStakeInfo;
 }
 
-export async function getMoonbeamWithdrawalTxInfo (dotSamaApi: ApiProps, address: string, collatorAddress: string) {
+export async function getMoonbeamWithdrawalTxInfo (dotSamaApi: ApiProps, address: string, collatorAddress: string, action: string) {
   const apiPromise = await dotSamaApi.isReady;
 
+  console.log(`executing ${action}`);
   const extrinsic = apiPromise.api.tx.parachainStaking.executeDelegationRequest(address, collatorAddress);
 
   return extrinsic.paymentInfo(address);
 }
 
-export async function handleMoonbeamWithdrawalTxInfo (networkKey: string, dotSamaApiMap: Record<string, ApiProps>, web3ApiMap: Record<string, Web3>, address: string, collatorAddress: string) {
+export async function handleMoonbeamWithdrawalTxInfo (networkKey: string, dotSamaApiMap: Record<string, ApiProps>, web3ApiMap: Record<string, Web3>, address: string, collatorAddress: string, action: string) {
   const [txInfo, balance] = await Promise.all([
-    getMoonbeamWithdrawalTxInfo(dotSamaApiMap[networkKey], address, collatorAddress),
+    getMoonbeamWithdrawalTxInfo(dotSamaApiMap[networkKey], address, collatorAddress, action),
     getFreeBalance(networkKey, address, dotSamaApiMap, web3ApiMap)
   ]);
 
@@ -353,8 +364,10 @@ export async function handleMoonbeamWithdrawalTxInfo (networkKey: string, dotSam
   } as BasicTxInfo;
 }
 
-export async function getMoonbeamWithdrawalExtrinsic (dotSamaApi: ApiProps, address: string, collatorAddress: string) {
+export async function getMoonbeamWithdrawalExtrinsic (dotSamaApi: ApiProps, address: string, collatorAddress: string, action: string) {
   const apiPromise = await dotSamaApi.isReady;
+
+  console.log(`executing ${action}`);
 
   return apiPromise.api.tx.parachainStaking.executeDelegationRequest(address, collatorAddress);
 }

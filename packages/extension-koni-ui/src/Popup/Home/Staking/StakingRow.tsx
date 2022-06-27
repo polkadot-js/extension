@@ -43,6 +43,7 @@ function StakingRow ({ activeStake, address, chainName, className, delegations, 
   const [nextWithdrawalAmount, setNextWithdrawalAmount] = useState(-1);
   const [showWithdrawalModal, setShowWithdrawalModal] = useState(false);
   const [targetValidator, setTargetValidator] = useState('');
+  const [nextWithdrawalAction, setNextWithdrawalAction] = useState<string | undefined>(undefined);
 
   const handleToggleReward = useCallback(() => {
     setShowReward(!showReward);
@@ -76,6 +77,7 @@ function StakingRow ({ activeStake, address, chainName, className, delegations, 
           setNextWithdrawal(resp.nextWithdrawal);
           setNextWithdrawalAmount(resp.nextWithdrawalAmount);
           setTargetValidator(resp.validatorAddress || '');
+          setNextWithdrawalAction(resp.nextWithdrawalAction);
         })
         .catch(console.error);
     }
@@ -280,6 +282,7 @@ function StakingRow ({ activeStake, address, chainName, className, delegations, 
           amount={redeemable}
           hideModal={handleHideWithdrawalModal}
           networkKey={networkKey}
+          nextWithdrawalAction={nextWithdrawalAction}
           targetValidator={targetValidator !== '' ? targetValidator : undefined}
         />
       }

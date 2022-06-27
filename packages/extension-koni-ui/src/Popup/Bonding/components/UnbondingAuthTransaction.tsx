@@ -27,10 +27,11 @@ interface Props extends ThemeProps {
   setExtrinsicHash: (val: string) => void,
   setIsTxSuccess: (val: boolean) => void,
   setTxError: (val: string) => void,
-  selectedValidator?: string
+  selectedValidator?: string,
+  unbondAll: boolean,
 }
 
-function UnbondingAuthTransaction ({ amount, balanceError, className, fee, selectedNetwork, selectedValidator, setExtrinsicHash, setIsTxSuccess, setShowConfirm, setShowResult, setTxError }: Props): React.ReactElement<Props> {
+function UnbondingAuthTransaction ({ amount, balanceError, className, fee, selectedNetwork, selectedValidator, setExtrinsicHash, setIsTxSuccess, setShowConfirm, setShowResult, setTxError, unbondAll }: Props): React.ReactElement<Props> {
   const { t } = useTranslation();
   const { show } = useToast();
   const networkJson = useGetNetworkJson(selectedNetwork);
@@ -57,7 +58,8 @@ function UnbondingAuthTransaction ({ amount, balanceError, className, fee, selec
       address: account?.address as string,
       amount,
       password,
-      validatorAddress: selectedValidator
+      validatorAddress: selectedValidator,
+      unstakeAll: unbondAll
     }, (resp) => {
       if (resp.passwordError) {
         show(resp.passwordError);
@@ -96,7 +98,7 @@ function UnbondingAuthTransaction ({ amount, balanceError, className, fee, selec
         }
       }
     });
-  }, [account?.address, amount, balanceError, password, selectedNetwork, selectedValidator, setExtrinsicHash, setIsTxSuccess, setShowConfirm, setShowResult, setTxError, show]);
+  }, [account?.address, amount, balanceError, password, selectedNetwork, selectedValidator, setExtrinsicHash, setIsTxSuccess, setShowConfirm, setShowResult, setTxError, show, unbondAll]);
 
   const handleConfirm = useCallback(() => {
     setLoading(true);

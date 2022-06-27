@@ -1,7 +1,7 @@
 // Copyright 2019-2022 @subwallet/extension-koni authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { ActionContext } from '@subwallet/extension-koni-ui/components';
+import { ActionContext, HorizontalLabelToggle } from '@subwallet/extension-koni-ui/components';
 import Button from '@subwallet/extension-koni-ui/components/Button';
 import InputAddress from '@subwallet/extension-koni-ui/components/InputAddress';
 import InputBalance from '@subwallet/extension-koni-ui/components/InputBalance';
@@ -36,11 +36,12 @@ function UnbondingSubmitTransaction ({ className }: Props): React.ReactElement<P
   const bondedAmount = unbondingParams.bondedAmount as number;
   const networkJson = useGetNetworkJson(selectedNetwork);
 
-  const [amount, setAmount] = useState(0);
+  const [amount, setAmount] = useState<number>(0);
   const [isReadySubmit, setIsReadySubmit] = useState(false);
   const [showAuth, setShowAuth] = useState(false);
   const [showResult, setShowResult] = useState(false);
   const [isClickNext, setIsClickNext] = useState(false);
+  const [unbondAll, setUnbondAll] = useState(false);
 
   const [fee, setFee] = useState('');
   const [balanceError, setBalanceError] = useState(false);
@@ -49,9 +50,9 @@ function UnbondingSubmitTransaction ({ className }: Props): React.ReactElement<P
   const [isTxSuccess, setIsTxSuccess] = useState(false);
   const [txError, setTxError] = useState('');
 
-  const [selectedValidator, setSelectedValidator] = useState(unbondingParams.delegations ? unbondingParams.delegations[0].owner : '');
-  const [nominatedAmount, setNominatedAmount] = useState(unbondingParams.delegations ? unbondingParams.delegations[0].amount : '0');
-  const [minBond, setMinBond] = useState(unbondingParams.delegations ? unbondingParams.delegations[0].minBond : '0');
+  const [selectedValidator, setSelectedValidator] = useState<string>(unbondingParams.delegations ? unbondingParams.delegations[0].owner : '');
+  const [nominatedAmount, setNominatedAmount] = useState<string>(unbondingParams.delegations ? unbondingParams.delegations[0].amount : '0');
+  const [minBond, setMinBond] = useState<string>(unbondingParams.delegations ? unbondingParams.delegations[0].minBond : '0');
 
   const goHome = useCallback(() => {
     navigate('/');
@@ -87,8 +88,12 @@ function UnbondingSubmitTransaction ({ className }: Props): React.ReactElement<P
   }, [amount, bondedAmount, isClickNext, minBond, networkJson.decimals, networkJson.nativeToken, nominatedAmount, show, showAuth, showResult, unbondingParams.delegations]);
 
   const convertToBN = useCallback(() => {
+    if (unbondAll) {
+      return new BN(nominatedAmount);
+    }
+
     return new BN('0');
-  }, []);
+  }, [nominatedAmount, unbondAll]);
 
   const handleResend = useCallback(() => {
     setExtrinsicHash('');
@@ -154,6 +159,18 @@ function UnbondingSubmitTransaction ({ className }: Props): React.ReactElement<P
       }
     }
   }, [unbondingParams.delegations]);
+
+  const toggleUnbondAll = useCallback((value: boolean) => {
+    const _nominatedAmount = parseFloat(nominatedAmount) / (10 ** (networkJson.decimals as number));
+
+    setUnbondAll(value);
+
+    if (value) {
+      setAmount(_nominatedAmount);
+    } else {
+      setAmount(0);
+    }
+  }, [networkJson.decimals, nominatedAmount]);
 
   return (
     <div className={className}>
@@ -227,6 +244,17 @@ function UnbondingSubmitTransaction ({ className }: Props): React.ReactElement<P
           </div>
         }
 
+        <div className={'unstake-all-container'}>
+          <div className={'unstake-all-text'}>Unstake all</div>
+          <HorizontalLabelToggle
+            checkedLabel={''}
+            className='info'
+            toggleFunc={toggleUnbondAll}
+            uncheckedLabel={''}
+            value={unbondAll}
+          />
+        </div>
+
         <div className='bonding-submit__separator' />
 
         <div className={'bonding-btn-container'}>
@@ -280,6 +308,23 @@ function UnbondingSubmitTransaction ({ className }: Props): React.ReactElement<P
 }
 
 export default React.memo(styled(UnbondingSubmitTransaction)(({ theme }: Props) => `
+  .unstake-all-container {
+    .horizontal-label-toggle {
+      margin-right: 0;
+      margin-left: 14px;
+    }
+    margin-top: 15px;
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+  }
+
+  .unstake-all-text {
+    color: ${theme.textColor2};
+    font-weight: 400;
+    font-size: 14px;
+  }
+
   .unbonding-input {
     margin-top: 20px;
   }

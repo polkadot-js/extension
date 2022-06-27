@@ -2,17 +2,10 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import State from '@subwallet/extension-koni-base/background/handlers/State';
-import ChangeTransactionHistoryStore from '@subwallet/extension-koni-base/migration/scripts/ChangeTransactionHistoryStore';
 import ApplicationStore from '@subwallet/extension-koni-base/stores/Application';
 
-// Migration scripts
 import BaseMigrationJob from './Base';
-
-const MIGRATIONS: Record<string, typeof BaseMigrationJob[]> = {
-  '0.4.4-0': [
-    ChangeTransactionHistoryStore
-  ]
-};
+import MigrationScripts from './scripts';
 
 export default class Migration {
   private readonly appStore = new ApplicationStore();
@@ -42,6 +35,7 @@ export default class Migration {
         // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
         const job = new JobClass(this.state);
 
+        console.log('[Migration] running script: ', JobClass.name);
         await job.run();
       }
 
@@ -55,10 +49,10 @@ export default class Migration {
 
   private getRunableScripts (fromVersion: string, toVersion: string) {
     const scripts: typeof BaseMigrationJob[] = [];
-    const missingVersions = Object.keys(MIGRATIONS).filter((version) => version > fromVersion && version <= toVersion).sort();
+    const missingVersions = Object.keys(MigrationScripts).filter((version) => version > fromVersion && version <= toVersion).sort();
 
     missingVersions.forEach((ver) => {
-      scripts.push(...MIGRATIONS[ver]);
+      scripts.push(...MigrationScripts[ver]);
     });
 
     return scripts;

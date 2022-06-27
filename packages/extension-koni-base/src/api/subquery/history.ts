@@ -110,7 +110,9 @@ export const fetchDotSamaHistory = (address: string, networkMap: Record<string, 
             networkKey,
             // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment,@typescript-eslint/no-unsafe-member-access
             time: (+n.timestamp) * 1000,
-            origin: 'network'
+            origin: 'network',
+            // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-assignment
+            eventIdx: n.transfer.eventIdx
           });
         });
 

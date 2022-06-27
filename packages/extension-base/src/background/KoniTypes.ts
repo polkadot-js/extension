@@ -419,6 +419,7 @@ export interface TransactionHistoryItemType {
   action: 'send' | 'received';
   extrinsicHash: string;
   origin?: 'app' | 'network';
+  eventIdx?: number | null;
 }
 
 export interface RequestTransactionHistoryGet {

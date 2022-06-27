@@ -1866,11 +1866,19 @@ export default class KoniState extends State {
   private combineHistories (oldItems: TransactionHistoryItemType[], newItems: TransactionHistoryItemType[]): TransactionHistoryItemType[] {
     const newHistories = newItems.filter((item) => !oldItems.some((old) => this.isSameHistory(old, item)));
 
-    return [...oldItems, ...newHistories].sort((a, b) => b.time - a.time);
+    return [...oldItems, ...newHistories].filter((his) => his.origin === 'app' || his.eventIdx).sort((a, b) => b.time - a.time);
   }
 
   public isSameHistory (oldItem: TransactionHistoryItemType, newItem: TransactionHistoryItemType): boolean {
-    return oldItem.extrinsicHash === newItem.extrinsicHash;
+    if (oldItem.extrinsicHash === newItem.extrinsicHash) {
+      if (oldItem.origin === 'app') {
+        return true;
+      } else {
+        return oldItem.eventIdx === newItem.eventIdx;
+      }
+    }
+
+    return false;
   }
 
   public pauseAllNetworks (code?: number, reason?: string) {

@@ -2,13 +2,15 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { ApiProps, NetworkJson, ValidatorInfo } from '@subwallet/extension-base/background/KoniTypes';
+import { getDarwiniaValidatorsInfo } from '@subwallet/extension-koni-base/api/bonding/darwinia';
 import { getParaBondingBasics, getParaBondingExtrinsic, getParaCollatorsInfo, getParaUnbondingExtrinsic, getParaWithdrawalExtrinsic, handleParaBondingTxInfo, handleParaUnbondingTxInfo, handleParaUnlockingInfo, handleParaWithdrawalTxInfo } from '@subwallet/extension-koni-base/api/bonding/paraChain';
 import { getRelayBondingExtrinsic, getRelayChainBondingBasics, getRelayUnbondingExtrinsic, getRelayValidatorsInfo, getRelayWithdrawalExtrinsic, getTargetValidators, handleRelayBondingTxInfo, handleRelayUnbondingTxInfo, handleRelayUnlockingInfo, handleRelayWithdrawalTxInfo } from '@subwallet/extension-koni-base/api/bonding/relayChain';
 import Web3 from 'web3';
 
 const CHAIN_TYPES: Record<string, string[]> = {
   relay: ['polkadot', 'kusama', 'hydradx', 'aleph', 'edgeware', 'darwinia', 'crab', 'polkadex'],
-  para: ['moonbeam', 'moonriver', 'moonbase', 'turing', 'turingStaging']
+  para: ['moonbeam', 'moonriver', 'moonbase', 'turing', 'turingStaging'],
+  darwinia: ['darwinia', 'crab', 'pangolin']
 };
 
 export async function getChainBondingBasics (networkKey: string, dotSamaApi: ApiProps) {
@@ -22,6 +24,8 @@ export async function getChainBondingBasics (networkKey: string, dotSamaApi: Api
 export async function getValidatorsInfo (networkKey: string, dotSamaApi: ApiProps, decimals: number, address: string) {
   if (CHAIN_TYPES.para.includes(networkKey)) {
     return getParaCollatorsInfo(networkKey, dotSamaApi, decimals, address);
+  } else if (CHAIN_TYPES.darwinia.includes(networkKey)) {
+    return getDarwiniaValidatorsInfo(networkKey, dotSamaApi, decimals, address);
   }
 
   return getRelayValidatorsInfo(networkKey, dotSamaApi, decimals, address);

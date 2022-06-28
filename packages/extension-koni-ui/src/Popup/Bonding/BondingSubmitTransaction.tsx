@@ -87,7 +87,7 @@ function BondingSubmitTransaction ({ className }: Props): React.ReactElement<Pro
         if (amount > parsedFreeBalance) {
           show('You do not have enough balance');
         } else if (amount >= 0) {
-          show(`You must bond at least ${validatorInfo.minBond} ${networkJson.nativeToken as string}`);
+          show(`You must stake at least ${validatorInfo.minBond} ${networkJson.nativeToken as string}`);
         }
       }
     }

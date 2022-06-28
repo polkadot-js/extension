@@ -1277,6 +1277,26 @@ export const PREDEFINED_NETWORKS: Record<string, NetworkJson> = {
     isEthereum: true,
     evmChainId: 44
   },
+  pangolin: {
+    key: 'pangolin',
+    chain: 'Pangolin',
+    genesisHash: '0xce44bd16fc276f9e457b452577b6c2678e57768260012af127479fed806da7e7',
+    ss58Format: 42,
+    providers: {
+      Darwinia_Network: 'wss://pangolin-rpc.darwinia.network'
+    },
+    active: false,
+    currentProviderMode: 'ws',
+    currentProvider: 'Darwinia_Network',
+    groups: ['MAIN_NET'],
+    paraId: 2105,
+    nativeToken: 'PRING',
+    crowdloanUrl: 'https://crab.network/plo',
+    decimals: 9,
+    coinGeckoKey: 'darwinia-crab-network',
+    supportBonding: true,
+    getStakingOnChain: true
+  },
   pangolinEvm: {
     key: 'pangolinEvm',
     chain: 'Pangolin - EVM',

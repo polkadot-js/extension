@@ -190,7 +190,6 @@ export const PREDEFINED_NETWORKS: Record<string, NetworkJson> = {
     currentProviderMode: 'ws',
     currentProvider: 'Astar',
     groups: ['POLKADOT_PARACHAIN'],
-    paraId: 2006,
     nativeToken: 'ASTR',
     crowdloanUrl: 'https://crowdloan.astar.network/#/',
     decimals: 18,
@@ -236,11 +235,29 @@ export const PREDEFINED_NETWORKS: Record<string, NetworkJson> = {
   },
   hydradx: {
     key: 'hydradx',
-    chain: 'HydraDX',
+    chain: 'HydraDX Snakenet',
     genesisHash: '0xd2a620c27ec5cbc5621ff9a522689895074f7cca0d08e7134a7804e1a3ba86fc',
     ss58Format: 63,
     providers: {
       'Galactic Council': 'wss://rpc-01.snakenet.hydradx.io'
+    },
+    active: false,
+    currentProviderMode: 'ws',
+    currentProvider: 'Galactic Council',
+    groups: ['MAIN_NET'],
+    nativeToken: 'HDX',
+    crowdloanUrl: 'https://loan.hydradx.io/',
+    decimals: 12,
+    supportBonding: true,
+    getStakingOnChain: true
+  },
+  hydradx_main: {
+    key: 'hydradx_main',
+    chain: 'HydraDX',
+    genesisHash: '0xd2a620c27ec5cbc5621ff9a522689895074f7cca0d08e7134a7804e1a3ba86fc',
+    ss58Format: 63,
+    providers: {
+      'Galactic Council': 'wss://rpc-01.hydradx.io'
     },
     active: false,
     currentProviderMode: 'ws',
@@ -551,7 +568,6 @@ export const PREDEFINED_NETWORKS: Record<string, NetworkJson> = {
     groups: ['TEST_NET'],
     nativeToken: 'DEV',
     isEthereum: true,
-    paraId: 1000,
     decimals: 18,
     evmChainId: 1287
   },
@@ -1114,7 +1130,6 @@ export const PREDEFINED_NETWORKS: Record<string, NetworkJson> = {
     currentProviderMode: 'ws',
     currentProvider: 'Dappforce',
     groups: ['KUSAMA_PARACHAIN'],
-    paraId: 2100,
     nativeToken: 'SUB',
     crowdloanUrl: 'https://app.subsocial.network/crowdloan',
     decimals: 11
@@ -1184,7 +1199,6 @@ export const PREDEFINED_NETWORKS: Record<string, NetworkJson> = {
     currentProviderMode: 'ws',
     currentProvider: 'Unique',
     groups: ['TEST_NET'],
-    paraId: 2012,
     nativeToken: 'UNQ',
     decimals: 15
   },
@@ -1238,7 +1252,6 @@ export const PREDEFINED_NETWORKS: Record<string, NetworkJson> = {
     currentProviderMode: 'ws',
     currentProvider: 'OnFinality',
     groups: ['MAIN_NET'],
-    paraId: 2105,
     nativeToken: 'CRAB',
     crowdloanUrl: 'https://crab.network/plo',
     decimals: 18,
@@ -1331,7 +1344,6 @@ export const PREDEFINED_NETWORKS: Record<string, NetworkJson> = {
     active: false,
     key: 'mangatax',
     groups: ['TEST_NET'],
-    paraId: 2110,
     nativeToken: 'MGAT'
   },
   mangatax_para: {
@@ -1398,6 +1410,39 @@ export const PREDEFINED_NETWORKS: Record<string, NetworkJson> = {
     crowdloanUrl: 'https://crowdloan.litentry.com/',
     decimals: 10,
     coinGeckoKey: 'litentry'
+  },
+  tinkernet: {
+    key: 'tinkernet',
+    chain: 'InvArch Tinker Network',
+    genesisHash: '0xd42e9606a995dfe433dc7955dc2a70f495f350f373daa200098ae84437816ad2',
+    ss58Format: 117,
+    providers: {
+      Invarch: 'wss://tinker.invarch.network'
+    },
+    active: false,
+    currentProviderMode: 'ws',
+    currentProvider: 'Invarch',
+    groups: ['KUSAMA_PARACHAIN'],
+    paraId: 2125,
+    nativeToken: 'TNKR',
+    crowdloanUrl: 'https://invarch.network/tinkernet',
+    decimals: 12
+  },
+  imbue_network: {
+    key: '  imbue_network',
+    chain: 'Imbue Kusama',
+    genesisHash: '0xca93a37c913a25fa8fdb33c7f738afc39379cb71d37874a16d4c091a5aef9f89',
+    ss58Format: 42,
+    providers: {
+      Imbue: 'wss://imbue-kusama.imbue.network'
+    },
+    active: false,
+    currentProviderMode: 'ws',
+    currentProvider: 'Imbue',
+    groups: ['KUSAMA_PARACHAIN'],
+    paraId: 2121,
+    nativeToken: 'IMBU',
+    decimals: 12
   },
   subspace: {
     key: 'subspace',

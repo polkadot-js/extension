@@ -930,7 +930,8 @@ export interface BondingSubmitParams {
   validatorInfo: ValidatorInfo,
   password?: string,
   isBondedBefore: boolean,
-  bondedValidators: string[],
+  bondedValidators: string[], // already delegated validators
+  lockPeriod?: number // in month
 }
 
 export interface BasicTxResponse {

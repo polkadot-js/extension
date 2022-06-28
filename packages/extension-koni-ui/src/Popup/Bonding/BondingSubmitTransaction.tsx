@@ -20,9 +20,10 @@ import useToast from '@subwallet/extension-koni-ui/hooks/useToast';
 import useTranslation from '@subwallet/extension-koni-ui/hooks/useTranslation';
 import { getBondingTxInfo } from '@subwallet/extension-koni-ui/messaging';
 import Header from '@subwallet/extension-koni-ui/partials/Header';
+import BondDurationDropdown from '@subwallet/extension-koni-ui/Popup/Bonding/components/BondDurationDropdown';
 import BondingAuthTransaction from '@subwallet/extension-koni-ui/Popup/Bonding/components/BondingAuthTransaction';
 import BondingResult from '@subwallet/extension-koni-ui/Popup/Bonding/components/BondingResult';
-import { parseBalanceString } from '@subwallet/extension-koni-ui/Popup/Bonding/utils';
+import { BOND_DURATION_OPTIONS, getStakeUnit, parseBalanceString } from '@subwallet/extension-koni-ui/Popup/Bonding/utils';
 import { RootState, store } from '@subwallet/extension-koni-ui/stores';
 import { BondingParams } from '@subwallet/extension-koni-ui/stores/types';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
@@ -58,6 +59,7 @@ function BondingSubmitTransaction ({ className }: Props): React.ReactElement<Pro
   const [showAuth, setShowAuth] = useState(false);
   const [showResult, setShowResult] = useState(false);
   const [isClickNext, setIsClickNext] = useState(false);
+  const unit = getStakeUnit(selectedNetwork, networkJson);
 
   const [fee, setFee] = useState('');
   const [balanceError, setBalanceError] = useState(false);
@@ -65,6 +67,7 @@ function BondingSubmitTransaction ({ className }: Props): React.ReactElement<Pro
   const [extrinsicHash, setExtrinsicHash] = useState('');
   const [isTxSuccess, setIsTxSuccess] = useState(false);
   const [txError, setTxError] = useState('');
+  const [lockPeriod, setLockPeriod] = useState(0);
 
   const isOversubscribed = validatorInfo.nominatorCount >= maxNominatorPerValidator;
   const isSufficientFund = useIsSufficientBalance(selectedNetwork, validatorInfo.minBond);
@@ -139,7 +142,8 @@ function BondingSubmitTransaction ({ className }: Props): React.ReactElement<Pro
       amount,
       validatorInfo,
       isBondedBefore,
-      bondedValidators
+      bondedValidators,
+      lockPeriod
     })
       .then((resp) => {
         setLoading(false);
@@ -150,7 +154,7 @@ function BondingSubmitTransaction ({ className }: Props): React.ReactElement<Pro
         setShowResult(false);
       })
       .catch(console.error);
-  }, [account?.address, amount, bondedValidators, isBondedBefore, selectedNetwork, validatorInfo]);
+  }, [account?.address, amount, bondedValidators, isBondedBefore, lockPeriod, selectedNetwork, validatorInfo]);
 
   const getMinBondTooltipText = useCallback(() => {
     if (isMinBondZero) {
@@ -159,6 +163,10 @@ function BondingSubmitTransaction ({ className }: Props): React.ReactElement<Pro
 
     return `Your free balance needs to be at least ${parseBalanceString(validatorInfo.minBond, networkJson.nativeToken as string)}.`;
   }, [isMinBondZero, networkJson.nativeToken, validatorInfo.minBond]);
+
+  const handleChangeLockingPeriod = useCallback((value: string) => {
+    setLockPeriod(parseInt(value));
+  }, []);
 
   return (
     <div className={className}>
@@ -250,7 +258,7 @@ function BondingSubmitTransaction ({ className }: Props): React.ReactElement<Pro
               <div className={'validator-att-container'}>
                 <div className={'validator-att'}>
                   <div className={'validator-att-title'}>Total stake</div>
-                  <div className={'validator-att-value'}>{parseBalanceString(validatorInfo.totalStake, networkJson.nativeToken as string)}</div>
+                  <div className={'validator-att-value'}>{parseBalanceString(validatorInfo.totalStake, unit)}</div>
                 </div>
 
                 <div className={'validator-att'}>
@@ -272,7 +280,7 @@ function BondingSubmitTransaction ({ className }: Props): React.ReactElement<Pro
                       trigger={`validator-has-no-stake-tooltip-${selectedNetwork}`}
                     />
                   </div>
-                  <div className={`${hasOwnStake ? 'validator-att-value' : 'validator-att-value-warning'}`}>{parseBalanceString(validatorInfo.ownStake, networkJson.nativeToken as string)}</div>
+                  <div className={`${hasOwnStake ? 'validator-att-value' : 'validator-att-value-warning'}`}>{parseBalanceString(validatorInfo.ownStake, unit)}</div>
                 </div>
               </div>
 
@@ -323,7 +331,7 @@ function BondingSubmitTransaction ({ className }: Props): React.ReactElement<Pro
               </div>
 
               {
-                validatorInfo.commission && <div className={'validator-att-container'}>
+                validatorInfo.commission !== undefined && <div className={'validator-att-container'}>
                   <div className={'validator-att'}>
                     <div className={'validator-att-title'}>
                       Commission
@@ -376,6 +384,13 @@ function BondingSubmitTransaction ({ className }: Props): React.ReactElement<Pro
           siSymbol={networkJson.nativeToken}
         />
 
+        {
+          Object.keys(BOND_DURATION_OPTIONS).includes(selectedNetwork) && <BondDurationDropdown
+            handleSelectValidator={handleChangeLockingPeriod}
+            networkKey={selectedNetwork}
+          />
+        }
+
         <div className='bonding-submit__separator' />
 
         <div className={'bonding-btn-container'}>
@@ -406,6 +421,7 @@ function BondingSubmitTransaction ({ className }: Props): React.ReactElement<Pro
           bondedValidators={bondedValidators}
           fee={fee}
           isBondedBefore={isBondedBefore}
+          lockPeriod={lockPeriod}
           selectedNetwork={selectedNetwork}
           setExtrinsicHash={setExtrinsicHash}
           setIsTxSuccess={setIsTxSuccess}

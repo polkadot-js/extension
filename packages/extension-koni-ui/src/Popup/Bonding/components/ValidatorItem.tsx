@@ -12,7 +12,7 @@ import Tooltip from '@subwallet/extension-koni-ui/components/Tooltip';
 import useIsSufficientBalance from '@subwallet/extension-koni-ui/hooks/screen/bonding/useIsSufficientBalance';
 import useGetNetworkJson from '@subwallet/extension-koni-ui/hooks/screen/home/useGetNetworkJson';
 import useToast from '@subwallet/extension-koni-ui/hooks/useToast';
-import { parseBalanceString } from '@subwallet/extension-koni-ui/Popup/Bonding/utils';
+import { getStakeUnit, parseBalanceString } from '@subwallet/extension-koni-ui/Popup/Bonding/utils';
 import { store } from '@subwallet/extension-koni-ui/stores';
 import { BondingParams } from '@subwallet/extension-koni-ui/stores/types';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
@@ -41,6 +41,7 @@ function ValidatorItem ({ bondedValidators, className, isBondedBefore, maxNomina
   const isSufficientFund = useIsSufficientBalance(networkKey, validatorInfo.minBond);
   const hasOwnStake = validatorInfo.ownStake > 0;
   const isMaxCommission = validatorInfo.commission === 100;
+  const unit = getStakeUnit(networkKey, networkJson);
 
   const navigate = useContext(ActionContext);
 
@@ -163,7 +164,7 @@ function ValidatorItem ({ bondedValidators, className, isBondedBefore, maxNomina
           <div className={'validator-att-container'}>
             <div className={'validator-att'}>
               <div className={'validator-att-title'}>Total stake</div>
-              <div className={'validator-att-value'}>{parseBalanceString(validatorInfo.totalStake, networkJson.nativeToken as string)}</div>
+              <div className={'validator-att-value'}>{parseBalanceString(validatorInfo.totalStake, unit)}</div>
             </div>
 
             <div className={'validator-att'}>
@@ -184,7 +185,7 @@ function ValidatorItem ({ bondedValidators, className, isBondedBefore, maxNomina
                   trigger={`validator-has-no-stake-tooltip-${networkKey}`}
                 />
               </div>
-              <div className={`${hasOwnStake ? 'validator-att-value' : 'validator-att-value-warning'}`}>{parseBalanceString(validatorInfo.ownStake, networkJson.nativeToken as string)}</div>
+              <div className={`${hasOwnStake ? 'validator-att-value' : 'validator-att-value-warning'}`}>{parseBalanceString(validatorInfo.ownStake, unit)}</div>
             </div>
           </div>
 
@@ -233,7 +234,7 @@ function ValidatorItem ({ bondedValidators, className, isBondedBefore, maxNomina
           </div>
 
           {
-            validatorInfo.commission && <div className={'validator-att-container'}>
+            validatorInfo.commission !== undefined && <div className={'validator-att-container'}>
               <div className={'validator-att'}>
                 <div className={'validator-att-title'}>
                   Commission

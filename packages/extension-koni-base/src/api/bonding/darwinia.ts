@@ -1,8 +1,12 @@
 // Copyright 2019-2022 @subwallet/extension-koni authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { ApiProps, ValidatorInfo } from '@subwallet/extension-base/background/KoniTypes';
+import { ApiProps, BasicTxInfo, NetworkJson, ValidatorInfo } from '@subwallet/extension-base/background/KoniTypes';
 import { calculateChainStakedReturn, calculateInflation, calculateValidatorStakedReturn, getCommission, ValidatorExtraInfo } from '@subwallet/extension-koni-base/api/bonding/utils';
+import { getFreeBalance } from '@subwallet/extension-koni-base/api/dotsama/balance';
+import Web3 from 'web3';
+
+import { BN } from '@polkadot/util';
 
 export async function getDarwiniaValidatorsInfo (networkKey: string, dotSamaApi: ApiProps, decimals: number, address: string) {
   const apiProps = await dotSamaApi.isReady;
@@ -160,4 +164,59 @@ export async function getDarwiniaValidatorsInfo (networkKey: string, dotSamaApi:
     bondedValidators,
     maxNominations
   };
+}
+
+export async function getDarwiniaBondingTxInfo (dotSamaApi: ApiProps, controllerId: string, amount: BN, validators: string[], isBondedBefore: boolean, lockPeriod: number, bondDest = 'Staked') {
+  const apiPromise = await dotSamaApi.isReady;
+
+  if (!isBondedBefore) {
+    const bondTx = apiPromise.api.tx.staking.bond(controllerId, { RingBalance: amount, KtonBalance: new BN(0) }, bondDest, new BN(lockPeriod.toString()));
+    const nominateTx = apiPromise.api.tx.staking.nominate(validators);
+    const extrinsic = apiPromise.api.tx.utility.batchAll([bondTx, nominateTx]);
+
+    return extrinsic.paymentInfo(controllerId);
+  } else {
+    const bondTx = apiPromise.api.tx.staking.bondExtra({ RingBalance: amount, KtonBalance: new BN(0) }, new BN(lockPeriod.toString()));
+    const nominateTx = apiPromise.api.tx.staking.nominate(validators);
+    const extrinsic = apiPromise.api.tx.utility.batchAll([bondTx, nominateTx]);
+
+    return extrinsic.paymentInfo(controllerId);
+  }
+}
+
+export async function handleDarwiniaBondingTxInfo (networkJson: NetworkJson, amount: number, targetValidators: string[], isBondedBefore: boolean, networkKey: string, nominatorAddress: string, dotSamaApiMap: Record<string, ApiProps>, web3ApiMap: Record<string, Web3>, lockPeriod: number) {
+  const parsedAmount = amount * (10 ** (networkJson.decimals as number));
+  const binaryAmount = new BN(parsedAmount);
+  const [txInfo, balance] = await Promise.all([
+    getDarwiniaBondingTxInfo(dotSamaApiMap[networkKey], nominatorAddress, binaryAmount, targetValidators, isBondedBefore, lockPeriod),
+    getFreeBalance(networkKey, nominatorAddress, dotSamaApiMap, web3ApiMap)
+  ]);
+
+  const feeString = txInfo.partialFee.toHuman();
+  const binaryBalance = new BN(balance);
+
+  const sumAmount = txInfo.partialFee.add(binaryAmount);
+  const balanceError = sumAmount.gt(binaryBalance);
+
+  return {
+    fee: feeString,
+    balanceError
+  } as BasicTxInfo;
+}
+
+export async function getDarwiniaBondingExtrinsic (dotSamaApi: ApiProps, controllerId: string, amount: number, validators: string[], isBondedBefore: boolean, networkJson: NetworkJson, lockPeriod: number, bondDest = 'Staked') {
+  const apiPromise = await dotSamaApi.isReady;
+  const parsedAmount = amount * (10 ** (networkJson.decimals as number));
+  const binaryAmount = new BN(parsedAmount);
+
+  let bondTx;
+  const nominateTx = apiPromise.api.tx.staking.nominate(validators);
+
+  if (!isBondedBefore) {
+    bondTx = apiPromise.api.tx.staking.bond(controllerId, { RingBalance: binaryAmount, KtonBalance: new BN(0) }, bondDest, new BN(lockPeriod.toString()));
+  } else {
+    bondTx = apiPromise.api.tx.staking.bondExtra({ RingBalance: binaryAmount, KtonBalance: new BN(0) }, new BN(lockPeriod.toString()));
+  }
+
+  return apiPromise.api.tx.utility.batchAll([bondTx, nominateTx]);
 }

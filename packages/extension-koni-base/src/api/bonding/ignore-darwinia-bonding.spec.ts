@@ -8,6 +8,7 @@ import { DOTSAMA_AUTO_CONNECT_MS } from '@subwallet/extension-koni-base/constant
 import { getCurrentProvider } from '@subwallet/extension-koni-base/utils/utils';
 
 import { ApiPromise, WsProvider } from '@polkadot/api';
+import {BN} from "@polkadot/util";
 
 jest.setTimeout(50000);
 
@@ -172,5 +173,16 @@ describe('test DotSama APIs', () => {
       bondedValidators,
       maxNominations
     };
+  });
+
+  test('test get bonding extrinsic', async () => {
+    const provider = new WsProvider(getCurrentProvider(PREDEFINED_NETWORKS.pangolin), DOTSAMA_AUTO_CONNECT_MS);
+    const api = new ApiPromise({ provider });
+    const apiPromise = await api.isReady;
+    const address = '5DLiz4E7znANe9LMWyFHPQvmdhSgdJeoJdgtFtEZ8c3TeBan';
+
+    const extrinsic = apiPromise.tx.staking.bond(address, {RingBalance: new BN(1), KtonBalance: new BN(0)}, 'Staked', new BN(0));
+
+    console.log(extrinsic.paymentInfo(address));
   });
 });

@@ -25,7 +25,8 @@ export const DEFAULT_STAKING_NETWORKS = {
   darwinia: PREDEFINED_NETWORKS.darwinia,
   crab: PREDEFINED_NETWORKS.crab,
   polkadex: PREDEFINED_NETWORKS.polkadex,
-  turing: PREDEFINED_NETWORKS.turing
+  turing: PREDEFINED_NETWORKS.turing,
+  turingStaging: PREDEFINED_NETWORKS.turingStaging
   // astar: NETWORKS.astar,
   // acala: PREDEFINED_NETWORKS.acala,
 };
@@ -55,7 +56,7 @@ export async function stakingOnChainApi (addresses: string[], dotSamaAPIMap: Rec
 
     if (['darwinia', 'crab'].includes(chain)) {
       return getDarwiniaStakingOnChain(parentApi, useAddresses, networks, chain, callback);
-    } else if (['moonbeam', 'moonriver', 'moonbase', 'turing'].includes(chain)) {
+    } else if (['moonbeam', 'moonriver', 'moonbase', 'turing', 'turingStaging'].includes(chain)) {
       return getParaStakingOnChain(parentApi, useAddresses, networks, chain, callback);
     }
 

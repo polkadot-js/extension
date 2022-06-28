@@ -8,7 +8,7 @@ import Web3 from 'web3';
 
 const CHAIN_TYPES: Record<string, string[]> = {
   relay: ['polkadot', 'kusama', 'hydradx', 'aleph', 'edgeware', 'darwinia', 'crab', 'polkadex'],
-  para: ['moonbeam', 'moonriver', 'moonbase', 'turing']
+  para: ['moonbeam', 'moonriver', 'moonbase', 'turing', 'turingStaging']
 };
 
 export async function getChainBondingBasics (networkKey: string, dotSamaApi: ApiProps) {

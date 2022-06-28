@@ -1377,6 +1377,25 @@ export const PREDEFINED_NETWORKS: Record<string, NetworkJson> = {
     getStakingOnChain: true,
     supportBonding: true
   },
+  turingStaging: {
+    chain: 'Turing Staging',
+    genesisHash: '0xd54f0988402deb4548538626ce37e4a318441ea0529ca369400ebec4e04dfe4b',
+    ss58Format: 51,
+    providers: {
+      turing: 'wss://rpc.turing-staging.oak.tech'
+    },
+    currentProviderMode: 'ws',
+    currentProvider: 'turing',
+    key: 'turingStaging',
+    active: false,
+    groups: ['TEST_NET'],
+    paraId: 2114,
+    nativeToken: 'TUR',
+    decimals: 10,
+    crowdloanUrl: 'https://crowdloan.zeitgeist.pm/',
+    getStakingOnChain: true,
+    supportBonding: true
+  },
   mangatax: {
     chain: 'MangataX Public Testnet',
     genesisHash: '0x8032ad7a75a2b9732315592c672ec6d0ddf95308de03a19878ed8627ae8796cc',

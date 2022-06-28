@@ -4,6 +4,7 @@
 import { ApiProps, BasicTxInfo, ChainBondingBasics, NetworkJson, UnlockingStakeInfo, ValidatorInfo } from '@subwallet/extension-base/background/KoniTypes';
 import { BOND_LESS_ACTION, calculateChainStakedReturn, ERA_LENGTH_MAP, PARACHAIN_INFLATION_DISTRIBUTION, parseRawNumber, REVOKE_ACTION } from '@subwallet/extension-koni-base/api/bonding/utils';
 import { getFreeBalance } from '@subwallet/extension-koni-base/api/dotsama/balance';
+import { reformatAddress } from '@subwallet/extension-koni-base/utils/utils';
 import Web3 from 'web3';
 
 import { BN } from '@polkadot/util';
@@ -299,7 +300,7 @@ export async function getParaUnlockingInfo (dotSamaApi: ApiProps, address: strin
     const scheduledRequests = (await apiPromise.api.query.parachainStaking.delegationScheduledRequests(validator)).toHuman() as Record<string, any>[];
 
     scheduledRequests.forEach((request) => {
-      if ((request.delegator as string).toLowerCase() === address.toLowerCase()) {
+      if (reformatAddress(request.delegator as string, 0).toLowerCase() === reformatAddress(address, 0).toLowerCase()) { // need to reformat address
         const redeemRound = parseRawNumber(request.whenExecutable as string);
         let amount;
         let action;

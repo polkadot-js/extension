@@ -49,6 +49,9 @@ export const PARACHAIN_INFLATION_DISTRIBUTION: Record<string, Record<string, num
   },
   turing: { // https://docs.oak.tech/docs/delegators/
     reward: 0.025
+  },
+  turingStaging: { // https://docs.oak.tech/docs/delegators/
+    reward: 0.025
   }
 };
 
@@ -71,7 +74,9 @@ export const ERA_LENGTH_MAP: Record<string, number> = { // in hours
   default: 24,
   moonbeam: 6,
   moonriver: 2,
-  moonbase: 2
+  moonbase: 2,
+  turing: 2,
+  turingStaging: 2
 };
 
 const ALEPH_DEFAULT_UNIFORM_ERA_PAYOUT_PARAMS: UniformEraPayoutInflationParams = {

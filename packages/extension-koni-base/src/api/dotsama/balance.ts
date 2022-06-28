@@ -57,7 +57,7 @@ function subscribeWithDerive (addresses: string[], networkKey: string, networkAP
   };
 }
 
-function subscribeERC20Interval (addresses: string[], networkKey: string, api: ApiPromise, originBalanceItem: BalanceItem, web3ApiMap: Record<string, Web3>, callback: (networkKey: string, rs: BalanceItem) => void): () => void {
+function subscribeERC20Interval (addresses: string[], networkKey: string, api: ApiPromise, web3ApiMap: Record<string, Web3>, subCallback: (rs: Record<string, BalanceChildItem>) => void): () => void {
   let tokenList = {} as TokenInfo[];
   const ERC20ContractMap = {} as Record<string, Contract>;
   const tokenBalanceMap = {} as Record<string, BalanceChildItem>;
@@ -87,8 +87,7 @@ function subscribeERC20Interval (addresses: string[], networkKey: string, api: A
       }
     });
 
-    originBalanceItem.children = tokenBalanceMap;
-    callback && callback(networkKey, originBalanceItem);
+    subCallback(tokenBalanceMap);
   };
 
   getRegistry(networkKey, api, state.getActiveErc20Tokens()).then(({ tokenMap }) => {
@@ -108,9 +107,8 @@ function subscribeERC20Interval (addresses: string[], networkKey: string, api: A
   };
 }
 
-async function subscribeGenshiroTokenBalance (addresses: string[], networkKey: string, api: ApiPromise, originBalanceItem: BalanceItem, callback: (rs: BalanceItem) => void, includeMainToken?: boolean): Promise<() => void> {
-  originBalanceItem.children = originBalanceItem.children || {};
-
+async function subscribeGenshiroTokenBalance (addresses: string[], networkKey: string, api: ApiPromise, mainCallback: (rs: BalanceItem) => void,
+  subCallback: (rs: Record<string, BalanceChildItem>) => void, includeMainToken?: boolean): Promise<() => void> {
   const { tokenMap } = await getRegistry(networkKey, api);
 
   let tokenList = Object.values(tokenMap);
@@ -137,14 +135,13 @@ async function subscribeGenshiroTokenBalance (addresses: string[], networkKey: s
         };
 
         if (includeMainToken && tokenMap[symbol].isMainToken) {
-          originBalanceItem.state = APIItemState.READY;
-          originBalanceItem.free = tokenBalance.free;
+          mainCallback({
+            state: APIItemState.READY,
+            free: tokenBalance.free
+          });
         } else {
-        // @ts-ignore
-          originBalanceItem.children[symbol] = tokenBalance;
+          subCallback({ [symbol]: tokenBalance });
         }
-
-        callback(originBalanceItem);
       });
 
       return unsub;
@@ -162,9 +159,8 @@ async function subscribeGenshiroTokenBalance (addresses: string[], networkKey: s
   };
 }
 
-async function subscribeTokensBalance (addresses: string[], networkKey: string, api: ApiPromise, originBalanceItem: BalanceItem, callback: (rs: BalanceItem) => void, includeMainToken?: boolean) {
-  originBalanceItem.children = originBalanceItem.children || {};
-
+async function subscribeTokensBalance (addresses: string[], networkKey: string, api: ApiPromise, mainCallback: (rs: BalanceItem) => void,
+  subCallback: (rs: Record<string, BalanceChildItem>) => void, includeMainToken?: boolean) {
   const { tokenMap } = await getRegistry(networkKey, api);
   let tokenList = Object.values(tokenMap);
 
@@ -190,16 +186,16 @@ async function subscribeTokensBalance (addresses: string[], networkKey: string, 
         };
 
         if (includeMainToken && tokenMap[symbol].isMainToken) {
-          originBalanceItem.state = APIItemState.READY;
-          originBalanceItem.free = tokenBalance.free;
-          originBalanceItem.reserved = tokenBalance.reserved;
-          originBalanceItem.feeFrozen = tokenBalance.frozen;
+          mainCallback({
+            state: APIItemState.READY,
+            free: tokenBalance.free,
+            reserved: tokenBalance.reserved,
+            feeFrozen: tokenBalance.frozen
+          });
         } else {
         // @ts-ignore
-          originBalanceItem.children[symbol] = tokenBalance;
+          subCallback({ [symbol]: tokenBalance });
         }
-
-        callback(originBalanceItem);
       });
 
       return unsub;
@@ -217,8 +213,7 @@ async function subscribeTokensBalance (addresses: string[], networkKey: string, 
   };
 }
 
-async function subscribeAssetsBalance (addresses: string[], networkKey: string, api: ApiPromise, originBalanceItem: BalanceItem, callback: (rs: BalanceItem) => void) {
-  originBalanceItem.children = originBalanceItem.children || {};
+async function subscribeAssetsBalance (addresses: string[], networkKey: string, api: ApiPromise, subCallback: (rs: Record<string, BalanceChildItem>) => void) {
   const { tokenMap } = await getRegistry(networkKey, api);
   let tokenList = Object.values(tokenMap);
 
@@ -261,10 +256,7 @@ async function subscribeAssetsBalance (addresses: string[], networkKey: string, 
           decimals
         };
 
-        // @ts-ignore
-        originBalanceItem.children[symbol] = tokenBalance;
-
-        callback(originBalanceItem);
+        subCallback({ [symbol]: tokenBalance });
       });
 
       return unsub;
@@ -316,26 +308,32 @@ async function subscribeWithAccountMulti (addresses: string[], networkKey: strin
     });
   }
 
+  function mainCallback (item = {}) {
+    Object.assign(balanceItem, item);
+    callback(networkKey, balanceItem);
+  }
+
+  function subCallback (children: Record<string, BalanceChildItem>) {
+    if (!Object.keys(children).length) {
+      return;
+    }
+
+    balanceItem.children = { ...balanceItem.children, ...children };
+    callback(networkKey, balanceItem);
+  }
+
   let unsub2: () => void;
 
   if (['bifrost', 'acala', 'karura', 'acala_testnet'].includes(networkKey)) {
-    unsub2 = await subscribeTokensBalance(addresses, networkKey, networkAPI.api, balanceItem, (balanceItem) => {
-      callback(networkKey, balanceItem);
-    });
+    unsub2 = await subscribeTokensBalance(addresses, networkKey, networkAPI.api, mainCallback, subCallback);
   } else if (['kintsugi', 'interlay', 'kintsugi_test'].includes(networkKey)) {
-    unsub2 = await subscribeTokensBalance(addresses, networkKey, networkAPI.api, balanceItem, (balanceItem) => {
-      callback(networkKey, balanceItem);
-    }, true);
+    unsub2 = await subscribeTokensBalance(addresses, networkKey, networkAPI.api, mainCallback, subCallback, true);
   } else if (['statemine'].indexOf(networkKey) > -1) {
-    unsub2 = await subscribeAssetsBalance(addresses, networkKey, networkAPI.api, balanceItem, (balanceItem) => {
-      callback(networkKey, balanceItem);
-    });
+    unsub2 = await subscribeAssetsBalance(addresses, networkKey, networkAPI.api, subCallback);
   } else if (['genshiro_testnet', 'genshiro', 'equilibrium_parachain'].includes(networkKey)) {
-    unsub2 = await subscribeGenshiroTokenBalance(addresses, networkKey, networkAPI.api, balanceItem, (balanceItem) => {
-      callback(networkKey, balanceItem);
-    }, true);
+    unsub2 = await subscribeGenshiroTokenBalance(addresses, networkKey, networkAPI.api, mainCallback, subCallback, true);
   } else if (moonbeamBaseChains.includes(networkKey) || networkAPI.isEthereum) {
-    unsub2 = subscribeERC20Interval(addresses, networkKey, networkAPI.api, balanceItem, web3ApiMap, callback);
+    unsub2 = subscribeERC20Interval(addresses, networkKey, networkAPI.api, web3ApiMap, subCallback);
   }
 
   return () => {
@@ -365,9 +363,18 @@ export function subscribeEVMBalance (networkKey: string, api: ApiPromise, addres
       .catch(console.warn);
   }
 
+  function subCallback (children: Record<string, BalanceChildItem>) {
+    if (!Object.keys(children).length) {
+      return;
+    }
+
+    balanceItem.children = { ...balanceItem.children, ...children };
+    callback(networkKey, balanceItem);
+  }
+
   getBalance();
   const interval = setInterval(getBalance, ASTAR_REFRESH_BALANCE_INTERVAL);
-  const unsub2 = subscribeERC20Interval(addresses, networkKey, api, balanceItem, web3ApiMap, callback);
+  const unsub2 = subscribeERC20Interval(addresses, networkKey, api, web3ApiMap, subCallback);
 
   return () => {
     clearInterval(interval);

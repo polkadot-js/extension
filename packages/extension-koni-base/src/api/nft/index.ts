@@ -161,7 +161,8 @@ export class NftHandler {
     updateItem: (data: NftItem) => void,
     updateCollection: (data: NftCollection) => void,
     updateReady: (ready: boolean) => void,
-    updateIds: (networkKey: string, collectionId?: string, nftIds?: string[]) => void) {
+    updateIds: (networkKey: string, collectionId?: string, nftIds?: string[]) => void,
+    updateCollectionIds: (networkKey: string, collectionIds?: string[]) => void) {
     this.setupApi();
     this.setEvmContracts(evmContracts);
     await Promise.all(this.handlers.map(async (handler) => {
@@ -173,7 +174,8 @@ export class NftHandler {
           updateCollection(data);
         },
         updateReady,
-        updateNftIds: updateIds
+        updateNftIds: updateIds,
+        updateCollectionIds
       });
     }));
 

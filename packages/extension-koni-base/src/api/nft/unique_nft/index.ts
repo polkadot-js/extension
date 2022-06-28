@@ -164,6 +164,8 @@ export default class UniqueNftApi extends BaseNftApi {
         }
       }));
 
+      params.updateCollectionIds(SUPPORTED_NFT_NETWORKS.uniqueNft, allCollectionId.map((o) => o.toString()));
+
       await Promise.all(allCollectionId.map(async (collectionId) => {
         const collectionIdStr = collectionId.toString();
 

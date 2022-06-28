@@ -223,6 +223,8 @@ export class RmrkNftApi extends BaseNftApi {
         }
       }
 
+      params.updateCollectionIds(SUPPORTED_NFT_NETWORKS.kusama, allCollections.map((o) => o.collectionId));
+
       allCollections.forEach((collection) => {
         params.updateNftIds(SUPPORTED_NFT_NETWORKS.kusama, collection.collectionId, (allNfts as NftItem[])
           .filter((o) => o?.id && o?.collectionId === collection.collectionId).map((nft) => nft?.id || ''));

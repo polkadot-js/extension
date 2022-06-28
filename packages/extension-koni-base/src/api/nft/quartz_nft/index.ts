@@ -223,6 +223,7 @@ export default class QuartzNftApi extends BaseNftApi {
         }
       }));
 
+      params.updateCollectionIds(SUPPORTED_NFT_NETWORKS.quartz, Object.keys(collectionNftIds));
       Object.entries(collectionNftIds).forEach(([collectionId, nftIds]) => params.updateNftIds(SUPPORTED_NFT_NETWORKS.quartz, collectionId, nftIds));
     } catch (e) {
       console.error('Failed to fetch quartz nft', e);

@@ -171,6 +171,7 @@ export default class StatemineNftApi extends BaseNftApi {
         params.updateReady(true);
       }));
 
+      params.updateCollectionIds(SUPPORTED_NFT_NETWORKS.statemine, Object.keys(collectionNftIds));
       Object.entries(collectionNftIds).forEach(([collectionId, nftIds]) => params.updateNftIds(SUPPORTED_NFT_NETWORKS.statemine, collectionId, nftIds));
     } catch (e) {
       console.error('Failed to fetch statemine nft', e);

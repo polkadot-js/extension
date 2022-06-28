@@ -838,6 +838,22 @@ export default class KoniState extends State {
     });
   }
 
+  public updateCollectionIds (chain: string, address: string, collectionIds?: string[]): void {
+    this.getCurrentAccount((currentAccountInfo) => {
+      if (currentAccountInfo.address === address) {
+        if (!collectionIds?.length) {
+          // Clear all nfts from chain
+          this.nftState.nftList = this.nftState.nftList.filter((nft) => nft.chain !== chain);
+        } else {
+          this.nftState.nftList = this.nftState.nftList.filter((nft) => !(nft.chain === chain &&
+          !collectionIds?.includes(nft?.collectionId || '')));
+        }
+
+        this.publishNftChanged(address);
+      }
+    });
+  }
+
   public resetMasterNftStore (): void {
     this.saveNft(ALL_ACCOUNT_KEY, true);
     this.saveNftCollection(ALL_ACCOUNT_KEY, true);

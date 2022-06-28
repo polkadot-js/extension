@@ -162,6 +162,7 @@ export class AcalaNftApi extends BaseNftApi {
         params.updateReady(true);
       }));
 
+      params.updateCollectionIds(SUPPORTED_NFT_NETWORKS.acala, Object.keys(collectionNftIds));
       Object.entries(collectionNftIds).forEach(([collectionId, nftIds]) => params.updateNftIds(SUPPORTED_NFT_NETWORKS.acala, collectionId, nftIds));
     } catch (e) {
       console.error('Failed to fetch acala nft', e);

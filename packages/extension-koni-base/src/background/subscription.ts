@@ -266,6 +266,9 @@ export class KoniSubscription {
         },
         (networkKey: string, collectionId?: string, nftIds?: string[]) => {
           state.updateNftIds(networkKey, addressKey, collectionId, nftIds);
+        },
+        (networkKey: string, collectionIds?: string[]) => {
+          state.updateCollectionIds(networkKey, addressKey, collectionIds);
         })
         .then(() => {
           console.log('nft state updated');

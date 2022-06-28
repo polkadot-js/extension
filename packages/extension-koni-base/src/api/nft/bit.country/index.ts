@@ -163,6 +163,7 @@ export class BitCountryNftApi extends BaseNftApi {
         params.updateReady(true);
       }));
 
+      params.updateCollectionIds(SUPPORTED_NFT_NETWORKS.bitcountry, Object.keys(collectionNftIds));
       Object.entries(collectionNftIds).forEach(([collectionId, nftIds]) => params.updateNftIds(SUPPORTED_NFT_NETWORKS.bitcountry, collectionId, nftIds));
     } catch (e) {
       console.error('Failed to fetch bit.country nft', e);

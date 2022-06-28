@@ -10,7 +10,8 @@ export interface HandleNftParams {
   updateItem: (data: NftItem) => void,
   updateCollection: (data: NftCollection) => void,
   updateReady: (ready: boolean) => void,
-  updateNftIds: (networkKey: string, collectionId?: string, nftIds?: string[]) => void
+  updateNftIds: (networkKey: string, collectionId?: string, nftIds?: string[]) => void,
+  updateCollectionIds: (networkKey: string, collectionIds?: string[]) => void
 }
 
 export abstract class BaseNftApi {

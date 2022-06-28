@@ -35,6 +35,15 @@ export function injectEvmExtension (evmProvider: EvmProvider): void {
 
   windowInject.dispatchEvent(new Event('subwallet#initialized'));
 
-  // Todo: need more discuss to set it global and not conflict with MetaMask
+  // Publish to global if window.ethereum is not available
+  windowInject.addEventListener('load', () => {
+    if (!windowInject.ethereum) {
+      windowInject.ethereum = evmProvider;
+      windowInject.dispatchEvent(new Event('ethereum#initialized'));
+    }
+  });
+
+  // Todo: Need more discuss to make SubWallet as global before window load because it can be conflict with MetaMask
+  // windowInject.ethereum = evmProvider;
   // windowInject.dispatchEvent(new Event('ethereum#initialized'));
 }

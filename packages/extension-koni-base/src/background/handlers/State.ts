@@ -85,11 +85,15 @@ export default class KoniState extends State {
   private readonly accountRefStore = new AccountRefStore();
   private readonly authorizeStore = new AuthorizeStore();
   readonly #authRequestsV2: Record<string, AuthRequestV2> = {};
+  private readonly evmChainSubject = new Subject<AuthUrls>();
+  private authorizeCached: AuthUrls | undefined = undefined;
+
   private priceStoreReady = false;
   private readonly transactionHistoryStore = new TransactionHistoryStore();
 
   private readonly confirmationsQueueSubject = new BehaviorSubject<ConfirmationsQueue>({
     addNetworkRequest: {},
+    addTokenRequest: {},
     switchNetworkRequest: {},
     evmSignatureRequest: {},
     evmSendTransactionRequest: {}
@@ -184,7 +188,10 @@ export default class KoniState extends State {
               mergedNetworkMap[key].currentProvider = storedNetwork.currentProvider;
             }
 
-            mergedNetworkMap[key].active = storedNetwork.active;
+            if (key !== 'polkadot' && key !== 'kusama') {
+              mergedNetworkMap[key].active = storedNetwork.active;
+            }
+
             mergedNetworkMap[key].coinGeckoKey = storedNetwork.coinGeckoKey;
             mergedNetworkMap[key].crowdloanUrl = storedNetwork.crowdloanUrl;
             mergedNetworkMap[key].blockExplorer = storedNetwork.blockExplorer;
@@ -334,11 +341,27 @@ export default class KoniState extends State {
   }
 
   public setAuthorize (data: AuthUrls, callback?: () => void): void {
-    this.authorizeStore.set('authUrls', data, callback);
+    this.authorizeStore.set('authUrls', data, () => {
+      this.authorizeCached = data;
+      this.evmChainSubject.next(this.authorizeCached);
+      callback && callback();
+    });
   }
 
   public getAuthorize (update: (value: AuthUrls) => void): void {
-    this.authorizeStore.get('authUrls', update);
+    // This action can be use many by DApp interaction => caching it in memory
+    if (this.authorizeCached) {
+      update(this.authorizeCached);
+    } else {
+      this.authorizeStore.get('authUrls', (data) => {
+        this.authorizeCached = data;
+        update(this.authorizeCached);
+      });
+    }
+  }
+
+  public subscribeEvmChainChange (): Subject<AuthUrls> {
+    return this.evmChainSubject;
   }
 
   private updateIconV2 (shouldClose?: boolean): void {
@@ -381,6 +404,11 @@ export default class KoniState extends State {
 
     const complete = (result: boolean | Error, cb: () => void, accounts?: string[]) => {
       const isAllowed = result === true;
+      let isCancelled = false;
+
+      if (!isAllowed && typeof result === 'object' && result.message === 'Cancelled') {
+        isCancelled = true;
+      }
 
       if (accounts && accounts.length) {
         accounts.forEach((acc) => {
@@ -416,8 +444,8 @@ export default class KoniState extends State {
 
         const existed = authorizeList[this.stripUrl(url)];
 
-        // On cancel existed auth not save anything
-        if (existed && !isAllowed) {
+        // On cancel don't save anything
+        if (isCancelled) {
           delete this.#authRequestsV2[id];
           this.updateIconAuthV2(true);
 
@@ -985,6 +1013,21 @@ export default class KoniState extends State {
     return true;
   }
 
+  public async switchEvmNetworkByUrl (shortenUrl: string, networkKey: string): Promise<void> {
+    const authUrls = await this.getAuthList();
+
+    if (authUrls[shortenUrl]) {
+      if (this.networkMap[networkKey] && !this.networkMap[networkKey].active) {
+        this.enableNetworkMap(networkKey);
+      }
+
+      authUrls[shortenUrl].currentEvmNetworkKey = networkKey;
+      this.setAuthorize(authUrls);
+    } else {
+      throw new EvmRpcError('INTERNAL_ERROR', `Not found ${shortenUrl} in auth list`);
+    }
+  }
+
   public async switchNetworkAccount (id: string, url: string, networkKey: string, changeAddress?: string): Promise<boolean> {
     const selectNetwork = this.getNetworkMap()[networkKey];
 
@@ -1025,6 +1068,13 @@ export default class KoniState extends State {
     networkData.requestId = id;
 
     return this.addConfirmation(id, url, 'addNetworkRequest', networkData)
+      .then(({ isApproved }) => {
+        return isApproved;
+      });
+  }
+
+  public async addTokenConfirm (id: string, url: string, tokenInfo: CustomEvmToken) {
+    return this.addConfirmation(id, url, 'addTokenRequest', tokenInfo)
       .then(({ isApproved }) => {
         return isApproved;
       });
@@ -1199,7 +1249,7 @@ export default class KoniState extends State {
     });
   }
 
-  public upsertChainRegistry (tokenData: CustomEvmToken) {
+  public checkTokenKey (tokenData: CustomEvmToken): string {
     const chainRegistry = this.chainRegistryMap[tokenData.chain];
     let tokenKey = '';
 
@@ -1209,6 +1259,13 @@ export default class KoniState extends State {
         break;
       }
     }
+
+    return tokenKey;
+  }
+
+  public upsertChainRegistry (tokenData: CustomEvmToken) {
+    const chainRegistry = this.chainRegistryMap[tokenData.chain];
+    const tokenKey = this.checkTokenKey(tokenData);
 
     if (tokenKey !== '') {
       chainRegistry.tokenMap[tokenKey] = {
@@ -1482,18 +1539,6 @@ export default class KoniState extends State {
     return this.networkMap[key];
   }
 
-  public getEthereumChains (): string[] {
-    const result: string[] = [];
-
-    Object.keys(this.networkMap).forEach((k) => {
-      if (this.networkMap[k].isEthereum) {
-        result.push(k);
-      }
-    });
-
-    return result;
-  }
-
   public subscribeNetworkMap () {
     return this.networkMapStore.getSubject();
   }
@@ -1598,6 +1643,12 @@ export default class KoniState extends State {
     this.updateServiceInfo();
     this.lockNetworkMap = false;
 
+    if (this.networkMap[networkKey].isEthereum) {
+      this.getAuthorize((data) => {
+        this.evmChainSubject.next(data);
+      });
+    }
+
     return true;
   }
 
@@ -1610,7 +1661,7 @@ export default class KoniState extends State {
     const targetNetworkKeys: string[] = [];
 
     for (const [key, network] of Object.entries(this.networkMap)) {
-      if (network.active) {
+      if (network.active && key !== 'polkadot' && key !== 'kusama') {
         targetNetworkKeys.push(key);
         this.networkMap[key].active = false;
       }
@@ -1633,6 +1684,10 @@ export default class KoniState extends State {
     this.updateServiceInfo();
     this.lockNetworkMap = false;
 
+    this.getAuthorize((data) => {
+      this.evmChainSubject.next(data);
+    });
+
     return true;
   }
 
@@ -1653,6 +1708,12 @@ export default class KoniState extends State {
     this.networkMapStore.set('NetworkMap', this.networkMap);
     this.updateServiceInfo();
     this.lockNetworkMap = false;
+
+    if (this.networkMap[networkKey].isEthereum) {
+      this.getAuthorize((data) => {
+        this.evmChainSubject.next(data);
+      });
+    }
 
     return true;
   }
@@ -1685,6 +1746,10 @@ export default class KoniState extends State {
 
     this.updateServiceInfo();
     this.lockNetworkMap = false;
+
+    this.getAuthorize((data) => {
+      this.evmChainSubject.next(data);
+    });
 
     return true;
   }
@@ -2020,23 +2085,29 @@ export default class KoniState extends State {
   }
 
   public async evmSign (id: string, url: string, method: string, params: any, allowedAccounts: string[]): Promise<string | undefined> {
-    let address: string;
+    let address = '';
     let payload: any;
+    const [p1, p2] = params as [string, string];
 
-    // Detech params
-    if (method === 'eth_sign') {
-      [address, payload] = params as [string, string];
-    } else if (['eth_signTypedData_v3', 'eth_signTypedData_v4'].indexOf(method) > -1) {
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-      [address, payload] = params as [string, any];
+    if (typeof p1 === 'string' && isEthereumAddress(p1)) {
+      address = p1;
+      payload = p2;
+    } else if (typeof p2 === 'string' && isEthereumAddress(p2)) {
+      address = p2;
+      payload = p1;
+    }
 
+    if (address === '' || !payload) {
+      throw new EvmRpcError('INVALID_PARAMS', 'Not found address or payload to sign');
+    }
+
+    if (['eth_sign', 'personal_sign', 'eth_signTypedData', 'eth_signTypedData_v1', 'eth_signTypedData_v3', 'eth_signTypedData_v4'].indexOf(method) < 0) {
+      throw new EvmRpcError('INVALID_PARAMS', 'Not found sign method');
+    }
+
+    if (['eth_signTypedData_v3', 'eth_signTypedData_v4'].indexOf(method) > -1) {
       // eslint-disable-next-line @typescript-eslint/no-unsafe-argument,@typescript-eslint/no-unsafe-assignment
       payload = JSON.parse(payload);
-    } else if (['personal_sign', 'eth_signTypedData', 'eth_signTypedData'].indexOf(method) > -1) {
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-      [payload, address] = params as [any, string];
-    } else {
-      throw new EvmRpcError('INVALID_PARAMS', 'Not found sign method');
     }
 
     // Check sign abiblity
@@ -2095,11 +2166,11 @@ export default class KoniState extends State {
       case 'eth_signTypedData_v4':
         return await simpleKeyring.signTypedData_v4(address, payload);
       default:
-        throw new Error('Not found sign method');
+        throw new EvmRpcError('INVALID_PARAMS', 'Not found sign method');
     }
   }
 
-  public async evmSendTransaction (id: string, url: string, networkKey: string, transactionParams: EvmSendTransactionParams): Promise<string | undefined> {
+  public async evmSendTransaction (id: string, url: string, networkKey: string, allowedAccounts: string[], transactionParams: EvmSendTransactionParams): Promise<string | undefined> {
     const web3 = this.getWeb3ApiMap()[networkKey];
 
     const autoFormatNumber = (val?: string | number): string | undefined => {
@@ -2139,7 +2210,13 @@ export default class KoniState extends State {
 
     const estimateGas = new BN(gasPrice.toString()).mul(new BN(transaction.gas)).toString();
 
-    const fromAddress = transaction.from as string; // Address is validated in before step
+    // Address is validated in before step
+    const fromAddress = allowedAccounts.find((account) => (account.toLowerCase() === (transaction.from as string).toLowerCase()));
+
+    if (!fromAddress) {
+      throw new EvmRpcError('INVALID_PARAMS', 'From address is not in available for ' + url);
+    }
+
     // Validate balance
     const balance = new BN(await web3.eth.getBalance(fromAddress) || 0);
 
@@ -2209,12 +2286,12 @@ export default class KoniState extends State {
 
           return new Promise<string>((resolve, reject) => {
             signTransaction.rawTransaction && web3.eth.sendSignedTransaction(signTransaction.rawTransaction)
-              .on('transactionHash', (hash) => {
+              .once('transactionHash', (hash) => {
                 transactionHash = hash;
                 resolve(hash);
               })
               .once('receipt', setTransactionHistory)
-              .on('error', (e) => {
+              .once('error', (e) => {
                 setFailedHistory(transactionHash);
                 reject(e);
               });
@@ -2322,6 +2399,8 @@ export default class KoniState extends State {
     Object.entries(request).forEach(([type, result]) => {
       if (type === 'addNetworkRequest') {
         _completeConfirmation(type, result as ConfirmationDefinitions['addNetworkRequest'][1]);
+      } else if (type === 'addTokenRequest') {
+        _completeConfirmation(type, result as ConfirmationDefinitions['addTokenRequest'][1]);
       } else if (type === 'switchNetworkRequest') {
         _completeConfirmation(type, result as ConfirmationDefinitions['switchNetworkRequest'][1]);
       } else if (type === 'evmSignatureRequest') {

@@ -269,37 +269,39 @@ export async function getUnlockingInfo (dotSamaApi: ApiProps, address: string, n
     apiPromise.api.derive.session.progress()
   ]);
 
-  // @ts-ignore
-  const mapped = stakingInfo?.unlocking
-    .filter(({ remainingEras, value }) => value.gt(BN_ZERO) && remainingEras.gt(BN_ZERO))
-    .map((unlock): [Unlocking, BN, BN] => [
-      unlock,
-      unlock.remainingEras,
-      unlock.remainingEras
-        .sub(BN_ONE)
-        .imul(progress.eraLength)
-        .iadd(progress.eraLength)
-        .isub(progress.eraProgress)
-    ]);
-
   // Only get the nearest redeemable
   let minRemainingEra = BN_ZERO;
   let nextWithdrawalAmount = BN_ZERO;
 
-  mapped.forEach(([{ value }, eras]) => {
-    if (minRemainingEra === BN_ZERO) {
-      minRemainingEra = eras;
-      nextWithdrawalAmount = value;
-    } else if (eras.lt(minRemainingEra)) {
-      minRemainingEra = eras;
-      nextWithdrawalAmount = value;
-    } else if (eras.eq(minRemainingEra)) {
-      nextWithdrawalAmount = nextWithdrawalAmount.add(value);
-    }
-  });
+  if (stakingInfo.unlocking) {
+    // @ts-ignore
+    const mapped = stakingInfo.unlocking
+      .filter(({ remainingEras, value }) => value.gt(BN_ZERO) && remainingEras.gt(BN_ZERO))
+      .map((unlock): [Unlocking, BN, BN] => [
+        unlock,
+        unlock.remainingEras,
+        unlock.remainingEras
+          .sub(BN_ONE)
+          .imul(progress.eraLength)
+          .iadd(progress.eraLength)
+          .isub(progress.eraProgress)
+      ]);
+
+    mapped.forEach(([{ value }, eras]) => {
+      if (minRemainingEra === BN_ZERO) {
+        minRemainingEra = eras;
+        nextWithdrawalAmount = value;
+      } else if (eras.lt(minRemainingEra)) {
+        minRemainingEra = eras;
+        nextWithdrawalAmount = value;
+      } else if (eras.eq(minRemainingEra)) {
+        nextWithdrawalAmount = nextWithdrawalAmount.add(value);
+      }
+    });
+  }
 
   return {
-    nextWithdrawal: minRemainingEra.muln(ERA_LENGTH_MAP[networkKey] | ERA_LENGTH_MAP.default),
+    nextWithdrawal: minRemainingEra.muln(ERA_LENGTH_MAP[networkKey] || ERA_LENGTH_MAP.default),
     redeemable: stakingInfo.redeemable,
     nextWithdrawalAmount
   };

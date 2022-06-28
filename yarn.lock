@@ -4386,7 +4386,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@subwallet/extension-base@^0.4.6-1, @subwallet/extension-base@workspace:packages/extension-base":
+"@subwallet/extension-base@^0.4.7-0, @subwallet/extension-base@workspace:packages/extension-base":
   version: 0.0.0-use.local
   resolution: "@subwallet/extension-base@workspace:packages/extension-base"
   dependencies:
@@ -4402,10 +4402,10 @@ __metadata:
     "@polkadot/ui-settings": ^0.89.1
     "@polkadot/util": ^8.3.1
     "@polkadot/util-crypto": ^8.3.1
-    "@subwallet/extension-chains": ^0.4.6-1
-    "@subwallet/extension-dapp": ^0.4.6-1
-    "@subwallet/extension-inject": ^0.4.6-1
-    "@subwallet/extension-mocks": ^0.4.6-1
+    "@subwallet/extension-chains": ^0.4.7-0
+    "@subwallet/extension-dapp": ^0.4.7-0
+    "@subwallet/extension-inject": ^0.4.7-0
+    "@subwallet/extension-mocks": ^0.4.7-0
     ethereumjs-tx: ^2.1.2
     eventemitter3: ^4.0.7
     rxjs: ^7.5.1
@@ -4415,7 +4415,7 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@subwallet/extension-chains@^0.4.6-1, @subwallet/extension-chains@workspace:packages/extension-chains":
+"@subwallet/extension-chains@^0.4.7-0, @subwallet/extension-chains@workspace:packages/extension-chains":
   version: 0.0.0-use.local
   resolution: "@subwallet/extension-chains@workspace:packages/extension-chains"
   dependencies:
@@ -4423,7 +4423,7 @@ __metadata:
     "@polkadot/networks": ^8.3.1
     "@polkadot/util": ^8.3.1
     "@polkadot/util-crypto": ^8.3.1
-    "@subwallet/extension-inject": ^0.4.6-1
+    "@subwallet/extension-inject": ^0.4.7-0
   peerDependencies:
     "@polkadot/api": "*"
     "@polkadot/types": "*"
@@ -4438,21 +4438,21 @@ __metadata:
     "@metamask/detect-provider": ^1.2.0
     "@polkadot/types": ^7.3.1
     "@polkadot/util": ^8.3.1
-    "@subwallet/extension-inject": ^0.4.6-1
+    "@subwallet/extension-inject": ^0.4.7-0
     web3: ^1.6.1
   peerDependencies:
     "@polkadot/util": "*"
   languageName: unknown
   linkType: soft
 
-"@subwallet/extension-dapp@^0.4.6-1, @subwallet/extension-dapp@workspace:packages/extension-dapp":
+"@subwallet/extension-dapp@^0.4.7-0, @subwallet/extension-dapp@workspace:packages/extension-dapp":
   version: 0.0.0-use.local
   resolution: "@subwallet/extension-dapp@workspace:packages/extension-dapp"
   dependencies:
     "@babel/runtime": ^7.16.7
     "@polkadot/util": ^8.3.1
     "@polkadot/util-crypto": ^8.3.1
-    "@subwallet/extension-inject": ^0.4.6-1
+    "@subwallet/extension-inject": ^0.4.7-0
   peerDependencies:
     "@polkadot/api": "*"
     "@polkadot/util": "*"
@@ -4460,7 +4460,7 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@subwallet/extension-inject@^0.4.6-1, @subwallet/extension-inject@workspace:packages/extension-inject":
+"@subwallet/extension-inject@^0.4.7-0, @subwallet/extension-inject@workspace:packages/extension-inject":
   version: 0.0.0-use.local
   resolution: "@subwallet/extension-inject@workspace:packages/extension-inject"
   dependencies:
@@ -4478,7 +4478,7 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@subwallet/extension-koni-base@^0.4.6-1, @subwallet/extension-koni-base@workspace:packages/extension-koni-base":
+"@subwallet/extension-koni-base@^0.4.7-0, @subwallet/extension-koni-base@workspace:packages/extension-koni-base":
   version: 0.0.0-use.local
   resolution: "@subwallet/extension-koni-base@workspace:packages/extension-koni-base"
   dependencies:
@@ -4517,11 +4517,11 @@ __metadata:
     "@snowfork/snowbridge-types": 0.2.7
     "@sora-substrate/type-definitions": 1.7.48
     "@subsocial/types": 0.6.5
-    "@subwallet/extension-base": ^0.4.6-1
-    "@subwallet/extension-chains": ^0.4.6-1
-    "@subwallet/extension-dapp": ^0.4.6-1
-    "@subwallet/extension-inject": ^0.4.6-1
-    "@subwallet/extension-mocks": ^0.4.6-1
+    "@subwallet/extension-base": ^0.4.7-0
+    "@subwallet/extension-chains": ^0.4.7-0
+    "@subwallet/extension-dapp": ^0.4.7-0
+    "@subwallet/extension-inject": ^0.4.7-0
+    "@subwallet/extension-mocks": ^0.4.7-0
     "@unique-nft/types": 0.3.1
     "@zeitgeistpm/type-defs": 0.4.5
     "@zeroio/type-definitions": 0.0.14
@@ -4531,6 +4531,7 @@ __metadata:
     ethereumjs-tx: ^2.1.2
     eventemitter3: ^4.0.7
     graphql: ^16.3.0
+    json-rpc-engine: ^6.1.0
     moonbeam-types-bundle: 2.0.3
     pontem-types-bundle: 1.0.15
     protobufjs: ^6.11.2
@@ -4542,7 +4543,7 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@subwallet/extension-koni-ui@^0.4.6-1, @subwallet/extension-koni-ui@workspace:packages/extension-koni-ui":
+"@subwallet/extension-koni-ui@^0.4.7-0, @subwallet/extension-koni-ui@workspace:packages/extension-koni-ui":
   version: 0.0.0-use.local
   resolution: "@subwallet/extension-koni-ui@workspace:packages/extension-koni-ui"
   dependencies:
@@ -4566,12 +4567,12 @@ __metadata:
     "@polkadot/util": ^8.3.1
     "@polkadot/util-crypto": ^8.3.1
     "@reduxjs/toolkit": ^1.7.1
-    "@subwallet/extension-base": ^0.4.6-1
-    "@subwallet/extension-chains": ^0.4.6-1
-    "@subwallet/extension-dapp": ^0.4.6-1
-    "@subwallet/extension-inject": ^0.4.6-1
-    "@subwallet/extension-koni-base": ^0.4.6-1
-    "@subwallet/extension-mocks": ^0.4.6-1
+    "@subwallet/extension-base": ^0.4.7-0
+    "@subwallet/extension-chains": ^0.4.7-0
+    "@subwallet/extension-dapp": ^0.4.7-0
+    "@subwallet/extension-inject": ^0.4.7-0
+    "@subwallet/extension-koni-base": ^0.4.7-0
+    "@subwallet/extension-mocks": ^0.4.7-0
     "@types/bn.js": ^4.11.6
     "@types/enzyme": ^3.10.11
     "@types/enzyme-adapter-react-16": ^1.0.6
@@ -4623,10 +4624,10 @@ __metadata:
   dependencies:
     "@babel/runtime": ^7.16.7
     "@polkadot/dev": ^0.65.23
-    "@subwallet/extension-base": ^0.4.6-1
-    "@subwallet/extension-inject": ^0.4.6-1
-    "@subwallet/extension-koni-base": ^0.4.6-1
-    "@subwallet/extension-koni-ui": ^0.4.6-1
+    "@subwallet/extension-base": ^0.4.7-0
+    "@subwallet/extension-inject": ^0.4.7-0
+    "@subwallet/extension-koni-base": ^0.4.7-0
+    "@subwallet/extension-koni-ui": ^0.4.7-0
     assert: ^2.0.0
     babel-loader: ^8.2.3
     browser-resolve: ^2.0.0
@@ -4651,7 +4652,7 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@subwallet/extension-mocks@^0.4.6-1, @subwallet/extension-mocks@workspace:packages/extension-mocks":
+"@subwallet/extension-mocks@^0.4.7-0, @subwallet/extension-mocks@workspace:packages/extension-mocks":
   version: 0.0.0-use.local
   resolution: "@subwallet/extension-mocks@workspace:packages/extension-mocks"
   dependencies:
@@ -4666,10 +4667,10 @@ __metadata:
   dependencies:
     "@babel/runtime": ^7.16.7
     "@polkadot/dev": ^0.65.23
-    "@subwallet/extension-base": ^0.4.6-1
-    "@subwallet/extension-inject": ^0.4.6-1
-    "@subwallet/extension-koni-base": ^0.4.6-1
-    "@subwallet/extension-koni-ui": ^0.4.6-1
+    "@subwallet/extension-base": ^0.4.7-0
+    "@subwallet/extension-inject": ^0.4.7-0
+    "@subwallet/extension-koni-base": ^0.4.7-0
+    "@subwallet/extension-koni-ui": ^0.4.7-0
     assert: ^2.0.0
     babel-loader: ^8.2.3
     browser-resolve: ^2.0.0
@@ -10872,6 +10873,15 @@ __metadata:
   languageName: node
   linkType: hard
 
+"eth-rpc-errors@npm:^4.0.2":
+  version: 4.0.3
+  resolution: "eth-rpc-errors@npm:4.0.3"
+  dependencies:
+    fast-safe-stringify: ^2.0.6
+  checksum: 5fa31d1a10fdb340733b9a55e38e7687222c501052ca20743cef4d0c911a9bbcc0cad54aa6bf3e4b428604c071ff519803060e1cbc79ddb7c9257c11d407d32a
+  languageName: node
+  linkType: hard
+
 "eth-sig-util@npm:^3.0.1":
   version: 3.0.1
   resolution: "eth-sig-util@npm:3.0.1"
@@ -11349,6 +11359,13 @@ __metadata:
   dependencies:
     fastest-levenshtein: ^1.0.7
   checksum: 02732ba6c656797ca7e987c25f3e53718c8fcc39a4bfab46def78eef7a8729eb629632d4a7eca4c27a33e10deabffa9984839557e18a96e91ecf7ccaeedb9890
+  languageName: node
+  linkType: hard
+
+"fast-safe-stringify@npm:^2.0.6":
+  version: 2.1.1
+  resolution: "fast-safe-stringify@npm:2.1.1"
+  checksum: a851cbddc451745662f8f00ddb622d6766f9bd97642dabfd9a405fb0d646d69fc0b9a1243cbf67f5f18a39f40f6fa821737651ff1bceeba06c9992ca2dc5bd3d
   languageName: node
   linkType: hard
 
@@ -14719,6 +14736,16 @@ __metadata:
   version: 2.3.1
   resolution: "json-parse-even-better-errors@npm:2.3.1"
   checksum: 798ed4cf3354a2d9ccd78e86d2169515a0097a5c133337807cdf7f1fc32e1391d207ccfc276518cc1d7d8d4db93288b8a50ba4293d212ad1336e52a8ec0a941f
+  languageName: node
+  linkType: hard
+
+"json-rpc-engine@npm:^6.1.0":
+  version: 6.1.0
+  resolution: "json-rpc-engine@npm:6.1.0"
+  dependencies:
+    "@metamask/safe-event-emitter": ^2.0.0
+    eth-rpc-errors: ^4.0.2
+  checksum: 33b6c9bbd81abf8e323a0281ee05871713203c40d34a4d0bda27706cd0a0935c7b51845238ba89b73027e44ebc8034bbd82db9f962e6c578eb922d9b95acc8bd
   languageName: node
   linkType: hard
 

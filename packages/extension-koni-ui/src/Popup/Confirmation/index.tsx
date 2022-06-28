@@ -36,7 +36,7 @@ function Confirmation ({ className, match: { params: { address } } }: Props): Re
   const [requestActionText2] = useState<string | undefined>(undefined);
   const [cancelLabel] = useState<string>('Cancel');
   const [confirmLabel, setConfirmLabel] = useState<string>('Confirm');
-  const [currentConfirmation, setCurrentConfirmation] = useState<ConfirmationDefinitions['addNetworkRequest' | 'switchNetworkRequest' | 'evmSignatureRequest' | 'evmSendTransactionRequest'][0] | undefined>(undefined);
+  const [currentConfirmation, setCurrentConfirmation] = useState<ConfirmationDefinitions['addNetworkRequest' | 'addTokenRequest' | 'switchNetworkRequest' | 'evmSignatureRequest' | 'evmSendTransactionRequest'][0] | undefined>(undefined);
   const [currentConfirmationType, setCurrentConfirmationType] = useState<ConfirmationType | undefined>(undefined);
   const [informationBlock, setInformationBlock] = useState<React.ReactElement>(<></>);
   const [requirePassword, setRequirePassword] = useState(false);
@@ -56,7 +56,7 @@ function Confirmation ({ className, match: { params: { address } } }: Props): Re
   );
 
   const setConfirmation = useCallback(
-    (confirmation: ConfirmationDefinitions['addNetworkRequest' | 'switchNetworkRequest' | 'evmSignatureRequest' | 'evmSendTransactionRequest'][0]) => {
+    (confirmation: ConfirmationDefinitions['addNetworkRequest' | 'addTokenRequest' | 'switchNetworkRequest' | 'evmSignatureRequest' | 'evmSendTransactionRequest'][0]) => {
       if (confirmation) {
         setCurrentConfirmation(confirmation);
         setNetwork(networkMap[confirmation.networkKey || '']);
@@ -103,9 +103,19 @@ function Confirmation ({ className, match: { params: { address } } }: Props): Re
 
       payload.requestId = id;
       store.dispatch({ type: 'networkConfigParams/update', payload: { data: payload, mode: 'create' } as NetworkConfigParams });
-
-      window.localStorage.setItem('popupNavigation', '/account/config-network');
       onAction('/account/config-network');
+    } else if (checkConfirmation('addTokenRequest')) {
+      const confirmation = Object.values(confirmations.addTokenRequest)[0];
+      const { payload } = confirmation;
+
+      setConfirmation(confirmation);
+      setCurrentConfirmationType('addTokenRequest');
+
+      if (payload.type === 'erc20') {
+        onAction('/account/import-evm-token');
+      } else if (payload.type === 'erc721') {
+        onAction('/account/import-evm-nft');
+      }
     } else if (checkConfirmation('switchNetworkRequest')) {
       const confirmation = Object.values(confirmations.switchNetworkRequest)[0];
 

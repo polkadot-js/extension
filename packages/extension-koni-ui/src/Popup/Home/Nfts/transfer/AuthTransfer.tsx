@@ -202,17 +202,17 @@ function AuthTransfer ({ chain, className, collectionId, nftItem, recipientAddre
       <Modal>
         <div>
           <div className={'header-confirm'}>
-            <div />
+            <div className={'header-alignment'} />
             <div
               className={'header-title-confirm'}
             >
               Authorize transaction
             </div>
             <div
-              className={'close-button-confirm'}
+              className={'close-button-confirm header-alignment'}
               onClick={hideConfirm}
             >
-              x
+              Cancel
             </div>
           </div>
 
@@ -335,8 +335,14 @@ export default React.memo(styled(AuthTransfer)(({ theme }: Props) => `
   }
 
   .close-button-confirm {
-    font-size: 20px;
+    text-align: right;
+    font-size: 14px;
     cursor: pointer;
+    color: ${theme.textColor3}
+  }
+
+  .header-alignment {
+    width: 20%;
   }
 
   .header-title-confirm {

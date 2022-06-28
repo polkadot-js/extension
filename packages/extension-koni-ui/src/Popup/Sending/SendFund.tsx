@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { ChainRegistry, NetworkJson } from '@subwallet/extension-base/background/KoniTypes';
+import { reformatAddress } from '@subwallet/extension-koni-base/utils';
 import { AccountContext, ActionContext, Warning } from '@subwallet/extension-koni-ui/components';
 import Button from '@subwallet/extension-koni-ui/components/Button';
 import InputBalance from '@subwallet/extension-koni-ui/components/InputBalance';
@@ -20,7 +21,7 @@ import { getAuthTransactionFeeInfo, getBalanceFormat, getDefaultValue, getMainTo
 import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { ThemeProps, TransferResultType } from '@subwallet/extension-koni-ui/types';
 import { getEthereumChains } from '@subwallet/extension-koni-ui/util';
-import React, { useCallback, useContext, useEffect, useState } from 'react';
+import React, { useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { useSelector } from 'react-redux';
 import styled from 'styled-components';
 
@@ -78,6 +79,9 @@ function Wrapper ({ className = '', theme }: Props): React.ReactElement<Props> {
 
 function SendFund ({ chainRegistryMap, className, defaultValue, networkMap }: ContentProps): React.ReactElement {
   const { t } = useTranslation();
+
+  const { accounts } = useContext(AccountContext);
+
   const [amount, setAmount] = useState<BN | undefined>(BN_ZERO);
   const [recipientId, setRecipientId] = useState<string | null>(null);
   const [isShowTxModal, setShowTxModal] = useState<boolean>(false);
@@ -116,7 +120,31 @@ function SendFund ({ chainRegistryMap, className, defaultValue, networkMap }: Co
   const [maxTransfer, noFees] = getMaxTransferAndNoFees(fee, feeSymbol, selectedToken, mainTokenInfo.symbol, senderFreeBalance, existentialDeposit);
   const canToggleAll = !!isSupportTransferAll && !!maxTransfer && !reference && !!recipientId;
   const valueToTransfer = canToggleAll && isAll ? maxTransfer.toString() : (amount?.toString() || '0');
+  const selectedNetwork = useMemo((): NetworkJson => {
+    return networkMap[selectedNetworkKey];
+  }, [networkMap, selectedNetworkKey]);
+
+  const isBlockHardware = useMemo((): boolean => {
+    if (senderId) {
+      const prefix = 42;
+      const account = accounts.find((acc) => reformatAddress(acc.address, prefix) === reformatAddress(senderId, prefix));
+
+      if (!account) {
+        return false;
+      } else {
+        if (account.isHardware) {
+          const network = networkMap[selectedNetworkKey];
+
+          return network.genesisHash !== account.originGenesisHash;
+        }
+      }
+    }
+
+    return false;
+  }, [senderId, accounts, networkMap, selectedNetworkKey]);
+
   const canMakeTransfer = isSupportTransfer &&
+    !isBlockHardware &&
     !isGasRequiredExceedsError &&
     !recipientPhish &&
     !!recipientId &&
@@ -329,6 +357,14 @@ function SendFund ({ chainRegistryMap, className, defaultValue, networkMap }: Co
                   value={isAll}
                 />
               </div>
+            )}
+
+            {isBlockHardware && (
+              <Warning
+                className={'send-fund-warning'}
+              >
+                {t<string>('The sender account is Ledger account. This is not support {{chain}}', { replace: { chain: selectedNetwork.chain } })}
+              </Warning>
             )}
 
             {!!recipientPhish && (

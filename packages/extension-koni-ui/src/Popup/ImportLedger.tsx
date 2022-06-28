@@ -12,7 +12,7 @@ import settings from '@polkadot/ui-settings';
 import { AccountInfoEl, ActionContext, Button, ButtonArea, Dropdown, Warning } from '../components';
 import { useLedger } from '../hooks/useLedger';
 import useTranslation from '../hooks/useTranslation';
-import { createAccountHardware } from '../messaging';
+import { createAccountHardwareV2 } from '../messaging';
 import { Header, Name } from '../partials';
 import { ThemeProps } from '../types';
 
@@ -77,7 +77,14 @@ function ImportLedger ({ className }: Props): React.ReactElement {
       if (address && genesis && name) {
         setIsBusy(true);
 
-        createAccountHardware(address, 'ledger', accountIndex, addressOffset, name, genesis)
+        createAccountHardwareV2({
+          address: address,
+          hardwareType: 'ledger',
+          accountIndex: accountIndex,
+          addressOffset: addressOffset,
+          name: name,
+          genesisHash: genesis
+        })
           .then(() => onAction('/'))
           .catch((error: Error) => {
             console.error(error);

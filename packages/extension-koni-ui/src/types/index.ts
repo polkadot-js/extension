@@ -16,6 +16,7 @@ export interface Recoded {
   account: AccountJson | null;
   formatted: string | null;
   genesisHash?: string | null;
+  originGenesisHash?: string | null;
   prefix?: number;
   isEthereum: boolean;
 }

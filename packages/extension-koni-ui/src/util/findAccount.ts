@@ -12,7 +12,7 @@ export const createFindAccountHandler = (accounts: AccountJson[]): FindAccountFu
   return (networkMap: Record<string, NetworkJson>, address: string, genesisHash?: string): AccountJson | undefined => {
     if (!genesisHash) {
       return accounts.find((account) => {
-        const formattedAddress = reformatAddress(account.address, 0, true);
+        const formattedAddress = reformatAddress(account.address, 42, true);
 
         return formattedAddress.toLowerCase() === address.toLowerCase();
       });

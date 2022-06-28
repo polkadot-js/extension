@@ -26,7 +26,7 @@ interface Props extends AccountJson {
   changeAccountCallback?: (address: string) => void;
 }
 
-function Account ({ address, changeAccountCallback, className, closeSetting, genesisHash, name, parentName, suri, type }: Props): React.ReactElement<Props> {
+function Account ({ address, changeAccountCallback, className, closeSetting, genesisHash, name, originGenesisHash, parentName, suri, type }: Props): React.ReactElement<Props> {
   const [isSelected, setSelected] = useState(false);
   const { accounts } = useContext(AccountContext);
   const onAction = useContext(ActionContext);
@@ -143,6 +143,7 @@ function Account ({ address, changeAccountCallback, className, closeSetting, gen
         genesisHash={genesisHash}
         isShowBanner={!_isAllAccount}
         name={name}
+        originGenesisHash={originGenesisHash}
         parentName={parentName}
         showCopyBtn={false}
         suri={suri}

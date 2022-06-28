@@ -28,6 +28,7 @@ export interface Props {
   address?: string | null;
   className?: string;
   genesisHash?: string | null;
+  originGenesisHash?: string | null;
   isExternal?: boolean | null;
   isHardware?: boolean | null;
   name?: string | null;
@@ -43,13 +44,14 @@ export interface Props {
   accountSplitPart?: 'both' | 'left' | 'right';
 }
 
-function AccountInfo ({ accountSplitPart = 'both', address, addressHalfLength = 10, className, genesisHash, iconSize = 32, isEthereum, isExternal, isHardware, isShowAddress = true, isShowBanner = true, name, parentName, showCopyBtn = true, suri, type: givenType }: Props): React.ReactElement<Props> {
+function AccountInfo ({ accountSplitPart = 'both', address, addressHalfLength = 10, className, genesisHash, iconSize = 32, isEthereum, isExternal, isHardware, isShowAddress = true, isShowBanner = true, name, originGenesisHash, parentName, showCopyBtn = true, suri, type: givenType }: Props): React.ReactElement<Props> {
   const { t } = useTranslation();
   const { accounts } = useContext(AccountContext);
   const [{ account,
     formatted,
     genesisHash: recodedGenesis,
     isEthereum: _isEthereum,
+    originGenesisHash: recodedOrigin,
     prefix }, setRecoded] = useState<Recoded>(defaultRecoded);
   const networkMap = useSelector((state: RootState) => state.networkMap);
   const { show } = useToast();
@@ -80,7 +82,7 @@ function AccountInfo ({ accountSplitPart = 'both', address, addressHalfLength = 
     return null;
   }, [networkMap]);
 
-  const networkInfo = getNetworkInfoByGenesisHash(genesisHash || recodedGenesis);
+  const networkInfo = getNetworkInfoByGenesisHash(originGenesisHash || genesisHash || recodedOrigin || recodedGenesis);
 
   useEffect((): void => {
     if (!address) {

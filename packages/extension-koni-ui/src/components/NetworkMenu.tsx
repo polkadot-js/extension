@@ -15,8 +15,11 @@ import { ActionContext } from '@subwallet/extension-koni-ui/contexts';
 import useGenesisHashOptions, { NetworkSelectOption } from '@subwallet/extension-koni-ui/hooks/useGenesisHashOptions';
 import useTranslation from '@subwallet/extension-koni-ui/hooks/useTranslation';
 import { triggerAccountsSubscription } from '@subwallet/extension-koni-ui/messaging';
+import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { getLogoByGenesisHash } from '@subwallet/extension-koni-ui/util/logoByGenesisHashMap';
-import React, { useCallback, useContext, useEffect, useState } from 'react';
+import CN from 'classnames';
+import React, { useCallback, useContext, useEffect, useMemo, useState } from 'react';
+import { useSelector } from 'react-redux';
 import styled from 'styled-components';
 
 interface Props extends ThemeProps {
@@ -36,6 +39,27 @@ function NetworkMenu ({ className, currentNetwork, genesisOptions, isNotHaveAcco
   const [filteredNetwork, setFilteredNetwork] = useState('');
   const [selectedGroup, setSelectedGroup] = useState('');
   const navigate = useContext(ActionContext);
+
+  const { currentAccount } = useSelector((state: RootState) => state);
+
+  const isHardware = useMemo((): boolean => {
+    return !!currentAccount?.account?.isHardware;
+  }, [currentAccount?.account?.isHardware]);
+
+  const originGenesisHash = useMemo((): string | null | undefined => {
+    return currentAccount?.account?.originGenesisHash;
+  }, [currentAccount?.account?.originGenesisHash]);
+
+  const isAllowAllNetwork = useMemo((): boolean => {
+    if (isHardware) {
+      const exists = genesisOptions.find((hash) => hash.value === originGenesisHash);
+
+      return !exists;
+    } else {
+      return true;
+    }
+  }, [isHardware, genesisOptions, originGenesisHash]);
+
   const filterCategories: {text: string, type: NetWorkGroup | string}[] = [
     {
       text: 'All',
@@ -184,46 +208,50 @@ function NetworkMenu ({ className, currentNetwork, genesisOptions, isNotHaveAcco
       <div className='network-item-list'>
         {
           filteredGenesisOptions && filteredGenesisOptions.length
-            ? filteredGenesisOptions.map(({ apiStatus, icon, networkKey, networkPrefix, text, value }, index): React.ReactNode => (
-              <div
-                className='network-item-container'
-                key={value}
-                onClick={_selectNetwork(value, networkPrefix, icon, networkKey)}
-              >
-                <div className={'network-item'}>
-                  <img
-                    alt='logo'
-                    className={'network-logo'}
-                    src={getLogoByGenesisHash(value)}
-                  />
+            ? filteredGenesisOptions.map(({ apiStatus, icon, networkKey, networkPrefix, text, value }, index): React.ReactNode => {
+              const isDisable = isHardware && (value ? value !== originGenesisHash : !isAllowAllNetwork);
 
-                  <span className={value === currentNetwork ? 'network-text__selected' : 'network-text'}>{text}</span>
+              return (
+                <div
+                  className={CN('network-item-container', { disable: isDisable })}
+                  key={value}
+                  onClick={isDisable ? undefined : _selectNetwork(value, networkPrefix, icon, networkKey)}
+                >
+                  <div className={'network-item'}>
+                    <img
+                      alt='logo'
+                      className={'network-logo'}
+                      src={getLogoByGenesisHash(value)}
+                    />
+
+                    <span className={value === currentNetwork ? 'network-text__selected' : 'network-text'}>{text}</span>
+                  </div>
+
+                  <div className={'icon-container'}>
+                    {value === currentNetwork
+                      ? (
+                        <img
+                          alt='check'
+                          className='checkIcon'
+                          src={check}
+                        />
+                      )
+                      : (
+                        <div className='uncheckedItem' />
+                      )
+                    }
+                    {
+                      networkKey.toLowerCase() !== ALL_ACCOUNT_KEY.toLowerCase() && handleStatusIcon(apiStatus, index)
+                    }
+
+                    <Tooltip
+                      text={handleStatusText(apiStatus)}
+                      trigger={`network-status-icon-${index}`}
+                    />
+                  </div>
                 </div>
-
-                <div className={'icon-container'}>
-                  {value === currentNetwork
-                    ? (
-                      <img
-                        alt='check'
-                        className='checkIcon'
-                        src={check}
-                      />
-                    )
-                    : (
-                      <div className='uncheckedItem' />
-                    )
-                  }
-                  {
-                    networkKey.toLowerCase() !== ALL_ACCOUNT_KEY.toLowerCase() && handleStatusIcon(apiStatus, index)
-                  }
-
-                  <Tooltip
-                    text={handleStatusText(apiStatus)}
-                    trigger={`network-status-icon-${index}`}
-                  />
-                </div>
-              </div>
-            ))
+              );
+            })
             : <div className='kn-no-result'>No results</div>
         }
       </div>
@@ -369,6 +397,16 @@ export default React.memo(styled(NetworkMenu)(({ theme }: Props) => `
     &:hover {
       .network-text {
         color: ${theme.textColor};
+      }
+    }
+  }
+
+  .network-item-container.disable {
+    cursor: not-allowed;
+
+    &:hover {
+      .network-text {
+        color: ${theme.textColor2};
       }
     }
   }

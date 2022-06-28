@@ -3,6 +3,7 @@
 
 import { ChainRegistry, DropdownTransformOptionType, NetworkJson } from '@subwallet/extension-base/background/KoniTypes';
 import { SupportedCrossChainsMap } from '@subwallet/extension-koni-base/api/supportedCrossChains';
+import { reformatAddress } from '@subwallet/extension-koni-base/utils';
 import { AccountContext, ActionContext, Button, Warning } from '@subwallet/extension-koni-ui/components';
 import InputBalance from '@subwallet/extension-koni-ui/components/InputBalance';
 import LoadingContainer from '@subwallet/extension-koni-ui/components/LoadingContainer';
@@ -19,7 +20,7 @@ import BridgeInputAddress from '@subwallet/extension-koni-ui/Popup/XcmTransfer/B
 import Dropdown from '@subwallet/extension-koni-ui/Popup/XcmTransfer/XcmDropdown/Dropdown';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { ThemeProps, TransferResultType } from '@subwallet/extension-koni-ui/types';
-import React, { useCallback, useContext, useEffect, useState } from 'react';
+import React, { useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { useSelector } from 'react-redux';
 import styled from 'styled-components';
 
@@ -107,6 +108,9 @@ function XcmTransfer ({ chainRegistryMap, className, defaultValue, firstOriginCh
   const [{ address: senderId,
     token: selectedToken }, setSenderValue] = useState<XcmTransferInputAddressType>(defaultValue);
   const onAction = useContext(ActionContext);
+
+  const { accounts } = useContext(AccountContext);
+
   const [[fee, feeSymbol], setFeeInfo] = useState<[string | null, string | null | undefined]>([null, null]);
   const senderFreeBalance = useFreeBalance(originChain, senderId, selectedToken);
   const recipientFreeBalance = useFreeBalance(originChain, recipientId, selectedToken);
@@ -140,12 +144,29 @@ function XcmTransfer ({ chainRegistryMap, className, defaultValue, firstOriginCh
     !!chainRegistryMap[originChain].tokenMap &&
     !!chainRegistryMap[originChain].tokenMap[feeSymbol]
   ;
+
+  const isBlockHardware = useMemo((): boolean => {
+    if (senderId) {
+      const prefix = 42;
+      const account = accounts.find((acc) => reformatAddress(acc.address, prefix) === reformatAddress(senderId, prefix));
+
+      if (!account) {
+        return false;
+      } else {
+        return !!account.isHardware;
+      }
+    }
+
+    return false;
+  }, [senderId, accounts]);
+
   const canMakeTransfer = checkOriginChainAndSenderIdType &&
     checkDestinationChainAndReceiverIdType &&
     feeInfoReady &&
     !!valueToTransfer &&
     !!recipientId &&
     !amountGtAvailableBalance &&
+    !isBlockHardware &&
     !!balanceFormat;
 
   useEffect(() => {
@@ -307,6 +328,14 @@ function XcmTransfer ({ chainRegistryMap, className, defaultValue, firstOriginCh
                   placeholder={'0'}
                   siSymbol={balanceFormat[2] || balanceFormat[1]}
                 />
+
+                {isBlockHardware && (
+                  <Warning
+                    className={'xcm-transfer-warning'}
+                  >
+                    {t<string>('The sender account is Ledger account. This is not support XCM Transfer')}
+                  </Warning>
+                )}
 
                 {!checkOriginChainAndSenderIdType &&
                 <Warning

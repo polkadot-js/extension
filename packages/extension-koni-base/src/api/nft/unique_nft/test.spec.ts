@@ -25,6 +25,9 @@ describe('test DotSama APIs', () => {
       },
       updateNftIds: (networkKey: string) => {
         console.log(networkKey);
+      },
+      updateCollectionIds: (networkKey: string) => {
+        console.log(networkKey);
       }
     });
   });

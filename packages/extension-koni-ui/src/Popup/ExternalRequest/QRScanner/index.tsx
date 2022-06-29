@@ -75,7 +75,7 @@ const QRScanner = (props: Props) => {
 export default React.memo(styled(QRScanner)(({ theme }: Props) => `
 
   .item-error {
-    margin-top: 10px;
+    margin: 10px 15px;
   }
 
   .scanner-wrapper {

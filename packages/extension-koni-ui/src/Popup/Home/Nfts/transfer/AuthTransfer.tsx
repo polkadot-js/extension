@@ -9,16 +9,18 @@ import InputAddress from '@subwallet/extension-koni-ui/components/InputAddress';
 import LedgerRequest from '@subwallet/extension-koni-ui/components/Ledger/LedgerRequest';
 import Modal from '@subwallet/extension-koni-ui/components/Modal';
 import QrRequest from '@subwallet/extension-koni-ui/components/Qr/QrRequest';
-import { MANUAL_CANCEL_EXTERNAL_REQUEST, SIGN_MODE } from '@subwallet/extension-koni-ui/constants/signing';
+import { SIGN_MODE } from '@subwallet/extension-koni-ui/constants/signing';
 import { ExternalRequestContext } from '@subwallet/extension-koni-ui/contexts/ExternalRequestContext';
 import { QrContext, QrContextState, QrStep } from '@subwallet/extension-koni-ui/contexts/QrContext';
+import { useRejectExternalRequest } from '@subwallet/extension-koni-ui/hooks/useRejectExternalRequest';
 import useToast from '@subwallet/extension-koni-ui/hooks/useToast';
 import useTranslation from '@subwallet/extension-koni-ui/hooks/useTranslation';
-import { evmNftSubmitTransaction, getAccountMeta, makeTransferNftLedgerSubstrate, makeTransferNftQrEvm, makeTransferNftQrSubstrate, nftForceUpdate, rejectExternalRequest, substrateNftSubmitTransaction } from '@subwallet/extension-koni-ui/messaging';
+import { evmNftSubmitTransaction, getAccountMeta, makeTransferNftLedgerSubstrate, makeTransferNftQrEvm, makeTransferNftQrSubstrate, nftForceUpdate, substrateNftSubmitTransaction } from '@subwallet/extension-koni-ui/messaging';
 import { _NftItem, SubstrateTransferParams, Web3TransferParams } from '@subwallet/extension-koni-ui/Popup/Home/Nfts/types';
 import Address from '@subwallet/extension-koni-ui/Popup/Sending/parts/Address';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
+import CN from 'classnames';
 import React, { useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { useSelector } from 'react-redux';
 import styled from 'styled-components';
@@ -49,6 +51,8 @@ interface Props extends ThemeProps {
 
 function AuthTransfer ({ chain, className, collectionId, nftItem, recipientAddress, senderAccount, setExtrinsicHash, setIsTxSuccess, setShowConfirm, setShowResult, setTxError, substrateTransferParams, web3TransferParams }: Props): React.ReactElement<Props> {
   const { t } = useTranslation();
+
+  const { handlerReject } = useRejectExternalRequest();
 
   const { cleanQrState, updateQrState } = useContext(QrContext);
   const { clearExternalState, externalState, updateExternalState } = useContext(ExternalRequestContext);
@@ -257,6 +261,7 @@ function AuthTransfer ({ chain, className, collectionId, nftItem, recipientAddre
         step: QrStep.DISPLAY_PAYLOAD
       };
 
+      setLoading(false);
       updateQrState(state);
     }
 
@@ -283,6 +288,7 @@ function AuthTransfer ({ chain, className, collectionId, nftItem, recipientAddre
   }, []);
 
   const handlerSendSubstrateQr = useCallback(() => {
+    setLoading(true);
     makeTransferNftQrSubstrate({
       recipientAddress: recipientAddress,
       senderAddress: senderAccount.address,
@@ -293,6 +299,8 @@ function AuthTransfer ({ chain, className, collectionId, nftItem, recipientAddre
   }, [handlerCallbackResponseResultQr, handlerResponseError, recipientAddress, senderAccount.address, substrateParams]);
 
   const handlerSendEvmQr = useCallback(() => {
+    setLoading(true);
+
     if (web3Tx) {
       makeTransferNftQrEvm({
         senderAddress: account?.account?.address as string,
@@ -407,20 +415,9 @@ function AuthTransfer ({ chain, className, collectionId, nftItem, recipientAddre
     }, 10);
   }, [loading, chain, currentNetwork.networkKey, handlerSendQr]);
 
-  const handlerReject = useCallback(async (externalId: string) => {
-    if (externalId) {
-      await rejectExternalRequest({ id: externalId, message: MANUAL_CANCEL_EXTERNAL_REQUEST });
-    }
-
-    cleanQrState();
-    clearExternalState();
-  }, [cleanQrState, clearExternalState]);
-
   const hideConfirm = useCallback(async () => {
     if (!loading) {
-      if (externalId) {
-        await handlerReject(externalId);
-      }
+      await handlerReject(externalId);
 
       setShowConfirm(false);
     }
@@ -542,11 +539,11 @@ function AuthTransfer ({ chain, className, collectionId, nftItem, recipientAddre
             Authorize transaction
           </div>
           <div
-            className={'close-button-confirm'}
+            className={CN('close-button-confirm', { disable: loading })}
             // eslint-disable-next-line @typescript-eslint/no-misused-promises
-            onClick={hideConfirm}
+            onClick={!loading ? hideConfirm : undefined}
           >
-            Cancel
+            {t('Cancel')}
           </div>
         </div>
 
@@ -684,6 +681,16 @@ export default React.memo(styled(AuthTransfer)(({ theme }: Props) => `
     color: ${theme.textColor3};
     position: absolute;
     right: 15px;
+    opacity: 0.85;
+  }
+
+  .close-button-confirm:hover {
+    opacity: 1;
+  }
+
+  .close-button-confirm.disable {
+    cursor: not-allowed;
+    opacity: 0.5;
   }
 
   .header-alignment {

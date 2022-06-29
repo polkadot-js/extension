@@ -588,6 +588,7 @@ export async function makeNftTransferQr ({ apiProp,
         });
     } else if (result.isError) {
       txState.txError = true;
+      txState.status = false;
       callback(txState);
     }
   });

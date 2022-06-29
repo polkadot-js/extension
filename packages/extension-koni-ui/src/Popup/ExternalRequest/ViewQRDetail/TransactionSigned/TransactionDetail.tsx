@@ -191,10 +191,6 @@ export default React.memo(styled(TransactionDetail)(({ theme }: Props) => `
   max-height: 240px;
   overflow-y: auto;
 
-  &::-webkit-scrollbar{
-    display: none;
-  }
-
   .info-container{
 
     .info-title{

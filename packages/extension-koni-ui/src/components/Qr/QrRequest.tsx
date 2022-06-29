@@ -14,9 +14,10 @@ import CN from 'classnames';
 import React, { useCallback, useContext, useState } from 'react';
 import styled from 'styled-components';
 
-import { QrScanSignature } from '@polkadot/react-qr';
 import { SignerResult } from '@polkadot/types/types';
 import { hexToU8a, isHex } from '@polkadot/util';
+
+import ScanSignature from './ScanSignature';
 
 interface Props extends ThemeProps{
   children: JSX.Element;
@@ -93,7 +94,7 @@ const QrRequest = (props: Props) => {
         return (
           <div className='auth-transaction-body'>
             <div className='scan-qr'>
-              <QrScanSignature
+              <ScanSignature
                 onError={onError}
                 // eslint-disable-next-line @typescript-eslint/no-misused-promises
                 onScan={handlerScanSignature}
@@ -170,6 +171,7 @@ export default React.memo(styled(QrRequest)(({ theme }: Props) => `
   display: flex;
   position: relative;
   flex: 1;
+  overflow-y: auto;
 
   .auth-transaction-body{
     flex: 1;

@@ -202,6 +202,10 @@ function ImportQr ({ className }: Props): React.ReactElement<Props> {
 }
 
 export default styled(ImportQr)`
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  overflow: hidden;
 
   .import-qr-content {
     flex: 1;
@@ -223,6 +227,6 @@ export default styled(ImportQr)`
   }
 
   .item-error {
-    margin-top: 10px
+    margin: 10px 15px;
   }
 `;

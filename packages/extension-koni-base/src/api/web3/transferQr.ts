@@ -349,6 +349,7 @@ export async function handleTransferNftQr ({ callback,
       }).catch((e) => {
         console.log('Error on transfer nft', (e as Error).message);
         response.txError = true;
+        response.status = false;
         updateState({ status: ExternalRequestPromiseStatus.FAILED });
         callback(response);
       });

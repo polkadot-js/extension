@@ -12,11 +12,12 @@ import LedgerRequest from '@subwallet/extension-koni-ui/components/Ledger/Ledger
 import Modal from '@subwallet/extension-koni-ui/components/Modal';
 import QrRequest from '@subwallet/extension-koni-ui/components/Qr/QrRequest';
 import { BalanceFormatType } from '@subwallet/extension-koni-ui/components/types';
-import { MANUAL_CANCEL_EXTERNAL_REQUEST, SIGN_MODE } from '@subwallet/extension-koni-ui/constants/signing';
+import { SIGN_MODE } from '@subwallet/extension-koni-ui/constants/signing';
 import { ExternalRequestContext } from '@subwallet/extension-koni-ui/contexts/ExternalRequestContext';
 import { QrContext, QrContextState, QrStep } from '@subwallet/extension-koni-ui/contexts/QrContext';
+import { useRejectExternalRequest } from '@subwallet/extension-koni-ui/hooks/useRejectExternalRequest';
 import useTranslation from '@subwallet/extension-koni-ui/hooks/useTranslation';
-import { getAccountMeta, makeCrossChainTransfer, makeCrossChainTransferLedger, makeCrossChainTransferQr, rejectExternalRequest } from '@subwallet/extension-koni-ui/messaging';
+import { getAccountMeta, makeCrossChainTransfer, makeCrossChainTransferLedger, makeCrossChainTransferQr } from '@subwallet/extension-koni-ui/messaging';
 import Dropdown from '@subwallet/extension-koni-ui/Popup/XcmTransfer/XcmDropdown/Dropdown';
 import { ThemeProps, TransferResultType } from '@subwallet/extension-koni-ui/types';
 import React, { useCallback, useContext, useEffect, useMemo, useState } from 'react';
@@ -85,6 +86,8 @@ function AuthTransaction ({ balanceFormat,
 
   const { clearExternalState, externalState, updateExternalState } = useContext(ExternalRequestContext);
 
+  const { handlerReject } = useRejectExternalRequest();
+
   const { externalId } = externalState;
 
   const originNetworkPrefix = networkMap[requestPayload.originNetworkKey].ss58Format;
@@ -109,19 +112,8 @@ function AuthTransaction ({ balanceFormat,
     return SIGN_MODE.PASSWORD;
   }, [accountMeta]);
 
-  const handlerReject = useCallback(async (externalId: string) => {
-    if (externalId) {
-      await rejectExternalRequest({ id: externalId, message: MANUAL_CANCEL_EXTERNAL_REQUEST });
-    }
-
-    cleanQrState();
-    clearExternalState();
-  }, [cleanQrState, clearExternalState]);
-
   const _onCancel = useCallback(async () => {
-    if (externalId) {
-      await handlerReject(externalId);
-    }
+    await handlerReject(externalId);
 
     onCancel();
   }, [handlerReject, onCancel, externalId]);
@@ -179,6 +171,10 @@ function AuthTransaction ({ balanceFormat,
     makeCrossChainTransferQr({
       ...requestPayload
     }, (rs) => {
+      if (rs.externalState) {
+        updateExternalState(rs.externalState);
+      }
+
       if (rs.qrState) {
         const state: QrContextState = {
           ...rs.qrState,
@@ -197,7 +193,7 @@ function AuthTransaction ({ balanceFormat,
       handlerCallbackResponseResult(rs);
     }).then(handlerResponseError)
       .catch((e) => console.log('There is problem when makeTransferQr', e));
-  }, [handlerCallbackResponseResult, handlerResponseError, requestPayload, updateQrState]);
+  }, [handlerCallbackResponseResult, handlerResponseError, requestPayload, updateExternalState, updateQrState]);
 
   const _doStartLedger = useCallback((handlerSignLedger: (ledgerState: LedgerState) => void): void => {
     setBusy(true);

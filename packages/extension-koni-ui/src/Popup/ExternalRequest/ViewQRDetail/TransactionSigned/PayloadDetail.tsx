@@ -172,7 +172,7 @@ const PayloadDetail = (props: Props) => {
           <>
             {decoded.message && decoded.warning &&
               (
-                <Warning>
+                <Warning className={'decode-warning'}>
                   {decoded.message}
                 </Warning>
               )
@@ -220,10 +220,6 @@ export default React.memo(styled(PayloadDetail)(({ theme }: Props) => `
   height: 240px;
   overflow-y: auto;
   position: relative;
-
-  &::-webkit-scrollbar{
-    display: none;
-  }
 
   .raw-method{
     word-break: break-all;

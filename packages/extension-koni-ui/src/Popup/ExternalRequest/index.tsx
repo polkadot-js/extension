@@ -61,6 +61,9 @@ const ExternalRequest = (props: Props) => {
 };
 
 export default React.memo(styled(ExternalRequest)(({ theme }: Props) => `
+  display: flex;
+  flex-direction: column;
+  height: 100%;
 
   .import-qr-content {
     flex: 1;

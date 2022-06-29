@@ -2552,8 +2552,14 @@ export default class KoniExtension extends Extension {
         console.log(`Start transfer nft from ${senderAddress} to ${recipientAddress}`);
       })
         .catch((e) => {
-          // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment,node/no-callback-literal,@typescript-eslint/no-unsafe-member-access
-          callback({ txError: true, isSendingSelf: false });
+          if (!e) {
+            // eslint-disable-next-line node/no-callback-literal
+            callback({ txError: true, isSendingSelf: false });
+          } else {
+            // eslint-disable-next-line node/no-callback-literal
+            callback({ txError: true, isSendingSelf: false, status: false });
+          }
+
           console.error('Error transferring nft', e);
           setTimeout(() => {
             unsubscribe(id);
@@ -2614,7 +2620,14 @@ export default class KoniExtension extends Extension {
       })
         .catch((e) => {
           // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment,node/no-callback-literal,@typescript-eslint/no-unsafe-member-access
-          callback({ txError: true, isSendingSelf: false });
+          if (!e) {
+            // eslint-disable-next-line node/no-callback-literal
+            callback({ txError: true, isSendingSelf: false });
+          } else {
+            // eslint-disable-next-line node/no-callback-literal
+            callback({ txError: true, isSendingSelf: false, status: false });
+          }
+
           console.error('Error transferring nft', e);
           setTimeout(() => {
             unsubscribe(id);
@@ -2831,7 +2844,14 @@ export default class KoniExtension extends Extension {
       })
         .catch((e) => {
           // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment,node/no-callback-literal,@typescript-eslint/no-unsafe-member-access
-          callback({ txError: true, isSendingSelf: false });
+          if (!e) {
+            // eslint-disable-next-line node/no-callback-literal
+            callback({ txError: true, isSendingSelf: false });
+          } else {
+            // eslint-disable-next-line node/no-callback-literal
+            callback({ txError: true, isSendingSelf: false, status: false });
+          }
+
           console.error('Error transferring nft', e);
           setTimeout(() => {
             unsubscribe(id);

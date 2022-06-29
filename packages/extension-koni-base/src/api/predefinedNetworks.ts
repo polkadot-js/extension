@@ -769,7 +769,9 @@ export const PREDEFINED_NETWORKS: Record<string, NetworkJson> = {
     currentProvider: 'Shibuya',
     groups: ['TEST_NET'],
     nativeToken: 'SBY',
-    decimals: 18
+    decimals: 18,
+    getStakingOnChain: true,
+    supportBonding: true
   },
   shibuyaEvm: {
     key: 'shibuyaEvm',

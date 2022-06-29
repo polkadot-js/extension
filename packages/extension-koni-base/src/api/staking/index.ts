@@ -55,7 +55,9 @@ export async function stakingOnChainApi (addresses: string[], dotSamaAPIMap: Rec
     const parentApi = await apiPromise.isReady;
     const useAddresses = apiPromise.isEthereum ? evmAddresses : substrateAddresses;
 
-    if (['darwinia', 'crab', 'pangolin'].includes(chain)) {
+    if (['astar', 'shiden', 'shibuya'].includes(chain)) {
+      return getAstarStakingOnChain(parentApi, useAddresses, networks, chain, callback);
+    } else if (['darwinia', 'crab', 'pangolin'].includes(chain)) {
       return getDarwiniaStakingOnChain(parentApi, useAddresses, networks, chain, callback);
     } else if (['moonbeam', 'moonriver', 'moonbase', 'turing', 'turingStaging'].includes(chain)) {
       return getParaStakingOnChain(parentApi, useAddresses, networks, chain, callback);
@@ -311,6 +313,53 @@ function getDarwiniaStakingOnChain (parentApi: ApiProps, useAddresses: string[],
           unlockingBalance: parsedUnlockingBalance.toString(),
           nativeToken: networks[chain].nativeToken,
           unit: unit || networks[chain].nativeToken,
+          state: APIItemState.READY
+        } as StakingItem;
+      }
+
+      // eslint-disable-next-line node/no-callback-literal
+      callback(chain, stakingItem);
+    }
+  });
+}
+
+function getAstarStakingOnChain (parentApi: ApiProps, useAddresses: string[], networks: Record<string, NetworkJson>, chain: string, callback: (networkKey: string, rs: StakingItem) => void) {
+  return parentApi.api.query.dappsStaking.ledger.multi(useAddresses, (ledgers: any[]) => {
+    let totalBalance = 0;
+    let stakingItem: StakingItem;
+
+    if (ledgers) {
+      for (const ledger of ledgers) {
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-member-access
+        const data = ledger.toHuman() as Record<string, any>;
+        let _totalStake = data.locked as string;
+
+        _totalStake = _totalStake.replaceAll(',', '');
+        totalBalance += parseFloat(_totalStake);
+      }
+
+      const parsedTotalBalance = parseStakingBalance(totalBalance, chain, networks);
+
+      if (totalBalance > 0) {
+        stakingItem = {
+          name: networks[chain].chain,
+          chainId: chain,
+          balance: parsedTotalBalance.toString(),
+          activeBalance: parsedTotalBalance.toString(),
+          unlockingBalance: '0',
+          nativeToken: networks[chain].nativeToken,
+          unit: networks[chain].nativeToken,
+          state: APIItemState.READY
+        } as StakingItem;
+      } else {
+        stakingItem = {
+          name: networks[chain].chain,
+          chainId: chain,
+          balance: parsedTotalBalance.toString(),
+          activeBalance: parsedTotalBalance.toString(),
+          unlockingBalance: '0',
+          nativeToken: networks[chain].nativeToken,
+          unit: networks[chain].nativeToken,
           state: APIItemState.READY
         } as StakingItem;
       }

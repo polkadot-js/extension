@@ -19,7 +19,7 @@ import keyring from '@polkadot/ui-keyring';
 import { assert } from '@polkadot/util';
 import { cryptoWaitReady } from '@polkadot/util-crypto';
 
-const IDLE_TIME = 60000 * 5; // 5 minutes
+const IDLE_TIME = 60000 * 2; // 2 minutes
 
 let cron: KoniCron;
 let subscriptions: KoniSubscription;

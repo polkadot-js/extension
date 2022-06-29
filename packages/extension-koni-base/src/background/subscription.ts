@@ -115,7 +115,7 @@ export class KoniSubscription {
   }
 
   initStakingOnChainSubscription (addresses: string[], dotSamaApiMap: Record<string, ApiProps>) {
-    const subscriptionPromises = stakingOnChainApi(['WKXbkBJKvXoN3w9QXZJpfsvZi1PMgUQXvfZs7zSRdNk9x9q'], dotSamaApiMap, (networkKey, rs) => {
+    const subscriptionPromises = stakingOnChainApi(addresses, dotSamaApiMap, (networkKey, rs) => {
       state.setStakingItem(networkKey, rs);
     }, state.getNetworkMap());
 

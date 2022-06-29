@@ -900,6 +900,7 @@ export interface ValidatorInfo {
   identity?: string;
   isVerified: boolean;
   minBond: number;
+  icon?: string;
   isNominated: boolean; // this validator has been staked to before
 }
 

@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { ApiProps, NetworkJson, ValidatorInfo } from '@subwallet/extension-base/background/KoniTypes';
+import { getAstarBondingBasics, getAstarDappsInfo, handleAstarBondingTxInfo } from '@subwallet/extension-koni-base/api/bonding/astar';
 import { getDarwiniaBondingExtrinsic, getDarwiniaValidatorsInfo, handleDarwiniaBondingTxInfo } from '@subwallet/extension-koni-base/api/bonding/darwinia';
 import { getParaBondingBasics, getParaBondingExtrinsic, getParaCollatorsInfo, getParaUnbondingExtrinsic, getParaWithdrawalExtrinsic, handleParaBondingTxInfo, handleParaUnbondingTxInfo, handleParaUnlockingInfo, handleParaWithdrawalTxInfo } from '@subwallet/extension-koni-base/api/bonding/paraChain';
 import { getRelayBondingExtrinsic, getRelayChainBondingBasics, getRelayUnbondingExtrinsic, getRelayValidatorsInfo, getRelayWithdrawalExtrinsic, getTargetValidators, handleRelayBondingTxInfo, handleRelayUnbondingTxInfo, handleRelayUnlockingInfo, handleRelayWithdrawalTxInfo } from '@subwallet/extension-koni-base/api/bonding/relayChain';
@@ -10,11 +11,14 @@ import Web3 from 'web3';
 const CHAIN_TYPES: Record<string, string[]> = {
   relay: ['polkadot', 'kusama', 'hydradx', 'aleph', 'edgeware', 'darwinia', 'crab', 'polkadex'],
   para: ['moonbeam', 'moonriver', 'moonbase', 'turing', 'turingStaging'],
-  darwinia: ['darwinia', 'crab', 'pangolin']
+  darwinia: ['darwinia', 'crab', 'pangolin'],
+  astar: ['astar', 'shiden', 'shibuya']
 };
 
 export async function getChainBondingBasics (networkKey: string, dotSamaApi: ApiProps) {
-  if (CHAIN_TYPES.para.includes(networkKey)) {
+  if (CHAIN_TYPES.astar.includes(networkKey)) {
+    return getAstarBondingBasics(networkKey);
+  } else if (CHAIN_TYPES.para.includes(networkKey)) {
     return getParaBondingBasics(networkKey, dotSamaApi);
   }
 
@@ -26,6 +30,8 @@ export async function getValidatorsInfo (networkKey: string, dotSamaApi: ApiProp
     return getParaCollatorsInfo(networkKey, dotSamaApi, decimals, address);
   } else if (CHAIN_TYPES.darwinia.includes(networkKey)) {
     return getDarwiniaValidatorsInfo(networkKey, dotSamaApi, decimals, address);
+  } else if (CHAIN_TYPES.astar.includes(networkKey)) {
+    return getAstarDappsInfo(networkKey, dotSamaApi, decimals, address);
   }
 
   return getRelayValidatorsInfo(networkKey, dotSamaApi, decimals, address);
@@ -38,6 +44,8 @@ export async function getBondingTxInfo (networkJson: NetworkJson, amount: number
     const targetValidators: string[] = getTargetValidators(bondedValidators, validatorInfo.address);
 
     return handleDarwiniaBondingTxInfo(networkJson, amount, targetValidators, isBondedBefore, networkKey, nominatorAddress, dotSamaApiMap, web3ApiMap, lockPeriod as number);
+  } else if (CHAIN_TYPES.astar.includes(networkKey)) {
+    return handleAstarBondingTxInfo(networkJson, amount, networkKey, nominatorAddress, validatorInfo, dotSamaApiMap, web3ApiMap);
   }
 
   const targetValidators: string[] = getTargetValidators(bondedValidators, validatorInfo.address);

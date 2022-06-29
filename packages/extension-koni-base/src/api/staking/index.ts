@@ -23,6 +23,7 @@ export const DEFAULT_STAKING_NETWORKS = {
   moonbeam: PREDEFINED_NETWORKS.moonbeam,
   moonbase: PREDEFINED_NETWORKS.moonbase,
   darwinia: PREDEFINED_NETWORKS.darwinia,
+  pangolin: PREDEFINED_NETWORKS.pangolin,
   crab: PREDEFINED_NETWORKS.crab,
   polkadex: PREDEFINED_NETWORKS.polkadex,
   turing: PREDEFINED_NETWORKS.turing,
@@ -54,7 +55,7 @@ export async function stakingOnChainApi (addresses: string[], dotSamaAPIMap: Rec
     const parentApi = await apiPromise.isReady;
     const useAddresses = apiPromise.isEthereum ? evmAddresses : substrateAddresses;
 
-    if (['darwinia', 'crab'].includes(chain)) {
+    if (['darwinia', 'crab', 'pangolin'].includes(chain)) {
       return getDarwiniaStakingOnChain(parentApi, useAddresses, networks, chain, callback);
     } else if (['moonbeam', 'moonriver', 'moonbase', 'turing', 'turingStaging'].includes(chain)) {
       return getParaStakingOnChain(parentApi, useAddresses, networks, chain, callback);
@@ -255,30 +256,30 @@ function getDarwiniaStakingOnChain (parentApi: ApiProps, useAddresses: string[],
     let totalBalance = 0;
     let activeBalance = 0;
     let unlockingBalance = 0;
-    let unit = '';
+    const unit = '';
     let stakingItem: StakingItem;
+    // TODO: get unstakable amount based on timestamp
+    // const timestamp = new Date().getTime();
 
     if (ledgers) {
       for (const ledger of ledgers) {
         // eslint-disable-next-line @typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-member-access
         const data = ledger.toHuman() as unknown as Record<string, any>;
 
-        if (data && data.ringStakingLock) {
-          const _ringStaking = data.ringStakingLock as Record<string, any>;
-          const _activeBalance = _ringStaking.stakingAmount as string;
-          const unlocking = _ringStaking.unbondings as Record<string, string>[];
+        if (data && data.active) {
+          // locked balance
+          const _ringLockStaking = data.ringStakingLock as Record<string, any>;
+          const unbondingLockBalance = _ringLockStaking.unbondings as Record<string, string>[];
+          let _totalActive = data.active as string;
 
-          unlocking.forEach((item) => {
+          unbondingLockBalance.forEach((item) => {
             const _unlockingBalance = item.amount.replaceAll(',', '');
 
             unlockingBalance += parseFloat(_unlockingBalance);
           });
 
-          let amount = _activeBalance ? _activeBalance.split(' ')[0] : '';
-
-          amount = amount.replaceAll(',', '');
-          unit = _activeBalance ? _activeBalance.split(' ')[1] : '';
-          activeBalance += parseFloat(amount);
+          _totalActive = _totalActive.replaceAll(',', '');
+          activeBalance += parseFloat(_totalActive);
 
           const _totalBalance = activeBalance + unlockingBalance;
 

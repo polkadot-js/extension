@@ -1,7 +1,7 @@
 // Copyright 2019-2022 @subwallet/extension-koni authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { APIItemState, StakingRewardItem, StakingRewardJson } from '@subwallet/extension-base/background/KoniTypes';
+import { APIItemState, StakingItem, StakingRewardItem, StakingRewardJson } from '@subwallet/extension-base/background/KoniTypes';
 import { PREDEFINED_NETWORKS } from '@subwallet/extension-koni-base/api/predefinedNetworks';
 import { SUBSQUID_ENDPOINTS, SUPPORTED_STAKING_CHAINS } from '@subwallet/extension-koni-base/api/staking/config';
 import { reformatAddress, toUnit } from '@subwallet/extension-koni-base/utils/utils';
@@ -69,7 +69,7 @@ const getSubsquidQuery = (account: string, chain: string) => {
   }`;
 };
 
-const getSubsquidStaking = async (accounts: string[], chain: string): Promise<StakingRewardItem> => {
+const getSubsquidStaking = async (accounts: string[], chain: string, callback: (networkKey: string, rs: StakingItem) => void): Promise<StakingRewardItem> => {
   try {
     const parsedResult: StakingAmount = {};
 
@@ -152,6 +152,15 @@ const getSubsquidStaking = async (accounts: string[], chain: string): Promise<St
       }
     }
 
+    callback(chain, {
+      name: PREDEFINED_NETWORKS[chain].chain,
+      chainId: chain,
+      balance: parsedResult.totalBond ? parsedResult.totalBond.toString() : '0',
+      nativeToken: PREDEFINED_NETWORKS[chain].nativeToken,
+      unit: PREDEFINED_NETWORKS[chain].nativeToken,
+      state: APIItemState.READY
+    } as StakingItem);
+
     return {
       name: PREDEFINED_NETWORKS[chain].chain,
       chainId: chain,
@@ -175,7 +184,7 @@ const getSubsquidStaking = async (accounts: string[], chain: string): Promise<St
   }
 };
 
-export const getAllSubsquidStaking = async (accounts: string[], activeNetworks: string[]): Promise<StakingRewardJson> => {
+export const getAllSubsquidStaking = async (accounts: string[], activeNetworks: string[], callback: (networkKey: string, rs: StakingItem) => void): Promise<StakingRewardJson> => {
   let rewardList: StakingRewardItem[] = [];
 
   const filteredNetworks: string[] = [];
@@ -187,7 +196,7 @@ export const getAllSubsquidStaking = async (accounts: string[], activeNetworks: 
   });
 
   const rewardItems = await Promise.all(filteredNetworks.map(async (network) => {
-    return await getSubsquidStaking(accounts, network);
+    return await getSubsquidStaking(accounts, network, callback);
   }));
 
   rewardList = rewardList.concat(rewardItems);

@@ -156,8 +156,7 @@ export const PREDEFINED_NETWORKS: Record<string, NetworkJson> = {
     crowdloanUrl: 'https://moonbeam.foundation/moonbeam-crowdloan/',
     decimals: 18,
     coinGeckoKey: 'moonbeam',
-    evmChainId: 1284,
-    supportBonding: true
+    evmChainId: 1284
   },
   astar: {
     key: 'astar',
@@ -470,11 +469,8 @@ export const PREDEFINED_NETWORKS: Record<string, NetworkJson> = {
     groups: ['POLKADOT_PARACHAIN'],
     paraId: 2040,
     nativeToken: 'PDEX',
-    coinGeckoKey: 'polkadex',
     crowdloanUrl: 'https://www.polkadex.trade/crowdloans',
-    decimals: 12,
-    getStakingOnChain: true,
-    supportBonding: true
+    decimals: 12
   },
   polkadexTest: {
     key: 'polkadexTest',
@@ -594,9 +590,7 @@ export const PREDEFINED_NETWORKS: Record<string, NetworkJson> = {
     nativeToken: 'DEV',
     isEthereum: true,
     decimals: 18,
-    evmChainId: 1287,
-    supportBonding: true,
-    getStakingOnChain: true
+    evmChainId: 1287
   },
   efinity: {
     key: 'efinity',
@@ -752,8 +746,7 @@ export const PREDEFINED_NETWORKS: Record<string, NetworkJson> = {
     crowdloanUrl: 'https://polkadot.js.org/apps/#/parachains/crowdloan',
     decimals: 18,
     coinGeckoKey: 'moonriver',
-    evmChainId: 1285,
-    supportBonding: true
+    evmChainId: 1285
   },
   shiden: {
     key: 'shiden',
@@ -808,9 +801,7 @@ export const PREDEFINED_NETWORKS: Record<string, NetworkJson> = {
     currentProvider: 'Shibuya',
     groups: ['TEST_NET'],
     nativeToken: 'SBY',
-    decimals: 18,
-    getStakingOnChain: true,
-    supportBonding: true
+    decimals: 18
   },
   shibuyaEvm: {
     key: 'shibuyaEvm',
@@ -1289,66 +1280,6 @@ export const PREDEFINED_NETWORKS: Record<string, NetworkJson> = {
     decimals: 18,
     coinGeckoKey: 'darwinia-crab-network'
   },
-  crabEvm: {
-    key: 'crabEvm',
-    chain: 'Darwinia Crab - EVM',
-    genesisHash: '0x34f61bfda344b3fad3c3e38832a91448b3c613b199eb23e5110a635d71c13c65_1',
-    ss58Format: 42,
-    providers: {
-      OnFinality: 'wss://darwinia-crab.api.onfinality.io/public-ws',
-      Darwinia_Network: 'wss://crab-rpc.darwinia.network',
-      Dwellir: 'wss://darwiniacrab-rpc.dwellir.com'
-    },
-    active: false,
-    currentProviderMode: 'ws',
-    currentProvider: 'OnFinality',
-    groups: ['MAIN_NET'],
-    paraId: 2105,
-    nativeToken: 'CRAB',
-    crowdloanUrl: 'https://crab.network/plo',
-    decimals: 18,
-    coinGeckoKey: 'darwinia-crab-network',
-    isEthereum: true,
-    evmChainId: 44
-  },
-  pangolin: {
-    key: 'pangolin',
-    chain: 'Pangolin',
-    genesisHash: '0xce44bd16fc276f9e457b452577b6c2678e57768260012af127479fed806da7e7',
-    ss58Format: 42,
-    providers: {
-      Darwinia_Network: 'wss://pangolin-rpc.darwinia.network'
-    },
-    active: false,
-    currentProviderMode: 'ws',
-    currentProvider: 'Darwinia_Network',
-    groups: ['MAIN_NET'],
-    paraId: 2105,
-    nativeToken: 'PRING',
-    crowdloanUrl: 'https://crab.network/plo',
-    decimals: 9,
-    coinGeckoKey: 'darwinia-crab-network'
-  },
-  pangolinEvm: {
-    key: 'pangolinEvm',
-    chain: 'Pangolin - EVM',
-    genesisHash: '0xce44bd16fc276f9e457b452577b6c2678e57768260012af127479fed806da7e7_1',
-    ss58Format: 42,
-    providers: {
-      Darwinia_Network: 'wss://pangolin-rpc.darwinia.network'
-    },
-    active: false,
-    currentProviderMode: 'ws',
-    currentProvider: 'Darwinia_Network',
-    groups: ['MAIN_NET'],
-    paraId: 2105,
-    nativeToken: 'PRING',
-    crowdloanUrl: 'https://crab.network/plo',
-    decimals: 9,
-    coinGeckoKey: 'darwinia-crab-network',
-    isEthereum: true,
-    evmChainId: 43
-  },
   bitcountry: {
     key: 'bitcountry',
     chain: 'Bit.Country - Alpha Net',
@@ -1413,9 +1344,7 @@ export const PREDEFINED_NETWORKS: Record<string, NetworkJson> = {
     genesisHash: '0x0f62b701fb12d02237a33b84818c11f621653d2b1614c777973babf4652b535d',
     ss58Format: 51,
     providers: {
-      turing: 'wss://rpc.turing.oak.tech',
-      OnFinality: 'wss://turing.api.onfinality.io/public-ws',
-      Dwellir: 'wss://turing-rpc.dwellir.com'
+      turing: 'wss://rpc.turing.oak.tech'
     },
     currentProviderMode: 'ws',
     currentProvider: 'turing',
@@ -1424,29 +1353,7 @@ export const PREDEFINED_NETWORKS: Record<string, NetworkJson> = {
     groups: ['KUSAMA_PARACHAIN'],
     paraId: 2114,
     nativeToken: 'TUR',
-    decimals: 10,
-    crowdloanUrl: 'https://crowdloan.zeitgeist.pm/',
-    getStakingOnChain: true,
-    supportBonding: true
-  },
-  turingStaging: {
-    chain: 'Turing Staging',
-    genesisHash: '0xd54f0988402deb4548538626ce37e4a318441ea0529ca369400ebec4e04dfe4b',
-    ss58Format: 51,
-    providers: {
-      turing: 'wss://rpc.turing-staging.oak.tech'
-    },
-    currentProviderMode: 'ws',
-    currentProvider: 'turing',
-    key: 'turingStaging',
-    active: false,
-    groups: ['TEST_NET'],
-    paraId: 2114,
-    nativeToken: 'TUR',
-    decimals: 10,
-    crowdloanUrl: 'https://crowdloan.zeitgeist.pm/',
-    getStakingOnChain: true,
-    supportBonding: true
+    crowdloanUrl: 'https://crowdloan.zeitgeist.pm/'
   },
   mangatax: {
     chain: 'MangataX Public Testnet',

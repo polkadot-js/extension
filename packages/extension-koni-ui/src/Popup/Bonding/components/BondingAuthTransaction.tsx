@@ -18,8 +18,6 @@ import React, { useCallback, useState } from 'react';
 import { useSelector } from 'react-redux';
 import styled from 'styled-components';
 
-import { isEthereumAddress } from '@polkadot/util-crypto';
-
 const Spinner = React.lazy(() => import('@subwallet/extension-koni-ui/components/Spinner'));
 const Identicon = React.lazy(() => import('@subwallet/extension-koni-ui/components/Identicon'));
 const Button = React.lazy(() => import('@subwallet/extension-koni-ui/components/Button'));
@@ -40,11 +38,10 @@ interface Props extends ThemeProps {
   setIsTxSuccess: (val: boolean) => void,
   setTxError: (val: string) => void,
   isBondedBefore: boolean,
-  bondedValidators: string[],
-  lockPeriod: number
+  bondedValidators: string[]
 }
 
-function BondingAuthTransaction ({ amount, balanceError, bondedValidators, className, fee, isBondedBefore, lockPeriod, selectedNetwork, setExtrinsicHash, setIsTxSuccess, setShowConfirm, setShowResult, setTxError, validatorInfo }: Props): React.ReactElement<Props> {
+function BondingAuthTransaction ({ amount, balanceError, bondedValidators, className, fee, isBondedBefore, selectedNetwork, setExtrinsicHash, setIsTxSuccess, setShowConfirm, setShowResult, setTxError, validatorInfo }: Props): React.ReactElement<Props> {
   const { t } = useTranslation();
   const networkJson = useGetNetworkJson(selectedNetwork);
   const freeBalance = useGetFreeBalance(selectedNetwork);
@@ -75,8 +72,7 @@ function BondingAuthTransaction ({ amount, balanceError, bondedValidators, class
       validatorInfo,
       password,
       isBondedBefore,
-      bondedValidators,
-      lockPeriod
+      bondedValidators
     }, (data) => {
       if (data.passwordError) {
         show(data.passwordError);
@@ -115,7 +111,7 @@ function BondingAuthTransaction ({ amount, balanceError, bondedValidators, class
         }
       }
     });
-  }, [account?.address, amount, balanceError, bondedValidators, isBondedBefore, lockPeriod, password, selectedNetwork, setExtrinsicHash, setIsTxSuccess, setShowConfirm, setShowResult, setTxError, show, validatorInfo]);
+  }, [account?.address, amount, balanceError, bondedValidators, isBondedBefore, password, selectedNetwork, setExtrinsicHash, setIsTxSuccess, setShowConfirm, setShowResult, setTxError, show, validatorInfo]);
 
   const handleConfirm = useCallback(() => {
     setLoading(true);
@@ -152,7 +148,6 @@ function BondingAuthTransaction ({ amount, balanceError, bondedValidators, class
               <Identicon
                 className='identityIcon'
                 genesisHash={networkJson.genesisHash}
-                iconTheme={isEthereumAddress(validatorInfo.address) ? 'ethereum' : 'substrate'}
                 prefix={networkJson.ss58Format}
                 size={20}
                 value={validatorInfo.address}
@@ -188,15 +183,13 @@ function BondingAuthTransaction ({ amount, balanceError, bondedValidators, class
               }
             </div>
             <div className={'validator-footer'}>
-              {
-                validatorInfo.expectedReturn && <div
-                  className={'validator-expected-return'}
-                  data-for={`validator-return-tooltip-${validatorInfo.address}`}
-                  data-tip={true}
-                >
-                  {validatorInfo.expectedReturn.toFixed(1)}%
-                </div>
-              }
+              <div
+                className={'validator-expected-return'}
+                data-for={`validator-return-tooltip-${validatorInfo.address}`}
+                data-tip={true}
+              >
+                {validatorInfo.expectedReturn.toFixed(1)}%
+              </div>
               <Tooltip
                 place={'top'}
                 text={'Expected return'}

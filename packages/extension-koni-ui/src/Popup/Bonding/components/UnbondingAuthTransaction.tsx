@@ -26,12 +26,10 @@ interface Props extends ThemeProps {
   setShowResult: (val: boolean) => void,
   setExtrinsicHash: (val: string) => void,
   setIsTxSuccess: (val: boolean) => void,
-  setTxError: (val: string) => void,
-  selectedValidator?: string,
-  unbondAll: boolean,
+  setTxError: (val: string) => void
 }
 
-function UnbondingAuthTransaction ({ amount, balanceError, className, fee, selectedNetwork, selectedValidator, setExtrinsicHash, setIsTxSuccess, setShowConfirm, setShowResult, setTxError, unbondAll }: Props): React.ReactElement<Props> {
+function BondingAuthTransaction ({ amount, balanceError, className, fee, selectedNetwork, setExtrinsicHash, setIsTxSuccess, setShowConfirm, setShowResult, setTxError }: Props): React.ReactElement<Props> {
   const { t } = useTranslation();
   const { show } = useToast();
   const networkJson = useGetNetworkJson(selectedNetwork);
@@ -57,9 +55,7 @@ function UnbondingAuthTransaction ({ amount, balanceError, className, fee, selec
       networkKey: selectedNetwork,
       address: account?.address as string,
       amount,
-      password,
-      validatorAddress: selectedValidator,
-      unstakeAll: unbondAll
+      password
     }, (resp) => {
       if (resp.passwordError) {
         show(resp.passwordError);
@@ -98,7 +94,7 @@ function UnbondingAuthTransaction ({ amount, balanceError, className, fee, selec
         }
       }
     });
-  }, [account?.address, amount, balanceError, password, selectedNetwork, selectedValidator, setExtrinsicHash, setIsTxSuccess, setShowConfirm, setShowResult, setTxError, show, unbondAll]);
+  }, [account?.address, amount, balanceError, password, selectedNetwork, setExtrinsicHash, setIsTxSuccess, setShowConfirm, setShowResult, setTxError, show]);
 
   const handleConfirm = useCallback(() => {
     setLoading(true);
@@ -193,7 +189,7 @@ function UnbondingAuthTransaction ({ amount, balanceError, className, fee, selec
   );
 }
 
-export default React.memo(styled(UnbondingAuthTransaction)(({ theme }: Props) => `
+export default React.memo(styled(BondingAuthTransaction)(({ theme }: Props) => `
   .bonding-auth-cancel-button {
     color: ${theme.textColor3};
     background: ${theme.buttonBackground1};

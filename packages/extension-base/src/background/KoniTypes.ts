@@ -88,13 +88,6 @@ export interface StakingRewardJson {
   details: Array<StakingRewardItem>;
 }
 
-export interface DelegationItem {
-  owner: string,
-  amount: string, // raw amount string
-  identity?: string,
-  minBond: string
-}
-
 export interface StakingItem {
   name: string,
   chainId: string,
@@ -103,7 +96,6 @@ export interface StakingItem {
   unlockingBalance?: string
   nativeToken: string,
   unit?: string,
-  delegation?: DelegationItem[],
   state: APIItemState
 }
 
@@ -894,13 +886,12 @@ export interface ValidatorInfo {
   ownStake: number;
   otherStake: number;
   nominatorCount: number;
-  commission?: number;
-  expectedReturn?: number;
+  commission: number;
+  expectedReturn: number;
   blocked: boolean;
   identity?: string;
   isVerified: boolean;
   minBond: number;
-  icon?: string;
   isNominated: boolean; // this validator has been staked to before
 }
 
@@ -931,8 +922,7 @@ export interface BondingSubmitParams {
   validatorInfo: ValidatorInfo,
   password?: string,
   isBondedBefore: boolean,
-  bondedValidators: string[], // already delegated validators
-  lockPeriod?: number // in month
+  bondedValidators: string[]
 }
 
 export interface BasicTxResponse {
@@ -952,32 +942,24 @@ export interface UnbondingSubmitParams {
   amount: number,
   networkKey: string,
   address: string,
-  password?: string,
-  // for some chains
-  validatorAddress?: string,
-  unstakeAll?: boolean
+  password?: string
 }
 
 export interface UnlockingStakeParams {
   address: string,
-  networkKey: string,
-  validatorList?: string[]
+  networkKey: string
 }
 
 export interface UnlockingStakeInfo {
   nextWithdrawal: number,
   redeemable: number,
-  nextWithdrawalAmount: number,
-  nextWithdrawalAction?: string,
-  validatorAddress?: string // validator to unstake from
+  nextWithdrawalAmount: number
 }
 
 export interface StakeWithdrawalParams {
   address: string,
   networkKey: string,
-  password?: string,
-  validatorAddress?: string,
-  action?: string
+  password?: string
 }
 
 export interface KoniRequestSignatures {

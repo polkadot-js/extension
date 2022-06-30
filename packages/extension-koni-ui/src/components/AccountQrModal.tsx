@@ -262,6 +262,10 @@ export default styled(AccountQrModal)(({ theme }: ThemeProps) => `
     border: 2px solid #fff;
     width: 144px;
     height: 144px;
+    
+    svg {
+      display:block;
+    }
   }
 
   .account-qr-modal__address {

@@ -5,7 +5,6 @@ import { PriceJson } from '@subwallet/extension-base/background/KoniTypes';
 import { PREDEFINED_NETWORKS } from '@subwallet/extension-koni-base/api/predefinedNetworks';
 import axios from 'axios';
 
-// This map used to get common token for xcToken or calculate assets price
 interface GeckoItem {
   id: string,
   name: string,

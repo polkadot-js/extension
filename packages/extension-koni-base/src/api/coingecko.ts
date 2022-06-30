@@ -5,25 +5,6 @@ import { PriceJson } from '@subwallet/extension-base/background/KoniTypes';
 import { PREDEFINED_NETWORKS } from '@subwallet/extension-koni-base/api/predefinedNetworks';
 import axios from 'axios';
 
-// const alternativeNameMap: Record<string, string> = {
-//   bifrost: 'bifrost-native-coin',
-//   calamari: 'calamari-network',
-//   crab: 'darwinia-crab-network',
-//   crust: 'crust-network',
-//   aleph: 'aleph-zero',
-//   darwinia: 'darwinia-network-native-token',
-//   kilt: 'kilt-protocol',
-//   kintsugi: 'kintsugi',
-//   parallel: 'paralink-network',
-//   phala: 'pha',
-//   picasso: 'pica',
-//   robonomics: 'robonomics-network',
-//   shadow: 'crust-storage-market',
-//   'sora-substrate': 'sora',
-//   astarEvm: 'astar',
-//   shidenEvm: 'shiden'
-// };
-
 interface GeckoItem {
   id: string,
   name: string,
@@ -35,10 +16,10 @@ export const getTokenPrice = async (chains: Array<string> = Object.keys(PREDEFIN
   try {
     const inverseMap: Record<string, string> = {};
 
-    chains.push(...['ausd', 'tai', 'kolibri-usd', 'zenlink-network-token']);
+    chains.push(...['ethereum', 'bitcoin', 'tether', 'usd-coin', 'binancecoin', 'binance-usd', 'xrp', 'solana', 'dai', 'acala-dollar', 'kolibri-usd', 'zenlink-network-token']);
 
     const chainsStr = chains.join(',');
-    const res = await axios.get(`https://api.coingecko.com/api/v3/coins/markets?vs_currency=${currency}&ids=${chainsStr}`);
+    const res = await axios.get(`https://api.coingecko.com/api/v3/coins/markets?vs_currency=${currency}&per_page=1000&ids=${chainsStr}`);
 
     if (res.status !== 200) {
       console.warn('Failed to get token price');

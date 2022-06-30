@@ -93,6 +93,8 @@ export async function getAstarDappsInfo (networkKey: string, dotSamaApi: ApiProp
     }
 
     allDappsInfo.push({
+      commission: 0,
+      expectedReturn: 0,
       address: dappAddress,
       totalStake: totalStake / 10 ** decimals,
       ownStake: 0,

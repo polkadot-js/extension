@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { ApiProps, NetworkJson, ValidatorInfo } from '@subwallet/extension-base/background/KoniTypes';
-import { getAstarBondingBasics, getAstarDappsInfo, handleAstarBondingTxInfo } from '@subwallet/extension-koni-base/api/bonding/astar';
+import { getAstarBondingBasics, getAstarBondingExtrinsic, getAstarDappsInfo, handleAstarBondingTxInfo } from '@subwallet/extension-koni-base/api/bonding/astar';
 import { getDarwiniaBondingExtrinsic, getDarwiniaValidatorsInfo, handleDarwiniaBondingTxInfo } from '@subwallet/extension-koni-base/api/bonding/darwinia';
 import { getParaBondingBasics, getParaBondingExtrinsic, getParaCollatorsInfo, getParaUnbondingExtrinsic, getParaWithdrawalExtrinsic, handleParaBondingTxInfo, handleParaUnbondingTxInfo, handleParaUnlockingInfo, handleParaWithdrawalTxInfo } from '@subwallet/extension-koni-base/api/bonding/paraChain';
 import { getRelayBondingExtrinsic, getRelayChainBondingBasics, getRelayUnbondingExtrinsic, getRelayValidatorsInfo, getRelayWithdrawalExtrinsic, getTargetValidators, handleRelayBondingTxInfo, handleRelayUnbondingTxInfo, handleRelayUnlockingInfo, handleRelayWithdrawalTxInfo } from '@subwallet/extension-koni-base/api/bonding/relayChain';
@@ -60,6 +60,8 @@ export async function getBondingExtrinsic (networkJson: NetworkJson, networkKey:
     const targetValidators: string[] = getTargetValidators(bondedValidators, validatorInfo.address);
 
     return getDarwiniaBondingExtrinsic(dotSamaApi, nominatorAddress, amount, targetValidators, isBondedBefore, networkJson, lockPeriod as number);
+  } else if (CHAIN_TYPES.astar.includes(networkKey)) {
+    return getAstarBondingExtrinsic(dotSamaApi, networkJson, amount, networkKey, nominatorAddress, validatorInfo);
   }
 
   const targetValidators: string[] = getTargetValidators(bondedValidators, validatorInfo.address);

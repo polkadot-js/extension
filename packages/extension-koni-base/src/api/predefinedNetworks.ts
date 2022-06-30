@@ -474,6 +474,25 @@ export const PREDEFINED_NETWORKS: Record<string, NetworkJson> = {
     getStakingOnChain: true,
     supportBonding: true
   },
+  polkadexTest: {
+    key: 'polkadexTest',
+    chain: 'Polkadex - Testnet',
+    genesisHash: '0xd0024e7110db2a8b35d6599e64e82d3eb30070200a423398319efb6b4d596427',
+    ss58Format: 88,
+    providers: {
+      'Polkadex Team': 'wss://blockchain.polkadex.trade'
+    },
+    active: false,
+    currentProviderMode: 'ws',
+    currentProvider: 'Polkadex Team',
+    groups: ['TEST_NET'],
+    nativeToken: 'Unit',
+    coinGeckoKey: 'polkadex',
+    crowdloanUrl: 'https://www.polkadex.trade/crowdloans',
+    decimals: 12,
+    getStakingOnChain: true,
+    supportBonding: true
+  },
   aleph: {
     key: 'aleph',
     chain: 'Aleph Zero',

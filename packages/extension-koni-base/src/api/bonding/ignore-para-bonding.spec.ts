@@ -6,7 +6,6 @@ import { DOTSAMA_AUTO_CONNECT_MS } from '@subwallet/extension-koni-base/constant
 import { getCurrentProvider } from '@subwallet/extension-koni-base/utils/utils';
 
 import { ApiPromise, WsProvider } from '@polkadot/api';
-import { BN } from '@polkadot/util';
 
 jest.setTimeout(50000);
 
@@ -179,6 +178,7 @@ describe('test DotSama APIs', () => {
     }
 
     // TODO: calculate validator returns
+    // TODO: get maxNominator per validator
 
     console.log(maxDelegations);
     console.log(maxDelegatorPerCandidate);
@@ -200,126 +200,6 @@ describe('test DotSama APIs', () => {
 
     const stakedReturn = calculateChainStakedReturn(2.5, parsedTotalStake, parsedTotalIssuance, 'moonbeam');
 
-    const _inflation = (await apiPromise.query.parachainStaking.inflationConfig()).toHuman() as Record<string, Record<string, any>>;
-    const inflationString = _inflation.annual.ideal as string;
-    const inflation = parseFloat(inflationString.split('%')[0]);
-
-    console.log(inflation);
-
     console.log(stakedReturn); // might or might not be right
-  });
-
-  test('get bonding extrinsic', async () => {
-    const provider = new WsProvider(getCurrentProvider(PREDEFINED_NETWORKS.moonbeam), DOTSAMA_AUTO_CONNECT_MS);
-    const api = new ApiPromise({ provider });
-    const apiPromise = await api.isReady;
-
-    const extrinsic = apiPromise.tx.parachainStaking.delegate('0x0198D3053a69C3f977bB1943bc95A0fFA7777474', new BN(6), 336, 0);
-
-    // TODO: get delegatorCount and bondedInfo
-    const fee = await extrinsic.paymentInfo('0xAF2b4242e766caf5791DA56723a8dE1BeA4e7098');
-
-    console.log(fee.toHuman());
-  });
-
-  test('get staking', async () => {
-    const provider = new WsProvider(getCurrentProvider(PREDEFINED_NETWORKS.moonbase), DOTSAMA_AUTO_CONNECT_MS);
-    const api = new ApiPromise({ provider });
-    const apiPromise = await api.isReady;
-
-    await apiPromise.query.parachainStaking.delegatorState.multi(['0xAF2b4242e766caf5791DA56723a8dE1BeA4e7098'], (resp: any) => {
-      console.log('here', resp);
-    });
-  });
-
-  test('get unbonding extrinsic', async () => {
-    const provider = new WsProvider(getCurrentProvider(PREDEFINED_NETWORKS.moonbeam), DOTSAMA_AUTO_CONNECT_MS);
-    const api = new ApiPromise({ provider });
-    const apiPromise = await api.isReady;
-
-    const extrinsic = apiPromise.tx.parachainStaking.scheduleDelegatorBondLess('0x0198D3053a69C3f977bB1943bc95A0fFA7777474', new BN(6));
-
-    const fee = await extrinsic.paymentInfo('0xAF2b4242e766caf5791DA56723a8dE1BeA4e7098');
-
-    console.log(fee.toHuman());
-  });
-
-  test('get withdrawable amount', async () => {
-    const provider = new WsProvider(getCurrentProvider(PREDEFINED_NETWORKS.moonbase), DOTSAMA_AUTO_CONNECT_MS);
-    const api = new ApiPromise({ provider });
-    const apiPromise = await api.isReady;
-    const collatorList = ['0x043f726A4eB956A19314386049769beC89Dd0F34', '0x0b70688C14297Bb634235a8870a9514c7A85a771'];
-    const allRequests: Record<string, Record<string, any>> = {};
-    const address = '0xAF2b4242e766caf5791DA56723a8dE1BeA4e7098';
-
-    await Promise.all(collatorList.map(async (validator) => {
-      const scheduledRequests = (await apiPromise.query.parachainStaking.delegationScheduledRequests(validator)).toHuman() as Record<string, any>[];
-
-      scheduledRequests.forEach((request) => {
-        if ((request.delegator as string).toLowerCase() === address.toLowerCase()) {
-          const redeemRound = parseRawNumber(request.whenExecutable as string);
-          let amount;
-          let action;
-
-          // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-          if (request.action.Revoke) {
-            action = 'revoke';
-            // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-            amount = parseRawNumber(request.action.Revoke as string);
-          } else {
-            action = 'bondLess';
-            // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-            amount = parseRawNumber(request.action.Decrease as string);
-          }
-
-          allRequests[redeemRound.toString()] = {
-            action,
-            amount
-          };
-        }
-      });
-    }));
-
-    let nextWithdrawalAmount = -1;
-    let nextWithdrawalAction = '';
-    let nextWithdrawalRound = -1;
-
-    Object.entries(allRequests).forEach(([round, data]) => {
-      if (nextWithdrawalRound === -1) {
-        nextWithdrawalRound = parseFloat(round);
-        nextWithdrawalAction = data.action as string;
-        nextWithdrawalAmount = data.amount as number;
-      } else if (nextWithdrawalRound > parseFloat(round)) {
-        nextWithdrawalRound = parseFloat(round);
-        nextWithdrawalAction = data.action as string;
-        nextWithdrawalAmount = data.amount as number;
-      }
-    });
-
-    const currentRoundInfo = (await apiPromise.query.parachainStaking.round()).toHuman() as Record<string, string>;
-    const currentRound = parseRawNumber(currentRoundInfo.current);
-
-    console.log(nextWithdrawalAmount);
-    console.log(nextWithdrawalAction);
-    console.log(nextWithdrawalRound);
-
-    const timeLeft = (nextWithdrawalRound - currentRound) * 2;
-
-    console.log('timeLeft', timeLeft);
-
-    if (timeLeft < 0) {
-      console.log('overtime');
-    }
-  });
-
-  test('get withdrawal tx', async () => {
-    const provider = new WsProvider(getCurrentProvider(PREDEFINED_NETWORKS.moonbase), DOTSAMA_AUTO_CONNECT_MS);
-    const api = new ApiPromise({ provider });
-    const apiPromise = await api.isReady;
-
-    const extrinsic = apiPromise.tx.parachainStaking.executeDelegationRequest('0xAF2b4242e766caf5791DA56723a8dE1BeA4e7098', '0x0198D3053a69C3f977bB1943bc95A0fFA7777474');
-    const fee = extrinsic.paymentInfo('0xAF2b4242e766caf5791DA56723a8dE1BeA4e7098');
-
-    console.log(fee);
   });
 });

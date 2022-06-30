@@ -26,7 +26,7 @@ function ImportEvmNft ({ className = '' }: Props): React.ReactElement<Props> {
   const chainOptions = useGetActiveEvmChains();
   const [contractAddress, setContractAddress] = useState(tokenInfo ? tokenInfo.smartContract : '');
   const [name, setName] = useState(tokenInfo ? tokenInfo.symbol : '');
-  const [chain, setChain] = useState(tokenInfo?.chain || chainOptions[0].value || '');
+  const [chain, setChain] = useState(tokenInfo ? tokenInfo.chain : chainOptions[0].value);
 
   const [isValidContract, setIsValidContract] = useState(true);
   const [isValidName, setIsValidName] = useState(true);

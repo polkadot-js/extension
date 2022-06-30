@@ -27,7 +27,7 @@ function ImportEvmToken ({ className = '' }: Props): React.ReactElement<Props> {
   const [contractAddress, setContractAddress] = useState(tokenInfo?.smartContract || '');
   const [symbol, setSymbol] = useState(tokenInfo?.symbol || '');
   const [decimals, setDecimals] = useState(tokenInfo ? String(tokenInfo?.decimals) : '');
-  const [chain, setChain] = useState(tokenInfo?.chain || chainOptions[0].value || '');
+  const [chain, setChain] = useState(tokenInfo?.chain || '');
 
   const [isValidDecimals, setIsValidDecimals] = useState(true);
   const [isValidContract, setIsValidContract] = useState(true);

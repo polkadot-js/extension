@@ -155,7 +155,7 @@ export const PREDEFINED_NETWORKS: Record<string, NetworkJson> = {
     nativeToken: 'GLMR',
     crowdloanUrl: 'https://moonbeam.foundation/moonbeam-crowdloan/',
     decimals: 18,
-    coinGeckoKey: 'Moonbeam Foundation',
+    coinGeckoKey: 'moonbeam',
     evmChainId: 1284,
     supportBonding: true
   },

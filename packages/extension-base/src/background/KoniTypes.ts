@@ -894,6 +894,7 @@ export interface ValidatorInfo {
   isVerified: boolean;
   minBond: number;
   isNominated: boolean; // this validator has been staked to before
+  icon?: string;
 }
 
 export interface BondingOptionInfo {

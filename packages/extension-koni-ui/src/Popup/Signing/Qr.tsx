@@ -5,16 +5,19 @@ import type { ExtrinsicPayload } from '@polkadot/types/interfaces';
 import type { HexString } from '@polkadot/util/types';
 
 import { wrapBytes } from '@subwallet/extension-dapp/wrapBytes';
-import React, { useCallback, useMemo, useState } from 'react';
+import { cancelSignRequest } from '@subwallet/extension-koni-ui/messaging';
+import { ThemeProps } from '@subwallet/extension-koni-ui/types';
+import CN from 'classnames';
+import React, { useCallback, useContext, useMemo, useState } from 'react';
 import styled from 'styled-components';
 
 import { QrDisplayPayload, QrScanSignature } from '@polkadot/react-qr';
 
-import { Button } from '../../components';
+import { ActionContext, Button } from '../../components';
 import useTranslation from '../../hooks/useTranslation';
 import { CMD_MORTAL, CMD_SIGN_MESSAGE } from './Request';
 
-interface Props {
+interface Props extends ThemeProps {
   address: string;
   children?: React.ReactNode;
   className?: string;
@@ -22,11 +25,14 @@ interface Props {
   genesisHash: string;
   onSignature: ({ signature }: { signature: HexString }) => void;
   payload: ExtrinsicPayload | string;
-
+  signId: string;
 }
 
-function Qr ({ address, className, cmd, genesisHash, onSignature, payload }: Props): React.ReactElement<Props> {
+function Qr ({ address, className, cmd, genesisHash, onSignature, payload, signId }: Props): React.ReactElement<Props> {
   const { t } = useTranslation();
+
+  const onAction = useContext(ActionContext);
+
   const [isScanning, setIsScanning] = useState(false);
 
   const payloadU8a = useMemo(
@@ -43,10 +49,16 @@ function Qr ({ address, className, cmd, genesisHash, onSignature, payload }: Pro
     [cmd, payload]
   );
 
-  const _onShowQr = useCallback(
-    () => setIsScanning(true),
+  const _onToggleState = useCallback(
+    () => setIsScanning((prevState) => !prevState),
     []
   );
+
+  const _onCancel = useCallback((): void => {
+    cancelSignRequest(signId)
+      .then(() => onAction())
+      .catch((error: Error) => console.error(error));
+  }, [onAction, signId]);
 
   if (!payloadU8a) {
     return (
@@ -59,36 +71,46 @@ function Qr ({ address, className, cmd, genesisHash, onSignature, payload }: Pro
   }
 
   return (
-    <div className={className}>
-      <div className='qr-container'>
-        {isScanning
-          ? <QrScanSignature onScan={onSignature} />
-          : (
+    <>
+      <div className={className}>
+        <div className='qr-container'>
+          { isScanning && <QrScanSignature onScan={onSignature} /> }
+          <div className={CN({ hidden: isScanning })}>
             <QrDisplayPayload
               address={address}
               cmd={cmd}
               genesisHash={genesisHash}
               payload={payloadU8a}
             />
-          )
-        }
-      </div>
-      {!isScanning && (
-        <div className='button-wrapper'>
-          <Button
-            className='scanButton'
-            onClick={_onShowQr}
-          >
-            {t<string>('Scan signature via camera')}
-          </Button>
+          </div>
         </div>
-      )}
-    </div>
+      </div>
+      <div className='sign-button-container'>
+        <Button
+          className='sign-button'
+          onClick={_onCancel}
+        >
+          <span>
+            {t<string>('Cancel')}
+          </span>
+        </Button>
+        <Button
+          className='sign-button'
+          onClick={_onToggleState}
+        >
+          {isScanning ? t('Display Payload') : t('Scan QR')}
+        </Button>
+      </div>
+    </>
   );
 }
 
-export default styled(Qr)`
+export default React.memo(styled(Qr)(({ theme }: Props) => `
   //height: 100%;
+
+  .hidden {
+    display: none;
+  }
 
   .qr-container {
     margin: 5px auto 10px auto;
@@ -99,11 +121,27 @@ export default styled(Qr)`
     }
   }
 
-  .button-wrapper{
-    padding: 0 10px;
+  .sign-button-container {
+    display: flex;
+    position: sticky;
+    bottom: 0;
+    background-color: ${theme.background};
+    margin-left: -15px;
+    margin-right: -15px;
+    margin-bottom: -15px;
+    padding: 15px;
+  }
 
-    .scanButton {
-      margin-bottom: 8px;
+  .sign-button {
+    flex: 1;
+  }
+
+  .sign-button:first-child {
+    background-color: ${theme.buttonBackground1};
+    margin-right: 8px;
+
+    span {
+      color: ${theme.buttonTextColor2};
     }
   }
-`;
+`));

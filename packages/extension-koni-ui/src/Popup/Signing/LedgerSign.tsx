@@ -6,14 +6,16 @@ import type { HexString } from '@polkadot/util/types';
 
 import { faSync } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import React, { useCallback, useEffect, useState } from 'react';
+import { cancelSignRequest } from '@subwallet/extension-koni-ui/messaging';
+import { ThemeProps } from '@subwallet/extension-koni-ui/types';
+import React, { useCallback, useContext, useEffect, useState } from 'react';
 import styled from 'styled-components';
 
-import { Button, Warning } from '../../components';
+import { ActionContext, Button, Warning } from '../../components';
 import { useLedger } from '../../hooks/useLedger';
 import useTranslation from '../../hooks/useTranslation';
 
-interface Props {
+interface Props extends ThemeProps{
   accountIndex?: number;
   addressOffset?: number;
   className?: string;
@@ -22,11 +24,15 @@ interface Props {
   onSignature?: ({ signature }: { signature: HexString }) => void;
   payload?: ExtrinsicPayload;
   setError: (value: string | null) => void;
+  signId: string;
 }
 
-function LedgerSign ({ accountIndex, addressOffset, className, error, genesisHash, onSignature, payload, setError }: Props): React.ReactElement<Props> {
+function LedgerSign ({ accountIndex, addressOffset, className, error, genesisHash, onSignature, payload, setError, signId }: Props): React.ReactElement<Props> {
   const [isBusy, setIsBusy] = useState(false);
   const { t } = useTranslation();
+
+  const onAction = useContext(ActionContext);
+
   const { error: ledgerError, isLoading: ledgerLoading, isLocked: ledgerLocked, ledger, refresh, warning: ledgerWarning } = useLedger(genesisHash, accountIndex, addressOffset);
 
   useEffect(() => {
@@ -59,39 +65,53 @@ function LedgerSign ({ accountIndex, addressOffset, className, error, genesisHas
     [accountIndex, addressOffset, ledger, onSignature, payload, setError]
   );
 
+  const _onCancel = useCallback((): void => {
+    cancelSignRequest(signId)
+      .then(() => onAction())
+      .catch((error: Error) => console.error(error));
+  }, [onAction, signId]);
+
   return (
-    <div className={className}>
-      {!!ledgerWarning && (
-        <Warning>
-          {ledgerWarning}
-        </Warning>
-      )}
-      {error && (
-        <Warning isDanger>
-          {error}
-        </Warning>
-      )}
-      {(ledgerLocked || error)
-        ? (
-          <Button
-            isBusy={isBusy || ledgerLoading}
-            onClick={_onRefresh}
-          >
-            {/* @ts-ignore */}
-            <FontAwesomeIcon icon={faSync} />
-            {t<string>('Refresh')}
-          </Button>
-        )
-        : (
-          <Button
-            isBusy={isBusy || ledgerLoading}
-            onClick={_onSignLedger}
-          >
-            {t<string>('Sign on Ledger')}
-          </Button>
-        )
-      }
-    </div>
+    <>
+      <div className={className}>
+        {!!ledgerWarning && (
+          <Warning>
+            {ledgerWarning}
+          </Warning>
+        )}
+        {error && (
+          <Warning isDanger>
+            {error}
+          </Warning>
+        )}
+      </div>
+      <div className='sign-button-container'>
+        <Button
+          className='sign-button'
+          onClick={_onCancel}
+        >
+          <span>
+            {t<string>('Cancel')}
+          </span>
+        </Button>
+        <Button
+          className='sign-button'
+          isBusy={isBusy || ledgerLoading}
+          onClick={(ledgerLocked || error) ? _onRefresh : _onSignLedger}
+        >
+          {
+            (ledgerLocked || error)
+              ? (
+                <>
+                  <FontAwesomeIcon icon={faSync} />
+                  {t<string>('Refresh')}
+                </>
+              )
+              : (t<string>('Sign on Ledger'))
+          }
+        </Button>
+      </div>
+    </>
   );
 }
 

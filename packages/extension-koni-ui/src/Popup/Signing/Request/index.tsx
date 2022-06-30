@@ -93,13 +93,52 @@ function Request ({ account: { accountIndex, addressOffset, isExternal, isHardwa
     [onAction, signId]
   );
 
-  const renderDataRequest = () => {
+  const renderDataRequest = useCallback(() => {
+    if (payload !== null) {
+      const json = request.payload as SignerPayloadJSON;
+
+      return (
+        <Extrinsic
+          payload={payload}
+          request={json}
+          url={url}
+        />
+      )
+      ;
+    } else if (hexBytes !== null) {
+      const { data } = request.payload as SignerPayloadRaw;
+
+      return (
+        <Bytes
+          bytes={data}
+          url={url}
+        />
+      );
+    }
+
+    return null;
+  }, [hexBytes, payload, request.payload, url]);
+
+  const renderSignArea = useCallback(() => {
+    if (!isExternal) {
+      return (
+        <SignArea
+          buttonText={buttonText}
+          error={error}
+          isExternal={isExternal}
+          isFirst={isFirst}
+          setError={setError}
+          signId={signId}
+        />
+      );
+    }
+
     if (payload !== null) {
       const json = request.payload as SignerPayloadJSON;
 
       return (
         <>
-          {isExternal && !isHardware
+          {!isHardware
             ? (
               <Qr
                 address={json.address}
@@ -108,31 +147,25 @@ function Request ({ account: { accountIndex, addressOffset, isExternal, isHardwa
                 // eslint-disable-next-line @typescript-eslint/no-misused-promises
                 onSignature={_onSignature}
                 payload={payload}
+                signId={signId}
               />
             )
             : (
-              <Extrinsic
+              <LedgerSign
+                accountIndex={accountIndex as number || 0}
+                addressOffset={addressOffset as number || 0}
+                error={error}
+                genesisHash={json.genesisHash}
+                // eslint-disable-next-line @typescript-eslint/no-misused-promises
+                onSignature={_onSignature}
                 payload={payload}
-                request={json}
-                url={url}
+                setError={setError}
+                signId={signId}
               />
             )
           }
-          {isHardware && (
-            <LedgerSign
-              accountIndex={accountIndex as number || 0}
-              addressOffset={addressOffset as number || 0}
-              error={error}
-              genesisHash={json.genesisHash}
-              // eslint-disable-next-line @typescript-eslint/no-misused-promises
-              onSignature={_onSignature}
-              payload={payload}
-              setError={setError}
-            />
-          )}
         </>
-      )
-      ;
+      );
     } else if (hexBytes !== null) {
       const { data } = request.payload as SignerPayloadRaw;
 
@@ -149,7 +182,7 @@ function Request ({ account: { accountIndex, addressOffset, isExternal, isHardwa
 
       return (
         <>
-          {isExternal && !isHardware && genesisHash
+          {!isHardware
             ? (
               <Qr
                 address={address}
@@ -161,23 +194,27 @@ function Request ({ account: { accountIndex, addressOffset, isExternal, isHardwa
               />
             )
             : (
-              <Bytes
-                bytes={data}
-                url={url}
-              />
+              <>
+                <VerticalSpace />
+                <Warning>{t('Message signing is not supported for hardware wallets.')}</Warning>
+                <VerticalSpace />
+                <SignArea
+                  buttonText={buttonText}
+                  error={error}
+                  isExternal={isExternal}
+                  isFirst={isFirst}
+                  setError={setError}
+                  signId={signId}
+                />
+              </>
             )
           }
-          <VerticalSpace />
-          {isHardware && <>
-            <Warning>{t('Message signing is not supported for hardware wallets.')}</Warning>
-            <VerticalSpace />
-          </>}
         </>
       );
     }
 
     return null;
-  };
+  }, [_onSignature, accountIndex, address, addressOffset, buttonText, error, hexBytes, isExternal, isFirst, isHardware, networkMap, payload, request.payload, signId, t]);
 
   const _viewDetails = useCallback(() => {
     setShowDetails(!isShowDetails);
@@ -186,12 +223,6 @@ function Request ({ account: { accountIndex, addressOffset, isExternal, isHardwa
   const account = accounts
     .filter((a) => !isAccountAll(a.address))
     .find((account) => decodeAddress(account.address).toString() === decodeAddress(address).toString());
-
-  useEffect(() => {
-    if (isExternal) {
-      setShowDetails(true);
-    }
-  }, [isExternal]);
 
   return (
     <div className={className}>
@@ -237,14 +268,7 @@ function Request ({ account: { accountIndex, addressOffset, isExternal, isHardwa
         >{isShowDetails ? t<string>('Hide Details') : t<string>('View Details')}</div>
       </div>
 
-      <SignArea
-        buttonText={buttonText}
-        error={error}
-        isExternal={isExternal}
-        isFirst={isFirst}
-        setError={setError}
-        signId={signId}
-      />
+      { renderSignArea() }
     </div>
   );
 }
@@ -334,4 +358,27 @@ export default styled(Request)(({ theme }: Props) => `
     color: ${theme.textColor2};
   }
 
+  .sign-button-container {
+    display: flex;
+    position: sticky;
+    bottom: 0;
+    background-color: ${theme.background};
+    margin-left: -15px;
+    margin-right: -15px;
+    margin-bottom: -15px;
+    padding: 15px;
+  }
+
+  .sign-button {
+    flex: 1;
+  }
+
+  .sign-button:first-child {
+    background-color: ${theme.buttonBackground1};
+    margin-right: 8px;
+
+    span {
+      color: ${theme.buttonTextColor2};
+    }
+  }
 `);

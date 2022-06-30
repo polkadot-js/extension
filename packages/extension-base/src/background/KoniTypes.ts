@@ -96,6 +96,7 @@ export interface StakingItem {
   unlockingBalance?: string
   nativeToken: string,
   unit?: string,
+  delegation?: DelegationItem[],
   state: APIItemState
 }
 
@@ -922,7 +923,8 @@ export interface BondingSubmitParams {
   validatorInfo: ValidatorInfo,
   password?: string,
   isBondedBefore: boolean,
-  bondedValidators: string[]
+  bondedValidators: string[], // already delegated validators
+  lockPeriod?: number // in month
 }
 
 export interface BasicTxResponse {
@@ -942,12 +944,23 @@ export interface UnbondingSubmitParams {
   amount: number,
   networkKey: string,
   address: string,
-  password?: string
+  password?: string,
+  // for some chains
+  validatorAddress?: string,
+  unstakeAll?: boolean
 }
 
 export interface UnlockingStakeParams {
   address: string,
-  networkKey: string
+  networkKey: string,
+  validatorList?: string[]
+}
+
+export interface DelegationItem {
+  owner: string,
+  amount: string, // raw amount string
+  identity?: string,
+  minBond: string
 }
 
 export interface UnlockingStakeInfo {
@@ -959,7 +972,9 @@ export interface UnlockingStakeInfo {
 export interface StakeWithdrawalParams {
   address: string,
   networkKey: string,
-  password?: string
+  password?: string,
+  validatorAddress?: string,
+  action?: string
 }
 
 export interface KoniRequestSignatures {

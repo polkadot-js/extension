@@ -65,13 +65,15 @@ function BondingNetworkItem ({ chainBondingMeta, className, icon, network }: Pro
             trigger={`max-nominator-tooltip-${network.key}`}
           />
 
-          <div
-            className={'chain-return'}
-            data-for={`chain-return-tooltip-${network.key}`}
-            data-tip={true}
-          >
-            {chainBondingMeta ? chainBondingMeta.stakedReturn.toFixed(1) + '%' : ''}
-          </div>
+          {
+            chainBondingMeta && chainBondingMeta.stakedReturn > 0 && <div
+              className={'chain-return'}
+              data-for={`chain-return-tooltip-${network.key}`}
+              data-tip={true}
+            >
+              {chainBondingMeta ? chainBondingMeta.stakedReturn.toFixed(1) + '%' : ''}
+            </div>
+          }
           <Tooltip
             place={'top'}
             // eslint-disable-next-line @typescript-eslint/restrict-plus-operands

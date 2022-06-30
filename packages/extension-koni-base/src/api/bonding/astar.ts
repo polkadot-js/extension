@@ -72,7 +72,7 @@ export async function getAstarDappsInfo (networkKey: string, dotSamaApi: ApiProp
     const data = item[0].toHuman() as any[];
     const stakedDapp = data[1] as Record<string, string>;
 
-    stakedDappsList.push(stakedDapp.Evm);
+    stakedDappsList.push((stakedDapp.Evm).toLowerCase());
   }
 
   const era = parseRawNumber(_era.toHuman() as string);
@@ -96,7 +96,7 @@ export async function getAstarDappsInfo (networkKey: string, dotSamaApi: ApiProp
       blocked: false,
       isVerified: false,
       minBond: (minStake / 10 ** decimals),
-      isNominated: stakedDappsList.includes(address),
+      isNominated: stakedDappsList.includes(dappAddress.toLowerCase()),
       icon: dappIcon,
       identity: dappName
     });
@@ -106,7 +106,7 @@ export async function getAstarDappsInfo (networkKey: string, dotSamaApi: ApiProp
     maxNominatorPerValidator: maxStakerPerContract,
     era: -1,
     validatorsInfo: allDappsInfo,
-    isBondedBefore: false, // TODO: add this
+    isBondedBefore: false, // No need for this on astar
     bondedValidators: stakedDappsList,
     maxNominations: 100
   };

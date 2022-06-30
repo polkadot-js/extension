@@ -168,6 +168,192 @@ function BondingSubmitTransaction ({ className }: Props): React.ReactElement<Pro
     setLockPeriod(parseInt(value));
   }, []);
 
+  const handleGetValidatorDetail = useCallback(() => {
+    if (['astar', 'shiden', 'shibuya'].includes(selectedNetwork)) {
+      return (
+        <div className={'validator-detail-container'}>
+          <div className={'validator-att-container'}>
+            <div className={'validator-att'}>
+              <div className={'validator-att-title'}>Total stake</div>
+              <div className={'validator-att-value'}>{parseBalanceString(validatorInfo.totalStake, unit)}</div>
+            </div>
+
+            <div className={'validator-att'}>
+              <div className={'validator-att-title'}>
+                Stakers count
+                {
+                  isOversubscribed && <FontAwesomeIcon
+                    className={'error-tooltip'}
+                    data-for={`validator-oversubscribed-tooltip-${selectedNetwork}`}
+                    data-tip={true}
+                    icon={faCircleExclamation}
+                  />
+                }
+                <Tooltip
+                  place={'top'}
+                  // eslint-disable-next-line @typescript-eslint/restrict-plus-operands
+                  text={'Oversubscribed. You will not be able to receive reward.'}
+                  trigger={`validator-oversubscribed-tooltip-${selectedNetwork}`}
+                />
+              </div>
+              <div className={`${!isOversubscribed ? 'validator-att-value' : 'validator-att-value-error'}`}>{validatorInfo.nominatorCount}</div>
+            </div>
+          </div>
+
+          <div className={'validator-att-container'}>
+            <div className={'validator-att'}>
+              <div className={'validator-att-title'}>
+                Minimum stake
+                {
+                  !isSufficientFund && <FontAwesomeIcon
+                    className={'error-tooltip'}
+                    data-for={`insufficient-fund-tooltip-${selectedNetwork}`}
+                    data-tip={true}
+                    icon={faCircleExclamation}
+                  />
+                }
+                <Tooltip
+                  place={'top'}
+                  // eslint-disable-next-line @typescript-eslint/restrict-plus-operands
+                  text={getMinBondTooltipText()}
+                  trigger={`insufficient-fund-tooltip-${selectedNetwork}`}
+                />
+              </div>
+              <div className={`${isSufficientFund ? 'validator-att-value' : 'validator-att-value-error'}`}>{parseBalanceString(validatorInfo.minBond, networkJson.nativeToken as string)}</div>
+            </div>
+          </div>
+
+          {
+            validatorInfo.commission !== undefined && <div className={'validator-att-container'}>
+              <div className={'validator-att'}>
+                <div className={'validator-att-title'}>
+                  Commission
+                  {
+                    isMaxCommission && <FontAwesomeIcon
+                      className={'error-tooltip'}
+                      data-for={`commission-max-tooltip-${selectedNetwork}`}
+                      data-tip={true}
+                      icon={faCircleExclamation}
+                    />
+                  }
+                  <Tooltip
+                    place={'top'}
+                    text={'You will not be able to receive reward.'}
+                    trigger={`commission-max-tooltip-${selectedNetwork}`}
+                  />
+                </div>
+                <div className={`${!isMaxCommission ? 'validator-att-value' : 'validator-att-value-error'}`}>{validatorInfo.commission}%</div>
+              </div>
+            </div>
+          }
+        </div>
+      );
+    } else {
+      return (
+        <div className={'validator-detail-container'}>
+          <div className={'validator-att-container'}>
+            <div className={'validator-att'}>
+              <div className={'validator-att-title'}>Total stake</div>
+              <div className={'validator-att-value'}>{parseBalanceString(validatorInfo.totalStake, unit)}</div>
+            </div>
+
+            <div className={'validator-att'}>
+              <div className={'validator-att-title'}>
+                Own stake
+                {
+                  !hasOwnStake && <img
+                    data-for={`validator-has-no-stake-tooltip-${selectedNetwork}`}
+                    data-tip={true}
+                    height={15}
+                    src={NeutralQuestion}
+                    width={15}
+                  />
+                }
+                <Tooltip
+                  place={'top'}
+                  // eslint-disable-next-line @typescript-eslint/restrict-plus-operands
+                  text={'Validators should have their own stake.'}
+                  trigger={`validator-has-no-stake-tooltip-${selectedNetwork}`}
+                />
+              </div>
+              <div className={`${hasOwnStake ? 'validator-att-value' : 'validator-att-value-warning'}`}>{parseBalanceString(validatorInfo.ownStake, unit)}</div>
+            </div>
+          </div>
+
+          <div className={'validator-att-container'}>
+            <div className={'validator-att'}>
+              <div className={'validator-att-title'}>
+                Nominators count
+                {
+                  isOversubscribed && <img
+                    data-for={`validator-oversubscribed-tooltip-${selectedNetwork}`}
+                    data-tip={true}
+                    height={15}
+                    src={NeutralQuestion}
+                    width={15}
+                  />
+                }
+                <Tooltip
+                  place={'top'}
+                  // eslint-disable-next-line @typescript-eslint/restrict-plus-operands
+                  text={'Oversubscribed. You will not be able to receive reward.'}
+                  trigger={`validator-oversubscribed-tooltip-${selectedNetwork}`}
+                />
+              </div>
+              <div className={`${!isOversubscribed ? 'validator-att-value' : 'validator-att-value-error'}`}>{validatorInfo.nominatorCount}</div>
+            </div>
+
+            <div className={'validator-att'}>
+              <div className={'validator-att-title'}>
+                Minimum stake
+                {
+                  !isSufficientFund && <img
+                    data-for={`insufficient-fund-tooltip-${selectedNetwork}`}
+                    data-tip={true}
+                    height={15}
+                    src={NeutralQuestion}
+                    width={15}
+                  />
+                }
+                <Tooltip
+                  place={'top'}
+                  // eslint-disable-next-line @typescript-eslint/restrict-plus-operands
+                  text={getMinBondTooltipText()}
+                  trigger={`insufficient-fund-tooltip-${selectedNetwork}`}
+                />
+              </div>
+              <div className={`${isSufficientFund ? 'validator-att-value' : 'validator-att-value-error'}`}>{parseBalanceString(validatorInfo.minBond, networkJson.nativeToken as string)}</div>
+            </div>
+          </div>
+
+          {
+            validatorInfo.commission !== undefined && <div className={'validator-att-container'}>
+              <div className={'validator-att'}>
+                <div className={'validator-att-title'}>
+                  Commission
+                  {
+                    isMaxCommission && <FontAwesomeIcon
+                      className={'error-tooltip'}
+                      data-for={`commission-max-tooltip-${selectedNetwork}`}
+                      data-tip={true}
+                      icon={faCircleExclamation}
+                    />
+                  }
+                  <Tooltip
+                    place={'top'}
+                    text={'You will not be able to receive reward.'}
+                    trigger={`commission-max-tooltip-${selectedNetwork}`}
+                  />
+                </div>
+                <div className={`${!isMaxCommission ? 'validator-att-value' : 'validator-att-value-error'}`}>{validatorInfo.commission}%</div>
+              </div>
+            </div>
+          }
+        </div>
+      );
+    }
+  }, [getMinBondTooltipText, hasOwnStake, isMaxCommission, isOversubscribed, isSufficientFund, networkJson.nativeToken, selectedNetwork, unit, validatorInfo.commission, validatorInfo.minBond, validatorInfo.nominatorCount, validatorInfo.ownStake, validatorInfo.totalStake]);
+
   return (
     <div className={className}>
       <Header
@@ -254,106 +440,7 @@ function BondingSubmitTransaction ({ className }: Props): React.ReactElement<Pro
           </div>
 
           {
-            showDetail && <div className={'validator-detail-container'}>
-              <div className={'validator-att-container'}>
-                <div className={'validator-att'}>
-                  <div className={'validator-att-title'}>Total stake</div>
-                  <div className={'validator-att-value'}>{parseBalanceString(validatorInfo.totalStake, unit)}</div>
-                </div>
-
-                <div className={'validator-att'}>
-                  <div className={'validator-att-title'}>
-                    Own stake
-                    {
-                      !hasOwnStake && <img
-                        data-for={`validator-has-no-stake-tooltip-${selectedNetwork}`}
-                        data-tip={true}
-                        height={15}
-                        src={NeutralQuestion}
-                        width={15}
-                      />
-                    }
-                    <Tooltip
-                      place={'top'}
-                      // eslint-disable-next-line @typescript-eslint/restrict-plus-operands
-                      text={'Validators should have their own stake.'}
-                      trigger={`validator-has-no-stake-tooltip-${selectedNetwork}`}
-                    />
-                  </div>
-                  <div className={`${hasOwnStake ? 'validator-att-value' : 'validator-att-value-warning'}`}>{parseBalanceString(validatorInfo.ownStake, unit)}</div>
-                </div>
-              </div>
-
-              <div className={'validator-att-container'}>
-                <div className={'validator-att'}>
-                  <div className={'validator-att-title'}>
-                    Nominators count
-                    {
-                      isOversubscribed && <img
-                        data-for={`validator-oversubscribed-tooltip-${selectedNetwork}`}
-                        data-tip={true}
-                        height={15}
-                        src={NeutralQuestion}
-                        width={15}
-                      />
-                    }
-                    <Tooltip
-                      place={'top'}
-                      // eslint-disable-next-line @typescript-eslint/restrict-plus-operands
-                      text={'Oversubscribed. You will not be able to receive reward.'}
-                      trigger={`validator-oversubscribed-tooltip-${selectedNetwork}`}
-                    />
-                  </div>
-                  <div className={`${!isOversubscribed ? 'validator-att-value' : 'validator-att-value-error'}`}>{validatorInfo.nominatorCount}</div>
-                </div>
-
-                <div className={'validator-att'}>
-                  <div className={'validator-att-title'}>
-                    Minimum stake
-                    {
-                      !isSufficientFund && <img
-                        data-for={`insufficient-fund-tooltip-${selectedNetwork}`}
-                        data-tip={true}
-                        height={15}
-                        src={NeutralQuestion}
-                        width={15}
-                      />
-                    }
-                    <Tooltip
-                      place={'top'}
-                      // eslint-disable-next-line @typescript-eslint/restrict-plus-operands
-                      text={getMinBondTooltipText()}
-                      trigger={`insufficient-fund-tooltip-${selectedNetwork}`}
-                    />
-                  </div>
-                  <div className={`${isSufficientFund ? 'validator-att-value' : 'validator-att-value-error'}`}>{parseBalanceString(validatorInfo.minBond, networkJson.nativeToken as string)}</div>
-                </div>
-              </div>
-
-              {
-                validatorInfo.commission !== undefined && <div className={'validator-att-container'}>
-                  <div className={'validator-att'}>
-                    <div className={'validator-att-title'}>
-                      Commission
-                      {
-                        isMaxCommission && <FontAwesomeIcon
-                          className={'error-tooltip'}
-                          data-for={`commission-max-tooltip-${selectedNetwork}`}
-                          data-tip={true}
-                          icon={faCircleExclamation}
-                        />
-                      }
-                      <Tooltip
-                        place={'top'}
-                        text={'You will not be able to receive reward.'}
-                        trigger={`commission-max-tooltip-${selectedNetwork}`}
-                      />
-                    </div>
-                    <div className={`${!isMaxCommission ? 'validator-att-value' : 'validator-att-value-error'}`}>{validatorInfo.commission}%</div>
-                  </div>
-                </div>
-              }
-            </div>
+            showDetail && handleGetValidatorDetail()
           }
         </div>
 

@@ -104,4 +104,16 @@ describe('test DotSama APIs', () => {
 
     console.log(extrinsic.paymentInfo(address));
   });
+
+  test('test get unbonding extrinsic', async () => {
+    const provider = new WsProvider(getCurrentProvider(PREDEFINED_NETWORKS.shibuya), DOTSAMA_AUTO_CONNECT_MS);
+    const api = new ApiPromise({ provider });
+    const apiPromise = await api.isReady;
+    const dappAddress = '0x1CeE94a11eAf390B67Aa346E9Dda3019DfaD4f6A';
+    const address = 'b6dCDjD46DHpikSDoAPt8Hw1r1SZfbwpi2AkX8z3xunvD4A';
+
+    const extrinsic = apiPromise.tx.dappsStaking.unbondAndUnstake({ Evm: dappAddress }, new BN(1));
+
+    console.log(extrinsic.paymentInfo(address));
+  });
 });

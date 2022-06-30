@@ -147,3 +147,39 @@ export async function getAstarBondingExtrinsic (dotSamaApi: ApiProps, networkJso
 
   return apiPromise.api.tx.dappsStaking.bondAndStake({ Evm: dappInfo.address }, binaryAmount);
 }
+
+export async function getAstarUnbondingTxInfo (networkJson: NetworkJson, dotSamaApi: ApiProps, stakerAddress: string, amount: number, dappAddress: string) {
+  const apiPromise = await dotSamaApi.isReady;
+  const parsedAmount = amount * (10 ** (networkJson.decimals as number));
+  const binaryAmount = new BN(parsedAmount.toString());
+
+  const extrinsic = apiPromise.api.tx.dappsStaking.unbondAndUnstake({ Evm: dappAddress }, binaryAmount);
+
+  return extrinsic.paymentInfo(stakerAddress);
+}
+
+export async function handleAstarUnbondingTxInfo (networkJson: NetworkJson, amount: number, networkKey: string, stakerAddress: string, dappAddress: string, dotSamaApiMap: Record<string, ApiProps>, web3ApiMap: Record<string, Web3>) {
+  const [txInfo, balance] = await Promise.all([
+    getAstarUnbondingTxInfo(networkJson, dotSamaApiMap[networkKey], stakerAddress, amount, dappAddress),
+    getFreeBalance(networkKey, stakerAddress, dotSamaApiMap, web3ApiMap)
+  ]);
+
+  const feeString = txInfo.partialFee.toHuman();
+  const binaryBalance = new BN(balance);
+
+  const sumAmount = txInfo.partialFee.addn(amount);
+  const balanceError = sumAmount.gt(binaryBalance);
+
+  return {
+    fee: feeString,
+    balanceError
+  } as BasicTxInfo;
+}
+
+export async function getAstarUnbondingExtrinsic (dotSamaApi: ApiProps, networkJson: NetworkJson, amount: number, networkKey: string, stakerAddress: string, dappAddress: string) {
+  const apiPromise = await dotSamaApi.isReady;
+  const parsedAmount = amount * (10 ** (networkJson.decimals as number));
+  const binaryAmount = new BN(parsedAmount.toString());
+
+  return apiPromise.api.tx.dappsStaking.unbondAndUnstake({ Evm: dappAddress }, binaryAmount);
+}

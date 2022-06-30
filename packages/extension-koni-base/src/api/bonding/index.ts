@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { ApiProps, NetworkJson, ValidatorInfo } from '@subwallet/extension-base/background/KoniTypes';
-import { getAstarBondingBasics, getAstarBondingExtrinsic, getAstarDappsInfo, handleAstarBondingTxInfo } from '@subwallet/extension-koni-base/api/bonding/astar';
+import { getAstarBondingBasics, getAstarBondingExtrinsic, getAstarDappsInfo, getAstarUnbondingExtrinsic, handleAstarBondingTxInfo, handleAstarUnbondingTxInfo } from '@subwallet/extension-koni-base/api/bonding/astar';
 import { getDarwiniaBondingExtrinsic, getDarwiniaValidatorsInfo, handleDarwiniaBondingTxInfo } from '@subwallet/extension-koni-base/api/bonding/darwinia';
 import { getParaBondingBasics, getParaBondingExtrinsic, getParaCollatorsInfo, getParaUnbondingExtrinsic, getParaWithdrawalExtrinsic, handleParaBondingTxInfo, handleParaUnbondingTxInfo, handleParaUnlockingInfo, handleParaWithdrawalTxInfo } from '@subwallet/extension-koni-base/api/bonding/paraChain';
 import { getRelayBondingExtrinsic, getRelayChainBondingBasics, getRelayUnbondingExtrinsic, getRelayValidatorsInfo, getRelayWithdrawalExtrinsic, getTargetValidators, handleRelayBondingTxInfo, handleRelayUnbondingTxInfo, handleRelayUnlockingInfo, handleRelayWithdrawalTxInfo } from '@subwallet/extension-koni-base/api/bonding/relayChain';
@@ -72,6 +72,8 @@ export async function getBondingExtrinsic (networkJson: NetworkJson, networkKey:
 export async function getUnbondingTxInfo (address: string, amount: number, networkKey: string, dotSamaApiMap: Record<string, ApiProps>, web3ApiMap: Record<string, Web3>, networkJson: NetworkJson, validatorAddress?: string, unstakeAll?: boolean) {
   if (CHAIN_TYPES.para.includes(networkKey)) {
     return handleParaUnbondingTxInfo(address, amount, networkKey, dotSamaApiMap, web3ApiMap, networkJson, validatorAddress as string, unstakeAll as boolean);
+  } else if (CHAIN_TYPES.astar.includes(networkKey)) {
+    return handleAstarUnbondingTxInfo(networkJson, amount, networkKey, address, validatorAddress as string, dotSamaApiMap, web3ApiMap);
   }
 
   return handleRelayUnbondingTxInfo(address, amount, networkKey, dotSamaApiMap, web3ApiMap, networkJson);
@@ -80,6 +82,8 @@ export async function getUnbondingTxInfo (address: string, amount: number, netwo
 export async function getUnbondingExtrinsic (address: string, amount: number, networkKey: string, networkJson: NetworkJson, dotSamaApi: ApiProps, validatorAddress?: string, unstakeAll?: boolean) {
   if (CHAIN_TYPES.para.includes(networkKey)) {
     return getParaUnbondingExtrinsic(dotSamaApi, amount, networkJson, validatorAddress as string, unstakeAll as boolean);
+  } else if (CHAIN_TYPES.astar.includes(networkKey)) {
+    return getAstarUnbondingExtrinsic(dotSamaApi, networkJson, amount, networkKey, address, validatorAddress as string);
   }
 
   return getRelayUnbondingExtrinsic(dotSamaApi, amount, networkJson);

@@ -3,7 +3,7 @@ Our SubWallet is forked from polkadot-js/extension. We aim to adding more featur
 ## Main Concept
 ![Main Concept](https://github.com/Koniverse/Subwallet-V2/wiki/images/ExtensionConcept.png)
 The extension is compiled from folder `packages/extension-koni`
-- **Background environment**: The Background environment is compiled from `packages/extension-koni/src/background.ts`. 
+- **Background environment**: The Background environment is compiled from `packages/extension-koni/src/background.ts`.
   - The Background is use to handle message from Extensions pages and Chrome tabs via Chrome API Message Passing.
   - Save all state to store and persist to chrome storage.
   - Run cronjob.
@@ -12,18 +12,18 @@ The extension is compiled from folder `packages/extension-koni`
   - portfolio.html: Frontend to display more complicated view.
 - **Inject Scripts**: Inject script into chrome tabs.
 
-All data requests must be called and processed in the background. Extension Pages and Inject Scripts use data from the background environment and do not call APIs directly. 
+All data requests must be called and processed in the background. Extension Pages and Inject Scripts use data from the background environment and do not call APIs directly.
 
 ## Project structure
 - **extension-base** - Contain main features run in background, call api, persist data into chrome store and inject script.
 - **extension-dapp** - A convenience wrapper to work with the injected objects, simplifying data extraction for any dapp that wishes to integrate the extension (or any extension that supports the interface)
 - **extension-inject** - A convenience wrapper that allows extension developers to inject their extension for use by any dapp
-- **extension-chains** - Definitions for chains that are supported by this extension. It contains the bare definitions as well as a stripped-down (call-only) metadata format.  
+- **extension-chains** - Definitions for chains that are supported by this extension. It contains the bare definitions as well as a stripped-down (call-only) metadata format.
 - **extension-dapp** - The actual in-depth technical breakdown is given in the next section for any dapp developer wishing to work with the raw objects injected into the window. However, convenience wrappers are provided that allows for any dapp to use this extension (or any other extension that conforms to the interface) without having to manage any additional info.
 - **extension-mocks** - Mock data for testing.
-- **extension-compat-metamask**: Compitable with metamask 
+- **extension-compat-metamask**: Compitable with metamask
 - **extension-koni-base**: Custom package, extension extension base
-- **extension-koni-ui** *(replace extension-ui)*: The UI components for the extension, to build up the popup 
+- **extension-koni-ui** *(replace extension-ui)*: The UI components for the extension, to build up the popup
 - **extension-koni** *(replace extension)*: All the injection and background processing logic (the main entry)
 
 # Development Guide
@@ -50,22 +50,22 @@ Store is used to persist data into local storage. Stores is defined in folder `p
   export default class KoniState extends State {
     private readonly priceStore = new PriceStore();
     private priceStoreReady = false;
-  
+
     public setPrice (priceData: PriceJson, callback?: (priceData: PriceJson) => void): void {
       ...
     }
-  
+
     public getPrice (update: (value: PriceJson) => void): void {
       ...
     }
-    
+
     public subscribePrice () {
       return this.priceStore.getSubject();
     }
   }
   ```
 
-## Add a message handle 
+## Add a message handle
 Subwallet extension use message passing concept via browser API to interact between Background - Extensions - Chrome Tabs.
 - Extension or Chrome Tabs send a message with id and type to Background
 - Background handle message by id and type and response data.
@@ -88,7 +88,7 @@ Subwallet extension use message passing concept via browser API to interact betw
       - Response type like `PriceJson`
       - Subscription param type (optional) like `PriceJson`
   - Add handler (Background):
-    - Add new case in function handle of `KoniExtension` or `KoniTabs` of package `extension-koni-base` 
+    - Add new case in function handle of `KoniExtension` or `KoniTabs` of package `extension-koni-base`
   - Add caller (Extension, Chrome Tabs):
     - Add new function in file `messaging.ts` of package `extension-koni-ui` to send request and handle receive data.
 
@@ -104,7 +104,7 @@ Cronjob is define in folder `packages/extension-koni-base/src/cron`.
 - Popup: Main extension page, show when click into extension icon in browser extension list.
 - Portfolio (Coming soon): Display more complicated view like dashboard, transaction...
 - Another folders:
-  - assets: images, resources of extensions. 
+  - assets: images, resources of extensions.
   - components: Common components use in extension pages.
   - hooks: public hook for global function.
   - i18n: Internationalization.
@@ -116,7 +116,7 @@ Cronjob is define in folder `packages/extension-koni-base/src/cron`.
 ### Add new redux store
 - Subwallet extension use [redux-tookit](https://redux-toolkit.js.org/) to generate store.
 - Define redux store reducers and state into separate file by method `createSlice` of redux toolkit.
-- Map reducer into root store in file index.ts
+- Map reducer into root store in file relayChain.ts
 
 ### Add new message caller
 Read "Add a message handle"

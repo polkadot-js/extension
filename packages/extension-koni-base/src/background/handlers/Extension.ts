@@ -7,7 +7,7 @@ import { AuthUrls } from '@subwallet/extension-base/background/handlers/State';
 import { createSubscription, isSubscriptionRunning, unsubscribe } from '@subwallet/extension-base/background/handlers/subscriptions';
 import { AccountsWithCurrentAddress, ApiProps, BalanceJson, BasicTxInfo, BasicTxResponse, BondingOptionInfo, BondingOptionParams, BondingSubmitParams, ChainBondingBasics, ChainRegistry, CrowdloanJson, CurrentAccountInfo, CustomEvmToken, DeleteEvmTokenParams, DisableNetworkResponse, EvmNftSubmitTransaction, EvmNftTransaction, EvmNftTransactionRequest, EvmTokenJson, NETWORK_ERROR, NetWorkGroup, NetworkJson, NftCollection, NftCollectionJson, NftItem, NftJson, NftTransactionResponse, NftTransferExtra, OptionInputAddress, PriceJson, RequestAccountCreateSuriV2, RequestAccountExportPrivateKey, RequestAuthorization, RequestAuthorizationPerAccount, RequestAuthorizeApproveV2, RequestBatchRestoreV2, RequestCheckCrossChainTransfer, RequestCheckTransfer, RequestConfirmationComplete, RequestCrossChainTransfer, RequestDeriveCreateV2, RequestForgetSite, RequestFreeBalance, RequestJsonRestoreV2, RequestNftForceUpdate, RequestSaveRecentAccount, RequestSeedCreateV2, RequestSeedValidateV2, RequestSettingsType, RequestTransactionHistoryAdd, RequestTransfer, RequestTransferCheckReferenceCount, RequestTransferCheckSupporting, RequestTransferExistentialDeposit, ResponseAccountCreateSuriV2, ResponseAccountExportPrivateKey, ResponseCheckCrossChainTransfer, ResponseCheckTransfer, ResponsePrivateKeyValidateV2, ResponseSeedCreateV2, ResponseSeedValidateV2, ResponseTransfer, StakeWithdrawalParams, StakingJson, StakingRewardJson, SubstrateNftSubmitTransaction, SubstrateNftTransaction, SubstrateNftTransactionRequest, SupportTransferResponse, ThemeTypes, TokenInfo, TransactionHistoryItemType, TransferError, TransferErrorCode, TransferStep, UnbondingSubmitParams, UnlockingStakeInfo, UnlockingStakeParams, ValidateEvmTokenRequest, ValidateEvmTokenResponse, ValidateNetworkRequest, ValidateNetworkResponse } from '@subwallet/extension-base/background/KoniTypes';
 import { AccountJson, AuthorizeRequest, MessageTypes, RequestAccountForget, RequestAccountTie, RequestAuthorizeCancel, RequestAuthorizeReject, RequestCurrentAccountAddress, RequestTypes, ResponseAuthorizeList, ResponseType } from '@subwallet/extension-base/background/types';
-import { getBondingExtrinsic, getBondingTxInfo, getChainBondingBasics, getTargetValidators, getUnbondingExtrinsic, getUnbondingTxInfo, getUnlockingInfo, getValidatorsInfo, getWithdrawalExtrinsic, getWithdrawalTxInfo } from '@subwallet/extension-koni-base/api/bonding';
+import { getBondingExtrinsic, getBondingTxInfo, getChainBondingBasics, getUnbondingExtrinsic, getUnbondingTxInfo, getUnlockingInfo, getValidatorsInfo, getWithdrawalExtrinsic, getWithdrawalTxInfo } from '@subwallet/extension-koni-base/api/bonding';
 import { initApi } from '@subwallet/extension-koni-base/api/dotsama';
 import { getFreeBalance, subscribeFreeBalance } from '@subwallet/extension-koni-base/api/dotsama/balance';
 import { getTokenInfo } from '@subwallet/extension-koni-base/api/dotsama/registry';
@@ -1520,6 +1520,7 @@ export default class KoniExtension extends Extension {
           updateState(txState);
         });
     } catch (e) {
+      console.log('send nft error', e);
       txState.txError = true;
 
       updateState(txState);
@@ -2101,36 +2102,15 @@ export default class KoniExtension extends Extension {
     } as BondingOptionInfo;
   }
 
-  private async getBondingTxInfo ({ amount, bondedValidators, isBondedBefore, networkKey, nominatorAddress, validatorInfo }: BondingSubmitParams): Promise<BasicTxInfo> {
-    const dotSamaApi = state.getDotSamaApi(networkKey);
+  private async getBondingTxInfo ({ amount, bondedValidators, isBondedBefore, lockPeriod, networkKey, nominatorAddress, validatorInfo }: BondingSubmitParams): Promise<BasicTxInfo> {
     const networkJson = state.getNetworkMapByKey(networkKey);
-    const parsedAmount = amount * (10 ** (networkJson.decimals as number));
-    const binaryAmount = new BN(parsedAmount);
-    const targetValidators: string[] = getTargetValidators(bondedValidators, validatorInfo.address);
 
-    const [txInfo, balance] = await Promise.all([
-      getBondingTxInfo(dotSamaApi, nominatorAddress, binaryAmount, targetValidators, isBondedBefore),
-      getFreeBalance(networkKey, nominatorAddress, state.getDotSamaApiMap(), state.getWeb3ApiMap())
-    ]);
-
-    const feeString = txInfo.partialFee.toHuman();
-    const binaryBalance = new BN(balance);
-
-    const sumAmount = txInfo.partialFee.add(binaryAmount);
-    const balanceError = sumAmount.gt(binaryBalance);
-
-    return {
-      fee: feeString,
-      balanceError
-    };
+    return await getBondingTxInfo(networkJson, amount, bondedValidators, isBondedBefore, networkKey, nominatorAddress, validatorInfo, state.getDotSamaApiMap(), state.getWeb3ApiMap(), lockPeriod);
   }
 
-  private async submitBonding (id: string, port: chrome.runtime.Port, { amount, bondedValidators, isBondedBefore, networkKey, nominatorAddress, password, validatorInfo }: BondingSubmitParams): Promise<BasicTxResponse> {
+  private async submitBonding (id: string, port: chrome.runtime.Port, { amount, bondedValidators, isBondedBefore, lockPeriod, networkKey, nominatorAddress, password, validatorInfo }: BondingSubmitParams): Promise<BasicTxResponse> {
     const txState: BasicTxResponse = {};
     const networkJson = state.getNetworkMapByKey(networkKey);
-    const parsedAmount = amount * (10 ** (networkJson.decimals as number));
-    const binaryAmount = new BN(parsedAmount);
-    const targetValidators: string[] = getTargetValidators(bondedValidators, validatorInfo.address);
 
     if (!amount || !nominatorAddress || !validatorInfo || !password) {
       txState.txError = true;
@@ -2140,7 +2120,7 @@ export default class KoniExtension extends Extension {
 
     const callback = createSubscription<'pri(bonding.submitTransaction)'>(id, port);
     const dotSamaApi = state.getDotSamaApi(networkKey);
-    const extrinsic = await getBondingExtrinsic(dotSamaApi, nominatorAddress, binaryAmount, targetValidators, isBondedBefore);
+    const extrinsic = await getBondingExtrinsic(networkJson, networkKey, amount, bondedValidators, validatorInfo, isBondedBefore, nominatorAddress, dotSamaApi, lockPeriod);
     const passwordError: string | null = unlockAccount(nominatorAddress, password);
 
     if (extrinsic !== null && passwordError === null) {
@@ -2189,34 +2169,14 @@ export default class KoniExtension extends Extension {
     return txState;
   }
 
-  private async getUnbondingTxInfo ({ address, amount, networkKey }: UnbondingSubmitParams): Promise<BasicTxInfo> {
-    const dotSamaApi = state.getDotSamaApi(networkKey);
+  private async getUnbondingTxInfo ({ address, amount, networkKey, unstakeAll, validatorAddress }: UnbondingSubmitParams): Promise<BasicTxInfo> {
     const networkJson = state.getNetworkMapByKey(networkKey);
-    const parsedAmount = amount * (10 ** (networkJson.decimals as number));
-    const binaryAmount = new BN(parsedAmount);
 
-    const [txInfo, balance] = await Promise.all([
-      getUnbondingTxInfo(dotSamaApi, binaryAmount, address),
-      getFreeBalance(networkKey, address, state.getDotSamaApiMap(), state.getWeb3ApiMap())
-    ]);
-
-    const feeString = txInfo.partialFee.toHuman();
-    const binaryBalance = new BN(balance);
-
-    const sumAmount = txInfo.partialFee.add(binaryAmount);
-    const balanceError = sumAmount.gt(binaryBalance);
-
-    return {
-      fee: feeString,
-      balanceError
-    };
+    return await getUnbondingTxInfo(address, amount, networkKey, state.getDotSamaApiMap(), state.getWeb3ApiMap(), networkJson, validatorAddress, unstakeAll);
   }
 
-  private async submitUnbonding (id: string, port: chrome.runtime.Port, { address, amount, networkKey, password }: UnbondingSubmitParams): Promise<BasicTxResponse> {
+  private async submitUnbonding (id: string, port: chrome.runtime.Port, { address, amount, networkKey, password, unstakeAll, validatorAddress }: UnbondingSubmitParams): Promise<BasicTxResponse> {
     const txState: BasicTxResponse = {};
-    const networkJson = state.getNetworkMapByKey(networkKey);
-    const parsedAmount = amount * (10 ** (networkJson.decimals as number));
-    const binaryAmount = new BN(parsedAmount);
 
     if (!amount || !address || !password) {
       txState.txError = true;
@@ -2226,7 +2186,8 @@ export default class KoniExtension extends Extension {
 
     const callback = createSubscription<'pri(unbonding.submitTransaction)'>(id, port);
     const dotSamaApi = state.getDotSamaApi(networkKey);
-    const extrinsic = await getUnbondingExtrinsic(dotSamaApi, binaryAmount);
+    const networkJson = state.getNetworkMapByKey(networkKey);
+    const extrinsic = await getUnbondingExtrinsic(address, amount, networkKey, networkJson, dotSamaApi, validatorAddress, unstakeAll);
     const passwordError: string | null = unlockAccount(address, password);
 
     if (extrinsic !== null && passwordError === null) {
@@ -2275,40 +2236,18 @@ export default class KoniExtension extends Extension {
     return txState;
   }
 
-  private async getUnlockingStakeInfo ({ address, networkKey }: UnlockingStakeParams) {
+  private async getUnlockingStakeInfo ({ address, networkKey, validatorList }: UnlockingStakeParams): Promise<UnlockingStakeInfo> {
     const dotSamaApi = state.getDotSamaApi(networkKey);
     const networkJson = state.getNetworkMapByKey(networkKey);
-    const { nextWithdrawal, nextWithdrawalAmount, redeemable } = await getUnlockingInfo(dotSamaApi, address, networkKey);
 
-    const parsedRedeemable = redeemable ? parseFloat(redeemable.toString()) / (10 ** (networkJson.decimals as number)) : 0;
-    const parsedNextWithdrawalAmount = parseFloat(nextWithdrawalAmount.toString()) / (10 ** (networkJson.decimals as number));
-
-    return {
-      nextWithdrawal: parseFloat(nextWithdrawal.toString()),
-      redeemable: parsedRedeemable,
-      nextWithdrawalAmount: parsedNextWithdrawalAmount
-    } as UnlockingStakeInfo;
+    return await getUnlockingInfo(dotSamaApi, networkJson, networkKey, address, validatorList);
   }
 
-  private async getStakeWithdrawalTxInfo ({ address, networkKey }: StakeWithdrawalParams): Promise<BasicTxInfo> {
-    const dotSamaApi = state.getDotSamaApi(networkKey);
-
-    const [txInfo, balance] = await Promise.all([
-      getWithdrawalTxInfo(dotSamaApi, address),
-      getFreeBalance(networkKey, address, state.getDotSamaApiMap(), state.getWeb3ApiMap())
-    ]);
-
-    const feeString = txInfo.partialFee.toHuman();
-    const binaryBalance = new BN(balance);
-    const balanceError = txInfo.partialFee.gt(binaryBalance);
-
-    return {
-      fee: feeString,
-      balanceError
-    };
+  private async getStakeWithdrawalTxInfo ({ action, address, networkKey, validatorAddress }: StakeWithdrawalParams): Promise<BasicTxInfo> {
+    return await getWithdrawalTxInfo(address, networkKey, state.getDotSamaApiMap(), state.getWeb3ApiMap(), validatorAddress, action);
   }
 
-  private async submitStakeWithdrawal (id: string, port: chrome.runtime.Port, { address, networkKey, password }: StakeWithdrawalParams): Promise<BasicTxResponse> {
+  private async submitStakeWithdrawal (id: string, port: chrome.runtime.Port, { action, address, networkKey, password, validatorAddress }: StakeWithdrawalParams): Promise<BasicTxResponse> {
     const txState: BasicTxResponse = {};
 
     if (!address || !password) {
@@ -2319,7 +2258,7 @@ export default class KoniExtension extends Extension {
 
     const callback = createSubscription<'pri(unbonding.submitWithdrawal)'>(id, port);
     const dotSamaApi = state.getDotSamaApi(networkKey);
-    const extrinsic = await getWithdrawalExtrinsic(dotSamaApi, address);
+    const extrinsic = await getWithdrawalExtrinsic(dotSamaApi, networkKey, address, validatorAddress, action);
     const passwordError: string | null = unlockAccount(address, password);
 
     if (extrinsic !== null && passwordError === null) {

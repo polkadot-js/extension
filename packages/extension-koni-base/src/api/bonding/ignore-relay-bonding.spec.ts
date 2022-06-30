@@ -150,6 +150,16 @@ function getCommission (commissionString: string) {
 
 describe('test DotSama APIs', () => {
   test('test get Validator', async () => {
+    const provider = new WsProvider(getCurrentProvider(PREDEFINED_NETWORKS.edgeware), DOTSAMA_AUTO_CONNECT_MS);
+    const api = new ApiPromise({ provider });
+    const apiPromise = await api.isReady;
+
+    const resp = await apiPromise.query?.staking?.maxNominatorsCount();
+
+    console.log(resp);
+  });
+
+  test('test get Validator', async () => {
     const provider = new WsProvider(getCurrentProvider(PREDEFINED_NETWORKS.hydradx), DOTSAMA_AUTO_CONNECT_MS);
     const api = new ApiPromise({ provider });
     const apiPromise = await api.isReady;
@@ -378,7 +388,7 @@ describe('test DotSama APIs', () => {
     });
 
     console.log(nextWithdrawalAmount);
-    console.log(minRemainingEra);
+    console.log('minRemainingEra', minRemainingEra.muln(6).toString());
 
     console.log(total);
   });

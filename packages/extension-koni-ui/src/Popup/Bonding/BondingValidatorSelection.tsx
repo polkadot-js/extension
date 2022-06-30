@@ -10,6 +10,7 @@ import useTranslation from '@subwallet/extension-koni-ui/hooks/useTranslation';
 import { getBondingOptions } from '@subwallet/extension-koni-ui/messaging';
 import Header from '@subwallet/extension-koni-ui/partials/Header';
 import ValidatorItem from '@subwallet/extension-koni-ui/Popup/Bonding/components/ValidatorItem';
+import { getChainType } from '@subwallet/extension-koni-ui/Popup/Bonding/utils';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import React, { useCallback, useContext, useEffect, useState } from 'react';
@@ -37,6 +38,8 @@ function BondingValidatorSelection ({ className }: Props): React.ReactElement<Pr
 
   const [sortByCommission, setSortByCommission] = useState(false);
   const [sortByReturn, setSortByReturn] = useState(false);
+  const [sortByMinBond, setSortByMinBond] = useState(false);
+  const [sortByTotalStake, setSortByTotalStake] = useState(false);
 
   const [filteredValidators, setFilteredValidators] = useState<ValidatorInfo[]>([]);
 
@@ -61,6 +64,22 @@ function BondingValidatorSelection ({ className }: Props): React.ReactElement<Pr
     setSortByReturn(!sortByReturn);
   }, [sortByReturn]);
 
+  const handleSortByMinBond = useCallback(() => {
+    if (!sortByMinBond) {
+      setSortByTotalStake(false);
+    }
+
+    setSortByMinBond(!sortByMinBond);
+  }, [sortByMinBond]);
+
+  const handleSortByTotalStake = useCallback(() => {
+    if (!sortByTotalStake) {
+      setSortByMinBond(false);
+    }
+
+    setSortByTotalStake(!sortByTotalStake);
+  }, [sortByTotalStake]);
+
   const filterValidators = useCallback(() => {
     const _filteredValidators: ValidatorInfo[] = [];
 
@@ -73,9 +92,9 @@ function BondingValidatorSelection ({ className }: Props): React.ReactElement<Pr
     if (sortByReturn) {
       return _filteredValidators
         .sort((validator: ValidatorInfo, _validator: ValidatorInfo) => {
-          if (validator.expectedReturn > _validator.expectedReturn) {
+          if (validator.expectedReturn && _validator.expectedReturn && validator.expectedReturn > _validator.expectedReturn) {
             return -1;
-          } else if (validator.expectedReturn <= _validator.expectedReturn) {
+          } else if (validator.expectedReturn && _validator.expectedReturn && validator.expectedReturn <= _validator.expectedReturn) {
             return 1;
           }
 
@@ -84,9 +103,31 @@ function BondingValidatorSelection ({ className }: Props): React.ReactElement<Pr
     } else if (sortByCommission) {
       return _filteredValidators
         .sort((validator: ValidatorInfo, _validator: ValidatorInfo) => {
-          if (validator.commission <= _validator.commission) {
+          if (validator.commission && _validator.commission && validator.commission <= _validator.commission) {
             return -1;
-          } else if (validator.commission > _validator.commission) {
+          } else if (validator.commission && _validator.commission && validator.commission > _validator.commission) {
+            return 1;
+          }
+
+          return 0;
+        });
+    } else if (sortByTotalStake) {
+      return _filteredValidators
+        .sort((validator: ValidatorInfo, _validator: ValidatorInfo) => {
+          if (validator.totalStake <= _validator.totalStake) {
+            return -1;
+          } else if (validator.totalStake > _validator.totalStake) {
+            return 1;
+          }
+
+          return 0;
+        });
+    } else if (sortByMinBond) {
+      return _filteredValidators
+        .sort((validator: ValidatorInfo, _validator: ValidatorInfo) => {
+          if (validator.minBond <= _validator.minBond) {
+            return -1;
+          } else if (validator.minBond > _validator.minBond) {
             return 1;
           }
 
@@ -95,7 +136,7 @@ function BondingValidatorSelection ({ className }: Props): React.ReactElement<Pr
     }
 
     return _filteredValidators;
-  }, [allValidators, searchString, sortByCommission, sortByReturn]);
+  }, [allValidators, searchString, sortByCommission, sortByMinBond, sortByReturn, sortByTotalStake]);
 
   useEffect(() => {
     const delayDebounceFn = setTimeout(() => {
@@ -198,20 +239,37 @@ function BondingValidatorSelection ({ className }: Props): React.ReactElement<Pr
           />
         </div>
 
-        <div className={'filter-container'}>
-          <div
-            className={`${sortByCommission ? 'active-bonding__btn' : 'bonding__btn'}`}
-            onClick={handleSortByCommission}
-          >
-            {t<string>('Lowest commission')}
-          </div>
-          <div
-            className={`${sortByReturn ? 'active-bonding__btn' : 'bonding__btn'} sort-return-btn`}
-            onClick={handleSortByReturn}
-          >
-            {t<string>('Highest return')}
-          </div>
-        </div>
+        {
+          getChainType(bondingParams.selectedNetwork) === 1
+            ? <div className={'filter-container'}>
+              <div
+                className={`${sortByTotalStake ? 'active-bonding__btn' : 'bonding__btn'}`}
+                onClick={handleSortByTotalStake}
+              >
+                {t<string>('Lowest total stake')}
+              </div>
+              <div
+                className={`${sortByMinBond ? 'active-bonding__btn' : 'bonding__btn'} last-sort-btn`}
+                onClick={handleSortByMinBond}
+              >
+                {t<string>('Lowest minimum stake')}
+              </div>
+            </div>
+            : <div className={'filter-container'}>
+              <div
+                className={`${sortByCommission ? 'active-bonding__btn' : 'bonding__btn'}`}
+                onClick={handleSortByCommission}
+              >
+                {t<string>('Lowest commission')}
+              </div>
+              <div
+                className={`${sortByReturn ? 'active-bonding__btn' : 'bonding__btn'} last-sort-btn`}
+                onClick={handleSortByReturn}
+              >
+                {t<string>('Highest return')}
+              </div>
+            </div>
+        }
       </div>
 
       <div
@@ -265,7 +323,7 @@ export default React.memo(styled(BondingValidatorSelection)(({ theme }: Props) =
     align-items: center;
   }
 
-  .sort-return-btn:before {
+  .last-sort-btn:before {
     content: '';
     position: absolute;
     width: 4px;
@@ -278,7 +336,7 @@ export default React.memo(styled(BondingValidatorSelection)(({ theme }: Props) =
     margin: auto 0;
   }
 
-  .sort-return-btn {
+  .last-sort-btn {
     padding-left: 20px;
   }
 

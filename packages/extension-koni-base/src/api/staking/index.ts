@@ -1,7 +1,8 @@
 // Copyright 2019-2022 @subwallet/extension-koni authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { APIItemState, ApiProps, NetworkJson, StakingItem } from '@subwallet/extension-base/background/KoniTypes';
+import { APIItemState, ApiProps, DelegationItem, NetworkJson, StakingItem } from '@subwallet/extension-base/background/KoniTypes';
+import { parseRawNumber } from '@subwallet/extension-koni-base/api/bonding/utils';
 import { PREDEFINED_NETWORKS } from '@subwallet/extension-koni-base/api/predefinedNetworks';
 import { IGNORE_GET_SUBSTRATE_FEATURES_LIST } from '@subwallet/extension-koni-base/constants';
 import { categoryAddresses, toUnit } from '@subwallet/extension-koni-base/utils/utils';
@@ -15,13 +16,20 @@ interface LedgerData {
 }
 
 export const DEFAULT_STAKING_NETWORKS = {
-  // polkadot: PREDEFINED_NETWORKS.polkadot,
-  // kusama: PREDEFINED_NETWORKS.kusama,
-  // hydradx: PREDEFINED_NETWORKS.hydradx,
-  // acala: PREDEFINED_NETWORKS.acala,
-  aleph: PREDEFINED_NETWORKS.aleph
+  polkadot: PREDEFINED_NETWORKS.polkadot,
+  kusama: PREDEFINED_NETWORKS.kusama,
+  hydradx: PREDEFINED_NETWORKS.hydradx,
+  aleph: PREDEFINED_NETWORKS.aleph,
+  moonbeam: PREDEFINED_NETWORKS.moonbeam,
+  moonbase: PREDEFINED_NETWORKS.moonbase,
+  darwinia: PREDEFINED_NETWORKS.darwinia,
+  pangolin: PREDEFINED_NETWORKS.pangolin,
+  crab: PREDEFINED_NETWORKS.crab,
+  polkadex: PREDEFINED_NETWORKS.polkadex,
+  turing: PREDEFINED_NETWORKS.turing,
+  turingStaging: PREDEFINED_NETWORKS.turingStaging
   // astar: NETWORKS.astar,
-  // moonbeam: NETWORKS.moonbeam
+  // acala: PREDEFINED_NETWORKS.acala,
 };
 
 interface PromiseMapping {
@@ -47,73 +55,317 @@ export async function stakingOnChainApi (addresses: string[], dotSamaAPIMap: Rec
     const parentApi = await apiPromise.isReady;
     const useAddresses = apiPromise.isEthereum ? evmAddresses : substrateAddresses;
 
-    return parentApi.api.query.staking?.ledger.multi(useAddresses, (ledgers: any[]) => {
-      let totalBalance = 0;
-      let activeBalance = 0;
-      let unlockingBalance = 0;
-      let unit = '';
-      let stakingItem: StakingItem;
+    if (['astar', 'shiden', 'shibuya'].includes(chain)) {
+      return getAstarStakingOnChain(parentApi, useAddresses, networks, chain, callback);
+    } else if (['darwinia', 'crab', 'pangolin'].includes(chain)) {
+      return getDarwiniaStakingOnChain(parentApi, useAddresses, networks, chain, callback);
+    } else if (['moonbeam', 'moonriver', 'moonbase', 'turing', 'turingStaging'].includes(chain)) {
+      return getParaStakingOnChain(parentApi, useAddresses, networks, chain, callback);
+    }
 
-      if (ledgers) {
-        for (const ledger of ledgers) {
-          // eslint-disable-next-line @typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-member-access
-          const data = ledger.toHuman() as unknown as LedgerData;
+    return getRelayStakingOnChain(parentApi, useAddresses, networks, chain, callback);
+  }));
+}
 
-          if (data && data.active) {
-            const _totalBalance = data.total;
-            const _activeBalance = data.active;
+function getParaStakingOnChain (parentApi: ApiProps, useAddresses: string[], networks: Record<string, NetworkJson>, chain: string, callback: (networkKey: string, rs: StakingItem) => void) {
+  return parentApi.api.query.parachainStaking.delegatorState.multi(useAddresses, async (ledgers: any) => {
+    let totalBalance = 0;
+    let activeBalance = 0;
+    let unlockingBalance = 0;
+    let stakingItem: StakingItem;
+    const delegationMap: Record<string, string> = {};
 
-            data.unlocking.forEach(({ value }) => {
-              value = value.split(' ')[0];
-              const _unlockingBalance = value.replaceAll(',', '');
+    if (ledgers) {
+      for (const ledger of ledgers) {
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-member-access
+        const data = ledger.toHuman() as Record<string, any> | null;
 
-              unlockingBalance += parseFloat(_unlockingBalance);
-            });
+        if (data !== null) {
+          let _totalBalance = data.total as string;
+          let _unlockingBalance = data.lessTotal as string;
+          const _delegations = data.delegations as Record<string, string>[];
 
-            let amount = _totalBalance ? _totalBalance.split(' ')[0] : '';
+          for (const item of _delegations) {
+            if (item.owner in delegationMap) {
+              delegationMap[item.owner] = (parseRawNumber(item.amount) + parseRawNumber(delegationMap[item.owner])).toString();
+            } else {
+              delegationMap[item.owner] = parseRawNumber(item.amount).toString();
+            }
+          }
 
-            amount = amount.replaceAll(',', '');
-            unit = _totalBalance ? _totalBalance.split(' ')[1] : '';
-            totalBalance += parseFloat(amount);
+          _totalBalance = _totalBalance.replaceAll(',', '');
+          _unlockingBalance = _unlockingBalance.replaceAll(',', '');
 
-            amount = _activeBalance ? _activeBalance.split(' ')[0] : '';
-            amount = amount.replaceAll(',', '');
-            unit = _activeBalance ? _activeBalance.split(' ')[1] : '';
-            activeBalance += parseFloat(amount);
+          totalBalance += parseFloat(_totalBalance);
+          unlockingBalance += parseFloat(_unlockingBalance);
+          activeBalance = totalBalance - unlockingBalance;
+        }
+      }
+
+      const delegationsList: DelegationItem[] = [];
+
+      await Promise.all(Object.entries(delegationMap).map(async ([owner, amount]) => {
+        const [_info, _identity] = await Promise.all([
+          parentApi.api.query.parachainStaking.candidateInfo(owner),
+          parentApi.api.query.identity.identityOf(owner)
+        ]);
+        const rawInfo = _info.toHuman() as Record<string, any>;
+        const rawIdentity = _identity.toHuman() as Record<string, any> | null;
+        let identity;
+
+        const minDelegation = (rawInfo?.lowestTopDelegationAmount as string).replaceAll(',', '');
+
+        if (rawIdentity !== null) {
+          // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+          const displayName = rawIdentity?.info?.display?.Raw as string;
+          // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+          const legal = rawIdentity?.info?.legal?.Raw as string;
+          // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+          const web = rawIdentity?.info?.web?.Raw as string;
+          // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+          const riot = rawIdentity?.info?.riot?.Raw as string;
+          // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+          const email = rawIdentity?.info?.email?.Raw as string;
+          // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+          const twitter = rawIdentity?.info?.twitter?.Raw as string;
+
+          if (displayName && !displayName.startsWith('0x')) {
+            // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+            identity = displayName;
+          } else if (legal && !legal.startsWith('0x')) {
+            identity = legal;
+          } else {
+            identity = twitter || web || email || riot;
           }
         }
 
-        const parsedActiveBalance = parseStakingBalance(activeBalance, chain, networks);
-        const parsedUnlockingBalance = parseStakingBalance(unlockingBalance, chain, networks);
-        const parsedTotal = parseStakingBalance(totalBalance, chain, networks);
+        delegationsList.push({
+          owner,
+          amount,
+          identity,
+          minBond: minDelegation
+        });
+      }));
 
-        if (totalBalance > 0) {
-          stakingItem = {
-            name: networks[chain].chain,
-            chainId: chain,
-            balance: parsedTotal.toString(),
-            activeBalance: parsedActiveBalance.toString(),
-            unlockingBalance: parsedUnlockingBalance.toString(),
-            nativeToken: networks[chain].nativeToken,
-            unit: unit || networks[chain].nativeToken,
-            state: APIItemState.READY
-          } as StakingItem;
-        } else {
-          stakingItem = {
-            name: networks[chain].chain,
-            chainId: chain,
-            balance: parsedTotal.toString(),
-            activeBalance: parsedActiveBalance.toString(),
-            unlockingBalance: parsedUnlockingBalance.toString(),
-            nativeToken: networks[chain].nativeToken,
-            unit: unit || networks[chain].nativeToken,
-            state: APIItemState.READY
-          } as StakingItem;
-        }
+      const parsedTotalBalance = parseStakingBalance(totalBalance, chain, networks);
+      const parsedUnlockingBalance = parseStakingBalance(unlockingBalance, chain, networks);
+      const parsedActiveBalance = parseStakingBalance(activeBalance, chain, networks);
 
-        // eslint-disable-next-line node/no-callback-literal
-        callback(chain, stakingItem);
+      if (totalBalance > 0) {
+        stakingItem = {
+          name: networks[chain].chain,
+          chainId: chain,
+          balance: parsedTotalBalance.toString(),
+          activeBalance: parsedActiveBalance.toString(),
+          unlockingBalance: parsedUnlockingBalance.toString(),
+          nativeToken: networks[chain].nativeToken,
+          unit: networks[chain].nativeToken,
+          state: APIItemState.READY,
+          delegation: delegationsList
+        } as StakingItem;
+      } else {
+        stakingItem = {
+          name: networks[chain].chain,
+          chainId: chain,
+          balance: parsedTotalBalance.toString(),
+          activeBalance: parsedActiveBalance.toString(),
+          unlockingBalance: parsedUnlockingBalance.toString(),
+          nativeToken: networks[chain].nativeToken,
+          unit: networks[chain].nativeToken,
+          state: APIItemState.READY
+        } as StakingItem;
       }
-    });
-  }));
+
+      // eslint-disable-next-line node/no-callback-literal
+      callback(chain, stakingItem);
+    }
+  });
+}
+
+function getRelayStakingOnChain (parentApi: ApiProps, useAddresses: string[], networks: Record<string, NetworkJson>, chain: string, callback: (networkKey: string, rs: StakingItem) => void) {
+  return parentApi.api.query.staking?.ledger.multi(useAddresses, (ledgers: any[]) => {
+    let totalBalance = 0;
+    let activeBalance = 0;
+    let unlockingBalance = 0;
+    let unit = '';
+    let stakingItem: StakingItem;
+
+    if (ledgers) {
+      for (const ledger of ledgers) {
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-member-access
+        const data = ledger.toHuman() as unknown as LedgerData;
+
+        if (data && data.active) {
+          const _totalBalance = data.total;
+          const _activeBalance = data.active;
+
+          data.unlocking.forEach(({ value }) => {
+            value = value.split(' ')[0];
+            const _unlockingBalance = value.replaceAll(',', '');
+
+            unlockingBalance += parseFloat(_unlockingBalance);
+          });
+
+          let amount = _totalBalance ? _totalBalance.split(' ')[0] : '';
+
+          amount = amount.replaceAll(',', '');
+          unit = _totalBalance ? _totalBalance.split(' ')[1] : '';
+          totalBalance += parseFloat(amount);
+
+          amount = _activeBalance ? _activeBalance.split(' ')[0] : '';
+          amount = amount.replaceAll(',', '');
+          unit = _activeBalance ? _activeBalance.split(' ')[1] : '';
+          activeBalance += parseFloat(amount);
+        }
+      }
+
+      const parsedActiveBalance = parseStakingBalance(activeBalance, chain, networks);
+      const parsedUnlockingBalance = parseStakingBalance(unlockingBalance, chain, networks);
+      const parsedTotal = parseStakingBalance(totalBalance, chain, networks);
+
+      if (totalBalance > 0) {
+        stakingItem = {
+          name: networks[chain].chain,
+          chainId: chain,
+          balance: parsedTotal.toString(),
+          activeBalance: parsedActiveBalance.toString(),
+          unlockingBalance: parsedUnlockingBalance.toString(),
+          nativeToken: networks[chain].nativeToken,
+          unit: unit || networks[chain].nativeToken,
+          state: APIItemState.READY
+        } as StakingItem;
+      } else {
+        stakingItem = {
+          name: networks[chain].chain,
+          chainId: chain,
+          balance: parsedTotal.toString(),
+          activeBalance: parsedActiveBalance.toString(),
+          unlockingBalance: parsedUnlockingBalance.toString(),
+          nativeToken: networks[chain].nativeToken,
+          unit: unit || networks[chain].nativeToken,
+          state: APIItemState.READY
+        } as StakingItem;
+      }
+
+      // eslint-disable-next-line node/no-callback-literal
+      callback(chain, stakingItem);
+    }
+  });
+}
+
+function getDarwiniaStakingOnChain (parentApi: ApiProps, useAddresses: string[], networks: Record<string, NetworkJson>, chain: string, callback: (networkKey: string, rs: StakingItem) => void) {
+  return parentApi.api.query.staking?.ledger.multi(useAddresses, (ledgers: any[]) => {
+    let totalBalance = 0;
+    let activeBalance = 0;
+    let unlockingBalance = 0;
+    const unit = '';
+    let stakingItem: StakingItem;
+    // TODO: get unstakable amount based on timestamp
+    // const timestamp = new Date().getTime();
+
+    if (ledgers) {
+      for (const ledger of ledgers) {
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-member-access
+        const data = ledger.toHuman() as unknown as Record<string, any>;
+
+        if (data && data.active) {
+          // locked balance
+          const _ringLockStaking = data.ringStakingLock as Record<string, any>;
+          const unbondingLockBalance = _ringLockStaking.unbondings as Record<string, string>[];
+          let _totalActive = data.active as string;
+
+          unbondingLockBalance.forEach((item) => {
+            const _unlockingBalance = item.amount.replaceAll(',', '');
+
+            unlockingBalance += parseFloat(_unlockingBalance);
+          });
+
+          _totalActive = _totalActive.replaceAll(',', '');
+          activeBalance += parseFloat(_totalActive);
+
+          const _totalBalance = activeBalance + unlockingBalance;
+
+          totalBalance += _totalBalance;
+        }
+      }
+
+      const parsedActiveBalance = parseStakingBalance(activeBalance, chain, networks);
+      const parsedUnlockingBalance = parseStakingBalance(unlockingBalance, chain, networks);
+      const parsedTotal = parseStakingBalance(totalBalance, chain, networks);
+
+      if (totalBalance > 0) {
+        stakingItem = {
+          name: networks[chain].chain,
+          chainId: chain,
+          balance: parsedTotal.toString(),
+          activeBalance: parsedActiveBalance.toString(),
+          unlockingBalance: parsedUnlockingBalance.toString(),
+          nativeToken: networks[chain].nativeToken,
+          unit: unit || networks[chain].nativeToken,
+          state: APIItemState.READY
+        } as StakingItem;
+      } else {
+        stakingItem = {
+          name: networks[chain].chain,
+          chainId: chain,
+          balance: parsedTotal.toString(),
+          activeBalance: parsedActiveBalance.toString(),
+          unlockingBalance: parsedUnlockingBalance.toString(),
+          nativeToken: networks[chain].nativeToken,
+          unit: unit || networks[chain].nativeToken,
+          state: APIItemState.READY
+        } as StakingItem;
+      }
+
+      // eslint-disable-next-line node/no-callback-literal
+      callback(chain, stakingItem);
+    }
+  });
+}
+
+function getAstarStakingOnChain (parentApi: ApiProps, useAddresses: string[], networks: Record<string, NetworkJson>, chain: string, callback: (networkKey: string, rs: StakingItem) => void) {
+  return parentApi.api.query.dappsStaking.ledger.multi(useAddresses, (ledgers: any[]) => {
+    let totalBalance = 0;
+    let stakingItem: StakingItem;
+
+    if (ledgers) {
+      for (const ledger of ledgers) {
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-member-access
+        const data = ledger.toHuman() as Record<string, any>;
+        let _totalStake = data.locked as string;
+
+        _totalStake = _totalStake.replaceAll(',', '');
+        totalBalance += parseFloat(_totalStake);
+      }
+
+      const parsedTotalBalance = parseStakingBalance(totalBalance, chain, networks);
+
+      if (totalBalance > 0) {
+        stakingItem = {
+          name: networks[chain].chain,
+          chainId: chain,
+          balance: parsedTotalBalance.toString(),
+          activeBalance: parsedTotalBalance.toString(),
+          unlockingBalance: '0',
+          nativeToken: networks[chain].nativeToken,
+          unit: networks[chain].nativeToken,
+          state: APIItemState.READY
+        } as StakingItem;
+      } else {
+        stakingItem = {
+          name: networks[chain].chain,
+          chainId: chain,
+          balance: parsedTotalBalance.toString(),
+          activeBalance: parsedTotalBalance.toString(),
+          unlockingBalance: '0',
+          nativeToken: networks[chain].nativeToken,
+          unit: networks[chain].nativeToken,
+          state: APIItemState.READY
+        } as StakingItem;
+      }
+
+      // eslint-disable-next-line node/no-callback-literal
+      callback(chain, stakingItem);
+    }
+  });
 }

@@ -7,7 +7,7 @@ import { typesBundle, typesChain } from '@subwallet/extension-koni-base/api/dots
 import { DOTSAMA_AUTO_CONNECT_MS, DOTSAMA_MAX_CONTINUE_RETRY } from '@subwallet/extension-koni-base/constants';
 import { inJestTest } from '@subwallet/extension-koni-base/utils/utils';
 
-import { ApiPromise, WsProvider } from '@polkadot/api';
+import { ApiPromise, HttpProvider, WsProvider } from '@polkadot/api';
 import { ScProvider, WellKnownChain } from '@polkadot/rpc-provider/substrate-connect';
 import { TypeRegistry } from '@polkadot/types/create';
 import { ChainProperties, ChainType } from '@polkadot/types/interfaces';
@@ -120,7 +120,7 @@ export function initApi (networkKey: string, apiUrl: string, isEthereum?: boolea
 
   const provider = apiUrl.startsWith('light://')
     ? new ScProvider(getWellKnownChain(apiUrl.replace('light://substrate-connect/', '')))
-    : new WsProvider(apiUrl, DOTSAMA_AUTO_CONNECT_MS);
+    : apiUrl.startsWith('http') ? new HttpProvider(apiUrl) : new WsProvider(apiUrl, DOTSAMA_AUTO_CONNECT_MS);
 
   const apiOption = { provider, typesBundle, typesChain: typesChain };
 

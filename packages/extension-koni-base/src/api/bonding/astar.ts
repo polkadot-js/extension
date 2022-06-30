@@ -1,8 +1,8 @@
 // Copyright 2019-2022 @subwallet/extension-koni authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { ApiProps, BasicTxInfo, NetworkJson, ValidatorInfo } from '@subwallet/extension-base/background/KoniTypes';
-import { parseRawNumber } from '@subwallet/extension-koni-base/api/bonding/utils';
+import { ApiProps, BasicTxInfo, NetworkJson, UnlockingStakeInfo, ValidatorInfo } from '@subwallet/extension-base/background/KoniTypes';
+import { ERA_LENGTH_MAP, parseRawNumber } from '@subwallet/extension-koni-base/api/bonding/utils';
 import { getFreeBalance } from '@subwallet/extension-koni-base/api/dotsama/balance';
 import { isUrl } from '@subwallet/extension-koni-base/utils/utils';
 import fetch from 'cross-fetch';
@@ -182,4 +182,62 @@ export async function getAstarUnbondingExtrinsic (dotSamaApi: ApiProps, networkJ
   const binaryAmount = new BN(parsedAmount.toString());
 
   return apiPromise.api.tx.dappsStaking.unbondAndUnstake({ Evm: dappAddress }, binaryAmount);
+}
+
+async function getAstarUnlockingInfo (dotSamaApi: ApiProps, address: string, networkKey: string) {
+  const apiPromise = await dotSamaApi.isReady;
+
+  const [_stakingInfo, _era] = await Promise.all([
+    apiPromise.api.query.dappsStaking.ledger(address),
+    apiPromise.api.query.dappsStaking.currentEra()
+  ]);
+
+  const currentEra = parseRawNumber(_era.toHuman() as string);
+  const stakingInfo = _stakingInfo.toHuman() as Record<string, any>;
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+  const unlockingChunks = stakingInfo.unbondingInfo.unlockingChunks as Record<string, string>[];
+
+  let nextWithdrawalEra = -1;
+  let nextWithdrawalAmount = 0;
+  let redeemable = 0;
+
+  for (const chunk of unlockingChunks) {
+    const unlockEra = parseRawNumber(chunk.unlockEra);
+    const amount = parseRawNumber(chunk.amount);
+
+    // Find next withdrawal
+    if (nextWithdrawalEra === -1) {
+      nextWithdrawalEra = unlockEra;
+      nextWithdrawalAmount = amount;
+    } else if (unlockEra <= nextWithdrawalEra) {
+      nextWithdrawalEra = unlockEra;
+      nextWithdrawalAmount += amount;
+    }
+
+    // Find redeemable
+    if (unlockEra - currentEra <= 0) {
+      redeemable += amount;
+    }
+  }
+
+  const nextWithdrawal = (nextWithdrawalEra - currentEra) * ERA_LENGTH_MAP[networkKey];
+
+  return {
+    nextWithdrawal,
+    nextWithdrawalAmount,
+    redeemable
+  };
+}
+
+export async function handleAstarUnlockingInfo (dotSamaApi: ApiProps, networkJson: NetworkJson, networkKey: string, address: string) {
+  const { nextWithdrawal, nextWithdrawalAmount, redeemable } = await getAstarUnlockingInfo(dotSamaApi, address, networkKey);
+
+  const parsedRedeemable = redeemable / (10 ** (networkJson.decimals as number));
+  const parsedNextWithdrawalAmount = nextWithdrawalAmount / (10 ** (networkJson.decimals as number));
+
+  return {
+    nextWithdrawal: nextWithdrawal,
+    redeemable: parsedRedeemable,
+    nextWithdrawalAmount: parsedNextWithdrawalAmount
+  } as UnlockingStakeInfo;
 }

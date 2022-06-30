@@ -76,7 +76,10 @@ export const ERA_LENGTH_MAP: Record<string, number> = { // in hours
   moonriver: 2,
   moonbase: 2,
   turing: 2,
-  turingStaging: 2
+  turingStaging: 2,
+  astar: 24,
+  shiden: 24,
+  shibuya: 24
 };
 
 const ALEPH_DEFAULT_UNIFORM_ERA_PAYOUT_PARAMS: UniformEraPayoutInflationParams = {

@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { ValidatorInfo } from '@subwallet/extension-base/background/KoniTypes';
-import { parseRawNumber } from '@subwallet/extension-koni-base/api/bonding/utils';
+import { ERA_LENGTH_MAP, parseRawNumber } from '@subwallet/extension-koni-base/api/bonding/utils';
 import { PREDEFINED_NETWORKS } from '@subwallet/extension-koni-base/api/predefinedNetworks';
 import { DOTSAMA_AUTO_CONNECT_MS } from '@subwallet/extension-koni-base/constants';
 import { getCurrentProvider, isUrl } from '@subwallet/extension-koni-base/utils/utils';
@@ -115,5 +115,54 @@ describe('test DotSama APIs', () => {
     const extrinsic = apiPromise.tx.dappsStaking.unbondAndUnstake({ Evm: dappAddress }, new BN(1));
 
     console.log(extrinsic.paymentInfo(address));
+  });
+
+  test('test get unlocking info', async () => {
+    const provider = new WsProvider(getCurrentProvider(PREDEFINED_NETWORKS.shibuya), DOTSAMA_AUTO_CONNECT_MS);
+    const api = new ApiPromise({ provider });
+    const apiPromise = await api.isReady;
+    const address = '5HbcGs2QXVAc6Q6eoTzLYNAJWpN17AkCFRLnWDaHCiGYXvNc';
+
+    const [_stakingInfo, _era] = await Promise.all([
+      apiPromise.query.dappsStaking.ledger(address),
+      apiPromise.query.dappsStaking.currentEra()
+    ]);
+
+    const currentEra = parseRawNumber(_era.toHuman() as string);
+    const stakingInfo = _stakingInfo.toHuman() as Record<string, any>;
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+    const unlockingChunks = stakingInfo.unbondingInfo.unlockingChunks as Record<string, string>[];
+
+    let nextWithdrawalEra = -1;
+    let nextWithdrawalAmount = 0;
+    let redeemable = 0;
+
+    for (const chunk of unlockingChunks) {
+      const unlockEra = parseRawNumber(chunk.unlockEra);
+      const amount = parseRawNumber(chunk.amount);
+
+      console.log('chunk', chunk);
+
+      if (nextWithdrawalEra === -1) {
+        nextWithdrawalEra = unlockEra;
+        nextWithdrawalAmount = amount;
+      } else if (unlockEra <= nextWithdrawalEra) {
+        nextWithdrawalEra = unlockEra;
+        nextWithdrawalAmount += amount;
+      }
+
+      // Find redeemable
+      if (unlockEra - currentEra <= 0) {
+        console.log('unlockEra', unlockEra);
+        redeemable += amount;
+      }
+    }
+
+    const nextWithdrawal = (nextWithdrawalEra - currentEra) * ERA_LENGTH_MAP.shibuya;
+
+    console.log(currentEra);
+    console.log(nextWithdrawal);
+    console.log(nextWithdrawalAmount);
+    console.log(redeemable);
   });
 });

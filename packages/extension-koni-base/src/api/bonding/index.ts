@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { ApiProps, NetworkJson, ValidatorInfo } from '@subwallet/extension-base/background/KoniTypes';
-import { getAstarBondingBasics, getAstarBondingExtrinsic, getAstarDappsInfo, getAstarUnbondingExtrinsic, handleAstarBondingTxInfo, handleAstarUnbondingTxInfo } from '@subwallet/extension-koni-base/api/bonding/astar';
+import { getAstarBondingBasics, getAstarBondingExtrinsic, getAstarDappsInfo, getAstarUnbondingExtrinsic, handleAstarBondingTxInfo, handleAstarUnbondingTxInfo, handleAstarUnlockingInfo } from '@subwallet/extension-koni-base/api/bonding/astar';
 import { getDarwiniaBondingExtrinsic, getDarwiniaValidatorsInfo, handleDarwiniaBondingTxInfo } from '@subwallet/extension-koni-base/api/bonding/darwinia';
 import { getParaBondingBasics, getParaBondingExtrinsic, getParaCollatorsInfo, getParaUnbondingExtrinsic, getParaWithdrawalExtrinsic, handleParaBondingTxInfo, handleParaUnbondingTxInfo, handleParaUnlockingInfo, handleParaWithdrawalTxInfo } from '@subwallet/extension-koni-base/api/bonding/paraChain';
 import { getRelayBondingExtrinsic, getRelayChainBondingBasics, getRelayUnbondingExtrinsic, getRelayValidatorsInfo, getRelayWithdrawalExtrinsic, getTargetValidators, handleRelayBondingTxInfo, handleRelayUnbondingTxInfo, handleRelayUnlockingInfo, handleRelayWithdrawalTxInfo } from '@subwallet/extension-koni-base/api/bonding/relayChain';
@@ -92,6 +92,8 @@ export async function getUnbondingExtrinsic (address: string, amount: number, ne
 export async function getUnlockingInfo (dotSamaApi: ApiProps, networkJson: NetworkJson, networkKey: string, address: string, validatorList?: string[]) {
   if (CHAIN_TYPES.para.includes(networkKey)) {
     return handleParaUnlockingInfo(dotSamaApi, networkJson, networkKey, address, validatorList as string[]);
+  } else if (CHAIN_TYPES.astar.includes(networkKey)) {
+    return handleAstarUnlockingInfo(dotSamaApi, networkJson, networkKey, address);
   }
 
   return handleRelayUnlockingInfo(dotSamaApi, networkJson, networkKey, address);

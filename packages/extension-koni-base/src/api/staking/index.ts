@@ -335,16 +335,22 @@ function getAstarStakingOnChain (parentApi: ApiProps, useAddresses: string[], ne
 
   return parentApi.api.query.dappsStaking.ledger.multi(useAddresses, async (ledgers: any[]) => {
     let totalBalance = 0;
+    let unlockingBalance = 0;
     let stakingItem: StakingItem;
 
     if (ledgers) {
       for (const ledger of ledgers) {
         // eslint-disable-next-line @typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-member-access
         const data = ledger.toHuman() as Record<string, any>;
-        let _totalStake = data.locked as string;
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+        const unlockingChunks = data.unbondingInfo.unlockingChunks as Record<string, string>[];
+        const _totalStake = data.locked as string;
 
-        _totalStake = _totalStake.replaceAll(',', '');
-        totalBalance += parseFloat(_totalStake);
+        for (const chunk of unlockingChunks) {
+          unlockingBalance += parseRawNumber(chunk.amount);
+        }
+
+        totalBalance += parseRawNumber(_totalStake);
       }
 
       const [_stakedDapps, _allDapps] = await Promise.all([
@@ -383,14 +389,16 @@ function getAstarStakingOnChain (parentApi: ApiProps, useAddresses: string[], ne
       }
 
       const parsedTotalBalance = parseStakingBalance(totalBalance, chain, networks);
+      const parsedActiveBalance = parseStakingBalance(totalBalance - unlockingBalance, chain, networks);
+      const parsedUnlockingBalance = parseStakingBalance(unlockingBalance, chain, networks);
 
       if (totalBalance > 0) {
         stakingItem = {
           name: networks[chain].chain,
           chainId: chain,
           balance: parsedTotalBalance.toString(),
-          activeBalance: parsedTotalBalance.toString(),
-          unlockingBalance: '0',
+          activeBalance: parsedActiveBalance.toString(),
+          unlockingBalance: parsedUnlockingBalance.toString(),
           nativeToken: networks[chain].nativeToken,
           unit: networks[chain].nativeToken,
           delegation: delegationsList,
@@ -401,8 +409,8 @@ function getAstarStakingOnChain (parentApi: ApiProps, useAddresses: string[], ne
           name: networks[chain].chain,
           chainId: chain,
           balance: parsedTotalBalance.toString(),
-          activeBalance: parsedTotalBalance.toString(),
-          unlockingBalance: '0',
+          activeBalance: parsedActiveBalance.toString(),
+          unlockingBalance: parsedUnlockingBalance.toString(),
           nativeToken: networks[chain].nativeToken,
           unit: networks[chain].nativeToken,
           state: APIItemState.READY

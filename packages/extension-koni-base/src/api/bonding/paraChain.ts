@@ -400,7 +400,7 @@ export async function handleParaWithdrawalTxInfo (networkKey: string, dotSamaApi
 export async function getParaWithdrawalExtrinsic (dotSamaApi: ApiProps, address: string, collatorAddress: string, action: string) {
   const apiPromise = await dotSamaApi.isReady;
 
-  console.log(`executing ${action}`);
+  console.log(`executing ${action}`, address, collatorAddress);
 
   return apiPromise.api.tx.parachainStaking.executeDelegationRequest(address, collatorAddress);
 }

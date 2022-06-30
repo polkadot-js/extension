@@ -69,7 +69,8 @@ function StakeAuthWithdrawal ({ address, amount, className, hideModal, networkKe
       address,
       networkKey,
       password,
-      action: nextWithdrawalAction
+      action: nextWithdrawalAction,
+      validatorAddress: targetValidator
     }, (cbData) => {
       if (cbData.passwordError) {
         show(cbData.passwordError);
@@ -106,7 +107,7 @@ function StakeAuthWithdrawal ({ address, amount, className, hideModal, networkKe
         }
       }
     });
-  }, [address, balanceError, networkKey, nextWithdrawalAction, password, show]);
+  }, [address, balanceError, networkKey, nextWithdrawalAction, password, show, targetValidator]);
 
   const handleConfirm = useCallback(() => {
     setLoading(true);

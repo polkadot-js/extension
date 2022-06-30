@@ -6,6 +6,7 @@ import { parseRawNumber } from '@subwallet/extension-koni-base/api/bonding/utils
 import { PREDEFINED_NETWORKS } from '@subwallet/extension-koni-base/api/predefinedNetworks';
 import { IGNORE_GET_SUBSTRATE_FEATURES_LIST } from '@subwallet/extension-koni-base/constants';
 import { categoryAddresses, toUnit } from '@subwallet/extension-koni-base/utils/utils';
+import fetch from 'cross-fetch';
 
 interface LedgerData {
   active: string,
@@ -324,7 +325,15 @@ function getDarwiniaStakingOnChain (parentApi: ApiProps, useAddresses: string[],
 }
 
 function getAstarStakingOnChain (parentApi: ApiProps, useAddresses: string[], networks: Record<string, NetworkJson>, chain: string, callback: (networkKey: string, rs: StakingItem) => void) {
-  return parentApi.api.query.dappsStaking.ledger.multi(useAddresses, (ledgers: any[]) => {
+  const allDappsReq = new Promise(function (resolve) {
+    fetch('https://api.astar.network/api/v1/shibuya/dapps-staking/dapps', {
+      method: 'GET'
+    }).then((resp) => {
+      resolve(resp.json());
+    }).catch(console.error);
+  });
+
+  return parentApi.api.query.dappsStaking.ledger.multi(useAddresses, async (ledgers: any[]) => {
     let totalBalance = 0;
     let stakingItem: StakingItem;
 
@@ -338,6 +347,41 @@ function getAstarStakingOnChain (parentApi: ApiProps, useAddresses: string[], ne
         totalBalance += parseFloat(_totalStake);
       }
 
+      const [_stakedDapps, _allDapps] = await Promise.all([
+        parentApi.api.query.dappsStaking.generalStakerInfo.entries(useAddresses[0]),
+        allDappsReq
+      ]);
+
+      const allDapps = _allDapps as Record<string, any>[];
+      const dappMap: Record<string, string> = {};
+      const delegationsList: DelegationItem[] = [];
+
+      for (const dappInfo of allDapps) {
+        const dappAddress = dappInfo.address as string;
+
+        dappMap[dappAddress.toLowerCase()] = dappInfo.name as string;
+      }
+
+      for (const item of _stakedDapps) {
+        const data = item[0].toHuman() as any[];
+        const stakedDapp = data[1] as Record<string, string>;
+        const stakeData = item[1].toHuman() as Record<string, Record<string, string>[]>;
+        const stakeList = stakeData.stakes;
+        const dappAddress = stakedDapp.Evm.toLowerCase();
+        let totalStake = 0;
+
+        for (const stake of stakeList) {
+          totalStake += parseRawNumber(stake.staked);
+        }
+
+        delegationsList.push({
+          owner: dappAddress,
+          amount: totalStake.toString(),
+          minBond: '0',
+          identity: dappMap[dappAddress]
+        });
+      }
+
       const parsedTotalBalance = parseStakingBalance(totalBalance, chain, networks);
 
       if (totalBalance > 0) {
@@ -349,6 +393,7 @@ function getAstarStakingOnChain (parentApi: ApiProps, useAddresses: string[], ne
           unlockingBalance: '0',
           nativeToken: networks[chain].nativeToken,
           unit: networks[chain].nativeToken,
+          delegation: delegationsList,
           state: APIItemState.READY
         } as StakingItem;
       } else {

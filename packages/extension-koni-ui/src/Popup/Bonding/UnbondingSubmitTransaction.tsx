@@ -98,7 +98,7 @@ function UnbondingSubmitTransaction ({ className }: Props): React.ReactElement<P
       } else {
         const binaryAmount = bondedAmount * (10 ** (networkJson.decimals as number));
 
-        return new BN(binaryAmount.toString());
+        return new BN(Math.round(binaryAmount).toString());
       }
     }
 

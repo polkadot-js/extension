@@ -9,7 +9,7 @@ import { getCurrentProvider, isUrl } from '@subwallet/extension-koni-base/utils/
 import fetch from 'cross-fetch';
 
 import { ApiPromise, WsProvider } from '@polkadot/api';
-import {BN} from "@polkadot/util";
+import { BN } from '@polkadot/util';
 
 jest.setTimeout(5000000);
 
@@ -100,7 +100,8 @@ describe('test DotSama APIs', () => {
     const dappAddress = '0x1CeE94a11eAf390B67Aa346E9Dda3019DfaD4f6A';
     const address = 'b6dCDjD46DHpikSDoAPt8Hw1r1SZfbwpi2AkX8z3xunvD4A';
 
-    const extrinsic = apiPromise.tx.dappsStaking.bondAndStake({Evm: dappAddress}, new BN(1));
+    const extrinsic = apiPromise.tx.dappsStaking.bondAndStake({ Evm: dappAddress }, new BN(1));
+
     console.log(extrinsic.paymentInfo(address));
   });
 });

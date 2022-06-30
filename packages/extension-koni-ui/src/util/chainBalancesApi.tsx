@@ -198,7 +198,7 @@ export const parseBalancesInfo = (priceMap: Record<string, number>, tokenPriceMa
       }
 
       const { balanceValue, convertedBalanceValue } = getBalances({
-        balance: String(10 ** item.decimals),
+        balance: item.free,
         decimals: item.decimals,
         symbol: _token,
         price: ignoreTestnetPrice ? 0 : getTokenPrice(tokenPriceMap, priceSymbol)

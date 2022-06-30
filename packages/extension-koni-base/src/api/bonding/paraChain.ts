@@ -72,6 +72,8 @@ export async function getParaCollatorsInfo (networkKey: string, dotSamaApi: ApiP
 
   for (const collator of rawAllCollators) {
     allValidators.push({
+      commission: 0,
+      expectedReturn: 0,
       address: collator.owner,
       totalStake: parseRawNumber(collator.amount) / 10 ** decimals,
       ownStake: 0,

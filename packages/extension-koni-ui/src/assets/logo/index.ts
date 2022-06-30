@@ -313,6 +313,12 @@ const LogosMap: Record<string, string> = {
   // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
   xcusdt: require('./usdt.svg'),
   // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+  imbue_network: require('./imbue.png'),
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+  tinkernet: require('./tinker.png'),
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+  hydradx_main: require('./hydradx.svg'),
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
   default: require('./default.svg')
 };
 

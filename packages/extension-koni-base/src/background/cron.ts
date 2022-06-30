@@ -222,14 +222,10 @@ export class KoniCron {
   }
 
   refreshPrice () {
-    const activeNetworks: string[] = [];
+    // Update for tokens price
+    const coinGeckoKeys = Object.values(state.getNetworkMap()).map((network) => network.coinGeckoKey).filter((key) => key) as string[];
 
-    Object.values(state.getNetworkMap()).forEach((network) => {
-      if (network.active && network.coinGeckoKey) {
-        activeNetworks.push(network.coinGeckoKey);
-      }
-    });
-    getTokenPrice(activeNetworks)
+    getTokenPrice(coinGeckoKeys)
       .then((rs) => {
         state.setPrice(rs, () => {
           console.log('Get Token Price From CoinGecko');

@@ -28,7 +28,7 @@ interface TransferQrArg extends BaseArg{
   changeValue: string;
 }
 
-const parseTxAndSignature = (tx: Web3Transaction, _signature: `0x${string}`): `0x${string}` => {
+export const parseTxAndSignature = (tx: Web3Transaction, _signature: `0x${string}`): `0x${string}` => {
   const signature = _signature.slice(2);
   const r = `0x${signature.substring(0, 64)}`;
   const s = `0x${signature.substring(64, 128)}`;

@@ -946,12 +946,21 @@ export interface ConfirmationResult<T> {
   id: string;
   isApproved: boolean;
   url?: string;
-  payload?: T
-  password?: string
+  payload?: T;
+  password?: string;
+}
+
+export interface ConfirmationResultQr<T> extends ConfirmationResult<T>{
+  signature: `0x${string}`;
 }
 
 export interface EvmSendTransactionRequest extends TransactionConfig {
   estimateGas: string;
+}
+
+export interface EvmSendTransactionRequestQr extends TransactionConfig {
+  estimateGas: string;
+  nonce: number;
 }
 
 export interface ConfirmationDefinitions {
@@ -960,6 +969,7 @@ export interface ConfirmationDefinitions {
   switchNetworkRequest: [ConfirmationsQueueItem<SwitchNetworkRequest>, ConfirmationResult<boolean>],
   evmSignatureRequest: [ConfirmationsQueueItem<EvmSignatureRequest>, ConfirmationResult<string>],
   evmSendTransactionRequest: [ConfirmationsQueueItem<EvmSendTransactionRequest>, ConfirmationResult<boolean>]
+  evmSendTransactionRequestQr: [ConfirmationsQueueItem<EvmSendTransactionRequestQr>, ConfirmationResultQr<boolean>]
 }
 
 export interface EVMTransactionArg {

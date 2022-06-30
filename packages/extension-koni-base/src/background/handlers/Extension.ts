@@ -3497,6 +3497,7 @@ export default class KoniExtension extends Extension {
         return this.rejectExternalRequest(request as RequestRejectExternalRequest);
       case 'pri(account.external.resolve)':
         return this.resolveQrTransfer(request as RequestResolveExternalRequest);
+
       case 'pri(accounts.tie)':
         return this.accountsTie2(request as RequestAccountTie);
       case 'pri(confirmations.subscribe)':

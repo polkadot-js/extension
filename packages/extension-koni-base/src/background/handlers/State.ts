@@ -3,8 +3,9 @@
 
 import { withErrorLog } from '@subwallet/extension-base/background/handlers/helpers';
 import State, { AuthUrls, Resolver } from '@subwallet/extension-base/background/handlers/State';
-import { AccountRefMap, APIItemState, ApiMap, AuthRequestV2, BalanceItem, BalanceJson, ChainRegistry, ConfirmationDefinitions, ConfirmationsQueue, ConfirmationsQueueItemOptions, ConfirmationType, CrowdloanItem, CrowdloanJson, CurrentAccountInfo, CustomEvmToken, DeleteEvmTokenParams, EvmSendTransactionParams, EvmTokenJson, ExternalRequestPromise, ExternalRequestPromiseStatus, NETWORK_STATUS, NetworkJson, NftCollection, NftCollectionJson, NftItem, NftJson, NftTransferExtra, PriceJson, RequestAccountExportPrivateKey, RequestConfirmationComplete, RequestSettingsType, ResponseAccountExportPrivateKey, ResultResolver, ServiceInfo, StakingItem, StakingJson, StakingRewardJson, TokenInfo, TransactionHistoryItemType } from '@subwallet/extension-base/background/KoniTypes';
+import { AccountRefMap, APIItemState, ApiMap, AuthRequestV2, BalanceItem, BalanceJson, ChainRegistry, ConfirmationDefinitions, ConfirmationsQueue, ConfirmationsQueueItemOptions, ConfirmationType, CrowdloanItem, CrowdloanJson, CurrentAccountInfo, CustomEvmToken, DeleteEvmTokenParams, EvmSendTransactionParams, EvmSendTransactionRequestQr, EvmTokenJson, ExternalRequestPromise, ExternalRequestPromiseStatus, NETWORK_STATUS, NetworkJson, NftCollection, NftCollectionJson, NftItem, NftJson, NftTransferExtra, PriceJson, RequestAccountExportPrivateKey, RequestConfirmationComplete, RequestSettingsType, ResponseAccountExportPrivateKey, ResultResolver, ServiceInfo, StakingItem, StakingJson, StakingRewardJson, TokenInfo, TransactionHistoryItemType } from '@subwallet/extension-base/background/KoniTypes';
 import { AuthorizeRequest, RequestAuthorizeTab } from '@subwallet/extension-base/background/types';
+import { Web3Transaction } from '@subwallet/extension-base/signers/types';
 import { getId } from '@subwallet/extension-base/utils/getId';
 import { getTokenPrice } from '@subwallet/extension-koni-base/api/coingecko';
 import { initApi } from '@subwallet/extension-koni-base/api/dotsama';
@@ -15,6 +16,7 @@ import { DEFAULT_STAKING_NETWORKS } from '@subwallet/extension-koni-base/api/sta
 import { DotSamaCrowdloan_crowdloans_nodes } from '@subwallet/extension-koni-base/api/subquery/__generated__/DotSamaCrowdloan';
 import { fetchDotSamaCrowdloan } from '@subwallet/extension-koni-base/api/subquery/crowdloan';
 import { DEFAULT_EVM_TOKENS } from '@subwallet/extension-koni-base/api/web3/defaultEvmToken';
+import { parseTxAndSignature } from '@subwallet/extension-koni-base/api/web3/transferQr';
 import { initWeb3Api } from '@subwallet/extension-koni-base/api/web3/web3';
 import { EvmRpcError } from '@subwallet/extension-koni-base/background/errors/EvmRpcError';
 import { ALL_ACCOUNT_KEY, ALL_GENESIS_HASH } from '@subwallet/extension-koni-base/constants';
@@ -25,12 +27,14 @@ import CustomEvmTokenStore from '@subwallet/extension-koni-base/stores/CustomEvm
 import SettingsStore from '@subwallet/extension-koni-base/stores/Settings';
 import TransactionHistoryStore from '@subwallet/extension-koni-base/stores/TransactionHistory';
 import { convertFundStatus, getCurrentProvider } from '@subwallet/extension-koni-base/utils';
+import { anyNumberToBN } from '@subwallet/extension-koni-base/utils/eth';
 import SimpleKeyring from 'eth-simple-keyring';
 import { BehaviorSubject, Subject } from 'rxjs';
 import Web3 from 'web3';
 import { TransactionConfig, TransactionReceipt } from 'web3-core';
 
 import { decodePair } from '@polkadot/keyring/pair/decode';
+import { KeyringPair$Meta } from '@polkadot/keyring/types';
 import { keyring } from '@polkadot/ui-keyring';
 import { accounts } from '@polkadot/ui-keyring/observable/accounts';
 import { assert, BN, u8aToHex } from '@polkadot/util';
@@ -143,7 +147,8 @@ export default class KoniState extends State {
     addTokenRequest: {},
     switchNetworkRequest: {},
     evmSignatureRequest: {},
-    evmSendTransactionRequest: {}
+    evmSendTransactionRequest: {},
+    evmSendTransactionRequestQr: {}
   });
 
   private readonly confirmationsPromiseMap: Record<string, { resolver: Resolver<any>, validator?: (rs: any) => Error | undefined }> = {};
@@ -1896,6 +1901,20 @@ export default class KoniState extends State {
       throw new EvmRpcError('INVALID_PARAMS', 'From address is not in available for ' + url);
     }
 
+    let meta: KeyringPair$Meta;
+
+    try {
+      const pair = keyring.getPair(fromAddress);
+
+      if (!pair) {
+        throw new EvmRpcError('INVALID_PARAMS', 'Cannot find pair with address: ' + fromAddress);
+      }
+
+      meta = pair.meta;
+    } catch (e) {
+      throw new EvmRpcError('INVALID_PARAMS', 'Cannot find pair with address: ' + fromAddress);
+    }
+
     // Validate balance
     const balance = new BN(await web3.eth.getBalance(fromAddress) || 0);
 
@@ -1957,28 +1976,82 @@ export default class KoniState extends State {
       });
     };
 
-    return this.addConfirmation(id, url, 'evmSendTransactionRequest', requestPayload, { requiredPassword: true, address: fromAddress, networkKey }, validateConfirmationResponsePayload)
-      .then(async ({ isApproved }) => {
-        if (isApproved) {
-          const signTransaction = await web3.eth.accounts.signTransaction(transaction, privateKey);
-          let transactionHash = '';
+    if (!meta.isExternal) {
+      return this.addConfirmation(id, url, 'evmSendTransactionRequest', requestPayload, { requiredPassword: true, address: fromAddress, networkKey }, validateConfirmationResponsePayload)
+        .then(async ({ isApproved }) => {
+          if (isApproved) {
+            const signTransaction = await web3.eth.accounts.signTransaction(transaction, privateKey);
+            let transactionHash = '';
 
-          return new Promise<string>((resolve, reject) => {
-            signTransaction.rawTransaction && web3.eth.sendSignedTransaction(signTransaction.rawTransaction)
-              .once('transactionHash', (hash) => {
-                transactionHash = hash;
-                resolve(hash);
-              })
-              .once('receipt', setTransactionHistory)
-              .once('error', (e) => {
-                setFailedHistory(transactionHash);
-                reject(e);
-              });
-          });
-        } else {
-          return Promise.reject(new EvmRpcError('USER_REJECTED_REQUEST'));
-        }
-      });
+            return new Promise<string>((resolve, reject) => {
+              signTransaction.rawTransaction && web3.eth.sendSignedTransaction(signTransaction.rawTransaction)
+                .once('transactionHash', (hash) => {
+                  transactionHash = hash;
+                  resolve(hash);
+                })
+                .once('receipt', setTransactionHistory)
+                .once('error', (e) => {
+                  setFailedHistory(transactionHash);
+                  reject(e);
+                });
+            });
+          } else {
+            return Promise.reject(new EvmRpcError('USER_REJECTED_REQUEST'));
+          }
+        });
+    } else {
+      const network = this.getNetworkMapByKey(networkKey);
+      const nonce = await web3.eth.getTransactionCount(fromAddress);
+      const requestPayload: EvmSendTransactionRequestQr = {
+        ...transaction,
+        gasPrice: transaction.gasPrice ? transaction.gasPrice : transaction.maxFeePerGas,
+        estimateGas,
+        nonce
+      };
+
+      return this.addConfirmation(id, url, 'evmSendTransactionRequestQr', requestPayload, { requiredPassword: false, address: fromAddress, networkKey })
+        .then(async ({ isApproved, signature }) => {
+          if (isApproved) {
+            const txObject: Web3Transaction = {
+              nonce: nonce,
+              from: fromAddress,
+              gasPrice: anyNumberToBN(requestPayload.gasPrice).toNumber(),
+              gasLimit: anyNumberToBN(requestPayload.gas).toNumber(),
+              to: requestPayload.to !== undefined ? requestPayload.to : '',
+              value: anyNumberToBN(requestPayload.value).toNumber(),
+              data: requestPayload.data ? requestPayload.data : '',
+              chainId: network?.evmChainId || 1
+            };
+            let transactionHash = '';
+
+            const signed = parseTxAndSignature(txObject, signature);
+
+            const recover = web3.eth.accounts.recoverTransaction(signed);
+
+            if (recover.toLowerCase() !== fromAddress.toLowerCase()) {
+              return Promise.reject(new EvmRpcError('UNAUTHORIZED', 'Bad signature'));
+            }
+
+            return new Promise<string>((resolve, reject) => {
+              web3.eth.sendSignedTransaction(signed)
+                .once('transactionHash', (hash) => {
+                  transactionHash = hash;
+                  resolve(hash);
+                })
+                .once('receipt', setTransactionHistory)
+                .once('error', (e) => {
+                  setFailedHistory(transactionHash);
+                  reject(e);
+                }).catch((e) => {
+                  setFailedHistory(transactionHash);
+                  reject(e);
+                });
+            });
+          } else {
+            return Promise.reject(new EvmRpcError('USER_REJECTED_REQUEST'));
+          }
+        });
+    }
   }
 
   public getConfirmationsQueueSubject () {
@@ -2086,6 +2159,8 @@ export default class KoniState extends State {
         _completeConfirmation(type, result as ConfirmationDefinitions['evmSignatureRequest'][1]);
       } else if (type === 'evmSendTransactionRequest') {
         _completeConfirmation(type, result as ConfirmationDefinitions['evmSendTransactionRequest'][1]);
+      } else if (type === 'evmSendTransactionRequestQr') {
+        _completeConfirmation(type, result as ConfirmationDefinitions['evmSendTransactionRequestQr'][1]);
       }
     });
 

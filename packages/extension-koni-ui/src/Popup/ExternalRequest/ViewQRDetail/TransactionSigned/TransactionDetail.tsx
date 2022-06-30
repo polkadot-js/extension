@@ -49,7 +49,7 @@ const TransactionDetail = (props: Props) => {
     if (isString(data)) {
       return (
         <div className={'raw-method'}>
-          {data}
+          {data.length > 2 ? data : ''}
         </div>
       );
     }

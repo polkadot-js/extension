@@ -266,9 +266,7 @@ export const PREDEFINED_NETWORKS: Record<string, NetworkJson> = {
     paraId: 2034,
     nativeToken: 'HDX',
     crowdloanUrl: 'https://loan.hydradx.io/',
-    decimals: 12,
-    supportBonding: true,
-    getStakingOnChain: true
+    decimals: 12
   },
   edgeware: {
     key: 'edgeware',

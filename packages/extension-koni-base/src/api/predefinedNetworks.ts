@@ -176,7 +176,9 @@ export const PREDEFINED_NETWORKS: Record<string, NetworkJson> = {
     nativeToken: 'ASTR',
     crowdloanUrl: 'https://crowdloan.astar.network/#/',
     decimals: 18,
-    coinGeckoKey: 'astar'
+    coinGeckoKey: 'astar',
+    getStakingOnChain: true,
+    supportBonding: true
   },
   astarEvm: {
     key: 'astarEvm',
@@ -772,7 +774,9 @@ export const PREDEFINED_NETWORKS: Record<string, NetworkJson> = {
     nativeToken: 'SDN',
     crowdloanUrl: 'https://polkadot.js.org/apps/#/parachains/crowdloan',
     decimals: 18,
-    coinGeckoKey: 'shiden'
+    coinGeckoKey: 'shiden',
+    supportBonding: true,
+    getStakingOnChain: true
   },
   shidenEvm: {
     key: 'shidenEvm',

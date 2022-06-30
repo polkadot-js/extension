@@ -84,8 +84,13 @@ export async function getAstarDappsInfo (networkKey: string, dotSamaApi: ApiProp
     const dappIcon = isUrl(dapp.iconUrl as string) ? dapp.iconUrl as string : undefined;
     const _contractInfo = await apiProps.api.query.dappsStaking.contractEraStake({ Evm: dappAddress }, era);
     const contractInfo = _contractInfo.toHuman() as Record<string, any>;
-    const totalStake = parseRawNumber(contractInfo.total as string);
-    const stakerCount = parseRawNumber(contractInfo.numberOfStakers as string);
+    let totalStake = 0;
+    let stakerCount = 0;
+
+    if (contractInfo !== null) {
+      totalStake = parseRawNumber(contractInfo.total as string);
+      stakerCount = parseRawNumber(contractInfo.numberOfStakers as string);
+    }
 
     allDappsInfo.push({
       address: dappAddress,

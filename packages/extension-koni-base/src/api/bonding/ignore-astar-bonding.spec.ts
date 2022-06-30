@@ -165,4 +165,15 @@ describe('test DotSama APIs', () => {
     console.log(nextWithdrawalAmount);
     console.log(redeemable);
   });
+
+  test('test get withdraw extrinsic', async () => {
+    const provider = new WsProvider(getCurrentProvider(PREDEFINED_NETWORKS.shibuya), DOTSAMA_AUTO_CONNECT_MS);
+    const api = new ApiPromise({ provider });
+    const apiPromise = await api.isReady;
+    const address = 'b6dCDjD46DHpikSDoAPt8Hw1r1SZfbwpi2AkX8z3xunvD4A';
+
+    const extrinsic = apiPromise.tx.dappsStaking.withdrawUnbonded();
+
+    console.log(extrinsic.paymentInfo(address));
+  });
 });

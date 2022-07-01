@@ -123,7 +123,8 @@ export default function Popup (): React.ReactElement {
     addTokenRequest: {},
     switchNetworkRequest: {},
     evmSignatureRequest: {},
-    evmSendTransactionRequest: {}
+    evmSendTransactionRequest: {},
+    evmSendTransactionRequestQr: {}
   });
   const [isWelcomeDone, setWelcomeDone] = useState(false);
   const [settingsCtx, setSettingsCtx] = useState<SettingsStruct>(startSettings);

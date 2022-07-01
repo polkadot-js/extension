@@ -278,3 +278,33 @@ export async function getAstarWithdrawalExtrinsic (dotSamaApi: ApiProps) {
 
   return apiPromise.api.tx.dappsStaking.withdrawUnbonded();
 }
+
+export async function getAstarClaimRewardTxInfo (dotSamaApi: ApiProps, address: string, dappAddress: string) {
+  const apiPromise = await dotSamaApi.isReady;
+
+  const extrinsic = apiPromise.api.tx.dappsStaking.claimStaker(dappAddress);
+
+  return extrinsic.paymentInfo(address);
+}
+
+export async function handleAstarClaimRewardTxInfo (address: string, dappAddress: string, networkKey: string, dotSamaApiMap: Record<string, ApiProps>, web3ApiMap: Record<string, Web3>) {
+  const [txInfo, balance] = await Promise.all([
+    getAstarClaimRewardTxInfo(dotSamaApiMap[networkKey], address, dappAddress),
+    getFreeBalance(networkKey, address, dotSamaApiMap, web3ApiMap)
+  ]);
+
+  const feeString = txInfo.partialFee.toHuman();
+  const binaryBalance = new BN(balance);
+  const balanceError = txInfo.partialFee.gt(binaryBalance);
+
+  return {
+    fee: feeString,
+    balanceError
+  } as BasicTxInfo;
+}
+
+export async function getAstarClaimRewardExtrinsic (dotSamaApi: ApiProps, dappAddress: string) {
+  const apiPromise = await dotSamaApi.isReady;
+
+  return apiPromise.api.tx.dappsStaking.claimStaker(dappAddress);
+}

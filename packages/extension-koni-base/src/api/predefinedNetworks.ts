@@ -846,7 +846,7 @@ export const PREDEFINED_NETWORKS: Record<string, NetworkJson> = {
     active: false,
     currentProviderMode: 'ws',
     currentProvider: 'Liebi',
-    groups: ['KUSAMA_PARACHAIN'],
+    groups: ['POLKADOT_PARACHAIN'],
     paraId: 2030,
     nativeToken: 'BNC',
     crowdloanUrl: 'https://bifrost.app/vcrowdloan',

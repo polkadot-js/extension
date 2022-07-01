@@ -17,14 +17,14 @@
     "./detectPackage.cjs"
   ],
   "type": "module",
-  "version": "0.44.2-2",
+  "version": "0.44.2-7-x",
   "main": "index.js",
   "dependencies": {
     "@babel/runtime": "^7.18.3",
-    "@polkadot/extension-inject": "^0.44.2-2",
-    "@polkadot/networks": "^9.4.1",
-    "@polkadot/util": "^9.4.1",
-    "@polkadot/util-crypto": "^9.4.1"
+    "@polkadot/extension-inject": "^0.44.2-7-x",
+    "@polkadot/networks": "^9.6.2",
+    "@polkadot/util": "^9.6.2",
+    "@polkadot/util-crypto": "^9.6.2"
   },
   "peerDependencies": {
     "@polkadot/api": "*",

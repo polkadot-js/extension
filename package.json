@@ -10,7 +10,7 @@
     "url": "https://github.com/polkadot-js/extension.git"
   },
   "sideEffects": false,
-  "version": "0.44.2-2",
+  "version": "0.44.2-7-x",
   "workspaces": [
     "packages/*"
   ],
@@ -33,22 +33,22 @@
     "watch": "cd packages/extension && yarn polkadot-exec-webpack --config webpack.watch.cjs --mode development --watch"
   },
   "devDependencies": {
-    "@babel/core": "^7.18.2",
-    "@polkadot/dev": "^0.66.37",
-    "@types/jest": "^28.1.1",
-    "i18next-scanner": "^3.1.0",
+    "@babel/core": "^7.18.5",
+    "@polkadot/dev": "^0.67.43",
+    "@types/jest": "^28.1.2",
+    "i18next-scanner": "^3.3.0",
     "sinon-chrome": "^3.0.1"
   },
   "resolutions": {
-    "@polkadot/api": "^8.7.1",
-    "@polkadot/keyring": "^9.4.1",
-    "@polkadot/networks": "^9.4.1",
-    "@polkadot/types": "^8.7.1",
-    "@polkadot/util": "^9.4.1",
-    "@polkadot/util-crypto": "^9.4.1",
-    "@polkadot/x-fetch": "^9.4.1",
+    "@polkadot/api": "^8.10.1",
+    "@polkadot/keyring": "^9.6.2",
+    "@polkadot/networks": "^9.6.2",
+    "@polkadot/types": "^8.10.1",
+    "@polkadot/util": "^9.6.2",
+    "@polkadot/util-crypto": "^9.6.2",
+    "@polkadot/x-fetch": "^9.6.2",
     "babel-core": "^7.0.0-bridge.0",
     "safe-buffer": "^5.2.1",
-    "typescript": "^4.7.3"
+    "typescript": "^4.7.4"
   }
 }

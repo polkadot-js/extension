@@ -45,6 +45,7 @@ function ConfirmationHeader ({ account, className, confirmation, network, reques
         className='header__account'
         genesisHash={account.genesisHash}
         iconSize={20}
+        isEthereum={true}
         isShowAddress={false}
         isShowBanner={false}
         name={account.name}
@@ -73,7 +74,7 @@ export default styled(ConfirmationHeader)(({ theme }: Props) => `
   text-align: center;
   white-space: nowrap;
   border-bottom: 1px solid ${theme.backgroundAccountAddress};
-    
+
   .header-requester {
     background-color: ${theme.backgroundAccountAddress};
     display: inline-flex;
@@ -81,14 +82,14 @@ export default styled(ConfirmationHeader)(({ theme }: Props) => `
     padding: 8px;
     padding-right: 10px;
     border-radius: 5px;
-    
+
     .requester__logo {
       min-width: 24px;
       width: 24px;
       align-self: center;
       margin-right: 8px;
     }
-    
+
     .requester__host-name {
       text-align: center;
       color: ${theme.textColor2};
@@ -96,38 +97,38 @@ export default styled(ConfirmationHeader)(({ theme }: Props) => `
       line-height: 24px;
     }
   }
-  
+
   .header__action-text {
     text-align: center;
     font-weight: 500;
     margin-top: 8px;
-  } 
+  }
   .header__account {
     margin-top: 8px;
     display: inline-block;
     text-align: left;
     background-color: ${theme.backgroundAccountAddress};
     border-radius: 5px;
-    
+
     .account-info-row {
       height: 42px;
       padding-left: 8px;
       padding-right: 10px;
     }
   }
-  
+
   .header__acc-network {
     display: flex;
     align-items: center;
     justify-content: space-evenly
   }
-  
+
   .acc-network-connector {
     padding-top: 8px;
     padding-left: 8px;
     padding-right: 8px;
   }
-  
+
   .header__network {
     position: relative;
     margin-top: 8px;
@@ -138,7 +139,7 @@ export default styled(ConfirmationHeader)(({ theme }: Props) => `
     height: 42px;
     padding-left: 8px;
     padding-right: 10px;
-    
+
     .network-logo {
       width: 24px;
       border-radius: 50%;

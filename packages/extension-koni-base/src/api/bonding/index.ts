@@ -120,7 +120,6 @@ export async function getWithdrawalExtrinsic (dotSamaApi: ApiProps, networkKey: 
 }
 
 export async function getClaimRewardTxInfo (address: string, networkKey: string, dotSamaApiMap: Record<string, ApiProps>, web3ApiMap: Record<string, Web3>, validatorAddress?: string) {
-  console.log('fuck', validatorAddress);
   return handleAstarClaimRewardTxInfo(address, validatorAddress as string, networkKey, dotSamaApiMap, web3ApiMap);
 }
 

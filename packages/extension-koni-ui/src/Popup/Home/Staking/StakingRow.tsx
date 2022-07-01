@@ -291,7 +291,7 @@ function StakingRow ({ activeStake, address, chainName, className, delegations, 
       {
         showClaimRewardModal && <StakeAuthClaimReward
           address={address}
-          delegations={delegations}
+          delegation={delegations}
           hideModal={handleHideClaimRewardModal}
           networkKey={networkKey}
         />

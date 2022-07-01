@@ -34,7 +34,9 @@ function StakeAuthClaimReward ({ address, className, delegation, hideModal, netw
   const [password, setPassword] = useState<string>('');
   const [passwordError, setPasswordError] = useState<string | null>('');
   const [isTxReady, setIsTxReady] = useState(false);
-  const [targetValidator, setTargetValidator] = useState('');
+  const [targetValidator, setTargetValidator] = useState(delegation ? delegation[0].owner : '');
+
+  console.log(delegation, targetValidator);
 
   const [balanceError, setBalanceError] = useState(false);
   const [fee, setFee] = useState('');

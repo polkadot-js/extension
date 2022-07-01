@@ -191,6 +191,7 @@ function Request ({ account: { accountIndex, addressOffset, isExternal, isHardwa
                 // eslint-disable-next-line @typescript-eslint/no-misused-promises
                 onSignature={_onSignature}
                 payload={data}
+                signId={signId}
               />
             )
             : (

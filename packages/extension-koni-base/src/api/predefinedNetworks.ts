@@ -257,18 +257,17 @@ export const PREDEFINED_NETWORKS: Record<string, NetworkJson> = {
     genesisHash: '0xd2a620c27ec5cbc5621ff9a522689895074f7cca0d08e7134a7804e1a3ba86fc',
     ss58Format: 63,
     providers: {
-      'Galactic Council': 'wss://rpc-01.hydradx.io'
+      'Galactic Council': 'wss://rpc-01.hydradx.io',
+      Dwellir: 'wss://hydradx-rpc.dwellir.com'
     },
     active: false,
     currentProviderMode: 'ws',
-    currentProvider: 'Galactic Council',
+    currentProvider: 'Dwellir',
     groups: ['POLKADOT_PARACHAIN'],
     paraId: 2034,
     nativeToken: 'HDX',
     crowdloanUrl: 'https://loan.hydradx.io/',
-    decimals: 12,
-    supportBonding: true,
-    getStakingOnChain: true
+    decimals: 12
   },
   edgeware: {
     key: 'edgeware',

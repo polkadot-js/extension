@@ -125,7 +125,10 @@ const SignQR = (props: Props) => {
       {
         (!loading && network) && (
           <>
-            <NetworkInfo network={network} />
+            <NetworkInfo
+              forceEthereum={isEthereum && !evmChainId}
+              network={network}
+            />
             <AccountInfo
               address={senderAddress}
               network={network}

@@ -175,10 +175,7 @@ export default React.memo(styled(QrRequest)(({ theme }: Props) => `
 
   .auth-transaction-body{
     flex: 1;
-    padding-left: 15px;
-    padding-right: 15px;
-    padding-bottom: 15px;
-    padding-top: 25px;
+    padding: 15px;
     overflow-y: auto;
   }
 

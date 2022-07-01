@@ -31,10 +31,17 @@ interface Props extends ThemeProps {
   showWithdrawalModal: () => void;
 }
 
+const MANUAL_CLAIM_CHAINS = [
+  'astar',
+  'shibuya',
+  'shiden'
+];
+
 function StakingMenu ({ bondedAmount, className, networkKey, nextWithdrawal, nextWithdrawalAmount, redeemable, showMenu, showWithdrawalModal, toggleMenu, unbondingStake }: Props): React.ReactElement<Props> {
   const stakingMenuRef = useRef(null);
   const navigate = useContext(ActionContext);
   const networkJson = useGetNetworkJson(networkKey);
+  const showClaimButton = MANUAL_CLAIM_CHAINS.includes(networkKey);
 
   const handleClickBondingMenu = useCallback((e: MouseEvent) => {
     e.stopPropagation();
@@ -92,6 +99,7 @@ function StakingMenu ({ bondedAmount, className, networkKey, nextWithdrawal, nex
           showMenu && <Menu
             className={'bonding-menu'}
             reference={stakingMenuRef}
+            style={{ marginTop: showClaimButton ? '200px' : '160px' }}
           >
             <div
               className={'bonding-menu-item'}
@@ -135,6 +143,22 @@ function StakingMenu ({ bondedAmount, className, networkKey, nextWithdrawal, nex
                 />
               }
             </div>
+
+            {
+              showClaimButton && <div
+                className={'bonding-menu-item'}
+                onClick={handleClickWithdraw}
+              >
+                <img
+                  data-for={`bonding-menu-tooltip-${networkKey}`}
+                  data-tip={true}
+                  height={18}
+                  src={ClockAfternoonGreen}
+                  width={18}
+                />
+                Claim rewards
+              </div>
+            }
           </Menu>
         }
       </div>

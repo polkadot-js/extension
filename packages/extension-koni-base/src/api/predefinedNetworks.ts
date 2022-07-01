@@ -175,7 +175,9 @@ export const PREDEFINED_NETWORKS: Record<string, NetworkJson> = {
     nativeToken: 'ASTR',
     crowdloanUrl: 'https://crowdloan.astar.network/#/',
     decimals: 18,
-    coinGeckoKey: 'astar'
+    coinGeckoKey: 'astar',
+    getStakingOnChain: true,
+    supportBonding: true
   },
   astarEvm: {
     key: 'astarEvm',
@@ -470,6 +472,25 @@ export const PREDEFINED_NETWORKS: Record<string, NetworkJson> = {
     crowdloanUrl: 'https://www.polkadex.trade/crowdloans',
     decimals: 12
   },
+  polkadexTest: {
+    key: 'polkadexTest',
+    chain: 'Polkadex - Testnet',
+    genesisHash: '0xd0024e7110db2a8b35d6599e64e82d3eb30070200a423398319efb6b4d596427',
+    ss58Format: 88,
+    providers: {
+      'Polkadex Team': 'wss://blockchain.polkadex.trade'
+    },
+    active: false,
+    currentProviderMode: 'ws',
+    currentProvider: 'Polkadex Team',
+    groups: ['TEST_NET'],
+    nativeToken: 'Unit',
+    coinGeckoKey: 'polkadex',
+    crowdloanUrl: 'https://www.polkadex.trade/crowdloans',
+    decimals: 12,
+    getStakingOnChain: true,
+    supportBonding: true
+  },
   aleph: {
     key: 'aleph',
     chain: 'Aleph Zero',
@@ -746,7 +767,9 @@ export const PREDEFINED_NETWORKS: Record<string, NetworkJson> = {
     nativeToken: 'SDN',
     crowdloanUrl: 'https://polkadot.js.org/apps/#/parachains/crowdloan',
     decimals: 18,
-    coinGeckoKey: 'shiden'
+    coinGeckoKey: 'shiden',
+    supportBonding: true,
+    getStakingOnChain: true
   },
   shidenEvm: {
     key: 'shidenEvm',

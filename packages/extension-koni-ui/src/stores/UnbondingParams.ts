@@ -18,6 +18,7 @@ const unbondingParamsSlice = createSlice({
 
       state.selectedNetwork = payload.selectedNetwork;
       state.bondedAmount = payload.bondedAmount;
+      state.delegations = payload.delegations;
     }
   }
 });

@@ -3,6 +3,9 @@
 
 import { BN } from '@polkadot/util';
 
+export const REVOKE_ACTION = 'revoke';
+export const BOND_LESS_ACTION = 'bondLess';
+
 export interface ValidatorExtraInfo {
   commission: string,
   blocked: false,
@@ -28,6 +31,30 @@ export interface UniformEraPayoutInflationParams extends InflationParams {
   yearlyInflationInTokens: number;
 }
 
+export const PARACHAIN_INFLATION_DISTRIBUTION: Record<string, Record<string, number>> = {
+  moonbeam: { // https://docs.moonbeam.network/learn/features/staking/#annual-inflation
+    reward: 0.5,
+    collatorCommission: 0.2,
+    bondReserve: 0.3
+  },
+  moonriver: {
+    reward: 0.5,
+    collatorCommission: 0.2,
+    bondReserve: 0.3
+  },
+  moonbase: {
+    reward: 0.5,
+    collatorCommission: 0.2,
+    bondReserve: 0.3
+  },
+  turing: { // https://docs.oak.tech/docs/delegators/
+    reward: 0.025
+  },
+  turingStaging: { // https://docs.oak.tech/docs/delegators/
+    reward: 0.025
+  }
+};
+
 const DEFAULT_PARAMS: InflationParams = {
   auctionAdjust: 0,
   auctionMax: 0,
@@ -37,14 +64,22 @@ const DEFAULT_PARAMS: InflationParams = {
   stakeTarget: 0.5
 };
 
-export const ERA_LENGTH_MAP: Record<string, number> = {
+export const ERA_LENGTH_MAP: Record<string, number> = { // in hours
   alephTest: 24,
   aleph: 24,
   polkadot: 24,
   kusama: 6,
   westend: 24,
   hydradx: 24,
-  default: 24
+  default: 24,
+  moonbeam: 6,
+  moonriver: 2,
+  moonbase: 2,
+  turing: 2,
+  turingStaging: 2,
+  astar: 24,
+  shiden: 24,
+  shibuya: 24
 };
 
 const ALEPH_DEFAULT_UNIFORM_ERA_PAYOUT_PARAMS: UniformEraPayoutInflationParams = {
@@ -64,6 +99,10 @@ const KNOWN_PARAMS: Record<string, InflationParams> = {
 
 export function getInflationParams (networkKey: string): InflationParams {
   return KNOWN_PARAMS[networkKey] || DEFAULT_PARAMS;
+}
+
+export function parseRawNumber (value: string) {
+  return parseFloat(value.replaceAll(',', ''));
 }
 
 export function calcInflationUniformEraPayout (totalIssuance: number, yearlyInflationInTokens: number): number {

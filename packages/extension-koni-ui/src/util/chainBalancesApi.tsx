@@ -141,7 +141,7 @@ function getTokenPrice (tokenPriceMap: Record<string, number>, token: string): n
 
 export const parseBalancesInfo = (priceMap: Record<string, number>, tokenPriceMap: Record<string, number>, balanceInfo: AccountInfoItem, tokenMap: Record<string, TokenInfo>, networkJson: NetworkJson): BalanceInfo => {
   const { balanceItem, networkKey, tokenDecimals, tokenSymbols } = balanceInfo;
-  const ignoreTestnetPrice = ['moonbase', 'shibuya', 'shibuyaEvm', 'acala_testnet'].includes(networkKey);
+  const ignoreTestnetPrice = networkJson.groups.includes('TEST_NET');
 
   const decimals = tokenDecimals && !isEmptyArray(tokenDecimals) ? tokenDecimals[0] : 0;
   const symbol = tokenSymbols && !isEmptyArray(tokenSymbols) ? tokenSymbols[0] : '';

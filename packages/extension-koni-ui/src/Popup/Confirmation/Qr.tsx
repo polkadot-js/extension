@@ -1,9 +1,7 @@
 // Copyright 2019-2022 @subwallet/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { ConfirmationDefinitions, NetworkJson } from '@subwallet/extension-base/background/KoniTypes';
-import { Web3Transaction } from '@subwallet/extension-base/signers/types';
-import { anyNumberToBN } from '@subwallet/extension-koni-base/utils/eth';
+import { ConfirmationDefinitions } from '@subwallet/extension-base/background/KoniTypes';
 import { LoadingContainer } from '@subwallet/extension-koni-ui/components';
 import DisplayPayload from '@subwallet/extension-koni-ui/components/Qr/DisplayPayload';
 import ScanSignature from '@subwallet/extension-koni-ui/components/Qr/ScanSignature';
@@ -11,8 +9,9 @@ import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { SigData } from '@subwallet/extension-koni-ui/types/accountExternalRequest';
 import CN from 'classnames';
 import React, { useCallback, useMemo } from 'react';
-import RLP, { Input } from 'rlp';
 import styled from 'styled-components';
+
+import { hexToU8a } from '@polkadot/util';
 
 interface Props extends ThemeProps {
   className?: string;
@@ -20,12 +19,12 @@ interface Props extends ThemeProps {
   onError: (error: string) => void;
   isLoading: boolean;
   isScanning: boolean;
-  confirmation: ConfirmationDefinitions['evmSendTransactionRequestQr'][0];
-  network?: NetworkJson;
+  isMessage: boolean;
+  confirmation: ConfirmationDefinitions['evmSendTransactionRequestQr' | 'evmSignatureRequestQr'][0];
 }
 
 const Qr = (props: Props) => {
-  const { className, confirmation, isLoading, isScanning, network, onError, onScan } = props;
+  const { className, confirmation, isLoading, isMessage, isScanning, onError, onScan } = props;
 
   const _onError = useCallback((error: Error) => {
     onError(error.message);
@@ -34,31 +33,18 @@ const Qr = (props: Props) => {
   const payload = useMemo((): Uint8Array => {
     const _raw = confirmation.payload;
 
-    const txObject: Web3Transaction = {
-      nonce: _raw.nonce,
-      from: confirmation.address || '',
-      gasPrice: anyNumberToBN(_raw.gasPrice).toNumber() || 0,
-      gasLimit: anyNumberToBN(_raw.gas).toNumber(),
-      to: _raw.to !== undefined ? _raw.to : '',
-      value: anyNumberToBN(_raw.value).toNumber(),
-      data: _raw.data ? _raw.data : '',
-      chainId: network?.evmChainId || 1
-    };
+    return hexToU8a(_raw.qrPayload);
+  }, [confirmation]);
 
-    const data: Input = [
-      txObject.nonce,
-      txObject.gasPrice,
-      txObject.gasLimit,
-      txObject.to,
-      txObject.value,
-      txObject.data,
-      txObject.chainId,
-      new Uint8Array([0x00]),
-      new Uint8Array([0x00])
-    ];
+  const canSign = useMemo((): boolean => {
+    return confirmation.payload.canSign;
+  }, [confirmation.payload.canSign]);
 
-    return RLP.encode(data);
-  }, [confirmation, network?.evmChainId]);
+  if (!canSign) {
+    return (
+      <></>
+    );
+  }
 
   return (
     <div className={CN(className)}>
@@ -83,6 +69,7 @@ const Qr = (props: Props) => {
               genesisHash={''}
               isEthereum={true}
               isHash={false}
+              isMessage={isMessage}
               payload={payload}
               size={320}
             />

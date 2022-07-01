@@ -3,7 +3,7 @@
 
 import { withErrorLog } from '@subwallet/extension-base/background/handlers/helpers';
 import State, { AuthUrls, Resolver } from '@subwallet/extension-base/background/handlers/State';
-import { AccountRefMap, APIItemState, ApiMap, AuthRequestV2, BalanceItem, BalanceJson, ChainRegistry, ConfirmationDefinitions, ConfirmationsQueue, ConfirmationsQueueItemOptions, ConfirmationType, CrowdloanItem, CrowdloanJson, CurrentAccountInfo, CustomEvmToken, DeleteEvmTokenParams, EvmSendTransactionParams, EvmSendTransactionRequestQr, EvmTokenJson, ExternalRequestPromise, ExternalRequestPromiseStatus, NETWORK_STATUS, NetworkJson, NftCollection, NftCollectionJson, NftItem, NftJson, NftTransferExtra, PriceJson, RequestAccountExportPrivateKey, RequestConfirmationComplete, RequestSettingsType, ResponseAccountExportPrivateKey, ResultResolver, ServiceInfo, StakingItem, StakingJson, StakingRewardJson, TokenInfo, TransactionHistoryItemType } from '@subwallet/extension-base/background/KoniTypes';
+import { AccountRefMap, APIItemState, ApiMap, AuthRequestV2, BalanceItem, BalanceJson, ChainRegistry, ConfirmationDefinitions, ConfirmationsQueue, ConfirmationsQueueItemOptions, ConfirmationType, CrowdloanItem, CrowdloanJson, CurrentAccountInfo, CustomEvmToken, DeleteEvmTokenParams, EvmSendTransactionParams, EvmSendTransactionRequestQr, EvmSignatureRequestQr, EvmTokenJson, ExternalRequestPromise, ExternalRequestPromiseStatus, NETWORK_STATUS, NetworkJson, NftCollection, NftCollectionJson, NftItem, NftJson, NftTransferExtra, PriceJson, RequestAccountExportPrivateKey, RequestConfirmationComplete, RequestSettingsType, ResponseAccountExportPrivateKey, ResultResolver, ServiceInfo, StakingItem, StakingJson, StakingRewardJson, TokenInfo, TransactionHistoryItemType } from '@subwallet/extension-base/background/KoniTypes';
 import { AuthorizeRequest, RequestAuthorizeTab } from '@subwallet/extension-base/background/types';
 import { Web3Transaction } from '@subwallet/extension-base/signers/types';
 import { getId } from '@subwallet/extension-base/utils/getId';
@@ -30,6 +30,7 @@ import TransactionHistoryStore from '@subwallet/extension-koni-base/stores/Trans
 import { convertFundStatus, getCurrentProvider } from '@subwallet/extension-koni-base/utils';
 import { anyNumberToBN } from '@subwallet/extension-koni-base/utils/eth';
 import SimpleKeyring from 'eth-simple-keyring';
+import RLP, { Input } from 'rlp';
 import { BehaviorSubject, Subject } from 'rxjs';
 import Web3 from 'web3';
 import { TransactionConfig, TransactionReceipt } from 'web3-core';
@@ -148,6 +149,7 @@ export default class KoniState extends State {
     addTokenRequest: {},
     switchNetworkRequest: {},
     evmSignatureRequest: {},
+    evmSignatureRequestQr: {},
     evmSendTransactionRequest: {},
     evmSendTransactionRequestQr: {}
   });
@@ -1813,39 +1815,78 @@ export default class KoniState extends State {
       return undefined;
     };
 
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-    const signPayload = { address, type: method, payload };
+    let meta: KeyringPair$Meta;
 
-    await this.addConfirmation(id, url, 'evmSignatureRequest', signPayload, { requiredPassword: true, address }, validateConfirmationResponsePayload)
-      .then(({ isApproved, password }) => {
-        if (isApproved && password) {
-          return password;
-        }
+    try {
+      const pair = keyring.getPair(address);
 
-        throw new EvmRpcError('USER_REJECTED_REQUEST');
-      });
+      if (!pair) {
+        throw new EvmRpcError('INVALID_PARAMS', 'Cannot find pair with address: ' + address);
+      }
 
-    if (privateKey === '') {
-      throw Error('Cannot export private key');
+      meta = pair.meta;
+    } catch (e) {
+      throw new EvmRpcError('INVALID_PARAMS', 'Cannot find pair with address: ' + address);
     }
 
-    const simpleKeyring = new SimpleKeyring([privateKey]);
+    if (!meta.isExternal) {
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+      const signPayload = { address, type: method, payload };
 
-    switch (method) {
-      case 'eth_sign':
-        return await simpleKeyring.signMessage(address, payload as string);
-      case 'personal_sign':
-        return await simpleKeyring.signPersonalMessage(address, payload as string);
-      case 'eth_signTypedData':
-        return await simpleKeyring.signTypedData(address, payload as any[]);
-      case 'eth_signTypedData_v1':
-        return await simpleKeyring.signTypedData_v1(address, payload as any[]);
-      case 'eth_signTypedData_v3':
-        return await simpleKeyring.signTypedData_v3(address, payload);
-      case 'eth_signTypedData_v4':
-        return await simpleKeyring.signTypedData_v4(address, payload);
-      default:
-        throw new EvmRpcError('INVALID_PARAMS', 'Not found sign method');
+      await this.addConfirmation(id, url, 'evmSignatureRequest', signPayload, { requiredPassword: true, address }, validateConfirmationResponsePayload)
+        .then(({ isApproved, password }) => {
+          if (isApproved && password) {
+            return password;
+          }
+
+          throw new EvmRpcError('USER_REJECTED_REQUEST');
+        });
+
+      if (privateKey === '') {
+        throw Error('Cannot export private key');
+      }
+
+      const simpleKeyring = new SimpleKeyring([privateKey]);
+
+      switch (method) {
+        case 'eth_sign':
+          return await simpleKeyring.signMessage(address, payload as string);
+        case 'personal_sign':
+          return await simpleKeyring.signPersonalMessage(address, payload as string);
+        case 'eth_signTypedData':
+          return await simpleKeyring.signTypedData(address, payload as any[]);
+        case 'eth_signTypedData_v1':
+          return await simpleKeyring.signTypedData_v1(address, payload as any[]);
+        case 'eth_signTypedData_v3':
+          return await simpleKeyring.signTypedData_v3(address, payload);
+        case 'eth_signTypedData_v4':
+          return await simpleKeyring.signTypedData_v4(address, payload);
+        default:
+          throw new EvmRpcError('INVALID_PARAMS', 'Not found sign method');
+      }
+    } else {
+      let qrPayload = '';
+      let canSign = false;
+
+      switch (method) {
+        case 'personal_sign':
+          canSign = true;
+          qrPayload = payload as string;
+          break;
+        default:
+          break;
+      }
+
+      const signPayload: EvmSignatureRequestQr = { address, type: method, payload: payload as unknown, qrPayload: qrPayload, canSign: canSign };
+
+      return this.addConfirmation(id, url, 'evmSignatureRequestQr', signPayload, { requiredPassword: false, address })
+        .then(({ isApproved, signature }) => {
+          if (isApproved) {
+            return signature;
+          } else {
+            throw new EvmRpcError('USER_REJECTED_REQUEST');
+          }
+        });
     }
   }
 
@@ -1997,26 +2038,42 @@ export default class KoniState extends State {
     } else {
       const network = this.getNetworkMapByKey(networkKey);
       const nonce = await web3.eth.getTransactionCount(fromAddress);
+
+      const txObject: Web3Transaction = {
+        nonce: nonce,
+        from: fromAddress,
+        gasPrice: anyNumberToBN(transaction.gasPrice ? transaction.gasPrice : transaction.maxFeePerGas).toNumber(),
+        gasLimit: anyNumberToBN(transaction.gas).toNumber(),
+        to: transaction.to !== undefined ? transaction.to : '',
+        value: anyNumberToBN(transaction.value).toNumber(),
+        data: transaction.data ? transaction.data : '',
+        chainId: network?.evmChainId || 1
+      };
+
+      const data: Input = [
+        txObject.nonce,
+        txObject.gasPrice,
+        txObject.gasLimit,
+        txObject.to,
+        txObject.value,
+        txObject.data,
+        txObject.chainId,
+        new Uint8Array([0x00]),
+        new Uint8Array([0x00])
+      ];
+
+      const encoded = RLP.encode(data);
+
       const requestPayload: EvmSendTransactionRequestQr = {
         ...transaction,
-        gasPrice: transaction.gasPrice ? transaction.gasPrice : transaction.maxFeePerGas,
         estimateGas,
-        nonce
+        qrPayload: u8aToHex(encoded),
+        canSign: true
       };
 
       return this.addConfirmation(id, url, 'evmSendTransactionRequestQr', requestPayload, { requiredPassword: false, address: fromAddress, networkKey })
         .then(async ({ isApproved, signature }) => {
           if (isApproved) {
-            const txObject: Web3Transaction = {
-              nonce: nonce,
-              from: fromAddress,
-              gasPrice: anyNumberToBN(requestPayload.gasPrice).toNumber(),
-              gasLimit: anyNumberToBN(requestPayload.gas).toNumber(),
-              to: requestPayload.to !== undefined ? requestPayload.to : '',
-              value: anyNumberToBN(requestPayload.value).toNumber(),
-              data: requestPayload.data ? requestPayload.data : '',
-              chainId: network?.evmChainId || 1
-            };
             let transactionHash = '';
 
             const signed = parseTxAndSignature(txObject, signature);
@@ -2152,6 +2209,8 @@ export default class KoniState extends State {
         _completeConfirmation(type, result as ConfirmationDefinitions['switchNetworkRequest'][1]);
       } else if (type === 'evmSignatureRequest') {
         _completeConfirmation(type, result as ConfirmationDefinitions['evmSignatureRequest'][1]);
+      } else if (type === 'evmSignatureRequestQr') {
+        _completeConfirmation(type, result as ConfirmationDefinitions['evmSignatureRequestQr'][1]);
       } else if (type === 'evmSendTransactionRequest') {
         _completeConfirmation(type, result as ConfirmationDefinitions['evmSendTransactionRequest'][1]);
       } else if (type === 'evmSendTransactionRequestQr') {

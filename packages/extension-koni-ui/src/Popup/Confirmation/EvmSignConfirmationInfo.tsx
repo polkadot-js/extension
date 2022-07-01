@@ -56,9 +56,9 @@ function EvmSignConfirmationInfo ({ className, confirmation: { payload } }: Prop
 export default styled(EvmSignConfirmationInfo)(({ theme }: Props) => `
   .signature-wrapper {
     position: relative;
-    width: 100%;  
+    width: 100%;
   }
-  
+
   .label {
     font-weight: bold;
     padding-right: 8px;
@@ -66,12 +66,13 @@ export default styled(EvmSignConfirmationInfo)(({ theme }: Props) => `
   .warning-message {
     color: red;
   }
-  
+
   .pre-wrap {
     color: #7B8098;
     display: block;
     white-space: pre-wrap;
     width: 100%;
     overflow: auto;
+    word-break: break-word;
   }
 `);

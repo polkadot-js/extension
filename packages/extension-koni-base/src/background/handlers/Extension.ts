@@ -36,7 +36,7 @@ import { ChainType } from '@polkadot/types/interfaces';
 import { keyring } from '@polkadot/ui-keyring';
 import { accounts as accountsObservable } from '@polkadot/ui-keyring/observable/accounts';
 import { SingleAddress, SubjectInfo } from '@polkadot/ui-keyring/observable/types';
-import { assert, BN, hexToU8a, isHex, u8aToString } from '@polkadot/util';
+import { assert, BN, hexToU8a, isAscii, isHex, u8aToString } from '@polkadot/util';
 import { base64Decode, isEthereumAddress, jsonDecrypt, keyExtractSuri, mnemonicGenerate, mnemonicValidate } from '@polkadot/util-crypto';
 import { EncryptedJson, KeypairType, Prefix } from '@polkadot/util-crypto/types';
 
@@ -2962,7 +2962,15 @@ export default class KoniExtension extends Extension {
     const web3 = initWeb3Api(getCurrentProvider(network));
 
     if (type === 'message') {
-      signed = web3.eth.accounts.sign(message, parsedPrivateKey);
+      let data = message;
+
+      if (isHex(message)) {
+        data = message;
+      } else if (isAscii(message)) {
+        data = `0x${message}`;
+      }
+
+      signed = web3.eth.accounts.sign(data, parsedPrivateKey);
     } else {
       const tx: QrTransaction | null = createTransactionFromRLP(message);
 

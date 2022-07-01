@@ -958,16 +958,23 @@ export interface EvmSendTransactionRequest extends TransactionConfig {
   estimateGas: string;
 }
 
-export interface EvmSendTransactionRequestQr extends TransactionConfig {
-  estimateGas: string;
-  nonce: number;
+export interface EvmRequestQr {
+  qrPayload: string;
+  canSign: boolean;
 }
+
+export interface EvmSendTransactionRequestQr extends TransactionConfig, EvmRequestQr {
+  estimateGas: string;
+}
+
+export interface EvmSignatureRequestQr extends EvmSignatureRequest, EvmRequestQr {}
 
 export interface ConfirmationDefinitions {
   addNetworkRequest: [ConfirmationsQueueItem<NetworkJson>, ConfirmationResult<NetworkJson>],
   addTokenRequest: [ConfirmationsQueueItem<CustomEvmToken>, ConfirmationResult<boolean>],
   switchNetworkRequest: [ConfirmationsQueueItem<SwitchNetworkRequest>, ConfirmationResult<boolean>],
   evmSignatureRequest: [ConfirmationsQueueItem<EvmSignatureRequest>, ConfirmationResult<string>],
+  evmSignatureRequestQr: [ConfirmationsQueueItem<EvmSignatureRequestQr>, ConfirmationResultQr<string>],
   evmSendTransactionRequest: [ConfirmationsQueueItem<EvmSendTransactionRequest>, ConfirmationResult<boolean>]
   evmSendTransactionRequestQr: [ConfirmationsQueueItem<EvmSendTransactionRequestQr>, ConfirmationResultQr<boolean>]
 }

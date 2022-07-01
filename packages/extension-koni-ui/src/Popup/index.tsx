@@ -123,6 +123,7 @@ export default function Popup (): React.ReactElement {
     addTokenRequest: {},
     switchNetworkRequest: {},
     evmSignatureRequest: {},
+    evmSignatureRequestQr: {},
     evmSendTransactionRequest: {},
     evmSendTransactionRequestQr: {}
   });

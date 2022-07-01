@@ -304,11 +304,9 @@ export function ScannerContextProvider ({ children }: ScannerContextProviderProp
       dataToSign = signRequest.data.data;
       message = dataToSign;
     } else {
+      dataToSign = signRequest.data.data;
       message = signRequest.data.data;
       isEthereum = true;
-
-      /// need check
-      // dataToSign = ethSign(message);
     }
 
     const sender = getAccountByAddress(networkMap, address, genesisHash);
@@ -374,6 +372,8 @@ export function ScannerContextProvider ({ children }: ScannerContextProviderProp
       if (isU8a(dataToSign)) {
         signable = u8aToHex(dataToSign);
       } else if (isHex(dataToSign)) {
+        signable = dataToSign;
+      } else if (isAscii(dataToSign)) {
         signable = dataToSign;
       } else {
         throw new Error('Signing Error: cannot signing message');

@@ -48,8 +48,8 @@ const TransactionDetail = (props: Props) => {
 
     if (isString(data)) {
       return (
-        <div className={'raw-method'}>
-          {data.length > 2 ? data : ''}
+        <div className={CN('raw-method', { hidden: data.length <= 2 })}>
+          {data}
         </div>
       );
     }
@@ -190,6 +190,12 @@ const TransactionDetail = (props: Props) => {
 export default React.memo(styled(TransactionDetail)(({ theme }: Props) => `
   max-height: 240px;
   overflow-y: auto;
+
+  .raw-method {
+    &.hidden {
+      opacity: 0;
+    }
+  }
 
   .info-container{
 

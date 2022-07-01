@@ -26,6 +26,8 @@ interface Props extends ThemeProps {
   className?: string;
 }
 
+const SettingPath = '/account/settings';
+
 function Settings ({ className }: Props): React.ReactElement {
   const { t } = useTranslation();
   const [camera, setCamera] = useState(settings.camera === 'on');
@@ -41,7 +43,12 @@ function Settings ({ className }: Props): React.ReactElement {
 
   const onChangeCameraAccess = useCallback(() => {
     setCamera(!camera);
-  }, [camera]);
+
+    if (!camera && isPopup) {
+      window.localStorage.setItem('popupNavigation', SettingPath);
+      windowOpen(SettingPath).catch(console.error);
+    }
+  }, [camera, isPopup]);
 
   return (
     <div className={className}>

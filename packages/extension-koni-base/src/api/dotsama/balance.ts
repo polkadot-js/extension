@@ -121,7 +121,7 @@ async function subscribeGenshiroTokenBalance (addresses: string[], networkKey: s
     console.log('Get tokens balance of', networkKey, tokenList);
   }
 
-  const unsubList = await Promise.all(tokenList.map(async ({ decimals, symbol }) => {
+  const unsubList = tokenList.map(async ({ decimals, symbol }) => {
     try {
       const asset = networkKey === 'equilibrium_parachain' ? assetFromToken(symbol)[0] : assetFromToken(symbol);
       // Get Token Balance
@@ -147,14 +147,16 @@ async function subscribeGenshiroTokenBalance (addresses: string[], networkKey: s
       return unsub;
     } catch (err) {
       console.warn(err);
-    }
 
-    return undefined;
-  }));
+      return undefined;
+    }
+  });
 
   return () => {
-    unsubList.forEach((unsub) => {
-      unsub && unsub();
+    unsubList.forEach((subProm) => {
+      subProm.then((unsub) => {
+        unsub && unsub();
+      }).catch(console.error);
     });
   };
 }
@@ -324,16 +326,20 @@ async function subscribeWithAccountMulti (addresses: string[], networkKey: strin
 
   let unsub2: () => void;
 
-  if (['bifrost', 'acala', 'karura', 'acala_testnet'].includes(networkKey)) {
-    unsub2 = await subscribeTokensBalance(addresses, networkKey, networkAPI.api, mainCallback, subCallback);
-  } else if (['kintsugi', 'interlay', 'kintsugi_test'].includes(networkKey)) {
-    unsub2 = await subscribeTokensBalance(addresses, networkKey, networkAPI.api, mainCallback, subCallback, true);
-  } else if (['statemine'].indexOf(networkKey) > -1) {
-    unsub2 = await subscribeAssetsBalance(addresses, networkKey, networkAPI.api, subCallback);
-  } else if (['genshiro_testnet', 'genshiro', 'equilibrium_parachain'].includes(networkKey)) {
-    unsub2 = await subscribeGenshiroTokenBalance(addresses, networkKey, networkAPI.api, mainCallback, subCallback, true);
-  } else if (moonbeamBaseChains.includes(networkKey) || networkAPI.isEthereum) {
-    unsub2 = subscribeERC20Interval(addresses, networkKey, networkAPI.api, web3ApiMap, subCallback);
+  try {
+    if (['bifrost', 'acala', 'karura', 'acala_testnet'].includes(networkKey)) {
+      unsub2 = await subscribeTokensBalance(addresses, networkKey, networkAPI.api, mainCallback, subCallback);
+    } else if (['kintsugi', 'interlay', 'kintsugi_test'].includes(networkKey)) {
+      unsub2 = await subscribeTokensBalance(addresses, networkKey, networkAPI.api, mainCallback, subCallback, true);
+    } else if (['statemine'].indexOf(networkKey) > -1) {
+      unsub2 = await subscribeAssetsBalance(addresses, networkKey, networkAPI.api, subCallback);
+    } else if (['genshiro_testnet', 'genshiro', 'equilibrium_parachain'].includes(networkKey)) {
+      unsub2 = await subscribeGenshiroTokenBalance(addresses, networkKey, networkAPI.api, mainCallback, subCallback, true);
+    } else if (moonbeamBaseChains.includes(networkKey) || networkAPI.isEthereum) {
+      unsub2 = subscribeERC20Interval(addresses, networkKey, networkAPI.api, web3ApiMap, subCallback);
+    }
+  } catch (err) {
+    console.warn(err);
   }
 
   return () => {
@@ -382,10 +388,10 @@ export function subscribeEVMBalance (networkKey: string, api: ApiPromise, addres
   };
 }
 
-export async function subscribeBalance (addresses: string[], dotSamaAPIMap: Record<string, ApiProps>, web3ApiMap: Record<string, Web3>, callback: (networkKey: string, rs: BalanceItem) => void) {
+export function subscribeBalance (addresses: string[], dotSamaAPIMap: Record<string, ApiProps>, web3ApiMap: Record<string, Web3>, callback: (networkKey: string, rs: BalanceItem) => void) {
   const [substrateAddresses, evmAddresses] = categoryAddresses(addresses);
 
-  const unsubs = await Promise.all(Object.entries(dotSamaAPIMap).map(async ([networkKey, apiProps]) => {
+  const unsubList = Object.entries(dotSamaAPIMap).map(async ([networkKey, apiProps]) => {
     const networkAPI = await apiProps.isReady;
     const useAddresses = apiProps.isEthereum ? evmAddresses : substrateAddresses;
 
@@ -408,13 +414,16 @@ export async function subscribeBalance (addresses: string[], dotSamaAPIMap: Reco
       return undefined;
     }
 
-    const unsub = await subscribeWithAccountMulti(useAddresses, networkKey, networkAPI, web3ApiMap, callback);
-
-    return unsub;
-  }));
+    // eslint-disable-next-line @typescript-eslint/no-misused-promises
+    return subscribeWithAccountMulti(useAddresses, networkKey, networkAPI, web3ApiMap, callback);
+  });
 
   return () => {
-    unsubs.forEach((unsub) => unsub && unsub());
+    unsubList.forEach((subProm) => {
+      subProm.then((unsub) => {
+        unsub && unsub();
+      }).catch(console.error);
+    });
   };
 }
 

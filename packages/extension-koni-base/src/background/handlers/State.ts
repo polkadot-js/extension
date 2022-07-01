@@ -594,7 +594,9 @@ export default class KoniState extends State {
 
     const oldItem = this.stakingMap[networkKey];
 
-    return oldItem?.balance !== item?.balance || !oldItem || oldItem?.state === APIItemState.PENDING;
+    return !oldItem || oldItem.state === APIItemState.PENDING ||
+      oldItem.balance !== item.balance || oldItem.activeBalance !== item.activeBalance ||
+      oldItem.unlockingBalance !== item.unlockingBalance;
   }
 
   public setStakingItem (networkKey: string, item: StakingItem): void {

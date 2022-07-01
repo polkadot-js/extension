@@ -11,8 +11,8 @@ import axios from 'axios';
 import { DeriveOwnContributions } from '@polkadot/api-derive/types';
 import { BN } from '@polkadot/util';
 
-async function getRPCCrowdloan (parentAPI: ApiProps, paraId: number, hexAddresses: string[], callback: (rs: CrowdloanItem) => void) {
-  const unsub = await parentAPI.api.derive.crowdloan.ownContributions(paraId, hexAddresses, (result: DeriveOwnContributions) => {
+function getRPCCrowdloan (parentAPI: ApiProps, paraId: number, hexAddresses: string[], callback: (rs: CrowdloanItem) => void) {
+  const unsubPromise = parentAPI.api.derive.crowdloan.ownContributions(paraId, hexAddresses, (result: DeriveOwnContributions) => {
     let contribute = new BN(0);
 
     Object.values(result).forEach((item) => {
@@ -28,7 +28,11 @@ async function getRPCCrowdloan (parentAPI: ApiProps, paraId: number, hexAddresse
   });
 
   return () => {
-    unsub && unsub();
+    unsubPromise
+      .then((unsub) => {
+        unsub();
+      })
+      .catch(console.error);
   };
 }
 
@@ -82,27 +86,23 @@ export async function subscribeCrowdloan (addresses: string[], dotSamaAPIMap: Re
       return registry.createType('AccountId', address).toHex();
     });
 
-    await Promise.all(Object.entries(networks).map(async ([networkKey, networkInfo]) => {
-      try {
-        const crowdloanCb = (rs: CrowdloanItem) => {
-          callback(networkKey, rs);
-        };
+    Object.entries(networks).forEach(([networkKey, networkInfo]) => {
+      const crowdloanCb = (rs: CrowdloanItem) => {
+        callback(networkKey, rs);
+      };
 
-        if (networkInfo.paraId === undefined || addresses.length === 0) {
-          return;
-        }
-
-        if (networkKey === 'acala') {
-          unsubMap.acala = subscribeAcalaContributeInterval(substrateAddresses.map((address) => reformatAddress(address, networkInfo.ss58Format, networkInfo.isEthereum)), crowdloanCb);
-        } else if (networkInfo.groups.includes('POLKADOT_PARACHAIN')) {
-          unsubMap[networkKey] = await getRPCCrowdloan(polkadotAPI, networkInfo.paraId, hexAddresses, crowdloanCb);
-        } else if (networkInfo.groups.includes('KUSAMA_PARACHAIN')) {
-          unsubMap[networkKey] = await getRPCCrowdloan(kusamaAPI, networkInfo.paraId, hexAddresses, crowdloanCb);
-        }
-      } catch (err) {
-        console.warn(err);
+      if (networkInfo.paraId === undefined || addresses.length === 0) {
+        return;
       }
-    }));
+
+      if (networkKey === 'acala') {
+        unsubMap.acala = subscribeAcalaContributeInterval(substrateAddresses.map((address) => reformatAddress(address, networkInfo.ss58Format, networkInfo.isEthereum)), crowdloanCb);
+      } else if (networkInfo.groups.includes('POLKADOT_PARACHAIN')) {
+        unsubMap[networkKey] = getRPCCrowdloan(polkadotAPI, networkInfo.paraId, hexAddresses, crowdloanCb);
+      } else if (networkInfo.groups.includes('KUSAMA_PARACHAIN')) {
+        unsubMap[networkKey] = getRPCCrowdloan(kusamaAPI, networkInfo.paraId, hexAddresses, crowdloanCb);
+      }
+    });
   }
 
   return () => {

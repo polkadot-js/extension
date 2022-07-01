@@ -67,10 +67,8 @@ export class KoniSubscription {
       if (currentAccountInfo) {
         const { address } = currentAccountInfo;
 
-        !(this.subscriptionMap.balance && this.subscriptionMap.crowdloan) &&
-          this.subscribeBalancesAndCrowdloans(address, state.getDotSamaApiMap(), state.getWeb3ApiMap());
-        !this.subscriptionMap.stakingOnChain &&
-          this.subscribeStakingOnChain(address, state.getDotSamaApiMap());
+        this.subscribeBalancesAndCrowdloans(address, state.getDotSamaApiMap(), state.getWeb3ApiMap());
+        this.subscribeStakingOnChain(address, state.getDotSamaApiMap());
       }
     });
 
@@ -146,38 +144,28 @@ export class KoniSubscription {
   }
 
   subscribeBalancesAndCrowdloans (address: string, dotSamaApiMap: Record<string, ApiProps>, web3ApiMap: Record<string, Web3>, onlyRunOnFirstTime?: boolean) {
-    state.switchAccount(address).catch((err) => console.warn(err));
-    this.detectAddresses(address)
-      .then(async (addresses) => {
-        const [unsubBalances, unsubCrowdloans] = await Promise.all([
-          this.initBalanceSubscription(addresses, dotSamaApiMap, web3ApiMap, onlyRunOnFirstTime),
-          this.initCrowdloanSubscription(addresses, dotSamaApiMap, onlyRunOnFirstTime)
-        ]);
-
-        this.updateSubscription('balance', unsubBalances);
-        this.updateSubscription('crowdloan', unsubCrowdloans);
-      })
-      .catch(console.error);
-  }
-
-  subscribeStakingOnChain (address: string, dotSamaApiMap: Record<string, ApiProps>, onlyRunOnFirstTime?: boolean) {
-    state.resetStakingMap(address).then(() => {
+    state.switchAccount(address).then(() => {
       this.detectAddresses(address)
-        .then(async (addresses) => {
-          const unsubStakingOnChain = await this.initStakingOnChainSubscription(addresses, dotSamaApiMap, onlyRunOnFirstTime);
-
-          this.updateSubscription('stakingOnChain', unsubStakingOnChain);
+        .then((addresses) => {
+          this.updateSubscription('balance', this.initBalanceSubscription(addresses, dotSamaApiMap, web3ApiMap, onlyRunOnFirstTime));
+          this.updateSubscription('crowdloan', this.initCrowdloanSubscription(addresses, dotSamaApiMap, onlyRunOnFirstTime));
         })
         .catch(console.error);
     }).catch((err) => console.warn(err));
   }
 
-  async initStakingOnChainSubscription (addresses: string[], dotSamaApiMap: Record<string, ApiProps>, onlyRunOnFirstTime?: boolean) {
-    state.setStakingReward({
-      ready: false,
-      details: []
-    } as StakingRewardJson);
-    const unsub = await stakingOnChainApi(addresses, dotSamaApiMap, (networkKey, rs) => {
+  subscribeStakingOnChain (address: string, dotSamaApiMap: Record<string, ApiProps>, onlyRunOnFirstTime?: boolean) {
+    state.resetStakingMap(address).then(() => {
+      this.detectAddresses(address)
+        .then((addresses) => {
+          this.updateSubscription('stakingOnChain', this.initStakingOnChainSubscription(addresses, dotSamaApiMap, onlyRunOnFirstTime));
+        })
+        .catch(console.error);
+    }).catch((err) => console.warn(err));
+  }
+
+  initStakingOnChainSubscription (addresses: string[], dotSamaApiMap: Record<string, ApiProps>, onlyRunOnFirstTime?: boolean) {
+    const unsub = stakingOnChainApi(addresses, dotSamaApiMap, (networkKey, rs) => {
       state.setStakingItem(networkKey, rs);
     }, state.getNetworkMap());
 
@@ -192,8 +180,8 @@ export class KoniSubscription {
     };
   }
 
-  async initBalanceSubscription (addresses: string[], dotSamaApiMap: Record<string, ApiProps>, web3ApiMap: Record<string, Web3>, onlyRunOnFirstTime?: boolean) {
-    const unsub = await subscribeBalance(addresses, dotSamaApiMap, web3ApiMap, (networkKey, rs) => {
+  initBalanceSubscription (addresses: string[], dotSamaApiMap: Record<string, ApiProps>, web3ApiMap: Record<string, Web3>, onlyRunOnFirstTime?: boolean) {
+    const unsub = subscribeBalance(addresses, dotSamaApiMap, web3ApiMap, (networkKey, rs) => {
       state.setBalanceItem(networkKey, rs);
     });
 
@@ -208,19 +196,19 @@ export class KoniSubscription {
     };
   }
 
-  async initCrowdloanSubscription (addresses: string[], dotSamaApiMap: Record<string, ApiProps>, onlyRunOnFirstTime?: boolean) {
-    const unsub = await subscribeCrowdloan(addresses, dotSamaApiMap, (networkKey, rs) => {
+  initCrowdloanSubscription (addresses: string[], dotSamaApiMap: Record<string, ApiProps>, onlyRunOnFirstTime?: boolean) {
+    const subscriptionPromise = subscribeCrowdloan(addresses, dotSamaApiMap, (networkKey, rs) => {
       state.setCrowdloanItem(networkKey, rs);
     });
 
     if (onlyRunOnFirstTime) {
-      unsub && unsub();
+      subscriptionPromise.then((unsub) => unsub()).catch(console.warn);
 
       return;
     }
 
     return () => {
-      unsub && unsub();
+      subscriptionPromise.then((unsub) => unsub()).catch(console.warn);
     };
   }
 

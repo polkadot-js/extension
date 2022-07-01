@@ -42,7 +42,7 @@ function parseStakingBalance (balance: number, chain: string, network: Record<st
   return toUnit(balance, network[chain].decimals as number);
 }
 
-export async function stakingOnChainApi (addresses: string[], dotSamaAPIMap: Record<string, ApiProps>, callback: (networkKey: string, rs: StakingItem) => void, networks: Record<string, NetworkJson> = DEFAULT_STAKING_NETWORKS) {
+export function stakingOnChainApi (addresses: string[], dotSamaAPIMap: Record<string, ApiProps>, callback: (networkKey: string, rs: StakingItem) => void, networks: Record<string, NetworkJson> = DEFAULT_STAKING_NETWORKS) {
   const allApiPromise: PromiseMapping[] = [];
   const [substrateAddresses, evmAddresses] = categoryAddresses(addresses);
 
@@ -52,7 +52,7 @@ export async function stakingOnChainApi (addresses: string[], dotSamaAPIMap: Rec
     }
   });
 
-  const unsubs = await Promise.all(allApiPromise.map(async ({ api: apiPromise, chain }) => {
+  const unsubList = allApiPromise.map(async ({ api: apiPromise, chain }) => {
     const parentApi = await apiPromise.isReady;
     const useAddresses = apiPromise.isEthereum ? evmAddresses : substrateAddresses;
 
@@ -65,10 +65,14 @@ export async function stakingOnChainApi (addresses: string[], dotSamaAPIMap: Rec
     }
 
     return getRelayStakingOnChain(parentApi, useAddresses, networks, chain, callback);
-  }));
+  });
 
   return () => {
-    unsubs.forEach((unsub) => unsub && unsub());
+    unsubList.forEach((subProm) => {
+      subProm.then((unsub) => {
+        unsub && unsub();
+      }).catch(console.error);
+    });
   };
 }
 

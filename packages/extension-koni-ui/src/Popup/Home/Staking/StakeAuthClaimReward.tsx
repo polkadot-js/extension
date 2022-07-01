@@ -36,8 +36,6 @@ function StakeAuthClaimReward ({ address, className, delegation, hideModal, netw
   const [isTxReady, setIsTxReady] = useState(false);
   const [targetValidator, setTargetValidator] = useState(delegation ? delegation[0].owner : '');
 
-  console.log(delegation, targetValidator);
-
   const [balanceError, setBalanceError] = useState(false);
   const [fee, setFee] = useState('');
 
@@ -62,8 +60,7 @@ function StakeAuthClaimReward ({ address, className, delegation, hideModal, netw
         setFee(resp.fee);
       })
       .catch(console.error);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [address, networkKey, targetValidator]);
 
   const _onChangePass = useCallback((value: string) => {
     setPassword(value);

@@ -1,6 +1,7 @@
 // Copyright 2019-2022 @subwallet/extension-koni authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
+import { DelegationItem } from '@subwallet/extension-base/background/KoniTypes';
 import { InputWithLabel } from '@subwallet/extension-koni-ui/components';
 import Button from '@subwallet/extension-koni-ui/components/Button';
 import InputAddress from '@subwallet/extension-koni-ui/components/InputAddress';
@@ -10,6 +11,7 @@ import useGetNetworkJson from '@subwallet/extension-koni-ui/hooks/screen/home/us
 import useToast from '@subwallet/extension-koni-ui/hooks/useToast';
 import useTranslation from '@subwallet/extension-koni-ui/hooks/useTranslation';
 import { getStakeClaimRewardTxInfo, submitStakeClaimReward } from '@subwallet/extension-koni-ui/messaging';
+import ValidatorsDropdown from '@subwallet/extension-koni-ui/Popup/Bonding/components/ValidatorsDropdown';
 import StakeClaimRewardResult from '@subwallet/extension-koni-ui/Popup/Home/Staking/StakeClaimRewardResult';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import React, { useCallback, useEffect, useState } from 'react';
@@ -20,9 +22,10 @@ interface Props extends ThemeProps {
   hideModal: () => void;
   address: string;
   networkKey: string;
+  delegation?: DelegationItem[];
 }
 
-function StakeAuthClaimReward ({ address, className, hideModal, networkKey }: Props): React.ReactElement<Props> {
+function StakeAuthClaimReward ({ address, className, delegation, hideModal, networkKey }: Props): React.ReactElement<Props> {
   const networkJson = useGetNetworkJson(networkKey);
   const { t } = useTranslation();
   const { show } = useToast();
@@ -40,6 +43,10 @@ function StakeAuthClaimReward ({ address, className, hideModal, networkKey }: Pr
   const [isTxSuccess, setIsTxSuccess] = useState(false);
   const [txError, setTxError] = useState('');
   const [showResult, setShowResult] = useState(false);
+
+  const handleSelectValidator = useCallback((val: string) => {
+    setTargetValidator(val);
+  }, []);
 
   useEffect(() => {
     getStakeClaimRewardTxInfo({
@@ -157,6 +164,13 @@ function StakeAuthClaimReward ({ address, className, hideModal, networkKey }: Pr
                       type='allPlus'
                       withEllipsis
                     />
+
+                    {
+                      delegation && <ValidatorsDropdown
+                        delegations={delegation}
+                        handleSelectValidator={handleSelectValidator}
+                      />
+                    }
 
                     <div className={'transaction-info-container'}>
                       {/* <div className={'transaction-info-row'}> */}

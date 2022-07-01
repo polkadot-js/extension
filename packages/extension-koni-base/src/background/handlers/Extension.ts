@@ -2307,7 +2307,7 @@ export default class KoniExtension extends Extension {
   }
 
   private async getStakeClaimRewardTxInfo ({ address, networkKey, validatorAddress }: StakeClaimRewardParams): Promise<BasicTxInfo> {
-    return await getClaimRewardTxInfo(address, validatorAddress, networkKey, state.getDotSamaApiMap(), state.getWeb3ApiMap());
+    return await getClaimRewardTxInfo(address, networkKey, state.getDotSamaApiMap(), state.getWeb3ApiMap(), validatorAddress);
   }
 
   private async submitStakeClaimReward (id: string, port: chrome.runtime.Port, { address, networkKey, password, validatorAddress }: StakeClaimRewardParams): Promise<BasicTxResponse> {
@@ -2321,7 +2321,7 @@ export default class KoniExtension extends Extension {
 
     const callback = createSubscription<'pri(unbonding.submitWithdrawal)'>(id, port);
     const dotSamaApi = state.getDotSamaApi(networkKey);
-    const extrinsic = await getClaimRewardExtrinsic(dotSamaApi, validatorAddress, networkKey);
+    const extrinsic = await getClaimRewardExtrinsic(dotSamaApi, networkKey, validatorAddress);
     const passwordError: string | null = unlockAccount(address, password);
 
     if (extrinsic !== null && passwordError === null) {

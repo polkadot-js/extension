@@ -282,7 +282,7 @@ export async function getAstarWithdrawalExtrinsic (dotSamaApi: ApiProps) {
 export async function getAstarClaimRewardTxInfo (dotSamaApi: ApiProps, address: string, dappAddress: string) {
   const apiPromise = await dotSamaApi.isReady;
 
-  const extrinsic = apiPromise.api.tx.dappsStaking.claimStaker(dappAddress);
+  const extrinsic = apiPromise.api.tx.dappsStaking.claimStaker({ Evm: dappAddress });
 
   return extrinsic.paymentInfo(address);
 }
@@ -306,5 +306,5 @@ export async function handleAstarClaimRewardTxInfo (address: string, dappAddress
 export async function getAstarClaimRewardExtrinsic (dotSamaApi: ApiProps, dappAddress: string) {
   const apiPromise = await dotSamaApi.isReady;
 
-  return apiPromise.api.tx.dappsStaking.claimStaker(dappAddress);
+  return apiPromise.api.tx.dappsStaking.claimStaker({ Evm: dappAddress });
 }

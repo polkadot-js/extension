@@ -981,7 +981,7 @@ export interface StakeWithdrawalParams {
 export interface StakeClaimRewardParams {
   address: string,
   networkKey: string,
-  validatorAddress: string,
+  validatorAddress?: string,
   password?: string
 }
 

@@ -1428,7 +1428,7 @@ export const PREDEFINED_NETWORKS: Record<string, NetworkJson> = {
     decimals: 12
   },
   imbue_network: {
-    key: '  imbue_network',
+    key: 'imbue_network',
     chain: 'Imbue Kusama',
     genesisHash: '0xca93a37c913a25fa8fdb33c7f738afc39379cb71d37874a16d4c091a5aef9f89',
     ss58Format: 42,

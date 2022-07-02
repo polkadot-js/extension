@@ -1,5 +1,16 @@
 # CHANGELOG
 
+## 0.4.9 (Koni)
+Build date: Jul 02, 2022.
+
+Update:
+- Add new network, update endpoint: Tinkernet, Imbue, HydraDX,...(#387)
+
+Bug fixes:
+- Fix bug report by Moonbeam team (#392)
+- Fix bug can not scan QR (#394)
+- Fix some errors related to Network Settings (#408)
+
 ## 0.4.8 (Koni)
 Build date: Jun 25, 2022.
 

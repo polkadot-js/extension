@@ -1,5 +1,15 @@
 # CHANGELOG
 
+## 0.4.8 (Koni)
+Build date: Jun 25, 2022.
+
+Update:
+- Update new way to interaction with chainId and accounts in EVM Provider (#357)
+
+Bug fixes:
+- Fix miscalculation of unstaking time (#382)
+- Fix bug not show transaction after transfer from astar app via EVM Provider
+
 ## 0.4.7 (Koni)
 Build date: Jun 24, 2022.
 

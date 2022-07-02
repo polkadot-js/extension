@@ -155,7 +155,7 @@ export const PREDEFINED_NETWORKS: Record<string, NetworkJson> = {
     nativeToken: 'GLMR',
     crowdloanUrl: 'https://moonbeam.foundation/moonbeam-crowdloan/',
     decimals: 18,
-    coinGeckoKey: 'Moonbeam Foundation',
+    coinGeckoKey: 'moonbeam',
     evmChainId: 1284
   },
   astar: {
@@ -257,18 +257,17 @@ export const PREDEFINED_NETWORKS: Record<string, NetworkJson> = {
     genesisHash: '0xafdc188f45c71dacbaa0b62e16a91f726c7b8699a9748cdf715459de6b7f366d',
     ss58Format: 63,
     providers: {
-      'Galactic Council': 'wss://rpc-01.hydradx.io'
+      'Galactic Council': 'wss://rpc-01.hydradx.io',
+      Dwellir: 'wss://hydradx-rpc.dwellir.com'
     },
     active: false,
     currentProviderMode: 'ws',
-    currentProvider: 'Galactic Council',
+    currentProvider: 'Dwellir',
     groups: ['POLKADOT_PARACHAIN'],
     paraId: 2034,
     nativeToken: 'HDX',
     crowdloanUrl: 'https://loan.hydradx.io/',
-    decimals: 12,
-    supportBonding: true,
-    getStakingOnChain: true
+    decimals: 12
   },
   edgeware: {
     key: 'edgeware',
@@ -847,7 +846,7 @@ export const PREDEFINED_NETWORKS: Record<string, NetworkJson> = {
     active: false,
     currentProviderMode: 'ws',
     currentProvider: 'Liebi',
-    groups: ['KUSAMA_PARACHAIN'],
+    groups: ['POLKADOT_PARACHAIN'],
     paraId: 2030,
     nativeToken: 'BNC',
     crowdloanUrl: 'https://bifrost.app/vcrowdloan',

@@ -116,7 +116,7 @@ export const getBalances = ({ balance,
   decimals,
   price,
   symbol }: BalanceType): BalanceValueType => {
-  const stable = symbol.toLowerCase().includes('usd') ? 1 : 0;
+  const stable = price !== undefined ? price : (symbol.toLowerCase().includes('usd') ? 1 : 0);
 
   const balanceValue = getBalanceWithDecimals({ balance, decimals });
 
@@ -141,6 +141,7 @@ function getTokenPrice (tokenPriceMap: Record<string, number>, token: string): n
 
 export const parseBalancesInfo = (priceMap: Record<string, number>, tokenPriceMap: Record<string, number>, balanceInfo: AccountInfoItem, tokenMap: Record<string, TokenInfo>, networkJson: NetworkJson): BalanceInfo => {
   const { balanceItem, networkKey, tokenDecimals, tokenSymbols } = balanceInfo;
+  const ignoreTestnetPrice = networkJson.groups.includes('TEST_NET');
 
   const decimals = tokenDecimals && !isEmptyArray(tokenDecimals) ? tokenDecimals[0] : 0;
   const symbol = tokenSymbols && !isEmptyArray(tokenSymbols) ? tokenSymbols[0] : '';
@@ -165,7 +166,7 @@ export const parseBalancesInfo = (priceMap: Record<string, number>, tokenPriceMa
       balance: value,
       decimals,
       symbol,
-      price: priceMap[networkJson.coinGeckoKey || networkKey]
+      price: ignoreTestnetPrice ? 0 : priceMap[networkJson.coinGeckoKey || networkKey]
     });
 
     if (['free', 'reserved', 'locked'].includes(key)) {
@@ -189,11 +190,18 @@ export const parseBalancesInfo = (priceMap: Record<string, number>, tokenPriceMa
       const item = balanceChildren[token];
       const _token: string = tokenMap[token]?.symbolAlt || token;
 
+      let priceSymbol = token;
+
+      // Apply special case for xcToken of Moonbeam and Moonriver
+      if (['moonbeam', 'moonriver'].includes(networkKey) && token.toLowerCase().startsWith('xc')) {
+        priceSymbol = token.toLowerCase().replace('xc', '');
+      }
+
       const { balanceValue, convertedBalanceValue } = getBalances({
         balance: item.free,
         decimals: item.decimals,
         symbol: _token,
-        price: getTokenPrice(tokenPriceMap, token)
+        price: ignoreTestnetPrice ? 0 : getTokenPrice(tokenPriceMap, priceSymbol)
       });
 
       childrenBalances.push({

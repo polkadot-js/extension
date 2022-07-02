@@ -254,7 +254,7 @@ export const PREDEFINED_NETWORKS: Record<string, NetworkJson> = {
   hydradx_main: {
     key: 'hydradx_main',
     chain: 'HydraDX',
-    genesisHash: '0xd2a620c27ec5cbc5621ff9a522689895074f7cca0d08e7134a7804e1a3ba86fc',
+    genesisHash: '0xafdc188f45c71dacbaa0b62e16a91f726c7b8699a9748cdf715459de6b7f366d',
     ss58Format: 63,
     providers: {
       'Galactic Council': 'wss://rpc-01.hydradx.io',

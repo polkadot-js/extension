@@ -33,9 +33,9 @@
     "watch": "cd packages/extension && yarn polkadot-exec-webpack --config webpack.watch.cjs --mode development --watch"
   },
   "devDependencies": {
-    "@babel/core": "^7.18.5",
+    "@babel/core": "^7.18.6",
     "@polkadot/dev": "^0.67.46",
-    "@types/jest": "^28.1.2",
+    "@types/jest": "^28.1.4",
     "i18next-scanner": "^3.3.0",
     "sinon-chrome": "^3.0.1"
   },

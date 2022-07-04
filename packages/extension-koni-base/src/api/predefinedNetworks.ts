@@ -486,7 +486,6 @@ export const PREDEFINED_NETWORKS: Record<string, NetworkJson> = {
     currentProvider: 'Polkadex Team',
     groups: ['TEST_NET'],
     nativeToken: 'Unit',
-    coinGeckoKey: 'polkadex',
     crowdloanUrl: 'https://www.polkadex.trade/crowdloans',
     decimals: 12,
     getStakingOnChain: true,

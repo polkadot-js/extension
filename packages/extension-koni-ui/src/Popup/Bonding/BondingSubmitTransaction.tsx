@@ -376,14 +376,23 @@ function BondingSubmitTransaction ({ className }: Props): React.ReactElement<Pro
             onClick={handleOnClick}
           >
             <div className={'validator-header'}>
-              <Identicon
-                className='identityIcon'
-                genesisHash={networkJson.genesisHash}
-                iconTheme={isEthereumAddress(validatorInfo.address) ? 'ethereum' : 'substrate'}
-                prefix={networkJson.ss58Format}
-                size={20}
-                value={validatorInfo.address}
-              />
+              {
+                validatorInfo.icon
+                  ? <img
+                    className='imgIcon'
+                    height={28}
+                    src={validatorInfo.icon}
+                    width={28}
+                  />
+                  : <Identicon
+                    className='identityIcon'
+                    genesisHash={networkJson.genesisHash}
+                    iconTheme={isEthereumAddress(validatorInfo.address) ? 'ethereum' : 'substrate'}
+                    prefix={networkJson.ss58Format}
+                    size={20}
+                    value={validatorInfo.address}
+                  />
+              }
 
               <div
                 data-for={`identity-tooltip-${validatorInfo.address}`}

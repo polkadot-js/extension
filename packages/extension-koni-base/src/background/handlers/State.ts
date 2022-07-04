@@ -1151,39 +1151,43 @@ export default class KoniState extends State {
   }
 
   public async resetBalanceMap (newAddress: string) {
-    this.balanceMap = {};
     const defaultData = this.generateDefaultBalanceMap();
     const storedData = await this.getStoredBalance(newAddress);
 
     const merge = { ...defaultData, ...storedData } as Record<string, BalanceItem>;
 
+    this.balanceMap = merge;
     this.publishBalance(merge);
   }
 
   public async resetCrowdloanMap (newAddress: string) {
-    this.crowdloanMap = {};
     const defaultData = generateDefaultCrowdloanMap();
     const storedData = await this.getStoredCrowdloan(newAddress);
 
     const merge = { ...defaultData, ...storedData } as Record<string, CrowdloanItem>;
 
+    this.crowdloanMap = merge;
     this.publishCrowdloan(merge);
   }
 
   public async resetStakingMap (newAddress: string) {
-    this.stakingMap = {};
     const defaultData = generateDefaultStakingMap();
     const storedData = await this.getStoredStaking(newAddress);
 
     const merge = { ...defaultData, ...storedData } as Record<string, StakingItem>;
 
+    this.stakingMap = merge;
     this.publishStaking(merge);
   }
 
   public setBalanceItem (networkKey: string, item: BalanceItem) {
+    if (Object.hasOwn(item, 'children') && item.children === undefined) {
+      delete item.children;
+    }
+
     const itemData = { timestamp: +new Date(), ...item };
 
-    this.balanceMap[networkKey] = itemData;
+    this.balanceMap[networkKey] = { ...this.balanceMap[networkKey], ...itemData };
 
     this.lazyNext('setBalanceItem', () => {
       this.updateBalanceStore();

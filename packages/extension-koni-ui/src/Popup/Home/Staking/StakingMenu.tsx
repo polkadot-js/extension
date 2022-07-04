@@ -4,6 +4,7 @@
 import { faMinus, faPlus } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { DelegationItem } from '@subwallet/extension-base/background/KoniTypes';
+import ArchiveTray from '@subwallet/extension-koni-ui/assets/ArchiveTray.svg';
 import ClockAfternoon from '@subwallet/extension-koni-ui/assets/ClockAfternoon.svg';
 import ClockAfternoonGreen from '@subwallet/extension-koni-ui/assets/ClockAfternoonGreen.svg';
 import DotsThree from '@subwallet/extension-koni-ui/assets/DotsThree.svg';
@@ -160,7 +161,7 @@ function StakingMenu ({ bondedAmount, className, delegations, networkKey, nextWi
                   data-for={`bonding-menu-tooltip-${networkKey}`}
                   data-tip={true}
                   height={18}
-                  src={ClockAfternoonGreen}
+                  src={ArchiveTray}
                   width={18}
                 />
                 Claim rewards

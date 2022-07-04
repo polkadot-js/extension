@@ -100,7 +100,6 @@ function Dropdown ({ allowAdd, className, handleCreate, label, onChange, options
               classNamePrefix='dropdown'
               isSearchable
               menuPlacement={'auto'}
-              menuPortalTarget={document.body}
               menuPosition='fixed'
               onChange={handleChange}
               options={transformOptions}
@@ -109,7 +108,6 @@ function Dropdown ({ allowAdd, className, handleCreate, label, onChange, options
               value={transformOptions.filter((obj: { value: string }) => obj.value === selectedValue)}
             />
         }
-
       </Label>
     </>
   );

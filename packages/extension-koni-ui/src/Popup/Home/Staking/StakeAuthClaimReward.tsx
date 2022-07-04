@@ -150,7 +150,7 @@ function StakeAuthClaimReward ({ address, className, delegation, hideModal, netw
             ? <div>
               {
                 isTxReady
-                  ? <div className={'withdrawal-auth-container'}>
+                  ? <div className={'claim-auth-container'}>
                     <InputAddress
                       autoPrefill={false}
                       className={'receive-input-address'}
@@ -166,14 +166,16 @@ function StakeAuthClaimReward ({ address, className, delegation, hideModal, netw
 
                     {
                       delegation && <ValidatorsDropdown
+                        className={'stake-claim-dropdown'}
                         delegations={delegation}
                         handleSelectValidator={handleSelectValidator}
+                        label={'Select a dApp'}
                       />
                     }
 
                     <div className={'transaction-info-container'}>
                       {/* <div className={'transaction-info-row'}> */}
-                      {/*  <div className={'transaction-info-title'}>Withdrawal amount</div> */}
+                      {/*  <div className={'transaction-info-title'}>claim amount</div> */}
                       {/*  <div className={'transaction-info-value'}>{amount} {networkJson.nativeToken}</div> */}
                       {/* </div> */}
                       <div className={'transaction-info-row'}>
@@ -187,7 +189,7 @@ function StakeAuthClaimReward ({ address, className, delegation, hideModal, netw
                       </div>
                     </div>
 
-                    <div className='withdrawal-auth__separator' />
+                    <div className='claim-auth__separator' />
 
                     <InputWithLabel
                       isError={passwordError !== null}
@@ -197,9 +199,9 @@ function StakeAuthClaimReward ({ address, className, delegation, hideModal, netw
                       value={password}
                     />
 
-                    <div className={'withdrawal-auth-btn-container'}>
+                    <div className={'claim-auth-btn-container'}>
                       <Button
-                        className={'withdrawal-auth-cancel-button'}
+                        className={'claim-auth-cancel-button'}
                         isDisabled={loading}
                         onClick={hideModal}
                       >
@@ -240,12 +242,12 @@ export default React.memo(styled(StakeAuthClaimReward)(({ theme }: Props) => `
     width: 65px;
   }
 
-  .withdrawal-auth-cancel-button {
+  .claim-auth-cancel-button {
     color: ${theme.textColor3};
     background: ${theme.buttonBackground1};
   }
 
-  .withdrawal-auth-btn-container {
+  .claim-auth-btn-container {
     margin-top: 20px;
     display: flex;
     justify-content: center;
@@ -253,12 +255,12 @@ export default React.memo(styled(StakeAuthClaimReward)(({ theme }: Props) => `
     gap: 20px;
   }
 
-  .withdrawal-auth__separator {
+  .claim-auth__separator {
     margin-top: 30px;
     margin-bottom: 18px;
   }
 
-  .withdrawal-auth__separator:before {
+  .claim-auth__separator:before {
     content: "";
     height: 1px;
     display: block;
@@ -297,7 +299,7 @@ export default React.memo(styled(StakeAuthClaimReward)(({ theme }: Props) => `
     margin-top: 5px;
   }
 
-  .withdrawal-auth-container {
+  .claim-auth-container {
     padding-left: 15px;
     padding-right: 15px;
   }

@@ -16,6 +16,7 @@ import React, { useCallback, useContext, useEffect, useState } from 'react';
 import InfiniteScroll from 'react-infinite-scroll-component';
 import { useSelector } from 'react-redux';
 import styled from 'styled-components';
+import {CHAIN_TYPE_MAP} from "@subwallet/extension-koni-ui/Popup/Bonding/utils";
 
 interface Props extends ThemeProps {
   className?: string;
@@ -157,6 +158,16 @@ function BondingValidatorSelection ({ className }: Props): React.ReactElement<Pr
     setSliceIndex(_sliceIndex + INFINITE_SCROLL_PER_PAGE);
   }, [filteredValidators, sliceIndex]);
 
+  const getSubHeaderTitle = useCallback(() => {
+    if (CHAIN_TYPE_MAP.astar.includes(bondingParams.selectedNetwork as string)) {
+      return 'Select a dApp';
+    } else if (CHAIN_TYPE_MAP.para.includes(bondingParams.selectedNetwork as string)) {
+      return 'Select a collator';
+    }
+
+    return 'Select a validator';
+  }, [bondingParams.selectedNetwork]);
+
   return (
     <div className={className}>
       <Header
@@ -165,7 +176,7 @@ function BondingValidatorSelection ({ className }: Props): React.ReactElement<Pr
         showBackArrow
         showCancelButton={true}
         showSubHeader
-        subHeaderName={t<string>('Select a validator')}
+        subHeaderName={t<string>(getSubHeaderTitle())}
         to='/account/select-bonding-network'
       >
         <div className={'bonding-input-filter-container'}>

@@ -16,6 +16,7 @@ import StakeClaimRewardResult from '@subwallet/extension-koni-ui/Popup/Home/Stak
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import React, { useCallback, useEffect, useState } from 'react';
 import styled from 'styled-components';
+import {CHAIN_TYPE_MAP} from "@subwallet/extension-koni-ui/Popup/Bonding/utils";
 
 interface Props extends ThemeProps {
   className?: string;
@@ -128,6 +129,16 @@ function StakeAuthClaimReward ({ address, className, delegation, hideModal, netw
     setShowResult(false);
   }, []);
 
+  const getDropdownTitle = useCallback(() => {
+    if (CHAIN_TYPE_MAP.astar.includes(networkKey)) {
+      return 'Select a dApp';
+    } else if (CHAIN_TYPE_MAP.para.includes(networkKey)) {
+      return 'Select a collator';
+    }
+
+    return 'Select a validator';
+  }, [networkKey]);
+
   return (
     <div className={className}>
       <Modal>
@@ -169,7 +180,7 @@ function StakeAuthClaimReward ({ address, className, delegation, hideModal, netw
                         className={'stake-claim-dropdown'}
                         delegations={delegation}
                         handleSelectValidator={handleSelectValidator}
-                        label={'Select a dApp'}
+                        label={getDropdownTitle()}
                       />
                     }
 

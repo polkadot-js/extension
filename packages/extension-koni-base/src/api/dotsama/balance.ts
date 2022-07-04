@@ -60,7 +60,6 @@ function subscribeWithDerive (addresses: string[], networkKey: string, networkAP
 function subscribeERC20Interval (addresses: string[], networkKey: string, api: ApiPromise, web3ApiMap: Record<string, Web3>, subCallback: (rs: Record<string, BalanceChildItem>) => void): () => void {
   let tokenList = {} as TokenInfo[];
   const ERC20ContractMap = {} as Record<string, Contract>;
-  const tokenBalanceMap = {} as Record<string, BalanceChildItem>;
 
   const getTokenBalances = () => {
     Object.values(tokenList).map(async ({ decimals, symbol }) => {
@@ -76,18 +75,18 @@ function subscribeERC20Interval (addresses: string[], networkKey: string, api: A
         free = sumBN(bals.map((bal) => new BN(bal || 0)));
         // console.log('TokenBals', symbol, addresses, bals, free);
 
-        tokenBalanceMap[symbol] = {
-          reserved: '0',
-          frozen: '0',
-          free: free.toString(),
-          decimals
-        };
+        subCallback({
+          [symbol]: {
+            reserved: '0',
+            frozen: '0',
+            free: free.toString(),
+            decimals
+          }
+        });
       } catch (err) {
         console.log('There is problem when fetching ' + symbol + ' token balance', err);
       }
     });
-
-    subCallback(tokenBalanceMap);
   };
 
   getRegistry(networkKey, api, state.getActiveErc20Tokens()).then(({ tokenMap }) => {

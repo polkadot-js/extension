@@ -15,6 +15,7 @@ import UnbondingAuthTransaction from '@subwallet/extension-koni-ui/Popup/Bonding
 import UnbondingResult from '@subwallet/extension-koni-ui/Popup/Bonding/components/UnbondingResult';
 // @ts-ignore
 import ValidatorsDropdown from '@subwallet/extension-koni-ui/Popup/Bonding/components/ValidatorsDropdown';
+import { CHAIN_TYPE_MAP } from '@subwallet/extension-koni-ui/Popup/Bonding/utils';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import React, { useCallback, useContext, useEffect, useState } from 'react';
@@ -187,6 +188,16 @@ function UnbondingSubmitTransaction ({ className }: Props): React.ReactElement<P
     }
   }, [bondedAmount, networkJson.decimals, nominatedAmount, unbondingParams.delegations]);
 
+  const getDropdownTitle = useCallback(() => {
+    if (CHAIN_TYPE_MAP.astar.includes(unbondingParams.selectedNetwork as string)) {
+      return 'Select a dApp';
+    } else if (CHAIN_TYPE_MAP.para.includes(unbondingParams.selectedNetwork as string)) {
+      return 'Select a collator';
+    }
+
+    return 'Select a validator';
+  }, [unbondingParams.selectedNetwork]);
+
   return (
     <div className={className}>
       <Header
@@ -216,6 +227,7 @@ function UnbondingSubmitTransaction ({ className }: Props): React.ReactElement<P
           unbondingParams.delegations && <ValidatorsDropdown
             delegations={unbondingParams.delegations}
             handleSelectValidator={handleSelectValidator}
+            label={getDropdownTitle()}
           />
         }
 

@@ -124,3 +124,9 @@ export const BOND_DURATION_OPTIONS: Record<string, any[]> = {
     { text: '12 months', value: '12' }
   ]
 };
+
+export const CHAIN_TYPE_MAP = {
+  relay: ['polkadot', 'kusama', 'aleph', 'alephTest', 'westend', 'hydradx', 'polkadex', 'polkadexTest'],
+  para: ['moonbeam', 'moonbase', 'moonriver', 'turing', 'turingStaging'],
+  astar: ['astar', 'shiden', 'shibuya']
+};

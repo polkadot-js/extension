@@ -3,6 +3,8 @@
 
 import { faMinus, faPlus } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { DelegationItem } from '@subwallet/extension-base/background/KoniTypes';
+import ArchiveTray from '@subwallet/extension-koni-ui/assets/ArchiveTray.svg';
 import ClockAfternoon from '@subwallet/extension-koni-ui/assets/ClockAfternoon.svg';
 import ClockAfternoonGreen from '@subwallet/extension-koni-ui/assets/ClockAfternoonGreen.svg';
 import DotsThree from '@subwallet/extension-koni-ui/assets/DotsThree.svg';
@@ -29,12 +31,21 @@ interface Props extends ThemeProps {
   nextWithdrawalAmount: number;
   unbondingStake: string | undefined;
   showWithdrawalModal: () => void;
+  showClaimRewardModal: () => void;
+  delegations: DelegationItem[] | undefined;
 }
 
-function StakingMenu ({ bondedAmount, className, networkKey, nextWithdrawal, nextWithdrawalAmount, redeemable, showMenu, showWithdrawalModal, toggleMenu, unbondingStake }: Props): React.ReactElement<Props> {
+const MANUAL_CLAIM_CHAINS = [
+  'astar',
+  'shibuya',
+  'shiden'
+];
+
+function StakingMenu ({ bondedAmount, className, delegations, networkKey, nextWithdrawal, nextWithdrawalAmount, redeemable, showClaimRewardModal, showMenu, showWithdrawalModal, toggleMenu, unbondingStake }: Props): React.ReactElement<Props> {
   const stakingMenuRef = useRef(null);
   const navigate = useContext(ActionContext);
   const networkJson = useGetNetworkJson(networkKey);
+  const showClaimButton = MANUAL_CLAIM_CHAINS.includes(networkKey);
 
   const handleClickBondingMenu = useCallback((e: MouseEvent) => {
     e.stopPropagation();
@@ -52,10 +63,10 @@ function StakingMenu ({ bondedAmount, className, networkKey, nextWithdrawal, nex
 
   const handleUnstake = useCallback(() => {
     if (parseFloat(bondedAmount) > 0) {
-      store.dispatch({ type: 'unbondingParams/update', payload: { selectedNetwork: networkKey, bondedAmount: parseFloat(bondedAmount) } as UnbondingParams });
+      store.dispatch({ type: 'unbondingParams/update', payload: { selectedNetwork: networkKey, bondedAmount: parseFloat(bondedAmount), delegations } as UnbondingParams });
       navigate('/account/unbonding-auth');
     }
-  }, [bondedAmount, navigate, networkKey]);
+  }, [bondedAmount, delegations, navigate, networkKey]);
 
   const getTooltipText = useCallback(() => {
     if (nextWithdrawalAmount === -1) {
@@ -75,6 +86,10 @@ function StakingMenu ({ bondedAmount, className, networkKey, nextWithdrawal, nex
     }
   }, [redeemable, showWithdrawalModal]);
 
+  const handleClickClaimReward = useCallback(() => {
+    showClaimRewardModal();
+  }, [showClaimRewardModal]);
+
   return (
     <div className={className}>
       <div
@@ -92,6 +107,7 @@ function StakingMenu ({ bondedAmount, className, networkKey, nextWithdrawal, nex
           showMenu && <Menu
             className={'bonding-menu'}
             reference={stakingMenuRef}
+            style={{ marginTop: showClaimButton ? '200px' : '160px' }}
           >
             <div
               className={'bonding-menu-item'}
@@ -135,6 +151,22 @@ function StakingMenu ({ bondedAmount, className, networkKey, nextWithdrawal, nex
                 />
               }
             </div>
+
+            {
+              showClaimButton && <div
+                className={'bonding-menu-item'}
+                onClick={handleClickClaimReward}
+              >
+                <img
+                  data-for={`bonding-menu-tooltip-${networkKey}`}
+                  data-tip={true}
+                  height={18}
+                  src={ArchiveTray}
+                  width={18}
+                />
+                Claim rewards
+              </div>
+            }
           </Menu>
         }
       </div>

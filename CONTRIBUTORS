@@ -1,11 +1,11 @@
-     488	Nam Phạm                      	fix bug showing incorrect withdrawal time
+     548	Nam Phạm                      	fix imbue networkJson and bug when coingeckoPrice is null
      465	Jaco                          	0.42.5 (#969)
-     306	AnhMTV                        	Release version 0.4.7
+     336	AnhMTV                        	Release version 0.4.9
      151	lw-cdm                        	Update logo for Moonbeans
      142	quangdo                       	update some label and variable (original to origin)
       82	Thibaut Sardan                	Add account filtering feature (#832)
-      62	lw-cdm                        	
-      55	Hieu Dao                      	
+      65	lw-cdm                        	
+      59	Hieu Dao                      	update hydradx genesisHash
       55	leewong                       	#118: update balance logic for Kintsugi testnet
       53	Dominhquangdev                	update Bridge code
       10	Trang Trịnh                   	api get karura and acala nfts
@@ -13,10 +13,10 @@
        9	minhld1029                    	[#115] [ForgetAccount] catch exception refList undefined
        7	Ivan Rukhavets                	Mention derivation in FAQ (#334)
        6	unknown                       	refactor code
+       5	S2kael                        	[Issue-145] fix wrong balance in test network
        4	Amaury Martiny                	PostMessageProvider with on('connected' | 'disconnected') (#279)
        4	namph                         	update UI for nft
        4	Quangdm-cdm                   	
-       4	S2kael                        	[Issue-156] [Account] [Text] Change text
        3	Antoine Estienne              	Add eth test for extension signature (#909)
        3	quangdm                       	Update style for Auth Transaction Screen, Export Screen, Derive Screen
        2	Axel Chalon                   	Add typings to messages (#130)

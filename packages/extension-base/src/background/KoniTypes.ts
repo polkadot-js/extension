@@ -993,8 +993,17 @@ export interface StakeWithdrawalParams {
   action?: string
 }
 
+export interface StakeClaimRewardParams {
+  address: string,
+  networkKey: string,
+  validatorAddress?: string,
+  password?: string
+}
+
 export interface KoniRequestSignatures {
-  'pri(unbonding.submitWithdrawal)': [StakeWithdrawalParams, BasicTxResponse, BasicTxResponse]
+  'pri(staking.submitClaimReward)': [StakeClaimRewardParams, BasicTxResponse, BasicTxResponse];
+  'pri(staking.claimRewardTxInfo)': [StakeClaimRewardParams, BasicTxInfo];
+  'pri(unbonding.submitWithdrawal)': [StakeWithdrawalParams, BasicTxResponse, BasicTxResponse];
   'pri(unbonding.withdrawalTxInfo)': [StakeWithdrawalParams, BasicTxInfo];
   'pri(unbonding.unlockingInfo)': [UnlockingStakeParams, UnlockingStakeInfo];
   'pri(unbonding.submitTransaction)': [UnbondingSubmitParams, BasicTxResponse, BasicTxResponse];

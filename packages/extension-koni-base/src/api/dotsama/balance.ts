@@ -461,9 +461,9 @@ export async function getFreeBalance (networkKey: string, address: string, dotSa
     }
   }
 
-  const balance = await api.query.system.account(address) as AccountInfo;
+  const balance = await api.derive.balances.all(address);
 
-  return balance.data?.free?.toString() || '0';
+  return balance.availableBalance?.toBn()?.toString() || '0';
 }
 
 export async function subscribeFreeBalance (

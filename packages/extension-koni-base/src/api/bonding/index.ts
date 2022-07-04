@@ -2,14 +2,14 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { ApiProps, NetworkJson, ValidatorInfo } from '@subwallet/extension-base/background/KoniTypes';
-import { getAstarBondingBasics, getAstarBondingExtrinsic, getAstarDappsInfo, getAstarUnbondingExtrinsic, getAstarWithdrawalExtrinsic, handleAstarBondingTxInfo, handleAstarUnbondingTxInfo, handleAstarUnlockingInfo, handleAstarWithdrawalTxInfo } from '@subwallet/extension-koni-base/api/bonding/astar';
+import { getAstarBondingBasics, getAstarBondingExtrinsic, getAstarClaimRewardExtrinsic, getAstarDappsInfo, getAstarUnbondingExtrinsic, getAstarWithdrawalExtrinsic, handleAstarBondingTxInfo, handleAstarClaimRewardTxInfo, handleAstarUnbondingTxInfo, handleAstarUnlockingInfo, handleAstarWithdrawalTxInfo } from '@subwallet/extension-koni-base/api/bonding/astar';
 import { getDarwiniaBondingExtrinsic, getDarwiniaValidatorsInfo, handleDarwiniaBondingTxInfo } from '@subwallet/extension-koni-base/api/bonding/darwinia';
 import { getParaBondingBasics, getParaBondingExtrinsic, getParaCollatorsInfo, getParaUnbondingExtrinsic, getParaWithdrawalExtrinsic, handleParaBondingTxInfo, handleParaUnbondingTxInfo, handleParaUnlockingInfo, handleParaWithdrawalTxInfo } from '@subwallet/extension-koni-base/api/bonding/paraChain';
 import { getRelayBondingExtrinsic, getRelayChainBondingBasics, getRelayUnbondingExtrinsic, getRelayValidatorsInfo, getRelayWithdrawalExtrinsic, getTargetValidators, handleRelayBondingTxInfo, handleRelayUnbondingTxInfo, handleRelayUnlockingInfo, handleRelayWithdrawalTxInfo } from '@subwallet/extension-koni-base/api/bonding/relayChain';
 import Web3 from 'web3';
 
 const CHAIN_TYPES: Record<string, string[]> = {
-  relay: ['polkadot', 'kusama', 'hydradx', 'aleph', 'edgeware', 'darwinia', 'crab', 'polkadex'],
+  relay: ['polkadot', 'kusama', 'hydradx', 'aleph', 'polkadex'],
   para: ['moonbeam', 'moonriver', 'moonbase', 'turing', 'turingStaging'],
   darwinia: ['darwinia', 'crab', 'pangolin'],
   astar: ['astar', 'shiden', 'shibuya']
@@ -117,4 +117,12 @@ export async function getWithdrawalExtrinsic (dotSamaApi: ApiProps, networkKey: 
   }
 
   return getRelayWithdrawalExtrinsic(dotSamaApi, address);
+}
+
+export async function getClaimRewardTxInfo (address: string, networkKey: string, dotSamaApiMap: Record<string, ApiProps>, web3ApiMap: Record<string, Web3>, validatorAddress?: string) {
+  return handleAstarClaimRewardTxInfo(address, validatorAddress as string, networkKey, dotSamaApiMap, web3ApiMap);
+}
+
+export async function getClaimRewardExtrinsic (dotSamaApi: ApiProps, networkKey: string, validatorAddress?: string) {
+  return getAstarClaimRewardExtrinsic(dotSamaApi, validatorAddress as string);
 }

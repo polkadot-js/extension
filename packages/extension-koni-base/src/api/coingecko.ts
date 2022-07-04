@@ -30,14 +30,14 @@ export const getTokenPrice = async (chains: Array<string> = Object.keys(PREDEFIN
     const tokenPriceMap: Record<string, number> = {};
 
     responseData.forEach((val) => {
-      priceMap[val.id] = val.current_price;
+      priceMap[val.id] = val.current_price !== null ? val.current_price : 0;
 
       if (inverseMap[val.id]) {
         // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-        priceMap[inverseMap[val.id]] = val.current_price;
+        priceMap[inverseMap[val.id]] = val.current_price !== null ? val.current_price : 0;
       }
 
-      tokenPriceMap[val.symbol] = val.current_price;
+      tokenPriceMap[val.symbol] = val.current_price !== null ? val.current_price : 0;
     });
 
     return {

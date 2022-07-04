@@ -1,5 +1,26 @@
 # CHANGELOG
 
+## 0.4.9 (Koni)
+Build date: Jul 02, 2022.
+
+Update:
+- Add new network, update endpoint: Tinkernet, Imbue, HydraDX,...(#387)
+
+Bug fixes:
+- Fix bug report by Moonbeam team (#392)
+- Fix bug can not scan QR (#394)
+- Fix some errors related to Network Settings (#408)
+
+## 0.4.8 (Koni)
+Build date: Jun 25, 2022.
+
+Update:
+- Update new way to interaction with chainId and accounts in EVM Provider (#357)
+
+Bug fixes:
+- Fix miscalculation of unstaking time (#382)
+- Fix bug not show transaction after transfer from astar app via EVM Provider
+
 ## 0.4.7 (Koni)
 Build date: Jun 24, 2022.
 

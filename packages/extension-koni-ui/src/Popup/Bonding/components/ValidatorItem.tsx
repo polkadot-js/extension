@@ -12,13 +12,15 @@ import Tooltip from '@subwallet/extension-koni-ui/components/Tooltip';
 import useIsSufficientBalance from '@subwallet/extension-koni-ui/hooks/screen/bonding/useIsSufficientBalance';
 import useGetNetworkJson from '@subwallet/extension-koni-ui/hooks/screen/home/useGetNetworkJson';
 import useToast from '@subwallet/extension-koni-ui/hooks/useToast';
-import { parseBalanceString } from '@subwallet/extension-koni-ui/Popup/Bonding/utils';
+import { getStakeUnit, parseBalanceString } from '@subwallet/extension-koni-ui/Popup/Bonding/utils';
 import { store } from '@subwallet/extension-koni-ui/stores';
 import { BondingParams } from '@subwallet/extension-koni-ui/stores/types';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { toShort } from '@subwallet/extension-koni-ui/util';
 import React, { useCallback, useContext, useState } from 'react';
 import styled from 'styled-components';
+
+import { isEthereumAddress } from '@polkadot/util-crypto';
 
 interface Props extends ThemeProps {
   className?: string;
@@ -39,12 +41,17 @@ function ValidatorItem ({ bondedValidators, className, isBondedBefore, maxNomina
   const isSufficientFund = useIsSufficientBalance(networkKey, validatorInfo.minBond);
   const hasOwnStake = validatorInfo.ownStake > 0;
   const isMaxCommission = validatorInfo.commission === 100;
+  const unit = getStakeUnit(networkKey, networkJson);
 
   const navigate = useContext(ActionContext);
 
   const handleOnClick = useCallback(() => {
     setShowDetail(!showDetail);
   }, [showDetail]);
+
+  const getMinBondTooltipText = useCallback(() => {
+    return `Your free balance needs to be at least ${parseBalanceString(validatorInfo.minBond, networkJson.nativeToken as string)}.`;
+  }, [networkJson.nativeToken, validatorInfo.minBond]);
 
   const handleOnSelect = useCallback(() => {
     if (!isSufficientFund) {
@@ -63,6 +70,203 @@ function ValidatorItem ({ bondedValidators, className, isBondedBefore, maxNomina
     navigate('/account/bonding-auth');
   }, [bondedValidators, isBondedBefore, isSufficientFund, maxNominations, maxNominatorPerValidator, navigate, networkKey, show, validatorInfo]);
 
+  const handleGetValidatorDetail = useCallback(() => {
+    if (['astar', 'shiden', 'shibuya'].includes(networkKey)) {
+      return (
+        <div className={'validator-detail-container'}>
+          <div className={'validator-att-container'}>
+            <div className={'validator-att'}>
+              <div className={'validator-att-title'}>Total stake</div>
+              <div className={'validator-att-value'}>{parseBalanceString(validatorInfo.totalStake, unit)}</div>
+            </div>
+
+            <div className={'validator-att'}>
+              <div className={'validator-att-title'}>
+                Stakers count
+                {
+                  isOversubscribed && <FontAwesomeIcon
+                    className={'error-tooltip'}
+                    data-for={`validator-oversubscribed-tooltip-${networkKey}`}
+                    data-tip={true}
+                    icon={faCircleExclamation}
+                  />
+                }
+                <Tooltip
+                  place={'top'}
+                  // eslint-disable-next-line @typescript-eslint/restrict-plus-operands
+                  text={'Oversubscribed. You will not be able to receive reward.'}
+                  trigger={`validator-oversubscribed-tooltip-${networkKey}`}
+                />
+              </div>
+              <div className={`${!isOversubscribed ? 'validator-att-value' : 'validator-att-value-error'}`}>{validatorInfo.nominatorCount}</div>
+            </div>
+          </div>
+
+          <div className={'validator-att-container'}>
+            <div className={'validator-att'}>
+              <div className={'validator-att-title'}>
+                Minimum stake
+                {
+                  !isSufficientFund && <FontAwesomeIcon
+                    className={'error-tooltip'}
+                    data-for={`insufficient-fund-tooltip-${networkKey}`}
+                    data-tip={true}
+                    icon={faCircleExclamation}
+                  />
+                }
+                <Tooltip
+                  place={'top'}
+                  // eslint-disable-next-line @typescript-eslint/restrict-plus-operands
+                  text={getMinBondTooltipText()}
+                  trigger={`insufficient-fund-tooltip-${networkKey}`}
+                />
+              </div>
+              <div className={`${isSufficientFund ? 'validator-att-value' : 'validator-att-value-error'}`}>{parseBalanceString(validatorInfo.minBond, networkJson.nativeToken as string)}</div>
+            </div>
+          </div>
+
+          {
+            validatorInfo.commission !== undefined && <div className={'validator-att-container'}>
+              <div className={'validator-att'}>
+                <div className={'validator-att-title'}>
+                  Commission
+                  {
+                    isMaxCommission && <FontAwesomeIcon
+                      className={'error-tooltip'}
+                      data-for={`commission-max-tooltip-${networkKey}`}
+                      data-tip={true}
+                      icon={faCircleExclamation}
+                    />
+                  }
+                  <Tooltip
+                    place={'top'}
+                    text={'You will not be able to receive reward.'}
+                    trigger={`commission-max-tooltip-${networkKey}`}
+                  />
+                </div>
+                <div className={`${!isMaxCommission ? 'validator-att-value' : 'validator-att-value-error'}`}>{validatorInfo.commission}%</div>
+              </div>
+            </div>
+          }
+
+          <Button
+            className={'staking-button'}
+            onClick={handleOnSelect}
+          >
+            Start staking
+          </Button>
+        </div>
+      );
+    } else {
+      return (
+        <div className={'validator-detail-container'}>
+          <div className={'validator-att-container'}>
+            <div className={'validator-att'}>
+              <div className={'validator-att-title'}>Total stake</div>
+              <div className={'validator-att-value'}>{parseBalanceString(validatorInfo.totalStake, unit)}</div>
+            </div>
+
+            <div className={'validator-att'}>
+              <div className={'validator-att-title'}>
+                Own stake
+                {
+                  !hasOwnStake && <FontAwesomeIcon
+                    className={'warning-tooltip'}
+                    data-for={`validator-has-no-stake-tooltip-${networkKey}`}
+                    data-tip={true}
+                    icon={faCircleExclamation}
+                  />
+                }
+                <Tooltip
+                  place={'top'}
+                  // eslint-disable-next-line @typescript-eslint/restrict-plus-operands
+                  text={'Validators should have their own stake.'}
+                  trigger={`validator-has-no-stake-tooltip-${networkKey}`}
+                />
+              </div>
+              <div className={`${hasOwnStake ? 'validator-att-value' : 'validator-att-value-warning'}`}>{parseBalanceString(validatorInfo.ownStake, unit)}</div>
+            </div>
+          </div>
+
+          <div className={'validator-att-container'}>
+            <div className={'validator-att'}>
+              <div className={'validator-att-title'}>
+                Nominators count
+                {
+                  isOversubscribed && <FontAwesomeIcon
+                    className={'error-tooltip'}
+                    data-for={`validator-oversubscribed-tooltip-${networkKey}`}
+                    data-tip={true}
+                    icon={faCircleExclamation}
+                  />
+                }
+                <Tooltip
+                  place={'top'}
+                  // eslint-disable-next-line @typescript-eslint/restrict-plus-operands
+                  text={'Oversubscribed. You will not be able to receive reward.'}
+                  trigger={`validator-oversubscribed-tooltip-${networkKey}`}
+                />
+              </div>
+              <div className={`${!isOversubscribed ? 'validator-att-value' : 'validator-att-value-error'}`}>{validatorInfo.nominatorCount}</div>
+            </div>
+
+            <div className={'validator-att'}>
+              <div className={'validator-att-title'}>
+                Minimum stake
+                {
+                  !isSufficientFund && <FontAwesomeIcon
+                    className={'error-tooltip'}
+                    data-for={`insufficient-fund-tooltip-${networkKey}`}
+                    data-tip={true}
+                    icon={faCircleExclamation}
+                  />
+                }
+                <Tooltip
+                  place={'top'}
+                  // eslint-disable-next-line @typescript-eslint/restrict-plus-operands
+                  text={getMinBondTooltipText()}
+                  trigger={`insufficient-fund-tooltip-${networkKey}`}
+                />
+              </div>
+              <div className={`${isSufficientFund ? 'validator-att-value' : 'validator-att-value-error'}`}>{parseBalanceString(validatorInfo.minBond, networkJson.nativeToken as string)}</div>
+            </div>
+          </div>
+
+          {
+            validatorInfo.commission !== undefined && <div className={'validator-att-container'}>
+              <div className={'validator-att'}>
+                <div className={'validator-att-title'}>
+                  Commission
+                  {
+                    isMaxCommission && <FontAwesomeIcon
+                      className={'error-tooltip'}
+                      data-for={`commission-max-tooltip-${networkKey}`}
+                      data-tip={true}
+                      icon={faCircleExclamation}
+                    />
+                  }
+                  <Tooltip
+                    place={'top'}
+                    text={'You will not be able to receive reward.'}
+                    trigger={`commission-max-tooltip-${networkKey}`}
+                  />
+                </div>
+                <div className={`${!isMaxCommission ? 'validator-att-value' : 'validator-att-value-error'}`}>{validatorInfo.commission}%</div>
+              </div>
+            </div>
+          }
+
+          <Button
+            className={'staking-button'}
+            onClick={handleOnSelect}
+          >
+            Start staking
+          </Button>
+        </div>
+      );
+    }
+  }, [getMinBondTooltipText, handleOnSelect, hasOwnStake, isMaxCommission, isOversubscribed, isSufficientFund, networkJson.nativeToken, networkKey, unit, validatorInfo.commission, validatorInfo.minBond, validatorInfo.nominatorCount, validatorInfo.ownStake, validatorInfo.totalStake]);
+
   return (
     <div className={className}>
       <div
@@ -70,13 +274,23 @@ function ValidatorItem ({ bondedValidators, className, isBondedBefore, maxNomina
         onClick={handleOnClick}
       >
         <div className={'validator-header'}>
-          <Identicon
-            className='identityIcon'
-            genesisHash={networkJson.genesisHash}
-            prefix={networkJson.ss58Format}
-            size={20}
-            value={validatorInfo.address}
-          />
+          {
+            validatorInfo.icon
+              ? <img
+                className='imgIcon'
+                height={28}
+                src={validatorInfo.icon}
+                width={28}
+              />
+              : <Identicon
+                className='identityIcon'
+                genesisHash={networkJson.genesisHash}
+                iconTheme={isEthereumAddress(validatorInfo.address) ? 'ethereum' : 'substrate'}
+                prefix={networkJson.ss58Format}
+                size={20}
+                value={validatorInfo.address}
+              />
+          }
 
           <div
             data-for={`identity-tooltip-${validatorInfo.address}`}
@@ -124,14 +338,18 @@ function ValidatorItem ({ bondedValidators, className, isBondedBefore, maxNomina
             />
           }
         </div>
+
         <div className={'validator-footer'}>
-          <div
-            className={'validator-expected-return'}
-            data-for={`validator-return-tooltip-${validatorInfo.address}`}
-            data-tip={true}
-          >
-            {validatorInfo.expectedReturn.toFixed(1)}%
-          </div>
+          {
+            validatorInfo.expectedReturn > 0 && <div
+              className={'validator-expected-return'}
+              data-for={`validator-return-tooltip-${validatorInfo.address}`}
+              data-tip={true}
+            >
+              {validatorInfo.expectedReturn.toFixed(1)}%
+            </div>
+          }
+
           <Tooltip
             place={'top'}
             text={'Expected return'}
@@ -148,108 +366,7 @@ function ValidatorItem ({ bondedValidators, className, isBondedBefore, maxNomina
       </div>
 
       {
-        showDetail && <div className={'validator-detail-container'}>
-          <div className={'validator-att-container'}>
-            <div className={'validator-att'}>
-              <div className={'validator-att-title'}>Total stake</div>
-              <div className={'validator-att-value'}>{parseBalanceString(validatorInfo.totalStake, networkJson.nativeToken as string)}</div>
-            </div>
-
-            <div className={'validator-att'}>
-              <div className={'validator-att-title'}>
-                Own stake
-                {
-                  !hasOwnStake && <FontAwesomeIcon
-                    className={'warning-tooltip'}
-                    data-for={`validator-has-no-stake-tooltip-${networkKey}`}
-                    data-tip={true}
-                    icon={faCircleExclamation}
-                  />
-                }
-                <Tooltip
-                  place={'top'}
-                  // eslint-disable-next-line @typescript-eslint/restrict-plus-operands
-                  text={'Validators should have their own stake.'}
-                  trigger={`validator-has-no-stake-tooltip-${networkKey}`}
-                />
-              </div>
-              <div className={`${hasOwnStake ? 'validator-att-value' : 'validator-att-value-warning'}`}>{parseBalanceString(validatorInfo.ownStake, networkJson.nativeToken as string)}</div>
-            </div>
-          </div>
-
-          <div className={'validator-att-container'}>
-            <div className={'validator-att'}>
-              <div className={'validator-att-title'}>
-                Nominators count
-                {
-                  isOversubscribed && <FontAwesomeIcon
-                    className={'error-tooltip'}
-                    data-for={`validator-oversubscribed-tooltip-${networkKey}`}
-                    data-tip={true}
-                    icon={faCircleExclamation}
-                  />
-                }
-                <Tooltip
-                  place={'top'}
-                  // eslint-disable-next-line @typescript-eslint/restrict-plus-operands
-                  text={'Oversubscribed. You will not be able to receive reward.'}
-                  trigger={`validator-oversubscribed-tooltip-${networkKey}`}
-                />
-              </div>
-              <div className={`${!isOversubscribed ? 'validator-att-value' : 'validator-att-value-error'}`}>{validatorInfo.nominatorCount}</div>
-            </div>
-
-            <div className={'validator-att'}>
-              <div className={'validator-att-title'}>
-                Commission
-                {
-                  isMaxCommission && <FontAwesomeIcon
-                    className={'error-tooltip'}
-                    data-for={`commission-max-tooltip-${networkKey}`}
-                    data-tip={true}
-                    icon={faCircleExclamation}
-                  />
-                }
-                <Tooltip
-                  place={'top'}
-                  text={'You will not be able to receive reward.'}
-                  trigger={`commission-max-tooltip-${networkKey}`}
-                />
-              </div>
-              <div className={`${!isMaxCommission ? 'validator-att-value' : 'validator-att-value-error'}`}>{validatorInfo.commission}%</div>
-            </div>
-          </div>
-
-          <div className={'validator-att-container'}>
-            <div className={'validator-att'}>
-              <div className={'validator-att-title'}>
-                Minimum stake
-                {
-                  !isSufficientFund && <FontAwesomeIcon
-                    className={'error-tooltip'}
-                    data-for={`insufficient-fund-tooltip-${networkKey}`}
-                    data-tip={true}
-                    icon={faCircleExclamation}
-                  />
-                }
-                <Tooltip
-                  place={'top'}
-                  // eslint-disable-next-line @typescript-eslint/restrict-plus-operands
-                  text={`Your free balance needs to be at least ${parseBalanceString(validatorInfo.minBond, networkJson.nativeToken as string)}.`}
-                  trigger={`insufficient-fund-tooltip-${networkKey}`}
-                />
-              </div>
-              <div className={`${isSufficientFund ? 'validator-att-value' : 'validator-att-value-error'}`}>{parseBalanceString(validatorInfo.minBond, networkJson.nativeToken as string)}</div>
-            </div>
-          </div>
-
-          <Button
-            className={'staking-button'}
-            onClick={handleOnSelect}
-          >
-            Start staking
-          </Button>
-        </div>
+        showDetail && handleGetValidatorDetail()
       }
     </div>
   );
@@ -258,22 +375,21 @@ function ValidatorItem ({ bondedValidators, className, isBondedBefore, maxNomina
 export default React.memo(styled(ValidatorItem)(({ theme }: Props) => `
   background: ${theme.accountAuthorizeRequest};
   border-radius: 8px;
-
+  .imgIcon {
+    border-radius: 50%;
+  }
   .warning-tooltip {
     color: ${theme.iconWarningColor};
     font-size: 12px;
   }
-
   .error-tooltip {
     color: ${theme.errorColor};
     font-size: 12px;
   }
-
   .validator-verified {
     color: ${theme.textColor3};
     font-size: 12px;
   }
-
   .validator-att-title {
     color: ${theme.textColor2};
     font-size: 14px;
@@ -281,39 +397,32 @@ export default React.memo(styled(ValidatorItem)(({ theme }: Props) => `
     align-items: center;
     gap: 5px;
   }
-
   .validator-att-value {
     color: ${theme.textColor3};
     font-size: 14px;
   }
-
   .validator-att-value-error {
     color: ${theme.errorColor};
     font-size: 14px;
   }
-
   .validator-att-value-warning {
     color: ${theme.iconWarningColor};
     font-size: 14px;
   }
-
   .staking-button {
     margin-top: 10px;
     margin-bottom: 10px;
     width: 50%;
   }
-
   .validator-att-container {
     width: 100%;
     margin-bottom: 15px;
     display: flex;
     gap: 20px;
   }
-
   .validator-att {
     width: 50%;
   }
-
   .validator-detail-container {
     background: ${theme.accountAuthorizeRequest};
     padding: 10px 15px;
@@ -323,42 +432,35 @@ export default React.memo(styled(ValidatorItem)(({ theme }: Props) => `
     align-items: center;
     border-radius: 0 0 8px 8px;
   }
-
   .validator-expected-return {
     font-size: 14px;
     color: ${theme.textColor3};
   }
-
   .validator-item-toggle {
     border-style: solid;
     border-width: 0 2px 2px 0;
     display: inline-block;
     padding: 2.5px;
   }
-
   .validator-item-toggle-container {
     display: flex;
     align-items: center;
   }
-
   .validator-footer {
     display: flex;
     align-items: center;
     justify-content: flex-end;
     gap: 10px;
   }
-
   .validator-header {
     font-size: 14px;
     display: flex;
     align-items: center;
     gap: 10px;
   }
-
   .identityIcon {
     border: 2px solid ${theme.checkDotColor};
   }
-
   .validator-item-container {
     cursor: pointer;
     display: flex;

@@ -12,9 +12,10 @@ interface Props extends ThemeProps {
   className?: string;
   delegations: DelegationItem[],
   handleSelectValidator: (value: string) => void;
+  label?: string;
 }
 
-function ValidatorsDropdown ({ className, delegations, handleSelectValidator }: Props): React.ReactElement<Props> {
+function ValidatorsDropdown ({ className, delegations, handleSelectValidator, label }: Props): React.ReactElement<Props> {
   const getDropdownOptions = useCallback(() => {
     return delegations.map((item) => {
       return {
@@ -27,7 +28,7 @@ function ValidatorsDropdown ({ className, delegations, handleSelectValidator }: 
   return (
     <div className={className}>
       <Dropdown
-        label={'Select a collator (*)'}
+        label={label || 'Select a collator (*)'}
         onChange={handleSelectValidator}
         options={getDropdownOptions()}
       />

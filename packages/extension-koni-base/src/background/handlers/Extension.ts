@@ -5,9 +5,9 @@ import Common from '@ethereumjs/common';
 import Extension, { SEED_DEFAULT_LENGTH, SEED_LENGTHS } from '@subwallet/extension-base/background/handlers/Extension';
 import { AuthUrls } from '@subwallet/extension-base/background/handlers/State';
 import { createSubscription, isSubscriptionRunning, unsubscribe } from '@subwallet/extension-base/background/handlers/subscriptions';
-import { AccountsWithCurrentAddress, ApiProps, BalanceJson, BasicTxInfo, BasicTxResponse, BondingOptionInfo, BondingOptionParams, BondingSubmitParams, ChainBondingBasics, ChainRegistry, CrowdloanJson, CurrentAccountInfo, CustomEvmToken, DeleteEvmTokenParams, DisableNetworkResponse, EvmNftSubmitTransaction, EvmNftTransaction, EvmNftTransactionRequest, EvmTokenJson, NETWORK_ERROR, NetWorkGroup, NetworkJson, NftCollection, NftCollectionJson, NftItem, NftJson, NftTransactionResponse, NftTransferExtra, OptionInputAddress, PriceJson, RequestAccountCreateSuriV2, RequestAccountExportPrivateKey, RequestAuthorization, RequestAuthorizationPerAccount, RequestAuthorizeApproveV2, RequestBatchRestoreV2, RequestCheckCrossChainTransfer, RequestCheckTransfer, RequestConfirmationComplete, RequestCrossChainTransfer, RequestDeriveCreateV2, RequestForgetSite, RequestFreeBalance, RequestJsonRestoreV2, RequestNftForceUpdate, RequestSaveRecentAccount, RequestSeedCreateV2, RequestSeedValidateV2, RequestSettingsType, RequestTransactionHistoryAdd, RequestTransfer, RequestTransferCheckReferenceCount, RequestTransferCheckSupporting, RequestTransferExistentialDeposit, ResponseAccountCreateSuriV2, ResponseAccountExportPrivateKey, ResponseCheckCrossChainTransfer, ResponseCheckTransfer, ResponsePrivateKeyValidateV2, ResponseSeedCreateV2, ResponseSeedValidateV2, ResponseTransfer, StakeWithdrawalParams, StakingJson, StakingRewardJson, SubstrateNftSubmitTransaction, SubstrateNftTransaction, SubstrateNftTransactionRequest, SupportTransferResponse, ThemeTypes, TokenInfo, TransactionHistoryItemType, TransferError, TransferErrorCode, TransferStep, UnbondingSubmitParams, UnlockingStakeInfo, UnlockingStakeParams, ValidateEvmTokenRequest, ValidateEvmTokenResponse, ValidateNetworkRequest, ValidateNetworkResponse } from '@subwallet/extension-base/background/KoniTypes';
+import { AccountsWithCurrentAddress, ApiProps, BalanceJson, BasicTxInfo, BasicTxResponse, BondingOptionInfo, BondingOptionParams, BondingSubmitParams, ChainBondingBasics, ChainRegistry, CrowdloanJson, CurrentAccountInfo, CustomEvmToken, DeleteEvmTokenParams, DisableNetworkResponse, EvmNftSubmitTransaction, EvmNftTransaction, EvmNftTransactionRequest, EvmTokenJson, NETWORK_ERROR, NetWorkGroup, NetworkJson, NftCollection, NftCollectionJson, NftItem, NftJson, NftTransactionResponse, NftTransferExtra, OptionInputAddress, PriceJson, RequestAccountCreateSuriV2, RequestAccountExportPrivateKey, RequestAuthorization, RequestAuthorizationPerAccount, RequestAuthorizeApproveV2, RequestBatchRestoreV2, RequestCheckCrossChainTransfer, RequestCheckTransfer, RequestConfirmationComplete, RequestCrossChainTransfer, RequestDeriveCreateV2, RequestForgetSite, RequestFreeBalance, RequestJsonRestoreV2, RequestNftForceUpdate, RequestSaveRecentAccount, RequestSeedCreateV2, RequestSeedValidateV2, RequestSettingsType, RequestTransactionHistoryAdd, RequestTransfer, RequestTransferCheckReferenceCount, RequestTransferCheckSupporting, RequestTransferExistentialDeposit, ResponseAccountCreateSuriV2, ResponseAccountExportPrivateKey, ResponseCheckCrossChainTransfer, ResponseCheckTransfer, ResponsePrivateKeyValidateV2, ResponseSeedCreateV2, ResponseSeedValidateV2, ResponseTransfer, StakeClaimRewardParams, StakeWithdrawalParams, StakingJson, StakingRewardJson, SubstrateNftSubmitTransaction, SubstrateNftTransaction, SubstrateNftTransactionRequest, SupportTransferResponse, ThemeTypes, TokenInfo, TransactionHistoryItemType, TransferError, TransferErrorCode, TransferStep, UnbondingSubmitParams, UnlockingStakeInfo, UnlockingStakeParams, ValidateEvmTokenRequest, ValidateEvmTokenResponse, ValidateNetworkRequest, ValidateNetworkResponse } from '@subwallet/extension-base/background/KoniTypes';
 import { AccountJson, AuthorizeRequest, MessageTypes, RequestAccountForget, RequestAccountTie, RequestAuthorizeCancel, RequestAuthorizeReject, RequestCurrentAccountAddress, RequestTypes, ResponseAuthorizeList, ResponseType } from '@subwallet/extension-base/background/types';
-import { getBondingExtrinsic, getBondingTxInfo, getChainBondingBasics, getUnbondingExtrinsic, getUnbondingTxInfo, getUnlockingInfo, getValidatorsInfo, getWithdrawalExtrinsic, getWithdrawalTxInfo } from '@subwallet/extension-koni-base/api/bonding';
+import { getBondingExtrinsic, getBondingTxInfo, getChainBondingBasics, getClaimRewardExtrinsic, getClaimRewardTxInfo, getUnbondingExtrinsic, getUnbondingTxInfo, getUnlockingInfo, getValidatorsInfo, getWithdrawalExtrinsic, getWithdrawalTxInfo } from '@subwallet/extension-koni-base/api/bonding';
 import { initApi } from '@subwallet/extension-koni-base/api/dotsama';
 import { getFreeBalance, subscribeFreeBalance } from '@subwallet/extension-koni-base/api/dotsama/balance';
 import { getTokenInfo } from '@subwallet/extension-koni-base/api/dotsama/registry';
@@ -2341,6 +2341,70 @@ export default class KoniExtension extends Extension {
     return txState;
   }
 
+  private async getStakeClaimRewardTxInfo ({ address, networkKey, validatorAddress }: StakeClaimRewardParams): Promise<BasicTxInfo> {
+    return await getClaimRewardTxInfo(address, networkKey, state.getDotSamaApiMap(), state.getWeb3ApiMap(), validatorAddress);
+  }
+
+  private async submitStakeClaimReward (id: string, port: chrome.runtime.Port, { address, networkKey, password, validatorAddress }: StakeClaimRewardParams): Promise<BasicTxResponse> {
+    const txState: BasicTxResponse = {};
+
+    if (!address || !password) {
+      txState.txError = true;
+
+      return txState;
+    }
+
+    const callback = createSubscription<'pri(unbonding.submitWithdrawal)'>(id, port);
+    const dotSamaApi = state.getDotSamaApi(networkKey);
+    const extrinsic = await getClaimRewardExtrinsic(dotSamaApi, networkKey, validatorAddress);
+    const passwordError: string | null = unlockAccount(address, password);
+
+    if (extrinsic !== null && passwordError === null) {
+      const pair = keyring.getPair(address);
+
+      try {
+        const unsubscribe = await extrinsic.signAndSend(pair, (result) => {
+          if (!result || !result.status) {
+            return;
+          }
+
+          if (result.status.isInBlock || result.status.isFinalized) {
+            result.events
+              .filter(({ event: { section } }) => section === 'system')
+              .forEach(({ event: { method } }): void => {
+                txState.transactionHash = extrinsic.hash.toHex();
+                callback(txState);
+
+                if (method === 'ExtrinsicFailed') {
+                  txState.status = false;
+                  callback(txState);
+                } else if (method === 'ExtrinsicSuccess') {
+                  txState.status = true;
+                  callback(txState);
+                }
+              });
+          } else if (result.isError) {
+            txState.txError = true;
+            callback(txState);
+          }
+
+          if (result.isCompleted) {
+            unsubscribe();
+          }
+        });
+      } catch (e) {
+        console.error('error withdrawing', e);
+        txState.txError = true;
+        callback(txState);
+      }
+    } else {
+      txState.passwordError = passwordError;
+      callback(txState);
+    }
+
+    return txState;
+  }
+
   // eslint-disable-next-line @typescript-eslint/require-await
   public override async handle<TMessageType extends MessageTypes> (id: string, type: TMessageType, request: RequestTypes[TMessageType], port: chrome.runtime.Port): Promise<ResponseType<TMessageType>> {
     switch (type) {
@@ -2526,6 +2590,10 @@ export default class KoniExtension extends Extension {
         return await this.getStakeWithdrawalTxInfo(request as StakeWithdrawalParams);
       case 'pri(unbonding.submitWithdrawal)':
         return await this.submitStakeWithdrawal(id, port, request as StakeWithdrawalParams);
+      case 'pri(staking.claimRewardTxInfo)':
+        return await this.getStakeClaimRewardTxInfo(request as StakeClaimRewardParams);
+      case 'pri(staking.submitClaimReward)':
+        return await this.submitStakeClaimReward(id, port, request as StakeClaimRewardParams);
       default:
         return super.handle(id, type, request, port);
     }

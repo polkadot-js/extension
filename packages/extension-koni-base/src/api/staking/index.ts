@@ -28,8 +28,10 @@ export const DEFAULT_STAKING_NETWORKS = {
   crab: PREDEFINED_NETWORKS.crab,
   polkadex: PREDEFINED_NETWORKS.polkadex,
   turing: PREDEFINED_NETWORKS.turing,
-  turingStaging: PREDEFINED_NETWORKS.turingStaging
-  // astar: NETWORKS.astar,
+  turingStaging: PREDEFINED_NETWORKS.turingStaging,
+  astar: PREDEFINED_NETWORKS.astar,
+  shibuya: PREDEFINED_NETWORKS.shibuya,
+  shiden: PREDEFINED_NETWORKS.shiden
   // acala: PREDEFINED_NETWORKS.acala,
 };
 
@@ -106,16 +108,19 @@ function getParaStakingOnChain (parentApi: ApiProps, useAddresses: string[], net
       const delegationsList: DelegationItem[] = [];
 
       await Promise.all(Object.entries(delegationMap).map(async ([owner, amount]) => {
-        const [_info, _identity] = await Promise.all([
+        const [_info, _identity, _scheduledRequests] = await Promise.all([
           parentApi.api.query.parachainStaking.candidateInfo(owner),
-          parentApi.api.query.identity.identityOf(owner)
+          parentApi.api.query.identity.identityOf(owner),
+          parentApi.api.query.parachainStaking.delegationScheduledRequests(owner)
         ]);
+        const rawScheduledRequests = _scheduledRequests.toHuman() as Record<string, any>[];
         const rawInfo = _info.toHuman() as Record<string, any>;
         const rawIdentity = _identity.toHuman() as Record<string, any> | null;
         let identity;
 
         const minDelegation = (rawInfo?.lowestTopDelegationAmount as string).replaceAll(',', '');
 
+        // handle identity
         if (rawIdentity !== null) {
           // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
           const displayName = rawIdentity?.info?.display?.Raw as string;
@@ -140,9 +145,26 @@ function getParaStakingOnChain (parentApi: ApiProps, useAddresses: string[], net
           }
         }
 
+        // check scheduled request
+        let unbondingAmount = 0;
+
+        for (const scheduledRequest of rawScheduledRequests) {
+          const delegator = scheduledRequest.delegator as string;
+
+          if (useAddresses.includes(delegator)) {
+            const action = scheduledRequest.action as Record<string, string>;
+
+            Object.values(action).forEach((value) => {
+              unbondingAmount += parseRawNumber(value);
+            });
+          }
+        }
+
+        const activeStake = parseRawNumber(amount) - unbondingAmount;
+
         delegationsList.push({
           owner,
-          amount,
+          amount: activeStake.toString(),
           identity,
           minBond: minDelegation
         });

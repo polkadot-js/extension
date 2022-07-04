@@ -65,7 +65,7 @@ function UnbondingSubmitTransaction ({ className }: Props): React.ReactElement<P
         const _nominatedAmount = parseFloat(nominatedAmount) / (10 ** (networkJson.decimals as number));
         const _minBond = parseFloat(minBond) / (10 ** (networkJson.decimals as number));
 
-        if ((amount > 0 && amount <= (_nominatedAmount - _minBond)) || amount === _nominatedAmount) {
+        if ((amount > 0 && amount <= (_nominatedAmount - _minBond)) || (amount === _nominatedAmount && amount > 0)) {
           setIsReadySubmit(true);
         } else {
           setIsReadySubmit(false);

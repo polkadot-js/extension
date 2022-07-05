@@ -154,6 +154,7 @@ export default React.memo(styled(Dropdown)(({ label, theme }: Props) => `
   .dropdown__menu-portal {
     text-align: left;
     font-size: 15px;
+    z-index: 99;
   }
 
   .dropdown__menu-notice--no-options {

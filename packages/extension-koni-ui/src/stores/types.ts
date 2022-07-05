@@ -28,6 +28,7 @@ export type NetworkConfigParams = {
 }
 
 export type BondingParams = {
+  selectedAccount: string | null;
   selectedNetwork: string | null;
   selectedValidator: ValidatorInfo | null;
   maxNominatorPerValidator: number | null;
@@ -36,6 +37,7 @@ export type BondingParams = {
 }
 
 export type UnbondingParams = {
+  selectedAccount: string | null;
   selectedNetwork: string | null;
   bondedAmount: number | null;
   delegations?: DelegationItem[]

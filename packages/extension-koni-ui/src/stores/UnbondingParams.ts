@@ -6,7 +6,8 @@ import { UnbondingParams } from '@subwallet/extension-koni-ui/stores/types';
 
 const initialState = {
   selectedNetwork: null,
-  bondedAmount: null
+  bondedAmount: null,
+  selectedAccount: null
 } as UnbondingParams;
 
 const unbondingParamsSlice = createSlice({
@@ -19,6 +20,7 @@ const unbondingParamsSlice = createSlice({
       state.selectedNetwork = payload.selectedNetwork;
       state.bondedAmount = payload.bondedAmount;
       state.delegations = payload.delegations;
+      state.selectedAccount = payload.selectedAccount;
     }
   }
 });

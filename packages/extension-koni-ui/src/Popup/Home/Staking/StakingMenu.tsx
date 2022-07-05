@@ -13,11 +13,12 @@ import Menu from '@subwallet/extension-koni-ui/components/Menu';
 import Tooltip from '@subwallet/extension-koni-ui/components/Tooltip';
 import useGetNetworkJson from '@subwallet/extension-koni-ui/hooks/screen/home/useGetNetworkJson';
 import useOutsideClick from '@subwallet/extension-koni-ui/hooks/useOutsideClick';
-import { store } from '@subwallet/extension-koni-ui/stores';
+import { RootState, store } from '@subwallet/extension-koni-ui/stores';
 import { BondingParams, UnbondingParams } from '@subwallet/extension-koni-ui/stores/types';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import moment from 'moment';
 import React, { useCallback, useContext, useRef } from 'react';
+import { useSelector } from 'react-redux';
 import styled from 'styled-components';
 
 interface Props extends ThemeProps {
@@ -46,6 +47,7 @@ function StakingMenu ({ bondedAmount, className, delegations, networkKey, nextWi
   const navigate = useContext(ActionContext);
   const networkJson = useGetNetworkJson(networkKey);
   const showClaimButton = MANUAL_CLAIM_CHAINS.includes(networkKey);
+  const { currentAccount: { account } } = useSelector((state: RootState) => state);
 
   const handleClickBondingMenu = useCallback((e: MouseEvent) => {
     e.stopPropagation();
@@ -57,16 +59,16 @@ function StakingMenu ({ bondedAmount, className, delegations, networkKey, nextWi
   });
 
   const handleClickStakeMore = useCallback(() => {
-    store.dispatch({ type: 'bondingParams/update', payload: { selectedNetwork: networkKey, selectedValidator: null, maxNominatorPerValidator: null } as BondingParams });
+    store.dispatch({ type: 'bondingParams/update', payload: { selectedAccount: account?.address as string, selectedNetwork: networkKey, selectedValidator: null, maxNominatorPerValidator: null } as BondingParams });
     navigate('/account/select-bonding-validator');
-  }, [navigate, networkKey]);
+  }, [account?.address, navigate, networkKey]);
 
   const handleUnstake = useCallback(() => {
     if (parseFloat(bondedAmount) > 0) {
-      store.dispatch({ type: 'unbondingParams/update', payload: { selectedNetwork: networkKey, bondedAmount: parseFloat(bondedAmount), delegations } as UnbondingParams });
+      store.dispatch({ type: 'unbondingParams/update', payload: { selectedAccount: account?.address as string, selectedNetwork: networkKey, bondedAmount: parseFloat(bondedAmount), delegations } as UnbondingParams });
       navigate('/account/unbonding-auth');
     }
-  }, [bondedAmount, delegations, navigate, networkKey]);
+  }, [account?.address, bondedAmount, delegations, navigate, networkKey]);
 
   const getTooltipText = useCallback(() => {
     if (nextWithdrawalAmount === -1) {
@@ -76,6 +78,10 @@ function StakingMenu ({ bondedAmount, className, delegations, networkKey, nextWi
     if (redeemable > 0) {
       return `${redeemable} ${networkJson.nativeToken as string} can be withdrawn now`;
     } else {
+      if (nextWithdrawal === 0) {
+        return `${nextWithdrawalAmount} ${networkJson.nativeToken as string} can be withdrawn soon`;
+      }
+
       return `${nextWithdrawalAmount} ${networkJson.nativeToken as string} can be withdrawn in ${moment.duration(nextWithdrawal, 'hours').humanize()}`;
     }
   }, [networkJson.nativeToken, nextWithdrawal, nextWithdrawalAmount, redeemable]);

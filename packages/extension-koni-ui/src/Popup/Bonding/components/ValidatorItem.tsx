@@ -13,11 +13,12 @@ import useIsSufficientBalance from '@subwallet/extension-koni-ui/hooks/screen/bo
 import useGetNetworkJson from '@subwallet/extension-koni-ui/hooks/screen/home/useGetNetworkJson';
 import useToast from '@subwallet/extension-koni-ui/hooks/useToast';
 import { getStakeUnit, parseBalanceString } from '@subwallet/extension-koni-ui/Popup/Bonding/utils';
-import { store } from '@subwallet/extension-koni-ui/stores';
+import { RootState, store } from '@subwallet/extension-koni-ui/stores';
 import { BondingParams } from '@subwallet/extension-koni-ui/stores/types';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { toShort } from '@subwallet/extension-koni-ui/util';
 import React, { useCallback, useContext, useState } from 'react';
+import { useSelector } from 'react-redux';
 import styled from 'styled-components';
 
 import { isEthereumAddress } from '@polkadot/util-crypto';
@@ -36,6 +37,7 @@ function ValidatorItem ({ bondedValidators, className, isBondedBefore, maxNomina
   const networkJson = useGetNetworkJson(networkKey);
   const [showDetail, setShowDetail] = useState(false);
   const { show } = useToast();
+  const { currentAccount: { account } } = useSelector((state: RootState) => state);
 
   const isOversubscribed = validatorInfo.nominatorCount >= maxNominatorPerValidator;
   const isSufficientFund = useIsSufficientBalance(networkKey, validatorInfo.minBond);
@@ -66,9 +68,9 @@ function ValidatorItem ({ bondedValidators, className, isBondedBefore, maxNomina
       return;
     }
 
-    store.dispatch({ type: 'bondingParams/update', payload: { selectedNetwork: networkKey, selectedValidator: validatorInfo, maxNominatorPerValidator, isBondedBefore, bondedValidators } as BondingParams });
+    store.dispatch({ type: 'bondingParams/update', payload: { selectedAccount: account?.address as string, selectedNetwork: networkKey, selectedValidator: validatorInfo, maxNominatorPerValidator, isBondedBefore, bondedValidators } as BondingParams });
     navigate('/account/bonding-auth');
-  }, [bondedValidators, isBondedBefore, isSufficientFund, maxNominations, maxNominatorPerValidator, navigate, networkKey, show, validatorInfo]);
+  }, [account?.address, bondedValidators, isBondedBefore, isSufficientFund, maxNominations, maxNominatorPerValidator, navigate, networkKey, show, validatorInfo]);
 
   const handleGetValidatorDetail = useCallback(() => {
     if (['astar', 'shiden', 'shibuya'].includes(networkKey)) {
@@ -125,29 +127,29 @@ function ValidatorItem ({ bondedValidators, className, isBondedBefore, maxNomina
             </div>
           </div>
 
-          {
-            validatorInfo.commission !== undefined && <div className={'validator-att-container'}>
-              <div className={'validator-att'}>
-                <div className={'validator-att-title'}>
-                  Commission
-                  {
-                    isMaxCommission && <FontAwesomeIcon
-                      className={'error-tooltip'}
-                      data-for={`commission-max-tooltip-${networkKey}`}
-                      data-tip={true}
-                      icon={faCircleExclamation}
-                    />
-                  }
-                  <Tooltip
-                    place={'top'}
-                    text={'You will not be able to receive reward.'}
-                    trigger={`commission-max-tooltip-${networkKey}`}
-                  />
-                </div>
-                <div className={`${!isMaxCommission ? 'validator-att-value' : 'validator-att-value-error'}`}>{validatorInfo.commission}%</div>
-              </div>
-            </div>
-          }
+          {/* { */}
+          {/*  validatorInfo.commission !== undefined && <div className={'validator-att-container'}> */}
+          {/*    <div className={'validator-att'}> */}
+          {/*      <div className={'validator-att-title'}> */}
+          {/*        Commission */}
+          {/*        { */}
+          {/*          isMaxCommission && <FontAwesomeIcon */}
+          {/*            className={'error-tooltip'} */}
+          {/*            data-for={`commission-max-tooltip-${networkKey}`} */}
+          {/*            data-tip={true} */}
+          {/*            icon={faCircleExclamation} */}
+          {/*          /> */}
+          {/*        } */}
+          {/*        <Tooltip */}
+          {/*          place={'top'} */}
+          {/*          text={'You will not be able to receive reward.'} */}
+          {/*          trigger={`commission-max-tooltip-${networkKey}`} */}
+          {/*        /> */}
+          {/*      </div> */}
+          {/*      <div className={`${!isMaxCommission ? 'validator-att-value' : 'validator-att-value-error'}`}>{validatorInfo.commission}%</div> */}
+          {/*    </div> */}
+          {/*  </div> */}
+          {/* } */}
 
           <Button
             className={'staking-button'}

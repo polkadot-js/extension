@@ -33,6 +33,7 @@ function UnbondingSubmitTransaction ({ className }: Props): React.ReactElement<P
   const { show } = useToast();
   const navigate = useContext(ActionContext);
   const { currentAccount: { account }, unbondingParams } = useSelector((state: RootState) => state);
+  const selectedAccount = unbondingParams.selectedAccount as string;
   const selectedNetwork = unbondingParams.selectedNetwork as string;
   const bondedAmount = unbondingParams.bondedAmount as number;
   const networkJson = useGetNetworkJson(selectedNetwork);
@@ -131,6 +132,12 @@ function UnbondingSubmitTransaction ({ className }: Props): React.ReactElement<P
     }
   }, [networkJson.decimals]);
 
+  useEffect(() => {
+    if (account && account.address !== selectedAccount) {
+      navigate('/');
+    }
+  }, [account, navigate, selectedAccount]);
+
   const handleClickCancel = useCallback(() => {
     navigate('/');
   }, [navigate]);
@@ -138,7 +145,7 @@ function UnbondingSubmitTransaction ({ className }: Props): React.ReactElement<P
   const handleConfirm = useCallback(() => {
     setLoading(true);
     getUnbondingTxInfo({
-      address: account?.address as string,
+      address: selectedAccount,
       amount,
       networkKey: selectedNetwork,
       validatorAddress: selectedValidator,
@@ -153,7 +160,7 @@ function UnbondingSubmitTransaction ({ className }: Props): React.ReactElement<P
         setShowResult(false);
       })
       .catch(console.error);
-  }, [account?.address, amount, selectedNetwork, selectedValidator, unbondAll]);
+  }, [amount, selectedAccount, selectedNetwork, selectedValidator, unbondAll]);
 
   const handleSelectValidator = useCallback((val: string) => {
     setSelectedValidator(val);
@@ -213,7 +220,7 @@ function UnbondingSubmitTransaction ({ className }: Props): React.ReactElement<P
         <InputAddress
           autoPrefill={false}
           className={'receive-input-address'}
-          defaultValue={account?.address}
+          defaultValue={selectedAccount}
           help={t<string>('The account which you will unstake')}
           isDisabled={true}
           isSetDefaultValue={true}
@@ -240,6 +247,7 @@ function UnbondingSubmitTransaction ({ className }: Props): React.ReactElement<P
               defaultValue={convertToBN()}
               help={`Type the amount you want to unstake. Your total stake is ${parseFloat(nominatedAmount) / (10 ** (networkJson.decimals as number))} ${networkJson.nativeToken as string}`}
               inputAddressHelp={''}
+              isDisabled={unbondAll}
               isError={false}
               isZeroable={false}
               label={t<string>('Amount')}
@@ -260,6 +268,7 @@ function UnbondingSubmitTransaction ({ className }: Props): React.ReactElement<P
               defaultValue={convertToBN()}
               help={`Type the amount you want to unstake. You can unstake ${bondedAmount} ${networkJson.nativeToken as string}`}
               inputAddressHelp={''}
+              isDisabled={unbondAll}
               isError={false}
               isZeroable={false}
               label={t<string>('Amount')}

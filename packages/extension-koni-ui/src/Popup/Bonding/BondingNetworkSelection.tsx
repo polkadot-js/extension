@@ -26,6 +26,8 @@ function BondingNetworkSelection ({ className }: Props): React.ReactElement<Prop
   const [chainBondingBasics, setChainBondingBasics] = useState<Record<string, ChainBondingBasics>>({});
   const [loading, setLoading] = useState(true);
 
+  const networkListHeight = window.innerHeight > 600 ? window.innerHeight * 0.7 : 370;
+
   const _onChangeFilter = useCallback((val: string) => {
     setSearchString(val);
   }, []);
@@ -74,7 +76,10 @@ function BondingNetworkSelection ({ className }: Props): React.ReactElement<Prop
         </div>
       </Header>
 
-      <div className={'network-list'}>
+      <div
+        className={'network-list'}
+        style={{ height: `${networkListHeight}px` }}
+      >
         {
           loading && <Spinner />
         }
@@ -106,7 +111,8 @@ export default React.memo(styled(BondingNetworkSelection)(({ theme }: Props) => 
     display: flex;
     flex-direction: column;
     gap: 10px;
-    margin-left: 15px;
-    margin-right: 15px;
+    padding-left: 15px;
+    padding-right: 15px;
+    overflow: auto;
   }
 `));

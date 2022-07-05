@@ -4,7 +4,6 @@
 import { faCircleCheck, faCircleExclamation } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { ValidatorInfo } from '@subwallet/extension-base/background/KoniTypes';
-import NeutralQuestion from '@subwallet/extension-koni-ui/assets/NeutralQuestion.svg';
 import { ActionContext } from '@subwallet/extension-koni-ui/components';
 import Button from '@subwallet/extension-koni-ui/components/Button';
 import Identicon from '@subwallet/extension-koni-ui/components/Identicon';
@@ -42,6 +41,7 @@ interface Props extends ThemeProps {
 function BondingSubmitTransaction ({ className }: Props): React.ReactElement<Props> {
   const { t } = useTranslation();
   const { bondingParams, currentAccount: { account }, networkMap } = useSelector((state: RootState) => state);
+  const selectedAccount = bondingParams.selectedAccount as string;
   const selectedNetwork = bondingParams.selectedNetwork as string;
   const validatorInfo = bondingParams.selectedValidator as ValidatorInfo;
   const isBondedBefore = bondingParams.isBondedBefore as boolean;
@@ -77,6 +77,12 @@ function BondingSubmitTransaction ({ className }: Props): React.ReactElement<Pro
 
   const navigate = useContext(ActionContext);
   const _height = window.innerHeight > 600 ? 650 : 450;
+
+  useEffect(() => {
+    if (account && account.address !== selectedAccount) {
+      navigate('/account/select-bonding-network');
+    }
+  }, [account, navigate, selectedAccount]);
 
   useEffect(() => {
     if (!isClickNext) {
@@ -138,7 +144,7 @@ function BondingSubmitTransaction ({ className }: Props): React.ReactElement<Pro
     setLoading(true);
     getBondingTxInfo({
       networkKey: selectedNetwork,
-      nominatorAddress: account?.address as string,
+      nominatorAddress: selectedAccount,
       amount,
       validatorInfo,
       isBondedBefore,
@@ -154,7 +160,7 @@ function BondingSubmitTransaction ({ className }: Props): React.ReactElement<Pro
         setShowResult(false);
       })
       .catch(console.error);
-  }, [account?.address, amount, bondedValidators, isBondedBefore, lockPeriod, selectedNetwork, validatorInfo]);
+  }, [amount, bondedValidators, isBondedBefore, lockPeriod, selectedAccount, selectedNetwork, validatorInfo]);
 
   const getMinBondTooltipText = useCallback(() => {
     if (isMinBondZero) {
@@ -223,29 +229,29 @@ function BondingSubmitTransaction ({ className }: Props): React.ReactElement<Pro
             </div>
           </div>
 
-          {
-            validatorInfo.commission !== undefined && <div className={'validator-att-container'}>
-              <div className={'validator-att'}>
-                <div className={'validator-att-title'}>
-                  Commission
-                  {
-                    isMaxCommission && <FontAwesomeIcon
-                      className={'error-tooltip'}
-                      data-for={`commission-max-tooltip-${selectedNetwork}`}
-                      data-tip={true}
-                      icon={faCircleExclamation}
-                    />
-                  }
-                  <Tooltip
-                    place={'top'}
-                    text={'You will not be able to receive reward.'}
-                    trigger={`commission-max-tooltip-${selectedNetwork}`}
-                  />
-                </div>
-                <div className={`${!isMaxCommission ? 'validator-att-value' : 'validator-att-value-error'}`}>{validatorInfo.commission}%</div>
-              </div>
-            </div>
-          }
+          {/* { */}
+          {/*  validatorInfo.commission !== undefined && <div className={'validator-att-container'}> */}
+          {/*    <div className={'validator-att'}> */}
+          {/*      <div className={'validator-att-title'}> */}
+          {/*        Commission */}
+          {/*        { */}
+          {/*          isMaxCommission && <FontAwesomeIcon */}
+          {/*            className={'error-tooltip'} */}
+          {/*            data-for={`commission-max-tooltip-${selectedNetwork}`} */}
+          {/*            data-tip={true} */}
+          {/*            icon={faCircleExclamation} */}
+          {/*          /> */}
+          {/*        } */}
+          {/*        <Tooltip */}
+          {/*          place={'top'} */}
+          {/*          text={'You will not be able to receive reward.'} */}
+          {/*          trigger={`commission-max-tooltip-${selectedNetwork}`} */}
+          {/*        /> */}
+          {/*      </div> */}
+          {/*      <div className={`${!isMaxCommission ? 'validator-att-value' : 'validator-att-value-error'}`}>{validatorInfo.commission}%</div> */}
+          {/*    </div> */}
+          {/*  </div> */}
+          {/* } */}
         </div>
       );
     } else {
@@ -261,12 +267,11 @@ function BondingSubmitTransaction ({ className }: Props): React.ReactElement<Pro
               <div className={'validator-att-title'}>
                 Own stake
                 {
-                  !hasOwnStake && <img
+                  !hasOwnStake && <FontAwesomeIcon
+                    className={'warning-tooltip'}
                     data-for={`validator-has-no-stake-tooltip-${selectedNetwork}`}
                     data-tip={true}
-                    height={15}
-                    src={NeutralQuestion}
-                    width={15}
+                    icon={faCircleExclamation}
                   />
                 }
                 <Tooltip
@@ -285,12 +290,11 @@ function BondingSubmitTransaction ({ className }: Props): React.ReactElement<Pro
               <div className={'validator-att-title'}>
                 Nominators count
                 {
-                  isOversubscribed && <img
+                  isOversubscribed && <FontAwesomeIcon
+                    className={'error-tooltip'}
                     data-for={`validator-oversubscribed-tooltip-${selectedNetwork}`}
                     data-tip={true}
-                    height={15}
-                    src={NeutralQuestion}
-                    width={15}
+                    icon={faCircleExclamation}
                   />
                 }
                 <Tooltip
@@ -307,12 +311,11 @@ function BondingSubmitTransaction ({ className }: Props): React.ReactElement<Pro
               <div className={'validator-att-title'}>
                 Minimum stake
                 {
-                  !isSufficientFund && <img
+                  !isSufficientFund && <FontAwesomeIcon
+                    className={'error-tooltip'}
                     data-for={`insufficient-fund-tooltip-${selectedNetwork}`}
                     data-tip={true}
-                    height={15}
-                    src={NeutralQuestion}
-                    width={15}
+                    icon={faCircleExclamation}
                   />
                 }
                 <Tooltip
@@ -425,7 +428,7 @@ function BondingSubmitTransaction ({ className }: Props): React.ReactElement<Pro
             </div>
             <div className={'validator-footer'}>
               {
-                validatorInfo.expectedReturn && <div
+                validatorInfo.expectedReturn > 0 && <div
                   className={'validator-expected-return'}
                   data-for={`validator-return-tooltip-${validatorInfo.address}`}
                   data-tip={true}
@@ -457,7 +460,7 @@ function BondingSubmitTransaction ({ className }: Props): React.ReactElement<Pro
           balance={freeBalance}
           balanceFormat={balanceFormat}
           className={'auth-bonding__input-address'}
-          defaultAddress={account?.address}
+          defaultAddress={selectedAccount}
           inputAddressHelp={'The account which you will stake with'}
           inputAddressLabel={'Stake with account'}
           isDisabled={true}
@@ -543,6 +546,10 @@ function BondingSubmitTransaction ({ className }: Props): React.ReactElement<Pro
 }
 
 export default React.memo(styled(BondingSubmitTransaction)(({ theme }: Props) => `
+  .imgIcon {
+    border-radius: 50%;
+  }
+
   .validator-att-title {
     color: ${theme.textColor2};
     font-size: 14px;

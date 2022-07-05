@@ -9,7 +9,8 @@ const initialState = {
   selectedValidator: null,
   maxNominatorPerValidator: null,
   isBondedBefore: null,
-  bondedValidators: null
+  bondedValidators: null,
+  selectedAccount: ''
 } as BondingParams;
 
 const bondingParamsSlice = createSlice({
@@ -24,6 +25,7 @@ const bondingParamsSlice = createSlice({
       state.maxNominatorPerValidator = payload.maxNominatorPerValidator;
       state.isBondedBefore = payload.isBondedBefore;
       state.bondedValidators = payload.bondedValidators;
+      state.selectedAccount = payload.selectedAccount;
     }
   }
 });

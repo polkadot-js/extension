@@ -418,4 +418,19 @@ describe('test DotSama APIs', () => {
 
     console.log(resp.toHuman());
   });
+
+  test('get pools info', async () => {
+    const provider = new WsProvider(getCurrentProvider(PREDEFINED_NETWORKS.westend), DOTSAMA_AUTO_CONNECT_MS);
+    const api = new ApiPromise({ provider });
+    const apiPromise = await api.isReady;
+
+    const allPools = await apiPromise.query.nominationPools.bondedPools.entries();
+
+    for (const _pool of allPools) {
+      const _poolId = _pool[0].toHuman();
+      const _poolData = _pool[1].toHuman();
+
+      console.log(_poolId, _poolData);
+    }
+  });
 });

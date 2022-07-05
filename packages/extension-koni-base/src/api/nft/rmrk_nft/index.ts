@@ -166,8 +166,6 @@ export class RmrkNftApi extends BaseNftApi {
   }
 
   public async handleNfts (updateItem: (data: NftItem) => void, updateCollection: (data: NftCollection) => void, updateReady: (ready: boolean) => void) {
-    // const start = performance.now();
-
     let allNfts: Record<string | number, any>[] = [];
     const allCollections: NftCollection[] = [];
 

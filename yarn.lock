@@ -191,6 +191,33 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@babel/cli@npm:^7.18.6":
+  version: 7.18.6
+  resolution: "@babel/cli@npm:7.18.6"
+  dependencies:
+    "@jridgewell/trace-mapping": ^0.3.8
+    "@nicolo-ribaudo/chokidar-2": 2.1.8-no-fsevents.3
+    chokidar: ^3.4.0
+    commander: ^4.0.1
+    convert-source-map: ^1.1.0
+    fs-readdir-recursive: ^1.1.0
+    glob: ^7.0.0
+    make-dir: ^2.1.0
+    slash: ^2.0.0
+  peerDependencies:
+    "@babel/core": ^7.0.0-0
+  dependenciesMeta:
+    "@nicolo-ribaudo/chokidar-2":
+      optional: true
+    chokidar:
+      optional: true
+  bin:
+    babel: ./bin/babel.js
+    babel-external-helpers: ./bin/babel-external-helpers.js
+  checksum: 5559c93127ba3bca60b16910cf59605eacc2abbe82cb372f3f510cb4d977a2beb495ea1cfd55061a75651d423053455fc2b5ceda72a193aedf54ed13379f81d5
+  languageName: node
+  linkType: hard
+
 "@babel/code-frame@npm:^7.0.0, @babel/code-frame@npm:^7.12.13, @babel/code-frame@npm:^7.16.7":
   version: 7.16.7
   resolution: "@babel/code-frame@npm:7.16.7"
@@ -19482,6 +19509,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "root-workspace-0b6124@workspace:."
   dependencies:
+    "@babel/cli": ^7.18.6
     "@babel/core": ^7.18.6
     "@polkadot/dev": ^0.65.23
     "@types/jest": ^27.4.0

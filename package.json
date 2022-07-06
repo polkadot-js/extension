@@ -46,6 +46,7 @@
     "typescript": "^4.5.4"
   },
   "devDependencies": {
+    "@babel/cli": "^7.18.6",
     "@babel/core": "^7.18.6",
     "@polkadot/dev": "^0.65.23",
     "@types/jest": "^27.4.0",

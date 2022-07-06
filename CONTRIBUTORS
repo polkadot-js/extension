@@ -1,4 +1,4 @@
-     525	Jaco                          	Bump 3rd party deps (#1100)
+     526	Jaco                          	Adjust issue template (#1103)
       82	Thibaut Sardan                	Add account filtering feature (#832)
        7	Ivan Rukhavets                	Mention derivation in FAQ (#334)
        4	Amaury Martiny                	PostMessageProvider with on('connected' | 'disconnected') (#279)

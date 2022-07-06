@@ -34,19 +34,19 @@
   },
   "devDependencies": {
     "@babel/core": "^7.18.6",
-    "@polkadot/dev": "^0.67.46",
+    "@polkadot/dev": "^0.67.55",
     "@types/jest": "^28.1.4",
     "i18next-scanner": "^3.3.0",
     "sinon-chrome": "^3.0.1"
   },
   "resolutions": {
-    "@polkadot/api": "^8.11.1",
-    "@polkadot/keyring": "^9.7.1",
-    "@polkadot/networks": "^9.7.1",
-    "@polkadot/types": "^8.11.1",
-    "@polkadot/util": "^9.7.1",
-    "@polkadot/util-crypto": "^9.7.1",
-    "@polkadot/x-fetch": "^9.7.1",
+    "@polkadot/api": "^8.11.3",
+    "@polkadot/keyring": "^9.7.2",
+    "@polkadot/networks": "^9.7.2",
+    "@polkadot/types": "^8.11.3",
+    "@polkadot/util": "^9.7.2",
+    "@polkadot/util-crypto": "^9.7.2",
+    "@polkadot/x-fetch": "^9.7.2",
     "babel-core": "^7.0.0-bridge.0",
     "safe-buffer": "^5.2.1",
     "typescript": "^4.7.4"

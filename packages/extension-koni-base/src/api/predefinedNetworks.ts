@@ -1249,12 +1249,66 @@ export const PREDEFINED_NETWORKS: Record<string, NetworkJson> = {
     },
     active: false,
     currentProviderMode: 'ws',
-    currentProvider: 'OnFinality',
+    currentProvider: 'Darwinia_Network',
     groups: ['MAIN_NET'],
     nativeToken: 'CRAB',
     crowdloanUrl: 'https://crab.network/plo',
-    decimals: 18,
+    decimals: 9,
     coinGeckoKey: 'darwinia-crab-network'
+  },
+  crabEvm: {
+    key: 'crabEvm',
+    chain: 'Darwinia Crab - EVM',
+    genesisHash: '0x34f61bfda344b3fad3c3e38832a91448b3c613b199eb23e5110a635d71c13c65_1',
+    ss58Format: 42,
+    providers: {
+      Darwinia_Network: 'wss://crab-rpc.darwinia.network'
+    },
+    active: false,
+    currentProviderMode: 'ws',
+    currentProvider: 'Darwinia_Network',
+    groups: ['MAIN_NET'],
+    nativeToken: 'CRAB',
+    decimals: 18,
+    coinGeckoKey: 'darwinia-crab-network',
+    isEthereum: true,
+    evmChainId: 44,
+    blockExplorer: 'https://crab.subscan.io'
+  },
+  pangolin: {
+    key: 'pangolin',
+    chain: 'Pangolin',
+    genesisHash: '0xce44bd16fc276f9e457b452577b6c2678e57768260012af127479fed806da7e7',
+    ss58Format: 42,
+    providers: {
+      Pangolin_Network: 'wss://pangolin-rpc.darwinia.network'
+    },
+    active: false,
+    currentProviderMode: 'ws',
+    currentProvider: 'Pangolin_Network',
+    groups: ['TEST_NET'],
+    nativeToken: 'PRING',
+    decimals: 9,
+    isEthereum: false,
+    blockExplorer: 'https://pangolin.subscan.io'
+  },
+  pangolinEvm: {
+    key: 'pangolinEvm',
+    chain: 'Pangolin - EVM',
+    genesisHash: '0xce44bd16fc276f9e457b452577b6c2678e57768260012af127479fed806da7e7_1',
+    ss58Format: 42,
+    providers: {
+      Pangolin_Network: 'wss://pangolin-rpc.darwinia.network'
+    },
+    active: false,
+    currentProviderMode: 'ws',
+    currentProvider: 'Pangolin_Network',
+    groups: ['TEST_NET'],
+    nativeToken: 'PRING',
+    decimals: 18,
+    isEthereum: true,
+    evmChainId: 43,
+    blockExplorer: 'https://pangolin.subscan.io'
   },
   bitcountry: {
     key: 'bitcountry',

@@ -1256,6 +1256,23 @@ export const PREDEFINED_NETWORKS: Record<string, NetworkJson> = {
     decimals: 9,
     coinGeckoKey: 'darwinia-crab-network'
   },
+  crabParachain: {
+    key: 'crab',
+    chain: 'Crab Parachain',
+    genesisHash: '0xeac895d7768b17837a9c3a9f0280c01502c3ef40193df923490a0fa9c60ea076',
+    ss58Format: 42,
+    providers: {
+      Crab: 'wss://crab-parachain-rpc.darwinia.network'
+    },
+    active: false,
+    currentProviderMode: 'ws',
+    currentProvider: 'Crab',
+    groups: ['KUSAMA_PARACHAIN'],
+    nativeToken: 'CRAB',
+    crowdloanUrl: 'https://crab.network/plo',
+    decimals: 18,
+    coinGeckoKey: 'darwinia-crab-network'
+  },
   crabEvm: {
     key: 'crabEvm',
     chain: 'Darwinia Crab - EVM',

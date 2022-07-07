@@ -567,6 +567,7 @@ export async function makeNftTransferQr ({ apiProp,
 
     if (result.status.isBroadcast) {
       txState.isBusy = true;
+      callback(txState);
     }
 
     if (result.status.isInBlock || result.status.isFinalized) {

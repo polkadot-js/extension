@@ -1,7 +1,7 @@
 // Copyright 2019-2022 @subwallet/extension-koni authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { RequestNftForceUpdate, ResponseNftTransferExternal, ResponseNftTransferLedger, ResponseNftTransferQr, TransferNftError } from '@subwallet/extension-base/background/KoniTypes';
+import { BaseTxError, RequestNftForceUpdate, ResponseNftTransferExternal, ResponseNftTransferLedger, ResponseNftTransferQr } from '@subwallet/extension-base/background/KoniTypes';
 import { AccountJson } from '@subwallet/extension-base/background/types';
 import { LedgerState } from '@subwallet/extension-base/signers/types';
 import { Spinner } from '@subwallet/extension-koni-ui/components';
@@ -13,19 +13,18 @@ import { SIGN_MODE } from '@subwallet/extension-koni-ui/constants/signing';
 import { ExternalRequestContext } from '@subwallet/extension-koni-ui/contexts/ExternalRequestContext';
 import { QrContext, QrContextState, QrStep } from '@subwallet/extension-koni-ui/contexts/QrContext';
 import { useRejectExternalRequest } from '@subwallet/extension-koni-ui/hooks/useRejectExternalRequest';
+import { useSignMode } from '@subwallet/extension-koni-ui/hooks/useSignMode';
 import useToast from '@subwallet/extension-koni-ui/hooks/useToast';
 import useTranslation from '@subwallet/extension-koni-ui/hooks/useTranslation';
-import { evmNftSubmitTransaction, getAccountMeta, makeTransferNftLedgerSubstrate, makeTransferNftQrEvm, makeTransferNftQrSubstrate, nftForceUpdate, substrateNftSubmitTransaction } from '@subwallet/extension-koni-ui/messaging';
+import { evmNftSubmitTransaction, makeTransferNftLedgerSubstrate, makeTransferNftQrEvm, makeTransferNftQrSubstrate, nftForceUpdate, substrateNftSubmitTransaction } from '@subwallet/extension-koni-ui/messaging';
 import { _NftItem, SubstrateTransferParams, Web3TransferParams } from '@subwallet/extension-koni-ui/Popup/Home/Nfts/types';
 import Address from '@subwallet/extension-koni-ui/Popup/Sending/parts/Address';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import CN from 'classnames';
-import React, { useCallback, useContext, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useContext, useEffect, useState } from 'react';
 import { useSelector } from 'react-redux';
 import styled from 'styled-components';
-
-import { KeyringPair$Meta } from '@polkadot/keyring/types';
 
 interface AddressProxy {
   isUnlockCached: boolean;
@@ -65,19 +64,6 @@ function AuthTransfer ({ chain, className, collectionId, nftItem, recipientAddre
 
   const [loading, setLoading] = useState(false);
   const [senderInfoSubstrate, setSenderInfoSubstrate] = useState<AddressProxy>(() => ({ isUnlockCached: false, signAddress: senderAccount.address, signPassword: '' }));
-  const [accountMeta, setAccountMeta] = useState<KeyringPair$Meta>({});
-
-  const signMode = useMemo((): SIGN_MODE => {
-    if (accountMeta.isExternal && !!accountMeta.isExternal) {
-      if (accountMeta.isHardware && !!accountMeta.isHardware) {
-        return SIGN_MODE.LEDGER;
-      }
-
-      return SIGN_MODE.QR;
-    }
-
-    return SIGN_MODE.PASSWORD;
-  }, [accountMeta]);
 
   const substrateParams = substrateTransferParams !== null ? substrateTransferParams.params : null;
   const substrateGas = substrateTransferParams !== null ? substrateTransferParams.estimatedFee : null;
@@ -89,6 +75,8 @@ function AuthTransfer ({ chain, className, collectionId, nftItem, recipientAddre
 
   const [balanceError] = useState(substrateTransferParams !== null ? substrateBalanceError : web3BalanceError);
   const { currentAccount: account, currentNetwork } = useSelector((state: RootState) => state);
+
+  const signMode = useSignMode(account.account);
 
   const genesisHash = currentNetwork.genesisHash;
 
@@ -277,7 +265,7 @@ function AuthTransfer ({ chain, className, collectionId, nftItem, recipientAddre
     handlerCallbackResponseResult(data);
   }, [handlerCallbackResponseResult, updateExternalState, updateQrState]);
 
-  const handlerResponseError = useCallback((errors: TransferNftError[]) => {
+  const handlerResponseError = useCallback((errors: BaseTxError[]) => {
     const errorMessage = errors.map((err) => err.message);
 
     setErrorArr(errorMessage);
@@ -455,7 +443,7 @@ function AuthTransfer ({ chain, className, collectionId, nftItem, recipientAddre
       case SIGN_MODE.LEDGER:
         return (
           <LedgerRequest
-            accountMeta={accountMeta}
+            accountMeta={account}
             errorArr={errorArr}
             genesisHash={genesisHash}
             handlerSignLedger={handlerSendLedger}
@@ -508,26 +496,7 @@ function AuthTransfer ({ chain, className, collectionId, nftItem, recipientAddre
           </div>
         );
     }
-  }, [accountMeta, currentNetwork.networkPrefix, errorArr, genesisHash, handleSignAndSubmit, handlerCreateQr, handlerErrorQr, handlerSendLedger, loading, passwordError, senderAccount.address, signMode, substrateGas, t, web3Gas]);
-
-  useEffect(() => {
-    let unmount = false;
-
-    const handler = async () => {
-      const { meta } = await getAccountMeta({ address: senderAccount.address });
-
-      if (!unmount) {
-        setAccountMeta(meta);
-      }
-    };
-
-    // eslint-disable-next-line no-void
-    void handler();
-
-    return () => {
-      unmount = true;
-    };
-  }, [senderAccount.address]);
+  }, [account, currentNetwork.networkPrefix, errorArr, genesisHash, handleSignAndSubmit, handlerCreateQr, handlerErrorQr, handlerSendLedger, loading, passwordError, senderAccount.address, signMode, substrateGas, t, web3Gas]);
 
   return (
     <div className={className}>

@@ -50,9 +50,7 @@ const QrRequest = (props: Props) => {
 
   const handlerResolve = useCallback(async (result: SignerResult) => {
     if (qrId) {
-      setLoading(true);
       await resolveExternalRequest({ id: qrId, data: result });
-      setLoading(false);
     }
   }, [qrId]);
 
@@ -60,7 +58,9 @@ const QrRequest = (props: Props) => {
     if (isHex(data.signature) && !loading) {
       const resolveData = createResolveExternalRequestData(data);
 
+      setLoading(true);
       await handlerResolve(resolveData);
+      setLoading(false);
     }
   }, [handlerResolve, createResolveExternalRequestData, loading]);
 

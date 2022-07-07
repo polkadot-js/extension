@@ -16,10 +16,11 @@ import { SIGN_MODE } from '@subwallet/extension-koni-ui/constants/signing';
 import { ExternalRequestContext } from '@subwallet/extension-koni-ui/contexts/ExternalRequestContext';
 import { QrContext, QrContextState, QrStep } from '@subwallet/extension-koni-ui/contexts/QrContext';
 import { useRejectExternalRequest } from '@subwallet/extension-koni-ui/hooks/useRejectExternalRequest';
+import {useSignMode} from '@subwallet/extension-koni-ui/hooks/useSignMode';
 import useTranslation from '@subwallet/extension-koni-ui/hooks/useTranslation';
 import { getAccountMeta, makeTransfer, makeTransferLedger, makeTransferQr } from '@subwallet/extension-koni-ui/messaging';
 import { ThemeProps, TransferResultType } from '@subwallet/extension-koni-ui/types';
-import React, { useCallback, useContext, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useContext, useEffect, useState } from 'react';
 import styled from 'styled-components';
 
 import { KeyringPair$Meta } from '@polkadot/keyring/types';
@@ -89,17 +90,7 @@ function AuthTransaction ({ className, isDonation, feeInfo: [fee, feeDecimals, f
   const networkPrefix = networkMap[requestPayload.networkKey].ss58Format;
   const genesisHash = networkMap[requestPayload.networkKey].genesisHash;
 
-  const signMode = useMemo((): SIGN_MODE => {
-    if (accountMeta.isExternal && !!accountMeta.isExternal) {
-      if (accountMeta.isHardware && !!accountMeta.isHardware) {
-        return SIGN_MODE.LEDGER;
-      }
-
-      return SIGN_MODE.QR;
-    }
-
-    return SIGN_MODE.PASSWORD;
-  }, [accountMeta]);
+  const signMode = useSignMode(accountMeta);
 
   const _onCancel = useCallback(async () => {
     if (externalId) {

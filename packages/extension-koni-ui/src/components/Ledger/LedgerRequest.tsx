@@ -3,6 +3,7 @@
 
 import { faSync } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { AccountJson } from '@subwallet/extension-base/background/types';
 import { LedgerState } from '@subwallet/extension-base/signers/types';
 import { ExternalRequestContext } from '@subwallet/extension-koni-ui/contexts/ExternalRequestContext';
 import { rejectExternalRequest, resolveExternalRequest } from '@subwallet/extension-koni-ui/messaging';
@@ -23,7 +24,7 @@ interface OnSignLedgerFunction {
 }
 
 interface Props extends ThemeProps{
-  accountMeta: KeyringPair$Meta;
+  accountMeta?: KeyringPair$Meta | AccountJson;
   children: JSX.Element;
   className?: string;
   errorArr: string[];
@@ -42,7 +43,7 @@ const LedgerSign = (props: Props) => {
 
   const { createResolveExternalRequestData } = useContext(ExternalRequestContext);
 
-  const { error: ledgerError, isLoading: ledgerLoading, isLocked: ledgerLocked, ledger, refresh, warning: ledgerWarning } = useLedger(genesisHash, accountMeta.accountIndex as number, accountMeta.addressOffset as number);
+  const { error: ledgerError, isLoading: ledgerLoading, isLocked: ledgerLocked, ledger, refresh, warning: ledgerWarning } = useLedger(genesisHash, accountMeta?.accountIndex as number, accountMeta?.addressOffset as number);
 
   const [loading, setLoading] = useState(false);
 
@@ -60,7 +61,7 @@ const LedgerSign = (props: Props) => {
   }, [refresh, setErrorArr]);
 
   const onSignLedger = useCallback((ledger: Ledger, ledgerState: LedgerState) => {
-    ledger.sign(hexToU8a(ledgerState.ledgerPayload), accountMeta.accountIndex as number, accountMeta.accountOffset as number)
+    ledger.sign(hexToU8a(ledgerState.ledgerPayload), accountMeta?.accountIndex as number, accountMeta?.accountOffset as number)
       .then(({ signature }) => {
         const resolveData = createResolveExternalRequestData({ signature });
 
@@ -165,6 +166,12 @@ export default React.memo(styled(LedgerSign)(({ theme }: Props) => `
     padding-bottom: 15px;
     padding-top: 25px;
     overflow-y: auto;
+  }
+
+  .auth-transaction__separator{
+    padding-top: 24px;
+    margin-bottom: 24px;
+    border-bottom: 1px solid ${theme.menuItemsBorder};
   }
 
   .auth-transaction__separator, .auth-transaction-error {

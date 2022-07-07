@@ -17,7 +17,7 @@ import { Contract } from 'web3-eth-contract';
 
 import { ApiPromise } from '@polkadot/api';
 import { DeriveBalancesAll } from '@polkadot/api-derive/types';
-import { AccountInfo } from '@polkadot/types/interfaces';
+import { AccountInfo, Balance } from '@polkadot/types/interfaces';
 import { BN } from '@polkadot/util';
 import { isEthereumAddress } from '@polkadot/util-crypto';
 
@@ -297,7 +297,7 @@ async function subscribeWithAccountMulti (addresses: string[], networkKey: strin
   // @ts-ignore
   let unsub;
 
-  if (!['kintsugi', 'interlay', 'kintsugi_test', 'genshiro_testnet', 'genshiro', 'equilibrium_parachain'].includes(networkKey)) {
+  if (!['kintsugi', 'interlay', 'kintsugi_test', 'genshiro_testnet', 'genshiro', 'equilibrium_parachain', 'crab', 'pangolin'].includes(networkKey)) {
     unsub = await networkAPI.api.query.system.account.multi(addresses, (balances: AccountInfo[]) => {
       let [free, reserved, miscFrozen, feeFrozen] = [new BN(0), new BN(0), new BN(0), new BN(0)];
 
@@ -313,6 +313,44 @@ async function subscribeWithAccountMulti (addresses: string[], networkKey: strin
       balanceItem.reserved = reserved.toString();
       balanceItem.miscFrozen = miscFrozen.toString();
       balanceItem.feeFrozen = feeFrozen.toString();
+
+      callback(networkKey, balanceItem);
+    });
+  }
+
+  if (['crab', 'pangolin'].includes(networkKey)) {
+    const { chainDecimals, chainTokens } = await getRegistry(networkKey, networkAPI.api);
+
+    unsub = await networkAPI.api.query.system.account.multi(addresses, (balances: AccountInfo[]) => {
+      let [free, reserved, freeKton, reservedKton] = [new BN(0), new BN(0), new BN(0), new BN(0)];
+
+      balances.forEach((balance: AccountInfo) => {
+        free = free.add(balance.data?.free?.toBn() || new BN(0));
+        reserved = reserved.add(balance.data?.reserved?.toBn() || new BN(0));
+        // @ts-ignore
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-argument,@typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-member-access
+        freeKton = freeKton.add(balance.data?.freeKton?.toBn() || new BN(0));
+        // @ts-ignore
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-argument,@typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-member-access
+        reservedKton = reservedKton.add(balance.data?.reservedKton?.toBn() || new BN(0));
+      });
+
+      balanceItem.state = APIItemState.READY;
+      balanceItem.free = free.toString();
+      balanceItem.reserved = reserved.toString();
+      balanceItem.miscFrozen = '0';
+      balanceItem.feeFrozen = '0';
+
+      if (chainTokens.length > 1) {
+        balanceItem.children = {
+          [chainTokens[1]]: {
+            reserved: reservedKton.toString(),
+            free: freeKton.toString(),
+            frozen: '0',
+            decimals: chainDecimals[1]
+          }
+        };
+      }
 
       callback(networkKey, balanceItem);
     });
@@ -384,7 +422,7 @@ export function subscribeBalance (addresses: string[], dotSamaAPIMap: Record<str
     const networkAPI = await apiProps.isReady;
     const useAddresses = apiProps.isEthereum ? evmAddresses : substrateAddresses;
 
-    if (networkKey === 'astarEvm' || networkKey === 'shidenEvm' || networkKey === 'shibuyaEvm') {
+    if (['astarEvm', 'shidenEvm', 'shibuyaEvm', 'crabEvm', 'pangolinEvm'].includes(networkKey)) {
       return subscribeEVMBalance(networkKey, networkAPI.api, useAddresses, web3ApiMap, callback);
     }
 
@@ -433,6 +471,11 @@ export async function getFreeBalance (networkKey: string, address: string, dotSa
         // @ts-ignore
         // eslint-disable-next-line @typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-member-access,@typescript-eslint/no-unsafe-return
         return balance.asPositive?.toString() || '0';
+      } else if (tokenInfo && ((networkKey === 'crab' && tokenInfo.symbol === 'CKTON') || (networkKey === 'pangolin' && tokenInfo.symbol === 'PKTON'))) {
+        // @ts-ignore
+        const balance = await api.query.system.account(address) as { data: {freeKton: Balance }};
+
+        return balance.data?.freeKton?.toString() || '0';
       } else if (!isMainToken || ['kintsugi', 'kintsugi_test', 'interlay'].includes(networkKey)) {
         // @ts-ignore
         const balance = await api.query.tokens.accounts(address, tokenInfo?.specialOption || { Token: token }) as TokenBalanceRaw;
@@ -506,6 +549,18 @@ export async function subscribeFreeBalance (
         const unsub = await api.query.eqBalances.account(address, asset, (balance) => {
           // eslint-disable-next-line node/no-callback-literal,@typescript-eslint/no-unsafe-argument,@typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-member-access
           update(balance.asPositive.toString() || '0');
+        });
+
+        return () => {
+          // @ts-ignore
+          unsub && unsub();
+        };
+      } else if (tokenInfo && ((networkKey === 'crab' && tokenInfo.symbol === 'CKTON') || (networkKey === 'pangolin' && tokenInfo.symbol === 'PKTON'))) {
+        // @ts-ignore
+        const unsub = await api.query.system.account(address, (balance: DeriveBalancesAll) => {
+          // @ts-ignore
+          // eslint-disable-next-line node/no-callback-literal,@typescript-eslint/no-unsafe-argument,@typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-member-access
+          update(balance.data?.freeKton?.toBn()?.toString() || '0');
         });
 
         return () => {

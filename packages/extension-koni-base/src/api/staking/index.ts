@@ -19,7 +19,6 @@ interface LedgerData {
 export const DEFAULT_STAKING_NETWORKS = {
   polkadot: PREDEFINED_NETWORKS.polkadot,
   kusama: PREDEFINED_NETWORKS.kusama,
-  hydradx: PREDEFINED_NETWORKS.hydradx,
   aleph: PREDEFINED_NETWORKS.aleph,
   moonbeam: PREDEFINED_NETWORKS.moonbeam,
   moonbase: PREDEFINED_NETWORKS.moonbase,

@@ -236,7 +236,9 @@ export default class KoniState extends State {
               // @ts-ignore
               mergedNetworkMap[targetKey].currentProviderMode = currentProviderMethod;
             } else {
-              mergedNetworkMap[key] = storedNetwork;
+              if (key.startsWith('custom')) { // in case a predefined network is removed, it will be discarded
+                mergedNetworkMap[key] = storedNetwork;
+              }
             }
           }
         }

@@ -234,24 +234,6 @@ export const PREDEFINED_NETWORKS: Record<string, NetworkJson> = {
     decimals: 18,
     coinGeckoKey: 'clover-finance'
   },
-  hydradx: {
-    key: 'hydradx',
-    chain: 'HydraDX Snakenet',
-    genesisHash: '0xd2a620c27ec5cbc5621ff9a522689895074f7cca0d08e7134a7804e1a3ba86fc',
-    ss58Format: 63,
-    providers: {
-      'Galactic Council': 'wss://rpc-01.snakenet.hydradx.io'
-    },
-    active: false,
-    currentProviderMode: 'ws',
-    currentProvider: 'Galactic Council',
-    groups: ['MAIN_NET'],
-    nativeToken: 'HDX',
-    crowdloanUrl: 'https://loan.hydradx.io/',
-    decimals: 12,
-    supportBonding: true,
-    getStakingOnChain: true
-  },
   hydradx_main: {
     key: 'hydradx_main',
     chain: 'HydraDX',

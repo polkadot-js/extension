@@ -2,16 +2,19 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { PREDEFINED_NETWORKS } from '@subwallet/extension-koni-base/api/predefinedNetworks';
+import { xTokenMoonbeamContract } from '@subwallet/extension-koni-base/api/xcm/utils';
 import { DOTSAMA_AUTO_CONNECT_MS } from '@subwallet/extension-koni-base/constants';
 import { getCurrentProvider } from '@subwallet/extension-koni-base/utils/utils';
+import Web3 from 'web3';
 
 import { ApiPromise, WsProvider } from '@polkadot/api';
-import { BN } from '@polkadot/util';
+import { BN, bnToHex, u8aToHex } from '@polkadot/util';
+import { decodeAddress } from '@polkadot/util-crypto';
 
 jest.setTimeout(50000);
 
 describe('test DotSama APIs', () => {
-  test('test get xcm extrinsic', async () => {
+  test('test xcm from substrate parachain - evm parachain', async () => {
     const provider = new WsProvider(getCurrentProvider(PREDEFINED_NETWORKS.acala_testnet), DOTSAMA_AUTO_CONNECT_MS);
     const api = new ApiPromise({ provider });
     const apiPromise = await api.isReady;
@@ -50,5 +53,69 @@ describe('test DotSama APIs', () => {
     console.log(fee.partialFee.toHuman());
 
     console.log((10 ** 12));
+  });
+
+  // eslint-disable-next-line @typescript-eslint/require-await
+  test('test xcm from moonbeam - substrate parachain', async () => {
+    const web3 = new Web3(getCurrentProvider(PREDEFINED_NETWORKS.moonbeam));
+
+    let targetParachain = bnToHex(2001).slice(2); // Bifrost Alphanet
+
+    targetParachain = '0x0000000000'.slice(0, -targetParachain.length) + targetParachain;
+    const accountHex = u8aToHex(decodeAddress('ettAyhG3qXgvc6tFbofxYzQSdXBMzXMehB1TmmSEQd8SxvJ'));
+    const targetAccount = accountHex.replace('0x', '0x01') + '00';
+    const destination = [1, [targetParachain, targetAccount]];
+    const weight = 4000000000;
+
+    console.log('Destination', JSON.stringify(destination));
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
+    const xTokenContract = new web3.eth.Contract(xTokenMoonbeamContract);
+
+    // Encode transfer
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-member-access,@typescript-eslint/no-unsafe-assignment
+    const transferData = xTokenContract.methods.transfer('0xAF2b4242e766caf5791DA56723a8dE1BeA4e7098', 1, destination, weight).encodeABI();
+
+    console.log(transferData);
+
+    // // Estimate gas fee
+    // const gasPrice = await web3.eth.getGasPrice();
+    //
+    // console.log(gasPrice);
+    //
+    // const transactionObject = {
+    //   from: fromAcc.address,
+    //   to: contractAddress,
+    //   gasPrice: gasPrice,
+    //   data: transferData
+    // };
+    // const gasLimit = await web3.eth.estimateGas(transactionObject);
+    //
+    // if (gasLimit) {
+    //   transactionObject.gas = gasLimit;
+    // }
+    //
+    // // Perform Transaction
+    // const signed = await web3.eth.accounts.signTransaction(transactionObject, fromAcc.privateKey);
+    //
+    // try {
+    //   web3.eth.sendSignedTransaction(signed.rawTransaction)
+    //     .on('transactionHash', function (hash) {
+    //       console.log('transactionHash', hash);
+    //     })
+    //     .on('receipt', function (receipt) {
+    //       console.log('receipt', receipt);
+    //     });
+    // } catch (e) {
+    //   console.log(e.message);
+    // }
+  });
+
+  test('test get moonbeam asset', async () => {
+    const provider = new WsProvider(getCurrentProvider(PREDEFINED_NETWORKS.moonbeam), DOTSAMA_AUTO_CONNECT_MS);
+    const api = new ApiPromise({ provider });
+    const apiPromise = await api.isReady;
+    const web3 = new Web3(getCurrentProvider(PREDEFINED_NETWORKS.moonbeam));
+
+    const assets = await api.query.assets.metadata.entries();
   });
 });

@@ -3,7 +3,7 @@
 
 import { ApiProps, NetworkJson, ResponseTransfer, TokenInfo } from '@subwallet/extension-base/background/KoniTypes';
 import { doSignAndSend, getUnsupportedResponse, updateResponseTxResult } from '@subwallet/extension-koni-base/api/dotsama/transfer';
-import { SupportedCrossChainsMap } from '@subwallet/extension-koni-base/api/xcm/supportedCrossChains';
+import {FOUR_INSTRUCTIONS_WEIGHT, SupportedCrossChainsMap} from '@subwallet/extension-koni-base/api/xcm/utils';
 
 import { KeyringPair } from '@polkadot/keyring/types';
 
@@ -83,7 +83,7 @@ export async function estimateCrossChainFee (
       },
       +value,
       getCrossChainTransferDest(paraId, to),
-      4000000000
+      FOUR_INSTRUCTIONS_WEIGHT
     ).paymentInfo(fromKeypair);
 
     fee = paymentInfo.partialFee.toString();
@@ -130,7 +130,7 @@ export async function makeCrossChainTransfer (
     },
     +value,
     getCrossChainTransferDest(paraId, to),
-    4000000000
+    FOUR_INSTRUCTIONS_WEIGHT
   );
 
   await doSignAndSend(api, originNetworkKey, tokenInfo, transfer, fromKeypair, updateResponseTxResult, callback);

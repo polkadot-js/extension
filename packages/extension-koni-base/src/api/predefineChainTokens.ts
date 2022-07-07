@@ -384,9 +384,9 @@ export const PREDEFINE_TOKEN_DATA_MAP: Record<string, Record<string, TokenInfo>>
       decimals: 18,
       name: 'RiverBoat'
     },
-    xcKBTC: {
+    xckBTC: {
       isMainToken: false,
-      symbol: 'xcKBTC',
+      symbol: 'xckBTC',
       erc20Address: '0xFFFFFFFFF6E528AD57184579BEEE00C5D5E646F0',
       decimals: 8,
       name: 'Kintsugi Wrapped BTC'
@@ -425,6 +425,28 @@ export const PREDEFINE_TOKEN_DATA_MAP: Record<string, Record<string, TokenInfo>>
       erc20Address: '0xFFFFFFFFF075423BE54811ECB478E911F22DDE7D',
       decimals: 12,
       name: 'xcBNC'
+    },
+    // TODO: edit this
+    xcUSDT: {
+      isMainToken: false,
+      symbol: 'xcUSDT',
+      erc20Address: '0xFFFFFFfFea09FB06d082fd1275CD48b191cbCD1d',
+      decimals: 12,
+      name: 'xcUSDT'
+    },
+    xcPHA: {
+      isMainToken: false,
+      symbol: 'xcPHA',
+      erc20Address: '0xffFfFFff8E6b63d9e447B6d4C45BDA8AF9dc9603',
+      decimals: 12,
+      name: 'xcPHA'
+    },
+    xcaUSD: {
+      isMainToken: false,
+      symbol: 'xcaUSD',
+      erc20Address: '0xFfFffFFfa1B026a00FbAA67c86D5d1d5BF8D8228',
+      decimals: 12,
+      name: 'xcaUSD'
     }
   },
   moonbeam: {
@@ -441,6 +463,20 @@ export const PREDEFINE_TOKEN_DATA_MAP: Record<string, Record<string, TokenInfo>>
       erc20Address: '0x818ec0A7Fe18Ff94269904fCED6AE3DaE6d6dC0b',
       decimals: 6,
       name: 'USD Coin'
+    },
+    xcACA: {
+      isMainToken: false,
+      symbol: 'xcACA',
+      erc20Address: '0xffffFFffa922Fef94566104a6e5A35a4fCDDAA9f',
+      decimals: 12,
+      name: 'Acala'
+    },
+    xcDOT: {
+      isMainToken: false,
+      symbol: 'xcDOT',
+      erc20Address: '0xFfFFfFff1FcaCBd218EDc0EbA20Fc2308C778080',
+      decimals: 12,
+      name: 'Polkadot'
     },
     xcaUSD: {
       isMainToken: false,

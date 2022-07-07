@@ -201,9 +201,10 @@ export const PREDEFINE_TOKEN_DATA_MAP: Record<string, Record<string, TokenInfo>>
       name: 'KSM',
       decimals: 12
     },
-    aUSD: {
+    AUSD: {
       isMainToken: false,
-      symbol: 'aUSD',
+      symbol: 'AUSD',
+      symbolAlt: 'aUSD',
       name: 'aUSD',
       decimals: 12
     },
@@ -440,6 +441,13 @@ export const PREDEFINE_TOKEN_DATA_MAP: Record<string, Record<string, TokenInfo>>
       erc20Address: '0x818ec0A7Fe18Ff94269904fCED6AE3DaE6d6dC0b',
       decimals: 6,
       name: 'USD Coin'
+    },
+    xcaUSD: {
+      isMainToken: false,
+      symbol: 'xcaUSD',
+      erc20Address: '0xfFfFFFFF52C56A9257bB97f4B2b6F7B2D624ecda',
+      decimals: 12,
+      name: 'Acala Dollar'
     },
     BNB: {
       isMainToken: false,

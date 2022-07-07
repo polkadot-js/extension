@@ -22,12 +22,21 @@ export const SupportedCrossChainsMap: Record<string, CrossChainRelation> = {
   //     }
   //   }
   // },
+  acala: {
+    type: 'p',
+    relationMap: {
+      moonbeam: {
+        type: 'p',
+        supportedToken: ['ACA', 'AUSD', 'LDOT']
+      }
+    }
+  },
   karura: {
     type: 'p',
     relationMap: {
       moonriver: {
         type: 'p',
-        supportedToken: ['KAR']
+        supportedToken: ['KAR', 'AUSD', 'LKSM', 'PHA', 'KINT', 'VSKSM', 'KSM', 'KBTC']
       }
     }
   },
@@ -39,7 +48,7 @@ export const SupportedCrossChainsMap: Record<string, CrossChainRelation> = {
         supportedToken: ['KINT']
       }
     }
-  },
+  }
   // todo: will support Bifrost later
   // bifrost: {
   //   type: 'p',
@@ -50,22 +59,13 @@ export const SupportedCrossChainsMap: Record<string, CrossChainRelation> = {
   //     }
   //   }
   // },
-  acala: {
-    type: 'p',
-    relationMap: {
-      moonbeam: {
-        type: 'p',
-        supportedToken: ['ACA', 'AUSD']
-      }
-    }
-  },
-  acala_testnet: {
-    type: 'p',
-    relationMap: {
-      moonbase: {
-        type: 'p',
-        supportedToken: ['ACA', 'AUSD']
-      }
-    }
-  }
+  // acala_testnet: {
+  //   type: 'p',
+  //   relationMap: {
+  //     moonbase: {
+  //       type: 'p',
+  //       supportedToken: ['ACA', 'AUSD']
+  //     }
+  //   }
+  // }
 };

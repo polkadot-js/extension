@@ -566,8 +566,8 @@ export async function getBondingOptions (networkKey: string, address: string): P
   return sendMessage('pri(bonding.getBondingOptions)', { networkKey, address });
 }
 
-export async function getChainBondingBasics (networkJsons: NetworkJson[]): Promise<Record<string, ChainBondingBasics>> {
-  return sendMessage('pri(bonding.getChainBondingBasics)', networkJsons);
+export async function getChainBondingBasics (networkJsons: NetworkJson[], callback: (data: Record<string, ChainBondingBasics>) => void): Promise<Record<string, ChainBondingBasics>> {
+  return sendMessage('pri(bonding.getChainBondingBasics)', networkJsons, callback);
 }
 
 export async function submitBonding (bondingSubmitParams: BondingSubmitParams, callback: (data: BasicTxResponse) => void): Promise<BasicTxResponse> {

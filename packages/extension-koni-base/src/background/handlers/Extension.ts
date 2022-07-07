@@ -2076,11 +2076,13 @@ export default class KoniExtension extends Extension {
     return state.completeConfirmation(request);
   }
 
-  private async getChainBondingBasics (networkJsons: NetworkJson[]) {
+  private async getChainBondingBasics (id: string, port: chrome.runtime.Port, networkJsons: NetworkJson[]) {
     const result: Record<string, ChainBondingBasics> = {};
+    const callback = createSubscription<'pri(bonding.getChainBondingBasics)'>(id, port);
 
     await Promise.all(networkJsons.map(async (networkJson) => {
       result[networkJson.key] = await getChainBondingBasics(networkJson.key, state.getDotSamaApi(networkJson.key));
+      callback(result);
     }));
 
     return result;
@@ -2540,7 +2542,7 @@ export default class KoniExtension extends Extension {
       case 'pri(bonding.getBondingOptions)':
         return await this.getBondingOption(request as BondingOptionParams);
       case 'pri(bonding.getChainBondingBasics)':
-        return await this.getChainBondingBasics(request as NetworkJson[]);
+        return await this.getChainBondingBasics(id, port, request as NetworkJson[]);
       case 'pri(bonding.submitTransaction)':
         return await this.submitBonding(id, port, request as BondingSubmitParams);
       case 'pri(bonding.txInfo)':

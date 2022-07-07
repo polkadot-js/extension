@@ -13,6 +13,7 @@ import { QrContext, QrContextState, QrStep } from '@subwallet/extension-koni-ui/
 import useGetFreeBalance from '@subwallet/extension-koni-ui/hooks/screen/bonding/useGetFreeBalance';
 import useGetNetworkJson from '@subwallet/extension-koni-ui/hooks/screen/home/useGetNetworkJson';
 import { useRejectExternalRequest } from '@subwallet/extension-koni-ui/hooks/useRejectExternalRequest';
+import { useSignMode } from '@subwallet/extension-koni-ui/hooks/useSignMode';
 import useToast from '@subwallet/extension-koni-ui/hooks/useToast';
 import useTranslation from '@subwallet/extension-koni-ui/hooks/useTranslation';
 import { makeBondingLedger, makeBondingQr, submitBonding } from '@subwallet/extension-koni-ui/messaging';
@@ -22,7 +23,6 @@ import { toShort } from '@subwallet/extension-koni-ui/util';
 import React, { useCallback, useContext, useMemo, useState } from 'react';
 import { useSelector } from 'react-redux';
 import styled from 'styled-components';
-import {useSignMode} from '@subwallet/extension-koni-ui/hooks/useSignMode';
 
 const Spinner = React.lazy(() => import('@subwallet/extension-koni-ui/components/Spinner'));
 const Identicon = React.lazy(() => import('@subwallet/extension-koni-ui/components/Identicon'));

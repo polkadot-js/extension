@@ -1293,7 +1293,8 @@ export const PREDEFINED_NETWORKS: Record<string, NetworkJson> = {
     icon: 'polkadot',
     ss58Format: 42,
     providers: {
-      OnFinality: 'wss://node-6870830370282213376.rz.onfinality.io/ws?apikey=0f273197-e4d5-45e2-b23e-03b015cb7000'
+      OnFinality: 'wss://acala-mandala.api.onfinality.io/public-ws',
+      Polkawallet: 'wss://mandala.polkawallet.io'
     },
     currentProviderMode: 'ws',
     currentProvider: 'OnFinality',

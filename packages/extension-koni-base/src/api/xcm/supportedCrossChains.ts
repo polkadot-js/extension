@@ -55,7 +55,16 @@ export const SupportedCrossChainsMap: Record<string, CrossChainRelation> = {
     relationMap: {
       moonbeam: {
         type: 'p',
-        supportedToken: ['ACA']
+        supportedToken: ['ACA', 'AUSD']
+      }
+    }
+  },
+  acala_testnet: {
+    type: 'p',
+    relationMap: {
+      moonbase: {
+        type: 'p',
+        supportedToken: ['ACA', 'AUSD']
       }
     }
   }

@@ -1390,15 +1390,16 @@ export const PREDEFINED_NETWORKS: Record<string, NetworkJson> = {
     groups: ['KUSAMA_PARACHAIN'],
     paraId: 2106,
     nativeToken: 'LIT',
+    decimals: 12,
     crowdloanUrl: 'https://kusama-crowdloan.litentry.com/'
   },
   litentry: {
     key: 'litentry',
     chain: 'Litentry',
-    genesisHash: 'UNKNOWN',
-    ss58Format: -1,
+    genesisHash: '0x2fc8bb6ed7c0051bdcf4866c322ed32b6276572713607e3297ccf411b8f14aa9',
+    ss58Format: 31,
     providers: {
-      Litentry: 'wss://parachain.litentry.io'
+      Litentry: 'wss://rpc.litentry-parachain.litentry.io'
     },
     active: false,
     currentProviderMode: 'ws',
@@ -1407,7 +1408,7 @@ export const PREDEFINED_NETWORKS: Record<string, NetworkJson> = {
     paraId: 2013,
     nativeToken: 'LIT',
     crowdloanUrl: 'https://crowdloan.litentry.com/',
-    decimals: 10,
+    decimals: 12,
     coinGeckoKey: 'litentry'
   },
   tinkernet: {

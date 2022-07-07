@@ -68,7 +68,7 @@ export async function estimateCrossChainFee (
   const isTxXTokensSupported = !!api && !!api.tx && !!api.tx.xTokens;
   let fee = '0';
   // eslint-disable-next-line prefer-const
-  let feeSymbol = tokenInfo.symbol;
+  let feeSymbol = networkMap[originNetworkKey].nativeToken as string;
 
   if (isTxXTokensSupported) {
     // todo: Case ParaChain vs RelayChain

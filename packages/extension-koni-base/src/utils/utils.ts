@@ -67,6 +67,13 @@ export function categoryAddresses (addresses: string[]) {
   return [substrateAddresses, evmAddresses];
 }
 
+export function categoryNetworks (networks: NetworkJson[]) {
+  const substrateAddresses: string[] = [];
+  const evmAddresses: string[] = [];
+
+  return [substrateAddresses, evmAddresses];
+}
+
 export function convertToEvmAddress (substrateAddress: string): string {
   const addressBytes = decodeAddress(substrateAddress);
 

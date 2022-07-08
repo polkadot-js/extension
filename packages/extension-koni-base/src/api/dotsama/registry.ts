@@ -79,6 +79,13 @@ export const getRegistry = async (networkKey: string, api: ApiPromise, customErc
 
   const { chainDecimals, chainTokens } = api.registry;
 
+  // Hotfix for these network because substrate and evm response different decimal
+  if (['pangolinEvm', 'crabEvm'].includes(networkKey)) {
+    chainDecimals.forEach((x, i, l) => {
+      l[i] = 18;
+    });
+  }
+
   // Build token map
   const tokenMap = {} as Record<string, TokenInfo>;
 

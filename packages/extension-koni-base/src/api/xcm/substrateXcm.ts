@@ -21,7 +21,7 @@ export async function substrateEstimateCrossChainFee (
   const api = apiProps.api;
   const isTxXTokensSupported = !!api && !!api.tx && !!api.tx.xTokens;
   let fee = '0';
-  const feeSymbol = networkMap[originNetworkKey].nativeToken as string;
+  let feeString = '';
 
   if (isTxXTokensSupported) {
     // todo: Case ParaChain vs RelayChain
@@ -38,9 +38,10 @@ export async function substrateEstimateCrossChainFee (
     ).paymentInfo(fromKeypair);
 
     fee = paymentInfo.partialFee.toString();
+    feeString = paymentInfo.partialFee.toHuman();
   }
 
-  return [fee, feeSymbol];
+  return [fee, feeString];
 }
 
 export function substrateGetXcmExtrinsic (

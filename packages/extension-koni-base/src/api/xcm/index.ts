@@ -37,7 +37,7 @@ export async function estimateCrossChainFee (
   networkMap: Record<string, NetworkJson>
 ): Promise<[string, string | undefined]> {
   if (!isNetworksPairSupportedTransferCrossChain(originNetworkKey, destinationNetworkKey, tokenInfo.symbol, networkMap)) {
-    return ['0', tokenInfo.symbol];
+    return ['0', ''];
   }
 
   if (['moonbase', 'moonriver', 'moonbeam'].includes(originNetworkKey)) {

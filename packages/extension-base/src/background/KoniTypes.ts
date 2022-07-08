@@ -517,8 +517,7 @@ export interface RequestCrossChainTransfer extends RequestCheckCrossChainTransfe
 
 export interface ResponseCheckCrossChainTransfer {
   errors?: Array<TransferError>,
-  estimateFee?: string,
-  feeSymbol?: string // if undefined => use main token
+  feeString?: string
 }
 
 export interface ResponsePrivateKeyValidateV2 {

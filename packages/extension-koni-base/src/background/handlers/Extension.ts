@@ -1199,13 +1199,13 @@ export default class KoniExtension extends Extension {
     const dotSamaApiMap = state.getDotSamaApiMap();
     const web3ApiMap = state.getApiMap().web3;
     let fee = '0';
-    let feeSymbol;
+    let feeString;
     let fromAccountFree = '0';
 
     // todo: Case ETH using web3 js
 
     if (tokenInfo && fromKeyPair) {
-      [[fee, feeSymbol], fromAccountFree] = await Promise.all([
+      [[fee, feeString], fromAccountFree] = await Promise.all([
         estimateCrossChainFee(
           originNetworkKey,
           destinationNetworkKey,
@@ -1235,8 +1235,7 @@ export default class KoniExtension extends Extension {
 
     return {
       errors,
-      estimateFee: fee,
-      feeSymbol
+      feeString
     };
   }
 

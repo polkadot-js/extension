@@ -39,9 +39,9 @@ export async function moonbeamEstimateCrossChainFee (
   ).paymentInfo(fromKeypair.address);
 
   const fee = paymentInfo.partialFee.toString();
-  const feeSymbol = networkMap[originNetworkKey].nativeToken as string;
+  const feeString = paymentInfo.partialFee.toHuman();
 
-  return [fee, feeSymbol];
+  return [fee, feeString];
 }
 
 export function moonbeamGetXcmExtrinsic (

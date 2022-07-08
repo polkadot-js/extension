@@ -9,7 +9,7 @@ import { getRegistry, getTokenInfo } from '@subwallet/extension-koni-base/api/do
 import { getEVMBalance } from '@subwallet/extension-koni-base/api/web3/balance';
 import { getERC20Contract } from '@subwallet/extension-koni-base/api/web3/web3';
 import { state } from '@subwallet/extension-koni-base/background/handlers';
-import { ASTAR_REFRESH_BALANCE_INTERVAL, IGNORE_GET_SUBSTRATE_FEATURES_LIST, MOONBEAM_REFRESH_BALANCE_INTERVAL } from '@subwallet/extension-koni-base/constants';
+import { ASTAR_REFRESH_BALANCE_INTERVAL, EVM_BALANCE_FAST_INTERVAL, IGNORE_GET_SUBSTRATE_FEATURES_LIST, MOONBEAM_REFRESH_BALANCE_INTERVAL } from '@subwallet/extension-koni-base/constants';
 import { categoryAddresses, sumBN } from '@subwallet/extension-koni-base/utils/utils';
 import { Observable } from 'rxjs';
 import Web3 from 'web3';
@@ -449,21 +449,35 @@ export function subscribeBalance (addresses: string[], dotSamaAPIMap: Record<str
 export async function getFreeBalance (networkKey: string, address: string, dotSamaApiMap: Record<string, ApiProps>, web3ApiMap: Record<string, Web3>, token?: string): Promise<string> {
   const apiProps = await dotSamaApiMap[networkKey].isReady;
   const api = apiProps.api;
+  const web3Api = web3ApiMap[networkKey];
+  const tokenInfo = token ? await getTokenInfo(networkKey, api, token) : undefined;
+  const isMainToken = tokenInfo ? tokenInfo.isMainToken : true;
 
-  if (token) {
-    const tokenInfo = await getTokenInfo(networkKey, api, token);
-    const isMainToken = !!(tokenInfo?.isMainToken);
+  // Only EVM Address use with EVM network
+  if (Boolean(web3Api || apiProps.isEthereum) !== isEthereumAddress(address)) {
+    if (!isEthereumAddress(address)) {
+      return '0';
+    }
+  }
 
-    if (apiProps.isEthereum && tokenInfo?.erc20Address) {
-      if (!isMainToken) {
-        const contract = getERC20Contract(networkKey, tokenInfo.erc20Address, web3ApiMap);
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment,@typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-member-access
-        const free = await contract.methods.balanceOf(address).call();
-
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access,@typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-return
-        return free?.toString() || '0';
-      }
+  // web3Api support mean isEthereum Network support
+  if (web3Api) {
+    if (isMainToken) {
+      return await web3Api?.eth.getBalance(address) || '0';
     } else {
+      if (!tokenInfo?.erc20Address) {
+        return '0';
+      }
+
+      const contract = getERC20Contract(networkKey, tokenInfo.erc20Address, web3ApiMap);
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment,@typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-member-access
+      const free = await contract.methods.balanceOf(address).call();
+
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access,@typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-return
+      return free?.toString() || '0';
+    }
+  } else {
+    if (token) {
       if (['genshiro_testnet', 'genshiro', 'equilibrium_parachain'].includes(networkKey)) {
         const asset = networkKey === 'equilibrium_parachain' ? assetFromToken(token)[0] : assetFromToken(token);
         const balance = await api.query.eqBalances.account(address, asset);
@@ -473,7 +487,7 @@ export async function getFreeBalance (networkKey: string, address: string, dotSa
         return balance.asPositive?.toString() || '0';
       } else if (tokenInfo && ((networkKey === 'crab' && tokenInfo.symbol === 'CKTON') || (networkKey === 'pangolin' && tokenInfo.symbol === 'PKTON'))) {
         // @ts-ignore
-        const balance = await api.query.system.account(address) as { data: {freeKton: Balance }};
+        const balance = await api.query.system.account(address) as { data: { freeKton: Balance } };
 
         return balance.data?.freeKton?.toString() || '0';
       } else if (!isMainToken || ['kintsugi', 'kintsugi_test', 'interlay'].includes(networkKey)) {
@@ -483,11 +497,11 @@ export async function getFreeBalance (networkKey: string, address: string, dotSa
         return balance.free?.toString() || '0';
       }
     }
+
+    const balance = await api.query.system.account(address) as AccountInfo;
+
+    return balance.data?.free?.toString() || '0';
   }
-
-  const balance = await api.query.system.account(address) as AccountInfo;
-
-  return balance.data?.free?.toString() || '0';
 }
 
 export async function subscribeFreeBalance (
@@ -499,50 +513,56 @@ export async function subscribeFreeBalance (
   update: (balance: string) => void): Promise<() => void> {
   const apiProps = await dotSamaApiMap[networkKey].isReady;
   const api = apiProps.api;
+  const web3Api = web3ApiMap[networkKey];
+  const tokenInfo = token ? await getTokenInfo(networkKey, api, token) : undefined;
+  const isMainToken = tokenInfo ? tokenInfo.isMainToken : true;
 
-  if (apiProps.isEthereum) {
+  // Only EVM Address use with EVM network
+  if (Boolean(web3Api || apiProps.isEthereum) !== isEthereumAddress(address)) {
     if (!isEthereumAddress(address)) {
-      update('0');
-
-      return () => undefined;
-    }
-  } else {
-    if (isEthereumAddress(address)) {
       update('0');
 
       return () => undefined;
     }
   }
 
-  if (token) {
-    const tokenInfo = await getTokenInfo(networkKey, api, token);
-    const isMainToken = !!(tokenInfo?.isMainToken);
+  // web3Api support mean isEthereum Network support
+  if (web3Api) {
+    const responseIntervalSubscription = (method: () => void) => {
+      method();
+      const interval = setInterval(method, EVM_BALANCE_FAST_INTERVAL);
 
-    if (apiProps.isEthereum && tokenInfo?.erc20Address) {
-      if (!isMainToken) {
-        const getFreeBalance = () => {
-          if (!tokenInfo?.erc20Address) {
-            return;
-          }
+      return () => {
+        clearInterval(interval);
+      };
+    };
 
-          const contract = getERC20Contract(networkKey, tokenInfo.erc20Address, web3ApiMap);
+    if (isMainToken) {
+      const getEvmMainBalance = () => {
+        web3Api.eth.getBalance(address).then(update).catch(console.log);
+      };
 
-          // @ts-ignore
-          // eslint-disable-next-line @typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-member-access
-          contract.methods.balanceOf(address).call().then((free) => {
-            // eslint-disable-next-line node/no-callback-literal,@typescript-eslint/no-unsafe-argument,@typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-member-access
-            update(free?.toString() || '0');
-          });
-        };
-
-        getFreeBalance();
-        const interval = setInterval(getFreeBalance, MOONBEAM_REFRESH_BALANCE_INTERVAL);
-
-        return () => {
-          clearInterval(interval);
-        };
-      }
+      return responseIntervalSubscription(getEvmMainBalance);
     } else {
+      const getERC20FreeBalance = () => {
+        if (!tokenInfo?.erc20Address) {
+          return;
+        }
+
+        const contract = getERC20Contract(networkKey, tokenInfo.erc20Address, web3ApiMap);
+
+        // @ts-ignore
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-member-access
+        contract.methods.balanceOf(address).call().then((free) => {
+          // eslint-disable-next-line node/no-callback-literal,@typescript-eslint/no-unsafe-argument,@typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-member-access
+          update(free?.toString() || '0');
+        });
+      };
+
+      return responseIntervalSubscription(getERC20FreeBalance);
+    }
+  } else {
+    if (token) {
       if (['genshiro_testnet', 'genshiro', 'equilibrium_parachain'].includes(networkKey)) {
         const asset = networkKey === 'equilibrium_parachain' ? assetFromToken(token)[0] : assetFromToken(token);
         // @ts-ignore
@@ -580,16 +600,13 @@ export async function subscribeFreeBalance (
         };
       }
     }
+
+    const unsub = await api.derive.balances?.all(address, (balance: DeriveBalancesAll) => {
+      update(balance.availableBalance?.toBn()?.toString() || '0');
+    });
+
+    return () => {
+      unsub && unsub();
+    };
   }
-
-  // @ts-ignore
-  const unsub = await api.derive.balances?.all(address, (balance: DeriveBalancesAll) => {
-    // eslint-disable-next-line node/no-callback-literal,@typescript-eslint/no-unsafe-argument,@typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-member-access
-    update(balance.availableBalance?.toBn()?.toString() || '0');
-  });
-
-  return () => {
-    // @ts-ignore
-    unsub && unsub();
-  };
 }

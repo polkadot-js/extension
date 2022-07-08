@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { PREDEFINED_NETWORKS } from '@subwallet/extension-koni-base/api/predefinedNetworks';
-import { xTokenMoonbeamContract } from '@subwallet/extension-koni-base/api/xcm/utils';
+import {getXcmMultiLocation, xTokenMoonbeamContract} from '@subwallet/extension-koni-base/api/xcm/utils';
 import { DOTSAMA_AUTO_CONNECT_MS } from '@subwallet/extension-koni-base/constants';
 import { getCurrentProvider } from '@subwallet/extension-koni-base/utils/utils';
 import Web3 from 'web3';
@@ -135,5 +135,11 @@ describe('test DotSama APIs', () => {
     const paymentInfo = await extrinsic.paymentInfo('0x40a207109cf531024B55010A1e760199Df0d3a13');
 
     console.log(paymentInfo.toHuman());
+  });
+
+  test('test get multilocation', () => {
+    const res = getXcmMultiLocation('moonbeam', 'polkadot', PREDEFINED_NETWORKS, 100, 'oakiscoais');
+
+    console.log(res);
   });
 });

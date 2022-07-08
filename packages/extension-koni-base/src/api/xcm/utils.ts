@@ -1,107 +1,130 @@
 // Copyright 2019-2022 @subwallet/extension-koni-base authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { CrossChainRelation } from '@subwallet/extension-base/background/KoniTypes';
+import { CrossChainRelation, NetworkJson } from '@subwallet/extension-base/background/KoniTypes';
 
 export const SupportedCrossChainsMap: Record<string, CrossChainRelation> = {
   moonbase: {
+    isEthereum: true,
     type: 'p',
     relationMap: {
       acala_dev: {
         type: 'p',
+        isEthereum: false,
         supportedToken: ['xcKAR']
       }
     }
   },
   acala: {
     type: 'p',
+    isEthereum: false,
     relationMap: {
       moonbeam: {
         type: 'p',
+        isEthereum: true,
         supportedToken: ['ACA', 'AUSD', 'LDOT']
       }
     }
   },
   moonbeam: {
     type: 'p',
+    isEthereum: true,
     relationMap: {
       acala: {
         type: 'p',
+        isEthereum: false,
         supportedToken: ['xcACA', 'xcaUSD']
       },
       polkadot: {
         type: 'r',
+        isEthereum: false,
         supportedToken: ['xcDOT']
       }
     }
   },
   moonriver: {
     type: 'p',
+    isEthereum: true,
     relationMap: {
       kusama: {
         type: 'r',
+        isEthereum: false,
         supportedToken: ['xcKSM']
       },
       bifrost: {
         type: 'p',
+        isEthereum: false,
         supportedToken: ['xcBNC']
       }
     }
   },
   polkadot: {
     type: 'r',
+    isEthereum: false,
     relationMap: {
       astar: {
         type: 'p',
+        isEthereum: false,
         supportedToken: ['DOT']
       },
       moonbeam: {
         type: 'p',
+        isEthereum: false,
         supportedToken: ['DOT']
       }
     }
   },
   kusama: {
     type: 'p',
+    isEthereum: false,
     relationMap: {
       moonriver: {
         type: 'p',
+        isEthereum: true,
         supportedToken: ['KSM']
       }
     }
   },
   astar: {
     type: 'p',
+    isEthereum: false,
     relationMap: {
       polkadot: {
         type: 'r',
+        isEthereum: false,
         supportedToken: ['DOT']
       }
     }
   },
   karura: {
     type: 'p',
+    isEthereum: false,
     relationMap: {
       moonriver: {
         type: 'p',
+        isEthereum: true,
         supportedToken: ['KAR', 'AUSD', 'LKSM', 'PHA', 'KINT', 'VSKSM', 'KSM', 'KBTC']
       }
     }
   },
   kintsugi: {
     type: 'p',
+    isEthereum: false,
     relationMap: {
       moonriver: {
         type: 'p',
+        isEthereum: true,
         supportedToken: ['KINT']
       }
     }
   },
   bifrost: {
     type: 'p',
+    isEthereum: false,
     relationMap: {
       moonriver: {
         type: 'p',
+        isEthereum: true,
         supportedToken: ['BNC']
       }
     }
@@ -140,25 +163,50 @@ export const FOUR_INSTRUCTIONS_WEIGHT = 4000000000;
 // eslint-disable-next-line @typescript-eslint/no-var-requires,@typescript-eslint/no-unsafe-assignment
 export const xTokenMoonbeamContract = require('./Xtokens.json');
 
-export function getCrossChainTransferDest (paraId: number, toAddress: string) {
-  // todo: Case ParaChain vs RelayChain
-  // todo: Case RelayChain vs ParaChain
+// get multilocation for destination chain
+export function getXcmMultiLocation (originChain: string, destinationChain: string, networkMap: Record<string, NetworkJson>, toAddress: string) {
+  const xcmType = SupportedCrossChainsMap[originChain].type + SupportedCrossChainsMap[originChain].relationMap[destinationChain].type;
+  const paraId = networkMap[destinationChain].paraId as number;
 
-  // Case ParaChain vs ParaChain
+  if (xcmType === 'pp') { // parachain -> parachain
+    let interior: Record<string, any> = {
+      X2: [
+        { Parachain: paraId },
+        { AccountId32: { network: 'Any', key: toAddress } }
+      ]
+    };
+
+    if (SupportedCrossChainsMap[originChain].relationMap[destinationChain].isEthereum) {
+      interior = {
+        X2: [
+          { Parachain: paraId },
+          { AccountKey20: { network: 'Any', key: toAddress } }
+        ]
+      };
+    }
+
+    return { V1: { parents: 1, interior } };
+  } else if (xcmType === 'pr') { // parachain -> relaychain
+    return {
+      V1: {
+        parents: 1,
+        interior: {
+          X1: [
+            { AccountId32: { network: 'Any', key: toAddress } }
+          ]
+        }
+      }
+    };
+  }
+
+  // relaychain -> parachain by default
+  // TODO: change later
   return ({
     V1: {
-      parents: 1,
+      parents: 0,
       interior: {
-        X2: [
-          {
-            Parachain: paraId
-          },
-          {
-            AccountKey20: {
-              network: 'Any',
-              key: toAddress
-            }
-          }
+        X1: [
+          { Parachain: paraId }
         ]
       }
     }

@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { ApiProps, NetworkJson, TokenInfo } from '@subwallet/extension-base/background/KoniTypes';
-import { FOUR_INSTRUCTIONS_WEIGHT, getCrossChainTransferDest } from '@subwallet/extension-koni-base/api/xcm/utils';
+import { FOUR_INSTRUCTIONS_WEIGHT, getXcmMultiLocation } from '@subwallet/extension-koni-base/api/xcm/utils';
 
 import { ApiPromise } from '@polkadot/api';
 import { KeyringPair } from '@polkadot/keyring/types';
@@ -27,15 +27,13 @@ export async function substrateEstimateCrossChainFee (
     // todo: Case ParaChain vs RelayChain
     // todo: Case RelayChain vs ParaChain
 
-    const paraId = networkMap[destinationNetworkKey].paraId as number;
-
     // Case ParaChain vs ParaChain
     const paymentInfo = await api.tx.xTokens.transfer(
       {
         Token: tokenInfo.symbol
       },
       +value,
-      getCrossChainTransferDest(paraId, to),
+      getXcmMultiLocation(originNetworkKey, destinationNetworkKey, networkMap, to),
       FOUR_INSTRUCTIONS_WEIGHT
     ).paymentInfo(fromKeypair);
 
@@ -57,14 +55,12 @@ export function substrateGetXcmExtrinsic (
   // todo: Case ParaChain vs RelayChain
   // todo: Case RelayChain vs ParaChain
 
-  const paraId = networkMap[destinationNetworkKey].paraId as number;
-
   return api.tx.xTokens.transfer(
     {
       Token: tokenInfo.symbol
     },
     +value,
-    getCrossChainTransferDest(paraId, to),
+    getXcmMultiLocation(originNetworkKey, destinationNetworkKey, networkMap, to),
     FOUR_INSTRUCTIONS_WEIGHT
   );
 }

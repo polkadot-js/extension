@@ -770,11 +770,13 @@ export type ChainRelationType = 'p' | 'r'; // parachain | relaychain
 
 export interface ChainRelationInfo {
   type: ChainRelationType;
+  isEthereum: boolean;
   supportedToken: string[];
 }
 
 export interface CrossChainRelation {
   type: ChainRelationType;
+  isEthereum: boolean;
   relationMap: Record<string, ChainRelationInfo>;
 }
 

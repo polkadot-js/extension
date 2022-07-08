@@ -47,6 +47,10 @@ const LogosMap: Record<string, string> = {
   // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
   crab: require('./crab.svg'),
   // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+  crabParachain: require('./crab.svg'),
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+  crabEvm: require('./crab.svg'),
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
   crust: require('./crust.svg'),
   // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
   darwinia: require('./darwinia.png'),
@@ -96,6 +100,10 @@ const LogosMap: Record<string, string> = {
   nodle: require('./nodle.svg'),
   // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
   parallel: require('./parallel.svg'),
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+  pangolin: require('./pangolin.svg'),
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+  pangolinEvm: require('./pangolin.svg'),
   // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
   phala: require('./phala.svg'),
   // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment

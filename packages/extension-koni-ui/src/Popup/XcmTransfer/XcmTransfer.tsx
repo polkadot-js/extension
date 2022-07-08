@@ -233,7 +233,14 @@ function XcmTransfer ({ chainRegistryMap, className, defaultValue, firstOriginCh
     setDestinationChain((prev) => {
       return [chain, prev[1]];
     });
-  }, []);
+
+    setSenderValue((prev) => {
+      return {
+        ...prev,
+        token: getSupportedTokens(originChain, chain)[0]
+      };
+    });
+  }, [originChain]);
 
   return (
     <>

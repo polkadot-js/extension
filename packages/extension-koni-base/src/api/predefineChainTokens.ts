@@ -426,20 +426,19 @@ export const PREDEFINE_TOKEN_DATA_MAP: Record<string, Record<string, TokenInfo>>
       decimals: 12,
       name: 'xcBNC'
     },
-    // TODO: edit this
     xcUSDT: {
       isMainToken: false,
       symbol: 'xcUSDT',
       erc20Address: '0xFFFFFFfFea09FB06d082fd1275CD48b191cbCD1d',
-      decimals: 12,
-      name: 'xcUSDT'
+      decimals: 6,
+      name: 'Tether USD'
     },
     xcPHA: {
       isMainToken: false,
       symbol: 'xcPHA',
       erc20Address: '0xffFfFFff8E6b63d9e447B6d4C45BDA8AF9dc9603',
       decimals: 12,
-      name: 'xcPHA'
+      name: 'Phala Token'
     },
     xcaUSD: {
       isMainToken: false,
@@ -475,8 +474,8 @@ export const PREDEFINE_TOKEN_DATA_MAP: Record<string, Record<string, TokenInfo>>
       isMainToken: false,
       symbol: 'xcDOT',
       erc20Address: '0xFfFFfFff1FcaCBd218EDc0EbA20Fc2308C778080',
-      decimals: 12,
-      name: 'Polkadot'
+      decimals: 10,
+      name: 'xcDOT'
     },
     xcaUSD: {
       isMainToken: false,

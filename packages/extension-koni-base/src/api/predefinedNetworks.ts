@@ -1490,6 +1490,21 @@ export const PREDEFINED_NETWORKS: Record<string, NetworkJson> = {
     nativeToken: 'KAR',
     decimals: 12,
     paraId: 2000
+  },
+  moonbase_relay: {
+    key: 'moonbase_relay',
+    chain: 'Moonbase Relay Testnet',
+    genesisHash: '0xe1ea3ab1d46ba8f4898b6b4b9c54ffc05282d299f89e84bd0fd08067758c9443',
+    ss58Format: 42,
+    providers: {
+      testnet: 'wss://frag-moonbase-relay-rpc-ws.g.moonbase.moonbeam.network/'
+    },
+    active: false,
+    currentProviderMode: 'ws',
+    currentProvider: 'testnet',
+    groups: ['TEST_NET'],
+    nativeToken: 'Unit',
+    decimals: 12
   }
 };
 

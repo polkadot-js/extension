@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { PREDEFINED_NETWORKS } from '@subwallet/extension-koni-base/api/predefinedNetworks';
-import {getXcmMultiLocation, xTokenMoonbeamContract} from '@subwallet/extension-koni-base/api/xcm/utils';
+import { getXcmMultiLocation, xTokenMoonbeamContract } from '@subwallet/extension-koni-base/api/xcm/utils';
 import { DOTSAMA_AUTO_CONNECT_MS } from '@subwallet/extension-koni-base/constants';
 import { getCurrentProvider } from '@subwallet/extension-koni-base/utils/utils';
 import Web3 from 'web3';
@@ -138,8 +138,48 @@ describe('test DotSama APIs', () => {
   });
 
   test('test get multilocation', () => {
-    const res = getXcmMultiLocation('moonbeam', 'polkadot', PREDEFINED_NETWORKS, 100, 'oakiscoais');
+    const res = getXcmMultiLocation('moonbeam', 'polkadot', PREDEFINED_NETWORKS, 'oakiscoais');
 
     console.log(res);
+  });
+
+  test('test get xcm transfer from relay -> parachain', async () => {
+    const provider = new WsProvider(getCurrentProvider(PREDEFINED_NETWORKS.moonbase_relay), DOTSAMA_AUTO_CONNECT_MS);
+    const api = new ApiPromise({ provider });
+    const apiProps = await api.isReady;
+
+    const extrinsic = apiProps.tx.xcmPallet.reserveTransferAssets(
+      {
+        V1: { // find the destination chain
+          parents: 0,
+          interior: {
+            X1: { Parachain: 1000 }
+          }
+        }
+      },
+      {
+        V1: { // find the receiver
+          parents: 0,
+          interior: {
+            X1: { AccountKey20: { network: 'Any', key: '0x40a207109cf531024B55010A1e760199Df0d3a13' } }
+          }
+        }
+      },
+      {
+        V1: [ // find the asset
+          {
+            id: {
+              Concrete: { parents: 0, interior: 'Here' },
+              fun: { Fungible: '70000000000' }
+            }
+          }
+        ]
+      },
+      0
+    );
+
+    const info = await extrinsic.paymentInfo('5HbcGs2QXVAc6Q6eoTzLYNAJWpN17AkCFRLnWDaHCiGYXvNc');
+
+    console.log(info.partialFee.toHuman());
   });
 });

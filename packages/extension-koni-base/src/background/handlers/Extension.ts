@@ -1194,12 +1194,7 @@ export default class KoniExtension extends Extension {
     return [errors, keypair, transferValue, tokenInfo];
   }
 
-  private async checkCrossChainTransfer ({ destinationNetworkKey,
-    from,
-    originNetworkKey,
-    to,
-    token,
-    value }: RequestCheckCrossChainTransfer): Promise<ResponseCheckCrossChainTransfer> {
+  private async checkCrossChainTransfer ({ destinationNetworkKey, from, originNetworkKey, to, token, value }: RequestCheckCrossChainTransfer): Promise<ResponseCheckCrossChainTransfer> {
     const [errors, fromKeyPair, valueNumber, tokenInfo] = await this.validateCrossChainTransfer(originNetworkKey, destinationNetworkKey, token, from, to, undefined, value);
     const dotSamaApiMap = state.getDotSamaApiMap();
     const web3ApiMap = state.getApiMap().web3;

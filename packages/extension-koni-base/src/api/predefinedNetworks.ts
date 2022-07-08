@@ -568,7 +568,8 @@ export const PREDEFINED_NETWORKS: Record<string, NetworkJson> = {
     nativeToken: 'DEV',
     isEthereum: true,
     decimals: 18,
-    evmChainId: 1287
+    evmChainId: 1287,
+    paraId: 1000
   },
   efinity: {
     key: 'efinity',
@@ -1473,6 +1474,22 @@ export const PREDEFINED_NETWORKS: Record<string, NetworkJson> = {
     groups: ['TEST_NET'],
     nativeToken: 'tSSC',
     decimals: 18
+  },
+  acala_dev: {
+    key: 'acala_dev',
+    chain: 'Acala Karura Dev',
+    genesisHash: '0x102c0b94289f766d68d41b788c48b3440baa46d40f7d46b413c59a1a2b1b4079',
+    ss58Format: 8,
+    providers: {
+      testnet: 'wss://crosschain-dev.polkawallet.io:9908/'
+    },
+    active: false,
+    currentProviderMode: 'ws',
+    currentProvider: 'testnet',
+    groups: ['TEST_NET'],
+    nativeToken: 'KAR',
+    decimals: 12,
+    paraId: 2000
   }
 };
 

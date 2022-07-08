@@ -357,7 +357,8 @@ export type TokenInfo = {
   decimals: number,
   name: string,
   coinGeckoKey?: string,
-  specialOption?: object
+  specialOption?: object,
+  assetId?: string // for moon assets
 }
 
 // all Accounts and the address of the current Account

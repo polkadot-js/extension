@@ -4,24 +4,15 @@
 import { CrossChainRelation } from '@subwallet/extension-base/background/KoniTypes';
 
 export const SupportedCrossChainsMap: Record<string, CrossChainRelation> = {
-  // karura_testnet: {
-  //   type: 'p',
-  //   relationMap: {
-  //     moonbase: {
-  //       type: 'p',
-  //       supportedToken: ['KAR']
-  //     }
-  //   }
-  // },
-  // interlay: {
-  //   type: 'p',
-  //   relationMap: {
-  //     moonbeam: {
-  //       type: 'p',
-  //       supportedToken: ['KAR']
-  //     }
-  //   }
-  // },
+  moonbase: {
+    type: 'p',
+    relationMap: {
+      acala_dev: {
+        type: 'p',
+        supportedToken: ['xcKAR']
+      }
+    }
+  },
   acala: {
     type: 'p',
     relationMap: {
@@ -123,10 +114,53 @@ export const SupportedCrossChainsMap: Record<string, CrossChainRelation> = {
   //       supportedToken: ['ACA', 'AUSD']
   //     }
   //   }
-  // }
+  // },
+  // karura_testnet: {
+  //   type: 'p',
+  //   relationMap: {
+  //     moonbase: {
+  //       type: 'p',
+  //       supportedToken: ['KAR']
+  //     }
+  //   }
+  // },
+  // interlay: {
+  //   type: 'p',
+  //   relationMap: {
+  //     moonbeam: {
+  //       type: 'p',
+  //       supportedToken: ['KAR']
+  //     }
+  //   }
+  // },
 };
 
 export const FOUR_INSTRUCTIONS_WEIGHT = 4000000000;
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires,@typescript-eslint/no-unsafe-assignment
 export const xTokenMoonbeamContract = require('./Xtokens.json');
+
+export function getCrossChainTransferDest (paraId: number, toAddress: string) {
+  // todo: Case ParaChain vs RelayChain
+  // todo: Case RelayChain vs ParaChain
+
+  // Case ParaChain vs ParaChain
+  return ({
+    V1: {
+      parents: 1,
+      interior: {
+        X2: [
+          {
+            Parachain: paraId
+          },
+          {
+            AccountKey20: {
+              network: 'Any',
+              key: toAddress
+            }
+          }
+        ]
+      }
+    }
+  });
+}

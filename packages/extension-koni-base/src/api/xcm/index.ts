@@ -3,7 +3,9 @@
 
 import { ApiProps, NetworkJson, ResponseTransfer, TokenInfo } from '@subwallet/extension-base/background/KoniTypes';
 import { doSignAndSend, getUnsupportedResponse, updateResponseTxResult } from '@subwallet/extension-koni-base/api/dotsama/transfer';
-import {FOUR_INSTRUCTIONS_WEIGHT, SupportedCrossChainsMap} from '@subwallet/extension-koni-base/api/xcm/utils';
+import { moonbeamEstimateCrossChainFee, moonbeamGetXcmExtrinsic } from '@subwallet/extension-koni-base/api/xcm/moonbeamXcm';
+import { substrateEstimateCrossChainFee, substrateGetXcmExtrinsic } from '@subwallet/extension-koni-base/api/xcm/substrateXcm';
+import { SupportedCrossChainsMap } from '@subwallet/extension-koni-base/api/xcm/utils';
 
 import { KeyringPair } from '@polkadot/keyring/types';
 
@@ -24,31 +26,6 @@ export function isNetworksPairSupportedTransferCrossChain (originNetworkKey: str
   return true;
 }
 
-function getCrossChainTransferDest (paraId: number, toAddress: string) {
-  // todo: Case ParaChain vs RelayChain
-  // todo: Case RelayChain vs ParaChain
-
-  // Case ParaChain vs ParaChain
-  return ({
-    V1: {
-      parents: 1,
-      interior: {
-        X2: [
-          {
-            Parachain: paraId
-          },
-          {
-            AccountKey20: {
-              network: 'Any',
-              key: toAddress
-            }
-          }
-        ]
-      }
-    }
-  });
-}
-
 export async function estimateCrossChainFee (
   originNetworkKey: string,
   destinationNetworkKey: string,
@@ -63,33 +40,11 @@ export async function estimateCrossChainFee (
     return ['0', tokenInfo.symbol];
   }
 
-  const apiProps = await dotSamaApiMap[originNetworkKey].isReady;
-  const api = apiProps.api;
-  const isTxXTokensSupported = !!api && !!api.tx && !!api.tx.xTokens;
-  let fee = '0';
-  // eslint-disable-next-line prefer-const
-  let feeSymbol = networkMap[originNetworkKey].nativeToken as string;
-
-  if (isTxXTokensSupported) {
-    // todo: Case ParaChain vs RelayChain
-    // todo: Case RelayChain vs ParaChain
-
-    const paraId = networkMap[destinationNetworkKey].paraId as number;
-
-    // Case ParaChain vs ParaChain
-    const paymentInfo = await api.tx.xTokens.transfer(
-      {
-        Token: tokenInfo.symbol
-      },
-      +value,
-      getCrossChainTransferDest(paraId, to),
-      FOUR_INSTRUCTIONS_WEIGHT
-    ).paymentInfo(fromKeypair);
-
-    fee = paymentInfo.partialFee.toString();
+  if (['moonbase', 'moonriver', 'moonbeam'].includes(originNetworkKey)) {
+    return moonbeamEstimateCrossChainFee(originNetworkKey, destinationNetworkKey, to, fromKeypair, value, dotSamaApiMap, tokenInfo, networkMap);
   }
 
-  return [fee, feeSymbol];
+  return substrateEstimateCrossChainFee(originNetworkKey, destinationNetworkKey, to, fromKeypair, value, dotSamaApiMap, tokenInfo, networkMap);
 }
 
 export async function makeCrossChainTransfer (
@@ -119,19 +74,13 @@ export async function makeCrossChainTransfer (
     return;
   }
 
-  // todo: Case ParaChain vs RelayChain
-  // todo: Case RelayChain vs ParaChain
+  let extrinsic;
 
-  const paraId = networkMap[destinationNetworkKey].paraId as number;
+  if (['moonbase', 'moonriver', 'moonbeam'].includes(originNetworkKey)) {
+    extrinsic = moonbeamGetXcmExtrinsic(originNetworkKey, destinationNetworkKey, to, value, api, tokenInfo, networkMap);
+  } else {
+    extrinsic = substrateGetXcmExtrinsic(originNetworkKey, destinationNetworkKey, to, value, api, tokenInfo, networkMap);
+  }
 
-  const transfer = api.tx.xTokens.transfer(
-    {
-      Token: tokenInfo.symbol
-    },
-    +value,
-    getCrossChainTransferDest(paraId, to),
-    FOUR_INSTRUCTIONS_WEIGHT
-  );
-
-  await doSignAndSend(api, originNetworkKey, tokenInfo, transfer, fromKeypair, updateResponseTxResult, callback);
+  await doSignAndSend(api, originNetworkKey, tokenInfo, extrinsic, fromKeypair, updateResponseTxResult, callback);
 }

@@ -110,12 +110,30 @@ describe('test DotSama APIs', () => {
     // }
   });
 
-  test('test get moonbeam asset', async () => {
-    const provider = new WsProvider(getCurrentProvider(PREDEFINED_NETWORKS.moonbeam), DOTSAMA_AUTO_CONNECT_MS);
+  test('test get moonbeam xcm', async () => {
+    const provider = new WsProvider(getCurrentProvider(PREDEFINED_NETWORKS.moonbase), DOTSAMA_AUTO_CONNECT_MS);
     const api = new ApiPromise({ provider });
-    const apiPromise = await api.isReady;
-    const web3 = new Web3(getCurrentProvider(PREDEFINED_NETWORKS.moonbeam));
+    const apiProps = await api.isReady;
 
-    const assets = await api.query.assets.metadata.entries();
+    const extrinsic = apiProps.tx.xTokens.transfer(
+      { ForeignAsset: new BN('10810581592933651521121702237638664357') },
+      '1000000000',
+      {
+        V1: {
+          parents: 1,
+          interior: {
+            X2: [
+              { parachain: 1000 },
+              { AccountKey20: { network: 'Any', key: '5DLiz4E7znANe9LMWyFHPQvmdhSgdJeoJdgtFtEZ8c3TeBan' } }
+            ]
+          }
+        }
+      },
+      400000000000
+    );
+
+    const paymentInfo = await extrinsic.paymentInfo('0x40a207109cf531024B55010A1e760199Df0d3a13');
+
+    console.log(paymentInfo.toHuman());
   });
 });

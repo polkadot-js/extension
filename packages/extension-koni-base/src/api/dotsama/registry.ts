@@ -26,7 +26,7 @@ export async function getMoonAssets (api: ApiPromise) {
     const valueData = value.toHuman();
     // @ts-ignore
     // eslint-disable-next-line @typescript-eslint/no-unsafe-argument,@typescript-eslint/no-unsafe-assignment
-    const info = { isMainToken: false, name: valueData.name, symbol: valueData.symbol, decimals: parseInt(valueData.decimals || ' 0'), erc20Address: address } as TokenInfo; // todo: get assetId for XCM
+    const info = { isMainToken: false, name: valueData.name, symbol: valueData.symbol, decimals: parseInt(valueData.decimals || ' 0'), erc20Address: address, assetId: keyString } as TokenInfo; // todo: get assetId for XCM
 
     assetRecord[info.symbol] = info;
   });
@@ -133,6 +133,8 @@ export const getRegistry = async (networkKey: string, api: ApiPromise, customErc
   } as ChainRegistry;
 
   cacheRegistryMap[networkKey] = chainRegistry;
+
+  console.log('chainRegistry', chainRegistry);
 
   return chainRegistry;
 };

@@ -475,7 +475,7 @@ export const PREDEFINE_TOKEN_DATA_MAP: Record<string, Record<string, TokenInfo>>
       symbol: 'xcDOT',
       erc20Address: '0xFfFFfFff1FcaCBd218EDc0EbA20Fc2308C778080',
       decimals: 10,
-      name: 'xcDOT'
+      name: 'Polkadot'
     },
     xcaUSD: {
       isMainToken: false,

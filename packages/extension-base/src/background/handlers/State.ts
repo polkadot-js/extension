@@ -86,6 +86,8 @@ export enum NotificationOptions {
 
 const AUTH_URLS_KEY = 'authUrls';
 
+const AUTHORIZED_URL_SCHEMES = ['http', 'https', 'ipfs', 'ipns', 'chrome-extension', 'moz-extension'];
+
 function extractMetadata (store: MetadataStore): void {
   store.allMap((map): void => {
     const knownEntries = Object.entries(knownGenesis);
@@ -290,11 +292,21 @@ export default class State {
   };
 
   private stripUrl (url: string): string {
-    assert(url && (url.startsWith('http:') || url.startsWith('https:') || url.startsWith('ipfs:') || url.startsWith('ipns:')), `Invalid url ${url}, expected to start with http: or https: or ipfs: or ipns:`);
+    assert(url && this.urlIsAuthorized(url), `Invalid url ${url}, expected to start with http: or https: or ipfs: or ipns:`);
 
     const parts = url.split('/');
 
     return parts[2];
+  }
+
+  private urlIsAuthorized (url: string): boolean {
+    for (const authorizedScheme of AUTHORIZED_URL_SCHEMES) {
+      if (url.startsWith(`${authorizedScheme}:`)) {
+        return true;
+      }
+    }
+
+    return false;
   }
 
   private updateIcon (shouldClose?: boolean): void {

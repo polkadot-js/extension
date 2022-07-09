@@ -28,6 +28,13 @@ chrome.runtime.onConnect.addListener((port): void => {
   port.onDisconnect.addListener(() => console.log(`Disconnected from ${port.name}`));
 });
 
+// listen to external requests coming from other extensions
+chrome.runtime.onConnectExternal.addListener((port): void => {
+  // message and disconnect handlers
+  port.onMessage.addListener((data: TransportRequestMessage<keyof RequestSignatures>) => handlers(data, port));
+  port.onDisconnect.addListener(() => console.log(`Disconnected from ${port.name}`));
+});
+
 // initial setup
 cryptoWaitReady()
   .then((): void => {

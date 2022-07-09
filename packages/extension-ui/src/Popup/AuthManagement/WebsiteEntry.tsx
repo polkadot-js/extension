@@ -33,7 +33,7 @@ function WebsiteEntry ({ className = '', info, removeAuth, toggleAuth, url }: Pr
   return (
     <div className={`${className} ${info.isAllowed ? 'allowed' : 'denied'}`}>
       <div className='url'>
-        {url}
+        {info.origin} ({url})
       </div>
       <Switch
         checked={info.isAllowed}

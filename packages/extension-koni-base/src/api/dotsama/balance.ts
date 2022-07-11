@@ -9,7 +9,7 @@ import { getRegistry, getTokenInfo } from '@subwallet/extension-koni-base/api/do
 import { getEVMBalance } from '@subwallet/extension-koni-base/api/web3/balance';
 import { getERC20Contract } from '@subwallet/extension-koni-base/api/web3/web3';
 import { state } from '@subwallet/extension-koni-base/background/handlers';
-import { ASTAR_REFRESH_BALANCE_INTERVAL, IGNORE_GET_SUBSTRATE_FEATURES_LIST, MOONBEAM_REFRESH_BALANCE_INTERVAL } from '@subwallet/extension-koni-base/constants';
+import { ASTAR_REFRESH_BALANCE_INTERVAL, EVM_BALANCE_FAST_INTERVAL, IGNORE_GET_SUBSTRATE_FEATURES_LIST, MOONBEAM_REFRESH_BALANCE_INTERVAL } from '@subwallet/extension-koni-base/constants';
 import { categoryAddresses, sumBN } from '@subwallet/extension-koni-base/utils/utils';
 import { Observable } from 'rxjs';
 import Web3 from 'web3';
@@ -17,7 +17,7 @@ import { Contract } from 'web3-eth-contract';
 
 import { ApiPromise } from '@polkadot/api';
 import { DeriveBalancesAll } from '@polkadot/api-derive/types';
-import { AccountInfo } from '@polkadot/types/interfaces';
+import { AccountInfo, Balance } from '@polkadot/types/interfaces';
 import { BN } from '@polkadot/util';
 import { isEthereumAddress } from '@polkadot/util-crypto';
 
@@ -297,7 +297,7 @@ async function subscribeWithAccountMulti (addresses: string[], networkKey: strin
   // @ts-ignore
   let unsub;
 
-  if (!['kintsugi', 'interlay', 'kintsugi_test', 'genshiro_testnet', 'genshiro', 'equilibrium_parachain'].includes(networkKey)) {
+  if (!['kintsugi', 'interlay', 'kintsugi_test', 'genshiro_testnet', 'genshiro', 'equilibrium_parachain', 'crab', 'pangolin'].includes(networkKey)) {
     unsub = await networkAPI.api.query.system.account.multi(addresses, (balances: AccountInfo[]) => {
       let [free, reserved, miscFrozen, feeFrozen] = [new BN(0), new BN(0), new BN(0), new BN(0)];
 
@@ -313,6 +313,44 @@ async function subscribeWithAccountMulti (addresses: string[], networkKey: strin
       balanceItem.reserved = reserved.toString();
       balanceItem.miscFrozen = miscFrozen.toString();
       balanceItem.feeFrozen = feeFrozen.toString();
+
+      callback(networkKey, balanceItem);
+    });
+  }
+
+  if (['crab', 'pangolin'].includes(networkKey)) {
+    const { chainDecimals, chainTokens } = await getRegistry(networkKey, networkAPI.api);
+
+    unsub = await networkAPI.api.query.system.account.multi(addresses, (balances: AccountInfo[]) => {
+      let [free, reserved, freeKton, reservedKton] = [new BN(0), new BN(0), new BN(0), new BN(0)];
+
+      balances.forEach((balance: AccountInfo) => {
+        free = free.add(balance.data?.free?.toBn() || new BN(0));
+        reserved = reserved.add(balance.data?.reserved?.toBn() || new BN(0));
+        // @ts-ignore
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-argument,@typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-member-access
+        freeKton = freeKton.add(balance.data?.freeKton?.toBn() || new BN(0));
+        // @ts-ignore
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-argument,@typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-member-access
+        reservedKton = reservedKton.add(balance.data?.reservedKton?.toBn() || new BN(0));
+      });
+
+      balanceItem.state = APIItemState.READY;
+      balanceItem.free = free.toString();
+      balanceItem.reserved = reserved.toString();
+      balanceItem.miscFrozen = '0';
+      balanceItem.feeFrozen = '0';
+
+      if (chainTokens.length > 1) {
+        balanceItem.children = {
+          [chainTokens[1]]: {
+            reserved: reservedKton.toString(),
+            free: freeKton.toString(),
+            frozen: '0',
+            decimals: chainDecimals[1]
+          }
+        };
+      }
 
       callback(networkKey, balanceItem);
     });
@@ -384,7 +422,7 @@ export function subscribeBalance (addresses: string[], dotSamaAPIMap: Record<str
     const networkAPI = await apiProps.isReady;
     const useAddresses = apiProps.isEthereum ? evmAddresses : substrateAddresses;
 
-    if (networkKey === 'astarEvm' || networkKey === 'shidenEvm' || networkKey === 'shibuyaEvm') {
+    if (['astarEvm', 'shidenEvm', 'shibuyaEvm', 'crabEvm', 'pangolinEvm'].includes(networkKey)) {
       return subscribeEVMBalance(networkKey, networkAPI.api, useAddresses, web3ApiMap, callback);
     }
 
@@ -411,21 +449,35 @@ export function subscribeBalance (addresses: string[], dotSamaAPIMap: Record<str
 export async function getFreeBalance (networkKey: string, address: string, dotSamaApiMap: Record<string, ApiProps>, web3ApiMap: Record<string, Web3>, token?: string): Promise<string> {
   const apiProps = await dotSamaApiMap[networkKey].isReady;
   const api = apiProps.api;
+  const web3Api = web3ApiMap[networkKey];
+  const tokenInfo = token ? await getTokenInfo(networkKey, api, token) : undefined;
+  const isMainToken = tokenInfo ? tokenInfo.isMainToken : true;
 
-  if (token) {
-    const tokenInfo = await getTokenInfo(networkKey, api, token);
-    const isMainToken = !!(tokenInfo?.isMainToken);
+  // Only EVM Address use with EVM network
+  if (Boolean(web3Api || apiProps.isEthereum) !== isEthereumAddress(address)) {
+    if (!isEthereumAddress(address)) {
+      return '0';
+    }
+  }
 
-    if (apiProps.isEthereum && tokenInfo?.erc20Address) {
-      if (!isMainToken) {
-        const contract = getERC20Contract(networkKey, tokenInfo.erc20Address, web3ApiMap);
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment,@typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-member-access
-        const free = await contract.methods.balanceOf(address).call();
-
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access,@typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-return
-        return free?.toString() || '0';
-      }
+  // web3Api support mean isEthereum Network support
+  if (web3Api) {
+    if (isMainToken) {
+      return await web3Api?.eth.getBalance(address) || '0';
     } else {
+      if (!tokenInfo?.erc20Address) {
+        return '0';
+      }
+
+      const contract = getERC20Contract(networkKey, tokenInfo.erc20Address, web3ApiMap);
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment,@typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-member-access
+      const free = await contract.methods.balanceOf(address).call();
+
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access,@typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-return
+      return free?.toString() || '0';
+    }
+  } else {
+    if (token) {
       if (['genshiro_testnet', 'genshiro', 'equilibrium_parachain'].includes(networkKey)) {
         const asset = networkKey === 'equilibrium_parachain' ? assetFromToken(token)[0] : assetFromToken(token);
         const balance = await api.query.eqBalances.account(address, asset);
@@ -433,6 +485,11 @@ export async function getFreeBalance (networkKey: string, address: string, dotSa
         // @ts-ignore
         // eslint-disable-next-line @typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-member-access,@typescript-eslint/no-unsafe-return
         return balance.asPositive?.toString() || '0';
+      } else if (tokenInfo && ((networkKey === 'crab' && tokenInfo.symbol === 'CKTON') || (networkKey === 'pangolin' && tokenInfo.symbol === 'PKTON'))) {
+        // @ts-ignore
+        const balance = await api.query.system.account(address) as { data: { freeKton: Balance } };
+
+        return balance.data?.freeKton?.toString() || '0';
       } else if (!isMainToken || ['kintsugi', 'kintsugi_test', 'interlay'].includes(networkKey)) {
         // @ts-ignore
         const balance = await api.query.tokens.accounts(address, tokenInfo?.specialOption || { Token: token }) as TokenBalanceRaw;
@@ -440,7 +497,6 @@ export async function getFreeBalance (networkKey: string, address: string, dotSa
         return balance.free?.toString() || '0';
       }
     }
-  }
 
   const balance = await api.derive.balances.all(address);
 
@@ -456,56 +512,74 @@ export async function subscribeFreeBalance (
   update: (balance: string) => void): Promise<() => void> {
   const apiProps = await dotSamaApiMap[networkKey].isReady;
   const api = apiProps.api;
+  const web3Api = web3ApiMap[networkKey];
+  const tokenInfo = token ? await getTokenInfo(networkKey, api, token) : undefined;
+  const isMainToken = tokenInfo ? tokenInfo.isMainToken : true;
 
-  if (apiProps.isEthereum) {
+  // Only EVM Address use with EVM network
+  if (Boolean(web3Api || apiProps.isEthereum) !== isEthereumAddress(address)) {
     if (!isEthereumAddress(address)) {
-      update('0');
-
-      return () => undefined;
-    }
-  } else {
-    if (isEthereumAddress(address)) {
       update('0');
 
       return () => undefined;
     }
   }
 
-  if (token) {
-    const tokenInfo = await getTokenInfo(networkKey, api, token);
-    const isMainToken = !!(tokenInfo?.isMainToken);
+  // web3Api support mean isEthereum Network support
+  if (web3Api) {
+    const responseIntervalSubscription = (method: () => void) => {
+      method();
+      const interval = setInterval(method, EVM_BALANCE_FAST_INTERVAL);
 
-    if (apiProps.isEthereum && tokenInfo?.erc20Address) {
-      if (!isMainToken) {
-        const getFreeBalance = () => {
-          if (!tokenInfo?.erc20Address) {
-            return;
-          }
+      return () => {
+        clearInterval(interval);
+      };
+    };
 
-          const contract = getERC20Contract(networkKey, tokenInfo.erc20Address, web3ApiMap);
+    if (isMainToken) {
+      const getEvmMainBalance = () => {
+        web3Api.eth.getBalance(address).then(update).catch(console.log);
+      };
 
-          // @ts-ignore
-          // eslint-disable-next-line @typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-member-access
-          contract.methods.balanceOf(address).call().then((free) => {
-            // eslint-disable-next-line node/no-callback-literal,@typescript-eslint/no-unsafe-argument,@typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-member-access
-            update(free?.toString() || '0');
-          });
-        };
-
-        getFreeBalance();
-        const interval = setInterval(getFreeBalance, MOONBEAM_REFRESH_BALANCE_INTERVAL);
-
-        return () => {
-          clearInterval(interval);
-        };
-      }
+      return responseIntervalSubscription(getEvmMainBalance);
     } else {
+      const getERC20FreeBalance = () => {
+        if (!tokenInfo?.erc20Address) {
+          return;
+        }
+
+        const contract = getERC20Contract(networkKey, tokenInfo.erc20Address, web3ApiMap);
+
+        // @ts-ignore
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-member-access
+        contract.methods.balanceOf(address).call().then((free) => {
+          // eslint-disable-next-line node/no-callback-literal,@typescript-eslint/no-unsafe-argument,@typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-member-access
+          update(free?.toString() || '0');
+        });
+      };
+
+      return responseIntervalSubscription(getERC20FreeBalance);
+    }
+  } else {
+    if (token) {
       if (['genshiro_testnet', 'genshiro', 'equilibrium_parachain'].includes(networkKey)) {
         const asset = networkKey === 'equilibrium_parachain' ? assetFromToken(token)[0] : assetFromToken(token);
         // @ts-ignore
         const unsub = await api.query.eqBalances.account(address, asset, (balance) => {
           // eslint-disable-next-line node/no-callback-literal,@typescript-eslint/no-unsafe-argument,@typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-member-access
           update(balance.asPositive.toString() || '0');
+        });
+
+        return () => {
+          // @ts-ignore
+          unsub && unsub();
+        };
+      } else if (tokenInfo && ((networkKey === 'crab' && tokenInfo.symbol === 'CKTON') || (networkKey === 'pangolin' && tokenInfo.symbol === 'PKTON'))) {
+        // @ts-ignore
+        const unsub = await api.query.system.account(address, (balance: DeriveBalancesAll) => {
+          // @ts-ignore
+          // eslint-disable-next-line node/no-callback-literal,@typescript-eslint/no-unsafe-argument,@typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-member-access
+          update(balance.data?.freeKton?.toBn()?.toString() || '0');
         });
 
         return () => {
@@ -525,16 +599,13 @@ export async function subscribeFreeBalance (
         };
       }
     }
+
+    const unsub = await api.derive.balances?.all(address, (balance: DeriveBalancesAll) => {
+      update(balance.availableBalance?.toBn()?.toString() || '0');
+    });
+
+    return () => {
+      unsub && unsub();
+    };
   }
-
-  // @ts-ignore
-  const unsub = await api.derive.balances?.all(address, (balance: DeriveBalancesAll) => {
-    // eslint-disable-next-line node/no-callback-literal,@typescript-eslint/no-unsafe-argument,@typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-member-access
-    update(balance.availableBalance?.toBn()?.toString() || '0');
-  });
-
-  return () => {
-    // @ts-ignore
-    unsub && unsub();
-  };
 }

@@ -1258,8 +1258,25 @@ export const PREDEFINED_NETWORKS: Record<string, NetworkJson> = {
     },
     active: false,
     currentProviderMode: 'ws',
-    currentProvider: 'OnFinality',
+    currentProvider: 'Darwinia_Network',
     groups: ['MAIN_NET'],
+    nativeToken: 'CRAB',
+    crowdloanUrl: 'https://crab.network/plo',
+    decimals: 9,
+    coinGeckoKey: 'darwinia-crab-network'
+  },
+  crabParachain: {
+    key: 'crab',
+    chain: 'Crab Parachain',
+    genesisHash: '0xeac895d7768b17837a9c3a9f0280c01502c3ef40193df923490a0fa9c60ea076',
+    ss58Format: 42,
+    providers: {
+      Crab: 'wss://crab-parachain-rpc.darwinia.network'
+    },
+    active: false,
+    currentProviderMode: 'ws',
+    currentProvider: 'Crab',
+    groups: ['KUSAMA_PARACHAIN'],
     nativeToken: 'CRAB',
     crowdloanUrl: 'https://crab.network/plo',
     decimals: 18,
@@ -1271,21 +1288,18 @@ export const PREDEFINED_NETWORKS: Record<string, NetworkJson> = {
     genesisHash: '0x34f61bfda344b3fad3c3e38832a91448b3c613b199eb23e5110a635d71c13c65_1',
     ss58Format: 42,
     providers: {
-      OnFinality: 'wss://darwinia-crab.api.onfinality.io/public-ws',
-      Darwinia_Network: 'wss://crab-rpc.darwinia.network',
-      Dwellir: 'wss://darwiniacrab-rpc.dwellir.com'
+      Darwinia_Network: 'wss://crab-rpc.darwinia.network'
     },
     active: false,
     currentProviderMode: 'ws',
-    currentProvider: 'OnFinality',
+    currentProvider: 'Darwinia_Network',
     groups: ['MAIN_NET'],
-    paraId: 2105,
     nativeToken: 'CRAB',
-    crowdloanUrl: 'https://crab.network/plo',
     decimals: 18,
     coinGeckoKey: 'darwinia-crab-network',
     isEthereum: true,
-    evmChainId: 44
+    evmChainId: 44,
+    blockExplorer: 'https://crab.subscan.io'
   },
   pangolin: {
     key: 'pangolin',
@@ -1293,17 +1307,16 @@ export const PREDEFINED_NETWORKS: Record<string, NetworkJson> = {
     genesisHash: '0xce44bd16fc276f9e457b452577b6c2678e57768260012af127479fed806da7e7',
     ss58Format: 42,
     providers: {
-      Darwinia_Network: 'wss://pangolin-rpc.darwinia.network'
+      Pangolin_Network: 'wss://pangolin-rpc.darwinia.network'
     },
     active: false,
     currentProviderMode: 'ws',
-    currentProvider: 'Darwinia_Network',
-    groups: ['MAIN_NET'],
-    paraId: 2105,
+    currentProvider: 'Pangolin_Network',
+    groups: ['TEST_NET'],
     nativeToken: 'PRING',
-    crowdloanUrl: 'https://crab.network/plo',
     decimals: 9,
-    coinGeckoKey: 'darwinia-crab-network'
+    isEthereum: false,
+    blockExplorer: 'https://pangolin.subscan.io'
   },
   pangolinEvm: {
     key: 'pangolinEvm',
@@ -1311,19 +1324,17 @@ export const PREDEFINED_NETWORKS: Record<string, NetworkJson> = {
     genesisHash: '0xce44bd16fc276f9e457b452577b6c2678e57768260012af127479fed806da7e7_1',
     ss58Format: 42,
     providers: {
-      Darwinia_Network: 'wss://pangolin-rpc.darwinia.network'
+      Pangolin_Network: 'wss://pangolin-rpc.darwinia.network'
     },
     active: false,
     currentProviderMode: 'ws',
-    currentProvider: 'Darwinia_Network',
-    groups: ['MAIN_NET'],
-    paraId: 2105,
+    currentProvider: 'Pangolin_Network',
+    groups: ['TEST_NET'],
     nativeToken: 'PRING',
-    crowdloanUrl: 'https://crab.network/plo',
-    decimals: 9,
-    coinGeckoKey: 'darwinia-crab-network',
+    decimals: 18,
     isEthereum: true,
-    evmChainId: 43
+    evmChainId: 43,
+    blockExplorer: 'https://pangolin.subscan.io'
   },
   bitcountry: {
     key: 'bitcountry',

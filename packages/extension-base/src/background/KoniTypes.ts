@@ -540,7 +540,7 @@ export type RequestSubscribeCrowdloan = null
 export type RequestSubscribeNft = null
 export type RequestSubscribeStaking = null
 export type RequestSubscribeStakingReward = null
-export type ThemeTypes = 'light' | 'dark'
+export type ThemeTypes = 'light' | 'dark' | 'subspace'
 export type RequestNftForceUpdate = {
   collectionId: string,
   nft: NftItem,

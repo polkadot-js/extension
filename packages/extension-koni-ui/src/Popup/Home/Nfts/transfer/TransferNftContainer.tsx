@@ -3,8 +3,7 @@
 
 import { ALL_ACCOUNT_KEY } from '@subwallet/extension-koni-base/constants';
 import { isValidAddress } from '@subwallet/extension-koni-base/utils/utils';
-import logo from '@subwallet/extension-koni-ui/assets/sub-wallet-logo.svg';
-import { ActionContext, Spinner } from '@subwallet/extension-koni-ui/components';
+import { ActionContext, Spinner, Theme } from '@subwallet/extension-koni-ui/components';
 import InputAddress from '@subwallet/extension-koni-ui/components/InputAddress';
 import useGetNetworkJson from '@subwallet/extension-koni-ui/hooks/screen/home/useGetNetworkJson';
 import useToast from '@subwallet/extension-koni-ui/hooks/useToast';
@@ -19,7 +18,7 @@ import { CurrentAccountType } from '@subwallet/extension-koni-ui/stores/types';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import React, { useCallback, useContext, useEffect, useState } from 'react';
 import { useSelector } from 'react-redux';
-import styled from 'styled-components';
+import styled, { ThemeContext } from 'styled-components';
 
 import { isEthereumAddress } from '@polkadot/util-crypto';
 
@@ -89,6 +88,7 @@ function TransferNftContainer ({ className, collectionId, collectionImage, nftIt
 
   const [showImage, setShowImage] = useState(true);
   const [imageError, setImageError] = useState(false);
+  const themeContext = useContext(ThemeContext as React.Context<Theme>);
 
   const navigate = useContext(ActionContext);
   const { show } = useToast();
@@ -184,8 +184,8 @@ function TransferNftContainer ({ className, collectionId, collectionImage, nftIt
       return collectionImage;
     }
 
-    return logo;
-  }, [collectionImage, nftItem, imageError]);
+    return themeContext.logo;
+  }, [nftItem.image, imageError, collectionImage, themeContext.logo]);
 
   const handleVideoError = useCallback(() => {
     setImageError(true);

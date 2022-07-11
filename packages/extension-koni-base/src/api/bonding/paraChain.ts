@@ -64,8 +64,11 @@ export async function getParaCollatorsInfo (networkKey: string, dotSamaApi: ApiP
   const _maxDelegatorPerCandidate = apiProps.api.consts.parachainStaking.maxTopDelegationsPerCandidate.toHuman() as string;
   const maxDelegatorPerCandidate = parseRawNumber(_maxDelegatorPerCandidate);
 
-  const _maxDelegation = apiProps.api.consts.parachainStaking.maxDelegationsPerDelegator.toHuman() as string;
-  const maxDelegations = parseRawNumber(_maxDelegation);
+  const _maxDelegationCount = apiProps.api.consts.parachainStaking.maxDelegationsPerDelegator.toHuman() as string;
+  const maxDelegationCount = parseRawNumber(_maxDelegationCount);
+
+  const _chainMinDelegation = apiProps.api.consts.parachainStaking.minDelegation.toHuman() as string;
+  const chainMinDelegation = parseRawNumber(_chainMinDelegation);
 
   const rawDelegatorState = _delegatorState.toHuman() as Record<string, any> | null;
   const rawAllCollators = _allCollators.toHuman() as unknown as CollatorInfo[];
@@ -150,7 +153,7 @@ export async function getParaCollatorsInfo (networkKey: string, dotSamaApi: ApiP
       identity,
       isVerified: isReasonable,
       bond: bond / 10 ** decimals,
-      minDelegation: minDelegation / 10 ** decimals,
+      minDelegation: Math.max(minDelegation, chainMinDelegation) / 10 ** decimals,
       delegationCount,
       active
     } as CollatorExtraInfo;
@@ -176,7 +179,7 @@ export async function getParaCollatorsInfo (networkKey: string, dotSamaApi: ApiP
     validatorsInfo: allValidators,
     isBondedBefore: rawDelegatorState !== null,
     bondedValidators,
-    maxNominations: maxDelegations
+    maxNominations: maxDelegationCount
   };
 }
 

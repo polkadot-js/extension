@@ -498,9 +498,10 @@ export async function getFreeBalance (networkKey: string, address: string, dotSa
       }
     }
 
-  const balance = await api.derive.balances.all(address);
+    const balance = await api.derive.balances.all(address);
 
-  return balance.availableBalance?.toBn()?.toString() || '0';
+    return balance.availableBalance?.toBn()?.toString() || '0';
+  }
 }
 
 export async function subscribeFreeBalance (

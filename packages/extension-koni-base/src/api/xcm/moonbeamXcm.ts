@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { ApiProps, NetworkJson, TokenInfo } from '@subwallet/extension-base/background/KoniTypes';
-import { FOUR_INSTRUCTIONS_WEIGHT, getXcmMultiLocation } from '@subwallet/extension-koni-base/api/xcm/utils';
+import { FOUR_INSTRUCTIONS_WEIGHT, getMultiLocationFromParachain } from '@subwallet/extension-koni-base/api/xcm/utils';
 
 import { ApiPromise } from '@polkadot/api';
 import { KeyringPair } from '@polkadot/keyring/types';
@@ -34,7 +34,7 @@ export async function moonbeamEstimateCrossChainFee (
   const paymentInfo = await apiProps.api.tx.xTokens.transfer(
     { [tokenType]: new BN(tokenInfo.assetId as string) },
     +value,
-    getXcmMultiLocation(originNetworkKey, destinationNetworkKey, networkMap, to),
+    getMultiLocationFromParachain(originNetworkKey, destinationNetworkKey, networkMap, to),
     FOUR_INSTRUCTIONS_WEIGHT
   ).paymentInfo(fromKeypair.address);
 
@@ -58,7 +58,7 @@ export function moonbeamGetXcmExtrinsic (
   return api.tx.xTokens.transfer(
     { [tokenType]: new BN(tokenInfo.assetId as string) },
     +value,
-    getXcmMultiLocation(originNetworkKey, destinationNetworkKey, networkMap, to),
+    getMultiLocationFromParachain(originNetworkKey, destinationNetworkKey, networkMap, to),
     FOUR_INSTRUCTIONS_WEIGHT
   );
 }

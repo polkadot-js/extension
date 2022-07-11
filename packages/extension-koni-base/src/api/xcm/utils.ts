@@ -4,6 +4,17 @@
 import { CrossChainRelation, NetworkJson } from '@subwallet/extension-base/background/KoniTypes';
 
 export const SupportedCrossChainsMap: Record<string, CrossChainRelation> = {
+  moonbase_relay: {
+    isEthereum: false,
+    type: 'r',
+    relationMap: {
+      moonbase: {
+        type: 'p',
+        isEthereum: true,
+        supportedToken: ['Unit']
+      }
+    }
+  },
   moonbase: {
     isEthereum: true,
     type: 'p',
@@ -163,8 +174,8 @@ export const FOUR_INSTRUCTIONS_WEIGHT = 4000000000;
 // eslint-disable-next-line @typescript-eslint/no-var-requires,@typescript-eslint/no-unsafe-assignment
 export const xTokenMoonbeamContract = require('./Xtokens.json');
 
-// get multilocation for destination chain
-export function getXcmMultiLocation (originChain: string, destinationChain: string, networkMap: Record<string, NetworkJson>, toAddress: string) {
+// get multilocation for destination chain from a parachain
+export function getMultiLocationFromParachain (originChain: string, destinationChain: string, networkMap: Record<string, NetworkJson>, toAddress: string) {
   const xcmType = SupportedCrossChainsMap[originChain].type + SupportedCrossChainsMap[originChain].relationMap[destinationChain].type;
   const paraId = networkMap[destinationChain].paraId as number;
 
@@ -186,29 +197,17 @@ export function getXcmMultiLocation (originChain: string, destinationChain: stri
     }
 
     return { V1: { parents: 1, interior } };
-  } else if (xcmType === 'pr') { // parachain -> relaychain
-    return {
-      V1: {
-        parents: 1,
-        interior: {
-          X1: [
-            { AccountId32: { network: 'Any', key: toAddress } }
-          ]
-        }
-      }
-    };
   }
 
-  // relaychain -> parachain by default
-  // TODO: change later
-  return ({
+  // parachain -> relaychain by default
+  return {
     V1: {
-      parents: 0,
+      parents: 1,
       interior: {
         X1: [
-          { Parachain: paraId }
+          { AccountId32: { network: 'Any', key: toAddress } }
         ]
       }
     }
-  });
+  };
 }

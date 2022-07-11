@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { PREDEFINED_NETWORKS } from '@subwallet/extension-koni-base/api/predefinedNetworks';
-import { getXcmMultiLocation, xTokenMoonbeamContract } from '@subwallet/extension-koni-base/api/xcm/utils';
+import { getMultiLocationFromParachain, xTokenMoonbeamContract } from '@subwallet/extension-koni-base/api/xcm/utils';
 import { DOTSAMA_AUTO_CONNECT_MS } from '@subwallet/extension-koni-base/constants';
 import { getCurrentProvider } from '@subwallet/extension-koni-base/utils/utils';
 import Web3 from 'web3';
@@ -138,7 +138,7 @@ describe('test DotSama APIs', () => {
   });
 
   test('test get multilocation', () => {
-    const res = getXcmMultiLocation('moonbeam', 'polkadot', PREDEFINED_NETWORKS, 'oakiscoais');
+    const res = getMultiLocationFromParachain('moonbeam', 'polkadot', PREDEFINED_NETWORKS, 'oakiscoais');
 
     console.log(res);
   });
@@ -147,6 +147,7 @@ describe('test DotSama APIs', () => {
     const provider = new WsProvider(getCurrentProvider(PREDEFINED_NETWORKS.moonbase_relay), DOTSAMA_AUTO_CONNECT_MS);
     const api = new ApiPromise({ provider });
     const apiProps = await api.isReady;
+    const decimals = PREDEFINED_NETWORKS.moonbase_relay.decimals as number;
 
     const extrinsic = apiProps.tx.xcmPallet.reserveTransferAssets(
       {
@@ -180,6 +181,10 @@ describe('test DotSama APIs', () => {
 
     const info = await extrinsic.paymentInfo('5HbcGs2QXVAc6Q6eoTzLYNAJWpN17AkCFRLnWDaHCiGYXvNc');
 
+    const rawFee = info.partialFee.toString();
+    const parsedFee = parseFloat(rawFee) / 10 ** decimals;
+
+    console.log(parsedFee);
     console.log(info.partialFee.toHuman());
   });
 });

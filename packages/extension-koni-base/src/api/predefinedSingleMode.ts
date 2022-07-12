@@ -7,6 +7,6 @@ export const PREDEFINED_SINGLE_MODES: Record<string, SingleModeJson> = {
   subspace: {
     networkKeys: ['subspace', 'subspace_test'],
     theme: 'subspace',
-    autoTriggerDomain: '*subspace.network*'
+    autoTriggerDomain: 'subspace.network'
   }
 };

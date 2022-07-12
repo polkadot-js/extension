@@ -2071,4 +2071,30 @@ export default class KoniState extends State {
 
     return true;
   }
+
+  public onInstall () {
+    const singleModes = Object.values(PREDEFINED_SINGLE_MODES);
+
+    const setUpSingleMode = ({ networkKeys }: SingleModeJson) => {
+      const { genesisHash } = this.getNetworkMapByKey(networkKeys[0]);
+
+      this.setCurrentAccount({ address: ALL_ACCOUNT_KEY, currentGenesisHash: genesisHash });
+    };
+
+    chrome.tabs.query({}, function (tabs) {
+      const openingUrls = tabs.map((t) => t.url);
+
+      const singleMode = singleModes.find(({ autoTriggerDomain }) => {
+        const urlRegex = new RegExp(autoTriggerDomain);
+
+        return Boolean(openingUrls.find((url) => {
+          return url && urlRegex.test(url);
+        }));
+      });
+
+      if (singleMode) {
+        setUpSingleMode(singleMode);
+      }
+    });
+  }
 }

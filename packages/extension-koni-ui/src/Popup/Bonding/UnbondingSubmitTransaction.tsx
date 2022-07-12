@@ -56,7 +56,11 @@ function UnbondingSubmitTransaction ({ className }: Props): React.ReactElement<P
   const [nominatedAmount, setNominatedAmount] = useState<string>(unbondingParams.delegations ? unbondingParams.delegations[0].amount : '0');
   const [minBond, setMinBond] = useState<string>(unbondingParams.delegations ? unbondingParams.delegations[0].minBond : '0');
 
-  console.log(unbondingParams.delegations);
+  useEffect(() => {
+    if (!networkJson.active) {
+      navigate('/');
+    }
+  }, [navigate, networkJson.active]);
 
   const goHome = useCallback(() => {
     navigate('/');
@@ -106,7 +110,7 @@ function UnbondingSubmitTransaction ({ className }: Props): React.ReactElement<P
       }
     }
 
-    return new BN('0');
+    return undefined;
   }, [bondedAmount, networkJson.decimals, nominatedAmount, unbondAll, unbondingParams.delegations]);
 
   const handleResend = useCallback(() => {

@@ -92,6 +92,14 @@ function StakingRow ({ activeStake, address, chainName, className, delegations, 
         })
         .catch(console.error);
     }
+
+    return () => {
+      setRedeemable(-1);
+      setNextWithdrawal(-1);
+      setNextWithdrawalAmount(-1);
+      setTargetValidator('');
+      setNextWithdrawalAction(undefined);
+    };
   }, [address, delegations, networkKey, unbondingStake]);
 
   const editBalance = (balance: string) => {

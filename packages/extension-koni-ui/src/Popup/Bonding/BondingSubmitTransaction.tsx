@@ -79,6 +79,12 @@ function BondingSubmitTransaction ({ className }: Props): React.ReactElement<Pro
   const _height = window.innerHeight > 600 ? 650 : 450;
 
   useEffect(() => {
+    if (!networkJson.active) {
+      navigate('/account/select-bonding-network');
+    }
+  }, [navigate, networkJson.active]);
+
+  useEffect(() => {
     if (account && account.address !== selectedAccount) {
       navigate('/account/select-bonding-network');
     }

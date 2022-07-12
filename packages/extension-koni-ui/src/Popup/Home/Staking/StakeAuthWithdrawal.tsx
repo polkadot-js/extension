@@ -126,6 +126,12 @@ function StakeAuthWithdrawal ({ address, amount, className, hideModal, networkKe
     setShowResult(false);
   }, []);
 
+  const handleClickCancel = useCallback(() => {
+    if (!loading) {
+      hideModal();
+    }
+  }, [hideModal, loading]);
+
   return (
     <div className={className}>
       <Modal>
@@ -138,7 +144,7 @@ function StakeAuthWithdrawal ({ address, amount, className, hideModal, networkKe
           </div>
           <div
             className={'close-button-confirm header-alignment'}
-            onClick={hideModal}
+            onClick={handleClickCancel}
           >
             Cancel
           </div>

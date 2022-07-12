@@ -3,13 +3,14 @@
 
 import { withErrorLog } from '@subwallet/extension-base/background/handlers/helpers';
 import State, { AuthUrls, Resolver } from '@subwallet/extension-base/background/handlers/State';
-import { AccountRefMap, APIItemState, ApiMap, AuthRequestV2, BalanceItem, BalanceJson, ChainRegistry, ConfirmationDefinitions, ConfirmationsQueue, ConfirmationsQueueItemOptions, ConfirmationType, CrowdloanItem, CrowdloanJson, CurrentAccountInfo, CustomEvmToken, DeleteEvmTokenParams, EvmSendTransactionParams, EvmTokenJson, NETWORK_STATUS, NetworkJson, NftCollection, NftCollectionJson, NftItem, NftJson, NftTransferExtra, PriceJson, RequestAccountExportPrivateKey, RequestConfirmationComplete, RequestSettingsType, ResponseAccountExportPrivateKey, ResultResolver, ServiceInfo, StakingItem, StakingJson, StakingRewardJson, TokenInfo, TransactionHistoryItemType } from '@subwallet/extension-base/background/KoniTypes';
+import { AccountRefMap, APIItemState, ApiMap, AuthRequestV2, BalanceItem, BalanceJson, ChainRegistry, ConfirmationDefinitions, ConfirmationsQueue, ConfirmationsQueueItemOptions, ConfirmationType, CrowdloanItem, CrowdloanJson, CurrentAccountInfo, CustomEvmToken, DeleteEvmTokenParams, EvmSendTransactionParams, EvmTokenJson, NETWORK_STATUS, NetworkJson, NftCollection, NftCollectionJson, NftItem, NftJson, NftTransferExtra, PriceJson, RequestAccountExportPrivateKey, RequestConfirmationComplete, RequestSettingsType, ResponseAccountExportPrivateKey, ResponseSettingsType, ResultResolver, ServiceInfo, SingleModeJson, StakingItem, StakingJson, StakingRewardJson, ThemeTypes, TokenInfo, TransactionHistoryItemType } from '@subwallet/extension-base/background/KoniTypes';
 import { AuthorizeRequest, RequestAuthorizeTab } from '@subwallet/extension-base/background/types';
 import { getId } from '@subwallet/extension-base/utils/getId';
 import { getTokenPrice } from '@subwallet/extension-koni-base/api/coingecko';
 import { initApi } from '@subwallet/extension-koni-base/api/dotsama';
 import { cacheRegistryMap, getRegistry } from '@subwallet/extension-koni-base/api/dotsama/registry';
 import { PREDEFINED_GENESIS_HASHES, PREDEFINED_NETWORKS } from '@subwallet/extension-koni-base/api/predefinedNetworks';
+import { PREDEFINED_SINGLE_MODES } from '@subwallet/extension-koni-base/api/predefinedSingleMode';
 import { DEFAULT_STAKING_NETWORKS } from '@subwallet/extension-koni-base/api/staking';
 // eslint-disable-next-line camelcase
 import { DotSamaCrowdloan_crowdloans_nodes } from '@subwallet/extension-koni-base/api/subquery/__generated__/DotSamaCrowdloan';
@@ -18,7 +19,7 @@ import { DEFAULT_EVM_TOKENS } from '@subwallet/extension-koni-base/api/web3/defa
 import { initWeb3Api } from '@subwallet/extension-koni-base/api/web3/web3';
 import { EvmRpcError } from '@subwallet/extension-koni-base/background/errors/EvmRpcError';
 import { state } from '@subwallet/extension-koni-base/background/handlers/index';
-import { ALL_ACCOUNT_KEY, ALL_GENESIS_HASH } from '@subwallet/extension-koni-base/constants';
+import { ALL_ACCOUNT_KEY, ALL_GENESIS_HASH, DEFAULT_THEME } from '@subwallet/extension-koni-base/constants';
 import { CurrentAccountStore, NetworkMapStore, PriceStore } from '@subwallet/extension-koni-base/stores';
 import AccountRefStore from '@subwallet/extension-koni-base/stores/AccountRef';
 import AuthorizeStore from '@subwallet/extension-koni-base/stores/Authorize';
@@ -849,6 +850,19 @@ export default class KoniState extends State {
   public setCurrentAccount (data: CurrentAccountInfo, callback?: () => void): void {
     this.currentAccountStore.set('CurrentAccountInfo', data, callback);
 
+    // Trigger single mode
+    if (data.currentGenesisHash) {
+      const singleMode = this.findSingleMode(data.currentGenesisHash);
+
+      if (singleMode) {
+        this.setTheme(singleMode.theme);
+      } else {
+        this.setTheme(DEFAULT_THEME);
+      }
+    } else {
+      this.setTheme(DEFAULT_THEME);
+    }
+
     this.updateServiceInfo();
   }
 
@@ -951,6 +965,19 @@ export default class KoniState extends State {
 
   public setSettings (data: RequestSettingsType, callback?: () => void): void {
     this.settingsStore.set('Settings', data, callback);
+  }
+
+  public setTheme (theme: ThemeTypes, callback?: (settingData: ResponseSettingsType) => void): void {
+    this.getSettings((settings) => {
+      const newSettings = {
+        ...settings,
+        theme
+      };
+
+      this.setSettings(newSettings, () => {
+        callback && callback(newSettings);
+      });
+    });
   }
 
   public subscribeSettingsSubject (): Subject<RequestSettingsType> {
@@ -1684,6 +1711,16 @@ export default class KoniState extends State {
     } else {
       return [undefined, undefined];
     }
+  }
+
+  findSingleMode (genesisHash: string): SingleModeJson | undefined {
+    const [networkKey] = this.findNetworkKeyByGenesisHash(genesisHash);
+
+    if (!networkKey) {
+      return undefined;
+    }
+
+    return (Object.values(PREDEFINED_SINGLE_MODES)).find((item) => (item.networkKeys.includes(networkKey)));
   }
 
   public accountExportPrivateKey ({ address, password }: RequestAccountExportPrivateKey): ResponseAccountExportPrivateKey {

@@ -962,6 +962,12 @@ export interface StakeWithdrawalParams {
   password?: string
 }
 
+export interface SingleModeJson {
+  networkKeys: string[],
+  theme: ThemeTypes,
+  autoTriggerDomain: string // Regex for auto trigger single mode
+}
+
 export interface KoniRequestSignatures {
   'pri(unbonding.submitWithdrawal)': [StakeWithdrawalParams, BasicTxResponse, BasicTxResponse]
   'pri(unbonding.withdrawalTxInfo)': [StakeWithdrawalParams, BasicTxInfo];

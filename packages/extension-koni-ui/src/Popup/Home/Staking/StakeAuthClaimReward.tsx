@@ -139,6 +139,12 @@ function StakeAuthClaimReward ({ address, className, delegation, hideModal, netw
     return 'Select a validator';
   }, [networkKey]);
 
+  const handleClickCancel = useCallback(() => {
+    if (!loading) {
+      hideModal();
+    }
+  }, [hideModal, loading]);
+
   return (
     <div className={className}>
       <Modal>
@@ -151,7 +157,7 @@ function StakeAuthClaimReward ({ address, className, delegation, hideModal, netw
           </div>
           <div
             className={'close-button-confirm header-alignment'}
-            onClick={hideModal}
+            onClick={handleClickCancel}
           >
             Cancel
           </div>
@@ -180,6 +186,7 @@ function StakeAuthClaimReward ({ address, className, delegation, hideModal, netw
                         className={'stake-claim-dropdown'}
                         delegations={delegation}
                         handleSelectValidator={handleSelectValidator}
+                        isDisabled={loading}
                         label={getDropdownTitle()}
                       />
                     }

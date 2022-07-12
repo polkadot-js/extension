@@ -452,4 +452,25 @@ describe('test DotSama APIs', () => {
       console.log(stakeList.slice(-1));
     }
   });
+
+  test('parse number', () => {
+    const number = 0.0015497538149;
+    const number1 = 8.001000000000;
+    const number3 = 9.05;
+    const number2 = 10;
+
+    const targetNumber = number1;
+
+    if (Number.isInteger(targetNumber)) {
+      console.log('result ', targetNumber);
+    } else {
+      const stringNumber = targetNumber.toString();
+
+      if (stringNumber.length >= 11) { // more than 9 decimals
+        console.log('result ', stringNumber.slice(0, 11));
+      } else {
+        console.log('result ', stringNumber);
+      }
+    }
+  });
 });

@@ -258,7 +258,6 @@ function UnbondingSubmitTransaction ({ className }: Props): React.ReactElement<P
               decimals={networkJson.decimals}
               defaultValue={convertToBN()}
               help={`Type the amount you want to unstake. Your total stake is ${parseFloat(nominatedAmount) / (10 ** (networkJson.decimals as number))} ${networkJson.nativeToken as string}`}
-              inputAddressHelp={''}
               isDisabled={unbondAll}
               isError={false}
               isZeroable={false}
@@ -279,7 +278,6 @@ function UnbondingSubmitTransaction ({ className }: Props): React.ReactElement<P
               decimals={networkJson.decimals}
               defaultValue={convertToBN()}
               help={`Type the amount you want to unstake. You can unstake ${bondedAmount} ${networkJson.nativeToken as string}`}
-              inputAddressHelp={''}
               isDisabled={unbondAll}
               isError={false}
               isZeroable={false}

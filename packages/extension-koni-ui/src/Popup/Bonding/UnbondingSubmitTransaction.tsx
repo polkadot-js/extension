@@ -56,6 +56,8 @@ function UnbondingSubmitTransaction ({ className }: Props): React.ReactElement<P
   const [nominatedAmount, setNominatedAmount] = useState<string>(unbondingParams.delegations ? unbondingParams.delegations[0].amount : '0');
   const [minBond, setMinBond] = useState<string>(unbondingParams.delegations ? unbondingParams.delegations[0].minBond : '0');
 
+  console.log(unbondingParams.delegations);
+
   const goHome = useCallback(() => {
     navigate('/');
   }, [navigate]);
@@ -118,16 +120,11 @@ function UnbondingSubmitTransaction ({ className }: Props): React.ReactElement<P
 
   const handleChangeAmount = useCallback((value: BN | string) => {
     let parsedValue;
-    let isUnbondAll: boolean;
 
     if (value instanceof BN) {
       parsedValue = parseFloat(value.toString()) / (10 ** (networkJson.decimals as number));
-      isUnbondAll = value.eq(new BN(nominatedAmount));
     } else {
       parsedValue = parseFloat(value) / (10 ** (networkJson.decimals as number));
-      const bnValue = new BN(value);
-
-      isUnbondAll = bnValue.eq(new BN(nominatedAmount));
     }
 
     if (isNaN(parsedValue)) {
@@ -135,9 +132,7 @@ function UnbondingSubmitTransaction ({ className }: Props): React.ReactElement<P
     } else {
       setAmount(parsedValue);
     }
-
-    setUnbondAll(isUnbondAll);
-  }, [networkJson.decimals, nominatedAmount]);
+  }, [networkJson.decimals]);
 
   useEffect(() => {
     if (account && account.address !== selectedAccount) {
@@ -151,13 +146,16 @@ function UnbondingSubmitTransaction ({ className }: Props): React.ReactElement<P
 
   const handleConfirm = useCallback(() => {
     setLoading(true);
-    console.log(unbondAll);
+    const _amount = amount * (10 ** (networkJson.decimals as number));
+    const bnAmount = new BN(_amount.toString());
+    const isAmountEqualAll = bnAmount.eq(new BN(nominatedAmount));
+
     getUnbondingTxInfo({
       address: selectedAccount,
       amount,
       networkKey: selectedNetwork,
       validatorAddress: selectedValidator,
-      unstakeAll: unbondAll
+      unstakeAll: isAmountEqualAll || unbondAll
     })
       .then((resp) => {
         setLoading(false);
@@ -168,9 +166,10 @@ function UnbondingSubmitTransaction ({ className }: Props): React.ReactElement<P
         setShowResult(false);
       })
       .catch(console.error);
-  }, [amount, selectedAccount, selectedNetwork, selectedValidator, unbondAll]);
+  }, [amount, networkJson.decimals, nominatedAmount, selectedAccount, selectedNetwork, selectedValidator, unbondAll]);
 
   const handleSelectValidator = useCallback((val: string) => {
+    console.log('run here handleSelectValidator');
     setSelectedValidator(val);
 
     if (unbondingParams.delegations) {

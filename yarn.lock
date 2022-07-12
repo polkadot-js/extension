@@ -2472,9 +2472,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@polkadot/dev@npm:^0.67.72":
-  version: 0.67.72
-  resolution: "@polkadot/dev@npm:0.67.72"
+"@polkadot/dev@npm:^0.67.73":
+  version: 0.67.73
+  resolution: "@polkadot/dev@npm:0.67.73"
   dependencies:
     "@babel/cli": ^7.18.6
     "@babel/core": ^7.18.6
@@ -2563,7 +2563,7 @@ __metadata:
     polkadot-exec-rollup: scripts/polkadot-exec-rollup.mjs
     polkadot-exec-tsc: scripts/polkadot-exec-tsc.mjs
     polkadot-exec-webpack: scripts/polkadot-exec-webpack.mjs
-  checksum: 9394d3648f43d35dbbfedc46fb1248fe407a6f93b36f7dc14f7b4e2562397abdddfac8ef876df628fbf425d89f45c1894bbc921fdbacbdc533fdb90aa98a0d04
+  checksum: 01afdfab153b4c86832389fb806cc3b0a338e6125ca6280ffbcad39758a6fcad5005161c21f922788dd4ec8a320ca7b7c7f5862c00c141170c0d7a554caf8ed7
   languageName: node
   linkType: hard
 
@@ -2587,7 +2587,7 @@ __metadata:
     "@polkadot/util": ^10.0.2
     "@polkadot/util-crypto": ^10.0.2
     eventemitter3: ^4.0.7
-    rxjs: ^7.5.5
+    rxjs: ^7.5.6
   languageName: unknown
   linkType: soft
 
@@ -2719,7 +2719,7 @@ __metadata:
   resolution: "@polkadot/extension@workspace:packages/extension"
   dependencies:
     "@babel/runtime": ^7.18.6
-    "@polkadot/dev": ^0.67.72
+    "@polkadot/dev": ^0.67.73
     "@polkadot/extension-base": ^0.44.2-13-x
     "@polkadot/extension-inject": ^0.44.2-13-x
     "@polkadot/extension-ui": ^0.44.2-13-x
@@ -14566,7 +14566,7 @@ resolve@^2.0.0-next.3:
   resolution: "root-workspace-0b6124@workspace:."
   dependencies:
     "@babel/core": ^7.18.6
-    "@polkadot/dev": ^0.67.72
+    "@polkadot/dev": ^0.67.73
     "@types/jest": ^28.1.4
     i18next-scanner: ^3.3.0
     sinon-chrome: ^3.0.1
@@ -14617,12 +14617,12 @@ resolve@^2.0.0-next.3:
   languageName: node
   linkType: hard
 
-"rxjs@npm:^7.2.0, rxjs@npm:^7.5.5":
-  version: 7.5.5
-  resolution: "rxjs@npm:7.5.5"
+"rxjs@npm:^7.2.0, rxjs@npm:^7.5.5, rxjs@npm:^7.5.6":
+  version: 7.5.6
+  resolution: "rxjs@npm:7.5.6"
   dependencies:
     tslib: ^2.1.0
-  checksum: e034f60805210cce756dd2f49664a8108780b117cf5d0e2281506e9e6387f7b4f1532d974a8c8b09314fa7a16dd2f6cff3462072a5789672b5dcb45c4173f3c6
+  checksum: fc05f01364a74dac57490fb3e07ea63b422af04017fae1db641a009073f902ef69f285c5daac31359620dc8d9aee7d81e42b370ca2a8573d1feae0b04329383b
   languageName: node
   linkType: hard
 

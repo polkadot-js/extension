@@ -967,7 +967,9 @@ export interface DelegationItem {
 export interface UnlockingStakeInfo {
   nextWithdrawal: number,
   redeemable: number,
-  nextWithdrawalAmount: number
+  nextWithdrawalAmount: number,
+  nextWithdrawalAction?: string,
+  validatorAddress?: string // validator to unstake from
 }
 
 export interface StakeWithdrawalParams {

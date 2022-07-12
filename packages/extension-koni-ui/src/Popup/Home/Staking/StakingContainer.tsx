@@ -107,12 +107,11 @@ function StakingContainer ({ className, data, loading, priceMap }: Props): React
               const name = item.name || item.chainId;
               const icon = LogosMap[item.chainId] || LogosMap.default;
               const price = priceMap[item.chainId];
-              const address = account?.address as string;
               const delegations = item?.delegation;
 
               return <StakingRow
                 activeStake={item.activeBalance}
-                address={address}
+                address={account?.address as string}
                 chainName={name}
                 delegations={delegations}
                 index={index}

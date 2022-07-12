@@ -118,11 +118,16 @@ function UnbondingSubmitTransaction ({ className }: Props): React.ReactElement<P
 
   const handleChangeAmount = useCallback((value: BN | string) => {
     let parsedValue;
+    let isUnbondAll: boolean;
 
     if (value instanceof BN) {
       parsedValue = parseFloat(value.toString()) / (10 ** (networkJson.decimals as number));
+      isUnbondAll = value.eq(new BN(nominatedAmount));
     } else {
       parsedValue = parseFloat(value) / (10 ** (networkJson.decimals as number));
+      const bnValue = new BN(value);
+
+      isUnbondAll = bnValue.eq(new BN(nominatedAmount));
     }
 
     if (isNaN(parsedValue)) {
@@ -130,7 +135,9 @@ function UnbondingSubmitTransaction ({ className }: Props): React.ReactElement<P
     } else {
       setAmount(parsedValue);
     }
-  }, [networkJson.decimals]);
+
+    setUnbondAll(isUnbondAll);
+  }, [networkJson.decimals, nominatedAmount]);
 
   useEffect(() => {
     if (account && account.address !== selectedAccount) {
@@ -144,6 +151,7 @@ function UnbondingSubmitTransaction ({ className }: Props): React.ReactElement<P
 
   const handleConfirm = useCallback(() => {
     setLoading(true);
+    console.log(unbondAll);
     getUnbondingTxInfo({
       address: selectedAccount,
       amount,

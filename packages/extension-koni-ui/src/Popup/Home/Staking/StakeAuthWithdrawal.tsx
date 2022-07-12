@@ -47,7 +47,8 @@ function StakeAuthWithdrawal ({ address, amount, className, hideModal, networkKe
     getStakeWithdrawalTxInfo({
       address,
       networkKey,
-      action: nextWithdrawalAction
+      action: nextWithdrawalAction,
+      validatorAddress: targetValidator
     })
       .then((resp) => {
         setIsTxReady(true);

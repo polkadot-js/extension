@@ -380,7 +380,7 @@ export async function handleParaUnlockingInfo (dotSamaApi: ApiProps, networkJson
 export async function getParaWithdrawalTxInfo (dotSamaApi: ApiProps, address: string, collatorAddress: string, action: string) {
   const apiPromise = await dotSamaApi.isReady;
 
-  console.log(`executing ${action}`);
+  console.log(`executing ${action}`, address, collatorAddress);
   const extrinsic = apiPromise.api.tx.parachainStaking.executeDelegationRequest(address, collatorAddress);
 
   return extrinsic.paymentInfo(address);

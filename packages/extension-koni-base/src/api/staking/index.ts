@@ -106,6 +106,8 @@ function getParaStakingOnChain (parentApi: ApiProps, useAddresses: string[], net
 
       const delegationsList: DelegationItem[] = [];
 
+      console.log(delegationMap);
+
       await Promise.all(Object.entries(delegationMap).map(async ([owner, amount]) => {
         const [_info, _identity, _scheduledRequests] = await Promise.all([
           parentApi.api.query.parachainStaking.candidateInfo(owner),
@@ -161,12 +163,14 @@ function getParaStakingOnChain (parentApi: ApiProps, useAddresses: string[], net
 
         const activeStake = parseRawNumber(amount) - unbondingAmount;
 
-        delegationsList.push({
-          owner,
-          amount: activeStake.toString(),
-          identity,
-          minBond: minDelegation
-        });
+        if (activeStake > 0) {
+          delegationsList.push({
+            owner,
+            amount: activeStake.toString(),
+            identity,
+            minBond: minDelegation
+          });
+        }
       }));
 
       const parsedTotalBalance = parseStakingBalance(totalBalance, chain, networks);
@@ -353,6 +357,17 @@ function getAstarStakingOnChain (parentApi: ApiProps, useAddresses: string[], ne
       resolve(resp.json());
     }).catch(console.error);
   });
+  const timeout = new Promise((resolve) => {
+    const id = setTimeout(() => {
+      clearTimeout(id);
+      resolve(null);
+    }, 2000);
+  });
+
+  const racePromise = Promise.race([
+    allDappsReq,
+    timeout
+  ]);
 
   return parentApi.api.query.dappsStaking.ledger.multi(useAddresses, async (ledgers: any[]) => {
     let totalBalance = 0;
@@ -376,17 +391,24 @@ function getAstarStakingOnChain (parentApi: ApiProps, useAddresses: string[], ne
 
       const [_stakedDapps, _allDapps] = await Promise.all([
         parentApi.api.query.dappsStaking.generalStakerInfo.entries(useAddresses[0]),
-        allDappsReq
+        racePromise
       ]);
 
-      const allDapps = _allDapps as Record<string, any>[];
+      let allDapps: Record<string, any>[] | null = null;
+
+      if (_allDapps !== null) {
+        allDapps = _allDapps as Record<string, any>[];
+      }
+
       const dappMap: Record<string, string> = {};
       const delegationsList: DelegationItem[] = [];
 
-      for (const dappInfo of allDapps) {
-        const dappAddress = dappInfo.address as string;
+      if (allDapps !== null) {
+        for (const dappInfo of allDapps) {
+          const dappAddress = dappInfo.address as string;
 
-        dappMap[dappAddress.toLowerCase()] = dappInfo.name as string;
+          dappMap[dappAddress.toLowerCase()] = dappInfo.name as string;
+        }
       }
 
       for (const item of _stakedDapps) {

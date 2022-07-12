@@ -56,6 +56,12 @@ function StakeAuthWithdrawal ({ address, amount, className, hideModal, networkKe
         setFee(resp.fee);
       })
       .catch(console.error);
+
+    return () => {
+      setIsTxReady(false);
+      setBalanceError(false);
+      setFee('');
+    };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 

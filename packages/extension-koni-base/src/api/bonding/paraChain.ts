@@ -253,8 +253,7 @@ export async function handleParaUnbondingTxInfo (address: string, amount: number
   const feeString = txInfo.partialFee.toHuman();
   const binaryBalance = new BN(balance);
 
-  const sumAmount = txInfo.partialFee.addn(amount);
-  const balanceError = sumAmount.gt(binaryBalance);
+  const balanceError = txInfo.partialFee.gt(binaryBalance);
 
   return {
     fee: feeString,

@@ -106,7 +106,7 @@ function UnbondingSubmitTransaction ({ className }: Props): React.ReactElement<P
       } else {
         const binaryAmount = bondedAmount * (10 ** (networkJson.decimals as number));
 
-        return new BN(Math.round(binaryAmount).toString());
+        return new BN(binaryAmount.toString());
       }
     }
 
@@ -122,21 +122,23 @@ function UnbondingSubmitTransaction ({ className }: Props): React.ReactElement<P
     setIsClickNext(false);
   }, []);
 
-  const handleChangeAmount = useCallback((value: BN | string) => {
-    let parsedValue;
+  const handleUpdateAmount = useCallback((value: BN | string) => {
+    if (!unbondAll) {
+      let parsedValue;
 
-    if (value instanceof BN) {
-      parsedValue = parseFloat(value.toString()) / (10 ** (networkJson.decimals as number));
-    } else {
-      parsedValue = parseFloat(value) / (10 ** (networkJson.decimals as number));
-    }
+      if (value instanceof BN) {
+        parsedValue = parseFloat(value.toString()) / (10 ** (networkJson.decimals as number));
+      } else {
+        parsedValue = parseFloat(value) / (10 ** (networkJson.decimals as number));
+      }
 
-    if (isNaN(parsedValue)) {
-      setAmount(-1);
-    } else {
-      setAmount(parsedValue);
+      if (isNaN(parsedValue)) {
+        setAmount(-1);
+      } else {
+        setAmount(parsedValue);
+      }
     }
-  }, [networkJson.decimals]);
+  }, [networkJson.decimals, unbondAll]);
 
   useEffect(() => {
     if (account && account.address !== selectedAccount) {
@@ -173,7 +175,6 @@ function UnbondingSubmitTransaction ({ className }: Props): React.ReactElement<P
   }, [amount, networkJson.decimals, nominatedAmount, selectedAccount, selectedNetwork, selectedValidator, unbondAll]);
 
   const handleSelectValidator = useCallback((val: string) => {
-    console.log('run here handleSelectValidator');
     setSelectedValidator(val);
 
     if (unbondingParams.delegations) {
@@ -262,7 +263,7 @@ function UnbondingSubmitTransaction ({ className }: Props): React.ReactElement<P
               isError={false}
               isZeroable={false}
               label={t<string>('Amount')}
-              onChange={handleChangeAmount}
+              onChange={handleUpdateAmount}
               placeholder={'0'}
               siDecimals={networkJson.decimals}
               siSymbol={networkJson.nativeToken}
@@ -283,7 +284,7 @@ function UnbondingSubmitTransaction ({ className }: Props): React.ReactElement<P
               isError={false}
               isZeroable={false}
               label={t<string>('Amount')}
-              onChange={handleChangeAmount}
+              onChange={handleUpdateAmount}
               placeholder={'0'}
               siDecimals={networkJson.decimals}
               siSymbol={networkJson.nativeToken}

@@ -300,8 +300,7 @@ export async function handleRelayUnbondingTxInfo (address: string, amount: numbe
   const feeString = txInfo.partialFee.toHuman();
   const binaryBalance = new BN(balance);
 
-  const sumAmount = txInfo.partialFee.add(binaryAmount);
-  const balanceError = sumAmount.gt(binaryBalance);
+  const balanceError = txInfo.partialFee.gt(binaryBalance);
 
   return {
     fee: feeString,

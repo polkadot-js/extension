@@ -61,6 +61,12 @@ function StakeAuthClaimReward ({ address, className, delegation, hideModal, netw
         setFee(resp.fee);
       })
       .catch(console.error);
+
+    return () => {
+      setIsTxReady(false);
+      setBalanceError(false);
+      setFee('');
+    };
   }, [address, networkKey, targetValidator]);
 
   const _onChangePass = useCallback((value: string) => {

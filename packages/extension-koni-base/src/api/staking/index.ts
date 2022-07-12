@@ -106,8 +106,6 @@ function getParaStakingOnChain (parentApi: ApiProps, useAddresses: string[], net
 
       const delegationsList: DelegationItem[] = [];
 
-      console.log(delegationMap);
-
       await Promise.all(Object.entries(delegationMap).map(async ([owner, amount]) => {
         const [_info, _identity, _scheduledRequests] = await Promise.all([
           parentApi.api.query.parachainStaking.candidateInfo(owner),
@@ -419,8 +417,10 @@ function getAstarStakingOnChain (parentApi: ApiProps, useAddresses: string[], ne
         const dappAddress = stakedDapp.Evm.toLowerCase();
         let totalStake = 0;
 
-        for (const stake of stakeList) {
-          totalStake += parseRawNumber(stake.staked);
+        if (stakeList.length > 0) {
+          const latestStake = stakeList.slice(-1)[0].staked.toString();
+
+          totalStake = parseRawNumber(latestStake);
         }
 
         delegationsList.push({

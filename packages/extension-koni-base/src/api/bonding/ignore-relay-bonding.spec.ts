@@ -433,4 +433,23 @@ describe('test DotSama APIs', () => {
       console.log(_poolId, _poolData);
     }
   });
+
+  test('get astar info', async () => {
+    const provider = new WsProvider(getCurrentProvider(PREDEFINED_NETWORKS.shibuya), DOTSAMA_AUTO_CONNECT_MS);
+    const api = new ApiPromise({ provider });
+    const apiPromise = await api.isReady;
+
+    const _stakedDapps = await apiPromise.query.dappsStaking.generalStakerInfo.entries('5HbcGs2QXVAc6Q6eoTzLYNAJWpN17AkCFRLnWDaHCiGYXvNc');
+
+    for (const item of _stakedDapps) {
+      // const data = item[0].toHuman() as any[];
+      // const stakedDapp = data[1] as Record<string, string>;
+      const stakeData = item[1].toHuman() as Record<string, Record<string, string>[]>;
+      const stakeList = stakeData.stakes;
+      // const dappAddress = stakedDapp.Evm.toLowerCase();
+      // const balance = stakeList.length && stakeList.slice(-1)[0].staked.toString();
+
+      console.log(stakeList.slice(-1));
+    }
+  });
 });

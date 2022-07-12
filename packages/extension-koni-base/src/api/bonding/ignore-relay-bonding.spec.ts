@@ -459,15 +459,17 @@ describe('test DotSama APIs', () => {
     const number3 = 9.05;
     const number2 = 10;
 
-    const targetNumber = number1;
+    const targetNumber = number;
 
     if (Number.isInteger(targetNumber)) {
       console.log('result ', targetNumber);
     } else {
       const stringNumber = targetNumber.toString();
 
+      targetNumber.toFixed(9);
+
       if (stringNumber.length >= 11) { // more than 9 decimals
-        console.log('result ', stringNumber.slice(0, 11));
+        console.log('result ', targetNumber.toFixed(9));
       } else {
         console.log('result ', stringNumber);
       }

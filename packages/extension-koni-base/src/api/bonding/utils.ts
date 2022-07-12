@@ -101,10 +101,6 @@ export function getInflationParams (networkKey: string): InflationParams {
   return KNOWN_PARAMS[networkKey] || DEFAULT_PARAMS;
 }
 
-export function parseRawNumber (value: string) {
-  return parseFloat(value.replaceAll(',', ''));
-}
-
 export function calcInflationUniformEraPayout (totalIssuance: number, yearlyInflationInTokens: number): number {
   const totalIssuanceInTokens = (totalIssuance / 1000000000) / 1000;
 

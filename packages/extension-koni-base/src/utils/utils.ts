@@ -268,3 +268,25 @@ export const filterAndSortingAccountByAuthType = (accounts: AccountJson[], accou
 
   return rs;
 };
+
+export function parseRawNumber (value: string) {
+  return parseFloat(value.replaceAll(',', ''));
+}
+
+export function parseNumberToDisplay (amount: BN, unit: string, decimals: number) {
+  let parsedAmount = parseRawNumber(amount.toString());
+
+  parsedAmount = parsedAmount / 10 ** decimals;
+
+  if (Number.isInteger(parsedAmount)) {
+    return parsedAmount.toString();
+  } else {
+    const stringNumber = parsedAmount.toString();
+
+    if (stringNumber.length >= 11) { // more than 9 decimals
+      return parsedAmount.toFixed(9);
+    } else {
+      return stringNumber;
+    }
+  }
+}

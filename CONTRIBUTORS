@@ -1,4 +1,4 @@
-     520	Jaco                          	Bump TS to 4.7.4 (#1093)
+     530	Jaco                          	Adjust gitignore (#1107)
       82	Thibaut Sardan                	Add account filtering feature (#832)
        7	Ivan Rukhavets                	Mention derivation in FAQ (#334)
        4	Amaury Martiny                	PostMessageProvider with on('connected' | 'disconnected') (#279)

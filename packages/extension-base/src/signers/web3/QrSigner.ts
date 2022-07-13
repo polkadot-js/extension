@@ -12,15 +12,23 @@ interface CallbackProps {
   qrState: QrState
 }
 
+interface QrSignerProps {
+  callback: (state: CallbackProps) => void;
+  id: string;
+  setState: (promise: ExternalRequestPromise) => void;
+  resolver: () => void;
+}
+
 export default class QrSigner {
   readonly #callback: (state: CallbackProps) => void;
-  readonly #setState: (promise: ExternalRequestPromise) => void;
   readonly #id: string;
+  readonly #resolver: () => void;
+  readonly #setState: (promise: ExternalRequestPromise) => void;
 
-  constructor (callback: (state: CallbackProps) => void, id: string, setState: (promise: ExternalRequestPromise) => void) {
+  constructor ({ callback, id, resolver, setState }: QrSignerProps) {
     this.#callback = callback;
     this.#id = id;
-
+    this.#resolver = resolver;
     this.#setState = setState;
   }
 
@@ -40,7 +48,12 @@ export default class QrSigner {
 
       const qrPayload = RLP.encode(data);
 
-      this.#setState({ reject: reject, resolve: resolve, status: ExternalRequestPromiseStatus.PENDING, createdAt: new Date().getTime() });
+      const resolver = (result: SignerResult | PromiseLike<SignerResult>): void => {
+        this.#resolver();
+        resolve(result);
+      };
+
+      this.#setState({ reject: reject, resolve: resolver, status: ExternalRequestPromiseStatus.PENDING, createdAt: new Date().getTime() });
 
       this.#callback({
         qrState: {

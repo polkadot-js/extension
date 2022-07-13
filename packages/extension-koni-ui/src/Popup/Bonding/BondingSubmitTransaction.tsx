@@ -113,7 +113,11 @@ function BondingSubmitTransaction ({ className }: Props): React.ReactElement<Pro
     navigate('/account/select-bonding-validator');
   }, [navigate, selectedNetwork, validatorInfo]);
 
-  const handleChangeAmount = useCallback((value: BN | string) => {
+  const handleChangeAmount = useCallback((value?: BN | string) => {
+    if (!value) {
+      return;
+    }
+
     let parsedValue;
 
     if (value instanceof BN) {

@@ -11,7 +11,7 @@ import CN from 'classnames';
 import React, { useCallback, useMemo } from 'react';
 import styled from 'styled-components';
 
-import { hexToU8a } from '@polkadot/util';
+import { u8aToU8a } from '@polkadot/util';
 
 interface Props extends ThemeProps {
   className?: string;
@@ -33,7 +33,7 @@ const Qr = (props: Props) => {
   const payload = useMemo((): Uint8Array => {
     const _raw = confirmation.payload;
 
-    return hexToU8a(_raw.qrPayload);
+    return u8aToU8a(_raw.qrPayload);
   }, [confirmation]);
 
   const canSign = useMemo((): boolean => {

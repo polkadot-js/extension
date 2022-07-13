@@ -609,6 +609,7 @@ export enum BasicTxErrorCode {
   TRANSFER_ERROR = 'transferError',
   STAKING_ERROR = 'stakingError',
   UN_STAKING_ERROR = 'unStakingError',
+  WITHDRAW_STAKING_ERROR = 'withdrawStakingError',
   TIMEOUT = 'timeout',
   UNSUPPORTED = 'unsupported'
 }
@@ -690,15 +691,6 @@ export interface EvmNftSubmitTransaction {
   recipientAddress: string,
   networkKey: string,
   rawTransaction: Record<string, any>
-}
-
-export interface NftTransactionResponse {
-  passwordError?: string | null,
-  callHash?: string,
-  status?: boolean,
-  transactionHash?: string,
-  txError?: boolean,
-  isSendingSelf: boolean
 }
 
 export interface ValidateNetworkResponse {
@@ -851,7 +843,7 @@ export enum ExternalRequestPromiseStatus {
 }
 
 export interface ExternalRequestPromise {
-  resolve?: (result: SignerResult) => void,
+  resolve?: (result: SignerResult | PromiseLike<SignerResult>) => void,
   reject?: (error?: Error) => void,
   status: ExternalRequestPromiseStatus,
   message?: string;
@@ -1096,6 +1088,10 @@ export interface BasicTxResponse {
   txError?: boolean,
 }
 
+export interface NftTransactionResponse extends BasicTxResponse{
+  isSendingSelf: boolean
+}
+
 export interface BondingOptionParams {
   networkKey: string;
   address: string;
@@ -1163,14 +1159,30 @@ export interface ResponseUnStakeExternal extends BasicTxResponse{
   externalState?: ExternalState;
 }
 
-export interface ResponseUnStakeQr extends ResponseStakeExternal{
+export interface ResponseUnStakeQr extends ResponseUnStakeExternal{
   qrState?: QrState;
   isBusy?: boolean;
 }
 
-export interface ResponseUnStakeLedger extends ResponseStakeExternal{
+export interface ResponseUnStakeLedger extends ResponseUnStakeExternal{
   ledgerState?: LedgerState;
 }
+
+export type RequestWithdrawStakeExternal = Omit<StakeWithdrawalParams, 'password'>
+
+export interface ResponseWithdrawStakeExternal extends BasicTxResponse{
+  externalState?: ExternalState;
+}
+
+export interface ResponseWithdrawStakeQr extends ResponseWithdrawStakeExternal{
+  qrState?: QrState;
+  isBusy?: boolean;
+}
+
+export interface ResponseWithdrawStakeLedger extends ResponseWithdrawStakeExternal{
+  ledgerState?: LedgerState;
+}
+
 
 export interface KoniRequestSignatures {
   'pri(unbonding.submitWithdrawal)': [StakeWithdrawalParams, BasicTxResponse, BasicTxResponse]
@@ -1292,6 +1304,7 @@ export interface KoniRequestSignatures {
   'pri(nft.transfer.qr.create.evm)': [RequestNftTransferExternalEVM, Array<BaseTxError>, ResponseNftTransferQr];
   'pri(stake.qr.create)': [RequestStakeExternal, Array<BaseTxError>, ResponseStakeQr];
   'pri(unStake.qr.create)': [RequestUnStakeExternal, Array<BaseTxError>, ResponseUnStakeQr];
+  'pri(withdrawStake.qr.create)': [RequestWithdrawStakeExternal, Array<BaseTxError>, ResponseWithdrawStakeQr];
 
   // Create ledger request
   'pri(accounts.transfer.ledger.create)': [RequestTransferExternal, Array<TransferError>, ResponseTransferLedger];
@@ -1299,5 +1312,6 @@ export interface KoniRequestSignatures {
   'pri(nft.transfer.ledger.create.substrate)': [RequestNftTransferExternalSubstrate, Array<BaseTxError>, ResponseNftTransferQr];
   'pri(stake.ledger.create)': [RequestStakeExternal, Array<BaseTxError>, ResponseStakeLedger];
   'pri(unStake.ledger.create)': [RequestUnStakeExternal, Array<BaseTxError>, ResponseUnStakeLedger];
+  'pri(withdrawStake.ledger.create)': [RequestWithdrawStakeExternal, Array<BaseTxError>, ResponseWithdrawStakeLedger];
 
 }

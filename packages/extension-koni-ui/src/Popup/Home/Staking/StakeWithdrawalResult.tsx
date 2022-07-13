@@ -73,12 +73,6 @@ function StakeWithdrawalResult ({ backToHome, className, extrinsicHash, handleRe
 
             <div className={'withdrawal-action-container'}>
               <div
-                className={'withdrawal-resend-button'}
-                onClick={backToHome}
-              >
-                {t<string>('Back To Home')}
-              </div>
-              <div
                 className={'withdrawal-history-button'}
                 onClick={handleResend}
               >

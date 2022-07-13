@@ -2,10 +2,11 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { assetFromToken } from '@equilab/api';
-import { ApiProps, ExternalRequestPromise, ExternalRequestPromiseStatus, NetworkJson, NftTransactionResponse, ResponseNftTransferLedger, ResponseNftTransferQr, ResponseTransfer, ResponseTransferLedger, ResponseTransferQr, TokenInfo, TransferErrorCode, TransferStep } from '@subwallet/extension-base/background/KoniTypes';
+import { ApiProps, BasicTxResponse, ExternalRequestPromise, ExternalRequestPromiseStatus, NetworkJson, NftTransactionResponse, ResponseNftTransferLedger, ResponseNftTransferQr, ResponseTransfer, ResponseTransferLedger, ResponseTransferQr, TokenInfo, TransferErrorCode, TransferStep } from '@subwallet/extension-base/background/KoniTypes';
 import LedgerSigner from '@subwallet/extension-base/signers/substrates/LedgerSigner';
 import QrSigner from '@subwallet/extension-base/signers/substrates/QrSigner';
 import { LedgerState, QrState } from '@subwallet/extension-base/signers/types';
+import { sendExtrinsic } from '@subwallet/extension-koni-base/api/dotsama/external/shared';
 import { getCrossChainTransferDest, isNetworksPairSupportedTransferCrossChain } from '@subwallet/extension-koni-base/api/dotsama/transfer';
 import { getNftTransferExtrinsic } from '@subwallet/extension-koni-base/api/nft/transfer';
 
@@ -32,7 +33,6 @@ interface DoSignAndSendProps {
   api: ApiPromise;
   networkKey: string;
   tokenInfo: TokenInfo | undefined;
-  nonce: AnyNumber;
   extrinsic: SubmittableExtrinsic;
   senderAddress: string;
   id: string;
@@ -325,19 +325,9 @@ const makeCrossChainTransferExternal = async ({ callback,
     return;
   }
 
-  let nonce: AnyNumber;
-
   const apiProps = await dotSamaApiMap[originalNetworkKey].isReady;
   const api = apiProps.api;
   const isTxXTokensSupported = !!api && !!api.tx && !!api.tx.xTokens;
-
-  if (['genshiro_testnet', 'genshiro', 'equilibrium_parachain'].includes(originalNetworkKey)) {
-    nonce = -1;
-  } else {
-    // @ts-ignore
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-    nonce = await api.query.system.account(senderAddress).nonce;
-  }
 
   if (!isTxXTokensSupported) {
     callback(getUnsupportedResponse());
@@ -363,7 +353,6 @@ const makeCrossChainTransferExternal = async ({ callback,
     api,
     networkKey: originalNetworkKey,
     tokenInfo,
-    nonce,
     extrinsic: transfer,
     senderAddress,
     id,
@@ -387,7 +376,6 @@ const doSignAndSendQr = async (
     extrinsic,
     id,
     networkKey,
-    nonce,
     senderAddress,
     setState,
     tokenInfo,
@@ -417,7 +405,26 @@ const doSignAndSendQr = async (
     });
   };
 
-  await extrinsic.signAsync(senderAddress, { nonce, signer: new QrSigner(api.registry, qrCallback, id, setState) });
+  const qrResolver = () => {
+    // eslint-disable-next-line node/no-callback-literal
+    callback({
+      step: TransferStep.SIGNING,
+      isBusy: true
+    });
+  };
+
+  await extrinsic.signAsync(
+    senderAddress,
+    {
+      signer: new QrSigner({
+        registry: api.registry,
+        callback: qrCallback,
+        id,
+        setState,
+        resolver: qrResolver
+      })
+    }
+  );
 
   await extrinsic.send(({ events, status }) => {
     console.log('Transaction status:', status.type, status.hash.toHex());
@@ -425,7 +432,6 @@ const doSignAndSendQr = async (
 
     if (status.isBroadcast) {
       response.step = TransferStep.START;
-      response.isBusy = true;
     }
 
     handlerTransferStatusCallback({ updateState, callback, updateResponseByEvents, response, events, status, extrinsic });
@@ -459,21 +465,10 @@ export async function makeTransferQr ({ apiProps,
     return;
   }
 
-  let nonce: AnyNumber;
-
-  if (['genshiro_testnet', 'genshiro', 'equilibrium_parachain'].includes(networkKey)) {
-    nonce = -1;
-  } else {
-    // @ts-ignore
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-    nonce = await api.query.system.account(senderAddress).nonce;
-  }
-
   await doSignAndSendQr({
     api,
     networkKey,
     tokenInfo,
-    nonce,
     extrinsic: transfer,
     senderAddress,
     id,
@@ -558,40 +553,41 @@ export async function makeNftTransferQr ({ apiProp,
     callback({ isSendingSelf: false, qrState: qrState, externalState: { externalId: qrState.qrId } });
   };
 
-  await extrinsic.signAsync(senderAddress, { nonce, signer: new QrSigner(apiProp.registry, qrCallback, qrId, setState) });
+  const qrResolver = () => {
+    // eslint-disable-next-line node/no-callback-literal
+    callback({
+      isSendingSelf: false,
+      isBusy: true
+    });
+  };
 
-  await extrinsic.send((result) => {
-    if (!result || !result.status) {
-      return;
+  await extrinsic.signAsync(
+    senderAddress,
+    {
+      nonce,
+      signer: new QrSigner({
+        registry: apiProp.registry,
+        callback: qrCallback,
+        id: qrId,
+        setState,
+        resolver: qrResolver
+      })
     }
+  );
 
-    if (result.status.isBroadcast) {
-      txState.isBusy = true;
-      callback(txState);
-    }
+  const extrinsicCallback = (txState: BasicTxResponse) => {
+    // eslint-disable-next-line node/no-callback-literal
+    callback({
+      ...txState,
+      isSendingSelf: false
+    });
+  };
 
-    if (result.status.isInBlock || result.status.isFinalized) {
-      result.events
-        .filter(({ event: { section } }) => section === 'system')
-        .forEach(({ event: { method } }): void => {
-          txState.transactionHash = extrinsic.hash.toHex();
-          callback(txState);
-
-          if (method === 'ExtrinsicFailed') {
-            txState.status = false;
-            callback(txState);
-            updateState({ status: ExternalRequestPromiseStatus.FAILED });
-          } else if (method === 'ExtrinsicSuccess') {
-            txState.status = true;
-            callback(txState);
-            updateState({ status: ExternalRequestPromiseStatus.COMPLETED });
-          }
-        });
-    } else if (result.isError) {
-      txState.txError = true;
-      txState.status = false;
-      callback(txState);
-    }
+  await sendExtrinsic({
+    callback: extrinsicCallback,
+    extrinsic,
+    txState,
+    updateState
   });
 }
 
@@ -608,7 +604,6 @@ const doSignAndSendLedger = async ({ api,
   extrinsic,
   id,
   networkKey,
-  nonce,
   senderAddress,
   setState,
   tokenInfo,
@@ -636,7 +631,7 @@ const doSignAndSendLedger = async ({ api,
     });
   };
 
-  await extrinsic.signAsync(senderAddress, { nonce, signer: new LedgerSigner(api.registry, ledgerCallback, id, setState) });
+  await extrinsic.signAsync(senderAddress, { signer: new LedgerSigner(api.registry, ledgerCallback, id, setState) });
 
   await extrinsic.send(({ events, status }) => {
     console.log('Transaction status:', status.type, status.hash.toHex());
@@ -677,21 +672,10 @@ export async function makeTransferLedger ({ apiProps,
     return;
   }
 
-  let nonce: AnyNumber;
-
-  if (['genshiro_testnet', 'genshiro', 'equilibrium_parachain'].includes(networkKey)) {
-    nonce = -1;
-  } else {
-    // @ts-ignore
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-    nonce = await api.query.system.account(senderAddress).nonce;
-  }
-
   await doSignAndSendLedger({
     api,
     networkKey,
     tokenInfo,
-    nonce,
     extrinsic: transfer,
     senderAddress,
     id,
@@ -761,48 +745,25 @@ export async function makeNftTransferLedger ({ apiProp,
     return;
   }
 
-  let nonce: AnyNumber;
-
-  if (['genshiro_testnet', 'genshiro', 'equilibrium_parachain'].includes(networkKey)) {
-    nonce = -1;
-  } else {
-    // @ts-ignore
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-    nonce = await apiProp.api.query.system.account(senderAddress).nonce;
-  }
-
   const ledgerCallback = ({ ledgerState }: {ledgerState: LedgerState}) => {
     // eslint-disable-next-line node/no-callback-literal
     callback({ isSendingSelf: false, ledgerState: ledgerState, externalState: { externalId: ledgerState.ledgerId } });
   };
 
-  await extrinsic.signAsync(senderAddress, { nonce, signer: new LedgerSigner(apiProp.registry, ledgerCallback, qrId, setState) });
+  await extrinsic.signAsync(senderAddress, { signer: new LedgerSigner(apiProp.registry, ledgerCallback, qrId, setState) });
 
-  await extrinsic.send((result) => {
-    if (!result || !result.status) {
-      return;
-    }
+  const extrinsicCallback = (txState: BasicTxResponse) => {
+    // eslint-disable-next-line node/no-callback-literal
+    callback({
+      ...txState,
+      isSendingSelf: false
+    });
+  };
 
-    if (result.status.isInBlock || result.status.isFinalized) {
-      result.events
-        .filter(({ event: { section } }) => section === 'system')
-        .forEach(({ event: { method } }): void => {
-          txState.transactionHash = extrinsic.hash.toHex();
-          callback(txState);
-
-          if (method === 'ExtrinsicFailed') {
-            txState.status = false;
-            callback(txState);
-            updateState({ status: ExternalRequestPromiseStatus.FAILED });
-          } else if (method === 'ExtrinsicSuccess') {
-            txState.status = true;
-            callback(txState);
-            updateState({ status: ExternalRequestPromiseStatus.COMPLETED });
-          }
-        });
-    } else if (result.isError) {
-      txState.txError = true;
-      callback(txState);
-    }
+  await sendExtrinsic({
+    callback: extrinsicCallback,
+    extrinsic,
+    txState,
+    updateState
   });
 }

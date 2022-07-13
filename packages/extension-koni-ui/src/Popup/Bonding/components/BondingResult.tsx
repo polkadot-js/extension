@@ -73,12 +73,6 @@ function BondingResult ({ backToHome, className, extrinsicHash, handleResend, is
 
             <div className={'bonding-action-container'}>
               <div
-                className={'bonding-resend-button'}
-                onClick={backToHome}
-              >
-                {t<string>('Back To Home')}
-              </div>
-              <div
                 className={'bonding-history-button'}
                 onClick={handleResend}
               >

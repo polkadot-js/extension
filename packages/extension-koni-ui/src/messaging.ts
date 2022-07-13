@@ -10,7 +10,102 @@ import type { HexString } from '@polkadot/util/types';
 import type { KeypairType } from '@polkadot/util-crypto/types';
 
 import { AuthUrls } from '@subwallet/extension-base/background/handlers/State';
-import { AccountExternalError, AccountsWithCurrentAddress, BalanceJson, BaseTxError, BasicTxInfo, BasicTxResponse, BondingOptionInfo, BondingSubmitParams, ChainBondingBasics, ChainRegistry, ConfirmationDefinitions, ConfirmationsQueue, ConfirmationType, CrowdloanJson, CurrentAccountInfo, CustomEvmToken, DeleteEvmTokenParams, DisableNetworkResponse, EvmNftSubmitTransaction, EvmNftTransaction, EvmNftTransactionRequest, EvmTokenJson, NetworkJson, NftCollectionJson, NftJson, NftTransactionResponse, NftTransferExtra, OptionInputAddress, PriceJson, RequestAccountCreateExternalV2, RequestAccountCreateHardwareV2, RequestAccountMeta, RequestCheckCrossChainTransfer, RequestCheckTransfer, RequestCrossChainTransfer, RequestCrossChainTransferExternal, RequestFreeBalance, RequestNftForceUpdate, RequestNftTransferExternalEVM, RequestNftTransferExternalSubstrate, RequestRejectExternalRequest, RequestResolveExternalRequest, RequestSettingsType, RequestStakeExternal, RequestSubscribeBalance, RequestSubscribeBalancesVisibility, RequestSubscribeCrowdloan, RequestSubscribeNft, RequestSubscribePrice, RequestSubscribeStaking, RequestSubscribeStakingReward, RequestTransfer, RequestTransferCheckReferenceCount, RequestTransferCheckSupporting, RequestTransferExistentialDeposit, RequestTransferExternal, RequestUnStakeExternal, ResponseAccountCreateSuriV2, ResponseAccountMeta, ResponseCheckCrossChainTransfer, ResponseCheckTransfer, ResponseNftTransferLedger, ResponseNftTransferQr, ResponseParseTransactionEVM, ResponsePrivateKeyValidateV2, ResponseQrSignEVM, ResponseRejectExternalRequest, ResponseResolveExternalRequest, ResponseSeedCreateV2, ResponseSeedValidateV2, ResponseSettingsType, ResponseStakeLedger, ResponseStakeQr, ResponseTransfer, ResponseTransferLedger, ResponseTransferQr, ResponseUnStakeLedger, ResponseUnStakeQr, StakeWithdrawalParams, StakingJson, StakingRewardJson, SubstrateNftSubmitTransaction, SubstrateNftTransaction, SubstrateNftTransactionRequest, SupportTransferResponse, ThemeTypes, TransactionHistoryItemType, TransferError, UnbondingSubmitParams, UnlockingStakeInfo, UnlockingStakeParams, ValidateEvmTokenRequest, ValidateNetworkResponse } from '@subwallet/extension-base/background/KoniTypes';
+import {
+  AccountExternalError,
+  AccountsWithCurrentAddress,
+  BalanceJson,
+  BaseTxError,
+  BasicTxInfo,
+  BasicTxResponse,
+  BondingOptionInfo,
+  BondingSubmitParams,
+  ChainBondingBasics,
+  ChainRegistry,
+  ConfirmationDefinitions,
+  ConfirmationsQueue,
+  ConfirmationType,
+  CrowdloanJson,
+  CurrentAccountInfo,
+  CustomEvmToken,
+  DeleteEvmTokenParams,
+  DisableNetworkResponse,
+  EvmNftSubmitTransaction,
+  EvmNftTransaction,
+  EvmNftTransactionRequest,
+  EvmTokenJson,
+  NetworkJson,
+  NftCollectionJson,
+  NftJson,
+  NftTransactionResponse,
+  NftTransferExtra,
+  OptionInputAddress,
+  PriceJson,
+  RequestAccountCreateExternalV2,
+  RequestAccountCreateHardwareV2,
+  RequestAccountMeta,
+  RequestCheckCrossChainTransfer,
+  RequestCheckTransfer,
+  RequestCrossChainTransfer,
+  RequestCrossChainTransferExternal,
+  RequestFreeBalance,
+  RequestNftForceUpdate,
+  RequestNftTransferExternalEVM,
+  RequestNftTransferExternalSubstrate,
+  RequestRejectExternalRequest,
+  RequestResolveExternalRequest,
+  RequestSettingsType,
+  RequestStakeExternal,
+  RequestSubscribeBalance,
+  RequestSubscribeBalancesVisibility,
+  RequestSubscribeCrowdloan,
+  RequestSubscribeNft,
+  RequestSubscribePrice,
+  RequestSubscribeStaking,
+  RequestSubscribeStakingReward,
+  RequestTransfer,
+  RequestTransferCheckReferenceCount,
+  RequestTransferCheckSupporting,
+  RequestTransferExistentialDeposit,
+  RequestTransferExternal,
+  RequestUnStakeExternal,
+  RequestWithdrawStakeExternal,
+  ResponseAccountCreateSuriV2,
+  ResponseAccountMeta,
+  ResponseCheckCrossChainTransfer,
+  ResponseCheckTransfer,
+  ResponseNftTransferLedger,
+  ResponseNftTransferQr,
+  ResponseParseTransactionEVM,
+  ResponsePrivateKeyValidateV2,
+  ResponseQrSignEVM,
+  ResponseRejectExternalRequest,
+  ResponseResolveExternalRequest,
+  ResponseSeedCreateV2,
+  ResponseSeedValidateV2,
+  ResponseSettingsType,
+  ResponseStakeLedger,
+  ResponseStakeQr,
+  ResponseTransfer,
+  ResponseTransferLedger,
+  ResponseTransferQr,
+  ResponseUnStakeLedger,
+  ResponseUnStakeQr, ResponseWithdrawStakeLedger, ResponseWithdrawStakeQr,
+  StakeWithdrawalParams,
+  StakingJson,
+  StakingRewardJson,
+  SubstrateNftSubmitTransaction,
+  SubstrateNftTransaction,
+  SubstrateNftTransactionRequest,
+  SupportTransferResponse,
+  ThemeTypes,
+  TransactionHistoryItemType,
+  TransferError,
+  UnbondingSubmitParams,
+  UnlockingStakeInfo,
+  UnlockingStakeParams,
+  ValidateEvmTokenRequest,
+  ValidateNetworkResponse
+} from '@subwallet/extension-base/background/KoniTypes';
 import { RequestCurrentAccountAddress, ResponseQRIsLocked, ResponseQrSignSubstrate } from '@subwallet/extension-base/background/types';
 import { PORT_EXTENSION } from '@subwallet/extension-base/defaults';
 import { getId } from '@subwallet/extension-base/utils/getId';
@@ -644,6 +739,10 @@ export async function makeUnBondingQr (request: RequestUnStakeExternal, callback
   return sendMessage('pri(unStake.qr.create)', request, callback);
 }
 
+export async function stakeWithdrawQr (request: RequestWithdrawStakeExternal, callback: (data: ResponseWithdrawStakeQr) => void): Promise<Array<BaseTxError>> {
+  return sendMessage('pri(withdrawStake.qr.create)', request, callback);
+}
+
 // External with Ledger
 
 export async function makeTransferLedger (request: RequestTransferExternal, callback: (data: ResponseTransferLedger) => void): Promise<Array<TransferError>> {
@@ -664,6 +763,10 @@ export async function makeBondingLedger (request: RequestStakeExternal, callback
 
 export async function makeUnBondingLedger (request: RequestUnStakeExternal, callback: (data: ResponseUnStakeLedger) => void): Promise<Array<BaseTxError>> {
   return sendMessage('pri(unStake.ledger.create)', request, callback);
+}
+
+export async function stakeWithdrawLedger (request: RequestWithdrawStakeExternal, callback: (data: ResponseWithdrawStakeLedger) => void): Promise<Array<BaseTxError>> {
+  return sendMessage('pri(withdrawStake.ledger.create)', request, callback);
 }
 
 // External request

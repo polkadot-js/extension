@@ -1,28 +1,33 @@
 // Copyright 2019-2022 @subwallet/extension-koni-base authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { ApiProps, ExternalRequestPromise, ExternalRequestPromiseStatus, NetworkJson, ResponseStakeExternal, ResponseStakeLedger, ResponseStakeQr, ResponseUnStakeExternal, ResponseUnStakeLedger, ResponseUnStakeQr, ValidatorInfo } from '@subwallet/extension-base/background/KoniTypes';
+import { ApiProps, ExternalRequestPromise, NetworkJson, ResponseStakeExternal, ResponseStakeLedger, ResponseStakeQr, ResponseUnStakeExternal, ResponseUnStakeLedger, ResponseUnStakeQr, ResponseWithdrawStakeExternal, ResponseWithdrawStakeLedger, ResponseWithdrawStakeQr, ValidatorInfo } from '@subwallet/extension-base/background/KoniTypes';
 import LedgerSigner from '@subwallet/extension-base/signers/substrates/LedgerSigner';
 import QrSigner from '@subwallet/extension-base/signers/substrates/QrSigner';
 import { LedgerState, QrState } from '@subwallet/extension-base/signers/types';
-import { getBondingExtrinsic, getTargetValidators, getUnbondingExtrinsic } from '@subwallet/extension-koni-base/api/bonding';
+import { getBondingExtrinsic, getTargetValidators, getUnbondingExtrinsic, getWithdrawalExtrinsic } from '@subwallet/extension-koni-base/api/bonding';
 
 import { SubmittableExtrinsic } from '@polkadot/api/types';
 import { BN } from '@polkadot/util';
 
+import { sendExtrinsic } from './shared';
+
 // Interface
 
-interface StakeExternalProps {
-  amount: number;
-  apiProp: ApiProps;
-  bondedValidators: string[];
+interface ExternalProps {
   id: string;
-  isBondedBefore: boolean;
-  network: NetworkJson;
-  nominatorAddress: string;
-  validatorInfo: ValidatorInfo;
   setState: (promise: ExternalRequestPromise) => void;
   updateState: (promise: Partial<ExternalRequestPromise>) => void;
+  apiProp: ApiProps;
+  network: NetworkJson;
+}
+
+interface StakeExternalProps extends ExternalProps{
+  amount: number;
+  bondedValidators: string[];
+  isBondedBefore: boolean;
+  nominatorAddress: string;
+  validatorInfo: ValidatorInfo;
   callback: (data: ResponseStakeExternal) => void;
 }
 
@@ -36,21 +41,21 @@ interface CreateBondingExtrinsicProps {
   bondedValidators: string[];
 }
 
-interface UnStakeExternalProps {
+interface UnStakeExternalProps extends ExternalProps{
   address: string;
   amount: number;
-  apiProp: ApiProps;
   callback: (data: ResponseUnStakeExternal) => void;
-  id: string;
-  network: NetworkJson;
-  setState: (promise: ExternalRequestPromise) => void;
-  updateState: (promise: Partial<ExternalRequestPromise>) => void;
 }
 
 interface CreateUnBondingExtrinsicProps {
   apiProp: ApiProps;
   network: NetworkJson;
   amount: number;
+}
+
+interface WithdrawStakeExternalProps extends Omit<ExternalProps, 'network'> {
+  address: string;
+  callback: (data: ResponseWithdrawStakeExternal) => void;
 }
 
 // Method
@@ -118,45 +123,32 @@ export const createStakeQr = async ({ amount,
       });
     };
 
-    await extrinsic.signAsync(nominatorAddress, { signer: new QrSigner(apiProp.registry, qrCallBack, id, setState) });
+    const qrResolver = () => {
+      // eslint-disable-next-line node/no-callback-literal
+      callback({
+        isBusy: true
+      });
+    };
+
+    await extrinsic.signAsync(
+      nominatorAddress,
+      {
+        signer: new QrSigner({
+          registry: apiProp.registry,
+          callback: qrCallBack,
+          id,
+          setState,
+          resolver: qrResolver
+        })
+      }
+    );
 
     try {
-      const unsubscribe = await extrinsic.send((result) => {
-        if (!result || !result.status) {
-          return;
-        }
-
-        if (result.status.isBroadcast) {
-          txState.isBusy = true;
-          callback(txState);
-        }
-
-        if (result.status.isInBlock || result.status.isFinalized) {
-          result.events
-            .filter(({ event: { section } }) => section === 'system')
-            .forEach(({ event: { method } }): void => {
-              txState.transactionHash = extrinsic.hash.toHex();
-              callback(txState);
-
-              if (method === 'ExtrinsicFailed') {
-                txState.status = false;
-                callback(txState);
-                updateState({ status: ExternalRequestPromiseStatus.FAILED });
-              } else if (method === 'ExtrinsicSuccess') {
-                txState.status = true;
-                callback(txState);
-                updateState({ status: ExternalRequestPromiseStatus.COMPLETED });
-              }
-            });
-        } else if (result.isError) {
-          txState.txError = true;
-          txState.status = false;
-          callback(txState);
-        }
-
-        if (result.isCompleted) {
-          unsubscribe();
-        }
+      await sendExtrinsic({
+        callback,
+        extrinsic,
+        txState,
+        updateState
       });
     } catch (e) {
       console.error('error bonding', e);
@@ -200,48 +192,97 @@ export const createUnStakeQr = async ({ address,
       });
     };
 
-    await extrinsic.signAsync(address, { signer: new QrSigner(apiProp.registry, qrCallBack, id, setState) });
+    const qrResolver = () => {
+    // eslint-disable-next-line node/no-callback-literal
+      callback({
+        isBusy: true
+      });
+    };
+
+    await extrinsic.signAsync(
+      address,
+      {
+        signer: new QrSigner({
+          registry: apiProp.registry,
+          callback: qrCallBack,
+          id,
+          setState,
+          resolver: qrResolver
+        })
+      }
+    );
 
     try {
-      const unsubscribe = await extrinsic.send((result) => {
-        if (!result || !result.status) {
-          return;
-        }
-
-        if (result.status.isBroadcast) {
-          txState.isBusy = true;
-          callback(txState);
-        }
-
-        if (result.status.isInBlock || result.status.isFinalized) {
-          result.events
-            .filter(({ event: { section } }) => section === 'system')
-            .forEach(({ event: { method } }): void => {
-              txState.transactionHash = extrinsic.hash.toHex();
-              callback(txState);
-
-              if (method === 'ExtrinsicFailed') {
-                txState.status = false;
-                callback(txState);
-                updateState({ status: ExternalRequestPromiseStatus.FAILED });
-              } else if (method === 'ExtrinsicSuccess') {
-                txState.status = true;
-                callback(txState);
-                updateState({ status: ExternalRequestPromiseStatus.COMPLETED });
-              }
-            });
-        } else if (result.isError) {
-          txState.txError = true;
-          txState.status = false;
-          callback(txState);
-        }
-
-        if (result.isCompleted) {
-          unsubscribe();
-        }
+      await sendExtrinsic({
+        callback,
+        extrinsic,
+        txState,
+        updateState
       });
     } catch (e) {
       console.error('error unbonding', e);
+      txState.txError = true;
+      txState.status = false;
+      callback(txState);
+    }
+  } else {
+    callback(txState);
+  }
+};
+
+interface WithdrawStakeQrProps extends WithdrawStakeExternalProps{
+  callback: (data: ResponseWithdrawStakeQr) => void;
+}
+
+export const createWithdrawStakeQr = async ({ address,
+  apiProp,
+  callback,
+  id,
+  setState,
+  updateState }: WithdrawStakeQrProps) => {
+  const extrinsic = await getWithdrawalExtrinsic(apiProp, address);
+  const txState: ResponseWithdrawStakeQr = {};
+
+  if (extrinsic !== null) {
+    const qrCallBack = ({ qrState }: {qrState: QrState}) => {
+      // eslint-disable-next-line node/no-callback-literal
+      callback({
+        qrState: qrState,
+        externalState: {
+          externalId: qrState.qrId
+        }
+      });
+    };
+
+    const qrResolver = () => {
+      // eslint-disable-next-line node/no-callback-literal
+      callback({
+        isBusy: true
+      });
+    };
+
+    await extrinsic.signAsync(
+      address,
+      {
+        signer: new QrSigner({
+          registry: apiProp.registry,
+          callback: qrCallBack,
+          id,
+          setState,
+          resolver: qrResolver
+        })
+      }
+    );
+
+    try {
+      await sendExtrinsic({
+        callback,
+        extrinsic,
+        txState,
+        updateState
+      });
+    } catch (e) {
+      console.error('error withdrawing', e);
       txState.txError = true;
       txState.status = false;
       callback(txState);
@@ -294,37 +335,11 @@ export const createStakeLedger = async ({ amount,
     await extrinsic.signAsync(nominatorAddress, { signer: new LedgerSigner(apiProp.registry, ledgerCallback, id, setState) });
 
     try {
-      const unsubscribe = await extrinsic.send((result) => {
-        if (!result || !result.status) {
-          return;
-        }
-
-        if (result.status.isInBlock || result.status.isFinalized) {
-          result.events
-            .filter(({ event: { section } }) => section === 'system')
-            .forEach(({ event: { method } }): void => {
-              txState.transactionHash = extrinsic.hash.toHex();
-              callback(txState);
-
-              if (method === 'ExtrinsicFailed') {
-                txState.status = false;
-                callback(txState);
-                updateState({ status: ExternalRequestPromiseStatus.FAILED });
-              } else if (method === 'ExtrinsicSuccess') {
-                txState.status = true;
-                callback(txState);
-                updateState({ status: ExternalRequestPromiseStatus.COMPLETED });
-              }
-            });
-        } else if (result.isError) {
-          txState.txError = true;
-          txState.status = false;
-          callback(txState);
-        }
-
-        if (result.isCompleted) {
-          unsubscribe();
-        }
+      await sendExtrinsic({
+        callback,
+        extrinsic,
+        txState,
+        updateState
       });
     } catch (e) {
       console.error('error bonding', e);
@@ -371,40 +386,58 @@ export const createUnStakeLedger = async ({ address,
     await extrinsic.signAsync(address, { signer: new LedgerSigner(apiProp.registry, ledgerCallback, id, setState) });
 
     try {
-      const unsubscribe = await extrinsic.send((result) => {
-        if (!result || !result.status) {
-          return;
-        }
-
-        if (result.status.isInBlock || result.status.isFinalized) {
-          result.events
-            .filter(({ event: { section } }) => section === 'system')
-            .forEach(({ event: { method } }): void => {
-              txState.transactionHash = extrinsic.hash.toHex();
-              callback(txState);
-
-              if (method === 'ExtrinsicFailed') {
-                txState.status = false;
-                callback(txState);
-                updateState({ status: ExternalRequestPromiseStatus.FAILED });
-              } else if (method === 'ExtrinsicSuccess') {
-                txState.status = true;
-                callback(txState);
-                updateState({ status: ExternalRequestPromiseStatus.COMPLETED });
-              }
-            });
-        } else if (result.isError) {
-          txState.txError = true;
-          txState.status = false;
-          callback(txState);
-        }
-
-        if (result.isCompleted) {
-          unsubscribe();
-        }
+      await sendExtrinsic({
+        callback,
+        extrinsic,
+        txState,
+        updateState
       });
     } catch (e) {
       console.error('error unbonding', e);
+      txState.txError = true;
+      txState.status = false;
+      callback(txState);
+    }
+  } else {
+    callback(txState);
+  }
+};
+
+interface WithdrawStakeLedgerProps extends WithdrawStakeExternalProps{
+  callback: (data: ResponseWithdrawStakeLedger) => void;
+}
+
+export const createWithdrawStakeLedger = async ({ address,
+  apiProp,
+  callback,
+  id,
+  setState,
+  updateState }: WithdrawStakeLedgerProps) => {
+  const extrinsic = await getWithdrawalExtrinsic(apiProp, address);
+  const txState: ResponseWithdrawStakeLedger = {};
+
+  if (extrinsic !== null) {
+    const ledgerCallback = ({ ledgerState }: {ledgerState: LedgerState}) => {
+      // eslint-disable-next-line node/no-callback-literal
+      callback({
+        ledgerState: ledgerState,
+        externalState: {
+          externalId: ledgerState.ledgerId
+        }
+      });
+    };
+
+    await extrinsic.signAsync(address, { signer: new LedgerSigner(apiProp.registry, ledgerCallback, id, setState) });
+
+    try {
+      await sendExtrinsic({
+        callback,
+        extrinsic,
+        txState,
+        updateState
+      });
+    } catch (e) {
+      console.error('error withdrawing', e);
       txState.txError = true;
       txState.status = false;
       callback(txState);

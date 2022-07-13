@@ -83,7 +83,7 @@ export async function handleTransferQr ({ callback,
   const qrCallback = ({ qrState }: {qrState: QrState}) => {
     // eslint-disable-next-line node/no-callback-literal
     callback({
-      step: TransferStep.READY,
+      step: TransferStep.SIGNING,
       errors: [],
       extrinsicStatus: undefined,
       data: {},
@@ -92,7 +92,20 @@ export async function handleTransferQr ({ callback,
     });
   };
 
-  const signer = new QrSigner(qrCallback, id, setState);
+  const qrResolver = () => {
+    // eslint-disable-next-line node/no-callback-literal
+    callback({
+      step: TransferStep.SIGNING,
+      isBusy: true
+    });
+  };
+
+  const signer = new QrSigner({
+    callback: qrCallback,
+    id,
+    setState,
+    resolver: qrResolver
+  });
 
   const { signature } = await signer.signTransaction(txObject);
 
@@ -326,7 +339,20 @@ export async function handleTransferNftQr ({ callback,
     });
   };
 
-  const signer = new QrSigner(qrCallback, id, setState);
+  const qrResolver = () => {
+    // eslint-disable-next-line node/no-callback-literal
+    callback({
+      isSendingSelf: isSendingSelf,
+      isBusy: true
+    });
+  };
+
+  const signer = new QrSigner({
+    callback: qrCallback,
+    id,
+    setState,
+    resolver: qrResolver
+  });
 
   const { signature } = await signer.signTransaction(txObject);
 

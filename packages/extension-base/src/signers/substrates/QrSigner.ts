@@ -14,17 +14,26 @@ interface CallbackProps {
   qrState: QrState
 }
 
-export default class QrSigner implements Signer {
-  readonly #registry: Registry;
-  readonly #callback: (state: CallbackProps) => void;
-  readonly #setState: (promise: ExternalRequestPromise) => void;
-  readonly #id: string;
+interface QrSignerProps {
+  registry: Registry;
+  callback: (state: CallbackProps) => void;
+  id: string;
+  setState: (promise: ExternalRequestPromise) => void;
+  resolver: () => void;
+}
 
-  constructor (registry: Registry, callback: (state: CallbackProps) => void, id: string, setState: (promise: ExternalRequestPromise) => void) {
-    this.#registry = registry;
+export default class QrSigner implements Signer {
+  readonly #callback: (state: CallbackProps) => void;
+  readonly #id: string;
+  readonly #registry: Registry;
+  readonly #resolver: () => void;
+  readonly #setState: (promise: ExternalRequestPromise) => void;
+
+  constructor ({ callback, id, registry, resolver, setState }: QrSignerProps) {
     this.#callback = callback;
     this.#id = id;
-
+    this.#registry = registry;
+    this.#resolver = resolver;
     this.#setState = setState;
   }
 
@@ -37,7 +46,12 @@ export default class QrSigner implements Signer {
         ? blake2AsU8a(wrapper.toU8a(true))
         : wrapper.toU8a();
 
-      this.#setState({ reject: reject, resolve: resolve, status: ExternalRequestPromiseStatus.PENDING, createdAt: new Date().getTime() });
+      const resolver = (result: SignerResult | PromiseLike<SignerResult>): void => {
+        this.#resolver();
+        resolve(result);
+      };
+
+      this.#setState({ reject: reject, resolve: resolver, status: ExternalRequestPromiseStatus.PENDING, createdAt: new Date().getTime() });
 
       this.#callback({
         qrState: {

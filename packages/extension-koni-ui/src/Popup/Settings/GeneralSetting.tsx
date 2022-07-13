@@ -3,17 +3,16 @@
 
 import type { ThemeProps } from '../../types';
 
-import { saveTheme, setNotification } from '@subwallet/extension-koni-ui/messaging';
+import { setNotification } from '@subwallet/extension-koni-ui/messaging';
 import Header from '@subwallet/extension-koni-ui/partials/Header';
 import getLanguageOptions from '@subwallet/extension-koni-ui/util/getLanguageOptions';
-import React, { useCallback, useContext, useMemo, useState } from 'react';
-import styled, { ThemeContext } from 'styled-components';
+import React, { useCallback, useMemo, useState } from 'react';
+import styled from 'styled-components';
 
 import settings from '@polkadot/ui-settings';
 
-import { Dropdown, HorizontalLabelToggle, MenuItem, themes, ThemeSwitchContext } from '../../components';
+import { Dropdown, MenuItem } from '../../components';
 import useTranslation from '../../hooks/useTranslation';
-import { Theme } from '../../types';
 
 interface Props extends ThemeProps {
   className?: string;
@@ -26,8 +25,6 @@ function GeneralSetting ({ className }: Props): React.ReactElement {
   const { t } = useTranslation();
   const [notification, updateNotification] = useState(settings.notification);
   const [language, updateLanguage] = useState(settings.i18nLang === 'default' ? 'en' : settings.i18nLang);
-  const themeContext = useContext(ThemeContext as React.Context<Theme>);
-  const setTheme = useContext(ThemeSwitchContext);
   const languageOptions = useMemo(() => getLanguageOptions(), []);
 
   const _onChangeNotification = useCallback(
@@ -38,15 +35,6 @@ function GeneralSetting ({ className }: Props): React.ReactElement {
       settings.set({ notification: value });
     },
     []
-  );
-
-  const _onChangeTheme = useCallback(
-    (checked: boolean): void => {
-      saveTheme(checked ? 'dark' : 'light', () => {
-        setTheme(checked ? 'dark' : 'light');
-      }).catch((e) => console.log('There is problem when saveTheme', e));
-    },
-    [setTheme]
   );
 
   const _onChangeLang = useCallback(
@@ -66,18 +54,6 @@ function GeneralSetting ({ className }: Props): React.ReactElement {
           subHeaderName={t<string>('General Setting')}
           to='/account/settings'
         />
-        <MenuItem
-          className='setting'
-          title='Theme'
-        >
-          <HorizontalLabelToggle
-            checkedLabel={t<string>('Dark')}
-            className='settings__theme-setting'
-            toggleFunc={_onChangeTheme}
-            uncheckedLabel={t<string>('Light')}
-            value={themeContext.id === themes.dark.id}
-          />
-        </MenuItem>
         <MenuItem
           className='setting'
           title={t<string>('Language')}

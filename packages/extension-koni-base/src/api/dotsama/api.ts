@@ -100,14 +100,14 @@ async function loadOnReady (registry: Registry, api: ApiPromise): Promise<ApiSta
   };
 }
 
-function getWellKnownChain (chain = 'polkadot') {
+function getWellKnownChain (chain = 'polkadot'): string {
   switch (chain) {
     case 'kusama':
       return WellKnownChain.ksmcc3;
     case 'polkadot':
       return WellKnownChain.polkadot;
     case 'rococo':
-      return WellKnownChain.rococo_v2_1;
+      return WellKnownChain.rococo_v2_2;
     case 'westend':
       return WellKnownChain.westend2;
     default:

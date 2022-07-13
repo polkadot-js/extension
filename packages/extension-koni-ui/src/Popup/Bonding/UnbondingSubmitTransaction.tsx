@@ -38,7 +38,7 @@ function UnbondingSubmitTransaction ({ className }: Props): React.ReactElement<P
   const bondedAmount = unbondingParams.bondedAmount as number;
   const networkJson = useGetNetworkJson(selectedNetwork);
 
-  const [amount, setAmount] = useState<number>(0);
+  const [amount, setAmount] = useState<number>(-1);
   const [isReadySubmit, setIsReadySubmit] = useState(false);
   const [showAuth, setShowAuth] = useState(false);
   const [showResult, setShowResult] = useState(false);
@@ -65,8 +65,6 @@ function UnbondingSubmitTransaction ({ className }: Props): React.ReactElement<P
   const goHome = useCallback(() => {
     navigate('/');
   }, [navigate]);
-
-  console.log('amount', amount);
 
   useEffect(() => {
     if (!isClickNext) {
@@ -101,19 +99,15 @@ function UnbondingSubmitTransaction ({ className }: Props): React.ReactElement<P
     }
   }, [amount, bondedAmount, isClickNext, minBond, networkJson.decimals, networkJson.nativeToken, nominatedAmount, show, showAuth, showResult, unbondingParams.delegations]);
 
-  const convertToBN = useCallback(() => {
-    if (unbondAll) {
-      if (unbondingParams.delegations) {
-        return new BN(nominatedAmount);
-      } else {
-        const binaryAmount = bondedAmount * (10 ** (networkJson.decimals as number));
-
-        return new BN(binaryAmount.toString());
-      }
+  const getDefaultValue = useCallback(() => {
+    if (amount === -1) {
+      return undefined;
     }
 
-    return undefined;
-  }, [bondedAmount, networkJson.decimals, nominatedAmount, unbondAll, unbondingParams.delegations]);
+    const parsedAmount = amount * (10 ** (networkJson.decimals as number));
+
+    return new BN(parsedAmount.toFixed(0));
+  }, [amount, networkJson.decimals]);
 
   const handleResend = useCallback(() => {
     setExtrinsicHash('');
@@ -125,22 +119,24 @@ function UnbondingSubmitTransaction ({ className }: Props): React.ReactElement<P
   }, []);
 
   const handleUpdateAmount = useCallback((value: BN | string) => {
-    if (!unbondAll) {
-      let parsedValue;
-
-      if (value instanceof BN) {
-        parsedValue = parseFloat(value.toString()) / (10 ** (networkJson.decimals as number));
-      } else {
-        parsedValue = parseFloat(value) / (10 ** (networkJson.decimals as number));
-      }
-
-      if (isNaN(parsedValue)) {
-        setAmount(-1);
-      } else {
-        setAmount(parsedValue);
-      }
+    if (!value) {
+      return;
     }
-  }, [networkJson.decimals, unbondAll]);
+
+    let parsedValue;
+
+    if (value instanceof BN) {
+      parsedValue = parseFloat(value.toString()) / (10 ** (networkJson.decimals as number));
+    } else {
+      parsedValue = parseFloat(value) / (10 ** (networkJson.decimals as number));
+    }
+
+    if (isNaN(parsedValue)) {
+      setAmount(0);
+    } else {
+      setAmount(parsedValue);
+    }
+  }, [networkJson.decimals]);
 
   useEffect(() => {
     if (account && account.address !== selectedAccount) {
@@ -264,7 +260,7 @@ function UnbondingSubmitTransaction ({ className }: Props): React.ReactElement<P
               autoFocus
               className={'submit-bond-amount-input'}
               decimals={networkJson.decimals}
-              defaultValue={convertToBN()}
+              defaultValue={getDefaultValue()}
               help={`Type the amount you want to unstake. Your total stake is ${parseFloat(nominatedAmount) / (10 ** (networkJson.decimals as number))} ${networkJson.nativeToken as string}`}
               isDisabled={unbondAll}
               isError={false}
@@ -284,7 +280,7 @@ function UnbondingSubmitTransaction ({ className }: Props): React.ReactElement<P
               autoFocus
               className={'submit-bond-amount-input'}
               decimals={networkJson.decimals}
-              defaultValue={convertToBN()}
+              defaultValue={getDefaultValue()}
               help={`Type the amount you want to unstake. You can unstake ${bondedAmount} ${networkJson.nativeToken as string}`}
               isDisabled={unbondAll}
               isError={false}

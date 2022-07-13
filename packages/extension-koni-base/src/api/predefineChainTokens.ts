@@ -90,6 +90,13 @@ export const PREDEFINE_TOKEN_DATA_MAP: Record<string, Record<string, TokenInfo>>
       name: 'LCDOT',
       decimals: 10,
       specialOption: { LiquidCrowdloan: 13 }
+    },
+    tDOT: {
+      isMainToken: false,
+      symbol: 'tDOT',
+      name: 'Tapio DOT',
+      decimals: 10,
+      specialOption: { StableAssetPoolToken: 0 }
     }
   },
   karura: {
@@ -108,8 +115,16 @@ export const PREDEFINE_TOKEN_DATA_MAP: Record<string, Record<string, TokenInfo>>
     taiKSM: {
       isMainToken: false,
       symbol: 'taiKSM',
-      name: 'taiKSM',
-      decimals: 12
+      name: 'Taiga KSM',
+      decimals: 12,
+      specialOption: { StableAssetPoolToken: 0 }
+    },
+    '3USD': {
+      isMainToken: false,
+      symbol: '3USD',
+      name: 'Taiga 3USD',
+      decimals: 12,
+      specialOption: { StableAssetPoolToken: 1 }
     },
     TEER: {
       isMainToken: false,

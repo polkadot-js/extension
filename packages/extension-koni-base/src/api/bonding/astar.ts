@@ -2,12 +2,13 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { ApiProps, BasicTxInfo, NetworkJson, UnlockingStakeInfo, ValidatorInfo } from '@subwallet/extension-base/background/KoniTypes';
-import { ERA_LENGTH_MAP, parseRawNumber } from '@subwallet/extension-koni-base/api/bonding/utils';
+import { ERA_LENGTH_MAP } from '@subwallet/extension-koni-base/api/bonding/utils';
 import { getFreeBalance } from '@subwallet/extension-koni-base/api/dotsama/balance';
-import { isUrl } from '@subwallet/extension-koni-base/utils/utils';
+import { isUrl, parseRawNumber } from '@subwallet/extension-koni-base/utils/utils';
 import fetch from 'cross-fetch';
 import Web3 from 'web3';
 
+import { SubmittableExtrinsic } from '@polkadot/api/promise/types';
 import { BN } from '@polkadot/util';
 
 export async function getAstarBondingBasics (networkKey: string) {
@@ -173,9 +174,7 @@ export async function handleAstarUnbondingTxInfo (networkJson: NetworkJson, amou
 
   const feeString = txInfo.partialFee.toHuman();
   const binaryBalance = new BN(balance);
-
-  const sumAmount = txInfo.partialFee.addn(amount);
-  const balanceError = sumAmount.gt(binaryBalance);
+  const balanceError = txInfo.partialFee.gt(binaryBalance);
 
   return {
     fee: feeString,
@@ -279,17 +278,60 @@ export async function getAstarWithdrawalExtrinsic (dotSamaApi: ApiProps) {
   return apiPromise.api.tx.dappsStaking.withdrawUnbonded();
 }
 
-export async function getAstarClaimRewardTxInfo (dotSamaApi: ApiProps, address: string, dappAddress: string) {
+export async function getAstarClaimRewardTxInfo (dotSamaApi: ApiProps, address: string) {
   const apiPromise = await dotSamaApi.isReady;
 
-  const extrinsic = apiPromise.api.tx.dappsStaking.claimStaker({ Evm: dappAddress });
+  const [_stakedDapps, _currentEra] = await Promise.all([
+    apiPromise.api.query.dappsStaking.generalStakerInfo.entries(address),
+    apiPromise.api.query.dappsStaking.currentEra()
+  ]);
+
+  const currentEra = parseRawNumber(_currentEra.toHuman() as string);
+  const transactions: SubmittableExtrinsic[] = [];
+
+  for (const item of _stakedDapps) {
+    const data = item[0].toHuman() as any[];
+    const stakedDapp = data[1] as Record<string, string>;
+    const stakeData = item[1].toHuman() as Record<string, Record<string, string>[]>;
+    const stakes = stakeData.stakes;
+    const dappAddress = stakedDapp.Evm.toLowerCase();
+
+    let numberOfUnclaimedEra = 0;
+
+    for (let i = 0; i < stakes.length; i++) {
+      const { era, staked } = stakes[i];
+      const bnStaked = new BN(staked.replaceAll(',', ''));
+      const parsedEra = parseRawNumber(era);
+
+      if (bnStaked.eq(new BN(0))) {
+        continue;
+      }
+
+      const nextEraData = stakes[i + 1] ?? null;
+      const nextEra = nextEraData && parseRawNumber(nextEraData.era);
+      const isLastEra = i === stakes.length - 1;
+      const eraToClaim = isLastEra ? currentEra - parsedEra : nextEra - parsedEra;
+
+      numberOfUnclaimedEra += eraToClaim;
+    }
+
+    for (let i = 0; i < numberOfUnclaimedEra; i++) {
+      const tx = apiPromise.api.tx.dappsStaking.claimStaker({ Evm: dappAddress });
+
+      transactions.push(tx);
+    }
+  }
+
+  console.log('no of tx: ', transactions.length);
+
+  const extrinsic = apiPromise.api.tx.utility.batch(transactions);
 
   return extrinsic.paymentInfo(address);
 }
 
-export async function handleAstarClaimRewardTxInfo (address: string, dappAddress: string, networkKey: string, dotSamaApiMap: Record<string, ApiProps>, web3ApiMap: Record<string, Web3>) {
+export async function handleAstarClaimRewardTxInfo (address: string, networkKey: string, dotSamaApiMap: Record<string, ApiProps>, web3ApiMap: Record<string, Web3>) {
   const [txInfo, balance] = await Promise.all([
-    getAstarClaimRewardTxInfo(dotSamaApiMap[networkKey], address, dappAddress),
+    getAstarClaimRewardTxInfo(dotSamaApiMap[networkKey], address),
     getFreeBalance(networkKey, address, dotSamaApiMap, web3ApiMap)
   ]);
 
@@ -303,8 +345,51 @@ export async function handleAstarClaimRewardTxInfo (address: string, dappAddress
   } as BasicTxInfo;
 }
 
-export async function getAstarClaimRewardExtrinsic (dotSamaApi: ApiProps, dappAddress: string) {
+export async function getAstarClaimRewardExtrinsic (dotSamaApi: ApiProps, dappAddress: string, address: string) {
   const apiPromise = await dotSamaApi.isReady;
 
-  return apiPromise.api.tx.dappsStaking.claimStaker({ Evm: dappAddress });
+  const [_stakedDapps, _currentEra] = await Promise.all([
+    apiPromise.api.query.dappsStaking.generalStakerInfo.entries(address),
+    apiPromise.api.query.dappsStaking.currentEra()
+  ]);
+
+  const currentEra = parseRawNumber(_currentEra.toHuman() as string);
+  const transactions: SubmittableExtrinsic[] = [];
+
+  for (const item of _stakedDapps) {
+    const data = item[0].toHuman() as any[];
+    const stakedDapp = data[1] as Record<string, string>;
+    const stakeData = item[1].toHuman() as Record<string, Record<string, string>[]>;
+    const stakes = stakeData.stakes;
+    const dappAddress = stakedDapp.Evm.toLowerCase();
+
+    let numberOfUnclaimedEra = 0;
+
+    for (let i = 0; i < stakes.length; i++) {
+      const { era, staked } = stakes[i];
+      const bnStaked = new BN(staked.replaceAll(',', ''));
+      const parsedEra = parseRawNumber(era);
+
+      if (bnStaked.eq(new BN(0))) {
+        continue;
+      }
+
+      const nextEraData = stakes[i + 1] ?? null;
+      const nextEra = nextEraData && parseRawNumber(nextEraData.era);
+      const isLastEra = i === stakes.length - 1;
+      const eraToClaim = isLastEra ? currentEra - parsedEra : nextEra - parsedEra;
+
+      numberOfUnclaimedEra += eraToClaim;
+    }
+
+    for (let i = 0; i < numberOfUnclaimedEra; i++) {
+      const tx = apiPromise.api.tx.dappsStaking.claimStaker({ Evm: dappAddress });
+
+      transactions.push(tx);
+    }
+  }
+
+  console.log('no of tx: ', transactions.length);
+
+  return apiPromise.api.tx.utility.batch(transactions);
 }

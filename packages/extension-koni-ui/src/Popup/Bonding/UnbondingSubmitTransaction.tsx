@@ -66,6 +66,8 @@ function UnbondingSubmitTransaction ({ className }: Props): React.ReactElement<P
     navigate('/');
   }, [navigate]);
 
+  console.log('amount', amount);
+
   useEffect(() => {
     if (!isClickNext) {
       if (unbondingParams.delegations) {
@@ -81,7 +83,7 @@ function UnbondingSubmitTransaction ({ className }: Props): React.ReactElement<P
             if ((_nominatedAmount - _minBond) <= 0) {
               show('You can only unstake everything');
             } else {
-              show(`You can unstake everything or a maximum of ${_nominatedAmount - _minBond} ${networkJson.nativeToken as string}`);
+              show(`You can unstake everything or a maximum of ${(_nominatedAmount - _minBond).toFixed(2)} ${networkJson.nativeToken as string}`);
             }
           }
         }
@@ -183,13 +185,19 @@ function UnbondingSubmitTransaction ({ className }: Props): React.ReactElement<P
           setNominatedAmount(item.amount);
           setMinBond(item.minBond);
 
-          setAmount(0);
-          setIsReadySubmit(false);
+          if (unbondAll) {
+            const _nominatedAmount = parseFloat(item.amount) / (10 ** (networkJson.decimals as number));
+
+            setAmount(_nominatedAmount);
+          } else {
+            setAmount(0);
+          }
+
           break;
         }
       }
     }
-  }, [unbondingParams.delegations]);
+  }, [networkJson.decimals, unbondAll, unbondingParams.delegations]);
 
   const toggleUnbondAll = useCallback((value: boolean) => {
     setUnbondAll(value);

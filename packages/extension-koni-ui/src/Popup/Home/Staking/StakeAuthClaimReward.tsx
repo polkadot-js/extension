@@ -11,8 +11,6 @@ import useGetNetworkJson from '@subwallet/extension-koni-ui/hooks/screen/home/us
 import useToast from '@subwallet/extension-koni-ui/hooks/useToast';
 import useTranslation from '@subwallet/extension-koni-ui/hooks/useTranslation';
 import { getStakeClaimRewardTxInfo, submitStakeClaimReward } from '@subwallet/extension-koni-ui/messaging';
-import ValidatorsDropdown from '@subwallet/extension-koni-ui/Popup/Bonding/components/ValidatorsDropdown';
-import { CHAIN_TYPE_MAP } from '@subwallet/extension-koni-ui/Popup/Bonding/utils';
 import StakeClaimRewardResult from '@subwallet/extension-koni-ui/Popup/Home/Staking/StakeClaimRewardResult';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import React, { useCallback, useEffect, useState } from 'react';
@@ -26,7 +24,7 @@ interface Props extends ThemeProps {
   delegation?: DelegationItem[];
 }
 
-function StakeAuthClaimReward ({ address, className, delegation, hideModal, networkKey }: Props): React.ReactElement<Props> {
+function StakeAuthClaimReward ({ address, className, hideModal, networkKey }: Props): React.ReactElement<Props> {
   const networkJson = useGetNetworkJson(networkKey);
   const { t } = useTranslation();
   const { show } = useToast();
@@ -35,7 +33,7 @@ function StakeAuthClaimReward ({ address, className, delegation, hideModal, netw
   const [password, setPassword] = useState<string>('');
   const [passwordError, setPasswordError] = useState<string | null>('');
   const [isTxReady, setIsTxReady] = useState(false);
-  const [targetValidator, setTargetValidator] = useState(delegation ? delegation[0].owner : '');
+  // const [targetValidator, setTargetValidator] = useState(delegation ? delegation[0].owner : ''); // enable this if any chain requires
 
   const [balanceError, setBalanceError] = useState(false);
   const [fee, setFee] = useState('');
@@ -45,15 +43,14 @@ function StakeAuthClaimReward ({ address, className, delegation, hideModal, netw
   const [txError, setTxError] = useState('');
   const [showResult, setShowResult] = useState(false);
 
-  const handleSelectValidator = useCallback((val: string) => {
-    setTargetValidator(val);
-  }, []);
+  // const handleSelectValidator = useCallback((val: string) => {
+  //   setTargetValidator(val);
+  // }, []);
 
   useEffect(() => {
     getStakeClaimRewardTxInfo({
       address,
-      networkKey,
-      validatorAddress: targetValidator
+      networkKey
     })
       .then((resp) => {
         setIsTxReady(true);
@@ -67,7 +64,7 @@ function StakeAuthClaimReward ({ address, className, delegation, hideModal, netw
       setBalanceError(false);
       setFee('');
     };
-  }, [address, networkKey, targetValidator]);
+  }, [address, networkKey]);
 
   const _onChangePass = useCallback((value: string) => {
     setPassword(value);
@@ -79,8 +76,7 @@ function StakeAuthClaimReward ({ address, className, delegation, hideModal, netw
     await submitStakeClaimReward({
       address,
       networkKey,
-      password,
-      validatorAddress: targetValidator
+      password
     }, (cbData) => {
       if (cbData.passwordError) {
         show(cbData.passwordError);
@@ -117,7 +113,7 @@ function StakeAuthClaimReward ({ address, className, delegation, hideModal, netw
         }
       }
     });
-  }, [address, balanceError, networkKey, password, show, targetValidator]);
+  }, [address, balanceError, networkKey, password, show]);
 
   const handleConfirm = useCallback(() => {
     setLoading(true);
@@ -135,15 +131,15 @@ function StakeAuthClaimReward ({ address, className, delegation, hideModal, netw
     setShowResult(false);
   }, []);
 
-  const getDropdownTitle = useCallback(() => {
-    if (CHAIN_TYPE_MAP.astar.includes(networkKey)) {
-      return 'Select a dApp';
-    } else if (CHAIN_TYPE_MAP.para.includes(networkKey)) {
-      return 'Select a collator';
-    }
-
-    return 'Select a validator';
-  }, [networkKey]);
+  // const getDropdownTitle = useCallback(() => {
+  //   if (CHAIN_TYPE_MAP.astar.includes(networkKey)) {
+  //     return 'Select a dApp';
+  //   } else if (CHAIN_TYPE_MAP.para.includes(networkKey)) {
+  //     return 'Select a collator';
+  //   }
+  //
+  //   return 'Select a validator';
+  // }, [networkKey]);
 
   const handleClickCancel = useCallback(() => {
     if (!loading) {
@@ -187,15 +183,15 @@ function StakeAuthClaimReward ({ address, className, delegation, hideModal, netw
                       withEllipsis
                     />
 
-                    {
-                      delegation && <ValidatorsDropdown
-                        className={'stake-claim-dropdown'}
-                        delegations={delegation}
-                        handleSelectValidator={handleSelectValidator}
-                        isDisabled={loading}
-                        label={getDropdownTitle()}
-                      />
-                    }
+                    {/* { */}
+                    {/*  delegation && <ValidatorsDropdown */}
+                    {/*    className={'stake-claim-dropdown'} */}
+                    {/*    delegations={delegation} */}
+                    {/*    handleSelectValidator={handleSelectValidator} */}
+                    {/*    isDisabled={loading} */}
+                    {/*    label={getDropdownTitle()} */}
+                    {/*  /> */}
+                    {/* } */}
 
                     <div className={'transaction-info-container'}>
                       {/* <div className={'transaction-info-row'}> */}

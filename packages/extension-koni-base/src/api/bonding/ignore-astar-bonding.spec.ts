@@ -2,13 +2,14 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { ValidatorInfo } from '@subwallet/extension-base/background/KoniTypes';
-import { ERA_LENGTH_MAP, parseRawNumber } from '@subwallet/extension-koni-base/api/bonding/utils';
+import { ERA_LENGTH_MAP } from '@subwallet/extension-koni-base/api/bonding/utils';
 import { PREDEFINED_NETWORKS } from '@subwallet/extension-koni-base/api/predefinedNetworks';
 import { DOTSAMA_AUTO_CONNECT_MS } from '@subwallet/extension-koni-base/constants';
-import { getCurrentProvider, isUrl } from '@subwallet/extension-koni-base/utils/utils';
+import { getCurrentProvider, isUrl, parseRawNumber } from '@subwallet/extension-koni-base/utils/utils';
 import fetch from 'cross-fetch';
 
 import { ApiPromise, WsProvider } from '@polkadot/api';
+import { SubmittableExtrinsic } from '@polkadot/api/promise/types';
 import { BN } from '@polkadot/util';
 
 jest.setTimeout(5000000);
@@ -175,5 +176,59 @@ describe('test DotSama APIs', () => {
     const extrinsic = apiPromise.tx.dappsStaking.withdrawUnbonded();
 
     console.log(extrinsic.paymentInfo(address));
+  });
+
+  test('test get unclaimed eras', async () => {
+    const provider = new WsProvider(getCurrentProvider(PREDEFINED_NETWORKS.shibuya), DOTSAMA_AUTO_CONNECT_MS);
+    const api = new ApiPromise({ provider });
+    const apiPromise = await api.isReady;
+    const address = '5HbcGs2QXVAc6Q6eoTzLYNAJWpN17AkCFRLnWDaHCiGYXvNc';
+
+    const [_stakedDapps, _currentEra] = await Promise.all([
+      apiPromise.query.dappsStaking.generalStakerInfo.entries(address),
+      apiPromise.query.dappsStaking.currentEra()
+    ]);
+
+    const currentEra = parseRawNumber(_currentEra.toHuman() as string);
+    const transactions: SubmittableExtrinsic[] = [];
+
+    for (const item of _stakedDapps) {
+      const data = item[0].toHuman() as any[];
+      const stakedDapp = data[1] as Record<string, string>;
+      const stakeData = item[1].toHuman() as Record<string, Record<string, string>[]>;
+      const stakes = stakeData.stakes;
+      const dappAddress = stakedDapp.Evm.toLowerCase();
+
+      let numberOfUnclaimedEra = 0;
+
+      for (let i = 0; i < stakes.length; i++) {
+        const { era, staked } = stakes[i];
+        const bnStaked = new BN(staked.replaceAll(',', ''));
+        const parsedEra = parseRawNumber(era);
+
+        if (bnStaked.eq(new BN(0))) {
+          continue;
+        }
+
+        const nextEraData = stakes[i + 1] ?? null;
+        const nextEra = nextEraData && parseRawNumber(nextEraData.era);
+        const isLastEra = i === stakes.length - 1;
+        const eraToClaim = isLastEra ? currentEra - parsedEra : nextEra - parsedEra;
+
+        numberOfUnclaimedEra += eraToClaim;
+      }
+
+      for (let i = 0; i < numberOfUnclaimedEra; i++) {
+        const tx = apiPromise.tx.dappsStaking.claimStaker({ Evm: dappAddress });
+
+        transactions.push(tx);
+      }
+    }
+
+    const extrinsic = apiPromise.tx.utility.batch(transactions);
+
+    const paymentInfo = await extrinsic.paymentInfo(address);
+
+    console.log(paymentInfo.toHuman());
   });
 });

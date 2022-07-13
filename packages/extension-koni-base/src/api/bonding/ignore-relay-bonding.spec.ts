@@ -455,9 +455,9 @@ describe('test DotSama APIs', () => {
 
   test('parse number', () => {
     const number = 0.0015497538149;
-    const number1 = 8.001000000000;
-    const number3 = 9.05;
-    const number2 = 10;
+    // const number1 = 8.001000000000;
+    // const number3 = 9.05;
+    // const number2 = 10;
 
     const targetNumber = number;
 

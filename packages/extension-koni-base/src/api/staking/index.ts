@@ -2,10 +2,9 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { APIItemState, ApiProps, DelegationItem, NetworkJson, StakingItem } from '@subwallet/extension-base/background/KoniTypes';
-import { parseRawNumber } from '@subwallet/extension-koni-base/api/bonding/utils';
 import { PREDEFINED_NETWORKS } from '@subwallet/extension-koni-base/api/predefinedNetworks';
 import { IGNORE_GET_SUBSTRATE_FEATURES_LIST } from '@subwallet/extension-koni-base/constants';
-import { categoryAddresses, toUnit } from '@subwallet/extension-koni-base/utils/utils';
+import { categoryAddresses, parseRawNumber, toUnit } from '@subwallet/extension-koni-base/utils/utils';
 import fetch from 'cross-fetch';
 
 interface LedgerData {
@@ -392,6 +391,9 @@ function getAstarStakingOnChain (parentApi: ApiProps, useAddresses: string[], ne
         racePromise
       ]);
 
+      const rawMinStake = (parentApi.api.consts.dappsStaking.minimumStakingAmount).toHuman() as string;
+      const minStake = parseRawNumber(rawMinStake);
+
       let allDapps: Record<string, any>[] | null = null;
 
       if (_allDapps !== null) {
@@ -426,7 +428,7 @@ function getAstarStakingOnChain (parentApi: ApiProps, useAddresses: string[], ne
         delegationsList.push({
           owner: dappAddress,
           amount: totalStake.toString(),
-          minBond: '0',
+          minBond: minStake.toString(),
           identity: dappMap[dappAddress]
         });
       }

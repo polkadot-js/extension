@@ -160,17 +160,24 @@ function StakingMenu ({ bondedAmount, className, delegations, networkKey, nextWi
 
             {
               showClaimButton && <div
-                className={'bonding-menu-item'}
+                className={`${parseFloat(bondedAmount) > 0 ? 'bonding-menu-item' : 'disabled-menu-item'}`}
                 onClick={handleClickClaimReward}
               >
                 <img
-                  data-for={`bonding-menu-tooltip-${networkKey}`}
+                  data-for={`claim-button-tooltip-${networkKey}`}
                   data-tip={true}
                   height={18}
                   src={ArchiveTray}
                   width={18}
                 />
                 Claim rewards
+                {
+                  unbondingStake && parseFloat(unbondingStake) !== 0 && <Tooltip
+                    place={'top'}
+                    text={'Make sure to claim your rewards before unstaking'}
+                    trigger={`claim-button-tooltip-${networkKey}`}
+                  />
+                }
               </div>
             }
           </Menu>

@@ -1183,7 +1183,6 @@ export interface ResponseWithdrawStakeLedger extends ResponseWithdrawStakeExtern
   ledgerState?: LedgerState;
 }
 
-
 export interface KoniRequestSignatures {
   'pri(unbonding.submitWithdrawal)': [StakeWithdrawalParams, BasicTxResponse, BasicTxResponse]
   'pri(unbonding.withdrawalTxInfo)': [StakeWithdrawalParams, BasicTxInfo];

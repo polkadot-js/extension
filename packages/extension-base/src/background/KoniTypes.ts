@@ -376,6 +376,7 @@ export interface OptionInputAddress {
 export interface CurrentAccountInfo {
   address: string;
   currentGenesisHash: string | null;
+  allGenesisHash?: string;
 }
 
 export interface RequestSettingsType {
@@ -540,7 +541,7 @@ export type RequestSubscribeCrowdloan = null
 export type RequestSubscribeNft = null
 export type RequestSubscribeStaking = null
 export type RequestSubscribeStakingReward = null
-export type ThemeTypes = 'light' | 'dark'
+export type ThemeTypes = 'light' | 'dark' | 'subspace'
 export type RequestNftForceUpdate = {
   collectionId: string,
   nft: NftItem,
@@ -960,6 +961,12 @@ export interface StakeWithdrawalParams {
   address: string,
   networkKey: string,
   password?: string
+}
+
+export interface SingleModeJson {
+  networkKeys: string[],
+  theme: ThemeTypes,
+  autoTriggerDomain: string // Regex for auto trigger single mode
 }
 
 export interface KoniRequestSignatures {

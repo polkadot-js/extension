@@ -1,12 +1,11 @@
 // Copyright 2019-2022 @polkadot/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import type { ThemeProps } from '../types';
+import type { Theme, ThemeProps } from '../types';
 
 import { faUsb } from '@fortawesome/free-brands-svg-icons';
 import { faCog, faFileUpload, faKey, faPlusCircle, faQrcode, faSeedling } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import logo from '@subwallet/extension-koni-ui/assets/sub-wallet-logo.svg';
 import InputFilter from '@subwallet/extension-koni-ui/components/InputFilter';
 import Link from '@subwallet/extension-koni-ui/components/Link';
 import Menu from '@subwallet/extension-koni-ui/components/Menu';
@@ -16,7 +15,7 @@ import { useLedger } from '@subwallet/extension-koni-ui/hooks/useLedger';
 import { windowOpen } from '@subwallet/extension-koni-ui/messaging';
 import AccountsTree from '@subwallet/extension-koni-ui/Popup/Accounts/AccountsTree';
 import React, { useCallback, useContext, useState } from 'react';
-import styled from 'styled-components';
+import styled, { ThemeContext } from 'styled-components';
 
 import { AccountContext, MediaContext, Svg } from '../components';
 import useTranslation from '../hooks/useTranslation';
@@ -49,6 +48,7 @@ function AccountMenuSettings ({ changeAccountCallback, className, closeSetting, 
   const isPopup = useIsPopup();
   const isFirefox = window.localStorage.getItem('browserInfo') === 'Firefox';
   const isLinux = window.localStorage.getItem('osInfo') === 'Linux';
+  const themeContext = useContext(ThemeContext as React.Context<Theme>);
 
   const _openJson = useCallback(
     () => {
@@ -85,7 +85,7 @@ function AccountMenuSettings ({ changeAccountCallback, className, closeSetting, 
         <div className='account-menu-settings__branding'>
           <img
             className='logo'
-            src={logo}
+            src={themeContext.logo}
           />
           <span className='account-menu-settings__logo-text'>Accounts</span>
         </div>

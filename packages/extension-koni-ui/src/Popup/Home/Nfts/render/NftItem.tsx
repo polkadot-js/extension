@@ -4,7 +4,7 @@
 import { faArrowLeft } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { CurrentNetworkInfo, NetWorkMetadataDef } from '@subwallet/extension-base/background/KoniTypes';
-import { ActionContext } from '@subwallet/extension-koni-ui/components';
+import { ActionContext, Theme } from '@subwallet/extension-koni-ui/components';
 import Spinner from '@subwallet/extension-koni-ui/components/Spinner';
 import useGetNetworkJson from '@subwallet/extension-koni-ui/hooks/screen/home/useGetNetworkJson';
 import useGetNetworkMetadata from '@subwallet/extension-koni-ui/hooks/screen/home/useGetNetworkMetadata';
@@ -17,9 +17,7 @@ import { TransferNftParams } from '@subwallet/extension-koni-ui/stores/types';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import React, { useCallback, useContext, useState } from 'react';
 import { useSelector } from 'react-redux';
-import styled from 'styled-components';
-
-import logo from '../../../../assets/sub-wallet-logo.svg';
+import styled, { ThemeContext } from 'styled-components';
 
 interface Props {
   className?: string;
@@ -52,6 +50,7 @@ function NftItem ({ className, collectionId, collectionImage, data, onClickBack 
   const { currentAccount: account, currentNetwork } = useSelector((state: RootState) => state);
   const networkMetadata = useGetNetworkMetadata();
   const networkJson = useGetNetworkJson(data.chain as string);
+  const themeContext = useContext(ThemeContext as React.Context<Theme>);
   const _isAccountAll = useIsAccountAll();
 
   const navigate = useContext(ActionContext);
@@ -146,8 +145,8 @@ function NftItem ({ className, collectionId, collectionImage, data, onClickBack 
       return collectionImage;
     }
 
-    return logo;
-  }, [collectionImage, data, imageError]);
+    return themeContext.logo;
+  }, [collectionImage, data.image, imageError, themeContext.logo]);
 
   return (
     <div className={className}>
@@ -209,7 +208,7 @@ function NftItem ({ className, collectionId, collectionImage, data, onClickBack 
                   : <img
                     alt={'default-img'}
                     className={'item-img'}
-                    src={logo}
+                    src={themeContext.logo}
                     style={{ borderRadius: '5px' }}
                   />
             }

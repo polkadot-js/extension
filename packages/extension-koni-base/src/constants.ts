@@ -24,6 +24,8 @@ export const ALL_NETWORK_KEY = 'all';
 export const ALL_GENESIS_HASH = null;
 export const IGNORE_GET_SUBSTRATE_FEATURES_LIST: string[] = ['astarEvm'];
 
+export const DEFAULT_THEME = 'dark';
+
 export const EVM_PROVIDER_RPC_ERRORS_MAP: EvmRpcErrorHelperMap = {
   USER_REJECTED_REQUEST: [4001, 'User Rejected Request'],
   UNAUTHORIZED: [4100, 'Unauthorized'],

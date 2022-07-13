@@ -112,18 +112,18 @@ export default React.memo(styled(AddAccount)(({ theme }: Props) => `
 
   .create-account {
     background-color: ${theme.buttonBackground2};
-    color: ${theme.buttonTextColor3};
+    color: ${theme.buttonTextColor};
   }
 
   .add-account-link {
     justify-content: center;
-    color: ${theme.textColor};
+    color: ${theme.buttonTextColor};
     opacity: 1;
   }
 
   .add-account-link__create-account {
     justify-content: center;
-    color: ${theme.buttonTextColor3};
+    color: ${theme.buttonTextColor};
     opacity: 1;
   }
 

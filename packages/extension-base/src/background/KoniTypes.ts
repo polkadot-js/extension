@@ -376,6 +376,7 @@ export interface OptionInputAddress {
 export interface CurrentAccountInfo {
   address: string;
   currentGenesisHash: string | null;
+  allGenesisHash?: string;
 }
 
 export interface RequestSettingsType {

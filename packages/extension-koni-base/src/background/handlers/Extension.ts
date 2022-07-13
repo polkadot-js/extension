@@ -456,6 +456,8 @@ export default class KoniExtension extends Extension {
           const currentKeyPair = keyring.getAccount(address);
 
           accountInfo.currentGenesisHash = currentKeyPair?.meta.genesisHash as string || ALL_GENESIS_HASH;
+        } else {
+          accountInfo.currentGenesisHash = accountInfo.allGenesisHash || ALL_GENESIS_HASH;
         }
       }
 

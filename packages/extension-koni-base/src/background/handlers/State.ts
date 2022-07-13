@@ -848,22 +848,29 @@ export default class KoniState extends State {
   }
 
   public setCurrentAccount (data: CurrentAccountInfo, callback?: () => void): void {
-    this.currentAccountStore.set('CurrentAccountInfo', data, callback);
+    const { address, currentGenesisHash } = data;
 
-    // Trigger single mode
-    if (data.currentGenesisHash) {
-      const singleMode = this.findSingleMode(data.currentGenesisHash);
+    if (address === ALL_ACCOUNT_KEY) {
+      data.allGenesisHash = currentGenesisHash || undefined;
+    }
 
-      if (singleMode) {
-        this.setTheme(singleMode.theme);
+    this.currentAccountStore.set('CurrentAccountInfo', data, () => {
+      // Trigger single mode
+      if (currentGenesisHash) {
+        const singleMode = this.findSingleMode(currentGenesisHash);
+
+        if (singleMode) {
+          this.setTheme(singleMode.theme);
+        } else {
+          this.setTheme(DEFAULT_THEME);
+        }
       } else {
         this.setTheme(DEFAULT_THEME);
       }
-    } else {
-      this.setTheme(DEFAULT_THEME);
-    }
 
-    this.updateServiceInfo();
+      this.updateServiceInfo();
+      callback && callback();
+    });
   }
 
   public setAccountTie (address: string, genesisHash: string | null): boolean {

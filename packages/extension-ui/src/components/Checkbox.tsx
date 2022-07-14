@@ -21,8 +21,8 @@ function Checkbox ({ checked, className, indeterminate, label, onChange, onClick
   const checkboxRef = React.useRef<HTMLInputElement | null>(null);
 
   useEffect(() => {
-    if (indeterminate && checkboxRef.current) {
-      checkboxRef.current.indeterminate = true;
+    if (checkboxRef.current) {
+      checkboxRef.current.indeterminate = !!indeterminate;
     }
   }, [indeterminate]);
 

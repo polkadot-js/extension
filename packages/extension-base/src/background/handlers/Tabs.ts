@@ -19,7 +19,7 @@ import { assert, isNumber } from '@polkadot/util';
 import RequestBytesSign from '../RequestBytesSign';
 import RequestExtrinsicSign from '../RequestExtrinsicSign';
 import { withErrorLog } from './helpers';
-import State from './State';
+import State, { AuthResponse } from './State';
 import { createSubscription, unsubscribe } from './subscriptions';
 
 interface AccountSub {
@@ -50,22 +50,38 @@ export default class Tabs {
     this.#state = state;
   }
 
-  private authorize (url: string, request: RequestAuthorizeTab): Promise<boolean> {
+  private filterForAuthorizedAccounts (accounts: InjectedAccount[], url: string): InjectedAccount[] {
+    const auth = this.#state.authUrls[this.#state.stripUrl(url)];
+
+    return accounts.filter(
+      (allAcc) =>
+        auth.authorizedAccounts
+          // we have a list, use it
+          ? auth.authorizedAccounts.includes(allAcc.address)
+          // if no authorizedAccounts and isAllowed return all - these are old converted urls
+          : auth.isAllowed
+    );
+  }
+
+  private authorize (url: string, request: RequestAuthorizeTab): Promise<AuthResponse> {
     return this.#state.authorizeUrl(url, request);
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  private accountsList (url: string, { anyType }: RequestAccountList): InjectedAccount[] {
-    return transformAccounts(accountsObservable.subject.getValue(), anyType);
+  private accountsListAuthorized (url: string, { anyType }: RequestAccountList): InjectedAccount[] {
+    const transformedAccounts = transformAccounts(accountsObservable.subject.getValue(), anyType);
+
+    return this.filterForAuthorizedAccounts(transformedAccounts, url);
   }
 
-  private accountsSubscribe (url: string, id: string, port: chrome.runtime.Port): string {
-    const cb = createSubscription<'pub(accounts.subscribe)'>(id, port);
+  private accountsSubscribeAuthorized (url: string, id: string, port: chrome.runtime.Port): string {
+    const cb = createSubscription<'pub(accounts.subscribeAuthorized)'>(id, port);
 
     this.#accountSubs[id] = {
-      subscription: accountsObservable.subject.subscribe((accounts: SubjectInfo): void =>
-        cb(transformAccounts(accounts))
-      ),
+      subscription: accountsObservable.subject.subscribe((accounts: SubjectInfo): void => {
+        const transformedAccounts = transformAccounts(accounts);
+
+        cb(this.filterForAuthorizedAccounts(transformedAccounts, url));
+      }),
       url
     };
 
@@ -207,11 +223,11 @@ export default class Tabs {
       case 'pub(authorize.tab)':
         return this.authorize(url, request as RequestAuthorizeTab);
 
-      case 'pub(accounts.list)':
-        return this.accountsList(url, request as RequestAccountList);
+      case 'pub(accounts.listAuthorized)':
+        return this.accountsListAuthorized(url, request as RequestAccountList);
 
-      case 'pub(accounts.subscribe)':
-        return this.accountsSubscribe(url, id, port);
+      case 'pub(accounts.subscribeAuthorized)':
+        return this.accountsSubscribeAuthorized(url, id, port);
 
       case 'pub(accounts.unsubscribe)':
         return this.accountsUnsubscribe(url, request as RequestAccountUnsubscribe);

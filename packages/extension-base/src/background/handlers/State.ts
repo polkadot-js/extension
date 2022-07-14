@@ -21,7 +21,7 @@ interface Resolver <T> {
   resolve: (result: T) => void;
 }
 
-interface AuthRequest extends Resolver<boolean> {
+interface AuthRequest extends Resolver<AuthResponse> {
   id: string;
   idStr: string;
   request: RequestAuthorizeTab;
@@ -30,18 +30,27 @@ interface AuthRequest extends Resolver<boolean> {
 
 export type AuthUrls = Record<string, AuthUrlInfo>;
 
+export type AuthorizedAccountsDiff = [url: string, authorizedAccounts: AuthUrlInfo['authorizedAccounts']][]
+
 export interface AuthUrlInfo {
   count: number;
   id: string;
-  isAllowed: boolean;
+  // this is from pre-0.44.1
+  isAllowed?: boolean;
   origin: string;
   url: string;
+  authorizedAccounts: string[];
 }
 
 interface MetaRequest extends Resolver<boolean> {
   id: string;
   request: MetadataDef;
   url: string;
+}
+
+export interface AuthResponse {
+  result: boolean;
+  authorizedAccounts: string[];
 }
 
 // List of providers passed into constructor. This is the list of providers
@@ -219,15 +228,14 @@ export default class State {
         });
   }
 
-  private authComplete = (id: string, resolve: (result: boolean) => void, reject: (error: Error) => void): Resolver<boolean> => {
-    const complete = (result: boolean | Error) => {
-      const isAllowed = result === true;
+  private authComplete = (id: string, resolve: (resValue: AuthResponse) => void, reject: (error: Error) => void): Resolver<AuthResponse> => {
+    const complete = (authorizedAccounts: string[] = []) => {
       const { idStr, request: { origin }, url } = this.#authRequests[id];
 
       this.#authUrls[this.stripUrl(url)] = {
+        authorizedAccounts,
         count: 0,
         id: idStr,
-        isAllowed,
         origin,
         url
       };
@@ -239,15 +247,20 @@ export default class State {
 
     return {
       reject: (error: Error): void => {
-        complete(error);
+        complete();
         reject(error);
       },
-      resolve: (result: boolean): void => {
-        complete(result);
-        resolve(result);
+      resolve: ({ authorizedAccounts, result }: AuthResponse): void => {
+        complete(authorizedAccounts);
+        resolve({ authorizedAccounts, result });
       }
     };
   };
+
+  public deleteAuthRequest (requestId: string) {
+    delete this.#authRequests[requestId];
+    this.updateIconAuth(true);
+  }
 
   private saveCurrentAuthList () {
     localStorage.setItem(AUTH_URLS_KEY, JSON.stringify(this.#authUrls));
@@ -289,7 +302,7 @@ export default class State {
     };
   };
 
-  private stripUrl (url: string): string {
+  public stripUrl (url: string): string {
     assert(url && (url.startsWith('http:') || url.startsWith('https:') || url.startsWith('ipfs:') || url.startsWith('ipns:')), `Invalid url ${url}, expected to start with http: or https: or ipfs: or ipns:`);
 
     const parts = url.split('/');
@@ -314,17 +327,6 @@ export default class State {
     if (shouldClose && text === '') {
       this.popupClose();
     }
-  }
-
-  public toggleAuthorization (url: string): AuthUrls {
-    const entry = this.#authUrls[url];
-
-    assert(entry, `The source ${url} is not known`);
-
-    this.#authUrls[url].isAllowed = !entry.isAllowed;
-    this.saveCurrentAuthList();
-
-    return this.#authUrls;
   }
 
   public removeAuthorization (url: string): AuthUrls {
@@ -353,20 +355,32 @@ export default class State {
     this.updateIcon(shouldClose);
   }
 
-  public async authorizeUrl (url: string, request: RequestAuthorizeTab): Promise<boolean> {
+  public updateAuthorizedAccounts (authorizedAccountDiff: AuthorizedAccountsDiff): void {
+    authorizedAccountDiff.forEach(([url, authorizedAccountDiff]) => {
+      this.#authUrls[url].authorizedAccounts = authorizedAccountDiff;
+    });
+
+    this.saveCurrentAuthList();
+  }
+
+  public async authorizeUrl (url: string, request: RequestAuthorizeTab): Promise<AuthResponse> {
     const idStr = this.stripUrl(url);
 
     // Do not enqueue duplicate authorization requests.
-    const isDuplicate = Object.values(this.#authRequests)
+    const isDuplicate = Object
+      .values(this.#authRequests)
       .some((request) => request.idStr === idStr);
 
     assert(!isDuplicate, `The source ${url} has a pending authorization request`);
 
     if (this.#authUrls[idStr]) {
       // this url was seen in the past
-      assert(this.#authUrls[idStr].isAllowed, `The source ${url} is not allowed to interact with this extension`);
+      assert(this.#authUrls[idStr].authorizedAccounts || this.#authUrls[idStr].isAllowed, `The source ${url} is not allowed to interact with this extension`);
 
-      return false;
+      return {
+        authorizedAccounts: [],
+        result: false
+      };
     }
 
     return new Promise((resolve, reject): void => {
@@ -389,7 +403,6 @@ export default class State {
     const entry = this.#authUrls[this.stripUrl(url)];
 
     assert(entry, `The source ${url} has not been enabled yet`);
-    assert(entry.isAllowed, `The source ${url} is not allowed to interact with this extension`);
 
     return true;
   }

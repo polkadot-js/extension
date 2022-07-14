@@ -3,7 +3,7 @@
 
 import { PREDEFINED_NETWORKS } from '@subwallet/extension-koni-base/api/predefinedNetworks';
 import { DOTSAMA_AUTO_CONNECT_MS } from '@subwallet/extension-koni-base/constants';
-import { getCurrentProvider } from '@subwallet/extension-koni-base/utils/utils';
+import { getCurrentProvider, parseNumberToDisplay } from '@subwallet/extension-koni-base/utils/utils';
 
 import { ApiPromise, WsProvider } from '@polkadot/api';
 import { BN, BN_ONE, BN_ZERO } from '@polkadot/util';
@@ -454,25 +454,11 @@ describe('test DotSama APIs', () => {
   });
 
   test('parse number', () => {
-    const number = 0.0015497538149;
+    // const number = 0.0015497538149;
     // const number1 = 8.001000000000;
     // const number3 = 9.05;
     // const number2 = 10;
 
-    const targetNumber = number;
-
-    if (Number.isInteger(targetNumber)) {
-      console.log('result ', targetNumber);
-    } else {
-      const stringNumber = targetNumber.toString();
-
-      targetNumber.toFixed(9);
-
-      if (stringNumber.length >= 11) { // more than 9 decimals
-        console.log('result ', targetNumber.toFixed(9));
-      } else {
-        console.log('result ', stringNumber);
-      }
-    }
+    parseNumberToDisplay(new BN('5000000'), 10);
   });
 });

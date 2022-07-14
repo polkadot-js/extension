@@ -4,7 +4,7 @@
 import { ApiProps, BasicTxInfo, NetworkJson, UnlockingStakeInfo, ValidatorInfo } from '@subwallet/extension-base/background/KoniTypes';
 import { ERA_LENGTH_MAP } from '@subwallet/extension-koni-base/api/bonding/utils';
 import { getFreeBalance } from '@subwallet/extension-koni-base/api/dotsama/balance';
-import { isUrl, parseRawNumber } from '@subwallet/extension-koni-base/utils/utils';
+import { isUrl, parseNumberToDisplay, parseRawNumber } from '@subwallet/extension-koni-base/utils/utils';
 import fetch from 'cross-fetch';
 import Web3 from 'web3';
 
@@ -136,7 +136,7 @@ export async function handleAstarBondingTxInfo (networkJson: NetworkJson, amount
     getFreeBalance(networkKey, stakerAddress, dotSamaApiMap, web3ApiMap)
   ]);
 
-  const feeString = txInfo.partialFee.toHuman();
+  const feeString = parseNumberToDisplay(txInfo.partialFee, networkJson.decimals) + ` ${networkJson.nativeToken ? networkJson.nativeToken : ''}`;
   const binaryBalance = new BN(balance);
 
   const sumAmount = txInfo.partialFee.addn(amount);
@@ -172,7 +172,7 @@ export async function handleAstarUnbondingTxInfo (networkJson: NetworkJson, amou
     getFreeBalance(networkKey, stakerAddress, dotSamaApiMap, web3ApiMap)
   ]);
 
-  const feeString = txInfo.partialFee.toHuman();
+  const feeString = parseNumberToDisplay(txInfo.partialFee, networkJson.decimals) + ` ${networkJson.nativeToken ? networkJson.nativeToken : ''}`;
   const binaryBalance = new BN(balance);
   const balanceError = txInfo.partialFee.gt(binaryBalance);
 
@@ -256,13 +256,13 @@ export async function getAstarWithdrawalTxInfo (dotSamaApi: ApiProps, address: s
   return extrinsic.paymentInfo(address);
 }
 
-export async function handleAstarWithdrawalTxInfo (networkKey: string, dotSamaApiMap: Record<string, ApiProps>, web3ApiMap: Record<string, Web3>, address: string) {
+export async function handleAstarWithdrawalTxInfo (networkKey: string, networkJson: NetworkJson, dotSamaApiMap: Record<string, ApiProps>, web3ApiMap: Record<string, Web3>, address: string) {
   const [txInfo, balance] = await Promise.all([
     getAstarWithdrawalTxInfo(dotSamaApiMap[networkKey], address),
     getFreeBalance(networkKey, address, dotSamaApiMap, web3ApiMap)
   ]);
 
-  const feeString = txInfo.partialFee.toHuman();
+  const feeString = parseNumberToDisplay(txInfo.partialFee, networkJson.decimals) + ` ${networkJson.nativeToken ? networkJson.nativeToken : ''}`;
   const binaryBalance = new BN(balance);
   const balanceError = txInfo.partialFee.gt(binaryBalance);
 
@@ -329,13 +329,13 @@ export async function getAstarClaimRewardTxInfo (dotSamaApi: ApiProps, address: 
   return extrinsic.paymentInfo(address);
 }
 
-export async function handleAstarClaimRewardTxInfo (address: string, networkKey: string, dotSamaApiMap: Record<string, ApiProps>, web3ApiMap: Record<string, Web3>) {
+export async function handleAstarClaimRewardTxInfo (address: string, networkKey: string, networkJson: NetworkJson, dotSamaApiMap: Record<string, ApiProps>, web3ApiMap: Record<string, Web3>) {
   const [txInfo, balance] = await Promise.all([
     getAstarClaimRewardTxInfo(dotSamaApiMap[networkKey], address),
     getFreeBalance(networkKey, address, dotSamaApiMap, web3ApiMap)
   ]);
 
-  const feeString = txInfo.partialFee.toHuman();
+  const feeString = parseNumberToDisplay(txInfo.partialFee, networkJson.decimals) + ` ${networkJson.nativeToken ? networkJson.nativeToken : ''}`;
   const binaryBalance = new BN(balance);
   const balanceError = txInfo.partialFee.gt(binaryBalance);
 

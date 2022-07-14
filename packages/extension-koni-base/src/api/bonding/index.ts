@@ -99,14 +99,14 @@ export async function getUnlockingInfo (dotSamaApi: ApiProps, networkJson: Netwo
   return handleRelayUnlockingInfo(dotSamaApi, networkJson, networkKey, address);
 }
 
-export async function getWithdrawalTxInfo (address: string, networkKey: string, dotSamaApiMap: Record<string, ApiProps>, web3ApiMap: Record<string, Web3>, validatorAddress?: string, action?: string) {
+export async function getWithdrawalTxInfo (address: string, networkKey: string, networkJson: NetworkJson, dotSamaApiMap: Record<string, ApiProps>, web3ApiMap: Record<string, Web3>, validatorAddress?: string, action?: string) {
   if (CHAIN_TYPES.para.includes(networkKey)) {
-    return handleParaWithdrawalTxInfo(networkKey, dotSamaApiMap, web3ApiMap, address, validatorAddress as string, action as string);
+    return handleParaWithdrawalTxInfo(networkKey, networkJson, dotSamaApiMap, web3ApiMap, address, validatorAddress as string, action as string);
   } else if (CHAIN_TYPES.astar.includes(networkKey)) {
-    return handleAstarWithdrawalTxInfo(networkKey, dotSamaApiMap, web3ApiMap, address);
+    return handleAstarWithdrawalTxInfo(networkKey, networkJson, dotSamaApiMap, web3ApiMap, address);
   }
 
-  return handleRelayWithdrawalTxInfo(address, networkKey, dotSamaApiMap, web3ApiMap);
+  return handleRelayWithdrawalTxInfo(address, networkKey, networkJson, dotSamaApiMap, web3ApiMap);
 }
 
 export async function getWithdrawalExtrinsic (dotSamaApi: ApiProps, networkKey: string, address: string, validatorAddress?: string, action?: string) {
@@ -119,8 +119,8 @@ export async function getWithdrawalExtrinsic (dotSamaApi: ApiProps, networkKey: 
   return getRelayWithdrawalExtrinsic(dotSamaApi, address);
 }
 
-export async function getClaimRewardTxInfo (address: string, networkKey: string, dotSamaApiMap: Record<string, ApiProps>, web3ApiMap: Record<string, Web3>) {
-  return handleAstarClaimRewardTxInfo(address, networkKey, dotSamaApiMap, web3ApiMap);
+export async function getClaimRewardTxInfo (address: string, networkKey: string, networkJson: NetworkJson, dotSamaApiMap: Record<string, ApiProps>, web3ApiMap: Record<string, Web3>) {
+  return handleAstarClaimRewardTxInfo(address, networkKey, networkJson, dotSamaApiMap, web3ApiMap);
 }
 
 export async function getClaimRewardExtrinsic (dotSamaApi: ApiProps, networkKey: string, address: string, validatorAddress?: string) {

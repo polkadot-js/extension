@@ -5,6 +5,7 @@ import { CrowdloanParaState, NetworkJson } from '@subwallet/extension-base/backg
 import { AccountAuthType, AccountJson } from '@subwallet/extension-base/background/types';
 import { CLOUDFLARE_PINATA_SERVER } from '@subwallet/extension-koni-base/api/nft/config';
 import { ALL_ACCOUNT_KEY } from '@subwallet/extension-koni-base/constants';
+import BigNumber from 'bignumber.js';
 
 import { BN, hexToU8a, isHex } from '@polkadot/util';
 import { decodeAddress, encodeAddress, ethereumEncode, isEthereumAddress } from '@polkadot/util-crypto';
@@ -273,20 +274,17 @@ export function parseRawNumber (value: string) {
   return parseFloat(value.replaceAll(',', ''));
 }
 
-export function parseNumberToDisplay (amount: BN, unit: string, decimals: number) {
-  let parsedAmount = parseRawNumber(amount.toString());
-
-  parsedAmount = parsedAmount / 10 ** decimals;
-
-  if (Number.isInteger(parsedAmount)) {
-    return parsedAmount.toString();
-  } else {
-    const stringNumber = parsedAmount.toString();
-
-    if (stringNumber.length >= 11) { // more than 9 decimals
-      return parsedAmount.toFixed(9);
-    } else {
-      return stringNumber;
-    }
+export function parseNumberToDisplay (amount: BN, decimals: number | undefined) {
+  if (!decimals) {
+    return '0';
   }
+
+  const parsedAmount = parseRawNumber(amount.toString());
+
+  const bigN = new BigNumber(parsedAmount / (10 ** decimals));
+  const roundedString = bigN.toFixed(9);
+
+  const formattedString = parseFloat(roundedString); // remove excess zeros at the end
+
+  return formattedString.toString();
 }

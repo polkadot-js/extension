@@ -2237,7 +2237,7 @@ export default class KoniExtension extends Extension {
   }
 
   private async getStakeWithdrawalTxInfo ({ action, address, networkKey, validatorAddress }: StakeWithdrawalParams): Promise<BasicTxInfo> {
-    return await getWithdrawalTxInfo(address, networkKey, state.getDotSamaApiMap(), state.getWeb3ApiMap(), validatorAddress, action);
+    return await getWithdrawalTxInfo(address, networkKey, state.getNetworkMapByKey(networkKey), state.getDotSamaApiMap(), state.getWeb3ApiMap(), validatorAddress, action);
   }
 
   private async submitStakeWithdrawal (id: string, port: chrome.runtime.Port, { action, address, networkKey, password, validatorAddress }: StakeWithdrawalParams): Promise<BasicTxResponse> {
@@ -2301,7 +2301,7 @@ export default class KoniExtension extends Extension {
   }
 
   private async getStakeClaimRewardTxInfo ({ address, networkKey }: StakeClaimRewardParams): Promise<BasicTxInfo> {
-    return await getClaimRewardTxInfo(address, networkKey, state.getDotSamaApiMap(), state.getWeb3ApiMap());
+    return await getClaimRewardTxInfo(address, networkKey, state.getNetworkMapByKey(networkKey), state.getDotSamaApiMap(), state.getWeb3ApiMap());
   }
 
   private async submitStakeClaimReward (id: string, port: chrome.runtime.Port, { address, networkKey, password, validatorAddress }: StakeClaimRewardParams): Promise<BasicTxResponse> {

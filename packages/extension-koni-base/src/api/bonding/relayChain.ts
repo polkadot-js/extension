@@ -4,6 +4,7 @@
 import { ApiProps, BasicTxInfo, ChainBondingBasics, NetworkJson, UnlockingStakeInfo, ValidatorInfo } from '@subwallet/extension-base/background/KoniTypes';
 import { calculateChainStakedReturn, calculateInflation, calculateValidatorStakedReturn, ERA_LENGTH_MAP, getCommission, Unlocking, ValidatorExtraInfo } from '@subwallet/extension-koni-base/api/bonding/utils';
 import { getFreeBalance } from '@subwallet/extension-koni-base/api/dotsama/balance';
+import { parseNumberToDisplay } from '@subwallet/extension-koni-base/utils/utils';
 import Web3 from 'web3';
 
 import { BN, BN_ONE, BN_ZERO } from '@polkadot/util';
@@ -224,7 +225,7 @@ export async function handleRelayBondingTxInfo (networkJson: NetworkJson, amount
     getFreeBalance(networkKey, nominatorAddress, dotSamaApiMap, web3ApiMap)
   ]);
 
-  const feeString = txInfo.partialFee.toHuman();
+  const feeString = parseNumberToDisplay(txInfo.partialFee, networkJson.decimals) + ` ${networkJson.nativeToken ? networkJson.nativeToken : ''}`;
   const binaryBalance = new BN(balance);
 
   const sumAmount = txInfo.partialFee.add(binaryAmount);
@@ -297,7 +298,7 @@ export async function handleRelayUnbondingTxInfo (address: string, amount: numbe
     getFreeBalance(networkKey, address, dotSamaApiMap, web3ApiMap)
   ]);
 
-  const feeString = txInfo.partialFee.toHuman();
+  const feeString = parseNumberToDisplay(txInfo.partialFee, networkJson.decimals) + ` ${networkJson.nativeToken ? networkJson.nativeToken : ''}`;
   const binaryBalance = new BN(balance);
 
   const balanceError = txInfo.partialFee.gt(binaryBalance);
@@ -382,13 +383,13 @@ export async function getRelayWithdrawalTxInfo (dotSamaAPi: ApiProps, address: s
   }
 }
 
-export async function handleRelayWithdrawalTxInfo (address: string, networkKey: string, dotSamaApiMap: Record<string, ApiProps>, web3ApiMap: Record<string, Web3>) {
+export async function handleRelayWithdrawalTxInfo (address: string, networkKey: string, networkJson: NetworkJson, dotSamaApiMap: Record<string, ApiProps>, web3ApiMap: Record<string, Web3>) {
   const [txInfo, balance] = await Promise.all([
     getRelayWithdrawalTxInfo(dotSamaApiMap[networkKey], address),
     getFreeBalance(networkKey, address, dotSamaApiMap, web3ApiMap)
   ]);
 
-  const feeString = txInfo.partialFee.toHuman();
+  const feeString = parseNumberToDisplay(txInfo.partialFee, networkJson.decimals) + ` ${networkJson.nativeToken ? networkJson.nativeToken : ''}`;
   const binaryBalance = new BN(balance);
   const balanceError = txInfo.partialFee.gt(binaryBalance);
 

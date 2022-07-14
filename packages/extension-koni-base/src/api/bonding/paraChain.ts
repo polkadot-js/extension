@@ -4,7 +4,7 @@
 import { ApiProps, BasicTxInfo, ChainBondingBasics, NetworkJson, UnlockingStakeInfo, ValidatorInfo } from '@subwallet/extension-base/background/KoniTypes';
 import { BOND_LESS_ACTION, calculateChainStakedReturn, ERA_LENGTH_MAP, PARACHAIN_INFLATION_DISTRIBUTION, REVOKE_ACTION } from '@subwallet/extension-koni-base/api/bonding/utils';
 import { getFreeBalance } from '@subwallet/extension-koni-base/api/dotsama/balance';
-import { parseRawNumber, reformatAddress } from '@subwallet/extension-koni-base/utils/utils';
+import { parseNumberToDisplay, parseRawNumber, reformatAddress } from '@subwallet/extension-koni-base/utils/utils';
 import Web3 from 'web3';
 
 import { BN } from '@polkadot/util';
@@ -216,7 +216,7 @@ export async function handleParaBondingTxInfo (networkJson: NetworkJson, amount:
     getFreeBalance(networkKey, nominatorAddress, dotSamaApiMap, web3ApiMap)
   ]);
 
-  const feeString = txInfo.partialFee.toHuman();
+  const feeString = parseNumberToDisplay(txInfo.partialFee, networkJson.decimals) + ` ${networkJson.nativeToken ? networkJson.nativeToken : ''}`;
   const binaryBalance = new BN(balance);
 
   const sumAmount = txInfo.partialFee.addn(amount);
@@ -250,7 +250,7 @@ export async function handleParaUnbondingTxInfo (address: string, amount: number
     getFreeBalance(networkKey, address, dotSamaApiMap, web3ApiMap)
   ]);
 
-  const feeString = txInfo.partialFee.toHuman();
+  const feeString = parseNumberToDisplay(txInfo.partialFee, networkJson.decimals) + ` ${networkJson.nativeToken ? networkJson.nativeToken : ''}`;
   const binaryBalance = new BN(balance);
 
   const balanceError = txInfo.partialFee.gt(binaryBalance);
@@ -385,13 +385,13 @@ export async function getParaWithdrawalTxInfo (dotSamaApi: ApiProps, address: st
   return extrinsic.paymentInfo(address);
 }
 
-export async function handleParaWithdrawalTxInfo (networkKey: string, dotSamaApiMap: Record<string, ApiProps>, web3ApiMap: Record<string, Web3>, address: string, collatorAddress: string, action: string) {
+export async function handleParaWithdrawalTxInfo (networkKey: string, networkJson: NetworkJson, dotSamaApiMap: Record<string, ApiProps>, web3ApiMap: Record<string, Web3>, address: string, collatorAddress: string, action: string) {
   const [txInfo, balance] = await Promise.all([
     getParaWithdrawalTxInfo(dotSamaApiMap[networkKey], address, collatorAddress, action),
     getFreeBalance(networkKey, address, dotSamaApiMap, web3ApiMap)
   ]);
 
-  const feeString = txInfo.partialFee.toHuman();
+  const feeString = parseNumberToDisplay(txInfo.partialFee, networkJson.decimals) + ` ${networkJson.nativeToken ? networkJson.nativeToken : ''}`;
   const binaryBalance = new BN(balance);
   const balanceError = txInfo.partialFee.gt(binaryBalance);
 

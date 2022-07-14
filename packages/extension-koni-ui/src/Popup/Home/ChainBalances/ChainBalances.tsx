@@ -7,7 +7,7 @@ import { Link } from '@subwallet/extension-koni-ui/components';
 import useTranslation from '@subwallet/extension-koni-ui/hooks/useTranslation';
 import { hasAnyChildTokenBalance } from '@subwallet/extension-koni-ui/Popup/Home/ChainBalances/utils';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
-import { ThemeProps } from '@subwallet/extension-koni-ui/types';
+import { ModalQrProps, ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { BN_ZERO, getLogoByNetworkKey } from '@subwallet/extension-koni-ui/util';
 import reformatAddress from '@subwallet/extension-koni-ui/util/reformatAddress';
 import { AccountInfoByNetwork, BalanceInfo } from '@subwallet/extension-koni-ui/util/types';
@@ -33,12 +33,7 @@ interface Props extends ThemeProps {
   networkBalanceMaps: Record<string, BalanceInfo>;
   networkMetadataMap: Record<string, NetWorkMetadataDef>;
   setQrModalOpen: (visible: boolean) => void;
-  setQrModalProps: (props: {
-    networkPrefix: number,
-    networkKey: string,
-    iconTheme: string,
-    showExportButton: boolean
-  }) => void;
+  updateModalQr: (value: Partial<ModalQrProps>) => void;
   setShowBalanceDetail: (isShowBalanceDetail: boolean) => void;
   setSelectedNetworkBalance?: (networkBalance: BigN) => void;
 }
@@ -98,9 +93,9 @@ function ChainBalances ({ address,
   networkKeys,
   networkMetadataMap,
   setQrModalOpen,
-  setQrModalProps,
   setSelectedNetworkBalance,
-  setShowBalanceDetail }: Props): React.ReactElement<Props> {
+  setShowBalanceDetail,
+  updateModalQr }: Props): React.ReactElement<Props> {
   const { t } = useTranslation();
   const accountInfoByNetworkMap: Record<string, AccountInfoByNetwork> =
     getAccountInfoByNetworkMap(address, networkKeys, networkMetadataMap);
@@ -153,8 +148,8 @@ function ChainBalances ({ address,
           isShowDetail={info.networkKey === selectedNetworkKey}
           key={info.key}
           setQrModalOpen={setQrModalOpen}
-          setQrModalProps={setQrModalProps}
           toggleBalanceDetail={toggleBalanceDetail}
+          updateModalQr={updateModalQr}
         />
       );
     }
@@ -166,9 +161,9 @@ function ChainBalances ({ address,
         isLoading={!balanceInfo}
         key={info.key}
         setQrModalOpen={setQrModalOpen}
-        setQrModalProps={setQrModalProps}
         setSelectedNetworkBalance={setSelectedNetworkBalance}
         showBalanceDetail={_openBalanceDetail}
+        updateModalQr={updateModalQr}
       />
     );
   };
@@ -253,7 +248,7 @@ function ChainBalances ({ address,
               backToHome={_backToHome}
               balanceInfo={selectedBalanceInfo}
               setQrModalOpen={setQrModalOpen}
-              setQrModalProps={setQrModalProps}
+              updateModalQr={updateModalQr}
             />
           </>
         )

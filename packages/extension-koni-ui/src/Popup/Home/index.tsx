@@ -177,9 +177,7 @@ function Wrapper ({ className, theme }: WrapperProps): React.ReactElement {
 }
 
 function Home ({ chainRegistryMap, className = '', currentAccount, historyMap, network }: Props): React.ReactElement {
-  const { icon: iconTheme,
-    networkKey,
-    networkPrefix } = network;
+  const { networkKey } = network;
   const { t } = useTranslation();
   const { address } = currentAccount;
   const [isShowBalanceDetail, setShowBalanceDetail] = useState<boolean>(false);
@@ -195,19 +193,9 @@ function Home ({ chainRegistryMap, className = '', currentAccount, historyMap, n
   );
   const [isQrModalOpen, setQrModalOpen] = useState<boolean>(false);
   const [selectedNetworkBalance, setSelectedNetworkBalance] = useState<BigN>(BN_ZERO);
-  const [
-    { iconTheme: qrModalIconTheme,
-      networkKey: qrModalNetworkKey,
-      networkPrefix: qrModalNetworkPrefix,
-      showExportButton: qrModalShowExportButton }, setQrModalProps] = useState({
-    networkPrefix,
-    networkKey,
-    iconTheme,
-    showExportButton: true
-  });
   const [modalQrProp, setModalQrProp] = useState<ModalQrProps>({
     network: {
-      networkKey: networkKey,
+      networkKey: networkKey
     },
     account: {
       address: currentAccount.address
@@ -286,21 +274,32 @@ function Home ({ chainRegistryMap, className = '', currentAccount, historyMap, n
   }, []);
 
   const _showQrModal = useCallback(() => {
-    setQrModalProps({
-      networkPrefix: networkPrefix,
-      networkKey: networkKey,
-      iconTheme: iconTheme,
+    setModalQrProp({
+      network: {
+        networkKey: networkKey
+      },
+      account: {
+        address: currentAccount.address
+      },
       showExportButton: true
     });
 
     setQrModalOpen(true);
-  }, [iconTheme, networkKey, networkPrefix]);
+  }, [currentAccount, networkKey]);
 
   const _closeQrModal = useCallback(() => {
-    setQrModalOpen(false);
-  }, []);
+    setModalQrProp({
+      network: {
+        networkKey: networkKey
+      },
+      account: {
+        address: currentAccount.address
+      },
+      showExportButton: false
+    });
 
-  const _isAccountAll = isAccountAll(address);
+    setQrModalOpen(false);
+  }, [networkKey, currentAccount.address]);
 
   const tabItems = useMemo<TabHeaderItemType[]>(() => {
     return getTabHeaderItems(address, t);
@@ -335,26 +334,13 @@ function Home ({ chainRegistryMap, className = '', currentAccount, historyMap, n
         </div>
 
         <div className='home-account-button-container'>
-          {!_isAccountAll && (
-            <div className='action-button-wrapper'>
-              <ActionButton
-                iconSrc={buyIcon}
-                onClick={_showQrModal}
-                tooltipContent={t<string>('Receive')}
-              />
-            </div>
-          )}
-
-          {_isAccountAll && (
-            <div className='action-button-wrapper'>
-              <ActionButton
-                iconSrc={buyIcon}
-                isDisabled
-                tooltipContent={t<string>('Receive')}
-              />
-            </div>
-          )}
-
+          <div className='action-button-wrapper'>
+            <ActionButton
+              iconSrc={buyIcon}
+              onClick={_showQrModal}
+              tooltipContent={t<string>('Receive')}
+            />
+          </div>
           <Link
             className={'action-button-wrapper'}
             to={'/account/send-fund'}
@@ -398,9 +384,9 @@ function Home ({ chainRegistryMap, className = '', currentAccount, historyMap, n
             networkKeys={showedNetworks}
             networkMetadataMap={networkMetadataMap}
             setQrModalOpen={setQrModalOpen}
-            setQrModalProps={setQrModalProps}
             setSelectedNetworkBalance={setSelectedNetworkBalance}
             setShowBalanceDetail={setShowBalanceDetail}
+            updateModalQr={updateModalQr}
           />
         )}
 
@@ -463,16 +449,10 @@ function Home ({ chainRegistryMap, className = '', currentAccount, historyMap, n
 
       {isQrModalOpen && (
         <AccountQrModal
-          accountName={currentAccount.name}
-          address={address}
           className='home__account-qr-modal'
           closeModal={_closeQrModal}
           modalQrProp={modalQrProp}
           updateModalQr={updateModalQr}
-          iconTheme={qrModalIconTheme}
-          networkKey={qrModalNetworkKey}
-          networkPrefix={qrModalNetworkPrefix}
-          showExportButton={qrModalShowExportButton}
         />
       )}
 

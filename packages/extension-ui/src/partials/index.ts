@@ -6,3 +6,4 @@ export { default as MenuSettings } from './MenuSettings';
 export { default as Name } from './Name';
 export { default as Password } from './Password';
 export { default as HeaderWithSteps } from './HeaderWithSteps';
+export { default as AccountSelection } from './AccountSelection';

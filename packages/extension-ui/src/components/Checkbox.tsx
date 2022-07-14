@@ -3,20 +3,29 @@
 
 import type { ThemeProps } from '../types';
 
-import React, { useCallback } from 'react';
+import React, { useCallback, useEffect } from 'react';
 import styled from 'styled-components';
 
 import Checkmark from '../assets/checkmark.svg';
 
 interface Props {
   checked: boolean;
+  indeterminate?: boolean;
   className?: string;
   label: string;
   onChange?: (checked: boolean) => void;
   onClick?: () => void;
 }
 
-function Checkbox ({ checked, className, label, onChange, onClick }: Props): React.ReactElement<Props> {
+function Checkbox ({ checked, className, indeterminate, label, onChange, onClick }: Props): React.ReactElement<Props> {
+  const checkboxRef = React.useRef<HTMLInputElement | null>(null);
+
+  useEffect(() => {
+    if (indeterminate && checkboxRef.current) {
+      checkboxRef.current.indeterminate = true;
+    }
+  }, [indeterminate]);
+
   const _onChange = useCallback(
     (event: React.ChangeEvent<HTMLInputElement>) => onChange && onChange(event.target.checked),
     [onChange]
@@ -32,9 +41,10 @@ function Checkbox ({ checked, className, label, onChange, onClick }: Props): Rea
       <label>
         {label}
         <input
-          checked={checked}
+          checked={checked && !indeterminate}
           onChange={_onChange}
           onClick={_onClick}
+          ref={checkboxRef}
           type='checkbox'
         />
         <span />
@@ -95,6 +105,10 @@ export default styled(Checkbox)(({ theme }: ThemeProps) => `
 
     input:checked ~ span:after {
       display: block;
+    }
+
+    input:indeterminate ~ span {
+      background: ${theme.primaryColor}
     }
   }
 `);

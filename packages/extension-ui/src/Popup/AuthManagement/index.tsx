@@ -10,7 +10,7 @@ import { AuthUrlInfo, AuthUrls } from '@polkadot/extension-base/background/handl
 import { InputFilter } from '@polkadot/extension-ui/components';
 
 import useTranslation from '../../hooks/useTranslation';
-import { getAuthList, removeAuthorization, toggleAuthorization } from '../../messaging';
+import { getAuthList, removeAuthorization } from '../../messaging';
 import { Header } from '../../partials';
 import WebsiteEntry from './WebsiteEntry';
 
@@ -33,12 +33,6 @@ function AuthManagement ({ className }: Props): React.ReactElement<Props> {
     setFilter(filter);
   }, []);
 
-  const toggleAuth = useCallback((url: string) => {
-    toggleAuthorization(url)
-      .then(({ list }) => setAuthList(list))
-      .catch(console.error);
-  }, []);
-
   const removeAuth = useCallback((url: string) => {
     removeAuthorization(url)
       .then(({ list }) => setAuthList(list))
@@ -52,36 +46,34 @@ function AuthManagement ({ className }: Props): React.ReactElement<Props> {
         smallMargin
         text={t<string>('Manage Website Access')}
       />
-      <>
+      <div className={className}>
         <InputFilter
+          className='inputFilter'
           onChange={_onChangeFilter}
           placeholder={t<string>('example.com')}
           value={filter}
           withReset
         />
-        <div className={className}>
-          {
-            !authList || !Object.entries(authList)?.length
-              ? <div className='empty-list'>{t<string>('No website request yet!')}</div>
-              : <>
-                <div className='website-list'>
-                  {Object.entries(authList)
-                    .filter(([url]: [string, AuthUrlInfo]) => url.includes(filter))
-                    .map(
-                      ([url, info]: [string, AuthUrlInfo]) =>
-                        <WebsiteEntry
-                          info={info}
-                          key={url}
-                          removeAuth={removeAuth}
-                          toggleAuth={toggleAuth}
-                          url={url}
-                        />
-                    )}
-                </div>
-              </>
-          }
-        </div>
-      </>
+        {
+          !authList || !Object.entries(authList)?.length
+            ? <div className='empty-list'>{t<string>('No website request yet!')}</div>
+            : <>
+              <div className='website-list'>
+                {Object.entries(authList)
+                  .filter(([url]: [string, AuthUrlInfo]) => url.includes(filter))
+                  .map(
+                    ([url, info]: [string, AuthUrlInfo]) =>
+                      <WebsiteEntry
+                        info={info}
+                        key={url}
+                        removeAuth={removeAuth}
+                        url={url}
+                      />
+                  )}
+              </div>
+            </>
+        }
+      </div>
     </>
   );
 }
@@ -90,7 +82,12 @@ export default styled(AuthManagement)`
   height: calc(100vh - 2px);
   overflow-y: auto;
 
-  .empty-list {
+  .empty-list{
     text-align: center;
+  }
+
+  .inputFilter{
+    margin-bottom: 0.8rem;
+    padding: 0 !important;
   }
 `;

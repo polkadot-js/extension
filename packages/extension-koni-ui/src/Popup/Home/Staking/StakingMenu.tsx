@@ -96,6 +96,10 @@ function StakingMenu ({ bondedAmount, className, delegations, networkKey, nextWi
     showClaimRewardModal();
   }, [showClaimRewardModal]);
 
+  console.log('nextWithdrawal', nextWithdrawal);
+  console.log('nextWithdrawalAmount', nextWithdrawalAmount);
+  console.log('redeemable', redeemable);
+
   return (
     <div className={className}>
       <div
@@ -172,7 +176,7 @@ function StakingMenu ({ bondedAmount, className, delegations, networkKey, nextWi
                 />
                 Claim rewards
                 {
-                  unbondingStake && parseFloat(unbondingStake) !== 0 && <Tooltip
+                  parseFloat(bondedAmount) > 0 && <Tooltip
                     place={'top'}
                     text={'Make sure to claim your rewards before unstaking'}
                     trigger={`claim-button-tooltip-${networkKey}`}

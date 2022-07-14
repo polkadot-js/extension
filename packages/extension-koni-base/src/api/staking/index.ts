@@ -105,6 +105,8 @@ function getParaStakingOnChain (parentApi: ApiProps, useAddresses: string[], net
 
       const delegationsList: DelegationItem[] = [];
 
+      console.log(delegationMap);
+
       await Promise.all(Object.entries(delegationMap).map(async ([owner, amount]) => {
         const [_info, _identity, _scheduledRequests] = await Promise.all([
           parentApi.api.query.parachainStaking.candidateInfo(owner),
@@ -160,14 +162,14 @@ function getParaStakingOnChain (parentApi: ApiProps, useAddresses: string[], net
 
         const activeStake = parseRawNumber(amount) - unbondingAmount;
 
-        if (activeStake > 0) {
-          delegationsList.push({
-            owner,
-            amount: activeStake.toString(),
-            identity,
-            minBond: minDelegation
-          });
-        }
+        console.log(activeStake, owner);
+
+        delegationsList.push({
+          owner,
+          amount: activeStake.toString(),
+          identity,
+          minBond: minDelegation
+        });
       }));
 
       const parsedTotalBalance = parseStakingBalance(totalBalance, chain, networks);

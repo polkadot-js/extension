@@ -18,12 +18,18 @@ interface Props extends ThemeProps {
 
 function ValidatorsDropdown ({ className, delegations, handleSelectValidator, isDisabled, label }: Props): React.ReactElement<Props> {
   const getDropdownOptions = useCallback(() => {
-    return delegations.map((item) => {
-      return {
-        text: item.identity ? `${item.identity} (${toShort(item.owner)})` : `${toShort(item.owner)}`,
-        value: item.owner
-      };
+    const filteredDelegations: Record<string, string>[] = [];
+
+    delegations.forEach((item) => {
+      if (parseFloat(item.amount) > 0) { // only show delegations with active stake
+        filteredDelegations.push({
+          text: item.identity ? `${item.identity} (${toShort(item.owner)})` : `${toShort(item.owner)}`,
+          value: item.owner
+        });
+      }
     });
+
+    return filteredDelegations;
   }, [delegations]);
 
   return (

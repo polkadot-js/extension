@@ -1,5 +1,5 @@
      534	Jaco                          	Silence i18next-scanner config (#1111)
-      83	Thibaut Sardan                	Account selection when authorizing a website (#1068)
+      84	Thibaut Sardan                	fix indeterminate state not reseting (#1112)
        7	Ivan Rukhavets                	Mention derivation in FAQ (#334)
        4	Amaury Martiny                	PostMessageProvider with on('connected' | 'disconnected') (#279)
        3	Antoine Estienne              	Add eth test for extension signature (#909)

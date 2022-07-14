@@ -2,6 +2,11 @@
 
 ## master
 
+Contributed:
+
+- Account selection/management for authorized sites (Thanks to https://github.com/Tbaut)
+- UI icon & cursor adjustments for authorization (Thanks to https://github.com/roiLeo)
+
 Changes:
 
 - Allow for unsubscribe handling on account subscriptions

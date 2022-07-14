@@ -35,6 +35,8 @@ export type AuthorizedAccountsDiff = [url: string, authorizedAccounts: AuthUrlIn
 export interface AuthUrlInfo {
   count: number;
   id: string;
+  // this is from pre-0.44.1
+  isAllowed?: boolean;
   origin: string;
   url: string;
   authorizedAccounts: string[];
@@ -355,9 +357,6 @@ export default class State {
 
   public updateAuthorizedAccounts (authorizedAccountDiff: AuthorizedAccountsDiff): void {
     authorizedAccountDiff.forEach(([url, authorizedAccountDiff]) => {
-      // this url was never seen in the past
-      assert(this.#authUrls[url].authorizedAccounts, `The source ${url} has never been authorized to interact with this extension`);
-
       this.#authUrls[url].authorizedAccounts = authorizedAccountDiff;
     });
 
@@ -368,19 +367,20 @@ export default class State {
     const idStr = this.stripUrl(url);
 
     // Do not enqueue duplicate authorization requests.
-    const isDuplicate = Object.values(this.#authRequests)
+    const isDuplicate = Object
+      .values(this.#authRequests)
       .some((request) => request.idStr === idStr);
 
     assert(!isDuplicate, `The source ${url} has a pending authorization request`);
 
     if (this.#authUrls[idStr]) {
       // this url was seen in the past
-      assert(this.#authUrls[idStr].authorizedAccounts, `The source ${url} is not allowed to interact with this extension`);
+      assert(this.#authUrls[idStr].authorizedAccounts || this.#authUrls[idStr].isAllowed, `The source ${url} is not allowed to interact with this extension`);
 
-      return ({
+      return {
         authorizedAccounts: [],
         result: false
-      });
+      };
     }
 
     return new Promise((resolve, reject): void => {

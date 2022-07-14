@@ -43,10 +43,15 @@ export default class Tabs {
   }
 
   private filterForAuthorizedAccounts (accounts: InjectedAccount[], url: string): InjectedAccount[] {
+    const auth = this.#state.authUrls[this.#state.stripUrl(url)];
+
     return accounts.filter(
-      (allAcc) => this.#state.authUrls[this.#state.stripUrl(url)]
-        .authorizedAccounts
-        .includes(allAcc.address)
+      (allAcc) =>
+        auth.authorizedAccounts
+          // we have a list, use it
+          ? auth.authorizedAccounts.includes(allAcc.address)
+          // if no authorizedAccounts and isAllowed return all - these are old converted urls
+          : auth.isAllowed
     );
   }
 

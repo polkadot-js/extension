@@ -18,7 +18,7 @@ interface Props extends ThemeProps {
   url: string;
 }
 
-function WebsiteEntry ({ className = '', info: { authorizedAccounts }, removeAuth, url }: Props): React.ReactElement<Props> {
+function WebsiteEntry ({ className = '', info: { authorizedAccounts, isAllowed }, removeAuth, url }: Props): React.ReactElement<Props> {
   const { t } = useTranslation();
 
   const _removeAuth = useCallback(
@@ -42,7 +42,9 @@ function WebsiteEntry ({ className = '', info: { authorizedAccounts }, removeAut
                 total: authorizedAccounts.length
               }
             })
-            : t('no accounts')
+            : isAllowed
+              ? t('all accounts')
+              : t('no accounts')
         }</Link>
     </div>
   );

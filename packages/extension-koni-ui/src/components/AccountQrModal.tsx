@@ -3,6 +3,7 @@
 
 import { faTimes } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { ALL_ACCOUNT_KEY, ALL_NETWORK_KEY } from '@subwallet/extension-koni-base/constants';
 import Identicon from '@subwallet/extension-koni-ui/components/Identicon';
 import Link from '@subwallet/extension-koni-ui/components/Link';
 import Modal from '@subwallet/extension-koni-ui/components/Modal';
@@ -13,7 +14,7 @@ import useTranslation from '@subwallet/extension-koni-ui/hooks/useTranslation';
 import { editAccount } from '@subwallet/extension-koni-ui/messaging';
 import HeaderEditName from '@subwallet/extension-koni-ui/partials/HeaderEditName';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
-import { ThemeProps } from '@subwallet/extension-koni-ui/types';
+import { ModalQrProps, ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { getLogoByNetworkKey, toShort } from '@subwallet/extension-koni-ui/util';
 import reformatAddress from '@subwallet/extension-koni-ui/util/reformatAddress';
 import React, { useCallback, useMemo, useState } from 'react';
@@ -26,6 +27,8 @@ import { IconTheme } from '@polkadot/react-identicon/types';
 
 import cloneLogo from '../assets/clone.svg';
 import pencil from '../assets/pencil.svg';
+import CN from 'classnames';
+import { faCircleQuestion } from '@fortawesome/free-regular-svg-icons';
 
 interface Props extends ThemeProps {
   className?: string;
@@ -35,7 +38,9 @@ interface Props extends ThemeProps {
   networkPrefix: number;
   networkKey: string;
   iconTheme: string;
-  showExportButton: boolean
+  showExportButton: boolean;
+  modalQrProp: ModalQrProps;
+  updateModalQr: (value: Partial<ModalQrProps>) => void;
 }
 
 interface EditState {
@@ -43,16 +48,45 @@ interface EditState {
   toggleActions: number;
 }
 
+interface WrapperProps {
+  children?: JSX.Element;
+  closeModal?: () => void;
+  className?: string;
+}
+
+const Wrapper = (props: WrapperProps) => {
+  const { children, className, closeModal } = props;
+
+  return (
+    <Modal className={className}>
+      <div className={'account-qr-modal'}>
+        <div className='account-qr-modal__header'>
+          <FontAwesomeIcon
+            className='account-qr-modal__icon'
+            // @ts-ignore
+            icon={faTimes}
+            onClick={closeModal}
+          />
+        </div>
+        {children}
+      </div>
+    </Modal>
+  );
+};
+
 function AccountQrModal ({ accountName, address, className,
   closeModal,
   iconTheme,
+  modalQrProp,
   networkKey,
   networkPrefix,
-  showExportButton }: Props): React.ReactElement<Props> {
+  showExportButton,
+  updateModalQr }: Props): React.ReactElement<Props> {
   const { t } = useTranslation();
   const { show } = useToast();
   const [editedName, setName] = useState<string | undefined | null>(accountName);
   const [{ isEditing }, setEditing] = useState<EditState>({ isEditing: false, toggleActions: 0 });
+  const { account: accountQr, network: networkQr, showExportButton: _showExportButton } = modalQrProp;
   const networkMap = useSelector((state: RootState) => state.networkMap);
   const formatted = useMemo(() => {
     const networkInfo = networkMap[networkKey];
@@ -83,6 +117,37 @@ function AccountQrModal ({ accountName, address, className,
     () => show(t('Copied')),
     [show, t]
   );
+
+  if (!accountQr || accountQr.address === ALL_ACCOUNT_KEY) {
+    return (
+      <Wrapper
+        className={className}
+        closeModal={closeModal}
+      >
+        <>
+          Account
+        </>
+      </Wrapper>
+    );
+  }
+
+  if (!networkQr || networkQr.networkKey === ALL_NETWORK_KEY) {
+    return (
+      <Wrapper
+        className={className}
+        closeModal={closeModal}
+      >
+        <>
+          <div className={CN('modal-header')}>
+            <div className={CN('header-title')}>Network Selection</div>
+            <div className={CN('header-icon')}>
+              <FontAwesomeIcon icon={faCircleQuestion} size={'1.5x'} />
+            </div>
+          </div>
+        </>
+      </Wrapper>
+    );
+  }
 
   return (
     <Modal className={className}>
@@ -258,7 +323,7 @@ export default styled(AccountQrModal)(({ theme }: ThemeProps) => `
   .account-qr-modal__qr-code {
     margin: 20px 0;
     border: 2px solid #fff;
-    
+
     svg {
       display:block;
     }
@@ -335,6 +400,23 @@ export default styled(AccountQrModal)(({ theme }: ThemeProps) => `
 
     input {
       height: 32px;
+    }
+  }
+
+  .modal-header {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    .header-title {
+      font-weight: 500;
+      font-size: 20px;
+      line-height: 32px;
+    }
+
+    .header-icon {
+      color: ${theme.primaryColor};
+      margin-left: 4px;
     }
   }
 `);

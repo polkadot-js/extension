@@ -13,7 +13,7 @@ import useShowedNetworks from '@subwallet/extension-koni-ui/hooks/screen/home/us
 import useTranslation from '@subwallet/extension-koni-ui/hooks/useTranslation';
 import { TabHeaderItemType } from '@subwallet/extension-koni-ui/Popup/Home/types';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
-import { ThemeProps } from '@subwallet/extension-koni-ui/types';
+import { ModalQrProps, ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { BN_ZERO, isAccountAll, NFT_DEFAULT_GRID_SIZE, NFT_GRID_HEIGHT_THRESHOLD, NFT_HEADER_HEIGHT, NFT_PER_ROW, NFT_PREVIEW_HEIGHT } from '@subwallet/extension-koni-ui/util';
 import BigN from 'bignumber.js';
 import React, { useCallback, useContext, useEffect, useMemo, useState } from 'react';
@@ -205,6 +205,16 @@ function Home ({ chainRegistryMap, className = '', currentAccount, historyMap, n
     iconTheme,
     showExportButton: true
   });
+  const [modalQrProp, setModalQrProp] = useState<ModalQrProps>({
+    network: {
+      networkKey: networkKey,
+    },
+    account: {
+      address: currentAccount.address
+    },
+    showExportButton: true
+  });
+
   const { accounts } = useContext(AccountContext);
   const networkMetadataMap = useGetNetworkMetadata();
   const showedNetworks = useShowedNetworks(networkKey, address, accounts);
@@ -223,6 +233,15 @@ function Home ({ chainRegistryMap, className = '', currentAccount, historyMap, n
 
   const isSetNetwork = window.localStorage.getItem('isSetNetwork') !== 'ok';
   const [showNetworkSelection, setShowNetworkSelection] = useState(isSetNetwork);
+
+  const updateModalQr = useCallback((newValue: Partial<ModalQrProps>) => {
+    setModalQrProp((oldValue) => {
+      return {
+        ...oldValue,
+        ...newValue
+      };
+    });
+  }, []);
 
   useEffect(() => {
     if (window.localStorage.getItem('isSetNetwork') === 'ok' && showNetworkSelection) {
@@ -448,6 +467,8 @@ function Home ({ chainRegistryMap, className = '', currentAccount, historyMap, n
           address={address}
           className='home__account-qr-modal'
           closeModal={_closeQrModal}
+          modalQrProp={modalQrProp}
+          updateModalQr={updateModalQr}
           iconTheme={qrModalIconTheme}
           networkKey={qrModalNetworkKey}
           networkPrefix={qrModalNetworkPrefix}

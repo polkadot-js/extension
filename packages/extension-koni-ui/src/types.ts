@@ -73,3 +73,13 @@ export interface Signed {
   message: Uint8Array;
   signature: Uint8Array;
 }
+
+export interface ModalQrProps {
+  network?: {
+    networkKey: string;
+  };
+  account?: {
+    address: string;
+  };
+  showExportButton: boolean;
+}

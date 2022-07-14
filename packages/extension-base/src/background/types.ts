@@ -117,7 +117,7 @@ export interface RequestSignatures {
   'pri(window.open)': [AllowedPath, boolean];
   // public/external requests, i.e. from a page
   'pub(accounts.listAuthorized)': [RequestAccountList, InjectedAccount[]];
-  'pub(accounts.subscribeAuthorized)': [RequestAccountSubscribe, boolean, InjectedAccount[]];
+  'pub(accounts.subscribeAuthorized)': [RequestAccountSubscribe, string, InjectedAccount[]];
   'pub(accounts.unsubscribe)': [RequestAccountUnsubscribe, boolean];
   'pub(authorize.tab)': [RequestAuthorizeTab, Promise<AuthResponse>];
   'pub(bytes.sign)': [SignerPayloadRaw, ResponseSigning];

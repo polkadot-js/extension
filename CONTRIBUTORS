@@ -1,4 +1,4 @@
-     530	Jaco                          	Adjust gitignore (#1107)
+     531	Jaco                          	Bump dev deps (#1108)
       83	Thibaut Sardan                	Account selection when authorizing a website (#1068)
        7	Ivan Rukhavets                	Mention derivation in FAQ (#334)
        4	Amaury Martiny                	PostMessageProvider with on('connected' | 'disconnected') (#279)

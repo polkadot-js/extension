@@ -31,14 +31,14 @@ function AccountManagement ({ className }: Props): React.ReactElement<Props> {
 
         setSelectedAccounts && setSelectedAccounts(list[url].authorizedAccounts);
       })
-      .catch((e) => console.error(e));
+      .catch(console.error);
   }, [setSelectedAccounts, url]);
 
   const _onApprove = useCallback(
     (): void => {
       updateAuthorization(selectedAccounts, url)
         .then(() => onAction('/auth-list'))
-        .catch((error: Error) => console.error(error));
+        .catch(console.error);
     },
     [onAction, selectedAccounts, url]
   );

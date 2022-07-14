@@ -25,7 +25,6 @@ import styled, { ThemeContext } from 'styled-components';
 import { IconTheme } from '@polkadot/react-identicon/types';
 
 import defaultAvatar from '../../assets/default-avatar.svg';
-import logo from '../../assets/sub-wallet-logo.svg';
 import useOutsideClick from '../../hooks/useOutsideClick';
 import { Theme } from '../../types';
 
@@ -220,7 +219,7 @@ function Header ({ cancelButtonText, changeAccountCallback, children, className 
             >
               <img
                 className='logo'
-                src={logo}
+                src={themeContext.logo}
               />
             </Link>
           </div>
@@ -420,7 +419,7 @@ export default React.memo(styled(Header)(({ theme }: Props) => `
       color: ${theme.labelColor};
       font-family: ${theme.fontFamily};
       text-align: center;
-      margin-left: 5px;
+      margin-left: ${['dark', 'light'].includes(theme.id) ? '5px' : '16px'};
 
       .logo {
         height: 48px;

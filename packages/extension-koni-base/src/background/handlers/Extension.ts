@@ -426,17 +426,7 @@ export default class KoniExtension extends Extension {
   private saveTheme (data: ThemeTypes, id: string, port: chrome.runtime.Port) {
     const cb = createSubscription<'pri(settings.saveTheme)'>(id, port);
 
-    state.getSettings((value) => {
-      const updateValue = {
-        ...value,
-        theme: data
-      };
-
-      state.setSettings(updateValue, () => {
-        // eslint-disable-next-line node/no-callback-literal
-        cb(updateValue);
-      });
-    });
+    state.setTheme(data, cb);
 
     port.onDisconnect.addListener((): void => {
       unsubscribe(id);
@@ -476,6 +466,8 @@ export default class KoniExtension extends Extension {
           const currentKeyPair = keyring.getAccount(address);
 
           accountInfo.currentGenesisHash = currentKeyPair?.meta.genesisHash as string || ALL_GENESIS_HASH;
+        } else {
+          accountInfo.currentGenesisHash = accountInfo.allGenesisHash || ALL_GENESIS_HASH;
         }
       }
 

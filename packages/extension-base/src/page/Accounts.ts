@@ -13,15 +13,21 @@ export default class Accounts implements InjectedAccounts {
   }
 
   public get (anyType?: boolean): Promise<InjectedAccount[]> {
-    return sendRequest('pub(accounts.listAuthorized)', { anyType });
+    return sendRequest('pub(accounts.list)', { anyType });
   }
 
   public subscribe (cb: (accounts: InjectedAccount[]) => unknown): Unsubcall {
-    sendRequest('pub(accounts.subscribeAuthorized)', null, cb)
-      .catch((error: Error) => console.error(error));
+    let id: string | null = null;
+
+    sendRequest('pub(accounts.subscribe)', null, cb)
+      .then((subId): void => {
+        id = subId;
+      })
+      .catch(console.error);
 
     return (): void => {
-      // FIXME we need the ability to unsubscribe
+      id && sendRequest('pub(accounts.unsubscribe)', { id })
+        .catch(console.error);
     };
   }
 }

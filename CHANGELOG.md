@@ -1,5 +1,18 @@
 # CHANGELOG
 
+## master
+
+Contributed:
+
+- Account selection/management for authorized sites (Thanks to https://github.com/Tbaut)
+- UI icon & cursor adjustments for authorization (Thanks to https://github.com/roiLeo)
+
+Changes:
+
+- Allow for unsubscribe handling on account subscriptions
+- Add error handling for user-supplied account callbacks
+
+
 ## 0.44.1 Jun 6, 2022
 
 **Important** CHANGELOG entries are a rollup of details since last publish to the stores

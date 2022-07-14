@@ -1,12 +1,13 @@
 // Copyright 2019-2022 @polkadot/extension authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
+import type { Subscription } from 'rxjs';
 import type { InjectedAccount, InjectedMetadataKnown, MetadataDef, ProviderMeta } from '@polkadot/extension-inject/types';
 import type { KeyringPair } from '@polkadot/keyring/types';
 import type { JsonRpcResponse } from '@polkadot/rpc-provider/types';
 import type { SignerPayloadJSON, SignerPayloadRaw } from '@polkadot/types/types';
 import type { SubjectInfo } from '@polkadot/ui-keyring/observable/types';
-import type { MessageTypes, RequestAccountList, RequestAuthorizeTab, RequestRpcSend, RequestRpcSubscribe, RequestRpcUnsubscribe, RequestTypes, ResponseRpcListProviders, ResponseSigning, ResponseTypes, SubscriptionMessageTypes } from '../types';
+import type { MessageTypes, RequestAccountList, RequestAccountUnsubscribe, RequestAuthorizeTab, RequestRpcSend, RequestRpcSubscribe, RequestRpcUnsubscribe, RequestTypes, ResponseRpcListProviders, ResponseSigning, ResponseTypes, SubscriptionMessageTypes } from '../types';
 
 import { PHISHING_PAGE_REDIRECT } from '@polkadot/extension-base/defaults';
 import { canDerive } from '@polkadot/extension-base/utils';
@@ -20,6 +21,11 @@ import RequestExtrinsicSign from '../RequestExtrinsicSign';
 import { withErrorLog } from './helpers';
 import State, { AuthResponse } from './State';
 import { createSubscription, unsubscribe } from './subscriptions';
+
+interface AccountSub {
+  subscription: Subscription;
+  url: string;
+}
 
 function transformAccounts (accounts: SubjectInfo, anyType = false): InjectedAccount[] {
   return Object
@@ -36,6 +42,8 @@ function transformAccounts (accounts: SubjectInfo, anyType = false): InjectedAcc
 }
 
 export default class Tabs {
+  readonly #accountSubs: Record<string, AccountSub> = {};
+
   readonly #state: State;
 
   constructor (state: State) {
@@ -65,20 +73,36 @@ export default class Tabs {
     return this.filterForAuthorizedAccounts(transformedAccounts, url);
   }
 
-  private accountsSubscribeAuthorized (url: string, id: string, port: chrome.runtime.Port): boolean {
-    const cb = createSubscription<'pub(accounts.subscribeAuthorized)'>(id, port);
-    const subscription = accountsObservable.subject.subscribe((accounts: SubjectInfo): void => {
-      const transformedAccounts = transformAccounts(accounts);
+  private accountsSubscribeAuthorized (url: string, id: string, port: chrome.runtime.Port): string {
+    const cb = createSubscription<'pub(accounts.subscribe)'>(id, port);
 
-      return cb(
-        this.filterForAuthorizedAccounts(transformedAccounts, url)
-      );
-    });
+    this.#accountSubs[id] = {
+      subscription: accountsObservable.subject.subscribe((accounts: SubjectInfo): void => {
+        const transformedAccounts = transformAccounts(accounts);
+
+        cb(this.filterForAuthorizedAccounts(transformedAccounts, url));
+      }),
+      url
+    };
 
     port.onDisconnect.addListener((): void => {
-      unsubscribe(id);
-      subscription.unsubscribe();
+      this.accountsUnsubscribe(url, { id });
     });
+
+    return id;
+  }
+
+  private accountsUnsubscribe (url: string, { id }: RequestAccountUnsubscribe): boolean {
+    const sub = this.#accountSubs[id];
+
+    if (!sub || sub.url !== url) {
+      return false;
+    }
+
+    delete this.#accountSubs[id];
+
+    unsubscribe(id);
+    sub.subscription.unsubscribe();
 
     return true;
   }
@@ -199,11 +223,14 @@ export default class Tabs {
       case 'pub(authorize.tab)':
         return this.authorize(url, request as RequestAuthorizeTab);
 
-      case 'pub(accounts.listAuthorized)':
+      case 'pub(accounts.list)':
         return this.accountsListAuthorized(url, request as RequestAccountList);
 
-      case 'pub(accounts.subscribeAuthorized)':
+      case 'pub(accounts.subscribe)':
         return this.accountsSubscribeAuthorized(url, id, port);
+
+      case 'pub(accounts.unsubscribe)':
+        return this.accountsUnsubscribe(url, request as RequestAccountUnsubscribe);
 
       case 'pub(bytes.sign)':
         return this.bytesSign(url, request as SignerPayloadRaw);

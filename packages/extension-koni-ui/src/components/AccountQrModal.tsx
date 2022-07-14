@@ -217,7 +217,7 @@ function AccountQrModal (props: Props): React.ReactElement<Props> {
 
               const onClick = () => {
                 onChangeAccount(address);
-              }
+              };
 
               if (_isAllAccount) {
                 return null;
@@ -278,7 +278,7 @@ function AccountQrModal (props: Props): React.ReactElement<Props> {
 
               const onClick = () => {
                 onChangeNetwork(networkKey);
-              }
+              };
 
               if (_isAllNetwork) {
                 return null;

@@ -18,11 +18,13 @@ interface Props extends ThemeProps {
   url: string;
 }
 
-function WebsiteEntry ({ className = '', info, removeAuth, url }: Props): React.ReactElement<Props> {
+function WebsiteEntry ({ className = '', info: { authorizedAccounts }, removeAuth, url }: Props): React.ReactElement<Props> {
   const { t } = useTranslation();
-  const _removeAuth = useCallback(() => {
-    removeAuth(url);
-  }, [removeAuth, url]);
+
+  const _removeAuth = useCallback(
+    () => removeAuth(url),
+    [removeAuth, url]
+  );
 
   return (
     <div className={className}>
@@ -34,11 +36,13 @@ function WebsiteEntry ({ className = '', info, removeAuth, url }: Props): React.
         className='connectedAccounts'
         to={`/url/manage/${url}`}
       >{
-          t('{{total}} accounts', {
-            replace: {
-              total: info.authorizedAccounts.length
-            }
-          })
+          authorizedAccounts && authorizedAccounts.length
+            ? t('{{total}} accounts', {
+              replace: {
+                total: authorizedAccounts.length
+              }
+            })
+            : t('no accounts')
         }</Link>
     </div>
   );

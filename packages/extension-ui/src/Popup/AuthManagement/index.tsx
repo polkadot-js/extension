@@ -3,7 +3,7 @@
 
 import type { ThemeProps } from '../../types';
 
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import styled from 'styled-components';
 
 import { AuthUrlInfo, AuthUrls } from '@polkadot/extension-base/background/handlers/State';
@@ -28,6 +28,11 @@ function AuthManagement ({ className }: Props): React.ReactElement<Props> {
       .then(({ list }) => setAuthList(list))
       .catch((e) => console.error(e));
   }, []);
+
+  const hasAuthList = useMemo(
+    () => !!authList && !!Object.keys(authList).length,
+    [authList]
+  );
 
   const _onChangeFilter = useCallback((filter: string) => {
     setFilter(filter);
@@ -55,23 +60,25 @@ function AuthManagement ({ className }: Props): React.ReactElement<Props> {
           withReset
         />
         {
-          !authList || !Object.entries(authList)?.length
+          !authList || !hasAuthList
             ? <div className='empty-list'>{t<string>('No website request yet!')}</div>
-            : <>
-              <div className='website-list'>
-                {Object.entries(authList)
-                  .filter(([url]: [string, AuthUrlInfo]) => url.includes(filter))
-                  .map(
-                    ([url, info]: [string, AuthUrlInfo]) =>
+            : (
+              <>
+                <div className='website-list'>
+                  {Object
+                    .entries<AuthUrlInfo>(authList)
+                    .filter(([url]) => url.includes(filter))
+                    .map(([url, info]) =>
                       <WebsiteEntry
                         info={info}
                         key={url}
                         removeAuth={removeAuth}
                         url={url}
                       />
-                  )}
-              </div>
-            </>
+                    )}
+                </div>
+              </>
+            )
         }
       </div>
     </>

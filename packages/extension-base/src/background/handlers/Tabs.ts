@@ -74,7 +74,7 @@ export default class Tabs {
   }
 
   private accountsSubscribeAuthorized (url: string, id: string, port: chrome.runtime.Port): string {
-    const cb = createSubscription<'pub(accounts.subscribeAuthorized)'>(id, port);
+    const cb = createSubscription<'pub(accounts.subscribe)'>(id, port);
 
     this.#accountSubs[id] = {
       subscription: accountsObservable.subject.subscribe((accounts: SubjectInfo): void => {
@@ -223,10 +223,10 @@ export default class Tabs {
       case 'pub(authorize.tab)':
         return this.authorize(url, request as RequestAuthorizeTab);
 
-      case 'pub(accounts.listAuthorized)':
+      case 'pub(accounts.list)':
         return this.accountsListAuthorized(url, request as RequestAccountList);
 
-      case 'pub(accounts.subscribeAuthorized)':
+      case 'pub(accounts.subscribe)':
         return this.accountsSubscribeAuthorized(url, id, port);
 
       case 'pub(accounts.unsubscribe)':

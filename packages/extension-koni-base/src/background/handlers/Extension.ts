@@ -1202,8 +1202,6 @@ export default class KoniExtension extends Extension {
     let feeString;
     let fromAccountFree = '0';
 
-    // todo: Case ETH using web3 js
-
     if (tokenInfo && fromKeyPair) {
       [[fee, feeString], fromAccountFree] = await Promise.all([
         estimateCrossChainFee(

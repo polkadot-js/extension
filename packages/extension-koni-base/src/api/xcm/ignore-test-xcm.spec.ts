@@ -116,21 +116,20 @@ describe('test DotSama APIs', () => {
     const apiProps = await api.isReady;
 
     const extrinsic = apiProps.tx.xTokens.transfer(
-      { ForeignAsset: new BN('10810581592933651521121702237638664357') },
-      '1000000000',
+      { ForeignAsset: '42259045809535163221576417993425387648' },
+      '1000000000000',
       {
         V1: {
           parents: 1,
           interior: {
-            X2: [
-              { parachain: 1000 },
-              { AccountKey20: { network: 'Any', key: '5DLiz4E7znANe9LMWyFHPQvmdhSgdJeoJdgtFtEZ8c3TeBan' } }
-            ]
+            X1: { AccountId32: { network: 'Any', id: '5DLiz4E7znANe9LMWyFHPQvmdhSgdJeoJdgtFtEZ8c3TeBan' } }
           }
         }
       },
-      400000000000
+      4000000000
     );
+
+    console.log(extrinsic.toHex());
 
     const paymentInfo = await extrinsic.paymentInfo('0x40a207109cf531024B55010A1e760199Df0d3a13');
 
@@ -186,5 +185,43 @@ describe('test DotSama APIs', () => {
 
     console.log(parsedFee);
     console.log(info.partialFee.toHuman());
+  });
+
+  test('test get moonbeam xcm to relay chain', async () => {
+    const provider = new WsProvider(getCurrentProvider(PREDEFINED_NETWORKS.moonbase), DOTSAMA_AUTO_CONNECT_MS);
+    const api = new ApiPromise({ provider });
+    const apiProps = await api.isReady;
+
+    const extrinsic = apiProps.tx.xTokens.transferMultiasset( // can be substitution for transfer()
+      {
+        V1: {
+          id: {
+            Concrete: {
+              parents: 1,
+              interior: 'Here'
+            }
+          },
+          fun: {
+            Fungible: '10000000000000'
+          }
+        }
+      },
+      {
+        V1: {
+          parents: 1,
+          interior: {
+            X1: {
+              AccountId32: {
+                network: 'Any',
+                id: '5HbcGs2QXVAc6Q6eoTzLYNAJWpN17AkCFRLnWDaHCiGYXvNc'
+              }
+            }
+          }
+        }
+      },
+      4000000000
+    );
+
+    console.log(extrinsic.toHex());
   });
 });

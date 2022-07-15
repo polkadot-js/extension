@@ -10,18 +10,15 @@ import { SupportedCrossChainsMap } from '@subwallet/extension-koni-base/api/xcm/
 import { KeyringPair } from '@polkadot/keyring/types';
 
 export function isNetworksPairSupportedTransferCrossChain (originNetworkKey: string, destinationNetworkKey: string, token: string, networkMap: Record<string, NetworkJson>): boolean {
-  // todo: Check ParaChain vs RelayChain, RelayChain vs ParaChain
   if (!SupportedCrossChainsMap[originNetworkKey] ||
     !SupportedCrossChainsMap[originNetworkKey].relationMap[destinationNetworkKey] ||
     !SupportedCrossChainsMap[originNetworkKey].relationMap[destinationNetworkKey].supportedToken.includes(token)) {
     return false;
   }
 
-  if (!(networkMap[destinationNetworkKey] && networkMap[destinationNetworkKey].paraId)) {
+  if (SupportedCrossChainsMap[originNetworkKey].relationMap[destinationNetworkKey].type === 'p' && !(networkMap[destinationNetworkKey] && networkMap[destinationNetworkKey].paraId)) {
     return false;
   }
-
-  // todo: There may have further conditions
 
   return true;
 }
@@ -66,13 +63,6 @@ export async function makeCrossChainTransfer (
 
   const apiProps = await dotSamaApiMap[originNetworkKey].isReady;
   const api = apiProps.api;
-  const isTxXTokensSupported = !!api && !!api.tx && !!api.tx.xTokens;
-
-  if (!isTxXTokensSupported) {
-    callback(getUnsupportedResponse());
-
-    return;
-  }
 
   let extrinsic;
 

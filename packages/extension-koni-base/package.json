@@ -60,6 +60,7 @@
     "@zeitgeistpm/type-defs": "0.4.5",
     "@zeroio/type-definitions": "0.0.14",
     "axios": "^0.24.0",
+    "bignumber.js": "^9.0.2",
     "cross-fetch": "^3.1.5",
     "eth-simple-keyring": "^4.2.0",
     "ethereumjs-tx": "^2.1.2",

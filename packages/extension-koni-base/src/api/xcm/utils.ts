@@ -3,6 +3,8 @@
 
 import { CrossChainRelation, NetworkJson } from '@subwallet/extension-base/background/KoniTypes';
 
+import { decodeAddress } from '@polkadot/util-crypto';
+
 export const SupportedCrossChainsMap: Record<string, CrossChainRelation> = {
   moonbase_relay: {
     isEthereum: false,
@@ -23,6 +25,11 @@ export const SupportedCrossChainsMap: Record<string, CrossChainRelation> = {
         type: 'p',
         isEthereum: false,
         supportedToken: ['xcKAR']
+      },
+      moonbase_relay: {
+        type: 'r',
+        isEthereum: false,
+        supportedToken: ['xcUNIT']
       }
     }
   },
@@ -86,7 +93,7 @@ export const SupportedCrossChainsMap: Record<string, CrossChainRelation> = {
     }
   },
   kusama: {
-    type: 'p',
+    type: 'r',
     isEthereum: false,
     relationMap: {
       moonriver: {
@@ -183,7 +190,7 @@ export function getMultiLocationFromParachain (originChain: string, destinationC
     let interior: Record<string, any> = {
       X2: [
         { Parachain: paraId },
-        { AccountId32: { network: 'Any', key: toAddress } }
+        { AccountId32: { network: 'Any', id: decodeAddress(toAddress) } }
       ]
     };
 
@@ -191,7 +198,7 @@ export function getMultiLocationFromParachain (originChain: string, destinationC
       interior = {
         X2: [
           { Parachain: paraId },
-          { AccountKey20: { network: 'Any', key: toAddress } }
+          { AccountKey20: { network: 'Any', key: decodeAddress(toAddress) } }
         ]
       };
     }
@@ -204,9 +211,7 @@ export function getMultiLocationFromParachain (originChain: string, destinationC
     V1: {
       parents: 1,
       interior: {
-        X1: [
-          { AccountId32: { network: 'Any', key: toAddress } }
-        ]
+        X1: { AccountId32: { network: 'Any', id: decodeAddress(toAddress) } }
       }
     }
   };

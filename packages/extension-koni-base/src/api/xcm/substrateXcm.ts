@@ -3,6 +3,7 @@
 
 import { ApiProps, NetworkJson, TokenInfo } from '@subwallet/extension-base/background/KoniTypes';
 import { FOUR_INSTRUCTIONS_WEIGHT, getMultiLocationFromParachain, SupportedCrossChainsMap } from '@subwallet/extension-koni-base/api/xcm/utils';
+import { parseNumberToDisplay } from '@subwallet/extension-koni-base/utils/utils';
 
 import { ApiPromise } from '@polkadot/api';
 import { KeyringPair } from '@polkadot/keyring/types';
@@ -21,6 +22,8 @@ export async function substrateEstimateCrossChainFee (
   const api = apiProps.api;
   let fee = '0';
   let feeString = '';
+  const originNetworkJson = networkMap[originNetworkKey];
+  const destinationNetworkJson = networkMap[destinationNetworkKey];
 
   if (SupportedCrossChainsMap[originNetworkKey].type === 'p') {
     // Case ParaChain -> ParaChain && ParaChain -> RelayChain
@@ -34,10 +37,10 @@ export async function substrateEstimateCrossChainFee (
     ).paymentInfo(fromKeypair);
 
     fee = paymentInfo.partialFee.toString();
-    feeString = paymentInfo.partialFee.toHuman();
+    feeString = parseNumberToDisplay(paymentInfo.partialFee, originNetworkJson.decimals) + ` ${originNetworkJson.nativeToken ? originNetworkJson.nativeToken : ''}`;
   } else {
     // Case RelayChain -> ParaChain
-    // TODO: add teleport assets
+    // TODO: add teleport assets for chain using the same native token as relaychain (statemint, statemine)
     let receiverLocation: Record<string, any> = { AccountId32: { network: 'Any', key: to } };
 
     if (SupportedCrossChainsMap[originNetworkKey].relationMap[destinationNetworkKey].isEthereum) {
@@ -49,7 +52,7 @@ export async function substrateEstimateCrossChainFee (
         V1: { // find the destination chain
           parents: 0,
           interior: {
-            X1: { Parachain: 1000 }
+            X1: { Parachain: destinationNetworkJson.paraId as number }
           }
         }
       },
@@ -66,7 +69,7 @@ export async function substrateEstimateCrossChainFee (
           {
             id: {
               Concrete: { parents: 0, interior: 'Here' },
-              fun: { Fungible: value }
+              fun: { Fungible: +value }
             }
           }
         ]
@@ -74,8 +77,35 @@ export async function substrateEstimateCrossChainFee (
       0
     ).paymentInfo(fromKeypair);
 
+    console.log({
+      V1: { // find the destination chain
+        parents: 0,
+        interior: {
+          X1: { Parachain: destinationNetworkJson.paraId as number }
+        }
+      }
+    });
+    console.log({
+      V1: { // find the receiver
+        parents: 0,
+        interior: {
+          X1: receiverLocation
+        }
+      }
+    });
+    console.log({
+      V1: [ // find the asset
+        {
+          id: {
+            Concrete: { parents: 0, interior: 'Here' },
+            fun: { Fungible: +value }
+          }
+        }
+      ]
+    });
+
     fee = paymentInfo.partialFee.toString();
-    feeString = paymentInfo.partialFee.toHuman();
+    feeString = parseNumberToDisplay(paymentInfo.partialFee, originNetworkJson.decimals) + ` ${originNetworkJson.nativeToken ? originNetworkJson.nativeToken : ''}`;
   }
 
   return [fee, feeString];
@@ -90,15 +120,80 @@ export function substrateGetXcmExtrinsic (
   tokenInfo: TokenInfo,
   networkMap: Record<string, NetworkJson>
 ) {
-  // todo: Case ParaChain vs RelayChain
-  // todo: Case RelayChain vs ParaChain
+  // Case ParaChain -> RelayChain && Parachain -> Parachain
+  if (SupportedCrossChainsMap[originNetworkKey].type === 'p') {
+    return api.tx.xTokens.transfer(
+      {
+        Token: tokenInfo.symbol
+      },
+      +value,
+      getMultiLocationFromParachain(originNetworkKey, destinationNetworkKey, networkMap, to),
+      FOUR_INSTRUCTIONS_WEIGHT
+    );
+  }
 
-  return api.tx.xTokens.transfer(
+  // Case RelayChain -> Parachain
+  const destinationNetworkJson = networkMap[destinationNetworkKey];
+  let receiverLocation: Record<string, any> = { AccountId32: { network: 'Any', key: to } };
+
+  if (SupportedCrossChainsMap[originNetworkKey].relationMap[destinationNetworkKey].isEthereum) {
+    receiverLocation = { AccountKey20: { network: 'Any', key: to } };
+  }
+
+  console.log({
+    V1: { // find the destination chain
+      parents: 0,
+      interior: {
+        X1: { Parachain: destinationNetworkJson.paraId as number }
+      }
+    }
+  });
+  console.log({
+    V1: { // find the receiver
+      parents: 0,
+      interior: {
+        X1: receiverLocation
+      }
+    }
+  });
+  console.log({
+    V1: [ // find the asset
+      {
+        id: {
+          Concrete: { parents: 0, interior: 'Here' },
+          fun: { Fungible: +value }
+        }
+      }
+    ]
+  });
+
+  return api.tx.xcmPallet.reserveTransferAssets(
     {
-      Token: tokenInfo.symbol
+      V1: { // find the destination chain
+        parents: 0,
+        interior: {
+          X1: { Parachain: destinationNetworkJson.paraId as number }
+        }
+      }
     },
-    +value,
-    getMultiLocationFromParachain(originNetworkKey, destinationNetworkKey, networkMap, to),
-    FOUR_INSTRUCTIONS_WEIGHT
+    {
+      V1: { // find the receiver
+        parents: 0,
+        interior: {
+          X1: receiverLocation
+        }
+      }
+    },
+    {
+      V1: [ // find the asset
+        {
+          id: {
+            Concrete: { parents: 0, interior: 'Here' },
+            fun: { Fungible: +value }
+          }
+        }
+      ]
+    },
+    0
   );
 }

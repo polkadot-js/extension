@@ -150,27 +150,39 @@ describe('test DotSama APIs', () => {
 
     const extrinsic = apiProps.tx.xcmPallet.reserveTransferAssets(
       {
-        V1: { // find the destination chain
+        V1: {
           parents: 0,
           interior: {
-            X1: { Parachain: 1000 }
+            X1: {
+              Parachain: 1000
+            }
           }
         }
       },
       {
-        V1: { // find the receiver
+        V1: {
           parents: 0,
           interior: {
-            X1: { AccountKey20: { network: 'Any', key: '0x40a207109cf531024B55010A1e760199Df0d3a13' } }
+            X1: {
+              AccountKey20: {
+                network: 'Any',
+                key: '0x40a207109cf531024b55010a1e760199df0d3a13'
+              }
+            }
           }
         }
       },
       {
-        V1: [ // find the asset
+        V1: [
           {
             id: {
-              Concrete: { parents: 0, interior: 'Here' },
-              fun: { Fungible: '70000000000' }
+              Concrete: {
+                parents: 0,
+                interior: 'Here'
+              }
+            },
+            fun: {
+              Fungible: '2000000000000'
             }
           }
         ]
@@ -178,13 +190,14 @@ describe('test DotSama APIs', () => {
       0
     );
 
+    console.log(extrinsic.toHex());
+
     const info = await extrinsic.paymentInfo('5HbcGs2QXVAc6Q6eoTzLYNAJWpN17AkCFRLnWDaHCiGYXvNc');
 
     const rawFee = info.partialFee.toString();
     const parsedFee = parseFloat(rawFee) / 10 ** decimals;
 
     console.log(parsedFee);
-    console.log(info.partialFee.toHuman());
   });
 
   test('test get moonbeam xcm to relay chain', async () => {

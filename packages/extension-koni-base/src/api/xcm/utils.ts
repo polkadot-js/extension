@@ -223,7 +223,7 @@ export function getMultiLocationFromParachain (originChain: string, destinationC
       interior = {
         X2: [
           { Parachain: paraId },
-          { AccountKey20: { network: 'Any', key: decodeAddress(toAddress) } }
+          { AccountKey20: { network: 'Any', key: toAddress } }
         ]
       };
     }

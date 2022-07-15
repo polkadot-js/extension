@@ -7,6 +7,7 @@ import { parseNumberToDisplay } from '@subwallet/extension-koni-base/utils/utils
 
 import { ApiPromise } from '@polkadot/api';
 import { KeyringPair } from '@polkadot/keyring/types';
+import { decodeAddress } from '@polkadot/util-crypto';
 
 export async function substrateEstimateCrossChainFee (
   originNetworkKey: string,
@@ -31,7 +32,7 @@ export async function substrateEstimateCrossChainFee (
       {
         Token: tokenInfo.symbol
       },
-      +value,
+      value,
       getMultiLocationFromParachain(originNetworkKey, destinationNetworkKey, networkMap, to),
       FOUR_INSTRUCTIONS_WEIGHT
     ).paymentInfo(fromKeypair);
@@ -41,7 +42,7 @@ export async function substrateEstimateCrossChainFee (
   } else {
     // Case RelayChain -> ParaChain
     // TODO: add teleport assets for chain using the same native token as relaychain (statemint, statemine)
-    let receiverLocation: Record<string, any> = { AccountId32: { network: 'Any', key: to } };
+    let receiverLocation: Record<string, any> = { AccountId32: { network: 'Any', id: decodeAddress(to) } };
 
     if (SupportedCrossChainsMap[originNetworkKey].relationMap[destinationNetworkKey].isEthereum) {
       receiverLocation = { AccountKey20: { network: 'Any', key: to } };
@@ -68,41 +69,14 @@ export async function substrateEstimateCrossChainFee (
         V1: [ // find the asset
           {
             id: {
-              Concrete: { parents: 0, interior: 'Here' },
-              fun: { Fungible: +value }
-            }
+              Concrete: { parents: 0, interior: 'Here' }
+            },
+            fun: { Fungible: value }
           }
         ]
       },
       0
     ).paymentInfo(fromKeypair);
-
-    console.log({
-      V1: { // find the destination chain
-        parents: 0,
-        interior: {
-          X1: { Parachain: destinationNetworkJson.paraId as number }
-        }
-      }
-    });
-    console.log({
-      V1: { // find the receiver
-        parents: 0,
-        interior: {
-          X1: receiverLocation
-        }
-      }
-    });
-    console.log({
-      V1: [ // find the asset
-        {
-          id: {
-            Concrete: { parents: 0, interior: 'Here' },
-            fun: { Fungible: +value }
-          }
-        }
-      ]
-    });
 
     fee = paymentInfo.partialFee.toString();
     feeString = parseNumberToDisplay(paymentInfo.partialFee, originNetworkJson.decimals) + ` ${originNetworkJson.nativeToken ? originNetworkJson.nativeToken : ''}`;
@@ -134,38 +108,11 @@ export function substrateGetXcmExtrinsic (
 
   // Case RelayChain -> Parachain
   const destinationNetworkJson = networkMap[destinationNetworkKey];
-  let receiverLocation: Record<string, any> = { AccountId32: { network: 'Any', key: to } };
+  let receiverLocation: Record<string, any> = { AccountId32: { network: 'Any', id: decodeAddress(to) } };
 
   if (SupportedCrossChainsMap[originNetworkKey].relationMap[destinationNetworkKey].isEthereum) {
     receiverLocation = { AccountKey20: { network: 'Any', key: to } };
   }
-
-  console.log({
-    V1: { // find the destination chain
-      parents: 0,
-      interior: {
-        X1: { Parachain: destinationNetworkJson.paraId as number }
-      }
-    }
-  });
-  console.log({
-    V1: { // find the receiver
-      parents: 0,
-      interior: {
-        X1: receiverLocation
-      }
-    }
-  });
-  console.log({
-    V1: [ // find the asset
-      {
-        id: {
-          Concrete: { parents: 0, interior: 'Here' },
-          fun: { Fungible: +value }
-        }
-      }
-    ]
-  });
 
   return api.tx.xcmPallet.reserveTransferAssets(
     {
@@ -188,9 +135,9 @@ export function substrateGetXcmExtrinsic (
       V1: [ // find the asset
         {
           id: {
-            Concrete: { parents: 0, interior: 'Here' },
-            fun: { Fungible: +value }
-          }
+            Concrete: { parents: 0, interior: 'Here' }
+          },
+          fun: { Fungible: value }
         }
       ]
     },

@@ -17,22 +17,6 @@ export const SupportedCrossChainsMap: Record<string, CrossChainRelation> = {
       }
     }
   },
-  moonbase: {
-    isEthereum: true,
-    type: 'p',
-    relationMap: {
-      acala_dev: {
-        type: 'p',
-        isEthereum: false,
-        supportedToken: ['xcKAR']
-      },
-      moonbase_relay: {
-        type: 'r',
-        isEthereum: false,
-        supportedToken: ['xcUNIT']
-      }
-    }
-  },
   acala: {
     type: 'p',
     isEthereum: false,
@@ -73,6 +57,26 @@ export const SupportedCrossChainsMap: Record<string, CrossChainRelation> = {
         type: 'p',
         isEthereum: false,
         supportedToken: ['xcBNC']
+      },
+      kintsugi: {
+        type: 'p',
+        isEthereum: false,
+        supportedToken: ['xcKINT', 'xckBTC']
+      },
+      karura: {
+        type: 'p',
+        isEthereum: false,
+        supportedToken: ['xcKAR', 'xcaUSD']
+      },
+      statemine: {
+        type: 'p',
+        isEthereum: false,
+        supportedToken: ['xcRMRK', 'xcUSDT']
+      },
+      khala: {
+        type: 'p',
+        isEthereum: false,
+        supportedToken: ['xcPHA']
       }
     }
   },
@@ -144,6 +148,27 @@ export const SupportedCrossChainsMap: Record<string, CrossChainRelation> = {
         type: 'p',
         isEthereum: true,
         supportedToken: ['BNC']
+      }
+    }
+  },
+  moonbase: {
+    isEthereum: true,
+    type: 'p',
+    relationMap: {
+      acala_dev: {
+        type: 'p',
+        isEthereum: false,
+        supportedToken: ['xcKAR']
+      },
+      moonbase_relay: {
+        type: 'r',
+        isEthereum: false,
+        supportedToken: ['xcUNIT']
+      },
+      bifrost_testnet: {
+        type: 'r',
+        isEthereum: false,
+        supportedToken: ['xcBNC']
       }
     }
   }

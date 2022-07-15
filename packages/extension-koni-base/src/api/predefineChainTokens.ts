@@ -281,6 +281,12 @@ export const PREDEFINE_TOKEN_DATA_MAP: Record<string, Record<string, TokenInfo>>
       symbol: 'RMRK',
       name: 'RMRK',
       decimals: 10
+    },
+    MOVR: {
+      isMainToken: false,
+      symbol: 'MOVR',
+      name: 'MOVR',
+      decimals: 18
     }
   },
   moonbase: {

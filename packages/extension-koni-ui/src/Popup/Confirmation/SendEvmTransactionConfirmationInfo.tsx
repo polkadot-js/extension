@@ -58,28 +58,30 @@ function SendEvmTransactionConfirmationInfo ({ className, confirmation: { payloa
   </div>;
 }
 
-export default styled(SendEvmTransactionConfirmationInfo)(({ theme }: Props) => `  
+export default styled(SendEvmTransactionConfirmationInfo)(({ theme }: Props) => `
   .network-wrapper {
-    width: 100%;  
+    width: 100%;
   }
-  
+
   .from-account, .to-account {
     .account-info-full-address, .account-info__name {
       max-width: none;
     }
-    
+
     .account-info-row {
       height: 54px;
       margin-bottom: 8px;
-    }  
+    }
   }
-  
+
   .label {
     font-weight: bold;
     padding-right: 8px;
   }
   .value {
     color: #7B8098;
+    white-space: pre-line;
+    word-break: break-word;
   }
   .format-balance {
   display: inline-block;

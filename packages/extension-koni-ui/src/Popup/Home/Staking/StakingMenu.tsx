@@ -42,6 +42,22 @@ const MANUAL_CLAIM_CHAINS = [
   'shiden'
 ];
 
+function parseDelegations (delegations: DelegationItem[] | undefined) {
+  if (!delegations) {
+    return undefined;
+  }
+
+  const filteredDelegations: DelegationItem[] = [];
+
+  delegations.forEach((item) => {
+    if (parseFloat(item.amount) > 0) { // only show delegations with active stake
+      filteredDelegations.push(item);
+    }
+  });
+
+  return filteredDelegations;
+}
+
 function StakingMenu ({ bondedAmount, className, delegations, networkKey, nextWithdrawal, nextWithdrawalAmount, redeemable, showClaimRewardModal, showMenu, showWithdrawalModal, toggleMenu, unbondingStake }: Props): React.ReactElement<Props> {
   const stakingMenuRef = useRef(null);
   const navigate = useContext(ActionContext);
@@ -64,8 +80,13 @@ function StakingMenu ({ bondedAmount, className, delegations, networkKey, nextWi
   }, [account?.address, navigate, networkKey]);
 
   const handleUnstake = useCallback(() => {
-    if (parseFloat(bondedAmount) > 0) {
-      store.dispatch({ type: 'unbondingParams/update', payload: { selectedAccount: account?.address as string, selectedNetwork: networkKey, bondedAmount: parseFloat(bondedAmount), delegations } as UnbondingParams });
+    const filteredDelegations = parseDelegations(delegations);
+
+    if (filteredDelegations && filteredDelegations.length > 0) {
+      store.dispatch({ type: 'unbondingParams/update', payload: { selectedAccount: account?.address as string, selectedNetwork: networkKey, bondedAmount: parseFloat(bondedAmount), delegations: filteredDelegations } as UnbondingParams });
+      navigate('/account/unbonding-auth');
+    } else if (parseFloat(bondedAmount) > 0) {
+      store.dispatch({ type: 'unbondingParams/update', payload: { selectedAccount: account?.address as string, selectedNetwork: networkKey, bondedAmount: parseFloat(bondedAmount), delegations: filteredDelegations } as UnbondingParams });
       navigate('/account/unbonding-auth');
     }
   }, [account?.address, bondedAmount, delegations, navigate, networkKey]);

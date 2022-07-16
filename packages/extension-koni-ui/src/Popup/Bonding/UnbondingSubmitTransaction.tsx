@@ -38,6 +38,8 @@ function UnbondingSubmitTransaction ({ className }: Props): React.ReactElement<P
   const bondedAmount = unbondingParams.bondedAmount as number;
   const networkJson = useGetNetworkJson(selectedNetwork);
 
+  console.log(unbondingParams.delegations);
+
   const [amount, setAmount] = useState<number>(-1);
   const [isReadySubmit, setIsReadySubmit] = useState(false);
   const [showAuth, setShowAuth] = useState(false);

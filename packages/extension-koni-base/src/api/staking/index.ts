@@ -4,7 +4,7 @@
 import { APIItemState, ApiProps, DelegationItem, NetworkJson, StakingItem } from '@subwallet/extension-base/background/KoniTypes';
 import { PREDEFINED_NETWORKS } from '@subwallet/extension-koni-base/api/predefinedNetworks';
 import { IGNORE_GET_SUBSTRATE_FEATURES_LIST } from '@subwallet/extension-koni-base/constants';
-import { categoryAddresses, parseRawNumber, toUnit } from '@subwallet/extension-koni-base/utils/utils';
+import {categoryAddresses, parseRawNumber, reformatAddress, toUnit} from '@subwallet/extension-koni-base/utils/utils';
 import fetch from 'cross-fetch';
 
 interface LedgerData {
@@ -75,6 +75,9 @@ function getParaStakingOnChain (parentApi: ApiProps, useAddresses: string[], net
     let unlockingBalance = 0;
     let stakingItem: StakingItem;
     const delegationMap: Record<string, string> = {};
+    const formattedAddresses = useAddresses.map((address) => {
+      return reformatAddress(address, 0);
+    });
 
     if (ledgers) {
       for (const ledger of ledgers) {
@@ -104,8 +107,6 @@ function getParaStakingOnChain (parentApi: ApiProps, useAddresses: string[], net
       }
 
       const delegationsList: DelegationItem[] = [];
-
-      console.log(delegationMap);
 
       await Promise.all(Object.entries(delegationMap).map(async ([owner, amount]) => {
         const [_info, _identity, _scheduledRequests] = await Promise.all([
@@ -150,8 +151,9 @@ function getParaStakingOnChain (parentApi: ApiProps, useAddresses: string[], net
 
         for (const scheduledRequest of rawScheduledRequests) {
           const delegator = scheduledRequest.delegator as string;
+          const formattedDelegator = reformatAddress(delegator, 0)
 
-          if (useAddresses.includes(delegator)) {
+          if (formattedAddresses.includes(formattedDelegator)) { // returned data might not have the same address format
             const action = scheduledRequest.action as Record<string, string>;
 
             Object.values(action).forEach((value) => {
@@ -161,8 +163,6 @@ function getParaStakingOnChain (parentApi: ApiProps, useAddresses: string[], net
         }
 
         const activeStake = parseRawNumber(amount) - unbondingAmount;
-
-        console.log(activeStake, owner);
 
         delegationsList.push({
           owner,

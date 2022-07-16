@@ -289,6 +289,8 @@ export async function getParaUnbondingExtrinsic (dotSamaApi: ApiProps, amount: n
   const parsedAmount = amount * (10 ** (networkJson.decimals as number));
   const binaryAmount = new BN(parsedAmount.toString());
 
+  console.log('unstakeAll', unstakeAll);
+
   if (!unstakeAll) {
     return apiPromise.api.tx.parachainStaking.scheduleDelegatorBondLess(collatorAddress, binaryAmount);
   } else {

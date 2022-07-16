@@ -56,6 +56,8 @@ function UnbondingSubmitTransaction ({ className }: Props): React.ReactElement<P
   const [nominatedAmount, setNominatedAmount] = useState<string>(unbondingParams.delegations ? unbondingParams.delegations[0].amount : '0');
   const [minBond, setMinBond] = useState<string>(unbondingParams.delegations ? unbondingParams.delegations[0].minBond : '0');
 
+  console.log(unbondingParams.delegations);
+
   useEffect(() => {
     if (!networkJson.active) {
       navigate('/');
@@ -147,6 +149,14 @@ function UnbondingSubmitTransaction ({ className }: Props): React.ReactElement<P
   const handleClickCancel = useCallback(() => {
     navigate('/');
   }, [navigate]);
+
+  const _getUnbondAll = useCallback(() => {
+    const _amount = amount * (10 ** (networkJson.decimals as number));
+    const bnAmount = new BN(_amount.toString());
+    const isAmountEqualAll = bnAmount.eq(new BN(nominatedAmount));
+
+    return isAmountEqualAll || unbondAll;
+  }, [amount, networkJson.decimals, nominatedAmount, unbondAll]);
 
   const handleConfirm = useCallback(() => {
     setLoading(true);
@@ -260,7 +270,7 @@ function UnbondingSubmitTransaction ({ className }: Props): React.ReactElement<P
               autoFocus
               className={'submit-bond-amount-input'}
               decimals={networkJson.decimals}
-              defaultValue={getDefaultValue()}
+              defaultValue={unbondAll ? getDefaultValue() : undefined}
               help={`Type the amount you want to unstake. Your total stake is ${parseFloat(nominatedAmount) / (10 ** (networkJson.decimals as number))} ${networkJson.nativeToken as string}`}
               isDisabled={unbondAll}
               isError={false}
@@ -340,7 +350,7 @@ function UnbondingSubmitTransaction ({ className }: Props): React.ReactElement<P
           setShowConfirm={setShowAuth}
           setShowResult={setShowResult}
           setTxError={setTxError}
-          unbondAll={unbondAll}
+          unbondAll={_getUnbondAll()}
         />
       }
 

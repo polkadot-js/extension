@@ -84,6 +84,7 @@ function StakingRow ({ activeStake, address, chainName, className, delegations, 
         validatorList: validatorList
       })
         .then((resp) => {
+          console.log('got new resp', resp);
           setRedeemable(resp.redeemable);
           setNextWithdrawal(resp.nextWithdrawal);
           setNextWithdrawalAmount(resp.nextWithdrawalAmount);

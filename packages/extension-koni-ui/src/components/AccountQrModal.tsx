@@ -585,7 +585,7 @@ export default styled(AccountQrModal)(({ theme }: ThemeProps) => `
     }
 
     .header-icon {
-      color: ${theme.secondaryColor};
+      color: ${theme.primaryColor};
       margin-left: 4px;
     }
   }

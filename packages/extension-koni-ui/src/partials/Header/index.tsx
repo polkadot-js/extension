@@ -507,6 +507,16 @@ export default React.memo(styled(Header)(({ theme }: Props) => `
     margin-left: 1rem;
     cursor: pointer;
     height: 56px;
+    position: relative;
+    
+    &:after {
+      content: '';
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      top: 0;
+      left: 0;
+    }
   }
 
   .koni-subheader-btn {

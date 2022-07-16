@@ -93,12 +93,10 @@ function StakingMenu ({ bondedAmount, className, delegations, networkKey, nextWi
   }, [redeemable, showWithdrawalModal]);
 
   const handleClickClaimReward = useCallback(() => {
-    showClaimRewardModal();
-  }, [showClaimRewardModal]);
-
-  console.log('nextWithdrawal', nextWithdrawal);
-  console.log('nextWithdrawalAmount', nextWithdrawalAmount);
-  console.log('redeemable', redeemable);
+    if (parseFloat(bondedAmount) > 0) {
+      showClaimRewardModal();
+    }
+  }, [bondedAmount, showClaimRewardModal]);
 
   return (
     <div className={className}>

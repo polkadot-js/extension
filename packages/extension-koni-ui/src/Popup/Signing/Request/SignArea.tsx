@@ -113,7 +113,7 @@ function SignArea ({ buttonText, children, className, error, isExternal, isFirst
 
           <div className='sign-button-container'>
             <Button
-              className='sign-button'
+              className='sign-button __cancel'
               onClick={_onCancel}
             >
               <span>
@@ -122,7 +122,7 @@ function SignArea ({ buttonText, children, className, error, isExternal, isFirst
 
             </Button>
             <Button
-              className='sign-button'
+              className='sign-button __sign'
               isBusy={isBusy}
               isDisabled={(!!isLocked && !password) || !!error}
               onClick={_onSign}
@@ -131,6 +131,19 @@ function SignArea ({ buttonText, children, className, error, isExternal, isFirst
             </Button>
           </div>
         </>
+      )}
+      {isExternal && (
+        <div className='sign-button-container'>
+          <Button
+            className='sign-button __cancel'
+            onClick={_onCancel}
+          >
+            <span>
+              {t<string>('Cancel')}
+            </span>
+
+          </Button>
+        </div>
       )}
 
     </div>
@@ -143,7 +156,6 @@ export default styled(SignArea)(({ theme }: Props) => `
   bottom: 0;
   margin-left: -15px;
   margin-right: -15px;
-  margin-bottom: -15px;
   padding: 0 15px 15px;
   background-color: ${theme.background};
 
@@ -153,18 +165,18 @@ export default styled(SignArea)(({ theme }: Props) => `
 
   .sign-button {
     flex: 1;
-  }
-
-  .sign-button:first-child {
-    background-color: ${theme.buttonBackground1};
-    margin-right: 8px;
-
-    span {
-      color: ${theme.buttonTextColor2};
+    
+    &.__cancel {
+      background-color: ${theme.buttonBackground1};
+  
+      span {
+        color: ${theme.buttonTextColor2};
+      }
+    }
+    
+    &.__sign {
+     margin-left: 15px;
     }
   }
-
-  .sign-button:last-child {
-    margin-left: 8px;
-  }
+  
 `);

@@ -208,7 +208,7 @@ function AccountQrModal (props: Props): React.ReactElement<Props> {
               />
             </div>
             <Tooltip
-              text={'handleStatusText(apiStatus)'}
+              text={t('Select the account you would like to send from')}
               trigger={'header-icon'}
             />
           </div>
@@ -277,7 +277,7 @@ function AccountQrModal (props: Props): React.ReactElement<Props> {
               />
             </div>
             <Tooltip
-              text={'handleStatusText(apiStatus)'}
+              text={t('Select the network to obtain the sending address')}
               trigger={'header-icon'}
             />
           </div>
@@ -443,7 +443,6 @@ function AccountQrModal (props: Props): React.ReactElement<Props> {
 export default styled(AccountQrModal)(({ theme }: ThemeProps) => `
   .account-qr-modal {
     position: relative;
-    max-height: 500px;
     display: flex;
     flex-direction: column;
   }
@@ -617,6 +616,10 @@ export default styled(AccountQrModal)(({ theme }: ThemeProps) => `
     .select-modal {
       max-width: 390px !important;
       background-color: ${theme.popupBackground};
+
+      .account-qr-modal{
+        height: 500px;
+      }
     }
   }
 

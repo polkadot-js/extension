@@ -1,10 +1,11 @@
 // Copyright 2019-2022 @subwallet/extension-koni-base authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import {ApiPromise, WsProvider} from "@polkadot/api";
-import {getCurrentProvider} from "@subwallet/extension-koni-base/utils/utils";
-import {PREDEFINED_NETWORKS} from "@subwallet/extension-koni-base/api/predefinedNetworks";
-import {DOTSAMA_AUTO_CONNECT_MS} from "@subwallet/extension-koni-base/constants";
+import { PREDEFINED_NETWORKS } from '@subwallet/extension-koni-base/api/predefinedNetworks';
+import { DOTSAMA_AUTO_CONNECT_MS } from '@subwallet/extension-koni-base/constants';
+import { getCurrentProvider } from '@subwallet/extension-koni-base/utils/utils';
+
+import { ApiPromise, WsProvider } from '@polkadot/api';
 
 jest.setTimeout(50000);
 
@@ -32,7 +33,7 @@ describe('test DotSama APIs', () => {
           ]
         }
       }
-    }
+    };
 
     // Case ParaChain vs ParaChain
     const paymentInfo = await apiPromise.tx.xTokens.transfer(

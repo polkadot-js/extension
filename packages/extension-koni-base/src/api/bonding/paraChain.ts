@@ -1,7 +1,7 @@
 // Copyright 2019-2022 @subwallet/extension-koni authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { ApiProps, BasicTxInfo, ChainBondingBasics, NetworkJson, UnlockingStakeInfo, ValidatorInfo } from '@subwallet/extension-base/background/KoniTypes';
+import { ApiProps, BasicTxInfo, ChainBondingBasics, DelegationItem, NetworkJson, UnlockingStakeInfo, ValidatorInfo } from '@subwallet/extension-base/background/KoniTypes';
 import { BOND_LESS_ACTION, calculateChainStakedReturn, ERA_LENGTH_MAP, PARACHAIN_INFLATION_DISTRIBUTION, REVOKE_ACTION } from '@subwallet/extension-koni-base/api/bonding/utils';
 import { getFreeBalance } from '@subwallet/extension-koni-base/api/dotsama/balance';
 import { parseNumberToDisplay, parseRawNumber, reformatAddress } from '@subwallet/extension-koni-base/utils/utils';
@@ -322,38 +322,49 @@ export async function getParaUnbondingExtrinsic (dotSamaApi: ApiProps, amount: n
   }
 }
 
-export async function getParaUnlockingInfo (dotSamaApi: ApiProps, address: string, networkKey: string, collatorList: string[]) {
+export async function getParaUnlockingInfo (dotSamaApi: ApiProps, address: string, networkKey: string) {
   const apiPromise = await dotSamaApi.isReady;
   const allRequests: Record<string, Record<string, any>> = {};
+  const collatorList: string[] = [];
 
-  await Promise.all(collatorList.map(async (validator) => {
-    const scheduledRequests = (await apiPromise.api.query.parachainStaking.delegationScheduledRequests(validator)).toHuman() as Record<string, any>[];
+  const rawDelegatorState = (await apiPromise.api.query.parachainStaking.delegatorState(address)).toHuman() as Record<string, any> | null;
 
-    scheduledRequests.forEach((request) => {
-      if (reformatAddress(request.delegator as string, 0).toLowerCase() === reformatAddress(address, 0).toLowerCase()) { // need to reformat address
-        const redeemRound = parseRawNumber(request.whenExecutable as string);
-        let amount;
-        let action;
+  if (rawDelegatorState !== null) {
+    const _delegations = rawDelegatorState.delegations as Record<string, string>[];
 
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-        if (request.action.Revoke) {
-          action = REVOKE_ACTION;
+    for (const item of _delegations) {
+      collatorList.push(item.owner);
+    }
+
+    await Promise.all(collatorList.map(async (validator) => {
+      const scheduledRequests = (await apiPromise.api.query.parachainStaking.delegationScheduledRequests(validator)).toHuman() as Record<string, any>[];
+
+      scheduledRequests.forEach((request) => {
+        if (reformatAddress(request.delegator as string, 0).toLowerCase() === reformatAddress(address, 0).toLowerCase()) { // need to reformat address
+          const redeemRound = parseRawNumber(request.whenExecutable as string);
+          let amount;
+          let action;
+
           // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-          amount = parseRawNumber(request.action.Revoke as string);
-        } else {
-          action = BOND_LESS_ACTION;
-          // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-          amount = parseRawNumber(request.action.Decrease as string);
+          if (request.action.Revoke) {
+            action = REVOKE_ACTION;
+            // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+            amount = parseRawNumber(request.action.Revoke as string);
+          } else {
+            action = BOND_LESS_ACTION;
+            // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+            amount = parseRawNumber(request.action.Decrease as string);
+          }
+
+          allRequests[redeemRound.toString()] = {
+            action,
+            amount,
+            validator
+          };
         }
-
-        allRequests[redeemRound.toString()] = {
-          action,
-          amount,
-          validator
-        };
-      }
-    });
-  }));
+      });
+    }));
+  }
 
   let nextWithdrawalAmount = 0;
   let nextWithdrawalAction = '';
@@ -387,8 +398,8 @@ export async function getParaUnlockingInfo (dotSamaApi: ApiProps, address: strin
   };
 }
 
-export async function handleParaUnlockingInfo (dotSamaApi: ApiProps, networkJson: NetworkJson, networkKey: string, address: string, collatorList: string[]) {
-  const { nextWithdrawal, nextWithdrawalAction, nextWithdrawalAmount, redeemable, validatorAddress } = await getParaUnlockingInfo(dotSamaApi, address, networkKey, collatorList);
+export async function handleParaUnlockingInfo (dotSamaApi: ApiProps, networkJson: NetworkJson, networkKey: string, address: string) {
+  const { nextWithdrawal, nextWithdrawalAction, nextWithdrawalAmount, redeemable, validatorAddress } = await getParaUnlockingInfo(dotSamaApi, address, networkKey);
 
   const parsedRedeemable = redeemable / (10 ** (networkJson.decimals as number));
   const parsedNextWithdrawalAmount = nextWithdrawalAmount / (10 ** (networkJson.decimals as number));
@@ -433,4 +444,94 @@ export async function getParaWithdrawalExtrinsic (dotSamaApi: ApiProps, address:
   console.log(`executing ${action}`, address, collatorAddress);
 
   return apiPromise.api.tx.parachainStaking.executeDelegationRequest(address, collatorAddress);
+}
+
+export async function getParaDelegationInfo (dotSamaApi: ApiProps, address: string) {
+  const apiPromise = await dotSamaApi.isReady;
+  const delegationsList: DelegationItem[] = [];
+
+  const rawDelegatorState = (await apiPromise.api.query.parachainStaking.delegatorState(address)).toHuman() as Record<string, any> | null;
+
+  if (rawDelegatorState !== null) {
+    const delegationMap: Record<string, string> = {};
+    const _delegations = rawDelegatorState.delegations as Record<string, string>[];
+
+    for (const item of _delegations) {
+      if (item.owner in delegationMap) {
+        delegationMap[item.owner] = (parseRawNumber(item.amount) + parseRawNumber(delegationMap[item.owner])).toString();
+      } else {
+        delegationMap[item.owner] = parseRawNumber(item.amount).toString();
+      }
+    }
+
+    await Promise.all(Object.entries(delegationMap).map(async ([owner, amount]) => {
+      const [_info, _identity, _scheduledRequests] = await Promise.all([
+        apiPromise.api.query.parachainStaking.candidateInfo(owner),
+        apiPromise.api.query.identity.identityOf(owner),
+        apiPromise.api.query.parachainStaking.delegationScheduledRequests(owner)
+      ]);
+      const rawScheduledRequests = _scheduledRequests.toHuman() as Record<string, any>[];
+      const rawInfo = _info.toHuman() as Record<string, any>;
+      const rawIdentity = _identity.toHuman() as Record<string, any> | null;
+      let identity;
+
+      const minDelegation = (rawInfo?.lowestTopDelegationAmount as string).replaceAll(',', '');
+
+      // handle identity
+      if (rawIdentity !== null) {
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+        const displayName = rawIdentity?.info?.display?.Raw as string;
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+        const legal = rawIdentity?.info?.legal?.Raw as string;
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+        const web = rawIdentity?.info?.web?.Raw as string;
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+        const riot = rawIdentity?.info?.riot?.Raw as string;
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+        const email = rawIdentity?.info?.email?.Raw as string;
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+        const twitter = rawIdentity?.info?.twitter?.Raw as string;
+
+        if (displayName && !displayName.startsWith('0x')) {
+          // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+          identity = displayName;
+        } else if (legal && !legal.startsWith('0x')) {
+          identity = legal;
+        } else {
+          identity = twitter || web || email || riot;
+        }
+      }
+
+      // check scheduled request
+      let unbondingAmount = 0;
+      let hasScheduledRequest = false;
+
+      for (const scheduledRequest of rawScheduledRequests) {
+        const delegator = scheduledRequest.delegator as string;
+        const formattedDelegator = reformatAddress(delegator, 0);
+        const formattedAddress = reformatAddress(address, 0);
+
+        if (formattedAddress.toLowerCase() === formattedDelegator.toLowerCase()) { // returned data might not have the same address format
+          hasScheduledRequest = true;
+          const action = scheduledRequest.action as Record<string, string>;
+
+          Object.values(action).forEach((value) => {
+            unbondingAmount += parseRawNumber(value);
+          });
+        }
+      }
+
+      const activeStake = parseRawNumber(amount) - unbondingAmount;
+
+      delegationsList.push({
+        owner,
+        amount: activeStake.toString(),
+        identity,
+        minBond: minDelegation,
+        hasScheduledRequest
+      });
+    }));
+  }
+
+  return delegationsList;
 }

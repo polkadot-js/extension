@@ -89,9 +89,9 @@ export async function getUnbondingExtrinsic (address: string, amount: number, ne
   return getRelayUnbondingExtrinsic(dotSamaApi, amount, networkJson);
 }
 
-export async function getUnlockingInfo (dotSamaApi: ApiProps, networkJson: NetworkJson, networkKey: string, address: string, validatorList?: string[]) {
+export async function getUnlockingInfo (dotSamaApi: ApiProps, networkJson: NetworkJson, networkKey: string, address: string) {
   if (CHAIN_TYPES.para.includes(networkKey)) {
-    return handleParaUnlockingInfo(dotSamaApi, networkJson, networkKey, address, validatorList as string[]);
+    return handleParaUnlockingInfo(dotSamaApi, networkJson, networkKey, address);
   } else if (CHAIN_TYPES.astar.includes(networkKey)) {
     return handleAstarUnlockingInfo(dotSamaApi, networkJson, networkKey, address);
   }

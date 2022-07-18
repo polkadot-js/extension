@@ -1,6 +1,7 @@
 // Copyright 2019-2022 @subwallet/extension-koni authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
+import { DelegationItem } from '@subwallet/extension-base/background/KoniTypes';
 import { ActionContext, HorizontalLabelToggle } from '@subwallet/extension-koni-ui/components';
 import Button from '@subwallet/extension-koni-ui/components/Button';
 import InputAddress from '@subwallet/extension-koni-ui/components/InputAddress';
@@ -9,7 +10,7 @@ import Spinner from '@subwallet/extension-koni-ui/components/Spinner';
 import useGetNetworkJson from '@subwallet/extension-koni-ui/hooks/screen/home/useGetNetworkJson';
 import useToast from '@subwallet/extension-koni-ui/hooks/useToast';
 import useTranslation from '@subwallet/extension-koni-ui/hooks/useTranslation';
-import { getUnbondingTxInfo } from '@subwallet/extension-koni-ui/messaging';
+import { getStakeDelegationInfo, getUnbondingTxInfo } from '@subwallet/extension-koni-ui/messaging';
 import Header from '@subwallet/extension-koni-ui/partials/Header';
 import UnbondingAuthTransaction from '@subwallet/extension-koni-ui/Popup/Bonding/components/UnbondingAuthTransaction';
 import UnbondingResult from '@subwallet/extension-koni-ui/Popup/Bonding/components/UnbondingResult';
@@ -44,6 +45,7 @@ function UnbondingSubmitTransaction ({ className }: Props): React.ReactElement<P
   const [showResult, setShowResult] = useState(false);
   const [isClickNext, setIsClickNext] = useState(false);
   const [unbondAll, setUnbondAll] = useState(false);
+  const [delegations, setDelegations] = useState<DelegationItem[] | undefined>(undefined);
 
   const [fee, setFee] = useState('');
   const [balanceError, setBalanceError] = useState(false);
@@ -52,11 +54,24 @@ function UnbondingSubmitTransaction ({ className }: Props): React.ReactElement<P
   const [isTxSuccess, setIsTxSuccess] = useState(false);
   const [txError, setTxError] = useState('');
 
-  const [selectedValidator, setSelectedValidator] = useState<string>(unbondingParams.delegations ? unbondingParams.delegations[0].owner : '');
-  const [nominatedAmount, setNominatedAmount] = useState<string>(unbondingParams.delegations ? unbondingParams.delegations[0].amount : '0');
-  const [minBond, setMinBond] = useState<string>(unbondingParams.delegations ? unbondingParams.delegations[0].minBond : '0');
+  useEffect(() => {
+    getStakeDelegationInfo({
+      address: account?.address as string,
+      networkKey: selectedNetwork
+    }).then((result) => {
+      setDelegations(result);
+    }).catch(console.error);
 
-  console.log(unbondingParams.delegations);
+    return () => {
+      setDelegations(undefined);
+    };
+  }, [account?.address, selectedNetwork]);
+
+  const [selectedValidator, setSelectedValidator] = useState<string>(delegations ? delegations[0].owner : '');
+  const [nominatedAmount, setNominatedAmount] = useState<string>(delegations ? delegations[0].amount : '0');
+  const [minBond, setMinBond] = useState<string>(delegations ? delegations[0].minBond : '0');
+
+  console.log(delegations);
 
   useEffect(() => {
     if (!networkJson.active) {
@@ -70,7 +85,7 @@ function UnbondingSubmitTransaction ({ className }: Props): React.ReactElement<P
 
   useEffect(() => {
     if (!isClickNext) {
-      if (unbondingParams.delegations) {
+      if (delegations) {
         const _nominatedAmount = parseFloat(nominatedAmount) / (10 ** (networkJson.decimals as number));
         const _minBond = parseFloat(minBond) / (10 ** (networkJson.decimals as number));
 
@@ -99,7 +114,7 @@ function UnbondingSubmitTransaction ({ className }: Props): React.ReactElement<P
         }
       }
     }
-  }, [amount, bondedAmount, isClickNext, minBond, networkJson.decimals, networkJson.nativeToken, nominatedAmount, show, showAuth, showResult, unbondingParams.delegations]);
+  }, [amount, bondedAmount, isClickNext, minBond, networkJson.decimals, networkJson.nativeToken, nominatedAmount, show, showAuth, showResult, delegations]);
 
   const getDefaultValue = useCallback(() => {
     if (amount === -1) {
@@ -185,8 +200,8 @@ function UnbondingSubmitTransaction ({ className }: Props): React.ReactElement<P
   const handleSelectValidator = useCallback((val: string) => {
     setSelectedValidator(val);
 
-    if (unbondingParams.delegations) {
-      for (const item of unbondingParams.delegations) {
+    if (delegations) {
+      for (const item of delegations) {
         if (item.owner === val) {
           setNominatedAmount(item.amount);
           setMinBond(item.minBond);
@@ -203,13 +218,13 @@ function UnbondingSubmitTransaction ({ className }: Props): React.ReactElement<P
         }
       }
     }
-  }, [networkJson.decimals, unbondAll, unbondingParams.delegations]);
+  }, [networkJson.decimals, unbondAll, delegations]);
 
   const toggleUnbondAll = useCallback((value: boolean) => {
     setUnbondAll(value);
 
     if (value) {
-      if (unbondingParams.delegations) {
+      if (delegations) {
         const _nominatedAmount = parseFloat(nominatedAmount) / (10 ** (networkJson.decimals as number));
 
         setAmount(_nominatedAmount);
@@ -219,7 +234,7 @@ function UnbondingSubmitTransaction ({ className }: Props): React.ReactElement<P
     } else {
       setAmount(0);
     }
-  }, [bondedAmount, networkJson.decimals, nominatedAmount, unbondingParams.delegations]);
+  }, [bondedAmount, networkJson.decimals, nominatedAmount, delegations]);
 
   const getDropdownTitle = useCallback(() => {
     if (CHAIN_TYPE_MAP.astar.includes(unbondingParams.selectedNetwork as string)) {
@@ -257,15 +272,15 @@ function UnbondingSubmitTransaction ({ className }: Props): React.ReactElement<P
         />
 
         {
-          unbondingParams.delegations && <ValidatorsDropdown
-            delegations={unbondingParams.delegations}
+          delegations && <ValidatorsDropdown
+            delegations={delegations}
             handleSelectValidator={handleSelectValidator}
             label={getDropdownTitle()}
           />
         }
 
         {
-          unbondingParams.delegations && <div className={'unbonding-input'}>
+          delegations && <div className={'unbonding-input'}>
             <InputBalance
               autoFocus
               className={'submit-bond-amount-input'}
@@ -285,7 +300,7 @@ function UnbondingSubmitTransaction ({ className }: Props): React.ReactElement<P
         }
 
         {
-          !unbondingParams.delegations && <div className={'unbonding-input'}>
+          !delegations && <div className={'unbonding-input'}>
             <InputBalance
               autoFocus
               className={'submit-bond-amount-input'}

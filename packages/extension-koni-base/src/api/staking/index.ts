@@ -4,7 +4,7 @@
 import { APIItemState, ApiProps, DelegationItem, NetworkJson, StakingItem } from '@subwallet/extension-base/background/KoniTypes';
 import { PREDEFINED_NETWORKS } from '@subwallet/extension-koni-base/api/predefinedNetworks';
 import { IGNORE_GET_SUBSTRATE_FEATURES_LIST } from '@subwallet/extension-koni-base/constants';
-import {categoryAddresses, parseRawNumber, reformatAddress, toUnit} from '@subwallet/extension-koni-base/utils/utils';
+import { categoryAddresses, parseRawNumber, reformatAddress, toUnit } from '@subwallet/extension-koni-base/utils/utils';
 import fetch from 'cross-fetch';
 
 interface LedgerData {
@@ -151,7 +151,7 @@ function getParaStakingOnChain (parentApi: ApiProps, useAddresses: string[], net
 
         for (const scheduledRequest of rawScheduledRequests) {
           const delegator = scheduledRequest.delegator as string;
-          const formattedDelegator = reformatAddress(delegator, 0)
+          const formattedDelegator = reformatAddress(delegator, 0);
 
           if (formattedAddresses.includes(formattedDelegator)) { // returned data might not have the same address format
             const action = scheduledRequest.action as Record<string, string>;
@@ -168,7 +168,8 @@ function getParaStakingOnChain (parentApi: ApiProps, useAddresses: string[], net
           owner,
           amount: activeStake.toString(),
           identity,
-          minBond: minDelegation
+          minBond: minDelegation,
+          hasScheduledRequest: false
         });
       }));
 
@@ -431,7 +432,8 @@ function getAstarStakingOnChain (parentApi: ApiProps, useAddresses: string[], ne
           owner: dappAddress,
           amount: totalStake.toString(),
           minBond: minStake.toString(),
-          identity: dappMap[dappAddress]
+          identity: dappMap[dappAddress],
+          hasScheduledRequest: false
         });
       }
 

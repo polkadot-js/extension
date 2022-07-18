@@ -1,7 +1,7 @@
 // Copyright 2019-2022 @subwallet/extension-koni authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { DelegationItem, StakingRewardItem } from '@subwallet/extension-base/background/KoniTypes';
+import { StakingRewardItem } from '@subwallet/extension-base/background/KoniTypes';
 import cloneIconLight from '@subwallet/extension-koni-ui/assets/clone--color-2.svg';
 import cloneIconDark from '@subwallet/extension-koni-ui/assets/clone--color-3.svg';
 import useToast from '@subwallet/extension-koni-ui/hooks/useToast';
@@ -34,10 +34,9 @@ interface Props extends ThemeProps {
   isExternalAccount: boolean;
   isHardwareAccount: boolean;
   address: string;
-  delegations: DelegationItem[] | undefined;
 }
 
-function StakingRow ({ activeStake, address, chainName, className, delegations, index, isAccountAll, isExternalAccount, isHardwareAccount, logo, networkKey, price, reward, totalStake, unbondingStake, unit }: Props): React.ReactElement<Props> {
+function StakingRow ({ activeStake, address, chainName, className, index, isAccountAll, isExternalAccount, isHardwareAccount, logo, networkKey, price, reward, totalStake, unbondingStake, unit }: Props): React.ReactElement<Props> {
   const [showReward, setShowReward] = useState(false);
   const [showStakingMenu, setShowStakingMenu] = useState(false);
   const [redeemable, setRedeemable] = useState(0);
@@ -74,14 +73,9 @@ function StakingRow ({ activeStake, address, chainName, className, delegations, 
 
   useEffect(() => {
     if (parseFloat(unbondingStake as string) > 0) {
-      const validatorList = delegations?.map((delegation) => {
-        return delegation.owner;
-      });
-
       getUnlockingStakeInfo({
         networkKey,
-        address,
-        validatorList: validatorList
+        address
       })
         .then((resp) => {
           console.log('got new resp', resp);
@@ -101,7 +95,7 @@ function StakingRow ({ activeStake, address, chainName, className, delegations, 
       setTargetValidator('');
       setNextWithdrawalAction(undefined);
     };
-  }, [address, delegations, networkKey, unbondingStake]);
+  }, [address, networkKey, unbondingStake]);
 
   const editBalance = (balance: string) => {
     if (parseFloat(balance) === 0) {
@@ -177,7 +171,6 @@ function StakingRow ({ activeStake, address, chainName, className, delegations, 
                 {
                   !isAccountAll && !isHardwareAccount && !isExternalAccount && <StakingMenu
                     bondedAmount={activeStake as string}
-                    delegations={delegations}
                     networkKey={networkKey}
                     nextWithdrawal={nextWithdrawal}
                     nextWithdrawalAmount={nextWithdrawalAmount}
@@ -311,7 +304,6 @@ function StakingRow ({ activeStake, address, chainName, className, delegations, 
       {
         showClaimRewardModal && <StakeAuthClaimReward
           address={address}
-          delegation={delegations}
           hideModal={handleHideClaimRewardModal}
           networkKey={networkKey}
         />

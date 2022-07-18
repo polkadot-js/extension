@@ -963,7 +963,8 @@ export interface DelegationItem {
   owner: string,
   amount: string, // raw amount string
   identity?: string,
-  minBond: string
+  minBond: string,
+  hasScheduledRequest: boolean
 }
 
 export interface UnlockingStakeInfo {
@@ -989,6 +990,11 @@ export interface StakeClaimRewardParams {
   password?: string
 }
 
+export interface StakeDelegationRequest {
+  address: string,
+  networkKey: string
+}
+
 export interface SingleModeJson {
   networkKeys: string[],
   theme: ThemeTypes,
@@ -996,6 +1002,7 @@ export interface SingleModeJson {
 }
 
 export interface KoniRequestSignatures {
+  'pri(staking.delegationInfo)': [StakeDelegationRequest, DelegationItem[]];
   'pri(staking.submitClaimReward)': [StakeClaimRewardParams, BasicTxResponse, BasicTxResponse];
   'pri(staking.claimRewardTxInfo)': [StakeClaimRewardParams, BasicTxInfo];
   'pri(unbonding.submitWithdrawal)': [StakeWithdrawalParams, BasicTxResponse, BasicTxResponse];

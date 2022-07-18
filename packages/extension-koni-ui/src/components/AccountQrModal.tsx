@@ -115,8 +115,9 @@ function AccountQrModal (props: Props): React.ReactElement<Props> {
       const _network: NetworkSelectOption | null = (network !== undefined && network.networkKey !== ALL_NETWORK_KEY) ? network : null;
       const typeCondition = _network ? (_network.isEthereum ? account.type === 'ethereum' : account.type !== 'ethereum') : true;
       const filterCondition = filter ? account.name?.toLowerCase().includes(filter.toLowerCase()) : true;
+
       return filterCondition && typeCondition;
-    })
+    });
   }, [filter, accounts, network]);
 
   const filteredNetwork = useMemo(() => {

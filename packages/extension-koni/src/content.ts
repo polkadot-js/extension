@@ -3,16 +3,42 @@
 
 import type { Message } from '@subwallet/extension-base/types';
 
+import { TransportRequestMessage } from '@subwallet/extension-base/background/types';
 import { MESSAGE_ORIGIN_CONTENT, MESSAGE_ORIGIN_PAGE, PORT_CONTENT } from '@subwallet/extension-base/defaults';
-import { redirectIfPhishing } from '@subwallet/extension-base/page';
+import { getId } from '@subwallet/extension-base/utils/getId';
 import { chrome } from '@subwallet/extension-inject/chrome';
 
 // connect to the extension
 const port = chrome.runtime.connect({ name: PORT_CONTENT });
 
+// redirect users if this page is considered as phishing, otherwise return false
+const handleRedirectPhishing: { id: string, resolve?: (value: (boolean | PromiseLike<boolean>)) => void, reject?: (e: Error) => void } = {
+  id: 'redirect-phishing-' + getId()
+};
+
+const redirectIfPhishingProm = new Promise<boolean>((resolve, reject) => {
+  handleRedirectPhishing.resolve = resolve;
+  handleRedirectPhishing.reject = reject;
+
+  const transportRequestMessage: TransportRequestMessage<'pub(phishing.redirectIfDenied)'> = {
+    id: handleRedirectPhishing.id,
+    message: 'pub(phishing.redirectIfDenied)',
+    origin: MESSAGE_ORIGIN_PAGE,
+    request: null
+  };
+
+  port.postMessage(transportRequestMessage);
+});
+
 // send any messages from the extension back to the page
-port.onMessage.addListener((data): void => {
-  window.postMessage({ ...data, origin: MESSAGE_ORIGIN_CONTENT }, '*');
+port.onMessage.addListener((data: {id: string, response: any}): void => {
+  const { id, resolve } = handleRedirectPhishing;
+
+  if (data?.id === id) {
+    resolve && resolve(Boolean(data.response));
+  } else {
+    window.postMessage({ ...data, origin: MESSAGE_ORIGIN_CONTENT }, '*');
+  }
 });
 
 // all messages from the page, pass them to the extension
@@ -39,7 +65,7 @@ script.onload = (): void => {
 
 (document.head || document.documentElement).appendChild(script);
 
-redirectIfPhishing().then((gotRedirected) => {
+redirectIfPhishingProm.then((gotRedirected) => {
   if (!gotRedirected) {
     console.log('Check phishing by URL: Passed.');
   }

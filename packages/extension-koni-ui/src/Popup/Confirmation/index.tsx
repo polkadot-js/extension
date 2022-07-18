@@ -3,7 +3,7 @@
 
 import { ConfirmationDefinitions, ConfirmationType, NetworkJson } from '@subwallet/extension-base/background/KoniTypes';
 import { AccountJson } from '@subwallet/extension-base/background/types';
-import { AccountContext, ActionContext, Button, ButtonArea, ConfirmationsQueueContext, InputWithLabel } from '@subwallet/extension-koni-ui/components';
+import { AccountContext, ActionContext, Button, ButtonArea, ConfirmationsQueueContext, InputWithLabel, Warning } from '@subwallet/extension-koni-ui/components';
 import useTranslation from '@subwallet/extension-koni-ui/hooks/useTranslation';
 import { completeConfirmation } from '@subwallet/extension-koni-ui/messaging';
 import { Header } from '@subwallet/extension-koni-ui/partials';
@@ -199,7 +199,14 @@ function Confirmation ({ className, match: { params: { address } } }: Props): Re
           placeholder={t<string>('Password')}
           type='password'
         />)}
-        {error && (<div className='confirmation-error'>{error}</div>)}
+        {error && (
+          <Warning
+            className='confirmation-error'
+            isDanger={true}
+          >
+            {error}
+          </Warning>
+        )}
         <ButtonArea className='button-area'>
           <Button
             className='cancel-button'
@@ -221,7 +228,7 @@ export default withRouter(styled(Confirmation)(({ theme }: Props) => `
   display: flex;
   flex-direction: column;
   height: 100%;
-  
+
   .confirmation-wrapper {
     overflow-y: auto;
     flex: 1;
@@ -229,37 +236,37 @@ export default withRouter(styled(Confirmation)(({ theme }: Props) => `
     display: flex;
     flex-direction: column;
   }
-  
+
   .confirmation-info {
     padding: 15px;
     flex: 1;
   }
-  
+
   .cancel-button {
     margin-right: 8px;
     background-color: ${theme.buttonBackground1};
     color: ${theme.buttonTextColor2};
   }
-  
+
   .confirm-button {
     margin-left: 8px;
   }
-  
+
   .action-area {
     padding: 15px;
-    
+
     .password{
       margin-top: 0;
       padding-top: 0;
-      
+
       .label-wrapper {
         margin-top: 0;
         padding-top: 0;
         display: none;
-      }    
+      }
     }
   }
-  
+
   .confirmation-error {
     margin-top: 10px;
     color: red;

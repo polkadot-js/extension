@@ -19,7 +19,7 @@ import { DEFAULT_EVM_TOKENS } from '@subwallet/extension-koni-base/api/web3/defa
 import { initWeb3Api } from '@subwallet/extension-koni-base/api/web3/web3';
 import { EvmRpcError } from '@subwallet/extension-koni-base/background/errors/EvmRpcError';
 import { state } from '@subwallet/extension-koni-base/background/handlers/index';
-import { ALL_ACCOUNT_KEY, ALL_GENESIS_HASH, DEFAULT_THEME } from '@subwallet/extension-koni-base/constants';
+import { ALL_ACCOUNT_KEY, ALL_GENESIS_HASH } from '@subwallet/extension-koni-base/constants';
 import { CurrentAccountStore, NetworkMapStore, PriceStore } from '@subwallet/extension-koni-base/stores';
 import AccountRefStore from '@subwallet/extension-koni-base/stores/AccountRef';
 import AuthorizeStore from '@subwallet/extension-koni-base/stores/Authorize';
@@ -858,17 +858,17 @@ export default class KoniState extends State {
 
     this.currentAccountStore.set('CurrentAccountInfo', data, () => {
       // Trigger single mode
-      if (currentGenesisHash) {
-        const singleMode = this.findSingleMode(currentGenesisHash);
-
-        if (singleMode) {
-          this.setTheme(singleMode.theme);
-        } else {
-          this.setTheme(DEFAULT_THEME);
-        }
-      } else {
-        this.setTheme(DEFAULT_THEME);
-      }
+      // if (currentGenesisHash) {
+      //   const singleMode = this.findSingleMode(currentGenesisHash);
+      //
+      //   if (singleMode) {
+      //     this.setTheme(singleMode.theme);
+      //   } else {
+      //     this.setTheme(DEFAULT_THEME);
+      //   }
+      // } else {
+      //   this.setTheme(DEFAULT_THEME);
+      // }
 
       this.updateServiceInfo();
       callback && callback();
@@ -2082,28 +2082,28 @@ export default class KoniState extends State {
   }
 
   public onInstall () {
-    const singleModes = Object.values(PREDEFINED_SINGLE_MODES);
-
-    const setUpSingleMode = ({ networkKeys }: SingleModeJson) => {
-      const { genesisHash } = this.getNetworkMapByKey(networkKeys[0]);
-
-      this.setCurrentAccount({ address: ALL_ACCOUNT_KEY, currentGenesisHash: genesisHash });
-    };
-
-    chrome.tabs.query({}, function (tabs) {
-      const openingUrls = tabs.map((t) => t.url);
-
-      const singleMode = singleModes.find(({ autoTriggerDomain }) => {
-        const urlRegex = new RegExp(autoTriggerDomain);
-
-        return Boolean(openingUrls.find((url) => {
-          return url && urlRegex.test(url);
-        }));
-      });
-
-      if (singleMode) {
-        setUpSingleMode(singleMode);
-      }
-    });
+    // const singleModes = Object.values(PREDEFINED_SINGLE_MODES);
+    //
+    // const setUpSingleMode = ({ networkKeys }: SingleModeJson) => {
+    //   const { genesisHash } = this.getNetworkMapByKey(networkKeys[0]);
+    //
+    //   this.setCurrentAccount({ address: ALL_ACCOUNT_KEY, currentGenesisHash: genesisHash });
+    // };
+    //
+    // chrome.tabs.query({}, function (tabs) {
+    //   const openingUrls = tabs.map((t) => t.url);
+    //
+    //   const singleMode = singleModes.find(({ autoTriggerDomain }) => {
+    //     const urlRegex = new RegExp(autoTriggerDomain);
+    //
+    //     return Boolean(openingUrls.find((url) => {
+    //       return url && urlRegex.test(url);
+    //     }));
+    //   });
+    //
+    //   if (singleMode) {
+    //     setUpSingleMode(singleMode);
+    //   }
+    // });
   }
 }

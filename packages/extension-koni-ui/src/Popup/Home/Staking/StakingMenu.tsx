@@ -56,8 +56,6 @@ function StakingMenu ({ bondedAmount, className, networkKey, nextWithdrawal, nex
     showMenu && toggleMenu();
   });
 
-  console.log(nextWithdrawalAmount);
-
   const handleClickStakeMore = useCallback(() => {
     store.dispatch({ type: 'bondingParams/update', payload: { selectedAccount: account?.address as string, selectedNetwork: networkKey, selectedValidator: null, maxNominatorPerValidator: null } as BondingParams });
     navigate('/account/select-bonding-validator');

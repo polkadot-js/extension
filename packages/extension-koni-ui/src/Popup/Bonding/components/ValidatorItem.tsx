@@ -56,6 +56,12 @@ function ValidatorItem ({ bondedValidators, className, isBondedBefore, maxNomina
   }, [networkJson.nativeToken, validatorInfo.minBond]);
 
   const handleOnSelect = useCallback(() => {
+    if (validatorInfo.hasScheduledRequest) {
+      show('Please withdraw the unstaking amount first');
+
+      return;
+    }
+
     if (!isSufficientFund) {
       show('Your free balance is not enough to stake');
 

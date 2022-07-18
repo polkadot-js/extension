@@ -842,7 +842,9 @@ export const PREDEFINED_NETWORKS: Record<string, NetworkJson> = {
     nativeToken: 'BNC',
     crowdloanUrl: 'https://bifrost.app/vcrowdloan',
     decimals: 12,
-    coinGeckoKey: 'bifrost-native-coin'
+    coinGeckoKey: 'bifrost-native-coin',
+    getStakingOnChain: true,
+    supportBonding: true
   },
   bifrost_dot: {
     key: 'bifrost_dot',
@@ -875,7 +877,9 @@ export const PREDEFINED_NETWORKS: Record<string, NetworkJson> = {
     currentProvider: 'Liebi',
     groups: ['TEST_NET'],
     nativeToken: 'BNC',
-    decimals: 12
+    decimals: 12,
+    getStakingOnChain: true,
+    supportBonding: true
   },
   kilt: {
     key: 'kilt',

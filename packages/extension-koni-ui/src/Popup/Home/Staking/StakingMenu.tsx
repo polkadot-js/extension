@@ -62,6 +62,8 @@ function StakingMenu ({ bondedAmount, className, networkKey, nextWithdrawal, nex
   }, [account?.address, navigate, networkKey]);
 
   const handleUnstake = useCallback(() => {
+    store.dispatch({ type: 'unbondingParams/update', payload: { selectedAccount: account?.address as string, selectedNetwork: networkKey, bondedAmount: parseFloat(bondedAmount) } as UnbondingParams });
+    navigate('/account/unbonding-auth');
     if (parseFloat(bondedAmount) > 0) {
       store.dispatch({ type: 'unbondingParams/update', payload: { selectedAccount: account?.address as string, selectedNetwork: networkKey, bondedAmount: parseFloat(bondedAmount) } as UnbondingParams });
       navigate('/account/unbonding-auth');

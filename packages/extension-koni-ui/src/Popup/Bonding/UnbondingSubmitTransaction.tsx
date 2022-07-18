@@ -88,6 +88,8 @@ function UnbondingSubmitTransaction ({ className }: Props): React.ReactElement<P
     }
   }, [navigate, networkJson.active]);
 
+  console.log(delegations);
+
   const goHome = useCallback(() => {
     navigate('/');
   }, [navigate]);

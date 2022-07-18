@@ -446,7 +446,11 @@ export async function getParaWithdrawalExtrinsic (dotSamaApi: ApiProps, address:
   return apiPromise.api.tx.parachainStaking.executeDelegationRequest(address, collatorAddress);
 }
 
-export async function getParaDelegationInfo (dotSamaApi: ApiProps, address: string) {
+export async function getParaDelegationInfo (dotSamaApi: ApiProps, address: string, networkKey: string) {
+  if (['bifrost', 'bifrost_testnet'].includes(networkKey)) {
+    return getBifrostDelegationInfo(dotSamaApi, address);
+  }
+
   const apiPromise = await dotSamaApi.isReady;
   const delegationsList: DelegationItem[] = [];
 
@@ -520,6 +524,94 @@ export async function getParaDelegationInfo (dotSamaApi: ApiProps, address: stri
           });
         }
       }
+
+      const activeStake = parseRawNumber(amount) - unbondingAmount;
+
+      delegationsList.push({
+        owner,
+        amount: activeStake.toString(),
+        identity,
+        minBond: minDelegation,
+        hasScheduledRequest
+      });
+    }));
+  }
+
+  return delegationsList;
+}
+
+async function getBifrostDelegationInfo (dotSamaApi: ApiProps, address: string) {
+  const apiPromise = await dotSamaApi.isReady;
+  const delegationsList: DelegationItem[] = [];
+
+  const rawDelegatorState = (await apiPromise.api.query.parachainStaking.delegatorState(address)).toHuman() as Record<string, any> | null;
+
+  if (rawDelegatorState !== null) {
+    const delegationMap: Record<string, string> = {};
+    const _delegations = rawDelegatorState.delegations as Record<string, string>[];
+
+    for (const item of _delegations) {
+      if (item.owner in delegationMap) {
+        delegationMap[item.owner] = (parseRawNumber(item.amount) + parseRawNumber(delegationMap[item.owner])).toString();
+      } else {
+        delegationMap[item.owner] = parseRawNumber(item.amount).toString();
+      }
+    }
+
+    await Promise.all(Object.entries(delegationMap).map(async ([owner, amount]) => {
+      const [_info, _identity] = await Promise.all([
+        apiPromise.api.query.parachainStaking.candidateInfo(owner),
+        apiPromise.api.query.identity.identityOf(owner)
+      ]);
+      const rawInfo = _info.toHuman() as Record<string, any>;
+      const rawIdentity = _identity.toHuman() as Record<string, any> | null;
+      let identity;
+
+      const minDelegation = (rawInfo?.lowestTopDelegationAmount as string).replaceAll(',', '');
+
+      // handle identity
+      if (rawIdentity !== null) {
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+        const displayName = rawIdentity?.info?.display?.Raw as string;
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+        const legal = rawIdentity?.info?.legal?.Raw as string;
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+        const web = rawIdentity?.info?.web?.Raw as string;
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+        const riot = rawIdentity?.info?.riot?.Raw as string;
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+        const email = rawIdentity?.info?.email?.Raw as string;
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+        const twitter = rawIdentity?.info?.twitter?.Raw as string;
+
+        if (displayName && !displayName.startsWith('0x')) {
+          // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+          identity = displayName;
+        } else if (legal && !legal.startsWith('0x')) {
+          identity = legal;
+        } else {
+          identity = twitter || web || email || riot;
+        }
+      }
+
+      // check scheduled request
+      const unbondingAmount = 0;
+      const hasScheduledRequest = false;
+
+      // for (const scheduledRequest of rawScheduledRequests) {
+      //   const delegator = scheduledRequest.delegator as string;
+      //   const formattedDelegator = reformatAddress(delegator, 0);
+      //   const formattedAddress = reformatAddress(address, 0);
+      //
+      //   if (formattedAddress.toLowerCase() === formattedDelegator.toLowerCase()) { // returned data might not have the same address format
+      //     hasScheduledRequest = true;
+      //     const action = scheduledRequest.action as Record<string, string>;
+      //
+      //     Object.values(action).forEach((value) => {
+      //       unbondingAmount += parseRawNumber(value);
+      //     });
+      //   }
+      // }
 
       const activeStake = parseRawNumber(amount) - unbondingAmount;
 

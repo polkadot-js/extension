@@ -10,7 +10,7 @@ import Web3 from 'web3';
 
 const CHAIN_TYPES: Record<string, string[]> = {
   relay: ['polkadot', 'kusama', 'aleph', 'polkadex'],
-  para: ['moonbeam', 'moonriver', 'moonbase', 'turing', 'turingStaging'],
+  para: ['moonbeam', 'moonriver', 'moonbase', 'turing', 'turingStaging', 'bifrost', 'bifrost_testnet'],
   darwinia: ['darwinia', 'crab', 'pangolin'],
   astar: ['astar', 'shiden', 'shibuya']
 };
@@ -129,7 +129,7 @@ export async function getClaimRewardExtrinsic (dotSamaApi: ApiProps, networkKey:
 
 export async function getDelegationInfo (dotSamaApi: ApiProps, address: string, networkKey: string) {
   if (CHAIN_TYPES.para.includes(networkKey)) {
-    return getParaDelegationInfo(dotSamaApi, address);
+    return getParaDelegationInfo(dotSamaApi, address, networkKey);
   }
 
   return getAstarDelegationInfo(dotSamaApi, address, networkKey);

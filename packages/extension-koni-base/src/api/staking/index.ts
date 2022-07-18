@@ -28,7 +28,9 @@ export const DEFAULT_STAKING_NETWORKS = {
   turingStaging: PREDEFINED_NETWORKS.turingStaging,
   astar: PREDEFINED_NETWORKS.astar,
   shibuya: PREDEFINED_NETWORKS.shibuya,
-  shiden: PREDEFINED_NETWORKS.shiden
+  shiden: PREDEFINED_NETWORKS.shiden,
+  bifrost: PREDEFINED_NETWORKS.bifrost,
+  bifrost_testnet: PREDEFINED_NETWORKS.bifrost_testnet
   // acala: PREDEFINED_NETWORKS.acala,
 };
 
@@ -59,7 +61,7 @@ export async function stakingOnChainApi (addresses: string[], dotSamaAPIMap: Rec
       return getAstarStakingOnChain(parentApi, useAddresses, networks, chain, callback);
     } else if (['darwinia', 'crab', 'pangolin'].includes(chain)) {
       return getDarwiniaStakingOnChain(parentApi, useAddresses, networks, chain, callback);
-    } else if (['moonbeam', 'moonriver', 'moonbase', 'turing', 'turingStaging'].includes(chain)) {
+    } else if (['moonbeam', 'moonriver', 'moonbase', 'turing', 'turingStaging', 'bifrost', 'bifrost_testnet'].includes(chain)) {
       return getParaStakingOnChain(parentApi, useAddresses, networks, chain, callback);
     }
 
@@ -82,7 +84,8 @@ function getParaStakingOnChain (parentApi: ApiProps, useAddresses: string[], net
 
         if (data !== null) {
           let _totalBalance = data.total as string;
-          let _unlockingBalance = data.lessTotal as string;
+          // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+          let _unlockingBalance = data.lessTotal ? data.lessTotal as string : data.requests.lessTotal as string;
           const _delegations = data.delegations as Record<string, string>[];
 
           for (const item of _delegations) {

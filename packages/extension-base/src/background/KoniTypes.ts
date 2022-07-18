@@ -96,7 +96,6 @@ export interface StakingItem {
   unlockingBalance?: string
   nativeToken: string,
   unit?: string,
-  delegation?: DelegationItem[],
   state: APIItemState
 }
 

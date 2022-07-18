@@ -1,7 +1,7 @@
 // Copyright 2019-2022 @subwallet/extension-koni authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { ApiProps, BasicTxInfo, NetworkJson, UnlockingStakeInfo, ValidatorInfo } from '@subwallet/extension-base/background/KoniTypes';
+import { ApiProps, BasicTxInfo, DelegationItem, NetworkJson, UnlockingStakeInfo, ValidatorInfo } from '@subwallet/extension-base/background/KoniTypes';
 import { ERA_LENGTH_MAP } from '@subwallet/extension-koni-base/api/bonding/utils';
 import { getFreeBalance } from '@subwallet/extension-koni-base/api/dotsama/balance';
 import { isUrl, parseNumberToDisplay, parseRawNumber } from '@subwallet/extension-koni-base/utils/utils';
@@ -392,4 +392,75 @@ export async function getAstarClaimRewardExtrinsic (dotSamaApi: ApiProps, dappAd
   console.log('no of tx: ', transactions.length);
 
   return apiPromise.api.tx.utility.batch(transactions);
+}
+
+export async function getAstarDelegationInfo (dotSamaApi: ApiProps, address: string, networkKey: string) {
+  const allDappsReq = new Promise(function (resolve) {
+    fetch(`https://api.astar.network/api/v1/${networkKey}/dapps-staking/dapps`, {
+      method: 'GET'
+    }).then((resp) => {
+      resolve(resp.json());
+    }).catch(console.error);
+  });
+  const timeout = new Promise((resolve) => {
+    const id = setTimeout(() => {
+      clearTimeout(id);
+      resolve(null);
+    }, 2000);
+  });
+
+  const racePromise = Promise.race([
+    allDappsReq,
+    timeout
+  ]);
+
+  const [_stakedDapps, _allDapps] = await Promise.all([
+    dotSamaApi.api.query.dappsStaking.generalStakerInfo.entries(address),
+    racePromise
+  ]);
+
+  const rawMinStake = (dotSamaApi.api.consts.dappsStaking.minimumStakingAmount).toHuman() as string;
+  const minStake = parseRawNumber(rawMinStake);
+
+  let allDapps: Record<string, any>[] | null = null;
+
+  if (_allDapps !== null) {
+    allDapps = _allDapps as Record<string, any>[];
+  }
+
+  const dappMap: Record<string, string> = {};
+  const delegationsList: DelegationItem[] = [];
+
+  if (allDapps !== null) {
+    for (const dappInfo of allDapps) {
+      const dappAddress = dappInfo.address as string;
+
+      dappMap[dappAddress.toLowerCase()] = dappInfo.name as string;
+    }
+  }
+
+  for (const item of _stakedDapps) {
+    const data = item[0].toHuman() as any[];
+    const stakedDapp = data[1] as Record<string, string>;
+    const stakeData = item[1].toHuman() as Record<string, Record<string, string>[]>;
+    const stakeList = stakeData.stakes;
+    const dappAddress = stakedDapp.Evm.toLowerCase();
+    let totalStake = 0;
+
+    if (stakeList.length > 0) {
+      const latestStake = stakeList.slice(-1)[0].staked.toString();
+
+      totalStake = parseRawNumber(latestStake);
+    }
+
+    delegationsList.push({
+      owner: dappAddress,
+      amount: totalStake.toString(),
+      minBond: minStake.toString(),
+      identity: dappMap[dappAddress],
+      hasScheduledRequest: false
+    });
+  }
+
+  return delegationsList;
 }

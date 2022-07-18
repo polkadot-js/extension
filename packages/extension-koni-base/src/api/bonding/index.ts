@@ -2,9 +2,9 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { ApiProps, NetworkJson, ValidatorInfo } from '@subwallet/extension-base/background/KoniTypes';
-import { getAstarBondingBasics, getAstarBondingExtrinsic, getAstarClaimRewardExtrinsic, getAstarDappsInfo, getAstarUnbondingExtrinsic, getAstarWithdrawalExtrinsic, handleAstarBondingTxInfo, handleAstarClaimRewardTxInfo, handleAstarUnbondingTxInfo, handleAstarUnlockingInfo, handleAstarWithdrawalTxInfo } from '@subwallet/extension-koni-base/api/bonding/astar';
+import { getAstarBondingBasics, getAstarBondingExtrinsic, getAstarClaimRewardExtrinsic, getAstarDappsInfo, getAstarDelegationInfo, getAstarUnbondingExtrinsic, getAstarWithdrawalExtrinsic, handleAstarBondingTxInfo, handleAstarClaimRewardTxInfo, handleAstarUnbondingTxInfo, handleAstarUnlockingInfo, handleAstarWithdrawalTxInfo } from '@subwallet/extension-koni-base/api/bonding/astar';
 import { getDarwiniaBondingExtrinsic, getDarwiniaValidatorsInfo, handleDarwiniaBondingTxInfo } from '@subwallet/extension-koni-base/api/bonding/darwinia';
-import { getParaBondingBasics, getParaBondingExtrinsic, getParaCollatorsInfo, getParaUnbondingExtrinsic, getParaWithdrawalExtrinsic, handleParaBondingTxInfo, handleParaUnbondingTxInfo, handleParaUnlockingInfo, handleParaWithdrawalTxInfo } from '@subwallet/extension-koni-base/api/bonding/paraChain';
+import { getParaBondingBasics, getParaBondingExtrinsic, getParaCollatorsInfo, getParaDelegationInfo, getParaUnbondingExtrinsic, getParaWithdrawalExtrinsic, handleParaBondingTxInfo, handleParaUnbondingTxInfo, handleParaUnlockingInfo, handleParaWithdrawalTxInfo } from '@subwallet/extension-koni-base/api/bonding/paraChain';
 import { getRelayBondingExtrinsic, getRelayChainBondingBasics, getRelayUnbondingExtrinsic, getRelayValidatorsInfo, getRelayWithdrawalExtrinsic, getTargetValidators, handleRelayBondingTxInfo, handleRelayUnbondingTxInfo, handleRelayUnlockingInfo, handleRelayWithdrawalTxInfo } from '@subwallet/extension-koni-base/api/bonding/relayChain';
 import Web3 from 'web3';
 
@@ -125,4 +125,12 @@ export async function getClaimRewardTxInfo (address: string, networkKey: string,
 
 export async function getClaimRewardExtrinsic (dotSamaApi: ApiProps, networkKey: string, address: string, validatorAddress?: string) {
   return getAstarClaimRewardExtrinsic(dotSamaApi, validatorAddress as string, address);
+}
+
+export async function getDelegationInfo (dotSamaApi: ApiProps, address: string, networkKey: string) {
+  if (CHAIN_TYPES.para.includes(networkKey)) {
+    return getParaDelegationInfo(dotSamaApi, address);
+  }
+
+  return getAstarDelegationInfo(dotSamaApi, address, networkKey);
 }

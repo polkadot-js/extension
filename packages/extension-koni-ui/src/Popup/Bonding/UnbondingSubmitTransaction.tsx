@@ -53,6 +53,12 @@ function UnbondingSubmitTransaction ({ className }: Props): React.ReactElement<P
   const [extrinsicHash, setExtrinsicHash] = useState('');
   const [isTxSuccess, setIsTxSuccess] = useState(false);
   const [txError, setTxError] = useState('');
+  const [isDataReady, setIsDataReady] = useState(false);
+  const [isValidValidator, setIsValidValidator] = useState(true);
+
+  const [selectedValidator, setSelectedValidator] = useState<string>('');
+  const [nominatedAmount, setNominatedAmount] = useState<string>('0');
+  const [minBond, setMinBond] = useState<string>('0');
 
   useEffect(() => {
     getStakeDelegationInfo({
@@ -60,18 +66,21 @@ function UnbondingSubmitTransaction ({ className }: Props): React.ReactElement<P
       networkKey: selectedNetwork
     }).then((result) => {
       setDelegations(result);
+      setIsDataReady(true);
+      setSelectedValidator(result[0].owner);
+      setNominatedAmount(result[0].amount);
+      setMinBond(result[0].minBond);
+
+      if (result[0].hasScheduledRequest) {
+        setIsValidValidator(false);
+      }
     }).catch(console.error);
 
     return () => {
       setDelegations(undefined);
+      setIsDataReady(false);
     };
   }, [account?.address, selectedNetwork]);
-
-  const [selectedValidator, setSelectedValidator] = useState<string>(delegations ? delegations[0].owner : '');
-  const [nominatedAmount, setNominatedAmount] = useState<string>(delegations ? delegations[0].amount : '0');
-  const [minBond, setMinBond] = useState<string>(delegations ? delegations[0].minBond : '0');
-
-  console.log(delegations);
 
   useEffect(() => {
     if (!networkJson.active) {
@@ -114,7 +123,7 @@ function UnbondingSubmitTransaction ({ className }: Props): React.ReactElement<P
         }
       }
     }
-  }, [amount, bondedAmount, isClickNext, minBond, networkJson.decimals, networkJson.nativeToken, nominatedAmount, show, showAuth, showResult, delegations]);
+  }, [amount, bondedAmount, isClickNext, minBond, networkJson.decimals, networkJson.nativeToken, nominatedAmount, show, showAuth, showResult, delegations, isValidValidator]);
 
   const getDefaultValue = useCallback(() => {
     if (amount === -1) {
@@ -198,27 +207,32 @@ function UnbondingSubmitTransaction ({ className }: Props): React.ReactElement<P
   }, [amount, networkJson.decimals, nominatedAmount, selectedAccount, selectedNetwork, selectedValidator, unbondAll]);
 
   const handleSelectValidator = useCallback((val: string) => {
-    setSelectedValidator(val);
-
     if (delegations) {
       for (const item of delegations) {
         if (item.owner === val) {
-          setNominatedAmount(item.amount);
-          setMinBond(item.minBond);
+          if (!item.hasScheduledRequest) {
+            setSelectedValidator(val);
+            setNominatedAmount(item.amount);
+            setMinBond(item.minBond);
+            setIsValidValidator(true);
 
-          if (unbondAll) {
-            const _nominatedAmount = parseFloat(item.amount) / (10 ** (networkJson.decimals as number));
+            if (unbondAll) {
+              const _nominatedAmount = parseFloat(item.amount) / (10 ** (networkJson.decimals as number));
 
-            setAmount(_nominatedAmount);
+              setAmount(_nominatedAmount);
+            } else {
+              setAmount(0);
+            }
+
+            break;
           } else {
-            setAmount(0);
+            show('Please withdraw the unstaking amount first');
+            setIsValidValidator(false);
           }
-
-          break;
         }
       }
     }
-  }, [networkJson.decimals, unbondAll, delegations]);
+  }, [delegations, unbondAll, networkJson.decimals, show]);
 
   const toggleUnbondAll = useCallback((value: boolean) => {
     setUnbondAll(value);
@@ -255,102 +269,108 @@ function UnbondingSubmitTransaction ({ className }: Props): React.ReactElement<P
         subHeaderName={t<string>('Unstaking action')}
       />
 
-      {!showResult && <div
-        className={'bonding-submit-container'}
-      >
-        <InputAddress
-          autoPrefill={false}
-          className={'receive-input-address'}
-          defaultValue={selectedAccount}
-          help={t<string>('The account which you will unstake')}
-          isDisabled={true}
-          isSetDefaultValue={true}
-          label={t<string>('Unstake from account')}
-          networkPrefix={networkJson.ss58Format}
-          type='allPlus'
-          withEllipsis
-        />
-
+      {!showResult && <div>
         {
-          delegations && <ValidatorsDropdown
-            delegations={delegations}
-            handleSelectValidator={handleSelectValidator}
-            label={getDropdownTitle()}
-          />
+          isDataReady
+            ? <div
+              className={'bonding-submit-container'}
+            >
+              <InputAddress
+                autoPrefill={false}
+                className={'receive-input-address'}
+                defaultValue={selectedAccount}
+                help={t<string>('The account which you will unstake')}
+                isDisabled={true}
+                isSetDefaultValue={true}
+                label={t<string>('Unstake from account')}
+                networkPrefix={networkJson.ss58Format}
+                type='allPlus'
+                withEllipsis
+              />
+
+              {
+                delegations && <ValidatorsDropdown
+                  delegations={delegations}
+                  handleSelectValidator={handleSelectValidator}
+                  label={getDropdownTitle()}
+                />
+              }
+
+              {
+                delegations && <div className={'unbonding-input'}>
+                  <InputBalance
+                    autoFocus
+                    className={'submit-bond-amount-input'}
+                    decimals={networkJson.decimals}
+                    defaultValue={unbondAll ? getDefaultValue() : undefined}
+                    help={`Type the amount you want to unstake. Your total stake is ${parseFloat(nominatedAmount) / (10 ** (networkJson.decimals as number))} ${networkJson.nativeToken as string}`}
+                    isDisabled={unbondAll}
+                    isError={false}
+                    isZeroable={false}
+                    label={t<string>('Amount')}
+                    onChange={handleUpdateAmount}
+                    placeholder={'0'}
+                    siDecimals={networkJson.decimals}
+                    siSymbol={networkJson.nativeToken}
+                  />
+                </div>
+              }
+
+              {
+                !delegations && <div className={'unbonding-input'}>
+                  <InputBalance
+                    autoFocus
+                    className={'submit-bond-amount-input'}
+                    decimals={networkJson.decimals}
+                    defaultValue={getDefaultValue()}
+                    help={`Type the amount you want to unstake. You can unstake ${bondedAmount} ${networkJson.nativeToken as string}`}
+                    isDisabled={unbondAll}
+                    isError={false}
+                    isZeroable={false}
+                    label={t<string>('Amount')}
+                    onChange={handleUpdateAmount}
+                    placeholder={'0'}
+                    siDecimals={networkJson.decimals}
+                    siSymbol={networkJson.nativeToken}
+                  />
+                </div>
+              }
+
+              <div className={'unstake-all-container'}>
+                <div className={'unstake-all-text'}>Unstake all</div>
+                <HorizontalLabelToggle
+                  checkedLabel={''}
+                  className='info'
+                  toggleFunc={toggleUnbondAll}
+                  uncheckedLabel={''}
+                  value={unbondAll}
+                />
+              </div>
+
+              <div className='bonding-submit__separator' />
+
+              <div className={'bonding-btn-container'}>
+                <Button
+                  className={'bonding-cancel-button'}
+                  isDisabled={loading}
+                  onClick={handleClickCancel}
+                >
+                Cancel
+                </Button>
+                <Button
+                  isDisabled={!isReadySubmit || !isValidValidator}
+                  onClick={handleConfirm}
+                >
+                  {
+                    loading
+                      ? <Spinner />
+                      : <span>Next</span>
+                  }
+                </Button>
+              </div>
+            </div>
+            : <Spinner className={'container-spinner'} />
         }
-
-        {
-          delegations && <div className={'unbonding-input'}>
-            <InputBalance
-              autoFocus
-              className={'submit-bond-amount-input'}
-              decimals={networkJson.decimals}
-              defaultValue={unbondAll ? getDefaultValue() : undefined}
-              help={`Type the amount you want to unstake. Your total stake is ${parseFloat(nominatedAmount) / (10 ** (networkJson.decimals as number))} ${networkJson.nativeToken as string}`}
-              isDisabled={unbondAll}
-              isError={false}
-              isZeroable={false}
-              label={t<string>('Amount')}
-              onChange={handleUpdateAmount}
-              placeholder={'0'}
-              siDecimals={networkJson.decimals}
-              siSymbol={networkJson.nativeToken}
-            />
-          </div>
-        }
-
-        {
-          !delegations && <div className={'unbonding-input'}>
-            <InputBalance
-              autoFocus
-              className={'submit-bond-amount-input'}
-              decimals={networkJson.decimals}
-              defaultValue={getDefaultValue()}
-              help={`Type the amount you want to unstake. You can unstake ${bondedAmount} ${networkJson.nativeToken as string}`}
-              isDisabled={unbondAll}
-              isError={false}
-              isZeroable={false}
-              label={t<string>('Amount')}
-              onChange={handleUpdateAmount}
-              placeholder={'0'}
-              siDecimals={networkJson.decimals}
-              siSymbol={networkJson.nativeToken}
-            />
-          </div>
-        }
-
-        <div className={'unstake-all-container'}>
-          <div className={'unstake-all-text'}>Unstake all</div>
-          <HorizontalLabelToggle
-            checkedLabel={''}
-            className='info'
-            toggleFunc={toggleUnbondAll}
-            uncheckedLabel={''}
-            value={unbondAll}
-          />
-        </div>
-
-        <div className='bonding-submit__separator' />
-
-        <div className={'bonding-btn-container'}>
-          <Button
-            className={'bonding-cancel-button'}
-            isDisabled={loading}
-            onClick={handleClickCancel}
-          >
-            Cancel
-          </Button>
-          <Button
-            isDisabled={!isReadySubmit}
-            onClick={handleConfirm}
-          >
-            {
-              loading
-                ? <Spinner />
-                : <span>Next</span>
-            }
-          </Button>
-        </div>
       </div>}
 
       {showAuth && !showResult &&
@@ -384,6 +404,11 @@ function UnbondingSubmitTransaction ({ className }: Props): React.ReactElement<P
 }
 
 export default React.memo(styled(UnbondingSubmitTransaction)(({ theme }: Props) => `
+  .container-spinner {
+    height: 65px;
+    width: 65px;
+  }
+
   .unstake-all-container {
     .horizontal-label-toggle {
       margin-right: 0;

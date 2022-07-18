@@ -1,11 +1,10 @@
 // Copyright 2019-2022 @subwallet/extension-koni authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { APIItemState, ApiProps, DelegationItem, NetworkJson, StakingItem } from '@subwallet/extension-base/background/KoniTypes';
+import { APIItemState, ApiProps, NetworkJson, StakingItem } from '@subwallet/extension-base/background/KoniTypes';
 import { PREDEFINED_NETWORKS } from '@subwallet/extension-koni-base/api/predefinedNetworks';
 import { IGNORE_GET_SUBSTRATE_FEATURES_LIST } from '@subwallet/extension-koni-base/constants';
-import { categoryAddresses, parseRawNumber, reformatAddress, toUnit } from '@subwallet/extension-koni-base/utils/utils';
-import fetch from 'cross-fetch';
+import { categoryAddresses, parseRawNumber, toUnit } from '@subwallet/extension-koni-base/utils/utils';
 
 interface LedgerData {
   active: string,
@@ -69,15 +68,12 @@ export async function stakingOnChainApi (addresses: string[], dotSamaAPIMap: Rec
 }
 
 function getParaStakingOnChain (parentApi: ApiProps, useAddresses: string[], networks: Record<string, NetworkJson>, chain: string, callback: (networkKey: string, rs: StakingItem) => void) {
-  return parentApi.api.query.parachainStaking.delegatorState.multi(useAddresses, async (ledgers: any) => {
+  return parentApi.api.query.parachainStaking.delegatorState.multi(useAddresses, (ledgers: any) => {
     let totalBalance = 0;
     let activeBalance = 0;
     let unlockingBalance = 0;
     let stakingItem: StakingItem;
     const delegationMap: Record<string, string> = {};
-    const formattedAddresses = useAddresses.map((address) => {
-      return reformatAddress(address, 0);
-    });
 
     if (ledgers) {
       for (const ledger of ledgers) {
@@ -106,73 +102,6 @@ function getParaStakingOnChain (parentApi: ApiProps, useAddresses: string[], net
         }
       }
 
-      const delegationsList: DelegationItem[] = [];
-
-      await Promise.all(Object.entries(delegationMap).map(async ([owner, amount]) => {
-        const [_info, _identity, _scheduledRequests] = await Promise.all([
-          parentApi.api.query.parachainStaking.candidateInfo(owner),
-          parentApi.api.query.identity.identityOf(owner),
-          parentApi.api.query.parachainStaking.delegationScheduledRequests(owner)
-        ]);
-        const rawScheduledRequests = _scheduledRequests.toHuman() as Record<string, any>[];
-        const rawInfo = _info.toHuman() as Record<string, any>;
-        const rawIdentity = _identity.toHuman() as Record<string, any> | null;
-        let identity;
-
-        const minDelegation = (rawInfo?.lowestTopDelegationAmount as string).replaceAll(',', '');
-
-        // handle identity
-        if (rawIdentity !== null) {
-          // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-          const displayName = rawIdentity?.info?.display?.Raw as string;
-          // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-          const legal = rawIdentity?.info?.legal?.Raw as string;
-          // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-          const web = rawIdentity?.info?.web?.Raw as string;
-          // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-          const riot = rawIdentity?.info?.riot?.Raw as string;
-          // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-          const email = rawIdentity?.info?.email?.Raw as string;
-          // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-          const twitter = rawIdentity?.info?.twitter?.Raw as string;
-
-          if (displayName && !displayName.startsWith('0x')) {
-            // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-            identity = displayName;
-          } else if (legal && !legal.startsWith('0x')) {
-            identity = legal;
-          } else {
-            identity = twitter || web || email || riot;
-          }
-        }
-
-        // check scheduled request
-        let unbondingAmount = 0;
-
-        for (const scheduledRequest of rawScheduledRequests) {
-          const delegator = scheduledRequest.delegator as string;
-          const formattedDelegator = reformatAddress(delegator, 0);
-
-          if (formattedAddresses.includes(formattedDelegator)) { // returned data might not have the same address format
-            const action = scheduledRequest.action as Record<string, string>;
-
-            Object.values(action).forEach((value) => {
-              unbondingAmount += parseRawNumber(value);
-            });
-          }
-        }
-
-        const activeStake = parseRawNumber(amount) - unbondingAmount;
-
-        delegationsList.push({
-          owner,
-          amount: activeStake.toString(),
-          identity,
-          minBond: minDelegation,
-          hasScheduledRequest: false
-        });
-      }));
-
       const parsedTotalBalance = parseStakingBalance(totalBalance, chain, networks);
       const parsedUnlockingBalance = parseStakingBalance(unlockingBalance, chain, networks);
       const parsedActiveBalance = parseStakingBalance(activeBalance, chain, networks);
@@ -186,8 +115,7 @@ function getParaStakingOnChain (parentApi: ApiProps, useAddresses: string[], net
           unlockingBalance: parsedUnlockingBalance.toString(),
           nativeToken: networks[chain].nativeToken,
           unit: networks[chain].nativeToken,
-          state: APIItemState.READY,
-          delegation: delegationsList
+          state: APIItemState.READY
         } as StakingItem;
       } else {
         stakingItem = {
@@ -350,26 +278,7 @@ function getDarwiniaStakingOnChain (parentApi: ApiProps, useAddresses: string[],
 }
 
 function getAstarStakingOnChain (parentApi: ApiProps, useAddresses: string[], networks: Record<string, NetworkJson>, chain: string, callback: (networkKey: string, rs: StakingItem) => void) {
-  const allDappsReq = new Promise(function (resolve) {
-    fetch('https://api.astar.network/api/v1/shibuya/dapps-staking/dapps', {
-      method: 'GET'
-    }).then((resp) => {
-      resolve(resp.json());
-    }).catch(console.error);
-  });
-  const timeout = new Promise((resolve) => {
-    const id = setTimeout(() => {
-      clearTimeout(id);
-      resolve(null);
-    }, 2000);
-  });
-
-  const racePromise = Promise.race([
-    allDappsReq,
-    timeout
-  ]);
-
-  return parentApi.api.query.dappsStaking.ledger.multi(useAddresses, async (ledgers: any[]) => {
+  return parentApi.api.query.dappsStaking.ledger.multi(useAddresses, (ledgers: any[]) => {
     let totalBalance = 0;
     let unlockingBalance = 0;
     let stakingItem: StakingItem;
@@ -389,54 +298,6 @@ function getAstarStakingOnChain (parentApi: ApiProps, useAddresses: string[], ne
         totalBalance += parseRawNumber(_totalStake);
       }
 
-      const [_stakedDapps, _allDapps] = await Promise.all([
-        parentApi.api.query.dappsStaking.generalStakerInfo.entries(useAddresses[0]),
-        racePromise
-      ]);
-
-      const rawMinStake = (parentApi.api.consts.dappsStaking.minimumStakingAmount).toHuman() as string;
-      const minStake = parseRawNumber(rawMinStake);
-
-      let allDapps: Record<string, any>[] | null = null;
-
-      if (_allDapps !== null) {
-        allDapps = _allDapps as Record<string, any>[];
-      }
-
-      const dappMap: Record<string, string> = {};
-      const delegationsList: DelegationItem[] = [];
-
-      if (allDapps !== null) {
-        for (const dappInfo of allDapps) {
-          const dappAddress = dappInfo.address as string;
-
-          dappMap[dappAddress.toLowerCase()] = dappInfo.name as string;
-        }
-      }
-
-      for (const item of _stakedDapps) {
-        const data = item[0].toHuman() as any[];
-        const stakedDapp = data[1] as Record<string, string>;
-        const stakeData = item[1].toHuman() as Record<string, Record<string, string>[]>;
-        const stakeList = stakeData.stakes;
-        const dappAddress = stakedDapp.Evm.toLowerCase();
-        let totalStake = 0;
-
-        if (stakeList.length > 0) {
-          const latestStake = stakeList.slice(-1)[0].staked.toString();
-
-          totalStake = parseRawNumber(latestStake);
-        }
-
-        delegationsList.push({
-          owner: dappAddress,
-          amount: totalStake.toString(),
-          minBond: minStake.toString(),
-          identity: dappMap[dappAddress],
-          hasScheduledRequest: false
-        });
-      }
-
       const parsedTotalBalance = parseStakingBalance(totalBalance, chain, networks);
       const parsedActiveBalance = parseStakingBalance(totalBalance - unlockingBalance, chain, networks);
       const parsedUnlockingBalance = parseStakingBalance(unlockingBalance, chain, networks);
@@ -450,7 +311,6 @@ function getAstarStakingOnChain (parentApi: ApiProps, useAddresses: string[], ne
           unlockingBalance: parsedUnlockingBalance.toString(),
           nativeToken: networks[chain].nativeToken,
           unit: networks[chain].nativeToken,
-          delegation: delegationsList,
           state: APIItemState.READY
         } as StakingItem;
       } else {

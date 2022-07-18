@@ -896,6 +896,7 @@ export interface ValidatorInfo {
   minBond: number;
   isNominated: boolean; // this validator has been staked to before
   icon?: string;
+  hasScheduledRequest?: boolean; // for parachain, can't stake more on a collator that has existing scheduled request
 }
 
 export interface BondingOptionInfo {

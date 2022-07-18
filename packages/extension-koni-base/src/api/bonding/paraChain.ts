@@ -99,6 +99,31 @@ export async function getParaCollatorsInfo (networkKey: string, dotSamaApi: ApiP
     }
   }
 
+  const currentBondingValidators: string[] = [];
+  const existingRequestsMap: Record<string, boolean> = {};
+
+  // double-check bondedValidators to see if exist unbonding request
+  await Promise.all(bondedValidators.map(async (validator) => {
+    const rawScheduledRequests = (await apiProps.api.query.parachainStaking.delegationScheduledRequests(validator)).toHuman() as Record<string, any>[];
+
+    for (const scheduledRequest of rawScheduledRequests) {
+      const delegator = scheduledRequest.delegator as string;
+      const formattedDelegator = reformatAddress(delegator, 0);
+      const formattedAddress = reformatAddress(address, 0);
+
+      if (formattedAddress === formattedDelegator) { // returned data might not have the same address format
+        const _action = scheduledRequest.action as Record<string, string>;
+        const action = Object.keys(_action)[0];
+
+        existingRequestsMap[validator] = true;
+
+        if (action.toLowerCase() !== REVOKE_ACTION) {
+          currentBondingValidators.push(validator);
+        }
+      }
+    }
+  }));
+
   const extraInfoMap: Record<string, CollatorExtraInfo> = {};
 
   await Promise.all(allValidators.map(async (validator) => {
@@ -160,10 +185,11 @@ export async function getParaCollatorsInfo (networkKey: string, dotSamaApi: ApiP
   }));
 
   for (const validator of allValidators) {
-    if (bondedValidators.includes(validator.address)) {
+    if (currentBondingValidators.includes(validator.address)) {
       validator.isNominated = true;
     }
 
+    validator.hasScheduledRequest = existingRequestsMap[validator.address];
     validator.minBond = extraInfoMap[validator.address].minDelegation;
     validator.ownStake = extraInfoMap[validator.address].bond;
     validator.blocked = !extraInfoMap[validator.address].active;
@@ -288,8 +314,6 @@ export async function getParaUnbondingExtrinsic (dotSamaApi: ApiProps, amount: n
   const apiPromise = await dotSamaApi.isReady;
   const parsedAmount = amount * (10 ** (networkJson.decimals as number));
   const binaryAmount = new BN(parsedAmount.toString());
-
-  console.log('unstakeAll', unstakeAll);
 
   if (!unstakeAll) {
     return apiPromise.api.tx.parachainStaking.scheduleDelegatorBondLess(collatorAddress, binaryAmount);

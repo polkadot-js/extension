@@ -82,12 +82,14 @@ function StakingMenu ({ bondedAmount, className, delegations, networkKey, nextWi
   const handleUnstake = useCallback(() => {
     const filteredDelegations = parseDelegations(delegations);
 
-    if (filteredDelegations && filteredDelegations.length > 0) {
-      store.dispatch({ type: 'unbondingParams/update', payload: { selectedAccount: account?.address as string, selectedNetwork: networkKey, bondedAmount: parseFloat(bondedAmount), delegations: filteredDelegations } as UnbondingParams });
-      navigate('/account/unbonding-auth');
-    } else if (parseFloat(bondedAmount) > 0) {
-      store.dispatch({ type: 'unbondingParams/update', payload: { selectedAccount: account?.address as string, selectedNetwork: networkKey, bondedAmount: parseFloat(bondedAmount), delegations: filteredDelegations } as UnbondingParams });
-      navigate('/account/unbonding-auth');
+    if (parseFloat(bondedAmount) > 0) {
+      if (filteredDelegations && filteredDelegations.length > 0) {
+        store.dispatch({ type: 'unbondingParams/update', payload: { selectedAccount: account?.address as string, selectedNetwork: networkKey, bondedAmount: parseFloat(bondedAmount), delegations: filteredDelegations } as UnbondingParams });
+        navigate('/account/unbonding-auth');
+      } else {
+        store.dispatch({ type: 'unbondingParams/update', payload: { selectedAccount: account?.address as string, selectedNetwork: networkKey, bondedAmount: parseFloat(bondedAmount), delegations: filteredDelegations } as UnbondingParams });
+        navigate('/account/unbonding-auth');
+      }
     }
   }, [account?.address, bondedAmount, delegations, navigate, networkKey]);
 

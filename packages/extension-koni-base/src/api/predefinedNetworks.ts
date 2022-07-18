@@ -923,11 +923,12 @@ export const PREDEFINED_NETWORKS: Record<string, NetworkJson> = {
     ss58Format: 10041,
     providers: {
       HydraDX: 'wss://rpc-01.basilisk.hydradx.io',
-      OnFinality: 'wss://basilisk.api.onfinality.io/public-ws'
+      OnFinality: 'wss://basilisk.api.onfinality.io/public-ws',
+      Dwellir: 'wss://basilisk-rpc.dwellir.com'
     },
     active: false,
     currentProviderMode: 'ws',
-    currentProvider: 'OnFinality',
+    currentProvider: 'Dwellir',
     groups: ['KUSAMA_PARACHAIN'],
     paraId: 2090,
     nativeToken: 'BSX',

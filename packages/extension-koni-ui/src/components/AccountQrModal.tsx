@@ -208,7 +208,7 @@ function AccountQrModal (props: Props): React.ReactElement<Props> {
               />
             </div>
             <Tooltip
-              text={t('Select the account you would like to send from')}
+              text={t<string>('Select the account you would like to send from')}
               trigger={'header-icon'}
             />
           </div>
@@ -277,7 +277,7 @@ function AccountQrModal (props: Props): React.ReactElement<Props> {
               />
             </div>
             <Tooltip
-              text={t('Select the network to obtain the sending address')}
+              text={t<string>('Select the network to obtain the sending address')}
               trigger={'header-icon'}
             />
           </div>

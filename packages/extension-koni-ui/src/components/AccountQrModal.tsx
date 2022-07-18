@@ -29,7 +29,7 @@ import { getGenesisOptionsByAddressType, getLogoByNetworkKey, isAccountAll, toSh
 import { getLogoByGenesisHash } from '@subwallet/extension-koni-ui/util/logoByGenesisHashMap';
 import reformatAddress from '@subwallet/extension-koni-ui/util/reformatAddress';
 import CN from 'classnames';
-import React, { useCallback, useContext, useMemo, useState } from 'react';
+import React, { useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import CopyToClipboard from 'react-copy-to-clipboard';
 import QRCode from 'react-qr-code';
 import { useSelector } from 'react-redux';
@@ -62,16 +62,13 @@ const Wrapper = (props: WrapperProps) => {
   const { children, className, closeModal } = props;
 
   return (
-    <Modal className={className}>
+    <Modal
+      className={CN(className, 'modal-container')}
+      maskClosable={true}
+      onClose={closeModal}
+      wrapperClassName={'select-modal'}
+    >
       <div className={'account-qr-modal'}>
-        <div className='account-qr-modal__header'>
-          <FontAwesomeIcon
-            className='account-qr-modal__icon'
-            // @ts-ignore
-            icon={faTimes}
-            onClick={closeModal}
-          />
-        </div>
         {children}
       </div>
     </Modal>
@@ -187,6 +184,10 @@ function AccountQrModal (props: Props): React.ReactElement<Props> {
     }
   }, []);
 
+  useEffect(() => {
+    setName(accountName);
+  }, [accountName]);
+
   if (!accountQr || isAccountAll(accountQr.address)) {
     return (
       <Wrapper
@@ -196,12 +197,20 @@ function AccountQrModal (props: Props): React.ReactElement<Props> {
         <>
           <div className={CN('modal-header')}>
             <div className={CN('header-title')}>Account Selection</div>
-            <div className={CN('header-icon')}>
+            <div
+              className={CN('header-icon')}
+              data-for={'header-icon'}
+              data-tip={true}
+            >
               <FontAwesomeIcon
                 icon={faCircleQuestion}
                 size={'lg'}
               />
             </div>
+            <Tooltip
+              text={'handleStatusText(apiStatus)'}
+              trigger={'header-icon'}
+            />
           </div>
           <Input
             className={CN('query-input')}
@@ -257,12 +266,20 @@ function AccountQrModal (props: Props): React.ReactElement<Props> {
         <>
           <div className={CN('modal-header')}>
             <div className={CN('header-title')}>Network Selection</div>
-            <div className={CN('header-icon')}>
+            <div
+              className={CN('header-icon')}
+              data-for={'header-icon'}
+              data-tip={true}
+            >
               <FontAwesomeIcon
                 icon={faCircleQuestion}
                 size={'lg'}
               />
             </div>
+            <Tooltip
+              text={'handleStatusText(apiStatus)'}
+              trigger={'header-icon'}
+            />
           </div>
           <Input
             className={CN('query-input')}
@@ -592,6 +609,15 @@ export default styled(AccountQrModal)(({ theme }: ThemeProps) => `
 
   .query-input {
     margin-top: 12px;
+    flex-shrink: 0;
+  }
+
+  &.modal-container {
+
+    .select-modal {
+      max-width: 390px !important;
+      background-color: ${theme.popupBackground};
+    }
   }
 
   .account-container {
@@ -611,6 +637,7 @@ export default styled(AccountQrModal)(({ theme }: ThemeProps) => `
     overflow-y: auto;
     margin-top: 24px;
     margin-bottom: 10px;
+    padding-right: 10px;
 
     .network-item-container {
       padding: 5px 0;

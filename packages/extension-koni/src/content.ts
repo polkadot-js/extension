@@ -52,18 +52,77 @@ window.addEventListener('message', ({ data, source }: Message): void => {
 });
 
 // inject our data injector
+const container = document.head || document.documentElement;
+const placeholderScript = document.createElement('script');
 const script = document.createElement('script');
 
+placeholderScript.textContent = `class SubWalletPlaceholder {
+  provider = undefined;
+  isSubWallet = true;
+  connected = false;
+  isConnected = () => false;
+  __waitProvider = async () => {
+    const self = this;
+    if (self.provider) {
+      return self.provider;
+    } else {
+      return await new Promise((resolve, reject) => {
+        let retry = 0;
+        const interval = setInterval(() => {
+          if (++retry > 30) {
+            clearInterval(interval);
+            reject(new Error('SubWallet provider not found'))
+          }
+          if (self.provider) {
+            clearInterval(interval);
+            resolve(self.provider)
+          }
+        }, 100);
+      })
+    }
+  }
+  async enable() {
+    const provider = await this.__waitProvider();
+    return await provider.enable(...arguments);
+  }
+  async request() {
+    const provider = await this.__waitProvider();
+    return await provider.request(...arguments);
+  }
+  async send() {
+    const provider = await this.__waitProvider();
+    return await provider.send(...arguments);
+  }
+  async sendAsync() {
+    const provider = await this.__waitProvider();
+    return await provider.sendAsync(...arguments);
+  }
+}
+
+
+window.SubWallet = new Proxy(new SubWalletPlaceholder(), {
+  get(obj, prop) {
+    if (prop === 'provider') {
+      return undefined;
+    }
+
+    if (obj.provider) {
+      return Reflect.get(obj.provider, prop);
+    } else {
+      return Reflect.get(obj, prop);
+    }
+  }
+})`;
 script.src = chrome.extension.getURL('page.js');
 
 script.onload = (): void => {
   // remove the injecting tag when loaded
-  if (script.parentNode) {
-    script.parentNode.removeChild(script);
-  }
+  script.parentNode && script.parentNode.removeChild(script);
+  placeholderScript.parentNode && placeholderScript.parentNode.removeChild(placeholderScript);
 };
 
-(document.head || document.documentElement).appendChild(script);
+container.insertBefore(placeholderScript, container.children[0]);
+container.insertBefore(script, container.children[0]);
 
 redirectIfPhishingProm.then((gotRedirected) => {
   if (!gotRedirected) {

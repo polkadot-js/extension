@@ -99,13 +99,18 @@ export async function getParaCollatorsInfo (networkKey: string, dotSamaApi: ApiP
     }
   }
 
-  const currentBondingValidators: string[] = [];
+  let currentBondingValidators: string[] = [];
   const existingRequestsMap: Record<string, boolean> = {};
 
   if (['bifrost', 'bifrost_testnet'].includes(networkKey)) {
-    const bifrostRes = getBifrostBondedValidators(networkKey, dotSamaApi, decimals, address);
+    if (rawDelegatorState !== null) {
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+      const unbondingRequests = rawDelegatorState.requests.requests as Record<string, Record<string, string>>;
 
-    console.log(bifrostRes);
+      currentBondingValidators = getBifrostBondedValidators(bondedValidators, unbondingRequests);
+    } else {
+      currentBondingValidators = bondedValidators;
+    }
   } else {
     // double-check bondedValidators to see if exist unbonding request
     await Promise.all(bondedValidators.map(async (validator) => {
@@ -648,6 +653,18 @@ async function getBifrostDelegationInfo (dotSamaApi: ApiProps, address: string) 
   return delegationsList;
 }
 
-function getBifrostBondedValidators (networkKey: string, dotSamaApi: ApiProps, decimals: number, address: string) {
-  return [];
+function getBifrostBondedValidators (bondedCollators: string[], unbondingRequests: Record<string, Record<string, string>>) {
+  const currentBondingValidators: string[] = [];
+
+  for (const collator of bondedCollators) {
+    if (collator in unbondingRequests) {
+      if (unbondingRequests[collator].action.toLowerCase() !== REVOKE_ACTION) {
+        currentBondingValidators.push(collator);
+      }
+    } else {
+      currentBondingValidators.push(collator);
+    }
+  }
+
+  return currentBondingValidators;
 }

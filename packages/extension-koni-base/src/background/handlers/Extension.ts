@@ -5,7 +5,91 @@ import Common from '@ethereumjs/common';
 import Extension, { SEED_DEFAULT_LENGTH, SEED_LENGTHS } from '@subwallet/extension-base/background/handlers/Extension';
 import { AuthUrls } from '@subwallet/extension-base/background/handlers/State';
 import { createSubscription, isSubscriptionRunning, unsubscribe } from '@subwallet/extension-base/background/handlers/subscriptions';
-import { AccountsWithCurrentAddress, ApiProps, BalanceJson, BasicTxInfo, BasicTxResponse, BondingOptionInfo, BondingOptionParams, BondingSubmitParams, ChainBondingBasics, ChainRegistry, CrowdloanJson, CurrentAccountInfo, CustomEvmToken, DeleteEvmTokenParams, DisableNetworkResponse, EvmNftSubmitTransaction, EvmNftTransaction, EvmNftTransactionRequest, EvmTokenJson, NETWORK_ERROR, NetWorkGroup, NetworkJson, NftCollection, NftCollectionJson, NftItem, NftJson, NftTransactionResponse, NftTransferExtra, OptionInputAddress, PriceJson, RequestAccountCreateSuriV2, RequestAccountExportPrivateKey, RequestAuthorization, RequestAuthorizationPerAccount, RequestAuthorizeApproveV2, RequestBatchRestoreV2, RequestCheckCrossChainTransfer, RequestCheckTransfer, RequestConfirmationComplete, RequestCrossChainTransfer, RequestDeriveCreateV2, RequestForgetSite, RequestFreeBalance, RequestJsonRestoreV2, RequestNftForceUpdate, RequestSaveRecentAccount, RequestSeedCreateV2, RequestSeedValidateV2, RequestSettingsType, RequestTransactionHistoryAdd, RequestTransfer, RequestTransferCheckReferenceCount, RequestTransferCheckSupporting, RequestTransferExistentialDeposit, ResponseAccountCreateSuriV2, ResponseAccountExportPrivateKey, ResponseCheckCrossChainTransfer, ResponseCheckTransfer, ResponsePrivateKeyValidateV2, ResponseSeedCreateV2, ResponseSeedValidateV2, ResponseTransfer, StakeWithdrawalParams, StakingJson, StakingRewardJson, SubstrateNftSubmitTransaction, SubstrateNftTransaction, SubstrateNftTransactionRequest, SupportTransferResponse, ThemeTypes, TokenInfo, TransactionHistoryItemType, TransferError, TransferErrorCode, TransferStep, UnbondingSubmitParams, UnlockingStakeInfo, UnlockingStakeParams, ValidateEvmTokenRequest, ValidateEvmTokenResponse, ValidateNetworkRequest, ValidateNetworkResponse } from '@subwallet/extension-base/background/KoniTypes';
+import {
+  AccountsWithCurrentAddress,
+  ApiProps,
+  BalanceJson,
+  BasicTxInfo,
+  BasicTxResponse,
+  BondingOptionInfo,
+  BondingOptionParams,
+  BondingSubmitParams,
+  ChainBondingBasics,
+  ChainRegistry,
+  CrowdloanJson,
+  CurrentAccountInfo,
+  CustomEvmToken,
+  DeleteEvmTokenParams,
+  DisableNetworkResponse,
+  EvmNftSubmitTransaction,
+  EvmNftTransaction,
+  EvmNftTransactionRequest,
+  EvmTokenJson,
+  NETWORK_ERROR,
+  NetWorkGroup,
+  NetworkJson,
+  NftCollection,
+  NftCollectionJson,
+  NftItem,
+  NftJson,
+  NftTransactionResponse,
+  NftTransferExtra,
+  OptionInputAddress,
+  PriceJson,
+  RequestAccountCreateSuriV2,
+  RequestAccountExportPrivateKey,
+  RequestAuthorization,
+  RequestAuthorizationPerAccount,
+  RequestAuthorizeApproveV2,
+  RequestBatchRestoreV2,
+  RequestCheckCrossChainTransfer,
+  RequestCheckTransfer,
+  RequestConfirmationComplete,
+  RequestCrossChainTransfer,
+  RequestDeriveCreateV2,
+  RequestForgetSite,
+  RequestFreeBalance,
+  RequestJsonRestoreV2,
+  RequestNftForceUpdate,
+  RequestParseEVMTransactionInput,
+  RequestSaveRecentAccount,
+  RequestSeedCreateV2,
+  RequestSeedValidateV2,
+  RequestSettingsType,
+  RequestTransactionHistoryAdd,
+  RequestTransfer,
+  RequestTransferCheckReferenceCount,
+  RequestTransferCheckSupporting,
+  RequestTransferExistentialDeposit,
+  ResponseAccountCreateSuriV2,
+  ResponseAccountExportPrivateKey,
+  ResponseCheckCrossChainTransfer,
+  ResponseCheckTransfer, ResponseParseEVMTransactionInput,
+  ResponsePrivateKeyValidateV2,
+  ResponseSeedCreateV2,
+  ResponseSeedValidateV2,
+  ResponseTransfer,
+  StakeWithdrawalParams,
+  StakingJson,
+  StakingRewardJson,
+  SubstrateNftSubmitTransaction,
+  SubstrateNftTransaction,
+  SubstrateNftTransactionRequest,
+  SupportTransferResponse,
+  ThemeTypes,
+  TokenInfo,
+  TransactionHistoryItemType,
+  TransferError,
+  TransferErrorCode,
+  TransferStep,
+  UnbondingSubmitParams,
+  UnlockingStakeInfo,
+  UnlockingStakeParams,
+  ValidateEvmTokenRequest,
+  ValidateEvmTokenResponse,
+  ValidateNetworkRequest,
+  ValidateNetworkResponse
+} from '@subwallet/extension-base/background/KoniTypes';
 import { AccountJson, AuthorizeRequest, MessageTypes, RequestAccountForget, RequestAccountTie, RequestAuthorizeCancel, RequestAuthorizeReject, RequestCurrentAccountAddress, RequestTypes, ResponseAuthorizeList, ResponseType } from '@subwallet/extension-base/background/types';
 import { getBondingExtrinsic, getBondingTxInfo, getChainBondingBasics, getTargetValidators, getUnbondingExtrinsic, getUnbondingTxInfo, getUnlockingInfo, getValidatorsInfo, getWithdrawalExtrinsic, getWithdrawalTxInfo } from '@subwallet/extension-koni-base/api/bonding';
 import { initApi } from '@subwallet/extension-koni-base/api/dotsama';
@@ -31,6 +115,7 @@ import { SingleAddress, SubjectInfo } from '@polkadot/ui-keyring/observable/type
 import { assert, BN, hexToU8a, isHex, u8aToString } from '@polkadot/util';
 import { base64Decode, isEthereumAddress, jsonDecrypt, keyExtractSuri, mnemonicGenerate, mnemonicValidate } from '@polkadot/util-crypto';
 import { EncryptedJson, KeypairType, Prefix } from '@polkadot/util-crypto/types';
+import {parseTransactionData} from "@subwallet/extension-koni-base/api/web3/parseEVMTransaction";
 
 const ETH_DERIVE_DEFAULT = '/m/44\'/60\'/0\'/0/0';
 
@@ -2360,6 +2445,11 @@ export default class KoniExtension extends Extension {
     return txState;
   }
 
+  // EVM Transaction
+  private parseEVMTransactionInput({ data }: RequestParseEVMTransactionInput): ResponseParseEVMTransactionInput {
+    return parseTransactionData(data);
+  }
+
   // eslint-disable-next-line @typescript-eslint/require-await
   public override async handle<TMessageType extends MessageTypes> (id: string, type: TMessageType, request: RequestTypes[TMessageType], port: chrome.runtime.Port): Promise<ResponseType<TMessageType>> {
     switch (type) {
@@ -2545,6 +2635,10 @@ export default class KoniExtension extends Extension {
         return await this.getStakeWithdrawalTxInfo(request as StakeWithdrawalParams);
       case 'pri(unbonding.submitWithdrawal)':
         return await this.submitStakeWithdrawal(id, port, request as StakeWithdrawalParams);
+
+      // EVM Transaction
+      case 'pri(evm.transaction.parse.input)':
+        return this.parseEVMTransactionInput(request as RequestParseEVMTransactionInput);
       default:
         return super.handle(id, type, request, port);
     }

@@ -298,6 +298,7 @@ export interface NetworkJson {
   // Other informations
   coinGeckoKey?: string; // Provider key to get token price from CoinGecko // user input
   blockExplorer?: string; // Link to block scanner to check transaction with extrinsic hash // user input
+  abiExplorer?: string; // Link to block scanner to check transaction with extrinsic hash // user input
   dependencies?: string[]; // Auto active network in dependencies if current network is activated
   getStakingOnChain?: boolean; // support get bonded on chain
   supportBonding?: boolean;
@@ -969,6 +970,27 @@ export interface SingleModeJson {
   autoTriggerDomain: string // Regex for auto trigger single mode
 }
 
+
+export interface EVMTransactionArg {
+  name: string;
+  type: string;
+  value: string;
+}
+
+export interface ParseEVMTransactionData{
+  method: string;
+  args: EVMTransactionArg[];
+}
+
+export interface RequestParseEVMTransactionInput {
+  data: string;
+}
+
+export interface ResponseParseEVMTransactionInput {
+  result: ParseEVMTransactionData | string
+}
+
+
 export interface KoniRequestSignatures {
   'pri(unbonding.submitWithdrawal)': [StakeWithdrawalParams, BasicTxResponse, BasicTxResponse]
   'pri(unbonding.withdrawalTxInfo)': [StakeWithdrawalParams, BasicTxInfo];
@@ -1069,5 +1091,8 @@ export interface KoniRequestSignatures {
   // EVM inject request
   'evm(events.subscribe)': [RequestEvmEvents, boolean, EvmEvent];
   'evm(request)': [RequestArguments, unknown];
-  'evm(provider.send)': [RequestEvmProviderSend, string | number, ResponseEvmProviderSend]
+  'evm(provider.send)': [RequestEvmProviderSend, string | number, ResponseEvmProviderSend];
+
+  // EVM Transaction
+  'pri(evm.transaction.parse.input)': [RequestParseEVMTransactionInput, ResponseParseEVMTransactionInput];
 }

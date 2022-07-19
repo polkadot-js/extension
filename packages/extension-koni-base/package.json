@@ -63,7 +63,9 @@
     "axios": "^0.27.2",
     "cross-fetch": "^3.1.5",
     "eth-simple-keyring": "^4.2.0",
+    "ethereum-input-data-decoder": "^0.4.1",
     "ethereumjs-tx": "^2.1.2",
+    "ethers": "^5.6.9",
     "eventemitter3": "^4.0.7",
     "graphql": "^16.5.0",
     "json-rpc-engine": "^6.1.0",
@@ -74,7 +76,8 @@
     "web3": "^1.7.4",
     "web3-core": "^1.7.4",
     "web3-core-helpers": "^1.7.4",
-    "web3-eth-contract": "^1.7.4"
+    "web3-eth-contract": "^1.7.4",
+    "web3-utils": "^1.7.4"
   },
   "devDependencies": {
     "@subwallet/extension-mocks": "^0.4.9-0"

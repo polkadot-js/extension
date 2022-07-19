@@ -20,7 +20,15 @@ import uiSettings from '@polkadot/ui-settings';
 
 import { AccountContext, ActionContext, AuthorizeReqContext, ConfirmationsQueueContext, MediaContext, MetadataReqContext, SettingsContext, SigningReqContext } from '../components/contexts';
 import ToastProvider from '../components/Toast/ToastProvider';
-import { saveCurrentAccountAddress, subscribeAccountsWithCurrentAddress, subscribeAuthorizeRequestsV2, subscribeConfirmations, subscribeMetadataRequests, subscribeSigningRequests } from '../messaging';
+import {
+  parseEVMTransactionInput,
+  saveCurrentAccountAddress,
+  subscribeAccountsWithCurrentAddress,
+  subscribeAuthorizeRequestsV2,
+  subscribeConfirmations,
+  subscribeMetadataRequests,
+  subscribeSigningRequests
+} from '../messaging';
 import { store } from '../stores';
 import { buildHierarchy } from '../util/buildHierarchy';
 
@@ -214,6 +222,9 @@ export default function Popup (): React.ReactElement {
       setSettingsCtx(settings);
       setCameraOn(settings.camera === 'on');
     });
+
+    parseEVMTransactionInput({data: '0xb9f813ff000000000000000000000000ffffffff1fcacbd218edc0eba20fc2308c7780800000000000000000000000000000000000000000000000000000000aaea91199000000000000000000000000000000000000000000000000000000000000008000000000000000000000000000000000000000000000000000000000ee6b28000000000000000000000000000000000000000000000000000000000000000001000000000000000000000000000000000000000000000000000000000000004000000000000000000000000000000000000000000000000000000000000000010000000000000000000000000000000000000000000000000000000000000020000000000000000000000000000000000000000000000000000000000000002201e29c57c350af5fe481825f1a88ab4371a6a6cb687a2f5961b92188cc72898a3300000000000000000000000000000000000000000000000000000000000000'})
+      .then(r => console.log(r));
   }, []);
 
   useSetupStore();

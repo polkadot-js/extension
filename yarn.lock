@@ -4960,6 +4960,7 @@ __metadata:
     "@zeitgeistpm/type-defs": ^0.6.0
     "@zeroio/type-definitions": ^0.0.14
     axios: ^0.27.2
+    bignumber.js: ^9.0.2
     cross-fetch: ^3.1.5
     eth-simple-keyring: ^4.2.0
     ethereumjs-tx: ^2.1.2
@@ -8218,7 +8219,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"bignumber.js@npm:^9.0.0, bignumber.js@npm:^9.0.1":
+"bignumber.js@npm:^9.0.0, bignumber.js@npm:^9.0.1, bignumber.js@npm:^9.0.2":
   version: 9.0.2
   resolution: "bignumber.js@npm:9.0.2"
   checksum: 8637b71d0a99104b20413c47578953970006fec6b4df796b9dcfd9835ea9c402ea0e727eba9a5ca9f9a393c1d88b6168c5bbe0887598b708d4f8b4870ad62e1f

@@ -61,20 +61,24 @@ function UnbondingSubmitTransaction ({ className }: Props): React.ReactElement<P
   const [minBond, setMinBond] = useState<string>('0');
 
   useEffect(() => {
-    getStakeDelegationInfo({
-      address: account?.address as string,
-      networkKey: selectedNetwork
-    }).then((result) => {
-      setDelegations(result);
-      setIsDataReady(true);
-      setSelectedValidator(result[0].owner);
-      setNominatedAmount(result[0].amount);
-      setMinBond(result[0].minBond);
+    if (CHAIN_TYPE_MAP.astar.includes(selectedNetwork) || CHAIN_TYPE_MAP.para.includes(selectedNetwork)) {
+      getStakeDelegationInfo({
+        address: account?.address as string,
+        networkKey: selectedNetwork
+      }).then((result) => {
+        setDelegations(result);
+        setIsDataReady(true);
+        setSelectedValidator(result[0].owner);
+        setNominatedAmount(result[0].amount);
+        setMinBond(result[0].minBond);
 
-      if (result[0].hasScheduledRequest) {
-        setIsValidValidator(false);
-      }
-    }).catch(console.error);
+        if (result[0].hasScheduledRequest) {
+          setIsValidValidator(false);
+        }
+      }).catch(console.error);
+    } else {
+      setIsDataReady(true);
+    }
 
     return () => {
       setDelegations(undefined);
@@ -87,8 +91,6 @@ function UnbondingSubmitTransaction ({ className }: Props): React.ReactElement<P
       navigate('/');
     }
   }, [navigate, networkJson.active]);
-
-  console.log(delegations);
 
   const goHome = useCallback(() => {
     navigate('/');
@@ -125,7 +127,7 @@ function UnbondingSubmitTransaction ({ className }: Props): React.ReactElement<P
         }
       }
     }
-  }, [amount, bondedAmount, isClickNext, minBond, networkJson.decimals, networkJson.nativeToken, nominatedAmount, show, showAuth, showResult, delegations, isValidValidator]);
+  }, [amount, bondedAmount, isClickNext, minBond, networkJson.decimals, networkJson.nativeToken, nominatedAmount, show, showAuth, showResult, delegations]);
 
   const getDefaultValue = useCallback(() => {
     if (amount === -1) {
@@ -360,7 +362,7 @@ function UnbondingSubmitTransaction ({ className }: Props): React.ReactElement<P
                 Cancel
                 </Button>
                 <Button
-                  isDisabled={!isReadySubmit || !isValidValidator}
+                  isDisabled={!isReadySubmit || (delegations && !isValidValidator)} // the latter is for parachains
                   onClick={handleConfirm}
                 >
                   {

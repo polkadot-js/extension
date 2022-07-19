@@ -341,7 +341,7 @@ function UnbondingSubmitTransaction ({ className }: Props): React.ReactElement<P
                     autoFocus
                     className={'submit-bond-amount-input'}
                     decimals={networkJson.decimals}
-                    defaultValue={getDefaultValue()}
+                    defaultValue={unbondAll ? getDefaultValue() : undefined}
                     help={`Type the amount you want to unstake. You can unstake ${bondedAmount} ${networkJson.nativeToken as string}`}
                     isDisabled={unbondAll}
                     isError={false}

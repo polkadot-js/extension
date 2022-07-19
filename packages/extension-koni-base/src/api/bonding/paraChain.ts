@@ -102,41 +102,47 @@ export async function getParaCollatorsInfo (networkKey: string, dotSamaApi: ApiP
   const currentBondingValidators: string[] = [];
   const existingRequestsMap: Record<string, boolean> = {};
 
-  // double-check bondedValidators to see if exist unbonding request
-  await Promise.all(bondedValidators.map(async (validator) => {
-    const rawScheduledRequests = (await apiProps.api.query.parachainStaking.delegationScheduledRequests(validator)).toHuman() as Record<string, any>[] | null;
+  if (['bifrost', 'bifrost_testnet'].includes(networkKey)) {
+    const bifrostRes = getBifrostBondedValidators(networkKey, dotSamaApi, decimals, address);
 
-    if (rawScheduledRequests === null) {
-      currentBondingValidators.push(validator);
-    } else {
-      let foundRevokeRequest = false;
+    console.log(bifrostRes);
+  } else {
+    // double-check bondedValidators to see if exist unbonding request
+    await Promise.all(bondedValidators.map(async (validator) => {
+      const rawScheduledRequests = (await apiProps.api.query.parachainStaking.delegationScheduledRequests(validator)).toHuman() as Record<string, any>[] | null;
 
-      for (const scheduledRequest of rawScheduledRequests) {
-        const delegator = scheduledRequest.delegator as string;
-        const formattedDelegator = reformatAddress(delegator, 0);
-        const formattedAddress = reformatAddress(address, 0);
+      if (rawScheduledRequests === null) {
+        currentBondingValidators.push(validator);
+      } else {
+        let foundRevokeRequest = false;
 
-        if (formattedAddress === formattedDelegator) { // returned data might not have the same address format
-          const _action = scheduledRequest.action as Record<string, string>;
-          const action = Object.keys(_action)[0];
+        for (const scheduledRequest of rawScheduledRequests) {
+          const delegator = scheduledRequest.delegator as string;
+          const formattedDelegator = reformatAddress(delegator, 0);
+          const formattedAddress = reformatAddress(address, 0);
 
-          existingRequestsMap[validator] = true;
+          if (formattedAddress === formattedDelegator) { // returned data might not have the same address format
+            const _action = scheduledRequest.action as Record<string, string>;
+            const action = Object.keys(_action)[0];
 
-          if (action.toLowerCase() !== REVOKE_ACTION) {
-            currentBondingValidators.push(validator);
-            break;
-          } else {
-            foundRevokeRequest = true;
-            break;
+            existingRequestsMap[validator] = true;
+
+            if (action.toLowerCase() !== REVOKE_ACTION) {
+              currentBondingValidators.push(validator);
+              break;
+            } else {
+              foundRevokeRequest = true;
+              break;
+            }
           }
         }
-      }
 
-      if (!foundRevokeRequest) {
-        currentBondingValidators.push(validator);
+        if (!foundRevokeRequest) {
+          currentBondingValidators.push(validator);
+        }
       }
-    }
-  }));
+    }));
+  }
 
   const extraInfoMap: Record<string, CollatorExtraInfo> = {};
 
@@ -640,4 +646,8 @@ async function getBifrostDelegationInfo (dotSamaApi: ApiProps, address: string) 
   }
 
   return delegationsList;
+}
+
+function getBifrostBondedValidators (networkKey: string, dotSamaApi: ApiProps, decimals: number, address: string) {
+  return [];
 }

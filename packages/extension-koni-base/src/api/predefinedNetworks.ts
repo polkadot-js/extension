@@ -568,7 +568,7 @@ export const PREDEFINED_NETWORKS: Record<string, NetworkJson> = {
     },
     active: false,
     currentProviderMode: 'ws',
-    currentProvider: 'Blast',
+    currentProvider: 'Moonbeam Foundation',
     groups: ['TEST_NET'],
     nativeToken: 'DEV',
     isEthereum: true,

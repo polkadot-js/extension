@@ -72,28 +72,28 @@ function StakingRow ({ activeStake, address, chainName, className, index, isAcco
   }, [showStakingMenu]);
 
   useEffect(() => {
+    let isNeedUpdate = true;
+
     if (parseFloat(unbondingStake as string) > 0) {
-      getUnlockingStakeInfo({
-        networkKey,
-        address
-      })
-        .then((resp) => {
-          console.log('call here');
-          setRedeemable(resp.redeemable);
-          setNextWithdrawal(resp.nextWithdrawal);
-          setNextWithdrawalAmount(resp.nextWithdrawalAmount);
-          setTargetValidator(resp.validatorAddress || '');
-          setNextWithdrawalAction(resp.nextWithdrawalAction);
+      if (isNeedUpdate) { // clean up useEffect on unmount
+        getUnlockingStakeInfo({
+          networkKey,
+          address
         })
-        .catch(console.error);
+          .then((resp) => {
+            console.log('call here', resp);
+            setRedeemable(resp.redeemable);
+            setNextWithdrawal(resp.nextWithdrawal);
+            setNextWithdrawalAmount(resp.nextWithdrawalAmount);
+            setTargetValidator(resp.validatorAddress || '');
+            setNextWithdrawalAction(resp.nextWithdrawalAction);
+          })
+          .catch(console.error);
+      }
     }
 
     return () => {
-      setRedeemable(-1);
-      setNextWithdrawal(-1);
-      setNextWithdrawalAmount(-1);
-      setTargetValidator('');
-      setNextWithdrawalAction(undefined);
+      isNeedUpdate = false;
     };
   }, [address, networkKey, unbondingStake]);
 

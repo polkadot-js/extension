@@ -174,7 +174,7 @@ function StakingMenu ({ bondedAmount, className, networkKey, nextWithdrawal, nex
                 {
                   parseFloat(bondedAmount) > 0 && <Tooltip
                     place={'top'}
-                    text={'Make sure to claim your rewards before unstaking'}
+                    text={'Make sure you claim all rewards regularly and before you unstake'}
                     trigger={`claim-button-tooltip-${networkKey}`}
                   />
                 }

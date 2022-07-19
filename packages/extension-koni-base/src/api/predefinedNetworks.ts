@@ -562,12 +562,13 @@ export const PREDEFINED_NETWORKS: Record<string, NetworkJson> = {
     ss58Format: 1287,
     providers: {
       'Moonbeam Foundation': 'wss://wss.api.moonbase.moonbeam.network',
-      OnFinality: 'wss://moonbeam-alpha.api.onfinality.io/public-ws'
+      OnFinality: 'wss://moonbeam-alpha.api.onfinality.io/public-ws',
+      Blast: 'wss://moonbase-alpha.public.blastapi.io'
       // Pinknode: 'wss://rpc.pinknode.io/alphanet/explorer' // https://github.com/polkadot-js/apps/issues/7058
     },
     active: false,
     currentProviderMode: 'ws',
-    currentProvider: 'Moonbeam Foundation',
+    currentProvider: 'Blast',
     groups: ['TEST_NET'],
     nativeToken: 'DEV',
     isEthereum: true,

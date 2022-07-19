@@ -104,22 +104,36 @@ export async function getParaCollatorsInfo (networkKey: string, dotSamaApi: ApiP
 
   // double-check bondedValidators to see if exist unbonding request
   await Promise.all(bondedValidators.map(async (validator) => {
-    const rawScheduledRequests = (await apiProps.api.query.parachainStaking.delegationScheduledRequests(validator)).toHuman() as Record<string, any>[];
+    const rawScheduledRequests = (await apiProps.api.query.parachainStaking.delegationScheduledRequests(validator)).toHuman() as Record<string, any>[] | null;
 
-    for (const scheduledRequest of rawScheduledRequests) {
-      const delegator = scheduledRequest.delegator as string;
-      const formattedDelegator = reformatAddress(delegator, 0);
-      const formattedAddress = reformatAddress(address, 0);
+    if (rawScheduledRequests === null) {
+      currentBondingValidators.push(validator);
+    } else {
+      let foundRevokeRequest = false;
 
-      if (formattedAddress === formattedDelegator) { // returned data might not have the same address format
-        const _action = scheduledRequest.action as Record<string, string>;
-        const action = Object.keys(_action)[0];
+      for (const scheduledRequest of rawScheduledRequests) {
+        const delegator = scheduledRequest.delegator as string;
+        const formattedDelegator = reformatAddress(delegator, 0);
+        const formattedAddress = reformatAddress(address, 0);
 
-        existingRequestsMap[validator] = true;
+        if (formattedAddress === formattedDelegator) { // returned data might not have the same address format
+          const _action = scheduledRequest.action as Record<string, string>;
+          const action = Object.keys(_action)[0];
 
-        if (action.toLowerCase() !== REVOKE_ACTION) {
-          currentBondingValidators.push(validator);
+          existingRequestsMap[validator] = true;
+
+          if (action.toLowerCase() !== REVOKE_ACTION) {
+            currentBondingValidators.push(validator);
+            break;
+          } else {
+            foundRevokeRequest = true;
+            break;
+          }
         }
+      }
+
+      if (!foundRevokeRequest) {
+        currentBondingValidators.push(validator);
       }
     }
   }));

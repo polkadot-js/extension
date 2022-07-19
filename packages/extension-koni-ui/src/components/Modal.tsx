@@ -3,25 +3,38 @@
 
 import type { ThemeProps } from '../types';
 
-import React from 'react';
+import CN from 'classnames';
+import React, { useCallback } from 'react';
 import styled from 'styled-components';
 
 interface Props {
   children: React.ReactNode;
   className?: string;
   reference?: React.RefObject<HTMLDivElement>;
+  wrapperClassName?: string;
+  maskClosable?: boolean;
+  onClose?: () => void;
 }
 
-function Modal ({ children, className, reference }: Props): React.ReactElement<Props> {
+function Modal ({ children, className, maskClosable, onClose, reference, wrapperClassName }: Props): React.ReactElement<Props> {
+  const onClickBackdrop = useCallback(() => {
+    if (maskClosable) {
+      onClose && onClose();
+    }
+  }, [maskClosable, onClose]);
+
   return (
     <div
       className={className}
       ref={reference}
     >
-      <div className='subwallet-modal'>
+      <div className={CN('subwallet-modal', wrapperClassName)}>
         {children}
       </div>
-      <div className='subwallet-modal__backdrop' />
+      <div
+        className='subwallet-modal__backdrop'
+        onClick={onClickBackdrop}
+      />
     </div>
   );
 }

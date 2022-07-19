@@ -228,25 +228,26 @@ function UnbondingSubmitTransaction ({ className }: Props): React.ReactElement<P
     if (delegations) {
       for (const item of delegations) {
         if (item.owner === val) {
+          setSelectedValidator(val);
+          setNominatedAmount(item.amount);
+          setMinBond(item.minBond);
+
+          if (unbondAll) {
+            const _nominatedAmount = parseFloat(item.amount) / (10 ** (networkJson.decimals as number));
+
+            setAmount(_nominatedAmount);
+          } else {
+            setAmount(0);
+          }
+
           if (!item.hasScheduledRequest) {
-            setSelectedValidator(val);
-            setNominatedAmount(item.amount);
-            setMinBond(item.minBond);
             setIsValidValidator(true);
-
-            if (unbondAll) {
-              const _nominatedAmount = parseFloat(item.amount) / (10 ** (networkJson.decimals as number));
-
-              setAmount(_nominatedAmount);
-            } else {
-              setAmount(0);
-            }
-
-            break;
           } else {
             show('Please withdraw the unstaking amount first');
             setIsValidValidator(false);
           }
+
+          break;
         }
       }
     }

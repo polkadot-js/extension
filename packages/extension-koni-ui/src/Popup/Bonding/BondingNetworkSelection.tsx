@@ -33,13 +33,21 @@ function BondingNetworkSelection ({ className }: Props): React.ReactElement<Prop
   }, []);
 
   useEffect(() => {
-    getChainBondingBasics(availableNetworks, (data) => {
-      setLoading(false);
-      setChainBondingBasics(data);
-    }).then((data) => {
-      setLoading(false);
-      setChainBondingBasics(data);
-    }).catch(console.error);
+    let needUpdate = true;
+
+    if (needUpdate) {
+      getChainBondingBasics(availableNetworks, (data) => {
+        setLoading(false);
+        setChainBondingBasics(data);
+      }).then((data) => {
+        setLoading(false);
+        setChainBondingBasics(data);
+      }).catch(console.error);
+    }
+
+    return () => {
+      needUpdate = false;
+    };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 

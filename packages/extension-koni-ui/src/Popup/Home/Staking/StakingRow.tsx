@@ -81,7 +81,6 @@ function StakingRow ({ activeStake, address, chainName, className, index, isAcco
           address
         })
           .then((resp) => {
-            console.log('call here', resp);
             setRedeemable(resp.redeemable);
             setNextWithdrawal(resp.nextWithdrawal);
             setNextWithdrawalAmount(resp.nextWithdrawalAmount);

@@ -29,6 +29,18 @@ interface Props extends ThemeProps {
   className?: string;
 }
 
+function filterValidDelegations (delegations: DelegationItem[]) {
+  const filteredDelegations: DelegationItem[] = [];
+
+  delegations.forEach((item) => {
+    if (parseFloat(item.amount) > 0) {
+      filteredDelegations.push(item);
+    }
+  });
+
+  return filteredDelegations;
+}
+
 function UnbondingSubmitTransaction ({ className }: Props): React.ReactElement<Props> {
   const { t } = useTranslation();
   const { show } = useToast();
@@ -66,13 +78,15 @@ function UnbondingSubmitTransaction ({ className }: Props): React.ReactElement<P
         address: account?.address as string,
         networkKey: selectedNetwork
       }).then((result) => {
-        setDelegations(result);
-        setIsDataReady(true);
-        setSelectedValidator(result[0].owner);
-        setNominatedAmount(result[0].amount);
-        setMinBond(result[0].minBond);
+        const filteredDelegations = filterValidDelegations(result);
 
-        if (result[0].hasScheduledRequest) {
+        setIsDataReady(true);
+        setDelegations(filteredDelegations);
+        setSelectedValidator(filteredDelegations[0].owner);
+        setNominatedAmount(filteredDelegations[0].amount);
+        setMinBond(filteredDelegations[0].minBond);
+
+        if (filteredDelegations[0].hasScheduledRequest) {
           setIsValidValidator(false);
         }
       }).catch(console.error);

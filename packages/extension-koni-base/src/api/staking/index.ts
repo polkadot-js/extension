@@ -75,7 +75,6 @@ function getParaStakingOnChain (parentApi: ApiProps, useAddresses: string[], net
     let activeBalance = 0;
     let unlockingBalance = 0;
     let stakingItem: StakingItem;
-    const delegationMap: Record<string, string> = {};
 
     if (ledgers) {
       for (const ledger of ledgers) {
@@ -86,15 +85,6 @@ function getParaStakingOnChain (parentApi: ApiProps, useAddresses: string[], net
           let _totalBalance = data.total as string;
           // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
           let _unlockingBalance = data.lessTotal ? data.lessTotal as string : data.requests.lessTotal as string;
-          const _delegations = data.delegations as Record<string, string>[];
-
-          for (const item of _delegations) {
-            if (item.owner in delegationMap) {
-              delegationMap[item.owner] = (parseRawNumber(item.amount) + parseRawNumber(delegationMap[item.owner])).toString();
-            } else {
-              delegationMap[item.owner] = parseRawNumber(item.amount).toString();
-            }
-          }
 
           _totalBalance = _totalBalance.replaceAll(',', '');
           _unlockingBalance = _unlockingBalance.replaceAll(',', '');

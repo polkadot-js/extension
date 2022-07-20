@@ -1,7 +1,6 @@
 // Copyright 2019-2022 @polkadot/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import type { IconTheme } from '@polkadot/react-identicon/types';
 import type { KeypairType } from '@polkadot/util-crypto/types';
 import type { Recoded, ThemeProps } from '../types';
 
@@ -18,6 +17,8 @@ import React, { useCallback, useContext, useEffect, useState } from 'react';
 import CopyToClipboard from 'react-copy-to-clipboard';
 import { useSelector } from 'react-redux';
 import styled from 'styled-components';
+
+import { isEthereumAddress } from '@polkadot/util-crypto';
 
 import useToast from '../hooks/useToast';
 import useTranslation from '../hooks/useTranslation';
@@ -48,9 +49,9 @@ function AccountInfo ({ accountSplitPart = 'both', address, addressHalfLength = 
   const [{ account,
     formatted,
     genesisHash: recodedGenesis,
-    isEthereum,
     prefix }, setRecoded] = useState<Recoded>(defaultRecoded);
   const networkMap = useSelector((state: RootState) => state.networkMap);
+  const [iconTheme, setIconTheme] = useState<'polkadot'|'ethereum'>('polkadot');
   const { show } = useToast();
   const accountName = name || account?.name;
   const displayName = accountName || t('<unknown>');
@@ -94,14 +95,12 @@ function AccountInfo ({ accountSplitPart = 'both', address, addressHalfLength = 
       return;
     }
 
+    if (isEthereumAddress(address)) {
+      setIconTheme('ethereum');
+    }
+
     setRecoded(recodeAddress(address, accounts, networkInfo, givenType));
   }, [accounts, _isAccountAll, address, networkInfo, givenType]);
-
-  const iconTheme = (
-    isEthereum
-      ? 'ethereum'
-      : (networkInfo?.icon || 'polkadot')
-  ) as IconTheme;
 
   const _onCopy = useCallback(
     () => show(t('Copied')),

@@ -11,6 +11,7 @@ import { _jsonInterfaceMethodToString, AbiInput, AbiItem, keccak256 } from 'web3
 
 export interface InputData {
   method: string | null;
+  methodName: string | null;
   types: string[];
   inputs: NestedArray<any>[];
   names: NestedArray<string>[];
@@ -56,6 +57,11 @@ const getMethodId = (abi: AbiItem): string => {
   return keccak256(_jsonInterfaceMethodToString(abi)).slice(2, 10);
 };
 
+const getMethodName = (abi: AbiItem): string => {
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-argument,@typescript-eslint/no-unsafe-call
+  return _jsonInterfaceMethodToString(abi) as string;
+};
+
 const deepRemoveUnwantedArrayProperties = (arr: any[] | Result): any[] => {
   // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment,@typescript-eslint/no-unsafe-return
   return [...arr.map((item) => {
@@ -76,11 +82,11 @@ function deepStripTupleAddresses (input: any[], tupleTypes: AbiInput[]): any[] {
     const type = tupleTypes[i] ? tupleTypes[i].type : null;
 
     if (type === 'address' && typeof item === 'string') {
-      return item.split('0x')[1];
+      return item;
     }
 
     if (type === 'address[]' && Array.isArray(item)) {
-      return item.map((a) => (a as string).split('0x')[1]);
+      return item.map((a) => a as string);
     }
 
     if (Array.isArray(item)) {
@@ -137,6 +143,7 @@ export class InputDataDecoder {
       }
 
       const method = obj.name || null;
+      const methodName = getMethodName(obj);
       const types = obj.inputs ? obj.inputs.map((x) => x.type) : [];
       const names = obj.inputs ? obj.inputs.map((x) => x.name) : [];
 
@@ -156,6 +163,7 @@ export class InputDataDecoder {
       const inputs = deepRemoveUnwantedArrayProperties(_inputs);
 
       return {
+        methodName,
         method,
         types,
         inputs,
@@ -181,7 +189,7 @@ export class InputDataDecoder {
     const methodId = toHexString(dataBuf.subarray(0, 4));
     const inputsBuf = dataBuf.subarray(4);
 
-    let result: InputData = { method: null, types: [], inputs: [], names: [] };
+    let result: InputData = { method: null, methodName: null, types: [], inputs: [], names: [] };
 
     for (const abi of this.abi) {
       try {
@@ -194,6 +202,7 @@ export class InputDataDecoder {
         }
 
         const method = abi.name || null;
+        const methodName = getMethodName(abi);
         const types = abi.inputs
           ? abi.inputs.map((x) => {
             if (x.type.includes('tuple')) {
@@ -242,11 +251,11 @@ export class InputDataDecoder {
             }
 
             if (types[i] === 'address' && typeof input === 'string') {
-              return input.split('0x')[1];
+              return input;
             }
 
             if (types[i] === 'address[]' && Array.isArray(input)) {
-              return input.map((address) => (address as string).split('0x')[1]);
+              return input.map((address) => address as string);
             }
 
             // eslint-disable-next-line @typescript-eslint/no-unsafe-return
@@ -260,6 +269,7 @@ export class InputDataDecoder {
           _inputs = deepRemoveUnwantedArrayProperties(_inputs);
 
           result = {
+            methodName,
             method,
             types: typesToReturn,
             inputs: _inputs,
@@ -289,6 +299,7 @@ export class InputDataDecoder {
           const inputs = deepRemoveUnwantedArrayProperties(_result);
 
           result.method = method;
+          result.methodName = getMethodName(obj);
           result.inputs = inputs;
           result.names = obj.inputs
             ? obj.inputs.map((x) => {

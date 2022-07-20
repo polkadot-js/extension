@@ -568,6 +568,7 @@ export const PREDEFINED_NETWORKS: Record<string, NetworkJson> = {
     groups: ['TEST_NET'],
     nativeToken: 'DEV',
     isEthereum: true,
+    abiExplorer: 'https://api-moonbase.moonscan.io/api?module=contract&action=getabi',
     decimals: 18,
     evmChainId: 1287
   },
@@ -725,6 +726,7 @@ export const PREDEFINED_NETWORKS: Record<string, NetworkJson> = {
     crowdloanUrl: 'https://polkadot.js.org/apps/#/parachains/crowdloan',
     decimals: 18,
     coinGeckoKey: 'moonriver',
+    abiExplorer: 'https://api-moonriver.moonscan.io/api?module=contract&action=getabi',
     evmChainId: 1285
   },
   shiden: {

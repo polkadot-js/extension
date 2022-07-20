@@ -981,6 +981,7 @@ export interface EVMTransactionArg {
 
 export interface ParseEVMTransactionData{
   method: string;
+  methodName: string;
   args: EVMTransactionArg[];
 }
 

@@ -132,9 +132,10 @@ export const parseTransactionData = async (input: string, contractAddress: strin
     const decoder = new InputDataDecoder(abi);
     const raw = decoder.decodeData(input);
 
-    if (raw.method) {
+    if (raw.method && raw.methodName) {
       const temp: ParseEVMTransactionData = {
         method: raw.method,
+        methodName: raw.methodName,
         args: []
       };
 

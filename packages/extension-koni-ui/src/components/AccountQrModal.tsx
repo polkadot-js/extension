@@ -622,7 +622,7 @@ export default styled(AccountQrModal)(({ theme }: ThemeProps) => `
       background-color: ${theme.popupBackground};
 
       .account-qr-modal{
-        height: 500px;
+        height: 450px;
       }
     }
   }
@@ -634,7 +634,7 @@ export default styled(AccountQrModal)(({ theme }: ThemeProps) => `
     margin-bottom: 10px;
 
     .account-item {
-      padding: 5px 0;
+      padding: 10px 0;
       position: relative;
       cursor: pointer;
 

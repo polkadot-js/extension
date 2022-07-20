@@ -4775,6 +4775,7 @@ __metadata:
     "@zeitgeistpm/type-defs": ^0.6.0
     "@zeroio/type-definitions": ^0.0.14
     axios: ^0.27.2
+    buffer: ^6.0.3
     cross-fetch: ^3.1.5
     eth-simple-keyring: ^4.2.0
     ethereum-input-data-decoder: ^0.4.1
@@ -4782,6 +4783,7 @@ __metadata:
     ethers: ^5.6.9
     eventemitter3: ^4.0.7
     graphql: ^16.5.0
+    is-buffer: ^2.0.5
     json-rpc-engine: ^6.1.0
     moonbeam-types-bundle: 2.0.3
     pontem-types-bundle: ^1.0.15
@@ -13940,7 +13942,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"is-buffer@npm:^2.0.0, is-buffer@npm:^2.0.3":
+"is-buffer@npm:^2.0.0, is-buffer@npm:^2.0.3, is-buffer@npm:^2.0.5":
   version: 2.0.5
   resolution: "is-buffer@npm:2.0.5"
   checksum: 764c9ad8b523a9f5a32af29bdf772b08eb48c04d2ad0a7240916ac2688c983bf5f8504bf25b35e66240edeb9d9085461f9b5dae1f3d2861c6b06a65fe983de42

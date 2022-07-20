@@ -152,7 +152,7 @@ module.exports = (entry, alias = {}, useSplitChunk = false) => {
       }
     },
     node: {
-      fs: "empty"
+      fs: 'empty'
     },
     watch: false
   };

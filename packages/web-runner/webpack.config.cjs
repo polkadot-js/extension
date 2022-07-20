@@ -8,6 +8,7 @@ const CopyPlugin = require('copy-webpack-plugin');
 
 const pkgJson = require('./package.json');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
+const InlineSourceWebpackPlugin = require('inline-source-webpack-plugin');
 
 const args = process.argv.slice(2);
 let mode = 'production';
@@ -104,8 +105,12 @@ const createConfig = (entry, alias = {}, useSplitChunk = false) => {
       }),
       new HtmlWebpackPlugin({
         filename: 'index.html',
-        template: 'public/index.html',
-        chunks: ['fallback', 'web-runner']
+        template: 'public/index.html'
+      }),
+      new InlineSourceWebpackPlugin({
+        compress: true,
+        rootpath: './build',
+        noAssetMatch: 'warn'
       })
     ],
     resolve: {
@@ -132,29 +137,10 @@ const createConfig = (entry, alias = {}, useSplitChunk = false) => {
     watch: false
   };
 
-  if (useSplitChunk) {
-    result.optimization = {
-      splitChunks: {
-        chunks: 'all',
-        maxSize: 2000000,
-        cacheGroups: {
-          vendors: {
-            test: /[\\/]node_modules[\\/]/,
-            priority: -10
-          },
-          default: {
-            priority: -20,
-            reuseExistingChunk: true
-          }
-        }
-      }
-    };
-  }
-
   return result;
 };
 
 module.exports = createConfig({
   fallback: './src/fallback.ts',
   'web-runner': './src/webRunner.ts'
-});
+}, {}, false);

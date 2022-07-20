@@ -3,7 +3,7 @@
 
 import type { ThemeProps } from '../types';
 
-import { AssetImageMap } from '@subwallet/extension-koni-ui/assets';
+import Loading from '@subwallet/extension-koni-ui/components/Loading';
 import React from 'react';
 import styled from 'styled-components';
 
@@ -14,10 +14,7 @@ interface Props extends ThemeProps {
 
 function Spinner ({ className = '', size = 'normal' }: Props): React.ReactElement<Props> {
   return (
-    <img
-      className={`${className} ${size}Size`}
-      src={AssetImageMap.loading}
-    />
+    <Loading className={`${className} ${size}Size`}/>
   );
 }
 
@@ -31,4 +28,9 @@ export default React.memo(styled(Spinner)`
   margin: auto;
   position: absolute;
   z-index: 1;
+  
+  &.largeSize {
+    height: 64px;
+    width: 64px;
+  }
 `);

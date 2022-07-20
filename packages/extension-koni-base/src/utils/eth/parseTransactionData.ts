@@ -5,7 +5,6 @@ import { FunctionFragment, JsonFragment, Result } from '@ethersproject/abi';
 import { NestedArray } from '@subwallet/extension-base/background/KoniTypes';
 import { Buffer } from 'buffer';
 import { ethers } from 'ethers';
-import fs from 'fs';
 import isBuffer from 'is-buffer';
 // @ts-ignore
 import { _jsonInterfaceMethodToString, AbiInput, AbiItem, keccak256 } from 'web3-utils';
@@ -108,13 +107,9 @@ export class InputDataDecoder {
 
     if (typeof prop === 'string') {
       try {
-        this.abi = JSON.parse(fs.readFileSync(prop) as unknown as string) as AbiItem[];
+        this.abi = JSON.parse(prop) as AbiItem[];
       } catch (err) {
-        try {
-          this.abi = JSON.parse(prop) as AbiItem[];
-        } catch (err) {
-          throw new Error(`Invalid ABI: ${(err as Error).message}`);
-        }
+        throw new Error(`Invalid ABI: ${(err as Error).message}`);
       }
     } else if (checkArrayAbiItems(prop)) {
       this.abi = prop as AbiItem[];

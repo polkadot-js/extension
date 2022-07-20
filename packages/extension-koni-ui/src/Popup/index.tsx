@@ -20,14 +20,7 @@ import uiSettings from '@polkadot/ui-settings';
 
 import { AccountContext, ActionContext, AuthorizeReqContext, ConfirmationsQueueContext, MediaContext, MetadataReqContext, SettingsContext, SigningReqContext } from '../components/contexts';
 import ToastProvider from '../components/Toast/ToastProvider';
-import {
-  saveCurrentAccountAddress,
-  subscribeAccountsWithCurrentAddress,
-  subscribeAuthorizeRequestsV2,
-  subscribeConfirmations,
-  subscribeMetadataRequests,
-  subscribeSigningRequests
-} from '../messaging';
+import { saveCurrentAccountAddress, subscribeAccountsWithCurrentAddress, subscribeAuthorizeRequestsV2, subscribeConfirmations, subscribeMetadataRequests, subscribeSigningRequests } from '../messaging';
 import { store } from '../stores';
 import { buildHierarchy } from '../util/buildHierarchy';
 

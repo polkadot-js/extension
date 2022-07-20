@@ -112,9 +112,9 @@ function SendEvmTransactionConfirmationInfo ({ className, confirmation: { payloa
       {transaction?.to && <div>
         <AccountInfoEl
           address={transaction.to}
-          genesisHash={network?.genesisHash}
           addressHalfLength={20}
           className='to-account'
+          genesisHash={network?.genesisHash}
           iconSize={20}
           isShowAddress={true}
           isShowBanner={false}

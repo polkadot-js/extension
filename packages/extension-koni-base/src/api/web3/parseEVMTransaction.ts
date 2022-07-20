@@ -1,13 +1,7 @@
 // Copyright 2019-2022 @subwallet/extension-koni authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import {
-  EVMTransactionArg,
-  NestedArray,
-  NetworkJson,
-  ParseEVMTransactionData,
-  ResponseParseEVMTransactionInput
-} from '@subwallet/extension-base/background/KoniTypes';
+import { EVMTransactionArg, NestedArray, NetworkJson, ParseEVMTransactionData, ResponseParseEVMTransactionInput } from '@subwallet/extension-base/background/KoniTypes';
 import { ERC20Contract, ERC721Contract } from '@subwallet/extension-koni-base/api/web3/web3';
 import { InputDataDecoder } from '@subwallet/extension-koni-base/utils/eth/parseTransactionData';
 import axios from 'axios';

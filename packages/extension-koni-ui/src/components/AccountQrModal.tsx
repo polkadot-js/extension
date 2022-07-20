@@ -632,9 +632,6 @@ export default styled(AccountQrModal)(({ theme }: ThemeProps) => `
     overflow-y: auto;
     margin-top: 10px;
     margin-bottom: 10px;
-    gap: 10px;
-    display: flex;
-    flex-direction: column;
 
     .account-item {
       padding: 5px 0;
@@ -667,11 +664,9 @@ export default styled(AccountQrModal)(({ theme }: ThemeProps) => `
     margin-top: 15px;
     margin-bottom: 10px;
     padding-right: 10px;
-    gap: 10px;
-    display: flex;
-    flex-direction: column;
 
     .network-item-container {
+      padding: 5px 0;
       cursor: pointer;
       display: flex;
       justify-content: space-between;

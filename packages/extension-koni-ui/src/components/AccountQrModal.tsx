@@ -12,9 +12,9 @@ import signalIcon from '@subwallet/extension-koni-ui/assets/signal-stream-solid.
 import { AccountContext } from '@subwallet/extension-koni-ui/components/contexts';
 import Identicon from '@subwallet/extension-koni-ui/components/Identicon';
 import { AccountInfoEl } from '@subwallet/extension-koni-ui/components/index';
+import InputFilter from '@subwallet/extension-koni-ui/components/InputFilter';
 import Link from '@subwallet/extension-koni-ui/components/Link';
 import Modal from '@subwallet/extension-koni-ui/components/Modal';
-import { Input } from '@subwallet/extension-koni-ui/components/TextInputs';
 import Tooltip from '@subwallet/extension-koni-ui/components/Tooltip';
 import useScanExplorerAddressUrl from '@subwallet/extension-koni-ui/hooks/screen/home/useScanExplorerAddressUrl';
 import useSupportScanExplorer from '@subwallet/extension-koni-ui/hooks/screen/home/useSupportScanExplorer';
@@ -146,9 +146,7 @@ function AccountQrModal (props: Props): React.ReactElement<Props> {
     [show, t]
   );
 
-  const onChangeFilter = useCallback((event: React.ChangeEvent<HTMLInputElement>) => {
-    const value = event.target.value;
-
+  const onChangeFilter = useCallback((value: string) => {
     setFilter(value);
   }, []);
 
@@ -210,7 +208,6 @@ function AccountQrModal (props: Props): React.ReactElement<Props> {
             >
               <FontAwesomeIcon
                 icon={faCircleQuestion}
-                size={'lg'}
               />
             </div>
             <Tooltip
@@ -218,11 +215,12 @@ function AccountQrModal (props: Props): React.ReactElement<Props> {
               trigger={'header-icon'}
             />
           </div>
-          <Input
+          <InputFilter
             className={CN('query-input')}
             onChange={onChangeFilter}
             placeholder='Search account...'
             value={filter}
+            withReset
           />
           <div className={CN('account-container')}>
             {filteredAccount.map((account, index): React.ReactNode => {
@@ -279,7 +277,6 @@ function AccountQrModal (props: Props): React.ReactElement<Props> {
             >
               <FontAwesomeIcon
                 icon={faCircleQuestion}
-                size={'lg'}
               />
             </div>
             <Tooltip
@@ -287,11 +284,12 @@ function AccountQrModal (props: Props): React.ReactElement<Props> {
               trigger={'header-icon'}
             />
           </div>
-          <Input
+          <InputFilter
             className={CN('query-input')}
             onChange={onChangeFilter}
             placeholder='Search network...'
             value={filter}
+            withReset
           />
           <div className={CN('network-container')}>
             {filteredNetwork.map((network, index): React.ReactNode => {
@@ -624,27 +622,46 @@ export default styled(AccountQrModal)(({ theme }: ThemeProps) => `
       background-color: ${theme.popupBackground};
 
       .account-qr-modal{
-        height: 500px;
+        height: 450px;
       }
     }
   }
 
   .account-container {
-    flex: 1;
+    flex: 1 1 0%;
     overflow-y: auto;
-    margin-top: 24px;
+    margin-top: 10px;
     margin-bottom: 10px;
 
     .account-item {
-       position: relative;
-       cursor: pointer;
+      padding: 10px 0;
+      position: relative;
+      cursor: pointer;
+
+      .account-info-row {
+        height: 40px;
+
+        .account-info__name {
+          line-height: 20px;
+          margin: 0;
+        }
+
+        .account-info-full-address {
+          line-height: 20px;
+          font-size: 12px;
+        }
+      }
+
+      .account-info-identity-icon {
+        padding: 0;
+      }
     }
   }
 
   .network-container {
-    flex: 1;
+    flex: 1 1 0%;
     overflow-y: auto;
-    margin-top: 24px;
+    margin-top: 15px;
     margin-bottom: 10px;
     padding-right: 10px;
 
@@ -662,8 +679,8 @@ export default styled(AccountQrModal)(({ theme }: ThemeProps) => `
 
       .network-logo {
         min-width: 30px;
-        width: 30px;
-        height: 30px;
+        width: 32px;
+        height: 32px;
         border-radius: 100%;
         overflow: hidden;
         image-rendering: -webkit-optimize-contrast;

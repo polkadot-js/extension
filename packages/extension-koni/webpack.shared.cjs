@@ -144,7 +144,8 @@ module.exports = (entry, alias = {}, useSplitChunk = false) => {
         https: require.resolve('https-browserify'),
         assert: require.resolve('assert'),
         zlib: false,
-        url: false
+        url: false,
+        fs: false
         // http: false,
         // zlib: require.resolve("browserify-zlib"),
         // url: require.resolve("url/")

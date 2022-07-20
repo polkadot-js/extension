@@ -970,11 +970,13 @@ export interface SingleModeJson {
   autoTriggerDomain: string // Regex for auto trigger single mode
 }
 
+export type NestedArray<T> = T | NestedArray<T>[];
 
 export interface EVMTransactionArg {
   name: string;
   type: string;
   value: string;
+  children?: EVMTransactionArg[];
 }
 
 export interface ParseEVMTransactionData{
@@ -984,12 +986,13 @@ export interface ParseEVMTransactionData{
 
 export interface RequestParseEVMTransactionInput {
   data: string;
+  contract: string;
+  chainId: number;
 }
 
 export interface ResponseParseEVMTransactionInput {
   result: ParseEVMTransactionData | string
 }
-
 
 export interface KoniRequestSignatures {
   'pri(unbonding.submitWithdrawal)': [StakeWithdrawalParams, BasicTxResponse, BasicTxResponse]

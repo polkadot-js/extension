@@ -156,6 +156,7 @@ export const PREDEFINED_NETWORKS: Record<string, NetworkJson> = {
     crowdloanUrl: 'https://moonbeam.foundation/moonbeam-crowdloan/',
     decimals: 18,
     coinGeckoKey: 'moonbeam',
+    abiExplorer: 'https://api-moonbeam.moonscan.io/api?module=contract&action=getabi',
     evmChainId: 1284
   },
   astar: {

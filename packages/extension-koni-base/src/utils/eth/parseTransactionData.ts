@@ -2,18 +2,18 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { FunctionFragment, JsonFragment, Result } from '@ethersproject/abi';
+import { NestedArray } from '@subwallet/extension-base/background/KoniTypes';
 import { Buffer } from 'buffer';
 import { ethers } from 'ethers';
-import * as fs from 'fs';
+import fs from 'fs';
 import isBuffer from 'is-buffer';
-import { AbiInput, AbiItem, jsonInterfaceMethodToString, keccak256 } from 'web3-utils';
-
-type NestedArray<T> = T | NestedArray<T>[];
+// @ts-ignore
+import { _jsonInterfaceMethodToString, AbiInput, AbiItem, keccak256 } from 'web3-utils';
 
 export interface InputData {
   method: string | null;
   types: string[];
-  inputs: any[];
+  inputs: NestedArray<any>[];
   names: NestedArray<string>[];
 }
 
@@ -32,8 +32,29 @@ const checkArrayAbiItems = (data: AbiItem[] | any): boolean => {
   }
 };
 
+const genType = (type: AbiInput | string): string => {
+  if (typeof type === 'string') {
+    return type;
+  } else {
+    if (type.components) {
+      const arr: string[] = type.components?.map(genType);
+
+      const tupleStr = `(${arr.join(',')})`;
+
+      if (type.type === 'tuple[]') {
+        return tupleStr + '[]';
+      } else {
+        return tupleStr;
+      }
+    } else {
+      return type.type;
+    }
+  }
+};
+
 const getMethodId = (abi: AbiItem): string => {
-  return keccak256(jsonInterfaceMethodToString(abi)).slice(2, 10);
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-argument,@typescript-eslint/no-unsafe-call
+  return keccak256(_jsonInterfaceMethodToString(abi)).slice(2, 10);
 };
 
 const deepRemoveUnwantedArrayProperties = (arr: any[] | Result): any[] => {
@@ -238,29 +259,7 @@ export class InputDataDecoder {
           });
 
           // Map any tuple types into arrays
-          const typesToReturn = types.map((type) => {
-            if (typeof type === 'string') {
-              return type;
-            } else {
-              if (type.components) {
-                const arr: string[] = [];
-
-                type.components?.forEach((cur) => {
-                  arr.push(cur.type);
-                });
-
-                const tupleStr = `(${arr.join(',')})`;
-
-                if (type.type === 'tuple[]') {
-                  return tupleStr + '[]';
-                } else {
-                  return tupleStr;
-                }
-              } else {
-                return type.type;
-              }
-            }
-          });
+          const typesToReturn = types.map(genType);
 
           // defaultAbiCoder attaches some unwanted properties to the list object
           _inputs = deepRemoveUnwantedArrayProperties(_inputs);
@@ -273,6 +272,7 @@ export class InputDataDecoder {
           };
         }
       } catch (err) {
+        console.log(err);
       }
     }
 
@@ -314,29 +314,7 @@ export class InputDataDecoder {
             })
             : [];
 
-          result.types = types.map((type) => {
-            if (typeof type === 'string') {
-              return type;
-            } else {
-              if (type.components) {
-                const arr: string[] = [];
-
-                type.components?.forEach((cur) => {
-                  arr.push(cur.type);
-                });
-
-                const tupleStr = `(${arr.join(',')})`;
-
-                if (type.type === 'tuple[]') {
-                  return tupleStr + '[]';
-                } else {
-                  return tupleStr;
-                }
-              } else {
-                return type.type;
-              }
-            }
-          });
+          result.types = types.map(genType);
         } catch (err) {}
       }
     }

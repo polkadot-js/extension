@@ -2446,8 +2446,44 @@ export default class KoniExtension extends Extension {
   }
 
   // EVM Transaction
-  private parseEVMTransactionInput({ data }: RequestParseEVMTransactionInput): ResponseParseEVMTransactionInput {
-    return parseTransactionData(data);
+  private getNetworkJsonByChainId (chainId?: number): NetworkJson | null {
+    const networkMap = state.getNetworkMap();
+
+    if (!chainId) {
+      for (const n in networkMap) {
+        if (!Object.prototype.hasOwnProperty.call(networkMap, n)) {
+          continue;
+        }
+
+        const networkInfo = networkMap[n];
+
+        if (networkInfo.isEthereum) {
+          return networkInfo;
+        }
+      }
+
+      return null;
+    }
+
+    for (const n in networkMap) {
+      if (!Object.prototype.hasOwnProperty.call(networkMap, n)) {
+        continue;
+      }
+
+      const networkInfo = networkMap[n];
+
+      if (networkInfo.evmChainId === chainId) {
+        return networkInfo;
+      }
+    }
+
+    return null;
+  }
+
+  private async parseEVMTransactionInput ({ chainId, contract, data }: RequestParseEVMTransactionInput): Promise<ResponseParseEVMTransactionInput> {
+    const network = this.getNetworkJsonByChainId(chainId);
+
+    return await parseTransactionData(data, contract, network);
   }
 
   // eslint-disable-next-line @typescript-eslint/require-await
@@ -2638,7 +2674,7 @@ export default class KoniExtension extends Extension {
 
       // EVM Transaction
       case 'pri(evm.transaction.parse.input)':
-        return this.parseEVMTransactionInput(request as RequestParseEVMTransactionInput);
+        return await this.parseEVMTransactionInput(request as RequestParseEVMTransactionInput);
       default:
         return super.handle(id, type, request, port);
     }

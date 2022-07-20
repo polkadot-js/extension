@@ -31,6 +31,7 @@
     "@equilab/api": "^1.12.7",
     "@equilab/definitions": "^1.4.12",
     "@ethereumjs/common": "^2.6.5",
+    "@ethersproject/abi": "^5.6.4",
     "@interlay/interbtc-types": "^1.7.0",
     "@kiltprotocol/type-definitions": "^0.1.23",
     "@laminar/type-definitions": "^0.3.1",

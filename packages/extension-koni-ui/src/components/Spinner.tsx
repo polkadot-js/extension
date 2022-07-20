@@ -14,7 +14,7 @@ interface Props extends ThemeProps {
 
 function Spinner ({ className = '', size = 'normal' }: Props): React.ReactElement<Props> {
   return (
-    <Loading className={`${className} ${size}Size`}/>
+    <Loading className={`${className} ${size}Size`} />
   );
 }
 

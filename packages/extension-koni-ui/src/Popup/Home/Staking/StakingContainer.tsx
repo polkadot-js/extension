@@ -15,6 +15,8 @@ import styled from 'styled-components';
 const StakingRow = React.lazy(() => import('./StakingRow'));
 const Spinner = React.lazy(() => import('@subwallet/extension-koni-ui/components/Spinner'));
 const EmptyList = React.lazy(() => import('@subwallet/extension-koni-ui/Popup/Home/Staking/EmptyList'));
+const StakeAuthClaimReward = React.lazy(() => import('@subwallet/extension-koni-ui/Popup/Home/Staking/StakeAuthClaimReward'));
+const StakeAuthWithdrawal = React.lazy(() => import('@subwallet/extension-koni-ui/Popup/Home/Staking/StakeAuthWithdrawal'));
 
 interface Props extends ThemeProps {
   className?: string;
@@ -30,6 +32,23 @@ function StakingContainer ({ className, data, loading, priceMap }: Props): React
   const [scrollWidth, setScrollWidth] = useState<number>(6);
   const [containerWidth, setContainerWidth] = useState<number>(458);
   const [listWidth, setListWidth] = useState<number>(452);
+
+  const [showWithdrawalModal, setShowWithdrawalModal] = useState(false);
+  const [showClaimRewardModal, setShowClaimRewardModal] = useState(false);
+
+  // for withdrawal and claiming rewards
+  const [targetNetworkKey, setTargetNetworkKey] = useState('');
+  const [targetValidator, setTargetValidator] = useState('');
+  const [targetNextWithdrawalAction, setTargetNextWithdrawalAction] = useState<string | undefined>(undefined);
+  const [targetRedeemable, setTargetRedeemable] = useState(0);
+
+  const handleHideWithdrawalModal = useCallback(() => {
+    setShowWithdrawalModal(false);
+  }, []);
+
+  const handleHideClaimRewardModal = useCallback(() => {
+    setShowClaimRewardModal(false);
+  }, []);
 
   const handlerResize = () => {
     const container = document.querySelector('.home-tab-contents') as HTMLElement;
@@ -107,10 +126,16 @@ function StakingContainer ({ className, data, loading, priceMap }: Props): React
               const name = item.name || item.chainId;
               const icon = LogosMap[item.chainId] || LogosMap.default;
               const price = priceMap[item.chainId];
+              const redeemable = item.unlockingInfo.redeemable;
+              const nextWithdrawal = item.unlockingInfo.nextWithdrawal;
+              const nextWithdrawalAmount = item.unlockingInfo.nextWithdrawalAmount;
+              const nextWithdrawalAction = item.unlockingInfo.nextWithdrawalAction;
+              const targetValidator = item.unlockingInfo.validatorAddress;
+
+              console.log(item.chainId, item);
 
               return <StakingRow
                 activeStake={item.activeBalance}
-                address={account?.address as string}
                 chainName={name}
                 index={index}
                 isAccountAll={isAccountAll}
@@ -119,8 +144,19 @@ function StakingContainer ({ className, data, loading, priceMap }: Props): React
                 key={index}
                 logo={icon}
                 networkKey={item.chainId}
+                nextWithdrawal={nextWithdrawal}
+                nextWithdrawalAction={nextWithdrawalAction}
+                nextWithdrawalAmount={nextWithdrawalAmount}
                 price={price}
+                redeemable={redeemable}
                 reward={reward}
+                setActionNetworkKey={setTargetNetworkKey}
+                setShowClaimRewardModal={setShowClaimRewardModal}
+                setShowWithdrawalModal={setShowWithdrawalModal}
+                setTargetNextWithdrawalAction={setTargetNextWithdrawalAction}
+                setTargetRedeemable={setTargetRedeemable}
+                setTargetValidator={setTargetValidator}
+                targetValidator={targetValidator}
                 totalStake={item.balance}
                 unbondingStake={item.unlockingBalance}
                 unit={item.unit}
@@ -141,6 +177,25 @@ function StakingContainer ({ className, data, loading, priceMap }: Props): React
           </div>
         }
       </div>
+
+      {
+        showWithdrawalModal && <StakeAuthWithdrawal
+          address={account?.address as string}
+          amount={targetRedeemable}
+          hideModal={handleHideWithdrawalModal}
+          networkKey={targetNetworkKey}
+          nextWithdrawalAction={targetNextWithdrawalAction}
+          targetValidator={targetValidator !== '' ? targetValidator : undefined}
+        />
+      }
+
+      {
+        showClaimRewardModal && <StakeAuthClaimReward
+          address={account?.address as string}
+          hideModal={handleHideClaimRewardModal}
+          networkKey={targetNetworkKey}
+        />
+      }
     </div>
   );
 }

@@ -96,7 +96,8 @@ export interface StakingItem {
   unlockingBalance?: string
   nativeToken: string,
   unit?: string,
-  state: APIItemState
+  state: APIItemState,
+  unlockingInfo: UnlockingStakeInfo
 }
 
 export interface StakingJson {

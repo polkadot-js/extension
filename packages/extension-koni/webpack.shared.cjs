@@ -151,6 +151,9 @@ module.exports = (entry, alias = {}, useSplitChunk = false) => {
         // url: require.resolve("url/")
       }
     },
+    node: {
+      fs: "empty"
+    },
     watch: false
   };
 

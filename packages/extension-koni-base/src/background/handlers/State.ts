@@ -574,24 +574,33 @@ export default class KoniState extends State {
       request.origin = existedAuth.origin;
     }
 
-    if (existedAuth && !confirmAnotherType && !request.reConfirm) {
+    // Reconfirm if check auth for empty list
+    if (existedAuth) {
+      request.allowedAccounts = Object.entries(existedAuth.isAllowedMap)
+        .map(([address, allowed]) => (allowed ? address : ''))
+        .filter((item) => (item !== ''));
+
+      let allowedListByRequestType = [...request.allowedAccounts];
+
+      if (accountAuthType === 'evm') {
+        allowedListByRequestType = allowedListByRequestType.filter((a) => isEthereumAddress(a));
+      } else if (accountAuthType === 'substrate') {
+        allowedListByRequestType = allowedListByRequestType.filter((a) => !isEthereumAddress(a));
+      }
+
+      if (!confirmAnotherType && !request.reConfirm && !(allowedListByRequestType.length === 0)) {
       // this url was seen in the past
-      const isConnected = Object.keys(existedAuth.isAllowedMap)
-        .some((address) => existedAuth.isAllowedMap[address]);
+        const isConnected = Object.keys(existedAuth.isAllowedMap)
+          .some((address) => existedAuth.isAllowedMap[address]);
 
-      assert(isConnected, `The source ${url} is not allowed to interact with this extension`);
+        assert(isConnected, `The source ${url} is not allowed to interact with this extension`);
 
-      return false;
+        return false;
+      }
     }
 
     return new Promise((resolve, reject): void => {
       const id = getId();
-
-      if (existedAuth) {
-        request.allowedAccounts = Object.entries(existedAuth.isAllowedMap)
-          .map(([address, allowed]) => (allowed ? address : ''))
-          .filter((item) => (item !== ''));
-      }
 
       this.#authRequestsV2[id] = {
         ...this.authCompleteV2(id, resolve, reject),

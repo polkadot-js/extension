@@ -396,8 +396,6 @@ export async function getParaUnlockingInfo (dotSamaApi: ApiProps, address: strin
   let nextWithdrawalRound = -1;
   let validatorAddress = '';
 
-  console.log(allRequests);
-
   Object.entries(allRequests).forEach(([key, data]) => {
     const round = key.split('_')[0];
 

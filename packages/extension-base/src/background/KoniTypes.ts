@@ -97,7 +97,7 @@ export interface StakingItem {
   nativeToken: string,
   unit?: string,
   state: APIItemState,
-  unlockingInfo: UnlockingStakeInfo
+  unlockingInfo?: UnlockingStakeInfo
 }
 
 export interface StakingJson {

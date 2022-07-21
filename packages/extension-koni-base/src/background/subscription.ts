@@ -2,7 +2,8 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { AuthUrls } from '@subwallet/extension-base/background/handlers/State';
-import { ApiProps, CustomEvmToken, NftTransferExtra } from '@subwallet/extension-base/background/KoniTypes';
+import { ApiProps, CustomEvmToken, NetworkJson, NftTransferExtra, UnlockingStakeInfo } from '@subwallet/extension-base/background/KoniTypes';
+import { getUnlockingInfo } from '@subwallet/extension-koni-base/api/bonding';
 import { subscribeBalance } from '@subwallet/extension-koni-base/api/dotsama/balance';
 import { subscribeCrowdloan } from '@subwallet/extension-koni-base/api/dotsama/crowdloan';
 import { stakingOnChainApi } from '@subwallet/extension-koni-base/api/staking';
@@ -14,6 +15,7 @@ import Web3 from 'web3';
 
 import { accounts as accountsObservable } from '@polkadot/ui-keyring/observable/accounts';
 import { SubjectInfo } from '@polkadot/ui-keyring/observable/types';
+import { isEthereumAddress } from '@polkadot/util-crypto';
 
 export class KoniSubscription {
   private subscriptionMap: Record<string, any> = {};
@@ -213,7 +215,7 @@ export class KoniSubscription {
       }
     });
 
-    await getAllSubsquidStaking(addresses, activeNetworks)
+    getAllSubsquidStaking(addresses, activeNetworks)
       .then((result) => {
         state.setStakingReward(result);
         console.log('set staking reward state done', result);
@@ -221,15 +223,24 @@ export class KoniSubscription {
       .catch(console.error);
   }
 
-  async subscribeStakeUnlockingInfo (address: string) {
+  async subscribeStakeUnlockingInfo (address: string, networkMap: Record<string, NetworkJson>, dotSamaApiMap: Record<string, ApiProps>) {
     const addresses = await this.detectAddresses(address);
-    const networkMap = state.getNetworkMap();
-    const targetNetworks: string[] = [];
+    const currentAddress = addresses[0]; // only get info for the current account
 
-    Object.entries(networkMap).forEach(([key, network]) => {
-      if (network.active) {
-        targetNetworks.push(key);
+    const stakeUnlockingInfo: Record<string, UnlockingStakeInfo> = {};
+
+    await Promise.all(Object.entries(networkMap).map(async ([networkKey, networkJson]) => {
+      if (isEthereumAddress(currentAddress)) {
+        if (networkJson.supportBonding && networkJson.active && networkJson.isEthereum) {
+          stakeUnlockingInfo[networkKey] = await getUnlockingInfo(dotSamaApiMap[networkKey], networkJson, networkKey, currentAddress);
+        }
+      } else {
+        if (networkJson.supportBonding && networkJson.active && !networkJson.isEthereum) {
+          stakeUnlockingInfo[networkKey] = await getUnlockingInfo(dotSamaApiMap[networkKey], networkJson, networkKey, currentAddress);
+        }
       }
-    });
+    }));
+
+    state.setStakeUnlockingInfo(stakeUnlockingInfo);
   }
 }

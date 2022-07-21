@@ -126,13 +126,20 @@ function StakingContainer ({ className, data, loading, priceMap }: Props): React
               const name = item.name || item.chainId;
               const icon = LogosMap[item.chainId] || LogosMap.default;
               const price = priceMap[item.chainId];
-              const redeemable = item.unlockingInfo.redeemable;
-              const nextWithdrawal = item.unlockingInfo.nextWithdrawal;
-              const nextWithdrawalAmount = item.unlockingInfo.nextWithdrawalAmount;
-              const nextWithdrawalAction = item.unlockingInfo.nextWithdrawalAction;
-              const targetValidator = item.unlockingInfo.validatorAddress;
 
-              console.log(item.chainId, item);
+              let redeemable = 0;
+              let nextWithdrawal = 0;
+              let nextWithdrawalAmount = -1;
+              let nextWithdrawalAction: string | undefined = '';
+              let targetValidator: string | undefined = '';
+
+              if (item.unlockingInfo) {
+                redeemable = item.unlockingInfo.redeemable;
+                nextWithdrawal = item.unlockingInfo.nextWithdrawal;
+                nextWithdrawalAmount = item.unlockingInfo.nextWithdrawalAmount;
+                nextWithdrawalAction = item.unlockingInfo.nextWithdrawalAction;
+                targetValidator = item.unlockingInfo.validatorAddress;
+              }
 
               return <StakingRow
                 activeStake={item.activeBalance}

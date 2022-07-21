@@ -69,7 +69,7 @@ function StakingMenu ({ bondedAmount, className, networkKey, nextWithdrawal, nex
   }, [account?.address, bondedAmount, navigate, networkKey]);
 
   const getTooltipText = useCallback(() => {
-    if (nextWithdrawalAmount === -1) {
+    if (nextWithdrawalAmount < 0) {
       return 'Loading...';
     }
 

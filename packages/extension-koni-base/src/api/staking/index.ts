@@ -2,9 +2,6 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { APIItemState, ApiProps, NetworkJson, StakingItem } from '@subwallet/extension-base/background/KoniTypes';
-import { handleAstarUnlockingInfo } from '@subwallet/extension-koni-base/api/bonding/astar';
-import { handleParaUnlockingInfo } from '@subwallet/extension-koni-base/api/bonding/paraChain';
-import { handleRelayUnlockingInfo } from '@subwallet/extension-koni-base/api/bonding/relayChain';
 import { PREDEFINED_NETWORKS } from '@subwallet/extension-koni-base/api/predefinedNetworks';
 import { IGNORE_GET_SUBSTRATE_FEATURES_LIST } from '@subwallet/extension-koni-base/constants';
 import { categoryAddresses, toUnit } from '@subwallet/extension-koni-base/utils/utils';
@@ -76,7 +73,7 @@ export async function stakingOnChainApi (addresses: string[], dotSamaAPIMap: Rec
 }
 
 function getParaStakingOnChain (parentApi: ApiProps, useAddresses: string[], networks: Record<string, NetworkJson>, chain: string, callback: (networkKey: string, rs: StakingItem) => void) {
-  return parentApi.api.query.parachainStaking.delegatorState.multi(useAddresses, async (ledgers: any) => {
+  return parentApi.api.query.parachainStaking.delegatorState.multi(useAddresses, (ledgers: any) => {
     let totalBalance = new BN(0);
     let unlockingBalance = new BN(0);
     let stakingItem: StakingItem;
@@ -110,8 +107,6 @@ function getParaStakingOnChain (parentApi: ApiProps, useAddresses: string[], net
       const parsedUnlockingBalance = parseStakingBalance(formattedUnlockingBalance, chain, networks);
       const parsedActiveBalance = parseStakingBalance(formattedActiveBalance, chain, networks);
 
-      const unlockingInfo = await handleParaUnlockingInfo(parentApi, networks[chain], chain, useAddresses[0]);
-
       if (totalBalance.gt(BN_ZERO)) {
         stakingItem = {
           name: networks[chain].chain,
@@ -121,8 +116,7 @@ function getParaStakingOnChain (parentApi: ApiProps, useAddresses: string[], net
           unlockingBalance: parsedUnlockingBalance.toString(),
           nativeToken: networks[chain].nativeToken,
           unit: networks[chain].nativeToken,
-          state: APIItemState.READY,
-          unlockingInfo
+          state: APIItemState.READY
         } as StakingItem;
       } else {
         stakingItem = {
@@ -133,8 +127,7 @@ function getParaStakingOnChain (parentApi: ApiProps, useAddresses: string[], net
           unlockingBalance: parsedUnlockingBalance.toString(),
           nativeToken: networks[chain].nativeToken,
           unit: networks[chain].nativeToken,
-          state: APIItemState.READY,
-          unlockingInfo
+          state: APIItemState.READY
         } as StakingItem;
       }
 
@@ -145,7 +138,7 @@ function getParaStakingOnChain (parentApi: ApiProps, useAddresses: string[], net
 }
 
 function getRelayStakingOnChain (parentApi: ApiProps, useAddresses: string[], networks: Record<string, NetworkJson>, chain: string, callback: (networkKey: string, rs: StakingItem) => void) {
-  return parentApi.api.query.staking?.ledger.multi(useAddresses, async (ledgers: any[]) => {
+  return parentApi.api.query.staking?.ledger.multi(useAddresses, (ledgers: any[]) => {
     let totalBalance = new BN(0);
     let activeBalance = new BN(0);
     let unlockingBalance = new BN(0);
@@ -194,8 +187,6 @@ function getRelayStakingOnChain (parentApi: ApiProps, useAddresses: string[], ne
       const parsedUnlockingBalance = parseStakingBalance(formattedUnlockingBalance, chain, networks);
       const parsedTotal = parseStakingBalance(formattedTotalBalance, chain, networks);
 
-      const unlockingInfo = await handleRelayUnlockingInfo(parentApi, networks[chain], chain, useAddresses[0]);
-
       if (totalBalance.gt(BN_ZERO)) {
         stakingItem = {
           name: networks[chain].chain,
@@ -205,8 +196,7 @@ function getRelayStakingOnChain (parentApi: ApiProps, useAddresses: string[], ne
           unlockingBalance: parsedUnlockingBalance.toString(),
           nativeToken: networks[chain].nativeToken,
           unit: unit || networks[chain].nativeToken,
-          state: APIItemState.READY,
-          unlockingInfo
+          state: APIItemState.READY
         } as StakingItem;
       } else {
         stakingItem = {
@@ -217,8 +207,7 @@ function getRelayStakingOnChain (parentApi: ApiProps, useAddresses: string[], ne
           unlockingBalance: parsedUnlockingBalance.toString(),
           nativeToken: networks[chain].nativeToken,
           unit: unit || networks[chain].nativeToken,
-          state: APIItemState.READY,
-          unlockingInfo
+          state: APIItemState.READY
         } as StakingItem;
       }
 
@@ -229,7 +218,7 @@ function getRelayStakingOnChain (parentApi: ApiProps, useAddresses: string[], ne
 }
 
 function getAstarStakingOnChain (parentApi: ApiProps, useAddresses: string[], networks: Record<string, NetworkJson>, chain: string, callback: (networkKey: string, rs: StakingItem) => void) {
-  return parentApi.api.query.dappsStaking.ledger.multi(useAddresses, async (ledgers: any[]) => {
+  return parentApi.api.query.dappsStaking.ledger.multi(useAddresses, (ledgers: any[]) => {
     let totalBalance = BN_ZERO;
     let unlockingBalance = BN_ZERO;
     let stakingItem: StakingItem;
@@ -261,8 +250,6 @@ function getAstarStakingOnChain (parentApi: ApiProps, useAddresses: string[], ne
       const parsedActiveBalance = parseStakingBalance(formattedActiveBalance, chain, networks);
       const parsedUnlockingBalance = parseStakingBalance(formattedUnlockingBalance, chain, networks);
 
-      const unlockingInfo = await handleAstarUnlockingInfo(parentApi, networks[chain], chain, useAddresses[0]);
-
       if (totalBalance.gt(BN_ZERO)) {
         stakingItem = {
           name: networks[chain].chain,
@@ -272,8 +259,7 @@ function getAstarStakingOnChain (parentApi: ApiProps, useAddresses: string[], ne
           unlockingBalance: parsedUnlockingBalance.toString(),
           nativeToken: networks[chain].nativeToken,
           unit: networks[chain].nativeToken,
-          state: APIItemState.READY,
-          unlockingInfo
+          state: APIItemState.READY
         } as StakingItem;
       } else {
         stakingItem = {
@@ -284,8 +270,7 @@ function getAstarStakingOnChain (parentApi: ApiProps, useAddresses: string[], ne
           unlockingBalance: parsedUnlockingBalance.toString(),
           nativeToken: networks[chain].nativeToken,
           unit: networks[chain].nativeToken,
-          state: APIItemState.READY,
-          unlockingInfo
+          state: APIItemState.READY
         } as StakingItem;
       }
 

@@ -237,7 +237,7 @@ function SendEvmTransactionConfirmationInfo ({ className, confirmation: { payloa
               <span className='label'>{t<string>('Amount')}</span>
               <span className='value'>
                 <FormatBalance
-                  format={[tokenTransfer?.decimals || 18, '']}
+                  format={[new BN(tokenTransfer?.decimals).toNumber() || 18, '']}
                   value={new BN(tokenTransfer.value || '0')}
                 />&nbsp;{tokenTransfer.symbol}
               </span>

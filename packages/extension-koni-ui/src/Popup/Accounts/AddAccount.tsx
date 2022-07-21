@@ -123,7 +123,7 @@ export default React.memo(styled(AddAccount)(({ theme }: Props) => `
 
   .add-account-link__create-account {
     justify-content: center;
-    color: ${theme.buttonTextColor};
+    color: ${theme.buttonTextColor3};
     opacity: 1;
   }
 

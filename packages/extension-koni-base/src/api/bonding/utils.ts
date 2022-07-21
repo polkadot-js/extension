@@ -5,6 +5,7 @@ import { BN } from '@polkadot/util';
 
 export const REVOKE_ACTION = 'revoke';
 export const BOND_LESS_ACTION = 'bondLess';
+export const DECREASE_ACTION = 'decrease'; // for bifrost
 
 export interface ValidatorExtraInfo {
   commission: string,

@@ -100,14 +100,17 @@ export async function getParaCollatorsInfo (networkKey: string, dotSamaApi: ApiP
   }
 
   let currentBondingValidators: string[] = [];
-  const existingRequestsMap: Record<string, boolean> = {};
+  let existingRequestsMap: Record<string, boolean> = {};
 
   if (['bifrost', 'bifrost_testnet'].includes(networkKey)) {
     if (rawDelegatorState !== null) {
       // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
       const unbondingRequests = rawDelegatorState.requests.requests as Record<string, Record<string, string>>;
 
-      currentBondingValidators = getBifrostBondedValidators(bondedValidators, unbondingRequests);
+      const result = getBifrostBondedValidators(bondedValidators, unbondingRequests);
+
+      currentBondingValidators = result.currentBondingValidators;
+      existingRequestsMap = result.existingRequestsMap;
     } else {
       currentBondingValidators = bondedValidators;
     }
@@ -417,7 +420,7 @@ export async function getParaUnlockingInfo (dotSamaApi: ApiProps, address: strin
   const nextWithdrawal = (nextWithdrawalRound - currentRound) * ERA_LENGTH_MAP[networkKey];
 
   return {
-    nextWithdrawal: nextWithdrawal <= 0 ? nextWithdrawal : 0,
+    nextWithdrawal: nextWithdrawal > 0 ? nextWithdrawal : 0,
     redeemable: nextWithdrawal <= 0 ? nextWithdrawalAmount : 0,
     nextWithdrawalAmount,
     nextWithdrawalAction,
@@ -426,6 +429,9 @@ export async function getParaUnlockingInfo (dotSamaApi: ApiProps, address: strin
 }
 
 export async function handleParaUnlockingInfo (dotSamaApi: ApiProps, networkJson: NetworkJson, networkKey: string, address: string) {
+  if (['bifrost', 'bifrost_testnet'].includes(networkKey)) {
+    return handleBifrostUnlockingInfo(dotSamaApi, networkJson, networkKey, address);
+  }
   const { nextWithdrawal, nextWithdrawalAction, nextWithdrawalAmount, redeemable, validatorAddress } = await getParaUnlockingInfo(dotSamaApi, address, networkKey);
 
   const parsedRedeemable = redeemable / (10 ** (networkJson.decimals as number));
@@ -576,6 +582,8 @@ async function getBifrostDelegationInfo (dotSamaApi: ApiProps, address: string) 
   if (rawDelegatorState !== null) {
     const delegationMap: Record<string, string> = {};
     const _delegations = rawDelegatorState.delegations as Record<string, string>[];
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+    const unbondingRequests = rawDelegatorState.requests.requests as Record<string, Record<string, string>>;
 
     for (const item of _delegations) {
       if (item.owner in delegationMap) {
@@ -622,23 +630,19 @@ async function getBifrostDelegationInfo (dotSamaApi: ApiProps, address: string) 
       }
 
       // check scheduled request
-      const unbondingAmount = 0;
-      const hasScheduledRequest = false;
+      let unbondingAmount = 0;
+      let hasScheduledRequest = false;
 
-      // for (const scheduledRequest of rawScheduledRequests) {
-      //   const delegator = scheduledRequest.delegator as string;
-      //   const formattedDelegator = reformatAddress(delegator, 0);
-      //   const formattedAddress = reformatAddress(address, 0);
-      //
-      //   if (formattedAddress.toLowerCase() === formattedDelegator.toLowerCase()) { // returned data might not have the same address format
-      //     hasScheduledRequest = true;
-      //     const action = scheduledRequest.action as Record<string, string>;
-      //
-      //     Object.values(action).forEach((value) => {
-      //       unbondingAmount += parseRawNumber(value);
-      //     });
-      //   }
-      // }
+      Object.values(unbondingRequests).forEach((request) => {
+        const collatorAddress = request.collator;
+        const formattedCollator = reformatAddress(collatorAddress, 0);
+        const formattedOwner = reformatAddress(owner, 0);
+
+        if (formattedCollator === formattedOwner) {
+          hasScheduledRequest = true;
+          unbondingAmount += parseRawNumber(request.amount);
+        }
+      });
 
       const activeStake = parseRawNumber(amount) - unbondingAmount;
 
@@ -657,9 +661,12 @@ async function getBifrostDelegationInfo (dotSamaApi: ApiProps, address: string) 
 
 function getBifrostBondedValidators (bondedCollators: string[], unbondingRequests: Record<string, Record<string, string>>) {
   const currentBondingValidators: string[] = [];
+  const existingRequestsMap: Record<string, boolean> = {};
 
   for (const collator of bondedCollators) {
     if (collator in unbondingRequests) {
+      existingRequestsMap[collator] = true;
+
       if (unbondingRequests[collator].action.toLowerCase() !== REVOKE_ACTION) {
         currentBondingValidators.push(collator);
       }
@@ -668,5 +675,58 @@ function getBifrostBondedValidators (bondedCollators: string[], unbondingRequest
     }
   }
 
-  return currentBondingValidators;
+  return {
+    currentBondingValidators,
+    existingRequestsMap
+  };
+}
+
+async function handleBifrostUnlockingInfo (dotSamaApi: ApiProps, networkJson: NetworkJson, networkKey: string, address: string) {
+  const apiPromise = await dotSamaApi.isReady;
+  const collatorList: string[] = [];
+
+  const rawDelegatorState = (await apiPromise.api.query.parachainStaking.delegatorState(address)).toHuman() as Record<string, any> | null;
+
+  let nextWithdrawalAmount = -1;
+  let nextWithdrawalAction = '';
+  let nextWithdrawalRound = -1;
+  let validatorAddress = '';
+
+  if (rawDelegatorState !== null) {
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+    const scheduledRequests = rawDelegatorState.requests.requests as Record<string, Record<string, string>>;
+    Object.values(scheduledRequests).forEach((request) => {
+      const roun
+    });
+  }
+
+
+
+  Object.entries(allRequests).forEach(([key, data]) => {
+    const round = key.split('_')[0];
+
+    if (nextWithdrawalRound === -1) {
+      nextWithdrawalRound = parseFloat(round);
+      nextWithdrawalAction = data.action as string;
+      nextWithdrawalAmount = data.amount as number;
+      validatorAddress = data.validator as string;
+    } else if (nextWithdrawalRound > parseFloat(round)) {
+      nextWithdrawalRound = parseFloat(round);
+      nextWithdrawalAction = data.action as string;
+      nextWithdrawalAmount = data.amount as number;
+      validatorAddress = data.validator as string;
+    }
+  });
+
+  const currentRoundInfo = (await apiPromise.api.query.parachainStaking.round()).toHuman() as Record<string, string>;
+  const currentRound = parseRawNumber(currentRoundInfo.current);
+  const nextWithdrawal = (nextWithdrawalRound - currentRound) * ERA_LENGTH_MAP[networkKey];
+
+  return {
+    nextWithdrawal: nextWithdrawal <= 0 ? nextWithdrawal : 0,
+    redeemable: nextWithdrawal <= 0 ? nextWithdrawalAmount : 0,
+    nextWithdrawalAmount,
+    nextWithdrawalAction,
+    validatorAddress
+  };
 }

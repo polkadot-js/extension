@@ -38,14 +38,10 @@ function NftCollectionPreview ({ className, data, onClick }: Props): React.React
       <div
         className={'nft-preview'}
         onClick={handleOnClick}
-        style={{ height: '164px' }}
       >
         <div className={'img-container'}>
           {
-            loading &&
-            <div>
-              <Spinner className={'img-spinner'} />
-            </div>
+            loading && <Spinner className={'img-spinner'} />
           }
           <LazyLoad
             scrollContainer={'.home-tab-contents'}
@@ -87,12 +83,11 @@ function NftCollectionPreview ({ className, data, onClick }: Props): React.React
 }
 
 export default React.memo(styled(NftCollectionPreview)(({ theme }: ThemeProps) => `
+  height: 164px;
+  
   .img-container {
     position: relative;
-  }
-
-  .img-spinner {
-    position: absolute;
+    height: 124px;
   }
 
   .nft-preview {

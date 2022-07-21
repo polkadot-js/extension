@@ -133,7 +133,7 @@ export const getBalances = ({ balance,
 
 function getTokenPrice (tokenPriceMap: Record<string, number>, token: string): number {
   if (token === 'LCDOT') {
-    return (tokenPriceMap.dot || 0) * 0.6925;
+    return 0;
   }
 
   return tokenPriceMap[token.toLowerCase()] || 0;

@@ -228,6 +228,8 @@ export default React.memo(styled(NftContainer)(({ theme }: Props) => `
   width: 100%;
   padding: 0 25px;
   padding-bottom: 20px;
+  position: relative;
+  min-height:100%;
 
   .loading-container {
     height: 100%;

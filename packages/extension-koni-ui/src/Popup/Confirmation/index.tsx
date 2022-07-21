@@ -297,7 +297,14 @@ function Confirmation ({ className, match: { params: { address } } }: Props): Re
           placeholder={t<string>('Password')}
           type='password'
         />)}
-        {error && (<div className='confirmation-error'>{error}</div>)}
+        {error && (
+          <Warning
+            className='confirmation-error'
+            isDanger={true}
+          >
+            {error}
+          </Warning>
+        )}
         <ButtonArea className='button-area'>
           <Button
             className='cancel-button'

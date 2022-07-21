@@ -9,7 +9,7 @@ import NetworkTools from '@subwallet/extension-koni-ui/components/NetworkTools';
 import useToast from '@subwallet/extension-koni-ui/hooks/useToast';
 import useTranslation from '@subwallet/extension-koni-ui/hooks/useTranslation';
 import { getTotalConvertedBalanceValue, hasAnyChildTokenBalance } from '@subwallet/extension-koni-ui/Popup/Home/ChainBalances/utils';
-import { ThemeProps } from '@subwallet/extension-koni-ui/types';
+import { ModalQrProps, ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { BN_ZERO, isAccountAll, toShort } from '@subwallet/extension-koni-ui/util';
 import { AccountInfoByNetwork, BalanceInfo } from '@subwallet/extension-koni-ui/util/types';
 import BigN from 'bignumber.js';
@@ -26,12 +26,7 @@ interface Props extends ThemeProps {
   isLoading: boolean;
   setIsExportModalOpen: (visible: boolean) => void;
   setQrModalOpen: (visible: boolean) => void;
-  setQrModalProps: (props: {
-    networkPrefix: number,
-    networkKey: string,
-    iconTheme: string,
-    showExportButton: boolean
-  }) => void;
+  updateModalQr: (value: Partial<ModalQrProps>) => void;
   showBalanceDetail: (networkKey: string) => void,
   setSelectedNetworkBalance?: (networkBalance: BigN) => void;
 }
@@ -42,8 +37,8 @@ function ChainBalanceItem ({ accountInfo,
   isLoading,
   setIsExportModalOpen,
   setQrModalOpen,
-  setQrModalProps,
   setSelectedNetworkBalance,
+  updateModalQr,
   showBalanceDetail }: Props): React.ReactElement<Props> {
   const { address, formattedAddress, networkIconTheme, networkKey, networkPrefix } = accountInfo;
   const _isAccountAll = useMemo((): boolean => {
@@ -68,25 +63,31 @@ function ChainBalanceItem ({ accountInfo,
 
   const _openQr = useCallback((e: React.MouseEvent<HTMLElement>) => {
     e.stopPropagation();
-    setQrModalProps({
-      networkPrefix: networkPrefix,
-      networkKey: networkKey,
-      iconTheme: networkIconTheme,
+    updateModalQr({
+      network: {
+        networkKey: networkKey
+      },
+      account: {
+        address: address
+      },
       showExportButton: false
     });
     setQrModalOpen(true);
-  }, [networkIconTheme, networkKey, networkPrefix, setQrModalOpen, setQrModalProps]);
+  }, [networkKey, setQrModalOpen, updateModalQr, address]);
 
   const _openExportQr = useCallback((e: React.MouseEvent<HTMLElement>) => {
     e.stopPropagation();
-    setQrModalProps({
-      networkPrefix: networkPrefix,
-      networkKey: networkKey,
-      iconTheme: networkIconTheme,
+    updateModalQr({
+      network: {
+        networkKey: networkKey
+      },
+      account: {
+        address: address
+      },
       showExportButton: false
     });
     setIsExportModalOpen(true);
-  }, [networkIconTheme, networkKey, networkPrefix, setIsExportModalOpen, setQrModalProps]);
+  }, [networkIconTheme, networkKey, networkPrefix, setIsExportModalOpen, updateModalQr]);
 
   const renderTokenValue = (balanceInfo: BalanceInfo) => {
     if (!hasAnyChildTokenBalance(balanceInfo)) {

@@ -4,7 +4,8 @@
 import { ConfirmationsQueue } from '@subwallet/extension-base/background/KoniTypes';
 import useTranslation from '@subwallet/extension-koni-ui/hooks/useTranslation';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
-import React, { useEffect, useState } from 'react';
+import CN from 'classnames';
+import React, { useCallback, useEffect, useState } from 'react';
 import styled from 'styled-components';
 
 interface Props extends ThemeProps {
@@ -12,10 +13,16 @@ interface Props extends ThemeProps {
   confirmation: ConfirmationsQueue['evmSignatureRequest'][0];
 }
 
+interface SignTypedDataObjectV1 {
+  type: string;
+  name: string;
+  value: any;
+}
+
 function EvmSignConfirmationInfo ({ className, confirmation: { payload } }: Props): React.ReactElement {
   const { t } = useTranslation();
   const [signMethod, setSignMethod] = useState('');
-  const [rawData, setRawData] = useState<string>('');
+  const [rawData, setRawData] = useState<string | object>('');
   const [warning, setWarning] = useState<string | undefined>(undefined);
 
   useEffect(() => {
@@ -34,10 +41,85 @@ function EvmSignConfirmationInfo ({ className, confirmation: { payload } }: Prop
       setSignMethod('Sign Typed Data V4');
     }
 
-    const raw = typeof payload.payload === 'string' ? payload.payload : JSON.stringify(payload.payload, null, 2);
+    const raw = typeof payload.payload === 'string' ? payload.payload : JSON.parse(JSON.stringify(payload.payload)) as object;
 
     setRawData(raw);
   }, [payload]);
+
+  const renderData = useCallback((data: any, needFilter?: boolean) => {
+    if (typeof data !== 'object') {
+      return (
+        <div className='content'>
+          {data as string}
+        </div>
+      );
+    } else {
+      return (
+        <>
+          {
+            Object.entries(data as object).map(([key, datum], index) => {
+              const isLeaf = typeof datum !== 'object';
+
+              if (needFilter && key.toLowerCase() !== 'message') {
+                return null;
+              }
+
+              return (
+                <div
+                  className={CN('node', { 'node-leaf': isLeaf })}
+                  key={index}
+                >
+                  <div className={CN('title')}>{key}:</div>
+                  {renderData(datum)}
+                </div>
+              );
+            })
+          }
+        </>
+      );
+    }
+  }, []);
+
+  const handlerRenderV1 = useCallback((data: SignTypedDataObjectV1[]) => {
+    return (
+      <div className={'special-container'}>
+        {
+          data.map((value, index) => {
+            return (
+              <div
+                className={'message-container'}
+                key={index}
+              >
+                <div className={'message-name'}>
+                  {value.name}:
+                </div>
+                <div className={'message-value'}>
+                  {value.value as string}
+                </div>
+              </div>
+            );
+          })
+        }
+      </div>
+    );
+  }, []);
+
+  const handlerRenderContent = useCallback(() => {
+    if (!rawData) {
+      return null;
+    }
+
+    switch (payload.type) {
+      case 'eth_signTypedData_v3':
+      case 'eth_signTypedData_v4':
+        return renderData(rawData, true);
+      case 'eth_signTypedData_v1':
+      case 'eth_signTypedData':
+        return handlerRenderV1(rawData as unknown as SignTypedDataObjectV1[]);
+      default:
+        return renderData(rawData);
+    }
+  }, [renderData, rawData, payload.type, handlerRenderV1]);
 
   return <div className={className}>
     <div className='signature-wrapper'>
@@ -47,7 +129,9 @@ function EvmSignConfirmationInfo ({ className, confirmation: { payload } }: Prop
       {warning && <div className='value warning-message'>{warning}</div>}
       <div>
         <span className='label'>{t<string>('Raw Data')}</span>
-        <div className='pre-wrap'>{rawData}</div>
+        <div className='data-wrapper'>
+          {handlerRenderContent()}
+        </div>
       </div>
     </div>
   </div>;
@@ -63,16 +147,73 @@ export default styled(EvmSignConfirmationInfo)(({ theme }: Props) => `
     font-weight: bold;
     padding-right: 8px;
   }
+
   .warning-message {
     color: red;
   }
 
-  .pre-wrap {
-    color: #7B8098;
-    display: block;
-    white-space: pre-wrap;
-    width: 100%;
-    overflow: auto;
-    word-break: break-word;
+  .data-wrapper {
+    margin-left: -16px;
+
+    .content {
+      color: ${theme.textColor2};
+      margin-left: 16px;
+      white-space: pre-line;
+      word-break: break-word;
+    }
+
+    .node {
+      overflow: hidden;
+      position: relative;
+      margin-left: 16px;
+
+      &.node-leaf {
+        display: flex;
+      }
+
+      .content {
+        margin-left: 8px;
+      }
+
+      .title {
+        color: ${theme.textColor};
+        white-space: nowrap;
+      }
+    }
+  }
+
+  .special-container {
+    margin-left: 16px;
+
+    .message-container {
+      position: relative;
+      padding-bottom: 20px;
+
+      :after {
+        content: '';
+        position: absolute;
+        width: 100%;
+        height: 1px;
+        bottom: 10px;
+        left: 0;
+        background-color: ${theme.textColor2};
+      }
+
+      .message-name {
+        color: ${theme.textColor};
+      }
+
+      .message-value {
+        color: ${theme.textColor2};
+        white-space: nowrap;
+      }
+
+      &:last-child {
+        :after {
+          content: none;
+          padding-bottom: 10px;
+        }
+      }
+    }
   }
 `);

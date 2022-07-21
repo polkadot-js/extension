@@ -1007,7 +1007,7 @@ export interface KoniRequestSignatures {
   'pri(staking.claimRewardTxInfo)': [StakeClaimRewardParams, BasicTxInfo];
   'pri(unbonding.submitWithdrawal)': [StakeWithdrawalParams, BasicTxResponse, BasicTxResponse];
   'pri(unbonding.withdrawalTxInfo)': [StakeWithdrawalParams, BasicTxInfo];
-  'pri(unbonding.unlockingInfo)': [UnlockingStakeParams, UnlockingStakeInfo];
+  'pri(unbonding.subscribeUnlockingInfo)': [null, Record<string, UnlockingStakeInfo>, Record<string, UnlockingStakeInfo>];
   'pri(unbonding.submitTransaction)': [UnbondingSubmitParams, BasicTxResponse, BasicTxResponse];
   'pri(unbonding.txInfo)': [UnbondingSubmitParams, BasicTxInfo];
   'pri(bonding.txInfo)': [BondingSubmitParams, BasicTxInfo];

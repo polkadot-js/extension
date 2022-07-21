@@ -398,7 +398,9 @@ export async function getParaUnlockingInfo (dotSamaApi: ApiProps, address: strin
 
   console.log(allRequests);
 
-  Object.entries(allRequests).forEach(([round, data]) => {
+  Object.entries(allRequests).forEach(([key, data]) => {
+    const round = key.split('_')[0];
+
     if (nextWithdrawalRound === -1) {
       nextWithdrawalRound = parseFloat(round);
       nextWithdrawalAction = data.action as string;

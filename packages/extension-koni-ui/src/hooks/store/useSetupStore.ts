@@ -11,6 +11,7 @@ import useSetupNftCollection from '@subwallet/extension-koni-ui/hooks/store/useS
 import useSetupNftTransfer from '@subwallet/extension-koni-ui/hooks/store/useSetupNftTransfer';
 import useSetupPrice from '@subwallet/extension-koni-ui/hooks/store/useSetupPrice';
 import useSetupSettings from '@subwallet/extension-koni-ui/hooks/store/useSetupSettings';
+import useSetupStakeUnlockingInfo from '@subwallet/extension-koni-ui/hooks/store/useSetupStakeUnlockingInfo';
 import useSetupStaking from '@subwallet/extension-koni-ui/hooks/store/useSetupStaking';
 import useSetupStakingReward from '@subwallet/extension-koni-ui/hooks/store/useSetupStakingReward';
 import useSetupTransactionHistory from '@subwallet/extension-koni-ui/hooks/store/useSetupTransactionHistory';
@@ -29,4 +30,5 @@ export default function useSetupStore (): void {
   useSetupNftTransfer();
   useSetupSettings();
   useSetupEvmToken();
+  useSetupStakeUnlockingInfo();
 }

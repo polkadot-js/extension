@@ -23,11 +23,9 @@ export const DEFAULT_STAKING_NETWORKS = {
   polkadot: PREDEFINED_NETWORKS.polkadot,
   kusama: PREDEFINED_NETWORKS.kusama,
   aleph: PREDEFINED_NETWORKS.aleph,
+  alephTest: PREDEFINED_NETWORKS.alephTest,
   moonbeam: PREDEFINED_NETWORKS.moonbeam,
   moonbase: PREDEFINED_NETWORKS.moonbase,
-  darwinia: PREDEFINED_NETWORKS.darwinia,
-  pangolin: PREDEFINED_NETWORKS.pangolin,
-  crab: PREDEFINED_NETWORKS.crab,
   polkadex: PREDEFINED_NETWORKS.polkadex,
   turing: PREDEFINED_NETWORKS.turing,
   turingStaging: PREDEFINED_NETWORKS.turingStaging,
@@ -37,6 +35,9 @@ export const DEFAULT_STAKING_NETWORKS = {
   bifrost: PREDEFINED_NETWORKS.bifrost,
   bifrost_testnet: PREDEFINED_NETWORKS.bifrost_testnet
   // acala: PREDEFINED_NETWORKS.acala,
+  // darwinia: PREDEFINED_NETWORKS.darwinia,
+  // pangolin: PREDEFINED_NETWORKS.pangolin,
+  // crab: PREDEFINED_NETWORKS.crab,
 };
 
 interface PromiseMapping {

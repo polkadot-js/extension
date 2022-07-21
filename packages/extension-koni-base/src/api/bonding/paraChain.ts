@@ -432,6 +432,7 @@ export async function handleParaUnlockingInfo (dotSamaApi: ApiProps, networkJson
   if (['bifrost', 'bifrost_testnet'].includes(networkKey)) {
     return handleBifrostUnlockingInfo(dotSamaApi, networkJson, networkKey, address);
   }
+
   const { nextWithdrawal, nextWithdrawalAction, nextWithdrawalAmount, redeemable, validatorAddress } = await getParaUnlockingInfo(dotSamaApi, address, networkKey);
 
   const parsedRedeemable = redeemable / (10 ** (networkJson.decimals as number));
@@ -683,7 +684,6 @@ function getBifrostBondedValidators (bondedCollators: string[], unbondingRequest
 
 async function handleBifrostUnlockingInfo (dotSamaApi: ApiProps, networkJson: NetworkJson, networkKey: string, address: string) {
   const apiPromise = await dotSamaApi.isReady;
-  const collatorList: string[] = [];
 
   const rawDelegatorState = (await apiPromise.api.query.parachainStaking.delegatorState(address)).toHuman() as Record<string, any> | null;
 
@@ -695,38 +695,37 @@ async function handleBifrostUnlockingInfo (dotSamaApi: ApiProps, networkJson: Ne
   if (rawDelegatorState !== null) {
     // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
     const scheduledRequests = rawDelegatorState.requests.requests as Record<string, Record<string, string>>;
+
     Object.values(scheduledRequests).forEach((request) => {
-      const roun
+      const round = parseRawNumber(request.whenExecutable);
+
+      if (nextWithdrawalRound === -1) {
+        nextWithdrawalRound = round;
+        nextWithdrawalAction = request.action;
+        nextWithdrawalAmount = parseRawNumber(request.amount);
+        validatorAddress = request.collator;
+      } else if (nextWithdrawalRound > round) {
+        nextWithdrawalRound = round;
+        nextWithdrawalAction = request.action;
+        nextWithdrawalAmount = parseRawNumber(request.amount);
+        validatorAddress = request.validator;
+      }
     });
   }
-
-
-
-  Object.entries(allRequests).forEach(([key, data]) => {
-    const round = key.split('_')[0];
-
-    if (nextWithdrawalRound === -1) {
-      nextWithdrawalRound = parseFloat(round);
-      nextWithdrawalAction = data.action as string;
-      nextWithdrawalAmount = data.amount as number;
-      validatorAddress = data.validator as string;
-    } else if (nextWithdrawalRound > parseFloat(round)) {
-      nextWithdrawalRound = parseFloat(round);
-      nextWithdrawalAction = data.action as string;
-      nextWithdrawalAmount = data.amount as number;
-      validatorAddress = data.validator as string;
-    }
-  });
 
   const currentRoundInfo = (await apiPromise.api.query.parachainStaking.round()).toHuman() as Record<string, string>;
   const currentRound = parseRawNumber(currentRoundInfo.current);
   const nextWithdrawal = (nextWithdrawalRound - currentRound) * ERA_LENGTH_MAP[networkKey];
 
+  const redeemable = nextWithdrawal <= 0 ? nextWithdrawalAmount : 0;
+  const parsedRedeemable = redeemable / (10 ** (networkJson.decimals as number));
+  const parsedNextWithdrawalAmount = nextWithdrawalAmount / (10 ** (networkJson.decimals as number));
+
   return {
-    nextWithdrawal: nextWithdrawal <= 0 ? nextWithdrawal : 0,
-    redeemable: nextWithdrawal <= 0 ? nextWithdrawalAmount : 0,
-    nextWithdrawalAmount,
+    nextWithdrawal: nextWithdrawal > 0 ? nextWithdrawal : 0,
+    redeemable: parsedRedeemable,
+    nextWithdrawalAmount: parsedNextWithdrawalAmount,
     nextWithdrawalAction,
     validatorAddress
-  };
+  } as UnlockingStakeInfo;
 }

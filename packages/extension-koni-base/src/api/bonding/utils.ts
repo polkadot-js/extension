@@ -80,7 +80,9 @@ export const ERA_LENGTH_MAP: Record<string, number> = { // in hours
   turingStaging: 2,
   astar: 24,
   shiden: 24,
-  shibuya: 24
+  shibuya: 24,
+  bifrost_testnet: 0.5,
+  bifrost: 2
 };
 
 const ALEPH_DEFAULT_UNIFORM_ERA_PAYOUT_PARAMS: UniformEraPayoutInflationParams = {

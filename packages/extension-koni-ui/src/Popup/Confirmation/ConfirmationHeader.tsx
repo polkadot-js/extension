@@ -43,7 +43,7 @@ function ConfirmationHeader ({ account, className, confirmation, network, reques
       <AccountInfoEl
         address={account.address}
         className='header__account'
-        genesisHash={account.genesisHash}
+        genesisHash={network?.genesisHash}
         iconSize={20}
         isEthereum={true}
         isShowAddress={false}

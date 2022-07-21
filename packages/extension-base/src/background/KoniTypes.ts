@@ -300,6 +300,7 @@ export interface NetworkJson {
   // Other informations
   coinGeckoKey?: string; // Provider key to get token price from CoinGecko // user input
   blockExplorer?: string; // Link to block scanner to check transaction with extrinsic hash // user input
+  abiExplorer?: string; // Link to block scanner to check transaction with extrinsic hash // user input
   dependencies?: string[]; // Auto active network in dependencies if current network is activated
   getStakingOnChain?: boolean; // support get bonded on chain
   supportBonding?: boolean;
@@ -1190,6 +1191,31 @@ export interface SingleModeJson {
   autoTriggerDomain: string // Regex for auto trigger single mode
 }
 
+export type NestedArray<T> = T | NestedArray<T>[];
+
+export interface EVMTransactionArg {
+  name: string;
+  type: string;
+  value: string;
+  children?: EVMTransactionArg[];
+}
+
+export interface ParseEVMTransactionData{
+  method: string;
+  methodName: string;
+  args: EVMTransactionArg[];
+}
+
+export interface RequestParseEVMTransactionInput {
+  data: string;
+  contract: string;
+  chainId: number;
+}
+
+export interface ResponseParseEVMTransactionInput {
+  result: ParseEVMTransactionData | string
+}
+
 export interface KoniRequestSignatures {
   'pri(unbonding.submitWithdrawal)': [StakeWithdrawalParams, BasicTxResponse, BasicTxResponse]
   'pri(unbonding.withdrawalTxInfo)': [StakeWithdrawalParams, BasicTxInfo];
@@ -1303,6 +1329,10 @@ export interface KoniRequestSignatures {
   'evm(request)': [RequestArguments, unknown];
   'evm(provider.send)': [RequestEvmProviderSend, string | number, ResponseEvmProviderSend]
 
+  // EVM Transaction
+  'pri(evm.transaction.parse.input)': [RequestParseEVMTransactionInput, ResponseParseEVMTransactionInput];
+
+  
   // Create qr request
   'pri(accounts.transfer.qr.create)': [RequestTransferExternal, Array<TransferError>, ResponseTransferQr];
   'pri(accounts.cross.transfer.qr.create)': [RequestCrossChainTransferExternal, Array<TransferError>, ResponseTransferQr];
@@ -1319,5 +1349,4 @@ export interface KoniRequestSignatures {
   'pri(stake.ledger.create)': [RequestStakeExternal, Array<BaseTxError>, ResponseStakeLedger];
   'pri(unStake.ledger.create)': [RequestUnStakeExternal, Array<BaseTxError>, ResponseUnStakeLedger];
   'pri(withdrawStake.ledger.create)': [RequestWithdrawStakeExternal, Array<BaseTxError>, ResponseWithdrawStakeLedger];
-
 }

@@ -213,15 +213,23 @@ export class KoniSubscription {
       }
     });
 
-    await getAllSubsquidStaking(addresses, activeNetworks, (networkKey, rs) => {
-      if (networkKey !== 'polkadot' && networkKey !== 'kusama' && networkKey !== 'hydradx') { // TODO: temporary fix because subsquid is not real-time
-        state.setStakingItem(networkKey, rs);
-      }
-    })
+    await getAllSubsquidStaking(addresses, activeNetworks)
       .then((result) => {
         state.setStakingReward(result);
         console.log('set staking reward state done', result);
       })
       .catch(console.error);
+  }
+
+  async subscribeStakeUnlockingInfo (address: string) {
+    const addresses = await this.detectAddresses(address);
+    const networkMap = state.getNetworkMap();
+    const targetNetworks: string[] = [];
+
+    Object.entries(networkMap).forEach(([key, network]) => {
+      if (network.active) {
+        targetNetworks.push(key);
+      }
+    });
   }
 }

@@ -31,7 +31,13 @@ export function injectEvmExtension (evmProvider: EvmProvider): void {
   const windowInject = window as Window & InjectedWindow;
 
   // add our enable function
-  windowInject.SubWallet = evmProvider;
+  if (windowInject.SubWallet) {
+    // Provider has been initialized in proxy mode
+    windowInject.SubWallet.provider = evmProvider;
+  } else {
+    // Provider has been initialized in direct mode
+    windowInject.SubWallet = evmProvider;
+  }
 
   windowInject.dispatchEvent(new Event('subwallet#initialized'));
 

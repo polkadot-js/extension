@@ -178,4 +178,8 @@ function Loading ({ className = '' }: Props): React.ReactElement<Props> {
   );
 }
 
-export default React.memo(styled(Loading)(({ theme }: Props) => ''));
+export default React.memo(styled(Loading)(({ theme }: Props) => `
+  .loading-img svg{
+    display: block;
+  }
+`));

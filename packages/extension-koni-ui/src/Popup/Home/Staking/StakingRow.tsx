@@ -2,15 +2,10 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { StakingRewardItem } from '@subwallet/extension-base/background/KoniTypes';
-import cloneIconLight from '@subwallet/extension-koni-ui/assets/clone--color-2.svg';
-import cloneIconDark from '@subwallet/extension-koni-ui/assets/clone--color-3.svg';
-import useToast from '@subwallet/extension-koni-ui/hooks/useToast';
-import useTranslation from '@subwallet/extension-koni-ui/hooks/useTranslation';
-import { Theme, ThemeProps } from '@subwallet/extension-koni-ui/types';
+import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { formatLocaleNumber } from '@subwallet/extension-koni-ui/util/formatNumber';
-import React, { useCallback, useContext, useState } from 'react';
-import CopyToClipboard from 'react-copy-to-clipboard';
-import styled, { ThemeContext } from 'styled-components';
+import React, { useCallback, useState } from 'react';
+import styled from 'styled-components';
 
 const StakingMenu = React.lazy(() => import('@subwallet/extension-koni-ui/Popup/Home/Staking/StakingMenu'));
 
@@ -36,6 +31,7 @@ interface Props extends ThemeProps {
   nextWithdrawalAmount: number;
   nextWithdrawalAction: string | undefined;
   targetValidator: string | undefined;
+  unlockingDataTimestamp: number;
 
   setShowWithdrawalModal: (val: boolean) => void;
   setShowClaimRewardModal: (val: boolean) => void;
@@ -59,7 +55,7 @@ function StakingRow ({ activeStake, chainName, className, index, isAccountAll, i
     setTargetRedeemable(redeemable);
     setTargetValidator(targetValidator || '');
     setShowWithdrawalModal(true);
-  }, [networkKey, nextWithdrawalAction, redeemable, setActionNetworkKey, setShowWithdrawalModal, setTargetNextWithdrawalAction, setTargetRedeemable, setTargetValidator, targetValidator]);
+  }, [nextWithdrawalAction, redeemable, targetValidator, networkKey, setActionNetworkKey, setShowWithdrawalModal, setTargetNextWithdrawalAction, setTargetRedeemable, setTargetValidator]);
 
   const handleShowClaimRewardModal = useCallback(() => {
     setActionNetworkKey(networkKey);
@@ -106,18 +102,6 @@ function StakingRow ({ activeStake, chainName, className, index, isAccountAll, i
 
     return editBalance(balance.toString());
   };
-
-  const { show } = useToast();
-  const { t } = useTranslation();
-  const themeContext = useContext(ThemeContext as React.Context<Theme>);
-  const theme = themeContext.id;
-
-  const _onCopy = useCallback(
-    () => {
-      show(t('Copied'));
-    },
-    [show, t]
-  );
 
   return (
     <div className={`${className || ''} ${showReward ? '-show-detail' : ''}`}>
@@ -221,38 +205,6 @@ function StakingRow ({ activeStake, chainName, className, index, isAccountAll, i
               </div>
             </div>
 
-            {
-              chainName === 'astar' &&
-              <div className={'reward-container'}>
-                <div className={'reward-title'}>Smart contract</div>
-                <div className={'smart-contract-field'}>
-                  <div className={'smart-contract-value'}>
-                    {reward?.smartContract?.slice(0, 6)}...{reward?.smartContract?.slice(-6)}
-                  </div>
-                  <CopyToClipboard text={(reward.smartContract && reward.smartContract) || ''}>
-                    <div
-                      className={'kn-copy-btn'}
-                      onClick={_onCopy}
-                    >
-                      {theme === 'dark'
-                        ? (
-                          <img
-                            alt='copy'
-                            src={cloneIconDark}
-                          />
-                        )
-                        : (
-                          <img
-                            alt='copy'
-                            src={cloneIconLight}
-                          />
-                        )
-                      }
-                    </div>
-                  </CopyToClipboard>
-                </div>
-              </div>
-            }
             {/* <div className={'reward-container'}> */}
             {/*  <div className={'reward-title'}>APR</div> */}
             {/*  <div className={'reward-amount'}> */}

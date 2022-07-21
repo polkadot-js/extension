@@ -249,7 +249,7 @@ function Home ({ chainRegistryMap, className = '', currentAccount, historyMap, n
   }, []);
   const nftGridSize = parseNftGridSize();
   const { loading: loadingNft, nftList, totalCollection, totalItems } = useFetchNft(nftPage, networkKey, nftGridSize);
-  const { data: stakingData, loading: loadingStaking, priceMap: stakingPriceMap } = useFetchStaking(networkKey);
+  const { data: stakingData, loading: loadingStaking, priceMap: stakingPriceMap, stakeUnlockingTimestamp } = useFetchStaking(networkKey);
 
   const handleNftPage = useCallback((page: number) => {
     setNftPage(page);
@@ -428,6 +428,7 @@ function Home ({ chainRegistryMap, className = '', currentAccount, historyMap, n
             data={stakingData}
             loading={loadingStaking}
             priceMap={stakingPriceMap}
+            stakeUnlockingTimestamp={stakeUnlockingTimestamp}
           />
         )}
 

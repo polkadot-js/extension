@@ -23,9 +23,10 @@ interface Props extends ThemeProps {
   data: StakingDataType[];
   loading: boolean;
   priceMap: Record<string, number>;
+  stakeUnlockingTimestamp: number;
 }
 
-function StakingContainer ({ className, data, loading, priceMap }: Props): React.ReactElement<Props> {
+function StakingContainer ({ className, data, loading, priceMap, stakeUnlockingTimestamp }: Props): React.ReactElement<Props> {
   const navigate = useContext(ActionContext);
   const { currentAccount: { account } } = useSelector((state: RootState) => state);
 
@@ -41,6 +42,7 @@ function StakingContainer ({ className, data, loading, priceMap }: Props): React
   const [targetValidator, setTargetValidator] = useState('');
   const [targetNextWithdrawalAction, setTargetNextWithdrawalAction] = useState<string | undefined>(undefined);
   const [targetRedeemable, setTargetRedeemable] = useState(0);
+  const [withdrawalTimestamp, setWithdrawalTimestamp] = useState(-1);
 
   const handleHideWithdrawalModal = useCallback(() => {
     setShowWithdrawalModal(false);
@@ -133,7 +135,7 @@ function StakingContainer ({ className, data, loading, priceMap }: Props): React
               let nextWithdrawalAction: string | undefined = '';
               let targetValidator: string | undefined = '';
 
-              if (item.unlockingInfo) {
+              if (item.unlockingInfo && withdrawalTimestamp !== stakeUnlockingTimestamp) {
                 redeemable = item.unlockingInfo.redeemable;
                 nextWithdrawal = item.unlockingInfo.nextWithdrawal;
                 nextWithdrawalAmount = item.unlockingInfo.nextWithdrawalAmount;
@@ -192,6 +194,8 @@ function StakingContainer ({ className, data, loading, priceMap }: Props): React
           hideModal={handleHideWithdrawalModal}
           networkKey={targetNetworkKey}
           nextWithdrawalAction={targetNextWithdrawalAction}
+          setWithdrawalTimestamp={setWithdrawalTimestamp}
+          stakeUnlockingTimestamp={stakeUnlockingTimestamp}
           targetValidator={targetValidator !== '' ? targetValidator : undefined}
         />
       }

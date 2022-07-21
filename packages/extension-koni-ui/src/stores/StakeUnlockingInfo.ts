@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
-import { StakeUnlockingJson } from '@subwallet/extension-koni-ui/stores/types';
+import { StakeUnlockingJson } from '@subwallet/extension-base/background/KoniTypes';
 
 const initialState = {
   details: {}
@@ -15,6 +15,7 @@ const stakeUnlockingSlice = createSlice({
     update (state, action: PayloadAction<StakeUnlockingJson>) {
       const payload = action.payload;
 
+      state.timestamp = payload.timestamp;
       state.details = payload.details;
     }
   }

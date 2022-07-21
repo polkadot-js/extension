@@ -975,6 +975,11 @@ export interface UnlockingStakeInfo {
   validatorAddress?: string // validator to unstake from
 }
 
+export interface StakeUnlockingJson {
+  timestamp: number,
+  details: Record<string, UnlockingStakeInfo>
+}
+
 export interface StakeWithdrawalParams {
   address: string,
   networkKey: string,
@@ -1007,7 +1012,7 @@ export interface KoniRequestSignatures {
   'pri(staking.claimRewardTxInfo)': [StakeClaimRewardParams, BasicTxInfo];
   'pri(unbonding.submitWithdrawal)': [StakeWithdrawalParams, BasicTxResponse, BasicTxResponse];
   'pri(unbonding.withdrawalTxInfo)': [StakeWithdrawalParams, BasicTxInfo];
-  'pri(unbonding.subscribeUnlockingInfo)': [null, Record<string, UnlockingStakeInfo>, Record<string, UnlockingStakeInfo>];
+  'pri(unbonding.subscribeUnlockingInfo)': [null, StakeUnlockingJson, StakeUnlockingJson];
   'pri(unbonding.submitTransaction)': [UnbondingSubmitParams, BasicTxResponse, BasicTxResponse];
   'pri(unbonding.txInfo)': [UnbondingSubmitParams, BasicTxInfo];
   'pri(bonding.txInfo)': [BondingSubmitParams, BasicTxInfo];

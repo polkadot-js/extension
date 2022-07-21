@@ -3,7 +3,7 @@
 
 import { withErrorLog } from '@subwallet/extension-base/background/handlers/helpers';
 import State, { AuthUrls, Resolver } from '@subwallet/extension-base/background/handlers/State';
-import { AccountRefMap, APIItemState, ApiMap, AuthRequestV2, BalanceItem, BalanceJson, ChainRegistry, ConfirmationDefinitions, ConfirmationsQueue, ConfirmationsQueueItemOptions, ConfirmationType, CrowdloanItem, CrowdloanJson, CurrentAccountInfo, CustomEvmToken, DeleteEvmTokenParams, EvmSendTransactionParams, EvmTokenJson, NETWORK_STATUS, NetworkJson, NftCollection, NftCollectionJson, NftItem, NftJson, NftTransferExtra, PriceJson, RequestAccountExportPrivateKey, RequestConfirmationComplete, RequestSettingsType, ResponseAccountExportPrivateKey, ResponseSettingsType, ResultResolver, ServiceInfo, SingleModeJson, StakingItem, StakingJson, StakingRewardJson, ThemeTypes, TokenInfo, TransactionHistoryItemType, UnlockingStakeInfo } from '@subwallet/extension-base/background/KoniTypes';
+import { AccountRefMap, APIItemState, ApiMap, AuthRequestV2, BalanceItem, BalanceJson, ChainRegistry, ConfirmationDefinitions, ConfirmationsQueue, ConfirmationsQueueItemOptions, ConfirmationType, CrowdloanItem, CrowdloanJson, CurrentAccountInfo, CustomEvmToken, DeleteEvmTokenParams, EvmSendTransactionParams, EvmTokenJson, NETWORK_STATUS, NetworkJson, NftCollection, NftCollectionJson, NftItem, NftJson, NftTransferExtra, PriceJson, RequestAccountExportPrivateKey, RequestConfirmationComplete, RequestSettingsType, ResponseAccountExportPrivateKey, ResponseSettingsType, ResultResolver, ServiceInfo, SingleModeJson, StakeUnlockingJson, StakingItem, StakingJson, StakingRewardJson, ThemeTypes, TokenInfo, TransactionHistoryItemType } from '@subwallet/extension-base/background/KoniTypes';
 import { AuthorizeRequest, RequestAuthorizeTab } from '@subwallet/extension-base/background/types';
 import { getId } from '@subwallet/extension-base/utils/getId';
 import { getTokenPrice } from '@subwallet/extension-koni-base/api/coingecko';
@@ -182,7 +182,7 @@ export default class KoniState extends State {
     details: []
   } as StakingRewardJson;
 
-  private stakeUnlockingInfo: Record<string, UnlockingStakeInfo> = {};
+  private stakeUnlockingInfo: StakeUnlockingJson = { timestamp: -1, details: {} };
 
   // eslint-disable-next-line camelcase
   private crowdloanFundMap: Record<string, DotSamaCrowdloan_crowdloans_nodes> = {};
@@ -193,7 +193,7 @@ export default class KoniState extends State {
   private nftCollectionSubject = new Subject<NftCollectionJson>();
   private stakingSubject = new Subject<StakingJson>();
   private stakingRewardSubject = new Subject<StakingRewardJson>();
-  private stakeUnlockingInfoSubject = new Subject<Record<string, UnlockingStakeInfo>>();
+  private stakeUnlockingInfoSubject = new Subject<StakeUnlockingJson>();
   private historyMap: Record<string, TransactionHistoryItemType[]> = {};
   private historySubject = new Subject<Record<string, TransactionHistoryItemType[]>>();
 
@@ -623,7 +623,7 @@ export default class KoniState extends State {
     return this.stakeUnlockingInfo;
   }
 
-  public setStakeUnlockingInfo (data: Record<string, UnlockingStakeInfo>) {
+  public setStakeUnlockingInfo (data: StakeUnlockingJson) {
     this.stakeUnlockingInfo = data;
 
     this.stakeUnlockingInfoSubject.next(this.stakeUnlockingInfo);

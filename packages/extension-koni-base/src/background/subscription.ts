@@ -241,6 +241,9 @@ export class KoniSubscription {
       }
     }));
 
-    state.setStakeUnlockingInfo(stakeUnlockingInfo);
+    state.setStakeUnlockingInfo({
+      timestamp: +new Date(),
+      details: stakeUnlockingInfo
+    });
   }
 }

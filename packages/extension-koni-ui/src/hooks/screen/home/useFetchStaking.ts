@@ -15,6 +15,7 @@ export default function useFetchStaking (networkKey: string): StakingType {
   const stakingItemMap = stakingReducer.details;
   const stakingRewardList = stakingRewardReducer.details;
   const stakeUnlockingInfo = stakeUnlockingInfoJson.details;
+  const stakeUnlockingTimestamp = stakeUnlockingInfoJson.timestamp;
   const readyStakingItems: StakingItem[] = [];
   const stakingData: StakingDataType[] = [];
   let loading = !stakingRewardReducer.ready;
@@ -89,6 +90,7 @@ export default function useFetchStaking (networkKey: string): StakingType {
   return {
     loading,
     data: stakingData,
-    priceMap: parsedPriceMap
+    priceMap: parsedPriceMap,
+    stakeUnlockingTimestamp
   } as StakingType;
 }

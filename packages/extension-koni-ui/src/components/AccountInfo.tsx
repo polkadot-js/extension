@@ -17,8 +17,10 @@ import React, { useCallback, useContext, useEffect, useState } from 'react';
 import CopyToClipboard from 'react-copy-to-clipboard';
 import { useSelector } from 'react-redux';
 import styled from 'styled-components';
-import { AccountContext } from '../contexts';
+
 import { isEthereumAddress } from '@polkadot/util-crypto';
+
+import { AccountContext } from '../contexts';
 import useToast from '../hooks/useToast';
 import useTranslation from '../hooks/useTranslation';
 import getParentNameSuri from '../util/getParentNameSuri';

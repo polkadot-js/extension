@@ -39,9 +39,9 @@ function ChainBalanceDetailItem ({ accountInfo,
   isShowDetail,
   setIsExportModalOpen,
   setQrModalOpen,
-  updateModalQr,
-  toggleBalanceDetail }: Props): React.ReactElement<Props> {
-  const { address, formattedAddress, networkIconTheme, networkKey, networkPrefix } = accountInfo;
+  toggleBalanceDetail,
+  updateModalQr }: Props): React.ReactElement<Props> {
+  const { address, formattedAddress, networkKey } = accountInfo;
   const _isAccountAll = useMemo((): boolean => {
     return isAccountAll(address);
   }, [address]);
@@ -91,7 +91,7 @@ function ChainBalanceDetailItem ({ accountInfo,
       showExportButton: false
     });
     setIsExportModalOpen(true);
-  }, [networkIconTheme, networkKey, networkPrefix, setIsExportModalOpen]);
+  }, [address, networkKey, setIsExportModalOpen, updateModalQr]);
 
   return (
     <div

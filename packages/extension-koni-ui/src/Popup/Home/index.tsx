@@ -306,9 +306,6 @@ function Home ({ chainRegistryMap, className = '', currentAccount, historyMap, n
     setIsExportModalOpen(false);
   }, []);
 
-  const _isAccountAll = isAccountAll(address);
-
-
   const tabItems = useMemo<TabHeaderItemType[]>(() => {
     return getTabHeaderItems(address, t);
   }, [address, t]);
@@ -469,8 +466,6 @@ function Home ({ chainRegistryMap, className = '', currentAccount, historyMap, n
 
       {isExportModalOpen && (
         <ExportAccountQrModal
-          accountName={currentAccount.name}
-          address={address}
           className='home__account-qr-modal'
           closeModal={_closeExportModal}
           modalQrProp={modalQrProp}

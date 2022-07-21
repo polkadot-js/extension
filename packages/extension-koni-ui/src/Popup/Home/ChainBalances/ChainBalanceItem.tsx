@@ -38,9 +38,9 @@ function ChainBalanceItem ({ accountInfo,
   setIsExportModalOpen,
   setQrModalOpen,
   setSelectedNetworkBalance,
-  updateModalQr,
-  showBalanceDetail }: Props): React.ReactElement<Props> {
-  const { address, formattedAddress, networkIconTheme, networkKey, networkPrefix } = accountInfo;
+  showBalanceDetail,
+  updateModalQr }: Props): React.ReactElement<Props> {
+  const { address, formattedAddress, networkKey } = accountInfo;
   const _isAccountAll = useMemo((): boolean => {
     return isAccountAll(address);
   }, [address]);
@@ -87,7 +87,7 @@ function ChainBalanceItem ({ accountInfo,
       showExportButton: false
     });
     setIsExportModalOpen(true);
-  }, [networkIconTheme, networkKey, networkPrefix, setIsExportModalOpen, updateModalQr]);
+  }, [address, networkKey, setIsExportModalOpen, updateModalQr]);
 
   const renderTokenValue = (balanceInfo: BalanceInfo) => {
     if (!hasAnyChildTokenBalance(balanceInfo)) {

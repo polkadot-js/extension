@@ -3,15 +3,18 @@
 
 import { faTimes } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { NetworkJson } from '@subwallet/extension-base/background/KoniTypes';
+import { AccountJson } from '@subwallet/extension-base/background/types';
 import Identicon from '@subwallet/extension-koni-ui/components/Identicon';
 import Modal from '@subwallet/extension-koni-ui/components/Modal';
+import { AccountContext } from '@subwallet/extension-koni-ui/contexts';
 import useToast from '@subwallet/extension-koni-ui/hooks/useToast';
 import useTranslation from '@subwallet/extension-koni-ui/hooks/useTranslation';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
-import { ThemeProps } from '@subwallet/extension-koni-ui/types';
+import { ModalQrProps, ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { getLogoByNetworkKey, toShort } from '@subwallet/extension-koni-ui/util';
 import reformatAddress from '@subwallet/extension-koni-ui/util/reformatAddress';
-import React, { useCallback, useMemo } from 'react';
+import React, { useCallback, useContext, useMemo } from 'react';
 import CopyToClipboard from 'react-copy-to-clipboard';
 import QRCode from 'react-qr-code';
 import { useSelector } from 'react-redux';
@@ -24,21 +27,27 @@ import cloneLogo from '../assets/clone.svg';
 interface Props extends ThemeProps {
   className?: string;
   closeModal?: () => void;
-  accountName: string | undefined;
-  address: string;
-  networkPrefix: number;
-  networkKey: string;
-  iconTheme: string;
+  modalQrProp: ModalQrProps;
 }
 
-function ExportAccountQrModal ({ accountName, address, className,
+function ExportAccountQrModal ({ className,
   closeModal,
-  iconTheme,
-  networkKey,
-  networkPrefix }: Props): React.ReactElement<Props> {
+  modalQrProp }: Props): React.ReactElement<Props> {
   const { t } = useTranslation();
   const { show } = useToast();
   const { networkMap } = useSelector((state: RootState) => state);
+
+  const { accounts } = useContext(AccountContext);
+
+  const { account: accountQr, network: networkQr } = modalQrProp;
+
+  const account = useMemo((): AccountJson | undefined => {
+    return accounts.find((acc) => acc.address === accountQr?.address);
+  }, [accounts, accountQr?.address]);
+
+  const networkInfo = useMemo((): NetworkJson => {
+    return networkMap[networkQr.networkKey];
+  }, [networkMap, networkQr.networkKey]);
 
   const _onCopy = useCallback(
     () => show(t('Copied')),
@@ -46,9 +55,8 @@ function ExportAccountQrModal ({ accountName, address, className,
   );
 
   const qrData = useMemo(() => {
-    const networkInfo = networkMap[networkKey];
-    const isEthereum = networkInfo?.isEthereum;
-    const formattedAddress = reformatAddress(address, networkPrefix, isEthereum);
+    const isEthereum = networkInfo.isEthereum;
+    const formattedAddress = reformatAddress(accountQr.address, networkInfo.ss58Format, isEthereum);
     const genesisHash = networkInfo.genesisHash;
     const accountType = isEthereum ? 'ethereum' : 'substrate';
     const result: string[] = [accountType];
@@ -59,19 +67,19 @@ function ExportAccountQrModal ({ accountName, address, className,
       result.push(formattedAddress, genesisHash);
     }
 
-    if (accountName) {
-      result.push(accountName);
+    if (account?.name) {
+      result.push(account.name);
     }
 
     return result.join(':');
-  }, [networkMap, networkKey, address, networkPrefix, accountName]);
+  }, [networkInfo.isEthereum, networkInfo.ss58Format, networkInfo.genesisHash, networkInfo.evmChainId, accountQr.address, account?.name]);
 
   const formattedAddress = useMemo(() => {
-    const networkInfo = networkMap[networkKey];
-    const isEthereum = networkInfo?.isEthereum;
+    const isEthereum = networkInfo.isEthereum;
+    const networkPrefix = networkInfo.ss58Format;
 
-    return reformatAddress(address, networkPrefix, isEthereum);
-  }, [networkMap, networkKey, address, networkPrefix]);
+    return reformatAddress(accountQr.address, networkPrefix, isEthereum);
+  }, [networkInfo.isEthereum, networkInfo.ss58Format, accountQr.address]);
 
   return (
     <Modal className={className}>
@@ -87,14 +95,14 @@ function ExportAccountQrModal ({ accountName, address, className,
         <div className='export-account-qr-modal__content'>
           <Identicon
             className='export-account-qr-modal__logo'
-            iconTheme={iconTheme as IconTheme}
-            prefix={networkPrefix}
+            iconTheme={networkInfo.icon as IconTheme}
+            prefix={networkInfo.ss58Format}
             size={54}
             value={formattedAddress}
           />
           <div className='export-account-qr-modal-token-name'>
             <div className='export-account-qr-modal-token-name__text'>
-              {accountName}
+              {account?.name}
             </div>
           </div>
           <div className='export-account-qr-modal__qr-code'>
@@ -112,7 +120,7 @@ function ExportAccountQrModal ({ accountName, address, className,
                 <img
                   alt='logo'
                   className={'export-account-qr-modal__network-logo'}
-                  src={getLogoByNetworkKey(networkKey)}
+                  src={getLogoByNetworkKey(networkQr.networkKey)}
                 />
                 {toShort(formattedAddress, 13, 13)}
                 <img

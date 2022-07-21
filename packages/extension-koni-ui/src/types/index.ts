@@ -76,10 +76,10 @@ export interface Signed {
 }
 
 export interface ModalQrProps {
-  network?: {
+  network: {
     networkKey: string;
   };
-  account?: {
+  account: {
     address: string;
   };
   showExportButton: boolean;

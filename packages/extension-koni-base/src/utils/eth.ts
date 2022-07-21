@@ -58,7 +58,7 @@ export const anyNumberToBN = (value?: string | number | BNEther): BigN => {
 
 export const rlpItem = (rlp: string, position: number) => {
   const decodeArr = RLP.decode(rlp);
-  const u8a = decodeArr[position] as Uint8Array || [0];
+  const u8a = (decodeArr as Uint8Array[])[position] || [0];
 
   return u8aToHex(u8a);
 };

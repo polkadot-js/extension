@@ -28,6 +28,7 @@ function WebsiteEntry ({ changeConnectSite, className = '', info, setList, url }
   const { hostname } = new URL(info.url);
   const { accounts } = useContext(AccountContext);
   const accountList = filterAndSortingAccountByAuthType(accounts, info?.accountAuthType || 'substrate', true);
+  const addressList = accountList.map((account) => account.address);
 
   const transformId = info.id.replace(/\./g, '-');
 
@@ -58,7 +59,7 @@ function WebsiteEntry ({ changeConnectSite, className = '', info, setList, url }
   }, [transformId, isShowDetail]);
 
   const accountSelectedLength = Object.keys(info.isAllowedMap)
-    .filter((acc) => info.isAllowedMap[acc]).length;
+    .filter((acc) => (info.isAllowedMap[acc] && addressList.includes(acc))).length;
 
   return (
     <div className={className}>

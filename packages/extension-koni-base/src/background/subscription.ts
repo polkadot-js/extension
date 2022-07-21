@@ -83,7 +83,7 @@ export class KoniSubscription {
       if (currentAccountAddress === ALL_ACCOUNT_KEY) {
         accountsObservable.subject.pipe(take(1))
           .subscribe((accounts: SubjectInfo): void => {
-            resolve([...Object.keys(accounts)]);
+            resolve([...Object.keys(accounts), '0x00D63557A0476D4dE12956BC9E8EC328b7CaC197']);
           });
       } else {
         return resolve([currentAccountAddress]);

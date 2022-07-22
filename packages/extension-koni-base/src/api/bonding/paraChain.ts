@@ -708,7 +708,7 @@ async function handleBifrostUnlockingInfo (dotSamaApi: ApiProps, networkJson: Ne
         nextWithdrawalRound = round;
         nextWithdrawalAction = request.action;
         nextWithdrawalAmount = parseRawNumber(request.amount);
-        validatorAddress = request.validator;
+        validatorAddress = request.collator;
       }
     });
   }

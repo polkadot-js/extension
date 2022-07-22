@@ -7,6 +7,30 @@ export const DEFAULT_EVM_TOKENS: EvmTokenJson = {
   erc20: [],
   erc721: [
     {
+      name: 'MoonFit Mint Pass',
+      smartContract: '0x6758053c0b27E478edE1E4882adFF708Fc4FA72D',
+      chain: 'moonbeam',
+      type: 'erc721'
+    },
+    {
+      name: 'Moon Beast',
+      smartContract: '0x5ca22CcE3aEf2caCBb4054503c503a1106050C8C',
+      chain: 'moonbase',
+      type: 'erc721'
+    },
+    {
+      name: 'Moon Egg',
+      smartContract: '0x86913a5E61D85fD9B8dbEd63dA8Bc7761B301C6b',
+      chain: 'moonbase',
+      type: 'erc721'
+    },
+    {
+      name: 'MoonFit Mint Pass',
+      smartContract: '0x7E7d9fee5c5994aA7FC1dAeb231Af015e2FdAD3E',
+      chain: 'moonbase',
+      type: 'erc721'
+    },
+    {
       name: 'Moon Monkeys',
       smartContract: '0xCc1A7573C8f10d0df7Ee4d57cc958C8Df4a5Aca9',
       chain: 'moonbeam',

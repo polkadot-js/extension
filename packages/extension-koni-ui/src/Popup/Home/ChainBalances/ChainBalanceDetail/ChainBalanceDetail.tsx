@@ -4,7 +4,7 @@
 import { faArrowLeft } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import useTranslation from '@subwallet/extension-koni-ui/hooks/useTranslation';
-import { ThemeProps } from '@subwallet/extension-koni-ui/types';
+import { ModalQrProps, ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { AccountInfoByNetwork, BalanceInfo } from '@subwallet/extension-koni-ui/util/types';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import styled from 'styled-components';
@@ -19,15 +19,10 @@ interface Props extends ThemeProps {
   className?: string;
   isConnecting: boolean;
   setQrModalOpen: (visible: boolean) => void;
-  setQrModalProps: (props: {
-    networkPrefix: number,
-    networkKey: string,
-    iconTheme: string,
-    showExportButton: boolean
-  }) => void;
+  updateModalQr: (value: Partial<ModalQrProps>) => void;
 }
 
-function ChainBalanceDetail ({ accountInfo, backToHome, balanceInfo, className, isConnecting, setQrModalOpen, setQrModalProps }: Props): React.ReactElement<Props> {
+function ChainBalanceDetail ({ accountInfo, backToHome, balanceInfo, className, isConnecting, setQrModalOpen, updateModalQr }: Props): React.ReactElement<Props> {
   const [selectedNetworkKey, setSelectedNetworkKey] = useState<string>('');
   const ref = useRef<HTMLDivElement>(null);
   const { t } = useTranslation();
@@ -69,8 +64,8 @@ function ChainBalanceDetail ({ accountInfo, backToHome, balanceInfo, className, 
         isLoading={!balanceInfo}
         isShowDetail={accountInfo.networkKey === selectedNetworkKey}
         setQrModalOpen={setQrModalOpen}
-        setQrModalProps={setQrModalProps}
         toggleBalanceDetail={toggleBalanceDetail}
+        updateModalQr={updateModalQr}
       />
 
       {balanceInfo && balanceInfo.childrenBalances.length

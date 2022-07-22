@@ -5,6 +5,7 @@ import { BN } from '@polkadot/util';
 
 export const REVOKE_ACTION = 'revoke';
 export const BOND_LESS_ACTION = 'bondLess';
+export const DECREASE_ACTION = 'decrease'; // for bifrost
 
 export interface ValidatorExtraInfo {
   commission: string,
@@ -79,7 +80,9 @@ export const ERA_LENGTH_MAP: Record<string, number> = { // in hours
   turingStaging: 2,
   astar: 24,
   shiden: 24,
-  shibuya: 24
+  shibuya: 24,
+  bifrost_testnet: 0.5,
+  bifrost: 2
 };
 
 const ALEPH_DEFAULT_UNIFORM_ERA_PAYOUT_PARAMS: UniformEraPayoutInflationParams = {
@@ -99,10 +102,6 @@ const KNOWN_PARAMS: Record<string, InflationParams> = {
 
 export function getInflationParams (networkKey: string): InflationParams {
   return KNOWN_PARAMS[networkKey] || DEFAULT_PARAMS;
-}
-
-export function parseRawNumber (value: string) {
-  return parseFloat(value.replaceAll(',', ''));
 }
 
 export function calcInflationUniformEraPayout (totalIssuance: number, yearlyInflationInTokens: number): number {

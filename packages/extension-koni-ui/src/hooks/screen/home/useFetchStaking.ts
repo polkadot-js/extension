@@ -8,12 +8,14 @@ import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { useSelector } from 'react-redux';
 
 export default function useFetchStaking (networkKey: string): StakingType {
-  const { networkMap, price: priceReducer, staking: stakingReducer, stakingReward: stakingRewardReducer } = useSelector((state: RootState) => state);
+  const { networkMap, price: priceReducer, stakeUnlockingInfo: stakeUnlockingInfoJson, staking: stakingReducer, stakingReward: stakingRewardReducer } = useSelector((state: RootState) => state);
 
   const { priceMap } = priceReducer;
   const parsedPriceMap: Record<string, number> = {};
   const stakingItemMap = stakingReducer.details;
   const stakingRewardList = stakingRewardReducer.details;
+  const stakeUnlockingInfo = stakeUnlockingInfoJson.details;
+  const stakeUnlockingTimestamp = stakeUnlockingInfoJson.timestamp;
   const readyStakingItems: StakingItem[] = [];
   const stakingData: StakingDataType[] = [];
   let loading = !stakingRewardReducer.ready;
@@ -43,13 +45,22 @@ export default function useFetchStaking (networkKey: string): StakingType {
     });
 
     for (const stakingItem of filteredStakingItems) {
-      const stakingDataType = { staking: stakingItem } as StakingDataType;
+      const stakingDataType = {} as StakingDataType;
 
       for (const reward of stakingRewardList) {
         if (stakingItem.chainId === reward.chainId && reward.state === APIItemState.READY) {
           stakingDataType.reward = reward;
         }
       }
+
+      Object.entries(stakeUnlockingInfo).forEach(([key, info]) => {
+        if (key === stakingItem.chainId) {
+          stakingDataType.staking = {
+            ...stakingItem,
+            unlockingInfo: info
+          } as StakingItem;
+        }
+      });
 
       stakingData.push(stakingDataType);
     }
@@ -63,6 +74,15 @@ export default function useFetchStaking (networkKey: string): StakingType {
         }
       }
 
+      Object.entries(stakeUnlockingInfo).forEach(([key, info]) => {
+        if (key === stakingItem.chainId) {
+          stakingDataType.staking = {
+            ...stakingItem,
+            unlockingInfo: info
+          } as StakingItem;
+        }
+      });
+
       stakingData.push(stakingDataType);
     }
   }
@@ -70,6 +90,7 @@ export default function useFetchStaking (networkKey: string): StakingType {
   return {
     loading,
     data: stakingData,
-    priceMap: parsedPriceMap
+    priceMap: parsedPriceMap,
+    stakeUnlockingTimestamp
   } as StakingType;
 }

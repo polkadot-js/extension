@@ -1,22 +1,35 @@
 // Copyright 2019-2022 @polkadot/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
+import { faCircleQuestion } from '@fortawesome/free-regular-svg-icons';
 import { faTimes } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { NETWORK_STATUS } from '@subwallet/extension-base/background/KoniTypes';
+import { AccountJson } from '@subwallet/extension-base/background/types';
+import { ALL_NETWORK_KEY } from '@subwallet/extension-koni-base/constants';
+import signalSlashIcon from '@subwallet/extension-koni-ui/assets/signal-stream-slash-solid.svg';
+import signalIcon from '@subwallet/extension-koni-ui/assets/signal-stream-solid.svg';
+import { AccountContext } from '@subwallet/extension-koni-ui/components/contexts';
 import Identicon from '@subwallet/extension-koni-ui/components/Identicon';
+import { AccountInfoEl } from '@subwallet/extension-koni-ui/components/index';
+import InputFilter from '@subwallet/extension-koni-ui/components/InputFilter';
 import Link from '@subwallet/extension-koni-ui/components/Link';
 import Modal from '@subwallet/extension-koni-ui/components/Modal';
+import Tooltip from '@subwallet/extension-koni-ui/components/Tooltip';
 import useScanExplorerAddressUrl from '@subwallet/extension-koni-ui/hooks/screen/home/useScanExplorerAddressUrl';
 import useSupportScanExplorer from '@subwallet/extension-koni-ui/hooks/screen/home/useSupportScanExplorer';
+import useGenesisHashOptions, { NetworkSelectOption } from '@subwallet/extension-koni-ui/hooks/useGenesisHashOptions';
 import useToast from '@subwallet/extension-koni-ui/hooks/useToast';
 import useTranslation from '@subwallet/extension-koni-ui/hooks/useTranslation';
 import { editAccount } from '@subwallet/extension-koni-ui/messaging';
 import HeaderEditName from '@subwallet/extension-koni-ui/partials/HeaderEditName';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
-import { ThemeProps } from '@subwallet/extension-koni-ui/types';
-import { getLogoByNetworkKey, toShort } from '@subwallet/extension-koni-ui/util';
+import { ModalQrProps, ThemeProps } from '@subwallet/extension-koni-ui/types';
+import { getGenesisOptionsByAddressType, getLogoByNetworkKey, isAccountAll, toShort } from '@subwallet/extension-koni-ui/util';
+import { getLogoByGenesisHash } from '@subwallet/extension-koni-ui/util/logoByGenesisHashMap';
 import reformatAddress from '@subwallet/extension-koni-ui/util/reformatAddress';
-import React, { useCallback, useMemo, useState } from 'react';
+import CN from 'classnames';
+import React, { useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import CopyToClipboard from 'react-copy-to-clipboard';
 import QRCode from 'react-qr-code';
 import { useSelector } from 'react-redux';
@@ -30,12 +43,8 @@ import pencil from '../assets/pencil.svg';
 interface Props extends ThemeProps {
   className?: string;
   closeModal?: () => void;
-  accountName: string | undefined;
-  address: string;
-  networkPrefix: number;
-  networkKey: string;
-  iconTheme: string;
-  showExportButton: boolean
+  modalQrProp: ModalQrProps;
+  updateModalQr: (value: Partial<ModalQrProps>) => void;
 }
 
 interface EditState {
@@ -43,14 +52,51 @@ interface EditState {
   toggleActions: number;
 }
 
-function AccountQrModal ({ accountName, address, className,
-  closeModal,
-  iconTheme,
-  networkKey,
-  networkPrefix,
-  showExportButton }: Props): React.ReactElement<Props> {
+interface WrapperProps {
+  children?: JSX.Element;
+  closeModal?: () => void;
+  className?: string;
+}
+
+const Wrapper = (props: WrapperProps) => {
+  const { children, className, closeModal } = props;
+
+  return (
+    <Modal
+      className={CN(className, 'modal-container')}
+      maskClosable={true}
+      onClose={closeModal}
+      wrapperClassName={'select-modal'}
+    >
+      <div className={'account-qr-modal'}>
+        {children}
+      </div>
+    </Modal>
+  );
+};
+
+function AccountQrModal (props: Props): React.ReactElement<Props> {
+  const { className, closeModal, modalQrProp, updateModalQr } = props;
+  const { account: accountQr, network: networkQr, showExportButton } = modalQrProp;
+
   const { t } = useTranslation();
   const { show } = useToast();
+
+  const { accounts } = useContext(AccountContext);
+
+  const account = useMemo((): AccountJson | undefined => {
+    return accounts.find((acc) => acc.address === accountQr?.address);
+  }, [accounts, accountQr?.address]);
+
+  const genesisOptions = getGenesisOptionsByAddressType(account?.address, accounts, useGenesisHashOptions());
+
+  const network = useMemo((): NetworkSelectOption | undefined => {
+    return genesisOptions.find((net) => net.networkKey === networkQr?.networkKey);
+  }, [genesisOptions, networkQr?.networkKey]);
+
+  const { address, isExternal, name: accountName } = (account as AccountJson);
+  const { icon: iconTheme, networkKey, networkPrefix } = (network as NetworkSelectOption);
+
   const [editedName, setName] = useState<string | undefined | null>(accountName);
   const [{ isEditing }, setEditing] = useState<EditState>({ isEditing: false, toggleActions: 0 });
   const networkMap = useSelector((state: RootState) => state.networkMap);
@@ -61,6 +107,22 @@ function AccountQrModal ({ accountName, address, className,
   }, [networkMap, networkKey, address, networkPrefix]);
   const isSupportScanExplorer = useSupportScanExplorer(networkKey);
   const scanExplorerAddressUrl = useScanExplorerAddressUrl(networkKey, formatted);
+
+  const [filter, setFilter] = useState('');
+
+  const filteredAccount = useMemo(() => {
+    return accounts.filter((account) => {
+      const _network: NetworkSelectOption | null = (network !== undefined && network.networkKey !== ALL_NETWORK_KEY) ? network : null;
+      const typeCondition = _network ? (_network.isEthereum ? account.type === 'ethereum' : account.type !== 'ethereum') : true;
+      const filterCondition = filter ? account.name?.toLowerCase().includes(filter.toLowerCase()) : true;
+
+      return filterCondition && typeCondition;
+    });
+  }, [filter, accounts, network]);
+
+  const filteredNetwork = useMemo(() => {
+    return filter ? genesisOptions.filter((network) => network.networkKey?.toLowerCase().includes(filter.toLowerCase())) : genesisOptions;
+  }, [filter, genesisOptions]);
 
   const _toggleEdit = useCallback(
     (): void => {
@@ -83,6 +145,197 @@ function AccountQrModal ({ accountName, address, className,
     () => show(t('Copied')),
     [show, t]
   );
+
+  const onChangeFilter = useCallback((value: string) => {
+    setFilter(value);
+  }, []);
+
+  const onChangeAccount = useCallback((address: string) => {
+    setFilter('');
+    updateModalQr({ account: { address: address } });
+  }, [updateModalQr]);
+
+  const onChangeNetwork = useCallback((networkKey: string) => {
+    setFilter('');
+    updateModalQr({ network: { networkKey: networkKey } });
+  }, [updateModalQr]);
+
+  const handleStatusIcon = useCallback((apiStatus: NETWORK_STATUS, index: number) => {
+    if (apiStatus === NETWORK_STATUS.CONNECTED) {
+      return <img
+        alt='network-status'
+        className={'network-status network-status-icon'}
+        data-for={`network-status-icon-${index}`}
+        data-tip={true}
+        src={signalIcon}
+      />;
+    } else {
+      return <img
+        alt='network-status'
+        className={'network-status network-status-icon'}
+        data-for={`network-status-icon-${index}`}
+        data-tip={true}
+        src={signalSlashIcon}
+      />;
+    }
+  }, []);
+
+  const handleStatusText = useCallback((apiStatus: NETWORK_STATUS) => {
+    if (apiStatus === NETWORK_STATUS.CONNECTED) {
+      return 'Connected';
+    } else {
+      return 'Unable to connect';
+    }
+  }, []);
+
+  useEffect(() => {
+    setName(accountName);
+  }, [accountName]);
+
+  if (!accountQr || isAccountAll(accountQr.address)) {
+    return (
+      <Wrapper
+        className={className}
+        closeModal={closeModal}
+      >
+        <>
+          <div className={CN('modal-header')}>
+            <div className={CN('header-title')}>Account Selection</div>
+            <div
+              className={CN('header-icon')}
+              data-for={'header-icon'}
+              data-tip={true}
+            >
+              <FontAwesomeIcon
+                icon={faCircleQuestion}
+              />
+            </div>
+            <Tooltip
+              text={t<string>('Select the account you would like to send from')}
+              trigger={'header-icon'}
+            />
+          </div>
+          <InputFilter
+            className={CN('query-input')}
+            onChange={onChangeFilter}
+            placeholder='Search account...'
+            value={filter}
+            withReset
+          />
+          <div className={CN('account-container')}>
+            {filteredAccount.map((account, index): React.ReactNode => {
+              const { address, genesisHash, name, suri, type } = account;
+
+              const _isAllAccount = isAccountAll(address);
+
+              const onClick = () => {
+                onChangeAccount(address);
+              };
+
+              if (_isAllAccount) {
+                return null;
+              }
+
+              return (
+                <div
+                  className={CN('account-item')}
+                  key={index}
+                  // eslint-disable-next-line react/jsx-no-bind
+                  onClick={onClick}
+                >
+                  <AccountInfoEl
+                    address={address}
+                    className='account__account-item'
+                    genesisHash={genesisHash}
+                    name={name}
+                    showCopyBtn={false}
+                    suri={suri}
+                    type={type}
+                  />
+                </div>
+              );
+            })}
+          </div>
+        </>
+      </Wrapper>
+    );
+  }
+
+  if (!networkQr || networkQr.networkKey === ALL_NETWORK_KEY) {
+    return (
+      <Wrapper
+        className={className}
+        closeModal={closeModal}
+      >
+        <>
+          <div className={CN('modal-header')}>
+            <div className={CN('header-title')}>Network Selection</div>
+            <div
+              className={CN('header-icon')}
+              data-for={'header-icon'}
+              data-tip={true}
+            >
+              <FontAwesomeIcon
+                icon={faCircleQuestion}
+              />
+            </div>
+            <Tooltip
+              text={t<string>('Select the network to obtain the sending address')}
+              trigger={'header-icon'}
+            />
+          </div>
+          <InputFilter
+            className={CN('query-input')}
+            onChange={onChangeFilter}
+            placeholder='Search network...'
+            value={filter}
+            withReset
+          />
+          <div className={CN('network-container')}>
+            {filteredNetwork.map((network, index): React.ReactNode => {
+              const { apiStatus, networkKey, text, value } = network;
+
+              const _isAllNetwork = networkKey === ALL_NETWORK_KEY;
+
+              const onClick = () => {
+                onChangeNetwork(networkKey);
+              };
+
+              if (_isAllNetwork) {
+                return null;
+              }
+
+              return (
+                <div
+                  className='network-item-container'
+                  key={value}
+                  // eslint-disable-next-line react/jsx-no-bind
+                  onClick={onClick}
+                >
+                  <div className={'network-item'}>
+                    <img
+                      alt='logo'
+                      className={'network-logo'}
+                      src={getLogoByGenesisHash(value)}
+                    />
+
+                    <span className={'network-text'}>{text}</span>
+                  </div>
+                  <div className={'icon-container'}>
+                    { handleStatusIcon(apiStatus, index) }
+                    <Tooltip
+                      text={handleStatusText(apiStatus)}
+                      trigger={`network-status-icon-${index}`}
+                    />
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </>
+      </Wrapper>
+    );
+  }
 
   return (
     <Modal className={className}>
@@ -175,7 +428,7 @@ function AccountQrModal ({ accountName, address, className,
               </span>
             )}
 
-          {showExportButton && (
+          {showExportButton && !isAccountAll(address) && !isExternal && (
             <Link
               className='account-qr-modal-button'
               to={`/account/export/${formatted}`}
@@ -194,6 +447,8 @@ function AccountQrModal ({ accountName, address, className,
 export default styled(AccountQrModal)(({ theme }: ThemeProps) => `
   .account-qr-modal {
     position: relative;
+    display: flex;
+    flex-direction: column;
   }
 
   .account-qr-modal__header {
@@ -258,7 +513,7 @@ export default styled(AccountQrModal)(({ theme }: ThemeProps) => `
   .account-qr-modal__qr-code {
     margin: 20px 0;
     border: 2px solid #fff;
-    
+
     svg {
       display:block;
     }
@@ -337,4 +592,117 @@ export default styled(AccountQrModal)(({ theme }: ThemeProps) => `
       height: 32px;
     }
   }
+
+  .modal-header {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    .header-title {
+      font-weight: 500;
+      font-size: 20px;
+      line-height: 32px;
+    }
+
+    .header-icon {
+      color: ${theme.primaryColor};
+      margin-left: 4px;
+    }
+  }
+
+  .query-input {
+    margin-top: 12px;
+    flex-shrink: 0;
+  }
+
+  &.modal-container {
+
+    .select-modal {
+      max-width: 390px !important;
+      background-color: ${theme.popupBackground};
+
+      .account-qr-modal{
+        height: 450px;
+      }
+    }
+  }
+
+  .account-container {
+    flex: 1 1 0%;
+    overflow-y: auto;
+    margin-top: 10px;
+    margin-bottom: 10px;
+
+    .account-item {
+      padding: 10px 0;
+      position: relative;
+      cursor: pointer;
+
+      .account-info-row {
+        height: 40px;
+
+        .account-info__name {
+          line-height: 20px;
+          margin: 0;
+        }
+
+        .account-info-full-address {
+          line-height: 20px;
+          font-size: 12px;
+        }
+      }
+
+      .account-info-identity-icon {
+        padding: 0;
+      }
+    }
+  }
+
+  .network-container {
+    flex: 1 1 0%;
+    overflow-y: auto;
+    margin-top: 15px;
+    margin-bottom: 10px;
+    padding-right: 10px;
+
+    .network-item-container {
+      padding: 5px 0;
+      cursor: pointer;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+
+      .network-item {
+        display: flex;
+        align-items: center;
+      }
+
+      .network-logo {
+        min-width: 30px;
+        width: 32px;
+        height: 32px;
+        border-radius: 100%;
+        overflow: hidden;
+        image-rendering: -webkit-optimize-contrast;
+        image-rendering: crisp-edges;
+        border: 1px solid #fff;
+        background: #fff;
+        margin-right: 10px;
+      }
+
+      .network-text {
+        font-weight: 500;
+        font-size: 15px;
+        line-height: 40px;
+        color: ${theme.textColor2};
+      }
+
+      &:hover {
+        .network-text {
+          color: ${theme.textColor};
+        }
+      }
+    }
+  }
+
 `);

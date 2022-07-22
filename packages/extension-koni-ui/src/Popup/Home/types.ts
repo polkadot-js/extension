@@ -19,8 +19,5 @@ export type CrowdloanItemType = {
 export type TabHeaderItemType = {
   tabId: number;
   label: string;
-  lightIcon: string;
-  darkIcon: string;
-  activatedLightIcon: string;
-  activatedDarkIcon: string;
+  icon: JSX.Element
 }

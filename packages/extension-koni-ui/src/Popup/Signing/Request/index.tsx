@@ -138,48 +138,49 @@ function Request ({ account: { isExternal, isHardware }, buttonText, className, 
 
   return (
     <div className={className}>
-      <img
-        alt={`${hostname}`}
-        className='signing-request__logo'
-        src={`https://icons.duckduckgo.com/ip2/${hostname}.ico`}
-      />
-      <div className='signing-request__host-name'>
-        {hostname}
-      </div>
-      <span className='signing-request__title'>
-        {t<string>('Approve Request')}
-      </span>
+      <div className='sign-request-content'>
+        <img
+          alt={`${hostname}`}
+          className='signing-request__logo'
+          src={`https://icons.duckduckgo.com/ip2/${hostname}.ico`}
+        />
+        <div className='signing-request__host-name'>
+          {hostname}
+        </div>
+        <span className='signing-request__title'>
+          {t<string>('Approve Request')}
+        </span>
 
-      <span className='signing-request__text'>
-        {t<string>('You are approving a request with account')}
-      </span>
+        <span className='signing-request__text'>
+          {t<string>('You are approving a request with account')}
+        </span>
 
-      <div className='signing-request__text-wrapper'>
-        {account &&
-        <AccountInfoEl
-          address={account.address}
-          className='signing-request__account'
-          genesisHash={account.genesisHash}
-          iconSize={20}
-          isShowAddress={false}
-          isShowBanner={false}
-          name={account.name}
-          showCopyBtn={false}
-        />}
-        <div className='signing-request__text'>{t<string>(`on ${hostname}`)}</div>
-      </div>
+        <div className='signing-request__text-wrapper'>
+          {account &&
+            <AccountInfoEl
+              address={account.address}
+              className='signing-request__account'
+              genesisHash={account.genesisHash}
+              iconSize={20}
+              isShowAddress={false}
+              isShowBanner={false}
+              name={account.name}
+              showCopyBtn={false}
+            />}
+          <div className='signing-request__text'>{t<string>(`on ${hostname}`)}</div>
+        </div>
 
-      {isShowDetails && renderDataRequest()}
+        {isShowDetails && renderDataRequest()}
 
-      <div
-        className='signing-request__view-detail-btn'
-        onClick={_viewDetails}
-      >
         <div
-          className='signing-request__view-detail-btn-text'
-        >{isShowDetails ? t<string>('Hide Details') : t<string>('View Details')}</div>
+          className='signing-request__view-detail-btn'
+          onClick={_viewDetails}
+        >
+          <div
+            className='signing-request__view-detail-btn-text'
+          >{isShowDetails ? t<string>('Hide Details') : t<string>('View Details')}</div>
+        </div>
       </div>
-
       <SignArea
         buttonText={buttonText}
         error={error}
@@ -200,6 +201,16 @@ export default styled(Request)(({ theme }: Props) => `
   overflow-y: auto;
   .transaction-account-info {
     padding-bottom: 0;
+  }
+  
+  .sign-request-content {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+  }
+  
+  .sign-request-footer {
+    overflow: hidden;
   }
 
   .signing-request__logo {

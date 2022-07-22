@@ -1,12 +1,18 @@
 // Copyright 2019-2022 @polkadot/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-const colors = {
-  primary1: '#004BFF',
-  primary2: '#42C59A'
+// import subspaceLogo from '@subwallet/extension-koni-ui/assets/logo/subspace.png';
+import subWalletLogo from '@subwallet/extension-koni-ui/assets/sub-wallet-logo.svg';
+
+const basicThemeColors = {
+  color1: '#004BFF',
+  color2: '#42C59A'
 };
 
 const darkTheme = {
+  logo: subWalletLogo,
+  primaryColor: basicThemeColors.color2,
+  secondaryColor: basicThemeColors.color1,
   accountBackground: '#1A1B20',
   accountDotsIconColor: '#8E8E8E',
   addAccountImageBackground: '#1A1B20',
@@ -26,15 +32,15 @@ const darkTheme = {
   boxPadding: '0 0.25rem',
   boxShadow: 'rgba(0, 0, 0, 0.86)',
   boxShadow2: '0px 0px 7px rgba(4, 193, 183, 0.4)',
-  buttonBackground: colors.primary1,
-  buttonBackground2: colors.primary2,
+  buttonBackground: basicThemeColors.color1,
+  buttonBackground2: basicThemeColors.color2,
   buttonBorderColor: 'rgb(66, 197, 154, 0.2)',
   buttonBackgroundDanger: '#AF1111',
   buttonBackground1: '#181E42',
   buttonBackgroundDangerHover: '#D93B3B',
   buttonBackgroundHover: '#ED9329',
   buttonTextColor: '#FFFFFF',
-  buttonTextColor2: colors.primary2,
+  buttonTextColor2: basicThemeColors.color2,
   buttonTextColor3: '#00072D',
   tabContentBorderBottomColor: '#343849',
   errorBorderColor: '#7E3530',
@@ -49,6 +55,8 @@ const darkTheme = {
   iconNeutralColor: '#7B8098',
   iconWarningColor: '#FF7D01',
   id: 'dark',
+  name: 'Dark',
+  HomeNavHighlightColor: basicThemeColors.color2,
   identiconBackground: '#F4F5F8',
   inputBackground: '#111218',
   inputBorderColor: '#2D365C',
@@ -66,17 +74,16 @@ const darkTheme = {
   overlayBackground: '#00072D',
   popupBackground: '#181E42',
   accountHoverBackground: 'rgba(255, 255, 255, 0.05)',
-  primaryColor: colors.primary2,
   readonlyInputBackground: 'rgba(38, 44, 74, 0.4)',
   warningBackgroundColor: 'rgba(231, 185, 23, 0.2)',
   dangerBackgroundColor: 'rgba(175, 17, 17, 0.25)',
   subTextColor: '#DDD',
   textColor: '#FFFFFF',
   textColor2: '#7B8098',
-  textColor3: colors.primary2,
+  textColor3: basicThemeColors.color2,
   textColorDanger: '#FF8686',
-  checkDotColor: colors.primary1,
-  iconHoverColor: colors.primary2,
+  checkDotColor: basicThemeColors.color1,
+  iconHoverColor: basicThemeColors.color2,
   chainTextColor: '#ED843D',
   chainBackgroundColor: 'rgba(237, 132, 61, 0.2)',
   checkboxColor: '#262C4A',
@@ -85,7 +92,7 @@ const darkTheme = {
   labelDarkThemeColor: '#FFFFFF',
   manageWebsiteAccessColor: '#9196AB',
   loadingBackground1: '#181E42',
-  loadingBackground2: colors.primary2,
+  loadingBackground2: basicThemeColors.color2,
   toggleInactiveBgc: '#262C4A',
   toggleInactiveThumbColor: '#9196AB',
   toggleInactiveThumbBoxShadow: '0px 0px 4px rgba(0, 0, 0, 0.25)',
@@ -120,7 +127,7 @@ const lightTheme: Theme = {
   boxShadow2: '0px 0px 5px rgba(0, 0, 0, 0.05), 0px 20px 60px rgba(0, 0, 0, 0.15)',
   buttonBackground1: '#F0F4FF',
   buttonBackgroundDanger: '#B5131C',
-  // buttonTextColor2: colors.primary1,
+  // buttonTextColor2: basicThemeColors.color1,
   tabContentBorderBottomColor: 'transparent',
   checkboxColor: '#F5F5F5',
   checkboxBorderColor: '#DDDDDD',
@@ -131,6 +138,8 @@ const lightTheme: Theme = {
   iconDangerColor: '#DC2222',
   iconNeutralColor: '#939CB1',
   id: 'light',
+  name: 'Light',
+  HomeNavHighlightColor: basicThemeColors.color2,
   inputBackground: '#FFFFFF',
   inputBorderColor: '#EDEDED',
   labelColor: '#333333',
@@ -144,7 +153,7 @@ const lightTheme: Theme = {
   subTextColor: '#454545',
   textColor: '#00072D',
   textColor2: '#888888',
-  textColor3: colors.primary1,
+  textColor3: basicThemeColors.color1,
   textColorDanger: '#F24A4A',
   labelLightThemeColor: '#00072D',
   labelDarkThemeColor: '#666666',
@@ -152,7 +161,7 @@ const lightTheme: Theme = {
   warningBackgroundColor: 'rgba(231, 185, 23, 0.1)',
   dangerBackgroundColor: 'rgba(175, 17, 17, 0.1)',
   loadingBackground1: '#F0F4FF',
-  loadingBackground2: colors.primary1,
+  loadingBackground2: basicThemeColors.color1,
   toggleInactiveBgc: '#ddd',
   toggleInactiveThumbColor: '#fff',
   toggleInactiveThumbBoxShadow: '0px 0px 4px rgba(0, 0, 0, 0.25)',
@@ -162,25 +171,52 @@ const lightTheme: Theme = {
   dropdownBackground: '#020412'
 };
 
-export const themes = {
+// interface GenerateOptions extends Partial<Theme> {
+//   primaryColor: string,
+//   secondaryColor: string
+// }
+
+export const themes: Record<string, Theme> = {
   dark: darkTheme,
   light: lightTheme
 };
 
+// function generateTheme (id: string, name: string, baseTheme: 'dark' | 'light', options: GenerateOptions) {
+//   themes[id] = {
+//     ...themes[baseTheme],
+//     id,
+//     name,
+//     buttonBackground: options.primaryColor,
+//     buttonBackground2: options.secondaryColor,
+//     buttonTextColor2: options.secondaryColor,
+//     textColor3: baseTheme === 'dark' ? options.secondaryColor : options.primaryColor,
+//     checkDotColor: options.primaryColor,
+//     iconHoverColor: options.secondaryColor,
+//     loadingBackground2: baseTheme === 'dark' ? options.secondaryColor : options.primaryColor,
+//     HomeNavHighlightColor: baseTheme === 'dark' ? options.secondaryColor : options.primaryColor,
+//     ...options
+//   };
+// }
+
+// Generate Subspace theme
+// generateTheme('subspace', 'Subspace', 'light', {
+//   primaryColor: '#562B8E',
+//   secondaryColor: '#562B8E',
+//   logo: subspaceLogo
+// });
+
 export declare type AvailableThemes = keyof typeof themes;
 
 export function chooseTheme (): AvailableThemes {
-  const preferredTheme = localStorage.getItem('theme');
+  const preferredTheme = localStorage.getItem('theme') as string;
 
-  if (preferredTheme) {
-    return preferredTheme === 'dark'
-      ? 'dark'
-      : 'light';
+  if (themes[preferredTheme]) {
+    return preferredTheme;
   }
 
-  // return window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches
-  //   ? 'light'
-  //   : 'dark';
-
   return 'dark';
+}
+
+export function getThemeOptions (): Array<{ value: string, text: string }> {
+  return Object.values(themes).map((v) => ({ text: v.name, value: v.id }));
 }

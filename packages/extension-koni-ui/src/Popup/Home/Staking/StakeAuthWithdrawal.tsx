@@ -23,13 +23,16 @@ interface Props extends ThemeProps {
   amount: number;
   targetValidator: string | undefined;
   nextWithdrawalAction: string | undefined;
+  stakeUnlockingTimestamp: number;
+  setWithdrawalTimestamp: (data: number) => void;
 }
 
-function StakeAuthWithdrawal ({ address, amount, className, hideModal, networkKey, nextWithdrawalAction, targetValidator }: Props): React.ReactElement<Props> {
+function StakeAuthWithdrawal ({ address, amount, className, hideModal, networkKey, nextWithdrawalAction, setWithdrawalTimestamp, stakeUnlockingTimestamp, targetValidator }: Props): React.ReactElement<Props> {
   const networkJson = useGetNetworkJson(networkKey);
   const { t } = useTranslation();
   const { show } = useToast();
 
+  const [actionTimestamp] = useState(stakeUnlockingTimestamp);
   const [loading, setLoading] = useState(false);
   const [password, setPassword] = useState<string>('');
   const [passwordError, setPasswordError] = useState<string | null>('');
@@ -47,7 +50,8 @@ function StakeAuthWithdrawal ({ address, amount, className, hideModal, networkKe
     getStakeWithdrawalTxInfo({
       address,
       networkKey,
-      action: nextWithdrawalAction
+      action: nextWithdrawalAction,
+      validatorAddress: targetValidator
     })
       .then((resp) => {
         setIsTxReady(true);
@@ -55,6 +59,12 @@ function StakeAuthWithdrawal ({ address, amount, className, hideModal, networkKe
         setFee(resp.fee);
       })
       .catch(console.error);
+
+    return () => {
+      setIsTxReady(false);
+      setBalanceError(false);
+      setFee('');
+    };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -94,6 +104,7 @@ function StakeAuthWithdrawal ({ address, amount, className, hideModal, networkKe
 
       if (cbData.status) {
         setLoading(false);
+        setWithdrawalTimestamp(actionTimestamp);
 
         if (cbData.status) {
           setIsTxSuccess(true);
@@ -107,7 +118,7 @@ function StakeAuthWithdrawal ({ address, amount, className, hideModal, networkKe
         }
       }
     });
-  }, [address, balanceError, networkKey, nextWithdrawalAction, password, show, targetValidator]);
+  }, [actionTimestamp, address, balanceError, networkKey, nextWithdrawalAction, password, setWithdrawalTimestamp, show, targetValidator]);
 
   const handleConfirm = useCallback(() => {
     setLoading(true);
@@ -125,6 +136,12 @@ function StakeAuthWithdrawal ({ address, amount, className, hideModal, networkKe
     setShowResult(false);
   }, []);
 
+  const handleClickCancel = useCallback(() => {
+    if (!loading) {
+      hideModal();
+    }
+  }, [hideModal, loading]);
+
   return (
     <div className={className}>
       <Modal>
@@ -137,7 +154,7 @@ function StakeAuthWithdrawal ({ address, amount, className, hideModal, networkKe
           </div>
           <div
             className={'close-button-confirm header-alignment'}
-            onClick={hideModal}
+            onClick={handleClickCancel}
           >
             Cancel
           </div>

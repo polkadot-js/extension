@@ -10,7 +10,7 @@ import type { HexString } from '@polkadot/util/types';
 import type { KeypairType } from '@polkadot/util-crypto/types';
 
 import { AuthUrls } from '@subwallet/extension-base/background/handlers/State';
-import { AccountsWithCurrentAddress, BalanceJson, BasicTxInfo, BasicTxResponse, BondingOptionInfo, BondingSubmitParams, ChainBondingBasics, ChainRegistry, ConfirmationDefinitions, ConfirmationsQueue, ConfirmationType, CrowdloanJson, CurrentAccountInfo, CustomEvmToken, DeleteEvmTokenParams, DisableNetworkResponse, EvmNftSubmitTransaction, EvmNftTransaction, EvmNftTransactionRequest, EvmTokenJson, NetworkJson, NftCollectionJson, NftJson, NftTransactionResponse, NftTransferExtra, OptionInputAddress, PriceJson, RequestCheckCrossChainTransfer, RequestCheckTransfer, RequestCrossChainTransfer, RequestFreeBalance, RequestNftForceUpdate, RequestSettingsType, RequestSubscribeBalance, RequestSubscribeBalancesVisibility, RequestSubscribeCrowdloan, RequestSubscribeNft, RequestSubscribePrice, RequestSubscribeStaking, RequestSubscribeStakingReward, RequestTransfer, RequestTransferCheckReferenceCount, RequestTransferCheckSupporting, RequestTransferExistentialDeposit, ResponseAccountCreateSuriV2, ResponseCheckCrossChainTransfer, ResponseCheckTransfer, ResponsePrivateKeyValidateV2, ResponseSeedCreateV2, ResponseSeedValidateV2, ResponseSettingsType, ResponseTransfer, StakeClaimRewardParams, StakeWithdrawalParams, StakingJson, StakingRewardJson, SubstrateNftSubmitTransaction, SubstrateNftTransaction, SubstrateNftTransactionRequest, SupportTransferResponse, ThemeTypes, TransactionHistoryItemType, TransferError, UnbondingSubmitParams, UnlockingStakeInfo, UnlockingStakeParams, ValidateEvmTokenRequest, ValidateNetworkResponse } from '@subwallet/extension-base/background/KoniTypes';
+import { AccountsWithCurrentAddress, BalanceJson, BasicTxInfo, BasicTxResponse, BondingOptionInfo, BondingSubmitParams, ChainBondingBasics, ChainRegistry, ConfirmationDefinitions, ConfirmationsQueue, ConfirmationType, CrowdloanJson, CurrentAccountInfo, CustomEvmToken, DelegationItem, DeleteEvmTokenParams, DisableNetworkResponse, EvmNftSubmitTransaction, EvmNftTransaction, EvmNftTransactionRequest, EvmTokenJson, NetworkJson, NftCollectionJson, NftJson, NftTransactionResponse, NftTransferExtra, OptionInputAddress, PriceJson, RequestCheckCrossChainTransfer, RequestCheckTransfer, RequestCrossChainTransfer, RequestFreeBalance, RequestNftForceUpdate, RequestSettingsType, RequestSubscribeBalance, RequestSubscribeBalancesVisibility, RequestSubscribeCrowdloan, RequestSubscribeNft, RequestSubscribePrice, RequestSubscribeStaking, RequestSubscribeStakingReward, RequestTransfer, RequestTransferCheckReferenceCount, RequestTransferCheckSupporting, RequestTransferExistentialDeposit, ResponseAccountCreateSuriV2, ResponseCheckCrossChainTransfer, ResponseCheckTransfer, ResponsePrivateKeyValidateV2, ResponseSeedCreateV2, ResponseSeedValidateV2, ResponseSettingsType, ResponseTransfer, StakeClaimRewardParams, StakeDelegationRequest, StakeUnlockingJson, StakeWithdrawalParams, StakingJson, StakingRewardJson, SubstrateNftSubmitTransaction, SubstrateNftTransaction, SubstrateNftTransactionRequest, SupportTransferResponse, ThemeTypes, TransactionHistoryItemType, TransferError, UnbondingSubmitParams, ValidateEvmTokenRequest, ValidateNetworkResponse } from '@subwallet/extension-base/background/KoniTypes';
 import { RequestCurrentAccountAddress } from '@subwallet/extension-base/background/types';
 import { PORT_EXTENSION } from '@subwallet/extension-base/defaults';
 import { getId } from '@subwallet/extension-base/utils/getId';
@@ -566,8 +566,8 @@ export async function getBondingOptions (networkKey: string, address: string): P
   return sendMessage('pri(bonding.getBondingOptions)', { networkKey, address });
 }
 
-export async function getChainBondingBasics (networkJsons: NetworkJson[]): Promise<Record<string, ChainBondingBasics>> {
-  return sendMessage('pri(bonding.getChainBondingBasics)', networkJsons);
+export async function getChainBondingBasics (networkJsons: NetworkJson[], callback: (data: Record<string, ChainBondingBasics>) => void): Promise<Record<string, ChainBondingBasics>> {
+  return sendMessage('pri(bonding.getChainBondingBasics)', networkJsons, callback);
 }
 
 export async function submitBonding (bondingSubmitParams: BondingSubmitParams, callback: (data: BasicTxResponse) => void): Promise<BasicTxResponse> {
@@ -586,8 +586,8 @@ export async function submitUnbonding (unbondingSubmitParams: UnbondingSubmitPar
   return sendMessage('pri(unbonding.submitTransaction)', unbondingSubmitParams, callback);
 }
 
-export async function getUnlockingStakeInfo (unlockingParams: UnlockingStakeParams): Promise<UnlockingStakeInfo> {
-  return sendMessage('pri(unbonding.unlockingInfo)', unlockingParams);
+export async function subscribeStakeUnlockingInfo (callback: (data: StakeUnlockingJson) => void): Promise<StakeUnlockingJson> {
+  return sendMessage('pri(unbonding.subscribeUnlockingInfo)', null, callback);
 }
 
 export async function getStakeWithdrawalTxInfo (params: StakeWithdrawalParams): Promise<BasicTxInfo> {
@@ -604,4 +604,8 @@ export async function getStakeClaimRewardTxInfo (params: StakeClaimRewardParams)
 
 export async function submitStakeClaimReward (params: StakeClaimRewardParams, callback: (data: BasicTxResponse) => void): Promise<BasicTxResponse> {
   return sendMessage('pri(staking.submitClaimReward)', params, callback);
+}
+
+export async function getStakeDelegationInfo (params: StakeDelegationRequest): Promise<DelegationItem[]> {
+  return sendMessage('pri(staking.delegationInfo)', params);
 }

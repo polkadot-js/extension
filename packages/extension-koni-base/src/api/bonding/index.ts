@@ -1,16 +1,16 @@
 // Copyright 2019-2022 @subwallet/extension-koni authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { ApiProps, NetworkJson, ValidatorInfo } from '@subwallet/extension-base/background/KoniTypes';
-import { getAstarBondingBasics, getAstarBondingExtrinsic, getAstarClaimRewardExtrinsic, getAstarDappsInfo, getAstarUnbondingExtrinsic, getAstarWithdrawalExtrinsic, handleAstarBondingTxInfo, handleAstarClaimRewardTxInfo, handleAstarUnbondingTxInfo, handleAstarUnlockingInfo, handleAstarWithdrawalTxInfo } from '@subwallet/extension-koni-base/api/bonding/astar';
+import { ApiProps, NetworkJson, UnlockingStakeInfo, ValidatorInfo } from '@subwallet/extension-base/background/KoniTypes';
+import { getAstarBondingBasics, getAstarBondingExtrinsic, getAstarClaimRewardExtrinsic, getAstarDappsInfo, getAstarDelegationInfo, getAstarUnbondingExtrinsic, getAstarWithdrawalExtrinsic, handleAstarBondingTxInfo, handleAstarClaimRewardTxInfo, handleAstarUnbondingTxInfo, handleAstarUnlockingInfo, handleAstarWithdrawalTxInfo } from '@subwallet/extension-koni-base/api/bonding/astar';
 import { getDarwiniaBondingExtrinsic, getDarwiniaValidatorsInfo, handleDarwiniaBondingTxInfo } from '@subwallet/extension-koni-base/api/bonding/darwinia';
-import { getParaBondingBasics, getParaBondingExtrinsic, getParaCollatorsInfo, getParaUnbondingExtrinsic, getParaWithdrawalExtrinsic, handleParaBondingTxInfo, handleParaUnbondingTxInfo, handleParaUnlockingInfo, handleParaWithdrawalTxInfo } from '@subwallet/extension-koni-base/api/bonding/paraChain';
+import { getParaBondingBasics, getParaBondingExtrinsic, getParaCollatorsInfo, getParaDelegationInfo, getParaUnbondingExtrinsic, getParaWithdrawalExtrinsic, handleParaBondingTxInfo, handleParaUnbondingTxInfo, handleParaUnlockingInfo, handleParaWithdrawalTxInfo } from '@subwallet/extension-koni-base/api/bonding/paraChain';
 import { getRelayBondingExtrinsic, getRelayChainBondingBasics, getRelayUnbondingExtrinsic, getRelayValidatorsInfo, getRelayWithdrawalExtrinsic, getTargetValidators, handleRelayBondingTxInfo, handleRelayUnbondingTxInfo, handleRelayUnlockingInfo, handleRelayWithdrawalTxInfo } from '@subwallet/extension-koni-base/api/bonding/relayChain';
 import Web3 from 'web3';
 
 const CHAIN_TYPES: Record<string, string[]> = {
-  relay: ['polkadot', 'kusama', 'hydradx', 'aleph', 'polkadex'],
-  para: ['moonbeam', 'moonriver', 'moonbase', 'turing', 'turingStaging'],
+  relay: ['polkadot', 'kusama', 'aleph', 'polkadex'],
+  para: ['moonbeam', 'moonriver', 'moonbase', 'turing', 'turingStaging', 'bifrost', 'bifrost_testnet'],
   darwinia: ['darwinia', 'crab', 'pangolin'],
   astar: ['astar', 'shiden', 'shibuya']
 };
@@ -89,9 +89,9 @@ export async function getUnbondingExtrinsic (address: string, amount: number, ne
   return getRelayUnbondingExtrinsic(dotSamaApi, amount, networkJson);
 }
 
-export async function getUnlockingInfo (dotSamaApi: ApiProps, networkJson: NetworkJson, networkKey: string, address: string, validatorList?: string[]) {
+export async function getUnlockingInfo (dotSamaApi: ApiProps, networkJson: NetworkJson, networkKey: string, address: string): Promise<UnlockingStakeInfo> {
   if (CHAIN_TYPES.para.includes(networkKey)) {
-    return handleParaUnlockingInfo(dotSamaApi, networkJson, networkKey, address, validatorList as string[]);
+    return handleParaUnlockingInfo(dotSamaApi, networkJson, networkKey, address);
   } else if (CHAIN_TYPES.astar.includes(networkKey)) {
     return handleAstarUnlockingInfo(dotSamaApi, networkJson, networkKey, address);
   }
@@ -99,14 +99,14 @@ export async function getUnlockingInfo (dotSamaApi: ApiProps, networkJson: Netwo
   return handleRelayUnlockingInfo(dotSamaApi, networkJson, networkKey, address);
 }
 
-export async function getWithdrawalTxInfo (address: string, networkKey: string, dotSamaApiMap: Record<string, ApiProps>, web3ApiMap: Record<string, Web3>, validatorAddress?: string, action?: string) {
+export async function getWithdrawalTxInfo (address: string, networkKey: string, networkJson: NetworkJson, dotSamaApiMap: Record<string, ApiProps>, web3ApiMap: Record<string, Web3>, validatorAddress?: string, action?: string) {
   if (CHAIN_TYPES.para.includes(networkKey)) {
-    return handleParaWithdrawalTxInfo(networkKey, dotSamaApiMap, web3ApiMap, address, validatorAddress as string, action as string);
+    return handleParaWithdrawalTxInfo(networkKey, networkJson, dotSamaApiMap, web3ApiMap, address, validatorAddress as string, action as string);
   } else if (CHAIN_TYPES.astar.includes(networkKey)) {
-    return handleAstarWithdrawalTxInfo(networkKey, dotSamaApiMap, web3ApiMap, address);
+    return handleAstarWithdrawalTxInfo(networkKey, networkJson, dotSamaApiMap, web3ApiMap, address);
   }
 
-  return handleRelayWithdrawalTxInfo(address, networkKey, dotSamaApiMap, web3ApiMap);
+  return handleRelayWithdrawalTxInfo(address, networkKey, networkJson, dotSamaApiMap, web3ApiMap);
 }
 
 export async function getWithdrawalExtrinsic (dotSamaApi: ApiProps, networkKey: string, address: string, validatorAddress?: string, action?: string) {
@@ -119,10 +119,18 @@ export async function getWithdrawalExtrinsic (dotSamaApi: ApiProps, networkKey: 
   return getRelayWithdrawalExtrinsic(dotSamaApi, address);
 }
 
-export async function getClaimRewardTxInfo (address: string, networkKey: string, dotSamaApiMap: Record<string, ApiProps>, web3ApiMap: Record<string, Web3>, validatorAddress?: string) {
-  return handleAstarClaimRewardTxInfo(address, validatorAddress as string, networkKey, dotSamaApiMap, web3ApiMap);
+export async function getClaimRewardTxInfo (address: string, networkKey: string, networkJson: NetworkJson, dotSamaApiMap: Record<string, ApiProps>, web3ApiMap: Record<string, Web3>) {
+  return handleAstarClaimRewardTxInfo(address, networkKey, networkJson, dotSamaApiMap, web3ApiMap);
 }
 
-export async function getClaimRewardExtrinsic (dotSamaApi: ApiProps, networkKey: string, validatorAddress?: string) {
-  return getAstarClaimRewardExtrinsic(dotSamaApi, validatorAddress as string);
+export async function getClaimRewardExtrinsic (dotSamaApi: ApiProps, networkKey: string, address: string, validatorAddress?: string) {
+  return getAstarClaimRewardExtrinsic(dotSamaApi, validatorAddress as string, address);
+}
+
+export async function getDelegationInfo (dotSamaApi: ApiProps, address: string, networkKey: string) {
+  if (CHAIN_TYPES.para.includes(networkKey)) {
+    return getParaDelegationInfo(dotSamaApi, address, networkKey);
+  }
+
+  return getAstarDelegationInfo(dotSamaApi, address, networkKey);
 }

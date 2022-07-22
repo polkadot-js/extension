@@ -5,9 +5,9 @@ import Common from '@ethereumjs/common';
 import Extension, { SEED_DEFAULT_LENGTH, SEED_LENGTHS } from '@subwallet/extension-base/background/handlers/Extension';
 import { AuthUrls } from '@subwallet/extension-base/background/handlers/State';
 import { createSubscription, isSubscriptionRunning, unsubscribe } from '@subwallet/extension-base/background/handlers/subscriptions';
-import { AccountsWithCurrentAddress, ApiProps, BalanceJson, BasicTxInfo, BasicTxResponse, BondingOptionInfo, BondingOptionParams, BondingSubmitParams, ChainBondingBasics, ChainRegistry, CrowdloanJson, CurrentAccountInfo, CustomEvmToken, DeleteEvmTokenParams, DisableNetworkResponse, EvmNftSubmitTransaction, EvmNftTransaction, EvmNftTransactionRequest, EvmTokenJson, NETWORK_ERROR, NetWorkGroup, NetworkJson, NftCollection, NftCollectionJson, NftItem, NftJson, NftTransactionResponse, NftTransferExtra, OptionInputAddress, PriceJson, RequestAccountCreateSuriV2, RequestAccountExportPrivateKey, RequestAuthorization, RequestAuthorizationPerAccount, RequestAuthorizeApproveV2, RequestBatchRestoreV2, RequestCheckCrossChainTransfer, RequestCheckTransfer, RequestConfirmationComplete, RequestCrossChainTransfer, RequestDeriveCreateV2, RequestForgetSite, RequestFreeBalance, RequestJsonRestoreV2, RequestNftForceUpdate, RequestSaveRecentAccount, RequestSeedCreateV2, RequestSeedValidateV2, RequestSettingsType, RequestTransactionHistoryAdd, RequestTransfer, RequestTransferCheckReferenceCount, RequestTransferCheckSupporting, RequestTransferExistentialDeposit, ResponseAccountCreateSuriV2, ResponseAccountExportPrivateKey, ResponseCheckCrossChainTransfer, ResponseCheckTransfer, ResponsePrivateKeyValidateV2, ResponseSeedCreateV2, ResponseSeedValidateV2, ResponseTransfer, StakeClaimRewardParams, StakeWithdrawalParams, StakingJson, StakingRewardJson, SubstrateNftSubmitTransaction, SubstrateNftTransaction, SubstrateNftTransactionRequest, SupportTransferResponse, ThemeTypes, TokenInfo, TransactionHistoryItemType, TransferError, TransferErrorCode, TransferStep, UnbondingSubmitParams, UnlockingStakeInfo, UnlockingStakeParams, ValidateEvmTokenRequest, ValidateEvmTokenResponse, ValidateNetworkRequest, ValidateNetworkResponse } from '@subwallet/extension-base/background/KoniTypes';
+import { AccountsWithCurrentAddress, ApiProps, BalanceJson, BasicTxInfo, BasicTxResponse, BondingOptionInfo, BondingOptionParams, BondingSubmitParams, ChainBondingBasics, ChainRegistry, CrowdloanJson, CurrentAccountInfo, CustomEvmToken, DelegationItem, DeleteEvmTokenParams, DisableNetworkResponse, EvmNftSubmitTransaction, EvmNftTransaction, EvmNftTransactionRequest, EvmTokenJson, NETWORK_ERROR, NetWorkGroup, NetworkJson, NftCollection, NftCollectionJson, NftItem, NftJson, NftTransactionResponse, NftTransferExtra, OptionInputAddress, PriceJson, RequestAccountCreateSuriV2, RequestAccountExportPrivateKey, RequestAuthorization, RequestAuthorizationPerAccount, RequestAuthorizeApproveV2, RequestBatchRestoreV2, RequestCheckCrossChainTransfer, RequestCheckTransfer, RequestConfirmationComplete, RequestCrossChainTransfer, RequestDeriveCreateV2, RequestForgetSite, RequestFreeBalance, RequestJsonRestoreV2, RequestNftForceUpdate, RequestSaveRecentAccount, RequestSeedCreateV2, RequestSeedValidateV2, RequestSettingsType, RequestTransactionHistoryAdd, RequestTransfer, RequestTransferCheckReferenceCount, RequestTransferCheckSupporting, RequestTransferExistentialDeposit, ResponseAccountCreateSuriV2, ResponseAccountExportPrivateKey, ResponseCheckCrossChainTransfer, ResponseCheckTransfer, ResponsePrivateKeyValidateV2, ResponseSeedCreateV2, ResponseSeedValidateV2, ResponseTransfer, StakeClaimRewardParams, StakeDelegationRequest, StakeUnlockingJson, StakeWithdrawalParams, StakingJson, StakingRewardJson, SubstrateNftSubmitTransaction, SubstrateNftTransaction, SubstrateNftTransactionRequest, SupportTransferResponse, ThemeTypes, TokenInfo, TransactionHistoryItemType, TransferError, TransferErrorCode, TransferStep, UnbondingSubmitParams, ValidateEvmTokenRequest, ValidateEvmTokenResponse, ValidateNetworkRequest, ValidateNetworkResponse } from '@subwallet/extension-base/background/KoniTypes';
 import { AccountJson, AuthorizeRequest, MessageTypes, RequestAccountForget, RequestAccountTie, RequestAuthorizeCancel, RequestAuthorizeReject, RequestCurrentAccountAddress, RequestTypes, ResponseAuthorizeList, ResponseType } from '@subwallet/extension-base/background/types';
-import { getBondingExtrinsic, getBondingTxInfo, getChainBondingBasics, getClaimRewardExtrinsic, getClaimRewardTxInfo, getUnbondingExtrinsic, getUnbondingTxInfo, getUnlockingInfo, getValidatorsInfo, getWithdrawalExtrinsic, getWithdrawalTxInfo } from '@subwallet/extension-koni-base/api/bonding';
+import { getBondingExtrinsic, getBondingTxInfo, getChainBondingBasics, getClaimRewardExtrinsic, getClaimRewardTxInfo, getDelegationInfo, getUnbondingExtrinsic, getUnbondingTxInfo, getValidatorsInfo, getWithdrawalExtrinsic, getWithdrawalTxInfo } from '@subwallet/extension-koni-base/api/bonding';
 import { initApi } from '@subwallet/extension-koni-base/api/dotsama';
 import { getFreeBalance, subscribeFreeBalance } from '@subwallet/extension-koni-base/api/dotsama/balance';
 import { getTokenInfo } from '@subwallet/extension-koni-base/api/dotsama/registry';
@@ -416,17 +416,7 @@ export default class KoniExtension extends Extension {
   private saveTheme (data: ThemeTypes, id: string, port: chrome.runtime.Port) {
     const cb = createSubscription<'pri(settings.saveTheme)'>(id, port);
 
-    state.getSettings((value) => {
-      const updateValue = {
-        ...value,
-        theme: data
-      };
-
-      state.setSettings(updateValue, () => {
-        // eslint-disable-next-line node/no-callback-literal
-        cb(updateValue);
-      });
-    });
+    state.setTheme(data, cb);
 
     port.onDisconnect.addListener((): void => {
       unsubscribe(id);
@@ -466,6 +456,8 @@ export default class KoniExtension extends Extension {
           const currentKeyPair = keyring.getAccount(address);
 
           accountInfo.currentGenesisHash = currentKeyPair?.meta.genesisHash as string || ALL_GENESIS_HASH;
+        } else {
+          accountInfo.currentGenesisHash = accountInfo.allGenesisHash || ALL_GENESIS_HASH;
         }
       }
 
@@ -2111,11 +2103,13 @@ export default class KoniExtension extends Extension {
     return state.completeConfirmation(request);
   }
 
-  private async getChainBondingBasics (networkJsons: NetworkJson[]) {
+  private async getChainBondingBasics (id: string, port: chrome.runtime.Port, networkJsons: NetworkJson[]) {
     const result: Record<string, ChainBondingBasics> = {};
+    const callback = createSubscription<'pri(bonding.getChainBondingBasics)'>(id, port);
 
     await Promise.all(networkJsons.map(async (networkJson) => {
       result[networkJson.key] = await getChainBondingBasics(networkJson.key, state.getDotSamaApi(networkJson.key));
+      callback(result);
     }));
 
     return result;
@@ -2270,15 +2264,8 @@ export default class KoniExtension extends Extension {
     return txState;
   }
 
-  private async getUnlockingStakeInfo ({ address, networkKey, validatorList }: UnlockingStakeParams): Promise<UnlockingStakeInfo> {
-    const dotSamaApi = state.getDotSamaApi(networkKey);
-    const networkJson = state.getNetworkMapByKey(networkKey);
-
-    return await getUnlockingInfo(dotSamaApi, networkJson, networkKey, address, validatorList);
-  }
-
   private async getStakeWithdrawalTxInfo ({ action, address, networkKey, validatorAddress }: StakeWithdrawalParams): Promise<BasicTxInfo> {
-    return await getWithdrawalTxInfo(address, networkKey, state.getDotSamaApiMap(), state.getWeb3ApiMap(), validatorAddress, action);
+    return await getWithdrawalTxInfo(address, networkKey, state.getNetworkMapByKey(networkKey), state.getDotSamaApiMap(), state.getWeb3ApiMap(), validatorAddress, action);
   }
 
   private async submitStakeWithdrawal (id: string, port: chrome.runtime.Port, { action, address, networkKey, password, validatorAddress }: StakeWithdrawalParams): Promise<BasicTxResponse> {
@@ -2341,8 +2328,8 @@ export default class KoniExtension extends Extension {
     return txState;
   }
 
-  private async getStakeClaimRewardTxInfo ({ address, networkKey, validatorAddress }: StakeClaimRewardParams): Promise<BasicTxInfo> {
-    return await getClaimRewardTxInfo(address, networkKey, state.getDotSamaApiMap(), state.getWeb3ApiMap(), validatorAddress);
+  private async getStakeClaimRewardTxInfo ({ address, networkKey }: StakeClaimRewardParams): Promise<BasicTxInfo> {
+    return await getClaimRewardTxInfo(address, networkKey, state.getNetworkMapByKey(networkKey), state.getDotSamaApiMap(), state.getWeb3ApiMap());
   }
 
   private async submitStakeClaimReward (id: string, port: chrome.runtime.Port, { address, networkKey, password, validatorAddress }: StakeClaimRewardParams): Promise<BasicTxResponse> {
@@ -2354,9 +2341,9 @@ export default class KoniExtension extends Extension {
       return txState;
     }
 
-    const callback = createSubscription<'pri(unbonding.submitWithdrawal)'>(id, port);
+    const callback = createSubscription<'pri(staking.submitClaimReward)'>(id, port);
     const dotSamaApi = state.getDotSamaApi(networkKey);
-    const extrinsic = await getClaimRewardExtrinsic(dotSamaApi, networkKey, validatorAddress);
+    const extrinsic = await getClaimRewardExtrinsic(dotSamaApi, networkKey, address, validatorAddress);
     const passwordError: string | null = unlockAccount(address, password);
 
     if (extrinsic !== null && passwordError === null) {
@@ -2403,6 +2390,28 @@ export default class KoniExtension extends Extension {
     }
 
     return txState;
+  }
+
+  private async getStakingDelegationInfo ({ address, networkKey }: StakeDelegationRequest): Promise<DelegationItem[]> {
+    const dotSamaApi = state.getDotSamaApi(networkKey);
+
+    return await getDelegationInfo(dotSamaApi, address, networkKey);
+  }
+
+  private subscribeStakeUnlockingInfo (id: string, port: chrome.runtime.Port): StakeUnlockingJson {
+    const cb = createSubscription<'pri(unbonding.subscribeUnlockingInfo)'>(id, port);
+    const unlockingInfoSubscription = state.subscribeStakeUnlockingInfo().subscribe({
+      next: (rs) => {
+        cb(rs);
+      }
+    });
+
+    port.onDisconnect.addListener((): void => {
+      unsubscribe(id);
+      unlockingInfoSubscription.unsubscribe();
+    });
+
+    return state.getStakeUnlockingInfo();
   }
 
   // eslint-disable-next-line @typescript-eslint/require-await
@@ -2575,7 +2584,7 @@ export default class KoniExtension extends Extension {
       case 'pri(bonding.getBondingOptions)':
         return await this.getBondingOption(request as BondingOptionParams);
       case 'pri(bonding.getChainBondingBasics)':
-        return await this.getChainBondingBasics(request as NetworkJson[]);
+        return await this.getChainBondingBasics(id, port, request as NetworkJson[]);
       case 'pri(bonding.submitTransaction)':
         return await this.submitBonding(id, port, request as BondingSubmitParams);
       case 'pri(bonding.txInfo)':
@@ -2584,8 +2593,8 @@ export default class KoniExtension extends Extension {
         return await this.getUnbondingTxInfo(request as UnbondingSubmitParams);
       case 'pri(unbonding.submitTransaction)':
         return await this.submitUnbonding(id, port, request as UnbondingSubmitParams);
-      case 'pri(unbonding.unlockingInfo)':
-        return await this.getUnlockingStakeInfo(request as UnlockingStakeParams);
+      case 'pri(unbonding.subscribeUnlockingInfo)':
+        return this.subscribeStakeUnlockingInfo(id, port);
       case 'pri(unbonding.withdrawalTxInfo)':
         return await this.getStakeWithdrawalTxInfo(request as StakeWithdrawalParams);
       case 'pri(unbonding.submitWithdrawal)':
@@ -2594,6 +2603,8 @@ export default class KoniExtension extends Extension {
         return await this.getStakeClaimRewardTxInfo(request as StakeClaimRewardParams);
       case 'pri(staking.submitClaimReward)':
         return await this.submitStakeClaimReward(id, port, request as StakeClaimRewardParams);
+      case 'pri(staking.delegationInfo)':
+        return await this.getStakingDelegationInfo(request as StakeDelegationRequest);
       default:
         return super.handle(id, type, request, port);
     }

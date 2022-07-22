@@ -6,6 +6,7 @@ import QuestionIcon from '@subwallet/extension-koni-ui/assets/Question.svg';
 import { ActionContext, InputFilter } from '@subwallet/extension-koni-ui/components';
 import Spinner from '@subwallet/extension-koni-ui/components/Spinner';
 import Tooltip from '@subwallet/extension-koni-ui/components/Tooltip';
+import useIsNetworkActive from '@subwallet/extension-koni-ui/hooks/screen/home/useIsNetworkActive';
 import useTranslation from '@subwallet/extension-koni-ui/hooks/useTranslation';
 import { getBondingOptions } from '@subwallet/extension-koni-ui/messaging';
 import Header from '@subwallet/extension-koni-ui/partials/Header';
@@ -35,6 +36,7 @@ function BondingValidatorSelection ({ className }: Props): React.ReactElement<Pr
   const [isBondedBefore, setIsBondedBefore] = useState(false);
   const [bondedValidators, setBondedValidators] = useState<string[]>([]);
   const [maxNominations, setMaxNominations] = useState(1);
+  const isNetworkActive = useIsNetworkActive(bondingParams.selectedNetwork !== null ? bondingParams.selectedNetwork : undefined);
 
   const [sortByCommission, setSortByCommission] = useState(false);
   const [sortByReturn, setSortByReturn] = useState(false);
@@ -45,6 +47,12 @@ function BondingValidatorSelection ({ className }: Props): React.ReactElement<Pr
   const [showedValidators, setShowedValidators] = useState<ValidatorInfo[]>([]);
 
   const _height = window.innerHeight !== 600 ? (window.innerHeight * 0.68) : 330;
+
+  useEffect(() => {
+    if (!isNetworkActive) {
+      navigate('/account/select-bonding-network');
+    }
+  }, [isNetworkActive, navigate]);
 
   const handleSortByCommission = useCallback(() => {
     if (!sortByCommission) {

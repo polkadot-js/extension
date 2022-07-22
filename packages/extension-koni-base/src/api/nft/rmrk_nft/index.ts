@@ -6,7 +6,7 @@ import { BaseNftApi, HandleNftParams } from '@subwallet/extension-koni-base/api/
 import { isUrl, reformatAddress } from '@subwallet/extension-koni-base/utils/utils';
 import fetch from 'cross-fetch';
 
-import { KANARIA_ENDPOINT, KANARIA_EXTERNAL_SERVER, RMRK_PINATA_SERVER, SINGULAR_V1_COLLECTION_ENDPOINT, SINGULAR_V1_ENDPOINT, SINGULAR_V1_EXTERNAL_SERVER, SINGULAR_V2_COLLECTION_ENDPOINT, SINGULAR_V2_ENDPOINT, SINGULAR_V2_EXTERNAL_SERVER, SUPPORTED_NFT_NETWORKS } from '../config';
+import { CLOUDFLARE_PINATA_SERVER, KANARIA_ENDPOINT, KANARIA_EXTERNAL_SERVER, SINGULAR_V1_COLLECTION_ENDPOINT, SINGULAR_V1_ENDPOINT, SINGULAR_V1_EXTERNAL_SERVER, SINGULAR_V2_COLLECTION_ENDPOINT, SINGULAR_V2_ENDPOINT, SINGULAR_V2_EXTERNAL_SERVER, SUPPORTED_NFT_NETWORKS } from '../config';
 
 enum RMRK_SOURCE {
   BIRD_KANARIA = 'bird_kanaria',
@@ -62,10 +62,10 @@ export class RmrkNftApi extends BaseNftApi {
     }
 
     if (!input.includes('ipfs://ipfs/')) {
-      return RMRK_PINATA_SERVER + input;
+      return CLOUDFLARE_PINATA_SERVER + input;
     }
 
-    return RMRK_PINATA_SERVER + input.split('ipfs://ipfs/')[1];
+    return CLOUDFLARE_PINATA_SERVER + input.split('ipfs://ipfs/')[1];
   }
 
   private async getMetadata (metadataUrl: string): Promise<NFTMetadata | undefined> {
@@ -233,22 +233,28 @@ export class RmrkNftApi extends BaseNftApi {
       const allCollectionMetaUrl: Record<string, any>[] = [];
 
       await Promise.all(collectionInfoUrl.map(async (url) => {
-        const data = await fetch(url, {
-          method: 'GET'
-        })
-          .then((resp) => resp.json()) as Record<string | number, string | number>[];
-        const result = data[0];
+        try {
+          const data = await fetch(url, {
+            method: 'GET'
+          })
+            .then((resp) => resp.json()) as Record<string | number, string | number>[];
+          const result = data[0];
 
-        if (result && 'metadata' in result) {
-          allCollectionMetaUrl.push({
-            url: this.parseUrl(result?.metadata as string),
-            id: result?.id
-          });
-        }
+          if (result && 'metadata' in result) {
+            allCollectionMetaUrl.push({
+              url: this.parseUrl(result?.metadata as string),
+              id: result?.id
+            });
+          }
 
-        if (data.length > 0) {
-          return result;
-        } else {
+          if (data.length > 0) {
+            return result;
+          } else {
+            return {};
+          }
+        } catch (e) {
+          console.error('error fetching collection info', url);
+
           return {};
         }
       }));
@@ -258,19 +264,23 @@ export class RmrkNftApi extends BaseNftApi {
       await Promise.all(allCollectionMetaUrl.map(async (item) => {
         let data: Record<string, any> = {};
 
-        if (item.url) {
-          data = await fetch(item?.url as string, {
-            method: 'GET'
-          })
-            .then((resp) => resp.json()) as Record<string, any>;
-        }
+        try {
+          if (item.url) {
+            data = await fetch(item?.url as string, {
+              method: 'GET'
+            })
+              .then((resp) => resp.json()) as Record<string, any>;
+          }
 
-        if ('mediaUri' in data) { // rmrk v2.0
-          // @ts-ignore
-          // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-          allCollectionMeta[item?.id as string] = { ...data, image: data.mediaUri };
-        } else {
-          allCollectionMeta[item?.id as string] = { ...data };
+          if ('mediaUri' in data) { // rmrk v2.0
+            // @ts-ignore
+            // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+            allCollectionMeta[item?.id as string] = { ...data, image: data.mediaUri };
+          } else {
+            allCollectionMeta[item?.id as string] = { ...data };
+          }
+        } catch (e) {
+          console.error('error parsing JSON for RMRK ', item.url, e);
         }
       }));
 

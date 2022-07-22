@@ -96,8 +96,8 @@ export interface StakingItem {
   unlockingBalance?: string
   nativeToken: string,
   unit?: string,
-  delegation?: DelegationItem[],
-  state: APIItemState
+  state: APIItemState,
+  unlockingInfo?: UnlockingStakeInfo
 }
 
 export interface StakingJson {
@@ -388,6 +388,7 @@ export interface OptionInputAddress {
 export interface CurrentAccountInfo {
   address: string;
   currentGenesisHash: string | null;
+  allGenesisHash?: string;
 }
 
 export interface RequestSettingsType {
@@ -554,7 +555,7 @@ export type RequestSubscribeCrowdloan = null
 export type RequestSubscribeNft = null
 export type RequestSubscribeStaking = null
 export type RequestSubscribeStakingReward = null
-export type ThemeTypes = 'light' | 'dark'
+export type ThemeTypes = 'light' | 'dark' | 'subspace'
 export type RequestNftForceUpdate = {
   collectionId: string,
   nft: NftItem,
@@ -910,6 +911,7 @@ export interface ValidatorInfo {
   minBond: number;
   isNominated: boolean; // this validator has been staked to before
   icon?: string;
+  hasScheduledRequest?: boolean; // for parachain, can't stake more on a collator that has existing scheduled request
 }
 
 export interface BondingOptionInfo {
@@ -976,13 +978,21 @@ export interface DelegationItem {
   owner: string,
   amount: string, // raw amount string
   identity?: string,
-  minBond: string
+  minBond: string,
+  hasScheduledRequest: boolean
 }
 
 export interface UnlockingStakeInfo {
   nextWithdrawal: number,
   redeemable: number,
-  nextWithdrawalAmount: number
+  nextWithdrawalAmount: number,
+  nextWithdrawalAction?: string,
+  validatorAddress?: string // validator to unstake from
+}
+
+export interface StakeUnlockingJson {
+  timestamp: number,
+  details: Record<string, UnlockingStakeInfo>
 }
 
 export interface StakeWithdrawalParams {
@@ -1000,17 +1010,29 @@ export interface StakeClaimRewardParams {
   password?: string
 }
 
+export interface StakeDelegationRequest {
+  address: string,
+  networkKey: string
+}
+
+export interface SingleModeJson {
+  networkKeys: string[],
+  theme: ThemeTypes,
+  autoTriggerDomain: string // Regex for auto trigger single mode
+}
+
 export interface KoniRequestSignatures {
+  'pri(staking.delegationInfo)': [StakeDelegationRequest, DelegationItem[]];
   'pri(staking.submitClaimReward)': [StakeClaimRewardParams, BasicTxResponse, BasicTxResponse];
   'pri(staking.claimRewardTxInfo)': [StakeClaimRewardParams, BasicTxInfo];
   'pri(unbonding.submitWithdrawal)': [StakeWithdrawalParams, BasicTxResponse, BasicTxResponse];
   'pri(unbonding.withdrawalTxInfo)': [StakeWithdrawalParams, BasicTxInfo];
-  'pri(unbonding.unlockingInfo)': [UnlockingStakeParams, UnlockingStakeInfo];
+  'pri(unbonding.subscribeUnlockingInfo)': [null, StakeUnlockingJson, StakeUnlockingJson];
   'pri(unbonding.submitTransaction)': [UnbondingSubmitParams, BasicTxResponse, BasicTxResponse];
   'pri(unbonding.txInfo)': [UnbondingSubmitParams, BasicTxInfo];
   'pri(bonding.txInfo)': [BondingSubmitParams, BasicTxInfo];
   'pri(bonding.submitTransaction)': [BondingSubmitParams, BasicTxResponse, BasicTxResponse];
-  'pri(bonding.getChainBondingBasics)': [NetworkJson[], Record<string, ChainBondingBasics>];
+  'pri(bonding.getChainBondingBasics)': [NetworkJson[], Record<string, ChainBondingBasics>, Record<string, ChainBondingBasics>];
   'pri(bonding.getBondingOptions)': [BondingOptionParams, BondingOptionInfo];
   'pri(networkMap.recoverDotSama)': [string, boolean];
   'pri(substrateNft.submitTransaction)': [SubstrateNftSubmitTransaction, NftTransactionResponse, NftTransactionResponse]

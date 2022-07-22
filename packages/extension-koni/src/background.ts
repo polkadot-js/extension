@@ -11,6 +11,7 @@ import { withErrorLog } from '@subwallet/extension-base/background/handlers/help
 import { PORT_CONTENT, PORT_EXTENSION } from '@subwallet/extension-base/defaults';
 import { AccountsStore } from '@subwallet/extension-base/stores';
 import { KoniCron } from '@subwallet/extension-koni-base/background/cron';
+import { onExtensionInstall } from '@subwallet/extension-koni-base/background/events';
 import handlers, { state as koniState } from '@subwallet/extension-koni-base/background/handlers';
 import { KoniSubscription } from '@subwallet/extension-koni-base/background/subscription';
 import Migration from '@subwallet/extension-koni-base/migration';
@@ -68,6 +69,13 @@ chrome.runtime.onConnect.addListener((port): void => {
 
     console.warn(`Disconnected from ${port.name}`);
   });
+});
+
+// Trigger single mode
+chrome.runtime.onInstalled.addListener(function (details) {
+  if (details.reason === 'install') {
+    onExtensionInstall();
+  }
 });
 
 // initial setup

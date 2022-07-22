@@ -98,6 +98,7 @@ export interface Injected {
   signer: InjectedSigner;
 }
 export interface EvmProvider {
+  provider?: EvmProvider,
   isMetaMask: boolean,
   isSubWallet: boolean,
   version: string,

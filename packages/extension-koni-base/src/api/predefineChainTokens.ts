@@ -90,6 +90,13 @@ export const PREDEFINE_TOKEN_DATA_MAP: Record<string, Record<string, TokenInfo>>
       name: 'LCDOT',
       decimals: 10,
       specialOption: { LiquidCrowdloan: 13 }
+    },
+    tDOT: {
+      isMainToken: false,
+      symbol: 'tDOT',
+      name: 'Tapio DOT',
+      decimals: 10,
+      specialOption: { StableAssetPoolToken: 0 }
     }
   },
   karura: {
@@ -108,8 +115,16 @@ export const PREDEFINE_TOKEN_DATA_MAP: Record<string, Record<string, TokenInfo>>
     taiKSM: {
       isMainToken: false,
       symbol: 'taiKSM',
-      name: 'taiKSM',
-      decimals: 12
+      name: 'Taiga KSM',
+      decimals: 12,
+      specialOption: { StableAssetPoolToken: 0 }
+    },
+    '3USD': {
+      isMainToken: false,
+      symbol: '3USD',
+      name: 'Taiga 3USD',
+      decimals: 12,
+      specialOption: { StableAssetPoolToken: 1 }
     },
     TEER: {
       isMainToken: false,
@@ -1089,6 +1104,57 @@ export const PREDEFINE_TOKEN_DATA_MAP: Record<string, Record<string, TokenInfo>>
       symbol: 'XDOT2',
       name: 'XDOT2',
       decimals: 9
+    }
+  },
+  crabEvm: {
+    CRAB: {
+      isMainToken: true,
+      symbol: 'CRAB',
+      decimals: 18,
+      name: 'CRAB'
+    },
+    WCRAB: {
+      isMainToken: false,
+      symbol: 'WCRAB',
+      erc20Address: '0x2d2b97ea380b0185e9fdf8271d1afb5d2bf18329',
+      decimals: 18,
+      name: 'Wrapped CRAB'
+    },
+    WCKTON: {
+      isMainToken: false,
+      symbol: 'WCKTON',
+      erc20Address: '0x159933C635570D5042723359fbD1619dFe83D3f3',
+      decimals: 18,
+      name: 'Wrapped KTON'
+    },
+    xRING: {
+      isMainToken: false,
+      symbol: 'xRING',
+      erc20Address: '0x7399Ea6C9d35124d893B8d9808930e9d3F211501',
+      decimals: 9,
+      name: 'Wrapped KTON'
+    }
+  },
+  pangolinEvm: {
+    PRING: {
+      isMainToken: true,
+      symbol: 'PRING',
+      decimals: 18,
+      name: 'PRING'
+    },
+    WCKTON: {
+      isMainToken: false,
+      symbol: 'WCKTON',
+      erc20Address: '0x8809f9b3acef1da309f49b5ab97a4c0faa64e6ae',
+      decimals: 18,
+      name: 'Wrapped CKTON'
+    },
+    xORING: {
+      isMainToken: false,
+      symbol: 'xORING',
+      erc20Address: '0xb142658bd18c560d8ea74a31c07297cecfecf949',
+      decimals: 9,
+      name: 'xORING'
     }
   }
 };

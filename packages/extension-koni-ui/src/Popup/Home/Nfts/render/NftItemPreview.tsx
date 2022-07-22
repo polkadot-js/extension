@@ -1,14 +1,13 @@
 // Copyright 2019-2022 @polkadot/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import logo from '@subwallet/extension-koni-ui/assets/sub-wallet-logo.svg';
 import Spinner from '@subwallet/extension-koni-ui/components/Spinner';
 import { _NftItem } from '@subwallet/extension-koni-ui/Popup/Home/Nfts/types';
-import { ThemeProps } from '@subwallet/extension-koni-ui/types';
-import React, { useCallback, useState } from 'react';
+import { Theme, ThemeProps } from '@subwallet/extension-koni-ui/types';
+import React, { useCallback, useContext, useState } from 'react';
 // @ts-ignore
 import LazyLoad from 'react-lazyload';
-import styled from 'styled-components';
+import styled, { ThemeContext } from 'styled-components';
 
 interface Props {
   className?: string;
@@ -21,6 +20,7 @@ function NftItemPreview ({ className, collectionImage, data, onClick }: Props): 
   const [loading, setLoading] = useState(true);
   const [showImage, setShowImage] = useState(true);
   const [imageError, setImageError] = useState(false);
+  const themeContext = useContext(ThemeContext as React.Context<Theme>);
 
   const handleOnLoad = useCallback(() => {
     setLoading(false);
@@ -46,8 +46,8 @@ function NftItemPreview ({ className, collectionImage, data, onClick }: Props): 
       return collectionImage;
     }
 
-    return logo;
-  }, [collectionImage, data.image, imageError]);
+    return themeContext.logo;
+  }, [collectionImage, data.image, imageError, themeContext.logo]);
 
   return (
     <div className={className}>
@@ -91,7 +91,7 @@ function NftItemPreview ({ className, collectionImage, data, onClick }: Props): 
                   : <img
                     alt={'default-img'}
                     className={'collection-thumbnail'}
-                    src={logo}
+                    src={themeContext.logo}
                     style={{ borderRadius: '5px 5px 0 0' }}
                   />
             }

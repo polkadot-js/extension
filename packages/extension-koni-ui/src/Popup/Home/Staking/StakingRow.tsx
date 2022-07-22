@@ -1,21 +1,13 @@
 // Copyright 2019-2022 @subwallet/extension-koni authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { DelegationItem, StakingRewardItem } from '@subwallet/extension-base/background/KoniTypes';
-import cloneIconLight from '@subwallet/extension-koni-ui/assets/clone--color-2.svg';
-import cloneIconDark from '@subwallet/extension-koni-ui/assets/clone--color-3.svg';
-import useToast from '@subwallet/extension-koni-ui/hooks/useToast';
-import useTranslation from '@subwallet/extension-koni-ui/hooks/useTranslation';
-import { getUnlockingStakeInfo } from '@subwallet/extension-koni-ui/messaging';
-import { Theme, ThemeProps } from '@subwallet/extension-koni-ui/types';
+import { StakingRewardItem } from '@subwallet/extension-base/background/KoniTypes';
+import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { formatLocaleNumber } from '@subwallet/extension-koni-ui/util/formatNumber';
-import React, { useCallback, useContext, useEffect, useState } from 'react';
-import CopyToClipboard from 'react-copy-to-clipboard';
-import styled, { ThemeContext } from 'styled-components';
+import React, { useCallback, useState } from 'react';
+import styled from 'styled-components';
 
 const StakingMenu = React.lazy(() => import('@subwallet/extension-koni-ui/Popup/Home/Staking/StakingMenu'));
-const StakeAuthClaimReward = React.lazy(() => import('@subwallet/extension-koni-ui/Popup/Home/Staking/StakeAuthClaimReward'));
-const StakeAuthWithdrawal = React.lazy(() => import('@subwallet/extension-koni-ui/Popup/Home/Staking/StakeAuthWithdrawal'));
 
 interface Props extends ThemeProps {
   className?: string;
@@ -33,62 +25,46 @@ interface Props extends ThemeProps {
   isAccountAll: boolean;
   isExternalAccount: boolean;
   isHardwareAccount: boolean;
-  address: string;
-  delegations: DelegationItem[] | undefined;
+
+  redeemable: number;
+  nextWithdrawal: number;
+  nextWithdrawalAmount: number;
+  nextWithdrawalAction: string | undefined;
+  targetValidator: string | undefined;
+  unlockingDataTimestamp: number;
+
+  setShowWithdrawalModal: (val: boolean) => void;
+  setShowClaimRewardModal: (val: boolean) => void;
+  setActionNetworkKey: (val: string) => void;
+  setTargetValidator: (val: string) => void;
+  setTargetNextWithdrawalAction: (val: string | undefined) => void;
+  setTargetRedeemable: (val: number) => void;
 }
 
-function StakingRow ({ activeStake, address, chainName, className, delegations, index, isAccountAll, isExternalAccount, isHardwareAccount, logo, networkKey, price, reward, totalStake, unbondingStake, unit }: Props): React.ReactElement<Props> {
+function StakingRow ({ activeStake, chainName, className, index, isAccountAll, isExternalAccount, isHardwareAccount, logo, networkKey, nextWithdrawal, nextWithdrawalAction, nextWithdrawalAmount, price, redeemable, reward, setActionNetworkKey, setShowClaimRewardModal, setShowWithdrawalModal, setTargetNextWithdrawalAction, setTargetRedeemable, setTargetValidator, targetValidator, totalStake, unbondingStake, unit }: Props): React.ReactElement<Props> {
   const [showReward, setShowReward] = useState(false);
   const [showStakingMenu, setShowStakingMenu] = useState(false);
-  const [redeemable, setRedeemable] = useState(0);
-  const [nextWithdrawal, setNextWithdrawal] = useState(-1);
-  const [nextWithdrawalAmount, setNextWithdrawalAmount] = useState(-1);
-  const [showWithdrawalModal, setShowWithdrawalModal] = useState(false);
-  const [showClaimRewardModal, setShowClaimRewardModal] = useState(false);
 
   const handleToggleReward = useCallback(() => {
     setShowReward(!showReward);
   }, [showReward]);
 
   const handleShowWithdrawalModal = useCallback(() => {
+    setActionNetworkKey(networkKey);
+    setTargetNextWithdrawalAction(nextWithdrawalAction);
+    setTargetRedeemable(redeemable);
+    setTargetValidator(targetValidator || '');
     setShowWithdrawalModal(true);
-  }, []);
+  }, [nextWithdrawalAction, redeemable, targetValidator, networkKey, setActionNetworkKey, setShowWithdrawalModal, setTargetNextWithdrawalAction, setTargetRedeemable, setTargetValidator]);
 
   const handleShowClaimRewardModal = useCallback(() => {
+    setActionNetworkKey(networkKey);
     setShowClaimRewardModal(true);
-  }, []);
-
-  const handleHideWithdrawalModal = useCallback(() => {
-    setShowWithdrawalModal(false);
-  }, []);
-
-  const handleHideClaimRewardModal = useCallback(() => {
-    setShowClaimRewardModal(false);
-  }, []);
+  }, [networkKey, setActionNetworkKey, setShowClaimRewardModal]);
 
   const handleToggleBondingMenu = useCallback(() => {
     setShowStakingMenu(!showStakingMenu);
   }, [showStakingMenu]);
-
-  useEffect(() => {
-    if (parseFloat(unbondingStake as string) > 0) {
-      const validatorList = delegations?.map((delegation) => {
-        return delegation.owner;
-      });
-
-      getUnlockingStakeInfo({
-        networkKey,
-        address,
-        validatorList: validatorList
-      })
-        .then((resp) => {
-          setRedeemable(resp.redeemable);
-          setNextWithdrawal(resp.nextWithdrawal);
-          setNextWithdrawalAmount(resp.nextWithdrawalAmount);
-        })
-        .catch(console.error);
-    }
-  }, [address, delegations, networkKey, unbondingStake]);
 
   const editBalance = (balance: string) => {
     if (parseFloat(balance) === 0) {
@@ -127,18 +103,6 @@ function StakingRow ({ activeStake, address, chainName, className, delegations, 
     return editBalance(balance.toString());
   };
 
-  const { show } = useToast();
-  const { t } = useTranslation();
-  const themeContext = useContext(ThemeContext as React.Context<Theme>);
-  const theme = themeContext.id;
-
-  const _onCopy = useCallback(
-    () => {
-      show(t('Copied'));
-    },
-    [show, t]
-  );
-
   return (
     <div className={`${className || ''} ${showReward ? '-show-detail' : ''}`}>
       <div
@@ -164,7 +128,6 @@ function StakingRow ({ activeStake, address, chainName, className, delegations, 
                 {
                   !isAccountAll && !isHardwareAccount && !isExternalAccount && <StakingMenu
                     bondedAmount={activeStake as string}
-                    delegations={delegations}
                     networkKey={networkKey}
                     nextWithdrawal={nextWithdrawal}
                     nextWithdrawalAmount={nextWithdrawalAmount}
@@ -242,38 +205,6 @@ function StakingRow ({ activeStake, address, chainName, className, delegations, 
               </div>
             </div>
 
-            {
-              chainName === 'astar' &&
-              <div className={'reward-container'}>
-                <div className={'reward-title'}>Smart contract</div>
-                <div className={'smart-contract-field'}>
-                  <div className={'smart-contract-value'}>
-                    {reward?.smartContract?.slice(0, 6)}...{reward?.smartContract?.slice(-6)}
-                  </div>
-                  <CopyToClipboard text={(reward.smartContract && reward.smartContract) || ''}>
-                    <div
-                      className={'kn-copy-btn'}
-                      onClick={_onCopy}
-                    >
-                      {theme === 'dark'
-                        ? (
-                          <img
-                            alt='copy'
-                            src={cloneIconDark}
-                          />
-                        )
-                        : (
-                          <img
-                            alt='copy'
-                            src={cloneIconLight}
-                          />
-                        )
-                      }
-                    </div>
-                  </CopyToClipboard>
-                </div>
-              </div>
-            }
             {/* <div className={'reward-container'}> */}
             {/*  <div className={'reward-title'}>APR</div> */}
             {/*  <div className={'reward-amount'}> */}
@@ -282,24 +213,6 @@ function StakingRow ({ activeStake, address, chainName, className, delegations, 
             {/* </div> */}
           </div>
         </div>
-      }
-
-      {
-        showWithdrawalModal && <StakeAuthWithdrawal
-          address={address}
-          amount={redeemable}
-          hideModal={handleHideWithdrawalModal}
-          networkKey={networkKey}
-        />
-      }
-
-      {
-        showClaimRewardModal && <StakeAuthClaimReward
-          address={address}
-          delegation={delegations}
-          hideModal={handleHideClaimRewardModal}
-          networkKey={networkKey}
-        />
       }
     </div>
   );

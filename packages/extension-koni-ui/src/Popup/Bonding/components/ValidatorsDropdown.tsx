@@ -13,21 +13,29 @@ interface Props extends ThemeProps {
   delegations: DelegationItem[],
   handleSelectValidator: (value: string) => void;
   label?: string;
+  isDisabled?: boolean;
 }
 
-function ValidatorsDropdown ({ className, delegations, handleSelectValidator, label }: Props): React.ReactElement<Props> {
+function ValidatorsDropdown ({ className, delegations, handleSelectValidator, isDisabled, label }: Props): React.ReactElement<Props> {
   const getDropdownOptions = useCallback(() => {
-    return delegations.map((item) => {
-      return {
-        text: item.identity ? `${item.identity} (${toShort(item.owner)})` : `${toShort(item.owner)}`,
-        value: item.owner
-      };
+    const filteredDelegations: Record<string, string>[] = [];
+
+    delegations.forEach((item) => {
+      if (parseFloat(item.amount) > 0) { // only show delegations with active stake
+        filteredDelegations.push({
+          text: item.identity ? `${item.identity} (${toShort(item.owner)})` : `${toShort(item.owner)}`,
+          value: item.owner
+        });
+      }
     });
+
+    return filteredDelegations;
   }, [delegations]);
 
   return (
     <div className={className}>
       <Dropdown
+        isDisabled={isDisabled}
         label={label || 'Select a collator (*)'}
         onChange={handleSelectValidator}
         options={getDropdownOptions()}

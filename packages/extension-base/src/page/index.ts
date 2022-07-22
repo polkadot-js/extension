@@ -56,13 +56,6 @@ export async function enable (origin: string): Promise<Injected> {
   return new Injected(sendMessage);
 }
 
-// redirect users if this page is considered as phishing, otherwise return false
-export async function redirectIfPhishing (): Promise<boolean> {
-  const res = await sendMessage('pub(phishing.redirectIfDenied)');
-
-  return res;
-}
-
 export function handleResponse<TMessageType extends MessageTypes> (data: TransportResponseMessage<TMessageType> & { subscription?: string }): void {
   const handler = handlers[data.id];
 

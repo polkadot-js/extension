@@ -8,7 +8,7 @@ import { useSelector } from 'react-redux';
 export default function useIsSufficientBalance (networkKey: string, minBond: number | undefined) {
   const { balance: { details: balanceMap }, networkMap } = useSelector((state: RootState) => state);
 
-  if (!minBond) {
+  if (minBond === undefined) {
     return false;
   }
 

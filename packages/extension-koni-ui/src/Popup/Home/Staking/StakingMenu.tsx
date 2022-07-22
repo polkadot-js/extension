@@ -3,7 +3,6 @@
 
 import { faMinus, faPlus } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { DelegationItem } from '@subwallet/extension-base/background/KoniTypes';
 import ArchiveTray from '@subwallet/extension-koni-ui/assets/ArchiveTray.svg';
 import ClockAfternoon from '@subwallet/extension-koni-ui/assets/ClockAfternoon.svg';
 import ClockAfternoonGreen from '@subwallet/extension-koni-ui/assets/ClockAfternoonGreen.svg';
@@ -13,11 +12,12 @@ import Menu from '@subwallet/extension-koni-ui/components/Menu';
 import Tooltip from '@subwallet/extension-koni-ui/components/Tooltip';
 import useGetNetworkJson from '@subwallet/extension-koni-ui/hooks/screen/home/useGetNetworkJson';
 import useOutsideClick from '@subwallet/extension-koni-ui/hooks/useOutsideClick';
-import { store } from '@subwallet/extension-koni-ui/stores';
+import { RootState, store } from '@subwallet/extension-koni-ui/stores';
 import { BondingParams, UnbondingParams } from '@subwallet/extension-koni-ui/stores/types';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import moment from 'moment';
 import React, { useCallback, useContext, useRef } from 'react';
+import { useSelector } from 'react-redux';
 import styled from 'styled-components';
 
 interface Props extends ThemeProps {
@@ -32,7 +32,6 @@ interface Props extends ThemeProps {
   unbondingStake: string | undefined;
   showWithdrawalModal: () => void;
   showClaimRewardModal: () => void;
-  delegations: DelegationItem[] | undefined;
 }
 
 const MANUAL_CLAIM_CHAINS = [
@@ -41,11 +40,12 @@ const MANUAL_CLAIM_CHAINS = [
   'shiden'
 ];
 
-function StakingMenu ({ bondedAmount, className, delegations, networkKey, nextWithdrawal, nextWithdrawalAmount, redeemable, showClaimRewardModal, showMenu, showWithdrawalModal, toggleMenu, unbondingStake }: Props): React.ReactElement<Props> {
+function StakingMenu ({ bondedAmount, className, networkKey, nextWithdrawal, nextWithdrawalAmount, redeemable, showClaimRewardModal, showMenu, showWithdrawalModal, toggleMenu, unbondingStake }: Props): React.ReactElement<Props> {
   const stakingMenuRef = useRef(null);
   const navigate = useContext(ActionContext);
   const networkJson = useGetNetworkJson(networkKey);
   const showClaimButton = MANUAL_CLAIM_CHAINS.includes(networkKey);
+  const { currentAccount: { account } } = useSelector((state: RootState) => state);
 
   const handleClickBondingMenu = useCallback((e: MouseEvent) => {
     e.stopPropagation();
@@ -57,25 +57,29 @@ function StakingMenu ({ bondedAmount, className, delegations, networkKey, nextWi
   });
 
   const handleClickStakeMore = useCallback(() => {
-    store.dispatch({ type: 'bondingParams/update', payload: { selectedNetwork: networkKey, selectedValidator: null, maxNominatorPerValidator: null } as BondingParams });
+    store.dispatch({ type: 'bondingParams/update', payload: { selectedAccount: account?.address as string, selectedNetwork: networkKey, selectedValidator: null, maxNominatorPerValidator: null } as BondingParams });
     navigate('/account/select-bonding-validator');
-  }, [navigate, networkKey]);
+  }, [account?.address, navigate, networkKey]);
 
   const handleUnstake = useCallback(() => {
     if (parseFloat(bondedAmount) > 0) {
-      store.dispatch({ type: 'unbondingParams/update', payload: { selectedNetwork: networkKey, bondedAmount: parseFloat(bondedAmount), delegations } as UnbondingParams });
+      store.dispatch({ type: 'unbondingParams/update', payload: { selectedAccount: account?.address as string, selectedNetwork: networkKey, bondedAmount: parseFloat(bondedAmount) } as UnbondingParams });
       navigate('/account/unbonding-auth');
     }
-  }, [bondedAmount, delegations, navigate, networkKey]);
+  }, [account?.address, bondedAmount, navigate, networkKey]);
 
   const getTooltipText = useCallback(() => {
-    if (nextWithdrawalAmount === -1) {
+    if (nextWithdrawalAmount < 0) {
       return 'Loading...';
     }
 
     if (redeemable > 0) {
       return `${redeemable} ${networkJson.nativeToken as string} can be withdrawn now`;
     } else {
+      if (nextWithdrawal === 0) {
+        return `${nextWithdrawalAmount} ${networkJson.nativeToken as string} can be withdrawn soon`;
+      }
+
       return `${nextWithdrawalAmount} ${networkJson.nativeToken as string} can be withdrawn in ${moment.duration(nextWithdrawal, 'hours').humanize()}`;
     }
   }, [networkJson.nativeToken, nextWithdrawal, nextWithdrawalAmount, redeemable]);
@@ -87,8 +91,10 @@ function StakingMenu ({ bondedAmount, className, delegations, networkKey, nextWi
   }, [redeemable, showWithdrawalModal]);
 
   const handleClickClaimReward = useCallback(() => {
-    showClaimRewardModal();
-  }, [showClaimRewardModal]);
+    if (parseFloat(bondedAmount) > 0) {
+      showClaimRewardModal();
+    }
+  }, [bondedAmount, showClaimRewardModal]);
 
   return (
     <div className={className}>
@@ -154,17 +160,24 @@ function StakingMenu ({ bondedAmount, className, delegations, networkKey, nextWi
 
             {
               showClaimButton && <div
-                className={'bonding-menu-item'}
+                className={`${parseFloat(bondedAmount) > 0 ? 'bonding-menu-item' : 'disabled-menu-item'}`}
                 onClick={handleClickClaimReward}
               >
                 <img
-                  data-for={`bonding-menu-tooltip-${networkKey}`}
+                  data-for={`claim-button-tooltip-${networkKey}`}
                   data-tip={true}
                   height={18}
                   src={ArchiveTray}
                   width={18}
                 />
                 Claim rewards
+                {
+                  parseFloat(bondedAmount) > 0 && <Tooltip
+                    place={'top'}
+                    text={'Make sure you claim all rewards regularly and before you unstake'}
+                    trigger={`claim-button-tooltip-${networkKey}`}
+                  />
+                }
               </div>
             }
           </Menu>

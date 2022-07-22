@@ -185,7 +185,8 @@ export const PREDEFINE_TOKEN_DATA_MAP: Record<string, Record<string, TokenInfo>>
       isMainToken: false,
       symbol: 'ARIS',
       name: 'PolarisDAO',
-      decimals: 8
+      decimals: 8,
+      specialOption: { ForeignAsset: 1 }
     },
     KINT: {
       isMainToken: false,
@@ -215,7 +216,8 @@ export const PREDEFINE_TOKEN_DATA_MAP: Record<string, Record<string, TokenInfo>>
       isMainToken: false,
       symbol: 'USDC',
       name: 'USDC',
-      decimals: 6
+      decimals: 6,
+      specialOption: { Erc20: '0x1f3a10587a20114ea25ba1b388ee2dd4a337ce27' }
     },
     KSM: {
       isMainToken: false,

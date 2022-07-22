@@ -122,13 +122,13 @@ export class KoniCron {
         // this.resetStakingReward(address);
         this.resetHistory(address).then(() => {
           this.removeCron('refreshHistory');
-          this.removeCron('refreshStakeUnlockingInfo');
 
           if (this.checkNetworkAvailable(serviceInfo)) { // only add cron job if there's at least 1 active network
             this.addCron('refreshHistory', this.refreshHistory(address, serviceInfo.networkMap), CRON_REFRESH_HISTORY_INTERVAL);
           }
         }).catch((err) => console.warn(err));
 
+        this.removeCron('refreshStakeUnlockingInfo');
         this.removeCron('refreshStakingReward');
         this.removeCron('refreshPrice');
         this.removeCron('checkStatusApiMap');

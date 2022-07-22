@@ -325,6 +325,20 @@ export const PREDEFINE_TOKEN_DATA_MAP: Record<string, Record<string, TokenInfo>>
       erc20Address: '0xFFFFFFFF27C019790DFBEE7CB70F5996671B2882',
       decimals: 12,
       name: 'xcKintsugi'
+    },
+    MFR: {
+      isMainToken: false,
+      symbol: 'MFR',
+      erc20Address: '0xc2bFd8e028b342F0537aDC2bF310821c807c1312',
+      decimals: 18,
+      name: 'MFR Token'
+    },
+    MFG: {
+      isMainToken: false,
+      symbol: 'MFG',
+      erc20Address: '0x3ef88816ebE8F50019e931bdFFB0e428A44a29B1',
+      decimals: 18,
+      name: 'MFG Token'
     }
   },
   moonriver: {

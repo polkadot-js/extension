@@ -4,6 +4,6 @@
 // We only load the definitions here explicitly - if we try to go via
 //   import { types } from '@subsocial/types/substrate';
 // we end up with multiple version of types/API
-import definitions from '@subsocial/types/substrate/interfaces/subsocial/definitions';
+import definitions from '@subsocial/types/substrate/interfaces';
 
 export default definitions;

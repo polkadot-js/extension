@@ -13,6 +13,7 @@ export const ACALA_REFRESH_CROWDLOAN_INTERVAL = 300000;
 export const ACALA_REFRESH_BALANCE_INTERVAL = 30000;
 export const ASTAR_REFRESH_BALANCE_INTERVAL = 30000;
 export const MOONBEAM_REFRESH_BALANCE_INTERVAL = 30000;
+export const EVM_BALANCE_FAST_INTERVAL = 9000;
 export const CRON_REFRESH_NFT_INTERVAL = 900000;
 export const CRON_REFRESH_STAKING_REWARD_INTERVAL = 900000;
 export const CRON_REFRESH_HISTORY_INTERVAL = 90000;
@@ -22,6 +23,8 @@ export const ALL_ACCOUNT_KEY = 'ALL';
 export const ALL_NETWORK_KEY = 'all';
 export const ALL_GENESIS_HASH = null;
 export const IGNORE_GET_SUBSTRATE_FEATURES_LIST: string[] = ['astarEvm'];
+
+export const DEFAULT_THEME = 'dark';
 
 export const EVM_PROVIDER_RPC_ERRORS_MAP: EvmRpcErrorHelperMap = {
   USER_REJECTED_REQUEST: [4001, 'User Rejected Request'],

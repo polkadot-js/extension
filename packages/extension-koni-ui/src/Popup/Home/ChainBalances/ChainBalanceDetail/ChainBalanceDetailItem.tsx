@@ -8,7 +8,7 @@ import NetworkTools from '@subwallet/extension-koni-ui/components/NetworkTools';
 import useToast from '@subwallet/extension-koni-ui/hooks/useToast';
 import useTranslation from '@subwallet/extension-koni-ui/hooks/useTranslation';
 import ChainBalanceItemRow from '@subwallet/extension-koni-ui/Popup/Home/ChainBalances/ChainBalanceItemRow';
-import { ThemeProps } from '@subwallet/extension-koni-ui/types';
+import { ModalQrProps, ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { isAccountAll, toShort } from '@subwallet/extension-koni-ui/util';
 import { waitForElement } from '@subwallet/extension-koni-ui/util/dom';
 import { AccountInfoByNetwork, BalanceInfo } from '@subwallet/extension-koni-ui/util/types';
@@ -25,12 +25,7 @@ interface Props extends ThemeProps {
   balanceInfo: BalanceInfo;
   isLoading: boolean;
   setQrModalOpen: (visible: boolean) => void;
-  setQrModalProps: (props: {
-    networkPrefix: number,
-    networkKey: string,
-    iconTheme: string,
-    showExportButton: boolean
-  }) => void;
+  updateModalQr: (value: Partial<ModalQrProps>) => void;
   isShowDetail?: boolean,
   toggleBalanceDetail?: (networkKey: string) => void
 }
@@ -41,9 +36,9 @@ function ChainBalanceDetailItem ({ accountInfo,
   isLoading,
   isShowDetail,
   setQrModalOpen,
-  setQrModalProps,
-  toggleBalanceDetail }: Props): React.ReactElement<Props> {
-  const { address, formattedAddress, networkIconTheme, networkKey, networkPrefix } = accountInfo;
+  toggleBalanceDetail,
+  updateModalQr }: Props): React.ReactElement<Props> {
+  const { address, formattedAddress, networkKey } = accountInfo;
   const { show } = useToast();
   const { t } = useTranslation();
   const _onCopy = useCallback((e: React.MouseEvent<HTMLElement>) => {
@@ -65,14 +60,17 @@ function ChainBalanceDetailItem ({ accountInfo,
 
   const _openQr = useCallback((e: React.MouseEvent<HTMLElement>) => {
     e.stopPropagation();
-    setQrModalProps({
-      networkPrefix: networkPrefix,
-      networkKey: networkKey,
-      iconTheme: networkIconTheme,
+    updateModalQr({
+      network: {
+        networkKey: networkKey
+      },
+      account: {
+        address: address
+      },
       showExportButton: false
     });
     setQrModalOpen(true);
-  }, [networkIconTheme, networkKey, networkPrefix, setQrModalOpen, setQrModalProps]);
+  }, [networkKey, setQrModalOpen, updateModalQr, address]);
 
   const _isAccountAll = isAccountAll(address);
 

@@ -25,7 +25,6 @@ import styled, { ThemeContext } from 'styled-components';
 import { IconTheme } from '@polkadot/react-identicon/types';
 
 import defaultAvatar from '../../assets/default-avatar.svg';
-import logo from '../../assets/sub-wallet-logo.svg';
 import useOutsideClick from '../../hooks/useOutsideClick';
 import { Theme } from '../../types';
 
@@ -218,7 +217,7 @@ function Header ({ cancelButtonText, changeAccountCallback, children, className 
             >
               <img
                 className='logo'
-                src={logo}
+                src={themeContext.logo}
               />
             </Link>
           </div>
@@ -416,7 +415,7 @@ export default React.memo(styled(Header)(({ theme }: Props) => `
       color: ${theme.labelColor};
       font-family: ${theme.fontFamily};
       text-align: center;
-      margin-left: 5px;
+      margin-left: ${['dark', 'light'].includes(theme.id) ? '5px' : '16px'};
 
       .logo {
         height: 48px;
@@ -508,6 +507,16 @@ export default React.memo(styled(Header)(({ theme }: Props) => `
     margin-left: 1rem;
     cursor: pointer;
     height: 56px;
+    position: relative;
+    
+    &:after {
+      content: '';
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      top: 0;
+      left: 0;
+    }
   }
 
   .koni-subheader-btn {

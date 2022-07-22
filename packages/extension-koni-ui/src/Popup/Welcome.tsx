@@ -7,11 +7,11 @@ import Button from '@subwallet/extension-koni-ui/components/Button';
 import ButtonArea from '@subwallet/extension-koni-ui/components/ButtonArea';
 import Header from '@subwallet/extension-koni-ui/partials/Header';
 import React, { useCallback, useContext } from 'react';
-import styled from 'styled-components';
+import styled, { ThemeContext } from 'styled-components';
 
-import logo from '../assets/sub-wallet-logo.svg';
 import { ActionContext } from '../components';
 import useTranslation from '../hooks/useTranslation';
+import { Theme } from '../types';
 
 interface Props extends ThemeProps {
   className?: string;
@@ -20,6 +20,7 @@ interface Props extends ThemeProps {
 function Welcome ({ className }: Props): React.ReactElement<Props> {
   const { t } = useTranslation();
   const onAction = useContext(ActionContext);
+  const themeContext = useContext(ThemeContext as React.Context<Theme>);
 
   const _onClick = useCallback(
     (): void => {
@@ -40,7 +41,7 @@ function Welcome ({ className }: Props): React.ReactElement<Props> {
           <img
             alt='logo'
             className='welcome-logo'
-            src={logo}
+            src={themeContext.logo}
           />
           <span className='welcome-title'>
             Welcome Back

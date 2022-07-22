@@ -87,6 +87,9 @@ export async function checkSupportTransfer (networkKey: string, token: string, d
   } else if (['genshiro_testnet', 'genshiro', 'equilibrium_parachain'].includes(networkKey) && tokenInfo && isTxEqBalancesSupported) {
     result.supportTransfer = true;
     result.supportTransferAll = false;
+  } else if (tokenInfo && ((networkKey === 'crab' && tokenInfo.symbol === 'CKTON') || (networkKey === 'pangolin' && tokenInfo.symbol === 'PKTON'))) {
+    result.supportTransfer = true;
+    result.supportTransferAll = true;
   } else if (isTxBalancesSupported && (!tokenInfo || tokenInfo.isMainToken)) {
     result.supportTransfer = true;
     result.supportTransferAll = true;
@@ -159,7 +162,7 @@ export async function estimateFee (
 
       fee = paymentInfo.partialFee.toString();
     }
-  } else if (isTxBalancesSupported && (!tokenInfo || tokenInfo.isMainToken)) {
+  } else if (isTxBalancesSupported && (!tokenInfo || tokenInfo.isMainToken || (tokenInfo && ((networkKey === 'crab' && tokenInfo.symbol === 'CKTON') || (networkKey === 'pangolin' && tokenInfo.symbol === 'PKTON'))))) {
     if (transferAll) {
       const paymentInfo = await api.tx.balances.transferAll(to, false).paymentInfo(fromKeypair);
 
@@ -418,6 +421,12 @@ export async function makeTransfer (
       const asset = networkKey === 'equilibrium_parachain' ? assetFromToken(tokenInfo.symbol)[0] : assetFromToken(tokenInfo.symbol);
 
       transfer = api.tx.eqBalances.transfer(asset, to, value);
+    }
+  } else if (tokenInfo && ((networkKey === 'crab' && tokenInfo.symbol === 'CKTON') || (networkKey === 'pangolin' && tokenInfo.symbol === 'PKTON'))) {
+    if (transferAll) {
+      transfer = api.tx.kton.transferAll(to, false);
+    } else if (value) {
+      transfer = api.tx.kton.transfer(to, new BN(value));
     }
   } else if (isTxBalancesSupported && (!tokenInfo || tokenInfo.isMainToken)) {
     if (transferAll) {

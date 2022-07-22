@@ -1099,4 +1099,7 @@ export interface KoniRequestSignatures {
 
   // EVM Transaction
   'pri(evm.transaction.parse.input)': [RequestParseEVMTransactionInput, ResponseParseEVMTransactionInput];
+
+  // Authorize
+  'pri(authorize.subscribe)': [null, AuthUrls, AuthUrls];
 }

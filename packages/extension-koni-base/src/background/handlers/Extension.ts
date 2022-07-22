@@ -443,6 +443,23 @@ export default class KoniExtension extends Extension {
     return await this.getSettings();
   }
 
+  private async subscribeAuthUrls (id: string, port: chrome.runtime.Port): Promise<AuthUrls> {
+    const cb = createSubscription<'pri(authorize.subscribe)'>(id, port);
+
+    const authorizeUrlSubscription = state.subscribeAuthorizeUrlSubject().subscribe({
+      next: (rs) => {
+        cb(rs);
+      }
+    });
+
+    port.onDisconnect.addListener((): void => {
+      unsubscribe(id);
+      authorizeUrlSubscription.unsubscribe();
+    });
+
+    return await state.getAuthList();
+  }
+
   private _saveCurrentAccountAddress (address: string, callback?: (data: CurrentAccountInfo) => void) {
     state.getCurrentAccount((accountInfo) => {
       if (!accountInfo) {
@@ -2591,6 +2608,12 @@ export default class KoniExtension extends Extension {
       // EVM Transaction
       case 'pri(evm.transaction.parse.input)':
         return await this.parseEVMTransactionInput(request as RequestParseEVMTransactionInput);
+
+      // Auth Url subscribe
+      case 'pri(authorize.subscribe)':
+        return await this.subscribeAuthUrls(id, port);
+
+      // Default
       default:
         return super.handle(id, type, request, port);
     }

@@ -601,3 +601,7 @@ export async function submitStakeWithdrawal (params: StakeWithdrawalParams, call
 export async function parseEVMTransactionInput (request: RequestParseEVMTransactionInput): Promise<ResponseParseEVMTransactionInput> {
   return sendMessage('pri(evm.transaction.parse.input)', request);
 }
+
+export async function subscribeAuthUrl (callback: (data: AuthUrls) => void): Promise<AuthUrls> {
+  return sendMessage('pri(authorize.subscribe)', null, callback);
+}

@@ -104,7 +104,11 @@ const darkTheme = {
   crowdloanFailStatus: '#F5000E',
   extensionBorder: '#030E45',
   accountAuthorizeRequest: '#151A30',
-  dropdownBackground: '#020412'
+  dropdownBackground: '#020412',
+  filterDefault: 'invert(51%) sepia(13%) saturate(545%) hue-rotate(192deg) brightness(96%) contrast(85%)',
+  filterError: 'invert(22%) sepia(85%) saturate(4711%) hue-rotate(351deg) brightness(98%) contrast(82%)',
+  filterSuccess: 'invert(71%) sepia(58%) saturate(424%) hue-rotate(107deg) brightness(85%) contrast(90%)',
+  filterWarning: 'invert(77%) sepia(67%) saturate(6392%) hue-rotate(0deg) brightness(103%) contrast(105%)'
 };
 
 export declare type Theme = typeof darkTheme;

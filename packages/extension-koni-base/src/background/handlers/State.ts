@@ -134,6 +134,7 @@ export default class KoniState extends State {
   private readonly authorizeStore = new AuthorizeStore();
   readonly #authRequestsV2: Record<string, AuthRequestV2> = {};
   private readonly evmChainSubject = new Subject<AuthUrls>();
+  private readonly authorizeUrlSubject = new Subject<AuthUrls>();
   private authorizeCached: AuthUrls | undefined = undefined;
 
   private priceStoreReady = false;
@@ -409,6 +410,7 @@ export default class KoniState extends State {
     this.authorizeStore.set('authUrls', data, () => {
       this.authorizeCached = data;
       this.evmChainSubject.next(this.authorizeCached);
+      this.authorizeUrlSubject.next(this.authorizeCached);
       callback && callback();
     });
   }
@@ -427,6 +429,10 @@ export default class KoniState extends State {
 
   public subscribeEvmChainChange (): Subject<AuthUrls> {
     return this.evmChainSubject;
+  }
+
+  public subscribeAuthorizeUrlSubject (): Subject<AuthUrls> {
+    return this.authorizeUrlSubject;
   }
 
   private updateIconV2 (shouldClose?: boolean): void {
@@ -1479,11 +1485,13 @@ export default class KoniState extends State {
     this.updateServiceInfo();
     this.lockNetworkMap = false;
 
-    if (this.networkMap[networkKey].isEthereum) {
-      this.getAuthorize((data) => {
+    this.getAuthorize((data) => {
+      if (this.networkMap[networkKey].isEthereum) {
         this.evmChainSubject.next(data);
-      });
-    }
+      }
+
+      this.authorizeUrlSubject.next(data);
+    });
 
     return true;
   }
@@ -1522,6 +1530,7 @@ export default class KoniState extends State {
 
     this.getAuthorize((data) => {
       this.evmChainSubject.next(data);
+      this.authorizeUrlSubject.next(data);
     });
 
     return true;
@@ -1545,11 +1554,13 @@ export default class KoniState extends State {
     this.updateServiceInfo();
     this.lockNetworkMap = false;
 
-    if (this.networkMap[networkKey].isEthereum) {
-      this.getAuthorize((data) => {
+    this.getAuthorize((data) => {
+      if (this.networkMap[networkKey].isEthereum) {
         this.evmChainSubject.next(data);
-      });
-    }
+      }
+
+      this.authorizeUrlSubject.next(data);
+    });
 
     return true;
   }
@@ -1585,6 +1596,7 @@ export default class KoniState extends State {
 
     this.getAuthorize((data) => {
       this.evmChainSubject.next(data);
+      this.authorizeUrlSubject.next(data);
     });
 
     return true;

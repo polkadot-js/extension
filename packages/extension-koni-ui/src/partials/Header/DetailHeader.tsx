@@ -6,8 +6,9 @@ import cloneLogo from '@subwallet/extension-koni-ui/assets/clone.svg';
 import moreButtonDark from '@subwallet/extension-koni-ui/assets/dots-three-vertical-dark.svg';
 import moreButtonLight from '@subwallet/extension-koni-ui/assets/dots-three-vertical-light.svg';
 import EyeIcon from '@subwallet/extension-koni-ui/assets/icon/eye.svg';
-import EyeSlashIcon from '@subwallet/extension-koni-ui/assets/icon/eye-slash.svg';
+import { AccountContext } from '@subwallet/extension-koni-ui/components';
 import Tooltip from '@subwallet/extension-koni-ui/components/Tooltip';
+import { useGetCurrentAuth } from '@subwallet/extension-koni-ui/hooks/useGetCurrentAuth';
 import useOutsideClick from '@subwallet/extension-koni-ui/hooks/useOutsideClick';
 import useToast from '@subwallet/extension-koni-ui/hooks/useToast';
 import useTranslation from '@subwallet/extension-koni-ui/hooks/useTranslation';
@@ -17,10 +18,13 @@ import HeaderEditName from '@subwallet/extension-koni-ui/partials/HeaderEditName
 import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { isAccountAll } from '@subwallet/extension-koni-ui/util';
-import React, { useCallback, useRef, useState } from 'react';
+import CN from 'classnames';
+import React, { useCallback, useContext, useMemo, useRef, useState } from 'react';
 import CopyToClipboard from 'react-copy-to-clipboard';
 import { useSelector } from 'react-redux';
 import styled from 'styled-components';
+
+import { isEthereumAddress } from '@polkadot/util-crypto';
 
 interface Props extends ThemeProps {
   className?: string,
@@ -39,21 +43,93 @@ interface EditState {
 
 let tooltipId = 0;
 
+enum ConnectionStatement {
+  UN_AUTH='UN_AUTH',
+  AUTHED='AUTHED',
+  PARTIAL_AUTHED='PARTIAL_AUTHED',
+  BANNED='BANNED'
+}
+
 function DetailHeader ({ className = '',
   currentAccount,
   formatted,
   isShowZeroBalances,
   popupTheme,
-  toggleVisibility,
+  // toggleVisibility,
   toggleZeroBalances }: Props): React.ReactElement {
   const actionsRef = useRef(null);
+
   const { t } = useTranslation();
+  const currentAuth = useGetCurrentAuth();
+
+  const { currentNetwork } = useSelector((state: RootState) => state);
+  const { accounts } = useContext(AccountContext);
+
+  const isAllAccount = isAccountAll(currentAccount.address);
+
+  const connectionState = useMemo((): ConnectionStatement => {
+    if (currentAuth) {
+      if (!currentAuth.isAllowed) {
+        return ConnectionStatement.BANNED;
+      }
+
+      const type = currentAuth.accountAuthType;
+      const allowedMap = currentAuth.isAllowedMap;
+
+      const filterType = (address: string) => {
+        if (type === 'both') {
+          return true;
+        }
+
+        const _type = type || 'substrate';
+
+        return _type === 'substrate' ? !isEthereumAddress(address) : isEthereumAddress(address);
+      };
+
+      if (!isAllAccount) {
+        const _allowedMap: Record<string, boolean> = {};
+
+        Object.entries(allowedMap)
+          .filter(([address]) => filterType(address))
+          .forEach(([address, value]) => {
+            _allowedMap[address] = value;
+          });
+
+        const isAllowed = _allowedMap[currentAccount.address];
+
+        if (isAllowed === undefined) {
+          return ConnectionStatement.UN_AUTH;
+        } else {
+          return isAllowed ? ConnectionStatement.AUTHED : ConnectionStatement.BANNED;
+        }
+      } else {
+        const _accounts = accounts.filter(({ address }) => !isAccountAll(address));
+
+        const numberAccounts = _accounts.filter(({ address }) => filterType(address)).length;
+        const numberAllowedAccounts = Object.entries(allowedMap)
+          .filter(([address]) => filterType(address))
+          .filter(([, value]) => value)
+          .length;
+
+        if (numberAllowedAccounts === 0) {
+          return ConnectionStatement.BANNED;
+        } else {
+          if (numberAllowedAccounts > 0 && numberAllowedAccounts < numberAccounts) {
+            return ConnectionStatement.PARTIAL_AUTHED;
+          } else {
+            return ConnectionStatement.AUTHED;
+          }
+        }
+      }
+    } else {
+      return ConnectionStatement.UN_AUTH;
+    }
+  }, [currentAccount.address, currentAuth, isAllAccount, accounts]);
+
   const [{ isEditing }, setEditing] = useState<EditState>({ isEditing: false, toggleActions: 0 });
   const [isActionOpen, setShowAccountAction] = useState(false);
   const { show } = useToast();
   const [trigger] = useState(() => `overview-btn-${++tooltipId}`);
-  const currentNetwork = useSelector((state: RootState) => state.currentNetwork);
-  const isAllAccount = isAccountAll(currentAccount.address);
 
   const _toggleEdit = useCallback(
     (): void => {
@@ -74,6 +150,20 @@ function DetailHeader ({ className = '',
   useOutsideClick(actionsRef, (): void => {
     isActionOpen && setShowAccountAction(!isActionOpen);
   });
+
+  const visibleClassName = useMemo((): string => {
+    switch (connectionState) {
+      case ConnectionStatement.AUTHED:
+        return 'authed';
+      case ConnectionStatement.PARTIAL_AUTHED:
+        return 'partial-authed';
+      case ConnectionStatement.BANNED:
+        return 'banned';
+      case ConnectionStatement.UN_AUTH:
+      default:
+        return 'un-auth';
+    }
+  }, [connectionState]);
 
   const _toggleAccountAction = useCallback(
     (): void => setShowAccountAction((isActionOpen) => !isActionOpen),
@@ -109,36 +199,23 @@ function DetailHeader ({ className = '',
 
   return (
     <div className={`detail-header ${className}`}>
-      {!isAllAccount &&
       <div className='detail-header__part-1'>
         <div
           className='detail-header-connect-status-btn'
           data-for={trigger}
           data-tip={true}
-          onClick={toggleVisibility}
         >
-          {currentAccount?.isHidden
-            ? (
-              <img
-                alt='Connect Icon'
-                className='detail-header-connect-status-btn__icon'
-                src={EyeSlashIcon}
-              />
-            )
-            : (
-              <img
-                alt='Connect Icon'
-                className='detail-header-connect-status-btn__icon'
-                src={EyeIcon}
-              />
-            )}
+          <img
+            alt='Connect Icon'
+            className={CN('detail-header-connect-status-btn__icon', visibleClassName)}
+            src={EyeIcon}
+          />
           <Tooltip
             text={'Account visibility'}
             trigger={trigger}
           />
         </div>
       </div>
-      }
 
       <div className='detail-header__part-2'>
         {!isEditing && (
@@ -235,6 +312,22 @@ export default styled(DetailHeader)(({ theme }: Props) => `
 
   .detail-header-connect-status-btn__icon {
     width: 15px;
+
+    &.authed {
+      filter: ${theme.filterSuccess};
+    }
+
+    &.banned {
+      filter: ${theme.filterError};
+    }
+
+    &.un-auth {
+      filter: ${theme.filterDefault};
+    }
+
+    &.partial-authed {
+      filter: ${theme.filterWarning};
+    }
   }
 
   .detail-header-account-info {
@@ -255,7 +348,7 @@ export default styled(DetailHeader)(({ theme }: Props) => `
   .detail-header__all-account {
     font-size: 18px;
     font-weight: 500;
-    padding-left: 25px;
+    // padding-left: 25px;
   }
 
   .detail-header-account-info-wrapper {

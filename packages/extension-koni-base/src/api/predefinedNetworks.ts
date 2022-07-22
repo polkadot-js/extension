@@ -157,7 +157,8 @@ export const PREDEFINED_NETWORKS: Record<string, NetworkJson> = {
     decimals: 18,
     coinGeckoKey: 'moonbeam',
     evmChainId: 1284,
-    supportBonding: true
+    supportBonding: true,
+    abiExplorer: 'https://api-moonbeam.moonscan.io/api?module=contract&action=getabi'
   },
   astar: {
     key: 'astar',
@@ -572,6 +573,7 @@ export const PREDEFINED_NETWORKS: Record<string, NetworkJson> = {
     groups: ['TEST_NET'],
     nativeToken: 'DEV',
     isEthereum: true,
+    abiExplorer: 'https://api-moonbase.moonscan.io/api?module=contract&action=getabi',
     decimals: 18,
     evmChainId: 1287,
     supportBonding: true,
@@ -732,7 +734,8 @@ export const PREDEFINED_NETWORKS: Record<string, NetworkJson> = {
     decimals: 18,
     coinGeckoKey: 'moonriver',
     evmChainId: 1285,
-    supportBonding: true
+    supportBonding: true,
+    abiExplorer: 'https://api-moonriver.moonscan.io/api?module=contract&action=getabi'
   },
   shiden: {
     key: 'shiden',

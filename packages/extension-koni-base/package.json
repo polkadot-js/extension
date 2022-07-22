@@ -14,7 +14,7 @@
   },
   "sideEffects": false,
   "type": "module",
-  "version": "0.4.9-0",
+  "version": "0.5.2",
   "main": "index.js",
   "dependencies": {
     "@acala-network/api": "^4.1.5",
@@ -31,6 +31,7 @@
     "@equilab/api": "^1.12.7",
     "@equilab/definitions": "^1.4.12",
     "@ethereumjs/common": "^2.6.5",
+    "@ethersproject/abi": "^5.6.4",
     "@interlay/interbtc-types": "^1.7.0",
     "@kiltprotocol/type-definitions": "^0.1.23",
     "@laminar/type-definitions": "^0.3.1",
@@ -53,20 +54,24 @@
     "@snowfork/snowbridge-types": "^0.2.7",
     "@sora-substrate/type-definitions": "^1.9.16",
     "@subsocial/types": "^0.6.11",
-    "@subwallet/extension-base": "^0.4.9-0",
-    "@subwallet/extension-chains": "^0.4.9-0",
-    "@subwallet/extension-dapp": "^0.4.9-0",
-    "@subwallet/extension-inject": "^0.4.9-0",
+    "@subwallet/extension-base": "^0.5.2",
+    "@subwallet/extension-chains": "^0.5.2",
+    "@subwallet/extension-dapp": "^0.5.2",
+    "@subwallet/extension-inject": "^0.5.2",
     "@unique-nft/types": "^0.6.0-4",
     "@zeitgeistpm/type-defs": "^0.6.0",
     "@zeroio/type-definitions": "^0.0.14",
     "axios": "^0.27.2",
+    "buffer": "^6.0.3",
     "bignumber.js": "^9.0.2",
     "cross-fetch": "^3.1.5",
     "eth-simple-keyring": "^4.2.0",
+    "ethereum-input-data-decoder": "^0.4.1",
     "ethereumjs-tx": "^2.1.2",
+    "ethers": "^5.6.9",
     "eventemitter3": "^4.0.7",
     "graphql": "^16.5.0",
+    "is-buffer": "^2.0.5",
     "json-rpc-engine": "^6.1.0",
     "moonbeam-types-bundle": "2.0.3",
     "pontem-types-bundle": "^1.0.15",
@@ -75,9 +80,10 @@
     "web3": "^1.7.4",
     "web3-core": "^1.7.4",
     "web3-core-helpers": "^1.7.4",
-    "web3-eth-contract": "^1.7.4"
+    "web3-eth-contract": "^1.7.4",
+    "web3-utils": "^1.7.4"
   },
   "devDependencies": {
-    "@subwallet/extension-mocks": "^0.4.9-0"
+    "@subwallet/extension-mocks": "^0.5.2"
   }
 }

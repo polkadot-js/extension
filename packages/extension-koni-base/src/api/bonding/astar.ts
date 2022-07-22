@@ -54,7 +54,7 @@ export async function getAstarDappsInfo (networkKey: string, dotSamaApi: ApiProp
   const maxStakerPerContract = parseRawNumber(rawMaxStakerPerContract);
 
   const allDappsReq = new Promise(function (resolve) {
-    fetch('https://api.astar.network/api/v1/shibuya/dapps-staking/dapps', {
+    fetch(`https://api.astar.network/api/v1/${networkKey}/dapps-staking/dapps`, {
       method: 'GET'
     }).then((resp) => {
       resolve(resp.json());
@@ -72,8 +72,13 @@ export async function getAstarDappsInfo (networkKey: string, dotSamaApi: ApiProp
   for (const item of _stakedDapps) {
     const data = item[0].toHuman() as any[];
     const stakedDapp = data[1] as Record<string, string>;
+    const _stakes = item[1].toHuman() as Record<string, any>;
+    const stakes = _stakes.stakes as Record<string, string>[];
+    const latestStakeInfo = stakes[stakes.length - 1];
 
-    stakedDappsList.push((stakedDapp.Evm).toLowerCase());
+    if (latestStakeInfo.staked && parseRawNumber(latestStakeInfo.staked) !== 0) {
+      stakedDappsList.push((stakedDapp.Evm).toLowerCase());
+    }
   }
 
   const era = parseRawNumber(_era.toHuman() as string);

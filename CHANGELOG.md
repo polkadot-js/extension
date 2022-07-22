@@ -1,7 +1,7 @@
 # CHANGELOG
 
-## 0.5.1 (Koni)
-Build date: Jul 21, 2022.
+## 0.5.2 (Koni)
+Build date: Jul 22, 2022.
 
 Update:
 - Improve the UX for contracts transaction with EVM provider (#393)

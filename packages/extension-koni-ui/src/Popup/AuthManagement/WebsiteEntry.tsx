@@ -6,7 +6,7 @@ import type { ThemeProps } from '../../types';
 import { AuthUrlInfo, AuthUrls } from '@subwallet/extension-base/background/handlers/State';
 import { filterAndSortingAccountByAuthType } from '@subwallet/extension-koni-base/utils/utils';
 import { AccountContext } from '@subwallet/extension-koni-ui/components';
-import { forgetSite } from '@subwallet/extension-koni-ui/messaging';
+import { forgetSite, toggleAuthorization } from '@subwallet/extension-koni-ui/messaging';
 import WebsiteEntryAccount from '@subwallet/extension-koni-ui/Popup/AuthManagement/WebsiteEntryAccount';
 import { waitForElement } from '@subwallet/extension-koni-ui/util/dom';
 import React, { useCallback, useContext, useState } from 'react';
@@ -45,6 +45,15 @@ function WebsiteEntry ({ changeConnectSite, className = '', info, setList, url }
       setList(data);
     }).catch(console.error);
   }, [setList, url]);
+
+  const onToggleAllow = useCallback(() => {
+    // @ts-ignore
+    toggleAuthorization(url).then(({ list }) => {
+      setList(list);
+    }).catch(console.error);
+  },
+  [setList, url]
+  );
 
   const _onToggleDetail = useCallback((e: React.MouseEvent<HTMLElement>) => {
     setShowDetail(!isShowDetail);
@@ -88,6 +97,12 @@ function WebsiteEntry ({ changeConnectSite, className = '', info, setList, url }
       {isShowDetail &&
         <div className={`website-entry__detail ${transformId}-detail`}>
           <div className='website-entry__top-action'>
+            <div
+              className='website-entry__btn'
+              onClick={onToggleAllow}
+            >
+              {info.isAllowed ? t<string>('Disallow') : t<string>('Allow')}
+            </div>
             <div
               className='website-entry__btn'
               onClick={onForgetSite}

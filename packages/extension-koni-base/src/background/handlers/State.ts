@@ -576,6 +576,12 @@ export default class KoniState extends State {
 
     // Reconfirm if check auth for empty list
     if (existedAuth) {
+      const inBlackList = existedAuth && !existedAuth.isAllowed;
+
+      if (inBlackList) {
+        throw new Error(`The source ${url} is not allowed to interact with this extension`);
+      }
+
       request.allowedAccounts = Object.entries(existedAuth.isAllowedMap)
         .map(([address, allowed]) => (allowed ? address : ''))
         .filter((item) => (item !== ''));
@@ -588,13 +594,8 @@ export default class KoniState extends State {
         allowedListByRequestType = allowedListByRequestType.filter((a) => !isEthereumAddress(a));
       }
 
-      if (!confirmAnotherType && !request.reConfirm && !(allowedListByRequestType.length === 0)) {
-      // this url was seen in the past
-        const isConnected = Object.keys(existedAuth.isAllowedMap)
-          .some((address) => existedAuth.isAllowedMap[address]);
-
-        assert(isConnected, `The source ${url} is not allowed to interact with this extension`);
-
+      if (!confirmAnotherType && !request.reConfirm && allowedListByRequestType.length !== 0) {
+        // Prevent appear confirmation popup
         return false;
       }
     }

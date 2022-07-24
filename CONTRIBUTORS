@@ -1,4 +1,4 @@
-     537	Jaco                          	0.44.2 (#1115)
+     538	Jaco                          	Bump ui libs (#1116)
       84	Thibaut Sardan                	fix indeterminate state not reseting (#1112)
        7	Ivan Rukhavets                	Mention derivation in FAQ (#334)
        4	Amaury Martiny                	PostMessageProvider with on('connected' | 'disconnected') (#279)

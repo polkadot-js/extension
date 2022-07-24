@@ -1,4 +1,4 @@
-     535	Jaco                          	Allow for unsubscribe on account subscriptions (#1067)
+     536	Jaco                          	Bump deps (#1114)
       84	Thibaut Sardan                	fix indeterminate state not reseting (#1112)
        7	Ivan Rukhavets                	Mention derivation in FAQ (#334)
        4	Amaury Martiny                	PostMessageProvider with on('connected' | 'disconnected') (#279)

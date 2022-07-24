@@ -1,6 +1,8 @@
 # CHANGELOG
 
-## master
+## 0.44.2 Jul 24, 2022
+
+- **Important** Not published to the stores, aligns with latest released packages.
 
 Contributed:
 
@@ -11,6 +13,8 @@ Changes:
 
 - Allow for unsubscribe handling on account subscriptions
 - Add error handling for user-supplied account callbacks
+- Upgrade to `@polkadot/api` 8.14.1
+- Updated to `@polkadot/util` 10.1.1
 
 
 ## 0.44.1 Jun 6, 2022

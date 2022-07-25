@@ -43,24 +43,42 @@ export async function getForeignToken (api: ApiPromise) {
   allTokens.forEach(([storageKey, tokenData]) => {
     // @ts-ignore
     // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access,@typescript-eslint/no-unsafe-assignment
-    const foreignAsset = storageKey.toHuman()[0].ForeignAssetId;
+    const assetMetadata = storageKey.toHuman()[0] as Record<string, any>;
 
-    if (foreignAsset) {
-      const { decimals, name, symbol } = tokenData.toHuman() as {
-        symbol: string,
-        decimals: string,
-        name: string
+    let specialOption;
+
+    if (assetMetadata.ForeignAssetId) {
+      specialOption = {
+        ForeignAsset: assetMetadata.ForeignAssetId as string
       };
+    } else if (assetMetadata.NativeAssetId) {
+      specialOption = {
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+        Token: assetMetadata.NativeAssetId.Token as string
+      };
+    } else if (assetMetadata.Erc20) {
+      specialOption = {
+        Erc20: assetMetadata.Erc20 as string
+      };
+    } else if (assetMetadata.StableAssetId) {
+      specialOption = {
+        StableAssetPoolToken: assetMetadata.StableAssetId as string
+      };
+    }
 
+    const { decimals, name, symbol } = tokenData.toHuman() as {
+      symbol: string,
+      decimals: string,
+      name: string
+    };
+
+    if (!(symbol in tokenMap)) {
       tokenMap[symbol] = {
         isMainToken: false,
         symbol,
         decimals: parseInt(decimals),
         name,
-        specialOption: {
-          // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-          ForeignAsset: foreignAsset
-        }
+        specialOption
       };
     }
   });
@@ -78,6 +96,8 @@ export const getRegistry = async (networkKey: string, api: ApiPromise, customErc
   await api.isReady;
 
   const { chainDecimals, chainTokens } = api.registry;
+
+  console.log('chainTokens', chainTokens);
 
   // Hotfix for these network because substrate and evm response different decimal
   if (['pangolinEvm', 'crabEvm'].includes(networkKey)) {

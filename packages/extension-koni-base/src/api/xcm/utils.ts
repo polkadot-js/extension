@@ -17,17 +17,17 @@ export const SupportedCrossChainsMap: Record<string, CrossChainRelation> = {
       }
     }
   },
-  karura: {
-    type: 'p',
-    isEthereum: false,
-    relationMap: {
-      moonriver: {
-        type: 'p',
-        isEthereum: true,
-        supportedToken: ['KAR', 'AUSD']
-      }
-    }
-  },
+  // karura: {
+  //   type: 'p',
+  //   isEthereum: false,
+  //   relationMap: {
+  //     moonriver: {
+  //       type: 'p',
+  //       isEthereum: true,
+  //       supportedToken: ['KAR', 'AUSD']
+  //     }
+  //   }
+  // },
   moonbeam: {
     type: 'p',
     isEthereum: true,
@@ -90,7 +90,7 @@ export const SupportedCrossChainsMap: Record<string, CrossChainRelation> = {
         supportedToken: ['KINT']
       }
     }
-  }
+  },
   // astar: {
   //   type: 'p',
   //   isEthereum: false,
@@ -155,56 +155,60 @@ export const SupportedCrossChainsMap: Record<string, CrossChainRelation> = {
   //     }
   //   }
   // }
-  // moonbase: {
-  //   isEthereum: true,
-  //   type: 'p',
-  //   relationMap: {
-  //     acala_dev: {
-  //       type: 'p',
-  //       isEthereum: false,
-  //       supportedToken: ['xcKAR']
-  //     },
-  //     moonbase_relay: {
-  //       type: 'r',
-  //       isEthereum: false,
-  //       supportedToken: ['xcUNIT']
-  //     },
-  //     bifrost_testnet: {
-  //       type: 'r',
-  //       isEthereum: false,
-  //       supportedToken: ['xcBNC']
-  //     }
-  //   }
-  // },
-  // moonbase_relay: {
-  //   isEthereum: false,
-  //   type: 'r',
-  //   relationMap: {
-  //     moonbase: {
-  //       type: 'p',
-  //       isEthereum: true,
-  //       supportedToken: ['Unit']
-  //     }
-  //   }
-  // }
-  // acala_testnet: {
-  //   type: 'p',
-  //   relationMap: {
-  //     moonbase: {
-  //       type: 'p',
-  //       supportedToken: ['ACA', 'AUSD']
-  //     }
-  //   }
-  // },
-  // karura_testnet: {
-  //   type: 'p',
-  //   relationMap: {
-  //     moonbase: {
-  //       type: 'p',
-  //       supportedToken: ['KAR']
-  //     }
-  //   }
-  // },
+  moonbase: {
+    isEthereum: true,
+    type: 'p',
+    relationMap: {
+      acala_dev: {
+        type: 'p',
+        isEthereum: false,
+        supportedToken: ['xcKAR']
+      },
+      moonbase_relay: {
+        type: 'r',
+        isEthereum: false,
+        supportedToken: ['xcUNIT']
+      },
+      bifrost_testnet: {
+        type: 'r',
+        isEthereum: false,
+        supportedToken: ['xcBNC']
+      }
+    }
+  },
+  moonbase_relay: {
+    isEthereum: false,
+    type: 'r',
+    relationMap: {
+      moonbase: {
+        type: 'p',
+        isEthereum: true,
+        supportedToken: ['Unit']
+      }
+    }
+  },
+  acala_testnet: {
+    type: 'p',
+    isEthereum: false,
+    relationMap: {
+      moonbase: {
+        type: 'p',
+        isEthereum: true,
+        supportedToken: ['ACA', 'AUSD']
+      }
+    }
+  },
+  karura_testnet: {
+    type: 'p',
+    isEthereum: false,
+    relationMap: {
+      moonbase: {
+        type: 'p',
+        isEthereum: true,
+        supportedToken: ['KAR']
+      }
+    }
+  }
   // interlay: {
   //   type: 'p',
   //   relationMap: {

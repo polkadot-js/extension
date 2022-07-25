@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { ApiProps, NftCollection, NftItem } from '@subwallet/extension-base/background/KoniTypes';
-import { CLOUDFLARE_PINATA_SERVER, SUPPORTED_NFT_NETWORKS } from '@subwallet/extension-koni-base/api/nft/config';
+import { getRandomIpfsGateway, SUPPORTED_NFT_NETWORKS } from '@subwallet/extension-koni-base/api/nft/config';
 import { BaseNftApi, HandleNftParams } from '@subwallet/extension-koni-base/api/nft/nft';
 import { isUrl } from '@subwallet/extension-koni-base/utils/utils';
 import fetch from 'cross-fetch';
@@ -45,10 +45,10 @@ export class AcalaNftApi extends BaseNftApi {
     }
 
     if (!input.includes('ipfs://')) {
-      return CLOUDFLARE_PINATA_SERVER + input;
+      return getRandomIpfsGateway() + input;
     }
 
-    return CLOUDFLARE_PINATA_SERVER + input.split('ipfs://')[1];
+    return getRandomIpfsGateway() + input.split('ipfs://')[1];
   }
 
   /**
@@ -192,7 +192,7 @@ const getMetadata = (metadataUrl: string) => {
     return null;
   }
 
-  url = CLOUDFLARE_PINATA_SERVER + metadataUrl + '/metadata.json';
+  url = getRandomIpfsGateway() + metadataUrl + '/metadata.json';
 
   return fetch(url, {
     method: 'GET',

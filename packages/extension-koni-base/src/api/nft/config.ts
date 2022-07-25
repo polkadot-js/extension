@@ -33,6 +33,10 @@ export const QUARTZ_SCAN_ENDPOINT = 'https://hasura-quartz.unique.network/v1/gra
 
 export const UNIQUE_IPFS_GATEWAY = 'https://ipfs.unique.network/ipfs/';
 
+export const NFT_STORAGE_GATEWAY = 'https://nftstorage.link/ipfs/';
+
+export const IPFS_IO_GATEWAY = 'https://ipfs.io/ipfs/';
+
 export enum SUPPORTED_NFT_NETWORKS {
   karura = 'karura',
   acala = 'acala',

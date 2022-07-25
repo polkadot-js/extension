@@ -101,6 +101,7 @@ export interface StakingItem {
 }
 
 export interface StakingJson {
+  reset?: boolean,
   ready?: boolean,
   details: Record<string, StakingItem>
 }
@@ -203,6 +204,7 @@ export interface BalanceItem {
 }
 
 export interface BalanceJson {
+  reset?: boolean,
   details: Record<string, BalanceItem>
 }
 
@@ -213,6 +215,7 @@ export interface CrowdloanItem {
 }
 
 export interface CrowdloanJson {
+  reset?: boolean,
   details: Record<string, CrowdloanItem>
 }
 

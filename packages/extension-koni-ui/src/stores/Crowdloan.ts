@@ -15,7 +15,7 @@ const crowdloanSlice = createSlice({
     update (state, action: PayloadAction<CrowdloanJson>) {
       const payload = action.payload;
 
-      state.details = { ...state.details, ...payload.details };
+      state.details = payload.reset ? payload.details : { ...state.details, ...payload.details };
     }
   }
 });

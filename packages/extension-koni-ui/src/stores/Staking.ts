@@ -20,7 +20,7 @@ const stakingSlice = createSlice({
         state.ready = payload.ready;
       }
 
-      if (payload.ready === false) {
+      if (payload.reset) {
         state.details = payload.details;
       } else {
         state.details = { ...state.details, ...payload.details };

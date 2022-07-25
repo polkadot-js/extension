@@ -158,6 +158,7 @@ export const PREDEFINED_NETWORKS: Record<string, NetworkJson> = {
     coinGeckoKey: 'moonbeam',
     evmChainId: 1284,
     supportBonding: true,
+    getStakingOnChain: true,
     abiExplorer: 'https://api-moonbeam.moonscan.io/api?module=contract&action=getabi'
   },
   astar: {
@@ -177,6 +178,8 @@ export const PREDEFINED_NETWORKS: Record<string, NetworkJson> = {
     nativeToken: 'ASTR',
     crowdloanUrl: 'https://crowdloan.astar.network/#/',
     decimals: 18,
+    getStakingOnChain: true,
+    supportBonding: true,
     coinGeckoKey: 'astar'
   },
   astarEvm: {
@@ -735,6 +738,7 @@ export const PREDEFINED_NETWORKS: Record<string, NetworkJson> = {
     coinGeckoKey: 'moonriver',
     evmChainId: 1285,
     supportBonding: true,
+    getStakingOnChain: true,
     abiExplorer: 'https://api-moonriver.moonscan.io/api?module=contract&action=getabi'
   },
   shiden: {

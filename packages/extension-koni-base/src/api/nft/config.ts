@@ -37,6 +37,16 @@ export const NFT_STORAGE_GATEWAY = 'https://nftstorage.link/ipfs/';
 
 export const IPFS_IO_GATEWAY = 'https://ipfs.io/ipfs/';
 
+export const GATEWAY_IPFS_IO = 'https://gateway.ipfs.io/ipfs/';
+
+export const DWEB_LINK = 'https://dweb.link/ipfs/';
+
+export const IPFS_GATEWAY_CLOUD = 'https://ipfs-gateway.cloud/ipfs/';
+
+export const IPFS_FLEEK = 'https://ipfs.fleek.co/ipfs/';
+
+export const IPFS_TELOS_MIAMI = 'https://ipfs.telos.miami/ipfs';
+
 export enum SUPPORTED_NFT_NETWORKS {
   karura = 'karura',
   acala = 'acala',
@@ -88,4 +98,64 @@ export enum SUPPORTED_TRANSFER_SUBSTRATE_CHAIN_NAME {
   opal = 'opal',
   statemint = 'statemint',
   bitcountry = 'bitcountry'
+}
+
+const RANDOM_IPFS_GATEWAY_SETTING = [
+  {
+    provider: IPFS_IO_GATEWAY,
+    weight: 0 // Not stable
+  },
+  {
+    provider: NFT_STORAGE_GATEWAY,
+    weight: 50
+  },
+  {
+    provider: CF_IPFS_GATEWAY,
+    weight: 4
+  },
+  {
+    provider: CLOUDFLARE_PINATA_SERVER,
+    weight: 10
+  },
+  {
+    provider: PINATA_IPFS_GATEWAY,
+    weight: 1 // Rate limit too low
+  },
+  {
+    provider: GATEWAY_IPFS_IO,
+    weight: 5
+  },
+  {
+    provider: DWEB_LINK,
+    weight: 5
+  },
+  {
+    provider: IPFS_GATEWAY_CLOUD,
+    weight: 5
+  },
+  {
+    provider: IPFS_FLEEK,
+    weight: 4
+  },
+  {
+    provider: IPFS_TELOS_MIAMI,
+    weight: 5
+  }
+];
+
+const RANDOM_IPFS_GATEWAY_TOTAL_WEIGHT = RANDOM_IPFS_GATEWAY_SETTING.reduce((value, item) => value + item.weight, 0);
+
+export function getRandomIpfsGateway () {
+  const weighedItems = [];
+  let currentItem = 0;
+
+  while (currentItem < RANDOM_IPFS_GATEWAY_SETTING.length) {
+    for (let i = 0; i < RANDOM_IPFS_GATEWAY_SETTING[currentItem].weight; i++) {
+      weighedItems[weighedItems.length] = RANDOM_IPFS_GATEWAY_SETTING[currentItem].provider;
+    }
+
+    currentItem++;
+  }
+
+  return weighedItems[Math.floor(Math.random() * RANDOM_IPFS_GATEWAY_TOTAL_WEIGHT)];
 }

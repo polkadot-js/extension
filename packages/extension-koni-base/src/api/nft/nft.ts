@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { ApiProps, NftCollection, NftItem } from '@subwallet/extension-base/background/KoniTypes';
-import { CLOUDFLARE_PINATA_SERVER } from '@subwallet/extension-koni-base/api/nft/config';
+import { getRandomIpfsGateway } from '@subwallet/extension-koni-base/api/nft/config';
 import { isUrl } from '@subwallet/extension-koni-base/utils/utils';
 import Web3 from 'web3';
 
@@ -97,10 +97,10 @@ export abstract class BaseNftApi {
     }
 
     if (!input.includes('ipfs://')) {
-      return CLOUDFLARE_PINATA_SERVER + input;
+      return getRandomIpfsGateway() + input;
     }
 
-    return CLOUDFLARE_PINATA_SERVER + input.split('ipfs://ipfs/')[1];
+    return getRandomIpfsGateway() + input.split('ipfs://ipfs/')[1];
   }
 
   // Sub-class implements this function to parse data into prop result

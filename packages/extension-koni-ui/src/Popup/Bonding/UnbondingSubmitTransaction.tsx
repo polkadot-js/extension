@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { DelegationItem } from '@subwallet/extension-base/background/KoniTypes';
-import { ActionContext, HorizontalLabelToggle } from '@subwallet/extension-koni-ui/components';
+import { ActionContext } from '@subwallet/extension-koni-ui/components';
 import Button from '@subwallet/extension-koni-ui/components/Button';
 import InputAddress from '@subwallet/extension-koni-ui/components/InputAddress';
 import InputBalance from '@subwallet/extension-koni-ui/components/InputBalance';
@@ -56,7 +56,7 @@ function UnbondingSubmitTransaction ({ className }: Props): React.ReactElement<P
   const [showAuth, setShowAuth] = useState(false);
   const [showResult, setShowResult] = useState(false);
   const [isClickNext, setIsClickNext] = useState(false);
-  const [unbondAll, setUnbondAll] = useState(false);
+  const [unbondAll] = useState(false);
   const [delegations, setDelegations] = useState<DelegationItem[] | undefined>(undefined);
 
   const [fee, setFee] = useState('');
@@ -253,21 +253,21 @@ function UnbondingSubmitTransaction ({ className }: Props): React.ReactElement<P
     }
   }, [delegations, unbondAll, networkJson.decimals, show]);
 
-  const toggleUnbondAll = useCallback((value: boolean) => {
-    setUnbondAll(value);
-
-    if (value) {
-      if (delegations) {
-        const _nominatedAmount = parseFloat(nominatedAmount) / (10 ** (networkJson.decimals as number));
-
-        setAmount(_nominatedAmount);
-      } else {
-        setAmount(bondedAmount);
-      }
-    } else {
-      setAmount(0);
-    }
-  }, [bondedAmount, networkJson.decimals, nominatedAmount, delegations]);
+  // const toggleUnbondAll = useCallback((value: boolean) => {
+  //   setUnbondAll(value);
+  //
+  //   if (value) {
+  //     if (delegations) {
+  //       const _nominatedAmount = parseFloat(nominatedAmount) / (10 ** (networkJson.decimals as number));
+  //
+  //       setAmount(_nominatedAmount);
+  //     } else {
+  //       setAmount(bondedAmount);
+  //     }
+  //   } else {
+  //     setAmount(0);
+  //   }
+  // }, [bondedAmount, networkJson.decimals, nominatedAmount, delegations]);
 
   const getDropdownTitle = useCallback(() => {
     if (CHAIN_TYPE_MAP.astar.includes(unbondingParams.selectedNetwork as string)) {
@@ -355,16 +355,16 @@ function UnbondingSubmitTransaction ({ className }: Props): React.ReactElement<P
                 </div>
               }
 
-              <div className={'unstake-all-container'}>
-                <div className={'unstake-all-text'}>Unstake all</div>
-                <HorizontalLabelToggle
-                  checkedLabel={''}
-                  className='info'
-                  toggleFunc={toggleUnbondAll}
-                  uncheckedLabel={''}
-                  value={unbondAll}
-                />
-              </div>
+              {/* <div className={'unstake-all-container'}> */}
+              {/*  <div className={'unstake-all-text'}>Unstake all</div> */}
+              {/*  <HorizontalLabelToggle */}
+              {/*    checkedLabel={''} */}
+              {/*    className='info' */}
+              {/*    toggleFunc={toggleUnbondAll} */}
+              {/*    uncheckedLabel={''} */}
+              {/*    value={unbondAll} */}
+              {/*  /> */}
+              {/* </div> */}
 
               <div className='bonding-submit__separator' />
 

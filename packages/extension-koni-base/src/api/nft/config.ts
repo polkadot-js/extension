@@ -145,7 +145,7 @@ const RANDOM_IPFS_GATEWAY_SETTING = [
 
 const RANDOM_IPFS_GATEWAY_TOTAL_WEIGHT = RANDOM_IPFS_GATEWAY_SETTING.reduce((value, item) => value + item.weight, 0);
 
-export function getRandomIpfsGateway () {
+export function getRandomIpfsGateway (): string {
   const weighedItems = [];
   let currentItem = 0;
 

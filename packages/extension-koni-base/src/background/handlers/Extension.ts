@@ -504,8 +504,8 @@ export default class KoniExtension extends Extension {
     return this.getPrice();
   }
 
-  private getBalance (): BalanceJson {
-    return state.getBalance();
+  private getBalance (reset?: boolean): BalanceJson {
+    return state.getBalance(reset);
   }
 
   private subscribeBalance (id: string, port: chrome.runtime.Port): BalanceJson {
@@ -522,11 +522,11 @@ export default class KoniExtension extends Extension {
       balanceSubscription.unsubscribe();
     });
 
-    return this.getBalance();
+    return this.getBalance(true);
   }
 
-  private getCrowdloan (): CrowdloanJson {
-    return state.getCrowdloan();
+  private getCrowdloan (reset?: boolean): CrowdloanJson {
+    return state.getCrowdloan(reset);
   }
 
   private subscribeCrowdloan (id: string, port: chrome.runtime.Port): CrowdloanJson {
@@ -543,7 +543,7 @@ export default class KoniExtension extends Extension {
       balanceSubscription.unsubscribe();
     });
 
-    return this.getCrowdloan();
+    return this.getCrowdloan(true);
   }
 
   private getChainRegistryMap (): Record<string, ChainRegistry> {
@@ -906,8 +906,8 @@ export default class KoniExtension extends Extension {
     return this.getStakingReward();
   }
 
-  private getStaking (): StakingJson {
-    return state.getStaking();
+  private getStaking (reset?: boolean): StakingJson {
+    return state.getStaking(reset);
   }
 
   private subscribeStaking (id: string, port: chrome.runtime.Port): StakingJson {
@@ -923,7 +923,7 @@ export default class KoniExtension extends Extension {
       stakingSubscription.unsubscribe();
     });
 
-    return this.getStaking();
+    return this.getStaking(true);
   }
 
   private subscribeHistory (id: string, port: chrome.runtime.Port): Record<string, TransactionHistoryItemType[]> {

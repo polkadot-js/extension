@@ -1019,7 +1019,7 @@ export default class KoniState extends State {
       this.lazyNext('setHistory', () => {
         // Save to storage
         this.saveHistoryToStorage(address);
-        this.publishHistory(this.getHistoryMap());
+        this.publishHistory();
       });
     }
   }
@@ -1428,7 +1428,7 @@ export default class KoniState extends State {
   }
 
   public getHistoryMap (): Record<string, TransactionHistoryItemType[]> {
-    return this.historyMap;
+    return this.removeInactiveNetworkData(this.historyMap);
   }
 
   public setTransactionHistory (address: string, networkKey: string, item: TransactionHistoryItemType, callback?: (items: TransactionHistoryItemType[]) => void): void {
@@ -1441,7 +1441,7 @@ export default class KoniState extends State {
         this.historyMap[networkKey] = items;
         // Save to storage
         this.saveHistoryToStorage(address);
-        this.publishHistory(this.getHistoryMap());
+        this.publishHistory();
         callback && callback(items);
       } else {
         this.transactionHistoryStore.asyncGet(address).then((data: Record<string, TransactionHistoryItemType[]>) => {
@@ -1953,7 +1953,7 @@ export default class KoniState extends State {
       this.historyMap = storedData;
     }
 
-    this.publishHistory(this.getHistoryMap());
+    this.publishHistory();
   }
 
   public async getStoredHistories (address: string) {
@@ -2092,10 +2092,8 @@ export default class KoniState extends State {
     this.stakingSubject.next(this.getStaking());
   }
 
-  private publishHistory (data: Record<string, TransactionHistoryItemType[]>) {
-    const activeData = this.removeInactiveNetworkData(data);
-
-    this.historySubject.next(activeData);
+  private publishHistory () {
+    this.historySubject.next(this.getHistoryMap());
   }
 
   private removeInactiveNetworkData<T> (data: Record<string, T>) {

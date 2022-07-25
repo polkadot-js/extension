@@ -553,7 +553,9 @@ export default class KoniState extends State {
   }
 
   public getStaking (): StakingJson {
-    return { ready: true, details: this.stakingMap } as StakingJson;
+    const activeData = this.removeInactiveNetworkData(this.stakingMap);
+
+    return { ready: true, details: activeData } as StakingJson;
   }
 
   public async getStoredStaking (address: string) {
@@ -628,7 +630,7 @@ export default class KoniState extends State {
 
       this.lazyNext('setStakingItem', () => {
         this.updateStakingStore();
-        this.publishStaking(this.stakingMap);
+        this.publishStaking();
       });
     }
   }
@@ -1227,12 +1229,14 @@ export default class KoniState extends State {
 
   public async resetStakingMap (newAddress: string) {
     const defaultData = generateDefaultStakingMap();
-    const storedData = await this.getStoredStaking(newAddress);
+    let storedData = await this.getStoredStaking(newAddress);
+
+    storedData = this.removeInactiveNetworkData(storedData);
 
     const merge = { ...defaultData, ...storedData } as Record<string, StakingItem>;
 
     this.stakingMap = merge;
-    this.publishStaking(merge);
+    this.publishStaking();
   }
 
   public setBalanceItem (networkKey: string, item: BalanceItem) {
@@ -2084,10 +2088,8 @@ export default class KoniState extends State {
     this.crowdloanSubject.next(this.getCrowdloan());
   }
 
-  private publishStaking (data: Record<string, StakingItem>) {
-    const activeData = this.removeInactiveNetworkData(data);
-
-    this.stakingSubject.next({ ready: false, details: activeData });
+  private publishStaking () {
+    this.stakingSubject.next(this.getStaking());
   }
 
   private publishHistory (data: Record<string, TransactionHistoryItemType[]>) {

@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { CustomEvmToken, NftCollection, NftItem } from '@subwallet/extension-base/background/KoniTypes';
-import { PINATA_IPFS_GATEWAY } from '@subwallet/extension-koni-base/api/nft/config';
+import { NFT_STORAGE_GATEWAY } from '@subwallet/extension-koni-base/api/nft/config';
 import { BaseNftApi, HandleNftParams } from '@subwallet/extension-koni-base/api/nft/nft';
 import { ERC721Contract } from '@subwallet/extension-koni-base/api/web3/web3';
 import { isUrl } from '@subwallet/extension-koni-base/utils/utils';
@@ -36,10 +36,10 @@ export class Web3NftApi extends BaseNftApi {
     }
 
     if (input.includes('ipfs://')) {
-      return PINATA_IPFS_GATEWAY + input.split('ipfs://')[1];
+      return NFT_STORAGE_GATEWAY + input.split('ipfs://')[1];
     }
 
-    return PINATA_IPFS_GATEWAY + input.split('ipfs://ipfs/')[1];
+    return NFT_STORAGE_GATEWAY + input.split('ipfs://ipfs/')[1];
   }
 
   private parseMetadata (data: Record<string, any>): NftItem {

@@ -1215,12 +1215,14 @@ export default class KoniState extends State {
 
   public async resetCrowdloanMap (newAddress: string) {
     const defaultData = generateDefaultCrowdloanMap();
-    const storedData = await this.getStoredCrowdloan(newAddress);
+    let storedData = await this.getStoredCrowdloan(newAddress);
+
+    storedData = this.removeInactiveNetworkData(storedData);
 
     const merge = { ...defaultData, ...storedData } as Record<string, CrowdloanItem>;
 
     this.crowdloanMap = merge;
-    this.publishCrowdloan(merge);
+    this.publishCrowdloan();
   }
 
   public async resetStakingMap (newAddress: string) {
@@ -1270,7 +1272,9 @@ export default class KoniState extends State {
   }
 
   public getCrowdloan (): CrowdloanJson {
-    return { details: this.crowdloanMap } as CrowdloanJson;
+    const activeData = this.removeInactiveNetworkData(this.crowdloanMap);
+
+    return { details: activeData } as CrowdloanJson;
   }
 
   public async getStoredCrowdloan (address: string) {
@@ -1293,7 +1297,7 @@ export default class KoniState extends State {
 
     this.lazyNext('setCrowdloanItem', () => {
       this.updateCrowdloanStore();
-      this.publishCrowdloan(this.crowdloanMap);
+      this.publishCrowdloan();
     });
   }
 
@@ -1301,12 +1305,16 @@ export default class KoniState extends State {
     const readyMap: Record<string, CrowdloanItem> = {};
 
     Object.entries(this.crowdloanMap).forEach(([key, item]) => {
-      if (item.state === APIItemState.READY) {
+      if (item.state === APIItemState.READY && item.contribute !== '0') {
         readyMap[key] = item;
       }
     });
     this.getCurrentAccount((currentAccountInfo) => {
-      this.crowdloanStore.set(currentAccountInfo.address, readyMap);
+      if (Object.keys(readyMap)) {
+        this.crowdloanStore.set(currentAccountInfo.address, readyMap);
+      } else {
+        this.crowdloanStore.remove(currentAccountInfo.address);
+      }
     });
   }
 
@@ -2072,10 +2080,8 @@ export default class KoniState extends State {
     this.balanceSubject.next({ details: activeData });
   }
 
-  private publishCrowdloan (data: Record<string, CrowdloanItem>) {
-    const activeData = this.removeInactiveNetworkData(data);
-
-    this.crowdloanSubject.next({ details: activeData });
+  private publishCrowdloan () {
+    this.crowdloanSubject.next(this.getCrowdloan());
   }
 
   private publishStaking (data: Record<string, StakingItem>) {

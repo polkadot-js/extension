@@ -6,10 +6,11 @@ import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { useMemo } from 'react';
 import { useSelector } from 'react-redux';
 
-import { useGetCurrentTabUrl } from './useGetCurrentTabUrl';
+import { useGetCurrentTab } from './useGetCurrentTab';
 
 export const useGetCurrentAuth = () => {
-  const currentUrl = useGetCurrentTabUrl();
+  const currentTab = useGetCurrentTab();
+  const currentUrl = currentTab?.url;
 
   const { authUrl } = useSelector((state: RootState) => state);
 

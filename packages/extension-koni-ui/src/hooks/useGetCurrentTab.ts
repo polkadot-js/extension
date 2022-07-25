@@ -3,16 +3,14 @@
 
 import { useEffect, useState } from 'react';
 
-export const useGetCurrentTabUrl = () => {
-  const [url, setUrl] = useState<string | undefined>(undefined);
+export const useGetCurrentTab = () => {
+  const [tab, setTab] = useState<chrome.tabs.Tab | undefined>(undefined);
 
   useEffect(() => {
     chrome.tabs.query({ active: true, lastFocusedWindow: true }, (tabs) => {
-      const url = tabs[0]?.url;
-
-      setUrl(url);
+      setTab(tabs[0]);
     });
   }, []);
 
-  return url;
+  return tab;
 };

@@ -59,6 +59,16 @@ export interface RequestAuthorizationPerAccount extends RequestAuthorization {
   address: string;
 }
 
+export interface RequestAuthorizationPerSite {
+  id: string;
+  values: Record<string, boolean>;
+}
+
+export interface RequestAuthorizationBlock {
+  id: string;
+  connectedValue: boolean;
+}
+
 export interface ResultResolver {
   result: boolean;
   accounts: string[];
@@ -1050,6 +1060,8 @@ export interface KoniRequestSignatures {
   'pri(authorize.changeSiteAll)': [RequestAuthorizationAll, boolean, AuthUrls];
   'pri(authorize.changeSite)': [RequestAuthorization, boolean, AuthUrls];
   'pri(authorize.changeSitePerAccount)': [RequestAuthorizationPerAccount, boolean, AuthUrls];
+  'pri(authorize.changeSitePerSite)': [RequestAuthorizationPerSite, boolean];
+  'pri(authorize.changeSiteBlock)': [RequestAuthorizationBlock, boolean];
   'pri(authorize.forgetSite)': [RequestForgetSite, boolean, AuthUrls];
   'pri(authorize.forgetAllSite)': [null, boolean, AuthUrls];
   'pri(authorize.rejectV2)': [RequestAuthorizeReject, boolean];

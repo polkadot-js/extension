@@ -988,17 +988,6 @@ export interface ConfirmationDefinitions {
   evmSendTransactionRequestQr: [ConfirmationsQueueItem<EvmSendTransactionRequestQr>, ConfirmationResultQr<boolean>]
 }
 
-export interface EVMTransactionArg {
-  name: string;
-  type: string;
-  value: string;
-}
-
-export interface ParseEVMTransactionData{
-  method: string;
-  args: EVMTransactionArg[];
-}
-
 export interface RequestParseTransactionEVM {
   data: string;
 }
@@ -1309,8 +1298,8 @@ export interface KoniRequestSignatures {
   'pri(freeBalance.subscribe)': [RequestFreeBalance, string, string];
 
   // Confirmation Queues
-  'pri(confirmations.subscribe)': [RequestConfirmationsSubscribe, ConfirmationsQueue, ConfirmationsQueue],
-  'pri(confirmations.complete)': [RequestConfirmationComplete, boolean]
+  'pri(confirmations.subscribe)': [RequestConfirmationsSubscribe, ConfirmationsQueue, ConfirmationsQueue];
+  'pri(confirmations.complete)': [RequestConfirmationComplete, boolean];
 
   'pub(utils.getRandom)': [RandomTestRequest, number];
   'pub(accounts.listV2)': [RequestAccountList, InjectedAccount[]];
@@ -1332,7 +1321,6 @@ export interface KoniRequestSignatures {
   // EVM Transaction
   'pri(evm.transaction.parse.input)': [RequestParseEVMTransactionInput, ResponseParseEVMTransactionInput];
 
-  
   // Create qr request
   'pri(accounts.transfer.qr.create)': [RequestTransferExternal, Array<TransferError>, ResponseTransferQr];
   'pri(accounts.cross.transfer.qr.create)': [RequestCrossChainTransferExternal, Array<TransferError>, ResponseTransferQr];

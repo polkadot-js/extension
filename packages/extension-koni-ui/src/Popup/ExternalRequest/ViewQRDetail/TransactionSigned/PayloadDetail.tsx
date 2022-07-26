@@ -217,7 +217,7 @@ const PayloadDetail = (props: Props) => {
 };
 
 export default React.memo(styled(PayloadDetail)(({ theme }: Props) => `
-  height: 240px;
+  height: 216px;
   overflow-y: auto;
   position: relative;
 

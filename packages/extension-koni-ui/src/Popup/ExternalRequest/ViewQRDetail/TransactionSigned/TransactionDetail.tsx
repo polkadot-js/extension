@@ -188,8 +188,9 @@ const TransactionDetail = (props: Props) => {
 };
 
 export default React.memo(styled(TransactionDetail)(({ theme }: Props) => `
-  max-height: 240px;
+  height: 216px;
   overflow-y: auto;
+  position: relative;
 
   .raw-method {
     &.hidden {

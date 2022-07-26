@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { EVMTransactionArg, NestedArray, NetworkJson, ParseEVMTransactionData, ResponseParseEVMTransactionInput, ResponseParseTransactionEVM } from '@subwallet/extension-base/background/KoniTypes';
-import { ERC20Contract, ERC721Contract } from '@subwallet/extension-koni-base/api/web3/web3';
+import { ERC20Contract, ERC721Contract, initWeb3Api } from '@subwallet/extension-koni-base/api/web3/web3';
 import { createTransactionFromRLP, Transaction as QrTransaction } from '@subwallet/extension-koni-base/utils/eth';
 import { InputDataDecoder } from '@subwallet/extension-koni-base/utils/eth/parseTransactionData';
 import axios from 'axios';
@@ -109,6 +109,19 @@ const parseResult = (type: string, input: NestedArray<any>, name: NestedArray<st
   }
 };
 
+const isContractAddress = async (address: string, network: NetworkJson): Promise<boolean> => {
+  const provider = network.providers[network.currentProvider];
+
+  if (!provider) {
+    return false;
+  } else {
+    const web3 = initWeb3Api(provider);
+    const code = await web3.eth.getCode(address);
+
+    return code !== '0x';
+  }
+};
+
 export const parseTransactionData = async (input: string, contractAddress: string, network: NetworkJson | null): Promise<ResponseParseEVMTransactionInput> => {
   let result: ParseEVMTransactionData | string = input;
 
@@ -209,16 +222,18 @@ export const parseEVMTransaction = async (data: string, networkMap: Record<strin
   const _ABIs: any[] = [...ABIs];
 
   if (tx.action && network) {
-    if (network?.abiExplorer) {
-      const res = await axios.get(network?.abiExplorer, {
-        params: {
-          address: tx.action
-        }
-      });
+    if (await isContractAddress(tx.action, network)) {
+      if (network?.abiExplorer) {
+        const res = await axios.get(network?.abiExplorer, {
+          params: {
+            address: tx.action
+          }
+        });
 
-      if (res.status === 200) {
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-        _ABIs.unshift(res.data.result);
+        if (res.status === 200) {
+          // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+          _ABIs.unshift(res.data.result);
+        }
       }
     }
   }

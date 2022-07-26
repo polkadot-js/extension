@@ -101,7 +101,7 @@ function WebsiteEntry ({ changeConnectSite, className = '', info, setList, url }
               className='website-entry__btn'
               onClick={onToggleAllow}
             >
-              {info.isAllowed ? t<string>('Disallow') : t<string>('Allow')}
+              {info.isAllowed ? t<string>('Block') : t<string>('Unblock')}
             </div>
             <div
               className='website-entry__btn'
@@ -109,20 +109,20 @@ function WebsiteEntry ({ changeConnectSite, className = '', info, setList, url }
             >
               {t<string>('Forget Site')}
             </div>
-            <div
+            {info.isAllowed && <div
               className='website-entry__btn'
               onClick={disconnectAll}
             >
               {t<string>('Disconnect All')}
-            </div>
-            <div
+            </div>}
+            {info.isAllowed && <div
               className='website-entry__btn'
               onClick={connectAll}
             >
               {t<string>('Connect All')}
-            </div>
+            </div>}
           </div>
-          {accountList.map((acc) =>
+          {info.isAllowed && accountList.map((acc) =>
             <WebsiteEntryAccount
               address={acc.address}
               isConnected={info.isAllowedMap[acc.address]}

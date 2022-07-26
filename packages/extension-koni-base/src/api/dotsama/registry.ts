@@ -95,9 +95,9 @@ export const getRegistry = async (networkKey: string, api: ApiPromise, customErc
 
   await api.isReady;
 
-  const { chainDecimals, chainTokens } = api.registry;
+  const { chainDecimals, chainTokens: _chainTokens } = api.registry;
 
-  console.log('chainTokens', chainTokens);
+  let chainTokens = _chainTokens;
 
   // Hotfix for these network because substrate and evm response different decimal
   if (['pangolinEvm', 'crabEvm'].includes(networkKey)) {
@@ -108,6 +108,19 @@ export const getRegistry = async (networkKey: string, api: ApiPromise, customErc
 
   // Build token map
   const tokenMap = {} as Record<string, TokenInfo>;
+
+  // hot fix for kUSD on karura
+  if (networkKey === 'karura' && chainTokens.includes('KUSD')) {
+    const filteredChainTokens: string[] = [];
+
+    chainTokens.forEach((token) => {
+      if (token !== 'KUSD') {
+        filteredChainTokens.push(token);
+      }
+    });
+
+    chainTokens = filteredChainTokens;
+  }
 
   if (!['genshiro_testnet', 'genshiro', 'equilibrium_parachain'].includes(networkKey)) {
     chainTokens.forEach((token, index) => {
@@ -160,8 +173,6 @@ export const getRegistry = async (networkKey: string, api: ApiPromise, customErc
   } as ChainRegistry;
 
   cacheRegistryMap[networkKey] = chainRegistry;
-
-  console.log('chainRegistry', chainRegistry);
 
   return chainRegistry;
 };

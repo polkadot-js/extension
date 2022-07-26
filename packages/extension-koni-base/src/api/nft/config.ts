@@ -139,7 +139,7 @@ const RANDOM_IPFS_GATEWAY_SETTING = [
   },
   {
     provider: IPFS_TELOS_MIAMI,
-    weight: 5
+    weight: 0
   }
 ];
 

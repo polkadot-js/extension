@@ -16,7 +16,7 @@ import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { isAccountAll } from '@subwallet/extension-koni-ui/util';
 import { noop } from '@subwallet/extension-koni-ui/util/function';
 import CN from 'classnames';
-import React, { useCallback, useContext, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
 import { useSelector } from 'react-redux';
 import styled from 'styled-components';
 
@@ -48,6 +48,7 @@ const AccountVisibleModal = (props: Props) => {
   const [title, setTitle] = useState('');
   const [icon, setIcon] = useState(DefaultWebIcon);
   const [requestId, setRequestId] = useState('');
+  const listRef: React.RefObject<HTMLDivElement> | null = useRef(null);
 
   const wrapperClassName = useMemo(() => {
     if (isNotConnected || !authInfo) {
@@ -140,7 +141,10 @@ const AccountVisibleModal = (props: Props) => {
           <div className='text-content text-left'>
             You have {oldConnected} accounts connected to this site
           </div>
-          <div className='accounts-container'>
+          <div
+            className='accounts-container'
+            ref={listRef}
+          >
             {
               list.map(({ address, value }) => {
                 const account = accounts.find((acc) => acc.address === address);
@@ -288,6 +292,26 @@ const AccountVisibleModal = (props: Props) => {
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [visible]);
+
+  useEffect(() => {
+    if (listRef.current) {
+      let interval: NodeJS.Timer | null = null;
+
+      listRef.current.addEventListener('scroll', () => {
+        if (!listRef.current?.classList.contains('on-scrollbar')) {
+          listRef.current?.classList.add('on-scrollbar');
+          interval = setInterval(() => {
+            if (interval) {
+              clearInterval(interval);
+            }
+
+            listRef.current?.classList.remove('on-scrollbar');
+          }, 1000);
+        }
+      });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [listRef.current]);
 
   if (!currentTab || !visible) {
     return null;
@@ -445,17 +469,19 @@ export default React.memo(styled(AccountVisibleModal)(({ theme }: Props) => `
           position: relative;
           scrollbar-width: thin; /* Firefox */
           -ms-overflow-style: none; /* IE 10+ */
+          -webkit-background-clip: text;
+          transition: background-color 0.5s ease-in-out;
+
+          &.on-scrollbar{
+            background-color: ${theme.scrollBarThumb};
+          }
 
           &.::-webkit-scrollbar {
             width: 6px !important;
           }
 
           &::-webkit-scrollbar-thumb {
-            background-color: transparent;
-          }
-
-          &.on-scrollbar::-webkit-scrollbar-thumb {
-            background-color: ${theme.scrollBarThumb};
+            background-color: inherit;
           }
 
           .account-item-container {

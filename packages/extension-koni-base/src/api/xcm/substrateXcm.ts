@@ -26,63 +26,69 @@ export async function substrateEstimateCrossChainFee (
   const originNetworkJson = networkMap[originNetworkKey];
   const destinationNetworkJson = networkMap[destinationNetworkKey];
 
-  if (SupportedCrossChainsMap[originNetworkKey].type === 'p') {
-    // Case ParaChain -> ParaChain && ParaChain -> RelayChain
-    const paymentInfo = await api.tx.xTokens.transfer(
-      {
-        Token: tokenInfo.symbol.toUpperCase()
-      },
-      value,
-      getMultiLocationFromParachain(originNetworkKey, destinationNetworkKey, networkMap, to),
-      FOUR_INSTRUCTIONS_WEIGHT
-    ).paymentInfo(fromKeypair);
+  try {
+    if (SupportedCrossChainsMap[originNetworkKey].type === 'p') {
+      // Case ParaChain -> ParaChain && ParaChain -> RelayChain
+      const paymentInfo = await api.tx.xTokens.transfer(
+        {
+          Token: tokenInfo.symbol.toUpperCase()
+        },
+        value,
+        getMultiLocationFromParachain(originNetworkKey, destinationNetworkKey, networkMap, to),
+        FOUR_INSTRUCTIONS_WEIGHT
+      ).paymentInfo(fromKeypair);
 
-    fee = paymentInfo.partialFee.toString();
-    feeString = parseNumberToDisplay(paymentInfo.partialFee, originNetworkJson.decimals) + ` ${originNetworkJson.nativeToken ? originNetworkJson.nativeToken : ''}`;
-  } else {
-    // Case RelayChain -> ParaChain
-    // TODO: add teleport assets for chain using the same native token as relaychain (statemint, statemine)
-    let receiverLocation: Record<string, any> = { AccountId32: { network: 'Any', id: decodeAddress(to) } };
+      fee = paymentInfo.partialFee.toString();
+      feeString = parseNumberToDisplay(paymentInfo.partialFee, originNetworkJson.decimals) + ` ${originNetworkJson.nativeToken ? originNetworkJson.nativeToken : ''}`;
+    } else {
+      // Case RelayChain -> ParaChain
+      // TODO: add teleport assets for chain using the same native token as relaychain (statemint, statemine)
+      let receiverLocation: Record<string, any> = { AccountId32: { network: 'Any', id: decodeAddress(to) } };
 
-    if (SupportedCrossChainsMap[originNetworkKey].relationMap[destinationNetworkKey].isEthereum) {
-      receiverLocation = { AccountKey20: { network: 'Any', key: to } };
+      if (SupportedCrossChainsMap[originNetworkKey].relationMap[destinationNetworkKey].isEthereum) {
+        receiverLocation = { AccountKey20: { network: 'Any', key: to } };
+      }
+
+      const paymentInfo = await api.tx.xcmPallet.reserveTransferAssets(
+        {
+          V1: { // find the destination chain
+            parents: 0,
+            interior: {
+              X1: { Parachain: destinationNetworkJson.paraId as number }
+            }
+          }
+        },
+        {
+          V1: { // find the receiver
+            parents: 0,
+            interior: {
+              X1: receiverLocation
+            }
+          }
+        },
+        {
+          V1: [ // find the asset
+            {
+              id: {
+                Concrete: { parents: 0, interior: 'Here' }
+              },
+              fun: { Fungible: value }
+            }
+          ]
+        },
+        0
+      ).paymentInfo(fromKeypair);
+
+      fee = paymentInfo.partialFee.toString();
+      feeString = parseNumberToDisplay(paymentInfo.partialFee, originNetworkJson.decimals) + ` ${originNetworkJson.nativeToken ? originNetworkJson.nativeToken : ''}`;
     }
 
-    const paymentInfo = await api.tx.xcmPallet.reserveTransferAssets(
-      {
-        V1: { // find the destination chain
-          parents: 0,
-          interior: {
-            X1: { Parachain: destinationNetworkJson.paraId as number }
-          }
-        }
-      },
-      {
-        V1: { // find the receiver
-          parents: 0,
-          interior: {
-            X1: receiverLocation
-          }
-        }
-      },
-      {
-        V1: [ // find the asset
-          {
-            id: {
-              Concrete: { parents: 0, interior: 'Here' }
-            },
-            fun: { Fungible: value }
-          }
-        ]
-      },
-      0
-    ).paymentInfo(fromKeypair);
+    return [fee, feeString];
+  } catch (e) {
+    console.error('error parsing xcm transaction', e);
 
-    fee = paymentInfo.partialFee.toString();
-    feeString = parseNumberToDisplay(paymentInfo.partialFee, originNetworkJson.decimals) + ` ${originNetworkJson.nativeToken ? originNetworkJson.nativeToken : ''}`;
+    return [fee, feeString];
   }
-
-  return [fee, feeString];
 }
 
 export function substrateGetXcmExtrinsic (

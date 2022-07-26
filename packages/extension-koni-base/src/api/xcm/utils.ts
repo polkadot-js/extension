@@ -91,6 +91,33 @@ export const SupportedCrossChainsMap: Record<string, CrossChainRelation> = {
       }
     }
   },
+  polkadot: {
+    type: 'r',
+    isEthereum: false,
+    relationMap: {
+      astar: {
+        type: 'p',
+        isEthereum: false,
+        supportedToken: ['DOT']
+      },
+      moonbeam: {
+        type: 'p',
+        isEthereum: true,
+        supportedToken: ['DOT']
+      }
+    }
+  },
+  kusama: {
+    type: 'r',
+    isEthereum: false,
+    relationMap: {
+      moonriver: {
+        type: 'p',
+        isEthereum: true,
+        supportedToken: ['KSM']
+      }
+    }
+  },
   // astar: {
   //   type: 'p',
   //   isEthereum: false,
@@ -99,33 +126,6 @@ export const SupportedCrossChainsMap: Record<string, CrossChainRelation> = {
   //       type: 'r',
   //       isEthereum: false,
   //       supportedToken: ['DOT']
-  //     }
-  //   }
-  // },
-  // polkadot: {
-  //   type: 'r',
-  //   isEthereum: false,
-  //   relationMap: {
-  //     astar: {
-  //       type: 'p',
-  //       isEthereum: false,
-  //       supportedToken: ['DOT']
-  //     },
-  //     moonbeam: {
-  //       type: 'p',
-  //       isEthereum: false,
-  //       supportedToken: ['DOT']
-  //     }
-  //   }
-  // },
-  // kusama: {
-  //   type: 'r',
-  //   isEthereum: false,
-  //   relationMap: {
-  //     moonriver: {
-  //       type: 'p',
-  //       isEthereum: true,
-  //       supportedToken: ['KSM']
   //     }
   //   }
   // },
@@ -173,6 +173,17 @@ export const SupportedCrossChainsMap: Record<string, CrossChainRelation> = {
         type: 'r',
         isEthereum: false,
         supportedToken: ['xcBNC']
+      }
+    }
+  },
+  rococo: {
+    isEthereum: false,
+    type: 'r',
+    relationMap: {
+      contractsRococo: {
+        type: 'p',
+        isEthereum: false,
+        supportedToken: ['ROC']
       }
     }
   },

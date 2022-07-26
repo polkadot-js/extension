@@ -1580,6 +1580,22 @@ export const PREDEFINED_NETWORKS: Record<string, NetworkJson> = {
     groups: ['TEST_NET'],
     nativeToken: 'Unit',
     decimals: 12
+  },
+  contractsRococo: {
+    key: 'contractsRococo',
+    chain: 'Contracts on Rococo',
+    genesisHash: '0xc5442742bb6288bb3835ea1c9032981f06433ee5fc65d6e216c4422c0c19b989',
+    ss58Format: 42,
+    providers: {
+      testnet: 'wss://rococo-contracts-rpc.polkadot.io'
+    },
+    active: false,
+    currentProviderMode: 'ws',
+    currentProvider: 'testnet',
+    groups: ['TEST_NET'],
+    nativeToken: 'ROC',
+    decimals: 12,
+    paraId: 1002
   }
 };
 

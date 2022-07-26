@@ -104,6 +104,11 @@ export const SupportedCrossChainsMap: Record<string, CrossChainRelation> = {
         type: 'p',
         isEthereum: true,
         supportedToken: ['DOT']
+      },
+      acala: {
+        type: 'p',
+        isEthereum: false,
+        supportedToken: ['DOT']
       }
     }
   },
@@ -114,6 +119,16 @@ export const SupportedCrossChainsMap: Record<string, CrossChainRelation> = {
       moonriver: {
         type: 'p',
         isEthereum: true,
+        supportedToken: ['KSM']
+      },
+      shiden: {
+        type: 'p',
+        isEthereum: false,
+        supportedToken: ['KSM']
+      },
+      karura: {
+        type: 'p',
+        isEthereum: false,
         supportedToken: ['KSM']
       }
     }

@@ -10,10 +10,11 @@ import Modal from '@subwallet/extension-koni-ui/components/Modal/index';
 import { useGetCurrentTab } from '@subwallet/extension-koni-ui/hooks/useGetCurrentTab';
 import useToast from '@subwallet/extension-koni-ui/hooks/useToast';
 import useTranslation from '@subwallet/extension-koni-ui/hooks/useTranslation';
-import { changeAuthorizationBlock, changeAuthorizationPerSite } from '@subwallet/extension-koni-ui/messaging';
+import { changeAuthorizationBlock, changeAuthorizationPerSite, saveCurrentAccountAddress } from '@subwallet/extension-koni-ui/messaging';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { isAccountAll } from '@subwallet/extension-koni-ui/util';
+import { noop } from '@subwallet/extension-koni-ui/util/function';
 import CN from 'classnames';
 import React, { useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { useSelector } from 'react-redux';
@@ -72,13 +73,20 @@ const AccountVisibleModal = (props: Props) => {
       setIsSubmit(true);
       changeAuthorizationPerSite({ values: allowedMap, id: authInfo.id })
         .then(() => {
+          if (currentAccount.account?.address) {
+            saveCurrentAccountAddress({ address: currentAccount.account.address }, noop)
+              .catch((e) => {
+                console.error('There is a problem when trigger saveCurrentAccountAddress', e);
+              });
+          }
+
           show(t('Data has been updated'));
           onClose();
           setIsSubmit(false);
         })
         .catch(console.error);
     }
-  }, [allowedMap, authInfo?.id, isSubmit, onClose, show, t]);
+  }, [allowedMap, authInfo?.id, currentAccount.account?.address, isSubmit, onClose, show, t]);
 
   const handlerUnblock = useCallback(() => {
     if (!isSubmit && authInfo?.id) {

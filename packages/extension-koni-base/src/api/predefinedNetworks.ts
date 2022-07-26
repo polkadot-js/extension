@@ -325,7 +325,7 @@ export const PREDEFINED_NETWORKS: Record<string, NetworkJson> = {
     nativeToken: 'TOKEN',
     crowdloanUrl: 'https://equilibrium.io/en/crowdloan#bid',
     decimals: 10,
-    coinGeckoKey: 'equilibrium'
+    coinGeckoKey: 'equilibrium-token'
   },
   nodle: {
     key: 'nodle',

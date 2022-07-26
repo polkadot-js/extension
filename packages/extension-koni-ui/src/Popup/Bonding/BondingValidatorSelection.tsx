@@ -29,6 +29,7 @@ function BondingValidatorSelection ({ className }: Props): React.ReactElement<Pr
   const { t } = useTranslation();
   const { bondingParams, currentAccount: { account } } = useSelector((state: RootState) => state);
   const navigate = useContext(ActionContext);
+  const [currentAccount] = useState(account?.address as string);
   const [searchString, setSearchString] = useState('');
   const [loading, setLoading] = useState(true);
   const [maxNominatorPerValidator, setMaxNominatorPerValidator] = useState(0);
@@ -49,8 +50,14 @@ function BondingValidatorSelection ({ className }: Props): React.ReactElement<Pr
   const _height = window.innerHeight !== 600 ? (window.innerHeight * 0.68) : 330;
 
   useEffect(() => {
+    if (account && account.address !== currentAccount) {
+      navigate('/');
+    }
+  }, [account, navigate, currentAccount]);
+
+  useEffect(() => {
     if (!isNetworkActive) {
-      navigate('/account/select-bonding-network');
+      navigate('/');
     }
   }, [isNetworkActive, navigate]);
 
@@ -126,7 +133,7 @@ function BondingValidatorSelection ({ className }: Props): React.ReactElement<Pr
     if (bondingParams.selectedNetwork === null) {
       navigate('/account/select-bonding-network');
     } else {
-      getBondingOptions(bondingParams.selectedNetwork, account?.address as string)
+      getBondingOptions(bondingParams.selectedNetwork, currentAccount)
         .then((bondingOptionInfo) => {
           setMaxNominatorPerValidator(bondingOptionInfo.maxNominatorPerValidator);
           setIsBondedBefore(bondingOptionInfo.isBondedBefore);

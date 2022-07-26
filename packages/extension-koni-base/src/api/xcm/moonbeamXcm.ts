@@ -73,13 +73,6 @@ export async function moonbeamEstimateCrossChainFee (
     FOUR_INSTRUCTIONS_WEIGHT
   ).paymentInfo(fromKeypair.address);
 
-  console.log(apiProps.api.tx.xTokens.transfer(
-    { [tokenType]: new BN(tokenInfo.assetId as string) },
-    +value,
-    getMultiLocationFromParachain(originNetworkKey, destinationNetworkKey, networkMap, to),
-    FOUR_INSTRUCTIONS_WEIGHT
-  ).toHex());
-
   const fee = paymentInfo.partialFee.toString();
   const feeString = parseNumberToDisplay(paymentInfo.partialFee, networkJson.decimals) + ` ${networkJson.nativeToken ? networkJson.nativeToken : ''}`;
 

@@ -30,7 +30,7 @@ export async function substrateEstimateCrossChainFee (
     // Case ParaChain -> ParaChain && ParaChain -> RelayChain
     const paymentInfo = await api.tx.xTokens.transfer(
       {
-        Token: tokenInfo.symbol
+        Token: tokenInfo.symbol.toUpperCase()
       },
       value,
       getMultiLocationFromParachain(originNetworkKey, destinationNetworkKey, networkMap, to),
@@ -98,7 +98,7 @@ export function substrateGetXcmExtrinsic (
   if (SupportedCrossChainsMap[originNetworkKey].type === 'p') {
     return api.tx.xTokens.transfer(
       {
-        Token: tokenInfo.symbol
+        Token: tokenInfo.symbol.toUpperCase()
       },
       +value,
       getMultiLocationFromParachain(originNetworkKey, destinationNetworkKey, networkMap, to),

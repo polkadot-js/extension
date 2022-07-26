@@ -17,17 +17,17 @@ export const SupportedCrossChainsMap: Record<string, CrossChainRelation> = {
       }
     }
   },
-  // karura: {
-  //   type: 'p',
-  //   isEthereum: false,
-  //   relationMap: {
-  //     moonriver: {
-  //       type: 'p',
-  //       isEthereum: true,
-  //       supportedToken: ['KAR', 'AUSD']
-  //     }
-  //   }
-  // },
+  karura: {
+    type: 'p',
+    isEthereum: false,
+    relationMap: {
+      moonriver: {
+        type: 'p',
+        isEthereum: true,
+        supportedToken: ['KAR', 'aUSD']
+      }
+    }
+  },
   moonbeam: {
     type: 'p',
     isEthereum: true,
@@ -197,18 +197,18 @@ export const SupportedCrossChainsMap: Record<string, CrossChainRelation> = {
         supportedToken: ['ACA', 'AUSD']
       }
     }
-  },
-  karura_testnet: {
-    type: 'p',
-    isEthereum: false,
-    relationMap: {
-      moonbase: {
-        type: 'p',
-        isEthereum: true,
-        supportedToken: ['KAR']
-      }
-    }
   }
+  // karura_testnet: {
+  //   type: 'p',
+  //   isEthereum: false,
+  //   relationMap: {
+  //     moonbase: {
+  //       type: 'p',
+  //       isEthereum: true,
+  //       supportedToken: ['KAR']
+  //     }
+  //   }
+  // }
   // interlay: {
   //   type: 'p',
   //   relationMap: {

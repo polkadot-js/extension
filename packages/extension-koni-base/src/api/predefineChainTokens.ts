@@ -100,12 +100,13 @@ export const PREDEFINE_TOKEN_DATA_MAP: Record<string, Record<string, TokenInfo>>
     }
   },
   karura: {
-    AUSD: {
+    aUSD: {
       isMainToken: false,
       symbol: 'AUSD',
       symbolAlt: 'aUSD',
       name: 'aUSD',
-      decimals: 12
+      decimals: 12,
+      specialOption: { Token: 'KUSD' }
     },
     LKSM: {
       isMainToken: false,

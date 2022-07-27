@@ -1629,6 +1629,22 @@ export const PREDEFINED_NETWORKS: Record<string, NetworkJson> = {
     paraId: 2118,
     nativeToken: 'LT',
     decimals: 12
+  },
+  kabocha: {
+    key: 'kabocha',
+    chain: 'Kabocha',
+    genesisHash: '0xfeb426ca713f0f46c96465b8f039890370cf6bfd687c9076ea2843f58a6ae8a7',
+    ss58Format: 27,
+    providers: {
+      JelliedOwl: 'wss://kabocha.jelliedowl.com'
+    },
+    active: false,
+    currentProviderMode: 'ws',
+    currentProvider: 'JelliedOwl',
+    groups: ['KUSAMA_PARACHAIN'],
+    paraId: 2113,
+    nativeToken: 'KAB',
+    decimals: 12
   }
 };
 

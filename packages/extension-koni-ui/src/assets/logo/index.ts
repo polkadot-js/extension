@@ -343,6 +343,8 @@ const LogosMap: Record<string, string> = {
   // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
   listen: require('./listen.png'),
   // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+  kabocha: require('./kabocha.png'),
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
   default: require('./default.svg')
 };
 

@@ -64,199 +64,192 @@ export const PREDEFINE_TOKEN_DATA_MAP: Record<string, Record<string, TokenInfo>>
       decimals: 0
     }
   },
-  acala: {
-    AUSD: {
-      isMainToken: false,
-      symbol: 'AUSD',
-      symbolAlt: 'aUSD',
-      name: 'aUSD',
-      decimals: 12
-    },
-    DOT: {
-      isMainToken: false,
-      symbol: 'DOT',
-      name: 'DOT',
-      decimals: 10
-    },
-    LDOT: {
-      isMainToken: false,
-      symbol: 'LDOT',
-      name: 'LDOT',
-      decimals: 10
-    },
-    LCDOT: {
-      isMainToken: false,
-      symbol: 'LCDOT',
-      name: 'LCDOT',
-      decimals: 10,
-      specialOption: { LiquidCrowdloan: 13 }
-    },
-    tDOT: {
-      isMainToken: false,
-      symbol: 'tDOT',
-      name: 'Tapio DOT',
-      decimals: 10,
-      specialOption: { StableAssetPoolToken: 0 }
-    }
-  },
-  karura: {
-    aUSD: {
-      isMainToken: false,
-      symbol: 'AUSD',
-      symbolAlt: 'aUSD',
-      name: 'aUSD',
-      decimals: 12,
-      specialOption: { Token: 'KUSD' }
-    },
-    LKSM: {
-      isMainToken: false,
-      symbol: 'LKSM',
-      name: 'LKSM',
-      decimals: 12
-    },
-    KMA: {
-      isMainToken: false,
-      symbol: 'KMA',
-      name: 'KMA',
-      decimals: 12
-    },
-    taiKSM: {
-      isMainToken: false,
-      symbol: 'taiKSM',
-      name: 'Taiga KSM',
-      decimals: 12,
-      specialOption: { StableAssetPoolToken: 0 }
-    },
-    '3USD': {
-      isMainToken: false,
-      symbol: '3USD',
-      name: 'Taiga 3USD',
-      decimals: 12,
-      specialOption: { StableAssetPoolToken: 1 }
-    },
-    TEER: {
-      isMainToken: false,
-      symbol: 'TEER',
-      name: 'TEER',
-      decimals: 12
-    },
-    BNC: {
-      isMainToken: false,
-      symbol: 'BNC',
-      name: 'BNC',
-      decimals: 12
-    },
-    TAI: {
-      isMainToken: false,
-      symbol: 'TAI',
-      name: 'TAI',
-      decimals: 12
-    },
-    HKO: {
-      isMainToken: false,
-      symbol: 'HKO',
-      name: 'HKO',
-      decimals: 12
-    },
-    KICO: {
-      isMainToken: false,
-      symbol: 'KICO',
-      name: 'KICO',
-      decimals: 14
-    },
-    QTZ: {
-      isMainToken: false,
-      symbol: 'QTZ',
-      name: 'Quartz',
-      decimals: 18
-    },
-    NEER: {
-      isMainToken: false,
-      symbol: 'NEER',
-      name: 'NEER',
-      decimals: 18
-    },
-    PHA: {
-      isMainToken: false,
-      symbol: 'PHA',
-      name: 'PHA',
-      decimals: 12
-    },
-    PolarisDAO: {
-      isMainToken: false,
-      symbol: 'ARIS',
-      name: 'PolarisDAO',
-      decimals: 8,
-      specialOption: { ForeignAsset: 1 }
-    },
-    KINT: {
-      isMainToken: false,
-      symbol: 'KINT',
-      name: 'KINT',
-      decimals: 12
-    },
-    RMRK: {
-      isMainToken: false,
-      symbol: 'RMRK',
-      name: 'RMRK',
-      decimals: 10
-    },
-    CSM: {
-      isMainToken: false,
-      symbol: 'CSM',
-      name: 'CSM',
-      decimals: 12
-    },
-    VSKSM: {
-      isMainToken: false,
-      symbol: 'VSKSM',
-      name: 'VSKSM',
-      decimals: 12
-    },
-    USDC: {
-      isMainToken: false,
-      symbol: 'USDC',
-      name: 'USDC',
-      decimals: 6,
-      specialOption: { Erc20: '0x1f3a10587a20114ea25ba1b388ee2dd4a337ce27' }
-    },
-    KSM: {
-      isMainToken: false,
-      symbol: 'KSM',
-      name: 'KSM',
-      decimals: 12
-    },
-    BSX: {
-      isMainToken: false,
-      symbol: 'BSX',
-      name: 'BSX',
-      decimals: 12
-    },
-    KBTC: {
-      isMainToken: false,
-      symbol: 'KBTC',
-      name: 'KBTC',
-      decimals: 8
-    },
-    AIR: {
-      isMainToken: false,
-      symbol: 'AIR',
-      name: 'AIR',
-      decimals: 18
-    },
-    USDT: {
-      isMainToken: false,
-      symbol: 'USDT',
-      name: 'USDT',
-      decimals: 6
-    },
-    MOVR: {
-      isMainToken: false,
-      symbol: 'MOVR',
-      name: 'MOVR',
-      decimals: 18
-    }
-  },
+  // acala: {
+  //   DOT: {
+  //     isMainToken: false,
+  //     symbol: 'DOT',
+  //     name: 'DOT',
+  //     decimals: 10
+  //   },
+  //   LDOT: {
+  //     isMainToken: false,
+  //     symbol: 'LDOT',
+  //     name: 'LDOT',
+  //     decimals: 10
+  //   },
+  //   LCDOT: {
+  //     isMainToken: false,
+  //     symbol: 'LCDOT',
+  //     name: 'LCDOT',
+  //     decimals: 10,
+  //     specialOption: { LiquidCrowdloan: 13 }
+  //   },
+  //   tDOT: {
+  //     isMainToken: false,
+  //     symbol: 'tDOT',
+  //     name: 'Tapio DOT',
+  //     decimals: 10,
+  //     specialOption: { StableAssetPoolToken: 0 }
+  //   }
+  // },
+  // karura: {
+  //   aUSD: {
+  //     isMainToken: false,
+  //     symbol: 'AUSD',
+  //     symbolAlt: 'aUSD',
+  //     name: 'aUSD',
+  //     decimals: 12,
+  //     specialOption: { Token: 'KUSD' }
+  //   },
+  //   LKSM: {
+  //     isMainToken: false,
+  //     symbol: 'LKSM',
+  //     name: 'LKSM',
+  //     decimals: 12
+  //   },
+  //   KMA: {
+  //     isMainToken: false,
+  //     symbol: 'KMA',
+  //     name: 'KMA',
+  //     decimals: 12
+  //   },
+  //   taiKSM: {
+  //     isMainToken: false,
+  //     symbol: 'taiKSM',
+  //     name: 'Taiga KSM',
+  //     decimals: 12,
+  //     specialOption: { StableAssetPoolToken: 0 }
+  //   },
+  //   '3USD': {
+  //     isMainToken: false,
+  //     symbol: '3USD',
+  //     name: 'Taiga 3USD',
+  //     decimals: 12,
+  //     specialOption: { StableAssetPoolToken: 1 }
+  //   },
+  //   TEER: {
+  //     isMainToken: false,
+  //     symbol: 'TEER',
+  //     name: 'TEER',
+  //     decimals: 12
+  //   },
+  //   BNC: {
+  //     isMainToken: false,
+  //     symbol: 'BNC',
+  //     name: 'BNC',
+  //     decimals: 12
+  //   },
+  //   TAI: {
+  //     isMainToken: false,
+  //     symbol: 'TAI',
+  //     name: 'TAI',
+  //     decimals: 12
+  //   },
+  //   HKO: {
+  //     isMainToken: false,
+  //     symbol: 'HKO',
+  //     name: 'HKO',
+  //     decimals: 12
+  //   },
+  //   KICO: {
+  //     isMainToken: false,
+  //     symbol: 'KICO',
+  //     name: 'KICO',
+  //     decimals: 14
+  //   },
+  //   QTZ: {
+  //     isMainToken: false,
+  //     symbol: 'QTZ',
+  //     name: 'Quartz',
+  //     decimals: 18
+  //   },
+  //   NEER: {
+  //     isMainToken: false,
+  //     symbol: 'NEER',
+  //     name: 'NEER',
+  //     decimals: 18
+  //   },
+  //   PHA: {
+  //     isMainToken: false,
+  //     symbol: 'PHA',
+  //     name: 'PHA',
+  //     decimals: 12
+  //   },
+  //   PolarisDAO: {
+  //     isMainToken: false,
+  //     symbol: 'ARIS',
+  //     name: 'PolarisDAO',
+  //     decimals: 8,
+  //     specialOption: { ForeignAsset: 1 }
+  //   },
+  //   KINT: {
+  //     isMainToken: false,
+  //     symbol: 'KINT',
+  //     name: 'KINT',
+  //     decimals: 12
+  //   },
+  //   RMRK: {
+  //     isMainToken: false,
+  //     symbol: 'RMRK',
+  //     name: 'RMRK',
+  //     decimals: 10
+  //   },
+  //   CSM: {
+  //     isMainToken: false,
+  //     symbol: 'CSM',
+  //     name: 'CSM',
+  //     decimals: 12
+  //   },
+  //   VSKSM: {
+  //     isMainToken: false,
+  //     symbol: 'VSKSM',
+  //     name: 'VSKSM',
+  //     decimals: 12
+  //   },
+  //   USDC: {
+  //     isMainToken: false,
+  //     symbol: 'USDC',
+  //     name: 'USDC',
+  //     decimals: 6,
+  //     specialOption: { Erc20: '0x1f3a10587a20114ea25ba1b388ee2dd4a337ce27' }
+  //   },
+  //   KSM: {
+  //     isMainToken: false,
+  //     symbol: 'KSM',
+  //     name: 'KSM',
+  //     decimals: 12
+  //   },
+  //   BSX: {
+  //     isMainToken: false,
+  //     symbol: 'BSX',
+  //     name: 'BSX',
+  //     decimals: 12
+  //   },
+  //   KBTC: {
+  //     isMainToken: false,
+  //     symbol: 'KBTC',
+  //     name: 'KBTC',
+  //     decimals: 8
+  //   },
+  //   AIR: {
+  //     isMainToken: false,
+  //     symbol: 'AIR',
+  //     name: 'AIR',
+  //     decimals: 18
+  //   },
+  //   USDT: {
+  //     isMainToken: false,
+  //     symbol: 'USDT',
+  //     name: 'USDT',
+  //     decimals: 6
+  //   },
+  //   MOVR: {
+  //     isMainToken: false,
+  //     symbol: 'MOVR',
+  //     name: 'MOVR',
+  //     decimals: 18
+  //   }
+  // },
   bifrost: {
     KUSD: {
       isMainToken: false,

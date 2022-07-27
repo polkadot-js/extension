@@ -52,10 +52,37 @@ export async function getForeignToken (api: ApiPromise) {
         ForeignAsset: assetMetadata.ForeignAssetId as string
       };
     } else if (assetMetadata.NativeAssetId) {
-      specialOption = {
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+      if (assetMetadata.NativeAssetId.Token) {
+        specialOption = {
+          // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+          Token: assetMetadata.NativeAssetId.Token as string
+        };
         // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-        Token: assetMetadata.NativeAssetId.Token as string
-      };
+      } else if (assetMetadata.NativeAssetId.LiquidCrowdloan) {
+        specialOption = {
+          // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+          LiquidCrowdloan: assetMetadata.NativeAssetId.LiquidCrowdloan as string
+        };
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+      } else if (assetMetadata.NativeAssetId.VSToken) {
+        specialOption = {
+          // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+          VSToken: assetMetadata.NativeAssetId.VSToken as string
+        };
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+      } else if (assetMetadata.NativeAssetId.Native) {
+        specialOption = {
+          // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+          Native: assetMetadata.NativeAssetId.Native as string
+        };
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+      } else if (assetMetadata.NativeAssetId.Stable) {
+        specialOption = {
+          // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+          Stable: assetMetadata.NativeAssetId.Stable as string
+        };
+      }
     } else if (assetMetadata.Erc20) {
       specialOption = {
         Erc20: assetMetadata.Erc20 as string
@@ -95,9 +122,7 @@ export const getRegistry = async (networkKey: string, api: ApiPromise, customErc
 
   await api.isReady;
 
-  const { chainDecimals, chainTokens: _chainTokens } = api.registry;
-
-  let chainTokens = _chainTokens;
+  const { chainDecimals, chainTokens } = api.registry;
 
   // Hotfix for these network because substrate and evm response different decimal
   if (['pangolinEvm', 'crabEvm'].includes(networkKey)) {
@@ -109,20 +134,7 @@ export const getRegistry = async (networkKey: string, api: ApiPromise, customErc
   // Build token map
   const tokenMap = {} as Record<string, TokenInfo>;
 
-  // hot fix for kUSD on karura
-  if (networkKey === 'karura' && chainTokens.includes('KUSD')) {
-    const filteredChainTokens: string[] = [];
-
-    chainTokens.forEach((token) => {
-      if (token !== 'KUSD') {
-        filteredChainTokens.push(token);
-      }
-    });
-
-    chainTokens = filteredChainTokens;
-  }
-
-  if (!['genshiro_testnet', 'genshiro', 'equilibrium_parachain'].includes(networkKey)) {
+  if (!['genshiro_testnet', 'genshiro', 'equilibrium_parachain', 'acala', 'karura'].includes(networkKey)) {
     chainTokens.forEach((token, index) => {
       tokenMap[token] = {
         isMainToken: index === 0,
@@ -142,6 +154,7 @@ export const getRegistry = async (networkKey: string, api: ApiPromise, customErc
   if (['karura', 'acala', 'bifrost'].indexOf(networkKey) > -1) {
     const foreignTokens = await getForeignToken(api);
 
+    console.log(networkKey, foreignTokens);
     Object.assign(tokenMap, foreignTokens);
   }
 

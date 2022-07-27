@@ -84,15 +84,16 @@ function Request ({ authId, className, isFirst, request: { origin }, url }: Prop
 export default styled(Request)`
   .acceptButton {
     width: 90%;
-    margin: 1rem auto 0;
+    margin: .5rem auto 0;
   }
 
   .rejectionButton {
-    margin: 8px 0 15px 0;
+    margin: 0 0 15px 0;
     text-decoration: underline;
 
     .closeLink {
       margin: auto;
+      padding: 0;
     }
   }
 `;

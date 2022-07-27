@@ -519,7 +519,7 @@ export const PREDEFINE_TOKEN_DATA_MAP: Record<string, Record<string, TokenInfo>>
       decimals: 18,
       name: 'Cougar'
     },
-    MoonWellArtemis: {
+    WELL: {
       isMainToken: false,
       symbol: 'WELL',
       erc20Address: '0x511ab53f793683763e5a8829738301368a2411e3',

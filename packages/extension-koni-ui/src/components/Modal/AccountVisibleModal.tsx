@@ -499,7 +499,7 @@ export default React.memo(styled(AccountVisibleModal)(({ theme }: Props) => `
             }
 
             & > .account-info{
-              width: 80%;
+              width: 290px;
 
               .authorize-request__account {
                 overflow: hidden;
@@ -518,7 +518,7 @@ export default React.memo(styled(AccountVisibleModal)(({ theme }: Props) => `
               .account-info-identity-icon {
                 border: 0;
                 padding: 0;
-                margin: 0 8px;
+                margin: 0 10px;
 
                 .icon {
                   height: 40px;

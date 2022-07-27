@@ -172,6 +172,7 @@ const AccountVisibleModal = (props: Props) => {
                         address={address}
                         addressHalfLength={5}
                         className='authorize-request__account'
+                        iconSize={40}
                         isShowBanner={false}
                         name={account.name}
                         showCopyBtn={false}
@@ -497,9 +498,18 @@ export default React.memo(styled(AccountVisibleModal)(({ theme }: Props) => `
               border: 1px solid #42C59A;
             }
 
+            & > .account-info{
+              width: 80%;
+
+              .authorize-request__account {
+                overflow: hidden;
+              }
+            }
+
             .account-info  {
               position: relative;
               display: flex;
+              overflow: hidden;
 
               .account-info-row {
                 height: 56px;
@@ -532,6 +542,7 @@ export default React.memo(styled(AccountVisibleModal)(({ theme }: Props) => `
                 font-weight: 600;
                 &:before {content: "("}
                 &:after {content: ")"}
+                white-space: nowrap;
               }
             }
 

@@ -1596,6 +1596,22 @@ export const PREDEFINED_NETWORKS: Record<string, NetworkJson> = {
     nativeToken: 'DORA',
     coinGeckoKey: 'dora-factory',
     decimals: 12
+  },
+  bajun: {
+    key: 'bajun',
+    chain: 'Bajun Kusama',
+    genesisHash: '0x35a06bfec2edf0ff4be89a6428ccd9ff5bd0167d618c5a0d4341f9600a458d14',
+    ss58Format: 1337,
+    providers: {
+      AjunaNetwork: 'wss://rpc-parachain.bajun.network'
+    },
+    active: false,
+    currentProviderMode: 'ws',
+    currentProvider: 'AjunaNetwork',
+    groups: ['KUSAMA_PARACHAIN'],
+    paraId: 2119,
+    nativeToken: 'BAJU',
+    decimals: 12
   }
 };
 

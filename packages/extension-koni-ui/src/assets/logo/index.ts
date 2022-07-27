@@ -339,6 +339,8 @@ const LogosMap: Record<string, string> = {
   // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
   dorafactory: require('./dorafactory.png'),
   // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+  bajun: require('./bajun.png'),
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
   default: require('./default.svg')
 };
 

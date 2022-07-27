@@ -56,9 +56,10 @@ export async function getParaCollatorsInfo (networkKey: string, dotSamaApi: ApiP
 
   const allValidators: ValidatorInfo[] = [];
 
-  const [_allCollators, _delegatorState] = await Promise.all([
+  const [_allCollators, _delegatorState, _collatorCommission] = await Promise.all([
     apiProps.api.query.parachainStaking.candidatePool(),
-    apiProps.api.query.parachainStaking.delegatorState(address)
+    apiProps.api.query.parachainStaking.delegatorState(address),
+    apiProps.api.query.parachainStaking.collatorCommission()
   ]);
 
   const _maxDelegatorPerCandidate = apiProps.api.consts.parachainStaking.maxTopDelegationsPerCandidate.toHuman() as string;
@@ -72,6 +73,9 @@ export async function getParaCollatorsInfo (networkKey: string, dotSamaApi: ApiP
 
   const rawDelegatorState = _delegatorState.toHuman() as Record<string, any> | null;
   const rawAllCollators = _allCollators.toHuman() as unknown as CollatorInfo[];
+
+  const rawCollatorCommission = _collatorCommission.toHuman() as string;
+  const collatorCommission = parseFloat(rawCollatorCommission.split('%')[0]);
 
   for (const collator of rawAllCollators) {
     allValidators.push({
@@ -225,6 +229,7 @@ export async function getParaCollatorsInfo (networkKey: string, dotSamaApi: ApiP
     validator.isVerified = extraInfoMap[validator.address].isVerified;
     validator.otherStake = validator.totalStake - validator.ownStake;
     validator.nominatorCount = extraInfoMap[validator.address].delegationCount;
+    validator.commission = collatorCommission;
   }
 
   return {

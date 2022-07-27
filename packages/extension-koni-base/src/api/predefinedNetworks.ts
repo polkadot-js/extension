@@ -1579,6 +1579,23 @@ export const PREDEFINED_NETWORKS: Record<string, NetworkJson> = {
     paraId: 2007,
     nativeToken: 'KAPEX',
     decimals: 12
+  },
+  dorafactory: {
+    key: 'dorafactory',
+    chain: 'Dorafactory Network',
+    genesisHash: '0x577d331ca43646f547cdaa07ad0aa387a383a93416764480665103081f3eaf14',
+    ss58Format: 128,
+    providers: {
+      DORA: 'wss://kusama.dorafactory.org'
+    },
+    active: false,
+    currentProviderMode: 'ws',
+    currentProvider: 'DORA',
+    groups: ['KUSAMA_PARACHAIN'],
+    paraId: 2115,
+    nativeToken: 'DORA',
+    coinGeckoKey: 'dora-factory',
+    decimals: 12
   }
 };
 

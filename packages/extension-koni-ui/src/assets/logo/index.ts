@@ -329,6 +329,8 @@ const LogosMap: Record<string, string> = {
   // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
   tdot: require('./tdot.svg'),
   // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+  origintrail: require('./origintrail.png'),
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
   taiksm: require('./taiksm.svg'),
   // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
   '3usd': require('./3usd.svg'),

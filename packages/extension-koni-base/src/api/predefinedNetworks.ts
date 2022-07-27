@@ -1547,6 +1547,22 @@ export const PREDEFINED_NETWORKS: Record<string, NetworkJson> = {
     groups: ['TEST_NET'],
     nativeToken: 'tSSC',
     decimals: 18
+  },
+  origintrail: {
+    key: 'origintrail',
+    chain: 'OriginTrail Parachain',
+    genesisHash: '0xe7e0962324a3b86c83404dbea483f25fb5dab4c224791c81b756cfc948006174',
+    ss58Format: 101,
+    providers: {
+      TraceLabs: 'wss://parachain-rpc.origin-trail.network'
+    },
+    active: false,
+    currentProviderMode: 'ws',
+    currentProvider: 'TraceLabs',
+    groups: ['POLKADOT_PARACHAIN'],
+    paraId: 2043,
+    nativeToken: 'OTP',
+    decimals: 12
   }
 };
 

@@ -106,7 +106,7 @@ function SenderInputAddress ({ balance, balanceFormat, chainRegistryMap, classNa
     <div className={className}>
       <InputAddress
         className={'sender-input-address'}
-        defaultValue={initValue.address}
+        defaultValue={address}
         help={t<string>(isDonation ? 'The account you will donate from.' : 'The account you will send funds from.')}
         isSetDefaultValue={true}
         label={t<string>(isDonation ? 'Donate from account' : 'Send from account')}

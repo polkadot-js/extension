@@ -1612,6 +1612,23 @@ export const PREDEFINED_NETWORKS: Record<string, NetworkJson> = {
     paraId: 2119,
     nativeToken: 'BAJU',
     decimals: 12
+  },
+  listen: {
+    key: 'listen',
+    chain: 'Listen Network',
+    genesisHash: '0x48eb7f3fff34e702aa2b504674df8f8afbf9889f804e3088c0cb662e433552a0',
+    ss58Format: 42,
+    providers: {
+      'Listen Foundation 1': 'wss://rpc.mainnet.listen.io',
+      'Listen Foundation 2': 'wss://wss.mainnet.listen.io'
+    },
+    active: false,
+    currentProviderMode: 'ws',
+    currentProvider: 'Listen Foundation 1',
+    groups: ['KUSAMA_PARACHAIN'],
+    paraId: 2118,
+    nativeToken: 'LT',
+    decimals: 12
   }
 };
 

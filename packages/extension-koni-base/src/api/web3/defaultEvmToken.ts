@@ -61,6 +61,12 @@ export const DEFAULT_EVM_TOKENS: EvmTokenJson = {
       type: 'erc721'
     },
     {
+      name: 'AthosNFT',
+      smartContract: '0xcf82ddcca84d0e419bccd7a540e807c114250ded',
+      chain: 'moonbeam',
+      type: 'erc721'
+    },
+    {
       name: 'Zoombies',
       smartContract: '0x08716e418e68564C96b68192E985762740728018',
       chain: 'moonriver',

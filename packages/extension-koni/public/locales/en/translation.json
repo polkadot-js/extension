@@ -382,5 +382,7 @@
   "The account which you will withdraw stake": "",
   "Withdraw stake from account": "",
   "Add NFT": "",
-  "Add Token": ""
+  "Add Token": "",
+  "Select the account you would like to send from": "",
+  "Select the network to obtain the sending address": ""
 }

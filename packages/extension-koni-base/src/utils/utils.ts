@@ -3,7 +3,7 @@
 
 import { CrowdloanParaState, NetworkJson } from '@subwallet/extension-base/background/KoniTypes';
 import { AccountAuthType, AccountJson } from '@subwallet/extension-base/background/types';
-import { CLOUDFLARE_PINATA_SERVER } from '@subwallet/extension-koni-base/api/nft/config';
+import { getRandomIpfsGateway } from '@subwallet/extension-koni-base/api/nft/config';
 import { ALL_ACCOUNT_KEY } from '@subwallet/extension-koni-base/constants';
 import BigNumber from 'bignumber.js';
 
@@ -102,7 +102,7 @@ export const parseIpfsLink = (ipfsLink: string) => {
     return ipfsLink;
   }
 
-  return CLOUDFLARE_PINATA_SERVER + ipfsLink.split('ipfs://ipfs/')[1];
+  return getRandomIpfsGateway() + ipfsLink.split('ipfs://ipfs/')[1];
 };
 
 export function hexToStr (buf: string): string {
@@ -245,6 +245,46 @@ export const getNftProvider = (data: NetworkJson) => {
 
   return '';
 };
+
+export function mergeNetworkProviders (customNetwork: NetworkJson, predefinedNetwork: NetworkJson) { // merge providers for 2 networks with the same genesisHash
+  if (customNetwork.customProviders) {
+    const parsedCustomProviders: Record<string, string> = {};
+    const currentProvider = customNetwork.customProviders[customNetwork.currentProvider];
+    const currentProviderMethod = currentProvider.startsWith('http') ? 'http' : 'ws';
+    let parsedProviderKey = '';
+
+    for (const customProvider of Object.values(customNetwork.customProviders)) {
+      let exist = false;
+
+      for (const [key, provider] of Object.entries(predefinedNetwork.providers)) {
+        if (currentProvider === provider) { // point currentProvider to predefined
+          parsedProviderKey = key;
+        }
+
+        if (provider === customProvider) {
+          exist = true;
+          break;
+        }
+      }
+
+      if (!exist) {
+        const index = Object.values(parsedCustomProviders).length;
+
+        parsedCustomProviders[`custom_${index}`] = customProvider;
+      }
+    }
+
+    for (const [key, parsedProvider] of Object.entries(parsedCustomProviders)) {
+      if (currentProvider === parsedProvider) {
+        parsedProviderKey = key;
+      }
+    }
+
+    return { currentProviderMethod, parsedProviderKey, parsedCustomProviders };
+  } else {
+    return { currentProviderMethod: '', parsedProviderKey: '', parsedCustomProviders: {} };
+  }
+}
 
 export const filterAndSortingAccountByAuthType = (accounts: AccountJson[], accountAuthType: AccountAuthType, sorting = false) => {
   let rs = [...accounts];

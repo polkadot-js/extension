@@ -17,6 +17,7 @@ import NftReducer from './Nft';
 import NftCollectionReducer from './NftCollection';
 import PriceReducer from './Price';
 import SettingsReducer from './Settings';
+import StakeUnlockingReducer from './StakeUnlockingInfo';
 import StakingReducer from './Staking';
 import StakingRewardReducer from './StakingReward';
 import TokenConfigReducer from './TokenConfigParams';
@@ -26,6 +27,7 @@ import TransferNftParamsReducer from './TransferNftParams';
 import UnbondingParamsReducer from './UnbondingParams';
 
 const reducers = {
+  stakeUnlockingInfo: StakeUnlockingReducer,
   unbondingParams: UnbondingParamsReducer,
   bondingParams: BondingParamsReducer,
   networkConfigParams: NetworkConfigParamsReducer,

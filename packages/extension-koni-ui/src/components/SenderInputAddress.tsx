@@ -2,13 +2,14 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { ChainRegistry, NetworkJson } from '@subwallet/extension-base/background/KoniTypes';
+import { AccountContext } from '@subwallet/extension-koni-ui/components/contexts';
 import FormatBalance from '@subwallet/extension-koni-ui/components/FormatBalance';
 import { useTranslation } from '@subwallet/extension-koni-ui/components/translate';
 import { BalanceFormatType, SenderInputAddressType, TokenItemType } from '@subwallet/extension-koni-ui/components/types';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { toShort } from '@subwallet/extension-koni-ui/util';
 import reformatAddress from '@subwallet/extension-koni-ui/util/reformatAddress';
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import styled from 'styled-components';
 
 import InputAddress from './InputAddress';
@@ -63,6 +64,8 @@ function SenderInputAddress ({ balance, balanceFormat, chainRegistryMap, classNa
   const { t } = useTranslation();
   const [{ address, networkKey, token }, setValue] = useState<SenderInputAddressType>(initValue);
 
+  const { accounts } = useContext(AccountContext);
+
   const networkPrefix = networkMap[networkKey].ss58Format;
 
   const formattedAddress = useMemo<string>(() => {
@@ -115,6 +118,27 @@ function SenderInputAddress ({ balance, balanceFormat, chainRegistryMap, classNa
       });
     }
   }, [_networkKey, _token]);
+
+  useEffect(() => {
+    console.log('useEffect');
+
+    const exists = accounts.find((acc) => acc.address.toLowerCase() === address.toLowerCase());
+
+    if (!exists) {
+      setValue((prev) => {
+        const newVal = {
+          ...prev,
+          address: initValue.address
+        };
+
+        setTimeout(() => {
+          onChange(newVal);
+        }, 200);
+
+        return newVal;
+      });
+    }
+  }, [initValue.address, accounts, address, onChange]);
 
   return (
     <div className={className}>

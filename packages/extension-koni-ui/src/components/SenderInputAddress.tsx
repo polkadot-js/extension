@@ -120,8 +120,6 @@ function SenderInputAddress ({ balance, balanceFormat, chainRegistryMap, classNa
   }, [_networkKey, _token]);
 
   useEffect(() => {
-    console.log('useEffect');
-
     const exists = accounts.find((acc) => acc.address.toLowerCase() === address.toLowerCase());
 
     if (!exists) {

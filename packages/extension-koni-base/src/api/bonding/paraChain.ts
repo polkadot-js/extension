@@ -29,11 +29,16 @@ export async function getParaBondingBasics (networkKey: string, dotSamaApi: ApiP
   const _round = (await apiProps.api.query.parachainStaking.round()).toHuman() as Record<string, string>;
   const round = parseRawNumber(_round.current);
 
-  const [_totalStake, _totalIssuance, _inflation, _unvestedAllocation] = await Promise.all([
+  let _unvestedAllocation;
+
+  if (apiProps.api.query.vesting.totalUnvestedAllocation) {
+    _unvestedAllocation = await apiProps.api.query.vesting.totalUnvestedAllocation();
+  }
+
+  const [_totalStake, _totalIssuance, _inflation] = await Promise.all([
     apiProps.api.query.parachainStaking.staked(round),
     apiProps.api.query.balances.totalIssuance(),
-    apiProps.api.query.parachainStaking.inflationConfig(),
-    apiProps.api.query?.vesting?.totalUnvestedAllocation()
+    apiProps.api.query.parachainStaking.inflationConfig()
   ]);
 
   let unvestedAllocation;

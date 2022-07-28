@@ -322,7 +322,6 @@ export default React.memo(styled(StakingRow)(({ theme }: Props) => `
     border-radius: 100%;
     overflow: hidden;
     background-color: #fff;
-    border: 1px solid #fff;
     cursor: pointer;
   }
 

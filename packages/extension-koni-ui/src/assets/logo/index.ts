@@ -41,6 +41,8 @@ const LogosMap: Record<string, string> = {
   // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
   clover: require('./67.Clover.png'),
   // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+  cloverEvm: require('./67.Clover.png'),
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
   coinversation: require('./12.Coinversation.png'),
   // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
   composableFinance: require('./13.Composable.png'),

@@ -318,7 +318,7 @@ export default React.memo(styled(StakingRow)(({ theme }: Props) => `
   .network-logo {
     display: block;
     min-width: 32px;
-    height: 32px;
+    height: 36px;
     border-radius: 100%;
     overflow: hidden;
     background-color: #fff;

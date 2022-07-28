@@ -8,7 +8,7 @@ import { BalanceFormatType, SenderInputAddressType, TokenItemType } from '@subwa
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { toShort } from '@subwallet/extension-koni-ui/util';
 import reformatAddress from '@subwallet/extension-koni-ui/util/reformatAddress';
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import styled from 'styled-components';
 
 import InputAddress from './InputAddress';
@@ -23,6 +23,8 @@ interface Props {
   balanceFormat: BalanceFormatType;
   isDonation?: boolean;
   networkMap: Record<string, NetworkJson>;
+  networkKey: string;
+  token: string;
 }
 
 function getOptions (chainRegistryMap: Record<string, ChainRegistry>, networkMap: Record<string, NetworkJson>): TokenItemType[] {
@@ -57,7 +59,7 @@ function getOptions (chainRegistryMap: Record<string, ChainRegistry>, networkMap
   return options;
 }
 
-function SenderInputAddress ({ balance, balanceFormat, chainRegistryMap, className = '', initValue, isDonation, networkMap, onChange }: Props): React.ReactElement {
+function SenderInputAddress ({ balance, balanceFormat, chainRegistryMap, className = '', initValue, isDonation, networkKey: _networkKey, networkMap, onChange, token: _token }: Props): React.ReactElement {
   const { t } = useTranslation();
   const [{ address, networkKey, token }, setValue] = useState<SenderInputAddressType>(initValue);
 
@@ -101,6 +103,18 @@ function SenderInputAddress ({ balance, balanceFormat, chainRegistryMap, classNa
       return newVal;
     });
   }, [onChange]);
+
+  useEffect(() => {
+    if (_token && _networkKey) {
+      setValue((prev) => {
+        return {
+          ...prev,
+          token: _token,
+          networkKey: _networkKey
+        };
+      });
+    }
+  }, [_networkKey, _token]);
 
   return (
     <div className={className}>

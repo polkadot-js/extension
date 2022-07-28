@@ -178,8 +178,10 @@ function Wrapper ({ className, theme }: WrapperProps): React.ReactElement {
 
 function Home ({ chainRegistryMap, className = '', currentAccount, historyMap, network }: Props): React.ReactElement {
   const { networkKey } = network;
-  const { t } = useTranslation();
   const { address } = currentAccount;
+
+  const { t } = useTranslation();
+
   const [isShowBalanceDetail, setShowBalanceDetail] = useState<boolean>(false);
   const backupTabId = window.localStorage.getItem('homeActiveTab') || '1';
   const [activatedTab, setActivatedTab] = useState<number>(Number(backupTabId));

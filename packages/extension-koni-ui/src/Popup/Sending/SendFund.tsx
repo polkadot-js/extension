@@ -171,6 +171,29 @@ function SendFund ({ chainRegistryMap, className, defaultValue, networkMap }: Co
   }, [amount, canToggleAll, isAll, recipientId, selectedNetworkKey, selectedToken, senderId, valueToTransfer]);
 
   useEffect(() => {
+    const network = networkMap[selectedNetworkKey];
+
+    if (!network.active) {
+      let newNetwork: NetworkJson | null = null;
+
+      for (const _network of Object.values(networkMap)) {
+        if (_network.active && _network.nativeToken) {
+          newNetwork = _network;
+          break;
+        }
+      }
+
+      if (newNetwork) {
+        setSenderValue({
+          address: senderId,
+          networkKey: newNetwork.key,
+          token: newNetwork.nativeToken as string
+        });
+      }
+    }
+  }, [senderId, selectedNetworkKey, networkMap]);
+
+  useEffect(() => {
     let isSync = true;
 
     transferGetExistentialDeposit({ networkKey: selectedNetworkKey, token: selectedToken })
@@ -276,8 +299,10 @@ function SendFund ({ chainRegistryMap, className, defaultValue, networkMap }: Co
               chainRegistryMap={chainRegistryMap}
               className=''
               initValue={defaultValue}
+              networkKey={selectedNetworkKey}
               networkMap={networkMap}
               onChange={setSenderValue}
+              token={selectedToken}
             />
 
             <ReceiverInputAddress

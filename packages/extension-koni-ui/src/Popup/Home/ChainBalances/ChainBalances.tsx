@@ -325,6 +325,7 @@ function ChainBalances ({ address,
               balanceInfo={selectedBalanceInfo}
               isConnecting={connectingList[selectedInfo.networkKey]?.status === 'done'}
               setQrModalOpen={setQrModalOpen}
+              setSelectedNetworkBalance={setSelectedNetworkBalance}
               updateModalQr={updateModalQr}
             />
           </>

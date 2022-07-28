@@ -88,6 +88,7 @@ export default class KoniState extends State {
   private readonly authorizeStore = new AuthorizeStore();
   readonly #authRequestsV2: Record<string, AuthRequestV2> = {};
   private readonly evmChainSubject = new Subject<AuthUrls>();
+  private readonly authorizeUrlSubject = new Subject<AuthUrls>();
   private authorizeCached: AuthUrls | undefined = undefined;
 
   private priceStoreReady = false;
@@ -246,33 +247,43 @@ export default class KoniState extends State {
       } else {
         const _evmTokenState = storedEvmTokens;
 
-        for (const storedToken of DEFAULT_EVM_TOKENS.erc20) {
+        for (const defaultToken of DEFAULT_EVM_TOKENS.erc20) {
           let exist = false;
 
-          for (const defaultToken of storedEvmTokens.erc20) {
-            if (defaultToken.smartContract === storedToken.smartContract && defaultToken.chain === storedToken.chain) {
+          for (const storedToken of _evmTokenState.erc20) {
+            if (defaultToken.smartContract.toLowerCase() === storedToken.smartContract.toLowerCase() && defaultToken.chain === storedToken.chain) {
+              if (storedToken.isCustom) {
+                // if existed, migrate the custom token -> default token
+                delete storedToken.isCustom;
+              }
+
               exist = true;
               break;
             }
           }
 
           if (!exist) {
-            _evmTokenState.erc20.push(storedToken);
+            _evmTokenState.erc20.push(defaultToken);
           }
         }
 
-        for (const storedToken of DEFAULT_EVM_TOKENS.erc721) {
+        for (const defaultToken of DEFAULT_EVM_TOKENS.erc721) {
           let exist = false;
 
-          for (const defaultToken of storedEvmTokens.erc721) {
-            if (defaultToken.smartContract === storedToken.smartContract && defaultToken.chain === storedToken.chain) {
+          for (const storedToken of _evmTokenState.erc721) {
+            if (defaultToken.smartContract.toLowerCase() === storedToken.smartContract.toLowerCase() && defaultToken.chain === storedToken.chain) {
+              if (storedToken.isCustom) {
+                // if existed custom token before, migrate the custom token -> default token
+                delete storedToken.isCustom;
+              }
+
               exist = true;
               break;
             }
           }
 
           if (!exist) {
-            _evmTokenState.erc721.push(storedToken);
+            _evmTokenState.erc721.push(defaultToken);
           }
         }
 
@@ -351,6 +362,7 @@ export default class KoniState extends State {
     this.authorizeStore.set('authUrls', data, () => {
       this.authorizeCached = data;
       this.evmChainSubject.next(this.authorizeCached);
+      this.authorizeUrlSubject.next(this.authorizeCached);
       callback && callback();
     });
   }
@@ -369,6 +381,10 @@ export default class KoniState extends State {
 
   public subscribeEvmChainChange (): Subject<AuthUrls> {
     return this.evmChainSubject;
+  }
+
+  public subscribeAuthorizeUrlSubject (): Subject<AuthUrls> {
+    return this.authorizeUrlSubject;
   }
 
   private updateIconV2 (shouldClose?: boolean): void {
@@ -516,24 +532,34 @@ export default class KoniState extends State {
       request.origin = existedAuth.origin;
     }
 
-    if (existedAuth && !confirmAnotherType && !request.reConfirm) {
-      // this url was seen in the past
-      const isConnected = Object.keys(existedAuth.isAllowedMap)
-        .some((address) => existedAuth.isAllowedMap[address]);
+    // Reconfirm if check auth for empty list
+    if (existedAuth) {
+      const inBlackList = existedAuth && !existedAuth.isAllowed;
 
-      assert(isConnected, `The source ${url} is not allowed to interact with this extension`);
+      if (inBlackList) {
+        throw new Error(`The source ${url} is not allowed to interact with this extension`);
+      }
 
-      return false;
+      request.allowedAccounts = Object.entries(existedAuth.isAllowedMap)
+        .map(([address, allowed]) => (allowed ? address : ''))
+        .filter((item) => (item !== ''));
+
+      let allowedListByRequestType = [...request.allowedAccounts];
+
+      if (accountAuthType === 'evm') {
+        allowedListByRequestType = allowedListByRequestType.filter((a) => isEthereumAddress(a));
+      } else if (accountAuthType === 'substrate') {
+        allowedListByRequestType = allowedListByRequestType.filter((a) => !isEthereumAddress(a));
+      }
+
+      if (!confirmAnotherType && !request.reConfirm && allowedListByRequestType.length !== 0) {
+        // Prevent appear confirmation popup
+        return false;
+      }
     }
 
     return new Promise((resolve, reject): void => {
       const id = getId();
-
-      if (existedAuth) {
-        request.allowedAccounts = Object.entries(existedAuth.isAllowedMap)
-          .map(([address, allowed]) => (allowed ? address : ''))
-          .filter((item) => (item !== ''));
-      }
 
       this.#authRequestsV2[id] = {
         ...this.authCompleteV2(id, resolve, reject),
@@ -1536,7 +1562,7 @@ export default class KoniState extends State {
     let isExist = false;
 
     for (const token of this.evmTokenState[data.type]) {
-      if (token.smartContract === data.smartContract && token.type === data.type && token.chain === data.chain) {
+      if (token.smartContract.toLowerCase() === data.smartContract.toLowerCase() && token.type === data.type && token.chain === data.chain) {
         isExist = true;
         break;
       }
@@ -1546,7 +1572,16 @@ export default class KoniState extends State {
       this.evmTokenState[data.type].push(data);
     } else {
       this.evmTokenState[data.type] = this.evmTokenState[data.type].map((token) => {
-        if (token.smartContract === data.smartContract) {
+        if (token.smartContract.toLowerCase() === data.smartContract.toLowerCase()) {
+          if (token.isDeleted) {
+            return {
+              name: token.name,
+              smartContract: token.smartContract,
+              chain: token.chain,
+              type: token.type
+            };
+          }
+
           return data;
         }
 
@@ -1729,11 +1764,13 @@ export default class KoniState extends State {
     this.updateServiceInfo();
     this.lockNetworkMap = false;
 
-    if (this.networkMap[networkKey].isEthereum) {
-      this.getAuthorize((data) => {
+    this.getAuthorize((data) => {
+      if (this.networkMap[networkKey].isEthereum) {
         this.evmChainSubject.next(data);
-      });
-    }
+      }
+
+      this.authorizeUrlSubject.next(data);
+    });
 
     return true;
   }
@@ -1772,6 +1809,7 @@ export default class KoniState extends State {
 
     this.getAuthorize((data) => {
       this.evmChainSubject.next(data);
+      this.authorizeUrlSubject.next(data);
     });
 
     return true;
@@ -1795,11 +1833,13 @@ export default class KoniState extends State {
     this.updateServiceInfo();
     this.lockNetworkMap = false;
 
-    if (this.networkMap[networkKey].isEthereum) {
-      this.getAuthorize((data) => {
+    this.getAuthorize((data) => {
+      if (this.networkMap[networkKey].isEthereum) {
         this.evmChainSubject.next(data);
-      });
-    }
+      }
+
+      this.authorizeUrlSubject.next(data);
+    });
 
     return true;
   }
@@ -1835,6 +1875,7 @@ export default class KoniState extends State {
 
     this.getAuthorize((data) => {
       this.evmChainSubject.next(data);
+      this.authorizeUrlSubject.next(data);
     });
 
     return true;

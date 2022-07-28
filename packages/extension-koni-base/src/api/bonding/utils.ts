@@ -55,6 +55,9 @@ export const PARACHAIN_INFLATION_DISTRIBUTION: Record<string, Record<string, num
   },
   turingStaging: { // https://docs.oak.tech/docs/delegators/
     reward: 0.5
+  },
+  bifrost: {
+    reward: 0
   }
 };
 

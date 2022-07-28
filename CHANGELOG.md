@@ -1,5 +1,21 @@
 # CHANGELOG
 
+## 0.5.2 (Koni)
+Build date: Jul 22, 2022.
+
+Update:
+- Improve the UX for contracts transaction with EVM provider (#393)
+- Add select acc screen when the user in All Account mode to show address (#425)
+
+Bug fixes:
+- Fix account balance still gets calculating from test net (#145)
+- Fix do not automatically connect account in case create both Substrate & EVM Account (#297)
+- Fix can't sign & can't turn off popup Signing with Ledger account (#327)
+- Fix copy account anytime user click on Manage Account icon (#336)
+- Fix do not show avatar account (#354, #457)
+- Fix error logs from koni-content (#438)
+- Fix the issues with EVM Provider by late initialized (#444)
+
 ## 0.4.9 (Koni)
 Build date: Jul 02, 2022.
 

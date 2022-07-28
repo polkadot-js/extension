@@ -81,6 +81,31 @@ placeholderScript.textContent = `class SubWalletPlaceholder {
       })
     }
   }
+  on() {
+    this.__waitProvider().then((provider) => {
+      provider.on(...arguments);
+    });
+  }
+  off() {
+    this.__waitProvider().then((provider) => {
+      provider.off(...arguments);
+    });
+  }
+  addListener() {
+    this.__waitProvider().then((provider) => {
+      provider.addListener(...arguments);
+    });
+  }
+  removeListener() {
+    this.__waitProvider().then((provider) => {
+      provider.removeListener(...arguments);
+    });
+  }
+  removeAllListeners() {
+    this.__waitProvider().then((provider) => {
+      provider.removeAllListeners(...arguments);
+    });
+  }
   async enable() {
     const provider = await this.__waitProvider();
     return await provider.enable(...arguments);

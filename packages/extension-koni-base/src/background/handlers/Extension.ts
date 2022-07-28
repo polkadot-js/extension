@@ -318,12 +318,26 @@ export default class KoniExtension extends Extension {
 
   private _changeAuthorization (url: string, connectValue: boolean, callBack?: (value: AuthUrls) => void) {
     state.getAuthorize((value) => {
-      assert(value, 'The source is not known');
+      assert(value[url], 'The source is not known');
 
       // eslint-disable-next-line no-return-assign
       Object.keys(value[url].isAllowedMap).forEach((address) => value[url].isAllowedMap[address] = connectValue);
       state.setAuthorize(value, () => {
         callBack && callBack(value);
+      });
+    });
+  }
+
+  public toggleAuthorization2 (url: string): Promise<ResponseAuthorizeList> {
+    return new Promise((resolve) => {
+      state.getAuthorize((value) => {
+        assert(value[url], 'The source is not known');
+
+        value[url].isAllowed = !value[url].isAllowed;
+
+        state.setAuthorize(value, () => {
+          resolve({ list: value });
+        });
       });
     });
   }
@@ -1903,7 +1917,7 @@ export default class KoniExtension extends Extension {
 
     // check exist in evmTokenState
     for (const token of evmTokenState[data.type]) {
-      if (token.smartContract.toLowerCase() === data.smartContract.toLowerCase() && token.type === data.type && token.chain === data.chain) {
+      if (token.smartContract.toLowerCase() === data.smartContract.toLowerCase() && token.type === data.type && token.chain === data.chain && !token.isDeleted) {
         isExist = true;
         break;
       }
@@ -2482,6 +2496,8 @@ export default class KoniExtension extends Extension {
         return this.authorizeSubscribeV2(id, port);
       case 'pri(authorize.listV2)':
         return this.getAuthListV2();
+      case 'pri(authorize.toggle)':
+        return this.toggleAuthorization2(request as string);
       case 'pri(accounts.create.suriV2)':
         return await this.accountsCreateSuriV2(request as RequestAccountCreateSuriV2);
       case 'pri(accounts.forget)':

@@ -166,11 +166,13 @@ export const PREDEFINED_NETWORKS: Record<string, NetworkJson> = {
     ss58Format: 5,
     providers: {
       OnFinality: 'wss://astar.api.onfinality.io/public-ws',
-      Dwellir: 'wss://astar-rpc.dwellir.com'
+      Dwellir: 'wss://astar-rpc.dwellir.com',
+      Astar: 'wss://rpc.astar.network',
+      PinkNode: 'wss://public-rpc.pinknode.io/astar'
     },
     active: false,
     currentProviderMode: 'ws',
-    currentProvider: 'OnFinality',
+    currentProvider: 'Dwellir',
     groups: ['POLKADOT_PARACHAIN'],
     paraId: 2006,
     nativeToken: 'ASTR',
@@ -184,7 +186,10 @@ export const PREDEFINED_NETWORKS: Record<string, NetworkJson> = {
     genesisHash: '0x9eb76c5184c4ab8679d2d5d819fdf90b9c001403e9e17da2e14b6d8aec4029c6_evm',
     ss58Format: 5,
     providers: {
-      Astar: 'wss://rpc.astar.network'
+      OnFinality: 'wss://astar.api.onfinality.io/public-ws',
+      Dwellir: 'wss://astar-rpc.dwellir.com',
+      Astar: 'wss://rpc.astar.network',
+      PinkNode: 'wss://public-rpc.pinknode.io/astar'
     },
     isEthereum: true,
     active: false,

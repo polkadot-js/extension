@@ -250,56 +250,56 @@ export const PREDEFINE_TOKEN_DATA_MAP: Record<string, Record<string, TokenInfo>>
   //     decimals: 18
   //   }
   // },
-  bifrost: {
-    KUSD: {
-      isMainToken: false,
-      symbol: 'KUSD',
-      name: 'KUSD',
-      decimals: 12
-    },
-    DOT: {
-      isMainToken: false,
-      symbol: 'DOT',
-      name: 'DOT',
-      decimals: 10
-    },
-    KSM: {
-      isMainToken: false,
-      symbol: 'KSM',
-      name: 'KSM',
-      decimals: 12
-    },
-    KAR: {
-      isMainToken: false,
-      symbol: 'KAR',
-      name: 'KAR',
-      decimals: 12
-    },
-    ZLK: {
-      isMainToken: false,
-      symbol: 'ZLK',
-      name: 'ZLK',
-      decimals: 18
-    },
-    PHA: {
-      isMainToken: false,
-      symbol: 'PHA',
-      name: 'PHA',
-      decimals: 12
-    },
-    RMRK: {
-      isMainToken: false,
-      symbol: 'RMRK',
-      name: 'RMRK',
-      decimals: 10
-    },
-    MOVR: {
-      isMainToken: false,
-      symbol: 'MOVR',
-      name: 'MOVR',
-      decimals: 18
-    }
-  },
+  // bifrost: {
+  //   KUSD: {
+  //     isMainToken: false,
+  //     symbol: 'KUSD',
+  //     name: 'KUSD',
+  //     decimals: 12
+  //   },
+  //   DOT: {
+  //     isMainToken: false,
+  //     symbol: 'DOT',
+  //     name: 'DOT',
+  //     decimals: 10
+  //   },
+  //   KSM: {
+  //     isMainToken: false,
+  //     symbol: 'KSM',
+  //     name: 'KSM',
+  //     decimals: 12
+  //   },
+  //   KAR: {
+  //     isMainToken: false,
+  //     symbol: 'KAR',
+  //     name: 'KAR',
+  //     decimals: 12
+  //   },
+  //   ZLK: {
+  //     isMainToken: false,
+  //     symbol: 'ZLK',
+  //     name: 'ZLK',
+  //     decimals: 18
+  //   },
+  //   PHA: {
+  //     isMainToken: false,
+  //     symbol: 'PHA',
+  //     name: 'PHA',
+  //     decimals: 12
+  //   },
+  //   RMRK: {
+  //     isMainToken: false,
+  //     symbol: 'RMRK',
+  //     name: 'RMRK',
+  //     decimals: 10
+  //   },
+  //   MOVR: {
+  //     isMainToken: false,
+  //     symbol: 'MOVR',
+  //     name: 'MOVR',
+  //     decimals: 18
+  //   }
+  // },
   moonbase: {
     xcBNC: {
       isMainToken: false,
@@ -564,6 +564,9 @@ export const PREDEFINE_TOKEN_DATA_MAP: Record<string, Record<string, TokenInfo>>
       decimals: 18,
       name: 'Cougar'
     }
+  },
+  astar: {
+
   },
   astarEvm: {
     ARSW: {

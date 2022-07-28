@@ -6,6 +6,48 @@ import { CrossChainRelation, NetworkJson } from '@subwallet/extension-base/backg
 import { decodeAddress } from '@polkadot/util-crypto';
 
 export const SupportedCrossChainsMap: Record<string, CrossChainRelation> = {
+  polkadot: {
+    type: 'r',
+    isEthereum: false,
+    relationMap: {
+      moonbeam: {
+        type: 'p',
+        isEthereum: true,
+        supportedToken: ['DOT']
+      }
+      // astar: {
+      //   type: 'p',
+      //   isEthereum: false,
+      //   supportedToken: ['DOT']
+      // },
+      // acala: {
+      //   type: 'p',
+      //   isEthereum: false,
+      //   supportedToken: ['DOT']
+      // }
+    }
+  },
+  kusama: {
+    type: 'r',
+    isEthereum: false,
+    relationMap: {
+      moonriver: {
+        type: 'p',
+        isEthereum: true,
+        supportedToken: ['KSM']
+      }
+      // shiden: {
+      //   type: 'p',
+      //   isEthereum: false,
+      //   supportedToken: ['KSM']
+      // },
+      // karura: {
+      //   type: 'p',
+      //   isEthereum: false,
+      //   supportedToken: ['KSM']
+      // }
+    }
+  },
   acala: {
     type: 'p',
     isEthereum: false,
@@ -13,7 +55,17 @@ export const SupportedCrossChainsMap: Record<string, CrossChainRelation> = {
       moonbeam: {
         type: 'p',
         isEthereum: true,
-        supportedToken: ['ACA', 'AUSD']
+        supportedToken: ['ACA', 'aUSD']
+      },
+      astar: {
+        type: 'p',
+        isEthereum: false,
+        supportedToken: ['aUSD']
+      },
+      astarEvm: {
+        type: 'p',
+        isEthereum: true,
+        supportedToken: ['aUSD']
       }
     }
   },
@@ -25,6 +77,16 @@ export const SupportedCrossChainsMap: Record<string, CrossChainRelation> = {
         type: 'p',
         isEthereum: true,
         supportedToken: ['KAR', 'aUSD']
+      },
+      astar: {
+        type: 'p',
+        isEthereum: false,
+        supportedToken: ['aUSD']
+      },
+      astarEvm: {
+        type: 'p',
+        isEthereum: true,
+        supportedToken: ['aUSD']
       }
     }
   },
@@ -91,59 +153,22 @@ export const SupportedCrossChainsMap: Record<string, CrossChainRelation> = {
       }
     }
   },
-  polkadot: {
-    type: 'r',
+  astar: {
+    type: 'p',
     isEthereum: false,
     relationMap: {
-      astar: {
-        type: 'p',
-        isEthereum: false,
-        supportedToken: ['DOT']
-      },
-      moonbeam: {
-        type: 'p',
-        isEthereum: true,
-        supportedToken: ['DOT']
-      },
       acala: {
-        type: 'p',
+        type: 'r',
+        isEthereum: false,
+        supportedToken: ['aUSD']
+      },
+      polkadot: {
+        type: 'r',
         isEthereum: false,
         supportedToken: ['DOT']
       }
     }
-  },
-  kusama: {
-    type: 'r',
-    isEthereum: false,
-    relationMap: {
-      moonriver: {
-        type: 'p',
-        isEthereum: true,
-        supportedToken: ['KSM']
-      },
-      shiden: {
-        type: 'p',
-        isEthereum: false,
-        supportedToken: ['KSM']
-      },
-      karura: {
-        type: 'p',
-        isEthereum: false,
-        supportedToken: ['KSM']
-      }
-    }
-  },
-  // astar: {
-  //   type: 'p',
-  //   isEthereum: false,
-  //   relationMap: {
-  //     polkadot: {
-  //       type: 'r',
-  //       isEthereum: false,
-  //       supportedToken: ['DOT']
-  //     }
-  //   }
-  // },
+  }
   // bifrost: { // bifrost on kusama
   //   type: 'p',
   //   isEthereum: false,
@@ -170,60 +195,60 @@ export const SupportedCrossChainsMap: Record<string, CrossChainRelation> = {
   //     }
   //   }
   // }
-  moonbase: {
-    isEthereum: true,
-    type: 'p',
-    relationMap: {
-      acala_dev: {
-        type: 'p',
-        isEthereum: false,
-        supportedToken: ['xcKAR']
-      },
-      moonbase_relay: {
-        type: 'r',
-        isEthereum: false,
-        supportedToken: ['xcUNIT']
-      },
-      bifrost_testnet: {
-        type: 'r',
-        isEthereum: false,
-        supportedToken: ['xcBNC']
-      }
-    }
-  },
-  rococo: {
-    isEthereum: false,
-    type: 'r',
-    relationMap: {
-      contractsRococo: {
-        type: 'p',
-        isEthereum: false,
-        supportedToken: ['ROC']
-      }
-    }
-  },
-  moonbase_relay: {
-    isEthereum: false,
-    type: 'r',
-    relationMap: {
-      moonbase: {
-        type: 'p',
-        isEthereum: true,
-        supportedToken: ['Unit']
-      }
-    }
-  },
-  acala_testnet: {
-    type: 'p',
-    isEthereum: false,
-    relationMap: {
-      moonbase: {
-        type: 'p',
-        isEthereum: true,
-        supportedToken: ['ACA', 'AUSD']
-      }
-    }
-  }
+  // moonbase: {
+  //   isEthereum: true,
+  //   type: 'p',
+  //   relationMap: {
+  //     acala_dev: {
+  //       type: 'p',
+  //       isEthereum: false,
+  //       supportedToken: ['xcKAR']
+  //     },
+  //     moonbase_relay: {
+  //       type: 'r',
+  //       isEthereum: false,
+  //       supportedToken: ['xcUNIT']
+  //     },
+  //     bifrost_testnet: {
+  //       type: 'r',
+  //       isEthereum: false,
+  //       supportedToken: ['xcBNC']
+  //     }
+  //   }
+  // },
+  // rococo: {
+  //   isEthereum: false,
+  //   type: 'r',
+  //   relationMap: {
+  //     contractsRococo: {
+  //       type: 'p',
+  //       isEthereum: false,
+  //       supportedToken: ['ROC']
+  //     }
+  //   }
+  // },
+  // moonbase_relay: {
+  //   isEthereum: false,
+  //   type: 'r',
+  //   relationMap: {
+  //     moonbase: {
+  //       type: 'p',
+  //       isEthereum: true,
+  //       supportedToken: ['Unit']
+  //     }
+  //   }
+  // },
+  // acala_testnet: {
+  //   type: 'p',
+  //   isEthereum: false,
+  //   relationMap: {
+  //     moonbase: {
+  //       type: 'p',
+  //       isEthereum: true,
+  //       supportedToken: ['ACA', 'AUSD']
+  //     }
+  //   }
+  // }
   // karura_testnet: {
   //   type: 'p',
   //   isEthereum: false,

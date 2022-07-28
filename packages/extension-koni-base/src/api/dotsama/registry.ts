@@ -154,7 +154,6 @@ export const getRegistry = async (networkKey: string, api: ApiPromise, customErc
   if (['karura', 'acala', 'bifrost'].indexOf(networkKey) > -1) {
     const foreignTokens = await getForeignToken(api);
 
-    console.log(networkKey, foreignTokens);
     Object.assign(tokenMap, foreignTokens);
   }
 

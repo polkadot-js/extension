@@ -38,7 +38,9 @@ export default function useFetchNft (page: number, networkKey: string, gridSize:
       }
     }
 
-    nftCollections.push(parsedCollection);
+    if (parsedCollection.nftItems.length) {
+      nftCollections.push(parsedCollection);
+    }
   }
 
   if (!showAll) {

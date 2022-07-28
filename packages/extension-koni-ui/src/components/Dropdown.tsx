@@ -18,9 +18,10 @@ interface Props extends ThemeProps {
   value?: string;
   allowAdd?: boolean;
   handleCreate?: (createValue: string) => Promise<string>; // handle create logic, return new value prop after custom logic
+  isDisabled?: boolean
 }
 
-function Dropdown ({ allowAdd, className, handleCreate, label, onChange, options, value }: Props): React.ReactElement<Props> {
+function Dropdown ({ allowAdd, className, handleCreate, isDisabled, label, onChange, options, value }: Props): React.ReactElement<Props> {
   // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment,@typescript-eslint/no-unsafe-member-access
   const transformOptions = options.map((t) => ({ label: t.text, value: t.value })); // will work as long as options has text and value field
   // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
@@ -98,9 +99,9 @@ function Dropdown ({ allowAdd, className, handleCreate, label, onChange, options
             : <Select
               className='dropdown-wrapper'
               classNamePrefix='dropdown'
+              isDisabled={isDisabled}
               isSearchable
               menuPlacement={'auto'}
-              menuPortalTarget={document.body}
               menuPosition='fixed'
               onChange={handleChange}
               options={transformOptions}
@@ -109,7 +110,6 @@ function Dropdown ({ allowAdd, className, handleCreate, label, onChange, options
               value={transformOptions.filter((obj: { value: string }) => obj.value === selectedValue)}
             />
         }
-
       </Label>
     </>
   );
@@ -156,6 +156,7 @@ export default React.memo(styled(Dropdown)(({ label, theme }: Props) => `
   .dropdown__menu-portal {
     text-align: left;
     font-size: 15px;
+    z-index: 99;
   }
 
   .dropdown__menu-notice--no-options {

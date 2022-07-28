@@ -13653,7 +13653,7 @@ __metadata:
     superagent: ^6.1.0
     svgo: ^1.3.0
     terser: ^5.10.0
-  checksum: 9ebe1fd8f508467eccb4a6dfbb5ccb15e2c4d05df74a08550a2684bf433c79451c33ee2b5718f4db2dfeb58c0dfc57af3398600d75864b239aede45c2f9a9678
+  checksum: 0801f877f468828fdb1321ccb4fb4490c250430c0b44fcaf49ef4c880fa1d0084d34522659189df34359afaa3b45c03e5566a297ebf52afc723d143dc1a61064
   languageName: node
   linkType: hard
 

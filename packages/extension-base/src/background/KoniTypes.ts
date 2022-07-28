@@ -816,10 +816,13 @@ export interface ResponseEvmProviderSend {
   result?: JsonRpcResponse;
 }
 
-export interface EvmProviderRpcErrorInterface extends Error{
-  message: string;
-  code: number;
+export interface SubWalletProviderErrorInterface extends Error{
+  code?: number;
   data?: unknown;
+}
+
+export interface EvmProviderRpcErrorInterface extends SubWalletProviderErrorInterface{
+  code: number;
 }
 
 export type EvmRpcErrorHelperMap = Record<'USER_REJECTED_REQUEST'| 'UNAUTHORIZED'| 'UNSUPPORTED_METHOD'| 'DISCONNECTED'| 'CHAIN_DISCONNECTED'| 'INVALID_PARAMS'| 'INTERNAL_ERROR', [number, string]>;

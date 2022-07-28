@@ -369,7 +369,7 @@ export type TokenInfo = {
   symbol: string,
   symbolAlt?: string, // Alternate display for symbol
   erc20Address?: string,
-  assetIndex?: number,
+  assetIndex?: number | string,
   decimals: number,
   name: string,
   coinGeckoKey?: string,

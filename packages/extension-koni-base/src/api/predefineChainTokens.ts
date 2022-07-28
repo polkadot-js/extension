@@ -566,7 +566,34 @@ export const PREDEFINE_TOKEN_DATA_MAP: Record<string, Record<string, TokenInfo>>
     }
   },
   astar: {
-
+    LDOT: {
+      isMainToken: false,
+      assetIndex: '18446744073709551618',
+      symbol: 'LDOT',
+      name: 'Liquid DOT',
+      decimals: 10
+    },
+    ACA: {
+      isMainToken: false,
+      assetIndex: '18446744073709551616',
+      symbol: 'ACA',
+      name: 'Acala',
+      decimals: 12
+    },
+    DOT: {
+      isMainToken: false,
+      assetIndex: '340282366920938463463374607431768211455',
+      symbol: 'DOT',
+      name: 'Polkadot',
+      decimals: 10
+    },
+    aUSD: {
+      isMainToken: false,
+      assetIndex: '18446744073709551617',
+      symbol: 'aUSD',
+      name: 'Acala Dollar',
+      decimals: 12
+    }
   },
   astarEvm: {
     ARSW: {

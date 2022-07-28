@@ -4,6 +4,7 @@
 import { configureStore } from '@reduxjs/toolkit/dist';
 
 import AllAccountReducer from './AllAccount';
+import AuthUrlReducer from './AuthUrl';
 import BalanceReducer from './Balance';
 import BondingParamsReducer from './BondingParams';
 import ChainRegistryReducer from './ChainRegistry';
@@ -46,7 +47,8 @@ const reducers = {
   currentNetwork: CurrentNetworkReducer,
   chainRegistry: ChainRegistryReducer,
   allAccount: AllAccountReducer,
-  settings: SettingsReducer
+  settings: SettingsReducer,
+  authUrl: AuthUrlReducer
 };
 
 export const store = configureStore({

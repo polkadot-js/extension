@@ -1,6 +1,7 @@
 // Copyright 2019-2022 @polkadot/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
+import useSetupAuthUrl from '@subwallet/extension-koni-ui/hooks/store/useSetupAuthUrl';
 import useSetupBalance from '@subwallet/extension-koni-ui/hooks/store/useSetupBalance';
 import useSetupChainRegistry from '@subwallet/extension-koni-ui/hooks/store/useSetupChainRegistry';
 import useSetupCrowdloan from '@subwallet/extension-koni-ui/hooks/store/useSetupCrowdloan';
@@ -29,4 +30,5 @@ export default function useSetupStore (): void {
   useSetupNftTransfer();
   useSetupSettings();
   useSetupEvmToken();
+  useSetupAuthUrl();
 }

@@ -248,6 +248,7 @@ function ChainBalances ({ address,
               backToHome={_backToHome}
               balanceInfo={selectedBalanceInfo}
               setQrModalOpen={setQrModalOpen}
+              setSelectedNetworkBalance={setSelectedNetworkBalance}
               updateModalQr={updateModalQr}
             />
           </>

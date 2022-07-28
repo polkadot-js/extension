@@ -41,6 +41,8 @@ const LogosMap: Record<string, string> = {
   // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
   clover: require('./clover.svg'),
   // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+  cloverEvm: require('./clover.svg'),
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
   coinversation: require('./coinversation.png'),
   // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
   composableFinance: require('./composableFinance.png'),
@@ -332,6 +334,8 @@ const LogosMap: Record<string, string> = {
   taiksm: require('./taiksm.svg'),
   // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
   '3usd': require('./3usd.svg'),
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+  well: require('./moonwell-artemis.png'),
   // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
   default: require('./default.svg')
 };

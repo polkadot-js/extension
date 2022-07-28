@@ -234,6 +234,27 @@ export const PREDEFINED_NETWORKS: Record<string, NetworkJson> = {
     decimals: 18,
     coinGeckoKey: 'clover-finance'
   },
+  cloverEvm: {
+    key: 'cloverEvm',
+    chain: 'Clover - EVM',
+    genesisHash: '0x5c7bd13edf349b33eb175ffae85210299e324d852916336027391536e686f267_1',
+    ss58Format: 128,
+    providers: {
+      Clover: 'wss://rpc-para.clover.finance',
+      OnFinality: 'wss://clover.api.onfinality.io/public-ws'
+    },
+    active: false,
+    isEthereum: true,
+    currentProviderMode: 'ws',
+    currentProvider: 'OnFinality',
+    groups: ['POLKADOT_PARACHAIN'],
+    paraId: 2002,
+    evmChainId: 1024,
+    nativeToken: 'CLV',
+    crowdloanUrl: 'https://lucky.clover.finance/?type=support',
+    decimals: 18,
+    coinGeckoKey: 'clover-finance'
+  },
   hydradx: {
     key: 'hydradx',
     chain: 'HydraDX Snakenet',

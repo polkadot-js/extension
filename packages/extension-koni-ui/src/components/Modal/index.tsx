@@ -1,7 +1,7 @@
 // Copyright 2019-2022 @polkadot/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import type { ThemeProps } from '../types';
+import type { ThemeProps } from '../../types';
 
 import CN from 'classnames';
 import React, { useCallback } from 'react';
@@ -16,7 +16,7 @@ interface Props {
   onClose?: () => void;
 }
 
-function Modal ({ children, className, maskClosable, onClose, reference, wrapperClassName }: Props): React.ReactElement<Props> {
+function Index ({ children, className, maskClosable, onClose, reference, wrapperClassName }: Props): React.ReactElement<Props> {
   const onClickBackdrop = useCallback(() => {
     if (maskClosable) {
       onClose && onClose();
@@ -39,7 +39,7 @@ function Modal ({ children, className, maskClosable, onClose, reference, wrapper
   );
 }
 
-export default styled(Modal)(({ theme }: ThemeProps) => `
+export default styled(Index)(({ theme }: ThemeProps) => `
   .subwallet-modal {
     border-radius: 15px;
     top: 10%;

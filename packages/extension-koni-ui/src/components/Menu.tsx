@@ -10,13 +10,15 @@ interface Props {
   children: React.ReactNode;
   className?: string;
   reference: React.RefObject<HTMLDivElement>;
+  style?: Record<string, string>;
 }
 
-function Menu ({ children, className, reference }: Props): React.ReactElement<Props> {
+function Menu ({ children, className, reference, style }: Props): React.ReactElement<Props> {
   return (
     <div
       className={className}
       ref={reference}
+      style={style}
     >
       {children}
     </div>

@@ -83,11 +83,12 @@ function Wrapper ({ className, historyMap, networkKey, registryMap }: Props): Re
 }
 
 function TransactionHistoryItemWrapper ({ item, registryMap }: ItemWrapperProp) {
-  const { networkKey } = item;
-  const { extrinsicHash } = item;
+  const { change, eventIdx, extrinsicHash, networkKey } = item;
   const registry = registryMap[networkKey];
   const isSupportScanExplorer = useSupportScanExplorer(networkKey);
   const isScanExplorerTxUrl = useScanExplorerTxUrl(networkKey, extrinsicHash);
+
+  const key = `${extrinsicHash}/${eventIdx || change}`;
 
   if ((item.changeSymbol && !registry.tokenMap[item.changeSymbol]) ||
     (item.feeSymbol && !registry.tokenMap[item.feeSymbol])) {
@@ -99,7 +100,7 @@ function TransactionHistoryItemWrapper ({ item, registryMap }: ItemWrapperProp) 
       <a
         className={'transaction-item-wrapper'}
         href={isScanExplorerTxUrl}
-        key={extrinsicHash}
+        key={key}
         rel='noreferrer'
         target={'_blank'}
       >
@@ -113,7 +114,7 @@ function TransactionHistoryItemWrapper ({ item, registryMap }: ItemWrapperProp) 
   }
 
   return (
-    <div key={extrinsicHash}>
+    <div key={key}>
       <TransactionHistoryItem
         isSupportScanExplorer={false}
         item={item}
@@ -129,7 +130,7 @@ function TransactionHistory ({ className, items, registryMap }: ContentProp): Re
       {items.map((item) => (
         <TransactionHistoryItemWrapper
           item={item}
-          key={item.extrinsicHash}
+          key={`${item.extrinsicHash}/${item.eventIdx || item.change}`}
           registryMap={registryMap}
         />
       ))}

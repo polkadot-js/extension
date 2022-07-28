@@ -1,6 +1,7 @@
 // Copyright 2019-2022 @subwallet/extension-koni authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
+import { DelegationItem } from '@subwallet/extension-base/background/KoniTypes';
 import { ActionContext } from '@subwallet/extension-koni-ui/components';
 import Button from '@subwallet/extension-koni-ui/components/Button';
 import InputAddress from '@subwallet/extension-koni-ui/components/InputAddress';
@@ -9,10 +10,13 @@ import Spinner from '@subwallet/extension-koni-ui/components/Spinner';
 import useGetNetworkJson from '@subwallet/extension-koni-ui/hooks/screen/home/useGetNetworkJson';
 import useToast from '@subwallet/extension-koni-ui/hooks/useToast';
 import useTranslation from '@subwallet/extension-koni-ui/hooks/useTranslation';
-import { getUnbondingTxInfo } from '@subwallet/extension-koni-ui/messaging';
+import { getStakeDelegationInfo, getUnbondingTxInfo } from '@subwallet/extension-koni-ui/messaging';
 import Header from '@subwallet/extension-koni-ui/partials/Header';
 import UnbondingAuthTransaction from '@subwallet/extension-koni-ui/Popup/Bonding/components/UnbondingAuthTransaction';
 import UnbondingResult from '@subwallet/extension-koni-ui/Popup/Bonding/components/UnbondingResult';
+// @ts-ignore
+import ValidatorsDropdown from '@subwallet/extension-koni-ui/Popup/Bonding/components/ValidatorsDropdown';
+import { CHAIN_TYPE_MAP } from '@subwallet/extension-koni-ui/Popup/Bonding/utils';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import React, { useCallback, useContext, useEffect, useState } from 'react';
@@ -25,20 +29,35 @@ interface Props extends ThemeProps {
   className?: string;
 }
 
+function filterValidDelegations (delegations: DelegationItem[]) {
+  const filteredDelegations: DelegationItem[] = [];
+
+  delegations.forEach((item) => {
+    if (parseFloat(item.amount) > 0) {
+      filteredDelegations.push(item);
+    }
+  });
+
+  return filteredDelegations;
+}
+
 function UnbondingSubmitTransaction ({ className }: Props): React.ReactElement<Props> {
   const { t } = useTranslation();
   const { show } = useToast();
   const navigate = useContext(ActionContext);
   const { currentAccount: { account }, unbondingParams } = useSelector((state: RootState) => state);
+  const selectedAccount = unbondingParams.selectedAccount as string;
   const selectedNetwork = unbondingParams.selectedNetwork as string;
   const bondedAmount = unbondingParams.bondedAmount as number;
-
   const networkJson = useGetNetworkJson(selectedNetwork);
-  const [amount, setAmount] = useState(bondedAmount);
+
+  const [amount, setAmount] = useState<number>(-1);
   const [isReadySubmit, setIsReadySubmit] = useState(false);
   const [showAuth, setShowAuth] = useState(false);
   const [showResult, setShowResult] = useState(false);
   const [isClickNext, setIsClickNext] = useState(false);
+  const [unbondAll] = useState(false);
+  const [delegations, setDelegations] = useState<DelegationItem[] | undefined>(undefined);
 
   const [fee, setFee] = useState('');
   const [balanceError, setBalanceError] = useState(false);
@@ -46,6 +65,46 @@ function UnbondingSubmitTransaction ({ className }: Props): React.ReactElement<P
   const [extrinsicHash, setExtrinsicHash] = useState('');
   const [isTxSuccess, setIsTxSuccess] = useState(false);
   const [txError, setTxError] = useState('');
+  const [isDataReady, setIsDataReady] = useState(false);
+  const [isValidValidator, setIsValidValidator] = useState(true);
+
+  const [selectedValidator, setSelectedValidator] = useState<string>('');
+  const [nominatedAmount, setNominatedAmount] = useState<string>('0');
+  const [minBond, setMinBond] = useState<string>('0');
+
+  useEffect(() => {
+    if (CHAIN_TYPE_MAP.astar.includes(selectedNetwork) || CHAIN_TYPE_MAP.para.includes(selectedNetwork)) {
+      getStakeDelegationInfo({
+        address: account?.address as string,
+        networkKey: selectedNetwork
+      }).then((result) => {
+        const filteredDelegations = filterValidDelegations(result);
+
+        setIsDataReady(true);
+        setDelegations(filteredDelegations);
+        setSelectedValidator(filteredDelegations[0].owner);
+        setNominatedAmount(filteredDelegations[0].amount);
+        setMinBond(filteredDelegations[0].minBond);
+
+        if (filteredDelegations[0].hasScheduledRequest) {
+          setIsValidValidator(false);
+        }
+      }).catch(console.error);
+    } else {
+      setIsDataReady(true);
+    }
+
+    return () => {
+      setDelegations(undefined);
+      setIsDataReady(false);
+    };
+  }, [account?.address, selectedNetwork]);
+
+  useEffect(() => {
+    if (!networkJson.active) {
+      navigate('/');
+    }
+  }, [navigate, networkJson.active]);
 
   const goHome = useCallback(() => {
     navigate('/');
@@ -53,23 +112,46 @@ function UnbondingSubmitTransaction ({ className }: Props): React.ReactElement<P
 
   useEffect(() => {
     if (!isClickNext) {
-      if (amount > 0 && amount <= bondedAmount) {
-        setIsReadySubmit(true);
-      } else {
-        setIsReadySubmit(false);
+      if (delegations) {
+        const _nominatedAmount = parseFloat(nominatedAmount) / (10 ** (networkJson.decimals as number));
+        const _minBond = parseFloat(minBond) / (10 ** (networkJson.decimals as number));
 
-        if (amount > bondedAmount) {
-          show(`Your total stake is ${bondedAmount} ${networkJson.nativeToken as string}`);
+        if ((amount > 0 && amount <= (_nominatedAmount - _minBond)) || (amount === _nominatedAmount && amount > 0)) {
+          setIsReadySubmit(true);
+        } else {
+          setIsReadySubmit(false);
+
+          if (amount > 0) {
+            if ((_nominatedAmount - _minBond) <= 0) {
+              show('You can only unstake everything');
+            } else {
+              show(`You can unstake everything or a maximum of ${(_nominatedAmount - _minBond).toFixed(2)} ${networkJson.nativeToken as string}`);
+            }
+          }
+        }
+      } else {
+        if (amount > 0 && amount <= bondedAmount) {
+          setIsReadySubmit(true);
+        } else {
+          setIsReadySubmit(false);
+
+          if (amount > bondedAmount) {
+            show(`You can unstake a maximum of ${bondedAmount} ${networkJson.nativeToken as string}`);
+          }
         }
       }
     }
-  }, [amount, bondedAmount, isClickNext, networkJson.decimals, networkJson.nativeToken, show, showAuth, showResult]);
+  }, [amount, bondedAmount, isClickNext, minBond, networkJson.decimals, networkJson.nativeToken, nominatedAmount, show, showAuth, showResult, delegations]);
 
-  const convertToBN = useCallback(() => {
-    const stringValue = (parseFloat(bondedAmount.toString()) * (10 ** (networkJson.decimals as number))).toString();
+  const getDefaultValue = useCallback(() => {
+    if (amount === -1) {
+      return undefined;
+    }
 
-    return new BN(stringValue);
-  }, [bondedAmount, networkJson.decimals]);
+    const parsedAmount = amount * (10 ** (networkJson.decimals as number));
+
+    return new BN(parsedAmount.toFixed(0));
+  }, [amount, networkJson.decimals]);
 
   const handleResend = useCallback(() => {
     setExtrinsicHash('');
@@ -80,7 +162,11 @@ function UnbondingSubmitTransaction ({ className }: Props): React.ReactElement<P
     setIsClickNext(false);
   }, []);
 
-  const handleChangeAmount = useCallback((value: BN | string) => {
+  const handleUpdateAmount = useCallback((value: BN | string) => {
+    if (!value) {
+      return;
+    }
+
     let parsedValue;
 
     if (value instanceof BN) {
@@ -90,22 +176,42 @@ function UnbondingSubmitTransaction ({ className }: Props): React.ReactElement<P
     }
 
     if (isNaN(parsedValue)) {
-      setAmount(-1);
+      setAmount(0);
     } else {
       setAmount(parsedValue);
     }
   }, [networkJson.decimals]);
 
+  useEffect(() => {
+    if (account && account.address !== selectedAccount) {
+      navigate('/');
+    }
+  }, [account, navigate, selectedAccount]);
+
   const handleClickCancel = useCallback(() => {
     navigate('/');
   }, [navigate]);
 
+  const _getUnbondAll = useCallback(() => {
+    const _amount = amount * (10 ** (networkJson.decimals as number));
+    const bnAmount = new BN(_amount.toString());
+    const isAmountEqualAll = bnAmount.eq(new BN(nominatedAmount));
+
+    return isAmountEqualAll || unbondAll;
+  }, [amount, networkJson.decimals, nominatedAmount, unbondAll]);
+
   const handleConfirm = useCallback(() => {
     setLoading(true);
+    const _amount = amount * (10 ** (networkJson.decimals as number));
+    const bnAmount = new BN(_amount.toString());
+    const isAmountEqualAll = bnAmount.eq(new BN(nominatedAmount));
+
     getUnbondingTxInfo({
-      address: account?.address as string,
+      address: selectedAccount,
       amount,
-      networkKey: selectedNetwork
+      networkKey: selectedNetwork,
+      validatorAddress: selectedValidator,
+      unstakeAll: isAmountEqualAll || unbondAll
     })
       .then((resp) => {
         setLoading(false);
@@ -116,7 +222,62 @@ function UnbondingSubmitTransaction ({ className }: Props): React.ReactElement<P
         setShowResult(false);
       })
       .catch(console.error);
-  }, [account?.address, amount, selectedNetwork]);
+  }, [amount, networkJson.decimals, nominatedAmount, selectedAccount, selectedNetwork, selectedValidator, unbondAll]);
+
+  const handleSelectValidator = useCallback((val: string) => {
+    if (delegations) {
+      for (const item of delegations) {
+        if (item.owner === val) {
+          setSelectedValidator(val);
+          setNominatedAmount(item.amount);
+          setMinBond(item.minBond);
+
+          if (unbondAll) {
+            const _nominatedAmount = parseFloat(item.amount) / (10 ** (networkJson.decimals as number));
+
+            setAmount(_nominatedAmount);
+          } else {
+            setAmount(0);
+          }
+
+          if (!item.hasScheduledRequest) {
+            setIsValidValidator(true);
+          } else {
+            show('Please withdraw the unstaking amount first');
+            setIsValidValidator(false);
+          }
+
+          break;
+        }
+      }
+    }
+  }, [delegations, unbondAll, networkJson.decimals, show]);
+
+  // const toggleUnbondAll = useCallback((value: boolean) => {
+  //   setUnbondAll(value);
+  //
+  //   if (value) {
+  //     if (delegations) {
+  //       const _nominatedAmount = parseFloat(nominatedAmount) / (10 ** (networkJson.decimals as number));
+  //
+  //       setAmount(_nominatedAmount);
+  //     } else {
+  //       setAmount(bondedAmount);
+  //     }
+  //   } else {
+  //     setAmount(0);
+  //   }
+  // }, [bondedAmount, networkJson.decimals, nominatedAmount, delegations]);
+
+  const getDropdownTitle = useCallback(() => {
+    if (CHAIN_TYPE_MAP.astar.includes(unbondingParams.selectedNetwork as string)) {
+      return 'Select a dApp';
+    } else if (CHAIN_TYPE_MAP.para.includes(unbondingParams.selectedNetwork as string)) {
+      return 'Select a collator';
+    }
+
+    return 'Select a validator';
+  }, [unbondingParams.selectedNetwork]);
 
   return (
     <div className={className}>
@@ -127,61 +288,108 @@ function UnbondingSubmitTransaction ({ className }: Props): React.ReactElement<P
         subHeaderName={t<string>('Unstaking action')}
       />
 
-      {!showResult && <div
-        className={'bonding-submit-container'}
-      >
-        <InputAddress
-          autoPrefill={false}
-          className={'receive-input-address'}
-          defaultValue={account?.address}
-          help={t<string>('The account which you will unstake')}
-          isDisabled={true}
-          isSetDefaultValue={true}
-          label={t<string>('Unstake from account')}
-          networkPrefix={networkJson.ss58Format}
-          type='allPlus'
-          withEllipsis
-        />
+      {!showResult && <div>
+        {
+          isDataReady
+            ? <div
+              className={'bonding-submit-container'}
+            >
+              <InputAddress
+                autoPrefill={false}
+                className={'receive-input-address'}
+                defaultValue={selectedAccount}
+                help={t<string>('The account which you will unstake')}
+                isDisabled={true}
+                isSetDefaultValue={true}
+                label={t<string>('Unstake from account')}
+                networkPrefix={networkJson.ss58Format}
+                type='allPlus'
+                withEllipsis
+              />
 
-        <div className={'unbonding-input'}>
-          <InputBalance
-            autoFocus
-            className={'submit-bond-amount-input'}
-            decimals={networkJson.decimals}
-            defaultValue={convertToBN()}
-            help={`Type the amount you want to unstake. The maximum amount is ${bondedAmount} ${networkJson.nativeToken as string}`}
-            inputAddressHelp={''}
-            isError={false}
-            isZeroable={false}
-            label={t<string>('Amount')}
-            onChange={handleChangeAmount}
-            placeholder={'0'}
-            siDecimals={networkJson.decimals}
-            siSymbol={networkJson.nativeToken}
-          />
-        </div>
+              {
+                delegations && <ValidatorsDropdown
+                  delegations={delegations}
+                  handleSelectValidator={handleSelectValidator}
+                  label={getDropdownTitle()}
+                />
+              }
 
-        <div className='bonding-submit__separator' />
+              {
+                delegations && <div className={'unbonding-input'}>
+                  <InputBalance
+                    autoFocus
+                    className={'submit-bond-amount-input'}
+                    decimals={networkJson.decimals}
+                    defaultValue={unbondAll ? getDefaultValue() : undefined}
+                    help={`Type the amount you want to unstake. Your total stake is ${parseFloat(nominatedAmount) / (10 ** (networkJson.decimals as number))} ${networkJson.nativeToken as string}`}
+                    isDisabled={unbondAll}
+                    isError={false}
+                    isZeroable={false}
+                    label={t<string>('Amount')}
+                    onChange={handleUpdateAmount}
+                    placeholder={'0'}
+                    siDecimals={networkJson.decimals}
+                    siSymbol={networkJson.nativeToken}
+                  />
+                </div>
+              }
 
-        <div className={'bonding-btn-container'}>
-          <Button
-            className={'bonding-cancel-button'}
-            isDisabled={loading}
-            onClick={handleClickCancel}
-          >
-            Cancel
-          </Button>
-          <Button
-            isDisabled={!isReadySubmit}
-            onClick={handleConfirm}
-          >
-            {
-              loading
-                ? <Spinner />
-                : <span>Next</span>
-            }
-          </Button>
-        </div>
+              {
+                !delegations && <div className={'unbonding-input'}>
+                  <InputBalance
+                    autoFocus
+                    className={'submit-bond-amount-input'}
+                    decimals={networkJson.decimals}
+                    defaultValue={unbondAll ? getDefaultValue() : undefined}
+                    help={`Type the amount you want to unstake. You can unstake ${bondedAmount} ${networkJson.nativeToken as string}`}
+                    isDisabled={unbondAll}
+                    isError={false}
+                    isZeroable={false}
+                    label={t<string>('Amount')}
+                    onChange={handleUpdateAmount}
+                    placeholder={'0'}
+                    siDecimals={networkJson.decimals}
+                    siSymbol={networkJson.nativeToken}
+                  />
+                </div>
+              }
+
+              {/* <div className={'unstake-all-container'}> */}
+              {/*  <div className={'unstake-all-text'}>Unstake all</div> */}
+              {/*  <HorizontalLabelToggle */}
+              {/*    checkedLabel={''} */}
+              {/*    className='info' */}
+              {/*    toggleFunc={toggleUnbondAll} */}
+              {/*    uncheckedLabel={''} */}
+              {/*    value={unbondAll} */}
+              {/*  /> */}
+              {/* </div> */}
+
+              <div className='bonding-submit__separator' />
+
+              <div className={'bonding-btn-container'}>
+                <Button
+                  className={'bonding-cancel-button'}
+                  isDisabled={loading}
+                  onClick={handleClickCancel}
+                >
+                Cancel
+                </Button>
+                <Button
+                  isDisabled={!isReadySubmit || (delegations && !isValidValidator)} // the latter is for parachains
+                  onClick={handleConfirm}
+                >
+                  {
+                    loading
+                      ? <Spinner />
+                      : <span>Next</span>
+                  }
+                </Button>
+              </div>
+            </div>
+            : <Spinner className={'container-spinner'} />
+        }
       </div>}
 
       {showAuth && !showResult &&
@@ -190,11 +398,13 @@ function UnbondingSubmitTransaction ({ className }: Props): React.ReactElement<P
           balanceError={balanceError}
           fee={fee}
           selectedNetwork={selectedNetwork}
+          selectedValidator={selectedValidator}
           setExtrinsicHash={setExtrinsicHash}
           setIsTxSuccess={setIsTxSuccess}
           setShowConfirm={setShowAuth}
           setShowResult={setShowResult}
           setTxError={setTxError}
+          unbondAll={_getUnbondAll()}
         />
       }
 
@@ -213,6 +423,28 @@ function UnbondingSubmitTransaction ({ className }: Props): React.ReactElement<P
 }
 
 export default React.memo(styled(UnbondingSubmitTransaction)(({ theme }: Props) => `
+  .container-spinner {
+    height: 65px;
+    width: 65px;
+  }
+
+  .unstake-all-container {
+    .horizontal-label-toggle {
+      margin-right: 0;
+      margin-left: 14px;
+    }
+    margin-top: 15px;
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+  }
+
+  .unstake-all-text {
+    color: ${theme.textColor2};
+    font-weight: 400;
+    font-size: 14px;
+  }
+
   .unbonding-input {
     margin-top: 20px;
   }

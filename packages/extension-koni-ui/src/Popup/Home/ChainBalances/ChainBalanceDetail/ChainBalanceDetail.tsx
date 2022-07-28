@@ -18,12 +18,13 @@ interface Props extends ThemeProps {
   balanceInfo: BalanceInfo;
   backToHome: () => void;
   className?: string;
+  isConnecting: boolean;
   setQrModalOpen: (visible: boolean) => void;
   updateModalQr: (value: Partial<ModalQrProps>) => void;
   setSelectedNetworkBalance?: (networkBalance: BigN) => void;
 }
 
-function ChainBalanceDetail ({ accountInfo, backToHome, balanceInfo, className, setQrModalOpen, setSelectedNetworkBalance, updateModalQr }: Props): React.ReactElement<Props> {
+function ChainBalanceDetail ({ accountInfo, backToHome, balanceInfo, className, isConnecting, setQrModalOpen, setSelectedNetworkBalance, updateModalQr }: Props): React.ReactElement<Props> {
   const [selectedNetworkKey, setSelectedNetworkKey] = useState<string>('');
   const ref = useRef<HTMLDivElement>(null);
   const { t } = useTranslation();
@@ -69,6 +70,7 @@ function ChainBalanceDetail ({ accountInfo, backToHome, balanceInfo, className, 
       <ChainBalanceDetailItem
         accountInfo={accountInfo}
         balanceInfo={balanceInfo}
+        isConnecting={isConnecting}
         isLoading={!balanceInfo}
         isShowDetail={accountInfo.networkKey === selectedNetworkKey}
         setQrModalOpen={setQrModalOpen}
@@ -81,6 +83,7 @@ function ChainBalanceDetail ({ accountInfo, backToHome, balanceInfo, className, 
           <ChainBalanceChildrenItem
             accountInfo={accountInfo}
             balanceInfo={child}
+            isConnecting={isConnecting}
             isLoading={!child}
             key={child.key}
           />

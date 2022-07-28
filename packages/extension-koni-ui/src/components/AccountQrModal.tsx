@@ -618,7 +618,6 @@ export default styled(AccountQrModal)(({ theme }: ThemeProps) => `
 
     .select-modal {
       max-width: 390px !important;
-      background-color: ${theme.popupBackground};
 
       .account-qr-modal{
         height: 450px;

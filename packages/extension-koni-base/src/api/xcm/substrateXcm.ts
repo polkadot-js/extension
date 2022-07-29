@@ -28,6 +28,14 @@ export async function substrateEstimateCrossChainFee (
 
   try {
     if (SupportedCrossChainsMap[originNetworkKey].type === 'p') {
+      console.log('here', api.tx.xTokens.transfer(
+        {
+          Token: tokenInfo.symbol.toUpperCase()
+        },
+        value,
+        getMultiLocationFromParachain(originNetworkKey, destinationNetworkKey, networkMap, to),
+        FOUR_INSTRUCTIONS_WEIGHT
+      ).toHex());
       // Case ParaChain -> ParaChain && ParaChain -> RelayChain
       const paymentInfo = await api.tx.xTokens.transfer(
         {

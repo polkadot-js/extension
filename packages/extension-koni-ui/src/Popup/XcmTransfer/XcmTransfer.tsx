@@ -151,6 +151,9 @@ function XcmTransfer ({ chainRegistryMap, className, defaultValue, firstOriginCh
     !amountGtAvailableBalance &&
     !!balanceFormat;
 
+  console.log('chainRegistryMap', chainRegistryMap);
+  console.log('mainTokenInfo', mainTokenInfo);
+
   useEffect(() => {
     let isSync = true;
 

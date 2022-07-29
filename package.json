@@ -10,7 +10,7 @@
     "url": "https://github.com/Koniverse/Subwallet-V2.git"
   },
   "sideEffects": false,
-  "version": "0.5.2",
+  "version": "0.5.3-0",
   "workspaces": [
     "packages/*"
   ],
@@ -31,6 +31,7 @@
     "build:zip:dst": "rm -rf ./master-build.zip && cd packages/extension-koni/build && zip -r -FS ../../../master-build.zip .",
     "build:zip:src": "rm -rf ./master-src.zip && zip -r -x '*build/*' -x '*node_modules*' -FS ./master-src.zip packages .editorconfig .eslintignore .eslintrc.js babel.config.cjs CHANGELOG.md CONTRIBUTING.md i18next-scanner.config.js jest.config.cjs LICENSE package.json README.md tsconfig.json yarn.lock",
     "clean": "polkadot-dev-clean-build",
+    "dev": "yarn watch-dev",
     "lint": "polkadot-dev-run-lint",
     "postinstall": "polkadot-dev-yarn-only && patch-package",
     "start": "yarn watch",
@@ -39,8 +40,7 @@
     "watch": "cd packages/extension-koni && yarn polkadot-exec-webpack --config webpack.watch.cjs --mode development --watch",
     "watch-dev": "cd packages/extension-koni && yarn polkadot-exec-webpack --config webpack.watch.cjs --mode development --watch -d inline-source-map",
     "web-runner:build": "cd packages/web-runner && yarn webpack --config webpack.config.cjs --mode production",
-    "web-runner:watch": "cd packages/web-runner && yarn webpack-dev-server --config webpack.config.cjs --mode development",
-    "dev": "yarn watch-dev"
+    "web-runner:watch": "cd packages/web-runner && yarn webpack-dev-server --config webpack.config.cjs --mode development"
   },
   "dependencies": {
     "@types/node": "^17.0.10",

@@ -36,7 +36,7 @@ function ImportQr ({ className }: Props): React.ReactElement<Props> {
   const [name, setName] = useState<string | null>(defaultName);
   const [password, setPassword] = useState<string | null>(null);
   const [errors, setErrors] = useState<AccountExternalError[]>([]);
-  const [isConnectWhenCreate, setIsConnectWhenCreate] = useState<boolean>(false);
+  const [isConnectWhenCreate, setIsConnectWhenCreate] = useState<boolean>(true);
   const [isBusy, setIsBusy] = useState<boolean>(false);
   const themeContext = useContext(ThemeContext as React.Context<Theme>);
 

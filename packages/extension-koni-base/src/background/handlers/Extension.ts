@@ -3858,6 +3858,10 @@ export default class KoniExtension extends Extension {
         return await this.accountsCreateSuriV2(request as RequestAccountCreateSuriV2);
       case 'pri(accounts.forget)':
         return await this.accountsForgetOverride(request as RequestAccountForget);
+      case 'pri(accounts.create.externalV2)':
+        return await this.accountsCreateExternalV2(request as RequestAccountCreateExternalV2);
+      case 'pri(accounts.create.hardwareV2)':
+        return await this.accountsCreateHardwareV2(request as RequestAccountCreateHardwareV2);
       case 'pri(seed.createV2)':
         return this.seedCreateV2(request as RequestSeedCreateV2);
       case 'pri(accounts.create.externalV2)':

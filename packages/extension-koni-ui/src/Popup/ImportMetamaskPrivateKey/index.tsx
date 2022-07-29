@@ -33,6 +33,7 @@ function ImportMetamaskPrivateKey ({ className = '' }: Props): React.ReactElemen
   const onAction = useContext(ActionContext);
   const [isBusy, setIsBusy] = useState(false);
   const [account, setAccount] = useState<AccountInfo | null>(null);
+  const [isConnectWhenImport, setIsConnectWhenImport] = useState<boolean>(false);
   const accountsWithoutAll = accounts.filter((acc: { address: string; }) => acc.address !== 'ALL');
   const name = `Account ${accountsWithoutAll.length + 1}`;
   const type = DEFAULT_TYPE;
@@ -46,7 +47,7 @@ function ImportMetamaskPrivateKey ({ className = '' }: Props): React.ReactElemen
     if (name && password && account) {
       setIsBusy(true);
 
-      createAccountSuriV2(name, password, account.suri, false, KEYTYPES)
+      createAccountSuriV2(name, password, account.suri, isConnectWhenImport, KEYTYPES)
         .then(() => {
           window.localStorage.setItem('popupNavigation', '/');
           onAction('/');
@@ -57,7 +58,7 @@ function ImportMetamaskPrivateKey ({ className = '' }: Props): React.ReactElemen
         });
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [account, onAction]);
+  }, [account, onAction, isConnectWhenImport]);
 
   return (
     <>
@@ -69,8 +70,10 @@ function ImportMetamaskPrivateKey ({ className = '' }: Props): React.ReactElemen
       />
       <MetamaskPrivateKeyImport
         account={account}
+        changeConnectWhenImport={setIsConnectWhenImport}
         className='import-seed-content-wrapper'
         isBusy={isBusy}
+        isConnectWhenImport={isConnectWhenImport}
         keyTypes={KEYTYPES}
         name={name}
         onAccountChange={setAccount}

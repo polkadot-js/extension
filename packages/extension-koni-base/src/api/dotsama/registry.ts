@@ -153,8 +153,9 @@ export const getRegistry = async (networkKey: string, api: ApiPromise, customErc
 
   if (['karura', 'acala', 'bifrost'].indexOf(networkKey) > -1) {
     const foreignTokens = await getForeignToken(api);
-
+    console.log('tokenMap before', tokenMap);
     Object.assign(tokenMap, foreignTokens);
+    console.log('tokenMap after', tokenMap);
   }
 
   // Get moonbeam base chains tokens

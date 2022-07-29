@@ -96,7 +96,15 @@ export default class KoniTabs extends Tabs {
   }
 
   private authorizeV2 (url: string, request: RequestAuthorizeTab): Promise<boolean> {
-    return this.#koniState.authorizeUrlV2(url, request);
+    if (request.accountAuthType === 'evm') {
+      return new Promise((resolve, reject) => {
+        this.#koniState.authorizeUrlV2(url, request).then(resolve).catch((e: Error) => {
+          reject(new EvmRpcError('USER_REJECTED_REQUEST'));
+        });
+      });
+    } else {
+      return this.#koniState.authorizeUrlV2(url, request);
+    }
   }
 
   private async getEvmCurrentAccount (url: string, getAll = false): Promise<string[]> {

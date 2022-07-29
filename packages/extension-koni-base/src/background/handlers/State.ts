@@ -529,6 +529,7 @@ export default class KoniState extends State {
         if (isCancelled) {
           delete this.#authRequestsV2[id];
           this.updateIconAuthV2(true);
+          cb();
 
           return;
         }

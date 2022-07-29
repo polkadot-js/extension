@@ -18,6 +18,8 @@ import React, { useCallback, useState } from 'react';
 import { useSelector } from 'react-redux';
 import styled from 'styled-components';
 
+import { isEthereumAddress } from '@polkadot/util-crypto';
+
 const Spinner = React.lazy(() => import('@subwallet/extension-koni-ui/components/Spinner'));
 const Identicon = React.lazy(() => import('@subwallet/extension-koni-ui/components/Identicon'));
 const Button = React.lazy(() => import('@subwallet/extension-koni-ui/components/Button'));
@@ -145,13 +147,23 @@ function BondingAuthTransaction ({ amount, balanceError, bondedValidators, class
 
           <div className={'validator-item-container'}>
             <div className={'validator-header'}>
-              <Identicon
-                className='identityIcon'
-                genesisHash={networkJson.genesisHash}
-                prefix={networkJson.ss58Format}
-                size={20}
-                value={validatorInfo.address}
-              />
+              {
+                validatorInfo.icon
+                  ? <img
+                    className='imgIcon'
+                    height={28}
+                    src={validatorInfo.icon}
+                    width={28}
+                  />
+                  : <Identicon
+                    className='identityIcon'
+                    genesisHash={networkJson.genesisHash}
+                    iconTheme={isEthereumAddress(validatorInfo.address) ? 'ethereum' : 'substrate'}
+                    prefix={networkJson.ss58Format}
+                    size={20}
+                    value={validatorInfo.address}
+                  />
+              }
 
               <div
                 data-for={`identity-tooltip-${validatorInfo.address}`}
@@ -183,13 +195,15 @@ function BondingAuthTransaction ({ amount, balanceError, bondedValidators, class
               }
             </div>
             <div className={'validator-footer'}>
-              <div
-                className={'validator-expected-return'}
-                data-for={`validator-return-tooltip-${validatorInfo.address}`}
-                data-tip={true}
-              >
-                {validatorInfo.expectedReturn.toFixed(1)}%
-              </div>
+              {
+                validatorInfo.expectedReturn > 0 && <div
+                  className={'validator-expected-return'}
+                  data-for={`validator-return-tooltip-${validatorInfo.address}`}
+                  data-tip={true}
+                >
+                  {validatorInfo.expectedReturn.toFixed(1)}%
+                </div>
+              }
               <Tooltip
                 place={'top'}
                 text={'Expected return'}

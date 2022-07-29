@@ -7,6 +7,6 @@ import SubscribableStore from '@subwallet/extension-koni-base/stores/Subscribabl
 
 export default class NftStore extends SubscribableStore<NftJson> {
   constructor () {
-    super(EXTENSION_PREFIX ? `${EXTENSION_PREFIX}nft` : null);
+    super(`${EXTENSION_PREFIX}nft`);
   }
 }

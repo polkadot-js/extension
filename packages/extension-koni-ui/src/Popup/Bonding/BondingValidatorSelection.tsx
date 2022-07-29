@@ -6,10 +6,12 @@ import QuestionIcon from '@subwallet/extension-koni-ui/assets/Question.svg';
 import { ActionContext, InputFilter } from '@subwallet/extension-koni-ui/components';
 import Spinner from '@subwallet/extension-koni-ui/components/Spinner';
 import Tooltip from '@subwallet/extension-koni-ui/components/Tooltip';
+import useIsNetworkActive from '@subwallet/extension-koni-ui/hooks/screen/home/useIsNetworkActive';
 import useTranslation from '@subwallet/extension-koni-ui/hooks/useTranslation';
 import { getBondingOptions } from '@subwallet/extension-koni-ui/messaging';
 import Header from '@subwallet/extension-koni-ui/partials/Header';
 import ValidatorItem from '@subwallet/extension-koni-ui/Popup/Bonding/components/ValidatorItem';
+import { CHAIN_TYPE_MAP } from '@subwallet/extension-koni-ui/Popup/Bonding/utils';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import React, { useCallback, useContext, useEffect, useState } from 'react';
@@ -27,6 +29,7 @@ function BondingValidatorSelection ({ className }: Props): React.ReactElement<Pr
   const { t } = useTranslation();
   const { bondingParams, currentAccount: { account } } = useSelector((state: RootState) => state);
   const navigate = useContext(ActionContext);
+  const [currentAccount] = useState(account?.address as string);
   const [searchString, setSearchString] = useState('');
   const [loading, setLoading] = useState(true);
   const [maxNominatorPerValidator, setMaxNominatorPerValidator] = useState(0);
@@ -34,6 +37,7 @@ function BondingValidatorSelection ({ className }: Props): React.ReactElement<Pr
   const [isBondedBefore, setIsBondedBefore] = useState(false);
   const [bondedValidators, setBondedValidators] = useState<string[]>([]);
   const [maxNominations, setMaxNominations] = useState(1);
+  const isNetworkActive = useIsNetworkActive(bondingParams.selectedNetwork !== null ? bondingParams.selectedNetwork : undefined);
 
   const [sortByCommission, setSortByCommission] = useState(false);
   const [sortByReturn, setSortByReturn] = useState(false);
@@ -44,6 +48,18 @@ function BondingValidatorSelection ({ className }: Props): React.ReactElement<Pr
   const [showedValidators, setShowedValidators] = useState<ValidatorInfo[]>([]);
 
   const _height = window.innerHeight !== 600 ? (window.innerHeight * 0.68) : 330;
+
+  useEffect(() => {
+    if (account && account.address !== currentAccount) {
+      navigate('/');
+    }
+  }, [account, navigate, currentAccount]);
+
+  useEffect(() => {
+    if (!isNetworkActive) {
+      navigate('/');
+    }
+  }, [isNetworkActive, navigate]);
 
   const handleSortByCommission = useCallback(() => {
     if (!sortByCommission) {
@@ -117,7 +133,7 @@ function BondingValidatorSelection ({ className }: Props): React.ReactElement<Pr
     if (bondingParams.selectedNetwork === null) {
       navigate('/account/select-bonding-network');
     } else {
-      getBondingOptions(bondingParams.selectedNetwork, account?.address as string)
+      getBondingOptions(bondingParams.selectedNetwork, currentAccount)
         .then((bondingOptionInfo) => {
           setMaxNominatorPerValidator(bondingOptionInfo.maxNominatorPerValidator);
           setIsBondedBefore(bondingOptionInfo.isBondedBefore);
@@ -157,6 +173,16 @@ function BondingValidatorSelection ({ className }: Props): React.ReactElement<Pr
     setSliceIndex(_sliceIndex + INFINITE_SCROLL_PER_PAGE);
   }, [filteredValidators, sliceIndex]);
 
+  const getSubHeaderTitle = useCallback(() => {
+    if (CHAIN_TYPE_MAP.astar.includes(bondingParams.selectedNetwork as string)) {
+      return 'Select a dApp';
+    } else if (CHAIN_TYPE_MAP.para.includes(bondingParams.selectedNetwork as string)) {
+      return 'Select a collator';
+    }
+
+    return 'Select a validator';
+  }, [bondingParams.selectedNetwork]);
+
   return (
     <div className={className}>
       <Header
@@ -165,7 +191,7 @@ function BondingValidatorSelection ({ className }: Props): React.ReactElement<Pr
         showBackArrow
         showCancelButton={true}
         showSubHeader
-        subHeaderName={t<string>('Select a validator')}
+        subHeaderName={t<string>(getSubHeaderTitle())}
         to='/account/select-bonding-network'
       >
         <div className={'bonding-input-filter-container'}>

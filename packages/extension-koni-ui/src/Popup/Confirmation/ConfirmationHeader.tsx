@@ -142,7 +142,6 @@ export default styled(ConfirmationHeader)(({ theme }: Props) => `
     .network-logo {
       width: 24px;
       border-radius: 50%;
-      border: 1px solid #fff;
       margin-right: 8px;
     }
   }

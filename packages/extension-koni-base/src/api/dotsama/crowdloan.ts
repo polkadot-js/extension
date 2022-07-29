@@ -105,5 +105,10 @@ export async function subscribeCrowdloan (addresses: string[], dotSamaAPIMap: Re
     });
   }
 
-  return unsubMap;
+  return () => {
+    Object.values(unsubMap).forEach((unsub) => {
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-call
+      unsub && unsub();
+    });
+  };
 }

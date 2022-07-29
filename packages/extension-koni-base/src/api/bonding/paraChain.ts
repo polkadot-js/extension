@@ -31,7 +31,7 @@ export async function getParaBondingBasics (networkKey: string, dotSamaApi: ApiP
 
   let _unvestedAllocation;
 
-  if (apiProps.api.query.vesting.totalUnvestedAllocation) {
+  if (apiProps.api.query.vesting && apiProps.api.query.vesting.totalUnvestedAllocation) {
     _unvestedAllocation = await apiProps.api.query.vesting.totalUnvestedAllocation();
   }
 

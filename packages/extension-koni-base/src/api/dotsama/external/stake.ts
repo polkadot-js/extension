@@ -5,10 +5,9 @@ import { ApiProps, ExternalRequestPromise, NetworkJson, ResponseStakeExternal, R
 import LedgerSigner from '@subwallet/extension-base/signers/substrates/LedgerSigner';
 import QrSigner from '@subwallet/extension-base/signers/substrates/QrSigner';
 import { LedgerState, QrState } from '@subwallet/extension-base/signers/types';
-import { getBondingExtrinsic, getTargetValidators, getUnbondingExtrinsic, getWithdrawalExtrinsic } from '@subwallet/extension-koni-base/api/bonding';
+import { getBondingExtrinsic, getUnbondingExtrinsic, getWithdrawalExtrinsic } from '@subwallet/extension-koni-base/api/bonding';
 
 import { SubmittableExtrinsic } from '@polkadot/api/types';
-import { BN } from '@polkadot/util';
 
 import { sendExtrinsic } from './shared';
 
@@ -25,37 +24,47 @@ interface ExternalProps {
 interface StakeExternalProps extends ExternalProps{
   amount: number;
   bondedValidators: string[];
+  callback: (data: ResponseStakeExternal) => void;
   isBondedBefore: boolean;
+  lockPeriod?: number;
   nominatorAddress: string;
   validatorInfo: ValidatorInfo;
-  callback: (data: ResponseStakeExternal) => void;
 }
 
 interface CreateBondingExtrinsicProps {
+  amount: number;
   apiProp: ApiProps;
+  bondedValidators: string[];
+  isBondedBefore: boolean;
+  lockPeriod?: number;
   network: NetworkJson;
   nominatorAddress: string;
-  amount: number;
   validatorInfo: ValidatorInfo;
-  isBondedBefore: boolean;
-  bondedValidators: string[];
 }
 
 interface UnStakeExternalProps extends ExternalProps{
   address: string;
   amount: number;
   callback: (data: ResponseUnStakeExternal) => void;
+  unstakeAll?: boolean;
+  validatorAddress?: string;
 }
 
 interface CreateUnBondingExtrinsicProps {
+  address: string;
+  amount: number;
   apiProp: ApiProps;
   network: NetworkJson;
-  amount: number;
+  unstakeAll?: boolean;
+  validatorAddress?: string;
 }
 
 interface WithdrawStakeExternalProps extends Omit<ExternalProps, 'network'> {
+  action?: string;
   address: string;
   callback: (data: ResponseWithdrawStakeExternal) => void;
+  networkKey: string;
+  validatorAddress?: string;
 }
 
 // Method
@@ -64,23 +73,20 @@ const createBondingExtrinsic = async ({ amount,
   apiProp,
   bondedValidators,
   isBondedBefore,
+  lockPeriod,
   network,
   nominatorAddress,
   validatorInfo }: CreateBondingExtrinsicProps): Promise<SubmittableExtrinsic<'promise'>> => {
-  const parsedAmount = amount * (10 ** (network.decimals as number));
-  const binaryAmount = new BN(parsedAmount);
-  const targetValidators: string[] = getTargetValidators(bondedValidators, validatorInfo.address);
-
-  return await getBondingExtrinsic(apiProp, nominatorAddress, binaryAmount, targetValidators, isBondedBefore);
+  return await getBondingExtrinsic(network, network.key, amount, bondedValidators, validatorInfo, isBondedBefore, nominatorAddress, apiProp, lockPeriod);
 };
 
-const createUnBondingExtrinsic = async ({ amount,
+const createUnBondingExtrinsic = async ({ address,
+  amount,
   apiProp,
-  network }: CreateUnBondingExtrinsicProps): Promise<SubmittableExtrinsic<'promise'>> => {
-  const parsedAmount = amount * (10 ** (network.decimals as number));
-  const binaryAmount = new BN(parsedAmount);
-
-  return await getUnbondingExtrinsic(apiProp, binaryAmount);
+  network,
+  unstakeAll,
+  validatorAddress }: CreateUnBondingExtrinsicProps): Promise<SubmittableExtrinsic<'promise'>> => {
+  return await getUnbondingExtrinsic(address, amount, network.key, network, apiProp, validatorAddress, unstakeAll);
 };
 
 // Method Qr
@@ -95,6 +101,7 @@ export const createStakeQr = async ({ amount,
   callback,
   id,
   isBondedBefore,
+  lockPeriod,
   network,
   nominatorAddress,
   setState,
@@ -109,7 +116,8 @@ export const createStakeQr = async ({ amount,
     nominatorAddress,
     validatorInfo,
     bondedValidators,
-    amount
+    amount,
+    lockPeriod
   });
 
   if (extrinsic !== null) {
@@ -172,13 +180,18 @@ export const createUnStakeQr = async ({ address,
   id,
   network,
   setState,
-  updateState }: UnStakeQrProps): Promise<void> => {
+  unstakeAll,
+  updateState,
+  validatorAddress }: UnStakeQrProps): Promise<void> => {
   const txState: ResponseUnStakeQr = {};
 
   const extrinsic = await createUnBondingExtrinsic({
     amount,
     apiProp,
-    network
+    network,
+    address,
+    unstakeAll,
+    validatorAddress
   });
 
   if (extrinsic !== null) {
@@ -234,13 +247,16 @@ interface WithdrawStakeQrProps extends WithdrawStakeExternalProps{
   callback: (data: ResponseWithdrawStakeQr) => void;
 }
 
-export const createWithdrawStakeQr = async ({ address,
+export const createWithdrawStakeQr = async ({ action,
+  address,
   apiProp,
   callback,
   id,
+  networkKey,
   setState,
-  updateState }: WithdrawStakeQrProps) => {
-  const extrinsic = await getWithdrawalExtrinsic(apiProp, address);
+  updateState,
+  validatorAddress }: WithdrawStakeQrProps) => {
+  const extrinsic = await getWithdrawalExtrinsic(apiProp, networkKey, address, validatorAddress, action);
   const txState: ResponseWithdrawStakeQr = {};
 
   if (extrinsic !== null) {
@@ -304,6 +320,7 @@ export const createStakeLedger = async ({ amount,
   callback,
   id,
   isBondedBefore,
+  lockPeriod,
   network,
   nominatorAddress,
   setState,
@@ -318,7 +335,8 @@ export const createStakeLedger = async ({ amount,
     nominatorAddress,
     validatorInfo,
     bondedValidators,
-    amount
+    amount,
+    lockPeriod
   });
 
   if (extrinsic !== null) {
@@ -363,13 +381,18 @@ export const createUnStakeLedger = async ({ address,
   id,
   network,
   setState,
-  updateState }: UnStakeLedgerProps): Promise<void> => {
+  unstakeAll,
+  updateState,
+  validatorAddress }: UnStakeLedgerProps): Promise<void> => {
   const txState: ResponseUnStakeLedger = {};
 
   const extrinsic = await createUnBondingExtrinsic({
     amount,
     apiProp,
-    network
+    network,
+    validatorAddress,
+    unstakeAll,
+    address
   });
 
   if (extrinsic !== null) {
@@ -407,13 +430,16 @@ interface WithdrawStakeLedgerProps extends WithdrawStakeExternalProps{
   callback: (data: ResponseWithdrawStakeLedger) => void;
 }
 
-export const createWithdrawStakeLedger = async ({ address,
+export const createWithdrawStakeLedger = async ({ action,
+  address,
   apiProp,
   callback,
   id,
+  networkKey,
   setState,
-  updateState }: WithdrawStakeLedgerProps) => {
-  const extrinsic = await getWithdrawalExtrinsic(apiProp, address);
+  updateState,
+  validatorAddress }: WithdrawStakeLedgerProps) => {
+  const extrinsic = await getWithdrawalExtrinsic(apiProp, networkKey, address, validatorAddress, action);
   const txState: ResponseWithdrawStakeLedger = {};
 
   if (extrinsic !== null) {

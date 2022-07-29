@@ -31,10 +31,10 @@ import CustomEvmTokenStore from '@subwallet/extension-koni-base/stores/CustomEvm
 import NftStore from '@subwallet/extension-koni-base/stores/Nft';
 import NftCollectionStore from '@subwallet/extension-koni-base/stores/NftCollection';
 import SettingsStore from '@subwallet/extension-koni-base/stores/Settings';
+import StakingStore from '@subwallet/extension-koni-base/stores/Staking';
 import TransactionHistoryStore from '@subwallet/extension-koni-base/stores/TransactionHistory';
 import { convertFundStatus, getCurrentProvider, mergeNetworkProviders } from '@subwallet/extension-koni-base/utils';
 import { anyNumberToBN } from '@subwallet/extension-koni-base/utils/eth';
-import StakingStore from '@subwallet/extension-koni-base/stores/Staking';
 import SimpleKeyring from 'eth-simple-keyring';
 import RLP, { Input } from 'rlp';
 import { BehaviorSubject, Subject } from 'rxjs';

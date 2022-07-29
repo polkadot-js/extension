@@ -447,6 +447,7 @@ function StakeAuthWithdrawal ({ address, amount, className, hideModal, networkKe
           </div>
           <div
             className={'close-button-confirm header-alignment'}
+            // eslint-disable-next-line @typescript-eslint/no-misused-promises
             onClick={hideConfirm}
           >
             Cancel

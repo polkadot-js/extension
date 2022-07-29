@@ -399,5 +399,10 @@
   "Display Payload": "",
   "The account you will send NFT from.": "",
   "The sender account is Ledger account. This is not support {{chain}}": "",
-  "The sender account is Ledger account. This is not support XCM Transfer": ""
+  "The sender account is Ledger account. This is not support XCM Transfer": "",
+  "Data has been updated": "",
+  "Block": "",
+  "Unblock": "",
+  "The account which you will claim reward": "",
+  "Claim staking reward from account": ""
 }

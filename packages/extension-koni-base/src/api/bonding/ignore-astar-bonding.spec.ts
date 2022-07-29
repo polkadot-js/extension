@@ -5,7 +5,7 @@ import { ValidatorInfo } from '@subwallet/extension-base/background/KoniTypes';
 import { ERA_LENGTH_MAP } from '@subwallet/extension-koni-base/api/bonding/utils';
 import { PREDEFINED_NETWORKS } from '@subwallet/extension-koni-base/api/predefinedNetworks';
 import { DOTSAMA_AUTO_CONNECT_MS } from '@subwallet/extension-koni-base/constants';
-import { getCurrentProvider, isUrl, parseRawNumber } from '@subwallet/extension-koni-base/utils/utils';
+import { getCurrentProvider, isUrl, parseRawNumber } from '@subwallet/extension-koni-base/utils';
 import fetch from 'cross-fetch';
 
 import { ApiPromise, WsProvider } from '@polkadot/api';

@@ -331,8 +331,8 @@ function ChainBalances ({ address,
               accountInfo={selectedInfo}
               backToHome={_backToHome}
               balanceInfo={selectedBalanceInfo}
-              setIsExportModalOpen={setIsExportModalOpen}
               isConnecting={connectingList[selectedInfo.networkKey]?.status === 'done'}
+              setIsExportModalOpen={setIsExportModalOpen}
               setQrModalOpen={setQrModalOpen}
               setSelectedNetworkBalance={setSelectedNetworkBalance}
               updateModalQr={updateModalQr}

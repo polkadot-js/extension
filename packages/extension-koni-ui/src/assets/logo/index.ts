@@ -340,6 +340,7 @@ const LogosMap: Record<string, string> = {
   listen: require('./listen.png'),
   // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
   kabocha: require('./kabocha.png'),
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
   tdot: require('./103.tDOT.png'),
   // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
   taiksm: require('./47.TaiKSM.png'),

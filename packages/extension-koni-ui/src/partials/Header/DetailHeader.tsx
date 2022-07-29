@@ -11,6 +11,7 @@ import { AccountContext } from '@subwallet/extension-koni-ui/components';
 import AccountVisibleModal from '@subwallet/extension-koni-ui/components/Modal/AccountVisibleModal';
 import Tooltip from '@subwallet/extension-koni-ui/components/Tooltip';
 import { useGetCurrentAuth } from '@subwallet/extension-koni-ui/hooks/useGetCurrentAuth';
+import useIsPopup from '@subwallet/extension-koni-ui/hooks/useIsPopup';
 import useOutsideClick from '@subwallet/extension-koni-ui/hooks/useOutsideClick';
 import useToast from '@subwallet/extension-koni-ui/hooks/useToast';
 import useTranslation from '@subwallet/extension-koni-ui/hooks/useTranslation';
@@ -63,6 +64,7 @@ function DetailHeader ({ className = '',
   const actionsRef = useRef(null);
 
   const { t } = useTranslation();
+  const isPopup = useIsPopup();
   const currentAuth = useGetCurrentAuth();
 
   const { currentNetwork } = useSelector((state: RootState) => state);
@@ -257,27 +259,32 @@ function DetailHeader ({ className = '',
   return (
     <div className={`detail-header ${className}`}>
       <div className='detail-header__part-1'>
-        <div
-          className='detail-header-connect-status-btn'
-          data-for={trigger}
-          data-tip={true}
-          onClick={openModal}
-        >
-          <img
-            alt='Connect Icon'
-            className={CN(
-              'detail-header-connect-status-btn__icon',
-              {
-                [visibleClassName]: connectionState !== ConnectionStatement.BLOCKED
-              }
-            )}
-            src={connectionState !== ConnectionStatement.BLOCKED ? EyeIcon : EyeSlashIcon}
-          />
-          <Tooltip
-            text={visibleText}
-            trigger={trigger}
-          />
-        </div>
+        {
+          isPopup &&
+          (
+            <div
+              className='detail-header-connect-status-btn'
+              data-for={trigger}
+              data-tip={true}
+              onClick={openModal}
+            >
+              <img
+                alt='Connect Icon'
+                className={CN(
+                  'detail-header-connect-status-btn__icon',
+                  {
+                    [visibleClassName]: connectionState !== ConnectionStatement.BLOCKED
+                  }
+                )}
+                src={connectionState !== ConnectionStatement.BLOCKED ? EyeIcon : EyeSlashIcon}
+              />
+              <Tooltip
+                text={visibleText}
+                trigger={trigger}
+              />
+            </div>
+          )
+        }
       </div>
 
       <div className='detail-header__part-2'>

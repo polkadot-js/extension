@@ -1564,22 +1564,22 @@ export const PREDEFINED_NETWORKS: Record<string, NetworkJson> = {
     nativeToken: 'OTP',
     decimals: 12
   },
-  kapex: {
-    key: 'kapex',
-    chain: 'Kapex',
-    genesisHash: '0x7838c3c774e887c0a53bcba9e64f702361a1a852d5550b86b58cd73827fa1e1e',
-    ss58Format: 2007,
-    providers: {
-      Totem: 'wss://k-ui.kapex.network'
-    },
-    active: false,
-    currentProviderMode: 'ws',
-    currentProvider: 'Totem',
-    groups: ['POLKADOT_PARACHAIN'],
-    paraId: 2007,
-    nativeToken: 'KAPEX',
-    decimals: 12
-  },
+  // kapex: {
+  //   key: 'kapex',
+  //   chain: 'Kapex',
+  //   genesisHash: '0x7838c3c774e887c0a53bcba9e64f702361a1a852d5550b86b58cd73827fa1e1e',
+  //   ss58Format: 2007,
+  //   providers: {
+  //     Totem: 'wss://k-ui.kapex.network'
+  //   },
+  //   active: false,
+  //   currentProviderMode: 'ws',
+  //   currentProvider: 'Totem',
+  //   groups: ['POLKADOT_PARACHAIN'],
+  //   paraId: 2007,
+  //   nativeToken: 'KAPEX',
+  //   decimals: 12
+  // },
   dorafactory: {
     key: 'dorafactory',
     chain: 'Dorafactory Network',

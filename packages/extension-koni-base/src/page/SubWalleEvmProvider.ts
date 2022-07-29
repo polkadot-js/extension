@@ -83,7 +83,6 @@ export class SubWalletEvmProvider extends SafeEventEmitter implements EvmProvide
                   // @ts-ignore
                   resolve(accounts);
                 }).catch((e: EvmRpcError) => {
-                  console.error(e.code, e);
                   reject(e);
                 });
             }).catch((e: EvmRpcError) => {
@@ -98,7 +97,6 @@ export class SubWalletEvmProvider extends SafeEventEmitter implements EvmProvide
               resolve(result as T);
             })
             .catch((e: EvmRpcError) => {
-              console.error(e.code, e);
               reject(e);
             });
         });

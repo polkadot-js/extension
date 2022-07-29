@@ -1,7 +1,13 @@
 // Copyright 2019-2022 @subwallet/extension-koni authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
+import { parseRawNumber } from '@subwallet/extension-koni-base/utils/utils';
+
 import { BN } from '@polkadot/util';
+
+export const REVOKE_ACTION = 'revoke';
+export const BOND_LESS_ACTION = 'bondLess';
+export const DECREASE_ACTION = 'decrease'; // for bifrost
 
 export interface ValidatorExtraInfo {
   commission: string,
@@ -28,6 +34,33 @@ export interface UniformEraPayoutInflationParams extends InflationParams {
   yearlyInflationInTokens: number;
 }
 
+export const PARACHAIN_INFLATION_DISTRIBUTION: Record<string, Record<string, number>> = {
+  moonbeam: { // https://docs.moonbeam.network/learn/features/staking/#annual-inflation
+    reward: 0.5,
+    collatorCommission: 0.2,
+    bondReserve: 0.3
+  },
+  moonriver: {
+    reward: 0.5,
+    collatorCommission: 0.2,
+    bondReserve: 0.3
+  },
+  moonbase: {
+    reward: 0.5,
+    collatorCommission: 0.2,
+    bondReserve: 0.3
+  },
+  turing: { // https://docs.oak.tech/docs/delegators/
+    reward: 0.5
+  },
+  turingStaging: { // https://docs.oak.tech/docs/delegators/
+    reward: 0.5
+  },
+  bifrost: {
+    reward: 0
+  }
+};
+
 const DEFAULT_PARAMS: InflationParams = {
   auctionAdjust: 0,
   auctionMax: 0,
@@ -37,14 +70,24 @@ const DEFAULT_PARAMS: InflationParams = {
   stakeTarget: 0.5
 };
 
-export const ERA_LENGTH_MAP: Record<string, number> = {
+export const ERA_LENGTH_MAP: Record<string, number> = { // in hours
   alephTest: 24,
   aleph: 24,
   polkadot: 24,
   kusama: 6,
   westend: 24,
   hydradx: 24,
-  default: 24
+  default: 24,
+  moonbeam: 6,
+  moonriver: 2,
+  moonbase: 2,
+  turing: 2,
+  turingStaging: 2,
+  astar: 24,
+  shiden: 24,
+  shibuya: 24,
+  bifrost_testnet: 0.5,
+  bifrost: 2
 };
 
 const ALEPH_DEFAULT_UNIFORM_ERA_PAYOUT_PARAMS: UniformEraPayoutInflationParams = {
@@ -123,4 +166,41 @@ export function calculateValidatorStakedReturn (chainStakedReturn: number, total
 
 export function getCommission (commissionString: string) {
   return parseFloat(commissionString.split('%')[0]); // Example: 12%
+}
+
+export interface InflationConfig {
+  expect: {
+    min: string,
+    ideal: string,
+    max: string
+  },
+  annual: {
+    min: string,
+    ideal: string,
+    max: string
+  },
+  round: {
+    min: string,
+    ideal: string,
+    max: string
+  }
+}
+
+export function getParaCurrentInflation (totalStaked: number, inflationConfig: InflationConfig) { // read more at https://hackmd.io/@sbAqOuXkRvyiZPOB3Ryn6Q/Sypr3ZJh5
+  const expectMin = parseRawNumber(inflationConfig.expect.min);
+  const expectMax = parseRawNumber(inflationConfig.expect.max);
+
+  if (totalStaked < expectMin) {
+    const inflationString = inflationConfig.annual.min.split('%')[0];
+
+    return parseFloat(inflationString);
+  } else if (totalStaked > expectMax) {
+    const inflationString = inflationConfig.annual.max.split('%')[0];
+
+    return parseFloat(inflationString);
+  }
+
+  const inflationString = inflationConfig.annual.ideal.split('%')[0];
+
+  return parseFloat(inflationString);
 }

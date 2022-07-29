@@ -11,7 +11,6 @@ import { BaseNftApi } from '@subwallet/extension-koni-base/api/nft/nft';
 import { RmrkNftApi } from '@subwallet/extension-koni-base/api/nft/rmrk_nft';
 import StatemineNftApi from '@subwallet/extension-koni-base/api/nft/statemine_nft';
 import UniqueNftApi from '@subwallet/extension-koni-base/api/nft/unique_nft';
-import { state } from '@subwallet/extension-koni-base/background/handlers';
 import { categoryAddresses } from '@subwallet/extension-koni-base/utils';
 import Web3 from 'web3';
 
@@ -53,6 +52,7 @@ function createWeb3NftApi (chain: string, web3: Web3 | null, addresses: string[]
   return new Web3NftApi(web3, evmAddresses, chain);
 }
 
+// TODO: race apiProps.isReady against a timeout, if timeout then read data from store (to be done after implementing light client and migrate use of full node connection)
 export class NftHandler {
   apiProps: Record<string, any>[] = [];
   web3ApiMap: Record<string, Web3> = {};
@@ -156,37 +156,27 @@ export class NftHandler {
     }
   }
 
-  private existCollection (newCollection: NftCollection) {
-    return state.getNftCollection().nftCollectionList.some((collection) =>
-      collection.chain === newCollection.chain &&
-      collection.collectionId === newCollection.collectionId &&
-      collection.collectionName === newCollection.collectionName);
-  }
-
-  private existItem (newItem: NftItem) {
-    return state.getNft().nftList.some((item) =>
-      item.chain === newItem.chain &&
-      item.id === newItem.id &&
-      item.collectionId === newItem.collectionId &&
-      item.name === newItem.name);
-  }
-
-  public async handleNfts (evmContracts: CustomEvmToken[], updateItem: (data: NftItem) => void, updateCollection: (data: NftCollection) => void, updateReady: (ready: boolean) => void) {
+  public async handleNfts (
+    evmContracts: CustomEvmToken[],
+    updateItem: (data: NftItem) => void,
+    updateCollection: (data: NftCollection) => void,
+    updateReady: (ready: boolean) => void,
+    updateIds: (networkKey: string, collectionId?: string, nftIds?: string[]) => void,
+    updateCollectionIds: (networkKey: string, collectionIds?: string[]) => void) {
     this.setupApi();
     this.setEvmContracts(evmContracts);
     await Promise.all(this.handlers.map(async (handler) => {
-      await handler.fetchNfts(
-        (data: NftItem) => {
-          if (!this.existItem(data)) {
-            updateItem(data);
-          }
+      await handler.fetchNfts({
+        updateItem: (data: NftItem) => {
+          updateItem(data);
         },
-        (data: NftCollection) => {
-          if (!this.existCollection(data)) {
-            updateCollection(data);
-          }
+        updateCollection: (data: NftCollection) => {
+          updateCollection(data);
         },
-        updateReady);
+        updateReady,
+        updateNftIds: updateIds,
+        updateCollectionIds
+      });
     }));
 
     updateReady(true);

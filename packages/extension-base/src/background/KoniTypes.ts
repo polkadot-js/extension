@@ -61,6 +61,16 @@ export interface RequestAuthorizationPerAccount extends RequestAuthorization {
   address: string;
 }
 
+export interface RequestAuthorizationPerSite {
+  id: string;
+  values: Record<string, boolean>;
+}
+
+export interface RequestAuthorizationBlock {
+  id: string;
+  connectedValue: boolean;
+}
+
 export interface ResultResolver {
   result: boolean;
   accounts: string[];
@@ -98,12 +108,19 @@ export interface StakingItem {
   unlockingBalance?: string
   nativeToken: string,
   unit?: string,
-  state: APIItemState
+  state: APIItemState,
+  unlockingInfo?: UnlockingStakeInfo
 }
 
 export interface StakingJson {
+  reset?: boolean,
   ready?: boolean,
   details: Record<string, StakingItem>
+}
+
+export interface StakingStoreJson {
+  bonded: Record<string, StakingItem>,
+  reward: Array<StakingRewardItem>
 }
 
 export interface PriceJson {
@@ -170,6 +187,11 @@ export interface NftCollectionJson {
   nftCollectionList: Array<NftCollection>;
 }
 
+export interface NftStoreJson {
+  nftList: Array<NftItem>;
+  nftCollectionList: Array<NftCollection>;
+}
+
 export interface TokenBalanceRaw {
   reserved: BN,
   frozen: BN,
@@ -185,14 +207,16 @@ export interface BalanceChildItem {
 
 export interface BalanceItem {
   state: APIItemState,
-  free: string,
-  reserved: string,
-  miscFrozen: string,
-  feeFrozen: string,
-  children?: Record<string, BalanceChildItem>
+  free?: string,
+  reserved?: string,
+  miscFrozen?: string,
+  feeFrozen?: string,
+  children?: Record<string, BalanceChildItem>,
+  timestamp?: number
 }
 
 export interface BalanceJson {
+  reset?: boolean,
   details: Record<string, BalanceItem>
 }
 
@@ -203,6 +227,7 @@ export interface CrowdloanItem {
 }
 
 export interface CrowdloanJson {
+  reset?: boolean,
   details: Record<string, CrowdloanItem>
 }
 
@@ -410,7 +435,9 @@ export interface TransactionHistoryItemType {
   // ex: sub token (DOT, AUSD, KSM, ...) of Acala, Karaura uses main token to pay fee
   isSuccess: boolean;
   action: 'send' | 'received';
-  extrinsicHash: string
+  extrinsicHash: string;
+  origin?: 'app' | 'network';
+  eventIdx?: number | null;
 }
 
 export interface RequestTransactionHistoryGet {
@@ -566,7 +593,9 @@ export type RequestNftForceUpdate = {
   collectionId: string,
   nft: NftItem,
   isSendingSelf: boolean,
-  chain: string
+  chain: string,
+  senderAddress: string,
+  recipientAddress: string
 }
 
 export enum NETWORK_ERROR {
@@ -1039,6 +1068,8 @@ export interface ValidatorInfo {
   isVerified: boolean;
   minBond: number;
   isNominated: boolean; // this validator has been staked to before
+  icon?: string;
+  hasScheduledRequest?: boolean; // for parachain, can't stake more on a collator that has existing scheduled request
 }
 
 export interface BondingOptionInfo {
@@ -1068,7 +1099,8 @@ export interface BondingSubmitParams {
   validatorInfo: ValidatorInfo,
   password?: string,
   isBondedBefore: boolean,
-  bondedValidators: string[]
+  bondedValidators: string[], // already delegated validators
+  lockPeriod?: number // in month
 }
 
 export interface BasicTxResponse {
@@ -1092,23 +1124,51 @@ export interface UnbondingSubmitParams {
   amount: number,
   networkKey: string,
   address: string,
-  password?: string
+  password?: string,
+  // for some chains
+  validatorAddress?: string,
+  unstakeAll?: boolean
 }
 
 export interface UnlockingStakeParams {
   address: string,
-  networkKey: string
+  networkKey: string,
+  validatorList?: string[]
+}
+
+export interface DelegationItem {
+  owner: string,
+  amount: string, // raw amount string
+  identity?: string,
+  minBond: string,
+  hasScheduledRequest: boolean
 }
 
 export interface UnlockingStakeInfo {
   nextWithdrawal: number,
   redeemable: number,
-  nextWithdrawalAmount: number
+  nextWithdrawalAmount: number,
+  nextWithdrawalAction?: string,
+  validatorAddress?: string // validator to unstake from
+}
+
+export interface StakeUnlockingJson {
+  timestamp: number,
+  details: Record<string, UnlockingStakeInfo>
 }
 
 export interface StakeWithdrawalParams {
   address: string,
   networkKey: string,
+  password?: string,
+  validatorAddress?: string,
+  action?: string
+}
+
+export interface StakeClaimRewardParams {
+  address: string,
+  networkKey: string,
+  validatorAddress?: string,
   password?: string
 }
 
@@ -1174,6 +1234,11 @@ export interface ResponseWithdrawStakeLedger extends ResponseWithdrawStakeExtern
   ledgerState?: LedgerState;
 }
 
+export interface StakeDelegationRequest {
+  address: string,
+  networkKey: string
+}
+
 export interface SingleModeJson {
   networkKeys: string[],
   theme: ThemeTypes,
@@ -1206,14 +1271,17 @@ export interface ResponseParseEVMTransactionInput {
 }
 
 export interface KoniRequestSignatures {
-  'pri(unbonding.submitWithdrawal)': [StakeWithdrawalParams, BasicTxResponse, BasicTxResponse]
+  'pri(staking.delegationInfo)': [StakeDelegationRequest, DelegationItem[]];
+  'pri(staking.submitClaimReward)': [StakeClaimRewardParams, BasicTxResponse, BasicTxResponse];
+  'pri(staking.claimRewardTxInfo)': [StakeClaimRewardParams, BasicTxInfo];
+  'pri(unbonding.submitWithdrawal)': [StakeWithdrawalParams, BasicTxResponse, BasicTxResponse];
   'pri(unbonding.withdrawalTxInfo)': [StakeWithdrawalParams, BasicTxInfo];
-  'pri(unbonding.unlockingInfo)': [UnlockingStakeParams, UnlockingStakeInfo];
+  'pri(unbonding.subscribeUnlockingInfo)': [null, StakeUnlockingJson, StakeUnlockingJson];
   'pri(unbonding.submitTransaction)': [UnbondingSubmitParams, BasicTxResponse, BasicTxResponse];
   'pri(unbonding.txInfo)': [UnbondingSubmitParams, BasicTxInfo];
   'pri(bonding.txInfo)': [BondingSubmitParams, BasicTxInfo];
   'pri(bonding.submitTransaction)': [BondingSubmitParams, BasicTxResponse, BasicTxResponse];
-  'pri(bonding.getChainBondingBasics)': [NetworkJson[], Record<string, ChainBondingBasics>];
+  'pri(bonding.getChainBondingBasics)': [NetworkJson[], Record<string, ChainBondingBasics>, Record<string, ChainBondingBasics>];
   'pri(bonding.getBondingOptions)': [BondingOptionParams, BondingOptionInfo];
   'pri(networkMap.recoverDotSama)': [string, boolean];
   'pri(substrateNft.submitTransaction)': [SubstrateNftSubmitTransaction, NftTransactionResponse, NftTransactionResponse]
@@ -1260,6 +1328,8 @@ export interface KoniRequestSignatures {
   'pri(authorize.changeSiteAll)': [RequestAuthorizationAll, boolean, AuthUrls];
   'pri(authorize.changeSite)': [RequestAuthorization, boolean, AuthUrls];
   'pri(authorize.changeSitePerAccount)': [RequestAuthorizationPerAccount, boolean, AuthUrls];
+  'pri(authorize.changeSitePerSite)': [RequestAuthorizationPerSite, boolean];
+  'pri(authorize.changeSiteBlock)': [RequestAuthorizationBlock, boolean];
   'pri(authorize.forgetSite)': [RequestForgetSite, boolean, AuthUrls];
   'pri(authorize.forgetAllSite)': [null, boolean, AuthUrls];
   'pri(authorize.rejectV2)': [RequestAuthorizeReject, boolean];
@@ -1337,4 +1407,10 @@ export interface KoniRequestSignatures {
   'pri(stake.ledger.create)': [RequestStakeExternal, Array<BaseTxError>, ResponseStakeLedger];
   'pri(unStake.ledger.create)': [RequestUnStakeExternal, Array<BaseTxError>, ResponseUnStakeLedger];
   'pri(withdrawStake.ledger.create)': [RequestWithdrawStakeExternal, Array<BaseTxError>, ResponseWithdrawStakeLedger];
+  // Authorize
+  'pri(authorize.subscribe)': [null, AuthUrls, AuthUrls];
+}
+
+export interface ApplicationMetadataType {
+  version: string;
 }

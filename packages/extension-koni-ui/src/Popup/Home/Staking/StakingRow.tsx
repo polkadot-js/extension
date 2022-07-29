@@ -2,18 +2,12 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { StakingRewardItem } from '@subwallet/extension-base/background/KoniTypes';
-import cloneIconLight from '@subwallet/extension-koni-ui/assets/clone--color-2.svg';
-import cloneIconDark from '@subwallet/extension-koni-ui/assets/clone--color-3.svg';
-import useToast from '@subwallet/extension-koni-ui/hooks/useToast';
-import useTranslation from '@subwallet/extension-koni-ui/hooks/useTranslation';
-import { getUnlockingStakeInfo } from '@subwallet/extension-koni-ui/messaging';
-import StakeAuthWithdrawal from '@subwallet/extension-koni-ui/Popup/Home/Staking/StakeAuthWithdrawal';
-import StakingMenu from '@subwallet/extension-koni-ui/Popup/Home/Staking/StakingMenu';
-import { Theme, ThemeProps } from '@subwallet/extension-koni-ui/types';
+import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { formatLocaleNumber } from '@subwallet/extension-koni-ui/util/formatNumber';
-import React, { useCallback, useContext, useEffect, useState } from 'react';
-import CopyToClipboard from 'react-copy-to-clipboard';
-import styled, { ThemeContext } from 'styled-components';
+import React, { useCallback, useState } from 'react';
+import styled from 'styled-components';
+
+const StakingMenu = React.lazy(() => import('@subwallet/extension-koni-ui/Popup/Home/Staking/StakingMenu'));
 
 interface Props extends ThemeProps {
   className?: string;
@@ -29,47 +23,48 @@ interface Props extends ThemeProps {
   activeStake: string | undefined;
   unbondingStake: string | undefined;
   isAccountAll: boolean;
-  address: string;
+  isExternalAccount: boolean;
+  isHardwareAccount: boolean;
+
+  redeemable: number;
+  nextWithdrawal: number;
+  nextWithdrawalAmount: number;
+  nextWithdrawalAction: string | undefined;
+  targetValidator: string | undefined;
+  unlockingDataTimestamp: number;
+
+  setShowWithdrawalModal: (val: boolean) => void;
+  setShowClaimRewardModal: (val: boolean) => void;
+  setActionNetworkKey: (val: string) => void;
+  setTargetValidator: (val: string) => void;
+  setTargetNextWithdrawalAction: (val: string | undefined) => void;
+  setTargetRedeemable: (val: number) => void;
 }
 
-function StakingRow ({ activeStake, address, chainName, className, index, isAccountAll, logo, networkKey, price, reward, totalStake, unbondingStake, unit }: Props): React.ReactElement<Props> {
+function StakingRow ({ activeStake, chainName, className, index, isAccountAll, isExternalAccount, isHardwareAccount, logo, networkKey, nextWithdrawal, nextWithdrawalAction, nextWithdrawalAmount, price, redeemable, reward, setActionNetworkKey, setShowClaimRewardModal, setShowWithdrawalModal, setTargetNextWithdrawalAction, setTargetRedeemable, setTargetValidator, targetValidator, totalStake, unbondingStake, unit }: Props): React.ReactElement<Props> {
   const [showReward, setShowReward] = useState(false);
   const [showStakingMenu, setShowStakingMenu] = useState(false);
-  const [redeemable, setRedeemable] = useState(0);
-  const [nextWithdrawal, setNextWithdrawal] = useState(-1);
-  const [nextWithdrawalAmount, setNextWithdrawalAmount] = useState(-1);
-  const [showWithdrawalModal, setShowWithdrawalModal] = useState(false);
 
   const handleToggleReward = useCallback(() => {
     setShowReward(!showReward);
   }, [showReward]);
 
   const handleShowWithdrawalModal = useCallback(() => {
+    setActionNetworkKey(networkKey);
+    setTargetNextWithdrawalAction(nextWithdrawalAction);
+    setTargetRedeemable(redeemable);
+    setTargetValidator(targetValidator || '');
     setShowWithdrawalModal(true);
-  }, []);
+  }, [nextWithdrawalAction, redeemable, targetValidator, networkKey, setActionNetworkKey, setShowWithdrawalModal, setTargetNextWithdrawalAction, setTargetRedeemable, setTargetValidator]);
 
-  const handleHideWithdrawalModal = useCallback(() => {
-    setShowWithdrawalModal(false);
-  }, []);
+  const handleShowClaimRewardModal = useCallback(() => {
+    setActionNetworkKey(networkKey);
+    setShowClaimRewardModal(true);
+  }, [networkKey, setActionNetworkKey, setShowClaimRewardModal]);
 
   const handleToggleBondingMenu = useCallback(() => {
     setShowStakingMenu(!showStakingMenu);
   }, [showStakingMenu]);
-
-  useEffect(() => {
-    if (parseFloat(unbondingStake as string) > 0) {
-      getUnlockingStakeInfo({
-        networkKey,
-        address
-      })
-        .then((resp) => {
-          setRedeemable(resp.redeemable);
-          setNextWithdrawal(resp.nextWithdrawal);
-          setNextWithdrawalAmount(resp.nextWithdrawalAmount);
-        })
-        .catch(console.error);
-    }
-  }, [address, networkKey, unbondingStake]);
 
   const editBalance = (balance: string) => {
     if (parseFloat(balance) === 0) {
@@ -108,18 +103,6 @@ function StakingRow ({ activeStake, address, chainName, className, index, isAcco
     return editBalance(balance.toString());
   };
 
-  const { show } = useToast();
-  const { t } = useTranslation();
-  const themeContext = useContext(ThemeContext as React.Context<Theme>);
-  const theme = themeContext.id;
-
-  const _onCopy = useCallback(
-    () => {
-      show(t('Copied'));
-    },
-    [show, t]
-  );
-
   return (
     <div className={`${className || ''} ${showReward ? '-show-detail' : ''}`}>
       <div
@@ -149,6 +132,7 @@ function StakingRow ({ activeStake, address, chainName, className, index, isAcco
                     nextWithdrawal={nextWithdrawal}
                     nextWithdrawalAmount={nextWithdrawalAmount}
                     redeemable={redeemable}
+                    showClaimRewardModal={handleShowClaimRewardModal}
                     showMenu={showStakingMenu}
                     showWithdrawalModal={handleShowWithdrawalModal}
                     toggleMenu={handleToggleBondingMenu}
@@ -221,38 +205,6 @@ function StakingRow ({ activeStake, address, chainName, className, index, isAcco
               </div>
             </div>
 
-            {
-              chainName === 'astar' &&
-              <div className={'reward-container'}>
-                <div className={'reward-title'}>Smart contract</div>
-                <div className={'smart-contract-field'}>
-                  <div className={'smart-contract-value'}>
-                    {reward?.smartContract?.slice(0, 6)}...{reward?.smartContract?.slice(-6)}
-                  </div>
-                  <CopyToClipboard text={(reward.smartContract && reward.smartContract) || ''}>
-                    <div
-                      className={'kn-copy-btn'}
-                      onClick={_onCopy}
-                    >
-                      {theme === 'dark'
-                        ? (
-                          <img
-                            alt='copy'
-                            src={cloneIconDark}
-                          />
-                        )
-                        : (
-                          <img
-                            alt='copy'
-                            src={cloneIconLight}
-                          />
-                        )
-                      }
-                    </div>
-                  </CopyToClipboard>
-                </div>
-              </div>
-            }
             {/* <div className={'reward-container'}> */}
             {/*  <div className={'reward-title'}>APR</div> */}
             {/*  <div className={'reward-amount'}> */}
@@ -261,15 +213,6 @@ function StakingRow ({ activeStake, address, chainName, className, index, isAcco
             {/* </div> */}
           </div>
         </div>
-      }
-
-      {
-        showWithdrawalModal && <StakeAuthWithdrawal
-          address={address}
-          amount={redeemable}
-          hideModal={handleHideWithdrawalModal}
-          networkKey={networkKey}
-        />
       }
     </div>
   );
@@ -374,12 +317,11 @@ export default React.memo(styled(StakingRow)(({ theme }: Props) => `
 
   .network-logo {
     display: block;
-    min-width: 32px;
-    height: 32px;
+    min-width: 36px;
+    height: 36px;
     border-radius: 100%;
     overflow: hidden;
     background-color: #fff;
-    border: 1px solid #fff;
     cursor: pointer;
   }
 

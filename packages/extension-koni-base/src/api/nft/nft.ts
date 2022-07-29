@@ -2,9 +2,17 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { ApiProps, NftCollection, NftItem } from '@subwallet/extension-base/background/KoniTypes';
-import { CLOUDFLARE_PINATA_SERVER } from '@subwallet/extension-koni-base/api/nft/config';
+import { getRandomIpfsGateway } from '@subwallet/extension-koni-base/api/nft/config';
 import { isUrl } from '@subwallet/extension-koni-base/utils';
 import Web3 from 'web3';
+
+export interface HandleNftParams {
+  updateItem: (data: NftItem) => void,
+  updateCollection: (data: NftCollection) => void,
+  updateReady: (ready: boolean) => void,
+  updateNftIds: (networkKey: string, collectionId?: string, nftIds?: string[]) => void,
+  updateCollectionIds: (networkKey: string, collectionIds?: string[]) => void
+}
 
 export abstract class BaseNftApi {
   chain = '';
@@ -89,14 +97,14 @@ export abstract class BaseNftApi {
     }
 
     if (!input.includes('ipfs://')) {
-      return CLOUDFLARE_PINATA_SERVER + input;
+      return getRandomIpfsGateway() + input;
     }
 
-    return CLOUDFLARE_PINATA_SERVER + input.split('ipfs://ipfs/')[1];
+    return getRandomIpfsGateway() + input.split('ipfs://ipfs/')[1];
   }
 
   // Sub-class implements this function to parse data into prop result
-  abstract handleNfts(updateItem: (data: NftItem) => void, updateCollection: (data: NftCollection) => void, updateReady: (ready: boolean) => void): void;
+  abstract handleNfts(params: HandleNftParams): void;
 
-  abstract fetchNfts(updateItem: (data: NftItem) => void, updateCollection: (data: NftCollection) => void, updateReady: (ready: boolean) => void): Promise<number>;
+  abstract fetchNfts(params: HandleNftParams): Promise<number>;
 }

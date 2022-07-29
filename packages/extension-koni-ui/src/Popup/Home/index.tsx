@@ -179,8 +179,10 @@ function Wrapper ({ className, theme }: WrapperProps): React.ReactElement {
 
 function Home ({ chainRegistryMap, className = '', currentAccount, historyMap, network }: Props): React.ReactElement {
   const { networkKey } = network;
-  const { t } = useTranslation();
   const { address } = currentAccount;
+
+  const { t } = useTranslation();
+
   const [isShowBalanceDetail, setShowBalanceDetail] = useState<boolean>(false);
   const backupTabId = window.localStorage.getItem('homeActiveTab') || '1';
   const [activatedTab, setActivatedTab] = useState<number>(Number(backupTabId));
@@ -251,7 +253,7 @@ function Home ({ chainRegistryMap, className = '', currentAccount, historyMap, n
   }, []);
   const nftGridSize = parseNftGridSize();
   const { loading: loadingNft, nftList, totalCollection, totalItems } = useFetchNft(nftPage, networkKey, nftGridSize);
-  const { data: stakingData, loading: loadingStaking, priceMap: stakingPriceMap } = useFetchStaking(networkKey);
+  const { data: stakingData, loading: loadingStaking, priceMap: stakingPriceMap, stakeUnlockingTimestamp } = useFetchStaking(networkKey);
 
   const handleNftPage = useCallback((page: number) => {
     setNftPage(page);
@@ -312,6 +314,7 @@ function Home ({ chainRegistryMap, className = '', currentAccount, historyMap, n
 
   const onChangeAccount = useCallback((address: string) => {
     setShowBalanceDetail(false);
+    setShowNftCollectionDetail(false);
   }, []);
 
   return (
@@ -434,6 +437,7 @@ function Home ({ chainRegistryMap, className = '', currentAccount, historyMap, n
             data={stakingData}
             loading={loadingStaking}
             priceMap={stakingPriceMap}
+            stakeUnlockingTimestamp={stakeUnlockingTimestamp}
           />
         )}
 
@@ -521,6 +525,6 @@ export default React.memo(styled(Wrapper)(({ theme }: WrapperProps) => `
   }
 
   .home__account-qr-modal .subwallet-modal {
-    max-width: 460px;
+    max-width: 390px;
   }
 `));

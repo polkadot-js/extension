@@ -4,6 +4,7 @@
 import { configureStore } from '@reduxjs/toolkit/dist';
 
 import AllAccountReducer from './AllAccount';
+import AuthUrlReducer from './AuthUrl';
 import BalanceReducer from './Balance';
 import BondingParamsReducer from './BondingParams';
 import ChainRegistryReducer from './ChainRegistry';
@@ -17,6 +18,7 @@ import NftReducer from './Nft';
 import NftCollectionReducer from './NftCollection';
 import PriceReducer from './Price';
 import SettingsReducer from './Settings';
+import StakeUnlockingReducer from './StakeUnlockingInfo';
 import StakingReducer from './Staking';
 import StakingRewardReducer from './StakingReward';
 import TokenConfigReducer from './TokenConfigParams';
@@ -26,6 +28,7 @@ import TransferNftParamsReducer from './TransferNftParams';
 import UnbondingParamsReducer from './UnbondingParams';
 
 const reducers = {
+  stakeUnlockingInfo: StakeUnlockingReducer,
   unbondingParams: UnbondingParamsReducer,
   bondingParams: BondingParamsReducer,
   networkConfigParams: NetworkConfigParamsReducer,
@@ -46,7 +49,8 @@ const reducers = {
   currentNetwork: CurrentNetworkReducer,
   chainRegistry: ChainRegistryReducer,
   allAccount: AllAccountReducer,
-  settings: SettingsReducer
+  settings: SettingsReducer,
+  authUrl: AuthUrlReducer
 };
 
 export const store = configureStore({

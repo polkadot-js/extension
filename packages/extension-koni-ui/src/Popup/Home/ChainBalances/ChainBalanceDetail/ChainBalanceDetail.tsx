@@ -6,7 +6,8 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import useTranslation from '@subwallet/extension-koni-ui/hooks/useTranslation';
 import { ModalQrProps, ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { AccountInfoByNetwork, BalanceInfo } from '@subwallet/extension-koni-ui/util/types';
-import React, { useCallback, useEffect, useRef, useState } from 'react';
+import BigN from 'bignumber.js';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import styled from 'styled-components';
 
 import ChainBalanceChildrenItem from '../ChainBalanceDetail/ChainBalanceChildrenItem';
@@ -18,11 +19,13 @@ interface Props extends ThemeProps {
   backToHome: () => void;
   className?: string;
   setIsExportModalOpen: (visible: boolean) => void;
+  isConnecting: boolean;
   setQrModalOpen: (visible: boolean) => void;
   updateModalQr: (value: Partial<ModalQrProps>) => void;
+  setSelectedNetworkBalance?: (networkBalance: BigN) => void;
 }
 
-function ChainBalanceDetail ({ accountInfo, backToHome, balanceInfo, className, setIsExportModalOpen, setQrModalOpen, updateModalQr }: Props): React.ReactElement<Props> {
+function ChainBalanceDetail ({ accountInfo, backToHome, balanceInfo, className, isConnecting, setIsExportModalOpen, setQrModalOpen, setSelectedNetworkBalance, updateModalQr }: Props): React.ReactElement<Props> {
   const [selectedNetworkKey, setSelectedNetworkKey] = useState<string>('');
   const ref = useRef<HTMLDivElement>(null);
   const { t } = useTranslation();
@@ -30,6 +33,14 @@ function ChainBalanceDetail ({ accountInfo, backToHome, balanceInfo, className, 
   useEffect(() => {
     ref.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
   }, []);
+
+  const convertedBalanceValue = useMemo((): string => {
+    return balanceInfo.convertedBalanceValue.toString();
+  }, [balanceInfo]);
+
+  useEffect(() => {
+    setSelectedNetworkBalance && setSelectedNetworkBalance(new BigN(convertedBalanceValue));
+  }, [setSelectedNetworkBalance, convertedBalanceValue]);
 
   const toggleBalanceDetail = useCallback((networkKey: string) => {
     if (networkKey === selectedNetworkKey) {
@@ -60,6 +71,7 @@ function ChainBalanceDetail ({ accountInfo, backToHome, balanceInfo, className, 
       <ChainBalanceDetailItem
         accountInfo={accountInfo}
         balanceInfo={balanceInfo}
+        isConnecting={isConnecting}
         isLoading={!balanceInfo}
         isShowDetail={accountInfo.networkKey === selectedNetworkKey}
         setIsExportModalOpen={setIsExportModalOpen}
@@ -73,6 +85,7 @@ function ChainBalanceDetail ({ accountInfo, backToHome, balanceInfo, className, 
           <ChainBalanceChildrenItem
             accountInfo={accountInfo}
             balanceInfo={child}
+            isConnecting={isConnecting}
             isLoading={!child}
             key={child.key}
           />

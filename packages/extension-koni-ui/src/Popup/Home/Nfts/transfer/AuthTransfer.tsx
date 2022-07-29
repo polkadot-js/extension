@@ -126,7 +126,7 @@ function AuthTransfer ({ chain, className, collectionId, nftItem, recipientAddre
             setShowConfirm(false);
             setShowResult(true);
             setExtrinsicHash(data.transactionHash as string);
-            nftForceUpdate({ nft: nftItem, collectionId, isSendingSelf: data.isSendingSelf, chain } as RequestNftForceUpdate)
+            nftForceUpdate({ nft: nftItem, collectionId, isSendingSelf: data.isSendingSelf, chain, senderAddress: account?.account?.address, recipientAddress } as RequestNftForceUpdate)
               .catch(console.error);
           } else {
             setIsTxSuccess(false);
@@ -180,7 +180,7 @@ function AuthTransfer ({ chain, className, collectionId, nftItem, recipientAddre
           setShowConfirm(false);
           setShowResult(true);
           setExtrinsicHash(data.transactionHash as string);
-          nftForceUpdate({ nft: nftItem, collectionId, isSendingSelf: data.isSendingSelf, chain } as RequestNftForceUpdate)
+          nftForceUpdate({ nft: nftItem, collectionId, isSendingSelf: data.isSendingSelf, chain, senderAddress: senderAccount.address, recipientAddress } as RequestNftForceUpdate)
             .catch(console.error);
         } else {
           setIsTxSuccess(false);

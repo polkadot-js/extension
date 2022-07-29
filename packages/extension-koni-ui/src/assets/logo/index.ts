@@ -329,6 +329,18 @@ const LogosMap: Record<string, string> = {
   // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
   hydradx_main: require('./80.HydraDX.png'),
   // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+  origintrail: require('./113.origintrail.png'),
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+  kapex: require('./114.kapex.png'),
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+  dorafactory: require('./115.dorafactory.png'),
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+  bajun: require('./116.bajun.png'),
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+  listen: require('./117.listen.png'),
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+  kabocha: require('./118.kabocha.png'),
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
   tdot: require('./103.tDOT.png'),
   // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
   taiksm: require('./47.TaiKSM.png'),

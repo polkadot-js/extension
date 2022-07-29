@@ -1,7 +1,7 @@
 // Copyright 2019-2022 @subwallet/extension-koni authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { TransactionHistoryItemType } from '@subwallet/extension-base/background/KoniTypes';
+import { TransactionHistoryItemJson, TransactionHistoryItemType } from '@subwallet/extension-base/background/KoniTypes';
 import BaseMigrationJob from '@subwallet/extension-koni-base/migration/Base';
 import TransactionHistoryStore from '@subwallet/extension-koni-base/stores/TransactionHistory';
 import TransactionHistoryStoreV2 from '@subwallet/extension-koni-base/stores/TransactionHistoryV2';
@@ -20,7 +20,7 @@ export default class ChangeTransactionHistoryStore extends BaseMigrationJob {
     const addressList = Object.keys(accounts.subject.value);
 
     for (const address of addressList) {
-      const transactions: Record<string, TransactionHistoryItemType[]> = {};
+      const transactions: Record<string, TransactionHistoryItemJson> = {};
 
       for (const networkJson of Object.values(this.state.getNetworkMap())) {
         let histories = await oldStore.asyncGet(getOldKey(address, networkJson.key));
@@ -45,7 +45,10 @@ export default class ChangeTransactionHistoryStore extends BaseMigrationJob {
         if (histories && histories.length) {
           const newHistories = histories.map((item) => ({ ...item, origin: 'app' } as TransactionHistoryItemType)).sort((a, b) => b.time - a.time);
 
-          transactions[hash] = newHistories;
+          transactions[hash] = {
+            items: newHistories,
+            total: newHistories.length
+          };
         }
       }
 

@@ -428,6 +428,11 @@ export interface TransactionHistoryItemType {
   eventIdx?: number | null;
 }
 
+export interface TransactionHistoryItemJson {
+  items: TransactionHistoryItemType[],
+  total: number
+}
+
 export interface RequestTransactionHistoryGet {
   address: string;
   networkKey: string;

@@ -16,13 +16,14 @@ import React, { useCallback } from 'react';
 import CopyToClipboard from 'react-copy-to-clipboard';
 import styled from 'styled-components';
 
-import { Loading } from '../../../components';
+import { CircleSpinner, Loading } from '../../../components';
 
 interface Props extends ThemeProps {
   className?: string;
   accountInfo: AccountInfoByNetwork;
   balanceInfo: BalanceInfo;
   isLoading: boolean;
+  isConnecting: boolean;
   setQrModalOpen: (visible: boolean) => void;
   updateModalQr: (value: Partial<ModalQrProps>) => void;
   showBalanceDetail: (networkKey: string) => void,
@@ -32,6 +33,7 @@ interface Props extends ThemeProps {
 function ChainBalanceItem ({ accountInfo,
   balanceInfo,
   className,
+  isConnecting,
   isLoading,
   setQrModalOpen,
   setSelectedNetworkBalance,
@@ -150,7 +152,7 @@ function ChainBalanceItem ({ accountInfo,
                 </div>
               )}
 
-              {isLoading && (
+              {(isLoading || isConnecting) && (
                 <NetworkTools networkKey={networkKey} />
               )}
             </div>
@@ -176,7 +178,13 @@ function ChainBalanceItem ({ accountInfo,
               />
             </div>
 
-            {(!!balanceInfo.detailBalances.length || !!balanceInfo.childrenBalances.length) && (
+            {isConnecting && (
+              <div className='chain-balance-item__spinner'>
+                <CircleSpinner className='chain-balance-item__spinner-image' />
+              </div>
+            )}
+
+            {!isConnecting && (!!balanceInfo.detailBalances.length || !!balanceInfo.childrenBalances.length) && (
               <div className='chain-balance-item__toggle' />
             )}
           </div>
@@ -240,12 +248,10 @@ export default React.memo(styled(ChainBalanceItem)(({ theme }: Props) => `
 
   .chain-balance-item__logo {
     min-width: 32px;
-    height: 32px;
+    height: 36px;
     border-radius: 100%;
     overflow: hidden;
     margin-right: 12px;
-    background-color: #fff;
-    border: 1px solid #fff;
     margin-top:10px;
   }
 
@@ -325,6 +331,19 @@ export default React.memo(styled(ChainBalanceItem)(({ theme }: Props) => `
       display: block;
       background: ${theme.boxBorderColor};
     }
+  }
+
+  .chain-balance-item__spinner {
+    position: absolute;
+    display: inline-block;
+    padding: 3.5px;
+    top: 10px;
+    right: 37px;
+  }
+
+  .chain-balance-item__spinner-image {
+    width: 28px;
+    height: 28px;
   }
 
 `));

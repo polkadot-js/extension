@@ -8,7 +8,7 @@ import { useSelector } from 'react-redux';
 export default function useIsSufficientBalance (networkKey: string, minBond: number | undefined) {
   const { balance: { details: balanceMap }, networkMap } = useSelector((state: RootState) => state);
 
-  if (!minBond) {
+  if (minBond === undefined) {
     return false;
   }
 
@@ -19,7 +19,7 @@ export default function useIsSufficientBalance (networkKey: string, minBond: num
       if (balanceObj.state !== APIItemState.READY) {
         break;
       } else {
-        const freeBalance = (parseFloat(balanceObj.free) - parseFloat(balanceObj.miscFrozen)) / (10 ** (networkMap[networkKey].decimals as number));
+        const freeBalance = (parseFloat(balanceObj.free || '0') - parseFloat(balanceObj.miscFrozen || '0')) / (10 ** (networkMap[networkKey].decimals as number));
 
         if (freeBalance > minBond) {
           result = true;

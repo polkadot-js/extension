@@ -381,7 +381,6 @@ export default React.memo(styled(NetworkMenu)(({ theme }: Props) => `
     overflow: hidden;
     image-rendering: -webkit-optimize-contrast;
     image-rendering: crisp-edges;
-    border: 1px solid #fff;
     background: #fff;
     margin-right: 10px;
   }

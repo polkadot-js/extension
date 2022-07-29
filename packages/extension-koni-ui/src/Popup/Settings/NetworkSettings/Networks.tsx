@@ -2,15 +2,15 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { NetworkJson } from '@subwallet/extension-base/background/KoniTypes';
-import { InputFilter, Link } from '@subwallet/extension-koni-ui/components';
+import { InputFilter } from '@subwallet/extension-koni-ui/components';
 import useFetchNetworkMap from '@subwallet/extension-koni-ui/hooks/screen/setting/useFetchNetworkMap';
 import useToast from '@subwallet/extension-koni-ui/hooks/useToast';
 import useTranslation from '@subwallet/extension-koni-ui/hooks/useTranslation';
 import { disableAllNetwork, resetDefaultNetwork } from '@subwallet/extension-koni-ui/messaging';
 import Header from '@subwallet/extension-koni-ui/partials/Header';
 import NetworkItem from '@subwallet/extension-koni-ui/Popup/Settings/NetworkSettings/NetworkItem';
-import { store } from '@subwallet/extension-koni-ui/stores';
-import { NetworkConfigParams } from '@subwallet/extension-koni-ui/stores/types';
+// import { store } from '@subwallet/extension-koni-ui/stores';
+// import { NetworkConfigParams } from '@subwallet/extension-koni-ui/stores/types';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import React, { useCallback, useState } from 'react';
 import styled from 'styled-components';
@@ -23,7 +23,7 @@ function Networks ({ className }: Props): React.ReactElement {
   const { t } = useTranslation();
   const { show } = useToast();
 
-  const { isEthereum, parsedNetworkMap: networkMap } = useFetchNetworkMap();
+  const { parsedNetworkMap: networkMap } = useFetchNetworkMap();
   const [searchString, setSearchString] = useState('');
 
   const filterNetwork = useCallback(() => {
@@ -44,22 +44,22 @@ function Networks ({ className }: Props): React.ReactElement {
     setSearchString(val);
   }, []);
 
-  const handleAddNetwork = useCallback(() => {
-    const item: NetworkJson = {
-      active: false,
-      currentProvider: '',
-      currentProviderMode: 'ws',
-      genesisHash: '',
-      groups: [],
-      providers: {},
-      ss58Format: 0,
-      key: '',
-      chain: '',
-      isEthereum
-    };
-
-    store.dispatch({ type: 'networkConfigParams/update', payload: { data: item, mode: 'create' } as NetworkConfigParams });
-  }, [isEthereum]);
+  // const handleAddNetwork = useCallback(() => {
+  //   const item: NetworkJson = {
+  //     active: false,
+  //     currentProvider: '',
+  //     currentProviderMode: 'ws',
+  //     genesisHash: '',
+  //     groups: [],
+  //     providers: {},
+  //     ss58Format: 0,
+  //     key: '',
+  //     chain: '',
+  //     isEthereum
+  //   };
+  //
+  //   store.dispatch({ type: 'networkConfigParams/update', payload: { data: item, mode: 'create' } as NetworkConfigParams });
+  // }, [isEthereum]);
 
   const handleDisableAll = useCallback(() => {
     disableAllNetwork()
@@ -146,17 +146,17 @@ function Networks ({ className }: Props): React.ReactElement {
         />)}
       </div>
 
-      <div className={'add-network-container'}>
-        <Link
-          className={'add-network-link'}
-          onClick={handleAddNetwork}
-          to='/account/config-network'
-        >
-          <div className={'add-network-button'}>
-            Add Network
-          </div>
-        </Link>
-      </div>
+      {/* <div className={'add-network-container'}> */}
+      {/*  <Link */}
+      {/*    className={'add-network-link'} */}
+      {/*    onClick={handleAddNetwork} */}
+      {/*    to='/account/config-network' */}
+      {/*  > */}
+      {/*    <div className={'add-network-button'}> */}
+      {/*      Add Network */}
+      {/*    </div> */}
+      {/*  </Link> */}
+      {/* </div> */}
     </div>
   );
 }
@@ -252,5 +252,6 @@ export default styled(Networks)(({ theme }: Props) => `
 
   .networks-list {
     overflow: auto;
+    margin-bottom: 20px;
   }
 `);

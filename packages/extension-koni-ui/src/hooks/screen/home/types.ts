@@ -34,4 +34,5 @@ export type StakingType = {
   loading: boolean;
   data: StakingDataType[];
   priceMap: Record<string, number>;
+  stakeUnlockingTimestamp: number; // the timestamp that unlocking data was retrieved
 }

@@ -1,12 +1,12 @@
-     674	Nam Phạm                      	remove usage of hydradx snakenet
+     676	Nam Phạm                      	
      465	Jaco                          	0.42.5 (#969)
-     409	AnhMTV                        	
+     411	AnhMTV                        	
      151	lw-cdm                        	Update logo for Moonbeans
      142	quangdo                       	update some label and variable (original to origin)
       83	lw-cdm                        	
       82	Thibaut Sardan                	Add account filtering feature (#832)
       68	Hieu Dao                      	Update staking logo
-      60	khainh                        	Show NFT home when switch account
+      61	khainh                        	Display crowdloans for inactive networks
       59	S2kael                        	[Issue-339] change name images
       55	leewong                       	#118: update balance logic for Kintsugi testnet
       53	Dominhquangdev                	update Bridge code

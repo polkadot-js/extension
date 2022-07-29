@@ -9,10 +9,10 @@ import styled from 'styled-components';
 
 import settings from '@polkadot/ui-settings';
 
-import { AccountInfoEl, ActionContext, Button, ButtonArea, Dropdown, Warning } from '../components';
+import { AccountInfoEl, ActionContext, Button, ButtonArea, Checkbox, Dropdown, Warning } from '../components';
 import { useLedger } from '../hooks/useLedger';
 import useTranslation from '../hooks/useTranslation';
-import { createAccountHardware } from '../messaging';
+import { createAccountHardwareV2 } from '../messaging';
 import { Header, Name } from '../partials';
 import { ThemeProps } from '../types';
 
@@ -39,6 +39,7 @@ function ImportLedger ({ className }: Props): React.ReactElement {
   const [error, setError] = useState<string | null>(null);
   const [isBusy, setIsBusy] = useState(false);
   const [genesis, setGenesis] = useState<string | null>(null);
+  const [isAllowed, setIsAllowed] = useState<boolean>(true);
   const onAction = useContext(ActionContext);
   const [name, setName] = useState<string | null>(null);
   const { address, error: ledgerError, isLoading: ledgerLoading, isLocked: ledgerLocked, refresh, warning: ledgerWarning } = useLedger(genesis, accountIndex, addressOffset);
@@ -77,7 +78,15 @@ function ImportLedger ({ className }: Props): React.ReactElement {
       if (address && genesis && name) {
         setIsBusy(true);
 
-        createAccountHardware(address, 'ledger', accountIndex, addressOffset, name, genesis)
+        createAccountHardwareV2({
+          address,
+          hardwareType: 'ledger',
+          accountIndex,
+          addressOffset,
+          name,
+          genesisHash: genesis,
+          isAllowed: isAllowed
+        })
           .then(() => onAction('/'))
           .catch((error: Error) => {
             console.error(error);
@@ -87,7 +96,7 @@ function ImportLedger ({ className }: Props): React.ReactElement {
           });
       }
     },
-    [accountIndex, address, addressOffset, genesis, name, onAction]
+    [accountIndex, address, addressOffset, genesis, isAllowed, name, onAction]
   );
 
   // select element is returning a string
@@ -156,6 +165,16 @@ function ImportLedger ({ className }: Props): React.ReactElement {
             {error || ledgerError}
           </Warning>
         )}
+
+        {!!name &&
+          (
+            <Checkbox
+              checked={isAllowed}
+              label={t<string>('Auto connect to all DApp after importing')}
+              onChange={setIsAllowed}
+            />
+          )
+        }
         <ButtonArea className={'import-ledger-button-area'}>
           {ledgerLocked
             ? (

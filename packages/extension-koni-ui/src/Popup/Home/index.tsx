@@ -510,6 +510,6 @@ export default React.memo(styled(Wrapper)(({ theme }: WrapperProps) => `
   }
 
   .home__account-qr-modal .subwallet-modal {
-    max-width: 460px;
+    max-width: 390px;
   }
 `));

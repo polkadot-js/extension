@@ -317,12 +317,11 @@ export default React.memo(styled(StakingRow)(({ theme }: Props) => `
 
   .network-logo {
     display: block;
-    min-width: 32px;
-    height: 32px;
+    min-width: 36px;
+    height: 36px;
     border-radius: 100%;
     overflow: hidden;
     background-color: #fff;
-    border: 1px solid #fff;
     cursor: pointer;
   }
 

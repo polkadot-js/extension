@@ -384,5 +384,10 @@
   "Add NFT": "",
   "Add Token": "",
   "Select the account you would like to send from": "",
-  "Select the network to obtain the sending address": ""
+  "Select the network to obtain the sending address": "",
+  "Data has been updated": "",
+  "Block": "",
+  "Unblock": "",
+  "The account which you will claim reward": "",
+  "Claim staking reward from account": ""
 }

@@ -1,14 +1,15 @@
-     550	Nam Phạm                      	update litentry/litmus metadata
+     674	Nam Phạm                      	remove usage of hydradx snakenet
      465	Jaco                          	0.42.5 (#969)
-     384	AnhMTV                        	Release version 0.5.2
+     409	AnhMTV                        	
      151	lw-cdm                        	Update logo for Moonbeans
      142	quangdo                       	update some label and variable (original to origin)
+      83	lw-cdm                        	
       82	Thibaut Sardan                	Add account filtering feature (#832)
-      81	lw-cdm                        	
-      59	Hieu Dao                      	update hydradx genesisHash
+      68	Hieu Dao                      	Update staking logo
+      60	khainh                        	Show NFT home when switch account
+      59	S2kael                        	[Issue-339] change name images
       55	leewong                       	#118: update balance logic for Kintsugi testnet
       53	Dominhquangdev                	update Bridge code
-      32	S2kael                        	[Issue-393] fix token decimals is string
       10	Trang Trịnh                   	api get karura and acala nfts
        9	Minh Le                       	
        9	minhld1029                    	[#115] [ForgetAccount] catch exception refList undefined
@@ -24,7 +25,6 @@
        2	carumusan                     	Support ipfs and ipns urls (#667)
        2	ccris02                       	Adding Polish Language Option to the Extension (#761)
        2	joe petrowski                 	add plasm (#462)
-       2	khainh                        	Add logo for 3usd, taiksm, tdot
        2	Remon Nashid                  	Prevent unauthorized apps from abusing pub(authorize.tab) request (#686)
        2	Shawn Tabrizi                 	Add configurable notifications (#767)
        2	WoeOm                         	add darwinia network (#493)

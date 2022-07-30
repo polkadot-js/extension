@@ -1,4 +1,4 @@
-     538	Jaco                          	Bump ui libs (#1116)
+     539	Jaco                          	0.44.3 (#1120)
       85	Thibaut Sardan                	fix ask again invisible in popup (#1119)
        7	Ivan Rukhavets                	Mention derivation in FAQ (#334)
        4	Amaury Martiny                	PostMessageProvider with on('connected' | 'disconnected') (#279)

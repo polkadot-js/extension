@@ -1,5 +1,19 @@
 # CHANGELOG
 
+## 0.44.3 Jul 30, 2022
+
+- **Important** Not published to the stores, aligns with latest released packages.
+
+Contributed:
+
+- Adjust layout for authorization modal (Thanks to https://github.com/Tbaut)
+
+Changes:
+
+- Upgrade to `@polkadot/api` 9.0.1
+- Updated to `@polkadot/util` 10.1.2
+
+
 ## 0.44.2 Jul 24, 2022
 
 - **Important** Not published to the stores, aligns with latest released packages.

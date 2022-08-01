@@ -4,6 +4,7 @@
 import BaseMigrationJob from '../Base';
 import ChangeTransactionHistoryStore from './ChangeTransactionHistoryStore';
 // import RemoveWrongTransactionHistoriesFromStore from './RemoveWrongTransactionHistoriesFromStore';
+import FixMissingTransactionHistory from './FixMissingTransactionHistory';
 
 export default <Record<string, typeof BaseMigrationJob[]>> {
   '0.4.4-0': [
@@ -11,5 +12,8 @@ export default <Record<string, typeof BaseMigrationJob[]>> {
   ],
   '0.4.6-2': [
     // RemoveWrongTransactionHistoriesFromStore
+  ],
+  '0.5.3-1': [
+    FixMissingTransactionHistory
   ]
 };

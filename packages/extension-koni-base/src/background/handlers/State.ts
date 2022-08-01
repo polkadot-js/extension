@@ -30,7 +30,7 @@ import NftStore from '@subwallet/extension-koni-base/stores/Nft';
 import NftCollectionStore from '@subwallet/extension-koni-base/stores/NftCollection';
 import SettingsStore from '@subwallet/extension-koni-base/stores/Settings';
 import StakingStore from '@subwallet/extension-koni-base/stores/Staking';
-import TransactionHistoryStore from '@subwallet/extension-koni-base/stores/TransactionHistoryV2';
+import TransactionHistoryStore from '@subwallet/extension-koni-base/stores/TransactionHistoryV3';
 import { convertFundStatus, getCurrentProvider, mergeNetworkProviders } from '@subwallet/extension-koni-base/utils/utils';
 import SimpleKeyring from 'eth-simple-keyring';
 import { BehaviorSubject, Subject } from 'rxjs';

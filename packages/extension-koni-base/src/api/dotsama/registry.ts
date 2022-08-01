@@ -156,7 +156,7 @@ export const getRegistry = async (networkKey: string, api: ApiPromise, customErc
 
     Object.assign(tokenMap, foreignTokens);
 
-    if (networkKey === 'karura') {
+    if (networkKey === 'karura') { // quick fix for native token
       tokenMap.KAR.isMainToken = true;
     } else if (networkKey === 'acala') {
       tokenMap.ACA.isMainToken = true;

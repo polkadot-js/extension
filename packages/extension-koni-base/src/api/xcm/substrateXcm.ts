@@ -25,12 +25,14 @@ export async function substrateEstimateCrossChainFee (
   let feeString = '';
   const originNetworkJson = networkMap[originNetworkKey];
   const destinationNetworkJson = networkMap[destinationNetworkKey];
+  // TODO: find a better way to handle kUSD on karura
+  const tokenSymbol = tokenInfo.symbol.toUpperCase() === 'AUSD' && originNetworkKey === 'karura' ? 'KUSD' : tokenInfo.symbol.toUpperCase();
 
   try {
     if (SupportedCrossChainsMap[originNetworkKey].type === 'p') {
-      console.log('here', api.tx.xTokens.transfer(
+      console.log('xcm tx here', api.tx.xTokens.transfer(
         {
-          Token: tokenInfo.symbol.toUpperCase()
+          Token: tokenSymbol
         },
         value,
         getMultiLocationFromParachain(originNetworkKey, destinationNetworkKey, networkMap, to),
@@ -39,7 +41,7 @@ export async function substrateEstimateCrossChainFee (
       // Case ParaChain -> ParaChain && ParaChain -> RelayChain
       const paymentInfo = await api.tx.xTokens.transfer(
         {
-          Token: tokenInfo.symbol.toUpperCase()
+          Token: tokenSymbol
         },
         value,
         getMultiLocationFromParachain(originNetworkKey, destinationNetworkKey, networkMap, to),
@@ -110,9 +112,12 @@ export function substrateGetXcmExtrinsic (
 ) {
   // Case ParaChain -> RelayChain && Parachain -> Parachain
   if (SupportedCrossChainsMap[originNetworkKey].type === 'p') {
+    // TODO: find a better way to handle kUSD on karura
+    const tokenSymbol = tokenInfo.symbol.toUpperCase() === 'AUSD' && originNetworkKey === 'karura' ? 'KUSD' : tokenInfo.symbol.toUpperCase();
+
     return api.tx.xTokens.transfer(
       {
-        Token: tokenInfo.symbol.toUpperCase()
+        Token: tokenSymbol
       },
       +value,
       getMultiLocationFromParachain(originNetworkKey, destinationNetworkKey, networkMap, to),

@@ -13,7 +13,7 @@ export default <Record<string, typeof BaseMigrationJob[]>> {
   '0.4.6-2': [
     // RemoveWrongTransactionHistoriesFromStore
   ],
-  '0.5.3-1': [
+  '0.5.3-2': [
     FixMissingTransactionHistory
   ]
 };

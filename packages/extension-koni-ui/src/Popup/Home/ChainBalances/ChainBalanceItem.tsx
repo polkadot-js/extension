@@ -2,9 +2,8 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import cloneIcon from '@subwallet/extension-koni-ui/assets/clone.svg';
-import uploadIcon from '@subwallet/extension-koni-ui/assets/icon/upload.svg';
-import receivedIcon from '@subwallet/extension-koni-ui/assets/receive-icon.svg';
 import { BalanceVal } from '@subwallet/extension-koni-ui/components/balance';
+import BalanceShowQrAction from '@subwallet/extension-koni-ui/components/BalanceShowQrAction';
 import NetworkTools from '@subwallet/extension-koni-ui/components/NetworkTools';
 import useToast from '@subwallet/extension-koni-ui/hooks/useToast';
 import useTranslation from '@subwallet/extension-koni-ui/hooks/useTranslation';
@@ -153,17 +152,9 @@ function ChainBalanceItem ({ accountInfo,
                       />
                     </div>
                   </CopyToClipboard>
-                  <img
-                    alt='receive'
-                    className='chain-balance-item__receive'
-                    onClick={_openQr}
-                    src={receivedIcon}
-                  />
-                  <img
-                    alt='receive'
-                    className='chain-balance-item__export'
-                    onClick={_openExportQr}
-                    src={uploadIcon}
+                  <BalanceShowQrAction
+                    openExportQr={_openExportQr}
+                    openQr={_openQr}
                   />
                 </>
               )}

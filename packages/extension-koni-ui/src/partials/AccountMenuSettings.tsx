@@ -84,6 +84,7 @@ function AccountMenuSettings ({ changeAccountCallback, className, closeSetting, 
       <div className='account-menu-settings-header'>
         <div className='account-menu-settings__branding'>
           <img
+            alt={'logo'}
             className='logo'
             src={themeContext.logo}
           />
@@ -227,23 +228,6 @@ function AccountMenuSettings ({ changeAccountCallback, className, closeSetting, 
                 </Link>
               )
             }
-          </MenuSettingItem>
-        </div>
-        <div className='account-menu-settings-items-wrapper'>
-          <MenuSettingItem className='account-menu-settings__menu-item'>
-            <Link
-              className='account-menu-settings__menu-item-text'
-              isDisabled={!mediaAllowed}
-              title={!mediaAllowed
-                ? t<string>('Camera access must be first enabled in the settings')
-                : ''
-              }
-              to='/account/scan-qr'
-            >
-              {/* @ts-ignore */}
-              <FontAwesomeIcon icon={faQrcode} />
-              <span>{t<string>('Scan QR')}</span>
-            </Link>
           </MenuSettingItem>
         </div>
       </div>

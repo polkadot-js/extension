@@ -1,12 +1,10 @@
 // Copyright 2019-2022 @polkadot/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { faTimes } from '@fortawesome/free-solid-svg-icons';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { NetworkJson } from '@subwallet/extension-base/background/KoniTypes';
 import { AccountJson } from '@subwallet/extension-base/background/types';
-import Identicon from '@subwallet/extension-koni-ui/components/Identicon';
-import Modal from '@subwallet/extension-koni-ui/components/Modal';
+import { Button } from '@subwallet/extension-koni-ui/components';
+import Modal from '@subwallet/extension-koni-ui/components/Modal/index';
 import { AccountContext } from '@subwallet/extension-koni-ui/contexts';
 import useToast from '@subwallet/extension-koni-ui/hooks/useToast';
 import useTranslation from '@subwallet/extension-koni-ui/hooks/useTranslation';
@@ -20,9 +18,7 @@ import QRCode from 'react-qr-code';
 import { useSelector } from 'react-redux';
 import styled from 'styled-components';
 
-import { IconTheme } from '@polkadot/react-identicon/types';
-
-import cloneLogo from '../assets/clone.svg';
+import cloneLogo from '../../assets/clone.svg';
 
 interface Props extends ThemeProps {
   className?: string;
@@ -83,23 +79,8 @@ function ExportAccountQrModal ({ className,
 
   return (
     <Modal className={className}>
-      <div className={'export-account-qr-modal'}>
-        <div className='export-account-qr-modal__header'>
-          <FontAwesomeIcon
-            className='export-account-qr-modal__icon'
-            // @ts-ignore
-            icon={faTimes}
-            onClick={closeModal}
-          />
-        </div>
+      <div className='export-account-qr-modal'>
         <div className='export-account-qr-modal__content'>
-          <Identicon
-            className='export-account-qr-modal__logo'
-            iconTheme={networkInfo.icon as IconTheme}
-            prefix={networkInfo.ss58Format}
-            size={54}
-            value={formattedAddress}
-          />
           <div className='export-account-qr-modal-token-name'>
             <div className='export-account-qr-modal-token-name__text'>
               {account?.name}
@@ -119,7 +100,7 @@ function ExportAccountQrModal ({ className,
               <div className='export-account-qr-modal__address-text'>
                 <img
                   alt='logo'
-                  className={'export-account-qr-modal__network-logo'}
+                  className='export-account-qr-modal__network-logo'
                   src={getLogoByNetworkKey(networkQr.networkKey)}
                 />
                 {toShort(formattedAddress, 13, 13)}
@@ -131,6 +112,12 @@ function ExportAccountQrModal ({ className,
               </div>
             </div>
           </CopyToClipboard>
+          <Button
+            className='button-close'
+            onClick={closeModal}
+          >
+            Close
+          </Button>
         </div>
       </div>
     </Modal>
@@ -142,28 +129,10 @@ export default styled(ExportAccountQrModal)(({ theme }: ThemeProps) => `
     position: relative;
   }
 
-  .export-account-qr-modal__header {
-    position: absolute;
-    top: -5px;
-    right: -5px;
-    cursor: pointer;
-  }
-
-  .export-account-qr-modal__icon {
-    cursor: pointer;
-    color: ${theme.textColor};
-  }
-
   .export-account-qr-modal__content {
     display: flex;
     flex-direction: column;
     align-items: center;
-  }
-
-  .export-account-qr-modal__logo {
-    margin-top: 11px;
-    width: 58px;
-    height: 58px;
   }
 
   .export-account-qr-modal__network-logo {
@@ -204,7 +173,7 @@ export default styled(ExportAccountQrModal)(({ theme }: ThemeProps) => `
     border-radius: 8px;
     background-color: ${theme.backgroundAccountAddress};
     width: 100%;
-    margin-bottom: 15px;
+    margin-bottom: 24px;
     cursor: pointer;
   }
 
@@ -226,51 +195,7 @@ export default styled(ExportAccountQrModal)(({ theme }: ThemeProps) => `
     padding-left: 10px;
   }
 
-  .export-account-qr-modal-button {
-    width: 320px;
-    padding: 11px;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    background-color: ${theme.buttonBackground1};
-    border-radius: 8px;
-    margin-bottom: 10px;
-    cursor: pointer;
-    text-decoration: none;
-    opacity: 1;
-  }
-
-  .export-account-qr-modal-button__text {
-    font-size: 15px;
-    line-height: 26px;
-    font-weight: 500;
-    color: ${theme.textColor3};
-  }
-
-  .export-account-qr-modal-button.-disabled {
-    cursor: not-allowed;
-
-    .export-account-qr-modal-button__text {
-      opacity: 0.5;
-    }
-  }
-
-  .export-account-qr-modal__edit-name {
-    position: absolute;
-    flex: 1;
-    left: calc(50% - 120px);
-    top: -5px;
-    width: 240px;
-    display: flex;
-    align-items: center;
-    z-index: 1050;
-    > div {
-      margin-top: 0;
-      width: 100%
-    }
-
-    input {
-      height: 32px;
-    }
+  .button-close {
+    width: 170px;
   }
 `);

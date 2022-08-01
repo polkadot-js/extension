@@ -200,7 +200,7 @@ function SelectParent ({ className, isBusy, isConnectWhenDerive, isLocked, onCon
 
         <Checkbox
           checked={isConnectWhenDerive}
-          label={t<string>('Auto connect to all DApp after importing')}
+          label={t<string>('Auto connect to all DApps after importing')}
           onChange={onConnectWhenDerive}
         />
         <ButtonArea>

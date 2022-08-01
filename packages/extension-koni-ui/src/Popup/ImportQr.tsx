@@ -126,7 +126,7 @@ function ImportQr ({ className }: Props): React.ReactElement<Props> {
             }
             <Checkbox
               checked={isAllowed}
-              label={t<string>('Auto connect to all DApp after importing')}
+              label={t<string>('Auto connect to all DApps after importing')}
               onChange={setIsAllowed}
             />
             {

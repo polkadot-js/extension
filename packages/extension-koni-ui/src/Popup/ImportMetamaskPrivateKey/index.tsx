@@ -33,7 +33,7 @@ function ImportMetamaskPrivateKey ({ className = '' }: Props): React.ReactElemen
   const onAction = useContext(ActionContext);
   const [isBusy, setIsBusy] = useState(false);
   const [account, setAccount] = useState<AccountInfo | null>(null);
-  const [isConnectWhenImport, setIsConnectWhenImport] = useState<boolean>(false);
+  const [isConnectWhenImport, setIsConnectWhenImport] = useState<boolean>(true);
   const accountsWithoutAll = accounts.filter((acc: { address: string; }) => acc.address !== 'ALL');
   const name = `Account ${accountsWithoutAll.length + 1}`;
   const type = DEFAULT_TYPE;

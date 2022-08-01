@@ -170,7 +170,7 @@ function ImportLedger ({ className }: Props): React.ReactElement {
           (
             <Checkbox
               checked={isAllowed}
-              label={t<string>('Auto connect to all DApp after importing')}
+              label={t<string>('Auto connect to all DApps after importing')}
               onChange={setIsAllowed}
             />
           )

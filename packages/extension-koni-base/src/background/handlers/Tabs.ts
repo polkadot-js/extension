@@ -96,7 +96,15 @@ export default class KoniTabs extends Tabs {
   }
 
   private authorizeV2 (url: string, request: RequestAuthorizeTab): Promise<boolean> {
-    return this.#koniState.authorizeUrlV2(url, request);
+    if (request.accountAuthType === 'evm') {
+      return new Promise((resolve, reject) => {
+        this.#koniState.authorizeUrlV2(url, request).then(resolve).catch((e: Error) => {
+          reject(new EvmRpcError('USER_REJECTED_REQUEST'));
+        });
+      });
+    } else {
+      return this.#koniState.authorizeUrlV2(url, request);
+    }
   }
 
   private async getEvmCurrentAccount (url: string, getAll = false): Promise<string[]> {
@@ -270,10 +278,10 @@ export default class KoniTabs extends Tabs {
     return null;
   }
 
-  private async getEvmCurrentChainId (url: string): Promise<string | undefined> {
+  private async getEvmCurrentChainId (url: string): Promise<string> {
     const evmState = await this.getEvmState(url);
 
-    return evmState.chainId;
+    return evmState.chainId || '0x0';
   }
 
   private async evmSubscribeEvents (url: string, id: string, port: chrome.runtime.Port) {
@@ -486,6 +494,8 @@ export default class KoniTabs extends Tabs {
       switch (method) {
         case 'eth_chainId':
           return await this.getEvmCurrentChainId(url);
+        case 'net_version':
+          return parseInt(await this.getEvmCurrentChainId(url), 16);
         case 'eth_accounts':
           return await this.getEvmCurrentAccount(url);
         case 'eth_sendTransaction':
@@ -548,7 +558,7 @@ export default class KoniTabs extends Tabs {
   }
 
   public isEvmPublicRequest (type: string, request: RequestArguments) {
-    if (type === 'evm(request)' && ['eth_chainId'].includes(request?.method)) {
+    if (type === 'evm(request)' && ['eth_chainId', 'net_version'].includes(request?.method)) {
       return true;
     } else {
       return false;

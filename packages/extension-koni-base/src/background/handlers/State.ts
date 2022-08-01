@@ -471,6 +471,7 @@ export default class KoniState extends State {
         if (isCancelled) {
           delete this.#authRequestsV2[id];
           this.updateIconAuthV2(true);
+          cb();
 
           return;
         }
@@ -1247,9 +1248,9 @@ export default class KoniState extends State {
 
   public async resetCrowdloanMap (newAddress: string) {
     const defaultData = generateDefaultCrowdloanMap();
-    let storedData = await this.getStoredCrowdloan(newAddress);
+    const storedData = await this.getStoredCrowdloan(newAddress);
 
-    storedData = this.removeInactiveNetworkData(storedData);
+    // storedData = this.removeInactiveNetworkData(storedData);
 
     const merge = { ...defaultData, ...storedData } as Record<string, CrowdloanItem>;
 
@@ -1306,9 +1307,9 @@ export default class KoniState extends State {
   }
 
   public getCrowdloan (reset?: boolean): CrowdloanJson {
-    const activeData = this.removeInactiveNetworkData(this.crowdloanMap);
+    // const activeData = this.removeInactiveNetworkData(this.crowdloanMap);
 
-    return { details: activeData, reset } as CrowdloanJson;
+    return { details: this.crowdloanMap, reset } as CrowdloanJson;
   }
 
   public async getStoredCrowdloan (address: string) {

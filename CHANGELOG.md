@@ -1,5 +1,26 @@
 # CHANGELOG
 
+## 0.5.3 (Koni)
+Build date: Jul 29, 2022.
+
+Update:
+- Add Clover EVM Network (#223)
+- Improve data fetching for better performance and UX (#255)
+- Optimize NFT loading with https://nft.storage/ (#480)
+- Temporarily remove "Add custom network" (#464)
+- Support staking for more chains (#386)
+- Display connection information with DApps (#469)
+- Add taiKSM and 3USD on Karura and tDOT on Acala (#417)
+- Integrate tokens for dapps on Moonbeam/Moonriver (#485)
+
+Bug fixes:
+- Fix bug happens on Send Fund/Donate screen when Delete Custom Network (#310)
+- Fix bug displaying incorrect balance & load incorrect view when update configure network (#311)
+- Fixed incorrect number of connected accounts displayed on "Manage Website Access" screen in case of "Connect All Accounts" (#355)
+- Fixed bug do not display popup connect wallet in case upgrade version (#401)
+- Fix bug adding default EVM token after deleting it (#490)
+- Update logo & modal style (#499)
+
 ## 0.5.2 (Koni)
 Build date: Jul 22, 2022.
 

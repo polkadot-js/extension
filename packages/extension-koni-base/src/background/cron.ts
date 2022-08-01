@@ -64,7 +64,11 @@ export class KoniCron {
 
   init () {
     state.getCurrentAccount((currentAccountInfo) => {
-      if (currentAccountInfo && (Object.keys(state.getDotSamaApiMap()).length !== 0 || Object.keys(state.getWeb3ApiMap()).length !== 0)) {
+      if (!currentAccountInfo?.address) {
+        return;
+      }
+
+      if (Object.keys(state.getDotSamaApiMap()).length !== 0 || Object.keys(state.getWeb3ApiMap()).length !== 0) {
         this.refreshPrice();
         this.updateApiMapStatus();
         this.refreshNft(currentAccountInfo.address, state.getApiMap(), state.getActiveErc721Tokens())();
@@ -86,7 +90,11 @@ export class KoniCron {
 
     console.log('Stating cron jobs');
     state.getCurrentAccount((currentAccountInfo) => {
-      if (currentAccountInfo && (Object.keys(state.getDotSamaApiMap()).length !== 0 || Object.keys(state.getWeb3ApiMap()).length !== 0)) {
+      if (!currentAccountInfo?.address) {
+        return;
+      }
+
+      if (Object.keys(state.getDotSamaApiMap()).length !== 0 || Object.keys(state.getWeb3ApiMap()).length !== 0) {
         this.resetNft(currentAccountInfo.address).then(() => {
           this.addCron('refreshNft', this.refreshNft(currentAccountInfo.address, state.getApiMap(), state.getActiveErc721Tokens()), CRON_REFRESH_NFT_INTERVAL);
         }).catch((err) => console.warn(err));
@@ -302,7 +310,7 @@ export class KoniCron {
     state.updateStakingRewardReady(true);
   }
 
-  resetHistory (address: string) {
+  resetHistory (address: string): Promise<void> {
     return state.resetHistoryMap(address).catch((err) => console.warn(err));
   }
 

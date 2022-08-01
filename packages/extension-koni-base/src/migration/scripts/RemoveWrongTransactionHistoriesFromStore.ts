@@ -1,7 +1,7 @@
 // Copyright 2019-2022 @subwallet/extension-koni authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { TransactionHistoryItemType } from '@subwallet/extension-base/background/KoniTypes';
+import { TransactionHistoryItemJson } from '@subwallet/extension-base/background/KoniTypes';
 import BaseMigrationJob from '@subwallet/extension-koni-base/migration/Base';
 import TransactionHistoryStoreV2 from '@subwallet/extension-koni-base/stores/TransactionHistoryV2';
 
@@ -15,13 +15,13 @@ export default class RemoveWrongTransactionHistoriesFromStore extends BaseMigrat
 
     for (const address of addressList) {
       const oldHistories = await newStore.asyncGet(address);
-      const newHistories: Record<string, TransactionHistoryItemType[]> = {};
+      const newHistories: Record<string, TransactionHistoryItemJson> = {};
 
       Object.entries(oldHistories).forEach(([hash, items]) => {
         // Remove wrong stored history (missing eventIdx)
-        const newItems = items.filter((item) => item.origin === 'app' || item.eventIdx);
+        const newItems = items.items.filter((item) => item.origin === 'app' || item.eventIdx);
 
-        newHistories[hash] = newItems;
+        newHistories[hash] = { items: newItems, total: newItems.length };
       });
 
       if (Object.keys(newHistories).length > 0) {

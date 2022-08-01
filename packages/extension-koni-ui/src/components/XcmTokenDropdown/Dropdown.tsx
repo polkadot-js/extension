@@ -230,7 +230,6 @@ export default React.memo(styled(DropdownWrapper)(({ theme }: ThemeProps) => `
     min-width: 30px;
     border-radius: 50%;
     background: ${theme.identiconBackground};
-    border: 2px solid transparent;
     margin-right: 8px;
   }
 

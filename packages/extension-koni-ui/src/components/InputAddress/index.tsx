@@ -12,7 +12,7 @@ import LabelHelp from '@subwallet/extension-koni-ui/components/LabelHelp';
 import { cancelSubscription, saveRecentAccountId, subscribeAccountsInputAddress } from '@subwallet/extension-koni-ui/messaging';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { toAddress } from '@subwallet/extension-koni-ui/util';
-import React, { useCallback, useEffect, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import store from 'store';
 import styled from 'styled-components';
 
@@ -187,15 +187,15 @@ function InputAddress ({ className = '', defaultValue, filter, help, isDisabled,
     };
   }, [type]);
 
-  const getFiltered = (): Option[] => {
+  const getFiltered = useCallback((): Option[] => {
     return !optionsAll
       ? []
       : optionsAll[type].filter(({ value }) => !filter || (!!value && filter.includes(value)));
-  };
+  }, [filter, optionsAll, type]);
 
-  function hasValue (test?: Uint8Array | string | null): boolean {
+  const hasValue = useCallback((test?: Uint8Array | string | null): boolean => {
     return getFiltered().some(({ value }) => test === value);
-  }
+  }, [getFiltered]);
 
   const getLastOptionValue = (): KeyringSectionOption | undefined => {
     const available = getFiltered();
@@ -207,17 +207,19 @@ function InputAddress ({ className = '', defaultValue, filter, help, isDisabled,
 
   const lastOption = getLastOptionValue();
 
-  const actualValue = transformToAddress(
+  const actualValue = useMemo(() => transformToAddress(
     isDisabled || (defaultValue && hasValue(defaultValue))
       ? defaultValue
       : lastValue || (lastOption && lastOption.value)
-  );
+  ), [defaultValue, hasValue, isDisabled, lastOption, lastValue]);
 
-  const actualOptions: KeyringSectionOption[] = options
-    ? dedupe(options)
-    : isDisabled && actualValue
-      ? [createOption(actualValue)]
-      : getFiltered();
+  const actualOptions = useMemo((): KeyringSectionOption[] => {
+    return options
+      ? dedupe(options)
+      : isDisabled && actualValue
+        ? [createOption(actualValue)]
+        : getFiltered();
+  }, [actualValue, getFiltered, isDisabled, options]);
 
   const onChangeData = useCallback((address: string): void => {
     !filter && setLastValue(type, address);
@@ -272,6 +274,16 @@ function InputAddress ({ className = '', defaultValue, filter, help, isDisabled,
       />
     );
   }, [networkPrefix]);
+
+  useEffect(() => {
+    if (defaultValue && actualOptions && actualOptions.length) {
+      const exists = actualOptions.find((item) => item.value && item.value.toLowerCase() === defaultValue.toLowerCase());
+
+      if (!exists) {
+        onChange && onChange(null);
+      }
+    }
+  }, [defaultValue, actualOptions, onChange]);
 
   return (
     <div className={className}>

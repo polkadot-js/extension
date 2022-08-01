@@ -52,6 +52,7 @@ function Wrapper ({ className = '', theme }: Props): React.ReactElement<Props> {
 
   useEffect(() => {
     if (!(accounts && accounts.length)) {
+      window.localStorage.setItem('popupNavigation', '/');
       onAction('/');
     }
   }, [accounts, onAction]);

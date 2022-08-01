@@ -532,6 +532,43 @@ export const PREDEFINE_TOKEN_DATA_MAP: Record<string, Record<string, TokenInfo>>
       decimals: 12
     }
   },
+  shiden: {
+    LKSM: {
+      isMainToken: false,
+      assetIndex: '18446744073709551619',
+      symbol: 'LKSM',
+      name: 'Liquid KSM',
+      decimals: 12
+    },
+    MOVR: {
+      isMainToken: false,
+      assetIndex: '18446744073709551620',
+      symbol: 'MOVR',
+      name: 'Moonriver',
+      decimals: 18
+    },
+    KSM: {
+      isMainToken: false,
+      assetIndex: '340282366920938463463374607431768211455',
+      symbol: 'KSM',
+      name: 'Kusama',
+      decimals: 12
+    },
+    aUSD: {
+      isMainToken: false,
+      assetIndex: '18446744073709551616',
+      symbol: 'aUSD',
+      name: 'Acala Dollar',
+      decimals: 12
+    },
+    KAR: {
+      isMainToken: false,
+      assetIndex: '18446744073709551618',
+      symbol: 'KAR',
+      name: 'Karura',
+      decimals: 12
+    }
+  },
   astarEvm: {
     ARSW: {
       isMainToken: false,

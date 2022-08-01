@@ -78,12 +78,12 @@ export const SupportedCrossChainsMap: Record<string, CrossChainRelation> = {
         isEthereum: true,
         supportedToken: ['KAR', 'aUSD']
       },
-      astar: {
+      shiden: {
         type: 'p',
         isEthereum: false,
         supportedToken: ['aUSD']
       },
-      astarEvm: {
+      shidenEvm: {
         type: 'p',
         isEthereum: true,
         supportedToken: ['aUSD']

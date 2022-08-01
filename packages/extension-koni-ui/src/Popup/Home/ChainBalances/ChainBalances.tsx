@@ -211,6 +211,10 @@ function ChainBalances ({ address,
   useEffect(() => {
     handlerResize();
     window.addEventListener('resize', handlerResize);
+
+    return () => {
+      window.removeEventListener('resize', handlerResize);
+    };
   }, []);
 
   useEffect(() => {

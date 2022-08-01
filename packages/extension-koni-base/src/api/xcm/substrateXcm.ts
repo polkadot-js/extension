@@ -30,23 +30,19 @@ export async function substrateEstimateCrossChainFee (
 
   try {
     if (SupportedCrossChainsMap[originNetworkKey].type === 'p') {
-      console.log('xcm tx here', api.tx.xTokens.transfer(
+      const extrinsic = api.tx.xTokens.transfer(
         {
           Token: tokenSymbol
         },
         value,
         getMultiLocationFromParachain(originNetworkKey, destinationNetworkKey, networkMap, to),
         FOUR_INSTRUCTIONS_WEIGHT
-      ).toHex());
+      );
+
+      console.log('substrate xcm tx here', extrinsic.toHex());
+
       // Case ParaChain -> ParaChain && ParaChain -> RelayChain
-      const paymentInfo = await api.tx.xTokens.transfer(
-        {
-          Token: tokenSymbol
-        },
-        value,
-        getMultiLocationFromParachain(originNetworkKey, destinationNetworkKey, networkMap, to),
-        FOUR_INSTRUCTIONS_WEIGHT
-      ).paymentInfo(fromKeypair);
+      const paymentInfo = await extrinsic.paymentInfo(fromKeypair);
 
       fee = paymentInfo.partialFee.toString();
       feeString = parseNumberToDisplay(paymentInfo.partialFee, originNetworkJson.decimals) + ` ${originNetworkJson.nativeToken ? originNetworkJson.nativeToken : ''}`;
@@ -59,7 +55,7 @@ export async function substrateEstimateCrossChainFee (
         receiverLocation = { AccountKey20: { network: 'Any', key: to } };
       }
 
-      const paymentInfo = await api.tx.xcmPallet.reserveTransferAssets(
+      const extrinsic = api.tx.xcmPallet.reserveTransferAssets(
         {
           V1: { // find the destination chain
             parents: 0,
@@ -87,7 +83,11 @@ export async function substrateEstimateCrossChainFee (
           ]
         },
         0
-      ).paymentInfo(fromKeypair);
+      );
+
+      console.log('substrate xcm tx here', extrinsic.toHex());
+
+      const paymentInfo = await extrinsic.paymentInfo(fromKeypair);
 
       fee = paymentInfo.partialFee.toString();
       feeString = parseNumberToDisplay(paymentInfo.partialFee, originNetworkJson.decimals) + ` ${originNetworkJson.nativeToken ? originNetworkJson.nativeToken : ''}`;
@@ -119,7 +119,7 @@ export function substrateGetXcmExtrinsic (
       {
         Token: tokenSymbol
       },
-      +value,
+      value,
       getMultiLocationFromParachain(originNetworkKey, destinationNetworkKey, networkMap, to),
       FOUR_INSTRUCTIONS_WEIGHT
     );

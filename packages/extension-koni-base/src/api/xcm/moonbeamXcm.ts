@@ -38,7 +38,7 @@ const TOKEN_TYPE_MAP: Record<string, Record<string, string>> = {
     xcCSM: MOON_ASSET_TYPES.ForeignAsset,
     xcHKO: MOON_ASSET_TYPES.ForeignAsset,
     xcKAR: MOON_ASSET_TYPES.ForeignAsset,
-    xcaUSD: MOON_ASSET_TYPES.ForeignAsset,
+    xcAUSD: MOON_ASSET_TYPES.ForeignAsset,
     xcPHA: MOON_ASSET_TYPES.ForeignAsset,
     xcKINT: MOON_ASSET_TYPES.ForeignAsset,
     xckBTC: MOON_ASSET_TYPES.ForeignAsset,
@@ -66,12 +66,16 @@ export async function moonbeamEstimateCrossChainFee (
   const tokenType = TOKEN_TYPE_MAP[originNetworkKey][tokenInfo.symbol];
   const networkJson = networkMap[originNetworkKey];
 
-  const paymentInfo = await apiProps.api.tx.xTokens.transfer(
+  const extrinsic = apiProps.api.tx.xTokens.transfer(
     { [tokenType]: new BN(tokenInfo.assetId as string) },
     +value,
     getMultiLocationFromParachain(originNetworkKey, destinationNetworkKey, networkMap, to),
     FOUR_INSTRUCTIONS_WEIGHT
-  ).paymentInfo(fromKeypair.address);
+  );
+
+  console.log('moon xcm tx here', extrinsic.toHex());
+
+  const paymentInfo = await extrinsic.paymentInfo(fromKeypair.address);
 
   const fee = paymentInfo.partialFee.toString();
   const feeString = parseNumberToDisplay(paymentInfo.partialFee, networkJson.decimals) + ` ${networkJson.nativeToken ? networkJson.nativeToken : ''}`;

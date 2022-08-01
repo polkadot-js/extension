@@ -414,69 +414,6 @@ export const PREDEFINE_TOKEN_DATA_MAP: Record<string, Record<string, TokenInfo>>
       erc20Address: '0xbD90A6125a84E5C512129D622a75CDDE176aDE5E',
       decimals: 18,
       name: 'RiverBoat'
-    },
-    xckBTC: {
-      isMainToken: false,
-      symbol: 'xckBTC',
-      erc20Address: '0xFFFFFFFFF6E528AD57184579BEEE00C5D5E646F0',
-      decimals: 8,
-      name: 'Kintsugi Wrapped BTC'
-    },
-    xcKINT: {
-      isMainToken: false,
-      symbol: 'xcKINT',
-      erc20Address: '0xFFFFFFFF83F4F317D3CBF6EC6250AEC3697B3FF2',
-      decimals: 12,
-      name: 'Kintsugi Native Token'
-    },
-    xcRMRK: {
-      isMainToken: false,
-      symbol: 'xcRMRK',
-      erc20Address: '0xFFFFFFFF893264794D9D57E1E0E21E0042AF5A0A',
-      decimals: 10,
-      name: 'xcRMRK'
-    },
-    xcKSM: {
-      isMainToken: false,
-      symbol: 'xcKSM',
-      erc20Address: '0xFFFFFFFF1FCACBD218EDC0EBA20FC2308C778080',
-      decimals: 12,
-      name: 'xcKSM'
-    },
-    xcKAR: {
-      isMainToken: false,
-      symbol: 'xcKAR',
-      erc20Address: '0xFFFFFFFF08220AD2E6E157F26ED8BD22A336A0A5',
-      decimals: 12,
-      name: 'Karura'
-    },
-    xcBNC: {
-      isMainToken: false,
-      symbol: 'xcBNC',
-      erc20Address: '0xFFFFFFFFF075423BE54811ECB478E911F22DDE7D',
-      decimals: 12,
-      name: 'xcBNC'
-    },
-    xcUSDT: {
-      isMainToken: false,
-      symbol: 'xcUSDT',
-      erc20Address: '0xFFFFFFfFea09FB06d082fd1275CD48b191cbCD1d',
-      decimals: 6,
-      name: 'Tether USD'
-    },
-    xcPHA: {
-      isMainToken: false,
-      symbol: 'xcPHA',
-      erc20Address: '0xffFfFFff8E6b63d9e447B6d4C45BDA8AF9dc9603',
-      decimals: 12,
-      name: 'Phala Token'
-    },
-    xcaUSD: {
-      isMainToken: false,
-      symbol: 'xcaUSD',
-      erc20Address: '0xFfFffFFfa1B026a00FbAA67c86D5d1d5BF8D8228',
-      decimals: 12,
-      name: 'xcaUSD'
     }
   },
   moonbeam: {
@@ -493,27 +430,6 @@ export const PREDEFINE_TOKEN_DATA_MAP: Record<string, Record<string, TokenInfo>>
       erc20Address: '0x818ec0A7Fe18Ff94269904fCED6AE3DaE6d6dC0b',
       decimals: 6,
       name: 'USD Coin'
-    },
-    xcACA: {
-      isMainToken: false,
-      symbol: 'xcACA',
-      erc20Address: '0xffffFFffa922Fef94566104a6e5A35a4fCDDAA9f',
-      decimals: 12,
-      name: 'Acala'
-    },
-    xcDOT: {
-      isMainToken: false,
-      symbol: 'xcDOT',
-      erc20Address: '0xFfFFfFff1FcaCBd218EDc0EbA20Fc2308C778080',
-      decimals: 10,
-      name: 'Polkadot'
-    },
-    xcaUSD: {
-      isMainToken: false,
-      symbol: 'xcaUSD',
-      erc20Address: '0xfFfFFFFF52C56A9257bB97f4B2b6F7B2D624ecda',
-      decimals: 12,
-      name: 'Acala Dollar'
     },
     BNB: {
       isMainToken: false,

@@ -726,6 +726,13 @@ export const PREDEFINE_TOKEN_DATA_MAP: Record<string, Record<string, TokenInfo>>
     }
   },
   shidenEvm: {
+    aUSD: {
+      isMainToken: false,
+      symbol: 'aUSD',
+      erc20Address: '0xfFFfFFfF00000000000000010000000000000000',
+      decimals: 12,
+      name: 'Acala Dollar'
+    },
     PKEX: {
       isMainToken: false,
       symbol: 'PKEX',

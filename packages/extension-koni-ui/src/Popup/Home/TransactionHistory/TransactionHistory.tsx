@@ -86,7 +86,7 @@ function TransactionHistoryItemWrapper ({ item, registryMap }: ItemWrapperProp) 
   const { change, eventIdx, extrinsicHash, networkKey } = item;
   const registry = registryMap[networkKey];
   const isSupportScanExplorer = useSupportScanExplorer(networkKey);
-  const isScanExplorerTxUrl = useScanExplorerTxUrl(networkKey, extrinsicHash);
+  const isScanExplorerTxUrl = useScanExplorerTxUrl(networkKey, extrinsicHash, true);
 
   const key = `${extrinsicHash}/${eventIdx || change}`;
 

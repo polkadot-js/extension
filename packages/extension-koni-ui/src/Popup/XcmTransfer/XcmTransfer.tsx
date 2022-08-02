@@ -388,6 +388,7 @@ function XcmTransfer ({ chainRegistryMap, className, defaultValue, firstOriginCh
         )
         : (
           <SendFundResult
+            isXcmTransfer={true}
             networkKey={originChain}
             onResend={_onResend}
             txResult={txResult}

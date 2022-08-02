@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { PREDEFINED_NETWORKS } from '@subwallet/extension-koni-base/api/predefinedNetworks';
-import { getMultiLocationFromParachain, xTokenMoonbeamContract } from '@subwallet/extension-koni-base/api/xcm/utils';
+import { FOUR_INSTRUCTIONS_WEIGHT, getMultiLocationFromParachain, xTokenMoonbeamContract } from '@subwallet/extension-koni-base/api/xcm/utils';
 import { DOTSAMA_AUTO_CONNECT_MS } from '@subwallet/extension-koni-base/constants';
 import { getCurrentProvider } from '@subwallet/extension-koni-base/utils/utils';
 import Web3 from 'web3';
@@ -290,5 +290,41 @@ describe('test DotSama APIs', () => {
     );
 
     console.log(extrinsic.toHex());
+  });
+
+  test('test get kint xcm to parachain', async () => {
+    const provider = new WsProvider(getCurrentProvider(PREDEFINED_NETWORKS.kintsugi), DOTSAMA_AUTO_CONNECT_MS);
+    const api = new ApiPromise({ provider });
+    const apiProps = await api.isReady;
+
+    const extrinsic = apiProps.tx.xTokens.transfer(
+      {
+        Token: 'KINT'
+      },
+      '1000000000000',
+      {
+        V1: {
+          parents: 1,
+          interior: {
+            X2: [
+              {
+                Parachain: 2023
+              },
+              {
+                AccountKey20: {
+                  network: 'Any',
+                  key: '0x40a207109cf531024b55010a1e760199df0d3a13'
+                }
+              }
+            ]
+          }
+        }
+      },
+      FOUR_INSTRUCTIONS_WEIGHT
+    );
+
+    const payment = await extrinsic.paymentInfo('5HbcGs2QXVAc6Q6eoTzLYNAJWpN17AkCFRLnWDaHCiGYXvNc');
+
+    console.log(payment.partialFee.toHuman());
   });
 });

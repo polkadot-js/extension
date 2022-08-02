@@ -45,7 +45,7 @@ export async function substrateEstimateCrossChainFee (
       fee = paymentInfo.partialFee.toString();
       feeString = parseNumberToDisplay(paymentInfo.partialFee, originNetworkJson.decimals) + ` ${originNetworkJson.nativeToken ? originNetworkJson.nativeToken : ''}`;
 
-      console.log('substrate xcm tx here', extrinsic.toHex());
+      console.log('substrate xcm tx p-p here', extrinsic.toHex());
     } else {
       // Case RelayChain -> ParaChain
       // TODO: add teleport assets for chain using the same native token as relaychain (statemint, statemine)
@@ -90,7 +90,7 @@ export async function substrateEstimateCrossChainFee (
       fee = paymentInfo.partialFee.toString();
       feeString = parseNumberToDisplay(paymentInfo.partialFee, originNetworkJson.decimals) + ` ${originNetworkJson.nativeToken ? originNetworkJson.nativeToken : ''}`;
 
-      console.log('substrate xcm tx here', extrinsic.toHex());
+      console.log('substrate xcm tx r-p here', extrinsic.toHex());
     }
 
     return [fee, feeString];

@@ -168,7 +168,27 @@ export const SupportedCrossChainsMap: Record<string, CrossChainRelation> = {
         supportedToken: ['DOT']
       }
     }
+  },
+  kintsugi_test: {
+    type: 'p',
+    isEthereum: false,
+    relationMap: {
+      moonriver: {
+        type: 'p',
+        isEthereum: true,
+        supportedToken: ['INTR']
+      }
+    }
   }
+  // interlay: {
+  //   type: 'p',
+  //   relationMap: {
+  //     moonbeam: {
+  //       type: 'p',
+  //       supportedToken: ['KAR']
+  //     }
+  //   }
+  // },
   // bifrost: { // bifrost on kusama
   //   type: 'p',
   //   isEthereum: false,
@@ -260,15 +280,6 @@ export const SupportedCrossChainsMap: Record<string, CrossChainRelation> = {
   //     }
   //   }
   // }
-  // interlay: {
-  //   type: 'p',
-  //   relationMap: {
-  //     moonbeam: {
-  //       type: 'p',
-  //       supportedToken: ['KAR']
-  //     }
-  //   }
-  // },
 };
 
 export const FOUR_INSTRUCTIONS_WEIGHT = 4000000000;

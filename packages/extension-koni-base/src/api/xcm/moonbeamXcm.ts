@@ -68,14 +68,14 @@ export async function moonbeamEstimateCrossChainFee (
 
   const extrinsic = apiProps.api.tx.xTokens.transfer(
     { [tokenType]: new BN(tokenInfo.assetId as string) },
-    +value,
+    value,
     getMultiLocationFromParachain(originNetworkKey, destinationNetworkKey, networkMap, to),
     FOUR_INSTRUCTIONS_WEIGHT
   );
 
   console.log('moon xcm tx here', extrinsic.toHex());
 
-  const paymentInfo = await extrinsic.paymentInfo(fromKeypair.address);
+  const paymentInfo = await extrinsic.paymentInfo(fromKeypair);
 
   const fee = paymentInfo.partialFee.toString();
   const feeString = parseNumberToDisplay(paymentInfo.partialFee, networkJson.decimals) + ` ${networkJson.nativeToken ? networkJson.nativeToken : ''}`;
@@ -96,7 +96,7 @@ export function moonbeamGetXcmExtrinsic (
 
   return api.tx.xTokens.transfer(
     { [tokenType]: new BN(tokenInfo.assetId as string) },
-    +value,
+    value,
     getMultiLocationFromParachain(originNetworkKey, destinationNetworkKey, networkMap, to),
     FOUR_INSTRUCTIONS_WEIGHT
   );

@@ -472,6 +472,8 @@ export async function getFreeBalance (networkKey: string, address: string, dotSa
   const tokenInfo = token ? await getTokenInfo(networkKey, api, token) : undefined;
   const isMainToken = tokenInfo ? tokenInfo.isMainToken : true;
 
+  console.log('here', networkKey, tokenInfo);
+
   // Only EVM Address use with EVM network
   if (Boolean(web3Api || apiProps.isEthereum) !== isEthereumAddress(address)) {
     if (!isEthereumAddress(address)) {
@@ -509,6 +511,10 @@ export async function getFreeBalance (networkKey: string, address: string, dotSa
         const balance = await api.query.system.account(address) as { data: { freeKton: Balance } };
 
         return balance.data?.freeKton?.toString() || '0';
+      } else if (['astar', 'shiden'].includes(networkKey)) {
+        const balanceInfo = (await api.query.assets.account(tokenInfo?.assetIndex, address)).toHuman() as Record<string, string>;
+
+        return balanceInfo.balance || '0';
       } else if (!isMainToken || ['kintsugi', 'kintsugi_test', 'interlay'].includes(networkKey)) {
         // @ts-ignore
         const balance = await api.query.tokens.accounts(address, tokenInfo?.specialOption || { Token: token }) as TokenBalanceRaw;

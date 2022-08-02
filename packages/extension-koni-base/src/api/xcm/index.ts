@@ -8,6 +8,7 @@ import { substrateEstimateCrossChainFee, substrateGetXcmExtrinsic } from '@subwa
 import { SupportedCrossChainsMap } from '@subwallet/extension-koni-base/api/xcm/utils';
 
 import { KeyringPair } from '@polkadot/keyring/types';
+import {astarEstimateCrossChainFee} from "@subwallet/extension-koni-base/api/xcm/astar";
 
 export function isNetworksPairSupportedTransferCrossChain (originNetworkKey: string, destinationNetworkKey: string, token: string, networkMap: Record<string, NetworkJson>): boolean {
   if (!SupportedCrossChainsMap[originNetworkKey] ||
@@ -41,6 +42,10 @@ export async function estimateCrossChainFee (
 
   if (['moonbase', 'moonriver', 'moonbeam'].includes(originNetworkKey)) {
     return moonbeamEstimateCrossChainFee(originNetworkKey, destinationNetworkKey, to, fromKeypair, value, dotSamaApiMap, tokenInfo, networkMap);
+  }
+
+  if (['astar', 'shiden'].includes(originNetworkKey)) {
+    return astarEstimateCrossChainFee(originNetworkKey, destinationNetworkKey, to, fromKeypair, value, dotSamaApiMap, tokenInfo, networkMap);
   }
 
   return substrateEstimateCrossChainFee(originNetworkKey, destinationNetworkKey, to, fromKeypair, value, dotSamaApiMap, tokenInfo, networkMap);

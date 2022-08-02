@@ -570,6 +570,13 @@ export const PREDEFINE_TOKEN_DATA_MAP: Record<string, Record<string, TokenInfo>>
     }
   },
   astarEvm: {
+    aUSD: {
+      isMainToken: false,
+      symbol: 'aUSD',
+      erc20Address: '0xfFFFFfFF00000000000000010000000000000001',
+      decimals: 12,
+      name: 'Acala Dollar'
+    },
     ARSW: {
       isMainToken: false,
       symbol: 'ARSW',

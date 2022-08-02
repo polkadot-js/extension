@@ -97,6 +97,8 @@ export async function substrateEstimateCrossChainFee (
   } catch (e) {
     console.error('error parsing xcm transaction', e);
 
+    feeString = `0.0000 ${originNetworkJson.nativeToken ? originNetworkJson.nativeToken : ''}`;
+
     return [fee, feeString];
   }
 }

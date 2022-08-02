@@ -9,7 +9,7 @@ import Web3 from 'web3';
 
 import { ApiPromise, WsProvider } from '@polkadot/api';
 import { BN, bnToHex, u8aToHex } from '@polkadot/util';
-import { decodeAddress } from '@polkadot/util-crypto';
+import { decodeAddress, evmToAddress } from '@polkadot/util-crypto';
 
 jest.setTimeout(50000);
 
@@ -245,6 +245,10 @@ describe('test DotSama APIs', () => {
 
     const assetLocation = await api.query.xcAssetConfig.assetIdToLocation('18446744073709551617');
 
+    const ss58Address = evmToAddress('0x40a207109cf531024B55010A1e760199Df0d3a13', PREDEFINED_NETWORKS.astar.ss58Format);
+
+    console.log(ss58Address);
+
     console.log(assetLocation.toHuman());
 
     const extrinsic = apiProps.tx.polkadotXcm.reserveWithdrawAssets( // can be substitution for transfer()
@@ -260,7 +264,7 @@ describe('test DotSama APIs', () => {
         V1: { // find the receiver
           parents: 0,
           interior: {
-            X1: { AccountId32: { network: 'Any', id: decodeAddress('5HbcGs2QXVAc6Q6eoTzLYNAJWpN17AkCFRLnWDaHCiGYXvNc') } }
+            X1: { AccountId32: { network: 'Any', id: decodeAddress(ss58Address) } }
           }
         }
       },

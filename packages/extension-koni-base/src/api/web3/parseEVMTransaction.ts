@@ -136,7 +136,8 @@ export const parseTransactionData = async (input: string, contractAddress: strin
         }
       });
 
-      if (res.status === 200) {
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+      if (res.status === 200 && res.data.status === '1') {
         // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
         _ABIs.unshift(res.data.result);
       }
@@ -230,7 +231,8 @@ export const parseEVMTransaction = async (data: string, networkMap: Record<strin
           }
         });
 
-        if (res.status === 200) {
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+        if (res.status === 200 && res.data.status === '1') {
           // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
           _ABIs.unshift(res.data.result);
         }

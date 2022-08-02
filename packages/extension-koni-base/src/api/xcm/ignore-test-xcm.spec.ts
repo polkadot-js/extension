@@ -247,7 +247,8 @@ describe('test DotSama APIs', () => {
 
     const ss58Address = evmToAddress('0x40a207109cf531024B55010A1e760199Df0d3a13', PREDEFINED_NETWORKS.astar.ss58Format);
 
-    console.log(ss58Address);
+    console.log(decodeAddress(ss58Address).toString());
+    console.log(decodeAddress('0x40a207109cf531024B55010A1e760199Df0d3a13').toString());
 
     console.log(assetLocation.toHuman());
 

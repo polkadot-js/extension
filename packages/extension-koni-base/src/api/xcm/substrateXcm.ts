@@ -30,6 +30,7 @@ export async function substrateEstimateCrossChainFee (
 
   try {
     if (SupportedCrossChainsMap[originNetworkKey].type === 'p') {
+      // Case ParaChain -> ParaChain && ParaChain -> RelayChain
       const extrinsic = api.tx.xTokens.transfer(
         {
           Token: tokenSymbol
@@ -39,7 +40,6 @@ export async function substrateEstimateCrossChainFee (
         FOUR_INSTRUCTIONS_WEIGHT
       );
 
-      // Case ParaChain -> ParaChain && ParaChain -> RelayChain
       const paymentInfo = await extrinsic.paymentInfo(fromKeypair);
 
       fee = paymentInfo.partialFee.toString();

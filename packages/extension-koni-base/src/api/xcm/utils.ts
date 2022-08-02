@@ -3,51 +3,51 @@
 
 import { CrossChainRelation, NetworkJson } from '@subwallet/extension-base/background/KoniTypes';
 
-import { decodeAddress } from '@polkadot/util-crypto';
+import { decodeAddress, evmToAddress } from '@polkadot/util-crypto';
 
 export const SupportedCrossChainsMap: Record<string, CrossChainRelation> = {
-  polkadot: {
-    type: 'r',
-    isEthereum: false,
-    relationMap: {
-      moonbeam: {
-        type: 'p',
-        isEthereum: true,
-        supportedToken: ['DOT']
-      }
-      // astar: {
-      //   type: 'p',
-      //   isEthereum: false,
-      //   supportedToken: ['DOT']
-      // },
-      // acala: {
-      //   type: 'p',
-      //   isEthereum: false,
-      //   supportedToken: ['DOT']
-      // }
-    }
-  },
-  kusama: {
-    type: 'r',
-    isEthereum: false,
-    relationMap: {
-      moonriver: {
-        type: 'p',
-        isEthereum: true,
-        supportedToken: ['KSM']
-      }
-      // shiden: {
-      //   type: 'p',
-      //   isEthereum: false,
-      //   supportedToken: ['KSM']
-      // },
-      // karura: {
-      //   type: 'p',
-      //   isEthereum: false,
-      //   supportedToken: ['KSM']
-      // }
-    }
-  },
+  // polkadot: {
+  //   type: 'r',
+  //   isEthereum: false,
+  //   relationMap: {
+  //     moonbeam: {
+  //       type: 'p',
+  //       isEthereum: true,
+  //       supportedToken: ['DOT']
+  //     }
+  //     // astar: {
+  //     //   type: 'p',
+  //     //   isEthereum: false,
+  //     //   supportedToken: ['DOT']
+  //     // },
+  //     // acala: {
+  //     //   type: 'p',
+  //     //   isEthereum: false,
+  //     //   supportedToken: ['DOT']
+  //     // }
+  //   }
+  // },
+  // kusama: {
+  //   type: 'r',
+  //   isEthereum: false,
+  //   relationMap: {
+  //     moonriver: {
+  //       type: 'p',
+  //       isEthereum: true,
+  //       supportedToken: ['KSM']
+  //     }
+  //     // shiden: {
+  //     //   type: 'p',
+  //     //   isEthereum: false,
+  //     //   supportedToken: ['KSM']
+  //     // },
+  //     // karura: {
+  //     //   type: 'p',
+  //     //   isEthereum: false,
+  //     //   supportedToken: ['KSM']
+  //     // }
+  //   }
+  // },
   acala: {
     type: 'p',
     isEthereum: false,
@@ -97,7 +97,7 @@ export const SupportedCrossChainsMap: Record<string, CrossChainRelation> = {
       acala: {
         type: 'p',
         isEthereum: false,
-        supportedToken: ['xcACA', 'xcaUSD']
+        supportedToken: ['xcaUSD']
       }
       // polkadot: {
       //   type: 'r',
@@ -113,7 +113,7 @@ export const SupportedCrossChainsMap: Record<string, CrossChainRelation> = {
       karura: {
         type: 'p',
         isEthereum: false,
-        supportedToken: ['xcKAR', 'xcAUSD']
+        supportedToken: ['xcAUSD']
       }
       // kusama: {
       //   type: 'r',
@@ -142,17 +142,6 @@ export const SupportedCrossChainsMap: Record<string, CrossChainRelation> = {
       // }
     }
   },
-  kintsugi: {
-    type: 'p',
-    isEthereum: false,
-    relationMap: {
-      moonriver: {
-        type: 'p',
-        isEthereum: true,
-        supportedToken: ['KINT']
-      }
-    }
-  },
   astar: {
     type: 'p',
     isEthereum: false,
@@ -161,22 +150,22 @@ export const SupportedCrossChainsMap: Record<string, CrossChainRelation> = {
         type: 'r',
         isEthereum: false,
         supportedToken: ['aUSD']
-      },
-      polkadot: {
-        type: 'r',
-        isEthereum: false,
-        supportedToken: ['DOT']
       }
+      // polkadot: {
+      //   type: 'r',
+      //   isEthereum: false,
+      //   supportedToken: ['DOT']
+      // }
     }
   },
-  kintsugi_test: {
+  kintsugi: {
     type: 'p',
     isEthereum: false,
     relationMap: {
       moonriver: {
         type: 'p',
         isEthereum: true,
-        supportedToken: ['INTR']
+        supportedToken: ['KINT']
       }
     }
   }
@@ -282,7 +271,7 @@ export const SupportedCrossChainsMap: Record<string, CrossChainRelation> = {
   // }
 };
 
-export const FOUR_INSTRUCTIONS_WEIGHT = 4000000000;
+export const FOUR_INSTRUCTIONS_WEIGHT = 5000000000;
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires,@typescript-eslint/no-unsafe-assignment
 export const xTokenMoonbeamContract = require('./Xtokens.json');
@@ -293,14 +282,20 @@ export function getMultiLocationFromParachain (originChain: string, destinationC
   const paraId = networkMap[destinationChain].paraId as number;
 
   if (xcmType === 'pp') { // parachain -> parachain
+    let ss58Address = toAddress;
+
+    if (destinationChain === 'astarEvm' || destinationChain === 'shidenEvm') {
+      ss58Address = evmToAddress(toAddress, networkMap[destinationChain].ss58Format);
+    }
+
     let interior: Record<string, any> = {
       X2: [
         { Parachain: paraId },
-        { AccountId32: { network: 'Any', id: decodeAddress(toAddress) } }
+        { AccountId32: { network: 'Any', id: decodeAddress(ss58Address) } }
       ]
     };
 
-    if (SupportedCrossChainsMap[originChain].relationMap[destinationChain].isEthereum) {
+    if (SupportedCrossChainsMap[originChain].relationMap[destinationChain].isEthereum && destinationChain !== 'astarEvm' && destinationChain !== 'shidenEvm') {
       interior = {
         X2: [
           { Parachain: paraId },

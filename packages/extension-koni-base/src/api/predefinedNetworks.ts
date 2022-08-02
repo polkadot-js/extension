@@ -204,7 +204,8 @@ export const PREDEFINED_NETWORKS: Record<string, NetworkJson> = {
     crowdloanUrl: 'https://crowdloan.astar.network/#/',
     decimals: 18,
     coinGeckoKey: 'astar',
-    evmChainId: 592
+    evmChainId: 592,
+    paraId: 2006
   },
   parallel: {
     key: 'parallel',
@@ -803,7 +804,8 @@ export const PREDEFINED_NETWORKS: Record<string, NetworkJson> = {
     groups: ['KUSAMA_PARACHAIN'],
     nativeToken: 'SDN',
     evmChainId: 336,
-    isEthereum: true
+    isEthereum: true,
+    paraId: 2007
   },
   shibuya: {
     key: 'shibuya',

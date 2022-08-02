@@ -168,7 +168,9 @@ export const PREDEFINED_NETWORKS: Record<string, NetworkJson> = {
     ss58Format: 5,
     providers: {
       OnFinality: 'wss://astar.api.onfinality.io/public-ws',
-      Dwellir: 'wss://astar-rpc.dwellir.com'
+      Dwellir: 'wss://astar-rpc.dwellir.com',
+      Astar: 'wss://rpc.astar.network',
+      PinkNode: 'wss://public-rpc.pinknode.io/astar'
     },
     active: false,
     currentProviderMode: 'ws',
@@ -188,12 +190,15 @@ export const PREDEFINED_NETWORKS: Record<string, NetworkJson> = {
     genesisHash: '0x9eb76c5184c4ab8679d2d5d819fdf90b9c001403e9e17da2e14b6d8aec4029c6_evm',
     ss58Format: 5,
     providers: {
-      Astar: 'wss://rpc.astar.network'
+      Astar: 'wss://rpc.astar.network',
+      OnFinality: 'wss://astar.api.onfinality.io/public-ws',
+      Dwellir: 'wss://astar-rpc.dwellir.com',
+      PinkNode: 'wss://public-rpc.pinknode.io/astar'
     },
     isEthereum: true,
     active: false,
     currentProviderMode: 'ws',
-    currentProvider: 'Astar',
+    currentProvider: 'OnFinality',
     groups: ['POLKADOT_PARACHAIN'],
     nativeToken: 'ASTR',
     crowdloanUrl: 'https://crowdloan.astar.network/#/',
@@ -233,6 +238,27 @@ export const PREDEFINED_NETWORKS: Record<string, NetworkJson> = {
     currentProvider: 'OnFinality',
     groups: ['POLKADOT_PARACHAIN'],
     paraId: 2002,
+    nativeToken: 'CLV',
+    crowdloanUrl: 'https://lucky.clover.finance/?type=support',
+    decimals: 18,
+    coinGeckoKey: 'clover-finance'
+  },
+  cloverEvm: {
+    key: 'cloverEvm',
+    chain: 'Clover - EVM',
+    genesisHash: '0x5c7bd13edf349b33eb175ffae85210299e324d852916336027391536e686f267_1',
+    ss58Format: 128,
+    providers: {
+      Clover: 'wss://rpc-para.clover.finance',
+      OnFinality: 'wss://clover.api.onfinality.io/public-ws'
+    },
+    active: false,
+    isEthereum: true,
+    currentProviderMode: 'ws',
+    currentProvider: 'OnFinality',
+    groups: ['POLKADOT_PARACHAIN'],
+    paraId: 2002,
+    evmChainId: 1024,
     nativeToken: 'CLV',
     crowdloanUrl: 'https://lucky.clover.finance/?type=support',
     decimals: 18,
@@ -1590,6 +1616,104 @@ export const PREDEFINED_NETWORKS: Record<string, NetworkJson> = {
     groups: ['TEST_NET'],
     nativeToken: 'tSSC',
     decimals: 18
+  },
+  origintrail: {
+    key: 'origintrail',
+    chain: 'OriginTrail Parachain',
+    genesisHash: '0xe7e0962324a3b86c83404dbea483f25fb5dab4c224791c81b756cfc948006174',
+    ss58Format: 101,
+    providers: {
+      TraceLabs: 'wss://parachain-rpc.origin-trail.network'
+    },
+    active: false,
+    currentProviderMode: 'ws',
+    currentProvider: 'TraceLabs',
+    groups: ['POLKADOT_PARACHAIN'],
+    paraId: 2043,
+    nativeToken: 'OTP',
+    decimals: 12
+  },
+  // kapex: {
+  //   key: 'kapex',
+  //   chain: 'Kapex',
+  //   genesisHash: '0x7838c3c774e887c0a53bcba9e64f702361a1a852d5550b86b58cd73827fa1e1e',
+  //   ss58Format: 2007,
+  //   providers: {
+  //     Totem: 'wss://k-ui.kapex.network'
+  //   },
+  //   active: false,
+  //   currentProviderMode: 'ws',
+  //   currentProvider: 'Totem',
+  //   groups: ['POLKADOT_PARACHAIN'],
+  //   paraId: 2007,
+  //   nativeToken: 'KAPEX',
+  //   decimals: 12
+  // },
+  dorafactory: {
+    key: 'dorafactory',
+    chain: 'Dorafactory Network',
+    genesisHash: '0x577d331ca43646f547cdaa07ad0aa387a383a93416764480665103081f3eaf14',
+    ss58Format: 128,
+    providers: {
+      DORA: 'wss://kusama.dorafactory.org'
+    },
+    active: false,
+    currentProviderMode: 'ws',
+    currentProvider: 'DORA',
+    groups: ['KUSAMA_PARACHAIN'],
+    paraId: 2115,
+    nativeToken: 'DORA',
+    coinGeckoKey: 'dora-factory',
+    decimals: 12
+  },
+  bajun: {
+    key: 'bajun',
+    chain: 'Bajun Kusama',
+    genesisHash: '0x35a06bfec2edf0ff4be89a6428ccd9ff5bd0167d618c5a0d4341f9600a458d14',
+    ss58Format: 1337,
+    providers: {
+      AjunaNetwork: 'wss://rpc-parachain.bajun.network'
+    },
+    active: false,
+    currentProviderMode: 'ws',
+    currentProvider: 'AjunaNetwork',
+    groups: ['KUSAMA_PARACHAIN'],
+    paraId: 2119,
+    nativeToken: 'BAJU',
+    decimals: 12
+  },
+  listen: {
+    key: 'listen',
+    chain: 'Listen Network',
+    genesisHash: '0x48eb7f3fff34e702aa2b504674df8f8afbf9889f804e3088c0cb662e433552a0',
+    ss58Format: 42,
+    providers: {
+      'Listen Foundation 1': 'wss://rpc.mainnet.listen.io',
+      'Listen Foundation 2': 'wss://wss.mainnet.listen.io'
+    },
+    active: false,
+    currentProviderMode: 'ws',
+    currentProvider: 'Listen Foundation 1',
+    groups: ['KUSAMA_PARACHAIN'],
+    paraId: 2118,
+    nativeToken: 'LT',
+    decimals: 12
+  },
+  kabocha: {
+    key: 'kabocha',
+    chain: 'Kabocha',
+    genesisHash: '0xfeb426ca713f0f46c96465b8f039890370cf6bfd687c9076ea2843f58a6ae8a7',
+    ss58Format: 27,
+    providers: {
+      JelliedOwl: 'wss://kabocha.jelliedowl.com'
+    },
+    active: false,
+    currentProviderMode: 'ws',
+    currentProvider: 'JelliedOwl',
+    groups: ['KUSAMA_PARACHAIN'],
+    paraId: 2113,
+    nativeToken: 'KAB',
+    decimals: 12
   }
 };
 

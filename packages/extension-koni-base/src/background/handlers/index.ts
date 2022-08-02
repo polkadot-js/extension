@@ -3,6 +3,7 @@
 
 import { MessageTypes, TransportRequestMessage } from '@subwallet/extension-base/background/types';
 import { PORT_EXTENSION } from '@subwallet/extension-base/defaults';
+import { SubWalletProviderError } from '@subwallet/extension-base/errors/SubWalletProviderError';
 import { NftHandler } from '@subwallet/extension-koni-base/api/nft';
 import KoniExtension from '@subwallet/extension-koni-base/background/handlers/Extension';
 import KoniState from '@subwallet/extension-koni-base/background/handlers/State';
@@ -44,12 +45,12 @@ export default function handlers<TMessageType extends MessageTypes> ({ id, messa
 
       port.postMessage({ id, response });
     })
-    .catch((error: Error): void => {
+    .catch((error: SubWalletProviderError): void => {
       console.log(`[err] ${source}:: ${error.message}`);
 
       // only send message back to port if it's still connected
       if (port) {
-        port.postMessage({ error: error.message, id });
+        port.postMessage({ error: error.message, errorCode: error.code, errorData: error.data, id });
       }
     });
 }

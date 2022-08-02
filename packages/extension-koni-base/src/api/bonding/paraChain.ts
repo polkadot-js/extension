@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { ApiProps, BasicTxInfo, ChainBondingBasics, DelegationItem, NetworkJson, UnlockingStakeInfo, ValidatorInfo } from '@subwallet/extension-base/background/KoniTypes';
-import { BOND_LESS_ACTION, calculateChainStakedReturn, ERA_LENGTH_MAP, PARACHAIN_INFLATION_DISTRIBUTION, REVOKE_ACTION } from '@subwallet/extension-koni-base/api/bonding/utils';
+import { BOND_LESS_ACTION, calculateChainStakedReturn, ERA_LENGTH_MAP, getParaCurrentInflation, InflationConfig, PARACHAIN_INFLATION_DISTRIBUTION, REVOKE_ACTION } from '@subwallet/extension-koni-base/api/bonding/utils';
 import { getFreeBalance } from '@subwallet/extension-koni-base/api/dotsama/balance';
 import { parseNumberToDisplay, parseRawNumber, reformatAddress } from '@subwallet/extension-koni-base/utils/utils';
 import Web3 from 'web3';
@@ -26,24 +26,44 @@ interface CollatorInfo {
 export async function getParaBondingBasics (networkKey: string, dotSamaApi: ApiProps) {
   const apiProps = await dotSamaApi.isReady;
 
+  const _round = (await apiProps.api.query.parachainStaking.round()).toHuman() as Record<string, string>;
+  const round = parseRawNumber(_round.current);
+
+  let _unvestedAllocation;
+
+  if (apiProps.api.query.vesting && apiProps.api.query.vesting.totalUnvestedAllocation) {
+    _unvestedAllocation = await apiProps.api.query.vesting.totalUnvestedAllocation();
+  }
+
   const [_totalStake, _totalIssuance, _inflation] = await Promise.all([
-    apiProps.api.query.parachainStaking.total(),
+    apiProps.api.query.parachainStaking.staked(round),
     apiProps.api.query.balances.totalIssuance(),
     apiProps.api.query.parachainStaking.inflationConfig()
   ]);
 
-  const totalStake = _totalStake.toHuman() as string;
-  const parsedTotalStake = parseFloat(totalStake.replaceAll(',', ''));
+  let unvestedAllocation;
 
-  const totalIssuance = _totalIssuance.toHuman() as string;
-  const parsedTotalIssuance = parseFloat(totalIssuance.replaceAll(',', ''));
+  if (_unvestedAllocation) {
+    const rawUnvestedAllocation = _unvestedAllocation.toHuman() as string;
 
-  const inflation = _inflation.toHuman() as Record<string, Record<string, any>>;
-  const inflationString = inflation.annual.ideal as string;
-  const parsedInflation = parseFloat(inflationString.split('%')[0]);
-  const rewardPool = parsedInflation * PARACHAIN_INFLATION_DISTRIBUTION[networkKey].reward;
+    unvestedAllocation = parseRawNumber(rawUnvestedAllocation);
+  }
 
-  const stakedReturn = calculateChainStakedReturn(rewardPool, parsedTotalStake, parsedTotalIssuance, networkKey);
+  const rawTotalStake = _totalStake.toHuman() as string;
+  const totalStake = parseRawNumber(rawTotalStake);
+
+  const rawTotalIssuance = _totalIssuance.toHuman() as string;
+  let totalIssuance = parseRawNumber(rawTotalIssuance);
+
+  if (unvestedAllocation) {
+    totalIssuance += unvestedAllocation; // for Turing network, read more at https://hackmd.io/@sbAqOuXkRvyiZPOB3Ryn6Q/Sypr3ZJh5
+  }
+
+  const inflationConfig = _inflation.toHuman() as unknown as InflationConfig;
+  const currentInflation = getParaCurrentInflation(totalStake, inflationConfig);
+  const rewardPool = currentInflation * PARACHAIN_INFLATION_DISTRIBUTION[networkKey].reward;
+
+  const stakedReturn = calculateChainStakedReturn(rewardPool, totalStake, totalIssuance, networkKey);
 
   return {
     isMaxNominators: false,
@@ -56,9 +76,10 @@ export async function getParaCollatorsInfo (networkKey: string, dotSamaApi: ApiP
 
   const allValidators: ValidatorInfo[] = [];
 
-  const [_allCollators, _delegatorState] = await Promise.all([
+  const [_allCollators, _delegatorState, _collatorCommission] = await Promise.all([
     apiProps.api.query.parachainStaking.candidatePool(),
-    apiProps.api.query.parachainStaking.delegatorState(address)
+    apiProps.api.query.parachainStaking.delegatorState(address),
+    apiProps.api.query.parachainStaking.collatorCommission()
   ]);
 
   const _maxDelegatorPerCandidate = apiProps.api.consts.parachainStaking.maxTopDelegationsPerCandidate.toHuman() as string;
@@ -72,6 +93,9 @@ export async function getParaCollatorsInfo (networkKey: string, dotSamaApi: ApiP
 
   const rawDelegatorState = _delegatorState.toHuman() as Record<string, any> | null;
   const rawAllCollators = _allCollators.toHuman() as unknown as CollatorInfo[];
+
+  const rawCollatorCommission = _collatorCommission.toHuman() as string;
+  const collatorCommission = parseFloat(rawCollatorCommission.split('%')[0]);
 
   for (const collator of rawAllCollators) {
     allValidators.push({
@@ -225,6 +249,7 @@ export async function getParaCollatorsInfo (networkKey: string, dotSamaApi: ApiP
     validator.isVerified = extraInfoMap[validator.address].isVerified;
     validator.otherStake = validator.totalStake - validator.ownStake;
     validator.nominatorCount = extraInfoMap[validator.address].delegationCount;
+    validator.commission = collatorCommission;
   }
 
   return {

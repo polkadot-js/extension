@@ -1,6 +1,8 @@
 // Copyright 2019-2022 @subwallet/extension-koni authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
+import { parseRawNumber } from '@subwallet/extension-koni-base/utils/utils';
+
 import { BN } from '@polkadot/util';
 
 export const REVOKE_ACTION = 'revoke';
@@ -49,10 +51,13 @@ export const PARACHAIN_INFLATION_DISTRIBUTION: Record<string, Record<string, num
     bondReserve: 0.3
   },
   turing: { // https://docs.oak.tech/docs/delegators/
-    reward: 0.025
+    reward: 0.5
   },
   turingStaging: { // https://docs.oak.tech/docs/delegators/
-    reward: 0.025
+    reward: 0.5
+  },
+  bifrost: {
+    reward: 0
   }
 };
 
@@ -161,4 +166,41 @@ export function calculateValidatorStakedReturn (chainStakedReturn: number, total
 
 export function getCommission (commissionString: string) {
   return parseFloat(commissionString.split('%')[0]); // Example: 12%
+}
+
+export interface InflationConfig {
+  expect: {
+    min: string,
+    ideal: string,
+    max: string
+  },
+  annual: {
+    min: string,
+    ideal: string,
+    max: string
+  },
+  round: {
+    min: string,
+    ideal: string,
+    max: string
+  }
+}
+
+export function getParaCurrentInflation (totalStaked: number, inflationConfig: InflationConfig) { // read more at https://hackmd.io/@sbAqOuXkRvyiZPOB3Ryn6Q/Sypr3ZJh5
+  const expectMin = parseRawNumber(inflationConfig.expect.min);
+  const expectMax = parseRawNumber(inflationConfig.expect.max);
+
+  if (totalStaked < expectMin) {
+    const inflationString = inflationConfig.annual.min.split('%')[0];
+
+    return parseFloat(inflationString);
+  } else if (totalStaked > expectMax) {
+    const inflationString = inflationConfig.annual.max.split('%')[0];
+
+    return parseFloat(inflationString);
+  }
+
+  const inflationString = inflationConfig.annual.ideal.split('%')[0];
+
+  return parseFloat(inflationString);
 }

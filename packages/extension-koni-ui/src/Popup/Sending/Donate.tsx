@@ -262,6 +262,29 @@ function Donate ({ chainRegistryMap, className, defaultValue, networkMap }: Cont
     setShowTxModal(false);
   }, []);
 
+  useEffect(() => {
+    const network = networkMap[selectedNetworkKey];
+
+    if (!network.active) {
+      let newNetwork: NetworkJson | null = null;
+
+      for (const _network of Object.values(networkMap)) {
+        if (_network.active && _network.nativeToken) {
+          newNetwork = _network;
+          break;
+        }
+      }
+
+      if (newNetwork) {
+        setSenderValue({
+          address: senderId,
+          networkKey: newNetwork.key,
+          token: newNetwork.nativeToken as string
+        });
+      }
+    }
+  }, [senderId, selectedNetworkKey, networkMap]);
+
   return (
     <>
       {!isShowTxResult
@@ -274,8 +297,10 @@ function Donate ({ chainRegistryMap, className, defaultValue, networkMap }: Cont
               className=''
               initValue={defaultValue}
               isDonation
+              networkKey={selectedNetworkKey}
               networkMap={networkMap}
               onChange={setSenderValue}
+              token={selectedToken}
             />
 
             <ReceiverDonateInputAddress

@@ -59,6 +59,16 @@ export interface RequestAuthorizationPerAccount extends RequestAuthorization {
   address: string;
 }
 
+export interface RequestAuthorizationPerSite {
+  id: string;
+  values: Record<string, boolean>;
+}
+
+export interface RequestAuthorizationBlock {
+  id: string;
+  connectedValue: boolean;
+}
+
 export interface ResultResolver {
   result: boolean;
   accounts: string[];
@@ -830,10 +840,13 @@ export interface ResponseEvmProviderSend {
   result?: JsonRpcResponse;
 }
 
-export interface EvmProviderRpcErrorInterface extends Error{
-  message: string;
-  code: number;
+export interface SubWalletProviderErrorInterface extends Error{
+  code?: number;
   data?: unknown;
+}
+
+export interface EvmProviderRpcErrorInterface extends SubWalletProviderErrorInterface{
+  code: number;
 }
 
 export type EvmRpcErrorHelperMap = Record<'USER_REJECTED_REQUEST'| 'UNAUTHORIZED'| 'UNSUPPORTED_METHOD'| 'DISCONNECTED'| 'CHAIN_DISCONNECTED'| 'INVALID_PARAMS'| 'INTERNAL_ERROR', [number, string]>;
@@ -1113,6 +1126,8 @@ export interface KoniRequestSignatures {
   'pri(authorize.changeSiteAll)': [RequestAuthorizationAll, boolean, AuthUrls];
   'pri(authorize.changeSite)': [RequestAuthorization, boolean, AuthUrls];
   'pri(authorize.changeSitePerAccount)': [RequestAuthorizationPerAccount, boolean, AuthUrls];
+  'pri(authorize.changeSitePerSite)': [RequestAuthorizationPerSite, boolean];
+  'pri(authorize.changeSiteBlock)': [RequestAuthorizationBlock, boolean];
   'pri(authorize.forgetSite)': [RequestForgetSite, boolean, AuthUrls];
   'pri(authorize.forgetAllSite)': [null, boolean, AuthUrls];
   'pri(authorize.rejectV2)': [RequestAuthorizeReject, boolean];
@@ -1162,6 +1177,9 @@ export interface KoniRequestSignatures {
 
   // EVM Transaction
   'pri(evm.transaction.parse.input)': [RequestParseEVMTransactionInput, ResponseParseEVMTransactionInput];
+
+  // Authorize
+  'pri(authorize.subscribe)': [null, AuthUrls, AuthUrls];
 }
 
 export interface ApplicationMetadataType {

@@ -237,4 +237,58 @@ describe('test DotSama APIs', () => {
 
     console.log(extrinsic.toHex());
   });
+
+  test('test get astar xcm to parachain', async () => {
+    const provider = new WsProvider(getCurrentProvider(PREDEFINED_NETWORKS.astar), DOTSAMA_AUTO_CONNECT_MS);
+    const api = new ApiPromise({ provider });
+    const apiProps = await api.isReady;
+
+    const assetLocation = await api.query.xcAssetConfig.assetIdToLocation('18446744073709551617');
+
+    console.log(assetLocation.toHuman());
+
+    const extrinsic = apiProps.tx.polkadotXcm.reserveWithdrawAssets( // can be substitution for transfer()
+      {
+        V1: { // find the destination chain
+          parents: 0,
+          interior: {
+            X1: { Parachain: 2000 }
+          }
+        }
+      },
+      {
+        V1: { // find the receiver
+          parents: 0,
+          interior: {
+            X1: { AccountId32: { network: 'Any', id: decodeAddress('5HbcGs2QXVAc6Q6eoTzLYNAJWpN17AkCFRLnWDaHCiGYXvNc') } }
+          }
+        }
+      },
+      {
+        V1: [ // find the asset
+          {
+            id: {
+              Concrete: {
+                parents: 1,
+                interior: {
+                  X2: [
+                    {
+                      Parachain: 2000
+                    },
+                    {
+                      GeneralKey: '0x0001'
+                    }
+                  ]
+                }
+              }
+            },
+            fun: { Fungible: '100000000000000' }
+          }
+        ]
+      },
+      0
+    );
+
+    console.log(extrinsic.toHex());
+  });
 });

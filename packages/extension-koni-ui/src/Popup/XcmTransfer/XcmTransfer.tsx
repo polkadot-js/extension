@@ -1,7 +1,7 @@
 // Copyright 2019-2022 @polkadot/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { ChainRegistry, CrossChainRelation, DropdownTransformOptionType, NetworkJson } from '@subwallet/extension-base/background/KoniTypes';
+import { ChainRegistry, DropdownTransformOptionType, NetworkJson } from '@subwallet/extension-base/background/KoniTypes';
 import { SupportedCrossChainsMap } from '@subwallet/extension-koni-base/api/xcm/utils';
 import { AccountContext, ActionContext, Button, Warning } from '@subwallet/extension-koni-ui/components';
 import InputBalance from '@subwallet/extension-koni-ui/components/InputBalance';
@@ -9,7 +9,6 @@ import LoadingContainer from '@subwallet/extension-koni-ui/components/LoadingCon
 import ReceiverInputAddress from '@subwallet/extension-koni-ui/components/ReceiverInputAddress';
 import { useTranslation } from '@subwallet/extension-koni-ui/components/translate';
 import { BalanceFormatType, XcmTransferInputAddressType } from '@subwallet/extension-koni-ui/components/types';
-import useIsAccountEvm from '@subwallet/extension-koni-ui/hooks/screen/home/useIsAccountEvm';
 import useFreeBalance from '@subwallet/extension-koni-ui/hooks/screen/sending/useFreeBalance';
 import { checkCrossChainTransfer } from '@subwallet/extension-koni-ui/messaging';
 import Header from '@subwallet/extension-koni-ui/partials/Header';
@@ -50,17 +49,17 @@ function getSupportedTokens (originChain: string, destinationChain: string): str
   return SupportedCrossChainsMap[originChain].relationMap[destinationChain].supportedToken;
 }
 
-function filterOriginChainOptions (isAccountEvm: boolean, supportedCrossChainsMap: Record<string, CrossChainRelation>, networkMap: Record<string, NetworkJson>) {
-  const filteredOptions: DropdownTransformOptionType[] = [];
-
-  Object.entries(supportedCrossChainsMap).forEach(([key, item]) => {
-    if (item.isEthereum === isAccountEvm) {
-      filteredOptions.push({ label: networkMap[key].chain, value: key });
-    }
-  });
-
-  return filteredOptions;
-}
+// function filterOriginChainOptions (isAccountEvm: boolean, supportedCrossChainsMap: Record<string, CrossChainRelation>, networkMap: Record<string, NetworkJson>) {
+//   const filteredOptions: DropdownTransformOptionType[] = [];
+//
+//   Object.entries(supportedCrossChainsMap).forEach(([key, item]) => {
+//     if (item.isEthereum === isAccountEvm) {
+//       filteredOptions.push({ label: networkMap[key].chain, value: key });
+//     }
+//   });
+//
+//   return filteredOptions;
+// }
 
 function Wrapper ({ className = '', theme }: Props): React.ReactElement<Props> {
   const { t } = useTranslation();
@@ -68,8 +67,8 @@ function Wrapper ({ className = '', theme }: Props): React.ReactElement<Props> {
   const { chainRegistry: chainRegistryMap,
     currentAccount: { account },
     networkMap } = useSelector((state: RootState) => state);
-  const isAccountEvm = useIsAccountEvm();
-  const originChainOptions = filterOriginChainOptions(isAccountEvm, SupportedCrossChainsMap, networkMap);
+  // const isAccountEvm = useIsAccountEvm();
+  const originChainOptions = Object.keys(SupportedCrossChainsMap).map((key) => ({ label: networkMap[key].chain, value: key }));
   const firstOriginChain = originChainOptions[0].value;
   const destinationChainList = Object.keys(SupportedCrossChainsMap[firstOriginChain].relationMap);
   let defaultValue;

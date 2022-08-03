@@ -41,6 +41,7 @@ interface ContentProps extends ThemeProps {
 
 function Wrapper ({ className = '', theme }: Props): React.ReactElement<Props> {
   const { t } = useTranslation();
+  const onAction = useContext(ActionContext);
   const { accounts } = useContext(AccountContext);
   const { chainRegistry: chainRegistryMap,
     currentAccount: { account },
@@ -48,6 +49,13 @@ function Wrapper ({ className = '', theme }: Props): React.ReactElement<Props> {
     networkMap } = useSelector((state: RootState) => state);
 
   const defaultValue = getDefaultValue(networkKey, !!isCurrentNetworkInfoReady, account?.address, chainRegistryMap, accounts);
+
+  useEffect(() => {
+    if (!(accounts && accounts.length)) {
+      window.localStorage.setItem('popupNavigation', '/');
+      onAction('/');
+    }
+  }, [accounts, onAction]);
 
   return (
     <div className={className}>

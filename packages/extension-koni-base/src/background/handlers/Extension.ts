@@ -5,7 +5,7 @@ import Common from '@ethereumjs/common';
 import Extension, { SEED_DEFAULT_LENGTH, SEED_LENGTHS } from '@subwallet/extension-base/background/handlers/Extension';
 import { AuthUrls } from '@subwallet/extension-base/background/handlers/State';
 import { createSubscription, isSubscriptionRunning, unsubscribe } from '@subwallet/extension-base/background/handlers/subscriptions';
-import { AccountsWithCurrentAddress, ApiProps, BalanceJson, BasicTxInfo, BasicTxResponse, BondingOptionInfo, BondingOptionParams, BondingSubmitParams, ChainBondingBasics, ChainRegistry, CrowdloanJson, CurrentAccountInfo, CustomEvmToken, DelegationItem, DeleteEvmTokenParams, DisableNetworkResponse, EvmNftSubmitTransaction, EvmNftTransaction, EvmNftTransactionRequest, EvmTokenJson, NETWORK_ERROR, NetWorkGroup, NetworkJson, NftCollection, NftCollectionJson, NftItem, NftJson, NftTransactionResponse, NftTransferExtra, OptionInputAddress, PriceJson, RequestAccountCreateSuriV2, RequestAccountExportPrivateKey, RequestAuthorization, RequestAuthorizationBlock, RequestAuthorizationPerAccount, RequestAuthorizationPerSite, RequestAuthorizeApproveV2, RequestBatchRestoreV2, RequestCheckCrossChainTransfer, RequestCheckTransfer, RequestConfirmationComplete, RequestCrossChainTransfer, RequestDeriveCreateV2, RequestForgetSite, RequestFreeBalance, RequestJsonRestoreV2, RequestNftForceUpdate, RequestParseEVMTransactionInput, RequestSaveRecentAccount, RequestSeedCreateV2, RequestSeedValidateV2, RequestSettingsType, RequestTransactionHistoryAdd, RequestTransfer, RequestTransferCheckReferenceCount, RequestTransferCheckSupporting, RequestTransferExistentialDeposit, ResponseAccountCreateSuriV2, ResponseAccountExportPrivateKey, ResponseCheckCrossChainTransfer, ResponseCheckTransfer, ResponseParseEVMTransactionInput, ResponsePrivateKeyValidateV2, ResponseSeedCreateV2, ResponseSeedValidateV2, ResponseTransfer, StakeClaimRewardParams, StakeDelegationRequest, StakeUnlockingJson, StakeWithdrawalParams, StakingJson, StakingRewardJson, SubstrateNftSubmitTransaction, SubstrateNftTransaction, SubstrateNftTransactionRequest, SupportTransferResponse, ThemeTypes, TokenInfo, TransactionHistoryItemType, TransferError, TransferErrorCode, TransferStep, UnbondingSubmitParams, ValidateEvmTokenRequest, ValidateEvmTokenResponse, ValidateNetworkRequest, ValidateNetworkResponse } from '@subwallet/extension-base/background/KoniTypes';
+import { AccountsWithCurrentAddress, ApiProps, BalanceJson, BasicTxInfo, BasicTxResponse, BondingOptionInfo, BondingOptionParams, BondingSubmitParams, ChainBondingBasics, ChainRegistry, CrowdloanJson, CurrentAccountInfo, CustomEvmToken, DelegationItem, DeleteEvmTokenParams, DisableNetworkResponse, EvmNftSubmitTransaction, EvmNftTransaction, EvmNftTransactionRequest, EvmTokenJson, NETWORK_ERROR, NetWorkGroup, NetworkJson, NftCollection, NftCollectionJson, NftItem, NftJson, NftTransactionResponse, NftTransferExtra, OptionInputAddress, PriceJson, RequestAccountCreateExternalV2, RequestAccountCreateHardwareV2, RequestAccountCreateSuriV2, RequestAccountExportPrivateKey, RequestAuthorization, RequestAuthorizationBlock, RequestAuthorizationPerAccount, RequestAuthorizationPerSite, RequestAuthorizeApproveV2, RequestBatchRestoreV2, RequestCheckCrossChainTransfer, RequestCheckTransfer, RequestConfirmationComplete, RequestCrossChainTransfer, RequestDeriveCreateV2, RequestForgetSite, RequestFreeBalance, RequestJsonRestoreV2, RequestNftForceUpdate, RequestParseEVMTransactionInput, RequestSaveRecentAccount, RequestSeedCreateV2, RequestSeedValidateV2, RequestSettingsType, RequestTransactionHistoryAdd, RequestTransfer, RequestTransferCheckReferenceCount, RequestTransferCheckSupporting, RequestTransferExistentialDeposit, ResponseAccountCreateSuriV2, ResponseAccountExportPrivateKey, ResponseCheckCrossChainTransfer, ResponseCheckTransfer, ResponseParseEVMTransactionInput, ResponsePrivateKeyValidateV2, ResponseSeedCreateV2, ResponseSeedValidateV2, ResponseTransfer, StakeClaimRewardParams, StakeDelegationRequest, StakeUnlockingJson, StakeWithdrawalParams, StakingJson, StakingRewardJson, SubstrateNftSubmitTransaction, SubstrateNftTransaction, SubstrateNftTransactionRequest, SupportTransferResponse, ThemeTypes, TokenInfo, TransactionHistoryItemType, TransferError, TransferErrorCode, TransferStep, UnbondingSubmitParams, ValidateEvmTokenRequest, ValidateEvmTokenResponse, ValidateNetworkRequest, ValidateNetworkResponse } from '@subwallet/extension-base/background/KoniTypes';
 import { AccountJson, AuthorizeRequest, MessageTypes, RequestAccountForget, RequestAccountTie, RequestAuthorizeCancel, RequestAuthorizeReject, RequestCurrentAccountAddress, RequestTypes, ResponseAuthorizeList, ResponseType } from '@subwallet/extension-base/background/types';
 import { getBondingExtrinsic, getBondingTxInfo, getChainBondingBasics, getClaimRewardExtrinsic, getClaimRewardTxInfo, getDelegationInfo, getUnbondingExtrinsic, getUnbondingTxInfo, getValidatorsInfo, getWithdrawalExtrinsic, getWithdrawalTxInfo } from '@subwallet/extension-koni-base/api/bonding';
 import { initApi } from '@subwallet/extension-koni-base/api/dotsama';
@@ -2523,6 +2523,66 @@ export default class KoniExtension extends Extension {
     return await parseTransactionData(data, contract, network);
   }
 
+  private async accountsCreateHardwareV2 ({ accountIndex, address, addressOffset, genesisHash, hardwareType, isAllowed, name }: RequestAccountCreateHardwareV2): Promise<boolean> {
+    const key = keyring.addHardware(address, hardwareType, { accountIndex, addressOffset, genesisHash, name, originGenesisHash: genesisHash });
+
+    const result = key.pair;
+
+    const _address = result.address;
+
+    await new Promise<void>((resolve) => {
+      state.addAccountRef([_address], () => {
+        resolve();
+      });
+    });
+
+    await new Promise<void>((resolve) => {
+      this._saveCurrentAccountAddress(_address, () => {
+        this._addAddressToAuthList(_address, isAllowed || false);
+        resolve();
+      });
+    });
+
+    return true;
+  }
+
+  private async accountsCreateExternalV2 ({ address,
+    genesisHash,
+    isAllowed,
+    isEthereum,
+    name }: RequestAccountCreateExternalV2): Promise<boolean> {
+    try {
+      let result: KeyringPair;
+
+      if (isEthereum) {
+        result = keyring.keyring.addFromAddress(address, { name, isExternal: true }, null, 'ethereum');
+
+        keyring.saveAccount(result);
+      } else {
+        result = keyring.addExternal(address, { genesisHash, name }).pair;
+      }
+
+      const _address = result.address;
+
+      await new Promise<void>((resolve) => {
+        state.addAccountRef([_address], () => {
+          resolve();
+        });
+      });
+
+      await new Promise<void>((resolve) => {
+        this._saveCurrentAccountAddress(_address, () => {
+          this._addAddressToAuthList(_address, isAllowed);
+          resolve();
+        });
+      });
+
+      return true;
+    } catch (e) {
+      return false;
+    }
+  }
+
   // eslint-disable-next-line @typescript-eslint/require-await
   public override async handle<TMessageType extends MessageTypes> (id: string, type: TMessageType, request: RequestTypes[TMessageType], port: chrome.runtime.Port): Promise<ResponseType<TMessageType>> {
     switch (type) {
@@ -2556,6 +2616,10 @@ export default class KoniExtension extends Extension {
         return await this.accountsCreateSuriV2(request as RequestAccountCreateSuriV2);
       case 'pri(accounts.forget)':
         return await this.accountsForgetOverride(request as RequestAccountForget);
+      case 'pri(accounts.create.externalV2)':
+        return await this.accountsCreateExternalV2(request as RequestAccountCreateExternalV2);
+      case 'pri(accounts.create.hardwareV2)':
+        return await this.accountsCreateHardwareV2(request as RequestAccountCreateHardwareV2);
       case 'pri(seed.createV2)':
         return this.seedCreateV2(request as RequestSeedCreateV2);
       case 'pri(seed.validateV2)':

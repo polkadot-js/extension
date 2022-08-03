@@ -631,7 +631,7 @@ export enum TransferStep {
   ERROR = 'error'
 }
 
-type TxResultType = {
+export type TxResultType = {
   change: string;
   changeSymbol?: string;
   fee?: string;

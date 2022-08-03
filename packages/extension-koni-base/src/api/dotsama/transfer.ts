@@ -11,8 +11,6 @@ import { KeyringPair } from '@polkadot/keyring/types';
 import { AccountInfoWithProviders, AccountInfoWithRefCount, EventRecord } from '@polkadot/types/interfaces';
 import { BN } from '@polkadot/util';
 
-// TODO: consider pass state.getApiMap() as a param
-
 export async function getExistentialDeposit (networkKey: string, token: string, dotSamaApiMap: Record<string, ApiProps>): Promise<string> {
   const apiProps = await dotSamaApiMap[networkKey].isReady;
   const api = apiProps.api;
@@ -264,7 +262,8 @@ export async function doSignAndSend (
     tokenInfo: undefined | TokenInfo,
     response: ResponseTransfer,
     records: EventRecord[]) => void,
-  callback: (data: ResponseTransfer) => void) {
+  callback: (data: ResponseTransfer) => void
+) {
   const response: ResponseTransfer = {
     step: TransferStep.READY,
     errors: [],

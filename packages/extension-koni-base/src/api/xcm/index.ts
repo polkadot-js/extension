@@ -2,13 +2,14 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { ApiProps, NetworkJson, ResponseTransfer, TokenInfo } from '@subwallet/extension-base/background/KoniTypes';
-import { doSignAndSend, getUnsupportedResponse, updateResponseTxResult } from '@subwallet/extension-koni-base/api/dotsama/transfer';
+import { doSignAndSend, getUnsupportedResponse } from '@subwallet/extension-koni-base/api/dotsama/transfer';
 import { astarEstimateCrossChainFee, astarGetXcmExtrinsic } from '@subwallet/extension-koni-base/api/xcm/astar';
 import { moonbeamEstimateCrossChainFee, moonbeamGetXcmExtrinsic } from '@subwallet/extension-koni-base/api/xcm/moonbeamXcm';
 import { substrateEstimateCrossChainFee, substrateGetXcmExtrinsic } from '@subwallet/extension-koni-base/api/xcm/substrateXcm';
 import { SupportedCrossChainsMap } from '@subwallet/extension-koni-base/api/xcm/utils';
 
 import { KeyringPair } from '@polkadot/keyring/types';
+import { EventRecord } from '@polkadot/types/interfaces';
 
 export function isNetworksPairSupportedTransferCrossChain (originNetworkKey: string, destinationNetworkKey: string, token: string, networkMap: Record<string, NetworkJson>): boolean {
   if (!SupportedCrossChainsMap[originNetworkKey] ||
@@ -81,5 +82,69 @@ export async function makeCrossChainTransfer (
     extrinsic = substrateGetXcmExtrinsic(originNetworkKey, destinationNetworkKey, to, value, api, tokenInfo, networkMap);
   }
 
-  await doSignAndSend(api, originNetworkKey, tokenInfo, extrinsic, fromKeypair, updateResponseTxResult, callback);
+  await doSignAndSend(api, originNetworkKey, tokenInfo, extrinsic, fromKeypair, updateXcmResponseTxResult, callback);
+}
+
+// TODO: add logic for more chains
+function updateXcmResponseTxResult (
+  networkKey: string,
+  tokenInfo: undefined | TokenInfo,
+  response: ResponseTransfer,
+  records: EventRecord[]
+) {
+  if (!response.txResult) {
+    response.txResult = { change: '0' };
+  }
+
+  let isFeeUseMainTokenSymbol = true;
+
+  for (let index = 0; index < records.length; index++) {
+    const record = records[index];
+
+    if (['karura', 'acala', 'acala_testnet'].includes(networkKey) && tokenInfo && !tokenInfo.isMainToken) {
+      if (record.event.section === 'currencies' &&
+        record.event.method.toLowerCase() === 'transferred') {
+        if (index === 0) {
+          // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+          response.txResult.fee = record.event.data[3]?.toString() || '0';
+          response.txResult.feeSymbol = tokenInfo.symbol;
+
+          isFeeUseMainTokenSymbol = false;
+        } else {
+          response.txResult.change = record.event.data[3]?.toString() || '0';
+          response.txResult.changeSymbol = tokenInfo.symbol;
+        }
+      }
+    } else if (['kintsugi', 'kintsugi_test', 'interlay'].includes(networkKey) && tokenInfo) {
+      if (record.event.section === 'tokens' &&
+        record.event.method.toLowerCase() === 'transfer') {
+        response.txResult.change = record.event.data[3]?.toString() || '0';
+        response.txResult.changeSymbol = tokenInfo.symbol;
+      }
+    } else if (['genshiro_testnet', 'genshiro', 'equilibrium_parachain'].includes(networkKey) && tokenInfo) {
+      if (record.event.section === 'eqBalances' &&
+        record.event.method.toLowerCase() === 'transfer') {
+        response.txResult.change = record.event.data[3]?.toString() || '0';
+        response.txResult.changeSymbol = tokenInfo.symbol;
+      }
+    } else {
+      if (record.event.section === 'balances' &&
+        record.event.method.toLowerCase() === 'transfer') {
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+        response.txResult.change = record.event.data[2]?.toString() || '0';
+      } else if (record.event.section === 'xTokens' &&
+        record.event.method.toLowerCase() === 'transferred') {
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+        response.txResult.change = record.event.data[2]?.toString() || '0';
+      }
+    }
+
+    if (isFeeUseMainTokenSymbol && record.event.section === 'balances' &&
+      record.event.method.toLowerCase() === 'withdraw') {
+      if (!response.txResult.fee) {
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+        response.txResult.fee = record.event.data[1]?.toString() || '0';
+      }
+    }
+  }
 }

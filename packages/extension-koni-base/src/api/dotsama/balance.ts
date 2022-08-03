@@ -513,7 +513,7 @@ export async function getFreeBalance (networkKey: string, address: string, dotSa
         const balanceInfo = (await api.query.assets.account(tokenInfo?.assetIndex, address)).toHuman() as Record<string, string>;
 
         // eslint-disable-next-line @typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-member-access,@typescript-eslint/no-unsafe-return
-        return balanceInfo.balance.replaceAll(',', '') || '0';
+        return balanceInfo?.balance?.replaceAll(',', '') || '0';
       } else if (!isMainToken || ['kintsugi', 'kintsugi_test', 'interlay'].includes(networkKey)) {
         // @ts-ignore
         const balance = await api.query.tokens.accounts(address, tokenInfo?.specialOption || { Token: token }) as TokenBalanceRaw;
@@ -618,7 +618,7 @@ export async function subscribeFreeBalance (
           const balanceInfo = _balanceInfo.toHuman() as Record<string, string>;
 
           // eslint-disable-next-line @typescript-eslint/no-unsafe-argument,@typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-member-access
-          update(balanceInfo.balance.replaceAll(',', '') || '0');
+          update(balanceInfo?.balance?.replaceAll(',', '') || '0');
         });
 
         return () => {

@@ -8,9 +8,16 @@ import { ApiPromise } from '@polkadot/api';
 import { KeyringPair } from '@polkadot/keyring/types';
 import { decodeAddress } from '@polkadot/util-crypto';
 
-const ASSET_TO_LOCATION_MAP: Record<string, Record<string, any>> = {
-  '18446744073709551617': { // aUSD
-    parents: 1, interior: { X2: [{ Parachain: 2000 }, { GeneralKey: '0x0001' }] }
+const ASSET_TO_LOCATION_MAP: Record<string, Record<string, Record<string, any>>> = {
+  astar: {
+    '18446744073709551617': { // aUSD
+      parents: 1, interior: { X2: [{ Parachain: 2000 }, { GeneralKey: '0x0001' }] }
+    }
+  },
+  shiden: {
+    '18446744073709551616': { // aUSD
+      parents: 1, interior: { X2: [{ Parachain: 2000 }, { GeneralKey: '0x0081' }] }
+    }
   }
 };
 
@@ -35,7 +42,7 @@ export async function astarEstimateCrossChainFee (
     return ['0', ''];
   }
 
-  const assetLocation = ASSET_TO_LOCATION_MAP[tokenInfo.assetIndex];
+  const assetLocation = ASSET_TO_LOCATION_MAP[originNetworkKey][tokenInfo.assetIndex];
 
   let receiverLocation: Record<string, any> = { AccountId32: { network: 'Any', id: decodeAddress(to) } };
 
@@ -94,7 +101,7 @@ export function astarGetXcmExtrinsic (
 ) {
   const destinationNetworkJson = networkMap[destinationNetworkKey];
 
-  const assetLocation = ASSET_TO_LOCATION_MAP[tokenInfo.assetIndex as string];
+  const assetLocation = ASSET_TO_LOCATION_MAP[originNetworkKey][tokenInfo.assetIndex as string];
 
   let receiverLocation: Record<string, any> = { AccountId32: { network: 'Any', id: decodeAddress(to) } };
 

@@ -158,6 +158,22 @@ export const SupportedCrossChainsMap: Record<string, CrossChainRelation> = {
       // }
     }
   },
+  shiden: {
+    type: 'p',
+    isEthereum: false,
+    relationMap: {
+      karura: {
+        type: 'r',
+        isEthereum: false,
+        supportedToken: ['aUSD']
+      }
+      // polkadot: {
+      //   type: 'r',
+      //   isEthereum: false,
+      //   supportedToken: ['DOT']
+      // }
+    }
+  },
   kintsugi: {
     type: 'p',
     isEthereum: false,

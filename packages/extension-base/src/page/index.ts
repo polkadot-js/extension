@@ -3,10 +3,11 @@
 
 import type { MessageTypes, MessageTypesWithNoSubscriptions, MessageTypesWithNullRequest, MessageTypesWithSubscriptions, RequestTypes, ResponseTypes, SubscriptionMessageTypes, TransportRequestMessage, TransportResponseMessage } from '../background/types';
 
+import { SubWalletProviderError } from '@subwallet/extension-base/errors/SubWalletProviderError';
+
 import { MESSAGE_ORIGIN_PAGE } from '../defaults';
 import { getId } from '../utils/getId';
 import Injected from './Injected';
-
 // when sending a message from the injector to the extension, we
 //  - create an event - this we send to the loader
 //  - the loader takes this event and uses port.postMessage to background
@@ -73,7 +74,7 @@ export function handleResponse<TMessageType extends MessageTypes> (data: Transpo
     // eslint-disable-next-line @typescript-eslint/ban-types
     (handler.subscriber as Function)(data.subscription);
   } else if (data.error) {
-    handler.reject(new Error(data.error));
+    handler.reject(new SubWalletProviderError(data.error, data.errorCode, data.errorData));
   } else {
     handler.resolve(data.response);
   }

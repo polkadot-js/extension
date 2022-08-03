@@ -5,6 +5,7 @@ import type { EvmProvider } from '@subwallet/extension-inject/types';
 
 import SafeEventEmitter from '@metamask/safe-event-emitter';
 import { SendRequest } from '@subwallet/extension-base/page/types';
+import { EvmRpcError } from '@subwallet/extension-koni-base/background/errors/EvmRpcError';
 import { JsonRpcRequest, JsonRpcResponse, JsonRpcSuccess } from 'json-rpc-engine';
 import { RequestArguments } from 'web3-core';
 
@@ -81,9 +82,12 @@ export class SubWalletEvmProvider extends SafeEventEmitter implements EvmProvide
                 .then((accounts) => {
                   // @ts-ignore
                   resolve(accounts);
-                }).catch(reject);
-            })
-            .catch(reject);
+                }).catch((e: EvmRpcError) => {
+                  reject(e);
+                });
+            }).catch((e: EvmRpcError) => {
+              reject(e);
+            });
         });
       default:
         return new Promise((resolve, reject) => {
@@ -92,7 +96,7 @@ export class SubWalletEvmProvider extends SafeEventEmitter implements EvmProvide
             .then((result) => {
               resolve(result as T);
             })
-            .catch((e) => {
+            .catch((e: EvmRpcError) => {
               reject(e);
             });
         });
@@ -145,7 +149,7 @@ export class SubWalletEvmProvider extends SafeEventEmitter implements EvmProvide
         // @ts-ignore
         callback(null, { result });
       })
-      .catch((e: Error) => {
+      .catch((e: EvmRpcError) => {
         callback(e);
       });
   }

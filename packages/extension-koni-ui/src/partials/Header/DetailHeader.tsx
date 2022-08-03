@@ -289,7 +289,14 @@ function DetailHeader ({ className = '',
 
       <div className='detail-header__part-2'>
         {!isEditing && (
-          <div className='detail-header-account-info'>
+          <div
+            className={CN(
+              'detail-header-account-info',
+              {
+                'detail-header-account-info__ml': !isPopup
+              }
+            )}
+          >
             {isAllAccount
               ? <div className='detail-header__all-account'>
                 {t<string>('All Accounts')}
@@ -410,6 +417,12 @@ export default styled(DetailHeader)(({ theme }: Props) => `
   .detail-header-account-info {
     display: flex;
     align-items: baseline;
+  }
+
+  .detail-header-account-info__ml {
+    .detail-header-account-info__name {
+      margin-left: 16px;
+    }
   }
 
   .detail-header-account-info__name {

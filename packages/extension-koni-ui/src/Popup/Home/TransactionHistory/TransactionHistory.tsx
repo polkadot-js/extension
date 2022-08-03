@@ -130,7 +130,7 @@ function TransactionHistory ({ className, items, registryMap }: ContentProp): Re
       {items.map((item) => (
         <TransactionHistoryItemWrapper
           item={item}
-          key={`${item.extrinsicHash}/${item.eventIdx || item.change}`}
+          key={`${item.extrinsicHash}/${item.eventIdx || item.change}/${item.action}`}
           registryMap={registryMap}
         />
       ))}

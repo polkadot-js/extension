@@ -19,6 +19,7 @@ interface Props extends ThemeProps{
   accountIndex?: number;
   addressOffset?: number;
   className?: string;
+  children: React.ReactNode;
   error: string | null;
   genesisHash?: string;
   onSignature?: ({ signature }: { signature: HexString }) => void;
@@ -27,7 +28,7 @@ interface Props extends ThemeProps{
   signId: string;
 }
 
-function LedgerSign ({ accountIndex, addressOffset, className, error, genesisHash, onSignature, payload, setError, signId }: Props): React.ReactElement<Props> {
+function LedgerSign ({ accountIndex, addressOffset, children, className, error, genesisHash, onSignature, payload, setError, signId }: Props): React.ReactElement<Props> {
   const [isBusy, setIsBusy] = useState(false);
   const { t } = useTranslation();
 
@@ -74,6 +75,7 @@ function LedgerSign ({ accountIndex, addressOffset, className, error, genesisHas
   return (
     <>
       <div className={className}>
+        {children}
         {!!ledgerWarning && (
           <Warning>
             {ledgerWarning}

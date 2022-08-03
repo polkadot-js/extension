@@ -28,7 +28,7 @@ interface Props extends ThemeProps {
   signId: string;
 }
 
-function Qr ({ address, className, cmd, genesisHash, onSignature, payload, signId }: Props): React.ReactElement<Props> {
+function Qr ({ address, children, className, cmd, genesisHash, onSignature, payload, signId }: Props): React.ReactElement<Props> {
   const { t } = useTranslation();
 
   const onAction = useContext(ActionContext);
@@ -84,6 +84,7 @@ function Qr ({ address, className, cmd, genesisHash, onSignature, payload, signI
             />
           </div>
         </div>
+        {children}
       </div>
       <div className='sign-button-container'>
         <Button
@@ -114,7 +115,8 @@ export default React.memo(styled(Qr)(({ theme }: Props) => `
 
   .qr-container {
     margin: 5px auto 10px auto;
-    width: 65%;
+    width: 220px;
+    height: 220px;
 
     img {
       border: white solid 1px;

@@ -7,10 +7,10 @@ import styled, { ThemeContext } from 'styled-components';
 
 import { QrScanAddress } from '@polkadot/react-qr';
 
-import { AccountContext, AccountInfoEl, ActionContext, ButtonArea, NextStepButton, Theme } from '../components';
+import { AccountContext, AccountInfoEl, ActionContext, ButtonArea, Checkbox, NextStepButton, Theme } from '../components';
 import AccountNamePasswordCreation from '../components/AccountNamePasswordCreation';
 import useTranslation from '../hooks/useTranslation';
-import { createAccountExternal, createAccountSuri, createSeed } from '../messaging';
+import { createAccountExternalV2, createAccountSuri, createSeed } from '../messaging';
 import { Header, Name } from '../partials';
 
 interface QrAccount {
@@ -34,6 +34,7 @@ function ImportQr ({ className }: Props): React.ReactElement<Props> {
   const [address, setAddress] = useState<string | null>(null);
   const [name, setName] = useState<string | null>(defaultName);
   const [password, setPassword] = useState<string | null>(null);
+  const [isAllowed, setIsAllowed] = useState<boolean>(true);
   const themeContext = useContext(ThemeContext as React.Context<Theme>);
 
   const _setAccount = useCallback(
@@ -56,7 +57,13 @@ function ImportQr ({ className }: Props): React.ReactElement<Props> {
     (): void => {
       if (account && name) {
         if (account.isAddress) {
-          createAccountExternal(name, account.content, account.genesisHash)
+          createAccountExternalV2({
+            name,
+            address: account.content,
+            genesisHash: account.genesisHash,
+            isAllowed: isAllowed,
+            isEthereum: false
+          })
             .then(() => {
               window.localStorage.setItem('popupNavigation', '/');
               onAction('/');
@@ -72,7 +79,7 @@ function ImportQr ({ className }: Props): React.ReactElement<Props> {
         }
       }
     },
-    [account, name, onAction, password]
+    [account, isAllowed, name, onAction, password]
   );
 
   return (
@@ -117,6 +124,11 @@ function ImportQr ({ className }: Props): React.ReactElement<Props> {
                 />
               )
             }
+            <Checkbox
+              checked={isAllowed}
+              label={t<string>('Auto connect to all DApps after importing')}
+              onChange={setIsAllowed}
+            />
             {
               account.isAddress && <ButtonArea>
                 <NextStepButton

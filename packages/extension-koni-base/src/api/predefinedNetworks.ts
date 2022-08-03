@@ -1718,54 +1718,54 @@ export const PREDEFINED_NETWORKS: Record<string, NetworkJson> = {
     paraId: 2113,
     nativeToken: 'KAB',
     decimals: 12
-  },
-  acala_dev: {
-    key: 'acala_dev',
-    chain: 'Acala Karura Dev',
-    genesisHash: '0x102c0b94289f766d68d41b788c48b3440baa46d40f7d46b413c59a1a2b1b4079',
-    ss58Format: 8,
-    providers: {
-      testnet: 'wss://crosschain-dev.polkawallet.io:9908/'
-    },
-    active: false,
-    currentProviderMode: 'ws',
-    currentProvider: 'testnet',
-    groups: ['TEST_NET'],
-    nativeToken: 'KAR',
-    decimals: 12,
-    paraId: 2000
-  },
-  moonbase_relay: {
-    key: 'moonbase_relay',
-    chain: 'Moonbase Relay Testnet',
-    genesisHash: '0xe1ea3ab1d46ba8f4898b6b4b9c54ffc05282d299f89e84bd0fd08067758c9443',
-    ss58Format: 42,
-    providers: {
-      testnet: 'wss://frag-moonbase-relay-rpc-ws.g.moonbase.moonbeam.network/'
-    },
-    active: false,
-    currentProviderMode: 'ws',
-    currentProvider: 'testnet',
-    groups: ['TEST_NET'],
-    nativeToken: 'Unit',
-    decimals: 12
-  },
-  contractsRococo: {
-    key: 'contractsRococo',
-    chain: 'Contracts on Rococo',
-    genesisHash: '0xc5442742bb6288bb3835ea1c9032981f06433ee5fc65d6e216c4422c0c19b989',
-    ss58Format: 42,
-    providers: {
-      testnet: 'wss://rococo-contracts-rpc.polkadot.io'
-    },
-    active: false,
-    currentProviderMode: 'ws',
-    currentProvider: 'testnet',
-    groups: ['TEST_NET'],
-    nativeToken: 'ROC',
-    decimals: 12,
-    paraId: 1002
   }
+  // acala_dev: {
+  //   key: 'acala_dev',
+  //   chain: 'Acala Karura Dev',
+  //   genesisHash: '0x102c0b94289f766d68d41b788c48b3440baa46d40f7d46b413c59a1a2b1b4079',
+  //   ss58Format: 8,
+  //   providers: {
+  //     testnet: 'wss://crosschain-dev.polkawallet.io:9908/'
+  //   },
+  //   active: false,
+  //   currentProviderMode: 'ws',
+  //   currentProvider: 'testnet',
+  //   groups: ['TEST_NET'],
+  //   nativeToken: 'KAR',
+  //   decimals: 12,
+  //   paraId: 2000
+  // },
+  // moonbase_relay: {
+  //   key: 'moonbase_relay',
+  //   chain: 'Moonbase Relay Testnet',
+  //   genesisHash: '0xe1ea3ab1d46ba8f4898b6b4b9c54ffc05282d299f89e84bd0fd08067758c9443',
+  //   ss58Format: 42,
+  //   providers: {
+  //     testnet: 'wss://frag-moonbase-relay-rpc-ws.g.moonbase.moonbeam.network/'
+  //   },
+  //   active: false,
+  //   currentProviderMode: 'ws',
+  //   currentProvider: 'testnet',
+  //   groups: ['TEST_NET'],
+  //   nativeToken: 'Unit',
+  //   decimals: 12
+  // },
+  // contractsRococo: {
+  //   key: 'contractsRococo',
+  //   chain: 'Contracts on Rococo',
+  //   genesisHash: '0xc5442742bb6288bb3835ea1c9032981f06433ee5fc65d6e216c4422c0c19b989',
+  //   ss58Format: 42,
+  //   providers: {
+  //     testnet: 'wss://rococo-contracts-rpc.polkadot.io'
+  //   },
+  //   active: false,
+  //   currentProviderMode: 'ws',
+  //   currentProvider: 'testnet',
+  //   groups: ['TEST_NET'],
+  //   nativeToken: 'ROC',
+  //   decimals: 12,
+  //   paraId: 1002
+  // }
 };
 
 function getGenesisHashes () {

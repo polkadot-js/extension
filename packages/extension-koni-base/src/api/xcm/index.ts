@@ -85,7 +85,7 @@ export async function makeCrossChainTransfer (
   await doSignAndSend(api, originNetworkKey, tokenInfo, extrinsic, fromKeypair, updateXcmResponseTxResult, callback);
 }
 
-// TODO: add logic for more chains
+// TODO: add + refine logic for more chains
 function updateXcmResponseTxResult (
   networkKey: string,
   tokenInfo: undefined | TokenInfo,
@@ -127,6 +127,18 @@ function updateXcmResponseTxResult (
         response.txResult.change = record.event.data[3]?.toString() || '0';
         response.txResult.changeSymbol = tokenInfo.symbol;
       }
+    } else if (['astar', 'shiden'].includes(networkKey) && tokenInfo) {
+      if (record.event.section === 'assets' &&
+        record.event.method.toLowerCase() === 'transferred') {
+        response.txResult.change = record.event.data[3]?.toString() || '0';
+        response.txResult.changeSymbol = tokenInfo.symbol;
+      }
+    } else if (['moonbeam', 'moonriver'].includes(networkKey) && tokenInfo) {
+      if (record.event.section === 'assets' &&
+        record.event.method.toLowerCase() === 'burned') {
+        response.txResult.change = record.event.data[2]?.toString() || '0';
+        response.txResult.changeSymbol = tokenInfo.symbol;
+      }
     } else {
       if (record.event.section === 'balances' &&
         record.event.method.toLowerCase() === 'transfer') {
@@ -139,8 +151,7 @@ function updateXcmResponseTxResult (
       }
     }
 
-    if (isFeeUseMainTokenSymbol && record.event.section === 'balances' &&
-      record.event.method.toLowerCase() === 'withdraw') {
+    if (isFeeUseMainTokenSymbol && record.event.section === 'balances' && record.event.method.toLowerCase() === 'withdraw') {
       if (!response.txResult.fee) {
         // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
         response.txResult.fee = record.event.data[1]?.toString() || '0';

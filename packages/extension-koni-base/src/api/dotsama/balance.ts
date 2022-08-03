@@ -511,10 +511,12 @@ export async function getFreeBalance (networkKey: string, address: string, dotSa
         const balance = await api.query.system.account(address) as { data: { freeKton: Balance } };
 
         return balance.data?.freeKton?.toString() || '0';
-      } else if (['astar', 'shiden'].includes(networkKey)) {
+      } else if (!isMainToken && ['astar', 'shiden'].includes(networkKey)) {
+        console.log('run ok');
         const balanceInfo = (await api.query.assets.account(tokenInfo?.assetIndex, address)).toHuman() as Record<string, string>;
 
-        return balanceInfo.balance || '0';
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-member-access,@typescript-eslint/no-unsafe-return
+        return balanceInfo.balance.replaceAll(',', '') || '0';
       } else if (!isMainToken || ['kintsugi', 'kintsugi_test', 'interlay'].includes(networkKey)) {
         // @ts-ignore
         const balance = await api.query.tokens.accounts(address, tokenInfo?.specialOption || { Token: token }) as TokenBalanceRaw;
@@ -606,6 +608,20 @@ export async function subscribeFreeBalance (
           // @ts-ignore
           // eslint-disable-next-line node/no-callback-literal,@typescript-eslint/no-unsafe-argument,@typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-member-access
           update(balance.data?.freeKton?.toBn()?.toString() || '0');
+        });
+
+        return () => {
+          // @ts-ignore
+          unsub && unsub();
+        };
+      } else if (!isMainToken && ['astar', 'shiden'].includes(networkKey)) {
+        // @ts-ignore
+        const unsub = await api.query.assets.account(tokenInfo?.assetIndex, address, (_balanceInfo) => {
+          // eslint-disable-next-line @typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-member-access
+          const balanceInfo = _balanceInfo.toHuman() as Record<string, string>;
+
+          // eslint-disable-next-line @typescript-eslint/no-unsafe-argument,@typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-member-access
+          update(balanceInfo.balance.replaceAll(',', '') || '0');
         });
 
         return () => {

@@ -54,7 +54,7 @@ export async function astarEstimateCrossChainFee (
     },
     {
       V1: { // find the receiver
-        parents: 1,
+        parents: 0, // parents for beneficiary is always 0
         interior: {
           X1: receiverLocation
         }
@@ -113,7 +113,7 @@ export function astarGetXcmExtrinsic (
     },
     {
       V1: { // find the receiver
-        parents: 1,
+        parents: 0, // parents for beneficiary is always 0
         interior: {
           X1: receiverLocation
         }

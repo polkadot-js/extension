@@ -44,29 +44,41 @@ const NetworkInfo = (props: Props) => {
 };
 
 export default React.memo(styled(NetworkInfo)(({ theme }: Props) => `
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
   .network-item-container {
     cursor: pointer;
     display: flex;
     align-items: center;
-    flex-direction: column;
+    flex-direction: row;
+    justify-content: center;
+    height: 40px;
+    max-width: 240px;
+    background: ${theme.backgroundAccountAddress};
+    border-radius: 5px;
+    padding: 6px 10px;
 
     .network-logo {
-      min-width: 45px;
-      width: 45px;
-      height: 45px;
+      min-width: 28px;
+      width: 28px;
+      height: 28px;
       border-radius: 100%;
       overflow: hidden;
       image-rendering: -webkit-optimize-contrast;
       image-rendering: crisp-edges;
       border: 1px solid #fff;
       background: #fff;
-      margin-bottom: 4px;
+      margin-right: 8px;
     }
 
     .network-text {
-      font-size: 16px;
-      line-height: 26px;
-      color: ${theme.textColor};
+      font-style: normal;
+      font-weight: 400;
+      font-size: 14px;
+      line-height: 24px;
+      color: ${theme.textColor2};
     }
   }
 `));

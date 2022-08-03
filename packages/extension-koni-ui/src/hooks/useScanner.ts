@@ -112,7 +112,7 @@ const useScanner = (showAlertMessage: (message: string) => void): ProcessBarcode
         return showAlertMessage(strings.ERROR_NO_EXTERNAL_ACCOUNT);
       }
 
-      setStep(SCANNER_QR_STEP.VIEW_DETAIL_STEP);
+      setStep(SCANNER_QR_STEP.CONFIRM_STEP);
 
       return showAlertMessage('');
     } catch (e) {

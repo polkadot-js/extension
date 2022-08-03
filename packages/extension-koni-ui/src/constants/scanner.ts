@@ -3,7 +3,6 @@
 
 export const SCANNER_QR_STEP = {
   SCAN_STEP: 1,
-  VIEW_DETAIL_STEP: 2,
-  CONFIRM_STEP: 3,
-  FINAL_STEP: 4
+  CONFIRM_STEP: 2,
+  FINAL_STEP: 3
 };

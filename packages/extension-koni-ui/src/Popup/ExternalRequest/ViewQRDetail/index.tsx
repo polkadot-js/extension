@@ -3,10 +3,8 @@
 
 import { NetworkJson } from '@subwallet/extension-base/background/KoniTypes';
 import { Button, Spinner } from '@subwallet/extension-koni-ui/components';
-import { SCANNER_QR_STEP } from '@subwallet/extension-koni-ui/constants/scanner';
 import { ScannerContext, ScannerContextType } from '@subwallet/extension-koni-ui/contexts/ScannerContext';
 import useTranslation from '@subwallet/extension-koni-ui/hooks/useTranslation';
-import AccountInfo from '@subwallet/extension-koni-ui/Popup/ExternalRequest/Shared/AccountInfo';
 import NetworkInfo from '@subwallet/extension-koni-ui/Popup/ExternalRequest/Shared/NetworkInfo';
 import MessageSigned from '@subwallet/extension-koni-ui/Popup/ExternalRequest/ViewQRDetail/MessageSigned';
 import TransactionSigned from '@subwallet/extension-koni-ui/Popup/ExternalRequest/ViewQRDetail/TransactionSigned';
@@ -20,20 +18,21 @@ import styled from 'styled-components';
 
 interface Props extends ThemeProps {
   className?: string;
+  onClose: () => void;
 }
 
 const ViewQRDetail = (props: Props) => {
-  const { className } = props;
+  const { className, onClose } = props;
 
   const { t } = useTranslation();
 
   const scannerStore = useContext<ScannerContextType>(ScannerContext);
-  const { cleanup, setStep, state } = scannerStore;
-  const { evmChainId, genesisHash, isEthereum, senderAddress, type } = state;
+  const { state } = scannerStore;
+  const { evmChainId, genesisHash, isEthereum, type } = state;
   const { networkMap } = useSelector((state: RootState) => state);
 
   const [loading, setLoading] = useState<boolean>(true);
-  const [buttonLoading, setButtonLoading] = useState<boolean>(false);
+  const [, setButtonLoading] = useState<boolean>(false);
   const [network, setNetwork] = useState<NetworkJson | null>(null);
 
   const handlerFetch = useCallback(() => {
@@ -73,17 +72,9 @@ const ViewQRDetail = (props: Props) => {
     }
   }, [loading, network, type]);
 
-  const handlerClickBack = useCallback(() => {
-    setButtonLoading(true);
-    cleanup();
-    setButtonLoading(false);
-  }, [cleanup]);
-
-  const handlerClickNext = useCallback(() => {
-    setButtonLoading(true);
-    setStep(SCANNER_QR_STEP.CONFIRM_STEP);
-    setButtonLoading(false);
-  }, [setStep]);
+  const handlerClickClose = useCallback(() => {
+    onClose && onClose();
+  }, [onClose]);
 
   if (loading && !network) {
     return (
@@ -95,64 +86,73 @@ const ViewQRDetail = (props: Props) => {
 
   return (
     <div className={CN(className)}>
-      {
-        (loading || !network) && (
-          <div className={CN('loading')}>
-            <Spinner />
-          </div>
-        )
-      }
-
-      {
-        (!loading && network) && (
-          <>
-            <NetworkInfo
-              forceEthereum={isEthereum && !evmChainId}
-              network={network}
-            />
-            <AccountInfo
-              address={senderAddress}
-              network={network}
-            />
-          </>
-        )
-      }
-      {handlerRenderContent()}
-      <div className={CN('grid-container')}>
-        <Button
-          className={CN('button')}
-          onClick={handlerClickBack}
-        >
-          {t('Previous Step')}
-        </Button>
-        <Button
-          className={CN('button')}
-          isBusy={buttonLoading || !network || loading}
-          onClick={handlerClickNext}
-        >
-          {t('Next Step')}
-        </Button>
+      <div className='info-area'>
+        {
+          (loading || !network) && (
+            <div className={CN('loading')}>
+              <Spinner />
+            </div>
+          )
+        }
+        {
+          (!loading && network) && (
+            <div className='network-info-container'>
+              <NetworkInfo
+                forceEthereum={isEthereum && !evmChainId}
+                network={network}
+              />
+            </div>
+          )
+        }
+        {handlerRenderContent()}
+      </div>
+      <div className='action-area'>
+        <div className={CN('action-container')}>
+          <Button
+            className={CN('button')}
+            onClick={handlerClickClose}
+          >
+            {t('Close')}
+          </Button>
+        </div>
       </div>
     </div>
   );
 };
 
 export default React.memo(styled(ViewQRDetail)(({ theme }: Props) => `
-  margin: 20px 20px 0 20px;
-  padding: 5px;
+  padding: 10px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  height: 100%;
 
   .loading{
     position: relative;
-    height: 300px;
+    height: 395px;
   }
 
-  .grid-container{
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    grid-gap: 4px;
+  .info-area {
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .network-info-container {
+    margin-bottom: 10px;
+  }
+
+  .action-container {
+    position: sticky;
+    bottom: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 
     .button{
       margin-top: 8px;
+      width: 170px;
     }
   }
+
 `));

@@ -1,33 +1,39 @@
 // Copyright 2019-2022 @polkadot/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { ResponseParseTransactionEVM } from '@subwallet/extension-base/background/KoniTypes';
+import { EVMTransactionArg, NetworkJson, ParseEVMTransactionData, ResponseParseTransactionEVM } from '@subwallet/extension-base/background/KoniTypes';
 import { Spinner } from '@subwallet/extension-koni-ui/components';
 import { ScannerContext, ScannerContextType } from '@subwallet/extension-koni-ui/contexts/ScannerContext';
 import { parseEVMTransaction } from '@subwallet/extension-koni-ui/messaging';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
+import { convertToSimpleNumber } from '@subwallet/extension-koni-ui/util/formatNumber';
 import CN from 'classnames';
 import React, { useCallback, useContext, useEffect, useState } from 'react';
 import styled from 'styled-components';
 
 import { isString, u8aToHex } from '@polkadot/util';
 
-interface Props extends ThemeProps{
+interface Props extends ThemeProps {
   className?: string;
   setButtonLoading: (value: boolean) => void;
+  network: NetworkJson;
 }
 
 type TxDetail = ResponseParseTransactionEVM;
 
 const TransactionDetail = (props: Props) => {
-  const { className, setButtonLoading } = props;
+  const { className, network, setButtonLoading } = props;
 
   const scannerStore = useContext<ScannerContextType>(ScannerContext);
   const { state } = scannerStore;
-  const { dataToSign } = state;
+  const { dataToSign, signedData } = state;
 
   const [payloadDetail, setPayloadDetail] = useState<TxDetail | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
+
+  const convertNumber = useCallback((val: number) => {
+    return `${convertToSimpleNumber(val, network.decimals || 18)}${network.nativeToken || 'token'}`;
+  }, [network.decimals, network.nativeToken]);
 
   const handlerParseTransaction = useCallback(async (dataToSign: string, mount: boolean) => {
     const data = await parseEVMTransaction(dataToSign);
@@ -39,73 +45,63 @@ const TransactionDetail = (props: Props) => {
     }
   }, [setButtonLoading]);
 
-  const handlerRenderData = useCallback(() => {
-    const data = payloadDetail?.data;
+  const handlerRenderArg = useCallback((data: EVMTransactionArg, parentName: string): JSX.Element => {
+    const { children, name, value } = data;
+    const _name = (parentName ? `${parentName}.` : '') + name;
 
-    if (!data) {
-      return <></>;
-    }
+    const _value: string = value;
 
-    if (isString(data)) {
+    if (children) {
       return (
-        <div className={CN('raw-method', { hidden: data.length <= 2 })}>
-          {data}
-        </div>
+        <React.Fragment key={parentName}>
+          {
+            children.map((child) => handlerRenderArg(child, name))
+          }
+        </React.Fragment>
       );
     }
 
-    const { args, method } = data;
-
     return (
-      <div className={'method-info'}>
-        <div className={'method-description'}>
-          <div>
-            Method: {method}
-          </div>
-          <div>
-            Arguments:
-          </div>
+      <div
+        className='info-container'
+        key={_name}
+      >
+        <div className='info-title'>
+          {_name}:
         </div>
-        {
-          args.map(({ name, type, value }, index) => {
-            return (
-              <div
-                className={'method-arg'}
-                key={index}
-              >
-                <div className={CN('grid-container')}>
-                  <div className={CN('info-container')}>
-                    <div className={CN('info-title')}>
-                      Name
-                    </div>
-                    <div className={CN('info-detail')}>
-                      {name}
-                    </div>
-                  </div>
-                  <div className={CN('info-container')}>
-                    <div className={CN('info-title')}>
-                      Type
-                    </div>
-                    <div className={CN('info-detail')}>
-                      {type}
-                    </div>
-                  </div>
-                </div>
-                <div className={CN('info-container')}>
-                  <div className={CN('info-title')}>
-                    Value
-                  </div>
-                  <div className={CN('info-detail')}>
-                    {value}
-                  </div>
-                </div>
-              </div>
-            );
-          })
-        }
+        <div className='info-detail'>
+          {_value}
+        </div>
       </div>
     );
-  }, [payloadDetail?.data]);
+  }, []);
+
+  const handlerRenderInputInfo = useCallback((info: string | ParseEVMTransactionData) => {
+    if (typeof info === 'string') {
+      return null;
+    }
+
+    return (
+      <div className={CN('info-group-container', 'detail-info-container')}>
+        <div className={CN('group-title')}>
+          Detail
+        </div>
+        <div className={CN('group-body')}>
+          <div className='info-container'>
+            <div className={CN('info-title')}>
+              Method:
+            </div>
+            <div className='info-detail'>
+              {info.methodName}
+            </div>
+          </div>
+          {
+            info.args.map((value) => handlerRenderArg(value, ''))
+          }
+        </div>
+      </div>
+    );
+  }, [handlerRenderArg]);
 
   useEffect(() => {
     let mount = true;
@@ -124,62 +120,108 @@ const TransactionDetail = (props: Props) => {
 
   return (
     <div className={CN(className)}>
-      { loading && <Spinner />}
+      {
+        loading &&
+        (
+          <div className={CN('info-loading')}>
+            <Spinner />
+          </div>
+        )
+      }
       {
         !loading && payloadDetail && (
           <>
-            <div className={CN('info-container')}>
-              <div className={CN('info-title')}>
-                To
+            <div className={CN('info-group-container')}>
+              <div className={CN('group-title')}>
+                Basic
               </div>
-              <div className={CN('info-detail')}>
-                {payloadDetail.to}
-              </div>
+              <table
+                cellPadding={0}
+                cellSpacing={4}
+                className={CN('group-body')}
+              >
+                <tbody>
+                  <tr className={'info-container'}>
+                    <td className={CN('info-title')}>
+                    To:
+                    </td>
+                    <td
+                      className={CN('info-detail')}
+                      colSpan={3}
+                    >
+                      {payloadDetail.to}
+                    </td>
+                  </tr>
+                  <tr className={'info-container'}>
+                    <td className={CN('info-title')}>
+                    Data:
+                    </td>
+                    <td
+                      className={CN(
+                        'info-detail',
+                        'raw-method',
+                        {
+                          hidden: payloadDetail.input.length <= 2
+                        }
+                      )}
+                      colSpan={3}
+                    >
+                      <div
+                        className={CN(
+                          'info-detail',
+                          'raw-method',
+                          {
+                            hidden: payloadDetail.input.length <= 2
+                          }
+                        )}
+                      >
+                        {payloadDetail.input}
+                      </div>
+                    </td>
+                  </tr>
+                  <tr className={'info-container'}>
+                    <td className={CN('info-title')}>
+                    Nonce:
+                    </td>
+                    <td className={CN('info-detail')}>
+                      {payloadDetail.nonce}
+                    </td>
+                    <td className={CN('info-title')}>
+                    Value:
+                    </td>
+                    <td className={CN('info-detail')}>
+                      {convertNumber(payloadDetail.value)}
+                    </td>
+                  </tr>
+                  <tr className={'info-container'}>
+                    <td className={CN('info-title')}>
+                    Gas:
+                    </td>
+                    <td className={CN('info-detail')}>
+                      {payloadDetail.gas}
+                    </td>
+                    <td className={CN('info-title')}>
+                    Gas price:
+                    </td>
+                    <td className={CN('info-detail')}>
+                      {convertNumber(payloadDetail.gasPrice)}
+                    </td>
+                  </tr>
+                  <tr className={'info-container'}>
+                    <td className={CN('info-title')}>
+                    Signature:
+                    </td>
+                    <td
+                      className={CN('info-detail')}
+                      colSpan={3}
+                    >
+                      {signedData}
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
             </div>
-            <div className={CN('info-container')}>
-              <div className={CN('info-title')}>
-                Data
-              </div>
-              <div className={CN('info-detail')}>
-                {handlerRenderData()}
-              </div>
-            </div>
-            <div className={CN('grid-container')}>
-              <div className={CN('info-container')}>
-                <div className={CN('info-title')}>
-                  Nonce
-                </div>
-                <div className={CN('info-detail')}>
-                  {payloadDetail.nonce}
-                </div>
-              </div>
-              <div className={CN('info-container')}>
-                <div className={CN('info-title')}>
-                  Value
-                </div>
-                <div className={CN('info-detail')}>
-                  {payloadDetail.value}
-                </div>
-              </div>
-            </div>
-            <div className={CN('grid-container')}>
-              <div className={CN('info-container')}>
-                <div className={CN('info-title')}>
-                  Gas
-                </div>
-                <div className={CN('info-detail')}>
-                  {payloadDetail.gas}
-                </div>
-              </div>
-              <div className={CN('info-container')}>
-                <div className={CN('info-title')}>
-                  Gas price
-                </div>
-                <div className={CN('info-detail')}>
-                  {payloadDetail.gasPrice}
-                </div>
-              </div>
-            </div>
+            {handlerRenderInputInfo(payloadDetail.data)}
           </>
         )
       }
@@ -188,9 +230,14 @@ const TransactionDetail = (props: Props) => {
 };
 
 export default React.memo(styled(TransactionDetail)(({ theme }: Props) => `
-  height: 216px;
+  height: 100%;
   overflow-y: auto;
   position: relative;
+
+  .info-loading {
+    position: relative;
+    height: 300px;
+  }
 
   .raw-method {
     &.hidden {
@@ -198,49 +245,62 @@ export default React.memo(styled(TransactionDetail)(({ theme }: Props) => `
     }
   }
 
-  .info-container{
+  .input-info-container {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+  }
 
-    .info-title{
-      background-color: ${theme.primaryColor};
-      color: ${theme.textColor};
-      padding-left: 4px;
-      font-weight: 500;
+  .info-group-container {
+    .group-title {
+      font-style: normal;
+      font-weight: 700;
+      font-size: 14px;
+      line-height: 26px;
+      text-align: left;
+      color: ${theme.primaryColor}
     }
 
-    .info-detail{
-      padding-left: 4px;
-      margin-bottom: 2px;
-      color: ${theme.textColor2};
-      word-break: break-word;
+    .group-body {
+      border-spacing: 4px;
+      margin-left: -4px;
+
+        .info-container{
+
+          .info-title{
+            color: ${theme.textColor2};
+            font-style: normal;
+            font-weight: 400;
+            font-size: 14px;
+            line-height: 26px;
+            text-align: left;
+            white-space: nowrap;
+            vertical-align: top;
+          }
+
+          .info-detail{
+            font-style: normal;
+            font-weight: 400;
+            font-size: 14px;
+            line-height: 26px;
+            color: ${theme.textColor};
+            text-align: left;
+            word-break: break-word;
+            vertical-align: top;
+            min-width: 90px;
+
+            &:nth-child(4) {
+              text-align: right;
+            }
+          }
+        }
     }
   }
 
-  .method-info {
-    margin-left: -4px;
-
-    .method-description {
-      padding-left: 4px;
-    }
-
-    .method-arg {
-      padding-bottom: 4px;
-      position: relative;
-
-      &:after {
-        content: '';
-        width: 100%;
-        background-color: ${theme.textColor2};
-        height: 1px;
-        position: absolute;
-        bottom: 4px;
-        left: 0;
-      }
+  .detail-info-container {
+    .group-body {
+      margin-left: 0;
     }
   }
 
-  .grid-container{
-    display: grid;
-    grid-template-columns: repeat(2,1fr);
-    grid-gap: 1px;
-  }
 `));

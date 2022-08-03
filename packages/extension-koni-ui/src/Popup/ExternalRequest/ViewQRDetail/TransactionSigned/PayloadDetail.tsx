@@ -18,7 +18,7 @@ import { isArray, isString, u8aToHex } from '@polkadot/util';
 
 type TxDetail = ResponseParseTransactionSubstrate;
 
-interface Props extends ThemeProps{
+interface Props extends ThemeProps {
   className?: string;
   setButtonLoading: (value: boolean) => void;
   network: NetworkJson;
@@ -29,7 +29,7 @@ const PayloadDetail = (props: Props) => {
 
   const scannerStore = useContext<ScannerContextType>(ScannerContext);
   const { state } = scannerStore;
-  const { genesisHash, rawPayload, specVersion } = state;
+  const { genesisHash, rawPayload, signedData, specVersion } = state;
 
   const [payloadDetail, setPayloadDetail] = useState<TxDetail | null>(null);
   const [chainLoading, setChainLoading] = useState<boolean>(true);
@@ -67,20 +67,34 @@ const PayloadDetail = (props: Props) => {
 
     if (isString(era)) {
       return (
-        <div className={CN('info-denetworktail grid-container')}>
-          {era.toString()}
-        </div>
+        <tr className={'info-container'}>
+          <td className={CN('info-title')}>
+            Era:
+          </td>
+          <td
+            className={CN('info-detail')}
+            colSpan={3}
+          >
+            {era}
+          </td>
+        </tr>
       );
     } else {
       return (
-        <div className={CN('info-detail grid-container')}>
-          <div>
-            phase: {(payloadDetail.era as EraInfo).phase}
-          </div>
-          <div>
-            period: {(payloadDetail.era as EraInfo).period}
-          </div>
-        </div>
+        <tr className={'info-container'}>
+          <td className={CN('info-title')}>
+            Phase:
+          </td>
+          <td className={CN('info-detail')}>
+            {(payloadDetail.era as EraInfo).phase}
+          </td>
+          <td className={CN('info-title')}>
+            Period:
+          </td>
+          <td className={CN('info-detail')}>
+            {(payloadDetail.era as EraInfo).period}
+          </td>
+        </tr>
       );
     }
   }, [payloadDetail?.era]);
@@ -93,56 +107,55 @@ const PayloadDetail = (props: Props) => {
     }
 
     if (isString(method)) {
-      return (
-        <div className={'raw-method'}>
-          {method}
-        </div>
-      );
+      return null;
     }
 
-    return method.map(({ args, method }, index) => {
-      // const sectionMethod = entry[0];
-      // const argList = entry[1];
-
-      return (
-        <div
-          className={CN('call-detail')}
-          key={index}
-        >
-          <div className={'call-header'}>
-            Call&nbsp;
-            <span className={'call-method'}>
-              {method}
-            </span>
-            { args && !!args.length &&
-              (
-                <span>
-                  &nbsp;with the following arguments:
-                </span>
-              )
-            }
-          </div>
-          {args && !!args.length && (
-            args.map(({ argName, argValue }, index) => (
-              <div
-                className={CN('call-args')}
-                key={index}
-              >
-                <div
-                  className={CN('arg')}
-                >
-                  {argName}:&nbsp;
-                  { argValue && isArray(argValue)
-                    ? argValue.join(', ')
-                    : argValue
-                  }
-                </div>
-              </div>
-            ))
-          )}
+    return (
+      <div
+        className={CN('info-group-container', 'detail-info-container')}
+      >
+        <div className={CN('group-title')}>
+          Detail
         </div>
-      );
-    });
+        {
+          method.map(({ args, method }) => {
+            return (
+              <div
+                className={CN('group-body')}
+                key={method}
+              >
+                <div className='info-container'>
+                  <div className={CN('info-title')}>
+                    Method:
+                  </div>
+                  <div className='info-detail'>
+                    {method}({args && !!args.length && args.map(({ argName }) => argName).join(', ')})
+                  </div>
+                </div>
+                {args && !!args.length && (
+                  args.map(({ argName, argValue }, index) => (
+                    <div
+                      className='info-container'
+                      key={`${argName}_${index}`}
+                    >
+                      <div className='info-title'>
+                        {argName}:
+                      </div>
+                      <div className='info-detail'>
+                        {argValue && isArray(argValue)
+                          ? argValue.join(', ')
+                          : argValue
+                        }
+                      </div>
+                    </div>
+                  ))
+                )}
+              </div>
+            );
+          })
+        }
+      </div>
+    );
   }, [decoded]);
 
   useEffect(() => {
@@ -166,49 +179,75 @@ const PayloadDetail = (props: Props) => {
 
   return (
     <div className={CN(className)}>
-      { !decoded && <Spinner />}
+      {!decoded &&
+        (
+          <div className={CN('info-loading')}>
+            <Spinner />
+          </div>
+        )
+      }
       {
         decoded && payloadDetail && (
           <>
-            {decoded.message && decoded.warning &&
+            {
+              decoded.message && decoded.warning &&
               (
                 <Warning className={'decode-warning'}>
                   {decoded.message}
                 </Warning>
               )
             }
-            <div className={CN('info-container')}>
-              <div className={CN('info-title')}>
-                Method
+            <div className={CN('info-group-container')}>
+              <div className={CN('group-title')}>
+                Basic
               </div>
-              <div className={CN('info-detail')}>
-                {handlerRenderMethod()}
-              </div>
+              <table
+                cellPadding={0}
+                cellSpacing={4}
+                className={CN('group-body')}
+              >
+                <tbody>
+                  <tr className={'info-container'}>
+                    <td className={CN('info-title')}>
+                    Method:
+                    </td>
+                    <td
+                      className={CN('info-detail')}
+                      colSpan={3}
+                    >
+                      {isString(rawPayload) ? rawPayload : u8aToHex(rawPayload)}
+                    </td>
+                  </tr>
+                  {handlerRenderEraDetail()}
+                  <tr className={'info-container'}>
+                    <td className={CN('info-title')}>
+                    Nonce:
+                    </td>
+                    <td className={CN('info-detail')}>
+                      {payloadDetail.nonce}
+                    </td>
+                    <td className={CN('info-title')}>
+                    Tip:
+                    </td>
+                    <td className={CN('info-detail')}>
+                      {payloadDetail.tip}
+                    </td>
+                  </tr>
+                  <tr className={'info-container'}>
+                    <td className={CN('info-title')}>
+                    Signature:
+                    </td>
+                    <td
+                      className={CN('info-detail')}
+                      colSpan={3}
+                    >
+                      {signedData}
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
             </div>
-            <div className={CN('info-container')}>
-              <div className={CN('info-title')}>
-                Era
-              </div>
-              { handlerRenderEraDetail() }
-            </div>
-            <div className={CN('grid-container')}>
-              <div className={CN('info-container')}>
-                <div className={CN('info-title')}>
-                  Nonce
-                </div>
-                <div className={CN('info-detail')}>
-                  {payloadDetail.nonce}
-                </div>
-              </div>
-              <div className={CN('info-container')}>
-                <div className={CN('info-title')}>
-                  Tip
-                </div>
-                <div className={CN('info-detail')}>
-                  {payloadDetail.tip}
-                </div>
-              </div>
-            </div>
+            {handlerRenderMethod()}
           </>
         )
       }
@@ -217,59 +256,80 @@ const PayloadDetail = (props: Props) => {
 };
 
 export default React.memo(styled(PayloadDetail)(({ theme }: Props) => `
-  height: 216px;
+  height: 100%;
   overflow-y: auto;
   position: relative;
 
-  .raw-method{
-    word-break: break-all;
+  .info-loading {
+    position: relative;
+    height: 300px;
+  }
+
+  .raw-method {
+    &.hidden {
+      opacity: 0;
+    }
   }
 
   .decode-warning {
     margin-bottom: 10px;
   }
 
-  .call-detail {
-    margin-bottom: 4px;
+  .input-info-container {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+  }
 
-    .call-header {
-      color: ${theme.textColor2};
-      padding: 4px 0;
+  .info-group-container {
+    .group-title {
+      font-style: normal;
+      font-weight: 700;
+      font-size: 14px;
+      line-height: 26px;
       text-align: left;
-
-      .call-method {
-        color: ${theme.textColor};
-      }
+      color: ${theme.primaryColor}
     }
 
-    .call-args{
-      margin-bottom: 4px;
-      color: ${theme.textColor};
+    .group-body {
+      border-spacing: 4px;
+      margin-left: -4px;
 
-      .arg{
-        word-break: break-all;
-      }
+        .info-container{
+
+          .info-title{
+            color: ${theme.textColor2};
+            font-style: normal;
+            font-weight: 400;
+            font-size: 14px;
+            line-height: 26px;
+            text-align: left;
+            white-space: nowrap;
+            vertical-align: top;
+          }
+
+          .info-detail{
+            font-style: normal;
+            font-weight: 400;
+            font-size: 14px;
+            line-height: 26px;
+            color: ${theme.textColor};
+            text-align: left;
+            word-break: break-word;
+            vertical-align: top;
+            min-width: 90px;
+
+            &:nth-child(4) {
+              text-align: right;
+            }
+          }
+        }
     }
   }
 
-  .info-container{
-
-    .info-title{
-      background-color: ${theme.primaryColor};
-      padding-left: 4px;
-      font-weight: 500;
+  .detail-info-container {
+    .group-body {
+      margin-left: 0;
     }
-
-    .info-detail{
-      padding-left: 4px;
-      margin-bottom: 2px;
-      color: ${theme.textColor2};
-    }
-  }
-
-  .grid-container{
-    display: grid;
-    grid-template-columns: repeat(2,1fr);
-    grid-gap: 1px;
   }
 `));

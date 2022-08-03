@@ -16,7 +16,7 @@ interface Props extends ThemeProps{
 
 const MessageSigned = (props: Props) => {
   const { className } = props;
-  const { state: { dataToSign, isHash, message } } = useContext<ScannerContextType>(ScannerContext);
+  const { state: { dataToSign, isHash, message, signedData } } = useContext<ScannerContextType>(ScannerContext);
 
   return (
     <div className={CN(className)}>
@@ -24,6 +24,7 @@ const MessageSigned = (props: Props) => {
         data={isU8a(dataToSign) ? u8aToHex(dataToSign) : dataToSign}
         isHash={isHash}
         message={message}
+        signature={signedData}
       />
     </div>
   );

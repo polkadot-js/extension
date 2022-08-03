@@ -27,7 +27,10 @@ const TransactionSigned = (props: Props) => {
       {
         isEthereum
           ? (
-            <TransactionDetail setButtonLoading={setButtonLoading} />
+            <TransactionDetail
+              network={network}
+              setButtonLoading={setButtonLoading}
+            />
           )
           : (
             <PayloadDetail
@@ -41,4 +44,5 @@ const TransactionSigned = (props: Props) => {
 };
 
 export default React.memo(styled(TransactionSigned)(({ theme }: Props) => `
+  overflow: hidden;
 `));

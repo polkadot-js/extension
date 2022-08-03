@@ -1,13 +1,14 @@
 // Copyright 2019-2022 @polkadot/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { Button } from '@subwallet/extension-koni-ui/components';
+import { Button, Modal } from '@subwallet/extension-koni-ui/components';
 import { ActionContext } from '@subwallet/extension-koni-ui/contexts';
 import { ScannerContext } from '@subwallet/extension-koni-ui/contexts/ScannerContext';
 import useTranslation from '@subwallet/extension-koni-ui/hooks/useTranslation';
+import ViewQRDetail from '@subwallet/extension-koni-ui/Popup/ExternalRequest/ViewQRDetail';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import CN from 'classnames';
-import React, { useCallback, useContext } from 'react';
+import React, { useCallback, useContext, useMemo, useState } from 'react';
 import QRCode from 'react-qr-code';
 import styled from 'styled-components';
 
@@ -21,45 +22,60 @@ const QRResult = (props: Props) => {
   const { t } = useTranslation();
 
   const onAction = useContext(ActionContext);
-
   const { cleanup, state: scannerState } = useContext(ScannerContext);
   const { signedData } = scannerState;
 
-  const handlerClickBack = useCallback(() => {
-    cleanup();
-  }, [cleanup]);
+  const [isOpen, setIsOpen] = useState(false);
 
-  const handlerClickHome = useCallback(() => {
+  const handlerOpenModal = useCallback(() => {
+    setIsOpen(true);
+  }, []);
+
+  const handlerCloseModal = useCallback(() => {
+    setIsOpen(false);
+  }, []);
+
+  const modalContent = useMemo((): JSX.Element => {
+    return <ViewQRDetail onClose={handlerCloseModal} />;
+  }, [handlerCloseModal]);
+
+  const handlerDone = useCallback(() => {
+    cleanup();
     window.localStorage.setItem('popupNavigation', '/');
     onAction('/');
-  }, [onAction]);
+  }, [cleanup, onAction]);
 
   return (
     <div className={CN(className)}>
-      <div className={CN('title')}>
-        {t('Scan to publish')}
-      </div>
-
       <div className={CN('account-qr-modal__qr-code')}>
         <QRCode
-          size={248}
+          size={300}
           value={signedData}
         />
       </div>
-      <div className={CN('grid-container')}>
-        <Button
-          className={CN('button')}
-          onClick={handlerClickBack}
-        >
-          {t('Scan another QR')}
-        </Button>
-        <Button
-          className={CN('button')}
-          onClick={handlerClickHome}
-        >
-          {t('Home')}
-        </Button>
+      <div
+        className={CN('show-detail-button')}
+        onClick={handlerOpenModal}
+      >
+        Show detail
       </div>
+      <Button
+        className={CN('done-button')}
+        onClick={handlerDone}
+      >
+        {t('Done')}
+      </Button>
+      {
+        isOpen && (
+          <Modal
+            className={'qr-result-modal'}
+            maskClosable={true}
+            onClose={handlerCloseModal}
+          >
+            {modalContent}
+          </Modal>
+        )
+      }
     </div>
   );
 };
@@ -72,29 +88,37 @@ export default React.memo(styled(QRResult)(({ theme }: Props) => `
   justify-content: center;
   padding: 0 15px 15px;
 
-  .title {
-    font-size: 18px;
-    line-height: 30px;
-    font-weight: 500;
-    color: ${theme.textColor};
-    margin-top: 20px;
+  .hidden {
+    display: none;
+  }
+
+  .qr-result-modal .subwallet-modal {
+    max-width: 390px;
+    height: 490px;
   }
 
   .account-qr-modal__qr-code {
-    margin: 20px 0;
-    border: 2px solid #fff;
-    width: 252px;
-    height: 252px;
+    margin: 25px 0;
+    border: 2px solid ${theme.borderQr};
+    width: 304px;
+    height: 304px;
   }
 
-  .grid-container{
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    grid-gap: 4px;
-    width: 100%;
+  .show-detail-button {
+    cursor: pointer;
+    background: ${theme.checkboxColor};
+    padding: 2px 6px;
+    border-radius: 3px;
+    color: ${theme.textColor2};
+    font-style: normal;
+    font-weight: 400;
+    font-size: 13px;
+    line-height: 20px;
+    text-align: center;
+  }
 
-    .button{
-      margin-top: 8px;
-    }
+  .done-button{
+    width: 200px;
+    margin-top: 30px;
   }
 `));

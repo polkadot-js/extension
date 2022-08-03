@@ -1026,6 +1026,7 @@ export interface RequestParseTransactionEVM {
 
 export interface ResponseParseTransactionEVM {
   data: ParseEVMTransactionData | string;
+  input: string;
   nonce: number;
   to: string;
   gas: number;

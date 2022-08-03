@@ -15,39 +15,106 @@ interface Props extends ThemeProps{
   isHash: boolean;
   message: string;
   data: string;
+  signature: string;
 }
 
 const MessageDetail = (props: Props) => {
-  const { className, data, isHash, message } = props;
+  const { className, data, isHash, message, signature } = props;
   const { t } = useTranslation();
 
   return (
     <div className={CN(className)}>
-      <div className={CN('label')}>
-        {isHash ? t('Message Hash') : t('Message')}:
+      <div className={CN('info-group-container')}>
+        <div className={CN('group-title')}>
+          Basic
+        </div>
+        <table
+          cellPadding={0}
+          cellSpacing={4}
+          className={CN('group-body')}
+        >
+          <tbody>
+            <tr className={'info-container'}>
+              <td className={CN('info-title')}>
+                {t('Signature')}:
+              </td>
+              <td
+                className={CN('info-detail')}
+                colSpan={3}
+              >
+                {
+                  isHash
+                    ? <div className={CN('text')}>{message}</div>
+                    : <div className={CN('text')}>
+                      {isAscii(message) ? unwrapMessage(hexToString(message)) : data}
+                    </div>
+                }
+              </td>
+            </tr>
+            <tr className={'info-container'}>
+              <td className={CN('info-title')}>
+                {isHash ? t('Message Hash') : t('Message')}:
+              </td>
+              <td
+                className={CN('info-detail')}
+                colSpan={3}
+              >
+                {signature}
+              </td>
+            </tr>
+          </tbody>
+        </table>
       </div>
-      {
-        isHash
-          ? <div className={CN('text')}>{message}</div>
-          : <div className={CN('text')}>
-            {isAscii(message) ? unwrapMessage(hexToString(message)) : data}
-          </div>
-      }
     </div>
   );
 };
 
 export default React.memo(styled(MessageDetail)(({ theme }: Props) => `
-  margin-top: 8px;
-  padding: 5px;
+  margin-top: 16px;
 
-  .label{
+  .info-group-container {
+    .group-title {
+      font-style: normal;
+      font-weight: 700;
+      font-size: 14px;
+      line-height: 26px;
+      text-align: left;
+      color: ${theme.primaryColor}
+    }
 
-  }
+    .group-body {
+      border-spacing: 4px;
+      margin-left: -4px;
 
-  .text{
-    overflow-wrap: break-word;
-    color: ${theme.textColor2};
-    font-size: 12px;
+        .info-container{
+
+          .info-title{
+            color: ${theme.textColor2};
+            font-style: normal;
+            font-weight: 400;
+            font-size: 14px;
+            line-height: 26px;
+            text-align: left;
+            white-space: nowrap;
+            vertical-align: top;
+          }
+
+          .info-detail{
+            font-style: normal;
+            font-weight: 400;
+            font-size: 14px;
+            line-height: 26px;
+            color: ${theme.textColor};
+            text-align: left;
+            word-break: break-word;
+            vertical-align: top;
+            min-width: 90px;
+
+            &:nth-child(4) {
+              text-align: right;
+            }
+          }
+        }
+    }
   }
 `));

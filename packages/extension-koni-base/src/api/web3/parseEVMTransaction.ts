@@ -209,6 +209,7 @@ export const parseEVMTransaction = async (data: string, networkMap: Record<strin
   }
 
   const result: ResponseParseTransactionEVM = {
+    input: tx.data,
     data: tx.data,
     gasPrice: new BigN(tx.gasPrice).toNumber(),
     gas: new BigN(tx.gas).toNumber(),
@@ -253,7 +254,7 @@ export const parseEVMTransaction = async (data: string, networkMap: Record<strin
 
       raw.types.forEach((type, index) => {
         // eslint-disable-next-line @typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-member-access,@typescript-eslint/no-unsafe-assignment
-        temp.args.push({ type: type, value: raw.inputs[index].toString(), name: raw.names[index].toString() });
+        temp.args.push(parseResult(type, raw.inputs[index], raw.names[index]));
       });
 
       result.data = temp;

@@ -7,7 +7,6 @@ import useTranslation from '@subwallet/extension-koni-ui/hooks/useTranslation';
 import { Header } from '@subwallet/extension-koni-ui/partials';
 import QRResult from '@subwallet/extension-koni-ui/Popup/ExternalRequest/QRResult';
 import QRScanner from '@subwallet/extension-koni-ui/Popup/ExternalRequest/QRScanner';
-import ViewQRDetail from '@subwallet/extension-koni-ui/Popup/ExternalRequest/ViewQRDetail';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import React, { useCallback, useContext } from 'react';
 import styled from 'styled-components';
@@ -19,8 +18,10 @@ interface Props extends ThemeProps {
 }
 
 const ExternalRequest = (props: Props) => {
-  const { t } = useTranslation();
   const { className } = props;
+
+  const { t } = useTranslation();
+
   const { setStep, state } = useContext<ScannerContextType>(ScannerContext);
   const { step } = state;
 
@@ -28,8 +29,6 @@ const ExternalRequest = (props: Props) => {
     switch (step) {
       case SCANNER_QR_STEP.SCAN_STEP:
         return <QRScanner />;
-      case SCANNER_QR_STEP.VIEW_DETAIL_STEP:
-        return <ViewQRDetail />;
       case SCANNER_QR_STEP.CONFIRM_STEP:
         return <SignQR />;
       case SCANNER_QR_STEP.FINAL_STEP:
@@ -51,7 +50,7 @@ const ExternalRequest = (props: Props) => {
         showBackArrow
         showCancelButton
         showSubHeader
-        subHeaderName={t<string>('Scan Qr')}
+        subHeaderName={t<string>('Authorize Transaction')}
       />
       <div className={'import-qr-content'}>
         {handlerRenderContent()}

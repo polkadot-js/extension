@@ -27,6 +27,7 @@ const darkTheme = {
   borderRadius: '3px',
   boxBorderColor: '#212845',
   borderColor: '#EEEEEE',
+  borderQr: '#FFF',
   borderColor2: '#212845',
   boxMargin: '0.75rem 0',
   boxPadding: '0 0.25rem',

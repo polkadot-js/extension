@@ -3,13 +3,13 @@
 
 import { NetworkJson } from '@subwallet/extension-base/background/KoniTypes';
 import { PASSWORD_EXPIRY_MIN } from '@subwallet/extension-base/defaults';
+import SignTransactionIcon from '@subwallet/extension-koni-ui/assets/icon/sign-transacion.svg';
 import { Button, Checkbox, Spinner } from '@subwallet/extension-koni-ui/components';
 import { SCANNER_QR_STEP } from '@subwallet/extension-koni-ui/constants/scanner';
 import { ScannerContext } from '@subwallet/extension-koni-ui/contexts/ScannerContext';
 import useTranslation from '@subwallet/extension-koni-ui/hooks/useTranslation';
 import { qrIsLocked } from '@subwallet/extension-koni-ui/messaging';
 import AccountInfo from '@subwallet/extension-koni-ui/Popup/ExternalRequest/Shared/AccountInfo';
-import NetworkInfo from '@subwallet/extension-koni-ui/Popup/ExternalRequest/Shared/NetworkInfo';
 import Unlock from '@subwallet/extension-koni-ui/Popup/Signing/Unlock';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
@@ -28,12 +28,12 @@ const SignQR = (props: Props) => {
 
   const { networkMap } = useSelector((state: RootState) => state);
   const { setStep, signDataLegacy, state: scannerState } = useContext(ScannerContext);
-  const { evmChainId, genesisHash, isEthereum, senderAddress } = scannerState;
+  const { evmChainId, genesisHash, isEthereum, senderAddress, type } = scannerState;
   const { t } = useTranslation();
 
   const [error, setError] = useState<string | null>(null);
   const [savePass, setSavePass] = useState(false);
-  const [isLocked, setIsLocked] = useState<boolean | null>(null);
+  const [isLocked, setIsLocked] = useState<boolean>(true);
   const [password, setPassword] = useState('');
   const [isBusy, setIsBusy] = useState(false);
 
@@ -52,25 +52,31 @@ const SignQR = (props: Props) => {
     (): Promise<void> => {
       setIsBusy(true);
 
-      return signDataLegacy(savePass, password)
-        .then((): void => {
-          setIsBusy(false);
-        })
-        .catch((error: Error): void => {
-          setIsBusy(false);
-          setError(error.message);
-          console.error(error);
-        });
+      return new Promise((resolve) => {
+        setTimeout(() => {
+          signDataLegacy(savePass, password)
+            .then((): void => {
+              setIsBusy(false);
+              resolve();
+            })
+            .catch((error: Error): void => {
+              setIsBusy(false);
+              setError(error.message);
+              console.error(error);
+              resolve();
+            });
+        }, 100);
+      });
     },
     [password, savePass, signDataLegacy]
   );
 
   const _onCancel = useCallback(() => {
-    setStep(SCANNER_QR_STEP.VIEW_DETAIL_STEP);
+    setStep(SCANNER_QR_STEP.SCAN_STEP);
   }, [setStep]);
 
   useEffect(() => {
-    setIsLocked(null);
+    setIsLocked(true);
     let timeout: NodeJS.Timeout;
 
     senderAddress && qrIsLocked(senderAddress)
@@ -125,48 +131,59 @@ const SignQR = (props: Props) => {
       {
         (!loading && network) && (
           <>
-            <NetworkInfo
-              forceEthereum={isEthereum && !evmChainId}
-              network={network}
-            />
+            <div className='sign-header'>
+              <img
+                alt=''
+                className='sign-icon'
+                src={SignTransactionIcon}
+              />
+              <div className='sign-title'>
+                Sign {type === 'transaction' ? 'transaction' : 'message'}
+              </div>
+              <div className='sign-description'>
+                You are approving a request with account
+              </div>
+            </div>
             <AccountInfo
               address={senderAddress}
+              forceEthereum={isEthereum && !evmChainId}
               network={network}
             />
           </>
         )
       }
-      {isLocked && (
-        <Unlock
-          error={error}
-          isBusy={isBusy}
-          onSign={_onSign}
-          password={password}
-          setError={setError}
-          setPassword={setPassword}
-        />
-      )}
+      <div className='action-container'>
+        {isLocked && (
+          <Unlock
+            error={error}
+            isBusy={isBusy}
+            onSign={_onSign}
+            password={password}
+            setError={setError}
+            setPassword={setPassword}
+          />
+        )}
 
-      {!isEthereum ? <RememberPasswordCheckbox /> : <div className={'separator'} />}
+        {!isEthereum ? <RememberPasswordCheckbox /> : <div className={'separator'} />}
 
-      <div className={CN('sign-button-container')}>
-        <Button
-          className={CN('sign-button')}
-          onClick={_onCancel}
-        >
-          <span>
-            {t('Previous Step')}
-          </span>
-
-        </Button>
-        <Button
-          className={CN('sign-button')}
-          isBusy={isBusy}
-          isDisabled={(!!isLocked && !password) || !!error}
-          onClick={_onSign}
-        >
-          {t('Next Step')}
-        </Button>
+        <div className={CN('sign-button-container')}>
+          <Button
+            className={CN('sign-button')}
+            onClick={_onCancel}
+          >
+            <span>
+              {t('Cancel')}
+            </span>
+          </Button>
+          <Button
+            className={CN('sign-button')}
+            isBusy={isBusy}
+            isDisabled={(isLocked && !password) || !!error || loading}
+            onClick={_onSign}
+          >
+            {t('Approve')}
+          </Button>
+        </div>
       </div>
     </div>
   );
@@ -174,38 +191,77 @@ const SignQR = (props: Props) => {
 
 export default React.memo(styled(SignQR)(({ theme }: Props) => `
   flex-direction: column;
-  position: sticky;
+  position: relative;
   bottom: 0;
-  padding: 0 15px 15px;
-  background-color: ${theme.background};
-
-  .separator{
-    margin: ${theme.boxMargin};
-  }
+  padding: 15px 15px 0;
 
   .loading{
     position: relative;
-    height: 300px;
+    height: 240px;
   }
 
-  .sign-button-container {
+  .sign-header {
     display: flex;
-  }
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    margin-top: 15px;
 
-  .sign-button {
-    flex: 1;
-  }
+    .sign-icon {
+      width: 48px;
+      height: 48px;
+      margin-bottom: 15px;
+    }
 
-  .sign-button:first-child {
-    background-color: ${theme.buttonBackground1};
-    margin-right: 8px;
+    .sign-title {
+      color: ${theme.textColor};
+      text-align: center;
+      font-style: normal;
+      font-weight: 500;
+      font-size: 24px;
+      line-height: 36px;
+      margin-bottom: 15px;
+    }
 
-    span {
-      color: ${theme.buttonTextColor2};
+    .sign-description {
+      font-style: normal;
+      font-weight: 500;
+      font-size: 15px;
+      line-height: 26px;
+      color: ${theme.textColor2};
+      margin-bottom: 24px;
     }
   }
 
-  .sign-button:last-child {
-    margin-left: 8px;
+  .action-container {
+    background-color: ${theme.background};
+    position: sticky;
+    padding-top: 3px;
+    bottom: 0;
+
+    .separator{
+      margin: ${theme.boxMargin};
+    }
+
+    .sign-button-container {
+      display: flex;
+    }
+
+    .sign-button {
+      flex: 1;
+    }
+
+    .sign-button:first-child {
+      background-color: ${theme.buttonBackground1};
+      margin-right: 8px;
+
+      span {
+        color: ${theme.buttonTextColor2};
+      }
+    }
+
+    .sign-button:last-child {
+      margin-left: 8px;
+    }
   }
 `));

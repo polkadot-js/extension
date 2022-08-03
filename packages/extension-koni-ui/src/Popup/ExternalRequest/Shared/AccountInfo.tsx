@@ -3,8 +3,10 @@
 
 import { NetworkJson } from '@subwallet/extension-base/background/KoniTypes';
 import { AccountJson } from '@subwallet/extension-base/background/types';
+import cloneLogo from '@subwallet/extension-koni-ui/assets/clone.svg';
 import { AccountContext } from '@subwallet/extension-koni-ui/components';
 import Identicon from '@subwallet/extension-koni-ui/components/Identicon';
+import useToast from '@subwallet/extension-koni-ui/hooks/useToast';
 import useTranslation from '@subwallet/extension-koni-ui/hooks/useTranslation';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
@@ -12,23 +14,29 @@ import { getAccountInfoByNetwork } from '@subwallet/extension-koni-ui/util/findA
 import { AccountInfoByNetwork } from '@subwallet/extension-koni-ui/util/types';
 import CN from 'classnames';
 import React, { useCallback, useContext, useMemo } from 'react';
+import CopyToClipboard from 'react-copy-to-clipboard';
 import { useSelector } from 'react-redux';
 import styled from 'styled-components';
 
 import { IconTheme } from '@polkadot/react-identicon/types';
 
-interface Props extends ThemeProps{
+interface Props extends ThemeProps {
   className?: string;
   address: string;
   network: NetworkJson;
+  forceEthereum: boolean;
 }
 
 const AccountInfo = (props: Props) => {
-  const { address, className, network } = props;
+  const { address, className, forceEthereum, network } = props;
+
+  const { show } = useToast();
+  const { t } = useTranslation();
+
   const { getAccountByAddress } = useContext(AccountContext);
+
   const { networkMap } = useSelector((state: RootState) => state);
 
-  const { t } = useTranslation();
   const account = useMemo((): AccountJson | undefined => {
     return getAccountByAddress(networkMap, address, network.genesisHash);
   }, [networkMap, getAccountByAddress, address, network.genesisHash]);
@@ -44,13 +52,10 @@ const AccountInfo = (props: Props) => {
     ) as IconTheme;
   }, [network.icon, network.isEthereum]);
 
-  const toShortAddress = useCallback((_address: string | null, halfLength?: number) => {
-    const address = (_address || '').toString();
-
-    const addressLength = halfLength || 7;
-
-    return address.length > 13 ? `${address.slice(0, addressLength)}…${address.slice(-addressLength)}` : address;
-  }, []);
+  const _onCopy = useCallback(
+    () => show(t('Copied')),
+    [show, t]
+  );
 
   return (
     <div className={CN(className)}>
@@ -59,23 +64,41 @@ const AccountInfo = (props: Props) => {
           className='account-info-identity-icon'
           iconTheme={iconTheme}
           prefix={info.networkPrefix}
-          size={32}
+          size={48}
           value={info.formattedAddress || address}
         />
         <div className='account-info'>
-          <div
-            className='account-info__name'
-            data-field='name'
-          >
-            <span title={account?.name}>{account?.name}</span>
+          <div className='info-row'>
+            <div
+              className='account-info__name'
+              data-field='name'
+            >
+              <span>{account?.name}</span>
+            </div>
+            <div
+              className='account-info-chain'
+              data-field='chain'
+            >
+              {forceEthereum ? 'EVM' : network.chain.replace(' Relay Chain', '')}
+            </div>
           </div>
-          <div className='account-info-address-display'>
+          <div className='info-row'>
             <div
               className='account-info-full-address'
               data-field='address'
             >
-              {toShortAddress(info.formattedAddress || address || t('<unknown>'), 10)}
+              {info.formattedAddress || address || ''}
             </div>
+            <CopyToClipboard
+              text={info.formattedAddress || address || ''}
+            >
+              <img
+                alt='copy'
+                className='copy-icon'
+                onClick={_onCopy}
+                src={cloneLogo}
+              />
+            </CopyToClipboard>
           </div>
         </div>
       </div>
@@ -84,13 +107,15 @@ const AccountInfo = (props: Props) => {
 };
 
 export default React.memo(styled(AccountInfo)(({ theme }: Props) => `
-  .account-info-identity-icon {
-    border: 2px solid ${theme.checkDotColor};
-    margin-right: 10px;
-  }
+  padding: 0 10px;
+  border: 2px dashed ${theme.boxBorderColor};
+  border-radius: 8px;
 
-  .account-info {
-    width: 100%;
+  .account-info-identity-icon {
+    margin-right: 14px;
+    width: 48px;
+    height: 48px;
+    padding: 0;
   }
 
   .account-info-row {
@@ -100,21 +125,69 @@ export default React.memo(styled(AccountInfo)(({ theme }: Props) => `
     align-items: center;
     height: 72px;
     border-radius: 4px;
-  }
-
-  .account-info__name {
-    font-size: 15px;
-    line-height: 24px;
-    font-weight: 500;
-    color: ${theme.textColor};
-    margin: 2px 0;
     overflow: hidden;
-    text-overflow: ellipsis;
-    max-width: 150px;
-    white-space: nowrap;
 
-    &.displaced {
-      padding-top: 10px;
+    .account-info {
+      width: 100%;
+      overflow: hidden;
+
+      .info-row {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        width: 100%;
+        overflow: hidden;
+
+        .account-info__name {
+          color: ${theme.textColor};
+          margin: 2px 0;
+          overflow: hidden;
+          text-overflow: ellipsis;
+          white-space: nowrap;
+          font-style: normal;
+          font-weight: 500;
+          font-size: 15px;
+          line-height: 26px;
+          width: 60%;
+
+          &.displaced {
+            padding-top: 10px;
+          }
+        }
+
+        .account-info-chain {
+          background-color: ${theme.chainBackgroundColor};
+          padding: 0 8px;
+          z-index: 1;
+          text-overflow: ellipsis;
+          overflow: hidden;
+          max-width: 40%;
+          white-space: nowrap;
+          border-radius: 4px;
+          font-style: normal;
+          font-weight: 400;
+          font-size: 15px;
+          line-height: 26px;
+          color: ${theme.chainTextColor};
+        }
+
+        .account-info-full-address {
+          overflow: hidden;
+          text-overflow: ellipsis;
+          font-style: normal;
+          font-weight: 400;
+          font-size: 14px;
+          line-height: 24px;
+          color: ${theme.textColor2};
+          width: 60%;
+        }
+
+        .copy-icon {
+          height: 20px;
+          width: 20px;
+          cursor: pointer;
+        }
+      }
     }
   }
 `));

@@ -49,7 +49,7 @@ export { isWeb3Injected, web3EnablePromise };
 
 function getWindowExtension (originName: string, extensionName?: string): Promise<[InjectedExtensionInfo, Injected | void][]> {
   return Promise.all(
-    Object.entries(win.injectedWeb3).filter(() => extensionName ? win.injectedWeb3[extensionName] : true).map(
+    Object.entries(win.injectedWeb3).filter(([name]) => !extensionName || name === extensionName).map(
       ([name, { enable, version }]): Promise<[InjectedExtensionInfo, Injected | void]> =>
         Promise.all([
           Promise.resolve({ name, version }),
@@ -62,7 +62,7 @@ function getWindowExtension (originName: string, extensionName?: string): Promis
 }
 
 // enables all the providers found on the injected window interface, or just the named one
-export function web3Enable (originName: string, extensionName?: string, compatInits: (() => Promise<boolean>)[] = []): Promise<InjectedExtension[]> {
+export function web3Enable (originName: string, compatInits: (() => Promise<boolean>)[] = [], extensionName?: string): Promise<InjectedExtension[]> {
   if (!originName) {
     throw new Error('You must pass a name for your app to the web3Enable function');
   }

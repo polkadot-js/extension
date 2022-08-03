@@ -1283,7 +1283,7 @@ export default class KoniExtension extends Extension {
           tokenInfo,
           state.getNetworkMap()
         ),
-        getFreeBalance(originNetworkKey, from, dotSamaApiMap, web3ApiMap, token)
+        getFreeBalance(originNetworkKey, from, dotSamaApiMap, web3ApiMap)
       ]);
     }
 

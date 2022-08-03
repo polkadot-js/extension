@@ -4,6 +4,7 @@
 import { ApiProps, NetworkJson, TokenInfo } from '@subwallet/extension-base/background/KoniTypes';
 import { parseNumberToDisplay } from '@subwallet/extension-koni-base/utils/utils';
 
+import { ApiPromise } from '@polkadot/api';
 import { KeyringPair } from '@polkadot/keyring/types';
 import { decodeAddress } from '@polkadot/util-crypto';
 
@@ -25,13 +26,16 @@ export async function astarEstimateCrossChainFee (
 ): Promise<[string, string | undefined]> {
   const apiProps = await dotSamaApiMap[originNetworkKey].isReady;
 
-  const networkJson = networkMap[originNetworkKey];
+  const originNetworkJson = networkMap[originNetworkKey];
+  const destinationNetworkJson = networkMap[destinationNetworkKey];
 
-  if (!tokenInfo.assetId) {
+  if (!tokenInfo.assetIndex) {
+    console.log('No assetId found for Astar token');
+
     return ['0', ''];
   }
 
-  const assetLocation = ASSET_TO_LOCATION_MAP[tokenInfo.assetId];
+  const assetLocation = ASSET_TO_LOCATION_MAP[tokenInfo.assetIndex];
 
   let receiverLocation: Record<string, any> = { AccountId32: { network: 'Any', id: decodeAddress(to) } };
 
@@ -39,18 +43,18 @@ export async function astarEstimateCrossChainFee (
     receiverLocation = { AccountKey20: { network: 'Any', id: decodeAddress(to) } };
   }
 
-  const extrinsic = apiProps.api.tx.polkadotXcm.reserveWithdrawAssets( // can be substitution for transfer()
+  const extrinsic = apiProps.api.tx.polkadotXcm.reserveTransferAssets(
     {
       V1: { // find the destination chain
-        parents: 0,
+        parents: 1,
         interior: {
-          X1: { Parachain: 2000 }
+          X1: { Parachain: destinationNetworkJson.paraId }
         }
       }
     },
     {
       V1: { // find the receiver
-        parents: 0,
+        parents: 1,
         interior: {
           X1: receiverLocation
         }
@@ -74,7 +78,57 @@ export async function astarEstimateCrossChainFee (
   const paymentInfo = await extrinsic.paymentInfo(fromKeypair);
 
   const fee = paymentInfo.partialFee.toString();
-  const feeString = parseNumberToDisplay(paymentInfo.partialFee, networkJson.decimals) + ` ${networkJson.nativeToken ? networkJson.nativeToken : ''}`;
+  const feeString = parseNumberToDisplay(paymentInfo.partialFee, originNetworkJson.decimals) + ` ${originNetworkJson.nativeToken ? originNetworkJson.nativeToken : ''}`;
 
   return [fee, feeString];
+}
+
+export function astarGetXcmExtrinsic (
+  originNetworkKey: string,
+  destinationNetworkKey: string,
+  to: string,
+  value: string,
+  api: ApiPromise,
+  tokenInfo: TokenInfo,
+  networkMap: Record<string, NetworkJson>
+) {
+  const destinationNetworkJson = networkMap[destinationNetworkKey];
+
+  const assetLocation = ASSET_TO_LOCATION_MAP[tokenInfo.assetIndex as string];
+
+  let receiverLocation: Record<string, any> = { AccountId32: { network: 'Any', id: decodeAddress(to) } };
+
+  if (networkMap[destinationNetworkKey].isEthereum) {
+    receiverLocation = { AccountKey20: { network: 'Any', id: decodeAddress(to) } };
+  }
+
+  return api.tx.polkadotXcm.reserveTransferAssets(
+    {
+      V1: { // find the destination chain
+        parents: 1,
+        interior: {
+          X1: { Parachain: destinationNetworkJson.paraId }
+        }
+      }
+    },
+    {
+      V1: { // find the receiver
+        parents: 1,
+        interior: {
+          X1: receiverLocation
+        }
+      }
+    },
+    {
+      V1: [ // find the asset
+        {
+          id: {
+            Concrete: assetLocation
+          },
+          fun: { Fungible: value }
+        }
+      ]
+    },
+    0
+  );
 }

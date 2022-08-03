@@ -3,12 +3,12 @@
 
 import { ApiProps, NetworkJson, ResponseTransfer, TokenInfo } from '@subwallet/extension-base/background/KoniTypes';
 import { doSignAndSend, getUnsupportedResponse, updateResponseTxResult } from '@subwallet/extension-koni-base/api/dotsama/transfer';
+import { astarEstimateCrossChainFee, astarGetXcmExtrinsic } from '@subwallet/extension-koni-base/api/xcm/astar';
 import { moonbeamEstimateCrossChainFee, moonbeamGetXcmExtrinsic } from '@subwallet/extension-koni-base/api/xcm/moonbeamXcm';
 import { substrateEstimateCrossChainFee, substrateGetXcmExtrinsic } from '@subwallet/extension-koni-base/api/xcm/substrateXcm';
 import { SupportedCrossChainsMap } from '@subwallet/extension-koni-base/api/xcm/utils';
 
 import { KeyringPair } from '@polkadot/keyring/types';
-import {astarEstimateCrossChainFee} from "@subwallet/extension-koni-base/api/xcm/astar";
 
 export function isNetworksPairSupportedTransferCrossChain (originNetworkKey: string, destinationNetworkKey: string, token: string, networkMap: Record<string, NetworkJson>): boolean {
   if (!SupportedCrossChainsMap[originNetworkKey] ||
@@ -75,6 +75,8 @@ export async function makeCrossChainTransfer (
 
   if (['moonbase', 'moonriver', 'moonbeam'].includes(originNetworkKey)) {
     extrinsic = moonbeamGetXcmExtrinsic(originNetworkKey, destinationNetworkKey, to, value, api, tokenInfo, networkMap);
+  } else if (['astar', 'shiden'].includes(originNetworkKey)) {
+    extrinsic = astarGetXcmExtrinsic(originNetworkKey, destinationNetworkKey, to, value, api, tokenInfo, networkMap);
   } else {
     extrinsic = substrateGetXcmExtrinsic(originNetworkKey, destinationNetworkKey, to, value, api, tokenInfo, networkMap);
   }

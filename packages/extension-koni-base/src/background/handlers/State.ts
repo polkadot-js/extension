@@ -30,7 +30,7 @@ import NftStore from '@subwallet/extension-koni-base/stores/Nft';
 import NftCollectionStore from '@subwallet/extension-koni-base/stores/NftCollection';
 import SettingsStore from '@subwallet/extension-koni-base/stores/Settings';
 import StakingStore from '@subwallet/extension-koni-base/stores/Staking';
-import TransactionHistoryStore from '@subwallet/extension-koni-base/stores/TransactionHistoryV2';
+import TransactionHistoryStore from '@subwallet/extension-koni-base/stores/TransactionHistoryV3';
 import { convertFundStatus, getCurrentProvider, mergeNetworkProviders } from '@subwallet/extension-koni-base/utils/utils';
 import SimpleKeyring from 'eth-simple-keyring';
 import { BehaviorSubject, Subject } from 'rxjs';
@@ -717,7 +717,7 @@ export default class KoniState extends State {
   public updateNftCollection (address: string, data: NftCollection, callback?: (data: NftCollection) => void): void {
     this.getCurrentAccount((currentAccountInfo) => {
       if (currentAccountInfo.address === address) {
-        const existedItemIndex = this.nftCollectionState.nftCollectionList.findIndex((col) => col.chain === data.chain && col.collectionId === data.collectionId);
+        const existedItemIndex = this.nftCollectionState.nftCollectionList.findIndex((col) => col.chain === data.chain && col.collectionId.toLowerCase() === data.collectionId.toLowerCase());
 
         if (existedItemIndex >= 0) {
           // Update to existed data
@@ -735,7 +735,7 @@ export default class KoniState extends State {
         this.publishNftCollectionChanged(address);
       } else {
         this.nftCollectionStore.asyncGet(address).then((storedData: NftCollection[]) => {
-          if (!storedData.some((col) => col.chain === data.chain && col.collectionId === data.collectionId)) {
+          if (!storedData.some((col) => col.chain === data.chain && col.collectionId.toLowerCase() === data.collectionId.toLowerCase())) {
             storedData.push(data);
             this.nftCollectionStore.set(address, storedData);
           }
@@ -881,7 +881,7 @@ export default class KoniState extends State {
           this.nftState.nftList = this.nftState.nftList.filter((nft) => nft.chain !== chain);
         } else {
           this.nftState.nftList = this.nftState.nftList.filter((nft) => !(nft.chain === chain &&
-          nft.collectionId === collectionId &&
+          nft.collectionId?.toLowerCase() === collectionId.toLowerCase() &&
           !nftIds?.includes(nft?.id || '')));
         }
 
@@ -897,8 +897,10 @@ export default class KoniState extends State {
           // Clear all nfts from chain
           this.nftState.nftList = this.nftState.nftList.filter((nft) => nft.chain !== chain);
         } else {
+          const convertedCollectionIds = collectionIds?.map((col) => col.toLowerCase());
+
           this.nftState.nftList = this.nftState.nftList.filter((nft) => !(nft.chain === chain &&
-          !collectionIds?.includes(nft?.collectionId || '')));
+          !convertedCollectionIds?.includes(nft?.collectionId?.toLowerCase() || '')));
         }
 
         this.publishNftChanged(address);
@@ -2138,7 +2140,7 @@ export default class KoniState extends State {
 
   private isSameNft (originNft: NftItem, destinationNft: NftItem) {
     return originNft.chain === destinationNft.chain &&
-      originNft.collectionId === destinationNft.collectionId &&
+      originNft.collectionId?.toLowerCase() === destinationNft.collectionId?.toLowerCase() &&
       originNft.id === destinationNft.id;
   }
 

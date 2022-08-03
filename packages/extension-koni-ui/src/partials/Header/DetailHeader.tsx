@@ -420,7 +420,7 @@ export default styled(DetailHeader)(({ theme }: Props) => `
   }
 
   .detail-header-account-info__ml {
-    .detail-header-account-info__name {
+    .detail-header-account-info__name, .detail-header__all-account {
       margin-left: 16px;
     }
   }

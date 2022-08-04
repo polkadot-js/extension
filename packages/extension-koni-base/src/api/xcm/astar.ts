@@ -50,7 +50,7 @@ export async function astarEstimateCrossChainFee (
     receiverLocation = { AccountKey20: { network: 'Any', id: decodeAddress(to) } };
   }
 
-  const extrinsic = apiProps.api.tx.polkadotXcm.reserveTransferAssets(
+  const extrinsic = apiProps.api.tx.polkadotXcm.reserveWithdrawAssets(
     {
       V1: { // find the destination chain
         parents: 1,
@@ -109,7 +109,7 @@ export function astarGetXcmExtrinsic (
     receiverLocation = { AccountKey20: { network: 'Any', id: decodeAddress(to) } };
   }
 
-  return api.tx.polkadotXcm.reserveTransferAssets(
+  return api.tx.polkadotXcm.reserveWithdrawAssets(
     {
       V1: { // find the destination chain
         parents: 1,

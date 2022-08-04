@@ -162,7 +162,7 @@ function MetamaskPrivateKeyImport ({ account, changeConnectWhenImport, className
           />
           <Checkbox
             checked={isConnectWhenImport}
-            label={t<string>('Auto connect to all DApp after importing')}
+            label={t<string>('Auto connect to all DApps after importing')}
             onChange={changeConnectWhenImport}
           />
         </div>

@@ -129,8 +129,8 @@ function updateXcmResponseTxResult (
       }
     } else if (['astar', 'shiden'].includes(networkKey) && tokenInfo) {
       if (record.event.section === 'assets' &&
-        record.event.method.toLowerCase() === 'transferred') {
-        response.txResult.change = record.event.data[3]?.toString() || '0';
+        record.event.method.toLowerCase() === 'burned') {
+        response.txResult.change = record.event.data[2]?.toString() || '0';
         response.txResult.changeSymbol = tokenInfo.symbol;
       }
     } else if (['moonbeam', 'moonriver'].includes(networkKey) && tokenInfo) {

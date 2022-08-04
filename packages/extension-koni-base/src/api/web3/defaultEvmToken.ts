@@ -132,7 +132,18 @@ export const DEFAULT_EVM_TOKENS: EvmTokenJson = {
       chain: 'astarEvm',
       type: 'erc721'
     },
-    { chain: 'moonbeam', name: 'Exiled Racers Pilot', smartContract: '0x515e20e6275ceefe19221fc53e77e38cc32b80fb', type: 'erc721' }
+    {
+      chain: 'moonbeam',
+      name: 'Exiled Racers Pilot',
+      smartContract: '0x515e20e6275ceefe19221fc53e77e38cc32b80fb',
+      type: 'erc721'
+    },
+    {
+      chain: 'moonbeam',
+      name: 'MOONPETS',
+      smartContract: '0x2159762693C629C5A44Fc9baFD484f8B96713467',
+      type: 'erc721'
+    }
     // {
     //   name: 'AstarBots',
     //   smartContract: '0x2af8a3eeab86545d6bb2f6bae7c4ab6b6d1141b8',

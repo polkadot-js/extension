@@ -131,7 +131,7 @@ export function initApi (networkKey: string, apiUrl: string, isEthereum?: boolea
 
   let api: ApiPromise;
 
-  if (['acala', 'karura', 'origintrail'].includes(networkKey)) {
+  if (['acala', 'karura', 'origintrail', 'kintsugi'].includes(networkKey)) {
     api = new ApiPromise(options({ provider }));
   } else {
     api = new ApiPromise(apiOption);

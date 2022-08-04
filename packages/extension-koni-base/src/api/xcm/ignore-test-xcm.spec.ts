@@ -328,6 +328,8 @@ describe('test DotSama APIs', () => {
       FOUR_INSTRUCTIONS_WEIGHT
     );
 
+    console.log(extrinsic.toHex());
+
     const payment = await extrinsic.paymentInfo('5HbcGs2QXVAc6Q6eoTzLYNAJWpN17AkCFRLnWDaHCiGYXvNc');
 
     console.log(payment.partialFee.toHuman());

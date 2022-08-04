@@ -1,40 +1,43 @@
 // Copyright 2019-2022 @polkadot/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { NetworkJson } from '@subwallet/extension-base/background/KoniTypes';
+import { NetworkJson, ResponseParseTransactionEVM } from '@subwallet/extension-base/background/KoniTypes';
 import { EraInfo, ResponseParseTransactionSubstrate } from '@subwallet/extension-base/background/types';
 import { Spinner, Warning } from '@subwallet/extension-koni-ui/components';
 import { ScannerContext, ScannerContextType } from '@subwallet/extension-koni-ui/contexts/ScannerContext';
 import useMetadataChain from '@subwallet/extension-koni-ui/hooks/useMetadataChain';
-import { parseSubstrateTransaction } from '@subwallet/extension-koni-ui/messaging';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { DecodedMethod, decodeMethod } from '@subwallet/extension-koni-ui/util/decoders';
 import BigN from 'bignumber.js';
 import CN from 'classnames';
-import React, { useCallback, useContext, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useContext, useMemo, useState } from 'react';
 import styled from 'styled-components';
 
 import { isArray, isString, u8aToHex } from '@polkadot/util';
 
-type TxDetail = ResponseParseTransactionSubstrate;
-
 interface Props extends ThemeProps {
   className?: string;
-  setButtonLoading: (value: boolean) => void;
   network: NetworkJson;
 }
 
+const isTransactionSubstrate = (tx: ResponseParseTransactionEVM | ResponseParseTransactionSubstrate): tx is ResponseParseTransactionSubstrate => {
+  return 'era' in tx;
+};
+
 const PayloadDetail = (props: Props) => {
-  const { className, network, setButtonLoading } = props;
+  const { className, network } = props;
 
   const scannerStore = useContext<ScannerContextType>(ScannerContext);
   const { state } = scannerStore;
-  const { genesisHash, rawPayload, signedData, specVersion } = state;
+  const { genesisHash, parsedTx, rawPayload, signedData } = state;
 
-  const [payloadDetail, setPayloadDetail] = useState<TxDetail | null>(null);
   const [chainLoading, setChainLoading] = useState<boolean>(true);
 
   const chain = useMetadataChain(genesisHash, setChainLoading);
+
+  const payloadDetail = useMemo((): ResponseParseTransactionSubstrate | null => {
+    return (!parsedTx || !isTransactionSubstrate(parsedTx)) ? null : parsedTx;
+  }, [parsedTx]);
 
   const decoded = useMemo((): DecodedMethod | null => {
     if (!payloadDetail || chainLoading) {
@@ -48,15 +51,7 @@ const PayloadDetail = (props: Props) => {
         return { warning: true, message: message, result: payloadDetail.method };
       }
     }
-  }, [chainLoading, network, chain, payloadDetail]);
-
-  const handlerParseTransaction = useCallback(async (genesisHash: string, rawPayload: string, specVersion: number, mount: boolean) => {
-    const data = await parseSubstrateTransaction(genesisHash, rawPayload, specVersion);
-
-    if (mount) {
-      setPayloadDetail(data);
-    }
-  }, []);
+  }, [payloadDetail, chainLoading, chain, network.chain]);
 
   const handlerRenderEraDetail = useCallback(() => {
     if (!payloadDetail?.era) {
@@ -157,25 +152,6 @@ const PayloadDetail = (props: Props) => {
       </div>
     );
   }, [decoded]);
-
-  useEffect(() => {
-    let mount = true;
-
-    if (genesisHash && rawPayload && specVersion) {
-      const _rawPayload = isString(rawPayload) ? rawPayload : u8aToHex(rawPayload);
-
-      // eslint-disable-next-line no-void
-      void handlerParseTransaction(genesisHash, _rawPayload, specVersion, mount);
-    }
-
-    return () => {
-      mount = false;
-    };
-  }, [genesisHash, handlerParseTransaction, rawPayload, specVersion]);
-
-  useEffect(() => {
-    setButtonLoading(!decoded);
-  }, [setButtonLoading, decoded]);
 
   return (
     <div className={CN(className)}>

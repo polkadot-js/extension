@@ -28,6 +28,7 @@ import { getCurrentProvider, isValidProvider, reformatAddress } from '@subwallet
 import { createTransactionFromRLP, signatureToHex, Transaction as QrTransaction } from '@subwallet/extension-koni-base/utils/eth';
 import BigN from 'bignumber.js';
 import { Transaction } from 'ethereumjs-tx';
+import Web3 from 'web3';
 import { SignedTransaction as Web3SignedTransaction, TransactionConfig } from 'web3-core';
 import { Contract } from 'web3-eth-contract';
 
@@ -2190,7 +2191,10 @@ export default class KoniExtension extends Extension {
   private parseSubstrateTransaction ({ genesisHash,
     rawPayload,
     specVersion }: RequestParseTransactionSubstrate): ResponseParseTransactionSubstrate {
-    return parseSubstratePayload(state, genesisHash, rawPayload, specVersion);
+    const networkMap = state.getNetworkMap();
+    const dotSamaApiMap = state.getDotSamaApiMap();
+
+    return parseSubstratePayload(networkMap, dotSamaApiMap, genesisHash, rawPayload, specVersion);
   }
 
   private async parseEVMTransaction ({ data }: RequestParseTransactionEVM): Promise<ResponseParseTransactionEVM> {
@@ -3466,7 +3470,17 @@ export default class KoniExtension extends Extension {
       throw new Error('Cannot find network');
     }
 
-    const web3 = initWeb3Api(getCurrentProvider(network));
+    let web3: Web3 | null;
+    let exists = false;
+
+    const web3Api = state.getWeb3ApiMap();
+
+    if (web3Api[network.key]) {
+      web3 = web3Api[network.key];
+      exists = true;
+    } else {
+      web3 = initWeb3Api(getCurrentProvider(network));
+    }
 
     if (type === 'message') {
       let data = message;
@@ -3495,6 +3509,12 @@ export default class KoniExtension extends Extension {
       };
 
       signed = await web3.eth.accounts.signTransaction(txObject, parsedPrivateKey);
+    }
+
+    if (!exists && web3.currentProvider instanceof Web3.providers.WebsocketProvider) {
+      web3.currentProvider.disconnect();
+      web3.setProvider(null);
+      web3 = null;
     }
 
     return {
@@ -3997,9 +4017,9 @@ export default class KoniExtension extends Extension {
       case 'pri(qr.transaction.parse.substrate)':
         return this.parseSubstrateTransaction(request as RequestParseTransactionSubstrate);
       case 'pri(qr.transaction.parse.evm)':
-        return this.parseEVMTransaction(request as RequestParseTransactionEVM);
+        return await this.parseEVMTransaction(request as RequestParseTransactionEVM);
       case 'pri(qr.sign.evm)':
-        return this.qrSignEVM(request as RequestQrSignEVM);
+        return await this.qrSignEVM(request as RequestQrSignEVM);
       case 'pri(networkMap.enableMany)':
         return this.enableNetworks(request as string[]);
       case 'pri(accounts.get.meta)':

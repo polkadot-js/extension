@@ -1,22 +1,18 @@
 // Copyright 2019-2022 @polkadot/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { NetworkJson } from '@subwallet/extension-base/background/KoniTypes';
 import { PASSWORD_EXPIRY_MIN } from '@subwallet/extension-base/defaults';
 import SignTransactionIcon from '@subwallet/extension-koni-ui/assets/icon/sign-transacion.svg';
 import { Button, Checkbox, Spinner } from '@subwallet/extension-koni-ui/components';
-import { SCANNER_QR_STEP } from '@subwallet/extension-koni-ui/constants/scanner';
 import { ScannerContext } from '@subwallet/extension-koni-ui/contexts/ScannerContext';
+import { useGetNetworkQrRequest } from '@subwallet/extension-koni-ui/hooks/useGetNetworkQrRequest';
 import useTranslation from '@subwallet/extension-koni-ui/hooks/useTranslation';
 import { qrIsLocked } from '@subwallet/extension-koni-ui/messaging';
 import AccountInfo from '@subwallet/extension-koni-ui/Popup/ExternalRequest/Shared/AccountInfo';
 import Unlock from '@subwallet/extension-koni-ui/Popup/Signing/Unlock';
-import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
-import { getNetworkJsonByInfo } from '@subwallet/extension-koni-ui/util/getNetworkJsonByGenesisHash';
 import CN from 'classnames';
 import React, { useCallback, useContext, useEffect, useState } from 'react';
-import { useSelector } from 'react-redux';
 import styled from 'styled-components';
 
 interface Props extends ThemeProps {
@@ -26,27 +22,18 @@ interface Props extends ThemeProps {
 const SignQR = (props: Props) => {
   const { className } = props;
 
-  const { networkMap } = useSelector((state: RootState) => state);
-  const { setStep, signDataLegacy, state: scannerState } = useContext(ScannerContext);
-  const { evmChainId, genesisHash, isEthereum, senderAddress, type } = scannerState;
   const { t } = useTranslation();
+
+  const { loading, network } = useGetNetworkQrRequest();
+
+  const { cleanup, signDataLegacy, state: scannerState } = useContext(ScannerContext);
+  const { evmChainId, isEthereum, senderAddress, type } = scannerState;
 
   const [error, setError] = useState<string | null>(null);
   const [savePass, setSavePass] = useState(false);
   const [isLocked, setIsLocked] = useState<boolean>(true);
   const [password, setPassword] = useState('');
   const [isBusy, setIsBusy] = useState(false);
-
-  const [loading, setLoading] = useState<boolean>(true);
-  const [network, setNetwork] = useState<NetworkJson | null>(null);
-
-  const handlerFetch = useCallback(() => {
-    const info: undefined | number | string = isEthereum ? evmChainId : genesisHash;
-    const network = getNetworkJsonByInfo(networkMap, isEthereum, info);
-
-    setLoading(!network);
-    setNetwork(network);
-  }, [isEthereum, evmChainId, genesisHash, networkMap]);
 
   const _onSign = useCallback(
     (): Promise<void> => {
@@ -55,14 +42,13 @@ const SignQR = (props: Props) => {
       return new Promise((resolve) => {
         setTimeout(() => {
           signDataLegacy(savePass, password)
-            .then((): void => {
-              setIsBusy(false);
-              resolve();
-            })
             .catch((error: Error): void => {
               setIsBusy(false);
               setError(error.message);
               console.error(error);
+            })
+            .finally(() => {
+              setIsBusy(false);
               resolve();
             });
         }, 100);
@@ -72,8 +58,8 @@ const SignQR = (props: Props) => {
   );
 
   const _onCancel = useCallback(() => {
-    setStep(SCANNER_QR_STEP.SCAN_STEP);
-  }, [setStep]);
+    cleanup();
+  }, [cleanup]);
 
   useEffect(() => {
     setIsLocked(true);
@@ -96,10 +82,6 @@ const SignQR = (props: Props) => {
       !!timeout && clearTimeout(timeout);
     };
   }, [senderAddress]);
-
-  useEffect(() => {
-    handlerFetch();
-  }, [handlerFetch]);
 
   const RememberPasswordCheckbox = () => (
     <Checkbox

@@ -1,10 +1,12 @@
 // Copyright 2019-2022 @subwallet/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
+import { ResponseParseTransactionEVM } from '@subwallet/extension-base/background/KoniTypes';
+import { ResponseParseTransactionSubstrate } from '@subwallet/extension-base/background/types';
 import { createTransactionFromRLP, Transaction } from '@subwallet/extension-koni-base/utils/eth';
 import { SCANNER_QR_STEP } from '@subwallet/extension-koni-ui/constants/scanner';
 import { AccountContext } from '@subwallet/extension-koni-ui/contexts/index';
-import { qrSignEvm, qrSignSubstrate } from '@subwallet/extension-koni-ui/messaging';
+import { parseEVMTransaction, parseSubstrateTransaction, qrSignEvm, qrSignSubstrate } from '@subwallet/extension-koni-ui/messaging';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { CompletedParsedData, EthereumParsedData, MessageQRInfo, MultiFramesInfo, QrInfo, SubstrateCompletedParsedData, SubstrateMessageParsedData, SubstrateTransactionParsedData, TxQRInfo } from '@subwallet/extension-koni-ui/types/scanner';
 import { constructDataFromBytes, encodeNumber } from '@subwallet/extension-koni-ui/util/decoders';
@@ -15,32 +17,33 @@ import React, { useCallback, useContext, useReducer } from 'react';
 import { useSelector } from 'react-redux';
 
 import { GenericExtrinsicPayload } from '@polkadot/types';
-import { compactFromU8a, hexToU8a, isAscii, isHex, isU8a, u8aConcat, u8aToHex } from '@polkadot/util';
+import { compactFromU8a, hexToU8a, isAscii, isHex, isString, isU8a, u8aConcat, u8aToHex } from '@polkadot/util';
 import { keccakAsHex } from '@polkadot/util-crypto';
 
 type ScannerStoreState = {
   busy: boolean;
   completedFramesCount: number;
   dataToSign: string | Uint8Array;
+  evmChainId?: number;
+  genesisHash?: string;
+  isEthereum: boolean;
   isHash: boolean;
   isOversized: boolean;
   latestFrame: number | null;
   message: string | null;
   missedFrames: Array<number>;
-  multipartData: null | Array<Uint8Array | null>;
   multipartComplete: boolean;
+  multipartData: null | Array<Uint8Array | null>;
+  parsedTx: ResponseParseTransactionSubstrate | ResponseParseTransactionEVM | null;
   rawPayload: Uint8Array | string | null;
   recipientAddress: string | null;
   senderAddress: string | null;
   signedData: string;
-  genesisHash?: string;
-  evmChainId?: number;
   specVersion: number;
+  step: number;
   totalFrameCount: number;
   tx: Transaction | GenericExtrinsicPayload | string | Uint8Array | null;
   type: 'transaction' | 'message' | null;
-  step: number;
-  isEthereum: boolean;
 };
 
 export type ScannerContextType = {
@@ -59,6 +62,7 @@ const DEFAULT_STATE: ScannerStoreState = {
   busy: false,
   completedFramesCount: 0,
   dataToSign: '',
+  isEthereum: false,
   isHash: false,
   isOversized: false,
   latestFrame: null,
@@ -66,16 +70,16 @@ const DEFAULT_STATE: ScannerStoreState = {
   missedFrames: [],
   multipartComplete: false,
   multipartData: null,
+  parsedTx: null,
   rawPayload: null,
   recipientAddress: null,
   senderAddress: null,
   signedData: '',
   specVersion: Number.MAX_SAFE_INTEGER,
+  step: SCANNER_QR_STEP.SCAN_STEP,
   totalFrameCount: 0,
   tx: null,
-  type: null,
-  step: SCANNER_QR_STEP.SCAN_STEP,
-  isEthereum: false
+  type: null
 };
 
 export const ScannerContext = React.createContext({} as ScannerContextType);
@@ -350,7 +354,7 @@ export function ScannerContextProvider ({ children }: ScannerContextProviderProp
 
   // signing data with legacy account.
   const signDataLegacy = useCallback(async (savePass: boolean, password = ''): Promise<void> => {
-    const { dataToSign, evmChainId, genesisHash, isEthereum, isHash, senderAddress, type } = state;
+    const { dataToSign, evmChainId, genesisHash, isEthereum, isHash, rawPayload, senderAddress, specVersion, type } = state;
     const sender = !!senderAddress && getAccountByAddress(networkMap, senderAddress, genesisHash);
 
     if (!sender) {
@@ -364,60 +368,86 @@ export function ScannerContextProvider ({ children }: ScannerContextProviderProp
     const senderNetwork = getNetworkJsonByGenesisHash(networkMap, genesisHash);
     const networkIsEthereum = senderNetwork && (senderNetwork.isEthereum);
 
-    let signedData;
+    const signData = async (): Promise<string> => {
+      if (isEthereum) {
+        let signable;
 
-    if (isEthereum) {
-      let signable;
+        if (isU8a(dataToSign)) {
+          signable = u8aToHex(dataToSign);
+        } else if (isHex(dataToSign)) {
+          signable = dataToSign;
+        } else if (isAscii(dataToSign)) {
+          signable = dataToSign;
+        } else {
+          throw new Error('Signing Error: cannot signing message');
+        }
 
-      if (isU8a(dataToSign)) {
-        signable = u8aToHex(dataToSign);
-      } else if (isHex(dataToSign)) {
-        signable = dataToSign;
-      } else if (isAscii(dataToSign)) {
-        signable = dataToSign;
+        const { signature } = await qrSignEvm(senderAddress, password, signable, type, evmChainId);
+
+        return signature;
       } else {
-        throw new Error('Signing Error: cannot signing message');
+        let signable;
+
+        if (dataToSign instanceof GenericExtrinsicPayload) {
+          signable = u8aToHex(dataToSign.toU8a(true));
+        } else if (isHash) {
+          console.log('sign legacy data type is', typeof dataToSign);
+          signable = dataToSign.toString();
+        } else if (isU8a(dataToSign)) {
+          signable = u8aToHex(dataToSign);
+        } else if (isAscii(dataToSign)) {
+          signable = dataToSign;
+        } else {
+          throw new Error('Signing Error: cannot signing message');
+        }
+
+        // signable is hex with prefix
+
+        let signed: string;
+
+        try {
+          const { signature } = await qrSignSubstrate(senderAddress, signable, savePass, password);
+
+          signed = signature;
+        } catch (e) {
+          console.error(e);
+          throw new Error((e as Error).message);
+        }
+
+        // Tweak the first byte if and when network is evm
+        const sig = networkIsEthereum ? u8aConcat(hexToU8a(signed)) : u8aConcat(SIG_TYPE_SR25519, hexToU8a(signed));
+
+        return u8aToHex(sig, -1, false); // the false doesn't add 0x
       }
+    };
 
-      const { signature } = await qrSignEvm(senderAddress, password, signable, type, evmChainId);
-
-      signedData = signature;
-    } else {
-      let signable;
-
-      if (dataToSign instanceof GenericExtrinsicPayload) {
-        signable = u8aToHex(dataToSign.toU8a(true));
-      } else if (isHash) {
-        console.log('sign legacy data type is', typeof dataToSign);
-        signable = dataToSign.toString();
-      } else if (isU8a(dataToSign)) {
-        signable = u8aToHex(dataToSign);
-      } else if (isAscii(dataToSign)) {
-        signable = dataToSign;
+    const parseTransaction = async (): Promise<ResponseParseTransactionEVM | ResponseParseTransactionSubstrate | null> => {
+      if (type === 'message') {
+        return null;
       } else {
-        throw new Error('Signing Error: cannot signing message');
+        if (!isEthereum) {
+          if (genesisHash && rawPayload && specVersion) {
+            const _rawPayload = isString(rawPayload) ? rawPayload : u8aToHex(rawPayload);
+
+            return await parseSubstrateTransaction(genesisHash, _rawPayload, specVersion);
+          } else {
+            return null;
+          }
+        } else {
+          if (dataToSign) {
+            const _raw = isString(dataToSign) ? dataToSign : u8aToHex(dataToSign);
+
+            return await parseEVMTransaction(_raw);
+          } else {
+            return null;
+          }
+        }
       }
+    };
 
-      // signable is hex with prefix
+    const [signedData, parsedTx] = await Promise.all([signData(), parseTransaction()]);
 
-      let signed: string;
-
-      try {
-        const { signature } = await qrSignSubstrate(senderAddress, signable, savePass, password);
-
-        signed = signature;
-      } catch (e) {
-        console.error(e);
-        throw new Error((e as Error).message);
-      }
-
-      // Tweak the first byte if and when network is evm
-      const sig = networkIsEthereum ? u8aConcat(hexToU8a(signed)) : u8aConcat(SIG_TYPE_SR25519, hexToU8a(signed));
-
-      signedData = u8aToHex(sig, -1, false); // the false doesn't add 0x
-    }
-
-    setState({ signedData, step: SCANNER_QR_STEP.FINAL_STEP });
+    setState({ signedData, parsedTx, step: SCANNER_QR_STEP.FINAL_STEP });
   }, [getAccountByAddress, networkMap, state]);
 
   const clearMultipartProgress = useCallback((): void => {

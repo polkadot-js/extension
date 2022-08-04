@@ -22,7 +22,7 @@ const ExternalRequest = (props: Props) => {
 
   const { t } = useTranslation();
 
-  const { setStep, state } = useContext<ScannerContextType>(ScannerContext);
+  const { cleanup, state } = useContext<ScannerContextType>(ScannerContext);
   const { step } = state;
 
   const handlerRenderContent = useCallback(() => {
@@ -39,8 +39,8 @@ const ExternalRequest = (props: Props) => {
   }, [step]);
 
   const handlerBackToHome = useCallback(() => {
-    setStep(SCANNER_QR_STEP.SCAN_STEP);
-  }, [setStep]);
+    cleanup();
+  }, [cleanup]);
 
   return (
     <div className={className}>

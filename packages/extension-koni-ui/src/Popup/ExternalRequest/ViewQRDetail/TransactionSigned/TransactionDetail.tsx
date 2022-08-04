@@ -2,48 +2,38 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { EVMTransactionArg, NetworkJson, ParseEVMTransactionData, ResponseParseTransactionEVM } from '@subwallet/extension-base/background/KoniTypes';
+import { ResponseParseTransactionSubstrate } from '@subwallet/extension-base/background/types';
 import { Spinner } from '@subwallet/extension-koni-ui/components';
 import { ScannerContext, ScannerContextType } from '@subwallet/extension-koni-ui/contexts/ScannerContext';
-import { parseEVMTransaction } from '@subwallet/extension-koni-ui/messaging';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { convertToSimpleNumber } from '@subwallet/extension-koni-ui/util/formatNumber';
 import CN from 'classnames';
-import React, { useCallback, useContext, useEffect, useState } from 'react';
+import React, { useCallback, useContext, useMemo } from 'react';
 import styled from 'styled-components';
-
-import { isString, u8aToHex } from '@polkadot/util';
 
 interface Props extends ThemeProps {
   className?: string;
-  setButtonLoading: (value: boolean) => void;
   network: NetworkJson;
 }
 
-type TxDetail = ResponseParseTransactionEVM;
+const isTransactionEVM = (tx: ResponseParseTransactionEVM | ResponseParseTransactionSubstrate): tx is ResponseParseTransactionEVM => {
+  return 'to' in tx;
+};
 
 const TransactionDetail = (props: Props) => {
-  const { className, network, setButtonLoading } = props;
+  const { className, network } = props;
 
   const scannerStore = useContext<ScannerContextType>(ScannerContext);
   const { state } = scannerStore;
-  const { dataToSign, signedData } = state;
+  const { parsedTx, signedData } = state;
 
-  const [payloadDetail, setPayloadDetail] = useState<TxDetail | null>(null);
-  const [loading, setLoading] = useState<boolean>(true);
+  const payloadDetail = useMemo((): ResponseParseTransactionEVM | null => {
+    return (!parsedTx || !isTransactionEVM(parsedTx)) ? null : parsedTx;
+  }, [parsedTx]);
 
   const convertNumber = useCallback((val: number) => {
     return `${convertToSimpleNumber(val, network.decimals || 18)}${network.nativeToken || 'token'}`;
   }, [network.decimals, network.nativeToken]);
-
-  const handlerParseTransaction = useCallback(async (dataToSign: string, mount: boolean) => {
-    const data = await parseEVMTransaction(dataToSign);
-
-    if (mount) {
-      setPayloadDetail(data);
-      setLoading(!data);
-      setButtonLoading(!data);
-    }
-  }, [setButtonLoading]);
 
   const handlerRenderArg = useCallback((data: EVMTransactionArg, parentName: string): JSX.Element => {
     const { children, name, value } = data;
@@ -103,25 +93,10 @@ const TransactionDetail = (props: Props) => {
     );
   }, [handlerRenderArg]);
 
-  useEffect(() => {
-    let mount = true;
-
-    if (dataToSign) {
-      const _raw = isString(dataToSign) ? dataToSign : u8aToHex(dataToSign);
-
-      // eslint-disable-next-line no-void
-      void handlerParseTransaction(_raw, mount);
-    }
-
-    return () => {
-      mount = false;
-    };
-  }, [dataToSign, handlerParseTransaction]);
-
   return (
     <div className={CN(className)}>
       {
-        loading &&
+        !payloadDetail &&
         (
           <div className={CN('info-loading')}>
             <Spinner />
@@ -129,7 +104,7 @@ const TransactionDetail = (props: Props) => {
         )
       }
       {
-        !loading && payloadDetail && (
+        payloadDetail && (
           <>
             <div className={CN('info-group-container')}>
               <div className={CN('group-title')}>

@@ -1,19 +1,16 @@
 // Copyright 2019-2022 @polkadot/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { NetworkJson } from '@subwallet/extension-base/background/KoniTypes';
 import { Button, Spinner } from '@subwallet/extension-koni-ui/components';
 import { ScannerContext, ScannerContextType } from '@subwallet/extension-koni-ui/contexts/ScannerContext';
+import { useGetNetworkQrRequest } from '@subwallet/extension-koni-ui/hooks/useGetNetworkQrRequest';
 import useTranslation from '@subwallet/extension-koni-ui/hooks/useTranslation';
 import NetworkInfo from '@subwallet/extension-koni-ui/Popup/ExternalRequest/Shared/NetworkInfo';
 import MessageSigned from '@subwallet/extension-koni-ui/Popup/ExternalRequest/ViewQRDetail/MessageSigned';
 import TransactionSigned from '@subwallet/extension-koni-ui/Popup/ExternalRequest/ViewQRDetail/TransactionSigned';
-import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
-import { getNetworkJsonByInfo } from '@subwallet/extension-koni-ui/util/getNetworkJsonByGenesisHash';
 import CN from 'classnames';
-import React, { useCallback, useContext, useEffect, useState } from 'react';
-import { useSelector } from 'react-redux';
+import React, { useCallback, useContext } from 'react';
 import styled from 'styled-components';
 
 interface Props extends ThemeProps {
@@ -28,24 +25,9 @@ const ViewQRDetail = (props: Props) => {
 
   const scannerStore = useContext<ScannerContextType>(ScannerContext);
   const { state } = scannerStore;
-  const { evmChainId, genesisHash, isEthereum, type } = state;
-  const { networkMap } = useSelector((state: RootState) => state);
+  const { evmChainId, isEthereum, type } = state;
 
-  const [loading, setLoading] = useState<boolean>(true);
-  const [, setButtonLoading] = useState<boolean>(false);
-  const [network, setNetwork] = useState<NetworkJson | null>(null);
-
-  const handlerFetch = useCallback(() => {
-    const info: undefined | number | string = isEthereum ? evmChainId : genesisHash;
-    const network = getNetworkJsonByInfo(networkMap, isEthereum, info);
-
-    setLoading(!network);
-    setNetwork(network);
-  }, [isEthereum, evmChainId, genesisHash, networkMap]);
-
-  useEffect(() => {
-    handlerFetch();
-  }, [handlerFetch]);
+  const { loading, network } = useGetNetworkQrRequest();
 
   const handlerRenderContent = useCallback(() => {
     if (loading || !network) {
@@ -59,10 +41,7 @@ const ViewQRDetail = (props: Props) => {
         );
       } else if (type === 'transaction') {
         return (
-          <TransactionSigned
-            network={network}
-            setButtonLoading={setButtonLoading}
-          />
+          <TransactionSigned network={network} />
         );
       }
 

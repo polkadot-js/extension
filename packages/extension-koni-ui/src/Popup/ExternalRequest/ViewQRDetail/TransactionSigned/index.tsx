@@ -14,11 +14,10 @@ import TransactionDetail from './TransactionDetail';
 interface Props extends ThemeProps{
   className?: string;
   network: NetworkJson;
-  setButtonLoading: (value: boolean) => void;
 }
 
 const TransactionSigned = (props: Props) => {
-  const { className, network, setButtonLoading } = props;
+  const { className, network } = props;
   // eslint-disable-next-line no-empty-pattern
   const { state: { isEthereum } } = useContext<ScannerContextType>(ScannerContext);
 
@@ -27,16 +26,10 @@ const TransactionSigned = (props: Props) => {
       {
         isEthereum
           ? (
-            <TransactionDetail
-              network={network}
-              setButtonLoading={setButtonLoading}
-            />
+            <TransactionDetail network={network} />
           )
           : (
-            <PayloadDetail
-              network={network}
-              setButtonLoading={setButtonLoading}
-            />
+            <PayloadDetail network={network} />
           )
       }
     </div>

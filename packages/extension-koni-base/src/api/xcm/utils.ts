@@ -181,7 +181,7 @@ export const SupportedCrossChainsMap: Record<string, CrossChainRelation> = {
       moonbeam: {
         type: 'p',
         isEthereum: true,
-        supportedToken: ['INTR', 'IBTC', 'KBTC', 'DOT', 'KSM', 'KINT']
+        supportedToken: ['INTR', 'IBTC']
       }
     }
   },
@@ -192,7 +192,7 @@ export const SupportedCrossChainsMap: Record<string, CrossChainRelation> = {
       moonriver: {
         type: 'p',
         isEthereum: true,
-        supportedToken: ['INTR', 'IBTC', 'KBTC', 'DOT', 'KSM', 'KINT']
+        supportedToken: ['KINT', 'KBTC']
       }
     }
   },

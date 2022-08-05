@@ -251,7 +251,7 @@ export const SupportedCrossChainsMap: Record<string, CrossChainRelation> = {
         supportedToken: ['ROC']
       }
     }
-  },
+  }
   // moonbase_relay: {
   //   isEthereum: false,
   //   type: 'r',

@@ -8,21 +8,17 @@ import styled from 'styled-components';
 
 interface Props extends ThemeProps {
   className?: string;
-  isExternalAccount: boolean;
-  isHardwareAccount: boolean;
   isAccountAll: boolean;
 }
 
-function StakingEmptyList ({ className, isAccountAll, isExternalAccount, isHardwareAccount }: Props): React.ReactElement {
+function StakingEmptyList ({ className, isAccountAll }: Props): React.ReactElement {
   const getText = useCallback(() => {
     if (isAccountAll) {
       return 'No staking data was recorded';
-    } else if (isHardwareAccount || isExternalAccount) {
-      return 'Staking from this account is not supported yet';
     }
 
     return '';
-  }, [isAccountAll, isExternalAccount, isHardwareAccount]);
+  }, [isAccountAll]);
 
   return (
     <div className={`${className || ''} empty-list stacking-empty-list`}>
@@ -32,7 +28,7 @@ function StakingEmptyList ({ className, isAccountAll, isExternalAccount, isHardw
         src={stackingEmptyData}
       />
       {
-        (isAccountAll || (isHardwareAccount || isExternalAccount)) && <div className={'empty-list__text'}>{getText()}</div>
+        (isAccountAll) && <div className={'empty-list__text'}>{getText()}</div>
       }
     </div>
   );

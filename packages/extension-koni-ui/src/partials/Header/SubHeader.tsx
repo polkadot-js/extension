@@ -10,16 +10,26 @@ import React from 'react';
 import styled from 'styled-components';
 
 interface Props extends ThemeProps {
-  className?: string,
-  showBackArrow?: boolean,
-  subHeaderName?: string,
-  showCancelButton?: boolean,
   cancelButtonText?: string;
-  isBusy?: boolean,
-  to?: string
+  className?: string;
+  isBusy?: boolean;
+  onBack?: () => void;
+  onCancel?: () => void;
+  showBackArrow?: boolean;
+  showCancelButton?: boolean;
+  subHeaderName?: string;
+  to?: string;
 }
 
-function SubHeader ({ cancelButtonText = 'Cancel', className = '', isBusy, showBackArrow, showCancelButton, subHeaderName, to = '/' }: Props): React.ReactElement {
+function SubHeader ({ cancelButtonText,
+  className = '',
+  isBusy,
+  onBack,
+  onCancel,
+  showBackArrow,
+  showCancelButton,
+  subHeaderName,
+  to = '/' }: Props): React.ReactElement {
   const { t } = useTranslation();
 
   return (
@@ -34,6 +44,7 @@ function SubHeader ({ cancelButtonText = 'Cancel', className = '', isBusy, showB
               className={`arrowLeftIcon ${isBusy ? 'disabled-btn' : ''}`}
               // @ts-ignore
               icon={faArrowLeft}
+              onClick={onBack}
             />
           </Link>
         )
@@ -50,7 +61,7 @@ function SubHeader ({ cancelButtonText = 'Cancel', className = '', isBusy, showB
             className='sub-header__cancel-btn'
             to='/'
           >
-            <span>{t<string>(cancelButtonText)}</span>
+            <span onClick={onCancel}>{cancelButtonText ? t<string>(cancelButtonText) : t<string>('Cancel')}</span>
           </Link>
         )
         }

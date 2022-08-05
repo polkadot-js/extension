@@ -3,7 +3,7 @@
 
 import { ApiProps, NetworkJson, TokenInfo } from '@subwallet/extension-base/background/KoniTypes';
 import { FOUR_INSTRUCTIONS_WEIGHT, getMultiLocationFromParachain } from '@subwallet/extension-koni-base/api/xcm/utils';
-import { parseNumberToDisplay } from '@subwallet/extension-koni-base/utils/utils';
+import { parseNumberToDisplay } from '@subwallet/extension-koni-base/utils';
 
 import { ApiPromise } from '@polkadot/api';
 import { KeyringPair } from '@polkadot/keyring/types';

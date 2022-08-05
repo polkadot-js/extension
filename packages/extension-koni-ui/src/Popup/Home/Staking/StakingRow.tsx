@@ -126,7 +126,7 @@ function StakingRow ({ activeStake, chainName, className, index, isAccountAll, i
               <div className={'balance-description'}>
                 <div>Staking balance</div>
                 {
-                  !isAccountAll && !isHardwareAccount && !isExternalAccount && <StakingMenu
+                  !isAccountAll && <StakingMenu
                     bondedAmount={activeStake as string}
                     networkKey={networkKey}
                     nextWithdrawal={nextWithdrawal}

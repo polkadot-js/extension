@@ -4,7 +4,7 @@
 import { PREDEFINED_NETWORKS } from '@subwallet/extension-koni-base/api/predefinedNetworks';
 import { FOUR_INSTRUCTIONS_WEIGHT, getMultiLocationFromParachain, xTokenMoonbeamContract } from '@subwallet/extension-koni-base/api/xcm/utils';
 import { DOTSAMA_AUTO_CONNECT_MS } from '@subwallet/extension-koni-base/constants';
-import { getCurrentProvider } from '@subwallet/extension-koni-base/utils/utils';
+import { getCurrentProvider } from '@subwallet/extension-koni-base/utils';
 import Web3 from 'web3';
 
 import { ApiPromise, WsProvider } from '@polkadot/api';

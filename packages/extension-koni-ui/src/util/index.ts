@@ -55,6 +55,7 @@ export function recodeAddress (address: string, accounts: AccountWithChildren[],
     account,
     formatted: reformatAddress(address, prefix, isEthereum),
     genesisHash: account?.genesisHash,
+    originGenesisHash: account?.originGenesisHash,
     prefix,
     isEthereum
   };

@@ -2,7 +2,8 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { AuthUrls, Resolver } from '@subwallet/extension-base/background/handlers/State';
-import { AccountAuthType, AccountJson, AuthorizeRequest, RequestAccountList, RequestAccountSubscribe, RequestAuthorizeCancel, RequestAuthorizeReject, RequestAuthorizeSubscribe, RequestAuthorizeTab, RequestCurrentAccountAddress, ResponseAuthorizeList, ResponseJsonGetAccountInfo, SeedLengths } from '@subwallet/extension-base/background/types';
+import { AccountAuthType, AccountJson, AuthorizeRequest, RequestAccountList, RequestAccountSubscribe, RequestAuthorizeCancel, RequestAuthorizeReject, RequestAuthorizeSubscribe, RequestAuthorizeTab, RequestCurrentAccountAddress, RequestParseTransactionSubstrate, RequestQRIsLocked, RequestQrSignSubstrate, ResponseAuthorizeList, ResponseJsonGetAccountInfo, ResponseParseTransactionSubstrate, ResponseQRIsLocked, ResponseQrSignSubstrate, SeedLengths } from '@subwallet/extension-base/background/types';
+import { ExternalState, LedgerState, QrState } from '@subwallet/extension-base/signers/types';
 import { InjectedAccount, MetadataDefBase } from '@subwallet/extension-inject/types';
 import Web3 from 'web3';
 import { RequestArguments, TransactionConfig } from 'web3-core';
@@ -10,8 +11,9 @@ import { JsonRpcPayload, JsonRpcResponse } from 'web3-core-helpers';
 
 import { ApiPromise } from '@polkadot/api';
 import { SubmittableExtrinsicFunction } from '@polkadot/api/promise/types';
-import { KeyringPair$Json } from '@polkadot/keyring/types';
+import { KeyringPair$Json, KeyringPair$Meta } from '@polkadot/keyring/types';
 import { Registry } from '@polkadot/types/types';
+import { SignerResult } from '@polkadot/types/types/extrinsic';
 import { SingleAddress } from '@polkadot/ui-keyring/observable/types';
 import { KeyringOptions } from '@polkadot/ui-keyring/options/types';
 import { KeyringPairs$Json } from '@polkadot/ui-keyring/types';
@@ -549,6 +551,23 @@ export interface ResponseCheckCrossChainTransfer {
   feeString?: string
 }
 
+export type RequestTransferExternal = RequestCheckTransfer
+
+export type RequestCrossChainTransferExternal = RequestCheckCrossChainTransfer
+
+// External is account external (import via qr and hard wallet)
+
+export interface RequestRejectExternalRequest {
+  id: string;
+  message?: string;
+  throwError?: boolean;
+}
+
+export interface RequestResolveExternalRequest {
+  id: string;
+  data: SignerResult;
+}
+
 export interface ResponsePrivateKeyValidateV2 {
   addressMap: Record<KeypairType, string>,
   autoAddPrefix: boolean
@@ -603,8 +622,25 @@ export enum TransferErrorCode {
   NOT_ENOUGH_VALUE = 'notEnoughValue',
   INVALID_VALUE = 'invalidValue',
   INVALID_TOKEN = 'invalidToken',
+  INVALID_PARAM = 'invalidParam',
   KEYRING_ERROR = 'keyringError',
   TRANSFER_ERROR = 'transferError',
+  TIMEOUT = 'timeout',
+  UNSUPPORTED = 'unsupported'
+}
+
+export enum BasicTxErrorCode {
+  INVALID_FROM_ADDRESS = 'invalidFromAccount',
+  INVALID_TO_ADDRESS = 'invalidToAccount',
+  NOT_ENOUGH_VALUE = 'notEnoughValue',
+  INVALID_VALUE = 'invalidValue',
+  INVALID_TOKEN = 'invalidToken',
+  INVALID_PARAM = 'invalidParam',
+  KEYRING_ERROR = 'keyringError',
+  TRANSFER_ERROR = 'transferError',
+  STAKING_ERROR = 'stakingError',
+  UN_STAKING_ERROR = 'unStakingError',
+  WITHDRAW_STAKING_ERROR = 'withdrawStakingError',
   TIMEOUT = 'timeout',
   UNSUPPORTED = 'unsupported'
 }
@@ -613,6 +649,11 @@ export type TransferError = {
   code: TransferErrorCode,
   data?: object,
   message: string
+}
+
+export interface BaseTxError {
+  code: BasicTxErrorCode;
+  message: string;
 }
 
 export interface ResponseCheckTransfer {
@@ -625,6 +666,7 @@ export interface ResponseCheckTransfer {
 
 export enum TransferStep {
   READY = 'ready',
+  SIGNING = 'signing',
   START = 'start',
   PROCESSING = 'processing',
   SUCCESS = 'success',
@@ -648,6 +690,19 @@ export interface ResponseTransfer {
   isFinalized?: boolean
 }
 
+export interface ResponseTransferExternal extends ResponseTransfer{
+  externalState?: ExternalState;
+}
+
+export interface ResponseTransferQr extends ResponseTransferExternal{
+  qrState?: QrState;
+  isBusy?: boolean;
+}
+
+export interface ResponseTransferLedger extends ResponseTransferExternal{
+  ledgerState?: LedgerState;
+}
+
 export interface EvmNftTransactionRequest {
   networkKey: string,
   senderAddress: string,
@@ -667,15 +722,6 @@ export interface EvmNftSubmitTransaction {
   recipientAddress: string,
   networkKey: string,
   rawTransaction: Record<string, any>
-}
-
-export interface NftTransactionResponse {
-  passwordError?: string | null,
-  callHash?: string,
-  status?: boolean,
-  transactionHash?: string,
-  txError?: boolean,
-  isSendingSelf: boolean
 }
 
 export interface ValidateNetworkResponse {
@@ -810,6 +856,62 @@ export interface CrossChainRelation {
   relationMap: Record<string, ChainRelationInfo>;
 }
 
+export interface RequestAccountMeta{
+  address: string | Uint8Array;
+}
+
+export interface ResponseAccountMeta{
+  meta: KeyringPair$Meta;
+}
+
+export type ResponseRejectExternalRequest = void
+
+export type ResponseResolveExternalRequest = void
+
+export enum ExternalRequestPromiseStatus {
+  PENDING,
+  REJECTED,
+  FAILED,
+  COMPLETED
+}
+
+export interface ExternalRequestPromise {
+  resolve?: (result: SignerResult | PromiseLike<SignerResult>) => void,
+  reject?: (error?: Error) => void,
+  status: ExternalRequestPromiseStatus,
+  message?: string;
+  createdAt: number
+}
+
+export interface RequestAccountCreateExternalV2 {
+  address: string;
+  genesisHash?: string | null;
+  name: string;
+  isEthereum: boolean;
+  isAllowed: boolean;
+}
+
+export interface RequestAccountCreateHardwareV2 {
+  accountIndex: number;
+  address: string;
+  addressOffset: number;
+  genesisHash: string;
+  hardwareType: string;
+  name: string;
+  isAllowed?: boolean;
+}
+
+export enum AccountExternalErrorCode {
+  INVALID_ADDRESS = 'invalidToAccount',
+  KEYRING_ERROR = 'keyringError',
+  UNKNOWN_ERROR = 'unknownError'
+}
+
+export interface AccountExternalError{
+  code: AccountExternalErrorCode;
+  message: string;
+}
+
 export type RequestEvmEvents = null;
 export type EvmEventType = 'connect' | 'disconnect' | 'accountsChanged' | 'chainChanged' | 'message' | 'data' | 'reconnect' | 'error';
 export type EvmAccountsChangedPayload = string [];
@@ -887,20 +989,63 @@ export interface ConfirmationResult<T> {
   id: string;
   isApproved: boolean;
   url?: string;
-  payload?: T
-  password?: string
+  payload?: T;
+  password?: string;
+}
+
+export interface ConfirmationResultQr<T> extends ConfirmationResult<T>{
+  signature: `0x${string}`;
 }
 
 export interface EvmSendTransactionRequest extends TransactionConfig {
   estimateGas: string;
 }
 
+export interface EvmRequestQr {
+  qrPayload: string;
+  canSign: boolean;
+}
+
+export interface EvmSendTransactionRequestQr extends TransactionConfig, EvmRequestQr {
+  estimateGas: string;
+}
+
+export interface EvmSignatureRequestQr extends EvmSignatureRequest, EvmRequestQr {}
+
 export interface ConfirmationDefinitions {
   addNetworkRequest: [ConfirmationsQueueItem<NetworkJson>, ConfirmationResult<NetworkJson>],
   addTokenRequest: [ConfirmationsQueueItem<CustomEvmToken>, ConfirmationResult<boolean>],
   switchNetworkRequest: [ConfirmationsQueueItem<SwitchNetworkRequest>, ConfirmationResult<boolean>],
   evmSignatureRequest: [ConfirmationsQueueItem<EvmSignatureRequest>, ConfirmationResult<string>],
+  evmSignatureRequestQr: [ConfirmationsQueueItem<EvmSignatureRequestQr>, ConfirmationResultQr<string>],
   evmSendTransactionRequest: [ConfirmationsQueueItem<EvmSendTransactionRequest>, ConfirmationResult<boolean>]
+  evmSendTransactionRequestQr: [ConfirmationsQueueItem<EvmSendTransactionRequestQr>, ConfirmationResultQr<boolean>]
+}
+
+export interface RequestParseTransactionEVM {
+  data: string;
+}
+
+export interface ResponseParseTransactionEVM {
+  data: ParseEVMTransactionData | string;
+  input: string;
+  nonce: number;
+  to: string;
+  gas: number;
+  gasPrice: number;
+  value: number;
+}
+
+export interface RequestQrSignEVM {
+  address: string;
+  message: string;
+  type: 'message' | 'transaction'
+  chainId?: number;
+  password: string;
+}
+
+export interface ResponseQrSignEVM {
+  signature: string;
 }
 
 export type ConfirmationType = keyof ConfirmationDefinitions;
@@ -972,6 +1117,10 @@ export interface BasicTxResponse {
   txError?: boolean,
 }
 
+export interface NftTransactionResponse extends BasicTxResponse{
+  isSendingSelf: boolean
+}
+
 export interface BondingOptionParams {
   networkKey: string;
   address: string;
@@ -1029,6 +1178,68 @@ export interface StakeClaimRewardParams {
   password?: string
 }
 
+export interface ResponseNftTransferExternal extends NftTransactionResponse{
+  externalState?: ExternalState;
+}
+
+export interface ResponseNftTransferQr extends ResponseNftTransferExternal{
+  qrState?: QrState;
+  isBusy?: boolean;
+}
+
+export interface ResponseNftTransferLedger extends ResponseNftTransferExternal{
+  ledgerState?: LedgerState;
+}
+
+export type RequestNftTransferExternalSubstrate = Omit<SubstrateNftSubmitTransaction, 'password'>
+
+export type RequestNftTransferExternalEVM = Omit<EvmNftSubmitTransaction, 'password'>
+
+export type RequestStakeExternal = Omit<BondingSubmitParams, 'password'>
+
+export interface ResponseStakeExternal extends BasicTxResponse{
+  externalState?: ExternalState;
+}
+
+export interface ResponseStakeQr extends ResponseStakeExternal{
+  qrState?: QrState;
+  isBusy?: boolean;
+}
+
+export interface ResponseStakeLedger extends ResponseStakeExternal{
+  ledgerState?: LedgerState;
+}
+
+export type RequestUnStakeExternal = Omit<UnbondingSubmitParams, 'password'>
+
+export interface ResponseUnStakeExternal extends BasicTxResponse{
+  externalState?: ExternalState;
+}
+
+export interface ResponseUnStakeQr extends ResponseUnStakeExternal{
+  qrState?: QrState;
+  isBusy?: boolean;
+}
+
+export interface ResponseUnStakeLedger extends ResponseUnStakeExternal{
+  ledgerState?: LedgerState;
+}
+
+export type RequestWithdrawStakeExternal = Omit<StakeWithdrawalParams, 'password'>
+
+export interface ResponseWithdrawStakeExternal extends BasicTxResponse{
+  externalState?: ExternalState;
+}
+
+export interface ResponseWithdrawStakeQr extends ResponseWithdrawStakeExternal{
+  qrState?: QrState;
+  isBusy?: boolean;
+}
+
+export interface ResponseWithdrawStakeLedger extends ResponseWithdrawStakeExternal{
+  ledgerState?: LedgerState;
+}
+
 export interface StakeDelegationRequest {
   address: string,
   networkKey: string
@@ -1065,22 +1276,12 @@ export interface ResponseParseEVMTransactionInput {
   result: ParseEVMTransactionData | string
 }
 
-export interface RequestAccountCreateHardwareV2 {
-  accountIndex: number;
-  address: string;
-  addressOffset: number;
+export interface LedgerNetwork {
   genesisHash: string;
-  hardwareType: string;
-  name: string;
-  isAllowed?: boolean;
-}
-
-export interface RequestAccountCreateExternalV2 {
-  address: string;
-  genesisHash?: string | null;
-  name: string;
-  isEthereum: boolean;
-  isAllowed: boolean;
+  displayName: string;
+  network: string;
+  icon: 'substrate' | 'ethereum';
+  isDevMode: boolean;
 }
 
 export interface KoniRequestSignatures {
@@ -1150,9 +1351,9 @@ export interface KoniRequestSignatures {
   'pri(seed.createV2)': [RequestSeedCreateV2, ResponseSeedCreateV2];
   'pri(seed.validateV2)': [RequestSeedValidateV2, ResponseSeedValidateV2];
   'pri(privateKey.validateV2)': [RequestSeedValidateV2, ResponsePrivateKeyValidateV2];
-  'pri(accounts.create.externalV2)': [RequestAccountCreateExternalV2, boolean];
-  'pri(accounts.create.hardwareV2)': [RequestAccountCreateHardwareV2, boolean];
   'pri(accounts.create.suriV2)': [RequestAccountCreateSuriV2, ResponseAccountCreateSuriV2];
+  'pri(accounts.create.externalV2)': [RequestAccountCreateExternalV2, AccountExternalError[]];
+  'pri(accounts.create.hardwareV2)': [RequestAccountCreateHardwareV2, boolean];
   'pri(accounts.checkTransfer)': [RequestCheckTransfer, ResponseCheckTransfer];
   'pri(accounts.checkCrossChainTransfer)': [RequestCheckCrossChainTransfer, ResponseCheckCrossChainTransfer];
   'pri(accounts.transfer)': [RequestTransfer, Array<TransferError>, ResponseTransfer];
@@ -1165,6 +1366,7 @@ export interface KoniRequestSignatures {
   'pri(accounts.subscribeAccountsInputAddress)': [RequestAccountSubscribe, string, OptionInputAddress];
   'pri(accounts.saveRecent)': [RequestSaveRecentAccount, SingleAddress];
   'pri(accounts.triggerSubscription)': [null, boolean];
+  'pri(accounts.get.meta)': [RequestAccountMeta, ResponseAccountMeta];
   'pri(currentAccount.saveAddress)': [RequestCurrentAccountAddress, boolean, CurrentAccountInfo];
   'pri(settings.changeBalancesVisibility)': [null, boolean, ResponseSettingsType];
   'pri(settings.subscribe)': [null, ResponseSettingsType, ResponseSettingsType];
@@ -1180,21 +1382,45 @@ export interface KoniRequestSignatures {
   'pri(freeBalance.subscribe)': [RequestFreeBalance, string, string];
 
   // Confirmation Queues
-  'pri(confirmations.subscribe)': [RequestConfirmationsSubscribe, ConfirmationsQueue, ConfirmationsQueue],
-  'pri(confirmations.complete)': [RequestConfirmationComplete, boolean]
+  'pri(confirmations.subscribe)': [RequestConfirmationsSubscribe, ConfirmationsQueue, ConfirmationsQueue];
+  'pri(confirmations.complete)': [RequestConfirmationComplete, boolean];
 
   'pub(utils.getRandom)': [RandomTestRequest, number];
   'pub(accounts.listV2)': [RequestAccountList, InjectedAccount[]];
   'pub(accounts.subscribeV2)': [RequestAccountSubscribe, boolean, InjectedAccount[]];
+  'pri(qr.transaction.parse.substrate)': [RequestParseTransactionSubstrate, ResponseParseTransactionSubstrate];
+  'pri(qr.transaction.parse.evm)': [RequestParseTransactionEVM, ResponseParseTransactionEVM];
+  'pri(qr.isLocked)': [RequestQRIsLocked, ResponseQRIsLocked];
+  'pri(qr.sign.substrate)': [RequestQrSignSubstrate, ResponseQrSignSubstrate];
+  'pri(qr.sign.evm)': [RequestQrSignEVM, ResponseQrSignEVM];
 
-  // EVM inject request
+  // External account request
+  'pri(account.external.reject)': [RequestRejectExternalRequest, ResponseRejectExternalRequest];
+  'pri(account.external.resolve)': [RequestResolveExternalRequest, ResponseResolveExternalRequest];
+
   'evm(events.subscribe)': [RequestEvmEvents, boolean, EvmEvent];
   'evm(request)': [RequestArguments, unknown];
-  'evm(provider.send)': [RequestEvmProviderSend, string | number, ResponseEvmProviderSend];
+  'evm(provider.send)': [RequestEvmProviderSend, string | number, ResponseEvmProviderSend]
 
   // EVM Transaction
   'pri(evm.transaction.parse.input)': [RequestParseEVMTransactionInput, ResponseParseEVMTransactionInput];
 
+  // Create qr request
+  'pri(accounts.transfer.qr.create)': [RequestTransferExternal, Array<TransferError>, ResponseTransferQr];
+  'pri(accounts.cross.transfer.qr.create)': [RequestCrossChainTransferExternal, Array<TransferError>, ResponseTransferQr];
+  'pri(nft.transfer.qr.create.substrate)': [RequestNftTransferExternalSubstrate, Array<BaseTxError>, ResponseNftTransferQr];
+  'pri(nft.transfer.qr.create.evm)': [RequestNftTransferExternalEVM, Array<BaseTxError>, ResponseNftTransferQr];
+  'pri(stake.qr.create)': [RequestStakeExternal, Array<BaseTxError>, ResponseStakeQr];
+  'pri(unStake.qr.create)': [RequestUnStakeExternal, Array<BaseTxError>, ResponseUnStakeQr];
+  'pri(withdrawStake.qr.create)': [RequestWithdrawStakeExternal, Array<BaseTxError>, ResponseWithdrawStakeQr];
+
+  // Create ledger request
+  'pri(accounts.transfer.ledger.create)': [RequestTransferExternal, Array<TransferError>, ResponseTransferLedger];
+  'pri(accounts.cross.transfer.ledger.create)': [RequestCrossChainTransferExternal, Array<TransferError>, ResponseTransferLedger];
+  'pri(nft.transfer.ledger.create.substrate)': [RequestNftTransferExternalSubstrate, Array<BaseTxError>, ResponseNftTransferQr];
+  'pri(stake.ledger.create)': [RequestStakeExternal, Array<BaseTxError>, ResponseStakeLedger];
+  'pri(unStake.ledger.create)': [RequestUnStakeExternal, Array<BaseTxError>, ResponseUnStakeLedger];
+  'pri(withdrawStake.ledger.create)': [RequestWithdrawStakeExternal, Array<BaseTxError>, ResponseWithdrawStakeLedger];
   // Authorize
   'pri(authorize.subscribe)': [null, AuthUrls, AuthUrls];
 }

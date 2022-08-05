@@ -8,6 +8,7 @@ import { moonbeamEstimateCrossChainFee, moonbeamGetXcmExtrinsic } from '@subwall
 import { substrateEstimateCrossChainFee, substrateGetXcmExtrinsic } from '@subwallet/extension-koni-base/api/xcm/substrateXcm';
 import { SupportedCrossChainsMap } from '@subwallet/extension-koni-base/api/xcm/utils';
 
+import { SubmittableExtrinsic } from '@polkadot/api/types';
 import { KeyringPair } from '@polkadot/keyring/types';
 import { EventRecord } from '@polkadot/types/interfaces';
 
@@ -52,6 +53,36 @@ export async function estimateCrossChainFee (
   return substrateEstimateCrossChainFee(originNetworkKey, destinationNetworkKey, to, fromKeypair, value, dotSamaApiMap, tokenInfo, networkMap);
 }
 
+interface CreateXcmExtrinsicProps {
+  destinationNetworkKey: string;
+  dotSamaApiMap: Record<string, ApiProps>;
+  networkMap: Record<string, NetworkJson>;
+  originNetworkKey: string;
+  to: string;
+  tokenInfo: TokenInfo;
+  value: string;
+}
+
+export const createXcmExtrinsic = async ({ destinationNetworkKey,
+  dotSamaApiMap,
+  networkMap,
+  originNetworkKey, to, tokenInfo, value }: CreateXcmExtrinsicProps): Promise<SubmittableExtrinsic<'promise'>> => {
+  const apiProps = await dotSamaApiMap[originNetworkKey].isReady;
+  const api = apiProps.api;
+
+  let extrinsic;
+
+  if (['moonbase', 'moonriver', 'moonbeam'].includes(originNetworkKey)) {
+    extrinsic = moonbeamGetXcmExtrinsic(originNetworkKey, destinationNetworkKey, to, value, api, tokenInfo, networkMap);
+  } else if (['astar', 'shiden'].includes(originNetworkKey)) {
+    extrinsic = astarGetXcmExtrinsic(originNetworkKey, destinationNetworkKey, to, value, api, tokenInfo, networkMap);
+  } else {
+    extrinsic = substrateGetXcmExtrinsic(originNetworkKey, destinationNetworkKey, to, value, api, tokenInfo, networkMap);
+  }
+
+  return extrinsic;
+};
+
 export async function makeCrossChainTransfer (
   originNetworkKey: string,
   destinationNetworkKey: string,
@@ -72,15 +103,15 @@ export async function makeCrossChainTransfer (
   const apiProps = await dotSamaApiMap[originNetworkKey].isReady;
   const api = apiProps.api;
 
-  let extrinsic;
-
-  if (['moonbase', 'moonriver', 'moonbeam'].includes(originNetworkKey)) {
-    extrinsic = moonbeamGetXcmExtrinsic(originNetworkKey, destinationNetworkKey, to, value, api, tokenInfo, networkMap);
-  } else if (['astar', 'shiden'].includes(originNetworkKey)) {
-    extrinsic = astarGetXcmExtrinsic(originNetworkKey, destinationNetworkKey, to, value, api, tokenInfo, networkMap);
-  } else {
-    extrinsic = substrateGetXcmExtrinsic(originNetworkKey, destinationNetworkKey, to, value, api, tokenInfo, networkMap);
-  }
+  const extrinsic = await createXcmExtrinsic({
+    value: value,
+    to: to,
+    networkMap: networkMap,
+    originNetworkKey: originNetworkKey,
+    destinationNetworkKey: destinationNetworkKey,
+    dotSamaApiMap: dotSamaApiMap,
+    tokenInfo: tokenInfo
+  });
 
   await doSignAndSend(api, originNetworkKey, tokenInfo, extrinsic, fromKeypair, updateXcmResponseTxResult, callback);
 }

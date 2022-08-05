@@ -262,8 +262,7 @@ export async function doSignAndSend (
     tokenInfo: undefined | TokenInfo,
     response: ResponseTransfer,
     records: EventRecord[]) => void,
-  callback: (data: ResponseTransfer) => void
-) {
+  callback: (data: ResponseTransfer) => void) {
   const response: ResponseTransfer = {
     step: TransferStep.READY,
     errors: [],

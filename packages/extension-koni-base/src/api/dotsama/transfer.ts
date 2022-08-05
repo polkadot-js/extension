@@ -2,17 +2,14 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { assetFromToken } from '@equilab/api';
-import { ApiProps, NetworkJson, ResponseTransfer, SupportTransferResponse, TokenInfo, TransferErrorCode, TransferStep } from '@subwallet/extension-base/background/KoniTypes';
+import { ApiProps, ResponseTransfer, SupportTransferResponse, TokenInfo, TransferErrorCode, TransferStep } from '@subwallet/extension-base/background/KoniTypes';
 import { getTokenInfo } from '@subwallet/extension-koni-base/api/dotsama/registry';
-import { SupportedCrossChainsMap } from '@subwallet/extension-koni-base/api/supportedCrossChains';
 
 import { ApiPromise } from '@polkadot/api';
 import { SubmittableExtrinsic } from '@polkadot/api/promise/types';
 import { KeyringPair } from '@polkadot/keyring/types';
 import { AccountInfoWithProviders, AccountInfoWithRefCount, EventRecord } from '@polkadot/types/interfaces';
 import { BN } from '@polkadot/util';
-
-// TODO: consider pass state.getApiMap() as a param
 
 export async function getExistentialDeposit (networkKey: string, token: string, dotSamaApiMap: Record<string, ApiProps>): Promise<string> {
   const apiProps = await dotSamaApiMap[networkKey].isReady;
@@ -178,7 +175,7 @@ export async function estimateFee (
   return [fee, feeSymbol];
 }
 
-function getUnsupportedResponse (): ResponseTransfer {
+export function getUnsupportedResponse (): ResponseTransfer {
   return {
     step: TransferStep.ERROR,
     errors: [
@@ -192,7 +189,7 @@ function getUnsupportedResponse (): ResponseTransfer {
   };
 }
 
-function updateResponseTxResult (
+export function updateResponseTxResult (
   networkKey: string,
   tokenInfo: undefined | TokenInfo,
   response: ResponseTransfer,
@@ -254,7 +251,7 @@ function updateResponseTxResult (
   }
 }
 
-async function doSignAndSend (
+export async function doSignAndSend (
   api: ApiPromise,
   networkKey: string,
   tokenInfo: TokenInfo | undefined,
@@ -444,138 +441,4 @@ export async function makeTransfer (
   }
 
   await doSignAndSend(api, networkKey, tokenInfo, transfer, fromKeypair, updateResponseTxResult, callback);
-}
-
-export function isNetworksPairSupportedTransferCrossChain (
-  originNetworkKey: string,
-  destinationNetworkKey: string,
-  token: string,
-  networkMap: Record<string, NetworkJson>
-): boolean {
-  // todo: Check ParaChain vs RelayChain, RelayChain vs ParaChain
-  if (!SupportedCrossChainsMap[originNetworkKey] ||
-    !SupportedCrossChainsMap[originNetworkKey].relationMap[destinationNetworkKey] ||
-    !SupportedCrossChainsMap[originNetworkKey].relationMap[destinationNetworkKey].supportedToken.includes(token)) {
-    return false;
-  }
-
-  if (!(networkMap[destinationNetworkKey] && networkMap[destinationNetworkKey].paraId)) {
-    return false;
-  }
-
-  // todo: There may have further conditions
-
-  return true;
-}
-
-export function getCrossChainTransferDest (paraId: number, toAddress: string) {
-  // todo: Case ParaChain vs RelayChain
-  // todo: Case RelayChain vs ParaChain
-
-  // Case ParaChain vs ParaChain
-  return ({
-    V1: {
-      parents: 1,
-      interior: {
-        X2: [
-          {
-            Parachain: paraId
-          },
-          {
-            AccountKey20: {
-              network: 'Any',
-              key: toAddress
-            }
-          }
-        ]
-      }
-    }
-  });
-}
-
-export async function estimateCrossChainFee (
-  originNetworkKey: string,
-  destinationNetworkKey: string,
-  to: string,
-  fromKeypair: KeyringPair,
-  value: string,
-  dotSamaApiMap: Record<string, ApiProps>,
-  tokenInfo: TokenInfo,
-  networkMap: Record<string, NetworkJson>
-): Promise<[string, string | undefined]> {
-  if (!isNetworksPairSupportedTransferCrossChain(originNetworkKey, destinationNetworkKey, tokenInfo.symbol, networkMap)) {
-    return ['0', tokenInfo.symbol];
-  }
-
-  const apiProps = await dotSamaApiMap[originNetworkKey].isReady;
-  const api = apiProps.api;
-  const isTxXTokensSupported = !!api && !!api.tx && !!api.tx.xTokens;
-  let fee = '0';
-  // eslint-disable-next-line prefer-const
-  let feeSymbol = tokenInfo.symbol;
-
-  if (isTxXTokensSupported) {
-    // todo: Case ParaChain vs RelayChain
-    // todo: Case RelayChain vs ParaChain
-
-    const paraId = networkMap[destinationNetworkKey].paraId as number;
-
-    // Case ParaChain vs ParaChain
-    const paymentInfo = await api.tx.xTokens.transfer(
-      {
-        Token: tokenInfo.symbol
-      },
-      +value,
-      getCrossChainTransferDest(paraId, to),
-      4000000000
-    ).paymentInfo(fromKeypair);
-
-    fee = paymentInfo.partialFee.toString();
-  }
-
-  return [fee, feeSymbol];
-}
-
-export async function makeCrossChainTransfer (
-  originNetworkKey: string,
-  destinationNetworkKey: string,
-  to: string,
-  fromKeypair: KeyringPair,
-  value: string,
-  dotSamaApiMap: Record<string, ApiProps>,
-  tokenInfo: TokenInfo,
-  networkMap: Record<string, NetworkJson>,
-  callback: (data: ResponseTransfer) => void
-): Promise<void> {
-  if (!isNetworksPairSupportedTransferCrossChain(originNetworkKey, destinationNetworkKey, tokenInfo.symbol, networkMap)) {
-    callback(getUnsupportedResponse());
-
-    return;
-  }
-
-  const apiProps = await dotSamaApiMap[originNetworkKey].isReady;
-  const api = apiProps.api;
-  const isTxXTokensSupported = !!api && !!api.tx && !!api.tx.xTokens;
-
-  if (!isTxXTokensSupported) {
-    callback(getUnsupportedResponse());
-
-    return;
-  }
-
-  // todo: Case ParaChain vs RelayChain
-  // todo: Case RelayChain vs ParaChain
-
-  const paraId = networkMap[destinationNetworkKey].paraId as number;
-
-  const transfer = api.tx.xTokens.transfer(
-    {
-      Token: tokenInfo.symbol
-    },
-    +value,
-    getCrossChainTransferDest(paraId, to),
-    4000000000
-  );
-
-  await doSignAndSend(api, originNetworkKey, tokenInfo, transfer, fromKeypair, updateResponseTxResult, callback);
 }

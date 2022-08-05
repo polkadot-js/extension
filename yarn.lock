@@ -1882,17 +1882,17 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@darwinia/types-known@npm:^2.8.7":
-  version: 2.8.7
-  resolution: "@darwinia/types-known@npm:2.8.7"
-  checksum: 74e35a716e54c1929fbce8fc7c998fdd93ac2fab5e6189cc6a14c692a1c15b2ef5a0ce49459a2423b4012310a88fd307db5e87a3c2939bc0cc1799ffadd55072
+"@darwinia/types-known@npm:^2.8.8":
+  version: 2.8.8
+  resolution: "@darwinia/types-known@npm:2.8.8"
+  checksum: 85eb0ff445db0e14c4f502a2407c1a94ab0c8ec0f7dbf7849c4aeb6a15f26807c1ab98053b51524a48f9dc4c0347464c392a2bd29b14bfdb69025afe35bcb5bb
   languageName: node
   linkType: hard
 
-"@darwinia/types@npm:^2.8.7":
-  version: 2.8.7
-  resolution: "@darwinia/types@npm:2.8.7"
-  checksum: aa37de4c90296a82d7454c5af2aa0c64ff4be7eac2070a8df7a314bf12899c7e08ef570904d937e158253f1cf2b9c2f1a2f8e5a6d62084c2424bf947adc45fc6
+"@darwinia/types@npm:^2.8.8":
+  version: 2.8.8
+  resolution: "@darwinia/types@npm:2.8.8"
+  checksum: 3056d26d1793739b6c5d628952292ebec0310da304de986fa33e3f731ca92527f88f08aad4f4b5c82a578f470530b2a2aa881dcfb8f23dab44c191cfd399b09c
   languageName: node
   linkType: hard
 
@@ -1913,10 +1913,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@docknetwork/node-types@npm:^0.6.0":
-  version: 0.6.0
-  resolution: "@docknetwork/node-types@npm:0.6.0"
-  checksum: 1eb122ec4dbe06e8a64b744c1f087f9e2f4b23e75e7fe05d4d2e38daea327fc02100609724beaaa84ad60dfbbbb084d930608fdb649cd80e47e87d58cadf9634
+"@docknetwork/node-types@npm:0.10.0":
+  version: 0.10.0
+  resolution: "@docknetwork/node-types@npm:0.10.0"
+  checksum: 2244238c65d9145c1fb18273019fe9dcbc24f4c3d0120831c896ef6a4ecc84eff14755592734f086b3c4747188d43216c0223a50bc5411fd490ddce589004717
   languageName: node
   linkType: hard
 
@@ -5142,10 +5142,10 @@ __metadata:
     "@babel/runtime": ^7.18.6
     "@bifrost-finance/type-definitions": ^1.6.1
     "@crustio/type-definitions": ^1.3.0
-    "@darwinia/types": ^2.8.7
-    "@darwinia/types-known": ^2.8.7
+    "@darwinia/types": ^2.8.8
+    "@darwinia/types-known": ^2.8.8
     "@digitalnative/type-definitions": ^1.1.27
-    "@docknetwork/node-types": ^0.6.0
+    "@docknetwork/node-types": 0.10.0
     "@edgeware/node-types": ^3.6.2-wako
     "@equilab/api": ^1.12.7
     "@equilab/definitions": ^1.4.12

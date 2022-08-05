@@ -22,7 +22,7 @@ interface Props extends ThemeProps {
 
 function StakeClaimRewardResult ({ backToHome, className, extrinsicHash, handleResend, isTxSuccess, networkKey, txError }: Props): React.ReactElement<Props> {
   const { t } = useTranslation();
-  const scanExplorerTxUrl = useScanExplorerTxUrl(networkKey, extrinsicHash);
+  const scanExplorerTxUrl = useScanExplorerTxUrl(networkKey, extrinsicHash, true);
 
   return (
     <div className={className}>

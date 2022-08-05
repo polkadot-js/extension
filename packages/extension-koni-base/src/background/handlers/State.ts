@@ -297,7 +297,7 @@ export default class KoniState extends State {
 
         // Update networkKey in case networkMap change
         for (const token of _evmTokenState.erc20) {
-          if (!(token.chain in this.networkMap)) {
+          if (!(token.chain in this.networkMap) && token.chain.startsWith('custom_')) {
             let newKey = '';
             const genesisHash = token.chain.split('custom_')[1]; // token from custom network has key with prefix custom_
 
@@ -313,7 +313,7 @@ export default class KoniState extends State {
         }
 
         for (const token of _evmTokenState.erc721) {
-          if (!(token.chain in this.networkMap)) {
+          if (!(token.chain in this.networkMap) && token.chain.startsWith('custom_')) {
             let newKey = '';
             const genesisHash = token.chain.split('custom_')[1]; // token from custom network has key with prefix custom_
 

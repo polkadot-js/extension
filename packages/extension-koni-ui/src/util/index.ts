@@ -182,8 +182,8 @@ export const subscanByNetworkKey: Record<string, string> = {
   kusama: 'https://kusama.subscan.io',
   // 'litentry': 'https://litentry.subscan.io',
   // 'manta': 'https://manta.subscan.io',
-  // moonbeam: 'https://moonbeam.subscan.io',
-  // moonriver: 'https://moonriver.subscan.io',
+  moonbeam: 'https://moonbeam.subscan.io',
+  moonriver: 'https://moonriver.subscan.io',
   // 'nodle': 'https://nodle.subscan.io',
   parallel: 'https://parallel.subscan.io',
   // 'phala': 'https://phala.subscan.io',
@@ -229,7 +229,11 @@ export function isSupportScanExplorer (networkKey: string): boolean {
   return ['moonbeam', 'moonriver', 'moonbase'].includes(networkKey) || isSupportSubscan(networkKey);
 }
 
-export function getScanExplorerTransactionHistoryUrl (networkKey: string, hash: string): string {
+export function getScanExplorerTransactionHistoryUrl (networkKey: string, hash: string, useSubscan?: boolean): string {
+  if (useSubscan) {
+    return `${subscanByNetworkKey[networkKey]}/extrinsic/${hash}`;
+  }
+
   if (networkKey === 'moonbeam') {
     return `${moonbeamScanUrl}/tx/${hash}`;
   }

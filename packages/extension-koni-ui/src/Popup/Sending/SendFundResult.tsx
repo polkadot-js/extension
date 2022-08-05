@@ -17,14 +17,15 @@ export interface Props extends ThemeProps {
   className?: string;
   txResult: TransferResultType;
   networkKey: string;
-  onResend: () => void
+  onResend: () => void;
+  isXcmTransfer?: boolean;
 }
 
-function SendFundResult ({ className = '', networkKey, onResend, txResult: { extrinsicHash, isTxSuccess, txError } }: Props): React.ReactElement<Props> {
+function SendFundResult ({ className = '', isXcmTransfer, networkKey, onResend, txResult: { extrinsicHash, isTxSuccess, txError } }: Props): React.ReactElement<Props> {
   const { t } = useTranslation();
   const onAction = useContext(ActionContext);
   const isSupportScanExplorer = useSupportScanExplorer(networkKey);
-  const isScanExplorerTxUrl = useScanExplorerTxUrl(networkKey, extrinsicHash);
+  const isScanExplorerTxUrl = useScanExplorerTxUrl(networkKey, extrinsicHash, isXcmTransfer);
   const _backToHome = useCallback(
     () => {
       window.localStorage.setItem('popupNavigation', '/');

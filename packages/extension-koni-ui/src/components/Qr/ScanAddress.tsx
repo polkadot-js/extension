@@ -28,6 +28,8 @@ const SUBSTRATE_PREFIX = 'substrate';
 const ETHEREUM_PREFIX = 'ethereum';
 const SECRET_PREFIX = 'secret';
 
+const ACCEPT_PREFIXES = [SUBSTRATE_PREFIX, SECRET_PREFIX];
+
 const PATH = '@subwallet/extension-koni-ui/components/Qr/ScanAddress';
 
 const ScanAddress = (props: Props) => {
@@ -52,8 +54,11 @@ const ScanAddress = (props: Props) => {
           genesisHash = '';
           content = content.substring(0, 42);
           isEthereum = true;
+          onError && onError(new Error(`Invalid prefix received, expected '${ACCEPT_PREFIXES.join(' or ')}' , found '${prefix}'`));
+
+          throw Error(`Invalid prefix received, expected '${SUBSTRATE_PREFIX} or ${SECRET_PREFIX} or ${ETHEREUM_PREFIX}' , found '${prefix}'`);
         } else {
-          onError && onError(new Error(`Invalid prefix received, expected '${SUBSTRATE_PREFIX} or ${SECRET_PREFIX} or ${ETHEREUM_PREFIX}' , found '${prefix}'`));
+          onError && onError(new Error(`Invalid prefix received, expected '${ACCEPT_PREFIXES.join(' or ')}' , found '${prefix}'`));
 
           throw Error(`Invalid prefix received, expected '${SUBSTRATE_PREFIX} or ${SECRET_PREFIX} or ${ETHEREUM_PREFIX}' , found '${prefix}'`);
         }

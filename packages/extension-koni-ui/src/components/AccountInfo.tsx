@@ -13,7 +13,7 @@ import Identicon from '@subwallet/extension-koni-ui/components/Identicon';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { accountAllRecoded, defaultRecoded, isAccountAll, recodeAddress } from '@subwallet/extension-koni-ui/util';
 import Avatar from 'boring-avatars';
-import React, { useCallback, useContext, useEffect, useState } from 'react';
+import React, { useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import CopyToClipboard from 'react-copy-to-clipboard';
 import { useSelector } from 'react-redux';
 import styled from 'styled-components';
@@ -55,7 +55,6 @@ function AccountInfo ({ accountSplitPart = 'both', address, addressHalfLength = 
     originGenesisHash: recodedOrigin,
     prefix }, setRecoded] = useState<Recoded>(defaultRecoded);
   const networkMap = useSelector((state: RootState) => state.networkMap);
-  const [iconTheme, setIconTheme] = useState<'polkadot'|'ethereum'>('polkadot');
   const { show } = useToast();
   const accountName = name || account?.name;
   const displayName = accountName || t('<unknown>');
@@ -99,12 +98,20 @@ function AccountInfo ({ accountSplitPart = 'both', address, addressHalfLength = 
       return;
     }
 
-    if (isEthereumAddress(address)) {
-      setIconTheme('ethereum');
-    }
-
     setRecoded(recodeAddress(address, accounts, networkInfo, givenType));
   }, [accounts, _isAccountAll, address, networkInfo, givenType]);
+
+  const iconTheme = useMemo((): 'polkadot'|'ethereum' => {
+    if (!address) {
+      return 'polkadot';
+    }
+
+    if (isEthereum || _isEthereum || isEthereumAddress(address)) {
+      return 'ethereum';
+    }
+
+    return 'polkadot';
+  }, [_isEthereum, address, isEthereum]);
 
   const _onCopy = useCallback(
     () => show(t('Copied')),

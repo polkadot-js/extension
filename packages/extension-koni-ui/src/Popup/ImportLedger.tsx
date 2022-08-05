@@ -69,7 +69,7 @@ function ImportLedger ({ className }: Props): React.ReactElement {
     ...ledgerChains.map(({ displayName, genesisHash }): NetworkOption => ({
       // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
       text: displayName,
-      value: genesisHash[0]
+      value: genesisHash
     }))]
   );
 

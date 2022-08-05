@@ -2191,10 +2191,7 @@ export default class KoniExtension extends Extension {
   private parseSubstrateTransaction ({ genesisHash,
     rawPayload,
     specVersion }: RequestParseTransactionSubstrate): ResponseParseTransactionSubstrate {
-    const networkMap = state.getNetworkMap();
-    const dotSamaApiMap = state.getDotSamaApiMap();
-
-    return parseSubstratePayload(networkMap, dotSamaApiMap, genesisHash, rawPayload, specVersion);
+    return parseSubstratePayload(genesisHash, rawPayload, specVersion);
   }
 
   private async parseEVMTransaction ({ data }: RequestParseTransactionEVM): Promise<ResponseParseTransactionEVM> {
@@ -2292,8 +2289,20 @@ export default class KoniExtension extends Extension {
     }
   }
 
-  private async accountsCreateHardwareV2 ({ accountIndex, address, addressOffset, genesisHash, hardwareType, isAllowed, name }: RequestAccountCreateHardwareV2): Promise<boolean> {
-    const key = keyring.addHardware(address, hardwareType, { accountIndex, addressOffset, genesisHash, name, originGenesisHash: genesisHash });
+  private async accountsCreateHardwareV2 ({ accountIndex,
+    address,
+    addressOffset,
+    genesisHash,
+    hardwareType,
+    isAllowed,
+    name }: RequestAccountCreateHardwareV2): Promise<boolean> {
+    const key = keyring.addHardware(address, hardwareType, {
+      accountIndex,
+      addressOffset,
+      genesisHash,
+      name,
+      originGenesisHash: genesisHash
+    });
 
     const result = key.pair;
 
@@ -2892,7 +2901,10 @@ export default class KoniExtension extends Extension {
     return [];
   }
 
-  private withdrawStakeCreateQr (id: string, port: chrome.runtime.Port, { action, address, networkKey, validatorAddress }: RequestWithdrawStakeExternal): Array<BaseTxError> {
+  private withdrawStakeCreateQr (id: string, port: chrome.runtime.Port, { action,
+    address,
+    networkKey,
+    validatorAddress }: RequestWithdrawStakeExternal): Array<BaseTxError> {
     const callback = createSubscription<'pri(withdrawStake.qr.create)'>(id, port);
     const apiProp = state.getDotSamaApi(networkKey);
 
@@ -3317,7 +3329,10 @@ export default class KoniExtension extends Extension {
     return [];
   }
 
-  private withdrawStakeCreateLedger (id: string, port: chrome.runtime.Port, { action, address, networkKey, validatorAddress }: RequestWithdrawStakeExternal): Array<BaseTxError> {
+  private withdrawStakeCreateLedger (id: string, port: chrome.runtime.Port, { action,
+    address,
+    networkKey,
+    validatorAddress }: RequestWithdrawStakeExternal): Array<BaseTxError> {
     const callback = createSubscription<'pri(withdrawStake.ledger.create)'>(id, port);
     const apiProp = state.getDotSamaApi(networkKey);
 
@@ -3394,7 +3409,12 @@ export default class KoniExtension extends Extension {
         promise.reject();
       }
 
-      state.updateExternalRequest(id, { status: ExternalRequestPromiseStatus.REJECTED, message: message, reject: undefined, resolve: undefined });
+      state.updateExternalRequest(id, {
+        status: ExternalRequestPromiseStatus.REJECTED,
+        message: message,
+        reject: undefined,
+        resolve: undefined
+      });
     }
   }
 
@@ -3405,7 +3425,11 @@ export default class KoniExtension extends Extension {
 
     if (promise.status === ExternalRequestPromiseStatus.PENDING) {
       promise.resolve && promise.resolve(data);
-      state.updateExternalRequest(id, { status: ExternalRequestPromiseStatus.COMPLETED, reject: undefined, resolve: undefined });
+      state.updateExternalRequest(id, {
+        status: ExternalRequestPromiseStatus.COMPLETED,
+        reject: undefined,
+        resolve: undefined
+      });
     }
   }
 
@@ -3554,13 +3578,26 @@ export default class KoniExtension extends Extension {
     } as BondingOptionInfo;
   }
 
-  private async getBondingTxInfo ({ amount, bondedValidators, isBondedBefore, lockPeriod, networkKey, nominatorAddress, validatorInfo }: BondingSubmitParams): Promise<BasicTxInfo> {
+  private async getBondingTxInfo ({ amount,
+    bondedValidators,
+    isBondedBefore,
+    lockPeriod,
+    networkKey,
+    nominatorAddress,
+    validatorInfo }: BondingSubmitParams): Promise<BasicTxInfo> {
     const networkJson = state.getNetworkMapByKey(networkKey);
 
     return await getBondingTxInfo(networkJson, amount, bondedValidators, isBondedBefore, networkKey, nominatorAddress, validatorInfo, state.getDotSamaApiMap(), state.getWeb3ApiMap(), lockPeriod);
   }
 
-  private async submitBonding (id: string, port: chrome.runtime.Port, { amount, bondedValidators, isBondedBefore, lockPeriod, networkKey, nominatorAddress, password, validatorInfo }: BondingSubmitParams): Promise<BasicTxResponse> {
+  private async submitBonding (id: string, port: chrome.runtime.Port, { amount,
+    bondedValidators,
+    isBondedBefore,
+    lockPeriod,
+    networkKey,
+    nominatorAddress,
+    password,
+    validatorInfo }: BondingSubmitParams): Promise<BasicTxResponse> {
     const txState: BasicTxResponse = {};
     const networkJson = state.getNetworkMapByKey(networkKey);
 
@@ -3621,13 +3658,22 @@ export default class KoniExtension extends Extension {
     return txState;
   }
 
-  private async getUnbondingTxInfo ({ address, amount, networkKey, unstakeAll, validatorAddress }: UnbondingSubmitParams): Promise<BasicTxInfo> {
+  private async getUnbondingTxInfo ({ address,
+    amount,
+    networkKey,
+    unstakeAll,
+    validatorAddress }: UnbondingSubmitParams): Promise<BasicTxInfo> {
     const networkJson = state.getNetworkMapByKey(networkKey);
 
     return await getUnbondingTxInfo(address, amount, networkKey, state.getDotSamaApiMap(), state.getWeb3ApiMap(), networkJson, validatorAddress, unstakeAll);
   }
 
-  private async submitUnbonding (id: string, port: chrome.runtime.Port, { address, amount, networkKey, password, unstakeAll, validatorAddress }: UnbondingSubmitParams): Promise<BasicTxResponse> {
+  private async submitUnbonding (id: string, port: chrome.runtime.Port, { address,
+    amount,
+    networkKey,
+    password,
+    unstakeAll,
+    validatorAddress }: UnbondingSubmitParams): Promise<BasicTxResponse> {
     const txState: BasicTxResponse = {};
 
     if (!amount || !address || !password) {
@@ -3688,11 +3734,18 @@ export default class KoniExtension extends Extension {
     return txState;
   }
 
-  private async getStakeWithdrawalTxInfo ({ action, address, networkKey, validatorAddress }: StakeWithdrawalParams): Promise<BasicTxInfo> {
+  private async getStakeWithdrawalTxInfo ({ action,
+    address,
+    networkKey,
+    validatorAddress }: StakeWithdrawalParams): Promise<BasicTxInfo> {
     return await getWithdrawalTxInfo(address, networkKey, state.getNetworkMapByKey(networkKey), state.getDotSamaApiMap(), state.getWeb3ApiMap(), validatorAddress, action);
   }
 
-  private async submitStakeWithdrawal (id: string, port: chrome.runtime.Port, { action, address, networkKey, password, validatorAddress }: StakeWithdrawalParams): Promise<BasicTxResponse> {
+  private async submitStakeWithdrawal (id: string, port: chrome.runtime.Port, { action,
+    address,
+    networkKey,
+    password,
+    validatorAddress }: StakeWithdrawalParams): Promise<BasicTxResponse> {
     const txState: BasicTxResponse = {};
 
     if (!address || !password) {
@@ -3756,7 +3809,10 @@ export default class KoniExtension extends Extension {
     return await getClaimRewardTxInfo(address, networkKey, state.getNetworkMapByKey(networkKey), state.getDotSamaApiMap(), state.getWeb3ApiMap());
   }
 
-  private async submitStakeClaimReward (id: string, port: chrome.runtime.Port, { address, networkKey, password, validatorAddress }: StakeClaimRewardParams): Promise<BasicTxResponse> {
+  private async submitStakeClaimReward (id: string, port: chrome.runtime.Port, { address,
+    networkKey,
+    password,
+    validatorAddress }: StakeClaimRewardParams): Promise<BasicTxResponse> {
     const txState: BasicTxResponse = {};
 
     if (!address || !password) {
@@ -3839,7 +3895,9 @@ export default class KoniExtension extends Extension {
   }
 
   // EVM Transaction
-  private async parseEVMTransactionInput ({ chainId, contract, data }: RequestParseEVMTransactionInput): Promise<ResponseParseEVMTransactionInput> {
+  private async parseEVMTransactionInput ({ chainId,
+    contract,
+    data }: RequestParseEVMTransactionInput): Promise<ResponseParseEVMTransactionInput> {
     const network = this.getNetworkJsonByChainId(chainId);
 
     return await parseTransactionData(data, contract, network);

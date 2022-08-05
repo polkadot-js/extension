@@ -174,6 +174,17 @@ export const SupportedCrossChainsMap: Record<string, CrossChainRelation> = {
       // }
     }
   },
+  interlay: {
+    type: 'p',
+    isEthereum: false,
+    relationMap: {
+      moonbeam: {
+        type: 'p',
+        isEthereum: true,
+        supportedToken: ['INTR', 'IBTC', 'KBTC', 'DOT', 'KSM', 'KINT']
+      }
+    }
+  },
   kintsugi: {
     type: 'p',
     isEthereum: false,
@@ -181,19 +192,10 @@ export const SupportedCrossChainsMap: Record<string, CrossChainRelation> = {
       moonriver: {
         type: 'p',
         isEthereum: true,
-        supportedToken: ['KINT']
+        supportedToken: ['INTR', 'IBTC', 'KBTC', 'DOT', 'KSM', 'KINT']
       }
     }
   },
-  // interlay: {
-  //   type: 'p',
-  //   relationMap: {
-  //     moonbeam: {
-  //       type: 'p',
-  //       supportedToken: ['KAR']
-  //     }
-  //   }
-  // },
   // bifrost: { // bifrost on kusama
   //   type: 'p',
   //   isEthereum: false,
@@ -311,7 +313,10 @@ export function getMultiLocationFromParachain (originChain: string, destinationC
       ]
     };
 
+    console.log(originChain, destinationChain, SupportedCrossChainsMap[originChain].relationMap[destinationChain]);
+
     if (SupportedCrossChainsMap[originChain].relationMap[destinationChain].isEthereum && destinationChain !== 'astarEvm' && destinationChain !== 'shidenEvm') {
+      console.log('run here');
       interior = {
         X2: [
           { Parachain: paraId },
@@ -319,6 +324,8 @@ export function getMultiLocationFromParachain (originChain: string, destinationC
         ]
       };
     }
+
+    console.log('multilocation', interior);
 
     return { V1: { parents: 1, interior } };
   }

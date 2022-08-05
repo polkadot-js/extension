@@ -364,7 +364,6 @@ async function subscribeWithAccountMulti (addresses: string[], networkKey: strin
   let unsub2: () => void;
 
   try {
-    // add logic to get astar sub token
     if (['bifrost', 'acala', 'karura', 'acala_testnet'].includes(networkKey)) {
       unsub2 = await subscribeTokensBalance(addresses, networkKey, networkAPI.api, mainCallback, subCallback);
     } else if (['kintsugi', 'interlay', 'kintsugi_test'].includes(networkKey)) {

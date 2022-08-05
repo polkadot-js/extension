@@ -7,6 +7,7 @@ import receiveIcon from '@subwallet/extension-koni-ui/assets/icon/receive-icon.s
 import receivedIcon from '@subwallet/extension-koni-ui/assets/receive-icon.svg';
 import { ActionContext } from '@subwallet/extension-koni-ui/contexts';
 import useOutsideClick from '@subwallet/extension-koni-ui/hooks/useOutsideClick';
+import useTranslation from '@subwallet/extension-koni-ui/hooks/useTranslation';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import CN from 'classnames';
@@ -27,6 +28,8 @@ interface Position {
 
 const BalanceShowQrAction = (props: Props) => {
   const { className, openExportQr, openQr } = props;
+
+  const { t } = useTranslation();
 
   const onAction = useContext(ActionContext);
 
@@ -126,7 +129,7 @@ const BalanceShowQrAction = (props: Props) => {
               src={buyIcon}
             />
             <div className={CN('action-title')}>
-              Receiver asset
+              {t('Receive assets')}
             </div>
           </div>
           {
@@ -142,7 +145,7 @@ const BalanceShowQrAction = (props: Props) => {
                     src={receiveIcon}
                   />
                   <div className={CN('action-title')}>
-                    Export to devices
+                    {t('Export to devices')}
                   </div>
                 </div>
                 <div
@@ -155,7 +158,7 @@ const BalanceShowQrAction = (props: Props) => {
                     src={penIcon}
                   />
                   <div className={CN('action-title')}>
-                    Sign transaction
+                    {t('Sign transactions')}
                   </div>
                 </div>
               </>

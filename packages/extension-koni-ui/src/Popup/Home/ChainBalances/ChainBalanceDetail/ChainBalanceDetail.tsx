@@ -4,6 +4,7 @@
 import { faArrowLeft } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import useTranslation from '@subwallet/extension-koni-ui/hooks/useTranslation';
+import { getTotalConvertedBalanceValue } from '@subwallet/extension-koni-ui/Popup/Home/ChainBalances/utils';
 import { ModalQrProps, ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { AccountInfoByNetwork, BalanceInfo } from '@subwallet/extension-koni-ui/util/types';
 import BigN from 'bignumber.js';
@@ -35,7 +36,7 @@ function ChainBalanceDetail ({ accountInfo, backToHome, balanceInfo, className, 
   }, []);
 
   const convertedBalanceValue = useMemo((): string => {
-    return balanceInfo.convertedBalanceValue.toString();
+    return getTotalConvertedBalanceValue(balanceInfo).toString();
   }, [balanceInfo]);
 
   useEffect(() => {

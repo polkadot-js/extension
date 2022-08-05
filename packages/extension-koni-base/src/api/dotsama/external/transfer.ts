@@ -7,8 +7,8 @@ import LedgerSigner from '@subwallet/extension-base/signers/substrates/LedgerSig
 import QrSigner from '@subwallet/extension-base/signers/substrates/QrSigner';
 import { LedgerState, QrState } from '@subwallet/extension-base/signers/types';
 import { sendExtrinsic } from '@subwallet/extension-koni-base/api/dotsama/external/shared';
-import { getCrossChainTransferDest, isNetworksPairSupportedTransferCrossChain } from '@subwallet/extension-koni-base/api/dotsama/transfer';
 import { getNftTransferExtrinsic } from '@subwallet/extension-koni-base/api/nft/transfer';
+import { createXcmExtrinsic, isNetworksPairSupportedTransferCrossChain } from '@subwallet/extension-koni-base/api/xcm';
 
 import { ApiPromise } from '@polkadot/api';
 import { SubmittableExtrinsic } from '@polkadot/api/promise/types';
@@ -335,25 +335,21 @@ const makeCrossChainTransferExternal = async ({ callback,
     return;
   }
 
-  // todo: Case ParaChain vs RelayChain
-  // todo: Case RelayChain vs ParaChain
-
-  const paraId = networkMap[destinationNetworkKey].paraId as number;
-
-  const transfer = api.tx.xTokens.transfer(
-    {
-      Token: tokenInfo.symbol
-    },
-    +value,
-    getCrossChainTransferDest(paraId, recipientAddress),
-    4000000000
-  );
+  const extrinsic = await createXcmExtrinsic({
+    destinationNetworkKey: destinationNetworkKey,
+    dotSamaApiMap: dotSamaApiMap,
+    networkMap: networkMap,
+    originNetworkKey: originalNetworkKey,
+    to: recipientAddress,
+    tokenInfo: tokenInfo,
+    value: value
+  });
 
   await doSignAndSend({
     api,
     networkKey: originalNetworkKey,
     tokenInfo,
-    extrinsic: transfer,
+    extrinsic: extrinsic,
     senderAddress,
     id,
     setState,

@@ -2,8 +2,8 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { ChainRegistry, DropdownTransformOptionType, NetworkJson } from '@subwallet/extension-base/background/KoniTypes';
-import { reformatAddress } from '@subwallet/extension-koni-base/utils';
 import { SupportedCrossChainsMap } from '@subwallet/extension-koni-base/api/xcm/utils';
+import { reformatAddress } from '@subwallet/extension-koni-base/utils';
 import { AccountContext, ActionContext, Button, Warning } from '@subwallet/extension-koni-ui/components';
 import InputBalance from '@subwallet/extension-koni-ui/components/InputBalance';
 import LoadingContainer from '@subwallet/extension-koni-ui/components/LoadingContainer';

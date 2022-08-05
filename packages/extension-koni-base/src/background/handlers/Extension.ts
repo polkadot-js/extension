@@ -11,12 +11,13 @@ import { getBondingExtrinsic, getBondingTxInfo, getChainBondingBasics, getClaimR
 import { initApi } from '@subwallet/extension-koni-base/api/dotsama';
 import { getFreeBalance, subscribeFreeBalance } from '@subwallet/extension-koni-base/api/dotsama/balance';
 import { getTokenInfo } from '@subwallet/extension-koni-base/api/dotsama/registry';
-import { checkReferenceCount, checkSupportTransfer, estimateCrossChainFee, estimateFee, getExistentialDeposit, makeCrossChainTransfer, makeTransfer } from '@subwallet/extension-koni-base/api/dotsama/transfer';
+import { checkReferenceCount, checkSupportTransfer, estimateFee, getExistentialDeposit, makeTransfer } from '@subwallet/extension-koni-base/api/dotsama/transfer';
 import { SUPPORTED_TRANSFER_SUBSTRATE_CHAIN_NAME } from '@subwallet/extension-koni-base/api/nft/config';
 import { acalaTransferHandler, getNftTransferExtrinsic, isRecipientSelf, quartzTransferHandler, rmrkTransferHandler, statemineTransferHandler, uniqueTransferHandler, unlockAccount } from '@subwallet/extension-koni-base/api/nft/transfer';
 import { parseTransactionData } from '@subwallet/extension-koni-base/api/web3/parseEVMTransaction';
 import { getERC20TransactionObject, getEVMTransactionObject, makeERC20Transfer, makeEVMTransfer } from '@subwallet/extension-koni-base/api/web3/transfer';
 import { ERC721Contract, getERC20Contract, getERC721Contract, initWeb3Api } from '@subwallet/extension-koni-base/api/web3/web3';
+import { estimateCrossChainFee, makeCrossChainTransfer } from '@subwallet/extension-koni-base/api/xcm';
 import { state } from '@subwallet/extension-koni-base/background/handlers/index';
 import { ALL_ACCOUNT_KEY, ALL_GENESIS_HASH } from '@subwallet/extension-koni-base/constants';
 import { isValidProvider, reformatAddress } from '@subwallet/extension-koni-base/utils/utils';
@@ -1262,24 +1263,16 @@ export default class KoniExtension extends Extension {
     return [errors, keypair, transferValue, tokenInfo];
   }
 
-  private async checkCrossChainTransfer ({ destinationNetworkKey,
-    from,
-    originNetworkKey,
-    to,
-    token,
-    value }: RequestCheckCrossChainTransfer): Promise<ResponseCheckCrossChainTransfer> {
-    const [errors, fromKeyPair, valueNumber, tokenInfo] =
-      await this.validateCrossChainTransfer(originNetworkKey, destinationNetworkKey, token, from, to, undefined, value);
+  private async checkCrossChainTransfer ({ destinationNetworkKey, from, originNetworkKey, to, token, value }: RequestCheckCrossChainTransfer): Promise<ResponseCheckCrossChainTransfer> {
+    const [errors, fromKeyPair, valueNumber, tokenInfo] = await this.validateCrossChainTransfer(originNetworkKey, destinationNetworkKey, token, from, to, undefined, value);
     const dotSamaApiMap = state.getDotSamaApiMap();
     const web3ApiMap = state.getApiMap().web3;
     let fee = '0';
-    let feeSymbol;
+    let feeString;
     let fromAccountFree = '0';
 
-    // todo: Case ETH using web3 js
-
     if (tokenInfo && fromKeyPair) {
-      [[fee, feeSymbol], fromAccountFree] = await Promise.all([
+      [[fee, feeString], fromAccountFree] = await Promise.all([
         estimateCrossChainFee(
           originNetworkKey,
           destinationNetworkKey,
@@ -1290,7 +1283,7 @@ export default class KoniExtension extends Extension {
           tokenInfo,
           state.getNetworkMap()
         ),
-        getFreeBalance(originNetworkKey, from, dotSamaApiMap, web3ApiMap, token)
+        getFreeBalance(originNetworkKey, from, dotSamaApiMap, web3ApiMap)
       ]);
     }
 
@@ -1309,8 +1302,7 @@ export default class KoniExtension extends Extension {
 
     return {
       errors,
-      estimateFee: fee,
-      feeSymbol
+      feeString
     };
   }
 

@@ -16,13 +16,11 @@ import { ThemeProps, TransferResultType } from '@subwallet/extension-koni-ui/typ
 import React, { useCallback, useState } from 'react';
 import styled from 'styled-components';
 
-import { BN } from '@polkadot/util';
-
 interface Props extends ThemeProps {
   className?: string;
   onCancel: () => void;
   requestPayload: RequestCheckCrossChainTransfer;
-  feeInfo: [string | null, number, string]; // fee, fee decimal, fee symbol
+  feeString: string;
   balanceFormat: BalanceFormatType; // decimal, symbol
   networkMap: Record<string, NetworkJson>;
   onChangeResult: (txResult: TransferResultType) => void;
@@ -30,48 +28,15 @@ interface Props extends ThemeProps {
   destinationChainOptions: DropdownTransformOptionType[];
 }
 
-type RenderTotalArg = {
-  fee: string | null,
-  feeDecimals: number,
-  feeSymbol: string,
-  amount?: string,
-  amountDecimals: number,
-  amountSymbol: string
-}
-
-function renderTotal (arg: RenderTotalArg) {
-  const { amount, amountDecimals, amountSymbol, fee, feeDecimals, feeSymbol } = arg;
-
-  if (feeDecimals === amountDecimals && feeSymbol === amountSymbol) {
-    return (
-      <FormatBalance
-        format={[feeDecimals, feeSymbol]}
-        value={new BN(fee || '0').add(new BN(amount || '0'))}
-      />
-    );
-  }
-
-  return (
-    <>
-      <FormatBalance
-        format={[amountDecimals, amountSymbol]}
-        value={new BN(amount || '0')}
-      />
-      <span className={'value-separator'}>+</span>
-      <FormatBalance
-        format={[feeDecimals, feeSymbol]}
-        value={new BN(fee || '0')}
-      />
-    </>
-  );
-}
-
 function AuthTransaction ({ balanceFormat,
   className,
   destinationChainOptions,
-  feeInfo: [fee, feeDecimals, feeSymbol],
-  networkMap, onCancel,
-  onChangeResult, originChainOptions, requestPayload }: Props): React.ReactElement<Props> | null {
+  feeString,
+  networkMap,
+  onCancel,
+  onChangeResult,
+  originChainOptions,
+  requestPayload }: Props): React.ReactElement<Props> | null {
   const { t } = useTranslation();
   const [isBusy, setBusy] = useState(false);
   const [password, setPassword] = useState<string>('');
@@ -248,24 +213,19 @@ function AuthTransaction ({ balanceFormat,
           <div className='auth-transaction__info'>
             <div className='auth-transaction__info-text'>Origin Chain Fee</div>
             <div className='auth-transaction__info-value'>
-              <FormatBalance
-                format={[feeDecimals, feeSymbol]}
-                value={fee}
-              />
+              {feeString}
             </div>
           </div>
 
           <div className='auth-transaction__info'>
             <div className='auth-transaction__info-text'>Total</div>
             <div className='auth-transaction__info-value'>
-              {renderTotal({
-                fee,
-                feeDecimals,
-                feeSymbol,
-                amount: requestPayload.value,
-                amountDecimals: balanceFormat[0],
-                amountSymbol: balanceFormat[2] || balanceFormat[1]
-              })}
+              <FormatBalance
+                format={balanceFormat}
+                value={requestPayload.value}
+              />
+              <span> + </span>
+              {feeString}
             </div>
           </div>
 
@@ -452,7 +412,7 @@ export default React.memo(styled(AuthTransaction)(({ theme }: ThemeProps) => `
 
   .auth-transaction__info-value {
     color: ${theme.textColor};
-    flex: 1;
+    flex: 2;
     text-align: right;
     font-weight: 500;
   }

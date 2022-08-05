@@ -379,11 +379,12 @@ export type TokenInfo = {
   symbol: string,
   symbolAlt?: string, // Alternate display for symbol
   erc20Address?: string,
-  assetIndex?: number,
+  assetIndex?: number | string,
   decimals: number,
   name: string,
   coinGeckoKey?: string,
-  specialOption?: object
+  specialOption?: object,
+  assetId?: string // for moon assets
 }
 
 // all Accounts and the address of the current Account
@@ -545,8 +546,7 @@ export interface RequestCrossChainTransfer extends RequestCheckCrossChainTransfe
 
 export interface ResponseCheckCrossChainTransfer {
   errors?: Array<TransferError>,
-  estimateFee?: string,
-  feeSymbol?: string // if undefined => use main token
+  feeString?: string
 }
 
 export interface ResponsePrivateKeyValidateV2 {
@@ -631,7 +631,7 @@ export enum TransferStep {
   ERROR = 'error'
 }
 
-type TxResultType = {
+export type TxResultType = {
   change: string;
   changeSymbol?: string;
   fee?: string;
@@ -800,11 +800,13 @@ export type ChainRelationType = 'p' | 'r'; // parachain | relaychain
 
 export interface ChainRelationInfo {
   type: ChainRelationType;
+  isEthereum: boolean;
   supportedToken: string[];
 }
 
 export interface CrossChainRelation {
   type: ChainRelationType;
+  isEthereum: boolean;
   relationMap: Record<string, ChainRelationInfo>;
 }
 

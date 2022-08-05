@@ -26,7 +26,7 @@ export async function getMoonAssets (api: ApiPromise) {
     const valueData = value.toHuman();
     // @ts-ignore
     // eslint-disable-next-line @typescript-eslint/no-unsafe-argument,@typescript-eslint/no-unsafe-assignment
-    const info = { isMainToken: false, name: valueData.name, symbol: valueData.symbol, decimals: parseInt(valueData.decimals || ' 0'), erc20Address: address } as TokenInfo;
+    const info = { isMainToken: false, name: valueData.name, symbol: valueData.symbol, decimals: parseInt(valueData.decimals || ' 0'), erc20Address: address, assetId: keyString } as TokenInfo; // todo: get assetId for XCM
 
     assetRecord[info.symbol] = info;
   });
@@ -43,24 +43,69 @@ export async function getForeignToken (api: ApiPromise) {
   allTokens.forEach(([storageKey, tokenData]) => {
     // @ts-ignore
     // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access,@typescript-eslint/no-unsafe-assignment
-    const foreignAsset = storageKey.toHuman()[0].ForeignAssetId;
+    const assetMetadata = storageKey.toHuman()[0] as Record<string, any>;
 
-    if (foreignAsset) {
-      const { decimals, name, symbol } = tokenData.toHuman() as {
-        symbol: string,
-        decimals: string,
-        name: string
+    let specialOption;
+
+    if (assetMetadata.ForeignAssetId) {
+      specialOption = {
+        ForeignAsset: assetMetadata.ForeignAssetId as string
       };
+    } else if (assetMetadata.NativeAssetId) {
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+      if (assetMetadata.NativeAssetId.Token) {
+        specialOption = {
+          // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+          Token: assetMetadata.NativeAssetId.Token as string
+        };
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+      } else if (assetMetadata.NativeAssetId.LiquidCrowdloan) {
+        specialOption = {
+          // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+          LiquidCrowdloan: assetMetadata.NativeAssetId.LiquidCrowdloan as string
+        };
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+      } else if (assetMetadata.NativeAssetId.VSToken) {
+        specialOption = {
+          // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+          VSToken: assetMetadata.NativeAssetId.VSToken as string
+        };
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+      } else if (assetMetadata.NativeAssetId.Native) {
+        specialOption = {
+          // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+          Native: assetMetadata.NativeAssetId.Native as string
+        };
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+      } else if (assetMetadata.NativeAssetId.Stable) {
+        specialOption = {
+          // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+          Stable: assetMetadata.NativeAssetId.Stable as string
+        };
+      }
+    } else if (assetMetadata.Erc20) {
+      specialOption = {
+        Erc20: assetMetadata.Erc20 as string
+      };
+    } else if (assetMetadata.StableAssetId) {
+      specialOption = {
+        StableAssetPoolToken: assetMetadata.StableAssetId as string
+      };
+    }
 
+    const { decimals, name, symbol } = tokenData.toHuman() as {
+      symbol: string,
+      decimals: string,
+      name: string
+    };
+
+    if (!(symbol in tokenMap)) {
       tokenMap[symbol] = {
         isMainToken: false,
         symbol,
         decimals: parseInt(decimals),
         name,
-        specialOption: {
-          // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-          ForeignAsset: foreignAsset
-        }
+        specialOption
       };
     }
   });
@@ -89,7 +134,7 @@ export const getRegistry = async (networkKey: string, api: ApiPromise, customErc
   // Build token map
   const tokenMap = {} as Record<string, TokenInfo>;
 
-  if (!['genshiro_testnet', 'genshiro', 'equilibrium_parachain'].includes(networkKey)) {
+  if (!['genshiro_testnet', 'genshiro', 'equilibrium_parachain', 'acala', 'karura'].includes(networkKey)) {
     chainTokens.forEach((token, index) => {
       tokenMap[token] = {
         isMainToken: index === 0,
@@ -110,6 +155,14 @@ export const getRegistry = async (networkKey: string, api: ApiPromise, customErc
     const foreignTokens = await getForeignToken(api);
 
     Object.assign(tokenMap, foreignTokens);
+
+    if (networkKey === 'karura') { // quick fix for native token
+      tokenMap.KAR.isMainToken = true;
+    } else if (networkKey === 'acala') {
+      tokenMap.ACA.isMainToken = true;
+    } else if (networkKey === 'bifrost') {
+      tokenMap.BNC.isMainToken = true;
+    }
   }
 
   // Get moonbeam base chains tokens

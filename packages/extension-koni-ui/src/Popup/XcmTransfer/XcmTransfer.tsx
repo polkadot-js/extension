@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { ChainRegistry, DropdownTransformOptionType, NetworkJson } from '@subwallet/extension-base/background/KoniTypes';
-import { SupportedCrossChainsMap } from '@subwallet/extension-koni-base/api/supportedCrossChains';
+import { SupportedCrossChainsMap } from '@subwallet/extension-koni-base/api/xcm/utils';
 import { AccountContext, ActionContext, Button, Warning } from '@subwallet/extension-koni-ui/components';
 import InputBalance from '@subwallet/extension-koni-ui/components/InputBalance';
 import LoadingContainer from '@subwallet/extension-koni-ui/components/LoadingContainer';
@@ -13,7 +13,7 @@ import useFreeBalance from '@subwallet/extension-koni-ui/hooks/screen/sending/us
 import { checkCrossChainTransfer } from '@subwallet/extension-koni-ui/messaging';
 import Header from '@subwallet/extension-koni-ui/partials/Header';
 import SendFundResult from '@subwallet/extension-koni-ui/Popup/Sending/SendFundResult';
-import { getAuthTransactionFeeInfo, getBalanceFormat, getDefaultAddress, getMainTokenInfo } from '@subwallet/extension-koni-ui/Popup/Sending/utils';
+import { getBalanceFormat, getDefaultAddress, getMainTokenInfo } from '@subwallet/extension-koni-ui/Popup/Sending/utils';
 import AuthTransaction from '@subwallet/extension-koni-ui/Popup/XcmTransfer/AuthTransaction';
 import BridgeInputAddress from '@subwallet/extension-koni-ui/Popup/XcmTransfer/BridgeInputAddress';
 import Dropdown from '@subwallet/extension-koni-ui/Popup/XcmTransfer/XcmDropdown/Dropdown';
@@ -49,12 +49,25 @@ function getSupportedTokens (originChain: string, destinationChain: string): str
   return SupportedCrossChainsMap[originChain].relationMap[destinationChain].supportedToken;
 }
 
+// function filterOriginChainOptions (isAccountEvm: boolean, supportedCrossChainsMap: Record<string, CrossChainRelation>, networkMap: Record<string, NetworkJson>) {
+//   const filteredOptions: DropdownTransformOptionType[] = [];
+//
+//   Object.entries(supportedCrossChainsMap).forEach(([key, item]) => {
+//     if (item.isEthereum === isAccountEvm) {
+//       filteredOptions.push({ label: networkMap[key].chain, value: key });
+//     }
+//   });
+//
+//   return filteredOptions;
+// }
+
 function Wrapper ({ className = '', theme }: Props): React.ReactElement<Props> {
   const { t } = useTranslation();
   const { accounts } = useContext(AccountContext);
   const { chainRegistry: chainRegistryMap,
     currentAccount: { account },
     networkMap } = useSelector((state: RootState) => state);
+  // const isAccountEvm = useIsAccountEvm();
   const originChainOptions = Object.keys(SupportedCrossChainsMap).map((key) => ({ label: networkMap[key].chain, value: key }));
   const firstOriginChain = originChainOptions[0].value;
   const destinationChainList = Object.keys(SupportedCrossChainsMap[firstOriginChain].relationMap);
@@ -107,7 +120,7 @@ function XcmTransfer ({ chainRegistryMap, className, defaultValue, firstOriginCh
   const [{ address: senderId,
     token: selectedToken }, setSenderValue] = useState<XcmTransferInputAddressType>(defaultValue);
   const onAction = useContext(ActionContext);
-  const [[fee, feeSymbol], setFeeInfo] = useState<[string | null, string | null | undefined]>([null, null]);
+  const [feeString, setFeeString] = useState<string | undefined>();
   const senderFreeBalance = useFreeBalance(originChain, senderId, selectedToken);
   const recipientFreeBalance = useFreeBalance(originChain, recipientId, selectedToken);
   const [txResult, setTxResult] = useState<TransferResultType>({ isShowTxResult: false, isTxSuccess: false });
@@ -116,11 +129,6 @@ function XcmTransfer ({ chainRegistryMap, className, defaultValue, firstOriginCh
     ? getBalanceFormat(originChain, selectedToken, chainRegistryMap)
     : null;
   const mainTokenInfo = chainRegistryMap[originChain] && networkMap[originChain].active ? getMainTokenInfo(originChain, chainRegistryMap) : null;
-  const feeDecimal: number | null = feeSymbol && (chainRegistryMap[originChain] && networkMap[originChain].active)
-    ? feeSymbol === selectedToken && balanceFormat
-      ? balanceFormat[0]
-      : getBalanceFormat(originChain, feeSymbol, chainRegistryMap)[0]
-    : null;
   const valueToTransfer = amount?.toString() || '0';
   const defaultDestinationChainOptions = getDestinationChainOptions(firstOriginChain, networkMap);
   const [[selectedDestinationChain, destinationChainOptions], setDestinationChain] = useState<[string, DropdownTransformOptionType[]]>([defaultDestinationChainOptions[0].value, defaultDestinationChainOptions]);
@@ -135,14 +143,8 @@ function XcmTransfer ({ chainRegistryMap, className, defaultValue, firstOriginCh
   const checkOriginChainAndSenderIdType = !!networkMap[originChain].isEthereum === isEthereumAddress(senderId);
   const checkDestinationChainAndReceiverIdType = !!recipientId && !!networkMap[selectedDestinationChain].isEthereum === isEthereumAddress(recipientId);
   const amountGtAvailableBalance = amount && senderFreeBalance && amount.gt(new BN(senderFreeBalance));
-  const feeInfoReady = feeSymbol &&
-    !!chainRegistryMap[originChain] &&
-    !!chainRegistryMap[originChain].tokenMap &&
-    !!chainRegistryMap[originChain].tokenMap[feeSymbol]
-  ;
   const canMakeTransfer = checkOriginChainAndSenderIdType &&
     checkDestinationChainAndReceiverIdType &&
-    feeInfoReady &&
     !!valueToTransfer &&
     !!recipientId &&
     !amountGtAvailableBalance &&
@@ -161,17 +163,12 @@ function XcmTransfer ({ chainRegistryMap, className, defaultValue, firstOriginCh
         value: valueToTransfer
       }).then((value) => {
         if (isSync) {
-          if (value.estimateFee) {
-            setFeeInfo([value.estimateFee, value.feeSymbol]);
-          } else {
-            setFeeInfo([null, value.feeSymbol]);
-          }
+          setFeeString(value.feeString);
         }
       }).catch((e) => {
         console.log('err--------', e);
 
         // todo: find better way to handle the error
-        setFeeInfo([null, selectedToken]);
       });
     }
 
@@ -233,7 +230,14 @@ function XcmTransfer ({ chainRegistryMap, className, defaultValue, firstOriginCh
     setDestinationChain((prev) => {
       return [chain, prev[1]];
     });
-  }, []);
+
+    setSenderValue((prev) => {
+      return {
+        ...prev,
+        token: getSupportedTokens(originChain, chain)[0]
+      };
+    });
+  }, [originChain]);
 
   return (
     <>
@@ -365,7 +369,7 @@ function XcmTransfer ({ chainRegistryMap, className, defaultValue, firstOriginCh
               <AuthTransaction
                 balanceFormat={balanceFormat}
                 destinationChainOptions={destinationChainOptions}
-                feeInfo={getAuthTransactionFeeInfo(fee, feeDecimal, feeSymbol, mainTokenInfo, chainRegistryMap[originChain].tokenMap)}
+                feeString={feeString}
                 networkMap={networkMap}
                 onCancel={_onCancelTx}
                 onChangeResult={_onChangeResult}
@@ -384,6 +388,7 @@ function XcmTransfer ({ chainRegistryMap, className, defaultValue, firstOriginCh
         )
         : (
           <SendFundResult
+            isXcmTransfer={true}
             networkKey={originChain}
             onResend={_onResend}
             txResult={txResult}

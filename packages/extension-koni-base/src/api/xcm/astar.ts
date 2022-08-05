@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { ApiProps, NetworkJson, TokenInfo } from '@subwallet/extension-base/background/KoniTypes';
-import { parseNumberToDisplay } from '@subwallet/extension-koni-base/utils/utils';
+import { parseNumberToDisplay } from '@subwallet/extension-koni-base/utils';
 
 import { ApiPromise } from '@polkadot/api';
 import { KeyringPair } from '@polkadot/keyring/types';

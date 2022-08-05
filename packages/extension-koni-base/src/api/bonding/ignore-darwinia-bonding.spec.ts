@@ -5,7 +5,7 @@ import { ValidatorInfo } from '@subwallet/extension-base/background/KoniTypes';
 import { calculateChainStakedReturn, calculateInflation, calculateValidatorStakedReturn, getCommission, ValidatorExtraInfo } from '@subwallet/extension-koni-base/api/bonding/utils';
 import { PREDEFINED_NETWORKS } from '@subwallet/extension-koni-base/api/predefinedNetworks';
 import { DOTSAMA_AUTO_CONNECT_MS } from '@subwallet/extension-koni-base/constants';
-import { getCurrentProvider } from '@subwallet/extension-koni-base/utils/utils';
+import { getCurrentProvider } from '@subwallet/extension-koni-base/utils';
 
 import { ApiPromise, WsProvider } from '@polkadot/api';
 import { BN } from '@polkadot/util';

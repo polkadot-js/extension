@@ -4,7 +4,7 @@
 import { faTimes } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import confirmIcon from '@subwallet/extension-koni-ui/assets/confirmIcon.png';
-import { Button, Modal } from '@subwallet/extension-koni-ui/components';
+import { Button, Modal } from '@subwallet/extension-koni-ui/components/index';
 import useTranslation from '@subwallet/extension-koni-ui/hooks/useTranslation';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import React from 'react';

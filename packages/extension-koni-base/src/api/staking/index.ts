@@ -4,7 +4,7 @@
 import { APIItemState, ApiProps, NetworkJson, StakingItem } from '@subwallet/extension-base/background/KoniTypes';
 import { PREDEFINED_NETWORKS } from '@subwallet/extension-koni-base/api/predefinedNetworks';
 import { IGNORE_GET_SUBSTRATE_FEATURES_LIST } from '@subwallet/extension-koni-base/constants';
-import { categoryAddresses, toUnit } from '@subwallet/extension-koni-base/utils/utils';
+import { categoryAddresses, toUnit } from '@subwallet/extension-koni-base/utils';
 
 import { BN, BN_ZERO } from '@polkadot/util';
 

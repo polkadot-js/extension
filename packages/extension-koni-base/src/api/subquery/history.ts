@@ -9,7 +9,7 @@ import { DotSamaHistory,
   DotSamaHistory_historyElements_nodes,
   DotSamaHistoryVariables } from '@subwallet/extension-koni-base/api/subquery/__generated__/DotSamaHistory';
 import { newApolloClient } from '@subwallet/extension-koni-base/api/subquery/subquery';
-import { isAccountAll, reformatAddress } from '@subwallet/extension-koni-base/utils/utils';
+import { isAccountAll, reformatAddress } from '@subwallet/extension-koni-base/utils';
 
 export const HistoryApiMap: Record<string, string> = {
   polkadot: 'https://api.subquery.network/sq/nova-wallet/nova-westend',

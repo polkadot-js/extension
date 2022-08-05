@@ -18,7 +18,7 @@ import { ThemeProps } from '../types';
 
 interface AccOption {
   text: string;
-  value: number;
+  value: string;
 }
 
 interface NetworkOption {
@@ -53,12 +53,12 @@ function ImportLedger ({ className }: Props): React.ReactElement {
 
   const accOps = useRef(AVAIL.map((value): AccOption => ({
     text: t('Account type {{index}}', { replace: { index: value } }),
-    value
+    value: value.toString()
   })));
 
   const addOps = useRef(AVAIL.map((value): AccOption => ({
     text: t('Address index {{index}}', { replace: { index: value } }),
-    value
+    value: value.toString()
   })));
 
   const networkOps = useRef(
@@ -69,7 +69,7 @@ function ImportLedger ({ className }: Props): React.ReactElement {
     ...ledgerChains.map(({ displayName, genesisHash }): NetworkOption => ({
       // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
       text: displayName,
-      value: genesisHash[0]
+      value: genesisHash
     }))]
   );
 
@@ -79,11 +79,11 @@ function ImportLedger ({ className }: Props): React.ReactElement {
         setIsBusy(true);
 
         createAccountHardwareV2({
-          address,
+          address: address,
           hardwareType: 'ledger',
-          accountIndex,
-          addressOffset,
-          name,
+          accountIndex: accountIndex,
+          addressOffset: addressOffset,
+          name: name,
           genesisHash: genesis,
           isAllowed: isAllowed
         })

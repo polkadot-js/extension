@@ -1,7 +1,7 @@
 // Copyright 2019-2022 @subwallet/extension-koni-base authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { convertToEvmAddress, filterAddressByNetworkKey } from '@subwallet/extension-koni-base/utils/utils';
+import { convertToEvmAddress, filterAddressByNetworkKey } from '@subwallet/extension-koni-base/utils/index';
 
 describe('test extension base utils', () => {
   test('test extension base utils SS58 to H160', () => {

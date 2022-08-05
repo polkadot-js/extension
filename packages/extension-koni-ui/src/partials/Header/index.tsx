@@ -35,30 +35,32 @@ const DetailHeader = React.lazy(() => import('@subwallet/extension-koni-ui/parti
 const SubHeader = React.lazy(() => import('@subwallet/extension-koni-ui/partials/Header/SubHeader'));
 
 interface Props extends ThemeProps {
+  changeAccountCallback?: (address: string) => void;
   children?: React.ReactNode;
   className?: string;
-  showAdd?: boolean;
-  showBackArrow?: boolean;
-  showSearch?: boolean;
-  showSettings?: boolean;
-  smallMargin?: boolean;
-  text?: React.ReactNode;
+  isBusy?: boolean;
   isContainDetailHeader: boolean;
-  showSubHeader?: boolean;
-  subHeaderName?: string;
-  showCancelButton?: boolean;
-  cancelButtonText?: string;
-  isWelcomeScreen?: boolean;
   isShowNetworkSelect?: boolean;
   isShowZeroBalances?: boolean;
-  toggleZeroBalances?: () => void;
-  changeAccountCallback?: (address: string) => void;
-  isBusy?: boolean;
+  isWelcomeScreen?: boolean;
+  onBack?: () => void;
+  onCancel?: () => void;
   setShowBalanceDetail?: (isShowBalanceDetail: boolean) => void;
+  showAdd?: boolean;
+  showBackArrow?: boolean;
+  showCancelButton?: boolean;
+  showSearch?: boolean;
+  showSettings?: boolean;
+  showSubHeader?: boolean;
+  smallMargin?: boolean;
+  subHeaderName?: string;
+  text?: React.ReactNode;
+  cancelButtonText?: string;
   to?: string;
+  toggleZeroBalances?: () => void;
 }
 
-function Header ({ cancelButtonText, changeAccountCallback, children, className = '', isBusy, isContainDetailHeader, isShowNetworkSelect = true, isShowZeroBalances, isWelcomeScreen, setShowBalanceDetail, showBackArrow, showCancelButton, showSubHeader, smallMargin = false, subHeaderName, to, toggleZeroBalances }: Props): React.ReactElement<Props> {
+function Header ({ cancelButtonText, changeAccountCallback, children, className = '', isBusy, isContainDetailHeader, isShowNetworkSelect = true, isShowZeroBalances, isWelcomeScreen, onBack, onCancel, setShowBalanceDetail, showBackArrow, showCancelButton, showSubHeader, smallMargin = false, subHeaderName, to, toggleZeroBalances }: Props): React.ReactElement<Props> {
   const [isSettingsOpen, setShowSettings] = useState(false);
   const [isActionOpen, setShowAccountAction] = useState(false);
   const [isNetworkSelectOpen, setShowNetworkSelect] = useState(false);
@@ -344,6 +346,8 @@ function Header ({ cancelButtonText, changeAccountCallback, children, className 
           <SubHeader
             cancelButtonText={cancelButtonText}
             isBusy={isBusy}
+            onBack={onBack}
+            onCancel={onCancel}
             showBackArrow={showBackArrow}
             showCancelButton={showCancelButton}
             subHeaderName={subHeaderName}

@@ -27,6 +27,7 @@ interface Props extends ThemeProps {
 }
 
 function StakingContainer ({ className, data, loading, priceMap, stakeUnlockingTimestamp }: Props): React.ReactElement<Props> {
+  const isAccountAll = useIsAccountAll();
   const navigate = useContext(ActionContext);
   const { currentAccount: { account } } = useSelector((state: RootState) => state);
 
@@ -97,10 +98,6 @@ function StakingContainer ({ className, data, loading, priceMap, stakeUnlockingT
     window.localStorage.setItem('popupNavigation', '/account/select-bonding-network');
   }, [navigate]);
 
-  const isAccountAll = useIsAccountAll();
-  const isExternalAccount = account?.isExternal;
-  const isHardwareAccount = account?.isHardware;
-
   return (
     <div
       className={className}
@@ -114,8 +111,6 @@ function StakingContainer ({ className, data, loading, priceMap, stakeUnlockingT
         {data.length === 0 && !loading &&
           <EmptyList
             isAccountAll={isAccountAll}
-            isExternalAccount={isExternalAccount}
-            isHardwareAccount={isHardwareAccount}
           />
         }
 
@@ -148,8 +143,6 @@ function StakingContainer ({ className, data, loading, priceMap, stakeUnlockingT
                 chainName={name}
                 index={index}
                 isAccountAll={isAccountAll}
-                isExternalAccount={isExternalAccount}
-                isHardwareAccount={isHardwareAccount}
                 key={index}
                 logo={icon}
                 networkKey={item.chainId}
@@ -176,7 +169,7 @@ function StakingContainer ({ className, data, loading, priceMap, stakeUnlockingT
         }
 
         {
-          !loading && !isAccountAll && !isHardwareAccount && !isExternalAccount && <div className={'staking-button-container'}>
+          !loading && !isAccountAll && <div className={'staking-button-container'}>
             <Button
               className={'staking-button'}
               onClick={handleNavigateBonding}

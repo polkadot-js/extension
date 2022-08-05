@@ -45,6 +45,7 @@ function ConfirmationHeader ({ account, className, confirmation, network, reques
         className='header__account'
         genesisHash={network?.genesisHash}
         iconSize={20}
+        isEthereum={true}
         isShowAddress={false}
         isShowBanner={false}
         name={account.name}

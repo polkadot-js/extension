@@ -1,7 +1,7 @@
 // Copyright 2019-2022 @polkadot/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-// import subspaceLogo from '@subwallet/extension-koni-ui/assets/logo/subspace.png';
+import subspaceLogo from '@subwallet/extension-koni-ui/assets/logo/46.Subspace.png';
 import subWalletLogo from '@subwallet/extension-koni-ui/assets/sub-wallet-logo.svg';
 
 const basicThemeColors = {
@@ -178,39 +178,39 @@ const lightTheme: Theme = {
   dropdownBackground: '#020412'
 };
 
-// interface GenerateOptions extends Partial<Theme> {
-//   primaryColor: string,
-//   secondaryColor: string
-// }
+interface GenerateOptions extends Partial<Theme> {
+  primaryColor: string,
+  secondaryColor: string
+}
 
 export const themes: Record<string, Theme> = {
   dark: darkTheme,
   light: lightTheme
 };
 
-// function generateTheme (id: string, name: string, baseTheme: 'dark' | 'light', options: GenerateOptions) {
-//   themes[id] = {
-//     ...themes[baseTheme],
-//     id,
-//     name,
-//     buttonBackground: options.primaryColor,
-//     buttonBackground2: options.secondaryColor,
-//     buttonTextColor2: options.secondaryColor,
-//     textColor3: baseTheme === 'dark' ? options.secondaryColor : options.primaryColor,
-//     checkDotColor: options.primaryColor,
-//     iconHoverColor: options.secondaryColor,
-//     loadingBackground2: baseTheme === 'dark' ? options.secondaryColor : options.primaryColor,
-//     HomeNavHighlightColor: baseTheme === 'dark' ? options.secondaryColor : options.primaryColor,
-//     ...options
-//   };
-// }
+function generateTheme (id: string, name: string, baseTheme: 'dark' | 'light', options: GenerateOptions) {
+  themes[id] = {
+    ...themes[baseTheme],
+    id,
+    name,
+    buttonBackground: options.primaryColor,
+    buttonBackground2: options.secondaryColor,
+    buttonTextColor2: options.secondaryColor,
+    textColor3: baseTheme === 'dark' ? options.secondaryColor : options.primaryColor,
+    checkDotColor: options.primaryColor,
+    iconHoverColor: options.secondaryColor,
+    loadingBackground2: baseTheme === 'dark' ? options.secondaryColor : options.primaryColor,
+    HomeNavHighlightColor: baseTheme === 'dark' ? options.secondaryColor : options.primaryColor,
+    ...options
+  };
+}
 
 // Generate Subspace theme
-// generateTheme('subspace', 'Subspace', 'light', {
-//   primaryColor: '#562B8E',
-//   secondaryColor: '#562B8E',
-//   logo: subspaceLogo
-// });
+generateTheme('subspace', 'Subspace', 'light', {
+  primaryColor: '#562B8E',
+  secondaryColor: '#562B8E',
+  logo: subspaceLogo
+});
 
 export declare type AvailableThemes = keyof typeof themes;
 

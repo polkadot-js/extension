@@ -98,6 +98,11 @@ export const SupportedCrossChainsMap: Record<string, CrossChainRelation> = {
         type: 'p',
         isEthereum: false,
         supportedToken: ['xcaUSD']
+      },
+      interlay: {
+        type: 'p',
+        isEthereum: false,
+        supportedToken: ['xcINTR', 'xcIBTC']
       }
       // polkadot: {
       //   type: 'r',
@@ -114,6 +119,11 @@ export const SupportedCrossChainsMap: Record<string, CrossChainRelation> = {
         type: 'p',
         isEthereum: false,
         supportedToken: ['xcAUSD']
+      },
+      kintsugi: {
+        type: 'p',
+        isEthereum: false,
+        supportedToken: ['xcKINT', 'xcKBTC']
       }
       // kusama: {
       //   type: 'r',
@@ -124,11 +134,6 @@ export const SupportedCrossChainsMap: Record<string, CrossChainRelation> = {
       //   type: 'p',
       //   isEthereum: false,
       //   supportedToken: ['xcBNC']
-      // },
-      // kintsugi: {
-      //   type: 'p',
-      //   isEthereum: false,
-      //   supportedToken: ['xcKINT', 'xckBTC']
       // },
       // statemine: {
       //   type: 'p',

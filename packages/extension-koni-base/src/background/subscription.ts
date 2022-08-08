@@ -149,6 +149,10 @@ export class KoniSubscription {
     state.switchAccount(address).then(() => {
       this.detectAddresses(address)
         .then((addresses) => {
+          if (!addresses.length) {
+            return;
+          }
+
           this.updateSubscription('balance', this.initBalanceSubscription(addresses, dotSamaApiMap, web3ApiMap, onlyRunOnFirstTime));
           this.updateSubscription('crowdloan', this.initCrowdloanSubscription(addresses, dotSamaApiMap, onlyRunOnFirstTime));
         })
@@ -160,6 +164,10 @@ export class KoniSubscription {
     state.resetStakingMap(address).then(() => {
       this.detectAddresses(address)
         .then((addresses) => {
+          if (!addresses.length) {
+            return;
+          }
+
           this.updateSubscription('stakingOnChain', this.initStakingOnChainSubscription(addresses, dotSamaApiMap, onlyRunOnFirstTime));
         })
         .catch(console.error);
@@ -217,6 +225,10 @@ export class KoniSubscription {
   subscribeNft (address: string, dotSamaApiMap: Record<string, ApiProps>, web3ApiMap: Record<string, Web3>, customErc721Registry: CustomEvmToken[]) {
     this.detectAddresses(address)
       .then((addresses) => {
+        if (!addresses.length) {
+          return;
+        }
+
         this.initNftSubscription(addresses, dotSamaApiMap, web3ApiMap, customErc721Registry, address);
       })
       .catch(console.error);
@@ -272,6 +284,10 @@ export class KoniSubscription {
     const networkMap = state.getNetworkMap();
     const activeNetworks: string[] = [];
 
+    if (!addresses.length) {
+      return;
+    }
+
     Object.entries(networkMap).forEach(([key, network]) => {
       if (network.active) {
         activeNetworks.push(key);
@@ -291,6 +307,10 @@ export class KoniSubscription {
     const currentAddress = addresses[0]; // only get info for the current account
 
     const stakeUnlockingInfo: Record<string, UnlockingStakeInfo> = {};
+
+    if (!addresses.length) {
+      return;
+    }
 
     await Promise.all(Object.entries(networkMap).map(async ([networkKey, networkJson]) => {
       if (isEthereumAddress(currentAddress)) {

@@ -13,7 +13,7 @@ import useTranslation from '@subwallet/extension-koni-ui/hooks/useTranslation';
 import { enableNetworks } from '@subwallet/extension-koni-ui/messaging';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { useSelector } from 'react-redux';
 import styled from 'styled-components';
 
@@ -29,8 +29,15 @@ function NetworkSelection ({ className, handleShow }: Props): React.ReactElement
   const { networkMap } = useSelector((state: RootState) => state);
   const [searchString, setSearchString] = useState('');
   // const [isCheck, setIsChecked] = useState(false);
-  const [selected, setSelected] = useState<string[]>(['polkadot', 'kusama']);
+  const [selected, setSelected] = useState<string[]>([]);
+  const [filteredNetworkMap, setFilteredNetworkMap] = useState<Record<string, NetworkJson>>({});
   const { show } = useToast();
+
+  useEffect(() => {
+    const selectedNetwork = Object.keys(networkMap).filter((k) => networkMap[k].active);
+
+    setSelected(selectedNetwork);
+  }, [networkMap]);
 
   const handleSelect = useCallback((networkKey: string, active: boolean) => {
     let _selected: string[] = [];
@@ -55,8 +62,10 @@ function NetworkSelection ({ className, handleShow }: Props): React.ReactElement
     setSelected(_selected);
   }, [selected]);
 
-  const filterNetwork = useCallback(() => {
+  useEffect(() => {
     const _filteredNetworkMap: Record<string, NetworkJson> = {};
+
+    console.log(selected);
 
     Object.entries(networkMap).forEach(([key, network]) => {
       if (network.chain.toLowerCase().includes(searchString.toLowerCase())) {
@@ -64,18 +73,8 @@ function NetworkSelection ({ className, handleShow }: Props): React.ReactElement
       }
     });
 
-    return _filteredNetworkMap;
-  }, [networkMap, searchString]);
-
-  // const handleCheckRecommended = useCallback((checked: boolean) => {
-  //   setIsChecked(checked);
-  //
-  //   if (checked) {
-  //     console.log('selected');
-  //   } else {
-  //     console.log('unselected');
-  //   }
-  // }, []);
+    setFilteredNetworkMap(_filteredNetworkMap);
+  }, [selected, networkMap, searchString]);
 
   const _onChangeFilter = useCallback((val: string) => {
     setSearchString(val);
@@ -95,12 +94,6 @@ function NetworkSelection ({ className, handleShow }: Props): React.ReactElement
     window.localStorage.setItem('isSetNetwork', 'ok');
     handleShow(false);
   }, [handleShow, selected, show]);
-
-  const filteredNetworkMap = filterNetwork();
-
-  const isSelected = useCallback((networkKey: string) => {
-    return selected.includes(networkKey);
-  }, [selected]);
 
   return (
     <div className={className}>
@@ -127,30 +120,24 @@ function NetworkSelection ({ className, handleShow }: Props): React.ReactElement
             value={searchString}
             withReset
           />
-          {/* <div className={'network-selection-suggestion'}> */}
-          {/*  <Checkbox */}
-          {/*    checked={isCheck} */}
-          {/*    className={'network-selection-checkbox'} */}
-          {/*    label={''} */}
-          {/*    onChange={handleCheckRecommended} */}
-          {/*  /> */}
-          {/*  <div className={'network-selection-recommendation'}>Use suggested setting</div> */}
-          {/* </div> */}
         </div>
 
         <div className={'network-selection-content-container'}>
           {
             Object.entries(filteredNetworkMap).map(([networkKey, networkJson]) => {
               const logo = LogosMap[networkKey] || LogosMap.default;
+              const isSelected = selected.includes(networkKey);
 
-              return <NetworkSelectionItem
+              console.log(networkKey, isSelected);
+
+              return (<NetworkSelectionItem
                 handleSelect={handleSelect}
-                isSelected={isSelected(networkKey)}
+                isSelected={isSelected}
                 key={networkKey}
                 logo={logo}
                 networkJson={networkJson}
                 networkKey={networkKey}
-              />;
+              />);
             })
           }
         </div>

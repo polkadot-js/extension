@@ -526,7 +526,8 @@ export default class KoniExtension extends Extension {
       if (!accountInfo) {
         accountInfo = {
           address,
-          currentGenesisHash: ALL_GENESIS_HASH
+          currentGenesisHash: ALL_GENESIS_HASH,
+          allGenesisHash: ALL_GENESIS_HASH || undefined
         };
       } else {
         accountInfo.address = address;
@@ -699,7 +700,7 @@ export default class KoniExtension extends Extension {
           addresses.forEach((address) => {
             value[url].isAllowedMap[address] = isAllowed;
           });
-        });
+        });/**/
 
         state.setAuthorize(value);
       }
@@ -713,6 +714,11 @@ export default class KoniExtension extends Extension {
     suri: _suri,
     types }: RequestAccountCreateSuriV2): Promise<ResponseAccountCreateSuriV2> {
     const addressDict = {} as Record<KeypairType, string>;
+    let changedAccount = false;
+
+    const { allGenesisHash } = await new Promise<CurrentAccountInfo>((resolve) => {
+      state.getCurrentAccount(resolve);
+    });
 
     types?.forEach((type) => {
       const suri = getSuri(_suri, type);
@@ -721,10 +727,13 @@ export default class KoniExtension extends Extension {
       addressDict[type] = address;
       const newAccountName = type === 'ethereum' ? `${name} - EVM` : name;
 
-      this._saveCurrentAccountAddress(address, () => {
-        keyring.addUri(suri, password, { genesisHash, name: newAccountName }, type);
-        this._addAddressToAuthList(address, isAllowed);
-      });
+      keyring.addUri(suri, password, { genesisHash, name: newAccountName }, type);
+      this._addAddressToAuthList(address, isAllowed);
+
+      if (!changedAccount) {
+        state.setCurrentAccount({ address, currentGenesisHash: genesisHash || null, allGenesisHash });
+        changedAccount = true;
+      }
     });
 
     await new Promise<void>((resolve) => {
@@ -763,12 +772,6 @@ export default class KoniExtension extends Extension {
 
     types?.forEach((type) => {
       rs.addressMap[type] = keyring.createFromUri(getSuri(seed, type), {}, type).address;
-    });
-
-    console.log('linkMapOK');
-
-    state.getAccountRefMap((map) => {
-      console.log('linkMap', map);
     });
 
     return rs;

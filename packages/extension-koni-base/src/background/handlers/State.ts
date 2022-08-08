@@ -2732,6 +2732,10 @@ export default class KoniState extends State {
     const singleModes = Object.values(PREDEFINED_SINGLE_MODES);
 
     const setUpSingleMode = ({ networkKeys }: SingleModeJson) => {
+      networkKeys.forEach((key) => {
+        this.enableNetworkMap(key);
+      });
+
       const { genesisHash } = this.getNetworkMapByKey(networkKeys[0]);
 
       this.setCurrentAccount({ address: ALL_ACCOUNT_KEY, currentGenesisHash: genesisHash });

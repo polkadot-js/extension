@@ -3,6 +3,7 @@
 
 import { ChainRegistry, CurrentNetworkInfo, NftCollection as _NftCollection, NftItem as _NftItem, TransactionHistoryItemType } from '@subwallet/extension-base/background/KoniTypes';
 import { AccountJson } from '@subwallet/extension-base/background/types';
+import { ALL_ACCOUNT_KEY } from '@subwallet/extension-koni-base/constants';
 import { AccountContext } from '@subwallet/extension-koni-ui/components';
 import ExportAccountQrModal from '@subwallet/extension-koni-ui/components/Modal/ExportAccountQrModal';
 import useAccountBalance from '@subwallet/extension-koni-ui/hooks/screen/home/useAccountBalance';
@@ -152,13 +153,13 @@ function getTabHeaderItems (address: string, t: TFunction): TabHeaderItemType[] 
 }
 
 function Wrapper ({ className, theme }: WrapperProps): React.ReactElement {
-  const { hierarchy } = useContext(AccountContext);
+  const { accounts } = useContext(AccountContext);
   const { chainRegistry: chainRegistryMap,
     currentAccount: { account: currentAccount },
     currentNetwork,
     transactionHistory: { historyMap } } = useSelector((state: RootState) => state);
 
-  if (!hierarchy.length) {
+  if (accounts.length === 1 && accounts.filter((acc) => (acc.address !== ALL_ACCOUNT_KEY)).length === 0) {
     return (<AddAccount />);
   }
 

@@ -4,7 +4,9 @@
 // eslint-disable-next-line header/header
 import LoadingContainer from '@subwallet/extension-koni-ui/components/LoadingContainer';
 import HeaderWithSteps from '@subwallet/extension-koni-ui/partials/HeaderWithSteps';
+import { RootState } from '@subwallet/extension-koni-ui/stores';
 import React, { useCallback, useContext, useEffect, useState } from 'react';
+import { useSelector } from 'react-redux';
 import styled from 'styled-components';
 
 import { KeypairType } from '@polkadot/util-crypto/types';
@@ -26,6 +28,7 @@ function CreateAccount ({ className, defaultClassName }: Props): React.ReactElem
   const { t } = useTranslation();
   const onAction = useContext(ActionContext);
   const [isBusy, setIsBusy] = useState(false);
+  const { currentNetwork: { genesisHash } } = useSelector((state: RootState) => state);
   const [step, setStep] = useState(1);
   const [keyTypes, setKeyTypes] = useState<Array<KeypairType>>([SUBSTRATE_ACCOUNT_TYPE, EVM_ACCOUNT_TYPE]);
   const dep = keyTypes.toString();
@@ -39,7 +42,6 @@ function CreateAccount ({ className, defaultClassName }: Props): React.ReactElem
   const evmName = `Account ${accountsWithoutAll.length + 1} - EVM`;
   const isFirefox = window.localStorage.getItem('browserInfo') === 'Firefox';
   const isLinux = window.localStorage.getItem('osInfo') === 'Linux';
-  const genesisHash = '';
 
   if (isFirefox || isLinux) {
     window.localStorage.setItem('popupNavigation', '');
@@ -54,7 +56,6 @@ function CreateAccount ({ className, defaultClassName }: Props): React.ReactElem
         setSeed(response.seed);
       })
       .catch(console.error);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect((): void => {

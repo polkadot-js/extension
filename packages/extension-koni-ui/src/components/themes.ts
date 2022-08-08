@@ -209,6 +209,7 @@ function generateTheme (id: string, name: string, baseTheme: 'dark' | 'light', o
 generateTheme('subspace', 'Subspace', 'light', {
   primaryColor: '#562B8E',
   secondaryColor: '#562B8E',
+  buttonTextColor3: '#FFFFFF',
   logo: subspaceLogo
 });
 

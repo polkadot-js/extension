@@ -45,6 +45,7 @@ function ConfirmationHeader ({ account, className, confirmation, network, reques
         className='header__account'
         genesisHash={network?.genesisHash}
         iconSize={20}
+        isEthereum={true}
         isShowAddress={false}
         isShowBanner={false}
         name={account.name}
@@ -142,7 +143,6 @@ export default styled(ConfirmationHeader)(({ theme }: Props) => `
     .network-logo {
       width: 24px;
       border-radius: 50%;
-      border: 1px solid #fff;
       margin-right: 8px;
     }
   }

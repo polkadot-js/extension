@@ -4,7 +4,6 @@
 import failStatus from '@subwallet/extension-koni-ui/assets/fail-status.svg';
 import successStatus from '@subwallet/extension-koni-ui/assets/success-status.svg';
 import useScanExplorerTxUrl from '@subwallet/extension-koni-ui/hooks/screen/home/useScanExplorerTxUrl';
-import useSupportScanExplorer from '@subwallet/extension-koni-ui/hooks/screen/home/useSupportScanExplorer';
 import useTranslation from '@subwallet/extension-koni-ui/hooks/useTranslation';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import CN from 'classnames';
@@ -23,8 +22,7 @@ interface Props extends ThemeProps {
 
 function StakeWithdrawalResult ({ backToHome, className, extrinsicHash, handleResend, isTxSuccess, networkKey, txError }: Props): React.ReactElement<Props> {
   const { t } = useTranslation();
-  const scanExplorerTxUrl = useScanExplorerTxUrl(networkKey, extrinsicHash);
-  const isSupportScanExplorer = useSupportScanExplorer(networkKey);
+  const scanExplorerTxUrl = useScanExplorerTxUrl(networkKey, extrinsicHash, true);
 
   return (
     <div className={className}>
@@ -49,7 +47,7 @@ function StakeWithdrawalResult ({ backToHome, className, extrinsicHash, handleRe
                 {t<string>('Back To Home')}
               </div>
               <a
-                className={CN('withdrawal-history-button', { '-disabled': !isSupportScanExplorer || !scanExplorerTxUrl })}
+                className={CN('withdrawal-history-button', { '-disabled': true })}
                 href={scanExplorerTxUrl}
                 rel='noreferrer'
                 target={'_blank'}
@@ -72,12 +70,6 @@ function StakeWithdrawalResult ({ backToHome, className, extrinsicHash, handleRe
             <div className={'withdrawal-error-text'}>{txError}</div>
 
             <div className={'withdrawal-action-container'}>
-              <div
-                className={'withdrawal-resend-button'}
-                onClick={backToHome}
-              >
-                {t<string>('Back To Home')}
-              </div>
               <div
                 className={'withdrawal-history-button'}
                 onClick={handleResend}

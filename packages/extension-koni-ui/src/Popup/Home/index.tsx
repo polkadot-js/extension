@@ -4,6 +4,7 @@
 import { ChainRegistry, CurrentNetworkInfo, NftCollection as _NftCollection, NftItem as _NftItem, TransactionHistoryItemType } from '@subwallet/extension-base/background/KoniTypes';
 import { AccountJson } from '@subwallet/extension-base/background/types';
 import { AccountContext } from '@subwallet/extension-koni-ui/components';
+import ExportAccountQrModal from '@subwallet/extension-koni-ui/components/Modal/ExportAccountQrModal';
 import useAccountBalance from '@subwallet/extension-koni-ui/hooks/screen/home/useAccountBalance';
 import useCrowdloanNetworks from '@subwallet/extension-koni-ui/hooks/screen/home/useCrowdloanNetworks';
 import useFetchNft from '@subwallet/extension-koni-ui/hooks/screen/home/useFetchNft';
@@ -35,7 +36,7 @@ const ChainBalances = React.lazy(() => import('@subwallet/extension-koni-ui/Popu
 const ActionButton = React.lazy(() => import('./ActionButton'));
 const AddAccount = React.lazy(() => import('@subwallet/extension-koni-ui/Popup/Accounts/AddAccount'));
 const BalancesVisibility = React.lazy(() => import('@subwallet/extension-koni-ui/Popup/Home/BalancesVisibility'));
-const AccountQrModal = React.lazy(() => import('@subwallet/extension-koni-ui/components/AccountQrModal'));
+const AccountQrModal = React.lazy(() => import('@subwallet/extension-koni-ui/components/Modal/AccountQrModal'));
 const Link = React.lazy(() => import('@subwallet/extension-koni-ui/components/Link'));
 const Header = React.lazy(() => import('@subwallet/extension-koni-ui/partials/Header'));
 
@@ -178,8 +179,10 @@ function Wrapper ({ className, theme }: WrapperProps): React.ReactElement {
 
 function Home ({ chainRegistryMap, className = '', currentAccount, historyMap, network }: Props): React.ReactElement {
   const { networkKey } = network;
-  const { t } = useTranslation();
   const { address } = currentAccount;
+
+  const { t } = useTranslation();
+
   const [isShowBalanceDetail, setShowBalanceDetail] = useState<boolean>(false);
   const backupTabId = window.localStorage.getItem('homeActiveTab') || '1';
   const [activatedTab, setActivatedTab] = useState<number>(Number(backupTabId));
@@ -192,6 +195,7 @@ function Home ({ chainRegistryMap, className = '', currentAccount, historyMap, n
     window.localStorage.getItem('show_zero_balances') === '1'
   );
   const [isQrModalOpen, setQrModalOpen] = useState<boolean>(false);
+  const [isExportModalOpen, setIsExportModalOpen] = useState<boolean>(false);
   const [selectedNetworkBalance, setSelectedNetworkBalance] = useState<BigN>(BN_ZERO);
   const [modalQrProp, setModalQrProp] = useState<ModalQrProps>({
     network: {
@@ -249,7 +253,7 @@ function Home ({ chainRegistryMap, className = '', currentAccount, historyMap, n
   }, []);
   const nftGridSize = parseNftGridSize();
   const { loading: loadingNft, nftList, totalCollection, totalItems } = useFetchNft(nftPage, networkKey, nftGridSize);
-  const { data: stakingData, loading: loadingStaking, priceMap: stakingPriceMap } = useFetchStaking(networkKey);
+  const { data: stakingData, loading: loadingStaking, priceMap: stakingPriceMap, stakeUnlockingTimestamp } = useFetchStaking(networkKey);
 
   const handleNftPage = useCallback((page: number) => {
     setNftPage(page);
@@ -297,9 +301,12 @@ function Home ({ chainRegistryMap, className = '', currentAccount, historyMap, n
       },
       showExportButton: false
     });
-
     setQrModalOpen(false);
   }, [networkKey, currentAccount.address]);
+
+  const _closeExportModal = useCallback(() => {
+    setIsExportModalOpen(false);
+  }, []);
 
   const tabItems = useMemo<TabHeaderItemType[]>(() => {
     return getTabHeaderItems(address, t);
@@ -307,6 +314,7 @@ function Home ({ chainRegistryMap, className = '', currentAccount, historyMap, n
 
   const onChangeAccount = useCallback((address: string) => {
     setShowBalanceDetail(false);
+    setShowNftCollectionDetail(false);
   }, []);
 
   return (
@@ -383,6 +391,7 @@ function Home ({ chainRegistryMap, className = '', currentAccount, historyMap, n
             networkBalanceMaps={networkBalanceMaps}
             networkKeys={showedNetworks}
             networkMetadataMap={networkMetadataMap}
+            setIsExportModalOpen={setIsExportModalOpen}
             setQrModalOpen={setQrModalOpen}
             setSelectedNetworkBalance={setSelectedNetworkBalance}
             setShowBalanceDetail={setShowBalanceDetail}
@@ -428,6 +437,7 @@ function Home ({ chainRegistryMap, className = '', currentAccount, historyMap, n
             data={stakingData}
             loading={loadingStaking}
             priceMap={stakingPriceMap}
+            stakeUnlockingTimestamp={stakeUnlockingTimestamp}
           />
         )}
 
@@ -449,6 +459,8 @@ function Home ({ chainRegistryMap, className = '', currentAccount, historyMap, n
 
       {isQrModalOpen && (
         <AccountQrModal
+          account={currentAccount}
+          address={address}
           className='home__account-qr-modal'
           closeModal={_closeQrModal}
           modalQrProp={modalQrProp}
@@ -456,6 +468,13 @@ function Home ({ chainRegistryMap, className = '', currentAccount, historyMap, n
         />
       )}
 
+      {isExportModalOpen && (
+        <ExportAccountQrModal
+          className='home__account-qr-modal'
+          closeModal={_closeExportModal}
+          modalQrProp={modalQrProp}
+        />
+      )}
       {
         showNetworkSelection && <NetworkSelection
           handleShow={setShowNetworkSelection}
@@ -506,6 +525,6 @@ export default React.memo(styled(Wrapper)(({ theme }: WrapperProps) => `
   }
 
   .home__account-qr-modal .subwallet-modal {
-    max-width: 460px;
+    max-width: 390px;
   }
 `));

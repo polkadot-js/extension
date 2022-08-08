@@ -3,7 +3,7 @@
 
 import { PREDEFINED_NETWORKS } from '@subwallet/extension-koni-base/api/predefinedNetworks';
 import { DOTSAMA_AUTO_CONNECT_MS } from '@subwallet/extension-koni-base/constants';
-import { getCurrentProvider } from '@subwallet/extension-koni-base/utils/utils';
+import { getCurrentProvider, parseNumberToDisplay } from '@subwallet/extension-koni-base/utils';
 
 import { ApiPromise, WsProvider } from '@polkadot/api';
 import { BN, BN_ONE, BN_ZERO } from '@polkadot/util';
@@ -417,5 +417,48 @@ describe('test DotSama APIs', () => {
     const resp = await apiPromise.query.staking.bonded('5CFWZcRb5xbKQqtWRTsijz3RVrR6Gx2oQksNhoGuDdpc5G42');
 
     console.log(resp.toHuman());
+  });
+
+  test('get pools info', async () => {
+    const provider = new WsProvider(getCurrentProvider(PREDEFINED_NETWORKS.westend), DOTSAMA_AUTO_CONNECT_MS);
+    const api = new ApiPromise({ provider });
+    const apiPromise = await api.isReady;
+
+    const allPools = await apiPromise.query.nominationPools.bondedPools.entries();
+
+    for (const _pool of allPools) {
+      const _poolId = _pool[0].toHuman();
+      const _poolData = _pool[1].toHuman();
+
+      console.log(_poolId, _poolData);
+    }
+  });
+
+  test('get astar info', async () => {
+    const provider = new WsProvider(getCurrentProvider(PREDEFINED_NETWORKS.shibuya), DOTSAMA_AUTO_CONNECT_MS);
+    const api = new ApiPromise({ provider });
+    const apiPromise = await api.isReady;
+
+    const _stakedDapps = await apiPromise.query.dappsStaking.generalStakerInfo.entries('5HbcGs2QXVAc6Q6eoTzLYNAJWpN17AkCFRLnWDaHCiGYXvNc');
+
+    for (const item of _stakedDapps) {
+      // const data = item[0].toHuman() as any[];
+      // const stakedDapp = data[1] as Record<string, string>;
+      const stakeData = item[1].toHuman() as Record<string, Record<string, string>[]>;
+      const stakeList = stakeData.stakes;
+      // const dappAddress = stakedDapp.Evm.toLowerCase();
+      // const balance = stakeList.length && stakeList.slice(-1)[0].staked.toString();
+
+      console.log(stakeList.slice(-1));
+    }
+  });
+
+  test('parse number', () => {
+    // const number = 0.0015497538149;
+    // const number1 = 8.001000000000;
+    // const number3 = 9.05;
+    // const number2 = 10;
+
+    parseNumberToDisplay(new BN('5000000'), 10);
   });
 });

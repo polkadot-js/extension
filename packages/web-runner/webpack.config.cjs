@@ -8,7 +8,6 @@ const CopyPlugin = require('copy-webpack-plugin');
 
 const pkgJson = require('./package.json');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
-const InlineSourceWebpackPlugin = require('inline-source-webpack-plugin');
 
 const args = process.argv.slice(2);
 let mode = 'production';
@@ -106,11 +105,6 @@ const createConfig = (entry, alias = {}, useSplitChunk = false) => {
       new HtmlWebpackPlugin({
         filename: 'index.html',
         template: 'public/index.html'
-      }),
-      new InlineSourceWebpackPlugin({
-        compress: true,
-        rootpath: './build',
-        noAssetMatch: 'warn'
       })
     ],
     resolve: {

@@ -5,7 +5,7 @@ import { APIItemState, ApiProps, CrowdloanItem } from '@subwallet/extension-base
 import registry from '@subwallet/extension-koni-base/api/dotsama/typeRegistry';
 import { PREDEFINED_NETWORKS } from '@subwallet/extension-koni-base/api/predefinedNetworks';
 import { ACALA_REFRESH_CROWDLOAN_INTERVAL } from '@subwallet/extension-koni-base/constants';
-import { categoryAddresses, reformatAddress } from '@subwallet/extension-koni-base/utils/utils';
+import { categoryAddresses, reformatAddress } from '@subwallet/extension-koni-base/utils';
 import axios from 'axios';
 
 import { DeriveOwnContributions } from '@polkadot/api-derive/types';
@@ -105,5 +105,10 @@ export async function subscribeCrowdloan (addresses: string[], dotSamaAPIMap: Re
     });
   }
 
-  return unsubMap;
+  return () => {
+    Object.values(unsubMap).forEach((unsub) => {
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-call
+      unsub && unsub();
+    });
+  };
 }

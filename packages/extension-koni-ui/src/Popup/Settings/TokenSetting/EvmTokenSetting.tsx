@@ -54,7 +54,11 @@ function EvmTokenSetting ({ className }: Props): React.ReactElement {
     const _selectedTokens = [];
 
     for (const token of selectedTokens) {
-      if (token.smartContract !== data.smartContract && token.type !== data.smartContract && token.chain !== data.chain) {
+      if (token.chain === data.chain) {
+        if (token.smartContract !== data.smartContract) {
+          _selectedTokens.push(token);
+        }
+      } else {
         _selectedTokens.push(token);
       }
     }

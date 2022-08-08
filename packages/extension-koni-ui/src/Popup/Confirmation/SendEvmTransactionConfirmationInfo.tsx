@@ -29,12 +29,6 @@ interface XCMTokenProps {
   decimals: number;
 }
 
-interface TokenTransferProps {
-  symbol?: string;
-  decimals: number;
-  value: string;
-}
-
 enum TAB_SELECTION_TYPE {
   BASIC,
   HEX,
@@ -54,11 +48,6 @@ function SendEvmTransactionConfirmationInfo ({ className, confirmation: { payloa
 
   const [inputInfo, setInputInfo] = useState<ResponseParseEVMTransactionInput | null>(null);
   const [XCMToken, setXCMToken] = useState<XCMTokenProps | null>(null);
-  const [tokenTransfer, setTokenTransfer] = useState<TokenTransferProps>({
-    symbol: network?.nativeToken,
-    decimals: network?.decimals || 18,
-    value: transaction?.value as string || '0'
-  });
 
   const [selectedTab, setSelectedTab] = useState<TAB_SELECTION_TYPE>(TAB_SELECTION_TYPE.BASIC);
 
@@ -233,16 +222,19 @@ function SendEvmTransactionConfirmationInfo ({ className, confirmation: { payloa
       default:
         return (
           <>
-            <div>
-              <span className='label'>{t<string>('Amount')}</span>
-              <span className='value'>
-                <FormatBalance
-                  format={[new BN(tokenTransfer?.decimals).toNumber() || 18, '']}
-                  value={new BN(tokenTransfer.value || '0')}
-                />&nbsp;{tokenTransfer.symbol}
-              </span>
-            </div>
-
+            {
+              transaction.value && (
+                <div>
+                  <span className='label'>{t<string>('Amount')}</span>
+                  <span className='value'>
+                    <FormatBalance
+                      format={[network?.decimals || 18, '']}
+                      value={new BN(transaction.value || '0')}
+                    />&nbsp;{network?.nativeToken}
+                  </span>
+                </div>
+              )
+            }
             {
               transaction?.estimateGas && (
                 <div>
@@ -259,19 +251,11 @@ function SendEvmTransactionConfirmationInfo ({ className, confirmation: { payloa
           </>
         );
     }
-  }, [handlerRenderInputInfo, inputInfo, network, selectedTab, t, tokenTransfer, transaction]);
+  }, [handlerRenderInputInfo, inputInfo, network, selectedTab, t, transaction]);
 
   useEffect(() => {
     setSelectedTab(TAB_SELECTION_TYPE.BASIC);
   }, [network, transaction]);
-
-  useEffect(() => {
-    setTokenTransfer({
-      symbol: network?.nativeToken,
-      decimals: network?.decimals || 18,
-      value: transaction?.value as string || '0'
-    });
-  }, [network?.decimals, network?.nativeToken, transaction?.value]);
 
   useEffect(() => {
     let amount = true;
@@ -317,7 +301,6 @@ function SendEvmTransactionConfirmationInfo ({ className, confirmation: { payloa
       }
 
       const contract = info.args.find((i) => i.name === 'currency_address')?.value;
-      const transferValue = info.args.find((i) => i.name === 'amount')?.value;
 
       if (!contract) {
         setXCMToken(null);
@@ -344,11 +327,6 @@ function SendEvmTransactionConfirmationInfo ({ className, confirmation: { payloa
             if (token.decimals && amount) {
               xcmToken = { symbol: token.symbol, decimals: token.decimals };
               setXCMToken(xcmToken);
-              setTokenTransfer({
-                symbol: token.symbol,
-                value: transferValue as string,
-                decimals: token.decimals
-              });
             }
           })
           .catch((error) => {
@@ -356,11 +334,6 @@ function SendEvmTransactionConfirmationInfo ({ className, confirmation: { payloa
             console.log((error as Error).message);
           });
       } else {
-        setTokenTransfer({
-          symbol: xcmToken.symbol,
-          value: transferValue as string,
-          decimals: xcmToken.decimals
-        });
         setXCMToken(xcmToken);
       }
     } else {

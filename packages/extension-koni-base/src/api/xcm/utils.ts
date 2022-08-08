@@ -66,6 +66,11 @@ export const SupportedCrossChainsMap: Record<string, CrossChainRelation> = {
         type: 'p',
         isEthereum: true,
         supportedToken: ['aUSD']
+      },
+      polkadot: {
+        type: 'r',
+        isEthereum: false,
+        supportedToken: ['DOT']
       }
     }
   },
@@ -87,6 +92,11 @@ export const SupportedCrossChainsMap: Record<string, CrossChainRelation> = {
         type: 'p',
         isEthereum: true,
         supportedToken: ['aUSD']
+      },
+      kusama: {
+        type: 'r',
+        isEthereum: false,
+        supportedToken: ['KSM']
       }
     }
   },
@@ -103,12 +113,12 @@ export const SupportedCrossChainsMap: Record<string, CrossChainRelation> = {
         type: 'p',
         isEthereum: false,
         supportedToken: ['xcINTR', 'xcIBTC']
+      },
+      polkadot: {
+        type: 'r',
+        isEthereum: false,
+        supportedToken: ['xcDOT']
       }
-      // polkadot: {
-      //   type: 'r',
-      //   isEthereum: false,
-      //   supportedToken: ['xcDOT']
-      // }
     }
   },
   moonriver: {
@@ -124,12 +134,12 @@ export const SupportedCrossChainsMap: Record<string, CrossChainRelation> = {
         type: 'p',
         isEthereum: false,
         supportedToken: ['xcKINT', 'xcKBTC']
+      },
+      kusama: {
+        type: 'r',
+        isEthereum: false,
+        supportedToken: ['xcKSM']
       }
-      // kusama: {
-      //   type: 'r',
-      //   isEthereum: false,
-      //   supportedToken: ['xcKSM']
-      // },
       // bifrost: {
       //   type: 'p',
       //   isEthereum: false,
@@ -152,15 +162,15 @@ export const SupportedCrossChainsMap: Record<string, CrossChainRelation> = {
     isEthereum: false,
     relationMap: {
       acala: {
-        type: 'r',
+        type: 'p',
         isEthereum: false,
         supportedToken: ['aUSD']
+      },
+      polkadot: {
+        type: 'r',
+        isEthereum: false,
+        supportedToken: ['DOT']
       }
-      // polkadot: {
-      //   type: 'r',
-      //   isEthereum: false,
-      //   supportedToken: ['DOT']
-      // }
     }
   },
   shiden: {
@@ -168,15 +178,15 @@ export const SupportedCrossChainsMap: Record<string, CrossChainRelation> = {
     isEthereum: false,
     relationMap: {
       karura: {
-        type: 'r',
+        type: 'p',
         isEthereum: false,
         supportedToken: ['aUSD']
+      },
+      kusama: {
+        type: 'r',
+        isEthereum: false,
+        supportedToken: ['KSM']
       }
-      // polkadot: {
-      //   type: 'r',
-      //   isEthereum: false,
-      //   supportedToken: ['DOT']
-      // }
     }
   },
   interlay: {

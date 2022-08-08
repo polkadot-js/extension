@@ -332,7 +332,7 @@ export const PREDEFINED_NETWORKS: Record<string, NetworkJson> = {
     currentProvider: 'Kintsugi Labs',
     groups: ['POLKADOT_PARACHAIN'],
     paraId: 2032,
-    nativeToken: 'DOT',
+    nativeToken: 'INTR',
     crowdloanUrl: 'https://crowdloan.interlay.io/',
     decimals: 10
   },

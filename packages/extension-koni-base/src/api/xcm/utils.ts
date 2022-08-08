@@ -328,10 +328,7 @@ export function getMultiLocationFromParachain (originChain: string, destinationC
       ]
     };
 
-    console.log(originChain, destinationChain, SupportedCrossChainsMap[originChain].relationMap[destinationChain]);
-
     if (SupportedCrossChainsMap[originChain].relationMap[destinationChain].isEthereum && destinationChain !== 'astarEvm' && destinationChain !== 'shidenEvm') {
-      console.log('run here');
       interior = {
         X2: [
           { Parachain: paraId },
@@ -339,8 +336,6 @@ export function getMultiLocationFromParachain (originChain: string, destinationC
         ]
       };
     }
-
-    console.log('multilocation', interior);
 
     return { V1: { parents: 1, interior } };
   }

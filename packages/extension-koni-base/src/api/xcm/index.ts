@@ -187,6 +187,11 @@ function updateXcmResponseTxResult (
         // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
         response.txResult.fee = record.event.data[1]?.toString() || '0';
       }
+    } else if (isFeeUseMainTokenSymbol && record.event.section === 'tokens' && record.event.method.toLowerCase() === 'withdrawn') {
+      if (!response.txResult.fee) {
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+        response.txResult.fee = record.event.data[2]?.toString() || '0';
+      }
     }
   }
 }

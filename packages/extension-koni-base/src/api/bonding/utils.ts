@@ -1,7 +1,7 @@
 // Copyright 2019-2022 @subwallet/extension-koni authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { parseRawNumber } from '@subwallet/extension-koni-base/utils/utils';
+import { parseRawNumber } from '@subwallet/extension-koni-base/utils';
 
 import { BN } from '@polkadot/util';
 

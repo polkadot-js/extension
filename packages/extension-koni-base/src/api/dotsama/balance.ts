@@ -10,7 +10,7 @@ import { getEVMBalance } from '@subwallet/extension-koni-base/api/web3/balance';
 import { getERC20Contract } from '@subwallet/extension-koni-base/api/web3/web3';
 import { state } from '@subwallet/extension-koni-base/background/handlers';
 import { ASTAR_REFRESH_BALANCE_INTERVAL, EVM_BALANCE_FAST_INTERVAL, IGNORE_GET_SUBSTRATE_FEATURES_LIST, MOONBEAM_REFRESH_BALANCE_INTERVAL } from '@subwallet/extension-koni-base/constants';
-import { categoryAddresses, sumBN } from '@subwallet/extension-koni-base/utils/utils';
+import { categoryAddresses, sumBN } from '@subwallet/extension-koni-base/utils';
 import Web3 from 'web3';
 import { Contract } from 'web3-eth-contract';
 
@@ -364,11 +364,12 @@ async function subscribeWithAccountMulti (addresses: string[], networkKey: strin
   let unsub2: () => void;
 
   try {
+    // add logic to get astar sub token
     if (['bifrost', 'acala', 'karura', 'acala_testnet'].includes(networkKey)) {
       unsub2 = await subscribeTokensBalance(addresses, networkKey, networkAPI.api, mainCallback, subCallback);
     } else if (['kintsugi', 'interlay', 'kintsugi_test'].includes(networkKey)) {
       unsub2 = await subscribeTokensBalance(addresses, networkKey, networkAPI.api, mainCallback, subCallback, true);
-    } else if (['statemine'].indexOf(networkKey) > -1) {
+    } else if (['statemine', 'astar', 'shiden'].indexOf(networkKey) > -1) {
       unsub2 = await subscribeAssetsBalance(addresses, networkKey, networkAPI.api, subCallback);
     } else if (['genshiro_testnet', 'genshiro', 'equilibrium_parachain'].includes(networkKey)) {
       unsub2 = await subscribeGenshiroTokenBalance(addresses, networkKey, networkAPI.api, mainCallback, subCallback, true);
@@ -508,6 +509,11 @@ export async function getFreeBalance (networkKey: string, address: string, dotSa
         const balance = await api.query.system.account(address) as { data: { freeKton: Balance } };
 
         return balance.data?.freeKton?.toString() || '0';
+      } else if (!isMainToken && ['astar', 'shiden'].includes(networkKey)) {
+        const balanceInfo = (await api.query.assets.account(tokenInfo?.assetIndex, address)).toHuman() as Record<string, string>;
+
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-member-access,@typescript-eslint/no-unsafe-return
+        return balanceInfo?.balance?.replaceAll(',', '') || '0';
       } else if (!isMainToken || ['kintsugi', 'kintsugi_test', 'interlay'].includes(networkKey)) {
         // @ts-ignore
         const balance = await api.query.tokens.accounts(address, tokenInfo?.specialOption || { Token: token }) as TokenBalanceRaw;
@@ -599,6 +605,20 @@ export async function subscribeFreeBalance (
           // @ts-ignore
           // eslint-disable-next-line node/no-callback-literal,@typescript-eslint/no-unsafe-argument,@typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-member-access
           update(balance.data?.freeKton?.toBn()?.toString() || '0');
+        });
+
+        return () => {
+          // @ts-ignore
+          unsub && unsub();
+        };
+      } else if (!isMainToken && ['astar', 'shiden'].includes(networkKey)) {
+        // @ts-ignore
+        const unsub = await api.query.assets.account(tokenInfo?.assetIndex, address, (_balanceInfo) => {
+          // eslint-disable-next-line @typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-member-access
+          const balanceInfo = _balanceInfo.toHuman() as Record<string, string>;
+
+          // eslint-disable-next-line @typescript-eslint/no-unsafe-argument,@typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-member-access
+          update(balanceInfo?.balance?.replaceAll(',', '') || '0');
         });
 
         return () => {

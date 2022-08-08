@@ -5,10 +5,11 @@ import { ChainRegistry, NetworkJson } from '@subwallet/extension-base/background
 import FormatBalance from '@subwallet/extension-koni-ui/components/FormatBalance';
 import { useTranslation } from '@subwallet/extension-koni-ui/components/translate';
 import { BalanceFormatType, SenderInputAddressType, TokenItemType } from '@subwallet/extension-koni-ui/components/types';
+import { AccountContext } from '@subwallet/extension-koni-ui/contexts';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { toShort } from '@subwallet/extension-koni-ui/util';
 import reformatAddress from '@subwallet/extension-koni-ui/util/reformatAddress';
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import styled from 'styled-components';
 
 import InputAddress from './InputAddress';
@@ -63,6 +64,8 @@ function SenderInputAddress ({ balance, balanceFormat, chainRegistryMap, classNa
   const { t } = useTranslation();
   const [{ address, networkKey, token }, setValue] = useState<SenderInputAddressType>(initValue);
 
+  const { accounts } = useContext(AccountContext);
+
   const networkPrefix = networkMap[networkKey].ss58Format;
 
   const formattedAddress = useMemo<string>(() => {
@@ -116,11 +119,30 @@ function SenderInputAddress ({ balance, balanceFormat, chainRegistryMap, classNa
     }
   }, [_networkKey, _token]);
 
+  useEffect(() => {
+    const exists = accounts.find((acc) => acc.address.toLowerCase() === address.toLowerCase());
+
+    if (!exists) {
+      setValue((prev) => {
+        const newVal = {
+          ...prev,
+          address: initValue.address
+        };
+
+        setTimeout(() => {
+          onChange(newVal);
+        }, 200);
+
+        return newVal;
+      });
+    }
+  }, [initValue.address, accounts, address, onChange]);
+
   return (
     <div className={className}>
       <InputAddress
         className={'sender-input-address'}
-        defaultValue={initValue.address}
+        defaultValue={address}
         help={t<string>(isDonation ? 'The account you will donate from.' : 'The account you will send funds from.')}
         isSetDefaultValue={true}
         label={t<string>(isDonation ? 'Donate from account' : 'Send from account')}

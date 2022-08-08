@@ -4,7 +4,7 @@
 import { ApiProps, BasicTxInfo, ChainBondingBasics, DelegationItem, NetworkJson, UnlockingStakeInfo, ValidatorInfo } from '@subwallet/extension-base/background/KoniTypes';
 import { BOND_LESS_ACTION, calculateChainStakedReturn, ERA_LENGTH_MAP, getParaCurrentInflation, InflationConfig, PARACHAIN_INFLATION_DISTRIBUTION, REVOKE_ACTION } from '@subwallet/extension-koni-base/api/bonding/utils';
 import { getFreeBalance } from '@subwallet/extension-koni-base/api/dotsama/balance';
-import { parseNumberToDisplay, parseRawNumber, reformatAddress } from '@subwallet/extension-koni-base/utils/utils';
+import { parseNumberToDisplay, parseRawNumber, reformatAddress } from '@subwallet/extension-koni-base/utils';
 import Web3 from 'web3';
 
 import { BN } from '@polkadot/util';

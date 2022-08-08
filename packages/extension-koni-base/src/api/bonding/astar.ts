@@ -4,7 +4,7 @@
 import { ApiProps, BasicTxInfo, DelegationItem, NetworkJson, UnlockingStakeInfo, ValidatorInfo } from '@subwallet/extension-base/background/KoniTypes';
 import { ERA_LENGTH_MAP } from '@subwallet/extension-koni-base/api/bonding/utils';
 import { getFreeBalance } from '@subwallet/extension-koni-base/api/dotsama/balance';
-import { isUrl, parseNumberToDisplay, parseRawNumber } from '@subwallet/extension-koni-base/utils/utils';
+import { isUrl, parseNumberToDisplay, parseRawNumber } from '@subwallet/extension-koni-base/utils';
 import fetch from 'cross-fetch';
 import Web3 from 'web3';
 

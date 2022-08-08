@@ -3,6 +3,7 @@
 
 import { PASSWORD_EXPIRY_MIN } from '@subwallet/extension-base/defaults';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
+import CN from 'classnames';
 import React, { useCallback, useContext, useEffect, useState } from 'react';
 import styled from 'styled-components';
 
@@ -95,7 +96,7 @@ function SignArea ({ buttonText, children, className, error, isExternal, isFirst
   );
 
   return (
-    <div className={className}>
+    <div className={CN(className, { external: isExternal })}>
       {children}
       {isFirst && !isExternal && (
         <>
@@ -132,20 +133,21 @@ function SignArea ({ buttonText, children, className, error, isExternal, isFirst
           </div>
         </>
       )}
-      {isExternal && (
-        <div className='sign-button-container'>
-          <Button
-            className='sign-button __cancel'
-            onClick={_onCancel}
-          >
-            <span>
-              {t<string>('Cancel')}
-            </span>
+      {
+        isExternal && (
+          <div className='sign-button-container'>
+            <Button
+              className='sign-button __cancel'
+              onClick={_onCancel}
+            >
+              <span>
+                {t<string>('Cancel')}
+              </span>
 
-          </Button>
-        </div>
-      )}
-
+            </Button>
+          </div>
+        )
+      }
     </div>
   );
 }
@@ -158,6 +160,16 @@ export default styled(SignArea)(({ theme }: Props) => `
   margin-right: -15px;
   padding: 0 15px 15px;
   background-color: ${theme.background};
+
+  &.external {
+    margin-bottom: 0;
+
+    .sign-button-container {
+      .sign-button{
+        margin: 0;
+      }
+    }
+  }
 
   .sign-button-container {
     display: flex;

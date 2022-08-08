@@ -9,13 +9,13 @@ import { AccountJson } from '@subwallet/extension-base/background/types';
 import { ALL_NETWORK_KEY } from '@subwallet/extension-koni-base/constants';
 import signalSlashIcon from '@subwallet/extension-koni-ui/assets/signal-stream-slash-solid.svg';
 import signalIcon from '@subwallet/extension-koni-ui/assets/signal-stream-solid.svg';
-import { AccountContext } from '@subwallet/extension-koni-ui/components/contexts';
+import { AccountInfoEl } from '@subwallet/extension-koni-ui/components';
 import Identicon from '@subwallet/extension-koni-ui/components/Identicon';
-import { AccountInfoEl } from '@subwallet/extension-koni-ui/components/index';
 import InputFilter from '@subwallet/extension-koni-ui/components/InputFilter';
 import Link from '@subwallet/extension-koni-ui/components/Link';
-import Modal from '@subwallet/extension-koni-ui/components/Modal';
+import Modal from '@subwallet/extension-koni-ui/components/Modal/index';
 import Tooltip from '@subwallet/extension-koni-ui/components/Tooltip';
+import { AccountContext } from '@subwallet/extension-koni-ui/contexts';
 import useScanExplorerAddressUrl from '@subwallet/extension-koni-ui/hooks/screen/home/useScanExplorerAddressUrl';
 import useSupportScanExplorer from '@subwallet/extension-koni-ui/hooks/screen/home/useSupportScanExplorer';
 import useGenesisHashOptions, { NetworkSelectOption } from '@subwallet/extension-koni-ui/hooks/useGenesisHashOptions';
@@ -37,8 +37,8 @@ import styled from 'styled-components';
 
 import { IconTheme } from '@polkadot/react-identicon/types';
 
-import cloneLogo from '../assets/clone.svg';
-import pencil from '../assets/pencil.svg';
+import cloneLogo from '../../assets/clone.svg';
+import pencil from '../../assets/pencil.svg';
 
 interface Props extends ThemeProps {
   className?: string;
@@ -512,6 +512,8 @@ export default styled(AccountQrModal)(({ theme }: ThemeProps) => `
   .account-qr-modal__qr-code {
     margin: 20px 0;
     border: 2px solid #fff;
+    width: 144px;
+    height: 144px;
 
     svg {
       display:block;

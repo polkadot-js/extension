@@ -4,7 +4,7 @@
 import { ApiProps, BasicTxInfo, ChainBondingBasics, NetworkJson, UnlockingStakeInfo, ValidatorInfo } from '@subwallet/extension-base/background/KoniTypes';
 import { calculateChainStakedReturn, calculateInflation, calculateValidatorStakedReturn, ERA_LENGTH_MAP, getCommission, Unlocking, ValidatorExtraInfo } from '@subwallet/extension-koni-base/api/bonding/utils';
 import { getFreeBalance } from '@subwallet/extension-koni-base/api/dotsama/balance';
-import { parseNumberToDisplay } from '@subwallet/extension-koni-base/utils/utils';
+import { parseNumberToDisplay } from '@subwallet/extension-koni-base/utils';
 import Web3 from 'web3';
 
 import { BN, BN_ONE, BN_ZERO } from '@polkadot/util';

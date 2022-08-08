@@ -22,7 +22,7 @@ interface Props extends ThemeProps {
 
 function StakeWithdrawalResult ({ backToHome, className, extrinsicHash, handleResend, isTxSuccess, networkKey, txError }: Props): React.ReactElement<Props> {
   const { t } = useTranslation();
-  const scanExplorerTxUrl = useScanExplorerTxUrl(networkKey, extrinsicHash);
+  const scanExplorerTxUrl = useScanExplorerTxUrl(networkKey, extrinsicHash, true);
 
   return (
     <div className={className}>
@@ -70,12 +70,6 @@ function StakeWithdrawalResult ({ backToHome, className, extrinsicHash, handleRe
             <div className={'withdrawal-error-text'}>{txError}</div>
 
             <div className={'withdrawal-action-container'}>
-              <div
-                className={'withdrawal-resend-button'}
-                onClick={backToHome}
-              >
-                {t<string>('Back To Home')}
-              </div>
               <div
                 className={'withdrawal-history-button'}
                 onClick={handleResend}

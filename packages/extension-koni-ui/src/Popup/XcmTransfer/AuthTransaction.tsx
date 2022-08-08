@@ -1,28 +1,36 @@
 // Copyright 2019-2022 @polkadot/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { DropdownTransformOptionType, NetworkJson, RequestCheckCrossChainTransfer, TransferStep } from '@subwallet/extension-base/background/KoniTypes';
+import { DropdownTransformOptionType, NetworkJson, RequestCheckCrossChainTransfer, ResponseTransfer, TransferError, TransferStep } from '@subwallet/extension-base/background/KoniTypes';
+import { LedgerState } from '@subwallet/extension-base/signers/types';
 import arrowRight from '@subwallet/extension-koni-ui/assets/arrow-right.svg';
 import { InputWithLabel, Warning } from '@subwallet/extension-koni-ui/components';
 import Button from '@subwallet/extension-koni-ui/components/Button';
 import FormatBalance from '@subwallet/extension-koni-ui/components/FormatBalance';
 import InputAddress from '@subwallet/extension-koni-ui/components/InputAddress';
+import LedgerRequest from '@subwallet/extension-koni-ui/components/Ledger/LedgerRequest';
 import Modal from '@subwallet/extension-koni-ui/components/Modal';
+import QrRequest from '@subwallet/extension-koni-ui/components/Qr/QrRequest';
 import { BalanceFormatType } from '@subwallet/extension-koni-ui/components/types';
+import { SIGN_MODE } from '@subwallet/extension-koni-ui/constants/signing';
+import { ExternalRequestContext } from '@subwallet/extension-koni-ui/contexts/ExternalRequestContext';
+import { QrContext, QrContextState, QrStep } from '@subwallet/extension-koni-ui/contexts/QrContext';
+import { useRejectExternalRequest } from '@subwallet/extension-koni-ui/hooks/useRejectExternalRequest';
+import { useSignMode } from '@subwallet/extension-koni-ui/hooks/useSignMode';
 import useTranslation from '@subwallet/extension-koni-ui/hooks/useTranslation';
-import { makeCrossChainTransfer } from '@subwallet/extension-koni-ui/messaging';
+import { getAccountMeta, makeCrossChainTransfer, makeCrossChainTransferLedger, makeCrossChainTransferQr } from '@subwallet/extension-koni-ui/messaging';
 import Dropdown from '@subwallet/extension-koni-ui/Popup/XcmTransfer/XcmDropdown/Dropdown';
 import { ThemeProps, TransferResultType } from '@subwallet/extension-koni-ui/types';
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useContext, useEffect, useState } from 'react';
 import styled from 'styled-components';
 
-import { BN } from '@polkadot/util';
+import { KeyringPair$Meta } from '@polkadot/keyring/types';
 
 interface Props extends ThemeProps {
   className?: string;
   onCancel: () => void;
   requestPayload: RequestCheckCrossChainTransfer;
-  feeInfo: [string | null, number, string]; // fee, fee decimal, fee symbol
+  feeString: string;
   balanceFormat: BalanceFormatType; // decimal, symbol
   networkMap: Record<string, NetworkJson>;
   onChangeResult: (txResult: TransferResultType) => void;
@@ -30,112 +38,137 @@ interface Props extends ThemeProps {
   destinationChainOptions: DropdownTransformOptionType[];
 }
 
-type RenderTotalArg = {
-  fee: string | null,
-  feeDecimals: number,
-  feeSymbol: string,
-  amount?: string,
-  amountDecimals: number,
-  amountSymbol: string
-}
-
-function renderTotal (arg: RenderTotalArg) {
-  const { amount, amountDecimals, amountSymbol, fee, feeDecimals, feeSymbol } = arg;
-
-  if (feeDecimals === amountDecimals && feeSymbol === amountSymbol) {
-    return (
-      <FormatBalance
-        format={[feeDecimals, feeSymbol]}
-        value={new BN(fee || '0').add(new BN(amount || '0'))}
-      />
-    );
-  }
-
-  return (
-    <>
-      <FormatBalance
-        format={[amountDecimals, amountSymbol]}
-        value={new BN(amount || '0')}
-      />
-      <span className={'value-separator'}>+</span>
-      <FormatBalance
-        format={[feeDecimals, feeSymbol]}
-        value={new BN(fee || '0')}
-      />
-    </>
-  );
-}
-
 function AuthTransaction ({ balanceFormat,
   className,
   destinationChainOptions,
-  feeInfo: [fee, feeDecimals, feeSymbol],
-  networkMap, onCancel,
-  onChangeResult, originChainOptions, requestPayload }: Props): React.ReactElement<Props> | null {
+  feeString,
+  networkMap,
+  onCancel,
+  onChangeResult,
+  originChainOptions,
+  requestPayload }: Props): React.ReactElement<Props> | null {
   const { t } = useTranslation();
+
+  const { cleanQrState, updateQrState } = useContext(QrContext);
+
+  const { clearExternalState, externalState, updateExternalState } = useContext(ExternalRequestContext);
+
+  const { handlerReject } = useRejectExternalRequest();
+
+  const { externalId } = externalState;
+
+  const originNetworkPrefix = networkMap[requestPayload.originNetworkKey].ss58Format;
+  const destinationNetworkPrefix = networkMap[requestPayload.destinationNetworkKey].ss58Format;
+  const genesisHash = networkMap[requestPayload.originNetworkKey].genesisHash;
+
   const [isBusy, setBusy] = useState(false);
   const [password, setPassword] = useState<string>('');
   const [isKeyringErr, setKeyringErr] = useState<boolean>(false);
   const [errorArr, setErrorArr] = useState<string[]>([]);
-  const originNetworkPrefix = networkMap[requestPayload.originNetworkKey].ss58Format;
-  const destinationNetworkPrefix = networkMap[requestPayload.destinationNetworkKey].ss58Format;
+  const [accountMeta, setAccountMeta] = useState<KeyringPair$Meta>({});
 
-  const _onCancel = useCallback(() => {
+  const signMode = useSignMode(accountMeta);
+
+  const _onCancel = useCallback(async () => {
+    await handlerReject(externalId);
+
     onCancel();
-  },
-  [onCancel]
-  );
+  }, [handlerReject, onCancel, externalId]);
 
-  const _doStart = useCallback(
-    (): void => {
-      setBusy(true);
+  const handlerResponseError = useCallback((errors: TransferError[]) => {
+    const errorMessage = errors.map((err) => err.message);
 
-      makeCrossChainTransfer({
-        ...requestPayload,
-        password
-      }, (rs) => {
-        if (!rs.isFinalized) {
-          if (rs.step === TransferStep.SUCCESS.valueOf()) {
-            onChangeResult({
-              isShowTxResult: true,
-              isTxSuccess: rs.step === TransferStep.SUCCESS.valueOf(),
-              extrinsicHash: rs.extrinsicHash
-            });
-          } else if (rs.step === TransferStep.ERROR.valueOf()) {
-            onChangeResult({
-              isShowTxResult: true,
-              isTxSuccess: rs.step === TransferStep.SUCCESS.valueOf(),
-              extrinsicHash: rs.extrinsicHash,
-              txError: rs.errors
-            });
-          }
-        }
-      }).then((errors) => {
-        const errorMessage = errors.map((err) => err.message);
+    if (errors.find((err) => err.code === 'keyringError')) {
+      setKeyringErr(true);
+    }
 
-        if (errors.find((err) => err.code === 'keyringError')) {
-          setKeyringErr(true);
-        }
+    setErrorArr(errorMessage);
 
-        setErrorArr(errorMessage);
+    if (errorMessage && errorMessage.length) {
+      setBusy(false);
+    }
+  }, []);
 
-        if (errorMessage && errorMessage.length) {
-          setBusy(false);
-        }
-      })
-        .catch((e) => console.log('There is problem when makeTransfer', e));
-    },
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [
-      password, onChangeResult,
-      requestPayload.originNetworkKey,
-      requestPayload.destinationNetworkKey,
-      requestPayload.from,
-      requestPayload.to,
-      requestPayload.value,
-      requestPayload.token
-    ]
-  );
+  const handlerCallbackResponseResult = useCallback((rs: ResponseTransfer) => {
+    if (!rs.isFinalized) {
+      if (rs.step === TransferStep.SUCCESS.valueOf()) {
+        onChangeResult({
+          isShowTxResult: true,
+          isTxSuccess: rs.step === TransferStep.SUCCESS.valueOf(),
+          extrinsicHash: rs.extrinsicHash
+        });
+        clearExternalState();
+        cleanQrState();
+        setBusy(false);
+      } else if (rs.step === TransferStep.ERROR.valueOf()) {
+        onChangeResult({
+          isShowTxResult: true,
+          isTxSuccess: rs.step === TransferStep.SUCCESS.valueOf(),
+          extrinsicHash: rs.extrinsicHash,
+          txError: rs.errors
+        });
+        clearExternalState();
+        cleanQrState();
+        setBusy(false);
+      }
+    }
+  }, [clearExternalState, cleanQrState, onChangeResult]);
+
+  const _doStart = useCallback((): void => {
+    setBusy(true);
+    makeCrossChainTransfer({
+      ...requestPayload,
+      password
+    }, handlerCallbackResponseResult).then(handlerResponseError)
+      .catch((e) => console.log('There is problem when makeTransfer', e));
+  }, [requestPayload, password, handlerCallbackResponseResult, handlerResponseError]);
+
+  const _doStartQr = useCallback(() => {
+    setBusy(true);
+    makeCrossChainTransferQr({
+      ...requestPayload
+    }, (rs) => {
+      if (rs.externalState) {
+        updateExternalState(rs.externalState);
+      }
+
+      if (rs.qrState) {
+        const state: QrContextState = {
+          ...rs.qrState,
+          step: QrStep.DISPLAY_PAYLOAD
+        };
+
+        updateQrState(state);
+        setBusy(false);
+      }
+
+      if (rs.isBusy && rs.step !== TransferStep.SUCCESS.valueOf()) {
+        updateQrState({ step: QrStep.SENDING_TX });
+        setBusy(true);
+      }
+
+      handlerCallbackResponseResult(rs);
+    }).then(handlerResponseError)
+      .catch((e) => console.log('There is problem when makeTransferQr', e));
+  }, [handlerCallbackResponseResult, handlerResponseError, requestPayload, updateExternalState, updateQrState]);
+
+  const _doStartLedger = useCallback((handlerSignLedger: (ledgerState: LedgerState) => void): void => {
+    setBusy(true);
+    makeCrossChainTransferLedger({
+      ...requestPayload
+    }, (rs) => {
+      if (rs.externalState) {
+        updateExternalState(rs.externalState);
+      }
+
+      if (rs.ledgerState) {
+        handlerSignLedger(rs.ledgerState);
+      }
+
+      handlerCallbackResponseResult(rs);
+    }).then(handlerResponseError)
+      .catch((e) => console.log('There is problem when makeCrossChainTransferLedger', e));
+  }, [updateExternalState, requestPayload, handlerCallbackResponseResult, handlerResponseError]);
 
   const _onChangePass = useCallback(
     (value: string): void => {
@@ -146,19 +179,205 @@ function AuthTransaction ({ balanceFormat,
     []
   );
 
-  const renderError = () => {
-    return errorArr.map((err) =>
-      (
-        <Warning
-          className='auth-transaction-error'
-          isDanger
-          key={err}
-        >
-          {t<string>(err)}
-        </Warning>
-      )
+  const handlerErrorQr = useCallback((error: Error) => {
+    setErrorArr([error.message]);
+  }, []);
+
+  const renderError = useCallback(() => {
+    if (!!errorArr && errorArr.length) {
+      return errorArr.map((err) =>
+        (
+          <Warning
+            className='auth-transaction-error'
+            isDanger
+            key={err}
+          >
+            {t<string>(err)}
+          </Warning>
+        )
+      );
+    } else {
+      return <></>;
+    }
+  }, [errorArr, t]);
+
+  const handlerRenderInfo = useCallback(() => {
+    return (
+      <>
+        <div className='bridge__chain-selector-area'>
+          <Dropdown
+            className='bridge__chain-selector'
+            isDisabled={true}
+            label={'Original Chain'}
+            options={originChainOptions}
+            value={requestPayload.originNetworkKey}
+          />
+
+          <div className='bridge__chain-swap'>
+            <img
+              alt='Icon'
+              src={arrowRight}
+            />
+          </div>
+
+          <Dropdown
+            className='bridge__chain-selector'
+            isDisabled={true}
+            label={'Destination Chain'}
+            options={destinationChainOptions}
+            value={requestPayload.destinationNetworkKey}
+          />
+        </div>
+
+        <InputAddress
+          className={'auth-transaction__input-address'}
+          defaultValue={requestPayload.from}
+          help={t<string>('The account you will transfer from.')}
+          isDisabled={true}
+          isSetDefaultValue={true}
+          label={t<string>('Origin Account')}
+          networkPrefix={originNetworkPrefix}
+          type='account'
+          withEllipsis
+        />
+
+        <InputAddress
+          className={'auth-transaction__input-address auth-transaction__destination-account'}
+          defaultValue={requestPayload.to}
+          help={t<string>('The account you want to transfer to.')}
+          isDisabled={true}
+          isSetDefaultValue={true}
+          label={t<string>('Destination Account')}
+          networkPrefix={destinationNetworkPrefix}
+          type='allPlus'
+          withEllipsis
+        />
+
+        <div className='auth-transaction__separator' />
+
+        <div className='auth-transaction__info'>
+          <div className='auth-transaction__info-text'>Amount</div>
+          <div className='auth-transaction__info-value'>
+            <FormatBalance
+              format={balanceFormat}
+              value={requestPayload.value}
+            />
+          </div>
+        </div>
+
+        <div className='auth-transaction__info'>
+          <div className='auth-transaction__info-text'>Origin Chain Fee</div>
+          <div className='auth-transaction__info-value'>
+            {feeString}
+          </div>
+        </div>
+
+        <div className='auth-transaction__info'>
+          <div className='auth-transaction__info-text'>Total</div>
+          <div className='auth-transaction__info-value'>
+            <FormatBalance
+              format={balanceFormat}
+              value={requestPayload.value}
+            />
+            <span> + </span>
+            {feeString}
+          </div>
+        </div>
+      </>
     );
-  };
+  }, [balanceFormat, destinationChainOptions, destinationNetworkPrefix, feeString, originChainOptions, originNetworkPrefix, requestPayload.destinationNetworkKey, requestPayload.from, requestPayload.originNetworkKey, requestPayload.to, requestPayload.value, t]);
+
+  const handlerRenderContent = useCallback(() => {
+    switch (signMode) {
+      case SIGN_MODE.QR:
+        return (
+          <QrRequest
+            errorArr={errorArr}
+            genesisHash={genesisHash}
+            handlerStart={_doStartQr}
+            isBusy={isBusy}
+            onError={handlerErrorQr}
+          >
+            { handlerRenderInfo() }
+          </QrRequest>
+        );
+      case SIGN_MODE.LEDGER:
+        return (
+          <LedgerRequest
+            accountMeta={accountMeta}
+            errorArr={errorArr}
+            genesisHash={genesisHash}
+            handlerSignLedger={_doStartLedger}
+            isBusy={isBusy}
+            setBusy={setBusy}
+            setErrorArr={setErrorArr}
+          >
+            { handlerRenderInfo() }
+          </LedgerRequest>
+        );
+      case SIGN_MODE.PASSWORD:
+      default:
+        return (
+          <div className='auth-transaction-body'>
+            { handlerRenderInfo() }
+            <div className='auth-transaction__separator' />
+
+            <InputWithLabel
+              className='auth-transaction__password-area'
+              isError={isKeyringErr}
+              label={t<string>('Unlock account with password')}
+              onChange={_onChangePass}
+              type='password'
+              value={password}
+            />
+
+            {renderError()}
+
+            <div className='bridge-button-container'>
+              <Button
+                className='bridge-button'
+                isDisabled={isBusy}
+                onClick={_onCancel}
+              >
+                <span>
+                  {t<string>('Reject')}
+                </span>
+              </Button>
+
+              <Button
+                className='bridge-button'
+                isBusy={isBusy}
+                isDisabled={!password}
+                onClick={_doStart}
+              >
+                <span>
+                  {t<string>('Confirm')}
+                </span>
+              </Button>
+            </div>
+          </div>
+        );
+    }
+  }, [_doStart, _doStartLedger, _doStartQr, _onCancel, _onChangePass, accountMeta, errorArr, genesisHash, handlerErrorQr, handlerRenderInfo, isBusy, isKeyringErr, password, renderError, signMode, t]);
+
+  useEffect(() => {
+    let unmount = false;
+
+    const handler = async () => {
+      const { meta } = await getAccountMeta({ address: requestPayload.from });
+
+      if (!unmount) {
+        setAccountMeta(meta);
+      }
+    };
+
+    // eslint-disable-next-line no-void
+    void handler();
+
+    return () => {
+      unmount = true;
+    };
+  }, [requestPayload.from]);
 
   return (
     <div className={className}>
@@ -176,6 +395,7 @@ function AuthTransaction ({ balanceFormat,
               : (
                 <span
                   className={'auth-transaction-header__close-btn'}
+                  // eslint-disable-next-line @typescript-eslint/no-misused-promises
                   onClick={_onCancel}
                 >{t('Cancel')}</span>
               )
@@ -183,128 +403,8 @@ function AuthTransaction ({ balanceFormat,
           </div>
         </div>
 
-        <div className='auth-transaction-body'>
-          <div className='bridge__chain-selector-area'>
-            <Dropdown
-              className='bridge__chain-selector'
-              isDisabled={true}
-              label={'Origin Chain'}
-              options={originChainOptions}
-              value={requestPayload.originNetworkKey}
-            />
+        { handlerRenderContent() }
 
-            <div className='bridge__chain-swap'>
-              <img
-                alt='Icon'
-                src={arrowRight}
-              />
-            </div>
-
-            <Dropdown
-              className='bridge__chain-selector'
-              isDisabled={true}
-              label={'Destination Chain'}
-              options={destinationChainOptions}
-              value={requestPayload.destinationNetworkKey}
-            />
-          </div>
-
-          <InputAddress
-            className={'auth-transaction__input-address'}
-            defaultValue={requestPayload.from}
-            help={t<string>('The account you will transfer from.')}
-            isDisabled={true}
-            isSetDefaultValue={true}
-            label={t<string>('Origin Account')}
-            networkPrefix={originNetworkPrefix}
-            type='account'
-            withEllipsis
-          />
-
-          <InputAddress
-            className={'auth-transaction__input-address auth-transaction__destination-account'}
-            defaultValue={requestPayload.to}
-            help={t<string>('The account you want to transfer to.')}
-            isDisabled={true}
-            isSetDefaultValue={true}
-            label={t<string>('Destination Account')}
-            networkPrefix={destinationNetworkPrefix}
-            type='allPlus'
-            withEllipsis
-          />
-
-          <div className='auth-transaction__separator' />
-
-          <div className='auth-transaction__info'>
-            <div className='auth-transaction__info-text'>Amount</div>
-            <div className='auth-transaction__info-value'>
-              <FormatBalance
-                format={balanceFormat}
-                value={requestPayload.value}
-              />
-            </div>
-          </div>
-
-          <div className='auth-transaction__info'>
-            <div className='auth-transaction__info-text'>Origin Chain Fee</div>
-            <div className='auth-transaction__info-value'>
-              <FormatBalance
-                format={[feeDecimals, feeSymbol]}
-                value={fee}
-              />
-            </div>
-          </div>
-
-          <div className='auth-transaction__info'>
-            <div className='auth-transaction__info-text'>Total</div>
-            <div className='auth-transaction__info-value'>
-              {renderTotal({
-                fee,
-                feeDecimals,
-                feeSymbol,
-                amount: requestPayload.value,
-                amountDecimals: balanceFormat[0],
-                amountSymbol: balanceFormat[2] || balanceFormat[1]
-              })}
-            </div>
-          </div>
-
-          <div className='auth-transaction__separator' />
-
-          <InputWithLabel
-            className='auth-transaction__password-area'
-            isError={isKeyringErr}
-            label={t<string>('Unlock account with password')}
-            onChange={_onChangePass}
-            type='password'
-            value={password}
-          />
-
-          {!!(errorArr && errorArr.length) && renderError()}
-
-          <div className='bridge-button-container'>
-            <Button
-              className='bridge-button'
-              isDisabled={isBusy}
-              onClick={_onCancel}
-            >
-              <span>
-                {t<string>('Reject')}
-              </span>
-            </Button>
-
-            <Button
-              className='bridge-button'
-              isBusy={isBusy}
-              isDisabled={!password}
-              onClick={_doStart}
-            >
-              <span>
-                {t<string>('Confirm')}
-              </span>
-            </Button>
-          </div>
-        </div>
       </Modal>
     </div>
   );
@@ -326,6 +426,23 @@ export default React.memo(styled(AuthTransaction)(({ theme }: ThemeProps) => `
 
   .auth-transaction-error {
     margin-top: 10px
+  }
+
+  .display-qr {
+    margin: 0 30px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    .qr-content {
+      height: 324px;
+      width: 324px;
+      border: 2px solid ${theme.textColor};
+    }
+  }
+
+  .scan-qr {
+    margin: 0 20px;
   }
 
   .auth-transaction-header {
@@ -452,7 +569,7 @@ export default React.memo(styled(AuthTransaction)(({ theme }: ThemeProps) => `
 
   .auth-transaction__info-value {
     color: ${theme.textColor};
-    flex: 1;
+    flex: 2;
     text-align: right;
     font-weight: 500;
   }

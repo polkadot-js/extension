@@ -4,6 +4,7 @@
 import { faArrowLeft } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import useTranslation from '@subwallet/extension-koni-ui/hooks/useTranslation';
+import { getTotalConvertedBalanceValue } from '@subwallet/extension-koni-ui/Popup/Home/ChainBalances/utils';
 import { ModalQrProps, ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { AccountInfoByNetwork, BalanceInfo } from '@subwallet/extension-koni-ui/util/types';
 import BigN from 'bignumber.js';
@@ -18,13 +19,14 @@ interface Props extends ThemeProps {
   balanceInfo: BalanceInfo;
   backToHome: () => void;
   className?: string;
+  setIsExportModalOpen: (visible: boolean) => void;
   isConnecting: boolean;
   setQrModalOpen: (visible: boolean) => void;
   updateModalQr: (value: Partial<ModalQrProps>) => void;
   setSelectedNetworkBalance?: (networkBalance: BigN) => void;
 }
 
-function ChainBalanceDetail ({ accountInfo, backToHome, balanceInfo, className, isConnecting, setQrModalOpen, setSelectedNetworkBalance, updateModalQr }: Props): React.ReactElement<Props> {
+function ChainBalanceDetail ({ accountInfo, backToHome, balanceInfo, className, isConnecting, setIsExportModalOpen, setQrModalOpen, setSelectedNetworkBalance, updateModalQr }: Props): React.ReactElement<Props> {
   const [selectedNetworkKey, setSelectedNetworkKey] = useState<string>('');
   const ref = useRef<HTMLDivElement>(null);
   const { t } = useTranslation();
@@ -34,7 +36,7 @@ function ChainBalanceDetail ({ accountInfo, backToHome, balanceInfo, className, 
   }, []);
 
   const convertedBalanceValue = useMemo((): string => {
-    return balanceInfo.convertedBalanceValue.toString();
+    return getTotalConvertedBalanceValue(balanceInfo).toString();
   }, [balanceInfo]);
 
   useEffect(() => {
@@ -73,6 +75,7 @@ function ChainBalanceDetail ({ accountInfo, backToHome, balanceInfo, className, 
         isConnecting={isConnecting}
         isLoading={!balanceInfo}
         isShowDetail={accountInfo.networkKey === selectedNetworkKey}
+        setIsExportModalOpen={setIsExportModalOpen}
         setQrModalOpen={setQrModalOpen}
         toggleBalanceDetail={toggleBalanceDetail}
         updateModalQr={updateModalQr}

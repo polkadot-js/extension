@@ -31,9 +31,10 @@ interface Props extends ThemeProps {
   currentNetworkKey: string;
   isShowBalanceDetail: boolean;
   isShowZeroBalances: boolean;
-  networkKeys: string[];
   networkBalanceMaps: Record<string, BalanceInfo>;
+  networkKeys: string[];
   networkMetadataMap: Record<string, NetWorkMetadataDef>;
+  setIsExportModalOpen: (visible: boolean) => void;
   setQrModalOpen: (visible: boolean) => void;
   updateModalQr: (value: Partial<ModalQrProps>) => void;
   setShowBalanceDetail: (isShowBalanceDetail: boolean) => void;
@@ -99,6 +100,7 @@ function ChainBalances ({ address,
   networkBalanceMaps,
   networkKeys,
   networkMetadataMap,
+  setIsExportModalOpen,
   setQrModalOpen,
   setSelectedNetworkBalance,
   setShowBalanceDetail,
@@ -159,6 +161,7 @@ function ChainBalances ({ address,
           isLoading={!balanceInfo}
           isShowDetail={info.networkKey === selectedNetworkKey}
           key={info.key}
+          setIsExportModalOpen={setIsExportModalOpen}
           setQrModalOpen={setQrModalOpen}
           toggleBalanceDetail={toggleBalanceDetail}
           updateModalQr={updateModalQr}
@@ -173,6 +176,7 @@ function ChainBalances ({ address,
         isConnecting={isConnecting}
         isLoading={!balanceInfo}
         key={info.key}
+        setIsExportModalOpen={setIsExportModalOpen}
         setQrModalOpen={setQrModalOpen}
         setSelectedNetworkBalance={setSelectedNetworkBalance}
         showBalanceDetail={_openBalanceDetail}
@@ -211,6 +215,10 @@ function ChainBalances ({ address,
   useEffect(() => {
     handlerResize();
     window.addEventListener('resize', handlerResize);
+
+    return () => {
+      window.removeEventListener('resize', handlerResize);
+    };
   }, []);
 
   useEffect(() => {
@@ -324,6 +332,7 @@ function ChainBalances ({ address,
               backToHome={_backToHome}
               balanceInfo={selectedBalanceInfo}
               isConnecting={connectingList[selectedInfo.networkKey]?.status === 'done'}
+              setIsExportModalOpen={setIsExportModalOpen}
               setQrModalOpen={setQrModalOpen}
               setSelectedNetworkBalance={setSelectedNetworkBalance}
               updateModalQr={updateModalQr}

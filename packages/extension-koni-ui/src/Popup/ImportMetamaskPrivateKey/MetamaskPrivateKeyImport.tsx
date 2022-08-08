@@ -13,7 +13,7 @@ import styled, { ThemeContext } from 'styled-components';
 
 import { objectSpread } from '@polkadot/util';
 
-import { AccountInfoEl, ButtonArea, NextStepButton, TextAreaWithLabel, Warning } from '../../components';
+import { AccountInfoEl, ButtonArea, Checkbox, NextStepButton, TextAreaWithLabel, Warning } from '../../components';
 import useTranslation from '../../hooks/useTranslation';
 import { Theme } from '../../types';
 
@@ -26,6 +26,8 @@ interface Props {
   account: AccountInfo | null;
   name: string;
   isBusy: boolean;
+  isConnectWhenImport: boolean;
+  changeConnectWhenImport: (val: boolean) => void;
 }
 
 interface PrivateKeyInfoType {
@@ -33,7 +35,7 @@ interface PrivateKeyInfoType {
   error: string;
 }
 
-function MetamaskPrivateKeyImport ({ account, className, isBusy, keyTypes, name, onAccountChange, onCreate, type }: Props): React.ReactElement {
+function MetamaskPrivateKeyImport ({ account, changeConnectWhenImport, className, isBusy, isConnectWhenImport, keyTypes, name, onAccountChange, onCreate, type }: Props): React.ReactElement {
   const { t } = useTranslation();
   const [{ address, error }, setPrivateKeyInfo] = useState<PrivateKeyInfoType>({ address: '', error: '' });
   const [seed, setSeed] = useState<string | null>(null);
@@ -157,6 +159,11 @@ function MetamaskPrivateKeyImport ({ account, className, isBusy, keyTypes, name,
             onFocusPasswordInput={_onFocusPasswordInput}
             onFocusRepeatPasswordInput={_onFocusRepeatPasswordInput}
             onScrollToError={_onScrollToError}
+          />
+          <Checkbox
+            checked={isConnectWhenImport}
+            label={t<string>('Auto connect to all DApps after importing')}
+            onChange={changeConnectWhenImport}
           />
         </div>
       </div>

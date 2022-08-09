@@ -146,6 +146,12 @@ function updateXcmResponseTxResult (
           response.txResult.changeSymbol = tokenInfo.symbol;
         }
       }
+
+      if (record.event.section === 'tokens' &&
+        record.event.method.toLowerCase() === 'withdrawn') {
+        response.txResult.change = record.event.data[2]?.toString() || '0';
+        response.txResult.changeSymbol = tokenInfo.symbol;
+      }
     } else if (['kintsugi', 'kintsugi_test', 'interlay'].includes(networkKey) && tokenInfo) {
       if (record.event.section === 'tokens' &&
         record.event.method.toLowerCase() === 'transfer') {

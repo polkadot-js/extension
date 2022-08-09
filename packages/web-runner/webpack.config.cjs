@@ -1,6 +1,16 @@
 // Copyright 2019-2022 @subwallet/extension-koni authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
+const general = require('@polkadot/dev/config/babel-general.cjs');
+const plugins = require('@polkadot/dev/config/babel-plugins.cjs');
+const presets = require('@polkadot/dev/config/babel-presets.cjs');
+
+module.exports = {
+  ...general,
+  plugins: plugins(false, false),
+  presets: presets(false)
+};
+
 const path = require('path');
 const webpack = require('webpack');
 
@@ -32,6 +42,9 @@ const packages = [
   'extension-koni-ui'
 ];
 
+const polkadotDevOptions = require('@polkadot/dev/config/babel-config-webpack.cjs');
+// Overwrite babel babel config from polkadot dev
+
 const createConfig = (entry, alias = {}, useSplitChunk = false) => {
   const result = {
     context: __dirname,
@@ -50,12 +63,12 @@ const createConfig = (entry, alias = {}, useSplitChunk = false) => {
     module: {
       rules: [
         {
-          exclude: /(node_modules)/,
+          exclude: /(node_modules\/(?!(\@equilab|\@subwallet|\@polkadot\/rpc-core)).*)/,
           test: /\.(js|mjs|ts|tsx)$/,
           use: [
             {
               loader: require.resolve('babel-loader'),
-              options: require('@polkadot/dev/config/babel-config-webpack.cjs')
+              options: polkadotDevOptions
             }
           ]
         },

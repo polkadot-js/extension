@@ -146,6 +146,12 @@ function updateXcmResponseTxResult (
           response.txResult.changeSymbol = tokenInfo.symbol;
         }
       }
+
+      if (record.event.section === 'tokens' &&
+        record.event.method.toLowerCase() === 'withdrawn') {
+        response.txResult.change = record.event.data[2]?.toString() || '0';
+        response.txResult.changeSymbol = tokenInfo.symbol;
+      }
     } else if (['kintsugi', 'kintsugi_test', 'interlay'].includes(networkKey) && tokenInfo) {
       if (record.event.section === 'tokens' &&
         record.event.method.toLowerCase() === 'transfer') {
@@ -186,6 +192,11 @@ function updateXcmResponseTxResult (
       if (!response.txResult.fee) {
         // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
         response.txResult.fee = record.event.data[1]?.toString() || '0';
+      }
+    } else if (isFeeUseMainTokenSymbol && record.event.section === 'tokens' && record.event.method.toLowerCase() === 'withdrawn') {
+      if (!response.txResult.fee) {
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+        response.txResult.fee = record.event.data[2]?.toString() || '0';
       }
     }
   }

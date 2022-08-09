@@ -312,13 +312,17 @@ export class KoniSubscription {
       return;
     }
 
+    const currentStakingInfo = state.getStaking().details;
+
     await Promise.all(Object.entries(networkMap).map(async ([networkKey, networkJson]) => {
+      const needUpdateUnlockingStake = currentStakingInfo[networkKey] && currentStakingInfo[networkKey].balance && parseFloat(currentStakingInfo[networkKey].balance as string) > 0;
+
       if (isEthereumAddress(currentAddress)) {
-        if (networkJson.supportBonding && networkJson.active && networkJson.isEthereum) {
+        if (networkJson.supportBonding && networkJson.active && networkJson.isEthereum && needUpdateUnlockingStake) {
           stakeUnlockingInfo[networkKey] = await getUnlockingInfo(dotSamaApiMap[networkKey], networkJson, networkKey, currentAddress);
         }
       } else {
-        if (networkJson.supportBonding && networkJson.active && !networkJson.isEthereum) {
+        if (networkJson.supportBonding && networkJson.active && !networkJson.isEthereum && needUpdateUnlockingStake) {
           stakeUnlockingInfo[networkKey] = await getUnlockingInfo(dotSamaApiMap[networkKey], networkJson, networkKey, currentAddress);
         }
       }

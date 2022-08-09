@@ -88,8 +88,8 @@ const createConfig = (entry, alias = {}, useSplitChunk = false) => {
       ]
     },
     output: {
-      chunkFilename: '[name].js',
-      filename: '[name].js',
+      chunkFilename: '[name]-[contenthash].js',
+      filename: '[name]-[contenthash].js',
       globalObject: '(typeof self !== \'undefined\' ? self : this)',
       path: path.join(__dirname, 'build'),
       publicPath: ''

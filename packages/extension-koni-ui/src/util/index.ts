@@ -178,6 +178,7 @@ export const subscanByNetworkKey: Record<string, string> = {
   karura: 'https://karura.subscan.io',
   khala: 'https://khala.subscan.io',
   kilt: 'https://spiritnet.subscan.io',
+  interlay: 'https://interlay.subscan.io',
   kintsugi: 'https://kintsugi.subscan.io',
   kusama: 'https://kusama.subscan.io',
   // 'litentry': 'https://litentry.subscan.io',

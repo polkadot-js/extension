@@ -41,14 +41,16 @@ const TOKEN_TYPE_MAP: Record<string, Record<string, string>> = {
     xcAUSD: MOON_ASSET_TYPES.ForeignAsset,
     xcPHA: MOON_ASSET_TYPES.ForeignAsset,
     xcKINT: MOON_ASSET_TYPES.ForeignAsset,
-    xckBTC: MOON_ASSET_TYPES.ForeignAsset,
+    xcKBTC: MOON_ASSET_TYPES.ForeignAsset,
     xcRMRK: MOON_ASSET_TYPES.ForeignAsset,
     xcUSDT: MOON_ASSET_TYPES.ForeignAsset
   },
   moonbeam: {
     xcDOT: MOON_ASSET_TYPES.ForeignAsset,
     xcaUSD: MOON_ASSET_TYPES.ForeignAsset,
-    xcACA: MOON_ASSET_TYPES.ForeignAsset
+    xcACA: MOON_ASSET_TYPES.ForeignAsset,
+    xcINTR: MOON_ASSET_TYPES.ForeignAsset,
+    xcIBTC: MOON_ASSET_TYPES.ForeignAsset
   }
 };
 

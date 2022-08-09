@@ -202,4 +202,14 @@ describe('test DotSama APIs', () => {
 
     console.log(stakedReturn); // might or might not be right
   });
+
+  test('get turing auto-compounding APY', async () => {
+    const provider = new WsProvider(getCurrentProvider(PREDEFINED_NETWORKS.turingStaging), DOTSAMA_AUTO_CONNECT_MS);
+    const api = new ApiPromise({ provider });
+    const apiPromise = await api.isReady;
+
+    const resp = await apiPromise.tx.automationTime.scheduleAutoCompoundDelegatedStakeTask('1658854800', '172800', );
+
+    console.log(resp); // might or might not be right
+  });
 });

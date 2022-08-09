@@ -63,7 +63,7 @@ const createConfig = (entry, alias = {}, useSplitChunk = false) => {
     module: {
       rules: [
         {
-          exclude: /(node_modules\/(?!(\@equilab|\@subwallet|\@polkadot\/rpc-core)).*)/,
+          exclude: /(node_modules\/(?!(@equilab|@subwallet|@polkadot\/rpc-core)).*)/,
           test: /\.(js|mjs|ts|tsx)$/,
           use: [
             {

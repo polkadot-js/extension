@@ -11,6 +11,7 @@ import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import React, { useCallback, useContext, useEffect, useState } from 'react';
 import { useSelector } from 'react-redux';
 import styled from 'styled-components';
+import StakeAuthCompoundRequest from "@subwallet/extension-koni-ui/Popup/Home/Staking/StakeAuthCompoundRequest";
 
 const StakingRow = React.lazy(() => import('./StakingRow'));
 const Spinner = React.lazy(() => import('@subwallet/extension-koni-ui/components/Spinner'));
@@ -155,6 +156,7 @@ function StakingContainer ({ className, data, loading, priceMap, stakeUnlockingT
                 reward={reward}
                 setActionNetworkKey={setTargetNetworkKey}
                 setShowClaimRewardModal={setShowClaimRewardModal}
+                setShowCompoundStakeModal={setShowCompoundStakeModal}
                 setShowWithdrawalModal={setShowWithdrawalModal}
                 setTargetNextWithdrawalAction={setTargetNextWithdrawalAction}
                 setTargetRedeemable={setTargetRedeemable}
@@ -196,6 +198,14 @@ function StakingContainer ({ className, data, loading, priceMap, stakeUnlockingT
 
       {
         showClaimRewardModal && <StakeAuthClaimReward
+          address={account?.address as string}
+          hideModal={handleHideClaimRewardModal}
+          networkKey={targetNetworkKey}
+        />
+      }
+
+      {
+        showCompoundStakeModal && <StakeAuthCompoundRequest
           address={account?.address as string}
           hideModal={handleHideClaimRewardModal}
           networkKey={targetNetworkKey}

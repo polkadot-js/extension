@@ -32,6 +32,7 @@ interface Props extends ThemeProps {
   unbondingStake: string | undefined;
   showWithdrawalModal: () => void;
   showClaimRewardModal: () => void;
+  showStakeCompoundModal: () => void;
 }
 
 const MANUAL_CLAIM_CHAINS = [
@@ -45,7 +46,7 @@ const MANUAL_COMPOUND_CHAINS = [
   'turingStaging'
 ];
 
-function StakingMenu ({ bondedAmount, className, networkKey, nextWithdrawal, nextWithdrawalAmount, redeemable, showClaimRewardModal, showMenu, showWithdrawalModal, toggleMenu, unbondingStake }: Props): React.ReactElement<Props> {
+function StakingMenu ({ bondedAmount, className, networkKey, nextWithdrawal, nextWithdrawalAmount, redeemable, showClaimRewardModal, showMenu, showStakeCompoundModal, showWithdrawalModal, toggleMenu, unbondingStake }: Props): React.ReactElement<Props> {
   const stakingMenuRef = useRef(null);
   const navigate = useContext(ActionContext);
   const networkJson = useGetNetworkJson(networkKey);
@@ -101,6 +102,12 @@ function StakingMenu ({ bondedAmount, className, networkKey, nextWithdrawal, nex
       showClaimRewardModal();
     }
   }, [bondedAmount, showClaimRewardModal]);
+
+  const handleClickCompoundStake = useCallback(() => {
+    if (parseFloat(bondedAmount) > 0) {
+      showStakeCompoundModal();
+    }
+  }, [bondedAmount, showStakeCompoundModal]);
 
   return (
     <div className={className}>
@@ -190,23 +197,14 @@ function StakingMenu ({ bondedAmount, className, networkKey, nextWithdrawal, nex
             {
               showCompoundButton && <div
                 className={`${parseFloat(bondedAmount) > 0 ? 'bonding-menu-item' : 'disabled-menu-item'}`}
-                onClick={handleClickClaimReward}
+                onClick={handleClickCompoundStake}
               >
                 <img
-                  data-for={`claim-button-tooltip-${networkKey}`}
-                  data-tip={true}
                   height={18}
                   src={ArchiveTray}
                   width={18}
                 />
-                Recurrent stake
-                {
-                  parseFloat(bondedAmount) > 0 && <Tooltip
-                    place={'top'}
-                    text={'Make sure you claim all rewards regularly and before you unstake'}
-                    trigger={`claim-button-tooltip-${networkKey}`}
-                  />
-                }
+                Compound stake
               </div>
             }
           </Menu>
@@ -287,7 +285,7 @@ export default React.memo(styled(StakingMenu)(({ theme }: Props) => `
     left: 5px;
     right: auto;
     margin-top: 160px;
-    width: 180px;
+    width: 190px;
     border-radius: 8px;
   }
 

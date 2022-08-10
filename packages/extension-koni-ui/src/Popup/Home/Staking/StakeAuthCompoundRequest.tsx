@@ -1,19 +1,40 @@
 // Copyright 2019-2022 @subwallet/extension-koni authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
+import { DelegationItem } from '@subwallet/extension-base/background/KoniTypes';
 import { InputWithLabel } from '@subwallet/extension-koni-ui/components';
 import Button from '@subwallet/extension-koni-ui/components/Button';
 import InputAddress from '@subwallet/extension-koni-ui/components/InputAddress';
+import InputBalance from '@subwallet/extension-koni-ui/components/InputBalance';
 import Modal from '@subwallet/extension-koni-ui/components/Modal';
 import Spinner from '@subwallet/extension-koni-ui/components/Spinner';
 import useGetNetworkJson from '@subwallet/extension-koni-ui/hooks/screen/home/useGetNetworkJson';
 import useToast from '@subwallet/extension-koni-ui/hooks/useToast';
 import useTranslation from '@subwallet/extension-koni-ui/hooks/useTranslation';
-import { getStakeClaimRewardTxInfo, submitStakeClaimReward } from '@subwallet/extension-koni-ui/messaging';
+import {
+  getStakeDelegationInfo,
+  getTuringStakeCompoundTxInfo,
+  submitStakeClaimReward
+} from '@subwallet/extension-koni-ui/messaging';
+import ValidatorsDropdown from '@subwallet/extension-koni-ui/Popup/Bonding/components/ValidatorsDropdown';
 import StakeClaimRewardResult from '@subwallet/extension-koni-ui/Popup/Home/Staking/StakeClaimRewardResult';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import React, { useCallback, useEffect, useState } from 'react';
 import styled from 'styled-components';
+
+import { BN } from '@polkadot/util';
+
+function filterValidDelegations (delegations: DelegationItem[]) {
+  const filteredDelegations: DelegationItem[] = [];
+
+  delegations.forEach((item) => {
+    if (parseFloat(item.amount) > 0) {
+      filteredDelegations.push(item);
+    }
+  });
+
+  return filteredDelegations;
+}
 
 interface Props extends ThemeProps {
   className?: string;
@@ -26,7 +47,7 @@ function StakeAuthClaimReward ({ address, className, hideModal, networkKey }: Pr
   const [loading, setLoading] = useState(false);
   const [password, setPassword] = useState<string>('');
   const [passwordError, setPasswordError] = useState<string | null>('');
-  const [isTxReady, setIsTxReady] = useState(false);
+  const [isDataReady, setIsDataReady] = useState(false);
 
   const networkJson = useGetNetworkJson(networkKey);
   const { t } = useTranslation();
@@ -34,28 +55,49 @@ function StakeAuthClaimReward ({ address, className, hideModal, networkKey }: Pr
 
   const [balanceError, setBalanceError] = useState(false);
   const [fee, setFee] = useState('');
+  const [delegations, setDelegations] = useState<DelegationItem[] | undefined>(undefined);
+  const [selectedCollator, setSelectedCollator] = useState<string>('');
+  const [accountMinimum, setAccountMinimum] = useState('0');
+  const [optimalTime, setOptimalTime] = useState('');
 
   const [extrinsicHash, setExtrinsicHash] = useState('');
   const [isTxSuccess, setIsTxSuccess] = useState(false);
   const [txError, setTxError] = useState('');
   const [showResult, setShowResult] = useState(false);
 
+  console.log(optimalTime);
+
   useEffect(() => {
-    getStakeClaimRewardTxInfo({
+    if (parseFloat(accountMinimum) > 0 && selectedCollator !== '') {
+      getTuringStakeCompoundTxInfo({
+        networkKey,
+        address,
+        accountMinimum,
+        collatorAddress: selectedCollator
+      }).then((result) => {
+        setFee(result.txInfo.fee);
+        setBalanceError(result.txInfo.balanceError);
+        setOptimalTime(result.optimalTime);
+      }).catch(console.error);
+    }
+  }, [accountMinimum, address, networkKey, selectedCollator]);
+
+  useEffect(() => {
+    getStakeDelegationInfo({
       address,
       networkKey
-    })
-      .then((resp) => {
-        setIsTxReady(true);
-        setBalanceError(resp.balanceError);
-        setFee(resp.fee);
-      })
-      .catch(console.error);
+    }).then((result) => {
+      const filteredDelegations = filterValidDelegations(result);
+
+      setDelegations(filteredDelegations);
+      setSelectedCollator(filteredDelegations[0].owner);
+      setIsDataReady(true);
+    }).catch(console.error);
 
     return () => {
-      setIsTxReady(false);
-      setBalanceError(false);
-      setFee('');
+      setDelegations(undefined);
+      setSelectedCollator('');
+      setIsDataReady(false);
     };
   }, [address, networkKey]);
 
@@ -130,6 +172,29 @@ function StakeAuthClaimReward ({ address, className, hideModal, networkKey }: Pr
     }, 10);
   }, [handleOnSubmit]);
 
+  const handleSelectValidator = useCallback((val: string) => {
+    if (delegations) {
+      for (const item of delegations) {
+        if (item.owner === val) {
+          setSelectedCollator(val);
+          break;
+        }
+      }
+    }
+  }, [delegations]);
+
+  const handleUpdateAccountMinimum = useCallback((value: BN | string) => {
+    if (!value) {
+      return;
+    }
+
+    if (value instanceof BN) {
+      setAccountMinimum(value.toString());
+    } else {
+      setAccountMinimum(value);
+    }
+  }, []);
+
   return (
     <div className={className}>
       <Modal>
@@ -151,7 +216,7 @@ function StakeAuthClaimReward ({ address, className, hideModal, networkKey }: Pr
           !showResult
             ? <div>
               {
-                isTxReady
+                isDataReady
                   ? <div className={'compound-auth-container'}>
                     <InputAddress
                       autoPrefill={false}
@@ -166,10 +231,39 @@ function StakeAuthClaimReward ({ address, className, hideModal, networkKey }: Pr
                       withEllipsis
                     />
 
+                    {
+                      delegations && <ValidatorsDropdown
+                        delegations={delegations}
+                        handleSelectValidator={handleSelectValidator}
+                        label={'Select a collator'}
+                      />
+                    }
+
+                    <div className={'stake-compound-input'}>
+                      <InputBalance
+                        autoFocus
+                        className={'submit-bond-amount-input'}
+                        decimals={networkJson.decimals}
+                        help={'The minimum balance that will be kept in your account'}
+                        isError={false}
+                        isZeroable={false}
+                        label={t<string>('Compounding threshold')}
+                        onChange={handleUpdateAccountMinimum}
+                        placeholder={'0'}
+                        siDecimals={networkJson.decimals}
+                        siSymbol={networkJson.nativeToken}
+                      />
+                    </div>
+
                     <div className={'transaction-info-container'}>
                       <div className={'transaction-info-row'}>
                         <div className={'transaction-info-title'}>Stake compounding fee</div>
                         <div className={'transaction-info-value'}>{fee}</div>
+                      </div>
+
+                      <div className={'transaction-info-row'}>
+                        <div className={'transaction-info-title'}>Optimal time</div>
+                        <div className={'transaction-info-value'}>{optimalTime}</div>
                       </div>
 
                       <div className={'transaction-info-row'}>
@@ -226,6 +320,10 @@ function StakeAuthClaimReward ({ address, className, hideModal, networkKey }: Pr
 }
 
 export default React.memo(styled(StakeAuthClaimReward)(({ theme }: Props) => `
+  .stake-compound-input {
+    margin-top: 20px;
+  }
+
   .container-spinner {
     height: 65px;
     width: 65px;

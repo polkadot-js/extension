@@ -336,15 +336,17 @@ export default class KoniTabs extends Tabs {
       });
 
     // Detect network chain
-    const evmState = await this.getEvmState(url);
-    let currentChainId = evmState.chainId;
+    // const evmState = await this.getEvmState(url);
+    // let currentChainId = evmState.chainId;
 
     const _onAuthChanged = async () => {
-      const { chainId } = await this.getEvmState(url);
+      const newAccountList = await this.getEvmCurrentAccount(url);
 
-      if (chainId !== currentChainId) {
-        emitEvent('chainChanged', chainId);
-        currentChainId = chainId;
+      // Compare to void looping reload
+      if (JSON.stringify(currentAccountList) !== JSON.stringify(newAccountList)) {
+        // eslint-disable-next-line node/no-callback-literal
+        emitEvent('accountsChanged', newAccountList);
+        currentAccountList = newAccountList;
       }
     };
 

@@ -309,7 +309,7 @@ function StakeAuthWithdrawal ({ address, amount, className, hideModal, networkKe
   }, [handlerSendLedgerSubstrate, loading]);
 
   const handlerClearError = useCallback(() => {
-    setErrorArr([])
+    setErrorArr([]);
   }, []);
 
   const renderInfo = useCallback(() => {

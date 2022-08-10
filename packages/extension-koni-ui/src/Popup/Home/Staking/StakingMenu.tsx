@@ -40,11 +40,17 @@ const MANUAL_CLAIM_CHAINS = [
   'shiden'
 ];
 
+const MANUAL_COMPOUND_CHAINS = [
+  'turing',
+  'turingStaging'
+];
+
 function StakingMenu ({ bondedAmount, className, networkKey, nextWithdrawal, nextWithdrawalAmount, redeemable, showClaimRewardModal, showMenu, showWithdrawalModal, toggleMenu, unbondingStake }: Props): React.ReactElement<Props> {
   const stakingMenuRef = useRef(null);
   const navigate = useContext(ActionContext);
   const networkJson = useGetNetworkJson(networkKey);
   const showClaimButton = MANUAL_CLAIM_CHAINS.includes(networkKey);
+  const showCompoundButton = MANUAL_COMPOUND_CHAINS.includes(networkKey);
   const { currentAccount: { account } } = useSelector((state: RootState) => state);
 
   const handleClickBondingMenu = useCallback((e: MouseEvent) => {
@@ -113,7 +119,7 @@ function StakingMenu ({ bondedAmount, className, networkKey, nextWithdrawal, nex
           showMenu && <Menu
             className={'bonding-menu'}
             reference={stakingMenuRef}
-            style={{ marginTop: showClaimButton ? '200px' : '160px' }}
+            style={{ marginTop: showClaimButton || showCompoundButton ? '200px' : '160px' }}
           >
             <div
               className={'bonding-menu-item'}
@@ -171,6 +177,29 @@ function StakingMenu ({ bondedAmount, className, networkKey, nextWithdrawal, nex
                   width={18}
                 />
                 Claim rewards
+                {
+                  parseFloat(bondedAmount) > 0 && <Tooltip
+                    place={'top'}
+                    text={'Make sure you claim all rewards regularly and before you unstake'}
+                    trigger={`claim-button-tooltip-${networkKey}`}
+                  />
+                }
+              </div>
+            }
+
+            {
+              showCompoundButton && <div
+                className={`${parseFloat(bondedAmount) > 0 ? 'bonding-menu-item' : 'disabled-menu-item'}`}
+                onClick={handleClickClaimReward}
+              >
+                <img
+                  data-for={`claim-button-tooltip-${networkKey}`}
+                  data-tip={true}
+                  height={18}
+                  src={ArchiveTray}
+                  width={18}
+                />
+                Recurrent stake
                 {
                   parseFloat(bondedAmount) > 0 && <Tooltip
                     place={'top'}

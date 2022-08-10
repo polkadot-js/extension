@@ -37,6 +37,7 @@ function StakingContainer ({ className, data, loading, priceMap, stakeUnlockingT
 
   const [showWithdrawalModal, setShowWithdrawalModal] = useState(false);
   const [showClaimRewardModal, setShowClaimRewardModal] = useState(false);
+  const [showCompoundStakeModal, setShowCompoundStakeModal] = useState(false);
 
   // for withdrawal and claiming rewards
   const [targetNetworkKey, setTargetNetworkKey] = useState('');

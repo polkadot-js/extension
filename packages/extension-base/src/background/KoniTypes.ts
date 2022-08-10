@@ -1284,7 +1284,20 @@ export interface LedgerNetwork {
   isDevMode: boolean;
 }
 
+export interface TuringStakeCompoundParams {
+  address: string,
+  collatorAddress: string,
+  networkKey: string,
+  accountMinimum: string
+}
+
+export interface TuringStakeCompoundResp {
+  txInfo: BasicTxInfo,
+  optimalTime: string
+}
+
 export interface KoniRequestSignatures {
+  'pri(staking.turingCompound)': [TuringStakeCompoundParams, TuringStakeCompoundResp];
   'pri(staking.delegationInfo)': [StakeDelegationRequest, DelegationItem[]];
   'pri(staking.submitClaimReward)': [StakeClaimRewardParams, BasicTxResponse, BasicTxResponse];
   'pri(staking.claimRewardTxInfo)': [StakeClaimRewardParams, BasicTxInfo];

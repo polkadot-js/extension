@@ -208,8 +208,9 @@ describe('test DotSama APIs', () => {
     const api = new ApiPromise({ provider });
     const apiPromise = await api.isReady;
 
-    const resp = await apiPromise.tx.automationTime.scheduleAutoCompoundDelegatedStakeTask('1658854800', '172800', );
+    const resp = apiPromise.tx.automationTime.scheduleAutoCompoundDelegatedStakeTask('1658854800', '172800', '691Fmzb8rhYmBxLvaqYEUApK22s3o6eCzC4whDY7dZZ83YYQ', '10000000000');
+    const paymentInfo = await resp.paymentInfo('5HbcGs2QXVAc6Q6eoTzLYNAJWpN17AkCFRLnWDaHCiGYXvNc');
 
-    console.log(resp); // might or might not be right
+    console.log(paymentInfo.toHuman()); // might or might not be right
   });
 });

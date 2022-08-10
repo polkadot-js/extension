@@ -1,7 +1,7 @@
 // Copyright 2019-2022 @subwallet/extension-koni authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { ApiProps, BasicTxInfo, ChainBondingBasics, DelegationItem, NetworkJson, UnlockingStakeInfo, ValidatorInfo } from '@subwallet/extension-base/background/KoniTypes';
+import { ApiProps, BasicTxInfo, ChainBondingBasics, DelegationItem, NetworkJson, TuringStakeCompoundResp, UnlockingStakeInfo, ValidatorInfo } from '@subwallet/extension-base/background/KoniTypes';
 import { BOND_LESS_ACTION, calculateChainStakedReturn, ERA_LENGTH_MAP, getParaCurrentInflation, InflationConfig, PARACHAIN_INFLATION_DISTRIBUTION, REVOKE_ACTION } from '@subwallet/extension-koni-base/api/bonding/utils';
 import { getFreeBalance } from '@subwallet/extension-koni-base/api/dotsama/balance';
 import { parseNumberToDisplay, parseRawNumber, reformatAddress } from '@subwallet/extension-koni-base/utils';
@@ -753,4 +753,38 @@ async function handleBifrostUnlockingInfo (dotSamaApi: ApiProps, networkJson: Ne
     nextWithdrawalAction,
     validatorAddress
   } as UnlockingStakeInfo;
+}
+
+async function getTuringCompoundTxInfo (dotSamaApi: ApiProps, address: string, collatorAddress: string, accountMinimum: string) {
+  const apiPromise = await dotSamaApi.isReady;
+  // TODO: get optimal params
+  const extrinsic = apiPromise.api.tx.automationTime.scheduleAutoCompoundDelegatedStakeTask('1658854800', '172800', collatorAddress, accountMinimum);
+
+  const paymentInfo = await extrinsic.paymentInfo(address);
+
+  return {
+    optimalTime: '172800',
+    paymentInfo
+  };
+}
+
+export async function handleTuringCompoundTxInfo (networkKey: string, networkJson: NetworkJson, dotSamaApiMap: Record<string, ApiProps>, web3ApiMap: Record<string, Web3>, address: string, collatorAddress: string, accountMinimum: string) {
+  const [txInfo, balance] = await Promise.all([
+    getTuringCompoundTxInfo(dotSamaApiMap[networkKey], address, collatorAddress, accountMinimum),
+    getFreeBalance(networkKey, address, dotSamaApiMap, web3ApiMap)
+  ]);
+
+  const feeString = parseNumberToDisplay(txInfo.paymentInfo.partialFee, networkJson.decimals) + ` ${networkJson.nativeToken ? networkJson.nativeToken : ''}`;
+  const binaryBalance = new BN(balance);
+  const balanceError = txInfo.paymentInfo.partialFee.gt(binaryBalance);
+
+  const basicTxInfo: BasicTxInfo = {
+    fee: feeString,
+    balanceError
+  };
+
+  return {
+    txInfo: basicTxInfo,
+    optimalTime: txInfo.optimalTime
+  } as TuringStakeCompoundResp;
 }

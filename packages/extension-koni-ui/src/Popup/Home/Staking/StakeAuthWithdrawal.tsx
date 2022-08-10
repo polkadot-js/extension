@@ -308,6 +308,10 @@ function StakeAuthWithdrawal ({ address, amount, className, hideModal, networkKe
     }, 10);
   }, [handlerSendLedgerSubstrate, loading]);
 
+  const handlerClearError = useCallback(() => {
+    setErrorArr([])
+  }, []);
+
   const renderInfo = useCallback(() => {
     return (
       <>
@@ -350,6 +354,7 @@ function StakeAuthWithdrawal ({ address, amount, className, hideModal, networkKe
         return (
           <div className='external-wrapper'>
             <QrRequest
+              clearError={handlerClearError}
               errorArr={errorArr}
               genesisHash={networkJson.genesisHash}
               handlerStart={handlerSubmitQr}
@@ -414,7 +419,7 @@ function StakeAuthWithdrawal ({ address, amount, className, hideModal, networkKe
           </>
         );
     }
-  }, [_onChangePass, accountMeta, errorArr, handleConfirm, handlerErrorQr, handlerSendLedger, handlerSubmitQr, hideConfirm, loading, networkJson.genesisHash, password, passwordError, renderInfo, signMode, t]);
+  }, [_onChangePass, accountMeta, errorArr, handleConfirm, handlerClearError, handlerErrorQr, handlerSendLedger, handlerSubmitQr, hideConfirm, loading, networkJson.genesisHash, password, passwordError, renderInfo, signMode, t]);
 
   useEffect(() => {
     let unmount = false;

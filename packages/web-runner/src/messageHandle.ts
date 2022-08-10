@@ -3,7 +3,7 @@
 
 import { RequestSignatures, TransportRequestMessage, TransportResponseMessage } from '@subwallet/extension-base/background/types';
 import { PORT_CONTENT, PORT_EXTENSION } from '@subwallet/extension-base/defaults';
-import handlers from '@subwallet/extension-koni-base/background/handlers';
+import handlers, { state as koniState } from '@subwallet/extension-koni-base/background/handlers';
 
 export interface CustomResponse<T> {
   id: string,
@@ -27,6 +27,7 @@ export function responseMessage (response: TransportResponseMessage<keyof Reques
 }
 
 export function setupHandlers () {
+  koniState.wakeup().catch((err) => console.warn(err));
   window.addEventListener('message', (ev) => {
     const data = ev.data as TransportRequestMessage<keyof RequestSignatures>;
     const port = {

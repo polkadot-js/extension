@@ -20,6 +20,7 @@ import { initWeb3Api } from '@subwallet/extension-koni-base/api/web3/web3';
 import { EvmRpcError } from '@subwallet/extension-koni-base/background/errors/EvmRpcError';
 import { state } from '@subwallet/extension-koni-base/background/handlers/index';
 import { ALL_ACCOUNT_KEY, ALL_GENESIS_HASH } from '@subwallet/extension-koni-base/constants';
+import DatabaseService from '@subwallet/extension-koni-base/services/DatabaseService';
 import { CurrentAccountStore, NetworkMapStore, PriceStore } from '@subwallet/extension-koni-base/stores';
 import AccountRefStore from '@subwallet/extension-koni-base/stores/AccountRef';
 import AuthorizeStore from '@subwallet/extension-koni-base/stores/Authorize';
@@ -32,6 +33,7 @@ import SettingsStore from '@subwallet/extension-koni-base/stores/Settings';
 import StakingStore from '@subwallet/extension-koni-base/stores/Staking';
 import TransactionHistoryStore from '@subwallet/extension-koni-base/stores/TransactionHistoryV3';
 import { convertFundStatus, getCurrentProvider, mergeNetworkProviders } from '@subwallet/extension-koni-base/utils/utils';
+import { Subscription } from 'dexie';
 import SimpleKeyring from 'eth-simple-keyring';
 import { BehaviorSubject, Subject } from 'rxjs';
 import Web3 from 'web3';
@@ -40,8 +42,12 @@ import { TransactionConfig, TransactionReceipt } from 'web3-core';
 import { decodePair } from '@polkadot/keyring/pair/decode';
 import { keyring } from '@polkadot/ui-keyring';
 import { accounts } from '@polkadot/ui-keyring/observable/accounts';
-import { assert, BN, u8aToHex } from '@polkadot/util';
+import { assert, BN, logger as createLogger, u8aToHex } from '@polkadot/util';
+import { Logger } from '@polkadot/util/types';
 import { base64Decode, isEthereumAddress } from '@polkadot/util-crypto';
+
+import { KoniCron } from '../cron';
+import { KoniSubscription } from '../subscription';
 
 function generateDefaultStakingMap () {
   const stakingMap: Record<string, StakingItem> = {};
@@ -162,6 +168,21 @@ export default class KoniState extends State {
   private chainRegistrySubject = new Subject<Record<string, ChainRegistry>>();
 
   private lazyMap: Record<string, unknown> = {};
+  private dbService: DatabaseService;
+  private cron: KoniCron;
+  private subscription: KoniSubscription;
+  private logger: Logger;
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  constructor (...args: any) {
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
+    super(args);
+    this.dbService = new DatabaseService();
+    this.subscription = new KoniSubscription(this, this.dbService);
+    this.cron = new KoniCron(this, this.subscription, this.dbService);
+    this.logger = createLogger('State');
+    this.init();
+  }
 
   public generateDefaultBalanceMap () {
     const balanceMap: Record<string, BalanceItem> = {};
@@ -175,6 +196,13 @@ export default class KoniState extends State {
     });
 
     return balanceMap;
+  }
+
+  public init () {
+    this.subscription.start();
+    this.cron.start();
+    this.initNetworkStates();
+    this.updateServiceInfo();
   }
 
   // init networkMap, apiMap and chainRegistry (first time only)
@@ -739,7 +767,7 @@ export default class KoniState extends State {
             storedData.push(data);
             this.nftCollectionStore.set(address, storedData);
           }
-        }).catch((err) => console.warn(err));
+        }).catch((err) => this.logger.warn(err));
       }
     });
   }
@@ -868,7 +896,7 @@ export default class KoniState extends State {
 
             this.nftStore.set(address, data);
           }
-        }).catch((err) => console.warn(err));
+        }).catch((err) => this.logger.warn(err));
       }
     });
   }
@@ -920,7 +948,7 @@ export default class KoniState extends State {
         data.total = data.nftList.length;
         this.nftStore.set(ALL_ACCOUNT_KEY, data);
       }
-    }).catch((err) => console.warn(err));
+    }).catch((err) => this.logger.warn(err));
   }
 
   private publishNftChanged (address: string) {
@@ -1039,7 +1067,7 @@ export default class KoniState extends State {
 
   public setHistory (address: string, network: string, histories: TransactionHistoryItemType[]) {
     if (histories.length) {
-      const oldItems = this.historyMap[network].items || [];
+      const oldItems = this.historyMap[network]?.items || [];
 
       const comnbinedHistories = this.combineHistories(oldItems, histories);
 
@@ -1432,7 +1460,7 @@ export default class KoniState extends State {
           .then((rs) => {
             this.setChainRegistryItem(networkKey, rs);
           })
-          .catch(console.error);
+          .catch(this.logger.error);
       });
     });
 
@@ -1441,7 +1469,7 @@ export default class KoniState extends State {
         .then((rs) => {
           this.setChainRegistryItem(networkKey, rs);
         })
-        .catch(console.error);
+        .catch(this.logger.error);
     });
   }
 
@@ -1450,7 +1478,7 @@ export default class KoniState extends State {
   }
 
   public getTransactionHistory (address: string, networkKey: string, update: (items: TransactionHistoryItemType[]) => void): void {
-    const items = this.historyMap[networkKey].items;
+    const items = this.historyMap[networkKey]?.items;
 
     if (!items) {
       update([]);
@@ -1492,7 +1520,7 @@ export default class KoniState extends State {
       } else {
         this.transactionHistoryStore.asyncGet(address).then((data: Record<string, TransactionHistoryItemJson>) => {
           const hash = this.getNetworkGenesisHashByKey(networkKey);
-          const items = data[hash].items || [];
+          const items = data[hash]?.items || [];
 
           item.origin = 'app';
           items.unshift(item);
@@ -1503,7 +1531,7 @@ export default class KoniState extends State {
           };
 
           this.transactionHistoryStore.set(address, data);
-        }).catch((err) => console.warn(err));
+        }).catch((err) => this.logger.warn(err));
       }
     });
   }
@@ -1530,7 +1558,7 @@ export default class KoniState extends State {
             update(rs);
           })
           .catch((err) => {
-            console.error(err);
+            this.logger.error(err);
             throw err;
           });
       }
@@ -1988,7 +2016,7 @@ export default class KoniState extends State {
   }
 
   public updateServiceInfo () {
-    console.log('<---Update serviceInfo--->');
+    this.logger.log('<---Update serviceInfo--->');
     this.getCurrentAccount((value) => {
       this.serviceInfoSubject.next({
         networkMap: this.networkMap,
@@ -2099,9 +2127,9 @@ export default class KoniState extends State {
     Object.entries(this.apiMap.web3).forEach(([key, network]) => {
       if (network.currentProvider instanceof Web3.providers.WebsocketProvider) {
         if (network.currentProvider?.connected) {
-          console.log(`[Web3] ${key} is conected`);
+          this.logger.log(`[Web3] ${key} is conected`);
           network.currentProvider?.disconnect(code, reason);
-          console.log(`[Web3] ${key} is ${network.currentProvider.connected ? 'connected' : 'disconnected'} now`);
+          this.logger.log(`[Web3] ${key} is ${network.currentProvider.connected ? 'connected' : 'disconnected'} now`);
         }
       }
     });
@@ -2109,7 +2137,7 @@ export default class KoniState extends State {
     // Disconnect dotsama networks
     return Promise.all(Object.values(this.apiMap.dotSama).map(async (network) => {
       if (network.api.isConnected) {
-        console.log(`[Dotsama] Stopping network [${network.specName}]`);
+        this.logger.log(`[Dotsama] Stopping network [${network.specName}]`);
         await network.api.disconnect();
       }
     }));
@@ -2122,9 +2150,9 @@ export default class KoniState extends State {
 
       if (currentProvider instanceof Web3.providers.WebsocketProvider) {
         if (!currentProvider.connected) {
-          console.log(`[Web3] ${key} is disconected`);
+          this.logger.log(`[Web3] ${key} is disconected`);
           currentProvider?.connect();
-          setTimeout(() => console.log(`[Web3] ${key} is ${currentProvider.connected ? 'connected' : 'disconnected'} now`), 500);
+          setTimeout(() => this.logger.log(`[Web3] ${key} is ${currentProvider.connected ? 'connected' : 'disconnected'} now`), 500);
         }
       }
     });
@@ -2132,7 +2160,7 @@ export default class KoniState extends State {
     // Reconnect dotsama networks
     return Promise.all(Object.values(this.apiMap.dotSama).map(async (network) => {
       if (!network.api.isConnected) {
-        console.log(`[Dotsama] Resumming network [${network.specName}]`);
+        this.logger.log(`[Dotsama] Resumming network [${network.specName}]`);
         await network.api.connect();
       }
     }));
@@ -2525,7 +2553,7 @@ export default class KoniState extends State {
       const { resolver, validator } = this.confirmationsPromiseMap[id];
 
       if (!resolver || !(confirmations[type][id])) {
-        console.error('Not found confirmation', type, id);
+        this.logger.error('Not found confirmation', type, id);
         throw new Error('Not found promise for confirmation');
       }
 
@@ -2587,5 +2615,17 @@ export default class KoniState extends State {
     //     setUpSingleMode(singleMode);
     //   }
     // });
+  }
+
+  public async sleep () {
+    this.cron.stop();
+    this.subscription.stop();
+    await this.pauseAllNetworks(undefined, 'IDLE mode');
+  }
+
+  public async wakeup () {
+    await this.resumeAllNetworks();
+    this.cron.start();
+    this.subscription.start();
   }
 }

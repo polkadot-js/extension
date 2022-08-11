@@ -158,6 +158,7 @@ export const subscanByNetworkKey: Record<string, string> = {
   acala: 'https://acala.subscan.io',
   // 'altair': 'https://altair.subscan.io',
   astar: 'https://astar.subscan.io',
+  astarEvm: 'https://astar.subscan.io',
   // 'basilisk': 'https://basilisk.subscan.io',
   bifrost_dot: 'https://bifrost.subscan.io',
   bifrost: 'https://bifrost-kusama.subscan.io/',

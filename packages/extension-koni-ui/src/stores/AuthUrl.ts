@@ -13,7 +13,7 @@ const authUrlSlice = createSlice({
     update (state: AuthUrls, action: PayloadAction<AuthUrls>) {
       const { payload } = action;
 
-      Object.assign(state, payload);
+      return payload;
     }
   }
 });

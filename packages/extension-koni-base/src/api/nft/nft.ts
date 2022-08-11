@@ -3,7 +3,7 @@
 
 import { ApiProps, NftCollection, NftItem } from '@subwallet/extension-base/background/KoniTypes';
 import { getRandomIpfsGateway } from '@subwallet/extension-koni-base/api/nft/config';
-import { isUrl } from '@subwallet/extension-koni-base/utils/utils';
+import { isUrl } from '@subwallet/extension-koni-base/utils';
 import Web3 from 'web3';
 
 export interface HandleNftParams {

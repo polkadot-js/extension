@@ -12,6 +12,7 @@ import { canDerive } from '@subwallet/extension-base/utils';
 import { EvmRpcError } from '@subwallet/extension-koni-base/background/errors/EvmRpcError';
 import KoniState from '@subwallet/extension-koni-base/background/handlers/State';
 import { ALL_ACCOUNT_KEY, CRON_GET_API_MAP_STATUS } from '@subwallet/extension-koni-base/constants';
+import Web3 from 'web3';
 import { RequestArguments, WebsocketProvider } from 'web3-core';
 import { JsonRpcPayload } from 'web3-core-helpers';
 
@@ -145,6 +146,27 @@ export default class KoniTabs extends Tabs {
     if (currentEvmNetwork) {
       const { evmChainId, key } = currentEvmNetwork;
       const web3 = this.#koniState.getWeb3ApiMap()[key];
+
+      if (web3.currentProvider instanceof Web3.providers.WebsocketProvider) {
+        const provider: WebsocketProvider = web3.currentProvider;
+
+        if (!provider.connected) {
+          console.log(`[Web3] ${key} is disconected, trying to connect...`);
+          provider.connect();
+
+          const poll = (resolve: (value: unknown) => void) => {
+            if (provider.connected) {
+              console.log(`Network [${key}] is connected.`);
+              resolve(true);
+            } else {
+              console.log(`Connecting to network [${key}]`);
+              setTimeout(() => poll(resolve), 400);
+            }
+          };
+
+          await new Promise(poll);
+        }
+      }
 
       return {
         networkKey: key,

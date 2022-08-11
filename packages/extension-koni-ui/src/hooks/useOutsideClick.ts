@@ -16,5 +16,5 @@ export default function useOutsideClick (ref: RefObject<HTMLDivElement>, callbac
     return (): void => {
       document.removeEventListener('mousedown', handleClick);
     };
-  });
+  }, [handleClick]);
 }

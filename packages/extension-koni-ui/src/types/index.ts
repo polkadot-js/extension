@@ -4,7 +4,7 @@
 import { TransferError } from '@subwallet/extension-base/background/KoniTypes';
 import { AccountJson } from '@subwallet/extension-base/background/types';
 
-import { Theme } from './components/themes';
+import { Theme } from '../components/themes';
 
 export { Theme };
 
@@ -16,6 +16,7 @@ export interface Recoded {
   account: AccountJson | null;
   formatted: string | null;
   genesisHash?: string | null;
+  originGenesisHash?: string | null;
   prefix?: number;
   isEthereum: boolean;
 }
@@ -75,10 +76,10 @@ export interface Signed {
 }
 
 export interface ModalQrProps {
-  network?: {
+  network: {
     networkKey: string;
   };
-  account?: {
+  account: {
     address: string;
   };
   showExportButton: boolean;

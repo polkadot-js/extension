@@ -1,17 +1,16 @@
 // Copyright 2019-2022 @polkadot/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { NetworkJson } from '@subwallet/extension-base/background/KoniTypes';
+import { LedgerNetwork, NetworkJson } from '@subwallet/extension-base/background/KoniTypes';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useSelector } from 'react-redux';
 
 import { Ledger } from '@polkadot/hw-ledger';
-import { selectableNetworks } from '@polkadot/networks';
-import { Network } from '@polkadot/networks/types';
 import uiSettings from '@polkadot/ui-settings';
 import { assert } from '@polkadot/util';
 
+import { PredefinedLedgerNetwork } from '../constants/ledger';
 import useTranslation from './useTranslation';
 
 interface StateBase {
@@ -38,11 +37,11 @@ function getState (): StateBase {
   };
 }
 
-function getNetwork (genesisHash: string, ledgerChains: Network[]): Network | undefined {
-  return ledgerChains.find(({ genesisHash: [hash] }) => hash === genesisHash);
+function getNetwork (genesisHash: string, ledgerChains: LedgerNetwork[]): LedgerNetwork | undefined {
+  return ledgerChains.find(({ genesisHash: hash }) => hash === genesisHash);
 }
 
-function retrieveLedger (genesis: string, ledgerChains: Network[]): Ledger {
+function retrieveLedger (genesis: string, ledgerChains: LedgerNetwork[]): Ledger {
   let ledger: Ledger | null = null;
 
   const { isLedgerCapable } = getState();
@@ -58,10 +57,9 @@ function retrieveLedger (genesis: string, ledgerChains: Network[]): Ledger {
   return ledger;
 }
 
-function getSupportedLedger (networkMap: Record<string, NetworkJson>) {
-  const result: Network[] = [];
-  const supportedLedgerNetwork = selectableNetworks
-    .filter((network) => network.hasLedgerSupport);
+function getSupportedLedger (networkMap: Record<string, NetworkJson>): LedgerNetwork[] {
+  const result: LedgerNetwork[] = [];
+  const supportedLedgerNetwork = [...PredefinedLedgerNetwork];
 
   const networkInfoItems: NetworkJson[] = [];
 
@@ -72,7 +70,7 @@ function getSupportedLedger (networkMap: Record<string, NetworkJson>) {
   });
 
   supportedLedgerNetwork.forEach((n) => {
-    const counterPathInfo = networkInfoItems.find((ni) => n.genesisHash.includes(ni.genesisHash));
+    const counterPathInfo = networkInfoItems.find((ni) => n.genesisHash === ni.genesisHash);
 
     if (counterPathInfo) {
       result.push({
@@ -85,7 +83,7 @@ function getSupportedLedger (networkMap: Record<string, NetworkJson>) {
   return result;
 }
 
-export function useLedger (genesis?: string | null, accountIndex = 0, addressOffset = 0): State {
+export function useLedger (genesis?: string | null, accountIndex?: number, addressOffset?: number): State {
   const [isLoading, setIsLoading] = useState(false);
   const [isLocked, setIsLocked] = useState(false);
   const [refreshLock, setRefreshLock] = useState(false);

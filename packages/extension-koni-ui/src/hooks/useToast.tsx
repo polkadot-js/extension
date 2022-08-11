@@ -3,7 +3,7 @@
 
 import { useContext } from 'react';
 
-import { ToastContext } from '../components/contexts';
+import { ToastContext } from '../contexts';
 
 export default function useToast (): {show: (message: string, isError?: boolean) => void} {
   return useContext(ToastContext);

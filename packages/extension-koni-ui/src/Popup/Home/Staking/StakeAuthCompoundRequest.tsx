@@ -11,11 +11,7 @@ import Spinner from '@subwallet/extension-koni-ui/components/Spinner';
 import useGetNetworkJson from '@subwallet/extension-koni-ui/hooks/screen/home/useGetNetworkJson';
 import useToast from '@subwallet/extension-koni-ui/hooks/useToast';
 import useTranslation from '@subwallet/extension-koni-ui/hooks/useTranslation';
-import {
-  getStakeDelegationInfo,
-  getTuringStakeCompoundTxInfo,
-  submitStakeClaimReward
-} from '@subwallet/extension-koni-ui/messaging';
+import { getStakeDelegationInfo, getTuringStakeCompoundTxInfo, submitStakeClaimReward } from '@subwallet/extension-koni-ui/messaging';
 import ValidatorsDropdown from '@subwallet/extension-koni-ui/Popup/Bonding/components/ValidatorsDropdown';
 import StakeClaimRewardResult from '@subwallet/extension-koni-ui/Popup/Home/Staking/StakeClaimRewardResult';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
@@ -64,8 +60,6 @@ function StakeAuthClaimReward ({ address, className, hideModal, networkKey }: Pr
   const [isTxSuccess, setIsTxSuccess] = useState(false);
   const [txError, setTxError] = useState('');
   const [showResult, setShowResult] = useState(false);
-
-  console.log(optimalTime);
 
   useEffect(() => {
     if (parseFloat(accountMinimum) > 0 && selectedCollator !== '') {

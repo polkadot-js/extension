@@ -30,8 +30,14 @@ function stripUrl (url: string): string {
 
 function transformAccountsV2 (accounts: SubjectInfo, anyType = false, authInfo?: AuthUrlInfo, accountAuthType?: AccountAuthType): InjectedAccount[] {
   const accountSelected = authInfo
-    ? Object.keys(authInfo.isAllowedMap)
-      .filter((address) => authInfo.isAllowedMap[address])
+    ? (
+      authInfo.isAllowed
+        ? (
+          Object.keys(authInfo.isAllowedMap)
+            .filter((address) => authInfo.isAllowedMap[address])
+        )
+        : []
+    )
     : [];
 
   let authTypeFilter = ({ type }: SingleAddress) => true;

@@ -36,6 +36,6 @@ export interface DotSamaHistory {
 }
 
 export interface DotSamaHistoryVariables {
-  first?: number | null;
+  last?: number | null;
   address?: string | null;
 }

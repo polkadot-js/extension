@@ -1279,7 +1279,8 @@ export default class KoniState extends State {
   }
 
   public setBalanceItem (networkKey: string, item: BalanceItem) {
-    if (Object.hasOwn(item, 'children') && item.children === undefined) {
+    // eslint-disable-next-line no-prototype-builtins
+    if (typeof item === 'object' && item.hasOwnProperty('children') && item.children === undefined) {
       delete item.children;
     }
 

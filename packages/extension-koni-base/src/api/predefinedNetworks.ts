@@ -332,7 +332,7 @@ export const PREDEFINED_NETWORKS: Record<string, NetworkJson> = {
     currentProvider: 'Kintsugi Labs',
     groups: ['POLKADOT_PARACHAIN'],
     paraId: 2032,
-    nativeToken: 'DOT',
+    nativeToken: 'INTR',
     crowdloanUrl: 'https://crowdloan.interlay.io/',
     decimals: 10
   },
@@ -1718,7 +1718,7 @@ export const PREDEFINED_NETWORKS: Record<string, NetworkJson> = {
     paraId: 2113,
     nativeToken: 'KAB',
     decimals: 12
-  }
+  },
   // acala_dev: {
   //   key: 'acala_dev',
   //   chain: 'Acala Karura Dev',
@@ -1750,22 +1750,22 @@ export const PREDEFINED_NETWORKS: Record<string, NetworkJson> = {
   //   nativeToken: 'Unit',
   //   decimals: 12
   // },
-  // contractsRococo: {
-  //   key: 'contractsRococo',
-  //   chain: 'Contracts on Rococo',
-  //   genesisHash: '0xc5442742bb6288bb3835ea1c9032981f06433ee5fc65d6e216c4422c0c19b989',
-  //   ss58Format: 42,
-  //   providers: {
-  //     testnet: 'wss://rococo-contracts-rpc.polkadot.io'
-  //   },
-  //   active: false,
-  //   currentProviderMode: 'ws',
-  //   currentProvider: 'testnet',
-  //   groups: ['TEST_NET'],
-  //   nativeToken: 'ROC',
-  //   decimals: 12,
-  //   paraId: 1002
-  // }
+  contractsRococo: {
+    key: 'contractsRococo',
+    chain: 'Contracts on Rococo',
+    genesisHash: '0xc5442742bb6288bb3835ea1c9032981f06433ee5fc65d6e216c4422c0c19b989',
+    ss58Format: 42,
+    providers: {
+      testnet: 'wss://rococo-contracts-rpc.polkadot.io'
+    },
+    active: false,
+    currentProviderMode: 'ws',
+    currentProvider: 'testnet',
+    groups: ['TEST_NET'],
+    nativeToken: 'ROC',
+    decimals: 12,
+    paraId: 1002
+  }
 };
 
 function getGenesisHashes () {

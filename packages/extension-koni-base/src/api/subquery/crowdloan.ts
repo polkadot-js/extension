@@ -8,8 +8,8 @@ import { DotSamaCrowdloan, DotSamaCrowdloan_crowdloans_nodes, DotSamaCrowdloanVa
 import { newApolloClient } from '@subwallet/extension-koni-base/api/subquery/subquery';
 
 export const CrowdloanClientMap = {
-  polkadotCrowdloan: newApolloClient('https://api.subquery.network/sq/subvis-io/polkadot-auctions-and-crowdloans'),
-  kusamaCrowdloan: newApolloClient('https://api.subquery.network/sq/subvis-io/kusama-crowdloans-and-auctions-v2')
+  polkadotCrowdloan: newApolloClient('https://api.subquery.network/sq/interlay/polkadot-crowdloan-indexer'),
+  kusamaCrowdloan: newApolloClient('https://api.subquery.network/sq/interlay/kusama-crowdloan-indexer')
 };
 
 export const DOTSAMA_CROWDLOAN_QUERY = gql`

@@ -564,7 +564,6 @@ export default React.memo(styled(AuthTransaction)(({ theme }: ThemeProps) => `
 
   .auth-transaction__info-text {
     color: ${theme.textColor2};
-    flex: 1;
   }
 
   .auth-transaction__info-value {

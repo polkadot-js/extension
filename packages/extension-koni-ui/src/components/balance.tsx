@@ -13,7 +13,7 @@ type BalanceViewProps = {
 }
 
 export const BalanceVal = ({ startWithSymbol = false, symbol, value, withComma = true, withSymbol = true }: BalanceViewProps) => {
-  let [prefix, postfix] = value.toString().split('.');
+  let [prefix, postfix] = typeof value === 'object' ? value.toFormat(9).split('.') : value.toString().split('.');
 
   if (startWithSymbol) {
     postfix = postfix?.substring(0, 3);
@@ -24,7 +24,7 @@ export const BalanceVal = ({ startWithSymbol = false, symbol, value, withComma =
   const lastSymbol = postfix?.slice(-1);
   const isString = /^[KMB]/.test(lastSymbol);
 
-  const postfixValue = postfix || '00';
+  const postfixValue = parseInt(postfix) > 0 ? postfix : '00';
 
   const symbolView = prefix && <span className='balance-val__symbol'>{symbol}</span>;
 

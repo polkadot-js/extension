@@ -210,7 +210,7 @@ export const SupportedCrossChainsMap: Record<string, CrossChainRelation> = {
         supportedToken: ['KINT', 'KBTC']
       }
     }
-  }
+  },
   // bifrost: { // bifrost on kusama
   //   type: 'p',
   //   isEthereum: false,
@@ -258,17 +258,17 @@ export const SupportedCrossChainsMap: Record<string, CrossChainRelation> = {
   //     }
   //   }
   // },
-  // rococo: {
-  //   isEthereum: false,
-  //   type: 'r',
-  //   relationMap: {
-  //     contractsRococo: {
-  //       type: 'p',
-  //       isEthereum: false,
-  //       supportedToken: ['ROC']
-  //     }
-  //   }
-  // }
+  rococo: {
+    isEthereum: false,
+    type: 'r',
+    relationMap: {
+      contractsRococo: {
+        type: 'p',
+        isEthereum: false,
+        supportedToken: ['ROC']
+      }
+    }
+  }
   // moonbase_relay: {
   //   isEthereum: false,
   //   type: 'r',

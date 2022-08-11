@@ -441,7 +441,25 @@ export default class KoniState extends State {
         isCancelled = true;
       }
 
+      const { accountAuthType, idStr, request: { allowedAccounts, origin }, url } = this.#authRequestsV2[id];
+
       if (accounts && accounts.length) {
+        let condition: (acc: string) => boolean;
+
+        if (accountAuthType === 'evm') {
+          condition = (a) => isEthereumAddress(a);
+        } else if (accountAuthType === 'substrate') {
+          condition = (a) => !isEthereumAddress(a);
+        } else {
+          condition = () => true;
+        }
+
+        for (const acc of Object.keys(isAllowedMap)) {
+          if (!condition(acc)) {
+            delete isAllowedMap[acc];
+          }
+        }
+
         accounts.forEach((acc) => {
           isAllowedMap[acc] = true;
         });
@@ -449,8 +467,6 @@ export default class KoniState extends State {
         // eslint-disable-next-line no-return-assign
         Object.keys(isAllowedMap).forEach((address) => isAllowedMap[address] = false);
       }
-
-      const { accountAuthType, idStr, request: { allowedAccounts, origin }, url } = this.#authRequestsV2[id];
 
       if (accountAuthType !== 'both') {
         const isEvmType = accountAuthType === 'evm';
@@ -484,14 +500,39 @@ export default class KoniState extends State {
           return;
         }
 
+        const existedIsAllowedMap: Record<string, boolean> = existed ? existed.isAllowedMap : {};
+
+        if (existed) {
+          let condition: (acc: string) => boolean;
+
+          if (existed.accountAuthType === 'evm') {
+            condition = (a) => isEthereumAddress(a);
+          } else if (existed.accountAuthType === 'substrate') {
+            condition = (a) => !isEthereumAddress(a);
+          } else {
+            condition = () => true;
+          }
+
+          for (const acc of Object.keys(existedIsAllowedMap)) {
+            if (!condition(acc)) {
+              delete existedIsAllowedMap[acc];
+            }
+          }
+        }
+
+        const _newIsAllowedMap = {
+          ...existedIsAllowedMap,
+          ...isAllowedMap
+        };
+
         authorizeList[this.stripUrl(url)] = {
           count: 0,
           id: idStr,
           isAllowed,
-          isAllowedMap,
+          isAllowedMap: _newIsAllowedMap,
           origin,
           url,
-          accountAuthType: (existed && existed.accountAuthType !== accountAuthType) ? 'both' : accountAuthType
+          accountAuthType: (existed && (existed.accountAuthType || 'substrate') !== accountAuthType) ? 'both' : accountAuthType
         };
 
         this.setAuthorize(authorizeList, () => {

@@ -12,15 +12,10 @@ import Toggle from '@subwallet/extension-koni-ui/components/Toggle';
 import { useTranslation } from '@subwallet/extension-koni-ui/components/translate';
 import { BalanceFormatType, XcmTransferInputAddressType } from '@subwallet/extension-koni-ui/components/types';
 import useFreeBalance from '@subwallet/extension-koni-ui/hooks/screen/sending/useFreeBalance';
-import {checkCrossChainTransfer, transferGetExistentialDeposit} from '@subwallet/extension-koni-ui/messaging';
+import { checkCrossChainTransfer, transferGetExistentialDeposit } from '@subwallet/extension-koni-ui/messaging';
 import Header from '@subwallet/extension-koni-ui/partials/Header';
 import SendFundResult from '@subwallet/extension-koni-ui/Popup/Sending/SendFundResult';
-import {
-  getBalanceFormat,
-  getDefaultAddress,
-  getMainTokenInfo,
-  getMaxTransferAndNoFees
-} from '@subwallet/extension-koni-ui/Popup/Sending/utils';
+import { getBalanceFormat, getDefaultAddress, getMainTokenInfo, getXcmMaxTransfer } from '@subwallet/extension-koni-ui/Popup/Sending/utils';
 import AuthTransaction from '@subwallet/extension-koni-ui/Popup/XcmTransfer/AuthTransaction';
 import BridgeInputAddress from '@subwallet/extension-koni-ui/Popup/XcmTransfer/BridgeInputAddress';
 import Dropdown from '@subwallet/extension-koni-ui/Popup/XcmTransfer/XcmDropdown/Dropdown';
@@ -138,9 +133,9 @@ function XcmTransfer ({ chainRegistryMap, className, defaultValue, firstOriginCh
   const senderFreeBalance = useFreeBalance(originChain, senderId, selectedToken);
   const recipientFreeBalance = useFreeBalance(originChain, recipientId, selectedToken);
 
-  const [maxTransfer] = getMaxTransferAndNoFees(estimatedFee, feeSymbol, selectedToken, networkMap[originChain].nativeToken as string, senderFreeBalance, existentialDeposit);
+  const maxTransfer = getXcmMaxTransfer(estimatedFee, feeSymbol, selectedToken, networkMap[originChain].nativeToken as string, senderFreeBalance, existentialDeposit);
 
-  console.log('maxTransfer', maxTransfer?.toString());
+  console.log('maxTransfer', maxTransfer?.toString(), senderFreeBalance, estimatedFee);
 
   const [txResult, setTxResult] = useState<TransferResultType>({ isShowTxResult: false, isTxSuccess: false });
   const { isShowTxResult } = txResult;
@@ -148,7 +143,7 @@ function XcmTransfer ({ chainRegistryMap, className, defaultValue, firstOriginCh
     ? getBalanceFormat(originChain, selectedToken, chainRegistryMap)
     : null;
   const mainTokenInfo = chainRegistryMap[originChain] && networkMap[originChain].active ? getMainTokenInfo(originChain, chainRegistryMap) : null;
-  const valueToTransfer = isTransferAll ? senderFreeBalance : amount?.toString() || '0';
+  const valueToTransfer = isTransferAll && maxTransfer ? maxTransfer.toString() : amount?.toString() || '0';
   const defaultDestinationChainOptions = getDestinationChainOptions(firstOriginChain, networkMap);
   const [[selectedDestinationChain, destinationChainOptions], setDestinationChain] = useState<[string, DropdownTransformOptionType[]]>([defaultDestinationChainOptions[0].value, defaultDestinationChainOptions]);
   const tokenList = getSupportedTokens(originChain, selectedDestinationChain).map((token) => (
@@ -353,21 +348,34 @@ function XcmTransfer ({ chainRegistryMap, className, defaultValue, firstOriginCh
                   onchange={setRecipientId}
                 />
 
-                <InputBalance
-                  autoFocus
-                  className={'bridge-amount-input'}
-                  decimals={balanceFormat[0]}
-                  defaultValue={isTransferAll && valueToTransfer}
-                  help={t<string>('Type the amount you want to transfer. Note that you can select the unit on the right e.g sending 1 milli is equivalent to sending 0.001.')}
-                  isDisabled={isTransferAll}
-                  isError={false}
-                  isZeroable
-                  label={t<string>('amount')}
-                  onChange={setAmount}
-                  placeholder={'0'}
-                  siDecimals={balanceFormat[0]}
-                  siSymbol={balanceFormat[2] || balanceFormat[1]}
-                />
+                {
+                  isTransferAll && maxTransfer
+                    ? <InputBalance
+                      autoFocus
+                      className={'bridge-amount-input'}
+                      decimals={balanceFormat[0]}
+                      defaultValue={valueToTransfer}
+                      help={t<string>('The full account balance to be transferred, minus the transaction fees and the existential deposit')}
+                      isDisabled
+                      key={maxTransfer?.toString()}
+                      label={t<string>('maximum transferable')}
+                      siDecimals={balanceFormat[0]}
+                      siSymbol={balanceFormat[2] || balanceFormat[1]}
+                    />
+                    : <InputBalance
+                      autoFocus
+                      className={'bridge-amount-input'}
+                      decimals={balanceFormat[0]}
+                      help={t<string>('Type the amount you want to transfer. Note that you can select the unit on the right e.g sending 1 milli is equivalent to sending 0.001.')}
+                      isError={false}
+                      isZeroable
+                      label={t<string>('amount')}
+                      onChange={setAmount}
+                      placeholder={'0'}
+                      siDecimals={balanceFormat[0]}
+                      siSymbol={balanceFormat[2] || balanceFormat[1]}
+                    />
+                }
 
                 {isBlockHardware && (
                   <Warning

@@ -1,7 +1,7 @@
 # CHANGELOG
 
 ## 0.5.5 (Koni)
-Build date: Aug 11, 2022.
+Build date: Aug 12, 2022.
 
 Update:
 - Add feature to allow first-time users to import their Metamask private keys (#254)

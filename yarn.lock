@@ -5194,6 +5194,7 @@ __metadata:
     is-buffer: ^2.0.5
     json-rpc-engine: ^6.1.0
     moonbeam-types-bundle: 2.0.3
+    oak-js-library: "github:OAK-Foundation/OAK-JS-SDK#0.1.0-backend"
     pontem-types-bundle: ^1.0.15
     protobufjs: ^6.11.3
     rlp: ^3.0.0
@@ -17796,6 +17797,13 @@ __metadata:
   version: 2.2.0
   resolution: "nwsapi@npm:2.2.0"
   checksum: 5ef4a9bc0c1a5b7f2e014aa6a4b359a257503b796618ed1ef0eb852098f77e772305bb0e92856e4bbfa3e6c75da48c0113505c76f144555ff38867229c2400a7
+  languageName: node
+  linkType: hard
+
+"oak-js-library@github:OAK-Foundation/OAK-JS-SDK#0.1.0-backend":
+  version: 0.1.0
+  resolution: "oak-js-library@https://github.com/OAK-Foundation/OAK-JS-SDK.git#commit=c5c160b4350337d8470ff68ebb5528a2d8e453eb"
+  checksum: 38b0cd554010cabb5381122b29c9ed6350e7e4cfbf8dca5a4709dbf8afbc5330d73818eb4cef93f4d6d331bfa7af0690c4beb0f739adb4b76a7143ce565497de
   languageName: node
   linkType: hard
 

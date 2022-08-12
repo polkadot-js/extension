@@ -1,5 +1,17 @@
 # CHANGELOG
 
+## 0.5.5 (Koni)
+Build date: Aug 11, 2022.
+
+Update:
+- Add feature to allow first-time users to import their Metamask private keys (#254)
+- Add support for transaction history on Astar EVM (#454)
+- Update XCM transfer support for Relaychain to Parachains (#411)
+
+Bug fixes:
+- Fix bug display wrong connection information with DApps (#498)
+- Fix bug some dApp can't connect to wallet when user close extension (#530)
+
 ## 0.5.4 (Koni)
 Build date: Aug 05, 2022.
 

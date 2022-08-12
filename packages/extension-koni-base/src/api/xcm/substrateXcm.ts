@@ -27,13 +27,14 @@ export async function substrateEstimateCrossChainFee (
   const destinationNetworkJson = networkMap[destinationNetworkKey];
   // TODO: find a better way to handle kUSD on karura
   const tokenSymbol = tokenInfo.symbol.toUpperCase() === 'AUSD' && originNetworkKey === 'karura' ? 'KUSD' : tokenInfo.symbol.toUpperCase();
+  const tokenIdentity = originNetworkKey === 'bifrost' || originNetworkKey === 'bifrost_testnet' ? 'Native' : 'Token';
 
   try {
     if (SupportedCrossChainsMap[originNetworkKey].type === 'p') {
       // Case ParaChain -> ParaChain && ParaChain -> RelayChain
       const extrinsic = api.tx.xTokens.transfer(
         {
-          Token: tokenSymbol
+          [tokenIdentity]: tokenSymbol
         },
         value,
         getMultiLocationFromParachain(originNetworkKey, destinationNetworkKey, networkMap, to),

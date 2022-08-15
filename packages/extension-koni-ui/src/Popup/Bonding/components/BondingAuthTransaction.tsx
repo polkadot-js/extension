@@ -534,7 +534,7 @@ export default React.memo(styled(BondingAuthTransaction)(({ theme }: Props) => `
   }
 
   .transaction-info-container {
-    margin-top: 20px;
+    margin-top: 10px;
     width: 100%;
   }
 
@@ -597,7 +597,6 @@ export default React.memo(styled(BondingAuthTransaction)(({ theme }: Props) => `
   }
   .validator-item-container {
     margin-top: 10px;
-    margin-bottom: 28px;
     display: flex;
     align-items: center;
     justify-content: space-between;

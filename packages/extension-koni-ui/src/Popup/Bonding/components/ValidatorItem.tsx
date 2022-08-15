@@ -39,6 +39,9 @@ function ValidatorItem ({ bondedValidators, className, isBondedBefore, maxNomina
   const { show } = useToast();
   const { currentAccount: { account } } = useSelector((state: RootState) => state);
 
+
+  console.log('bondedValidators', bondedValidators);
+
   const isOversubscribed = validatorInfo.nominatorCount >= maxNominatorPerValidator;
   const isSufficientFund = useIsSufficientBalance(networkKey, validatorInfo.minBond);
   const hasOwnStake = validatorInfo.ownStake > 0;

@@ -1,13 +1,13 @@
-     740	Nam Phạm                      	update package.json
+     757	Nam Phạm                      	remove xcm usage of rococo
      465	Jaco                          	0.42.5 (#969)
-     427	AnhMTV                        	Release version 0.5.4
-     173	S2kael                        	[Issue-150] merge xcm
+     451	AnhMTV                        	Release version 0.5.5
+     182	S2kael                        	[Issue-254] [AddAccountScreen] Add button Import private key from MetaMask
      151	lw-cdm                        	Update logo for Moonbeans
      142	quangdo                       	update some label and variable (original to origin)
       84	lw-cdm                        	
       82	Thibaut Sardan                	Add account filtering feature (#832)
       68	Hieu Dao                      	Update staking logo
-      61	khainh                        	Display crowdloans for inactive networks
+      64	khainh                        	Keep EVM connections in IDLE mode
       55	leewong                       	#118: update balance logic for Kintsugi testnet
       53	Dominhquangdev                	update Bridge code
       10	Trang Trịnh                   	api get karura and acala nfts

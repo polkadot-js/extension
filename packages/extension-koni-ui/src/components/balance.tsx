@@ -15,8 +15,6 @@ type BalanceViewProps = {
 export const BalanceVal = ({ startWithSymbol = false, symbol, value, withComma = true, withSymbol = true }: BalanceViewProps) => {
   let [prefix, postfix] = typeof value === 'object' ? value.toFormat(9).split('.') : value.toString().split('.');
 
-  console.log('prefix', prefix);
-
   if (startWithSymbol) {
     postfix = postfix?.substring(0, 3);
   } else {
@@ -30,13 +28,9 @@ export const BalanceVal = ({ startWithSymbol = false, symbol, value, withComma =
 
   const symbolView = prefix && <span className='balance-val__symbol'>{symbol}</span>;
 
-  const formatPrefix = new Intl.NumberFormat().format(Number(prefix));
-
-  console.log('formatPrefix', formatPrefix);
-
   return (
     <span className='balance-val'>
-      {startWithSymbol && withSymbol && symbolView}<span className='balance-val__prefix'>{withComma ? formatPrefix.replace(/[. ]+/g, ',') : prefix}</span>
+      {startWithSymbol && withSymbol && symbolView}<span className='balance-val__prefix'>{prefix}</span>
 
       .<span className='balance-val__postfix'>
         {isString ? postfixValue.slice(0, -1) : postfixValue}

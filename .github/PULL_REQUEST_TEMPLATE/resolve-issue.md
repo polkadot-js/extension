@@ -1,8 +1,8 @@
-### Related issue
+### Related issue(s)
 
 - #
 
-### Is your feature request related to a problem? Please describe.
+### Is your feature request related to a problem(s)? Please describe.
 
 -
 

@@ -8,14 +8,13 @@ import { AccountContext, ActionContext, Button, Warning } from '@subwallet/exten
 import InputBalance from '@subwallet/extension-koni-ui/components/InputBalance';
 import LoadingContainer from '@subwallet/extension-koni-ui/components/LoadingContainer';
 import ReceiverInputAddress from '@subwallet/extension-koni-ui/components/ReceiverInputAddress';
-import Toggle from '@subwallet/extension-koni-ui/components/Toggle';
 import { useTranslation } from '@subwallet/extension-koni-ui/components/translate';
 import { BalanceFormatType, XcmTransferInputAddressType } from '@subwallet/extension-koni-ui/components/types';
 import useFreeBalance from '@subwallet/extension-koni-ui/hooks/screen/sending/useFreeBalance';
-import { checkCrossChainTransfer, transferGetExistentialDeposit } from '@subwallet/extension-koni-ui/messaging';
+import { checkCrossChainTransfer } from '@subwallet/extension-koni-ui/messaging';
 import Header from '@subwallet/extension-koni-ui/partials/Header';
 import SendFundResult from '@subwallet/extension-koni-ui/Popup/Sending/SendFundResult';
-import { getBalanceFormat, getDefaultAddress, getMainTokenInfo, getXcmMaxTransfer } from '@subwallet/extension-koni-ui/Popup/Sending/utils';
+import { getBalanceFormat, getDefaultAddress, getMainTokenInfo } from '@subwallet/extension-koni-ui/Popup/Sending/utils';
 import AuthTransaction from '@subwallet/extension-koni-ui/Popup/XcmTransfer/AuthTransaction';
 import BridgeInputAddress from '@subwallet/extension-koni-ui/Popup/XcmTransfer/BridgeInputAddress';
 import Dropdown from '@subwallet/extension-koni-ui/Popup/XcmTransfer/XcmDropdown/Dropdown';
@@ -121,10 +120,10 @@ function XcmTransfer ({ chainRegistryMap, className, defaultValue, firstOriginCh
   const [originChain, setOriginChain] = useState<string>(firstOriginChain);
   const [{ address: senderId,
     token: selectedToken }, setSenderValue] = useState<XcmTransferInputAddressType>(defaultValue);
-  const [isTransferAll, setIsTransferAll] = useState(false);
-  const [existentialDeposit, setExistentialDeposit] = useState<string>('0');
-  const [estimatedFee, setEstimatedFee] = useState('0');
-  const [feeSymbol, setFeeSymbol] = useState<string | undefined>(undefined);
+  // const [isTransferAll, setIsTransferAll] = useState(false);
+  // const [existentialDeposit, setExistentialDeposit] = useState<string>('0');
+  // const [estimatedFee, setEstimatedFee] = useState('0');
+  // const [feeSymbol, setFeeSymbol] = useState<string | undefined>(undefined);
   const onAction = useContext(ActionContext);
 
   const { accounts } = useContext(AccountContext);
@@ -133,9 +132,7 @@ function XcmTransfer ({ chainRegistryMap, className, defaultValue, firstOriginCh
   const senderFreeBalance = useFreeBalance(originChain, senderId, selectedToken);
   const recipientFreeBalance = useFreeBalance(originChain, recipientId, selectedToken);
 
-  const maxTransfer = getXcmMaxTransfer(estimatedFee, feeSymbol, selectedToken, networkMap[originChain].nativeToken as string, senderFreeBalance, existentialDeposit);
-
-  console.log('maxTransfer', maxTransfer?.toString(), senderFreeBalance, estimatedFee);
+  // const maxTransfer = getXcmMaxTransfer(estimatedFee, feeSymbol, selectedToken, networkMap[originChain].nativeToken as string, senderFreeBalance, existentialDeposit);
 
   const [txResult, setTxResult] = useState<TransferResultType>({ isShowTxResult: false, isTxSuccess: false });
   const { isShowTxResult } = txResult;
@@ -143,7 +140,8 @@ function XcmTransfer ({ chainRegistryMap, className, defaultValue, firstOriginCh
     ? getBalanceFormat(originChain, selectedToken, chainRegistryMap)
     : null;
   const mainTokenInfo = chainRegistryMap[originChain] && networkMap[originChain].active ? getMainTokenInfo(originChain, chainRegistryMap) : null;
-  const valueToTransfer = isTransferAll && maxTransfer ? maxTransfer.toString() : amount?.toString() || '0';
+  // const valueToTransfer = isTransferAll && maxTransfer ? maxTransfer.toString() : amount?.toString() || '0';
+  const valueToTransfer = amount?.toString() || '0';
   const defaultDestinationChainOptions = getDestinationChainOptions(firstOriginChain, networkMap);
   const [[selectedDestinationChain, destinationChainOptions], setDestinationChain] = useState<[string, DropdownTransformOptionType[]]>([defaultDestinationChainOptions[0].value, defaultDestinationChainOptions]);
   const tokenList = getSupportedTokens(originChain, selectedDestinationChain).map((token) => (
@@ -181,21 +179,21 @@ function XcmTransfer ({ chainRegistryMap, className, defaultValue, firstOriginCh
     !isBlockHardware &&
     !!balanceFormat;
 
-  useEffect(() => {
-    let isSync = true;
-
-    transferGetExistentialDeposit({ networkKey: originChain, token: selectedToken })
-      .then((rs) => {
-        if (isSync) {
-          setExistentialDeposit(rs);
-        }
-      }).catch((e) => console.log('There is problem when transferGetExistentialDeposit', e));
-
-    return () => {
-      isSync = false;
-      setExistentialDeposit('0');
-    };
-  }, [originChain, selectedToken]);
+  // useEffect(() => {
+  //   let isSync = true;
+  //
+  //   transferGetExistentialDeposit({ networkKey: originChain, token: selectedToken })
+  //     .then((rs) => {
+  //       if (isSync) {
+  //         setExistentialDeposit(rs);
+  //       }
+  //     }).catch((e) => console.log('There is problem when transferGetExistentialDeposit', e));
+  //
+  //   return () => {
+  //     isSync = false;
+  //     setExistentialDeposit('0');
+  //   };
+  // }, [originChain, selectedToken]);
 
   useEffect(() => {
     let isSync = true;
@@ -211,8 +209,8 @@ function XcmTransfer ({ chainRegistryMap, className, defaultValue, firstOriginCh
       }).then((value) => {
         if (isSync) {
           setFeeString(value.feeString);
-          setFeeSymbol(value.feeSymbol);
-          setEstimatedFee(value.estimatedFee);
+          // setFeeSymbol(value.feeSymbol);
+          // setEstimatedFee(value.estimatedFee);
         }
       }).catch((e) => {
         console.log('err--------', e);
@@ -348,34 +346,48 @@ function XcmTransfer ({ chainRegistryMap, className, defaultValue, firstOriginCh
                   onchange={setRecipientId}
                 />
 
-                {
-                  isTransferAll && maxTransfer
-                    ? <InputBalance
-                      autoFocus
-                      className={'bridge-amount-input'}
-                      decimals={balanceFormat[0]}
-                      defaultValue={valueToTransfer}
-                      help={t<string>('The full account balance to be transferred, minus the transaction fees and the existential deposit')}
-                      isDisabled
-                      key={maxTransfer?.toString()}
-                      label={t<string>('maximum transferable')}
-                      siDecimals={balanceFormat[0]}
-                      siSymbol={balanceFormat[2] || balanceFormat[1]}
-                    />
-                    : <InputBalance
-                      autoFocus
-                      className={'bridge-amount-input'}
-                      decimals={balanceFormat[0]}
-                      help={t<string>('Type the amount you want to transfer. Note that you can select the unit on the right e.g sending 1 milli is equivalent to sending 0.001.')}
-                      isError={false}
-                      isZeroable
-                      label={t<string>('amount')}
-                      onChange={setAmount}
-                      placeholder={'0'}
-                      siDecimals={balanceFormat[0]}
-                      siSymbol={balanceFormat[2] || balanceFormat[1]}
-                    />
-                }
+                {/* { */}
+                {/*  isTransferAll && maxTransfer */}
+                {/*    ? <InputBalance */}
+                {/*      autoFocus */}
+                {/*      className={'bridge-amount-input'} */}
+                {/*      decimals={balanceFormat[0]} */}
+                {/*      defaultValue={valueToTransfer} */}
+                {/*      help={t<string>('The full account balance to be transferred, minus the transaction fees and the existential deposit')} */}
+                {/*      isDisabled */}
+                {/*      key={maxTransfer?.toString()} */}
+                {/*      label={t<string>('maximum transferable')} */}
+                {/*      siDecimals={balanceFormat[0]} */}
+                {/*      siSymbol={balanceFormat[2] || balanceFormat[1]} */}
+                {/*    /> */}
+                {/*    : <InputBalance */}
+                {/*      autoFocus */}
+                {/*      className={'bridge-amount-input'} */}
+                {/*      decimals={balanceFormat[0]} */}
+                {/*      help={t<string>('Type the amount you want to transfer. Note that you can select the unit on the right e.g sending 1 milli is equivalent to sending 0.001.')} */}
+                {/*      isError={false} */}
+                {/*      isZeroable */}
+                {/*      label={t<string>('amount')} */}
+                {/*      onChange={setAmount} */}
+                {/*      placeholder={'0'} */}
+                {/*      siDecimals={balanceFormat[0]} */}
+                {/*      siSymbol={balanceFormat[2] || balanceFormat[1]} */}
+                {/*    /> */}
+                {/* } */}
+
+                <InputBalance
+                  autoFocus
+                  className={'bridge-amount-input'}
+                  decimals={balanceFormat[0]}
+                  help={t<string>('Type the amount you want to transfer. Note that you can select the unit on the right e.g sending 1 milli is equivalent to sending 0.001.')}
+                  isError={false}
+                  isZeroable
+                  label={t<string>('amount')}
+                  onChange={setAmount}
+                  placeholder={'0'}
+                  siDecimals={balanceFormat[0]}
+                  siSymbol={balanceFormat[2] || balanceFormat[1]}
+                />
 
                 {isBlockHardware && (
                   <Warning
@@ -417,14 +429,14 @@ function XcmTransfer ({ chainRegistryMap, className, defaultValue, firstOriginCh
               </Warning>
             }
 
-            <div className={'send-fund-toggle'}>
-              <Toggle
-                className='typeToggle'
-                label={t<string>('Transfer all')}
-                onChange={setIsTransferAll}
-                value={isTransferAll}
-              />
-            </div>
+            {/* <div className={'send-fund-toggle'}> */}
+            {/*  <Toggle */}
+            {/*    className='typeToggle' */}
+            {/*    label={t<string>('Transfer all')} */}
+            {/*    onChange={setIsTransferAll} */}
+            {/*    value={isTransferAll} */}
+            {/*  /> */}
+            {/* </div> */}
 
             <div className='bridge-button-container'>
               <Button

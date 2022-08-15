@@ -19,9 +19,6 @@ import useToast from '@subwallet/extension-koni-ui/hooks/useToast';
 import useTranslation from '@subwallet/extension-koni-ui/hooks/useTranslation';
 import { getBondingTxInfo } from '@subwallet/extension-koni-ui/messaging';
 import Header from '@subwallet/extension-koni-ui/partials/Header';
-import BondDurationDropdown from '@subwallet/extension-koni-ui/Popup/Bonding/components/BondDurationDropdown';
-import BondingAuthTransaction from '@subwallet/extension-koni-ui/Popup/Bonding/components/BondingAuthTransaction';
-import BondingResult from '@subwallet/extension-koni-ui/Popup/Bonding/components/BondingResult';
 import { BOND_DURATION_OPTIONS, getStakeUnit, parseBalanceString } from '@subwallet/extension-koni-ui/Popup/Bonding/utils';
 import { RootState, store } from '@subwallet/extension-koni-ui/stores';
 import { BondingParams } from '@subwallet/extension-koni-ui/stores/types';
@@ -33,6 +30,10 @@ import styled from 'styled-components';
 
 import { BN } from '@polkadot/util';
 import { isEthereumAddress } from '@polkadot/util-crypto';
+
+const BondDurationDropdown = React.lazy(() => import('@subwallet/extension-koni-ui/Popup/Bonding/components/BondDurationDropdown'));
+const BondingAuthTransaction = React.lazy(() => import('@subwallet/extension-koni-ui/Popup/Bonding/components/BondingAuthTransaction'));
+const BondingResult = React.lazy(() => import('@subwallet/extension-koni-ui/Popup/Bonding/components/BondingResult'));
 
 interface Props extends ThemeProps {
   className?: string;
@@ -69,6 +70,7 @@ function BondingSubmitTransaction ({ className }: Props): React.ReactElement<Pro
   const [txError, setTxError] = useState('');
   const [lockPeriod, setLockPeriod] = useState(0);
 
+  const isCurrentlyBonded = bondedValidators.includes(validatorInfo.address);
   const isOversubscribed = validatorInfo.nominatorCount >= maxNominatorPerValidator;
   const isSufficientFund = useIsSufficientBalance(selectedNetwork, validatorInfo.minBond);
   const hasOwnStake = validatorInfo.ownStake > 0;
@@ -77,6 +79,10 @@ function BondingSubmitTransaction ({ className }: Props): React.ReactElement<Pro
 
   const navigate = useContext(ActionContext);
   const _height = window.innerHeight > 600 ? 650 : 450;
+
+  const handleRevertClickNext = useCallback(() => {
+    setIsClickNext(false);
+  }, []);
 
   useEffect(() => {
     if (!networkJson.active) {
@@ -94,19 +100,33 @@ function BondingSubmitTransaction ({ className }: Props): React.ReactElement<Pro
     if (!isClickNext) {
       const parsedFreeBalance = parseFloat(freeBalance) / (10 ** (networkJson.decimals as number));
 
-      if (amount >= validatorInfo.minBond && amount <= parsedFreeBalance) {
-        setIsReadySubmit(true);
-      } else {
-        setIsReadySubmit(false);
+      if (isCurrentlyBonded) {
+        if (amount > 0 && amount <= parsedFreeBalance) {
+          setIsReadySubmit(true);
+        } else {
+          setIsReadySubmit(false);
 
-        if (amount > parsedFreeBalance) {
-          show('You do not have enough balance');
-        } else if (amount >= 0) {
-          show(`You must stake at least ${validatorInfo.minBond} ${networkJson.nativeToken as string}`);
+          if (amount === 0) {
+            show('Your stake must be greater than 0');
+          } else if (amount >= parsedFreeBalance) {
+            show('You do not have enough balance');
+          }
+        }
+      } else {
+        if (amount >= validatorInfo.minBond && amount <= parsedFreeBalance) {
+          setIsReadySubmit(true);
+        } else {
+          setIsReadySubmit(false);
+
+          if (amount > parsedFreeBalance) {
+            show('You do not have enough balance');
+          } else if (amount >= 0) {
+            show(`You must stake at least ${validatorInfo.minBond} ${networkJson.nativeToken as string}`);
+          }
         }
       }
     }
-  }, [amount, freeBalance, isClickNext, networkJson.decimals, networkJson.nativeToken, show, showAuth, showResult, validatorInfo.minBond]);
+  }, [amount, freeBalance, isClickNext, isCurrentlyBonded, networkJson.decimals, networkJson.nativeToken, show, showAuth, showResult, validatorInfo.minBond]);
 
   const handleOnClick = useCallback(() => {
     setShowDetail(!showDetail);
@@ -221,7 +241,7 @@ function BondingSubmitTransaction ({ className }: Props): React.ReactElement<Pro
               <div className={'validator-att-title'}>
                 Minimum stake
                 {
-                  !isSufficientFund && <FontAwesomeIcon
+                  !isSufficientFund && !isCurrentlyBonded && <FontAwesomeIcon
                     className={'error-tooltip'}
                     data-for={`insufficient-fund-tooltip-${selectedNetwork}`}
                     data-tip={true}
@@ -235,7 +255,7 @@ function BondingSubmitTransaction ({ className }: Props): React.ReactElement<Pro
                   trigger={`insufficient-fund-tooltip-${selectedNetwork}`}
                 />
               </div>
-              <div className={`${isSufficientFund ? 'validator-att-value' : 'validator-att-value-error'}`}>{parseBalanceString(validatorInfo.minBond, networkJson.nativeToken as string)}</div>
+              <div className={`${isSufficientFund || isCurrentlyBonded ? 'validator-att-value' : 'validator-att-value-error'}`}>{parseBalanceString(validatorInfo.minBond, networkJson.nativeToken as string)}</div>
             </div>
           </div>
 
@@ -321,7 +341,7 @@ function BondingSubmitTransaction ({ className }: Props): React.ReactElement<Pro
               <div className={'validator-att-title'}>
                 Minimum stake
                 {
-                  !isSufficientFund && <FontAwesomeIcon
+                  !isSufficientFund && !isCurrentlyBonded && <FontAwesomeIcon
                     className={'error-tooltip'}
                     data-for={`insufficient-fund-tooltip-${selectedNetwork}`}
                     data-tip={true}
@@ -335,7 +355,7 @@ function BondingSubmitTransaction ({ className }: Props): React.ReactElement<Pro
                   trigger={`insufficient-fund-tooltip-${selectedNetwork}`}
                 />
               </div>
-              <div className={`${isSufficientFund ? 'validator-att-value' : 'validator-att-value-error'}`}>{parseBalanceString(validatorInfo.minBond, networkJson.nativeToken as string)}</div>
+              <div className={`${isSufficientFund || isCurrentlyBonded ? 'validator-att-value' : 'validator-att-value-error'}`}>{parseBalanceString(validatorInfo.minBond, networkJson.nativeToken as string)}</div>
             </div>
           </div>
 
@@ -365,7 +385,7 @@ function BondingSubmitTransaction ({ className }: Props): React.ReactElement<Pro
         </div>
       );
     }
-  }, [getMinBondTooltipText, hasOwnStake, isMaxCommission, isOversubscribed, isSufficientFund, networkJson.nativeToken, selectedNetwork, unit, validatorInfo.commission, validatorInfo.minBond, validatorInfo.nominatorCount, validatorInfo.ownStake, validatorInfo.totalStake]);
+  }, [getMinBondTooltipText, hasOwnStake, isCurrentlyBonded, isMaxCommission, isOversubscribed, isSufficientFund, networkJson.nativeToken, selectedNetwork, unit, validatorInfo.commission, validatorInfo.minBond, validatorInfo.nominatorCount, validatorInfo.ownStake, validatorInfo.totalStake]);
 
   return (
     <div className={className}>
@@ -483,7 +503,7 @@ function BondingSubmitTransaction ({ className }: Props): React.ReactElement<Pro
           autoFocus
           className={'submit-bond-amount-input'}
           decimals={networkJson.decimals}
-          help={`Type the amount you want to stake. The minimum amount is ${validatorInfo.minBond} ${networkJson.nativeToken as string}`}
+          help={`Type the amount you want to stake. ${!isCurrentlyBonded ? `The minimum amount is ${validatorInfo.minBond}` : 'Amount must be greater than 0'} ${networkJson.nativeToken as string}`}
           inputAddressHelp={''}
           isError={false}
           isZeroable={false}
@@ -529,6 +549,7 @@ function BondingSubmitTransaction ({ className }: Props): React.ReactElement<Pro
           balanceError={balanceError}
           bondedValidators={bondedValidators}
           fee={fee}
+          handleRevertClickNext={handleRevertClickNext}
           isBondedBefore={isBondedBefore}
           lockPeriod={lockPeriod}
           selectedNetwork={selectedNetwork}

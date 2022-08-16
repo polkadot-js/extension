@@ -682,24 +682,24 @@ export const PREDEFINED_NETWORKS: Record<string, NetworkJson> = {
     decimals: 12,
     coinGeckoKey: 'crust-network'
   },
-  coinversation: {
-    key: 'coinversation',
-    chain: 'Coinversation',
-    genesisHash: 'UNKNOWN',
-    ss58Format: -1,
-    providers: {
-      Coinversation: 'wss://rpc.coinversation.io/'
-    },
-    active: false,
-    currentProviderMode: 'ws',
-    currentProvider: 'Coinversation',
-    groups: ['POLKADOT_PARACHAIN'],
-    paraId: 2027,
-    nativeToken: 'CTO',
-    crowdloanUrl: 'https://www.coinversation.io/joinus',
-    decimals: 10,
-    coinGeckoKey: 'coinversation'
-  },
+  // coinversation: {
+  //   key: 'coinversation',
+  //   chain: 'Coinversation',
+  //   genesisHash: 'UNKNOWN',
+  //   ss58Format: -1,
+  //   providers: {
+  //     Coinversation: 'wss://rpc.coinversation.io/'
+  //   },
+  //   active: false,
+  //   currentProviderMode: 'ws',
+  //   currentProvider: 'Coinversation',
+  //   groups: ['POLKADOT_PARACHAIN'],
+  //   paraId: 2027,
+  //   nativeToken: 'CTO',
+  //   crowdloanUrl: 'https://www.coinversation.io/joinus',
+  //   decimals: 10,
+  //   coinGeckoKey: 'coinversation'
+  // },
   statemine: {
     key: 'statemine',
     chain: 'Statemine',
@@ -1288,6 +1288,24 @@ export const PREDEFINED_NETWORKS: Record<string, NetworkJson> = {
     decimals: 12,
     coinGeckoKey: 'integritee'
   },
+  integriteePolkadot: {
+    key: 'integriteePolkadot',
+    chain: 'Integritee Shell',
+    genesisHash: '0xe13e7af377c64e83f95e0d70d5e5c3c01d697a84538776c5b9bbe0e7d7b6034c',
+    ss58Format: 13,
+    providers: {
+      Integritee: 'wss://polkadot.api.integritee.network'
+    },
+    active: false,
+    currentProviderMode: 'ws',
+    currentProvider: 'Integritee',
+    groups: ['POLKADOT_PARACHAIN'],
+    paraId: 2015,
+    nativeToken: 'TEER',
+    crowdloanUrl: 'https://crowdloan.integritee.network/',
+    decimals: 12,
+    coinGeckoKey: 'integritee'
+  },
   crab: {
     key: 'crab',
     chain: 'Darwinia Crab',
@@ -1736,6 +1754,84 @@ export const PREDEFINED_NETWORKS: Record<string, NetworkJson> = {
     nativeToken: 'KAB',
     decimals: 12
   },
+  gmdie: {
+    key: 'gmdie',
+    chain: 'GM Parachain',
+    genesisHash: '0x19a3733beb9cb8a970a308d835599e9005e02dc007a35440e461a451466776f8',
+    ss58Format: 7013,
+    providers: {
+      gmDie: 'wss://kusama.gmordie.com'
+    },
+    active: false,
+    currentProvider: 'gmDie',
+    currentProviderMode: 'ws',
+    groups: ['KUSAMA_PARACHAIN'],
+    paraId: 2123,
+    nativeToken: 'FREN',
+    decimals: 12
+  },
+  ternoa: {
+    key: 'ternoa',
+    chain: 'Ternoa Mainnet',
+    genesisHash: '0x6859c81ca95ef624c9dfe4dc6e3381c33e5d6509e35e147092bfbc780f777c4e',
+    ss58Format: 42,
+    providers: {
+      ternoa: 'wss://mainnet.ternoa.network'
+    },
+    active: false,
+    currentProviderMode: 'ws',
+    currentProvider: 'ternoa',
+    nativeToken: 'CAPS',
+    groups: ['MAIN_NET'],
+    decimals: 18
+  },
+  ternoaEvm: {
+    key: 'ternoaEvm',
+    chain: 'Ternoa Mainnet - EVM',
+    genesisHash: '0x6859c81ca95ef624c9dfe4dc6e3381c33e5d6509e35e147092bfbc780f777c4e_1',
+    ss58Format: 42,
+    providers: {
+      ternoa: 'wss://mainnet.ternoa.network'
+    },
+    active: false,
+    isEthereum: true,
+    currentProviderMode: 'ws',
+    currentProvider: 'ternoa',
+    nativeToken: 'CAPS',
+    groups: ['MAIN_NET'],
+    decimals: 18
+  },
+  tanganika: {
+    key: 'tanganika',
+    chain: 'DataHighway Tanganika',
+    genesisHash: '0xeacdd2d5b42de9769ccbb6e8d9013ab0d90ab105bf601d4aac53e874c145ec21',
+    ss58Format: 33,
+    providers: {
+      tanganika: 'wss://tanganika.datahighway.com'
+    },
+    active: false,
+    currentProvider: 'tanganika',
+    currentProviderMode: 'ws',
+    nativeToken: 'DHX',
+    groups: ['KUSAMA_PARACHAIN'],
+    decimals: 18
+  }
+  // contractsRococo: {
+  //   key: 'contractsRococo',
+  //   chain: 'Contracts on Rococo',
+  //   genesisHash: '0xc5442742bb6288bb3835ea1c9032981f06433ee5fc65d6e216c4422c0c19b989',
+  //   ss58Format: 42,
+  //   providers: {
+  //     testnet: 'wss://rococo-contracts-rpc.polkadot.io'
+  //   },
+  //   active: false,
+  //   currentProviderMode: 'ws',
+  //   currentProvider: 'testnet',
+  //   groups: ['TEST_NET'],
+  //   nativeToken: 'ROC',
+  //   decimals: 12,
+  //   paraId: 1002
+  // }
   // acala_dev: {
   //   key: 'acala_dev',
   //   chain: 'Acala Karura Dev',
@@ -1767,22 +1863,6 @@ export const PREDEFINED_NETWORKS: Record<string, NetworkJson> = {
   //   nativeToken: 'Unit',
   //   decimals: 12
   // },
-  contractsRococo: {
-    key: 'contractsRococo',
-    chain: 'Contracts on Rococo',
-    genesisHash: '0xc5442742bb6288bb3835ea1c9032981f06433ee5fc65d6e216c4422c0c19b989',
-    ss58Format: 42,
-    providers: {
-      testnet: 'wss://rococo-contracts-rpc.polkadot.io'
-    },
-    active: false,
-    currentProviderMode: 'ws',
-    currentProvider: 'testnet',
-    groups: ['TEST_NET'],
-    nativeToken: 'ROC',
-    decimals: 12,
-    paraId: 1002
-  }
 };
 
 function getGenesisHashes () {

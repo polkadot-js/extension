@@ -351,6 +351,18 @@ const LogosMap: Record<string, string> = {
   // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
   well: require('./112.moonwell-artemis.png'),
   // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+  gmdie: require('./119.gmDie.png'),
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+  amplitude: require('./120.amplitude.jpg'),
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+  ternoa: require('./121.ternoa.jpg'),
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+  ternoaEvm: require('./121.ternoa.jpg'),
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+  integriteePolkadot: require('./81.Integritee.png'),
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+  tanganika: require('./122.dataHighway.png'),
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
   default: require('./73.Default.png')
 };
 

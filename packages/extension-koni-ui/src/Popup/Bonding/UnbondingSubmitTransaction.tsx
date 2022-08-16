@@ -12,10 +12,7 @@ import useToast from '@subwallet/extension-koni-ui/hooks/useToast';
 import useTranslation from '@subwallet/extension-koni-ui/hooks/useTranslation';
 import { getStakeDelegationInfo, getUnbondingTxInfo } from '@subwallet/extension-koni-ui/messaging';
 import Header from '@subwallet/extension-koni-ui/partials/Header';
-import UnbondingAuthTransaction from '@subwallet/extension-koni-ui/Popup/Bonding/components/UnbondingAuthTransaction';
-import UnbondingResult from '@subwallet/extension-koni-ui/Popup/Bonding/components/UnbondingResult';
 // @ts-ignore
-import ValidatorsDropdown from '@subwallet/extension-koni-ui/Popup/Bonding/components/ValidatorsDropdown';
 import { CHAIN_TYPE_MAP } from '@subwallet/extension-koni-ui/Popup/Bonding/utils';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
@@ -24,6 +21,10 @@ import { useSelector } from 'react-redux';
 import styled from 'styled-components';
 
 import { BN } from '@polkadot/util';
+
+const UnbondingAuthTransaction = React.lazy(() => import('@subwallet/extension-koni-ui/Popup/Bonding/components/UnbondingAuthTransaction'));
+const UnbondingResult = React.lazy(() => import('@subwallet/extension-koni-ui/Popup/Bonding/components/UnbondingResult'));
+const ValidatorsDropdown = React.lazy(() => import('@subwallet/extension-koni-ui/Popup/Bonding/components/ValidatorsDropdown'));
 
 interface Props extends ThemeProps {
   className?: string;
@@ -109,6 +110,10 @@ function UnbondingSubmitTransaction ({ className }: Props): React.ReactElement<P
   const goHome = useCallback(() => {
     navigate('/');
   }, [navigate]);
+
+  const handleRevertClickNext = useCallback(() => {
+    setIsClickNext(false);
+  }, []);
 
   useEffect(() => {
     if (!isClickNext) {
@@ -397,6 +402,7 @@ function UnbondingSubmitTransaction ({ className }: Props): React.ReactElement<P
           amount={amount}
           balanceError={balanceError}
           fee={fee}
+          handleRevertClickNext={handleRevertClickNext}
           selectedNetwork={selectedNetwork}
           selectedValidator={selectedValidator}
           setExtrinsicHash={setExtrinsicHash}

@@ -1593,7 +1593,7 @@ export const PREDEFINED_NETWORKS: Record<string, NetworkJson> = {
   },
   subspace: {
     key: 'subspace',
-    chain: 'Subspace',
+    chain: 'Subspace Farmnet',
     genesisHash: '0x332ef6e751e25426e38996c51299dfc53bcd56f40b53dce2b2fc8442ae9c4a74',
     ss58Format: 2254,
     providers: {
@@ -1602,6 +1602,23 @@ export const PREDEFINED_NETWORKS: Record<string, NetworkJson> = {
     active: false,
     currentProviderMode: 'ws',
     currentProvider: 'subspace',
+    groups: ['MAIN_NET'],
+    nativeToken: 'tSSC',
+    decimals: 18
+  },
+  subspace_gemini: {
+    key: 'subspace_gemini',
+    chain: 'Subspace Gemini 1',
+    genesisHash: '0x9ee86eefc3cc61c71a7751bba7f25e442da2512f408e6286153b3ccc055dccf0',
+    ss58Format: 2254,
+    providers: {
+      subspaceAsia: 'wss://apac.gemini-1b.subspace.network/ws',
+      subspaceEU: 'wss://eu.gemini-1b.subspace.network/ws',
+      subspaceUS: 'wss://na.gemini-1b.subspace.network/ws'
+    },
+    active: false,
+    currentProviderMode: 'ws',
+    currentProvider: 'subspaceUS',
     groups: ['MAIN_NET'],
     nativeToken: 'tSSC',
     decimals: 18

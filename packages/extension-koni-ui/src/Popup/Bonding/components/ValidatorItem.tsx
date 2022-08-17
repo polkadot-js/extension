@@ -33,13 +33,25 @@ interface Props extends ThemeProps {
   maxNominations: number
 }
 
+function checkCurrentlyBonded (bondedValidators: string[], validatorAddress: string) {
+  let isBonded = false;
+
+  bondedValidators.forEach((bondedValidator) => {
+    if (bondedValidator.toLowerCase() === validatorAddress.toLowerCase()) {
+      isBonded = true;
+    }
+  });
+
+  return isBonded;
+}
+
 function ValidatorItem ({ bondedValidators, className, isBondedBefore, maxNominations, maxNominatorPerValidator, networkKey, validatorInfo }: Props): React.ReactElement<Props> {
   const networkJson = useGetNetworkJson(networkKey);
   const [showDetail, setShowDetail] = useState(false);
   const { show } = useToast();
   const { currentAccount: { account } } = useSelector((state: RootState) => state);
 
-  const isCurrentlyBonded = bondedValidators.includes(validatorInfo.address);
+  const isCurrentlyBonded = checkCurrentlyBonded(bondedValidators, validatorInfo.address);
   const isOversubscribed = validatorInfo.nominatorCount >= maxNominatorPerValidator;
   const isSufficientFund = useIsSufficientBalance(networkKey, validatorInfo.minBond);
   const hasOwnStake = validatorInfo.ownStake > 0;

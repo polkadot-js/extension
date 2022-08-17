@@ -39,6 +39,18 @@ interface Props extends ThemeProps {
   className?: string;
 }
 
+function checkCurrentlyBonded (bondedValidators: string[], validatorAddress: string) {
+  let isBonded = false;
+
+  bondedValidators.forEach((bondedValidator) => {
+    if (bondedValidator.toLowerCase() === validatorAddress.toLowerCase()) {
+      isBonded = true;
+    }
+  });
+
+  return isBonded;
+}
+
 function BondingSubmitTransaction ({ className }: Props): React.ReactElement<Props> {
   const { t } = useTranslation();
   const { bondingParams, currentAccount: { account }, networkMap } = useSelector((state: RootState) => state);
@@ -70,7 +82,9 @@ function BondingSubmitTransaction ({ className }: Props): React.ReactElement<Pro
   const [txError, setTxError] = useState('');
   const [lockPeriod, setLockPeriod] = useState(0);
 
-  const isCurrentlyBonded = bondedValidators.includes(validatorInfo.address);
+  console.log('bondedValidators', bondedValidators, validatorInfo.address);
+
+  const isCurrentlyBonded = checkCurrentlyBonded(bondedValidators, validatorInfo.address);
   const isOversubscribed = validatorInfo.nominatorCount >= maxNominatorPerValidator;
   const isSufficientFund = useIsSufficientBalance(selectedNetwork, validatorInfo.minBond);
   const hasOwnStake = validatorInfo.ownStake > 0;

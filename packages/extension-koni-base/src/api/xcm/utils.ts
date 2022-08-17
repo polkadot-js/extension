@@ -223,7 +223,7 @@ export const SupportedCrossChainsMap: Record<string, CrossChainRelation> = {
       karura: {
         type: 'p',
         isEthereum: false,
-        supportedToken: ['KUSD', 'KAR', 'BNC']
+        supportedToken: ['aUSD', 'KAR', 'BNC']
       },
       kusama: {
         type: 'r',

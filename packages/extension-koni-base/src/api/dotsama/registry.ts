@@ -100,13 +100,23 @@ export async function getForeignToken (api: ApiPromise) {
     };
 
     if (!(symbol in tokenMap)) {
-      tokenMap[symbol] = {
-        isMainToken: false,
-        symbol,
-        decimals: parseInt(decimals),
-        name,
-        specialOption
-      };
+      if (symbol === 'KUSD') {
+        tokenMap.aUSD = {
+          isMainToken: false,
+          symbol: 'aUSD',
+          decimals: parseInt(decimals),
+          name,
+          specialOption
+        };
+      } else {
+        tokenMap[symbol] = {
+          isMainToken: false,
+          symbol,
+          decimals: parseInt(decimals),
+          name,
+          specialOption
+        };
+      }
     }
   });
 
@@ -145,6 +155,8 @@ export const getRegistry = async (networkKey: string, api: ApiPromise, customErc
     });
   }
 
+  console.log('chainTokens', chainTokens);
+
   const predefineTokenMap = PREDEFINE_TOKEN_DATA_MAP[networkKey];
 
   if (predefineTokenMap) {
@@ -154,6 +166,8 @@ export const getRegistry = async (networkKey: string, api: ApiPromise, customErc
   if (['karura', 'acala', 'bifrost'].indexOf(networkKey) > -1) {
     const foreignTokens = await getForeignToken(api);
 
+    console.log('foreignTokens', foreignTokens);
+
     Object.assign(tokenMap, foreignTokens);
 
     if (networkKey === 'karura') { // quick fix for native token
@@ -162,6 +176,7 @@ export const getRegistry = async (networkKey: string, api: ApiPromise, customErc
       tokenMap.ACA.isMainToken = true;
     } else if (networkKey === 'bifrost') {
       tokenMap.BNC.isMainToken = true;
+      delete tokenMap.KUSD;
     }
   }
 

@@ -154,14 +154,12 @@ export default class KoniTabs extends Tabs {
       const web3 = this.#koniState.getWeb3ApiMap()[key];
 
       if (web3.currentProvider instanceof Web3.providers.WebsocketProvider) {
-        const provider: WebsocketProvider = web3.currentProvider;
-
-        if (!provider.connected) {
+        if (!web3.currentProvider.connected) {
           console.log(`[Web3] ${key} is disconected, trying to connect...`);
-          provider.connect();
+          web3.currentProvider.connect();
 
           const poll = (resolve: (value: unknown) => void) => {
-            if (provider.connected) {
+            if ((web3.currentProvider as WebsocketProvider).connected) {
               console.log(`Network [${key}] is connected.`);
               resolve(true);
             } else {

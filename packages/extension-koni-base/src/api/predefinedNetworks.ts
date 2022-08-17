@@ -1815,6 +1815,21 @@ export const PREDEFINED_NETWORKS: Record<string, NetworkJson> = {
     nativeToken: 'DHX',
     groups: ['KUSAMA_PARACHAIN'],
     decimals: 18
+  },
+  amplitude: {
+    key: 'amplitude',
+    chain: 'Amplitude',
+    genesisHash: '0xcceae7f3b9947cdb67369c026ef78efa5f34a08fe5808d373c04421ecf4f1aaf',
+    ss58Format: 57,
+    providers: {
+      amplitude: 'wss://pencol-kus-01.pendulumchain.tech'
+    },
+    active: false,
+    currentProviderMode: 'ws',
+    currentProvider: 'amplitude',
+    nativeToken: 'AMPE',
+    groups: ['KUSAMA_PARACHAIN'],
+    decimals: 12
   }
   // contractsRococo: {
   //   key: 'contractsRococo',

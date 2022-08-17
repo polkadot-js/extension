@@ -4,8 +4,6 @@
 import { PREDEFINED_NETWORKS } from '@subwallet/extension-koni-base/api/predefinedNetworks';
 import { DOTSAMA_AUTO_CONNECT_MS } from '@subwallet/extension-koni-base/constants';
 import { getCurrentProvider } from '@subwallet/extension-koni-base/utils';
-// @ts-ignore
-import { Scheduler, oakConstants } from 'oak-js-library/dist';
 
 import { ApiPromise, WsProvider } from '@polkadot/api';
 
@@ -206,17 +204,56 @@ describe('test DotSama APIs', () => {
   });
 
   test('get turing auto-compounding APY', async () => {
-    // const provider = new WsProvider(getCurrentProvider(PREDEFINED_NETWORKS.turingStaging), DOTSAMA_AUTO_CONNECT_MS);
-    // const api = new ApiPromise({ provider });
-    // const apiPromise = await api.isReady;
-    //
+    const provider = new WsProvider(getCurrentProvider(PREDEFINED_NETWORKS.turingStaging), DOTSAMA_AUTO_CONNECT_MS);
+    const api = new ApiPromise({
+      provider,
+      rpc: {
+        automationTime: {
+          generateTaskId: {
+            description: 'Getting task ID given account ID and provided ID',
+            params: [
+              {
+                name: 'accountId',
+                type: 'AccountId'
+              },
+              {
+                name: 'providedId',
+                type: 'Text'
+              }
+            ],
+            type: 'Hash'
+          },
+          calculateOptimalAutostaking: {
+            description: 'blah',
+            params: [
+              {
+                name: 'principal',
+                type: 'u128'
+              },
+              {
+                name: 'collator',
+                type: 'AccountId'
+              }
+            ],
+            type: 'Hash'
+          }
+        }
+      }
+    });
+    const apiPromise = await api.isReady;
+
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-member-access
+    const resp = await (apiPromise.rpc as any).automationTime.calculateOptimalAutostaking('10000000000000', '691Fmzb8rhYmBxLvaqYEUApK22s3o6eCzC4whDY7dZZ83YYQ');
+
+    console.log(resp.toHuman());
+
     // const resp = apiPromise.tx.automationTime.scheduleAutoCompoundDelegatedStakeTask('1658854800', '172800', '691Fmzb8rhYmBxLvaqYEUApK22s3o6eCzC4whDY7dZZ83YYQ', '10000000000');
     // const paymentInfo = await resp.paymentInfo('5HbcGs2QXVAc6Q6eoTzLYNAJWpN17AkCFRLnWDaHCiGYXvNc');
     //
     // console.log(paymentInfo.toHuman()); // might or might not be right
 
-    const scheduler = new Scheduler(oakConstants.OakChains.TUR);
+    // const scheduler = new Scheduler(oakConstants.OakChains.TUR);
 
-    console.log(scheduler);
+    // console.log(scheduler);
   });
 });

@@ -340,10 +340,19 @@ export default class KoniTabs extends Tabs {
       });
 
     // Detect network chain
-    // const evmState = await this.getEvmState(url);
-    // let currentChainId = evmState.chainId;
+    const evmState = await this.getEvmState(url);
+    let currentChainId = evmState.chainId;
 
     const _onAuthChanged = async () => {
+      // Detect network
+      const { chainId } = await this.getEvmState(url);
+
+      if (chainId !== currentChainId) {
+        emitEvent('chainChanged', chainId);
+        currentChainId = chainId;
+      }
+
+      // Detect account
       const newAccountList = await this.getEvmCurrentAccount(url);
 
       // Compare to void looping reload
@@ -354,7 +363,7 @@ export default class KoniTabs extends Tabs {
       }
     };
 
-    const chainChainSubscription = this.#koniState.subscribeEvmChainChange()
+    const authUrlSubscription = this.#koniState.subscribeEvmChainChange()
       .subscribe((rs) => {
         _onAuthChanged().catch(console.error);
       });
@@ -416,7 +425,7 @@ export default class KoniTabs extends Tabs {
       });
       unsubscribe(id);
       accountListSubscription.unsubscribe();
-      chainChainSubscription.unsubscribe();
+      authUrlSubscription.unsubscribe();
       clearInterval(networkCheckInterval);
     });
 

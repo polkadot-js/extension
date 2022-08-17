@@ -4020,15 +4020,15 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@polkadot/phishing@npm:^0.16.2":
-  version: 0.16.2
-  resolution: "@polkadot/phishing@npm:0.16.2"
+"@polkadot/phishing@npm:^0.18.5":
+  version: 0.18.5
+  resolution: "@polkadot/phishing@npm:0.18.5"
   dependencies:
-    "@babel/runtime": ^7.18.6
-    "@polkadot/util": ^9.7.2
-    "@polkadot/util-crypto": ^9.7.2
-    "@polkadot/x-fetch": ^9.7.2
-  checksum: 10a9d95a0a66929434ed41ba3e6376141871819228ae249d67f2375df6eaecf2b1ffa66e46413336a6804f0934ff9f5f523a025286d5ce345d12b9e0b9698464
+    "@babel/runtime": ^7.18.9
+    "@polkadot/util": ^10.1.4
+    "@polkadot/util-crypto": ^10.1.4
+    "@polkadot/x-fetch": ^10.1.4
+  checksum: 14eaa03feb99e9fe3dee194bc3a41e59e39dd3408834ef6c5707170320dfaf66bc1e3c7d26656cb850a0a4f008817a9eb556d973b25dd7427bb066f2982422e3
   languageName: node
   linkType: hard
 
@@ -5048,7 +5048,7 @@ __metadata:
     "@polkadot/api": ^8.11.3
     "@polkadot/keyring": ^9.7.2
     "@polkadot/networks": ^9.7.2
-    "@polkadot/phishing": ^0.16.2
+    "@polkadot/phishing": ^0.18.5
     "@polkadot/rpc-provider": ^8.11.3
     "@polkadot/types": ^8.11.3
     "@polkadot/ui-keyring": ^2.7.2
@@ -5162,7 +5162,7 @@ __metadata:
     "@polkadot/api-derive": ^8.11.3
     "@polkadot/keyring": ^9.7.2
     "@polkadot/networks": ^9.7.2
-    "@polkadot/phishing": ^0.16.2
+    "@polkadot/phishing": ^0.18.5
     "@polkadot/rpc-provider": ^8.11.3
     "@polkadot/types": ^8.11.3
     "@polkadot/ui-keyring": ^2.7.2

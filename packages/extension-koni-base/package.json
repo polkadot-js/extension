@@ -43,7 +43,7 @@
     "@polkadot/api-derive": "^8.11.3",
     "@polkadot/keyring": "^9.7.2",
     "@polkadot/networks": "^9.7.2",
-    "@polkadot/phishing": "^0.16.2",
+    "@polkadot/phishing": "^0.18.5",
     "@polkadot/rpc-provider": "^8.11.3",
     "@polkadot/types": "^8.11.3",
     "@polkadot/ui-keyring": "^2.7.2",

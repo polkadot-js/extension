@@ -327,13 +327,6 @@ const makeCrossChainTransferExternal = async ({ callback,
 
   const apiProps = await dotSamaApiMap[originalNetworkKey].isReady;
   const api = apiProps.api;
-  const isTxXTokensSupported = !!api && !!api.tx && !!api.tx.xTokens;
-
-  if (!isTxXTokensSupported) {
-    callback(getUnsupportedResponse());
-
-    return;
-  }
 
   const extrinsic = await createXcmExtrinsic({
     destinationNetworkKey: destinationNetworkKey,

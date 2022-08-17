@@ -155,8 +155,6 @@ export const getRegistry = async (networkKey: string, api: ApiPromise, customErc
     });
   }
 
-  console.log('chainTokens', chainTokens);
-
   const predefineTokenMap = PREDEFINE_TOKEN_DATA_MAP[networkKey];
 
   if (predefineTokenMap) {
@@ -165,8 +163,6 @@ export const getRegistry = async (networkKey: string, api: ApiPromise, customErc
 
   if (['karura', 'acala', 'bifrost'].indexOf(networkKey) > -1) {
     const foreignTokens = await getForeignToken(api);
-
-    console.log('foreignTokens', foreignTokens);
 
     Object.assign(tokenMap, foreignTokens);
 

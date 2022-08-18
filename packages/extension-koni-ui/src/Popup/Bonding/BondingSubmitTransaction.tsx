@@ -19,8 +19,7 @@ import useToast from '@subwallet/extension-koni-ui/hooks/useToast';
 import { getBondingTxInfo } from '@subwallet/extension-koni-ui/messaging';
 import Header from '@subwallet/extension-koni-ui/partials/Header';
 import { BOND_DURATION_OPTIONS, getStakeUnit, parseBalanceString } from '@subwallet/extension-koni-ui/Popup/Bonding/utils';
-import { RootState, store } from '@subwallet/extension-koni-ui/stores';
-import { BondingParams } from '@subwallet/extension-koni-ui/stores/types';
+import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { toShort } from '@subwallet/extension-koni-ui/util';
 import React, { useCallback, useContext, useEffect, useState } from 'react';
@@ -156,9 +155,9 @@ function BondingSubmitTransaction ({ className }: Props): React.ReactElement<Pro
   }, [navigate]);
 
   const handleClickCancel = useCallback(() => {
-    store.dispatch({ type: 'bondingParams/update', payload: { selectedNetwork, selectedValidator: validatorInfo, maxNominatorPerValidator: null, selectedAccount } as BondingParams });
     navigate('/account/select-bonding-validator');
-  }, [navigate, selectedAccount, selectedNetwork, validatorInfo]);
+    // store.dispatch({ type: 'bondingParams/update', payload: { selectedNetwork, selectedValidator: validatorInfo, maxNominatorPerValidator: null, selectedAccount } as BondingParams });
+  }, [navigate]);
 
   const handleChangeAmount = useCallback((value?: BN | string) => {
     if (!value) {

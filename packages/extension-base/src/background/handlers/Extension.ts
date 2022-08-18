@@ -6,7 +6,7 @@ import type { KeyringPair, KeyringPair$Json, KeyringPair$Meta } from '@polkadot/
 import type { SignerPayloadJSON, SignerPayloadRaw } from '@polkadot/types/types';
 import type { SubjectInfo } from '@polkadot/ui-keyring/observable/types';
 import type { KeypairType } from '@polkadot/util-crypto/types';
-import type { AccountJson, AllowedPath, AuthorizeRequest, MessageTypes, MetadataRequest, RequestAccountBatchExport, RequestAccountChangePassword, RequestAccountCreateExternal, RequestAccountCreateHardware, RequestAccountCreateSuri, RequestAccountEdit, RequestAccountExport, RequestAccountForget, RequestAccountShow, RequestAccountTie, RequestAccountValidate, RequestAuthorizeApprove, RequestAuthorizeReject, RequestBatchRestore, RequestDeriveCreate, RequestDeriveValidate, RequestJsonRestore, RequestMetadataApprove, RequestMetadataReject, RequestSeedCreate, RequestSeedValidate, RequestSigningApprovePassword, RequestSigningApproveSignature, RequestSigningCancel, RequestSigningIsLocked, RequestTypes, ResponseAccountExport, ResponseAccountsExport, ResponseAuthorizeList, ResponseDeriveValidate, ResponseJsonGetAccountInfo, ResponseSeedCreate, ResponseSeedValidate, ResponseSigningIsLocked, ResponseType, SigningRequest } from '../types';
+import type { AccountJson, AllowedPath, AuthorizeRequest, MessageTypes, MetadataRequest, RequestAccountBatchExport, RequestAccountChangePassword, RequestAccountCreateExternal, RequestAccountCreateHardware, RequestAccountCreateSuri, RequestAccountEdit, RequestAccountExport, RequestAccountForget, RequestAccountShow, RequestAccountTie, RequestAccountValidate, RequestAuthorizeApprove, RequestBatchRestore, RequestDeriveCreate, RequestDeriveValidate, RequestJsonRestore, RequestMetadataApprove, RequestMetadataReject, RequestSeedCreate, RequestSeedValidate, RequestSigningApprovePassword, RequestSigningApproveSignature, RequestSigningCancel, RequestSigningIsLocked, RequestTypes, RequestUpdateAuthorizedAccounts, ResponseAccountExport, ResponseAccountsExport, ResponseAuthorizeList, ResponseDeriveValidate, ResponseJsonGetAccountInfo, ResponseSeedCreate, ResponseSeedValidate, ResponseSigningIsLocked, ResponseType, SigningRequest } from '../types';
 
 import { ALLOWED_PATH, PASSWORD_EXPIRY_MS } from '@polkadot/extension-base/defaults';
 import { Metadata, TypeRegistry } from '@polkadot/types';
@@ -16,7 +16,7 @@ import { assert, isHex } from '@polkadot/util';
 import { base64Decode, keyExtractSuri, mnemonicGenerate, mnemonicValidate } from '@polkadot/util-crypto';
 
 import { withErrorLog } from './helpers';
-import State from './State';
+import State, { AuthorizedAccountsDiff } from './State';
 import { createSubscription, unsubscribe } from './subscriptions';
 
 type CachedUnlocks = Record<string, number>;
@@ -115,6 +115,18 @@ export default class Extension {
   }
 
   private accountsForget ({ address }: RequestAccountForget): boolean {
+    const authorizedAccountsDiff: AuthorizedAccountsDiff = [];
+
+    // cycle through authUrls and prepare the array of diff
+    Object.entries(this.#state.authUrls).forEach(([url, urlInfo]) => {
+      if (!urlInfo.authorizedAccounts.includes(address)) {
+        return;
+      }
+
+      authorizedAccountsDiff.push([url, urlInfo.authorizedAccounts.filter((previousAddress) => previousAddress !== address)]);
+    });
+
+    this.#state.updateAuthorizedAccounts(authorizedAccountsDiff);
     keyring.forgetAccount(address);
 
     return true;
@@ -166,7 +178,6 @@ export default class Extension {
     }
   }
 
-  // FIXME This looks very much like what we have in Tabs
   private accountsSubscribe (id: string, port: chrome.runtime.Port): boolean {
     const cb = createSubscription<'pri(accounts.subscribe)'>(id, port);
     const subscription = accountsObservable.subject.subscribe((accounts: SubjectInfo): void =>
@@ -181,32 +192,24 @@ export default class Extension {
     return true;
   }
 
-  private authorizeApprove ({ id }: RequestAuthorizeApprove): boolean {
+  private authorizeApprove ({ authorizedAccounts, id }: RequestAuthorizeApprove): boolean {
     const queued = this.#state.getAuthRequest(id);
 
     assert(queued, 'Unable to find request');
 
     const { resolve } = queued;
 
-    resolve(true);
+    resolve({ authorizedAccounts, result: true });
 
     return true;
+  }
+
+  private authorizeUpdate ({ authorizedAccounts, url }: RequestUpdateAuthorizedAccounts): void {
+    return this.#state.updateAuthorizedAccounts([[url, authorizedAccounts]]);
   }
 
   private getAuthList (): ResponseAuthorizeList {
     return { list: this.#state.authUrls };
-  }
-
-  private authorizeReject ({ id }: RequestAuthorizeReject): boolean {
-    const queued = this.#state.getAuthRequest(id);
-
-    assert(queued, 'Unable to find request');
-
-    const { reject } = queued;
-
-    reject(new Error('Rejected'));
-
-    return true;
   }
 
   // FIXME This looks very much like what we have in accounts
@@ -506,12 +509,12 @@ export default class Extension {
     return true;
   }
 
-  private toggleAuthorization (url: string): ResponseAuthorizeList {
-    return { list: this.#state.toggleAuthorization(url) };
-  }
-
   private removeAuthorization (url: string): ResponseAuthorizeList {
     return { list: this.#state.removeAuthorization(url) };
+  }
+
+  private deleteAuthRequest (requestId: string): void {
+    return this.#state.deleteAuthRequest(requestId);
   }
 
   // Weird thought, the eslint override is not needed in Tabs
@@ -524,17 +527,17 @@ export default class Extension {
       case 'pri(authorize.list)':
         return this.getAuthList();
 
-      case 'pri(authorize.reject)':
-        return this.authorizeReject(request as RequestAuthorizeReject);
-
-      case 'pri(authorize.toggle)':
-        return this.toggleAuthorization(request as string);
-
       case 'pri(authorize.remove)':
         return this.removeAuthorization(request as string);
 
+      case 'pri(authorize.delete.request)':
+        return this.deleteAuthRequest(request as string);
+
       case 'pri(authorize.requests)':
         return this.authorizeSubscribe(id, port);
+
+      case 'pri(authorize.update)':
+        return this.authorizeUpdate(request as RequestUpdateAuthorizedAccounts);
 
       case 'pri(accounts.create.external)':
         return this.accountsCreateExternal(request as RequestAccountCreateExternal);

@@ -1,5 +1,60 @@
 # CHANGELOG
 
+## 0.44.5 Aug 13, 2022
+
+- **Important** Not published to the stores, aligns with latest released packages.
+
+Changes:
+
+- Upgrade to `@polkadot/api` 9.2.1
+- Updated to `@polkadot/util` 10.1.4
+
+
+## 0.44.4 Aug 8, 2022
+
+- **Important** Not published to the stores, aligns with latest released packages.
+
+Contributed:
+
+- Adjust layout for authorization modal (Thanks to https://github.com/Tbaut)
+
+Changes:
+
+- Upgrade to `@polkadot/api` 9.1.1
+- Updated to `@polkadot/util` 10.1.3
+
+
+## 0.44.3 Jul 30, 2022
+
+- **Important** Not published to the stores, aligns with latest released packages.
+
+Contributed:
+
+- Adjust layout for authorization modal (Thanks to https://github.com/Tbaut)
+
+Changes:
+
+- Upgrade to `@polkadot/api` 9.0.1
+- Updated to `@polkadot/util` 10.1.2
+
+
+## 0.44.2 Jul 24, 2022
+
+- **Important** Not published to the stores, aligns with latest released packages.
+
+Contributed:
+
+- Account selection/management for authorized sites (Thanks to https://github.com/Tbaut)
+- UI icon & cursor adjustments for authorization (Thanks to https://github.com/roiLeo)
+
+Changes:
+
+- Allow for unsubscribe handling on account subscriptions
+- Add error handling for user-supplied account callbacks
+- Upgrade to `@polkadot/api` 8.14.1
+- Updated to `@polkadot/util` 10.1.1
+
+
 ## 0.44.1 Jun 6, 2022
 
 **Important** CHANGELOG entries are a rollup of details since last publish to the stores

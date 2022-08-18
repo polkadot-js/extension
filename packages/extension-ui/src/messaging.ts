@@ -95,8 +95,8 @@ export async function forgetAccount (address: string): Promise<boolean> {
   return sendMessage('pri(accounts.forget)', { address });
 }
 
-export async function approveAuthRequest (id: string): Promise<boolean> {
-  return sendMessage('pri(authorize.approve)', { id });
+export async function approveAuthRequest (id: string, authorizedAccounts: string[]): Promise<boolean> {
+  return sendMessage('pri(authorize.approve)', { authorizedAccounts, id });
 }
 
 export async function approveMetaRequest (id: string): Promise<boolean> {
@@ -172,10 +172,6 @@ export async function getMetadata (genesisHash?: string | null, isPartial = fals
   return null;
 }
 
-export async function rejectAuthRequest (id: string): Promise<boolean> {
-  return sendMessage('pri(authorize.reject)', { id });
-}
-
 export async function rejectMetaRequest (id: string): Promise<boolean> {
   return sendMessage('pri(metadata.reject)', { id });
 }
@@ -192,12 +188,16 @@ export async function getAuthList (): Promise<ResponseAuthorizeList> {
   return sendMessage('pri(authorize.list)');
 }
 
-export async function toggleAuthorization (url: string): Promise<ResponseAuthorizeList> {
-  return sendMessage('pri(authorize.toggle)', url);
-}
-
 export async function removeAuthorization (url: string): Promise<ResponseAuthorizeList> {
   return sendMessage('pri(authorize.remove)', url);
+}
+
+export async function updateAuthorization (authorizedAccounts: string[], url: string): Promise<void> {
+  return sendMessage('pri(authorize.update)', { authorizedAccounts, url });
+}
+
+export async function deleteAuthRequest (requestId: string): Promise<void> {
+  return sendMessage('pri(authorize.delete.request)', requestId);
 }
 
 export async function subscribeMetadataRequests (cb: (accounts: MetadataRequest[]) => void): Promise<boolean> {

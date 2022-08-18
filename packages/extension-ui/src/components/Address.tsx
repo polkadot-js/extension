@@ -42,6 +42,7 @@ export interface Props {
   isHidden?: boolean;
   name?: string | null;
   parentName?: string | null;
+  showVisibilityAction?: boolean
   suri?: string;
   toggleActions?: number;
   type?: KeypairType;
@@ -95,7 +96,7 @@ function recodeAddress (address: string, accounts: AccountWithChildren[], chain:
 const ACCOUNTS_SCREEN_HEIGHT = 550;
 const defaultRecoded = { account: null, formatted: null, prefix: 42, type: DEFAULT_TYPE };
 
-function Address ({ actions, address, children, className, genesisHash, isExternal, isHardware, isHidden, name, parentName, suri, toggleActions, type: givenType }: Props): React.ReactElement<Props> {
+function Address ({ actions, address, children, className, genesisHash, isExternal, isHardware, isHidden, name, parentName, showVisibilityAction = false, suri, toggleActions, type: givenType }: Props): React.ReactElement<Props> {
   const { t } = useTranslation();
   const { accounts } = useContext(AccountContext);
   const settings = useContext(SettingsContext);
@@ -268,7 +269,7 @@ function Address ({ actions, address, children, className, genesisHash, isExtern
                 title={t('copy address')}
               />
             </CopyToClipboard>
-            {actions && (
+            {(actions || showVisibilityAction) && (
               <FontAwesomeIcon
                 className={isHidden ? 'hiddenIcon' : 'visibleIcon'}
                 icon={isHidden ? faEyeSlash : faEye}

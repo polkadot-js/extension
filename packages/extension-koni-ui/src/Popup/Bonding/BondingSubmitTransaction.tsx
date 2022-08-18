@@ -16,7 +16,6 @@ import useGetFreeBalance from '@subwallet/extension-koni-ui/hooks/screen/bonding
 import useIsSufficientBalance from '@subwallet/extension-koni-ui/hooks/screen/bonding/useIsSufficientBalance';
 import useGetNetworkJson from '@subwallet/extension-koni-ui/hooks/screen/home/useGetNetworkJson';
 import useToast from '@subwallet/extension-koni-ui/hooks/useToast';
-import useTranslation from '@subwallet/extension-koni-ui/hooks/useTranslation';
 import { getBondingTxInfo } from '@subwallet/extension-koni-ui/messaging';
 import Header from '@subwallet/extension-koni-ui/partials/Header';
 import { BOND_DURATION_OPTIONS, getStakeUnit, parseBalanceString } from '@subwallet/extension-koni-ui/Popup/Bonding/utils';
@@ -52,7 +51,6 @@ function checkCurrentlyBonded (bondedValidators: string[], validatorAddress: str
 }
 
 function BondingSubmitTransaction ({ className }: Props): React.ReactElement<Props> {
-  const { t } = useTranslation();
   const { bondingParams, currentAccount: { account }, networkMap } = useSelector((state: RootState) => state);
   const selectedAccount = bondingParams.selectedAccount as string;
   const selectedNetwork = bondingParams.selectedNetwork as string;
@@ -81,8 +79,6 @@ function BondingSubmitTransaction ({ className }: Props): React.ReactElement<Pro
   const [isTxSuccess, setIsTxSuccess] = useState(false);
   const [txError, setTxError] = useState('');
   const [lockPeriod, setLockPeriod] = useState(0);
-
-  console.log('bondedValidators', bondedValidators, validatorInfo.address);
 
   const isCurrentlyBonded = checkCurrentlyBonded(bondedValidators, validatorInfo.address);
   const isOversubscribed = validatorInfo.nominatorCount >= maxNominatorPerValidator;
@@ -408,7 +404,7 @@ function BondingSubmitTransaction ({ className }: Props): React.ReactElement<Pro
         isShowNetworkSelect={false}
         showCancelButton={!loading}
         showSubHeader
-        subHeaderName={t<string>('Staking action')}
+        subHeaderName={'Staking action'}
       />
 
       {!showResult && <div
@@ -521,7 +517,7 @@ function BondingSubmitTransaction ({ className }: Props): React.ReactElement<Pro
           inputAddressHelp={''}
           isError={false}
           isZeroable={false}
-          label={t<string>('Amount')}
+          label={'Amount'}
           onChange={handleChangeAmount}
           placeholder={'0'}
           siSymbol={networkJson.nativeToken}

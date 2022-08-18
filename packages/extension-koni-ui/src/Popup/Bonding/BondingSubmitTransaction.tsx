@@ -515,7 +515,7 @@ function BondingSubmitTransaction ({ className }: Props): React.ReactElement<Pro
           help={`Type the amount you want to stake. ${!isCurrentlyBonded ? `The minimum amount is ${validatorInfo.minBond}` : 'Amount must be greater than 0'} ${networkJson.nativeToken as string}`}
           inputAddressHelp={''}
           isError={false}
-          isZeroable={false}
+          isZeroable={true}
           label={'Amount'}
           onChange={handleChangeAmount}
           placeholder={'0'}

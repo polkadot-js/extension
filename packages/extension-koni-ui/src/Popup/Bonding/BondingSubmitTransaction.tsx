@@ -160,9 +160,9 @@ function BondingSubmitTransaction ({ className }: Props): React.ReactElement<Pro
   }, [navigate]);
 
   const handleClickCancel = useCallback(() => {
-    store.dispatch({ type: 'bondingParams/update', payload: { selectedNetwork, selectedValidator: validatorInfo, maxNominatorPerValidator: null } as BondingParams });
+    store.dispatch({ type: 'bondingParams/update', payload: { selectedNetwork, selectedValidator: validatorInfo, maxNominatorPerValidator: null, selectedAccount } as BondingParams });
     navigate('/account/select-bonding-validator');
-  }, [navigate, selectedNetwork, validatorInfo]);
+  }, [navigate, selectedAccount, selectedNetwork, validatorInfo]);
 
   const handleChangeAmount = useCallback((value?: BN | string) => {
     if (!value) {

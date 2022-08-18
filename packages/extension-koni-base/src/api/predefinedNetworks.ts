@@ -972,6 +972,7 @@ export const PREDEFINED_NETWORKS: Record<string, NetworkJson> = {
     currentProvider: 'Dwellir',
     groups: ['KUSAMA_PARACHAIN'],
     paraId: 2090,
+    coinGeckoKey: 'basilisk',
     nativeToken: 'BSX',
     crowdloanUrl: 'https://loan.bsx.fi/',
     decimals: 12

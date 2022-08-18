@@ -45,6 +45,11 @@ export const SupportedCrossChainsMap: Record<string, CrossChainRelation> = {
         type: 'p',
         isEthereum: false,
         supportedToken: ['KSM']
+      },
+      bifrost: {
+        type: 'p',
+        isEthereum: false,
+        supportedToken: ['KSM']
       }
     }
   },
@@ -97,6 +102,11 @@ export const SupportedCrossChainsMap: Record<string, CrossChainRelation> = {
         type: 'r',
         isEthereum: false,
         supportedToken: ['KSM']
+      },
+      bifrost: {
+        type: 'p',
+        isEthereum: false,
+        supportedToken: ['aUSD', 'BNC', 'KAR']
       }
     }
   },
@@ -139,22 +149,12 @@ export const SupportedCrossChainsMap: Record<string, CrossChainRelation> = {
         type: 'r',
         isEthereum: false,
         supportedToken: ['xcKSM']
+      },
+      bifrost: {
+        type: 'p',
+        isEthereum: false,
+        supportedToken: ['xcBNC']
       }
-      // bifrost: {
-      //   type: 'p',
-      //   isEthereum: false,
-      //   supportedToken: ['xcBNC']
-      // },
-      // statemine: {
-      //   type: 'p',
-      //   isEthereum: false,
-      //   supportedToken: ['xcRMRK', 'xcUSDT']
-      // },
-      // khala: {
-      //   type: 'p',
-      //   isEthereum: false,
-      //   supportedToken: ['xcPHA']
-      // }
     }
   },
   astar: {
@@ -210,33 +210,28 @@ export const SupportedCrossChainsMap: Record<string, CrossChainRelation> = {
         supportedToken: ['KINT', 'KBTC']
       }
     }
+  },
+  bifrost: { // bifrost on kusama
+    type: 'p',
+    isEthereum: false,
+    relationMap: {
+      moonriver: {
+        type: 'p',
+        isEthereum: true,
+        supportedToken: ['BNC']
+      },
+      karura: {
+        type: 'p',
+        isEthereum: false,
+        supportedToken: ['aUSD', 'KAR', 'BNC']
+      },
+      kusama: {
+        type: 'r',
+        isEthereum: false,
+        supportedToken: ['KSM']
+      }
+    }
   }
-  // bifrost: { // bifrost on kusama
-  //   type: 'p',
-  //   isEthereum: false,
-  //   relationMap: {
-  //     moonriver: {
-  //       type: 'p',
-  //       isEthereum: true,
-  //       supportedToken: ['BNC', 'MOVR']
-  //     },
-  //     statemine: {
-  //       type: 'p',
-  //       isEthereum: false,
-  //       supportedToken: ['USDT', 'RMRK']
-  //     },
-  //     karura: {
-  //       type: 'p',
-  //       isEthereum: false,
-  //       supportedToken: ['KUSD', 'KAR']
-  //     },
-  //     kusama: {
-  //       type: 'r',
-  //       isEthereum: false,
-  //       supportedToken: ['KSM']
-  //     }
-  //   }
-  // }
   // moonbase: {
   //   isEthereum: true,
   //   type: 'p',

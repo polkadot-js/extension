@@ -73,6 +73,7 @@ export async function getEVMTransactionObject (
   transferAll: boolean,
   web3ApiMap: Record<string, Web3>
 ): Promise<[TransactionConfig, string, string]> {
+  console.log('run here');
   const web3Api = web3ApiMap[networkKey];
   const gasPrice = await web3Api.eth.getGasPrice();
   const transactionObject = {

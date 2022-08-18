@@ -88,7 +88,6 @@ export async function subscribeCrowdloan (addresses: string[], dotSamaAPIMap: Re
 
     Object.entries(networks).forEach(([networkKey, networkInfo]) => {
       const crowdloanCb = (rs: CrowdloanItem) => {
-        console.log('here', networkKey, rs, substrateAddresses);
         callback(networkKey, rs);
       };
 

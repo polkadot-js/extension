@@ -7,11 +7,10 @@ import { isUrl } from '@subwallet/extension-koni-base/utils/utils';
 import Web3 from 'web3';
 
 export interface HandleNftParams {
-  updateItem: (data: NftItem) => void,
-  updateCollection: (data: NftCollection) => void,
-  updateReady: (ready: boolean) => void,
-  updateNftIds: (networkKey: string, collectionId?: string, nftIds?: string[]) => void,
-  updateCollectionIds: (networkKey: string, collectionIds?: string[]) => void
+  updateItem: (chain: string, data: NftItem, owner: string) => void,
+  updateCollection: (chain: string, data: NftCollection) => void,
+  updateNftIds: (chain: string, owner: string, collectionId?: string, nftIds?: string[]) => void,
+  updateCollectionIds: (chain: string, address: string, collectionIds?: string[]) => void
 }
 
 export abstract class BaseNftApi {

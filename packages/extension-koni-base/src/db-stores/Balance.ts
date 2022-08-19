@@ -9,11 +9,6 @@ import BaseStoreWithAddress from '../db-stores/BaseStoreWithAddress';
 
 export default class BalanceStore extends BaseStoreWithAddress<IBalance> {
   private balanceSub!: Subscription;
-
-  updateBalance (balance: IBalance) {
-    return this.table.put(balance);
-  }
-
   liveQueryBalance (address: string, cb: (result: BalanceJson) => void) {
     if (this.balanceSub) {
       this.balanceSub.unsubscribe();
@@ -25,7 +20,7 @@ export default class BalanceStore extends BaseStoreWithAddress<IBalance> {
 
     this.balanceSub = subscription.subscribe({
       next: (rs) => {
-        const data = rs.reduce((a, v) => ({ ...a, [v.chain]: v }), {});
+        const data = this.convertToJsonObject(rs);
 
         if (Object.keys(data).length) {
           const res: BalanceJson = { details: data };
@@ -36,9 +31,5 @@ export default class BalanceStore extends BaseStoreWithAddress<IBalance> {
     });
 
     return this.balanceSub;
-  }
-
-  getBalance (address: string) {
-    return this.table.where('address').equals(address).toArray();
   }
 }

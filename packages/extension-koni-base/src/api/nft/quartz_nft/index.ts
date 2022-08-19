@@ -2,7 +2,6 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { ApiProps, NftCollection, NftItem } from '@subwallet/extension-base/background/KoniTypes';
-import { SUPPORTED_NFT_NETWORKS } from '@subwallet/extension-koni-base/api/nft/config';
 import { BaseNftApi, HandleNftParams } from '@subwallet/extension-koni-base/api/nft/nft';
 import { hexToStr, hexToUTF16, parseIpfsLink, utf16ToString } from '@subwallet/extension-koni-base/utils/utils';
 
@@ -129,7 +128,7 @@ export default class QuartzNftApi extends BaseNftApi {
     };
   }
 
-  public async handleNfts (params: HandleNftParams) {
+  public async handleNft (address: string, params: HandleNftParams) {
     const collectionCount = await this.getCreatedCollectionCount();
     const collectionPropertiesMap: Record<number, any> = {};
     const collectionIds: number[] = [];
@@ -144,10 +143,8 @@ export default class QuartzNftApi extends BaseNftApi {
       }
 
       for (let i = 0; i < collectionCount; i++) {
-        for (const address of this.addresses) {
-          if (collectionPropertiesMap[i] !== null) {
-            addressTokenDict.push({ i, account: address });
-          }
+        if (collectionPropertiesMap[i] !== null) {
+          addressTokenDict.push({ i, account: address });
         }
       }
 
@@ -177,8 +174,8 @@ export default class QuartzNftApi extends BaseNftApi {
       ]);
 
       if (allNftId.length <= 0) {
-        params.updateReady(true);
-        params.updateNftIds(SUPPORTED_NFT_NETWORKS.quartz);
+        // params.updateReady(true);
+        params.updateNftIds(this.chain, address);
 
         return;
       }
@@ -206,28 +203,32 @@ export default class QuartzNftApi extends BaseNftApi {
             collectionId: collectionId.toString(),
             properties: nftData.properties,
             rarity: '',
-            chain: SUPPORTED_NFT_NETWORKS.quartz
+            chain: this.chain
           } as NftItem;
 
-          params.updateItem(parsedItem);
+          params.updateItem(this.chain, parsedItem, address);
 
           const parsedCollection = {
             collectionId: collectionId.toString(),
             collectionName: nftData.collectionName,
             image: parseIpfsLink(nftData.image),
-            chain: SUPPORTED_NFT_NETWORKS.quartz
+            chain: this.chain
           } as NftCollection;
 
-          params.updateCollection(parsedCollection);
-          params.updateReady(true);
+          params.updateCollection(this.chain, parsedCollection);
+          // params.updateReady(true);
         }
       }));
 
-      params.updateCollectionIds(SUPPORTED_NFT_NETWORKS.quartz, Object.keys(collectionNftIds));
-      Object.entries(collectionNftIds).forEach(([collectionId, nftIds]) => params.updateNftIds(SUPPORTED_NFT_NETWORKS.quartz, collectionId, nftIds));
+      params.updateCollectionIds(this.chain, address, Object.keys(collectionNftIds));
+      Object.entries(collectionNftIds).forEach(([collectionId, nftIds]) => params.updateNftIds(this.chain, address, collectionId, nftIds));
     } catch (e) {
       console.error('Failed to fetch quartz nft', e);
     }
+  }
+
+  public async handleNfts (params: HandleNftParams) {
+    await Promise.all(this.addresses.map((address) => this.handleNft(address, params)));
   }
 
   public async fetchNfts (params: HandleNftParams): Promise<number> {

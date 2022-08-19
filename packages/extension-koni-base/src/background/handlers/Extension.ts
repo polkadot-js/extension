@@ -903,15 +903,11 @@ export default class KoniExtension extends Extension {
     return this.getNftTransfer();
   }
 
-  private getNftCollection (): Promise<NftCollectionJson> {
-    return new Promise<NftCollectionJson>((resolve) => {
-      state.getNftCollectionSubscription((rs: NftCollectionJson) => {
-        resolve(rs);
-      });
-    });
+  private getNftCollection (): Promise<NftCollection[]> {
+    return state.getNftCollection();
   }
 
-  private subscribeNftCollection (id: string, port: chrome.runtime.Port): Promise<NftCollectionJson | null> {
+  private subscribeNftCollection (id: string, port: chrome.runtime.Port): Promise<NftCollection[]> {
     const cb = createSubscription<'pri(nftCollection.getSubscription)'>(id, port);
     const nftCollectionSubscription = state.subscribeNftCollection().subscribe({
       next: (rs) => {
@@ -927,15 +923,11 @@ export default class KoniExtension extends Extension {
     return this.getNftCollection();
   }
 
-  private getNft (): Promise<NftJson> {
-    return new Promise<NftJson>((resolve) => {
-      state.getNftSubscription((rs: NftJson) => {
-        resolve(rs);
-      });
-    });
+  private getNft (): Promise<NftJson | undefined> {
+    return state.getNft();
   }
 
-  private async subscribeNft (id: string, port: chrome.runtime.Port): Promise<NftJson | null> {
+  private async subscribeNft (id: string, port: chrome.runtime.Port): Promise<NftJson | null | undefined> {
     const cb = createSubscription<'pri(nft.getSubscription)'>(id, port);
     const nftSubscription = state.subscribeNft().subscribe({
       next: (rs) => {
@@ -1015,7 +1007,7 @@ export default class KoniExtension extends Extension {
   private updateTransactionHistory ({ address, item, networkKey }: RequestTransactionHistoryAdd, id: string, port: chrome.runtime.Port): boolean {
     const cb = createSubscription<'pri(transaction.history.add)'>(id, port);
 
-    state.setTransactionHistory(address, networkKey, item, (items) => {
+    state.setHistory(address, networkKey, item, (items) => {
       cb(items);
     });
 
@@ -1033,73 +1025,15 @@ export default class KoniExtension extends Extension {
   }
 
   private forceUpdateNftState (request: RequestNftForceUpdate): boolean {
-    let selectedNftCollection: NftCollection = { collectionId: '' };
-    const nftJson = state.getNft();
-    const nftCollectionJson = state.getNftCollection();
-    const filteredCollections: NftCollection[] = [];
-    const filteredItems: NftItem[] = [];
-    const remainedItems: NftItem[] = [];
-    let itemCount = 0; // count item left in collection
-
-    for (const collection of nftCollectionJson.nftCollectionList) {
-      if (collection.chain === request.chain && collection.collectionId === request.collectionId) {
-        selectedNftCollection = collection;
-        break;
-      }
-    }
-
     if (!request.isSendingSelf) {
-      for (const item of nftJson.nftList) {
-        if (item.chain === request.chain && item.collectionId === request.collectionId) {
-          if (item.id !== request.nft.id) {
-            itemCount += 1;
-            filteredItems.push(item);
-            remainedItems.push(item);
-          }
-        } else {
-          filteredItems.push(item);
-        }
-      }
-
-      state.setNft(request.senderAddress, {
-        nftList: filteredItems
-      } as NftJson);
-
-      if (itemCount <= 0) {
-        for (const collection of nftCollectionJson.nftCollectionList) {
-          if (collection.chain !== request.chain || collection.collectionId !== request.collectionId) {
-            filteredCollections.push(collection);
-          }
-        }
-
-        state.setNftCollection(request.senderAddress, {
-          ready: true,
-          nftCollectionList: filteredCollections
-        } as NftCollectionJson);
-      }
+      state.removeNfts(request.chain, request.senderAddress, request.collectionId, [request.nft.id || '']).catch((e) => console.warn(e));
 
       this.isInWalletAccount(request.recipientAddress).then((res) => {
         if (res) {
-          state.updateNftData(request.recipientAddress, request.nft);
-          state.updateNftCollection(request.recipientAddress, selectedNftCollection);
-        } else {
-          state.removeNftFromMasterStore(request.nft);
+          state.updateNftData(request.chain, request.nft, request.recipientAddress);
         }
       }).catch((err) => console.warn(err));
-    } else {
-      for (const item of nftJson.nftList) {
-        if (item.chain === request.chain && item.collectionId === request.collectionId) {
-          remainedItems.push(item);
-        }
-      }
     }
-
-    state.setNftTransfer({
-      cronUpdate: false,
-      forceUpdate: true,
-      selectedNftCollection,
-      nftItems: remainedItems
-    });
 
     return true;
   }
@@ -1335,11 +1269,11 @@ export default class KoniExtension extends Extension {
           extrinsicHash: res.extrinsicHash
         } as TransactionHistoryItemType;
 
-        state.setTransactionHistory(address, networkKey, { ...transaction, action: 'send' });
+        state.setHistory(address, networkKey, { ...transaction, action: 'send' });
 
         this.isInWalletAccount(recipientAddress).then((isValid) => {
           if (isValid) {
-            state.setTransactionHistory(recipientAddress, networkKey, { ...transaction, action: 'received' });
+            state.setHistory(recipientAddress, networkKey, { ...transaction, action: 'received' });
           } else {
             console.log(`The recipient address [${recipientAddress}] is not in wallet.`);
           }

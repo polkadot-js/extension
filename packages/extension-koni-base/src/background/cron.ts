@@ -88,7 +88,7 @@ export class KoniCron {
           this.refreshHistory(currentAccountInfo.address, this.state.getNetworkMap())();
         }).catch((err) => this.logger.warn(err));
       } else {
-        this.setNftReady(currentAccountInfo.address);
+        // this.setNftReady(currentAccountInfo.address);
         this.setStakingRewardReady();
       }
     });
@@ -106,10 +106,8 @@ export class KoniCron {
       }
 
       if (Object.keys(this.state.getDotSamaApiMap()).length !== 0 || Object.keys(this.state.getWeb3ApiMap()).length !== 0) {
-        this.resetNft(currentAccountInfo.address).then(() => {
-          this.addCron('refreshNft', this.refreshNft(currentAccountInfo.address, this.state.getApiMap(), this.state.getActiveErc721Tokens()), CRON_REFRESH_NFT_INTERVAL);
-        }).catch((err) => this.logger.warn(err));
-
+        this.resetNft(currentAccountInfo.address);
+        this.addCron('refreshNft', this.refreshNft(currentAccountInfo.address, this.state.getApiMap(), this.state.getActiveErc721Tokens()), CRON_REFRESH_NFT_INTERVAL);
         this.addCron('refreshPrice', this.refreshPrice, CRON_REFRESH_PRICE_INTERVAL);
         this.addCron('checkStatusApiMap', this.updateApiMapStatus, CRON_GET_API_MAP_STATUS);
         this.addCron('recoverApiMap', this.recoverApiMap, CRON_AUTO_RECOVER_DOTSAMA_INTERVAL, false);
@@ -120,7 +118,7 @@ export class KoniCron {
           this.addCron('refreshHistory', this.refreshHistory(currentAccountInfo.address, this.state.getNetworkMap()), CRON_REFRESH_HISTORY_INTERVAL);
         }).catch((err) => this.logger.warn(err));
       } else {
-        this.setNftReady(currentAccountInfo.address);
+        // this.setNftReady(currentAccountInfo.address);
         this.setStakingRewardReady();
       }
     });
@@ -129,14 +127,13 @@ export class KoniCron {
       next: (serviceInfo) => {
         const { address } = serviceInfo.currentAccountInfo;
 
-        this.resetNft(address).then(() => {
-          this.resetNftTransferMeta();
-          this.removeCron('refreshNft');
+        this.resetNft(address);
+        this.resetNftTransferMeta();
+        this.removeCron('refreshNft');
 
-          if (this.checkNetworkAvailable(serviceInfo)) { // only add cron job if there's at least 1 active network
-            this.addCron('refreshNft', this.refreshNft(address, serviceInfo.apiMap, serviceInfo.customErc721Registry), CRON_REFRESH_NFT_INTERVAL);
-          }
-        }).catch((err) => this.logger.warn(err));
+        if (this.checkNetworkAvailable(serviceInfo)) { // only add cron job if there's at least 1 active network
+          this.addCron('refreshNft', this.refreshNft(address, serviceInfo.apiMap, serviceInfo.customErc721Registry), CRON_REFRESH_NFT_INTERVAL);
+        }
 
         // this.resetStakingReward(address);
         this.resetHistory(address).then(() => {
@@ -160,7 +157,7 @@ export class KoniCron {
           this.addCron('refreshStakingReward', this.refreshStakingReward(address), CRON_REFRESH_STAKING_REWARD_INTERVAL);
           this.addCron('refreshStakeUnlockingInfo', this.refreshStakeUnlockingInfo(address, serviceInfo.networkMap, serviceInfo.apiMap.dotSama), CRON_REFRESH_STAKE_UNLOCKING_INFO);
         } else {
-          this.setNftReady(address);
+          // this.setNftReady(address);
           this.setStakingRewardReady();
         }
       }
@@ -263,12 +260,9 @@ export class KoniCron {
     };
   };
 
-  resetNft = async (newAddress: string) => {
+  resetNft = (newAddress: string) => {
     this.logger.log('Reset Nft state');
-    await Promise.all([
-      this.state.resetNft(newAddress),
-      this.state.resetNftCollection(newAddress)
-    ]);
+    this.state.resetNft(newAddress);
   };
 
   resetNftTransferMeta = () => {
@@ -305,9 +299,9 @@ export class KoniCron {
     };
   };
 
-  setNftReady = (address: string) => {
-    this.state.updateNftReady(address, true);
-  };
+  // setNftReady = (address: string) => {
+  //   this.state.updateNftReady(address, true);
+  // };
 
   refreshStakeUnlockingInfo (address: string, networkMap: Record<string, NetworkJson>, dotSamaApiMap: Record<string, ApiProps>) {
     return () => {

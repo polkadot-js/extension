@@ -24,16 +24,9 @@ import DatabaseService from '@subwallet/extension-koni-base/services/DatabaseSer
 import { CurrentAccountStore, NetworkMapStore, PriceStore } from '@subwallet/extension-koni-base/stores';
 import AccountRefStore from '@subwallet/extension-koni-base/stores/AccountRef';
 import AuthorizeStore from '@subwallet/extension-koni-base/stores/Authorize';
-import BalanceStore from '@subwallet/extension-koni-base/stores/Balance';
-import CrowdloanStore from '@subwallet/extension-koni-base/stores/Crowdloan';
 import CustomEvmTokenStore from '@subwallet/extension-koni-base/stores/CustomEvmToken';
-import NftStore from '@subwallet/extension-koni-base/stores/Nft';
-import NftCollectionStore from '@subwallet/extension-koni-base/stores/NftCollection';
 import SettingsStore from '@subwallet/extension-koni-base/stores/Settings';
-import StakingStore from '@subwallet/extension-koni-base/stores/Staking';
-import TransactionHistoryStore from '@subwallet/extension-koni-base/stores/TransactionHistoryV3';
 import { convertFundStatus, getCurrentProvider, mergeNetworkProviders } from '@subwallet/extension-koni-base/utils/utils';
-import { Subscription } from 'dexie';
 import SimpleKeyring from 'eth-simple-keyring';
 import { BehaviorSubject, Subject } from 'rxjs';
 import Web3 from 'web3';
@@ -80,11 +73,6 @@ function generateDefaultCrowdloanMap () {
 export default class KoniState extends State {
   public readonly authSubjectV2: BehaviorSubject<AuthorizeRequest[]> = new BehaviorSubject<AuthorizeRequest[]>([]);
 
-  private readonly balanceStore = new BalanceStore();
-  private readonly crowdloanStore = new CrowdloanStore();
-  private readonly stakingStore = new StakingStore();
-  private readonly nftStore = new NftStore();
-  private readonly nftCollectionStore = new NftCollectionStore();
   private readonly networkMapStore = new NetworkMapStore(); // persist custom networkMap by user
   private readonly customEvmTokenStore = new CustomEvmTokenStore();
   private readonly priceStore = new PriceStore();
@@ -98,7 +86,6 @@ export default class KoniState extends State {
   private authorizeCached: AuthUrls | undefined = undefined;
 
   private priceStoreReady = false;
-  private readonly transactionHistoryStore = new TransactionHistoryStore();
 
   private readonly confirmationsQueueSubject = new BehaviorSubject<ConfirmationsQueue>({
     addNetworkRequest: {},
@@ -136,18 +123,7 @@ export default class KoniState extends State {
     forceUpdate: false
   };
 
-  private nftState: NftJson = {
-    total: 0,
-    nftList: []
-  };
-
-  private nftCollectionState: NftCollectionJson = {
-    ready: false,
-    nftCollectionList: []
-  };
-
   private nftSubject = new Subject<NftJson>();
-  private nftCollectionSubject = new Subject<NftCollectionJson>();
 
   private stakingSubject = new Subject<StakingJson>();
   private stakingRewardSubject = new Subject<StakingRewardJson>();
@@ -161,7 +137,7 @@ export default class KoniState extends State {
 
   // eslint-disable-next-line camelcase
   private stakeUnlockingInfoSubject = new Subject<StakeUnlockingJson>();
-  private historyMap: Record<string, TransactionHistoryItemJson> = {};
+  private historyMap: Record<string, TransactionHistoryItemType[]> = {};
   private historySubject = new Subject<Record<string, TransactionHistoryItemType[]>>();
 
   private chainRegistryMap: Record<string, ChainRegistry> = {};
@@ -199,10 +175,10 @@ export default class KoniState extends State {
   }
 
   public init () {
-    this.subscription.start();
-    this.cron.start();
     this.initNetworkStates();
     this.updateServiceInfo();
+    this.subscription.start();
+    this.cron.start();
   }
 
   // init networkMap, apiMap and chainRegistry (first time only)
@@ -614,7 +590,7 @@ export default class KoniState extends State {
   }
 
   public async getStoredStaking (address: string) {
-    const items = await this.stakingStore.asyncGet(address);
+    const items = await this.dbService.stores.staking.getDataByAddressAsObject(address);
 
     return items || {};
   }
@@ -682,28 +658,18 @@ export default class KoniState extends State {
     if (this.hasUpdateStakingItem(networkKey, item)) {
       // Update staking map
       this.stakingMap[networkKey] = itemData;
+      this.updateStakingStore(networkKey, item);
 
       this.lazyNext('setStakingItem', () => {
-        this.updateStakingStore();
         this.publishStaking();
       });
     }
   }
 
-  private updateStakingStore () {
-    const readyMap: Record<string, StakingItem> = {};
-
-    Object.entries(this.stakingMap).forEach(([key, item]) => {
-      if (item.state === APIItemState.READY) {
-        readyMap[key] = item;
-      }
+  private updateStakingStore (networkKey: string, item: StakingItem) {
+    this.getCurrentAccount((currentAccountInfo) => {
+      this.dbService.updateStakingStore(networkKey, this.getNetworkGenesisHashByKey(networkKey), currentAccountInfo.address, item).catch((e) => this.logger.warn(e));
     });
-
-    if (Object.keys(readyMap).length > 0) {
-      this.getCurrentAccount((currentAccountInfo) => {
-        this.stakingStore.set(currentAccountInfo.address, readyMap);
-      });
-    }
   }
 
   public setNftTransfer (data: NftTransferExtra, callback?: (data: NftTransferExtra) => void): void {
@@ -728,266 +694,69 @@ export default class KoniState extends State {
     return this.nftTransferSubject;
   }
 
-  public setNftCollection (address: string, data: NftCollectionJson, callback?: (data: NftCollectionJson) => void): void {
-    this.getCurrentAccount((currentAccountInfo) => {
-      if (currentAccountInfo.address === address) {
-        this.nftCollectionState = data;
-
-        if (callback) {
-          callback(data);
-        }
-
-        this.publishNftCollectionChanged(address);
-      }
-    });
-  }
-
-  public updateNftCollection (address: string, data: NftCollection, callback?: (data: NftCollection) => void): void {
-    this.getCurrentAccount((currentAccountInfo) => {
-      if (currentAccountInfo.address === address) {
-        const existedItemIndex = this.nftCollectionState.nftCollectionList.findIndex((col) => col.chain === data.chain && col.collectionId.toLowerCase() === data.collectionId.toLowerCase());
-
-        if (existedItemIndex >= 0) {
-          // Update to existed data
-          if (data.collectionName && data.image) {
-            this.nftCollectionState.nftCollectionList[existedItemIndex] = data;
-          }
-        } else {
-          this.nftCollectionState.nftCollectionList.push(data);
-        }
-
-        if (callback) {
-          callback(data);
-        }
-
-        this.publishNftCollectionChanged(address);
-      } else {
-        this.nftCollectionStore.asyncGet(address).then((storedData: NftCollection[]) => {
-          if (!storedData.some((col) => col.chain === data.chain && col.collectionId.toLowerCase() === data.collectionId.toLowerCase())) {
-            storedData.push(data);
-            this.nftCollectionStore.set(address, storedData);
-          }
-        }).catch((err) => this.logger.warn(err));
-      }
-    });
-  }
-
-  public updateNftReady (address: string, ready: boolean, callback?: (ready: boolean) => void): void {
-    this.getCurrentAccount((currentAccountInfo) => {
-      if (currentAccountInfo.address === address) {
-        if (callback) {
-          callback(ready);
-        }
-
-        if (this.nftCollectionState.ready !== ready) {
-          this.nftCollectionState.ready = ready;
-
-          this.publishNftCollectionChanged(address);
-        }
-      }
-    });
-  }
-
-  private publishNftCollectionChanged (address: string) {
-    this.lazyNext('saveNftCollection', () => {
-      this.saveNftCollection(address);
-      this.nftCollectionState.nftCollectionList = this.nftCollectionState.nftCollectionList.filter((item) => item.chain && this.networkMap[item.chain]?.active);
-
-      this.nftCollectionSubject.next(this.nftCollectionState);
-    });
-  }
-
-  private saveNftCollection (address: string, clear = false) {
-    if (clear) {
-      this.nftCollectionStore.remove(address);
-    } else if (this.nftCollectionState.ready && this.nftCollectionState.nftCollectionList) {
-      this.nftCollectionStore.set(address, this.nftCollectionState.nftCollectionList);
-    }
-  }
-
-  public async resetNftCollection (newAddress: string): Promise<void> {
-    this.nftCollectionState = {
-      ready: false,
-      nftCollectionList: []
-    } as NftCollectionJson;
-
-    const storedData = await this.getStoredNftCollection(newAddress);
-
-    if (storedData) {
-      this.nftCollectionState.ready = true;
-      this.nftCollectionState.nftCollectionList = storedData;
-    }
-
-    this.nftCollectionSubject.next(this.nftCollectionState);
+  public setNftCollection (network: string, data: NftCollection, callback?: (data: NftCollection) => void): void {
+    this.dbService.addNftCollection(network, this.getNetworkGenesisHashByKey(network), data).catch((e) => this.logger.warn(e));
+    callback && callback(data);
   }
 
   public getNftCollection () {
-    return this.nftCollectionState;
-  }
-
-  public async getStoredNftCollection (address: string) {
-    const items = await this.nftCollectionStore.asyncGet(address);
-
-    return items;
-  }
-
-  public getNftCollectionSubscription (update: (value: NftCollectionJson) => void): void {
-    update(this.nftCollectionState);
+    return this.dbService.getAllNftCollection();
   }
 
   public subscribeNftCollection () {
-    return this.nftCollectionSubject;
+    return this.dbService.stores.nftCollection.subscribeNftCollection();
   }
 
-  public async resetNft (newAddress: string): Promise<void> {
-    this.nftState = {
-      total: 0,
-      nftList: []
-    } as NftJson;
+  public resetNft (newAddress: string): void {
+    this.getNft().then((data) => this.nftSubject.next(data || { nftList: [], total: 0 })).catch((e) => this.logger.warn(e));
 
-    const storedData = await this.getStoredNft(newAddress);
+    const activeNetworkHashs = Object.values(this.activeNetworks).map((network) => network.genesisHash);
 
-    if (storedData) {
-      storedData.nftList = storedData.nftList.filter((item) => item.chain && this.networkMap[item.chain]?.active);
-      storedData.total = storedData.nftList.length;
-      this.nftState = storedData;
-    }
-
-    this.nftSubject.next(this.nftState);
-  }
-
-  // For NFT transfer
-  public setNft (address: string, data: NftJson, callback?: (nftData: NftJson) => void): void {
-    this.getCurrentAccount((currentAccountInfo) => {
-      if (currentAccountInfo.address === address) {
-        this.nftState = data;
-
-        if (callback) {
-          callback(data);
-        }
-
-        this.publishNftChanged(address);
-      }
+    this.dbService.subscribeNft(newAddress, activeNetworkHashs, (nfts) => {
+      this.nftSubject.next({
+        nftList: nfts,
+        total: nfts.length
+      });
     });
   }
 
-  public updateNftData (address: string, nftData: NftItem, callback?: (nftData: NftItem) => void): void {
-    this.getCurrentAccount((currentAccountInfo) => {
-      if (currentAccountInfo.address === address) {
-        const existedItemIndex = this.nftState.nftList.findIndex((nft) => this.isSameNft(nft, nftData));
+  public updateNftData (network: string, nftData: NftItem, address: string, callback?: (nftData: NftItem) => void): void {
+    this.dbService.addNft(network, this.getNetworkGenesisHashByKey(network), address, nftData).catch((e) => this.logger.warn(e));
 
-        if (existedItemIndex >= 0) {
-          // Update to existed data
-          this.nftState.nftList[existedItemIndex] = nftData;
-        } else {
-          this.nftState.nftList.push(nftData);
-        }
-
-        if (callback) {
-          callback(nftData);
-        }
-
-        this.publishNftChanged(address);
-      } else {
-        this.nftStore.asyncGet(address).then((data: NftJson) => {
-          if (!data.nftList.some((nft) => this.isSameNft(nft, nftData))) {
-            data.total += 1;
-            data.nftList.push(nftData);
-
-            this.nftStore.set(address, data);
-          }
-        }).catch((err) => this.logger.warn(err));
-      }
-    });
+    callback && callback(nftData);
   }
 
   public updateNftIds (chain: string, address: string, collectionId?: string, nftIds?: string[]): void {
-    this.getCurrentAccount((currentAccountInfo) => {
-      if (currentAccountInfo.address === address) {
-        if (!collectionId) {
-          // Clear all nfts from chain
-          this.nftState.nftList = this.nftState.nftList.filter((nft) => nft.chain !== chain);
-        } else {
-          this.nftState.nftList = this.nftState.nftList.filter((nft) => !(nft.chain === chain &&
-          nft.collectionId?.toLowerCase() === collectionId.toLowerCase() &&
-          !nftIds?.includes(nft?.id || '')));
-        }
-
-        this.publishNftChanged(address);
-      }
-    });
+    this.dbService.deleteRemovedNftsFromCollection(this.getNetworkGenesisHashByKey(chain), address, collectionId, nftIds).catch((e) => this.logger.warn(e));
   }
 
-  public updateCollectionIds (chain: string, address: string, collectionIds?: string[]): void {
-    this.getCurrentAccount((currentAccountInfo) => {
-      if (currentAccountInfo.address === address) {
-        if (!collectionIds?.length) {
-          // Clear all nfts from chain
-          this.nftState.nftList = this.nftState.nftList.filter((nft) => nft.chain !== chain);
-        } else {
-          const convertedCollectionIds = collectionIds?.map((col) => col.toLowerCase());
-
-          this.nftState.nftList = this.nftState.nftList.filter((nft) => !(nft.chain === chain &&
-          !convertedCollectionIds?.includes(nft?.collectionId?.toLowerCase() || '')));
-        }
-
-        this.publishNftChanged(address);
-      }
-    });
+  public removeNfts (chain: string, address: string, collectionId: string, nftIds: string[]) {
+    return this.dbService.stores.nft.table.where({
+      chainHash: this.getNetworkGenesisHashByKey(chain),
+      address,
+      collectionId
+    }).and((item) => nftIds.includes(item.id || '')).delete();
   }
 
-  public resetMasterNftStore (): void {
-    this.saveNft(ALL_ACCOUNT_KEY, true);
-    this.saveNftCollection(ALL_ACCOUNT_KEY, true);
+  public updateCollectionIds (chain: string, address: string, collectionIds: string[] = []): void {
+    this.dbService.deleteNftsFromRemovedCollection(this.getNetworkGenesisHashByKey(chain), address, collectionIds);
   }
 
-  public removeNftFromMasterStore (nftData: NftItem): void {
-    this.nftStore.asyncGet(ALL_ACCOUNT_KEY).then((data: NftJson) => {
-      if (data.nftList.some((nft) => this.isSameNft(nft, nftData))) {
-        data.nftList = data.nftList.filter((nft) => nft.id !== nftData.id);
-        data.total = data.nftList.length;
-        this.nftStore.set(ALL_ACCOUNT_KEY, data);
-      }
-    }).catch((err) => this.logger.warn(err));
-  }
+  public async getNft (): Promise<NftJson | undefined> {
+    const address = await this.getAccountAddress();
 
-  private publishNftChanged (address: string) {
-    this.lazyNext('saveNft', () => {
-      if (this.nftState.nftList.length) {
-        this.nftState.nftList = this.nftState.nftList.filter((item, index) => {
-          return this.nftState.nftList.indexOf(item) === index;
-        });
-      }
-
-      this.saveNft(address);
-      this.nftState.nftList = this.nftState.nftList.filter((item) => item.chain && this.networkMap[item.chain]?.active);
-      this.nftState.total = this.nftState.nftList.length;
-
-      this.nftSubject.next(this.nftState);
-    });
-  }
-
-  private saveNft (address: string, clear = false) {
-    if (clear) {
-      this.nftStore.remove(address);
-    } else if (this.nftState && this.nftState.nftList) {
-      this.nftState.total = this.nftState.nftList.length;
-      this.nftStore.set(address, this.nftState);
+    if (!address) {
+      return;
     }
-  }
 
-  public getNft () {
-    return this.nftState;
-  }
+    const activeNetworkHashs = Object.values(this.activeNetworks).map((network) => network.genesisHash);
 
-  public async getStoredNft (address: string) {
-    const items = await this.nftStore.asyncGet(address);
+    const nfts = await this.dbService.getNft(address as string, activeNetworkHashs);
 
-    return items;
-  }
-
-  public getNftSubscription (update: (value: NftJson) => void): void {
-    update(this.nftState);
+    return {
+      nftList: nfts,
+      total: nfts.length
+    };
   }
 
   public subscribeNft () {
@@ -1065,20 +834,24 @@ export default class KoniState extends State {
     return this.stakingRewardSubject;
   }
 
-  public setHistory (address: string, network: string, histories: TransactionHistoryItemType[]) {
-    if (histories.length) {
-      const oldItems = this.historyMap[network]?.items || [];
+  public setHistory (address: string, network: string, item: TransactionHistoryItemType | TransactionHistoryItemType[], callback?: (items: TransactionHistoryItemType[]) => void): void {
+    let items;
 
-      const comnbinedHistories = this.combineHistories(oldItems, histories);
+    if (item && !Array.isArray(item)) {
+      item.origin = 'app';
+      items = [item];
+    } else {
+      items = item;
+    }
 
-      this.historyMap[network] = {
-        items: comnbinedHistories,
-        total: comnbinedHistories.length
-      };
+    if (items.length) {
+      const oldItems = this.historyMap[network] || [];
+
+      this.historyMap[network] = this.combineHistories(oldItems, items);
+      this.saveHistoryToStorage(address, network, this.historyMap[network]);
+      callback && callback(this.historyMap[network]);
 
       this.lazyNext('setHistory', () => {
-        // Save to storage
-        this.saveHistoryToStorage(address);
         this.publishHistory();
       });
     }
@@ -1254,8 +1027,8 @@ export default class KoniState extends State {
     return { details: activeData, reset } as BalanceJson;
   }
 
-  public async getStoredBalance (address: string) {
-    const items = await this.balanceStore.asyncGet(address);
+  public async getStoredBalance (address: string): Promise<Record<string, BalanceItem>> {
+    const items = await this.dbService.stores.balance.getDataByAddressAsObject(address);
 
     return items || {};
   }
@@ -1311,23 +1084,16 @@ export default class KoniState extends State {
     const itemData = { timestamp: +new Date(), ...item };
 
     this.balanceMap[networkKey] = { ...this.balanceMap[networkKey], ...itemData };
+    this.updateBalanceStore(networkKey, item);
 
     this.lazyNext('setBalanceItem', () => {
-      this.updateBalanceStore();
       this.publishBalance();
     });
   }
 
-  private updateBalanceStore () {
-    const readyBalanceMap: Record<string, BalanceItem> = {};
-
-    Object.entries(this.balanceMap).forEach(([key, balanceItem]) => {
-      if (balanceItem.state === APIItemState.READY) {
-        readyBalanceMap[key] = balanceItem;
-      }
-    });
+  private updateBalanceStore (networkKey: string, item: BalanceItem) {
     this.getCurrentAccount((currentAccountInfo) => {
-      this.balanceStore.set(currentAccountInfo.address, readyBalanceMap);
+      this.dbService.updateBalanceStore(networkKey, this.getNetworkGenesisHashByKey(networkKey), currentAccountInfo.address, item).catch((e) => this.logger.warn(e));
     });
   }
 
@@ -1346,7 +1112,7 @@ export default class KoniState extends State {
   }
 
   public async getStoredCrowdloan (address: string) {
-    const items = await this.crowdloanStore.asyncGet(address);
+    const items = await this.dbService.stores.crowdloan.getDataByAddressAsObject(address);
 
     return items || {};
   }
@@ -1362,27 +1128,16 @@ export default class KoniState extends State {
 
     // Update crowdloan map
     this.crowdloanMap[networkKey] = itemData;
+    this.updateCrowdloanStore(networkKey, item);
 
     this.lazyNext('setCrowdloanItem', () => {
-      this.updateCrowdloanStore();
       this.publishCrowdloan();
     });
   }
 
-  private updateCrowdloanStore () {
-    const readyMap: Record<string, CrowdloanItem> = {};
-
-    Object.entries(this.crowdloanMap).forEach(([key, item]) => {
-      if (item.state === APIItemState.READY && item.contribute !== '0') {
-        readyMap[key] = item;
-      }
-    });
+  private updateCrowdloanStore (networkKey: string, item: CrowdloanItem) {
     this.getCurrentAccount((currentAccountInfo) => {
-      if (Object.keys(readyMap)) {
-        this.crowdloanStore.set(currentAccountInfo.address, readyMap);
-      } else {
-        this.crowdloanStore.remove(currentAccountInfo.address);
-      }
+      this.dbService.updateCrowdloanStore(networkKey, this.getNetworkGenesisHashByKey(networkKey), currentAccountInfo.address, item).catch((e) => this.logger.warn(e));
     });
   }
 
@@ -1478,7 +1233,7 @@ export default class KoniState extends State {
   }
 
   public getTransactionHistory (address: string, networkKey: string, update: (items: TransactionHistoryItemType[]) => void): void {
-    const items = this.historyMap[networkKey]?.items;
+    const items = this.historyMap[networkKey];
 
     if (!items) {
       update([]);
@@ -1492,48 +1247,7 @@ export default class KoniState extends State {
   }
 
   public getHistoryMap (): Record<string, TransactionHistoryItemType[]> {
-    const data: Record<string, TransactionHistoryItemType[]> = {};
-
-    Object.entries(this.historyMap).forEach(([key, { items }]) => {
-      data[key] = items;
-    });
-
-    return this.removeInactiveNetworkData(data);
-  }
-
-  public setTransactionHistory (address: string, networkKey: string, item: TransactionHistoryItemType, callback?: (items: TransactionHistoryItemType[]) => void): void {
-    this.getCurrentAccount((currentAccountInfo) => {
-      if (currentAccountInfo.address === address) {
-        const items = this.historyMap[networkKey]?.items || [];
-
-        item.origin = 'app';
-        items.unshift(item);
-        this.historyMap[networkKey] = {
-          items,
-          total: items.length
-        };
-
-        // Save to storage
-        this.saveHistoryToStorage(address);
-        this.publishHistory();
-        callback && callback(items);
-      } else {
-        this.transactionHistoryStore.asyncGet(address).then((data: Record<string, TransactionHistoryItemJson>) => {
-          const hash = this.getNetworkGenesisHashByKey(networkKey);
-          const items = data[hash]?.items || [];
-
-          item.origin = 'app';
-          items.unshift(item);
-
-          data[hash] = {
-            items,
-            total: items.length
-          };
-
-          this.transactionHistoryStore.set(address, data);
-        }).catch((err) => this.logger.warn(err));
-      }
-    });
+    return this.removeInactiveNetworkData(this.historyMap);
   }
 
   public setPrice (priceData: PriceJson, callback?: (priceData: PriceJson) => void): void {
@@ -2051,57 +1765,13 @@ export default class KoniState extends State {
   }
 
   public async getStoredHistories (address: string) {
-    if (Object.keys(this.networkMap).length === 0) {
-      return;
-    }
+    const items = await this.dbService.stores.transaction.getHistoryByAddressAsObject(address);
 
-    const data = await this.transactionHistoryStore.asyncGet(address);
-
-    if (data) {
-      return this.convertHashKeyToNetworkKey(data);
-    }
-
-    return undefined;
+    return items || {};
   }
 
-  private saveHistoryToStorage (address: string) {
-    if (Object.keys(this.networkMap).length === 0) {
-      return;
-    }
-
-    const newestHistoryMap = this.convertNetworkKeyToHashKey(this.historyMap);
-
-    Object.entries(newestHistoryMap).forEach(([key, { items }]) => {
-      if (!Array.isArray(items) || !items.length) {
-        delete newestHistoryMap[key];
-      }
-    });
-
-    this.transactionHistoryStore.set(address, newestHistoryMap);
-  }
-
-  private convertNetworkKeyToHashKey<T> (object: Record<string, T> = {}) {
-    return Object.entries(object).reduce((newObj: Record<string, T>, [key, data]) => {
-      const hash = this.getNetworkGenesisHashByKey(key);
-
-      if (hash) {
-        newObj[hash] = data;
-      }
-
-      return newObj;
-    }, {});
-  }
-
-  private convertHashKeyToNetworkKey<T> (object: Record<string, T> = {}) {
-    return Object.entries(object).reduce((newObj: Record<string, T>, [hash, data]) => {
-      const key = this.getNetworkKeyByGenesisHash(hash);
-
-      if (key) {
-        newObj[key] = data;
-      }
-
-      return newObj;
-    }, {});
+  private saveHistoryToStorage (address: string, network: string, items: TransactionHistoryItemType[]) {
+    this.dbService.addHistories(network, this.getNetworkGenesisHashByKey(network), address, items).catch((e) => this.logger.warn(e));
   }
 
   private combineHistories (oldItems: TransactionHistoryItemType[], newItems: TransactionHistoryItemType[]): TransactionHistoryItemType[] {
@@ -2427,7 +2097,7 @@ export default class KoniState extends State {
     const setTransactionHistory = (receipt: TransactionReceipt) => {
       const network = this.getNetworkMapByKey(networkKey);
 
-      this.setTransactionHistory(fromAddress, networkKey, {
+      this.setHistory(fromAddress, networkKey, {
         isSuccess: true,
         time: Date.now(),
         networkKey,
@@ -2443,7 +2113,7 @@ export default class KoniState extends State {
     const setFailedHistory = (transactionHash: string) => {
       const network = this.getNetworkMapByKey(networkKey);
 
-      this.setTransactionHistory(fromAddress, networkKey, {
+      this.setHistory(fromAddress, networkKey, {
         isSuccess: false,
         time: Date.now(),
         networkKey,
@@ -2615,6 +2285,14 @@ export default class KoniState extends State {
     //     setUpSingleMode(singleMode);
     //   }
     // });
+  }
+
+  public get activeNetworks () {
+    return Object.entries(this.networkMap).filter(([, network]) => network.active).reduce((obj, [key, network]) => {
+      obj[key] = network;
+
+      return obj;
+    }, {} as Record<string, NetworkJson>);
   }
 
   public async sleep () {

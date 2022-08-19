@@ -165,22 +165,18 @@ export class RmrkNftApi extends BaseNftApi {
     return nfts;
   }
 
-  public async handleNfts (params: HandleNftParams) {
+  public async handleNft (address: string, params: HandleNftParams) {
     // const start = performance.now();
 
     let allNfts: Record<string | number, any>[] = [];
     const allCollections: NftCollection[] = [];
 
     try {
-      await Promise.all(this.addresses.map(async (address) => {
-        const nfts = await this.getAllByAccount(address);
-
-        allNfts = allNfts.concat(nfts);
-      }));
+      allNfts = await this.getAllByAccount(address);
 
       if (allNfts.length <= 0) {
-        params.updateReady(true);
-        params.updateNftIds(SUPPORTED_NFT_NETWORKS.kusama);
+        // params.updateReady(true);
+        params.updateNftIds(this.chain, address);
 
         return;
       }
@@ -202,11 +198,12 @@ export class RmrkNftApi extends BaseNftApi {
           collectionId: item?.collectionId as string,
           // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
           properties: item?.metadata?.properties as Record<any, any>,
-          chain: SUPPORTED_NFT_NETWORKS.kusama,
+          chain: this.chain,
           rmrk_ver: item.source && item.source === RMRK_SOURCE.SINGULAR_V1 ? RMRK_VER.VER_1 : RMRK_VER.VER_2
         } as NftItem;
 
-        params.updateItem(parsedItem);
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
+        params.updateItem(this.chain, parsedItem, address);
 
         let url = '';
 
@@ -223,10 +220,10 @@ export class RmrkNftApi extends BaseNftApi {
         }
       }
 
-      params.updateCollectionIds(SUPPORTED_NFT_NETWORKS.kusama, allCollections.map((o) => o.collectionId));
+      params.updateCollectionIds(this.chain, address, allCollections.map((o) => o.collectionId));
 
       allCollections.forEach((collection) => {
-        params.updateNftIds(SUPPORTED_NFT_NETWORKS.kusama, collection.collectionId, (allNfts as NftItem[])
+        params.updateNftIds(this.chain, address, collection.collectionId, (allNfts as NftItem[])
           .filter((o) => o?.id && o?.collectionId === collection.collectionId).map((nft) => nft?.id || ''));
       });
 
@@ -291,15 +288,19 @@ export class RmrkNftApi extends BaseNftApi {
           collectionName: allCollectionMeta[item.collectionId] ? allCollectionMeta[item.collectionId].name as string : null,
           // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
           image: allCollectionMeta[item.collectionId] ? this.parseUrl(allCollectionMeta[item.collectionId].image as string) : null,
-          chain: SUPPORTED_NFT_NETWORKS.kusama
+          chain: this.chain
         } as NftCollection;
 
-        params.updateCollection(parsedCollection);
-        params.updateReady(true);
+        params.updateCollection(this.chain, parsedCollection);
+        // params.updateReady(true);
       });
     } catch (e) {
       console.error('Failed to fetch rmrk nft', e);
     }
+  }
+
+  public async handleNfts (params: HandleNftParams) {
+    await Promise.all(this.addresses.map((address) => this.handleNft(address, params)));
   }
 
   public async fetchNfts (params: HandleNftParams): Promise<number> {

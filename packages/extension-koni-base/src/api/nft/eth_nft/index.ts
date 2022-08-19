@@ -79,8 +79,6 @@ export class Web3NftApi extends BaseNftApi {
   }
 
   private async getItemsByCollection (smartContract: string, collectionName: string | undefined, nftParams: HandleNftParams) {
-    const nftIds: string[] = [];
-
     if (!this.web3) {
       return;
     }
@@ -96,11 +94,13 @@ export class Web3NftApi extends BaseNftApi {
         return;
       }
 
+      const nftIds: string[] = [];
+
       // eslint-disable-next-line @typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-member-access
       const balance = (await contract.methods.balanceOf(address).call()) as unknown as number;
 
       if (Number(balance) === 0) {
-        nftParams.updateReady(true);
+        // nftParams.updateReady(true);
 
         return;
       }
@@ -145,7 +145,7 @@ export class Web3NftApi extends BaseNftApi {
                   collectionImage = parsedItem.image;
                 }
 
-                nftParams.updateItem(parsedItem);
+                nftParams.updateItem(this.chain, parsedItem, address);
                 ownItem = true;
               }
             } catch (e) {
@@ -156,6 +156,8 @@ export class Web3NftApi extends BaseNftApi {
       } catch (e) {
         console.error('evm nft error', e);
       }
+
+      nftParams.updateNftIds(this.chain, address, smartContract, nftIds);
     }));
 
     if (ownItem) {
@@ -166,11 +168,9 @@ export class Web3NftApi extends BaseNftApi {
         chain: this.chain
       } as NftCollection;
 
-      nftParams.updateCollection(nftCollection);
-      nftParams.updateReady(true);
+      nftParams.updateCollection(this.chain, nftCollection);
+      // nftParams.updateReady(true);
     }
-
-    nftParams.updateNftIds(this.chain, smartContract, nftIds);
   }
 
   async handleNfts (params: HandleNftParams): Promise<void> {

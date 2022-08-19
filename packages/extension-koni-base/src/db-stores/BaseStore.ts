@@ -10,7 +10,7 @@ import { DefaultDoc } from '../databases';
 
 export default class BaseStore<T extends DefaultDoc> {
   private _table: Table<T, unknown>;
-  private logger: Logger;
+  public logger: Logger;
   constructor (table: Table<T, unknown>) {
     this._table = table;
     this.logger = createLogger(this.constructor.name);
@@ -20,11 +20,19 @@ export default class BaseStore<T extends DefaultDoc> {
     return this._table;
   }
 
-  public upsert (record: T) {
+  public upsert (record: T): Promise<unknown> {
     return this.table.put(record);
   }
 
-  public remove (record: T) {
+  public bulkUpsert (records: T[]): Promise<unknown> {
+    return this.table.bulkPut(records);
+  }
+
+  public remove (record: T): Promise<void> {
     return this.table.delete(record);
+  }
+
+  public convertToJsonObject (items: T[]): Record<string, T> {
+    return items.reduce((a, v) => ({ ...a, [v.chain]: v }), {});
   }
 }

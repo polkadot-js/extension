@@ -1,12 +1,12 @@
 // Copyright 2019-2022 @polkadot/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { NftCollectionJson } from '@subwallet/extension-base/background/KoniTypes';
+import { NftCollection } from '@subwallet/extension-base/background/KoniTypes';
 import { subscribeNftCollection } from '@subwallet/extension-koni-ui/messaging';
 import { store } from '@subwallet/extension-koni-ui/stores';
 import { useEffect } from 'react';
 
-function updateNftCollection (nftData: NftCollectionJson): void {
+function updateNftCollection (nftData: NftCollection[]): void {
   store.dispatch({ type: 'nftCollection/update', payload: nftData });
 }
 

@@ -158,28 +158,20 @@ export class NftHandler {
 
   public async handleNfts (
     evmContracts: CustomEvmToken[],
-    updateItem: (data: NftItem) => void,
-    updateCollection: (data: NftCollection) => void,
-    updateReady: (ready: boolean) => void,
-    updateIds: (networkKey: string, collectionId?: string, nftIds?: string[]) => void,
-    updateCollectionIds: (networkKey: string, collectionIds?: string[]) => void) {
+    updateItem: (chain: string, data: NftItem, owner: string) => void,
+    updateCollection: (chain: string, data: NftCollection) => void,
+    updateIds: (chain: string, owner: string, collectionId?: string, nftIds?: string[]) => void,
+    updateCollectionIds: (chain: string, address: string, collectionIds?: string[]) => void) {
     this.setupApi();
     this.setEvmContracts(evmContracts);
     await Promise.all(this.handlers.map(async (handler) => {
       await handler.fetchNfts({
-        updateItem: (data: NftItem) => {
-          updateItem(data);
-        },
-        updateCollection: (data: NftCollection) => {
-          updateCollection(data);
-        },
-        updateReady,
+        updateItem,
+        updateCollection,
         updateNftIds: updateIds,
         updateCollectionIds
       });
     }));
-
-    updateReady(true);
   }
 
   public parseAssetId (id: string) {

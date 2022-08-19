@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { ApiProps, NftCollection, NftItem } from '@subwallet/extension-base/background/KoniTypes';
-import { getRandomIpfsGateway, SUPPORTED_NFT_NETWORKS } from '@subwallet/extension-koni-base/api/nft/config';
+import { getRandomIpfsGateway } from '@subwallet/extension-koni-base/api/nft/config';
 import { BaseNftApi, HandleNftParams } from '@subwallet/extension-koni-base/api/nft/nft';
 import { isUrl } from '@subwallet/extension-koni-base/utils/utils';
 import fetch from 'cross-fetch';
@@ -62,23 +62,21 @@ export class AcalaNftApi extends BaseNftApi {
       return [];
     }
 
-    let accountAssets: any[] = [];
+    const assetIds: AssetId[] = [];
 
     await Promise.all(addresses.map(async (address) => {
       // @ts-ignore
       const resp = await this.dotSamaApi.api.query.ormlNFT.tokensByOwner.keys(address);
 
-      accountAssets = accountAssets.concat(resp);
+      if (resp) {
+        for (const key of resp) {
+          // eslint-disable-next-line @typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-member-access
+          const data = key.toHuman() as string[];
+
+          assetIds.push({ classId: data[1], tokenId: this.parseTokenId(data[2]) });
+        }
+      }
     }));
-
-    const assetIds: AssetId[] = [];
-
-    for (const key of accountAssets) {
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-member-access
-      const data = key.toHuman() as string[];
-
-      assetIds.push({ classId: data[1], tokenId: this.parseTokenId(data[2]) });
-    }
 
     return assetIds;
   }
@@ -107,14 +105,14 @@ export class AcalaNftApi extends BaseNftApi {
     return (await this.dotSamaApi.api.query.ormlNFT.tokens(assetId.classId, assetId.tokenId)).toHuman() as unknown as Token;
   }
 
-  public async handleNfts (params: HandleNftParams) {
+  private async handleNft (address: string, params: HandleNftParams) {
     // const start = performance.now();
-    const assetIds = await this.getNfts(this.addresses);
+    const assetIds = await this.getNfts([address]);
 
     try {
       if (!assetIds || assetIds.length === 0) {
-        params.updateReady(true);
-        params.updateNftIds(SUPPORTED_NFT_NETWORKS.acala);
+        // params.updateReady(true);
+        params.updateNftIds(this.chain, address);
 
         return;
       }
@@ -145,28 +143,32 @@ export class AcalaNftApi extends BaseNftApi {
           // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access,@typescript-eslint/no-unsafe-assignment
           image: tokenInfo && tokenInfo.image ? this.parseUrl(tokenInfo?.image) : collectionMeta?.image,
           collectionId: parsedClassId,
-          chain: SUPPORTED_NFT_NETWORKS.acala
+          chain: this.chain
         } as NftItem;
 
         const parsedCollection = {
           collectionId: parsedClassId,
-          chain: SUPPORTED_NFT_NETWORKS.acala,
+          chain: this.chain,
           // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment,@typescript-eslint/no-unsafe-member-access
           collectionName: collectionMeta?.name,
           // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment,@typescript-eslint/no-unsafe-member-access
           image: collectionMeta?.image
         } as NftCollection;
 
-        params.updateItem(parsedNft);
-        params.updateCollection(parsedCollection);
-        params.updateReady(true);
+        params.updateItem(this.chain, parsedNft, address);
+        params.updateCollection(this.chain, parsedCollection);
+        // params.updateReady(true);
       }));
 
-      params.updateCollectionIds(SUPPORTED_NFT_NETWORKS.acala, Object.keys(collectionNftIds));
-      Object.entries(collectionNftIds).forEach(([collectionId, nftIds]) => params.updateNftIds(SUPPORTED_NFT_NETWORKS.acala, collectionId, nftIds));
+      params.updateCollectionIds(this.chain, address, Object.keys(collectionNftIds));
+      Object.entries(collectionNftIds).forEach(([collectionId, nftIds]) => params.updateNftIds(this.chain, address, collectionId, nftIds));
     } catch (e) {
       console.error('Failed to fetch acala nft', e);
     }
+  }
+
+  public async handleNfts (params: HandleNftParams) {
+    await Promise.all(this.addresses.map((address) => this.handleNft(address, params)));
   }
 
   public async fetchNfts (params: HandleNftParams): Promise<number> {

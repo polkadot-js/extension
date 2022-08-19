@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { AuthUrls } from '@subwallet/extension-base/background/handlers/State';
-import { ApiProps, CustomEvmToken, NetworkJson, NftTransferExtra, UnlockingStakeInfo } from '@subwallet/extension-base/background/KoniTypes';
+import { ApiProps, CustomEvmToken, NetworkJson, NftItem, NftTransferExtra, UnlockingStakeInfo } from '@subwallet/extension-base/background/KoniTypes';
 import { getUnlockingInfo } from '@subwallet/extension-koni-base/api/bonding';
 import { subscribeBalance } from '@subwallet/extension-koni-base/api/dotsama/balance';
 import { subscribeCrowdloan } from '@subwallet/extension-koni-base/api/dotsama/crowdloan';
@@ -197,8 +197,6 @@ export class KoniSubscription {
   initBalanceSubscription (key: string, addresses: string[], dotSamaApiMap: Record<string, ApiProps>, web3ApiMap: Record<string, Web3>, onlyRunOnFirstTime?: boolean) {
     const unsub = subscribeBalance(addresses, dotSamaApiMap, web3ApiMap, (networkKey, rs) => {
       this.state.setBalanceItem(networkKey, rs);
-
-      this.dbService.addBalance(networkKey, this.state.getNetworkGenesisHashByKey(networkKey), key, rs).catch((e) => this.logger.warn(e));
     });
 
     if (onlyRunOnFirstTime) {
@@ -231,12 +229,12 @@ export class KoniSubscription {
   subscribeNft (address: string, dotSamaApiMap: Record<string, ApiProps>, web3ApiMap: Record<string, Web3>, customErc721Registry: CustomEvmToken[]) {
     this.detectAddresses(address)
       .then((addresses) => {
-        this.initNftSubscription(addresses, dotSamaApiMap, web3ApiMap, customErc721Registry, address);
+        this.initNftSubscription(addresses, dotSamaApiMap, web3ApiMap, customErc721Registry);
       })
       .catch(this.logger.error);
   }
 
-  initNftSubscription (addresses: string[], dotSamaApiMap: Record<string, ApiProps>, web3ApiMap: Record<string, Web3>, customErc721Registry: CustomEvmToken[], addressKey: string) {
+  initNftSubscription (addresses: string[], dotSamaApiMap: Record<string, ApiProps>, web3ApiMap: Record<string, Web3>, customErc721Registry: CustomEvmToken[]) {
     const { cronUpdate, forceUpdate, selectedNftCollection } = this.state.getNftTransfer();
 
     if (forceUpdate && !cronUpdate) {
@@ -257,23 +255,10 @@ export class KoniSubscription {
       nftHandler.setAddresses(addresses);
       nftHandler.handleNfts(
         customErc721Registry,
-        (data) => {
-          this.state.updateNftData(addressKey, data);
-        },
-        (data) => {
-          if (data !== null) {
-            this.state.updateNftCollection(addressKey, data);
-          }
-        },
-        (ready) => {
-          this.state.updateNftReady(addressKey, ready);
-        },
-        (networkKey: string, collectionId?: string, nftIds?: string[]) => {
-          this.state.updateNftIds(networkKey, addressKey, collectionId, nftIds);
-        },
-        (networkKey: string, collectionIds?: string[]) => {
-          this.state.updateCollectionIds(networkKey, addressKey, collectionIds);
-        })
+        (...args) => this.state.updateNftData(...args),
+        (...args) => this.state.setNftCollection(...args),
+        (...args) => this.state.updateNftIds(...args),
+        (...args) => this.state.updateCollectionIds(...args))
         .then(() => {
           this.logger.log('nft state updated');
         })

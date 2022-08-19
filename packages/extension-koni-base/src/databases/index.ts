@@ -42,12 +42,12 @@ export default class KoniDatabase extends Dexie {
     this.schemaVersion = schemaVersion;
 
     this.conditionalVersion(1, {
-      nfts: '[chainHash+collectionId+id+address], &[chainHash+collectionId+id+address], chainHash, chain, id, address, collectionId, name',
+      nfts: '[chainHash+collectionId+id+address], &[chainHash+collectionId+id+address], [address+chainHash], chainHash, chain, id, address, collectionId, name',
       nftCollections: '[chainHash+collectionId], &[chainHash+collectionId], chainHash, collectionId, collectionName',
       balances: '[chainHash+address], &[chainHash+address], chainHash, chain, address',
       crowdloans: '[chainHash+address], &[chainHash+address], chainHash, chain, address',
       stakings: '[chainHash+address], &[chainHash+address], chainHash, chain, address',
-      transactions: '[chainHash+address], &[chainHash+address], chainHash, chain, address'
+      transactions: '[chainHash+address+extrinsicHash+eventIdx], &[chainHash+address+extrinsicHash+eventIdx], chainHash, chain, address, extrinsicHash, eventIdx, action'
     });
   }
 

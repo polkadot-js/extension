@@ -5,5 +5,11 @@ import { ICrowdloanItem } from '../databases';
 import BaseStoreWithAddress from './BaseStoreWithAddress';
 
 export default class CrowdloanStore extends BaseStoreWithAddress <ICrowdloanItem> {
+  getCrowdloan (address: string) {
+    return this.table.where('address').equals(address).toArray();
+  }
 
+  deleteByChainAndAddress (chainHash: string, address: string) {
+    return this.table.where({ chainHash, address }).delete();
+  }
 }

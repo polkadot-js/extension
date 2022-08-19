@@ -3,7 +3,7 @@
 
 import { ApiProps, NftCollection, NftItem } from '@subwallet/extension-base/background/KoniTypes';
 import { BaseNftApi, HandleNftParams } from '@subwallet/extension-koni-base/api/nft/nft';
-import { isUrl } from '@subwallet/extension-koni-base/utils/utils';
+import { isUrl } from '@subwallet/extension-koni-base/utils';
 import fetch from 'cross-fetch';
 
 interface AssetId {

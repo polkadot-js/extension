@@ -9,7 +9,7 @@ import { DotSamaHistory,
   DotSamaHistory_historyElements_nodes,
   DotSamaHistoryVariables } from '@subwallet/extension-koni-base/api/subquery/__generated__/DotSamaHistory';
 import { newApolloClient } from '@subwallet/extension-koni-base/api/subquery/subquery';
-import { isAccountAll, reformatAddress } from '@subwallet/extension-koni-base/utils/utils';
+import { isAccountAll, reformatAddress } from '@subwallet/extension-koni-base/utils';
 
 export const HistoryApiMap: Record<string, string> = {
   polkadot: 'https://api.subquery.network/sq/nova-wallet/nova-westend',
@@ -43,8 +43,8 @@ function getApolloClient (networkKey: string) {
 }
 
 export const DOTSAMA_HISTORY_QUERY = gql`
-    query DotSamaHistory($first: Int = 100, $address: String = null) {
-        historyElements (first: $first, filter: {address: {equalTo: $address}}) {
+    query DotSamaHistory($last: Int = 100, $address: String = null) {
+        historyElements (last: $last, filter: {address: {equalTo: $address}}) {
             nodes {
                 id
                 blockNumber
@@ -80,7 +80,7 @@ export const fetchDotSamaHistory = (address: string, networkMap: Record<string, 
       getApolloClient(networkKey).query<DotSamaHistory, DotSamaHistoryVariables>({
         query: DOTSAMA_HISTORY_QUERY,
         variables: {
-          first: 0,
+          last: 100,
           address: formattedAddress
         }
       }).then((rs) => {

@@ -64,239 +64,242 @@ export const PREDEFINE_TOKEN_DATA_MAP: Record<string, Record<string, TokenInfo>>
       decimals: 0
     }
   },
-  acala: {
-    AUSD: {
-      isMainToken: false,
-      symbol: 'AUSD',
-      symbolAlt: 'aUSD',
-      name: 'aUSD',
-      decimals: 12
-    },
-    DOT: {
-      isMainToken: false,
-      symbol: 'DOT',
-      name: 'DOT',
-      decimals: 10
-    },
-    LDOT: {
-      isMainToken: false,
-      symbol: 'LDOT',
-      name: 'LDOT',
-      decimals: 10
-    },
-    LCDOT: {
-      isMainToken: false,
-      symbol: 'LCDOT',
-      name: 'LCDOT',
-      decimals: 10,
-      specialOption: { LiquidCrowdloan: 13 }
-    },
-    tDOT: {
-      isMainToken: false,
-      symbol: 'tDOT',
-      name: 'Tapio DOT',
-      decimals: 10,
-      specialOption: { StableAssetPoolToken: 0 }
-    }
-  },
-  karura: {
-    LKSM: {
-      isMainToken: false,
-      symbol: 'LKSM',
-      name: 'LKSM',
-      decimals: 12
-    },
-    KMA: {
-      isMainToken: false,
-      symbol: 'KMA',
-      name: 'KMA',
-      decimals: 12
-    },
-    taiKSM: {
-      isMainToken: false,
-      symbol: 'taiKSM',
-      name: 'Taiga KSM',
-      decimals: 12,
-      specialOption: { StableAssetPoolToken: 0 }
-    },
-    '3USD': {
-      isMainToken: false,
-      symbol: '3USD',
-      name: 'Taiga 3USD',
-      decimals: 12,
-      specialOption: { StableAssetPoolToken: 1 }
-    },
-    TEER: {
-      isMainToken: false,
-      symbol: 'TEER',
-      name: 'TEER',
-      decimals: 12
-    },
-    BNC: {
-      isMainToken: false,
-      symbol: 'BNC',
-      name: 'BNC',
-      decimals: 12
-    },
-    TAI: {
-      isMainToken: false,
-      symbol: 'TAI',
-      name: 'TAI',
-      decimals: 12
-    },
-    HKO: {
-      isMainToken: false,
-      symbol: 'HKO',
-      name: 'HKO',
-      decimals: 12
-    },
-    KICO: {
-      isMainToken: false,
-      symbol: 'KICO',
-      name: 'KICO',
-      decimals: 14
-    },
-    QTZ: {
-      isMainToken: false,
-      symbol: 'QTZ',
-      name: 'Quartz',
-      decimals: 18
-    },
-    NEER: {
-      isMainToken: false,
-      symbol: 'NEER',
-      name: 'NEER',
-      decimals: 18
-    },
-    PHA: {
-      isMainToken: false,
-      symbol: 'PHA',
-      name: 'PHA',
-      decimals: 12
-    },
-    PolarisDAO: {
-      isMainToken: false,
-      symbol: 'ARIS',
-      name: 'PolarisDAO',
-      decimals: 8
-    },
-    KINT: {
-      isMainToken: false,
-      symbol: 'KINT',
-      name: 'KINT',
-      decimals: 12
-    },
-    RMRK: {
-      isMainToken: false,
-      symbol: 'RMRK',
-      name: 'RMRK',
-      decimals: 10
-    },
-    CSM: {
-      isMainToken: false,
-      symbol: 'CSM',
-      name: 'CSM',
-      decimals: 12
-    },
-    VSKSM: {
-      isMainToken: false,
-      symbol: 'VSKSM',
-      name: 'VSKSM',
-      decimals: 12
-    },
-    USDC: {
-      isMainToken: false,
-      symbol: 'USDC',
-      name: 'USDC',
-      decimals: 6
-    },
-    KSM: {
-      isMainToken: false,
-      symbol: 'KSM',
-      name: 'KSM',
-      decimals: 12
-    },
-    aUSD: {
-      isMainToken: false,
-      symbol: 'aUSD',
-      name: 'aUSD',
-      decimals: 12
-    },
-    BSX: {
-      isMainToken: false,
-      symbol: 'BSX',
-      name: 'BSX',
-      decimals: 12
-    },
-    KBTC: {
-      isMainToken: false,
-      symbol: 'KBTC',
-      name: 'KBTC',
-      decimals: 8
-    },
-    AIR: {
-      isMainToken: false,
-      symbol: 'AIR',
-      name: 'AIR',
-      decimals: 18
-    },
-    USDT: {
-      isMainToken: false,
-      symbol: 'USDT',
-      name: 'USDT',
-      decimals: 6
-    },
-    MOVR: {
-      isMainToken: false,
-      symbol: 'MOVR',
-      name: 'MOVR',
-      decimals: 18
-    }
-  },
-  bifrost: {
-    KUSD: {
-      isMainToken: false,
-      symbol: 'KUSD',
-      name: 'KUSD',
-      decimals: 12
-    },
-    DOT: {
-      isMainToken: false,
-      symbol: 'DOT',
-      name: 'DOT',
-      decimals: 10
-    },
-    KSM: {
-      isMainToken: false,
-      symbol: 'KSM',
-      name: 'KSM',
-      decimals: 12
-    },
-    KAR: {
-      isMainToken: false,
-      symbol: 'KAR',
-      name: 'KAR',
-      decimals: 12
-    },
-    ZLK: {
-      isMainToken: false,
-      symbol: 'ZLK',
-      name: 'ZLK',
-      decimals: 18
-    },
-    PHA: {
-      isMainToken: false,
-      symbol: 'PHA',
-      name: 'PHA',
-      decimals: 12
-    },
-    RMRK: {
-      isMainToken: false,
-      symbol: 'RMRK',
-      name: 'RMRK',
-      decimals: 10
-    }
-  },
+  // acala: {
+  //   DOT: {
+  //     isMainToken: false,
+  //     symbol: 'DOT',
+  //     name: 'DOT',
+  //     decimals: 10
+  //   },
+  //   LDOT: {
+  //     isMainToken: false,
+  //     symbol: 'LDOT',
+  //     name: 'LDOT',
+  //     decimals: 10
+  //   },
+  //   LCDOT: {
+  //     isMainToken: false,
+  //     symbol: 'LCDOT',
+  //     name: 'LCDOT',
+  //     decimals: 10,
+  //     specialOption: { LiquidCrowdloan: 13 }
+  //   },
+  //   tDOT: {
+  //     isMainToken: false,
+  //     symbol: 'tDOT',
+  //     name: 'Tapio DOT',
+  //     decimals: 10,
+  //     specialOption: { StableAssetPoolToken: 0 }
+  //   }
+  // },
+  // karura: {
+  //   aUSD: {
+  //     isMainToken: false,
+  //     symbol: 'AUSD',
+  //     symbolAlt: 'aUSD',
+  //     name: 'aUSD',
+  //     decimals: 12,
+  //     specialOption: { Token: 'KUSD' }
+  //   },
+  //   LKSM: {
+  //     isMainToken: false,
+  //     symbol: 'LKSM',
+  //     name: 'LKSM',
+  //     decimals: 12
+  //   },
+  //   KMA: {
+  //     isMainToken: false,
+  //     symbol: 'KMA',
+  //     name: 'KMA',
+  //     decimals: 12
+  //   },
+  //   taiKSM: {
+  //     isMainToken: false,
+  //     symbol: 'taiKSM',
+  //     name: 'Taiga KSM',
+  //     decimals: 12,
+  //     specialOption: { StableAssetPoolToken: 0 }
+  //   },
+  //   '3USD': {
+  //     isMainToken: false,
+  //     symbol: '3USD',
+  //     name: 'Taiga 3USD',
+  //     decimals: 12,
+  //     specialOption: { StableAssetPoolToken: 1 }
+  //   },
+  //   TEER: {
+  //     isMainToken: false,
+  //     symbol: 'TEER',
+  //     name: 'TEER',
+  //     decimals: 12
+  //   },
+  //   BNC: {
+  //     isMainToken: false,
+  //     symbol: 'BNC',
+  //     name: 'BNC',
+  //     decimals: 12
+  //   },
+  //   TAI: {
+  //     isMainToken: false,
+  //     symbol: 'TAI',
+  //     name: 'TAI',
+  //     decimals: 12
+  //   },
+  //   HKO: {
+  //     isMainToken: false,
+  //     symbol: 'HKO',
+  //     name: 'HKO',
+  //     decimals: 12
+  //   },
+  //   KICO: {
+  //     isMainToken: false,
+  //     symbol: 'KICO',
+  //     name: 'KICO',
+  //     decimals: 14
+  //   },
+  //   QTZ: {
+  //     isMainToken: false,
+  //     symbol: 'QTZ',
+  //     name: 'Quartz',
+  //     decimals: 18
+  //   },
+  //   NEER: {
+  //     isMainToken: false,
+  //     symbol: 'NEER',
+  //     name: 'NEER',
+  //     decimals: 18
+  //   },
+  //   PHA: {
+  //     isMainToken: false,
+  //     symbol: 'PHA',
+  //     name: 'PHA',
+  //     decimals: 12
+  //   },
+  //   PolarisDAO: {
+  //     isMainToken: false,
+  //     symbol: 'ARIS',
+  //     name: 'PolarisDAO',
+  //     decimals: 8,
+  //     specialOption: { ForeignAsset: 1 }
+  //   },
+  //   KINT: {
+  //     isMainToken: false,
+  //     symbol: 'KINT',
+  //     name: 'KINT',
+  //     decimals: 12
+  //   },
+  //   RMRK: {
+  //     isMainToken: false,
+  //     symbol: 'RMRK',
+  //     name: 'RMRK',
+  //     decimals: 10
+  //   },
+  //   CSM: {
+  //     isMainToken: false,
+  //     symbol: 'CSM',
+  //     name: 'CSM',
+  //     decimals: 12
+  //   },
+  //   VSKSM: {
+  //     isMainToken: false,
+  //     symbol: 'VSKSM',
+  //     name: 'VSKSM',
+  //     decimals: 12
+  //   },
+  //   USDC: {
+  //     isMainToken: false,
+  //     symbol: 'USDC',
+  //     name: 'USDC',
+  //     decimals: 6,
+  //     specialOption: { Erc20: '0x1f3a10587a20114ea25ba1b388ee2dd4a337ce27' }
+  //   },
+  //   KSM: {
+  //     isMainToken: false,
+  //     symbol: 'KSM',
+  //     name: 'KSM',
+  //     decimals: 12
+  //   },
+  //   BSX: {
+  //     isMainToken: false,
+  //     symbol: 'BSX',
+  //     name: 'BSX',
+  //     decimals: 12
+  //   },
+  //   KBTC: {
+  //     isMainToken: false,
+  //     symbol: 'KBTC',
+  //     name: 'KBTC',
+  //     decimals: 8
+  //   },
+  //   AIR: {
+  //     isMainToken: false,
+  //     symbol: 'AIR',
+  //     name: 'AIR',
+  //     decimals: 18
+  //   },
+  //   USDT: {
+  //     isMainToken: false,
+  //     symbol: 'USDT',
+  //     name: 'USDT',
+  //     decimals: 6
+  //   },
+  //   MOVR: {
+  //     isMainToken: false,
+  //     symbol: 'MOVR',
+  //     name: 'MOVR',
+  //     decimals: 18
+  //   }
+  // },
+  // bifrost: {
+  //   KUSD: {
+  //     isMainToken: false,
+  //     symbol: 'KUSD',
+  //     name: 'KUSD',
+  //     decimals: 12
+  //   },
+  //   DOT: {
+  //     isMainToken: false,
+  //     symbol: 'DOT',
+  //     name: 'DOT',
+  //     decimals: 10
+  //   },
+  //   KSM: {
+  //     isMainToken: false,
+  //     symbol: 'KSM',
+  //     name: 'KSM',
+  //     decimals: 12
+  //   },
+  //   KAR: {
+  //     isMainToken: false,
+  //     symbol: 'KAR',
+  //     name: 'KAR',
+  //     decimals: 12
+  //   },
+  //   ZLK: {
+  //     isMainToken: false,
+  //     symbol: 'ZLK',
+  //     name: 'ZLK',
+  //     decimals: 18
+  //   },
+  //   PHA: {
+  //     isMainToken: false,
+  //     symbol: 'PHA',
+  //     name: 'PHA',
+  //     decimals: 12
+  //   },
+  //   RMRK: {
+  //     isMainToken: false,
+  //     symbol: 'RMRK',
+  //     name: 'RMRK',
+  //     decimals: 10
+  //   },
+  //   MOVR: {
+  //     isMainToken: false,
+  //     symbol: 'MOVR',
+  //     name: 'MOVR',
+  //     decimals: 18
+  //   }
+  // },
   moonbase: {
     xcBNC: {
       isMainToken: false,
@@ -411,48 +414,6 @@ export const PREDEFINE_TOKEN_DATA_MAP: Record<string, Record<string, TokenInfo>>
       erc20Address: '0xbD90A6125a84E5C512129D622a75CDDE176aDE5E',
       decimals: 18,
       name: 'RiverBoat'
-    },
-    xcKBTC: {
-      isMainToken: false,
-      symbol: 'xcKBTC',
-      erc20Address: '0xFFFFFFFFF6E528AD57184579BEEE00C5D5E646F0',
-      decimals: 8,
-      name: 'Kintsugi Wrapped BTC'
-    },
-    xcKINT: {
-      isMainToken: false,
-      symbol: 'xcKINT',
-      erc20Address: '0xFFFFFFFF83F4F317D3CBF6EC6250AEC3697B3FF2',
-      decimals: 12,
-      name: 'Kintsugi Native Token'
-    },
-    xcRMRK: {
-      isMainToken: false,
-      symbol: 'xcRMRK',
-      erc20Address: '0xFFFFFFFF893264794D9D57E1E0E21E0042AF5A0A',
-      decimals: 10,
-      name: 'xcRMRK'
-    },
-    xcKSM: {
-      isMainToken: false,
-      symbol: 'xcKSM',
-      erc20Address: '0xFFFFFFFF1FCACBD218EDC0EBA20FC2308C778080',
-      decimals: 12,
-      name: 'xcKSM'
-    },
-    xcKAR: {
-      isMainToken: false,
-      symbol: 'xcKAR',
-      erc20Address: '0xFFFFFFFF08220AD2E6E157F26ED8BD22A336A0A5',
-      decimals: 12,
-      name: 'Karura'
-    },
-    xcBNC: {
-      isMainToken: false,
-      symbol: 'xcBNC',
-      erc20Address: '0xFFFFFFFFF075423BE54811ECB478E911F22DDE7D',
-      decimals: 12,
-      name: 'xcBNC'
     }
   },
   moonbeam: {
@@ -541,7 +502,88 @@ export const PREDEFINE_TOKEN_DATA_MAP: Record<string, Record<string, TokenInfo>>
       name: 'MoonWell Artemis'
     }
   },
+  astar: {
+    LDOT: {
+      isMainToken: false,
+      assetIndex: '18446744073709551618',
+      symbol: 'LDOT',
+      name: 'Liquid DOT',
+      decimals: 10
+    },
+    ACA: {
+      isMainToken: false,
+      assetIndex: '18446744073709551616',
+      symbol: 'ACA',
+      name: 'Acala',
+      decimals: 12
+    },
+    DOT: {
+      isMainToken: false,
+      assetIndex: '340282366920938463463374607431768211455',
+      symbol: 'DOT',
+      name: 'Polkadot',
+      decimals: 10
+    },
+    aUSD: {
+      isMainToken: false,
+      assetIndex: '18446744073709551617',
+      symbol: 'aUSD',
+      name: 'Acala Dollar',
+      decimals: 12
+    }
+  },
+  shiden: {
+    LKSM: {
+      isMainToken: false,
+      assetIndex: '18446744073709551619',
+      symbol: 'LKSM',
+      name: 'Liquid KSM',
+      decimals: 12
+    },
+    MOVR: {
+      isMainToken: false,
+      assetIndex: '18446744073709551620',
+      symbol: 'MOVR',
+      name: 'Moonriver',
+      decimals: 18
+    },
+    KSM: {
+      isMainToken: false,
+      assetIndex: '340282366920938463463374607431768211455',
+      symbol: 'KSM',
+      name: 'Kusama',
+      decimals: 12
+    },
+    aUSD: {
+      isMainToken: false,
+      assetIndex: '18446744073709551616',
+      symbol: 'aUSD',
+      name: 'Acala Dollar',
+      decimals: 12
+    },
+    KAR: {
+      isMainToken: false,
+      assetIndex: '18446744073709551618',
+      symbol: 'KAR',
+      name: 'Karura',
+      decimals: 12
+    }
+  },
   astarEvm: {
+    DOT: {
+      isMainToken: false,
+      symbol: 'DOT',
+      erc20Address: '0xffffffffffffffffffffffffffffffffffffffff',
+      decimals: 12,
+      name: 'Polkadot'
+    },
+    aUSD: {
+      isMainToken: false,
+      symbol: 'aUSD',
+      erc20Address: '0xfFFFFfFF00000000000000010000000000000001',
+      decimals: 12,
+      name: 'Acala Dollar'
+    },
     ARSW: {
       isMainToken: false,
       symbol: 'ARSW',
@@ -691,6 +733,13 @@ export const PREDEFINE_TOKEN_DATA_MAP: Record<string, Record<string, TokenInfo>>
     }
   },
   shidenEvm: {
+    aUSD: {
+      isMainToken: false,
+      symbol: 'aUSD',
+      erc20Address: '0xfFFfFFfF00000000000000010000000000000000',
+      decimals: 12,
+      name: 'Acala Dollar'
+    },
     PKEX: {
       isMainToken: false,
       symbol: 'PKEX',

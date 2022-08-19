@@ -37,3 +37,4 @@ packages/extension-koni-base/src/api/nft/karura_nft/ignore-karura-nft.spec.ts
 packages/extension-koni-base/src/api/nft/acala_nft/ignore-acala-nft.spec.ts
 packages/extension-koni-base/src/api/dotsama/ignore-staking.spec.ts
 packages/extension-koni-base/src/api/nft/eth_nft/ignore-moonbeam.api.spec.ts
+test.ts

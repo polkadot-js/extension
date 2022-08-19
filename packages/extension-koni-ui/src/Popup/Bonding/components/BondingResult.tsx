@@ -22,7 +22,7 @@ interface Props extends ThemeProps {
 
 function BondingResult ({ backToHome, className, extrinsicHash, handleResend, isTxSuccess, networkKey, txError }: Props): React.ReactElement<Props> {
   const { t } = useTranslation();
-  const scanExplorerTxUrl = useScanExplorerTxUrl(networkKey, extrinsicHash);
+  const scanExplorerTxUrl = useScanExplorerTxUrl(networkKey, extrinsicHash, true);
 
   return (
     <div className={className}>
@@ -70,12 +70,6 @@ function BondingResult ({ backToHome, className, extrinsicHash, handleResend, is
             <div className={'bonding-error-text'}>{txError}</div>
 
             <div className={'bonding-action-container'}>
-              <div
-                className={'bonding-resend-button'}
-                onClick={backToHome}
-              >
-                {t<string>('Back To Home')}
-              </div>
               <div
                 className={'bonding-history-button'}
                 onClick={handleResend}

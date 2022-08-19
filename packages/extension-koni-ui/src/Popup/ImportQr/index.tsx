@@ -1,23 +1,24 @@
 // Copyright 2019-2022 @polkadot/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
+import { AccountExternalError, AccountExternalErrorCode } from '@subwallet/extension-base/background/KoniTypes';
+import ScanAddress from '@subwallet/extension-koni-ui/components/Qr/ScanAddress';
 import { SUBSTRATE_ACCOUNT_TYPE } from '@subwallet/extension-koni-ui/Popup/CreateAccount';
 import React, { useCallback, useContext, useState } from 'react';
 import styled, { ThemeContext } from 'styled-components';
 
-import { QrScanAddress } from '@polkadot/react-qr';
-
-import { AccountContext, AccountInfoEl, ActionContext, ButtonArea, NextStepButton, Theme } from '../components';
-import AccountNamePasswordCreation from '../components/AccountNamePasswordCreation';
-import useTranslation from '../hooks/useTranslation';
-import { createAccountExternal, createAccountSuri, createSeed } from '../messaging';
-import { Header, Name } from '../partials';
+import { AccountContext, AccountInfoEl, ActionContext, ButtonArea, Checkbox, NextStepButton, Theme, Warning } from '../../components';
+import AccountNamePasswordCreation from '../../components/AccountNamePasswordCreation';
+import useTranslation from '../../hooks/useTranslation';
+import { createAccountExternalV2, createAccountSuri, createSeed } from '../../messaging';
+import { Header, Name } from '../../partials';
 
 interface QrAccount {
   content: string;
   genesisHash: string;
   isAddress: boolean;
   name?: string;
+  isEthereum: boolean;
 }
 
 interface Props {
@@ -34,6 +35,9 @@ function ImportQr ({ className }: Props): React.ReactElement<Props> {
   const [address, setAddress] = useState<string | null>(null);
   const [name, setName] = useState<string | null>(defaultName);
   const [password, setPassword] = useState<string | null>(null);
+  const [errors, setErrors] = useState<AccountExternalError[]>([]);
+  const [isConnectWhenCreate, setIsConnectWhenCreate] = useState<boolean>(true);
+  const [isBusy, setIsBusy] = useState<boolean>(false);
   const themeContext = useContext(ThemeContext as React.Context<Theme>);
 
   const _setAccount = useCallback(
@@ -54,26 +58,72 @@ function ImportQr ({ className }: Props): React.ReactElement<Props> {
 
   const _onCreate = useCallback(
     (): void => {
+      setIsBusy(true);
+
       if (account && name) {
         if (account.isAddress) {
-          createAccountExternal(name, account.content, account.genesisHash)
-            .then(() => {
-              window.localStorage.setItem('popupNavigation', '/');
-              onAction('/');
+          createAccountExternalV2({
+            name: name,
+            address: account.content,
+            genesisHash: account.genesisHash,
+            isEthereum: account.isEthereum,
+            isAllowed: isConnectWhenCreate
+          })
+            .then((errors) => {
+              if (errors.length) {
+                setErrors(errors);
+              } else {
+                window.localStorage.setItem('popupNavigation', '/');
+                onAction('/');
+              }
             })
-            .catch((error: Error) => console.error(error));
+            .catch((error: Error) => {
+              setErrors([{ code: AccountExternalErrorCode.UNKNOWN_ERROR, message: error.message }]);
+              console.error(error);
+            });
         } else if (password) {
           createAccountSuri(name, password, account.content, 'sr25519', account.genesisHash)
             .then(() => {
               window.localStorage.setItem('popupNavigation', '/');
               onAction('/');
             })
-            .catch((error: Error) => console.error(error));
+            .catch((error: Error) => {
+              setErrors([{ code: AccountExternalErrorCode.UNKNOWN_ERROR, message: error.message }]);
+              console.error(error);
+            });
         }
       }
+
+      setIsBusy(false);
     },
-    [account, name, onAction, password]
+    [account, isConnectWhenCreate, name, onAction, password]
   );
+
+  const renderErrors = useCallback(() => {
+    if (errors && errors.length) {
+      return errors.map((err, index) =>
+        (
+          <Warning
+            className='item-error'
+            isDanger
+            key={index}
+          >
+            {t<string>(err.message)}
+          </Warning>
+        )
+      );
+    } else {
+      return <></>;
+    }
+  }, [errors, t]);
+
+  const handlerScanError = useCallback((e?: Error) => {
+    if (e) {
+      setErrors([{ code: AccountExternalErrorCode.UNKNOWN_ERROR, message: e.message }]);
+    } else {
+      setErrors([]);
+    }
+  }, []);
 
   return (
     <div className={className}>
@@ -84,19 +134,28 @@ function ImportQr ({ className }: Props): React.ReactElement<Props> {
       />
       <div className={account && account.isAddress ? 'import-qr-content -with-padding' : 'import-qr-content'}>
         {!account && (
-          <div>
-            <QrScanAddress onScan={_setAccount} />
-          </div>
+          <>
+            <div>
+              <ScanAddress
+                onError={handlerScanError}
+                onScan={_setAccount}
+              />
+            </div>
+            {renderErrors()}
+          </>
         )}
         {account && (
           <>
-            {account.isAddress && (<div className={`account-info-container ${themeContext.id === 'dark' ? '-dark' : '-light'}`}>
-              <AccountInfoEl
-                address={address}
-                isExternal={true}
-                name={name}
-              />
-            </div>)}
+            {account.isAddress && (
+              <div className={`account-info-container ${themeContext.id === 'dark' ? '-dark' : '-light'}`}>
+                <AccountInfoEl
+                  address={address}
+                  genesisHash={account.genesisHash}
+                  isEthereum={account.isEthereum}
+                  isExternal={true}
+                  name={name}
+                />
+              </div>)}
             {account.isAddress
               ? (
                 <Name
@@ -117,10 +176,17 @@ function ImportQr ({ className }: Props): React.ReactElement<Props> {
                 />
               )
             }
+            <Checkbox
+              checked={isConnectWhenCreate}
+              label={t<string>('Auto connect to all DApps after importing')}
+              onChange={setIsConnectWhenCreate}
+            />
+            {renderErrors()}
             {
               account.isAddress && <ButtonArea>
                 <NextStepButton
                   className='next-step-btn'
+                  isBusy={isBusy}
                   isDisabled={!name || (!account.isAddress && !password)}
                   onClick={_onCreate}
                 >
@@ -136,6 +202,10 @@ function ImportQr ({ className }: Props): React.ReactElement<Props> {
 }
 
 export default styled(ImportQr)`
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  overflow: hidden;
 
   .import-qr-content {
     flex: 1;
@@ -147,7 +217,6 @@ export default styled(ImportQr)`
   }
 
 
-
   .next-step-btn {
     > .children {
       display: flex;
@@ -155,5 +224,9 @@ export default styled(ImportQr)`
       position: relative;
       justify-content: center;
     }
+  }
+
+  .item-error {
+    margin: 10px 15px;
   }
 `;

@@ -3,7 +3,7 @@
 
 export { default as AccountInfoEl } from './AccountInfo';
 export { default as AccountNamePasswordCreation } from './AccountNamePasswordCreation';
-export { default as AccountQrModal } from './AccountQrModal';
+export { default as AccountQrModal } from './Modal/AccountQrModal';
 export { default as ActionBar } from './ActionBar';
 export { default as ActionText } from './ActionText';
 export { default as AdvanceIcon } from './AdvanceIcon';
@@ -51,5 +51,5 @@ export { default as Warning } from './Warning';
 
 export { Input, TextArea } from './TextInputs';
 
-export * from './contexts';
+export * from '../contexts';
 export * from './themes';

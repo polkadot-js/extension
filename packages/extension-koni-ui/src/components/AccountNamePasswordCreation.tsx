@@ -9,7 +9,7 @@ import styled, { ThemeContext } from 'styled-components';
 
 import { KeypairType } from '@polkadot/util-crypto/types';
 
-import { AccountInfoEl, ButtonArea, NextStepButton } from '../components';
+import { AccountInfoEl, ButtonArea, NextStepButton } from './index';
 
 interface Props {
   buttonLabel?: string;

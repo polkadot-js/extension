@@ -12,6 +12,7 @@ import { canDerive } from '@subwallet/extension-base/utils';
 import { EvmRpcError } from '@subwallet/extension-koni-base/background/errors/EvmRpcError';
 import KoniState from '@subwallet/extension-koni-base/background/handlers/State';
 import { ALL_ACCOUNT_KEY, CRON_GET_API_MAP_STATUS } from '@subwallet/extension-koni-base/constants';
+import Web3 from 'web3';
 import { RequestArguments, WebsocketProvider } from 'web3-core';
 import { JsonRpcPayload } from 'web3-core-helpers';
 
@@ -29,8 +30,14 @@ function stripUrl (url: string): string {
 
 function transformAccountsV2 (accounts: SubjectInfo, anyType = false, authInfo?: AuthUrlInfo, accountAuthType?: AccountAuthType): InjectedAccount[] {
   const accountSelected = authInfo
-    ? Object.keys(authInfo.isAllowedMap)
-      .filter((address) => authInfo.isAllowedMap[address])
+    ? (
+      authInfo.isAllowed
+        ? (
+          Object.keys(authInfo.isAllowedMap)
+            .filter((address) => authInfo.isAllowedMap[address])
+        )
+        : []
+    )
     : [];
 
   let authTypeFilter = ({ type }: SingleAddress) => true;
@@ -145,6 +152,25 @@ export default class KoniTabs extends Tabs {
     if (currentEvmNetwork) {
       const { evmChainId, key } = currentEvmNetwork;
       const web3 = this.#koniState.getWeb3ApiMap()[key];
+
+      if (web3.currentProvider instanceof Web3.providers.WebsocketProvider) {
+        if (!web3.currentProvider.connected) {
+          console.log(`[Web3] ${key} is disconected, trying to connect...`);
+          web3.currentProvider.connect();
+
+          const poll = (resolve: (value: unknown) => void) => {
+            if ((web3.currentProvider as WebsocketProvider).connected) {
+              console.log(`Network [${key}] is connected.`);
+              resolve(true);
+            } else {
+              console.log(`Connecting to network [${key}]`);
+              setTimeout(() => poll(resolve), 400);
+            }
+          };
+
+          await new Promise(poll);
+        }
+      }
 
       return {
         networkKey: key,
@@ -318,15 +344,26 @@ export default class KoniTabs extends Tabs {
     let currentChainId = evmState.chainId;
 
     const _onAuthChanged = async () => {
+      // Detect network
       const { chainId } = await this.getEvmState(url);
 
       if (chainId !== currentChainId) {
         emitEvent('chainChanged', chainId);
         currentChainId = chainId;
       }
+
+      // Detect account
+      const newAccountList = await this.getEvmCurrentAccount(url);
+
+      // Compare to void looping reload
+      if (JSON.stringify(currentAccountList) !== JSON.stringify(newAccountList)) {
+        // eslint-disable-next-line node/no-callback-literal
+        emitEvent('accountsChanged', newAccountList);
+        currentAccountList = newAccountList;
+      }
     };
 
-    const chainChainSubscription = this.#koniState.subscribeEvmChainChange()
+    const authUrlSubscription = this.#koniState.subscribeEvmChainChange()
       .subscribe((rs) => {
         _onAuthChanged().catch(console.error);
       });
@@ -388,7 +425,7 @@ export default class KoniTabs extends Tabs {
       });
       unsubscribe(id);
       accountListSubscription.unsubscribe();
-      chainChainSubscription.unsubscribe();
+      authUrlSubscription.unsubscribe();
       clearInterval(networkCheckInterval);
     });
 

@@ -84,6 +84,7 @@ function AccountMenuSettings ({ changeAccountCallback, className, closeSetting, 
       <div className='account-menu-settings-header'>
         <div className='account-menu-settings__branding'>
           <img
+            alt={'logo'}
             className='logo'
             src={themeContext.logo}
           />
@@ -230,6 +231,7 @@ function AccountMenuSettings ({ changeAccountCallback, className, closeSetting, 
           </MenuSettingItem>
         </div>
       </div>
+
       <div className='koni-menu-items-container'>
         <MenuSettingItem className='account-menu-settings__menu-item'>
           <Link
@@ -366,10 +368,16 @@ export default React.memo(styled(AccountMenuSettings)(({ theme }: Props) => `
 
   .koni-menu-items-container {
     padding: 0 15px;
+    max-height: 260px;
+    overflow-y: auto;
 
     &:last-child {
       padding: 0 27px;
       margin: 8px 0
+    }
+
+    &::-webkit-scrollbar {
+      display: none;
     }
   }
 

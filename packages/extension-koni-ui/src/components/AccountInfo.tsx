@@ -13,22 +13,23 @@ import Identicon from '@subwallet/extension-koni-ui/components/Identicon';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { accountAllRecoded, defaultRecoded, isAccountAll, recodeAddress } from '@subwallet/extension-koni-ui/util';
 import Avatar from 'boring-avatars';
-import React, { useCallback, useContext, useEffect, useState } from 'react';
+import React, { useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import CopyToClipboard from 'react-copy-to-clipboard';
 import { useSelector } from 'react-redux';
 import styled from 'styled-components';
 
 import { isEthereumAddress } from '@polkadot/util-crypto';
 
+import { AccountContext } from '../contexts';
 import useToast from '../hooks/useToast';
 import useTranslation from '../hooks/useTranslation';
 import getParentNameSuri from '../util/getParentNameSuri';
-import { AccountContext } from './contexts';
 
 export interface Props {
   address?: string | null;
   className?: string;
   genesisHash?: string | null;
+  originGenesisHash?: string | null;
   isExternal?: boolean | null;
   isHardware?: boolean | null;
   name?: string | null;
@@ -39,19 +40,21 @@ export interface Props {
   isShowAddress?: boolean;
   isShowBanner?: boolean;
   iconSize?: number;
+  isEthereum?: boolean;
   addressHalfLength?: number;
   accountSplitPart?: 'both' | 'left' | 'right';
 }
 
-function AccountInfo ({ accountSplitPart = 'both', address, addressHalfLength = 10, className, genesisHash, iconSize = 32, isExternal, isHardware, isShowAddress = true, isShowBanner = true, name, parentName, showCopyBtn = true, suri, type: givenType }: Props): React.ReactElement<Props> {
+function AccountInfo ({ accountSplitPart = 'both', address, addressHalfLength = 10, className, genesisHash, iconSize = 32, isEthereum, isExternal, isHardware, isShowAddress = true, isShowBanner = true, name, originGenesisHash, parentName, showCopyBtn = true, suri, type: givenType }: Props): React.ReactElement<Props> {
   const { t } = useTranslation();
   const { accounts } = useContext(AccountContext);
   const [{ account,
     formatted,
     genesisHash: recodedGenesis,
+    isEthereum: _isEthereum,
+    originGenesisHash: recodedOrigin,
     prefix }, setRecoded] = useState<Recoded>(defaultRecoded);
   const networkMap = useSelector((state: RootState) => state.networkMap);
-  const [iconTheme, setIconTheme] = useState<'polkadot'|'ethereum'>('polkadot');
   const { show } = useToast();
   const accountName = name || account?.name;
   const displayName = accountName || t('<unknown>');
@@ -80,7 +83,7 @@ function AccountInfo ({ accountSplitPart = 'both', address, addressHalfLength = 
     return null;
   }, [networkMap]);
 
-  const networkInfo = getNetworkInfoByGenesisHash(genesisHash || recodedGenesis);
+  const networkInfo = getNetworkInfoByGenesisHash(originGenesisHash || genesisHash || recodedOrigin || recodedGenesis);
 
   useEffect((): void => {
     if (!address) {
@@ -95,12 +98,20 @@ function AccountInfo ({ accountSplitPart = 'both', address, addressHalfLength = 
       return;
     }
 
-    if (isEthereumAddress(address)) {
-      setIconTheme('ethereum');
-    }
-
     setRecoded(recodeAddress(address, accounts, networkInfo, givenType));
   }, [accounts, _isAccountAll, address, networkInfo, givenType]);
+
+  const iconTheme = useMemo((): 'polkadot'|'ethereum' => {
+    if (!address) {
+      return 'polkadot';
+    }
+
+    if (isEthereum || _isEthereum || isEthereumAddress(address)) {
+      return 'ethereum';
+    }
+
+    return 'polkadot';
+  }, [_isEthereum, address, isEthereum]);
 
   const _onCopy = useCallback(
     () => show(t('Copied')),

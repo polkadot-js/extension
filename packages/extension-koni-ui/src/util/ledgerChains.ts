@@ -1,19 +1,16 @@
 // Copyright 2019-2022 @polkadot/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { NetworkJson } from '@subwallet/extension-base/background/KoniTypes';
+import { LedgerNetwork, NetworkJson } from '@subwallet/extension-base/background/KoniTypes';
+import { PredefinedLedgerNetwork } from '@subwallet/extension-koni-ui/constants/ledger';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { useSelector } from 'react-redux';
 
-import { selectableNetworks } from '@polkadot/networks';
-import { Network } from '@polkadot/networks/types';
-
-export function useGetSupportedLedger (): Network[] {
-  const result: Network[] = [];
+export function useGetSupportedLedger (): LedgerNetwork[] {
+  const result: LedgerNetwork[] = [];
   const { networkMap } = useSelector((state: RootState) => state);
 
-  const supportedLedgerNetwork = selectableNetworks
-    .filter((network) => network.hasLedgerSupport);
+  const supportedLedgerNetwork = [...PredefinedLedgerNetwork];
 
   const networkInfoItems: NetworkJson[] = [];
 

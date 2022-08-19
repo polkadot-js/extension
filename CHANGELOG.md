@@ -1,5 +1,30 @@
 # CHANGELOG
 
+## 0.5.5 (Koni)
+Build date: Aug 11, 2022.
+
+Update:
+- Add feature to allow first-time users to import their Metamask private keys (#254)
+- Add support for transaction history on Astar EVM (#454)
+- Update XCM transfer support for Relaychain to Parachains (#411)
+
+Bug fixes:
+- Fix bug display wrong connection information with DApps (#498)
+- Fix bug some dApp can't connect to wallet when user close extension (#530)
+
+## 0.5.4 (Koni)
+Build date: Aug 05, 2022.
+
+Update:
+- Support interaction with other devices (Ledger and Parity Signer, Stylo...) for signature (#150)
+- Support cross chain transfer: aUSD (#472)
+- Update response information of EVM Provider (#489)
+- Add the checkbox "Auto connect to all EVM DApps after importing" in the Import Private Key screen (#358)
+- Add Moonpets NFT (#517)
+
+Bug fixes:
+- Fix balance showing incorrect in Send Fund screen in case create/forget acc successfully (#271)
+
 ## 0.5.3 (Koni)
 Build date: Jul 29, 2022.
 
@@ -187,7 +212,7 @@ Bug Fixed:
 - Not have website list in website access screen
 
 ## 0.3.2 (Koni)
-Build date: Apr 07, 2022. 
+Build date: Apr 07, 2022.
 
 Update:
 - Improve the custom access screen (issue #91)
@@ -229,7 +254,7 @@ Update:
 
 Bug Fixed:
 - Display RMRK 2.0
-- Staking balance 
+- Staking balance
 
 ## 0.2.8 (Koni)
 Build date: Mar 18, 2022. Complete External Security Audit
@@ -239,7 +264,7 @@ Build date: Mar 18, 2022. Complete External Security Audit
 - Show Karura and Acala tokens balances: LCDOT, LDOT, DOT,aUSD, kUSD
 - Show Karura and Acala cross-chain assets: BNC, KINT, KSM, LKSM, PHA, TAI, kBTC, vsKSM, RMRK
 - Import Private key for EVM account from Metamask
-- Hide account balance 
+- Hide account balance
 - Customize avatar for All account
 
 **Bug Fixed:**
@@ -300,7 +325,7 @@ Build date: Feb 19, 2022. Complete internal security audit
 
 Update:
 - Added the feature to track the balances of multiple accounts in one wallet
-- Integration Quartz Network's NFT 
+- Integration Quartz Network's NFT
 - Integration Layer 1 blockchain built on Substrate Aleph Zero
 - Displays Staking information of some networks in the Polkadot and Kusama ecosystem
 
@@ -338,7 +363,7 @@ Bugs Fixed:
 
 ---
 
-## 0.0.3 (Koni) 
+## 0.0.3 (Koni)
 
 Build date: Jan 16, 2022. Complete internal security audi
 
@@ -376,7 +401,7 @@ Bugs Fixed
 
 ---
 
-## 0.0.1 (Koni) 
+## 0.0.1 (Koni)
 Build date: Jan 05, 2022 with basic features
 
 Update:
@@ -386,7 +411,7 @@ Update:
 - Manage an account balance
 - And much more
 
---- 
+---
 
 ## 0.42.5 Jan 10, 2022
 

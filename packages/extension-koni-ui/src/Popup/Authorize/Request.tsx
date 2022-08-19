@@ -5,7 +5,7 @@ import type { RequestAuthorizeTab } from '@subwallet/extension-base/background/t
 import type { ThemeProps } from '../../types';
 
 import { ALL_ACCOUNT_KEY } from '@subwallet/extension-koni-base/constants';
-import { filterAndSortingAccountByAuthType } from '@subwallet/extension-koni-base/utils/utils';
+import { filterAndSortingAccountByAuthType } from '@subwallet/extension-koni-base/utils';
 import ConfirmModal from '@subwallet/extension-koni-ui/components/ConfirmModal';
 import ConnectAccount from '@subwallet/extension-koni-ui/Popup/Authorize/ConnectAccount';
 import React, { useCallback, useContext, useEffect, useState } from 'react';
@@ -192,13 +192,13 @@ export default styled(Request)(({ theme }: Props) => `
   flex: 1;
   overflow-y: auto;
   flex-direction: column;
-  
+
   .request-content {
     flex: 1;
     overflow-y: auto;
     padding: 22px 18px 22px 22px;
   }
-  
+
   .request-footer {
     padding: 12px 22px 22px;
   }
@@ -258,7 +258,7 @@ export default styled(Request)(({ theme }: Props) => `
     background-color: ${theme.buttonBackgroundDanger};
     margin-right: 8px;
     flex: 0;
-    
+
     .children {
       display: flex;
     }
@@ -314,7 +314,7 @@ export default styled(Request)(({ theme }: Props) => `
     flex-direction: row;
     padding-top: 20px;
   }
-  
+
   .subwallet-modal {
     top: 171px;
     left: 15px;

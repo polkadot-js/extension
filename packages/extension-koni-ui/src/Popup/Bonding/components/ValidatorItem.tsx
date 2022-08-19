@@ -33,12 +33,25 @@ interface Props extends ThemeProps {
   maxNominations: number
 }
 
+function checkCurrentlyBonded (bondedValidators: string[], validatorAddress: string) {
+  let isBonded = false;
+
+  bondedValidators.forEach((bondedValidator) => {
+    if (bondedValidator.toLowerCase() === validatorAddress.toLowerCase()) {
+      isBonded = true;
+    }
+  });
+
+  return isBonded;
+}
+
 function ValidatorItem ({ bondedValidators, className, isBondedBefore, maxNominations, maxNominatorPerValidator, networkKey, validatorInfo }: Props): React.ReactElement<Props> {
   const networkJson = useGetNetworkJson(networkKey);
   const [showDetail, setShowDetail] = useState(false);
   const { show } = useToast();
   const { currentAccount: { account } } = useSelector((state: RootState) => state);
 
+  const isCurrentlyBonded = checkCurrentlyBonded(bondedValidators, validatorInfo.address);
   const isOversubscribed = validatorInfo.nominatorCount >= maxNominatorPerValidator;
   const isSufficientFund = useIsSufficientBalance(networkKey, validatorInfo.minBond);
   const hasOwnStake = validatorInfo.ownStake > 0;
@@ -62,7 +75,7 @@ function ValidatorItem ({ bondedValidators, className, isBondedBefore, maxNomina
       return;
     }
 
-    if (!isSufficientFund) {
+    if (!isSufficientFund && !isCurrentlyBonded) {
       show('Your free balance is not enough to stake');
 
       return;
@@ -76,7 +89,7 @@ function ValidatorItem ({ bondedValidators, className, isBondedBefore, maxNomina
 
     store.dispatch({ type: 'bondingParams/update', payload: { selectedAccount: account?.address as string, selectedNetwork: networkKey, selectedValidator: validatorInfo, maxNominatorPerValidator, isBondedBefore, bondedValidators } as BondingParams });
     navigate('/account/bonding-auth');
-  }, [account?.address, bondedValidators, isBondedBefore, isSufficientFund, maxNominations, maxNominatorPerValidator, navigate, networkKey, show, validatorInfo]);
+  }, [account?.address, bondedValidators, isBondedBefore, isCurrentlyBonded, isSufficientFund, maxNominations, maxNominatorPerValidator, navigate, networkKey, show, validatorInfo]);
 
   const handleGetValidatorDetail = useCallback(() => {
     if (['astar', 'shiden', 'shibuya'].includes(networkKey)) {
@@ -115,7 +128,7 @@ function ValidatorItem ({ bondedValidators, className, isBondedBefore, maxNomina
               <div className={'validator-att-title'}>
                 Minimum stake
                 {
-                  !isSufficientFund && <FontAwesomeIcon
+                  !isSufficientFund && !isCurrentlyBonded && <FontAwesomeIcon
                     className={'error-tooltip'}
                     data-for={`insufficient-fund-tooltip-${networkKey}`}
                     data-tip={true}
@@ -129,7 +142,7 @@ function ValidatorItem ({ bondedValidators, className, isBondedBefore, maxNomina
                   trigger={`insufficient-fund-tooltip-${networkKey}`}
                 />
               </div>
-              <div className={`${isSufficientFund ? 'validator-att-value' : 'validator-att-value-error'}`}>{parseBalanceString(validatorInfo.minBond, networkJson.nativeToken as string)}</div>
+              <div className={`${isSufficientFund || isCurrentlyBonded ? 'validator-att-value' : 'validator-att-value-error'}`}>{parseBalanceString(validatorInfo.minBond, networkJson.nativeToken as string)}</div>
             </div>
           </div>
 
@@ -222,7 +235,7 @@ function ValidatorItem ({ bondedValidators, className, isBondedBefore, maxNomina
               <div className={'validator-att-title'}>
                 Minimum stake
                 {
-                  !isSufficientFund && <FontAwesomeIcon
+                  !isSufficientFund && !isCurrentlyBonded && <FontAwesomeIcon
                     className={'error-tooltip'}
                     data-for={`insufficient-fund-tooltip-${networkKey}`}
                     data-tip={true}
@@ -236,7 +249,7 @@ function ValidatorItem ({ bondedValidators, className, isBondedBefore, maxNomina
                   trigger={`insufficient-fund-tooltip-${networkKey}`}
                 />
               </div>
-              <div className={`${isSufficientFund ? 'validator-att-value' : 'validator-att-value-error'}`}>{parseBalanceString(validatorInfo.minBond, networkJson.nativeToken as string)}</div>
+              <div className={`${isSufficientFund || isCurrentlyBonded ? 'validator-att-value' : 'validator-att-value-error'}`}>{parseBalanceString(validatorInfo.minBond, networkJson.nativeToken as string)}</div>
             </div>
           </div>
 
@@ -273,7 +286,7 @@ function ValidatorItem ({ bondedValidators, className, isBondedBefore, maxNomina
         </div>
       );
     }
-  }, [getMinBondTooltipText, handleOnSelect, hasOwnStake, isMaxCommission, isOversubscribed, isSufficientFund, networkJson.nativeToken, networkKey, unit, validatorInfo.commission, validatorInfo.minBond, validatorInfo.nominatorCount, validatorInfo.ownStake, validatorInfo.totalStake]);
+  }, [getMinBondTooltipText, handleOnSelect, hasOwnStake, isCurrentlyBonded, isMaxCommission, isOversubscribed, isSufficientFund, networkJson.nativeToken, networkKey, unit, validatorInfo.commission, validatorInfo.minBond, validatorInfo.nominatorCount, validatorInfo.ownStake, validatorInfo.totalStake]);
 
   return (
     <div className={className}>

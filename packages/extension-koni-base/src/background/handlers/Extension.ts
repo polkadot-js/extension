@@ -1331,7 +1331,9 @@ export default class KoniExtension extends Extension {
 
     return {
       errors,
-      feeString
+      feeString,
+      estimatedFee: fee,
+      feeSymbol: state.getNetworkMapByKey(originNetworkKey).nativeToken as string
     };
   }
 

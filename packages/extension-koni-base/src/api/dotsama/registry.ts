@@ -100,13 +100,23 @@ export async function getForeignToken (api: ApiPromise) {
     };
 
     if (!(symbol in tokenMap)) {
-      tokenMap[symbol] = {
-        isMainToken: false,
-        symbol,
-        decimals: parseInt(decimals),
-        name,
-        specialOption
-      };
+      if (symbol === 'KUSD') {
+        tokenMap.aUSD = {
+          isMainToken: false,
+          symbol: 'aUSD',
+          decimals: parseInt(decimals),
+          name,
+          specialOption
+        };
+      } else {
+        tokenMap[symbol] = {
+          isMainToken: false,
+          symbol,
+          decimals: parseInt(decimals),
+          name,
+          specialOption
+        };
+      }
     }
   });
 
@@ -162,6 +172,7 @@ export const getRegistry = async (networkKey: string, api: ApiPromise, customErc
       tokenMap.ACA.isMainToken = true;
     } else if (networkKey === 'bifrost') {
       tokenMap.BNC.isMainToken = true;
+      delete tokenMap.KUSD;
     }
   }
 

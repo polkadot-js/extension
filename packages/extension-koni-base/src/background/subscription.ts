@@ -2,19 +2,16 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { AuthUrls } from '@subwallet/extension-base/background/handlers/State';
-import { ApiProps, CustomEvmToken, NetworkJson, NftItem, NftTransferExtra, UnlockingStakeInfo } from '@subwallet/extension-base/background/KoniTypes';
+import { ApiProps, CustomEvmToken, NetworkJson, NftTransferExtra, UnlockingStakeInfo } from '@subwallet/extension-base/background/KoniTypes';
 import { getUnlockingInfo } from '@subwallet/extension-koni-base/api/bonding';
 import { subscribeBalance } from '@subwallet/extension-koni-base/api/dotsama/balance';
 import { subscribeCrowdloan } from '@subwallet/extension-koni-base/api/dotsama/crowdloan';
 import { stakingOnChainApi } from '@subwallet/extension-koni-base/api/staking';
 import { getAllSubsquidStaking } from '@subwallet/extension-koni-base/api/staking/subsquidStaking';
 import { nftHandler } from '@subwallet/extension-koni-base/background/handlers';
-import { ALL_ACCOUNT_KEY } from '@subwallet/extension-koni-base/constants';
-import { Subscription, take } from 'rxjs';
+import { Subscription } from 'rxjs';
 import Web3 from 'web3';
 
-import { accounts as accountsObservable } from '@polkadot/ui-keyring/observable/accounts';
-import { SubjectInfo } from '@polkadot/ui-keyring/observable/types';
 import { logger as createLogger } from '@polkadot/util';
 import { Logger } from '@polkadot/util/types';
 import { isEthereumAddress } from '@polkadot/util-crypto';
@@ -144,22 +141,9 @@ export class KoniSubscription {
     });
   }
 
-  detectAddresses (currentAccountAddress: string) {
-    return new Promise<Array<string>>((resolve) => {
-      if (currentAccountAddress === ALL_ACCOUNT_KEY) {
-        accountsObservable.subject.pipe(take(1))
-          .subscribe((accounts: SubjectInfo): void => {
-            resolve([...Object.keys(accounts)]);
-          });
-      } else {
-        return resolve([currentAccountAddress]);
-      }
-    });
-  }
-
   subscribeBalancesAndCrowdloans (address: string, dotSamaApiMap: Record<string, ApiProps>, web3ApiMap: Record<string, Web3>, onlyRunOnFirstTime?: boolean) {
     this.state.switchAccount(address).then(() => {
-      this.detectAddresses(address)
+      this.state.getDecodedAddresses(address)
         .then((addresses) => {
           if (!addresses.length) {
             return;
@@ -174,7 +158,7 @@ export class KoniSubscription {
 
   subscribeStakingOnChain (address: string, dotSamaApiMap: Record<string, ApiProps>, onlyRunOnFirstTime?: boolean) {
     this.state.resetStakingMap(address).then(() => {
-      this.detectAddresses(address)
+      this.state.getDecodedAddresses(address)
         .then((addresses) => {
           if (!addresses.length) {
             return;
@@ -235,7 +219,7 @@ export class KoniSubscription {
   }
 
   subscribeNft (address: string, dotSamaApiMap: Record<string, ApiProps>, web3ApiMap: Record<string, Web3>, customErc721Registry: CustomEvmToken[]) {
-    this.detectAddresses(address)
+    this.state.getDecodedAddresses(address)
       .then((addresses) => {
         if (!addresses.length) {
           return;
@@ -279,7 +263,7 @@ export class KoniSubscription {
   }
 
   async subscribeStakingReward (address: string) {
-    const addresses = await this.detectAddresses(address);
+    const addresses = await this.state.getDecodedAddresses(address);
     const networkMap = this.state.getNetworkMap();
     const activeNetworks: string[] = [];
 
@@ -302,7 +286,7 @@ export class KoniSubscription {
   }
 
   async subscribeStakeUnlockingInfo (address: string, networkMap: Record<string, NetworkJson>, dotSamaApiMap: Record<string, ApiProps>) {
-    const addresses = await this.detectAddresses(address);
+    const addresses = await this.state.getDecodedAddresses(address);
     const currentAddress = addresses[0]; // only get info for the current account
 
     const stakeUnlockingInfo: Record<string, UnlockingStakeInfo> = {};

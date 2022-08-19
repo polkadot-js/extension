@@ -132,11 +132,18 @@ function NftItem ({ className, collectionId, collectionImage, data, onClickBack 
   }, []);
 
   const handleOnClick = useCallback(() => {
-    if (data.external_url) {
-      // eslint-disable-next-line no-void
-      void chrome.tabs.create({ url: data?.external_url, active: true }).then(() => console.log('redirecting'));
+    try {
+      if (data.external_url) {
+        // eslint-disable-next-line no-void
+        void chrome.tabs.create({ url: data?.external_url, active: true }).then(() => console.log('redirecting'));
+      } else if (!loading) {
+        // eslint-disable-next-line no-void
+        void chrome.tabs.create({ url: data?.image, active: true }).then(() => console.log('redirecting'));
+      }
+    } catch (e) {
+      console.log('redirecting to a new tab');
     }
-  }, [data]);
+  }, [data.external_url, data?.image, loading]);
 
   const getItemImage = useCallback(() => {
     if (data.image && !imageError) {
@@ -147,6 +154,13 @@ function NftItem ({ className, collectionId, collectionImage, data, onClickBack 
 
     return themeContext.logo;
   }, [collectionImage, data.image, imageError, themeContext.logo]);
+
+  const handleRightClick = useCallback((e: any) => {
+    if (loading) {
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-member-access
+      e.preventDefault();
+    }
+  }, [loading]);
 
   return (
     <div className={className}>
@@ -187,6 +201,7 @@ function NftItem ({ className, collectionId, collectionImage, data, onClickBack 
                   alt={'item-img'}
                   className={'item-img'}
                   onClick={handleOnClick}
+                  onContextMenu={handleRightClick}
                   onError={handleImageError}
                   onLoad={handleOnLoad}
                   src={getItemImage()}

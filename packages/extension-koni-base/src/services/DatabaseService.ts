@@ -1,7 +1,7 @@
 // Copyright 2019-2022 @subwallet/extension-koni authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { APIItemState, BalanceItem, BalanceJson, CrowdloanItem, NftCollection, NftItem, StakingItem, TransactionHistoryItemType } from '@subwallet/extension-base/background/KoniTypes';
+import { APIItemState, BalanceItem, BalanceJson, CrowdloanItem, DeleteEvmTokenParams, NftCollection, NftItem, StakingItem, TransactionHistoryItemType } from '@subwallet/extension-base/background/KoniTypes';
 import { Subscription } from 'dexie';
 
 import { logger as createLogger } from '@polkadot/util';
@@ -113,5 +113,9 @@ export default class DatabaseService {
 
   deleteNftsFromRemovedCollection (chainHash: string, address: string, collectionIds: string[]) {
     return this.stores.nft.deleteNftsFromRemovedCollection(chainHash, address, collectionIds);
+  }
+
+  deleteNftsByEvmToken (chainHash: string, tokenId: string) {
+    return this.stores.nft.deleteNftsByCollection(chainHash, tokenId);
   }
 }

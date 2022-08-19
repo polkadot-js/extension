@@ -1406,6 +1406,9 @@ export default class KoniState extends State {
           }
         }
       }
+
+      // Delete stored nfts
+      this.dbService.deleteNftsByEvmToken(this.getNetworkGenesisHashByKey(targetToken.chain), targetToken.smartContract).catch((e) => this.logger.warn(e));
     }
 
     this.evmTokenState = _evmTokenState;

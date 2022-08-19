@@ -1898,12 +1898,6 @@ export default class KoniState extends State {
     }));
   }
 
-  private isSameNft (originNft: NftItem, destinationNft: NftItem) {
-    return originNft.chain === destinationNft.chain &&
-      originNft.collectionId?.toLowerCase() === destinationNft.collectionId?.toLowerCase() &&
-      originNft.id === destinationNft.id;
-  }
-
   private publishBalance (reset?: boolean) {
     this.balanceSubject.next(this.getBalance(reset));
   }

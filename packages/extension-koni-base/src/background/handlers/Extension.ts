@@ -2323,7 +2323,7 @@ export default class KoniExtension extends Extension {
     return (res: ResponseTransferQr) => {
       // !res.isFinalized to prevent duplicate action
       if (!res.isFinalized && res.txResult && res.extrinsicHash) {
-        state.setTransactionHistory(address, networkKey, {
+        state.setHistory(address, networkKey, {
           time: Date.now(),
           networkKey,
           change: res.txResult.change,

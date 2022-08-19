@@ -29,7 +29,7 @@ export class KoniSubscription {
     stakingOnChain: undefined
   };
 
-  private dbService: DatabaseService;
+  public dbService: DatabaseService;
   private state: KoniState;
   private logger: Logger;
 

@@ -18,7 +18,7 @@ export class KoniCron {
   subscriptions: KoniSubscription;
   public status: 'pending' | 'running' | 'stopped' = 'pending';
   private serviceSubscription: Subscription | undefined;
-  private dbService: DatabaseService;
+  public dbService: DatabaseService;
   private state: KoniState;
   private logger: Logger;
 

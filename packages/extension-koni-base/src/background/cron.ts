@@ -262,7 +262,7 @@ export class KoniCron {
 
   resetNft = (newAddress: string) => {
     this.logger.log('Reset Nft state');
-    this.state.resetNft(newAddress);
+    this.state.resetNft(newAddress).catch((e) => this.logger.warn(e));
   };
 
   resetNftTransferMeta = () => {

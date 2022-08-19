@@ -2,9 +2,9 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { DefaultAddressDoc } from '../databases';
-import BaseStore from './BaseStore';
+import BaseStoreWithChain from './BaseStoreWithChain';
 
-export default class BaseStoreWithAddress<T extends DefaultAddressDoc> extends BaseStore<T> {
+export default class BaseStoreWithAddress<T extends DefaultAddressDoc> extends BaseStoreWithChain<T> {
   public removeAllByAddress (address: string, chain?: string) {
     const conditions = { address } as T;
 

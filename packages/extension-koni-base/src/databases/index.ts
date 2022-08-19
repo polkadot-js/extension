@@ -16,16 +16,17 @@ export interface DefaultAddressDoc extends DefaultDoc {
 }
 
 export interface INft extends Omit<NftItem, 'chain'>, DefaultAddressDoc {}
-
 export interface INftCollection extends Omit<NftCollection, 'chain'>, DefaultDoc {}
-
 export interface IBalance extends BalanceItem, DefaultAddressDoc {}
-
 export interface ICrowdloanItem extends CrowdloanItem, DefaultAddressDoc {}
-
 export interface IStakingItem extends StakingItem, DefaultAddressDoc {}
+export interface ITransactionHistoryItem extends TransactionHistoryItemType, DefaultAddressDoc { }
 
-export interface ITransactionHistoryItem extends TransactionHistoryItemType, DefaultAddressDoc {}
+export interface IMigration {
+  key: string,
+  name: string,
+  timestamp: number
+}
 
 export default class KoniDatabase extends Dexie {
   public nfts!: Table<INft, object>;
@@ -34,10 +35,11 @@ export default class KoniDatabase extends Dexie {
   public crowdloans!: Table<ICrowdloanItem, object>;
   public stakings!: Table<IStakingItem, object>;
   public transactions!: Table<ITransactionHistoryItem, object>;
+  public migrations!: Table<IMigration, object>;
 
   private schemaVersion: number;
 
-  public constructor (name = DEFAULT_DATABASE, schemaVersion = 1) {
+  public constructor (name = DEFAULT_DATABASE, schemaVersion = 2) {
     super(name);
     this.schemaVersion = schemaVersion;
 
@@ -48,6 +50,10 @@ export default class KoniDatabase extends Dexie {
       crowdloans: '[chainHash+address], &[chainHash+address], chainHash, chain, address',
       stakings: '[chainHash+address], &[chainHash+address], chainHash, chain, address',
       transactions: '[chainHash+address+extrinsicHash+eventIdx], &[chainHash+address+extrinsicHash+eventIdx], chainHash, chain, address, extrinsicHash, eventIdx, action'
+    });
+
+    this.conditionalVersion(2, {
+      migrations: '&[key+name]'
     });
   }
 

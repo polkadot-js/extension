@@ -7,3 +7,4 @@ export { default as NftStore } from './Nft';
 export { default as NftCollectionStore } from './NftCollection';
 export { default as StakingStore } from './Staking';
 export { default as TransactionStore } from './Transaction';
+export { default as MigrationStore } from './Migration';

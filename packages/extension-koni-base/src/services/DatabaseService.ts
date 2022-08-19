@@ -1,14 +1,14 @@
 // Copyright 2019-2022 @subwallet/extension-koni authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { APIItemState, BalanceItem, BalanceJson, CrowdloanItem, DeleteEvmTokenParams, NftCollection, NftItem, StakingItem, TransactionHistoryItemType } from '@subwallet/extension-base/background/KoniTypes';
+import { APIItemState, BalanceItem, BalanceJson, CrowdloanItem, NftCollection, NftItem, StakingItem, TransactionHistoryItemType } from '@subwallet/extension-base/background/KoniTypes';
 import { Subscription } from 'dexie';
 
 import { logger as createLogger } from '@polkadot/util';
 import { Logger } from '@polkadot/util/types';
 
 import KoniDatabase, { INft } from '../databases';
-import { BalanceStore, CrowdloanStore, NftCollectionStore, NftStore, StakingStore, TransactionStore } from '../db-stores';
+import { BalanceStore, CrowdloanStore, MigrationStore, NftCollectionStore, NftStore, StakingStore, TransactionStore } from '../db-stores';
 
 export default class DatabaseService {
   private _db: KoniDatabase;
@@ -25,7 +25,8 @@ export default class DatabaseService {
       nftCollection: new NftCollectionStore(this._db.nftCollections),
       crowdloan: new CrowdloanStore(this._db.crowdloans),
       staking: new StakingStore(this._db.stakings),
-      transaction: new TransactionStore(this._db.transactions)
+      transaction: new TransactionStore(this._db.transactions),
+      migration: new MigrationStore(this._db.migrations)
     };
   }
 

@@ -6,9 +6,7 @@ import { Table } from 'dexie';
 import { logger as createLogger } from '@polkadot/util';
 import { Logger } from '@polkadot/util/types';
 
-import { DefaultDoc } from '../databases';
-
-export default class BaseStore<T extends DefaultDoc> {
+export default class BaseStore<T> {
   private _table: Table<T, unknown>;
   public logger: Logger;
   constructor (table: Table<T, unknown>) {
@@ -30,9 +28,5 @@ export default class BaseStore<T extends DefaultDoc> {
 
   public remove (record: T): Promise<void> {
     return this.table.delete(record);
-  }
-
-  public convertToJsonObject (items: T[]): Record<string, T> {
-    return items.reduce((a, v) => ({ ...a, [v.chain]: v }), {});
   }
 }

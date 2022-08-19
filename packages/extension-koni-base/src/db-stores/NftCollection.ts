@@ -4,9 +4,9 @@
 import { liveQuery } from 'dexie';
 
 import { INftCollection } from '../databases';
-import BaseStore from './BaseStore';
+import BaseStoreWithChain from './BaseStoreWithChain';
 
-export default class NftCollectionStore extends BaseStore<INftCollection> {
+export default class NftCollectionStore extends BaseStoreWithChain<INftCollection> {
   subscribeNftCollection () {
     return liveQuery(
       () => this.table.toArray()

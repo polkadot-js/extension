@@ -144,7 +144,7 @@ export default class KoniState extends State {
   private chainRegistrySubject = new Subject<Record<string, ChainRegistry>>();
 
   private lazyMap: Record<string, unknown> = {};
-  private dbService: DatabaseService;
+  public dbService: DatabaseService;
   private cron: KoniCron;
   private subscription: KoniSubscription;
   private logger: Logger;
@@ -1788,7 +1788,7 @@ export default class KoniState extends State {
       if (oldItem.origin === 'app') {
         return true;
       } else {
-        return oldItem.eventIdx === newItem.eventIdx;
+        return !oldItem.eventIdx || !newItem.eventIdx || oldItem.eventIdx === newItem.eventIdx;
       }
     }
 

@@ -2,59 +2,50 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import State from '@subwallet/extension-koni-base/background/handlers/State';
-import ApplicationStore from '@subwallet/extension-koni-base/stores/Application';
 
-import BaseMigrationJob from './Base';
+import { logger as createLogger } from '@polkadot/util';
+import { Logger } from '@polkadot/util/types';
+
 import MigrationScripts from './scripts';
 
 export default class Migration {
-  private readonly appStore = new ApplicationStore();
   readonly state: State;
+  private logger: Logger;
 
   constructor (state: State) {
     this.state = state;
+    this.logger = createLogger('Migration');
   }
 
   public async run (): Promise<void> {
-    const appVersion = process.env.PKG_VERSION || '0.0.0';
-    const storedVersion = await this.appStore.getVersion() || '0.0.0';
-
-    console.log('Running version: ', appVersion);
-
-    if (appVersion <= storedVersion) {
-      return Promise.resolve(console.log('No need to migrate.'));
-    }
-
-    console.log('Migrating...');
-    const scripts = this.getRunableScripts(storedVersion, appVersion);
+    this.logger.log('Migrating...');
+    const keys = Object.keys(MigrationScripts).sort((a, b) => a.localeCompare(b));
 
     try {
-      for (let i = 0; i < scripts.length; i++) {
-        const JobClass = scripts[i];
+      for (let i = 0; i < keys.length; i++) {
+        const JobClass = MigrationScripts[keys[i]];
 
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-        const job = new JobClass(this.state);
+        const check = await this.state.dbService.stores.migration.table.where({
+          name: JobClass.name,
+          key: keys[i]
+        }).first();
 
-        console.log('[Migration] running script: ', JobClass.name);
-        await job.run();
+        if (!check) {
+          const job = new JobClass(this.state);
+
+          this.logger.log('Running script: ', JobClass.name);
+          await job.run();
+          await this.state.dbService.stores.migration.table.put({
+            key: keys[i],
+            name: JobClass.name,
+            timestamp: +new Date()
+          });
+        }
       }
-
-      await this.appStore.setVersion(appVersion);
     } catch (error) {
-      console.warn('Migration error: ', error);
+      this.logger.warn('Migration error: ', error);
     }
 
-    console.log('Migration done.');
-  }
-
-  private getRunableScripts (fromVersion: string, toVersion: string) {
-    const scripts: typeof BaseMigrationJob[] = [];
-    const missingVersions = Object.keys(MigrationScripts).filter((version) => version > fromVersion && version <= toVersion).sort();
-
-    missingVersions.forEach((ver) => {
-      scripts.push(...MigrationScripts[ver]);
-    });
-
-    return scripts;
+    this.logger.log('Migration done.');
   }
 }

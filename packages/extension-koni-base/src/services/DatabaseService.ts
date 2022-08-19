@@ -84,18 +84,18 @@ export default class DatabaseService {
   }
 
   // NFT
-  subscribeNft (address: string, chainHashs?: string[], callback?: (nfts: INft[]) => void) {
+  subscribeNft (addresses: string[], chainHashs?: string[], callback?: (nfts: INft[]) => void) {
     this.nftSubscription && this.nftSubscription.unsubscribe();
 
-    this.nftSubscription = this.stores.nft.subscribeNft(address, chainHashs).subscribe({
+    this.nftSubscription = this.stores.nft.subscribeNft(addresses, chainHashs).subscribe({
       next: (nfts) => callback && callback(nfts)
     });
 
     return this.nftSubscription;
   }
 
-  async getNft (address: string, chainHashs?: string[]) {
-    const nfts = await this.stores.nft.getNft(address, chainHashs);
+  async getNft (addresses: string[], chainHashs?: string[]) {
+    const nfts = await this.stores.nft.getNft(addresses, chainHashs);
 
     this.logger.log('Nfts: ', nfts);
 

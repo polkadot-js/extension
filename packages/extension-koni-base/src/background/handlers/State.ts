@@ -715,12 +715,13 @@ export default class KoniState extends State {
     return this.dbService.stores.nftCollection.subscribeNftCollection();
   }
 
-  public resetNft (newAddress: string): void {
+  public async resetNft (newAddress: string): Promise<void> {
     this.getNft().then((data) => this.nftSubject.next(data || { nftList: [], total: 0 })).catch((e) => this.logger.warn(e));
 
     const activeNetworkHashs = Object.values(this.activeNetworks).map((network) => network.genesisHash);
+    const addresses = await this.getDecodedAddresses(newAddress);
 
-    this.dbService.subscribeNft(newAddress, activeNetworkHashs, (nfts) => {
+    this.dbService.subscribeNft(addresses, activeNetworkHashs, (nfts) => {
       this.nftSubject.next({
         nftList: nfts,
         total: nfts.length
@@ -751,15 +752,15 @@ export default class KoniState extends State {
   }
 
   public async getNft (): Promise<NftJson | undefined> {
-    const address = await this.getAccountAddress();
+    const addresses = await this.getDecodedAddresses();
 
-    if (!address) {
+    if (!addresses.length) {
       return;
     }
 
     const activeNetworkHashs = Object.values(this.activeNetworks).map((network) => network.genesisHash);
 
-    const nfts = await this.dbService.getNft(address as string, activeNetworkHashs);
+    const nfts = await this.dbService.getNft(addresses, activeNetworkHashs);
 
     return {
       nftList: nfts,
@@ -1017,7 +1018,7 @@ export default class KoniState extends State {
     return this.currentAccountStore.getSubject();
   }
 
-  public getAccountAddress () {
+  public getAccountAddress (): Promise<string | null | undefined> {
     return new Promise((resolve, reject) => {
       this.getCurrentAccount((account) => {
         if (account) {
@@ -1027,6 +1028,24 @@ export default class KoniState extends State {
         }
       });
     });
+  }
+
+  public async getDecodedAddresses (address?: string): Promise<string[]> {
+    let checkingAddress: string | null | undefined = address;
+
+    if (!address) {
+      checkingAddress = await this.getAccountAddress();
+    }
+
+    if (!checkingAddress) {
+      return [];
+    }
+
+    if (checkingAddress === ALL_ACCOUNT_KEY) {
+      return Object.keys(accounts.subject.value);
+    }
+
+    return [checkingAddress];
   }
 
   public getBalance (reset?: boolean): BalanceJson {

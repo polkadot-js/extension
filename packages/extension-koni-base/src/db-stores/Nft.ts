@@ -3,28 +3,21 @@
 
 import { liveQuery } from 'dexie';
 
-import { ALL_ACCOUNT_KEY } from '../constants';
 import { INft } from '../databases';
 import BaseStoreWithAddress from '../db-stores/BaseStoreWithAddress';
 
 export default class NftStore extends BaseStoreWithAddress<INft> {
-  getNft (address: string, chainHashs: string[] = []) {
-    const conditions: Record<string, string> = {};
-
-    if (address && address !== ALL_ACCOUNT_KEY) {
-      conditions.address = address;
-    }
-
-    if (Object.keys(conditions).length) {
-      return this.table.where(conditions).and((item) => !chainHashs.length || chainHashs.includes(item.chainHash)).toArray();
+  getNft (addresses: string[], chainHashs: string[] = []) {
+    if (addresses.length) {
+      return this.table.where('address').anyOfIgnoreCase(addresses).and((item) => !chainHashs.length || chainHashs.includes(item.chainHash)).toArray();
     }
 
     return this.table.filter((item) => !chainHashs.length || chainHashs.includes(item.chainHash)).toArray();
   }
 
-  subscribeNft (address: string, chainHashs: string[] = []) {
+  subscribeNft (addresses: string[], chainHashs: string[] = []) {
     return liveQuery(
-      () => this.getNft(address, chainHashs)
+      () => this.getNft(addresses, chainHashs)
     );
   }
 

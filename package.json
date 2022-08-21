@@ -12,8 +12,8 @@
   "sideEffects": false,
   "version": "0.44.6",
   "versions": {
-    "git": "0.44.6-0-x",
-    "npm": "0.44.5"
+    "git": "0.44.6",
+    "npm": "0.44.6"
   },
   "workspaces": [
     "packages/*"

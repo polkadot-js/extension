@@ -74,7 +74,6 @@
     "is-buffer": "^2.0.5",
     "json-rpc-engine": "^6.1.0",
     "moonbeam-types-bundle": "2.0.3",
-    "oak-js-library": "github:OAK-Foundation/OAK-JS-SDK#0.1.0-backend",
     "pontem-types-bundle": "^1.0.15",
     "protobufjs": "^6.11.3",
     "rlp": "^3.0.0",

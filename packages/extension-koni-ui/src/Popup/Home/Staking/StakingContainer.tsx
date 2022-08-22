@@ -64,6 +64,10 @@ function StakingContainer ({ className, data, loading, priceMap, stakeUnlockingT
   useEffect(() => {
     handlerResize();
     window.addEventListener('resize', handlerResize);
+
+    return () => {
+      window.removeEventListener('resize', handlerResize);
+    };
   }, []);
 
   const getScrollbarWidth = () => {
@@ -88,11 +92,23 @@ function StakingContainer ({ className, data, loading, priceMap, stakeUnlockingT
   };
 
   useEffect(() => {
-    getScrollbarWidth();
+    let isMounted = true;
+
+    if (isMounted) {
+      getScrollbarWidth();
+    }
+
+    return () => {
+      isMounted = false;
+    };
   }, []);
 
   useEffect(() => {
     setListWidth(containerWidth - scrollWidth);
+
+    return () => {
+      setListWidth(0);
+    };
   }, [containerWidth, scrollWidth]);
 
   const handleNavigateBonding = useCallback(() => {

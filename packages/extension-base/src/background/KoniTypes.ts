@@ -548,7 +548,9 @@ export interface RequestCrossChainTransfer extends RequestCheckCrossChainTransfe
 
 export interface ResponseCheckCrossChainTransfer {
   errors?: Array<TransferError>,
-  feeString?: string
+  feeString?: string,
+  estimatedFee: string,
+  feeSymbol: string
 }
 
 export type RequestTransferExternal = RequestCheckTransfer

@@ -179,10 +179,10 @@ describe('test DotSama APIs', () => {
   });
 
   test('test get unclaimed eras', async () => {
-    const provider = new WsProvider(getCurrentProvider(PREDEFINED_NETWORKS.shibuya), DOTSAMA_AUTO_CONNECT_MS);
+    const provider = new WsProvider(getCurrentProvider(PREDEFINED_NETWORKS.astar), DOTSAMA_AUTO_CONNECT_MS);
     const api = new ApiPromise({ provider });
     const apiPromise = await api.isReady;
-    const address = '5HbcGs2QXVAc6Q6eoTzLYNAJWpN17AkCFRLnWDaHCiGYXvNc';
+    const address = 'ZqKUXnwYnsXCwRqML5F8ZQh8RAZcR3cHMDsB5vqRu4obK6n';
 
     const [_stakedDapps, _currentEra] = await Promise.all([
       apiPromise.query.dappsStaking.generalStakerInfo.entries(address),
@@ -192,7 +192,10 @@ describe('test DotSama APIs', () => {
     const currentEra = parseRawNumber(_currentEra.toHuman() as string);
     const transactions: SubmittableExtrinsic[] = [];
 
+    console.log('_stakedDapps', _stakedDapps.length);
+
     for (const item of _stakedDapps) {
+      console.log('run here');
       const data = item[0].toHuman() as any[];
       const stakedDapp = data[1] as Record<string, string>;
       const stakeData = item[1].toHuman() as Record<string, Record<string, string>[]>;
@@ -218,11 +221,19 @@ describe('test DotSama APIs', () => {
         numberOfUnclaimedEra += eraToClaim;
       }
 
+      console.log('numberOfUnclaimedEra', numberOfUnclaimedEra);
+      const totalWeight: BN = new BN(0);
+
       for (let i = 0; i < numberOfUnclaimedEra; i++) {
         const tx = apiPromise.tx.dappsStaking.claimStaker({ Evm: dappAddress });
+        const payment = await tx.paymentInfo(address);
 
+        // console.log('payment.weight', payment.weight.toString());
+        totalWeight.add(payment.weight);
         transactions.push(tx);
       }
+
+      console.log(totalWeight.toString());
     }
 
     const extrinsic = apiPromise.tx.utility.batch(transactions);

@@ -26,8 +26,10 @@ import TransactionHistoryReducer from './TransactionHistory';
 import TransferNftExtraReducer from './TransferNftExtra';
 import TransferNftParamsReducer from './TransferNftParams';
 import UnbondingParamsReducer from './UnbondingParams';
+import stakeCompoundParamsReducer from './StakeCompound';
 
 const reducers = {
+  stakeCompoundParams: stakeCompoundParamsReducer,
   stakeUnlockingInfo: StakeUnlockingReducer,
   unbondingParams: UnbondingParamsReducer,
   bondingParams: BondingParamsReducer,

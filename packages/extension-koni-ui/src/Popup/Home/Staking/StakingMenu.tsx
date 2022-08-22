@@ -13,7 +13,7 @@ import Tooltip from '@subwallet/extension-koni-ui/components/Tooltip';
 import useGetNetworkJson from '@subwallet/extension-koni-ui/hooks/screen/home/useGetNetworkJson';
 import useOutsideClick from '@subwallet/extension-koni-ui/hooks/useOutsideClick';
 import { RootState, store } from '@subwallet/extension-koni-ui/stores';
-import { BondingParams, UnbondingParams } from '@subwallet/extension-koni-ui/stores/types';
+import { BondingParams, StakeCompoundParams, UnbondingParams } from '@subwallet/extension-koni-ui/stores/types';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import moment from 'moment';
 import React, { useCallback, useContext, useRef } from 'react';
@@ -32,7 +32,6 @@ interface Props extends ThemeProps {
   unbondingStake: string | undefined;
   showWithdrawalModal: () => void;
   showClaimRewardModal: () => void;
-  showStakeCompoundModal: () => void;
 }
 
 const MANUAL_CLAIM_CHAINS = [
@@ -46,7 +45,7 @@ const MANUAL_COMPOUND_CHAINS = [
   'turingStaging'
 ];
 
-function StakingMenu ({ bondedAmount, className, networkKey, nextWithdrawal, nextWithdrawalAmount, redeemable, showClaimRewardModal, showMenu, showStakeCompoundModal, showWithdrawalModal, toggleMenu, unbondingStake }: Props): React.ReactElement<Props> {
+function StakingMenu ({ bondedAmount, className, networkKey, nextWithdrawal, nextWithdrawalAmount, redeemable, showClaimRewardModal, showMenu, showWithdrawalModal, toggleMenu, unbondingStake }: Props): React.ReactElement<Props> {
   const stakingMenuRef = useRef(null);
   const navigate = useContext(ActionContext);
   const networkJson = useGetNetworkJson(networkKey);
@@ -72,6 +71,13 @@ function StakingMenu ({ bondedAmount, className, networkKey, nextWithdrawal, nex
     if (parseFloat(bondedAmount) > 0) {
       store.dispatch({ type: 'unbondingParams/update', payload: { selectedAccount: account?.address as string, selectedNetwork: networkKey, bondedAmount: parseFloat(bondedAmount) } as UnbondingParams });
       navigate('/account/unbonding-auth');
+    }
+  }, [account?.address, bondedAmount, navigate, networkKey]);
+
+  const handleClickCompoundStake = useCallback(() => {
+    if (parseFloat(bondedAmount) > 0) {
+      store.dispatch({ type: 'stakeCompoundParams/update', payload: { selectedAccount: account?.address as string, selectedNetwork: networkKey } as StakeCompoundParams });
+      navigate('/account/stake-compounding-auth');
     }
   }, [account?.address, bondedAmount, navigate, networkKey]);
 
@@ -102,12 +108,6 @@ function StakingMenu ({ bondedAmount, className, networkKey, nextWithdrawal, nex
       showClaimRewardModal();
     }
   }, [bondedAmount, showClaimRewardModal]);
-
-  const handleClickCompoundStake = useCallback(() => {
-    if (parseFloat(bondedAmount) > 0) {
-      showStakeCompoundModal();
-    }
-  }, [bondedAmount, showStakeCompoundModal]);
 
   return (
     <div className={className}>

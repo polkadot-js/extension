@@ -13,24 +13,13 @@ import useToast from '@subwallet/extension-koni-ui/hooks/useToast';
 import useTranslation from '@subwallet/extension-koni-ui/hooks/useTranslation';
 import { getStakeDelegationInfo, getTuringStakeCompoundTxInfo, submitStakeClaimReward } from '@subwallet/extension-koni-ui/messaging';
 import ValidatorsDropdown from '@subwallet/extension-koni-ui/Popup/Bonding/components/ValidatorsDropdown';
-import StakeClaimRewardResult from '@subwallet/extension-koni-ui/Popup/Home/Staking/StakeClaimRewardResult';
+import StakeClaimRewardResult from '@subwallet/extension-koni-ui/Popup/Home/Staking/components/StakeClaimRewardResult';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import React, { useCallback, useEffect, useState } from 'react';
 import styled from 'styled-components';
 
 import { BN } from '@polkadot/util';
-
-function filterValidDelegations (delegations: DelegationItem[]) {
-  const filteredDelegations: DelegationItem[] = [];
-
-  delegations.forEach((item) => {
-    if (parseFloat(item.amount) > 0) {
-      filteredDelegations.push(item);
-    }
-  });
-
-  return filteredDelegations;
-}
+import moment from "moment/moment";
 
 interface Props extends ThemeProps {
   className?: string;
@@ -39,7 +28,7 @@ interface Props extends ThemeProps {
   networkKey: string;
 }
 
-function StakeAuthClaimReward ({ address, className, hideModal, networkKey }: Props): React.ReactElement<Props> {
+function StakeAuthCompoundRequest ({ address, className, hideModal, networkKey }: Props): React.ReactElement<Props> {
   const [loading, setLoading] = useState(false);
   const [password, setPassword] = useState<string>('');
   const [passwordError, setPasswordError] = useState<string | null>('');
@@ -54,7 +43,7 @@ function StakeAuthClaimReward ({ address, className, hideModal, networkKey }: Pr
   const [delegations, setDelegations] = useState<DelegationItem[] | undefined>(undefined);
   const [selectedCollator, setSelectedCollator] = useState<string>('');
   const [accountMinimum, setAccountMinimum] = useState('0');
-  const [optimalTime, setOptimalTime] = useState('');
+  const [optimalTime, setOptimalTime] = useState('-1');
 
   const [extrinsicHash, setExtrinsicHash] = useState('');
   const [isTxSuccess, setIsTxSuccess] = useState(false);
@@ -72,28 +61,10 @@ function StakeAuthClaimReward ({ address, className, hideModal, networkKey }: Pr
         setFee(result.txInfo.fee);
         setBalanceError(result.txInfo.balanceError);
         setOptimalTime(result.optimalTime);
+        console.log(result);
       }).catch(console.error);
     }
   }, [accountMinimum, address, networkKey, selectedCollator]);
-
-  useEffect(() => {
-    getStakeDelegationInfo({
-      address,
-      networkKey
-    }).then((result) => {
-      const filteredDelegations = filterValidDelegations(result);
-
-      setDelegations(filteredDelegations);
-      setSelectedCollator(filteredDelegations[0].owner);
-      setIsDataReady(true);
-    }).catch(console.error);
-
-    return () => {
-      setDelegations(undefined);
-      setSelectedCollator('');
-      setIsDataReady(false);
-    };
-  }, [address, networkKey]);
 
   const _onChangePass = useCallback((value: string) => {
     setPassword(value);
@@ -166,29 +137,6 @@ function StakeAuthClaimReward ({ address, className, hideModal, networkKey }: Pr
     }, 10);
   }, [handleOnSubmit]);
 
-  const handleSelectValidator = useCallback((val: string) => {
-    if (delegations) {
-      for (const item of delegations) {
-        if (item.owner === val) {
-          setSelectedCollator(val);
-          break;
-        }
-      }
-    }
-  }, [delegations]);
-
-  const handleUpdateAccountMinimum = useCallback((value: BN | string) => {
-    if (!value) {
-      return;
-    }
-
-    if (value instanceof BN) {
-      setAccountMinimum(value.toString());
-    } else {
-      setAccountMinimum(value);
-    }
-  }, []);
-
   return (
     <div className={className}>
       <Modal>
@@ -256,8 +204,8 @@ function StakeAuthClaimReward ({ address, className, hideModal, networkKey }: Pr
                       </div>
 
                       <div className={'transaction-info-row'}>
-                        <div className={'transaction-info-title'}>Optimal time</div>
-                        <div className={'transaction-info-value'}>{optimalTime}</div>
+                        <div className={'transaction-info-title'}>Optimal compounding time</div>
+                        <div className={'transaction-info-value'}>{moment.duration(optimalTime, 'days').humanize()}</div>
                       </div>
 
                       <div className={'transaction-info-row'}>
@@ -313,7 +261,7 @@ function StakeAuthClaimReward ({ address, className, hideModal, networkKey }: Pr
   );
 }
 
-export default React.memo(styled(StakeAuthClaimReward)(({ theme }: Props) => `
+export default React.memo(styled(StakeAuthCompoundRequest)(({ theme }: Props) => `
   .stake-compound-input {
     margin-top: 20px;
   }

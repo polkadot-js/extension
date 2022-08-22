@@ -11,13 +11,12 @@ import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import React, { useCallback, useContext, useEffect, useState } from 'react';
 import { useSelector } from 'react-redux';
 import styled from 'styled-components';
-import StakeAuthCompoundRequest from "@subwallet/extension-koni-ui/Popup/Home/Staking/StakeAuthCompoundRequest";
 
 const StakingRow = React.lazy(() => import('./StakingRow'));
 const Spinner = React.lazy(() => import('@subwallet/extension-koni-ui/components/Spinner'));
 const EmptyList = React.lazy(() => import('@subwallet/extension-koni-ui/Popup/Home/Staking/EmptyList'));
-const StakeAuthClaimReward = React.lazy(() => import('@subwallet/extension-koni-ui/Popup/Home/Staking/StakeAuthClaimReward'));
-const StakeAuthWithdrawal = React.lazy(() => import('@subwallet/extension-koni-ui/Popup/Home/Staking/StakeAuthWithdrawal'));
+const StakeAuthClaimReward = React.lazy(() => import('@subwallet/extension-koni-ui/Popup/Home/Staking/components/StakeAuthClaimReward'));
+const StakeAuthWithdrawal = React.lazy(() => import('@subwallet/extension-koni-ui/Popup/Home/Staking/components/StakeAuthWithdrawal'));
 
 interface Props extends ThemeProps {
   className?: string;
@@ -38,7 +37,6 @@ function StakingContainer ({ className, data, loading, priceMap, stakeUnlockingT
 
   const [showWithdrawalModal, setShowWithdrawalModal] = useState(false);
   const [showClaimRewardModal, setShowClaimRewardModal] = useState(false);
-  const [showCompoundStakeModal, setShowCompoundStakeModal] = useState(false);
 
   // for withdrawal and claiming rewards
   const [targetNetworkKey, setTargetNetworkKey] = useState('');
@@ -172,7 +170,6 @@ function StakingContainer ({ className, data, loading, priceMap, stakeUnlockingT
                 reward={reward}
                 setActionNetworkKey={setTargetNetworkKey}
                 setShowClaimRewardModal={setShowClaimRewardModal}
-                setShowCompoundStakeModal={setShowCompoundStakeModal}
                 setShowWithdrawalModal={setShowWithdrawalModal}
                 setTargetNextWithdrawalAction={setTargetNextWithdrawalAction}
                 setTargetRedeemable={setTargetRedeemable}
@@ -214,14 +211,6 @@ function StakingContainer ({ className, data, loading, priceMap, stakeUnlockingT
 
       {
         showClaimRewardModal && <StakeAuthClaimReward
-          address={account?.address as string}
-          hideModal={handleHideClaimRewardModal}
-          networkKey={targetNetworkKey}
-        />
-      }
-
-      {
-        showCompoundStakeModal && <StakeAuthCompoundRequest
           address={account?.address as string}
           hideModal={handleHideClaimRewardModal}
           networkKey={targetNetworkKey}

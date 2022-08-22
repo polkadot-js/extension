@@ -10,7 +10,7 @@ import useGetNetworkJson from '@subwallet/extension-koni-ui/hooks/screen/home/us
 import useToast from '@subwallet/extension-koni-ui/hooks/useToast';
 import useTranslation from '@subwallet/extension-koni-ui/hooks/useTranslation';
 import { getStakeClaimRewardTxInfo, submitStakeClaimReward } from '@subwallet/extension-koni-ui/messaging';
-import StakeClaimRewardResult from '@subwallet/extension-koni-ui/Popup/Home/Staking/StakeClaimRewardResult';
+import StakeClaimRewardResult from '@subwallet/extension-koni-ui/Popup/Home/Staking/components/StakeClaimRewardResult';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import React, { useCallback, useEffect, useState } from 'react';
 import styled from 'styled-components';

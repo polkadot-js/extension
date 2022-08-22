@@ -41,3 +41,8 @@ export type UnbondingParams = {
   selectedNetwork: string | null;
   bondedAmount: number | null;
 }
+
+export type StakeCompoundParams = {
+  selectedAccount: string;
+  selectedNetwork: string;
+}

@@ -758,12 +758,12 @@ async function handleBifrostUnlockingInfo (dotSamaApi: ApiProps, networkJson: Ne
 async function getTuringCompoundTxInfo (dotSamaApi: ApiProps, address: string, collatorAddress: string, accountMinimum: string) {
   const apiPromise = await dotSamaApi.isReady;
   // TODO: get optimal params
-  const extrinsic = apiPromise.api.tx.automationTime.scheduleAutoCompoundDelegatedStakeTask('1658854800', '172800', collatorAddress, accountMinimum);
+  const extrinsic = apiPromise.api.tx.automationTime.scheduleAutoCompoundDelegatedStakeTask('1661200000', '172800', collatorAddress, accountMinimum);
 
   const paymentInfo = await extrinsic.paymentInfo(address);
 
   return {
-    optimalTime: '172800',
+    optimalTime: '46',
     paymentInfo
   };
 }

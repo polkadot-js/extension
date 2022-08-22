@@ -5,6 +5,7 @@ import { ChainRegistry, CurrentNetworkInfo, NftCollection as _NftCollection, Nft
 import { AccountJson } from '@subwallet/extension-base/background/types';
 import { AccountContext } from '@subwallet/extension-koni-ui/components';
 import ExportAccountQrModal from '@subwallet/extension-koni-ui/components/Modal/ExportAccountQrModal';
+import TransakModal from '@subwallet/extension-koni-ui/components/Modal/TransakModal';
 import useAccountBalance from '@subwallet/extension-koni-ui/hooks/screen/home/useAccountBalance';
 import useCrowdloanNetworks from '@subwallet/extension-koni-ui/hooks/screen/home/useCrowdloanNetworks';
 import useFetchNft from '@subwallet/extension-koni-ui/hooks/screen/home/useFetchNft';
@@ -23,6 +24,7 @@ import { useSelector } from 'react-redux';
 import styled from 'styled-components';
 
 import buyIcon from '../../assets/buy-icon.svg';
+import cryptoIcon from '../../assets/crypto.svg';
 import sendIcon from '../../assets/send-icon.svg';
 import swapIcon from '../../assets/swap-icon.svg';
 
@@ -225,6 +227,7 @@ function Home ({ chainRegistryMap, className = '', currentAccount, historyMap, n
 
   const isSetNetwork = window.localStorage.getItem('isSetNetwork') !== 'ok';
   const [showNetworkSelection, setShowNetworkSelection] = useState(isSetNetwork);
+  const [isVisibleBuyModal, setIsVisibleBuyModal] = useState<boolean>(false);
 
   const updateModalQr = useCallback((newValue: Partial<ModalQrProps>) => {
     setModalQrProp((oldValue) => {
@@ -308,6 +311,14 @@ function Home ({ chainRegistryMap, className = '', currentAccount, historyMap, n
     setIsExportModalOpen(false);
   }, []);
 
+  const openTransakModal = useCallback(() => {
+    setIsVisibleBuyModal(true);
+  }, []);
+
+  const closeTransakModal = useCallback(() => {
+    setIsVisibleBuyModal(false);
+  }, []);
+
   const tabItems = useMemo<TabHeaderItemType[]>(() => {
     return getTabHeaderItems(address, t);
   }, [address, t]);
@@ -342,6 +353,13 @@ function Home ({ chainRegistryMap, className = '', currentAccount, historyMap, n
         </div>
 
         <div className='home-account-button-container'>
+          <div className='action-button-wrapper'>
+            <ActionButton
+              iconSrc={cryptoIcon}
+              onClick={openTransakModal}
+              tooltipContent={t<string>('Buy')}
+            />
+          </div>
           <div className='action-button-wrapper'>
             <ActionButton
               iconSrc={buyIcon}
@@ -479,6 +497,13 @@ function Home ({ chainRegistryMap, className = '', currentAccount, historyMap, n
         showNetworkSelection && <NetworkSelection
           handleShow={setShowNetworkSelection}
         />
+      }
+      {
+        isVisibleBuyModal && (
+          <TransakModal
+            closeModal={closeTransakModal}
+          />
+        )
       }
     </div>
   );

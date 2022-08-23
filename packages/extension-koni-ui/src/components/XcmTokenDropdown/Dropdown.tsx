@@ -263,7 +263,7 @@ export default React.memo(styled(DropdownWrapper)(({ theme }: ThemeProps) => `
     justify-content: space-between;
     min-height: 48px;
     position: relative;
-    min-width: 240px;
+    width: 240px;
     box-shadow: ${theme.boxShadow2};
   }
 
@@ -272,6 +272,8 @@ export default React.memo(styled(DropdownWrapper)(({ theme }: ThemeProps) => `
     color: ${theme.textColor2};
     padding: 4px 8px;
     border-radius: 8px;
+    overflow: hidden;
+    width: 220px;
   }
 
   .token-dropdown-dropdown__input {

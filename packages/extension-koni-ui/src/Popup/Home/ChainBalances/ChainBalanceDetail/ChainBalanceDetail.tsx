@@ -125,9 +125,13 @@ export default React.memo(styled(ChainBalanceDetail)(({ theme }: Props) => `
     font-size: 15px;
     line-height: 26px;
     font-weight: 500;
-    margin-left: 25px;
+    padding-left: 25px;
     cursor: pointer;
-    margin-bottom: 10px;
+    padding-bottom: 10px;
+    position: sticky;
+    top: 0;
+    background-color: ${theme.background};
+    z-index: 1;
   }
 
   .chain-balance-detail__back-icon {

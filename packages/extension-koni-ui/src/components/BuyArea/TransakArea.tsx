@@ -37,11 +37,15 @@ const TransakArea = (props: Props) => {
       return '';
     }
 
+    const networks = [..._network.networks];
+    const tokenList = [..._network.tokens];
+    const defaultToken = tokenList[0];
+
     const params = {
-      apiKey: '25ac1309-a49b-4411-b20e-5e56c61a5b1c',
-      defaultCryptoCurrency: _network.defaultToken,
-      cryptoCurrencyList: _network.tokens.join(','),
-      network: networkKey !== 'shiden' ? _network.network : undefined,
+      apiKey: '25ac1309-a49b-4411-b20e-5e56c61a5b1c', // MetaMask's apiKey
+      defaultCryptoCurrency: defaultToken,
+      cryptoCurrencyList: tokenList.join(','),
+      networks: networkKey !== 'shiden' ? networks.join(',') : undefined,
       disableWalletAddressForm: true,
       walletAddress: formattedAddress
     };

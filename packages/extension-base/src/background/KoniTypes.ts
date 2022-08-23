@@ -1287,8 +1287,7 @@ export interface LedgerNetwork {
 }
 
 export interface TransakNetwork {
-  network: string;
-  defaultToken: string;
+  networks: string[];
   tokens: string[];
 }
 

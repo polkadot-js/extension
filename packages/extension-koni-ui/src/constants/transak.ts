@@ -5,33 +5,27 @@ import { TransakNetwork } from '@subwallet/extension-base/background/KoniTypes';
 
 export const PREDEFINED_TRANSAK_NETWORK: Record<string, TransakNetwork> = {
   polkadot: {
-    network: 'mainnet',
-    defaultToken: 'DOT',
+    networks: ['mainnet'],
     tokens: ['DOT']
   },
   kusama: {
-    network: 'mainnet',
-    defaultToken: 'KSM',
+    networks: ['mainnet'],
     tokens: ['KSM']
   },
   astar: {
-    network: 'astar',
-    defaultToken: 'ASTR',
+    networks: ['astar'],
     tokens: ['ASTR']
   },
   shiden: {
-    network: 'Shiden',
-    defaultToken: 'SDN',
+    networks: ['Shiden'],
     tokens: ['SDN']
   },
   moonbeam: {
-    network: 'mainnet',
-    defaultToken: 'GLMR',
+    networks: ['mainnet'],
     tokens: ['GLMR']
   },
   moonriver: {
-    network: 'moonriver',
-    defaultToken: 'MOVR',
+    networks: ['moonriver'],
     tokens: ['MOVR']
   }
 };

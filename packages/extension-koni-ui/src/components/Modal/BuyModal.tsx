@@ -218,7 +218,6 @@ const BuyModal = (props: Props) => {
       <Wrapper
         className={className}
         closeModal={closeModal}
-        closeable={false}
       >
         <>
           <div className={CN('modal-header')}>

@@ -3,6 +3,7 @@
 
 import arrowCounterClockWise from '@subwallet/extension-koni-ui/assets/arrow-counter-clockwise.svg';
 import pencilIcon from '@subwallet/extension-koni-ui/assets/pencil-gray.svg';
+import Tooltip from '@subwallet/extension-koni-ui/components/Tooltip';
 import { ActionContext } from '@subwallet/extension-koni-ui/contexts';
 import useGetNetworkJson from '@subwallet/extension-koni-ui/hooks/screen/home/useGetNetworkJson';
 import useToast from '@subwallet/extension-koni-ui/hooks/useToast';
@@ -47,15 +48,28 @@ function NetworkTools ({ className, networkKey }: Props): React.ReactElement<Pro
         <img
           alt='reload-network'
           className={'reload-network-btn'}
+          data-for={`reload-network-${networkKey}`}
+          data-tip={true}
           onClick={handleClickReload}
           src={arrowCounterClockWise}
         />
-
+        <Tooltip
+          offset={{ top: 4 }}
+          text={'Reload network'}
+          trigger={`reload-network-${networkKey}`}
+        />
         <img
           alt='edit-network'
           className={'network-edit-icon'}
+          data-for={`edit-network-${networkKey}`}
+          data-tip={true}
           onClick={handleClickEdit}
           src={pencilIcon}
+        />
+        <Tooltip
+          offset={{ top: 4 }}
+          text={'Configure network'}
+          trigger={`edit-network-${networkKey}`}
         />
       </div>
     </div>

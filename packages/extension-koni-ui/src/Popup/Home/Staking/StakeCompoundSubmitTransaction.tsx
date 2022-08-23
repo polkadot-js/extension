@@ -9,7 +9,7 @@ import Spinner from '@subwallet/extension-koni-ui/components/Spinner';
 import { ActionContext } from '@subwallet/extension-koni-ui/contexts';
 import useGetNetworkJson from '@subwallet/extension-koni-ui/hooks/screen/home/useGetNetworkJson';
 import useTranslation from '@subwallet/extension-koni-ui/hooks/useTranslation';
-import { getStakeDelegationInfo } from '@subwallet/extension-koni-ui/messaging';
+import { getStakeDelegationInfo, getTuringStakeCompoundTxInfo } from '@subwallet/extension-koni-ui/messaging';
 import Header from '@subwallet/extension-koni-ui/partials/Header';
 import ValidatorsDropdown from '@subwallet/extension-koni-ui/Popup/Bonding/components/ValidatorsDropdown';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
@@ -21,6 +21,7 @@ import styled from 'styled-components';
 import { BN } from '@polkadot/util';
 
 const StakeAuthCompoundRequest = React.lazy(() => import('@subwallet/extension-koni-ui/Popup/Home/Staking/components/StakeAuthCompoundRequest'));
+const StakeClaimRewardResult = React.lazy(() => import('@subwallet/extension-koni-ui/Popup/Home/Staking/components/StakeClaimRewardResult'));
 
 interface Props extends ThemeProps {
   className?: string;
@@ -47,10 +48,19 @@ function StakeCompoundSubmitTransaction ({ className }: Props): React.ReactEleme
   const [accountMinimum, setAccountMinimum] = useState('0');
   const [showAuth, setShowAuth] = useState(false);
   const { currentAccount: { account }, stakeCompoundParams: { selectedAccount, selectedNetwork } } = useSelector((state: RootState) => state);
+
+  const [balanceError, setBalanceError] = useState(false);
+  const [fee, setFee] = useState('');
+  const [optimalTime, setOptimalTime] = useState('');
+
   const navigate = useContext(ActionContext);
   const [loading, setLoading] = useState(false);
   const [isReadySubmit, setIsReadySubmit] = useState(false);
   const [isClickNext, setIsClickNext] = useState(false);
+
+  const [extrinsicHash, setExtrinsicHash] = useState('');
+  const [isTxSuccess, setIsTxSuccess] = useState(false);
+  const [txError, setTxError] = useState('');
 
   useEffect(() => {
     if (account?.address !== selectedAccount) {
@@ -83,7 +93,7 @@ function StakeCompoundSubmitTransaction ({ className }: Props): React.ReactEleme
     if (!isClickNext) {
       const _accountMinimum = parseFloat(accountMinimum);
 
-      if (_accountMinimum !== 0) {
+      if (_accountMinimum > 0) {
         setIsReadySubmit(true);
       } else {
         setIsReadySubmit(false);
@@ -107,12 +117,16 @@ function StakeCompoundSubmitTransaction ({ className }: Props): React.ReactEleme
       return;
     }
 
+    let parsedValue;
+
     if (value instanceof BN) {
-      setAccountMinimum(value.toString());
+      parsedValue = parseFloat(value.toString()) / (10 ** (networkJson.decimals as number));
     } else {
-      setAccountMinimum(value);
+      parsedValue = parseFloat(value) / (10 ** (networkJson.decimals as number));
     }
-  }, []);
+
+    setAccountMinimum(parsedValue.toString());
+  }, [networkJson.decimals]);
 
   const handleClickCancel = useCallback(() => {
     navigate('/');
@@ -120,10 +134,33 @@ function StakeCompoundSubmitTransaction ({ className }: Props): React.ReactEleme
 
   const handleConfirm = useCallback(() => {
     setLoading(true);
-    setIsClickNext(true);
-  }, []);
+
+    getTuringStakeCompoundTxInfo({
+      networkKey: selectedNetwork,
+      address: selectedAccount,
+      accountMinimum,
+      collatorAddress: selectedCollator
+    }).then((result) => {
+      setFee(result.txInfo.fee);
+      setBalanceError(result.txInfo.balanceError);
+      setOptimalTime(result.optimalTime);
+
+      setShowAuth(true);
+      setLoading(false);
+      setIsClickNext(true);
+    }).catch(console.error);
+  }, [accountMinimum, selectedAccount, selectedCollator, selectedNetwork]);
 
   const handleRevertClickNext = useCallback(() => {
+    setIsClickNext(false);
+  }, []);
+
+  const handleResend = useCallback(() => {
+    setExtrinsicHash('');
+    setIsTxSuccess(false);
+    setTxError('');
+    setShowResult(false);
+    setShowAuth(true);
     setIsClickNext(false);
   }, []);
 
@@ -168,7 +205,6 @@ function StakeCompoundSubmitTransaction ({ className }: Props): React.ReactEleme
                   decimals={networkJson.decimals}
                   help={'The minimum balance that will be kept in your account'}
                   isError={false}
-                  isZeroable={false}
                   label={t<string>('Compounding threshold')}
                   onChange={handleUpdateAccountMinimum}
                   placeholder={'0'}
@@ -207,11 +243,28 @@ function StakeCompoundSubmitTransaction ({ className }: Props): React.ReactEleme
         <StakeAuthCompoundRequest
           accountMinimum={accountMinimum}
           address={selectedAccount}
+          balanceError={balanceError}
+          fee={fee}
           handleRevertClickNext={handleRevertClickNext}
           networkKey={selectedNetwork}
+          optimalTime={optimalTime}
           selectedCollator={selectedCollator}
+          setExtrinsicHash={setExtrinsicHash}
+          setIsTxSuccess={setIsTxSuccess}
           setShowAuth={setShowAuth}
           setShowResult={setShowResult}
+          setTxError={setTxError}
+        />
+      }
+
+      {!showAuth && showResult &&
+        <StakeClaimRewardResult
+          backToHome={handleClickCancel}
+          extrinsicHash={extrinsicHash}
+          handleResend={handleResend}
+          isTxSuccess={isTxSuccess}
+          networkKey={selectedNetwork}
+          txError={txError}
         />
       }
     </div>

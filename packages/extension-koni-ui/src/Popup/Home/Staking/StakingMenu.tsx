@@ -200,11 +200,20 @@ function StakingMenu ({ bondedAmount, className, networkKey, nextWithdrawal, nex
                 onClick={handleClickCompoundStake}
               >
                 <img
+                  data-for={`stake-compound-tooltip-${networkKey}`}
+                  data-tip={true}
                   height={18}
                   src={ArchiveTray}
                   width={18}
                 />
                 Compound stake
+                {
+                  parseFloat(bondedAmount) > 0 && <Tooltip
+                    place={'top'}
+                    text={'Periodically stake a proportion of your free balance'}
+                    trigger={`stake-compound-tooltip-${networkKey}`}
+                  />
+                }
               </div>
             }
           </Menu>

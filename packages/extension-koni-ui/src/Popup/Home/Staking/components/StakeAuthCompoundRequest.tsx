@@ -1,70 +1,47 @@
 // Copyright 2019-2022 @subwallet/extension-koni authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { DelegationItem } from '@subwallet/extension-base/background/KoniTypes';
 import { InputWithLabel } from '@subwallet/extension-koni-ui/components';
 import Button from '@subwallet/extension-koni-ui/components/Button';
 import InputAddress from '@subwallet/extension-koni-ui/components/InputAddress';
-import InputBalance from '@subwallet/extension-koni-ui/components/InputBalance';
 import Modal from '@subwallet/extension-koni-ui/components/Modal';
 import Spinner from '@subwallet/extension-koni-ui/components/Spinner';
 import useGetNetworkJson from '@subwallet/extension-koni-ui/hooks/screen/home/useGetNetworkJson';
 import useToast from '@subwallet/extension-koni-ui/hooks/useToast';
 import useTranslation from '@subwallet/extension-koni-ui/hooks/useTranslation';
-import { getStakeDelegationInfo, getTuringStakeCompoundTxInfo, submitStakeClaimReward } from '@subwallet/extension-koni-ui/messaging';
-import ValidatorsDropdown from '@subwallet/extension-koni-ui/Popup/Bonding/components/ValidatorsDropdown';
-import StakeClaimRewardResult from '@subwallet/extension-koni-ui/Popup/Home/Staking/components/StakeClaimRewardResult';
+import { submitStakeClaimReward } from '@subwallet/extension-koni-ui/messaging';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
-import React, { useCallback, useEffect, useState } from 'react';
+import moment from 'moment/moment';
+import React, { useCallback, useState } from 'react';
 import styled from 'styled-components';
-
-import { BN } from '@polkadot/util';
-import moment from "moment/moment";
 
 interface Props extends ThemeProps {
   className?: string;
-  hideModal: () => void;
+  handleRevertClickNext: () => void;
+  selectedCollator: string;
+  setShowAuth: (val: boolean) => void;
+  setShowResult: (val: boolean) => void;
+
+  accountMinimum: string;
   address: string;
   networkKey: string;
+  setExtrinsicHash: (val: string) => void;
+  setIsTxSuccess: (val: boolean) => void;
+  setTxError: (val: string) => void;
+
+  balanceError: boolean;
+  fee: string;
+  optimalTime: string;
 }
 
-function StakeAuthCompoundRequest ({ address, className, hideModal, networkKey }: Props): React.ReactElement<Props> {
+function StakeAuthCompoundRequest ({ accountMinimum, address, balanceError, className, fee, handleRevertClickNext, networkKey, optimalTime, selectedCollator, setExtrinsicHash, setIsTxSuccess, setShowAuth, setShowResult, setTxError }: Props): React.ReactElement<Props> {
   const [loading, setLoading] = useState(false);
   const [password, setPassword] = useState<string>('');
   const [passwordError, setPasswordError] = useState<string | null>('');
-  const [isDataReady, setIsDataReady] = useState(false);
 
   const networkJson = useGetNetworkJson(networkKey);
   const { t } = useTranslation();
   const { show } = useToast();
-
-  const [balanceError, setBalanceError] = useState(false);
-  const [fee, setFee] = useState('');
-  const [delegations, setDelegations] = useState<DelegationItem[] | undefined>(undefined);
-  const [selectedCollator, setSelectedCollator] = useState<string>('');
-  const [accountMinimum, setAccountMinimum] = useState('0');
-  const [optimalTime, setOptimalTime] = useState('-1');
-
-  const [extrinsicHash, setExtrinsicHash] = useState('');
-  const [isTxSuccess, setIsTxSuccess] = useState(false);
-  const [txError, setTxError] = useState('');
-  const [showResult, setShowResult] = useState(false);
-
-  useEffect(() => {
-    if (parseFloat(accountMinimum) > 0 && selectedCollator !== '') {
-      getTuringStakeCompoundTxInfo({
-        networkKey,
-        address,
-        accountMinimum,
-        collatorAddress: selectedCollator
-      }).then((result) => {
-        setFee(result.txInfo.fee);
-        setBalanceError(result.txInfo.balanceError);
-        setOptimalTime(result.optimalTime);
-        console.log(result);
-      }).catch(console.error);
-    }
-  }, [accountMinimum, address, networkKey, selectedCollator]);
 
   const _onChangePass = useCallback((value: string) => {
     setPassword(value);
@@ -73,19 +50,16 @@ function StakeAuthCompoundRequest ({ address, className, hideModal, networkKey }
 
   const handleClickCancel = useCallback(() => {
     if (!loading) {
-      hideModal();
+      setShowAuth(false);
+      handleRevertClickNext();
     }
-  }, [hideModal, loading]);
-
-  const handleResend = useCallback(() => {
-    setExtrinsicHash('');
-    setIsTxSuccess(false);
-    setTxError('');
-    setShowResult(false);
-  }, []);
+  }, [loading, setShowAuth, handleRevertClickNext]);
 
   const handleOnSubmit = useCallback(async () => {
     setLoading(true);
+    console.log(accountMinimum);
+    console.log(selectedCollator);
+
     await submitStakeClaimReward({
       address,
       networkKey,
@@ -126,7 +100,7 @@ function StakeAuthCompoundRequest ({ address, className, hideModal, networkKey }
         }
       }
     });
-  }, [address, balanceError, networkKey, password, show]);
+  }, [accountMinimum, address, balanceError, networkKey, password, selectedCollator, setExtrinsicHash, setIsTxSuccess, setShowResult, setTxError, show]);
 
   const handleConfirm = useCallback(() => {
     setLoading(true);
@@ -154,108 +128,78 @@ function StakeAuthCompoundRequest ({ address, className, hideModal, networkKey }
             Cancel
           </div>
         </div>
-        {
-          !showResult
-            ? <div>
-              {
-                isDataReady
-                  ? <div className={'compound-auth-container'}>
-                    <InputAddress
-                      autoPrefill={false}
-                      className={'receive-input-address'}
-                      defaultValue={address}
-                      help={t<string>('The account which you will compound the stake')}
-                      isDisabled={true}
-                      isSetDefaultValue={true}
-                      label={t<string>('Compound the stake from account')}
-                      networkPrefix={networkJson.ss58Format}
-                      type='allPlus'
-                      withEllipsis
-                    />
 
-                    {
-                      delegations && <ValidatorsDropdown
-                        delegations={delegations}
-                        handleSelectValidator={handleSelectValidator}
-                        label={'Select a collator'}
-                      />
-                    }
+        <div className={'compound-auth-container'}>
+          <InputAddress
+            autoPrefill={false}
+            className={'receive-input-address'}
+            defaultValue={address}
+            help={t<string>('The account which you will compound the stake')}
+            isDisabled={true}
+            isSetDefaultValue={true}
+            label={t<string>('Compound the stake from account')}
+            networkPrefix={networkJson.ss58Format}
+            type='allPlus'
+            withEllipsis
+          />
 
-                    <div className={'stake-compound-input'}>
-                      <InputBalance
-                        autoFocus
-                        className={'submit-bond-amount-input'}
-                        decimals={networkJson.decimals}
-                        help={'The minimum balance that will be kept in your account'}
-                        isError={false}
-                        isZeroable={false}
-                        label={t<string>('Compounding threshold')}
-                        onChange={handleUpdateAccountMinimum}
-                        placeholder={'0'}
-                        siDecimals={networkJson.decimals}
-                        siSymbol={networkJson.nativeToken}
-                      />
-                    </div>
-
-                    <div className={'transaction-info-container'}>
-                      <div className={'transaction-info-row'}>
-                        <div className={'transaction-info-title'}>Stake compounding fee</div>
-                        <div className={'transaction-info-value'}>{fee}</div>
-                      </div>
-
-                      <div className={'transaction-info-row'}>
-                        <div className={'transaction-info-title'}>Optimal compounding time</div>
-                        <div className={'transaction-info-value'}>{moment.duration(optimalTime, 'days').humanize()}</div>
-                      </div>
-
-                      <div className={'transaction-info-row'}>
-                        <div className={'transaction-info-title'}>Total</div>
-                        <div className={'transaction-info-value'}>{fee}</div>
-                      </div>
-                    </div>
-
-                    <div className='compound-auth__separator' />
-
-                    <InputWithLabel
-                      isError={passwordError !== null}
-                      label={t<string>('Unlock account with password')}
-                      onChange={_onChangePass}
-                      type='password'
-                      value={password}
-                    />
-
-                    <div className={'compound-auth-btn-container'}>
-                      <Button
-                        className={'compound-auth-cancel-button'}
-                        isDisabled={loading}
-                        onClick={hideModal}
-                      >
-                        Reject
-                      </Button>
-                      <Button
-                        isDisabled={password === ''}
-                        onClick={handleConfirm}
-                      >
-                        {
-                          loading
-                            ? <Spinner />
-                            : <span>Confirm</span>
-                        }
-                      </Button>
-                    </div>
-                  </div>
-                  : <Spinner className={'container-spinner'} />
-              }
+          <div className={'transaction-info-container'}>
+            <div className={'transaction-info-row'}>
+              <div className={'transaction-info-title'}>Compounding threshold</div>
+              <div className={'transaction-info-value'}>{accountMinimum} TUR</div>
             </div>
-            : <StakeClaimRewardResult
-              backToHome={hideModal}
-              extrinsicHash={extrinsicHash}
-              handleResend={handleResend}
-              isTxSuccess={isTxSuccess}
-              networkKey={networkKey}
-              txError={txError}
-            />
-        }
+            <div className={'transaction-info-row'}>
+              <div className={'transaction-info-title'}>Compounding starts at</div>
+              <div className={'transaction-info-value'}>Tue Aug 23 2022</div>
+            </div>
+            <div className={'transaction-info-row'}>
+              <div className={'transaction-info-title'}>Optimal compounding time</div>
+              <div className={'transaction-info-value'}>Every {moment.duration(optimalTime, 'days').humanize()}</div>
+            </div>
+          </div>
+
+          <div className={'transaction-info-container'}>
+            <div className={'transaction-info-row'}>
+              <div className={'transaction-info-title'}>Transaction fee</div>
+              <div className={'transaction-info-value'}>{fee}</div>
+            </div>
+
+            <div className={'transaction-info-row'}>
+              <div className={'transaction-info-title'}>Total</div>
+              <div className={'transaction-info-value'}>{fee}</div>
+            </div>
+          </div>
+
+          <div className='compound-auth__separator' />
+
+          <InputWithLabel
+            isError={passwordError !== null}
+            label={t<string>('Unlock account with password')}
+            onChange={_onChangePass}
+            type='password'
+            value={password}
+          />
+
+          <div className={'compound-auth-btn-container'}>
+            <Button
+              className={'compound-auth-cancel-button'}
+              isDisabled={loading}
+              onClick={handleClickCancel}
+            >
+              Reject
+            </Button>
+            <Button
+              isDisabled={password === ''}
+              onClick={handleConfirm}
+            >
+              {
+                loading
+                  ? <Spinner />
+                  : <span>Confirm</span>
+              }
+            </Button>
+          </div>
+        </div>
       </Modal>
     </div>
   );

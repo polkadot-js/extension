@@ -31,6 +31,12 @@ export const DEFAULT_EVM_TOKENS: EvmTokenJson = {
       type: 'erc721'
     },
     {
+      name: 'MoonFit Beast and Beauty',
+      smartContract: '0x02A6DeC99B2Ca768D638fcD87A96F6069F91287c',
+      chain: 'moonbeam',
+      type: 'erc721'
+    },
+    {
       name: 'Moon Monkeys',
       smartContract: '0xCc1A7573C8f10d0df7Ee4d57cc958C8Df4a5Aca9',
       chain: 'moonbeam',

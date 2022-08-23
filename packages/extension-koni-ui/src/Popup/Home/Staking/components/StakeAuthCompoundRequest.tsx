@@ -262,10 +262,6 @@ function StakeAuthCompoundRequest ({ address, className, hideModal, networkKey }
 }
 
 export default React.memo(styled(StakeAuthCompoundRequest)(({ theme }: Props) => `
-  .stake-compound-input {
-    margin-top: 20px;
-  }
-
   .container-spinner {
     height: 65px;
     width: 65px;

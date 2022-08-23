@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { DelegationItem } from '@subwallet/extension-base/background/KoniTypes';
+import Button from '@subwallet/extension-koni-ui/components/Button';
 import InputAddress from '@subwallet/extension-koni-ui/components/InputAddress';
 import InputBalance from '@subwallet/extension-koni-ui/components/InputBalance';
 import Spinner from '@subwallet/extension-koni-ui/components/Spinner';
@@ -47,6 +48,9 @@ function StakeCompoundSubmitTransaction ({ className }: Props): React.ReactEleme
   const [showAuth, setShowAuth] = useState(false);
   const { currentAccount: { account }, stakeCompoundParams: { selectedAccount, selectedNetwork } } = useSelector((state: RootState) => state);
   const navigate = useContext(ActionContext);
+  const [loading, setLoading] = useState(false);
+  const [isReadySubmit, setIsReadySubmit] = useState(false);
+  const [isClickNext, setIsClickNext] = useState(false);
 
   useEffect(() => {
     if (account?.address !== selectedAccount) {
@@ -75,6 +79,18 @@ function StakeCompoundSubmitTransaction ({ className }: Props): React.ReactEleme
     };
   }, [selectedAccount, selectedNetwork]);
 
+  useEffect(() => {
+    if (!isClickNext) {
+      const _accountMinimum = parseFloat(accountMinimum);
+
+      if (_accountMinimum !== 0) {
+        setIsReadySubmit(true);
+      } else {
+        setIsReadySubmit(false);
+      }
+    }
+  }, [accountMinimum, isClickNext]);
+
   const handleSelectValidator = useCallback((val: string) => {
     if (delegations) {
       for (const item of delegations) {
@@ -98,6 +114,19 @@ function StakeCompoundSubmitTransaction ({ className }: Props): React.ReactEleme
     }
   }, []);
 
+  const handleClickCancel = useCallback(() => {
+    navigate('/');
+  }, [navigate]);
+
+  const handleConfirm = useCallback(() => {
+    setLoading(true);
+    setIsClickNext(true);
+  }, []);
+
+  const handleRevertClickNext = useCallback(() => {
+    setIsClickNext(false);
+  }, []);
+
   return (
     <div className={className}>
       <Header
@@ -110,7 +139,7 @@ function StakeCompoundSubmitTransaction ({ className }: Props): React.ReactEleme
       {!showResult && <div>
         {
           isDataReady
-            ? <div className={'compound-auth-container'}>
+            ? <div className={'stake-compound-submit-container'}>
               <InputAddress
                 autoPrefill={false}
                 className={'receive-input-address'}
@@ -135,7 +164,7 @@ function StakeCompoundSubmitTransaction ({ className }: Props): React.ReactEleme
               <div className={'stake-compound-input'}>
                 <InputBalance
                   autoFocus
-                  className={'submit-bond-amount-input'}
+                  className={'stake-compound-amount-input'}
                   decimals={networkJson.decimals}
                   help={'The minimum balance that will be kept in your account'}
                   isError={false}
@@ -147,6 +176,28 @@ function StakeCompoundSubmitTransaction ({ className }: Props): React.ReactEleme
                   siSymbol={networkJson.nativeToken}
                 />
               </div>
+
+              <div className='stake-compound__separator' />
+
+              <div className={'stake-compound-btn-container'}>
+                <Button
+                  className={'stake-compound-cancel-button'}
+                  isDisabled={loading}
+                  onClick={handleClickCancel}
+                >
+                  Cancel
+                </Button>
+                <Button
+                  isDisabled={!isReadySubmit} // the latter is for parachains
+                  onClick={handleConfirm}
+                >
+                  {
+                    loading
+                      ? <Spinner />
+                      : <span>Next</span>
+                  }
+                </Button>
+              </div>
             </div>
             : <Spinner className={'container-spinner'} />
         }
@@ -156,6 +207,7 @@ function StakeCompoundSubmitTransaction ({ className }: Props): React.ReactEleme
         <StakeAuthCompoundRequest
           accountMinimum={accountMinimum}
           address={selectedAccount}
+          handleRevertClickNext={handleRevertClickNext}
           networkKey={selectedNetwork}
           selectedCollator={selectedCollator}
           setShowAuth={setShowAuth}
@@ -167,10 +219,50 @@ function StakeCompoundSubmitTransaction ({ className }: Props): React.ReactEleme
 }
 
 export default React.memo(styled(StakeCompoundSubmitTransaction)(({ theme }: Props) => `
+  .stake-compound-amount-input {
+    margin-top: 15px;
+  }
+
+  .stake-compound-btn-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 20px;
+  }
+
+  .stake-compound-cancel-button {
+    color: ${theme.textColor3};
+    background: ${theme.buttonBackground1};
+  }
+
+  .stake-compound__separator:before {
+    content: "";
+    height: 1px;
+    display: block;
+    background: ${theme.boxBorderColor};
+  }
+
+  .stake-compound__separator {
+    margin-top: 30px;
+    margin-bottom: 30px;
+  }
+
   .container-spinner {
     height: 65px;
     width: 65px;
   }
 
+  .stake-compound-submit-container {
+    overflow-y: scroll;
+    margin-top: 20px;
+    display: flex;
+    flex-direction: column;
+    padding-left: 15px;
+    padding-right: 15px;
+    padding-bottom: 10px;
+  }
 
+  .stake-compound-input {
+    margin-top: 20px;
+  }
 `));

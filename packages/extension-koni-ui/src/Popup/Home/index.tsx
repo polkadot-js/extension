@@ -4,8 +4,6 @@
 import { ChainRegistry, CurrentNetworkInfo, NftCollection as _NftCollection, NftItem as _NftItem, TransactionHistoryItemType } from '@subwallet/extension-base/background/KoniTypes';
 import { AccountJson } from '@subwallet/extension-base/background/types';
 import { AccountContext } from '@subwallet/extension-koni-ui/components';
-import ExportAccountQrModal from '@subwallet/extension-koni-ui/components/Modal/ExportAccountQrModal';
-import TransakModal from '@subwallet/extension-koni-ui/components/Modal/TransakModal';
 import useAccountBalance from '@subwallet/extension-koni-ui/hooks/screen/home/useAccountBalance';
 import useCrowdloanNetworks from '@subwallet/extension-koni-ui/hooks/screen/home/useCrowdloanNetworks';
 import useFetchNft from '@subwallet/extension-koni-ui/hooks/screen/home/useFetchNft';
@@ -39,6 +37,8 @@ const ActionButton = React.lazy(() => import('./ActionButton'));
 const AddAccount = React.lazy(() => import('@subwallet/extension-koni-ui/Popup/Accounts/AddAccount'));
 const BalancesVisibility = React.lazy(() => import('@subwallet/extension-koni-ui/Popup/Home/BalancesVisibility'));
 const AccountQrModal = React.lazy(() => import('@subwallet/extension-koni-ui/components/Modal/AccountQrModal'));
+const BuyModal = React.lazy(() => import('@subwallet/extension-koni-ui/components/Modal/BuyModal'));
+const ExportAccountQrModal = React.lazy(() => import('@subwallet/extension-koni-ui/components/Modal/ExportAccountQrModal'));
 const Link = React.lazy(() => import('@subwallet/extension-koni-ui/components/Link'));
 const Header = React.lazy(() => import('@subwallet/extension-koni-ui/partials/Header'));
 
@@ -311,12 +311,21 @@ function Home ({ chainRegistryMap, className = '', currentAccount, historyMap, n
     setIsExportModalOpen(false);
   }, []);
 
-  const openTransakModal = useCallback(() => {
-    setIsVisibleBuyModal(true);
-  }, []);
-
-  const closeTransakModal = useCallback(() => {
+  const _closeBuyModal = useCallback(() => {
+    setModalQrProp({
+      network: {
+        networkKey: networkKey
+      },
+      account: {
+        address: currentAccount.address
+      },
+      showExportButton: false
+    });
     setIsVisibleBuyModal(false);
+  }, [networkKey, currentAccount.address]);
+
+  const openBuyModal = useCallback(() => {
+    setIsVisibleBuyModal(true);
   }, []);
 
   const tabItems = useMemo<TabHeaderItemType[]>(() => {
@@ -356,7 +365,7 @@ function Home ({ chainRegistryMap, className = '', currentAccount, historyMap, n
           <div className='action-button-wrapper'>
             <ActionButton
               iconSrc={cryptoIcon}
-              onClick={openTransakModal}
+              onClick={openBuyModal}
               tooltipContent={t<string>('Buy')}
             />
           </div>
@@ -477,8 +486,6 @@ function Home ({ chainRegistryMap, className = '', currentAccount, historyMap, n
 
       {isQrModalOpen && (
         <AccountQrModal
-          account={currentAccount}
-          address={address}
           className='home__account-qr-modal'
           closeModal={_closeQrModal}
           modalQrProp={modalQrProp}
@@ -500,8 +507,11 @@ function Home ({ chainRegistryMap, className = '', currentAccount, historyMap, n
       }
       {
         isVisibleBuyModal && (
-          <TransakModal
-            closeModal={closeTransakModal}
+          <BuyModal
+            className='home__account-qr-modal'
+            closeModal={_closeBuyModal}
+            modalQrProp={modalQrProp}
+            updateModalQr={updateModalQr}
           />
         )
       }

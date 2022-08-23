@@ -48,10 +48,11 @@ interface Props extends ThemeProps {
   setIsTxSuccess: (val: boolean) => void,
   setTxError: (val: string) => void,
   isBondedBefore: boolean,
-  bondedValidators: string[]
+  bondedValidators: string[],
+  handleRevertClickNext: () => void
 }
 
-function BondingAuthTransaction ({ amount, balanceError, bondedValidators, className, fee, isBondedBefore, selectedNetwork, setExtrinsicHash, setIsTxSuccess, setShowConfirm, setShowResult, setTxError, validatorInfo }: Props): React.ReactElement<Props> {
+function BondingAuthTransaction ({ amount, balanceError, bondedValidators, className, fee, handleRevertClickNext, isBondedBefore, selectedNetwork, setExtrinsicHash, setIsTxSuccess, setShowConfirm, setShowResult, setTxError, validatorInfo }: Props): React.ReactElement<Props> {
   const { t } = useTranslation();
   const { show } = useToast();
   const { handlerReject } = useRejectExternalRequest();
@@ -83,9 +84,10 @@ function BondingAuthTransaction ({ amount, balanceError, bondedValidators, class
     if (!loading) {
       await handlerReject(externalId);
 
+      handleRevertClickNext();
       setShowConfirm(false);
     }
-  }, [handlerReject, loading, setShowConfirm, externalId]);
+  }, [loading, handlerReject, externalId, handleRevertClickNext, setShowConfirm]);
 
   const handleOnSubmit = useCallback(async () => {
     await submitBonding({
@@ -534,7 +536,7 @@ export default React.memo(styled(BondingAuthTransaction)(({ theme }: Props) => `
   }
 
   .transaction-info-container {
-    margin-top: 20px;
+    margin-top: 10px;
     width: 100%;
   }
 
@@ -597,7 +599,6 @@ export default React.memo(styled(BondingAuthTransaction)(({ theme }: Props) => `
   }
   .validator-item-container {
     margin-top: 10px;
-    margin-bottom: 28px;
     display: flex;
     align-items: center;
     justify-content: space-between;

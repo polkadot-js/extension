@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { ApiProps, NetworkJson, TokenInfo } from '@subwallet/extension-base/background/KoniTypes';
+import { SupportedCrossChainsMap } from '@subwallet/extension-koni-base/api/xcm/utils';
 import { parseNumberToDisplay } from '@subwallet/extension-koni-base/utils';
 
 import { ApiPromise } from '@polkadot/api';
@@ -12,11 +13,17 @@ const ASSET_TO_LOCATION_MAP: Record<string, Record<string, Record<string, any>>>
   astar: {
     '18446744073709551617': { // aUSD
       parents: 1, interior: { X2: [{ Parachain: 2000 }, { GeneralKey: '0x0001' }] }
+    },
+    '340282366920938463463374607431768211455': { // DOT
+      parents: 1, interior: 'Here'
     }
   },
   shiden: {
     '18446744073709551616': { // aUSD
       parents: 1, interior: { X2: [{ Parachain: 2000 }, { GeneralKey: '0x0081' }] }
+    },
+    '340282366920938463463374607431768211455': {
+      parents: 1, interior: 'Here'
     }
   }
 };
@@ -45,20 +52,30 @@ export async function astarEstimateCrossChainFee (
   const assetLocation = ASSET_TO_LOCATION_MAP[originNetworkKey][tokenInfo.assetIndex];
 
   let receiverLocation: Record<string, any> = { AccountId32: { network: 'Any', id: decodeAddress(to) } };
+  let destinationChainLocation: Record<string, any> = {
+    V1: { // find the destination chain
+      parents: 1,
+      interior: {
+        X1: { Parachain: destinationNetworkJson.paraId }
+      }
+    }
+  };
 
   if (networkMap[destinationNetworkKey].isEthereum) {
     receiverLocation = { AccountKey20: { network: 'Any', id: decodeAddress(to) } };
   }
 
-  const extrinsic = apiProps.api.tx.polkadotXcm.reserveWithdrawAssets(
-    {
+  if (SupportedCrossChainsMap[originNetworkKey].relationMap[destinationNetworkKey].type === 'r') {
+    destinationChainLocation = {
       V1: { // find the destination chain
         parents: 1,
-        interior: {
-          X1: { Parachain: destinationNetworkJson.paraId }
-        }
+        interior: 'Here'
       }
-    },
+    };
+  }
+
+  const extrinsic = apiProps.api.tx.polkadotXcm.reserveWithdrawAssets(
+    destinationChainLocation,
     {
       V1: { // find the receiver
         parents: 0, // parents for beneficiary is always 0
@@ -104,20 +121,30 @@ export function astarGetXcmExtrinsic (
   const assetLocation = ASSET_TO_LOCATION_MAP[originNetworkKey][tokenInfo.assetIndex as string];
 
   let receiverLocation: Record<string, any> = { AccountId32: { network: 'Any', id: decodeAddress(to) } };
+  let destinationChainLocation: Record<string, any> = {
+    V1: { // find the destination chain
+      parents: 1,
+      interior: {
+        X1: { Parachain: destinationNetworkJson.paraId }
+      }
+    }
+  };
 
   if (networkMap[destinationNetworkKey].isEthereum) {
     receiverLocation = { AccountKey20: { network: 'Any', id: decodeAddress(to) } };
   }
 
-  return api.tx.polkadotXcm.reserveWithdrawAssets(
-    {
+  if (SupportedCrossChainsMap[originNetworkKey].relationMap[destinationNetworkKey].type === 'r') {
+    destinationChainLocation = {
       V1: { // find the destination chain
         parents: 1,
-        interior: {
-          X1: { Parachain: destinationNetworkJson.paraId }
-        }
+        interior: 'Here'
       }
-    },
+    };
+  }
+
+  return api.tx.polkadotXcm.reserveWithdrawAssets(
+    destinationChainLocation,
     {
       V1: { // find the receiver
         parents: 0, // parents for beneficiary is always 0

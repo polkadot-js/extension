@@ -27,14 +27,17 @@ export async function substrateEstimateCrossChainFee (
   const destinationNetworkJson = networkMap[destinationNetworkKey];
   // TODO: find a better way to handle kUSD on karura
   const tokenSymbol = tokenInfo.symbol.toUpperCase() === 'AUSD' && originNetworkKey === 'karura' ? 'KUSD' : tokenInfo.symbol.toUpperCase();
+  const tokenIdentity = originNetworkKey === 'bifrost'
+    ? tokenInfo.specialOption as Record<string, any>
+    : {
+      Token: tokenSymbol
+    };
 
   try {
     if (SupportedCrossChainsMap[originNetworkKey].type === 'p') {
       // Case ParaChain -> ParaChain && ParaChain -> RelayChain
       const extrinsic = api.tx.xTokens.transfer(
-        {
-          Token: tokenSymbol
-        },
+        tokenIdentity,
         value,
         getMultiLocationFromParachain(originNetworkKey, destinationNetworkKey, networkMap, to),
         FOUR_INSTRUCTIONS_WEIGHT
@@ -45,7 +48,7 @@ export async function substrateEstimateCrossChainFee (
       fee = paymentInfo.partialFee.toString();
       feeString = parseNumberToDisplay(paymentInfo.partialFee, originNetworkJson.decimals) + ` ${originNetworkJson.nativeToken ? originNetworkJson.nativeToken : ''}`;
 
-      console.log('substrate xcm tx p-p here', extrinsic.toHex());
+      console.log('substrate xcm tx p-p or p-r here', extrinsic.toHex());
     } else {
       // Case RelayChain -> ParaChain
       // TODO: add teleport assets for chain using the same native token as relaychain (statemint, statemine)
@@ -116,11 +119,14 @@ export function substrateGetXcmExtrinsic (
   if (SupportedCrossChainsMap[originNetworkKey].type === 'p') {
     // TODO: find a better way to handle kUSD on karura
     const tokenSymbol = tokenInfo.symbol.toUpperCase() === 'AUSD' && originNetworkKey === 'karura' ? 'KUSD' : tokenInfo.symbol.toUpperCase();
+    const tokenIdentity = originNetworkKey === 'bifrost'
+      ? tokenInfo.specialOption as Record<string, any>
+      : {
+        Token: tokenSymbol
+      };
 
     return api.tx.xTokens.transfer(
-      {
-        Token: tokenSymbol
-      },
+      tokenIdentity,
       value,
       getMultiLocationFromParachain(originNetworkKey, destinationNetworkKey, networkMap, to),
       FOUR_INSTRUCTIONS_WEIGHT

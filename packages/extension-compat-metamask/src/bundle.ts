@@ -84,6 +84,9 @@ function injectMetaMaskWeb3 (win: Web3Window): void {
         }
       };
     },
+    isEnabled: async (): Promise<boolean> => {
+      return new Promise((resolve) => resolve(true));
+    }, // TODO: stub for now
     version: '0' // TODO: win.ethereum.version
   };
 }

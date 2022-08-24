@@ -100,6 +100,7 @@ export interface Injected {
 
 export interface InjectedWindowProvider {
   enable: (origin: string) => Promise<Injected>;
+  isEnabled: () => Promise<boolean>;
   version: string;
 }
 

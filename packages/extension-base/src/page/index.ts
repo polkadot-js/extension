@@ -56,6 +56,12 @@ export async function enable (origin: string): Promise<Injected> {
   return new Injected(sendMessage);
 }
 
+export async function isEnabled (): Promise<boolean> {
+  const res = await sendMessage('pub(authorize.isEnabled)');
+
+  return res;
+}
+
 // redirect users if this page is considered as phishing, otherwise return false
 export async function redirectIfPhishing (): Promise<boolean> {
   const res = await sendMessage('pub(phishing.redirectIfDenied)');

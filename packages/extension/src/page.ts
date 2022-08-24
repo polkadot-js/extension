@@ -5,13 +5,13 @@ import type { RequestSignatures, TransportRequestMessage } from '@polkadot/exten
 import type { Message } from '@polkadot/extension-base/types';
 
 import { MESSAGE_ORIGIN_CONTENT } from '@polkadot/extension-base/defaults';
-import { enable, handleResponse, redirectIfPhishing } from '@polkadot/extension-base/page';
+import { enable, handleResponse, isEnabled, redirectIfPhishing } from '@polkadot/extension-base/page';
 import { injectExtension } from '@polkadot/extension-inject';
 
 import { packageInfo } from './packageInfo';
 
 function inject () {
-  injectExtension(enable, {
+  injectExtension(enable, isEnabled, {
     name: 'polkadot-js',
     version: packageInfo.version
   });

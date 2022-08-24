@@ -215,11 +215,14 @@ export default class Tabs {
       return this.redirectIfPhishing(url);
     }
 
-    if (type !== 'pub(authorize.tab)') {
+    if (type !== 'pub(authorize.tab)' && type !== 'pub(authorize.isEnabled)') {
       this.#state.ensureUrlAuthorized(url);
     }
 
     switch (type) {
+      case 'pub(authorize.isEnabled)':
+        return !!this.#state.authUrls[this.#state.stripUrl(url)];
+
       case 'pub(authorize.tab)':
         return this.authorize(url, request as RequestAuthorizeTab);
 

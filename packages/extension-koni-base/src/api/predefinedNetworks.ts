@@ -1443,20 +1443,6 @@ export const PREDEFINED_NETWORKS: Record<string, NetworkJson> = {
     nativeToken: 'ACA',
     decimals: 12
   },
-  neumann: {
-    chain: 'Neumann Network',
-    genesisHash: '0x68577f68a47847fb974c220189333c46e83a899b6e375abf50b9a615d9019c20',
-    ss58Format: 51,
-    providers: {
-      neumann: 'wss://neumann.api.onfinality.io/public-ws'
-    },
-    currentProvider: 'neumann',
-    currentProviderMode: 'ws',
-    active: false,
-    key: 'neumann',
-    groups: ['TEST_NET'],
-    nativeToken: 'NEU'
-  },
   turing: {
     chain: 'Turing Network',
     genesisHash: '0x0f62b701fb12d02237a33b84818c11f621653d2b1614c777973babf4652b535d',

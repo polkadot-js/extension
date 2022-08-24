@@ -1,10 +1,10 @@
-     757	Nam Phạm                      	remove xcm usage of rococo
+     801	Nam Phạm                      	update information for Ternoa
+     470	AnhMTV                        	
      465	Jaco                          	0.42.5 (#969)
-     451	AnhMTV                        	Release version 0.5.5
-     182	S2kael                        	[Issue-254] [AddAccountScreen] Add button Import private key from MetaMask
+     194	S2kael                        	[Issue-467] [NFT] add MoonFit Beast and Beauty
      151	lw-cdm                        	Update logo for Moonbeans
      142	quangdo                       	update some label and variable (original to origin)
-      84	lw-cdm                        	
+      85	lw-cdm                        	
       82	Thibaut Sardan                	Add account filtering feature (#832)
       68	Hieu Dao                      	Update staking logo
       64	khainh                        	Keep EVM connections in IDLE mode

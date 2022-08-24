@@ -1372,6 +1372,47 @@ export default class KoniExtension extends Extension {
     };
   }
 
+  private makeCrossChainTransferCallback (
+    address: string,
+    recipientAddress: string,
+    originalNetworkKey: string,
+    value: string,
+    token: string | undefined,
+    portCallback: (res: ResponseTransfer) => void): (res: ResponseTransfer) => void {
+    return (res: ResponseTransfer) => {
+      // !res.isFinalized to prevent duplicate action
+      if (!res.isFinalized && res.txResult && res.extrinsicHash) {
+        const change = (parseInt(res.txResult.change) || parseInt(value)).toString();
+        const transaction = {
+          time: Date.now(),
+          networkKey: originalNetworkKey,
+          change: change,
+          changeSymbol: res.txResult.changeSymbol || token,
+          fee: res.txResult.fee,
+          feeSymbol: res.txResult.feeSymbol,
+          isSuccess: res.step.valueOf() === TransferStep.SUCCESS.valueOf(),
+          extrinsicHash: res.extrinsicHash
+        } as TransactionHistoryItemType;
+
+        const setSendHistory = new Promise((resolve) => {
+          state.setTransactionHistory(address, originalNetworkKey, { ...transaction, action: 'send' }, resolve);
+        });
+
+        setSendHistory.then(() => {
+          this.isInWalletAccount(recipientAddress).then((isValid) => {
+            if (isValid) {
+              state.setTransactionHistory(recipientAddress, originalNetworkKey, { ...transaction, action: 'received' });
+            } else {
+              console.log(`The recipient address [${recipientAddress}] is not in wallet.`);
+            }
+          }).catch((err) => console.warn(err));
+        }).catch((err) => console.warn(err));
+      }
+
+      portCallback(res);
+    };
+  }
+
   private async makeTransfer (id: string, port: chrome.runtime.Port, { from,
     networkKey,
     password,
@@ -1477,6 +1518,8 @@ export default class KoniExtension extends Extension {
 
       // todo: Case ETH using web3 js
 
+      const callback = this.makeCrossChainTransferCallback(from, to, originNetworkKey, value || '0', token, cb);
+
       // eslint-disable-next-line prefer-const
       transferProm = makeCrossChainTransfer(
         originNetworkKey, destinationNetworkKey,
@@ -1485,7 +1528,7 @@ export default class KoniExtension extends Extension {
         state.getDotSamaApiMap(),
         tokenInfo,
         state.getNetworkMap(),
-        this.makeTransferCallback(from, to, originNetworkKey, token, cb)
+        callback
       );
 
       transferProm.then(() => {
@@ -2542,7 +2585,7 @@ export default class KoniExtension extends Extension {
         state.updateExternalRequest(id, { ...promise, resolve: undefined, reject: undefined });
       };
 
-      const callback = this.makeTransferCallback(from, to, originNetworkKey, token, cb);
+      const callback = this.makeCrossChainTransferCallback(from, to, originNetworkKey, value || '0', token, cb);
 
       const transferProm = makeCrossChainTransferQr({
         originalNetworkKey: originNetworkKey,
@@ -3044,7 +3087,7 @@ export default class KoniExtension extends Extension {
         state.updateExternalRequest(id, { ...promise, resolve: undefined, reject: undefined });
       };
 
-      const callback = this.makeTransferCallback(from, to, originNetworkKey, token, cb);
+      const callback = this.makeCrossChainTransferCallback(from, to, originNetworkKey, value || '0', token, cb);
 
       const transferProm = makeCrossChainTransferLedger({
         originalNetworkKey: originNetworkKey,

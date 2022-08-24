@@ -1492,6 +1492,7 @@ export default class KoniState extends State {
           items.unshift(item);
           data[hash] = items;
           this.transactionHistoryStore.set(address, data);
+          callback && callback(items);
         }).catch((err) => console.warn(err));
       }
     });

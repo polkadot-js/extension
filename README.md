@@ -120,6 +120,7 @@ window.injectedWeb3 = {
 
     // this call returns extension status that tells if extension is already authorized
     isEnabled (): Promise<boolean>,
+
     // semver for the package
     version: '0.1.0'
   }

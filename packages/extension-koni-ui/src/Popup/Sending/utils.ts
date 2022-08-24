@@ -69,6 +69,20 @@ export function getMaxTransferAndNoFees (
     : [null, true];
 }
 
+export function getXcmMaxTransfer (
+  fee: string | null,
+  feeSymbol: string | null | undefined,
+  selectedToken: string,
+  mainTokenSymbol: string,
+  senderFreeBalance: string,
+  existentialDeposit: string): BN | null {
+  const partialFee = getPartialFee(fee, feeSymbol, selectedToken, mainTokenSymbol);
+  const adjFee = partialFee.muln(110).div(BN_HUNDRED);
+  const maxTransferAfterFee = (new BN(senderFreeBalance)).sub(adjFee);
+
+  return maxTransferAfterFee.sub(new BN(existentialDeposit));
+}
+
 export function getMainTokenInfo (networkKey: string, chainRegistryMap: Record<string, ChainRegistry>): TokenInfo {
   // chainRegistryMap always has main token
   return Object.values(chainRegistryMap[networkKey].tokenMap).find((t) => t.isMainToken) as TokenInfo;

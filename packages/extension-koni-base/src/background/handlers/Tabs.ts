@@ -30,8 +30,14 @@ function stripUrl (url: string): string {
 
 function transformAccountsV2 (accounts: SubjectInfo, anyType = false, authInfo?: AuthUrlInfo, accountAuthType?: AccountAuthType): InjectedAccount[] {
   const accountSelected = authInfo
-    ? Object.keys(authInfo.isAllowedMap)
-      .filter((address) => authInfo.isAllowedMap[address])
+    ? (
+      authInfo.isAllowed
+        ? (
+          Object.keys(authInfo.isAllowedMap)
+            .filter((address) => authInfo.isAllowedMap[address])
+        )
+        : []
+    )
     : [];
 
   let authTypeFilter = ({ type }: SingleAddress) => true;
@@ -338,15 +344,26 @@ export default class KoniTabs extends Tabs {
     let currentChainId = evmState.chainId;
 
     const _onAuthChanged = async () => {
+      // Detect network
       const { chainId } = await this.getEvmState(url);
 
       if (chainId !== currentChainId) {
         emitEvent('chainChanged', chainId);
         currentChainId = chainId;
       }
+
+      // Detect account
+      const newAccountList = await this.getEvmCurrentAccount(url);
+
+      // Compare to void looping reload
+      if (JSON.stringify(currentAccountList) !== JSON.stringify(newAccountList)) {
+        // eslint-disable-next-line node/no-callback-literal
+        emitEvent('accountsChanged', newAccountList);
+        currentAccountList = newAccountList;
+      }
     };
 
-    const chainChainSubscription = this.#koniState.subscribeEvmChainChange()
+    const authUrlSubscription = this.#koniState.subscribeEvmChainChange()
       .subscribe((rs) => {
         _onAuthChanged().catch(console.error);
       });
@@ -408,7 +425,7 @@ export default class KoniTabs extends Tabs {
       });
       unsubscribe(id);
       accountListSubscription.unsubscribe();
-      chainChainSubscription.unsubscribe();
+      authUrlSubscription.unsubscribe();
       clearInterval(networkCheckInterval);
     });
 

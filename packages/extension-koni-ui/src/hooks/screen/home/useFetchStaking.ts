@@ -45,7 +45,7 @@ export default function useFetchStaking (networkKey: string): StakingType {
     });
 
     for (const stakingItem of filteredStakingItems) {
-      const stakingDataType = {} as StakingDataType;
+      const stakingDataType = { staking: stakingItem } as StakingDataType;
 
       for (const reward of stakingRewardList) {
         if (stakingItem.chainId === reward.chainId && reward.state === APIItemState.READY) {

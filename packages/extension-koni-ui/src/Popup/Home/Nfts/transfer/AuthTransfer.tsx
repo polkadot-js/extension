@@ -562,7 +562,6 @@ export default React.memo(styled(AuthTransfer)(({ theme }: Props) => `
 
   .sender-container {
     .input-address__dropdown {
-      border: 0;
       height: auto;
     }
   }

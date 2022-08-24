@@ -1443,20 +1443,6 @@ export const PREDEFINED_NETWORKS: Record<string, NetworkJson> = {
     nativeToken: 'ACA',
     decimals: 12
   },
-  neumann: {
-    chain: 'Neumann Network',
-    genesisHash: '0x68577f68a47847fb974c220189333c46e83a899b6e375abf50b9a615d9019c20',
-    ss58Format: 51,
-    providers: {
-      neumann: 'wss://neumann.api.onfinality.io/public-ws'
-    },
-    currentProvider: 'neumann',
-    currentProviderMode: 'ws',
-    active: false,
-    key: 'neumann',
-    groups: ['TEST_NET'],
-    nativeToken: 'NEU'
-  },
   turing: {
     chain: 'Turing Network',
     genesisHash: '0x0f62b701fb12d02237a33b84818c11f621653d2b1614c777973babf4652b535d',
@@ -1784,24 +1770,9 @@ export const PREDEFINED_NETWORKS: Record<string, NetworkJson> = {
     currentProvider: 'ternoa',
     nativeToken: 'CAPS',
     groups: ['MAIN_NET'],
-    decimals: 18
+    decimals: 18,
+    coinGeckoKey: 'coin-capsule'
   },
-  // ternoaEvm: {
-  //   key: 'ternoaEvm',
-  //   chain: 'Ternoa Mainnet - EVM',
-  //   genesisHash: '0x6859c81ca95ef624c9dfe4dc6e3381c33e5d6509e35e147092bfbc780f777c4e_1',
-  //   ss58Format: 42,
-  //   providers: {
-  //     ternoa: 'wss://mainnet.ternoa.network'
-  //   },
-  //   active: false,
-  //   isEthereum: true,
-  //   currentProviderMode: 'ws',
-  //   currentProvider: 'ternoa',
-  //   nativeToken: 'CAPS',
-  //   groups: ['MAIN_NET'],
-  //   decimals: 18
-  // },
   tanganika: {
     key: 'tanganika',
     chain: 'DataHighway Tanganika',

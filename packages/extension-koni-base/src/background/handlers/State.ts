@@ -156,6 +156,7 @@ export default class KoniState extends State {
   private cron: KoniCron;
   private subscription: KoniSubscription;
   private logger: Logger;
+  private ready = false;
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   constructor (...args: any) {
@@ -185,8 +186,17 @@ export default class KoniState extends State {
   public init () {
     this.initNetworkStates();
     this.updateServiceInfo();
+  }
+
+  private onReady () {
     this.subscription.start();
     this.cron.start();
+
+    this.ready = true;
+  }
+
+  public isReady () {
+    return this.ready;
   }
 
   // init networkMap, apiMap and chainRegistry (first time only)
@@ -740,11 +750,7 @@ export default class KoniState extends State {
   }
 
   public removeNfts (chain: string, address: string, collectionId: string, nftIds: string[]) {
-    return this.dbService.stores.nft.table.where({
-      chainHash: this.getNetworkGenesisHashByKey(chain),
-      address,
-      collectionId
-    }).and((item) => nftIds.includes(item.id || '')).delete();
+    return this.dbService.removeNfts(this.getNetworkGenesisHashByKey(chain), address, collectionId, nftIds);
   }
 
   public updateCollectionIds (chain: string, address: string, collectionIds: string[] = []): void {
@@ -1254,6 +1260,8 @@ export default class KoniState extends State {
         })
         .catch(this.logger.error);
     });
+
+    this.onReady();
   }
 
   public subscribeChainRegistryMap () {

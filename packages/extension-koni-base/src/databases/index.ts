@@ -39,7 +39,7 @@ export default class KoniDatabase extends Dexie {
 
   private schemaVersion: number;
 
-  public constructor (name = DEFAULT_DATABASE, schemaVersion = 2) {
+  public constructor (name = DEFAULT_DATABASE, schemaVersion = 3) {
     super(name);
     this.schemaVersion = schemaVersion;
 
@@ -54,6 +54,10 @@ export default class KoniDatabase extends Dexie {
 
     this.conditionalVersion(2, {
       migrations: '&[key+name]'
+    });
+
+    this.conditionalVersion(3, {
+      nfts: '[chainHash+collectionId+id+address], &[chainHash+collectionId+id+address], [address+chainHash], [chainHash+collectionId], [chainHash+collectionId+address], chainHash, chain, id, address, collectionId, name'
     });
   }
 

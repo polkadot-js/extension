@@ -105,7 +105,7 @@ export default class DatabaseService {
   async addNft (chain: string, chainHash: string, address: string, nft: NftItem) {
     this.logger.log(`Updating NFT for [${chain}]`);
 
-    return this.stores.nft.upsert({ chainHash, chain, address, ...nft });
+    return this.stores.nft.upsert({ ...nft, chainHash, chain, address });
   }
 
   async deleteRemovedNftsFromCollection (chainHash: string, address: string, collectionId?: string, nftIds?: string[]) {
@@ -118,5 +118,11 @@ export default class DatabaseService {
 
   deleteNftsByEvmToken (chainHash: string, tokenId: string) {
     return this.stores.nft.deleteNftsByCollection(chainHash, tokenId);
+  }
+
+  removeNfts (chainHash: string, address: string, collectionId: string, nftIds: string[]) {
+    this.logger.log(`Remove NFTs [${nftIds.join(', ')}]`);
+
+    return this.stores.nft.removeNfts(chainHash, address, collectionId, nftIds);
   }
 }

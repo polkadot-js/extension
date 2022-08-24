@@ -16,8 +16,8 @@ const nftSlice = createSlice({
     update (state, action: PayloadAction<NftJson>) {
       const payload = action.payload;
 
-      state.total = payload.total;
-      state.nftList = payload.nftList;
+      state.total = payload?.total || 0;
+      state.nftList = payload?.nftList || [];
     }
   }
 });

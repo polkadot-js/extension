@@ -18,9 +18,24 @@ export const tabs = new KoniTabs(state);
 export const nftHandler = new NftHandler(state.getDotSamaApiMap(), [], state.getWeb3ApiMap());
 
 // Migration
-const migration = new Migration(state);
+async function makeSureStateReady () {
+  const poll = (resolve: (value: unknown) => void) => {
+    if (state.isReady()) {
+      resolve(true);
+    } else {
+      console.log('Waiting for State is ready...');
+      setTimeout(() => poll(resolve), 400);
+    }
+  };
 
-migration.run().catch((err) => console.warn(err));
+  return new Promise(poll);
+}
+
+makeSureStateReady().then(() => {
+  const migration = new Migration(state);
+
+  migration.run().catch((err) => console.warn(err));
+}).catch((e) => console.warn(e));
 
 export default function handlers<TMessageType extends MessageTypes> ({ id, message, request }: TransportRequestMessage<TMessageType>, port: chrome.runtime.Port, extensionPortName = PORT_EXTENSION): void {
   const isExtension = port.name === extensionPortName;

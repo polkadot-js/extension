@@ -850,7 +850,7 @@ export default class KoniState extends State {
   }
 
   public setHistory (address: string, network: string, item: TransactionHistoryItemType | TransactionHistoryItemType[], callback?: (items: TransactionHistoryItemType[]) => void): void {
-    let items;
+    let items: TransactionHistoryItemType[];
 
     if (item && !Array.isArray(item)) {
       item.origin = 'app';
@@ -860,15 +860,21 @@ export default class KoniState extends State {
     }
 
     if (items.length) {
-      const oldItems = this.historyMap[network] || [];
+      this.getAccountAddress().then((currentAddress) => {
+        if (currentAddress === address) {
+          const oldItems = this.historyMap[network] || [];
 
-      this.historyMap[network] = this.combineHistories(oldItems, items);
-      this.saveHistoryToStorage(address, network, this.historyMap[network]);
-      callback && callback(this.historyMap[network]);
+          this.historyMap[network] = this.combineHistories(oldItems, items);
+          this.saveHistoryToStorage(address, network, this.historyMap[network]);
+          callback && callback(this.historyMap[network]);
 
-      this.lazyNext('setHistory', () => {
-        this.publishHistory();
-      });
+          this.lazyNext('setHistory', () => {
+            this.publishHistory();
+          });
+        } else {
+          this.saveHistoryToStorage(address, network, items);
+        }
+      }).catch((e) => this.logger.warn(e));
     }
   }
 

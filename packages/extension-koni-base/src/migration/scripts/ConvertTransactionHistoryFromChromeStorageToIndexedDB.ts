@@ -40,24 +40,35 @@ export default class ConvertTransactionHistoryFromChromeStorageToIndexedDB exten
             if (!Array.isArray(v1Items) || !v1Items.length) {
               v1Items = customHistories;
             } else {
-              const newHistories = customHistories.filter((item) => !v1Items.some((old) => this.state.isSameHistory(old, item)));
+              const newHistories = customHistories.filter((item) => !v1Items.some((old) => this.isSameHistory(old, item)));
 
               v1Items = [...v1Items, ...newHistories];
             }
           }
         }
 
-        const v2Items = Array.isArray(v2Data?.[hash]) ? v2Data[hash] || [] : [];
-        const v3Items = Array.isArray(v3Data?.[hash]?.items) ? v3Data[hash]?.items || [] : [];
+        const v2Items = v2Data && Array.isArray(v2Data[hash]) ? v2Data[hash] || [] : [];
+        const v3Items = v3Data && Array.isArray(v3Data[hash]?.items) ? v3Data[hash]?.items || [] : [];
 
         v1Items = Array.isArray(v1Items) ? v1Items.map((item) => ({ origin: 'app', eventIdx: 0, ...item }) as TransactionHistoryItemType) : [];
+        const allItems = v3Items;
 
-        const allItems = v1Items.concat(v2Items).concat(v3Items);
-
+        this.mergeHistories(allItems, v2Items);
+        this.mergeHistories(allItems, v1Items);
         this.state.setHistory(address, networkJson.key, allItems);
       }
 
       // TODO: remove old transaction data in next version
     }
+  }
+
+  mergeHistories (allItems: TransactionHistoryItemType[], newItems: TransactionHistoryItemType[]) {
+    const oldItems = newItems.filter((item) => !allItems.some((newItem) => this.isSameHistory(newItem, item)));
+
+    return allItems.concat(oldItems);
+  }
+
+  isSameHistory (newItem: TransactionHistoryItemType, oldItem: TransactionHistoryItemType) {
+    return (newItem.extrinsicHash === oldItem.extrinsicHash) && (!newItem.eventIdx || !oldItem.eventIdx || newItem.eventIdx === oldItem.eventIdx);
   }
 }

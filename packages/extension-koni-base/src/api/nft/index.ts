@@ -25,13 +25,7 @@ function createSubstrateNftApi (chain: string, apiProps: ApiProps | null, addres
     case SUPPORTED_NFT_NETWORKS.acala:
       return new AcalaNftApi(apiProps, useAddresses, chain);
     case SUPPORTED_NFT_NETWORKS.kusama:
-      // eslint-disable-next-line no-case-declarations
-      const rmrkNftApi = new RmrkNftApi();
-
-      rmrkNftApi.setChain(SUPPORTED_NFT_NETWORKS.kusama);
-      rmrkNftApi.setAddresses(useAddresses);
-
-      return rmrkNftApi;
+      return new RmrkNftApi(apiProps, useAddresses, chain);
     case SUPPORTED_NFT_NETWORKS.statemine:
       return new StatemineNftApi(apiProps, useAddresses, chain);
     case SUPPORTED_NFT_NETWORKS.uniqueNft:

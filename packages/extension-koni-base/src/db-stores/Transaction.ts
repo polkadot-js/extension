@@ -20,4 +20,19 @@ export default class TransactionStore extends BaseStoreWithAddress<ITransactionH
       return { ...a, [v.chain]: value };
     }, {});
   }
+
+  public override async bulkUpsert (records: ITransactionHistoryItem[]): Promise<unknown> {
+    await this.table.bulkPut(records);
+
+    await Promise.all(records.map((record) => {
+      return this.table.where({
+        chainHash: record.chainHash,
+        address: record.address,
+        extrinsicHash: record.extrinsicHash
+      }).filter((item) => (item.origin === 'app' && record.origin !== 'app') || (item.eventIdx === 0 && record.eventIdx !== 0))
+        .delete();
+    }));
+
+    return true;
+  }
 }

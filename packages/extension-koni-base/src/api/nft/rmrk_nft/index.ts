@@ -1,7 +1,7 @@
 // Copyright 2019-2022 @subwallet/extension-koni authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { NftCollection, NftItem, RMRK_VER } from '@subwallet/extension-base/background/KoniTypes';
+import { ApiProps, NftCollection, NftItem, RMRK_VER } from '@subwallet/extension-base/background/KoniTypes';
 import { BaseNftApi, HandleNftParams } from '@subwallet/extension-koni-base/api/nft/nft';
 import { isUrl, reformatAddress } from '@subwallet/extension-koni-base/utils';
 import fetch from 'cross-fetch';
@@ -34,22 +34,8 @@ interface NFTResource {
 }
 
 export class RmrkNftApi extends BaseNftApi {
-  // eslint-disable-next-line no-useless-constructor
-  constructor () {
-    super('');
-  }
-
-  override setAddresses (addresses: string[]) {
-    super.setAddresses(addresses);
-    const kusamaAddresses = [];
-
-    for (const address of this.addresses) {
-      const kusamaAddress = reformatAddress(address, 2);
-
-      kusamaAddresses.push(kusamaAddress);
-    }
-
-    this.addresses = kusamaAddresses;
+  constructor (api: ApiProps | null, addresses: string[], chain: string) {
+    super(chain, api, addresses);
   }
 
   override parseUrl (input: string): string | undefined {
@@ -172,7 +158,9 @@ export class RmrkNftApi extends BaseNftApi {
     const allCollections: NftCollection[] = [];
 
     try {
-      allNfts = await this.getAllByAccount(address);
+      const kusamaAddress = reformatAddress(address, 2);
+
+      allNfts = await this.getAllByAccount(kusamaAddress);
 
       if (allNfts.length <= 0) {
         // params.updateReady(true);

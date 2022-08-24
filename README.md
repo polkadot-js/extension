@@ -113,13 +113,15 @@ window.injectedWeb3 = {
   // this is the name for this extension, there could be multiples injected,
   // each with their own keys, here `polkadot-js` is for this extension
   'polkadot-js': {
-    // semver for the package
-    version: '0.1.0',
-
     // this is called to enable the injection, and returns an injected
     // object containing the accounts, signer and provider interfaces
     // (or it will reject if not authorized)
-    enable (originName: string): Promise<Injected>
+    enable (originName: string): Promise<Injected>,
+
+    // this call returns extension status that tells if extension is already authorized
+    isEnabled (): Promise<boolean>,
+    // semver for the package
+    version: '0.1.0'
   }
 }
 ```

@@ -61,7 +61,7 @@ const TransakArea = (props: Props) => {
             >
               <img
                 alt='Transak logo'
-                className='img-logo'
+                className='img-logo disabled'
                 src={transakLogo}
               />
             </div>
@@ -101,5 +101,9 @@ export default React.memo(styled(TransakArea)(({ theme }: Props) => `
   .img-logo {
     height: 40px;
     margin: 10px 0;
+
+    &.disabled {
+      opacity: 0.5;
+    }
   }
 `));

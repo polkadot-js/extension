@@ -2,10 +2,8 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import transakLogo from '@subwallet/extension-koni-ui/assets/logo/123.transak.png';
-import { Button } from '@subwallet/extension-koni-ui/components';
 import Tooltip from '@subwallet/extension-koni-ui/components/Tooltip';
 import { PREDEFINED_TRANSAK_NETWORK } from '@subwallet/extension-koni-ui/constants/transak';
-import useTranslation from '@subwallet/extension-koni-ui/hooks/useTranslation';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import CN from 'classnames';
 import qs from 'querystring';
@@ -26,8 +24,6 @@ const HOST = {
 const TransakArea = (props: Props) => {
   const { className, formattedAddress, networkKey } = props;
 
-  const { t } = useTranslation();
-
   const url = useMemo((): string => {
     const host = HOST.PRODUCTION;
 
@@ -46,7 +42,7 @@ const TransakArea = (props: Props) => {
       defaultCryptoCurrency: defaultToken,
       cryptoCurrencyList: tokenList.join(','),
       networks: networkKey !== 'shiden' ? networks.join(',') : undefined,
-      disableWalletAddressForm: true,
+      // disableWalletAddressForm: true,
       walletAddress: formattedAddress
     };
     const query = qs.stringify(params);
@@ -56,11 +52,6 @@ const TransakArea = (props: Props) => {
 
   return (
     <div className={CN(className)}>
-      <img
-        alt='Transak logo'
-        className='img-logo'
-        src={transakLogo}
-      />
       {
         !url
           ? (
@@ -68,12 +59,11 @@ const TransakArea = (props: Props) => {
               data-for='transak-button'
               data-tip={true}
             >
-              <Button
-                className={CN(className)}
-                isDisabled={true}
-              >
-                {t('Continue with Transak')}
-              </Button>
+              <img
+                alt='Transak logo'
+                className='img-logo'
+                src={transakLogo}
+              />
             </div>
           )
           : (
@@ -82,11 +72,11 @@ const TransakArea = (props: Props) => {
               rel='noreferrer'
               target='_blank'
             >
-              <Button
-                className={CN(className)}
-              >
-                {t('Continue with Transak')}
-              </Button>
+              <img
+                alt='Transak logo'
+                className='img-logo'
+                src={transakLogo}
+              />
             </a>
           )
       }

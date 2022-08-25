@@ -325,8 +325,18 @@ function Home ({ chainRegistryMap, className = '', currentAccount, historyMap, n
   }, [networkKey, currentAccount.address]);
 
   const openBuyModal = useCallback(() => {
+    setModalQrProp({
+      network: {
+        networkKey: networkKey
+      },
+      account: {
+        address: currentAccount.address
+      },
+      showExportButton: false
+    });
+
     setIsVisibleBuyModal(true);
-  }, []);
+  }, [currentAccount, networkKey]);
 
   const tabItems = useMemo<TabHeaderItemType[]>(() => {
     return getTabHeaderItems(address, t);

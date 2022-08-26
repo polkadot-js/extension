@@ -4,6 +4,8 @@
 import { BaseTxError, ResponseStakeExternal, ResponseStakeLedger, ResponseWithdrawStakeQr } from '@subwallet/extension-base/background/KoniTypes';
 import { LedgerState } from '@subwallet/extension-base/signers/types';
 import { InputWithLabel } from '@subwallet/extension-koni-ui/components';
+import { BalanceVal } from '@subwallet/extension-koni-ui/components/Balance';
+import FeeValue from '@subwallet/extension-koni-ui/components/Balance/FeeValue';
 import Button from '@subwallet/extension-koni-ui/components/Button';
 import InputAddress from '@subwallet/extension-koni-ui/components/InputAddress';
 import LedgerRequest from '@subwallet/extension-koni-ui/components/Ledger/LedgerRequest';
@@ -327,17 +329,33 @@ function StakeAuthWithdrawal ({ address, amount, className, hideModal, networkKe
         <div className={'transaction-info-container'}>
           <div className={'transaction-info-row'}>
             <div className={'transaction-info-title'}>Withdrawal amount</div>
-            <div className={'transaction-info-value'}>{amount} {networkJson.nativeToken}</div>
+            <div className={'transaction-info-value'}>
+              <BalanceVal
+                symbol={networkJson.nativeToken}
+                value={amount}
+                withSymbol={true}
+              />
+            </div>
           </div>
 
           <div className={'transaction-info-row'}>
             <div className={'transaction-info-title'}>Withdrawal fee</div>
-            <div className={'transaction-info-value'}>{fee}</div>
+            <div className={'transaction-info-value'}>
+              <FeeValue feeString={fee} />
+            </div>
           </div>
 
           <div className={'transaction-info-row'}>
             <div className={'transaction-info-title'}>Total</div>
-            <div className={'transaction-info-value'}>{amount} {networkJson.nativeToken} + {fee}</div>
+            <div className={'transaction-info-value'}>
+              <BalanceVal
+                symbol={networkJson.nativeToken}
+                value={amount}
+                withSymbol={true}
+              />
+              &nbsp;+&nbsp;
+              <FeeValue feeString={fee} />
+            </div>
           </div>
         </div>
       </>

@@ -26,7 +26,7 @@ import styled from 'styled-components';
 
 import { KeyringPair$Meta } from '@polkadot/keyring/types';
 
-import FeeValue from './FeeValue';
+import FeeValue from '../../components/Balance/FeeValue';
 
 interface Props extends ThemeProps {
   className?: string;

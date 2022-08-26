@@ -5,7 +5,7 @@ import { ChainRegistry, TransactionHistoryItemType } from '@subwallet/extension-
 import arrowReceived from '@subwallet/extension-koni-ui/assets/arrow-received.svg';
 import arrowSend from '@subwallet/extension-koni-ui/assets/arrow-send.svg';
 import arrowSendError from '@subwallet/extension-koni-ui/assets/arrow-send-error.svg';
-import { BalanceVal } from '@subwallet/extension-koni-ui/components/balance';
+import { BalanceVal } from '@subwallet/extension-koni-ui/components/Balance';
 import Tooltip from '@subwallet/extension-koni-ui/components/Tooltip';
 import useTranslation from '@subwallet/extension-koni-ui/hooks/useTranslation';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';

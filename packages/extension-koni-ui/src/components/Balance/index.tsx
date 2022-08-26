@@ -48,6 +48,6 @@ const BalanceValComponent = ({ className, startWithSymbol = false, symbol, value
 
 export const BalanceVal = React.memo(styled(BalanceValComponent)(({ theme }: BalanceViewProps) => `
   .balance-val__postfix {
-    opacity: 0.6;
+    opacity: ${theme.textOpacity};
   }
 `));

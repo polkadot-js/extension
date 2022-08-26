@@ -36,6 +36,6 @@ const FeeValue = ({ className, feeString }: Props) => {
 
 export default React.memo(styled(FeeValue)(({ theme }: Props) => `
   .balance-val__postfix {
-    opacity: 0.6;
+    opacity: ${theme.textOpacity};
   }
 `));

@@ -26,6 +26,8 @@ import styled from 'styled-components';
 
 import { KeyringPair$Meta } from '@polkadot/keyring/types';
 
+import FeeValue from './FeeValue';
+
 interface Props extends ThemeProps {
   className?: string;
   onCancel: () => void;
@@ -268,7 +270,7 @@ function AuthTransaction ({ balanceFormat,
         <div className='auth-transaction__info'>
           <div className='auth-transaction__info-text'>Origin Chain Fee</div>
           <div className='auth-transaction__info-value'>
-            {feeString}
+            <FeeValue feeString={feeString} />
           </div>
         </div>
 
@@ -280,7 +282,7 @@ function AuthTransaction ({ balanceFormat,
               value={requestPayload.value}
             />
             <span> + </span>
-            {feeString}
+            <FeeValue feeString={feeString} />
           </div>
         </div>
       </>

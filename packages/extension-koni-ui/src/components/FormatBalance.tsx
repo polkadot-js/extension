@@ -28,8 +28,11 @@ const K_LENGTH = 3 + 1;
 type LabelPost = string | React.ReactNode
 
 function createElement (prefix: string, postfix: string, unit: string, label: LabelPost = '', isShort = false): React.ReactNode {
+  const length = parseFloat(prefix) >= 1 ? 2 : 4;
+  const prePostfix = Array.apply('0', new Array(length)).fill('0');
+
   return <><span className='format-balance__front-part'>{`${prefix}${isShort ? '' : '.'}`}{!isShort &&
-  <span className='format-balance__postfix'>{`0000${postfix || ''}`.slice(-4)}</span>}</span><span
+  <span className='format-balance__postfix'>{`${prePostfix.join('')}${postfix || ''}`.slice(-length)}</span>}</span><span
     className='format-balance__unit'
   > {unit}</span>{label}</>;
 }
@@ -41,7 +44,8 @@ function applyFormat (value: Compact<any> | BN | string, [decimals, symbol, symb
 
   if (prefix.length > M_LENGTH) {
     const [major, rest] = formatBalance(value, { decimals, withUnit: false }).split('.');
-    const minor = rest.substr(0, 4);
+    const length = parseFloat(major) >= 1 ? 2 : 4;
+    const minor = rest.substr(0, length);
     const unit = rest.substr(4);
 
     return <><span className='format-balance__front-part'>{major}.<span className='format-balance__postfix'>{minor}</span></span><span
@@ -75,4 +79,7 @@ function FormatBalance ({ children,
 
 export default React.memo(styled(FormatBalance)`
 
+  .format-balance__postfix {
+    opacity: 0.6;
+  }
 `);

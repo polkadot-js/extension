@@ -18,11 +18,12 @@ interface BalanceViewProps extends ThemeProps {
 
 const BalanceValComponent = ({ className, startWithSymbol = false, symbol, value, withComma = true, withSymbol = true }: BalanceViewProps) => {
   let [prefix, postfix] = typeof value === 'object' ? value.toFormat(9).split('.') : value.toString().split('.');
+  const length = parseFloat(prefix) >= 1 ? 2 : 4;
 
   if (startWithSymbol) {
-    postfix = postfix?.substring(0, 3);
+    postfix = postfix?.substring(0, length - 1);
   } else {
-    postfix = postfix?.substring(0, 4);
+    postfix = postfix?.substring(0, length);
   }
 
   const lastSymbol = postfix?.slice(-1);

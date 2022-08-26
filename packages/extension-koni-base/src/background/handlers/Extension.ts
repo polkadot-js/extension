@@ -5,7 +5,7 @@ import Common from '@ethereumjs/common';
 import Extension, { SEED_DEFAULT_LENGTH, SEED_LENGTHS } from '@subwallet/extension-base/background/handlers/Extension';
 import { AuthUrls } from '@subwallet/extension-base/background/handlers/State';
 import { createSubscription, isSubscriptionRunning, unsubscribe } from '@subwallet/extension-base/background/handlers/subscriptions';
-import { AccountExternalError, AccountExternalErrorCode, AccountsWithCurrentAddress, ApiProps, BalanceJson, BaseTxError, BasicTxErrorCode, BasicTxInfo, BasicTxResponse, BondingOptionInfo, BondingOptionParams, BondingSubmitParams, ChainBondingBasics, ChainRegistry, CrowdloanJson, CurrentAccountInfo, CustomEvmToken, DelegationItem, DeleteEvmTokenParams, DisableNetworkResponse, EvmNftSubmitTransaction, EvmNftTransaction, EvmNftTransactionRequest, EvmTokenJson, ExternalRequestPromise, ExternalRequestPromiseStatus, NETWORK_ERROR, NetWorkGroup, NetworkJson, NftCollection, NftCollectionJson, NftItem, NftJson, NftTransactionResponse, NftTransferExtra, OptionInputAddress, PriceJson, RequestAccountCreateExternalV2, RequestAccountCreateHardwareV2, RequestAccountCreateSuriV2, RequestAccountExportPrivateKey, RequestAccountMeta, RequestAuthorization, RequestAuthorizationBlock, RequestAuthorizationPerAccount, RequestAuthorizationPerSite, RequestAuthorizeApproveV2, RequestBatchRestoreV2, RequestCheckCrossChainTransfer, RequestCheckTransfer, RequestConfirmationComplete, RequestCrossChainTransfer, RequestCrossChainTransferExternal, RequestDeriveCreateV2, RequestForgetSite, RequestFreeBalance, RequestJsonRestoreV2, RequestNftForceUpdate, RequestNftTransferExternalEVM, RequestNftTransferExternalSubstrate, RequestParseEVMTransactionInput, RequestParseTransactionEVM, RequestQrSignEVM, RequestRejectExternalRequest, RequestResolveExternalRequest, RequestSaveRecentAccount, RequestSeedCreateV2, RequestSeedValidateV2, RequestSettingsType, RequestStakeExternal, RequestTransactionHistoryAdd, RequestTransfer, RequestTransferCheckReferenceCount, RequestTransferCheckSupporting, RequestTransferExistentialDeposit, RequestTransferExternal, RequestUnStakeExternal, RequestWithdrawStakeExternal, ResponseAccountCreateSuriV2, ResponseAccountExportPrivateKey, ResponseAccountMeta, ResponseCheckCrossChainTransfer, ResponseCheckTransfer, ResponseParseEVMTransactionInput, ResponseParseTransactionEVM, ResponsePrivateKeyValidateV2, ResponseQrSignEVM, ResponseRejectExternalRequest, ResponseResolveExternalRequest, ResponseSeedCreateV2, ResponseSeedValidateV2, ResponseTransfer, ResponseTransferQr, StakeClaimRewardParams, StakeDelegationRequest, StakeUnlockingJson, StakeWithdrawalParams, StakingJson, StakingRewardJson, SubstrateNftSubmitTransaction, SubstrateNftTransaction, SubstrateNftTransactionRequest, SupportTransferResponse, ThemeTypes, TokenInfo, TransactionHistoryItemType, TransferError, TransferErrorCode, TransferStep, UnbondingSubmitParams, ValidateEvmTokenRequest, ValidateEvmTokenResponse, ValidateNetworkRequest, ValidateNetworkResponse } from '@subwallet/extension-base/background/KoniTypes';
+import { AccountExternalError, AccountExternalErrorCode, AccountsWithCurrentAddress, ApiProps, BalanceJson, BaseTxError, BasicTxErrorCode, BasicTxInfo, BasicTxResponse, BondingOptionInfo, BondingOptionParams, BondingSubmitParams, ChainBondingBasics, ChainRegistry, CrowdloanJson, CurrentAccountInfo, CustomEvmToken, DelegationItem, DeleteEvmTokenParams, DisableNetworkResponse, EvmNftSubmitTransaction, EvmNftTransaction, EvmNftTransactionRequest, EvmTokenJson, ExternalRequestPromise, ExternalRequestPromiseStatus, NETWORK_ERROR, NetWorkGroup, NetworkJson, NftCollection, NftCollectionJson, NftItem, NftJson, NftTransactionResponse, NftTransferExtra, OptionInputAddress, PriceJson, RequestAccountCreateExternalV2, RequestAccountCreateHardwareV2, RequestAccountCreateSuriV2, RequestAccountExportPrivateKey, RequestAccountMeta, RequestAuthorization, RequestAuthorizationBlock, RequestAuthorizationPerAccount, RequestAuthorizationPerSite, RequestAuthorizeApproveV2, RequestBatchRestoreV2, RequestCheckCrossChainTransfer, RequestCheckTransfer, RequestConfirmationComplete, RequestCrossChainTransfer, RequestCrossChainTransferExternal, RequestDeriveCreateV2, RequestForgetSite, RequestFreeBalance, RequestJsonRestoreV2, RequestNftForceUpdate, RequestNftTransferExternalEVM, RequestNftTransferExternalSubstrate, RequestParseEVMTransactionInput, RequestParseTransactionEVM, RequestQrSignEVM, RequestRejectExternalRequest, RequestResolveExternalRequest, RequestSaveRecentAccount, RequestSeedCreateV2, RequestSeedValidateV2, RequestSettingsType, RequestStakeExternal, RequestTransactionHistoryAdd, RequestTransfer, RequestTransferCheckReferenceCount, RequestTransferCheckSupporting, RequestTransferExistentialDeposit, RequestTransferExternal, RequestUnStakeExternal, RequestWithdrawStakeExternal, ResponseAccountCreateSuriV2, ResponseAccountExportPrivateKey, ResponseAccountMeta, ResponseCheckCrossChainTransfer, ResponseCheckTransfer, ResponseParseEVMTransactionInput, ResponseParseTransactionEVM, ResponsePrivateKeyValidateV2, ResponseQrSignEVM, ResponseRejectExternalRequest, ResponseResolveExternalRequest, ResponseSeedCreateV2, ResponseSeedValidateV2, ResponseTransfer, StakeClaimRewardParams, StakeDelegationRequest, StakeUnlockingJson, StakeWithdrawalParams, StakingJson, StakingRewardJson, SubstrateNftSubmitTransaction, SubstrateNftTransaction, SubstrateNftTransactionRequest, SupportTransferResponse, ThemeTypes, TokenInfo, TransactionHistoryItemType, TransferError, TransferErrorCode, TransferStep, UnbondingSubmitParams, ValidateEvmTokenRequest, ValidateEvmTokenResponse, ValidateNetworkRequest, ValidateNetworkResponse } from '@subwallet/extension-base/background/KoniTypes';
 import { AccountJson, AuthorizeRequest, MessageTypes, RequestAccountForget, RequestAccountTie, RequestAuthorizeCancel, RequestAuthorizeReject, RequestCurrentAccountAddress, RequestParseTransactionSubstrate, RequestTypes, ResponseAuthorizeList, ResponseParseTransactionSubstrate, ResponseType } from '@subwallet/extension-base/background/types';
 import { getId } from '@subwallet/extension-base/utils/getId';
 import { getBondingExtrinsic, getBondingTxInfo, getChainBondingBasics, getClaimRewardExtrinsic, getClaimRewardTxInfo, getDelegationInfo, getUnbondingExtrinsic, getUnbondingTxInfo, getValidatorsInfo, getWithdrawalExtrinsic, getWithdrawalTxInfo } from '@subwallet/extension-koni-base/api/bonding';
@@ -1372,6 +1372,47 @@ export default class KoniExtension extends Extension {
     };
   }
 
+  private makeCrossChainTransferCallback (
+    address: string,
+    recipientAddress: string,
+    originalNetworkKey: string,
+    value: string,
+    token: string | undefined,
+    portCallback: (res: ResponseTransfer) => void): (res: ResponseTransfer) => void {
+    return (res: ResponseTransfer) => {
+      // !res.isFinalized to prevent duplicate action
+      if (!res.isFinalized && res.txResult && res.extrinsicHash) {
+        const change = (parseInt(res.txResult.change) || parseInt(value)).toString();
+        const transaction = {
+          time: Date.now(),
+          networkKey: originalNetworkKey,
+          change: change,
+          changeSymbol: res.txResult.changeSymbol || token,
+          fee: res.txResult.fee,
+          feeSymbol: res.txResult.feeSymbol,
+          isSuccess: res.step.valueOf() === TransferStep.SUCCESS.valueOf(),
+          extrinsicHash: res.extrinsicHash
+        } as TransactionHistoryItemType;
+
+        const setSendHistory = new Promise((resolve) => {
+          state.setTransactionHistory(address, originalNetworkKey, { ...transaction, action: 'send' }, resolve);
+        });
+
+        setSendHistory.then(() => {
+          this.isInWalletAccount(recipientAddress).then((isValid) => {
+            if (isValid) {
+              state.setTransactionHistory(recipientAddress, originalNetworkKey, { ...transaction, action: 'received' });
+            } else {
+              console.log(`The recipient address [${recipientAddress}] is not in wallet.`);
+            }
+          }).catch((err) => console.warn(err));
+        }).catch((err) => console.warn(err));
+      }
+
+      portCallback(res);
+    };
+  }
+
   private async makeTransfer (id: string, port: chrome.runtime.Port, { from,
     networkKey,
     password,
@@ -1477,6 +1518,8 @@ export default class KoniExtension extends Extension {
 
       // todo: Case ETH using web3 js
 
+      const callback = this.makeCrossChainTransferCallback(from, to, originNetworkKey, value || '0', token, cb);
+
       // eslint-disable-next-line prefer-const
       transferProm = makeCrossChainTransfer(
         originNetworkKey, destinationNetworkKey,
@@ -1485,7 +1528,7 @@ export default class KoniExtension extends Extension {
         state.getDotSamaApiMap(),
         tokenInfo,
         state.getNetworkMap(),
-        this.makeTransferCallback(from, to, originNetworkKey, token, cb)
+        callback
       );
 
       transferProm.then(() => {
@@ -2380,31 +2423,6 @@ export default class KoniExtension extends Extension {
     return [errors, keypair, transferValue, tokenInfo];
   }
 
-  private makeTransferQrCallback (
-    address: string,
-    networkKey: string,
-    token: string | undefined,
-    portCallback: (res: ResponseTransferQr) => void): (res: ResponseTransferQr) => void {
-    return (res: ResponseTransferQr) => {
-      // !res.isFinalized to prevent duplicate action
-      if (!res.isFinalized && res.txResult && res.extrinsicHash) {
-        state.setTransactionHistory(address, networkKey, {
-          time: Date.now(),
-          networkKey,
-          change: res.txResult.change,
-          changeSymbol: res.txResult.changeSymbol || token,
-          fee: res.txResult.fee,
-          feeSymbol: res.txResult.feeSymbol,
-          isSuccess: res.step.valueOf() === TransferStep.SUCCESS.valueOf(),
-          action: 'send',
-          extrinsicHash: res.extrinsicHash
-        });
-      }
-
-      portCallback(res);
-    };
-  }
-
   private validateAccountExternal (address: string): [Array<BaseTxError>, KeyringPair | undefined] {
     const errors = [] as Array<BaseTxError>;
     let keypair: KeyringPair | undefined;
@@ -2452,7 +2470,7 @@ export default class KoniExtension extends Extension {
         state.updateExternalRequest(id, { ...promise, resolve: undefined, reject: undefined });
       };
 
-      const callback = this.makeTransferQrCallback(from, networkKey, token, cb);
+      const callback = this.makeTransferCallback(from, to, networkKey, token, cb);
 
       let transferProm: Promise<void>;
 
@@ -2567,7 +2585,7 @@ export default class KoniExtension extends Extension {
         state.updateExternalRequest(id, { ...promise, resolve: undefined, reject: undefined });
       };
 
-      const callback = this.makeTransferCallback(from, to, originNetworkKey, token, cb);
+      const callback = this.makeCrossChainTransferCallback(from, to, originNetworkKey, value || '0', token, cb);
 
       const transferProm = makeCrossChainTransferQr({
         originalNetworkKey: originNetworkKey,
@@ -2994,7 +3012,7 @@ export default class KoniExtension extends Extension {
         state.updateExternalRequest(id, { ...promise, resolve: undefined, reject: undefined });
       };
 
-      const callback = this.makeTransferQrCallback(from, networkKey, token, cb);
+      const callback = this.makeTransferCallback(from, to, networkKey, token, cb);
 
       const apiProps = await state.getDotSamaApiMap()[networkKey].isReady;
 
@@ -3069,7 +3087,7 @@ export default class KoniExtension extends Extension {
         state.updateExternalRequest(id, { ...promise, resolve: undefined, reject: undefined });
       };
 
-      const callback = this.makeTransferCallback(from, to, originNetworkKey, token, cb);
+      const callback = this.makeCrossChainTransferCallback(from, to, originNetworkKey, value || '0', token, cb);
 
       const transferProm = makeCrossChainTransferLedger({
         originalNetworkKey: originNetworkKey,

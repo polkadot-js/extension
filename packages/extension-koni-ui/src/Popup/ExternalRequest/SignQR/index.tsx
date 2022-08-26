@@ -86,6 +86,7 @@ const SignQR = (props: Props) => {
   const RememberPasswordCheckbox = () => (
     <Checkbox
       checked={savePass}
+      className={'save-password-container'}
       label={isLocked
         ? t<string>(
           'Remember my password for the next {{expiration}} minutes',
@@ -102,38 +103,40 @@ const SignQR = (props: Props) => {
 
   return (
     <div className={CN(className)}>
-      {
-        (loading || !network) && (
-          <div className={CN('loading')}>
-            <Spinner />
-          </div>
-        )
-      }
-
-      {
-        (!loading && network) && (
-          <>
-            <div className='sign-header'>
-              <img
-                alt=''
-                className='sign-icon'
-                src={SignTransactionIcon}
-              />
-              <div className='sign-title'>
-                Sign {type === 'transaction' ? 'transaction' : 'message'}
-              </div>
-              <div className='sign-description'>
-                You are approving a request with account
-              </div>
+      <div className='info-container'>
+        {
+          (loading || !network) && (
+            <div className={CN('loading')}>
+              <Spinner />
             </div>
-            <AccountInfo
-              address={senderAddress}
-              forceEthereum={isEthereum && !evmChainId}
-              network={network}
-            />
-          </>
-        )
-      }
+          )
+        }
+
+        {
+          (!loading && network) && (
+            <>
+              <div className='sign-header'>
+                <img
+                  alt=''
+                  className='sign-icon'
+                  src={SignTransactionIcon}
+                />
+                <div className='sign-title'>
+                  Sign {type === 'transaction' ? 'transaction' : 'message'}
+                </div>
+                <div className='sign-description'>
+                  You are approving a request with account
+                </div>
+              </div>
+              <AccountInfo
+                address={senderAddress}
+                forceEthereum={isEthereum && !evmChainId}
+                network={network}
+              />
+            </>
+          )
+        }
+      </div>
       <div className='action-container'>
         {isLocked && (
           <Unlock
@@ -175,7 +178,13 @@ export default React.memo(styled(SignQR)(({ theme }: Props) => `
   flex-direction: column;
   position: relative;
   bottom: 0;
-  padding: 15px 15px 0;
+  padding: 15px;
+  height: 100%;
+  overflow-y: auto;
+
+  .save-password-container {
+    margin: 8px 0;
+  }
 
   .loading{
     position: relative;
@@ -220,6 +229,7 @@ export default React.memo(styled(SignQR)(({ theme }: Props) => `
     position: sticky;
     padding-top: 3px;
     bottom: 0;
+    z-index: 10;
 
     .separator{
       margin: ${theme.boxMargin};

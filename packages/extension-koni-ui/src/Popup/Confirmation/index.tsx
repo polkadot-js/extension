@@ -365,6 +365,8 @@ export default withRouter(styled(Confirmation)(({ theme }: Props) => `
   }
 
   .action-area {
+    background: ${theme.background};
+    z-index: 10;
     padding: 15px;
     position: sticky;
     bottom: 0;

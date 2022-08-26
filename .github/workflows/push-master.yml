@@ -13,7 +13,7 @@ jobs:
     name: ${{ matrix.step }}
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@7884fcad6b5d53d10323aee724dc68d8b9096a2e
       with:
         fetch-depth: 0
         token: ${{ secrets.GH_PAT }}

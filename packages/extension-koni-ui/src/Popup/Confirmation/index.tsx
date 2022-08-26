@@ -268,55 +268,57 @@ function Confirmation ({ className, match: { params: { address } } }: Props): Re
         showSubHeader={!!header}
         subHeaderName={header}
       />
-      <div className='confirmation-wrapper'>
-        {currentConfirmation && <ConfirmationHeader
-          account={account}
-          className='confirmation-header'
-          confirmation={currentConfirmation}
-          network={network}
-          requestActionText={requestActionText}
-          requestActionText2={requestActionText2}
-        />}
-        {informationBlock}
-        {qrArea}
-      </div>
-      {isWarning &&
-        (
-          <div className='warning-area'>
-            <Warning>
-              This method is not currently supported
+      <div className='body-container'>
+        <div className='confirmation-wrapper'>
+          {currentConfirmation && <ConfirmationHeader
+            account={account}
+            className='confirmation-header'
+            confirmation={currentConfirmation}
+            network={network}
+            requestActionText={requestActionText}
+            requestActionText2={requestActionText2}
+          />}
+          {informationBlock}
+          {qrArea}
+        </div>
+        {isWarning &&
+          (
+            <div className='warning-area'>
+              <Warning>
+                This method is not currently supported
+              </Warning>
+            </div>
+          )
+        }
+        <div className='action-area'>
+          {requirePassword && (<InputWithLabel
+            className='password'
+            label={''}
+            onChange={_onPasswordChange}
+            placeholder={t<string>('Password')}
+            type='password'
+          />)}
+          {error && (
+            <Warning
+              className='confirmation-error'
+              isDanger={true}
+            >
+              {error}
             </Warning>
-          </div>
-        )
-      }
-      <div className='action-area'>
-        {requirePassword && (<InputWithLabel
-          className='password'
-          label={''}
-          onChange={_onPasswordChange}
-          placeholder={t<string>('Password')}
-          type='password'
-        />)}
-        {error && (
-          <Warning
-            className='confirmation-error'
-            isDanger={true}
-          >
-            {error}
-          </Warning>
-        )}
-        <ButtonArea className='button-area'>
-          <Button
-            className='cancel-button'
-            isDisabled={isLoading}
-            onClick={_onCancel}
-          >{cancelLabel}</Button>
-          <Button
-            className='confirm-button'
-            isDisabled={disableConfirm()}
-            onClick={_onApprove}
-          >{confirmLabel}</Button>
-        </ButtonArea>
+          )}
+          <ButtonArea className='button-area'>
+            <Button
+              className='cancel-button'
+              isDisabled={isLoading}
+              onClick={_onCancel}
+            >{cancelLabel}</Button>
+            <Button
+              className='confirm-button'
+              isDisabled={disableConfirm()}
+              onClick={_onApprove}
+            >{confirmLabel}</Button>
+          </ButtonArea>
+        </div>
       </div>
     </div>
   </>);
@@ -327,10 +329,16 @@ export default withRouter(styled(Confirmation)(({ theme }: Props) => `
   flex-direction: column;
   height: 100%;
 
+  .body-container {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    overflow-y: auto;
+    position: relative;
+  }
+
   .confirmation-wrapper {
-    overflow-y: auto;
     flex: 1;
-    overflow-y: auto;
     display: flex;
     flex-direction: column;
   }
@@ -357,7 +365,12 @@ export default withRouter(styled(Confirmation)(({ theme }: Props) => `
   }
 
   .action-area {
+    background: ${theme.background};
+    z-index: 10;
     padding: 15px;
+    position: sticky;
+    bottom: 0;
+    left: 0;
 
     .password{
       margin-top: 0;

@@ -229,6 +229,10 @@ function UnbondingAuthTransaction ({ amount, balanceError, className, fee, handl
     setErrorArr([error.message]);
   }, []);
 
+  const handlerClearError = useCallback(() => {
+    setErrorArr([]);
+  }, []);
+
   const handlerSubmitQr = useCallback(() => {
     setLoading(true);
 
@@ -325,6 +329,7 @@ function UnbondingAuthTransaction ({ amount, balanceError, className, fee, handl
         return (
           <div className='external-wrapper'>
             <QrRequest
+              clearError={handlerClearError}
               errorArr={errorArr}
               genesisHash={networkJson.genesisHash}
               handlerStart={handlerSubmitQr}
@@ -389,7 +394,7 @@ function UnbondingAuthTransaction ({ amount, balanceError, className, fee, handl
           </>
         );
     }
-  }, [_onChangePass, account, errorArr, handleConfirm, handlerErrorQr, handlerSendLedger, handlerSubmitQr, hideConfirm, loading, networkJson.genesisHash, password, passwordError, renderInfo, signMode, t]);
+  }, [_onChangePass, account, errorArr, handleConfirm, handlerClearError, handlerErrorQr, handlerSendLedger, handlerSubmitQr, hideConfirm, loading, networkJson.genesisHash, password, passwordError, renderInfo, signMode, t]);
 
   return (
     <div className={className}>

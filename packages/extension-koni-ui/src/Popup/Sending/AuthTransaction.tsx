@@ -304,11 +304,16 @@ function AuthTransaction ({ className, isDonation, feeInfo: [fee, feeDecimals, f
     setErrorArr([error.message]);
   }, []);
 
+  const handlerClearError = useCallback(() => {
+    setErrorArr([]);
+  }, []);
+
   const handlerRenderContent = useCallback(() => {
     switch (signMode) {
       case SIGN_MODE.QR:
         return (
           <QrRequest
+            clearError={handlerClearError}
             errorArr={errorArr}
             genesisHash={genesisHash}
             handlerStart={_doStartQr}
@@ -360,7 +365,7 @@ function AuthTransaction ({ className, isDonation, feeInfo: [fee, feeDecimals, f
           </div>
         );
     }
-  }, [signMode, errorArr, genesisHash, _doStartQr, isBusy, handlerErrorQr, handlerRenderInfo, accountMeta, _doSignLedger, isKeyringErr, t, _onChangePass, password, renderError, _doStart]);
+  }, [signMode, handlerClearError, errorArr, genesisHash, _doStartQr, isBusy, handlerErrorQr, handlerRenderInfo, accountMeta, _doSignLedger, isKeyringErr, t, _onChangePass, password, renderError, _doStart]);
 
   useEffect(() => {
     let unmount = false;

@@ -1,4 +1,4 @@
-     545	Jaco                          	Bump TS (#1129)
+     546	Jaco                          	Pin Github actions (#1130)
       85	Thibaut Sardan                	fix ask again invisible in popup (#1119)
        7	Ivan Rukhavets                	Mention derivation in FAQ (#334)
        4	Amaury Martiny                	PostMessageProvider with on('connected' | 'disconnected') (#279)

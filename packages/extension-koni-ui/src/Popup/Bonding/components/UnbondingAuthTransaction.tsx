@@ -37,10 +37,11 @@ interface Props extends ThemeProps {
   setIsTxSuccess: (val: boolean) => void,
   setTxError: (val: string) => void,
   unbondAll: boolean,
-  selectedValidator: string
+  selectedValidator: string,
+  handleRevertClickNext: () => void
 }
 
-function UnbondingAuthTransaction ({ amount, balanceError, className, fee, selectedNetwork, selectedValidator, setExtrinsicHash, setIsTxSuccess, setShowConfirm, setShowResult, setTxError, unbondAll }: Props): React.ReactElement<Props> {
+function UnbondingAuthTransaction ({ amount, balanceError, className, fee, handleRevertClickNext, selectedNetwork, selectedValidator, setExtrinsicHash, setIsTxSuccess, setShowConfirm, setShowResult, setTxError, unbondAll }: Props): React.ReactElement<Props> {
   const { t } = useTranslation();
   const { show } = useToast();
 
@@ -68,9 +69,10 @@ function UnbondingAuthTransaction ({ amount, balanceError, className, fee, selec
     if (!loading) {
       await handlerReject(externalId);
 
+      handleRevertClickNext();
       setShowConfirm(false);
     }
-  }, [externalId, handlerReject, loading, setShowConfirm]);
+  }, [externalId, handleRevertClickNext, handlerReject, loading, setShowConfirm]);
 
   const handleOnSubmit = useCallback(async () => {
     await submitUnbonding({

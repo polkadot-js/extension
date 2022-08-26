@@ -62,6 +62,14 @@ function getSupportedTokens (originChain: string, destinationChain: string): str
 //   return filteredOptions;
 // }
 
+enum BLOCK_HARDWARE_STATE {
+  ACCEPTED,
+  BLOCK_CHAIN,
+  WRONG_CHAIN
+}
+
+const SUPPORT_LEDGER_XCM: string[] = [];
+
 function Wrapper ({ className = '', theme }: Props): React.ReactElement<Props> {
   const { t } = useTranslation();
   const { accounts } = useContext(AccountContext);
@@ -120,6 +128,10 @@ function XcmTransfer ({ chainRegistryMap, className, defaultValue, firstOriginCh
   const [originChain, setOriginChain] = useState<string>(firstOriginChain);
   const [{ address: senderId,
     token: selectedToken }, setSenderValue] = useState<XcmTransferInputAddressType>(defaultValue);
+  // const [isTransferAll, setIsTransferAll] = useState(false);
+  // const [existentialDeposit, setExistentialDeposit] = useState<string>('0');
+  // const [estimatedFee, setEstimatedFee] = useState('0');
+  // const [feeSymbol, setFeeSymbol] = useState<string | undefined>(undefined);
   const onAction = useContext(ActionContext);
 
   const { accounts } = useContext(AccountContext);
@@ -127,12 +139,16 @@ function XcmTransfer ({ chainRegistryMap, className, defaultValue, firstOriginCh
   const [feeString, setFeeString] = useState<string | undefined>();
   const senderFreeBalance = useFreeBalance(originChain, senderId, selectedToken);
   const recipientFreeBalance = useFreeBalance(originChain, recipientId, selectedToken);
+
+  // const maxTransfer = getXcmMaxTransfer(estimatedFee, feeSymbol, selectedToken, networkMap[originChain].nativeToken as string, senderFreeBalance, existentialDeposit);
+
   const [txResult, setTxResult] = useState<TransferResultType>({ isShowTxResult: false, isTxSuccess: false });
   const { isShowTxResult } = txResult;
   const balanceFormat: BalanceFormatType | null = chainRegistryMap[originChain] && networkMap[originChain].active
     ? getBalanceFormat(originChain, selectedToken, chainRegistryMap)
     : null;
   const mainTokenInfo = chainRegistryMap[originChain] && networkMap[originChain].active ? getMainTokenInfo(originChain, chainRegistryMap) : null;
+  // const valueToTransfer = isTransferAll && maxTransfer ? maxTransfer.toString() : amount?.toString() || '0';
   const valueToTransfer = amount?.toString() || '0';
   const defaultDestinationChainOptions = getDestinationChainOptions(firstOriginChain, networkMap);
   const [[selectedDestinationChain, destinationChainOptions], setDestinationChain] = useState<[string, DropdownTransformOptionType[]]>([defaultDestinationChainOptions[0].value, defaultDestinationChainOptions]);
@@ -148,28 +164,93 @@ function XcmTransfer ({ chainRegistryMap, className, defaultValue, firstOriginCh
   const checkDestinationChainAndReceiverIdType = !!recipientId && !!networkMap[selectedDestinationChain].isEthereum === isEthereumAddress(recipientId);
   const amountGtAvailableBalance = amount && senderFreeBalance && amount.gt(new BN(senderFreeBalance));
 
-  const isBlockHardware = useMemo((): boolean => {
-    if (senderId) {
+  const accountBlockHardwareState = useCallback((address: string | null, chain: string, isReceiver?: boolean): BLOCK_HARDWARE_STATE => {
+    if (address) {
       const prefix = 42;
-      const account = accounts.find((acc) => reformatAddress(acc.address, prefix) === reformatAddress(senderId, prefix));
+      const account = accounts.find((acc) => reformatAddress(acc.address, prefix) === reformatAddress(address, prefix));
 
       if (!account) {
-        return false;
+        return BLOCK_HARDWARE_STATE.ACCEPTED;
       } else {
-        return !!account.isHardware;
+        if (account.isHardware) {
+          const network = networkMap[chain];
+
+          if (!network) {
+            return BLOCK_HARDWARE_STATE.BLOCK_CHAIN;
+          } else {
+            if (SUPPORT_LEDGER_XCM.includes(network.key) || isReceiver) {
+              return (account.originGenesisHash === network.genesisHash) ? BLOCK_HARDWARE_STATE.ACCEPTED : BLOCK_HARDWARE_STATE.WRONG_CHAIN;
+            } else {
+              return BLOCK_HARDWARE_STATE.BLOCK_CHAIN;
+            }
+          }
+        } else {
+          return BLOCK_HARDWARE_STATE.ACCEPTED;
+        }
       }
     }
 
-    return false;
-  }, [senderId, accounts]);
+    return BLOCK_HARDWARE_STATE.ACCEPTED;
+  }, [accounts, networkMap]);
+
+  const senderBlockHardwareState = useMemo((): BLOCK_HARDWARE_STATE => {
+    return accountBlockHardwareState(senderId, originChain);
+  }, [accountBlockHardwareState, originChain, senderId]);
+
+  const receiverBlockHardwareState = useMemo((): BLOCK_HARDWARE_STATE => {
+    return accountBlockHardwareState(recipientId, selectedDestinationChain, true);
+  }, [accountBlockHardwareState, recipientId, selectedDestinationChain]);
 
   const canMakeTransfer = checkOriginChainAndSenderIdType &&
     checkDestinationChainAndReceiverIdType &&
     !!valueToTransfer &&
     !!recipientId &&
     !amountGtAvailableBalance &&
-    !isBlockHardware &&
+    senderBlockHardwareState === BLOCK_HARDWARE_STATE.ACCEPTED &&
+    receiverBlockHardwareState === BLOCK_HARDWARE_STATE.ACCEPTED &&
     !!balanceFormat;
+
+  const getLedgerXCMText = useCallback((state: BLOCK_HARDWARE_STATE, isSender: boolean) => {
+    let accountMessage: string;
+
+    if (isSender) {
+      accountMessage = t('The sender account is Ledger account.');
+    } else {
+      accountMessage = t('The receiver account is Ledger account.');
+    }
+
+    let stateMessage: string;
+
+    switch (state) {
+      case BLOCK_HARDWARE_STATE.BLOCK_CHAIN:
+        stateMessage = t('This is not support XCM Transfer.');
+        break;
+      case BLOCK_HARDWARE_STATE.WRONG_CHAIN:
+        stateMessage = t('The network not match.');
+        break;
+      default:
+        stateMessage = '';
+        break;
+    }
+
+    return [accountMessage, stateMessage].join(' ');
+  }, [t]);
+
+  // useEffect(() => {
+  //   let isSync = true;
+  //
+  //   transferGetExistentialDeposit({ networkKey: originChain, token: selectedToken })
+  //     .then((rs) => {
+  //       if (isSync) {
+  //         setExistentialDeposit(rs);
+  //       }
+  //     }).catch((e) => console.log('There is problem when transferGetExistentialDeposit', e));
+  //
+  //   return () => {
+  //     isSync = false;
+  //     setExistentialDeposit('0');
+  //   };
+  // }, [originChain, selectedToken]);
 
   useEffect(() => {
     let isSync = true;
@@ -185,6 +266,8 @@ function XcmTransfer ({ chainRegistryMap, className, defaultValue, firstOriginCh
       }).then((value) => {
         if (isSync) {
           setFeeString(value.feeString);
+          // setFeeSymbol(value.feeSymbol);
+          // setEstimatedFee(value.estimatedFee);
         }
       }).catch((e) => {
         console.log('err--------', e);
@@ -320,6 +403,35 @@ function XcmTransfer ({ chainRegistryMap, className, defaultValue, firstOriginCh
                   onchange={setRecipientId}
                 />
 
+                {/* { */}
+                {/*  isTransferAll && maxTransfer */}
+                {/*    ? <InputBalance */}
+                {/*      autoFocus */}
+                {/*      className={'bridge-amount-input'} */}
+                {/*      decimals={balanceFormat[0]} */}
+                {/*      defaultValue={valueToTransfer} */}
+                {/*      help={t<string>('The full account balance to be transferred, minus the transaction fees and the existential deposit')} */}
+                {/*      isDisabled */}
+                {/*      key={maxTransfer?.toString()} */}
+                {/*      label={t<string>('maximum transferable')} */}
+                {/*      siDecimals={balanceFormat[0]} */}
+                {/*      siSymbol={balanceFormat[2] || balanceFormat[1]} */}
+                {/*    /> */}
+                {/*    : <InputBalance */}
+                {/*      autoFocus */}
+                {/*      className={'bridge-amount-input'} */}
+                {/*      decimals={balanceFormat[0]} */}
+                {/*      help={t<string>('Type the amount you want to transfer. Note that you can select the unit on the right e.g sending 1 milli is equivalent to sending 0.001.')} */}
+                {/*      isError={false} */}
+                {/*      isZeroable */}
+                {/*      label={t<string>('amount')} */}
+                {/*      onChange={setAmount} */}
+                {/*      placeholder={'0'} */}
+                {/*      siDecimals={balanceFormat[0]} */}
+                {/*      siSymbol={balanceFormat[2] || balanceFormat[1]} */}
+                {/*    /> */}
+                {/* } */}
+
                 <InputBalance
                   autoFocus
                   className={'bridge-amount-input'}
@@ -330,14 +442,23 @@ function XcmTransfer ({ chainRegistryMap, className, defaultValue, firstOriginCh
                   label={t<string>('amount')}
                   onChange={setAmount}
                   placeholder={'0'}
+                  siDecimals={balanceFormat[0]}
                   siSymbol={balanceFormat[2] || balanceFormat[1]}
                 />
 
-                {isBlockHardware && (
+                {senderBlockHardwareState !== BLOCK_HARDWARE_STATE.ACCEPTED && (
                   <Warning
                     className={'xcm-transfer-warning'}
                   >
-                    {t<string>('The sender account is Ledger account. This is not support XCM Transfer')}
+                    {getLedgerXCMText(senderBlockHardwareState, true)}
+                  </Warning>
+                )}
+
+                {receiverBlockHardwareState !== BLOCK_HARDWARE_STATE.ACCEPTED && (
+                  <Warning
+                    className={'xcm-transfer-warning'}
+                  >
+                    {getLedgerXCMText(receiverBlockHardwareState, false)}
                   </Warning>
                 )}
 
@@ -372,6 +493,15 @@ function XcmTransfer ({ chainRegistryMap, className, defaultValue, firstOriginCh
                 {t<string>('To perform the transaction, please make sure the selected network in Origin Chain is activated first.')}
               </Warning>
             }
+
+            {/* <div className={'send-fund-toggle'}> */}
+            {/*  <Toggle */}
+            {/*    className='typeToggle' */}
+            {/*    label={t<string>('Transfer all')} */}
+            {/*    onChange={setIsTransferAll} */}
+            {/*    value={isTransferAll} */}
+            {/*  /> */}
+            {/* </div> */}
 
             <div className='bridge-button-container'>
               <Button
@@ -433,6 +563,13 @@ export default React.memo(styled(Wrapper)(({ theme }: Props) => `
   flex: 1;
   overflow-y: auto;
   flex-direction: column;
+
+  .send-fund-toggle {
+    display: flex;
+    justify-content: flex-end;
+    margin-top: 20px;
+    margin-bottom: 20px;
+  }
 
   .sub-header__cancel-btn {
     display: none;

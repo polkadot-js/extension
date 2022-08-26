@@ -447,6 +447,13 @@ export default React.memo(styled(AuthTransaction)(({ theme }: ThemeProps) => `
     margin: 0 20px;
   }
 
+  .signer-modal {
+    .subwallet-modal {
+        border: 1px solid ${theme.extensionBorder};
+    }
+  }
+
+
   .auth-transaction-error {
     margin-top: 10px
   }

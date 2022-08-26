@@ -86,6 +86,18 @@ function AddAccount ({ className }: Props): React.ReactElement<Props> {
           >
             <Link
               className='add-account-link'
+              to='/account/import-metamask-private-key'
+            >
+              {t<string>('Import private key from MetaMask')}
+            </Link>
+          </Button>
+
+          <Button
+            className='add-account-btn'
+            data-export-button
+          >
+            <Link
+              className='add-account-link'
               onClick={isPopup && (isFirefox || isLinux) ? _openJson : undefined}
               to={isPopup && (isFirefox || isLinux) ? undefined : jsonPath}
             >

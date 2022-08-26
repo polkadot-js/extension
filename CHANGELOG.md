@@ -1,5 +1,43 @@
 # CHANGELOG
 
+## 0.5.6 (Koni)
+Build date: Aug 24, 2022.
+
+Update:
+- Add new networks to SubWallet (#558)
+  - Amplitude
+  - GM Parachain
+  - Integritee Polkadot
+  - Integritee Kusama
+  - Tanganika Network
+  - Coinversation
+  - Ternoa Network
+- Add Suspace testnets into SubWallet (#553)
+- Add support for DOT on Astar Native and on Astar EVM (#450)
+- Integrate aUSD and USDT on Bifrost (#185)
+
+Bug fixes:
+- Fix bug not trigger accountChanged when changed account list and submit authList of DApp (#518)
+- Fix some issues related to "minimum stake" in cases stake more and unstake (#555)
+- Fix bug showing balance on very small balance (#556)
+- Fix bug happens when NFT image error (#557)
+- Fix bug can't XCM Transfer of the Bifrost Chain (#333)
+- Fix some bugs & feedback to improve UX-UI (#340)
+- Fix bug parsing Acala crowdloan data (#568)
+- Fix staking data UI error (#567)
+
+## 0.5.5 (Koni)
+Build date: Aug 12, 2022.
+
+Update:
+- Add feature to allow first-time users to import their Metamask private keys (#254)
+- Add support for transaction history on Astar EVM (#454)
+- Update XCM transfer support for Relaychain to Parachains (#411)
+
+Bug fixes:
+- Fix bug display wrong connection information with DApps (#498)
+- Fix bug some dApp can't connect to wallet when user close extension (#530)
+
 ## 0.5.4 (Koni)
 Build date: Aug 05, 2022.
 

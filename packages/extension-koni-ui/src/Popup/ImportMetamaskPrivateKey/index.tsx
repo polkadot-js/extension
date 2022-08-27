@@ -3,8 +3,10 @@
 
 import { Header } from '@subwallet/extension-koni-ui/partials';
 import { EVM_ACCOUNT_TYPE } from '@subwallet/extension-koni-ui/Popup/CreateAccount';
+import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import React, { useCallback, useContext, useEffect, useState } from 'react';
+import { useSelector } from 'react-redux';
 import styled from 'styled-components';
 
 import { KeypairType } from '@polkadot/util-crypto/types';
@@ -31,6 +33,7 @@ function ImportMetamaskPrivateKey ({ className = '' }: Props): React.ReactElemen
   const { t } = useTranslation();
   const { accounts } = useContext(AccountContext);
   const onAction = useContext(ActionContext);
+  const { genesisHash, isEthereum } = useSelector((state: RootState) => state.currentNetwork);
   const [isBusy, setIsBusy] = useState(false);
   const [account, setAccount] = useState<AccountInfo | null>(null);
   const [isConnectWhenImport, setIsConnectWhenImport] = useState<boolean>(true);
@@ -43,11 +46,12 @@ function ImportMetamaskPrivateKey ({ className = '' }: Props): React.ReactElemen
   }, [accounts, onAction]);
 
   const _onCreate = useCallback((name: string, password: string): void => {
-    // this should always be the case
+    const _genesisHash = isEthereum ? genesisHash : '';
+
     if (name && password && account) {
       setIsBusy(true);
 
-      createAccountSuriV2(name, password, account.suri, isConnectWhenImport, KEYTYPES)
+      createAccountSuriV2(name, password, account.suri, isConnectWhenImport, KEYTYPES, _genesisHash)
         .then(() => {
           window.localStorage.setItem('popupNavigation', '/');
           onAction('/');
@@ -57,8 +61,7 @@ function ImportMetamaskPrivateKey ({ className = '' }: Props): React.ReactElemen
           console.error(error);
         });
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [account, onAction, isConnectWhenImport]);
+  }, [isEthereum, genesisHash, account, isConnectWhenImport, onAction]);
 
   return (
     <>

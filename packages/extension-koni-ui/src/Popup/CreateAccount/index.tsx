@@ -28,7 +28,7 @@ function CreateAccount ({ className, defaultClassName }: Props): React.ReactElem
   const { t } = useTranslation();
   const onAction = useContext(ActionContext);
   const [isBusy, setIsBusy] = useState(false);
-  const { currentNetwork: { genesisHash } } = useSelector((state: RootState) => state);
+  const genesisHash = useSelector((state: RootState) => state.currentNetwork.genesisHash);
   const [step, setStep] = useState(1);
   const [keyTypes, setKeyTypes] = useState<Array<KeypairType>>([SUBSTRATE_ACCOUNT_TYPE, EVM_ACCOUNT_TYPE]);
   const dep = keyTypes.toString();

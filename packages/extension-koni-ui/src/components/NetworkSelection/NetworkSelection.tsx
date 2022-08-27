@@ -26,12 +26,11 @@ interface Props extends ThemeProps {
 
 function NetworkSelection ({ className, handleShow }: Props): React.ReactElement {
   const { t } = useTranslation();
-  const { networkMap } = useSelector((state: RootState) => state);
+  const networkMap = useSelector((state: RootState) => state.networkMap);
   const [searchString, setSearchString] = useState('');
-  // const [isCheck, setIsChecked] = useState(false);
   const [selected, setSelected] = useState<string[]>([]);
-  const [filteredNetworkMap, setFilteredNetworkMap] = useState<Record<string, NetworkJson>>({});
-  const { show } = useToast();
+  const [filteredNetworkList, setFilteredNetworkList] = useState<NetworkJson[]>([]);
+  const show = useToast().show;
 
   useEffect(() => {
     const selectedNetwork = Object.keys(networkMap).filter((k) => networkMap[k].active);
@@ -63,18 +62,11 @@ function NetworkSelection ({ className, handleShow }: Props): React.ReactElement
   }, [selected]);
 
   useEffect(() => {
-    const _filteredNetworkMap: Record<string, NetworkJson> = {};
+    const _filteredNetworkList = Object.values(networkMap).filter((network) => network.chain.toLowerCase().includes(searchString.toLowerCase()));
+    const _sortedNetworkList = _filteredNetworkList.filter(({ active }) => active).concat(_filteredNetworkList.filter(({ active }) => !active));
 
-    console.log(selected);
-
-    Object.entries(networkMap).forEach(([key, network]) => {
-      if (network.chain.toLowerCase().includes(searchString.toLowerCase())) {
-        _filteredNetworkMap[key] = network;
-      }
-    });
-
-    setFilteredNetworkMap(_filteredNetworkMap);
-  }, [selected, networkMap, searchString]);
+    setFilteredNetworkList(_sortedNetworkList);
+  }, [networkMap, searchString, selected]);
 
   const _onChangeFilter = useCallback((val: string) => {
     setSearchString(val);
@@ -124,7 +116,8 @@ function NetworkSelection ({ className, handleShow }: Props): React.ReactElement
 
         <div className={'network-selection-content-container'}>
           {
-            Object.entries(filteredNetworkMap).map(([networkKey, networkJson]) => {
+            filteredNetworkList.map((network) => {
+              const networkKey = network.key;
               const logo = LogosMap[networkKey] || LogosMap.default;
               const isSelected = selected.includes(networkKey);
 
@@ -135,7 +128,7 @@ function NetworkSelection ({ className, handleShow }: Props): React.ReactElement
                 isSelected={isSelected}
                 key={networkKey}
                 logo={logo}
-                networkJson={networkJson}
+                networkJson={network}
                 networkKey={networkKey}
               />);
             })

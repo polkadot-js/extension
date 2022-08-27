@@ -314,6 +314,10 @@ export class KoniSubscription {
 
     const currentStakingInfo = state.getStaking().details;
 
+    if (!addresses.length) {
+      return;
+    }
+
     await Promise.all(Object.entries(networkMap).map(async ([networkKey, networkJson]) => {
       const needUpdateUnlockingStake = currentStakingInfo[networkKey] && currentStakingInfo[networkKey].balance && parseFloat(currentStakingInfo[networkKey].balance as string) > 0;
 

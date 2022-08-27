@@ -37,10 +37,11 @@ interface Props extends ThemeProps {
   setIsTxSuccess: (val: boolean) => void,
   setTxError: (val: string) => void,
   unbondAll: boolean,
-  selectedValidator: string
+  selectedValidator: string,
+  handleRevertClickNext: () => void
 }
 
-function UnbondingAuthTransaction ({ amount, balanceError, className, fee, selectedNetwork, selectedValidator, setExtrinsicHash, setIsTxSuccess, setShowConfirm, setShowResult, setTxError, unbondAll }: Props): React.ReactElement<Props> {
+function UnbondingAuthTransaction ({ amount, balanceError, className, fee, handleRevertClickNext, selectedNetwork, selectedValidator, setExtrinsicHash, setIsTxSuccess, setShowConfirm, setShowResult, setTxError, unbondAll }: Props): React.ReactElement<Props> {
   const { t } = useTranslation();
   const { show } = useToast();
 
@@ -68,9 +69,10 @@ function UnbondingAuthTransaction ({ amount, balanceError, className, fee, selec
     if (!loading) {
       await handlerReject(externalId);
 
+      handleRevertClickNext();
       setShowConfirm(false);
     }
-  }, [externalId, handlerReject, loading, setShowConfirm]);
+  }, [externalId, handleRevertClickNext, handlerReject, loading, setShowConfirm]);
 
   const handleOnSubmit = useCallback(async () => {
     await submitUnbonding({
@@ -227,6 +229,10 @@ function UnbondingAuthTransaction ({ amount, balanceError, className, fee, selec
     setErrorArr([error.message]);
   }, []);
 
+  const handlerClearError = useCallback(() => {
+    setErrorArr([]);
+  }, []);
+
   const handlerSubmitQr = useCallback(() => {
     setLoading(true);
 
@@ -323,6 +329,7 @@ function UnbondingAuthTransaction ({ amount, balanceError, className, fee, selec
         return (
           <div className='external-wrapper'>
             <QrRequest
+              clearError={handlerClearError}
               errorArr={errorArr}
               genesisHash={networkJson.genesisHash}
               handlerStart={handlerSubmitQr}
@@ -387,7 +394,7 @@ function UnbondingAuthTransaction ({ amount, balanceError, className, fee, selec
           </>
         );
     }
-  }, [_onChangePass, account, errorArr, handleConfirm, handlerErrorQr, handlerSendLedger, handlerSubmitQr, hideConfirm, loading, networkJson.genesisHash, password, passwordError, renderInfo, signMode, t]);
+  }, [_onChangePass, account, errorArr, handleConfirm, handlerClearError, handlerErrorQr, handlerSendLedger, handlerSubmitQr, hideConfirm, loading, networkJson.genesisHash, password, passwordError, renderInfo, signMode, t]);
 
   return (
     <div className={className}>

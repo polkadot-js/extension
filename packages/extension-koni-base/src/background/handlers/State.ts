@@ -1279,7 +1279,8 @@ export default class KoniState extends State {
   }
 
   public setBalanceItem (networkKey: string, item: BalanceItem) {
-    if (Object.hasOwn(item, 'children') && item.children === undefined) {
+    // eslint-disable-next-line no-prototype-builtins
+    if (typeof item === 'object' && item.hasOwnProperty('children') && item.children === undefined) {
       delete item.children;
     }
 
@@ -1491,6 +1492,7 @@ export default class KoniState extends State {
           items.unshift(item);
           data[hash] = items;
           this.transactionHistoryStore.set(address, data);
+          callback && callback(items);
         }).catch((err) => console.warn(err));
       }
     });
@@ -2134,15 +2136,15 @@ export default class KoniState extends State {
 
   public pauseAllNetworks (code?: number, reason?: string) {
     // Disconnect web3 networks
-    Object.entries(this.apiMap.web3).forEach(([key, network]) => {
-      if (network.currentProvider instanceof Web3.providers.WebsocketProvider) {
-        if (network.currentProvider?.connected) {
-          console.log(`[Web3] ${key} is conected`);
-          network.currentProvider?.disconnect(code, reason);
-          console.log(`[Web3] ${key} is ${network.currentProvider.connected ? 'connected' : 'disconnected'} now`);
-        }
-      }
-    });
+    // Object.entries(this.apiMap.web3).forEach(([key, network]) => {
+    //   if (network.currentProvider instanceof Web3.providers.WebsocketProvider) {
+    //     if (network.currentProvider?.connected) {
+    //       console.log(`[Web3] ${key} is conected`);
+    //       network.currentProvider?.disconnect(code, reason);
+    //       console.log(`[Web3] ${key} is ${network.currentProvider.connected ? 'connected' : 'disconnected'} now`);
+    //     }
+    //   }
+    // });
 
     // Disconnect dotsama networks
     return Promise.all(Object.values(this.apiMap.dotSama).map(async (network) => {
@@ -2155,17 +2157,17 @@ export default class KoniState extends State {
 
   async resumeAllNetworks () {
     // Reconnect web3 networks
-    Object.entries(this.apiMap.web3).forEach(([key, network]) => {
-      const currentProvider = network.currentProvider;
+    // Object.entries(this.apiMap.web3).forEach(([key, network]) => {
+    //   const currentProvider = network.currentProvider;
 
-      if (currentProvider instanceof Web3.providers.WebsocketProvider) {
-        if (!currentProvider.connected) {
-          console.log(`[Web3] ${key} is disconected`);
-          currentProvider?.connect();
-          setTimeout(() => console.log(`[Web3] ${key} is ${currentProvider.connected ? 'connected' : 'disconnected'} now`), 500);
-        }
-      }
-    });
+    //   if (currentProvider instanceof Web3.providers.WebsocketProvider) {
+    //     if (!currentProvider.connected) {
+    //       console.log(`[Web3] ${key} is disconected`);
+    //       currentProvider?.connect();
+    //       setTimeout(() => console.log(`[Web3] ${key} is ${currentProvider.connected ? 'connected' : 'disconnected'} now`), 500);
+    //     }
+    //   }
+    // });
 
     // Reconnect dotsama networks
     return Promise.all(Object.values(this.apiMap.dotSama).map(async (network) => {

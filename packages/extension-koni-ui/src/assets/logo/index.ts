@@ -309,6 +309,8 @@ const LogosMap: Record<string, string> = {
   // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
   subspace: require('./46.Subspace.png'),
   // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+  subspace_gemini: require('./46.Subspace.png'),
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
   subspace_test: require('./46.Subspace.png'),
   // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
   xcpara: require('./90.Parallel.png'),
@@ -348,6 +350,18 @@ const LogosMap: Record<string, string> = {
   '3usd': require('./53.3USD.png'),
   // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
   well: require('./112.moonwell-artemis.png'),
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+  gmdie: require('./119.gmDie.png'),
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+  amplitude: require('./120.amplitude.jpg'),
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+  ternoa: require('./121.ternoa.svg'),
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+  ternoa_alphanet: require('./121.ternoa.svg'),
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+  integriteePolkadot: require('./81.Integritee.png'),
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+  tanganika: require('./122.dataHighway.png'),
   // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
   default: require('./73.Default.png')
 };

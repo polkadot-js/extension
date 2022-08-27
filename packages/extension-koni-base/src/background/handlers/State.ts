@@ -2755,7 +2755,10 @@ export default class KoniState extends State {
       });
 
       if (singleMode) {
-        setUpSingleMode(singleMode);
+        // Wait for everything is ready before enable single mode
+        setTimeout(() => {
+          setUpSingleMode(singleMode);
+        }, 999);
       }
     });
   }

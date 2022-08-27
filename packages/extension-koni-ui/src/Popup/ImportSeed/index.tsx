@@ -105,6 +105,7 @@ function ImportSeed ({ className = '' }: Props): React.ReactElement {
             onEvmAccountChange={setEvmAccount}
             onNextStep={_onNextStep}
             onSelectAccountImported={setKeyTypes}
+            defaultGenesisHash={genesisHash}
             setSelectedGenesis={setSelectedGenesis}
             type={type}
           />

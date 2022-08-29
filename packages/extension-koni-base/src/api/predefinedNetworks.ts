@@ -334,7 +334,8 @@ export const PREDEFINED_NETWORKS: Record<string, NetworkJson> = {
     paraId: 2032,
     nativeToken: 'INTR',
     crowdloanUrl: 'https://crowdloan.interlay.io/',
-    decimals: 10
+    decimals: 10,
+    coinGeckoKey: 'interlay'
   },
   equilibrium_parachain: {
     key: 'equilibrium_parachain',
@@ -881,7 +882,8 @@ export const PREDEFINED_NETWORKS: Record<string, NetworkJson> = {
     decimals: 12,
     coinGeckoKey: 'bifrost-native-coin',
     getStakingOnChain: true,
-    supportBonding: true
+    supportBonding: true,
+    blockExplorer: 'https://bifrost-kusama.subscan.io/'
   },
   bifrost_dot: {
     key: 'bifrost_dot',
@@ -899,7 +901,8 @@ export const PREDEFINED_NETWORKS: Record<string, NetworkJson> = {
     nativeToken: 'BNC',
     crowdloanUrl: 'https://bifrost.app/vcrowdloan',
     decimals: 12,
-    coinGeckoKey: 'bifrost-native-coin'
+    coinGeckoKey: 'bifrost-native-coin',
+    blockExplorer: 'https://bifrost.subscan.io/'
   },
   bifrost_testnet: {
     key: 'bifrost_testnet',

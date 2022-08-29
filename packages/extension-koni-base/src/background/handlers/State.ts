@@ -21,7 +21,7 @@ import { parseTxAndSignature } from '@subwallet/extension-koni-base/api/web3/tra
 import { initWeb3Api } from '@subwallet/extension-koni-base/api/web3/web3';
 import { EvmRpcError } from '@subwallet/extension-koni-base/background/errors/EvmRpcError';
 import { state } from '@subwallet/extension-koni-base/background/handlers/index';
-import { ALL_ACCOUNT_KEY, ALL_GENESIS_HASH, DEFAULT_THEME } from '@subwallet/extension-koni-base/constants';
+import { ALL_ACCOUNT_KEY, ALL_GENESIS_HASH } from '@subwallet/extension-koni-base/constants';
 import { CurrentAccountStore, NetworkMapStore, PriceStore } from '@subwallet/extension-koni-base/stores';
 import AccountRefStore from '@subwallet/extension-koni-base/stores/AccountRef';
 import AuthorizeStore from '@subwallet/extension-koni-base/stores/Authorize';
@@ -1071,18 +1071,18 @@ export default class KoniState extends State {
     }
 
     this.currentAccountStore.set('CurrentAccountInfo', data, () => {
-      // Trigger single mode
-      if (currentGenesisHash) {
-        const singleMode = this.findSingleMode(currentGenesisHash);
-
-        if (singleMode) {
-          this.setTheme(singleMode.theme);
-        } else {
-          this.setTheme(DEFAULT_THEME);
-        }
-      } else {
-        this.setTheme(DEFAULT_THEME);
-      }
+      // Trigger single mode by chain network
+      // if (currentGenesisHash) {
+      //   const singleMode = this.findSingleMode(currentGenesisHash);
+      //
+      //   if (singleMode) {
+      //     this.setTheme(singleMode.theme);
+      //   } else {
+      //     this.setTheme(DEFAULT_THEME);
+      //   }
+      // } else {
+      //   this.setTheme(DEFAULT_THEME);
+      // }
 
       this.updateServiceInfo();
       callback && callback();
@@ -2733,7 +2733,7 @@ export default class KoniState extends State {
   public onInstall () {
     const singleModes = Object.values(PREDEFINED_SINGLE_MODES);
 
-    const setUpSingleMode = ({ networkKeys }: SingleModeJson) => {
+    const setUpSingleMode = ({ networkKeys, theme }: SingleModeJson) => {
       networkKeys.forEach((key) => {
         this.enableNetworkMap(key);
       });
@@ -2741,6 +2741,7 @@ export default class KoniState extends State {
       const { genesisHash } = this.getNetworkMapByKey(networkKeys[0]);
 
       this.setCurrentAccount({ address: ALL_ACCOUNT_KEY, currentGenesisHash: genesisHash });
+      this.setTheme(theme);
     };
 
     chrome.tabs.query({}, function (tabs) {

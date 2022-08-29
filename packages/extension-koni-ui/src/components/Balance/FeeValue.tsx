@@ -18,7 +18,7 @@ const FeeValue = ({ className, feeString }: Props) => {
 
   const [value, symbol] = feeString.split(' ');
   const [prefix, postfix] = value.split('.');
-  const length = parseFloat(prefix) >= 1 ? 2 : 4;
+  const length = 4;
 
   const postfixValue = postfix.substring(0, length);
 

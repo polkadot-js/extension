@@ -397,6 +397,7 @@ function BondingAuthTransaction ({ amount, balanceError, bondedValidators, class
             <div className={'transaction-info-title'}>Staking amount</div>
             <div className={'transaction-info-value'}>
               <BalanceVal
+                newRule={false}
                 symbol={networkJson.nativeToken}
                 value={amount}
                 withSymbol={true}
@@ -415,6 +416,7 @@ function BondingAuthTransaction ({ amount, balanceError, bondedValidators, class
             <div className={'transaction-info-title'}>Total</div>
             <div className={'transaction-info-value'}>
               <BalanceVal
+                newRule={false}
                 symbol={networkJson.nativeToken}
                 value={amount}
                 withSymbol={true}

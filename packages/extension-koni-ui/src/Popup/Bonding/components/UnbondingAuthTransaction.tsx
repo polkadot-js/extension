@@ -306,6 +306,7 @@ function UnbondingAuthTransaction ({ amount, balanceError, className, fee, handl
             <div className={'transaction-info-title'}>Unstaking amount</div>
             <div className={'transaction-info-value'}>
               <BalanceVal
+                newRule={false}
                 symbol={networkJson.nativeToken}
                 value={amount}
                 withSymbol={true}
@@ -324,6 +325,7 @@ function UnbondingAuthTransaction ({ amount, balanceError, className, fee, handl
             <div className={'transaction-info-title'}>Total</div>
             <div className={'transaction-info-value'}>
               <BalanceVal
+                newRule={false}
                 symbol={networkJson.nativeToken}
                 value={amount}
                 withSymbol={true}

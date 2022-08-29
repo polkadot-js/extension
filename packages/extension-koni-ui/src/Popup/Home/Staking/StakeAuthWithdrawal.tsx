@@ -331,6 +331,7 @@ function StakeAuthWithdrawal ({ address, amount, className, hideModal, networkKe
             <div className={'transaction-info-title'}>Withdrawal amount</div>
             <div className={'transaction-info-value'}>
               <BalanceVal
+                newRule={false}
                 symbol={networkJson.nativeToken}
                 value={amount}
                 withSymbol={true}
@@ -349,6 +350,7 @@ function StakeAuthWithdrawal ({ address, amount, className, hideModal, networkKe
             <div className={'transaction-info-title'}>Total</div>
             <div className={'transaction-info-value'}>
               <BalanceVal
+                newRule={false}
                 symbol={networkJson.nativeToken}
                 value={amount}
                 withSymbol={true}

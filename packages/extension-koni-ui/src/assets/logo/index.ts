@@ -335,7 +335,7 @@ const LogosMap: Record<string, string> = {
   // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
   xcSDN: require('./42.Shiden.png'),
   // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-  xcKMA: require('18.KMA.png'),
+  xcKMA: require('./18.KMA.png'),
   // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
   xcLIT: require('./19.Litentry.png'),
   // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment

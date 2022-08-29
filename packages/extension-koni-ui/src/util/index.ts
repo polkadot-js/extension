@@ -232,7 +232,7 @@ export function isSupportScanExplorer (networkKey: string): boolean {
 }
 
 export function getScanExplorerTransactionHistoryUrl (networkKey: string, hash: string, useSubscan?: boolean): string {
-  if (useSubscan) {
+  if (useSubscan && subscanByNetworkKey[networkKey]) {
     return `${subscanByNetworkKey[networkKey]}/extrinsic/${hash}`;
   }
 

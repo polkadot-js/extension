@@ -19,7 +19,7 @@ interface BalanceViewProps extends ThemeProps {
 
 const BalanceValComponent = ({ className, newRule = true, startWithSymbol = false, symbol, value, withComma = true, withSymbol = true }: BalanceViewProps) => {
   let [prefix, postfix] = typeof value === 'object' ? value.toFormat(9).split('.') : value.toString().split('.');
-  const length = newRule ? (parseFloat(prefix) >= 1 ? 2 : 4) : 4;
+  const length = newRule ? 4 : 4;
 
   postfix = postfix?.substring(0, length);
 

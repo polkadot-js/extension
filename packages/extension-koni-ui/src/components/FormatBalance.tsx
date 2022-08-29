@@ -29,7 +29,7 @@ const K_LENGTH = 3 + 1;
 type LabelPost = string | React.ReactNode
 
 function createElement (prefix: string, postfix: string, unit: string, label: LabelPost = '', isShort = false, newRule = true): React.ReactNode {
-  const length = newRule ? (parseFloat(prefix) >= 1 ? 2 : 4) : 4;
+  const length = newRule ? 4 : 4;
   const postfixLength = (postfix && postfix.length > length) ? postfix.length : length;
 
   return <><span className='format-balance__front-part'>{`${prefix}${isShort ? '' : '.'}`}{!isShort &&
@@ -45,7 +45,7 @@ function applyFormat (value: Compact<any> | BN | string, [decimals, symbol, symb
 
   if (prefix.length > M_LENGTH) {
     const [major, rest] = formatBalance(value, { decimals, withUnit: false }).split('.');
-    const length = newRule ? (parseFloat(major) >= 1 ? 2 : 4) : 4;
+    const length = newRule ? 4 : 4;
     const minor = rest.substr(0, length);
     const unit = rest.substr(4);
 

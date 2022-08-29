@@ -27,7 +27,9 @@ function Request ({ authId, className, isFirst, request: { origin }, url }: Prop
   const onAction = useContext(ActionContext);
 
   useEffect(() => {
-    const defaultAccountSelection = accounts.filter(({ isDefaultAuthSelected }) => !!isDefaultAuthSelected).map(({ address }) => address);
+    const defaultAccountSelection = accounts
+      .filter(({ isDefaultAuthSelected }) => !!isDefaultAuthSelected)
+      .map(({ address }) => address);
 
     setSelectedAccounts && setSelectedAccounts(defaultAccountSelection);
   }, [accounts, setSelectedAccounts]);

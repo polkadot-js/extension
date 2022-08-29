@@ -21,7 +21,11 @@ const BalanceValComponent = ({ className, newRule = true, startWithSymbol = fals
   let [prefix, postfix] = typeof value === 'object' ? value.toFormat(9).split('.') : value.toString().split('.');
   const length = newRule ? 4 : 4;
 
-  postfix = postfix?.substring(0, length);
+  if (startWithSymbol) {
+    postfix = postfix?.substring(0, length - 1);
+  } else {
+    postfix = postfix?.substring(0, length);
+  }
 
   const lastSymbol = postfix?.slice(-1);
   const isString = /^[KMB]/.test(lastSymbol);

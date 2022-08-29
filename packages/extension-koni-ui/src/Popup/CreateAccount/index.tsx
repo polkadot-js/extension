@@ -4,9 +4,7 @@
 // eslint-disable-next-line header/header
 import LoadingContainer from '@subwallet/extension-koni-ui/components/LoadingContainer';
 import HeaderWithSteps from '@subwallet/extension-koni-ui/partials/HeaderWithSteps';
-import { RootState } from '@subwallet/extension-koni-ui/stores';
 import React, { useCallback, useContext, useEffect, useState } from 'react';
-import { useSelector } from 'react-redux';
 import styled from 'styled-components';
 
 import { KeypairType } from '@polkadot/util-crypto/types';
@@ -28,7 +26,6 @@ function CreateAccount ({ className, defaultClassName }: Props): React.ReactElem
   const { t } = useTranslation();
   const onAction = useContext(ActionContext);
   const [isBusy, setIsBusy] = useState(false);
-  const genesisHash = useSelector((state: RootState) => state.currentNetwork.genesisHash);
   const [step, setStep] = useState(1);
   const [keyTypes, setKeyTypes] = useState<Array<KeypairType>>([SUBSTRATE_ACCOUNT_TYPE, EVM_ACCOUNT_TYPE]);
   const dep = keyTypes.toString();
@@ -75,7 +72,7 @@ function CreateAccount ({ className, defaultClassName }: Props): React.ReactElem
       // this should always be the case
       if (name && password && seed) {
         setIsBusy(true);
-        createAccountSuriV2(name, password, seed, isConnectWhenCreate, keyTypes, genesisHash)
+        createAccountSuriV2(name, password, seed, isConnectWhenCreate, keyTypes)
           .then((response) => {
             window.localStorage.setItem('popupNavigation', '/');
             onAction('/');
@@ -87,7 +84,7 @@ function CreateAccount ({ className, defaultClassName }: Props): React.ReactElem
       }
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [isConnectWhenCreate, genesisHash, onAction, seed, dep]
+    [isConnectWhenCreate, onAction, seed, dep]
   );
 
   const _onNextStep = useCallback(

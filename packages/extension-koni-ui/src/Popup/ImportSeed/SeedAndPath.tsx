@@ -34,11 +34,10 @@ interface Props {
   onConnectWhenImport: (isConnectWhenImport: boolean) => void;
   name: string | null;
   evmName: string | null;
-  defaultGenesisHash?: string;
   setSelectedGenesis: (genesis: string) => void;
 }
 
-function SeedAndPath ({ account, className, defaultGenesisHash, evmAccount, evmName, isConnectWhenImport, keyTypes, name, onAccountChange, onConnectWhenImport, onEvmAccountChange, onNextStep, onSelectAccountImported, setSelectedGenesis, type }: Props): React.ReactElement {
+function SeedAndPath ({ account, className, evmAccount, evmName, isConnectWhenImport, keyTypes, name, onAccountChange, onConnectWhenImport, onEvmAccountChange, onNextStep, onSelectAccountImported, setSelectedGenesis, type }: Props): React.ReactElement {
   const { t } = useTranslation();
   const [address, setAddress] = useState('');
   const [evmAddress, setEvmAddress] = useState<null | string>(null);
@@ -55,17 +54,6 @@ function SeedAndPath ({ account, className, defaultGenesisHash, evmAccount, evmN
   const dep = keyTypes.toString();
   const sustrateGenesisHashOption = options.filter((opt) => !opt.isEthereum);
   const ethGenesisHashOption = options.filter((opt) => opt.isEthereum || opt.networkKey === 'all');
-  const defaultChain = defaultGenesisHash && options.find((i) => i.value === defaultGenesisHash);
-
-  useEffect(() => {
-    if (defaultChain) {
-      if (!defaultChain.isEthereum) {
-        setGenesis(defaultGenesisHash);
-      } else {
-        setEvmGenesis(defaultGenesisHash);
-      }
-    }
-  }, []);
 
   useEffect(() => {
     // No need to validate an empty seed
@@ -117,9 +105,11 @@ function SeedAndPath ({ account, className, defaultGenesisHash, evmAccount, evmN
     if (selectedAccType !== SUBSTRATE_ACCOUNT_TYPE) {
       onSelectAccountImported && onSelectAccountImported([SUBSTRATE_ACCOUNT_TYPE]);
       setSelectedAccType(SUBSTRATE_ACCOUNT_TYPE);
+      setEvmGenesis('');
     } else {
       onSelectAccountImported && onSelectAccountImported([]);
       setSelectedAccType('');
+      setGenesis('');
     }
   }, [onSelectAccountImported, selectedAccType]);
 
@@ -127,9 +117,11 @@ function SeedAndPath ({ account, className, defaultGenesisHash, evmAccount, evmN
     if (selectedAccType !== EVM_ACCOUNT_TYPE) {
       onSelectAccountImported && onSelectAccountImported([EVM_ACCOUNT_TYPE]);
       setSelectedAccType(EVM_ACCOUNT_TYPE);
+      setGenesis('');
     } else {
       onSelectAccountImported && onSelectAccountImported([]);
       setSelectedAccType('');
+      setEvmGenesis('');
     }
   }, [onSelectAccountImported, selectedAccType]);
 

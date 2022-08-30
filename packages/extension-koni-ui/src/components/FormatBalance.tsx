@@ -14,6 +14,7 @@ interface Props {
   className?: string;
   format: BalanceFormatType; // decimals | symbol | symbol Alt
   isShort?: boolean;
+  newRule?: boolean;
   label?: React.ReactNode;
   labelPost?: LabelPost;
   value?: Compact<any> | BN | string | null | 'all';
@@ -27,21 +28,25 @@ const K_LENGTH = 3 + 1;
 
 type LabelPost = string | React.ReactNode
 
-function createElement (prefix: string, postfix: string, unit: string, label: LabelPost = '', isShort = false): React.ReactNode {
+function createElement (prefix: string, postfix: string, unit: string, label: LabelPost = '', isShort = false, newRule = true): React.ReactNode {
+  const length = newRule ? 4 : 4;
+  const postfixLength = (postfix && postfix.length > length) ? postfix.length : length;
+
   return <><span className='format-balance__front-part'>{`${prefix}${isShort ? '' : '.'}`}{!isShort &&
-  <span className='format-balance__postfix'>{`0000${postfix || ''}`.slice(-4)}</span>}</span><span
+  <span className='format-balance__postfix'>{`${(postfix || '').padStart(postfixLength, '0')}`.substring(0, length)}</span>}</span><span
     className='format-balance__unit'
   > {unit}</span>{label}</>;
 }
 
-function applyFormat (value: Compact<any> | BN | string, [decimals, symbol, symbolAlt]: BalanceFormatType, withCurrency = true, withSi?: boolean, _isShort?: boolean, labelPost?: LabelPost): React.ReactNode {
+function applyFormat (value: Compact<any> | BN | string, [decimals, symbol, symbolAlt]: BalanceFormatType, withCurrency = true, withSi?: boolean, _isShort?: boolean, labelPost?: LabelPost, newRule = true): React.ReactNode {
   const [prefix, postfix] = formatBalance(value, { decimals, forceUnit: '-', withSi: false }).split('.');
   const isShort = _isShort || (withSi && prefix.length >= K_LENGTH);
   const unitPost = withCurrency ? (symbolAlt || symbol) : '';
 
   if (prefix.length > M_LENGTH) {
     const [major, rest] = formatBalance(value, { decimals, withUnit: false }).split('.');
-    const minor = rest.substr(0, 4);
+    const length = newRule ? 4 : 4;
+    const minor = rest.substr(0, length);
     const unit = rest.substr(4);
 
     return <><span className='format-balance__front-part'>{major}.<span className='format-balance__postfix'>{minor}</span></span><span
@@ -49,7 +54,7 @@ function applyFormat (value: Compact<any> | BN | string, [decimals, symbol, symb
     >{unit}{unit ? unitPost : ` ${unitPost}`}</span>{labelPost || ''}</>;
   }
 
-  return createElement(prefix, postfix, unitPost, labelPost, isShort);
+  return createElement(prefix, postfix, unitPost, labelPost, isShort, newRule);
 }
 
 function FormatBalance ({ children,
@@ -58,6 +63,7 @@ function FormatBalance ({ children,
   isShort,
   label,
   labelPost,
+  newRule = false,
   value,
   withCurrency,
   withSi }: Props): React.ReactElement<Props> {
@@ -66,8 +72,8 @@ function FormatBalance ({ children,
       {label ? <>{label}&nbsp;</> : ''}
       <span className='format-balance__value'>{
         value
-          ? applyFormat(value, format, withCurrency, withSi, isShort, labelPost)
-          : applyFormat(BN_ZERO, format, withCurrency, withSi, isShort, labelPost)
+          ? applyFormat(value, format, withCurrency, withSi, isShort, labelPost, newRule)
+          : applyFormat(BN_ZERO, format, withCurrency, withSi, isShort, labelPost, newRule)
       }</span>{children}
     </div>
   );
@@ -75,4 +81,7 @@ function FormatBalance ({ children,
 
 export default React.memo(styled(FormatBalance)`
 
+  .format-balance__postfix {
+    opacity: 0.6;
+  }
 `);

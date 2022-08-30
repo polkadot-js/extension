@@ -27,11 +27,12 @@ interface Props extends ThemeProps{
   handlerStart: () => void;
   isBusy: boolean;
   onError: (error: Error) => void;
+  clearError: () => void;
 }
 
 const QrRequest = (props: Props) => {
   const { t } = useTranslation();
-  const { children, className, errorArr, genesisHash, handlerStart, isBusy, onError } = props;
+  const { children, className, clearError, errorArr, genesisHash, handlerStart, isBusy, onError } = props;
 
   const { QrState, updateQrState } = useContext(QrContext);
   const { createResolveExternalRequestData } = useContext(ExternalRequestContext);
@@ -45,8 +46,9 @@ const QrRequest = (props: Props) => {
   }, [updateQrState]);
 
   const handlerChangeToDisplayQr = useCallback(() => {
+    clearError();
     updateQrState({ step: QrStep.DISPLAY_PAYLOAD });
-  }, [updateQrState]);
+  }, [clearError, updateQrState]);
 
   const handlerResolve = useCallback(async (result: SignerResult) => {
     if (qrId) {

@@ -2358,30 +2358,30 @@ export default class KoniExtension extends Extension {
     return [errors, keypair, transferValue, tokenInfo];
   }
 
-  private makeTransferQrCallback (
-    address: string,
-    networkKey: string,
-    token: string | undefined,
-    portCallback: (res: ResponseTransferQr) => void): (res: ResponseTransferQr) => void {
-    return (res: ResponseTransferQr) => {
-      // !res.isFinalized to prevent duplicate action
-      if (!res.isFinalized && res.txResult && res.extrinsicHash) {
-        state.setHistory(address, networkKey, {
-          time: Date.now(),
-          networkKey,
-          change: res.txResult.change,
-          changeSymbol: res.txResult.changeSymbol || token,
-          fee: res.txResult.fee,
-          feeSymbol: res.txResult.feeSymbol,
-          isSuccess: res.step.valueOf() === TransferStep.SUCCESS.valueOf(),
-          action: 'send',
-          extrinsicHash: res.extrinsicHash
-        });
-      }
+  // private makeTransferQrCallback (
+  //   address: string,
+  //   networkKey: string,
+  //   token: string | undefined,
+  //   portCallback: (res: ResponseTransferQr) => void): (res: ResponseTransferQr) => void {
+  //   return (res: ResponseTransferQr) => {
+  //     // !res.isFinalized to prevent duplicate action
+  //     if (!res.isFinalized && res.txResult && res.extrinsicHash) {
+  //       state.setHistory(address, networkKey, {
+  //         time: Date.now(),
+  //         networkKey,
+  //         change: res.txResult.change,
+  //         changeSymbol: res.txResult.changeSymbol || token,
+  //         fee: res.txResult.fee,
+  //         feeSymbol: res.txResult.feeSymbol,
+  //         isSuccess: res.step.valueOf() === TransferStep.SUCCESS.valueOf(),
+  //         action: 'send',
+  //         extrinsicHash: res.extrinsicHash
+  //       });
+  //     }
 
-      portCallback(res);
-    };
-  }
+  //     portCallback(res);
+  //   };
+  // }
 
   private validateAccountExternal (address: string): [Array<BaseTxError>, KeyringPair | undefined] {
     const errors = [] as Array<BaseTxError>;

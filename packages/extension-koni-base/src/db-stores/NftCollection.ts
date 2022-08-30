@@ -8,12 +8,14 @@ import BaseStoreWithChain from './BaseStoreWithChain';
 
 export default class NftCollectionStore extends BaseStoreWithChain<INftCollection> {
   subscribeNftCollection () {
-    return liveQuery(
-      () => this.table.toArray().then((items) => items.map((item) => {
-        item.collectionId = item.collectionId.toLowerCase();
+    return liveQuery(() => this.getNftCollection());
+  }
 
-        return item;
-      }))
-    );
+  getNftCollection () {
+    return this.table.toArray().then((items) => items.map((item) => {
+      item.collectionId = item.collectionId.toLowerCase();
+
+      return item;
+    }));
   }
 }

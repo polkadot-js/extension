@@ -80,7 +80,7 @@ export default class DatabaseService {
   }
 
   getAllNftCollection () {
-    return this.stores.nftCollection.table.toArray();
+    return this.stores.nftCollection.getNftCollection();
   }
 
   // NFT

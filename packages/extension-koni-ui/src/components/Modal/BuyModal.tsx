@@ -10,6 +10,7 @@ import { ALL_NETWORK_KEY } from '@subwallet/extension-koni-base/constants';
 import signalSlashIcon from '@subwallet/extension-koni-ui/assets/signal-stream-slash-solid.svg';
 import signalIcon from '@subwallet/extension-koni-ui/assets/signal-stream-solid.svg';
 import { AccountInfoEl } from '@subwallet/extension-koni-ui/components';
+import MoonpayArea from '@subwallet/extension-koni-ui/components/BuyArea/MoonpayArea';
 import TransakArea from '@subwallet/extension-koni-ui/components/BuyArea/TransakArea';
 import InputFilter from '@subwallet/extension-koni-ui/components/InputFilter';
 import Modal from '@subwallet/extension-koni-ui/components/Modal/index';
@@ -152,7 +153,9 @@ const BuyModal = (props: Props) => {
       >
         <>
           <div className={CN('modal-header')}>
-            <div className={CN('header-title')}>Account Selection</div>
+            <div className={CN('header-title')}>
+              {t('Account Selection')}
+            </div>
             <div
               className={CN('header-icon')}
               data-for={'header-icon'}
@@ -163,14 +166,14 @@ const BuyModal = (props: Props) => {
               />
             </div>
             <Tooltip
-              text={t<string>('Select the account you would like to send from')}
+              text={t<string>('Select the account you want to receive your cryptos')}
               trigger={'header-icon'}
             />
           </div>
           <InputFilter
             className={CN('query-input')}
             onChange={onChangeFilter}
-            placeholder='Search account...'
+            placeholder={t('Search account...')}
             value={filter}
             withReset
           />
@@ -221,7 +224,7 @@ const BuyModal = (props: Props) => {
       >
         <>
           <div className={CN('modal-header')}>
-            <div className={CN('header-title')}>Network Selection</div>
+            <div className={CN('header-title')}>{t('Network Selection')}</div>
             <div
               className={CN('header-icon')}
               data-for={'header-icon'}
@@ -232,14 +235,14 @@ const BuyModal = (props: Props) => {
               />
             </div>
             <Tooltip
-              text={t<string>('Select the network to obtain the sending address')}
+              text={t<string>('Select the network you want to buy cryptos')}
               trigger={'header-icon'}
             />
           </div>
           <InputFilter
             className={CN('query-input')}
             onChange={onChangeFilter}
-            placeholder='Search network...'
+            placeholder={t('Search network...')}
             value={filter}
             withReset
           />
@@ -306,7 +309,9 @@ const BuyModal = (props: Props) => {
         </div>
         <div className='buy-modal__content'>
           <div className={CN('modal-header')}>
-            <div className={CN('header-title')}>Select service</div>
+            <div className={CN('header-title')}>
+              {t('Service Selection')}
+            </div>
             <div
               className={CN('header-icon')}
               data-for={'header-icon'}
@@ -317,12 +322,16 @@ const BuyModal = (props: Props) => {
               />
             </div>
             <Tooltip
-              text={t<string>('Select the service to obtain the sending address')}
+              text={t<string>('Select the service you want to buy cryptos')}
               trigger={'header-icon'}
             />
           </div>
           <div className='modal-body'>
             <TransakArea
+              formattedAddress={formatted}
+              networkKey={networkKey}
+            />
+            <MoonpayArea
               formattedAddress={formatted}
               networkKey={networkKey}
             />
@@ -403,6 +412,7 @@ export default styled(BuyModal)(({ theme }: ThemeProps) => `
     width: 100%;
     flex: 1;
     justify-content: center;
+    gap: 40px;
   }
 
   &.modal-container {

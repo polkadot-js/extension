@@ -99,8 +99,7 @@ export default React.memo(styled(TransakArea)(({ theme }: Props) => `
   justify-content: center;
 
   .img-logo {
-    height: 40px;
-    margin: 10px 0;
+    width: 160px;
 
     &.disabled {
       opacity: 0.5;

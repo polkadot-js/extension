@@ -355,9 +355,9 @@ const LogosMap: Record<string, string> = {
   // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
   amplitude: require('./120.amplitude.jpg'),
   // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-  ternoa: require('./121.ternoa.jpg'),
+  ternoa: require('./121.ternoa.svg'),
   // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-  ternoaEvm: require('./121.ternoa.jpg'),
+  ternoa_alphanet: require('./121.ternoa.svg'),
   // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
   integriteePolkadot: require('./81.Integritee.png'),
   // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment

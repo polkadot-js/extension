@@ -26,6 +26,8 @@ import styled from 'styled-components';
 
 import { KeyringPair$Meta } from '@polkadot/keyring/types';
 
+import FeeValue from '../../components/Balance/FeeValue';
+
 interface Props extends ThemeProps {
   className?: string;
   onCancel: () => void;
@@ -183,6 +185,10 @@ function AuthTransaction ({ balanceFormat,
     setErrorArr([error.message]);
   }, []);
 
+  const handlerClearError = useCallback(() => {
+    setErrorArr([]);
+  }, []);
+
   const renderError = useCallback(() => {
     if (!!errorArr && errorArr.length) {
       return errorArr.map((err) =>
@@ -268,7 +274,7 @@ function AuthTransaction ({ balanceFormat,
         <div className='auth-transaction__info'>
           <div className='auth-transaction__info-text'>Origin Chain Fee</div>
           <div className='auth-transaction__info-value'>
-            {feeString}
+            <FeeValue feeString={feeString} />
           </div>
         </div>
 
@@ -280,7 +286,7 @@ function AuthTransaction ({ balanceFormat,
               value={requestPayload.value}
             />
             <span> + </span>
-            {feeString}
+            <FeeValue feeString={feeString} />
           </div>
         </div>
       </>
@@ -292,6 +298,7 @@ function AuthTransaction ({ balanceFormat,
       case SIGN_MODE.QR:
         return (
           <QrRequest
+            clearError={handlerClearError}
             errorArr={errorArr}
             genesisHash={genesisHash}
             handlerStart={_doStartQr}
@@ -358,7 +365,7 @@ function AuthTransaction ({ balanceFormat,
           </div>
         );
     }
-  }, [_doStart, _doStartLedger, _doStartQr, _onCancel, _onChangePass, accountMeta, errorArr, genesisHash, handlerErrorQr, handlerRenderInfo, isBusy, isKeyringErr, password, renderError, signMode, t]);
+  }, [_doStart, _doStartLedger, _doStartQr, _onCancel, _onChangePass, accountMeta, errorArr, genesisHash, handlerClearError, handlerErrorQr, handlerRenderInfo, isBusy, isKeyringErr, password, renderError, signMode, t]);
 
   useEffect(() => {
     let unmount = false;
@@ -422,6 +429,12 @@ export default React.memo(styled(AuthTransaction)(({ theme }: ThemeProps) => `
     display: flex;
     flex-direction: column;
     overflow: hidden;
+  }
+
+  .signer-modal {
+    .subwallet-modal {
+        border: 1px solid ${theme.extensionBorder};
+    }
   }
 
   .auth-transaction-error {

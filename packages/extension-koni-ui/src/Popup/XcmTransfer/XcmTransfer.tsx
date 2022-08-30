@@ -62,6 +62,14 @@ function getSupportedTokens (originChain: string, destinationChain: string): str
 //   return filteredOptions;
 // }
 
+enum BLOCK_HARDWARE_STATE {
+  ACCEPTED,
+  BLOCK_CHAIN,
+  WRONG_CHAIN
+}
+
+const SUPPORT_LEDGER_XCM: string[] = [];
+
 function Wrapper ({ className = '', theme }: Props): React.ReactElement<Props> {
   const { t } = useTranslation();
   const { accounts } = useContext(AccountContext);
@@ -156,28 +164,77 @@ function XcmTransfer ({ chainRegistryMap, className, defaultValue, firstOriginCh
   const checkDestinationChainAndReceiverIdType = !!recipientId && !!networkMap[selectedDestinationChain].isEthereum === isEthereumAddress(recipientId);
   const amountGtAvailableBalance = amount && senderFreeBalance && amount.gt(new BN(senderFreeBalance));
 
-  const isBlockHardware = useMemo((): boolean => {
-    if (senderId) {
+  const accountBlockHardwareState = useCallback((address: string | null, chain: string, isReceiver?: boolean): BLOCK_HARDWARE_STATE => {
+    if (address) {
       const prefix = 42;
-      const account = accounts.find((acc) => reformatAddress(acc.address, prefix) === reformatAddress(senderId, prefix));
+      const account = accounts.find((acc) => reformatAddress(acc.address, prefix) === reformatAddress(address, prefix));
 
       if (!account) {
-        return false;
+        return BLOCK_HARDWARE_STATE.ACCEPTED;
       } else {
-        return !!account.isHardware;
+        if (account.isHardware) {
+          const network = networkMap[chain];
+
+          if (!network) {
+            return BLOCK_HARDWARE_STATE.BLOCK_CHAIN;
+          } else {
+            if (SUPPORT_LEDGER_XCM.includes(network.key) || isReceiver) {
+              return (account.originGenesisHash === network.genesisHash) ? BLOCK_HARDWARE_STATE.ACCEPTED : BLOCK_HARDWARE_STATE.WRONG_CHAIN;
+            } else {
+              return BLOCK_HARDWARE_STATE.BLOCK_CHAIN;
+            }
+          }
+        } else {
+          return BLOCK_HARDWARE_STATE.ACCEPTED;
+        }
       }
     }
 
-    return false;
-  }, [senderId, accounts]);
+    return BLOCK_HARDWARE_STATE.ACCEPTED;
+  }, [accounts, networkMap]);
+
+  const senderBlockHardwareState = useMemo((): BLOCK_HARDWARE_STATE => {
+    return accountBlockHardwareState(senderId, originChain);
+  }, [accountBlockHardwareState, originChain, senderId]);
+
+  const receiverBlockHardwareState = useMemo((): BLOCK_HARDWARE_STATE => {
+    return accountBlockHardwareState(recipientId, selectedDestinationChain, true);
+  }, [accountBlockHardwareState, recipientId, selectedDestinationChain]);
 
   const canMakeTransfer = checkOriginChainAndSenderIdType &&
     checkDestinationChainAndReceiverIdType &&
     !!valueToTransfer &&
     !!recipientId &&
     !amountGtAvailableBalance &&
-    !isBlockHardware &&
+    senderBlockHardwareState === BLOCK_HARDWARE_STATE.ACCEPTED &&
+    receiverBlockHardwareState === BLOCK_HARDWARE_STATE.ACCEPTED &&
     !!balanceFormat;
+
+  const getLedgerXCMText = useCallback((state: BLOCK_HARDWARE_STATE, isSender: boolean) => {
+    let accountMessage: string;
+
+    if (isSender) {
+      accountMessage = t('The sender account is Ledger account.');
+    } else {
+      accountMessage = t('The receiver account is Ledger account.');
+    }
+
+    let stateMessage: string;
+
+    switch (state) {
+      case BLOCK_HARDWARE_STATE.BLOCK_CHAIN:
+        stateMessage = t('This is not support XCM Transfer.');
+        break;
+      case BLOCK_HARDWARE_STATE.WRONG_CHAIN:
+        stateMessage = t('The network not match.');
+        break;
+      default:
+        stateMessage = '';
+        break;
+    }
+
+    return [accountMessage, stateMessage].join(' ');
+  }, [t]);
 
   // useEffect(() => {
   //   let isSync = true;
@@ -389,11 +446,19 @@ function XcmTransfer ({ chainRegistryMap, className, defaultValue, firstOriginCh
                   siSymbol={balanceFormat[2] || balanceFormat[1]}
                 />
 
-                {isBlockHardware && (
+                {senderBlockHardwareState !== BLOCK_HARDWARE_STATE.ACCEPTED && (
                   <Warning
                     className={'xcm-transfer-warning'}
                   >
-                    {t<string>('The sender account is Ledger account. This is not support XCM Transfer')}
+                    {getLedgerXCMText(senderBlockHardwareState, true)}
+                  </Warning>
+                )}
+
+                {receiverBlockHardwareState !== BLOCK_HARDWARE_STATE.ACCEPTED && (
+                  <Warning
+                    className={'xcm-transfer-warning'}
+                  >
+                    {getLedgerXCMText(receiverBlockHardwareState, false)}
                   </Warning>
                 )}
 

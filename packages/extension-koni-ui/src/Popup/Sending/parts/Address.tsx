@@ -89,7 +89,7 @@ export default React.memo(styled(Address)(({ theme }: ThemeProps) => `
 
   .auth-transaction-input-address {
     border-radius: 8px;
-    border: 2px dashed ${theme.boxBorderColor};
+    // border: 2px dashed ${theme.boxBorderColor};
     height: 72px;
   }
 `));

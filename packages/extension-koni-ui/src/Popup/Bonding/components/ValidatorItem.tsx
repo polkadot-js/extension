@@ -314,6 +314,7 @@ function ValidatorItem ({ bondedValidators, className, isBondedBefore, maxNomina
           }
 
           <div
+            className={'validator-identity'}
             data-for={`identity-tooltip-${validatorInfo.address}`}
             data-tip={true}
           >
@@ -478,7 +479,15 @@ export default React.memo(styled(ValidatorItem)(({ theme }: Props) => `
     display: flex;
     align-items: center;
     gap: 10px;
+    overflow: hidden;
   }
+
+  .validator-identity {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
   .identityIcon {
     border: 2px solid ${theme.checkDotColor};
   }

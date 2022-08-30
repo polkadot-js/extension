@@ -415,11 +415,16 @@ function AuthTransfer ({ chain, className, collectionId, nftItem, recipientAddre
     setErrorArr([error.message]);
   }, []);
 
+  const handlerClearError = useCallback(() => {
+    setErrorArr([]);
+  }, []);
+
   const handlerRenderContent = useCallback(() => {
     switch (signMode) {
       case SIGN_MODE.QR:
         return (
           <QrRequest
+            clearError={handlerClearError}
             errorArr={errorArr}
             genesisHash={genesisHash}
             handlerStart={handlerCreateQr}
@@ -496,7 +501,7 @@ function AuthTransfer ({ chain, className, collectionId, nftItem, recipientAddre
           </div>
         );
     }
-  }, [account, currentNetwork.networkPrefix, errorArr, genesisHash, handleSignAndSubmit, handlerCreateQr, handlerErrorQr, handlerSendLedger, loading, passwordError, senderAccount.address, signMode, substrateGas, t, web3Gas]);
+  }, [account, currentNetwork.networkPrefix, errorArr, genesisHash, handleSignAndSubmit, handlerClearError, handlerCreateQr, handlerErrorQr, handlerSendLedger, loading, passwordError, senderAccount.address, signMode, substrateGas, t, web3Gas]);
 
   return (
     <div className={className}>
@@ -562,7 +567,6 @@ export default React.memo(styled(AuthTransfer)(({ theme }: Props) => `
 
   .sender-container {
     .input-address__dropdown {
-      border: 0;
       height: auto;
     }
   }

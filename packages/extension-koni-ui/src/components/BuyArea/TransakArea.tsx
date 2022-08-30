@@ -38,7 +38,7 @@ const TransakArea = (props: Props) => {
     const defaultToken = tokenList[0];
 
     const params = {
-      apiKey: '25ac1309-a49b-4411-b20e-5e56c61a5b1c', // MetaMask's apiKey
+      apiKey: '4b3bfb00-7f7c-44b3-844f-d4504f1065be',
       defaultCryptoCurrency: defaultToken,
       cryptoCurrencyList: tokenList.join(','),
       networks: networkKey !== 'shiden' ? networks.join(',') : undefined,

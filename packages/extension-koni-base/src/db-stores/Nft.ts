@@ -12,7 +12,12 @@ export default class NftStore extends BaseStoreWithAddress<INft> {
       return this.table.where('address').anyOfIgnoreCase(addresses).and((item) => !chainHashs.length || chainHashs.includes(item.chainHash)).toArray();
     }
 
-    return this.table.filter((item) => !chainHashs.length || chainHashs.includes(item.chainHash)).toArray();
+    // return this.table.filter((item) => !chainHashs.length || chainHashs.includes(item.chainHash)).toArray();
+    return this.table.filter((item) => !chainHashs.length || chainHashs.includes(item.chainHash)).toArray().then((items) => items.map((item) => {
+      item.collectionId = item.collectionId?.toLowerCase();
+
+      return item;
+    }));
   }
 
   subscribeNft (addresses: string[], chainHashs: string[] = []) {

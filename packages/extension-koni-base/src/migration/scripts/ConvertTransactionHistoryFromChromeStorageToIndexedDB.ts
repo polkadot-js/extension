@@ -51,10 +51,10 @@ export default class ConvertTransactionHistoryFromChromeStorageToIndexedDB exten
         const v3Items = v3Data && Array.isArray(v3Data[hash]?.items) ? v3Data[hash]?.items || [] : [];
 
         v1Items = Array.isArray(v1Items) ? v1Items.map((item) => ({ origin: 'app', eventIdx: 0, ...item }) as TransactionHistoryItemType) : [];
-        const allItems = v3Items;
+        let allItems = v3Items;
 
-        this.mergeHistories(allItems, v2Items);
-        this.mergeHistories(allItems, v1Items);
+        allItems = this.mergeHistories(allItems, v2Items);
+        allItems = this.mergeHistories(allItems, v1Items);
         this.state.setHistory(address, networkJson.key, allItems);
       }
 

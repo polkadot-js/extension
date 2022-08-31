@@ -1,5 +1,12 @@
 # CHANGELOG
 
+## master
+
+Changes:
+
+- Ensure that `EXTENSION_PREFIX` is always set as part of `@polkadot/extension-base`
+
+
 ## 0.44.6 Aug 21, 2022
 
 - **Important** Not published to the stores, aligns with latest released packages.

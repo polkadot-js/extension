@@ -72,7 +72,7 @@ module.exports = (entry, alias = {}) => ({
     }),
     new webpack.DefinePlugin({
       'process.env': {
-        EXTENSION_PREFIX: JSON.stringify(EXT_NAME),
+        EXTENSION_PREFIX: JSON.stringify(process.env.EXTENSION_PREFIX || EXT_NAME),
         NODE_ENV: JSON.stringify('production')
       }
     }),

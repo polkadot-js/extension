@@ -5,7 +5,7 @@
 const EXTENSION_PREFIX = process.env.EXTENSION_PREFIX || '';
 
 if (!EXTENSION_PREFIX) {
-  console.error('CRITICAL: The extension does not define an own EXTENSION_PREFIX environment variable as part of the build, this is required to ensure that messages are not shared between extensions. Failure to do so will yield messages sent to multiple extensions.');
+  throw new Error('CRITICAL: The extension does not define an own EXTENSION_PREFIX environment variable as part of the build, this is required to ensure that messages are not shared between extensions. Failure to do so will yield messages sent to multiple extensions.');
 }
 
 const PORT_PREFIX = `${EXTENSION_PREFIX || 'unknown'}-${process.env.PORT_PREFIX || 'unknown'}`;

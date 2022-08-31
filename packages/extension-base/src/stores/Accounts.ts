@@ -8,7 +8,11 @@ import BaseStore from './Base';
 
 export default class AccountsStore extends BaseStore<KeyringJson> implements KeyringStore {
   constructor () {
-    super(EXTENSION_PREFIX !== 'polkadot{.js}' ? `${EXTENSION_PREFIX || 'unknown'}accounts` : null);
+    super(
+      EXTENSION_PREFIX && EXTENSION_PREFIX !== 'polkadot{.js}'
+        ? `${EXTENSION_PREFIX}accounts`
+        : null
+    );
   }
 
   public override set (key: string, value: KeyringJson, update?: () => void): void {

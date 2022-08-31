@@ -6,5 +6,5 @@ import { EXTENSION_PREFIX } from '../defaults';
 let counter = 0;
 
 export function getId (): string {
-  return `${EXTENSION_PREFIX || 'unknown'}.${Date.now()}.${++counter}`;
+  return `${EXTENSION_PREFIX}.${Date.now()}.${++counter}`;
 }

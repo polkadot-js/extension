@@ -3,9 +3,10 @@
 
 const path = require('path');
 const webpack = require('webpack');
-
 const CopyPlugin = require('copy-webpack-plugin');
 const ManifestPlugin = require('webpack-extension-manifest-plugin');
+
+const { blake2AsHex } = require('@polkadot/util-crypto');
 
 const pkgJson = require('./package.json');
 const manifest = require('./manifest.json');
@@ -73,7 +74,8 @@ module.exports = (entry, alias = {}) => ({
     new webpack.DefinePlugin({
       'process.env': {
         EXTENSION_PREFIX: JSON.stringify(process.env.EXTENSION_PREFIX || EXT_NAME),
-        NODE_ENV: JSON.stringify('production')
+        NODE_ENV: JSON.stringify('production'),
+        PORT_PREFIX: JSON.stringify(blake2AsHex(JSON.stringify(manifest), 64))
       }
     }),
     new CopyPlugin({ patterns: [{ from: 'public' }] }),

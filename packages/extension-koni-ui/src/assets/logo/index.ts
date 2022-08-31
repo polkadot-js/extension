@@ -327,9 +327,11 @@ const LogosMap: Record<string, string> = {
   // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
   xcintr: require('./82.Interlay.png'),
   // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-  xcibtc: require('./64.BTC.png'),
+  xcibtc: require('./123.iBTC.jpg'),
   // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-  xckbtc: require('./64.BTC.png'),
+  ibtc: require('./123.iBTC.jpg'),
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+  xckbtc: require('./23.kbtc.png'),
   // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
   xccsm: require('./15.CSM.png'),
   // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment

@@ -10,6 +10,8 @@ const ManifestPlugin = require('webpack-extension-manifest-plugin');
 const pkgJson = require('./package.json');
 const manifest = require('./manifest.json');
 
+const EXT_NAME = manifest.short_name.replace(/{/, '').replace(/}/, '').replace(/\./, '-');
+
 const packages = [
   'extension',
   'extension-base',
@@ -70,6 +72,7 @@ module.exports = (entry, alias = {}) => ({
     }),
     new webpack.DefinePlugin({
       'process.env': {
+        EXTENSION_PREFIX: JSON.stringify(EXT_NAME),
         NODE_ENV: JSON.stringify('production')
       }
     }),

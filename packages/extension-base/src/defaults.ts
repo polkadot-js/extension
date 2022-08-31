@@ -2,16 +2,13 @@
 // SPDX-License-Identifier: Apache-2.0
 
 // this _must_ be changed for each extension
-const SUPPLIED_EXTENSION_PREFIX = process.env.EXTENSION_PREFIX;
+const EXTENSION_PREFIX = process.env.EXTENSION_PREFIX;
 
-if (!SUPPLIED_EXTENSION_PREFIX) {
-  throw new Error('The extension does not define an own EXTENSION_PREFIX as part of the build, this is required to ensure that messages are not shared between extensions');
+if (!EXTENSION_PREFIX) {
+  throw new Error('The extension does not define an own EXTENSION_PREFIX environment variable as part of the build, this is required to ensure that messages are not shared between extensions');
 }
 
-const EXTENSION_PREFIX = SUPPLIED_EXTENSION_PREFIX === 'polkadot-js'
-  ? ''
-  : SUPPLIED_EXTENSION_PREFIX;
-const PORT_PREFIX = `${EXTENSION_PREFIX}${EXTENSION_PREFIX ? '-' : ''}${SUPPLIED_EXTENSION_PREFIX}-`;
+const PORT_PREFIX = `${EXTENSION_PREFIX}-`;
 const PORT_CONTENT = `${PORT_PREFIX}content`;
 const PORT_EXTENSION = `${PORT_PREFIX}extension`;
 const MESSAGE_ORIGIN_PAGE = `${PORT_PREFIX}page`;

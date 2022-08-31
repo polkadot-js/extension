@@ -10,7 +10,7 @@ const ManifestPlugin = require('webpack-extension-manifest-plugin');
 const pkgJson = require('./package.json');
 const manifest = require('./manifest.json');
 
-const EXT_NAME = manifest.short_name.replace(/{/, '').replace(/}/, '').replace(/\./, '-');
+const EXT_NAME = manifest.short_name;
 
 const packages = [
   'extension',

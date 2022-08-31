@@ -8,6 +8,6 @@ import BaseStore from './Base';
 
 export default class MetadataStore extends BaseStore<MetadataDef> {
   constructor () {
-    super(`${EXTENSION_PREFIX}metadata`);
+    super(`${EXTENSION_PREFIX !== 'polkadot{.js}' ? (EXTENSION_PREFIX || 'unknown') : ''}metadata`);
   }
 }

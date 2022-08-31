@@ -32,8 +32,8 @@
     "lint": "polkadot-dev-run-lint",
     "postinstall": "polkadot-dev-yarn-only",
     "start": "yarn watch",
-    "test": "EXTENSION_PREFIX='polkadot-js' polkadot-dev-run-test --detectOpenHandles",
-    "test:one": "EXTENSION_PREFIX='polkadot-js' polkadot-dev-run-test --detectOpenHandles",
+    "test": "EXTENSION_PREFIX='test' polkadot-dev-run-test --detectOpenHandles",
+    "test:one": "EXTENSION_PREFIX='test' polkadot-dev-run-test --detectOpenHandles",
     "watch": "cd packages/extension && yarn polkadot-exec-webpack --config webpack.watch.cjs --mode development --watch"
   },
   "devDependencies": {

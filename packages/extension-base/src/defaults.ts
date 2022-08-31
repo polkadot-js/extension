@@ -4,7 +4,7 @@
 // this _must_ be changed for each extension
 const EXTENSION_PREFIX = process.env.EXTENSION_PREFIX || '';
 
-if (!EXTENSION_PREFIX) {
+if (!EXTENSION_PREFIX && !process.env.PORT_PREFIX) {
   throw new Error('CRITICAL: The extension does not define an own EXTENSION_PREFIX environment variable as part of the build, this is required to ensure that messages are not shared between extensions. Failure to do so will yield messages sent to multiple extensions.');
 }
 

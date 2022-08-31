@@ -327,21 +327,21 @@ const LogosMap: Record<string, string> = {
   // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
   xcintr: require('./82.Interlay.png'),
   // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-  xciBTC: require('./64.BTC.png'),
+  xcibtc: require('./64.BTC.png'),
   // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-  xckBTC: require('./64.BTC.png'),
+  xckbtc: require('./64.BTC.png'),
   // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-  xcCSM: require('./15.CSM.png'),
+  xccsm: require('./15.CSM.png'),
   // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-  xcSDN: require('./42.Shiden.png'),
+  xcsdn: require('./42.Shiden.png'),
   // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-  xcKMA: require('./18.KMA.png'),
+  xckma: require('./18.KMA.png'),
   // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-  xcLIT: require('./19.Litentry.png'),
+  xclit: require('./19.Litentry.png'),
   // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-  xcCRAB: require('./68.Crab.png'),
+  xccrab: require('./68.Crab.png'),
   // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-  xcTEER: require('./81.Integritee.png'),
+  xcteer: require('./81.Integritee.png'),
   // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
   imbue_network: require('./22.Imbue.png'),
   // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment

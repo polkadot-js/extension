@@ -175,7 +175,7 @@ async function subscribeTokensBalance (addresses: string[], networkKey: string, 
 
   const unsubList = await Promise.all(tokenList.map(async ({ decimals, specialOption, symbol }) => {
     try {
-      const options = specialOption || { Token: symbol };
+      const options = specialOption || { Token: symbol.toUpperCase() };
       // Get Token Balance
       // @ts-ignore
       const unsub = await api.query.tokens.accounts.multi(addresses.map((address) => [address, options]), (balances: TokenBalanceRaw[]) => {

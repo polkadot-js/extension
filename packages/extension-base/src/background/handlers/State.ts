@@ -16,7 +16,7 @@ import { assert } from '@polkadot/util';
 import { MetadataStore } from '../../stores';
 import { withErrorLog } from './helpers';
 
-interface Resolver <T> {
+interface Resolver<T> {
   reject: (error: Error) => void;
   resolve: (result: T) => void;
 }
@@ -94,6 +94,7 @@ export enum NotificationOptions {
 }
 
 const AUTH_URLS_KEY = 'authUrls';
+const DEFAULT_AUTH_ACCOUNTS = 'defaultAuthAccounts';
 
 function extractMetadata (store: MetadataStore): void {
   store.allMap((map): void => {
@@ -158,6 +159,8 @@ export default class State {
 
   public readonly signSubject: BehaviorSubject<SigningRequest[]> = new BehaviorSubject<SigningRequest[]>([]);
 
+  public defaultAuthAccountSelection: string[] = [];
+
   constructor (providers: Providers = {}) {
     this.#providers = providers;
 
@@ -168,6 +171,12 @@ export default class State {
     const previousAuth = JSON.parse(authString) as AuthUrls;
 
     this.#authUrls = previousAuth;
+
+    // retrieve previously set default auth accounts
+    const defaultAuthString = localStorage.getItem(DEFAULT_AUTH_ACCOUNTS) || '[]';
+    const previousDefaultAuth = JSON.parse(defaultAuthString) as string[];
+
+    this.defaultAuthAccountSelection = previousDefaultAuth;
   }
 
   public get knownMetadata (): MetadataDef[] {
@@ -241,6 +250,7 @@ export default class State {
       };
 
       this.saveCurrentAuthList();
+      this.updateDefaultAuthAccounts(authorizedAccounts);
       delete this.#authRequests[id];
       this.updateIconAuth(true);
     };
@@ -264,6 +274,15 @@ export default class State {
 
   private saveCurrentAuthList () {
     localStorage.setItem(AUTH_URLS_KEY, JSON.stringify(this.#authUrls));
+  }
+
+  private saveDefaultAuthAccounts () {
+    localStorage.setItem(DEFAULT_AUTH_ACCOUNTS, JSON.stringify(this.defaultAuthAccountSelection));
+  }
+
+  public updateDefaultAuthAccounts (newList: string[]) {
+    this.defaultAuthAccountSelection = newList;
+    this.saveDefaultAuthAccounts();
   }
 
   private metaComplete = (id: string, resolve: (result: boolean) => void, reject: (error: Error) => void): Resolver<boolean> => {

@@ -34,14 +34,6 @@ function getSuri (seed: string, type?: KeypairType): string {
     : seed;
 }
 
-function transformAccounts (accounts: SubjectInfo): AccountJson[] {
-  return Object.values(accounts).map(({ json: { address, meta }, type }): AccountJson => ({
-    address,
-    ...meta,
-    type
-  }));
-}
-
 function isJsonPayload (value: SignerPayloadJSON | SignerPayloadRaw): value is SignerPayloadJSON {
   return (value as SignerPayloadJSON).genesisHash !== undefined;
 }
@@ -54,6 +46,15 @@ export default class Extension {
   constructor (state: State) {
     this.#cachedUnlocks = {};
     this.#state = state;
+  }
+
+  private transformAccounts (accounts: SubjectInfo): AccountJson[] {
+    return Object.values(accounts).map(({ json: { address, meta }, type }): AccountJson => ({
+      address,
+      isDefaultAuthSelected: this.#state.defaultAuthAccountSelection.includes(address),
+      ...meta,
+      type
+    }));
   }
 
   private accountsCreateExternal ({ address, genesisHash, name }: RequestAccountCreateExternal): boolean {
@@ -127,6 +128,12 @@ export default class Extension {
     });
 
     this.#state.updateAuthorizedAccounts(authorizedAccountsDiff);
+
+    // cycle through default account selection for auth and remove any occurence of the account
+    const newDefaultAuthAccounts = this.#state.defaultAuthAccountSelection.filter((defaultSelectionAddress) => defaultSelectionAddress !== address);
+
+    this.#state.updateDefaultAuthAccounts(newDefaultAuthAccounts);
+
     keyring.forgetAccount(address);
 
     return true;
@@ -181,7 +188,7 @@ export default class Extension {
   private accountsSubscribe (id: string, port: chrome.runtime.Port): boolean {
     const cb = createSubscription<'pri(accounts.subscribe)'>(id, port);
     const subscription = accountsObservable.subject.subscribe((accounts: SubjectInfo): void =>
-      cb(transformAccounts(accounts))
+      cb(this.transformAccounts(accounts))
     );
 
     port.onDisconnect.addListener((): void => {

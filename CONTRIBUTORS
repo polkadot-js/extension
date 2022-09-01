@@ -1,7 +1,7 @@
-     801	Nam Phạm                      	update information for Ternoa
-     471	AnhMTV                        	Release version 0.5.6
+     805	Nam Phạm                      	fix bug parsing Pangolin/Crab balance
+     484	AnhMTV                        	
      465	Jaco                          	0.42.5 (#969)
-     194	S2kael                        	[Issue-467] [NFT] add MoonFit Beast and Beauty
+     216	S2kael                        	[Issue-584] [TransactionHistory] Fix cannot open history in moonbase
      151	lw-cdm                        	Update logo for Moonbeans
      142	quangdo                       	update some label and variable (original to origin)
       85	lw-cdm                        	

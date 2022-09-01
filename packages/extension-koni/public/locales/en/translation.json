@@ -410,5 +410,9 @@
   "Sign transactions": "",
   "Done": "",
   "Close": "",
-  "Signature": ""
+  "Signature": "",
+  "The sender account is Ledger account.": "",
+  "The receiver account is Ledger account.": "",
+  "This is not support XCM Transfer.": "",
+  "The network not match.": ""
 }

@@ -1,4 +1,4 @@
-     548	Jaco                          	Bump deps (#1135)
+     549	Jaco                          	Bump deps (#1137)
       86	Thibaut Sardan                	Remember last account selection for authorization (#1133)
        7	Ivan Rukhavets                	Mention derivation in FAQ (#334)
        4	Amaury Martiny                	PostMessageProvider with on('connected' | 'disconnected') (#279)

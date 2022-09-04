@@ -5,7 +5,7 @@ import type { ThemeProps } from '../types';
 
 import { faArrowLeft, faCog, faPlusCircle, faSearch } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import React, { useCallback, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import styled from 'styled-components';
 
 import logo from '../assets/pjs.svg';
@@ -13,6 +13,7 @@ import InputFilter from '../components/InputFilter';
 import Link from '../components/Link';
 import useOutsideClick from '../hooks/useOutsideClick';
 import useTranslation from '../hooks/useTranslation';
+import { getConnectedTabUrls } from '../messaging';
 import MenuAdd from './MenuAdd';
 import MenuSettings from './MenuSettings';
 
@@ -22,22 +23,36 @@ interface Props extends ThemeProps {
   onFilter?: (filter: string) => void;
   showAdd?: boolean;
   showBackArrow?: boolean;
+  showConnectedAccounts?: boolean;
   showSearch?: boolean;
   showSettings?: boolean;
   smallMargin?: boolean;
   text?: React.ReactNode;
 }
 
-function Header ({ children, className = '', onFilter, showAdd, showBackArrow, showSearch, showSettings, smallMargin = false, text }: Props): React.ReactElement<Props> {
+function Header ({ children, className = '', onFilter, showAdd, showBackArrow, showConnectedAccounts, showSearch, showSettings, smallMargin = false, text }: Props): React.ReactElement<Props> {
   const [isAddOpen, setShowAdd] = useState(false);
   const [isSettingsOpen, setShowSettings] = useState(false);
   const [isSearchOpen, setShowSearch] = useState(false);
   const [filter, setFilter] = useState('');
+  const [connectedTabUrls, setConnectedTabUrls] = useState<string[]>([]);
   const { t } = useTranslation();
   const addIconRef = useRef(null);
   const addMenuRef = useRef(null);
   const setIconRef = useRef(null);
   const setMenuRef = useRef(null);
+  const isConnected = useMemo(() => connectedTabUrls.length >= 1
+    , [connectedTabUrls]);
+
+  useEffect(() => {
+    if (!showConnectedAccounts) {
+      return;
+    }
+
+    getConnectedTabUrls()
+      .then((tabUrls) => setConnectedTabUrls(tabUrls))
+      .catch(console.error);
+  }, [showConnectedAccounts]);
 
   useOutsideClick([addIconRef, addMenuRef], (): void => {
     isAddOpen && setShowAdd(!isAddOpen);
@@ -103,6 +118,16 @@ function Header ({ children, className = '', onFilter, showAdd, showBackArrow, s
         </div>
         {showSearch && (
           <div className={`searchBarWrapper ${isSearchOpen ? 'selected' : ''}`}>
+            {showConnectedAccounts && !!isConnected && !isSearchOpen && (
+              <div className='connectedAccountsWrapper'>
+                <Link
+                  className='connectedAccounts'
+                  to={connectedTabUrls.length === 1 ? `/url/manage/${connectedTabUrls[0]}` : '/auth-list'}
+                >
+                  <span className='greenDot'>•</span>Connected
+                </Link>
+              </div>
+            )}
             {isSearchOpen && (
               <InputFilter
                 className='inputFilter'
@@ -207,11 +232,31 @@ export default React.memo(styled(Header)(({ theme }: Props) => `
       align-self: center;
     }
 
+    .connectedAccountsWrapper {
+      flex: 1;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .connectedAccounts {
+      border: 1px solid ${theme.inputBorderColor};
+      border-radius: 4px;
+      padding: 0 0.5rem;
+
+      .greenDot {
+        margin-right: 0.3rem;
+        font-size: 1.5rem;
+        color: ${theme.connectedDotColor};
+        padding-bottom: 0.2rem;
+      }
+    }
+
     .searchBarWrapper {
       flex: 1;
       display: flex;
       justify-content: end;
-      align-items: center;;
+      align-items: center;
 
       .searchIcon {
         margin-right: 8px;

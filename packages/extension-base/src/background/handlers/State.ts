@@ -153,6 +153,8 @@ export default class State {
 
   #windows: number[] = [];
 
+  #connectedTabUrls: string[] = [];
+
   public readonly authSubject: BehaviorSubject<AuthorizeRequest[]> = new BehaviorSubject<AuthorizeRequest[]>([]);
 
   public readonly metaSubject: BehaviorSubject<MetadataRequest[]> = new BehaviorSubject<MetadataRequest[]>([]);
@@ -266,6 +268,31 @@ export default class State {
       }
     };
   };
+
+  public udateCurrentTabsUrl (urls: string[]) {
+    const connectedTabs = urls.map((url) => {
+      let strippedUrl = '';
+
+      // the assert in stripUrl may throw for new tabs with "chrome://newtab/"
+      try {
+        strippedUrl = this.stripUrl(url);
+      } catch (e) {
+        console.error(e);
+      }
+
+      // return the stripped url only if this website is known
+      return !!strippedUrl && this.authUrls[strippedUrl]
+        ? strippedUrl
+        : undefined;
+    })
+      .filter((value) => !!value) as string[];
+
+    this.#connectedTabUrls = connectedTabs;
+  }
+
+  public getCurrentTabUrls () {
+    return this.#connectedTabUrls;
+  }
 
   public deleteAuthRequest (requestId: string) {
     delete this.#authRequests[requestId];

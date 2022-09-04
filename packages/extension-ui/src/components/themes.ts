@@ -21,6 +21,7 @@ const darkTheme = {
   buttonBackgroundDangerHover: '#D93B3B',
   buttonBackgroundHover: '#ED9329',
   buttonTextColor: '#FFFFFF',
+  connectedDotColor: 'seagreen',
   errorBorderColor: '#7E3530',
   errorColor: '#E42F2F',
   fontFamily: 'Nunito, sans-serif',

@@ -13,7 +13,7 @@ import InputFilter from '../components/InputFilter';
 import Link from '../components/Link';
 import useOutsideClick from '../hooks/useOutsideClick';
 import useTranslation from '../hooks/useTranslation';
-import { getConnectedTabUrls } from '../messaging';
+import { getConnectedTabsUrl } from '../messaging';
 import MenuAdd from './MenuAdd';
 import MenuSettings from './MenuSettings';
 
@@ -35,22 +35,22 @@ function Header ({ children, className = '', onFilter, showAdd, showBackArrow, s
   const [isSettingsOpen, setShowSettings] = useState(false);
   const [isSearchOpen, setShowSearch] = useState(false);
   const [filter, setFilter] = useState('');
-  const [connectedTabUrls, setConnectedTabUrls] = useState<string[]>([]);
+  const [connectedTabsUrl, setConnectedTabsUrl] = useState<string[]>([]);
   const { t } = useTranslation();
   const addIconRef = useRef(null);
   const addMenuRef = useRef(null);
   const setIconRef = useRef(null);
   const setMenuRef = useRef(null);
-  const isConnected = useMemo(() => connectedTabUrls.length >= 1
-    , [connectedTabUrls]);
+  const isConnected = useMemo(() => connectedTabsUrl.length >= 1
+    , [connectedTabsUrl]);
 
   useEffect(() => {
     if (!showConnectedAccounts) {
       return;
     }
 
-    getConnectedTabUrls()
-      .then((tabUrls) => setConnectedTabUrls(tabUrls))
+    getConnectedTabsUrl()
+      .then((tabsUrl) => setConnectedTabsUrl(tabsUrl))
       .catch(console.error);
   }, [showConnectedAccounts]);
 
@@ -122,7 +122,7 @@ function Header ({ children, className = '', onFilter, showAdd, showBackArrow, s
               <div className='connectedAccountsWrapper'>
                 <Link
                   className='connectedAccounts'
-                  to={connectedTabUrls.length === 1 ? `/url/manage/${connectedTabUrls[0]}` : '/auth-list'}
+                  to={connectedTabsUrl.length === 1 ? `/url/manage/${connectedTabsUrl[0]}` : '/auth-list'}
                 >
                   <span className='greenDot'>•</span>Connected
                 </Link>

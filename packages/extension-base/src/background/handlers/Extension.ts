@@ -6,7 +6,7 @@ import type { KeyringPair, KeyringPair$Json, KeyringPair$Meta } from '@polkadot/
 import type { SignerPayloadJSON, SignerPayloadRaw } from '@polkadot/types/types';
 import type { SubjectInfo } from '@polkadot/ui-keyring/observable/types';
 import type { KeypairType } from '@polkadot/util-crypto/types';
-import type { AccountJson, AllowedPath, AuthorizeRequest, MessageTypes, MetadataRequest, RequestAccountBatchExport, RequestAccountChangePassword, RequestAccountCreateExternal, RequestAccountCreateHardware, RequestAccountCreateSuri, RequestAccountEdit, RequestAccountExport, RequestAccountForget, RequestAccountShow, RequestAccountTie, RequestAccountValidate, RequestAuthorizeApprove, RequestBatchRestore, RequestCurrentTabUrlUpdate, RequestDeriveCreate, RequestDeriveValidate, RequestJsonRestore, RequestMetadataApprove, RequestMetadataReject, RequestSeedCreate, RequestSeedValidate, RequestSigningApprovePassword, RequestSigningApproveSignature, RequestSigningCancel, RequestSigningIsLocked, RequestTypes, RequestUpdateAuthorizedAccounts, ResponseAccountExport, ResponseAccountsExport, ResponseAuthorizeList, ResponseDeriveValidate, ResponseJsonGetAccountInfo, ResponseSeedCreate, ResponseSeedValidate, ResponseSigningIsLocked, ResponseType, SigningRequest } from '../types';
+import type { AccountJson, AllowedPath, AuthorizeRequest, MessageTypes, MetadataRequest, RequestAccountBatchExport, RequestAccountChangePassword, RequestAccountCreateExternal, RequestAccountCreateHardware, RequestAccountCreateSuri, RequestAccountEdit, RequestAccountExport, RequestAccountForget, RequestAccountShow, RequestAccountTie, RequestAccountValidate, RequestActiveTabsUrlUpdate, RequestAuthorizeApprove, RequestBatchRestore, RequestDeriveCreate, RequestDeriveValidate, RequestJsonRestore, RequestMetadataApprove, RequestMetadataReject, RequestSeedCreate, RequestSeedValidate, RequestSigningApprovePassword, RequestSigningApproveSignature, RequestSigningCancel, RequestSigningIsLocked, RequestTypes, RequestUpdateAuthorizedAccounts, ResponseAccountExport, ResponseAccountsExport, ResponseAuthorizeList, ResponseDeriveValidate, ResponseJsonGetAccountInfo, ResponseSeedCreate, ResponseSeedValidate, ResponseSigningIsLocked, ResponseType, SigningRequest } from '../types';
 
 import { ALLOWED_PATH, PASSWORD_EXPIRY_MS } from '@polkadot/extension-base/defaults';
 import { TypeRegistry } from '@polkadot/types';
@@ -518,12 +518,12 @@ export default class Extension {
     return this.#state.deleteAuthRequest(requestId);
   }
 
-  private updateCurrentTabs ({ urls }: RequestCurrentTabUrlUpdate) {
+  private updateCurrentTabs ({ urls }: RequestActiveTabsUrlUpdate) {
     this.#state.udateCurrentTabsUrl(urls);
   }
 
-  private getConnectedTabUrls () {
-    return this.#state.getCurrentTabUrls();
+  private getConnectedTabsUrl () {
+    return this.#state.getConnectedTabsUrl();
   }
 
   // Weird thought, the eslint override is not needed in Tabs
@@ -600,10 +600,10 @@ export default class Extension {
         return port && this.metadataSubscribe(id, port);
 
       case 'pri(activeTabsUrl.update)':
-        return this.updateCurrentTabs(request as RequestCurrentTabUrlUpdate);
+        return this.updateCurrentTabs(request as RequestActiveTabsUrlUpdate);
 
-      case 'pri(connectedTabUrls.get)':
-        return this.getConnectedTabUrls();
+      case 'pri(connectedTabsUrl.get)':
+        return this.getConnectedTabsUrl();
 
       case 'pri(derivation.create)':
         return this.derivationCreate(request as RequestDeriveCreate);

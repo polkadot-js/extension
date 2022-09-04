@@ -153,7 +153,7 @@ export default class State {
 
   #windows: number[] = [];
 
-  #connectedTabUrls: string[] = [];
+  #connectedTabsUrl: string[] = [];
 
   public readonly authSubject: BehaviorSubject<AuthorizeRequest[]> = new BehaviorSubject<AuthorizeRequest[]>([]);
 
@@ -287,11 +287,11 @@ export default class State {
     })
       .filter((value) => !!value) as string[];
 
-    this.#connectedTabUrls = connectedTabs;
+    this.#connectedTabsUrl = connectedTabs;
   }
 
-  public getCurrentTabUrls () {
-    return this.#connectedTabUrls;
+  public getConnectedTabsUrl () {
+    return this.#connectedTabsUrl;
   }
 
   public deleteAuthRequest (requestId: string) {

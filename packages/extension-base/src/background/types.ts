@@ -75,7 +75,7 @@ export interface SigningRequest {
   url: string;
 }
 
-export type CurentTabUrlResponse = string[]
+export type ConnectedTabsUrlResponse = string[]
 
 // [MessageType]: [RequestType, ResponseType, SubscriptionMessageType?]
 export interface RequestSignatures {
@@ -99,8 +99,8 @@ export interface RequestSignatures {
   'pri(authorize.remove)': [string, ResponseAuthorizeList];
   'pri(authorize.delete.request)': [string, void];
   'pri(authorize.update)': [RequestUpdateAuthorizedAccounts, void];
-  'pri(activeTabsUrl.update)': [RequestCurrentTabUrlUpdate, void];
-  'pri(connectedTabUrls.get)': [null, CurentTabUrlResponse];
+  'pri(activeTabsUrl.update)': [RequestActiveTabsUrlUpdate, void];
+  'pri(connectedTabsUrl.get)': [null, ConnectedTabsUrlResponse];
   'pri(derivation.create)': [RequestDeriveCreate, boolean];
   'pri(derivation.validate)': [RequestDeriveValidate, ResponseDeriveValidate];
   'pri(json.restore)': [RequestJsonRestore, void];
@@ -266,7 +266,7 @@ export interface RequestAccountList {
 
 export type RequestAccountSubscribe = null;
 
-export interface RequestCurrentTabUrlUpdate {
+export interface RequestActiveTabsUrlUpdate {
   urls: string[];
 }
 

@@ -883,7 +883,7 @@ export const PREDEFINED_NETWORKS: Record<string, NetworkJson> = {
     coinGeckoKey: 'bifrost-native-coin',
     getStakingOnChain: true,
     supportBonding: true,
-    blockExplorer: 'https://bifrost-kusama.subscan.io/'
+    blockExplorer: 'https://bifrost-kusama.subscan.io'
   },
   bifrost_dot: {
     key: 'bifrost_dot',
@@ -902,7 +902,7 @@ export const PREDEFINED_NETWORKS: Record<string, NetworkJson> = {
     crowdloanUrl: 'https://bifrost.app/vcrowdloan',
     decimals: 12,
     coinGeckoKey: 'bifrost-native-coin',
-    blockExplorer: 'https://bifrost.subscan.io/'
+    blockExplorer: 'https://bifrost.subscan.io'
   },
   bifrost_testnet: {
     key: 'bifrost_testnet',

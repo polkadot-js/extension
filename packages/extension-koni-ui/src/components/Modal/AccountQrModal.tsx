@@ -108,6 +108,8 @@ function AccountQrModal (props: Props): React.ReactElement<Props> {
   const isSupportScanExplorer = useSupportScanExplorer(networkKey);
   const scanExplorerAddressUrl = useScanExplorerAddressUrl(networkKey, formatted);
 
+  console.log('scanExplorerAddressUrl', scanExplorerAddressUrl);
+
   const [filter, setFilter] = useState('');
 
   const filteredAccount = useMemo(() => {

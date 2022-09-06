@@ -50,6 +50,7 @@ function Accounts ({ className }: Props): React.ReactElement {
             <Header
               onFilter={_onFilter}
               showAdd
+              showConnectedAccounts
               showSearch
               showSettings
               text={t<string>('Accounts')}

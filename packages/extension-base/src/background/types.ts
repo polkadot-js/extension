@@ -75,6 +75,8 @@ export interface SigningRequest {
   url: string;
 }
 
+export type ConnectedTabsUrlResponse = string[]
+
 // [MessageType]: [RequestType, ResponseType, SubscriptionMessageType?]
 export interface RequestSignatures {
   // private/internal requests, i.e. from a popup
@@ -96,7 +98,9 @@ export interface RequestSignatures {
   'pri(authorize.requests)': [RequestAuthorizeSubscribe, boolean, AuthorizeRequest[]];
   'pri(authorize.remove)': [string, ResponseAuthorizeList];
   'pri(authorize.delete.request)': [string, void];
-  'pri(authorize.update)': [RequestUpdateAuthorizedAccounts, void]
+  'pri(authorize.update)': [RequestUpdateAuthorizedAccounts, void];
+  'pri(activeTabsUrl.update)': [RequestActiveTabsUrlUpdate, void];
+  'pri(connectedTabsUrl.get)': [null, ConnectedTabsUrlResponse];
   'pri(derivation.create)': [RequestDeriveCreate, boolean];
   'pri(derivation.validate)': [RequestDeriveValidate, ResponseDeriveValidate];
   'pri(json.restore)': [RequestJsonRestore, void];
@@ -261,6 +265,10 @@ export interface RequestAccountList {
 }
 
 export type RequestAccountSubscribe = null;
+
+export interface RequestActiveTabsUrlUpdate {
+  urls: string[];
+}
 
 export interface RequestAccountUnsubscribe {
   id: string;

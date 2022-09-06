@@ -6,7 +6,7 @@ import type { KeyringPair, KeyringPair$Json, KeyringPair$Meta } from '@polkadot/
 import type { SignerPayloadJSON, SignerPayloadRaw } from '@polkadot/types/types';
 import type { SubjectInfo } from '@polkadot/ui-keyring/observable/types';
 import type { KeypairType } from '@polkadot/util-crypto/types';
-import type { AccountJson, AllowedPath, AuthorizeRequest, MessageTypes, MetadataRequest, RequestAccountBatchExport, RequestAccountChangePassword, RequestAccountCreateExternal, RequestAccountCreateHardware, RequestAccountCreateSuri, RequestAccountEdit, RequestAccountExport, RequestAccountForget, RequestAccountShow, RequestAccountTie, RequestAccountValidate, RequestAuthorizeApprove, RequestBatchRestore, RequestDeriveCreate, RequestDeriveValidate, RequestJsonRestore, RequestMetadataApprove, RequestMetadataReject, RequestSeedCreate, RequestSeedValidate, RequestSigningApprovePassword, RequestSigningApproveSignature, RequestSigningCancel, RequestSigningIsLocked, RequestTypes, RequestUpdateAuthorizedAccounts, ResponseAccountExport, ResponseAccountsExport, ResponseAuthorizeList, ResponseDeriveValidate, ResponseJsonGetAccountInfo, ResponseSeedCreate, ResponseSeedValidate, ResponseSigningIsLocked, ResponseType, SigningRequest } from '../types';
+import type { AccountJson, AllowedPath, AuthorizeRequest, MessageTypes, MetadataRequest, RequestAccountBatchExport, RequestAccountChangePassword, RequestAccountCreateExternal, RequestAccountCreateHardware, RequestAccountCreateSuri, RequestAccountEdit, RequestAccountExport, RequestAccountForget, RequestAccountShow, RequestAccountTie, RequestAccountValidate, RequestActiveTabsUrlUpdate, RequestAuthorizeApprove, RequestBatchRestore, RequestDeriveCreate, RequestDeriveValidate, RequestJsonRestore, RequestMetadataApprove, RequestMetadataReject, RequestSeedCreate, RequestSeedValidate, RequestSigningApprovePassword, RequestSigningApproveSignature, RequestSigningCancel, RequestSigningIsLocked, RequestTypes, RequestUpdateAuthorizedAccounts, ResponseAccountExport, ResponseAccountsExport, ResponseAuthorizeList, ResponseDeriveValidate, ResponseJsonGetAccountInfo, ResponseSeedCreate, ResponseSeedValidate, ResponseSigningIsLocked, ResponseType, SigningRequest } from '../types';
 
 import { ALLOWED_PATH, PASSWORD_EXPIRY_MS } from '@polkadot/extension-base/defaults';
 import { TypeRegistry } from '@polkadot/types';
@@ -518,9 +518,17 @@ export default class Extension {
     return this.#state.deleteAuthRequest(requestId);
   }
 
+  private updateCurrentTabs ({ urls }: RequestActiveTabsUrlUpdate) {
+    this.#state.udateCurrentTabsUrl(urls);
+  }
+
+  private getConnectedTabsUrl () {
+    return this.#state.getConnectedTabsUrl();
+  }
+
   // Weird thought, the eslint override is not needed in Tabs
   // eslint-disable-next-line @typescript-eslint/require-await
-  public async handle<TMessageType extends MessageTypes> (id: string, type: TMessageType, request: RequestTypes[TMessageType], port: chrome.runtime.Port): Promise<ResponseType<TMessageType>> {
+  public async handle<TMessageType extends MessageTypes> (id: string, type: TMessageType, request: RequestTypes[TMessageType], port?: chrome.runtime.Port): Promise<ResponseType<TMessageType>> {
     switch (type) {
       case 'pri(authorize.approve)':
         return this.authorizeApprove(request as RequestAuthorizeApprove);
@@ -535,7 +543,7 @@ export default class Extension {
         return this.deleteAuthRequest(request as string);
 
       case 'pri(authorize.requests)':
-        return this.authorizeSubscribe(id, port);
+        return port && this.authorizeSubscribe(id, port);
 
       case 'pri(authorize.update)':
         return this.authorizeUpdate(request as RequestUpdateAuthorizedAccounts);
@@ -568,7 +576,7 @@ export default class Extension {
         return this.accountsShow(request as RequestAccountShow);
 
       case 'pri(accounts.subscribe)':
-        return this.accountsSubscribe(id, port);
+        return port && this.accountsSubscribe(id, port);
 
       case 'pri(accounts.tie)':
         return this.accountsTie(request as RequestAccountTie);
@@ -589,7 +597,13 @@ export default class Extension {
         return this.metadataReject(request as RequestMetadataReject);
 
       case 'pri(metadata.requests)':
-        return this.metadataSubscribe(id, port);
+        return port && this.metadataSubscribe(id, port);
+
+      case 'pri(activeTabsUrl.update)':
+        return this.updateCurrentTabs(request as RequestActiveTabsUrlUpdate);
+
+      case 'pri(connectedTabsUrl.get)':
+        return this.getConnectedTabsUrl();
 
       case 'pri(derivation.create)':
         return this.derivationCreate(request as RequestDeriveCreate);
@@ -628,7 +642,7 @@ export default class Extension {
         return this.signingIsLocked(request as RequestSigningIsLocked);
 
       case 'pri(signing.requests)':
-        return this.signingSubscribe(id, port);
+        return port && this.signingSubscribe(id, port);
 
       case 'pri(window.open)':
         return this.windowOpen(request as AllowedPath);

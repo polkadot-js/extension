@@ -11,6 +11,7 @@ import signalSlashIcon from '@subwallet/extension-koni-ui/assets/signal-stream-s
 import signalIcon from '@subwallet/extension-koni-ui/assets/signal-stream-solid.svg';
 import { AccountInfoEl } from '@subwallet/extension-koni-ui/components';
 import MoonpayArea from '@subwallet/extension-koni-ui/components/BuyArea/MoonpayArea';
+import OnRamperArea from '@subwallet/extension-koni-ui/components/BuyArea/OnRamperArea';
 import TransakArea from '@subwallet/extension-koni-ui/components/BuyArea/TransakArea';
 import InputFilter from '@subwallet/extension-koni-ui/components/InputFilter';
 import Modal from '@subwallet/extension-koni-ui/components/Modal/index';
@@ -335,6 +336,10 @@ const BuyModal = (props: Props) => {
               formattedAddress={formatted}
               networkKey={networkKey}
             />
+            <OnRamperArea
+              formattedAddress={formatted}
+              networkKey={networkKey}
+            />
           </div>
         </div>
 
@@ -412,7 +417,7 @@ export default styled(BuyModal)(({ theme }: ThemeProps) => `
     width: 100%;
     flex: 1;
     justify-content: center;
-    gap: 40px;
+    gap: 50px;
   }
 
   &.modal-container {

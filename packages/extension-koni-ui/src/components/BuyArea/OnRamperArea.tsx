@@ -1,7 +1,7 @@
 // Copyright 2019-2022 @polkadot/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import MoonpayLogo from '@subwallet/extension-koni-ui/assets/logo/125.Moonpay.png';
+import OnRamperLogo from '@subwallet/extension-koni-ui/assets/logo/126.OnRamper.png';
 import Tooltip from '@subwallet/extension-koni-ui/components/Tooltip';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import CN from 'classnames';
@@ -15,11 +15,11 @@ interface Props extends ThemeProps{
 }
 
 // const HOST = {
-//   STAGING: 'https://staging-global.Moonpay.com',
-//   PRODUCTION: 'https://global.Moonpay.com'
+//   STAGING: 'https://staging-global.OnRamper.com',
+//   PRODUCTION: 'https://global.OnRamper.com'
 // };
 
-const MoonpayArea = (props: Props) => {
+const OnRamperArea = (props: Props) => {
   const { className } = props;
 
   const url = useMemo((): string => {
@@ -55,13 +55,13 @@ const MoonpayArea = (props: Props) => {
         !url
           ? (
             <div
-              data-for='moonpay-button'
+              data-for='on-ramper-button'
               data-tip={true}
             >
               <img
-                alt='Moonpay logo'
+                alt='OnRamper logo'
                 className='img-logo disabled'
-                src={MoonpayLogo}
+                src={OnRamperLogo}
               />
             </div>
           )
@@ -72,9 +72,9 @@ const MoonpayArea = (props: Props) => {
               target='_blank'
             >
               <img
-                alt='Moonpay logo'
+                alt='OnRamper logo'
                 className='img-logo'
-                src={MoonpayLogo}
+                src={OnRamperLogo}
               />
             </a>
           )
@@ -85,13 +85,13 @@ const MoonpayArea = (props: Props) => {
         }}
         place='bottom'
         text={'Coming soon'}
-        trigger={'moonpay-button'}
+        trigger={'on-ramper-button'}
       />
     </div>
   );
 };
 
-export default React.memo(styled(MoonpayArea)(({ theme }: Props) => `
+export default React.memo(styled(OnRamperArea)(({ theme }: Props) => `
   display: flex;
   flex-direction: column;
   align-items: center;

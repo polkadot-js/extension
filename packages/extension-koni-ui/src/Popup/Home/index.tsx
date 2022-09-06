@@ -4,6 +4,7 @@
 import { ChainRegistry, CurrentNetworkInfo, NftCollection as _NftCollection, NftItem as _NftItem, TransactionHistoryItemType } from '@subwallet/extension-base/background/KoniTypes';
 import { AccountJson } from '@subwallet/extension-base/background/types';
 import { AccountContext } from '@subwallet/extension-koni-ui/components';
+import ReceiveButton from '@subwallet/extension-koni-ui/components/Button/ReceiveButton';
 import useAccountBalance from '@subwallet/extension-koni-ui/hooks/screen/home/useAccountBalance';
 import useCrowdloanNetworks from '@subwallet/extension-koni-ui/hooks/screen/home/useCrowdloanNetworks';
 import useFetchNft from '@subwallet/extension-koni-ui/hooks/screen/home/useFetchNft';
@@ -21,8 +22,6 @@ import { TFunction } from 'react-i18next';
 import { useSelector } from 'react-redux';
 import styled from 'styled-components';
 
-import buyIcon from '../../assets/buy-icon.svg';
-import cryptoIcon from '../../assets/crypto.svg';
 import sendIcon from '../../assets/send-icon.svg';
 import swapIcon from '../../assets/swap-icon.svg';
 
@@ -373,17 +372,9 @@ function Home ({ chainRegistryMap, className = '', currentAccount, historyMap, n
 
         <div className='home-account-button-container'>
           <div className='action-button-wrapper'>
-            <ActionButton
-              iconSrc={cryptoIcon}
-              onClick={openBuyModal}
-              tooltipContent={t<string>('Buy')}
-            />
-          </div>
-          <div className='action-button-wrapper'>
-            <ActionButton
-              iconSrc={buyIcon}
-              onClick={_showQrModal}
-              tooltipContent={t<string>('Receive')}
+            <ReceiveButton
+              openAddress={_showQrModal}
+              openBuy={openBuyModal}
             />
           </div>
           <Link

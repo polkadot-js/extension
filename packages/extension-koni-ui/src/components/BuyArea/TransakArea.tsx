@@ -99,10 +99,10 @@ export default React.memo(styled(TransakArea)(({ theme }: Props) => `
   justify-content: center;
 
   .img-logo {
-    width: 160px;
+    width: 264px;
 
     &.disabled {
-      opacity: 0.5;
+      opacity: ${theme.buyServiceOpacity};
     }
   }
 `));

@@ -1,6 +1,12 @@
 # CHANGELOG
 
 ## 0.5.7 (Koni)
+Build date: Sep 7, 2022.
+
+Update:
+- Add support Subspace Gemini 2a
+
+## 0.5.7 (Koni)
 Build date: Sep 6, 2022.
 
 Update:
@@ -8,7 +14,6 @@ Update:
 - Improved decimal display UX (#585)
 - Integrate Gear testnet into SubWallet (#605)
 - Update the logo of xcINTR, xciBTC, xckBTC, xcCSM, xcSDN, xcKMA, xcLIT, xcCRAB, xcTEER#524
-
 
 Bug fixes:
 - Fix bug inject provider not auto remove (#591)

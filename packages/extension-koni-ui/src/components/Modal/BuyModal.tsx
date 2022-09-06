@@ -6,7 +6,7 @@ import { faTimes } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { NETWORK_STATUS } from '@subwallet/extension-base/background/KoniTypes';
 import { AccountJson } from '@subwallet/extension-base/background/types';
-import { ALL_NETWORK_KEY } from '@subwallet/extension-koni-base/constants';
+import { ALL_ACCOUNT_KEY, ALL_NETWORK_KEY } from '@subwallet/extension-koni-base/constants';
 import signalSlashIcon from '@subwallet/extension-koni-ui/assets/signal-stream-slash-solid.svg';
 import signalIcon from '@subwallet/extension-koni-ui/assets/signal-stream-solid.svg';
 import { AccountInfoEl } from '@subwallet/extension-koni-ui/components';
@@ -25,7 +25,7 @@ import { getGenesisOptionsByAddressType, isAccountAll } from '@subwallet/extensi
 import { getLogoByGenesisHash } from '@subwallet/extension-koni-ui/util/logoByGenesisHashMap';
 import reformatAddress from '@subwallet/extension-koni-ui/util/reformatAddress';
 import CN from 'classnames';
-import React, { useCallback, useContext, useMemo, useState } from 'react';
+import React, { useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { useSelector } from 'react-redux';
 import styled from 'styled-components';
 
@@ -78,8 +78,8 @@ const BuyModal = (props: Props) => {
     return genesisOptions.find((net) => net.networkKey === networkQr?.networkKey);
   }, [genesisOptions, networkQr?.networkKey]);
 
-  const { address } = (account as AccountJson);
-  const { networkKey, networkPrefix } = (network as NetworkSelectOption);
+  const { address } = (account as AccountJson) || { address: ALL_ACCOUNT_KEY };
+  const { networkKey, networkPrefix } = (network as NetworkSelectOption) || { networkKey: ALL_NETWORK_KEY, networkPrefix: 42 };
 
   const networkMap = useSelector((state: RootState) => state.networkMap);
   const formatted = useMemo(() => {
@@ -145,6 +145,12 @@ const BuyModal = (props: Props) => {
       return 'Unable to connect';
     }
   }, []);
+
+  useEffect(() => {
+    if ((accountQr && !account) || (networkQr && !network)) {
+      closeModal && closeModal();
+    }
+  }, [account, accountQr, closeModal, network, networkQr]);
 
   if (!accountQr || isAccountAll(accountQr.address)) {
     return (

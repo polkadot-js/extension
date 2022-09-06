@@ -140,7 +140,7 @@ const ReceiveButton = (props: Props) => {
       </div>
       <Tooltip
         offset={{ top: 8 }}
-        text={t<string>('Receiver')}
+        text={t<string>('Receive')}
         trigger={trigger}
       />
     </>

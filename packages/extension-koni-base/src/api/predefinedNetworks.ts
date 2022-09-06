@@ -334,7 +334,8 @@ export const PREDEFINED_NETWORKS: Record<string, NetworkJson> = {
     paraId: 2032,
     nativeToken: 'INTR',
     crowdloanUrl: 'https://crowdloan.interlay.io/',
-    decimals: 10
+    decimals: 10,
+    coinGeckoKey: 'interlay'
   },
   equilibrium_parachain: {
     key: 'equilibrium_parachain',
@@ -881,7 +882,8 @@ export const PREDEFINED_NETWORKS: Record<string, NetworkJson> = {
     decimals: 12,
     coinGeckoKey: 'bifrost-native-coin',
     getStakingOnChain: true,
-    supportBonding: true
+    supportBonding: true,
+    blockExplorer: 'https://bifrost-kusama.subscan.io'
   },
   bifrost_dot: {
     key: 'bifrost_dot',
@@ -899,7 +901,8 @@ export const PREDEFINED_NETWORKS: Record<string, NetworkJson> = {
     nativeToken: 'BNC',
     crowdloanUrl: 'https://bifrost.app/vcrowdloan',
     decimals: 12,
-    coinGeckoKey: 'bifrost-native-coin'
+    coinGeckoKey: 'bifrost-native-coin',
+    blockExplorer: 'https://bifrost.subscan.io'
   },
   bifrost_testnet: {
     key: 'bifrost_testnet',
@@ -1802,54 +1805,22 @@ export const PREDEFINED_NETWORKS: Record<string, NetworkJson> = {
     nativeToken: 'AMPE',
     groups: ['KUSAMA_PARACHAIN'],
     decimals: 12
+  },
+  gear_testnet: {
+    key: 'gear_testnet',
+    chain: 'Gear Staging Testnet',
+    genesisHash: '0x6f022bd353c56b3e441507e1173601fd9dc0fb7547e6a95bbaf9b21f311bcab6',
+    ss58Format: 42,
+    providers: {
+      gear: 'wss://rpc-node.gear-tech.io'
+    },
+    currentProvider: 'gear',
+    active: false,
+    currentProviderMode: 'ws',
+    nativeToken: 'Unit',
+    decimals: 12,
+    groups: ['TEST_NET']
   }
-  // contractsRococo: {
-  //   key: 'contractsRococo',
-  //   chain: 'Contracts on Rococo',
-  //   genesisHash: '0xc5442742bb6288bb3835ea1c9032981f06433ee5fc65d6e216c4422c0c19b989',
-  //   ss58Format: 42,
-  //   providers: {
-  //     testnet: 'wss://rococo-contracts-rpc.polkadot.io'
-  //   },
-  //   active: false,
-  //   currentProviderMode: 'ws',
-  //   currentProvider: 'testnet',
-  //   groups: ['TEST_NET'],
-  //   nativeToken: 'ROC',
-  //   decimals: 12,
-  //   paraId: 1002
-  // }
-  // acala_dev: {
-  //   key: 'acala_dev',
-  //   chain: 'Acala Karura Dev',
-  //   genesisHash: '0x102c0b94289f766d68d41b788c48b3440baa46d40f7d46b413c59a1a2b1b4079',
-  //   ss58Format: 8,
-  //   providers: {
-  //     testnet: 'wss://crosschain-dev.polkawallet.io:9908/'
-  //   },
-  //   active: false,
-  //   currentProviderMode: 'ws',
-  //   currentProvider: 'testnet',
-  //   groups: ['TEST_NET'],
-  //   nativeToken: 'KAR',
-  //   decimals: 12,
-  //   paraId: 2000
-  // },
-  // moonbase_relay: {
-  //   key: 'moonbase_relay',
-  //   chain: 'Moonbase Relay Testnet',
-  //   genesisHash: '0xe1ea3ab1d46ba8f4898b6b4b9c54ffc05282d299f89e84bd0fd08067758c9443',
-  //   ss58Format: 42,
-  //   providers: {
-  //     testnet: 'wss://frag-moonbase-relay-rpc-ws.g.moonbase.moonbeam.network/'
-  //   },
-  //   active: false,
-  //   currentProviderMode: 'ws',
-  //   currentProvider: 'testnet',
-  //   groups: ['TEST_NET'],
-  //   nativeToken: 'Unit',
-  //   decimals: 12
-  // },
 };
 
 function getGenesisHashes () {

@@ -414,5 +414,14 @@
   "The sender account is Ledger account.": "",
   "The receiver account is Ledger account.": "",
   "This is not support XCM Transfer.": "",
-  "The network not match.": ""
+  "The network not match.": "",
+  "Buy crypto from fiat": "",
+  "Get wallet address": "",
+  "Account Selection": "",
+  "Search account...": "",
+  "Network Selection": "",
+  "Service Selection": "",
+  "Select the account you want to receive your cryptos": "",
+  "Select the network you want to buy cryptos": "",
+  "Select the service you want to buy cryptos": ""
 }

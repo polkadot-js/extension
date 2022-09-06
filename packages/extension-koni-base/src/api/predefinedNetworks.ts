@@ -1610,7 +1610,7 @@ export const PREDEFINED_NETWORKS: Record<string, NetworkJson> = {
     active: false,
     currentProviderMode: 'ws',
     currentProvider: 'subspace',
-    groups: ['MAIN_NET'],
+    groups: ['TEST_NET'],
     nativeToken: 'tSSC',
     decimals: 18
   },
@@ -1627,7 +1627,24 @@ export const PREDEFINED_NETWORKS: Record<string, NetworkJson> = {
     active: false,
     currentProviderMode: 'ws',
     currentProvider: 'subspaceUS',
-    groups: ['MAIN_NET'],
+    groups: ['TEST_NET'],
+    nativeToken: 'tSSC',
+    decimals: 18
+  },
+  subspace_gemini_2a: {
+    key: 'subspace_gemini_2a',
+    chain: 'Subspace Gemini 2a',
+    genesisHash: '0x43d10ffd50990380ffe6c9392145431d630ae67e89dbc9c014cac2a417759101',
+    ss58Format: 2254,
+    providers: {
+      'Europe 0': 'wss://eu-0.gemini-2a.subspace.network/ws',
+      'Europe 1': 'wss://eu-1.gemini-2a.subspace.network/ws',
+      'Europe 2': 'wss://eu-2.gemini-2a.subspace.network/ws'
+    },
+    active: false,
+    currentProviderMode: 'ws',
+    currentProvider: 'Europe 0',
+    groups: ['TEST_NET'],
     nativeToken: 'tSSC',
     decimals: 18
   },

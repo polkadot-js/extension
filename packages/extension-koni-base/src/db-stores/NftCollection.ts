@@ -12,10 +12,6 @@ export default class NftCollectionStore extends BaseStoreWithChain<INftCollectio
   }
 
   getNftCollection () {
-    return this.table.toArray().then((items) => items.map((item) => {
-      item.collectionId = item.collectionId.toLowerCase();
-
-      return item;
-    }));
+    return this.table.toArray();
   }
 }

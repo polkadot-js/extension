@@ -9,11 +9,11 @@ import BaseStoreWithAddress from '../db-stores/BaseStoreWithAddress';
 export default class NftStore extends BaseStoreWithAddress<INft> {
   getNft (addresses: string[], chainHashs: string[] = []) {
     if (addresses.length) {
-      return this.table.where('address').anyOfIgnoreCase(addresses).and((item) => !chainHashs.length || chainHashs.includes(item.chainHash)).toArray().then(this.reformatCollectionIds);
+      return this.table.where('address').anyOfIgnoreCase(addresses).and((item) => !chainHashs.length || chainHashs.includes(item.chainHash)).toArray();
     }
 
     // return this.table.filter((item) => !chainHashs.length || chainHashs.includes(item.chainHash)).toArray();
-    return this.table.filter((item) => !chainHashs.length || chainHashs.includes(item.chainHash)).toArray().then(this.reformatCollectionIds);
+    return this.table.filter((item) => !chainHashs.length || chainHashs.includes(item.chainHash)).toArray();
   }
 
   subscribeNft (addresses: string[], chainHashs: string[] = []) {
@@ -58,11 +58,11 @@ export default class NftStore extends BaseStoreWithAddress<INft> {
     }).filter((item) => nftIds.includes(item.id || '')).delete();
   }
 
-  reformatCollectionIds (items: INft[]) {
-    return items.map((item) => {
-      item.collectionId = item.collectionId?.toLowerCase();
+  // reformatCollectionIds (items: INft[]) {
+  //   return items.map((item) => {
+  //     item.collectionId = item.collectionId?.toLowerCase();
 
-      return item;
-    });
-  }
+  //     return item;
+  //   });
+  // }
 }

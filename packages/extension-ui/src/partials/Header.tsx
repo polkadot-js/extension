@@ -305,17 +305,6 @@ export default React.memo(styled(Header)(({ theme }: Props) => `
     cursor: pointer;
   }
 
-  /* .backlink {
-    color: ${theme.labelColor};
-    min-height: 52px;
-    text-decoration: underline;
-    width: min-content;
-
-    &:visited {
-      color: ${theme.labelColor};
-    }
-  } */
-
   &.smallMargin {
     margin-bottom: 15px;
   }

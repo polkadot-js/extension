@@ -77,23 +77,24 @@ export default function Popup (): React.ReactElement {
   const [signRequests, setSignRequests] = useState<null | SigningRequest[]>(null);
   const [isWelcomeDone, setWelcomeDone] = useState(false);
   const [settingsCtx, setSettingsCtx] = useState<SettingsStruct>(startSettings);
-  const { goBack } = useHistory();
+  const history = useHistory();
 
   const _onAction = useCallback(
     (to?: string): void => {
       setWelcomeDone(window.localStorage.getItem('welcome_read') === 'ok');
 
       if (!to) {
-        console.error('Destination unspecified');
-
         return;
       }
 
       to === '..'
-        ? goBack()
+        // if we can't go gack from there, go to the home
+        ? history.length === 1
+          ? history.push('/')
+          : history.goBack()
         : window.location.hash = to;
     },
-    [goBack]
+    [history]
   );
 
   useEffect((): void => {

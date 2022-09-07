@@ -1,13 +1,13 @@
      813	Nam Phạm                      	add Gear testnet
-     491	AnhMTV                        	Release version 0.5.8
+     495	AnhMTV                        	
      465	Jaco                          	0.42.5 (#969)
-     231	S2kael                        	[Issue-245] Handle when disconnect network/remove account
+     232	S2kael                        	[Issue-616] [OnRamp] [Transak] updateLogo
      151	lw-cdm                        	Update logo for Moonbeans
      142	quangdo                       	update some label and variable (original to origin)
       85	lw-cdm                        	
       82	Thibaut Sardan                	Add account filtering feature (#832)
       70	Hieu Dao                      	update KMA logo URL
-      64	khainh                        	Keep EVM connections in IDLE mode
+      65	khainh                        	Disable ipfs-gateway.cloud
       55	leewong                       	#118: update balance logic for Kintsugi testnet
       53	Dominhquangdev                	update Bridge code
       10	Trang Trịnh                   	api get karura and acala nfts

@@ -1071,19 +1071,6 @@ export default class KoniState extends State {
     }
 
     this.currentAccountStore.set('CurrentAccountInfo', data, () => {
-      // Trigger single mode by chain network
-      // if (currentGenesisHash) {
-      //   const singleMode = this.findSingleMode(currentGenesisHash);
-      //
-      //   if (singleMode) {
-      //     this.setTheme(singleMode.theme);
-      //   } else {
-      //     this.setTheme(DEFAULT_THEME);
-      //   }
-      // } else {
-      //   this.setTheme(DEFAULT_THEME);
-      // }
-
       this.updateServiceInfo();
       callback && callback();
     });

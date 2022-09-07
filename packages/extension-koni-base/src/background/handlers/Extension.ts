@@ -753,6 +753,13 @@ export default class KoniExtension extends Extension {
       });
     });
 
+    // Set current account to if forgot all account
+    if (keyring.getAccounts().length === 0) {
+      state.getCurrentAccount(({ allGenesisHash }) => {
+        state.setCurrentAccount({ currentGenesisHash: allGenesisHash || null, address: ALL_ACCOUNT_KEY });
+      });
+    }
+
     state.getAuthorize((value) => {
       if (value && Object.keys(value).length) {
         Object.keys(value).forEach((url) => {

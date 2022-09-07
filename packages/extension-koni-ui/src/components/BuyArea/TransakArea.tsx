@@ -1,7 +1,7 @@
 // Copyright 2019-2022 @polkadot/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import transakLogo from '@subwallet/extension-koni-ui/assets/logo/123.transak.png';
+import transakLogo from '@subwallet/extension-koni-ui/assets/logo/123.Transak.png';
 import Tooltip from '@subwallet/extension-koni-ui/components/Tooltip';
 import { PREDEFINED_TRANSAK_NETWORK } from '@subwallet/extension-koni-ui/constants/transak';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';

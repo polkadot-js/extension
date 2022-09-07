@@ -5,10 +5,9 @@ import type { ThemeProps } from '../../types';
 
 import React, { useCallback, useContext, useEffect } from 'react';
 import { useParams } from 'react-router';
-import { useHistory } from 'react-router-dom';
 import styled from 'styled-components';
 
-import { AccountContext, Button } from '../../components';
+import { AccountContext, ActionContext, Button } from '../../components';
 import useTranslation from '../../hooks/useTranslation';
 import { getAuthList, updateAuthorization } from '../../messaging';
 import { AccountSelection, Header } from '../../partials';
@@ -21,7 +20,7 @@ function AccountManagement ({ className }: Props): React.ReactElement<Props> {
   const { url } = useParams<{url: string}>();
   const { selectedAccounts = [], setSelectedAccounts } = useContext(AccountContext);
   const { t } = useTranslation();
-  const { goBack } = useHistory();
+  const onAction = useContext(ActionContext);
 
   useEffect(() => {
     getAuthList()
@@ -38,10 +37,10 @@ function AccountManagement ({ className }: Props): React.ReactElement<Props> {
   const _onApprove = useCallback(
     (): void => {
       updateAuthorization(selectedAccounts, url)
-        .then(() => goBack())
+        .then(() => onAction('..'))
         .catch(console.error);
     },
-    [goBack, selectedAccounts, url]
+    [onAction, selectedAccounts, url]
   );
 
   return (

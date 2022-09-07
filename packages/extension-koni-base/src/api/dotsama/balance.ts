@@ -48,12 +48,12 @@ function subscribeWithDerive (addresses: string[], networkKey: string, networkAP
     });
   });
 
-  return async () => {
-    const unsubs = await Promise.all(unsubProms);
-
-    unsubs.forEach((unsub) => {
-      unsub && unsub();
-    });
+  return () => {
+    Promise.all(unsubProms).then((unsubs) => {
+      unsubs.forEach((unsub) => {
+        unsub && unsub();
+      });
+    }).catch(console.error);
   };
 }
 
@@ -175,7 +175,7 @@ async function subscribeTokensBalance (addresses: string[], networkKey: string, 
 
   const unsubList = await Promise.all(tokenList.map(async ({ decimals, specialOption, symbol }) => {
     try {
-      const options = specialOption || { Token: symbol };
+      const options = specialOption || { Token: symbol.toUpperCase() };
       // Get Token Balance
       // @ts-ignore
       const unsub = await api.query.tokens.accounts.multi(addresses.map((address) => [address, options]), (balances: TokenBalanceRaw[]) => {
@@ -312,39 +312,64 @@ async function subscribeWithAccountMulti (addresses: string[], networkKey: strin
   if (['crab', 'pangolin'].includes(networkKey)) {
     const { chainDecimals, chainTokens } = await getRegistry(networkKey, networkAPI.api);
 
-    unsub = await networkAPI.api.query.system.account.multi(addresses, (balances: AccountInfo[]) => {
-      let [free, reserved, freeKton, reservedKton] = [new BN(0), new BN(0), new BN(0), new BN(0)];
+    let totalBalance: BN = new BN(0);
+    let freeBalance: BN = new BN(0);
+    let miscFrozen: BN = new BN(0);
+    let reservedKtonBalance: BN = new BN(0);
+    let freeKtonBalance: BN = new BN(0);
 
-      balances.forEach((balance: AccountInfo) => {
-        free = free.add(balance.data?.free?.toBn() || new BN(0));
-        reserved = reserved.add(balance.data?.reserved?.toBn() || new BN(0));
+    const unsubProms = addresses.map((address) => {
+      return networkAPI.api.derive.balances?.all(address, async (balance: DeriveBalancesAll) => {
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+        freeBalance = freeBalance.add(balance.availableBalance?.toBn() || new BN(0));
+        miscFrozen = miscFrozen.add(balance.lockedBalance?.toBn() || new BN(0));
+        totalBalance = totalBalance.add(balance.freeBalance?.toBn() || new BN(0));
+
+        const _systemBalance = await networkAPI.api.query.system.account(address);
+        const systemBalance = _systemBalance.toHuman() as unknown as AccountInfo;
+
+        // @ts-ignore
+        const rawFreeKton = (systemBalance.data?.freeKton as string).replaceAll(',', '');
+        // @ts-ignore
+        const rawReservedKton = (systemBalance.data?.reservedKton as string).replaceAll(',', '');
+
         // @ts-ignore
         // eslint-disable-next-line @typescript-eslint/no-unsafe-argument,@typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-member-access
-        freeKton = freeKton.add(balance.data?.freeKton?.toBn() || new BN(0));
+        freeKtonBalance = freeKtonBalance.add(new BN(rawFreeKton) || new BN(0));
         // @ts-ignore
         // eslint-disable-next-line @typescript-eslint/no-unsafe-argument,@typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-member-access
-        reservedKton = reservedKton.add(balance.data?.reservedKton?.toBn() || new BN(0));
+        reservedKtonBalance = reservedKtonBalance.add(new BN(rawReservedKton) || new BN(0));
+
+        const balanceItem = {
+          state: APIItemState.READY,
+          free: totalBalance.toString(),
+          miscFrozen: miscFrozen.toString(),
+          feeFrozen: '0',
+          reserved: '0'
+        } as BalanceItem;
+
+        if (chainTokens.length > 1) {
+          balanceItem.children = {
+            [chainTokens[1]]: {
+              reserved: reservedKtonBalance.toString(),
+              free: freeKtonBalance.toString(),
+              frozen: '0',
+              decimals: chainDecimals[1]
+            }
+          };
+        }
+
+        callback(networkKey, balanceItem);
       });
-
-      balanceItem.state = APIItemState.READY;
-      balanceItem.free = free.toString();
-      balanceItem.reserved = reserved.toString();
-      balanceItem.miscFrozen = '0';
-      balanceItem.feeFrozen = '0';
-
-      if (chainTokens.length > 1) {
-        balanceItem.children = {
-          [chainTokens[1]]: {
-            reserved: reservedKton.toString(),
-            free: freeKton.toString(),
-            frozen: '0',
-            decimals: chainDecimals[1]
-          }
-        };
-      }
-
-      callback(networkKey, balanceItem);
     });
+
+    unsub = () => {
+      Promise.all(unsubProms).then((unsubs) => {
+        unsubs.forEach((unsub) => {
+          unsub && unsub();
+        });
+      }).catch(console.error);
+    };
   }
 
   function mainCallback (item = {}) {

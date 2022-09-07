@@ -167,7 +167,7 @@ function Request ({ authId, className, request: { accountAuthType, allowedAccoun
           </Button>
           <Button
             className='authorize-request__btn'
-            isDisabled={selectedAccounts.length === 0}
+            isDisabled={accountList.length === 0 || selectedAccounts.length === 0}
             onClick={_onApprove}
           >
             {t<string>('Connect')}

@@ -85,6 +85,7 @@ const darkTheme = {
   textColorDanger: '#FF8686',
   textColorFilter2: 'invert(55%) sepia(15%) saturate(461%) hue-rotate(192deg) brightness(89%) contrast(88%)',
   textDark: '#000000',
+  textOpacity: 0.6,
   checkDotColor: basicThemeColors.primary1,
   iconHoverColor: basicThemeColors.primary2,
   chainTextColor: '#ED843D',
@@ -108,6 +109,7 @@ const darkTheme = {
   extensionBorder: '#030E45',
   accountAuthorizeRequest: '#151A30',
   dropdownBackground: '#020412',
+  buyServiceOpacity: 0.6,
   filterDefault: 'invert(51%) sepia(13%) saturate(545%) hue-rotate(192deg) brightness(96%) contrast(85%)', // #7B8098
   filterError: 'invert(22%) sepia(85%) saturate(4711%) hue-rotate(351deg) brightness(98%) contrast(82%)', // #FF8686
   filterSuccess: 'invert(71%) sepia(58%) saturate(424%) hue-rotate(107deg) brightness(85%) contrast(90%)', // #42C59A

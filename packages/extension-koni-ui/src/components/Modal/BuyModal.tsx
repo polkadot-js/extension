@@ -1,4 +1,4 @@
-// Copyright 2019-2022 @polkadot/extension-ui authors & contributors
+// Copyright 2019-2022 @polkadot/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
 import { faCircleQuestion } from '@fortawesome/free-regular-svg-icons';
@@ -10,35 +10,24 @@ import { ALL_ACCOUNT_KEY, ALL_NETWORK_KEY } from '@subwallet/extension-koni-base
 import signalSlashIcon from '@subwallet/extension-koni-ui/assets/signal-stream-slash-solid.svg';
 import signalIcon from '@subwallet/extension-koni-ui/assets/signal-stream-solid.svg';
 import { AccountInfoEl } from '@subwallet/extension-koni-ui/components';
-import Identicon from '@subwallet/extension-koni-ui/components/Identicon';
+import MoonpayArea from '@subwallet/extension-koni-ui/components/BuyArea/MoonpayArea';
+import OnRamperArea from '@subwallet/extension-koni-ui/components/BuyArea/OnRamperArea';
+import TransakArea from '@subwallet/extension-koni-ui/components/BuyArea/TransakArea';
 import InputFilter from '@subwallet/extension-koni-ui/components/InputFilter';
-import Link from '@subwallet/extension-koni-ui/components/Link';
 import Modal from '@subwallet/extension-koni-ui/components/Modal/index';
 import Tooltip from '@subwallet/extension-koni-ui/components/Tooltip';
 import { AccountContext } from '@subwallet/extension-koni-ui/contexts';
-import useScanExplorerAddressUrl from '@subwallet/extension-koni-ui/hooks/screen/home/useScanExplorerAddressUrl';
-import useSupportScanExplorer from '@subwallet/extension-koni-ui/hooks/screen/home/useSupportScanExplorer';
 import useGenesisHashOptions, { NetworkSelectOption } from '@subwallet/extension-koni-ui/hooks/useGenesisHashOptions';
-import useToast from '@subwallet/extension-koni-ui/hooks/useToast';
 import useTranslation from '@subwallet/extension-koni-ui/hooks/useTranslation';
-import { editAccount } from '@subwallet/extension-koni-ui/messaging';
-import HeaderEditName from '@subwallet/extension-koni-ui/partials/HeaderEditName';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { ModalQrProps, ThemeProps } from '@subwallet/extension-koni-ui/types';
-import { getGenesisOptionsByAddressType, getLogoByNetworkKey, isAccountAll, toShort } from '@subwallet/extension-koni-ui/util';
+import { getGenesisOptionsByAddressType, isAccountAll } from '@subwallet/extension-koni-ui/util';
 import { getLogoByGenesisHash } from '@subwallet/extension-koni-ui/util/logoByGenesisHashMap';
 import reformatAddress from '@subwallet/extension-koni-ui/util/reformatAddress';
 import CN from 'classnames';
 import React, { useCallback, useContext, useEffect, useMemo, useState } from 'react';
-import CopyToClipboard from 'react-copy-to-clipboard';
-import QRCode from 'react-qr-code';
 import { useSelector } from 'react-redux';
 import styled from 'styled-components';
-
-import { IconTheme } from '@polkadot/react-identicon/types';
-
-import cloneLogo from '../../assets/clone.svg';
-import pencil from '../../assets/pencil.svg';
 
 interface Props extends ThemeProps {
   className?: string;
@@ -47,40 +36,35 @@ interface Props extends ThemeProps {
   updateModalQr: (value: Partial<ModalQrProps>) => void;
 }
 
-interface EditState {
-  isEditing: boolean;
-  toggleActions: number;
-}
-
 interface WrapperProps {
   children?: JSX.Element;
   closeModal?: () => void;
   className?: string;
+  closeable?: boolean;
 }
 
 const Wrapper = (props: WrapperProps) => {
-  const { children, className, closeModal } = props;
+  const { children, className, closeModal, closeable = true } = props;
 
   return (
     <Modal
       className={CN(className, 'modal-container')}
-      maskClosable={true}
+      maskClosable={closeable}
       onClose={closeModal}
       wrapperClassName={'select-modal'}
     >
-      <div className={'account-qr-modal'}>
+      <div className={'buy-modal'}>
         {children}
       </div>
     </Modal>
   );
 };
 
-function AccountQrModal (props: Props): React.ReactElement<Props> {
+const BuyModal = (props: Props) => {
   const { className, closeModal, modalQrProp, updateModalQr } = props;
-  const { account: accountQr, network: networkQr, showExportButton } = modalQrProp;
+  const { account: accountQr, network: networkQr } = modalQrProp;
 
   const { t } = useTranslation();
-  const { show } = useToast();
 
   const { accounts } = useContext(AccountContext);
 
@@ -94,19 +78,15 @@ function AccountQrModal (props: Props): React.ReactElement<Props> {
     return genesisOptions.find((net) => net.networkKey === networkQr?.networkKey);
   }, [genesisOptions, networkQr?.networkKey]);
 
-  const { address, isExternal, name: accountName } = (account as AccountJson) || { address: ALL_ACCOUNT_KEY, name: '', isExternal: true };
-  const { icon: iconTheme, networkKey, networkPrefix } = (network as NetworkSelectOption) || { networkKey: ALL_NETWORK_KEY, networkPrefix: 42, icon: 'polkadot' };
+  const { address } = (account as AccountJson) || { address: ALL_ACCOUNT_KEY };
+  const { networkKey, networkPrefix } = (network as NetworkSelectOption) || { networkKey: ALL_NETWORK_KEY, networkPrefix: 42 };
 
-  const [editedName, setName] = useState<string | undefined | null>(accountName);
-  const [{ isEditing }, setEditing] = useState<EditState>({ isEditing: false, toggleActions: 0 });
   const networkMap = useSelector((state: RootState) => state.networkMap);
   const formatted = useMemo(() => {
     const networkInfo = networkMap[networkKey];
 
     return reformatAddress(address, networkPrefix, networkInfo?.isEthereum);
   }, [networkMap, networkKey, address, networkPrefix]);
-  const isSupportScanExplorer = useSupportScanExplorer(networkKey);
-  const scanExplorerAddressUrl = useScanExplorerAddressUrl(networkKey, formatted);
 
   const [filter, setFilter] = useState('');
 
@@ -123,28 +103,6 @@ function AccountQrModal (props: Props): React.ReactElement<Props> {
   const filteredNetwork = useMemo(() => {
     return filter ? genesisOptions.filter((network) => network.networkKey?.toLowerCase().includes(filter.toLowerCase())) : genesisOptions;
   }, [filter, genesisOptions]);
-
-  const _toggleEdit = useCallback(
-    (): void => {
-      setEditing(({ toggleActions }) => ({ isEditing: !isEditing, toggleActions: ++toggleActions }));
-    },
-    [isEditing]
-  );
-
-  const _saveChanges = useCallback(
-    (): void => {
-      editedName && editAccount(address, editedName)
-        .catch(console.error);
-
-      _toggleEdit();
-    },
-    [editedName, address, _toggleEdit]
-  );
-
-  const _onCopy = useCallback(
-    () => show(t('Copied')),
-    [show, t]
-  );
 
   const onChangeFilter = useCallback((value: string) => {
     setFilter(value);
@@ -189,10 +147,6 @@ function AccountQrModal (props: Props): React.ReactElement<Props> {
   }, []);
 
   useEffect(() => {
-    setName(accountName);
-  }, [accountName]);
-
-  useEffect(() => {
     if ((accountQr && !account) || (networkQr && !network)) {
       closeModal && closeModal();
     }
@@ -206,7 +160,9 @@ function AccountQrModal (props: Props): React.ReactElement<Props> {
       >
         <>
           <div className={CN('modal-header')}>
-            <div className={CN('header-title')}>Account Selection</div>
+            <div className={CN('header-title')}>
+              {t('Account Selection')}
+            </div>
             <div
               className={CN('header-icon')}
               data-for={'header-icon'}
@@ -217,14 +173,14 @@ function AccountQrModal (props: Props): React.ReactElement<Props> {
               />
             </div>
             <Tooltip
-              text={t<string>('Select the account you would like to send from')}
+              text={t<string>('Select the account you want to receive your cryptos')}
               trigger={'header-icon'}
             />
           </div>
           <InputFilter
             className={CN('query-input')}
             onChange={onChangeFilter}
-            placeholder='Search account...'
+            placeholder={t('Search account...')}
             value={filter}
             withReset
           />
@@ -275,7 +231,7 @@ function AccountQrModal (props: Props): React.ReactElement<Props> {
       >
         <>
           <div className={CN('modal-header')}>
-            <div className={CN('header-title')}>Network Selection</div>
+            <div className={CN('header-title')}>{t('Network Selection')}</div>
             <div
               className={CN('header-icon')}
               data-for={'header-icon'}
@@ -286,14 +242,14 @@ function AccountQrModal (props: Props): React.ReactElement<Props> {
               />
             </div>
             <Tooltip
-              text={t<string>('Select the network to obtain the sending address')}
+              text={t<string>('Select the network you want to buy cryptos')}
               trigger={'header-icon'}
             />
           </div>
           <InputFilter
             className={CN('query-input')}
             onChange={onChangeFilter}
-            placeholder='Search network...'
+            placeholder={t('Search network...')}
             value={filter}
             withReset
           />
@@ -344,215 +300,87 @@ function AccountQrModal (props: Props): React.ReactElement<Props> {
   }
 
   return (
-    <Modal className={className}>
-      <div className={'account-qr-modal'}>
-        <div className='account-qr-modal__header'>
+    <Wrapper
+      className={CN(className)}
+      closeModal={closeModal}
+      closeable={false}
+    >
+      <div className={'buy-modal'}>
+        <div className='buy-modal__header'>
           <FontAwesomeIcon
-            className='account-qr-modal__icon'
+            className='buy-modal__icon'
             // @ts-ignore
             icon={faTimes}
             onClick={closeModal}
           />
         </div>
-        <div className='account-qr-modal__content'>
-          <Identicon
-            className='account-qr-modal__logo'
-            iconTheme={iconTheme as IconTheme}
-            prefix={networkPrefix}
-            size={54}
-            value={formatted}
-          />
-          <div className='account-qr-modal-token-name'>
-            <div className='account-qr-modal-token-name__text'>
-              {accountName}
+        <div className='buy-modal__content'>
+          <div className={CN('modal-header')}>
+            <div className={CN('header-title')}>
+              {t('Service Selection')}
             </div>
             <div
-              className='account-qr-modal-token-name__edit-btn'
-              onClick={_toggleEdit}
+              className={CN('header-icon')}
+              data-for={'header-icon'}
+              data-tip={true}
             >
-              <img
-                alt='edit'
-                src={pencil}
+              <FontAwesomeIcon
+                icon={faCircleQuestion}
               />
             </div>
-            {isEditing && (
-              <HeaderEditName
-                className='account-qr-modal__edit-name'
-                defaultValue={accountName}
-                isFocused
-                label={' '}
-                onBlur={_saveChanges}
-                onChange={setName}
-              />
-            )}
-          </div>
-          <div className='account-qr-modal__qr-code'>
-            <QRCode
-              size={140}
-              value={formatted}
+            <Tooltip
+              text={t<string>('Select the service you want to buy cryptos')}
+              trigger={'header-icon'}
             />
           </div>
-          <CopyToClipboard text={formatted || ''}>
-            <div
-              className='account-qr-modal__address'
-              onClick={_onCopy}
-            >
-              <div className='account-qr-modal__address-text'>
-                <img
-                  alt='logo'
-                  className={'account-qr-modal__network-logo'}
-                  src={getLogoByNetworkKey(networkKey)}
-                />
-                {toShort(formatted, 13, 13)}
-                <img
-                  alt='clone'
-                  className='account-qr-modal__clone-logo'
-                  src={cloneLogo}
-                />
-              </div>
-            </div>
-          </CopyToClipboard>
-
-          {isSupportScanExplorer
-            ? (
-              <a
-                className='account-qr-modal-button'
-                href={scanExplorerAddressUrl}
-                rel='noreferrer'
-                target='_blank'
-              >
-                <div className='account-qr-modal-button__text'>
-                  {t<string>('View Account on Explorer')}
-                </div>
-              </a>
-            )
-            : (
-              <span className='account-qr-modal-button -disabled'>
-                <div className='account-qr-modal-button__text'>
-                  {t<string>('View Account on Explorer')}
-                </div>
-              </span>
-            )}
-
-          {showExportButton && !isAccountAll(address) && !isExternal && (
-            <Link
-              className='account-qr-modal-button'
-              to={`/account/export/${formatted}`}
-            >
-              <div className='account-qr-modal-button__text'>
-                {t<string>('Export Private Key')}
-              </div>
-            </Link>
-          )}
+          <div className='modal-body'>
+            <TransakArea
+              formattedAddress={formatted}
+              networkKey={networkKey}
+            />
+            <MoonpayArea
+              formattedAddress={formatted}
+              networkKey={networkKey}
+            />
+            <OnRamperArea
+              formattedAddress={formatted}
+              networkKey={networkKey}
+            />
+          </div>
         </div>
-      </div>
-    </Modal>
-  );
-}
 
-export default styled(AccountQrModal)(({ theme }: ThemeProps) => `
-  .account-qr-modal {
+      </div>
+    </Wrapper>
+  );
+};
+
+export default styled(BuyModal)(({ theme }: ThemeProps) => `
+  .buy-modal {
     position: relative;
     display: flex;
     flex-direction: column;
   }
 
-  .account-qr-modal__header {
+  .buy-modal__header {
     position: absolute;
     top: -5px;
     right: -5px;
     cursor: pointer;
   }
 
-  .account-qr-modal__icon {
+  .buy-modal__icon {
     cursor: pointer;
     color: ${theme.textColor};
   }
 
-  .account-qr-modal__content {
+  .buy-modal__content {
     display: flex;
     flex-direction: column;
     align-items: center;
+    flex: 1;
   }
 
-  .account-qr-modal__logo {
-    margin-top: 11px;
-    width: 58px;
-    height: 58px;
-  }
-
-  .account-qr-modal__network-logo {
-    width: 20px;
-    height: 20px;
-    border-radius: 50%;
-    margin-right: 10px;
-    background-color: #fff;
-  }
-
-  .account-qr-modal-token-name {
-    margin-top: 3px;
-    display: flex;
-    align-items: center;
-    position: relative;
-  }
-
-  .account-qr-modal-token-name__text {
-    font-size: 18px;
-    line-height: 30px;
-    font-weight: 500;
-    margin-right: 5px;
-    max-width: 200px;
-    text-overflow: ellipsis;
-    overflow: hidden;
-    white-space: nowrap;
-  }
-
-  .account-qr-modal-token-name__edit-btn {
-    height: 30px;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    cursor: pointer;
-  }
-
-  .account-qr-modal__qr-code {
-    margin: 20px 0;
-    border: 2px solid #fff;
-    width: 144px;
-    height: 144px;
-
-    svg {
-      display:block;
-    }
-  }
-
-  .account-qr-modal__address {
-    border-radius: 8px;
-    background-color: ${theme.backgroundAccountAddress};
-    width: 100%;
-    margin-bottom: 15px;
-    cursor: pointer;
-  }
-
-  .account-qr-modal__address-text {
-    font-size: 15px;
-    line-height: 26px;
-    color: ${theme.textColor2};
-    max-width: 100%;
-    text-overflow: ellipsis;
-    overflow: hidden;
-    white-space: nowrap;
-    padding: 11px 43px 11px 43px;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-  }
-
-  .account-qr-modal__clone-logo {
-    padding-left: 10px;
-  }
-
-  .account-qr-modal-button {
+  .buy-modal-button {
     width: 320px;
     padding: 11px;
     display: flex;
@@ -564,40 +392,6 @@ export default styled(AccountQrModal)(({ theme }: ThemeProps) => `
     cursor: pointer;
     text-decoration: none;
     opacity: 1;
-  }
-
-  .account-qr-modal-button__text {
-    font-size: 15px;
-    line-height: 26px;
-    font-weight: 500;
-    color: ${theme.textColor3};
-  }
-
-  .account-qr-modal-button.-disabled {
-    cursor: not-allowed;
-
-    .account-qr-modal-button__text {
-      opacity: 0.5;
-    }
-  }
-
-  .account-qr-modal__edit-name {
-    position: absolute;
-    flex: 1;
-    left: calc(50% - 120px);
-    top: -5px;
-    width: 240px;
-    display: flex;
-    align-items: center;
-    z-index: 1050;
-    > div {
-      margin-top: 0;
-      width: 100%
-    }
-
-    input {
-      height: 32px;
-    }
   }
 
   .modal-header {
@@ -622,12 +416,22 @@ export default styled(AccountQrModal)(({ theme }: ThemeProps) => `
     flex-shrink: 0;
   }
 
+
+  .modal-body {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    flex: 1;
+    justify-content: center;
+    gap: 50px;
+  }
+
   &.modal-container {
 
     .select-modal {
       max-width: 390px !important;
 
-      .account-qr-modal{
+      .buy-modal{
         height: 450px;
       }
     }

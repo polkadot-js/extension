@@ -1,7 +1,7 @@
 // Copyright 2019-2022 @polkadot/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { BalanceVal } from '@subwallet/extension-koni-ui/components/balance';
+import { BalanceVal } from '@subwallet/extension-koni-ui/components/Balance';
 import Tooltip from '@subwallet/extension-koni-ui/components/Tooltip';
 import { toggleBalancesVisibility } from '@subwallet/extension-koni-ui/messaging';
 import { RootState } from '@subwallet/extension-koni-ui/stores';

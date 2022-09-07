@@ -1,12 +1,12 @@
-     801	Nam Phạm                      	update information for Ternoa
-     471	AnhMTV                        	Release version 0.5.6
+     813	Nam Phạm                      	add Gear testnet
+     491	AnhMTV                        	Release version 0.5.8
      465	Jaco                          	0.42.5 (#969)
-     194	S2kael                        	[Issue-467] [NFT] add MoonFit Beast and Beauty
+     231	S2kael                        	[Issue-245] Handle when disconnect network/remove account
      151	lw-cdm                        	Update logo for Moonbeans
      142	quangdo                       	update some label and variable (original to origin)
       85	lw-cdm                        	
       82	Thibaut Sardan                	Add account filtering feature (#832)
-      68	Hieu Dao                      	Update staking logo
+      70	Hieu Dao                      	update KMA logo URL
       64	khainh                        	Keep EVM connections in IDLE mode
       55	leewong                       	#118: update balance logic for Kintsugi testnet
       53	Dominhquangdev                	update Bridge code

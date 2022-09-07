@@ -10,7 +10,7 @@ import NetworkSelectionItem from '@subwallet/extension-koni-ui/components/Networ
 import Tooltip from '@subwallet/extension-koni-ui/components/Tooltip';
 import useToast from '@subwallet/extension-koni-ui/hooks/useToast';
 import useTranslation from '@subwallet/extension-koni-ui/hooks/useTranslation';
-import { enableNetworks } from '@subwallet/extension-koni-ui/messaging';
+import { disableNetworks, enableNetworks } from '@subwallet/extension-koni-ui/messaging';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import React, { useCallback, useEffect, useState } from 'react';
@@ -73,9 +73,20 @@ function NetworkSelection ({ className, handleShow }: Props): React.ReactElement
   }, []);
 
   const handleSubmit = useCallback(() => {
-    enableNetworks(selected)
-      .then((result) => {
-        if (result) {
+    const enabledList = Object.values(networkMap).filter((v) => (v.active)).map((v) => v.key);
+    const enableList = selected.filter((k) => !enabledList.includes(k));
+    const disableList = enabledList.filter((k) => !selected.includes(k));
+
+    console.log('Check list', enableList, disableList);
+
+    const promList = [];
+
+    enableList.length > 0 && promList.push(enableNetworks(enableList));
+    disableList.length > 0 && promList.push(disableNetworks(disableList));
+
+    Promise.all(promList)
+      .then((rs) => {
+        if (rs.filter((r) => r).length === rs.length) {
           show('Your setting has been saved');
         } else {
           show('Encountered an error. Please try again later');
@@ -85,7 +96,7 @@ function NetworkSelection ({ className, handleShow }: Props): React.ReactElement
 
     window.localStorage.setItem('isSetNetwork', 'ok');
     handleShow(false);
-  }, [handleShow, selected, show]);
+  }, [handleShow, networkMap, selected, show]);
 
   return (
     <div className={className}>

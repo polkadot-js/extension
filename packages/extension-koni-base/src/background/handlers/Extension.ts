@@ -2257,6 +2257,18 @@ export default class KoniExtension extends Extension {
     return true;
   }
 
+  private async disableNetworks (targetKeys: string[]) {
+    try {
+      for (const key of targetKeys) {
+        await this.disableNetworkMap(key);
+      }
+    } catch (e) {
+      return false;
+    }
+
+    return true;
+  }
+
   private getAccountMeta ({ address }: RequestAccountMeta): ResponseAccountMeta {
     const pair = keyring.getPair(address);
 
@@ -4102,6 +4114,8 @@ export default class KoniExtension extends Extension {
         return await this.qrSignEVM(request as RequestQrSignEVM);
       case 'pri(networkMap.enableMany)':
         return this.enableNetworks(request as string[]);
+      case 'pri(networkMap.disableMany)':
+        return await this.disableNetworks(request as string[]);
       case 'pri(accounts.get.meta)':
         return this.getAccountMeta(request as RequestAccountMeta);
 

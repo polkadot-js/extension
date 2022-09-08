@@ -77,7 +77,6 @@ export class KoniSubscription {
     !this.serviceSubscription &&
       (this.serviceSubscription = state.subscribeServiceInfo().subscribe({
         next: (serviceInfo) => {
-          console.log('serviceInfo update', serviceInfo);
           const { address } = serviceInfo.currentAccountInfo;
 
           state.initChainRegistry();

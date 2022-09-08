@@ -753,21 +753,25 @@ export default class KoniExtension extends Extension {
       });
     });
 
-    // Set current account to if forgot all account
-    if (keyring.getAccounts().length === 0) {
-      state.getCurrentAccount(({ allGenesisHash }) => {
-        state.setCurrentAccount({ currentGenesisHash: allGenesisHash || null, address: ALL_ACCOUNT_KEY });
+    await new Promise<void>((resolve) => {
+      state.getAuthorize((value) => {
+        if (value && Object.keys(value).length) {
+          Object.keys(value).forEach((url) => {
+            delete value[url].isAllowedMap[address];
+          });
+
+          state.setAuthorize(value, resolve);
+        } else {
+          resolve();
+        }
       });
-    }
+    });
 
-    state.getAuthorize((value) => {
-      if (value && Object.keys(value).length) {
-        Object.keys(value).forEach((url) => {
-          delete value[url].isAllowedMap[address];
-        });
-
-        state.setAuthorize(value);
-      }
+    // Set current account to all account
+    await new Promise<void>((resolve) => {
+      state.getCurrentAccount(({ allGenesisHash }) => {
+        state.setCurrentAccount({ currentGenesisHash: allGenesisHash || null, address: ALL_ACCOUNT_KEY }, resolve);
+      });
     });
 
     return true;

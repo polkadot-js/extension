@@ -3,7 +3,6 @@
 
 import { AccountContext } from '@subwallet/extension-koni-ui/components';
 import useGenesisHashOptions from '@subwallet/extension-koni-ui/hooks/useGenesisHashOptions';
-import { tieAccount } from '@subwallet/extension-koni-ui/messaging';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { updateCurrentNetwork } from '@subwallet/extension-koni-ui/stores/updater';
 import { getGenesisOptionsByAddressType, isAccountAll } from '@subwallet/extension-koni-ui/util';
@@ -20,30 +19,27 @@ function Rendering (): React.ReactElement {
   useEffect(() => {
     let isSync = true;
 
-    (async () => {
-      let networkSelected;
+    let networkSelected;
 
-      if (!account || !account?.genesisHash) {
+    if (!account || !account?.genesisHash) {
+      networkSelected = genesisOptions[0];
+    } else {
+      networkSelected = genesisOptions.find((opt) => opt.value === account.genesisHash);
+
+      if (!networkSelected) {
         networkSelected = genesisOptions[0];
-      } else {
-        networkSelected = genesisOptions.find((opt) => opt.value === account.genesisHash);
-
-        if (!networkSelected) {
-          await tieAccount(account.address, null);
-          networkSelected = genesisOptions[0];
-        }
       }
+    }
 
-      if (isSync && networkSelected) {
-        updateCurrentNetwork({
-          networkPrefix: networkSelected.networkPrefix,
-          icon: networkSelected.icon,
-          genesisHash: networkSelected.value,
-          networkKey: networkSelected.networkKey,
-          isEthereum: networkSelected.isEthereum
-        });
-      }
-    })().catch((e) => console.log('error is', e));
+    if (isSync && networkSelected) {
+      updateCurrentNetwork({
+        networkPrefix: networkSelected.networkPrefix,
+        icon: networkSelected.icon,
+        genesisHash: networkSelected.value,
+        networkKey: networkSelected.networkKey,
+        isEthereum: networkSelected.isEthereum
+      });
+    }
 
     return () => {
       isSync = false;

@@ -1298,6 +1298,11 @@ export interface TuringStakeCompoundResp {
   optimalTime: string
 }
 
+export interface TransakNetwork {
+  networks: string[];
+  tokens: string[];
+}
+
 export interface KoniRequestSignatures {
   'pri(staking.turingCompound)': [TuringStakeCompoundParams, TuringStakeCompoundResp];
   'pri(staking.delegationInfo)': [StakeDelegationRequest, DelegationItem[]];

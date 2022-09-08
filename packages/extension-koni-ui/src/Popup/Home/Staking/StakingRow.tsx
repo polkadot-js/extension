@@ -388,7 +388,8 @@ export default React.memo(styled(StakingRow)(({ theme }: Props) => `
   .major-balance {}
 
   .decimal-balance {
-    color: #7B8098;
+    color: ${theme.textColor2};
+    opacity: ${theme.textOpacity};
   }
 
   &.-show-detail .chain-balance-item__toggle {

@@ -334,7 +334,8 @@ export const PREDEFINED_NETWORKS: Record<string, NetworkJson> = {
     paraId: 2032,
     nativeToken: 'INTR',
     crowdloanUrl: 'https://crowdloan.interlay.io/',
-    decimals: 10
+    decimals: 10,
+    coinGeckoKey: 'interlay'
   },
   equilibrium_parachain: {
     key: 'equilibrium_parachain',
@@ -881,7 +882,8 @@ export const PREDEFINED_NETWORKS: Record<string, NetworkJson> = {
     decimals: 12,
     coinGeckoKey: 'bifrost-native-coin',
     getStakingOnChain: true,
-    supportBonding: true
+    supportBonding: true,
+    blockExplorer: 'https://bifrost-kusama.subscan.io'
   },
   bifrost_dot: {
     key: 'bifrost_dot',
@@ -899,7 +901,8 @@ export const PREDEFINED_NETWORKS: Record<string, NetworkJson> = {
     nativeToken: 'BNC',
     crowdloanUrl: 'https://bifrost.app/vcrowdloan',
     decimals: 12,
-    coinGeckoKey: 'bifrost-native-coin'
+    coinGeckoKey: 'bifrost-native-coin',
+    blockExplorer: 'https://bifrost.subscan.io'
   },
   bifrost_testnet: {
     key: 'bifrost_testnet',
@@ -1443,20 +1446,6 @@ export const PREDEFINED_NETWORKS: Record<string, NetworkJson> = {
     nativeToken: 'ACA',
     decimals: 12
   },
-  neumann: {
-    chain: 'Neumann Network',
-    genesisHash: '0x68577f68a47847fb974c220189333c46e83a899b6e375abf50b9a615d9019c20',
-    ss58Format: 51,
-    providers: {
-      neumann: 'wss://neumann.api.onfinality.io/public-ws'
-    },
-    currentProvider: 'neumann',
-    currentProviderMode: 'ws',
-    active: false,
-    key: 'neumann',
-    groups: ['TEST_NET'],
-    nativeToken: 'NEU'
-  },
   turing: {
     chain: 'Turing Network',
     genesisHash: '0x0f62b701fb12d02237a33b84818c11f621653d2b1614c777973babf4652b535d',
@@ -1621,7 +1610,7 @@ export const PREDEFINED_NETWORKS: Record<string, NetworkJson> = {
     active: false,
     currentProviderMode: 'ws',
     currentProvider: 'subspace',
-    groups: ['MAIN_NET'],
+    groups: ['TEST_NET'],
     nativeToken: 'tSSC',
     decimals: 18
   },
@@ -1638,7 +1627,24 @@ export const PREDEFINED_NETWORKS: Record<string, NetworkJson> = {
     active: false,
     currentProviderMode: 'ws',
     currentProvider: 'subspaceUS',
-    groups: ['MAIN_NET'],
+    groups: ['TEST_NET'],
+    nativeToken: 'tSSC',
+    decimals: 18
+  },
+  subspace_gemini_2a: {
+    key: 'subspace_gemini_2a',
+    chain: 'Subspace Gemini 2a',
+    genesisHash: '0x43d10ffd50990380ffe6c9392145431d630ae67e89dbc9c014cac2a417759101',
+    ss58Format: 2254,
+    providers: {
+      'Europe 0': 'wss://eu-0.gemini-2a.subspace.network/ws',
+      'Europe 1': 'wss://eu-1.gemini-2a.subspace.network/ws',
+      'Europe 2': 'wss://eu-2.gemini-2a.subspace.network/ws'
+    },
+    active: false,
+    currentProviderMode: 'ws',
+    currentProvider: 'Europe 0',
+    groups: ['TEST_NET'],
     nativeToken: 'tSSC',
     decimals: 18
   },
@@ -1784,24 +1790,9 @@ export const PREDEFINED_NETWORKS: Record<string, NetworkJson> = {
     currentProvider: 'ternoa',
     nativeToken: 'CAPS',
     groups: ['MAIN_NET'],
-    decimals: 18
+    decimals: 18,
+    coinGeckoKey: 'coin-capsule'
   },
-  // ternoaEvm: {
-  //   key: 'ternoaEvm',
-  //   chain: 'Ternoa Mainnet - EVM',
-  //   genesisHash: '0x6859c81ca95ef624c9dfe4dc6e3381c33e5d6509e35e147092bfbc780f777c4e_1',
-  //   ss58Format: 42,
-  //   providers: {
-  //     ternoa: 'wss://mainnet.ternoa.network'
-  //   },
-  //   active: false,
-  //   isEthereum: true,
-  //   currentProviderMode: 'ws',
-  //   currentProvider: 'ternoa',
-  //   nativeToken: 'CAPS',
-  //   groups: ['MAIN_NET'],
-  //   decimals: 18
-  // },
   tanganika: {
     key: 'tanganika',
     chain: 'DataHighway Tanganika',
@@ -1831,54 +1822,22 @@ export const PREDEFINED_NETWORKS: Record<string, NetworkJson> = {
     nativeToken: 'AMPE',
     groups: ['KUSAMA_PARACHAIN'],
     decimals: 12
+  },
+  gear_testnet: {
+    key: 'gear_testnet',
+    chain: 'Gear Staging Testnet',
+    genesisHash: '0x6f022bd353c56b3e441507e1173601fd9dc0fb7547e6a95bbaf9b21f311bcab6',
+    ss58Format: 42,
+    providers: {
+      gear: 'wss://rpc-node.gear-tech.io'
+    },
+    currentProvider: 'gear',
+    active: false,
+    currentProviderMode: 'ws',
+    nativeToken: 'Unit',
+    decimals: 12,
+    groups: ['TEST_NET']
   }
-  // contractsRococo: {
-  //   key: 'contractsRococo',
-  //   chain: 'Contracts on Rococo',
-  //   genesisHash: '0xc5442742bb6288bb3835ea1c9032981f06433ee5fc65d6e216c4422c0c19b989',
-  //   ss58Format: 42,
-  //   providers: {
-  //     testnet: 'wss://rococo-contracts-rpc.polkadot.io'
-  //   },
-  //   active: false,
-  //   currentProviderMode: 'ws',
-  //   currentProvider: 'testnet',
-  //   groups: ['TEST_NET'],
-  //   nativeToken: 'ROC',
-  //   decimals: 12,
-  //   paraId: 1002
-  // }
-  // acala_dev: {
-  //   key: 'acala_dev',
-  //   chain: 'Acala Karura Dev',
-  //   genesisHash: '0x102c0b94289f766d68d41b788c48b3440baa46d40f7d46b413c59a1a2b1b4079',
-  //   ss58Format: 8,
-  //   providers: {
-  //     testnet: 'wss://crosschain-dev.polkawallet.io:9908/'
-  //   },
-  //   active: false,
-  //   currentProviderMode: 'ws',
-  //   currentProvider: 'testnet',
-  //   groups: ['TEST_NET'],
-  //   nativeToken: 'KAR',
-  //   decimals: 12,
-  //   paraId: 2000
-  // },
-  // moonbase_relay: {
-  //   key: 'moonbase_relay',
-  //   chain: 'Moonbase Relay Testnet',
-  //   genesisHash: '0xe1ea3ab1d46ba8f4898b6b4b9c54ffc05282d299f89e84bd0fd08067758c9443',
-  //   ss58Format: 42,
-  //   providers: {
-  //     testnet: 'wss://frag-moonbase-relay-rpc-ws.g.moonbase.moonbeam.network/'
-  //   },
-  //   active: false,
-  //   currentProviderMode: 'ws',
-  //   currentProvider: 'testnet',
-  //   groups: ['TEST_NET'],
-  //   nativeToken: 'Unit',
-  //   decimals: 12
-  // },
 };
 
 function getGenesisHashes () {

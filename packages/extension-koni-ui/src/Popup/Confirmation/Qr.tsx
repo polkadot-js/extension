@@ -85,7 +85,7 @@ export default React.memo(styled(Qr)(({ theme }: Props) => `
   position: relative;
   flex: 1;
   margin-top: 10px;
-  min-height: 320px;
+  min-height: 360px;
 
   .auth-transaction-body{
     flex: 1;

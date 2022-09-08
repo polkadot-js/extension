@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { CrowdloanParaState } from '@subwallet/extension-base/background/KoniTypes';
-import { BalanceVal } from '@subwallet/extension-koni-ui/components/balance';
+import { BalanceVal } from '@subwallet/extension-koni-ui/components/Balance';
 import useTranslation from '@subwallet/extension-koni-ui/hooks/useTranslation';
 import { CrowdloanItemType } from '@subwallet/extension-koni-ui/Popup/Home/types';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';

@@ -6,7 +6,7 @@ import { faTimes } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { NETWORK_STATUS } from '@subwallet/extension-base/background/KoniTypes';
 import { AccountJson } from '@subwallet/extension-base/background/types';
-import { ALL_NETWORK_KEY } from '@subwallet/extension-koni-base/constants';
+import { ALL_ACCOUNT_KEY, ALL_NETWORK_KEY } from '@subwallet/extension-koni-base/constants';
 import signalSlashIcon from '@subwallet/extension-koni-ui/assets/signal-stream-slash-solid.svg';
 import signalIcon from '@subwallet/extension-koni-ui/assets/signal-stream-solid.svg';
 import { AccountInfoEl } from '@subwallet/extension-koni-ui/components';
@@ -94,8 +94,8 @@ function AccountQrModal (props: Props): React.ReactElement<Props> {
     return genesisOptions.find((net) => net.networkKey === networkQr?.networkKey);
   }, [genesisOptions, networkQr?.networkKey]);
 
-  const { address, isExternal, name: accountName } = (account as AccountJson);
-  const { icon: iconTheme, networkKey, networkPrefix } = (network as NetworkSelectOption);
+  const { address, isExternal, name: accountName } = (account as AccountJson) || { address: ALL_ACCOUNT_KEY, name: '', isExternal: true };
+  const { icon: iconTheme, networkKey, networkPrefix } = (network as NetworkSelectOption) || { networkKey: ALL_NETWORK_KEY, networkPrefix: 42, icon: 'polkadot' };
 
   const [editedName, setName] = useState<string | undefined | null>(accountName);
   const [{ isEditing }, setEditing] = useState<EditState>({ isEditing: false, toggleActions: 0 });
@@ -191,6 +191,12 @@ function AccountQrModal (props: Props): React.ReactElement<Props> {
   useEffect(() => {
     setName(accountName);
   }, [accountName]);
+
+  useEffect(() => {
+    if ((accountQr && !account) || (networkQr && !network)) {
+      closeModal && closeModal();
+    }
+  }, [account, accountQr, closeModal, network, networkQr]);
 
   if (!accountQr || isAccountAll(accountQr.address)) {
     return (

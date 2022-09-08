@@ -56,6 +56,8 @@ const container = document.head || document.documentElement;
 const placeholderScript = document.createElement('script');
 const script = document.createElement('script');
 
+script.src = chrome.extension.getURL('page.js');
+
 placeholderScript.textContent = `class SubWalletPlaceholder {
   provider = undefined;
   isSubWallet = true;
@@ -138,16 +140,11 @@ window.SubWallet = new Proxy(new SubWalletPlaceholder(), {
     }
   }
 })`;
-script.src = chrome.extension.getURL('page.js');
 
-script.onload = (): void => {
-  // remove the injecting tag when loaded
-  script.parentNode && script.parentNode.removeChild(script);
-  placeholderScript.parentNode && placeholderScript.parentNode.removeChild(placeholderScript);
-};
-
-container.insertBefore(placeholderScript, container.children[0]);
 container.insertBefore(script, container.children[0]);
+container.insertBefore(placeholderScript, container.children[0]);
+container.removeChild(script);
+container.removeChild(placeholderScript);
 
 redirectIfPhishingProm.then((gotRedirected) => {
   if (!gotRedirected) {

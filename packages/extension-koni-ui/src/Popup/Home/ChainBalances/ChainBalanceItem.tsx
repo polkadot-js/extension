@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import cloneIcon from '@subwallet/extension-koni-ui/assets/clone.svg';
-import { BalanceVal } from '@subwallet/extension-koni-ui/components/balance';
+import { BalanceVal } from '@subwallet/extension-koni-ui/components/Balance';
 import BalanceShowQrAction from '@subwallet/extension-koni-ui/components/BalanceShowQrAction';
 import NetworkTools from '@subwallet/extension-koni-ui/components/NetworkTools';
 import useToast from '@subwallet/extension-koni-ui/hooks/useToast';

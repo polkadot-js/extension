@@ -131,7 +131,7 @@ const RANDOM_IPFS_GATEWAY_SETTING = [
   },
   {
     provider: IPFS_GATEWAY_CLOUD,
-    weight: 5
+    weight: 0 // Deceptive site warning
   },
   {
     provider: IPFS_FLEEK,

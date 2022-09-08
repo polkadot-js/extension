@@ -10,6 +10,21 @@ import { BN, bnToHex } from '@polkadot/util';
 
 export const cacheRegistryMap: Record<string, ChainRegistry> = {};
 
+// temporary fix for token symbols, need a better fix later
+function formatTokenSymbol (rawSymbol: string) {
+  if (rawSymbol === 'xcKBTC') {
+    return 'xckBTC';
+  } else if (rawSymbol === 'xcIBTC') {
+    return 'xciBTC';
+  } else if (rawSymbol === 'KBTC') {
+    return 'kBTC';
+  } else if (rawSymbol === 'IBTC') {
+    return 'iBTC';
+  }
+
+  return rawSymbol;
+}
+
 export async function getMoonAssets (api: ApiPromise) {
   await api.isReady;
   const assets = await api.query.assets.metadata.entries();
@@ -26,7 +41,7 @@ export async function getMoonAssets (api: ApiPromise) {
     const valueData = value.toHuman();
     // @ts-ignore
     // eslint-disable-next-line @typescript-eslint/no-unsafe-argument,@typescript-eslint/no-unsafe-assignment
-    const info = { isMainToken: false, name: valueData.name, symbol: valueData.symbol, decimals: parseInt(valueData.decimals || ' 0'), erc20Address: address, assetId: keyString } as TokenInfo; // todo: get assetId for XCM
+    const info = { isMainToken: false, name: valueData.name, symbol: formatTokenSymbol(valueData.symbol), decimals: parseInt(valueData.decimals || ' 0'), erc20Address: address, assetId: keyString } as TokenInfo; // todo: get assetId for XCM
 
     assetRecord[info.symbol] = info;
   });
@@ -146,10 +161,12 @@ export const getRegistry = async (networkKey: string, api: ApiPromise, customErc
 
   if (!['genshiro_testnet', 'genshiro', 'equilibrium_parachain', 'acala', 'karura'].includes(networkKey)) {
     chainTokens.forEach((token, index) => {
-      tokenMap[token] = {
+      const formattedToken = formatTokenSymbol(token);
+
+      tokenMap[formattedToken] = {
         isMainToken: index === 0,
-        name: token,
-        symbol: token,
+        name: formattedToken,
+        symbol: formattedToken,
         decimals: chainDecimals[index]
       };
     });

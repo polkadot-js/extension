@@ -4,7 +4,7 @@
 import { ChainRegistry, CurrentNetworkInfo, NftCollection as _NftCollection, NftItem as _NftItem, TransactionHistoryItemType } from '@subwallet/extension-base/background/KoniTypes';
 import { AccountJson } from '@subwallet/extension-base/background/types';
 import { AccountContext } from '@subwallet/extension-koni-ui/components';
-import ExportAccountQrModal from '@subwallet/extension-koni-ui/components/Modal/ExportAccountQrModal';
+import ReceiveButton from '@subwallet/extension-koni-ui/components/Button/ReceiveButton';
 import useAccountBalance from '@subwallet/extension-koni-ui/hooks/screen/home/useAccountBalance';
 import useCrowdloanNetworks from '@subwallet/extension-koni-ui/hooks/screen/home/useCrowdloanNetworks';
 import useFetchNft from '@subwallet/extension-koni-ui/hooks/screen/home/useFetchNft';
@@ -22,7 +22,6 @@ import { TFunction } from 'react-i18next';
 import { useSelector } from 'react-redux';
 import styled from 'styled-components';
 
-import buyIcon from '../../assets/buy-icon.svg';
 import sendIcon from '../../assets/send-icon.svg';
 import swapIcon from '../../assets/swap-icon.svg';
 
@@ -37,6 +36,8 @@ const ActionButton = React.lazy(() => import('./ActionButton'));
 const AddAccount = React.lazy(() => import('@subwallet/extension-koni-ui/Popup/Accounts/AddAccount'));
 const BalancesVisibility = React.lazy(() => import('@subwallet/extension-koni-ui/Popup/Home/BalancesVisibility'));
 const AccountQrModal = React.lazy(() => import('@subwallet/extension-koni-ui/components/Modal/AccountQrModal'));
+const BuyModal = React.lazy(() => import('@subwallet/extension-koni-ui/components/Modal/BuyModal'));
+const ExportAccountQrModal = React.lazy(() => import('@subwallet/extension-koni-ui/components/Modal/ExportAccountQrModal'));
 const Link = React.lazy(() => import('@subwallet/extension-koni-ui/components/Link'));
 const Header = React.lazy(() => import('@subwallet/extension-koni-ui/partials/Header'));
 
@@ -225,6 +226,7 @@ function Home ({ chainRegistryMap, className = '', currentAccount, historyMap, n
 
   const isSetNetwork = window.localStorage.getItem('isSetNetwork') !== 'ok';
   const [showNetworkSelection, setShowNetworkSelection] = useState(isSetNetwork);
+  const [isVisibleBuyModal, setIsVisibleBuyModal] = useState<boolean>(false);
 
   const updateModalQr = useCallback((newValue: Partial<ModalQrProps>) => {
     setModalQrProp((oldValue) => {
@@ -308,6 +310,33 @@ function Home ({ chainRegistryMap, className = '', currentAccount, historyMap, n
     setIsExportModalOpen(false);
   }, []);
 
+  const _closeBuyModal = useCallback(() => {
+    setModalQrProp({
+      network: {
+        networkKey: networkKey
+      },
+      account: {
+        address: currentAccount.address
+      },
+      showExportButton: false
+    });
+    setIsVisibleBuyModal(false);
+  }, [networkKey, currentAccount.address]);
+
+  const openBuyModal = useCallback(() => {
+    setModalQrProp({
+      network: {
+        networkKey: networkKey
+      },
+      account: {
+        address: currentAccount.address
+      },
+      showExportButton: false
+    });
+
+    setIsVisibleBuyModal(true);
+  }, [currentAccount, networkKey]);
+
   const tabItems = useMemo<TabHeaderItemType[]>(() => {
     return getTabHeaderItems(address, t);
   }, [address, t]);
@@ -343,10 +372,9 @@ function Home ({ chainRegistryMap, className = '', currentAccount, historyMap, n
 
         <div className='home-account-button-container'>
           <div className='action-button-wrapper'>
-            <ActionButton
-              iconSrc={buyIcon}
-              onClick={_showQrModal}
-              tooltipContent={t<string>('Receive')}
+            <ReceiveButton
+              openAddress={_showQrModal}
+              openBuy={openBuyModal}
             />
           </div>
           <Link
@@ -459,8 +487,6 @@ function Home ({ chainRegistryMap, className = '', currentAccount, historyMap, n
 
       {isQrModalOpen && (
         <AccountQrModal
-          account={currentAccount}
-          address={address}
           className='home__account-qr-modal'
           closeModal={_closeQrModal}
           modalQrProp={modalQrProp}
@@ -479,6 +505,16 @@ function Home ({ chainRegistryMap, className = '', currentAccount, historyMap, n
         showNetworkSelection && <NetworkSelection
           handleShow={setShowNetworkSelection}
         />
+      }
+      {
+        isVisibleBuyModal && (
+          <BuyModal
+            className='home__account-qr-modal'
+            closeModal={_closeBuyModal}
+            modalQrProp={modalQrProp}
+            updateModalQr={updateModalQr}
+          />
+        )
       }
     </div>
   );

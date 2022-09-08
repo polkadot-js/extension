@@ -1,12 +1,12 @@
 // Copyright 2019-2022 @polkadot/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import type { ThemeProps } from '../types';
+import type { ThemeProps } from '../../types';
 
 import React, { useCallback } from 'react';
 import styled from 'styled-components';
 
-import Spinner from './Spinner';
+import Spinner from '../Spinner';
 
 interface Props extends ThemeProps {
   className?: string;

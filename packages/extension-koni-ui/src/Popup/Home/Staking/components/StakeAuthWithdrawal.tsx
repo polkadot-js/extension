@@ -4,6 +4,8 @@
 import { BaseTxError, ResponseStakeExternal, ResponseStakeLedger, ResponseWithdrawStakeQr } from '@subwallet/extension-base/background/KoniTypes';
 import { LedgerState } from '@subwallet/extension-base/signers/types';
 import { InputWithLabel } from '@subwallet/extension-koni-ui/components';
+import { BalanceVal } from '@subwallet/extension-koni-ui/components/Balance';
+import FeeValue from '@subwallet/extension-koni-ui/components/Balance/FeeValue';
 import Button from '@subwallet/extension-koni-ui/components/Button';
 import InputAddress from '@subwallet/extension-koni-ui/components/InputAddress';
 import LedgerRequest from '@subwallet/extension-koni-ui/components/Ledger/LedgerRequest';
@@ -308,6 +310,10 @@ function StakeAuthWithdrawal ({ address, amount, className, hideModal, networkKe
     }, 10);
   }, [handlerSendLedgerSubstrate, loading]);
 
+  const handlerClearError = useCallback(() => {
+    setErrorArr([]);
+  }, []);
+
   const renderInfo = useCallback(() => {
     return (
       <>
@@ -327,17 +333,35 @@ function StakeAuthWithdrawal ({ address, amount, className, hideModal, networkKe
         <div className={'transaction-info-container'}>
           <div className={'transaction-info-row'}>
             <div className={'transaction-info-title'}>Withdrawal amount</div>
-            <div className={'transaction-info-value'}>{amount} {networkJson.nativeToken}</div>
+            <div className={'transaction-info-value'}>
+              <BalanceVal
+                newRule={false}
+                symbol={networkJson.nativeToken}
+                value={amount}
+                withSymbol={true}
+              />
+            </div>
           </div>
 
           <div className={'transaction-info-row'}>
             <div className={'transaction-info-title'}>Withdrawal fee</div>
-            <div className={'transaction-info-value'}>{fee}</div>
+            <div className={'transaction-info-value'}>
+              <FeeValue feeString={fee} />
+            </div>
           </div>
 
           <div className={'transaction-info-row'}>
             <div className={'transaction-info-title'}>Total</div>
-            <div className={'transaction-info-value'}>{amount} {networkJson.nativeToken} + {fee}</div>
+            <div className={'transaction-info-value'}>
+              <BalanceVal
+                newRule={false}
+                symbol={networkJson.nativeToken}
+                value={amount}
+                withSymbol={true}
+              />
+              &nbsp;+&nbsp;
+              <FeeValue feeString={fee} />
+            </div>
           </div>
         </div>
       </>
@@ -350,6 +374,7 @@ function StakeAuthWithdrawal ({ address, amount, className, hideModal, networkKe
         return (
           <div className='external-wrapper'>
             <QrRequest
+              clearError={handlerClearError}
               errorArr={errorArr}
               genesisHash={networkJson.genesisHash}
               handlerStart={handlerSubmitQr}
@@ -414,7 +439,7 @@ function StakeAuthWithdrawal ({ address, amount, className, hideModal, networkKe
           </>
         );
     }
-  }, [_onChangePass, accountMeta, errorArr, handleConfirm, handlerErrorQr, handlerSendLedger, handlerSubmitQr, hideConfirm, loading, networkJson.genesisHash, password, passwordError, renderInfo, signMode, t]);
+  }, [_onChangePass, accountMeta, errorArr, handleConfirm, handlerClearError, handlerErrorQr, handlerSendLedger, handlerSubmitQr, hideConfirm, loading, networkJson.genesisHash, password, passwordError, renderInfo, signMode, t]);
 
   useEffect(() => {
     let unmount = false;

@@ -311,6 +311,8 @@ const LogosMap: Record<string, string> = {
   // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
   subspace_gemini: require('./46.Subspace.png'),
   // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+  subspace_gemini_2a: require('./46.Subspace.png'),
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
   subspace_test: require('./46.Subspace.png'),
   // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
   xcpara: require('./90.Parallel.png'),
@@ -324,6 +326,26 @@ const LogosMap: Record<string, string> = {
   xcpha: require('./91.Phala.png'),
   // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
   xcusdt: require('./106.USDT.png'),
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+  xcintr: require('./82.Interlay.png'),
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+  xcibtc: require('./123.iBTC.jpg'),
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+  ibtc: require('./123.iBTC.jpg'),
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+  xckbtc: require('./23.kbtc.png'),
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+  xccsm: require('./15.CSM.png'),
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+  xcsdn: require('./42.Shiden.png'),
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+  xckma: require('./18.KMA.png'),
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+  xclit: require('./19.Litentry.png'),
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+  xccrab: require('./68.Crab.png'),
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+  xcteer: require('./81.Integritee.png'),
   // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
   imbue_network: require('./22.Imbue.png'),
   // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
@@ -355,9 +377,9 @@ const LogosMap: Record<string, string> = {
   // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
   amplitude: require('./120.amplitude.jpg'),
   // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-  ternoa: require('./121.ternoa.jpg'),
+  ternoa: require('./121.ternoa.svg'),
   // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-  ternoaEvm: require('./121.ternoa.jpg'),
+  ternoa_alphanet: require('./121.ternoa.svg'),
   // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
   integriteePolkadot: require('./81.Integritee.png'),
   // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment

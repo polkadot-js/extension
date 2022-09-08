@@ -206,39 +206,7 @@ describe('test DotSama APIs', () => {
   test('get turing auto-compounding APY', async () => {
     const provider = new WsProvider(getCurrentProvider(PREDEFINED_NETWORKS.turingStaging), DOTSAMA_AUTO_CONNECT_MS);
     const api = new ApiPromise({
-      provider,
-      rpc: {
-        automationTime: {
-          generateTaskId: {
-            description: 'Getting task ID given account ID and provided ID',
-            params: [
-              {
-                name: 'accountId',
-                type: 'AccountId'
-              },
-              {
-                name: 'providedId',
-                type: 'Text'
-              }
-            ],
-            type: 'Hash'
-          },
-          calculateOptimalAutostaking: {
-            description: 'blah',
-            params: [
-              {
-                name: 'principal',
-                type: 'u128'
-              },
-              {
-                name: 'collator',
-                type: 'AccountId'
-              }
-            ],
-            type: 'jsonrpc'
-          }
-        }
-      }
+      provider
     });
     const apiPromise = await api.isReady;
 

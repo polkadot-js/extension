@@ -5,7 +5,7 @@ import type { AccountJson, AccountsContext, AuthorizeRequest, MetadataRequest, S
 import type { SettingsStruct } from '@polkadot/ui-settings/types';
 
 import React, { useCallback, useEffect, useState } from 'react';
-import { Route, Switch } from 'react-router';
+import { Route, Switch, useHistory } from 'react-router';
 
 import { PHISHING_PAGE_REDIRECT } from '@polkadot/extension-base/defaults';
 import { canDerive } from '@polkadot/extension-base/utils';
@@ -77,16 +77,24 @@ export default function Popup (): React.ReactElement {
   const [signRequests, setSignRequests] = useState<null | SigningRequest[]>(null);
   const [isWelcomeDone, setWelcomeDone] = useState(false);
   const [settingsCtx, setSettingsCtx] = useState<SettingsStruct>(startSettings);
+  const history = useHistory();
 
   const _onAction = useCallback(
     (to?: string): void => {
       setWelcomeDone(window.localStorage.getItem('welcome_read') === 'ok');
 
-      if (to) {
-        window.location.hash = to;
+      if (!to) {
+        return;
       }
+
+      to === '..'
+        // if we can't go gack from there, go to the home
+        ? history.length === 1
+          ? history.push('/')
+          : history.goBack()
+        : window.location.hash = to;
     },
-    []
+    [history]
   );
 
   useEffect((): void => {

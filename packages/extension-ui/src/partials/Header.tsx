@@ -5,10 +5,11 @@ import type { ThemeProps } from '../types';
 
 import { faArrowLeft, faCog, faPlusCircle, faSearch } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import React, { useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
 import styled from 'styled-components';
 
 import logo from '../assets/pjs.svg';
+import { ActionContext } from '../components';
 import InputFilter from '../components/InputFilter';
 import Link from '../components/Link';
 import useOutsideClick from '../hooks/useOutsideClick';
@@ -43,6 +44,7 @@ function Header ({ children, className = '', onFilter, showAdd, showBackArrow, s
   const setMenuRef = useRef(null);
   const isConnected = useMemo(() => connectedTabsUrl.length >= 1
     , [connectedTabsUrl]);
+  const onAction = useContext(ActionContext);
 
   useEffect(() => {
     if (!showConnectedAccounts) {
@@ -91,21 +93,21 @@ function Header ({ children, className = '', onFilter, showAdd, showBackArrow, s
     [_onChangeFilter, isSearchOpen]
   );
 
+  const _onBackArrowClick = useCallback(
+    () => onAction('..')
+    , [onAction]);
+
   return (
     <div className={`${className} ${smallMargin ? 'smallMargin' : ''}`}>
       <div className='container'>
         <div className='branding'>
           {showBackArrow
             ? (
-              <Link
-                className='backlink'
-                to='/'
-              >
-                <FontAwesomeIcon
-                  className='arrowLeftIcon'
-                  icon={faArrowLeft}
-                />
-              </Link>
+              <FontAwesomeIcon
+                className='arrowLeftIcon'
+                icon={faArrowLeft}
+                onClick={_onBackArrowClick}
+              />
             )
             : (
               <img
@@ -300,17 +302,7 @@ export default React.memo(styled(Header)(({ theme }: Props) => `
   .arrowLeftIcon {
     color: ${theme.labelColor};
     margin-right: 1rem;
-  }
-
-  .backlink {
-    color: ${theme.labelColor};
-    min-height: 52px;
-    text-decoration: underline;
-    width: min-content;
-
-    &:visited {
-      color: ${theme.labelColor};
-    }
+    cursor: pointer;
   }
 
   &.smallMargin {

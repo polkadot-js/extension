@@ -3332,6 +3332,35 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@oak-foundation/api-augment@npm:^0.0.9":
+  version: 0.0.9
+  resolution: "@oak-foundation/api-augment@npm:0.0.9"
+  dependencies:
+    "@polkadot/types": ^9.2.3
+  checksum: cc578ac312dcd41fb25709835a48fc729a6fbff0b185f90c060ead2667780ccacc5812f7371c58a5376cd0c2a8cc0a931594258e0ed3290991348b280e383249
+  languageName: node
+  linkType: hard
+
+"@oak-foundation/api@npm:^0.0.13":
+  version: 0.0.13
+  resolution: "@oak-foundation/api@npm:0.0.13"
+  dependencies:
+    "@oak-foundation/types": ^0.0.5
+    "@open-web3/orml-type-definitions": ^2.0.1
+    "@polkadot/api": ">=8"
+  checksum: eb0c84bd8a9470f3d77ffe69cdffba78effa1657bbe663cc466b6e46993ac541a44c4b74aea6e765d8f9751d20435d615aae000296fb658d25280fee3d949140
+  languageName: node
+  linkType: hard
+
+"@oak-foundation/types@npm:^0.0.5":
+  version: 0.0.5
+  resolution: "@oak-foundation/types@npm:0.0.5"
+  dependencies:
+    "@open-web3/orml-type-definitions": ^2.0.1
+  checksum: 6c171d643bed01ff461acab24ecbcbd7e2e7e2a8a24c94b3e452317a3836f1780f382bc63bb14941a954b9fcaee457bf0707f9ccfcd526972d9f0d82196e665b
+  languageName: node
+  linkType: hard
+
 "@oclif/color@npm:^1.0.0, @oclif/color@npm:^1.0.1":
   version: 1.0.1
   resolution: "@oclif/color@npm:1.0.1"
@@ -3733,6 +3762,15 @@ __metadata:
   dependencies:
     lodash.merge: ^4.6.2
   checksum: 49d2d1b902621cf0e295002f62ff4f1aa5e9a75acdf490dd16fb4c944c58aa48aeac2c535ce8b5cac9e0d5acd4dd706c37b2267e4d11db126601974572559302
+  languageName: node
+  linkType: hard
+
+"@open-web3/orml-type-definitions@npm:^2.0.1":
+  version: 2.0.1
+  resolution: "@open-web3/orml-type-definitions@npm:2.0.1"
+  dependencies:
+    lodash.merge: ^4.6.2
+  checksum: a27ba7d37d9c4d497989d4f4cebaf997bc4a06e2f74412a46735b4431d8f21d2ce2ceaafcebbb9911b0e5271a169994bad0b7c359d8eef0839cfdb3575a3c886
   languageName: node
   linkType: hard
 
@@ -5156,6 +5194,8 @@ __metadata:
     "@laminar/type-definitions": ^0.3.1
     "@metamask/safe-event-emitter": ^2.0.0
     "@metaverse-network-sdk/type-definitions": ^0.0.1-13
+    "@oak-foundation/api": ^0.0.13
+    "@oak-foundation/api-augment": ^0.0.9
     "@parallel-finance/type-definitions": ^1.7.7
     "@phala/typedefs": ^0.2.30
     "@polkadot/api": ^8.11.3

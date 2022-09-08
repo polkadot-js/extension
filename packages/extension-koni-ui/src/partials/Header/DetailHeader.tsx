@@ -446,7 +446,7 @@ export default styled(DetailHeader)(({ theme }: Props) => `
   }
   
   .kn-l-edit-name input{
-    border: 1px solid ${theme.name === 'Dark' ? 'transparent' : theme.primaryColor};
+    border: 1px solid ${theme.group === 'dark' ? 'transparent' : theme.primaryColor};
   }
 
   .detail-header-account-info__formatted-wrapper {

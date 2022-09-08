@@ -1,5 +1,12 @@
 # CHANGELOG
 
+## 0.5.9 (Koni)
+Build date: Sep 7, 2022.
+
+Bug fixes:
+- Fix error of ipfs-gateway.cloud (#612)
+- Fix Transak logo (#616)
+
 ## 0.5.8 (Koni)
 Build date: Sep 7, 2022.
 

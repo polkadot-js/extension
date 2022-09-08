@@ -146,7 +146,7 @@ export default React.memo(styled(UnbondingResult)(({ theme }: Props) => `
     width: 100%;
     padding: 10px;
     text-align: center;
-    background-color: #004BFF;
+    background-color: ${theme.secondaryColor};
     border-radius: 8px;
     cursor: pointer;
     color: #FFFFFF;

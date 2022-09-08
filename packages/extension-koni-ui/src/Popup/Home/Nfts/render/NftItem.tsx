@@ -330,7 +330,7 @@ export default React.memo(styled(NftItem)(({ theme }: ThemeProps) => `
 
   .send-button {
     margin-top: 5px;
-    background: #004BFF;
+    background: ${theme.secondaryColor};
     border-radius: 8px;
     display: flex;
     justify-content: center;

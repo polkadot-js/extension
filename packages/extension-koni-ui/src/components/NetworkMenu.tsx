@@ -298,7 +298,7 @@ export default React.memo(styled(NetworkMenu)(({ theme }: Props) => `
 
   .confirm-button {
     cursor: pointer;
-    background: #004BFF;
+    background: ${theme.secondaryColor};
     border-radius: 8px;
     display: flex;
     justify-content: center;

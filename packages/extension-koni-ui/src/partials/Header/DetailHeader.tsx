@@ -444,6 +444,10 @@ export default styled(DetailHeader)(({ theme }: Props) => `
   .detail-header-account-info-wrapper {
     display: flex;
   }
+  
+  .kn-l-edit-name input{
+    border: 1px solid ${theme.name === 'Dark' ? 'transparent' : theme.primaryColor};
+  }
 
   .detail-header-account-info__formatted-wrapper {
     display: flex;

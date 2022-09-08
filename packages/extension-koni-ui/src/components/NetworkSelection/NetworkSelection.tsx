@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { NetworkJson } from '@subwallet/extension-base/background/KoniTypes';
-import QuestionIcon from '@subwallet/extension-koni-ui/assets/Question.svg';
+import { IconMaps } from '@subwallet/extension-koni-ui/assets/icon';
 import { InputFilter } from '@subwallet/extension-koni-ui/components';
 import Button from '@subwallet/extension-koni-ui/components/Button';
 import Modal from '@subwallet/extension-koni-ui/components/Modal';
@@ -103,12 +103,13 @@ function NetworkSelection ({ className, handleShow }: Props): React.ReactElement
       <Modal className={'network-selection-container'}>
         <div className={'network-selection-title'}>
           <div>Network Selection</div>
-          <img
+          <div
             className={'question-icon'}
             data-for={'network-selection-question-icon'}
             data-tip={true}
-            src={QuestionIcon}
-          />
+          >
+            {IconMaps.question}
+          </div>
           <Tooltip
             place={'bottom'}
             text={t<string>('Please only select networks that you need to optimize resource consumption. You can always turn them on later if needed')}
@@ -229,6 +230,7 @@ export default styled(NetworkSelection)(({ theme }: Props) => `
     width: 20px;
     margin-left: 10px;
     cursor: pointer;
+    color: ${theme.primaryColor}
   }
 
   .network-selection-container .subwallet-modal {

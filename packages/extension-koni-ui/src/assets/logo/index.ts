@@ -385,6 +385,8 @@ const LogosMap: Record<string, string> = {
   // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
   tanganika: require('./122.dataHighway.png'),
   // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+  gear_testnet: require('./127.Gear.png'),
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
   default: require('./73.Default.png')
 };
 

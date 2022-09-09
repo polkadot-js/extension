@@ -297,7 +297,7 @@ const LogosMap: Record<string, string> = {
   // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
   polarisdao: require('./40.PolarisDAO.png'),
   // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-  arsw: require('./05.Arthswap.png'),
+  arsw: require('./05.ArthSwap.svg'),
   // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
   oru: require('./37.Oru.png'),
   // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment

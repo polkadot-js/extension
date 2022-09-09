@@ -79,7 +79,7 @@ function WebsiteEntry ({ changeConnectSite, className = '', info, setList, url }
         <img
           alt={`${hostname}`}
           className='website-entry__connected-app-logo'
-          src={`https://icons.duckduckgo.com/ip2/${hostname}.ico`}
+          src={`https://icon.horse/icon/${hostname}`}
         />
         <div className='origin'>
           {info.origin}
@@ -182,6 +182,7 @@ export default styled(WebsiteEntry)(({ theme }: Props) => `
     width: 28px;
     min-width: 28px;
     margin-right: 8px;
+    border-radius: 5px;
   }
 
   .website-entry__right-content {

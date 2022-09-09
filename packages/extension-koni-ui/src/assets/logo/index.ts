@@ -297,7 +297,7 @@ const LogosMap: Record<string, string> = {
   // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
   polarisdao: require('./40.PolarisDAO.png'),
   // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-  arsw: require('./05.Arthswap.png'),
+  arsw: require('./05.ArthSwap.svg'),
   // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
   oru: require('./37.Oru.png'),
   // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
@@ -384,6 +384,8 @@ const LogosMap: Record<string, string> = {
   integriteePolkadot: require('./81.Integritee.png'),
   // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
   tanganika: require('./122.dataHighway.png'),
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+  gear_testnet: require('./127.Gear.png'),
   // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
   default: require('./73.Default.png')
 };

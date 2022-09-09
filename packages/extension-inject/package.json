@@ -18,8 +18,8 @@
   "main": "index.js",
   "dependencies": {
     "@babel/runtime": "^7.18.9",
-    "@polkadot/rpc-provider": "^9.2.4",
-    "@polkadot/types": "^9.2.4",
+    "@polkadot/rpc-provider": "^9.3.3",
+    "@polkadot/types": "^9.3.3",
     "@polkadot/util": "^10.1.7",
     "@polkadot/util-crypto": "^10.1.7",
     "@polkadot/x-global": "^10.1.7"

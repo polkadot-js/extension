@@ -8,6 +8,8 @@ import ReactDOM from 'react-dom';
 import ReactTooltip from 'react-tooltip';
 import styled, { ThemeContext } from 'styled-components';
 
+import { convertHexColorToRGBA } from '../util/color';
+
 function rootElement () {
   return typeof document === 'undefined'
     ? null // This hack is required for server side rendering
@@ -77,7 +79,7 @@ export default React.memo(styled(Tooltip)(({ theme }: Props) => `
     max-width: 300px;
     text-align: center;
     border: 1px solid #2D365C;
-    box-shadow: 0px 10px 40px rgba(0, 75, 255, 0.4);
+    box-shadow: 0px 10px 40px ${convertHexColorToRGBA(theme.secondaryColor, 0.4)};
     border-radius: 5px;
   }
 

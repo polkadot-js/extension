@@ -731,7 +731,12 @@ export default class KoniExtension extends Extension {
       this._addAddressToAuthList(address, isAllowed);
 
       if (!changedAccount) {
-        state.setCurrentAccount({ address: ALL_ACCOUNT_KEY, currentGenesisHash: allGenesisHash || null, allGenesisHash });
+        if (types.length === 1) {
+          state.setCurrentAccount({ address, currentGenesisHash: genesisHash || null, allGenesisHash });
+        } else {
+          state.setCurrentAccount({ address: ALL_ACCOUNT_KEY, currentGenesisHash: allGenesisHash || null, allGenesisHash });
+        }
+
         changedAccount = true;
       }
     });

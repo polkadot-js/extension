@@ -94,7 +94,7 @@ function Request ({ authId, className, request: { accountAuthType, allowedAccoun
             <img
               alt={`${hostname}`}
               className='request-info__connected-app-logo'
-              src={`https://icons.duckduckgo.com/ip2/${hostname}.ico`}
+              src={`https://icon.horse/icon/${hostname}`}
             />
             <div className='request-info-connected-app__text'>
               {origin}

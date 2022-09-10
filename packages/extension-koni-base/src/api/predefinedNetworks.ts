@@ -1626,7 +1626,7 @@ export const PREDEFINED_NETWORKS: Record<string, NetworkJson> = {
     },
     active: false,
     currentProviderMode: 'ws',
-    currentProvider: 'subspaceUS',
+    currentProvider: 'subspaceEU',
     groups: ['TEST_NET'],
     nativeToken: 'tSSC',
     decimals: 18

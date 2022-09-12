@@ -117,6 +117,8 @@ const LogosMap: Record<string, string> = {
   // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
   pioneer: require('./39.Pioneer.png'),
   // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+  neer: require('./39.Pioneer.png'),
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
   polkadot: require('./71.Polkadot.png'),
   // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
   quartz: require('./41.Quartz.png'),

@@ -1767,9 +1767,9 @@ export const PREDEFINED_NETWORKS: Record<string, NetworkJson> = {
     genesisHash: '0x19a3733beb9cb8a970a308d835599e9005e02dc007a35440e461a451466776f8',
     ss58Format: 7013,
     providers: {
-      'gmDie': 'wss://kusama.gmordie.com',
-      'bLdNodes': 'wss://ws.gm.bldnodes.org',
-      'TerraBioDAO': 'wss://ws-node-gm.terrabiodao.org'
+      gmDie: 'wss://kusama.gmordie.com',
+      bLdNodes: 'wss://ws.gm.bldnodes.org',
+      TerraBioDAO: 'wss://ws-node-gm.terrabiodao.org'
     },
     active: false,
     currentProvider: 'bLdNodes',

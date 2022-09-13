@@ -107,6 +107,11 @@ export const SupportedCrossChainsMap: Record<string, CrossChainRelation> = {
         type: 'p',
         isEthereum: false,
         supportedToken: ['aUSD', 'BNC', 'KAR']
+      },
+      pioneer: {
+        type: 'p',
+        isEthereum: false,
+        supportedToken: ['NEER']
       }
     }
   },
@@ -229,6 +234,17 @@ export const SupportedCrossChainsMap: Record<string, CrossChainRelation> = {
         type: 'r',
         isEthereum: false,
         supportedToken: ['KSM']
+      }
+    }
+  },
+  pioneer: {
+    type: 'p',
+    isEthereum: false,
+    relationMap: {
+      karura: {
+        type: 'p',
+        isEthereum: false,
+        supportedToken: ['NEER']
       }
     }
   }

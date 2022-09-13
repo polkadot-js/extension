@@ -191,7 +191,7 @@ export const subscanByNetworkKey: Record<string, string> = {
   // 'phala': 'https://phala.subscan.io',
   picasso: 'https://picasso.subscan.io',
   pichiu: 'https://pichiu.subscan.io',
-  // 'pioneer': 'https://pioneer.subscan.io',
+  pioneer: 'https://pioneer.subscan.io',
   polkadot: 'https://polkadot.subscan.io',
   quartz: 'https://quartz.subscan.io',
   sakura: 'https://sakura.subscan.io',

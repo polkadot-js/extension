@@ -755,19 +755,21 @@ async function handleBifrostUnlockingInfo (dotSamaApi: ApiProps, networkJson: Ne
   } as UnlockingStakeInfo;
 }
 
-async function getTuringCompoundTxInfo (dotSamaApi: ApiProps, address: string, collatorAddress: string, accountMinimum: string) {
+async function getTuringCompoundTxInfo (dotSamaApi: ApiProps, address: string, collatorAddress: string, accountMinimum: string, bondedAmount: string) {
   const apiPromise = await dotSamaApi.isReady;
 
   // @ts-ignore
   // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment,@typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-member-access
-  const _optimalCompounding = await apiPromise.api.rpc.automationTime.calculateOptimalAutostaking('10000000000000', collatorAddress);
+  const _optimalCompounding = await apiPromise.api.rpc.automationTime.calculateOptimalAutostaking(bondedAmount, collatorAddress);
 
   // eslint-disable-next-line @typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-member-access
   const optimalCompounding = _optimalCompounding.toHuman() as TuringOptimalCompoundFormat;
 
+  // TODO: time must be rounded to the nearest hour
   const frequency = parseInt(optimalCompounding.period) * 24 * 60 * 60; // in seconds
+  const timestamp = Math.floor((Date.now() / 1000) + 3600); // must be in seconds, 1 hour from the moment the tx is submitted
 
-  const extrinsic = apiPromise.api.tx.automationTime.scheduleAutoCompoundDelegatedStakeTask('1661200000', frequency.toString(), collatorAddress, accountMinimum);
+  const extrinsic = apiPromise.api.tx.automationTime.scheduleAutoCompoundDelegatedStakeTask(timestamp.toString(), frequency.toString(), collatorAddress, accountMinimum);
 
   const paymentInfo = await extrinsic.paymentInfo(address);
 
@@ -777,9 +779,9 @@ async function getTuringCompoundTxInfo (dotSamaApi: ApiProps, address: string, c
   };
 }
 
-export async function handleTuringCompoundTxInfo (networkKey: string, networkJson: NetworkJson, dotSamaApiMap: Record<string, ApiProps>, web3ApiMap: Record<string, Web3>, address: string, collatorAddress: string, accountMinimum: string) {
+export async function handleTuringCompoundTxInfo (networkKey: string, networkJson: NetworkJson, dotSamaApiMap: Record<string, ApiProps>, web3ApiMap: Record<string, Web3>, address: string, collatorAddress: string, accountMinimum: string, bondedAmount: string) {
   const [txInfo, balance] = await Promise.all([
-    getTuringCompoundTxInfo(dotSamaApiMap[networkKey], address, collatorAddress, accountMinimum),
+    getTuringCompoundTxInfo(dotSamaApiMap[networkKey], address, collatorAddress, accountMinimum, bondedAmount),
     getFreeBalance(networkKey, address, dotSamaApiMap, web3ApiMap)
   ]);
 
@@ -798,17 +800,26 @@ export async function handleTuringCompoundTxInfo (networkKey: string, networkJso
   } as TuringStakeCompoundResp;
 }
 
-export async function getTuringCompoundExtrinsic (dotSamaApi: ApiProps, address: string, collatorAddress: string, accountMinimum: string) {
+export async function getTuringCompoundExtrinsic (dotSamaApi: ApiProps, address: string, collatorAddress: string, accountMinimum: string, bondedAmount: string) {
   const apiPromise = await dotSamaApi.isReady;
+
+  console.log('collatorAddress', collatorAddress);
+  console.log('accountMinimum', accountMinimum);
+  console.log('bondedAmount', bondedAmount);
+  console.log('address', address);
 
   // @ts-ignore
   // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment,@typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-member-access
-  const _optimalCompounding = await apiPromise.api.rpc.automationTime.calculateOptimalAutostaking('10000000000000', collatorAddress);
+  const _optimalCompounding = await apiPromise.api.rpc.automationTime.calculateOptimalAutostaking(bondedAmount, collatorAddress);
 
   // eslint-disable-next-line @typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-member-access
   const optimalCompounding = _optimalCompounding.toHuman() as TuringOptimalCompoundFormat;
 
   const frequency = parseInt(optimalCompounding.period) * 24 * 60 * 60; // in seconds
+  const timestamp = Math.floor((Date.now() / 1000) + 3600); // must be in seconds, 1 hour from the moment the tx is submitted (first time compounding)
 
-  return apiPromise.api.tx.automationTime.scheduleAutoCompoundDelegatedStakeTask('1661200000', frequency.toString(), collatorAddress, accountMinimum);
+  console.log('frequency', frequency);
+  console.log('timestamp', timestamp);
+
+  return apiPromise.api.tx.automationTime.scheduleAutoCompoundDelegatedStakeTask(timestamp, frequency.toString(), collatorAddress, accountMinimum);
 }

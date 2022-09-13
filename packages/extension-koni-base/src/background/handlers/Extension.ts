@@ -3916,11 +3916,14 @@ export default class KoniExtension extends Extension {
     return await parseTransactionData(data, contract, network);
   }
 
-  private async getTuringStakeCompoundTxInfo ({ accountMinimum, address, collatorAddress, networkKey }: TuringStakeCompoundParams) {
-    return await handleTuringCompoundTxInfo(networkKey, state.getNetworkMapByKey(networkKey), state.getDotSamaApiMap(), state.getWeb3ApiMap(), address, collatorAddress, accountMinimum);
+  private async getTuringStakeCompoundTxInfo ({ accountMinimum, address, bondedAmount, collatorAddress, networkKey }: TuringStakeCompoundParams) {
+    const networkJson = state.getNetworkMapByKey(networkKey);
+    const parsedAccountMinimum = parseFloat(accountMinimum) * 10 ** (networkJson.decimals as number);
+
+    return await handleTuringCompoundTxInfo(networkKey, networkJson, state.getDotSamaApiMap(), state.getWeb3ApiMap(), address, collatorAddress, parsedAccountMinimum.toString(), bondedAmount);
   }
 
-  private async submitTuringStakeCompounding (id: string, port: chrome.runtime.Port, { accountMinimum, address, collatorAddress, networkKey, password }: TuringStakeCompoundParams) {
+  private async submitTuringStakeCompounding (id: string, port: chrome.runtime.Port, { accountMinimum, address, bondedAmount, collatorAddress, networkKey, password }: TuringStakeCompoundParams) {
     const txState: BasicTxResponse = {};
 
     if (!address || !password) {
@@ -3931,7 +3934,9 @@ export default class KoniExtension extends Extension {
 
     const callback = createSubscription<'pri(staking.submitTuringCompound)'>(id, port);
     const dotSamaApi = state.getDotSamaApi(networkKey);
-    const extrinsic = await getTuringCompoundExtrinsic(dotSamaApi, address, collatorAddress, accountMinimum);
+    const networkJson = state.getNetworkMapByKey(networkKey);
+    const parsedAccountMinimum = parseFloat(accountMinimum) * 10 ** (networkJson.decimals as number);
+    const extrinsic = await getTuringCompoundExtrinsic(dotSamaApi, address, collatorAddress, parsedAccountMinimum.toString(), bondedAmount);
     const passwordError: string | null = unlockAccount(address, password);
 
     if (extrinsic !== null && passwordError === null) {
@@ -3947,6 +3952,7 @@ export default class KoniExtension extends Extension {
             result.events
               .filter(({ event: { section } }) => section === 'system')
               .forEach(({ event: { method } }): void => {
+                console.log('status', result.status);
                 txState.transactionHash = extrinsic.hash.toHex();
                 callback(txState);
 

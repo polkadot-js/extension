@@ -45,6 +45,7 @@ function StakeCompoundSubmitTransaction ({ className }: Props): React.ReactEleme
   const [isDataReady, setIsDataReady] = useState(false);
   const [delegations, setDelegations] = useState<DelegationItem[] | undefined>(undefined);
   const [selectedCollator, setSelectedCollator] = useState<string>('');
+  const [bondedAmount, setBondedAmount] = useState('');
   const [accountMinimum, setAccountMinimum] = useState('0');
   const [showAuth, setShowAuth] = useState(false);
   const { currentAccount: { account }, stakeCompoundParams: { selectedAccount, selectedNetwork } } = useSelector((state: RootState) => state);
@@ -79,6 +80,7 @@ function StakeCompoundSubmitTransaction ({ className }: Props): React.ReactEleme
 
       setDelegations(filteredDelegations);
       setSelectedCollator(filteredDelegations[0].owner);
+      setBondedAmount(filteredDelegations[0].amount);
       setIsDataReady(true);
     }).catch(console.error);
 
@@ -86,6 +88,7 @@ function StakeCompoundSubmitTransaction ({ className }: Props): React.ReactEleme
       setDelegations(undefined);
       setSelectedCollator('');
       setIsDataReady(false);
+      setSelectedCollator('');
     };
   }, [selectedAccount, selectedNetwork]);
 
@@ -106,6 +109,7 @@ function StakeCompoundSubmitTransaction ({ className }: Props): React.ReactEleme
       for (const item of delegations) {
         if (item.owner === val) {
           setSelectedCollator(val);
+          setBondedAmount(item.amount);
           break;
         }
       }
@@ -139,7 +143,8 @@ function StakeCompoundSubmitTransaction ({ className }: Props): React.ReactEleme
       networkKey: selectedNetwork,
       address: selectedAccount,
       accountMinimum,
-      collatorAddress: selectedCollator
+      collatorAddress: selectedCollator,
+      bondedAmount
     }).then((result) => {
       setFee(result.txInfo.fee);
       setBalanceError(result.txInfo.balanceError);
@@ -149,7 +154,7 @@ function StakeCompoundSubmitTransaction ({ className }: Props): React.ReactEleme
       setLoading(false);
       setIsClickNext(true);
     }).catch(console.error);
-  }, [accountMinimum, selectedAccount, selectedCollator, selectedNetwork]);
+  }, [accountMinimum, bondedAmount, selectedAccount, selectedCollator, selectedNetwork]);
 
   const handleRevertClickNext = useCallback(() => {
     setIsClickNext(false);
@@ -244,6 +249,7 @@ function StakeCompoundSubmitTransaction ({ className }: Props): React.ReactEleme
           accountMinimum={accountMinimum}
           address={selectedAccount}
           balanceError={balanceError}
+          bondedAmount={bondedAmount}
           fee={fee}
           handleRevertClickNext={handleRevertClickNext}
           networkKey={selectedNetwork}

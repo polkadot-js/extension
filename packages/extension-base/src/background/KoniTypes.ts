@@ -1291,6 +1291,7 @@ export interface TuringStakeCompoundParams {
   collatorAddress: string,
   networkKey: string,
   accountMinimum: string,
+  bondedAmount: string,
   password?: string
 }
 

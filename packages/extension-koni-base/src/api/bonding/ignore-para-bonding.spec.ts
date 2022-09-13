@@ -223,4 +223,9 @@ describe('test DotSama APIs', () => {
 
     // console.log(scheduler);
   });
+
+  test('get turing auto-compounding APY', () => {
+    const timestamp = new Date();
+
+  });
 });

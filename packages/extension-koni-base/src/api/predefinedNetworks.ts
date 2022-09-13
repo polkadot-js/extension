@@ -1084,7 +1084,8 @@ export const PREDEFINED_NETWORKS: Record<string, NetworkJson> = {
     paraId: 2096,
     nativeToken: 'NEER',
     crowdloanUrl: 'https://ksmcrowdloan.bit.country/',
-    decimals: 18
+    decimals: 18,
+    coinGeckoKey: 'metaverse-network-pioneer'
   },
   quartz: {
     key: 'quartz',

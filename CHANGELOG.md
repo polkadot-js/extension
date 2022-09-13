@@ -1,5 +1,15 @@
 # CHANGELOG
 
+## 0.6.1 (Koni)
+Build date: Sep 13, 2022.
+
+Update:
+- Integrate Bit.Country Token and XCM (#621)
+- Update Gear Staging Testnet logo (#625)
+- Update ArthSwap logo (ARSW token on Astar-EVM) (#626)
+- Update default provider for Subspace Gemini 1 (#628)
+- Update endpoint list for GM Chain (#632)
+
 ## 0.5.9 (Koni)
 Build date: Sep 7, 2022.
 

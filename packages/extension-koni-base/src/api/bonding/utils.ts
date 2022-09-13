@@ -204,3 +204,8 @@ export function getParaCurrentInflation (totalStaked: number, inflationConfig: I
 
   return parseFloat(inflationString);
 }
+
+export interface TuringOptimalCompoundFormat {
+  period: string; // in days
+  apy: string;
+}

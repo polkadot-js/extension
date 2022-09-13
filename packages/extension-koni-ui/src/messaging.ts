@@ -763,3 +763,7 @@ export async function subscribeAuthUrl (callback: (data: AuthUrls) => void): Pro
 export async function getTuringStakeCompoundTxInfo (request: TuringStakeCompoundParams): Promise<TuringStakeCompoundResp> {
   return sendMessage('pri(staking.turingCompound)', request);
 }
+
+export async function submitTuringStakeCompounding (request: TuringStakeCompoundParams, callback: (data: BasicTxResponse) => void): Promise<BasicTxResponse> {
+  return sendMessage('pri(staking.submitTuringCompound)', request, callback);
+}

@@ -1290,7 +1290,8 @@ export interface TuringStakeCompoundParams {
   address: string,
   collatorAddress: string,
   networkKey: string,
-  accountMinimum: string
+  accountMinimum: string,
+  password?: string
 }
 
 export interface TuringStakeCompoundResp {
@@ -1304,6 +1305,7 @@ export interface TransakNetwork {
 }
 
 export interface KoniRequestSignatures {
+  'pri(staking.submitTuringCompound)': [TuringStakeCompoundParams, BasicTxResponse, BasicTxResponse];
   'pri(staking.turingCompound)': [TuringStakeCompoundParams, TuringStakeCompoundResp];
   'pri(staking.delegationInfo)': [StakeDelegationRequest, DelegationItem[]];
   'pri(staking.submitClaimReward)': [StakeClaimRewardParams, BasicTxResponse, BasicTxResponse];

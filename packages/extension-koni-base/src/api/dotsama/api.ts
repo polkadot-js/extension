@@ -1,7 +1,8 @@
 // Copyright 2019-2022 @subwallet/extension-koni-base authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { options } from '@acala-network/api';
+import { options as acalaOptions } from '@acala-network/api';
+import { options as oakOptions } from '@oak-foundation/api';
 import { ApiProps, ApiState } from '@subwallet/extension-base/background/KoniTypes';
 import { typesBundle, typesChain } from '@subwallet/extension-koni-base/api/dotsama/api-helper';
 import { DOTSAMA_AUTO_CONNECT_MS, DOTSAMA_MAX_CONTINUE_RETRY } from '@subwallet/extension-koni-base/constants';
@@ -132,7 +133,9 @@ export function initApi (networkKey: string, apiUrl: string, isEthereum?: boolea
   let api: ApiPromise;
 
   if (['acala', 'karura', 'origintrail', 'kintsugi'].includes(networkKey)) {
-    api = new ApiPromise(options({ provider }));
+    api = new ApiPromise(acalaOptions({ provider }));
+  } else if (['turingStaging', 'turing'].includes(networkKey)) {
+    api = new ApiPromise(oakOptions({ provider }));
   } else {
     api = new ApiPromise(apiOption);
   }

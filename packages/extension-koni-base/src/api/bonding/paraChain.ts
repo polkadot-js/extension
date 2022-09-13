@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { ApiProps, BasicTxInfo, ChainBondingBasics, DelegationItem, NetworkJson, TuringStakeCompoundResp, UnlockingStakeInfo, ValidatorInfo } from '@subwallet/extension-base/background/KoniTypes';
-import { BOND_LESS_ACTION, calculateChainStakedReturn, ERA_LENGTH_MAP, getParaCurrentInflation, InflationConfig, PARACHAIN_INFLATION_DISTRIBUTION, REVOKE_ACTION } from '@subwallet/extension-koni-base/api/bonding/utils';
+import { BOND_LESS_ACTION, calculateChainStakedReturn, ERA_LENGTH_MAP, getParaCurrentInflation, InflationConfig, PARACHAIN_INFLATION_DISTRIBUTION, REVOKE_ACTION, TuringOptimalCompoundFormat } from '@subwallet/extension-koni-base/api/bonding/utils';
 import { getFreeBalance } from '@subwallet/extension-koni-base/api/dotsama/balance';
 import { parseNumberToDisplay, parseRawNumber, reformatAddress } from '@subwallet/extension-koni-base/utils';
 import Web3 from 'web3';
@@ -757,13 +757,22 @@ async function handleBifrostUnlockingInfo (dotSamaApi: ApiProps, networkJson: Ne
 
 async function getTuringCompoundTxInfo (dotSamaApi: ApiProps, address: string, collatorAddress: string, accountMinimum: string) {
   const apiPromise = await dotSamaApi.isReady;
-  // TODO: get optimal params
-  const extrinsic = apiPromise.api.tx.automationTime.scheduleAutoCompoundDelegatedStakeTask('1661200000', '172800', collatorAddress, accountMinimum);
+
+  // @ts-ignore
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment,@typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-member-access
+  const _optimalCompounding = await apiPromise.api.rpc.automationTime.calculateOptimalAutostaking('10000000000000', collatorAddress);
+
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-member-access
+  const optimalCompounding = _optimalCompounding.toHuman() as TuringOptimalCompoundFormat;
+
+  const frequency = parseInt(optimalCompounding.period) * 24 * 60 * 60; // in seconds
+
+  const extrinsic = apiPromise.api.tx.automationTime.scheduleAutoCompoundDelegatedStakeTask('1661200000', frequency.toString(), collatorAddress, accountMinimum);
 
   const paymentInfo = await extrinsic.paymentInfo(address);
 
   return {
-    optimalTime: '46',
+    optimalTime: optimalCompounding.period, // in days
     paymentInfo
   };
 }
@@ -787,4 +796,19 @@ export async function handleTuringCompoundTxInfo (networkKey: string, networkJso
     txInfo: basicTxInfo,
     optimalTime: txInfo.optimalTime
   } as TuringStakeCompoundResp;
+}
+
+export async function getTuringCompoundExtrinsic (dotSamaApi: ApiProps, address: string, collatorAddress: string, accountMinimum: string) {
+  const apiPromise = await dotSamaApi.isReady;
+
+  // @ts-ignore
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment,@typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-member-access
+  const _optimalCompounding = await apiPromise.api.rpc.automationTime.calculateOptimalAutostaking('10000000000000', collatorAddress);
+
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-member-access
+  const optimalCompounding = _optimalCompounding.toHuman() as TuringOptimalCompoundFormat;
+
+  const frequency = parseInt(optimalCompounding.period) * 24 * 60 * 60; // in seconds
+
+  return apiPromise.api.tx.automationTime.scheduleAutoCompoundDelegatedStakeTask('1661200000', frequency.toString(), collatorAddress, accountMinimum);
 }

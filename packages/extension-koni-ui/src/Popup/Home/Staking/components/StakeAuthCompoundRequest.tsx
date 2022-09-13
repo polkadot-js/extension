@@ -9,7 +9,7 @@ import Spinner from '@subwallet/extension-koni-ui/components/Spinner';
 import useGetNetworkJson from '@subwallet/extension-koni-ui/hooks/screen/home/useGetNetworkJson';
 import useToast from '@subwallet/extension-koni-ui/hooks/useToast';
 import useTranslation from '@subwallet/extension-koni-ui/hooks/useTranslation';
-import { submitStakeClaimReward } from '@subwallet/extension-koni-ui/messaging';
+import { submitTuringStakeCompounding } from '@subwallet/extension-koni-ui/messaging';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import moment from 'moment/moment';
 import React, { useCallback, useState } from 'react';
@@ -57,13 +57,13 @@ function StakeAuthCompoundRequest ({ accountMinimum, address, balanceError, clas
 
   const handleOnSubmit = useCallback(async () => {
     setLoading(true);
-    console.log(accountMinimum);
-    console.log(selectedCollator);
 
-    await submitStakeClaimReward({
+    await submitTuringStakeCompounding({
       address,
-      networkKey,
-      password
+      accountMinimum,
+      password,
+      collatorAddress: selectedCollator,
+      networkKey
     }, (cbData) => {
       if (cbData.passwordError) {
         show(cbData.passwordError);

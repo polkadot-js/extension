@@ -8,8 +8,9 @@ import InputBalance from '@subwallet/extension-koni-ui/components/InputBalance';
 import Spinner from '@subwallet/extension-koni-ui/components/Spinner';
 import { ActionContext } from '@subwallet/extension-koni-ui/contexts';
 import useGetNetworkJson from '@subwallet/extension-koni-ui/hooks/screen/home/useGetNetworkJson';
+import useToast from '@subwallet/extension-koni-ui/hooks/useToast';
 import useTranslation from '@subwallet/extension-koni-ui/hooks/useTranslation';
-import { getStakeDelegationInfo, getTuringStakeCompoundTxInfo } from '@subwallet/extension-koni-ui/messaging';
+import { checkTuringCompoundTask, getStakeDelegationInfo, getTuringStakeCompoundTxInfo } from '@subwallet/extension-koni-ui/messaging';
 import Header from '@subwallet/extension-koni-ui/partials/Header';
 import ValidatorsDropdown from '@subwallet/extension-koni-ui/Popup/Bonding/components/ValidatorsDropdown';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
@@ -39,6 +40,8 @@ function filterValidDelegations (delegations: DelegationItem[]) {
   return filteredDelegations;
 }
 
+const TURING_ED = 0.01; // TODO: can be done better, fix this upon new architecture
+
 function StakeCompoundSubmitTransaction ({ className }: Props): React.ReactElement<Props> {
   const { t } = useTranslation();
   const [showResult, setShowResult] = useState(false);
@@ -48,6 +51,7 @@ function StakeCompoundSubmitTransaction ({ className }: Props): React.ReactEleme
   const [bondedAmount, setBondedAmount] = useState('');
   const [accountMinimum, setAccountMinimum] = useState('0');
   const [showAuth, setShowAuth] = useState(false);
+  const [hasCompoundRequest, setHasCompoundRequest] = useState(false);
   const { currentAccount: { account }, stakeCompoundParams: { selectedAccount, selectedNetwork } } = useSelector((state: RootState) => state);
 
   const [balanceError, setBalanceError] = useState(false);
@@ -62,6 +66,7 @@ function StakeCompoundSubmitTransaction ({ className }: Props): React.ReactEleme
   const [extrinsicHash, setExtrinsicHash] = useState('');
   const [isTxSuccess, setIsTxSuccess] = useState(false);
   const [txError, setTxError] = useState('');
+  const { show } = useToast();
 
   useEffect(() => {
     if (account?.address !== selectedAccount) {
@@ -93,16 +98,31 @@ function StakeCompoundSubmitTransaction ({ className }: Props): React.ReactEleme
   }, [selectedAccount, selectedNetwork]);
 
   useEffect(() => {
+    if (selectedCollator !== '') {
+      checkTuringCompoundTask(selectedAccount)
+        .then((result) => {
+          console.log(result);
+          setHasCompoundRequest(result.exist);
+        })
+        .catch(console.error);
+    }
+  }, [selectedAccount, selectedCollator]);
+
+  useEffect(() => {
     if (!isClickNext) {
       const _accountMinimum = parseFloat(accountMinimum);
 
-      if (_accountMinimum > 0) {
+      if (_accountMinimum > TURING_ED) {
         setIsReadySubmit(true);
       } else {
         setIsReadySubmit(false);
+
+        if (_accountMinimum > 0) {
+          show(`The threshold must be larger than ${TURING_ED}`);
+        }
       }
     }
-  }, [accountMinimum, isClickNext]);
+  }, [accountMinimum, isClickNext, show]);
 
   const handleSelectValidator = useCallback((val: string) => {
     if (delegations) {

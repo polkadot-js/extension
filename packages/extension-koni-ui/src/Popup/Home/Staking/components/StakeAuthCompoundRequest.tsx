@@ -11,6 +11,7 @@ import useToast from '@subwallet/extension-koni-ui/hooks/useToast';
 import useTranslation from '@subwallet/extension-koni-ui/hooks/useTranslation';
 import { submitTuringStakeCompounding } from '@subwallet/extension-koni-ui/messaging';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
+import { formatLocaleNumber } from '@subwallet/extension-koni-ui/util/formatNumber';
 import moment from 'moment/moment';
 import React, { useCallback, useState } from 'react';
 import styled from 'styled-components';
@@ -148,7 +149,7 @@ function StakeAuthCompoundRequest ({ accountMinimum, address, balanceError, bond
           <div className={'transaction-info-container'}>
             <div className={'transaction-info-row'}>
               <div className={'transaction-info-title'}>Compounding threshold</div>
-              <div className={'transaction-info-value'}>{accountMinimum} TUR</div>
+              <div className={'transaction-info-value'}>{formatLocaleNumber(parseFloat(accountMinimum), 4)} TUR</div>
             </div>
             <div className={'transaction-info-row'}>
               <div className={'transaction-info-title'}>Compounding starts in</div>

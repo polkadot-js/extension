@@ -152,7 +152,7 @@ function StakeAuthCompoundRequest ({ accountMinimum, address, balanceError, bond
             </div>
             <div className={'transaction-info-row'}>
               <div className={'transaction-info-title'}>Compounding starts in</div>
-              <div className={'transaction-info-value'}>About 1 hour</div>
+              <div className={'transaction-info-value'}>About 1 day</div>
             </div>
             <div className={'transaction-info-row'}>
               <div className={'transaction-info-title'}>Optimal compounding time</div>

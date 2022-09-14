@@ -21,7 +21,7 @@ import styled from 'styled-components';
 import { BN } from '@polkadot/util';
 
 const StakeAuthCompoundRequest = React.lazy(() => import('@subwallet/extension-koni-ui/Popup/Home/Staking/components/StakeAuthCompoundRequest'));
-const StakeClaimRewardResult = React.lazy(() => import('@subwallet/extension-koni-ui/Popup/Home/Staking/components/StakeClaimRewardResult'));
+const StakeCompoundResult = React.lazy(() => import('@subwallet/extension-koni-ui/Popup/Home/Staking/components/StakeCompoundResult'));
 
 interface Props extends ThemeProps {
   className?: string;
@@ -264,7 +264,7 @@ function StakeCompoundSubmitTransaction ({ className }: Props): React.ReactEleme
       }
 
       {!showAuth && showResult &&
-        <StakeClaimRewardResult
+        <StakeCompoundResult
           backToHome={handleClickCancel}
           extrinsicHash={extrinsicHash}
           handleResend={handleResend}

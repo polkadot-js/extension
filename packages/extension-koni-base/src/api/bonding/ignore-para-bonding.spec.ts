@@ -223,4 +223,30 @@ describe('test DotSama APIs', () => {
 
     // console.log(scheduler);
   });
+
+  test('get turing auto-compounding APY', async () => {
+    const provider = new WsProvider(getCurrentProvider(PREDEFINED_NETWORKS.turingStaging), DOTSAMA_AUTO_CONNECT_MS);
+    const api = new ApiPromise(options({ provider }));
+    const apiPromise = await api.isReady;
+
+    const address = '5HbcGs2QXVAc6Q6eoTzLYNAJWpN17AkCFRLnWDaHCiGYXvNc';
+
+    const resp = await apiPromise.query.automationTime.accountTasks.entries(address);
+
+    for (const res of resp) {
+      const taskMetadata = res[0].toHuman() as string[];
+      const taskDetail = res[1].toHuman() as Record<string, any>;
+
+      // Only check for the AutoCompoundDelegatedStake task
+      if (taskDetail.action.AutoCompoundDelegatedStake) {
+        const taskId = taskMetadata[1];
+
+        console.log(taskDetail.action.AutoCompoundDelegatedStake.collator);
+
+        // TODO: returns the first encountered task
+      }
+
+      console.log(res[1].toHuman());
+    }
+  });
 });

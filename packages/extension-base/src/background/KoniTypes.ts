@@ -1305,13 +1305,18 @@ export interface TransakNetwork {
   tokens: string[];
 }
 
+export interface CheckExistingTuringCompoundParams {
+  address: string;
+  collatorAddress: string;
+}
+
 export interface ExistingTuringCompoundTask {
   exist: boolean;
   taskId: string;
 }
 
 export interface KoniRequestSignatures {
-  'pri(staking.checkTuringCompoundTask)': [string, ExistingTuringCompoundTask];
+  'pri(staking.checkTuringCompoundTask)': [CheckExistingTuringCompoundParams, ExistingTuringCompoundTask];
   'pri(staking.submitTuringCompound)': [TuringStakeCompoundParams, BasicTxResponse, BasicTxResponse];
   'pri(staking.turingCompound)': [TuringStakeCompoundParams, TuringStakeCompoundResp];
   'pri(staking.delegationInfo)': [StakeDelegationRequest, DelegationItem[]];

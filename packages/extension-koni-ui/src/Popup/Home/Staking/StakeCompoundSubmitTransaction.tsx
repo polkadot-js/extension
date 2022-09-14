@@ -10,7 +10,7 @@ import { ActionContext } from '@subwallet/extension-koni-ui/contexts';
 import useGetNetworkJson from '@subwallet/extension-koni-ui/hooks/screen/home/useGetNetworkJson';
 import useToast from '@subwallet/extension-koni-ui/hooks/useToast';
 import useTranslation from '@subwallet/extension-koni-ui/hooks/useTranslation';
-import { checkTuringCompoundTask, getStakeDelegationInfo, getTuringStakeCompoundTxInfo } from '@subwallet/extension-koni-ui/messaging';
+import { checkTuringStakeCompounding, getStakeDelegationInfo, getTuringStakeCompoundTxInfo } from '@subwallet/extension-koni-ui/messaging';
 import Header from '@subwallet/extension-koni-ui/partials/Header';
 import ValidatorsDropdown from '@subwallet/extension-koni-ui/Popup/Bonding/components/ValidatorsDropdown';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
@@ -99,7 +99,10 @@ function StakeCompoundSubmitTransaction ({ className }: Props): React.ReactEleme
 
   useEffect(() => {
     if (selectedCollator !== '') {
-      checkTuringCompoundTask(selectedAccount)
+      checkTuringStakeCompounding({
+        address: selectedAccount,
+        collatorAddress: selectedCollator
+      })
         .then((result) => {
           console.log(result);
           setHasCompoundRequest(result.exist);

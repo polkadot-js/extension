@@ -827,3 +827,7 @@ export async function getTuringCompoundExtrinsic (dotSamaApi: ApiProps, address:
 
   return apiPromise.api.tx.automationTime.scheduleAutoCompoundDelegatedStakeTask(startTime.toString(), frequency.toString(), collatorAddress, accountMinimum);
 }
+
+export async function checkTuringStakeCompoundingTask (address: string) {
+
+}

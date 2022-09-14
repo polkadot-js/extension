@@ -1291,6 +1291,11 @@ export interface LedgerNetwork {
   isDevMode: boolean;
 }
 
+export interface TransakNetwork {
+  networks: string[];
+  tokens: string[];
+}
+
 export interface KoniRequestSignatures {
   'pri(staking.delegationInfo)': [StakeDelegationRequest, DelegationItem[]];
   'pri(staking.submitClaimReward)': [StakeClaimRewardParams, BasicTxResponse, BasicTxResponse];

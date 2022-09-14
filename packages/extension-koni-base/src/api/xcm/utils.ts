@@ -107,6 +107,11 @@ export const SupportedCrossChainsMap: Record<string, CrossChainRelation> = {
         type: 'p',
         isEthereum: false,
         supportedToken: ['aUSD', 'BNC', 'KAR']
+      },
+      pioneer: {
+        type: 'p',
+        isEthereum: false,
+        supportedToken: ['NEER']
       }
     }
   },
@@ -122,7 +127,7 @@ export const SupportedCrossChainsMap: Record<string, CrossChainRelation> = {
       interlay: {
         type: 'p',
         isEthereum: false,
-        supportedToken: ['xcINTR', 'xcIBTC']
+        supportedToken: ['xcINTR', 'xciBTC']
       },
       polkadot: {
         type: 'r',
@@ -143,7 +148,7 @@ export const SupportedCrossChainsMap: Record<string, CrossChainRelation> = {
       kintsugi: {
         type: 'p',
         isEthereum: false,
-        supportedToken: ['xcKINT', 'xcKBTC']
+        supportedToken: ['xcKINT', 'xckBTC']
       },
       kusama: {
         type: 'r',
@@ -196,7 +201,7 @@ export const SupportedCrossChainsMap: Record<string, CrossChainRelation> = {
       moonbeam: {
         type: 'p',
         isEthereum: true,
-        supportedToken: ['INTR', 'IBTC']
+        supportedToken: ['INTR', 'iBTC']
       }
     }
   },
@@ -207,7 +212,7 @@ export const SupportedCrossChainsMap: Record<string, CrossChainRelation> = {
       moonriver: {
         type: 'p',
         isEthereum: true,
-        supportedToken: ['KINT', 'KBTC']
+        supportedToken: ['KINT', 'kBTC']
       }
     }
   },
@@ -229,6 +234,17 @@ export const SupportedCrossChainsMap: Record<string, CrossChainRelation> = {
         type: 'r',
         isEthereum: false,
         supportedToken: ['KSM']
+      }
+    }
+  },
+  pioneer: {
+    type: 'p',
+    isEthereum: false,
+    relationMap: {
+      karura: {
+        type: 'p',
+        isEthereum: false,
+        supportedToken: ['NEER']
       }
     }
   }

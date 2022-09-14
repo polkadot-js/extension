@@ -1,5 +1,37 @@
 # CHANGELOG
 
+## 0.5.9 (Koni)
+Build date: Sep 7, 2022.
+
+Bug fixes:
+- Fix error of ipfs-gateway.cloud (#612)
+- Fix Transak logo (#616)
+
+## 0.5.8 (Koni)
+Build date: Sep 7, 2022.
+
+Update:
+- Add support Subspace Gemini 2a
+
+## 0.5.7 (Koni)
+Build date: Sep 6, 2022.
+
+Update:
+- Integrate on-ramp feature to buy crypto from fiat currencies (#245)
+- Improved decimal display UX (#585)
+- Integrate Gear testnet into SubWallet (#605)
+- Update the logo of xcINTR, xciBTC, xckBTC, xcCSM, xcSDN, xcKMA, xcLIT, xcCRAB, xcTEER#524
+
+Bug fixes:
+- Fix bug inject provider not auto remove (#591)
+- Fix bug still shows deleted NFTs (#497)
+- Fix issues related to QR Signer (#525)
+- Fix issue display lack of transaction history when user performs xcm transfer#586
+- Fix showing incorrect transferable balance for PRING token (#576)
+- Fix bug can't view transaction history of Moonbase Alpha network (#584)
+- Fix bug happens when user disconnect network or remove account that selected to buy cryptos (#609)
+- Fix support Xcm transfer on Kusama, Polkadot, Astar, Shiden chain for QR Account (#552)
+
 ## 0.5.6 (Koni)
 Build date: Aug 24, 2022.
 

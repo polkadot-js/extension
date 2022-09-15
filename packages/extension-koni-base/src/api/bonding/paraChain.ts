@@ -831,6 +831,39 @@ export async function getTuringCompoundExtrinsic (dotSamaApi: ApiProps, address:
   return apiPromise.api.tx.automationTime.scheduleAutoCompoundDelegatedStakeTask(startTime.toString(), frequency.toString(), collatorAddress, accountMinimum);
 }
 
-export async function checkTuringStakeCompoundingTask (address: string) {
+export async function checkTuringStakeCompoundingTask (dotSamaApi: ApiProps, address: string, collatorAddress: string) {
+  const apiPromise = await dotSamaApi.isReady;
 
+  const _allTasks = await apiPromise.api.query.automationTime.accountTasks.entries(address);
+  let taskId = '';
+  let accountMinimum = 0;
+  let frequency = 0;
+  let nextExecutionTimestamp = 0;
+
+  for (const task of _allTasks) {
+    const taskMetadata = task[0].toHuman() as string[];
+    const taskDetail = task[1].toHuman() as Record<string, any>;
+
+    // Only check for the AutoCompoundDelegatedStake task
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+    if (taskDetail.action.AutoCompoundDelegatedStake && taskDetail.action.AutoCompoundDelegatedStake.collator === collatorAddress) {
+      taskId = taskMetadata[1];
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+      accountMinimum = parseRawNumber(taskDetail?.action?.AutoCompoundDelegatedStake?.accountMinimum as string);
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+      frequency = parseRawNumber(taskDetail?.action?.AutoCompoundDelegatedStake?.frequency as string);
+      const executionTimes = taskDetail?.executionTimes as string[];
+
+      nextExecutionTimestamp = parseRawNumber(executionTimes[executionTimes.length - 1]);
+
+      break; // only need to check for the first task
+    }
+  }
+
+  return {
+    taskId,
+    accountMinimum,
+    frequency,
+    nextExecution: nextExecutionTimestamp
+  };
 }

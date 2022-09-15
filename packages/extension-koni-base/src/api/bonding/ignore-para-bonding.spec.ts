@@ -238,25 +238,16 @@ describe('test DotSama APIs', () => {
       const taskDetail = res[1].toHuman() as Record<string, any>;
 
       // Only check for the AutoCompoundDelegatedStake task
-      if (taskDetail.action.AutoCompoundDelegatedStake) {
+      if (taskDetail.action.AutoCompoundDelegatedStake && taskDetail.action.AutoCompoundDelegatedStake.collator === '691Fmzb8rhYmBxLvaqYEUApK22s3o6eCzC4whDY7dZZ83YYQ') {
         const taskId = taskMetadata[1];
 
-        console.log(taskDetail.action.AutoCompoundDelegatedStake.collator);
+        console.log(taskId);
 
+        console.log(taskDetail);
+
+        // console.log(taskDetail.action.AutoCompoundDelegatedStake.collator);
         // TODO: returns the first encountered task
       }
-
-      console.log(res[1].toHuman());
     }
-  });
-
-  test('parse time', () => {
-    const timestamp = new Date();
-
-    timestamp.setDate(timestamp.getDate() + 3)
-    timestamp.setHours(timestamp.getHours() + Math.round(timestamp.getMinutes() / 60));
-    timestamp.setMinutes(0, 0, 0);
-
-    console.log(timestamp.valueOf() / 1000);
   });
 });

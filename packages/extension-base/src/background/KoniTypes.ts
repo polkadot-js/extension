@@ -1309,11 +1309,15 @@ export interface TransakNetwork {
 export interface CheckExistingTuringCompoundParams {
   address: string;
   collatorAddress: string;
+  networkKey: string;
 }
 
 export interface ExistingTuringCompoundTask {
   exist: boolean;
   taskId: string;
+  accountMinimum: number;
+  frequency: number;
+  nextExecution: number;
 }
 
 export interface KoniRequestSignatures {

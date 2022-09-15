@@ -15,11 +15,14 @@ import Header from '@subwallet/extension-koni-ui/partials/Header';
 import ValidatorsDropdown from '@subwallet/extension-koni-ui/Popup/Bonding/components/ValidatorsDropdown';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
+import { formatLocaleNumber } from '@subwallet/extension-koni-ui/util/formatNumber';
+import moment from 'moment';
 import React, { useCallback, useContext, useEffect, useState } from 'react';
 import { useSelector } from 'react-redux';
 import styled from 'styled-components';
 
 import { BN } from '@polkadot/util';
+import {toShort} from "@subwallet/extension-koni-ui/util";
 
 const StakeAuthCompoundRequest = React.lazy(() => import('@subwallet/extension-koni-ui/Popup/Home/Staking/components/StakeAuthCompoundRequest'));
 const StakeCompoundResult = React.lazy(() => import('@subwallet/extension-koni-ui/Popup/Home/Staking/components/StakeCompoundResult'));
@@ -51,8 +54,13 @@ function StakeCompoundSubmitTransaction ({ className }: Props): React.ReactEleme
   const [bondedAmount, setBondedAmount] = useState('');
   const [accountMinimum, setAccountMinimum] = useState('0');
   const [showAuth, setShowAuth] = useState(false);
-  const [hasCompoundRequest, setHasCompoundRequest] = useState(false);
   const { currentAccount: { account }, stakeCompoundParams: { selectedAccount, selectedNetwork } } = useSelector((state: RootState) => state);
+
+  const [hasCompoundRequest, setHasCompoundRequest] = useState(false);
+  const [currentTaskId, setCurrentTaskId] = useState('');
+  const [currentFrequency, setCurrentFrequency] = useState(-1);
+  const [currentAccountMinimum, setCurrentAccountMinimum] = useState(-1);
+  const [nextExecution, setNextExecution] = useState(-1);
 
   const [balanceError, setBalanceError] = useState(false);
   const [fee, setFee] = useState('');
@@ -102,15 +110,20 @@ function StakeCompoundSubmitTransaction ({ className }: Props): React.ReactEleme
     if (selectedCollator !== '') {
       checkTuringStakeCompounding({
         address: selectedAccount,
-        collatorAddress: selectedCollator
+        collatorAddress: selectedCollator,
+        networkKey: selectedNetwork
       })
         .then((result) => {
-          console.log(result);
+          console.log('result', result);
+          setCurrentAccountMinimum(result.accountMinimum);
+          setCurrentFrequency(result.frequency);
+          setNextExecution(result.nextExecution);
           setHasCompoundRequest(result.exist);
+          setCurrentTaskId(result.taskId);
         })
         .catch(console.error);
     }
-  }, [selectedAccount, selectedCollator]);
+  }, [selectedAccount, selectedCollator, selectedNetwork]);
 
   useEffect(() => {
     if (!isClickNext) {
@@ -194,7 +207,13 @@ function StakeCompoundSubmitTransaction ({ className }: Props): React.ReactEleme
     setIsClickNext(false);
   }, []);
 
-  console.log('showAuth', showAuth);
+  const isNextButtonDisabled = useCallback(() => {
+    if (!hasCompoundRequest) {
+      return !isReadySubmit;
+    }
+
+    return false;
+  }, [hasCompoundRequest, isReadySubmit]);
 
   return (
     <div className={className}>
@@ -230,20 +249,41 @@ function StakeCompoundSubmitTransaction ({ className }: Props): React.ReactEleme
                 />
               }
 
-              <div className={'stake-compound-input'}>
-                <InputBalance
-                  autoFocus
-                  className={'stake-compound-amount-input'}
-                  decimals={networkJson.decimals}
-                  help={'The minimum balance that will be kept in your account'}
-                  isError={false}
-                  label={t<string>('Compounding threshold')}
-                  onChange={handleUpdateAccountMinimum}
-                  placeholder={'0'}
-                  siDecimals={networkJson.decimals}
-                  siSymbol={networkJson.nativeToken}
-                />
-              </div>
+              {
+                !hasCompoundRequest
+                  ? <div className={'stake-compound-input'}>
+                    <InputBalance
+                      autoFocus
+                      className={'stake-compound-amount-input'}
+                      decimals={networkJson.decimals}
+                      help={'The minimum balance that will be kept in your account'}
+                      isError={false}
+                      label={t<string>('Compounding threshold')}
+                      onChange={handleUpdateAccountMinimum}
+                      placeholder={'0'}
+                      siDecimals={networkJson.decimals}
+                      siSymbol={networkJson.nativeToken}
+                    />
+                  </div>
+                  : <div className={'transaction-info-container'}>
+                    <div className={'transaction-info-row'}>
+                      <div className={'transaction-info-title'}>Task Id</div>
+                      <div className={'transaction-info-value'}>{toShort(currentTaskId)}</div>
+                    </div>
+                    <div className={'transaction-info-row'}>
+                      <div className={'transaction-info-title'}>Compounding threshold</div>
+                      <div className={'transaction-info-value'}>{formatLocaleNumber(currentAccountMinimum, 4)} TUR</div>
+                    </div>
+                    <div className={'transaction-info-row'}>
+                      <div className={'transaction-info-title'}>Next execution</div>
+                      <div className={'transaction-info-value'}>About {nextExecution}</div>
+                    </div>
+                    <div className={'transaction-info-row'}>
+                      <div className={'transaction-info-title'}>Optimal compounding time</div>
+                      <div className={'transaction-info-value'}>Every {moment.duration(currentFrequency, 'seconds').humanize()}</div>
+                    </div>
+                  </div>
+              }
 
               <div className='stake-compound__separator' />
 
@@ -256,13 +296,13 @@ function StakeCompoundSubmitTransaction ({ className }: Props): React.ReactEleme
                   Cancel
                 </Button>
                 <Button
-                  isDisabled={!isReadySubmit} // the latter is for parachains
+                  isDisabled={isNextButtonDisabled()} // the latter is for parachains
                   onClick={handleConfirm}
                 >
                   {
                     loading
                       ? <Spinner />
-                      : <span>Next</span>
+                      : <span>{hasCompoundRequest ? 'Cancel task' : 'Next'}</span>
                   }
                 </Button>
               </div>
@@ -279,6 +319,7 @@ function StakeCompoundSubmitTransaction ({ className }: Props): React.ReactEleme
           bondedAmount={bondedAmount}
           fee={fee}
           handleRevertClickNext={handleRevertClickNext}
+          initTime={initTime}
           networkKey={selectedNetwork}
           optimalTime={optimalFrequency}
           selectedCollator={selectedCollator}
@@ -287,7 +328,6 @@ function StakeCompoundSubmitTransaction ({ className }: Props): React.ReactEleme
           setShowAuth={setShowAuth}
           setShowResult={setShowResult}
           setTxError={setTxError}
-          initTime={initTime}
         />
       }
 
@@ -306,6 +346,31 @@ function StakeCompoundSubmitTransaction ({ className }: Props): React.ReactEleme
 }
 
 export default React.memo(styled(StakeCompoundSubmitTransaction)(({ theme }: Props) => `
+  .transaction-info-container {
+    margin-top: 20px;
+    width: 100%;
+  }
+
+  .transaction-info-row {
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .transaction-info-title {
+    font-weight: 500;
+    font-size: 15px;
+    line-height: 26px;
+    color: ${theme.textColor2};
+  }
+
+  .transaction-info-value {
+    font-weight: 500;
+    font-size: 15px;
+    line-height: 26px;
+  }
+
   .stake-compound-amount-input {
     margin-top: 15px;
   }

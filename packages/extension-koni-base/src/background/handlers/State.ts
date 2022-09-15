@@ -873,6 +873,7 @@ export default class KoniState extends State {
           });
         } else {
           this.saveHistoryToStorage(address, network, items);
+          callback && callback(this.historyMap[network]);
         }
       }).catch((e) => this.logger.warn(e));
     }
@@ -1876,7 +1877,7 @@ export default class KoniState extends State {
   }
 
   public isSameHistory (oldItem: TransactionHistoryItemType, newItem: TransactionHistoryItemType): boolean {
-    if (oldItem.extrinsicHash === newItem.extrinsicHash) {
+    if (oldItem.extrinsicHash === newItem.extrinsicHash && oldItem.action === newItem.action) {
       if (oldItem.origin === 'app') {
         return true;
       } else {

@@ -56,7 +56,8 @@ function StakeCompoundSubmitTransaction ({ className }: Props): React.ReactEleme
 
   const [balanceError, setBalanceError] = useState(false);
   const [fee, setFee] = useState('');
-  const [optimalTime, setOptimalTime] = useState('');
+  const [optimalFrequency, setOptimalFrequency] = useState('');
+  const [initTime, setInitTime] = useState(-1);
 
   const navigate = useContext(ActionContext);
   const [loading, setLoading] = useState(false);
@@ -171,7 +172,8 @@ function StakeCompoundSubmitTransaction ({ className }: Props): React.ReactEleme
     }).then((result) => {
       setFee(result.txInfo.fee);
       setBalanceError(result.txInfo.balanceError);
-      setOptimalTime(result.optimalTime);
+      setOptimalFrequency(result.optimalFrequency);
+      setInitTime(result.initTime);
 
       setShowAuth(true);
       setLoading(false);
@@ -191,6 +193,8 @@ function StakeCompoundSubmitTransaction ({ className }: Props): React.ReactEleme
     setShowAuth(true);
     setIsClickNext(false);
   }, []);
+
+  console.log('showAuth', showAuth);
 
   return (
     <div className={className}>
@@ -276,13 +280,14 @@ function StakeCompoundSubmitTransaction ({ className }: Props): React.ReactEleme
           fee={fee}
           handleRevertClickNext={handleRevertClickNext}
           networkKey={selectedNetwork}
-          optimalTime={optimalTime}
+          optimalTime={optimalFrequency}
           selectedCollator={selectedCollator}
           setExtrinsicHash={setExtrinsicHash}
           setIsTxSuccess={setIsTxSuccess}
           setShowAuth={setShowAuth}
           setShowResult={setShowResult}
           setTxError={setTxError}
+          initTime={initTime}
         />
       }
 

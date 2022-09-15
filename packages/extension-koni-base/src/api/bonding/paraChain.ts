@@ -764,16 +764,16 @@ async function getTuringCompoundTxInfo (dotSamaApi: ApiProps, address: string, c
 
   // eslint-disable-next-line @typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-member-access
   const optimalCompounding = _optimalCompounding.toHuman() as TuringOptimalCompoundFormat;
+  const compoundingPeriod = parseInt(optimalCompounding.period); // in days
 
-  // TODO: time must be rounded to the nearest hour
-  const frequency = parseInt(optimalCompounding.period) * 24 * 60 * 60; // in seconds
+  const frequency = compoundingPeriod * 24 * 60 * 60; // in seconds
   const timestamp = new Date();
 
-  timestamp.setDate(timestamp.getDate() + 1);
+  timestamp.setDate(timestamp.getDate() + compoundingPeriod);
   timestamp.setHours(timestamp.getHours() + Math.round(timestamp.getMinutes() / 60));
   timestamp.setMinutes(0, 0, 0);
 
-  const startTime = Math.floor(timestamp.valueOf() / 1000); // must be in seconds, 1 hour from the moment the tx is submitted (first time compounding)
+  const startTime = Math.floor(timestamp.valueOf() / 1000); // must be unix timestamp in seconds
 
   const extrinsic = apiPromise.api.tx.automationTime.scheduleAutoCompoundDelegatedStakeTask(startTime.toString(), frequency.toString(), collatorAddress, accountMinimum);
 
@@ -781,7 +781,8 @@ async function getTuringCompoundTxInfo (dotSamaApi: ApiProps, address: string, c
 
   return {
     optimalTime: optimalCompounding.period, // in days
-    paymentInfo
+    paymentInfo,
+    initTime: compoundingPeriod
   };
 }
 
@@ -802,7 +803,8 @@ export async function handleTuringCompoundTxInfo (networkKey: string, networkJso
 
   return {
     txInfo: basicTxInfo,
-    optimalTime: txInfo.optimalTime
+    optimalFrequency: txInfo.optimalTime,
+    initTime: txInfo.initTime
   } as TuringStakeCompoundResp;
 }
 
@@ -815,15 +817,16 @@ export async function getTuringCompoundExtrinsic (dotSamaApi: ApiProps, address:
 
   // eslint-disable-next-line @typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-member-access
   const optimalCompounding = _optimalCompounding.toHuman() as TuringOptimalCompoundFormat;
+  const compoundingPeriod = parseInt(optimalCompounding.period); // in days
 
-  const frequency = parseInt(optimalCompounding.period) * 24 * 60 * 60; // in seconds
+  const frequency = compoundingPeriod * 24 * 60 * 60; // in seconds
   const timestamp = new Date();
 
-  timestamp.setDate(timestamp.getDate() + 1);
+  timestamp.setDate(timestamp.getDate() + compoundingPeriod);
   timestamp.setHours(timestamp.getHours() + Math.round(timestamp.getMinutes() / 60));
   timestamp.setMinutes(0, 0, 0);
 
-  const startTime = Math.floor(timestamp.valueOf() / 1000); // must be in seconds, 1 hour from the moment the tx is submitted (first time compounding)
+  const startTime = Math.floor(timestamp.valueOf() / 1000); // must be in seconds
 
   return apiPromise.api.tx.automationTime.scheduleAutoCompoundDelegatedStakeTask(startTime.toString(), frequency.toString(), collatorAddress, accountMinimum);
 }

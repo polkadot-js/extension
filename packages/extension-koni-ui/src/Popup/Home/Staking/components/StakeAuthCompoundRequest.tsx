@@ -30,13 +30,14 @@ interface Props extends ThemeProps {
   setIsTxSuccess: (val: boolean) => void;
   setTxError: (val: string) => void;
   bondedAmount: string;
+  initTime: number;
 
   balanceError: boolean;
   fee: string;
   optimalTime: string;
 }
 
-function StakeAuthCompoundRequest ({ accountMinimum, address, balanceError, bondedAmount, className, fee, handleRevertClickNext, networkKey, optimalTime, selectedCollator, setExtrinsicHash, setIsTxSuccess, setShowAuth, setShowResult, setTxError }: Props): React.ReactElement<Props> {
+function StakeAuthCompoundRequest ({ accountMinimum, address, balanceError, bondedAmount, className, fee, handleRevertClickNext, initTime, networkKey, optimalTime, selectedCollator, setExtrinsicHash, setIsTxSuccess, setShowAuth, setShowResult, setTxError }: Props): React.ReactElement<Props> {
   const [loading, setLoading] = useState(false);
   const [password, setPassword] = useState<string>('');
   const [passwordError, setPasswordError] = useState<string | null>('');
@@ -93,17 +94,19 @@ function StakeAuthCompoundRequest ({ accountMinimum, address, balanceError, bond
 
         if (cbData.status) {
           setIsTxSuccess(true);
+          setShowAuth(false);
           setShowResult(true);
           setExtrinsicHash(cbData.transactionHash as string);
         } else {
           setIsTxSuccess(false);
           setTxError('Error submitting transaction');
+          setShowAuth(false);
           setShowResult(true);
           setExtrinsicHash(cbData.transactionHash as string);
         }
       }
     });
-  }, [accountMinimum, address, balanceError, bondedAmount, networkKey, password, selectedCollator, setExtrinsicHash, setIsTxSuccess, setShowResult, setTxError, show]);
+  }, [accountMinimum, address, balanceError, bondedAmount, networkKey, password, selectedCollator, setExtrinsicHash, setIsTxSuccess, setShowAuth, setShowResult, setTxError, show]);
 
   const handleConfirm = useCallback(() => {
     setLoading(true);
@@ -153,7 +156,7 @@ function StakeAuthCompoundRequest ({ accountMinimum, address, balanceError, bond
             </div>
             <div className={'transaction-info-row'}>
               <div className={'transaction-info-title'}>Compounding starts in</div>
-              <div className={'transaction-info-value'}>About 1 day</div>
+              <div className={'transaction-info-value'}>About {moment.duration(initTime, 'days').humanize()}</div>
             </div>
             <div className={'transaction-info-row'}>
               <div className={'transaction-info-title'}>Optimal compounding time</div>

@@ -224,7 +224,7 @@ describe('test DotSama APIs', () => {
     // console.log(scheduler);
   });
 
-  test('get turing auto-compounding APY', async () => {
+  test('get compounding task', async () => {
     const provider = new WsProvider(getCurrentProvider(PREDEFINED_NETWORKS.turingStaging), DOTSAMA_AUTO_CONNECT_MS);
     const api = new ApiPromise(options({ provider }));
     const apiPromise = await api.isReady;
@@ -248,5 +248,15 @@ describe('test DotSama APIs', () => {
 
       console.log(res[1].toHuman());
     }
+  });
+
+  test('parse time', () => {
+    const timestamp = new Date();
+
+    timestamp.setDate(timestamp.getDate() + 3)
+    timestamp.setHours(timestamp.getHours() + Math.round(timestamp.getMinutes() / 60));
+    timestamp.setMinutes(0, 0, 0);
+
+    console.log(timestamp.valueOf() / 1000);
   });
 });

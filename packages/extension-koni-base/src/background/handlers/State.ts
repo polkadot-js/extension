@@ -1071,19 +1071,6 @@ export default class KoniState extends State {
     }
 
     this.currentAccountStore.set('CurrentAccountInfo', data, () => {
-      // Trigger single mode
-      // if (currentGenesisHash) {
-      //   const singleMode = this.findSingleMode(currentGenesisHash);
-      //
-      //   if (singleMode) {
-      //     this.setTheme(singleMode.theme);
-      //   } else {
-      //     this.setTheme(DEFAULT_THEME);
-      //   }
-      // } else {
-      //   this.setTheme(DEFAULT_THEME);
-      // }
-
       this.updateServiceInfo();
       callback && callback();
     });
@@ -2731,28 +2718,36 @@ export default class KoniState extends State {
   }
 
   public onInstall () {
-    // const singleModes = Object.values(PREDEFINED_SINGLE_MODES);
-    //
-    // const setUpSingleMode = ({ networkKeys }: SingleModeJson) => {
-    //   const { genesisHash } = this.getNetworkMapByKey(networkKeys[0]);
-    //
-    //   this.setCurrentAccount({ address: ALL_ACCOUNT_KEY, currentGenesisHash: genesisHash });
-    // };
-    //
-    // chrome.tabs.query({}, function (tabs) {
-    //   const openingUrls = tabs.map((t) => t.url);
-    //
-    //   const singleMode = singleModes.find(({ autoTriggerDomain }) => {
-    //     const urlRegex = new RegExp(autoTriggerDomain);
-    //
-    //     return Boolean(openingUrls.find((url) => {
-    //       return url && urlRegex.test(url);
-    //     }));
-    //   });
-    //
-    //   if (singleMode) {
-    //     setUpSingleMode(singleMode);
-    //   }
-    // });
+    const singleModes = Object.values(PREDEFINED_SINGLE_MODES);
+
+    const setUpSingleMode = ({ networkKeys, theme }: SingleModeJson) => {
+      networkKeys.forEach((key) => {
+        this.enableNetworkMap(key);
+      });
+
+      const { genesisHash } = this.getNetworkMapByKey(networkKeys[0]);
+
+      this.setCurrentAccount({ address: ALL_ACCOUNT_KEY, currentGenesisHash: genesisHash });
+      this.setTheme(theme);
+    };
+
+    chrome.tabs.query({}, function (tabs) {
+      const openingUrls = tabs.map((t) => t.url);
+
+      const singleMode = singleModes.find(({ autoTriggerDomain }) => {
+        const urlRegex = new RegExp(autoTriggerDomain);
+
+        return Boolean(openingUrls.find((url) => {
+          return url && urlRegex.test(url);
+        }));
+      });
+
+      if (singleMode) {
+        // Wait for everything is ready before enable single mode
+        setTimeout(() => {
+          setUpSingleMode(singleMode);
+        }, 999);
+      }
+    });
   }
 }

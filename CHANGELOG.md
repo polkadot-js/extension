@@ -1,5 +1,12 @@
 # CHANGELOG
 
+## 0.6.2 (Koni)
+Build date: Sep 16, 2022.
+
+Update:
+- Support Single-chain mode feature customize for Parachain & Solo chains (#331)
+
+
 ## 0.6.1 (Koni)
 Build date: Sep 13, 2022.
 

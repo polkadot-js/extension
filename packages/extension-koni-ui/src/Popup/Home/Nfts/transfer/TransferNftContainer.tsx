@@ -342,7 +342,7 @@ export default React.memo(styled(Wrapper)(({ theme }: Props) => `
 
   .send-button-default {
     margin-top: 40px;
-    background: #004BFF;
+    background: ${theme.secondaryColor};
     border-radius: 8px;
     display: flex;
     justify-content: center;

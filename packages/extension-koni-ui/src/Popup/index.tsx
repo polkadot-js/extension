@@ -7,6 +7,7 @@ import type { SettingsStruct } from '@polkadot/ui-settings/types';
 import { AccountsWithCurrentAddress, ConfirmationsQueue, ConfirmationType, CurrentAccountInfo } from '@subwallet/extension-base/background/KoniTypes';
 import { PHISHING_PAGE_REDIRECT } from '@subwallet/extension-base/defaults';
 import { canDerive } from '@subwallet/extension-base/utils';
+import { ALL_ACCOUNT_KEY } from '@subwallet/extension-koni-base/constants';
 import { AccountContext, ActionContext, AuthorizeReqContext, ConfirmationsQueueContext, MediaContext, MetadataReqContext, SettingsContext, SigningReqContext } from '@subwallet/extension-koni-ui/contexts';
 import { ExternalRequestContextProvider } from '@subwallet/extension-koni-ui/contexts/ExternalRequestContext';
 import { QRContextProvider } from '@subwallet/extension-koni-ui/contexts/QrContext';
@@ -158,6 +159,10 @@ export default function Popup (): React.ReactElement {
   // @ts-ignore
   const handleGetAccountsWithCurrentAddress = (data: AccountsWithCurrentAddress) => {
     const { accounts, currentAddress, currentGenesisHash } = data;
+
+    if (accounts && accounts.length === 0) {
+      accounts.push({ address: currentAddress || ALL_ACCOUNT_KEY, genesisHash: currentGenesisHash });
+    }
 
     setAccounts(accounts);
 

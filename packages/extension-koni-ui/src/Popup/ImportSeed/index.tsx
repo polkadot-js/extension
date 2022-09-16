@@ -3,8 +3,10 @@
 
 import HeaderWithSteps from '@subwallet/extension-koni-ui/partials/HeaderWithSteps';
 import { EVM_ACCOUNT_TYPE, SUBSTRATE_ACCOUNT_TYPE } from '@subwallet/extension-koni-ui/Popup/CreateAccount';
+import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import React, { useCallback, useContext, useEffect, useState } from 'react';
+import { useSelector } from 'react-redux';
 import styled from 'styled-components';
 
 import { KeypairType } from '@polkadot/util-crypto/types';
@@ -30,6 +32,7 @@ function ImportSeed ({ className = '' }: Props): React.ReactElement {
   const { t } = useTranslation();
   const { accounts } = useContext(AccountContext);
   const onAction = useContext(ActionContext);
+  const { genesisHash } = useSelector((state: RootState) => state.currentNetwork);
   const [isBusy, setIsBusy] = useState(false);
   const [account, setAccount] = useState<AccountInfo | null>(null);
   const [evmAccount, setEvmAccount] = useState<AccountInfo | null>(null);
@@ -42,6 +45,10 @@ function ImportSeed ({ className = '' }: Props): React.ReactElement {
   const evmName = `Account ${accountsWithoutAll.length + 1} - EVM`;
   const [step1, setStep1] = useState(true);
   const type = DEFAULT_TYPE;
+
+  useEffect(() => {
+    setSelectedGenesis(genesisHash);
+  }, [genesisHash]);
 
   useEffect((): void => {
     !accounts.length && onAction();

@@ -7,8 +7,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { NETWORK_STATUS } from '@subwallet/extension-base/background/KoniTypes';
 import { AccountJson } from '@subwallet/extension-base/background/types';
 import { ALL_ACCOUNT_KEY, ALL_NETWORK_KEY } from '@subwallet/extension-koni-base/constants';
-import signalSlashIcon from '@subwallet/extension-koni-ui/assets/signal-stream-slash-solid.svg';
-import signalIcon from '@subwallet/extension-koni-ui/assets/signal-stream-solid.svg';
+import { IconMaps } from '@subwallet/extension-koni-ui/assets/icon';
 import { AccountInfoEl } from '@subwallet/extension-koni-ui/components';
 import MoonpayArea from '@subwallet/extension-koni-ui/components/BuyArea/MoonpayArea';
 import OnRamperArea from '@subwallet/extension-koni-ui/components/BuyArea/OnRamperArea';
@@ -120,21 +119,21 @@ const BuyModal = (props: Props) => {
 
   const handleStatusIcon = useCallback((apiStatus: NETWORK_STATUS, index: number) => {
     if (apiStatus === NETWORK_STATUS.CONNECTED) {
-      return <img
-        alt='network-status'
-        className={'network-status network-status-icon'}
+      return <div
+        className={'network-status network-status-icon network-status-icon-connected'}
         data-for={`network-status-icon-${index}`}
         data-tip={true}
-        src={signalIcon}
-      />;
+      >
+        {IconMaps.signal}
+      </div>;
     } else {
-      return <img
-        alt='network-status'
-        className={'network-status network-status-icon'}
+      return <div
+        className={'network-status network-status-icon network-status-icon-disconnected'}
         data-for={`network-status-icon-${index}`}
         data-tip={true}
-        src={signalSlashIcon}
-      />;
+      >
+        {IconMaps.signalSplash}
+      </div>;
     }
   }, []);
 
@@ -466,6 +465,13 @@ export default styled(BuyModal)(({ theme }: ThemeProps) => `
         padding: 0;
       }
     }
+  }
+
+  .network-status-icon-connected {
+    color: ${theme.primaryColor}
+  }
+  .network-status-icon-disconnected {
+    color: ${theme.iconNeutralColor}
   }
 
   .network-container {

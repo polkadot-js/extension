@@ -13,7 +13,6 @@ import useToast from '@subwallet/extension-koni-ui/hooks/useToast';
 import useTranslation from '@subwallet/extension-koni-ui/hooks/useTranslation';
 import { checkTuringStakeCompounding, getStakeDelegationInfo, getTuringCancelStakeCompoundTxInfo, getTuringStakeCompoundTxInfo } from '@subwallet/extension-koni-ui/messaging';
 import Header from '@subwallet/extension-koni-ui/partials/Header';
-import ValidatorsDropdown from '@subwallet/extension-koni-ui/Popup/Bonding/components/ValidatorsDropdown';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { toShort } from '@subwallet/extension-koni-ui/util';
@@ -27,6 +26,9 @@ import { BN } from '@polkadot/util';
 
 const StakeAuthCompoundRequest = React.lazy(() => import('@subwallet/extension-koni-ui/Popup/Home/Staking/components/StakeAuthCompoundRequest'));
 const StakeCompoundResult = React.lazy(() => import('@subwallet/extension-koni-ui/Popup/Home/Staking/components/StakeCompoundResult'));
+const StakeAuthCancelCompoundRequest = React.lazy(() => import('@subwallet/extension-koni-ui/Popup/Home/Staking/components/StakeAuthCancelCompoundRequest'));
+const ValidatorsDropdown = React.lazy(() => import('@subwallet/extension-koni-ui/Popup/Bonding/components/ValidatorsDropdown'));
+const CancelStakeCompoundResult = React.lazy(() => import('@subwallet/extension-koni-ui/Popup/Home/Staking/components/CancelStakeCompoundResult'));
 
 interface Props extends ThemeProps {
   className?: string;
@@ -371,27 +373,22 @@ function StakeCompoundSubmitTransaction ({ className }: Props): React.ReactEleme
           </div>
           : <div>
             {showCancelCompoundingAuth && !showResult &&
-              <StakeAuthCompoundRequest
-                accountMinimum={accountMinimum}
+              <StakeAuthCancelCompoundRequest
                 address={selectedAccount}
                 balanceError={balanceError}
-                bondedAmount={bondedAmount}
                 fee={fee}
-                handleRevertClickNext={handleRevertClickNext}
-                initTime={initTime}
                 networkKey={selectedNetwork}
-                optimalTime={optimalFrequency}
-                selectedCollator={selectedCollator}
                 setExtrinsicHash={setExtrinsicHash}
                 setIsTxSuccess={setIsTxSuccess}
-                setShowAuth={setShowCompoundingAuth}
+                setShowAuth={setShowCancelCompoundingAuth}
                 setShowResult={setShowResult}
                 setTxError={setTxError}
+                taskId={currentTaskId}
               />
             }
 
             {!showCancelCompoundingAuth && showResult &&
-              <StakeCompoundResult
+              <CancelStakeCompoundResult
                 backToHome={handleClickCancel}
                 extrinsicHash={extrinsicHash}
                 handleResend={handleResend}

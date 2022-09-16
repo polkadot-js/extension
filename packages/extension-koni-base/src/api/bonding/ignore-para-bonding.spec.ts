@@ -238,6 +238,7 @@ describe('test DotSama APIs', () => {
       const taskDetail = res[1].toHuman() as Record<string, any>;
 
       // Only check for the AutoCompoundDelegatedStake task
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
       if (taskDetail.action.AutoCompoundDelegatedStake && taskDetail.action.AutoCompoundDelegatedStake.collator === '691Fmzb8rhYmBxLvaqYEUApK22s3o6eCzC4whDY7dZZ83YYQ') {
         const taskId = taskMetadata[1];
 
@@ -246,8 +247,17 @@ describe('test DotSama APIs', () => {
         console.log(taskDetail);
 
         // console.log(taskDetail.action.AutoCompoundDelegatedStake.collator);
-        // TODO: returns the first encountered task
       }
     }
   });
+
+  // test('get web3', async () => {
+  //   const web3 = new Web3('wss://wss.api.moonbeam.network');
+  //
+  //   const contract = new web3.eth.Contract(ERC721Contract, '0x6758053c0b27E478edE1E4882adFF708Fc4FA72D');
+  //
+  //   const resp = await contract.methods.ownerOf('8').call()
+  //
+  //   console.log(resp)
+  // });
 });

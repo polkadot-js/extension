@@ -838,7 +838,6 @@ export async function checkTuringStakeCompoundingTask (dotSamaApi: ApiProps, add
   let taskId = '';
   let accountMinimum = 0;
   let frequency = 0;
-  let nextExecutionTimestamp = 0;
 
   for (const task of _allTasks) {
     const taskMetadata = task[0].toHuman() as string[];
@@ -852,9 +851,6 @@ export async function checkTuringStakeCompoundingTask (dotSamaApi: ApiProps, add
       accountMinimum = parseRawNumber(taskDetail?.action?.AutoCompoundDelegatedStake?.accountMinimum as string);
       // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
       frequency = parseRawNumber(taskDetail?.action?.AutoCompoundDelegatedStake?.frequency as string);
-      const executionTimes = taskDetail?.executionTimes as string[];
-
-      nextExecutionTimestamp = parseRawNumber(executionTimes[executionTimes.length - 1]);
 
       break; // only need to check for the first task
     }
@@ -863,7 +859,35 @@ export async function checkTuringStakeCompoundingTask (dotSamaApi: ApiProps, add
   return {
     taskId,
     accountMinimum,
-    frequency,
-    nextExecution: nextExecutionTimestamp
+    frequency
   };
+}
+
+export async function handleTuringCancelCompoundTxInfo (dotSamaApiMap: Record<string, ApiProps>, web3ApiMap: Record<string, Web3>, taskId: string, address: string, networkKey: string, networkJson: NetworkJson) {
+  const dotSamaApi = dotSamaApiMap[networkKey];
+  const apiPromise = await dotSamaApi.isReady;
+
+  const extrinsic = apiPromise.api.tx.automationTime.cancelTask(taskId);
+
+  const [paymentInfo, balance] = await Promise.all([
+    extrinsic.paymentInfo(address),
+    getFreeBalance(networkKey, address, dotSamaApiMap, web3ApiMap)
+  ]);
+
+  const feeString = parseNumberToDisplay(paymentInfo.partialFee, networkJson.decimals) + ` ${networkJson.nativeToken ? networkJson.nativeToken : ''}`;
+  const binaryBalance = new BN(balance);
+  const balanceError = paymentInfo.partialFee.gt(binaryBalance);
+
+  const basicTxInfo: BasicTxInfo = {
+    fee: feeString,
+    balanceError
+  };
+
+  return basicTxInfo;
+}
+
+export async function getTuringCancelCompoundingExtrinsic (dotSamaApi: ApiProps, taskId: string) {
+  const apiPromise = await dotSamaApi.isReady;
+
+  return apiPromise.api.tx.automationTime.cancelTask(taskId);
 }

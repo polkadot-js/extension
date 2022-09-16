@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { DelegationItem } from '@subwallet/extension-base/background/KoniTypes';
+import cloneLogo from '@subwallet/extension-koni-ui/assets/clone.svg';
 import Button from '@subwallet/extension-koni-ui/components/Button';
 import InputAddress from '@subwallet/extension-koni-ui/components/InputAddress';
 import InputBalance from '@subwallet/extension-koni-ui/components/InputBalance';
@@ -10,11 +11,12 @@ import { ActionContext } from '@subwallet/extension-koni-ui/contexts';
 import useGetNetworkJson from '@subwallet/extension-koni-ui/hooks/screen/home/useGetNetworkJson';
 import useToast from '@subwallet/extension-koni-ui/hooks/useToast';
 import useTranslation from '@subwallet/extension-koni-ui/hooks/useTranslation';
-import { checkTuringStakeCompounding, getStakeDelegationInfo, getTuringStakeCompoundTxInfo } from '@subwallet/extension-koni-ui/messaging';
+import { checkTuringStakeCompounding, getStakeDelegationInfo, getTuringCancelStakeCompoundTxInfo, getTuringStakeCompoundTxInfo } from '@subwallet/extension-koni-ui/messaging';
 import Header from '@subwallet/extension-koni-ui/partials/Header';
 import ValidatorsDropdown from '@subwallet/extension-koni-ui/Popup/Bonding/components/ValidatorsDropdown';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
+import { toShort } from '@subwallet/extension-koni-ui/util';
 import { formatLocaleNumber } from '@subwallet/extension-koni-ui/util/formatNumber';
 import moment from 'moment';
 import React, { useCallback, useContext, useEffect, useState } from 'react';
@@ -22,7 +24,6 @@ import { useSelector } from 'react-redux';
 import styled from 'styled-components';
 
 import { BN } from '@polkadot/util';
-import {toShort} from "@subwallet/extension-koni-ui/util";
 
 const StakeAuthCompoundRequest = React.lazy(() => import('@subwallet/extension-koni-ui/Popup/Home/Staking/components/StakeAuthCompoundRequest'));
 const StakeCompoundResult = React.lazy(() => import('@subwallet/extension-koni-ui/Popup/Home/Staking/components/StakeCompoundResult'));
@@ -53,14 +54,14 @@ function StakeCompoundSubmitTransaction ({ className }: Props): React.ReactEleme
   const [selectedCollator, setSelectedCollator] = useState<string>('');
   const [bondedAmount, setBondedAmount] = useState('');
   const [accountMinimum, setAccountMinimum] = useState('0');
-  const [showAuth, setShowAuth] = useState(false);
+  const [showCompoundingAuth, setShowCompoundingAuth] = useState(false);
+  const [showCancelCompoundingAuth, setShowCancelCompoundingAuth] = useState(false);
   const { currentAccount: { account }, stakeCompoundParams: { selectedAccount, selectedNetwork } } = useSelector((state: RootState) => state);
 
   const [hasCompoundRequest, setHasCompoundRequest] = useState(false);
   const [currentTaskId, setCurrentTaskId] = useState('');
   const [currentFrequency, setCurrentFrequency] = useState(-1);
   const [currentAccountMinimum, setCurrentAccountMinimum] = useState(-1);
-  const [nextExecution, setNextExecution] = useState(-1);
 
   const [balanceError, setBalanceError] = useState(false);
   const [fee, setFee] = useState('');
@@ -95,14 +96,12 @@ function StakeCompoundSubmitTransaction ({ className }: Props): React.ReactEleme
       setDelegations(filteredDelegations);
       setSelectedCollator(filteredDelegations[0].owner);
       setBondedAmount(filteredDelegations[0].amount);
-      setIsDataReady(true);
     }).catch(console.error);
 
     return () => {
       setDelegations(undefined);
       setSelectedCollator('');
-      setIsDataReady(false);
-      setSelectedCollator('');
+      setBondedAmount('');
     };
   }, [selectedAccount, selectedNetwork]);
 
@@ -114,12 +113,11 @@ function StakeCompoundSubmitTransaction ({ className }: Props): React.ReactEleme
         networkKey: selectedNetwork
       })
         .then((result) => {
-          console.log('result', result);
           setCurrentAccountMinimum(result.accountMinimum);
           setCurrentFrequency(result.frequency);
-          setNextExecution(result.nextExecution);
           setHasCompoundRequest(result.exist);
           setCurrentTaskId(result.taskId);
+          setIsDataReady(true);
         })
         .catch(console.error);
     }
@@ -176,23 +174,38 @@ function StakeCompoundSubmitTransaction ({ className }: Props): React.ReactEleme
   const handleConfirm = useCallback(() => {
     setLoading(true);
 
-    getTuringStakeCompoundTxInfo({
-      networkKey: selectedNetwork,
-      address: selectedAccount,
-      accountMinimum,
-      collatorAddress: selectedCollator,
-      bondedAmount
-    }).then((result) => {
-      setFee(result.txInfo.fee);
-      setBalanceError(result.txInfo.balanceError);
-      setOptimalFrequency(result.optimalFrequency);
-      setInitTime(result.initTime);
+    if (!hasCompoundRequest) {
+      getTuringStakeCompoundTxInfo({
+        networkKey: selectedNetwork,
+        address: selectedAccount,
+        accountMinimum,
+        collatorAddress: selectedCollator,
+        bondedAmount
+      }).then((result) => {
+        setFee(result.txInfo.fee);
+        setBalanceError(result.txInfo.balanceError);
+        setOptimalFrequency(result.optimalFrequency);
+        setInitTime(result.initTime);
 
-      setShowAuth(true);
-      setLoading(false);
-      setIsClickNext(true);
-    }).catch(console.error);
-  }, [accountMinimum, bondedAmount, selectedAccount, selectedCollator, selectedNetwork]);
+        setShowCompoundingAuth(true);
+        setLoading(false);
+        setIsClickNext(true);
+      }).catch(console.error);
+    } else {
+      getTuringCancelStakeCompoundTxInfo({
+        taskId: currentTaskId,
+        networkKey: selectedNetwork,
+        address: selectedAccount
+      })
+        .then((result) => {
+          setLoading(false);
+          setShowCancelCompoundingAuth(true);
+          setFee(result.fee);
+          setBalanceError(result.balanceError);
+        })
+        .catch(console.error);
+    }
+  }, [accountMinimum, bondedAmount, hasCompoundRequest, selectedAccount, selectedCollator, selectedNetwork, currentTaskId]);
 
   const handleRevertClickNext = useCallback(() => {
     setIsClickNext(false);
@@ -203,7 +216,7 @@ function StakeCompoundSubmitTransaction ({ className }: Props): React.ReactEleme
     setIsTxSuccess(false);
     setTxError('');
     setShowResult(false);
-    setShowAuth(true);
+    setShowCompoundingAuth(true);
     setIsClickNext(false);
   }, []);
 
@@ -214,6 +227,11 @@ function StakeCompoundSubmitTransaction ({ className }: Props): React.ReactEleme
 
     return false;
   }, [hasCompoundRequest, isReadySubmit]);
+
+  const handleCopy = useCallback(() => {
+    navigator.clipboard.writeText(currentTaskId).then().catch(console.error);
+    show('Copied');
+  }, [currentTaskId, show]);
 
   return (
     <div className={className}>
@@ -268,15 +286,21 @@ function StakeCompoundSubmitTransaction ({ className }: Props): React.ReactEleme
                   : <div className={'transaction-info-container'}>
                     <div className={'transaction-info-row'}>
                       <div className={'transaction-info-title'}>Task Id</div>
-                      <div className={'transaction-info-value'}>{toShort(currentTaskId)}</div>
+                      <div
+                        className={'transaction-info-value task-id-container'}
+                        onClick={handleCopy}
+                      >
+                        {toShort(currentTaskId)}
+                        <img
+                          alt='copy'
+                          className='stake_compound-copy-btn'
+                          src={cloneLogo}
+                        />
+                      </div>
                     </div>
                     <div className={'transaction-info-row'}>
                       <div className={'transaction-info-title'}>Compounding threshold</div>
                       <div className={'transaction-info-value'}>{formatLocaleNumber(currentAccountMinimum, 4)} TUR</div>
-                    </div>
-                    <div className={'transaction-info-row'}>
-                      <div className={'transaction-info-title'}>Next execution</div>
-                      <div className={'transaction-info-value'}>About {nextExecution}</div>
                     </div>
                     <div className={'transaction-info-row'}>
                       <div className={'transaction-info-title'}>Optimal compounding time</div>
@@ -311,41 +335,88 @@ function StakeCompoundSubmitTransaction ({ className }: Props): React.ReactEleme
         }
       </div>}
 
-      {showAuth && !showResult &&
-        <StakeAuthCompoundRequest
-          accountMinimum={accountMinimum}
-          address={selectedAccount}
-          balanceError={balanceError}
-          bondedAmount={bondedAmount}
-          fee={fee}
-          handleRevertClickNext={handleRevertClickNext}
-          initTime={initTime}
-          networkKey={selectedNetwork}
-          optimalTime={optimalFrequency}
-          selectedCollator={selectedCollator}
-          setExtrinsicHash={setExtrinsicHash}
-          setIsTxSuccess={setIsTxSuccess}
-          setShowAuth={setShowAuth}
-          setShowResult={setShowResult}
-          setTxError={setTxError}
-        />
-      }
+      {
+        !hasCompoundRequest
+          ? <div>
+            {showCompoundingAuth && !showResult &&
+              <StakeAuthCompoundRequest
+                accountMinimum={accountMinimum}
+                address={selectedAccount}
+                balanceError={balanceError}
+                bondedAmount={bondedAmount}
+                fee={fee}
+                handleRevertClickNext={handleRevertClickNext}
+                initTime={initTime}
+                networkKey={selectedNetwork}
+                optimalTime={optimalFrequency}
+                selectedCollator={selectedCollator}
+                setExtrinsicHash={setExtrinsicHash}
+                setIsTxSuccess={setIsTxSuccess}
+                setShowAuth={setShowCompoundingAuth}
+                setShowResult={setShowResult}
+                setTxError={setTxError}
+              />
+            }
 
-      {!showAuth && showResult &&
-        <StakeCompoundResult
-          backToHome={handleClickCancel}
-          extrinsicHash={extrinsicHash}
-          handleResend={handleResend}
-          isTxSuccess={isTxSuccess}
-          networkKey={selectedNetwork}
-          txError={txError}
-        />
+            {!showCompoundingAuth && showResult &&
+              <StakeCompoundResult
+                backToHome={handleClickCancel}
+                extrinsicHash={extrinsicHash}
+                handleResend={handleResend}
+                isTxSuccess={isTxSuccess}
+                networkKey={selectedNetwork}
+                txError={txError}
+              />
+            }
+          </div>
+          : <div>
+            {showCancelCompoundingAuth && !showResult &&
+              <StakeAuthCompoundRequest
+                accountMinimum={accountMinimum}
+                address={selectedAccount}
+                balanceError={balanceError}
+                bondedAmount={bondedAmount}
+                fee={fee}
+                handleRevertClickNext={handleRevertClickNext}
+                initTime={initTime}
+                networkKey={selectedNetwork}
+                optimalTime={optimalFrequency}
+                selectedCollator={selectedCollator}
+                setExtrinsicHash={setExtrinsicHash}
+                setIsTxSuccess={setIsTxSuccess}
+                setShowAuth={setShowCompoundingAuth}
+                setShowResult={setShowResult}
+                setTxError={setTxError}
+              />
+            }
+
+            {!showCancelCompoundingAuth && showResult &&
+              <StakeCompoundResult
+                backToHome={handleClickCancel}
+                extrinsicHash={extrinsicHash}
+                handleResend={handleResend}
+                isTxSuccess={isTxSuccess}
+                networkKey={selectedNetwork}
+                txError={txError}
+              />
+            }
+          </div>
       }
     </div>
   );
 }
 
 export default React.memo(styled(StakeCompoundSubmitTransaction)(({ theme }: Props) => `
+  .stake_compound-copy-btn {
+    margin-left: 5px;
+  }
+
+  .task-id-container {
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+  }
+
   .transaction-info-container {
     margin-top: 20px;
     width: 100%;

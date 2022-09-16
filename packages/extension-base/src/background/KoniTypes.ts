@@ -1317,10 +1317,18 @@ export interface ExistingTuringCompoundTask {
   taskId: string;
   accountMinimum: number;
   frequency: number;
-  nextExecution: number;
+}
+
+export interface TuringCancelStakeCompoundParams {
+  taskId: string;
+  networkKey: string;
+  address: string;
+  password?: string;
 }
 
 export interface KoniRequestSignatures {
+  'pri(staking.submitTuringCancelCompound)': [TuringCancelStakeCompoundParams, BasicTxResponse, BasicTxResponse];
+  'pri(staking.turingCancelCompound)': [TuringCancelStakeCompoundParams, BasicTxInfo];
   'pri(staking.checkTuringCompoundTask)': [CheckExistingTuringCompoundParams, ExistingTuringCompoundTask];
   'pri(staking.submitTuringCompound)': [TuringStakeCompoundParams, BasicTxResponse, BasicTxResponse];
   'pri(staking.turingCompound)': [TuringStakeCompoundParams, TuringStakeCompoundResp];

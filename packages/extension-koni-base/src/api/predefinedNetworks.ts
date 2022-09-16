@@ -1086,24 +1086,6 @@ export const PREDEFINED_NETWORKS: Record<string, NetworkJson> = {
     decimals: 12,
     coinGeckoKey: 'picasso-network'
   },
-  pioneer: {
-    key: 'pioneer',
-    chain: 'Pioneer Network',
-    genesisHash: '0xf22b7850cdd5a7657bbfd90ac86441275bbc57ace3d2698a740c7b0ec4de5ec3',
-    ss58Format: 268,
-    providers: {
-      OnFinality: 'wss://pioneer.api.onfinality.io/public-ws'
-    },
-    active: false,
-    currentProviderMode: 'ws',
-    currentProvider: 'OnFinality',
-    groups: ['KUSAMA_PARACHAIN'],
-    paraId: 2096,
-    nativeToken: 'NEER',
-    crowdloanUrl: 'https://ksmcrowdloan.bit.country/',
-    decimals: 18,
-    coinGeckoKey: 'metaverse-network-pioneer'
-  },
   quartz: {
     key: 'quartz',
     chain: 'QUARTZ by UNIQUE',

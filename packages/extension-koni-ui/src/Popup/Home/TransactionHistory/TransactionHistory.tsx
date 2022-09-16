@@ -88,8 +88,6 @@ function TransactionHistoryItemWrapper ({ item, registryMap }: ItemWrapperProp) 
   const isSupportScanExplorer = useSupportScanExplorer(networkKey);
   const scanExplorerTxUrl = useScanExplorerTxUrl(networkKey, extrinsicHash, true);
 
-  console.log('scan URL', scanExplorerTxUrl);
-
   const key = `${extrinsicHash}/${eventIdx || change}`;
 
   if ((item.changeSymbol && !registry.tokenMap[item.changeSymbol]) ||

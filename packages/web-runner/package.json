@@ -14,13 +14,13 @@
   },
   "sideEffects": false,
   "type": "module",
-  "version": "0.6.1",
+  "version": "0.6.2-0",
   "dependencies": {
     "@babel/runtime": "^7.18.6",
-    "@subwallet/extension-base": "^0.6.1",
-    "@subwallet/extension-inject": "^0.6.1",
-    "@subwallet/extension-koni-base": "^0.6.1",
-    "@subwallet/extension-koni-ui": "^0.6.1"
+    "@subwallet/extension-base": "^0.6.2-0",
+    "@subwallet/extension-inject": "^0.6.2-0",
+    "@subwallet/extension-koni-base": "^0.6.2-0",
+    "@subwallet/extension-koni-ui": "^0.6.2-0"
   },
   "devDependencies": {
     "@polkadot/dev": "^0.65.23",

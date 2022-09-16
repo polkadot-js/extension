@@ -1075,7 +1075,6 @@ export const PREDEFINED_NETWORKS: Record<string, NetworkJson> = {
     genesisHash: '0xf22b7850cdd5a7657bbfd90ac86441275bbc57ace3d2698a740c7b0ec4de5ec3',
     ss58Format: 268,
     providers: {
-      'Bit.Country': 'wss://pioneer-1-rpc.bit.country',
       OnFinality: 'wss://pioneer.api.onfinality.io/public-ws'
     },
     active: false,
@@ -1085,7 +1084,8 @@ export const PREDEFINED_NETWORKS: Record<string, NetworkJson> = {
     paraId: 2096,
     nativeToken: 'NEER',
     crowdloanUrl: 'https://ksmcrowdloan.bit.country/',
-    decimals: 18
+    decimals: 18,
+    coinGeckoKey: 'metaverse-network-pioneer'
   },
   quartz: {
     key: 'quartz',
@@ -1767,10 +1767,12 @@ export const PREDEFINED_NETWORKS: Record<string, NetworkJson> = {
     genesisHash: '0x19a3733beb9cb8a970a308d835599e9005e02dc007a35440e461a451466776f8',
     ss58Format: 7013,
     providers: {
-      gmDie: 'wss://kusama.gmordie.com'
+      gmDie: 'wss://kusama.gmordie.com',
+      bLdNodes: 'wss://ws.gm.bldnodes.org',
+      TerraBioDAO: 'wss://ws-node-gm.terrabiodao.org'
     },
     active: false,
-    currentProvider: 'gmDie',
+    currentProvider: 'bLdNodes',
     currentProviderMode: 'ws',
     groups: ['KUSAMA_PARACHAIN'],
     paraId: 2123,

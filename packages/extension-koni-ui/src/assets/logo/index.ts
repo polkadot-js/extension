@@ -117,6 +117,8 @@ const LogosMap: Record<string, string> = {
   // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
   pioneer: require('./39.Pioneer.png'),
   // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+  neer: require('./39.Pioneer.png'),
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
   polkadot: require('./71.Polkadot.png'),
   // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
   quartz: require('./41.Quartz.png'),
@@ -386,6 +388,8 @@ const LogosMap: Record<string, string> = {
   tanganika: require('./122.dataHighway.png'),
   // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
   gear_testnet: require('./127.Gear.png'),
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+  bit: require('./128.BIT.png'),
   // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
   default: require('./73.Default.png')
 };

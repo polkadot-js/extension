@@ -1226,5 +1226,14 @@ export const PREDEFINE_TOKEN_DATA_MAP: Record<string, Record<string, TokenInfo>>
       decimals: 9,
       name: 'xORING'
     }
+  },
+  pioneer: {
+    BIT: {
+      isMainToken: false,
+      symbol: 'BIT',
+      decimals: 18,
+      name: 'BIT',
+      specialOption: { MiningResource: 0 }
+    }
   }
 };

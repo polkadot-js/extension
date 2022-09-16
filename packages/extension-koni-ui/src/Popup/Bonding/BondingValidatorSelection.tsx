@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { ValidatorInfo } from '@subwallet/extension-base/background/KoniTypes';
-import QuestionIcon from '@subwallet/extension-koni-ui/assets/Question.svg';
+import { IconMaps } from '@subwallet/extension-koni-ui/assets/icon';
 import { ActionContext, InputFilter } from '@subwallet/extension-koni-ui/components';
 import Spinner from '@subwallet/extension-koni-ui/components/Spinner';
 import Tooltip from '@subwallet/extension-koni-ui/components/Tooltip';
@@ -207,13 +207,13 @@ function BondingValidatorSelection ({ className }: Props): React.ReactElement<Pr
           className={'staking-help'}
           onClick={handleClickHelper}
         >
-          <img
+          <div
+            className='helper-icon'
             data-for={'staking-helper'}
             data-tip={true}
-            height={24}
-            src={QuestionIcon}
-            width={24}
-          />
+          >
+            {IconMaps.question}
+          </div>
           <Tooltip
             place={'top'}
             // eslint-disable-next-line @typescript-eslint/restrict-plus-operands
@@ -280,6 +280,16 @@ export default React.memo(styled(BondingValidatorSelection)(({ theme }: Props) =
     cursor: pointer;
     display: flex;
     align-items: center;
+  }
+  
+  .helper-icon {
+    color: ${theme.primaryColor}
+  }
+  
+  .helper-icon svg {
+    display: block;
+    width: 24px;
+    height: 24px;
   }
 
   .filter-container {

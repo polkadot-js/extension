@@ -4,7 +4,7 @@
 import { BaseTxError, RequestNftForceUpdate, ResponseNftTransferExternal, ResponseNftTransferLedger, ResponseNftTransferQr } from '@subwallet/extension-base/background/KoniTypes';
 import { AccountJson } from '@subwallet/extension-base/background/types';
 import { LedgerState } from '@subwallet/extension-base/signers/types';
-import { Spinner } from '@subwallet/extension-koni-ui/components';
+import { Spinner, Theme } from '@subwallet/extension-koni-ui/components';
 import InputAddress from '@subwallet/extension-koni-ui/components/InputAddress';
 import LedgerRequest from '@subwallet/extension-koni-ui/components/Ledger/LedgerRequest';
 import Modal from '@subwallet/extension-koni-ui/components/Modal';
@@ -24,7 +24,7 @@ import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import CN from 'classnames';
 import React, { useCallback, useContext, useEffect, useState } from 'react';
 import { useSelector } from 'react-redux';
-import styled from 'styled-components';
+import styled, { ThemeContext } from 'styled-components';
 
 interface AddressProxy {
   isUnlockCached: boolean;
@@ -55,6 +55,7 @@ function AuthTransfer ({ chain, className, collectionId, nftItem, recipientAddre
 
   const { cleanQrState, updateQrState } = useContext(QrContext);
   const { clearExternalState, externalState, updateExternalState } = useContext(ExternalRequestContext);
+  const themeContext = useContext(ThemeContext as React.Context<Theme>);
 
   const { externalId } = externalState;
 
@@ -490,7 +491,7 @@ function AuthTransfer ({ chain, className, collectionId, nftItem, recipientAddre
               className={'submit-btn'}
               // eslint-disable-next-line @typescript-eslint/no-misused-promises
               onClick={handleSignAndSubmit}
-              style={{ marginTop: '40px', background: loading ? 'rgba(0, 75, 255, 0.25)' : '#004BFF', cursor: loading ? 'default' : 'pointer' }}
+              style={{ marginTop: '40px', background: loading ? 'rgba(0, 75, 255, 0.25)' : themeContext.secondaryColor, cursor: loading ? 'default' : 'pointer' }}
             >
               {
                 !loading
@@ -501,7 +502,7 @@ function AuthTransfer ({ chain, className, collectionId, nftItem, recipientAddre
           </div>
         );
     }
-  }, [account, currentNetwork.networkPrefix, errorArr, genesisHash, handleSignAndSubmit, handlerClearError, handlerCreateQr, handlerErrorQr, handlerSendLedger, loading, passwordError, senderAccount.address, signMode, substrateGas, t, web3Gas]);
+  }, [account, currentNetwork.networkPrefix, errorArr, genesisHash, handleSignAndSubmit, handlerClearError, handlerCreateQr, handlerErrorQr, handlerSendLedger, loading, passwordError, senderAccount.address, signMode, substrateGas, t, themeContext.secondaryColor, web3Gas]);
 
   return (
     <div className={className}>

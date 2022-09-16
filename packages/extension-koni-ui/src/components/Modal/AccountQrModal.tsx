@@ -7,8 +7,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { NETWORK_STATUS } from '@subwallet/extension-base/background/KoniTypes';
 import { AccountJson } from '@subwallet/extension-base/background/types';
 import { ALL_ACCOUNT_KEY, ALL_NETWORK_KEY } from '@subwallet/extension-koni-base/constants';
-import signalSlashIcon from '@subwallet/extension-koni-ui/assets/signal-stream-slash-solid.svg';
-import signalIcon from '@subwallet/extension-koni-ui/assets/signal-stream-solid.svg';
+import { IconMaps } from '@subwallet/extension-koni-ui/assets/icon';
 import { AccountInfoEl } from '@subwallet/extension-koni-ui/components';
 import Identicon from '@subwallet/extension-koni-ui/components/Identicon';
 import InputFilter from '@subwallet/extension-koni-ui/components/InputFilter';
@@ -38,7 +37,6 @@ import styled from 'styled-components';
 import { IconTheme } from '@polkadot/react-identicon/types';
 
 import cloneLogo from '../../assets/clone.svg';
-import pencil from '../../assets/pencil.svg';
 
 interface Props extends ThemeProps {
   className?: string;
@@ -162,21 +160,21 @@ function AccountQrModal (props: Props): React.ReactElement<Props> {
 
   const handleStatusIcon = useCallback((apiStatus: NETWORK_STATUS, index: number) => {
     if (apiStatus === NETWORK_STATUS.CONNECTED) {
-      return <img
-        alt='network-status'
-        className={'network-status network-status-icon'}
+      return <div
+        className={'network-status network-status-icon network-status-icon-connected'}
         data-for={`network-status-icon-${index}`}
         data-tip={true}
-        src={signalIcon}
-      />;
+      >
+        {IconMaps.signal}
+      </div>;
     } else {
-      return <img
-        alt='network-status'
-        className={'network-status network-status-icon'}
+      return <div
+        className={'network-status network-status-icon network-status-icon-disconnected'}
         data-for={`network-status-icon-${index}`}
         data-tip={true}
-        src={signalSlashIcon}
-      />;
+      >
+        {IconMaps.signalSplash}
+      </div>;
     }
   }, []);
 
@@ -370,10 +368,9 @@ function AccountQrModal (props: Props): React.ReactElement<Props> {
               className='account-qr-modal-token-name__edit-btn'
               onClick={_toggleEdit}
             >
-              <img
-                alt='edit'
-                src={pencil}
-              />
+              <div className='edit-icon'>
+                {IconMaps.pencil}
+              </div>
             </div>
             {isEditing && (
               <HeaderEditName
@@ -661,6 +658,21 @@ export default styled(AccountQrModal)(({ theme }: ThemeProps) => `
       .account-info-identity-icon {
         padding: 0;
       }
+    }
+  }
+   
+  .network-status-icon-connected {
+    color: ${theme.primaryColor}
+  }
+  .network-status-icon-disconnected {
+    color: ${theme.iconNeutralColor}
+  }
+  
+  .edit-icon {
+    color: ${theme.primaryColor}
+    
+    svg {
+      display: block;
     }
   }
 

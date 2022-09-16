@@ -5,9 +5,7 @@ import type { ThemeProps } from '../types';
 
 import { NETWORK_STATUS, NetWorkGroup } from '@subwallet/extension-base/background/KoniTypes';
 import { ALL_ACCOUNT_KEY } from '@subwallet/extension-koni-base/constants';
-import check from '@subwallet/extension-koni-ui/assets/check.svg';
-import signalSlashIcon from '@subwallet/extension-koni-ui/assets/signal-stream-slash-solid.svg';
-import signalIcon from '@subwallet/extension-koni-ui/assets/signal-stream-solid.svg';
+import { IconMaps } from '@subwallet/extension-koni-ui/assets/icon';
 import InputFilter from '@subwallet/extension-koni-ui/components/InputFilter';
 import Menu from '@subwallet/extension-koni-ui/components/Menu';
 import Tooltip from '@subwallet/extension-koni-ui/components/Tooltip';
@@ -160,21 +158,21 @@ function NetworkMenu ({ className, currentNetwork, genesisOptions, isNotHaveAcco
 
   const handleStatusIcon = useCallback((apiStatus: NETWORK_STATUS, index: number) => {
     if (apiStatus === NETWORK_STATUS.CONNECTED) {
-      return <img
-        alt='network-status'
-        className={'network-status network-status-icon'}
+      return <div
+        className={'network-status network-status-icon network-status-icon-connected'}
         data-for={`network-status-icon-${index}`}
         data-tip={true}
-        src={signalIcon}
-      />;
+      >
+        {IconMaps.signal}
+      </div>;
     } else {
-      return <img
-        alt='network-status'
-        className={'network-status network-status-icon'}
+      return <div
+        className={'network-status network-status-icon network-status-icon-disconnected'}
         data-for={`network-status-icon-${index}`}
         data-tip={true}
-        src={signalSlashIcon}
-      />;
+      >
+        {IconMaps.signalSplash}
+      </div>;
     }
   }, []);
 
@@ -230,11 +228,9 @@ function NetworkMenu ({ className, currentNetwork, genesisOptions, isNotHaveAcco
                   <div className={'icon-container'}>
                     {value === currentNetwork
                       ? (
-                        <img
-                          alt='check'
-                          className='checkIcon'
-                          src={check}
-                        />
+                        <div className='checkedItem'>
+                          {IconMaps.check}
+                        </div>
                       )
                       : (
                         <div className='uncheckedItem' />
@@ -302,7 +298,7 @@ export default React.memo(styled(NetworkMenu)(({ theme }: Props) => `
 
   .confirm-button {
     cursor: pointer;
-    background: #004BFF;
+    background: ${theme.secondaryColor};
     border-radius: 8px;
     display: flex;
     justify-content: center;
@@ -318,7 +314,7 @@ export default React.memo(styled(NetworkMenu)(({ theme }: Props) => `
     align-items: center;
     background-color: #181E42;
     border-radius: 8px;
-    color: #42C59A;
+    color: ${theme.primaryColor};
     padding: 10px;
   }
 
@@ -437,10 +433,21 @@ export default React.memo(styled(NetworkMenu)(({ theme }: Props) => `
     height: 16px;
     width: 16px;
   }
+  
+  .checkedItem {
+    color: ${theme.primaryColor}
+  }
 
   .uncheckedItem {
     width: 14px;
     height: 100%;
+  }
+  
+  .network-status-icon-connected {
+    color: ${theme.primaryColor}
+  }
+  .network-status-icon-disconnected {
+    color: ${theme.iconNeutralColor}
   }
 
   .check-radio-wrapper {

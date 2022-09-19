@@ -9,6 +9,7 @@ import InputBalance from '@subwallet/extension-koni-ui/components/InputBalance';
 import Spinner from '@subwallet/extension-koni-ui/components/Spinner';
 import { ActionContext } from '@subwallet/extension-koni-ui/contexts';
 import useGetNetworkJson from '@subwallet/extension-koni-ui/hooks/screen/home/useGetNetworkJson';
+import useIsNetworkActive from '@subwallet/extension-koni-ui/hooks/screen/home/useIsNetworkActive';
 import useToast from '@subwallet/extension-koni-ui/hooks/useToast';
 import useTranslation from '@subwallet/extension-koni-ui/hooks/useTranslation';
 import { checkTuringStakeCompounding, getStakeDelegationInfo, getTuringCancelStakeCompoundTxInfo, getTuringStakeCompoundTxInfo } from '@subwallet/extension-koni-ui/messaging';
@@ -79,6 +80,14 @@ function StakeCompoundSubmitTransaction ({ className }: Props): React.ReactEleme
   const [isTxSuccess, setIsTxSuccess] = useState(false);
   const [txError, setTxError] = useState('');
   const { show } = useToast();
+
+  const isNetworkActive = useIsNetworkActive(selectedNetwork);
+
+  useEffect(() => {
+    if (!isNetworkActive) {
+      navigate('/');
+    }
+  }, [isNetworkActive, navigate]);
 
   useEffect(() => {
     if (account?.address !== selectedAccount) {

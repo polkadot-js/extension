@@ -315,7 +315,7 @@ function StakeCompoundSubmitTransaction ({ className }: Props): React.ReactEleme
                     </div>
                     <div className={'transaction-info-row'}>
                       <div className={'transaction-info-title'}>Optimal compounding time</div>
-                      <div className={'transaction-info-value'}>Every {moment.duration(currentFrequency, 'seconds').humanize()}</div>
+                      <div className={'transaction-info-value'}>{moment.duration(currentFrequency, 'seconds').humanize()}</div>
                     </div>
                   </div>
               }

@@ -716,9 +716,10 @@ export default class KoniExtension extends Extension {
     const addressDict = {} as Record<KeypairType, string>;
     let changedAccount = false;
 
-    const { allGenesisHash } = await new Promise<CurrentAccountInfo>((resolve) => {
+    const currentAccount = await new Promise<CurrentAccountInfo>((resolve) => {
       state.getCurrentAccount(resolve);
     });
+    const allGenesisHash = currentAccount?.allGenesisHash || undefined;
 
     types?.forEach((type) => {
       const suri = getSuri(_suri, type);

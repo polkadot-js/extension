@@ -245,6 +245,8 @@ function Home ({ chainRegistryMap, className = '', currentAccount, historyMap, n
   }, [networkMetadataMap, showNetworkSelection]);
 
   useEffect(() => {
+    setShowNftItemDetail(false);
+    setShowNftCollectionDetail(false);
     setNftPage(1); // reset NFT page on current account change
   }, [currentAccount.address]);
 

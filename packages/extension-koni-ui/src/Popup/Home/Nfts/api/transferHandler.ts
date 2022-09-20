@@ -59,8 +59,8 @@ export default async function transferHandler (networkKey: string, senderAddress
         return await substrateTransferHandler(SUPPORTED_TRANSFER_CHAIN_NAME.karura, senderAddress, recipientAddress, params);
       case SUPPORTED_TRANSFER_CHAIN_NAME.kusama:
         return await substrateTransferHandler(SUPPORTED_TRANSFER_CHAIN_NAME.kusama, senderAddress, recipientAddress, params);
-      case SUPPORTED_TRANSFER_CHAIN_NAME.uniqueNft:
-        return await substrateTransferHandler(SUPPORTED_TRANSFER_CHAIN_NAME.uniqueNft, senderAddress, recipientAddress, params);
+      case SUPPORTED_TRANSFER_CHAIN_NAME.unique_network:
+        return await substrateTransferHandler(SUPPORTED_TRANSFER_CHAIN_NAME.unique_network, senderAddress, recipientAddress, params);
       case SUPPORTED_TRANSFER_CHAIN_NAME.quartz:
         return await substrateTransferHandler(SUPPORTED_TRANSFER_CHAIN_NAME.quartz, senderAddress, recipientAddress, params);
       case SUPPORTED_TRANSFER_CHAIN_NAME.opal:

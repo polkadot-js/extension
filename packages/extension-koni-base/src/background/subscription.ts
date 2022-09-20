@@ -255,10 +255,12 @@ export class KoniSubscription {
       nftHandler.handleNfts(
         customErc721Registry,
         (data) => {
+          console.log('nft', data);
           state.updateNftData(addressKey, data);
         },
         (data) => {
           if (data !== null) {
+            console.log('nft collection', data);
             state.updateNftCollection(addressKey, data);
           }
         },

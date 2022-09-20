@@ -39,7 +39,7 @@ function uniqueParser (nftItem: NftItem) {
   return {
     collectionId,
     itemId,
-    networkKey: SUPPORTED_TRANSFER_CHAIN_NAME.uniqueNft
+    networkKey: SUPPORTED_TRANSFER_CHAIN_NAME.unique_network
   };
 }
 
@@ -75,7 +75,7 @@ export default function paramsHandler (nftItem: NftItem, networkKey: string, net
         return acalaParser(nftItem);
       case SUPPORTED_TRANSFER_CHAIN_NAME.kusama:
         return rmrkParser(nftItem);
-      case SUPPORTED_TRANSFER_CHAIN_NAME.uniqueNft:
+      case SUPPORTED_TRANSFER_CHAIN_NAME.unique_network:
         return uniqueParser(nftItem);
       case SUPPORTED_TRANSFER_CHAIN_NAME.quartz:
         return uniqueParser(nftItem);

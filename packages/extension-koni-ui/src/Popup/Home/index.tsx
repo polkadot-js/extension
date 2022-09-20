@@ -244,6 +244,10 @@ function Home ({ chainRegistryMap, className = '', currentAccount, historyMap, n
     }
   }, [networkMetadataMap, showNetworkSelection]);
 
+  useEffect(() => {
+    setNftPage(1); // reset NFT page on current account change
+  }, [currentAccount.address]);
+
   const parseNftGridSize = useCallback(() => {
     if (window.innerHeight > NFT_GRID_HEIGHT_THRESHOLD) {
       const nftContainerHeight = window.innerHeight - NFT_HEADER_HEIGHT;

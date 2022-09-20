@@ -9,7 +9,8 @@ import fetch from 'cross-fetch';
 
 interface AssetId {
   classId: string | number,
-  tokenId: string | number
+  tokenId: string | number,
+  owner: string
 }
 
 interface MetadataResponse {
@@ -67,23 +68,29 @@ export default class StatemineNftApi extends BaseNftApi {
       return [];
     }
 
-    let accountAssets: any[] = [];
+    const accountAssets: Record<string, any[]> = {};
 
     await Promise.all(addresses.map(async (address) => {
       // @ts-ignore
       const resp = await this.dotSamaApi.api.query.uniques.account.keys(address);
 
-      accountAssets = accountAssets.concat(...resp);
+      if (address in accountAssets) {
+        accountAssets[address].concat(resp);
+      } else {
+        accountAssets[address] = resp;
+      }
     }));
 
     const assetIds: AssetId[] = [];
 
-    for (const key of accountAssets) {
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-member-access
-      const data = key.toHuman() as string[];
+    Object.entries(accountAssets).forEach(([owner, rawData]) => {
+      for (const key of rawData) {
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-member-access
+        const data = key.toHuman() as string[];
 
-      assetIds.push({ classId: data[1], tokenId: this.parseTokenId(data[2]) });
-    }
+        assetIds.push({ classId: data[1], tokenId: this.parseTokenId(data[2]), owner });
+      }
+    });
 
     return assetIds;
   }
@@ -155,7 +162,8 @@ export default class StatemineNftApi extends BaseNftApi {
           description: tokenInfo?.description as string,
           image: tokenInfo && tokenInfo.image ? this.parseUrl(tokenInfo?.image) : undefined,
           collectionId: this.parseTokenId(parsedClassId),
-          chain: SUPPORTED_NFT_NETWORKS.statemine
+          chain: SUPPORTED_NFT_NETWORKS.statemine,
+          owner: assetId.owner
         } as NftItem;
 
         params.updateItem(parsedNft);

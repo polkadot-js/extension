@@ -34,7 +34,7 @@ function createSubstrateNftApi (chain: string, apiProps: ApiProps | null, addres
       return rmrkNftApi;
     case SUPPORTED_NFT_NETWORKS.statemine:
       return new StatemineNftApi(apiProps, useAddresses, chain);
-    case SUPPORTED_NFT_NETWORKS.uniqueNft:
+    case SUPPORTED_NFT_NETWORKS.unique_network:
       return new UniqueNftApi(apiProps, useAddresses, chain);
     // case SUPPORTED_NFT_NETWORKS.quartz:
     //   return new QuartzNftApi(api, useAddresses, chain);
@@ -132,6 +132,7 @@ export class NftHandler {
         const [substrateAddresses, evmAddresses] = categoryAddresses(this.addresses);
 
         this.apiProps.forEach(({ api: apiPromise, chain }) => {
+          console.log('chain', chain);
           // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
           const handler = createSubstrateNftApi(chain, apiPromise as ApiProps, substrateAddresses);
 

@@ -22,6 +22,7 @@ interface Token {
   Owner: string
 }
 
+// deprecated
 export default class UniqueNftApi extends BaseNftApi {
   // eslint-disable-next-line no-useless-constructor
   constructor (api: ApiProps | null, addresses: string[], chain: string) {
@@ -164,7 +165,7 @@ export default class UniqueNftApi extends BaseNftApi {
         }
       }));
 
-      params.updateCollectionIds(SUPPORTED_NFT_NETWORKS.uniqueNft, allCollectionId.map((o) => o.toString()));
+      params.updateCollectionIds(SUPPORTED_NFT_NETWORKS.unique_network, allCollectionId.map((o) => o.toString()));
 
       await Promise.all(allCollectionId.map(async (collectionId) => {
         const collectionIdStr = collectionId.toString();
@@ -175,11 +176,11 @@ export default class UniqueNftApi extends BaseNftApi {
         collectionMap[collectionIdStr] = collection;
         const collectionNftIds = Object.entries(nftMap).filter((item) => item[1] === collectionId).map((item) => item[0]);
 
-        params.updateNftIds(SUPPORTED_NFT_NETWORKS.uniqueNft, collectionIdStr, collectionNftIds);
+        params.updateNftIds(SUPPORTED_NFT_NETWORKS.unique_network, collectionIdStr, collectionNftIds);
 
         const parsedCollection: NftCollection = {
           collectionId: collectionIdStr,
-          chain: SUPPORTED_NFT_NETWORKS.uniqueNft
+          chain: SUPPORTED_NFT_NETWORKS.unique_network
         };
 
         await Promise.all(collectionNftIds.map(async (nft) => {
@@ -197,7 +198,7 @@ export default class UniqueNftApi extends BaseNftApi {
               collectionId: collectionIdStr,
               properties: tokenData.properties,
               rarity: '',
-              chain: SUPPORTED_NFT_NETWORKS.uniqueNft
+              chain: SUPPORTED_NFT_NETWORKS.unique_network
             } as NftItem;
 
             if (!parsedCollection.collectionName) {

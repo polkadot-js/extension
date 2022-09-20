@@ -167,6 +167,7 @@ export interface NftItem {
   properties?: Record<any, any> | null;
   chain?: string;
   rmrk_ver?: RMRK_VER;
+  owner?: string;
 }
 
 export interface NftCollection {

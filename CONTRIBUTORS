@@ -1,12 +1,12 @@
-     822	Nam Phạm                      	update BIT token logo
-     531	AnhMTV                        	Release version 0.6.2
+     824	Nam Phạm                      	remove console.log
+     537	AnhMTV                        	
      465	Jaco                          	0.42.5 (#969)
      232	S2kael                        	[Issue-616] [OnRamp] [Transak] updateLogo
      151	lw-cdm                        	Update logo for Moonbeans
      142	quangdo                       	update some label and variable (original to origin)
       88	lw-cdm                        	
       82	Thibaut Sardan                	Add account filtering feature (#832)
-      72	Hieu Dao                      	Update GM or Die Endpoint
+      75	Hieu Dao                      	Remove redundant pioneer network
       65	khainh                        	Disable ipfs-gateway.cloud
       55	leewong                       	#118: update balance logic for Kintsugi testnet
       53	Dominhquangdev                	update Bridge code

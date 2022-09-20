@@ -244,10 +244,12 @@ function Home ({ chainRegistryMap, className = '', currentAccount, historyMap, n
     }
   }, [networkMetadataMap, showNetworkSelection]);
 
-  useEffect(() => {
+  useEffect(() => { // reset NFT state on current account change
+    setChosenNftCollection(undefined);
+    setChosenNftItem(undefined);
     setShowNftItemDetail(false);
     setShowNftCollectionDetail(false);
-    setNftPage(1); // reset NFT page on current account change
+    setNftPage(1);
   }, [currentAccount.address]);
 
   const parseNftGridSize = useCallback(() => {

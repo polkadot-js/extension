@@ -1598,21 +1598,6 @@ export const PREDEFINED_NETWORKS: Record<string, NetworkJson> = {
     nativeToken: 'IMBU',
     decimals: 12
   },
-  subspace: {
-    key: 'subspace',
-    chain: 'Subspace Farmnet',
-    genesisHash: '0x332ef6e751e25426e38996c51299dfc53bcd56f40b53dce2b2fc8442ae9c4a74',
-    ss58Format: 2254,
-    providers: {
-      subspace: 'wss://farm-rpc.subspace.network/ws'
-    },
-    active: false,
-    currentProviderMode: 'ws',
-    currentProvider: 'subspace',
-    groups: ['TEST_NET'],
-    nativeToken: 'tSSC',
-    decimals: 18
-  },
   subspace_gemini: {
     key: 'subspace_gemini',
     chain: 'Subspace Gemini 1',
@@ -1643,21 +1628,6 @@ export const PREDEFINED_NETWORKS: Record<string, NetworkJson> = {
     active: false,
     currentProviderMode: 'ws',
     currentProvider: 'Europe 0',
-    groups: ['TEST_NET'],
-    nativeToken: 'tSSC',
-    decimals: 18
-  },
-  subspace_test: {
-    key: 'subspace_test',
-    chain: 'Subspace Testnet',
-    genesisHash: '0x332ef6e751e25426e38996c51299dfc53bcd56f40b53dce2b2fc8442ae9c4a74_2',
-    ss58Format: 2254,
-    providers: {
-      testnet: 'wss://test-rpc.subspace.network/ws'
-    },
-    active: false,
-    currentProviderMode: 'ws',
-    currentProvider: 'testnet',
     groups: ['TEST_NET'],
     nativeToken: 'tSSC',
     decimals: 18

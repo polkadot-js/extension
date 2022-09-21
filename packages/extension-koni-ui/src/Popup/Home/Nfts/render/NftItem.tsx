@@ -48,8 +48,8 @@ function updateCurrentNetwork (networkMetadata: NetWorkMetadataDef) {
 function NftItem ({ className, collectionId, collectionImage, data, onClickBack }: Props): React.ReactElement<Props> {
   const [loading, setLoading] = useState(true);
   const [showImage, setShowImage] = useState(true);
-  const [imageError, setImageError] = useState(false);
-  const [videoError, setVideoError] = useState(false);
+  const [showVideo, setShowVideo] = useState(false);
+  const [show3dViewer, setShow3dViewer] = useState(false);
   const { currentAccount: account, currentNetwork } = useSelector((state: RootState) => state);
   const networkMetadata = useGetNetworkMetadata();
   const networkJson = useGetNetworkJson(data.chain as string);
@@ -128,10 +128,13 @@ function NftItem ({ className, collectionId, collectionImage, data, onClickBack 
   const handleImageError = useCallback(() => {
     setLoading(false);
     setShowImage(false);
+    setShowVideo(true);
   }, []);
 
   const handleVideoError = useCallback(() => {
-    setImageError(true);
+    setLoading(false);
+    setShowVideo(false);
+    setShow3dViewer(true);
   }, []);
 
   const handleOnClick = useCallback(() => {
@@ -149,12 +152,12 @@ function NftItem ({ className, collectionId, collectionImage, data, onClickBack 
   }, [data.external_url, data?.image, loading]);
 
   const getItemImage = useCallback(() => {
-    if (data.image && !imageError) {
+    if (data.image) {
       return data.image;
     }
 
     return themeContext.logo;
-  }, [data.image, imageError, themeContext.logo]);
+  }, [data.image, themeContext.logo]);
 
   const handleRightClick = useCallback((e: any) => {
     if (loading) {
@@ -177,42 +180,44 @@ function NftItem ({ className, collectionId, collectionImage, data, onClickBack 
           style={{ borderRadius: '5px' }}
         />
       );
-    } else {
-      if (!imageError) {
-        return (
-          <video
-            autoPlay
-            height='416'
-            loop={true}
-            onError={handleVideoError}
-            width='100%'
-          >
-            <source
-              src={getItemImage()}
-              type='video/mp4'
-            />
-          </video>
-        );
-      } else {
-        return (
-          // @ts-ignore
-          <model-viewer
-            alt={'model-viewer'}
-            animation-name={'Idle'}
-            ar-status={'not-presenting'}
-            auto-rotate={true}
-            auto-rotate-delay={100}
-            bounds={'tight'}
-            environment-image={'neutral'}
-            interaction-prompt={'none'}
-            loading={'lazy'}
-            rotation-per-second={'30deg'}
-            shadow-intensity={'1'}
-            src={data.image}
-            style={{ width: '100%', height: '402px', cursor: 'pointer', borderRadius: '5px' }}
+    }
+
+    if (showVideo) {
+      return (
+        <video
+          autoPlay
+          height='416'
+          loop={true}
+          onError={handleVideoError}
+          width='100%'
+        >
+          <source
+            src={getItemImage()}
+            type='video/mp4'
           />
-        );
-      }
+        </video>
+      );
+    }
+
+    if (show3dViewer) {
+      return (
+        // @ts-ignore
+        <model-viewer
+          alt={'model-viewer'}
+          animation-name={'Idle'}
+          ar-status={'not-presenting'}
+          auto-rotate={true}
+          auto-rotate-delay={100}
+          bounds={'tight'}
+          environment-image={'neutral'}
+          interaction-prompt={'none'}
+          loading={'lazy'}
+          rotation-per-second={'15deg'}
+          shadow-intensity={'1'}
+          src={data.image}
+          style={{ width: '100%', height: '402px', cursor: 'pointer', borderRadius: '5px' }}
+        />
+      );
     }
 
     return (
@@ -223,7 +228,7 @@ function NftItem ({ className, collectionId, collectionImage, data, onClickBack 
         style={{ borderRadius: '5px' }}
       />
     );
-  }, [data.image, getItemImage, handleImageError, handleOnClick, handleOnLoad, handleRightClick, handleVideoError, imageError, showImage, themeContext.logo]);
+  }, [getItemImage, handleImageError, handleOnClick, handleOnLoad, handleRightClick, handleVideoError, show3dViewer, showImage, showVideo, themeContext.logo]);
 
   return (
     <div className={className}>

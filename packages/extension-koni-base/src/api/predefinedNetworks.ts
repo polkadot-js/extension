@@ -1598,34 +1598,17 @@ export const PREDEFINED_NETWORKS: Record<string, NetworkJson> = {
     nativeToken: 'IMBU',
     decimals: 12
   },
-  subspace: {
-    key: 'subspace',
-    chain: 'Subspace Farmnet',
-    genesisHash: '0x332ef6e751e25426e38996c51299dfc53bcd56f40b53dce2b2fc8442ae9c4a74',
+  subspace_test: {
+    key: 'subspace_test',
+    chain: 'Subspace Testnet',
+    genesisHash: '0x332ef6e751e25426e38996c51299dfc53bcd56f40b53dce2b2fc8442ae9c4a74_2',
     ss58Format: 2254,
     providers: {
-      subspace: 'wss://farm-rpc.subspace.network/ws'
+      testnet: 'wss://test-rpc.subspace.network/ws'
     },
     active: false,
     currentProviderMode: 'ws',
-    currentProvider: 'subspace',
-    groups: ['TEST_NET'],
-    nativeToken: 'tSSC',
-    decimals: 18
-  },
-  subspace_gemini: {
-    key: 'subspace_gemini',
-    chain: 'Subspace Gemini 1',
-    genesisHash: '0x9ee86eefc3cc61c71a7751bba7f25e442da2512f408e6286153b3ccc055dccf0',
-    ss58Format: 2254,
-    providers: {
-      subspaceAsia: 'wss://apac.gemini-1b.subspace.network/ws',
-      subspaceEU: 'wss://eu.gemini-1b.subspace.network/ws',
-      subspaceUS: 'wss://na.gemini-1b.subspace.network/ws'
-    },
-    active: false,
-    currentProviderMode: 'ws',
-    currentProvider: 'subspaceEU',
+    currentProvider: 'testnet',
     groups: ['TEST_NET'],
     nativeToken: 'tSSC',
     decimals: 18
@@ -1645,22 +1628,8 @@ export const PREDEFINED_NETWORKS: Record<string, NetworkJson> = {
     currentProvider: 'Europe 0',
     groups: ['TEST_NET'],
     nativeToken: 'tSSC',
-    decimals: 18
-  },
-  subspace_test: {
-    key: 'subspace_test',
-    chain: 'Subspace Testnet',
-    genesisHash: '0x332ef6e751e25426e38996c51299dfc53bcd56f40b53dce2b2fc8442ae9c4a74_2',
-    ss58Format: 2254,
-    providers: {
-      testnet: 'wss://test-rpc.subspace.network/ws'
-    },
-    active: false,
-    currentProviderMode: 'ws',
-    currentProvider: 'testnet',
-    groups: ['TEST_NET'],
-    nativeToken: 'tSSC',
-    decimals: 18
+    decimals: 18,
+    blockExplorer: 'https://bifrost-kusama.subscan.io'
   },
   origintrail: {
     key: 'origintrail',
@@ -1837,6 +1806,21 @@ export const PREDEFINED_NETWORKS: Record<string, NetworkJson> = {
     currentProviderMode: 'ws',
     nativeToken: 'Unit',
     decimals: 12,
+    groups: ['TEST_NET']
+  },
+  arctic_testnet: {
+    key: 'arctic_testnet',
+    chain: 'Arctic Testnet',
+    genesisHash: '0x5c4207232d344710a176b1982471acf9b058f40b4a57470c25410b68b684c766',
+    ss58Format: 2207,
+    providers: {
+      arctic: 'wss://arctic-rpc.icenetwork.io:9944'
+    },
+    currentProvider: 'arctic',
+    active: false,
+    currentProviderMode: 'ws',
+    nativeToken: 'ICY',
+    decimals: 18,
     groups: ['TEST_NET']
   }
 };

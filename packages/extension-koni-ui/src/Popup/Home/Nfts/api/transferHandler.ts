@@ -71,6 +71,8 @@ export default async function transferHandler (networkKey: string, senderAddress
         return await substrateTransferHandler(SUPPORTED_TRANSFER_CHAIN_NAME.statemint, senderAddress, recipientAddress, params);
       case SUPPORTED_TRANSFER_CHAIN_NAME.bitcountry:
         return await substrateTransferHandler(SUPPORTED_TRANSFER_CHAIN_NAME.bitcountry, senderAddress, recipientAddress, params);
+      case SUPPORTED_TRANSFER_CHAIN_NAME.pioneer:
+        return await substrateTransferHandler(SUPPORTED_TRANSFER_CHAIN_NAME.pioneer, senderAddress, recipientAddress, params);
     }
   }
 

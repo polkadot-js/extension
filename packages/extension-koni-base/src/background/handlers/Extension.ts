@@ -1252,8 +1252,6 @@ export default class KoniExtension extends Extension {
       );
     }
 
-    console.log('fee', fee);
-
     const fromAccountFreeNumber = new BN(fromAccountFree);
     const feeNumber = fee ? new BN(fee) : undefined;
 
@@ -2170,6 +2168,8 @@ export default class KoniExtension extends Extension {
       case SUPPORTED_TRANSFER_SUBSTRATE_CHAIN_NAME.statemint:
         return await statemineTransferHandler(networkKey, state.getDotSamaApiMap(), state.getWeb3ApiMap(), senderAddress, recipientAddress, params, networkJson);
       case SUPPORTED_TRANSFER_SUBSTRATE_CHAIN_NAME.bitcountry:
+        return await acalaTransferHandler(networkKey, state.getDotSamaApiMap(), state.getWeb3ApiMap(), senderAddress, recipientAddress, params, networkJson);
+      case SUPPORTED_TRANSFER_SUBSTRATE_CHAIN_NAME.pioneer:
         return await acalaTransferHandler(networkKey, state.getDotSamaApiMap(), state.getWeb3ApiMap(), senderAddress, recipientAddress, params, networkJson);
     }
 

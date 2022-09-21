@@ -180,12 +180,10 @@ function TransferNftContainer ({ className, collectionId, collectionImage, nftIt
   const getItemImage = useCallback(() => {
     if (nftItem.image && !imageError) {
       return nftItem.image;
-    } else if (collectionImage) {
-      return collectionImage;
     }
 
     return themeContext.logo;
-  }, [nftItem.image, imageError, collectionImage, themeContext.logo]);
+  }, [nftItem.image, imageError, themeContext.logo]);
 
   const handleVideoError = useCallback(() => {
     setImageError(true);

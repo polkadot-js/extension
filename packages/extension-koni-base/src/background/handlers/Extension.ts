@@ -1252,6 +1252,8 @@ export default class KoniExtension extends Extension {
       );
     }
 
+    console.log('fee', fee);
+
     const fromAccountFreeNumber = new BN(fromAccountFree);
     const feeNumber = fee ? new BN(fee) : undefined;
 
@@ -2147,29 +2149,28 @@ export default class KoniExtension extends Extension {
     return await getExistentialDeposit(networkKey, token, state.getDotSamaApiMap());
   }
 
-  private async substrateNftGetTransaction ({ networkKey,
-    params,
-    recipientAddress,
-    senderAddress }: SubstrateNftTransactionRequest): Promise<SubstrateNftTransaction> {
+  private async substrateNftGetTransaction ({ networkKey, params, recipientAddress, senderAddress }: SubstrateNftTransactionRequest): Promise<SubstrateNftTransaction> {
+    const networkJson = state.getNetworkMapByKey(networkKey);
+
     switch (networkKey) {
       case SUPPORTED_TRANSFER_SUBSTRATE_CHAIN_NAME.acala:
-        return await acalaTransferHandler(networkKey, state.getDotSamaApiMap(), state.getWeb3ApiMap(), senderAddress, recipientAddress, params);
+        return await acalaTransferHandler(networkKey, state.getDotSamaApiMap(), state.getWeb3ApiMap(), senderAddress, recipientAddress, params, networkJson);
       case SUPPORTED_TRANSFER_SUBSTRATE_CHAIN_NAME.karura:
-        return await acalaTransferHandler(networkKey, state.getDotSamaApiMap(), state.getWeb3ApiMap(), senderAddress, recipientAddress, params);
+        return await acalaTransferHandler(networkKey, state.getDotSamaApiMap(), state.getWeb3ApiMap(), senderAddress, recipientAddress, params, networkJson);
       case SUPPORTED_TRANSFER_SUBSTRATE_CHAIN_NAME.kusama:
-        return await rmrkTransferHandler(networkKey, state.getDotSamaApiMap(), state.getWeb3ApiMap(), senderAddress, recipientAddress, params);
+        return await rmrkTransferHandler(networkKey, state.getDotSamaApiMap(), state.getWeb3ApiMap(), senderAddress, recipientAddress, params, networkJson);
       case SUPPORTED_TRANSFER_SUBSTRATE_CHAIN_NAME.uniqueNft:
-        return await uniqueTransferHandler(networkKey, state.getDotSamaApiMap(), state.getWeb3ApiMap(), senderAddress, recipientAddress, params);
+        return await uniqueTransferHandler(networkKey, state.getDotSamaApiMap(), state.getWeb3ApiMap(), senderAddress, recipientAddress, params, networkJson);
       case SUPPORTED_TRANSFER_SUBSTRATE_CHAIN_NAME.quartz:
-        return await quartzTransferHandler(networkKey, state.getDotSamaApiMap(), state.getWeb3ApiMap(), senderAddress, recipientAddress, params);
+        return await quartzTransferHandler(networkKey, state.getDotSamaApiMap(), state.getWeb3ApiMap(), senderAddress, recipientAddress, params, networkJson);
       case SUPPORTED_TRANSFER_SUBSTRATE_CHAIN_NAME.opal:
-        return await quartzTransferHandler(networkKey, state.getDotSamaApiMap(), state.getWeb3ApiMap(), senderAddress, recipientAddress, params);
+        return await quartzTransferHandler(networkKey, state.getDotSamaApiMap(), state.getWeb3ApiMap(), senderAddress, recipientAddress, params, networkJson);
       case SUPPORTED_TRANSFER_SUBSTRATE_CHAIN_NAME.statemine:
-        return await statemineTransferHandler(networkKey, state.getDotSamaApiMap(), state.getWeb3ApiMap(), senderAddress, recipientAddress, params);
+        return await statemineTransferHandler(networkKey, state.getDotSamaApiMap(), state.getWeb3ApiMap(), senderAddress, recipientAddress, params, networkJson);
       case SUPPORTED_TRANSFER_SUBSTRATE_CHAIN_NAME.statemint:
-        return await statemineTransferHandler(networkKey, state.getDotSamaApiMap(), state.getWeb3ApiMap(), senderAddress, recipientAddress, params);
+        return await statemineTransferHandler(networkKey, state.getDotSamaApiMap(), state.getWeb3ApiMap(), senderAddress, recipientAddress, params, networkJson);
       case SUPPORTED_TRANSFER_SUBSTRATE_CHAIN_NAME.bitcountry:
-        return await acalaTransferHandler(networkKey, state.getDotSamaApiMap(), state.getWeb3ApiMap(), senderAddress, recipientAddress, params);
+        return await acalaTransferHandler(networkKey, state.getDotSamaApiMap(), state.getWeb3ApiMap(), senderAddress, recipientAddress, params, networkJson);
     }
 
     return {

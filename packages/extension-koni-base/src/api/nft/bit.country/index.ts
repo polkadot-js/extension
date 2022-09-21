@@ -65,6 +65,8 @@ export class BitCountryNftApi extends BaseNftApi {
       }
     }));
 
+    console.log('assetIds', assetIds);
+
     return assetIds;
   }
 
@@ -110,12 +112,13 @@ export class BitCountryNftApi extends BaseNftApi {
   }
 
   async handleNfts (params: HandleNftParams): Promise<void> {
+    console.log('running bit.country');
     const assetIds = await this.getNfts(this.addresses);
 
     try {
       if (!assetIds || assetIds.length === 0) {
         params.updateReady(true);
-        params.updateNftIds(SUPPORTED_NFT_NETWORKS.bitcountry);
+        params.updateNftIds(this.chain); // TODO
 
         return;
       }
@@ -136,6 +139,9 @@ export class BitCountryNftApi extends BaseNftApi {
           this.getTokenDetails(assetId),
           this.getCollectionDetails(parsedClassId)
         ]);
+
+        console.log('tokenInfo', tokenInfo);
+        console.log('collectionMeta', collectionMeta);
 
         const parsedNft = {
           id: parsedTokenId,

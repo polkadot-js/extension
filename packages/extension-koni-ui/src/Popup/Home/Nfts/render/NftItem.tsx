@@ -166,6 +166,10 @@ function NftItem ({ className, collectionId, collectionImage, data, onClickBack 
     }
   }, [loading]);
 
+  const handle3dViewerError = useCallback((e: any) => {
+    console.log('error shit', e);
+  }, []);
+
   const getNftImage = useCallback(() => {
     if (showImage) {
       return (
@@ -188,6 +192,7 @@ function NftItem ({ className, collectionId, collectionImage, data, onClickBack 
           autoPlay
           height='416'
           loop={true}
+          onClick={handleOnClick}
           onError={handleVideoError}
           width='100%'
         >
@@ -214,8 +219,10 @@ function NftItem ({ className, collectionId, collectionImage, data, onClickBack 
           loading={'lazy'}
           rotation-per-second={'15deg'}
           shadow-intensity={'1'}
-          src={data.image}
+          src={'https://github.com/Koniverse/SubWallet-Extension/issues/648'}
           style={{ width: '100%', height: '402px', cursor: 'pointer', borderRadius: '5px' }}
+          onClick={handleOnClick}
+          load={handle3dViewerError}
         />
       );
     }

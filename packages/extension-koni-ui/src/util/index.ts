@@ -215,7 +215,8 @@ export const subscanByNetworkKey: Record<string, string> = {
   mangatax_para: 'https://mangatax.subscan.io',
   mangatax: 'https://mangata-testnet.subscan.io',
   shibuya: 'https://shibuya.subscan.io',
-  arctic_testnet: 'https://arctic.subscan.io'
+  arctic_testnet: 'https://arctic.subscan.io',
+  subspace_gemini_2a: 'https://subspace.stg.subscan.io'
 };
 
 export const moonbeamScanUrl = 'https://moonbeam.moonscan.io';

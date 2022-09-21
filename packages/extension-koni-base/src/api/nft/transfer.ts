@@ -1,7 +1,7 @@
 // Copyright 2019-2022 @subwallet/extension-koni authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { ApiProps, SubstrateNftTransaction } from '@subwallet/extension-base/background/KoniTypes';
+import { ApiProps, NetworkJson, SubstrateNftTransaction } from '@subwallet/extension-base/background/KoniTypes';
 import { getFreeBalance } from '@subwallet/extension-koni-base/api/dotsama/balance';
 import { SUPPORTED_TRANSFER_SUBSTRATE_CHAIN_NAME } from '@subwallet/extension-koni-base/api/nft/config';
 import { reformatAddress } from '@subwallet/extension-koni-base/utils';
@@ -10,7 +10,7 @@ import Web3 from 'web3';
 import { keyring } from '@polkadot/ui-keyring';
 import { BN } from '@polkadot/util';
 
-export async function acalaTransferHandler (networkKey: string, dotSamaApiMap: Record<string, ApiProps>, web3ApiMap: Record<string, Web3>, senderAddress: string, recipientAddress: string, params: Record<string, any>) {
+export async function acalaTransferHandler (networkKey: string, dotSamaApiMap: Record<string, ApiProps>, web3ApiMap: Record<string, Web3>, senderAddress: string, recipientAddress: string, params: Record<string, any>, networkJson: NetworkJson) {
   try {
     const apiProp = dotSamaApiMap[networkKey];
     const itemId = params.itemId as number;
@@ -38,7 +38,7 @@ export async function acalaTransferHandler (networkKey: string, dotSamaApiMap: R
   }
 }
 
-export async function rmrkTransferHandler (networkKey: string, dotSamaApiMap: Record<string, ApiProps>, web3ApiMap: Record<string, Web3>, senderAddress: string, recipientAddress: string, params: Record<string, any>) {
+export async function rmrkTransferHandler (networkKey: string, dotSamaApiMap: Record<string, ApiProps>, web3ApiMap: Record<string, Web3>, senderAddress: string, recipientAddress: string, params: Record<string, any>, networkJson: NetworkJson) {
   try {
     const apiProp = dotSamaApiMap[networkKey];
     const remark = params.remark as string;
@@ -66,6 +66,16 @@ export async function rmrkTransferHandler (networkKey: string, dotSamaApiMap: Re
       balanceError
     } as SubstrateNftTransaction;
   } catch (e) {
+    // @ts-ignore
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-member-access
+    if (e.toString().includes('Error: createType(RuntimeDispatchInfo):: Struct: failed on weight: u64:: Assertion failed')) {
+      return {
+        error: false,
+        estimatedFee: `0.0000 ${networkJson.nativeToken as string}`,
+        balanceError: false
+      } as SubstrateNftTransaction;
+    }
+
     console.error('error handling rmrk transfer nft', e);
 
     return {
@@ -75,7 +85,7 @@ export async function rmrkTransferHandler (networkKey: string, dotSamaApiMap: Re
   }
 }
 
-export async function uniqueTransferHandler (networkKey: string, dotSamaApiMap: Record<string, ApiProps>, web3ApiMap: Record<string, Web3>, senderAddress: string, recipientAddress: string, params: Record<string, any>) {
+export async function uniqueTransferHandler (networkKey: string, dotSamaApiMap: Record<string, ApiProps>, web3ApiMap: Record<string, Web3>, senderAddress: string, recipientAddress: string, params: Record<string, any>, networkJson: NetworkJson) {
   try {
     const apiProp = dotSamaApiMap[networkKey];
     const itemId = params.itemId as number;
@@ -104,7 +114,7 @@ export async function uniqueTransferHandler (networkKey: string, dotSamaApiMap: 
   }
 }
 
-export async function quartzTransferHandler (networkKey: string, dotSamaApiMap: Record<string, ApiProps>, web3ApiMap: Record<string, Web3>, senderAddress: string, recipientAddress: string, params: Record<string, any>) {
+export async function quartzTransferHandler (networkKey: string, dotSamaApiMap: Record<string, ApiProps>, web3ApiMap: Record<string, Web3>, senderAddress: string, recipientAddress: string, params: Record<string, any>, networkJson: NetworkJson) {
   try {
     const apiProp = dotSamaApiMap[networkKey];
     const itemId = params.itemId as number;
@@ -133,7 +143,7 @@ export async function quartzTransferHandler (networkKey: string, dotSamaApiMap: 
   }
 }
 
-export async function statemineTransferHandler (networkKey: string, dotSamaApiMap: Record<string, ApiProps>, web3ApiMap: Record<string, Web3>, senderAddress: string, recipientAddress: string, params: Record<string, any>) {
+export async function statemineTransferHandler (networkKey: string, dotSamaApiMap: Record<string, ApiProps>, web3ApiMap: Record<string, Web3>, senderAddress: string, recipientAddress: string, params: Record<string, any>, networkJson: NetworkJson) {
   try {
     const apiProp = dotSamaApiMap[networkKey];
     const itemId = params.itemId as number;
@@ -283,6 +293,8 @@ export function getNftTransferExtrinsic (networkKey: string, apiProp: ApiProps, 
     case SUPPORTED_TRANSFER_SUBSTRATE_CHAIN_NAME.statemint:
       return statemineGetExtrinsic(apiProp, senderAddress, recipientAddress, params);
     case SUPPORTED_TRANSFER_SUBSTRATE_CHAIN_NAME.bitcountry:
+      return acalaGetExtrinsic(apiProp, senderAddress, recipientAddress, params);
+    case SUPPORTED_TRANSFER_SUBSTRATE_CHAIN_NAME.pioneer:
       return acalaGetExtrinsic(apiProp, senderAddress, recipientAddress, params);
   }
 

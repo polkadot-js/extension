@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { ApiProps, NftCollection, NftItem } from '@subwallet/extension-base/background/KoniTypes';
-import { BIT_COUNTRY_SERVER, SUPPORTED_NFT_NETWORKS } from '@subwallet/extension-koni-base/api/nft/config';
+import { BIT_COUNTRY_SERVER } from '@subwallet/extension-koni-base/api/nft/config';
 import { BaseNftApi, HandleNftParams } from '@subwallet/extension-koni-base/api/nft/nft';
 import { isUrl } from '@subwallet/extension-koni-base/utils';
 import fetch from 'cross-fetch';
@@ -115,7 +115,7 @@ export class BitCountryNftApi extends BaseNftApi {
     try {
       if (!assetIds || assetIds.length === 0) {
         params.updateReady(true);
-        params.updateNftIds(SUPPORTED_NFT_NETWORKS.bitcountry);
+        params.updateNftIds(this.chain); // TODO
 
         return;
       }
@@ -146,12 +146,12 @@ export class BitCountryNftApi extends BaseNftApi {
           // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access,@typescript-eslint/no-unsafe-assignment
           image: tokenInfo && tokenInfo.image_url ? this.parseUrl(tokenInfo?.image_url as string) : this.parseUrl(collectionMeta?.image_url as string),
           collectionId: parsedClassId,
-          chain: SUPPORTED_NFT_NETWORKS.bitcountry
+          chain: this.chain
         } as NftItem;
 
         const parsedCollection = {
           collectionId: parsedClassId,
-          chain: SUPPORTED_NFT_NETWORKS.bitcountry,
+          chain: this.chain,
           // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment,@typescript-eslint/no-unsafe-member-access
           collectionName: collectionMeta?.name,
           // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment,@typescript-eslint/no-unsafe-member-access
@@ -163,8 +163,8 @@ export class BitCountryNftApi extends BaseNftApi {
         params.updateReady(true);
       }));
 
-      params.updateCollectionIds(SUPPORTED_NFT_NETWORKS.bitcountry, Object.keys(collectionNftIds));
-      Object.entries(collectionNftIds).forEach(([collectionId, nftIds]) => params.updateNftIds(SUPPORTED_NFT_NETWORKS.bitcountry, collectionId, nftIds));
+      params.updateCollectionIds(this.chain, Object.keys(collectionNftIds));
+      Object.entries(collectionNftIds).forEach(([collectionId, nftIds]) => params.updateNftIds(this.chain, collectionId, nftIds));
     } catch (e) {
       console.error('Failed to fetch bit.country nft', e);
     }

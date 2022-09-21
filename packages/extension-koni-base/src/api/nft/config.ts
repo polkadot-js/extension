@@ -59,6 +59,7 @@ export enum SUPPORTED_NFT_NETWORKS {
   moonriver = 'moonriver',
   moonbase = 'moonbase',
   astarEvm = 'astarEvm',
+  pioneer = 'pioneer'
 }
 
 export enum SUPPORTED_TRANSFER_EVM_CHAIN_NAME {
@@ -97,7 +98,8 @@ export enum SUPPORTED_TRANSFER_SUBSTRATE_CHAIN_NAME {
   quartz = 'quartz',
   opal = 'opal',
   statemint = 'statemint',
-  bitcountry = 'bitcountry'
+  bitcountry = 'bitcountry',
+  pioneer = 'pioneer'
 }
 
 const RANDOM_IPFS_GATEWAY_SETTING = [

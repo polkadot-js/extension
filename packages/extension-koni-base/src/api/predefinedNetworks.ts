@@ -1838,6 +1838,21 @@ export const PREDEFINED_NETWORKS: Record<string, NetworkJson> = {
     nativeToken: 'Unit',
     decimals: 12,
     groups: ['TEST_NET']
+  },
+  arctic_testnet: {
+    key: 'arctic_testnet',
+    chain: 'Arctic Testnet',
+    genesisHash: '0x5c4207232d344710a176b1982471acf9b058f40b4a57470c25410b68b684c766',
+    ss58Format: 2207,
+    providers: {
+      arctic: 'wss://arctic-rpc.icenetwork.io:9944'
+    },
+    currentProvider: 'arctic',
+    active: false,
+    currentProviderMode: 'ws',
+    nativeToken: 'ICY',
+    decimals: 18,
+    groups: ['TEST_NET']
   }
 };
 

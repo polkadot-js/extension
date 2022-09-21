@@ -87,6 +87,8 @@ export default function paramsHandler (nftItem: NftItem, networkKey: string, net
         return statemineParser(nftItem);
       case SUPPORTED_TRANSFER_CHAIN_NAME.bitcountry:
         return acalaParser(nftItem);
+      case SUPPORTED_TRANSFER_CHAIN_NAME.pioneer:
+        return acalaParser(nftItem);
     }
   }
 

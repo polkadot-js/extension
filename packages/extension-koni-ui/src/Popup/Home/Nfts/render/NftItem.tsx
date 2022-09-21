@@ -1,6 +1,8 @@
 // Copyright 2019-2022 @polkadot/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
+import '@google/model-viewer';
+
 import { faArrowLeft } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { CurrentNetworkInfo, NetWorkMetadataDef } from '@subwallet/extension-base/background/KoniTypes';
@@ -47,6 +49,7 @@ function NftItem ({ className, collectionId, collectionImage, data, onClickBack 
   const [loading, setLoading] = useState(true);
   const [showImage, setShowImage] = useState(true);
   const [imageError, setImageError] = useState(false);
+  const [videoError, setVideoError] = useState(false);
   const { currentAccount: account, currentNetwork } = useSelector((state: RootState) => state);
   const networkMetadata = useGetNetworkMetadata();
   const networkJson = useGetNetworkJson(data.chain as string);
@@ -162,6 +165,66 @@ function NftItem ({ className, collectionId, collectionImage, data, onClickBack 
     }
   }, [loading]);
 
+  const getNftImage = useCallback(() => {
+    if (showImage) {
+      return (
+        <img
+          alt={'item-img'}
+          className={'item-img'}
+          onClick={handleOnClick}
+          onContextMenu={handleRightClick}
+          onError={handleImageError}
+          onLoad={handleOnLoad}
+          src={getItemImage()}
+          style={{ borderRadius: '5px' }}
+        />
+      );
+    } else {
+      if (!imageError) {
+        return (
+          <video
+            autoPlay
+            height='416'
+            loop={true}
+            onError={handleVideoError}
+            width='100%'
+          >
+            <source
+              src={getItemImage()}
+              type='video/mp4'
+            />
+          </video>
+        );
+      } else {
+        return (
+          // @ts-ignore
+          <model-viewer
+            alt={'model-viewer'}
+            animation-name={'Idle'}
+            ar-status={'not-presenting'}
+            bounds={'tight'}
+            camera-controls={'true'}
+            disable-zoom={true}
+            environment-image={'neutral'}
+            loading={'lazy'}
+            shadow-intensity={'1'}
+            src={getItemImage()}
+            style={{ width: '100%', height: '402px', cursor: 'pointer', borderRadius: '5px' }}
+          />
+        );
+      }
+    }
+
+    return (
+      <img
+        alt={'default-img'}
+        className={'item-img'}
+        src={themeContext.logo}
+        style={{ borderRadius: '5px' }}
+      />
+    );
+  }, [getItemImage, handleImageError, handleOnClick, handleOnLoad, handleRightClick, handleVideoError, imageError, showImage, themeContext.logo]);
+
   return (
     <div className={className}>
       <div>
@@ -195,38 +258,7 @@ function NftItem ({ className, collectionId, collectionImage, data, onClickBack 
               loading &&
               <Spinner className={'img-spinner'} />
             }
-            {
-              showImage
-                ? <img
-                  alt={'item-img'}
-                  className={'item-img'}
-                  onClick={handleOnClick}
-                  onContextMenu={handleRightClick}
-                  onError={handleImageError}
-                  onLoad={handleOnLoad}
-                  src={getItemImage()}
-                  style={{ borderRadius: '5px' }}
-                />
-                : !imageError
-                  ? <video
-                    autoPlay
-                    height='416'
-                    loop={true}
-                    onError={handleVideoError}
-                    width='100%'
-                  >
-                    <source
-                      src={getItemImage()}
-                      type='video/mp4'
-                    />
-                  </video>
-                  : <img
-                    alt={'default-img'}
-                    className={'item-img'}
-                    src={themeContext.logo}
-                    style={{ borderRadius: '5px' }}
-                  />
-            }
+            {getNftImage()}
           </div>
 
           {

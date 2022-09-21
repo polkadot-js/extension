@@ -24,6 +24,7 @@
     "@fortawesome/free-regular-svg-icons": "^6.1.1",
     "@fortawesome/free-solid-svg-icons": "^6.1.1",
     "@fortawesome/react-fontawesome": "^0.1.18",
+    "@google/model-viewer": "^2.0.0",
     "@polkadot/api-contract": "^8.11.3",
     "@polkadot/hw-ledger": "^10.1.2",
     "@polkadot/keyring": "^9.7.2",

@@ -151,12 +151,10 @@ function NftItem ({ className, collectionId, collectionImage, data, onClickBack 
   const getItemImage = useCallback(() => {
     if (data.image && !imageError) {
       return data.image;
-    } else if (collectionImage) {
-      return collectionImage;
     }
 
     return themeContext.logo;
-  }, [collectionImage, data.image, imageError, themeContext.logo]);
+  }, [data.image, imageError, themeContext.logo]);
 
   const handleRightClick = useCallback((e: any) => {
     if (loading) {
@@ -202,13 +200,15 @@ function NftItem ({ className, collectionId, collectionImage, data, onClickBack 
             alt={'model-viewer'}
             animation-name={'Idle'}
             ar-status={'not-presenting'}
+            auto-rotate={true}
+            auto-rotate-delay={100}
             bounds={'tight'}
-            camera-controls={'true'}
-            disable-zoom={true}
             environment-image={'neutral'}
+            interaction-prompt={'none'}
             loading={'lazy'}
+            rotation-per-second={'30deg'}
             shadow-intensity={'1'}
-            src={getItemImage()}
+            src={data.image}
             style={{ width: '100%', height: '402px', cursor: 'pointer', borderRadius: '5px' }}
           />
         );
@@ -223,7 +223,7 @@ function NftItem ({ className, collectionId, collectionImage, data, onClickBack 
         style={{ borderRadius: '5px' }}
       />
     );
-  }, [getItemImage, handleImageError, handleOnClick, handleOnLoad, handleRightClick, handleVideoError, imageError, showImage, themeContext.logo]);
+  }, [data.image, getItemImage, handleImageError, handleOnClick, handleOnLoad, handleRightClick, handleVideoError, imageError, showImage, themeContext.logo]);
 
   return (
     <div className={className}>

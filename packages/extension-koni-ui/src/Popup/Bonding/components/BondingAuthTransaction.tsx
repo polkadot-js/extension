@@ -3,7 +3,7 @@
 
 import { faCircleCheck } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { BaseTxError, ResponseStakeExternal, ResponseStakeLedger, ResponseStakeQr, ValidatorInfo } from '@subwallet/extension-base/background/KoniTypes';
+import { BaseTxError, BasicTxError, ResponseStakeExternal, ResponseStakeLedger, ResponseStakeQr, ValidatorInfo } from '@subwallet/extension-base/background/KoniTypes';
 import { LedgerState } from '@subwallet/extension-base/signers/types';
 import { InputWithLabel } from '@subwallet/extension-koni-ui/components';
 import { BalanceVal } from '@subwallet/extension-koni-ui/components/Balance';
@@ -115,7 +115,12 @@ function BondingAuthTransaction ({ amount, balanceError, bondedValidators, class
       }
 
       if (data.txError && data.txError) {
-        show('Encountered an error, please try again.');
+        if (data.errorMessage && data.errorMessage === BasicTxError.BalanceTooLow) {
+          show('Your balance is too low to cover fees');
+        } else {
+          show('Encountered an error, please try again.');
+        }
+
         setLoading(false);
 
         return;

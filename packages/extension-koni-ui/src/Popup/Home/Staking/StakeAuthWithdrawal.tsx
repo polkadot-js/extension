@@ -1,7 +1,7 @@
 // Copyright 2019-2022 @subwallet/extension-koni authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { BaseTxError, ResponseStakeExternal, ResponseStakeLedger, ResponseWithdrawStakeQr } from '@subwallet/extension-base/background/KoniTypes';
+import { BaseTxError, BasicTxError, ResponseStakeExternal, ResponseStakeLedger, ResponseWithdrawStakeQr } from '@subwallet/extension-base/background/KoniTypes';
 import { LedgerState } from '@subwallet/extension-base/signers/types';
 import { InputWithLabel } from '@subwallet/extension-koni-ui/components';
 import { BalanceVal } from '@subwallet/extension-koni-ui/components/Balance';
@@ -124,7 +124,12 @@ function StakeAuthWithdrawal ({ address, amount, className, hideModal, networkKe
       }
 
       if (cbData.txError && cbData.txError) {
-        show('Encountered an error, please try again.');
+        if (cbData.errorMessage && cbData.errorMessage === BasicTxError.BalanceTooLow) {
+          show('Your balance is too low to cover fees');
+        } else {
+          show('Encountered an error, please try again.');
+        }
+
         setLoading(false);
 
         return;

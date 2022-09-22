@@ -29,6 +29,16 @@ export async function acalaTransferHandler (networkKey: string, dotSamaApiMap: R
       balanceError
     } as SubstrateNftTransaction;
   } catch (e) {
+    // @ts-ignore
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-member-access
+    if (e.toString().includes('Error: createType(RuntimeDispatchInfo):: Struct: failed on weight: u64:: Assertion failed')) {
+      return {
+        error: false,
+        estimatedFee: `0.0000 ${networkJson.nativeToken as string}`,
+        balanceError: false
+      } as SubstrateNftTransaction;
+    }
+
     console.error('error handling acala transfer nft', e);
 
     return {
@@ -105,6 +115,16 @@ export async function uniqueTransferHandler (networkKey: string, dotSamaApiMap: 
       balanceError
     } as SubstrateNftTransaction;
   } catch (e) {
+    // @ts-ignore
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-member-access
+    if (e.toString().includes('Error: createType(RuntimeDispatchInfo):: Struct: failed on weight: u64:: Assertion failed')) {
+      return {
+        error: false,
+        estimatedFee: `0.0000 ${networkJson.nativeToken as string}`,
+        balanceError: false
+      } as SubstrateNftTransaction;
+    }
+
     console.error('error handling unique transfer nft', e);
 
     return {
@@ -134,6 +154,16 @@ export async function quartzTransferHandler (networkKey: string, dotSamaApiMap: 
       balanceError
     } as SubstrateNftTransaction;
   } catch (e) {
+    // @ts-ignore
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-member-access
+    if (e.toString().includes('Error: createType(RuntimeDispatchInfo):: Struct: failed on weight: u64:: Assertion failed')) {
+      return {
+        error: false,
+        estimatedFee: `0.0000 ${networkJson.nativeToken as string}`,
+        balanceError: false
+      } as SubstrateNftTransaction;
+    }
+
     console.error('error handling quartz transfer nft', e);
 
     return {
@@ -163,6 +193,16 @@ export async function statemineTransferHandler (networkKey: string, dotSamaApiMa
       balanceError
     } as SubstrateNftTransaction;
   } catch (e) {
+    // @ts-ignore
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-member-access
+    if (e.toString().includes('Error: createType(RuntimeDispatchInfo):: Struct: failed on weight: u64:: Assertion failed')) {
+      return {
+        error: false,
+        estimatedFee: `0.0000 ${networkJson.nativeToken as string}`,
+        balanceError: false
+      } as SubstrateNftTransaction;
+    }
+
     console.error('error handling statemine transfer nft', e);
 
     return {

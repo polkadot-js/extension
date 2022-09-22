@@ -1112,15 +1112,20 @@ export interface BondingSubmitParams {
   lockPeriod?: number // in month
 }
 
+export enum BasicTxError {
+  BalanceTooLow = 'BalanceTooLow'
+}
+
 export interface BasicTxResponse {
   passwordError?: string | null,
   callHash?: string,
   status?: boolean,
   transactionHash?: string,
   txError?: boolean,
+  errorMessage?: BasicTxError
 }
 
-export interface NftTransactionResponse extends BasicTxResponse{
+export interface NftTransactionResponse extends BasicTxResponse {
   isSendingSelf: boolean
 }
 

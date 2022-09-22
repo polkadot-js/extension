@@ -1629,7 +1629,7 @@ export const PREDEFINED_NETWORKS: Record<string, NetworkJson> = {
     groups: ['TEST_NET'],
     nativeToken: 'tSSC',
     decimals: 18,
-    blockExplorer: 'https://bifrost-kusama.subscan.io'
+    blockExplorer: 'https://subspace.subscan.io/'
   },
   origintrail: {
     key: 'origintrail',

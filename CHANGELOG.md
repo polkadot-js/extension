@@ -1,5 +1,16 @@
 # CHANGELOG
 
+## 0.6.3 (Koni)
+Build date: Sep 21, 2022.
+
+Update:
+- Add new networks (new parachain winners) (#608)
+- Add more attributes to NFT collection and item (#643)
+- Update subscan for Subspace 2a network (#651)
+
+Bug fixes:
+- Can't see the NFT in case NFT Collection is on multi-page (#639)
+
 ## 0.6.2 (Koni)
 Build date: Sep 16, 2022.
 

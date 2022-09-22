@@ -5,7 +5,7 @@ import { SingleModeJson } from '@subwallet/extension-base/background/KoniTypes';
 
 export const PREDEFINED_SINGLE_MODES: Record<string, SingleModeJson> = {
   subspace: {
-    networkKeys: ['subspace', 'subspace_gemini', 'subspace_gemini_2a', 'subspace_test'],
+    networkKeys: ['subspace_gemini_2a', 'subspace_test'],
     theme: 'subspace',
     autoTriggerDomain: 'subspace.network'
   }

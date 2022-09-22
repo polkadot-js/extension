@@ -33,6 +33,8 @@ function updateTransferNftParams (nftItem: _NftItem, collectionImage: string | u
   store.dispatch({ type: 'transferNftParams/update', payload: { nftItem, collectionImage, collectionId } as TransferNftParams });
 }
 
+const SHOW_3D_MODELS = ['pioneer', 'bit.country'];
+
 function updateCurrentNetwork (networkMetadata: NetWorkMetadataDef) {
   const newState = {
     networkPrefix: networkMetadata.ss58Format,
@@ -166,10 +168,6 @@ function NftItem ({ className, collectionId, collectionImage, data, onClickBack 
     }
   }, [loading]);
 
-  const handle3dViewerError = useCallback((e: any) => {
-    console.log('error shit', e);
-  }, []);
-
   const getNftImage = useCallback(() => {
     if (showImage) {
       return (
@@ -204,7 +202,7 @@ function NftItem ({ className, collectionId, collectionImage, data, onClickBack 
       );
     }
 
-    if (show3dViewer) {
+    if (show3dViewer && data.chain && SHOW_3D_MODELS.includes(data.chain)) {
       return (
         // @ts-ignore
         <model-viewer
@@ -219,10 +217,8 @@ function NftItem ({ className, collectionId, collectionImage, data, onClickBack 
           loading={'lazy'}
           rotation-per-second={'15deg'}
           shadow-intensity={'1'}
-          src={'https://github.com/Koniverse/SubWallet-Extension/issues/648'}
+          src={data.image}
           style={{ width: '100%', height: '402px', cursor: 'pointer', borderRadius: '5px' }}
-          onClick={handleOnClick}
-          load={handle3dViewerError}
         />
       );
     }
@@ -235,7 +231,7 @@ function NftItem ({ className, collectionId, collectionImage, data, onClickBack 
         style={{ borderRadius: '5px' }}
       />
     );
-  }, [getItemImage, handleImageError, handleOnClick, handleOnLoad, handleRightClick, handleVideoError, show3dViewer, showImage, showVideo, themeContext.logo]);
+  }, [data.chain, data.image, getItemImage, handleImageError, handleOnClick, handleOnLoad, handleRightClick, handleVideoError, show3dViewer, showImage, showVideo, themeContext.logo]);
 
   return (
     <div className={className}>

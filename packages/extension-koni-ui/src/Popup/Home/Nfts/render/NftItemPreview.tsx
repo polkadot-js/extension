@@ -1,6 +1,8 @@
 // Copyright 2019-2022 @polkadot/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
+import '@google/model-viewer';
+
 import Spinner from '@subwallet/extension-koni-ui/components/Spinner';
 import { _NftItem } from '@subwallet/extension-koni-ui/Popup/Home/Nfts/types';
 import { Theme, ThemeProps } from '@subwallet/extension-koni-ui/types';
@@ -16,9 +18,14 @@ interface Props {
   collectionImage?: string;
 }
 
+const SHOW_3D_MODELS = ['pioneer', 'bit.country'];
+
 function NftItemPreview ({ className, collectionImage, data, onClick }: Props): React.ReactElement<Props> {
   const [loading, setLoading] = useState(true);
   const [showImage, setShowImage] = useState(true);
+  const [showVideo, setShowVideo] = useState(false);
+  const [show3dViewer, setShow3dViewer] = useState(false);
+
   const [imageError, setImageError] = useState(false);
   const themeContext = useContext(ThemeContext as React.Context<Theme>);
 
@@ -49,6 +56,77 @@ function NftItemPreview ({ className, collectionImage, data, onClick }: Props): 
     return themeContext.logo;
   }, [collectionImage, data.image, imageError, themeContext.logo]);
 
+  const getNftImage = useCallback(() => {
+    if (showImage) {
+      return (
+        <LazyLoad
+          scrollContainer={'.home-tab-contents'}
+        >
+          <img
+            alt={'collection-thumbnail'}
+            className={'collection-thumbnail'}
+            onError={handleImageError}
+            onLoad={handleOnLoad}
+            src={getItemImage()}
+            style={{ borderRadius: '5px 5px 0 0' }}
+          />
+        </LazyLoad>
+      );
+    }
+
+    if (showVideo) {
+      return (
+        <LazyLoad
+          scrollContainer={'.home-tab-contents'}
+        >
+          <video
+            autoPlay
+            height='124'
+            loop={true}
+            muted
+            onError={handleVideoError}
+            width='124'
+          >
+            <source
+              src={getItemImage()}
+              type='video/mp4'
+            />
+          </video>
+        </LazyLoad>
+      );
+    }
+
+    if (show3dViewer && data.chain && SHOW_3D_MODELS.includes(data.chain)) {
+      return (
+        // @ts-ignore
+        <model-viewer
+          alt={'model-viewer'}
+          animation-name={'Idle'}
+          ar-status={'not-presenting'}
+          auto-rotate={true}
+          auto-rotate-delay={100}
+          bounds={'tight'}
+          environment-image={'neutral'}
+          interaction-prompt={'none'}
+          loading={'lazy'}
+          rotation-per-second={'15deg'}
+          shadow-intensity={'1'}
+          src={data.image}
+          style={{ width: '100%', height: '402px', cursor: 'pointer', borderRadius: '5px' }}
+        />
+      );
+    }
+
+    return (
+      <img
+        alt={'default-img'}
+        className={'collection-thumbnail'}
+        src={themeContext.logo}
+        style={{ borderRadius: '5px 5px 0 0' }}
+      />
+    );
+  }, [data.chain, data.image, getItemImage, handleImageError, handleOnLoad, handleVideoError, showImage, themeContext.logo]);
+
   return (
     <div className={className}>
       <div
@@ -61,41 +139,8 @@ function NftItemPreview ({ className, collectionImage, data, onClick }: Props): 
             loading &&
             <Spinner className={'img-spinner'} />
           }
-          <LazyLoad
-            scrollContainer={'.home-tab-contents'}
-          >
-            {
-              showImage
-                ? <img
-                  alt={'collection-thumbnail'}
-                  className={'collection-thumbnail'}
-                  onError={handleImageError}
-                  onLoad={handleOnLoad}
-                  src={getItemImage()}
-                  style={{ borderRadius: '5px 5px 0 0' }}
-                />
-                : !imageError
-                  ? <video
-                    autoPlay
-                    height='124'
-                    loop={true}
-                    muted
-                    onError={handleVideoError}
-                    width='124'
-                  >
-                    <source
-                      src={getItemImage()}
-                      type='video/mp4'
-                    />
-                  </video>
-                  : <img
-                    alt={'default-img'}
-                    className={'collection-thumbnail'}
-                    src={themeContext.logo}
-                    style={{ borderRadius: '5px 5px 0 0' }}
-                  />
-            }
-          </LazyLoad>
+
+          {getNftImage()}
         </div>
 
         <div className={'collection-title'}>

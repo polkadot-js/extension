@@ -26,7 +26,6 @@ function NftItemPreview ({ className, collectionImage, data, onClick }: Props): 
   const [showVideo, setShowVideo] = useState(false);
   const [show3dViewer, setShow3dViewer] = useState(false);
 
-  const [imageError, setImageError] = useState(false);
   const themeContext = useContext(ThemeContext as React.Context<Theme>);
 
   const handleOnLoad = useCallback(() => {
@@ -40,21 +39,22 @@ function NftItemPreview ({ className, collectionImage, data, onClick }: Props): 
   const handleImageError = useCallback(() => {
     setLoading(false);
     setShowImage(false);
+    setShowVideo(true);
   }, []);
 
   const handleVideoError = useCallback(() => {
-    setImageError(true);
+    setLoading(false);
+    setShowVideo(false);
+    setShow3dViewer(true);
   }, []);
 
   const getItemImage = useCallback(() => {
-    if (data.image && !imageError) {
+    if (data.image) {
       return data.image;
-    } else if (collectionImage) {
-      return collectionImage;
     }
 
     return themeContext.logo;
-  }, [collectionImage, data.image, imageError, themeContext.logo]);
+  }, [data.image, themeContext.logo]);
 
   const getNftImage = useCallback(() => {
     if (showImage) {
@@ -112,7 +112,7 @@ function NftItemPreview ({ className, collectionImage, data, onClick }: Props): 
           rotation-per-second={'15deg'}
           shadow-intensity={'1'}
           src={data.image}
-          style={{ width: '100%', height: '402px', cursor: 'pointer', borderRadius: '5px' }}
+          style={{ width: '124px', height: '124px', cursor: 'pointer', borderRadius: '5px 5px 0 0' }}
         />
       );
     }
@@ -125,7 +125,7 @@ function NftItemPreview ({ className, collectionImage, data, onClick }: Props): 
         style={{ borderRadius: '5px 5px 0 0' }}
       />
     );
-  }, [data.chain, data.image, getItemImage, handleImageError, handleOnLoad, handleVideoError, showImage, themeContext.logo]);
+  }, [data.chain, data.image, getItemImage, handleImageError, handleOnLoad, handleVideoError, show3dViewer, showImage, showVideo, themeContext.logo]);
 
   return (
     <div className={className}>

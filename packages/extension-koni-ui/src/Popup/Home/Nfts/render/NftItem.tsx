@@ -212,10 +212,12 @@ function NftItem ({ className, collectionId, collectionImage, data, onClickBack 
           auto-rotate={true}
           auto-rotate-delay={100}
           bounds={'tight'}
+          camera-controls={true}
+          disable-pan={true}
+          disable-scroll={true}
+          disable-zoom={true}
           environment-image={'neutral'}
-          interaction-prompt={'none'}
           loading={'lazy'}
-          rotation-per-second={'15deg'}
           shadow-intensity={'1'}
           src={data.image}
           style={{ width: '100%', height: '402px', cursor: 'pointer', borderRadius: '5px' }}

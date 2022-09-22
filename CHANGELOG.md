@@ -1,6 +1,6 @@
 # CHANGELOG
 
-## 0.6.3 (Koni)
+## 0.6.4 (Koni)
 Build date: Sep 21, 2022.
 
 Update:

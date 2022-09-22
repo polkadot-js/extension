@@ -106,13 +106,16 @@ function NftItemPreview ({ className, collectionImage, data, onClick }: Props): 
           auto-rotate={true}
           auto-rotate-delay={100}
           bounds={'tight'}
+          disable-pan={true}
+          disable-tap={true}
+          disable-zoom={true}
           environment-image={'neutral'}
           interaction-prompt={'none'}
-          loading={'lazy'}
-          rotation-per-second={'15deg'}
+          loading={'eager'}
           shadow-intensity={'1'}
           src={data.image}
           style={{ width: '124px', height: '124px', cursor: 'pointer', borderRadius: '5px 5px 0 0' }}
+          touch-action={'none'}
         />
       );
     }

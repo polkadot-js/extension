@@ -1,6 +1,8 @@
 // Copyright 2019-2022 @polkadot/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
+import '@google/model-viewer';
+
 import { faArrowLeft } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { CurrentNetworkInfo, NetWorkMetadataDef } from '@subwallet/extension-base/background/KoniTypes';
@@ -31,6 +33,8 @@ function updateTransferNftParams (nftItem: _NftItem, collectionImage: string | u
   store.dispatch({ type: 'transferNftParams/update', payload: { nftItem, collectionImage, collectionId } as TransferNftParams });
 }
 
+const SHOW_3D_MODELS = ['pioneer', 'bit.country'];
+
 function updateCurrentNetwork (networkMetadata: NetWorkMetadataDef) {
   const newState = {
     networkPrefix: networkMetadata.ss58Format,
@@ -46,7 +50,8 @@ function updateCurrentNetwork (networkMetadata: NetWorkMetadataDef) {
 function NftItem ({ className, collectionId, collectionImage, data, onClickBack }: Props): React.ReactElement<Props> {
   const [loading, setLoading] = useState(true);
   const [showImage, setShowImage] = useState(true);
-  const [imageError, setImageError] = useState(false);
+  const [showVideo, setShowVideo] = useState(false);
+  const [show3dViewer, setShow3dViewer] = useState(false);
   const { currentAccount: account, currentNetwork } = useSelector((state: RootState) => state);
   const networkMetadata = useGetNetworkMetadata();
   const networkJson = useGetNetworkJson(data.chain as string);
@@ -125,10 +130,13 @@ function NftItem ({ className, collectionId, collectionImage, data, onClickBack 
   const handleImageError = useCallback(() => {
     setLoading(false);
     setShowImage(false);
+    setShowVideo(true);
   }, []);
 
   const handleVideoError = useCallback(() => {
-    setImageError(true);
+    setLoading(false);
+    setShowVideo(false);
+    setShow3dViewer(true);
   }, []);
 
   const handleOnClick = useCallback(() => {
@@ -146,14 +154,12 @@ function NftItem ({ className, collectionId, collectionImage, data, onClickBack 
   }, [data.external_url, data?.image, loading]);
 
   const getItemImage = useCallback(() => {
-    if (data.image && !imageError) {
+    if (data.image) {
       return data.image;
-    } else if (collectionImage) {
-      return collectionImage;
     }
 
     return themeContext.logo;
-  }, [collectionImage, data.image, imageError, themeContext.logo]);
+  }, [data.image, themeContext.logo]);
 
   const handleRightClick = useCallback((e: any) => {
     if (loading) {
@@ -161,6 +167,73 @@ function NftItem ({ className, collectionId, collectionImage, data, onClickBack 
       e.preventDefault();
     }
   }, [loading]);
+
+  const getNftImage = useCallback(() => {
+    if (showImage) {
+      return (
+        <img
+          alt={'item-img'}
+          className={'item-img'}
+          onClick={handleOnClick}
+          onContextMenu={handleRightClick}
+          onError={handleImageError}
+          onLoad={handleOnLoad}
+          src={getItemImage()}
+          style={{ borderRadius: '5px' }}
+        />
+      );
+    }
+
+    if (showVideo) {
+      return (
+        <video
+          autoPlay
+          height='416'
+          loop={true}
+          onClick={handleOnClick}
+          onError={handleVideoError}
+          width='100%'
+        >
+          <source
+            src={getItemImage()}
+            type='video/mp4'
+          />
+        </video>
+      );
+    }
+
+    if (show3dViewer && data.chain && SHOW_3D_MODELS.includes(data.chain)) {
+      return (
+        // @ts-ignore
+        <model-viewer
+          alt={'model-viewer'}
+          ar-status={'not-presenting'}
+          auto-rotate={true}
+          auto-rotate-delay={100}
+          bounds={'tight'}
+          disable-pan={true}
+          disable-scroll={true}
+          disable-tap={true}
+          disable-zoom={true}
+          environment-image={'neutral'}
+          interaction-prompt={'none'}
+          loading={'eager'}
+          src={data.image}
+          style={{ width: '100%', height: '402px', cursor: 'pointer', borderRadius: '5px' }}
+          touch-action={'none'}
+        />
+      );
+    }
+
+    return (
+      <img
+        alt={'default-img'}
+        className={'item-img'}
+        src={themeContext.logo}
+        style={{ borderRadius: '5px' }}
+      />
+    );
+  }, [data.chain, data.image, getItemImage, handleImageError, handleOnClick, handleOnLoad, handleRightClick, handleVideoError, show3dViewer, showImage, showVideo, themeContext.logo]);
 
   return (
     <div className={className}>
@@ -195,38 +268,7 @@ function NftItem ({ className, collectionId, collectionImage, data, onClickBack 
               loading &&
               <Spinner className={'img-spinner'} />
             }
-            {
-              showImage
-                ? <img
-                  alt={'item-img'}
-                  className={'item-img'}
-                  onClick={handleOnClick}
-                  onContextMenu={handleRightClick}
-                  onError={handleImageError}
-                  onLoad={handleOnLoad}
-                  src={getItemImage()}
-                  style={{ borderRadius: '5px' }}
-                />
-                : !imageError
-                  ? <video
-                    autoPlay
-                    height='416'
-                    loop={true}
-                    onError={handleVideoError}
-                    width='100%'
-                  >
-                    <source
-                      src={getItemImage()}
-                      type='video/mp4'
-                    />
-                  </video>
-                  : <img
-                    alt={'default-img'}
-                    className={'item-img'}
-                    src={themeContext.logo}
-                    style={{ borderRadius: '5px' }}
-                  />
-            }
+            {getNftImage()}
           </div>
 
           {

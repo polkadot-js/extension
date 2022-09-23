@@ -433,6 +433,8 @@ export async function makeTransfer (
     } else if (value) {
       transfer = api.tx.kton.transfer(to, new BN(value));
     }
+  } else if (['pioneer'].includes(networkKey) && tokenInfo && tokenInfo.symbol === 'BIT') {
+    transfer = api.tx.currencies.transfer(to, tokenInfo.specialOption, value);
   } else if (isTxBalancesSupported && (!tokenInfo || tokenInfo.isMainToken)) {
     if (transferAll) {
       transfer = api.tx.balances.transferAll(to, false);

@@ -116,7 +116,7 @@ export class BitCountryNftApi extends BaseNftApi {
     try {
       if (!assetIds || assetIds.length === 0) {
         params.updateReady(true);
-        params.updateNftIds(this.chain); // TODO
+        params.updateNftIds(this.chain);
 
         return;
       }

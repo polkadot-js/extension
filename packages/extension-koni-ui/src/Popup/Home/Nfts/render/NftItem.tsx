@@ -218,7 +218,6 @@ function NftItem ({ className, collectionId, collectionImage, data, onClickBack 
           environment-image={'neutral'}
           interaction-prompt={'none'}
           loading={'eager'}
-          onClick={handleOnClick}
           src={data.image}
           style={{ width: '100%', height: '402px', cursor: 'pointer', borderRadius: '5px' }}
           touch-action={'none'}

@@ -164,7 +164,9 @@ export async function estimateFee (
       fee = paymentInfo.partialFee.toString();
     }
   } else if (['pioneer'].includes(networkKey) && tokenInfo && tokenInfo.symbol === 'BIT') {
-    console.log('go in here');
+    const paymentInfo = await api.tx.currencies.transfer(to, tokenInfo.specialOption, value).paymentInfo(fromKeypair);
+
+    fee = paymentInfo.partialFee.toString();
   } else if (isTxBalancesSupported && (!tokenInfo || tokenInfo.isMainToken || (tokenInfo && ((networkKey === 'crab' && tokenInfo.symbol === 'CKTON') || (networkKey === 'pangolin' && tokenInfo.symbol === 'PKTON'))))) {
     if (transferAll) {
       const paymentInfo = await api.tx.balances.transferAll(to, false).paymentInfo(fromKeypair);

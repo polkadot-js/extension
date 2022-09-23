@@ -228,7 +228,7 @@ export class KoniSubscription {
           return;
         }
 
-        this.initNftSubscription(['WWYksPQzzBXZNPCDLbcabam6cGuk7m4z5vpsVZ9MRF3pTwdvQ'], dotSamaApiMap, web3ApiMap, customErc721Registry, address);
+        this.initNftSubscription(addresses, dotSamaApiMap, web3ApiMap, customErc721Registry, address);
       })
       .catch(console.error);
   }

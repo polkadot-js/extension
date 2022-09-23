@@ -19,12 +19,12 @@ export const SupportedCrossChainsMap: Record<string, CrossChainRelation> = {
         type: 'p',
         isEthereum: false,
         supportedToken: ['DOT']
-      },
-      acala: {
-        type: 'p',
-        isEthereum: false,
-        supportedToken: ['DOT']
       }
+      // acala: {
+      //   type: 'p',
+      //   isEthereum: false,
+      //   supportedToken: ['DOT']
+      // }
     }
   },
   kusama: {
@@ -53,32 +53,32 @@ export const SupportedCrossChainsMap: Record<string, CrossChainRelation> = {
       }
     }
   },
-  acala: {
-    type: 'p',
-    isEthereum: false,
-    relationMap: {
-      moonbeam: {
-        type: 'p',
-        isEthereum: true,
-        supportedToken: ['ACA', 'aUSD']
-      },
-      astar: {
-        type: 'p',
-        isEthereum: false,
-        supportedToken: ['aUSD']
-      },
-      astarEvm: {
-        type: 'p',
-        isEthereum: true,
-        supportedToken: ['aUSD']
-      },
-      polkadot: {
-        type: 'r',
-        isEthereum: false,
-        supportedToken: ['DOT']
-      }
-    }
-  },
+  // acala: {
+  //   type: 'p',
+  //   isEthereum: false,
+  //   relationMap: {
+  //     moonbeam: {
+  //       type: 'p',
+  //       isEthereum: true,
+  //       supportedToken: ['ACA', 'aUSD']
+  //     },
+  //     astar: {
+  //       type: 'p',
+  //       isEthereum: false,
+  //       supportedToken: ['aUSD']
+  //     },
+  //     astarEvm: {
+  //       type: 'p',
+  //       isEthereum: true,
+  //       supportedToken: ['aUSD']
+  //     },
+  //     polkadot: {
+  //       type: 'r',
+  //       isEthereum: false,
+  //       supportedToken: ['DOT']
+  //     }
+  //   }
+  // },
   karura: {
     type: 'p',
     isEthereum: false,
@@ -119,11 +119,11 @@ export const SupportedCrossChainsMap: Record<string, CrossChainRelation> = {
     type: 'p',
     isEthereum: true,
     relationMap: {
-      acala: {
-        type: 'p',
-        isEthereum: false,
-        supportedToken: ['xcaUSD']
-      },
+      // acala: {
+      //   type: 'p',
+      //   isEthereum: false,
+      //   supportedToken: ['xcaUSD']
+      // },
       interlay: {
         type: 'p',
         isEthereum: false,
@@ -166,11 +166,11 @@ export const SupportedCrossChainsMap: Record<string, CrossChainRelation> = {
     type: 'p',
     isEthereum: false,
     relationMap: {
-      acala: {
-        type: 'p',
-        isEthereum: false,
-        supportedToken: ['aUSD']
-      },
+      // acala: {
+      //   type: 'p',
+      //   isEthereum: false,
+      //   supportedToken: ['aUSD']
+      // },
       polkadot: {
         type: 'r',
         isEthereum: false,
@@ -248,71 +248,6 @@ export const SupportedCrossChainsMap: Record<string, CrossChainRelation> = {
       }
     }
   }
-  // moonbase: {
-  //   isEthereum: true,
-  //   type: 'p',
-  //   relationMap: {
-  //     acala_dev: {
-  //       type: 'p',
-  //       isEthereum: false,
-  //       supportedToken: ['xcKAR']
-  //     },
-  //     moonbase_relay: {
-  //       type: 'r',
-  //       isEthereum: false,
-  //       supportedToken: ['xcUNIT']
-  //     },
-  //     bifrost_testnet: {
-  //       type: 'r',
-  //       isEthereum: false,
-  //       supportedToken: ['xcBNC']
-  //     }
-  //   }
-  // },
-  // rococo: {
-  //   isEthereum: false,
-  //   type: 'r',
-  //   relationMap: {
-  //     contractsRococo: {
-  //       type: 'p',
-  //       isEthereum: false,
-  //       supportedToken: ['ROC']
-  //     }
-  //   }
-  // }
-  // moonbase_relay: {
-  //   isEthereum: false,
-  //   type: 'r',
-  //   relationMap: {
-  //     moonbase: {
-  //       type: 'p',
-  //       isEthereum: true,
-  //       supportedToken: ['Unit']
-  //     }
-  //   }
-  // },
-  // acala_testnet: {
-  //   type: 'p',
-  //   isEthereum: false,
-  //   relationMap: {
-  //     moonbase: {
-  //       type: 'p',
-  //       isEthereum: true,
-  //       supportedToken: ['ACA', 'AUSD']
-  //     }
-  //   }
-  // }
-  // karura_testnet: {
-  //   type: 'p',
-  //   isEthereum: false,
-  //   relationMap: {
-  //     moonbase: {
-  //       type: 'p',
-  //       isEthereum: true,
-  //       supportedToken: ['KAR']
-  //     }
-  //   }
-  // }
 };
 
 export const FOUR_INSTRUCTIONS_WEIGHT = 5000000000;

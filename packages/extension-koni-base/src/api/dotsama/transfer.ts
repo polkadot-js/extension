@@ -236,7 +236,7 @@ export function updateResponseTxResult (
         response.txResult.change = record.event.data[3]?.toString() || '0';
         response.txResult.changeSymbol = tokenInfo.symbol;
       }
-    } else if (['pioneer', 'bit.country'].includes(networkKey) && tokenInfo) {
+    } else if (['pioneer', 'bit.country'].includes(networkKey) && tokenInfo && !tokenInfo.isMainToken) {
       if (record.event.section === 'tokens' &&
         record.event.method.toLowerCase() === 'transfer') {
         response.txResult.change = record.event.data[3]?.toString() || '0';

@@ -18,13 +18,11 @@ interface Props {
   collectionImage?: string;
 }
 
-const SHOW_3D_MODELS = ['pioneer', 'bit.country'];
-
 function NftItemPreview ({ className, collectionImage, data, onClick }: Props): React.ReactElement<Props> {
   const [loading, setLoading] = useState(true);
   const [showImage, setShowImage] = useState(true);
   const [showVideo, setShowVideo] = useState(false);
-  const [show3dViewer, setShow3dViewer] = useState(false);
+  const [showCollectionImage, setShowCollectionImage] = useState(false);
 
   const themeContext = useContext(ThemeContext as React.Context<Theme>);
 
@@ -45,7 +43,7 @@ function NftItemPreview ({ className, collectionImage, data, onClick }: Props): 
   const handleVideoError = useCallback(() => {
     setLoading(false);
     setShowVideo(false);
-    setShow3dViewer(true);
+    setShowCollectionImage(true);
   }, []);
 
   const getItemImage = useCallback(() => {
@@ -96,27 +94,20 @@ function NftItemPreview ({ className, collectionImage, data, onClick }: Props): 
       );
     }
 
-    if (show3dViewer && data.chain && SHOW_3D_MODELS.includes(data.chain)) {
+    if (showCollectionImage) {
       return (
-        // @ts-ignore
-        <model-viewer
-          alt={'model-viewer'}
-          animation-name={'Idle'}
-          ar-status={'not-presenting'}
-          auto-rotate={true}
-          auto-rotate-delay={100}
-          bounds={'tight'}
-          disable-pan={true}
-          disable-tap={true}
-          disable-zoom={true}
-          environment-image={'neutral'}
-          interaction-prompt={'none'}
-          loading={'eager'}
-          shadow-intensity={'1'}
-          src={data.image}
-          style={{ width: '124px', height: '124px', cursor: 'pointer', borderRadius: '5px 5px 0 0' }}
-          touch-action={'none'}
-        />
+        <LazyLoad
+          scrollContainer={'.home-tab-contents'}
+        >
+          <img
+            alt={'collection-thumbnail'}
+            className={'collection-thumbnail'}
+            onError={handleImageError}
+            onLoad={handleOnLoad}
+            src={collectionImage}
+            style={{ borderRadius: '5px 5px 0 0' }}
+          />
+        </LazyLoad>
       );
     }
 
@@ -128,7 +119,7 @@ function NftItemPreview ({ className, collectionImage, data, onClick }: Props): 
         style={{ borderRadius: '5px 5px 0 0' }}
       />
     );
-  }, [data.chain, data.image, getItemImage, handleImageError, handleOnLoad, handleVideoError, show3dViewer, showImage, showVideo, themeContext.logo]);
+  }, [collectionImage, getItemImage, handleImageError, handleOnLoad, handleVideoError, showCollectionImage, showImage, showVideo, themeContext.logo]);
 
   return (
     <div className={className}>

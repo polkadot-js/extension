@@ -207,7 +207,6 @@ function NftItem ({ className, collectionId, collectionImage, data, onClickBack 
         // @ts-ignore
         <model-viewer
           alt={'model-viewer'}
-          animation-name={'Idle'}
           ar-status={'not-presenting'}
           auto-rotate={true}
           auto-rotate-delay={100}
@@ -215,12 +214,14 @@ function NftItem ({ className, collectionId, collectionImage, data, onClickBack 
           camera-controls={true}
           disable-pan={true}
           disable-scroll={true}
+          disable-tap={true}
           disable-zoom={true}
           environment-image={'neutral'}
-          loading={'lazy'}
-          shadow-intensity={'1'}
+          interaction-prompt={'none'}
+          loading={'eager'}
           src={data.image}
           style={{ width: '100%', height: '402px', cursor: 'pointer', borderRadius: '5px' }}
+          touch-action={'none'}
         />
       );
     }

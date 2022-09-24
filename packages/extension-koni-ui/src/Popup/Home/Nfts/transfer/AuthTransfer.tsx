@@ -1,7 +1,7 @@
 // Copyright 2019-2022 @subwallet/extension-koni authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { BaseTxError, RequestNftForceUpdate, ResponseNftTransferExternal, ResponseNftTransferLedger, ResponseNftTransferQr } from '@subwallet/extension-base/background/KoniTypes';
+import { BaseTxError, BasicTxError, RequestNftForceUpdate, ResponseNftTransferExternal, ResponseNftTransferLedger, ResponseNftTransferQr } from '@subwallet/extension-base/background/KoniTypes';
 import { AccountJson } from '@subwallet/extension-base/background/types';
 import { LedgerState } from '@subwallet/extension-base/signers/types';
 import { Spinner, Theme } from '@subwallet/extension-koni-ui/components';
@@ -167,7 +167,12 @@ function AuthTransfer ({ chain, className, collectionId, nftItem, recipientAddre
       // }
 
       if (data.txError && data.txError) {
-        show('Encountered an error, please try again.');
+        if (data.errorMessage && data.errorMessage === BasicTxError.BalanceTooLow) {
+          show('Your balance is too low to cover fees');
+        } else {
+          show('Encountered an error, please try again.');
+        }
+
         setLoading(false);
 
         return;

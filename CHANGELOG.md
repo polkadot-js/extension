@@ -1,5 +1,14 @@
 # CHANGELOG
 
+## 0.6.5 (Koni)
+Build date: Sep 24, 2022.
+
+Update:
+- Integrate Pioneer Network NFT (#649)
+- Support transfer BIT token on Pioneer Network (#665)
+- Temporarily disable XCM for Acala (#667)
+- Update Zeitgeist endpoints (#669)
+
 ## 0.6.4 (Koni)
 Build date: Sep 21, 2022.
 

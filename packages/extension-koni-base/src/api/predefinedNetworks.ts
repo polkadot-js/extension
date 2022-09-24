@@ -1193,11 +1193,12 @@ export const PREDEFINED_NETWORKS: Record<string, NetworkJson> = {
     genesisHash: '0x1bf2a2ecb4a868de66ea8610f2ce7c8c43706561b6476031315f6640fe38e060',
     ss58Format: 73,
     providers: {
-      ZeitgeistPM: 'wss://rpc-0.zeitgeist.pm'
+      OnFinality: 'wss://zeitgeist.api.onfinality.io/public-ws',
+      Dwellir: 'wss://zeitgeist-rpc.dwellir.com'
     },
     active: false,
     currentProviderMode: 'ws',
-    currentProvider: 'ZeitgeistPM',
+    currentProvider: 'OnFinality',
     groups: ['KUSAMA_PARACHAIN'],
     paraId: 2101,
     nativeToken: 'ZTG',

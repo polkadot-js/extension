@@ -251,13 +251,15 @@ describe('test DotSama APIs', () => {
     }
   });
 
-  // test('get web3', async () => {
-  //   const web3 = new Web3('wss://wss.api.moonbeam.network');
-  //
-  //   const contract = new web3.eth.Contract(ERC721Contract, '0x6758053c0b27E478edE1E4882adFF708Fc4FA72D');
-  //
-  //   const resp = await contract.methods.ownerOf('8').call()
-  //
-  //   console.log(resp)
-  // });
+  test('get compounding task fee', async () => {
+    const provider = new WsProvider(getCurrentProvider(PREDEFINED_NETWORKS.turingStaging), DOTSAMA_AUTO_CONNECT_MS);
+    const api = new ApiPromise(options({ provider }));
+    const apiPromise = await api.isReady;
+
+    const address = '5HbcGs2QXVAc6Q6eoTzLYNAJWpN17AkCFRLnWDaHCiGYXvNc';
+
+    const resp = await apiPromise.rpc.automationTime.getTimeAutomationFees('AutoCompoundDelegatedStake', 1);
+
+    console.log(resp);
+  });
 });

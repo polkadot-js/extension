@@ -1,7 +1,7 @@
 // Copyright 2019-2022 @subwallet/extension-koni-base authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { options } from '@oak-foundation/api';
+import { rpc, types } from '@oak-foundation/types';
 import { PREDEFINED_NETWORKS } from '@subwallet/extension-koni-base/api/predefinedNetworks';
 import { DOTSAMA_AUTO_CONNECT_MS } from '@subwallet/extension-koni-base/constants';
 import { getCurrentProvider } from '@subwallet/extension-koni-base/utils';
@@ -253,13 +253,17 @@ describe('test DotSama APIs', () => {
 
   test('get compounding task fee', async () => {
     const provider = new WsProvider(getCurrentProvider(PREDEFINED_NETWORKS.turingStaging), DOTSAMA_AUTO_CONNECT_MS);
-    const api = new ApiPromise(options({ provider }));
+    const api = new ApiPromise({
+      provider,
+      rpc: rpc,
+      types: types
+    });
     const apiPromise = await api.isReady;
 
     const address = '5HbcGs2QXVAc6Q6eoTzLYNAJWpN17AkCFRLnWDaHCiGYXvNc';
 
     const resp = await apiPromise.rpc.automationTime.getTimeAutomationFees('AutoCompoundDelegatedStake', 1);
 
-    console.log(resp);
+    console.log(resp.toHuman());
   });
 });

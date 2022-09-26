@@ -3349,32 +3349,21 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@oak-foundation/api-augment@npm:^0.0.15":
-  version: 0.0.15
-  resolution: "@oak-foundation/api-augment@npm:0.0.15"
+"@oak-foundation/api-augment@npm:^0.0.18":
+  version: 0.0.18
+  resolution: "@oak-foundation/api-augment@npm:0.0.18"
   dependencies:
     "@polkadot/types": ^9.2.3
-  checksum: 342bf444ecff9d7bd681e527ea9555f2ecbe5aa7be252bb7b34888036a7a9bb6059c2f95d7a50961feb5db12f9511b2035741fe0b6f36312cb6ab04774d27afb
+  checksum: e61c269f352334cc100546cf53b8477642295a6c1dbdaaed366663a5f97ffdcb31c4dada4a0b680d49ee9222f976e2b4d40c86ff21324069532a1e344381bd3f
   languageName: node
   linkType: hard
 
-"@oak-foundation/api@npm:^0.0.13":
-  version: 0.0.13
-  resolution: "@oak-foundation/api@npm:0.0.13"
-  dependencies:
-    "@oak-foundation/types": ^0.0.5
-    "@open-web3/orml-type-definitions": ^2.0.1
-    "@polkadot/api": ">=8"
-  checksum: eb0c84bd8a9470f3d77ffe69cdffba78effa1657bbe663cc466b6e46993ac541a44c4b74aea6e765d8f9751d20435d615aae000296fb658d25280fee3d949140
-  languageName: node
-  linkType: hard
-
-"@oak-foundation/types@npm:^0.0.5":
-  version: 0.0.5
-  resolution: "@oak-foundation/types@npm:0.0.5"
+"@oak-foundation/types@npm:^0.0.18":
+  version: 0.0.18
+  resolution: "@oak-foundation/types@npm:0.0.18"
   dependencies:
     "@open-web3/orml-type-definitions": ^2.0.1
-  checksum: 6c171d643bed01ff461acab24ecbcbd7e2e7e2a8a24c94b3e452317a3836f1780f382bc63bb14941a954b9fcaee457bf0707f9ccfcd526972d9f0d82196e665b
+  checksum: 82b92a9ac387ffd191f2ce09daaa53608942d88107d321001671007cfb80e9303a24b0babc64e7d4ca79cb77808358b1a62ab01a428e184e0a5bcdb5153b7b2e
   languageName: node
   linkType: hard
 
@@ -5211,8 +5200,8 @@ __metadata:
     "@laminar/type-definitions": ^0.3.1
     "@metamask/safe-event-emitter": ^2.0.0
     "@metaverse-network-sdk/type-definitions": ^0.0.1-13
-    "@oak-foundation/api": ^0.0.13
-    "@oak-foundation/api-augment": ^0.0.15
+    "@oak-foundation/api-augment": ^0.0.18
+    "@oak-foundation/types": ^0.0.18
     "@parallel-finance/type-definitions": ^1.7.7
     "@phala/typedefs": ^0.2.30
     "@polkadot/api": ^8.11.3

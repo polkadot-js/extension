@@ -35,11 +35,14 @@ export async function getParaBondingBasics (networkKey: string, dotSamaApi: ApiP
     _unvestedAllocation = await apiProps.api.query.vesting.totalUnvestedAllocation();
   }
 
-  const [_totalStake, _totalIssuance, _inflation] = await Promise.all([
+  const [_totalStake, _totalIssuance, _inflation, _allCollators] = await Promise.all([
     apiProps.api.query.parachainStaking.staked(round),
     apiProps.api.query.balances.totalIssuance(),
-    apiProps.api.query.parachainStaking.inflationConfig()
+    apiProps.api.query.parachainStaking.inflationConfig(),
+    apiProps.api.query.parachainStaking.candidatePool()
   ]);
+
+  const rawAllCollators = _allCollators.toHuman() as unknown as CollatorInfo[];
 
   let unvestedAllocation;
 
@@ -67,7 +70,8 @@ export async function getParaBondingBasics (networkKey: string, dotSamaApi: ApiP
 
   return {
     isMaxNominators: false,
-    stakedReturn
+    stakedReturn,
+    validatorCount: rawAllCollators.length
   } as ChainBondingBasics;
 }
 

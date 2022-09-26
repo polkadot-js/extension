@@ -12,13 +12,21 @@ import { SubmittableExtrinsic } from '@polkadot/api/promise/types';
 import { BN } from '@polkadot/util';
 
 export async function getAstarBondingBasics (networkKey: string) {
-  const allDappsReq = new Promise(function (resolve) {
+  const aprPromise = new Promise(function (resolve) {
     fetch(`https://api.astar.network/api/v1/${networkKey}/dapps-staking/apr`, {
       method: 'GET'
     }).then((resp) => {
       resolve(resp.json());
     }).catch(console.error);
   });
+  const dappInfoPromise = new Promise(function (resolve) {
+    fetch(`https://api.astar.network/api/v1/${networkKey}/dapps-staking/dapps`, {
+      method: 'GET'
+    }).then((resp) => {
+      resolve(resp.json());
+    }).catch(console.error);
+  });
+
   const timeout = new Promise((resolve) => {
     const id = setTimeout(() => {
       clearTimeout(id);
@@ -26,21 +34,41 @@ export async function getAstarBondingBasics (networkKey: string) {
     }, 5000);
   });
 
-  const resp = await Promise.race([
+  const aprRacePromise = Promise.race([
     timeout,
-    allDappsReq
-  ]); // need race because of API often timeout
+    aprPromise
+  ]); // need race because API often timeout
 
-  if (resp !== null) {
+  const dappRacePromise = Promise.race([
+    timeout,
+    dappInfoPromise
+  ]); // need race because API often timeout
+
+  const [aprInfo, _dappInfo] = await Promise.all([
+    aprRacePromise,
+    dappRacePromise
+  ]);
+
+  let validatorCount = 0;
+
+  if (_dappInfo !== null) {
+    const allDapps = _dappInfo as Record<string, any>[];
+
+    validatorCount = allDapps.length;
+  }
+
+  if (aprInfo !== null) {
     return {
       isMaxNominators: false,
-      stakedReturn: resp as number
+      stakedReturn: aprInfo as number,
+      validatorCount
     };
   }
 
   return {
     isMaxNominators: false,
-    stakedReturn: 0
+    stakedReturn: 0,
+    validatorCount
   };
 }
 

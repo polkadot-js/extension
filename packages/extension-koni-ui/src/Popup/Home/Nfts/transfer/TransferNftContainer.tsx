@@ -1,6 +1,8 @@
 // Copyright 2019-2022 @subwallet/extension-koni authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
+import '@google/model-viewer';
+
 import { ALL_ACCOUNT_KEY } from '@subwallet/extension-koni-base/constants';
 import { isValidAddress } from '@subwallet/extension-koni-base/utils';
 import { ActionContext, Spinner, Theme } from '@subwallet/extension-koni-ui/components';
@@ -40,6 +42,8 @@ const isValidRecipient = (address: string, isEthereum: boolean) => {
     return isValidAddress(address);
   }
 };
+
+const SHOW_3D_MODELS = ['pioneer', 'bit.country'];
 
 function Wrapper ({ className = '' }: Props): React.ReactElement<Props> {
   const { transferNftParams } = useSelector((state: RootState) => state);
@@ -87,7 +91,9 @@ function TransferNftContainer ({ className, collectionId, collectionImage, nftIt
   const [txError, setTxError] = useState('');
 
   const [showImage, setShowImage] = useState(true);
-  const [imageError, setImageError] = useState(false);
+  const [showVideo, setShowVideo] = useState(false);
+  const [show3dViewer, setShow3dViewer] = useState(false);
+
   const themeContext = useContext(ThemeContext as React.Context<Theme>);
 
   const navigate = useContext(ActionContext);
@@ -175,22 +181,83 @@ function TransferNftContainer ({ className, collectionId, collectionImage, nftIt
   const handleImageError = useCallback(() => {
     setLoading(false);
     setShowImage(false);
+    setShowVideo(true);
   }, []);
 
   const getItemImage = useCallback(() => {
-    if (nftItem.image && !imageError) {
+    if (nftItem.image) {
       return nftItem.image;
-    } else if (collectionImage) {
-      return collectionImage;
     }
 
     return themeContext.logo;
-  }, [nftItem.image, imageError, collectionImage, themeContext.logo]);
+  }, [nftItem.image, themeContext.logo]);
 
   const handleVideoError = useCallback(() => {
-    setImageError(true);
-    setShowImage(true);
+    setLoading(false);
+    setShowVideo(false);
+    setShow3dViewer(true);
   }, []);
+
+  const getNftImage = useCallback(() => {
+    if (showImage) {
+      return (
+        <img
+          alt={'item-img'}
+          className={'item-img'}
+          onError={handleImageError}
+          src={getItemImage()}
+          style={{ borderRadius: '5px' }}
+        />
+      );
+    }
+
+    if (showVideo) {
+      return (
+        <video
+          autoPlay
+          height='416'
+          loop={true}
+          onError={handleVideoError}
+          width='100%'
+        >
+          <source
+            src={getItemImage()}
+            type='video/mp4'
+          />
+        </video>
+      );
+    }
+
+    if (show3dViewer && nftItem.chain && SHOW_3D_MODELS.includes(nftItem.chain)) {
+      return (
+        // @ts-ignore
+        <model-viewer
+          alt={'model-viewer'}
+          animation-name={'Idle'}
+          ar-status={'not-presenting'}
+          auto-rotate={true}
+          auto-rotate-delay={100}
+          bounds={'tight'}
+          environment-image={'neutral'}
+          interaction-prompt={'none'}
+          loading={'lazy'}
+          rotation-per-second={'15deg'}
+          shadow-intensity={'1'}
+          src={nftItem.image}
+          style={{ width: '130px', height: '130px', cursor: 'pointer', borderRadius: '5px' }}
+        />
+      );
+    }
+
+    return (
+      <img
+        alt={'default-img'}
+        className={'item-img'}
+        src={themeContext.logo}
+        style={{ borderRadius: '5px' }}
+      />
+    );
+  }, [nftItem.chain, nftItem.image, getItemImage, handleImageError, handleVideoError, show3dViewer, showImage, showVideo, themeContext.logo]);
 
   return (
     // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
@@ -199,28 +266,7 @@ function TransferNftContainer ({ className, collectionId, collectionImage, nftIt
         !showTransferResult &&
         <div>
           <div className={'img-container'}>
-            {
-              showImage
-                ? <img
-                  alt={'item-img'}
-                  className={'item-img'}
-                  onError={handleImageError}
-                  src={getItemImage()}
-                  style={{ borderRadius: '5px' }}
-                />
-                : <video
-                  autoPlay
-                  height='416'
-                  loop={true}
-                  onError={handleVideoError}
-                  width='100%'
-                >
-                  <source
-                    src={getItemImage()}
-                    type='video/mp4'
-                  />
-                </video>
-            }
+            {getNftImage()}
           </div>
 
           <InputAddress

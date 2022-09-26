@@ -167,6 +167,7 @@ export interface NftItem {
   properties?: Record<any, any> | null;
   chain?: string;
   rmrk_ver?: RMRK_VER;
+  owner?: string;
 }
 
 export interface NftCollection {
@@ -1111,15 +1112,20 @@ export interface BondingSubmitParams {
   lockPeriod?: number // in month
 }
 
+export enum BasicTxError {
+  BalanceTooLow = 'BalanceTooLow'
+}
+
 export interface BasicTxResponse {
   passwordError?: string | null,
   callHash?: string,
   status?: boolean,
   transactionHash?: string,
   txError?: boolean,
+  errorMessage?: BasicTxError
 }
 
-export interface NftTransactionResponse extends BasicTxResponse{
+export interface NftTransactionResponse extends BasicTxResponse {
   isSendingSelf: boolean
 }
 

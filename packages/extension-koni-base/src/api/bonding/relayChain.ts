@@ -14,13 +14,16 @@ export async function getRelayChainBondingBasics (networkKey: string, dotSamaApi
   const _era = await apiProps.api.query.staking.currentEra();
   const currentEra = _era.toString();
 
-  const [_totalEraStake, _totalIssuance, _auctionCounter, _maxNominator, _nominatorCount] = await Promise.all([
+  const [_totalEraStake, _totalIssuance, _auctionCounter, _maxNominator, _nominatorCount, _eraStakers] = await Promise.all([
     apiProps.api.query.staking.erasTotalStake(parseInt(currentEra)),
     apiProps.api.query.balances.totalIssuance(),
     apiProps.api.query.auctions?.auctionCounter(),
     apiProps.api.query.staking.maxNominatorsCount(),
-    apiProps.api.query.staking.counterForNominators()
+    apiProps.api.query.staking.counterForNominators(),
+    apiProps.api.query.staking.erasStakers.entries(parseInt(currentEra))
   ]);
+
+  const eraStakers = _eraStakers as any[];
 
   const rawMaxNominator = _maxNominator.toHuman() as string;
   const rawNominatorCount = _nominatorCount.toHuman() as string;
@@ -38,7 +41,8 @@ export async function getRelayChainBondingBasics (networkKey: string, dotSamaApi
 
   return {
     isMaxNominators: maxNominator !== -1 ? nominatorCount >= maxNominator : false,
-    stakedReturn
+    stakedReturn,
+    validatorCount: eraStakers.length
   } as ChainBondingBasics;
 }
 

@@ -5,11 +5,12 @@ import type { ThemeProps } from '../types.js';
 
 import { faCopy } from '@fortawesome/free-regular-svg-icons';
 import React, { MouseEventHandler } from 'react';
+import CopyToClipboard from 'react-copy-to-clipboard';
 
 import useTranslation from '../hooks/useTranslation.js';
 import { styled } from '../styled.js';
 import ActionText from './ActionText.js';
-import TextAreaWithLabel from './TextAreaWithLabel.js';
+import BoxWithLabel from './BoxWithLabel.js';
 
 interface Props {
   seed: string;
@@ -22,20 +23,21 @@ function MnemonicSeed ({ className, onCopy, seed }: Props): React.ReactElement<P
 
   return (
     <div className={className}>
-      <TextAreaWithLabel
+      <BoxWithLabel
         className='mnemonicDisplay'
-        isReadOnly
         label={t<string>('Generated 12-word mnemonic seed:')}
         value={seed}
       />
       <div className='buttonsRow'>
-        <ActionText
-          className='copyBtn'
-          data-seed-action='copy'
-          icon={faCopy}
-          onClick={onCopy}
-          text={t<string>('Copy to clipboard')}
-        />
+        <CopyToClipboard text={seed}>
+          <ActionText
+            className='copyBtn'
+            data-seed-action='copy'
+            icon={faCopy}
+            onClick={onCopy}
+            text={t<string>('Copy to clipboard')}
+          />
+        </CopyToClipboard>
       </div>
     </div>
   );
@@ -54,7 +56,7 @@ export default styled(MnemonicSeed)(({ theme }: ThemeProps) => `
   }
 
   .mnemonicDisplay {
-    textarea {
+    .seedBox {
       color: ${theme.primaryColor};
       font-size: ${theme.fontSize};
       height: unset;

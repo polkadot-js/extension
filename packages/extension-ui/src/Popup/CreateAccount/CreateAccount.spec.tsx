@@ -72,8 +72,8 @@ describe('Create Account', () => {
   });
 
   describe('Phase 1', () => {
-    it('shows seed phrase in textarea', () => {
-      expect(wrapper.find('textarea').text()).toBe(exampleAccount.seed);
+    it('shows seed phrase in a span inside a div', () => {
+      expect(wrapper.find('.seedBox span').text()).toBe(exampleAccount.seed);
     });
 
     it('next step button is disabled when checkbox is not checked', () => {

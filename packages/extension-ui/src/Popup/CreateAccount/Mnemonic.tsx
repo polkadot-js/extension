@@ -12,26 +12,12 @@ interface Props {
   seed: string;
 }
 
-const onCopy = (): void => {
-  const mnemonicSeedTextElement = document.querySelector('textarea');
-
-  if (!mnemonicSeedTextElement) {
-    return;
-  }
-
-  mnemonicSeedTextElement.select();
-
-  // eslint-disable-next-line deprecation/deprecation
-  document.execCommand('copy');
-};
-
 function Mnemonic ({ onNextStep, seed }: Props): React.ReactElement<Props> {
   const { t } = useTranslation();
   const [isMnemonicSaved, setIsMnemonicSaved] = useState(false);
   const { show } = useToast();
 
   const _onCopy = useCallback((): void => {
-    onCopy();
     show(t<string>('Copied'));
   }, [show, t]);
 

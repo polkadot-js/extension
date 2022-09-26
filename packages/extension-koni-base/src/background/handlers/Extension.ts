@@ -3613,8 +3613,6 @@ export default class KoniExtension extends Extension {
       callback(result);
     }));
 
-    console.log(result);
-
     return result;
   }
 

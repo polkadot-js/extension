@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { options as acalaOptions } from '@acala-network/api';
-import { options as oakOptions } from '@oak-foundation/api';
+import { rpc as oakRpc, types as oakTypes } from '@oak-foundation/types';
 import { ApiProps, ApiState } from '@subwallet/extension-base/background/KoniTypes';
 import { typesBundle, typesChain } from '@subwallet/extension-koni-base/api/dotsama/api-helper';
 import { DOTSAMA_AUTO_CONNECT_MS, DOTSAMA_MAX_CONTINUE_RETRY } from '@subwallet/extension-koni-base/constants';
@@ -135,7 +135,11 @@ export function initApi (networkKey: string, apiUrl: string, isEthereum?: boolea
   if (['acala', 'karura', 'origintrail', 'kintsugi'].includes(networkKey)) {
     api = new ApiPromise(acalaOptions({ provider }));
   } else if (['turingStaging', 'turing'].includes(networkKey)) {
-    api = new ApiPromise(oakOptions({ provider }));
+    api = new ApiPromise({
+      provider,
+      rpc: oakRpc,
+      types: oakTypes
+    });
   } else {
     api = new ApiPromise(apiOption);
   }

@@ -1304,7 +1304,8 @@ export interface TuringStakeCompoundParams {
 export interface TuringStakeCompoundResp {
   txInfo: BasicTxInfo,
   optimalFrequency: string,
-  initTime: number
+  initTime: number,
+  compoundFee: string
 }
 
 export interface TransakNetwork {

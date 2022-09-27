@@ -35,9 +35,10 @@ interface Props extends ThemeProps {
   balanceError: boolean;
   fee: string;
   optimalTime: string;
+  compoundFee: string
 }
 
-function StakeAuthCompoundRequest ({ accountMinimum, address, balanceError, bondedAmount, className, fee, handleRevertClickNext, initTime, networkKey, optimalTime, selectedCollator, setExtrinsicHash, setIsTxSuccess, setShowAuth, setShowResult, setTxError }: Props): React.ReactElement<Props> {
+function StakeAuthCompoundRequest ({ accountMinimum, address, balanceError, bondedAmount, className, compoundFee, fee, handleRevertClickNext, initTime, networkKey, optimalTime, selectedCollator, setExtrinsicHash, setIsTxSuccess, setShowAuth, setShowResult, setTxError }: Props): React.ReactElement<Props> {
   const [loading, setLoading] = useState(false);
   const [password, setPassword] = useState<string>('');
   const [passwordError, setPasswordError] = useState<string | null>('');
@@ -171,8 +172,13 @@ function StakeAuthCompoundRequest ({ accountMinimum, address, balanceError, bond
             </div>
 
             <div className={'transaction-info-row'}>
+              <div className={'transaction-info-title'}>Compounding fee</div>
+              <div className={'transaction-info-value'}>{compoundFee}</div>
+            </div>
+
+            <div className={'transaction-info-row'}>
               <div className={'transaction-info-title'}>Total</div>
-              <div className={'transaction-info-value'}>{fee}</div>
+              <div className={'transaction-info-value'}>{fee} + {compoundFee}</div>
             </div>
           </div>
 

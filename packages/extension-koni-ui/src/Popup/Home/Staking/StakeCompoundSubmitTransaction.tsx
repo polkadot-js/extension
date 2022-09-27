@@ -70,6 +70,7 @@ function StakeCompoundSubmitTransaction ({ className }: Props): React.ReactEleme
   const [fee, setFee] = useState('');
   const [optimalFrequency, setOptimalFrequency] = useState('');
   const [initTime, setInitTime] = useState(-1);
+  const [compoundFee, setCompoundFee] = useState('');
 
   const navigate = useContext(ActionContext);
   const [loading, setLoading] = useState(false);
@@ -197,6 +198,7 @@ function StakeCompoundSubmitTransaction ({ className }: Props): React.ReactEleme
         setBalanceError(result.txInfo.balanceError);
         setOptimalFrequency(result.optimalFrequency);
         setInitTime(result.initTime);
+        setCompoundFee(result.compoundFee);
 
         setShowCompoundingAuth(true);
         setLoading(false);
@@ -366,6 +368,7 @@ function StakeCompoundSubmitTransaction ({ className }: Props): React.ReactEleme
                 setShowAuth={setShowCompoundingAuth}
                 setShowResult={setShowResult}
                 setTxError={setTxError}
+                compoundFee={compoundFee}
               />
             }
 

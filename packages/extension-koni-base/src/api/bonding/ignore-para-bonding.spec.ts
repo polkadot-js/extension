@@ -206,7 +206,11 @@ describe('test DotSama APIs', () => {
 
   test('get turing auto-compounding APY', async () => {
     const provider = new WsProvider(getCurrentProvider(PREDEFINED_NETWORKS.turingStaging), DOTSAMA_AUTO_CONNECT_MS);
-    const api = new ApiPromise(options({ provider }));
+    const api = new ApiPromise({
+      provider,
+      rpc: rpc,
+      types: types
+    });
     const apiPromise = await api.isReady;
 
     // @ts-ignore
@@ -226,7 +230,11 @@ describe('test DotSama APIs', () => {
 
   test('get compounding task', async () => {
     const provider = new WsProvider(getCurrentProvider(PREDEFINED_NETWORKS.turingStaging), DOTSAMA_AUTO_CONNECT_MS);
-    const api = new ApiPromise(options({ provider }));
+    const api = new ApiPromise({
+      provider,
+      rpc: rpc,
+      types: types
+    });
     const apiPromise = await api.isReady;
 
     const address = '5HbcGs2QXVAc6Q6eoTzLYNAJWpN17AkCFRLnWDaHCiGYXvNc';
@@ -260,10 +268,11 @@ describe('test DotSama APIs', () => {
     });
     const apiPromise = await api.isReady;
 
-    const address = '5HbcGs2QXVAc6Q6eoTzLYNAJWpN17AkCFRLnWDaHCiGYXvNc';
-
+    // @ts-ignore
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment,@typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-member-access
     const resp = await apiPromise.rpc.automationTime.getTimeAutomationFees('AutoCompoundDelegatedStake', 1);
 
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-member-access
     console.log(resp.toHuman());
   });
 });

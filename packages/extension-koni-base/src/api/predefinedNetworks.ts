@@ -1203,7 +1203,8 @@ export const PREDEFINED_NETWORKS: Record<string, NetworkJson> = {
     paraId: 2101,
     nativeToken: 'ZTG',
     crowdloanUrl: 'https://crowdloan.zeitgeist.pm/',
-    decimals: 10
+    decimals: 10,
+    coinGeckoKey: 'zeitgeist'
   },
   sakura: {
     key: 'sakura',

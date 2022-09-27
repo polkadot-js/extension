@@ -357,6 +357,7 @@ function StakeCompoundSubmitTransaction ({ className }: Props): React.ReactEleme
                 address={selectedAccount}
                 balanceError={balanceError}
                 bondedAmount={bondedAmount}
+                compoundFee={compoundFee}
                 fee={fee}
                 handleRevertClickNext={handleRevertClickNext}
                 initTime={initTime}
@@ -368,7 +369,6 @@ function StakeCompoundSubmitTransaction ({ className }: Props): React.ReactEleme
                 setShowAuth={setShowCompoundingAuth}
                 setShowResult={setShowResult}
                 setTxError={setTxError}
-                compoundFee={compoundFee}
               />
             }
 

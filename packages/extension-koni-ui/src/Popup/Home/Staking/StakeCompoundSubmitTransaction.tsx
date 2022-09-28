@@ -51,37 +51,46 @@ const TURING_ED = 0.01; // TODO: can be done better, fix this upon new architect
 
 function StakeCompoundSubmitTransaction ({ className }: Props): React.ReactElement<Props> {
   const { t } = useTranslation();
-  const [showResult, setShowResult] = useState(false);
-  const [isDataReady, setIsDataReady] = useState(false);
+
+  // TODO: use useReducer to manage states
+  // delegation state
   const [delegations, setDelegations] = useState<DelegationItem[] | undefined>(undefined);
   const [selectedCollator, setSelectedCollator] = useState<string>('');
   const [bondedAmount, setBondedAmount] = useState('');
   const [accountMinimum, setAccountMinimum] = useState('0');
+
+  // show state
   const [showCompoundingAuth, setShowCompoundingAuth] = useState(false);
   const [showCancelCompoundingAuth, setShowCancelCompoundingAuth] = useState(false);
-  const { currentAccount: { account }, stakeCompoundParams: { selectedAccount, selectedNetwork } } = useSelector((state: RootState) => state);
+  const [showResult, setShowResult] = useState(false);
 
+  // existing request state
   const [hasCompoundRequest, setHasCompoundRequest] = useState(false);
   const [currentTaskId, setCurrentTaskId] = useState('');
   const [currentFrequency, setCurrentFrequency] = useState(-1);
   const [currentAccountMinimum, setCurrentAccountMinimum] = useState(-1);
 
+  // loadingState
+  const [isDataReady, setIsDataReady] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [isReadySubmit, setIsReadySubmit] = useState(false);
+  const [isClickNext, setIsClickNext] = useState(false);
+
+  // txInfo
   const [balanceError, setBalanceError] = useState(false);
   const [fee, setFee] = useState('');
   const [optimalFrequency, setOptimalFrequency] = useState('');
   const [initTime, setInitTime] = useState(-1);
   const [compoundFee, setCompoundFee] = useState('');
-
-  const navigate = useContext(ActionContext);
-  const [loading, setLoading] = useState(false);
-  const [isReadySubmit, setIsReadySubmit] = useState(false);
-  const [isClickNext, setIsClickNext] = useState(false);
-
+  // result state
   const [extrinsicHash, setExtrinsicHash] = useState('');
   const [isTxSuccess, setIsTxSuccess] = useState(false);
   const [txError, setTxError] = useState('');
-  const { show } = useToast();
 
+  const { show } = useToast();
+  const navigate = useContext(ActionContext);
+  const account = useSelector((state: RootState) => state.currentAccount.account);
+  const { selectedAccount, selectedNetwork } = useSelector((state: RootState) => state.stakeCompoundParams);
   const isNetworkActive = useIsNetworkActive(selectedNetwork);
 
   useEffect(() => {

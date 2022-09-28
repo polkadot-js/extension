@@ -533,7 +533,7 @@ export async function getFreeBalance (networkKey: string, address: string, dotSa
         const balance = await api.query.system.account(address) as { data: { freeKton: Balance } };
 
         return balance.data?.freeKton?.toString() || '0';
-      } else if (!isMainToken && ['astar', 'shiden', 'statemint'].includes(networkKey)) {
+      } else if (!isMainToken && ['astar', 'shiden', 'statemint', 'statemine'].includes(networkKey)) {
         const balanceInfo = (await api.query.assets.account(tokenInfo?.assetIndex, address)).toHuman() as Record<string, string>;
 
         // eslint-disable-next-line @typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-member-access,@typescript-eslint/no-unsafe-return
@@ -635,7 +635,7 @@ export async function subscribeFreeBalance (
           // @ts-ignore
           unsub && unsub();
         };
-      } else if (!isMainToken && ['astar', 'shiden', 'statemint'].includes(networkKey)) {
+      } else if (!isMainToken && ['astar', 'shiden', 'statemint', 'statemine'].includes(networkKey)) {
         // @ts-ignore
         const unsub = await api.query.assets.account(tokenInfo?.assetIndex, address, (_balanceInfo) => {
           // eslint-disable-next-line @typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-member-access

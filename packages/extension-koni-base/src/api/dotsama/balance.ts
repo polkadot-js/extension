@@ -393,7 +393,7 @@ async function subscribeWithAccountMulti (addresses: string[], networkKey: strin
       unsub2 = await subscribeTokensBalance(addresses, networkKey, networkAPI.api, mainCallback, subCallback);
     } else if (['kintsugi', 'interlay', 'kintsugi_test'].includes(networkKey)) {
       unsub2 = await subscribeTokensBalance(addresses, networkKey, networkAPI.api, mainCallback, subCallback, true);
-    } else if (['statemine', 'astar', 'shiden'].indexOf(networkKey) > -1) {
+    } else if (['statemine', 'astar', 'shiden', 'statemint'].indexOf(networkKey) > -1) {
       unsub2 = await subscribeAssetsBalance(addresses, networkKey, networkAPI.api, subCallback);
     } else if (['genshiro_testnet', 'genshiro', 'equilibrium_parachain'].includes(networkKey)) {
       unsub2 = await subscribeGenshiroTokenBalance(addresses, networkKey, networkAPI.api, mainCallback, subCallback, true);

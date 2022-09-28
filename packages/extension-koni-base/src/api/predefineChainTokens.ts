@@ -1235,5 +1235,14 @@ export const PREDEFINE_TOKEN_DATA_MAP: Record<string, Record<string, TokenInfo>>
       name: 'BIT',
       specialOption: { MiningResource: 0 }
     }
+  },
+  statemint: {
+    USDt: {
+      isMainToken: false,
+      symbol: 'USDt',
+      decimals: 6,
+      name: 'Tether USD',
+      assetIndex: 1984
+    }
   }
 };

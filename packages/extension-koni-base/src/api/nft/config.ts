@@ -23,6 +23,8 @@ export const CLOUDFLARE_PINATA_SERVER = 'https://cloudflare-ipfs.com/ipfs/';
 
 export const BIT_COUNTRY_SERVER = 'https://ipfs-cdn.bit.country/';
 
+export const BIT_COUNTRY_THUMBNAIL_RESOLVER = 'https://res.cloudinary.com/ddftctzph/image/upload/c_scale,q_100,w_250/production-ipfs/asset/';
+
 export const CF_IPFS_GATEWAY = 'https://cf-ipfs.com/ipfs/';
 
 export const PINATA_IPFS_GATEWAY = 'https://gateway.pinata.cloud/ipfs/';
@@ -52,13 +54,14 @@ export enum SUPPORTED_NFT_NETWORKS {
   acala = 'acala',
   kusama = 'kusama',
   statemine = 'statemine',
-  uniqueNft = 'uniqueNft',
+  unique_network = 'unique_network',
   quartz = 'quartz',
   bitcountry = 'bitcountry',
   moonbeam = 'moonbeam',
   moonriver = 'moonriver',
   moonbase = 'moonbase',
   astarEvm = 'astarEvm',
+  pioneer = 'pioneer'
 }
 
 export enum SUPPORTED_TRANSFER_EVM_CHAIN_NAME {
@@ -93,11 +96,12 @@ export enum SUPPORTED_TRANSFER_SUBSTRATE_CHAIN_NAME {
   acala = 'acala',
   karura = 'karura',
   kusama = 'kusama',
-  uniqueNft = 'uniqueNft',
+  uniqueNft = 'unique_network',
   quartz = 'quartz',
   opal = 'opal',
   statemint = 'statemint',
-  bitcountry = 'bitcountry'
+  bitcountry = 'bitcountry',
+  pioneer = 'pioneer'
 }
 
 const RANDOM_IPFS_GATEWAY_SETTING = [
@@ -131,7 +135,7 @@ const RANDOM_IPFS_GATEWAY_SETTING = [
   },
   {
     provider: IPFS_GATEWAY_CLOUD,
-    weight: 5
+    weight: 0 // Deceptive site warning
   },
   {
     provider: IPFS_FLEEK,

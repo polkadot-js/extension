@@ -43,7 +43,6 @@ function ImportMetamaskPrivateKey ({ className = '' }: Props): React.ReactElemen
   }, [accounts, onAction]);
 
   const _onCreate = useCallback((name: string, password: string): void => {
-    // this should always be the case
     if (name && password && account) {
       setIsBusy(true);
 
@@ -57,8 +56,7 @@ function ImportMetamaskPrivateKey ({ className = '' }: Props): React.ReactElemen
           console.error(error);
         });
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [account, onAction, isConnectWhenImport]);
+  }, [account, isConnectWhenImport, onAction]);
 
   return (
     <>

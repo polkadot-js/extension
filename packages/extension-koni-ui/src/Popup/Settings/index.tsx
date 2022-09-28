@@ -10,7 +10,7 @@ import { faLock } from '@fortawesome/free-solid-svg-icons/faLock';
 import { faPlug } from '@fortawesome/free-solid-svg-icons/faPlug';
 import { faQrcode } from '@fortawesome/free-solid-svg-icons/faQrcode';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import check from '@subwallet/extension-koni-ui/assets/check.svg';
+import { IconMaps } from '@subwallet/extension-koni-ui/assets/icon';
 import { Link } from '@subwallet/extension-koni-ui/components';
 import useIsPopup from '@subwallet/extension-koni-ui/hooks/useIsPopup';
 import useTranslation from '@subwallet/extension-koni-ui/hooks/useTranslation';
@@ -136,11 +136,9 @@ function Settings ({ className }: Props): React.ReactElement {
           <div className='menu-setting-item__text'>{t<string>('Allow QR Camera Access')}</div>
           {camera
             ? (
-              <img
-                alt='check'
-                className='account-checked'
-                src={check}
-              />
+              <div className='account-checked'>
+                {IconMaps.check}
+              </div>
             )
             : (
               <div className='account-checked account-unchecked-item' />
@@ -259,5 +257,6 @@ export default styled(Settings)(({ theme }: Props) => `
   .account-checked {
     position: absolute;
     right: 25px;
+    color: ${theme.primaryColor}
   }
 `);

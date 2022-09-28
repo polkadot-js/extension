@@ -9,6 +9,25 @@ import { ApiPromise } from '@polkadot/api';
 import { KeyringPair } from '@polkadot/keyring/types';
 import { decodeAddress } from '@polkadot/util-crypto';
 
+function getTokenIdentity (originNetworkKey: string, tokenInfo: TokenInfo) {
+  // TODO: find a better way to handle kUSD on karura
+  const tokenSymbol = tokenInfo.symbol.toUpperCase() === 'AUSD' && originNetworkKey === 'karura' ? 'KUSD' : tokenInfo.symbol.toUpperCase();
+
+  if (originNetworkKey === 'bifrost') {
+    return tokenInfo.specialOption as Record<string, any>;
+  } else if (originNetworkKey === 'pioneer' && tokenSymbol.toUpperCase() === 'NEER') {
+    return {
+      NativeToken: 0
+    };
+  } else if (originNetworkKey === 'karura' && tokenSymbol.toUpperCase() === 'NEER') { // TODO: modify later with different assets on Karura
+    return tokenInfo.specialOption as Record<string, any>;
+  }
+
+  return {
+    Token: tokenSymbol
+  };
+}
+
 export async function substrateEstimateCrossChainFee (
   originNetworkKey: string,
   destinationNetworkKey: string,
@@ -25,16 +44,13 @@ export async function substrateEstimateCrossChainFee (
   let feeString = '';
   const originNetworkJson = networkMap[originNetworkKey];
   const destinationNetworkJson = networkMap[destinationNetworkKey];
-  // TODO: find a better way to handle kUSD on karura
-  const tokenSymbol = tokenInfo.symbol.toUpperCase() === 'AUSD' && originNetworkKey === 'karura' ? 'KUSD' : tokenInfo.symbol.toUpperCase();
+  const tokenIdentity = getTokenIdentity(originNetworkKey, tokenInfo);
 
   try {
     if (SupportedCrossChainsMap[originNetworkKey].type === 'p') {
       // Case ParaChain -> ParaChain && ParaChain -> RelayChain
       const extrinsic = api.tx.xTokens.transfer(
-        {
-          Token: tokenSymbol
-        },
+        tokenIdentity,
         value,
         getMultiLocationFromParachain(originNetworkKey, destinationNetworkKey, networkMap, to),
         FOUR_INSTRUCTIONS_WEIGHT
@@ -114,13 +130,10 @@ export function substrateGetXcmExtrinsic (
 ) {
   // Case ParaChain -> RelayChain && Parachain -> Parachain
   if (SupportedCrossChainsMap[originNetworkKey].type === 'p') {
-    // TODO: find a better way to handle kUSD on karura
-    const tokenSymbol = tokenInfo.symbol.toUpperCase() === 'AUSD' && originNetworkKey === 'karura' ? 'KUSD' : tokenInfo.symbol.toUpperCase();
+    const tokenIdentity = getTokenIdentity(originNetworkKey, tokenInfo);
 
     return api.tx.xTokens.transfer(
-      {
-        Token: tokenSymbol
-      },
+      tokenIdentity,
       value,
       getMultiLocationFromParachain(originNetworkKey, destinationNetworkKey, networkMap, to),
       FOUR_INSTRUCTIONS_WEIGHT

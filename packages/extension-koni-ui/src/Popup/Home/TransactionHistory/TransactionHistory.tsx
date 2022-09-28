@@ -86,7 +86,7 @@ function TransactionHistoryItemWrapper ({ item, registryMap }: ItemWrapperProp) 
   const { change, eventIdx, extrinsicHash, networkKey } = item;
   const registry = registryMap[networkKey];
   const isSupportScanExplorer = useSupportScanExplorer(networkKey);
-  const isScanExplorerTxUrl = useScanExplorerTxUrl(networkKey, extrinsicHash, true);
+  const scanExplorerTxUrl = useScanExplorerTxUrl(networkKey, extrinsicHash, true);
 
   const key = `${extrinsicHash}/${eventIdx || change}`;
 
@@ -99,7 +99,7 @@ function TransactionHistoryItemWrapper ({ item, registryMap }: ItemWrapperProp) 
     return (
       <a
         className={'transaction-item-wrapper'}
-        href={isScanExplorerTxUrl}
+        href={scanExplorerTxUrl}
         key={key}
         rel='noreferrer'
         target={'_blank'}

@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { AuthUrlInfo } from '@subwallet/extension-base/background/handlers/State';
-import checkIcon from '@subwallet/extension-koni-ui/assets/check.svg';
+import { IconMaps } from '@subwallet/extension-koni-ui/assets/icon';
 import DefaultWebIcon from '@subwallet/extension-koni-ui/assets/icon/web.svg';
 import rejectIcon from '@subwallet/extension-koni-ui/assets/reject-icon.svg';
 import { AccountContext, AccountInfoEl, Button } from '@subwallet/extension-koni-ui/components';
@@ -10,11 +10,10 @@ import Modal from '@subwallet/extension-koni-ui/components/Modal/index';
 import { useGetCurrentTab } from '@subwallet/extension-koni-ui/hooks/useGetCurrentTab';
 import useToast from '@subwallet/extension-koni-ui/hooks/useToast';
 import useTranslation from '@subwallet/extension-koni-ui/hooks/useTranslation';
-import { changeAuthorizationBlock, changeAuthorizationPerSite, saveCurrentAccountAddress } from '@subwallet/extension-koni-ui/messaging';
+import { changeAuthorizationBlock, changeAuthorizationPerSite } from '@subwallet/extension-koni-ui/messaging';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { isAccountAll } from '@subwallet/extension-koni-ui/util';
-import { noop } from '@subwallet/extension-koni-ui/util/function';
 import CN from 'classnames';
 import React, { useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
 import { useSelector } from 'react-redux';
@@ -74,20 +73,13 @@ const AccountVisibleModal = (props: Props) => {
       setIsSubmit(true);
       changeAuthorizationPerSite({ values: allowedMap, id: authInfo.id })
         .then(() => {
-          if (currentAccount.account?.address) {
-            saveCurrentAccountAddress({ address: currentAccount.account.address }, noop)
-              .catch((e) => {
-                console.error('There is a problem when trigger saveCurrentAccountAddress', e);
-              });
-          }
-
           show(t('Data has been updated'));
           onClose();
           setIsSubmit(false);
         })
         .catch(console.error);
     }
-  }, [allowedMap, authInfo?.id, currentAccount.account?.address, isSubmit, onClose, show, t]);
+  }, [allowedMap, authInfo?.id, isSubmit, onClose, show, t]);
 
   const handlerUnblock = useCallback(() => {
     if (!isSubmit && authInfo?.id) {
@@ -183,10 +175,7 @@ const AccountVisibleModal = (props: Props) => {
                     <div className='account-selection'>
                       {value && (
                         <div className='selected'>
-                          <img
-                            alt='selected-icon'
-                            src={checkIcon}
-                          />
+                          {IconMaps.check}
                         </div>
                       )}
                     </div>
@@ -386,7 +375,7 @@ export default React.memo(styled(AccountVisibleModal)(({ theme }: Props) => `
           align-items: center;
           justify-content: center;
           padding: 6px 10px;
-          background-color: #262C4A;
+          background-color: ${theme.checkboxColor};
           border-radius: 5px;
           max-width: 237px;
           height: 40px;
@@ -489,13 +478,13 @@ export default React.memo(styled(AccountVisibleModal)(({ theme }: Props) => `
             display: flex;
             align-items: center;
             justify-content: space-between;
-            background: #151A30;
+            background: ${theme.accountAuthorizeRequest};
             border-radius: 8px;
             height: 56px;
             cursor: pointer;
 
             &.current-account {
-              border: 1px solid #42C59A;
+              border: 1px solid ${theme.primaryColor};
             }
 
             & > .account-info{
@@ -548,6 +537,7 @@ export default React.memo(styled(AccountVisibleModal)(({ theme }: Props) => `
 
             .account-selection {
               .selected {
+                color: ${theme.primaryColor};
                 padding-right: 22px;
               }
             }
@@ -571,7 +561,7 @@ export default React.memo(styled(AccountVisibleModal)(({ theme }: Props) => `
 
         .primary-button {
           background: ${theme.secondaryColor};
-          color: ${theme.textColor};
+          color: ${theme.buttonTextColor};
         }
 
         .secondary-button {

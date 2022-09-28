@@ -1,12 +1,10 @@
-/* eslint-disable react-hooks/exhaustive-deps */
 // Copyright 2019-2022 @polkadot/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-// eslint-disable-next-line header/header
 import type { ThemeProps } from '../../types';
 
 import { ALL_ACCOUNT_KEY } from '@subwallet/extension-koni-base/constants';
-import check from '@subwallet/extension-koni-ui/assets/check.svg';
+import { IconMaps } from '@subwallet/extension-koni-ui/assets/icon';
 import { AccountInfoEl } from '@subwallet/extension-koni-ui/components';
 import React, { useCallback } from 'react';
 import styled from 'styled-components';
@@ -43,6 +41,7 @@ function ConnectAccount ({ address, className, genesisHash, isSelected, name, pa
     }
 
     selectAccountCallBack && selectAccountCallBack(newSelectedAccounts);
+    /* eslint-disable react-hooks/exhaustive-deps */
   }, [address, isSelected, selectAccountCallBack, deps]);
 
   return (
@@ -66,10 +65,9 @@ function ConnectAccount ({ address, className, genesisHash, isSelected, name, pa
       />
       {isSelected
         ? (
-          <img
-            alt='check'
-            src={check}
-          />
+          <div className='account-checked-item'>
+            {IconMaps.check}
+          </div>
         )
         : (
           <div className='account-unchecked-item' />
@@ -113,5 +111,10 @@ export default styled(ConnectAccount)(({ theme }: Props) => `
       &:before {content: "("}    
       &:after {content: ")"}    
     }
+  }
+  
+  .account-checked-item {
+    color: ${theme.primaryColor};
+    align-self: center;
   }
 `);

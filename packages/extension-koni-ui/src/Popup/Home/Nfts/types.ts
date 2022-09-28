@@ -58,11 +58,12 @@ export enum SUPPORTED_TRANSFER_CHAIN_NAME {
   acala = 'acala',
   karura = 'karura',
   kusama = 'kusama',
-  uniqueNft = 'uniqueNft',
+  unique_network = 'unique_network',
   quartz = 'quartz',
   opal = 'opal',
   statemint = 'statemint',
   bitcountry = 'bitcountry',
+  pioneer = 'pioneer'
 }
 
 export const SUPPORTED_TRANSFER_SUBSTRATE_CHAIN = [
@@ -70,9 +71,10 @@ export const SUPPORTED_TRANSFER_SUBSTRATE_CHAIN = [
   SUPPORTED_TRANSFER_CHAIN_NAME.acala as string,
   SUPPORTED_TRANSFER_CHAIN_NAME.karura as string,
   SUPPORTED_TRANSFER_CHAIN_NAME.kusama as string,
-  SUPPORTED_TRANSFER_CHAIN_NAME.uniqueNft as string,
+  SUPPORTED_TRANSFER_CHAIN_NAME.unique_network as string,
   SUPPORTED_TRANSFER_CHAIN_NAME.quartz as string,
   SUPPORTED_TRANSFER_CHAIN_NAME.opal as string,
   SUPPORTED_TRANSFER_CHAIN_NAME.statemint as string,
-  SUPPORTED_TRANSFER_CHAIN_NAME.bitcountry as string
+  SUPPORTED_TRANSFER_CHAIN_NAME.bitcountry as string,
+  SUPPORTED_TRANSFER_CHAIN_NAME.pioneer as string
 ];

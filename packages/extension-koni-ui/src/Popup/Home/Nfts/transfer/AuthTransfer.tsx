@@ -1,10 +1,10 @@
 // Copyright 2019-2022 @subwallet/extension-koni authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { BaseTxError, RequestNftForceUpdate, ResponseNftTransferExternal, ResponseNftTransferLedger, ResponseNftTransferQr } from '@subwallet/extension-base/background/KoniTypes';
+import { BaseTxError, BasicTxError, RequestNftForceUpdate, ResponseNftTransferExternal, ResponseNftTransferLedger, ResponseNftTransferQr } from '@subwallet/extension-base/background/KoniTypes';
 import { AccountJson } from '@subwallet/extension-base/background/types';
 import { LedgerState } from '@subwallet/extension-base/signers/types';
-import { Spinner } from '@subwallet/extension-koni-ui/components';
+import { Spinner, Theme } from '@subwallet/extension-koni-ui/components';
 import InputAddress from '@subwallet/extension-koni-ui/components/InputAddress';
 import LedgerRequest from '@subwallet/extension-koni-ui/components/Ledger/LedgerRequest';
 import Modal from '@subwallet/extension-koni-ui/components/Modal';
@@ -24,7 +24,7 @@ import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import CN from 'classnames';
 import React, { useCallback, useContext, useEffect, useState } from 'react';
 import { useSelector } from 'react-redux';
-import styled from 'styled-components';
+import styled, { ThemeContext } from 'styled-components';
 
 interface AddressProxy {
   isUnlockCached: boolean;
@@ -55,6 +55,7 @@ function AuthTransfer ({ chain, className, collectionId, nftItem, recipientAddre
 
   const { cleanQrState, updateQrState } = useContext(QrContext);
   const { clearExternalState, externalState, updateExternalState } = useContext(ExternalRequestContext);
+  const themeContext = useContext(ThemeContext as React.Context<Theme>);
 
   const { externalId } = externalState;
 
@@ -166,7 +167,12 @@ function AuthTransfer ({ chain, className, collectionId, nftItem, recipientAddre
       // }
 
       if (data.txError && data.txError) {
-        show('Encountered an error, please try again.');
+        if (data.errorMessage && data.errorMessage === BasicTxError.BalanceTooLow) {
+          show('Your balance is too low to cover fees');
+        } else {
+          show('Encountered an error, please try again.');
+        }
+
         setLoading(false);
 
         return;
@@ -415,11 +421,16 @@ function AuthTransfer ({ chain, className, collectionId, nftItem, recipientAddre
     setErrorArr([error.message]);
   }, []);
 
+  const handlerClearError = useCallback(() => {
+    setErrorArr([]);
+  }, []);
+
   const handlerRenderContent = useCallback(() => {
     switch (signMode) {
       case SIGN_MODE.QR:
         return (
           <QrRequest
+            clearError={handlerClearError}
             errorArr={errorArr}
             genesisHash={genesisHash}
             handlerStart={handlerCreateQr}
@@ -485,7 +496,7 @@ function AuthTransfer ({ chain, className, collectionId, nftItem, recipientAddre
               className={'submit-btn'}
               // eslint-disable-next-line @typescript-eslint/no-misused-promises
               onClick={handleSignAndSubmit}
-              style={{ marginTop: '40px', background: loading ? 'rgba(0, 75, 255, 0.25)' : '#004BFF', cursor: loading ? 'default' : 'pointer' }}
+              style={{ marginTop: '40px', background: loading ? 'rgba(0, 75, 255, 0.25)' : themeContext.secondaryColor, cursor: loading ? 'default' : 'pointer' }}
             >
               {
                 !loading
@@ -496,7 +507,7 @@ function AuthTransfer ({ chain, className, collectionId, nftItem, recipientAddre
           </div>
         );
     }
-  }, [account, currentNetwork.networkPrefix, errorArr, genesisHash, handleSignAndSubmit, handlerCreateQr, handlerErrorQr, handlerSendLedger, loading, passwordError, senderAccount.address, signMode, substrateGas, t, web3Gas]);
+  }, [account, currentNetwork.networkPrefix, errorArr, genesisHash, handleSignAndSubmit, handlerClearError, handlerCreateQr, handlerErrorQr, handlerSendLedger, loading, passwordError, senderAccount.address, signMode, substrateGas, t, themeContext.secondaryColor, web3Gas]);
 
   return (
     <div className={className}>
@@ -562,7 +573,6 @@ export default React.memo(styled(AuthTransfer)(({ theme }: Props) => `
 
   .sender-container {
     .input-address__dropdown {
-      border: 0;
       height: auto;
     }
   }

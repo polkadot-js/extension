@@ -1,13 +1,13 @@
-     757	Nam Phạm                      	remove xcm usage of rococo
+     861	Nam Phạm                      	Update Zeitgeist endpoints
+     562	AnhMTV                        	Release version 0.6.5
      465	Jaco                          	0.42.5 (#969)
-     451	AnhMTV                        	Release version 0.5.5
-     182	S2kael                        	[Issue-254] [AddAccountScreen] Add button Import private key from MetaMask
+     232	S2kael                        	[Issue-616] [OnRamp] [Transak] updateLogo
      151	lw-cdm                        	Update logo for Moonbeans
      142	quangdo                       	update some label and variable (original to origin)
-      84	lw-cdm                        	
+      88	lw-cdm                        	
       82	Thibaut Sardan                	Add account filtering feature (#832)
-      68	Hieu Dao                      	Update staking logo
-      64	khainh                        	Keep EVM connections in IDLE mode
+      81	Hieu Dao                      	[CI Skip] Update subspace block explorer
+      65	khainh                        	Disable ipfs-gateway.cloud
       55	leewong                       	#118: update balance logic for Kintsugi testnet
       53	Dominhquangdev                	update Bridge code
       10	Trang Trịnh                   	api get karura and acala nfts

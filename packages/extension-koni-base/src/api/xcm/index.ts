@@ -164,6 +164,17 @@ function updateXcmResponseTxResult (
         response.txResult.change = record.event.data[3]?.toString() || '0';
         response.txResult.changeSymbol = tokenInfo.symbol;
       }
+    } else if (['bifrost'].includes(networkKey) && tokenInfo) {
+      if (record.event.section === 'tokens' &&
+        record.event.method.toLowerCase() === 'withdrawn') {
+        response.txResult.change = record.event.data[2]?.toString() || '0';
+        response.txResult.changeSymbol = tokenInfo.symbol;
+      } else if (record.event.section === 'balances' &&
+        record.event.method.toLowerCase() === 'transfer') {
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+        response.txResult.change = record.event.data[2]?.toString() || '0';
+        response.txResult.changeSymbol = tokenInfo.symbol;
+      }
     } else if (['astar', 'shiden'].includes(networkKey) && tokenInfo) {
       if (record.event.section === 'assets' &&
         record.event.method.toLowerCase() === 'burned') {

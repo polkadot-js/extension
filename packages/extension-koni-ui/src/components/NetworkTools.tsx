@@ -2,7 +2,8 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import arrowCounterClockWise from '@subwallet/extension-koni-ui/assets/arrow-counter-clockwise.svg';
-import pencilIcon from '@subwallet/extension-koni-ui/assets/pencil-gray.svg';
+import { IconMaps } from '@subwallet/extension-koni-ui/assets/icon';
+import Tooltip from '@subwallet/extension-koni-ui/components/Tooltip';
 import { ActionContext } from '@subwallet/extension-koni-ui/contexts';
 import useGetNetworkJson from '@subwallet/extension-koni-ui/hooks/screen/home/useGetNetworkJson';
 import useToast from '@subwallet/extension-koni-ui/hooks/useToast';
@@ -47,15 +48,28 @@ function NetworkTools ({ className, networkKey }: Props): React.ReactElement<Pro
         <img
           alt='reload-network'
           className={'reload-network-btn'}
+          data-for={`reload-network-${networkKey}`}
+          data-tip={true}
           onClick={handleClickReload}
           src={arrowCounterClockWise}
         />
-
-        <img
-          alt='edit-network'
+        <Tooltip
+          offset={{ top: 4 }}
+          text={'Reload network'}
+          trigger={`reload-network-${networkKey}`}
+        />
+        <div
           className={'network-edit-icon'}
+          data-for={`edit-network-${networkKey}`}
+          data-tip={true}
           onClick={handleClickEdit}
-          src={pencilIcon}
+        >
+          {IconMaps.pencil}
+        </div>
+        <Tooltip
+          offset={{ top: 4 }}
+          text={'Configure network'}
+          trigger={`edit-network-${networkKey}`}
         />
       </div>
     </div>
@@ -70,6 +84,10 @@ export default React.memo(styled(NetworkTools)(() => `
   .network-edit-icon {
     cursor: pointer;
     color: '#7B8098'
+  }
+  
+  svg {
+    display: block;
   }
 
   .network-action-container {

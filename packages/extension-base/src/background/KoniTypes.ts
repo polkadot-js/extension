@@ -167,6 +167,7 @@ export interface NftItem {
   properties?: Record<any, any> | null;
   chain?: string;
   rmrk_ver?: RMRK_VER;
+  owner?: string;
 }
 
 export interface NftCollection {
@@ -548,7 +549,9 @@ export interface RequestCrossChainTransfer extends RequestCheckCrossChainTransfe
 
 export interface ResponseCheckCrossChainTransfer {
   errors?: Array<TransferError>,
-  feeString?: string
+  feeString?: string,
+  estimatedFee: string,
+  feeSymbol: string
 }
 
 export type RequestTransferExternal = RequestCheckTransfer
@@ -1090,7 +1093,8 @@ export interface BondingOptionInfo {
 export interface ChainBondingBasics {
   stakedReturn: number,
   // minBond: number,
-  isMaxNominators: boolean
+  isMaxNominators: boolean,
+  validatorCount: number
 }
 
 export interface BasicTxInfo {
@@ -1109,15 +1113,20 @@ export interface BondingSubmitParams {
   lockPeriod?: number // in month
 }
 
+export enum BasicTxError {
+  BalanceTooLow = 'BalanceTooLow'
+}
+
 export interface BasicTxResponse {
   passwordError?: string | null,
   callHash?: string,
   status?: boolean,
   transactionHash?: string,
   txError?: boolean,
+  errorMessage?: BasicTxError
 }
 
-export interface NftTransactionResponse extends BasicTxResponse{
+export interface NftTransactionResponse extends BasicTxResponse {
   isSendingSelf: boolean
 }
 
@@ -1284,6 +1293,11 @@ export interface LedgerNetwork {
   isDevMode: boolean;
 }
 
+export interface TransakNetwork {
+  networks: string[];
+  tokens: string[];
+}
+
 export interface KoniRequestSignatures {
   'pri(staking.delegationInfo)': [StakeDelegationRequest, DelegationItem[]];
   'pri(staking.submitClaimReward)': [StakeClaimRewardParams, BasicTxResponse, BasicTxResponse];
@@ -1305,6 +1319,7 @@ export interface KoniRequestSignatures {
   'pri(networkMap.resetDefault)': [null, boolean];
   'pri(apiMap.validate)': [ValidateNetworkRequest, ValidateNetworkResponse];
   'pri(networkMap.enableMany)': [string[], boolean];
+  'pri(networkMap.disableMany)': [string[], boolean];
   'pri(networkMap.enableOne)': [string, boolean];
   'pri(networkMap.disableOne)': [string, DisableNetworkResponse];
   'pri(networkMap.removeOne)': [string, boolean];

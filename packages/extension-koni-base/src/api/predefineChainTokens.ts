@@ -570,6 +570,13 @@ export const PREDEFINE_TOKEN_DATA_MAP: Record<string, Record<string, TokenInfo>>
     }
   },
   astarEvm: {
+    DOT: {
+      isMainToken: false,
+      symbol: 'DOT',
+      erc20Address: '0xffffffffffffffffffffffffffffffffffffffff',
+      decimals: 12,
+      name: 'Polkadot'
+    },
     aUSD: {
       isMainToken: false,
       symbol: 'aUSD',
@@ -1218,6 +1225,15 @@ export const PREDEFINE_TOKEN_DATA_MAP: Record<string, Record<string, TokenInfo>>
       erc20Address: '0xb142658bd18c560d8ea74a31c07297cecfecf949',
       decimals: 9,
       name: 'xORING'
+    }
+  },
+  pioneer: {
+    BIT: {
+      isMainToken: false,
+      symbol: 'BIT',
+      decimals: 18,
+      name: 'BIT',
+      specialOption: { MiningResource: 0 }
     }
   }
 };

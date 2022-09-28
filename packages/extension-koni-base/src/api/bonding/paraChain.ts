@@ -35,11 +35,14 @@ export async function getParaBondingBasics (networkKey: string, dotSamaApi: ApiP
     _unvestedAllocation = await apiProps.api.query.vesting.totalUnvestedAllocation();
   }
 
-  const [_totalStake, _totalIssuance, _inflation] = await Promise.all([
+  const [_totalStake, _totalIssuance, _inflation, _allCollators] = await Promise.all([
     apiProps.api.query.parachainStaking.staked(round),
     apiProps.api.query.balances.totalIssuance(),
-    apiProps.api.query.parachainStaking.inflationConfig()
+    apiProps.api.query.parachainStaking.inflationConfig(),
+    apiProps.api.query.parachainStaking.candidatePool()
   ]);
+
+  const rawAllCollators = _allCollators.toHuman() as unknown as CollatorInfo[];
 
   let unvestedAllocation;
 
@@ -67,7 +70,8 @@ export async function getParaBondingBasics (networkKey: string, dotSamaApi: ApiP
 
   return {
     isMaxNominators: false,
-    stakedReturn
+    stakedReturn,
+    validatorCount: rawAllCollators.length
   } as ChainBondingBasics;
 }
 
@@ -290,21 +294,28 @@ export async function getParaBondingTxInfo (networkJson: NetworkJson, dotSamaApi
 }
 
 export async function handleParaBondingTxInfo (networkJson: NetworkJson, amount: number, networkKey: string, nominatorAddress: string, validatorInfo: ValidatorInfo, dotSamaApiMap: Record<string, ApiProps>, web3ApiMap: Record<string, Web3>, currentNominationCount: number) {
-  const [txInfo, balance] = await Promise.all([
-    getParaBondingTxInfo(networkJson, dotSamaApiMap[networkKey], nominatorAddress, amount, validatorInfo, currentNominationCount),
-    getFreeBalance(networkKey, nominatorAddress, dotSamaApiMap, web3ApiMap)
-  ]);
+  try {
+    const [txInfo, balance] = await Promise.all([
+      getParaBondingTxInfo(networkJson, dotSamaApiMap[networkKey], nominatorAddress, amount, validatorInfo, currentNominationCount),
+      getFreeBalance(networkKey, nominatorAddress, dotSamaApiMap, web3ApiMap)
+    ]);
 
-  const feeString = parseNumberToDisplay(txInfo.partialFee, networkJson.decimals) + ` ${networkJson.nativeToken ? networkJson.nativeToken : ''}`;
-  const binaryBalance = new BN(balance);
+    const feeString = parseNumberToDisplay(txInfo.partialFee, networkJson.decimals) + ` ${networkJson.nativeToken ? networkJson.nativeToken : ''}`;
+    const binaryBalance = new BN(balance);
 
-  const sumAmount = txInfo.partialFee.addn(amount);
-  const balanceError = sumAmount.gt(binaryBalance);
+    const sumAmount = txInfo.partialFee.addn(amount);
+    const balanceError = sumAmount.gt(binaryBalance);
 
-  return {
-    fee: feeString,
-    balanceError
-  } as BasicTxInfo;
+    return {
+      fee: feeString,
+      balanceError
+    } as BasicTxInfo;
+  } catch (e) {
+    return {
+      fee: `0.0000 ${networkJson.nativeToken as string}`,
+      balanceError: false
+    } as BasicTxInfo;
+  }
 }
 
 export async function getParaUnbondingTxInfo (networkJson: NetworkJson, dotSamaApi: ApiProps, address: string, amount: number, collatorAddress: string, unstakeAll: boolean) {
@@ -324,20 +335,27 @@ export async function getParaUnbondingTxInfo (networkJson: NetworkJson, dotSamaA
 }
 
 export async function handleParaUnbondingTxInfo (address: string, amount: number, networkKey: string, dotSamaApiMap: Record<string, ApiProps>, web3ApiMap: Record<string, Web3>, networkJson: NetworkJson, collatorAddress: string, unstakeAll: boolean) {
-  const [txInfo, balance] = await Promise.all([
-    getParaUnbondingTxInfo(networkJson, dotSamaApiMap[networkKey], address, amount, collatorAddress, unstakeAll),
-    getFreeBalance(networkKey, address, dotSamaApiMap, web3ApiMap)
-  ]);
+  try {
+    const [txInfo, balance] = await Promise.all([
+      getParaUnbondingTxInfo(networkJson, dotSamaApiMap[networkKey], address, amount, collatorAddress, unstakeAll),
+      getFreeBalance(networkKey, address, dotSamaApiMap, web3ApiMap)
+    ]);
 
-  const feeString = parseNumberToDisplay(txInfo.partialFee, networkJson.decimals) + ` ${networkJson.nativeToken ? networkJson.nativeToken : ''}`;
-  const binaryBalance = new BN(balance);
+    const feeString = parseNumberToDisplay(txInfo.partialFee, networkJson.decimals) + ` ${networkJson.nativeToken ? networkJson.nativeToken : ''}`;
+    const binaryBalance = new BN(balance);
 
-  const balanceError = txInfo.partialFee.gt(binaryBalance);
+    const balanceError = txInfo.partialFee.gt(binaryBalance);
 
-  return {
-    fee: feeString,
-    balanceError
-  } as BasicTxInfo;
+    return {
+      fee: feeString,
+      balanceError
+    } as BasicTxInfo;
+  } catch (e) {
+    return {
+      fee: `0.0000 ${networkJson.nativeToken as string}`,
+      balanceError: false
+    } as BasicTxInfo;
+  }
 }
 
 export async function getParaBondingExtrinsic (delegatorAddress: string, networkJson: NetworkJson, dotSamaApi: ApiProps, amount: number, collatorInfo: ValidatorInfo, currentNominationCount: number) {
@@ -482,19 +500,26 @@ export async function getParaWithdrawalTxInfo (dotSamaApi: ApiProps, address: st
 }
 
 export async function handleParaWithdrawalTxInfo (networkKey: string, networkJson: NetworkJson, dotSamaApiMap: Record<string, ApiProps>, web3ApiMap: Record<string, Web3>, address: string, collatorAddress: string, action: string) {
-  const [txInfo, balance] = await Promise.all([
-    getParaWithdrawalTxInfo(dotSamaApiMap[networkKey], address, collatorAddress, action),
-    getFreeBalance(networkKey, address, dotSamaApiMap, web3ApiMap)
-  ]);
+  try {
+    const [txInfo, balance] = await Promise.all([
+      getParaWithdrawalTxInfo(dotSamaApiMap[networkKey], address, collatorAddress, action),
+      getFreeBalance(networkKey, address, dotSamaApiMap, web3ApiMap)
+    ]);
 
-  const feeString = parseNumberToDisplay(txInfo.partialFee, networkJson.decimals) + ` ${networkJson.nativeToken ? networkJson.nativeToken : ''}`;
-  const binaryBalance = new BN(balance);
-  const balanceError = txInfo.partialFee.gt(binaryBalance);
+    const feeString = parseNumberToDisplay(txInfo.partialFee, networkJson.decimals) + ` ${networkJson.nativeToken ? networkJson.nativeToken : ''}`;
+    const binaryBalance = new BN(balance);
+    const balanceError = txInfo.partialFee.gt(binaryBalance);
 
-  return {
-    fee: feeString,
-    balanceError
-  } as BasicTxInfo;
+    return {
+      fee: feeString,
+      balanceError
+    } as BasicTxInfo;
+  } catch (e) {
+    return {
+      fee: `0.0000 ${networkJson.nativeToken as string}`,
+      balanceError: false
+    } as BasicTxInfo;
+  }
 }
 
 export async function getParaWithdrawalExtrinsic (dotSamaApi: ApiProps, address: string, collatorAddress: string, action: string) {

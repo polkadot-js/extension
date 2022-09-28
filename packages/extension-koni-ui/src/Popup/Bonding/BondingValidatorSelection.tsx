@@ -2,12 +2,11 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { ValidatorInfo } from '@subwallet/extension-base/background/KoniTypes';
-import QuestionIcon from '@subwallet/extension-koni-ui/assets/Question.svg';
+import { IconMaps } from '@subwallet/extension-koni-ui/assets/icon';
 import { ActionContext, InputFilter } from '@subwallet/extension-koni-ui/components';
 import Spinner from '@subwallet/extension-koni-ui/components/Spinner';
 import Tooltip from '@subwallet/extension-koni-ui/components/Tooltip';
 import useIsNetworkActive from '@subwallet/extension-koni-ui/hooks/screen/home/useIsNetworkActive';
-import useTranslation from '@subwallet/extension-koni-ui/hooks/useTranslation';
 import { getBondingOptions } from '@subwallet/extension-koni-ui/messaging';
 import Header from '@subwallet/extension-koni-ui/partials/Header';
 import ValidatorItem from '@subwallet/extension-koni-ui/Popup/Bonding/components/ValidatorItem';
@@ -26,7 +25,6 @@ interface Props extends ThemeProps {
 const INFINITE_SCROLL_PER_PAGE = window.innerHeight > 600 ? 15 : 10;
 
 function BondingValidatorSelection ({ className }: Props): React.ReactElement<Props> {
-  const { t } = useTranslation();
   const { bondingParams, currentAccount: { account } } = useSelector((state: RootState) => state);
   const navigate = useContext(ActionContext);
   const [currentAccount] = useState(account?.address as string);
@@ -191,13 +189,13 @@ function BondingValidatorSelection ({ className }: Props): React.ReactElement<Pr
         showBackArrow
         showCancelButton={true}
         showSubHeader
-        subHeaderName={t<string>(getSubHeaderTitle())}
+        subHeaderName={getSubHeaderTitle()}
         to='/account/select-bonding-network'
       >
         <div className={'bonding-input-filter-container'}>
           <InputFilter
             onChange={_onChangeFilter}
-            placeholder={t<string>('Search validator...')}
+            placeholder={'Search validator...'}
             value={searchString}
             withReset
           />
@@ -209,13 +207,13 @@ function BondingValidatorSelection ({ className }: Props): React.ReactElement<Pr
           className={'staking-help'}
           onClick={handleClickHelper}
         >
-          <img
+          <div
+            className='helper-icon'
             data-for={'staking-helper'}
             data-tip={true}
-            height={24}
-            src={QuestionIcon}
-            width={24}
-          />
+          >
+            {IconMaps.question}
+          </div>
           <Tooltip
             place={'top'}
             // eslint-disable-next-line @typescript-eslint/restrict-plus-operands
@@ -229,13 +227,13 @@ function BondingValidatorSelection ({ className }: Props): React.ReactElement<Pr
             className={`${sortByCommission ? 'active-bonding__btn' : 'bonding__btn'}`}
             onClick={handleSortByCommission}
           >
-            {t<string>('Lowest commission')}
+            {'Lowest commission'}
           </div>
           <div
             className={`${sortByReturn ? 'active-bonding__btn' : 'bonding__btn'} sort-return-btn`}
             onClick={handleSortByReturn}
           >
-            {t<string>('Highest return')}
+            {'Highest return'}
           </div>
         </div>
       </div>
@@ -282,6 +280,16 @@ export default React.memo(styled(BondingValidatorSelection)(({ theme }: Props) =
     cursor: pointer;
     display: flex;
     align-items: center;
+  }
+  
+  .helper-icon {
+    color: ${theme.primaryColor}
+  }
+  
+  .helper-icon svg {
+    display: block;
+    width: 24px;
+    height: 24px;
   }
 
   .filter-container {

@@ -1,7 +1,9 @@
 // Copyright 2019-2022 @subwallet/extension-koni authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
+import { BasicTxError } from '@subwallet/extension-base/background/KoniTypes';
 import { InputWithLabel } from '@subwallet/extension-koni-ui/components';
+import FeeValue from '@subwallet/extension-koni-ui/components/Balance/FeeValue';
 import Button from '@subwallet/extension-koni-ui/components/Button';
 import InputAddress from '@subwallet/extension-koni-ui/components/InputAddress';
 import Modal from '@subwallet/extension-koni-ui/components/Modal';
@@ -90,7 +92,12 @@ function StakeAuthClaimReward ({ address, className, hideModal, networkKey }: Pr
       }
 
       if (cbData.txError && cbData.txError) {
-        show('Encountered an error, please try again.');
+        if (cbData.errorMessage && cbData.errorMessage === BasicTxError.BalanceTooLow) {
+          show('Your balance is too low to cover fees');
+        } else {
+          show('Encountered an error, please try again.');
+        }
+
         setLoading(false);
 
         return;
@@ -198,12 +205,16 @@ function StakeAuthClaimReward ({ address, className, hideModal, networkKey }: Pr
                       {/* </div> */}
                       <div className={'transaction-info-row'}>
                         <div className={'transaction-info-title'}>Reward claiming fee</div>
-                        <div className={'transaction-info-value'}>{fee}</div>
+                        <div className={'transaction-info-value'}>
+                          <FeeValue feeString={fee} />
+                        </div>
                       </div>
 
                       <div className={'transaction-info-row'}>
                         <div className={'transaction-info-title'}>Total</div>
-                        <div className={'transaction-info-value'}>{fee}</div>
+                        <div className={'transaction-info-value'}>
+                          <FeeValue feeString={fee} />
+                        </div>
                       </div>
                     </div>
 

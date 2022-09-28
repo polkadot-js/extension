@@ -161,7 +161,7 @@ export const subscanByNetworkKey: Record<string, string> = {
   astarEvm: 'https://astar.subscan.io',
   // 'basilisk': 'https://basilisk.subscan.io',
   bifrost_dot: 'https://bifrost.subscan.io',
-  bifrost: 'https://bifrost-kusama.subscan.io/',
+  bifrost: 'https://bifrost-kusama.subscan.io',
   calamari: 'https://calamari.subscan.io',
   centrifuge: 'https://centrifuge.subscan.io',
   clover: 'https://clover.subscan.io',
@@ -170,7 +170,7 @@ export const subscanByNetworkKey: Record<string, string> = {
   crust: 'https://crust.subscan.io',
   darwinia: 'https://darwinia.subscan.io',
   edgeware: 'https://edgeware.subscan.io',
-  // 'efinity': 'https://efinity.subscan.io/',
+  // 'efinity': 'https://efinity.subscan.io',
   equilibrium: 'https://equilibrium.subscan.io',
   // 'genshiro': 'https://genshiro.subscan.io',
   heiko: 'https://parallel-heiko.subscan.io',
@@ -191,7 +191,7 @@ export const subscanByNetworkKey: Record<string, string> = {
   // 'phala': 'https://phala.subscan.io',
   picasso: 'https://picasso.subscan.io',
   pichiu: 'https://pichiu.subscan.io',
-  // 'pioneer': 'https://pioneer.subscan.io',
+  pioneer: 'https://pioneer.subscan.io',
   polkadot: 'https://polkadot.subscan.io',
   quartz: 'https://quartz.subscan.io',
   sakura: 'https://sakura.subscan.io',
@@ -207,14 +207,16 @@ export const subscanByNetworkKey: Record<string, string> = {
   rococo: 'https://rococo.subscan.io',
   robonomics: 'https://robonomics.subscan.io',
   // moonbase: 'https://moonbase.subscan.io',
-  dolphin: 'https://dolphin.subscan.io/',
-  encointer: 'https://encointer.subscan.io/',
-  chainx: 'https://chainx.subscan.io/',
-  litmus: 'https://litmus.subscan.io/',
-  crab: 'https://crab.subscan.io/',
-  mangatax_para: 'https://mangatax.subscan.io/',
-  mangatax: 'https://mangata-testnet.subscan.io/',
-  shibuya: 'https://shibuya.subscan.io/'
+  dolphin: 'https://dolphin.subscan.io',
+  encointer: 'https://encointer.subscan.io',
+  chainx: 'https://chainx.subscan.io',
+  litmus: 'https://litmus.subscan.io',
+  crab: 'https://crab.subscan.io',
+  mangatax_para: 'https://mangatax.subscan.io',
+  mangatax: 'https://mangata-testnet.subscan.io',
+  shibuya: 'https://shibuya.subscan.io',
+  arctic_testnet: 'https://arctic.subscan.io',
+  subspace_gemini_2a: 'https://subspace.stg.subscan.io'
 };
 
 export const moonbeamScanUrl = 'https://moonbeam.moonscan.io';
@@ -232,7 +234,7 @@ export function isSupportScanExplorer (networkKey: string): boolean {
 }
 
 export function getScanExplorerTransactionHistoryUrl (networkKey: string, hash: string, useSubscan?: boolean): string {
-  if (useSubscan) {
+  if (useSubscan && subscanByNetworkKey[networkKey]) {
     return `${subscanByNetworkKey[networkKey]}/extrinsic/${hash}`;
   }
 

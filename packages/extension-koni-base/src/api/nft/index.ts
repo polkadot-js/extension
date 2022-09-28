@@ -34,11 +34,13 @@ function createSubstrateNftApi (chain: string, apiProps: ApiProps | null, addres
       return rmrkNftApi;
     case SUPPORTED_NFT_NETWORKS.statemine:
       return new StatemineNftApi(apiProps, useAddresses, chain);
-    case SUPPORTED_NFT_NETWORKS.uniqueNft:
+    case SUPPORTED_NFT_NETWORKS.unique_network:
       return new UniqueNftApi(apiProps, useAddresses, chain);
     // case SUPPORTED_NFT_NETWORKS.quartz:
     //   return new QuartzNftApi(api, useAddresses, chain);
     case SUPPORTED_NFT_NETWORKS.bitcountry:
+      return new BitCountryNftApi(apiProps, useAddresses, chain);
+    case SUPPORTED_NFT_NETWORKS.pioneer:
       return new BitCountryNftApi(apiProps, useAddresses, chain);
   }
 
@@ -52,7 +54,6 @@ function createWeb3NftApi (chain: string, web3: Web3 | null, addresses: string[]
   return new Web3NftApi(web3, evmAddresses, chain);
 }
 
-// TODO: race apiProps.isReady against a timeout, if timeout then read data from store (to be done after implementing light client and migrate use of full node connection)
 export class NftHandler {
   apiProps: Record<string, any>[] = [];
   web3ApiMap: Record<string, Web3> = {};

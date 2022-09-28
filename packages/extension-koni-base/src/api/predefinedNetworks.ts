@@ -1763,7 +1763,9 @@ export const PREDEFINED_NETWORKS: Record<string, NetworkJson> = {
     nativeToken: 'CAPS',
     groups: ['MAIN_NET'],
     decimals: 18,
-    coinGeckoKey: 'coin-capsule'
+    coinGeckoKey: 'coin-capsule',
+    supportBonding: true,
+    getStakingOnChain: true
   },
   tanganika: {
     key: 'tanganika',
@@ -1824,6 +1826,23 @@ export const PREDEFINED_NETWORKS: Record<string, NetworkJson> = {
     nativeToken: 'ICY',
     decimals: 18,
     groups: ['TEST_NET']
+  },
+  ternoa_alphanet: {
+    key: 'ternoa_alphanet',
+    chain: 'Ternoa Alphanet',
+    genesisHash: '0x18bcdb75a0bba577b084878db2dc2546eb21504eaad4b564bb7d47f9d02b6ace',
+    ss58Format: 42,
+    providers: {
+      ternoa: 'wss://alphanet.ternoa.com'
+    },
+    active: false,
+    currentProviderMode: 'ws',
+    currentProvider: 'ternoa',
+    nativeToken: 'CAPS',
+    groups: ['TEST_NET'],
+    decimals: 18,
+    supportBonding: true,
+    getStakingOnChain: true
   }
 };
 

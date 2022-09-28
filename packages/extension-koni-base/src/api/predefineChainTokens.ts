@@ -530,6 +530,13 @@ export const PREDEFINE_TOKEN_DATA_MAP: Record<string, Record<string, TokenInfo>>
       symbol: 'aUSD',
       name: 'Acala Dollar',
       decimals: 12
+    },
+    USDt: {
+      isMainToken: false,
+      assetIndex: '4294969280',
+      symbol: 'USDt',
+      name: 'Tether USD',
+      decimals: 6
     }
   },
   shiden: {

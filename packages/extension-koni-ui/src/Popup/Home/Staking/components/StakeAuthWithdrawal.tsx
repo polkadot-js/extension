@@ -21,7 +21,7 @@ import { useSignMode } from '@subwallet/extension-koni-ui/hooks/useSignMode';
 import useToast from '@subwallet/extension-koni-ui/hooks/useToast';
 import useTranslation from '@subwallet/extension-koni-ui/hooks/useTranslation';
 import { getAccountMeta, getStakeWithdrawalTxInfo, stakeWithdrawLedger, stakeWithdrawQr, submitStakeWithdrawal } from '@subwallet/extension-koni-ui/messaging';
-import StakeWithdrawalResult from '@subwallet/extension-koni-ui/Popup/Home/Staking/StakeWithdrawalResult';
+import StakeWithdrawalResult from '@subwallet/extension-koni-ui/Popup/Home/Staking/components/StakeWithdrawalResult';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import React, { useCallback, useContext, useEffect, useState } from 'react';
 import styled from 'styled-components';

@@ -1,6 +1,7 @@
 // Copyright 2019-2022 @subwallet/extension-koni-base authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
+import { rpc, types } from '@oak-foundation/types';
 import { PREDEFINED_NETWORKS } from '@subwallet/extension-koni-base/api/predefinedNetworks';
 import { DOTSAMA_AUTO_CONNECT_MS } from '@subwallet/extension-koni-base/constants';
 import { getCurrentProvider } from '@subwallet/extension-koni-base/utils';
@@ -201,5 +202,77 @@ describe('test DotSama APIs', () => {
     const stakedReturn = calculateChainStakedReturn(2.5, parsedTotalStake, parsedTotalIssuance, 'moonbeam');
 
     console.log(stakedReturn); // might or might not be right
+  });
+
+  test('get turing auto-compounding APY', async () => {
+    const provider = new WsProvider(getCurrentProvider(PREDEFINED_NETWORKS.turingStaging), DOTSAMA_AUTO_CONNECT_MS);
+    const api = new ApiPromise({
+      provider,
+      rpc: rpc,
+      types: types
+    });
+    const apiPromise = await api.isReady;
+
+    // @ts-ignore
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-member-access,@typescript-eslint/no-unsafe-assignment
+    const resp = await apiPromise.rpc.automationTime.calculateOptimalAutostaking('10000000000000', '691Fmzb8rhYmBxLvaqYEUApK22s3o6eCzC4whDY7dZZ83YYQ');
+
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-member-access
+    console.log(resp.toHuman());
+
+    // const resp = apiPromise.tx.automationTime.scheduleAutoCompoundDelegatedStakeTask('1658854800', '172800', '691Fmzb8rhYmBxLvaqYEUApK22s3o6eCzC4whDY7dZZ83YYQ', '10000000000');
+    // const paymentInfo = await resp.paymentInfo('5HbcGs2QXVAc6Q6eoTzLYNAJWpN17AkCFRLnWDaHCiGYXvNc');
+    //
+    // console.log(paymentInfo.toHuman()); // might or might not be right
+
+    // console.log(scheduler);
+  });
+
+  test('get compounding task', async () => {
+    const provider = new WsProvider(getCurrentProvider(PREDEFINED_NETWORKS.turingStaging), DOTSAMA_AUTO_CONNECT_MS);
+    const api = new ApiPromise({
+      provider,
+      rpc: rpc,
+      types: types
+    });
+    const apiPromise = await api.isReady;
+
+    const address = '5HbcGs2QXVAc6Q6eoTzLYNAJWpN17AkCFRLnWDaHCiGYXvNc';
+
+    const resp = await apiPromise.query.automationTime.accountTasks.entries(address);
+
+    for (const res of resp) {
+      const taskMetadata = res[0].toHuman() as string[];
+      const taskDetail = res[1].toHuman() as Record<string, any>;
+
+      // Only check for the AutoCompoundDelegatedStake task
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+      if (taskDetail.action.AutoCompoundDelegatedStake && taskDetail.action.AutoCompoundDelegatedStake.collator === '691Fmzb8rhYmBxLvaqYEUApK22s3o6eCzC4whDY7dZZ83YYQ') {
+        const taskId = taskMetadata[1];
+
+        console.log(taskId);
+
+        console.log(taskDetail);
+
+        // console.log(taskDetail.action.AutoCompoundDelegatedStake.collator);
+      }
+    }
+  });
+
+  test('get compounding task fee', async () => {
+    const provider = new WsProvider(getCurrentProvider(PREDEFINED_NETWORKS.turingStaging), DOTSAMA_AUTO_CONNECT_MS);
+    const api = new ApiPromise({
+      provider,
+      rpc: rpc,
+      types: types
+    });
+    const apiPromise = await api.isReady;
+
+    // @ts-ignore
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment,@typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-member-access
+    const resp = await apiPromise.rpc.automationTime.getTimeAutomationFees('AutoCompoundDelegatedStake', 1);
+
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-member-access
+    console.log(resp.toHuman());
   });
 });

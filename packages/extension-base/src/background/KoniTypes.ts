@@ -1093,7 +1093,8 @@ export interface BondingOptionInfo {
 export interface ChainBondingBasics {
   stakedReturn: number,
   // minBond: number,
-  isMaxNominators: boolean
+  isMaxNominators: boolean,
+  validatorCount: number
 }
 
 export interface BasicTxInfo {

@@ -54,7 +54,7 @@ export const SupportedCrossChainsMap: Record<string, CrossChainRelation> = {
     }
   },
   statemint: {
-    type: 'r',
+    type: 'p',
     isEthereum: false,
     relationMap: {
       astar: {

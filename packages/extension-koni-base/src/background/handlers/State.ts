@@ -1919,7 +1919,6 @@ export default class KoniState extends State {
     const networkKeys = this.getDefaultNetworkKey();
 
     for (const [key, network] of Object.entries(this.networkMap)) {
-
       if (!network.active) {
         if (networkKeys.includes(key)) {
           this.apiMap.dotSama[key] = initApi(key, getCurrentProvider(this.networkMap[key]), this.networkMap[key].isEthereum);

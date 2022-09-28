@@ -51,7 +51,7 @@ function StakingMenu ({ bondedAmount, className, networkKey, nextWithdrawal, nex
   const networkJson = useGetNetworkJson(networkKey);
   const showClaimButton = MANUAL_CLAIM_CHAINS.includes(networkKey);
   const showCompoundButton = MANUAL_COMPOUND_CHAINS.includes(networkKey);
-  const { currentAccount: { account } } = useSelector((state: RootState) => state);
+  const account = useSelector((state: RootState) => state.currentAccount.account);
 
   const handleClickBondingMenu = useCallback((e: MouseEvent) => {
     e.stopPropagation();

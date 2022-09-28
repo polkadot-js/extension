@@ -2128,7 +2128,7 @@ export default class KoniExtension extends Extension {
     const cb = createSubscription<'pri(freeBalance.subscribe)'>(id, port);
 
     // eslint-disable-next-line @typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-assignment
-    this.cancelSubscriptionMap[id] = await subscribeFreeBalance(networkKey, '1UJSCYLh44UYhkm1WwXAwT2W8nirTD74VzPsdhfsstY8S3u', state.getDotSamaApiMap(), state.getWeb3ApiMap(), token, cb);
+    this.cancelSubscriptionMap[id] = await subscribeFreeBalance(networkKey, address, state.getDotSamaApiMap(), state.getWeb3ApiMap(), token, cb);
 
     port.onDisconnect.addListener((): void => {
       this.cancelSubscription(id);

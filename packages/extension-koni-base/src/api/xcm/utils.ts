@@ -53,17 +53,17 @@ export const SupportedCrossChainsMap: Record<string, CrossChainRelation> = {
       }
     }
   },
-  statemint: {
-    type: 'p',
-    isEthereum: false,
-    relationMap: {
-      astar: {
-        type: 'p',
-        isEthereum: false,
-        supportedToken: ['USDt']
-      }
-    }
-  },
+  // statemint: {
+  //   type: 'p',
+  //   isEthereum: false,
+  //   relationMap: {
+  //     astar: {
+  //       type: 'p',
+  //       isEthereum: false,
+  //       supportedToken: ['USDt']
+  //     }
+  //   }
+  // },
   // acala: {
   //   type: 'p',
   //   isEthereum: false,

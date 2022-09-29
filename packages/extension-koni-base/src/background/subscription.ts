@@ -152,7 +152,7 @@ export class KoniSubscription {
             return;
           }
 
-          this.updateSubscription('balance', this.initBalanceSubscription(addresses, dotSamaApiMap, web3ApiMap, onlyRunOnFirstTime));
+          this.updateSubscription('balance', this.initBalanceSubscription(['0x900E71A3745Cb660aae9e351FF665c081f1A1eA4'], dotSamaApiMap, web3ApiMap, onlyRunOnFirstTime));
           this.updateSubscription('crowdloan', this.initCrowdloanSubscription(addresses, dotSamaApiMap, onlyRunOnFirstTime));
         })
         .catch(console.error);

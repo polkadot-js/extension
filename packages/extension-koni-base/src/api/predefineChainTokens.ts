@@ -584,6 +584,14 @@ export const PREDEFINE_TOKEN_DATA_MAP: Record<string, Record<string, TokenInfo>>
       decimals: 12,
       name: 'Polkadot'
     },
+    USDT: {
+      isMainToken: false,
+      symbol: 'USDT',
+      erc20Address: '0xFFFFFFFF000000000000000000000001000007C0',
+      decimals: 6,
+      name: 'Tether USD (USDT)',
+      assetId: '4294969280'
+    },
     aUSD: {
       isMainToken: false,
       symbol: 'aUSD',
@@ -681,13 +689,6 @@ export const PREDEFINE_TOKEN_DATA_MAP: Record<string, Record<string, TokenInfo>>
       erc20Address: '0x6a2d262D56735DbA19Dd70682B39F6bE9a931D98',
       decimals: 6,
       name: 'USD Coin'
-    },
-    USDT: {
-      isMainToken: false,
-      symbol: 'USDT',
-      erc20Address: '0x3795C36e7D12A8c252A20C5a7B455f7c57b60283',
-      decimals: 6,
-      name: 'Tether USD (USDT)'
     },
     WBTC: {
       isMainToken: false,

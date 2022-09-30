@@ -307,12 +307,12 @@ export const PREDEFINED_NETWORKS: Record<string, NetworkJson> = {
     genesisHash: '0x742a2ca70c2fda6cee4f8df98d64c4c670a052d9568058982dad9d5a7a135c5b',
     ss58Format: 7,
     providers: {
-      'Commonwealth Labs': 'wss://mainnet.edgewa.re',
+      JelliedOwl: 'wss://edgeware.jelliedowl.net',
       OnFinality: 'wss://edgeware.api.onfinality.io/public-ws'
     },
     active: false,
     currentProviderMode: 'ws',
-    currentProvider: 'Commonwealth Labs',
+    currentProvider: 'JelliedOwl',
     groups: ['MAIN_NET'],
     nativeToken: 'EDG',
     decimals: 18,
@@ -433,14 +433,9 @@ export const PREDEFINED_NETWORKS: Record<string, NetworkJson> = {
     key: 'sora-substrate',
     chain: 'SORA',
     genesisHash: '0x7e4e32d0feafd4f9c9414b0be86373f9a1efa904809b683453a9af6856d38ad5',
-    ss58Format: 69,
+    ss58Format: 420,
     providers: {
-      'SORA Parliament Ministry of Finance #2': 'wss://mof2.sora.org',
-      'SORA Parliament Ministry of Finance': 'wss://ws.mof.sora.org',
-      'SORA Parliament Ministry of Finance #3': 'wss://mof3.sora.org',
-      Soramitsu: 'wss://ws.alb.sora.org',
-      OnFinality: 'wss://sora.api.onfinality.io/public-ws'
-      // 'SORA Community (Lux8)': 'wss://sora.lux8.net' // https://github.com/polkadot-js/apps/issues/6195
+      Soramitsu: 'wss://ws.parachain-collator-1.c1.sora2.soramitsu.co.jp'
     },
     active: false,
     currentProviderMode: 'ws',
@@ -448,7 +443,8 @@ export const PREDEFINED_NETWORKS: Record<string, NetworkJson> = {
     groups: ['KUSAMA_PARACHAIN'],
     nativeToken: 'XOR',
     crowdloanUrl: 'https://polkadot.js.org/apps/#/parachains/crowdloan',
-    decimals: 18
+    decimals: 12,
+    paraId: 2011
   },
   subgame: {
     key: 'subgame',

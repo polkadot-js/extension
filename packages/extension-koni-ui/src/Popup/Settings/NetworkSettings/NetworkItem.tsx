@@ -4,7 +4,7 @@
 import { faTrashAlt } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { NetworkJson } from '@subwallet/extension-base/background/KoniTypes';
-import { ActionContext, Button, ButtonArea, HorizontalLabelToggle } from '@subwallet/extension-koni-ui/components';
+import { AccountContext, ActionContext, Button, ButtonArea, HorizontalLabelToggle } from '@subwallet/extension-koni-ui/components';
 import Modal from '@subwallet/extension-koni-ui/components/Modal';
 import useToast from '@subwallet/extension-koni-ui/hooks/useToast';
 import useTranslation from '@subwallet/extension-koni-ui/hooks/useTranslation';
@@ -12,7 +12,7 @@ import { disableNetworkMap, enableNetworkMap, removeNetworkMap } from '@subwalle
 import { store } from '@subwallet/extension-koni-ui/stores';
 import { NetworkConfigParams } from '@subwallet/extension-koni-ui/stores/types';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
-import React, { useCallback, useContext, useState } from 'react';
+import React, { useCallback, useContext, useMemo, useState } from 'react';
 import styled from 'styled-components';
 
 interface Props extends ThemeProps {
@@ -22,10 +22,23 @@ interface Props extends ThemeProps {
 
 function NetworkItem ({ className, item }: Props): React.ReactElement {
   const { show } = useToast();
+  const { accounts } = useContext(AccountContext);
   const navigate = useContext(ActionContext);
   const [showModal, setShowModal] = useState(false);
   const [isHover, setIsHover] = useState(false);
   const { t } = useTranslation();
+
+  const originGenesisHashes = useMemo((): string[] => {
+    const result: Record<string, string> = {};
+
+    accounts.forEach((acc) => {
+      if (acc.originGenesisHash) {
+        result[acc.originGenesisHash] = acc.originGenesisHash;
+      }
+    });
+
+    return Object.keys(result);
+  }, [accounts]);
 
   const handleHideModal = useCallback(() => {
     setShowModal(false);
@@ -59,6 +72,12 @@ function NetworkItem ({ className, item }: Props): React.ReactElement {
       return;
     }
 
+    if (originGenesisHashes.includes(item.genesisHash)) {
+      show('You have a ledger account connected to this network');
+
+      return;
+    }
+
     if (!val) {
       disableNetworkMap(item.key)
         .then(({ success }) => handleShowStateConfirm(success))
@@ -68,7 +87,7 @@ function NetworkItem ({ className, item }: Props): React.ReactElement {
         .then((resp) => handleShowStateConfirm(resp))
         .catch(console.error);
     }
-  }, [handleShowStateConfirm, item.key, show]);
+  }, [handleShowStateConfirm, item.genesisHash, item.key, originGenesisHashes, show]);
 
   const handleNetworkEdit = useCallback(() => {
     store.dispatch({ type: 'networkConfigParams/update', payload: { data: item, mode: 'edit' } as NetworkConfigParams });

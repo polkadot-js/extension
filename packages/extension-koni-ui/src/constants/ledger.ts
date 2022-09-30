@@ -17,7 +17,7 @@ export const PredefinedLedgerNetwork: LedgerNetwork[] = [
     icon: 'substrate',
     network: 'kusama',
     isDevMode: false
-  }
+  },
   // {
   //   displayName: 'Moonbeam',
   //   genesisHash: '0xfe58ea77779b7abda7da4ec526d14db9b1e9cd40a217c34892af80a9b332b76d',
@@ -25,13 +25,13 @@ export const PredefinedLedgerNetwork: LedgerNetwork[] = [
   //   network: 'moonbeam',
   //   isDevMode: false
   // },
-  // {
-  //   displayName: 'Acala',
-  //   genesisHash: '0xfc41b9bd8ef8fe53d58c7ea67c794c7ec9a73daf05e6d54b14ff6342c99ba64c',
-  //   icon: 'substrate',
-  //   network: 'acala',
-  //   isDevMode: true
-  // },
+  {
+    displayName: 'Acala',
+    genesisHash: '0xfc41b9bd8ef8fe53d58c7ea67c794c7ec9a73daf05e6d54b14ff6342c99ba64c',
+    icon: 'substrate',
+    network: 'acala',
+    isDevMode: true
+  }
   // {
   //   displayName: 'Centrifuge',
   //   genesisHash: '0xb3db41421702df9a7fcac62b53ffeac85f7853cc4e689e0b93aeb3db18c09d82',

@@ -417,13 +417,6 @@ export const PREDEFINE_TOKEN_DATA_MAP: Record<string, Record<string, TokenInfo>>
     }
   },
   moonbeam: {
-    USDT: {
-      isMainToken: false,
-      symbol: 'USDT',
-      erc20Address: '0xeFAeeE334F0Fd1712f9a8cc375f427D9Cdd40d73',
-      decimals: 6,
-      name: 'Tether USD'
-    },
     USDC: {
       isMainToken: false,
       symbol: 'USDC',

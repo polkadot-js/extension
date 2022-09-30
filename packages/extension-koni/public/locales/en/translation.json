@@ -423,5 +423,12 @@
   "Service Selection": "",
   "Select the account you want to receive your cryptos": "",
   "Select the network you want to buy cryptos": "",
-  "Select the service you want to buy cryptos": ""
+  "Select the service you want to buy cryptos": "",
+  "The account which you will cancel the compounding task": "",
+  "Cancel compounding task of account": "",
+  "The account which you will compound the stake": "",
+  "Compound the stake from account": "",
+  "Stake compounding": "",
+  "Compounding threshold": "",
+  "Note that you cannot transfer all tokens out from this account.": ""
 }

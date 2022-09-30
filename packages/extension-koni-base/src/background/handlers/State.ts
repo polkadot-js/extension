@@ -1380,29 +1380,32 @@ export default class KoniState extends State {
 
   public upsertChainRegistry (tokenData: CustomEvmToken) {
     const chainRegistry = this.chainRegistryMap[tokenData.chain];
-    const tokenKey = this.checkTokenKey(tokenData);
 
-    if (tokenKey !== '') {
-      chainRegistry.tokenMap[tokenKey] = {
-        isMainToken: false,
-        symbol: tokenData.symbol,
-        name: tokenData.name,
-        erc20Address: tokenData.smartContract,
-        decimals: tokenData.decimals
-      } as TokenInfo;
-    } else {
-      // @ts-ignore
-      chainRegistry.tokenMap[tokenData.symbol] = {
-        isMainToken: false,
-        symbol: tokenData.symbol,
-        name: tokenData.symbol,
-        erc20Address: tokenData.smartContract,
-        decimals: tokenData.decimals
-      } as TokenInfo;
+    if (chainRegistry) {
+      const tokenKey = this.checkTokenKey(tokenData);
+
+      if (tokenKey !== '') {
+        chainRegistry.tokenMap[tokenKey] = {
+          isMainToken: false,
+          symbol: tokenData.symbol,
+          name: tokenData.name,
+          erc20Address: tokenData.smartContract,
+          decimals: tokenData.decimals
+        } as TokenInfo;
+      } else {
+        // @ts-ignore
+        chainRegistry.tokenMap[tokenData.symbol] = {
+          isMainToken: false,
+          symbol: tokenData.symbol,
+          name: tokenData.symbol,
+          erc20Address: tokenData.smartContract,
+          decimals: tokenData.decimals
+        } as TokenInfo;
+      }
+
+      cacheRegistryMap[tokenData.chain] = chainRegistry;
+      this.chainRegistrySubject.next(this.getChainRegistryMap());
     }
-
-    cacheRegistryMap[tokenData.chain] = chainRegistry;
-    this.chainRegistrySubject.next(this.getChainRegistryMap());
   }
 
   public initChainRegistry () {
@@ -1600,9 +1603,6 @@ export default class KoniState extends State {
     const _evmTokenState: EvmTokenJson = this.evmTokenState;
     let needUpdateChainRegistry = false;
 
-    console.log('cacheRegistryMap', cacheRegistryMap);
-    console.log('targetToken', targetTokens);
-
     for (const targetToken of targetTokens) {
       for (let index = 0; index < _evmTokenState.erc20.length; index++) {
         if (_evmTokenState.erc20[index].smartContract === targetToken.smartContract && _evmTokenState.erc20[index].chain === targetToken.chain && targetToken.type === 'erc20') {
@@ -1620,19 +1620,20 @@ export default class KoniState extends State {
     if (needUpdateChainRegistry) {
       for (const targetToken of targetTokens) {
         const chainRegistry = this.chainRegistryMap[targetToken.chain];
-        console.log('chainRegistry', chainRegistry);
-        console.log('this.chainRegistryMap', this.chainRegistryMap);
-        let deleteKey = '';
 
-        for (const [key, token] of Object.entries(chainRegistry.tokenMap)) {
-          if (token.erc20Address === targetToken.smartContract && targetToken.type === 'erc20') {
-            deleteKey = key;
+        if (chainRegistry) {
+          let deleteKey = '';
+
+          for (const [key, token] of Object.entries(chainRegistry.tokenMap)) {
+            if (token.erc20Address === targetToken.smartContract && targetToken.type === 'erc20') {
+              deleteKey = key;
+            }
           }
-        }
 
-        delete chainRegistry.tokenMap[deleteKey];
-        this.chainRegistryMap[targetToken.chain] = chainRegistry;
-        cacheRegistryMap[targetToken.chain] = chainRegistry;
+          delete chainRegistry.tokenMap[deleteKey];
+          this.chainRegistryMap[targetToken.chain] = chainRegistry;
+          cacheRegistryMap[targetToken.chain] = chainRegistry;
+        }
       }
     }
 

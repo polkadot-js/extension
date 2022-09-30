@@ -1406,7 +1406,7 @@ export default class KoniState extends State {
   }
 
   public initChainRegistry () {
-    this.chainRegistryMap = {};
+    this.chainRegistryMap = cacheRegistryMap; // prevents deleting token registry even when network is disabled
     this.getEvmTokenStore((evmTokens) => {
       const erc20Tokens: CustomEvmToken[] = evmTokens ? evmTokens.erc20 : [];
 
@@ -1600,6 +1600,9 @@ export default class KoniState extends State {
     const _evmTokenState: EvmTokenJson = this.evmTokenState;
     let needUpdateChainRegistry = false;
 
+    console.log('cacheRegistryMap', cacheRegistryMap);
+    console.log('targetToken', targetTokens);
+
     for (const targetToken of targetTokens) {
       for (let index = 0; index < _evmTokenState.erc20.length; index++) {
         if (_evmTokenState.erc20[index].smartContract === targetToken.smartContract && _evmTokenState.erc20[index].chain === targetToken.chain && targetToken.type === 'erc20') {
@@ -1617,6 +1620,8 @@ export default class KoniState extends State {
     if (needUpdateChainRegistry) {
       for (const targetToken of targetTokens) {
         const chainRegistry = this.chainRegistryMap[targetToken.chain];
+        console.log('chainRegistry', chainRegistry);
+        console.log('this.chainRegistryMap', this.chainRegistryMap);
         let deleteKey = '';
 
         for (const [key, token] of Object.entries(chainRegistry.tokenMap)) {

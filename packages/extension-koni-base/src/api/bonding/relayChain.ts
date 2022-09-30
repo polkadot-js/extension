@@ -224,7 +224,7 @@ export async function getRelayBondingTxInfo (dotSamaApi: ApiProps, controllerId:
 export async function handleRelayBondingTxInfo (networkJson: NetworkJson, amount: number, targetValidators: string[], isBondedBefore: boolean, networkKey: string, nominatorAddress: string, dotSamaApiMap: Record<string, ApiProps>, web3ApiMap: Record<string, Web3>) {
   try {
     const parsedAmount = amount * (10 ** (networkJson.decimals as number));
-    const binaryAmount = new BN(parsedAmount);
+    const binaryAmount = new BN(parsedAmount.toString());
     const [txInfo, balance] = await Promise.all([
       getRelayBondingTxInfo(dotSamaApiMap[networkKey], nominatorAddress, binaryAmount, targetValidators, isBondedBefore),
       getFreeBalance(networkKey, nominatorAddress, dotSamaApiMap, web3ApiMap)
@@ -251,7 +251,7 @@ export async function handleRelayBondingTxInfo (networkJson: NetworkJson, amount
 export async function getRelayBondingExtrinsic (dotSamaApi: ApiProps, controllerId: string, amount: number, validators: string[], isBondedBefore: boolean, networkJson: NetworkJson, bondDest = 'Staked') {
   const apiPromise = await dotSamaApi.isReady;
   const parsedAmount = amount * (10 ** (networkJson.decimals as number));
-  const binaryAmount = new BN(parsedAmount);
+  const binaryAmount = new BN(parsedAmount.toString());
 
   let bondTx;
   const nominateTx = apiPromise.api.tx.staking.nominate(validators);
@@ -291,7 +291,7 @@ export async function getRelayUnbondingTxInfo (dotSamaApi: ApiProps, amount: BN,
 export async function getRelayUnbondingExtrinsic (dotSamaApi: ApiProps, amount: number, networkJson: NetworkJson) {
   const apiPromise = await dotSamaApi.isReady;
   const parsedAmount = amount * (10 ** (networkJson.decimals as number));
-  const binaryAmount = new BN(parsedAmount);
+  const binaryAmount = new BN(parsedAmount.toString());
 
   const chillTx = apiPromise.api.tx.staking.chill();
   const unbondTx = apiPromise.api.tx.staking.unbond(binaryAmount);
@@ -303,7 +303,7 @@ export async function handleRelayUnbondingTxInfo (address: string, amount: numbe
   try {
     const dotSamaApi = dotSamaApiMap[networkKey];
     const parsedAmount = amount * (10 ** (networkJson.decimals as number));
-    const binaryAmount = new BN(parsedAmount);
+    const binaryAmount = new BN(parsedAmount.toString());
 
     const [txInfo, balance] = await Promise.all([
       getRelayUnbondingTxInfo(dotSamaApi, binaryAmount, address),

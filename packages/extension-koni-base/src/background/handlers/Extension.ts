@@ -5,10 +5,11 @@ import Common from '@ethereumjs/common';
 import Extension, { SEED_DEFAULT_LENGTH, SEED_LENGTHS } from '@subwallet/extension-base/background/handlers/Extension';
 import { AuthUrls } from '@subwallet/extension-base/background/handlers/State';
 import { createSubscription, isSubscriptionRunning, unsubscribe } from '@subwallet/extension-base/background/handlers/subscriptions';
-import { AccountExternalError, AccountExternalErrorCode, AccountsWithCurrentAddress, ApiProps, BalanceJson, BaseTxError, BasicTxError, BasicTxErrorCode, BasicTxInfo, BasicTxResponse, BondingOptionInfo, BondingOptionParams, BondingSubmitParams, ChainBondingBasics, ChainRegistry, CrowdloanJson, CurrentAccountInfo, CustomEvmToken, DelegationItem, DeleteEvmTokenParams, DisableNetworkResponse, EvmNftSubmitTransaction, EvmNftTransaction, EvmNftTransactionRequest, EvmTokenJson, ExternalRequestPromise, ExternalRequestPromiseStatus, NETWORK_ERROR, NetWorkGroup, NetworkJson, NftCollection, NftCollectionJson, NftItem, NftJson, NftTransactionResponse, NftTransferExtra, OptionInputAddress, PriceJson, RequestAccountCreateExternalV2, RequestAccountCreateHardwareV2, RequestAccountCreateSuriV2, RequestAccountExportPrivateKey, RequestAccountMeta, RequestAuthorization, RequestAuthorizationBlock, RequestAuthorizationPerAccount, RequestAuthorizationPerSite, RequestAuthorizeApproveV2, RequestBatchRestoreV2, RequestCheckCrossChainTransfer, RequestCheckTransfer, RequestConfirmationComplete, RequestCrossChainTransfer, RequestCrossChainTransferExternal, RequestDeriveCreateV2, RequestForgetSite, RequestFreeBalance, RequestJsonRestoreV2, RequestNftForceUpdate, RequestNftTransferExternalEVM, RequestNftTransferExternalSubstrate, RequestParseEVMTransactionInput, RequestParseTransactionEVM, RequestQrSignEVM, RequestRejectExternalRequest, RequestResolveExternalRequest, RequestSaveRecentAccount, RequestSeedCreateV2, RequestSeedValidateV2, RequestSettingsType, RequestStakeExternal, RequestTransactionHistoryAdd, RequestTransfer, RequestTransferCheckReferenceCount, RequestTransferCheckSupporting, RequestTransferExistentialDeposit, RequestTransferExternal, RequestUnStakeExternal, RequestWithdrawStakeExternal, ResponseAccountCreateSuriV2, ResponseAccountExportPrivateKey, ResponseAccountMeta, ResponseCheckCrossChainTransfer, ResponseCheckTransfer, ResponseParseEVMTransactionInput, ResponseParseTransactionEVM, ResponsePrivateKeyValidateV2, ResponseQrSignEVM, ResponseRejectExternalRequest, ResponseResolveExternalRequest, ResponseSeedCreateV2, ResponseSeedValidateV2, ResponseTransfer, StakeClaimRewardParams, StakeDelegationRequest, StakeUnlockingJson, StakeWithdrawalParams, StakingJson, StakingRewardJson, SubstrateNftSubmitTransaction, SubstrateNftTransaction, SubstrateNftTransactionRequest, SupportTransferResponse, ThemeTypes, TokenInfo, TransactionHistoryItemType, TransferError, TransferErrorCode, TransferStep, UnbondingSubmitParams, ValidateEvmTokenRequest, ValidateEvmTokenResponse, ValidateNetworkRequest, ValidateNetworkResponse } from '@subwallet/extension-base/background/KoniTypes';
+import { AccountExternalError, AccountExternalErrorCode, AccountsWithCurrentAddress, ApiProps, BalanceJson, BaseTxError, BasicTxError, BasicTxErrorCode, BasicTxInfo, BasicTxResponse, BondingOptionInfo, BondingOptionParams, BondingSubmitParams, ChainBondingBasics, ChainRegistry, CheckExistingTuringCompoundParams, CrowdloanJson, CurrentAccountInfo, CustomEvmToken, DelegationItem, DeleteEvmTokenParams, DisableNetworkResponse, EvmNftSubmitTransaction, EvmNftTransaction, EvmNftTransactionRequest, EvmTokenJson, ExistingTuringCompoundTask, ExternalRequestPromise, ExternalRequestPromiseStatus, NETWORK_ERROR, NetWorkGroup, NetworkJson, NftCollection, NftCollectionJson, NftItem, NftJson, NftTransactionResponse, NftTransferExtra, OptionInputAddress, PriceJson, RequestAccountCreateExternalV2, RequestAccountCreateHardwareV2, RequestAccountCreateSuriV2, RequestAccountExportPrivateKey, RequestAccountMeta, RequestAuthorization, RequestAuthorizationBlock, RequestAuthorizationPerAccount, RequestAuthorizationPerSite, RequestAuthorizeApproveV2, RequestBatchRestoreV2, RequestCheckCrossChainTransfer, RequestCheckTransfer, RequestConfirmationComplete, RequestCrossChainTransfer, RequestCrossChainTransferExternal, RequestDeriveCreateV2, RequestForgetSite, RequestFreeBalance, RequestJsonRestoreV2, RequestNftForceUpdate, RequestNftTransferExternalEVM, RequestNftTransferExternalSubstrate, RequestParseEVMTransactionInput, RequestParseTransactionEVM, RequestQrSignEVM, RequestRejectExternalRequest, RequestResolveExternalRequest, RequestSaveRecentAccount, RequestSeedCreateV2, RequestSeedValidateV2, RequestSettingsType, RequestStakeExternal, RequestTransactionHistoryAdd, RequestTransfer, RequestTransferCheckReferenceCount, RequestTransferCheckSupporting, RequestTransferExistentialDeposit, RequestTransferExternal, RequestUnStakeExternal, RequestWithdrawStakeExternal, ResponseAccountCreateSuriV2, ResponseAccountExportPrivateKey, ResponseAccountMeta, ResponseCheckCrossChainTransfer, ResponseCheckTransfer, ResponseParseEVMTransactionInput, ResponseParseTransactionEVM, ResponsePrivateKeyValidateV2, ResponseQrSignEVM, ResponseRejectExternalRequest, ResponseResolveExternalRequest, ResponseSeedCreateV2, ResponseSeedValidateV2, ResponseTransfer, StakeClaimRewardParams, StakeDelegationRequest, StakeUnlockingJson, StakeWithdrawalParams, StakingJson, StakingRewardJson, SubstrateNftSubmitTransaction, SubstrateNftTransaction, SubstrateNftTransactionRequest, SupportTransferResponse, ThemeTypes, TokenInfo, TransactionHistoryItemType, TransferError, TransferErrorCode, TransferStep, TuringCancelStakeCompoundParams, TuringStakeCompoundParams, UnbondingSubmitParams, ValidateEvmTokenRequest, ValidateEvmTokenResponse, ValidateNetworkRequest, ValidateNetworkResponse } from '@subwallet/extension-base/background/KoniTypes';
 import { AccountJson, AuthorizeRequest, MessageTypes, RequestAccountForget, RequestAccountTie, RequestAuthorizeCancel, RequestAuthorizeReject, RequestCurrentAccountAddress, RequestParseTransactionSubstrate, RequestTypes, ResponseAuthorizeList, ResponseParseTransactionSubstrate, ResponseType } from '@subwallet/extension-base/background/types';
 import { getId } from '@subwallet/extension-base/utils/getId';
 import { getBondingExtrinsic, getBondingTxInfo, getChainBondingBasics, getClaimRewardExtrinsic, getClaimRewardTxInfo, getDelegationInfo, getUnbondingExtrinsic, getUnbondingTxInfo, getValidatorsInfo, getWithdrawalExtrinsic, getWithdrawalTxInfo } from '@subwallet/extension-koni-base/api/bonding';
+import { checkTuringStakeCompoundingTask, getTuringCancelCompoundingExtrinsic, getTuringCompoundExtrinsic, handleTuringCancelCompoundTxInfo, handleTuringCompoundTxInfo } from '@subwallet/extension-koni-base/api/bonding/paraChain';
 import { initApi } from '@subwallet/extension-koni-base/api/dotsama';
 import { getFreeBalance, subscribeFreeBalance } from '@subwallet/extension-koni-base/api/dotsama/balance';
 import { createStakeLedger, createStakeQr, createUnStakeLedger, createUnStakeQr, createWithdrawStakeLedger, createWithdrawStakeQr } from '@subwallet/extension-koni-base/api/dotsama/external/stake';
@@ -3989,6 +3990,157 @@ export default class KoniExtension extends Extension {
     return await parseTransactionData(data, contract, network);
   }
 
+  private async getTuringStakeCompoundTxInfo ({ accountMinimum, address, bondedAmount, collatorAddress, networkKey }: TuringStakeCompoundParams) {
+    const networkJson = state.getNetworkMapByKey(networkKey);
+    const parsedAccountMinimum = parseFloat(accountMinimum) * 10 ** (networkJson.decimals as number);
+
+    return await handleTuringCompoundTxInfo(networkKey, networkJson, state.getDotSamaApiMap(), state.getWeb3ApiMap(), address, collatorAddress, parsedAccountMinimum.toString(), bondedAmount);
+  }
+
+  private async submitTuringStakeCompounding (id: string, port: chrome.runtime.Port, { accountMinimum, address, bondedAmount, collatorAddress, networkKey, password }: TuringStakeCompoundParams) {
+    const txState: BasicTxResponse = {};
+
+    if (!address || !password) {
+      txState.txError = true;
+
+      return txState;
+    }
+
+    const callback = createSubscription<'pri(staking.submitTuringCompound)'>(id, port);
+    const dotSamaApi = state.getDotSamaApi(networkKey);
+    const networkJson = state.getNetworkMapByKey(networkKey);
+    const parsedAccountMinimum = parseFloat(accountMinimum) * 10 ** (networkJson.decimals as number);
+    const extrinsic = await getTuringCompoundExtrinsic(dotSamaApi, address, collatorAddress, parsedAccountMinimum.toString(), bondedAmount);
+    const passwordError: string | null = unlockAccount(address, password);
+
+    if (extrinsic !== null && passwordError === null) {
+      const pair = keyring.getPair(address);
+
+      try {
+        const unsubscribe = await extrinsic.signAndSend(pair, (result) => {
+          if (!result || !result.status) {
+            return;
+          }
+
+          if (result.status.isInBlock || result.status.isFinalized) {
+            result.events
+              .filter(({ event: { section } }) => section === 'system')
+              .forEach(({ event: { method } }): void => {
+                txState.transactionHash = extrinsic.hash.toHex();
+                callback(txState);
+
+                if (method === 'ExtrinsicFailed') {
+                  txState.status = false;
+                  callback(txState);
+                } else if (method === 'ExtrinsicSuccess') {
+                  txState.status = true;
+                  callback(txState);
+                }
+              });
+          } else if (result.isError) {
+            txState.txError = true;
+            callback(txState);
+          }
+
+          if (result.isCompleted) {
+            unsubscribe();
+          }
+        });
+      } catch (e) {
+        console.error('error compounding Turing stake', e);
+        txState.txError = true;
+        callback(txState);
+      }
+    } else {
+      txState.passwordError = passwordError;
+      callback(txState);
+    }
+
+    return txState;
+  }
+
+  private async checkTuringStakeCompounding ({ address, collatorAddress, networkKey }: CheckExistingTuringCompoundParams): Promise<ExistingTuringCompoundTask> {
+    const dotSamaApi = state.getDotSamaApi(networkKey);
+    const networkJson = state.getNetworkMapByKey(networkKey);
+
+    const { accountMinimum, frequency, taskId } = await checkTuringStakeCompoundingTask(dotSamaApi, address, collatorAddress);
+
+    const parsedAccountMinimum = accountMinimum / (10 ** (networkJson.decimals as number));
+
+    return {
+      exist: taskId !== '',
+      taskId,
+      accountMinimum: parsedAccountMinimum,
+      frequency
+    } as ExistingTuringCompoundTask;
+  }
+
+  private async getTuringCancelStakeCompoundTxInfo ({ address, networkKey, taskId }: TuringCancelStakeCompoundParams): Promise<BasicTxInfo> {
+    const networkJson = state.getNetworkMapByKey(networkKey);
+
+    return await handleTuringCancelCompoundTxInfo(state.getDotSamaApiMap(), state.getWeb3ApiMap(), taskId, address, networkKey, networkJson);
+  }
+
+  private async submitTuringCancelStakeCompound (id: string, port: chrome.runtime.Port, { address, networkKey, password, taskId }: TuringCancelStakeCompoundParams) {
+    const txState: BasicTxResponse = {};
+
+    if (!address || !password) {
+      txState.txError = true;
+
+      return txState;
+    }
+
+    const callback = createSubscription<'pri(staking.submitTuringCancelCompound)'>(id, port);
+    const dotSamaApi = state.getDotSamaApi(networkKey);
+    const extrinsic = await getTuringCancelCompoundingExtrinsic(dotSamaApi, taskId);
+    const passwordError: string | null = unlockAccount(address, password);
+
+    if (extrinsic !== null && passwordError === null) {
+      const pair = keyring.getPair(address);
+
+      try {
+        const unsubscribe = await extrinsic.signAndSend(pair, (result) => {
+          if (!result || !result.status) {
+            return;
+          }
+
+          if (result.status.isInBlock || result.status.isFinalized) {
+            result.events
+              .filter(({ event: { section } }) => section === 'system')
+              .forEach(({ event: { method } }): void => {
+                txState.transactionHash = extrinsic.hash.toHex();
+                callback(txState);
+
+                if (method === 'ExtrinsicFailed') {
+                  txState.status = false;
+                  callback(txState);
+                } else if (method === 'ExtrinsicSuccess') {
+                  txState.status = true;
+                  callback(txState);
+                }
+              });
+          } else if (result.isError) {
+            txState.txError = true;
+            callback(txState);
+          }
+
+          if (result.isCompleted) {
+            unsubscribe();
+          }
+        });
+      } catch (e) {
+        console.error('error canceling Turing compounding task stake', e);
+        txState.txError = true;
+        callback(txState);
+      }
+    } else {
+      txState.passwordError = passwordError;
+      callback(txState);
+    }
+
+    return txState;
+  }
+
   // eslint-disable-next-line @typescript-eslint/require-await
   public override async handle<TMessageType extends MessageTypes> (id: string, type: TMessageType, request: RequestTypes[TMessageType], port: chrome.runtime.Port): Promise<ResponseType<TMessageType>> {
     switch (type) {
@@ -4240,11 +4392,19 @@ export default class KoniExtension extends Extension {
       // EVM Transaction
       case 'pri(evm.transaction.parse.input)':
         return await this.parseEVMTransactionInput(request as RequestParseEVMTransactionInput);
-
       // Auth Url subscribe
       case 'pri(authorize.subscribe)':
         return await this.subscribeAuthUrls(id, port);
-
+      case 'pri(staking.turingCompound)':
+        return await this.getTuringStakeCompoundTxInfo(request as TuringStakeCompoundParams);
+      case 'pri(staking.submitTuringCompound)':
+        return await this.submitTuringStakeCompounding(id, port, request as TuringStakeCompoundParams);
+      case 'pri(staking.checkTuringCompoundTask)':
+        return await this.checkTuringStakeCompounding(request as CheckExistingTuringCompoundParams);
+      case 'pri(staking.turingCancelCompound)':
+        return await this.getTuringCancelStakeCompoundTxInfo(request as TuringCancelStakeCompoundParams);
+      case 'pri(staking.submitTuringCancelCompound)':
+        return await this.submitTuringCancelStakeCompound(id, port, request as TuringCancelStakeCompoundParams);
       // Default
       default:
         return super.handle(id, type, request, port);

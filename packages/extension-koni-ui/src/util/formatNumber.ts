@@ -4,8 +4,8 @@
 import BigN from 'bignumber.js';
 
 // 1000.12345 -> 1,000; 1000,654321 -> 1,001
-export const formatLocaleNumber = (number: number): string => {
-  return number.toLocaleString('en-UK', { maximumFractionDigits: 0 });
+export const formatLocaleNumber = (number: number, digits?: number): string => {
+  return number.toLocaleString('en-UK', { maximumFractionDigits: digits || 0 });
 };
 
 const prefixArray = ['a', 'n', 'µ', 'm', '', 'K', 'M', 'B', 'T'];

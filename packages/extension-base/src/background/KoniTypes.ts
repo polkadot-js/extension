@@ -1293,12 +1293,53 @@ export interface LedgerNetwork {
   isDevMode: boolean;
 }
 
+export interface TuringStakeCompoundParams {
+  address: string,
+  collatorAddress: string,
+  networkKey: string,
+  accountMinimum: string,
+  bondedAmount: string,
+  password?: string
+}
+
+export interface TuringStakeCompoundResp {
+  txInfo: BasicTxInfo,
+  optimalFrequency: string,
+  initTime: number,
+  compoundFee: string
+}
+
 export interface TransakNetwork {
   networks: string[];
   tokens: string[];
 }
 
+export interface CheckExistingTuringCompoundParams {
+  address: string;
+  collatorAddress: string;
+  networkKey: string;
+}
+
+export interface ExistingTuringCompoundTask {
+  exist: boolean;
+  taskId: string;
+  accountMinimum: number;
+  frequency: number;
+}
+
+export interface TuringCancelStakeCompoundParams {
+  taskId: string;
+  networkKey: string;
+  address: string;
+  password?: string;
+}
+
 export interface KoniRequestSignatures {
+  'pri(staking.submitTuringCancelCompound)': [TuringCancelStakeCompoundParams, BasicTxResponse, BasicTxResponse];
+  'pri(staking.turingCancelCompound)': [TuringCancelStakeCompoundParams, BasicTxInfo];
+  'pri(staking.checkTuringCompoundTask)': [CheckExistingTuringCompoundParams, ExistingTuringCompoundTask];
+  'pri(staking.submitTuringCompound)': [TuringStakeCompoundParams, BasicTxResponse, BasicTxResponse];
+  'pri(staking.turingCompound)': [TuringStakeCompoundParams, TuringStakeCompoundResp];
   'pri(staking.delegationInfo)': [StakeDelegationRequest, DelegationItem[]];
   'pri(staking.submitClaimReward)': [StakeClaimRewardParams, BasicTxResponse, BasicTxResponse];
   'pri(staking.claimRewardTxInfo)': [StakeClaimRewardParams, BasicTxInfo];

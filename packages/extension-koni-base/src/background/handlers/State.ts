@@ -1380,33 +1380,36 @@ export default class KoniState extends State {
 
   public upsertChainRegistry (tokenData: CustomEvmToken) {
     const chainRegistry = this.chainRegistryMap[tokenData.chain];
-    const tokenKey = this.checkTokenKey(tokenData);
 
-    if (tokenKey !== '') {
-      chainRegistry.tokenMap[tokenKey] = {
-        isMainToken: false,
-        symbol: tokenData.symbol,
-        name: tokenData.name,
-        erc20Address: tokenData.smartContract,
-        decimals: tokenData.decimals
-      } as TokenInfo;
-    } else {
-      // @ts-ignore
-      chainRegistry.tokenMap[tokenData.symbol] = {
-        isMainToken: false,
-        symbol: tokenData.symbol,
-        name: tokenData.symbol,
-        erc20Address: tokenData.smartContract,
-        decimals: tokenData.decimals
-      } as TokenInfo;
+    if (chainRegistry) {
+      const tokenKey = this.checkTokenKey(tokenData);
+
+      if (tokenKey !== '') {
+        chainRegistry.tokenMap[tokenKey] = {
+          isMainToken: false,
+          symbol: tokenData.symbol,
+          name: tokenData.name,
+          erc20Address: tokenData.smartContract,
+          decimals: tokenData.decimals
+        } as TokenInfo;
+      } else {
+        // @ts-ignore
+        chainRegistry.tokenMap[tokenData.symbol] = {
+          isMainToken: false,
+          symbol: tokenData.symbol,
+          name: tokenData.symbol,
+          erc20Address: tokenData.smartContract,
+          decimals: tokenData.decimals
+        } as TokenInfo;
+      }
+
+      cacheRegistryMap[tokenData.chain] = chainRegistry;
+      this.chainRegistrySubject.next(this.getChainRegistryMap());
     }
-
-    cacheRegistryMap[tokenData.chain] = chainRegistry;
-    this.chainRegistrySubject.next(this.getChainRegistryMap());
   }
 
   public initChainRegistry () {
-    this.chainRegistryMap = {};
+    this.chainRegistryMap = cacheRegistryMap; // prevents deleting token registry even when network is disabled
     this.getEvmTokenStore((evmTokens) => {
       const erc20Tokens: CustomEvmToken[] = evmTokens ? evmTokens.erc20 : [];
 
@@ -1617,17 +1620,20 @@ export default class KoniState extends State {
     if (needUpdateChainRegistry) {
       for (const targetToken of targetTokens) {
         const chainRegistry = this.chainRegistryMap[targetToken.chain];
-        let deleteKey = '';
 
-        for (const [key, token] of Object.entries(chainRegistry.tokenMap)) {
-          if (token.erc20Address === targetToken.smartContract && targetToken.type === 'erc20') {
-            deleteKey = key;
+        if (chainRegistry) {
+          let deleteKey = '';
+
+          for (const [key, token] of Object.entries(chainRegistry.tokenMap)) {
+            if (token.erc20Address === targetToken.smartContract && targetToken.type === 'erc20') {
+              deleteKey = key;
+            }
           }
-        }
 
-        delete chainRegistry.tokenMap[deleteKey];
-        this.chainRegistryMap[targetToken.chain] = chainRegistry;
-        cacheRegistryMap[targetToken.chain] = chainRegistry;
+          delete chainRegistry.tokenMap[deleteKey];
+          this.chainRegistryMap[targetToken.chain] = chainRegistry;
+          cacheRegistryMap[targetToken.chain] = chainRegistry;
+        }
       }
     }
 

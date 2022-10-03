@@ -61,6 +61,16 @@ export const SupportedCrossChainsMap: Record<string, CrossChainRelation> = {
         type: 'p',
         isEthereum: false,
         supportedToken: ['USDt']
+      },
+      moonbeam: {
+        type: 'p',
+        isEthereum: true,
+        supportedToken: ['USDt']
+      },
+      polkadot: {
+        type: 'r',
+        isEthereum: false,
+        supportedToken: ['DOT']
       }
     }
   },

@@ -19,7 +19,7 @@ export const PREDEFINED_NETWORKS: Record<string, NetworkJson> = {
       // Pinknode: 'wss://rpc.pinknode.io/polkadot/explorer' // https://github.com/polkadot-js/apps/issues/5721
     },
     active: true,
-    currentProvider: 'Dwellir',
+    currentProvider: 'Parity',
     currentProviderMode: 'ws',
     groups: ['RELAY_CHAIN'],
     nativeToken: 'DOT',
@@ -105,11 +105,11 @@ export const PREDEFINED_NETWORKS: Record<string, NetworkJson> = {
       Dwellir: 'wss://statemint-rpc.dwellir.com'
     },
     active: false,
-    currentProvider: 'Dwellir',
+    currentProvider: 'Parity',
     currentProviderMode: 'ws',
     groups: ['POLKADOT_PARACHAIN'],
     paraId: 1000,
-    nativeToken: 'KSM',
+    nativeToken: 'DOT',
     decimals: 10
   },
   pioneer: {

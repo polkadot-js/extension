@@ -2,8 +2,10 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { ApiProps, NetworkJson, TokenInfo } from '@subwallet/extension-base/background/KoniTypes';
+import { SupportedCrossChainsMap } from '@subwallet/extension-koni-base/api/xcm/utils';
 import { parseNumberToDisplay } from '@subwallet/extension-koni-base/utils';
 
+import { ApiPromise } from '@polkadot/api';
 import { KeyringPair } from '@polkadot/keyring/types';
 import { decodeAddress } from '@polkadot/util-crypto';
 
@@ -31,68 +33,217 @@ export async function statemintEstimateCrossChainFee (
   networkMap: Record<string, NetworkJson>
 ): Promise<[string, string | undefined]> {
   const apiProps = await dotSamaApiMap[originNetworkKey].isReady;
+  let fee = '0';
+  let feeString = '';
 
   const originNetworkJson = networkMap[originNetworkKey];
   const destinationNetworkJson = networkMap[destinationNetworkKey];
 
-  if (!tokenInfo.assetIndex) {
+  if (!tokenInfo.assetIndex && SupportedCrossChainsMap[originNetworkKey].relationMap[destinationNetworkKey].type === 'p') {
     console.log('No assetId found for Statemint token');
 
-    return ['0', ''];
+    return [fee, feeString];
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-  const assetLocation = ASSET_TO_LOCATION_MAP[originNetworkKey][tokenInfo.assetIndex];
-  const receiverLocation: Record<string, any> = { AccountId32: { network: 'Any', id: decodeAddress(to) } };
-  const destinationChainLocation: Record<string, any> = {
-    V1: { // find the destination chain
-      parents: 1,
-      interior: {
-        X1: { Parachain: destinationNetworkJson.paraId }
-      }
-    }
-  };
-
-  const extrinsic = apiProps.api.tx.polkadotXcm.limitedReserveTransferAssets(
-    destinationChainLocation, // dest
-    {
-      V1: { // beneficiary
-        parents: 0,
-        interior: {
-          X1: receiverLocation
+  try {
+    if (SupportedCrossChainsMap[originNetworkKey].relationMap[destinationNetworkKey].type === 'p') {
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+      const assetLocation = ASSET_TO_LOCATION_MAP[originNetworkKey][tokenInfo.assetIndex as string];
+      let receiverLocation: Record<string, any> = { AccountId32: { network: 'Any', id: decodeAddress(to) } };
+      const destinationChainLocation: Record<string, any> = {
+        V1: { // find the destination chain
+          parents: 1,
+          interior: {
+            X1: { Parachain: destinationNetworkJson.paraId }
+          }
         }
+      };
+
+      if (networkMap[destinationNetworkKey].isEthereum) {
+        receiverLocation = { AccountKey20: { network: 'Any', id: to } };
       }
-    },
-    {
-      V1: [
+
+      const extrinsic = apiProps.api.tx.polkadotXcm.limitedReserveTransferAssets(
+        destinationChainLocation, // dest
         {
-          id: {
-            Concrete: {
-              parents: 0,
-              interior: {
-                // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-                X2: assetLocation
+          V1: { // beneficiary
+            parents: 0,
+            interior: {
+              X1: receiverLocation
+            }
+          }
+        },
+        {
+          V1: [
+            {
+              id: {
+                Concrete: {
+                  parents: 0,
+                  interior: {
+                    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+                    X2: assetLocation
+                  }
+                }
+              },
+              fun: { Fungible: value }
+            }
+          ]
+        },
+        0, // FeeAssetItem
+        'Unlimited'
+      );
+
+      console.log('statemint xcm tx here', extrinsic.toHex());
+
+      const paymentInfo = await extrinsic.paymentInfo(fromKeypair);
+
+      fee = paymentInfo.partialFee.toString();
+      feeString = parseNumberToDisplay(paymentInfo.partialFee, originNetworkJson.decimals) + ` ${originNetworkJson.nativeToken ? originNetworkJson.nativeToken : ''}`;
+    } else {
+      console.log('transferring to dot', tokenInfo);
+
+      const extrinsic = apiProps.api.tx.polkadotXcm.limitedReserveTransferAssets(
+        {
+          V1: {
+            parents: 1,
+            interior: 'Here'
+          }
+        }, // dest
+        {
+          V1: { // beneficiary
+            parents: 0,
+            interior: {
+              X1: {
+                AccountId32: { network: 'Any', id: decodeAddress(to) }
               }
             }
-          },
-          fun: { Fungible: value }
+          }
+        },
+        {
+          V1: [
+            {
+              id: {
+                Concrete: {
+                  parents: 1,
+                  interior: 'Here' // Native token of relaychain
+                }
+              },
+              fun: { Fungible: value }
+            }
+          ]
+        },
+        0, // FeeAssetItem
+        'Unlimited'
+      );
+
+      console.log('statemint xcm tx here', extrinsic.toHex());
+
+      const paymentInfo = await extrinsic.paymentInfo(fromKeypair);
+
+      fee = paymentInfo.partialFee.toString();
+      feeString = parseNumberToDisplay(paymentInfo.partialFee, originNetworkJson.decimals) + ` ${originNetworkJson.nativeToken ? originNetworkJson.nativeToken : ''}`;
+    }
+
+    return [fee, feeString];
+  } catch (e) {
+    console.error('error parsing xcm transaction', e);
+
+    feeString = `0.0000 ${originNetworkJson.nativeToken ? originNetworkJson.nativeToken : ''}`;
+
+    return [fee, feeString];
+  }
+}
+
+export function statemintGetXcmExtrinsic (
+  originNetworkKey: string,
+  destinationNetworkKey: string,
+  to: string,
+  value: string,
+  api: ApiPromise,
+  tokenInfo: TokenInfo,
+  networkMap: Record<string, NetworkJson>
+) {
+  const destinationNetworkJson = networkMap[destinationNetworkKey];
+
+  if (SupportedCrossChainsMap[originNetworkKey].relationMap[destinationNetworkKey].type === 'p') {
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+    const assetLocation = ASSET_TO_LOCATION_MAP[originNetworkKey][tokenInfo.assetIndex as string];
+    let receiverLocation: Record<string, any> = { AccountId32: { network: 'Any', id: decodeAddress(to) } };
+    const destinationChainLocation: Record<string, any> = {
+      V1: { // find the destination chain
+        parents: 1,
+        interior: {
+          X1: { Parachain: destinationNetworkJson.paraId }
         }
-      ]
-    },
-    0, // FeeAssetItem
-    'Unlimited'
-  );
+      }
+    };
 
-  console.log('statemint xcm tx here', extrinsic.toHex());
+    if (networkMap[destinationNetworkKey].isEthereum) {
+      receiverLocation = { AccountKey20: { network: 'Any', id: to } };
+    }
 
-  const _fee = await apiProps.api.rpc.payment.queryInfo(extrinsic.toHex());
-
-  console.log('_fee here', _fee.toHuman());
-
-  // const paymentInfo = await extrinsic.paymentInfo(fromKeypair);
-  //
-  // const fee = paymentInfo.partialFee.toString();
-  // const feeString = parseNumberToDisplay(paymentInfo.partialFee, originNetworkJson.decimals) + ` ${originNetworkJson.nativeToken ? originNetworkJson.nativeToken : ''}`;
-
-  return ['0', 'feeString'];
+    return api.tx.polkadotXcm.limitedReserveTransferAssets(
+      destinationChainLocation, // dest
+      {
+        V1: { // beneficiary
+          parents: 0,
+          interior: {
+            X1: receiverLocation
+          }
+        }
+      },
+      {
+        V1: [
+          {
+            id: {
+              Concrete: {
+                parents: 0,
+                interior: {
+                  // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+                  X2: assetLocation
+                }
+              }
+            },
+            fun: { Fungible: value }
+          }
+        ]
+      },
+      0, // FeeAssetItem
+      'Unlimited'
+    );
+  } else {
+    return api.tx.polkadotXcm.limitedReserveTransferAssets(
+      {
+        V1: {
+          parents: 1,
+          interior: 'Here'
+        }
+      }, // dest
+      {
+        V1: { // beneficiary
+          parents: 0,
+          interior: {
+            X1: {
+              AccountId32: { network: 'Any', id: decodeAddress(to) }
+            }
+          }
+        }
+      },
+      {
+        V1: [
+          {
+            id: {
+              Concrete: {
+                parents: 1,
+                interior: 'Here' // Native token of relaychain
+              }
+            },
+            fun: { Fungible: value }
+          }
+        ]
+      },
+      0, // FeeAssetItem
+      'Unlimited'
+    );
+  }
 }

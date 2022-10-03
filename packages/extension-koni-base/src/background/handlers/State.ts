@@ -1380,33 +1380,36 @@ export default class KoniState extends State {
 
   public upsertChainRegistry (tokenData: CustomEvmToken) {
     const chainRegistry = this.chainRegistryMap[tokenData.chain];
-    const tokenKey = this.checkTokenKey(tokenData);
 
-    if (tokenKey !== '') {
-      chainRegistry.tokenMap[tokenKey] = {
-        isMainToken: false,
-        symbol: tokenData.symbol,
-        name: tokenData.name,
-        erc20Address: tokenData.smartContract,
-        decimals: tokenData.decimals
-      } as TokenInfo;
-    } else {
-      // @ts-ignore
-      chainRegistry.tokenMap[tokenData.symbol] = {
-        isMainToken: false,
-        symbol: tokenData.symbol,
-        name: tokenData.symbol,
-        erc20Address: tokenData.smartContract,
-        decimals: tokenData.decimals
-      } as TokenInfo;
+    if (chainRegistry) {
+      const tokenKey = this.checkTokenKey(tokenData);
+
+      if (tokenKey !== '') {
+        chainRegistry.tokenMap[tokenKey] = {
+          isMainToken: false,
+          symbol: tokenData.symbol,
+          name: tokenData.name,
+          erc20Address: tokenData.smartContract,
+          decimals: tokenData.decimals
+        } as TokenInfo;
+      } else {
+        // @ts-ignore
+        chainRegistry.tokenMap[tokenData.symbol] = {
+          isMainToken: false,
+          symbol: tokenData.symbol,
+          name: tokenData.symbol,
+          erc20Address: tokenData.smartContract,
+          decimals: tokenData.decimals
+        } as TokenInfo;
+      }
+
+      cacheRegistryMap[tokenData.chain] = chainRegistry;
+      this.chainRegistrySubject.next(this.getChainRegistryMap());
     }
-
-    cacheRegistryMap[tokenData.chain] = chainRegistry;
-    this.chainRegistrySubject.next(this.getChainRegistryMap());
   }
 
   public initChainRegistry () {
-    this.chainRegistryMap = {};
+    this.chainRegistryMap = cacheRegistryMap; // prevents deleting token registry even when network is disabled
     this.getEvmTokenStore((evmTokens) => {
       const erc20Tokens: CustomEvmToken[] = evmTokens ? evmTokens.erc20 : [];
 
@@ -1617,17 +1620,20 @@ export default class KoniState extends State {
     if (needUpdateChainRegistry) {
       for (const targetToken of targetTokens) {
         const chainRegistry = this.chainRegistryMap[targetToken.chain];
-        let deleteKey = '';
 
-        for (const [key, token] of Object.entries(chainRegistry.tokenMap)) {
-          if (token.erc20Address === targetToken.smartContract && targetToken.type === 'erc20') {
-            deleteKey = key;
+        if (chainRegistry) {
+          let deleteKey = '';
+
+          for (const [key, token] of Object.entries(chainRegistry.tokenMap)) {
+            if (token.erc20Address === targetToken.smartContract && targetToken.type === 'erc20') {
+              deleteKey = key;
+            }
           }
-        }
 
-        delete chainRegistry.tokenMap[deleteKey];
-        this.chainRegistryMap[targetToken.chain] = chainRegistry;
-        cacheRegistryMap[targetToken.chain] = chainRegistry;
+          delete chainRegistry.tokenMap[deleteKey];
+          this.chainRegistryMap[targetToken.chain] = chainRegistry;
+          cacheRegistryMap[targetToken.chain] = chainRegistry;
+        }
       }
     }
 
@@ -1773,6 +1779,34 @@ export default class KoniState extends State {
     return true;
   }
 
+  private getDefaultNetworkKey = (): string[] => {
+    const genesisHashes: Record<string, string> = {};
+
+    const pairs = keyring.getPairs();
+
+    pairs.forEach((pair) => {
+      const originGenesisHash = pair.meta.originGenesisHash;
+
+      if (originGenesisHash && typeof originGenesisHash === 'string') {
+        genesisHashes[originGenesisHash] = originGenesisHash;
+      }
+    });
+
+    const hashes = Object.keys(genesisHashes);
+
+    const result: string[] = [];
+
+    for (const [key, network] of Object.entries(this.networkMap)) {
+      const condition = key === 'polkadot' || key === 'kusama' || hashes.includes(network.genesisHash);
+
+      if (condition) {
+        result.push(key);
+      }
+    }
+
+    return result;
+  };
+
   public async disableAllNetworks (): Promise<boolean> {
     if (this.lockNetworkMap) {
       return false;
@@ -1781,8 +1815,10 @@ export default class KoniState extends State {
     this.lockNetworkMap = true;
     const targetNetworkKeys: string[] = [];
 
+    const networkKeys = this.getDefaultNetworkKey();
+
     for (const [key, network] of Object.entries(this.networkMap)) {
-      if (network.active && key !== 'polkadot' && key !== 'kusama') {
+      if (network.active && !networkKeys.includes(key)) {
         targetNetworkKeys.push(key);
         this.networkMap[key].active = false;
       }
@@ -1886,17 +1922,17 @@ export default class KoniState extends State {
 
     this.lockNetworkMap = true;
     const targetNetworkKeys: string[] = [];
+    const networkKeys = this.getDefaultNetworkKey();
 
     for (const [key, network] of Object.entries(this.networkMap)) {
       if (!network.active) {
-        if (key === 'polkadot' || key === 'kusama') {
+        if (networkKeys.includes(key)) {
           this.apiMap.dotSama[key] = initApi(key, getCurrentProvider(this.networkMap[key]), this.networkMap[key].isEthereum);
           this.networkMap[key].active = true;
         }
       } else {
-        if (key !== 'polkadot' && key !== 'kusama') {
+        if (!networkKeys.includes(key)) {
           targetNetworkKeys.push(key);
-
           this.networkMap[key].active = false;
           this.networkMap[key].apiStatus = NETWORK_STATUS.DISCONNECTED;
         }

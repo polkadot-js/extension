@@ -77,7 +77,7 @@ const BuyModal = (props: Props) => {
     return genesisOptions.find((net) => net.networkKey === networkQr?.networkKey);
   }, [genesisOptions, networkQr?.networkKey]);
 
-  const { address } = (account as AccountJson) || { address: ALL_ACCOUNT_KEY };
+  const { address, originGenesisHash } = (account as AccountJson) || { address: ALL_ACCOUNT_KEY };
   const { networkKey, networkPrefix } = (network as NetworkSelectOption) || { networkKey: ALL_NETWORK_KEY, networkPrefix: 42 };
 
   const networkMap = useSelector((state: RootState) => state.networkMap);
@@ -100,8 +100,10 @@ const BuyModal = (props: Props) => {
   }, [filter, accounts, network]);
 
   const filteredNetwork = useMemo(() => {
-    return filter ? genesisOptions.filter((network) => network.networkKey?.toLowerCase().includes(filter.toLowerCase())) : genesisOptions;
-  }, [filter, genesisOptions]);
+    const options = originGenesisHash ? genesisOptions.filter((option) => option.value === originGenesisHash) : genesisOptions;
+
+    return filter ? options.filter((network) => network.networkKey?.toLowerCase().includes(filter.toLowerCase())) : options;
+  }, [filter, genesisOptions, originGenesisHash]);
 
   const onChangeFilter = useCallback((value: string) => {
     setFilter(value);

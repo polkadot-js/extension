@@ -5,7 +5,7 @@ import type { ThemeProps } from '../types';
 
 import Label from '@subwallet/extension-koni-ui/components/Label';
 import React, { createRef, useCallback, useState } from 'react';
-import Dropzone, { DropzoneRef } from 'react-dropzone';
+import Dropzone, { Accept, DropzoneRef } from 'react-dropzone';
 import styled from 'styled-components';
 
 import { formatNumber, hexToU8a, isHex, u8aToString } from '@polkadot/util';
@@ -22,7 +22,7 @@ export interface InputFileProps {
   // Reference Example Usage: https://github.com/react-dropzone/react-dropzone/tree/master/examples/Accept
   // i.e. MIME types: 'application/json, text/plain', or '.json, .txt'
   className?: string;
-  accept?: string;
+  accept?: Accept;
   clearContent?: boolean;
   convertHex?: boolean;
   help?: React.ReactNode;

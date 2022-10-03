@@ -1,5 +1,21 @@
 # CHANGELOG
 
+## 0.6.6 (Koni)
+Build date: Sep 30, 2022.
+
+Update:
+- Update Acala endpoints (#685)
+- Change transfer warning when the account cannot be reaped (#681)
+- Integration Ledger Acala account (#564)
+- Update $ price for ZTG token (#671)
+- Integrate Auto-Compound Staking Reward API for Turing Network (#520)
+- Add staking for $CAPS and add support for Ternoa's testnet Alphanet (#636)
+
+Bug fixes:
+- Still shows deleted NFTs (#497)
+- Some errors occurred when updating the caching mechanism (#583)
+- Some bugs related to custom tokens when the chain is disconnected (#687)
+
 ## 0.6.5 (Koni)
 Build date: Sep 24, 2022.
 

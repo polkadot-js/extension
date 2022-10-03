@@ -194,6 +194,20 @@ function updateXcmResponseTxResult (
         response.txResult.change = record.event.data[2]?.toString() || '0';
         response.txResult.changeSymbol = tokenInfo.symbol;
       }
+    } else if (['statemint', 'statemine'].includes(networkKey) && tokenInfo) {
+      if (!tokenInfo.isMainToken) {
+        if (record.event.section === 'assets' &&
+          record.event.method.toLowerCase() === 'transferred') {
+          response.txResult.change = record.event.data[3]?.toString() || '0';
+          response.txResult.changeSymbol = tokenInfo.symbol;
+        }
+      } else {
+        if (record.event.section === 'balances' &&
+          record.event.method.toLowerCase() === 'withdraw') {
+          response.txResult.change = record.event.data[1]?.toString() || '0';
+          response.txResult.changeSymbol = tokenInfo.symbol;
+        }
+      }
     } else {
       if (record.event.section === 'balances' &&
         record.event.method.toLowerCase() === 'transfer') {

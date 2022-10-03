@@ -38,16 +38,16 @@
   },
   "devDependencies": {
     "@babel/core": "^7.19.3",
-    "@polkadot/dev": "^0.67.134",
-    "@types/jest": "^29.0.3",
+    "@polkadot/dev": "^0.67.135",
+    "@types/jest": "^29.1.1",
     "i18next-scanner": "^4.0.0",
     "sinon-chrome": "^3.0.1"
   },
   "resolutions": {
-    "@polkadot/api": "^9.4.2",
+    "@polkadot/api": "^9.4.3",
     "@polkadot/keyring": "^10.1.9",
     "@polkadot/networks": "^10.1.9",
-    "@polkadot/types": "^9.4.2",
+    "@polkadot/types": "^9.4.3",
     "@polkadot/util": "^10.1.9",
     "@polkadot/util-crypto": "^10.1.9",
     "@polkadot/x-fetch": "^10.1.9",

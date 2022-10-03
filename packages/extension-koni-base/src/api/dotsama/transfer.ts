@@ -173,7 +173,10 @@ export async function estimateFee (
 
     fee = paymentInfo.partialFee.toString();
   } else if (['statemint', 'statemine'].includes(networkKey) && tokenInfo) {
-    const paymentInfo = await api.tx.assets.transfer(tokenInfo.assetIndex, to, value).paymentInfo(fromKeypair);
+    const paymentInfo = await api.tx.balances.transfer(tokenInfo.assetIndex, to, value).paymentInfo(fromKeypair);
+
+    const extrinsic = api.tx.balances.transfer(tokenInfo.assetIndex, to, value);
+    console.log(extrinsic.toHex());
 
     fee = paymentInfo.partialFee.toString();
   } else if (isTxBalancesSupported && (!tokenInfo || tokenInfo.isMainToken || (tokenInfo && ((networkKey === 'crab' && tokenInfo.symbol === 'CKTON') || (networkKey === 'pangolin' && tokenInfo.symbol === 'PKTON'))))) {

@@ -229,7 +229,7 @@ function SendEvmTransactionConfirmationInfo ({ className, confirmation: { payloa
                   <span className='value'>
                     <FormatBalance
                       format={[network?.decimals || 18, '']}
-                      value={new BN(transaction.value || '0')}
+                      value={new BN(transaction.value as string | number | Uint8Array | BN | number[] | Buffer || '0')}
                     />&nbsp;{network?.nativeToken}
                   </span>
                 </div>

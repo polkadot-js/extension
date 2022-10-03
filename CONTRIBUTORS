@@ -1,4 +1,4 @@
-     553	Jaco                          	Bump TS (#1149)
+     554	Jaco                          	Bump deps (#1153)
       88	Thibaut Sardan                	Use go-back instead of going to overview from the auth management (#1139)
        7	Ivan Rukhavets                	Mention derivation in FAQ (#334)
        4	Amaury Martiny                	PostMessageProvider with on('connected' | 'disconnected') (#279)

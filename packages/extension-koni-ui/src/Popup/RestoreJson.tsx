@@ -20,8 +20,8 @@ import { isKeyringPairs$Json } from '../util/typeGuards';
 
 const acceptedFormats = {
   'application/json': ['.json'],
-  'text/plain': ['.json', '', 'txt'],
-}
+  'text/plain': ['.json', '', 'txt']
+};
 
 interface Props {
   className?: string;

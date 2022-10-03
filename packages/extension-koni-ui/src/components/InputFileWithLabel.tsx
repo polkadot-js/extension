@@ -5,7 +5,7 @@ import type { ThemeProps } from '../types';
 
 import Label from '@subwallet/extension-koni-ui/components/Label';
 import React, { createRef, useCallback, useState } from 'react';
-import Dropzone, {Accept, DropzoneRef} from 'react-dropzone';
+import Dropzone, { Accept, DropzoneRef } from 'react-dropzone';
 import styled from 'styled-components';
 
 import { formatNumber, hexToU8a, isHex, u8aToString } from '@polkadot/util';

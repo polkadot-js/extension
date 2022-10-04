@@ -393,7 +393,7 @@ async function subscribeWithAccountMulti (addresses: string[], networkKey: strin
       unsub2 = await subscribeTokensBalance(addresses, networkKey, networkAPI.api, mainCallback, subCallback);
     } else if (['kintsugi', 'interlay', 'kintsugi_test'].includes(networkKey)) {
       unsub2 = await subscribeTokensBalance(addresses, networkKey, networkAPI.api, mainCallback, subCallback, true);
-    } else if (['statemine', 'astar', 'shiden'].indexOf(networkKey) > -1) {
+    } else if (['statemine', 'astar', 'shiden', 'statemint'].indexOf(networkKey) > -1) {
       unsub2 = await subscribeAssetsBalance(addresses, networkKey, networkAPI.api, subCallback);
     } else if (['genshiro_testnet', 'genshiro', 'equilibrium_parachain'].includes(networkKey)) {
       unsub2 = await subscribeGenshiroTokenBalance(addresses, networkKey, networkAPI.api, mainCallback, subCallback, true);
@@ -533,7 +533,7 @@ export async function getFreeBalance (networkKey: string, address: string, dotSa
         const balance = await api.query.system.account(address) as { data: { freeKton: Balance } };
 
         return balance.data?.freeKton?.toString() || '0';
-      } else if (!isMainToken && ['astar', 'shiden'].includes(networkKey)) {
+      } else if (!isMainToken && ['astar', 'shiden', 'statemint', 'statemine'].includes(networkKey)) {
         const balanceInfo = (await api.query.assets.account(tokenInfo?.assetIndex, address)).toHuman() as Record<string, string>;
 
         // eslint-disable-next-line @typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-member-access,@typescript-eslint/no-unsafe-return
@@ -635,7 +635,7 @@ export async function subscribeFreeBalance (
           // @ts-ignore
           unsub && unsub();
         };
-      } else if (!isMainToken && ['astar', 'shiden'].includes(networkKey)) {
+      } else if (!isMainToken && ['astar', 'shiden', 'statemint', 'statemine'].includes(networkKey)) {
         // @ts-ignore
         const unsub = await api.query.assets.account(tokenInfo?.assetIndex, address, (_balanceInfo) => {
           // eslint-disable-next-line @typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-member-access

@@ -734,6 +734,14 @@ export const PREDEFINE_TOKEN_DATA_MAP: Record<string, Record<string, TokenInfo>>
     }
   },
   shidenEvm: {
+    USDT: {
+      isMainToken: false,
+      symbol: 'USDT',
+      erc20Address: '0xFFFFFFFF000000000000000000000001000007C0',
+      decimals: 6,
+      name: 'Tether USD',
+      assetId: '4294969280'
+    },
     aUSD: {
       isMainToken: false,
       symbol: 'aUSD',
@@ -782,13 +790,6 @@ export const PREDEFINE_TOKEN_DATA_MAP: Record<string, Record<string, TokenInfo>>
       erc20Address: '0xfa9343c3897324496a05fc75abed6bac29f8a40f',
       decimals: 6,
       name: 'USD Coin'
-    },
-    USDT: {
-      isMainToken: false,
-      symbol: 'USDT',
-      erc20Address: '0x818ec0A7Fe18Ff94269904fCED6AE3DaE6d6dC0b',
-      decimals: 18,
-      name: 'Tether USD'
     },
     WSDN: {
       isMainToken: false,

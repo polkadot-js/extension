@@ -3,11 +3,16 @@
 
 import State from '@subwallet/extension-koni-base/background/handlers/State';
 
+import { logger as createLogger } from '@polkadot/util';
+import { Logger } from '@polkadot/util/types';
+
 export default class BaseMigrationJob {
   readonly state: State;
+  public logger: Logger;
 
   constructor (state: State) {
     this.state = state;
+    this.logger = createLogger(this.constructor.name);
   }
 
   public run (): Promise<void> {

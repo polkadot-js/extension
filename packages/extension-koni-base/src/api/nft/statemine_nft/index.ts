@@ -2,15 +2,13 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { ApiProps, NftCollection, NftItem } from '@subwallet/extension-base/background/KoniTypes';
-import { SUPPORTED_NFT_NETWORKS } from '@subwallet/extension-koni-base/api/nft/config';
 import { BaseNftApi, HandleNftParams } from '@subwallet/extension-koni-base/api/nft/nft';
 import { isUrl } from '@subwallet/extension-koni-base/utils';
 import fetch from 'cross-fetch';
 
 interface AssetId {
   classId: string | number,
-  tokenId: string | number,
-  owner: string
+  tokenId: string | number
 }
 
 interface MetadataResponse {
@@ -68,29 +66,21 @@ export default class StatemineNftApi extends BaseNftApi {
       return [];
     }
 
-    const accountAssets: Record<string, any[]> = {};
+    const assetIds: AssetId[] = [];
 
     await Promise.all(addresses.map(async (address) => {
       // @ts-ignore
       const resp = await this.dotSamaApi.api.query.uniques.account.keys(address);
 
-      if (address in accountAssets) {
-        accountAssets[address].concat(resp);
-      } else {
-        accountAssets[address] = resp;
+      if (resp) {
+        for (const key of resp) {
+          // eslint-disable-next-line @typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-member-access
+          const data = key.toHuman() as string[];
+
+          assetIds.push({ classId: data[1], tokenId: this.parseTokenId(data[2]) });
+        }
       }
     }));
-
-    const assetIds: AssetId[] = [];
-
-    Object.entries(accountAssets).forEach(([owner, rawData]) => {
-      for (const key of rawData) {
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-member-access
-        const data = key.toHuman() as string[];
-
-        assetIds.push({ classId: data[1], tokenId: this.parseTokenId(data[2]), owner });
-      }
-    });
 
     return assetIds;
   }
@@ -126,15 +116,15 @@ export default class StatemineNftApi extends BaseNftApi {
     return this.getMetadata(collectionMetadata?.data);
   }
 
-  public async handleNfts (params: HandleNftParams) {
+  public async handleNft (address: string, params: HandleNftParams) {
     // const start = performance.now();
 
-    const assetIds = await this.getNfts(this.addresses);
+    const assetIds = await this.getNfts([address]);
 
     try {
       if (!assetIds || assetIds.length === 0) {
-        params.updateReady(true);
-        params.updateNftIds(SUPPORTED_NFT_NETWORKS.statemine);
+        // params.updateReady(true);
+        params.updateNftIds(this.chain, address);
 
         return;
       }
@@ -162,28 +152,32 @@ export default class StatemineNftApi extends BaseNftApi {
           description: tokenInfo?.description as string,
           image: tokenInfo && tokenInfo.image ? this.parseUrl(tokenInfo?.image) : undefined,
           collectionId: this.parseTokenId(parsedClassId),
-          chain: SUPPORTED_NFT_NETWORKS.statemine,
-          owner: assetId.owner
+          chain: this.chain,
+          owner: address
         } as NftItem;
 
-        params.updateItem(parsedNft);
+        params.updateItem(this.chain, parsedNft, address);
 
         const parsedCollection = {
           collectionId: parsedClassId,
-          chain: SUPPORTED_NFT_NETWORKS.statemine,
+          chain: this.chain,
           collectionName: collectionMeta?.name,
           image: collectionMeta && collectionMeta.image ? this.parseUrl(collectionMeta?.image) : undefined
         } as NftCollection;
 
-        params.updateCollection(parsedCollection);
-        params.updateReady(true);
+        params.updateCollection(this.chain, parsedCollection);
+        // params.updateReady(true);
       }));
 
-      params.updateCollectionIds(SUPPORTED_NFT_NETWORKS.statemine, Object.keys(collectionNftIds));
-      Object.entries(collectionNftIds).forEach(([collectionId, nftIds]) => params.updateNftIds(SUPPORTED_NFT_NETWORKS.statemine, collectionId, nftIds));
+      params.updateCollectionIds(this.chain, address, Object.keys(collectionNftIds));
+      Object.entries(collectionNftIds).forEach(([collectionId, nftIds]) => params.updateNftIds(this.chain, address, collectionId, nftIds));
     } catch (e) {
       console.error('Failed to fetch statemine nft', e);
     }
+  }
+
+  public async handleNfts (params: HandleNftParams) {
+    await Promise.all(this.addresses.map((address) => this.handleNft(address, params)));
   }
 
   public async fetchNfts (params: HandleNftParams): Promise<number> {

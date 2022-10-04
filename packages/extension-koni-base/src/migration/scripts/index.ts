@@ -2,14 +2,13 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import BaseMigrationJob from '../Base';
-import ChangeTransactionHistoryStore from './ChangeTransactionHistoryStore';
-// import RemoveWrongTransactionHistoriesFromStore from './RemoveWrongTransactionHistoriesFromStore';
+// import FixMissingTransactionHistory from './FixMissingTransactionHistory';
+import ClearOldStorage from './ClearOldStorage';
+import ConvertTransactionHistoryFromChromeStorageToIndexedDB from './ConvertTransactionHistoryFromChromeStorageToIndexedDB';
 
-export default <Record<string, typeof BaseMigrationJob[]>> {
-  '0.4.4-0': [
-    ChangeTransactionHistoryStore
-  ],
-  '0.4.6-2': [
-    // RemoveWrongTransactionHistoriesFromStore
-  ]
+export default <Record<string, typeof BaseMigrationJob>> {
+  // '0.5.3-2': FixMissingTransactionHistory,
+  '0.5.3-3': ConvertTransactionHistoryFromChromeStorageToIndexedDB,
+  // '0.5.3-3-1': ConvertTransactionHistoryFromChromeStorageToIndexedDB, // Can run multiple times with diffrent key
+  '0.5.6-1': ClearOldStorage
 };

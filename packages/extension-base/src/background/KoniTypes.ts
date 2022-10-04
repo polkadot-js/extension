@@ -442,6 +442,11 @@ export interface TransactionHistoryItemType {
   eventIdx?: number | null;
 }
 
+export interface TransactionHistoryItemJson {
+  items: TransactionHistoryItemType[],
+  total: number
+}
+
 export interface RequestTransactionHistoryGet {
   address: string;
   networkKey: string;
@@ -1385,7 +1390,7 @@ export interface KoniRequestSignatures {
   'pri(nft.getNft)': [null, NftJson];
   'pri(nft.getSubscription)': [RequestSubscribeNft, NftJson, NftJson];
   'pri(nftCollection.getNftCollection)': [null, NftCollectionJson];
-  'pri(nftCollection.getSubscription)': [null, NftCollectionJson, NftCollectionJson];
+  'pri(nftCollection.getSubscription)': [null, NftCollection[], NftCollection[]];
   'pri(price.getPrice)': [RequestPrice, PriceJson];
   'pri(price.getSubscription)': [RequestSubscribePrice, PriceJson, PriceJson];
   'pri(balance.getBalance)': [RequestBalance, BalanceJson];

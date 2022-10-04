@@ -25,13 +25,7 @@ function createSubstrateNftApi (chain: string, apiProps: ApiProps | null, addres
     case SUPPORTED_NFT_NETWORKS.acala:
       return new AcalaNftApi(apiProps, useAddresses, chain);
     case SUPPORTED_NFT_NETWORKS.kusama:
-      // eslint-disable-next-line no-case-declarations
-      const rmrkNftApi = new RmrkNftApi();
-
-      rmrkNftApi.setChain(SUPPORTED_NFT_NETWORKS.kusama);
-      rmrkNftApi.setAddresses(useAddresses);
-
-      return rmrkNftApi;
+      return new RmrkNftApi(apiProps, useAddresses, chain);
     case SUPPORTED_NFT_NETWORKS.statemine:
       return new StatemineNftApi(apiProps, useAddresses, chain);
     case SUPPORTED_NFT_NETWORKS.unique_network:
@@ -159,28 +153,20 @@ export class NftHandler {
 
   public async handleNfts (
     evmContracts: CustomEvmToken[],
-    updateItem: (data: NftItem) => void,
-    updateCollection: (data: NftCollection) => void,
-    updateReady: (ready: boolean) => void,
-    updateIds: (networkKey: string, collectionId?: string, nftIds?: string[]) => void,
-    updateCollectionIds: (networkKey: string, collectionIds?: string[]) => void) {
+    updateItem: (chain: string, data: NftItem, owner: string) => void,
+    updateCollection: (chain: string, data: NftCollection) => void,
+    updateIds: (chain: string, owner: string, collectionId?: string, nftIds?: string[]) => void,
+    updateCollectionIds: (chain: string, address: string, collectionIds?: string[]) => void) {
     this.setupApi();
     this.setEvmContracts(evmContracts);
     await Promise.all(this.handlers.map(async (handler) => {
       await handler.fetchNfts({
-        updateItem: (data: NftItem) => {
-          updateItem(data);
-        },
-        updateCollection: (data: NftCollection) => {
-          updateCollection(data);
-        },
-        updateReady,
+        updateItem,
+        updateCollection,
         updateNftIds: updateIds,
         updateCollectionIds
       });
     }));
-
-    updateReady(true);
   }
 
   public parseAssetId (id: string) {

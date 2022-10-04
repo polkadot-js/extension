@@ -110,13 +110,13 @@ export class BitCountryNftApi extends BaseNftApi {
     return 1;
   }
 
-  async handleNfts (params: HandleNftParams): Promise<void> {
-    const assetIds = await this.getNfts(this.addresses);
+  async handleNft (address: string, params: HandleNftParams): Promise<void> {
+    const assetIds = await this.getNfts([address]);
 
     try {
       if (!assetIds || assetIds.length === 0) {
-        params.updateReady(true);
-        params.updateNftIds(this.chain);
+        // params.updateReady(true);
+        params.updateNftIds(this.chain, address);
 
         return;
       }
@@ -148,7 +148,7 @@ export class BitCountryNftApi extends BaseNftApi {
           image: tokenInfo && tokenInfo.image_url ? this.parseUrl(tokenInfo?.image_url as string) : this.parseUrl(collectionMeta?.image_url as string),
           collectionId: parsedClassId,
           chain: this.chain,
-          owner: assetId.owner
+          owner: address
         } as NftItem;
 
         const parsedCollection = {
@@ -160,15 +160,19 @@ export class BitCountryNftApi extends BaseNftApi {
           image: this.parseUrl(collectionMeta?.image_url as string)
         } as NftCollection;
 
-        params.updateItem(parsedNft);
-        params.updateCollection(parsedCollection);
-        params.updateReady(true);
+        params.updateItem(this.chain, parsedNft, address);
+        params.updateCollection(this.chain, parsedCollection);
+        // params.updateReady(true);
       }));
 
-      params.updateCollectionIds(this.chain, Object.keys(collectionNftIds));
-      Object.entries(collectionNftIds).forEach(([collectionId, nftIds]) => params.updateNftIds(this.chain, collectionId, nftIds));
+      params.updateCollectionIds(this.chain, address, Object.keys(collectionNftIds));
+      Object.entries(collectionNftIds).forEach(([collectionId, nftIds]) => params.updateNftIds(this.chain, address, collectionId, nftIds));
     } catch (e) {
       console.error('Failed to fetch bit.country nft', e);
     }
+  }
+
+  public async handleNfts (params: HandleNftParams) {
+    await Promise.all(this.addresses.map((address) => this.handleNft(address, params)));
   }
 }

@@ -4152,11 +4152,16 @@ __metadata:
   resolution: "@polkadot/api-derive@npm:9.4.3"
   dependencies:
     "@babel/runtime": ^7.19.0
+    "@polkadot/api": 9.4.3
+    "@polkadot/api-augment": 9.4.3
+    "@polkadot/api-base": 9.4.3
     "@polkadot/rpc-core": 9.4.3
     "@polkadot/types": 9.4.3
+    "@polkadot/types-codec": 9.4.3
     "@polkadot/util": ^10.1.9
+    "@polkadot/util-crypto": ^10.1.9
     rxjs: ^7.5.7
-  checksum: 41a755bd4cf322fa2548ff5ab0cabcd77c9899ebbd07151ca38660a9fec181d54767c8c23f7e4e288503d256ca5eef89b5005c5cded487182bef7ffdd60a7fe3
+  checksum: a4190dd0b2561ba189c8cb2ef2927af298c08760ca473bf01714cf51176aaf4f7cbb86ff3c9815f58d2178a61fd73904b37db7ed09a3b4ffe0a6af6bc6baa725
   languageName: node
   linkType: hard
 
@@ -4198,8 +4203,8 @@ __metadata:
     "@polkadot/util": ^10.1.9
     "@polkadot/util-crypto": ^10.1.9
     eventemitter3: ^4.0.7
-    rxjs: ^7.5.5
-  checksum: 8ba0041ae8b7d3dddd060e7e80b4aba7ebf6be9b90b61b4bd4c251bc9d04a6d1a15398ba13fba1c1c01722f610f6670eba121dc1dac346b8907a99d877dbab1d
+    rxjs: ^7.5.7
+  checksum: 45d0448f1fa744977bf093ab886723734541c9a1013556529045f32d404e4587cc795832210c59bfacd6695cd5db5e66db428a44434aa4f33e46656881baaa98
   languageName: node
   linkType: hard
 
@@ -5020,21 +5025,32 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@polkadot/x-global@npm:10.1.3, @polkadot/x-global@npm:^10.1.3":
-  version: 10.1.3
-  resolution: "@polkadot/x-global@npm:10.1.3"
-  dependencies:
-    "@babel/runtime": ^7.18.9
-  checksum: 8b3aacdf9102bb9b5c3ceb29f1b7288c7fee11fd79f375f5c61efc4ed77eae200e478edf6fe88d7ecdf5961d8d7cda69beea28eea2c1e0f6e70eecff19aa8cd2
-  languageName: node
-  linkType: hard
-
 "@polkadot/x-global@npm:9.7.2, @polkadot/x-global@npm:^9.7.2":
   version: 9.7.2
   resolution: "@polkadot/x-global@npm:9.7.2"
   dependencies:
     "@babel/runtime": ^7.18.6
   checksum: 1c64fd3ba0d81707887bb0fcb55da1ee5977ebf4bf247bc078e1d96e7a12d2bed089fafa8776b8c219772049521cf49f45d378f37fed82aaafe44b0b5aad41ac
+  languageName: node
+  linkType: hard
+
+"@polkadot/x-randomvalues@npm:10.1.9":
+  version: 10.1.9
+  resolution: "@polkadot/x-randomvalues@npm:10.1.9"
+  dependencies:
+    "@babel/runtime": ^7.19.0
+    "@polkadot/x-global": 10.1.9
+  checksum: 2478a3ca35c65b4c711b4a042b8ac1e9a8a3bb0b0904dcb48b27a7445bb246215599a219f90cf816b33fa1a7c18aa39ef25db97951051a824f2ebb4eeb8d59d5
+  languageName: node
+  linkType: hard
+
+"@polkadot/x-textdecoder@npm:10.1.9":
+  version: 10.1.9
+  resolution: "@polkadot/x-textdecoder@npm:10.1.9"
+  dependencies:
+    "@babel/runtime": ^7.19.0
+    "@polkadot/x-global": 10.1.9
+  checksum: bd3c70c454c0b8275f9078e1e84bbfd5abc8ba5ee91540e9b8793c9f81320ced488a0b5744e7ed8a9416ca540a153be95bcac40b2d1180042ebf313ca502bb8d
   languageName: node
   linkType: hard
 

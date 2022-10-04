@@ -294,7 +294,7 @@ export class KoniSubscription {
       return;
     }
 
-    const currentStakingInfo = state.getStaking().details;
+    const currentStakingInfo = this.state.getStaking().details;
 
     if (!addresses.length) {
       return;

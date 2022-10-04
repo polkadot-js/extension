@@ -7,12 +7,12 @@ import { TokenInfo } from '@subwallet/extension-base/background/KoniTypes';
 // Note: tokenKey and TokenInfo.symbol must be the same value to prevent unwanted problem
 export const PREDEFINE_TOKEN_DATA_MAP: Record<string, Record<string, TokenInfo>> = {
   statemine: {
-    USDT: {
+    USDt: {
       isMainToken: false,
-      assetIndex: 11,
-      symbol: 'USDT',
-      name: 'USDT',
-      decimals: 4
+      assetIndex: 1984,
+      symbol: 'USDt',
+      name: 'USDt',
+      decimals: 6
     },
     USDC: {
       isMainToken: false,

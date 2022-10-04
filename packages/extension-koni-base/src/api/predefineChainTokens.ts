@@ -345,13 +345,6 @@ export const PREDEFINE_TOKEN_DATA_MAP: Record<string, Record<string, TokenInfo>>
     }
   },
   moonriver: {
-    USDT: {
-      isMainToken: false,
-      symbol: 'USDT',
-      erc20Address: '0xB44a9B6905aF7c801311e8F4E76932ee959c663C',
-      decimals: 6,
-      name: 'Tether USD'
-    },
     USDC: {
       isMainToken: false,
       symbol: 'USDC',

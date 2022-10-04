@@ -71,8 +71,6 @@ export async function checkSupportTransfer (networkKey: string, token: string, d
   };
 
   if (!(isTxCurrenciesSupported || isTxBalancesSupported || isTxTokensSupported || isTxEqBalancesSupported)) {
-    console.log('got in here');
-
     return result;
   }
 
@@ -97,8 +95,8 @@ export async function checkSupportTransfer (networkKey: string, token: string, d
     result.supportTransfer = true;
     result.supportTransferAll = true;
   } else if (['statemint', 'statemine'].includes(networkKey) && tokenInfo) {
-    result.supportTransfer = true;
-    result.supportTransferAll = true;
+    result.supportTransfer = false;
+    result.supportTransferAll = false;
   }
 
   return result;

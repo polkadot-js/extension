@@ -10,6 +10,7 @@ import useOutsideClick from '@subwallet/extension-koni-ui/hooks/useOutsideClick'
 import useTranslation from '@subwallet/extension-koni-ui/hooks/useTranslation';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
+import { convertHexColorToRGBA } from '@subwallet/extension-koni-ui/util/color';
 import CN from 'classnames';
 import React, { useCallback, useContext, useMemo, useRef, useState } from 'react';
 import { useSelector } from 'react-redux';
@@ -186,7 +187,7 @@ export default React.memo(styled(BalanceShowQrAction)(({ theme }: Props) => `
     position: fixed;
     padding: 10px;
     background: ${theme.popupBackground};
-    box-shadow: 0px 0px 7px rgba(102, 225, 182, 0.4);
+    box-shadow: 0px 0px 7px ${convertHexColorToRGBA(theme.primaryColor, 0.4)};
     z-index: 10;
     border-radius: 8px;
 

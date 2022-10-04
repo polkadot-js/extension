@@ -9,7 +9,8 @@ import fetch from 'cross-fetch';
 
 interface AssetId {
   classId: string | number,
-  tokenId: string | number
+  tokenId: string | number,
+  owner: string
 }
 
 interface Collection {
@@ -60,23 +61,29 @@ export class KaruraNftApi extends BaseNftApi {
       return [];
     }
 
-    let accountAssets: any[] = [];
+    const accountAssets: Record<string, any[]> = {};
 
     await Promise.all(addresses.map(async (address) => {
       // @ts-ignore
       const resp = await this.dotSamaApi.api.query.ormlNFT.tokensByOwner.keys(address);
 
-      accountAssets = accountAssets.concat(resp);
+      if (address in accountAssets) {
+        accountAssets[address].concat(resp);
+      } else {
+        accountAssets[address] = resp;
+      }
     }));
 
     const assetIds: AssetId[] = [];
 
-    for (const key of accountAssets) {
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-member-access
-      const data = key.toHuman() as string[];
+    Object.entries(accountAssets).forEach(([owner, rawData]) => {
+      for (const key of rawData) {
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-member-access
+        const data = key.toHuman() as string[];
 
-      assetIds.push({ classId: data[1], tokenId: this.parseTokenId(data[2]) });
-    }
+        assetIds.push({ classId: data[1], tokenId: this.parseTokenId(data[2]), owner });
+      }
+    });
 
     return assetIds;
   }
@@ -141,7 +148,8 @@ export class KaruraNftApi extends BaseNftApi {
           // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access,@typescript-eslint/no-unsafe-assignment
           image: tokenInfo && tokenInfo.image ? this.parseUrl(tokenInfo?.image) : collectionMeta?.image,
           collectionId: parsedClassId,
-          chain: this.chain
+          chain: this.chain,
+          owner: assetId.owner
         } as NftItem;
 
         const parsedCollection = {

@@ -20,7 +20,7 @@ interface Props extends ThemeProps {
   handleResend: () => void;
 }
 
-function StakeWithdrawalResult ({ backToHome, className, extrinsicHash, handleResend, isTxSuccess, networkKey, txError }: Props): React.ReactElement<Props> {
+function StakeCompoundResult ({ backToHome, className, extrinsicHash, handleResend, isTxSuccess, networkKey, txError }: Props): React.ReactElement<Props> {
   const { t } = useTranslation();
   const scanExplorerTxUrl = useScanExplorerTxUrl(networkKey, extrinsicHash, true);
 
@@ -28,26 +28,26 @@ function StakeWithdrawalResult ({ backToHome, className, extrinsicHash, handleRe
     <div className={className}>
       {
         isTxSuccess
-          ? <div className={'withdrawal-result-container'}>
+          ? <div className={'stake-compound-result-container'}>
             <img
               alt={'fail'}
-              className={'withdrawal-result-img'}
+              className={'stake-compound-result-img'}
               src={successStatus}
             />
 
-            <div className={'withdrawal-result-title'}>Withdraw Successfully</div>
+            <div className={'stake-compound-result-title'}>Request Executed Successfully</div>
 
-            <div className={'withdrawal-result-subtext'}>Your withdrawal request has been confirmed. It might take a minute to see changes in your wallet.</div>
+            <div className={'stake-compound-result-subtext'}>Your compounding request has been confirmed. It might take a minute to see changes in your wallet.</div>
 
-            <div className={'withdrawal-action-container'}>
+            <div className={'stake-compound-action-container'}>
               <div
-                className={'withdrawal-resend-button'}
+                className={'stake-compound-resend-button'}
                 onClick={backToHome}
               >
                 {t<string>('Back To Home')}
               </div>
               <a
-                className={CN('withdrawal-history-button', { '-disabled': true })}
+                className={CN('stake-compound-history-button', { '-disabled': true })}
                 href={scanExplorerTxUrl}
                 rel='noreferrer'
                 target={'_blank'}
@@ -56,22 +56,28 @@ function StakeWithdrawalResult ({ backToHome, className, extrinsicHash, handleRe
               </a>
             </div>
           </div>
-          : <div className={'withdrawal-result-container'}>
+          : <div className={'stake-compound-result-container'}>
             <img
               alt={'fail'}
-              className={'withdrawal-result-img'}
+              className={'stake-compound-result-img'}
               src={failStatus}
             />
 
-            <div className={'withdrawal-result-title'}>Withdrawal Failed</div>
+            <div className={'stake-compound-result-title'}>Compounding Request Failed</div>
 
-            <div className={'withdrawal-result-subtext'}>There was a problem with your request. You can try again.</div>
+            <div className={'stake-compound-result-subtext'}>There was a problem with your request. You can try again.</div>
 
-            <div className={'withdrawal-error-text'}>{txError}</div>
+            <div className={'stake-compound-error-text'}>{txError}</div>
 
-            <div className={'withdrawal-action-container'}>
+            <div className={'stake-compound-action-container'}>
               <div
-                className={'withdrawal-history-button'}
+                className={'stake-compound-resend-button'}
+                onClick={backToHome}
+              >
+                {t<string>('Back To Home')}
+              </div>
+              <div
+                className={'stake-compound-history-button'}
                 onClick={handleResend}
               >
                 {t<string>('Retry')}
@@ -83,11 +89,11 @@ function StakeWithdrawalResult ({ backToHome, className, extrinsicHash, handleRe
   );
 }
 
-export default React.memo(styled(StakeWithdrawalResult)(({ theme }: Props) => `
+export default React.memo(styled(StakeCompoundResult)(({ theme }: Props) => `
   padding-left: 45px;
   padding-right: 45px;
 
-  .withdrawal-history-button {
+  .stake-compound-history-button {
     width: 100%;
     padding: 10px;
     text-align: center;
@@ -100,7 +106,7 @@ export default React.memo(styled(StakeWithdrawalResult)(({ theme }: Props) => `
     line-height: 26px;
   }
 
-  .withdrawal-action-container {
+  .stake-compound-action-container {
     width: 100%;
     display: flex;
     flex-direction: column;
@@ -108,21 +114,21 @@ export default React.memo(styled(StakeWithdrawalResult)(({ theme }: Props) => `
     gap: 15px;
   }
 
-  .withdrawal-result-subtext {
+  .stake-compound-result-subtext {
     color: ${theme.textColor};
     text-align: center;
     font-size: 14px;
     margin-bottom: 10px;
   }
 
-  .withdrawal-error-text {
+  .stake-compound-error-text {
     color: ${theme.errorColor};
     margin-bottom: 30px;
     text-align: center;
     font-size: 14px;
   }
 
-  .withdrawal-result-title {
+  .stake-compound-result-title {
     font-size: 20px;
     line-height: 36px;
     color: ${theme.textColor};
@@ -130,19 +136,19 @@ export default React.memo(styled(StakeWithdrawalResult)(({ theme }: Props) => `
     text-align: center;
   }
 
-  .withdrawal-result-img {
+  .stake-compound-result-img {
     width: 120px;
     margin-top: 10px;
     margin-bottom: 32px;
   }
 
-  .withdrawal-result-container {
+  .stake-compound-result-container {
     display: flex;
     flex-direction: column;
     align-items: center;
   }
 
-  .withdrawal-resend-button {
+  .stake-compound-resend-button {
     width: 100%;
     padding: 10px;
     text-align: center;

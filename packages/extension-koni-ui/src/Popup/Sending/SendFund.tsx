@@ -465,7 +465,7 @@ function SendFund ({ chainRegistryMap, className, defaultValue, networkMap }: Co
 
             {reference && (
               <Warning className={'send-fund-warning'}>
-                {t<string>('There is an existing reference count on the sender account. As such the account cannot be reaped from the state.')}
+                {t<string>('Note that you cannot transfer all tokens out from this account.')}
               </Warning>
             )}
 

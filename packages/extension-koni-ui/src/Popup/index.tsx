@@ -7,6 +7,7 @@ import type { SettingsStruct } from '@polkadot/ui-settings/types';
 import { AccountsWithCurrentAddress, ConfirmationsQueue, ConfirmationType, CurrentAccountInfo } from '@subwallet/extension-base/background/KoniTypes';
 import { PHISHING_PAGE_REDIRECT } from '@subwallet/extension-base/defaults';
 import { canDerive } from '@subwallet/extension-base/utils';
+import { ALL_ACCOUNT_KEY } from '@subwallet/extension-koni-base/constants';
 import { AccountContext, ActionContext, AuthorizeReqContext, ConfirmationsQueueContext, MediaContext, MetadataReqContext, SettingsContext, SigningReqContext } from '@subwallet/extension-koni-ui/contexts';
 import { ExternalRequestContextProvider } from '@subwallet/extension-koni-ui/contexts/ExternalRequestContext';
 import { QRContextProvider } from '@subwallet/extension-koni-ui/contexts/QrContext';
@@ -30,6 +31,7 @@ import { buildHierarchy } from '../util/buildHierarchy';
 import { createFindAccountHandler } from '../util/findAccount';
 // import Home from './Home';
 
+const StakeCompoundSubmitTransaction = React.lazy(() => import('@subwallet/extension-koni-ui/Popup/Home/Staking/StakeCompoundSubmitTransaction'));
 const UnbondingSubmitTransaction = React.lazy(() => import('@subwallet/extension-koni-ui/Popup/Bonding/UnbondingSubmitTransaction'));
 const BondingSubmitTransaction = React.lazy(() => import('@subwallet/extension-koni-ui/Popup/Bonding/BondingSubmitTransaction'));
 const BondingValidatorSelection = React.lazy(() => import('@subwallet/extension-koni-ui/Popup/Bonding/BondingValidatorSelection'));
@@ -157,6 +159,10 @@ export default function Popup (): React.ReactElement {
   // @ts-ignore
   const handleGetAccountsWithCurrentAddress = (data: AccountsWithCurrentAddress) => {
     const { accounts, currentAddress, currentGenesisHash } = data;
+
+    if (accounts && accounts.length === 0) {
+      accounts.push({ address: currentAddress || ALL_ACCOUNT_KEY, genesisHash: currentGenesisHash });
+    }
 
     setAccounts(accounts);
 
@@ -307,6 +313,7 @@ export default function Popup (): React.ReactElement {
                                   <Route path='/account/select-bonding-validator'>{wrapWithErrorBoundary(<BondingValidatorSelection />, 'bonding-validator')}</Route>
                                   <Route path='/account/bonding-auth'>{wrapWithErrorBoundary(<BondingSubmitTransaction />, 'bonding-auth')}</Route>
                                   <Route path='/account/unbonding-auth'>{wrapWithErrorBoundary(<UnbondingSubmitTransaction />, 'unbonding-auth')}</Route>
+                                  <Route path='/account/stake-compounding-auth'>{wrapWithErrorBoundary(<StakeCompoundSubmitTransaction />, 'stake-compounding-auth')}</Route>
                                   <Route path={`${PHISHING_PAGE_REDIRECT}/:website`}>{wrapWithErrorBoundary(<PhishingDetected />, 'phishing-page-redirect')}</Route>
                                   <Route
                                     exact

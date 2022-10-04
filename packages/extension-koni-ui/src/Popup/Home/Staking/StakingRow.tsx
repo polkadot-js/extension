@@ -33,6 +33,7 @@ interface Props extends ThemeProps {
   targetValidator: string | undefined;
   unlockingDataTimestamp: number;
 
+  setShowCompoundStakeModal: (val: boolean) => void;
   setShowWithdrawalModal: (val: boolean) => void;
   setShowClaimRewardModal: (val: boolean) => void;
   setActionNetworkKey: (val: string) => void;
@@ -41,7 +42,7 @@ interface Props extends ThemeProps {
   setTargetRedeemable: (val: number) => void;
 }
 
-function StakingRow ({ activeStake, chainName, className, index, isAccountAll, isExternalAccount, isHardwareAccount, logo, networkKey, nextWithdrawal, nextWithdrawalAction, nextWithdrawalAmount, price, redeemable, reward, setActionNetworkKey, setShowClaimRewardModal, setShowWithdrawalModal, setTargetNextWithdrawalAction, setTargetRedeemable, setTargetValidator, targetValidator, totalStake, unbondingStake, unit }: Props): React.ReactElement<Props> {
+function StakingRow ({ activeStake, chainName, className, index, isAccountAll, isExternalAccount, isHardwareAccount, logo, networkKey, nextWithdrawal, nextWithdrawalAction, nextWithdrawalAmount, price, redeemable, reward, setActionNetworkKey, setShowClaimRewardModal, setShowCompoundStakeModal, setShowWithdrawalModal, setTargetNextWithdrawalAction, setTargetRedeemable, setTargetValidator, targetValidator, totalStake, unbondingStake, unit }: Props): React.ReactElement<Props> {
   const [showReward, setShowReward] = useState(false);
   const [showStakingMenu, setShowStakingMenu] = useState(false);
 
@@ -61,6 +62,11 @@ function StakingRow ({ activeStake, chainName, className, index, isAccountAll, i
     setActionNetworkKey(networkKey);
     setShowClaimRewardModal(true);
   }, [networkKey, setActionNetworkKey, setShowClaimRewardModal]);
+
+  const handleShowCompoundStakeModal = useCallback(() => {
+    setActionNetworkKey(networkKey);
+    setShowCompoundStakeModal(true);
+  }, [networkKey, setActionNetworkKey, setShowCompoundStakeModal]);
 
   const handleToggleBondingMenu = useCallback(() => {
     setShowStakingMenu(!showStakingMenu);
@@ -134,6 +140,7 @@ function StakingRow ({ activeStake, chainName, className, index, isAccountAll, i
                     redeemable={redeemable}
                     showClaimRewardModal={handleShowClaimRewardModal}
                     showMenu={showStakingMenu}
+                    showStakeCompoundModal={handleShowCompoundStakeModal}
                     showWithdrawalModal={handleShowWithdrawalModal}
                     toggleMenu={handleToggleBondingMenu}
                     unbondingStake={unbondingStake}

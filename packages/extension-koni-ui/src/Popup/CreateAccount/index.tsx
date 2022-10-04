@@ -39,7 +39,6 @@ function CreateAccount ({ className, defaultClassName }: Props): React.ReactElem
   const evmName = `Account ${accountsWithoutAll.length + 1} - EVM`;
   const isFirefox = window.localStorage.getItem('browserInfo') === 'Firefox';
   const isLinux = window.localStorage.getItem('osInfo') === 'Linux';
-  const genesisHash = '';
 
   if (isFirefox || isLinux) {
     window.localStorage.setItem('popupNavigation', '');
@@ -54,7 +53,6 @@ function CreateAccount ({ className, defaultClassName }: Props): React.ReactElem
         setSeed(response.seed);
       })
       .catch(console.error);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect((): void => {
@@ -74,7 +72,7 @@ function CreateAccount ({ className, defaultClassName }: Props): React.ReactElem
       // this should always be the case
       if (name && password && seed) {
         setIsBusy(true);
-        createAccountSuriV2(name, password, seed, isConnectWhenCreate, keyTypes, genesisHash)
+        createAccountSuriV2(name, password, seed, isConnectWhenCreate, keyTypes)
           .then((response) => {
             window.localStorage.setItem('popupNavigation', '/');
             onAction('/');
@@ -86,7 +84,7 @@ function CreateAccount ({ className, defaultClassName }: Props): React.ReactElem
       }
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [isConnectWhenCreate, genesisHash, onAction, seed, dep]
+    [isConnectWhenCreate, onAction, seed, dep]
   );
 
   const _onNextStep = useCallback(

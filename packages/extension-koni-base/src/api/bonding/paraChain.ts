@@ -1,8 +1,8 @@
 // Copyright 2019-2022 @subwallet/extension-koni authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { ApiProps, BasicTxInfo, ChainBondingBasics, DelegationItem, NetworkJson, UnlockingStakeInfo, ValidatorInfo } from '@subwallet/extension-base/background/KoniTypes';
-import { BOND_LESS_ACTION, calculateChainStakedReturn, ERA_LENGTH_MAP, getParaCurrentInflation, InflationConfig, PARACHAIN_INFLATION_DISTRIBUTION, REVOKE_ACTION } from '@subwallet/extension-koni-base/api/bonding/utils';
+import { ApiProps, BasicTxInfo, ChainBondingBasics, DelegationItem, NetworkJson, TuringStakeCompoundResp, UnlockingStakeInfo, ValidatorInfo } from '@subwallet/extension-base/background/KoniTypes';
+import { BOND_LESS_ACTION, calculateChainStakedReturn, ERA_LENGTH_MAP, getParaCurrentInflation, InflationConfig, PARACHAIN_INFLATION_DISTRIBUTION, REVOKE_ACTION, TuringOptimalCompoundFormat } from '@subwallet/extension-koni-base/api/bonding/utils';
 import { getFreeBalance } from '@subwallet/extension-koni-base/api/dotsama/balance';
 import { parseNumberToDisplay, parseRawNumber, reformatAddress } from '@subwallet/extension-koni-base/utils';
 import Web3 from 'web3';
@@ -35,11 +35,14 @@ export async function getParaBondingBasics (networkKey: string, dotSamaApi: ApiP
     _unvestedAllocation = await apiProps.api.query.vesting.totalUnvestedAllocation();
   }
 
-  const [_totalStake, _totalIssuance, _inflation] = await Promise.all([
+  const [_totalStake, _totalIssuance, _inflation, _allCollators] = await Promise.all([
     apiProps.api.query.parachainStaking.staked(round),
     apiProps.api.query.balances.totalIssuance(),
-    apiProps.api.query.parachainStaking.inflationConfig()
+    apiProps.api.query.parachainStaking.inflationConfig(),
+    apiProps.api.query.parachainStaking.candidatePool()
   ]);
+
+  const rawAllCollators = _allCollators.toHuman() as unknown as CollatorInfo[];
 
   let unvestedAllocation;
 
@@ -67,7 +70,8 @@ export async function getParaBondingBasics (networkKey: string, dotSamaApi: ApiP
 
   return {
     isMaxNominators: false,
-    stakedReturn
+    stakedReturn,
+    validatorCount: rawAllCollators.length
   } as ChainBondingBasics;
 }
 
@@ -290,21 +294,28 @@ export async function getParaBondingTxInfo (networkJson: NetworkJson, dotSamaApi
 }
 
 export async function handleParaBondingTxInfo (networkJson: NetworkJson, amount: number, networkKey: string, nominatorAddress: string, validatorInfo: ValidatorInfo, dotSamaApiMap: Record<string, ApiProps>, web3ApiMap: Record<string, Web3>, currentNominationCount: number) {
-  const [txInfo, balance] = await Promise.all([
-    getParaBondingTxInfo(networkJson, dotSamaApiMap[networkKey], nominatorAddress, amount, validatorInfo, currentNominationCount),
-    getFreeBalance(networkKey, nominatorAddress, dotSamaApiMap, web3ApiMap)
-  ]);
+  try {
+    const [txInfo, balance] = await Promise.all([
+      getParaBondingTxInfo(networkJson, dotSamaApiMap[networkKey], nominatorAddress, amount, validatorInfo, currentNominationCount),
+      getFreeBalance(networkKey, nominatorAddress, dotSamaApiMap, web3ApiMap)
+    ]);
 
-  const feeString = parseNumberToDisplay(txInfo.partialFee, networkJson.decimals) + ` ${networkJson.nativeToken ? networkJson.nativeToken : ''}`;
-  const binaryBalance = new BN(balance);
+    const feeString = parseNumberToDisplay(txInfo.partialFee, networkJson.decimals) + ` ${networkJson.nativeToken ? networkJson.nativeToken : ''}`;
+    const binaryBalance = new BN(balance);
 
-  const sumAmount = txInfo.partialFee.addn(amount);
-  const balanceError = sumAmount.gt(binaryBalance);
+    const sumAmount = txInfo.partialFee.addn(amount);
+    const balanceError = sumAmount.gt(binaryBalance);
 
-  return {
-    fee: feeString,
-    balanceError
-  } as BasicTxInfo;
+    return {
+      fee: feeString,
+      balanceError
+    } as BasicTxInfo;
+  } catch (e) {
+    return {
+      fee: `0.0000 ${networkJson.nativeToken as string}`,
+      balanceError: false
+    } as BasicTxInfo;
+  }
 }
 
 export async function getParaUnbondingTxInfo (networkJson: NetworkJson, dotSamaApi: ApiProps, address: string, amount: number, collatorAddress: string, unstakeAll: boolean) {
@@ -324,20 +335,27 @@ export async function getParaUnbondingTxInfo (networkJson: NetworkJson, dotSamaA
 }
 
 export async function handleParaUnbondingTxInfo (address: string, amount: number, networkKey: string, dotSamaApiMap: Record<string, ApiProps>, web3ApiMap: Record<string, Web3>, networkJson: NetworkJson, collatorAddress: string, unstakeAll: boolean) {
-  const [txInfo, balance] = await Promise.all([
-    getParaUnbondingTxInfo(networkJson, dotSamaApiMap[networkKey], address, amount, collatorAddress, unstakeAll),
-    getFreeBalance(networkKey, address, dotSamaApiMap, web3ApiMap)
-  ]);
+  try {
+    const [txInfo, balance] = await Promise.all([
+      getParaUnbondingTxInfo(networkJson, dotSamaApiMap[networkKey], address, amount, collatorAddress, unstakeAll),
+      getFreeBalance(networkKey, address, dotSamaApiMap, web3ApiMap)
+    ]);
 
-  const feeString = parseNumberToDisplay(txInfo.partialFee, networkJson.decimals) + ` ${networkJson.nativeToken ? networkJson.nativeToken : ''}`;
-  const binaryBalance = new BN(balance);
+    const feeString = parseNumberToDisplay(txInfo.partialFee, networkJson.decimals) + ` ${networkJson.nativeToken ? networkJson.nativeToken : ''}`;
+    const binaryBalance = new BN(balance);
 
-  const balanceError = txInfo.partialFee.gt(binaryBalance);
+    const balanceError = txInfo.partialFee.gt(binaryBalance);
 
-  return {
-    fee: feeString,
-    balanceError
-  } as BasicTxInfo;
+    return {
+      fee: feeString,
+      balanceError
+    } as BasicTxInfo;
+  } catch (e) {
+    return {
+      fee: `0.0000 ${networkJson.nativeToken as string}`,
+      balanceError: false
+    } as BasicTxInfo;
+  }
 }
 
 export async function getParaBondingExtrinsic (delegatorAddress: string, networkJson: NetworkJson, dotSamaApi: ApiProps, amount: number, collatorInfo: ValidatorInfo, currentNominationCount: number) {
@@ -482,19 +500,26 @@ export async function getParaWithdrawalTxInfo (dotSamaApi: ApiProps, address: st
 }
 
 export async function handleParaWithdrawalTxInfo (networkKey: string, networkJson: NetworkJson, dotSamaApiMap: Record<string, ApiProps>, web3ApiMap: Record<string, Web3>, address: string, collatorAddress: string, action: string) {
-  const [txInfo, balance] = await Promise.all([
-    getParaWithdrawalTxInfo(dotSamaApiMap[networkKey], address, collatorAddress, action),
-    getFreeBalance(networkKey, address, dotSamaApiMap, web3ApiMap)
-  ]);
+  try {
+    const [txInfo, balance] = await Promise.all([
+      getParaWithdrawalTxInfo(dotSamaApiMap[networkKey], address, collatorAddress, action),
+      getFreeBalance(networkKey, address, dotSamaApiMap, web3ApiMap)
+    ]);
 
-  const feeString = parseNumberToDisplay(txInfo.partialFee, networkJson.decimals) + ` ${networkJson.nativeToken ? networkJson.nativeToken : ''}`;
-  const binaryBalance = new BN(balance);
-  const balanceError = txInfo.partialFee.gt(binaryBalance);
+    const feeString = parseNumberToDisplay(txInfo.partialFee, networkJson.decimals) + ` ${networkJson.nativeToken ? networkJson.nativeToken : ''}`;
+    const binaryBalance = new BN(balance);
+    const balanceError = txInfo.partialFee.gt(binaryBalance);
 
-  return {
-    fee: feeString,
-    balanceError
-  } as BasicTxInfo;
+    return {
+      fee: feeString,
+      balanceError
+    } as BasicTxInfo;
+  } catch (e) {
+    return {
+      fee: `0.0000 ${networkJson.nativeToken as string}`,
+      balanceError: false
+    } as BasicTxInfo;
+  }
 }
 
 export async function getParaWithdrawalExtrinsic (dotSamaApi: ApiProps, address: string, collatorAddress: string, action: string) {
@@ -753,4 +778,156 @@ async function handleBifrostUnlockingInfo (dotSamaApi: ApiProps, networkJson: Ne
     nextWithdrawalAction,
     validatorAddress
   } as UnlockingStakeInfo;
+}
+
+async function getTuringCompoundTxInfo (dotSamaApi: ApiProps, address: string, collatorAddress: string, accountMinimum: string, bondedAmount: string, networkJson: NetworkJson) {
+  const apiPromise = await dotSamaApi.isReady;
+
+  // @ts-ignore
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment,@typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-member-access
+  const _optimalCompounding = await apiPromise.api.rpc.automationTime.calculateOptimalAutostaking(bondedAmount, collatorAddress);
+
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-member-access
+  const optimalCompounding = _optimalCompounding.toHuman() as TuringOptimalCompoundFormat;
+  const compoundingPeriod = parseInt(optimalCompounding.period); // in days
+
+  const frequency = compoundingPeriod * 24 * 60 * 60; // in seconds
+  const timestamp = new Date();
+
+  timestamp.setDate(timestamp.getDate() + compoundingPeriod);
+  timestamp.setHours(timestamp.getHours() + Math.round(timestamp.getMinutes() / 60));
+  timestamp.setMinutes(0, 0, 0);
+
+  const startTime = Math.floor(timestamp.valueOf() / 1000); // must be unix timestamp in seconds
+
+  const extrinsic = apiPromise.api.tx.automationTime.scheduleAutoCompoundDelegatedStakeTask(startTime.toString(), frequency.toString(), collatorAddress, accountMinimum);
+
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+  const [paymentInfo, _compoundFee] = await Promise.all([
+    extrinsic.paymentInfo(address),
+    // @ts-ignore
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-member-access
+    apiPromise.api.rpc.automationTime.getTimeAutomationFees('AutoCompoundDelegatedStake', 1)
+  ]);
+
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-member-access
+  const bnCompoundFee = _compoundFee as BN;
+
+  const compoundFee = parseNumberToDisplay(bnCompoundFee, networkJson.decimals) + ` ${networkJson.nativeToken ? networkJson.nativeToken : ''}`;
+
+  return {
+    optimalTime: optimalCompounding.period, // in days
+    paymentInfo,
+    initTime: compoundingPeriod,
+    compoundFee,
+    bnCompoundFee
+  };
+}
+
+export async function handleTuringCompoundTxInfo (networkKey: string, networkJson: NetworkJson, dotSamaApiMap: Record<string, ApiProps>, web3ApiMap: Record<string, Web3>, address: string, collatorAddress: string, accountMinimum: string, bondedAmount: string) {
+  const [txInfo, balance] = await Promise.all([
+    getTuringCompoundTxInfo(dotSamaApiMap[networkKey], address, collatorAddress, accountMinimum, bondedAmount, networkJson),
+    getFreeBalance(networkKey, address, dotSamaApiMap, web3ApiMap)
+  ]);
+
+  const feeString = parseNumberToDisplay(txInfo.paymentInfo.partialFee, networkJson.decimals) + ` ${networkJson.nativeToken ? networkJson.nativeToken : ''}`;
+  const binaryBalance = new BN(balance);
+  const totalFee = txInfo.paymentInfo.partialFee.add(txInfo.bnCompoundFee);
+  const balanceError = totalFee.gt(binaryBalance);
+
+  const basicTxInfo: BasicTxInfo = {
+    fee: feeString,
+    balanceError
+  };
+
+  return {
+    txInfo: basicTxInfo,
+    optimalFrequency: txInfo.optimalTime,
+    initTime: txInfo.initTime,
+    compoundFee: txInfo.compoundFee
+  } as TuringStakeCompoundResp;
+}
+
+export async function getTuringCompoundExtrinsic (dotSamaApi: ApiProps, address: string, collatorAddress: string, accountMinimum: string, bondedAmount: string) {
+  const apiPromise = await dotSamaApi.isReady;
+
+  // @ts-ignore
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment,@typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-member-access
+  const _optimalCompounding = await apiPromise.api.rpc.automationTime.calculateOptimalAutostaking(bondedAmount, collatorAddress);
+
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-member-access
+  const optimalCompounding = _optimalCompounding.toHuman() as TuringOptimalCompoundFormat;
+  const compoundingPeriod = parseInt(optimalCompounding.period); // in days
+
+  const frequency = compoundingPeriod * 24 * 60 * 60; // in seconds
+  const timestamp = new Date();
+
+  timestamp.setDate(timestamp.getDate() + compoundingPeriod);
+  timestamp.setHours(timestamp.getHours() + Math.round(timestamp.getMinutes() / 60));
+  timestamp.setMinutes(0, 0, 0);
+
+  const startTime = Math.floor(timestamp.valueOf() / 1000); // must be in seconds
+
+  return apiPromise.api.tx.automationTime.scheduleAutoCompoundDelegatedStakeTask(startTime.toString(), frequency.toString(), collatorAddress, accountMinimum);
+}
+
+export async function checkTuringStakeCompoundingTask (dotSamaApi: ApiProps, address: string, collatorAddress: string) {
+  const apiPromise = await dotSamaApi.isReady;
+
+  const _allTasks = await apiPromise.api.query.automationTime.accountTasks.entries(address);
+  let taskId = '';
+  let accountMinimum = 0;
+  let frequency = 0;
+
+  for (const task of _allTasks) {
+    const taskMetadata = task[0].toHuman() as string[];
+    const taskDetail = task[1].toHuman() as Record<string, any>;
+
+    // Only check for the AutoCompoundDelegatedStake task
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+    if (taskDetail.action.AutoCompoundDelegatedStake && taskDetail.action.AutoCompoundDelegatedStake.collator === collatorAddress) {
+      taskId = taskMetadata[1];
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+      accountMinimum = parseRawNumber(taskDetail?.action?.AutoCompoundDelegatedStake?.accountMinimum as string);
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+      frequency = parseRawNumber(taskDetail?.action?.AutoCompoundDelegatedStake?.frequency as string);
+
+      break; // only need to check for the first task
+    }
+  }
+
+  return {
+    taskId,
+    accountMinimum,
+    frequency
+  };
+}
+
+export async function handleTuringCancelCompoundTxInfo (dotSamaApiMap: Record<string, ApiProps>, web3ApiMap: Record<string, Web3>, taskId: string, address: string, networkKey: string, networkJson: NetworkJson) {
+  const dotSamaApi = dotSamaApiMap[networkKey];
+  const apiPromise = await dotSamaApi.isReady;
+
+  const extrinsic = apiPromise.api.tx.automationTime.cancelTask(taskId);
+
+  const [paymentInfo, balance] = await Promise.all([
+    extrinsic.paymentInfo(address),
+    getFreeBalance(networkKey, address, dotSamaApiMap, web3ApiMap)
+  ]);
+
+  const feeString = parseNumberToDisplay(paymentInfo.partialFee, networkJson.decimals) + ` ${networkJson.nativeToken ? networkJson.nativeToken : ''}`;
+  const binaryBalance = new BN(balance);
+  const balanceError = paymentInfo.partialFee.gt(binaryBalance);
+
+  const basicTxInfo: BasicTxInfo = {
+    fee: feeString,
+    balanceError
+  };
+
+  return basicTxInfo;
+}
+
+export async function getTuringCancelCompoundingExtrinsic (dotSamaApi: ApiProps, taskId: string) {
+  const apiPromise = await dotSamaApi.isReady;
+
+  return apiPromise.api.tx.automationTime.cancelTask(taskId);
 }

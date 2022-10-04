@@ -105,7 +105,8 @@ export class RmrkNftApi extends BaseNftApi {
         nfts.push({
           ...item,
           metadata: result,
-          external_url: KANARIA_EXTERNAL_SERVER + item.id.toString()
+          external_url: KANARIA_EXTERNAL_SERVER + item.id.toString(),
+          owner: account
         });
       } else if (item.source === RMRK_SOURCE.KANARIA) {
         nfts.push({
@@ -114,7 +115,8 @@ export class RmrkNftApi extends BaseNftApi {
             ...result,
             image: this.parseUrl(result?.image as string)
           },
-          external_url: KANARIA_EXTERNAL_SERVER + item.id.toString()
+          external_url: KANARIA_EXTERNAL_SERVER + item.id.toString(),
+          owner: account
         });
       } else if (item.source === RMRK_SOURCE.SINGULAR_V1) {
         nfts.push({
@@ -126,7 +128,8 @@ export class RmrkNftApi extends BaseNftApi {
             animation_url: this.parseUrl(result?.animation_url as string),
             image: this.parseUrl(result?.image as string)
           },
-          external_url: SINGULAR_V1_EXTERNAL_SERVER + item.id.toString()
+          external_url: SINGULAR_V1_EXTERNAL_SERVER + item.id.toString(),
+          owner: account
         });
       } else if (item.source === RMRK_SOURCE.SINGULAR_V2) {
         const id = item.id as string;
@@ -142,7 +145,8 @@ export class RmrkNftApi extends BaseNftApi {
               animation_url: this.parseUrl(result?.animation_url as string),
               image: this.parseUrl(result?.mediaUri as string)
             },
-            external_url: SINGULAR_V2_EXTERNAL_SERVER + item.id.toString()
+            external_url: SINGULAR_V2_EXTERNAL_SERVER + item.id.toString(),
+            owner: account
           });
         }
       }
@@ -187,7 +191,8 @@ export class RmrkNftApi extends BaseNftApi {
           // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
           properties: item?.metadata?.properties as Record<any, any>,
           chain: this.chain,
-          rmrk_ver: item.source && item.source === RMRK_SOURCE.SINGULAR_V1 ? RMRK_VER.VER_1 : RMRK_VER.VER_2
+          rmrk_ver: item.source && item.source === RMRK_SOURCE.SINGULAR_V1 ? RMRK_VER.VER_1 : RMRK_VER.VER_2,
+          owner: item.owner as string
         } as NftItem;
 
         // eslint-disable-next-line @typescript-eslint/no-unsafe-argument

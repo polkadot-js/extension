@@ -3,6 +3,7 @@
 
 import { ChainRegistry, CurrentNetworkInfo, NftCollection as _NftCollection, NftItem as _NftItem, TransactionHistoryItemType } from '@subwallet/extension-base/background/KoniTypes';
 import { AccountJson } from '@subwallet/extension-base/background/types';
+import { ALL_ACCOUNT_KEY } from '@subwallet/extension-koni-base/constants';
 import { AccountContext } from '@subwallet/extension-koni-ui/components';
 import ReceiveButton from '@subwallet/extension-koni-ui/components/Button/ReceiveButton';
 import useAccountBalance from '@subwallet/extension-koni-ui/hooks/screen/home/useAccountBalance';
@@ -153,13 +154,13 @@ function getTabHeaderItems (address: string, t: TFunction): TabHeaderItemType[] 
 }
 
 function Wrapper ({ className, theme }: WrapperProps): React.ReactElement {
-  const { hierarchy } = useContext(AccountContext);
+  const { accounts } = useContext(AccountContext);
   const { chainRegistry: chainRegistryMap,
     currentAccount: { account: currentAccount },
     currentNetwork,
     transactionHistory: { historyMap } } = useSelector((state: RootState) => state);
 
-  if (!hierarchy.length) {
+  if (accounts.length === 1 && accounts.filter((acc) => (acc.address !== ALL_ACCOUNT_KEY)).length === 0) {
     return (<AddAccount />);
   }
 
@@ -242,6 +243,14 @@ function Home ({ chainRegistryMap, className = '', currentAccount, historyMap, n
       setShowNetworkSelection(false);
     }
   }, [networkMetadataMap, showNetworkSelection]);
+
+  useEffect(() => { // reset NFT state on current account change
+    setChosenNftCollection(undefined);
+    setChosenNftItem(undefined);
+    setShowNftItemDetail(false);
+    setShowNftCollectionDetail(false);
+    setNftPage(1);
+  }, [currentAccount.address]);
 
   const parseNftGridSize = useCallback(() => {
     if (window.innerHeight > NFT_GRID_HEIGHT_THRESHOLD) {

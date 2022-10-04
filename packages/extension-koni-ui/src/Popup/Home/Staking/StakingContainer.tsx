@@ -15,8 +15,8 @@ import styled from 'styled-components';
 const StakingRow = React.lazy(() => import('./StakingRow'));
 const Spinner = React.lazy(() => import('@subwallet/extension-koni-ui/components/Spinner'));
 const EmptyList = React.lazy(() => import('@subwallet/extension-koni-ui/Popup/Home/Staking/EmptyList'));
-const StakeAuthClaimReward = React.lazy(() => import('@subwallet/extension-koni-ui/Popup/Home/Staking/StakeAuthClaimReward'));
-const StakeAuthWithdrawal = React.lazy(() => import('@subwallet/extension-koni-ui/Popup/Home/Staking/StakeAuthWithdrawal'));
+const StakeAuthClaimReward = React.lazy(() => import('@subwallet/extension-koni-ui/Popup/Home/Staking/components/StakeAuthClaimReward'));
+const StakeAuthWithdrawal = React.lazy(() => import('@subwallet/extension-koni-ui/Popup/Home/Staking/components/StakeAuthWithdrawal'));
 
 interface Props extends ThemeProps {
   className?: string;

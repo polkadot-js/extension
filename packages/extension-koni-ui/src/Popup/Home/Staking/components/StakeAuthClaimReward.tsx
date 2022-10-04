@@ -1,6 +1,7 @@
 // Copyright 2019-2022 @subwallet/extension-koni authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
+import { BasicTxError } from '@subwallet/extension-base/background/KoniTypes';
 import { InputWithLabel } from '@subwallet/extension-koni-ui/components';
 import FeeValue from '@subwallet/extension-koni-ui/components/Balance/FeeValue';
 import Button from '@subwallet/extension-koni-ui/components/Button';
@@ -11,7 +12,7 @@ import useGetNetworkJson from '@subwallet/extension-koni-ui/hooks/screen/home/us
 import useToast from '@subwallet/extension-koni-ui/hooks/useToast';
 import useTranslation from '@subwallet/extension-koni-ui/hooks/useTranslation';
 import { getStakeClaimRewardTxInfo, submitStakeClaimReward } from '@subwallet/extension-koni-ui/messaging';
-import StakeClaimRewardResult from '@subwallet/extension-koni-ui/Popup/Home/Staking/StakeClaimRewardResult';
+import StakeClaimRewardResult from '@subwallet/extension-koni-ui/Popup/Home/Staking/components/StakeClaimRewardResult';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import React, { useCallback, useEffect, useState } from 'react';
 import styled from 'styled-components';
@@ -91,7 +92,12 @@ function StakeAuthClaimReward ({ address, className, hideModal, networkKey }: Pr
       }
 
       if (cbData.txError && cbData.txError) {
-        show('Encountered an error, please try again.');
+        if (cbData.errorMessage && cbData.errorMessage === BasicTxError.BalanceTooLow) {
+          show('Your balance is too low to cover fees');
+        } else {
+          show('Encountered an error, please try again.');
+        }
+
         setLoading(false);
 
         return;

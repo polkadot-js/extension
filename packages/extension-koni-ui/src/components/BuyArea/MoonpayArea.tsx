@@ -2,11 +2,12 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import MoonpayLogo from '@subwallet/extension-koni-ui/assets/logo/125.Moonpay.png';
+import MoonpayDarkLogo from '@subwallet/extension-koni-ui/assets/logo/127.MoonpayDark.png';
 import Tooltip from '@subwallet/extension-koni-ui/components/Tooltip';
-import { ThemeProps } from '@subwallet/extension-koni-ui/types';
+import { Theme, ThemeProps } from '@subwallet/extension-koni-ui/types';
 import CN from 'classnames';
-import React, { useMemo } from 'react';
-import styled from 'styled-components';
+import React, { useContext, useEffect, useMemo, useState } from 'react';
+import styled, { ThemeContext } from 'styled-components';
 
 interface Props extends ThemeProps{
   className?: string;
@@ -21,6 +22,12 @@ interface Props extends ThemeProps{
 
 const MoonpayArea = (props: Props) => {
   const { className } = props;
+  const themeGroup = useContext(ThemeContext as React.Context<Theme>).group;
+  const [logo, setLogo] = useState(themeGroup === 'Dark' ? MoonpayLogo : MoonpayDarkLogo);
+
+  useEffect(() => {
+    setLogo(themeGroup === 'dark' ? MoonpayLogo : MoonpayDarkLogo);
+  }, [themeGroup]);
 
   const url = useMemo((): string => {
     return '';
@@ -61,7 +68,7 @@ const MoonpayArea = (props: Props) => {
               <img
                 alt='Moonpay logo'
                 className='img-logo disabled'
-                src={MoonpayLogo}
+                src={logo}
               />
             </div>
           )
@@ -74,7 +81,7 @@ const MoonpayArea = (props: Props) => {
               <img
                 alt='Moonpay logo'
                 className='img-logo'
-                src={MoonpayLogo}
+                src={logo}
               />
             </a>
           )

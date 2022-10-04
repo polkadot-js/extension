@@ -9,7 +9,8 @@ import fetch from 'cross-fetch';
 
 interface AssetId {
   classId: string | number,
-  tokenId: string | number
+  tokenId: string | number,
+  owner: string
 }
 
 interface Token {
@@ -61,7 +62,7 @@ export class BitCountryNftApi extends BaseNftApi {
       for (const item of resp) {
         const data = item[0].toHuman() as string[];
 
-        assetIds.push({ classId: this.parseTokenId(data[1]), tokenId: this.parseTokenId(data[2]) });
+        assetIds.push({ classId: this.parseTokenId(data[1]), tokenId: this.parseTokenId(data[2]), owner: address });
       }
     }));
 
@@ -146,7 +147,8 @@ export class BitCountryNftApi extends BaseNftApi {
           // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access,@typescript-eslint/no-unsafe-assignment
           image: tokenInfo && tokenInfo.image_url ? this.parseUrl(tokenInfo?.image_url as string) : this.parseUrl(collectionMeta?.image_url as string),
           collectionId: parsedClassId,
-          chain: this.chain
+          chain: this.chain,
+          owner: address
         } as NftItem;
 
         const parsedCollection = {

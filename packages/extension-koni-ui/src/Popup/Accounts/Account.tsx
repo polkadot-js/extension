@@ -4,9 +4,7 @@
 import type { AccountJson } from '@subwallet/extension-base/background/types';
 
 import { CurrentAccountInfo } from '@subwallet/extension-base/background/KoniTypes';
-import check from '@subwallet/extension-koni-ui/assets/check.svg';
-import changeAvatar from '@subwallet/extension-koni-ui/assets/icon/camera.svg';
-import changeAvatarHover from '@subwallet/extension-koni-ui/assets/icon/camera-hover.svg';
+import { IconMaps } from '@subwallet/extension-koni-ui/assets/icon';
 import { AccountContext, AccountInfoEl, ActionContext } from '@subwallet/extension-koni-ui/components';
 import useIsPopup from '@subwallet/extension-koni-ui/hooks/useIsPopup';
 import useToast from '@subwallet/extension-koni-ui/hooks/useToast';
@@ -128,10 +126,9 @@ function Account ({ address, changeAccountCallback, className, closeSetting, gen
     >
       {isSelected
         ? (
-          <img
-            alt='check'
-            src={check}
-          />
+          <div className='account-checked-item'>
+            {IconMaps.check}
+          </div>
         )
         : (
           <div className='account-unchecked-item' />
@@ -164,17 +161,7 @@ function Account ({ address, changeAccountCallback, className, closeSetting, gen
           />
           <span className='account__change-avatar-text'>{t<string>('Change Avatar')}</span>
           <div className='account__change-avatar-icon-btn'>
-            <img
-              alt='change'
-              className='account__change-avatar-icon'
-              src={changeAvatar}
-            />
-
-            <img
-              alt='change'
-              className='account__change-avatar-icon-hover'
-              src={changeAvatarHover}
-            />
+            {IconMaps.camera}
           </div>
         </div>
       )}
@@ -195,6 +182,11 @@ export default styled(Account)(({ theme }: ThemeProps) => `
 
   .account__account-item {
     margin-left: 5px;
+  }
+  
+  .account-checked-item {
+    color: ${theme.primaryColor};
+    align-self: center;
   }
 
   .account-unchecked-item {
@@ -223,22 +215,14 @@ export default styled(Account)(({ theme }: ThemeProps) => `
   }
 
   .account__change-avatar {
-    .account__change-avatar-icon {
-      display: block;
-    }
-
-    .account__change-avatar-icon-hover {
-      display: none;
+    .account__change-avatar-icon-btn svg{
+      color: ${theme.iconNeutralColor}
     }
   }
 
   .account__change-avatar:hover {
-    .account__change-avatar-icon {
-      display: none;
-    }
-
-    .account__change-avatar-icon-hover {
-      display: block;
+    .account__change-avatar-icon-btn svg{
+      color: ${theme.primaryColor}
     }
   }
 

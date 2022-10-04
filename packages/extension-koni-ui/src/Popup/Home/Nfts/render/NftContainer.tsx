@@ -285,7 +285,7 @@ export default React.memo(styled(NftContainer)(({ theme }: Props) => `
   }
 
   .link {
-    color: #42C59A;
+    color: ${theme.primaryColor};
   }
 
   .link:hover {

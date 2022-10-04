@@ -152,7 +152,8 @@ export default class StatemineNftApi extends BaseNftApi {
           description: tokenInfo?.description as string,
           image: tokenInfo && tokenInfo.image ? this.parseUrl(tokenInfo?.image) : undefined,
           collectionId: this.parseTokenId(parsedClassId),
-          chain: this.chain
+          chain: this.chain,
+          owner: address
         } as NftItem;
 
         params.updateItem(this.chain, parsedNft, address);

@@ -1,12 +1,12 @@
-     813	Nam Phạm                      	add Gear testnet
-     496	AnhMTV                        	Release version 0.5.9
+     918	Nam Phạm                      	update check chain registry exist
+     580	AnhMTV                        	Release version 0.6.6
      465	Jaco                          	0.42.5 (#969)
-     232	S2kael                        	[Issue-616] [OnRamp] [Transak] updateLogo
+     237	S2kael                        	[Issue-564] fix eslint
      151	lw-cdm                        	Update logo for Moonbeans
      142	quangdo                       	update some label and variable (original to origin)
-      85	lw-cdm                        	
+      88	lw-cdm                        	
       82	Thibaut Sardan                	Add account filtering feature (#832)
-      70	Hieu Dao                      	update KMA logo URL
+      81	Hieu Dao                      	[CI Skip] Update subspace block explorer
       65	khainh                        	Disable ipfs-gateway.cloud
       55	leewong                       	#118: update balance logic for Kintsugi testnet
       53	Dominhquangdev                	update Bridge code

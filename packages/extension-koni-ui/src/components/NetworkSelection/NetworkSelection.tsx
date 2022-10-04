@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { NetworkJson } from '@subwallet/extension-base/background/KoniTypes';
-import QuestionIcon from '@subwallet/extension-koni-ui/assets/Question.svg';
+import { IconMaps } from '@subwallet/extension-koni-ui/assets/icon';
 import { InputFilter } from '@subwallet/extension-koni-ui/components';
 import Button from '@subwallet/extension-koni-ui/components/Button';
 import Modal from '@subwallet/extension-koni-ui/components/Modal';
@@ -10,10 +10,10 @@ import NetworkSelectionItem from '@subwallet/extension-koni-ui/components/Networ
 import Tooltip from '@subwallet/extension-koni-ui/components/Tooltip';
 import useToast from '@subwallet/extension-koni-ui/hooks/useToast';
 import useTranslation from '@subwallet/extension-koni-ui/hooks/useTranslation';
-import { enableNetworks } from '@subwallet/extension-koni-ui/messaging';
+import { disableNetworks, enableNetworks } from '@subwallet/extension-koni-ui/messaging';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { useSelector } from 'react-redux';
 import styled from 'styled-components';
 
@@ -26,11 +26,17 @@ interface Props extends ThemeProps {
 
 function NetworkSelection ({ className, handleShow }: Props): React.ReactElement {
   const { t } = useTranslation();
-  const { networkMap } = useSelector((state: RootState) => state);
+  const networkMap = useSelector((state: RootState) => state.networkMap);
   const [searchString, setSearchString] = useState('');
-  // const [isCheck, setIsChecked] = useState(false);
-  const [selected, setSelected] = useState<string[]>(['polkadot', 'kusama']);
-  const { show } = useToast();
+  const [selected, setSelected] = useState<string[]>([]);
+  const [filteredNetworkList, setFilteredNetworkList] = useState<NetworkJson[]>([]);
+  const show = useToast().show;
+
+  useEffect(() => {
+    const selectedNetwork = Object.keys(networkMap).filter((k) => networkMap[k].active);
+
+    setSelected(selectedNetwork);
+  }, [networkMap]);
 
   const handleSelect = useCallback((networkKey: string, active: boolean) => {
     let _selected: string[] = [];
@@ -55,36 +61,32 @@ function NetworkSelection ({ className, handleShow }: Props): React.ReactElement
     setSelected(_selected);
   }, [selected]);
 
-  const filterNetwork = useCallback(() => {
-    const _filteredNetworkMap: Record<string, NetworkJson> = {};
+  useEffect(() => {
+    const _filteredNetworkList = Object.values(networkMap).filter((network) => network.chain.toLowerCase().includes(searchString.toLowerCase()));
+    const _sortedNetworkList = _filteredNetworkList.filter(({ active }) => active).concat(_filteredNetworkList.filter(({ active }) => !active));
 
-    Object.entries(networkMap).forEach(([key, network]) => {
-      if (network.chain.toLowerCase().includes(searchString.toLowerCase())) {
-        _filteredNetworkMap[key] = network;
-      }
-    });
-
-    return _filteredNetworkMap;
-  }, [networkMap, searchString]);
-
-  // const handleCheckRecommended = useCallback((checked: boolean) => {
-  //   setIsChecked(checked);
-  //
-  //   if (checked) {
-  //     console.log('selected');
-  //   } else {
-  //     console.log('unselected');
-  //   }
-  // }, []);
+    setFilteredNetworkList(_sortedNetworkList);
+  }, [networkMap, searchString, selected]);
 
   const _onChangeFilter = useCallback((val: string) => {
     setSearchString(val);
   }, []);
 
   const handleSubmit = useCallback(() => {
-    enableNetworks(selected)
-      .then((result) => {
-        if (result) {
+    const enabledList = Object.values(networkMap).filter((v) => (v.active)).map((v) => v.key);
+    const enableList = selected.filter((k) => !enabledList.includes(k));
+    const disableList = enabledList.filter((k) => !selected.includes(k));
+
+    console.log('Check list', enableList, disableList);
+
+    const promList = [];
+
+    enableList.length > 0 && promList.push(enableNetworks(enableList));
+    disableList.length > 0 && promList.push(disableNetworks(disableList));
+
+    Promise.all(promList)
+      .then((rs) => {
+        if (rs.filter((r) => r).length === rs.length) {
           show('Your setting has been saved');
         } else {
           show('Encountered an error. Please try again later');
@@ -94,25 +96,20 @@ function NetworkSelection ({ className, handleShow }: Props): React.ReactElement
 
     window.localStorage.setItem('isSetNetwork', 'ok');
     handleShow(false);
-  }, [handleShow, selected, show]);
-
-  const filteredNetworkMap = filterNetwork();
-
-  const isSelected = useCallback((networkKey: string) => {
-    return selected.includes(networkKey);
-  }, [selected]);
+  }, [handleShow, networkMap, selected, show]);
 
   return (
     <div className={className}>
       <Modal className={'network-selection-container'}>
         <div className={'network-selection-title'}>
           <div>Network Selection</div>
-          <img
+          <div
             className={'question-icon'}
             data-for={'network-selection-question-icon'}
             data-tip={true}
-            src={QuestionIcon}
-          />
+          >
+            {IconMaps.question}
+          </div>
           <Tooltip
             place={'bottom'}
             text={t<string>('Please only select networks that you need to optimize resource consumption. You can always turn them on later if needed')}
@@ -127,30 +124,25 @@ function NetworkSelection ({ className, handleShow }: Props): React.ReactElement
             value={searchString}
             withReset
           />
-          {/* <div className={'network-selection-suggestion'}> */}
-          {/*  <Checkbox */}
-          {/*    checked={isCheck} */}
-          {/*    className={'network-selection-checkbox'} */}
-          {/*    label={''} */}
-          {/*    onChange={handleCheckRecommended} */}
-          {/*  /> */}
-          {/*  <div className={'network-selection-recommendation'}>Use suggested setting</div> */}
-          {/* </div> */}
         </div>
 
         <div className={'network-selection-content-container'}>
           {
-            Object.entries(filteredNetworkMap).map(([networkKey, networkJson]) => {
+            filteredNetworkList.map((network) => {
+              const networkKey = network.key;
               const logo = LogosMap[networkKey] || LogosMap.default;
+              const isSelected = selected.includes(networkKey);
 
-              return <NetworkSelectionItem
+              console.log(networkKey, isSelected);
+
+              return (<NetworkSelectionItem
                 handleSelect={handleSelect}
-                isSelected={isSelected(networkKey)}
+                isSelected={isSelected}
                 key={networkKey}
                 logo={logo}
-                networkJson={networkJson}
+                networkJson={network}
                 networkKey={networkKey}
-              />;
+              />);
             })
           }
         </div>
@@ -238,6 +230,7 @@ export default styled(NetworkSelection)(({ theme }: Props) => `
     width: 20px;
     margin-left: 10px;
     cursor: pointer;
+    color: ${theme.primaryColor}
   }
 
   .network-selection-container .subwallet-modal {

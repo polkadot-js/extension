@@ -87,7 +87,8 @@ export const ERA_LENGTH_MAP: Record<string, number> = { // in hours
   shiden: 24,
   shibuya: 24,
   bifrost_testnet: 0.5,
-  bifrost: 2
+  bifrost: 2,
+  ternoa: 24
 };
 
 const ALEPH_DEFAULT_UNIFORM_ERA_PAYOUT_PARAMS: UniformEraPayoutInflationParams = {
@@ -203,4 +204,9 @@ export function getParaCurrentInflation (totalStaked: number, inflationConfig: I
   const inflationString = inflationConfig.annual.ideal.split('%')[0];
 
   return parseFloat(inflationString);
+}
+
+export interface TuringOptimalCompoundFormat {
+  period: string; // in days
+  apy: string;
 }

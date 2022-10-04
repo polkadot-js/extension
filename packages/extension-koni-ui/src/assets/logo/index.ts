@@ -391,6 +391,8 @@ const LogosMap: Record<string, string> = {
   // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
   bit: require('./128.BIT.png'),
   // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+  arctic_testnet: require('./129.snow.png'),
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
   default: require('./73.Default.png')
 };
 

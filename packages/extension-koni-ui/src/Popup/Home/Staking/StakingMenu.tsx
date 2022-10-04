@@ -13,7 +13,7 @@ import Tooltip from '@subwallet/extension-koni-ui/components/Tooltip';
 import useGetNetworkJson from '@subwallet/extension-koni-ui/hooks/screen/home/useGetNetworkJson';
 import useOutsideClick from '@subwallet/extension-koni-ui/hooks/useOutsideClick';
 import { RootState, store } from '@subwallet/extension-koni-ui/stores';
-import { BondingParams, UnbondingParams } from '@subwallet/extension-koni-ui/stores/types';
+import { BondingParams, StakeCompoundParams, UnbondingParams } from '@subwallet/extension-koni-ui/stores/types';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import moment from 'moment';
 import React, { useCallback, useContext, useRef } from 'react';
@@ -40,12 +40,18 @@ const MANUAL_CLAIM_CHAINS = [
   'shiden'
 ];
 
+const MANUAL_COMPOUND_CHAINS = [
+  'turing',
+  'turingStaging'
+];
+
 function StakingMenu ({ bondedAmount, className, networkKey, nextWithdrawal, nextWithdrawalAmount, redeemable, showClaimRewardModal, showMenu, showWithdrawalModal, toggleMenu, unbondingStake }: Props): React.ReactElement<Props> {
   const stakingMenuRef = useRef(null);
   const navigate = useContext(ActionContext);
   const networkJson = useGetNetworkJson(networkKey);
   const showClaimButton = MANUAL_CLAIM_CHAINS.includes(networkKey);
-  const { currentAccount: { account } } = useSelector((state: RootState) => state);
+  const showCompoundButton = MANUAL_COMPOUND_CHAINS.includes(networkKey);
+  const account = useSelector((state: RootState) => state.currentAccount.account);
 
   const handleClickBondingMenu = useCallback((e: MouseEvent) => {
     e.stopPropagation();
@@ -65,6 +71,13 @@ function StakingMenu ({ bondedAmount, className, networkKey, nextWithdrawal, nex
     if (parseFloat(bondedAmount) > 0) {
       store.dispatch({ type: 'unbondingParams/update', payload: { selectedAccount: account?.address as string, selectedNetwork: networkKey, bondedAmount: parseFloat(bondedAmount) } as UnbondingParams });
       navigate('/account/unbonding-auth');
+    }
+  }, [account?.address, bondedAmount, navigate, networkKey]);
+
+  const handleClickCompoundStake = useCallback(() => {
+    if (parseFloat(bondedAmount) > 0) {
+      store.dispatch({ type: 'stakeCompoundParams/update', payload: { selectedAccount: account?.address as string, selectedNetwork: networkKey } as StakeCompoundParams });
+      navigate('/account/stake-compounding-auth');
     }
   }, [account?.address, bondedAmount, navigate, networkKey]);
 
@@ -113,7 +126,7 @@ function StakingMenu ({ bondedAmount, className, networkKey, nextWithdrawal, nex
           showMenu && <Menu
             className={'bonding-menu'}
             reference={stakingMenuRef}
-            style={{ marginTop: showClaimButton ? '200px' : '160px' }}
+            style={{ marginTop: showClaimButton || showCompoundButton ? '200px' : '160px' }}
           >
             <div
               className={'bonding-menu-item'}
@@ -176,6 +189,29 @@ function StakingMenu ({ bondedAmount, className, networkKey, nextWithdrawal, nex
                     place={'top'}
                     text={'Make sure you claim all rewards regularly and before you unstake'}
                     trigger={`claim-button-tooltip-${networkKey}`}
+                  />
+                }
+              </div>
+            }
+
+            {
+              showCompoundButton && <div
+                className={`${parseFloat(bondedAmount) > 0 ? 'bonding-menu-item' : 'disabled-menu-item'}`}
+                onClick={handleClickCompoundStake}
+              >
+                <img
+                  data-for={`stake-compound-tooltip-${networkKey}`}
+                  data-tip={true}
+                  height={18}
+                  src={ArchiveTray}
+                  width={18}
+                />
+                Compound stake
+                {
+                  parseFloat(bondedAmount) > 0 && <Tooltip
+                    place={'top'}
+                    text={'Periodically stake a proportion of your free balance'}
+                    trigger={`stake-compound-tooltip-${networkKey}`}
                   />
                 }
               </div>
@@ -258,7 +294,7 @@ export default React.memo(styled(StakingMenu)(({ theme }: Props) => `
     left: 5px;
     right: auto;
     margin-top: 160px;
-    width: 180px;
+    width: 190px;
     border-radius: 8px;
   }
 

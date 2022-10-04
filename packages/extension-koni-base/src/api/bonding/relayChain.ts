@@ -14,13 +14,16 @@ export async function getRelayChainBondingBasics (networkKey: string, dotSamaApi
   const _era = await apiProps.api.query.staking.currentEra();
   const currentEra = _era.toString();
 
-  const [_totalEraStake, _totalIssuance, _auctionCounter, _maxNominator, _nominatorCount] = await Promise.all([
+  const [_totalEraStake, _totalIssuance, _auctionCounter, _maxNominator, _nominatorCount, _eraStakers] = await Promise.all([
     apiProps.api.query.staking.erasTotalStake(parseInt(currentEra)),
     apiProps.api.query.balances.totalIssuance(),
     apiProps.api.query.auctions?.auctionCounter(),
     apiProps.api.query.staking.maxNominatorsCount(),
-    apiProps.api.query.staking.counterForNominators()
+    apiProps.api.query.staking.counterForNominators(),
+    apiProps.api.query.staking.erasStakers.entries(parseInt(currentEra))
   ]);
+
+  const eraStakers = _eraStakers as any[];
 
   const rawMaxNominator = _maxNominator.toHuman() as string;
   const rawNominatorCount = _nominatorCount.toHuman() as string;
@@ -38,7 +41,8 @@ export async function getRelayChainBondingBasics (networkKey: string, dotSamaApi
 
   return {
     isMaxNominators: maxNominator !== -1 ? nominatorCount >= maxNominator : false,
-    stakedReturn
+    stakedReturn,
+    validatorCount: eraStakers.length
   } as ChainBondingBasics;
 }
 
@@ -218,29 +222,36 @@ export async function getRelayBondingTxInfo (dotSamaApi: ApiProps, controllerId:
 }
 
 export async function handleRelayBondingTxInfo (networkJson: NetworkJson, amount: number, targetValidators: string[], isBondedBefore: boolean, networkKey: string, nominatorAddress: string, dotSamaApiMap: Record<string, ApiProps>, web3ApiMap: Record<string, Web3>) {
-  const parsedAmount = amount * (10 ** (networkJson.decimals as number));
-  const binaryAmount = new BN(parsedAmount);
-  const [txInfo, balance] = await Promise.all([
-    getRelayBondingTxInfo(dotSamaApiMap[networkKey], nominatorAddress, binaryAmount, targetValidators, isBondedBefore),
-    getFreeBalance(networkKey, nominatorAddress, dotSamaApiMap, web3ApiMap)
-  ]);
+  try {
+    const parsedAmount = amount * (10 ** (networkJson.decimals as number));
+    const binaryAmount = new BN(parsedAmount.toString());
+    const [txInfo, balance] = await Promise.all([
+      getRelayBondingTxInfo(dotSamaApiMap[networkKey], nominatorAddress, binaryAmount, targetValidators, isBondedBefore),
+      getFreeBalance(networkKey, nominatorAddress, dotSamaApiMap, web3ApiMap)
+    ]);
 
-  const feeString = parseNumberToDisplay(txInfo.partialFee, networkJson.decimals) + ` ${networkJson.nativeToken ? networkJson.nativeToken : ''}`;
-  const binaryBalance = new BN(balance);
+    const feeString = parseNumberToDisplay(txInfo.partialFee, networkJson.decimals) + ` ${networkJson.nativeToken ? networkJson.nativeToken : ''}`;
+    const binaryBalance = new BN(balance);
 
-  const sumAmount = txInfo.partialFee.add(binaryAmount);
-  const balanceError = sumAmount.gt(binaryBalance);
+    const sumAmount = txInfo.partialFee.add(binaryAmount);
+    const balanceError = sumAmount.gt(binaryBalance);
 
-  return {
-    fee: feeString,
-    balanceError
-  } as BasicTxInfo;
+    return {
+      fee: feeString,
+      balanceError
+    } as BasicTxInfo;
+  } catch (e) {
+    return {
+      fee: `0.0000 ${networkJson.nativeToken as string}`,
+      balanceError: false
+    };
+  }
 }
 
 export async function getRelayBondingExtrinsic (dotSamaApi: ApiProps, controllerId: string, amount: number, validators: string[], isBondedBefore: boolean, networkJson: NetworkJson, bondDest = 'Staked') {
   const apiPromise = await dotSamaApi.isReady;
   const parsedAmount = amount * (10 ** (networkJson.decimals as number));
-  const binaryAmount = new BN(parsedAmount);
+  const binaryAmount = new BN(parsedAmount.toString());
 
   let bondTx;
   const nominateTx = apiPromise.api.tx.staking.nominate(validators);
@@ -280,7 +291,7 @@ export async function getRelayUnbondingTxInfo (dotSamaApi: ApiProps, amount: BN,
 export async function getRelayUnbondingExtrinsic (dotSamaApi: ApiProps, amount: number, networkJson: NetworkJson) {
   const apiPromise = await dotSamaApi.isReady;
   const parsedAmount = amount * (10 ** (networkJson.decimals as number));
-  const binaryAmount = new BN(parsedAmount);
+  const binaryAmount = new BN(parsedAmount.toString());
 
   const chillTx = apiPromise.api.tx.staking.chill();
   const unbondTx = apiPromise.api.tx.staking.unbond(binaryAmount);
@@ -289,24 +300,31 @@ export async function getRelayUnbondingExtrinsic (dotSamaApi: ApiProps, amount: 
 }
 
 export async function handleRelayUnbondingTxInfo (address: string, amount: number, networkKey: string, dotSamaApiMap: Record<string, ApiProps>, web3ApiMap: Record<string, Web3>, networkJson: NetworkJson) {
-  const dotSamaApi = dotSamaApiMap[networkKey];
-  const parsedAmount = amount * (10 ** (networkJson.decimals as number));
-  const binaryAmount = new BN(parsedAmount);
+  try {
+    const dotSamaApi = dotSamaApiMap[networkKey];
+    const parsedAmount = amount * (10 ** (networkJson.decimals as number));
+    const binaryAmount = new BN(parsedAmount.toString());
 
-  const [txInfo, balance] = await Promise.all([
-    getRelayUnbondingTxInfo(dotSamaApi, binaryAmount, address),
-    getFreeBalance(networkKey, address, dotSamaApiMap, web3ApiMap)
-  ]);
+    const [txInfo, balance] = await Promise.all([
+      getRelayUnbondingTxInfo(dotSamaApi, binaryAmount, address),
+      getFreeBalance(networkKey, address, dotSamaApiMap, web3ApiMap)
+    ]);
 
-  const feeString = parseNumberToDisplay(txInfo.partialFee, networkJson.decimals) + ` ${networkJson.nativeToken ? networkJson.nativeToken : ''}`;
-  const binaryBalance = new BN(balance);
+    const feeString = parseNumberToDisplay(txInfo.partialFee, networkJson.decimals) + ` ${networkJson.nativeToken ? networkJson.nativeToken : ''}`;
+    const binaryBalance = new BN(balance);
 
-  const balanceError = txInfo.partialFee.gt(binaryBalance);
+    const balanceError = txInfo.partialFee.gt(binaryBalance);
 
-  return {
-    fee: feeString,
-    balanceError
-  } as BasicTxInfo;
+    return {
+      fee: feeString,
+      balanceError
+    } as BasicTxInfo;
+  } catch (e) {
+    return {
+      fee: `0.0000 ${networkJson.nativeToken as string}`,
+      balanceError: false
+    } as BasicTxInfo;
+  }
 }
 
 export async function getRelayUnlockingInfo (dotSamaApi: ApiProps, address: string, networkKey: string) {
@@ -384,19 +402,26 @@ export async function getRelayWithdrawalTxInfo (dotSamaAPi: ApiProps, address: s
 }
 
 export async function handleRelayWithdrawalTxInfo (address: string, networkKey: string, networkJson: NetworkJson, dotSamaApiMap: Record<string, ApiProps>, web3ApiMap: Record<string, Web3>) {
-  const [txInfo, balance] = await Promise.all([
-    getRelayWithdrawalTxInfo(dotSamaApiMap[networkKey], address),
-    getFreeBalance(networkKey, address, dotSamaApiMap, web3ApiMap)
-  ]);
+  try {
+    const [txInfo, balance] = await Promise.all([
+      getRelayWithdrawalTxInfo(dotSamaApiMap[networkKey], address),
+      getFreeBalance(networkKey, address, dotSamaApiMap, web3ApiMap)
+    ]);
 
-  const feeString = parseNumberToDisplay(txInfo.partialFee, networkJson.decimals) + ` ${networkJson.nativeToken ? networkJson.nativeToken : ''}`;
-  const binaryBalance = new BN(balance);
-  const balanceError = txInfo.partialFee.gt(binaryBalance);
+    const feeString = parseNumberToDisplay(txInfo.partialFee, networkJson.decimals) + ` ${networkJson.nativeToken ? networkJson.nativeToken : ''}`;
+    const binaryBalance = new BN(balance);
+    const balanceError = txInfo.partialFee.gt(binaryBalance);
 
-  return {
-    fee: feeString,
-    balanceError
-  } as BasicTxInfo;
+    return {
+      fee: feeString,
+      balanceError
+    } as BasicTxInfo;
+  } catch (e) {
+    return {
+      fee: `0.0000 ${networkJson.nativeToken as string}`,
+      balanceError: false
+    } as BasicTxInfo;
+  }
 }
 
 export async function getRelayWithdrawalExtrinsic (dotSamaAPi: ApiProps, address: string) {

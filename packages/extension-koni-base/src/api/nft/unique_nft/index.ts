@@ -21,6 +21,7 @@ interface Token {
   Owner: string
 }
 
+// deprecated
 export default class UniqueNftApi extends BaseNftApi {
   // eslint-disable-next-line no-useless-constructor
   constructor (api: ApiProps | null, addresses: string[], chain: string) {
@@ -196,7 +197,8 @@ export default class UniqueNftApi extends BaseNftApi {
               collectionId: collectionIdStr,
               properties: tokenData.properties,
               rarity: '',
-              chain: this.chain
+              chain: this.chain,
+              owner: address
             } as NftItem;
 
             if (!parsedCollection.collectionName) {

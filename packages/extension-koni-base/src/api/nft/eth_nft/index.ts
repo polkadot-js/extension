@@ -140,6 +140,7 @@ export class Web3NftApi extends BaseNftApi {
 
               parsedItem.collectionId = smartContract;
               parsedItem.id = nftId;
+              parsedItem.owner = address;
 
               if (parsedItem) {
                 if (parsedItem.image) {

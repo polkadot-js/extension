@@ -7,8 +7,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { NETWORK_STATUS } from '@subwallet/extension-base/background/KoniTypes';
 import { AccountJson } from '@subwallet/extension-base/background/types';
 import { ALL_ACCOUNT_KEY, ALL_NETWORK_KEY } from '@subwallet/extension-koni-base/constants';
-import signalSlashIcon from '@subwallet/extension-koni-ui/assets/signal-stream-slash-solid.svg';
-import signalIcon from '@subwallet/extension-koni-ui/assets/signal-stream-solid.svg';
+import { IconMaps } from '@subwallet/extension-koni-ui/assets/icon';
 import { AccountInfoEl } from '@subwallet/extension-koni-ui/components';
 import MoonpayArea from '@subwallet/extension-koni-ui/components/BuyArea/MoonpayArea';
 import OnRamperArea from '@subwallet/extension-koni-ui/components/BuyArea/OnRamperArea';
@@ -78,7 +77,7 @@ const BuyModal = (props: Props) => {
     return genesisOptions.find((net) => net.networkKey === networkQr?.networkKey);
   }, [genesisOptions, networkQr?.networkKey]);
 
-  const { address } = (account as AccountJson) || { address: ALL_ACCOUNT_KEY };
+  const { address, originGenesisHash } = (account as AccountJson) || { address: ALL_ACCOUNT_KEY };
   const { networkKey, networkPrefix } = (network as NetworkSelectOption) || { networkKey: ALL_NETWORK_KEY, networkPrefix: 42 };
 
   const networkMap = useSelector((state: RootState) => state.networkMap);
@@ -101,8 +100,10 @@ const BuyModal = (props: Props) => {
   }, [filter, accounts, network]);
 
   const filteredNetwork = useMemo(() => {
-    return filter ? genesisOptions.filter((network) => network.networkKey?.toLowerCase().includes(filter.toLowerCase())) : genesisOptions;
-  }, [filter, genesisOptions]);
+    const options = originGenesisHash ? genesisOptions.filter((option) => option.value === originGenesisHash) : genesisOptions;
+
+    return filter ? options.filter((network) => network.networkKey?.toLowerCase().includes(filter.toLowerCase())) : options;
+  }, [filter, genesisOptions, originGenesisHash]);
 
   const onChangeFilter = useCallback((value: string) => {
     setFilter(value);
@@ -120,21 +121,21 @@ const BuyModal = (props: Props) => {
 
   const handleStatusIcon = useCallback((apiStatus: NETWORK_STATUS, index: number) => {
     if (apiStatus === NETWORK_STATUS.CONNECTED) {
-      return <img
-        alt='network-status'
-        className={'network-status network-status-icon'}
+      return <div
+        className={'network-status network-status-icon network-status-icon-connected'}
         data-for={`network-status-icon-${index}`}
         data-tip={true}
-        src={signalIcon}
-      />;
+      >
+        {IconMaps.signal}
+      </div>;
     } else {
-      return <img
-        alt='network-status'
-        className={'network-status network-status-icon'}
+      return <div
+        className={'network-status network-status-icon network-status-icon-disconnected'}
         data-for={`network-status-icon-${index}`}
         data-tip={true}
-        src={signalSlashIcon}
-      />;
+      >
+        {IconMaps.signalSplash}
+      </div>;
     }
   }, []);
 
@@ -466,6 +467,13 @@ export default styled(BuyModal)(({ theme }: ThemeProps) => `
         padding: 0;
       }
     }
+  }
+
+  .network-status-icon-connected {
+    color: ${theme.primaryColor}
+  }
+  .network-status-icon-disconnected {
+    color: ${theme.iconNeutralColor}
   }
 
   .network-container {

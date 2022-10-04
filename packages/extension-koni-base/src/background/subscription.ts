@@ -86,7 +86,6 @@ export class KoniSubscription {
     !this.serviceSubscription &&
       (this.serviceSubscription = this.state.subscribeServiceInfo().subscribe({
         next: (serviceInfo) => {
-          this.logger.log('serviceInfo update', serviceInfo);
           const { address } = serviceInfo.currentAccountInfo;
 
           this.state.initChainRegistry();
@@ -291,7 +290,11 @@ export class KoniSubscription {
 
     const stakeUnlockingInfo: Record<string, UnlockingStakeInfo> = {};
 
-    const currentStakingInfo = this.state.getStaking().details;
+    if (!addresses.length) {
+      return;
+    }
+
+    const currentStakingInfo = state.getStaking().details;
 
     if (!addresses.length) {
       return;

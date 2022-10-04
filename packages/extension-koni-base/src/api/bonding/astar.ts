@@ -12,13 +12,21 @@ import { SubmittableExtrinsic } from '@polkadot/api/promise/types';
 import { BN } from '@polkadot/util';
 
 export async function getAstarBondingBasics (networkKey: string) {
-  const allDappsReq = new Promise(function (resolve) {
+  const aprPromise = new Promise(function (resolve) {
     fetch(`https://api.astar.network/api/v1/${networkKey}/dapps-staking/apr`, {
       method: 'GET'
     }).then((resp) => {
       resolve(resp.json());
     }).catch(console.error);
   });
+  const dappInfoPromise = new Promise(function (resolve) {
+    fetch(`https://api.astar.network/api/v1/${networkKey}/dapps-staking/dapps`, {
+      method: 'GET'
+    }).then((resp) => {
+      resolve(resp.json());
+    }).catch(console.error);
+  });
+
   const timeout = new Promise((resolve) => {
     const id = setTimeout(() => {
       clearTimeout(id);
@@ -26,21 +34,41 @@ export async function getAstarBondingBasics (networkKey: string) {
     }, 5000);
   });
 
-  const resp = await Promise.race([
+  const aprRacePromise = Promise.race([
     timeout,
-    allDappsReq
-  ]); // need race because of API often timeout
+    aprPromise
+  ]); // need race because API often timeout
 
-  if (resp !== null) {
+  const dappRacePromise = Promise.race([
+    timeout,
+    dappInfoPromise
+  ]); // need race because API often timeout
+
+  const [aprInfo, _dappInfo] = await Promise.all([
+    aprRacePromise,
+    dappRacePromise
+  ]);
+
+  let validatorCount = 0;
+
+  if (_dappInfo !== null) {
+    const allDapps = _dappInfo as Record<string, any>[];
+
+    validatorCount = allDapps.length;
+  }
+
+  if (aprInfo !== null) {
     return {
       isMaxNominators: false,
-      stakedReturn: resp as number
+      stakedReturn: aprInfo as number,
+      validatorCount
     };
   }
 
   return {
     isMaxNominators: false,
-    stakedReturn: 0
+    stakedReturn: 0,
+    validatorCount
   };
 }
 
@@ -136,21 +164,28 @@ export async function getAstarBondingTxInfo (networkJson: NetworkJson, dotSamaAp
 }
 
 export async function handleAstarBondingTxInfo (networkJson: NetworkJson, amount: number, networkKey: string, stakerAddress: string, dappInfo: ValidatorInfo, dotSamaApiMap: Record<string, ApiProps>, web3ApiMap: Record<string, Web3>) {
-  const [txInfo, balance] = await Promise.all([
-    getAstarBondingTxInfo(networkJson, dotSamaApiMap[networkKey], stakerAddress, amount, dappInfo),
-    getFreeBalance(networkKey, stakerAddress, dotSamaApiMap, web3ApiMap)
-  ]);
+  try {
+    const [txInfo, balance] = await Promise.all([
+      getAstarBondingTxInfo(networkJson, dotSamaApiMap[networkKey], stakerAddress, amount, dappInfo),
+      getFreeBalance(networkKey, stakerAddress, dotSamaApiMap, web3ApiMap)
+    ]);
 
-  const feeString = parseNumberToDisplay(txInfo.partialFee, networkJson.decimals) + ` ${networkJson.nativeToken ? networkJson.nativeToken : ''}`;
-  const binaryBalance = new BN(balance);
+    const feeString = parseNumberToDisplay(txInfo.partialFee, networkJson.decimals) + ` ${networkJson.nativeToken ? networkJson.nativeToken : ''}`;
+    const binaryBalance = new BN(balance);
 
-  const sumAmount = txInfo.partialFee.addn(amount);
-  const balanceError = sumAmount.gt(binaryBalance);
+    const sumAmount = txInfo.partialFee.addn(amount);
+    const balanceError = sumAmount.gt(binaryBalance);
 
-  return {
-    fee: feeString,
-    balanceError
-  } as BasicTxInfo;
+    return {
+      fee: feeString,
+      balanceError
+    } as BasicTxInfo;
+  } catch (e) {
+    return {
+      fee: `0.0000 ${networkJson.nativeToken as string}`,
+      balanceError: false
+    } as BasicTxInfo;
+  }
 }
 
 export async function getAstarBondingExtrinsic (dotSamaApi: ApiProps, networkJson: NetworkJson, amount: number, networkKey: string, stakerAddress: string, dappInfo: ValidatorInfo) {
@@ -172,19 +207,26 @@ export async function getAstarUnbondingTxInfo (networkJson: NetworkJson, dotSama
 }
 
 export async function handleAstarUnbondingTxInfo (networkJson: NetworkJson, amount: number, networkKey: string, stakerAddress: string, dappAddress: string, dotSamaApiMap: Record<string, ApiProps>, web3ApiMap: Record<string, Web3>) {
-  const [txInfo, balance] = await Promise.all([
-    getAstarUnbondingTxInfo(networkJson, dotSamaApiMap[networkKey], stakerAddress, amount, dappAddress),
-    getFreeBalance(networkKey, stakerAddress, dotSamaApiMap, web3ApiMap)
-  ]);
+  try {
+    const [txInfo, balance] = await Promise.all([
+      getAstarUnbondingTxInfo(networkJson, dotSamaApiMap[networkKey], stakerAddress, amount, dappAddress),
+      getFreeBalance(networkKey, stakerAddress, dotSamaApiMap, web3ApiMap)
+    ]);
 
-  const feeString = parseNumberToDisplay(txInfo.partialFee, networkJson.decimals) + ` ${networkJson.nativeToken ? networkJson.nativeToken : ''}`;
-  const binaryBalance = new BN(balance);
-  const balanceError = txInfo.partialFee.gt(binaryBalance);
+    const feeString = parseNumberToDisplay(txInfo.partialFee, networkJson.decimals) + ` ${networkJson.nativeToken ? networkJson.nativeToken : ''}`;
+    const binaryBalance = new BN(balance);
+    const balanceError = txInfo.partialFee.gt(binaryBalance);
 
-  return {
-    fee: feeString,
-    balanceError
-  } as BasicTxInfo;
+    return {
+      fee: feeString,
+      balanceError
+    } as BasicTxInfo;
+  } catch (e) {
+    return {
+      fee: `0.0000 ${networkJson.nativeToken as string}`,
+      balanceError: false
+    } as BasicTxInfo;
+  }
 }
 
 export async function getAstarUnbondingExtrinsic (dotSamaApi: ApiProps, networkJson: NetworkJson, amount: number, networkKey: string, stakerAddress: string, dappAddress: string) {
@@ -335,19 +377,26 @@ export async function getAstarClaimRewardTxInfo (dotSamaApi: ApiProps, address: 
 }
 
 export async function handleAstarClaimRewardTxInfo (address: string, networkKey: string, networkJson: NetworkJson, dotSamaApiMap: Record<string, ApiProps>, web3ApiMap: Record<string, Web3>) {
-  const [txInfo, balance] = await Promise.all([
-    getAstarClaimRewardTxInfo(dotSamaApiMap[networkKey], address),
-    getFreeBalance(networkKey, address, dotSamaApiMap, web3ApiMap)
-  ]);
+  try {
+    const [txInfo, balance] = await Promise.all([
+      getAstarClaimRewardTxInfo(dotSamaApiMap[networkKey], address),
+      getFreeBalance(networkKey, address, dotSamaApiMap, web3ApiMap)
+    ]);
 
-  const feeString = parseNumberToDisplay(txInfo.partialFee, networkJson.decimals) + ` ${networkJson.nativeToken ? networkJson.nativeToken : ''}`;
-  const binaryBalance = new BN(balance);
-  const balanceError = txInfo.partialFee.gt(binaryBalance);
+    const feeString = parseNumberToDisplay(txInfo.partialFee, networkJson.decimals) + ` ${networkJson.nativeToken ? networkJson.nativeToken : ''}`;
+    const binaryBalance = new BN(balance);
+    const balanceError = txInfo.partialFee.gt(binaryBalance);
 
-  return {
-    fee: feeString,
-    balanceError
-  } as BasicTxInfo;
+    return {
+      fee: feeString,
+      balanceError
+    } as BasicTxInfo;
+  } catch (e) {
+    return {
+      fee: `0.0000 ${networkJson.nativeToken as string}`,
+      balanceError: false
+    } as BasicTxInfo;
+  }
 }
 
 export async function getAstarClaimRewardExtrinsic (dotSamaApi: ApiProps, dappAddress: string, address: string) {

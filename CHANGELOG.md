@@ -1,5 +1,61 @@
 # CHANGELOG
 
+## 0.6.6 (Koni)
+Build date: Sep 30, 2022.
+
+Update:
+- Update Acala endpoints (#685)
+- Change transfer warning when the account cannot be reaped (#681)
+- Integration Ledger Acala account (#564)
+- Update $ price for ZTG token (#671)
+- Integrate Auto-Compound Staking Reward API for Turing Network (#520)
+- Add staking for $CAPS and add support for Ternoa's testnet Alphanet (#636)
+
+Bug fixes:
+- Still shows deleted NFTs (#497)
+- Some errors occurred when updating the caching mechanism (#583)
+- Some bugs related to custom tokens when the chain is disconnected (#687)
+
+## 0.6.5 (Koni)
+Build date: Sep 24, 2022.
+
+Update:
+- Integrate Pioneer Network NFT (#649)
+- Support 3D viewer for NFT (#662)
+- Support transfer BIT token on Pioneer Network (#665)
+- Temporarily disable XCM for Acala (#667)
+- Update Zeitgeist endpoints (#669)
+
+Bug fixes:
+- Handle estimated fee error on NFT sending + staking (#648)
+
+## 0.6.4 (Koni)
+Build date: Sep 21, 2022.
+
+Update:
+- Add new networks (new parachain winners) (#608)
+- Add more attributes to NFT collection and item (#643)
+- Update subscan for Subspace 2a network (#651)
+
+Bug fixes:
+- Can't see the NFT in case NFT Collection is on multi-page (#639)
+
+## 0.6.2 (Koni)
+Build date: Sep 16, 2022.
+
+Update:
+- Support Single-chain mode feature customize for Parachain & Solo chains (#331)
+
+## 0.6.1 (Koni)
+Build date: Sep 13, 2022.
+
+Update:
+- Integrate Bit.Country Token and XCM (#621)
+- Update Gear Staging Testnet logo (#625)
+- Update ArthSwap logo (ARSW token on Astar-EVM) (#626)
+- Update default provider for Subspace Gemini 1 (#628)
+- Update endpoint list for GM Chain (#632)
+
 ## 0.5.9 (Koni)
 Build date: Sep 7, 2022.
 

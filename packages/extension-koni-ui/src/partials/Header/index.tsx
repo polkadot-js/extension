@@ -512,7 +512,7 @@ export default React.memo(styled(Header)(({ theme }: Props) => `
     cursor: pointer;
     height: 56px;
     position: relative;
-    
+
     &:after {
       content: '';
       position: absolute;

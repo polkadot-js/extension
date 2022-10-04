@@ -9,7 +9,7 @@ import { getRelayBondingExtrinsic, getRelayChainBondingBasics, getRelayUnbonding
 import Web3 from 'web3';
 
 const CHAIN_TYPES: Record<string, string[]> = {
-  relay: ['polkadot', 'kusama', 'aleph', 'polkadex'],
+  relay: ['polkadot', 'kusama', 'aleph', 'polkadex', 'ternoa', 'ternoa_alphanet'],
   para: ['moonbeam', 'moonriver', 'moonbase', 'turing', 'turingStaging', 'bifrost', 'bifrost_testnet'],
   darwinia: ['darwinia', 'crab', 'pangolin'],
   astar: ['astar', 'shiden', 'shibuya']

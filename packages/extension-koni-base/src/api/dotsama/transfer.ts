@@ -172,13 +172,8 @@ export async function estimateFee (
     const paymentInfo = await api.tx.currencies.transfer(to, tokenInfo.specialOption, value).paymentInfo(fromKeypair);
 
     fee = paymentInfo.partialFee.toString();
-  } else if (['statemint', 'statemine'].includes(networkKey) && tokenInfo) {
-    const paymentInfo = await api.tx.balances.transfer(tokenInfo.assetIndex, to, value).paymentInfo(fromKeypair);
-
-    // TODO: XCM from polkadot
-
-    const extrinsic = api.tx.balances.transfer(tokenInfo.assetIndex, to, value);
-    console.log(extrinsic.toHex());
+  } else if (['statemint', 'statemine'].includes(networkKey) && tokenInfo && !tokenInfo.isMainToken) {
+    const paymentInfo = await api.tx.assets.transfer(tokenInfo.assetIndex, to, value).paymentInfo(fromKeypair);
 
     fee = paymentInfo.partialFee.toString();
   } else if (isTxBalancesSupported && (!tokenInfo || tokenInfo.isMainToken || (tokenInfo && ((networkKey === 'crab' && tokenInfo.symbol === 'CKTON') || (networkKey === 'pangolin' && tokenInfo.symbol === 'PKTON'))))) {
@@ -455,6 +450,8 @@ export async function makeTransfer (
     }
   } else if (['pioneer'].includes(networkKey) && tokenInfo && tokenInfo.symbol === 'BIT') {
     transfer = api.tx.currencies.transfer(to, tokenInfo.specialOption, value);
+  } else if (['statemint', 'statemine'].includes(networkKey) && tokenInfo && !tokenInfo.isMainToken) {
+    transfer = api.tx.assets.transfer(tokenInfo.assetIndex, to, value);
   } else if (isTxBalancesSupported && (!tokenInfo || tokenInfo.isMainToken)) {
     if (transferAll) {
       transfer = api.tx.balances.transferAll(to, false);

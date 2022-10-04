@@ -62,12 +62,17 @@ export const SupportedCrossChainsMap: Record<string, CrossChainRelation> = {
     type: 'p',
     isEthereum: false,
     relationMap: {
+      moonbeam: {
+        type: 'p',
+        isEthereum: true,
+        supportedToken: ['USDt']
+      },
       astar: {
         type: 'p',
         isEthereum: false,
         supportedToken: ['USDt']
       },
-      moonbeam: {
+      astarEvm: {
         type: 'p',
         isEthereum: true,
         supportedToken: ['USDt']
@@ -285,29 +290,15 @@ export const xTokenMoonbeamContract = require('./Xtokens.json');
 export function getMultiLocationFromParachain (originChain: string, destinationChain: string, networkMap: Record<string, NetworkJson>, toAddress: string) {
   const xcmType = SupportedCrossChainsMap[originChain].type + SupportedCrossChainsMap[originChain].relationMap[destinationChain].type;
   const paraId = networkMap[destinationChain].paraId as number;
+  const receiverLocation = getReceiverLocation(originChain, destinationChain, networkMap, toAddress);
 
   if (xcmType === 'pp') { // parachain -> parachain
-    let ss58Address = toAddress;
-
-    if (destinationChain === 'astarEvm' || destinationChain === 'shidenEvm') {
-      ss58Address = evmToAddress(toAddress, networkMap[destinationChain].ss58Format);
-    }
-
-    let interior: Record<string, any> = {
+    const interior: Record<string, any> = {
       X2: [
         { Parachain: paraId },
-        { AccountId32: { network: 'Any', id: decodeAddress(ss58Address) } }
+        receiverLocation
       ]
     };
-
-    if (SupportedCrossChainsMap[originChain].relationMap[destinationChain].isEthereum && destinationChain !== 'astarEvm' && destinationChain !== 'shidenEvm') {
-      interior = {
-        X2: [
-          { Parachain: paraId },
-          { AccountKey20: { network: 'Any', key: toAddress } }
-        ]
-      };
-    }
 
     return { V1: { parents: 1, interior } };
   }
@@ -317,8 +308,22 @@ export function getMultiLocationFromParachain (originChain: string, destinationC
     V1: {
       parents: 1,
       interior: {
-        X1: { AccountId32: { network: 'Any', id: decodeAddress(toAddress) } }
+        X1: receiverLocation
       }
     }
   };
+}
+
+export function getReceiverLocation (originChain: string, destinationChain: string, networkMap: Record<string, NetworkJson>, toAddress: string): Record<string, any> {
+  if (['astarEvm', 'shidenEvm'].includes(destinationChain)) {
+    const ss58Address = evmToAddress(toAddress, networkMap[destinationChain].ss58Format);
+
+    return { AccountId32: { network: 'Any', id: decodeAddress(ss58Address) } };
+  }
+
+  if (SupportedCrossChainsMap[originChain].relationMap[destinationChain].isEthereum) {
+    return { AccountKey20: { network: 'Any', key: toAddress } };
+  }
+
+  return { AccountId32: { network: 'Any', id: decodeAddress(toAddress) } };
 }

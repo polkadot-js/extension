@@ -2,12 +2,11 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { ApiProps, NetworkJson, TokenInfo } from '@subwallet/extension-base/background/KoniTypes';
-import { SupportedCrossChainsMap } from '@subwallet/extension-koni-base/api/xcm/utils';
+import { getReceiverLocation, SupportedCrossChainsMap } from '@subwallet/extension-koni-base/api/xcm/utils';
 import { parseNumberToDisplay } from '@subwallet/extension-koni-base/utils';
 
 import { ApiPromise } from '@polkadot/api';
 import { KeyringPair } from '@polkadot/keyring/types';
-import { decodeAddress } from '@polkadot/util-crypto';
 
 const ASSET_TO_LOCATION_MAP: Record<string, Record<string, any>> = {
   statemint: {
@@ -45,11 +44,12 @@ export async function statemintEstimateCrossChainFee (
     return [fee, feeString];
   }
 
+  const receiverLocation: Record<string, any> = getReceiverLocation(originNetworkKey, destinationNetworkKey, networkMap, to);
+
   try {
     if (SupportedCrossChainsMap[originNetworkKey].relationMap[destinationNetworkKey].type === 'p') {
       // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
       const assetLocation = ASSET_TO_LOCATION_MAP[originNetworkKey][tokenInfo.assetIndex as string];
-      let receiverLocation: Record<string, any> = { AccountId32: { network: 'Any', id: decodeAddress(to) } };
       const destinationChainLocation: Record<string, any> = {
         V1: { // find the destination chain
           parents: 1,
@@ -58,10 +58,6 @@ export async function statemintEstimateCrossChainFee (
           }
         }
       };
-
-      if (networkMap[destinationNetworkKey].isEthereum) {
-        receiverLocation = { AccountKey20: { network: 'Any', id: to } };
-      }
 
       const extrinsic = apiProps.api.tx.polkadotXcm.limitedReserveTransferAssets(
         destinationChainLocation, // dest
@@ -100,7 +96,7 @@ export async function statemintEstimateCrossChainFee (
       fee = paymentInfo.partialFee.toString();
       feeString = parseNumberToDisplay(paymentInfo.partialFee, originNetworkJson.decimals) + ` ${originNetworkJson.nativeToken ? originNetworkJson.nativeToken : ''}`;
     } else {
-      console.log('transferring to dot', tokenInfo);
+      console.log('transferring to r', tokenInfo);
 
       const extrinsic = apiProps.api.tx.polkadotXcm.limitedReserveTransferAssets(
         {
@@ -113,9 +109,7 @@ export async function statemintEstimateCrossChainFee (
           V1: { // beneficiary
             parents: 0,
             interior: {
-              X1: {
-                AccountId32: { network: 'Any', id: decodeAddress(to) }
-              }
+              X1: receiverLocation
             }
           }
         },
@@ -164,11 +158,11 @@ export function statemintGetXcmExtrinsic (
   networkMap: Record<string, NetworkJson>
 ) {
   const destinationNetworkJson = networkMap[destinationNetworkKey];
+  const receiverLocation: Record<string, any> = getReceiverLocation(originNetworkKey, destinationNetworkKey, networkMap, to);
 
   if (SupportedCrossChainsMap[originNetworkKey].relationMap[destinationNetworkKey].type === 'p') {
     // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
     const assetLocation = ASSET_TO_LOCATION_MAP[originNetworkKey][tokenInfo.assetIndex as string];
-    let receiverLocation: Record<string, any> = { AccountId32: { network: 'Any', id: decodeAddress(to) } };
     const destinationChainLocation: Record<string, any> = {
       V1: { // find the destination chain
         parents: 1,
@@ -177,10 +171,6 @@ export function statemintGetXcmExtrinsic (
         }
       }
     };
-
-    if (networkMap[destinationNetworkKey].isEthereum) {
-      receiverLocation = { AccountKey20: { network: 'Any', id: to } };
-    }
 
     return api.tx.polkadotXcm.limitedReserveTransferAssets(
       destinationChainLocation, // dest
@@ -223,9 +213,7 @@ export function statemintGetXcmExtrinsic (
         V1: { // beneficiary
           parents: 0,
           interior: {
-            X1: {
-              AccountId32: { network: 'Any', id: decodeAddress(to) }
-            }
+            X1: receiverLocation
           }
         }
       },

@@ -5,7 +5,7 @@ import { ApiProps, NetworkJson, ResponseTransfer, TokenInfo } from '@subwallet/e
 import { doSignAndSend, getUnsupportedResponse } from '@subwallet/extension-koni-base/api/dotsama/transfer';
 import { astarEstimateCrossChainFee, astarGetXcmExtrinsic } from '@subwallet/extension-koni-base/api/xcm/astar';
 import { moonbeamEstimateCrossChainFee, moonbeamGetXcmExtrinsic } from '@subwallet/extension-koni-base/api/xcm/moonbeamXcm';
-import { statemintEstimateCrossChainFee, statemintGetXcmExtrinsic } from '@subwallet/extension-koni-base/api/xcm/statemint';
+import { statemintEstimateCrossChainFee, statemintGetXcmExtrinsic } from '@subwallet/extension-koni-base/api/xcm/statemintXcm';
 import { substrateEstimateCrossChainFee, substrateGetXcmExtrinsic } from '@subwallet/extension-koni-base/api/xcm/substrateXcm';
 import { SupportedCrossChainsMap } from '@subwallet/extension-koni-base/api/xcm/utils';
 

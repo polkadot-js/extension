@@ -71,42 +71,80 @@ export async function substrateEstimateCrossChainFee (
         receiverLocation = { AccountKey20: { network: 'Any', key: to } };
       }
 
-      const extrinsic = api.tx.xcmPallet.reserveTransferAssets(
-        {
-          V1: { // find the destination chain
-            parents: 0,
-            interior: {
-              X1: { Parachain: destinationNetworkJson.paraId as number }
+      if (['statemint', 'statemine'].includes(destinationNetworkKey)) {
+        const extrinsic = api.tx.xcmPallet.limitedTeleportAssets(
+          {
+            V1: {
+              parents: 0,
+              interior: {
+                X1: { Parachain: destinationNetworkJson.paraId }
+              }
             }
-          }
-        },
-        {
-          V1: { // find the receiver
-            parents: 0,
-            interior: {
-              X1: receiverLocation
+          },
+          {
+            V1: {
+              parents: 0,
+              interior: {
+                X1: receiverLocation
+              }
             }
-          }
-        },
-        {
-          V1: [ // find the asset
-            {
-              id: {
-                Concrete: { parents: 0, interior: 'Here' }
-              },
-              fun: { Fungible: value }
+          },
+          {
+            V1: [
+              {
+                id: { Concrete: { parents: 0, interior: 'Here' } },
+                fun: { Fungible: value }
+              }
+            ]
+          },
+          0,
+          'Unlimited'
+        );
+
+        const paymentInfo = await extrinsic.paymentInfo(fromKeypair);
+
+        fee = paymentInfo.partialFee.toString();
+        feeString = parseNumberToDisplay(paymentInfo.partialFee, originNetworkJson.decimals) + ` ${originNetworkJson.nativeToken ? originNetworkJson.nativeToken : ''}`;
+
+        console.log('substrate xcm teleport asset tx r-p here', extrinsic.toHex());
+      } else {
+        const extrinsic = api.tx.xcmPallet.reserveTransferAssets(
+          {
+            V1: { // find the destination chain
+              parents: 0,
+              interior: {
+                X1: { Parachain: destinationNetworkJson.paraId as number }
+              }
             }
-          ]
-        },
-        0
-      );
+          },
+          {
+            V1: { // find the receiver
+              parents: 0,
+              interior: {
+                X1: receiverLocation
+              }
+            }
+          },
+          {
+            V1: [ // find the asset
+              {
+                id: {
+                  Concrete: { parents: 0, interior: 'Here' }
+                },
+                fun: { Fungible: value }
+              }
+            ]
+          },
+          0
+        );
 
-      const paymentInfo = await extrinsic.paymentInfo(fromKeypair);
+        const paymentInfo = await extrinsic.paymentInfo(fromKeypair);
 
-      fee = paymentInfo.partialFee.toString();
-      feeString = parseNumberToDisplay(paymentInfo.partialFee, originNetworkJson.decimals) + ` ${originNetworkJson.nativeToken ? originNetworkJson.nativeToken : ''}`;
+        fee = paymentInfo.partialFee.toString();
+        feeString = parseNumberToDisplay(paymentInfo.partialFee, originNetworkJson.decimals) + ` ${originNetworkJson.nativeToken ? originNetworkJson.nativeToken : ''}`;
 
-      console.log('substrate xcm tx r-p here', extrinsic.toHex());
+        console.log('substrate xcm reserve transfer tx r-p here', extrinsic.toHex());
+      }
     }
 
     return [fee, feeString];
@@ -146,6 +184,37 @@ export function substrateGetXcmExtrinsic (
 
   if (SupportedCrossChainsMap[originNetworkKey].relationMap[destinationNetworkKey].isEthereum) {
     receiverLocation = { AccountKey20: { network: 'Any', key: to } };
+  }
+
+  if (['statemint', 'statemine'].includes(destinationNetworkKey)) {
+    return api.tx.xcmPallet.limitedTeleportAssets(
+      {
+        V1: {
+          parents: 0,
+          interior: {
+            X1: { Parachain: destinationNetworkJson.paraId }
+          }
+        }
+      },
+      {
+        V1: {
+          parents: 0,
+          interior: {
+            X1: receiverLocation
+          }
+        }
+      },
+      {
+        V1: [
+          {
+            id: { Concrete: { parents: 0, interior: 'Here' } },
+            fun: { Fungible: value }
+          }
+        ]
+      },
+      0,
+      'Unlimited'
+    );
   }
 
   return api.tx.xcmPallet.reserveTransferAssets(

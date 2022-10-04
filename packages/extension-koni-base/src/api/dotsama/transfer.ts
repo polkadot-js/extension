@@ -175,6 +175,8 @@ export async function estimateFee (
   } else if (['statemint', 'statemine'].includes(networkKey) && tokenInfo) {
     const paymentInfo = await api.tx.balances.transfer(tokenInfo.assetIndex, to, value).paymentInfo(fromKeypair);
 
+    // TODO: XCM from polkadot
+
     const extrinsic = api.tx.balances.transfer(tokenInfo.assetIndex, to, value);
     console.log(extrinsic.toHex());
 

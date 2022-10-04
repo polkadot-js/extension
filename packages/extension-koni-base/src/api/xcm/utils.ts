@@ -24,6 +24,11 @@ export const SupportedCrossChainsMap: Record<string, CrossChainRelation> = {
         type: 'p',
         isEthereum: false,
         supportedToken: ['DOT']
+      },
+      statemint: {
+        type: 'p',
+        isEthereum: false,
+        supportedToken: ['DOT']
       }
     }
   },

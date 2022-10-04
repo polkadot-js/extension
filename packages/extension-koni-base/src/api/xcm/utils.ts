@@ -19,12 +19,12 @@ export const SupportedCrossChainsMap: Record<string, CrossChainRelation> = {
         type: 'p',
         isEthereum: false,
         supportedToken: ['DOT']
+      },
+      acala: {
+        type: 'p',
+        isEthereum: false,
+        supportedToken: ['DOT']
       }
-      // acala: {
-      //   type: 'p',
-      //   isEthereum: false,
-      //   supportedToken: ['DOT']
-      // }
     }
   },
   kusama: {
@@ -53,32 +53,43 @@ export const SupportedCrossChainsMap: Record<string, CrossChainRelation> = {
       }
     }
   },
-  // acala: {
+  // statemint: {
   //   type: 'p',
   //   isEthereum: false,
   //   relationMap: {
-  //     moonbeam: {
-  //       type: 'p',
-  //       isEthereum: true,
-  //       supportedToken: ['ACA', 'aUSD']
-  //     },
   //     astar: {
   //       type: 'p',
   //       isEthereum: false,
-  //       supportedToken: ['aUSD']
-  //     },
-  //     astarEvm: {
-  //       type: 'p',
-  //       isEthereum: true,
-  //       supportedToken: ['aUSD']
-  //     },
-  //     polkadot: {
-  //       type: 'r',
-  //       isEthereum: false,
-  //       supportedToken: ['DOT']
+  //       supportedToken: ['USDt']
   //     }
   //   }
   // },
+  acala: {
+    type: 'p',
+    isEthereum: false,
+    relationMap: {
+      moonbeam: {
+        type: 'p',
+        isEthereum: true,
+        supportedToken: ['ACA', 'aUSD']
+      },
+      astar: {
+        type: 'p',
+        isEthereum: false,
+        supportedToken: ['aUSD']
+      },
+      astarEvm: {
+        type: 'p',
+        isEthereum: true,
+        supportedToken: ['aUSD']
+      },
+      polkadot: {
+        type: 'r',
+        isEthereum: false,
+        supportedToken: ['DOT']
+      }
+    }
+  },
   karura: {
     type: 'p',
     isEthereum: false,
@@ -119,11 +130,11 @@ export const SupportedCrossChainsMap: Record<string, CrossChainRelation> = {
     type: 'p',
     isEthereum: true,
     relationMap: {
-      // acala: {
-      //   type: 'p',
-      //   isEthereum: false,
-      //   supportedToken: ['xcaUSD']
-      // },
+      acala: {
+        type: 'p',
+        isEthereum: false,
+        supportedToken: ['xcaUSD']
+      },
       interlay: {
         type: 'p',
         isEthereum: false,
@@ -166,11 +177,11 @@ export const SupportedCrossChainsMap: Record<string, CrossChainRelation> = {
     type: 'p',
     isEthereum: false,
     relationMap: {
-      // acala: {
-      //   type: 'p',
-      //   isEthereum: false,
-      //   supportedToken: ['aUSD']
-      // },
+      acala: {
+        type: 'p',
+        isEthereum: false,
+        supportedToken: ['aUSD']
+      },
       polkadot: {
         type: 'r',
         isEthereum: false,

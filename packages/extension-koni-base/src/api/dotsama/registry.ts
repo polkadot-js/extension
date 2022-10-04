@@ -41,7 +41,7 @@ export async function getMoonAssets (api: ApiPromise) {
     const valueData = value.toHuman();
     // @ts-ignore
     // eslint-disable-next-line @typescript-eslint/no-unsafe-argument,@typescript-eslint/no-unsafe-assignment
-    const info = { isMainToken: false, name: valueData.name, symbol: formatTokenSymbol(valueData.symbol), decimals: parseInt(valueData.decimals || ' 0'), erc20Address: address, assetId: keyString } as TokenInfo; // todo: get assetId for XCM
+    const info = { isMainToken: false, name: valueData.name, symbol: formatTokenSymbol(valueData.symbol), decimals: parseInt(valueData.decimals || ' 0'), erc20Address: address, assetId: keyString } as TokenInfo;
 
     assetRecord[info.symbol] = info;
   });

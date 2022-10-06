@@ -17,8 +17,8 @@ export default function useFetchNft (page: number, networkKey: string, gridSize:
 
   const showAll = networkKey.toLowerCase() === ALL_ACCOUNT_KEY.toLowerCase();
 
-  const rawItems = nftReducer?.nftList;
-  const rawCollections = nftCollectionReducer.nftCollectionList;
+  const rawItems = nftReducer?.nftList || [];
+  const rawCollections = nftCollectionReducer?.nftCollectionList || [];
 
   let totalItems = 0;
 

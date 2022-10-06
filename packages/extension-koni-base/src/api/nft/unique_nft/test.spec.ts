@@ -14,14 +14,11 @@ describe('test DotSama APIs', () => {
     nftApi.setAddresses(['5HdwtP77HPPVzCVqEu38GGCHf1g9eQXCMZV5aPhZttN3sKF4']);
 
     await nftApi.fetchNfts({
-      updateItem: (data: NftItem) => {
-        console.log(data);
+      updateItem: (chain: string, data: NftItem, owner: string) => {
+        console.log(chain, data, owner);
       },
-      updateCollection: (data: NftCollection) => {
-        console.log(data);
-      },
-      updateReady: (ready) => {
-        console.log(ready);
+      updateCollection: (network: string, data: NftCollection) => {
+        console.log(network, data);
       },
       updateNftIds: (networkKey: string) => {
         console.log(networkKey);

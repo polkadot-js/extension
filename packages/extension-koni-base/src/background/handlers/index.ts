@@ -8,18 +8,34 @@ import { NftHandler } from '@subwallet/extension-koni-base/api/nft';
 import KoniExtension from '@subwallet/extension-koni-base/background/handlers/Extension';
 import KoniState from '@subwallet/extension-koni-base/background/handlers/State';
 import KoniTabs from '@subwallet/extension-koni-base/background/handlers/Tabs';
+import Migration from '@subwallet/extension-koni-base/migration';
 
 import { assert } from '@polkadot/util';
 
 export const state = new KoniState();
-
-state.initNetworkStates();
-
 export const extension = new KoniExtension(state);
 export const tabs = new KoniTabs(state);
 export const nftHandler = new NftHandler(state.getDotSamaApiMap(), [], state.getWeb3ApiMap());
 
-state.updateServiceInfo();
+// Migration
+async function makeSureStateReady () {
+  const poll = (resolve: (value: unknown) => void) => {
+    if (state.isReady()) {
+      resolve(true);
+    } else {
+      console.log('Waiting for State is ready...');
+      setTimeout(() => poll(resolve), 400);
+    }
+  };
+
+  return new Promise(poll);
+}
+
+makeSureStateReady().then(() => {
+  const migration = new Migration(state);
+
+  migration.run().catch((err) => console.warn(err));
+}).catch((e) => console.warn(e));
 
 export default function handlers<TMessageType extends MessageTypes> ({ id, message, request }: TransportRequestMessage<TMessageType>, port: chrome.runtime.Port, extensionPortName = PORT_EXTENSION): void {
   const isExtension = port.name === extensionPortName;

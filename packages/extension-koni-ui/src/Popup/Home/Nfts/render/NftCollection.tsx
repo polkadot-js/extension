@@ -137,7 +137,7 @@ export default React.memo(styled(NftCollection)(({ theme }: ThemeProps) => `
   }
 
   .header-title {
-    width: 60%;
+    width: 90%;
     display: flex;
     gap: 10px;
     justify-content: center;

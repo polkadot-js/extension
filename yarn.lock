@@ -5705,6 +5705,7 @@ __metadata:
     bn.js: ^5.2.1
     buffer: ^6.0.3
     cross-fetch: ^3.1.5
+    dexie: ^3.2.2
     eth-simple-keyring: ^4.2.0
     ethereumjs-tx: ^2.1.2
     ethers: ^5.7.1
@@ -11409,6 +11410,13 @@ __metadata:
     node-source-walk: ^4.2.0
     typescript: ^3.9.10
   checksum: 77703410baa242029dc5e7d02cca7a26278dea498ec1c3320f92efa08a85263affc3b102fc2b09952ece1d2c851a3808733d7bfa9ed11944a7c0f39920e33ec9
+  languageName: node
+  linkType: hard
+
+"dexie@npm:^3.2.2":
+  version: 3.2.2
+  resolution: "dexie@npm:3.2.2"
+  checksum: 7a21079f7ab139ebd724a009917f9293f2b01c341e2a3cd51d2455dda4d4e78b9ca7de0373e963108395cf1921ce7f6556cac967c1e957005a3c7c11794ceccf
   languageName: node
   linkType: hard
 
@@ -21372,6 +21380,7 @@ __metadata:
     "@types/node": ^17.0.10
     apollo: ^2.33.9
     axios: ^0.27.2
+    dexie: ^3.2.2
     discord-webhook-node: ^1.1.8
     i18next-scanner: ^4.0.0
     patch-package: ^6.4.7

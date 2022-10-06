@@ -4,128 +4,136 @@
 import { ApiMap, ApiProps, CustomEvmToken, NETWORK_STATUS, NetworkJson, NftTransferExtra, ServiceInfo, StakingRewardJson } from '@subwallet/extension-base/background/KoniTypes';
 import { getTokenPrice } from '@subwallet/extension-koni-base/api/coingecko';
 import { fetchDotSamaHistory } from '@subwallet/extension-koni-base/api/subquery/history';
-import { state } from '@subwallet/extension-koni-base/background/handlers';
 import { KoniSubscription } from '@subwallet/extension-koni-base/background/subscription';
 import { CRON_AUTO_RECOVER_DOTSAMA_INTERVAL, CRON_GET_API_MAP_STATUS, CRON_REFRESH_HISTORY_INTERVAL, CRON_REFRESH_NFT_INTERVAL, CRON_REFRESH_PRICE_INTERVAL, CRON_REFRESH_STAKE_UNLOCKING_INFO, CRON_REFRESH_STAKING_REWARD_INTERVAL } from '@subwallet/extension-koni-base/constants';
 import { Subject, Subscription } from 'rxjs';
+
+import { logger as createLogger } from '@polkadot/util';
+import { Logger } from '@polkadot/util/types';
+
+import DatabaseService from '../services/DatabaseService';
+import KoniState from './handlers/State';
 
 export class KoniCron {
   subscriptions: KoniSubscription;
   public status: 'pending' | 'running' | 'stopped' = 'pending';
   private serviceSubscription: Subscription | undefined;
+  public dbService: DatabaseService;
+  private state: KoniState;
+  private logger: Logger;
 
-  constructor (subscriptions: KoniSubscription) {
+  constructor (state: KoniState, subscriptions: KoniSubscription, dbService: DatabaseService) {
     this.subscriptions = subscriptions;
-    this.init();
+    this.dbService = dbService;
+    this.state = state;
+    this.logger = createLogger('Cron');
+    // this.init();
   }
 
   private cronMap: Record<string, any> = {};
   private subjectMap: Record<string, Subject<any>> = {};
 
-  getCron (name: string): any {
+  getCron = (name: string): any => {
     return this.cronMap[name];
-  }
+  };
 
-  getSubjectMap (name: string): any {
+  getSubjectMap = (name: string): any => {
     return this.subjectMap[name];
-  }
+  };
 
-  addCron (name: string, callback: (param?: any) => void, interval: number, runFirst = true) {
+  addCron = (name: string, callback: (param?: any) => void, interval: number, runFirst = true) => {
     if (runFirst) {
       callback();
     }
 
     this.cronMap[name] = setInterval(callback, interval);
-  }
+  };
 
-  addSubscribeCron<T> (name: string, callback: (subject: Subject<T>) => void, interval: number) {
+  addSubscribeCron = <T>(name: string, callback: (subject: Subject<T>) => void, interval: number) => {
     const sb = new Subject<T>();
 
     callback(sb);
     this.subjectMap[name] = sb;
     this.cronMap[name] = setInterval(callback, interval);
-  }
+  };
 
-  removeCron (name: string) {
+  removeCron = (name: string) => {
     const interval = this.cronMap[name] as number;
 
     if (interval) {
       clearInterval(interval);
       delete this.cronMap[name];
     }
-  }
+  };
 
-  removeAllCrons () {
+  removeAllCrons = () => {
     Object.entries(this.cronMap).forEach(([key, interval]) => {
       clearInterval(interval as number);
       delete this.cronMap[key];
     });
-  }
+  };
 
-  init () {
-    state.getCurrentAccount((currentAccountInfo) => {
+  init = () => {
+    this.state.getCurrentAccount((currentAccountInfo) => {
       if (!currentAccountInfo?.address) {
         return;
       }
 
-      if (Object.keys(state.getDotSamaApiMap()).length !== 0 || Object.keys(state.getWeb3ApiMap()).length !== 0) {
+      if (Object.keys(this.state.getDotSamaApiMap()).length !== 0 || Object.keys(this.state.getWeb3ApiMap()).length !== 0) {
         this.refreshPrice();
         this.updateApiMapStatus();
-        this.refreshNft(currentAccountInfo.address, state.getApiMap(), state.getActiveErc721Tokens())();
+        this.refreshNft(currentAccountInfo.address, this.state.getApiMap(), this.state.getActiveErc721Tokens())();
         this.refreshStakingReward(currentAccountInfo.address)();
         this.resetHistory(currentAccountInfo.address).then(() => {
-          this.refreshHistory(currentAccountInfo.address, state.getNetworkMap())();
-        }).catch((err) => console.warn(err));
+          this.refreshHistory(currentAccountInfo.address, this.state.getNetworkMap())();
+        }).catch((err) => this.logger.warn(err));
       } else {
-        this.setNftReady(currentAccountInfo.address);
+        // this.setNftReady(currentAccountInfo.address);
         this.setStakingRewardReady();
       }
     });
-  }
+  };
 
-  start () {
+  start = () => {
     if (this.status === 'running') {
       return;
     }
 
-    console.log('Stating cron jobs');
-    state.getCurrentAccount((currentAccountInfo) => {
+    this.logger.log('Stating cron jobs');
+    this.state.getCurrentAccount((currentAccountInfo) => {
       if (!currentAccountInfo?.address) {
         return;
       }
 
-      if (Object.keys(state.getDotSamaApiMap()).length !== 0 || Object.keys(state.getWeb3ApiMap()).length !== 0) {
-        this.resetNft(currentAccountInfo.address).then(() => {
-          this.addCron('refreshNft', this.refreshNft(currentAccountInfo.address, state.getApiMap(), state.getActiveErc721Tokens()), CRON_REFRESH_NFT_INTERVAL);
-        }).catch((err) => console.warn(err));
-
+      if (Object.keys(this.state.getDotSamaApiMap()).length !== 0 || Object.keys(this.state.getWeb3ApiMap()).length !== 0) {
+        this.resetNft(currentAccountInfo.address);
+        this.addCron('refreshNft', this.refreshNft(currentAccountInfo.address, this.state.getApiMap(), this.state.getActiveErc721Tokens()), CRON_REFRESH_NFT_INTERVAL);
         this.addCron('refreshPrice', this.refreshPrice, CRON_REFRESH_PRICE_INTERVAL);
         this.addCron('checkStatusApiMap', this.updateApiMapStatus, CRON_GET_API_MAP_STATUS);
         this.addCron('recoverApiMap', this.recoverApiMap, CRON_AUTO_RECOVER_DOTSAMA_INTERVAL, false);
         this.addCron('refreshStakingReward', this.refreshStakingReward(currentAccountInfo.address), CRON_REFRESH_STAKING_REWARD_INTERVAL);
-        this.addCron('refreshStakeUnlockingInfo', this.refreshStakeUnlockingInfo(currentAccountInfo.address, state.getNetworkMap(), state.getDotSamaApiMap()), CRON_REFRESH_STAKE_UNLOCKING_INFO);
+        this.addCron('refreshStakeUnlockingInfo', this.refreshStakeUnlockingInfo(currentAccountInfo.address, this.state.getNetworkMap(), this.state.getDotSamaApiMap()), CRON_REFRESH_STAKE_UNLOCKING_INFO);
 
         this.resetHistory(currentAccountInfo.address).then(() => {
-          this.addCron('refreshHistory', this.refreshHistory(currentAccountInfo.address, state.getNetworkMap()), CRON_REFRESH_HISTORY_INTERVAL);
-        }).catch((err) => console.warn(err));
+          this.addCron('refreshHistory', this.refreshHistory(currentAccountInfo.address, this.state.getNetworkMap()), CRON_REFRESH_HISTORY_INTERVAL);
+        }).catch((err) => this.logger.warn(err));
       } else {
-        this.setNftReady(currentAccountInfo.address);
+        // this.setNftReady(currentAccountInfo.address);
         this.setStakingRewardReady();
       }
     });
 
-    this.serviceSubscription = state.subscribeServiceInfo().subscribe({
+    this.serviceSubscription = this.state.subscribeServiceInfo().subscribe({
       next: (serviceInfo) => {
         const { address } = serviceInfo.currentAccountInfo;
 
-        this.resetNft(address).then(() => {
-          this.resetNftTransferMeta();
-          this.removeCron('refreshNft');
+        this.resetNft(address);
+        this.resetNftTransferMeta();
+        this.removeCron('refreshNft');
 
-          if (this.checkNetworkAvailable(serviceInfo)) { // only add cron job if there's at least 1 active network
-            this.addCron('refreshNft', this.refreshNft(address, serviceInfo.apiMap, serviceInfo.customErc721Registry), CRON_REFRESH_NFT_INTERVAL);
-          }
-        }).catch((err) => console.warn(err));
+        if (this.checkNetworkAvailable(serviceInfo)) { // only add cron job if there's at least 1 active network
+          this.addCron('refreshNft', this.refreshNft(address, serviceInfo.apiMap, serviceInfo.customErc721Registry), CRON_REFRESH_NFT_INTERVAL);
+        }
 
         // this.resetStakingReward(address);
         this.resetHistory(address).then(() => {
@@ -134,7 +142,7 @@ export class KoniCron {
           if (this.checkNetworkAvailable(serviceInfo)) { // only add cron job if there's at least 1 active network
             this.addCron('refreshHistory', this.refreshHistory(address, serviceInfo.networkMap), CRON_REFRESH_HISTORY_INTERVAL);
           }
-        }).catch((err) => console.warn(err));
+        }).catch((err) => this.logger.warn(err));
 
         this.removeCron('refreshStakeUnlockingInfo');
         this.removeCron('refreshStakingReward');
@@ -149,16 +157,16 @@ export class KoniCron {
           this.addCron('refreshStakingReward', this.refreshStakingReward(address), CRON_REFRESH_STAKING_REWARD_INTERVAL);
           this.addCron('refreshStakeUnlockingInfo', this.refreshStakeUnlockingInfo(address, serviceInfo.networkMap, serviceInfo.apiMap.dotSama), CRON_REFRESH_STAKE_UNLOCKING_INFO);
         } else {
-          this.setNftReady(address);
+          // this.setNftReady(address);
           this.setStakingRewardReady();
         }
       }
     });
 
     this.status = 'running';
-  }
+  };
 
-  stop () {
+  stop = () => {
     if (this.status === 'stopped') {
       return;
     }
@@ -168,14 +176,14 @@ export class KoniCron {
       this.serviceSubscription = undefined;
     }
 
-    console.log('Stopping cron jobs');
+    this.logger.log('Stopping cron jobs');
     this.removeAllCrons();
 
     this.status = 'stopped';
-  }
+  };
 
-  recoverApiMap () {
-    const apiMap = state.getApiMap();
+  recoverApiMap = () => {
+    const apiMap = this.state.getApiMap();
 
     for (const apiProp of Object.values(apiMap.dotSama)) {
       if (!apiProp.isApiConnected) {
@@ -186,18 +194,18 @@ export class KoniCron {
     for (const [key, web3] of Object.entries(apiMap.web3)) {
       web3.eth.net.isListening()
         .catch(() => {
-          state.refreshWeb3Api(key);
+          this.state.refreshWeb3Api(key);
         });
     }
 
-    state.getCurrentAccount(({ address }) => {
-      this.subscriptions?.subscribeBalancesAndCrowdloans && this.subscriptions.subscribeBalancesAndCrowdloans(address, state.getDotSamaApiMap(), state.getWeb3ApiMap());
+    this.state.getCurrentAccount(({ address }) => {
+      this.subscriptions?.subscribeBalancesAndCrowdloans && this.subscriptions.subscribeBalancesAndCrowdloans(address, this.state.getDotSamaApiMap(), this.state.getWeb3ApiMap());
     });
-  }
+  };
 
-  updateApiMapStatus () {
-    const apiMap = state.getApiMap();
-    const networkMap = state.getNetworkMap();
+  updateApiMapStatus = () => {
+    const apiMap = this.state.getApiMap();
+    const networkMap = this.state.getNetworkMap();
 
     for (const [key, apiProp] of Object.entries(apiMap.dotSama)) {
       let status: NETWORK_STATUS = NETWORK_STATUS.CONNECTING;
@@ -207,9 +215,9 @@ export class KoniCron {
       }
 
       if (!networkMap[key].apiStatus) {
-        state.updateNetworkStatus(key, status);
+        this.state.updateNetworkStatus(key, status);
       } else if (networkMap[key].apiStatus && networkMap[key].apiStatus !== status) {
-        state.updateNetworkStatus(key, status);
+        this.state.updateNetworkStatus(key, status);
       }
     }
 
@@ -217,104 +225,101 @@ export class KoniCron {
       web3.eth.net.isListening()
         .then(() => {
           if (!networkMap[key].apiStatus) {
-            state.updateNetworkStatus(key, NETWORK_STATUS.CONNECTED);
+            this.state.updateNetworkStatus(key, NETWORK_STATUS.CONNECTED);
           } else if (networkMap[key].apiStatus && networkMap[key].apiStatus !== NETWORK_STATUS.CONNECTED) {
-            state.updateNetworkStatus(key, NETWORK_STATUS.CONNECTED);
+            this.state.updateNetworkStatus(key, NETWORK_STATUS.CONNECTED);
           }
         })
         .catch(() => {
           if (!networkMap[key].apiStatus) {
-            state.updateNetworkStatus(key, NETWORK_STATUS.CONNECTING);
+            this.state.updateNetworkStatus(key, NETWORK_STATUS.CONNECTING);
           } else if (networkMap[key].apiStatus && networkMap[key].apiStatus !== NETWORK_STATUS.CONNECTING) {
-            state.updateNetworkStatus(key, NETWORK_STATUS.CONNECTING);
+            this.state.updateNetworkStatus(key, NETWORK_STATUS.CONNECTING);
           }
         });
     }
-  }
+  };
 
-  refreshPrice () {
+  refreshPrice = () => {
     // Update for tokens price
-    const coinGeckoKeys = Object.values(state.getNetworkMap()).map((network) => network.coinGeckoKey).filter((key) => key) as string[];
+    const coinGeckoKeys = Object.values(this.state.getNetworkMap()).map((network) => network.coinGeckoKey).filter((key) => key) as string[];
 
     getTokenPrice(coinGeckoKeys)
       .then((rs) => {
-        state.setPrice(rs, () => {
-          console.log('Get Token Price From CoinGecko');
+        this.state.setPrice(rs, () => {
+          this.logger.log('Get Token Price From CoinGecko');
         });
       })
-      .catch((err) => console.log(err));
-  }
+      .catch((err) => this.logger.log(err));
+  };
 
-  refreshNft (address: string, apiMap: ApiMap, customErc721Registry: CustomEvmToken[]) {
+  refreshNft = (address: string, apiMap: ApiMap, customErc721Registry: CustomEvmToken[]) => {
     return () => {
-      console.log('Refresh Nft state');
+      this.logger.log('Refresh Nft state');
       this.subscriptions.subscribeNft(address, apiMap.dotSama, apiMap.web3, customErc721Registry);
     };
-  }
+  };
 
-  async resetNft (newAddress: string) {
-    console.log('Reset Nft state');
-    await Promise.all([
-      state.resetNft(newAddress),
-      state.resetNftCollection(newAddress)
-    ]);
-  }
+  resetNft = (newAddress: string) => {
+    this.logger.log('Reset Nft state');
+    this.state.resetNft(newAddress).catch((e) => this.logger.warn(e));
+  };
 
-  resetNftTransferMeta () {
-    state.setNftTransfer({
+  resetNftTransferMeta = () => {
+    this.state.setNftTransfer({
       cronUpdate: false,
       forceUpdate: false
     } as NftTransferExtra);
-  }
+  };
 
-  resetStakingReward (address: string) {
-    state.resetStakingMap(address).catch((err) => console.warn(err));
-    state.setStakingReward({
+  resetStakingReward = (address: string) => {
+    this.state.resetStakingMap(address).catch((err) => this.logger.warn(err));
+    this.state.setStakingReward({
       ready: false,
       details: []
     } as StakingRewardJson);
-    // console.log('Reset Staking reward state');
-  }
+    // this.logger.log('Reset Staking reward state');
+  };
 
-  refreshStakingReward (address: string) {
+  refreshStakingReward = (address: string) => {
     return () => {
       this.subscriptions.subscribeStakingReward(address)
-        .then(() => console.log('Refresh staking reward state'))
-        .catch(console.error);
+        .then(() => this.logger.log('Refresh staking reward state'))
+        .catch(this.logger.error);
     };
-  }
+  };
 
-  refreshHistory (address: string, networkMap: Record<string, NetworkJson>) {
+  refreshHistory = (address: string, networkMap: Record<string, NetworkJson>) => {
     return () => {
-      console.log('Refresh History state');
+      this.logger.log('Refresh History state');
       fetchDotSamaHistory(address, networkMap, (network, historyMap) => {
-        console.log(`[${network}] historyMap: `, historyMap);
-        state.setHistory(address, network, historyMap);
+        this.logger.log(`[${network}] historyMap: `, historyMap);
+        this.state.setHistory(address, network, historyMap);
       });
     };
-  }
+  };
 
-  setNftReady (address: string) {
-    state.updateNftReady(address, true);
-  }
+  // setNftReady = (address: string) => {
+  //   this.state.updateNftReady(address, true);
+  // };
 
   refreshStakeUnlockingInfo (address: string, networkMap: Record<string, NetworkJson>, dotSamaApiMap: Record<string, ApiProps>) {
     return () => {
       this.subscriptions.subscribeStakeUnlockingInfo(address, networkMap, dotSamaApiMap)
-        .then(() => console.log('Refresh staking unlocking info done'))
-        .catch(console.error);
+        .then(() => this.logger.log('Refresh staking unlocking info done'))
+        .catch(this.logger.error);
     };
   }
 
-  setStakingRewardReady () {
-    state.updateStakingRewardReady(true);
-  }
+  setStakingRewardReady = () => {
+    this.state.updateStakingRewardReady(true);
+  };
 
-  resetHistory (address: string): Promise<void> {
-    return state.resetHistoryMap(address).catch((err) => console.warn(err));
-  }
+  resetHistory = (address: string): Promise<void> => {
+    return this.state.resetHistoryMap(address).catch((err) => this.logger.warn(err));
+  };
 
-  checkNetworkAvailable (serviceInfo: ServiceInfo): boolean {
+  checkNetworkAvailable = (serviceInfo: ServiceInfo): boolean => {
     return Object.keys(serviceInfo.apiMap.dotSama).length > 0 || Object.keys(serviceInfo.apiMap.web3).length > 0;
-  }
+  };
 }

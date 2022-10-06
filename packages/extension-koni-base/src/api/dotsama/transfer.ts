@@ -94,6 +94,9 @@ export async function checkSupportTransfer (networkKey: string, token: string, d
   } else if (['pioneer'].includes(networkKey) && tokenInfo && tokenInfo.symbol === 'BIT') {
     result.supportTransfer = true;
     result.supportTransferAll = true;
+  } else if (['statemint', 'statemine'].includes(networkKey) && tokenInfo) {
+    result.supportTransfer = false;
+    result.supportTransferAll = false;
   }
 
   return result;
@@ -165,6 +168,10 @@ export async function estimateFee (
     }
   } else if (['pioneer'].includes(networkKey) && tokenInfo && tokenInfo.symbol === 'BIT') {
     const paymentInfo = await api.tx.currencies.transfer(to, tokenInfo.specialOption, value).paymentInfo(fromKeypair);
+
+    fee = paymentInfo.partialFee.toString();
+  } else if (['statemint', 'statemine'].includes(networkKey) && tokenInfo) {
+    const paymentInfo = await api.tx.assets.transfer(tokenInfo.assetIndex, to, value).paymentInfo(fromKeypair);
 
     fee = paymentInfo.partialFee.toString();
   } else if (isTxBalancesSupported && (!tokenInfo || tokenInfo.isMainToken || (tokenInfo && ((networkKey === 'crab' && tokenInfo.symbol === 'CKTON') || (networkKey === 'pangolin' && tokenInfo.symbol === 'PKTON'))))) {

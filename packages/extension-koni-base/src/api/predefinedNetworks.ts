@@ -430,17 +430,16 @@ export const PREDEFINED_NETWORKS: Record<string, NetworkJson> = {
   odyssey: {
     key: 'odyssey',
     chain: 'Ares Odyssey',
-    genesisHash: '0x52097bd7416205228bf13ac3eda6f16de56c19cac3476866b8b8a9c00d515870',
-    ss58Format: 42,
+    genesisHash: '0x0f3665e2e57fb38fd638145b69e567fb05bbadfd457624f90f15e5dbb31320bb',
+    ss58Format: 34,
     providers: {
-      AresProtocol: 'wss://wss.odyssey.aresprotocol.io'
+      AresProtocol: 'wss://odyssey.aresprotocol.io'
     },
     active: false,
     currentProviderMode: 'ws',
     currentProvider: 'AresProtocol',
-    groups: ['POLKADOT_PARACHAIN'],
-    paraId: 2028,
-    nativeToken: 'AMAS',
+    groups: ['MAIN_NET'],
+    nativeToken: 'ARES',
     crowdloanUrl: 'https://polkadot.js.org/apps/#/parachains/crowdloan',
     decimals: 12
   },

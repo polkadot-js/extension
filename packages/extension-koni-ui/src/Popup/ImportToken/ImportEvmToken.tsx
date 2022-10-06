@@ -1,11 +1,11 @@
 // Copyright 2019-2022 @subwallet/extension-koni authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { CustomToken } from '@subwallet/extension-base/background/KoniTypes';
+import { CustomToken, CustomTokenType } from '@subwallet/extension-base/background/KoniTypes';
 import { ActionContext, Button, ConfirmationsQueueContext, Dropdown, InputWithLabel } from '@subwallet/extension-koni-ui/components';
 import useGetActiveEvmChains from '@subwallet/extension-koni-ui/hooks/screen/import/useGetActiveEvmChains';
 import useTranslation from '@subwallet/extension-koni-ui/hooks/useTranslation';
-import { completeConfirmation, upsertEvmToken, validateEvmToken } from '@subwallet/extension-koni-ui/messaging';
+import { completeConfirmation, upsertEvmToken, validateCustomToken } from '@subwallet/extension-koni-ui/messaging';
 import { Header } from '@subwallet/extension-koni-ui/partials';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import React, { useCallback, useContext, useEffect, useState } from 'react';
@@ -47,11 +47,11 @@ function ImportEvmToken ({ className = '' }: Props): React.ReactElement<Props> {
         setDecimals('');
         setWarning('Invalid EVM contract address');
       } else {
-        validateEvmToken({
+        validateCustomToken({
           smartContract: contractAddress,
           // @ts-ignore
           chain,
-          type: 'erc20'
+          type: CustomTokenType.erc20
         })
           .then((resp) => {
             if (resp.isExist) {

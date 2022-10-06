@@ -1381,11 +1381,11 @@ export interface KoniRequestSignatures {
   'pri(networkMap.upsert)': [NetworkJson, boolean];
   'pri(networkMap.getNetworkMap)': [null, Record<string, NetworkJson>];
   'pri(networkMap.getSubscription)': [null, Record<string, NetworkJson>, Record<string, NetworkJson>];
-  'pri(evmTokenState.validateEvmToken)': [ValidateEvmTokenRequest, ValidateEvmTokenResponse];
-  'pri(evmTokenState.deleteMany)': [DeleteEvmTokenParams[], boolean];
-  'pri(evmTokenState.upsertEvmTokenState)': [CustomToken, boolean];
-  'pri(evmTokenState.getEvmTokenState)': [null, CustomTokenJson];
-  'pri(evmTokenState.getSubscription)': [null, CustomTokenJson, CustomTokenJson];
+  'pri(customTokenState.validateCustomToken)': [ValidateEvmTokenRequest, ValidateEvmTokenResponse];
+  'pri(customTokenState.deleteMany)': [DeleteEvmTokenParams[], boolean];
+  'pri(customTokenState.upsertCustomTokenState)': [CustomToken, boolean];
+  'pri(customTokenState.getCustomTokenState)': [null, CustomTokenJson];
+  'pri(customTokenState.getSubscription)': [null, CustomTokenJson, CustomTokenJson];
   'pri(evmNft.submitTransaction)': [EvmNftSubmitTransaction, NftTransactionResponse, NftTransactionResponse];
   'pri(evmNft.getTransaction)': [EvmNftTransactionRequest, EvmNftTransaction];
   'pri(nftTransfer.setNftTransfer)': [NftTransferExtra, boolean];

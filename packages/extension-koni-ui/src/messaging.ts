@@ -571,23 +571,23 @@ export async function resetDefaultNetwork (): Promise<boolean> {
 }
 
 export async function subscribeEvmToken (callback: (data: CustomTokenJson) => void): Promise<CustomTokenJson> {
-  return sendMessage('pri(evmTokenState.getSubscription)', null, callback);
+  return sendMessage('pri(customTokenState.getSubscription)', null, callback);
 }
 
 export async function getEvmTokenState (): Promise<CustomTokenJson> {
-  return sendMessage('pri(evmTokenState.getEvmTokenState)', null);
+  return sendMessage('pri(customTokenState.getCustomTokenState)', null);
 }
 
 export async function upsertEvmToken (data: CustomToken): Promise<boolean> {
-  return sendMessage('pri(evmTokenState.upsertEvmTokenState)', data);
+  return sendMessage('pri(customTokenState.upsertCustomTokenState)', data);
 }
 
 export async function deleteEvmTokens (data: DeleteEvmTokenParams[]) {
-  return sendMessage('pri(evmTokenState.deleteMany)', data);
+  return sendMessage('pri(customTokenState.deleteMany)', data);
 }
 
-export async function validateEvmToken (data: ValidateEvmTokenRequest) {
-  return sendMessage('pri(evmTokenState.validateEvmToken)', data);
+export async function validateCustomToken (data: ValidateEvmTokenRequest) {
+  return sendMessage('pri(customTokenState.validateCustomToken)', data);
 }
 
 export async function transferCheckReferenceCount (request: RequestTransferCheckReferenceCount): Promise<boolean> {

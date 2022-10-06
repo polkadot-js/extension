@@ -1231,7 +1231,7 @@ export default class KoniState extends State {
 
   public initChainRegistry () {
     this.chainRegistryMap = cacheRegistryMap; // prevents deleting token registry even when network is disabled
-    this.getEvmTokenStore((evmTokens) => {
+    this.getCustomTokenStore((evmTokens) => {
       const erc20Tokens: CustomToken[] = evmTokens ? evmTokens.erc20 : [];
 
       if (evmTokens) {
@@ -1317,11 +1317,11 @@ export default class KoniState extends State {
     return this.priceStore.getSubject();
   }
 
-  public subscribeEvmToken () {
+  public subscribeCustomToken () {
     return this.customTokenSubject;
   }
 
-  public getEvmTokenState () {
+  public getCustomTokenState () {
     return this.customTokenState;
   }
 
@@ -1349,7 +1349,7 @@ export default class KoniState extends State {
     return filteredErc721Tokens;
   }
 
-  public getEvmTokenStore (callback: (data: CustomTokenJson) => void) {
+  public getCustomTokenStore (callback: (data: CustomTokenJson) => void) {
     return this.customTokenStore.get('EvmToken', (data) => {
       callback(data);
     });
@@ -1773,6 +1773,10 @@ export default class KoniState extends State {
 
   public getWeb3ApiMap (): Record<string, Web3> {
     return this.apiMap.web3;
+  }
+
+  public getWeb3Api (networkKey: string) {
+    return this.apiMap.web3[networkKey];
   }
 
   public getApiMap () {

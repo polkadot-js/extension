@@ -570,19 +570,19 @@ export async function resetDefaultNetwork (): Promise<boolean> {
   return sendMessage('pri(networkMap.resetDefault)', null);
 }
 
-export async function subscribeEvmToken (callback: (data: CustomTokenJson) => void): Promise<CustomTokenJson> {
+export async function subscribeCustomToken (callback: (data: CustomTokenJson) => void): Promise<CustomTokenJson> {
   return sendMessage('pri(customTokenState.getSubscription)', null, callback);
 }
 
-export async function getEvmTokenState (): Promise<CustomTokenJson> {
+export async function getCustomTokenState (): Promise<CustomTokenJson> {
   return sendMessage('pri(customTokenState.getCustomTokenState)', null);
 }
 
-export async function upsertEvmToken (data: CustomToken): Promise<boolean> {
+export async function upsertCustomToken (data: CustomToken): Promise<boolean> {
   return sendMessage('pri(customTokenState.upsertCustomTokenState)', data);
 }
 
-export async function deleteEvmTokens (data: DeleteEvmTokenParams[]) {
+export async function deleteCustomTokens (data: DeleteEvmTokenParams[]) {
   return sendMessage('pri(customTokenState.deleteMany)', data);
 }
 

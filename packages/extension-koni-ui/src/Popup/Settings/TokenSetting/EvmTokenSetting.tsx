@@ -7,7 +7,7 @@ import Modal from '@subwallet/extension-koni-ui/components/Modal';
 import useFetchEvmToken from '@subwallet/extension-koni-ui/hooks/screen/setting/useFetchEvmToken';
 import useToast from '@subwallet/extension-koni-ui/hooks/useToast';
 import useTranslation from '@subwallet/extension-koni-ui/hooks/useTranslation';
-import { deleteEvmTokens } from '@subwallet/extension-koni-ui/messaging';
+import { deleteCustomTokens } from '@subwallet/extension-koni-ui/messaging';
 import Header from '@subwallet/extension-koni-ui/partials/Header';
 import EvmTokenRow from '@subwallet/extension-koni-ui/Popup/Settings/TokenSetting/EvmTokenRow';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
@@ -75,7 +75,7 @@ function EvmTokenSetting ({ className }: Props): React.ReactElement {
   }, [selectedTokens.length, show, t]);
 
   const handleDelete = useCallback(() => {
-    deleteEvmTokens(selectedTokens)
+    deleteCustomTokens(selectedTokens)
       .then((resp) => {
         if (resp) {
           show('Your changes are saved successfully');

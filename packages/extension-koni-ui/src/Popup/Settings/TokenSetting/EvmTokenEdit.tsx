@@ -5,7 +5,7 @@ import { ActionContext, Button, ButtonArea, InputWithLabel } from '@subwallet/ex
 import useGetNetworkJson from '@subwallet/extension-koni-ui/hooks/screen/home/useGetNetworkJson';
 import useToast from '@subwallet/extension-koni-ui/hooks/useToast';
 import useTranslation from '@subwallet/extension-koni-ui/hooks/useTranslation';
-import { upsertEvmToken } from '@subwallet/extension-koni-ui/messaging';
+import { upsertCustomToken } from '@subwallet/extension-koni-ui/messaging';
 import Header from '@subwallet/extension-koni-ui/partials/Header';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
@@ -44,7 +44,7 @@ function EvmTokenEdit ({ className }: Props): React.ReactElement {
 
   const _onEditToken = useCallback(() => {
     if (isValidDecimals && isValidSymbol) {
-      upsertEvmToken(tokenInfo)
+      upsertCustomToken(tokenInfo)
         .then((resp) => {
           if (resp) {
             show('Your changes are saved successfully');

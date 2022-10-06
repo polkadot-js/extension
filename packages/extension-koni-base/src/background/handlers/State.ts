@@ -3,7 +3,7 @@
 
 import { withErrorLog } from '@subwallet/extension-base/background/handlers/helpers';
 import State, { AuthUrls, Resolver } from '@subwallet/extension-base/background/handlers/State';
-import { AccountRefMap, APIItemState, ApiMap, AuthRequestV2, BalanceItem, BalanceJson, ChainRegistry, ConfirmationDefinitions, ConfirmationsQueue, ConfirmationsQueueItemOptions, ConfirmationType, CrowdloanItem, CrowdloanJson, CurrentAccountInfo, CustomToken, CustomTokenJson, DeleteEvmTokenParams, EvmSendTransactionParams, EvmSendTransactionRequestQr, EvmSignatureRequestQr, ExternalRequestPromise, ExternalRequestPromiseStatus, NETWORK_STATUS, NetworkJson, NftCollection, NftItem, NftJson, NftTransferExtra, PriceJson, RequestAccountExportPrivateKey, RequestConfirmationComplete, RequestSettingsType, ResponseAccountExportPrivateKey, ResponseSettingsType, ResultResolver, ServiceInfo, SingleModeJson, StakeUnlockingJson, StakingItem, StakingJson, StakingRewardJson, ThemeTypes, TokenInfo, TransactionHistoryItemType } from '@subwallet/extension-base/background/KoniTypes';
+import { AccountRefMap, APIItemState, ApiMap, AuthRequestV2, BalanceItem, BalanceJson, ChainRegistry, ConfirmationDefinitions, ConfirmationsQueue, ConfirmationsQueueItemOptions, ConfirmationType, CrowdloanItem, CrowdloanJson, CurrentAccountInfo, CustomToken, CustomTokenJson, CustomTokenType, DeleteEvmTokenParams, EvmSendTransactionParams, EvmSendTransactionRequestQr, EvmSignatureRequestQr, ExternalRequestPromise, ExternalRequestPromiseStatus, NETWORK_STATUS, NetworkJson, NftCollection, NftItem, NftJson, NftTransferExtra, PriceJson, RequestAccountExportPrivateKey, RequestConfirmationComplete, RequestSettingsType, ResponseAccountExportPrivateKey, ResponseSettingsType, ResultResolver, ServiceInfo, SingleModeJson, StakeUnlockingJson, StakingItem, StakingJson, StakingRewardJson, ThemeTypes, TokenInfo, TransactionHistoryItemType } from '@subwallet/extension-base/background/KoniTypes';
 import { AuthorizeRequest, RequestAuthorizeTab } from '@subwallet/extension-base/background/types';
 import { Web3Transaction } from '@subwallet/extension-base/signers/types';
 import { getId } from '@subwallet/extension-base/utils/getId';
@@ -1355,7 +1355,7 @@ export default class KoniState extends State {
     });
   }
 
-  public upsertEvmToken (data: CustomToken) {
+  public upsertCustomToken (data: CustomToken) {
     let isExist = false;
 
     for (const token of this.customTokenState[data.type]) {
@@ -1386,7 +1386,7 @@ export default class KoniState extends State {
       });
     }
 
-    if (data.type === 'erc20') {
+    if (data.type === CustomTokenType.erc20) {
       this.upsertChainRegistry(data);
     }
 
@@ -1395,17 +1395,17 @@ export default class KoniState extends State {
     this.updateServiceInfo();
   }
 
-  public deleteEvmTokens (targetTokens: DeleteEvmTokenParams[]) {
-    const _evmTokenState: CustomTokenJson = this.customTokenState;
+  public deleteCustomTokens (targetTokens: DeleteEvmTokenParams[]) {
+    const _customTokenState: CustomTokenJson = this.customTokenState;
     let needUpdateChainRegistry = false;
 
     for (const targetToken of targetTokens) {
-      for (let index = 0; index < _evmTokenState.erc20.length; index++) {
-        if (_evmTokenState.erc20[index].smartContract === targetToken.smartContract && _evmTokenState.erc20[index].chain === targetToken.chain && targetToken.type === 'erc20') {
-          if (_evmTokenState.erc20[index].isCustom) {
-            _evmTokenState.erc20.splice(index, 1);
+      for (let index = 0; index < _customTokenState.erc20.length; index++) {
+        if (_customTokenState.erc20[index].smartContract === targetToken.smartContract && _customTokenState.erc20[index].chain === targetToken.chain && targetToken.type === 'erc20') {
+          if (_customTokenState.erc20[index].isCustom) {
+            _customTokenState.erc20.splice(index, 1);
           } else {
-            _evmTokenState.erc20[index].isDeleted = true;
+            _customTokenState.erc20[index].isDeleted = true;
           }
 
           needUpdateChainRegistry = true;
@@ -1434,12 +1434,12 @@ export default class KoniState extends State {
     }
 
     for (const targetToken of targetTokens) {
-      for (let index = 0; index < _evmTokenState.erc721.length; index++) {
-        if (_evmTokenState.erc721[index].smartContract === targetToken.smartContract && _evmTokenState.erc721[index].chain === targetToken.chain && targetToken.type === 'erc721') {
-          if (_evmTokenState.erc721[index].isCustom) {
-            _evmTokenState.erc721.splice(index, 1);
+      for (let index = 0; index < _customTokenState.erc721.length; index++) {
+        if (_customTokenState.erc721[index].smartContract === targetToken.smartContract && _customTokenState.erc721[index].chain === targetToken.chain && targetToken.type === 'erc721') {
+          if (_customTokenState.erc721[index].isCustom) {
+            _customTokenState.erc721.splice(index, 1);
           } else {
-            _evmTokenState.erc721[index].isDeleted = true;
+            _customTokenState.erc721[index].isDeleted = true;
           }
         }
       }
@@ -1448,7 +1448,7 @@ export default class KoniState extends State {
       this.dbService.deleteNftsByEvmToken(this.getNetworkGenesisHashByKey(targetToken.chain), targetToken.smartContract).catch((e) => this.logger.warn(e));
     }
 
-    this.customTokenState = _evmTokenState;
+    this.customTokenState = _customTokenState;
     this.customTokenSubject.next(this.customTokenState);
     this.chainRegistrySubject.next(this.getChainRegistryMap());
     this.customTokenStore.set('EvmToken', this.customTokenState);

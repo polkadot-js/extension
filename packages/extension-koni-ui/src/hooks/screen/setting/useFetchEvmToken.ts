@@ -6,17 +6,17 @@ import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { useSelector } from 'react-redux';
 
 export default function useFetchEvmToken (): CustomToken[] {
-  const { evmToken } = useSelector((state: RootState) => state);
+  const { customToken } = useSelector((state: RootState) => state);
   const filteredErc20Token: CustomToken[] = [];
   const filteredErc721Token: CustomToken[] = [];
 
-  for (const token of evmToken.erc20) {
+  for (const token of customToken.erc20) {
     if (!token.isDeleted) {
       filteredErc20Token.push(token);
     }
   }
 
-  for (const token of evmToken.erc721) {
+  for (const token of customToken.erc721) {
     if (!token.isDeleted) {
       filteredErc721Token.push(token);
     }

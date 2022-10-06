@@ -1971,14 +1971,14 @@ export default class KoniExtension extends Extension {
     return state.getCustomTokenState();
   }
 
-  private upsertEvmToken (data: CustomToken) {
-    state.upsertEvmToken(data);
+  private upsertCustomToken (data: CustomToken) {
+    state.upsertCustomToken(data);
 
     return true;
   }
 
-  private deleteEvmToken (data: DeleteEvmTokenParams[]) {
-    state.deleteEvmTokens(data);
+  private deleteCustomToken (data: DeleteEvmTokenParams[]) {
+    state.deleteCustomTokens(data);
 
     return true;
   }
@@ -4218,9 +4218,9 @@ export default class KoniExtension extends Extension {
       case 'pri(customTokenState.getCustomTokenState)':
         return this.getEvmTokenState();
       case 'pri(customTokenState.upsertCustomTokenState)':
-        return this.upsertEvmToken(request as CustomToken);
+        return this.upsertCustomToken(request as CustomToken);
       case 'pri(customTokenState.deleteMany)':
-        return this.deleteEvmToken(request as DeleteEvmTokenParams[]);
+        return this.deleteCustomToken(request as DeleteEvmTokenParams[]);
       case 'pri(transfer.checkReferenceCount)':
         return await this.transferCheckReferenceCount(request as RequestTransferCheckReferenceCount);
       case 'pri(transfer.checkSupporting)':

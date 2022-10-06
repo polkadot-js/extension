@@ -5,7 +5,7 @@ import { CustomToken, CustomTokenType } from '@subwallet/extension-base/backgrou
 import { ActionContext, Button, ConfirmationsQueueContext, Dropdown, InputWithLabel } from '@subwallet/extension-koni-ui/components';
 import useGetActiveEvmChains from '@subwallet/extension-koni-ui/hooks/screen/import/useGetActiveEvmChains';
 import useTranslation from '@subwallet/extension-koni-ui/hooks/useTranslation';
-import { completeConfirmation, upsertEvmToken, validateCustomToken } from '@subwallet/extension-koni-ui/messaging';
+import { completeConfirmation, upsertCustomToken, validateCustomToken } from '@subwallet/extension-koni-ui/messaging';
 import { Header } from '@subwallet/extension-koni-ui/partials';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import React, { useCallback, useContext, useEffect, useState } from 'react';
@@ -145,7 +145,7 @@ function ImportEvmToken ({ className = '' }: Props): React.ReactElement<Props> {
       completeConfirmation('addTokenRequest', { id: currentRequest.id, isApproved: true }).catch(console.error);
     }
 
-    upsertEvmToken(evmToken)
+    upsertCustomToken(evmToken)
       .then((resp) => {
         if (resp) {
           setWarning('Successfully added an EVM token');

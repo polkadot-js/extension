@@ -6,21 +6,25 @@ import { CustomTokenJson } from '@subwallet/extension-base/background/KoniTypes'
 
 const initialState = {
   erc721: [],
-  erc20: []
+  erc20: [],
+  psp22: [],
+  psp34: []
 } as CustomTokenJson;
 
-const evmTokenSlice = createSlice({
+const customTokenSlice = createSlice({
   initialState,
-  name: 'evmToken',
+  name: 'customToken',
   reducers: {
     update (state, action: PayloadAction<CustomTokenJson>) {
       const payload = action.payload;
 
       state.erc20 = payload.erc20;
       state.erc721 = payload.erc721;
+      state.psp22 = payload.psp22;
+      state.psp34 = payload.psp34;
     }
   }
 });
 
-export const { update } = evmTokenSlice.actions;
-export default evmTokenSlice.reducer;
+export const { update } = customTokenSlice.actions;
+export default customTokenSlice.reducer;

@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { PREDEFINED_NETWORKS } from '@subwallet/extension-koni-base/api/predefinedNetworks';
-import { PSP22Contract } from '@subwallet/extension-koni-base/api/psp/helper';
+import { PSP22Contract } from '@subwallet/extension-koni-base/api/tokens/wasm/helper';
 import { DOTSAMA_AUTO_CONNECT_MS } from '@subwallet/extension-koni-base/constants';
 import { getCurrentProvider } from '@subwallet/extension-koni-base/utils';
 
@@ -100,8 +100,5 @@ describe('test DotSama APIs', () => {
     console.log('megaGas', megaGas.toNumber());
     console.log('weight', weight.toNumber());
     console.log(executionTime);
-
-    // TODO: calculate gasLimit, gasFee
-    // TODO: UI
   });
 });

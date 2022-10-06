@@ -1,7 +1,7 @@
 // Copyright 2019-2022 @subwallet/extension-koni authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { ApiMap, ApiProps, CustomEvmToken, NETWORK_STATUS, NetworkJson, NftTransferExtra, ServiceInfo, StakingRewardJson } from '@subwallet/extension-base/background/KoniTypes';
+import { ApiMap, ApiProps, CustomToken, NETWORK_STATUS, NetworkJson, NftTransferExtra, ServiceInfo, StakingRewardJson } from '@subwallet/extension-base/background/KoniTypes';
 import { getTokenPrice } from '@subwallet/extension-koni-base/api/coingecko';
 import { fetchDotSamaHistory } from '@subwallet/extension-koni-base/api/subquery/history';
 import { KoniSubscription } from '@subwallet/extension-koni-base/background/subscription';
@@ -253,7 +253,7 @@ export class KoniCron {
       .catch((err) => this.logger.log(err));
   };
 
-  refreshNft = (address: string, apiMap: ApiMap, customErc721Registry: CustomEvmToken[]) => {
+  refreshNft = (address: string, apiMap: ApiMap, customErc721Registry: CustomToken[]) => {
     return () => {
       this.logger.log('Refresh Nft state');
       this.subscriptions.subscribeNft(address, apiMap.dotSama, apiMap.web3, customErc721Registry);

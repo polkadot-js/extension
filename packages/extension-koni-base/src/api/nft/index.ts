@@ -1,7 +1,7 @@
 // Copyright 2019-2022 @subwallet/extension-koni authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { ApiProps, CustomEvmToken, NftCollection, NftItem } from '@subwallet/extension-base/background/KoniTypes';
+import { ApiProps, CustomToken, NftCollection, NftItem } from '@subwallet/extension-base/background/KoniTypes';
 import { AcalaNftApi } from '@subwallet/extension-koni-base/api/nft/acala_nft';
 import { BitCountryNftApi } from '@subwallet/extension-koni-base/api/nft/bit.country';
 import { SUPPORTED_NFT_NETWORKS } from '@subwallet/extension-koni-base/api/nft/config';
@@ -55,7 +55,7 @@ export class NftHandler {
   addresses: string[] = [];
   total = 0;
   needSetupApi = true;
-  evmContracts: Record<string, CustomEvmToken[]> = {};
+  evmContracts: Record<string, CustomToken[]> = {};
 
   constructor (dotSamaAPIMap: Record<string, ApiProps>, addresses?: string[], web3ApiMap?: Record<string, Web3>) {
     if (addresses) {
@@ -102,7 +102,7 @@ export class NftHandler {
     }
   }
 
-  private setEvmContracts (evmContracts: CustomEvmToken[]) {
+  private setEvmContracts (evmContracts: CustomToken[]) {
     this.evmContracts = {};
 
     for (const contract of evmContracts) {
@@ -152,7 +152,7 @@ export class NftHandler {
   }
 
   public async handleNfts (
-    evmContracts: CustomEvmToken[],
+    evmContracts: CustomToken[],
     updateItem: (chain: string, data: NftItem, owner: string) => void,
     updateCollection: (chain: string, data: NftCollection) => void,
     updateIds: (chain: string, owner: string, collectionId?: string, nftIds?: string[]) => void,

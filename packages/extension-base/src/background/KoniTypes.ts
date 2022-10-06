@@ -26,7 +26,7 @@ export interface ServiceInfo {
   isLock?: boolean;
   currentAccountInfo: CurrentAccountInfo;
   chainRegistry: Record<string, ChainRegistry>;
-  customErc721Registry: CustomEvmToken[];
+  customErc721Registry: CustomToken[];
 }
 
 export enum ApiInitStatus {
@@ -764,33 +764,42 @@ export interface DisableNetworkResponse {
   activeNetworkCount?: number
 }
 
-export interface CustomEvmToken {
+export enum CustomTokenType {
+  erc20 = 'erc20',
+  erc721 = 'erc721',
+  psp22 = 'psp22',
+  psp34 = 'psp34'
+}
+
+export interface CustomToken { // general interface for all kinds of tokens
   name?: string,
   smartContract: string,
   symbol?: string,
   decimals?: number,
   chain: string,
-  type: 'erc20' | 'erc721',
+  type: CustomTokenType,
   isCustom?: boolean,
   isDeleted?: boolean,
   image?: string
 }
 
-export interface EvmTokenJson {
-  erc20: CustomEvmToken[],
-  erc721: CustomEvmToken[]
+export interface CustomTokenJson {
+  [CustomTokenType.erc20]: CustomToken[],
+  [CustomTokenType.erc721]: CustomToken[],
+  [CustomTokenType.psp22]: CustomToken[],
+  [CustomTokenType.psp34]: CustomToken[]
 }
 
 export interface DeleteEvmTokenParams {
   smartContract: string,
   chain: string,
-  type: 'erc20' | 'erc721'
+  type: CustomTokenType
 }
 
 export interface ValidateEvmTokenRequest {
   smartContract: string,
   chain: string,
-  type: 'erc20' | 'erc721'
+  type: CustomTokenType
 }
 
 export interface ValidateEvmTokenResponse {
@@ -1022,7 +1031,7 @@ export interface EvmSignatureRequestQr extends EvmSignatureRequest, EvmRequestQr
 
 export interface ConfirmationDefinitions {
   addNetworkRequest: [ConfirmationsQueueItem<NetworkJson>, ConfirmationResult<NetworkJson>],
-  addTokenRequest: [ConfirmationsQueueItem<CustomEvmToken>, ConfirmationResult<boolean>],
+  addTokenRequest: [ConfirmationsQueueItem<CustomToken>, ConfirmationResult<boolean>],
   switchNetworkRequest: [ConfirmationsQueueItem<SwitchNetworkRequest>, ConfirmationResult<boolean>],
   evmSignatureRequest: [ConfirmationsQueueItem<EvmSignatureRequest>, ConfirmationResult<string>],
   evmSignatureRequestQr: [ConfirmationsQueueItem<EvmSignatureRequestQr>, ConfirmationResultQr<string>],
@@ -1374,9 +1383,9 @@ export interface KoniRequestSignatures {
   'pri(networkMap.getSubscription)': [null, Record<string, NetworkJson>, Record<string, NetworkJson>];
   'pri(evmTokenState.validateEvmToken)': [ValidateEvmTokenRequest, ValidateEvmTokenResponse];
   'pri(evmTokenState.deleteMany)': [DeleteEvmTokenParams[], boolean];
-  'pri(evmTokenState.upsertEvmTokenState)': [CustomEvmToken, boolean];
-  'pri(evmTokenState.getEvmTokenState)': [null, EvmTokenJson];
-  'pri(evmTokenState.getSubscription)': [null, EvmTokenJson, EvmTokenJson];
+  'pri(evmTokenState.upsertEvmTokenState)': [CustomToken, boolean];
+  'pri(evmTokenState.getEvmTokenState)': [null, CustomTokenJson];
+  'pri(evmTokenState.getSubscription)': [null, CustomTokenJson, CustomTokenJson];
   'pri(evmNft.submitTransaction)': [EvmNftSubmitTransaction, NftTransactionResponse, NftTransactionResponse];
   'pri(evmNft.getTransaction)': [EvmNftTransactionRequest, EvmNftTransaction];
   'pri(nftTransfer.setNftTransfer)': [NftTransferExtra, boolean];

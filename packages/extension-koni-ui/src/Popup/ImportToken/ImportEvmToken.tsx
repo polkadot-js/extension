@@ -1,7 +1,7 @@
 // Copyright 2019-2022 @subwallet/extension-koni authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { CustomEvmToken } from '@subwallet/extension-base/background/KoniTypes';
+import { CustomToken } from '@subwallet/extension-base/background/KoniTypes';
 import { ActionContext, Button, ConfirmationsQueueContext, Dropdown, InputWithLabel } from '@subwallet/extension-koni-ui/components';
 import useGetActiveEvmChains from '@subwallet/extension-koni-ui/hooks/screen/import/useGetActiveEvmChains';
 import useTranslation from '@subwallet/extension-koni-ui/hooks/useTranslation';
@@ -133,7 +133,7 @@ function ImportEvmToken ({ className = '' }: Props): React.ReactElement<Props> {
       decimals: parseInt(decimals),
       type: 'erc20',
       isCustom: true
-    } as CustomEvmToken;
+    } as CustomToken;
 
     if (symbol) {
       evmToken.symbol = symbol;

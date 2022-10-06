@@ -1,7 +1,7 @@
 // Copyright 2019-2022 @polkadot/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { CustomEvmToken, DeleteEvmTokenParams } from '@subwallet/extension-base/background/KoniTypes';
+import { CustomToken, DeleteEvmTokenParams } from '@subwallet/extension-base/background/KoniTypes';
 import { ActionContext } from '@subwallet/extension-koni-ui/components';
 import Checkbox from '@subwallet/extension-koni-ui/components/Checkbox';
 import { store } from '@subwallet/extension-koni-ui/stores';
@@ -12,7 +12,7 @@ import styled from 'styled-components';
 
 interface Props extends ThemeProps {
   className?: string;
-  item: CustomEvmToken;
+  item: CustomToken;
   handleSelected: (val: DeleteEvmTokenParams) => void;
   handleUnselected: (val: DeleteEvmTokenParams) => void;
 }

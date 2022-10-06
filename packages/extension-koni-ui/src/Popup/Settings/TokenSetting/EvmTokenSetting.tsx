@@ -1,7 +1,7 @@
 // Copyright 2019-2022 @polkadot/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { CustomEvmToken, DeleteEvmTokenParams } from '@subwallet/extension-base/background/KoniTypes';
+import { CustomToken, DeleteEvmTokenParams } from '@subwallet/extension-base/background/KoniTypes';
 import { Button, ButtonArea, InputFilter } from '@subwallet/extension-koni-ui/components';
 import Modal from '@subwallet/extension-koni-ui/components/Modal';
 import useFetchEvmToken from '@subwallet/extension-koni-ui/hooks/screen/setting/useFetchEvmToken';
@@ -32,7 +32,7 @@ function EvmTokenSetting ({ className }: Props): React.ReactElement {
   }, []);
 
   const filterToken = useCallback(() => {
-    const _filteredTokens: CustomEvmToken[] = [];
+    const _filteredTokens: CustomToken[] = [];
 
     allEvmTokens.forEach((token) => {
       if ((token.symbol && token.symbol.toLowerCase().includes(searchString.toLowerCase())) || (token.name && token.name.toLowerCase().includes(searchString.toLowerCase()))) {

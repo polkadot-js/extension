@@ -1,14 +1,14 @@
 // Copyright 2019-2022 @polkadot/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { CustomEvmToken } from '@subwallet/extension-base/background/KoniTypes';
+import { CustomToken } from '@subwallet/extension-base/background/KoniTypes';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { useSelector } from 'react-redux';
 
-export default function useFetchEvmToken (): CustomEvmToken[] {
+export default function useFetchEvmToken (): CustomToken[] {
   const { evmToken } = useSelector((state: RootState) => state);
-  const filteredErc20Token: CustomEvmToken[] = [];
-  const filteredErc721Token: CustomEvmToken[] = [];
+  const filteredErc20Token: CustomToken[] = [];
+  const filteredErc721Token: CustomToken[] = [];
 
   for (const token of evmToken.erc20) {
     if (!token.isDeleted) {

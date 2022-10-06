@@ -2,18 +2,18 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
-import { EvmTokenJson } from '@subwallet/extension-base/background/KoniTypes';
+import { CustomTokenJson } from '@subwallet/extension-base/background/KoniTypes';
 
 const initialState = {
   erc721: [],
   erc20: []
-} as EvmTokenJson;
+} as CustomTokenJson;
 
 const evmTokenSlice = createSlice({
   initialState,
   name: 'evmToken',
   reducers: {
-    update (state, action: PayloadAction<EvmTokenJson>) {
+    update (state, action: PayloadAction<CustomTokenJson>) {
       const payload = action.payload;
 
       state.erc20 = payload.erc20;

@@ -3,7 +3,7 @@
 
 import { withErrorLog } from '@subwallet/extension-base/background/handlers/helpers';
 import State, { AuthUrls, Resolver } from '@subwallet/extension-base/background/handlers/State';
-import { AccountRefMap, APIItemState, ApiMap, AuthRequestV2, BalanceItem, BalanceJson, ChainRegistry, ConfirmationDefinitions, ConfirmationsQueue, ConfirmationsQueueItemOptions, ConfirmationType, CrowdloanItem, CrowdloanJson, CurrentAccountInfo, CustomEvmToken, DeleteEvmTokenParams, EvmSendTransactionParams, EvmSendTransactionRequestQr, EvmSignatureRequestQr, EvmTokenJson, ExternalRequestPromise, ExternalRequestPromiseStatus, NETWORK_STATUS, NetworkJson, NftCollection, NftItem, NftJson, NftTransferExtra, PriceJson, RequestAccountExportPrivateKey, RequestConfirmationComplete, RequestSettingsType, ResponseAccountExportPrivateKey, ResponseSettingsType, ResultResolver, ServiceInfo, SingleModeJson, StakeUnlockingJson, StakingItem, StakingJson, StakingRewardJson, ThemeTypes, TokenInfo, TransactionHistoryItemType } from '@subwallet/extension-base/background/KoniTypes';
+import { AccountRefMap, APIItemState, ApiMap, AuthRequestV2, BalanceItem, BalanceJson, ChainRegistry, ConfirmationDefinitions, ConfirmationsQueue, ConfirmationsQueueItemOptions, ConfirmationType, CrowdloanItem, CrowdloanJson, CurrentAccountInfo, CustomToken, CustomTokenJson, DeleteEvmTokenParams, EvmSendTransactionParams, EvmSendTransactionRequestQr, EvmSignatureRequestQr, ExternalRequestPromise, ExternalRequestPromiseStatus, NETWORK_STATUS, NetworkJson, NftCollection, NftItem, NftJson, NftTransferExtra, PriceJson, RequestAccountExportPrivateKey, RequestConfirmationComplete, RequestSettingsType, ResponseAccountExportPrivateKey, ResponseSettingsType, ResultResolver, ServiceInfo, SingleModeJson, StakeUnlockingJson, StakingItem, StakingJson, StakingRewardJson, ThemeTypes, TokenInfo, TransactionHistoryItemType } from '@subwallet/extension-base/background/KoniTypes';
 import { AuthorizeRequest, RequestAuthorizeTab } from '@subwallet/extension-base/background/types';
 import { Web3Transaction } from '@subwallet/extension-base/signers/types';
 import { getId } from '@subwallet/extension-base/utils/getId';
@@ -16,9 +16,10 @@ import { DEFAULT_STAKING_NETWORKS } from '@subwallet/extension-koni-base/api/sta
 // eslint-disable-next-line camelcase
 import { DotSamaCrowdloan_crowdloans_nodes } from '@subwallet/extension-koni-base/api/subquery/__generated__/DotSamaCrowdloan';
 import { fetchDotSamaCrowdloan } from '@subwallet/extension-koni-base/api/subquery/crowdloan';
-import { DEFAULT_EVM_TOKENS } from '@subwallet/extension-koni-base/api/web3/defaultEvmToken';
-import { parseTxAndSignature } from '@subwallet/extension-koni-base/api/web3/transferQr';
-import { initWeb3Api } from '@subwallet/extension-koni-base/api/web3/web3';
+import { DEFAULT_SUPPORTED_TOKENS } from '@subwallet/extension-koni-base/api/tokens/defaultSupportedTokens';
+import { DEFAULT_EVM_TOKENS } from '@subwallet/extension-koni-base/api/tokens/evm/defaultEvmToken';
+import { parseTxAndSignature } from '@subwallet/extension-koni-base/api/tokens/evm/transferQr';
+import { initWeb3Api } from '@subwallet/extension-koni-base/api/tokens/evm/web3';
 import { EvmRpcError } from '@subwallet/extension-koni-base/background/errors/EvmRpcError';
 import { state } from '@subwallet/extension-koni-base/background/handlers/index';
 import { ALL_ACCOUNT_KEY, ALL_GENESIS_HASH } from '@subwallet/extension-koni-base/constants';
@@ -26,7 +27,7 @@ import DatabaseService from '@subwallet/extension-koni-base/services/DatabaseSer
 import { CurrentAccountStore, NetworkMapStore, PriceStore } from '@subwallet/extension-koni-base/stores';
 import AccountRefStore from '@subwallet/extension-koni-base/stores/AccountRef';
 import AuthorizeStore from '@subwallet/extension-koni-base/stores/Authorize';
-import CustomEvmTokenStore from '@subwallet/extension-koni-base/stores/CustomEvmToken';
+import CustomTokenStore from '@subwallet/extension-koni-base/stores/CustomEvmToken';
 import SettingsStore from '@subwallet/extension-koni-base/stores/Settings';
 import { convertFundStatus, getCurrentProvider, mergeNetworkProviders } from '@subwallet/extension-koni-base/utils';
 import { anyNumberToBN } from '@subwallet/extension-koni-base/utils/eth';
@@ -79,7 +80,7 @@ export default class KoniState extends State {
   public readonly authSubjectV2: BehaviorSubject<AuthorizeRequest[]> = new BehaviorSubject<AuthorizeRequest[]>([]);
 
   private readonly networkMapStore = new NetworkMapStore(); // persist custom networkMap by user
-  private readonly customEvmTokenStore = new CustomEvmTokenStore();
+  private readonly customTokenStore = new CustomTokenStore();
   private readonly priceStore = new PriceStore();
   private readonly currentAccountStore = new CurrentAccountStore();
   private readonly settingsStore = new SettingsStore();
@@ -113,8 +114,8 @@ export default class KoniState extends State {
 
   private serviceInfoSubject = new Subject<ServiceInfo>();
 
-  private evmTokenState: EvmTokenJson = { erc20: [], erc721: [] };
-  private evmTokenSubject = new Subject<EvmTokenJson>();
+  private customTokenState: CustomTokenJson = { erc20: [], erc721: [], psp22: [], psp34: [] };
+  private customTokenSubject = new Subject<CustomTokenJson>();
 
   private balanceMap: Record<string, BalanceItem> = this.generateDefaultBalanceMap();
   private balanceSubject = new Subject<BalanceJson>();
@@ -263,9 +264,9 @@ export default class KoniState extends State {
   }
 
   public initEvmTokenState () {
-    this.customEvmTokenStore.get('EvmToken', (storedEvmTokens) => {
+    this.customTokenStore.get('EvmToken', (storedEvmTokens) => {
       if (!storedEvmTokens) {
-        this.evmTokenState = DEFAULT_EVM_TOKENS;
+        this.customTokenState = DEFAULT_SUPPORTED_TOKENS;
       } else {
         const _evmTokenState = storedEvmTokens;
 
@@ -342,11 +343,11 @@ export default class KoniState extends State {
           }
         }
 
-        this.evmTokenState = _evmTokenState;
+        this.customTokenState = _evmTokenState;
       }
 
-      this.customEvmTokenStore.set('EvmToken', this.evmTokenState);
-      this.evmTokenSubject.next(this.evmTokenState);
+      this.customTokenStore.set('EvmToken', this.customTokenState);
+      this.customTokenSubject.next(this.customTokenState);
 
       this.initChainRegistry();
     });
@@ -976,7 +977,7 @@ export default class KoniState extends State {
       });
   }
 
-  public async addTokenConfirm (id: string, url: string, tokenInfo: CustomEvmToken) {
+  public async addTokenConfirm (id: string, url: string, tokenInfo: CustomToken) {
     return this.addConfirmation(id, url, 'addTokenRequest', tokenInfo)
       .then(({ isApproved }) => {
         return isApproved;
@@ -1184,7 +1185,7 @@ export default class KoniState extends State {
     });
   }
 
-  public checkTokenKey (tokenData: CustomEvmToken): string {
+  public checkTokenKey (tokenData: CustomToken): string {
     const chainRegistry = this.chainRegistryMap[tokenData.chain];
     let tokenKey = '';
 
@@ -1198,7 +1199,7 @@ export default class KoniState extends State {
     return tokenKey;
   }
 
-  public upsertChainRegistry (tokenData: CustomEvmToken) {
+  public upsertChainRegistry (tokenData: CustomToken) {
     const chainRegistry = this.chainRegistryMap[tokenData.chain];
 
     if (chainRegistry) {
@@ -1231,7 +1232,7 @@ export default class KoniState extends State {
   public initChainRegistry () {
     this.chainRegistryMap = cacheRegistryMap; // prevents deleting token registry even when network is disabled
     this.getEvmTokenStore((evmTokens) => {
-      const erc20Tokens: CustomEvmToken[] = evmTokens ? evmTokens.erc20 : [];
+      const erc20Tokens: CustomToken[] = evmTokens ? evmTokens.erc20 : [];
 
       if (evmTokens) {
         evmTokens.erc20.forEach((token) => {
@@ -1317,17 +1318,17 @@ export default class KoniState extends State {
   }
 
   public subscribeEvmToken () {
-    return this.evmTokenSubject;
+    return this.customTokenSubject;
   }
 
   public getEvmTokenState () {
-    return this.evmTokenState;
+    return this.customTokenState;
   }
 
   public getActiveErc20Tokens () {
-    const filteredErc20Tokens: CustomEvmToken[] = [];
+    const filteredErc20Tokens: CustomToken[] = [];
 
-    this.evmTokenState.erc20.forEach((token) => {
+    this.customTokenState.erc20.forEach((token) => {
       if (!token.isDeleted) {
         filteredErc20Tokens.push(token);
       }
@@ -1337,9 +1338,9 @@ export default class KoniState extends State {
   }
 
   public getActiveErc721Tokens () {
-    const filteredErc721Tokens: CustomEvmToken[] = [];
+    const filteredErc721Tokens: CustomToken[] = [];
 
-    this.evmTokenState.erc721.forEach((token) => {
+    this.customTokenState.erc721.forEach((token) => {
       if (!token.isDeleted) {
         filteredErc721Tokens.push(token);
       }
@@ -1348,16 +1349,16 @@ export default class KoniState extends State {
     return filteredErc721Tokens;
   }
 
-  public getEvmTokenStore (callback: (data: EvmTokenJson) => void) {
-    return this.customEvmTokenStore.get('EvmToken', (data) => {
+  public getEvmTokenStore (callback: (data: CustomTokenJson) => void) {
+    return this.customTokenStore.get('EvmToken', (data) => {
       callback(data);
     });
   }
 
-  public upsertEvmToken (data: CustomEvmToken) {
+  public upsertEvmToken (data: CustomToken) {
     let isExist = false;
 
-    for (const token of this.evmTokenState[data.type]) {
+    for (const token of this.customTokenState[data.type]) {
       if (token.smartContract.toLowerCase() === data.smartContract.toLowerCase() && token.type === data.type && token.chain === data.chain) {
         isExist = true;
         break;
@@ -1365,9 +1366,9 @@ export default class KoniState extends State {
     }
 
     if (!isExist) {
-      this.evmTokenState[data.type].push(data);
+      this.customTokenState[data.type].push(data);
     } else {
-      this.evmTokenState[data.type] = this.evmTokenState[data.type].map((token) => {
+      this.customTokenState[data.type] = this.customTokenState[data.type].map((token) => {
         if (token.smartContract.toLowerCase() === data.smartContract.toLowerCase()) {
           if (token.isDeleted) {
             return {
@@ -1389,13 +1390,13 @@ export default class KoniState extends State {
       this.upsertChainRegistry(data);
     }
 
-    this.evmTokenSubject.next(this.evmTokenState);
-    this.customEvmTokenStore.set('EvmToken', this.evmTokenState);
+    this.customTokenSubject.next(this.customTokenState);
+    this.customTokenStore.set('EvmToken', this.customTokenState);
     this.updateServiceInfo();
   }
 
   public deleteEvmTokens (targetTokens: DeleteEvmTokenParams[]) {
-    const _evmTokenState: EvmTokenJson = this.evmTokenState;
+    const _evmTokenState: CustomTokenJson = this.customTokenState;
     let needUpdateChainRegistry = false;
 
     for (const targetToken of targetTokens) {
@@ -1447,10 +1448,10 @@ export default class KoniState extends State {
       this.dbService.deleteNftsByEvmToken(this.getNetworkGenesisHashByKey(targetToken.chain), targetToken.smartContract).catch((e) => this.logger.warn(e));
     }
 
-    this.evmTokenState = _evmTokenState;
-    this.evmTokenSubject.next(this.evmTokenState);
+    this.customTokenState = _evmTokenState;
+    this.customTokenSubject.next(this.customTokenState);
     this.chainRegistrySubject.next(this.getChainRegistryMap());
-    this.customEvmTokenStore.set('EvmToken', this.evmTokenState);
+    this.customTokenStore.set('EvmToken', this.customTokenState);
     this.updateServiceInfo();
   }
 

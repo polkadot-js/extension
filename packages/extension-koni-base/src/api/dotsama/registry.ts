@@ -1,7 +1,7 @@
 // Copyright 2019-2022 @subwallet/extension-koni-base authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { ChainRegistry, CustomEvmToken, TokenInfo } from '@subwallet/extension-base/background/KoniTypes';
+import { ChainRegistry, CustomToken, TokenInfo } from '@subwallet/extension-base/background/KoniTypes';
 import { moonbeamBaseChains } from '@subwallet/extension-koni-base/api/dotsama/api-helper';
 import { PREDEFINE_TOKEN_DATA_MAP } from '@subwallet/extension-koni-base/api/predefineChainTokens';
 
@@ -138,7 +138,7 @@ export async function getForeignToken (api: ApiPromise) {
   return tokenMap;
 }
 
-export const getRegistry = async (networkKey: string, api: ApiPromise, customErc20Tokens?: CustomEvmToken[]) => {
+export const getRegistry = async (networkKey: string, api: ApiPromise, customErc20Tokens?: CustomToken[]) => {
   const cached = cacheRegistryMap[networkKey];
 
   if (cached) {

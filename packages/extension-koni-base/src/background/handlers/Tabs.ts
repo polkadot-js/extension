@@ -6,7 +6,7 @@ import type { InjectedAccount } from '@subwallet/extension-inject/types';
 import { AuthUrlInfo } from '@subwallet/extension-base/background/handlers/State';
 import { createSubscription, unsubscribe } from '@subwallet/extension-base/background/handlers/subscriptions';
 import Tabs from '@subwallet/extension-base/background/handlers/Tabs';
-import { CustomEvmToken, EvmAppState, EvmEventType, EvmSendTransactionParams, NetworkJson, RequestEvmProviderSend } from '@subwallet/extension-base/background/KoniTypes';
+import { CustomToken, EvmAppState, EvmEventType, EvmSendTransactionParams, NetworkJson, RequestEvmProviderSend } from '@subwallet/extension-base/background/KoniTypes';
 import { AccountAuthType, MessageTypes, RequestAccountList, RequestAccountSubscribe, RequestAuthorizeTab, RequestTypes, ResponseTypes } from '@subwallet/extension-base/background/types';
 import { canDerive } from '@subwallet/extension-base/utils';
 import { EvmRpcError } from '@subwallet/extension-koni-base/background/errors/EvmRpcError';
@@ -238,7 +238,7 @@ export default class KoniTabs extends Tabs {
     }
 
     try {
-      const tokenInfo: CustomEvmToken = {
+      const tokenInfo: CustomToken = {
         type: tokenType,
         smartContract: input.options?.address,
         symbol: input.options?.symbol,

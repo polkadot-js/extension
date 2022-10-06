@@ -5,11 +5,11 @@ import Web3 from 'web3';
 import { Contract } from 'web3-eth-contract';
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires,@typescript-eslint/no-unsafe-assignment
-export const ERC20Contract = require('./api-helper/ERC20Contract.json');
+export const ERC20Contract = require('./helper/ERC20Contract.json');
 // eslint-disable-next-line @typescript-eslint/no-var-requires,@typescript-eslint/no-unsafe-assignment
-export const ERC721Contract = require('./api-helper/ERC721Contract.json');
+export const ERC721Contract = require('./helper/ERC721Contract.json');
 // eslint-disable-next-line @typescript-eslint/no-var-requires,@typescript-eslint/no-unsafe-assignment
-export const TestERC721Contract = require('./api-helper/TestERC721Contract.json');
+export const TestERC721Contract = require('./helper/TestERC721Contract.json');
 
 export const getERC20Contract = (networkKey: string, assetAddress: string, web3ApiMap: Record<string, Web3>, options = {}): Contract => {
   // @ts-ignore

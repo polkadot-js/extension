@@ -17,7 +17,7 @@ interface Props extends ThemeProps {
   className?: string;
 }
 
-function ImportEvmNft ({ className = '' }: Props): React.ReactElement<Props> {
+function ImportNft ({ className = '' }: Props): React.ReactElement<Props> {
   const { t } = useTranslation();
   const addTokenRequest = useContext(ConfirmationsQueueContext).addTokenRequest;
   const requests = Object.values(addTokenRequest);
@@ -176,7 +176,7 @@ function ImportEvmNft ({ className = '' }: Props): React.ReactElement<Props> {
   );
 }
 
-export default React.memo(styled(ImportEvmNft)(({ theme }: Props) => `
+export default React.memo(styled(ImportNft)(({ theme }: Props) => `
   height: 100%;
   display: flex;
   flex-direction: column;

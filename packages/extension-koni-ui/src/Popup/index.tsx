@@ -36,8 +36,8 @@ const UnbondingSubmitTransaction = React.lazy(() => import('@subwallet/extension
 const BondingSubmitTransaction = React.lazy(() => import('@subwallet/extension-koni-ui/Popup/Bonding/BondingSubmitTransaction'));
 const BondingValidatorSelection = React.lazy(() => import('@subwallet/extension-koni-ui/Popup/Bonding/BondingValidatorSelection'));
 const BondingNetworkSelection = React.lazy(() => import('@subwallet/extension-koni-ui/Popup/Bonding/BondingNetworkSelection'));
-const EvmTokenEdit = React.lazy(() => import('@subwallet/extension-koni-ui/Popup/Settings/TokenSetting/EvmTokenEdit'));
-const EvmTokenSetting = React.lazy(() => import('@subwallet/extension-koni-ui/Popup/Settings/TokenSetting/EvmTokenSetting'));
+const TokenEdit = React.lazy(() => import('@subwallet/extension-koni-ui/Popup/Settings/TokenSetting/EvmTokenEdit'));
+const TokenSetting = React.lazy(() => import('@subwallet/extension-koni-ui/Popup/Settings/TokenSetting/EvmTokenSetting'));
 const Welcome = React.lazy(() => import('./Welcome'));
 const Signing = React.lazy(() => import('./Signing'));
 const Confirmation = React.lazy(() => import('./Confirmation'));
@@ -56,8 +56,8 @@ const AuthList = React.lazy(() => import('./AuthManagement'));
 const LoadingContainer = React.lazy(() => import('@subwallet/extension-koni-ui/components/LoadingContainer'));
 const TransferNftContainer = React.lazy(() => import('@subwallet/extension-koni-ui/Popup/Home/Nfts/transfer/TransferNftContainer'));
 const ImportLedger = React.lazy(() => import('@subwallet/extension-koni-ui/Popup/ImportLedger'));
-const ImportEvmNft = React.lazy(() => import('@subwallet/extension-koni-ui/Popup/ImportToken/ImportEvmNft'));
-const ImportEvmToken = React.lazy(() => import('@subwallet/extension-koni-ui/Popup/ImportToken/ImportEvmToken'));
+const ImportNft = React.lazy(() => import('@subwallet/extension-koni-ui/Popup/ImportToken/ImportNft'));
+const ImportToken = React.lazy(() => import('@subwallet/extension-koni-ui/Popup/ImportToken/ImportToken'));
 const SendFund = React.lazy(() => import('@subwallet/extension-koni-ui/Popup/Sending/SendFund'));
 const Settings = React.lazy(() => import('@subwallet/extension-koni-ui/Popup/Settings'));
 const GeneralSetting = React.lazy(() => import('@subwallet/extension-koni-ui/Popup/Settings/GeneralSetting'));
@@ -305,10 +305,10 @@ export default function Popup (): React.ReactElement {
                                   <Route path='/account/send-fund'>{wrapWithErrorBoundary(<SendFund />, 'send-fund')}</Route>
                                   <Route path='/account/donate'>{wrapWithErrorBoundary(<Donate />, 'donate')}</Route>
                                   <Route path='/account/send-nft'>{wrapWithErrorBoundary(<TransferNftContainer />, 'send-nft')}</Route>
-                                  <Route path='/account/import-evm-token'>{wrapWithErrorBoundary(<ImportEvmToken />, 'import-evm-token')}</Route>
-                                  <Route path='/account/import-evm-nft'>{wrapWithErrorBoundary(<ImportEvmNft />, 'import-evm-nft')}</Route>
-                                  <Route path='/account/evm-token-setting'>{wrapWithErrorBoundary(<EvmTokenSetting />, 'evm-token-setting')}</Route>
-                                  <Route path='/account/evm-token-edit'>{wrapWithErrorBoundary(<EvmTokenEdit />, 'evm-token-edit')}</Route>
+                                  <Route path='/account/import--token'>{wrapWithErrorBoundary(<ImportToken />, 'import-evm-token')}</Route>
+                                  <Route path='/account/import--nft'>{wrapWithErrorBoundary(<ImportNft />, 'import-evm-nft')}</Route>
+                                  <Route path='/account/token-setting'>{wrapWithErrorBoundary(<TokenSetting />, 'evm-token-setting')}</Route>
+                                  <Route path='/account/token-edit'>{wrapWithErrorBoundary(<TokenEdit />, 'evm-token-edit')}</Route>
                                   <Route path='/account/select-bonding-network'>{wrapWithErrorBoundary(<BondingNetworkSelection />, 'bonding-network')}</Route>
                                   <Route path='/account/select-bonding-validator'>{wrapWithErrorBoundary(<BondingValidatorSelection />, 'bonding-validator')}</Route>
                                   <Route path='/account/bonding-auth'>{wrapWithErrorBoundary(<BondingSubmitTransaction />, 'bonding-auth')}</Route>

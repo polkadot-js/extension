@@ -17,7 +17,7 @@ interface Props extends ThemeProps {
   className?: string;
 }
 
-function ImportEvmToken ({ className = '' }: Props): React.ReactElement<Props> {
+function ImportToken ({ className = '' }: Props): React.ReactElement<Props> {
   const { t } = useTranslation();
   const addTokenRequest = useContext(ConfirmationsQueueContext).addTokenRequest;
   const requests = Object.values(addTokenRequest);
@@ -218,7 +218,7 @@ function ImportEvmToken ({ className = '' }: Props): React.ReactElement<Props> {
   );
 }
 
-export default React.memo(styled(ImportEvmToken)(({ theme }: Props) => `
+export default React.memo(styled(ImportToken)(({ theme }: Props) => `
   height: 100%;
   display: flex;
   flex-direction: column;

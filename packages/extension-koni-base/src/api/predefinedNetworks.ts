@@ -19,7 +19,7 @@ export const PREDEFINED_NETWORKS: Record<string, NetworkJson> = {
       // Pinknode: 'wss://rpc.pinknode.io/polkadot/explorer' // https://github.com/polkadot-js/apps/issues/5721
     },
     active: true,
-    currentProvider: 'Dwellir',
+    currentProvider: 'Parity',
     currentProviderMode: 'ws',
     groups: ['RELAY_CHAIN'],
     nativeToken: 'DOT',

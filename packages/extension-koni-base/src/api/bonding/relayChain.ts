@@ -4,7 +4,7 @@
 import { ApiProps, BasicTxInfo, ChainBondingBasics, NetworkJson, UnlockingStakeInfo, ValidatorInfo } from '@subwallet/extension-base/background/KoniTypes';
 import { calculateChainStakedReturn, calculateInflation, calculateValidatorStakedReturn, ERA_LENGTH_MAP, getCommission, Unlocking, ValidatorExtraInfo } from '@subwallet/extension-koni-base/api/bonding/utils';
 import { getFreeBalance } from '@subwallet/extension-koni-base/api/dotsama/balance';
-import { parseNumberToDisplay } from '@subwallet/extension-koni-base/utils';
+import { parseNumberToDisplay, parseRawNumber } from '@subwallet/extension-koni-base/utils';
 import Web3 from 'web3';
 
 import { BN, BN_ONE, BN_ZERO } from '@polkadot/util';
@@ -231,12 +231,14 @@ export async function handleRelayBondingTxInfo (networkJson: NetworkJson, amount
     ]);
 
     const feeString = parseNumberToDisplay(txInfo.partialFee, networkJson.decimals) + ` ${networkJson.nativeToken ? networkJson.nativeToken : ''}`;
+    const rawFee = parseRawNumber(txInfo.partialFee.toString());
     const binaryBalance = new BN(balance);
 
     const sumAmount = txInfo.partialFee.add(binaryAmount);
     const balanceError = sumAmount.gt(binaryBalance);
 
     return {
+      rawFee,
       fee: feeString,
       balanceError
     } as BasicTxInfo;
@@ -311,11 +313,13 @@ export async function handleRelayUnbondingTxInfo (address: string, amount: numbe
     ]);
 
     const feeString = parseNumberToDisplay(txInfo.partialFee, networkJson.decimals) + ` ${networkJson.nativeToken ? networkJson.nativeToken : ''}`;
+    const rawFee = parseRawNumber(txInfo.partialFee.toString());
     const binaryBalance = new BN(balance);
 
     const balanceError = txInfo.partialFee.gt(binaryBalance);
 
     return {
+      rawFee,
       fee: feeString,
       balanceError
     } as BasicTxInfo;
@@ -409,10 +413,12 @@ export async function handleRelayWithdrawalTxInfo (address: string, networkKey: 
     ]);
 
     const feeString = parseNumberToDisplay(txInfo.partialFee, networkJson.decimals) + ` ${networkJson.nativeToken ? networkJson.nativeToken : ''}`;
+    const rawFee = parseRawNumber(txInfo.partialFee.toString());
     const binaryBalance = new BN(balance);
     const balanceError = txInfo.partialFee.gt(binaryBalance);
 
     return {
+      rawFee,
       fee: feeString,
       balanceError
     } as BasicTxInfo;

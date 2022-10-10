@@ -305,10 +305,10 @@ export default function Popup (): React.ReactElement {
                                   <Route path='/account/send-fund'>{wrapWithErrorBoundary(<SendFund />, 'send-fund')}</Route>
                                   <Route path='/account/donate'>{wrapWithErrorBoundary(<Donate />, 'donate')}</Route>
                                   <Route path='/account/send-nft'>{wrapWithErrorBoundary(<TransferNftContainer />, 'send-nft')}</Route>
-                                  <Route path='/account/import--token'>{wrapWithErrorBoundary(<ImportToken />, 'import-evm-token')}</Route>
-                                  <Route path='/account/import--nft'>{wrapWithErrorBoundary(<ImportNft />, 'import-evm-nft')}</Route>
-                                  <Route path='/account/token-setting'>{wrapWithErrorBoundary(<TokenSetting />, 'evm-token-setting')}</Route>
-                                  <Route path='/account/token-edit'>{wrapWithErrorBoundary(<TokenEdit />, 'evm-token-edit')}</Route>
+                                  <Route path='/account/import-token'>{wrapWithErrorBoundary(<ImportToken />, 'import-token')}</Route>
+                                  <Route path='/account/import-nft'>{wrapWithErrorBoundary(<ImportNft />, 'import-nft')}</Route>
+                                  <Route path='/account/token-setting'>{wrapWithErrorBoundary(<TokenSetting />, 'token-setting')}</Route>
+                                  <Route path='/account/token-edit'>{wrapWithErrorBoundary(<TokenEdit />, 'token-edit')}</Route>
                                   <Route path='/account/select-bonding-network'>{wrapWithErrorBoundary(<BondingNetworkSelection />, 'bonding-network')}</Route>
                                   <Route path='/account/select-bonding-validator'>{wrapWithErrorBoundary(<BondingValidatorSelection />, 'bonding-validator')}</Route>
                                   <Route path='/account/bonding-auth'>{wrapWithErrorBoundary(<BondingSubmitTransaction />, 'bonding-auth')}</Route>

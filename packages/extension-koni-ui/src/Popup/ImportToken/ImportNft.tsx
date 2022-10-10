@@ -3,7 +3,7 @@
 
 import { CustomToken, CustomTokenType } from '@subwallet/extension-base/background/KoniTypes';
 import { ActionContext, Button, ConfirmationsQueueContext, Dropdown, InputWithLabel } from '@subwallet/extension-koni-ui/components';
-import useGetActiveEvmChains from '@subwallet/extension-koni-ui/hooks/screen/import/useGetActiveEvmChains';
+import useGetActiveChains from '@subwallet/extension-koni-ui/hooks/screen/import/useGetActiveChains';
 import useTranslation from '@subwallet/extension-koni-ui/hooks/useTranslation';
 import { completeConfirmation, upsertCustomToken, validateCustomToken } from '@subwallet/extension-koni-ui/messaging';
 import { Header } from '@subwallet/extension-koni-ui/partials';
@@ -23,7 +23,7 @@ function ImportNft ({ className = '' }: Props): React.ReactElement<Props> {
   const requests = Object.values(addTokenRequest);
   const currentRequest = requests[0];
   const tokenInfo = currentRequest?.payload;
-  const chainOptions = useGetActiveEvmChains();
+  const chainOptions = useGetActiveChains();
   const [contractAddress, setContractAddress] = useState(tokenInfo ? tokenInfo.smartContract : '');
   const [name, setName] = useState(tokenInfo ? tokenInfo.symbol : '');
   const [chain, setChain] = useState(tokenInfo?.chain || chainOptions[0].value || '');

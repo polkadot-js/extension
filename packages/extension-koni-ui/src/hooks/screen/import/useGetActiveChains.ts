@@ -9,12 +9,12 @@ export interface ChainOptions {
   value: string;
 }
 
-export default function useGetActiveSubstrateChain () {
+export default function useGetActiveChains () {
   const networkMap = useSelector((state: RootState) => state.networkMap);
   const result: ChainOptions[] = [];
 
   for (const [key, network] of Object.entries(networkMap)) {
-    if (!network.isEthereum && network.active) {
+    if (network.active) {
       result.push({
         text: network.chain,
         value: key
@@ -24,7 +24,7 @@ export default function useGetActiveSubstrateChain () {
 
   if (result.length === 0) {
     return [{
-      text: 'Please enable at least 1 substrate-based network',
+      text: 'Please enable at least 1 network',
       value: ''
     }];
   }

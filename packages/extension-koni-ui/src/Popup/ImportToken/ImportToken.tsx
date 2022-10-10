@@ -3,7 +3,7 @@
 
 import { CustomToken, CustomTokenType } from '@subwallet/extension-base/background/KoniTypes';
 import { ActionContext, Button, ConfirmationsQueueContext, Dropdown, InputWithLabel } from '@subwallet/extension-koni-ui/components';
-import useGetActiveEvmChains from '@subwallet/extension-koni-ui/hooks/screen/import/useGetActiveEvmChains';
+import useGetActiveChains from '@subwallet/extension-koni-ui/hooks/screen/import/useGetActiveChains';
 import useTranslation from '@subwallet/extension-koni-ui/hooks/useTranslation';
 import { completeConfirmation, upsertCustomToken, validateCustomToken } from '@subwallet/extension-koni-ui/messaging';
 import { Header } from '@subwallet/extension-koni-ui/partials';
@@ -23,7 +23,8 @@ function ImportToken ({ className = '' }: Props): React.ReactElement<Props> {
   const requests = Object.values(addTokenRequest);
   const currentRequest = requests[0];
   const tokenInfo = currentRequest?.payload;
-  const chainOptions = useGetActiveEvmChains();
+  const chainOptions = useGetActiveChains();
+  // TODO:
   const [contractAddress, setContractAddress] = useState(tokenInfo?.smartContract || '');
   const [symbol, setSymbol] = useState(tokenInfo?.symbol || '');
   const [decimals, setDecimals] = useState(tokenInfo ? String(tokenInfo?.decimals) : '');
@@ -165,15 +166,24 @@ function ImportToken ({ className = '' }: Props): React.ReactElement<Props> {
         showCancelButton={false}
         showSettings
         showSubHeader
-        subHeaderName={'Import EVM Token'}
+        subHeaderName={'Import Token'}
       />
 
       <div className={'import-container'}>
         <InputWithLabel
-          label={'Token Contract Address (*)'}
+          label={'Contract Address (*)'}
           onChange={onChangeContractAddress}
           value={contractAddress}
         />
+
+        <div style={{ marginTop: '12px' }}>
+          <Dropdown
+            label={'Token type (*)'}
+            onChange={onSelectChain}
+            options={chainOptions}
+            value={chain}
+          />
+        </div>
 
         <div style={{ marginTop: '12px' }}>
           <Dropdown

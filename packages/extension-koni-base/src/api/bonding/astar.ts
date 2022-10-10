@@ -171,12 +171,14 @@ export async function handleAstarBondingTxInfo (networkJson: NetworkJson, amount
     ]);
 
     const feeString = parseNumberToDisplay(txInfo.partialFee, networkJson.decimals) + ` ${networkJson.nativeToken ? networkJson.nativeToken : ''}`;
+    const rawFee = parseRawNumber(txInfo.partialFee.toString());
     const binaryBalance = new BN(balance);
 
     const sumAmount = txInfo.partialFee.addn(amount);
     const balanceError = sumAmount.gt(binaryBalance);
 
     return {
+      rawFee,
       fee: feeString,
       balanceError
     } as BasicTxInfo;
@@ -214,10 +216,12 @@ export async function handleAstarUnbondingTxInfo (networkJson: NetworkJson, amou
     ]);
 
     const feeString = parseNumberToDisplay(txInfo.partialFee, networkJson.decimals) + ` ${networkJson.nativeToken ? networkJson.nativeToken : ''}`;
+    const rawFee = parseRawNumber(txInfo.partialFee.toString());
     const binaryBalance = new BN(balance);
     const balanceError = txInfo.partialFee.gt(binaryBalance);
 
     return {
+      rawFee,
       fee: feeString,
       balanceError
     } as BasicTxInfo;
@@ -310,10 +314,12 @@ export async function handleAstarWithdrawalTxInfo (networkKey: string, networkJs
   ]);
 
   const feeString = parseNumberToDisplay(txInfo.partialFee, networkJson.decimals) + ` ${networkJson.nativeToken ? networkJson.nativeToken : ''}`;
+  const rawFee = parseRawNumber(txInfo.partialFee.toString());
   const binaryBalance = new BN(balance);
   const balanceError = txInfo.partialFee.gt(binaryBalance);
 
   return {
+    rawFee,
     fee: feeString,
     balanceError
   } as BasicTxInfo;
@@ -384,10 +390,12 @@ export async function handleAstarClaimRewardTxInfo (address: string, networkKey:
     ]);
 
     const feeString = parseNumberToDisplay(txInfo.partialFee, networkJson.decimals) + ` ${networkJson.nativeToken ? networkJson.nativeToken : ''}`;
+    const rawFee = parseRawNumber(txInfo.partialFee.toString());
     const binaryBalance = new BN(balance);
     const balanceError = txInfo.partialFee.gt(binaryBalance);
 
     return {
+      rawFee,
       fee: feeString,
       balanceError
     } as BasicTxInfo;

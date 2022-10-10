@@ -1156,7 +1156,7 @@ export default class KoniState extends State {
 
     // Update crowdloan map
     this.crowdloanMap[networkKey] = itemData;
-    this.updateCrowdloanStore(networkKey, item);
+    this.updateCrowdloanStore(networkKey, itemData);
 
     this.lazyNext('setCrowdloanItem', () => {
       this.publishCrowdloan();

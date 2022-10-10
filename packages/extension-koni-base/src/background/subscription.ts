@@ -37,7 +37,7 @@ export class KoniSubscription {
     this.dbService = dbService;
     this.state = state;
     this.logger = createLogger('Subscription');
-    // this.init();
+    this.init();
   }
 
   getSubscriptionMap () {

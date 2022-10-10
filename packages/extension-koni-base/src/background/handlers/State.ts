@@ -343,6 +343,8 @@ export default class KoniState extends State {
           }
         }
 
+        console.log('init toke state', _evmTokenState);
+
         this.customTokenState = _evmTokenState;
       }
 
@@ -1190,7 +1192,7 @@ export default class KoniState extends State {
     let tokenKey = '';
 
     for (const [key, token] of Object.entries(chainRegistry.tokenMap)) {
-      if (token.erc20Address === tokenData.smartContract) {
+      if (token.contractAddress === tokenData.smartContract) {
         tokenKey = key;
         break;
       }
@@ -1210,7 +1212,7 @@ export default class KoniState extends State {
           isMainToken: false,
           symbol: tokenData.symbol,
           name: tokenData.name,
-          erc20Address: tokenData.smartContract,
+          contractAddress: tokenData.smartContract,
           decimals: tokenData.decimals
         } as TokenInfo;
       } else {
@@ -1219,7 +1221,7 @@ export default class KoniState extends State {
           isMainToken: false,
           symbol: tokenData.symbol,
           name: tokenData.symbol,
-          erc20Address: tokenData.smartContract,
+          contractAddress: tokenData.smartContract,
           decimals: tokenData.decimals
         } as TokenInfo;
       }
@@ -1421,7 +1423,7 @@ export default class KoniState extends State {
           let deleteKey = '';
 
           for (const [key, token] of Object.entries(chainRegistry.tokenMap)) {
-            if (token.erc20Address === targetToken.smartContract && targetToken.type === 'erc20') {
+            if (token.contractAddress === targetToken.smartContract && targetToken.type === 'erc20') {
               deleteKey = key;
             }
           }

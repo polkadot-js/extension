@@ -311,7 +311,7 @@ function SendEvmTransactionConfirmationInfo ({ className, confirmation: { payloa
       let xcmToken: XCMTokenProps | null = null;
 
       for (const token of Object.values(chainRegistry.tokenMap)) {
-        if (token.erc20Address?.toLowerCase() === contract.toLowerCase()) {
+        if (token.contractAddress?.toLowerCase() === contract.toLowerCase()) {
           xcmToken = {
             symbol: token.symbol,
             decimals: token.decimals

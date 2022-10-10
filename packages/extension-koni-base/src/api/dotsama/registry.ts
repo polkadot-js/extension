@@ -41,7 +41,7 @@ export async function getMoonAssets (api: ApiPromise) {
     const valueData = value.toHuman();
     // @ts-ignore
     // eslint-disable-next-line @typescript-eslint/no-unsafe-argument,@typescript-eslint/no-unsafe-assignment
-    const info = { isMainToken: false, name: valueData.name, symbol: formatTokenSymbol(valueData.symbol), decimals: parseInt(valueData.decimals || ' 0'), erc20Address: address, assetId: keyString } as TokenInfo;
+    const info = { isMainToken: false, name: valueData.name, symbol: formatTokenSymbol(valueData.symbol), decimals: parseInt(valueData.decimals || ' 0'), contractAddress: address, assetId: keyString } as TokenInfo;
 
     assetRecord[info.symbol] = info;
   });
@@ -204,7 +204,7 @@ export const getRegistry = async (networkKey: string, api: ApiPromise, customErc
     for (const erc20Token of customErc20Tokens) {
       if (erc20Token.chain === networkKey && erc20Token.symbol && !(erc20Token.symbol in tokenMap)) {
         tokenMap[erc20Token.symbol] = {
-          erc20Address: erc20Token.smartContract,
+          contractAddress: erc20Token.smartContract,
           isMainToken: false,
           name: erc20Token.symbol,
           symbol: erc20Token.symbol,

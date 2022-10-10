@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { CustomToken, CustomTokenType } from '@subwallet/extension-base/background/KoniTypes';
+import { isValidAddress } from '@subwallet/extension-koni-base/utils';
 import { ActionContext, Button, ConfirmationsQueueContext, Dropdown, InputWithLabel } from '@subwallet/extension-koni-ui/components';
 import useGetActiveChains from '@subwallet/extension-koni-ui/hooks/screen/import/useGetActiveChains';
 import useTranslation from '@subwallet/extension-koni-ui/hooks/useTranslation';
@@ -11,7 +12,7 @@ import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import React, { useCallback, useContext, useEffect, useReducer, useState } from 'react';
 import styled from 'styled-components';
 
-import { isEthereumAddress, validateAddress } from '@polkadot/util-crypto';
+import { isEthereumAddress } from '@polkadot/util-crypto';
 
 interface Props extends ThemeProps {
   className?: string;
@@ -72,12 +73,7 @@ function ImportToken ({ className = '' }: Props): React.ReactElement<Props> {
   const externalTokenInfo = currentRequest?.payload; // import from dapp
   const chainOptions = useGetActiveChains();
 
-  // const [contractAddress, setContractAddress] = useState(externalTokenInfo?.smartContract || '');
-  // const [symbol, setSymbol] = useState(externalTokenInfo?.symbol || '');
-  // const [decimals, setDecimals] = useState(externalTokenInfo ? String(externalTokenInfo?.decimals) : '');
-  // const [chain, setChain] = useState(externalTokenInfo?.chain || chainOptions[0].value || '');
-
-  const [tokenInfo, dispatchTokenInfo] = useReducer(tokenInfoReducer, externalTokenInfo || initTokenInfo);
+  const [tokenInfo, dispatchTokenInfo] = useReducer(tokenInfoReducer, externalTokenInfo || { ...initTokenInfo, chain: chainOptions[0].value || '' });
 
   const [isValidDecimals, setIsValidDecimals] = useState(true);
   const [isValidContract, setIsValidContract] = useState(true);
@@ -86,27 +82,35 @@ function ImportToken ({ className = '' }: Props): React.ReactElement<Props> {
 
   const onChangeContractAddress = useCallback((val: string) => {
     setWarning('');
-    dispatchTokenInfo({ type: TokenInfoActionType.UPDATE_CONTRACT, payload: val.toLowerCase() });
-    // setContractAddress(val.toLowerCase());
+    dispatchTokenInfo({ type: TokenInfoActionType.UPDATE_CONTRACT, payload: val }); // ss58 address is case-sensitive but ETH address is not
   }, []);
-
-  console.log(validateAddress('5HbcGs2QXVAc6Q6eoTzLYNAJWpN17AkCFRLnWDaHCiGYXvNc'));
 
   useEffect(() => {
     if (tokenInfo.smartContract !== '') {
-      if (!isEthereumAddress(tokenInfo.smartContract)) {
+      let tokenType; // set token type
+
+      // TODO: this should be done manually by user when there are more token standards
+      if (isEthereumAddress(tokenInfo.smartContract)) {
+        tokenType = CustomTokenType.erc20;
+      } else if (isValidAddress(tokenInfo.smartContract)) {
+        tokenType = CustomTokenType.psp22;
+      }
+
+      if (!tokenType) { // if not valid EVM contract or WASM contract
         setIsValidContract(false);
         dispatchTokenInfo({ type: TokenInfoActionType.UPDATE_METADATA, payload: { symbol: '', decimals: '' } });
-        // setSymbol('');
-        // setDecimals('');
-        setWarning('Invalid EVM contract address');
+        setWarning('Invalid contract address');
       } else {
+        console.log('contract ok, validate token', tokenType, tokenInfo.chain);
+
         validateCustomToken({
           smartContract: tokenInfo.smartContract,
           chain: tokenInfo.chain,
-          type: CustomTokenType.erc20 // TODO: check type of token
+          type: tokenType
         })
           .then((resp) => {
+            console.log('resp', resp);
+
             if (resp.isExist) {
               setWarning('This token has already been added');
               setIsValidContract(false);
@@ -115,11 +119,8 @@ function ImportToken ({ className = '' }: Props): React.ReactElement<Props> {
                 setWarning('This token has already been added');
                 setIsValidContract(false);
               } else {
-                // setSymbol(resp.symbol);
-
                 if (resp.decimals) {
                   dispatchTokenInfo({ type: TokenInfoActionType.UPDATE_METADATA, payload: { symbol: resp.symbol, decimals: resp.decimals } });
-                  // setDecimals(resp.decimals.toString());
                 } else {
                   dispatchTokenInfo({ type: TokenInfoActionType.UPDATE_METADATA, payload: { symbol: resp.symbol } });
                 }
@@ -147,7 +148,6 @@ function ImportToken ({ className = '' }: Props): React.ReactElement<Props> {
     }
 
     dispatchTokenInfo({ type: TokenInfoActionType.UPDATE_METADATA, payload: { symbol: val } });
-    // setSymbol(val);
   }, []);
 
   const onChangeDecimals = useCallback((val: string) => {
@@ -161,7 +161,6 @@ function ImportToken ({ className = '' }: Props): React.ReactElement<Props> {
     }
 
     dispatchTokenInfo({ type: TokenInfoActionType.UPDATE_METADATA, payload: { decimals: _decimals } });
-    // setDecimals(val);
   }, []);
 
   const onSelectChain = useCallback((val: any) => {
@@ -170,7 +169,6 @@ function ImportToken ({ className = '' }: Props): React.ReactElement<Props> {
     setWarning('');
 
     dispatchTokenInfo({ type: TokenInfoActionType.UPDATE_CHAIN, payload: { chain: _chain } });
-    // setChain(_chain);
   }, []);
 
   const onAction = useContext(ActionContext);

@@ -14,7 +14,7 @@ export default function useGetActiveChains () {
   const result: ChainOptions[] = [];
 
   for (const [key, network] of Object.entries(networkMap)) {
-    if (network.active) {
+    if (network.active && key !== 'polkadot' && key !== 'kusama') {
       result.push({
         text: network.chain,
         value: key

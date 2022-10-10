@@ -2,47 +2,253 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import Common from '@ethereumjs/common';
-import Extension, { SEED_DEFAULT_LENGTH, SEED_LENGTHS } from '@subwallet/extension-base/background/handlers/Extension';
-import { AuthUrls } from '@subwallet/extension-base/background/handlers/State';
-import { createSubscription, isSubscriptionRunning, unsubscribe } from '@subwallet/extension-base/background/handlers/subscriptions';
-import { AccountExternalError, AccountExternalErrorCode, AccountsWithCurrentAddress, ApiProps, BalanceJson, BaseTxError, BasicTxError, BasicTxErrorCode, BasicTxInfo, BasicTxResponse, BondingOptionInfo, BondingOptionParams, BondingSubmitParams, ChainBondingBasics, ChainRegistry, CheckExistingTuringCompoundParams, CrowdloanJson, CurrentAccountInfo, CustomToken, CustomTokenJson, CustomTokenType, DelegationItem, DeleteEvmTokenParams, DisableNetworkResponse, EvmNftSubmitTransaction, EvmNftTransaction, EvmNftTransactionRequest, ExistingTuringCompoundTask, ExternalRequestPromise, ExternalRequestPromiseStatus, NETWORK_ERROR, NetWorkGroup, NetworkJson, NftCollection, NftJson, NftTransactionResponse, NftTransferExtra, OptionInputAddress, PriceJson, RequestAccountCreateExternalV2, RequestAccountCreateHardwareV2, RequestAccountCreateSuriV2, RequestAccountExportPrivateKey, RequestAccountMeta, RequestAuthorization, RequestAuthorizationBlock, RequestAuthorizationPerAccount, RequestAuthorizationPerSite, RequestAuthorizeApproveV2, RequestBatchRestoreV2, RequestCheckCrossChainTransfer, RequestCheckTransfer, RequestConfirmationComplete, RequestCrossChainTransfer, RequestCrossChainTransferExternal, RequestDeriveCreateV2, RequestForgetSite, RequestFreeBalance, RequestJsonRestoreV2, RequestNftForceUpdate, RequestNftTransferExternalEVM, RequestNftTransferExternalSubstrate, RequestParseEVMTransactionInput, RequestParseTransactionEVM, RequestQrSignEVM, RequestRejectExternalRequest, RequestResolveExternalRequest, RequestSaveRecentAccount, RequestSeedCreateV2, RequestSeedValidateV2, RequestSettingsType, RequestStakeExternal, RequestTransactionHistoryAdd, RequestTransfer, RequestTransferCheckReferenceCount, RequestTransferCheckSupporting, RequestTransferExistentialDeposit, RequestTransferExternal, RequestUnStakeExternal, RequestWithdrawStakeExternal, ResponseAccountCreateSuriV2, ResponseAccountExportPrivateKey, ResponseAccountMeta, ResponseCheckCrossChainTransfer, ResponseCheckTransfer, ResponseParseEVMTransactionInput, ResponseParseTransactionEVM, ResponsePrivateKeyValidateV2, ResponseQrSignEVM, ResponseRejectExternalRequest, ResponseResolveExternalRequest, ResponseSeedCreateV2, ResponseSeedValidateV2, ResponseTransfer, StakeClaimRewardParams, StakeDelegationRequest, StakeUnlockingJson, StakeWithdrawalParams, StakingJson, StakingRewardJson, SubstrateNftSubmitTransaction, SubstrateNftTransaction, SubstrateNftTransactionRequest, SupportTransferResponse, ThemeTypes, TokenInfo, TransactionHistoryItemType, TransferError, TransferErrorCode, TransferStep, TuringCancelStakeCompoundParams, TuringStakeCompoundParams, UnbondingSubmitParams, ValidateEvmTokenRequest, ValidateEvmTokenResponse, ValidateNetworkRequest, ValidateNetworkResponse } from '@subwallet/extension-base/background/KoniTypes';
-import { AccountJson, AuthorizeRequest, MessageTypes, RequestAccountForget, RequestAccountTie, RequestAuthorizeCancel, RequestAuthorizeReject, RequestCurrentAccountAddress, RequestParseTransactionSubstrate, RequestTypes, ResponseAuthorizeList, ResponseParseTransactionSubstrate, ResponseType } from '@subwallet/extension-base/background/types';
-import { getId } from '@subwallet/extension-base/utils/getId';
-import { getBondingExtrinsic, getBondingTxInfo, getChainBondingBasics, getClaimRewardExtrinsic, getClaimRewardTxInfo, getDelegationInfo, getUnbondingExtrinsic, getUnbondingTxInfo, getValidatorsInfo, getWithdrawalExtrinsic, getWithdrawalTxInfo } from '@subwallet/extension-koni-base/api/bonding';
-import { checkTuringStakeCompoundingTask, getTuringCancelCompoundingExtrinsic, getTuringCompoundExtrinsic, handleTuringCancelCompoundTxInfo, handleTuringCompoundTxInfo } from '@subwallet/extension-koni-base/api/bonding/paraChain';
-import { initApi } from '@subwallet/extension-koni-base/api/dotsama';
-import { getFreeBalance, subscribeFreeBalance } from '@subwallet/extension-koni-base/api/dotsama/balance';
-import { createStakeLedger, createStakeQr, createUnStakeLedger, createUnStakeQr, createWithdrawStakeLedger, createWithdrawStakeQr } from '@subwallet/extension-koni-base/api/dotsama/external/stake';
-import { makeCrossChainTransferLedger, makeCrossChainTransferQr, makeNftTransferLedger, makeNftTransferQr, makeTransferLedger, makeTransferQr } from '@subwallet/extension-koni-base/api/dotsama/external/transfer';
-import { parseSubstratePayload } from '@subwallet/extension-koni-base/api/dotsama/parseSubstratePayload';
-import { getTokenInfo } from '@subwallet/extension-koni-base/api/dotsama/registry';
-import { checkReferenceCount, checkSupportTransfer, estimateFee, getExistentialDeposit, makeTransfer } from '@subwallet/extension-koni-base/api/dotsama/transfer';
-import { SUPPORTED_TRANSFER_SUBSTRATE_CHAIN_NAME } from '@subwallet/extension-koni-base/api/nft/config';
-import { acalaTransferHandler, getNftTransferExtrinsic, isRecipientSelf, quartzTransferHandler, rmrkTransferHandler, statemineTransferHandler, uniqueTransferHandler, unlockAccount } from '@subwallet/extension-koni-base/api/nft/transfer';
-import { validateCustomToken } from '@subwallet/extension-koni-base/api/tokens';
-import { parseEVMTransaction, parseTransactionData } from '@subwallet/extension-koni-base/api/tokens/evm/parseEVMTransaction';
-import { getERC20TransactionObject, getEVMTransactionObject, makeERC20Transfer, makeEVMTransfer } from '@subwallet/extension-koni-base/api/tokens/evm/transfer';
-import { handleTransferNftQr, makeERC20TransferQr, makeEVMTransferQr } from '@subwallet/extension-koni-base/api/tokens/evm/transferQr';
-import { ERC721Contract, initWeb3Api } from '@subwallet/extension-koni-base/api/tokens/evm/web3';
-import { estimateCrossChainFee, makeCrossChainTransfer } from '@subwallet/extension-koni-base/api/xcm';
-import { state } from '@subwallet/extension-koni-base/background/handlers/index';
-import { ALL_ACCOUNT_KEY, ALL_GENESIS_HASH } from '@subwallet/extension-koni-base/constants';
-import { getCurrentProvider, isValidProvider, reformatAddress } from '@subwallet/extension-koni-base/utils';
-import { createTransactionFromRLP, signatureToHex, Transaction as QrTransaction } from '@subwallet/extension-koni-base/utils/eth';
+import Extension, {SEED_DEFAULT_LENGTH, SEED_LENGTHS} from '@subwallet/extension-base/background/handlers/Extension';
+import {AuthUrls} from '@subwallet/extension-base/background/handlers/State';
+import {
+  createSubscription,
+  isSubscriptionRunning,
+  unsubscribe
+} from '@subwallet/extension-base/background/handlers/subscriptions';
+import {
+  AccountExternalError,
+  AccountExternalErrorCode,
+  AccountsWithCurrentAddress,
+  ApiProps,
+  BalanceJson,
+  BaseTxError,
+  BasicTxError,
+  BasicTxErrorCode,
+  BasicTxInfo,
+  BasicTxResponse,
+  BondingOptionInfo,
+  BondingOptionParams,
+  BondingSubmitParams,
+  ChainBondingBasics,
+  ChainRegistry,
+  CheckExistingTuringCompoundParams,
+  CrowdloanJson,
+  CurrentAccountInfo,
+  CustomToken,
+  CustomTokenJson,
+  CustomTokenType,
+  DelegationItem,
+  DeleteEvmTokenParams,
+  DisableNetworkResponse,
+  EvmNftSubmitTransaction,
+  EvmNftTransaction,
+  EvmNftTransactionRequest,
+  ExistingTuringCompoundTask,
+  ExternalRequestPromise,
+  ExternalRequestPromiseStatus,
+  NETWORK_ERROR,
+  NetWorkGroup,
+  NetworkJson,
+  NftCollection,
+  NftJson,
+  NftTransactionResponse,
+  NftTransferExtra,
+  OptionInputAddress,
+  PriceJson,
+  RequestAccountCreateExternalV2,
+  RequestAccountCreateHardwareV2,
+  RequestAccountCreateSuriV2,
+  RequestAccountExportPrivateKey,
+  RequestAccountMeta,
+  RequestAuthorization,
+  RequestAuthorizationBlock,
+  RequestAuthorizationPerAccount,
+  RequestAuthorizationPerSite,
+  RequestAuthorizeApproveV2,
+  RequestBatchRestoreV2,
+  RequestCheckCrossChainTransfer,
+  RequestCheckTransfer,
+  RequestConfirmationComplete,
+  RequestCrossChainTransfer,
+  RequestCrossChainTransferExternal,
+  RequestDeriveCreateV2,
+  RequestForgetSite,
+  RequestFreeBalance,
+  RequestJsonRestoreV2,
+  RequestNftForceUpdate,
+  RequestNftTransferExternalEVM,
+  RequestNftTransferExternalSubstrate,
+  RequestParseEVMTransactionInput,
+  RequestParseTransactionEVM,
+  RequestQrSignEVM,
+  RequestRejectExternalRequest,
+  RequestResolveExternalRequest,
+  RequestSaveRecentAccount,
+  RequestSeedCreateV2,
+  RequestSeedValidateV2,
+  RequestSettingsType,
+  RequestStakeExternal,
+  RequestTransactionHistoryAdd,
+  RequestTransfer,
+  RequestTransferCheckReferenceCount,
+  RequestTransferCheckSupporting,
+  RequestTransferExistentialDeposit,
+  RequestTransferExternal,
+  RequestUnStakeExternal,
+  RequestWithdrawStakeExternal,
+  ResponseAccountCreateSuriV2,
+  ResponseAccountExportPrivateKey,
+  ResponseAccountMeta,
+  ResponseCheckCrossChainTransfer,
+  ResponseCheckTransfer,
+  ResponseParseEVMTransactionInput,
+  ResponseParseTransactionEVM,
+  ResponsePrivateKeyValidateV2,
+  ResponseQrSignEVM,
+  ResponseRejectExternalRequest,
+  ResponseResolveExternalRequest,
+  ResponseSeedCreateV2,
+  ResponseSeedValidateV2,
+  ResponseTransfer,
+  StakeClaimRewardParams,
+  StakeDelegationRequest,
+  StakeUnlockingJson,
+  StakeWithdrawalParams,
+  StakingJson,
+  StakingRewardJson,
+  SubstrateNftSubmitTransaction,
+  SubstrateNftTransaction,
+  SubstrateNftTransactionRequest,
+  SupportTransferResponse,
+  ThemeTypes,
+  TokenInfo,
+  TransactionHistoryItemType,
+  TransferError,
+  TransferErrorCode,
+  TransferStep,
+  TuringCancelStakeCompoundParams,
+  TuringStakeCompoundParams,
+  UnbondingSubmitParams,
+  ValidateEvmTokenRequest,
+  ValidateEvmTokenResponse,
+  ValidateNetworkRequest,
+  ValidateNetworkResponse
+} from '@subwallet/extension-base/background/KoniTypes';
+import {
+  AccountJson,
+  AuthorizeRequest,
+  MessageTypes,
+  RequestAccountForget,
+  RequestAccountTie,
+  RequestAuthorizeCancel,
+  RequestAuthorizeReject,
+  RequestCurrentAccountAddress,
+  RequestParseTransactionSubstrate,
+  RequestTypes,
+  ResponseAuthorizeList,
+  ResponseParseTransactionSubstrate,
+  ResponseType
+} from '@subwallet/extension-base/background/types';
+import {getId} from '@subwallet/extension-base/utils/getId';
+import {
+  getBondingExtrinsic,
+  getBondingTxInfo,
+  getChainBondingBasics,
+  getClaimRewardExtrinsic,
+  getClaimRewardTxInfo,
+  getDelegationInfo,
+  getUnbondingExtrinsic,
+  getUnbondingTxInfo,
+  getValidatorsInfo,
+  getWithdrawalExtrinsic,
+  getWithdrawalTxInfo
+} from '@subwallet/extension-koni-base/api/bonding';
+import {
+  checkTuringStakeCompoundingTask,
+  getTuringCancelCompoundingExtrinsic,
+  getTuringCompoundExtrinsic,
+  handleTuringCancelCompoundTxInfo,
+  handleTuringCompoundTxInfo
+} from '@subwallet/extension-koni-base/api/bonding/paraChain';
+import {initApi} from '@subwallet/extension-koni-base/api/dotsama';
+import {getFreeBalance, subscribeFreeBalance} from '@subwallet/extension-koni-base/api/dotsama/balance';
+import {
+  createStakeLedger,
+  createStakeQr,
+  createUnStakeLedger,
+  createUnStakeQr,
+  createWithdrawStakeLedger,
+  createWithdrawStakeQr
+} from '@subwallet/extension-koni-base/api/dotsama/external/stake';
+import {
+  makeCrossChainTransferLedger,
+  makeCrossChainTransferQr,
+  makeNftTransferLedger,
+  makeNftTransferQr,
+  makeTransferLedger,
+  makeTransferQr
+} from '@subwallet/extension-koni-base/api/dotsama/external/transfer';
+import {parseSubstratePayload} from '@subwallet/extension-koni-base/api/dotsama/parseSubstratePayload';
+import {getTokenInfo} from '@subwallet/extension-koni-base/api/dotsama/registry';
+import {
+  checkReferenceCount,
+  checkSupportTransfer,
+  estimateFee,
+  getExistentialDeposit,
+  makeTransfer
+} from '@subwallet/extension-koni-base/api/dotsama/transfer';
+import {SUPPORTED_TRANSFER_SUBSTRATE_CHAIN_NAME} from '@subwallet/extension-koni-base/api/nft/config';
+import {
+  acalaTransferHandler,
+  getNftTransferExtrinsic,
+  isRecipientSelf,
+  quartzTransferHandler,
+  rmrkTransferHandler,
+  statemineTransferHandler,
+  uniqueTransferHandler,
+  unlockAccount
+} from '@subwallet/extension-koni-base/api/nft/transfer';
+import {validateCustomToken} from '@subwallet/extension-koni-base/api/tokens';
+import {
+  parseEVMTransaction,
+  parseTransactionData
+} from '@subwallet/extension-koni-base/api/tokens/evm/parseEVMTransaction';
+import {
+  getERC20TransactionObject,
+  getEVMTransactionObject,
+  makeERC20Transfer,
+  makeEVMTransfer
+} from '@subwallet/extension-koni-base/api/tokens/evm/transfer';
+import {
+  handleTransferNftQr,
+  makeERC20TransferQr,
+  makeEVMTransferQr
+} from '@subwallet/extension-koni-base/api/tokens/evm/transferQr';
+import {ERC721Contract, initWeb3Api} from '@subwallet/extension-koni-base/api/tokens/evm/web3';
+import {estimateCrossChainFee, makeCrossChainTransfer} from '@subwallet/extension-koni-base/api/xcm';
+import {state} from '@subwallet/extension-koni-base/background/handlers/index';
+import {ALL_ACCOUNT_KEY, ALL_GENESIS_HASH} from '@subwallet/extension-koni-base/constants';
+import {getCurrentProvider, isValidProvider, reformatAddress} from '@subwallet/extension-koni-base/utils';
+import {
+  createTransactionFromRLP,
+  signatureToHex,
+  Transaction as QrTransaction
+} from '@subwallet/extension-koni-base/utils/eth';
 import BigN from 'bignumber.js';
-import { Transaction } from 'ethereumjs-tx';
+import {Transaction} from 'ethereumjs-tx';
 import Web3 from 'web3';
-import { SignedTransaction as Web3SignedTransaction, TransactionConfig } from 'web3-core';
+import {SignedTransaction as Web3SignedTransaction, TransactionConfig} from 'web3-core';
 
-import { createPair } from '@polkadot/keyring';
-import { KeyringPair, KeyringPair$Json, KeyringPair$Meta } from '@polkadot/keyring/types';
-import { ChainType } from '@polkadot/types/interfaces';
-import { keyring } from '@polkadot/ui-keyring';
-import { accounts as accountsObservable } from '@polkadot/ui-keyring/observable/accounts';
-import { SingleAddress, SubjectInfo } from '@polkadot/ui-keyring/observable/types';
-import { assert, BN, hexToU8a, isAscii, isHex, u8aToString } from '@polkadot/util';
-import { base64Decode, isEthereumAddress, jsonDecrypt, keyExtractSuri, mnemonicGenerate, mnemonicValidate } from '@polkadot/util-crypto';
-import { EncryptedJson, KeypairType, Prefix } from '@polkadot/util-crypto/types';
+import {createPair} from '@polkadot/keyring';
+import {KeyringPair, KeyringPair$Json, KeyringPair$Meta} from '@polkadot/keyring/types';
+import {ChainType} from '@polkadot/types/interfaces';
+import {keyring} from '@polkadot/ui-keyring';
+import {accounts as accountsObservable} from '@polkadot/ui-keyring/observable/accounts';
+import {SingleAddress, SubjectInfo} from '@polkadot/ui-keyring/observable/types';
+import {assert, BN, hexToU8a, isAscii, isHex, u8aToString} from '@polkadot/util';
+import {
+  base64Decode,
+  isEthereumAddress,
+  jsonDecrypt,
+  keyExtractSuri,
+  mnemonicGenerate,
+  mnemonicValidate
+} from '@polkadot/util-crypto';
+import {EncryptedJson, KeypairType, Prefix} from '@polkadot/util-crypto/types';
 
 const ETH_DERIVE_DEFAULT = '/m/44\'/60\'/0\'/0/0';
 
@@ -1137,7 +1343,7 @@ export default class KoniExtension extends Extension {
         });
       }
 
-      if (isEthereumAddress(from) && isEthereumAddress(to) && !tokenInfo?.isMainToken && !(tokenInfo?.erc20Address)) {
+      if (isEthereumAddress(from) && isEthereumAddress(to) && !tokenInfo?.isMainToken && !(tokenInfo?.contractAddress)) {
         errors.push({
           code: TransferErrorCode.INVALID_TOKEN,
           message: 'Not found ERC20 address for this token'
@@ -1172,8 +1378,8 @@ export default class KoniExtension extends Extension {
       const txVal: string = transferAll ? fromAccountFree : (value || '0');
 
       // Estimate with EVM API
-      if (tokenInfo && !tokenInfo.isMainToken && tokenInfo.erc20Address) {
-        [, , fee] = await getERC20TransactionObject(tokenInfo.erc20Address, networkKey, from, to, txVal, !!transferAll, web3ApiMap);
+      if (tokenInfo && !tokenInfo.isMainToken && tokenInfo.contractAddress) {
+        [, , fee] = await getERC20TransactionObject(tokenInfo.contractAddress, networkKey, from, to, txVal, !!transferAll, web3ApiMap);
       } else {
         [, , fee] = await getEVMTransactionObject(networkKey, to, txVal, !!transferAll, web3ApiMap);
       }
@@ -1398,9 +1604,9 @@ export default class KoniExtension extends Extension {
         const { privateKey } = this.accountExportPrivateKey({ address: from, password });
         const web3ApiMap = state.getApiMap().web3;
 
-        if (tokenInfo && !tokenInfo.isMainToken && tokenInfo.erc20Address) {
+        if (tokenInfo && !tokenInfo.isMainToken && tokenInfo.contractAddress) {
           transferProm = makeERC20Transfer(
-            tokenInfo.erc20Address, networkKey, from, to, privateKey, value || '0', !!transferAll, web3ApiMap,
+            tokenInfo.contractAddress, networkKey, from, to, privateKey, value || '0', !!transferAll, web3ApiMap,
             this.makeTransferCallback(from, to, networkKey, token, cb)
           );
         } else {
@@ -1987,7 +2193,10 @@ export default class KoniExtension extends Extension {
     const customTokenState = state.getCustomTokenState();
     let isExist = false;
 
-    // check exist in evmTokenState
+
+    console.log('customTokenState[data.type]', customTokenState, customTokenState[data.type]);
+
+    // check exist in customTokenState
     for (const token of customTokenState[data.type]) {
       if (token.smartContract.toLowerCase() === data.smartContract.toLowerCase() && token.type === data.type && token.chain === data.chain && !token.isDeleted) {
         isExist = true;
@@ -1996,12 +2205,12 @@ export default class KoniExtension extends Extension {
     }
 
     // check exist in chainRegistry
-    if (!isExist && data.type === CustomTokenType.erc20) {
+    if (!isExist && (data.type === CustomTokenType.erc20 || data.type === CustomTokenType.psp22)) {
       const chainRegistryMap = state.getChainRegistryMap();
       const tokenMap = chainRegistryMap[data.chain].tokenMap;
 
       for (const token of Object.values(tokenMap)) {
-        if (token?.erc20Address?.toLowerCase() === data.smartContract.toLowerCase()) {
+        if (token?.contractAddress?.toLowerCase() === data.smartContract.toLowerCase()) {
           isExist = true;
           break;
         }
@@ -2363,7 +2572,7 @@ export default class KoniExtension extends Extension {
         });
       }
 
-      if (isEthereumAddress(from) && isEthereumAddress(to) && !tokenInfo?.isMainToken && !(tokenInfo?.erc20Address)) {
+      if (isEthereumAddress(from) && isEthereumAddress(to) && !tokenInfo?.isMainToken && !(tokenInfo?.contractAddress)) {
         errors.push({
           code: TransferErrorCode.INVALID_TOKEN,
           message: 'Not found ERC20 address for this token'
@@ -2454,10 +2663,10 @@ export default class KoniExtension extends Extension {
         const web3ApiMap = state.getApiMap().web3;
         const chainId = state.getNetworkMap()[networkKey].evmChainId || 1;
 
-        if (tokenInfo && !tokenInfo.isMainToken && tokenInfo.erc20Address) {
+        if (tokenInfo && !tokenInfo.isMainToken && tokenInfo.contractAddress) {
           transferProm = makeERC20TransferQr(
             {
-              assetAddress: tokenInfo.erc20Address,
+              assetAddress: tokenInfo.contractAddress,
               callback,
               chainId,
               from,

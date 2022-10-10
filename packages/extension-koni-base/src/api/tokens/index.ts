@@ -9,6 +9,7 @@ export async function validateCustomToken (contractAddress: string, tokenType: C
   if ((tokenType === CustomTokenType.erc20 || tokenType === CustomTokenType.erc721) && web3 !== undefined) {
     return await validateEvmToken(contractAddress, tokenType, web3);
   } else if ((tokenType === CustomTokenType.psp22 || tokenType === CustomTokenType.psp34) && apiProps !== undefined) {
+    console.log('got into here');
     // TODO: validate psp22 and psp34
 
     return { decimals: 12, symbol: 'TEST', name: 'tokenTest' };

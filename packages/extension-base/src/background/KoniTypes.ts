@@ -381,13 +381,15 @@ export type TokenInfo = {
   isMainToken: boolean,
   symbol: string,
   symbolAlt?: string, // Alternate display for symbol
-  erc20Address?: string,
-  assetIndex?: number | string,
+  contractAddress?: string,
+  type?: CustomTokenType, // to differentiate custom tokens from native tokens
   decimals: number,
   name: string,
   coinGeckoKey?: string,
+  // TODO: unify specialOption, assetId, assetIndex
   specialOption?: object,
-  assetId?: string // for moon assets
+  assetId?: string, // for moon assets
+  assetIndex?: number | string,
 }
 
 // all Accounts and the address of the current Account

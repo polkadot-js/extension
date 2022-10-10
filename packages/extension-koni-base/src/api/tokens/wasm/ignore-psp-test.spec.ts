@@ -4,7 +4,7 @@
 import { PREDEFINED_NETWORKS } from '@subwallet/extension-koni-base/api/predefinedNetworks';
 import { PSP22Contract } from '@subwallet/extension-koni-base/api/tokens/wasm/helper';
 import { DOTSAMA_AUTO_CONNECT_MS } from '@subwallet/extension-koni-base/constants';
-import { getCurrentProvider } from '@subwallet/extension-koni-base/utils';
+import {getCurrentProvider, isValidAddress} from '@subwallet/extension-koni-base/utils';
 
 import { ApiPromise, WsProvider } from '@polkadot/api';
 import { ContractPromise } from '@polkadot/api-contract';
@@ -100,5 +100,11 @@ describe('test DotSama APIs', () => {
     console.log('megaGas', megaGas.toNumber());
     console.log('weight', weight.toNumber());
     console.log(executionTime);
+  });
+
+  test('validate contract', () => {
+    const resp = isValidAddress('5HbcGs2QXVAc6Q6eoTzLYNAJWpN17AkCFRLnWDaHCiGYXvNc');
+
+    console.log('resp', resp);
   });
 });

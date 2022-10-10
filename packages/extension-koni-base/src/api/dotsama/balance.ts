@@ -91,9 +91,9 @@ function subscribeERC20Interval (addresses: string[], networkKey: string, api: A
 
   getRegistry(networkKey, api, state.getActiveErc20Tokens()).then(({ tokenMap }) => {
     tokenList = Object.values(tokenMap).filter(({ erc20Address }) => (!!erc20Address));
-    tokenList.forEach(({ erc20Address, symbol }) => {
-      if (erc20Address) {
-        ERC20ContractMap[symbol] = getERC20Contract(networkKey, erc20Address, web3ApiMap);
+    tokenList.forEach(({ contractAddress, symbol }) => {
+      if (contractAddress) {
+        ERC20ContractMap[symbol] = getERC20Contract(networkKey, contractAddress, web3ApiMap);
       }
     });
     getTokenBalances();
@@ -508,11 +508,11 @@ export async function getFreeBalance (networkKey: string, address: string, dotSa
     if (isMainToken) {
       return await web3Api?.eth.getBalance(address) || '0';
     } else {
-      if (!tokenInfo?.erc20Address) {
+      if (!tokenInfo?.contractAddress) {
         return '0';
       }
 
-      const contract = getERC20Contract(networkKey, tokenInfo.erc20Address, web3ApiMap);
+      const contract = getERC20Contract(networkKey, tokenInfo.contractAddress, web3ApiMap);
       // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment,@typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-member-access
       const free = await contract.methods.balanceOf(address).call();
 
@@ -593,11 +593,11 @@ export async function subscribeFreeBalance (
       return responseIntervalSubscription(getEvmMainBalance);
     } else {
       const getERC20FreeBalance = () => {
-        if (!tokenInfo?.erc20Address) {
+        if (!tokenInfo?.contractAddress) {
           return;
         }
 
-        const contract = getERC20Contract(networkKey, tokenInfo.erc20Address, web3ApiMap);
+        const contract = getERC20Contract(networkKey, tokenInfo.contractAddress, web3ApiMap);
 
         // @ts-ignore
         // eslint-disable-next-line @typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-member-access

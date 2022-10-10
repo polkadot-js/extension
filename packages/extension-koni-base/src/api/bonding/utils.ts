@@ -58,6 +58,12 @@ export const PARACHAIN_INFLATION_DISTRIBUTION: Record<string, Record<string, num
   },
   bifrost: {
     reward: 0
+  },
+  bifrost_testnet: {
+    reward: 0
+  },
+  default: {
+    reward: 0
   }
 };
 

@@ -1113,7 +1113,8 @@ export interface ChainBondingBasics {
 
 export interface BasicTxInfo {
   fee: string,
-  balanceError: boolean
+  balanceError: boolean,
+  rawFee?: number
 }
 
 export interface BondingSubmitParams {
@@ -1320,7 +1321,8 @@ export interface TuringStakeCompoundResp {
   txInfo: BasicTxInfo,
   optimalFrequency: string,
   initTime: number,
-  compoundFee: string
+  compoundFee: string,
+  rawCompoundFee?: number
 }
 
 export interface TransakNetwork {

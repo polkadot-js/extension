@@ -64,7 +64,7 @@ export async function getParaBondingBasics (networkKey: string, dotSamaApi: ApiP
 
   const inflationConfig = _inflation.toHuman() as unknown as InflationConfig;
   const currentInflation = getParaCurrentInflation(totalStake, inflationConfig);
-  const rewardPool = currentInflation * PARACHAIN_INFLATION_DISTRIBUTION[networkKey].reward;
+  const rewardPool = currentInflation * (PARACHAIN_INFLATION_DISTRIBUTION[networkKey].reward || PARACHAIN_INFLATION_DISTRIBUTION.default.reward);
 
   const stakedReturn = calculateChainStakedReturn(rewardPool, totalStake, totalIssuance, networkKey);
 
@@ -301,12 +301,14 @@ export async function handleParaBondingTxInfo (networkJson: NetworkJson, amount:
     ]);
 
     const feeString = parseNumberToDisplay(txInfo.partialFee, networkJson.decimals) + ` ${networkJson.nativeToken ? networkJson.nativeToken : ''}`;
+    const rawFee = parseRawNumber(txInfo.partialFee.toString());
     const binaryBalance = new BN(balance);
 
     const sumAmount = txInfo.partialFee.addn(amount);
     const balanceError = sumAmount.gt(binaryBalance);
 
     return {
+      rawFee,
       fee: feeString,
       balanceError
     } as BasicTxInfo;
@@ -342,11 +344,13 @@ export async function handleParaUnbondingTxInfo (address: string, amount: number
     ]);
 
     const feeString = parseNumberToDisplay(txInfo.partialFee, networkJson.decimals) + ` ${networkJson.nativeToken ? networkJson.nativeToken : ''}`;
+    const rawFee = parseRawNumber(txInfo.partialFee.toString());
     const binaryBalance = new BN(balance);
 
     const balanceError = txInfo.partialFee.gt(binaryBalance);
 
     return {
+      rawFee,
       fee: feeString,
       balanceError
     } as BasicTxInfo;
@@ -507,10 +511,12 @@ export async function handleParaWithdrawalTxInfo (networkKey: string, networkJso
     ]);
 
     const feeString = parseNumberToDisplay(txInfo.partialFee, networkJson.decimals) + ` ${networkJson.nativeToken ? networkJson.nativeToken : ''}`;
+    const rawFee = parseRawNumber(txInfo.partialFee.toString());
     const binaryBalance = new BN(balance);
     const balanceError = txInfo.partialFee.gt(binaryBalance);
 
     return {
+      rawFee,
       fee: feeString,
       balanceError
     } as BasicTxInfo;
@@ -831,11 +837,14 @@ export async function handleTuringCompoundTxInfo (networkKey: string, networkJso
   ]);
 
   const feeString = parseNumberToDisplay(txInfo.paymentInfo.partialFee, networkJson.decimals) + ` ${networkJson.nativeToken ? networkJson.nativeToken : ''}`;
+  const rawFee = parseRawNumber(txInfo.paymentInfo.toString());
   const binaryBalance = new BN(balance);
   const totalFee = txInfo.paymentInfo.partialFee.add(txInfo.bnCompoundFee);
+  const rawCompoundFee = parseRawNumber(txInfo.bnCompoundFee.toString());
   const balanceError = totalFee.gt(binaryBalance);
 
   const basicTxInfo: BasicTxInfo = {
+    rawFee,
     fee: feeString,
     balanceError
   };
@@ -844,7 +853,8 @@ export async function handleTuringCompoundTxInfo (networkKey: string, networkJso
     txInfo: basicTxInfo,
     optimalFrequency: txInfo.optimalTime,
     initTime: txInfo.initTime,
-    compoundFee: txInfo.compoundFee
+    compoundFee: txInfo.compoundFee,
+    rawCompoundFee
   } as TuringStakeCompoundResp;
 }
 
@@ -915,10 +925,12 @@ export async function handleTuringCancelCompoundTxInfo (dotSamaApiMap: Record<st
   ]);
 
   const feeString = parseNumberToDisplay(paymentInfo.partialFee, networkJson.decimals) + ` ${networkJson.nativeToken ? networkJson.nativeToken : ''}`;
+  const rawFee = parseRawNumber(paymentInfo.partialFee.toString());
   const binaryBalance = new BN(balance);
   const balanceError = paymentInfo.partialFee.gt(binaryBalance);
 
   const basicTxInfo: BasicTxInfo = {
+    rawFee,
     fee: feeString,
     balanceError
   };

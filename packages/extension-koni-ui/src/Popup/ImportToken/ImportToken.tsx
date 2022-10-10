@@ -37,9 +37,31 @@ const initTokenInfo: CustomToken = {
 };
 
 function tokenInfoReducer (state: CustomToken, action: TokenInfoAction) {
-  // TODO: update logic
+  switch (action.type) {
+    case TokenInfoActionType.UPDATE_CHAIN:
+      return {
+        ...state,
+        chain: action.payload as string
+      } as CustomToken;
+    case TokenInfoActionType.UPDATE_CONTRACT:
+      return {
+        ...state,
+        smartContract: action.payload as string
+      };
 
-  return state;
+    case TokenInfoActionType.UPDATE_METADATA: {
+      const payload = action.payload as Record<string, any>;
+
+      return {
+        ...state,
+        symbol: payload.symbol as string || state.symbol,
+        decimals: payload.decimals as number || state.decimals
+      } as CustomToken;
+    }
+
+    default:
+      throw new Error();
+  }
 }
 
 function ImportToken ({ className = '' }: Props): React.ReactElement<Props> {

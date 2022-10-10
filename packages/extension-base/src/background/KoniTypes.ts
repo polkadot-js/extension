@@ -772,12 +772,13 @@ export enum CustomTokenType {
 }
 
 export interface CustomToken { // general interface for all kinds of tokens
-  name?: string,
   smartContract: string,
-  symbol?: string,
-  decimals?: number,
   chain: string,
   type: CustomTokenType,
+
+  name?: string,
+  symbol?: string,
+  decimals?: number,
   isCustom?: boolean,
   isDeleted?: boolean,
   image?: string

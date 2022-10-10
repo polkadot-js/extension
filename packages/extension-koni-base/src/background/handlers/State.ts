@@ -1230,6 +1230,33 @@ export default class KoniState extends State {
 
   public initChainRegistry () {
     this.chainRegistryMap = cacheRegistryMap; // prevents deleting token registry even when network is disabled
+
+    this.setChainRegistryItem('polkadot', {
+      chainDecimals: [10],
+      chainTokens: ['DOT'],
+      tokenMap: {
+        DOT: {
+          isMainToken: true,
+          name: 'DOT',
+          symbol: 'DOT',
+          decimals: 10
+        }
+      }
+    });
+
+    this.setChainRegistryItem('kusama', {
+      chainDecimals: [12],
+      chainTokens: ['KSM'],
+      tokenMap: {
+        KSM: {
+          isMainToken: true,
+          name: 'KSM',
+          symbol: 'KSM',
+          decimals: 12
+        }
+      }
+    });
+
     this.getEvmTokenStore((evmTokens) => {
       const erc20Tokens: CustomEvmToken[] = evmTokens ? evmTokens.erc20 : [];
 

@@ -490,14 +490,16 @@ export async function getAstarDelegationInfo (dotSamaApi: ApiProps, address: str
     allDapps = _allDapps as Record<string, any>[];
   }
 
-  const dappMap: Record<string, string> = {};
+  const dappMap: Record<string, { identity: string; icon?: string; }> = {};
   const delegationsList: DelegationItem[] = [];
 
   if (allDapps !== null) {
     for (const dappInfo of allDapps) {
       const dappAddress = dappInfo.address as string;
+      const dappName = dappInfo.name as string;
+      const dappIcon = isUrl(dappInfo.iconUrl as string) ? dappInfo.iconUrl as string : undefined;
 
-      dappMap[dappAddress.toLowerCase()] = dappInfo.name as string;
+      dappMap[dappAddress.toLowerCase()] = { identity: dappName, icon: dappIcon };
     }
   }
 
@@ -519,7 +521,8 @@ export async function getAstarDelegationInfo (dotSamaApi: ApiProps, address: str
       owner: dappAddress,
       amount: totalStake.toString(),
       minBond: minStake.toString(),
-      identity: dappMap[dappAddress],
+      identity: dappMap[dappAddress].identity,
+      icon: dappMap[dappAddress].icon,
       hasScheduledRequest: false
     });
   }

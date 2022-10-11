@@ -1163,6 +1163,7 @@ export interface DelegationItem {
   identity?: string,
   minBond: string,
   hasScheduledRequest: boolean
+  icon?: string;
 }
 
 export interface UnlockingStakeInfo {

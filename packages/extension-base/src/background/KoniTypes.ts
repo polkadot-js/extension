@@ -799,17 +799,19 @@ export interface DeleteEvmTokenParams {
   type: CustomTokenType
 }
 
-export interface ValidateEvmTokenRequest {
+export interface ValidateCustomTokenRequest {
   smartContract: string,
   chain: string,
-  type: CustomTokenType
+  type: CustomTokenType,
+  contractCaller?: string
 }
 
-export interface ValidateEvmTokenResponse {
+export interface ValidateCustomTokenResponse {
   name: string,
   symbol: string,
   decimals?: number,
-  isExist: boolean
+  isExist: boolean,
+  contractError: boolean
 }
 
 export interface SupportTransferResponse {
@@ -1386,7 +1388,7 @@ export interface KoniRequestSignatures {
   'pri(networkMap.upsert)': [NetworkJson, boolean];
   'pri(networkMap.getNetworkMap)': [null, Record<string, NetworkJson>];
   'pri(networkMap.getSubscription)': [null, Record<string, NetworkJson>, Record<string, NetworkJson>];
-  'pri(customTokenState.validateCustomToken)': [ValidateEvmTokenRequest, ValidateEvmTokenResponse];
+  'pri(customTokenState.validateCustomToken)': [ValidateCustomTokenRequest, ValidateCustomTokenResponse];
   'pri(customTokenState.deleteMany)': [DeleteEvmTokenParams[], boolean];
   'pri(customTokenState.upsertCustomTokenState)': [CustomToken, boolean];
   'pri(customTokenState.getCustomTokenState)': [null, CustomTokenJson];

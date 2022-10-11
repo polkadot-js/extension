@@ -122,10 +122,10 @@ describe('test DotSama APIs', () => {
 
     console.log('resp', resp);
 
-    const psp34Address = '5EQXQ5E1NfU6Znm3avpZM7mArxZDwQeugJG3pFNADU6Pygfw';
-    // const psp22Address = '5CY8zDBjUDNwZBHdGbERtLLSZqY7dJYsm1KhY6tSorYvnSke';
+    // const psp34Address = '5EQXQ5E1NfU6Znm3avpZM7mArxZDwQeugJG3pFNADU6Pygfw';
+    const psp22Address = '5CY8zDBjUDNwZBHdGbERtLLSZqY7dJYsm1KhY6tSorYvnSke';
 
-    const res = await validateWasmToken(psp34Address, CustomTokenType.psp34, api);
+    const res = await validateWasmToken(psp22Address, CustomTokenType.psp22, api, '5HbcGs2QXVAc6Q6eoTzLYNAJWpN17AkCFRLnWDaHCiGYXvNc');
 
     console.log(res);
   });

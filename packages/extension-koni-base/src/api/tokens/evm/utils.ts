@@ -12,43 +12,60 @@ export async function validateEvmToken (contractAddress: string, tokenType: Cust
   let name = '';
   let decimals: number | undefined = -1;
   let symbol = '';
+  let contractError = false;
 
-  if (tokenType === CustomTokenType.erc721) {
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-argument,@typescript-eslint/no-unsafe-member-access
-    tokenContract = new web3.eth.Contract(ERC721Contract.abi, contractAddress);
+  try {
+    if (tokenType === CustomTokenType.erc721) {
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-argument,@typescript-eslint/no-unsafe-member-access
+      tokenContract = new web3.eth.Contract(ERC721Contract.abi, contractAddress);
 
-    const [_name, _symbol] = await Promise.all([
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-member-access
-      tokenContract.methods.name().call() as string,
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-member-access
-      tokenContract.methods.symbol().call() as string
-    ]);
+      const [_name, _symbol] = await Promise.all([
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-member-access
+        tokenContract.methods.name().call() as string,
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-member-access
+        tokenContract.methods.symbol().call() as string
+      ]);
 
-    name = _name;
-    symbol = _symbol;
-  } else {
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-argument,@typescript-eslint/no-unsafe-member-access
-    tokenContract = new web3.eth.Contract(ERC20Contract.abi, contractAddress);
+      name = _name;
+      symbol = _symbol;
+    } else {
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-argument,@typescript-eslint/no-unsafe-member-access
+      tokenContract = new web3.eth.Contract(ERC20Contract.abi, contractAddress);
 
-    const [_name, _decimals, _symbol] = await Promise.all([
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-member-access
-      tokenContract.methods.name().call() as string,
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-member-access
-      tokenContract.methods.decimals().call() as number,
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-member-access
-      tokenContract.methods.symbol().call() as string
-    ]);
+      const [_name, _decimals, _symbol] = await Promise.all([
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-member-access
+        tokenContract.methods.name().call() as string,
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-member-access
+        tokenContract.methods.decimals().call() as number,
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-member-access
+        tokenContract.methods.symbol().call() as string
+      ]);
 
-    name = _name;
-    decimals = _decimals;
-    symbol = _symbol;
+      name = _name;
+      decimals = _decimals;
+      symbol = _symbol;
+    }
+
+    if (name === '' || symbol === '') {
+      contractError = true;
+    }
+
+    return {
+      name,
+      decimals,
+      symbol,
+      contractError
+    };
+  } catch (e) {
+    console.error('Error response while validating WASM contract', e);
+
+    return {
+      name,
+      decimals,
+      symbol,
+      contractError: true
+    };
   }
-
-  return {
-    name,
-    decimals,
-    symbol
-  };
 }
 
 export function initEvmTokenState (customTokenState: CustomTokenJson, networkMap: Record<string, NetworkJson>) {

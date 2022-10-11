@@ -8,8 +8,10 @@ import useGetActiveChains from '@subwallet/extension-koni-ui/hooks/screen/import
 import useTranslation from '@subwallet/extension-koni-ui/hooks/useTranslation';
 import { completeConfirmation, upsertCustomToken, validateCustomToken } from '@subwallet/extension-koni-ui/messaging';
 import { Header } from '@subwallet/extension-koni-ui/partials';
+import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import React, { useCallback, useContext, useEffect, useReducer, useState } from 'react';
+import { useSelector } from 'react-redux';
 import styled from 'styled-components';
 
 import { isEthereumAddress } from '@polkadot/util-crypto';
@@ -22,7 +24,8 @@ interface Props extends ThemeProps {
 enum TokenInfoActionType {
   UPDATE_CHAIN = 'UPDATE_CHAIN',
   UPDATE_CONTRACT = 'UPDATE_CONTRACT',
-  UPDATE_METADATA = 'UPDATE_METADATA'
+  UPDATE_METADATA = 'UPDATE_METADATA',
+  RESET_METADATA = 'RESET_METADATA'
 }
 
 interface TokenInfoAction {
@@ -34,7 +37,10 @@ const initTokenInfo: CustomToken = {
   chain: '',
   smartContract: '',
   type: CustomTokenType.erc20,
-  isCustom: true
+  isCustom: true,
+  symbol: '',
+  name: '',
+  decimals: 0
 };
 
 function tokenInfoReducer (state: CustomToken, action: TokenInfoAction) {
@@ -49,6 +55,13 @@ function tokenInfoReducer (state: CustomToken, action: TokenInfoAction) {
         ...state,
         smartContract: action.payload as string
       };
+    case TokenInfoActionType.RESET_METADATA:
+      return {
+        ...initTokenInfo,
+        smartContract: state.smartContract,
+        type: state.type,
+        chain: state.chain
+      };
 
     case TokenInfoActionType.UPDATE_METADATA: {
       const payload = action.payload as Record<string, any>;
@@ -56,7 +69,8 @@ function tokenInfoReducer (state: CustomToken, action: TokenInfoAction) {
       return {
         ...state,
         symbol: payload.symbol as string || state.symbol,
-        decimals: payload.decimals as number || state.decimals
+        decimals: payload.decimals as number || state.decimals,
+        type: payload.type as CustomTokenType || state.type
       } as CustomToken;
     }
 
@@ -72,6 +86,7 @@ function ImportToken ({ className = '' }: Props): React.ReactElement<Props> {
   const currentRequest = requests[0];
   const externalTokenInfo = currentRequest?.payload; // import from dapp
   const chainOptions = useGetActiveChains();
+  const { account: currentAccount } = useSelector((state: RootState) => state.currentAccount);
 
   const [tokenInfo, dispatchTokenInfo] = useReducer(tokenInfoReducer, externalTokenInfo || { ...initTokenInfo, chain: chainOptions[0].value || '' });
 
@@ -87,7 +102,7 @@ function ImportToken ({ className = '' }: Props): React.ReactElement<Props> {
 
   useEffect(() => {
     if (tokenInfo.smartContract !== '') {
-      let tokenType; // set token type
+      let tokenType: CustomTokenType | undefined; // set token type
 
       // TODO: this should be done manually by user when there are more token standards
       if (isEthereumAddress(tokenInfo.smartContract)) {
@@ -101,28 +116,29 @@ function ImportToken ({ className = '' }: Props): React.ReactElement<Props> {
         dispatchTokenInfo({ type: TokenInfoActionType.UPDATE_METADATA, payload: { symbol: '', decimals: '' } });
         setWarning('Invalid contract address');
       } else {
-        console.log('contract ok, validate token', tokenType, tokenInfo.chain);
-
         validateCustomToken({
           smartContract: tokenInfo.smartContract,
           chain: tokenInfo.chain,
-          type: tokenType
+          type: tokenType,
+          contractCaller: currentAccount?.address as string
         })
           .then((resp) => {
-            console.log('resp', resp);
-
             if (resp.isExist) {
               setWarning('This token has already been added');
               setIsValidContract(false);
             } else {
-              if (resp.isExist) {
-                setWarning('This token has already been added');
+              if (resp.contractError) {
+                setIsValidSymbol(false);
+                setIsValidDecimals(false);
                 setIsValidContract(false);
+                setWarning('Invalid contract for the selected chain');
+
+                dispatchTokenInfo({ type: TokenInfoActionType.RESET_METADATA, payload: {} });
               } else {
                 if (resp.decimals) {
-                  dispatchTokenInfo({ type: TokenInfoActionType.UPDATE_METADATA, payload: { symbol: resp.symbol, decimals: resp.decimals } });
+                  dispatchTokenInfo({ type: TokenInfoActionType.UPDATE_METADATA, payload: { symbol: resp.symbol, decimals: resp.decimals, type: tokenType } });
                 } else {
-                  dispatchTokenInfo({ type: TokenInfoActionType.UPDATE_METADATA, payload: { symbol: resp.symbol } });
+                  dispatchTokenInfo({ type: TokenInfoActionType.UPDATE_METADATA, payload: { symbol: resp.symbol, type: tokenType } });
                 }
 
                 setIsValidSymbol(true);
@@ -137,7 +153,7 @@ function ImportToken ({ className = '' }: Props): React.ReactElement<Props> {
           });
       }
     }
-  }, [tokenInfo.smartContract, tokenInfo.chain]);
+  }, [tokenInfo.smartContract, tokenInfo.chain, currentAccount?.address]);
 
   const onChangeSymbol = useCallback((val: string) => {
     if ((val.length > 11 && val !== '') || (val.split(' ').join('') === '')) {
@@ -241,7 +257,7 @@ function ImportToken ({ className = '' }: Props): React.ReactElement<Props> {
           disabled={true}
           label={'Token Decimals (*)'}
           onChange={onChangeDecimals}
-          value={tokenInfo.decimals?.toString()}
+          value={tokenInfo.decimals && tokenInfo.decimals > 0 ? tokenInfo.decimals?.toString() : ''}
         />
       </div>
       <div className={'add-token-container'}>

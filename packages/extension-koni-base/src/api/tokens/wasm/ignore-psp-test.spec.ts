@@ -1,10 +1,12 @@
 // Copyright 2019-2022 @subwallet/extension-koni authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
+import { CustomTokenType } from '@subwallet/extension-base/background/KoniTypes';
 import { PREDEFINED_NETWORKS } from '@subwallet/extension-koni-base/api/predefinedNetworks';
 import { PSP22Contract } from '@subwallet/extension-koni-base/api/tokens/wasm/helper';
+import { validateWasmToken } from '@subwallet/extension-koni-base/api/tokens/wasm/utils';
 import { DOTSAMA_AUTO_CONNECT_MS } from '@subwallet/extension-koni-base/constants';
-import {getCurrentProvider, isValidAddress} from '@subwallet/extension-koni-base/utils';
+import { getCurrentProvider, isValidAddress } from '@subwallet/extension-koni-base/utils';
 
 import { ApiPromise, WsProvider } from '@polkadot/api';
 import { ContractPromise } from '@polkadot/api-contract';
@@ -63,6 +65,14 @@ describe('test DotSama APIs', () => {
 
     const contract = new ContractPromise(api, PSP22Contract, '5CY8zDBjUDNwZBHdGbERtLLSZqY7dJYsm1KhY6tSorYvnSke');
 
+    const nameResp = await contract.query['psp22Metadata::tokenName']('5HbcGs2QXVAc6Q6eoTzLYNAJWpN17AkCFRLnWDaHCiGYXvNc', { gasLimit: -1 });
+    const symbolResp = await contract.query['psp22Metadata::tokenSymbol']('5HbcGs2QXVAc6Q6eoTzLYNAJWpN17AkCFRLnWDaHCiGYXvNc', { gasLimit: -1 });
+    const decimalsResp = await contract.query['psp22Metadata::tokenDecimals']('5HbcGs2QXVAc6Q6eoTzLYNAJWpN17AkCFRLnWDaHCiGYXvNc', { gasLimit: -1 });
+
+    console.log(nameResp.output?.toHuman());
+    console.log(symbolResp.output?.toHuman());
+    console.log(decimalsResp.output?.toHuman());
+
     // const totalSupply = await contract.query['psp22::totalSupply']('5HbcGs2QXVAc6Q6eoTzLYNAJWpN17AkCFRLnWDaHCiGYXvNc', { gasLimit: -1 });
     //
     // const _result = totalSupply.output.toHuman();
@@ -77,34 +87,46 @@ describe('test DotSama APIs', () => {
     //
     // console.log(result);
     //
-    const transfer = contract.tx['psp22::transfer']({ gasLimit: '100000' }, '5Dy4D7r9HeWvrcyjUF51zK3z3gePYrcaT9fF8Q7M6LYhgrGM', '100000', '');
-
-    console.log((await transfer.paymentInfo('5Dy4D7r9HeWvrcyjUF51zK3z3gePYrcaT9fF8Q7M6LYhgrGM')).toHuman());
-
+    // const transfer = contract.tx['psp22::transfer']({ gasLimit: '100000' }, '5Dy4D7r9HeWvrcyjUF51zK3z3gePYrcaT9fF8Q7M6LYhgrGM', '100000', '');
+    //
+    // console.log((await transfer.paymentInfo('5Dy4D7r9HeWvrcyjUF51zK3z3gePYrcaT9fF8Q7M6LYhgrGM')).toHuman());
+    //
     const megaGas = getMegaGas(api);
 
     const blockInterval = getBlockInterval(api);
 
     console.log(blockInterval.toString());
-
+    //
     const weight = megaGas.mul(BN_MILLION);
 
-    const executionTime = weight.mul(blockInterval).div(
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
-      api.consts.system.blockWeights
-        // @ts-ignore
-        ? api.consts.system.blockWeights.maxBlock
-        : api.consts.system.maximumBlockWeight as Weight
-    ).toNumber();
-
-    console.log('megaGas', megaGas.toNumber());
-    console.log('weight', weight.toNumber());
-    console.log(executionTime);
+    console.log(weight);
+    //
+    // const executionTime = weight.mul(blockInterval).div(
+    //   // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
+    //   api.consts.system.blockWeights
+    //     // @ts-ignore
+    //     ? api.consts.system.blockWeights.maxBlock
+    //     : api.consts.system.maximumBlockWeight as Weight
+    // ).toNumber();
+    //
+    // console.log('megaGas', megaGas.toNumber());
+    // console.log('weight', weight.toNumber());
+    // console.log(executionTime);
   });
 
-  test('validate contract', () => {
+  test('validate contract', async () => {
     const resp = isValidAddress('5HbcGs2QXVAc6Q6eoTzLYNAJWpN17AkCFRLnWDaHCiGYXvNc');
+    const provider = new WsProvider(getCurrentProvider(PREDEFINED_NETWORKS.alephTest), DOTSAMA_AUTO_CONNECT_MS);
+    const apiPromise = new ApiPromise({ provider });
+    const api = await apiPromise.isReady;
 
     console.log('resp', resp);
+
+    const psp34Address = '5EQXQ5E1NfU6Znm3avpZM7mArxZDwQeugJG3pFNADU6Pygfw';
+    // const psp22Address = '5CY8zDBjUDNwZBHdGbERtLLSZqY7dJYsm1KhY6tSorYvnSke';
+
+    const res = await validateWasmToken(psp34Address, CustomTokenType.psp34, api);
+
+    console.log(res);
   });
 });

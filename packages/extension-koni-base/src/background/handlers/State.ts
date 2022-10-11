@@ -17,9 +17,10 @@ import { DEFAULT_STAKING_NETWORKS } from '@subwallet/extension-koni-base/api/sta
 import { DotSamaCrowdloan_crowdloans_nodes } from '@subwallet/extension-koni-base/api/subquery/__generated__/DotSamaCrowdloan';
 import { fetchDotSamaCrowdloan } from '@subwallet/extension-koni-base/api/subquery/crowdloan';
 import { DEFAULT_SUPPORTED_TOKENS } from '@subwallet/extension-koni-base/api/tokens/defaultSupportedTokens';
-import { DEFAULT_EVM_TOKENS } from '@subwallet/extension-koni-base/api/tokens/evm/defaultEvmToken';
 import { parseTxAndSignature } from '@subwallet/extension-koni-base/api/tokens/evm/transferQr';
+import { initEvmTokenState } from '@subwallet/extension-koni-base/api/tokens/evm/utils';
 import { initWeb3Api } from '@subwallet/extension-koni-base/api/tokens/evm/web3';
+import { initWasmTokenState } from '@subwallet/extension-koni-base/api/tokens/wasm/utils';
 import { EvmRpcError } from '@subwallet/extension-koni-base/background/errors/EvmRpcError';
 import { state } from '@subwallet/extension-koni-base/background/handlers/index';
 import { ALL_ACCOUNT_KEY, ALL_GENESIS_HASH } from '@subwallet/extension-koni-base/constants';
@@ -259,93 +260,20 @@ export default class KoniState extends State {
         }
       }
 
-      this.initEvmTokenState();
+      this.initCustomTokenState();
     });
   }
 
-  public initEvmTokenState () {
-    this.customTokenStore.get('EvmToken', (storedEvmTokens) => {
-      if (!storedEvmTokens) {
+  public initCustomTokenState () {
+    this.customTokenStore.get('EvmToken', (storedCustomTokens) => {
+      if (!storedCustomTokens) {
         this.customTokenState = DEFAULT_SUPPORTED_TOKENS;
       } else {
-        const _evmTokenState = storedEvmTokens;
+        const processedEvmTokens = initEvmTokenState(storedCustomTokens, this.networkMap);
 
-        for (const defaultToken of DEFAULT_EVM_TOKENS.erc20) {
-          let exist = false;
+        const processedWasmTokens = initWasmTokenState(storedCustomTokens, this.networkMap);
 
-          for (const storedToken of _evmTokenState.erc20) {
-            if (defaultToken.smartContract.toLowerCase() === storedToken.smartContract.toLowerCase() && defaultToken.chain === storedToken.chain) {
-              if (storedToken.isCustom) {
-                // if existed, migrate the custom token -> default token
-                delete storedToken.isCustom;
-              }
-
-              exist = true;
-              break;
-            }
-          }
-
-          if (!exist) {
-            _evmTokenState.erc20.push(defaultToken);
-          }
-        }
-
-        for (const defaultToken of DEFAULT_EVM_TOKENS.erc721) {
-          let exist = false;
-
-          for (const storedToken of _evmTokenState.erc721) {
-            if (defaultToken.smartContract.toLowerCase() === storedToken.smartContract.toLowerCase() && defaultToken.chain === storedToken.chain) {
-              if (storedToken.isCustom) {
-                // if existed custom token before, migrate the custom token -> default token
-                delete storedToken.isCustom;
-              }
-
-              exist = true;
-              break;
-            }
-          }
-
-          if (!exist) {
-            _evmTokenState.erc721.push(defaultToken);
-          }
-        }
-
-        // Update networkKey in case networkMap change
-        for (const token of _evmTokenState.erc20) {
-          if (!(token.chain in this.networkMap) && token.chain.startsWith('custom_')) {
-            let newKey = '';
-            const genesisHash = token.chain.split('custom_')[1]; // token from custom network has key with prefix custom_
-
-            for (const [key, network] of Object.entries(this.networkMap)) {
-              if (network.genesisHash.toLowerCase() === genesisHash.toLowerCase()) {
-                newKey = key;
-                break;
-              }
-            }
-
-            token.chain = newKey;
-          }
-        }
-
-        for (const token of _evmTokenState.erc721) {
-          if (!(token.chain in this.networkMap) && token.chain.startsWith('custom_')) {
-            let newKey = '';
-            const genesisHash = token.chain.split('custom_')[1]; // token from custom network has key with prefix custom_
-
-            for (const [key, network] of Object.entries(this.networkMap)) {
-              if (network.genesisHash.toLowerCase() === genesisHash.toLowerCase()) {
-                newKey = key;
-                break;
-              }
-            }
-
-            token.chain = newKey;
-          }
-        }
-
-        console.log('init toke state', _evmTokenState);
-
-        this.customTokenState = _evmTokenState;
+        this.customTokenState = { ...processedEvmTokens, ...processedWasmTokens };
       }
 
       this.customTokenStore.set('EvmToken', this.customTokenState);

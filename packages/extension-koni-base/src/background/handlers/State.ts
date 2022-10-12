@@ -1088,7 +1088,7 @@ export default class KoniState extends State {
 
     // Update crowdloan map
     this.crowdloanMap[networkKey] = itemData;
-    this.updateCrowdloanStore(networkKey, item);
+    this.updateCrowdloanStore(networkKey, itemData);
 
     this.lazyNext('setCrowdloanItem', () => {
       this.publishCrowdloan();
@@ -1166,6 +1166,43 @@ export default class KoniState extends State {
     this.chainRegistryMap = cacheRegistryMap; // prevents deleting token registry even when network is disabled
     this.getCustomTokenStore((storedCustomTokens) => {
       const customTokens = getTokensForChainRegistry(storedCustomTokens);
+
+    this.setChainRegistryItem('polkadot', {
+      chainDecimals: [10],
+      chainTokens: ['DOT'],
+      tokenMap: {
+        DOT: {
+          isMainToken: true,
+          name: 'DOT',
+          symbol: 'DOT',
+          decimals: 10
+        }
+      }
+    });
+
+    this.setChainRegistryItem('kusama', {
+      chainDecimals: [12],
+      chainTokens: ['KSM'],
+      tokenMap: {
+        KSM: {
+          isMainToken: true,
+          name: 'KSM',
+          symbol: 'KSM',
+          decimals: 12
+        }
+      }
+    });
+
+    this.getEvmTokenStore((evmTokens) => {
+      const erc20Tokens: CustomEvmToken[] = evmTokens ? evmTokens.erc20 : [];
+
+      if (evmTokens) {
+        evmTokens.erc20.forEach((token) => {
+          if (!token.isDeleted) {
+            erc20Tokens.push(token);
+          }
+        });
+      }
 
       Object.entries(this.apiMap.dotSama).forEach(([networkKey, { api }]) => {
         getRegistry(networkKey, api, customTokens)

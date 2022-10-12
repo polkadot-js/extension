@@ -64,7 +64,8 @@ export async function getParaBondingBasics (networkKey: string, dotSamaApi: ApiP
 
   const inflationConfig = _inflation.toHuman() as unknown as InflationConfig;
   const currentInflation = getParaCurrentInflation(totalStake, inflationConfig);
-  const rewardPool = currentInflation * (PARACHAIN_INFLATION_DISTRIBUTION[networkKey].reward || PARACHAIN_INFLATION_DISTRIBUTION.default.reward);
+  const rewardDistribution = PARACHAIN_INFLATION_DISTRIBUTION[networkKey] ? PARACHAIN_INFLATION_DISTRIBUTION[networkKey].reward : PARACHAIN_INFLATION_DISTRIBUTION.default.reward;
+  const rewardPool = currentInflation * rewardDistribution;
 
   const stakedReturn = calculateChainStakedReturn(rewardPool, totalStake, totalIssuance, networkKey);
 

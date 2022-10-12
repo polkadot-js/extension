@@ -16,7 +16,7 @@ import { DEFAULT_STAKING_NETWORKS } from '@subwallet/extension-koni-base/api/sta
 // eslint-disable-next-line camelcase
 import { DotSamaCrowdloan_crowdloans_nodes } from '@subwallet/extension-koni-base/api/subquery/__generated__/DotSamaCrowdloan';
 import { fetchDotSamaCrowdloan } from '@subwallet/extension-koni-base/api/subquery/crowdloan';
-import { upsertCustomToken } from '@subwallet/extension-koni-base/api/tokens';
+import { getTokensForChainRegistry, upsertCustomToken } from '@subwallet/extension-koni-base/api/tokens';
 import { DEFAULT_SUPPORTED_TOKENS } from '@subwallet/extension-koni-base/api/tokens/defaultSupportedTokens';
 import { parseTxAndSignature } from '@subwallet/extension-koni-base/api/tokens/evm/transferQr';
 import { initEvmTokenState } from '@subwallet/extension-koni-base/api/tokens/evm/utils';
@@ -1164,19 +1164,11 @@ export default class KoniState extends State {
 
   public initChainRegistry () {
     this.chainRegistryMap = cacheRegistryMap; // prevents deleting token registry even when network is disabled
-    this.getCustomTokenStore((evmTokens) => {
-      const erc20Tokens: CustomToken[] = evmTokens ? evmTokens.erc20 : [];
-
-      if (evmTokens) {
-        evmTokens.erc20.forEach((token) => {
-          if (!token.isDeleted) {
-            erc20Tokens.push(token);
-          }
-        });
-      }
+    this.getCustomTokenStore((storedCustomTokens) => {
+      const customTokens = getTokensForChainRegistry(storedCustomTokens);
 
       Object.entries(this.apiMap.dotSama).forEach(([networkKey, { api }]) => {
-        getRegistry(networkKey, api, erc20Tokens)
+        getRegistry(networkKey, api, customTokens)
           .then((rs) => {
             this.setChainRegistryItem(networkKey, rs);
           })

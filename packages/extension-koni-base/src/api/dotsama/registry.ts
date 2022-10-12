@@ -138,7 +138,7 @@ export async function getForeignToken (api: ApiPromise) {
   return tokenMap;
 }
 
-export const getRegistry = async (networkKey: string, api: ApiPromise, customErc20Tokens?: CustomToken[]) => {
+export const getRegistry = async (networkKey: string, api: ApiPromise, customTokens?: CustomToken[]) => {
   const cached = cacheRegistryMap[networkKey];
 
   if (cached) {
@@ -200,15 +200,15 @@ export const getRegistry = async (networkKey: string, api: ApiPromise, customErc
     Object.assign(tokenMap, moonTokens);
   }
 
-  if (customErc20Tokens) {
-    for (const erc20Token of customErc20Tokens) {
-      if (erc20Token.chain === networkKey && erc20Token.symbol && !(erc20Token.symbol in tokenMap)) {
-        tokenMap[erc20Token.symbol] = {
-          contractAddress: erc20Token.smartContract,
+  if (customTokens) {
+    for (const customToken of customTokens) {
+      if (customToken.chain === networkKey && customToken.symbol && !(customToken.symbol in tokenMap)) {
+        tokenMap[customToken.symbol] = {
+          contractAddress: customToken.smartContract,
           isMainToken: false,
-          name: erc20Token.symbol,
-          symbol: erc20Token.symbol,
-          decimals: erc20Token.decimals as number
+          name: customToken.name,
+          symbol: customToken.symbol,
+          decimals: customToken.decimals as number
         } as TokenInfo;
       }
     }

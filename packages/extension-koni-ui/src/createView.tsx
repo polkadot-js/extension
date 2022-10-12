@@ -4,7 +4,7 @@
 import './i18n/i18n';
 
 import React, { Suspense } from 'react';
-import { createRoot } from 'react-dom/client';
+import ReactDOM from 'react-dom';
 import { HashRouter } from 'react-router-dom';
 
 import { View } from './components';
@@ -16,17 +16,14 @@ export default function createView (Entry: React.ComponentType, rootId = 'root')
     throw new Error(`Unable to find element with id '${rootId}'`);
   }
 
-  const root = createRoot(rootElement);
-
-  const fallbackElement = <View><></></View>;
-
-  root.render(
-    <Suspense fallback={fallbackElement}>
+  ReactDOM.render(
+    <Suspense fallback='...'>
       <View>
         <HashRouter>
           <Entry />
         </HashRouter>
       </View>
-    </Suspense>
+    </Suspense>,
+    rootElement
   );
 }

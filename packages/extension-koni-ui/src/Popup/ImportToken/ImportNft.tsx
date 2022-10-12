@@ -2,13 +2,16 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { CustomToken, CustomTokenType } from '@subwallet/extension-base/background/KoniTypes';
+import { isValidAddress } from '@subwallet/extension-koni-base/utils';
 import { ActionContext, Button, ConfirmationsQueueContext, Dropdown, InputWithLabel } from '@subwallet/extension-koni-ui/components';
 import useGetActiveChains from '@subwallet/extension-koni-ui/hooks/screen/import/useGetActiveChains';
 import useTranslation from '@subwallet/extension-koni-ui/hooks/useTranslation';
 import { completeConfirmation, upsertCustomToken, validateCustomToken } from '@subwallet/extension-koni-ui/messaging';
 import { Header } from '@subwallet/extension-koni-ui/partials';
+import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
-import React, { useCallback, useContext, useEffect, useState } from 'react';
+import React, { useCallback, useContext, useEffect, useReducer, useState } from 'react';
+import { useSelector } from 'react-redux';
 import styled from 'styled-components';
 
 import { isEthereumAddress } from '@polkadot/util-crypto';
@@ -17,16 +20,72 @@ interface Props extends ThemeProps {
   className?: string;
 }
 
+// NFT info logic
+enum NftInfoActionType {
+  UPDATE_CHAIN = 'UPDATE_CHAIN',
+  UPDATE_CONTRACT = 'UPDATE_CONTRACT',
+  UPDATE_METADATA = 'UPDATE_METADATA',
+  RESET_METADATA = 'RESET_METADATA'
+}
+
+interface NftInfoAction {
+  type: NftInfoActionType,
+  payload: Record<string, any> | string
+}
+
+const initNftInfo: CustomToken = {
+  chain: '',
+  smartContract: '',
+  type: CustomTokenType.erc721,
+  isCustom: true,
+  name: ''
+};
+
+function nftInfoReducer (state: CustomToken, action: NftInfoAction) {
+  switch (action.type) {
+    case NftInfoActionType.UPDATE_CHAIN:
+      return {
+        ...state,
+        chain: action.payload as string
+      } as CustomToken;
+    case NftInfoActionType.UPDATE_CONTRACT:
+      return {
+        ...state,
+        smartContract: action.payload as string
+      };
+    case NftInfoActionType.RESET_METADATA:
+      return {
+        ...initNftInfo,
+        smartContract: state.smartContract,
+        type: state.type,
+        chain: state.chain
+      };
+
+    case NftInfoActionType.UPDATE_METADATA: {
+      const payload = action.payload as Record<string, any>;
+
+      return {
+        ...state,
+        name: payload.name as string || state.name,
+        type: payload.type as CustomTokenType || state.type
+      } as CustomToken;
+    }
+
+    default:
+      throw new Error();
+  }
+}
+
 function ImportNft ({ className = '' }: Props): React.ReactElement<Props> {
   const { t } = useTranslation();
   const addTokenRequest = useContext(ConfirmationsQueueContext).addTokenRequest;
   const requests = Object.values(addTokenRequest);
   const currentRequest = requests[0];
-  const tokenInfo = currentRequest?.payload;
+  const externalTokenInfo = currentRequest?.payload;
   const chainOptions = useGetActiveChains();
-  const [contractAddress, setContractAddress] = useState(tokenInfo ? tokenInfo.smartContract : '');
-  const [name, setName] = useState(tokenInfo ? tokenInfo.symbol : '');
-  const [chain, setChain] = useState(tokenInfo?.chain || chainOptions[0].value || '');
+  const { account: currentAccount } = useSelector((state: RootState) => state.currentAccount);
+
+  const [nftInfo, dispatchNftInfo] = useReducer(nftInfoReducer, externalTokenInfo || { ...initNftInfo, chain: chainOptions[0].value || '' });
 
   const [isValidContract, setIsValidContract] = useState(true);
   const [isValidName, setIsValidName] = useState(true);
@@ -47,37 +106,56 @@ function ImportNft ({ className = '' }: Props): React.ReactElement<Props> {
 
   const onChangeContractAddress = useCallback((val: string) => {
     setWarning('');
-    setContractAddress(val.toLowerCase());
+    dispatchNftInfo({ type: NftInfoActionType.UPDATE_CONTRACT, payload: val }); // ss58 address is case-sensitive but ETH address is not
   }, []);
 
   useEffect(() => {
-    if (contractAddress !== '') {
-      if (!isEthereumAddress(contractAddress)) {
+    if (nftInfo.smartContract !== '') {
+      let tokenType: CustomTokenType | undefined; // set token type
+
+      // TODO: this should be done manually by user when there are more token standards
+      if (isEthereumAddress(nftInfo.smartContract)) {
+        tokenType = CustomTokenType.erc721;
+      } else if (isValidAddress(nftInfo.smartContract)) {
+        tokenType = CustomTokenType.psp34;
+      }
+
+      if (!tokenType) { // if not valid EVM contract or WASM contract
         setIsValidContract(false);
-        setWarning('Invalid EVM contract address');
+        dispatchNftInfo({ type: NftInfoActionType.UPDATE_METADATA, payload: { name: '' } });
+        setWarning('Invalid contract address');
       } else {
         validateCustomToken({
-          smartContract: contractAddress,
-          // @ts-ignore
-          chain,
-          type: CustomTokenType.erc721
+          smartContract: nftInfo.smartContract,
+          chain: nftInfo.chain,
+          type: tokenType,
+          contractCaller: currentAccount?.address as string
         })
           .then((resp) => {
             if (resp.isExist) {
               setWarning('This token has already been added');
               setIsValidContract(false);
             } else {
-              setName(resp.name);
-              setIsValidContract(true);
+              if (resp.contractError) {
+                setIsValidContract(false);
+                setWarning('Invalid contract for the selected chain');
+
+                dispatchNftInfo({ type: NftInfoActionType.RESET_METADATA, payload: {} });
+              } else {
+                setIsValidContract(true);
+                dispatchNftInfo({ type: NftInfoActionType.UPDATE_METADATA, payload: { name: resp.name, type: tokenType } });
+              }
             }
           })
           .catch(() => {
             setWarning('Invalid contract for the selected chain');
             setIsValidContract(false);
+
+            dispatchNftInfo({ type: NftInfoActionType.RESET_METADATA, payload: {} });
           });
       }
     }
-  }, [contractAddress, chain]);
+  }, [nftInfo.smartContract, nftInfo.chain, currentAccount?.address]);
 
   const onChangeName = useCallback((val: string) => {
     if (val.split(' ').join('') === '') {
@@ -86,33 +164,25 @@ function ImportNft ({ className = '' }: Props): React.ReactElement<Props> {
       setIsValidName(true);
     }
 
-    setName(val);
+    dispatchNftInfo({ type: NftInfoActionType.UPDATE_METADATA, payload: { name: val } });
   }, []);
 
   const onSelectChain = useCallback((val: any) => {
     const _chain = val as string;
 
     setWarning('');
-    setChain(_chain);
+
+    dispatchNftInfo({ type: NftInfoActionType.UPDATE_CHAIN, payload: _chain });
   }, []);
 
   const handleAddToken = useCallback(() => {
-    const evmToken = {
-      smartContract: contractAddress,
-      chain,
-      type: 'erc721',
-      isCustom: true
-    } as CustomToken;
-
-    if (name) {
-      evmToken.name = name;
-    }
+    setWarning('');
 
     if (currentRequest) {
       completeConfirmation('addTokenRequest', { id: currentRequest.id, isApproved: true }).catch(console.error);
     }
 
-    upsertCustomToken(evmToken)
+    upsertCustomToken(nftInfo)
       .then((resp) => {
         if (resp) {
           setWarning('Successfully added a NFT collection');
@@ -124,21 +194,21 @@ function ImportNft ({ className = '' }: Props): React.ReactElement<Props> {
       .catch(() => {
         setWarning('An error has occurred. Please try again later');
       });
-  }, [_goBack, chain, contractAddress, currentRequest, name]);
+  }, [_goBack, currentRequest, nftInfo]);
 
   return (
     <div className={className}>
       <Header
         showSettings
         showSubHeader
-        subHeaderName={'Import EVM NFT'}
+        subHeaderName={'Import NFT'}
       />
 
       <div className={'import-container'}>
         <InputWithLabel
           label={'NFT Contract Address (*)'}
           onChange={onChangeContractAddress}
-          value={contractAddress}
+          value={nftInfo.smartContract}
         />
 
         <div style={{ marginTop: '12px' }}>
@@ -146,14 +216,14 @@ function ImportNft ({ className = '' }: Props): React.ReactElement<Props> {
             label={'Chain (*)'}
             onChange={onSelectChain}
             options={chainOptions}
-            value={chain}
+            value={nftInfo.chain}
           />
         </div>
 
         <InputWithLabel
           label={'NFT Collection Name (*)'}
           onChange={onChangeName}
-          value={name}
+          value={nftInfo.name}
         />
       </div>
       <div className={'add-token-container'}>
@@ -166,7 +236,7 @@ function ImportNft ({ className = '' }: Props): React.ReactElement<Props> {
         </Button>
         <Button
           className={'add-token-button'}
-          isDisabled={!isValidContract || !isValidName || contractAddress === '' || name === '' || chainOptions.length === 0}
+          isDisabled={!isValidContract || !isValidName || nftInfo.smartContract === '' || nftInfo.name === '' || chainOptions.length === 0}
           onClick={handleAddToken}
         >
           {t<string>('Add NFT')}

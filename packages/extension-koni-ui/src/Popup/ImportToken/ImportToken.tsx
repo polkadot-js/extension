@@ -150,6 +150,8 @@ function ImportToken ({ className = '' }: Props): React.ReactElement<Props> {
           .catch(() => {
             setWarning('Invalid contract for the selected chain');
             setIsValidContract(false);
+
+            dispatchTokenInfo({ type: TokenInfoActionType.RESET_METADATA, payload: {} });
           });
       }
     }
@@ -184,7 +186,7 @@ function ImportToken ({ className = '' }: Props): React.ReactElement<Props> {
 
     setWarning('');
 
-    dispatchTokenInfo({ type: TokenInfoActionType.UPDATE_CHAIN, payload: { chain: _chain } });
+    dispatchTokenInfo({ type: TokenInfoActionType.UPDATE_CHAIN, payload: _chain });
   }, []);
 
   const onAction = useContext(ActionContext);

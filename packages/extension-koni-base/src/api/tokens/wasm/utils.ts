@@ -8,6 +8,84 @@ import { PSP22Contract, PSP34Contract } from '@subwallet/extension-koni-base/api
 import { ApiPromise } from '@polkadot/api';
 import { ContractPromise } from '@polkadot/api-contract';
 
+export async function validateWasmToken (contractAddress: string, tokenType: CustomTokenType.psp22 | CustomTokenType.psp34, apiPromise: ApiPromise, contractCaller: string) {
+  let tokenContract: ContractPromise;
+  let name = '';
+  let decimals: number | undefined = -1;
+  let symbol = '';
+  let contractError = false;
+
+  try {
+    if (tokenType === CustomTokenType.psp22) {
+      tokenContract = new ContractPromise(apiPromise, PSP22Contract, contractAddress);
+
+      const [nameResp, symbolResp, decimalsResp] = await Promise.all([
+        tokenContract.query['psp22Metadata::tokenName'](contractCaller, { gasLimit: -1 }), // read-only operation so no gas limit
+        tokenContract.query['psp22Metadata::tokenSymbol'](contractCaller, { gasLimit: -1 }),
+        tokenContract.query['psp22Metadata::tokenDecimals'](contractCaller, { gasLimit: -1 })
+      ]);
+
+      if (!(nameResp.result.isOk && symbolResp.result.isOk && decimalsResp.result.isOk) || !nameResp.output || !decimalsResp.output || !symbolResp.output) {
+        console.error('Error response while validating WASM contract');
+
+        return {
+          name: '',
+          decimals: -1,
+          symbol: '',
+          contractError: true
+        };
+      } else {
+        name = nameResp.output?.toHuman() as string;
+        decimals = parseInt(decimalsResp.output?.toHuman() as string);
+        symbol = symbolResp.output?.toHuman() as string;
+
+        if (name === '' || symbol === '') {
+          contractError = true;
+        }
+      }
+    } else {
+      tokenContract = new ContractPromise(apiPromise, PSP34Contract, contractAddress);
+
+      const collectionIdResp = await tokenContract.query['psp34::collectionId'](contractCaller, { gasLimit: -1 }); // read-only operation so no gas limit
+
+      if (!collectionIdResp.result.isOk || !collectionIdResp.output) {
+        console.error('Error response while validating WASM contract');
+
+        return {
+          name: '',
+          decimals: -1,
+          symbol: '',
+          contractError: true
+        };
+      } else {
+        const collectionIdDict = collectionIdResp.output?.toHuman() as Record<string, string>;
+
+        name = collectionIdDict.Bytes;
+
+        if (name === '') {
+          contractError = true;
+        }
+      }
+    }
+
+    return {
+      name,
+      decimals,
+      symbol,
+      contractError
+    };
+  } catch (e) {
+    console.error('Error validating WASM contract', e);
+
+    return {
+      name: '',
+      decimals: -1,
+      symbol: '',
+      contractError: true
+    };
+  }
+}
+
 export function initWasmTokenState (customTokenState: CustomTokenJson, networkMap: Record<string, NetworkJson>) {
   const wasmTokenState = { psp22: customTokenState.psp22 || [], psp34: customTokenState.psp34 || [] };
 
@@ -85,82 +163,4 @@ export function initWasmTokenState (customTokenState: CustomTokenJson, networkMa
   }
 
   return wasmTokenState;
-}
-
-export async function validateWasmToken (contractAddress: string, tokenType: CustomTokenType.psp22 | CustomTokenType.psp34, apiPromise: ApiPromise, contractCaller: string) {
-  let tokenContract: ContractPromise;
-  let name = '';
-  let decimals: number | undefined = -1;
-  let symbol = '';
-  let contractError = false;
-
-  try {
-    if (tokenType === CustomTokenType.psp22) {
-      tokenContract = new ContractPromise(apiPromise, PSP22Contract, contractAddress);
-
-      const [nameResp, symbolResp, decimalsResp] = await Promise.all([
-        tokenContract.query['psp22Metadata::tokenName'](contractCaller, { gasLimit: -1 }), // read-only operation so no gas limit
-        tokenContract.query['psp22Metadata::tokenSymbol'](contractCaller, { gasLimit: -1 }),
-        tokenContract.query['psp22Metadata::tokenDecimals'](contractCaller, { gasLimit: -1 })
-      ]);
-
-      if (!(nameResp.result.isOk && symbolResp.result.isOk && decimalsResp.result.isOk) || !nameResp.output || !decimalsResp.output || !symbolResp.output) {
-        console.error('Error response while validating WASM contract');
-
-        return {
-          name: '',
-          decimals: -1,
-          symbol: '',
-          contractError: true
-        };
-      } else {
-        name = nameResp.output?.toHuman() as string;
-        decimals = parseInt(decimalsResp.output?.toHuman() as string);
-        symbol = symbolResp.output?.toHuman() as string;
-
-        if (name === '' || symbol === '') {
-          contractError = true;
-        }
-      }
-    } else {
-      tokenContract = new ContractPromise(apiPromise, PSP34Contract, contractAddress);
-
-      const collectionIdResp = await tokenContract.query['psp34::collectionId'](contractCaller, { gasLimit: -1 }); // read-only operation so no gas limit
-
-      if (!collectionIdResp.result.isOk || !collectionIdResp.output) {
-        console.error('Error response while validating WASM contract');
-
-        return {
-          name: '',
-          decimals: -1,
-          symbol: '',
-          contractError: true
-        };
-      } else {
-        const collectionIdDict = collectionIdResp.output?.toHuman() as Record<string, string>;
-
-        name = collectionIdDict.Bytes;
-
-        if (name === '') {
-          contractError = true;
-        }
-      }
-    }
-
-    return {
-      name,
-      decimals,
-      symbol,
-      contractError
-    };
-  } catch (e) {
-    console.error('Error validating WASM contract', e);
-
-    return {
-      name: '',
-      decimals: -1,
-      symbol: '',
-      contractError: true
-    };
-  }
 }

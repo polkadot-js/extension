@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { CustomToken, CustomTokenType } from '@subwallet/extension-base/background/KoniTypes';
-import { isValidAddress } from '@subwallet/extension-koni-base/utils';
+import { isValidSubstrateAddress } from '@subwallet/extension-koni-base/utils';
 import { ActionContext, Button, ConfirmationsQueueContext, Dropdown, InputWithLabel } from '@subwallet/extension-koni-ui/components';
 import useGetActiveChains from '@subwallet/extension-koni-ui/hooks/screen/import/useGetActiveChains';
 import useTranslation from '@subwallet/extension-koni-ui/hooks/useTranslation';
@@ -68,6 +68,7 @@ function tokenInfoReducer (state: CustomToken, action: TokenInfoAction) {
 
       return {
         ...state,
+        name: payload.name as string || state.name,
         symbol: payload.symbol as string || state.symbol,
         decimals: payload.decimals as number || state.decimals,
         type: payload.type as CustomTokenType || state.type
@@ -107,7 +108,7 @@ function ImportToken ({ className = '' }: Props): React.ReactElement<Props> {
       // TODO: this should be done manually by user when there are more token standards
       if (isEthereumAddress(tokenInfo.smartContract)) {
         tokenType = CustomTokenType.erc20;
-      } else if (isValidAddress(tokenInfo.smartContract)) {
+      } else if (isValidSubstrateAddress(tokenInfo.smartContract)) {
         tokenType = CustomTokenType.psp22;
       }
 
@@ -136,9 +137,9 @@ function ImportToken ({ className = '' }: Props): React.ReactElement<Props> {
                 dispatchTokenInfo({ type: TokenInfoActionType.RESET_METADATA, payload: {} });
               } else {
                 if (resp.decimals) {
-                  dispatchTokenInfo({ type: TokenInfoActionType.UPDATE_METADATA, payload: { symbol: resp.symbol, decimals: resp.decimals, type: tokenType } });
+                  dispatchTokenInfo({ type: TokenInfoActionType.UPDATE_METADATA, payload: { symbol: resp.symbol, name: resp.name, decimals: resp.decimals, type: tokenType } });
                 } else {
-                  dispatchTokenInfo({ type: TokenInfoActionType.UPDATE_METADATA, payload: { symbol: resp.symbol, type: tokenType } });
+                  dispatchTokenInfo({ type: TokenInfoActionType.UPDATE_METADATA, payload: { symbol: resp.symbol, name: resp.name, type: tokenType } });
                 }
 
                 setIsValidSymbol(true);
@@ -212,7 +213,7 @@ function ImportToken ({ className = '' }: Props): React.ReactElement<Props> {
     upsertCustomToken(tokenInfo)
       .then((resp) => {
         if (resp) {
-          setWarning('Successfully added an EVM token'); // TODO: parse warning
+          setWarning(`Successfully added a token on ${tokenInfo.chain}`);
           _goBack();
         } else {
           setWarning('An error has occurred. Please try again later');

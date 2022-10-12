@@ -19,7 +19,7 @@ import { getTokenInfo } from '@subwallet/extension-koni-base/api/dotsama/registr
 import { checkReferenceCount, checkSupportTransfer, estimateFee, getExistentialDeposit, makeTransfer } from '@subwallet/extension-koni-base/api/dotsama/transfer';
 import { SUPPORTED_TRANSFER_SUBSTRATE_CHAIN_NAME } from '@subwallet/extension-koni-base/api/nft/config';
 import { acalaTransferHandler, getNftTransferExtrinsic, isRecipientSelf, quartzTransferHandler, rmrkTransferHandler, statemineTransferHandler, uniqueTransferHandler, unlockAccount } from '@subwallet/extension-koni-base/api/nft/transfer';
-import { validateCustomToken } from '@subwallet/extension-koni-base/api/tokens';
+import { isEqualContractAddress, validateCustomToken } from '@subwallet/extension-koni-base/api/tokens';
 import { parseEVMTransaction, parseTransactionData } from '@subwallet/extension-koni-base/api/tokens/evm/parseEVMTransaction';
 import { getERC20TransactionObject, getEVMTransactionObject, makeERC20Transfer, makeEVMTransfer } from '@subwallet/extension-koni-base/api/tokens/evm/transfer';
 import { handleTransferNftQr, makeERC20TransferQr, makeEVMTransferQr } from '@subwallet/extension-koni-base/api/tokens/evm/transferQr';
@@ -1972,9 +1972,15 @@ export default class KoniExtension extends Extension {
   }
 
   private upsertCustomToken (data: CustomToken) {
-    state.upsertCustomToken(data);
+    try {
+      state.upsertCustomToken(data);
 
-    return true;
+      return true;
+    } catch (e) {
+      console.error('Error insert/update custom token', e);
+
+      return false;
+    }
   }
 
   private deleteCustomToken (data: DeleteEvmTokenParams[]) {
@@ -1989,7 +1995,7 @@ export default class KoniExtension extends Extension {
 
     // check exist in customTokenState
     for (const token of customTokenState[data.type]) {
-      if (token.smartContract.toLowerCase() === data.smartContract.toLowerCase() && token.type === data.type && token.chain === data.chain && !token.isDeleted) {
+      if (isEqualContractAddress(token.smartContract, data.smartContract) && token.type === data.type && token.chain === data.chain && !token.isDeleted) {
         isExist = true;
         break;
       }

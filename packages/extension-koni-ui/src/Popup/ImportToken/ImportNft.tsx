@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { CustomToken, CustomTokenType } from '@subwallet/extension-base/background/KoniTypes';
-import { isValidAddress } from '@subwallet/extension-koni-base/utils';
+import { isValidSubstrateAddress } from '@subwallet/extension-koni-base/utils';
 import { ActionContext, Button, ConfirmationsQueueContext, Dropdown, InputWithLabel } from '@subwallet/extension-koni-ui/components';
 import useGetActiveChains from '@subwallet/extension-koni-ui/hooks/screen/import/useGetActiveChains';
 import useTranslation from '@subwallet/extension-koni-ui/hooks/useTranslation';
@@ -116,7 +116,7 @@ function ImportNft ({ className = '' }: Props): React.ReactElement<Props> {
       // TODO: this should be done manually by user when there are more token standards
       if (isEthereumAddress(nftInfo.smartContract)) {
         tokenType = CustomTokenType.erc721;
-      } else if (isValidAddress(nftInfo.smartContract)) {
+      } else if (isValidSubstrateAddress(nftInfo.smartContract)) {
         tokenType = CustomTokenType.psp34;
       }
 
@@ -185,7 +185,7 @@ function ImportNft ({ className = '' }: Props): React.ReactElement<Props> {
     upsertCustomToken(nftInfo)
       .then((resp) => {
         if (resp) {
-          setWarning('Successfully added a NFT collection');
+          setWarning(`Successfully added a NFT collection on ${nftInfo.chain}`);
           _goBack();
         } else {
           setWarning('An error has occurred. Please try again later');

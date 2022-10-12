@@ -6,7 +6,7 @@ import { PREDEFINED_NETWORKS } from '@subwallet/extension-koni-base/api/predefin
 import { PSP22Contract } from '@subwallet/extension-koni-base/api/tokens/wasm/helper';
 import { validateWasmToken } from '@subwallet/extension-koni-base/api/tokens/wasm/utils';
 import { DOTSAMA_AUTO_CONNECT_MS } from '@subwallet/extension-koni-base/constants';
-import { getCurrentProvider, isValidAddress } from '@subwallet/extension-koni-base/utils';
+import { getCurrentProvider, isValidSubstrateAddress } from '@subwallet/extension-koni-base/utils';
 
 import { ApiPromise, WsProvider } from '@polkadot/api';
 import { ContractPromise } from '@polkadot/api-contract';
@@ -115,7 +115,7 @@ describe('test DotSama APIs', () => {
   });
 
   test('validate contract', async () => {
-    const resp = isValidAddress('5HbcGs2QXVAc6Q6eoTzLYNAJWpN17AkCFRLnWDaHCiGYXvNc');
+    const resp = isValidSubstrateAddress('5HbcGs2QXVAc6Q6eoTzLYNAJWpN17AkCFRLnWDaHCiGYXvNc');
     const provider = new WsProvider(getCurrentProvider(PREDEFINED_NETWORKS.alephTest), DOTSAMA_AUTO_CONNECT_MS);
     const apiPromise = new ApiPromise({ provider });
     const api = await apiPromise.isReady;

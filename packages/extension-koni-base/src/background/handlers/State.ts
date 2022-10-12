@@ -3,7 +3,7 @@
 
 import { withErrorLog } from '@subwallet/extension-base/background/handlers/helpers';
 import State, { AuthUrls, Resolver } from '@subwallet/extension-base/background/handlers/State';
-import { AccountRefMap, APIItemState, ApiMap, AuthRequestV2, BalanceItem, BalanceJson, ChainRegistry, ConfirmationDefinitions, ConfirmationsQueue, ConfirmationsQueueItemOptions, ConfirmationType, CrowdloanItem, CrowdloanJson, CurrentAccountInfo, CustomToken, CustomTokenJson, CustomTokenType, DeleteEvmTokenParams, EvmSendTransactionParams, EvmSendTransactionRequestQr, EvmSignatureRequestQr, ExternalRequestPromise, ExternalRequestPromiseStatus, NETWORK_STATUS, NetworkJson, NftCollection, NftItem, NftJson, NftTransferExtra, PriceJson, RequestAccountExportPrivateKey, RequestConfirmationComplete, RequestSettingsType, ResponseAccountExportPrivateKey, ResponseSettingsType, ResultResolver, ServiceInfo, SingleModeJson, StakeUnlockingJson, StakingItem, StakingJson, StakingRewardJson, ThemeTypes, TokenInfo, TransactionHistoryItemType } from '@subwallet/extension-base/background/KoniTypes';
+import { AccountRefMap, APIItemState, ApiMap, AuthRequestV2, BalanceItem, BalanceJson, ChainRegistry, ConfirmationDefinitions, ConfirmationsQueue, ConfirmationsQueueItemOptions, ConfirmationType, CrowdloanItem, CrowdloanJson, CurrentAccountInfo, CustomToken, CustomTokenJson, DeleteEvmTokenParams, EvmSendTransactionParams, EvmSendTransactionRequestQr, EvmSignatureRequestQr, ExternalRequestPromise, ExternalRequestPromiseStatus, NETWORK_STATUS, NetworkJson, NftCollection, NftItem, NftJson, NftTransferExtra, PriceJson, RequestAccountExportPrivateKey, RequestConfirmationComplete, RequestSettingsType, ResponseAccountExportPrivateKey, ResponseSettingsType, ResultResolver, ServiceInfo, SingleModeJson, StakeUnlockingJson, StakingItem, StakingJson, StakingRewardJson, ThemeTypes, TokenInfo, TransactionHistoryItemType } from '@subwallet/extension-base/background/KoniTypes';
 import { AuthorizeRequest, RequestAuthorizeTab } from '@subwallet/extension-base/background/types';
 import { Web3Transaction } from '@subwallet/extension-base/signers/types';
 import { getId } from '@subwallet/extension-base/utils/getId';
@@ -16,6 +16,7 @@ import { DEFAULT_STAKING_NETWORKS } from '@subwallet/extension-koni-base/api/sta
 // eslint-disable-next-line camelcase
 import { DotSamaCrowdloan_crowdloans_nodes } from '@subwallet/extension-koni-base/api/subquery/__generated__/DotSamaCrowdloan';
 import { fetchDotSamaCrowdloan } from '@subwallet/extension-koni-base/api/subquery/crowdloan';
+import { upsertCustomToken } from '@subwallet/extension-koni-base/api/tokens';
 import { DEFAULT_SUPPORTED_TOKENS } from '@subwallet/extension-koni-base/api/tokens/defaultSupportedTokens';
 import { parseTxAndSignature } from '@subwallet/extension-koni-base/api/tokens/evm/transferQr';
 import { initEvmTokenState } from '@subwallet/extension-koni-base/api/tokens/evm/utils';
@@ -1141,16 +1142,18 @@ export default class KoniState extends State {
           symbol: tokenData.symbol,
           name: tokenData.name,
           contractAddress: tokenData.smartContract,
-          decimals: tokenData.decimals
+          decimals: tokenData.decimals,
+          type: tokenData.type
         } as TokenInfo;
       } else {
         // @ts-ignore
         chainRegistry.tokenMap[tokenData.symbol] = {
           isMainToken: false,
           symbol: tokenData.symbol,
-          name: tokenData.symbol,
+          name: tokenData.name,
           contractAddress: tokenData.smartContract,
-          decimals: tokenData.decimals
+          decimals: tokenData.decimals,
+          type: tokenData.type
         } as TokenInfo;
       }
 
@@ -1286,37 +1289,11 @@ export default class KoniState extends State {
   }
 
   public upsertCustomToken (data: CustomToken) {
-    let isExist = false;
+    const { needUpdateChainRegistry, newCustomTokenState } = upsertCustomToken(data, this.customTokenState);
 
-    for (const token of this.customTokenState[data.type]) {
-      if (token.smartContract.toLowerCase() === data.smartContract.toLowerCase() && token.type === data.type && token.chain === data.chain) {
-        isExist = true;
-        break;
-      }
-    }
+    this.customTokenState = newCustomTokenState;
 
-    if (!isExist) {
-      this.customTokenState[data.type].push(data);
-    } else {
-      this.customTokenState[data.type] = this.customTokenState[data.type].map((token) => {
-        if (token.smartContract.toLowerCase() === data.smartContract.toLowerCase()) {
-          if (token.isDeleted) {
-            return {
-              name: token.name,
-              smartContract: token.smartContract,
-              chain: token.chain,
-              type: token.type
-            };
-          }
-
-          return data;
-        }
-
-        return token;
-      });
-    }
-
-    if (data.type === CustomTokenType.erc20) {
+    if (needUpdateChainRegistry) {
       this.upsertChainRegistry(data);
     }
 

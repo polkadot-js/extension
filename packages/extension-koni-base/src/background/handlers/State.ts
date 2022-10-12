@@ -1167,42 +1167,31 @@ export default class KoniState extends State {
     this.getCustomTokenStore((storedCustomTokens) => {
       const customTokens = getTokensForChainRegistry(storedCustomTokens);
 
-    this.setChainRegistryItem('polkadot', {
-      chainDecimals: [10],
-      chainTokens: ['DOT'],
-      tokenMap: {
-        DOT: {
-          isMainToken: true,
-          name: 'DOT',
-          symbol: 'DOT',
-          decimals: 10
-        }
-      }
-    });
-
-    this.setChainRegistryItem('kusama', {
-      chainDecimals: [12],
-      chainTokens: ['KSM'],
-      tokenMap: {
-        KSM: {
-          isMainToken: true,
-          name: 'KSM',
-          symbol: 'KSM',
-          decimals: 12
-        }
-      }
-    });
-
-    this.getEvmTokenStore((evmTokens) => {
-      const erc20Tokens: CustomEvmToken[] = evmTokens ? evmTokens.erc20 : [];
-
-      if (evmTokens) {
-        evmTokens.erc20.forEach((token) => {
-          if (!token.isDeleted) {
-            erc20Tokens.push(token);
+      this.setChainRegistryItem('polkadot', {
+        chainDecimals: [10],
+        chainTokens: ['DOT'],
+        tokenMap: {
+          DOT: {
+            isMainToken: true,
+            name: 'DOT',
+            symbol: 'DOT',
+            decimals: 10
           }
-        });
-      }
+        }
+      });
+
+      this.setChainRegistryItem('kusama', {
+        chainDecimals: [12],
+        chainTokens: ['KSM'],
+        tokenMap: {
+          KSM: {
+            isMainToken: true,
+            name: 'KSM',
+            symbol: 'KSM',
+            decimals: 12
+          }
+        }
+      });
 
       Object.entries(this.apiMap.dotSama).forEach(([networkKey, { api }]) => {
         getRegistry(networkKey, api, customTokens)
@@ -1211,17 +1200,9 @@ export default class KoniState extends State {
           })
           .catch(this.logger.error);
       });
-    });
 
-    Object.entries(this.apiMap.dotSama).forEach(([networkKey, { api }]) => {
-      getRegistry(networkKey, api)
-        .then((rs) => {
-          this.setChainRegistryItem(networkKey, rs);
-        })
-        .catch(this.logger.error);
+      this.onReady();
     });
-
-    this.onReady();
   }
 
   public subscribeChainRegistryMap () {

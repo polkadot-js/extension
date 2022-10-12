@@ -77,7 +77,7 @@ export function upsertCustomToken (targetToken: CustomToken, customTokenState: C
   } as UpsertCustomTokenResp;
 }
 
-const FUNGIBLE_TOKEN_STANDARDS = [
+export const FUNGIBLE_TOKEN_STANDARDS = [
   CustomTokenType.erc20,
   CustomTokenType.psp22
 ];

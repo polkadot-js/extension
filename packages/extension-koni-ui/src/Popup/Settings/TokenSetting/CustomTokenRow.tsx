@@ -17,13 +17,13 @@ interface Props extends ThemeProps {
   handleUnselected: (val: DeleteEvmTokenParams) => void;
 }
 
-function EvmTokenRow ({ className, handleSelected, handleUnselected, item }: Props): React.ReactElement {
+function CustomTokenRow ({ className, handleSelected, handleUnselected, item }: Props): React.ReactElement {
   const [isCheck, setIsChecked] = useState(false);
   const navigate = useContext(ActionContext);
 
   const updateTokenEditParams = useCallback(() => {
     store.dispatch({ type: 'tokenConfigParams/update', payload: { data: item } as TokenConfigParams });
-    navigate('/account/evm-token-edit');
+    navigate('/account/token-edit');
   }, [item, navigate]);
 
   const handleCheck = useCallback((checked: boolean) => {
@@ -70,7 +70,7 @@ function EvmTokenRow ({ className, handleSelected, handleUnselected, item }: Pro
   );
 }
 
-export default styled(EvmTokenRow)(({ theme }: Props) => `
+export default styled(CustomTokenRow)(({ theme }: Props) => `
   .link-edit {
     cursor: pointer;
     width: 82%;

@@ -17,7 +17,7 @@ export async function validateEvmToken (contractAddress: string, tokenType: Cust
   try {
     if (tokenType === CustomTokenType.erc721) {
       // eslint-disable-next-line @typescript-eslint/no-unsafe-argument,@typescript-eslint/no-unsafe-member-access
-      tokenContract = new web3.eth.Contract(ERC721Contract.abi, contractAddress);
+      tokenContract = new web3.eth.Contract(ERC721Contract, contractAddress);
 
       const [_name, _symbol] = await Promise.all([
         // eslint-disable-next-line @typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-member-access

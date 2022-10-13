@@ -161,10 +161,6 @@
   "I want to export all my accounts": "",
   "Notifications": "",
   "Search by name or network...": "",
-  "Message signing is not supported for hardware wallets.": "",
-  "Message signing is not supported for QR wallets.": "",
-  "Raw data signing is not supported for hardware wallets.": "",
-  "Raw data signing is not supported for QR wallets.": "",
   "Select all": "",
   "Accounts connected to {{url}}": "",
   "Connect {{total}} account(s)": "",
@@ -173,5 +169,6 @@
   "Understood": "",
   "Ask again later": "",
   "no accounts": "",
-  "all accounts": ""
+  "all accounts": "",
+  "Message signing is not supported for hardware wallets.": ""
 }

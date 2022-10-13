@@ -6,7 +6,7 @@ import type { ExtrinsicPayload } from '@polkadot/types/interfaces';
 import type { SignerPayloadJSON, SignerPayloadRaw } from '@polkadot/types/types';
 import type { HexString } from '@polkadot/util/types';
 
-import React, { useCallback, useContext, useEffect, useState } from 'react';
+import React, { useCallback, useContext, useEffect, useMemo, useState } from 'react';
 
 import { TypeRegistry } from '@polkadot/types';
 import { decodeAddress } from '@polkadot/util-crypto';
@@ -44,11 +44,10 @@ function isRawPayload (payload: SignerPayloadJSON | SignerPayloadRaw): payload i
   return !!(payload as SignerPayloadRaw).data;
 }
 
-export default function Request ({ account: { accountIndex, addressOffset, isExternal, isHardware }, buttonText, isFirst, request, signId, url }: Props): React.ReactElement<Props> | null {
+export default function Request ({ account: { accountIndex, addressOffset, genesisHash, isExternal, isHardware }, buttonText, isFirst, request, signId, url }: Props): React.ReactElement<Props> | null {
   const onAction = useContext(ActionContext);
   const [{ hexBytes, payload }, setData] = useState<Data>({ hexBytes: null, payload: null });
   const [error, setError] = useState<string | null>(null);
-  const { accounts } = useContext(AccountContext);
   const { t } = useTranslation();
 
   useEffect((): void => {
@@ -135,7 +134,6 @@ export default function Request ({ account: { accountIndex, addressOffset, isExt
     );
   } else if (hexBytes !== null) {
     const { address, data } = request.payload as SignerPayloadRaw;
-    const account = accounts.find((account) => decodeAddress(account.address).toString() === decodeAddress(address).toString());
 
     return (
       <>
@@ -145,12 +143,12 @@ export default function Request ({ account: { accountIndex, addressOffset, isExt
             isExternal={isExternal}
           />
         </div>
-        {isExternal && !isHardware && account?.genesisHash
+        {isExternal && !isHardware && genesisHash
           ? (
             <Qr
               address={address}
               cmd={CMD_SIGN_MESSAGE}
-              genesisHash={account.genesisHash}
+              genesisHash={genesisHash}
               onSignature={_onSignature}
               payload={data}
             />
@@ -163,7 +161,7 @@ export default function Request ({ account: { accountIndex, addressOffset, isExt
           )
         }
         <VerticalSpace />
-        {isExternal && !isHardware && !account?.genesisHash && (
+        {isExternal && !isHardware && !genesisHash && (
           <>
             <Warning isDanger>{t('"Allow use on any network" is not supported to show a QR code. You must associate this account with a network.')}</Warning>
             <VerticalSpace />

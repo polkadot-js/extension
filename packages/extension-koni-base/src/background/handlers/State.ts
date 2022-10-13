@@ -3,7 +3,7 @@
 
 import { withErrorLog } from '@subwallet/extension-base/background/handlers/helpers';
 import State, { AuthUrls, Resolver } from '@subwallet/extension-base/background/handlers/State';
-import { AccountRefMap, APIItemState, ApiMap, AuthRequestV2, BalanceItem, BalanceJson, ChainRegistry, ConfirmationDefinitions, ConfirmationsQueue, ConfirmationsQueueItemOptions, ConfirmationType, CrowdloanItem, CrowdloanJson, CurrentAccountInfo, CustomToken, CustomTokenJson, DeleteEvmTokenParams, EvmSendTransactionParams, EvmSendTransactionRequestQr, EvmSignatureRequestQr, ExternalRequestPromise, ExternalRequestPromiseStatus, NETWORK_STATUS, NetworkJson, NftCollection, NftItem, NftJson, NftTransferExtra, PriceJson, RequestAccountExportPrivateKey, RequestConfirmationComplete, RequestSettingsType, ResponseAccountExportPrivateKey, ResponseSettingsType, ResultResolver, ServiceInfo, SingleModeJson, StakeUnlockingJson, StakingItem, StakingJson, StakingRewardJson, ThemeTypes, TokenInfo, TransactionHistoryItemType } from '@subwallet/extension-base/background/KoniTypes';
+import { AccountRefMap, APIItemState, ApiMap, AuthRequestV2, BalanceItem, BalanceJson, ChainRegistry, ConfirmationDefinitions, ConfirmationsQueue, ConfirmationsQueueItemOptions, ConfirmationType, CrowdloanItem, CrowdloanJson, CurrentAccountInfo, CustomToken, CustomTokenJson, DeleteCustomTokenParams, EvmSendTransactionParams, EvmSendTransactionRequestQr, EvmSignatureRequestQr, ExternalRequestPromise, ExternalRequestPromiseStatus, NETWORK_STATUS, NetworkJson, NftCollection, NftItem, NftJson, NftTransferExtra, PriceJson, RequestAccountExportPrivateKey, RequestConfirmationComplete, RequestSettingsType, ResponseAccountExportPrivateKey, ResponseSettingsType, ResultResolver, ServiceInfo, SingleModeJson, StakeUnlockingJson, StakingItem, StakingJson, StakingRewardJson, ThemeTypes, TokenInfo, TransactionHistoryItemType } from '@subwallet/extension-base/background/KoniTypes';
 import { AuthorizeRequest, RequestAuthorizeTab } from '@subwallet/extension-base/background/types';
 import { Web3Transaction } from '@subwallet/extension-base/signers/types';
 import { getId } from '@subwallet/extension-base/utils/getId';
@@ -16,7 +16,7 @@ import { DEFAULT_STAKING_NETWORKS } from '@subwallet/extension-koni-base/api/sta
 // eslint-disable-next-line camelcase
 import { DotSamaCrowdloan_crowdloans_nodes } from '@subwallet/extension-koni-base/api/subquery/__generated__/DotSamaCrowdloan';
 import { fetchDotSamaCrowdloan } from '@subwallet/extension-koni-base/api/subquery/crowdloan';
-import { getTokensForChainRegistry, upsertCustomToken } from '@subwallet/extension-koni-base/api/tokens';
+import { deleteCustomTokens, getTokensForChainRegistry, upsertCustomToken } from '@subwallet/extension-koni-base/api/tokens';
 import { DEFAULT_SUPPORTED_TOKENS } from '@subwallet/extension-koni-base/api/tokens/defaultSupportedTokens';
 import { parseTxAndSignature } from '@subwallet/extension-koni-base/api/tokens/evm/transferQr';
 import { initEvmTokenState } from '@subwallet/extension-koni-base/api/tokens/evm/utils';
@@ -1312,60 +1312,23 @@ export default class KoniState extends State {
     this.updateServiceInfo();
   }
 
-  public deleteCustomTokens (targetTokens: DeleteEvmTokenParams[]) {
-    const _customTokenState: CustomTokenJson = this.customTokenState;
-    let needUpdateChainRegistry = false;
+  public deleteCustomTokens (targetTokens: DeleteCustomTokenParams[]) {
+    const { deletedNfts, newChainRegistryMap, newCustomTokenState } = deleteCustomTokens(targetTokens, this.customTokenState, this.chainRegistryMap);
 
-    for (const targetToken of targetTokens) {
-      for (let index = 0; index < _customTokenState.erc20.length; index++) {
-        if (_customTokenState.erc20[index].smartContract === targetToken.smartContract && _customTokenState.erc20[index].chain === targetToken.chain && targetToken.type === 'erc20') {
-          if (_customTokenState.erc20[index].isCustom) {
-            _customTokenState.erc20.splice(index, 1);
-          } else {
-            _customTokenState.erc20[index].isDeleted = true;
-          }
-
-          needUpdateChainRegistry = true;
-        }
-      }
+    // Delete stored nfts
+    for (const targetToken of deletedNfts) {
+      this.dbService.deleteNftsByCustomToken(this.getNetworkGenesisHashByKey(targetToken.chain), targetToken.smartContract).catch((e) => this.logger.warn(e));
     }
 
-    if (needUpdateChainRegistry) {
-      for (const targetToken of targetTokens) {
-        const chainRegistry = this.chainRegistryMap[targetToken.chain];
+    this.chainRegistryMap = newChainRegistryMap;
 
-        if (chainRegistry) {
-          let deleteKey = '';
+    console.log('newChainRegistryMap', newChainRegistryMap);
 
-          for (const [key, token] of Object.entries(chainRegistry.tokenMap)) {
-            if (token.contractAddress === targetToken.smartContract && targetToken.type === 'erc20') {
-              deleteKey = key;
-            }
-          }
+    Object.entries(newChainRegistryMap).forEach(([key, chainRegistry]) => {
+      cacheRegistryMap[key] = chainRegistry;
+    });
 
-          delete chainRegistry.tokenMap[deleteKey];
-          this.chainRegistryMap[targetToken.chain] = chainRegistry;
-          cacheRegistryMap[targetToken.chain] = chainRegistry;
-        }
-      }
-    }
-
-    for (const targetToken of targetTokens) {
-      for (let index = 0; index < _customTokenState.erc721.length; index++) {
-        if (_customTokenState.erc721[index].smartContract === targetToken.smartContract && _customTokenState.erc721[index].chain === targetToken.chain && targetToken.type === 'erc721') {
-          if (_customTokenState.erc721[index].isCustom) {
-            _customTokenState.erc721.splice(index, 1);
-          } else {
-            _customTokenState.erc721[index].isDeleted = true;
-          }
-        }
-      }
-
-      // Delete stored nfts
-      this.dbService.deleteNftsByEvmToken(this.getNetworkGenesisHashByKey(targetToken.chain), targetToken.smartContract).catch((e) => this.logger.warn(e));
-    }
-
-    this.customTokenState = _customTokenState;
+    this.customTokenState = newCustomTokenState;
     this.customTokenSubject.next(this.customTokenState);
     this.chainRegistrySubject.next(this.getChainRegistryMap());
     this.customTokenStore.set('EvmToken', this.customTokenState);

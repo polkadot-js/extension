@@ -1,7 +1,7 @@
 // Copyright 2019-2022 @subwallet/extension-koni-base authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { ApiProps, CustomToken, CustomTokenJson, CustomTokenType } from '@subwallet/extension-base/background/KoniTypes';
+import { ApiProps, ChainRegistry, CustomToken, CustomTokenJson, CustomTokenType, DeleteCustomTokenParams } from '@subwallet/extension-base/background/KoniTypes';
 import { validateEvmToken } from '@subwallet/extension-koni-base/api/tokens/evm/utils';
 import { validateWasmToken } from '@subwallet/extension-koni-base/api/tokens/wasm/utils';
 import Web3 from 'web3';
@@ -94,4 +94,66 @@ export function getTokensForChainRegistry (customTokenJson: CustomTokenJson) {
   }
 
   return customTokens;
+}
+
+export function deleteCustomTokens (targetTokens: DeleteCustomTokenParams[], customTokenState: CustomTokenJson, chainRegistryMap: Record<string, ChainRegistry>) {
+  let needUpdateChainRegistry = false;
+  const deletedNfts: DeleteCustomTokenParams[] = [];
+  const deletedFungibleTokens: DeleteCustomTokenParams[] = [];
+
+  // handle token state
+  for (const targetToken of targetTokens) {
+    const tokenList = customTokenState[targetToken.type];
+    let processed = false;
+
+    for (let index = 0; index < tokenList.length; index++) {
+      if (isEqualContractAddress(tokenList[index].smartContract, targetToken.smartContract) &&
+        tokenList[index].chain === targetToken.chain &&
+        tokenList[index].type === targetToken.type) {
+        if (tokenList[index].isCustom) {
+          tokenList.splice(index, 1);
+        } else {
+          tokenList[index].isDeleted = true;
+        }
+
+        processed = true;
+      }
+    }
+
+    if (processed) {
+      if (FUNGIBLE_TOKEN_STANDARDS.includes(targetToken.type)) {
+        needUpdateChainRegistry = true;
+        deletedFungibleTokens.push(targetToken);
+      } else {
+        deletedNfts.push(targetToken);
+      }
+    }
+  }
+
+  // update chain registry
+  if (needUpdateChainRegistry) {
+    for (const targetToken of deletedFungibleTokens) {
+      const chainRegistry = chainRegistryMap[targetToken.chain];
+
+      if (chainRegistry) {
+        let deleteKey = '';
+
+        for (const [key, token] of Object.entries(chainRegistry.tokenMap)) {
+          if (token.contractAddress && isEqualContractAddress(token.contractAddress, targetToken.smartContract) && token.type === targetToken.type) {
+            deleteKey = key;
+            break;
+          }
+        }
+
+        delete chainRegistry.tokenMap[deleteKey];
+        chainRegistryMap[targetToken.chain] = chainRegistry;
+      }
+    }
+  }
+
+  return {
+    newCustomTokenState: customTokenState,
+    newChainRegistryMap: chainRegistryMap,
+    deletedNfts
+  };
 }

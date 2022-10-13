@@ -116,7 +116,7 @@ export default class DatabaseService {
     return this.stores.nft.deleteNftsFromRemovedCollection(chainHash, address, collectionIds);
   }
 
-  deleteNftsByEvmToken (chainHash: string, tokenId: string) {
+  deleteNftsByCustomToken (chainHash: string, tokenId: string) {
     return this.stores.nft.deleteNftsByCollection(chainHash, tokenId);
   }
 

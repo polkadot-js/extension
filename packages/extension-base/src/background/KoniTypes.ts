@@ -793,7 +793,7 @@ export interface CustomTokenJson {
   [CustomTokenType.psp34]: CustomToken[]
 }
 
-export interface DeleteEvmTokenParams {
+export interface DeleteCustomTokenParams {
   smartContract: string,
   chain: string,
   type: CustomTokenType
@@ -1390,7 +1390,7 @@ export interface KoniRequestSignatures {
   'pri(networkMap.getNetworkMap)': [null, Record<string, NetworkJson>];
   'pri(networkMap.getSubscription)': [null, Record<string, NetworkJson>, Record<string, NetworkJson>];
   'pri(customTokenState.validateCustomToken)': [ValidateCustomTokenRequest, ValidateCustomTokenResponse];
-  'pri(customTokenState.deleteMany)': [DeleteEvmTokenParams[], boolean];
+  'pri(customTokenState.deleteMany)': [DeleteCustomTokenParams[], boolean];
   'pri(customTokenState.upsertCustomTokenState)': [CustomToken, boolean];
   'pri(customTokenState.getCustomTokenState)': [null, CustomTokenJson];
   'pri(customTokenState.getSubscription)': [null, CustomTokenJson, CustomTokenJson];

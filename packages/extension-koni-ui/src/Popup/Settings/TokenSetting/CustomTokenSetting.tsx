@@ -1,7 +1,7 @@
 // Copyright 2019-2022 @polkadot/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { CustomToken, DeleteEvmTokenParams } from '@subwallet/extension-base/background/KoniTypes';
+import { CustomToken, DeleteCustomTokenParams } from '@subwallet/extension-base/background/KoniTypes';
 import { Button, ButtonArea, InputFilter } from '@subwallet/extension-koni-ui/components';
 import Modal from '@subwallet/extension-koni-ui/components/Modal';
 import useFetchCustomToken from '@subwallet/extension-koni-ui/hooks/screen/setting/useFetchCustomToken';
@@ -24,7 +24,7 @@ function CustomTokenSetting ({ className }: Props): React.ReactElement {
 
   const customTokens = useFetchCustomToken();
   const [searchString, setSearchString] = useState('');
-  const [selectedTokens, setSelectedTokens] = useState<DeleteEvmTokenParams[]>([]);
+  const [selectedTokens, setSelectedTokens] = useState<DeleteCustomTokenParams[]>([]);
   const [showModal, setShowModal] = useState(false);
 
   const _onChangeFilter = useCallback((val: string) => {
@@ -43,14 +43,14 @@ function CustomTokenSetting ({ className }: Props): React.ReactElement {
     return _filteredTokens;
   }, [customTokens, searchString]);
 
-  const handleSelected = useCallback((data: DeleteEvmTokenParams) => {
+  const handleSelected = useCallback((data: DeleteCustomTokenParams) => {
     setSelectedTokens([
       ...selectedTokens,
       data
     ]);
   }, [selectedTokens]);
 
-  const handleUnselected = useCallback((data: DeleteEvmTokenParams) => {
+  const handleUnselected = useCallback((data: DeleteCustomTokenParams) => {
     const _selectedTokens = [];
 
     for (const token of selectedTokens) {

@@ -11,4 +11,23 @@ interface WasmTokenJson {
 export const DEFAULT_WASM_TOKENS: WasmTokenJson = {
   psp22: [],
   psp34: []
+  // psp22: [
+  //   {
+  //     name: 'PANX',
+  //     smartContract: '5CY8zDBjUDNwZBHdGbERtLLSZqY7dJYsm1KhY6tSorYvnSke',
+  //     chain: 'alephTest',
+  //     symbol: 'PANX',
+  //     decimals: 12,
+  //     type: CustomTokenType.psp22,
+  //     isCustom: true
+  //   }
+  // ],
+  // psp34: [
+  //   {
+  //     name: 'Frog Collection',
+  //     smartContract: '5EQXQ5E1NfU6Znm3avpZM7mArxZDwQeugJG3pFNADU6Pygfw',
+  //     chain: 'alephTest',
+  //     type: CustomTokenType.psp34
+  //   }
+  // ]
 };

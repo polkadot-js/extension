@@ -1,10 +1,8 @@
 // Copyright 2019-2022 @subwallet/extension-koni authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { CustomTokenType } from '@subwallet/extension-base/background/KoniTypes';
 import { PREDEFINED_NETWORKS } from '@subwallet/extension-koni-base/api/predefinedNetworks';
 import { PSP22Contract } from '@subwallet/extension-koni-base/api/tokens/wasm/helper';
-import { validateWasmToken } from '@subwallet/extension-koni-base/api/tokens/wasm/utils';
 import { DOTSAMA_AUTO_CONNECT_MS } from '@subwallet/extension-koni-base/constants';
 import { getCurrentProvider, isValidSubstrateAddress } from '@subwallet/extension-koni-base/utils';
 
@@ -80,12 +78,12 @@ describe('test DotSama APIs', () => {
     // console.log(_result);
     //
     // const balanceOf = await contract.query['psp22::balanceOf']('5HbcGs2QXVAc6Q6eoTzLYNAJWpN17AkCFRLnWDaHCiGYXvNc', { gasLimit: -1 }, '5HbcGs2QXVAc6Q6eoTzLYNAJWpN17AkCFRLnWDaHCiGYXvNc');
-    //
-    // const result = balanceOf.output.toHuman();
+
+    // const result = balanceOf.output.toString();
     //
     // console.log(balanceOf.result.isOk);
     //
-    // console.log(result);
+    // console.log('result', typeof result, result);
     //
     // const transfer = contract.tx['psp22::transfer']({ gasLimit: '100000' }, '5Dy4D7r9HeWvrcyjUF51zK3z3gePYrcaT9fF8Q7M6LYhgrGM', '100000', '');
     //
@@ -116,17 +114,18 @@ describe('test DotSama APIs', () => {
 
   test('validate contract', async () => {
     const resp = isValidSubstrateAddress('5HbcGs2QXVAc6Q6eoTzLYNAJWpN17AkCFRLnWDaHCiGYXvNc');
-    const provider = new WsProvider(getCurrentProvider(PREDEFINED_NETWORKS.alephTest), DOTSAMA_AUTO_CONNECT_MS);
+    const provider = new WsProvider(getCurrentProvider(PREDEFINED_NETWORKS.polkadot), DOTSAMA_AUTO_CONNECT_MS);
     const apiPromise = new ApiPromise({ provider });
     const api = await apiPromise.isReady;
 
+    console.log(api.query.contracts);
     console.log('resp', resp);
-
-    // const psp34Address = '5EQXQ5E1NfU6Znm3avpZM7mArxZDwQeugJG3pFNADU6Pygfw';
-    const psp22Address = '5CY8zDBjUDNwZBHdGbERtLLSZqY7dJYsm1KhY6tSorYvnSke';
-
-    const res = await validateWasmToken(psp22Address, CustomTokenType.psp22, api, '5HbcGs2QXVAc6Q6eoTzLYNAJWpN17AkCFRLnWDaHCiGYXvNc');
-
-    console.log(res);
+    //
+    // // const psp34Address = '5EQXQ5E1NfU6Znm3avpZM7mArxZDwQeugJG3pFNADU6Pygfw';
+    // const psp22Address = '5CY8zDBjUDNwZBHdGbERtLLSZqY7dJYsm1KhY6tSorYvnSke';
+    //
+    // const res = await validateWasmToken(psp22Address, CustomTokenType.psp22, api, '5HbcGs2QXVAc6Q6eoTzLYNAJWpN17AkCFRLnWDaHCiGYXvNc');
+    //
+    // console.log(res);
   });
 });

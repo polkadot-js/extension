@@ -130,6 +130,48 @@ export const PREDEFINED_NETWORKS: Record<string, NetworkJson> = {
     decimals: 18,
     coinGeckoKey: 'metaverse-network-pioneer'
   },
+  ethereum: {
+    key: 'ethereum',
+    chain: 'Ethereum Mainnet',
+    genesisHash: '0xb60d7bdd334cd3768d43f14a05c7fe7e886ba5bcb77e1064530052fed1a3f145',
+    ss58Format: 0,
+    providers: {
+      Infura: 'https://mainnet.infura.io/v3/b6bf7d3508c941499b10025c0776eaf8'
+    },
+    active: true,
+    currentProviderMode: 'http',
+    currentProvider: 'Infura',
+    groups: ['MAIN_NET'],
+    isEthereum: true,
+    nativeToken: 'ETH',
+    decimals: 18,
+    coinGeckoKey: 'ethereum',
+    evmChainId: 1,
+    supportBonding: false,
+    getStakingOnChain: false,
+    abiExplorer: 'https://etherscan.io'
+  },
+  binance: {
+    key: 'binance',
+    chain: 'Binance Smart Chain',
+    genesisHash: '0x59bba357145ca539dcd1ac957abc1ec5833319ddcae7f5e8b5da0c36624784b2',
+    ss58Format: 0,
+    providers: {
+      Binance: 'https://bsc-dataseed.binance.org/'
+    },
+    active: false,
+    currentProviderMode: 'http',
+    currentProvider: 'Binance',
+    groups: ['MAIN_NET'],
+    isEthereum: true,
+    nativeToken: 'BNB',
+    decimals: 18,
+    coinGeckoKey: 'binancecoin',
+    evmChainId: 56,
+    supportBonding: false,
+    getStakingOnChain: false,
+    abiExplorer: 'https://bscscan.com'
+  },
   moonbeam: {
     key: 'moonbeam',
     chain: 'Moonbeam',

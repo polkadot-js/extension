@@ -25,6 +25,11 @@ function formatTokenSymbol (rawSymbol: string) {
   return rawSymbol;
 }
 
+const DEFAULT_TOKEN_REGISTRY: Record<string, { chainDecimals: number[], chainTokens: string[] }> = {
+  ethereum: { chainDecimals: [18], chainTokens: ['ETH'] },
+  binance: { chainDecimals: [18], chainTokens: ['BNB'] }
+};
+
 export async function getMoonAssets (api: ApiPromise) {
   await api.isReady;
   const assets = await api.query.assets.metadata.entries();
@@ -147,7 +152,7 @@ export const getRegistry = async (networkKey: string, api: ApiPromise, customErc
 
   await api.isReady;
 
-  const { chainDecimals, chainTokens } = api.registry;
+  const { chainDecimals, chainTokens } = api.registry || DEFAULT_TOKEN_REGISTRY[networkKey] || { chainDecimals: [], chainTokens: [] };
 
   // Hotfix for these network because substrate and evm response different decimal
   if (['pangolinEvm', 'crabEvm'].includes(networkKey)) {

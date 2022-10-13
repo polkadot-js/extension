@@ -211,7 +211,11 @@ const LogosMap: Record<string, string> = {
   // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
   eth: require('./77.Ethereum.png'),
   // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+  ethereum: require('./77.Ethereum.png'),
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
   bnb: require('./62.BNB.png'),
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+  binance: require('./62.BNB.png'),
   // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
   usdt: require('./106.USDT.png'),
   // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment

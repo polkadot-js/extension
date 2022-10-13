@@ -1534,7 +1534,7 @@ export default class KoniState extends State {
 
     if (this.networkMap[data.key].active) { // update API map if network is active
       if (data.key in this.apiMap.dotSama) {
-        await this.apiMap.dotSama[data.key].api.disconnect();
+        await this.apiMap.dotSama[data.key].api?.disconnect();
         delete this.apiMap.dotSama[data.key];
       }
 
@@ -1579,7 +1579,7 @@ export default class KoniState extends State {
     }
 
     this.lockNetworkMap = true;
-    await this.apiMap.dotSama[networkKey]?.api.disconnect();
+    this.apiMap.dotSama[networkKey].api.disconnect && await this.apiMap.dotSama[networkKey].api.disconnect();
     delete this.apiMap.dotSama[networkKey];
 
     if (this.networkMap[networkKey].isEthereum && this.networkMap[networkKey].isEthereum) {
@@ -1653,7 +1653,7 @@ export default class KoniState extends State {
     this.networkMapStore.set('NetworkMap', this.networkMap);
 
     for (const key of targetNetworkKeys) {
-      await this.apiMap.dotSama[key].api.disconnect();
+      await this.apiMap.dotSama[key].api?.disconnect();
       delete this.apiMap.dotSama[key];
 
       if (this.networkMap[key].isEthereum && this.networkMap[key].isEthereum) {
@@ -1679,14 +1679,16 @@ export default class KoniState extends State {
       return false;
     }
 
-    this.lockNetworkMap = true;
-    this.apiMap.dotSama[networkKey] = initApi(networkKey, getCurrentProvider(this.networkMap[networkKey]), this.networkMap[networkKey].isEthereum);
+    const networkData = this.networkMap[networkKey];
 
-    if (this.networkMap[networkKey].isEthereum && this.networkMap[networkKey].isEthereum) {
-      this.apiMap.web3[networkKey] = initWeb3Api(getCurrentProvider(this.networkMap[networkKey]));
+    this.lockNetworkMap = true;
+    this.apiMap.dotSama[networkKey] = initApi(networkKey, getCurrentProvider(networkData), networkData.isEthereum);
+
+    if (networkData.isEthereum && networkData.isEthereum) {
+      this.apiMap.web3[networkKey] = initWeb3Api(getCurrentProvider(networkData));
     }
 
-    this.networkMap[networkKey].active = true;
+    networkData.active = true;
     this.networkMapSubject.next(this.networkMap);
     this.networkMapStore.set('NetworkMap', this.networkMap);
     this.updateServiceInfo();
@@ -1768,7 +1770,7 @@ export default class KoniState extends State {
     this.networkMapStore.set('NetworkMap', this.networkMap);
 
     for (const key of targetNetworkKeys) {
-      await this.apiMap.dotSama[key].api.disconnect();
+      await this.apiMap.dotSama[key].api?.disconnect();
       delete this.apiMap.dotSama[key];
 
       if (this.networkMap[key].isEthereum && this.networkMap[key].isEthereum) {
@@ -1954,7 +1956,7 @@ export default class KoniState extends State {
     return Promise.all(Object.values(this.apiMap.dotSama).map(async (network) => {
       if (network.api.isConnected) {
         this.logger.log(`[Dotsama] Stopping network [${network.specName}]`);
-        await network.api.disconnect();
+        await network.api?.disconnect();
       }
     }));
   }
@@ -1975,7 +1977,7 @@ export default class KoniState extends State {
 
     // Reconnect dotsama networks
     return Promise.all(Object.values(this.apiMap.dotSama).map(async (network) => {
-      if (!network.api.isConnected) {
+      if (!network.api.isConnected && network.api.connect) {
         this.logger.log(`[Dotsama] Resumming network [${network.specName}]`);
         await network.api.connect();
       }

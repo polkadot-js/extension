@@ -90,7 +90,7 @@ function subscribeERC20Interval (addresses: string[], networkKey: string, api: A
   };
 
   getRegistry(networkKey, api, state.getActiveErc20Tokens()).then(({ tokenMap }) => {
-    tokenList = Object.values(tokenMap).filter(({ erc20Address }) => (!!erc20Address));
+    tokenList = Object.values(tokenMap).filter(({ contractAddress }) => (!!contractAddress));
     tokenList.forEach(({ contractAddress, symbol }) => {
       if (contractAddress) {
         ERC20ContractMap[symbol] = getERC20Contract(networkKey, contractAddress, web3ApiMap);

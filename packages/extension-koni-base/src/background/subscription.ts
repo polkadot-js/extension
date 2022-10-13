@@ -187,6 +187,7 @@ export class KoniSubscription {
 
   initBalanceSubscription (key: string, addresses: string[], dotSamaApiMap: Record<string, ApiProps>, web3ApiMap: Record<string, Web3>, onlyRunOnFirstTime?: boolean) {
     const unsub = subscribeBalance(addresses, dotSamaApiMap, web3ApiMap, (networkKey, rs) => {
+      console.log('balance item', rs);
       this.state.setBalanceItem(networkKey, rs);
     });
 

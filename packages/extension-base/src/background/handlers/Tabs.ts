@@ -210,7 +210,7 @@ export default class Tabs {
     return false;
   }
 
-  public async handle<TMessageType extends MessageTypes> (id: string, type: TMessageType, request: RequestTypes[TMessageType], url: string, port: chrome.runtime.Port): Promise<ResponseTypes[keyof ResponseTypes]> {
+  public async handle<TMessageType extends MessageTypes> (id: string, type: TMessageType, request: RequestTypes[TMessageType], url: string, port?: chrome.runtime.Port): Promise<ResponseTypes[keyof ResponseTypes]> {
     if (type === 'pub(phishing.redirectIfDenied)') {
       return this.redirectIfPhishing(url);
     }
@@ -227,7 +227,7 @@ export default class Tabs {
         return this.accountsListAuthorized(url, request as RequestAccountList);
 
       case 'pub(accounts.subscribe)':
-        return this.accountsSubscribeAuthorized(url, id, port);
+        return port && this.accountsSubscribeAuthorized(url, id, port);
 
       case 'pub(accounts.unsubscribe)':
         return this.accountsUnsubscribe(url, request as RequestAccountUnsubscribe);
@@ -248,19 +248,19 @@ export default class Tabs {
         return this.rpcListProviders();
 
       case 'pub(rpc.send)':
-        return this.rpcSend(request as RequestRpcSend, port);
+        return port && this.rpcSend(request as RequestRpcSend, port);
 
       case 'pub(rpc.startProvider)':
-        return this.rpcStartProvider(request as string, port);
+        return port && this.rpcStartProvider(request as string, port);
 
       case 'pub(rpc.subscribe)':
-        return this.rpcSubscribe(request as RequestRpcSubscribe, id, port);
+        return port && this.rpcSubscribe(request as RequestRpcSubscribe, id, port);
 
       case 'pub(rpc.subscribeConnected)':
-        return this.rpcSubscribeConnected(request as null, id, port);
+        return port && this.rpcSubscribeConnected(request as null, id, port);
 
       case 'pub(rpc.unsubscribe)':
-        return this.rpcUnsubscribe(request as RequestRpcUnsubscribe, port);
+        return port && this.rpcUnsubscribe(request as RequestRpcUnsubscribe, port);
 
       default:
         throw new Error(`Unable to handle message of type ${type}`);

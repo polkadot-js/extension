@@ -20,7 +20,14 @@ interface Props extends ThemeProps {
 function AddAccountImage ({ className, onClick }: Props): React.ReactElement<Props> {
   return (
     <svg className={className} width='265' height='265' viewBox='0 0 265 265' fill='none' xmlns='http://www.w3.org/2000/svg'>
-      <mask id='mask0' mask-type='alpha' maskUnits='userSpaceOnUse' x='40' y='40' width='185' height='185'>
+      <mask
+        id='mask0'
+        maskUnits='userSpaceOnUse'
+        x='40'
+        y='40'
+        width='185'
+        height='185'
+      >
         <circle cx='132.5' cy='132.5' r='92' fill='white' fillOpacity='0.9' stroke='#E3E7ED' />
       </mask>
       <g mask='url(#mask0)'>

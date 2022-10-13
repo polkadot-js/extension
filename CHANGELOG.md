@@ -1,5 +1,23 @@
 # CHANGELOG
 
+## master
+
+Changes:
+
+- Ensure that `EXTENSION_PREFIX` is always set as part of `@polkadot/extension-base`
+
+
+## 0.44.6 Aug 21, 2022
+
+- **Important** Not published to the stores, aligns with latest released packages.
+
+Changes:
+
+- Swap to using webpack from `@polkadot/dev`
+- Upgrade to `@polkadot/api` 9.2.3
+- Updated to `@polkadot/util` 10.1.5
+
+
 ## 0.44.5 Aug 13, 2022
 
 - **Important** Not published to the stores, aligns with latest released packages.

@@ -27,8 +27,12 @@ function Request ({ authId, className, isFirst, request: { origin }, url }: Prop
   const onAction = useContext(ActionContext);
 
   useEffect(() => {
-    setSelectedAccounts && setSelectedAccounts([]);
-  }, [setSelectedAccounts]);
+    const defaultAccountSelection = accounts
+      .filter(({ isDefaultAuthSelected }) => !!isDefaultAuthSelected)
+      .map(({ address }) => address);
+
+    setSelectedAccounts && setSelectedAccounts(defaultAccountSelection);
+  }, [accounts, setSelectedAccounts]);
 
   const _onApprove = useCallback(
     (): void => {

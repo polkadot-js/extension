@@ -37,7 +37,7 @@ function AccountManagement ({ className }: Props): React.ReactElement<Props> {
   const _onApprove = useCallback(
     (): void => {
       updateAuthorization(selectedAccounts, url)
-        .then(() => onAction('/auth-list'))
+        .then(() => onAction('..'))
         .catch(console.error);
     },
     [onAction, selectedAccounts, url]

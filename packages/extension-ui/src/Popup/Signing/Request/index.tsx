@@ -6,12 +6,11 @@ import type { ExtrinsicPayload } from '@polkadot/types/interfaces';
 import type { SignerPayloadJSON, SignerPayloadRaw } from '@polkadot/types/types';
 import type { HexString } from '@polkadot/util/types';
 
-import React, { useCallback, useContext, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useContext, useEffect, useState } from 'react';
 
 import { TypeRegistry } from '@polkadot/types';
-import { decodeAddress } from '@polkadot/util-crypto';
 
-import { AccountContext, ActionContext, Address, VerticalSpace, Warning } from '../../../components';
+import { ActionContext, Address, VerticalSpace, Warning } from '../../../components';
 import { useTranslation } from '../../../components/translate';
 import { approveSignSignature } from '../../../messaging';
 import Bytes from '../Bytes';

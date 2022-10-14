@@ -1739,6 +1739,7 @@ export default class KoniExtension extends Extension {
     try {
       return await state.upsertNetworkMap(data);
     } catch (e) {
+      console.error(e);
       return false;
     }
   }

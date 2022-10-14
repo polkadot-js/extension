@@ -1534,7 +1534,7 @@ export default class KoniState extends State {
 
     if (this.networkMap[data.key].active) { // update API map if network is active
       if (data.key in this.apiMap.dotSama) {
-        await this.apiMap.dotSama[data.key].api?.disconnect();
+        this.apiMap.dotSama[data.key].api?.disconnect && await this.apiMap.dotSama[data.key].api.disconnect();
         delete this.apiMap.dotSama[data.key];
       }
 

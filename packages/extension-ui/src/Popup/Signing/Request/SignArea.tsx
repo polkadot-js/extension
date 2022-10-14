@@ -17,12 +17,11 @@ interface Props {
   error: string | null;
   isExternal?: boolean;
   isFirst: boolean;
-  isSignable: boolean;
   setError: (value: string | null) => void;
   signId: string;
 }
 
-function SignArea ({ buttonText, className, error, isExternal, isFirst, isSignable, setError, signId }: Props): JSX.Element {
+function SignArea ({ buttonText, className, error, isExternal, isFirst, setError, signId }: Props): JSX.Element {
   const [savePass, setSavePass] = useState(false);
   const [isLocked, setIsLocked] = useState<boolean | null>(null);
   const [password, setPassword] = useState('');
@@ -97,7 +96,7 @@ function SignArea ({ buttonText, className, error, isExternal, isFirst, isSignab
 
   return (
     <ButtonArea className={className}>
-      {isSignable && isFirst && !isExternal && (
+      {isFirst && !isExternal && (
         <>
           {isLocked && (
             <Unlock

@@ -2,7 +2,6 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { ApiProps, NftCollection, NftItem } from '@subwallet/extension-base/background/KoniTypes';
-import { SUPPORTED_NFT_NETWORKS } from '@subwallet/extension-koni-base/api/nft/config';
 import { BaseNftApi, HandleNftParams } from '@subwallet/extension-koni-base/api/nft/nft';
 import { hexToStr, hexToUTF16, parseIpfsLink, utf16ToString } from '@subwallet/extension-koni-base/utils';
 
@@ -133,7 +132,7 @@ export default class UniqueNftApi extends BaseNftApi {
     };
   }
 
-  public async handleNfts (params: HandleNftParams) {
+  public async handleNft (address: string, params: HandleNftParams) {
     // const start = performance.now();
 
     const collectionCount = await this.getCollectionCount();
@@ -144,8 +143,8 @@ export default class UniqueNftApi extends BaseNftApi {
 
     try {
       for (let i = 0; i < collectionCount; i++) {
-        for (const address of this.addresses) {
-          addressTokenDict.push({ i, account: address });
+        for (const addr of [address]) {
+          addressTokenDict.push({ i, account: addr });
         }
       }
 
@@ -165,7 +164,7 @@ export default class UniqueNftApi extends BaseNftApi {
         }
       }));
 
-      params.updateCollectionIds(SUPPORTED_NFT_NETWORKS.unique_network, allCollectionId.map((o) => o.toString()));
+      params.updateCollectionIds(this.chain, address, allCollectionId.map((o) => o.toString()));
 
       await Promise.all(allCollectionId.map(async (collectionId) => {
         const collectionIdStr = collectionId.toString();
@@ -174,16 +173,16 @@ export default class UniqueNftApi extends BaseNftApi {
         const collection = (await this.dotSamaApi.api.query.nft.collectionById(collectionId)).toJSON() as unknown as Collection;
 
         collectionMap[collectionIdStr] = collection;
-        const collectionNftIds = Object.entries(nftMap).filter((item) => item[1] === collectionId).map((item) => item[0]);
+        const nftIds = Object.entries(nftMap).filter((item) => item[1] === collectionId).map((item) => item[0]);
 
-        params.updateNftIds(SUPPORTED_NFT_NETWORKS.unique_network, collectionIdStr, collectionNftIds);
+        params.updateNftIds(this.chain, collectionIdStr, address, nftIds);
 
         const parsedCollection: NftCollection = {
           collectionId: collectionIdStr,
-          chain: SUPPORTED_NFT_NETWORKS.unique_network
+          chain: this.chain
         };
 
-        await Promise.all(collectionNftIds.map(async (nft) => {
+        await Promise.all(nftIds.map(async (nft) => {
           const tokenId = nft;
           const imageUrl = this.getNftImageUrl(collection, tokenId);
 
@@ -198,7 +197,8 @@ export default class UniqueNftApi extends BaseNftApi {
               collectionId: collectionIdStr,
               properties: tokenData.properties,
               rarity: '',
-              chain: SUPPORTED_NFT_NETWORKS.unique_network
+              chain: this.chain,
+              owner: address
             } as NftItem;
 
             if (!parsedCollection.collectionName) {
@@ -206,15 +206,19 @@ export default class UniqueNftApi extends BaseNftApi {
               parsedCollection.image = parseIpfsLink(tokenData.image);
             }
 
-            params.updateItem(parsedItem);
-            params.updateCollection(parsedCollection);
-            params.updateReady(true);
+            params.updateItem(this.chain, parsedItem, address);
+            params.updateCollection(this.chain, parsedCollection);
+            // params.updateReady(true);
           }
         }));
       }));
     } catch (e) {
       console.error('Failed to fetch unique nft', e);
     }
+  }
+
+  public async handleNfts (params: HandleNftParams) {
+    await Promise.all(this.addresses.map((address) => this.handleNft(address, params)));
   }
 
   public async fetchNfts (params: HandleNftParams): Promise<number> {

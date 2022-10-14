@@ -7,12 +7,12 @@ import { TokenInfo } from '@subwallet/extension-base/background/KoniTypes';
 // Note: tokenKey and TokenInfo.symbol must be the same value to prevent unwanted problem
 export const PREDEFINE_TOKEN_DATA_MAP: Record<string, Record<string, TokenInfo>> = {
   statemine: {
-    USDT: {
+    USDt: {
       isMainToken: false,
-      assetIndex: 11,
-      symbol: 'USDT',
-      name: 'USDT',
-      decimals: 4
+      assetIndex: 1984,
+      symbol: 'USDt',
+      name: 'USDt',
+      decimals: 6
     },
     USDC: {
       isMainToken: false,
@@ -345,13 +345,6 @@ export const PREDEFINE_TOKEN_DATA_MAP: Record<string, Record<string, TokenInfo>>
     }
   },
   moonriver: {
-    USDT: {
-      isMainToken: false,
-      symbol: 'USDT',
-      erc20Address: '0xB44a9B6905aF7c801311e8F4E76932ee959c663C',
-      decimals: 6,
-      name: 'Tether USD'
-    },
     USDC: {
       isMainToken: false,
       symbol: 'USDC',
@@ -734,6 +727,14 @@ export const PREDEFINE_TOKEN_DATA_MAP: Record<string, Record<string, TokenInfo>>
     }
   },
   shidenEvm: {
+    USDT: {
+      isMainToken: false,
+      symbol: 'USDT',
+      erc20Address: '0xFFFFFFFF000000000000000000000001000007C0',
+      decimals: 6,
+      name: 'Tether USD',
+      assetId: '4294969280'
+    },
     aUSD: {
       isMainToken: false,
       symbol: 'aUSD',
@@ -782,13 +783,6 @@ export const PREDEFINE_TOKEN_DATA_MAP: Record<string, Record<string, TokenInfo>>
       erc20Address: '0xfa9343c3897324496a05fc75abed6bac29f8a40f',
       decimals: 6,
       name: 'USD Coin'
-    },
-    USDT: {
-      isMainToken: false,
-      symbol: 'USDT',
-      erc20Address: '0x818ec0A7Fe18Ff94269904fCED6AE3DaE6d6dC0b',
-      decimals: 18,
-      name: 'Tether USD'
     },
     WSDN: {
       isMainToken: false,

@@ -171,12 +171,14 @@ export async function handleAstarBondingTxInfo (networkJson: NetworkJson, amount
     ]);
 
     const feeString = parseNumberToDisplay(txInfo.partialFee, networkJson.decimals) + ` ${networkJson.nativeToken ? networkJson.nativeToken : ''}`;
+    const rawFee = parseRawNumber(txInfo.partialFee.toString());
     const binaryBalance = new BN(balance);
 
     const sumAmount = txInfo.partialFee.addn(amount);
     const balanceError = sumAmount.gt(binaryBalance);
 
     return {
+      rawFee,
       fee: feeString,
       balanceError
     } as BasicTxInfo;
@@ -214,10 +216,12 @@ export async function handleAstarUnbondingTxInfo (networkJson: NetworkJson, amou
     ]);
 
     const feeString = parseNumberToDisplay(txInfo.partialFee, networkJson.decimals) + ` ${networkJson.nativeToken ? networkJson.nativeToken : ''}`;
+    const rawFee = parseRawNumber(txInfo.partialFee.toString());
     const binaryBalance = new BN(balance);
     const balanceError = txInfo.partialFee.gt(binaryBalance);
 
     return {
+      rawFee,
       fee: feeString,
       balanceError
     } as BasicTxInfo;
@@ -310,10 +314,12 @@ export async function handleAstarWithdrawalTxInfo (networkKey: string, networkJs
   ]);
 
   const feeString = parseNumberToDisplay(txInfo.partialFee, networkJson.decimals) + ` ${networkJson.nativeToken ? networkJson.nativeToken : ''}`;
+  const rawFee = parseRawNumber(txInfo.partialFee.toString());
   const binaryBalance = new BN(balance);
   const balanceError = txInfo.partialFee.gt(binaryBalance);
 
   return {
+    rawFee,
     fee: feeString,
     balanceError
   } as BasicTxInfo;
@@ -384,10 +390,12 @@ export async function handleAstarClaimRewardTxInfo (address: string, networkKey:
     ]);
 
     const feeString = parseNumberToDisplay(txInfo.partialFee, networkJson.decimals) + ` ${networkJson.nativeToken ? networkJson.nativeToken : ''}`;
+    const rawFee = parseRawNumber(txInfo.partialFee.toString());
     const binaryBalance = new BN(balance);
     const balanceError = txInfo.partialFee.gt(binaryBalance);
 
     return {
+      rawFee,
       fee: feeString,
       balanceError
     } as BasicTxInfo;
@@ -482,14 +490,16 @@ export async function getAstarDelegationInfo (dotSamaApi: ApiProps, address: str
     allDapps = _allDapps as Record<string, any>[];
   }
 
-  const dappMap: Record<string, string> = {};
+  const dappMap: Record<string, { identity: string; icon?: string; }> = {};
   const delegationsList: DelegationItem[] = [];
 
   if (allDapps !== null) {
     for (const dappInfo of allDapps) {
       const dappAddress = dappInfo.address as string;
+      const dappName = dappInfo.name as string;
+      const dappIcon = isUrl(dappInfo.iconUrl as string) ? dappInfo.iconUrl as string : undefined;
 
-      dappMap[dappAddress.toLowerCase()] = dappInfo.name as string;
+      dappMap[dappAddress.toLowerCase()] = { identity: dappName, icon: dappIcon };
     }
   }
 
@@ -511,7 +521,8 @@ export async function getAstarDelegationInfo (dotSamaApi: ApiProps, address: str
       owner: dappAddress,
       amount: totalStake.toString(),
       minBond: minStake.toString(),
-      identity: dappMap[dappAddress],
+      identity: dappMap[dappAddress].identity,
+      icon: dappMap[dappAddress].icon,
       hasScheduledRequest: false
     });
   }

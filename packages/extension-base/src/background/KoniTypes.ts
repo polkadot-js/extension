@@ -442,6 +442,11 @@ export interface TransactionHistoryItemType {
   eventIdx?: number | null;
 }
 
+export interface TransactionHistoryItemJson {
+  items: TransactionHistoryItemType[],
+  total: number
+}
+
 export interface RequestTransactionHistoryGet {
   address: string;
   networkKey: string;
@@ -1099,7 +1104,8 @@ export interface ChainBondingBasics {
 
 export interface BasicTxInfo {
   fee: string,
-  balanceError: boolean
+  balanceError: boolean,
+  rawFee?: number
 }
 
 export interface BondingSubmitParams {
@@ -1157,6 +1163,7 @@ export interface DelegationItem {
   identity?: string,
   minBond: string,
   hasScheduledRequest: boolean
+  icon?: string;
 }
 
 export interface UnlockingStakeInfo {
@@ -1306,7 +1313,8 @@ export interface TuringStakeCompoundResp {
   txInfo: BasicTxInfo,
   optimalFrequency: string,
   initTime: number,
-  compoundFee: string
+  compoundFee: string,
+  rawCompoundFee?: number
 }
 
 export interface TransakNetwork {
@@ -1385,7 +1393,7 @@ export interface KoniRequestSignatures {
   'pri(nft.getNft)': [null, NftJson];
   'pri(nft.getSubscription)': [RequestSubscribeNft, NftJson, NftJson];
   'pri(nftCollection.getNftCollection)': [null, NftCollectionJson];
-  'pri(nftCollection.getSubscription)': [null, NftCollectionJson, NftCollectionJson];
+  'pri(nftCollection.getSubscription)': [null, NftCollection[], NftCollection[]];
   'pri(price.getPrice)': [RequestPrice, PriceJson];
   'pri(price.getSubscription)': [RequestSubscribePrice, PriceJson, PriceJson];
   'pri(balance.getBalance)': [RequestBalance, BalanceJson];

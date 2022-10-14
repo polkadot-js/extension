@@ -410,25 +410,6 @@ export const PREDEFINED_NETWORKS: Record<string, NetworkJson> = {
     decimals: 9,
     coinGeckoKey: 'darwinia-network-native-token'
   },
-  manta: {
-    key: 'manta',
-    chain: 'Manta',
-    genesisHash: '0x7822fe86be209e140e1bdb80fb09539d1825e3d1dfee79ce37c336a832a26d48',
-    ss58Format: 77,
-    providers: {
-      'Manta Kuhlii': 'wss://kuhlii.manta.systems' // https://github.com/polkadot-js/apps/issues/6930
-      // 'Manta Munkiana': 'wss://munkiana.manta.systems', // https://github.com/polkadot-js/apps/issues/6871
-      // 'Manta Pectinata': 'wss://pectinata.manta.systems' // https://github.com/polkadot-js/apps/issues/7018
-    },
-    active: false,
-    currentProviderMode: 'ws',
-    currentProvider: 'Manta Kuhlii',
-    groups: ['POLKADOT_PARACHAIN'],
-    paraId: 2015,
-    nativeToken: 'MANTA',
-    crowdloanUrl: 'https://crowdloan.manta.network/',
-    decimals: 10
-  },
   'sora-substrate': {
     key: 'sora-substrate',
     chain: 'SORA',
@@ -446,37 +427,19 @@ export const PREDEFINED_NETWORKS: Record<string, NetworkJson> = {
     decimals: 12,
     paraId: 2011
   },
-  subgame: {
-    key: 'subgame',
-    chain: 'SubGame',
-    genesisHash: '0xe6343cef9167c43305c6f197bbd90d55bf93efc561b3d698845398cd864f6eb3',
-    ss58Format: 27,
-    providers: {
-      SubGame: 'wss://mainnet.subgame.org/'
-    },
-    active: false,
-    currentProviderMode: 'ws',
-    currentProvider: 'SubGame',
-    groups: ['POLKADOT_PARACHAIN'],
-    paraId: 2017,
-    nativeToken: 'SGB',
-    crowdloanUrl: 'https://www.subgame.org/#/crowdloan',
-    decimals: 10
-  },
   odyssey: {
     key: 'odyssey',
     chain: 'Ares Odyssey',
-    genesisHash: '0x52097bd7416205228bf13ac3eda6f16de56c19cac3476866b8b8a9c00d515870',
-    ss58Format: 42,
+    genesisHash: '0x0f3665e2e57fb38fd638145b69e567fb05bbadfd457624f90f15e5dbb31320bb',
+    ss58Format: 34,
     providers: {
-      AresProtocol: 'wss://wss.odyssey.aresprotocol.io'
+      AresProtocol: 'wss://odyssey.aresprotocol.io'
     },
     active: false,
     currentProviderMode: 'ws',
     currentProvider: 'AresProtocol',
-    groups: ['POLKADOT_PARACHAIN'],
-    paraId: 2028,
-    nativeToken: 'AMAS',
+    groups: ['MAIN_NET'],
+    nativeToken: 'ARES',
     crowdloanUrl: 'https://polkadot.js.org/apps/#/parachains/crowdloan',
     decimals: 12
   },
@@ -559,15 +522,16 @@ export const PREDEFINED_NETWORKS: Record<string, NetworkJson> = {
     key: 'dolphin',
     chain: 'Dolphin Testnet',
     active: false,
-    genesisHash: '0xa3e43f6bb8cc5767147764709d6353f8654a7ef31d0577758c0e8ced0bb43087',
-    ss58Format: 42,
+    genesisHash: '0x79372c8ed25b51c0d3c1f085becb264c93f1ecbc71dcf387fdb5c294fd823a08',
+    ss58Format: 78,
     providers: {
-      dolphin: 'wss://trillian.dolphin.red'
+      dolphin: 'wss://ws.rococo.dolphin.engineering'
     },
     currentProvider: 'dolphin',
     currentProviderMode: 'ws',
     groups: ['TEST_NET'],
-    nativeToken: 'DOL'
+    nativeToken: 'DOL',
+    decimals: 18
   },
   alephTest: {
     key: 'alephTest',
@@ -592,7 +556,10 @@ export const PREDEFINED_NETWORKS: Record<string, NetworkJson> = {
     genesisHash: '0x3fa374fbc8d0a9077356aefe327c88f447ce7f1fda905b1d4b4a2680a7b5cefa',
     ss58Format: 42,
     providers: {
-      Unique: 'wss://opal.unique.network'
+      Unique: 'wss://ws-opal.unique.network',
+      Europe: 'wss://eu-ws-opal.unique.network',
+      NA: 'wss://us-ws-opal.unique.network',
+      Asia: 'wss://asia-ws-opal.unique.network'
     },
     active: false,
     currentProviderMode: 'ws',
@@ -924,7 +891,7 @@ export const PREDEFINED_NETWORKS: Record<string, NetworkJson> = {
     genesisHash: '0x8b290fa39a8808f29d7309ea99442c95bf964838aef14be5a6449ae48f8a5f1f',
     ss58Format: 6,
     providers: {
-      Liebi: 'wss://bifrost-rpc.testnet.liebi.com/ws'
+      Liebi: 'wss://bifrost-rpc.rococo.liebi.com/ws'
     },
     active: false,
     currentProviderMode: 'ws',
@@ -1167,22 +1134,6 @@ export const PREDEFINED_NETWORKS: Record<string, NetworkJson> = {
     paraId: 2100,
     nativeToken: 'SUB',
     crowdloanUrl: 'https://app.subsocial.network/crowdloan'
-  },
-  subsocial: {
-    key: 'subsocial',
-    chain: 'Subsocial',
-    genesisHash: '0x0bd72c1c305172e1275278aaeb3f161e02eccb7a819e63f62d47bd53a28189f8',
-    ss58Format: 28,
-    providers: {
-      Dappforce: 'wss://rpc.subsocial.network'
-    },
-    active: false,
-    currentProviderMode: 'ws',
-    currentProvider: 'Dappforce',
-    groups: ['KUSAMA_PARACHAIN'],
-    nativeToken: 'SUB',
-    crowdloanUrl: 'https://app.subsocial.network/crowdloan',
-    decimals: 11
   },
   zeitgeist: {
     key: 'zeitgeist',
@@ -1439,7 +1390,7 @@ export const PREDEFINED_NETWORKS: Record<string, NetworkJson> = {
       Polkawallet: 'wss://mandala.polkawallet.io'
     },
     currentProviderMode: 'ws',
-    currentProvider: 'Polkawallet',
+    currentProvider: 'OnFinality',
     groups: ['TEST_NET'],
     nativeToken: 'ACA',
     decimals: 12
@@ -1486,17 +1437,18 @@ export const PREDEFINED_NETWORKS: Record<string, NetworkJson> = {
   },
   mangatax: {
     chain: 'MangataX Public Testnet',
-    genesisHash: '0x8032ad7a75a2b9732315592c672ec6d0ddf95308de03a19878ed8627ae8796cc',
+    genesisHash: '0x797fe0d6ea6917b5a36707961d819dca1826628123510730425c3bafc65ccf59',
     ss58Format: 42,
     providers: {
-      mangatax: 'wss://v4-prod-collator-01.mangatafinance.cloud'
+      mangatax: 'wss://roccoco-testnet-collator-01.mangatafinance.cloud'
     },
     currentProvider: 'mangatax',
     currentProviderMode: 'ws',
     active: false,
     key: 'mangatax',
     groups: ['TEST_NET'],
-    nativeToken: 'MGAT'
+    nativeToken: 'MGAT',
+    decimals: 18
   },
   mangatax_para: {
     chain: 'Mangata Kusama Mainnet',
@@ -1685,11 +1637,13 @@ export const PREDEFINED_NETWORKS: Record<string, NetworkJson> = {
     genesisHash: '0x35a06bfec2edf0ff4be89a6428ccd9ff5bd0167d618c5a0d4341f9600a458d14',
     ss58Format: 1337,
     providers: {
-      AjunaNetwork: 'wss://rpc-parachain.bajun.network'
+      AjunaNetwork: 'wss://rpc-parachain.bajun.network',
+      OnFinality: 'wss://bajun.api.onfinality.io/public-ws',
+      Dwellir: 'wss://bajun-rpc.dwellir.com'
     },
     active: false,
     currentProviderMode: 'ws',
-    currentProvider: 'AjunaNetwork',
+    currentProvider: 'Dwellir',
     groups: ['KUSAMA_PARACHAIN'],
     paraId: 2119,
     nativeToken: 'BAJU',

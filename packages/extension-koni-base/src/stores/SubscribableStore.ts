@@ -23,4 +23,8 @@ export default abstract class SubscribableStore<T> extends BaseStore<T> {
       this.get(key, resolve);
     });
   };
+
+  public removeAll () {
+    return this.all((key) => this.remove(key));
+  }
 }

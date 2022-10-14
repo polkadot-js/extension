@@ -10,7 +10,7 @@
     "url": "https://github.com/Koniverse/Subwallet-V2.git"
   },
   "sideEffects": false,
-  "version": "0.6.6",
+  "version": "0.6.7-1",
   "workspaces": [
     "packages/*"
   ],
@@ -45,6 +45,7 @@
   "dependencies": {
     "@types/node": "^17.0.10",
     "apollo": "^2.33.9",
+    "dexie": "^3.2.2",
     "typescript": "^4.5.4"
   },
   "devDependencies": {

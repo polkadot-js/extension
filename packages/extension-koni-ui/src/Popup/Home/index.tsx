@@ -353,6 +353,7 @@ function Home ({ chainRegistryMap, className = '', currentAccount, historyMap, n
   const onChangeAccount = useCallback((address: string) => {
     setShowBalanceDetail(false);
     setShowNftCollectionDetail(false);
+    setNftPage(1);
   }, []);
 
   return (

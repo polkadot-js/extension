@@ -2059,7 +2059,8 @@ export default class KoniState extends State {
     const decoded = decodePair(password, base64Decode(exportedJson.encoded), exportedJson.encoding.type);
 
     return {
-      privateKey: u8aToHex(decoded.secretKey)
+      privateKey: u8aToHex(decoded.secretKey),
+      publicKey: u8aToHex(decoded.publicKey)
     };
   }
 

@@ -474,6 +474,7 @@ export interface RequestAccountExportPrivateKey {
 
 export interface ResponseAccountExportPrivateKey {
   privateKey: string;
+  publicKey: string;
 }
 
 export interface RequestSeedCreateV2 {

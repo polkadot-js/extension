@@ -5,7 +5,7 @@ import { ApiProps, CustomToken, NftCollection, NftItem } from '@subwallet/extens
 import { AcalaNftApi } from '@subwallet/extension-koni-base/api/nft/acala_nft';
 import { BitCountryNftApi } from '@subwallet/extension-koni-base/api/nft/bit.country';
 import { SUPPORTED_NFT_NETWORKS } from '@subwallet/extension-koni-base/api/nft/config';
-import { Web3NftApi } from '@subwallet/extension-koni-base/api/nft/eth_nft';
+import { EvmNftApi } from '@subwallet/extension-koni-base/api/nft/evm_nft';
 import { KaruraNftApi } from '@subwallet/extension-koni-base/api/nft/karura_nft';
 import { BaseNftApi } from '@subwallet/extension-koni-base/api/nft/nft';
 import { RmrkNftApi } from '@subwallet/extension-koni-base/api/nft/rmrk_nft';
@@ -45,7 +45,7 @@ function createWeb3NftApi (chain: string, web3: Web3 | null, addresses: string[]
   // @ts-ignore
   const [substrateAddresses, evmAddresses] = categoryAddresses(addresses);
 
-  return new Web3NftApi(web3, evmAddresses, chain);
+  return new EvmNftApi(web3, evmAddresses, chain);
 }
 
 export class NftHandler {
@@ -114,7 +114,7 @@ export class NftHandler {
     }
 
     for (const handler of this.handlers) {
-      if (handler instanceof Web3NftApi) {
+      if (handler instanceof EvmNftApi) {
         handler.setEvmContracts(this.evmContracts[handler.chain]);
       }
     }

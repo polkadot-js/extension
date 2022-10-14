@@ -11,8 +11,7 @@ import Web3 from 'web3';
 
 import { isEthereumAddress } from '@polkadot/util-crypto';
 
-export class Web3NftApi extends BaseNftApi {
-  isConnected = false;
+export class EvmNftApi extends BaseNftApi {
   evmContracts: CustomToken[] = [];
 
   constructor (web3: Web3 | null, addresses: string[], chain: string) {

@@ -222,8 +222,6 @@ export const getRegistry = async (networkKey: string, api: ApiPromise, customTok
 
   cacheRegistryMap[networkKey] = chainRegistry;
 
-  console.log('chainRegistry', chainRegistry, networkKey);
-
   return chainRegistry;
 };
 

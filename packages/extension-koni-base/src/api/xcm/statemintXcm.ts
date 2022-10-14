@@ -59,7 +59,7 @@ export async function statemintEstimateCrossChainFee (
         }
       };
 
-      const extrinsic = apiProps.api.tx.polkadotXcm.limitedReserveTransferAssets(
+      const extrinsic = apiProps.api.tx.polkadotXcm.reserveTransferAssets(
         destinationChainLocation, // dest
         {
           V1: { // beneficiary
@@ -85,8 +85,7 @@ export async function statemintEstimateCrossChainFee (
             }
           ]
         },
-        0, // FeeAssetItem
-        'Unlimited'
+        0 // FeeAssetItem
       );
 
       console.log('statemint xcm tx here', extrinsic.toHex());
@@ -98,7 +97,7 @@ export async function statemintEstimateCrossChainFee (
     } else {
       console.log('transferring to r', tokenInfo);
 
-      const extrinsic = apiProps.api.tx.polkadotXcm.limitedReserveTransferAssets(
+      const extrinsic = apiProps.api.tx.polkadotXcm.teleportAssets(
         {
           V1: {
             parents: 1,
@@ -126,8 +125,7 @@ export async function statemintEstimateCrossChainFee (
             }
           ]
         },
-        0, // FeeAssetItem
-        'Unlimited'
+        0 // FeeAssetItem
       );
 
       console.log('statemint xcm tx here', extrinsic.toHex());
@@ -172,7 +170,7 @@ export function statemintGetXcmExtrinsic (
       }
     };
 
-    return api.tx.polkadotXcm.limitedReserveTransferAssets(
+    return api.tx.polkadotXcm.reserveTransferAssets(
       destinationChainLocation, // dest
       {
         V1: { // beneficiary
@@ -198,11 +196,10 @@ export function statemintGetXcmExtrinsic (
           }
         ]
       },
-      0, // FeeAssetItem
-      'Unlimited'
+      0 // FeeAssetItem
     );
   } else {
-    return api.tx.polkadotXcm.limitedReserveTransferAssets(
+    return api.tx.polkadotXcm.teleportAssets(
       {
         V1: {
           parents: 1,
@@ -230,8 +227,7 @@ export function statemintGetXcmExtrinsic (
           }
         ]
       },
-      0, // FeeAssetItem
-      'Unlimited'
+      0 // FeeAssetItem
     );
   }
 }

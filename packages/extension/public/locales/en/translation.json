@@ -170,5 +170,6 @@
   "Ask again later": "",
   "no accounts": "",
   "all accounts": "",
-  "Message signing is not supported for hardware wallets.": ""
+  "Message signing is not supported for hardware wallets.": "",
+  "\"Allow use on any network\" is not supported to show a QR code. You must associate this account with a network.": ""
 }

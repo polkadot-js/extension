@@ -27,7 +27,9 @@ function formatTokenSymbol (rawSymbol: string) {
 
 const DEFAULT_TOKEN_REGISTRY: Record<string, { chainDecimals: number[], chainTokens: string[] }> = {
   ethereum: { chainDecimals: [18], chainTokens: ['ETH'] },
-  binance: { chainDecimals: [18], chainTokens: ['BNB'] }
+  ethereum_goerli: { chainDecimals: [18], chainTokens: ['GoerliETH'] },
+  binance: { chainDecimals: [18], chainTokens: ['BNB'] },
+  binance_test: { chainDecimals: [18], chainTokens: ['tBNB'] }
 };
 
 export async function getMoonAssets (api: ApiPromise) {

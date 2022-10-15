@@ -2807,22 +2807,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@floating-ui/core@npm:^1.0.1":
-  version: 1.0.1
-  resolution: "@floating-ui/core@npm:1.0.1"
-  checksum: c8a5f1a491788e5bebfe747e9372df2c7cbee0d8790ddf95e25149ac91ccf1a2cca8f768029826cfd3d687617c1d0f3241b97f1648bdf2a28d421f39e79c2eee
-  languageName: node
-  linkType: hard
-
-"@floating-ui/dom@npm:^1.0.1":
-  version: 1.0.2
-  resolution: "@floating-ui/dom@npm:1.0.2"
-  dependencies:
-    "@floating-ui/core": ^1.0.1
-  checksum: 4494db572d953f1f0544b91e6c16c63eae890c96befc5a60528e01b8e93182458ac4aec08873d6544c18353fb90d46b1ff4e19407bc48ea8f27a1bce372e48e5
-  languageName: node
-  linkType: hard
-
 "@fluentui/react-component-event-listener@npm:~0.63.0":
   version: 0.63.1
   resolution: "@fluentui/react-component-event-listener@npm:0.63.1"
@@ -20502,16 +20486,14 @@ __metadata:
     "@babel/runtime": ^7.12.0
     "@emotion/cache": ^11.4.0
     "@emotion/react": ^11.8.1
-    "@floating-ui/dom": ^1.0.1
     "@types/react-transition-group": ^4.4.0
     memoize-one: ^5.0.0
     prop-types: ^15.6.0
     react-transition-group: ^4.3.0
-    use-isomorphic-layout-effect: ^1.1.2
   peerDependencies:
     react: ^16.8.0 || ^17.0.0 || ^18.0.0
     react-dom: ^16.8.0 || ^17.0.0 || ^18.0.0
-  checksum: a3d61bc1a2ec3cb4faf6ddfbc53b6f7dd7898303e1d728f17de3961492f2b01d1411a92f01f03f85d049b7c8483bb9427f66a64e24f177fcc3dd1e21f9656edd
+  checksum: da896f0f8b3c7f6250148ce9ded1ace60abb35b812be50d34cf7ba980b12ca75533c3bbfd9e722530cc0e70c17e8997c3c7e93743877d84c00b0d90e4da521e6
   languageName: node
   linkType: hard
 

@@ -31,17 +31,23 @@ type Step = 'Scan' | 'Name' | 'Confirm';
 function ImportQr ({ className }: Props): React.ReactElement<Props> {
   const { t } = useTranslation();
   const onAction = useContext(ActionContext);
+
   const [account, setAccount] = useState<QrAccount | null>(null);
+
   const { accounts } = useContext(AccountContext);
   const accountsWithoutAll = accounts.filter((acc: { address: string; }) => acc.address !== 'ALL');
   const defaultName = useMemo((): string => `Account ${accountsWithoutAll.length + 1}`, [accountsWithoutAll.length]);
+
+  const [step, setStep] = useState<Step>('Scan');
+
   const [address, setAddress] = useState<string | null>(null);
+  const [isEthereum, setIsEthereum] = useState(false);
   const [name, setName] = useState<string | null>(defaultName);
   const [password, setPassword] = useState<string | null>(null);
   const [errors, setErrors] = useState<AccountExternalError[]>([]);
   const [isConnectWhenCreate, setIsConnectWhenCreate] = useState<boolean>(true);
+
   const [isBusy, setIsBusy] = useState<boolean>(false);
-  const [step, setStep] = useState<Step>('Scan');
   const themeContext = useContext(ThemeContext as React.Context<Theme>);
 
   const _setAccount = useCallback(
@@ -52,12 +58,14 @@ function ImportQr ({ className }: Props): React.ReactElement<Props> {
       if (qrAccount.isAddress) {
         setAddress(qrAccount.content);
         setStep('Name');
+        setIsEthereum(qrAccount.isEthereum);
       } else {
         setStep('Name');
         checkPublicAndPrivateKey(qrAccount.genesisHash, qrAccount.content)
-          .then(({ address, isValid }) => {
+          .then(({ address, isEthereum, isValid }) => {
             if (isValid) {
               setAddress(address);
+              setIsEthereum(isEthereum);
             } else {
               setStep('Scan');
               setErrors([{ code: AccountExternalErrorCode.KEYRING_ERROR, message: 'Invalid public and private key' }]);
@@ -89,7 +97,7 @@ function ImportQr ({ className }: Props): React.ReactElement<Props> {
             name: name,
             address: account.content,
             genesisHash: account.genesisHash,
-            isEthereum: account.isEthereum,
+            isEthereum: isEthereum,
             isAllowed: isConnectWhenCreate
           })
             .then((errors) => {
@@ -108,7 +116,7 @@ function ImportQr ({ className }: Props): React.ReactElement<Props> {
               setIsBusy(false);
             });
         } else if (password) {
-          createAccountWithSecret({ name, password, isAllow: isConnectWhenCreate, secretKey: account.content, publicKey: account.genesisHash })
+          createAccountWithSecret({ name, password, isAllow: isConnectWhenCreate, secretKey: account.content, publicKey: account.genesisHash, isEthereum: isEthereum })
             .then(({ errors, success }) => {
               if (success) {
                 window.localStorage.setItem('popupNavigation', '/');
@@ -131,7 +139,7 @@ function ImportQr ({ className }: Props): React.ReactElement<Props> {
         setIsBusy(false);
       }
     },
-    [account, isConnectWhenCreate, name, onAction, password]
+    [account, isConnectWhenCreate, isEthereum, name, onAction, password]
   );
 
   const renderErrors = useCallback((): JSX.Element => {

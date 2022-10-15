@@ -40,7 +40,7 @@ import { ChainType } from '@polkadot/types/interfaces';
 import { keyring } from '@polkadot/ui-keyring';
 import { accounts as accountsObservable } from '@polkadot/ui-keyring/observable/accounts';
 import { SingleAddress, SubjectInfo } from '@polkadot/ui-keyring/observable/types';
-import { assert, BN, hexToU8a, isAscii, isHex, u8aToString } from '@polkadot/util';
+import { assert, BN, hexStripPrefix, hexToU8a, isAscii, isHex, u8aToString } from '@polkadot/util';
 import { base64Decode, isEthereumAddress, jsonDecrypt, keyExtractSuri, mnemonicGenerate, mnemonicValidate } from '@polkadot/util-crypto';
 import { EncryptedJson, KeypairType, Prefix } from '@polkadot/util-crypto/types';
 
@@ -2350,14 +2350,38 @@ export default class KoniExtension extends Extension {
   }
 
   private async accountsCreateWithSecret ({ isAllow,
+    isEthereum,
     name,
     password,
     publicKey,
     secretKey }: RequestAccountCreateWithSecretKey): Promise<ResponseAccountCreateWithSecretKey> {
     try {
-      const keyringPair: KeyringPair = keyring.keyring.addFromPair({ publicKey: hexToU8a(publicKey), secretKey: hexToU8a(secretKey) }, { name });
+      let keyringPair: KeyringPair | null = null;
 
-      keyring.addPair(keyringPair, password);
+      if (isEthereum) {
+        const _secret = hexStripPrefix(secretKey);
+
+        if (_secret.length === 64) {
+          const suri = `0x${_secret}`;
+          const { phrase } = keyExtractSuri(suri);
+
+          if (isHex(phrase) && isHex(phrase, 256)) {
+            const type: KeypairType = 'ethereum';
+
+            keyringPair = keyring.addUri(getSuri(suri, type), password, { name: name }, type).pair;
+          }
+        }
+      } else {
+        keyringPair = keyring.keyring.addFromPair({ publicKey: hexToU8a(publicKey), secretKey: hexToU8a(secretKey) }, { name });
+        keyring.addPair(keyringPair, password);
+      }
+
+      if (!keyringPair) {
+        return {
+          success: false,
+          errors: [{ code: AccountExternalErrorCode.KEYRING_ERROR, message: 'Invalid keyring' }]
+        };
+      }
 
       const _address = keyringPair.address;
 

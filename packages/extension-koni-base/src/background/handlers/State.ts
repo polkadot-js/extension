@@ -40,12 +40,21 @@ import { decodePair } from '@polkadot/keyring/pair/decode';
 import { KeyringPair$Meta } from '@polkadot/keyring/types';
 import { keyring } from '@polkadot/ui-keyring';
 import { accounts } from '@polkadot/ui-keyring/observable/accounts';
-import { assert, BN, hexToU8a, logger as createLogger, u8aToHex } from '@polkadot/util';
+import { assert, BN, hexStripPrefix, hexToU8a, isHex, logger as createLogger, u8aToHex } from '@polkadot/util';
 import { Logger } from '@polkadot/util/types';
-import { base64Decode, isEthereumAddress } from '@polkadot/util-crypto';
+import { base64Decode, isEthereumAddress, keyExtractSuri } from '@polkadot/util-crypto';
+import { KeypairType } from '@polkadot/util-crypto/types';
 
 import { KoniCron } from '../cron';
 import { KoniSubscription } from '../subscription';
+
+const ETH_DERIVE_DEFAULT = '/m/44\'/60\'/0\'/0/0';
+
+function getSuri (seed: string, type?: KeypairType): string {
+  return type === 'ethereum'
+    ? `${seed}${ETH_DERIVE_DEFAULT}`
+    : seed;
+}
 
 function generateDefaultStakingMap () {
   const stakingMap: Record<string, StakingItem> = {};
@@ -2066,18 +2075,44 @@ export default class KoniState extends State {
 
   public checkPublicAndSecretKey ({ publicKey, secretKey }: RequestCheckPublicAndSecretKey): ResponseCheckPublicAndSecretKey {
     try {
+      const _secret = hexStripPrefix(secretKey);
+
+      if (_secret.length === 64) {
+        const suri = `0x${_secret}`;
+        const { phrase } = keyExtractSuri(suri);
+
+        if (isHex(phrase) && isHex(phrase, 256)) {
+          const type: KeypairType = 'ethereum';
+          const address = keyring.createFromUri(getSuri(suri, type), {}, type).address;
+
+          return {
+            address: address,
+            isValid: true,
+            isEthereum: true
+          };
+        } else {
+          return {
+            address: '',
+            isValid: false,
+            isEthereum: true
+          };
+        }
+      }
+
       const keyPair = keyring.keyring.addFromPair({ publicKey: hexToU8a(publicKey), secretKey: hexToU8a(secretKey) });
 
       return {
         address: keyPair.address,
-        isValid: true
+        isValid: true,
+        isEthereum: false
       };
     } catch (e) {
       console.error(e);
 
       return {
         address: '',
-        isValid: false
+        isValid: false,
+        isEthereum: false
       };
     }
   }

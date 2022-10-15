@@ -16,8 +16,6 @@ import { useSelector } from 'react-redux';
 import { RouteComponentProps, withRouter } from 'react-router';
 import styled, { ThemeContext } from 'styled-components';
 
-import { isEthereumAddress } from '@polkadot/util-crypto';
-
 import { AccountContext, AccountInfoEl, ActionBar, ActionContext, ActionText, Button, InputWithLabel, Label, Warning } from '../components';
 import useTranslation from '../hooks/useTranslation';
 import { exportAccount, exportAccountPrivateKey } from '../messaging';
@@ -47,8 +45,6 @@ function ExportAccount ({ className, match: { params: { address } } }: Props): R
   const accountName = useMemo((): string | undefined => {
     return accounts.accounts.find((acc) => acc.address === address)?.name;
   }, [accounts, address]);
-
-  const isEthereum = isEthereumAddress(address);
 
   const qrData = useMemo(() => {
     const prefix = 'secret';
@@ -251,7 +247,7 @@ function ExportAccount ({ className, match: { params: { address } } }: Props): R
                   { privateKey ? t<string>('Via Text') : t<string>('Private Key')}
                 </Button>}
               {
-                (privateKey && !isQr && !isEthereum) &&
+                (privateKey && !isQr) &&
                 <Button
                   className='export-button'
                   data-export-button

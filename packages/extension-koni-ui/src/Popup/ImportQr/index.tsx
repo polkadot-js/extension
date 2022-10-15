@@ -56,27 +56,28 @@ function ImportQr ({ className }: Props): React.ReactElement<Props> {
         setStep('Name');
         checkPublicAndPrivateKey(qrAccount.genesisHash, qrAccount.content)
           .then(({ address, isValid }) => {
-            if (isValid){
+            if (isValid) {
               setAddress(address);
             } else {
               setStep('Scan');
-              setErrors([{code: AccountExternalErrorCode.KEYRING_ERROR, message: 'Invalid public and private key'}])
+              setErrors([{ code: AccountExternalErrorCode.KEYRING_ERROR, message: 'Invalid public and private key' }]);
             }
           })
           .catch((e) => {
             const error = (e as Error).message;
+
             console.error(error);
             setStep('Scan');
-            setErrors([{code: AccountExternalErrorCode.UNKNOWN_ERROR, message: error}])
+            setErrors([{ code: AccountExternalErrorCode.UNKNOWN_ERROR, message: error }]);
           });
       }
     },
-    []
+    [defaultName]
   );
 
   const _onGoToConfirm = useCallback(() => {
     setStep('Confirm');
-  }, [])
+  }, []);
 
   const _onCreate = useCallback(
     (): void => {
@@ -108,7 +109,7 @@ function ImportQr ({ className }: Props): React.ReactElement<Props> {
             });
         } else if (password) {
           createAccountWithSecret({ name, password, isAllow: isConnectWhenCreate, secretKey: account.content, publicKey: account.genesisHash })
-            .then(({errors, success}) => {
+            .then(({ errors, success }) => {
               if (success) {
                 window.localStorage.setItem('popupNavigation', '/');
                 onAction('/');
@@ -122,7 +123,7 @@ function ImportQr ({ className }: Props): React.ReactElement<Props> {
             })
             .finally(() => {
               setIsBusy(false);
-            });;
+            });
         } else {
           setIsBusy(false);
         }
@@ -174,9 +175,9 @@ function ImportQr ({ className }: Props): React.ReactElement<Props> {
       />
       <div
         className={CN({
-            '-with-padding': account && ((step === 'Confirm' && account.isAddress) || step !== 'Confirm')
-          },
-          'import-qr-content'
+          '-with-padding': account && ((step === 'Confirm' && account.isAddress) || step !== 'Confirm')
+        },
+        'import-qr-content'
         )}
       >
         {(!account || step === 'Scan') && (
@@ -193,40 +194,10 @@ function ImportQr ({ className }: Props): React.ReactElement<Props> {
         {(account && step !== 'Scan') && (
           <>
             {
-              step === 'Name' ? (
-                  address ? (
-                    <>
-                      <div className={`account-info-container ${themeContext.id === 'dark' ? '-dark' : '-light'}`}>
-                        <AccountInfoEl
-                          address={address}
-                          genesisHash={account.genesisHash}
-                          isEthereum={account.isEthereum}
-                          isExternal={true}
-                          name={name}
-                        />
-                        <Name
-                          isFocused
-                          onChange={setName}
-                          value={name || ''}
-                          className='name-margin-bottom'
-                        />
-                      </div>
-                      <ButtonArea>
-                        <NextStepButton
-                          className='next-step-btn'
-                          onClick={_onGoToConfirm}
-                        >
-                          {t<string>('Continue')}
-                        </NextStepButton>
-                      </ButtonArea>
-                    </>
-                  ) : (
-                    <LoadingContainer/>
-                  )
-              ) : (
-                <>
-                  {
-                    account.isAddress ? (
+              step === 'Name'
+                ? (
+                  address
+                    ? (
                       <>
                         <div className={`account-info-container ${themeContext.id === 'dark' ? '-dark' : '-light'}`}>
                           <AccountInfoEl
@@ -236,41 +207,77 @@ function ImportQr ({ className }: Props): React.ReactElement<Props> {
                             isExternal={true}
                             name={name}
                           />
+                          <Name
+                            className='name-margin-bottom'
+                            isFocused
+                            onChange={setName}
+                            value={name || ''}
+                          />
                         </div>
-                        <Checkbox
-                          checked={isConnectWhenCreate}
-                          label={t<string>('Auto connect to all DApps after importing')}
-                          onChange={setIsConnectWhenCreate}
-                        />
-                        {renderErrors()}
                         <ButtonArea>
                           <NextStepButton
                             className='next-step-btn'
-                            isBusy={isBusy}
-                            isDisabled={!name || (!account.isAddress && !password)}
-                            onClick={_onCreate}
+                            onClick={_onGoToConfirm}
                           >
-                            {t<string>('Add the account with identified address')}
+                            {t<string>('Continue')}
                           </NextStepButton>
                         </ButtonArea>
                       </>
-                    ) : (
-                      <AccountNamePasswordCreation
-                        address={address}
-                        buttonLabel={t<string>('Add the account with identified address')}
-                        isBusy={isBusy}
-                        keyTypes={account.isEthereum ? [EVM_ACCOUNT_TYPE] : [SUBSTRATE_ACCOUNT_TYPE]}
-                        name={name || defaultName}
-                        onCreate={_onCreate}
-                        onPasswordChange={setPassword}
-                        checked={isConnectWhenCreate}
-                        setChecked={setIsConnectWhenCreate}
-                        renderErrors={renderErrors}
-                      />
                     )
-                  }
-                </>
-              )
+                    : (
+                      <LoadingContainer />
+                    )
+                )
+                : (
+                  <>
+                    {
+                      account.isAddress
+                        ? (
+                          <>
+                            <div className={`account-info-container ${themeContext.id === 'dark' ? '-dark' : '-light'}`}>
+                              <AccountInfoEl
+                                address={address}
+                                genesisHash={account.genesisHash}
+                                isEthereum={account.isEthereum}
+                                isExternal={true}
+                                name={name}
+                              />
+                            </div>
+                            <Checkbox
+                              checked={isConnectWhenCreate}
+                              label={t<string>('Auto connect to all DApps after importing')}
+                              onChange={setIsConnectWhenCreate}
+                            />
+                            {renderErrors()}
+                            <ButtonArea>
+                              <NextStepButton
+                                className='next-step-btn'
+                                isBusy={isBusy}
+                                isDisabled={!name || (!account.isAddress && !password)}
+                                onClick={_onCreate}
+                              >
+                                {t<string>('Add the account with identified address')}
+                              </NextStepButton>
+                            </ButtonArea>
+                          </>
+                        )
+                        : (
+                          <AccountNamePasswordCreation
+                            address={address}
+                            buttonLabel={t<string>('Add the account with identified address')}
+                            checked={isConnectWhenCreate}
+                            isBusy={isBusy}
+                            keyTypes={account.isEthereum ? [EVM_ACCOUNT_TYPE] : [SUBSTRATE_ACCOUNT_TYPE]}
+                            name={name || defaultName}
+                            onCreate={_onCreate}
+                            onPasswordChange={setPassword}
+                            renderErrors={renderErrors}
+                            setChecked={setIsConnectWhenCreate}
+                          />
+                        )
+                    }
+                  </>
+                )
             }
           </>
         )}

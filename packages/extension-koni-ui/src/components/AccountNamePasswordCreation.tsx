@@ -29,7 +29,7 @@ interface Props {
   renderErrors?: () => JSX.Element;
 }
 
-function AccountNamePasswordCreation ({ address, buttonLabel, children, className, evmAddress, isBusy, keyTypes, name, onCreate, selectedGenesis, checked = null, setChecked, renderErrors, onPasswordChange }: Props): React.ReactElement<Props> {
+function AccountNamePasswordCreation ({ address, buttonLabel, checked = null, children, className, evmAddress, isBusy, keyTypes, name, onCreate, onPasswordChange, renderErrors, selectedGenesis, setChecked }: Props): React.ReactElement<Props> {
   const { t } = useTranslation();
   const [password, setPassword] = useState<string | null>(null);
   const themeContext = useContext(ThemeContext as React.Context<Theme>);
@@ -42,8 +42,8 @@ function AccountNamePasswordCreation ({ address, buttonLabel, children, classNam
 
   const handleChangePassword = useCallback((val: string | null) => {
     setPassword(val);
-    onPasswordChange && onPasswordChange(val)
-  }, [onPasswordChange])
+    onPasswordChange && onPasswordChange(val);
+  }, [onPasswordChange]);
 
   return (
     <>

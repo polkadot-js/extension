@@ -1,8 +1,6 @@
 // Copyright 2019-2022 @polkadot/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { isEthereumAddress } from '@polkadot/util-crypto';
-import QRCode from 'react-qr-code';
 import type { Theme, ThemeProps } from '../types';
 
 import cloneLogo from '@subwallet/extension-koni-ui/assets/clone.svg';
@@ -13,9 +11,12 @@ import { isAccountAll, toShort } from '@subwallet/extension-koni-ui/util';
 import { saveAs } from 'file-saver';
 import React, { useCallback, useContext, useMemo, useState } from 'react';
 import CopyToClipboard from 'react-copy-to-clipboard';
+import QRCode from 'react-qr-code';
 import { useSelector } from 'react-redux';
 import { RouteComponentProps, withRouter } from 'react-router';
 import styled, { ThemeContext } from 'styled-components';
+
+import { isEthereumAddress } from '@polkadot/util-crypto';
 
 import { AccountContext, AccountInfoEl, ActionBar, ActionContext, ActionText, Button, InputWithLabel, Label, Warning } from '../components';
 import useTranslation from '../hooks/useTranslation';
@@ -27,7 +28,7 @@ interface Props extends RouteComponentProps<{ address: string }>, ThemeProps {
   className?: string;
 }
 
-function ExportAccount({ className, match: { params: { address } } }: Props): React.ReactElement<Props> {
+function ExportAccount ({ className, match: { params: { address } } }: Props): React.ReactElement<Props> {
   const { t } = useTranslation();
   const onAction = useContext(ActionContext);
   const accounts = useContext(AccountContext);
@@ -45,7 +46,7 @@ function ExportAccount({ className, match: { params: { address } } }: Props): Re
 
   const accountName = useMemo((): string | undefined => {
     return accounts.accounts.find((acc) => acc.address === address)?.name;
-  }, [accounts, address])
+  }, [accounts, address]);
 
   const isEthereum = isEthereumAddress(address);
 
@@ -110,13 +111,14 @@ function ExportAccount({ className, match: { params: { address } } }: Props): Re
         setError(error.message);
         setIsBusy(false);
       });
-  }, [])
+  }, []);
 
   const _onExportPrivateButtonClick = useCallback(
     (): void => {
       setIsBusy(true);
       setButtonId('exportPrivate');
       setIsQr(false);
+
       if (!privateKey) {
         handleExportPublicAndPrivateKey(address, pass);
       } else {
@@ -137,6 +139,7 @@ function ExportAccount({ className, match: { params: { address } } }: Props): Re
       setButtonId('exportQr');
       setIsQr(true);
       setIsBusy(false);
+
       if (!privateKey) {
         handleExportPublicAndPrivateKey(address, pass);
       } else {
@@ -161,33 +164,34 @@ function ExportAccount({ className, match: { params: { address } } }: Props): Re
               {t<string>('Account "All" doesn\'t support this action. Please switch to another account')}
             </Warning>
 
-            <ActionBar className="export__action-bar">
+            <ActionBar className='export__action-bar'>
               <ActionText
-                className="cancel-button"
+                className='cancel-button'
                 onClick={_goHome}
                 text={t<string>('Cancel')}
               />
             </ActionBar>
           </div>
           : <div
-            className={`account-info-container ${themeContext.id === 'dark' ? '-dark' : '-light'} export-account-wrapper`}>
+            className={`account-info-container ${themeContext.id === 'dark' ? '-dark' : '-light'} export-account-wrapper`}
+          >
             <AccountInfoEl
               address={address}
               type={currentAccount.account?.type}
             />
-            <Warning className="export-warning">
+            <Warning className='export-warning'>
               {t<string>('You are exporting your account. Keep it safe and don\'t share it with anyone.')}
             </Warning>
 
-            {!privateKey && <div className="export__password-area">
+            {!privateKey && <div className='export__password-area'>
               <InputWithLabel
-                className="export__input-label"
+                className='export__input-label'
                 data-export-password
                 disabled={isBusy}
                 isError={pass.length < MIN_LENGTH || !!error}
                 label={t<string>('password for this account')}
                 onChange={onPassChange}
-                type="password"
+                type='password'
               />
               {error && (
                 <Warning
@@ -199,16 +203,16 @@ function ExportAccount({ className, match: { params: { address } } }: Props): Re
               )}
             </div>}
 
-            {privateKey && !isQr && <div className="export__private-key-area">
+            {privateKey && !isQr && <div className='export__private-key-area'>
               <Label label={t<string>('Private Key')}>
-                <div className="private-key">
-                  <span className="key">
+                <div className='private-key'>
+                  <span className='key'>
                     {toShort(privateKey, 18, 18)}
                   </span>
                   <CopyToClipboard text={(privateKey && privateKey) || ''}>
                     <img
-                      alt="copy"
-                      className="private-key-copy-icon"
+                      alt='copy'
+                      className='private-key-copy-icon'
                       onClick={_onCopyPrivateKey}
                       src={cloneLogo}
                     />
@@ -227,9 +231,9 @@ function ExportAccount({ className, match: { params: { address } } }: Props): Re
               </div>
             )}
 
-            <div className="export__action-area">
+            <div className='export__action-area'>
               <Button
-                className="export-button"
+                className='export-button'
                 isBusy={isBusy && buttonId === 'cancel'}
                 isDisabled={isBusy}
                 onClick={_goHome}
@@ -238,7 +242,7 @@ function ExportAccount({ className, match: { params: { address } } }: Props): Re
               </Button>
               {(!privateKey || (privateKey && isQr)) &&
                 <Button
-                  className="export-button"
+                  className='export-button'
                   data-export-button
                   isBusy={isBusy && buttonId === 'exportPrivate'}
                   isDisabled={pass.length === 0 || !!error || isBusy}
@@ -249,7 +253,7 @@ function ExportAccount({ className, match: { params: { address } } }: Props): Re
               {
                 (privateKey && !isQr && !isEthereum) &&
                 <Button
-                  className="export-button"
+                  className='export-button'
                   data-export-button
                   isBusy={isBusy && buttonId === 'exportQr'}
                   isDisabled={pass.length === 0 || !!error || isBusy}
@@ -259,7 +263,7 @@ function ExportAccount({ className, match: { params: { address } } }: Props): Re
                 </Button>
               }
               <Button
-                className="export-button"
+                className='export-button'
                 data-export-button
                 isBusy={isBusy && buttonId === 'export'}
                 isDisabled={pass.length === 0 || !!error || isBusy}

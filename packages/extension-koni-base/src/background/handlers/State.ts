@@ -2064,19 +2064,21 @@ export default class KoniState extends State {
     };
   }
 
-  public checkPublicAndSecretKey ({publicKey, secretKey}: RequestCheckPublicAndSecretKey): ResponseCheckPublicAndSecretKey {
+  public checkPublicAndSecretKey ({ publicKey, secretKey }: RequestCheckPublicAndSecretKey): ResponseCheckPublicAndSecretKey {
     try {
-      const keyPair = keyring.keyring.addFromPair({publicKey: hexToU8a(publicKey), secretKey: hexToU8a(secretKey)});
+      const keyPair = keyring.keyring.addFromPair({ publicKey: hexToU8a(publicKey), secretKey: hexToU8a(secretKey) });
+
       return {
         address: keyPair.address,
         isValid: true
-      }
+      };
     } catch (e) {
       console.error(e);
+
       return {
         address: '',
         isValid: false
-      }
+      };
     }
   }
 

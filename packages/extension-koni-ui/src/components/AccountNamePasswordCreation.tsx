@@ -1,6 +1,7 @@
 // Copyright 2019-2022 @polkadot/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
+import useTranslation from '@subwallet/extension-koni-ui/hooks/useTranslation';
 import Password from '@subwallet/extension-koni-ui/partials/Password';
 import { EVM_ACCOUNT_TYPE, SUBSTRATE_ACCOUNT_TYPE } from '@subwallet/extension-koni-ui/Popup/CreateAccount';
 import { Theme, ThemeProps } from '@subwallet/extension-koni-ui/types';
@@ -9,7 +10,7 @@ import styled, { ThemeContext } from 'styled-components';
 
 import { KeypairType } from '@polkadot/util-crypto/types';
 
-import { AccountInfoEl, ButtonArea, NextStepButton } from './index';
+import { AccountInfoEl, ButtonArea, Checkbox, NextStepButton } from './index';
 
 interface Props {
   buttonLabel?: string;
@@ -19,13 +20,17 @@ interface Props {
   children?: any;
   evmAddress?: string | null;
   address?: string | null;
-  onPasswordChange?: (password: string) => void;
+  onPasswordChange?: (password: string | null) => void;
   name: string;
   keyTypes: KeypairType[];
   selectedGenesis?: string;
+  checked?: boolean | null;
+  setChecked?: (val: boolean) => void;
+  renderErrors?: () => JSX.Element;
 }
 
-function AccountNamePasswordCreation ({ address, buttonLabel, children, className, evmAddress, isBusy, keyTypes, name, onCreate, selectedGenesis }: Props): React.ReactElement<Props> {
+function AccountNamePasswordCreation ({ address, buttonLabel, children, className, evmAddress, isBusy, keyTypes, name, onCreate, selectedGenesis, checked = null, setChecked, renderErrors, onPasswordChange }: Props): React.ReactElement<Props> {
+  const { t } = useTranslation();
   const [password, setPassword] = useState<string | null>(null);
   const themeContext = useContext(ThemeContext as React.Context<Theme>);
   const _onCreate = useCallback(
@@ -34,6 +39,11 @@ function AccountNamePasswordCreation ({ address, buttonLabel, children, classNam
     },
     [name, password, onCreate]
   );
+
+  const handleChangePassword = useCallback((val: string | null) => {
+    setPassword(val);
+    onPasswordChange && onPasswordChange(val)
+  }, [onPasswordChange])
 
   return (
     <>
@@ -59,9 +69,19 @@ function AccountNamePasswordCreation ({ address, buttonLabel, children, classNam
             <div className={ children ? 'children-wrapper' : ''}>
               {children}
             </div>
-            <Password onChange={setPassword} />
+            <Password onChange={handleChangePassword} />
           </div>
         </div>
+        {
+          typeof checked === 'boolean' && setChecked && (
+            <Checkbox
+              checked={checked}
+              label={t<string>('Auto connect to all DApps after importing')}
+              onChange={setChecked}
+            />
+          )
+        }
+        {renderErrors && renderErrors()}
         <ButtonArea className='kn-button-area'>
           <NextStepButton
             className='next-step-btn'

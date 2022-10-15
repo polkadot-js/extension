@@ -3,7 +3,7 @@
 
 import { withErrorLog } from '@subwallet/extension-base/background/handlers/helpers';
 import State, { AuthUrls, Resolver } from '@subwallet/extension-base/background/handlers/State';
-import { AccountRefMap, APIItemState, ApiMap, AuthRequestV2, BalanceItem, BalanceJson, ChainRegistry, ConfirmationDefinitions, ConfirmationsQueue, ConfirmationsQueueItemOptions, ConfirmationType, CrowdloanItem, CrowdloanJson, CurrentAccountInfo, CustomEvmToken, DeleteEvmTokenParams, EvmSendTransactionParams, EvmSendTransactionRequestQr, EvmSignatureRequestQr, EvmTokenJson, ExternalRequestPromise, ExternalRequestPromiseStatus, NETWORK_STATUS, NetworkJson, NftCollection, NftItem, NftJson, NftTransferExtra, PriceJson, RequestAccountExportPrivateKey, RequestConfirmationComplete, RequestSettingsType, ResponseAccountExportPrivateKey, ResponseSettingsType, ResultResolver, ServiceInfo, SingleModeJson, StakeUnlockingJson, StakingItem, StakingJson, StakingRewardJson, ThemeTypes, TokenInfo, TransactionHistoryItemType } from '@subwallet/extension-base/background/KoniTypes';
+import { AccountRefMap, APIItemState, ApiMap, AuthRequestV2, BalanceItem, BalanceJson, ChainRegistry, ConfirmationDefinitions, ConfirmationsQueue, ConfirmationsQueueItemOptions, ConfirmationType, CrowdloanItem, CrowdloanJson, CurrentAccountInfo, CustomEvmToken, DeleteEvmTokenParams, EvmSendTransactionParams, EvmSendTransactionRequestQr, EvmSignatureRequestQr, EvmTokenJson, ExternalRequestPromise, ExternalRequestPromiseStatus, NETWORK_STATUS, NetworkJson, NftCollection, NftItem, NftJson, NftTransferExtra, PriceJson, RequestAccountExportPrivateKey, RequestCheckPublicAndSecretKey, RequestConfirmationComplete, RequestSettingsType, ResponseAccountExportPrivateKey, ResponseCheckPublicAndSecretKey, ResponseSettingsType, ResultResolver, ServiceInfo, SingleModeJson, StakeUnlockingJson, StakingItem, StakingJson, StakingRewardJson, ThemeTypes, TokenInfo, TransactionHistoryItemType } from '@subwallet/extension-base/background/KoniTypes';
 import { AuthorizeRequest, RequestAuthorizeTab } from '@subwallet/extension-base/background/types';
 import { Web3Transaction } from '@subwallet/extension-base/signers/types';
 import { getId } from '@subwallet/extension-base/utils/getId';
@@ -40,7 +40,7 @@ import { decodePair } from '@polkadot/keyring/pair/decode';
 import { KeyringPair$Meta } from '@polkadot/keyring/types';
 import { keyring } from '@polkadot/ui-keyring';
 import { accounts } from '@polkadot/ui-keyring/observable/accounts';
-import { assert, BN, logger as createLogger, u8aToHex } from '@polkadot/util';
+import { assert, BN, hexToU8a, logger as createLogger, u8aToHex } from '@polkadot/util';
 import { Logger } from '@polkadot/util/types';
 import { base64Decode, isEthereumAddress } from '@polkadot/util-crypto';
 
@@ -2062,6 +2062,22 @@ export default class KoniState extends State {
       privateKey: u8aToHex(decoded.secretKey),
       publicKey: u8aToHex(decoded.publicKey)
     };
+  }
+
+  public checkPublicAndSecretKey ({publicKey, secretKey}: RequestCheckPublicAndSecretKey): ResponseCheckPublicAndSecretKey {
+    try {
+      const keyPair = keyring.keyring.addFromPair({publicKey: hexToU8a(publicKey), secretKey: hexToU8a(secretKey)});
+      return {
+        address: keyPair.address,
+        isValid: true
+      }
+    } catch (e) {
+      console.error(e);
+      return {
+        address: '',
+        isValid: false
+      }
+    }
   }
 
   public getEthKeyring (address: string, password: string): Promise<SimpleKeyring> {

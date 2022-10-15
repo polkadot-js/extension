@@ -1,6 +1,7 @@
 // Copyright 2019-2022 @polkadot/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
+import { isEthereumAddress } from '@polkadot/util-crypto';
 import QRCode from 'react-qr-code';
 import type { Theme, ThemeProps } from '../types';
 
@@ -45,6 +46,8 @@ function ExportAccount({ className, match: { params: { address } } }: Props): Re
   const accountName = useMemo((): string | undefined => {
     return accounts.accounts.find((acc) => acc.address === address)?.name;
   }, [accounts, address])
+
+  const isEthereum = isEthereumAddress(address);
 
   const qrData = useMemo(() => {
     const prefix = 'secret';
@@ -244,7 +247,7 @@ function ExportAccount({ className, match: { params: { address } } }: Props): Re
                   { privateKey ? t<string>('Via Text') : t<string>('Private Key')}
                 </Button>}
               {
-                (privateKey && !isQr) &&
+                (privateKey && !isQr && !isEthereum) &&
                 <Button
                   className="export-button"
                   data-export-button

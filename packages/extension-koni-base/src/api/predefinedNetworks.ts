@@ -173,7 +173,7 @@ export const PREDEFINED_NETWORKS: Record<string, NetworkJson> = {
     evmChainId: 1,
     supportBonding: false,
     getStakingOnChain: false,
-    abiExplorer: 'https://optimism.io'
+    abiExplorer: 'https://goerli.etherscan.io'
   },
   binance: {
     key: 'binance',

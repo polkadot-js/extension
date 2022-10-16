@@ -219,18 +219,22 @@ export const subscanByNetworkKey: Record<string, string> = {
   subspace_gemini_2a: 'https://subspace.stg.subscan.io'
 };
 
-export const moonbeamScanUrl = 'https://moonbeam.moonscan.io';
-
-export const moonriverScanUrl = 'https://moonriver.moonscan.io';
-
-export const moonbaseScanUrl = 'https://moonbase.moonscan.io';
+const evmBlockExplorer: Record<string, string> = {
+  moonbeam: 'https://moonbeam.moonscan.io',
+  moonriver: 'https://moonriver.moonscan.io',
+  moonbase: 'https://moonbase.moonscan.io',
+  ethereum: 'https://etherscan.io',
+  ethereum_goerli: 'https://goerli.etherscan.io',
+  binance: 'https://bscscan.com',
+  binance_test: 'https://testnet.bscscan.com'
+};
 
 export function isSupportSubscan (networkKey: string): boolean {
   return !!subscanByNetworkKey[networkKey];
 }
 
 export function isSupportScanExplorer (networkKey: string): boolean {
-  return ['moonbeam', 'moonriver', 'moonbase'].includes(networkKey) || isSupportSubscan(networkKey);
+  return Object.keys(evmBlockExplorer).includes(networkKey) || isSupportSubscan(networkKey);
 }
 
 export function getScanExplorerTransactionHistoryUrl (networkKey: string, hash: string, useSubscan?: boolean): string {
@@ -238,16 +242,8 @@ export function getScanExplorerTransactionHistoryUrl (networkKey: string, hash: 
     return `${subscanByNetworkKey[networkKey]}/extrinsic/${hash}`;
   }
 
-  if (networkKey === 'moonbeam') {
-    return `${moonbeamScanUrl}/tx/${hash}`;
-  }
-
-  if (networkKey === 'moonriver') {
-    return `${moonriverScanUrl}/tx/${hash}`;
-  }
-
-  if (networkKey === 'moonbase') {
-    return `${moonbaseScanUrl}/tx/${hash}`;
+  if (Object.keys(evmBlockExplorer).indexOf(networkKey) > -1) {
+    return `${evmBlockExplorer[networkKey]}/tx/${hash}`;
   }
 
   if (!subscanByNetworkKey[networkKey]) {
@@ -258,16 +254,8 @@ export function getScanExplorerTransactionHistoryUrl (networkKey: string, hash: 
 }
 
 export function getScanExplorerAddressInfoUrl (networkKey: string, address: string): string {
-  if (networkKey === 'moonbeam') {
-    return `${moonbeamScanUrl}/address/${address}`;
-  }
-
-  if (networkKey === 'moonriver') {
-    return `${moonriverScanUrl}/address/${address}`;
-  }
-
-  if (networkKey === 'moonbase') {
-    return `${moonbaseScanUrl}/address/${address}`;
+  if (Object.keys(evmBlockExplorer).indexOf(networkKey) > -1) {
+    return `${evmBlockExplorer[networkKey]}/address/${address}`;
   }
 
   if (!subscanByNetworkKey[networkKey]) {

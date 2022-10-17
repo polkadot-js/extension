@@ -134,7 +134,6 @@ function ExportAccount ({ className, match: { params: { address } } }: Props): R
       setIsBusy(true);
       setButtonId('exportQr');
       setIsQr(true);
-      setIsBusy(false);
 
       if (!privateKey) {
         handleExportPublicAndPrivateKey(address, pass);
@@ -146,14 +145,16 @@ function ExportAccount ({ className, match: { params: { address } } }: Props): R
   );
 
   return (
-    <>
+    <div className={className}>
       <Header
         isBusy={isBusy}
+        onCancel={_goHome}
         showBackArrow
+        showCancelButton={true}
         showSubHeader
         subHeaderName={t<string>('Export account')}
       />
-      <div className={className}>
+      <div className='content-wrapper'>
         {_isAllAccount
           ? <div>
             <Warning>
@@ -230,34 +231,22 @@ function ExportAccount ({ className, match: { params: { address } } }: Props): R
             <div className='export__action-area'>
               <Button
                 className='export-button'
-                isBusy={isBusy && buttonId === 'cancel'}
-                isDisabled={isBusy}
-                onClick={_goHome}
+                data-export-button
+                isBusy={isBusy && buttonId === 'exportPrivate'}
+                isDisabled={pass.length === 0 || !!error || isBusy || (!!privateKey && !isQr)}
+                onClick={_onExportPrivateButtonClick}
               >
-                <span>{t<string>('Cancel')}</span>
+                {t<string>('Private Key')}
               </Button>
-              {(!privateKey || (privateKey && isQr)) &&
-                <Button
-                  className='export-button'
-                  data-export-button
-                  isBusy={isBusy && buttonId === 'exportPrivate'}
-                  isDisabled={pass.length === 0 || !!error || isBusy}
-                  onClick={_onExportPrivateButtonClick}
-                >
-                  { privateKey ? t<string>('Via Text') : t<string>('Private Key')}
-                </Button>}
-              {
-                (privateKey && !isQr) &&
-                <Button
-                  className='export-button'
-                  data-export-button
-                  isBusy={isBusy && buttonId === 'exportQr'}
-                  isDisabled={pass.length === 0 || !!error || isBusy}
-                  onClick={_onExportQrButtonClick}
-                >
-                  {t<string>('Via QR')}
-                </Button>
-              }
+              <Button
+                className='export-button'
+                data-export-button
+                isBusy={isBusy && buttonId === 'exportQr'}
+                isDisabled={pass.length === 0 || !!error || isBusy || (!!privateKey && isQr)}
+                onClick={_onExportQrButtonClick}
+              >
+                {t<string>('QR')}
+              </Button>
               <Button
                 className='export-button'
                 data-export-button
@@ -272,13 +261,20 @@ function ExportAccount ({ className, match: { params: { address } } }: Props): R
         }
 
       </div>
-    </>
+    </div>
   );
 }
 
 export default withRouter(styled(ExportAccount)(({ theme }: Props) => `
-  margin: 0 15px;
-  padding-top: 25px;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  height: 100%;
+
+  .content-wrapper {
+    padding: 25px 15px;
+    overflow-y: auto;
+  }
 
   .qr-container {
     display: flex;
@@ -322,6 +318,7 @@ export default withRouter(styled(ExportAccount)(({ theme }: Props) => `
     align-items: center;
     padding-top: 10px;
     padding-bottom: 7px;
+    margin: 0 -4px;
   }
 
   .export-account-wrapper {
@@ -330,19 +327,24 @@ export default withRouter(styled(ExportAccount)(({ theme }: Props) => `
 
   .export-button {
     flex: 1;
+    margin: 0 4px;
   }
 
-  .export-button:first-child {
-    margin-right: 8px;
-    background-color: ${theme.buttonBackground1};
-
-    span {
-      color: ${theme.buttonTextColor2};
-    }
+  .shrink-button {
+    flex-shrink: 1;
+    flex-grow: 0;
   }
 
-  .export-button:last-child {
-    margin-left: 8px;
+  .button-content {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .qr-icon {
+    width: 20px;
+    height: 20px;
+    filter: ${theme.filterWhite};
   }
 
   .export-warning {

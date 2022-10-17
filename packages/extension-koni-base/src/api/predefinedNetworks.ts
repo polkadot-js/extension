@@ -548,7 +548,8 @@ export const PREDEFINED_NETWORKS: Record<string, NetworkJson> = {
     nativeToken: 'TZERO',
     decimals: 12,
     getStakingOnChain: true,
-    supportBonding: true
+    supportBonding: true,
+    supportPSP: true
   },
   opal: {
     key: 'opal',

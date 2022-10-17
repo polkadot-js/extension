@@ -9,12 +9,12 @@ export interface ChainOptions {
   value: string;
 }
 
-export default function useGetActiveChains () {
+export default function useGetContractSupportedChains () {
   const networkMap = useSelector((state: RootState) => state.networkMap);
   const result: ChainOptions[] = [];
 
   for (const [key, network] of Object.entries(networkMap)) {
-    if (network.active && key !== 'polkadot' && key !== 'kusama') {
+    if (network.active && (network.supportPSP || network.isEthereum)) {
       result.push({
         text: network.chain,
         value: key

@@ -4,7 +4,7 @@
 import { CustomToken, CustomTokenType } from '@subwallet/extension-base/background/KoniTypes';
 import { isValidSubstrateAddress } from '@subwallet/extension-koni-base/utils';
 import { ActionContext, Button, ConfirmationsQueueContext, Dropdown, InputWithLabel } from '@subwallet/extension-koni-ui/components';
-import useGetActiveChains from '@subwallet/extension-koni-ui/hooks/screen/import/useGetActiveChains';
+import useGetContractSupportedChains from '@subwallet/extension-koni-ui/hooks/screen/import/useGetContractSupportedChains';
 import useTranslation from '@subwallet/extension-koni-ui/hooks/useTranslation';
 import { completeConfirmation, upsertCustomToken, validateCustomToken } from '@subwallet/extension-koni-ui/messaging';
 import { Header } from '@subwallet/extension-koni-ui/partials';
@@ -82,7 +82,7 @@ function ImportNft ({ className = '' }: Props): React.ReactElement<Props> {
   const requests = Object.values(addTokenRequest);
   const currentRequest = requests[0];
   const externalTokenInfo = currentRequest?.payload;
-  const chainOptions = useGetActiveChains();
+  const chainOptions = useGetContractSupportedChains();
   const { account: currentAccount } = useSelector((state: RootState) => state.currentAccount);
 
   const [nftInfo, dispatchNftInfo] = useReducer(nftInfoReducer, externalTokenInfo || { ...initNftInfo, chain: chainOptions[0].value || '' });

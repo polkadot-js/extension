@@ -166,6 +166,7 @@ export interface NftItem {
   description?: string;
   properties?: Record<any, any> | null;
   chain?: string;
+  type?: CustomTokenType.erc721 | CustomTokenType.psp34 | RMRK_VER; // for sending
   rmrk_ver?: RMRK_VER;
   owner?: string;
 }

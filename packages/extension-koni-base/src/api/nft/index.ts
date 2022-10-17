@@ -11,39 +11,43 @@ import { BaseNftApi } from '@subwallet/extension-koni-base/api/nft/nft';
 import { RmrkNftApi } from '@subwallet/extension-koni-base/api/nft/rmrk_nft';
 import StatemineNftApi from '@subwallet/extension-koni-base/api/nft/statemine_nft';
 import UniqueNftApi from '@subwallet/extension-koni-base/api/nft/unique_nft';
+import { WasmNftApi } from '@subwallet/extension-koni-base/api/nft/wasm_nft';
 import { categoryAddresses } from '@subwallet/extension-koni-base/utils';
 import Web3 from 'web3';
 
 function createSubstrateNftApi (chain: string, apiProps: ApiProps | null, addresses: string[]): BaseNftApi | null {
-  // @ts-ignore
-  const [substrateAddresses, evmAddresses] = categoryAddresses(addresses);
-  const useAddresses = substrateAddresses;
+  const [substrateAddresses] = categoryAddresses(addresses);
 
   switch (chain) {
     case SUPPORTED_NFT_NETWORKS.karura:
-      return new KaruraNftApi(apiProps, useAddresses, chain);
+      return new KaruraNftApi(apiProps, substrateAddresses, chain);
     case SUPPORTED_NFT_NETWORKS.acala:
-      return new AcalaNftApi(apiProps, useAddresses, chain);
+      return new AcalaNftApi(apiProps, substrateAddresses, chain);
     case SUPPORTED_NFT_NETWORKS.kusama:
-      return new RmrkNftApi(apiProps, useAddresses, chain);
+      return new RmrkNftApi(apiProps, substrateAddresses, chain);
     case SUPPORTED_NFT_NETWORKS.statemine:
-      return new StatemineNftApi(apiProps, useAddresses, chain);
+      return new StatemineNftApi(apiProps, substrateAddresses, chain);
     case SUPPORTED_NFT_NETWORKS.unique_network:
-      return new UniqueNftApi(apiProps, useAddresses, chain);
+      return new UniqueNftApi(apiProps, substrateAddresses, chain);
     // case SUPPORTED_NFT_NETWORKS.quartz:
-    //   return new QuartzNftApi(api, useAddresses, chain);
+    //   return new QuartzNftApi(api, substrateAddresses, chain);
     case SUPPORTED_NFT_NETWORKS.bitcountry:
-      return new BitCountryNftApi(apiProps, useAddresses, chain);
+      return new BitCountryNftApi(apiProps, substrateAddresses, chain);
     case SUPPORTED_NFT_NETWORKS.pioneer:
-      return new BitCountryNftApi(apiProps, useAddresses, chain);
+      return new BitCountryNftApi(apiProps, substrateAddresses, chain);
   }
 
   return null;
 }
 
+function createWasmNftApi (chain: string, apiProps: ApiProps | null, addresses: string[]): BaseNftApi | null {
+  const [substrateAddresses] = categoryAddresses(addresses);
+
+  return new WasmNftApi(apiProps, substrateAddresses, chain);
+}
+
 function createWeb3NftApi (chain: string, web3: Web3 | null, addresses: string[]): BaseNftApi | null {
-  // @ts-ignore
-  const [substrateAddresses, evmAddresses] = categoryAddresses(addresses);
+  const [, evmAddresses] = categoryAddresses(addresses);
 
   return new EvmNftApi(web3, evmAddresses, chain);
 }

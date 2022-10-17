@@ -1,7 +1,7 @@
 // Copyright 2019-2022 @subwallet/extension-koni authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { NetworkJson } from '@subwallet/extension-base/background/KoniTypes';
+import { ContractType, NetworkJson } from '@subwallet/extension-base/background/KoniTypes';
 
 export const PREDEFINED_NETWORKS: Record<string, NetworkJson> = {
   polkadot: {
@@ -153,7 +153,8 @@ export const PREDEFINED_NETWORKS: Record<string, NetworkJson> = {
     evmChainId: 1284,
     supportBonding: true,
     getStakingOnChain: true,
-    abiExplorer: 'https://api-moonbeam.moonscan.io/api?module=contract&action=getabi'
+    abiExplorer: 'https://api-moonbeam.moonscan.io/api?module=contract&action=getabi',
+    supportSmartContract: [ContractType.evm]
   },
   astar: {
     key: 'astar',
@@ -199,7 +200,8 @@ export const PREDEFINED_NETWORKS: Record<string, NetworkJson> = {
     decimals: 18,
     coinGeckoKey: 'astar',
     evmChainId: 592,
-    paraId: 2006
+    paraId: 2006,
+    supportSmartContract: [ContractType.evm]
   },
   acala: {
     key: 'acala',
@@ -549,7 +551,7 @@ export const PREDEFINED_NETWORKS: Record<string, NetworkJson> = {
     decimals: 12,
     getStakingOnChain: true,
     supportBonding: true,
-    supportPSP: true
+    supportSmartContract: [ContractType.wasm]
   },
   opal: {
     key: 'opal',
@@ -591,7 +593,8 @@ export const PREDEFINED_NETWORKS: Record<string, NetworkJson> = {
     evmChainId: 1287,
     supportBonding: true,
     getStakingOnChain: true,
-    paraId: 1000
+    paraId: 1000,
+    supportSmartContract: [ContractType.evm]
   },
   efinity: {
     key: 'efinity',
@@ -750,7 +753,8 @@ export const PREDEFINED_NETWORKS: Record<string, NetworkJson> = {
     evmChainId: 1285,
     supportBonding: true,
     getStakingOnChain: true,
-    abiExplorer: 'https://api-moonriver.moonscan.io/api?module=contract&action=getabi'
+    abiExplorer: 'https://api-moonriver.moonscan.io/api?module=contract&action=getabi',
+    supportSmartContract: [ContractType.evm]
   },
   shiden: {
     key: 'shiden',

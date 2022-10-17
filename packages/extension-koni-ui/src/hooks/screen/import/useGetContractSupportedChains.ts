@@ -14,7 +14,7 @@ export default function useGetContractSupportedChains () {
   const result: ChainOptions[] = [];
 
   for (const [key, network] of Object.entries(networkMap)) {
-    if (network.active && (network.supportPSP || network.isEthereum)) {
+    if (network.active && network.supportSmartContract && network.supportSmartContract.length > 0) {
       result.push({
         text: network.chain,
         value: key

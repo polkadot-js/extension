@@ -292,6 +292,11 @@ export interface NetWorkInfo {
   decimals?: number;
 }
 
+export enum ContractType {
+  wasm = 'wasm',
+  evm = 'evm'
+}
+
 export interface NetworkJson {
   // General Information
   key: string; // Key of network in NetworkMap
@@ -331,7 +336,7 @@ export interface NetworkJson {
   dependencies?: string[]; // Auto active network in dependencies if current network is activated
   getStakingOnChain?: boolean; // support get bonded on chain
   supportBonding?: boolean;
-  supportPSP?: boolean; // if network supports PSP smart contracts
+  supportSmartContract?: ContractType[]; // if network supports PSP smart contracts
 
   apiStatus?: NETWORK_STATUS;
   requestId?: string;

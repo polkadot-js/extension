@@ -372,14 +372,18 @@ export default class Extension {
       const metadata = this.#state.knownMetadata.find(({ genesisHash }) => genesisHash === payload.genesisHash);
 
       if (metadata) {
-        registry = metadataExpand(metadata, false, payload.signedExtensions).registry;
-      } else {
-        registry = new TypeRegistry();
+        // we have metadata, expand it and extract the info/registry
+        const expanded = metadataExpand(metadata, false);
 
-        // set the extensions before signing (only payload info)
+        registry = expanded.registry;
+        registry.setSignedExtensions(payload.signedExtensions, expanded.definition.userExtensions);
+      } else {
+        // we have no metadata, create a new registry
+        registry = new TypeRegistry();
         registry.setSignedExtensions(payload.signedExtensions);
       }
     } else {
+      // for non-payload, just create a registry to use
       registry = new TypeRegistry();
     }
 

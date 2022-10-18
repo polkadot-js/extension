@@ -17,7 +17,7 @@
   "version": "0.44.7-15-x",
   "main": "index.js",
   "dependencies": {
-    "@babel/runtime": "^7.19.0",
+    "@babel/runtime": "^7.19.4",
     "sinon-chrome": "^3.0.1"
   }
 }

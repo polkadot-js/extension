@@ -660,10 +660,10 @@ export default class KoniState extends State {
   public async resetNft (newAddress: string): Promise<void> {
     this.getNft().then((data) => this.nftSubject.next(data || { nftList: [], total: 0 })).catch((e) => this.logger.warn(e));
 
-    const activeNetworkHashs = Object.values(this.activeNetworks).map((network) => network.genesisHash);
+    const activeNetworkHashes = Object.values(this.activeNetworks).map((network) => network.genesisHash);
     const addresses = await this.getDecodedAddresses(newAddress);
 
-    this.dbService.subscribeNft(addresses, activeNetworkHashs, (nfts) => {
+    this.dbService.subscribeNft(addresses, activeNetworkHashes, (nfts) => {
       this.nftSubject.next({
         nftList: nfts,
         total: nfts.length

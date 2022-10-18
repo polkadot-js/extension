@@ -94,10 +94,10 @@ export default class DatabaseService {
     return this.nftSubscription;
   }
 
-  async getNft (addresses: string[], chainHashs?: string[]) {
-    const nfts = await this.stores.nft.getNft(addresses, chainHashs);
+  async getNft (addresses: string[], chainHashes?: string[]) {
+    const nfts = await this.stores.nft.getNft(addresses, chainHashes);
 
-    this.logger.log('Nfts: ', nfts);
+    this.logger.log('Get NFTs: ', nfts);
 
     return nfts;
   }

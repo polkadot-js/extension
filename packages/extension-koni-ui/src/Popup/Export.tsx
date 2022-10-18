@@ -9,7 +9,7 @@ import Header from '@subwallet/extension-koni-ui/partials/Header';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { isAccountAll, toShort } from '@subwallet/extension-koni-ui/util';
 import { saveAs } from 'file-saver';
-import React, { useCallback, useContext, useMemo, useState } from 'react';
+import React, { useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import CopyToClipboard from 'react-copy-to-clipboard';
 import QRCode from 'react-qr-code';
 import { useSelector } from 'react-redux';
@@ -44,6 +44,10 @@ function ExportAccount ({ className, match: { params: { address } } }: Props): R
 
   const accountName = useMemo((): string | undefined => {
     return accounts.accounts.find((acc) => acc.address === address)?.name;
+  }, [accounts, address]);
+
+  const isValidAccount = useMemo((): boolean => {
+    return !!accounts.accounts.find((acc) => acc.address === address);
   }, [accounts, address]);
 
   const qrData = useMemo(() => {
@@ -143,6 +147,13 @@ function ExportAccount ({ className, match: { params: { address } } }: Props): R
     },
     [address, pass, privateKey, handleExportPublicAndPrivateKey]
   );
+
+  useEffect(() => {
+    if (!isValidAccount) {
+      window.localStorage.setItem('popupNavigation', '/');
+      onAction('/');
+    }
+  }, [isValidAccount, onAction]);
 
   return (
     <div className={className}>

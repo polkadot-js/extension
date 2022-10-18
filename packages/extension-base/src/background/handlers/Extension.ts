@@ -9,11 +9,11 @@ import type { KeypairType } from '@polkadot/util-crypto/types';
 import type { AccountJson, AllowedPath, AuthorizeRequest, MessageTypes, MetadataRequest, RequestAccountBatchExport, RequestAccountChangePassword, RequestAccountCreateExternal, RequestAccountCreateHardware, RequestAccountCreateSuri, RequestAccountEdit, RequestAccountExport, RequestAccountForget, RequestAccountShow, RequestAccountTie, RequestAccountValidate, RequestActiveTabsUrlUpdate, RequestAuthorizeApprove, RequestBatchRestore, RequestDeriveCreate, RequestDeriveValidate, RequestJsonRestore, RequestMetadataApprove, RequestMetadataReject, RequestSeedCreate, RequestSeedValidate, RequestSigningApprovePassword, RequestSigningApproveSignature, RequestSigningCancel, RequestSigningIsLocked, RequestTypes, RequestUpdateAuthorizedAccounts, ResponseAccountExport, ResponseAccountsExport, ResponseAuthorizeList, ResponseDeriveValidate, ResponseJsonGetAccountInfo, ResponseSeedCreate, ResponseSeedValidate, ResponseSigningIsLocked, ResponseType, SigningRequest } from '../types';
 
 import { ALLOWED_PATH, PASSWORD_EXPIRY_MS } from '@polkadot/extension-base/defaults';
-import { TypeRegistry } from '@polkadot/types';
+import { Metadata, TypeRegistry } from '@polkadot/types';
 import keyring from '@polkadot/ui-keyring';
 import { accounts as accountsObservable } from '@polkadot/ui-keyring/observable/accounts';
 import { assert, isHex } from '@polkadot/util';
-import { keyExtractSuri, mnemonicGenerate, mnemonicValidate } from '@polkadot/util-crypto';
+import { base64Decode, keyExtractSuri, mnemonicGenerate, mnemonicValidate } from '@polkadot/util-crypto';
 
 import { withErrorLog } from './helpers';
 import State, { AuthorizedAccountsDiff } from './State';
@@ -348,11 +348,6 @@ export default class Extension {
     const { reject, request, resolve } = queued;
     const pair = keyring.getPair(queued.account.address);
 
-    // unlike queued.account.address the following
-    // address is encoded with the default prefix
-    // which what is used for password caching mapping
-    const { address } = pair;
-
     if (!pair) {
       reject(new Error('Unable to find pair'));
 
@@ -374,21 +369,38 @@ export default class Extension {
 
     if (isJsonPayload(payload)) {
       // Get the metadata for the genesisHash
-      const currentMetadata = this.#state.knownMetadata.find((meta: MetadataDef) =>
-        meta.genesisHash === payload.genesisHash);
+      const metadata = this.#state.knownMetadata.find(({ genesisHash }) => genesisHash === payload.genesisHash);
 
-      // set the registry before calling the sign function
-      registry.setSignedExtensions(payload.signedExtensions, currentMetadata?.userExtensions);
+      if (metadata) {
+        // apply all types registered (not needed on metadata v14 chains)
+        registry.register(metadata.types);
 
-      if (currentMetadata) {
-        registry.register(currentMetadata?.types);
+        if (metadata.metaCalls) {
+          // combine set of calls & extensions before signing
+          // (attaching the metadata here ensures that the lookup types are done, which
+          // also implies overrides for the account/extrinsic types)
+          registry.setMetadata(
+            new Metadata(registry, base64Decode(metadata.metaCalls)),
+            payload.signedExtensions,
+            metadata.userExtensions
+          );
+        } else {
+          // set the extensions before signing (payload & user extensions)
+          registry.setSignedExtensions(payload.signedExtensions, metadata.userExtensions);
+        }
+      } else {
+        // set the extensions before signing (only payload info)
+        registry.setSignedExtensions(payload.signedExtensions);
       }
     }
 
     const result = request.sign(registry, pair);
 
     if (savePass) {
-      this.#cachedUnlocks[address] = Date.now() + PASSWORD_EXPIRY_MS;
+      // unlike queued.account.address the following
+      // address is encoded with the default prefix
+      // which what is used for password caching mapping
+      this.#cachedUnlocks[pair.address] = Date.now() + PASSWORD_EXPIRY_MS;
     } else {
       pair.lock();
     }

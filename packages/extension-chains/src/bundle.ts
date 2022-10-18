@@ -19,7 +19,7 @@ const definitions = new Map<string, MetadataDef>(
 
 const expanded = new Map<string, Chain>();
 
-export function metadataExpand (definition: MetadataDef, isPartial = false): Chain {
+export function metadataExpand (definition: MetadataDef, isPartial = false, extensions?: string[]): Chain {
   const cached = expanded.get(definition.genesisHash);
 
   if (cached && cached.specVersion === definition.specVersion) {
@@ -42,7 +42,7 @@ export function metadataExpand (definition: MetadataDef, isPartial = false): Cha
   const hasMetadata = !!metaCalls && !isPartial;
 
   if (hasMetadata) {
-    registry.setMetadata(new Metadata(registry, base64Decode(metaCalls)), undefined, userExtensions);
+    registry.setMetadata(new Metadata(registry, base64Decode(metaCalls)), extensions, userExtensions);
   }
 
   const isUnknown = genesisHash === '0x';

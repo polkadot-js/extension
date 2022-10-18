@@ -3,17 +3,18 @@
 
 import type { MetadataDef } from '@polkadot/extension-inject/types';
 import type { KeyringPair, KeyringPair$Json, KeyringPair$Meta } from '@polkadot/keyring/types';
-import type { SignerPayloadJSON, SignerPayloadRaw } from '@polkadot/types/types';
+import type { Registry, SignerPayloadJSON, SignerPayloadRaw } from '@polkadot/types/types';
 import type { SubjectInfo } from '@polkadot/ui-keyring/observable/types';
 import type { KeypairType } from '@polkadot/util-crypto/types';
 import type { AccountJson, AllowedPath, AuthorizeRequest, MessageTypes, MetadataRequest, RequestAccountBatchExport, RequestAccountChangePassword, RequestAccountCreateExternal, RequestAccountCreateHardware, RequestAccountCreateSuri, RequestAccountEdit, RequestAccountExport, RequestAccountForget, RequestAccountShow, RequestAccountTie, RequestAccountValidate, RequestActiveTabsUrlUpdate, RequestAuthorizeApprove, RequestBatchRestore, RequestDeriveCreate, RequestDeriveValidate, RequestJsonRestore, RequestMetadataApprove, RequestMetadataReject, RequestSeedCreate, RequestSeedValidate, RequestSigningApprovePassword, RequestSigningApproveSignature, RequestSigningCancel, RequestSigningIsLocked, RequestTypes, RequestUpdateAuthorizedAccounts, ResponseAccountExport, ResponseAccountsExport, ResponseAuthorizeList, ResponseDeriveValidate, ResponseJsonGetAccountInfo, ResponseSeedCreate, ResponseSeedValidate, ResponseSigningIsLocked, ResponseType, SigningRequest } from '../types';
 
 import { ALLOWED_PATH, PASSWORD_EXPIRY_MS } from '@polkadot/extension-base/defaults';
-import { Metadata, TypeRegistry } from '@polkadot/types';
+import { metadataExpand } from '@polkadot/extension-chains';
+import { TypeRegistry } from '@polkadot/types';
 import keyring from '@polkadot/ui-keyring';
 import { accounts as accountsObservable } from '@polkadot/ui-keyring/observable/accounts';
 import { assert, isHex } from '@polkadot/util';
-import { base64Decode, keyExtractSuri, mnemonicGenerate, mnemonicValidate } from '@polkadot/util-crypto';
+import { keyExtractSuri, mnemonicGenerate, mnemonicValidate } from '@polkadot/util-crypto';
 
 import { withErrorLog } from './helpers';
 import State, { AuthorizedAccountsDiff } from './State';
@@ -24,9 +25,6 @@ type CachedUnlocks = Record<string, number>;
 const SEED_DEFAULT_LENGTH = 12;
 const SEED_LENGTHS = [12, 15, 18, 21, 24];
 const ETH_DERIVE_DEFAULT = "/m/44'/60'/0'/0/0";
-
-// a global registry to use internally
-const registry = new TypeRegistry();
 
 function getSuri (seed: string, type?: KeypairType): string {
   return type === 'ethereum'
@@ -365,6 +363,8 @@ export default class Extension {
       pair.decodePkcs8(password);
     }
 
+    // construct a new registry (avoiding pollution), between requests
+    let registry: Registry;
     const { payload } = request;
 
     if (isJsonPayload(payload)) {
@@ -372,26 +372,15 @@ export default class Extension {
       const metadata = this.#state.knownMetadata.find(({ genesisHash }) => genesisHash === payload.genesisHash);
 
       if (metadata) {
-        // apply all types registered (not needed on metadata v14 chains)
-        registry.register(metadata.types);
-
-        if (metadata.metaCalls) {
-          // combine set of calls & extensions before signing
-          // (attaching the metadata here ensures that the lookup types are done, which
-          // also implies overrides for the account/extrinsic types)
-          registry.setMetadata(
-            new Metadata(registry, base64Decode(metadata.metaCalls)),
-            payload.signedExtensions,
-            metadata.userExtensions
-          );
-        } else {
-          // set the extensions before signing (payload & user extensions)
-          registry.setSignedExtensions(payload.signedExtensions, metadata.userExtensions);
-        }
+        registry = metadataExpand(metadata, false, payload.signedExtensions).registry;
       } else {
+        registry = new TypeRegistry();
+
         // set the extensions before signing (only payload info)
         registry.setSignedExtensions(payload.signedExtensions);
       }
+    } else {
+      registry = new TypeRegistry();
     }
 
     const result = request.sign(registry, pair);

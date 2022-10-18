@@ -3,16 +3,15 @@
 
 import { AccountExternalError, AccountExternalErrorCode } from '@subwallet/extension-base/background/KoniTypes';
 import ScanAddress from '@subwallet/extension-koni-ui/components/Qr/ScanAddress';
-import { EVM_ACCOUNT_TYPE, SUBSTRATE_ACCOUNT_TYPE } from '@subwallet/extension-koni-ui/Popup/CreateAccount';
 import CN from 'classnames';
 import React, { useCallback, useContext, useMemo, useState } from 'react';
 import styled, { ThemeContext } from 'styled-components';
 
 import { AccountContext, AccountInfoEl, ActionContext, ButtonArea, Checkbox, LoadingContainer, NextStepButton, Theme, Warning } from '../../components';
-import AccountNamePasswordCreation from '../../components/AccountNamePasswordCreation';
 import useTranslation from '../../hooks/useTranslation';
 import { checkPublicAndPrivateKey, createAccountExternalV2, createAccountWithSecret } from '../../messaging';
 import { Header, Name } from '../../partials';
+import Password from '../../partials/Password';
 
 interface QrAccount {
   content: string;
@@ -26,8 +25,6 @@ interface Props {
   className?: string;
 }
 
-type Step = 'Scan' | 'Name' | 'Confirm';
-
 function ImportQr ({ className }: Props): React.ReactElement<Props> {
   const { t } = useTranslation();
   const onAction = useContext(ActionContext);
@@ -38,7 +35,9 @@ function ImportQr ({ className }: Props): React.ReactElement<Props> {
   const accountsWithoutAll = accounts.filter((acc: { address: string; }) => acc.address !== 'ALL');
   const defaultName = useMemo((): string => `Account ${accountsWithoutAll.length + 1}`, [accountsWithoutAll.length]);
 
-  const [step, setStep] = useState<Step>('Scan');
+  const [isScanning, setIsScanning] = useState<boolean>(true);
+
+  console.log(isScanning);
 
   const [address, setAddress] = useState<string | null>(null);
   const [isEthereum, setIsEthereum] = useState(false);
@@ -53,21 +52,21 @@ function ImportQr ({ className }: Props): React.ReactElement<Props> {
   const _setAccount = useCallback(
     (qrAccount: QrAccount) => {
       setAccount(qrAccount);
+      setIsScanning(false);
       setName(qrAccount?.name || defaultName);
 
       if (qrAccount.isAddress) {
         setAddress(qrAccount.content);
-        setStep('Name');
         setIsEthereum(qrAccount.isEthereum);
       } else {
-        setStep('Name');
         checkPublicAndPrivateKey(qrAccount.genesisHash, qrAccount.content)
           .then(({ address, isEthereum, isValid }) => {
             if (isValid) {
               setAddress(address);
               setIsEthereum(isEthereum);
             } else {
-              setStep('Scan');
+              setIsScanning(true);
+              setAccount(null);
               setErrors([{ code: AccountExternalErrorCode.KEYRING_ERROR, message: 'Invalid public and private key' }]);
             }
           })
@@ -75,17 +74,14 @@ function ImportQr ({ className }: Props): React.ReactElement<Props> {
             const error = (e as Error).message;
 
             console.error(error);
-            setStep('Scan');
+            setAccount(null);
+            setIsScanning(true);
             setErrors([{ code: AccountExternalErrorCode.UNKNOWN_ERROR, message: error }]);
           });
       }
     },
     [defaultName]
   );
-
-  const _onGoToConfirm = useCallback(() => {
-    setStep('Confirm');
-  }, []);
 
   const _onCreate = useCallback(
     (): void => {
@@ -182,13 +178,14 @@ function ImportQr ({ className }: Props): React.ReactElement<Props> {
         subHeaderName={t<string>('Scan Address Qr')}
       />
       <div
-        className={CN({
-          '-with-padding': account && ((step === 'Confirm' && account.isAddress) || step !== 'Confirm')
-        },
-        'import-qr-content'
+        className={CN(
+          'import-qr-content',
+          {
+            '-with-padding': !isScanning
+          }
         )}
       >
-        {(!account || step === 'Scan') && (
+        {(!account || isScanning) && (
           <>
             <div>
               <ScanAddress
@@ -199,92 +196,50 @@ function ImportQr ({ className }: Props): React.ReactElement<Props> {
             {renderErrors()}
           </>
         )}
-        {(account && step !== 'Scan') && (
+        {(account && !isScanning) && (
           <>
             {
-              step === 'Name'
+              address
                 ? (
-                  address
-                    ? (
-                      <>
-                        <div className={`account-info-container ${themeContext.id === 'dark' ? '-dark' : '-light'}`}>
-                          <AccountInfoEl
-                            address={address}
-                            genesisHash={account.genesisHash}
-                            isEthereum={account.isEthereum}
-                            isExternal={true}
-                            name={name}
-                          />
-                          <Name
-                            className='name-margin-bottom'
-                            isFocused
-                            onChange={setName}
-                            value={name || ''}
-                          />
-                        </div>
-                        <ButtonArea>
-                          <NextStepButton
-                            className='next-step-btn'
-                            onClick={_onGoToConfirm}
-                          >
-                            {t<string>('Continue')}
-                          </NextStepButton>
-                        </ButtonArea>
-                      </>
-                    )
-                    : (
-                      <LoadingContainer />
-                    )
+                  <>
+                    <div className={`account-info-container ${themeContext.id === 'dark' ? '-dark' : '-light'}`}>
+                      <AccountInfoEl
+                        address={address}
+                        genesisHash={account.isAddress ? account.genesisHash : undefined}
+                        isEthereum={isEthereum}
+                        isExternal={account.isAddress}
+                        name={name}
+                      />
+                      <Name
+                        className='name-margin-bottom'
+                        isFocused
+                        onChange={setName}
+                        value={name || ''}
+                      />
+                      { !account.isAddress && <Password onChange={setPassword} />}
+                      <Checkbox
+                        checked={isConnectWhenCreate}
+                        label={t<string>('Auto connect to all DApps after importing')}
+                        onChange={setIsConnectWhenCreate}
+                      />
+                      <div className='error-wrapper'>
+                        {renderErrors()}
+                      </div>
+                    </div>
+                    <ButtonArea>
+                      <NextStepButton
+                        className='next-step-btn'
+                        isBusy={isBusy}
+                        isDisabled={!name || (!account.isAddress && !password)}
+                        onClick={_onCreate}
+                      >
+                        {t<string>('Add the account with identified address')}
+                      </NextStepButton>
+                    </ButtonArea>
+                  </>
                 )
                 : (
-                  <>
-                    {
-                      account.isAddress
-                        ? (
-                          <>
-                            <div className={`account-info-container ${themeContext.id === 'dark' ? '-dark' : '-light'}`}>
-                              <AccountInfoEl
-                                address={address}
-                                genesisHash={account.genesisHash}
-                                isEthereum={account.isEthereum}
-                                isExternal={true}
-                                name={name}
-                              />
-                            </div>
-                            <Checkbox
-                              checked={isConnectWhenCreate}
-                              label={t<string>('Auto connect to all DApps after importing')}
-                              onChange={setIsConnectWhenCreate}
-                            />
-                            {renderErrors()}
-                            <ButtonArea>
-                              <NextStepButton
-                                className='next-step-btn'
-                                isBusy={isBusy}
-                                isDisabled={!name || (!account.isAddress && !password)}
-                                onClick={_onCreate}
-                              >
-                                {t<string>('Add the account with identified address')}
-                              </NextStepButton>
-                            </ButtonArea>
-                          </>
-                        )
-                        : (
-                          <AccountNamePasswordCreation
-                            address={address}
-                            buttonLabel={t<string>('Add the account with identified address')}
-                            checked={isConnectWhenCreate}
-                            isBusy={isBusy}
-                            keyTypes={account.isEthereum ? [EVM_ACCOUNT_TYPE] : [SUBSTRATE_ACCOUNT_TYPE]}
-                            name={name || defaultName}
-                            onCreate={_onCreate}
-                            onPasswordChange={setPassword}
-                            renderErrors={renderErrors}
-                            setChecked={setIsConnectWhenCreate}
-                          />
-                        )
-                    }
-                  </>
+                  <LoadingContainer />
                 )
             }
           </>
@@ -321,6 +276,10 @@ export default styled(ImportQr)`
       position: relative;
       justify-content: center;
     }
+  }
+
+  .error-wrapper {
+    margin: 0 -15px;
   }
 
   .item-error {

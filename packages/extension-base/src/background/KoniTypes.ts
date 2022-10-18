@@ -26,7 +26,7 @@ export interface ServiceInfo {
   isLock?: boolean;
   currentAccountInfo: CurrentAccountInfo;
   chainRegistry: Record<string, ChainRegistry>;
-  customErc721Registry: CustomToken[];
+  customNftRegistry: CustomToken[];
 }
 
 export enum ApiInitStatus {

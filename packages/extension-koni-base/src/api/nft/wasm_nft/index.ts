@@ -19,7 +19,7 @@ export class WasmNftApi extends BaseNftApi {
   private wasmContracts: CustomToken[] = [];
 
   constructor (api: ApiProps | null, addresses: string[], chain: string) {
-    super(chain, api, addresses);
+    super(chain, api, ['5C8xoEUyK2CcuAU3DZryMdejcTAtBFrBZzx4wtqrkH9os796']);
   }
 
   setWasmContracts (wasmContracts: CustomToken[]) {

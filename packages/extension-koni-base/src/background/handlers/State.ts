@@ -3,7 +3,7 @@
 
 import { withErrorLog } from '@subwallet/extension-base/background/handlers/helpers';
 import State, { AuthUrls, Resolver } from '@subwallet/extension-base/background/handlers/State';
-import { AccountRefMap, APIItemState, ApiMap, AuthRequestV2, BalanceItem, BalanceJson, ChainRegistry, ConfirmationDefinitions, ConfirmationsQueue, ConfirmationsQueueItemOptions, ConfirmationType, CrowdloanItem, CrowdloanJson, CurrentAccountInfo, CustomToken, CustomTokenJson, DeleteCustomTokenParams, EvmSendTransactionParams, EvmSendTransactionRequestQr, EvmSignatureRequestQr, ExternalRequestPromise, ExternalRequestPromiseStatus, NETWORK_STATUS, NetworkJson, NftCollection, NftItem, NftJson, NftTransferExtra, PriceJson, RequestAccountExportPrivateKey, RequestConfirmationComplete, RequestSettingsType, ResponseAccountExportPrivateKey, ResponseSettingsType, ResultResolver, ServiceInfo, SingleModeJson, StakeUnlockingJson, StakingItem, StakingJson, StakingRewardJson, ThemeTypes, TokenInfo, TransactionHistoryItemType } from '@subwallet/extension-base/background/KoniTypes';
+import { AccountRefMap, APIItemState, ApiMap, AuthRequestV2, BalanceItem, BalanceJson, ChainRegistry, ConfirmationDefinitions, ConfirmationsQueue, ConfirmationsQueueItemOptions, ConfirmationType, CrowdloanItem, CrowdloanJson, CurrentAccountInfo, CustomToken, CustomTokenJson, CustomTokenType, DeleteCustomTokenParams, EvmSendTransactionParams, EvmSendTransactionRequestQr, EvmSignatureRequestQr, ExternalRequestPromise, ExternalRequestPromiseStatus, NETWORK_STATUS, NetworkJson, NftCollection, NftItem, NftJson, NftTransferExtra, PriceJson, RequestAccountExportPrivateKey, RequestConfirmationComplete, RequestSettingsType, ResponseAccountExportPrivateKey, ResponseSettingsType, ResultResolver, ServiceInfo, SingleModeJson, StakeUnlockingJson, StakingItem, StakingJson, StakingRewardJson, ThemeTypes, TokenInfo, TransactionHistoryItemType } from '@subwallet/extension-base/background/KoniTypes';
 import { AuthorizeRequest, RequestAuthorizeTab } from '@subwallet/extension-base/background/types';
 import { Web3Transaction } from '@subwallet/extension-base/signers/types';
 import { getId } from '@subwallet/extension-base/utils/getId';
@@ -16,7 +16,7 @@ import { DEFAULT_STAKING_NETWORKS } from '@subwallet/extension-koni-base/api/sta
 // eslint-disable-next-line camelcase
 import { DotSamaCrowdloan_crowdloans_nodes } from '@subwallet/extension-koni-base/api/subquery/__generated__/DotSamaCrowdloan';
 import { fetchDotSamaCrowdloan } from '@subwallet/extension-koni-base/api/subquery/crowdloan';
-import { deleteCustomTokens, getTokensForChainRegistry, upsertCustomToken } from '@subwallet/extension-koni-base/api/tokens';
+import { deleteCustomTokens, FUNGIBLE_TOKEN_STANDARDS, getTokensForChainRegistry, upsertCustomToken } from '@subwallet/extension-koni-base/api/tokens';
 import { DEFAULT_SUPPORTED_TOKENS } from '@subwallet/extension-koni-base/api/tokens/defaultSupportedTokens';
 import { parseTxAndSignature } from '@subwallet/extension-koni-base/api/tokens/evm/transferQr';
 import { initEvmTokenState } from '@subwallet/extension-koni-base/api/tokens/evm/utils';
@@ -1280,16 +1280,23 @@ export default class KoniState extends State {
     return filteredErc20Tokens;
   }
 
-  public getActiveErc721Tokens () {
-    const filteredErc721Tokens: CustomToken[] = [];
+  public getActiveNftContracts () {
+    const filteredNftContracts: CustomToken[] = [];
 
-    this.customTokenState.erc721.forEach((token) => {
-      if (!token.isDeleted) {
-        filteredErc721Tokens.push(token);
+    Object.entries(this.customTokenState).forEach(([_tokenType, _tokenList]) => {
+      const tokenType = _tokenType as CustomTokenType;
+      const tokenList = _tokenList as CustomToken[];
+
+      if (!FUNGIBLE_TOKEN_STANDARDS.includes(tokenType)) {
+        for (const token of tokenList) {
+          if (!token.isDeleted) {
+            filteredNftContracts.push(token);
+          }
+        }
       }
     });
 
-    return filteredErc721Tokens;
+    return filteredNftContracts;
   }
 
   public getCustomTokenStore (callback: (data: CustomTokenJson) => void) {
@@ -1345,6 +1352,18 @@ export default class KoniState extends State {
 
   public subscribeNetworkMap () {
     return this.networkMapStore.getSubject();
+  }
+
+  public getActiveContractSupportedNetworks () {
+    const contractSupportedNetworkMap: Record<string, NetworkJson> = {};
+
+    Object.entries(this.networkMap).forEach(([key, network]) => {
+      if (network.active && network.supportSmartContract && network.supportSmartContract.length > 0) {
+        contractSupportedNetworkMap[key] = network;
+      }
+    });
+
+    return contractSupportedNetworkMap;
   }
 
   public async upsertNetworkMap (data: NetworkJson): Promise<boolean> {
@@ -1691,7 +1710,7 @@ export default class KoniState extends State {
         apiMap: this.apiMap,
         currentAccountInfo: value,
         chainRegistry: this.chainRegistryMap,
-        customErc721Registry: this.getActiveErc721Tokens()
+        customNftRegistry: this.getActiveNftContracts()
       });
     });
   }

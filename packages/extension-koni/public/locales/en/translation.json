@@ -430,5 +430,8 @@
   "Compound the stake from account": "",
   "Stake compounding": "",
   "Compounding threshold": "",
-  "Note that you cannot transfer all tokens out from this account.": ""
+  "Note that you cannot transfer all tokens out from this account.": "",
+  "Via Text": "",
+  "Via QR": "",
+  "Continue": ""
 }

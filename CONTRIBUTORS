@@ -1,4 +1,4 @@
-     555	Jaco                          	Bump deps (#1154)
+     556	Jaco                          	Bump deps (#1158)
       89	Thibaut Sardan                	Allow QR signing and add error when the account has no genesis (#1155)
        7	Ivan Rukhavets                	Mention derivation in FAQ (#334)
        4	Amaury Martiny                	PostMessageProvider with on('connected' | 'disconnected') (#279)

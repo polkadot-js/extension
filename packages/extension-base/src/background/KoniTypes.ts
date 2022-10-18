@@ -267,6 +267,7 @@ export interface ApiProps extends ApiState {
   isApiReadyOnce: boolean;
   isApiConnected: boolean;
   isEthereum: boolean;
+  isEthereumOnly: boolean;
   isApiInitialized: boolean;
   isReady: Promise<ApiProps>;
   apiRetry?: number;

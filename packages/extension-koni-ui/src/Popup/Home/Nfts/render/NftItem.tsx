@@ -96,7 +96,7 @@ function NftItem ({ className, collectionId, collectionImage, data, onClickBack 
     }
 
     if (SUPPORTED_TRANSFER_SUBSTRATE_CHAIN.indexOf(data.chain) <= -1 && !networkJson.isEthereum) {
-      show(`Transferring is not supported for ${data.chain.toUpperCase()} network`);
+      show('Transfer is not supported for this network');
 
       return;
     }

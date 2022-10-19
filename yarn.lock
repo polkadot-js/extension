@@ -5686,6 +5686,7 @@ __metadata:
     "@parallel-finance/type-definitions": ^1.7.13
     "@phala/typedefs": ^0.2.31
     "@polkadot/api": ^9.4.3
+    "@polkadot/api-contract": ^9.4.3
     "@polkadot/api-derive": ^9.4.3
     "@polkadot/keyring": ^10.1.9
     "@polkadot/networks": ^10.1.9

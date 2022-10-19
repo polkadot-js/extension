@@ -1346,7 +1346,7 @@ export interface TuringStakeCompoundResp {
 
 export interface TransakNetwork {
   networks: string[];
-  tokens: string[];
+  tokens?: string[];
 }
 
 export interface CheckExistingTuringCompoundParams {

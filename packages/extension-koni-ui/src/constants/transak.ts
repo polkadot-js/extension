@@ -27,5 +27,13 @@ export const PREDEFINED_TRANSAK_NETWORK: Record<string, TransakNetwork> = {
   moonriver: {
     networks: ['moonriver'],
     tokens: ['MOVR']
+  },
+  ethereum: {
+    networks: ['ethereum'],
+    tokens: ['ETH']
+  },
+  binance: {
+    networks: ['bsc'],
+    tokens: ['BNB']
   }
 };

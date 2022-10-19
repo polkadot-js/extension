@@ -1239,5 +1239,21 @@ export const PREDEFINE_TOKEN_DATA_MAP: Record<string, Record<string, TokenInfo>>
       name: 'Tether USD',
       assetIndex: 1984
     }
+  },
+  ethereum: {
+    ETH: {
+      isMainToken: true,
+      symbol: 'ETH',
+      decimals: 18,
+      name: 'ETH'
+    }
+  },
+  binance: {
+    BNB: {
+      isMainToken: true,
+      symbol: 'BNB',
+      decimals: 18,
+      name: 'BNB'
+    }
   }
 };

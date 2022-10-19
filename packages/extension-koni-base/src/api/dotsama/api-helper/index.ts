@@ -20,6 +20,8 @@ export const ethereumChains = [
   'moonbeam',
   'moonriver',
   'moonshadow',
+  'ethereum',
+  'binance',
   'astarEvm',
   'shidenEvm',
   'shibuyaEvm',

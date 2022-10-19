@@ -54,9 +54,11 @@ const ScanAddress = (props: Props) => {
           genesisHash = '';
           content = content.substring(0, 42);
           isEthereum = true;
-          onError && onError(new Error(`Invalid prefix received, expected '${ACCEPT_PREFIXES.join(' or ')}' , found '${prefix}'`));
 
-          throw Error(`Invalid prefix received, expected '${SUBSTRATE_PREFIX} or ${SECRET_PREFIX} or ${ETHEREUM_PREFIX}' , found '${prefix}'`);
+          // Todo: Comment this again after finish #426
+          // onError && onError(new Error(`Invalid prefix received, expected '${ACCEPT_PREFIXES.join(' or ')}' , found '${prefix}'`));
+          //
+          // throw Error(`Invalid prefix received, expected '${SUBSTRATE_PREFIX} or ${SECRET_PREFIX} or ${ETHEREUM_PREFIX}' , found '${prefix}'`);
         } else {
           onError && onError(new Error(`Invalid prefix received, expected '${ACCEPT_PREFIXES.join(' or ')}' , found '${prefix}'`));
 

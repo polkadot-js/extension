@@ -268,6 +268,7 @@ export interface ApiProps extends ApiState {
   isApiReadyOnce: boolean;
   isApiConnected: boolean;
   isEthereum: boolean;
+  isEthereumOnly: boolean;
   isApiInitialized: boolean;
   isReady: Promise<ApiProps>;
   apiRetry?: number;
@@ -483,6 +484,18 @@ export interface RequestAccountExportPrivateKey {
 
 export interface ResponseAccountExportPrivateKey {
   privateKey: string;
+  publicKey: string;
+}
+
+export interface RequestCheckPublicAndSecretKey {
+  secretKey: string;
+  publicKey: string;
+}
+
+export interface ResponseCheckPublicAndSecretKey {
+  address: string;
+  isValid: boolean;
+  isEthereum: boolean;
 }
 
 export interface RequestSeedCreateV2 {
@@ -939,6 +952,20 @@ export enum AccountExternalErrorCode {
 export interface AccountExternalError{
   code: AccountExternalErrorCode;
   message: string;
+}
+
+export interface RequestAccountCreateWithSecretKey {
+  publicKey: string;
+  secretKey: string;
+  password: string;
+  name: string;
+  isAllow: boolean;
+  isEthereum: boolean;
+}
+
+export interface ResponseAccountCreateWithSecretKey {
+  errors: AccountExternalError[];
+  success: boolean;
 }
 
 export type RequestEvmEvents = null;
@@ -1439,6 +1466,7 @@ export interface KoniRequestSignatures {
   'pri(accounts.create.suriV2)': [RequestAccountCreateSuriV2, ResponseAccountCreateSuriV2];
   'pri(accounts.create.externalV2)': [RequestAccountCreateExternalV2, AccountExternalError[]];
   'pri(accounts.create.hardwareV2)': [RequestAccountCreateHardwareV2, boolean];
+  'pri(accounts.create.withSecret)': [RequestAccountCreateWithSecretKey, ResponseAccountCreateWithSecretKey];
   'pri(accounts.checkTransfer)': [RequestCheckTransfer, ResponseCheckTransfer];
   'pri(accounts.checkCrossChainTransfer)': [RequestCheckCrossChainTransfer, ResponseCheckCrossChainTransfer];
   'pri(accounts.transfer)': [RequestTransfer, Array<TransferError>, ResponseTransfer];
@@ -1447,6 +1475,7 @@ export interface KoniRequestSignatures {
   'pri(json.restoreV2)': [RequestJsonRestoreV2, void];
   'pri(json.batchRestoreV2)': [RequestBatchRestoreV2, void];
   'pri(accounts.exportPrivateKey)': [RequestAccountExportPrivateKey, ResponseAccountExportPrivateKey];
+  'pri(accounts.checkPublicAndSecretKey)': [RequestCheckPublicAndSecretKey, ResponseCheckPublicAndSecretKey];
   'pri(accounts.subscribeWithCurrentAddress)': [RequestAccountSubscribe, boolean, AccountsWithCurrentAddress];
   'pri(accounts.subscribeAccountsInputAddress)': [RequestAccountSubscribe, string, OptionInputAddress];
   'pri(accounts.saveRecent)': [RequestSaveRecentAccount, SingleAddress];

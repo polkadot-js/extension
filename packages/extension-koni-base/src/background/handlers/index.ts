@@ -62,6 +62,7 @@ export default function handlers<TMessageType extends MessageTypes> ({ id, messa
       port.postMessage({ id, response });
     })
     .catch((error: SubWalletProviderError): void => {
+      console.error(error);
       console.log(`[err] ${source}:: ${error.message}`);
 
       // only send message back to port if it's still connected

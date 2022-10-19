@@ -517,7 +517,7 @@ export function subscribeBalance (addresses: string[], dotSamaAPIMap: Record<str
     const networkAPI = await apiProps.isReady;
     const useAddresses = apiProps.isEthereum ? evmAddresses : substrateAddresses;
 
-    if (['astarEvm', 'shidenEvm', 'shibuyaEvm', 'crabEvm', 'pangolinEvm', 'cloverEvm'].includes(networkKey)) {
+    if (['binance', 'binance_test', 'ethereum', 'ethereum_goerli', 'astarEvm', 'shidenEvm', 'shibuyaEvm', 'crabEvm', 'pangolinEvm', 'cloverEvm'].includes(networkKey)) {
       return subscribeEVMBalance(networkKey, networkAPI.api, useAddresses, web3ApiMap, callback);
     }
 

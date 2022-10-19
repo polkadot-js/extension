@@ -3,7 +3,7 @@
 
 import { withErrorLog } from '@subwallet/extension-base/background/handlers/helpers';
 import State, { AuthUrls, Resolver } from '@subwallet/extension-base/background/handlers/State';
-import { AccountRefMap, APIItemState, ApiMap, AuthRequestV2, BalanceItem, BalanceJson, ChainRegistry, ConfirmationDefinitions, ConfirmationsQueue, ConfirmationsQueueItemOptions, ConfirmationType, CrowdloanItem, CrowdloanJson, CurrentAccountInfo, CustomToken, CustomTokenJson, CustomTokenType, DeleteCustomTokenParams, EvmSendTransactionParams, EvmSendTransactionRequestQr, EvmSignatureRequestQr, ExternalRequestPromise, ExternalRequestPromiseStatus, NETWORK_STATUS, NetworkJson, NftCollection, NftItem, NftJson, NftTransferExtra, PriceJson, RequestAccountExportPrivateKey, RequestConfirmationComplete, RequestSettingsType, ResponseAccountExportPrivateKey, ResponseSettingsType, ResultResolver, ServiceInfo, SingleModeJson, StakeUnlockingJson, StakingItem, StakingJson, StakingRewardJson, ThemeTypes, TokenInfo, TransactionHistoryItemType } from '@subwallet/extension-base/background/KoniTypes';
+import { AccountRefMap, APIItemState, ApiMap, AuthRequestV2, BalanceItem, BalanceJson, ChainRegistry, ConfirmationDefinitions, ConfirmationsQueue, ConfirmationsQueueItemOptions, ConfirmationType, CrowdloanItem, CrowdloanJson, CurrentAccountInfo, CustomEvmToken, DeleteEvmTokenParams, EvmSendTransactionParams, EvmSendTransactionRequestQr, EvmSignatureRequestQr, EvmTokenJson, ExternalRequestPromise, ExternalRequestPromiseStatus, NETWORK_STATUS, NetworkJson, NftCollection, NftItem, NftJson, NftTransferExtra, PriceJson, RequestAccountExportPrivateKey, RequestCheckPublicAndSecretKey, RequestConfirmationComplete, RequestSettingsType, ResponseAccountExportPrivateKey, ResponseCheckPublicAndSecretKey, ResponseSettingsType, ResultResolver, ServiceInfo, SingleModeJson, StakeUnlockingJson, StakingItem, StakingJson, StakingRewardJson, ThemeTypes, TokenInfo, TransactionHistoryItemType } from '@subwallet/extension-base/background/KoniTypes';
 import { AuthorizeRequest, RequestAuthorizeTab } from '@subwallet/extension-base/background/types';
 import { Web3Transaction } from '@subwallet/extension-base/signers/types';
 import { getId } from '@subwallet/extension-base/utils/getId';
@@ -43,12 +43,21 @@ import { decodePair } from '@polkadot/keyring/pair/decode';
 import { KeyringPair$Meta } from '@polkadot/keyring/types';
 import { keyring } from '@polkadot/ui-keyring';
 import { accounts } from '@polkadot/ui-keyring/observable/accounts';
-import { assert, BN, logger as createLogger, u8aToHex } from '@polkadot/util';
+import { assert, BN, hexStripPrefix, hexToU8a, isHex, logger as createLogger, u8aToHex } from '@polkadot/util';
 import { Logger } from '@polkadot/util/types';
-import { base64Decode, isEthereumAddress } from '@polkadot/util-crypto';
+import { base64Decode, isEthereumAddress, keyExtractSuri } from '@polkadot/util-crypto';
+import { KeypairType } from '@polkadot/util-crypto/types';
 
 import { KoniCron } from '../cron';
 import { KoniSubscription } from '../subscription';
+
+const ETH_DERIVE_DEFAULT = '/m/44\'/60\'/0\'/0/0';
+
+function getSuri (seed: string, type?: KeypairType): string {
+  return type === 'ethereum'
+    ? `${seed}${ETH_DERIVE_DEFAULT}`
+    : seed;
+}
 
 function generateDefaultStakingMap () {
   const stakingMap: Record<string, StakingItem> = {};
@@ -1407,7 +1416,7 @@ export default class KoniState extends State {
 
     if (this.networkMap[data.key].active) { // update API map if network is active
       if (data.key in this.apiMap.dotSama) {
-        await this.apiMap.dotSama[data.key].api.disconnect();
+        this.apiMap.dotSama[data.key].api?.disconnect && await this.apiMap.dotSama[data.key].api.disconnect();
         delete this.apiMap.dotSama[data.key];
       }
 
@@ -1452,7 +1461,7 @@ export default class KoniState extends State {
     }
 
     this.lockNetworkMap = true;
-    await this.apiMap.dotSama[networkKey]?.api.disconnect();
+    this.apiMap.dotSama[networkKey].api.disconnect && await this.apiMap.dotSama[networkKey].api.disconnect();
     delete this.apiMap.dotSama[networkKey];
 
     if (this.networkMap[networkKey].isEthereum && this.networkMap[networkKey].isEthereum) {
@@ -1526,7 +1535,7 @@ export default class KoniState extends State {
     this.networkMapStore.set('NetworkMap', this.networkMap);
 
     for (const key of targetNetworkKeys) {
-      await this.apiMap.dotSama[key].api.disconnect();
+      this.apiMap.dotSama[key].api.disconnect && await this.apiMap.dotSama[key].api.disconnect();
       delete this.apiMap.dotSama[key];
 
       if (this.networkMap[key].isEthereum && this.networkMap[key].isEthereum) {
@@ -1552,14 +1561,16 @@ export default class KoniState extends State {
       return false;
     }
 
-    this.lockNetworkMap = true;
-    this.apiMap.dotSama[networkKey] = initApi(networkKey, getCurrentProvider(this.networkMap[networkKey]), this.networkMap[networkKey].isEthereum);
+    const networkData = this.networkMap[networkKey];
 
-    if (this.networkMap[networkKey].isEthereum && this.networkMap[networkKey].isEthereum) {
-      this.apiMap.web3[networkKey] = initWeb3Api(getCurrentProvider(this.networkMap[networkKey]));
+    this.lockNetworkMap = true;
+    this.apiMap.dotSama[networkKey] = initApi(networkKey, getCurrentProvider(networkData), networkData.isEthereum);
+
+    if (networkData.isEthereum && networkData.isEthereum) {
+      this.apiMap.web3[networkKey] = initWeb3Api(getCurrentProvider(networkData));
     }
 
-    this.networkMap[networkKey].active = true;
+    networkData.active = true;
     this.networkMapSubject.next(this.networkMap);
     this.networkMapStore.set('NetworkMap', this.networkMap);
     this.updateServiceInfo();
@@ -1641,7 +1652,7 @@ export default class KoniState extends State {
     this.networkMapStore.set('NetworkMap', this.networkMap);
 
     for (const key of targetNetworkKeys) {
-      await this.apiMap.dotSama[key].api.disconnect();
+      this.apiMap.dotSama[key].api.disconnect && await this.apiMap.dotSama[key].api.disconnect();
       delete this.apiMap.dotSama[key];
 
       if (this.networkMap[key].isEthereum && this.networkMap[key].isEthereum) {
@@ -1831,7 +1842,7 @@ export default class KoniState extends State {
     return Promise.all(Object.values(this.apiMap.dotSama).map(async (network) => {
       if (network.api.isConnected) {
         this.logger.log(`[Dotsama] Stopping network [${network.specName}]`);
-        await network.api.disconnect();
+        await network.api?.disconnect();
       }
     }));
   }
@@ -1852,7 +1863,7 @@ export default class KoniState extends State {
 
     // Reconnect dotsama networks
     return Promise.all(Object.values(this.apiMap.dotSama).map(async (network) => {
-      if (!network.api.isConnected) {
+      if (!network.api.isConnected && network.api.connect) {
         this.logger.log(`[Dotsama] Resumming network [${network.specName}]`);
         await network.api.connect();
       }
@@ -1936,8 +1947,53 @@ export default class KoniState extends State {
     const decoded = decodePair(password, base64Decode(exportedJson.encoded), exportedJson.encoding.type);
 
     return {
-      privateKey: u8aToHex(decoded.secretKey)
+      privateKey: u8aToHex(decoded.secretKey),
+      publicKey: u8aToHex(decoded.publicKey)
     };
+  }
+
+  public checkPublicAndSecretKey ({ publicKey, secretKey }: RequestCheckPublicAndSecretKey): ResponseCheckPublicAndSecretKey {
+    try {
+      const _secret = hexStripPrefix(secretKey);
+
+      if (_secret.length === 64) {
+        const suri = `0x${_secret}`;
+        const { phrase } = keyExtractSuri(suri);
+
+        if (isHex(phrase) && isHex(phrase, 256)) {
+          const type: KeypairType = 'ethereum';
+          const address = keyring.createFromUri(getSuri(suri, type), {}, type).address;
+
+          return {
+            address: address,
+            isValid: true,
+            isEthereum: true
+          };
+        } else {
+          return {
+            address: '',
+            isValid: false,
+            isEthereum: true
+          };
+        }
+      }
+
+      const keyPair = keyring.keyring.addFromPair({ publicKey: hexToU8a(publicKey), secretKey: hexToU8a(secretKey) });
+
+      return {
+        address: keyPair.address,
+        isValid: true,
+        isEthereum: false
+      };
+    } catch (e) {
+      console.error(e);
+
+      return {
+        address: '',
+        isValid: false,
+        isEthereum: false
+      };
+    }
   }
 
   public getEthKeyring (address: string, password: string): Promise<SimpleKeyring> {

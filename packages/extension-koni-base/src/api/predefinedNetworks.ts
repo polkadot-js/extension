@@ -130,6 +130,96 @@ export const PREDEFINED_NETWORKS: Record<string, NetworkJson> = {
     decimals: 18,
     coinGeckoKey: 'metaverse-network-pioneer'
   },
+  ethereum: {
+    key: 'ethereum',
+    chain: 'Ethereum Mainnet',
+    genesisHash: '0xb60d7bdd334cd3768d43f14a05c7fe7e886ba5bcb77e1064530052fed1a3f145',
+    ss58Format: 0,
+    providers: {
+      Cloudflare: 'https://cloudflare-eth.com',
+      BlastApi: 'https://eth-mainnet.public.blastapi.io',
+      Infura: 'https://mainnet.infura.io/v3/b6bf7d3508c941499b10025c0776eaf8'
+    },
+    active: false,
+    currentProviderMode: 'http',
+    currentProvider: 'Infura',
+    groups: ['MAIN_NET'],
+    isEthereum: true,
+    nativeToken: 'ETH',
+    decimals: 18,
+    coinGeckoKey: 'ethereum',
+    evmChainId: 1,
+    supportBonding: false,
+    getStakingOnChain: false,
+    abiExplorer: 'https://etherscan.io'
+  },
+  ethereum_goerli: {
+    key: 'ethereum_goerli',
+    chain: 'Ethereum Testnet (Goerli)',
+    genesisHash: '0x2c8974e8936649eb65786299a1129fb6a47c5e703705489be96ea715496096c5',
+    ss58Format: 0,
+    providers: {
+      Infura: 'https://goerli.infura.io/v3/b6bf7d3508c941499b10025c0776eaf8',
+      Optimism: 'https://goerli.optimism.io'
+    },
+    active: false,
+    currentProviderMode: 'http',
+    currentProvider: 'Infura',
+    groups: ['TEST_NET'],
+    isEthereum: true,
+    nativeToken: 'GoerliETH',
+    decimals: 18,
+    coinGeckoKey: 'ethereum_goerli',
+    evmChainId: 1,
+    supportBonding: false,
+    getStakingOnChain: false,
+    abiExplorer: 'https://goerli.etherscan.io'
+  },
+  binance: {
+    key: 'binance',
+    chain: 'Binance Smart Chain',
+    genesisHash: '0x59bba357145ca539dcd1ac957abc1ec5833319ddcae7f5e8b5da0c36624784b2',
+    ss58Format: 0,
+    providers: {
+      Binance: 'https://bsc-dataseed.binance.org/',
+      Defibit: 'https://bsc-dataseed1.defibit.io/',
+      Ninicoin: 'https://bsc-dataseed1.ninicoin.io/',
+      Nodereal: 'https://bsc.nodereal.io/'
+    },
+    active: false,
+    currentProviderMode: 'http',
+    currentProvider: 'Binance',
+    groups: ['MAIN_NET'],
+    isEthereum: true,
+    nativeToken: 'BNB',
+    decimals: 18,
+    coinGeckoKey: 'binancecoin',
+    evmChainId: 56,
+    supportBonding: false,
+    getStakingOnChain: false,
+    abiExplorer: 'https://bscscan.com'
+  },
+  binance_test: {
+    key: 'binance_test',
+    chain: 'Binance Smart Chain (Testnet)',
+    genesisHash: '0xdd00fd71b568b8a2571a276129bc122ec640095f16c01d851c45a64e9a0731f1',
+    ss58Format: 0,
+    providers: {
+      Binance: 'https://data-seed-prebsc-1-s1.binance.org:8545/',
+      Binance2: 'https://data-seed-prebsc-2-s1.binance.org:8545/'
+    },
+    active: false,
+    currentProviderMode: 'http',
+    currentProvider: 'Binance',
+    groups: ['TEST_NET'],
+    isEthereum: true,
+    nativeToken: 'BNB',
+    decimals: 18,
+    evmChainId: 97,
+    supportBonding: false,
+    getStakingOnChain: false,
+    abiExplorer: 'https://testnet.bscscan.com'
+  },
   moonbeam: {
     key: 'moonbeam',
     chain: 'Moonbeam',

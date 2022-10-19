@@ -264,7 +264,10 @@ export class WasmNftApi extends BaseNftApi {
 
             nftParams.updateItem(this.chain, nftItem, address);
             ownItem = true;
-            collectionImage = nftItem.image; // No default collection image
+
+            if (!isFeatured && !collectionImage && nftItem.image) {
+              collectionImage = nftItem.image; // No default collection image
+            }
           }
         }));
       } catch (e) {

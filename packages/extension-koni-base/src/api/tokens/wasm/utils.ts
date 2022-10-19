@@ -60,10 +60,10 @@ export async function validateWasmToken (contractAddress: string, tokenType: Cus
       } else {
         const collectionIdDict = collectionIdResp.output?.toHuman() as Record<string, string>;
 
-        name = collectionIdDict.Bytes;
-
-        if (name === '') {
+        if (collectionIdDict.Bytes === '') {
           contractError = true;
+        } else {
+          name = contractAddress; // no function to get collection name
         }
       }
     }

@@ -37,8 +37,6 @@ function ImportQr ({ className }: Props): React.ReactElement<Props> {
 
   const [isScanning, setIsScanning] = useState<boolean>(true);
 
-  console.log(isScanning);
-
   const [address, setAddress] = useState<string | null>(null);
   const [isEthereum, setIsEthereum] = useState(false);
   const [name, setName] = useState<string | null>(defaultName);
@@ -67,7 +65,7 @@ function ImportQr ({ className }: Props): React.ReactElement<Props> {
             } else {
               setIsScanning(true);
               setAccount(null);
-              setErrors([{ code: AccountExternalErrorCode.KEYRING_ERROR, message: 'Invalid public and private key' }]);
+              setErrors([{ code: AccountExternalErrorCode.KEYRING_ERROR, message: 'Can\'t extract address from the QR code' }]);
             }
           })
           .catch((e) => {

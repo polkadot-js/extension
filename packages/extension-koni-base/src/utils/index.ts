@@ -162,7 +162,7 @@ export function hexToUTF16 (hex: string): Uint8Array {
   return new Uint8Array(buf);
 }
 
-export const isValidAddress = (address: string) => {
+export const isValidSubstrateAddress = (address: string) => {
   try {
     encodeAddress(
       isHex(address)

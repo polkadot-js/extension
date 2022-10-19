@@ -6,14 +6,10 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import Link from '@subwallet/extension-koni-ui/components/Link';
 import useFetchNftExtra from '@subwallet/extension-koni-ui/hooks/screen/home/useFetchNftTransferExtra';
 import { _NftCollection, _NftItem } from '@subwallet/extension-koni-ui/Popup/Home/Nfts/types';
-import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { NFT_PER_ROW } from '@subwallet/extension-koni-ui/util';
 import React, { useCallback, useEffect, useState } from 'react';
-import { useSelector } from 'react-redux';
 import styled from 'styled-components';
-
-import { isEthereumAddress } from '@polkadot/util-crypto';
 
 const NftCollection = React.lazy(() => import('@subwallet/extension-koni-ui/Popup/Home/Nfts/render/NftCollection'));
 const NftCollectionPreview = React.lazy(() => import('./NftCollectionPreview'));
@@ -75,10 +71,6 @@ function NftContainer (
     setShowCollectionDetail(true);
     setChosenCollection(data);
   }, [setChosenCollection, setShowCollectionDetail]);
-
-  const { currentAccount: { account: currentAccount } } = useSelector((state: RootState) => state);
-
-  const isEthAccount = isEthereumAddress(currentAccount?.address);
 
   useEffect(() => {
     if (!showTransferredCollection && selectedNftCollection) { // show collection after transfer
@@ -207,13 +199,13 @@ function NftContainer (
         </div>
       }
 
-      {!loading && !showCollectionDetail && !showItemDetail && isEthAccount &&
+      {!loading && !showCollectionDetail && !showItemDetail &&
         <div className={'footer'}>
           <div>Don&apos;t see your NFTs?</div>
           <div>
             <Link
               className={'link'}
-              to='/account/import-evm-nft'
+              to='/account/import-nft'
             >
               Import NFTs
             </Link>

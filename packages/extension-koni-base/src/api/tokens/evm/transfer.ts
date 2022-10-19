@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { ResponseTransfer, TransferErrorCode, TransferStep } from '@subwallet/extension-base/background/KoniTypes';
-import { getERC20Contract } from '@subwallet/extension-koni-base/api/web3/web3';
+import { getERC20Contract } from '@subwallet/extension-koni-base/api/tokens/evm/web3';
 import Web3 from 'web3';
 import { TransactionConfig, TransactionReceipt } from 'web3-core';
 

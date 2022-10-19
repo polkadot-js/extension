@@ -4,7 +4,7 @@
 import { ExternalRequestPromise, ExternalRequestPromiseStatus, ResponseNftTransferQr, ResponseTransferQr, TransferErrorCode, TransferStep } from '@subwallet/extension-base/background/KoniTypes';
 import { QrState, Web3Transaction } from '@subwallet/extension-base/signers/types';
 import QrSigner from '@subwallet/extension-base/signers/web3/QrSigner';
-import { getERC20Contract } from '@subwallet/extension-koni-base/api/web3/web3';
+import { getERC20Contract } from '@subwallet/extension-koni-base/api/tokens/evm/web3';
 import { anyNumberToBN } from '@subwallet/extension-koni-base/utils/eth';
 import RLP, { Input } from 'rlp';
 import Web3 from 'web3';

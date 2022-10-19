@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { AuthUrls } from '@subwallet/extension-base/background/handlers/State';
-import { ApiProps, CustomEvmToken, NetworkJson, NftTransferExtra, UnlockingStakeInfo } from '@subwallet/extension-base/background/KoniTypes';
+import { ApiProps, CustomToken, NetworkJson, NftTransferExtra, UnlockingStakeInfo } from '@subwallet/extension-base/background/KoniTypes';
 import { getUnlockingInfo } from '@subwallet/extension-koni-base/api/bonding';
 import { subscribeBalance } from '@subwallet/extension-koni-base/api/dotsama/balance';
 import { subscribeCrowdloan } from '@subwallet/extension-koni-base/api/dotsama/crowdloan';
@@ -217,19 +217,19 @@ export class KoniSubscription {
     };
   }
 
-  subscribeNft (address: string, dotSamaApiMap: Record<string, ApiProps>, web3ApiMap: Record<string, Web3>, customErc721Registry: CustomEvmToken[]) {
+  subscribeNft (address: string, dotSamaApiMap: Record<string, ApiProps>, web3ApiMap: Record<string, Web3>, customErc721Registry: CustomToken[], contractSupportedNetworkMap: Record<string, NetworkJson>) {
     this.state.getDecodedAddresses(address)
       .then((addresses) => {
         if (!addresses.length) {
           return;
         }
 
-        this.initNftSubscription(addresses, dotSamaApiMap, web3ApiMap, customErc721Registry);
+        this.initNftSubscription(addresses, dotSamaApiMap, web3ApiMap, customErc721Registry, contractSupportedNetworkMap);
       })
       .catch(this.logger.error);
   }
 
-  initNftSubscription (addresses: string[], dotSamaApiMap: Record<string, ApiProps>, web3ApiMap: Record<string, Web3>, customErc721Registry: CustomEvmToken[]) {
+  initNftSubscription (addresses: string[], dotSamaApiMap: Record<string, ApiProps>, web3ApiMap: Record<string, Web3>, customNftRegistry: CustomToken[], contractSupportedNetworkMap: Record<string, NetworkJson>) {
     const { cronUpdate, forceUpdate, selectedNftCollection } = this.state.getNftTransfer();
 
     if (forceUpdate && !cronUpdate) {
@@ -245,11 +245,14 @@ export class KoniSubscription {
         forceUpdate: false,
         selectedNftCollection
       } as NftTransferExtra);
-      nftHandler.setApiProps(dotSamaApiMap);
+
+      nftHandler.setContractSupportedNetworkMap(contractSupportedNetworkMap);
+      nftHandler.setDotSamaApiMap(dotSamaApiMap);
       nftHandler.setWeb3ApiMap(web3ApiMap);
       nftHandler.setAddresses(addresses);
+
       nftHandler.handleNfts(
-        customErc721Registry,
+        customNftRegistry,
         (...args) => this.state.updateNftData(...args),
         (...args) => this.state.setNftCollection(...args),
         (...args) => this.state.updateNftIds(...args),

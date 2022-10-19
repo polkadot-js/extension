@@ -54,17 +54,23 @@ export class WasmNftApi extends BaseNftApi {
   }
 
   private async parseFeaturedCollectionImage (smartContract: string) {
-    const resp = await fetch(`${ART_ZERO_COLLECTION_API}`, {
+    const resp = await fetch(ART_ZERO_COLLECTION_API, {
       method: 'POST',
+      headers: {
+        Accept: 'application/json',
+        'Content-Type': 'application/json'
+      },
       body: JSON.stringify({ collection_address: smartContract })
     });
 
-    const collectionDetail = (resp && resp.ok && await resp.json() as Record<string, any>);
+    const result = (resp && resp.ok && await resp.json() as Record<string, any>);
 
-    if (!collectionDetail) {
+    if (!result) {
       return;
     }
 
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+    const collectionDetail = result.ret[0] as Record<string, any>;
     const collectionImage = collectionDetail.avatarImage as string;
     const parsedCollectionImage = this.parseFeaturedTokenUri(collectionImage);
 

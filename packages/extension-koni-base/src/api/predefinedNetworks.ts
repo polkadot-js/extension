@@ -151,7 +151,8 @@ export const PREDEFINED_NETWORKS: Record<string, NetworkJson> = {
     evmChainId: 1,
     supportBonding: false,
     getStakingOnChain: false,
-    abiExplorer: 'https://etherscan.io'
+    abiExplorer: 'https://etherscan.io',
+    supportSmartContract: [ContractType.evm]
   },
   ethereum_goerli: {
     key: 'ethereum_goerli',
@@ -173,7 +174,8 @@ export const PREDEFINED_NETWORKS: Record<string, NetworkJson> = {
     evmChainId: 1,
     supportBonding: false,
     getStakingOnChain: false,
-    abiExplorer: 'https://goerli.etherscan.io'
+    abiExplorer: 'https://goerli.etherscan.io',
+    supportSmartContract: [ContractType.evm]
   },
   binance: {
     key: 'binance',
@@ -197,7 +199,8 @@ export const PREDEFINED_NETWORKS: Record<string, NetworkJson> = {
     evmChainId: 56,
     supportBonding: false,
     getStakingOnChain: false,
-    abiExplorer: 'https://bscscan.com'
+    abiExplorer: 'https://bscscan.com',
+    supportSmartContract: [ContractType.evm]
   },
   binance_test: {
     key: 'binance_test',
@@ -218,7 +221,8 @@ export const PREDEFINED_NETWORKS: Record<string, NetworkJson> = {
     evmChainId: 97,
     supportBonding: false,
     getStakingOnChain: false,
-    abiExplorer: 'https://testnet.bscscan.com'
+    abiExplorer: 'https://testnet.bscscan.com',
+    supportSmartContract: [ContractType.evm]
   },
   moonbeam: {
     key: 'moonbeam',

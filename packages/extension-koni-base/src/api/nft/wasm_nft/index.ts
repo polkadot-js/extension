@@ -72,8 +72,6 @@ export class WasmNftApi extends BaseNftApi {
       return;
     }
 
-    console.log('featured collection image', `${ART_ZERO_IMAGE_API}?input=${parsedCollectionImage}`);
-
     return `${ART_ZERO_IMAGE_API}?input=${parsedCollectionImage}`;
   }
 
@@ -158,8 +156,6 @@ export class WasmNftApi extends BaseNftApi {
 
       if (isFeatured) {
         const parsedTokenUri = this.parseFeaturedTokenUri(tokenUri);
-
-        console.log('parsedTokenUri', parsedTokenUri);
 
         if (parsedTokenUri) {
           const resp = await fetch(`${ART_ZERO_IPFS_API}?input=${parsedTokenUri}`);

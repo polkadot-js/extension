@@ -18,7 +18,7 @@ export const DEFAULT_WASM_TOKENS: WasmTokenJson = {
       type: CustomTokenType.psp34
     },
     {
-      name: 'ArtZero Collection',
+      name: 'Praying Mantis Predators',
       smartContract: '5HrE1aYXt4k1TvBZYkL6B1BBcFp9tCWyMdCZqp2cXDNub5zW',
       chain: 'alephTest',
       type: CustomTokenType.psp34

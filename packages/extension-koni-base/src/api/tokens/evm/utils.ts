@@ -32,16 +32,14 @@ export async function validateEvmToken (contractAddress: string, tokenType: Cust
       // eslint-disable-next-line @typescript-eslint/no-unsafe-argument,@typescript-eslint/no-unsafe-member-access
       tokenContract = new web3.eth.Contract(ERC20Contract.abi, contractAddress);
 
-      const [_name, _decimals, _symbol] = await Promise.all([
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-member-access
-        tokenContract.methods.name().call() as string,
+      const [_decimals, _symbol] = await Promise.all([
         // eslint-disable-next-line @typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-member-access
         tokenContract.methods.decimals().call() as number,
         // eslint-disable-next-line @typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-member-access
         tokenContract.methods.symbol().call() as string
       ]);
 
-      name = _name;
+      name = _symbol;
       decimals = _decimals;
       symbol = _symbol;
     }

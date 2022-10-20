@@ -1,7 +1,7 @@
 // Copyright 2019-2022 @subwallet/extension-koni authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import {ContractType, NetworkJson} from '@subwallet/extension-base/background/KoniTypes';
+import { ContractType, NetworkJson } from '@subwallet/extension-base/background/KoniTypes';
 
 export const PREDEFINED_NETWORKS: Record<string, NetworkJson> = {
   polkadot: {

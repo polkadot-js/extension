@@ -63,7 +63,7 @@ export async function validateWasmToken (contractAddress: string, tokenType: Cus
         if (collectionIdDict.Bytes === '') {
           contractError = true;
         } else {
-          name = contractAddress; // no function to get collection name
+          name = ''; // no function to get collection name, let user manually put in the name
         }
       }
     }

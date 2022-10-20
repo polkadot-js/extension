@@ -66,7 +66,7 @@ function nftInfoReducer (state: CustomToken, action: NftInfoAction) {
 
       return {
         ...state,
-        name: payload.name as string || state.name,
+        name: (payload.name || payload.name === '') ? payload.name as string : state.name,
         type: payload.type as CustomTokenType || state.type
       } as CustomToken;
     }

@@ -35,7 +35,7 @@ export async function validateWasmToken (contractAddress: string, tokenType: Cus
           contractError: true
         };
       } else {
-        name = nameResp.output?.toHuman() as string;
+        name = symbolResp.output?.toHuman() as string;
         decimals = parseInt(decimalsResp.output?.toHuman() as string);
         symbol = symbolResp.output?.toHuman() as string;
 

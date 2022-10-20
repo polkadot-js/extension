@@ -671,6 +671,7 @@ export async function subscribeFreeBalance (
     }
   } else {
     if (token) {
+      // TODO: check PSP balance
       if (['genshiro_testnet', 'genshiro', 'equilibrium_parachain'].includes(networkKey)) {
         const asset = networkKey === 'equilibrium_parachain' ? assetFromToken(token)[0] : assetFromToken(token);
         // @ts-ignore

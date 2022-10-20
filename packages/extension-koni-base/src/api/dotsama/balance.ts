@@ -622,8 +622,10 @@ export async function subscribeFreeBalance (
   const apiProps = await dotSamaApiMap[networkKey].isReady;
   const api = apiProps.api;
   const web3Api = web3ApiMap[networkKey];
-  const tokenInfo = token ? await getTokenInfo(networkKey, api, token) : undefined;
+  const tokenInfo = token ? await getTokenInfo(networkKey, api, token) : undefined; // TODO: add tokenType to differentiate tokens
   const isMainToken = tokenInfo ? tokenInfo.isMainToken : true;
+
+  console.log('tokenInfo', tokenInfo);
 
   // Only EVM Address use with EVM network
   if (Boolean(web3Api || apiProps.isEthereum) !== isEthereumAddress(address)) {

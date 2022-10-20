@@ -17,8 +17,6 @@ import React, { Fragment, useCallback, useEffect, useState } from 'react';
 import { useSelector } from 'react-redux';
 import styled from 'styled-components';
 
-import { isEthereumAddress } from '@polkadot/util-crypto';
-
 const ChainBalanceDetail = React.lazy(() => import('../ChainBalances/ChainBalanceDetail/ChainBalanceDetail'));
 const ChainBalanceItem = React.lazy(() => import('@subwallet/extension-koni-ui/Popup/Home/ChainBalances/ChainBalanceItem'));
 const ChainBalanceDetailItem = React.lazy(() => import('@subwallet/extension-koni-ui/Popup/Home/ChainBalances/ChainBalanceDetail/ChainBalanceDetailItem'));
@@ -114,11 +112,8 @@ function ChainBalances ({ address,
   const [listWidth, setListWidth] = useState<number>(452);
   const selectedInfo = accountInfoByNetworkMap[selectedNetworkKey];
   const selectedBalanceInfo = networkBalanceMaps[selectedNetworkKey];
-  const { currentAccount: { account: currentAccount } } = useSelector((state: RootState) => state);
   const { networkMap } = useSelector((state: RootState) => state);
   const [connectingList, setConnectingList] = useState<Record<string, ConnectingState>>({});
-
-  const isEthAccount = isEthereumAddress(currentAccount?.address);
 
   const _openBalanceDetail = useCallback((networkKey: string) => {
     setSelectedNetworkKey(networkKey);
@@ -303,26 +298,24 @@ function ChainBalances ({ address,
             >
               {networkKeys.map((networkKey) => renderChainBalanceItem(networkKey))}
             </div>
-            {
-              isEthAccount &&
-              <div className='chain-balances-container__footer'>
-                <div>
-                  <div className='chain-balances-container__footer-row-1'>
-                    {t<string>("Don't see your token?")}
-                  </div>
-                  <div className='chain-balances-container__footer-row-2'>
-                    {/* <div className='chain-balances-container__footer-action'>{t<string>('Refresh list')}</div> */}
-                    {/* <span>&nbsp;{t<string>('or')}&nbsp;</span> */}
-                    <Link
-                      className='chain-balances-container__footer-action'
-                      to={'/account/import-evm-token'}
-                    >
-                      {t<string>('Import tokens')}
-                    </Link>
-                  </div>
+
+            <div className='chain-balances-container__footer'>
+              <div>
+                <div className='chain-balances-container__footer-row-1'>
+                  {t<string>("Don't see your token?")}
+                </div>
+                <div className='chain-balances-container__footer-row-2'>
+                  {/* <div className='chain-balances-container__footer-action'>{t<string>('Refresh list')}</div> */}
+                  {/* <span>&nbsp;{t<string>('or')}&nbsp;</span> */}
+                  <Link
+                    className='chain-balances-container__footer-action'
+                    to={'/account/import-token'}
+                  >
+                    {t<string>('Import tokens')}
+                  </Link>
                 </div>
               </div>
-            }
+            </div>
           </>
         )
         : (

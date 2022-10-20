@@ -9,12 +9,12 @@ export interface ChainOptions {
   value: string;
 }
 
-export default function useGetActiveEvmChains () {
-  const { networkMap } = useSelector((state: RootState) => state);
+export default function useGetContractSupportedChains () {
+  const networkMap = useSelector((state: RootState) => state.networkMap);
   const result: ChainOptions[] = [];
 
   for (const [key, network] of Object.entries(networkMap)) {
-    if (network.isEthereum && network.active) {
+    if (network.active && network.supportSmartContract && network.supportSmartContract.length > 0) {
       result.push({
         text: network.chain,
         value: key
@@ -24,7 +24,7 @@ export default function useGetActiveEvmChains () {
 
   if (result.length === 0) {
     return [{
-      text: 'Please enable at least 1 Ethereum compatible network',
+      text: 'Please enable at least 1 network',
       value: ''
     }];
   }

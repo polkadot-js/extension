@@ -1,7 +1,7 @@
 // Copyright 2019-2022 @polkadot/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { CustomEvmToken, DeleteEvmTokenParams } from '@subwallet/extension-base/background/KoniTypes';
+import { CustomToken, DeleteCustomTokenParams } from '@subwallet/extension-base/background/KoniTypes';
 import { ActionContext } from '@subwallet/extension-koni-ui/components';
 import Checkbox from '@subwallet/extension-koni-ui/components/Checkbox';
 import { store } from '@subwallet/extension-koni-ui/stores';
@@ -12,18 +12,18 @@ import styled from 'styled-components';
 
 interface Props extends ThemeProps {
   className?: string;
-  item: CustomEvmToken;
-  handleSelected: (val: DeleteEvmTokenParams) => void;
-  handleUnselected: (val: DeleteEvmTokenParams) => void;
+  item: CustomToken;
+  handleSelected: (val: DeleteCustomTokenParams) => void;
+  handleUnselected: (val: DeleteCustomTokenParams) => void;
 }
 
-function EvmTokenRow ({ className, handleSelected, handleUnselected, item }: Props): React.ReactElement {
+function CustomTokenRow ({ className, handleSelected, handleUnselected, item }: Props): React.ReactElement {
   const [isCheck, setIsChecked] = useState(false);
   const navigate = useContext(ActionContext);
 
   const updateTokenEditParams = useCallback(() => {
     store.dispatch({ type: 'tokenConfigParams/update', payload: { data: item } as TokenConfigParams });
-    navigate('/account/evm-token-edit');
+    navigate('/account/token-edit');
   }, [item, navigate]);
 
   const handleCheck = useCallback((checked: boolean) => {
@@ -70,7 +70,7 @@ function EvmTokenRow ({ className, handleSelected, handleUnselected, item }: Pro
   );
 }
 
-export default styled(EvmTokenRow)(({ theme }: Props) => `
+export default styled(CustomTokenRow)(({ theme }: Props) => `
   .link-edit {
     cursor: pointer;
     width: 82%;

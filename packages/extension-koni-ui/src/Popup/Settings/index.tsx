@@ -105,11 +105,11 @@ function Settings ({ className }: Props): React.ReactElement {
 
         <Link
           className='menu-setting-item'
-          to='/account/evm-token-setting'
+          to='/account/token-setting'
         >
           {/* @ts-ignore */}
           <FontAwesomeIcon icon={faCoins} />
-          <div className='menu-setting-item__text'>{t<string>('Manage EVM Tokens')}</div>
+          <div className='menu-setting-item__text'>{t<string>('Manage Tokens')}</div>
           {/* @ts-ignore */}
           <div className='menu-setting-item__toggle' />
         </Link>

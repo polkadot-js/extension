@@ -1,15 +1,15 @@
 // Copyright 2019-2022 @polkadot/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { CustomEvmToken, DeleteEvmTokenParams } from '@subwallet/extension-base/background/KoniTypes';
+import { CustomToken, DeleteCustomTokenParams } from '@subwallet/extension-base/background/KoniTypes';
 import { Button, ButtonArea, InputFilter } from '@subwallet/extension-koni-ui/components';
 import Modal from '@subwallet/extension-koni-ui/components/Modal';
-import useFetchEvmToken from '@subwallet/extension-koni-ui/hooks/screen/setting/useFetchEvmToken';
+import useFetchCustomToken from '@subwallet/extension-koni-ui/hooks/screen/setting/useFetchCustomToken';
 import useToast from '@subwallet/extension-koni-ui/hooks/useToast';
 import useTranslation from '@subwallet/extension-koni-ui/hooks/useTranslation';
-import { deleteEvmTokens } from '@subwallet/extension-koni-ui/messaging';
+import { deleteCustomTokens } from '@subwallet/extension-koni-ui/messaging';
 import Header from '@subwallet/extension-koni-ui/partials/Header';
-import EvmTokenRow from '@subwallet/extension-koni-ui/Popup/Settings/TokenSetting/EvmTokenRow';
+import CustomTokenRow from '@subwallet/extension-koni-ui/Popup/Settings/TokenSetting/CustomTokenRow';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import React, { useCallback, useState } from 'react';
 import styled from 'styled-components';
@@ -18,13 +18,13 @@ interface Props extends ThemeProps {
   className?: string;
 }
 
-function EvmTokenSetting ({ className }: Props): React.ReactElement {
+function CustomTokenSetting ({ className }: Props): React.ReactElement {
   const { t } = useTranslation();
   const { show } = useToast();
 
-  const allEvmTokens = useFetchEvmToken();
+  const customTokens = useFetchCustomToken();
   const [searchString, setSearchString] = useState('');
-  const [selectedTokens, setSelectedTokens] = useState<DeleteEvmTokenParams[]>([]);
+  const [selectedTokens, setSelectedTokens] = useState<DeleteCustomTokenParams[]>([]);
   const [showModal, setShowModal] = useState(false);
 
   const _onChangeFilter = useCallback((val: string) => {
@@ -32,25 +32,25 @@ function EvmTokenSetting ({ className }: Props): React.ReactElement {
   }, []);
 
   const filterToken = useCallback(() => {
-    const _filteredTokens: CustomEvmToken[] = [];
+    const _filteredTokens: CustomToken[] = [];
 
-    allEvmTokens.forEach((token) => {
+    customTokens.forEach((token) => {
       if ((token.symbol && token.symbol.toLowerCase().includes(searchString.toLowerCase())) || (token.name && token.name.toLowerCase().includes(searchString.toLowerCase()))) {
         _filteredTokens.push(token);
       }
     });
 
     return _filteredTokens;
-  }, [allEvmTokens, searchString]);
+  }, [customTokens, searchString]);
 
-  const handleSelected = useCallback((data: DeleteEvmTokenParams) => {
+  const handleSelected = useCallback((data: DeleteCustomTokenParams) => {
     setSelectedTokens([
       ...selectedTokens,
       data
     ]);
   }, [selectedTokens]);
 
-  const handleUnselected = useCallback((data: DeleteEvmTokenParams) => {
+  const handleUnselected = useCallback((data: DeleteCustomTokenParams) => {
     const _selectedTokens = [];
 
     for (const token of selectedTokens) {
@@ -75,7 +75,7 @@ function EvmTokenSetting ({ className }: Props): React.ReactElement {
   }, [selectedTokens.length, show, t]);
 
   const handleDelete = useCallback(() => {
-    deleteEvmTokens(selectedTokens)
+    deleteCustomTokens(selectedTokens)
       .then((resp) => {
         if (resp) {
           show('Your changes are saved successfully');
@@ -100,7 +100,7 @@ function EvmTokenSetting ({ className }: Props): React.ReactElement {
       <Header
         showBackArrow
         showSubHeader
-        subHeaderName={t<string>('Custom EVM tokens')}
+        subHeaderName={t<string>('Token setting')}
         to='/account/settings'
       >
         <div className={'networks-input-filter-container'}>
@@ -124,7 +124,7 @@ function EvmTokenSetting ({ className }: Props): React.ReactElement {
       </div>
 
       <div className='networks-list'>
-        {filteredTokens.map((item) => <EvmTokenRow
+        {filteredTokens.map((item) => <CustomTokenRow
           handleSelected={handleSelected}
           handleUnselected={handleUnselected}
           item={item}
@@ -171,7 +171,7 @@ function EvmTokenSetting ({ className }: Props): React.ReactElement {
   );
 }
 
-export default styled(EvmTokenSetting)(({ theme }: Props) => `
+export default styled(CustomTokenSetting)(({ theme }: Props) => `
   display: flex;
   flex-direction: column;
   height: 100%;

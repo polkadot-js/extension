@@ -1,11 +1,11 @@
 // Copyright 2019-2022 @subwallet/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { ConfirmationsQueue, EVMTransactionArg, NetworkJson, ResponseParseEVMTransactionInput } from '@subwallet/extension-base/background/KoniTypes';
+import { ConfirmationsQueue, CustomTokenType, EVMTransactionArg, NetworkJson, ResponseParseEVMTransactionInput } from '@subwallet/extension-base/background/KoniTypes';
 import { AccountInfoEl } from '@subwallet/extension-koni-ui/components';
 import FormatBalance from '@subwallet/extension-koni-ui/components/FormatBalance';
 import useTranslation from '@subwallet/extension-koni-ui/hooks/useTranslation';
-import { parseEVMTransactionInput, validateEvmToken } from '@subwallet/extension-koni-ui/messaging';
+import { parseEVMTransactionInput, validateCustomToken } from '@subwallet/extension-koni-ui/messaging';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import CN from 'classnames';
@@ -311,7 +311,7 @@ function SendEvmTransactionConfirmationInfo ({ className, confirmation: { payloa
       let xcmToken: XCMTokenProps | null = null;
 
       for (const token of Object.values(chainRegistry.tokenMap)) {
-        if (token.erc20Address?.toLowerCase() === contract.toLowerCase()) {
+        if (token.contractAddress?.toLowerCase() === contract.toLowerCase()) {
           xcmToken = {
             symbol: token.symbol,
             decimals: token.decimals
@@ -322,7 +322,7 @@ function SendEvmTransactionConfirmationInfo ({ className, confirmation: { payloa
       }
 
       if (!xcmToken) {
-        validateEvmToken({ smartContract: contract, type: 'erc20', chain })
+        validateCustomToken({ smartContract: contract, type: CustomTokenType.erc20, chain })
           .then((token) => {
             if (token.decimals && amount) {
               xcmToken = { symbol: token.symbol, decimals: token.decimals };

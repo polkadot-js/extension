@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { EVMTransactionArg, NestedArray, NetworkJson, ParseEVMTransactionData, ResponseParseEVMTransactionInput, ResponseParseTransactionEVM } from '@subwallet/extension-base/background/KoniTypes';
-import { ERC20Contract, ERC721Contract, initWeb3Api } from '@subwallet/extension-koni-base/api/web3/web3';
+import { ERC20Contract, ERC721Contract, initWeb3Api } from '@subwallet/extension-koni-base/api/tokens/evm/web3';
 import { createTransactionFromRLP, Transaction as QrTransaction } from '@subwallet/extension-koni-base/utils/eth';
 import { InputDataDecoder } from '@subwallet/extension-koni-base/utils/eth/parseTransactionData';
 import axios from 'axios';

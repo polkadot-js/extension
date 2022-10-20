@@ -3,12 +3,13 @@
 
 import type { MetadataDef } from '@polkadot/extension-inject/types';
 import type { KeyringPair, KeyringPair$Json, KeyringPair$Meta } from '@polkadot/keyring/types';
-import type { SignerPayloadJSON, SignerPayloadRaw } from '@polkadot/types/types';
+import type { Registry, SignerPayloadJSON, SignerPayloadRaw } from '@polkadot/types/types';
 import type { SubjectInfo } from '@polkadot/ui-keyring/observable/types';
 import type { KeypairType } from '@polkadot/util-crypto/types';
 import type { AccountJson, AllowedPath, AuthorizeRequest, MessageTypes, MetadataRequest, RequestAccountBatchExport, RequestAccountChangePassword, RequestAccountCreateExternal, RequestAccountCreateHardware, RequestAccountCreateSuri, RequestAccountEdit, RequestAccountExport, RequestAccountForget, RequestAccountShow, RequestAccountTie, RequestAccountValidate, RequestActiveTabsUrlUpdate, RequestAuthorizeApprove, RequestBatchRestore, RequestDeriveCreate, RequestDeriveValidate, RequestJsonRestore, RequestMetadataApprove, RequestMetadataReject, RequestSeedCreate, RequestSeedValidate, RequestSigningApprovePassword, RequestSigningApproveSignature, RequestSigningCancel, RequestSigningIsLocked, RequestTypes, RequestUpdateAuthorizedAccounts, ResponseAccountExport, ResponseAccountsExport, ResponseAuthorizeList, ResponseDeriveValidate, ResponseJsonGetAccountInfo, ResponseSeedCreate, ResponseSeedValidate, ResponseSigningIsLocked, ResponseType, SigningRequest } from '../types';
 
 import { ALLOWED_PATH, PASSWORD_EXPIRY_MS } from '@polkadot/extension-base/defaults';
+import { metadataExpand } from '@polkadot/extension-chains';
 import { TypeRegistry } from '@polkadot/types';
 import keyring from '@polkadot/ui-keyring';
 import { accounts as accountsObservable } from '@polkadot/ui-keyring/observable/accounts';
@@ -24,9 +25,6 @@ type CachedUnlocks = Record<string, number>;
 const SEED_DEFAULT_LENGTH = 12;
 const SEED_LENGTHS = [12, 15, 18, 21, 24];
 const ETH_DERIVE_DEFAULT = "/m/44'/60'/0'/0/0";
-
-// a global registry to use internally
-const registry = new TypeRegistry();
 
 function getSuri (seed: string, type?: KeypairType): string {
   return type === 'ethereum'
@@ -348,11 +346,6 @@ export default class Extension {
     const { reject, request, resolve } = queued;
     const pair = keyring.getPair(queued.account.address);
 
-    // unlike queued.account.address the following
-    // address is encoded with the default prefix
-    // which what is used for password caching mapping
-    const { address } = pair;
-
     if (!pair) {
       reject(new Error('Unable to find pair'));
 
@@ -370,25 +363,37 @@ export default class Extension {
       pair.decodePkcs8(password);
     }
 
+    // construct a new registry (avoiding pollution), between requests
+    let registry: Registry;
     const { payload } = request;
 
     if (isJsonPayload(payload)) {
       // Get the metadata for the genesisHash
-      const currentMetadata = this.#state.knownMetadata.find((meta: MetadataDef) =>
-        meta.genesisHash === payload.genesisHash);
+      const metadata = this.#state.knownMetadata.find(({ genesisHash }) => genesisHash === payload.genesisHash);
 
-      // set the registry before calling the sign function
-      registry.setSignedExtensions(payload.signedExtensions, currentMetadata?.userExtensions);
+      if (metadata) {
+        // we have metadata, expand it and extract the info/registry
+        const expanded = metadataExpand(metadata, false);
 
-      if (currentMetadata) {
-        registry.register(currentMetadata?.types);
+        registry = expanded.registry;
+        registry.setSignedExtensions(payload.signedExtensions, expanded.definition.userExtensions);
+      } else {
+        // we have no metadata, create a new registry
+        registry = new TypeRegistry();
+        registry.setSignedExtensions(payload.signedExtensions);
       }
+    } else {
+      // for non-payload, just create a registry to use
+      registry = new TypeRegistry();
     }
 
     const result = request.sign(registry, pair);
 
     if (savePass) {
-      this.#cachedUnlocks[address] = Date.now() + PASSWORD_EXPIRY_MS;
+      // unlike queued.account.address the following
+      // address is encoded with the default prefix
+      // which what is used for password caching mapping
+      this.#cachedUnlocks[pair.address] = Date.now() + PASSWORD_EXPIRY_MS;
     } else {
       pair.lock();
     }

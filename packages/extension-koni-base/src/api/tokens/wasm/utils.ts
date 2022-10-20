@@ -8,7 +8,7 @@ import { PSP22Contract, PSP34Contract } from '@subwallet/extension-koni-base/api
 import { ApiPromise } from '@polkadot/api';
 import { ContractPromise } from '@polkadot/api-contract';
 
-export async function validateWasmToken (contractAddress: string, tokenType: CustomTokenType.psp22 | CustomTokenType.psp34, apiPromise: ApiPromise, contractCaller: string) {
+export async function validateWasmToken (contractAddress: string, tokenType: CustomTokenType.psp22 | CustomTokenType.psp34, apiPromise: ApiPromise, contractCaller?: string) {
   let tokenContract: ContractPromise;
   let name = '';
   let decimals: number | undefined = -1;
@@ -20,9 +20,9 @@ export async function validateWasmToken (contractAddress: string, tokenType: Cus
       tokenContract = new ContractPromise(apiPromise, PSP22Contract, contractAddress);
 
       const [nameResp, symbolResp, decimalsResp] = await Promise.all([
-        tokenContract.query['psp22Metadata::tokenName'](contractCaller, { gasLimit: -1 }), // read-only operation so no gas limit
-        tokenContract.query['psp22Metadata::tokenSymbol'](contractCaller, { gasLimit: -1 }),
-        tokenContract.query['psp22Metadata::tokenDecimals'](contractCaller, { gasLimit: -1 })
+        tokenContract.query['psp22Metadata::tokenName'](contractCaller || contractAddress, { gasLimit: -1 }), // read-only operation so no gas limit
+        tokenContract.query['psp22Metadata::tokenSymbol'](contractCaller || contractAddress, { gasLimit: -1 }),
+        tokenContract.query['psp22Metadata::tokenDecimals'](contractCaller || contractAddress, { gasLimit: -1 })
       ]);
 
       if (!(nameResp.result.isOk && symbolResp.result.isOk && decimalsResp.result.isOk) || !nameResp.output || !decimalsResp.output || !symbolResp.output) {
@@ -46,7 +46,7 @@ export async function validateWasmToken (contractAddress: string, tokenType: Cus
     } else {
       tokenContract = new ContractPromise(apiPromise, PSP34Contract, contractAddress);
 
-      const collectionIdResp = await tokenContract.query['psp34::collectionId'](contractCaller, { gasLimit: -1 }); // read-only operation so no gas limit
+      const collectionIdResp = await tokenContract.query['psp34::collectionId'](contractCaller || contractAddress, { gasLimit: -1 }); // read-only operation so no gas limit
 
       if (!collectionIdResp.result.isOk || !collectionIdResp.output) {
         console.error('Error response while validating WASM contract');

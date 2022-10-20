@@ -887,7 +887,8 @@ export const PREDEFINED_NETWORKS: Record<string, NetworkJson> = {
     nativeToken: 'SDN',
     evmChainId: 336,
     isEthereum: true,
-    paraId: 2007
+    paraId: 2007,
+    supportSmartContract: [ContractType.evm]
   },
   shibuya: {
     key: 'shibuya',
@@ -922,7 +923,8 @@ export const PREDEFINED_NETWORKS: Record<string, NetworkJson> = {
     groups: ['TEST_NET'],
     evmChainId: 81,
     nativeToken: 'SBY',
-    decimals: 18
+    decimals: 18,
+    supportSmartContract: [ContractType.evm]
   },
   khala: {
     key: 'khala',
@@ -1448,7 +1450,8 @@ export const PREDEFINED_NETWORKS: Record<string, NetworkJson> = {
     decimals: 18,
     isEthereum: true,
     evmChainId: 43,
-    blockExplorer: 'https://pangolin.subscan.io'
+    blockExplorer: 'https://pangolin.subscan.io',
+    supportSmartContract: [ContractType.evm]
   },
   bitcountry: {
     key: 'bitcountry',

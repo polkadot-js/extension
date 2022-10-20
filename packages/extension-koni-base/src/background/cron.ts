@@ -1,7 +1,7 @@
 // Copyright 2019-2022 @subwallet/extension-koni authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { ApiMap, ApiProps, CustomEvmToken, NETWORK_STATUS, NetworkJson, NftTransferExtra, ServiceInfo, StakingRewardJson } from '@subwallet/extension-base/background/KoniTypes';
+import { ApiMap, ApiProps, CustomToken, NETWORK_STATUS, NetworkJson, NftTransferExtra, ServiceInfo, StakingRewardJson } from '@subwallet/extension-base/background/KoniTypes';
 import { getTokenPrice } from '@subwallet/extension-koni-base/api/coingecko';
 import { fetchDotSamaHistory } from '@subwallet/extension-koni-base/api/subquery/history';
 import { KoniSubscription } from '@subwallet/extension-koni-base/background/subscription';
@@ -82,13 +82,12 @@ export class KoniCron {
       if (Object.keys(this.state.getDotSamaApiMap()).length !== 0 || Object.keys(this.state.getWeb3ApiMap()).length !== 0) {
         this.refreshPrice();
         this.updateApiMapStatus();
-        this.refreshNft(currentAccountInfo.address, this.state.getApiMap(), this.state.getActiveErc721Tokens())();
-        this.refreshStakingReward(currentAccountInfo.address)();
+        this.refreshNft(currentAccountInfo.address, this.state.getApiMap(), this.state.getActiveNftContracts(), this.state.getActiveContractSupportedNetworks());
+        this.refreshStakingReward(currentAccountInfo.address);
         this.resetHistory(currentAccountInfo.address).then(() => {
-          this.refreshHistory(currentAccountInfo.address, this.state.getNetworkMap())();
+          this.refreshHistory(currentAccountInfo.address, this.state.getNetworkMap());
         }).catch((err) => this.logger.warn(err));
       } else {
-        // this.setNftReady(currentAccountInfo.address);
         this.setStakingRewardReady();
       }
     });
@@ -107,7 +106,7 @@ export class KoniCron {
 
       if (Object.keys(this.state.getDotSamaApiMap()).length !== 0 || Object.keys(this.state.getWeb3ApiMap()).length !== 0) {
         this.resetNft(currentAccountInfo.address);
-        this.addCron('refreshNft', this.refreshNft(currentAccountInfo.address, this.state.getApiMap(), this.state.getActiveErc721Tokens()), CRON_REFRESH_NFT_INTERVAL);
+        this.addCron('refreshNft', this.refreshNft(currentAccountInfo.address, this.state.getApiMap(), this.state.getActiveNftContracts(), this.state.getActiveContractSupportedNetworks()), CRON_REFRESH_NFT_INTERVAL);
         this.addCron('refreshPrice', this.refreshPrice, CRON_REFRESH_PRICE_INTERVAL);
         this.addCron('checkStatusApiMap', this.updateApiMapStatus, CRON_GET_API_MAP_STATUS);
         this.addCron('recoverApiMap', this.recoverApiMap, CRON_AUTO_RECOVER_DOTSAMA_INTERVAL, false);
@@ -132,7 +131,7 @@ export class KoniCron {
         this.removeCron('refreshNft');
 
         if (this.checkNetworkAvailable(serviceInfo)) { // only add cron job if there's at least 1 active network
-          this.addCron('refreshNft', this.refreshNft(address, serviceInfo.apiMap, serviceInfo.customErc721Registry), CRON_REFRESH_NFT_INTERVAL);
+          this.addCron('refreshNft', this.refreshNft(address, serviceInfo.apiMap, serviceInfo.customNftRegistry, this.getActiveContractSupportedNetworks(serviceInfo.networkMap)), CRON_REFRESH_NFT_INTERVAL);
         }
 
         // this.resetStakingReward(address);
@@ -253,10 +252,10 @@ export class KoniCron {
       .catch((err) => this.logger.log(err));
   };
 
-  refreshNft = (address: string, apiMap: ApiMap, customErc721Registry: CustomEvmToken[]) => {
+  refreshNft = (address: string, apiMap: ApiMap, customNftRegistry: CustomToken[], contractSupportedNetworkMap: Record<string, NetworkJson>) => {
     return () => {
       this.logger.log('Refresh Nft state');
-      this.subscriptions.subscribeNft(address, apiMap.dotSama, apiMap.web3, customErc721Registry);
+      this.subscriptions.subscribeNft(address, apiMap.dotSama, apiMap.web3, customNftRegistry, contractSupportedNetworkMap);
     };
   };
 
@@ -321,5 +320,17 @@ export class KoniCron {
 
   checkNetworkAvailable = (serviceInfo: ServiceInfo): boolean => {
     return Object.keys(serviceInfo.apiMap.dotSama).length > 0 || Object.keys(serviceInfo.apiMap.web3).length > 0;
+  };
+
+  getActiveContractSupportedNetworks = (networkMap: Record<string, NetworkJson>): Record<string, NetworkJson> => {
+    const contractSupportedNetworkMap: Record<string, NetworkJson> = {};
+
+    Object.entries(networkMap).forEach(([key, network]) => {
+      if (network.active && network.supportSmartContract && network.supportSmartContract.length > 0) {
+        contractSupportedNetworkMap[key] = network;
+      }
+    });
+
+    return contractSupportedNetworkMap;
   };
 }

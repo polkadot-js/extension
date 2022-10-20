@@ -57,11 +57,12 @@ export enum SUPPORTED_NFT_NETWORKS {
   unique_network = 'unique_network',
   quartz = 'quartz',
   bitcountry = 'bitcountry',
-  moonbeam = 'moonbeam',
-  moonriver = 'moonriver',
-  moonbase = 'moonbase',
-  astarEvm = 'astarEvm',
   pioneer = 'pioneer'
+  // TODO: refactor this
+  // moonbeam = 'moonbeam',
+  // moonriver = 'moonriver',
+  // moonbase = 'moonbase',
+  // astarEvm = 'astarEvm'
 }
 
 export enum SUPPORTED_TRANSFER_EVM_CHAIN_NAME {

@@ -1,7 +1,7 @@
 // Copyright 2019-2022 @subwallet/extension-koni-base authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { ChainRegistry, CustomEvmToken, TokenInfo } from '@subwallet/extension-base/background/KoniTypes';
+import { ChainRegistry, CustomToken, TokenInfo } from '@subwallet/extension-base/background/KoniTypes';
 import { moonbeamBaseChains } from '@subwallet/extension-koni-base/api/dotsama/api-helper';
 import { PREDEFINE_TOKEN_DATA_MAP } from '@subwallet/extension-koni-base/api/predefineChainTokens';
 
@@ -48,7 +48,7 @@ export async function getMoonAssets (api: ApiPromise) {
     const valueData = value.toHuman();
     // @ts-ignore
     // eslint-disable-next-line @typescript-eslint/no-unsafe-argument,@typescript-eslint/no-unsafe-assignment
-    const info = { isMainToken: false, name: valueData.name, symbol: formatTokenSymbol(valueData.symbol), decimals: parseInt(valueData.decimals || ' 0'), erc20Address: address, assetId: keyString } as TokenInfo;
+    const info = { isMainToken: false, name: valueData.name, symbol: formatTokenSymbol(valueData.symbol), decimals: parseInt(valueData.decimals || ' 0'), contractAddress: address, assetId: keyString } as TokenInfo;
 
     assetRecord[info.symbol] = info;
   });
@@ -145,7 +145,7 @@ export async function getForeignToken (api: ApiPromise) {
   return tokenMap;
 }
 
-export const getRegistry = async (networkKey: string, api: ApiPromise, customErc20Tokens?: CustomEvmToken[]) => {
+export const getRegistry = async (networkKey: string, api: ApiPromise, customTokens?: CustomToken[]) => {
   const cached = cacheRegistryMap[networkKey];
 
   if (cached) {
@@ -207,15 +207,15 @@ export const getRegistry = async (networkKey: string, api: ApiPromise, customErc
     Object.assign(tokenMap, moonTokens);
   }
 
-  if (customErc20Tokens) {
-    for (const erc20Token of customErc20Tokens) {
-      if (erc20Token.chain === networkKey && erc20Token.symbol && !(erc20Token.symbol in tokenMap)) {
-        tokenMap[erc20Token.symbol] = {
-          erc20Address: erc20Token.smartContract,
+  if (customTokens) {
+    for (const customToken of customTokens) {
+      if (customToken.chain === networkKey && customToken.symbol && !(customToken.symbol in tokenMap)) {
+        tokenMap[customToken.symbol] = {
+          contractAddress: customToken.smartContract,
           isMainToken: false,
-          name: erc20Token.symbol,
-          symbol: erc20Token.symbol,
-          decimals: erc20Token.decimals as number
+          name: customToken.name,
+          symbol: customToken.symbol,
+          decimals: customToken.decimals as number
         } as TokenInfo;
       }
     }

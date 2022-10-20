@@ -1,11 +1,12 @@
 // Copyright 2019-2022 @polkadot/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
+import { FUNGIBLE_TOKEN_STANDARDS } from '@subwallet/extension-koni-base/api/tokens';
 import { ActionContext, Button, ButtonArea, InputWithLabel } from '@subwallet/extension-koni-ui/components';
 import useGetNetworkJson from '@subwallet/extension-koni-ui/hooks/screen/home/useGetNetworkJson';
 import useToast from '@subwallet/extension-koni-ui/hooks/useToast';
 import useTranslation from '@subwallet/extension-koni-ui/hooks/useTranslation';
-import { upsertEvmToken } from '@subwallet/extension-koni-ui/messaging';
+import { upsertCustomToken } from '@subwallet/extension-koni-ui/messaging';
 import Header from '@subwallet/extension-koni-ui/partials/Header';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
@@ -17,19 +18,19 @@ interface Props extends ThemeProps {
   className?: string;
 }
 
-function EvmTokenEdit ({ className }: Props): React.ReactElement {
+function CustomTokenEdit ({ className }: Props): React.ReactElement {
   const { show } = useToast();
   const { t } = useTranslation();
   const onAction = useContext(ActionContext);
   const _goBack = useCallback(
     () => {
-      window.localStorage.setItem('popupNavigation', '/account/evm-token-setting');
-      onAction('/account/evm-token-setting');
+      window.localStorage.setItem('popupNavigation', '/account/token-setting');
+      onAction('/account/token-setting');
     },
     [onAction]
   );
 
-  const { tokenConfigParams: { data: _tokenInfo } } = useSelector((state: RootState) => state);
+  const _tokenInfo = useSelector((state: RootState) => state.tokenConfigParams.data);
   const [tokenInfo, setTokenInfo] = useState(_tokenInfo);
   const [isValidSymbol, setIsValidSymbol] = useState(true);
   const [isValidDecimals, setIsValidDecimals] = useState(true);
@@ -44,7 +45,7 @@ function EvmTokenEdit ({ className }: Props): React.ReactElement {
 
   const _onEditToken = useCallback(() => {
     if (isValidDecimals && isValidSymbol) {
-      upsertEvmToken(tokenInfo)
+      upsertCustomToken(tokenInfo)
         .then((resp) => {
           if (resp) {
             show('Your changes are saved successfully');
@@ -106,8 +107,8 @@ function EvmTokenEdit ({ className }: Props): React.ReactElement {
       <Header
         showBackArrow
         showSubHeader
-        subHeaderName={t<string>('Configure EVM Token')}
-        to='/account/evm-token-setting'
+        subHeaderName={t<string>('Configure Token')}
+        to='/account/token-setting'
       />
 
       <div className={className}>
@@ -118,7 +119,7 @@ function EvmTokenEdit ({ className }: Props): React.ReactElement {
         />
 
         {
-          tokenInfo.type === 'erc721' &&
+          !FUNGIBLE_TOKEN_STANDARDS.includes(tokenInfo.type) &&
           <InputWithLabel
             label={t<string>('Token Name (*)')}
             onChange={onChangeName}
@@ -127,7 +128,7 @@ function EvmTokenEdit ({ className }: Props): React.ReactElement {
         }
 
         {
-          tokenInfo.type === 'erc20' &&
+          FUNGIBLE_TOKEN_STANDARDS.includes(tokenInfo.type) &&
           <InputWithLabel
             disabled={true}
             label={t<string>('Symbol (*)')}
@@ -137,7 +138,7 @@ function EvmTokenEdit ({ className }: Props): React.ReactElement {
         }
 
         {
-          tokenInfo.type === 'erc20' &&
+          FUNGIBLE_TOKEN_STANDARDS.includes(tokenInfo.type) &&
           <InputWithLabel
             disabled={true}
             label={t<string>('Decimals (*)')}
@@ -178,7 +179,7 @@ function EvmTokenEdit ({ className }: Props): React.ReactElement {
   );
 }
 
-export default styled(EvmTokenEdit)(({ theme }: Props) => `
+export default styled(CustomTokenEdit)(({ theme }: Props) => `
   padding: 0 15px 15px;
   flex: 1;
   overflow-y: auto;
@@ -207,6 +208,4 @@ export default styled(EvmTokenEdit)(({ theme }: Props) => `
   .network-edit-button:last-child {
     margin-left: 8px;
   }
-
-
 `);

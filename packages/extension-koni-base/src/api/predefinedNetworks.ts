@@ -1,7 +1,7 @@
 // Copyright 2019-2022 @subwallet/extension-koni authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { ContractType, NetworkJson } from '@subwallet/extension-base/background/KoniTypes';
+import {ContractType, NetworkJson} from '@subwallet/extension-base/background/KoniTypes';
 
 export const PREDEFINED_NETWORKS: Record<string, NetworkJson> = {
   polkadot: {
@@ -377,7 +377,8 @@ export const PREDEFINED_NETWORKS: Record<string, NetworkJson> = {
     nativeToken: 'CLV',
     crowdloanUrl: 'https://lucky.clover.finance/?type=support',
     decimals: 18,
-    coinGeckoKey: 'clover-finance'
+    coinGeckoKey: 'clover-finance',
+    supportSmartContract: [ContractType.evm]
   },
   hydradx_main: {
     key: 'hydradx_main',
@@ -1411,7 +1412,8 @@ export const PREDEFINED_NETWORKS: Record<string, NetworkJson> = {
     coinGeckoKey: 'darwinia-crab-network',
     isEthereum: true,
     evmChainId: 44,
-    blockExplorer: 'https://crab.subscan.io'
+    blockExplorer: 'https://crab.subscan.io',
+    supportSmartContract: [ContractType.evm]
   },
   pangolin: {
     key: 'pangolin',

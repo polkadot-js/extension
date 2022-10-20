@@ -124,7 +124,7 @@ export class WasmNftApi extends BaseNftApi {
     if (_attributeValues.output) {
       const attributeValues = _attributeValues.output.toHuman() as string[];
 
-      const attributeDict: Record<string, string> = {};
+      const attributeDict: Record<string, any> = {};
 
       for (let i = 0; i < collectionAttributes.length; i++) {
         const attributeName = collectionAttributes[i];
@@ -141,7 +141,9 @@ export class WasmNftApi extends BaseNftApi {
             nftItem.image = this.parseUrl(attributeValue);
           }
         } else {
-          attributeDict[attributeName] = attributeValue;
+          if (attributeValue !== '') {
+            attributeDict[attributeName] = { value: attributeValue };
+          }
         }
       }
 

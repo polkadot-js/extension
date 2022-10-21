@@ -5,10 +5,12 @@ import BaseMigrationJob from '../Base';
 // import FixMissingTransactionHistory from './FixMissingTransactionHistory';
 import ClearOldStorage from './ClearOldStorage';
 import ConvertTransactionHistoryFromChromeStorageToIndexedDB from './ConvertTransactionHistoryFromChromeStorageToIndexedDB';
+import ChangeRouteToHome from "@subwallet/extension-koni-base/migration/scripts/ChangeRouteToHome";
 
 export default <Record<string, typeof BaseMigrationJob>> {
   // '0.5.3-2': FixMissingTransactionHistory,
   '0.5.3-3': ConvertTransactionHistoryFromChromeStorageToIndexedDB,
   // '0.5.3-3-1': ConvertTransactionHistoryFromChromeStorageToIndexedDB, // Can run multiple times with diffrent key
-  '0.5.6-1': ClearOldStorage
+  '0.5.6-1': ClearOldStorage,
+  '0.6.6-1': ChangeRouteToHome
 };

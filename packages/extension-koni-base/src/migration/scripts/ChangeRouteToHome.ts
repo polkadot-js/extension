@@ -1,7 +1,7 @@
 // Copyright 2019-2022 @subwallet/extension-koni authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import BaseMigrationJob from "@subwallet/extension-koni-base/migration/Base";
+import BaseMigrationJob from '@subwallet/extension-koni-base/migration/Base';
 
 export default class ChangeRouteToHome extends BaseMigrationJob {
   public override async run (): Promise<void> {
@@ -16,8 +16,8 @@ export default class ChangeRouteToHome extends BaseMigrationJob {
       '/account/evm-token-edit'
     ];
     const currentRoute = window.localStorage.getItem('popupNavigation');
-    // @ts-ignore
-    if (deletedRoutes.includes(currentRoute)) {
+
+    if (currentRoute !== null && deletedRoutes.includes(currentRoute)) {
       window.localStorage.setItem('popupNavigation', '/');
     }
 

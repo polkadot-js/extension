@@ -171,10 +171,12 @@ function ImportNft ({ className = '' }: Props): React.ReactElement<Props> {
   const onSelectChain = useCallback((val: any) => {
     const _chain = val as string;
 
-    setWarning('');
+    if (_chain !== nftInfo.chain) {
+      setWarning('');
+    }
 
     dispatchNftInfo({ type: NftInfoActionType.UPDATE_CHAIN, payload: _chain });
-  }, []);
+  }, [nftInfo.chain]);
 
   const handleAddToken = useCallback(() => {
     setWarning('');

@@ -186,10 +186,12 @@ function ImportToken ({ className = '' }: Props): React.ReactElement<Props> {
   const onSelectChain = useCallback((val: any) => {
     const _chain = val as string;
 
-    setWarning('');
+    if (_chain !== tokenInfo.chain) {
+      setWarning('');
+    }
 
     dispatchTokenInfo({ type: TokenInfoActionType.UPDATE_CHAIN, payload: _chain });
-  }, []);
+  }, [tokenInfo.chain]);
 
   const onAction = useContext(ActionContext);
   const _goBack = useCallback(

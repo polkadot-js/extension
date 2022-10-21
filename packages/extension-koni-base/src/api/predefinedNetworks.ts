@@ -1858,6 +1858,21 @@ export const PREDEFINED_NETWORKS: Record<string, NetworkJson> = {
     decimals: 12,
     groups: ['TEST_NET']
   },
+  snow: {
+    key: 'snow',
+    chain: 'Snow Network',
+    genesisHash: '0xb34f6cd03a41f0fab38ba9fd5b11cce5f303633c46f39f0c6fdc7c3c602bafa9',
+    ss58Format: 2207,
+    providers: {
+      snow: 'wss://snow-rpc.icenetwork.io'
+    },
+    currentProvider: 'snow',
+    active: false,
+    currentProviderMode: 'ws',
+    nativeToken: 'ICZ',
+    decimals: 18,
+    groups: ['KUSAMA_PARACHAIN']
+  },
   arctic_testnet: {
     key: 'arctic_testnet',
     chain: 'Arctic Testnet',

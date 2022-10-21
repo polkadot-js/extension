@@ -10,7 +10,7 @@ import { getEVMBalance } from '@subwallet/extension-koni-base/api/tokens/evm/bal
 import { getERC20Contract } from '@subwallet/extension-koni-base/api/tokens/evm/web3';
 import { getPSP22ContractPromise } from '@subwallet/extension-koni-base/api/tokens/wasm';
 import { state } from '@subwallet/extension-koni-base/background/handlers';
-import { ASTAR_REFRESH_BALANCE_INTERVAL, EVM_BALANCE_FAST_INTERVAL, IGNORE_GET_SUBSTRATE_FEATURES_LIST, SUB_TOKEN_REFRESH_BALANCE_INTERVAL } from '@subwallet/extension-koni-base/constants';
+import { ASTAR_REFRESH_BALANCE_INTERVAL, IGNORE_GET_SUBSTRATE_FEATURES_LIST, SUB_TOKEN_REFRESH_BALANCE_INTERVAL, SUBSCRIBE_BALANCE_FAST_INTERVAL } from '@subwallet/extension-koni-base/constants';
 import { categoryAddresses, sumBN } from '@subwallet/extension-koni-base/utils';
 import Web3 from 'web3';
 import { Contract } from 'web3-eth-contract';
@@ -581,7 +581,17 @@ export async function getFreeBalance (networkKey: string, address: string, dotSa
     }
   } else {
     if (token) {
-      if (['genshiro_testnet', 'genshiro', 'equilibrium_parachain'].includes(networkKey)) {
+      if (tokenInfo && tokenInfo.type) {
+        if (!tokenInfo?.contractAddress) {
+          return '0';
+        }
+
+        const contractPromise = getPSP22ContractPromise(api, tokenInfo.contractAddress);
+
+        const balanceOf = await contractPromise.query['psp22::balanceOf'](address, { gasLimit: -1 }, address);
+
+        return balanceOf.output ? balanceOf.output.toString() : '0';
+      } else if (['genshiro_testnet', 'genshiro', 'equilibrium_parachain'].includes(networkKey)) {
         const asset = networkKey === 'equilibrium_parachain' ? assetFromToken(token)[0] : assetFromToken(token);
         const balance = await api.query.eqBalances.account(address, asset);
 
@@ -634,17 +644,17 @@ export async function subscribeFreeBalance (
     }
   }
 
+  const responseIntervalSubscription = (method: () => void) => {
+    method();
+    const interval = setInterval(method, SUBSCRIBE_BALANCE_FAST_INTERVAL);
+
+    return () => {
+      clearInterval(interval);
+    };
+  };
+
   // web3Api support mean isEthereum Network support
   if (web3Api) {
-    const responseIntervalSubscription = (method: () => void) => {
-      method();
-      const interval = setInterval(method, EVM_BALANCE_FAST_INTERVAL);
-
-      return () => {
-        clearInterval(interval);
-      };
-    };
-
     if (isMainToken) {
       const getEvmMainBalance = () => {
         web3Api.eth.getBalance(address).then(update).catch(console.log);
@@ -670,8 +680,24 @@ export async function subscribeFreeBalance (
       return responseIntervalSubscription(getERC20FreeBalance);
     }
   } else {
+    // Handle WASM tokens
     if (token) {
-      if (['genshiro_testnet', 'genshiro', 'equilibrium_parachain'].includes(networkKey)) {
+      if (tokenInfo && tokenInfo.type) {
+        const getPSP22FreeBalance = () => {
+          if (!tokenInfo?.contractAddress) {
+            return;
+          }
+
+          const contractPromise = getPSP22ContractPromise(api, tokenInfo.contractAddress);
+
+          contractPromise.query['psp22::balanceOf'](address, { gasLimit: -1 }, address)
+            .then((balanceOf) => {
+              update(balanceOf.output ? balanceOf.output.toString() : '0');
+            }).catch(console.error);
+        };
+
+        return responseIntervalSubscription(getPSP22FreeBalance);
+      } else if (['genshiro_testnet', 'genshiro', 'equilibrium_parachain'].includes(networkKey)) {
         const asset = networkKey === 'equilibrium_parachain' ? assetFromToken(token)[0] : assetFromToken(token);
         // @ts-ignore
         const unsub = await api.query.eqBalances.account(address, asset, (balance) => {

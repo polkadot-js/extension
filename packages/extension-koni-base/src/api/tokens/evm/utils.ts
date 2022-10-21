@@ -56,7 +56,7 @@ export async function validateEvmToken (contractAddress: string, tokenType: Cust
       contractError
     };
   } catch (e) {
-    console.error('Error response while validating WASM contract', e);
+    console.error('Error response while validating EVM contract', e);
 
     return {
       name,

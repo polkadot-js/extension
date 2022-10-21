@@ -11,7 +11,7 @@ import { isEthereumAddress } from '@polkadot/util-crypto';
 export async function validateCustomToken (contractAddress: string, tokenType: CustomTokenType, web3: Web3 | undefined, apiProps: ApiProps | undefined, contractCaller?: string) {
   if ((tokenType === CustomTokenType.erc20 || tokenType === CustomTokenType.erc721) && web3 !== undefined) {
     return await validateEvmToken(contractAddress, tokenType, web3);
-  } else if ((tokenType === CustomTokenType.psp22 || tokenType === CustomTokenType.psp34) && apiProps !== undefined && contractCaller) {
+  } else if ((tokenType === CustomTokenType.psp22 || tokenType === CustomTokenType.psp34) && apiProps !== undefined) {
     return await validateWasmToken(contractAddress, tokenType, apiProps.api, contractCaller);
   }
 

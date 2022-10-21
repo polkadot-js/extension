@@ -66,7 +66,7 @@ function nftInfoReducer (state: CustomToken, action: NftInfoAction) {
 
       return {
         ...state,
-        name: payload.name as string || state.name,
+        name: (payload.name || payload.name === '') ? payload.name as string : state.name,
         type: payload.type as CustomTokenType || state.type
       } as CustomToken;
     }
@@ -112,6 +112,7 @@ function ImportNft ({ className = '' }: Props): React.ReactElement<Props> {
   useEffect(() => {
     if (nftInfo.smartContract !== '') {
       let tokenType: CustomTokenType | undefined; // set token type
+      const isValidContractCaller = isValidSubstrateAddress(currentAccount?.address as string);
 
       // TODO: this should be done manually by user when there are more token standards
       if (isEthereumAddress(nftInfo.smartContract)) {
@@ -129,7 +130,7 @@ function ImportNft ({ className = '' }: Props): React.ReactElement<Props> {
           smartContract: nftInfo.smartContract,
           chain: nftInfo.chain,
           type: tokenType,
-          contractCaller: currentAccount?.address as string
+          contractCaller: isValidContractCaller ? currentAccount?.address as string : undefined
         })
           .then((resp) => {
             if (resp.isExist) {
@@ -170,10 +171,12 @@ function ImportNft ({ className = '' }: Props): React.ReactElement<Props> {
   const onSelectChain = useCallback((val: any) => {
     const _chain = val as string;
 
-    setWarning('');
+    if (_chain !== nftInfo.chain) {
+      setWarning('');
+    }
 
     dispatchNftInfo({ type: NftInfoActionType.UPDATE_CHAIN, payload: _chain });
-  }, []);
+  }, [nftInfo.chain]);
 
   const handleAddToken = useCallback(() => {
     setWarning('');

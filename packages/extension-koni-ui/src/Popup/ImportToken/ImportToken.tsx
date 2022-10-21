@@ -104,6 +104,7 @@ function ImportToken ({ className = '' }: Props): React.ReactElement<Props> {
   useEffect(() => {
     if (tokenInfo.smartContract !== '') {
       let tokenType: CustomTokenType | undefined; // set token type
+      const isValidContractCaller = isValidSubstrateAddress(currentAccount?.address as string);
 
       // TODO: this should be done manually by user when there are more token standards
       if (isEthereumAddress(tokenInfo.smartContract)) {
@@ -121,7 +122,7 @@ function ImportToken ({ className = '' }: Props): React.ReactElement<Props> {
           smartContract: tokenInfo.smartContract,
           chain: tokenInfo.chain,
           type: tokenType,
-          contractCaller: currentAccount?.address as string
+          contractCaller: isValidContractCaller ? currentAccount?.address as string : undefined
         })
           .then((resp) => {
             if (resp.isExist) {
@@ -185,10 +186,12 @@ function ImportToken ({ className = '' }: Props): React.ReactElement<Props> {
   const onSelectChain = useCallback((val: any) => {
     const _chain = val as string;
 
-    setWarning('');
+    if (_chain !== tokenInfo.chain) {
+      setWarning('');
+    }
 
     dispatchTokenInfo({ type: TokenInfoActionType.UPDATE_CHAIN, payload: _chain });
-  }, []);
+  }, [tokenInfo.chain]);
 
   const onAction = useContext(ActionContext);
   const _goBack = useCallback(

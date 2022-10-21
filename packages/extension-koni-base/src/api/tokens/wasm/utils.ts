@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { CustomTokenJson, CustomTokenType, NetworkJson } from '@subwallet/extension-base/background/KoniTypes';
+import { isEqualContractAddress } from '@subwallet/extension-koni-base/api/tokens';
 import { DEFAULT_WASM_TOKENS } from '@subwallet/extension-koni-base/api/tokens/wasm/defaultWasmToken';
 import { PSP22Contract, PSP34Contract } from '@subwallet/extension-koni-base/api/tokens/wasm/helper';
 
@@ -93,7 +94,7 @@ export function initWasmTokenState (customTokenState: CustomTokenJson, networkMa
     let exist = false;
 
     for (const storedToken of wasmTokenState.psp22) {
-      if (defaultToken.smartContract === storedToken.smartContract && defaultToken.chain === storedToken.chain) {
+      if (isEqualContractAddress(defaultToken.smartContract, storedToken.smartContract) && defaultToken.chain === storedToken.chain) {
         if (storedToken.isCustom) {
           // if existed, migrate the custom token -> default token
           delete storedToken.isCustom;
@@ -113,7 +114,7 @@ export function initWasmTokenState (customTokenState: CustomTokenJson, networkMa
     let exist = false;
 
     for (const storedToken of wasmTokenState.psp34) {
-      if (defaultToken.smartContract === storedToken.smartContract && defaultToken.chain === storedToken.chain) {
+      if (isEqualContractAddress(defaultToken.smartContract, storedToken.smartContract) && defaultToken.chain === storedToken.chain) {
         if (storedToken.isCustom) {
           // if existed, migrate the custom token -> default token
           delete storedToken.isCustom;

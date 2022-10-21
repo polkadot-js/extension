@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { CustomTokenJson, CustomTokenType, NetworkJson } from '@subwallet/extension-base/background/KoniTypes';
+import { isEqualContractAddress } from '@subwallet/extension-koni-base/api/tokens';
 import { DEFAULT_EVM_TOKENS } from '@subwallet/extension-koni-base/api/tokens/evm/defaultEvmToken';
 import { ERC20Contract, ERC721Contract } from '@subwallet/extension-koni-base/api/tokens/evm/web3';
 import Web3 from 'web3';
@@ -73,7 +74,7 @@ export function initEvmTokenState (customTokenState: CustomTokenJson, networkMap
     let exist = false;
 
     for (const storedToken of evmTokenState.erc20) {
-      if (defaultToken.smartContract.toLowerCase() === storedToken.smartContract.toLowerCase() && defaultToken.chain === storedToken.chain) {
+      if (isEqualContractAddress(defaultToken.smartContract, storedToken.smartContract) && defaultToken.chain === storedToken.chain) {
         if (storedToken.isCustom) {
           // if existed, migrate the custom token -> default token
           delete storedToken.isCustom;
@@ -93,7 +94,7 @@ export function initEvmTokenState (customTokenState: CustomTokenJson, networkMap
     let exist = false;
 
     for (const storedToken of evmTokenState.erc721) {
-      if (defaultToken.smartContract.toLowerCase() === storedToken.smartContract.toLowerCase() && defaultToken.chain === storedToken.chain) {
+      if (isEqualContractAddress(defaultToken.smartContract, storedToken.smartContract) && defaultToken.chain === storedToken.chain) {
         if (storedToken.isCustom) {
           // if existed custom token before, migrate the custom token -> default token
           delete storedToken.isCustom;

@@ -2283,7 +2283,7 @@ export default class KoniState extends State {
         nonce: nonce,
         from: fromAddress,
         gasPrice: anyNumberToBN(gasPrice).toNumber(),
-        gasLimit: anyNumberToBN(estimateGas).toNumber(),
+        gasLimit: anyNumberToBN(transaction.gas).toNumber(),
         to: transaction.to !== undefined ? transaction.to : '',
         value: anyNumberToBN(transaction.value).toNumber(),
         data: transaction.data ? transaction.data : '',

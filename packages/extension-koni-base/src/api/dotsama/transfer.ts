@@ -51,7 +51,6 @@ export async function checkReferenceCount (networkKey: string, address: string, 
 }
 
 export async function checkSupportTransfer (networkKey: string, token: string, dotSamaApiMap: Record<string, ApiProps>): Promise<SupportTransferResponse> {
-  console.log('check support transfer');
   const apiProps = await dotSamaApiMap[networkKey].isReady;
 
   if (apiProps.isEthereum) {
@@ -76,6 +75,13 @@ export async function checkSupportTransfer (networkKey: string, token: string, d
   }
 
   const tokenInfo = await getTokenInfo(networkKey, api, token);
+
+  if (tokenInfo && tokenInfo.type && !apiProps.isEthereum && api.query.contracts) { // for PSP tokens
+    return {
+      supportTransfer: true,
+      supportTransferAll: true
+    };
+  }
 
   if (['karura', 'acala', 'acala_testnet'].includes(networkKey) && tokenInfo && !tokenInfo.isMainToken && isTxCurrenciesSupported) {
     result.supportTransfer = true;

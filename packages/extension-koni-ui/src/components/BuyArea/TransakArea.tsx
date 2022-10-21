@@ -34,13 +34,13 @@ const TransakArea = (props: Props) => {
     }
 
     const networks = [..._network.networks];
-    const tokenList = [..._network.tokens];
-    const defaultToken = tokenList[0];
+    const tokenList = _network.tokens ? [..._network.tokens] : undefined;
+    const defaultToken = tokenList ? tokenList[0] : undefined;
 
     const params = {
       apiKey: '4b3bfb00-7f7c-44b3-844f-d4504f1065be',
       defaultCryptoCurrency: defaultToken,
-      cryptoCurrencyList: tokenList.join(','),
+      cryptoCurrencyList: tokenList ? tokenList.join(',') : undefined,
       networks: networkKey !== 'shiden' ? networks.join(',') : undefined,
       // disableWalletAddressForm: true,
       walletAddress: formattedAddress

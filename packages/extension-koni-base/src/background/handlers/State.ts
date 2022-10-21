@@ -2282,8 +2282,8 @@ export default class KoniState extends State {
       const txObject: Web3Transaction = {
         nonce: nonce,
         from: fromAddress,
-        gasPrice: anyNumberToBN(transaction.gasPrice ? transaction.gasPrice : transaction.maxFeePerGas).toNumber(),
-        gasLimit: anyNumberToBN(transaction.gas).toNumber(),
+        gasPrice: anyNumberToBN(gasPrice).toNumber(),
+        gasLimit: anyNumberToBN(estimateGas).toNumber(),
         to: transaction.to !== undefined ? transaction.to : '',
         value: anyNumberToBN(transaction.value).toNumber(),
         data: transaction.data ? transaction.data : '',

@@ -50,7 +50,7 @@ class ErrorBoundary extends React.Component<Props> {
     return error
       ? (
         <>
-          <Header text={t<string>('An error occured')} />
+          <Header text={t<string>('An error occurred')} />
           <div>
             {t<string>('Something went wrong with the query and rendering of this component. {{message}}', {
               replace: { message: error.message }

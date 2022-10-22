@@ -252,11 +252,13 @@ function StakeAuthWithdrawal ({ address, amount, className, hideModal, networkKe
   const handlerOnSubmitQr = useCallback(() => {
     stakeWithdrawQr({
       address: address,
-      networkKey: networkKey
+      networkKey: networkKey,
+      action: nextWithdrawalAction,
+      validatorAddress: targetValidator
     }, handlerCallbackResponseResultQr)
       .then(handlerResponseError)
       .catch((e) => console.log('There is problem when makeBondingQr', e));
-  }, [address, handlerCallbackResponseResultQr, handlerResponseError, networkKey]);
+  }, [address, handlerCallbackResponseResultQr, handlerResponseError, networkKey, nextWithdrawalAction, targetValidator]);
 
   const handlerErrorQr = useCallback((error: Error) => {
     setErrorArr([error.message]);
@@ -292,11 +294,13 @@ function StakeAuthWithdrawal ({ address, amount, className, hideModal, networkKe
 
     stakeWithdrawLedger({
       networkKey: networkKey,
-      address: address
+      address: address,
+      action: nextWithdrawalAction,
+      validatorAddress: targetValidator
     }, callback)
       .then(handlerResponseError)
       .catch((e) => console.log('There is problem when makeTransferNftQrSubstrate', e));
-  }, [address, handlerCallbackResponseResultLedger, handlerResponseError, networkKey]);
+  }, [address, handlerCallbackResponseResultLedger, handlerResponseError, networkKey, nextWithdrawalAction, targetValidator]);
 
   const handlerSendLedger = useCallback((handlerSignLedger: (ledgerState: LedgerState) => void) => {
     if (loading) {

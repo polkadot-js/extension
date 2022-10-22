@@ -215,7 +215,8 @@ export const getRegistry = async (networkKey: string, api: ApiPromise, customTok
           isMainToken: false,
           name: customToken.name,
           symbol: customToken.symbol,
-          decimals: customToken.decimals as number
+          decimals: customToken.decimals as number,
+          type: customToken.type // must have type to retrieve balance
         } as TokenInfo;
       }
     }

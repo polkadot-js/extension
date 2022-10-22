@@ -128,7 +128,7 @@ function CustomTokenSetting ({ className }: Props): React.ReactElement {
           handleSelected={handleSelected}
           handleUnselected={handleUnselected}
           item={item}
-          key={item.smartContract.concat(item.chain)}
+          key={`${item.smartContract}-${item.chain}-${item.type}`}
         />)}
       </div>
 

@@ -151,7 +151,8 @@ export const PREDEFINED_NETWORKS: Record<string, NetworkJson> = {
     evmChainId: 1,
     supportBonding: false,
     getStakingOnChain: false,
-    abiExplorer: 'https://etherscan.io'
+    abiExplorer: 'https://etherscan.io',
+    supportSmartContract: [ContractType.evm]
   },
   ethereum_goerli: {
     key: 'ethereum_goerli',
@@ -173,7 +174,8 @@ export const PREDEFINED_NETWORKS: Record<string, NetworkJson> = {
     evmChainId: 1,
     supportBonding: false,
     getStakingOnChain: false,
-    abiExplorer: 'https://goerli.etherscan.io'
+    abiExplorer: 'https://goerli.etherscan.io',
+    supportSmartContract: [ContractType.evm]
   },
   binance: {
     key: 'binance',
@@ -197,7 +199,8 @@ export const PREDEFINED_NETWORKS: Record<string, NetworkJson> = {
     evmChainId: 56,
     supportBonding: false,
     getStakingOnChain: false,
-    abiExplorer: 'https://bscscan.com'
+    abiExplorer: 'https://bscscan.com',
+    supportSmartContract: [ContractType.evm]
   },
   binance_test: {
     key: 'binance_test',
@@ -218,7 +221,8 @@ export const PREDEFINED_NETWORKS: Record<string, NetworkJson> = {
     evmChainId: 97,
     supportBonding: false,
     getStakingOnChain: false,
-    abiExplorer: 'https://testnet.bscscan.com'
+    abiExplorer: 'https://testnet.bscscan.com',
+    supportSmartContract: [ContractType.evm]
   },
   moonbeam: {
     key: 'moonbeam',
@@ -373,7 +377,8 @@ export const PREDEFINED_NETWORKS: Record<string, NetworkJson> = {
     nativeToken: 'CLV',
     crowdloanUrl: 'https://lucky.clover.finance/?type=support',
     decimals: 18,
-    coinGeckoKey: 'clover-finance'
+    coinGeckoKey: 'clover-finance',
+    supportSmartContract: [ContractType.evm]
   },
   hydradx_main: {
     key: 'hydradx_main',
@@ -882,7 +887,8 @@ export const PREDEFINED_NETWORKS: Record<string, NetworkJson> = {
     nativeToken: 'SDN',
     evmChainId: 336,
     isEthereum: true,
-    paraId: 2007
+    paraId: 2007,
+    supportSmartContract: [ContractType.evm]
   },
   shibuya: {
     key: 'shibuya',
@@ -917,7 +923,8 @@ export const PREDEFINED_NETWORKS: Record<string, NetworkJson> = {
     groups: ['TEST_NET'],
     evmChainId: 81,
     nativeToken: 'SBY',
-    decimals: 18
+    decimals: 18,
+    supportSmartContract: [ContractType.evm]
   },
   khala: {
     key: 'khala',
@@ -1407,7 +1414,8 @@ export const PREDEFINED_NETWORKS: Record<string, NetworkJson> = {
     coinGeckoKey: 'darwinia-crab-network',
     isEthereum: true,
     evmChainId: 44,
-    blockExplorer: 'https://crab.subscan.io'
+    blockExplorer: 'https://crab.subscan.io',
+    supportSmartContract: [ContractType.evm]
   },
   pangolin: {
     key: 'pangolin',
@@ -1442,7 +1450,8 @@ export const PREDEFINED_NETWORKS: Record<string, NetworkJson> = {
     decimals: 18,
     isEthereum: true,
     evmChainId: 43,
-    blockExplorer: 'https://pangolin.subscan.io'
+    blockExplorer: 'https://pangolin.subscan.io',
+    supportSmartContract: [ContractType.evm]
   },
   bitcountry: {
     key: 'bitcountry',
@@ -1857,6 +1866,21 @@ export const PREDEFINED_NETWORKS: Record<string, NetworkJson> = {
     nativeToken: 'Unit',
     decimals: 12,
     groups: ['TEST_NET']
+  },
+  snow: {
+    key: 'snow',
+    chain: 'Snow Network',
+    genesisHash: '0xb34f6cd03a41f0fab38ba9fd5b11cce5f303633c46f39f0c6fdc7c3c602bafa9',
+    ss58Format: 2207,
+    providers: {
+      snow: 'wss://snow-rpc.icenetwork.io'
+    },
+    currentProvider: 'snow',
+    active: false,
+    currentProviderMode: 'ws',
+    nativeToken: 'ICZ',
+    decimals: 18,
+    groups: ['KUSAMA_PARACHAIN']
   },
   arctic_testnet: {
     key: 'arctic_testnet',

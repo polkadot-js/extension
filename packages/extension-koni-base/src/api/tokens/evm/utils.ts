@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { CustomTokenJson, CustomTokenType, NetworkJson } from '@subwallet/extension-base/background/KoniTypes';
+import { isEqualContractAddress } from '@subwallet/extension-koni-base/api/tokens';
 import { DEFAULT_EVM_TOKENS } from '@subwallet/extension-koni-base/api/tokens/evm/defaultEvmToken';
 import { ERC20Contract, ERC721Contract } from '@subwallet/extension-koni-base/api/tokens/evm/web3';
 import Web3 from 'web3';
@@ -32,16 +33,14 @@ export async function validateEvmToken (contractAddress: string, tokenType: Cust
       // eslint-disable-next-line @typescript-eslint/no-unsafe-argument,@typescript-eslint/no-unsafe-member-access
       tokenContract = new web3.eth.Contract(ERC20Contract.abi, contractAddress);
 
-      const [_name, _decimals, _symbol] = await Promise.all([
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-member-access
-        tokenContract.methods.name().call() as string,
+      const [_decimals, _symbol] = await Promise.all([
         // eslint-disable-next-line @typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-member-access
         tokenContract.methods.decimals().call() as number,
         // eslint-disable-next-line @typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-member-access
         tokenContract.methods.symbol().call() as string
       ]);
 
-      name = _name;
+      name = _symbol;
       decimals = _decimals;
       symbol = _symbol;
     }
@@ -57,7 +56,7 @@ export async function validateEvmToken (contractAddress: string, tokenType: Cust
       contractError
     };
   } catch (e) {
-    console.error('Error response while validating WASM contract', e);
+    console.error('Error response while validating EVM contract', e);
 
     return {
       name,
@@ -75,7 +74,7 @@ export function initEvmTokenState (customTokenState: CustomTokenJson, networkMap
     let exist = false;
 
     for (const storedToken of evmTokenState.erc20) {
-      if (defaultToken.smartContract.toLowerCase() === storedToken.smartContract.toLowerCase() && defaultToken.chain === storedToken.chain) {
+      if (isEqualContractAddress(defaultToken.smartContract, storedToken.smartContract) && defaultToken.chain === storedToken.chain) {
         if (storedToken.isCustom) {
           // if existed, migrate the custom token -> default token
           delete storedToken.isCustom;
@@ -95,7 +94,7 @@ export function initEvmTokenState (customTokenState: CustomTokenJson, networkMap
     let exist = false;
 
     for (const storedToken of evmTokenState.erc721) {
-      if (defaultToken.smartContract.toLowerCase() === storedToken.smartContract.toLowerCase() && defaultToken.chain === storedToken.chain) {
+      if (isEqualContractAddress(defaultToken.smartContract, storedToken.smartContract) && defaultToken.chain === storedToken.chain) {
         if (storedToken.isCustom) {
           // if existed custom token before, migrate the custom token -> default token
           delete storedToken.isCustom;

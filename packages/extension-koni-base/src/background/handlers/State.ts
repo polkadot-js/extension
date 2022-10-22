@@ -1338,8 +1338,6 @@ export default class KoniState extends State {
 
     this.chainRegistryMap = newChainRegistryMap;
 
-    console.log('newChainRegistryMap', newChainRegistryMap);
-
     Object.entries(newChainRegistryMap).forEach(([key, chainRegistry]) => {
       cacheRegistryMap[key] = chainRegistry;
     });

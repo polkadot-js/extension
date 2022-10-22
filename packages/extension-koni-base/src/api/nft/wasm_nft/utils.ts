@@ -11,3 +11,5 @@ export const ART_ZERO_IMAGE_API = 'https://api.artzero.io/getImage';
 export const ART_ZERO_IPFS_API = 'https://api.artzero.io/getJSON';
 
 export const ART_ZERO_COLLECTION_API = 'https://api.artzero.io/getCollectionByAddress';
+
+export const ART_ZERO_EXTERNAL_URL = 'https://artzero.io/demotestnet/#/marketplace';

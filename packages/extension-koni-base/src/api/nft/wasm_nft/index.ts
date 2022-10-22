@@ -3,7 +3,7 @@
 
 import { ApiProps, CustomToken, CustomTokenType, NftCollection, NftItem } from '@subwallet/extension-base/background/KoniTypes';
 import { BaseNftApi, HandleNftParams } from '@subwallet/extension-koni-base/api/nft/nft';
-import { ART_ZERO_COLLECTION_API, ART_ZERO_CONTRACTS, ART_ZERO_IMAGE_API, ART_ZERO_IPFS_API } from '@subwallet/extension-koni-base/api/nft/wasm_nft/utils';
+import { ART_ZERO_COLLECTION_API, ART_ZERO_CONTRACTS, ART_ZERO_EXTERNAL_URL, ART_ZERO_IMAGE_API, ART_ZERO_IPFS_API } from '@subwallet/extension-koni-base/api/nft/wasm_nft/utils';
 import { PSP34Contract } from '@subwallet/extension-koni-base/api/tokens/wasm/helper';
 import fetch from 'cross-fetch';
 
@@ -54,17 +54,23 @@ export class WasmNftApi extends BaseNftApi {
   }
 
   private async parseFeaturedCollectionImage (smartContract: string) {
-    const resp = await fetch(`${ART_ZERO_COLLECTION_API}`, {
+    const resp = await fetch(ART_ZERO_COLLECTION_API, {
       method: 'POST',
+      headers: {
+        Accept: 'application/json',
+        'Content-Type': 'application/json'
+      },
       body: JSON.stringify({ collection_address: smartContract })
     });
 
-    const collectionDetail = (resp && resp.ok && await resp.json() as Record<string, any>);
+    const result = (resp && resp.ok && await resp.json() as Record<string, any>);
 
-    if (!collectionDetail) {
+    if (!result) {
       return;
     }
 
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+    const collectionDetail = result.ret[0] as Record<string, any>;
     const collectionImage = collectionDetail.avatarImage as string;
     const parsedCollectionImage = this.parseFeaturedTokenUri(collectionImage);
 
@@ -118,7 +124,7 @@ export class WasmNftApi extends BaseNftApi {
     if (_attributeValues.output) {
       const attributeValues = _attributeValues.output.toHuman() as string[];
 
-      const attributeDict: Record<string, string> = {};
+      const attributeDict: Record<string, any> = {};
 
       for (let i = 0; i < collectionAttributes.length; i++) {
         const attributeName = collectionAttributes[i];
@@ -135,7 +141,9 @@ export class WasmNftApi extends BaseNftApi {
             nftItem.image = this.parseUrl(attributeValue);
           }
         } else {
-          attributeDict[attributeName] = attributeValue;
+          if (attributeValue !== '') {
+            attributeDict[attributeName] = { value: attributeValue };
+          }
         }
       }
 
@@ -186,6 +194,7 @@ export class WasmNftApi extends BaseNftApi {
 
       if (isFeatured) {
         nftItem.image = this.parseFeaturedNftImage(rawImageSrc);
+        nftItem.external_url = ART_ZERO_EXTERNAL_URL;
       } else {
         nftItem.image = this.parseUrl(rawImageSrc);
       }
@@ -264,7 +273,10 @@ export class WasmNftApi extends BaseNftApi {
 
             nftParams.updateItem(this.chain, nftItem, address);
             ownItem = true;
-            collectionImage = nftItem.image; // No default collection image
+
+            if (!isFeatured && !collectionImage && nftItem.image) {
+              collectionImage = nftItem.image; // No default collection image
+            }
           }
         }));
       } catch (e) {

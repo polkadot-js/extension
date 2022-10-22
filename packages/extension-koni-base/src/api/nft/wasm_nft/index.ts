@@ -3,7 +3,7 @@
 
 import { ApiProps, CustomToken, CustomTokenType, NftCollection, NftItem } from '@subwallet/extension-base/background/KoniTypes';
 import { BaseNftApi, HandleNftParams } from '@subwallet/extension-koni-base/api/nft/nft';
-import { ART_ZERO_COLLECTION_API, ART_ZERO_CONTRACTS, ART_ZERO_IMAGE_API, ART_ZERO_IPFS_API } from '@subwallet/extension-koni-base/api/nft/wasm_nft/utils';
+import { ART_ZERO_COLLECTION_API, ART_ZERO_CONTRACTS, ART_ZERO_EXTERNAL_URL, ART_ZERO_IMAGE_API, ART_ZERO_IPFS_API } from '@subwallet/extension-koni-base/api/nft/wasm_nft/utils';
 import { PSP34Contract } from '@subwallet/extension-koni-base/api/tokens/wasm/helper';
 import fetch from 'cross-fetch';
 
@@ -194,6 +194,7 @@ export class WasmNftApi extends BaseNftApi {
 
       if (isFeatured) {
         nftItem.image = this.parseFeaturedNftImage(rawImageSrc);
+        nftItem.external_url = ART_ZERO_EXTERNAL_URL;
       } else {
         nftItem.image = this.parseUrl(rawImageSrc);
       }

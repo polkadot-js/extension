@@ -1338,8 +1338,6 @@ export default class KoniState extends State {
 
     this.chainRegistryMap = newChainRegistryMap;
 
-    console.log('newChainRegistryMap', newChainRegistryMap);
-
     Object.entries(newChainRegistryMap).forEach(([key, chainRegistry]) => {
       cacheRegistryMap[key] = chainRegistry;
     });
@@ -2282,7 +2280,7 @@ export default class KoniState extends State {
       const txObject: Web3Transaction = {
         nonce: nonce,
         from: fromAddress,
-        gasPrice: anyNumberToBN(transaction.gasPrice ? transaction.gasPrice : transaction.maxFeePerGas).toNumber(),
+        gasPrice: anyNumberToBN(gasPrice).toNumber(),
         gasLimit: anyNumberToBN(transaction.gas).toNumber(),
         to: transaction.to !== undefined ? transaction.to : '',
         value: anyNumberToBN(transaction.value).toNumber(),

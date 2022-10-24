@@ -36,7 +36,7 @@ const MessageDetail = (props: Props) => {
           <tbody>
             <tr className={'info-container'}>
               <td className={CN('info-title')}>
-                {t('Signature')}:
+                {isHash ? t('Message Hash') : t('Message')}:
               </td>
               <td
                 className={CN('info-detail')}
@@ -53,7 +53,7 @@ const MessageDetail = (props: Props) => {
             </tr>
             <tr className={'info-container'}>
               <td className={CN('info-title')}>
-                {isHash ? t('Message Hash') : t('Message')}:
+                {t('Signature')}:
               </td>
               <td
                 className={CN('info-detail')}

@@ -4,6 +4,7 @@
 import { assetFromToken } from '@equilab/api';
 import { ApiProps, ResponseTransfer, SupportTransferResponse, TokenInfo, TransferErrorCode, TransferStep } from '@subwallet/extension-base/background/KoniTypes';
 import { getTokenInfo } from '@subwallet/extension-koni-base/api/dotsama/registry';
+import { getPSP22ContractPromise } from '@subwallet/extension-koni-base/api/tokens/wasm';
 
 import { ApiPromise } from '@polkadot/api';
 import { SubmittableExtrinsic } from '@polkadot/api/promise/types';
@@ -132,7 +133,13 @@ export async function estimateFee (
   const isTxTokensSupported = !!api && !!api.tx && !!api.tx.tokens;
   const isTxEqBalancesSupported = !!api && !!api.tx && !!api.tx.eqBalances;
 
-  if (['karura', 'acala', 'acala_testnet'].includes(networkKey) && tokenInfo && !tokenInfo.isMainToken && isTxCurrenciesSupported) {
+  if (tokenInfo && tokenInfo.contractAddress && tokenInfo.type && !apiProps.isEthereum && api.query.contracts) { // for PSP tokens
+    const contractPromise = getPSP22ContractPromise(api, tokenInfo.contractAddress);
+    const paymentInfo = await contractPromise.tx['psp22::transfer']({ gasLimit: '10000' }, to, value, {}) // gasLimit is arbitrary since it's only estimating fee
+      .paymentInfo(fromKeypair);
+
+    fee = paymentInfo.partialFee.toString();
+  } else if (['karura', 'acala', 'acala_testnet'].includes(networkKey) && tokenInfo && !tokenInfo.isMainToken && isTxCurrenciesSupported) {
     // Note: currently 'karura', 'acala', 'acala_testnet' do not support transfer all
     // if (transferAll) {
     //   const freeBalanceString = await getFreeBalance(networkKey, fromKeypair.address, tokenInfo.symbol);

@@ -1152,28 +1152,23 @@ export default class KoniExtension extends Extension {
     return [errors, keypair, transferValue, tokenInfo];
   }
 
-  private async checkTransfer ({ from,
-    networkKey,
-    to,
-    token,
-    transferAll,
-    value }: RequestCheckTransfer): Promise<ResponseCheckTransfer> {
+  private async checkTransfer ({ from, networkKey, to, token, transferAll, value }: RequestCheckTransfer): Promise<ResponseCheckTransfer> {
     const [errors, fromKeyPair, valueNumber, tokenInfo] = await this.validateTransfer(networkKey, token, from, to, undefined, value, transferAll);
     const dotSamaApiMap = state.getDotSamaApiMap();
     const web3ApiMap = state.getApiMap().web3;
 
     let fee = '0';
     let feeSymbol;
-    let fromAccountFree = '0';
-    let toAccountFree = '0';
+    let fromAccountFreeBalance = '0';
+    let toAccountFreeBalance = '0';
 
     if (isEthereumAddress(from) && isEthereumAddress(to)) {
       // @ts-ignore
-      [fromAccountFree, toAccountFree] = await Promise.all([
+      [fromAccountFreeBalance, toAccountFreeBalance] = await Promise.all([
         getFreeBalance(networkKey, from, dotSamaApiMap, web3ApiMap, token),
         getFreeBalance(networkKey, to, dotSamaApiMap, web3ApiMap, token)
       ]);
-      const txVal: string = transferAll ? fromAccountFree : (value || '0');
+      const txVal: string = transferAll ? fromAccountFreeBalance : (value || '0');
 
       // Estimate with EVM API
       if (tokenInfo && !tokenInfo.isMainToken && tokenInfo.contractAddress) {
@@ -1183,16 +1178,16 @@ export default class KoniExtension extends Extension {
       }
     } else {
       // Estimate with DotSama API
-      [[fee, feeSymbol], fromAccountFree, toAccountFree] = await Promise.all(
+      [[fee, feeSymbol], fromAccountFreeBalance, toAccountFreeBalance] = await Promise.all(
         [
           estimateFee(networkKey, fromKeyPair, to, value, !!transferAll, dotSamaApiMap, tokenInfo),
           getFreeBalance(networkKey, from, dotSamaApiMap, web3ApiMap, token),
-          getFreeBalance(networkKey, to, dotSamaApiMap, web3ApiMap, token)
+          getFreeBalance(networkKey, to, dotSamaApiMap, web3ApiMap, token) // TODO: check free balance of fee token and transfer token, not just transfer token
         ]
       );
     }
 
-    const fromAccountFreeNumber = new BN(fromAccountFree);
+    const fromAccountFreeNumber = new BN(fromAccountFreeBalance);
     const feeNumber = fee ? new BN(fee) : undefined;
 
     if (!transferAll && value && feeNumber && valueNumber) {
@@ -1205,10 +1200,35 @@ export default class KoniExtension extends Extension {
       }
     }
 
+    // TODO: check balanceError: enough free balance + enough fee payment
+    // if (!transferAll && value && feeNumber && valueNumber) {
+    //   if (tokenInfo && tokenInfo.isMainToken) {
+    //     console.log('balance error for native tokens');
+    //
+    //     // eslint-disable-next-line @typescript-eslint/no-unsafe-call
+    //     if (fromAccountFreeNumber.lt(feeNumber.add(valueNumber))) {
+    //       errors.push({
+    //         code: TransferErrorCode.NOT_ENOUGH_VALUE,
+    //         message: 'Not enough balance free to make transfer'
+    //       });
+    //     }
+    //   } else {
+    //     console.log('balance error for non-native tokens');
+    //
+    //     // eslint-disable-next-line @typescript-eslint/no-unsafe-call
+    //     if (fromAccountFreeNumber.lt(feeNumber)) {
+    //       errors.push({
+    //         code: TransferErrorCode.NOT_ENOUGH_VALUE,
+    //         message: 'Not enough balance free to make transfer'
+    //       });
+    //     }
+    //   }
+    // }
+
     return {
       errors,
-      fromAccountFree: fromAccountFree,
-      toAccountFree: toAccountFree,
+      fromAccountFree: fromAccountFreeBalance,
+      toAccountFree: toAccountFreeBalance,
       estimateFee: fee,
       feeSymbol
     } as ResponseCheckTransfer;

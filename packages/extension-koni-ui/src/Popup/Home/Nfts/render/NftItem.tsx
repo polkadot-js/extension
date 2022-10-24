@@ -13,7 +13,7 @@ import useGetNetworkMetadata from '@subwallet/extension-koni-ui/hooks/screen/hom
 import useIsAccountAll from '@subwallet/extension-koni-ui/hooks/screen/home/useIsAccountAll';
 import useToast from '@subwallet/extension-koni-ui/hooks/useToast';
 import { tieAccount } from '@subwallet/extension-koni-ui/messaging';
-import { _NftItem, SUPPORTED_TRANSFER_SUBSTRATE_CHAIN } from '@subwallet/extension-koni-ui/Popup/Home/Nfts/utils';
+import { _NftItem, isNftTransferSupported } from '@subwallet/extension-koni-ui/Popup/Home/Nfts/utils';
 import { RootState, store } from '@subwallet/extension-koni-ui/stores';
 import { TransferNftParams } from '@subwallet/extension-koni-ui/stores/types';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
@@ -95,12 +95,13 @@ function NftItem ({ className, collectionId, collectionImage, data, onClickBack 
       return;
     }
 
-    if (SUPPORTED_TRANSFER_SUBSTRATE_CHAIN.indexOf(data.chain) <= -1 && !networkJson.isEthereum) {
+    if (!isNftTransferSupported(data.chain, networkJson)) {
       show('Transfer is not supported for this network');
 
       return;
     }
 
+    // TODO: remove this logic
     if (data.chain !== currentNetwork.networkKey) {
       const targetNetwork = networkMetadata[data?.chain];
 
@@ -117,7 +118,7 @@ function NftItem ({ className, collectionId, collectionImage, data, onClickBack 
 
     updateTransferNftParams(data, collectionImage, collectionId);
     navigate('/account/send-nft');
-  }, [_isAccountAll, account.account, collectionId, collectionImage, currentNetwork.networkKey, data, navigate, networkJson.isEthereum, networkMetadata, show]);
+  }, [_isAccountAll, account.account, collectionId, collectionImage, currentNetwork.networkKey, data, navigate, networkJson, networkMetadata, show]);
 
   const handleClickBack = useCallback(() => {
     onClickBack();

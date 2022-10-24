@@ -150,8 +150,8 @@ function TransferNftContainer ({ className, collectionId, collectionImage, nftIt
 
     setLoading(true);
     const senderAddress = currentAccount.account.address;
-    const params = paramsHandler(nftItem, networkKey, networkJson);
-    const transferMeta = await transferHandler(networkKey, senderAddress, recipientAddress as string, params, networkJson);
+    const params = paramsHandler(nftItem, networkKey);
+    const transferMeta = await transferHandler(networkKey, senderAddress, recipientAddress as string, params, nftItem);
 
     if (transferMeta !== null) {
       // @ts-ignore

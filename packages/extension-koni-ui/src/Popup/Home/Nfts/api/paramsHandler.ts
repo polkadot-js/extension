@@ -74,8 +74,8 @@ function psp34Parser (nftItem: NftItem) {
   };
 }
 
-export default function paramsHandler (nftItem: NftItem, networkKey: string, networkJson: NetworkJson) {
-  if (networkJson.isEthereum && networkJson.isEthereum) {
+export default function paramsHandler (nftItem: NftItem, networkKey: string) {
+  if (nftItem.type === CustomTokenType.erc721) {
     return web3Parser(nftItem);
   } else if (nftItem.type === CustomTokenType.psp34) {
     return psp34Parser(nftItem);

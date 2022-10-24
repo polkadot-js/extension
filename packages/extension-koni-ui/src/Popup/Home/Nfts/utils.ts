@@ -1,7 +1,7 @@
 // Copyright 2019-2022 @subwallet/extension-koni authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import {NetworkJson, RMRK_VER} from '@subwallet/extension-base/background/KoniTypes';
+import {ContractType, CustomTokenType, NetworkJson, RMRK_VER} from '@subwallet/extension-base/background/KoniTypes';
 
 // For rendering purposes only
 export interface _NftItem {
@@ -14,7 +14,10 @@ export interface _NftItem {
   description?: string;
   properties?: Record<any, any> | null;
   chain?: string;
+  type?: CustomTokenType.erc721 | CustomTokenType.psp34 | RMRK_VER; // for sending
   rmrk_ver?: RMRK_VER;
+  owner?: string;
+  onChainOption?: any; // for sending PSP-34 tokens, should be done better
 }
 
 export interface _NftCollection {
@@ -79,6 +82,14 @@ export const SUPPORTED_TRANSFER_SUBSTRATE_CHAIN = [
   SUPPORTED_TRANSFER_CHAIN_NAME.pioneer as string
 ];
 
-export function isTransferSupported (networkKey: string, networkJson: NetworkJson) {
+export function isNftTransferSupported (networkKey: string, networkJson: NetworkJson) {
+  if (networkJson.isEthereum) {
+    return true;
+  }
 
+  if (!networkJson.isEthereum && networkJson.supportSmartContract && networkJson.supportSmartContract.includes(ContractType.wasm)) {
+    return true;
+  }
+
+  return SUPPORTED_TRANSFER_SUBSTRATE_CHAIN.includes(networkKey);
 }

@@ -431,7 +431,15 @@ export async function makeTransfer (
   const isTxTokensSupported = !!api && !!api.tx && !!api.tx.tokens;
   const isTxEqBalancesSupported = !!api && !!api.tx && !!api.tx.eqBalances;
 
-  if (['karura', 'acala', 'acala_testnet'].includes(networkKey) && tokenInfo && !tokenInfo.isMainToken && isTxCurrenciesSupported) {
+  if (tokenInfo && tokenInfo.contractAddress && tokenInfo.type && !apiProps.isEthereum && api.query.contracts) {
+    const contractPromise = getPSP22ContractPromise(api, tokenInfo.contractAddress);
+    const extrinsic = await contractPromise.query['psp22::transfer'](fromKeypair.address, { gasLimit: -1 }, to, value, {});
+    const gasLimit = extrinsic.gasRequired.toString();
+
+    console.log('gasLimit', gasLimit);
+
+    transfer = contractPromise.tx['psp22::transfer']({ gasLimit }, to, value, {});
+  } else if (['karura', 'acala', 'acala_testnet'].includes(networkKey) && tokenInfo && !tokenInfo.isMainToken && isTxCurrenciesSupported) {
     if (transferAll) {
       // currently Acala, Karura, Acala testnet do not have transfer all method for sub token
     } else if (value) {

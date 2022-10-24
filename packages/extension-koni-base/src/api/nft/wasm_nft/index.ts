@@ -270,6 +270,7 @@ export class WasmNftApi extends BaseNftApi {
             nftItem.type = CustomTokenType.psp34;
             nftItem.id = tokenId;
             nftItem.owner = address;
+            nftItem.onChainOption = tokenIdObj;
 
             nftParams.updateItem(this.chain, nftItem, address);
             ownItem = true;

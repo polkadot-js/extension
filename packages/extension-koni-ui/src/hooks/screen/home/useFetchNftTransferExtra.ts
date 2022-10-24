@@ -3,7 +3,7 @@
 
 import { NftTransferExtra } from '@subwallet/extension-base/background/KoniTypes';
 import { setNftTransfer } from '@subwallet/extension-koni-ui/messaging';
-import { _NftCollection } from '@subwallet/extension-koni-ui/Popup/Home/Nfts/types';
+import { _NftCollection } from '@subwallet/extension-koni-ui/Popup/Home/Nfts/utils';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { useSelector } from 'react-redux';
 

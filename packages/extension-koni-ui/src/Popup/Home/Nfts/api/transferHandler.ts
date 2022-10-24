@@ -3,7 +3,7 @@
 
 import { NetworkJson } from '@subwallet/extension-base/background/KoniTypes';
 import { evmNftGetTransaction, substrateNftGetTransaction } from '@subwallet/extension-koni-ui/messaging';
-import { SUPPORTED_TRANSFER_CHAIN_NAME, TransferResponse } from '@subwallet/extension-koni-ui/Popup/Home/Nfts/types';
+import { SUPPORTED_TRANSFER_CHAIN_NAME, TransferResponse } from '@subwallet/extension-koni-ui/Popup/Home/Nfts/utils';
 
 async function substrateTransferHandler (networkKey: string, senderAddress: string, recipientAddress: string, params: Record<string, any>) {
   try {

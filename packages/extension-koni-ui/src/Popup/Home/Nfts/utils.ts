@@ -1,7 +1,7 @@
 // Copyright 2019-2022 @subwallet/extension-koni authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { RMRK_VER } from '@subwallet/extension-base/background/KoniTypes';
+import {NetworkJson, RMRK_VER} from '@subwallet/extension-base/background/KoniTypes';
 
 // For rendering purposes only
 export interface _NftItem {
@@ -78,3 +78,7 @@ export const SUPPORTED_TRANSFER_SUBSTRATE_CHAIN = [
   SUPPORTED_TRANSFER_CHAIN_NAME.bitcountry as string,
   SUPPORTED_TRANSFER_CHAIN_NAME.pioneer as string
 ];
+
+export function isTransferSupported (networkKey: string, networkJson: NetworkJson) {
+
+}

@@ -436,8 +436,6 @@ export async function makeTransfer (
     const extrinsic = await contractPromise.query['psp22::transfer'](fromKeypair.address, { gasLimit: -1 }, to, value, {});
     const gasLimit = extrinsic.gasRequired.toString();
 
-    console.log('gasLimit', gasLimit);
-
     transfer = contractPromise.tx['psp22::transfer']({ gasLimit }, to, value, {});
   } else if (['karura', 'acala', 'acala_testnet'].includes(networkKey) && tokenInfo && !tokenInfo.isMainToken && isTxCurrenciesSupported) {
     if (transferAll) {

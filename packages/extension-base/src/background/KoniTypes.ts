@@ -169,6 +169,7 @@ export interface NftItem {
   type?: CustomTokenType.erc721 | CustomTokenType.psp34 | RMRK_VER; // for sending
   rmrk_ver?: RMRK_VER;
   owner?: string;
+  onChainOption?: any; // for sending PSP-34 tokens, should be done better
 }
 
 export interface NftCollection {

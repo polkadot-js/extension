@@ -1,13 +1,9 @@
 // Copyright 2019-2022 @subwallet/extension-koni authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import {CustomTokenType} from '@subwallet/extension-base/background/KoniTypes';
-import {evmNftGetTransaction, substrateNftGetTransaction} from '@subwallet/extension-koni-ui/messaging';
-import {
-  _NftItem,
-  SUPPORTED_TRANSFER_CHAIN_NAME,
-  TransferResponse
-} from '@subwallet/extension-koni-ui/Popup/Home/Nfts/utils';
+import { CustomTokenType } from '@subwallet/extension-base/background/KoniTypes';
+import { evmNftGetTransaction, substrateNftGetTransaction, wasmNftGetTransaction } from '@subwallet/extension-koni-ui/messaging';
+import { _NftItem, SUPPORTED_TRANSFER_CHAIN_NAME, TransferResponse } from '@subwallet/extension-koni-ui/Popup/Home/Nfts/utils';
 
 async function substrateTransferHandler (networkKey: string, senderAddress: string, recipientAddress: string, params: Record<string, any>) {
   try {
@@ -53,7 +49,27 @@ async function web3TransferHandler (networkKey: string, senderAddress: string, r
 }
 
 async function psp34TransferHandler (networkKey: string, senderAddress: string, recipientAddress: string, params: Record<string, any>) {
+  try {
+    const resp = await wasmNftGetTransaction({
+      networkKey,
+      senderAddress,
+      recipientAddress,
+      params
+    });
 
+    if (resp.error) {
+      return null;
+    } else {
+      return {
+        estimatedFee: resp.estimatedFee,
+        balanceError: resp.balanceError
+      } as TransferResponse;
+    }
+  } catch (e) {
+    console.error('error handling wasm transfer nft', e);
+
+    return null;
+  }
 }
 
 export default async function transferHandler (networkKey: string, senderAddress: string, recipientAddress: string, params: Record<string, any>, nftItem: _NftItem): Promise<TransferResponse | null> {

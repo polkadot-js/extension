@@ -734,7 +734,7 @@ export interface ResponseTransferLedger extends ResponseTransferExternal{
   ledgerState?: LedgerState;
 }
 
-export interface EvmNftTransactionRequest {
+export interface NftTransactionRequest {
   networkKey: string,
   senderAddress: string,
   recipientAddress: string,
@@ -863,13 +863,6 @@ export interface RequestTransferExistentialDeposit {
 
 export interface RequestSaveRecentAccount {
   accountId: string;
-}
-
-export interface SubstrateNftTransactionRequest {
-  params: Record<string, any>;
-  senderAddress: string;
-  recipientAddress: string;
-  networkKey: string;
 }
 
 export interface SubstrateNftTransaction {
@@ -1392,6 +1385,7 @@ export interface TuringCancelStakeCompoundParams {
 }
 
 export interface KoniRequestSignatures {
+  // Bonding functions
   'pri(staking.submitTuringCancelCompound)': [TuringCancelStakeCompoundParams, BasicTxResponse, BasicTxResponse];
   'pri(staking.turingCancelCompound)': [TuringCancelStakeCompoundParams, BasicTxInfo];
   'pri(staking.checkTuringCompoundTask)': [CheckExistingTuringCompoundParams, ExistingTuringCompoundTask];
@@ -1409,9 +1403,9 @@ export interface KoniRequestSignatures {
   'pri(bonding.submitTransaction)': [BondingSubmitParams, BasicTxResponse, BasicTxResponse];
   'pri(bonding.getChainBondingBasics)': [NetworkJson[], Record<string, ChainBondingBasics>, Record<string, ChainBondingBasics>];
   'pri(bonding.getBondingOptions)': [BondingOptionParams, BondingOptionInfo];
+
+  // Network, APIs, Custom tokens functions
   'pri(networkMap.recoverDotSama)': [string, boolean];
-  'pri(substrateNft.submitTransaction)': [SubstrateNftSubmitTransaction, NftTransactionResponse, NftTransactionResponse]
-  'pri(substrateNft.getTransaction)': [SubstrateNftTransactionRequest, SubstrateNftTransaction];
   'pri(networkMap.disableAll)': [null, boolean];
   'pri(networkMap.enableAll)': [null, boolean];
   'pri(networkMap.resetDefault)': [null, boolean];
@@ -1429,26 +1423,37 @@ export interface KoniRequestSignatures {
   'pri(customTokenState.upsertCustomTokenState)': [CustomToken, boolean];
   'pri(customTokenState.getCustomTokenState)': [null, CustomTokenJson];
   'pri(customTokenState.getSubscription)': [null, CustomTokenJson, CustomTokenJson];
+
+  // NFT functions
   'pri(evmNft.submitTransaction)': [EvmNftSubmitTransaction, NftTransactionResponse, NftTransactionResponse];
-  'pri(evmNft.getTransaction)': [EvmNftTransactionRequest, EvmNftTransaction];
+  'pri(evmNft.getTransaction)': [NftTransactionRequest, EvmNftTransaction];
+  'pri(substrateNft.submitTransaction)': [SubstrateNftSubmitTransaction, NftTransactionResponse, NftTransactionResponse];
+  'pri(substrateNft.getTransaction)': [NftTransactionRequest, SubstrateNftTransaction];
   'pri(nftTransfer.setNftTransfer)': [NftTransferExtra, boolean];
   'pri(nftTransfer.getNftTransfer)': [null, NftTransferExtra];
   'pri(nftTransfer.getSubscription)': [null, NftTransferExtra, NftTransferExtra];
   'pri(nft.forceUpdate)': [RequestNftForceUpdate, boolean];
-  'pri(staking.getStaking)': [null, StakingJson];
-  'pri(staking.getSubscription)': [RequestSubscribeStaking, StakingJson, StakingJson];
-  'pri(stakingReward.getStakingReward)': [null, StakingRewardJson];
-  'pri(stakingReward.getSubscription)': [RequestSubscribeStakingReward, StakingRewardJson, StakingRewardJson];
   'pri(nft.getNft)': [null, NftJson];
   'pri(nft.getSubscription)': [RequestSubscribeNft, NftJson, NftJson];
   'pri(nftCollection.getNftCollection)': [null, NftCollectionJson];
   'pri(nftCollection.getSubscription)': [null, NftCollection[], NftCollection[]];
+  'pri(wasmNft.getTransaction)': [NftTransactionRequest, SubstrateNftTransaction];
+
+  // Staking functions
+  'pri(staking.getStaking)': [null, StakingJson];
+  'pri(staking.getSubscription)': [RequestSubscribeStaking, StakingJson, StakingJson];
+  'pri(stakingReward.getStakingReward)': [null, StakingRewardJson];
+  'pri(stakingReward.getSubscription)': [RequestSubscribeStakingReward, StakingRewardJson, StakingRewardJson];
+
+  // Price, balance, crowdloan functions
   'pri(price.getPrice)': [RequestPrice, PriceJson];
   'pri(price.getSubscription)': [RequestSubscribePrice, PriceJson, PriceJson];
   'pri(balance.getBalance)': [RequestBalance, BalanceJson];
   'pri(balance.getSubscription)': [RequestSubscribeBalance, BalanceJson, BalanceJson];
   'pri(crowdloan.getCrowdloan)': [RequestCrowdloan, CrowdloanJson];
   'pri(crowdloan.getSubscription)': [RequestSubscribeCrowdloan, CrowdloanJson, CrowdloanJson];
+
+  // Auth
   'pri(authorize.listV2)': [null, ResponseAuthorizeList];
   'pri(authorize.requestsV2)': [RequestAuthorizeSubscribe, boolean, AuthorizeRequest[]];
   'pri(authorize.approveV2)': [RequestAuthorizeApproveV2, boolean];
@@ -1461,6 +1466,8 @@ export interface KoniRequestSignatures {
   'pri(authorize.forgetAllSite)': [null, boolean, AuthUrls];
   'pri(authorize.rejectV2)': [RequestAuthorizeReject, boolean];
   'pri(authorize.cancelV2)': [RequestAuthorizeCancel, boolean];
+
+  // Account management
   'pri(seed.createV2)': [RequestSeedCreateV2, ResponseSeedCreateV2];
   'pri(seed.validateV2)': [RequestSeedValidateV2, ResponseSeedValidateV2];
   'pri(privateKey.validateV2)': [RequestSeedValidateV2, ResponsePrivateKeyValidateV2];
@@ -1483,10 +1490,14 @@ export interface KoniRequestSignatures {
   'pri(accounts.triggerSubscription)': [null, boolean];
   'pri(accounts.get.meta)': [RequestAccountMeta, ResponseAccountMeta];
   'pri(currentAccount.saveAddress)': [RequestCurrentAccountAddress, boolean, CurrentAccountInfo];
+
+  // Settings
   'pri(settings.changeBalancesVisibility)': [null, boolean, ResponseSettingsType];
   'pri(settings.subscribe)': [null, ResponseSettingsType, ResponseSettingsType];
   'pri(settings.saveAccountAllLogo)': [string, boolean, ResponseSettingsType];
   'pri(settings.saveTheme)': [ThemeTypes, boolean, ResponseSettingsType];
+
+  // Subscription
   'pri(chainRegistry.getSubscription)': [null, Record<string, ChainRegistry>, Record<string, ChainRegistry>];
   'pri(transaction.history.getSubscription)': [null, Record<string, TransactionHistoryItemType[]>, Record<string, TransactionHistoryItemType[]>];
   'pri(transaction.history.add)': [RequestTransactionHistoryAdd, boolean, TransactionHistoryItemType[]];

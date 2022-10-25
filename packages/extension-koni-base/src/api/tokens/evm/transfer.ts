@@ -1,8 +1,9 @@
 // Copyright 2019-2022 @subwallet/extension-koni-base authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { ResponseTransfer, TransferErrorCode, TransferStep } from '@subwallet/extension-base/background/KoniTypes';
-import { getERC20Contract } from '@subwallet/extension-koni-base/api/tokens/evm/web3';
+import { ApiProps, NetworkJson, ResponseTransfer, TransferErrorCode, TransferStep } from '@subwallet/extension-base/background/KoniTypes';
+import { getFreeBalance } from '@subwallet/extension-koni-base/api/dotsama/balance';
+import { ERC721Contract, getERC20Contract } from '@subwallet/extension-koni-base/api/tokens/evm/web3';
 import Web3 from 'web3';
 import { TransactionConfig, TransactionReceipt } from 'web3-core';
 
@@ -167,4 +168,60 @@ export async function makeERC20Transfer (
   const [transactionObject, changeValue] = await getERC20TransactionObject(assetAddress, networkKey, from, to, value, transferAll, web3ApiMap);
 
   await handleTransfer(transactionObject, changeValue, networkKey, privateKey, web3ApiMap, callback);
+}
+
+export async function getERC721Transaction (
+  web3ApiMap: Record<string, Web3>,
+  dotSamaApiMap: Record<string, ApiProps>,
+  networkJson: NetworkJson,
+  networkKey: string,
+  contractAddress: string,
+  senderAddress: string,
+  recipientAddress: string,
+  tokenId: string) {
+  const web3 = web3ApiMap[networkKey];
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
+  const contract = new web3.eth.Contract(ERC721Contract, contractAddress);
+
+  const [fromAccountTxCount, gasPriceGwei, freeBalance] = await Promise.all([
+    web3.eth.getTransactionCount(senderAddress),
+    web3.eth.getGasPrice(),
+    getFreeBalance(networkKey, senderAddress, dotSamaApiMap, web3ApiMap)
+  ]);
+
+  const binaryFreeBalance = new BN(freeBalance);
+
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-assignment,@typescript-eslint/no-unsafe-member-access
+  const gasLimit = await contract.methods.safeTransferFrom(
+    senderAddress,
+    recipientAddress,
+    tokenId
+  ).estimateGas({
+    from: senderAddress
+  });
+
+  const rawTransaction = {
+    nonce: '0x' + fromAccountTxCount.toString(16),
+    from: senderAddress,
+    gasPrice: web3.utils.toHex(gasPriceGwei),
+    gasLimit: web3.utils.toHex(gasLimit as number),
+    to: contractAddress,
+    value: '0x00',
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-member-access,@typescript-eslint/no-unsafe-assignment
+    data: contract.methods.safeTransferFrom(senderAddress, recipientAddress, tokenId).encodeABI()
+  };
+  const rawFee = gasLimit * parseFloat(gasPriceGwei);
+  // @ts-ignore
+  const estimatedFee = rawFee / (10 ** networkJson.decimals);
+  // eslint-disable-next-line @typescript-eslint/restrict-plus-operands
+  const feeString = estimatedFee.toString() + ' ' + networkJson.nativeToken;
+
+  const binaryFee = new BN(rawFee.toString());
+  const balanceError = binaryFee.gt(binaryFreeBalance);
+
+  return {
+    tx: rawTransaction,
+    estimatedFee: feeString,
+    balanceError
+  };
 }

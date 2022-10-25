@@ -67,3 +67,23 @@ export async function getPSP34Transaction (
     };
   }
 }
+
+export async function getPSP34TransferExtrinsic (networkKey: string, apiProp: ApiProps, senderAddress: string, recipientAddress: string, params: Record<string, any>) {
+  const contractAddress = params.contractAddress as string;
+  const onChainOption = params.onChainOption as Record<string, string>;
+
+  try {
+    const contractPromise = getPSP34ContractPromise(apiProp.api, contractAddress);
+    const transferQuery = await contractPromise.query['psp34::transfer'](senderAddress, { gasLimit: -1 }, recipientAddress, onChainOption, {});
+
+    const gasLimit = transferQuery.gasRequired.toString();
+
+    console.log('get psp34 extrinsic ok');
+
+    return contractPromise.tx['psp34::transfer']({ gasLimit }, recipientAddress, onChainOption, {});
+  } catch (e) {
+    console.error('Error getting WASM NFT transfer extrinsic', e);
+
+    return null;
+  }
+}

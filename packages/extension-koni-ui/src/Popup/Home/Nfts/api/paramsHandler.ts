@@ -71,7 +71,8 @@ function psp34Parser (nftItem: NftItem) {
   return {
     contractAddress,
     onChainOption,
-    isPsp34: true
+    isPsp34: true,
+    networkKey: nftItem.chain
   };
 }
 

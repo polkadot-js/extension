@@ -433,8 +433,8 @@ export async function makeTransfer (
 
   if (tokenInfo && tokenInfo.contractAddress && tokenInfo.type && !apiProps.isEthereum && api.query.contracts) {
     const contractPromise = getPSP22ContractPromise(api, tokenInfo.contractAddress);
-    const extrinsic = await contractPromise.query['psp22::transfer'](fromKeypair.address, { gasLimit: -1 }, to, value, {});
-    const gasLimit = extrinsic.gasRequired.toString();
+    const transferQuery = await contractPromise.query['psp22::transfer'](fromKeypair.address, { gasLimit: -1 }, to, value, {});
+    const gasLimit = transferQuery.gasRequired.toString();
 
     transfer = contractPromise.tx['psp22::transfer']({ gasLimit }, to, value, {});
   } else if (['karura', 'acala', 'acala_testnet'].includes(networkKey) && tokenInfo && !tokenInfo.isMainToken && isTxCurrenciesSupported) {

@@ -24,7 +24,7 @@ import { parseEVMTransaction, parseTransactionData } from '@subwallet/extension-
 import { getERC20TransactionObject, getERC721Transaction, getEVMTransactionObject, makeERC20Transfer, makeEVMTransfer } from '@subwallet/extension-koni-base/api/tokens/evm/transfer';
 import { handleTransferNftQr, makeERC20TransferQr, makeEVMTransferQr } from '@subwallet/extension-koni-base/api/tokens/evm/transferQr';
 import { initWeb3Api } from '@subwallet/extension-koni-base/api/tokens/evm/web3';
-import { getPSP34Transaction } from '@subwallet/extension-koni-base/api/tokens/wasm';
+import { getPSP34Transaction, getPSP34TransferExtrinsic } from '@subwallet/extension-koni-base/api/tokens/wasm';
 import { estimateCrossChainFee, makeCrossChainTransfer } from '@subwallet/extension-koni-base/api/xcm';
 import { state } from '@subwallet/extension-koni-base/background/handlers/index';
 import { ALL_ACCOUNT_KEY, ALL_GENESIS_HASH } from '@subwallet/extension-koni-base/constants';
@@ -2089,9 +2089,13 @@ export default class KoniExtension extends Extension {
       return txState;
     }
 
+    const isPSP34 = params.isPsp34 as boolean | undefined;
     const updateState = createSubscription<'pri(substrateNft.submitTransaction)'>(id, port);
     const networkKey = params.networkKey as string;
-    const extrinsic = getNftTransferExtrinsic(networkKey, state.getDotSamaApi(networkKey), senderAddress, recipientAddress, params);
+    const extrinsic = !isPSP34
+      ? getNftTransferExtrinsic(networkKey, state.getDotSamaApi(networkKey), senderAddress, recipientAddress, params)
+      : await getPSP34TransferExtrinsic(networkKey, state.getDotSamaApi(networkKey), senderAddress, recipientAddress, params);
+
     const passwordError: string | null = unlockAccount(senderAddress, password);
 
     if (extrinsic !== null && passwordError === null) {

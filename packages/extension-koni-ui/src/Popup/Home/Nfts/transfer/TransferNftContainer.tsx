@@ -154,8 +154,6 @@ function TransferNftContainer ({ className, collectionId, collectionImage, nftIt
     const params = paramsHandler(nftItem, networkKey);
     const transferMeta = await transferHandler(networkKey, senderAddress, recipientAddress as string, params, nftItem);
 
-    console.log('transferMeta', transferMeta);
-
     if (transferMeta !== null) {
       // @ts-ignore
       if (SUPPORTED_TRANSFER_SUBSTRATE_CHAIN.indexOf(networkKey) > -1 || nftItem.type === CustomTokenType.psp34) {

@@ -1,7 +1,7 @@
 // Copyright 2019-2022 @subwallet/extension-koni authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import {ContractType, CustomTokenType, NetworkJson, RMRK_VER} from '@subwallet/extension-base/background/KoniTypes';
+import { ContractType, CustomTokenType, NetworkJson, RMRK_VER } from '@subwallet/extension-base/background/KoniTypes';
 
 // For rendering purposes only
 export interface _NftItem {

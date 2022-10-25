@@ -3,6 +3,7 @@
 
 import '@google/model-viewer';
 
+import { CustomTokenType } from '@subwallet/extension-base/background/KoniTypes';
 import { ALL_ACCOUNT_KEY } from '@subwallet/extension-koni-base/constants';
 import { isValidSubstrateAddress } from '@subwallet/extension-koni-base/utils';
 import { ActionContext, Spinner, Theme } from '@subwallet/extension-koni-ui/components';
@@ -153,16 +154,18 @@ function TransferNftContainer ({ className, collectionId, collectionImage, nftIt
     const params = paramsHandler(nftItem, networkKey);
     const transferMeta = await transferHandler(networkKey, senderAddress, recipientAddress as string, params, nftItem);
 
+    console.log('transferMeta', transferMeta);
+
     if (transferMeta !== null) {
       // @ts-ignore
-      if (SUPPORTED_TRANSFER_SUBSTRATE_CHAIN.indexOf(networkKey) > -1) {
+      if (SUPPORTED_TRANSFER_SUBSTRATE_CHAIN.indexOf(networkKey) > -1 || nftItem.type === CustomTokenType.psp34) {
         setSubstrateTransferParams({
           params,
           estimatedFee: transferMeta.estimatedFee,
           balanceError: transferMeta.balanceError
         } as SubstrateTransferParams);
         // @ts-ignore
-      } else if (networkJson.isEthereum && networkJson.isEthereum) {
+      } else if (nftItem.type === CustomTokenType.erc721) {
         setWeb3TransferParams({
           rawTx: transferMeta.web3RawTx,
           estimatedGas: transferMeta.estimatedGas,

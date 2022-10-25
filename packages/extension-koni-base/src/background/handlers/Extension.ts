@@ -24,6 +24,7 @@ import { parseEVMTransaction, parseTransactionData } from '@subwallet/extension-
 import { getERC20TransactionObject, getERC721Transaction, getEVMTransactionObject, makeERC20Transfer, makeEVMTransfer } from '@subwallet/extension-koni-base/api/tokens/evm/transfer';
 import { handleTransferNftQr, makeERC20TransferQr, makeEVMTransferQr } from '@subwallet/extension-koni-base/api/tokens/evm/transferQr';
 import { initWeb3Api } from '@subwallet/extension-koni-base/api/tokens/evm/web3';
+import { getPSP34Transaction } from '@subwallet/extension-koni-base/api/tokens/wasm';
 import { estimateCrossChainFee, makeCrossChainTransfer } from '@subwallet/extension-koni-base/api/xcm';
 import { state } from '@subwallet/extension-koni-base/background/handlers/index';
 import { ALL_ACCOUNT_KEY, ALL_GENESIS_HASH } from '@subwallet/extension-koni-base/constants';
@@ -4118,11 +4119,19 @@ export default class KoniExtension extends Extension {
   }
 
   private async wasmNftGetTransaction ({ networkKey, params, recipientAddress, senderAddress }: NftTransactionRequest): Promise<SubstrateNftTransaction> {
-    return {
-      error: false,
-      estimatedFee: 'oiauscnoaisc',
-      balanceError: false
-    };
+    const contractAddress = params.contractAddress as string;
+    const onChainOption = params.onChainOption as Record<string, string>;
+
+    try {
+      return await getPSP34Transaction(state.getWeb3ApiMap(), state.getDotSamaApiMap(), state.getNetworkMapByKey(networkKey), networkKey, contractAddress, senderAddress, recipientAddress, onChainOption);
+    } catch (e) {
+      console.error('Error getting WASM NFT transaction', e);
+
+      return {
+        error: true,
+        balanceError: false
+      };
+    }
   }
 
   // eslint-disable-next-line @typescript-eslint/require-await

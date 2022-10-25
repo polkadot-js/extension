@@ -374,12 +374,6 @@ function AuthTransfer ({ chain, className, collectionId, nftItem, recipientAddre
       return;
     }
 
-    if (chain !== currentNetwork.networkKey) {
-      show('Incorrect network');
-
-      return;
-    }
-
     setLoading(true);
 
     // eslint-disable-next-line @typescript-eslint/no-misused-promises
@@ -390,7 +384,7 @@ function AuthTransfer ({ chain, className, collectionId, nftItem, recipientAddre
         await onSendEvm();
       }
     }, 10);
-  }, [loading, chain, currentNetwork.networkKey, show, substrateParams, web3Tx, onSendSubstrate, onSendEvm]);
+  }, [loading, substrateParams, web3Tx, onSendSubstrate, onSendEvm]);
 
   const handlerCreateQr = useCallback(() => {
     if (loading) {

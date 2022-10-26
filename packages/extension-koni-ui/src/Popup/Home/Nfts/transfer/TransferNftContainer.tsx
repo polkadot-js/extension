@@ -99,6 +99,12 @@ function TransferNftContainer ({ className, collectionId, collectionImage, nftIt
   const navigate = useContext(ActionContext);
   const { show } = useToast();
 
+  useEffect(() => { // handle user change network setting during sending process
+    if (!networkJson.active) {
+      navigate('/');
+    }
+  }, [navigate, networkJson.active]);
+
   useEffect(() => { // handle user change account during sending process
     if (account.account?.address !== currentAccount.account?.address) {
       navigate('/');

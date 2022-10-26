@@ -1157,11 +1157,17 @@ export default class KoniExtension extends Extension {
     const [errors, fromKeyPair, valueNumber, tokenInfo] = await this.validateTransfer(networkKey, token, from, to, undefined, value, transferAll);
     const dotSamaApiMap = state.getDotSamaApiMap();
     const web3ApiMap = state.getApiMap().web3;
+    let mainToken: string | undefined;
+
+    if (tokenInfo && !tokenInfo.isMainToken) {
+      mainToken = state.getNetworkMapByKey(networkKey).nativeToken as string;
+    }
 
     let fee = '0';
     let feeSymbol;
     let fromAccountFreeBalance = '0';
     let toAccountFreeBalance = '0';
+    let fromAccountNativeBalance = '0';
 
     if (isEthereumAddress(from) && isEthereumAddress(to)) {
       // @ts-ignore
@@ -1179,50 +1185,58 @@ export default class KoniExtension extends Extension {
       }
     } else {
       // Estimate with DotSama API
-      [[fee, feeSymbol], fromAccountFreeBalance, toAccountFreeBalance] = await Promise.all(
-        [
-          estimateFee(networkKey, fromKeyPair, to, value, !!transferAll, dotSamaApiMap, tokenInfo),
-          getFreeBalance(networkKey, from, dotSamaApiMap, web3ApiMap, token),
-          getFreeBalance(networkKey, to, dotSamaApiMap, web3ApiMap, token) // TODO: check free balance of fee token and transfer token, not just transfer token
-        ]
-      );
+      if (tokenInfo && !tokenInfo.isMainToken) {
+        [[fee, feeSymbol], fromAccountFreeBalance, toAccountFreeBalance, fromAccountNativeBalance] = await Promise.all(
+          [
+            estimateFee(networkKey, fromKeyPair, to, value, !!transferAll, dotSamaApiMap, tokenInfo),
+            getFreeBalance(networkKey, from, dotSamaApiMap, web3ApiMap, token),
+            getFreeBalance(networkKey, to, dotSamaApiMap, web3ApiMap, token),
+            getFreeBalance(networkKey, from, dotSamaApiMap, web3ApiMap, mainToken)
+          ]
+        );
+      } else {
+        [[fee, feeSymbol], fromAccountFreeBalance, toAccountFreeBalance] = await Promise.all(
+          [
+            estimateFee(networkKey, fromKeyPair, to, value, !!transferAll, dotSamaApiMap, tokenInfo),
+            getFreeBalance(networkKey, from, dotSamaApiMap, web3ApiMap, token),
+            getFreeBalance(networkKey, to, dotSamaApiMap, web3ApiMap, token)
+          ]
+        );
+      }
     }
 
     const fromAccountFreeNumber = new BN(fromAccountFreeBalance);
     const feeNumber = fee ? new BN(fee) : undefined;
+    const toAccountFreeBalanceNumber = new BN(fromAccountNativeBalance);
 
+    // TODO: check balanceError: enough free balance + enough fee payment
     if (!transferAll && value && feeNumber && valueNumber) {
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-call
-      if (fromAccountFreeNumber.lt(feeNumber.add(valueNumber))) {
-        errors.push({
-          code: TransferErrorCode.NOT_ENOUGH_VALUE,
-          message: 'Not enough balance free to make transfer'
-        });
+      if (tokenInfo && tokenInfo.isMainToken) {
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-call
+        if (fromAccountFreeNumber.lt(feeNumber.add(valueNumber))) {
+          errors.push({
+            code: TransferErrorCode.NOT_ENOUGH_VALUE,
+            message: 'Not enough balance free to make transfer'
+          });
+        }
+      } else {
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-call
+        if (toAccountFreeBalanceNumber.lt(feeNumber)) {
+          errors.push({
+            code: TransferErrorCode.NOT_ENOUGH_VALUE,
+            message: 'Not enough balance free to make transfer'
+          });
+        }
       }
     }
 
-    // TODO: check balanceError: enough free balance + enough fee payment
     // if (!transferAll && value && feeNumber && valueNumber) {
-    //   if (tokenInfo && tokenInfo.isMainToken) {
-    //     console.log('balance error for native tokens');
-    //
-    //     // eslint-disable-next-line @typescript-eslint/no-unsafe-call
-    //     if (fromAccountFreeNumber.lt(feeNumber.add(valueNumber))) {
-    //       errors.push({
-    //         code: TransferErrorCode.NOT_ENOUGH_VALUE,
-    //         message: 'Not enough balance free to make transfer'
-    //       });
-    //     }
-    //   } else {
-    //     console.log('balance error for non-native tokens');
-    //
-    //     // eslint-disable-next-line @typescript-eslint/no-unsafe-call
-    //     if (fromAccountFreeNumber.lt(feeNumber)) {
-    //       errors.push({
-    //         code: TransferErrorCode.NOT_ENOUGH_VALUE,
-    //         message: 'Not enough balance free to make transfer'
-    //       });
-    //     }
+    //   // eslint-disable-next-line @typescript-eslint/no-unsafe-call
+    //   if (fromAccountFreeNumber.lt(feeNumber.add(valueNumber))) {
+    //     errors.push({
+    //       code: TransferErrorCode.NOT_ENOUGH_VALUE,
+    //       message: 'Not enough balance free to make transfer'
+    //     });
     //   }
     // }
 

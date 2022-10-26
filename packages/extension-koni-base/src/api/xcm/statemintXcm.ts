@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { ApiProps, NetworkJson, TokenInfo } from '@subwallet/extension-base/background/KoniTypes';
-import { getReceiverLocation, SupportedCrossChainsMap } from '@subwallet/extension-koni-base/api/xcm/utils';
+import { getReceiverLocation, POLKADOT_LIMITED_WEIGHT, SupportedCrossChainsMap } from '@subwallet/extension-koni-base/api/xcm/utils';
 import { parseNumberToDisplay } from '@subwallet/extension-koni-base/utils';
 
 import { ApiPromise } from '@polkadot/api';
@@ -59,7 +59,7 @@ export async function statemintEstimateCrossChainFee (
         }
       };
 
-      const extrinsic = apiProps.api.tx.polkadotXcm.reserveTransferAssets(
+      const extrinsic = apiProps.api.tx.polkadotXcm.limitedReserveTransferAssets(
         destinationChainLocation, // dest
         {
           V1: { // beneficiary
@@ -85,19 +85,18 @@ export async function statemintEstimateCrossChainFee (
             }
           ]
         },
-        0 // FeeAssetItem
+        0, // FeeAssetItem
+        { Limited: POLKADOT_LIMITED_WEIGHT }
       );
 
-      console.log('statemint xcm tx here', extrinsic.toHex());
+      console.log('statemint xcm tx to p here', extrinsic.toHex());
 
       const paymentInfo = await extrinsic.paymentInfo(fromKeypair);
 
       fee = paymentInfo.partialFee.toString();
       feeString = parseNumberToDisplay(paymentInfo.partialFee, originNetworkJson.decimals) + ` ${originNetworkJson.nativeToken ? originNetworkJson.nativeToken : ''}`;
     } else {
-      console.log('transferring to r', tokenInfo);
-
-      const extrinsic = apiProps.api.tx.polkadotXcm.teleportAssets(
+      const extrinsic = apiProps.api.tx.polkadotXcm.limitedTeleportAssets(
         {
           V1: {
             parents: 1,
@@ -125,10 +124,11 @@ export async function statemintEstimateCrossChainFee (
             }
           ]
         },
-        0 // FeeAssetItem
+        0, // FeeAssetItem
+        'Unlimited'
       );
 
-      console.log('statemint xcm tx here', extrinsic.toHex());
+      console.log('statemint xcm tx to r here', extrinsic.toHex());
 
       const paymentInfo = await extrinsic.paymentInfo(fromKeypair);
 
@@ -170,7 +170,7 @@ export function statemintGetXcmExtrinsic (
       }
     };
 
-    return api.tx.polkadotXcm.reserveTransferAssets(
+    return api.tx.polkadotXcm.limitedReserveTransferAssets(
       destinationChainLocation, // dest
       {
         V1: { // beneficiary
@@ -196,10 +196,11 @@ export function statemintGetXcmExtrinsic (
           }
         ]
       },
-      0 // FeeAssetItem
+      0, // FeeAssetItem
+      { Limited: POLKADOT_LIMITED_WEIGHT }
     );
   } else {
-    return api.tx.polkadotXcm.teleportAssets(
+    return api.tx.polkadotXcm.limitedTeleportAssets(
       {
         V1: {
           parents: 1,
@@ -227,7 +228,8 @@ export function statemintGetXcmExtrinsic (
           }
         ]
       },
-      0 // FeeAssetItem
+      0, // FeeAssetItem
+      'Unlimited'
     );
   }
 }

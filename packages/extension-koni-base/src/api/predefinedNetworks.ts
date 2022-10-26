@@ -110,7 +110,8 @@ export const PREDEFINED_NETWORKS: Record<string, NetworkJson> = {
     groups: ['POLKADOT_PARACHAIN'],
     paraId: 1000,
     nativeToken: 'DOT',
-    decimals: 10
+    decimals: 10,
+    coinGeckoKey: 'polkadot'
   },
   pioneer: {
     key: 'pioneer',

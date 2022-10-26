@@ -166,6 +166,7 @@ function NftContainer (
             setChosenItem={setChosenItem}
             setShowItemDetail={setShowItemDetail}
             showItemDetail={showItemDetail}
+            setShowCollectionDetail={setShowCollectionDetail}
           />
       }
 

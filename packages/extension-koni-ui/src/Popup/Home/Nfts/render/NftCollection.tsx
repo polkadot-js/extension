@@ -3,6 +3,7 @@
 
 import { faArrowLeft } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import useGetNetworkJson from '@subwallet/extension-koni-ui/hooks/screen/home/useGetNetworkJson';
 import { _NftCollection, _NftItem } from '@subwallet/extension-koni-ui/Popup/Home/Nfts/utils';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { NFT_PER_ROW } from '@subwallet/extension-koni-ui/util';
@@ -23,10 +24,13 @@ interface Props {
 
   showItemDetail: boolean;
   setShowItemDetail: (val: boolean) => void;
+
+  setShowCollectionDetail: (val: boolean) => void;
 }
 
-function NftCollection ({ chosenItem, className, currentNetwork, data, onClickBack, setChosenItem, setShowItemDetail, showItemDetail }: Props): React.ReactElement<Props> {
+function NftCollection ({ chosenItem, className, currentNetwork, data, onClickBack, setChosenItem, setShowCollectionDetail, setShowItemDetail, showItemDetail }: Props): React.ReactElement<Props> {
   const [networkKey, setNetworkKey] = useState(currentNetwork);
+  const networkJson = useGetNetworkJson(data?.chain as string);
 
   const handleShowItem = useCallback((data: _NftItem) => {
     setChosenItem(data);
@@ -39,6 +43,13 @@ function NftCollection ({ chosenItem, className, currentNetwork, data, onClickBa
       setNetworkKey(currentNetwork);
     }
   }, [currentNetwork, networkKey, setShowItemDetail]);
+
+  useEffect(() => { // handle user change network setting during sending process
+    if (!networkJson.active) {
+      setShowItemDetail(false);
+      setShowCollectionDetail(false);
+    }
+  }, [networkJson.active, setShowCollectionDetail, setShowItemDetail]);
 
   const handleClickBack = useCallback(() => {
     onClickBack();

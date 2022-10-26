@@ -3,7 +3,7 @@
 
 import { withErrorLog } from '@subwallet/extension-base/background/handlers/helpers';
 import State, { AuthUrls, Resolver } from '@subwallet/extension-base/background/handlers/State';
-import { AccountRefMap, APIItemState, ApiMap, AuthRequestV2, BalanceItem, BalanceJson, ChainRegistry, ConfirmationDefinitions, ConfirmationsQueue, ConfirmationsQueueItemOptions, ConfirmationType, CrowdloanItem, CrowdloanJson, CurrentAccountInfo, CustomEvmToken, DeleteEvmTokenParams, EvmSendTransactionParams, EvmSendTransactionRequestQr, EvmSignatureRequestQr, EvmTokenJson, ExternalRequestPromise, ExternalRequestPromiseStatus, NETWORK_STATUS, NetworkJson, NftCollection, NftItem, NftJson, NftTransferExtra, PriceJson, RequestAccountExportPrivateKey, RequestConfirmationComplete, RequestSettingsType, ResponseAccountExportPrivateKey, ResponseSettingsType, ResultResolver, ServiceInfo, SingleModeJson, StakeUnlockingJson, StakingItem, StakingJson, StakingRewardJson, ThemeTypes, TokenInfo, TransactionHistoryItemType } from '@subwallet/extension-base/background/KoniTypes';
+import { AccountRefMap, APIItemState, ApiMap, AuthRequestV2, BalanceItem, BalanceJson, ChainRegistry, ConfirmationDefinitions, ConfirmationsQueue, ConfirmationsQueueItemOptions, ConfirmationType, CrowdloanItem, CrowdloanJson, CurrentAccountInfo, CustomToken, CustomTokenJson, CustomTokenType, DeleteCustomTokenParams, EvmSendTransactionParams, EvmSendTransactionRequestQr, EvmSignatureRequestQr, ExternalRequestPromise, ExternalRequestPromiseStatus, NETWORK_STATUS, NetworkJson, NftCollection, NftItem, NftJson, NftTransferExtra, PriceJson, RequestAccountExportPrivateKey, RequestCheckPublicAndSecretKey, RequestConfirmationComplete, RequestSettingsType, ResponseAccountExportPrivateKey, ResponseCheckPublicAndSecretKey, ResponseSettingsType, ResultResolver, ServiceInfo, SingleModeJson, StakeUnlockingJson, StakingItem, StakingJson, StakingRewardJson, ThemeTypes, TokenInfo, TransactionHistoryItemType } from '@subwallet/extension-base/background/KoniTypes';
 import { AuthorizeRequest, RequestAuthorizeTab } from '@subwallet/extension-base/background/types';
 import { Web3Transaction } from '@subwallet/extension-base/signers/types';
 import { getId } from '@subwallet/extension-base/utils/getId';
@@ -16,9 +16,12 @@ import { DEFAULT_STAKING_NETWORKS } from '@subwallet/extension-koni-base/api/sta
 // eslint-disable-next-line camelcase
 import { DotSamaCrowdloan_crowdloans_nodes } from '@subwallet/extension-koni-base/api/subquery/__generated__/DotSamaCrowdloan';
 import { fetchDotSamaCrowdloan } from '@subwallet/extension-koni-base/api/subquery/crowdloan';
-import { DEFAULT_EVM_TOKENS } from '@subwallet/extension-koni-base/api/web3/defaultEvmToken';
-import { parseTxAndSignature } from '@subwallet/extension-koni-base/api/web3/transferQr';
-import { initWeb3Api } from '@subwallet/extension-koni-base/api/web3/web3';
+import { deleteCustomTokens, FUNGIBLE_TOKEN_STANDARDS, getTokensForChainRegistry, upsertCustomToken } from '@subwallet/extension-koni-base/api/tokens';
+import { DEFAULT_SUPPORTED_TOKENS } from '@subwallet/extension-koni-base/api/tokens/defaultSupportedTokens';
+import { parseTxAndSignature } from '@subwallet/extension-koni-base/api/tokens/evm/transferQr';
+import { initEvmTokenState } from '@subwallet/extension-koni-base/api/tokens/evm/utils';
+import { initWeb3Api } from '@subwallet/extension-koni-base/api/tokens/evm/web3';
+import { initWasmTokenState } from '@subwallet/extension-koni-base/api/tokens/wasm/utils';
 import { EvmRpcError } from '@subwallet/extension-koni-base/background/errors/EvmRpcError';
 import { state } from '@subwallet/extension-koni-base/background/handlers/index';
 import { ALL_ACCOUNT_KEY, ALL_GENESIS_HASH } from '@subwallet/extension-koni-base/constants';
@@ -26,7 +29,7 @@ import DatabaseService from '@subwallet/extension-koni-base/services/DatabaseSer
 import { CurrentAccountStore, NetworkMapStore, PriceStore } from '@subwallet/extension-koni-base/stores';
 import AccountRefStore from '@subwallet/extension-koni-base/stores/AccountRef';
 import AuthorizeStore from '@subwallet/extension-koni-base/stores/Authorize';
-import CustomEvmTokenStore from '@subwallet/extension-koni-base/stores/CustomEvmToken';
+import CustomTokenStore from '@subwallet/extension-koni-base/stores/CustomEvmToken';
 import SettingsStore from '@subwallet/extension-koni-base/stores/Settings';
 import { convertFundStatus, getCurrentProvider, mergeNetworkProviders } from '@subwallet/extension-koni-base/utils';
 import { anyNumberToBN } from '@subwallet/extension-koni-base/utils/eth';
@@ -40,12 +43,21 @@ import { decodePair } from '@polkadot/keyring/pair/decode';
 import { KeyringPair$Meta } from '@polkadot/keyring/types';
 import { keyring } from '@polkadot/ui-keyring';
 import { accounts } from '@polkadot/ui-keyring/observable/accounts';
-import { assert, BN, logger as createLogger, u8aToHex } from '@polkadot/util';
+import { assert, BN, hexStripPrefix, hexToU8a, isHex, logger as createLogger, u8aToHex } from '@polkadot/util';
 import { Logger } from '@polkadot/util/types';
-import { base64Decode, isEthereumAddress } from '@polkadot/util-crypto';
+import { base64Decode, isEthereumAddress, keyExtractSuri } from '@polkadot/util-crypto';
+import { KeypairType } from '@polkadot/util-crypto/types';
 
 import { KoniCron } from '../cron';
 import { KoniSubscription } from '../subscription';
+
+const ETH_DERIVE_DEFAULT = '/m/44\'/60\'/0\'/0/0';
+
+function getSuri (seed: string, type?: KeypairType): string {
+  return type === 'ethereum'
+    ? `${seed}${ETH_DERIVE_DEFAULT}`
+    : seed;
+}
 
 function generateDefaultStakingMap () {
   const stakingMap: Record<string, StakingItem> = {};
@@ -79,7 +91,7 @@ export default class KoniState extends State {
   public readonly authSubjectV2: BehaviorSubject<AuthorizeRequest[]> = new BehaviorSubject<AuthorizeRequest[]>([]);
 
   private readonly networkMapStore = new NetworkMapStore(); // persist custom networkMap by user
-  private readonly customEvmTokenStore = new CustomEvmTokenStore();
+  private readonly customTokenStore = new CustomTokenStore();
   private readonly priceStore = new PriceStore();
   private readonly currentAccountStore = new CurrentAccountStore();
   private readonly settingsStore = new SettingsStore();
@@ -113,8 +125,8 @@ export default class KoniState extends State {
 
   private serviceInfoSubject = new Subject<ServiceInfo>();
 
-  private evmTokenState: EvmTokenJson = { erc20: [], erc721: [] };
-  private evmTokenSubject = new Subject<EvmTokenJson>();
+  private customTokenState: CustomTokenJson = { erc20: [], erc721: [], psp22: [], psp34: [] };
+  private customTokenSubject = new Subject<CustomTokenJson>();
 
   private balanceMap: Record<string, BalanceItem> = this.generateDefaultBalanceMap();
   private balanceSubject = new Subject<BalanceJson>();
@@ -258,95 +270,24 @@ export default class KoniState extends State {
         }
       }
 
-      this.initEvmTokenState();
+      this.initCustomTokenState();
     });
   }
 
-  public initEvmTokenState () {
-    this.customEvmTokenStore.get('EvmToken', (storedEvmTokens) => {
-      if (!storedEvmTokens) {
-        this.evmTokenState = DEFAULT_EVM_TOKENS;
+  public initCustomTokenState () {
+    this.customTokenStore.get('EvmToken', (storedCustomTokens) => {
+      if (!storedCustomTokens) {
+        this.customTokenState = DEFAULT_SUPPORTED_TOKENS;
       } else {
-        const _evmTokenState = storedEvmTokens;
+        const processedEvmTokens = initEvmTokenState(storedCustomTokens, this.networkMap);
 
-        for (const defaultToken of DEFAULT_EVM_TOKENS.erc20) {
-          let exist = false;
+        const processedWasmTokens = initWasmTokenState(storedCustomTokens, this.networkMap);
 
-          for (const storedToken of _evmTokenState.erc20) {
-            if (defaultToken.smartContract.toLowerCase() === storedToken.smartContract.toLowerCase() && defaultToken.chain === storedToken.chain) {
-              if (storedToken.isCustom) {
-                // if existed, migrate the custom token -> default token
-                delete storedToken.isCustom;
-              }
-
-              exist = true;
-              break;
-            }
-          }
-
-          if (!exist) {
-            _evmTokenState.erc20.push(defaultToken);
-          }
-        }
-
-        for (const defaultToken of DEFAULT_EVM_TOKENS.erc721) {
-          let exist = false;
-
-          for (const storedToken of _evmTokenState.erc721) {
-            if (defaultToken.smartContract.toLowerCase() === storedToken.smartContract.toLowerCase() && defaultToken.chain === storedToken.chain) {
-              if (storedToken.isCustom) {
-                // if existed custom token before, migrate the custom token -> default token
-                delete storedToken.isCustom;
-              }
-
-              exist = true;
-              break;
-            }
-          }
-
-          if (!exist) {
-            _evmTokenState.erc721.push(defaultToken);
-          }
-        }
-
-        // Update networkKey in case networkMap change
-        for (const token of _evmTokenState.erc20) {
-          if (!(token.chain in this.networkMap) && token.chain.startsWith('custom_')) {
-            let newKey = '';
-            const genesisHash = token.chain.split('custom_')[1]; // token from custom network has key with prefix custom_
-
-            for (const [key, network] of Object.entries(this.networkMap)) {
-              if (network.genesisHash.toLowerCase() === genesisHash.toLowerCase()) {
-                newKey = key;
-                break;
-              }
-            }
-
-            token.chain = newKey;
-          }
-        }
-
-        for (const token of _evmTokenState.erc721) {
-          if (!(token.chain in this.networkMap) && token.chain.startsWith('custom_')) {
-            let newKey = '';
-            const genesisHash = token.chain.split('custom_')[1]; // token from custom network has key with prefix custom_
-
-            for (const [key, network] of Object.entries(this.networkMap)) {
-              if (network.genesisHash.toLowerCase() === genesisHash.toLowerCase()) {
-                newKey = key;
-                break;
-              }
-            }
-
-            token.chain = newKey;
-          }
-        }
-
-        this.evmTokenState = _evmTokenState;
+        this.customTokenState = { ...processedEvmTokens, ...processedWasmTokens };
       }
 
-      this.customEvmTokenStore.set('EvmToken', this.evmTokenState);
-      this.evmTokenSubject.next(this.evmTokenState);
+      this.customTokenStore.set('EvmToken', this.customTokenState);
+      this.customTokenSubject.next(this.customTokenState);
 
       this.initChainRegistry();
     });
@@ -728,10 +669,10 @@ export default class KoniState extends State {
   public async resetNft (newAddress: string): Promise<void> {
     this.getNft().then((data) => this.nftSubject.next(data || { nftList: [], total: 0 })).catch((e) => this.logger.warn(e));
 
-    const activeNetworkHashs = Object.values(this.activeNetworks).map((network) => network.genesisHash);
+    const activeNetworkHashes = Object.values(this.activeNetworks).map((network) => network.genesisHash);
     const addresses = await this.getDecodedAddresses(newAddress);
 
-    this.dbService.subscribeNft(addresses, activeNetworkHashs, (nfts) => {
+    this.dbService.subscribeNft(addresses, activeNetworkHashes, (nfts) => {
       this.nftSubject.next({
         nftList: nfts,
         total: nfts.length
@@ -976,7 +917,7 @@ export default class KoniState extends State {
       });
   }
 
-  public async addTokenConfirm (id: string, url: string, tokenInfo: CustomEvmToken) {
+  public async addTokenConfirm (id: string, url: string, tokenInfo: CustomToken) {
     return this.addConfirmation(id, url, 'addTokenRequest', tokenInfo)
       .then(({ isApproved }) => {
         return isApproved;
@@ -1184,12 +1125,12 @@ export default class KoniState extends State {
     });
   }
 
-  public checkTokenKey (tokenData: CustomEvmToken): string {
+  public checkTokenKey (tokenData: CustomToken): string {
     const chainRegistry = this.chainRegistryMap[tokenData.chain];
     let tokenKey = '';
 
     for (const [key, token] of Object.entries(chainRegistry.tokenMap)) {
-      if (token.erc20Address === tokenData.smartContract) {
+      if (token.contractAddress === tokenData.smartContract) {
         tokenKey = key;
         break;
       }
@@ -1198,7 +1139,7 @@ export default class KoniState extends State {
     return tokenKey;
   }
 
-  public upsertChainRegistry (tokenData: CustomEvmToken) {
+  public upsertChainRegistry (tokenData: CustomToken) {
     const chainRegistry = this.chainRegistryMap[tokenData.chain];
 
     if (chainRegistry) {
@@ -1209,17 +1150,19 @@ export default class KoniState extends State {
           isMainToken: false,
           symbol: tokenData.symbol,
           name: tokenData.name,
-          erc20Address: tokenData.smartContract,
-          decimals: tokenData.decimals
+          contractAddress: tokenData.smartContract,
+          decimals: tokenData.decimals,
+          type: tokenData.type
         } as TokenInfo;
       } else {
         // @ts-ignore
         chainRegistry.tokenMap[tokenData.symbol] = {
           isMainToken: false,
           symbol: tokenData.symbol,
-          name: tokenData.symbol,
-          erc20Address: tokenData.smartContract,
-          decimals: tokenData.decimals
+          name: tokenData.name,
+          contractAddress: tokenData.smartContract,
+          decimals: tokenData.decimals,
+          type: tokenData.type
         } as TokenInfo;
       }
 
@@ -1230,62 +1173,45 @@ export default class KoniState extends State {
 
   public initChainRegistry () {
     this.chainRegistryMap = cacheRegistryMap; // prevents deleting token registry even when network is disabled
+    this.getCustomTokenStore((storedCustomTokens) => {
+      const customTokens = getTokensForChainRegistry(storedCustomTokens);
 
-    this.setChainRegistryItem('polkadot', {
-      chainDecimals: [10],
-      chainTokens: ['DOT'],
-      tokenMap: {
-        DOT: {
-          isMainToken: true,
-          name: 'DOT',
-          symbol: 'DOT',
-          decimals: 10
-        }
-      }
-    });
-
-    this.setChainRegistryItem('kusama', {
-      chainDecimals: [12],
-      chainTokens: ['KSM'],
-      tokenMap: {
-        KSM: {
-          isMainToken: true,
-          name: 'KSM',
-          symbol: 'KSM',
-          decimals: 12
-        }
-      }
-    });
-
-    this.getEvmTokenStore((evmTokens) => {
-      const erc20Tokens: CustomEvmToken[] = evmTokens ? evmTokens.erc20 : [];
-
-      if (evmTokens) {
-        evmTokens.erc20.forEach((token) => {
-          if (!token.isDeleted) {
-            erc20Tokens.push(token);
+      this.setChainRegistryItem('polkadot', {
+        chainDecimals: [10],
+        chainTokens: ['DOT'],
+        tokenMap: {
+          DOT: {
+            isMainToken: true,
+            name: 'DOT',
+            symbol: 'DOT',
+            decimals: 10
           }
-        });
-      }
+        }
+      });
+
+      this.setChainRegistryItem('kusama', {
+        chainDecimals: [12],
+        chainTokens: ['KSM'],
+        tokenMap: {
+          KSM: {
+            isMainToken: true,
+            name: 'KSM',
+            symbol: 'KSM',
+            decimals: 12
+          }
+        }
+      });
 
       Object.entries(this.apiMap.dotSama).forEach(([networkKey, { api }]) => {
-        getRegistry(networkKey, api, erc20Tokens)
+        getRegistry(networkKey, api, customTokens)
           .then((rs) => {
             this.setChainRegistryItem(networkKey, rs);
           })
           .catch(this.logger.error);
       });
-    });
 
-    Object.entries(this.apiMap.dotSama).forEach(([networkKey, { api }]) => {
-      getRegistry(networkKey, api)
-        .then((rs) => {
-          this.setChainRegistryItem(networkKey, rs);
-        })
-        .catch(this.logger.error);
+      this.onReady();
     });
-
-    this.onReady();
   }
 
   public subscribeChainRegistryMap () {
@@ -1343,18 +1269,18 @@ export default class KoniState extends State {
     return this.priceStore.getSubject();
   }
 
-  public subscribeEvmToken () {
-    return this.evmTokenSubject;
+  public subscribeCustomToken () {
+    return this.customTokenSubject;
   }
 
-  public getEvmTokenState () {
-    return this.evmTokenState;
+  public getCustomTokenState () {
+    return this.customTokenState;
   }
 
   public getActiveErc20Tokens () {
-    const filteredErc20Tokens: CustomEvmToken[] = [];
+    const filteredErc20Tokens: CustomToken[] = [];
 
-    this.evmTokenState.erc20.forEach((token) => {
+    this.customTokenState.erc20.forEach((token) => {
       if (!token.isDeleted) {
         filteredErc20Tokens.push(token);
       }
@@ -1363,121 +1289,63 @@ export default class KoniState extends State {
     return filteredErc20Tokens;
   }
 
-  public getActiveErc721Tokens () {
-    const filteredErc721Tokens: CustomEvmToken[] = [];
+  public getActiveNftContracts () {
+    const filteredNftContracts: CustomToken[] = [];
 
-    this.evmTokenState.erc721.forEach((token) => {
-      if (!token.isDeleted) {
-        filteredErc721Tokens.push(token);
+    Object.entries(this.customTokenState).forEach(([_tokenType, _tokenList]) => {
+      const tokenType = _tokenType as CustomTokenType;
+      const tokenList = _tokenList as CustomToken[];
+
+      if (!FUNGIBLE_TOKEN_STANDARDS.includes(tokenType)) {
+        for (const token of tokenList) {
+          if (!token.isDeleted) {
+            filteredNftContracts.push(token);
+          }
+        }
       }
     });
 
-    return filteredErc721Tokens;
+    return filteredNftContracts;
   }
 
-  public getEvmTokenStore (callback: (data: EvmTokenJson) => void) {
-    return this.customEvmTokenStore.get('EvmToken', (data) => {
+  public getCustomTokenStore (callback: (data: CustomTokenJson) => void) {
+    return this.customTokenStore.get('EvmToken', (data) => {
       callback(data);
     });
   }
 
-  public upsertEvmToken (data: CustomEvmToken) {
-    let isExist = false;
+  public upsertCustomToken (data: CustomToken) {
+    const { needUpdateChainRegistry, newCustomTokenState } = upsertCustomToken(data, this.customTokenState);
 
-    for (const token of this.evmTokenState[data.type]) {
-      if (token.smartContract.toLowerCase() === data.smartContract.toLowerCase() && token.type === data.type && token.chain === data.chain) {
-        isExist = true;
-        break;
-      }
-    }
+    this.customTokenState = newCustomTokenState;
 
-    if (!isExist) {
-      this.evmTokenState[data.type].push(data);
-    } else {
-      this.evmTokenState[data.type] = this.evmTokenState[data.type].map((token) => {
-        if (token.smartContract.toLowerCase() === data.smartContract.toLowerCase()) {
-          if (token.isDeleted) {
-            return {
-              name: token.name,
-              smartContract: token.smartContract,
-              chain: token.chain,
-              type: token.type
-            };
-          }
-
-          return data;
-        }
-
-        return token;
-      });
-    }
-
-    if (data.type === 'erc20') {
+    if (needUpdateChainRegistry) {
       this.upsertChainRegistry(data);
     }
 
-    this.evmTokenSubject.next(this.evmTokenState);
-    this.customEvmTokenStore.set('EvmToken', this.evmTokenState);
+    this.customTokenSubject.next(this.customTokenState);
+    this.customTokenStore.set('EvmToken', this.customTokenState);
     this.updateServiceInfo();
   }
 
-  public deleteEvmTokens (targetTokens: DeleteEvmTokenParams[]) {
-    const _evmTokenState: EvmTokenJson = this.evmTokenState;
-    let needUpdateChainRegistry = false;
+  public deleteCustomTokens (targetTokens: DeleteCustomTokenParams[]) {
+    const { deletedNfts, newChainRegistryMap, newCustomTokenState } = deleteCustomTokens(targetTokens, this.customTokenState, this.chainRegistryMap);
 
-    for (const targetToken of targetTokens) {
-      for (let index = 0; index < _evmTokenState.erc20.length; index++) {
-        if (_evmTokenState.erc20[index].smartContract === targetToken.smartContract && _evmTokenState.erc20[index].chain === targetToken.chain && targetToken.type === 'erc20') {
-          if (_evmTokenState.erc20[index].isCustom) {
-            _evmTokenState.erc20.splice(index, 1);
-          } else {
-            _evmTokenState.erc20[index].isDeleted = true;
-          }
-
-          needUpdateChainRegistry = true;
-        }
-      }
+    // Delete stored nfts
+    for (const targetToken of deletedNfts) {
+      this.dbService.deleteNftsByCustomToken(this.getNetworkGenesisHashByKey(targetToken.chain), targetToken.smartContract).catch((e) => this.logger.warn(e));
     }
 
-    if (needUpdateChainRegistry) {
-      for (const targetToken of targetTokens) {
-        const chainRegistry = this.chainRegistryMap[targetToken.chain];
+    this.chainRegistryMap = newChainRegistryMap;
 
-        if (chainRegistry) {
-          let deleteKey = '';
+    Object.entries(newChainRegistryMap).forEach(([key, chainRegistry]) => {
+      cacheRegistryMap[key] = chainRegistry;
+    });
 
-          for (const [key, token] of Object.entries(chainRegistry.tokenMap)) {
-            if (token.erc20Address === targetToken.smartContract && targetToken.type === 'erc20') {
-              deleteKey = key;
-            }
-          }
-
-          delete chainRegistry.tokenMap[deleteKey];
-          this.chainRegistryMap[targetToken.chain] = chainRegistry;
-          cacheRegistryMap[targetToken.chain] = chainRegistry;
-        }
-      }
-    }
-
-    for (const targetToken of targetTokens) {
-      for (let index = 0; index < _evmTokenState.erc721.length; index++) {
-        if (_evmTokenState.erc721[index].smartContract === targetToken.smartContract && _evmTokenState.erc721[index].chain === targetToken.chain && targetToken.type === 'erc721') {
-          if (_evmTokenState.erc721[index].isCustom) {
-            _evmTokenState.erc721.splice(index, 1);
-          } else {
-            _evmTokenState.erc721[index].isDeleted = true;
-          }
-        }
-      }
-
-      // Delete stored nfts
-      this.dbService.deleteNftsByEvmToken(this.getNetworkGenesisHashByKey(targetToken.chain), targetToken.smartContract).catch((e) => this.logger.warn(e));
-    }
-
-    this.evmTokenState = _evmTokenState;
-    this.evmTokenSubject.next(this.evmTokenState);
+    this.customTokenState = newCustomTokenState;
+    this.customTokenSubject.next(this.customTokenState);
     this.chainRegistrySubject.next(this.getChainRegistryMap());
-    this.customEvmTokenStore.set('EvmToken', this.evmTokenState);
+    this.customTokenStore.set('EvmToken', this.customTokenState);
     this.updateServiceInfo();
   }
 
@@ -1491,6 +1359,18 @@ export default class KoniState extends State {
 
   public subscribeNetworkMap () {
     return this.networkMapStore.getSubject();
+  }
+
+  public getActiveContractSupportedNetworks () {
+    const contractSupportedNetworkMap: Record<string, NetworkJson> = {};
+
+    Object.entries(this.networkMap).forEach(([key, network]) => {
+      if (network.active && network.supportSmartContract && network.supportSmartContract.length > 0) {
+        contractSupportedNetworkMap[key] = network;
+      }
+    });
+
+    return contractSupportedNetworkMap;
   }
 
   public async upsertNetworkMap (data: NetworkJson): Promise<boolean> {
@@ -1534,7 +1414,7 @@ export default class KoniState extends State {
 
     if (this.networkMap[data.key].active) { // update API map if network is active
       if (data.key in this.apiMap.dotSama) {
-        await this.apiMap.dotSama[data.key].api.disconnect();
+        this.apiMap.dotSama[data.key].api?.disconnect && await this.apiMap.dotSama[data.key].api.disconnect();
         delete this.apiMap.dotSama[data.key];
       }
 
@@ -1579,7 +1459,7 @@ export default class KoniState extends State {
     }
 
     this.lockNetworkMap = true;
-    await this.apiMap.dotSama[networkKey]?.api.disconnect();
+    this.apiMap.dotSama[networkKey].api.disconnect && await this.apiMap.dotSama[networkKey].api.disconnect();
     delete this.apiMap.dotSama[networkKey];
 
     if (this.networkMap[networkKey].isEthereum && this.networkMap[networkKey].isEthereum) {
@@ -1653,7 +1533,7 @@ export default class KoniState extends State {
     this.networkMapStore.set('NetworkMap', this.networkMap);
 
     for (const key of targetNetworkKeys) {
-      await this.apiMap.dotSama[key].api.disconnect();
+      this.apiMap.dotSama[key].api.disconnect && await this.apiMap.dotSama[key].api.disconnect();
       delete this.apiMap.dotSama[key];
 
       if (this.networkMap[key].isEthereum && this.networkMap[key].isEthereum) {
@@ -1679,14 +1559,16 @@ export default class KoniState extends State {
       return false;
     }
 
-    this.lockNetworkMap = true;
-    this.apiMap.dotSama[networkKey] = initApi(networkKey, getCurrentProvider(this.networkMap[networkKey]), this.networkMap[networkKey].isEthereum);
+    const networkData = this.networkMap[networkKey];
 
-    if (this.networkMap[networkKey].isEthereum && this.networkMap[networkKey].isEthereum) {
-      this.apiMap.web3[networkKey] = initWeb3Api(getCurrentProvider(this.networkMap[networkKey]));
+    this.lockNetworkMap = true;
+    this.apiMap.dotSama[networkKey] = initApi(networkKey, getCurrentProvider(networkData), networkData.isEthereum);
+
+    if (networkData.isEthereum && networkData.isEthereum) {
+      this.apiMap.web3[networkKey] = initWeb3Api(getCurrentProvider(networkData));
     }
 
-    this.networkMap[networkKey].active = true;
+    networkData.active = true;
     this.networkMapSubject.next(this.networkMap);
     this.networkMapStore.set('NetworkMap', this.networkMap);
     this.updateServiceInfo();
@@ -1768,7 +1650,7 @@ export default class KoniState extends State {
     this.networkMapStore.set('NetworkMap', this.networkMap);
 
     for (const key of targetNetworkKeys) {
-      await this.apiMap.dotSama[key].api.disconnect();
+      this.apiMap.dotSama[key].api.disconnect && await this.apiMap.dotSama[key].api.disconnect();
       delete this.apiMap.dotSama[key];
 
       if (this.networkMap[key].isEthereum && this.networkMap[key].isEthereum) {
@@ -1799,6 +1681,10 @@ export default class KoniState extends State {
 
   public getWeb3ApiMap (): Record<string, Web3> {
     return this.apiMap.web3;
+  }
+
+  public getWeb3Api (networkKey: string) {
+    return this.apiMap.web3[networkKey];
   }
 
   public getApiMap () {
@@ -1833,7 +1719,7 @@ export default class KoniState extends State {
         apiMap: this.apiMap,
         currentAccountInfo: value,
         chainRegistry: this.chainRegistryMap,
-        customErc721Registry: this.getActiveErc721Tokens()
+        customNftRegistry: this.getActiveNftContracts()
       });
     });
   }
@@ -1954,7 +1840,7 @@ export default class KoniState extends State {
     return Promise.all(Object.values(this.apiMap.dotSama).map(async (network) => {
       if (network.api.isConnected) {
         this.logger.log(`[Dotsama] Stopping network [${network.specName}]`);
-        await network.api.disconnect();
+        await network.api?.disconnect();
       }
     }));
   }
@@ -1975,7 +1861,7 @@ export default class KoniState extends State {
 
     // Reconnect dotsama networks
     return Promise.all(Object.values(this.apiMap.dotSama).map(async (network) => {
-      if (!network.api.isConnected) {
+      if (!network.api.isConnected && network.api.connect) {
         this.logger.log(`[Dotsama] Resumming network [${network.specName}]`);
         await network.api.connect();
       }
@@ -2059,8 +1945,53 @@ export default class KoniState extends State {
     const decoded = decodePair(password, base64Decode(exportedJson.encoded), exportedJson.encoding.type);
 
     return {
-      privateKey: u8aToHex(decoded.secretKey)
+      privateKey: u8aToHex(decoded.secretKey),
+      publicKey: u8aToHex(decoded.publicKey)
     };
+  }
+
+  public checkPublicAndSecretKey ({ publicKey, secretKey }: RequestCheckPublicAndSecretKey): ResponseCheckPublicAndSecretKey {
+    try {
+      const _secret = hexStripPrefix(secretKey);
+
+      if (_secret.length === 64) {
+        const suri = `0x${_secret}`;
+        const { phrase } = keyExtractSuri(suri);
+
+        if (isHex(phrase) && isHex(phrase, 256)) {
+          const type: KeypairType = 'ethereum';
+          const address = keyring.createFromUri(getSuri(suri, type), {}, type).address;
+
+          return {
+            address: address,
+            isValid: true,
+            isEthereum: true
+          };
+        } else {
+          return {
+            address: '',
+            isValid: false,
+            isEthereum: true
+          };
+        }
+      }
+
+      const keyPair = keyring.keyring.addFromPair({ publicKey: hexToU8a(publicKey), secretKey: hexToU8a(secretKey) });
+
+      return {
+        address: keyPair.address,
+        isValid: true,
+        isEthereum: false
+      };
+    } catch (e) {
+      console.error(e);
+
+      return {
+        address: '',
+        isValid: false,
+        isEthereum: false
+      };
+    }
   }
 
   public getEthKeyring (address: string, password: string): Promise<SimpleKeyring> {
@@ -2349,7 +2280,7 @@ export default class KoniState extends State {
       const txObject: Web3Transaction = {
         nonce: nonce,
         from: fromAddress,
-        gasPrice: anyNumberToBN(transaction.gasPrice ? transaction.gasPrice : transaction.maxFeePerGas).toNumber(),
+        gasPrice: anyNumberToBN(gasPrice).toNumber(),
         gasLimit: anyNumberToBN(transaction.gas).toNumber(),
         to: transaction.to !== undefined ? transaction.to : '',
         value: anyNumberToBN(transaction.value).toNumber(),

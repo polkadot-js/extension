@@ -15,7 +15,7 @@ import { assert } from '@polkadot/util';
 export const state = new KoniState();
 export const extension = new KoniExtension(state);
 export const tabs = new KoniTabs(state);
-export const nftHandler = new NftHandler(state.getDotSamaApiMap(), [], state.getWeb3ApiMap());
+export const nftHandler = new NftHandler();
 
 // Migration
 async function makeSureStateReady () {
@@ -62,6 +62,7 @@ export default function handlers<TMessageType extends MessageTypes> ({ id, messa
       port.postMessage({ id, response });
     })
     .catch((error: SubWalletProviderError): void => {
+      console.error(error);
       console.log(`[err] ${source}:: ${error.message}`);
 
       // only send message back to port if it's still connected

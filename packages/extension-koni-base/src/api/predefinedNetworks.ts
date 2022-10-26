@@ -1,7 +1,7 @@
 // Copyright 2019-2022 @subwallet/extension-koni authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { NetworkJson } from '@subwallet/extension-base/background/KoniTypes';
+import { ContractType, NetworkJson } from '@subwallet/extension-base/background/KoniTypes';
 
 export const PREDEFINED_NETWORKS: Record<string, NetworkJson> = {
   polkadot: {
@@ -130,6 +130,100 @@ export const PREDEFINED_NETWORKS: Record<string, NetworkJson> = {
     decimals: 18,
     coinGeckoKey: 'metaverse-network-pioneer'
   },
+  ethereum: {
+    key: 'ethereum',
+    chain: 'Ethereum Mainnet',
+    genesisHash: '0xb60d7bdd334cd3768d43f14a05c7fe7e886ba5bcb77e1064530052fed1a3f145',
+    ss58Format: 0,
+    providers: {
+      Cloudflare: 'https://cloudflare-eth.com',
+      BlastApi: 'https://eth-mainnet.public.blastapi.io',
+      Infura: 'https://mainnet.infura.io/v3/b6bf7d3508c941499b10025c0776eaf8'
+    },
+    active: false,
+    currentProviderMode: 'http',
+    currentProvider: 'Infura',
+    groups: ['MAIN_NET'],
+    isEthereum: true,
+    nativeToken: 'ETH',
+    decimals: 18,
+    coinGeckoKey: 'ethereum',
+    evmChainId: 1,
+    supportBonding: false,
+    getStakingOnChain: false,
+    abiExplorer: 'https://etherscan.io',
+    supportSmartContract: [ContractType.evm]
+  },
+  ethereum_goerli: {
+    key: 'ethereum_goerli',
+    chain: 'Ethereum Testnet (Goerli)',
+    genesisHash: '0x2c8974e8936649eb65786299a1129fb6a47c5e703705489be96ea715496096c5',
+    ss58Format: 0,
+    providers: {
+      Infura: 'https://goerli.infura.io/v3/b6bf7d3508c941499b10025c0776eaf8',
+      Optimism: 'https://goerli.optimism.io'
+    },
+    active: false,
+    currentProviderMode: 'http',
+    currentProvider: 'Infura',
+    groups: ['TEST_NET'],
+    isEthereum: true,
+    nativeToken: 'GoerliETH',
+    decimals: 18,
+    coinGeckoKey: 'ethereum_goerli',
+    evmChainId: 1,
+    supportBonding: false,
+    getStakingOnChain: false,
+    abiExplorer: 'https://goerli.etherscan.io',
+    supportSmartContract: [ContractType.evm]
+  },
+  binance: {
+    key: 'binance',
+    chain: 'Binance Smart Chain',
+    genesisHash: '0x59bba357145ca539dcd1ac957abc1ec5833319ddcae7f5e8b5da0c36624784b2',
+    ss58Format: 0,
+    providers: {
+      Binance: 'https://bsc-dataseed.binance.org/',
+      Defibit: 'https://bsc-dataseed1.defibit.io/',
+      Ninicoin: 'https://bsc-dataseed1.ninicoin.io/',
+      Nodereal: 'https://bsc.nodereal.io/'
+    },
+    active: false,
+    currentProviderMode: 'http',
+    currentProvider: 'Binance',
+    groups: ['MAIN_NET'],
+    isEthereum: true,
+    nativeToken: 'BNB',
+    decimals: 18,
+    coinGeckoKey: 'binancecoin',
+    evmChainId: 56,
+    supportBonding: false,
+    getStakingOnChain: false,
+    abiExplorer: 'https://bscscan.com',
+    supportSmartContract: [ContractType.evm]
+  },
+  binance_test: {
+    key: 'binance_test',
+    chain: 'Binance Smart Chain (Testnet)',
+    genesisHash: '0xdd00fd71b568b8a2571a276129bc122ec640095f16c01d851c45a64e9a0731f1',
+    ss58Format: 0,
+    providers: {
+      Binance: 'https://data-seed-prebsc-1-s1.binance.org:8545/',
+      Binance2: 'https://data-seed-prebsc-2-s1.binance.org:8545/'
+    },
+    active: false,
+    currentProviderMode: 'http',
+    currentProvider: 'Binance',
+    groups: ['TEST_NET'],
+    isEthereum: true,
+    nativeToken: 'BNB',
+    decimals: 18,
+    evmChainId: 97,
+    supportBonding: false,
+    getStakingOnChain: false,
+    abiExplorer: 'https://testnet.bscscan.com',
+    supportSmartContract: [ContractType.evm]
+  },
   moonbeam: {
     key: 'moonbeam',
     chain: 'Moonbeam',
@@ -153,7 +247,8 @@ export const PREDEFINED_NETWORKS: Record<string, NetworkJson> = {
     evmChainId: 1284,
     supportBonding: true,
     getStakingOnChain: true,
-    abiExplorer: 'https://api-moonbeam.moonscan.io/api?module=contract&action=getabi'
+    abiExplorer: 'https://api-moonbeam.moonscan.io/api?module=contract&action=getabi',
+    supportSmartContract: [ContractType.evm]
   },
   astar: {
     key: 'astar',
@@ -199,7 +294,8 @@ export const PREDEFINED_NETWORKS: Record<string, NetworkJson> = {
     decimals: 18,
     coinGeckoKey: 'astar',
     evmChainId: 592,
-    paraId: 2006
+    paraId: 2006,
+    supportSmartContract: [ContractType.evm]
   },
   acala: {
     key: 'acala',
@@ -281,7 +377,8 @@ export const PREDEFINED_NETWORKS: Record<string, NetworkJson> = {
     nativeToken: 'CLV',
     crowdloanUrl: 'https://lucky.clover.finance/?type=support',
     decimals: 18,
-    coinGeckoKey: 'clover-finance'
+    coinGeckoKey: 'clover-finance',
+    supportSmartContract: [ContractType.evm]
   },
   hydradx_main: {
     key: 'hydradx_main',
@@ -548,7 +645,8 @@ export const PREDEFINED_NETWORKS: Record<string, NetworkJson> = {
     nativeToken: 'TZERO',
     decimals: 12,
     getStakingOnChain: true,
-    supportBonding: true
+    supportBonding: true,
+    supportSmartContract: [ContractType.wasm]
   },
   opal: {
     key: 'opal',
@@ -590,7 +688,8 @@ export const PREDEFINED_NETWORKS: Record<string, NetworkJson> = {
     evmChainId: 1287,
     supportBonding: true,
     getStakingOnChain: true,
-    paraId: 1000
+    paraId: 1000,
+    supportSmartContract: [ContractType.evm]
   },
   efinity: {
     key: 'efinity',
@@ -749,7 +848,8 @@ export const PREDEFINED_NETWORKS: Record<string, NetworkJson> = {
     evmChainId: 1285,
     supportBonding: true,
     getStakingOnChain: true,
-    abiExplorer: 'https://api-moonriver.moonscan.io/api?module=contract&action=getabi'
+    abiExplorer: 'https://api-moonriver.moonscan.io/api?module=contract&action=getabi',
+    supportSmartContract: [ContractType.evm]
   },
   shiden: {
     key: 'shiden',
@@ -787,7 +887,8 @@ export const PREDEFINED_NETWORKS: Record<string, NetworkJson> = {
     nativeToken: 'SDN',
     evmChainId: 336,
     isEthereum: true,
-    paraId: 2007
+    paraId: 2007,
+    supportSmartContract: [ContractType.evm]
   },
   shibuya: {
     key: 'shibuya',
@@ -822,7 +923,8 @@ export const PREDEFINED_NETWORKS: Record<string, NetworkJson> = {
     groups: ['TEST_NET'],
     evmChainId: 81,
     nativeToken: 'SBY',
-    decimals: 18
+    decimals: 18,
+    supportSmartContract: [ContractType.evm]
   },
   khala: {
     key: 'khala',
@@ -1312,7 +1414,8 @@ export const PREDEFINED_NETWORKS: Record<string, NetworkJson> = {
     coinGeckoKey: 'darwinia-crab-network',
     isEthereum: true,
     evmChainId: 44,
-    blockExplorer: 'https://crab.subscan.io'
+    blockExplorer: 'https://crab.subscan.io',
+    supportSmartContract: [ContractType.evm]
   },
   pangolin: {
     key: 'pangolin',
@@ -1347,7 +1450,8 @@ export const PREDEFINED_NETWORKS: Record<string, NetworkJson> = {
     decimals: 18,
     isEthereum: true,
     evmChainId: 43,
-    blockExplorer: 'https://pangolin.subscan.io'
+    blockExplorer: 'https://pangolin.subscan.io',
+    supportSmartContract: [ContractType.evm]
   },
   bitcountry: {
     key: 'bitcountry',
@@ -1762,6 +1866,21 @@ export const PREDEFINED_NETWORKS: Record<string, NetworkJson> = {
     nativeToken: 'Unit',
     decimals: 12,
     groups: ['TEST_NET']
+  },
+  snow: {
+    key: 'snow',
+    chain: 'Snow Network',
+    genesisHash: '0xb34f6cd03a41f0fab38ba9fd5b11cce5f303633c46f39f0c6fdc7c3c602bafa9',
+    ss58Format: 2207,
+    providers: {
+      snow: 'wss://snow-rpc.icenetwork.io'
+    },
+    currentProvider: 'snow',
+    active: false,
+    currentProviderMode: 'ws',
+    nativeToken: 'ICZ',
+    decimals: 18,
+    groups: ['KUSAMA_PARACHAIN']
   },
   arctic_testnet: {
     key: 'arctic_testnet',

@@ -226,11 +226,13 @@ function UnbondingAuthTransaction ({ amount, balanceError, className, fee, handl
     makeUnBondingQr({
       networkKey: selectedNetwork,
       address: account?.address as string,
-      amount
+      amount,
+      unstakeAll: unbondAll,
+      validatorAddress: selectedValidator
     }, handlerCallbackResponseResultQr)
       .then(handlerResponseError)
       .catch((e) => console.log('There is problem when makeUnBondingQr', e));
-  }, [account?.address, amount, handlerCallbackResponseResultQr, handlerResponseError, selectedNetwork]);
+  }, [account?.address, amount, handlerCallbackResponseResultQr, handlerResponseError, selectedNetwork, selectedValidator, unbondAll]);
 
   const handlerErrorQr = useCallback((error: Error) => {
     setErrorArr([error.message]);
@@ -271,11 +273,13 @@ function UnbondingAuthTransaction ({ amount, balanceError, className, fee, handl
     makeUnBondingLedger({
       networkKey: selectedNetwork,
       address: account?.address as string,
-      amount
+      amount,
+      unstakeAll: unbondAll,
+      validatorAddress: selectedValidator
     }, callback)
       .then(handlerResponseError)
       .catch((e) => console.log('There is problem when makeTransferNftQrSubstrate', e));
-  }, [account?.address, amount, handlerCallbackResponseResultLedger, handlerResponseError, selectedNetwork]);
+  }, [account?.address, amount, handlerCallbackResponseResultLedger, handlerResponseError, selectedNetwork, selectedValidator, unbondAll]);
 
   const handlerSendLedger = useCallback((handlerSignLedger: (ledgerState: LedgerState) => void) => {
     if (loading) {

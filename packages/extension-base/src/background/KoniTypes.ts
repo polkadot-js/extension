@@ -26,7 +26,7 @@ export interface ServiceInfo {
   isLock?: boolean;
   currentAccountInfo: CurrentAccountInfo;
   chainRegistry: Record<string, ChainRegistry>;
-  customErc721Registry: CustomEvmToken[];
+  customNftRegistry: CustomToken[];
 }
 
 export enum ApiInitStatus {
@@ -166,6 +166,7 @@ export interface NftItem {
   description?: string;
   properties?: Record<any, any> | null;
   chain?: string;
+  type?: CustomTokenType.erc721 | CustomTokenType.psp34 | RMRK_VER; // for sending
   rmrk_ver?: RMRK_VER;
   owner?: string;
 }
@@ -267,6 +268,7 @@ export interface ApiProps extends ApiState {
   isApiReadyOnce: boolean;
   isApiConnected: boolean;
   isEthereum: boolean;
+  isEthereumOnly: boolean;
   isApiInitialized: boolean;
   isReady: Promise<ApiProps>;
   apiRetry?: number;
@@ -291,14 +293,19 @@ export interface NetWorkInfo {
   decimals?: number;
 }
 
+export enum ContractType {
+  wasm = 'wasm',
+  evm = 'evm'
+}
+
 export interface NetworkJson {
-  // General Informations
+  // General Information
   key: string; // Key of network in NetworkMap
   chain: string; // Name of the network
   icon?: string; // Icon name, available with known network
   active: boolean; // Network is active or not
 
-  // Provider Informations
+  // Provider Information
   providers: Record<string, string>; // Predefined provider map
   currentProvider: string; // Current provider key
   currentProviderMode: 'http' | 'ws'; // Current provider mode, compute depend on provider protocol. the feature need to know this to decide use subscribe or cronjob to use this features.
@@ -313,7 +320,7 @@ export interface NetworkJson {
   chainType?: 'substrate' | 'ethereum';
   crowdloanUrl?: string;
 
-  // Ethereum informations for predefine network only
+  // Ethereum related information for predefined network only
   isEthereum?: boolean; // Only show network with isEthereum=true when select one EVM account // user input
   evmChainId?: number;
 
@@ -323,13 +330,14 @@ export interface NetworkJson {
   nativeToken?: string;
   decimals?: number;
 
-  // Other informations
+  // Other information
   coinGeckoKey?: string; // Provider key to get token price from CoinGecko // user input
   blockExplorer?: string; // Link to block scanner to check transaction with extrinsic hash // user input
   abiExplorer?: string; // Link to block scanner to check transaction with extrinsic hash // user input
   dependencies?: string[]; // Auto active network in dependencies if current network is activated
   getStakingOnChain?: boolean; // support get bonded on chain
   supportBonding?: boolean;
+  supportSmartContract?: ContractType[]; // if network supports PSP smart contracts
 
   apiStatus?: NETWORK_STATUS;
   requestId?: string;
@@ -381,13 +389,15 @@ export type TokenInfo = {
   isMainToken: boolean,
   symbol: string,
   symbolAlt?: string, // Alternate display for symbol
-  erc20Address?: string,
-  assetIndex?: number | string,
+  contractAddress?: string,
+  type?: CustomTokenType, // to differentiate custom tokens from native tokens
   decimals: number,
   name: string,
   coinGeckoKey?: string,
+  // TODO: unify specialOption, assetId, assetIndex
   specialOption?: object,
-  assetId?: string // for moon assets
+  assetId?: string, // for moon assets
+  assetIndex?: number | string,
 }
 
 // all Accounts and the address of the current Account
@@ -474,6 +484,18 @@ export interface RequestAccountExportPrivateKey {
 
 export interface ResponseAccountExportPrivateKey {
   privateKey: string;
+  publicKey: string;
+}
+
+export interface RequestCheckPublicAndSecretKey {
+  secretKey: string;
+  publicKey: string;
+}
+
+export interface ResponseCheckPublicAndSecretKey {
+  address: string;
+  isValid: boolean;
+  isEthereum: boolean;
 }
 
 export interface RequestSeedCreateV2 {
@@ -764,40 +786,52 @@ export interface DisableNetworkResponse {
   activeNetworkCount?: number
 }
 
-export interface CustomEvmToken {
-  name?: string,
+export enum CustomTokenType {
+  erc20 = 'erc20',
+  erc721 = 'erc721',
+  psp22 = 'psp22',
+  psp34 = 'psp34'
+}
+
+export interface CustomToken { // general interface for all kinds of tokens
   smartContract: string,
+  chain: string,
+  type: CustomTokenType,
+
+  name?: string,
   symbol?: string,
   decimals?: number,
-  chain: string,
-  type: 'erc20' | 'erc721',
   isCustom?: boolean,
   isDeleted?: boolean,
   image?: string
 }
 
-export interface EvmTokenJson {
-  erc20: CustomEvmToken[],
-  erc721: CustomEvmToken[]
+export interface CustomTokenJson {
+  [CustomTokenType.erc20]: CustomToken[],
+  [CustomTokenType.erc721]: CustomToken[],
+  [CustomTokenType.psp22]: CustomToken[],
+  [CustomTokenType.psp34]: CustomToken[]
 }
 
-export interface DeleteEvmTokenParams {
+export interface DeleteCustomTokenParams {
   smartContract: string,
   chain: string,
-  type: 'erc20' | 'erc721'
+  type: CustomTokenType
 }
 
-export interface ValidateEvmTokenRequest {
+export interface ValidateCustomTokenRequest {
   smartContract: string,
   chain: string,
-  type: 'erc20' | 'erc721'
+  type: CustomTokenType,
+  contractCaller?: string
 }
 
-export interface ValidateEvmTokenResponse {
+export interface ValidateCustomTokenResponse {
   name: string,
   symbol: string,
   decimals?: number,
-  isExist: boolean
+  isExist: boolean,
+  contractError: boolean
 }
 
 export interface SupportTransferResponse {
@@ -920,6 +954,20 @@ export interface AccountExternalError{
   message: string;
 }
 
+export interface RequestAccountCreateWithSecretKey {
+  publicKey: string;
+  secretKey: string;
+  password: string;
+  name: string;
+  isAllow: boolean;
+  isEthereum: boolean;
+}
+
+export interface ResponseAccountCreateWithSecretKey {
+  errors: AccountExternalError[];
+  success: boolean;
+}
+
 export type RequestEvmEvents = null;
 export type EvmEventType = 'connect' | 'disconnect' | 'accountsChanged' | 'chainChanged' | 'message' | 'data' | 'reconnect' | 'error';
 export type EvmAccountsChangedPayload = string [];
@@ -1022,7 +1070,7 @@ export interface EvmSignatureRequestQr extends EvmSignatureRequest, EvmRequestQr
 
 export interface ConfirmationDefinitions {
   addNetworkRequest: [ConfirmationsQueueItem<NetworkJson>, ConfirmationResult<NetworkJson>],
-  addTokenRequest: [ConfirmationsQueueItem<CustomEvmToken>, ConfirmationResult<boolean>],
+  addTokenRequest: [ConfirmationsQueueItem<CustomToken>, ConfirmationResult<boolean>],
   switchNetworkRequest: [ConfirmationsQueueItem<SwitchNetworkRequest>, ConfirmationResult<boolean>],
   evmSignatureRequest: [ConfirmationsQueueItem<EvmSignatureRequest>, ConfirmationResult<string>],
   evmSignatureRequestQr: [ConfirmationsQueueItem<EvmSignatureRequestQr>, ConfirmationResultQr<string>],
@@ -1319,7 +1367,7 @@ export interface TuringStakeCompoundResp {
 
 export interface TransakNetwork {
   networks: string[];
-  tokens: string[];
+  tokens?: string[];
 }
 
 export interface CheckExistingTuringCompoundParams {
@@ -1375,11 +1423,11 @@ export interface KoniRequestSignatures {
   'pri(networkMap.upsert)': [NetworkJson, boolean];
   'pri(networkMap.getNetworkMap)': [null, Record<string, NetworkJson>];
   'pri(networkMap.getSubscription)': [null, Record<string, NetworkJson>, Record<string, NetworkJson>];
-  'pri(evmTokenState.validateEvmToken)': [ValidateEvmTokenRequest, ValidateEvmTokenResponse];
-  'pri(evmTokenState.deleteMany)': [DeleteEvmTokenParams[], boolean];
-  'pri(evmTokenState.upsertEvmTokenState)': [CustomEvmToken, boolean];
-  'pri(evmTokenState.getEvmTokenState)': [null, EvmTokenJson];
-  'pri(evmTokenState.getSubscription)': [null, EvmTokenJson, EvmTokenJson];
+  'pri(customTokenState.validateCustomToken)': [ValidateCustomTokenRequest, ValidateCustomTokenResponse];
+  'pri(customTokenState.deleteMany)': [DeleteCustomTokenParams[], boolean];
+  'pri(customTokenState.upsertCustomTokenState)': [CustomToken, boolean];
+  'pri(customTokenState.getCustomTokenState)': [null, CustomTokenJson];
+  'pri(customTokenState.getSubscription)': [null, CustomTokenJson, CustomTokenJson];
   'pri(evmNft.submitTransaction)': [EvmNftSubmitTransaction, NftTransactionResponse, NftTransactionResponse];
   'pri(evmNft.getTransaction)': [EvmNftTransactionRequest, EvmNftTransaction];
   'pri(nftTransfer.setNftTransfer)': [NftTransferExtra, boolean];
@@ -1418,6 +1466,7 @@ export interface KoniRequestSignatures {
   'pri(accounts.create.suriV2)': [RequestAccountCreateSuriV2, ResponseAccountCreateSuriV2];
   'pri(accounts.create.externalV2)': [RequestAccountCreateExternalV2, AccountExternalError[]];
   'pri(accounts.create.hardwareV2)': [RequestAccountCreateHardwareV2, boolean];
+  'pri(accounts.create.withSecret)': [RequestAccountCreateWithSecretKey, ResponseAccountCreateWithSecretKey];
   'pri(accounts.checkTransfer)': [RequestCheckTransfer, ResponseCheckTransfer];
   'pri(accounts.checkCrossChainTransfer)': [RequestCheckCrossChainTransfer, ResponseCheckCrossChainTransfer];
   'pri(accounts.transfer)': [RequestTransfer, Array<TransferError>, ResponseTransfer];
@@ -1426,6 +1475,7 @@ export interface KoniRequestSignatures {
   'pri(json.restoreV2)': [RequestJsonRestoreV2, void];
   'pri(json.batchRestoreV2)': [RequestBatchRestoreV2, void];
   'pri(accounts.exportPrivateKey)': [RequestAccountExportPrivateKey, ResponseAccountExportPrivateKey];
+  'pri(accounts.checkPublicAndSecretKey)': [RequestCheckPublicAndSecretKey, ResponseCheckPublicAndSecretKey];
   'pri(accounts.subscribeWithCurrentAddress)': [RequestAccountSubscribe, boolean, AccountsWithCurrentAddress];
   'pri(accounts.subscribeAccountsInputAddress)': [RequestAccountSubscribe, string, OptionInputAddress];
   'pri(accounts.saveRecent)': [RequestSaveRecentAccount, SingleAddress];

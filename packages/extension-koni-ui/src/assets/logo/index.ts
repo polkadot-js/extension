@@ -211,7 +211,15 @@ const LogosMap: Record<string, string> = {
   // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
   eth: require('./77.Ethereum.png'),
   // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+  ethereum: require('./77.Ethereum.png'),
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+  ethereum_goerli: require('./77.Ethereum.png'),
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
   bnb: require('./62.BNB.png'),
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+  binance: require('./62.BNB.png'),
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+  binance_test: require('./62.BNB.png'),
   // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
   usdt: require('./106.USDT.png'),
   // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
@@ -391,7 +399,11 @@ const LogosMap: Record<string, string> = {
   // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
   bit: require('./128.BIT.png'),
   // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-  arctic_testnet: require('./129.snow.png'),
+  arctic_testnet: require('./131.Arctic.png'),
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+  snow: require('./129.snow.png'),
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+  panx: require('./130.PANX.jpg'),
   // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
   default: require('./73.Default.png')
 };

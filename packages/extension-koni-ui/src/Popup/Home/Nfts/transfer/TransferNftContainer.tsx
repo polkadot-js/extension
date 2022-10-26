@@ -4,7 +4,7 @@
 import '@google/model-viewer';
 
 import { ALL_ACCOUNT_KEY } from '@subwallet/extension-koni-base/constants';
-import { isValidAddress } from '@subwallet/extension-koni-base/utils';
+import { isValidSubstrateAddress } from '@subwallet/extension-koni-base/utils';
 import { ActionContext, Spinner, Theme } from '@subwallet/extension-koni-ui/components';
 import InputAddress from '@subwallet/extension-koni-ui/components/InputAddress';
 import useGetNetworkJson from '@subwallet/extension-koni-ui/hooks/screen/home/useGetNetworkJson';
@@ -39,7 +39,7 @@ const isValidRecipient = (address: string, isEthereum: boolean) => {
   if (isEthereum) {
     return isEthereumAddress(address);
   } else {
-    return isValidAddress(address);
+    return isValidSubstrateAddress(address);
   }
 };
 

@@ -18,10 +18,7 @@ import { batchRestoreV2, jsonGetAccountInfo, jsonRestoreV2 } from '../messaging'
 import { DEFAULT_TYPE } from '../util/defaultType';
 import { isKeyringPairs$Json } from '../util/typeGuards';
 
-const acceptedFormats = {
-  'application/json': ['.json'],
-  'text/plain': ['.json', '', 'txt']
-};
+const acceptedFormats = ['application/json', 'text/plain'].join(', ');
 
 interface Props {
   className?: string;

@@ -10,7 +10,7 @@ import type { HexString } from '@polkadot/util/types';
 import type { KeypairType } from '@polkadot/util-crypto/types';
 
 import { AuthUrls } from '@subwallet/extension-base/background/handlers/State';
-import { AccountExternalError, AccountsWithCurrentAddress, BalanceJson, BaseTxError, BasicTxInfo, BasicTxResponse, BondingOptionInfo, BondingSubmitParams, ChainBondingBasics, ChainRegistry, CheckExistingTuringCompoundParams, ConfirmationDefinitions, ConfirmationsQueue, ConfirmationType, CrowdloanJson, CurrentAccountInfo, CustomEvmToken, DelegationItem, DeleteEvmTokenParams, DisableNetworkResponse, EvmNftSubmitTransaction, EvmNftTransaction, EvmNftTransactionRequest, EvmTokenJson, ExistingTuringCompoundTask, NetworkJson, NftCollection, NftJson, NftTransactionResponse, NftTransferExtra, OptionInputAddress, PriceJson, RequestAccountCreateExternalV2, RequestAccountCreateHardwareV2, RequestAccountMeta, RequestAuthorizationBlock, RequestAuthorizationPerSite, RequestCheckCrossChainTransfer, RequestCheckTransfer, RequestCrossChainTransfer, RequestCrossChainTransferExternal, RequestFreeBalance, RequestNftForceUpdate, RequestNftTransferExternalEVM, RequestNftTransferExternalSubstrate, RequestParseEVMTransactionInput, RequestRejectExternalRequest, RequestResolveExternalRequest, RequestSettingsType, RequestStakeExternal, RequestSubscribeBalance, RequestSubscribeBalancesVisibility, RequestSubscribeCrowdloan, RequestSubscribeNft, RequestSubscribePrice, RequestSubscribeStaking, RequestSubscribeStakingReward, RequestTransfer, RequestTransferCheckReferenceCount, RequestTransferCheckSupporting, RequestTransferExistentialDeposit, RequestTransferExternal, RequestUnStakeExternal, RequestWithdrawStakeExternal, ResponseAccountCreateSuriV2, ResponseAccountMeta, ResponseCheckCrossChainTransfer, ResponseCheckTransfer, ResponseNftTransferLedger, ResponseNftTransferQr, ResponseParseEVMTransactionInput, ResponseParseTransactionEVM, ResponsePrivateKeyValidateV2, ResponseQrSignEVM, ResponseRejectExternalRequest, ResponseResolveExternalRequest, ResponseSeedCreateV2, ResponseSeedValidateV2, ResponseSettingsType, ResponseStakeLedger, ResponseStakeQr, ResponseTransfer, ResponseTransferLedger, ResponseTransferQr, ResponseUnStakeLedger, ResponseUnStakeQr, ResponseWithdrawStakeLedger, ResponseWithdrawStakeQr, StakeClaimRewardParams, StakeDelegationRequest, StakeUnlockingJson, StakeWithdrawalParams, StakingJson, StakingRewardJson, SubstrateNftSubmitTransaction, SubstrateNftTransaction, SubstrateNftTransactionRequest, SupportTransferResponse, ThemeTypes, TransactionHistoryItemType, TransferError, TuringCancelStakeCompoundParams, TuringStakeCompoundParams, TuringStakeCompoundResp, UnbondingSubmitParams, ValidateEvmTokenRequest, ValidateNetworkResponse } from '@subwallet/extension-base/background/KoniTypes';
+import { AccountExternalError, AccountsWithCurrentAddress, BalanceJson, BaseTxError, BasicTxInfo, BasicTxResponse, BondingOptionInfo, BondingSubmitParams, ChainBondingBasics, ChainRegistry, CheckExistingTuringCompoundParams, ConfirmationDefinitions, ConfirmationsQueue, ConfirmationType, CrowdloanJson, CurrentAccountInfo, CustomToken, CustomTokenJson, DelegationItem, DeleteCustomTokenParams, DisableNetworkResponse, EvmNftSubmitTransaction, EvmNftTransaction, EvmNftTransactionRequest, ExistingTuringCompoundTask, NetworkJson, NftCollection, NftJson, NftTransactionResponse, NftTransferExtra, OptionInputAddress, PriceJson, RequestAccountCreateExternalV2, RequestAccountCreateHardwareV2, RequestAccountCreateWithSecretKey, RequestAccountMeta, RequestAuthorizationBlock, RequestAuthorizationPerSite, RequestCheckCrossChainTransfer, RequestCheckTransfer, RequestCrossChainTransfer, RequestCrossChainTransferExternal, RequestFreeBalance, RequestNftForceUpdate, RequestNftTransferExternalEVM, RequestNftTransferExternalSubstrate, RequestParseEVMTransactionInput, RequestRejectExternalRequest, RequestResolveExternalRequest, RequestSettingsType, RequestStakeExternal, RequestSubscribeBalance, RequestSubscribeBalancesVisibility, RequestSubscribeCrowdloan, RequestSubscribeNft, RequestSubscribePrice, RequestSubscribeStaking, RequestSubscribeStakingReward, RequestTransfer, RequestTransferCheckReferenceCount, RequestTransferCheckSupporting, RequestTransferExistentialDeposit, RequestTransferExternal, RequestUnStakeExternal, RequestWithdrawStakeExternal, ResponseAccountCreateSuriV2, ResponseAccountCreateWithSecretKey, ResponseAccountExportPrivateKey, ResponseAccountMeta, ResponseCheckCrossChainTransfer, ResponseCheckPublicAndSecretKey, ResponseCheckTransfer, ResponseNftTransferLedger, ResponseNftTransferQr, ResponseParseEVMTransactionInput, ResponseParseTransactionEVM, ResponsePrivateKeyValidateV2, ResponseQrSignEVM, ResponseRejectExternalRequest, ResponseResolveExternalRequest, ResponseSeedCreateV2, ResponseSeedValidateV2, ResponseSettingsType, ResponseStakeLedger, ResponseStakeQr, ResponseTransfer, ResponseTransferLedger, ResponseTransferQr, ResponseUnStakeLedger, ResponseUnStakeQr, ResponseWithdrawStakeLedger, ResponseWithdrawStakeQr, StakeClaimRewardParams, StakeDelegationRequest, StakeUnlockingJson, StakeWithdrawalParams, StakingJson, StakingRewardJson, SubstrateNftSubmitTransaction, SubstrateNftTransaction, SubstrateNftTransactionRequest, SupportTransferResponse, ThemeTypes, TransactionHistoryItemType, TransferError, TuringCancelStakeCompoundParams, TuringStakeCompoundParams, TuringStakeCompoundResp, UnbondingSubmitParams, ValidateCustomTokenRequest, ValidateCustomTokenResponse, ValidateNetworkResponse } from '@subwallet/extension-base/background/KoniTypes';
 import { RequestCurrentAccountAddress, ResponseQRIsLocked, ResponseQrSignSubstrate } from '@subwallet/extension-base/background/types';
 import { PORT_EXTENSION } from '@subwallet/extension-base/defaults';
 import { getId } from '@subwallet/extension-base/utils/getId';
@@ -108,12 +108,16 @@ export async function exportAccount (address: string, password: string): Promise
   return sendMessage('pri(accounts.export)', { address, password });
 }
 
-export async function exportAccountPrivateKey (address: string, password: string): Promise<{ privateKey: string }> {
+export async function exportAccountPrivateKey (address: string, password: string): Promise<ResponseAccountExportPrivateKey> {
   return sendMessage('pri(accounts.exportPrivateKey)', { address, password });
 }
 
 export async function exportAccounts (addresses: string[], password: string): Promise<{ exportedJson: KeyringPairs$Json }> {
   return sendMessage('pri(accounts.batchExport)', { addresses, password });
+}
+
+export async function checkPublicAndPrivateKey (publicKey: string, secretKey: string): Promise<ResponseCheckPublicAndSecretKey> {
+  return sendMessage('pri(accounts.checkPublicAndSecretKey)', { publicKey, secretKey });
 }
 
 export async function validateAccount (address: string, password: string): Promise<boolean> {
@@ -194,6 +198,10 @@ export async function createSeed (length?: SeedLengths, seed?: string, type?: Ke
 
 export async function createSeedV2 (length?: SeedLengths, seed?: string, types?: Array<KeypairType>): Promise<ResponseSeedCreateV2> {
   return sendMessage('pri(seed.createV2)', { length, seed, types });
+}
+
+export async function createAccountWithSecret (request: RequestAccountCreateWithSecretKey): Promise<ResponseAccountCreateWithSecretKey> {
+  return sendMessage('pri(accounts.create.withSecret)', request);
 }
 
 export async function getAllMetatdata (): Promise<MetadataDef[]> {
@@ -570,24 +578,24 @@ export async function resetDefaultNetwork (): Promise<boolean> {
   return sendMessage('pri(networkMap.resetDefault)', null);
 }
 
-export async function subscribeEvmToken (callback: (data: EvmTokenJson) => void): Promise<EvmTokenJson> {
-  return sendMessage('pri(evmTokenState.getSubscription)', null, callback);
+export async function subscribeCustomToken (callback: (data: CustomTokenJson) => void): Promise<CustomTokenJson> {
+  return sendMessage('pri(customTokenState.getSubscription)', null, callback);
 }
 
-export async function getEvmTokenState (): Promise<EvmTokenJson> {
-  return sendMessage('pri(evmTokenState.getEvmTokenState)', null);
+export async function getCustomTokenState (): Promise<CustomTokenJson> {
+  return sendMessage('pri(customTokenState.getCustomTokenState)', null);
 }
 
-export async function upsertEvmToken (data: CustomEvmToken): Promise<boolean> {
-  return sendMessage('pri(evmTokenState.upsertEvmTokenState)', data);
+export async function upsertCustomToken (data: CustomToken): Promise<boolean> {
+  return sendMessage('pri(customTokenState.upsertCustomTokenState)', data);
 }
 
-export async function deleteEvmTokens (data: DeleteEvmTokenParams[]) {
-  return sendMessage('pri(evmTokenState.deleteMany)', data);
+export async function deleteCustomTokens (data: DeleteCustomTokenParams[]) {
+  return sendMessage('pri(customTokenState.deleteMany)', data);
 }
 
-export async function validateEvmToken (data: ValidateEvmTokenRequest) {
-  return sendMessage('pri(evmTokenState.validateEvmToken)', data);
+export async function validateCustomToken (data: ValidateCustomTokenRequest): Promise<ValidateCustomTokenResponse> {
+  return sendMessage('pri(customTokenState.validateCustomToken)', data);
 }
 
 export async function transferCheckReferenceCount (request: RequestTransferCheckReferenceCount): Promise<boolean> {

@@ -112,6 +112,7 @@ const darkTheme = {
   dropdownBackground: '#020412',
   buyServiceOpacity: 0.6,
   filterDefault: 'invert(51%) sepia(13%) saturate(545%) hue-rotate(192deg) brightness(96%) contrast(85%)', // #7B8098
+  filterWhite: 'invert(100%) sepia(0%) saturate(25%) hue-rotate(70deg) brightness(108%) contrast(108%)', // #FFFFFF
   filterError: 'invert(22%) sepia(85%) saturate(4711%) hue-rotate(351deg) brightness(98%) contrast(82%)', // #FF8686
   filterSuccess: 'invert(71%) sepia(58%) saturate(424%) hue-rotate(107deg) brightness(85%) contrast(90%)', // #42C59A
   filterWarning: 'invert(77%) sepia(67%) saturate(6392%) hue-rotate(0deg) brightness(103%) contrast(105%)' // #FF7D01

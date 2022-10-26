@@ -27,7 +27,6 @@ interface Collection {
 }
 
 export class BitCountryNftApi extends BaseNftApi {
-  // eslint-disable-next-line no-useless-constructor
   constructor (api: ApiProps | null, addresses: string[], chain: string) {
     super(chain, api, addresses);
   }

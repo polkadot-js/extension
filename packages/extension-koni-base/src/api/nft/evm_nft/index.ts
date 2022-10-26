@@ -1,7 +1,7 @@
 // Copyright 2019-2022 @subwallet/extension-koni authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { CustomToken, NftCollection, NftItem } from '@subwallet/extension-base/background/KoniTypes';
+import { CustomToken, CustomTokenType, NftCollection, NftItem } from '@subwallet/extension-base/background/KoniTypes';
 import { getRandomIpfsGateway } from '@subwallet/extension-koni-base/api/nft/config';
 import { BaseNftApi, HandleNftParams } from '@subwallet/extension-koni-base/api/nft/nft';
 import { ERC721Contract } from '@subwallet/extension-koni-base/api/tokens/evm/web3';
@@ -140,6 +140,7 @@ export class EvmNftApi extends BaseNftApi {
               parsedItem.collectionId = smartContract;
               parsedItem.id = nftId;
               parsedItem.owner = address;
+              parsedItem.type = CustomTokenType.erc721;
 
               if (parsedItem) {
                 if (parsedItem.image) {

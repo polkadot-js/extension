@@ -3,7 +3,7 @@
 
 import { ALL_ACCOUNT_KEY } from '@subwallet/extension-koni-base/constants';
 import { NftType } from '@subwallet/extension-koni-ui/hooks/screen/home/types';
-import { _NftCollection } from '@subwallet/extension-koni-ui/Popup/Home/Nfts/types';
+import { _NftCollection } from '@subwallet/extension-koni-ui/Popup/Home/Nfts/utils';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { useSelector } from 'react-redux';
 

@@ -1207,9 +1207,8 @@ export default class KoniExtension extends Extension {
 
     const fromAccountFreeNumber = new BN(fromAccountFreeBalance);
     const feeNumber = fee ? new BN(fee) : undefined;
-    const toAccountFreeBalanceNumber = new BN(fromAccountNativeBalance);
+    const fromAccountNativeBalanceNumber = new BN(fromAccountNativeBalance);
 
-    // TODO: check balanceError: enough free balance + enough fee payment
     if (!transferAll && value && feeNumber && valueNumber) {
       if (tokenInfo && tokenInfo.isMainToken) {
         // eslint-disable-next-line @typescript-eslint/no-unsafe-call
@@ -1221,7 +1220,7 @@ export default class KoniExtension extends Extension {
         }
       } else {
         // eslint-disable-next-line @typescript-eslint/no-unsafe-call
-        if (toAccountFreeBalanceNumber.lt(feeNumber)) {
+        if (fromAccountNativeBalanceNumber.lt(feeNumber) || valueNumber > fromAccountFreeNumber) {
           errors.push({
             code: TransferErrorCode.NOT_ENOUGH_VALUE,
             message: 'Not enough balance free to make transfer'
@@ -1229,16 +1228,6 @@ export default class KoniExtension extends Extension {
         }
       }
     }
-
-    // if (!transferAll && value && feeNumber && valueNumber) {
-    //   // eslint-disable-next-line @typescript-eslint/no-unsafe-call
-    //   if (fromAccountFreeNumber.lt(feeNumber.add(valueNumber))) {
-    //     errors.push({
-    //       code: TransferErrorCode.NOT_ENOUGH_VALUE,
-    //       message: 'Not enough balance free to make transfer'
-    //     });
-    //   }
-    // }
 
     return {
       errors,

@@ -150,6 +150,10 @@ export class WasmNftApi extends BaseNftApi {
       nftItem.properties = attributeDict;
     }
 
+    if (isFeatured) {
+      nftItem.external_url = ART_ZERO_EXTERNAL_URL;
+    }
+
     return nftItem;
   }
 

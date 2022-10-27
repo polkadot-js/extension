@@ -5,7 +5,7 @@ import { faArrowLeft, faArrowRight } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import Link from '@subwallet/extension-koni-ui/components/Link';
 import useFetchNftExtra from '@subwallet/extension-koni-ui/hooks/screen/home/useFetchNftTransferExtra';
-import { _NftCollection, _NftItem } from '@subwallet/extension-koni-ui/Popup/Home/Nfts/types';
+import { _NftCollection, _NftItem } from '@subwallet/extension-koni-ui/Popup/Home/Nfts/utils';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { NFT_PER_ROW } from '@subwallet/extension-koni-ui/util';
 import React, { useCallback, useEffect, useState } from 'react';
@@ -166,6 +166,7 @@ function NftContainer (
             setChosenItem={setChosenItem}
             setShowItemDetail={setShowItemDetail}
             showItemDetail={showItemDetail}
+            setShowCollectionDetail={setShowCollectionDetail}
           />
       }
 

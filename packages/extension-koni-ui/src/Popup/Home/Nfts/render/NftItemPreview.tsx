@@ -4,7 +4,7 @@
 import '@google/model-viewer';
 
 import Spinner from '@subwallet/extension-koni-ui/components/Spinner';
-import { _NftItem } from '@subwallet/extension-koni-ui/Popup/Home/Nfts/types';
+import { _NftItem } from '@subwallet/extension-koni-ui/Popup/Home/Nfts/utils';
 import { Theme, ThemeProps } from '@subwallet/extension-koni-ui/types';
 import React, { useCallback, useContext, useState } from 'react';
 // @ts-ignore

@@ -4,7 +4,7 @@
 import { ApiProps, CustomToken, CustomTokenType, NftCollection, NftItem } from '@subwallet/extension-base/background/KoniTypes';
 import { BaseNftApi, HandleNftParams } from '@subwallet/extension-koni-base/api/nft/nft';
 import { ART_ZERO_COLLECTION_API, ART_ZERO_CONTRACTS, ART_ZERO_EXTERNAL_URL, ART_ZERO_IMAGE_API, ART_ZERO_IPFS_API } from '@subwallet/extension-koni-base/api/nft/wasm_nft/utils';
-import { PSP34Contract } from '@subwallet/extension-koni-base/api/tokens/wasm/helper';
+import { getPSP34ContractPromise } from '@subwallet/extension-koni-base/api/tokens/wasm';
 import fetch from 'cross-fetch';
 
 import { ApiPromise } from '@polkadot/api';
@@ -150,6 +150,10 @@ export class WasmNftApi extends BaseNftApi {
       nftItem.properties = attributeDict;
     }
 
+    if (isFeatured) {
+      nftItem.external_url = ART_ZERO_EXTERNAL_URL;
+    }
+
     return nftItem;
   }
 
@@ -270,6 +274,7 @@ export class WasmNftApi extends BaseNftApi {
             nftItem.type = CustomTokenType.psp34;
             nftItem.id = tokenId;
             nftItem.owner = address;
+            nftItem.onChainOption = tokenIdObj;
 
             nftParams.updateItem(this.chain, nftItem, address);
             ownItem = true;
@@ -326,7 +331,7 @@ export class WasmNftApi extends BaseNftApi {
     const apiPromise = this.dotSamaApi?.api as ApiPromise;
 
     await Promise.all(this.wasmContracts.map(async ({ name, smartContract }) => {
-      const contractPromise = new ContractPromise(apiPromise, PSP34Contract, smartContract);
+      const contractPromise = getPSP34ContractPromise(apiPromise, smartContract);
 
       const { attributeList, storedOnChain } = await this.getCollectionAttributes(contractPromise);
 

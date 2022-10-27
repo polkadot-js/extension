@@ -3,7 +3,7 @@
 
 import '@google/model-viewer';
 
-import { ALL_ACCOUNT_KEY } from '@subwallet/extension-koni-base/constants';
+import { CustomTokenType } from '@subwallet/extension-base/background/KoniTypes';
 import { isValidSubstrateAddress } from '@subwallet/extension-koni-base/utils';
 import { ActionContext, Spinner, Theme } from '@subwallet/extension-koni-ui/components';
 import InputAddress from '@subwallet/extension-koni-ui/components/InputAddress';
@@ -14,7 +14,7 @@ import paramsHandler from '@subwallet/extension-koni-ui/Popup/Home/Nfts/api/para
 import transferHandler from '@subwallet/extension-koni-ui/Popup/Home/Nfts/api/transferHandler';
 import AuthTransfer from '@subwallet/extension-koni-ui/Popup/Home/Nfts/transfer/AuthTransfer';
 import TransferResult from '@subwallet/extension-koni-ui/Popup/Home/Nfts/transfer/TransferResult';
-import { _NftItem, SubstrateTransferParams, SUPPORTED_TRANSFER_SUBSTRATE_CHAIN, Web3TransferParams } from '@subwallet/extension-koni-ui/Popup/Home/Nfts/types';
+import { _NftItem, SubstrateTransferParams, SUPPORTED_TRANSFER_SUBSTRATE_CHAIN, Web3TransferParams } from '@subwallet/extension-koni-ui/Popup/Home/Nfts/utils';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { CurrentAccountType } from '@subwallet/extension-koni-ui/stores/types';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
@@ -71,7 +71,7 @@ function Wrapper ({ className = '' }: Props): React.ReactElement<Props> {
 function TransferNftContainer ({ className, collectionId, collectionImage, nftItem }: ContentProps): React.ReactElement<ContentProps> {
   const [recipientAddress, setRecipientAddress] = useState<string | null>('');
   const [addressError, setAddressError] = useState(true);
-  const { currentAccount: account, currentNetwork } = useSelector((state: RootState) => state);
+  const { currentAccount: account } = useSelector((state: RootState) => state);
   const [currentAccount] = useState<CurrentAccountType>(account);
   const networkKey = nftItem.chain as string;
   const networkJson = useGetNetworkJson(networkKey);
@@ -98,6 +98,12 @@ function TransferNftContainer ({ className, collectionId, collectionImage, nftIt
 
   const navigate = useContext(ActionContext);
   const { show } = useToast();
+
+  useEffect(() => { // handle user change network setting during sending process
+    if (!networkJson.active) {
+      navigate('/');
+    }
+  }, [navigate, networkJson.active]);
 
   useEffect(() => { // handle user change account during sending process
     if (account.account?.address !== currentAccount.account?.address) {
@@ -135,34 +141,24 @@ function TransferNftContainer ({ className, collectionId, collectionImage, nftIt
     }
 
     if (!networkKey) {
-      if (currentNetwork.networkKey.toLowerCase() === ALL_ACCOUNT_KEY.toLowerCase()) {
-        show(`Please change to ${networkJson.chain.toUpperCase()}`);
-      }
-
-      return;
-    }
-
-    if (networkKey !== currentNetwork.networkKey) {
-      show(`Please change to ${networkJson.chain.toUpperCase()}`);
-
       return;
     }
 
     setLoading(true);
     const senderAddress = currentAccount.account.address;
-    const params = paramsHandler(nftItem, networkKey, networkJson);
-    const transferMeta = await transferHandler(networkKey, senderAddress, recipientAddress as string, params, networkJson);
+    const params = paramsHandler(nftItem, networkKey);
+    const transferMeta = await transferHandler(networkKey, senderAddress, recipientAddress as string, params, nftItem);
 
     if (transferMeta !== null) {
       // @ts-ignore
-      if (SUPPORTED_TRANSFER_SUBSTRATE_CHAIN.indexOf(networkKey) > -1) {
+      if (SUPPORTED_TRANSFER_SUBSTRATE_CHAIN.indexOf(networkKey) > -1 || nftItem.type === CustomTokenType.psp34) {
         setSubstrateTransferParams({
           params,
           estimatedFee: transferMeta.estimatedFee,
           balanceError: transferMeta.balanceError
         } as SubstrateTransferParams);
         // @ts-ignore
-      } else if (networkJson.isEthereum && networkJson.isEthereum) {
+      } else if (nftItem.type === CustomTokenType.erc721) {
         setWeb3TransferParams({
           rawTx: transferMeta.web3RawTx,
           estimatedGas: transferMeta.estimatedGas,
@@ -176,7 +172,7 @@ function TransferNftContainer ({ className, collectionId, collectionImage, nftIt
     }
 
     setLoading(false);
-  }, [addressError, currentAccount.account?.address, currentNetwork.networkKey, networkJson, networkKey, nftItem, recipientAddress, show]);
+  }, [addressError, currentAccount?.account?.address, networkKey, nftItem, recipientAddress, show]);
 
   const handleImageError = useCallback(() => {
     setLoading(false);

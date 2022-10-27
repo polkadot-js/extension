@@ -2,17 +2,17 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { RootState } from '@subwallet/extension-koni-ui/stores';
-import { AccountType } from '@subwallet/extension-koni-ui/types/account';
+import { AccountSignType } from '@subwallet/extension-koni-ui/types/account';
 import { getAccountType } from '@subwallet/extension-koni-ui/util/account';
 import { useMemo } from 'react';
 import { useSelector } from 'react-redux';
 
-const useGetCurrentAccountType = (): AccountType => {
+const useGetCurrentAccountSignType = (): AccountSignType => {
   const account = useSelector((state: RootState) => state.currentAccount.account);
 
-  return useMemo((): AccountType => {
+  return useMemo((): AccountSignType => {
     return getAccountType(account);
   }, [account]);
 };
 
-export default useGetCurrentAccountType;
+export default useGetCurrentAccountSignType;

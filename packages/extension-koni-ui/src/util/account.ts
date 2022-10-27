@@ -5,7 +5,7 @@ import { NetworkJson } from '@subwallet/extension-base/background/KoniTypes';
 import { AccountJson, FindAccountFunction } from '@subwallet/extension-base/background/types';
 import { ALL_ACCOUNT_KEY } from '@subwallet/extension-koni-base/constants';
 import { TYPE_ACCOUNT_CAN_SIGN } from '@subwallet/extension-koni-ui/constants/account';
-import { AccountType } from '@subwallet/extension-koni-ui/types/account';
+import { AccountSignType } from '@subwallet/extension-koni-ui/types/account';
 import { getNetworkJsonByGenesisHash, getNetworkKeyByGenesisHash } from '@subwallet/extension-koni-ui/util/getNetworkJsonByGenesisHash';
 import { getLogoByNetworkKey } from '@subwallet/extension-koni-ui/util/index';
 import reformatAddress from '@subwallet/extension-koni-ui/util/reformatAddress';
@@ -74,7 +74,7 @@ export const findAccountByAddress = (accounts: AccountJson[], address: string): 
   }
 };
 
-export const getAccountType = (account: AccountJson | null | undefined): AccountType => {
+export const getAccountType = (account: AccountJson | null | undefined): AccountSignType => {
   if (!account) {
     return 'Unknown';
   } else {
@@ -96,6 +96,6 @@ export const getAccountType = (account: AccountJson | null | undefined): Account
   }
 };
 
-export const accountCanSign = (accountType: AccountType): boolean => {
+export const accountCanSign = (accountType: AccountSignType): boolean => {
   return TYPE_ACCOUNT_CAN_SIGN.includes(accountType);
 };

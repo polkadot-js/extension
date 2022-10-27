@@ -1,16 +1,16 @@
 // Copyright 2019-2022 @subwallet/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import useGetCurrentAccountType from '@subwallet/extension-koni-ui/hooks/useGetCurrentAccountType';
+import useGetCurrentAccountSignType from '@subwallet/extension-koni-ui/hooks/useGetCurrentAccountSignType';
 import { accountCanSign } from '@subwallet/extension-koni-ui/util/account';
 import { useMemo } from 'react';
 
 const useCurrentAccountCanSign = () => {
-  const accountType = useGetCurrentAccountType();
+  const accountSignType = useGetCurrentAccountSignType();
 
   return useMemo((): boolean => {
-    return accountCanSign(accountType);
-  }, [accountType]);
+    return accountCanSign(accountSignType);
+  }, [accountSignType]);
 };
 
 export default useCurrentAccountCanSign;

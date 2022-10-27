@@ -16,7 +16,8 @@ export const DEFAULT_WASM_TOKENS: WasmTokenJson = {
       chain: 'alephTest',
       symbol: 'PANX',
       decimals: 12,
-      type: CustomTokenType.psp22
+      type: CustomTokenType.psp22,
+      isCustom: true
     }
   ],
   psp34: [

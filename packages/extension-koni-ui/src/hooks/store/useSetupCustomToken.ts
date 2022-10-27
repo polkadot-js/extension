@@ -7,7 +7,6 @@ import { store } from '@subwallet/extension-koni-ui/stores';
 import { useEffect } from 'react';
 
 function updateCustomTokenState (data: CustomTokenJson): void {
-  console.log('customToken', data);
   store.dispatch({ type: 'customToken/update', payload: data });
 }
 

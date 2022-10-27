@@ -402,6 +402,8 @@ const doSignAndSendQr = async (
     });
   };
 
+  console.log(senderAddress);
+
   await extrinsic.signAsync(
     senderAddress,
     {

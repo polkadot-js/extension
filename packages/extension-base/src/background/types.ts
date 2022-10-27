@@ -44,6 +44,7 @@ export interface AccountJson extends KeyringPair$Meta {
   suri?: string;
   type?: KeypairType;
   whenCreated?: number;
+  isReadOnly?: boolean;
 }
 
 // all Accounts and the address of the current Account

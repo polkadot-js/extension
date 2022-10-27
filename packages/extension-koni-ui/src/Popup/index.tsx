@@ -28,7 +28,7 @@ import { ScannerContextProvider } from '../contexts/ScannerContext';
 import { saveCurrentAccountAddress, subscribeAccountsWithCurrentAddress, subscribeAuthorizeRequestsV2, subscribeConfirmations, subscribeMetadataRequests, subscribeSigningRequests } from '../messaging';
 import { store } from '../stores';
 import { buildHierarchy } from '../util/buildHierarchy';
-import { createFindAccountHandler } from '../util/findAccount';
+import { createFindAccountHandler } from '../util/account';
 // import Home from './Home';
 
 const StakeCompoundSubmitTransaction = React.lazy(() => import('@subwallet/extension-koni-ui/Popup/Home/Staking/StakeCompoundSubmitTransaction'));

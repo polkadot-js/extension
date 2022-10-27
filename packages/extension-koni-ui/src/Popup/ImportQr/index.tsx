@@ -43,6 +43,7 @@ function ImportQr ({ className }: Props): React.ReactElement<Props> {
   const [password, setPassword] = useState<string | null>(null);
   const [errors, setErrors] = useState<AccountExternalError[]>([]);
   const [isConnectWhenCreate, setIsConnectWhenCreate] = useState<boolean>(true);
+  const [isReadOnly, setIsReadOnly] = useState<boolean>(false);
 
   const [isBusy, setIsBusy] = useState<boolean>(false);
   const themeContext = useContext(ThemeContext as React.Context<Theme>);
@@ -52,6 +53,7 @@ function ImportQr ({ className }: Props): React.ReactElement<Props> {
       setAccount(qrAccount);
       setIsScanning(false);
       setName(qrAccount?.name || defaultName);
+      setIsReadOnly(false);
 
       if (qrAccount.isAddress) {
         setAddress(qrAccount.content);
@@ -92,7 +94,8 @@ function ImportQr ({ className }: Props): React.ReactElement<Props> {
             address: account.content,
             genesisHash: account.genesisHash,
             isEthereum: isEthereum,
-            isAllowed: isConnectWhenCreate
+            isAllowed: isConnectWhenCreate,
+            isReadOnly: isReadOnly
           })
             .then((errors) => {
               if (errors.length) {
@@ -133,7 +136,7 @@ function ImportQr ({ className }: Props): React.ReactElement<Props> {
         setIsBusy(false);
       }
     },
-    [account, isConnectWhenCreate, isEthereum, name, onAction, password]
+    [account, isConnectWhenCreate, isEthereum, isReadOnly, name, onAction, password]
   );
 
   const renderErrors = useCallback((): JSX.Element => {
@@ -206,6 +209,7 @@ function ImportQr ({ className }: Props): React.ReactElement<Props> {
                         genesisHash={account.isAddress ? account.genesisHash : undefined}
                         isEthereum={isEthereum}
                         isExternal={account.isAddress}
+                        isReadOnly={isReadOnly}
                         name={name}
                       />
                       <Name
@@ -215,6 +219,13 @@ function ImportQr ({ className }: Props): React.ReactElement<Props> {
                         value={name || ''}
                       />
                       { !account.isAddress && <Password onChange={setPassword} />}
+                      { account.isAddress && (
+                        <Checkbox
+                          checked={isReadOnly}
+                          label={t<string>('Read only account')}
+                          onChange={setIsReadOnly}
+                        />
+                      )}
                       <Checkbox
                         checked={isConnectWhenCreate}
                         label={t<string>('Auto connect to all DApps after importing')}

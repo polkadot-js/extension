@@ -433,5 +433,12 @@
   "Note that you cannot transfer all tokens out from this account.": "",
   "Via Text": "",
   "Via QR": "",
-  "Continue": ""
+  "Continue": "",
+  "read only account": "",
+  "QR": "",
+  "Read only account": "",
+  "The sender account is read only account": "",
+  "Manage Tokens": "",
+  "Configure Token": "",
+  "Token setting": ""
 }

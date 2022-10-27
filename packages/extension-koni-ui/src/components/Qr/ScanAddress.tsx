@@ -51,7 +51,7 @@ const ScanAddress = (props: Props) => {
           [prefix, content, genesisHash, ...name] = arr;
         } else if (prefix === ETHEREUM_PREFIX) {
           [prefix, content, ...name] = arr;
-          genesisHash = '';
+          genesisHash = content.split('@')[1] || '';
           content = content.substring(0, 42);
           isEthereum = true;
 

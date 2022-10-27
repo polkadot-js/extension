@@ -925,6 +925,7 @@ export interface RequestAccountCreateExternalV2 {
   name: string;
   isEthereum: boolean;
   isAllowed: boolean;
+  isReadOnly: boolean;
 }
 
 export interface RequestAccountCreateHardwareV2 {

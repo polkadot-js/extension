@@ -3,7 +3,6 @@
 
 import { ChainRegistry, DropdownTransformOptionType, NetworkJson } from '@subwallet/extension-base/background/KoniTypes';
 import { SupportedCrossChainsMap } from '@subwallet/extension-koni-base/api/xcm/utils';
-import { reformatAddress } from '@subwallet/extension-koni-base/utils';
 import { AccountContext, ActionContext, Button, Warning } from '@subwallet/extension-koni-ui/components';
 import InputBalance from '@subwallet/extension-koni-ui/components/InputBalance';
 import LoadingContainer from '@subwallet/extension-koni-ui/components/LoadingContainer';
@@ -11,6 +10,7 @@ import ReceiverInputAddress from '@subwallet/extension-koni-ui/components/Receiv
 import { useTranslation } from '@subwallet/extension-koni-ui/components/translate';
 import { BalanceFormatType, XcmTransferInputAddressType } from '@subwallet/extension-koni-ui/components/types';
 import useFreeBalance from '@subwallet/extension-koni-ui/hooks/screen/sending/useFreeBalance';
+import useGetAccountByAddress from '@subwallet/extension-koni-ui/hooks/useGetAccountByAddress';
 import { checkCrossChainTransfer } from '@subwallet/extension-koni-ui/messaging';
 import Header from '@subwallet/extension-koni-ui/partials/Header';
 import SendFundResult from '@subwallet/extension-koni-ui/Popup/Sending/SendFundResult';
@@ -20,6 +20,7 @@ import BridgeInputAddress from '@subwallet/extension-koni-ui/Popup/XcmTransfer/B
 import Dropdown from '@subwallet/extension-koni-ui/Popup/XcmTransfer/XcmDropdown/Dropdown';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { ThemeProps, TransferResultType } from '@subwallet/extension-koni-ui/types';
+import { findAccountByAddress } from '@subwallet/extension-koni-ui/util/account';
 import React, { useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { useSelector } from 'react-redux';
 import styled from 'styled-components';
@@ -166,8 +167,7 @@ function XcmTransfer ({ chainRegistryMap, className, defaultValue, firstOriginCh
 
   const accountBlockHardwareState = useCallback((address: string | null, chain: string, isReceiver?: boolean): BLOCK_HARDWARE_STATE => {
     if (address) {
-      const prefix = 42;
-      const account = accounts.find((acc) => reformatAddress(acc.address, prefix) === reformatAddress(address, prefix));
+      const account = findAccountByAddress(accounts, address);
 
       if (!account) {
         return BLOCK_HARDWARE_STATE.ACCEPTED;
@@ -193,6 +193,16 @@ function XcmTransfer ({ chainRegistryMap, className, defaultValue, firstOriginCh
     return BLOCK_HARDWARE_STATE.ACCEPTED;
   }, [accounts, networkMap]);
 
+  const senderAccount = useGetAccountByAddress(senderId);
+
+  const isReadOnly = useMemo((): boolean => {
+    if (!senderAccount) {
+      return false;
+    } else {
+      return !!senderAccount.isReadOnly;
+    }
+  }, [senderAccount]);
+
   const senderBlockHardwareState = useMemo((): BLOCK_HARDWARE_STATE => {
     return accountBlockHardwareState(senderId, originChain);
   }, [accountBlockHardwareState, originChain, senderId]);
@@ -208,7 +218,8 @@ function XcmTransfer ({ chainRegistryMap, className, defaultValue, firstOriginCh
     !amountGtAvailableBalance &&
     senderBlockHardwareState === BLOCK_HARDWARE_STATE.ACCEPTED &&
     receiverBlockHardwareState === BLOCK_HARDWARE_STATE.ACCEPTED &&
-    !!balanceFormat;
+    !!balanceFormat &&
+    !isReadOnly;
 
   const getLedgerXCMText = useCallback((state: BLOCK_HARDWARE_STATE, isSender: boolean) => {
     let accountMessage: string;
@@ -459,6 +470,15 @@ function XcmTransfer ({ chainRegistryMap, className, defaultValue, firstOriginCh
                     className={'xcm-transfer-warning'}
                   >
                     {getLedgerXCMText(receiverBlockHardwareState, false)}
+                  </Warning>
+                )}
+
+                {isReadOnly && (
+                  <Warning
+                    className='xcm-transfer-warning'
+                    isDanger
+                  >
+                    {t<string>('The sender account is read only account')}
                   </Warning>
                 )}
 

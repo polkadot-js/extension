@@ -22,9 +22,7 @@ interface Props extends ThemeProps {
   networkKey: string;
   activeStake: string | undefined;
   unbondingStake: string | undefined;
-  isAccountAll: boolean;
-  isExternalAccount: boolean;
-  isHardwareAccount: boolean;
+  isCanSign: boolean;
 
   redeemable: number;
   nextWithdrawal: number;
@@ -42,7 +40,7 @@ interface Props extends ThemeProps {
   setTargetRedeemable: (val: number) => void;
 }
 
-function StakingRow ({ activeStake, chainName, className, index, isAccountAll, isExternalAccount, isHardwareAccount, logo, networkKey, nextWithdrawal, nextWithdrawalAction, nextWithdrawalAmount, price, redeemable, reward, setActionNetworkKey, setShowClaimRewardModal, setShowCompoundStakeModal, setShowWithdrawalModal, setTargetNextWithdrawalAction, setTargetRedeemable, setTargetValidator, targetValidator, totalStake, unbondingStake, unit }: Props): React.ReactElement<Props> {
+function StakingRow ({ activeStake, chainName, className, index, isCanSign, logo, networkKey, nextWithdrawal, nextWithdrawalAction, nextWithdrawalAmount, price, redeemable, reward, setActionNetworkKey, setShowClaimRewardModal, setShowCompoundStakeModal, setShowWithdrawalModal, setTargetNextWithdrawalAction, setTargetRedeemable, setTargetValidator, targetValidator, totalStake, unbondingStake, unit }: Props): React.ReactElement<Props> {
   const [showReward, setShowReward] = useState(false);
   const [showStakingMenu, setShowStakingMenu] = useState(false);
 
@@ -132,7 +130,7 @@ function StakingRow ({ activeStake, chainName, className, index, isAccountAll, i
               <div className={'balance-description'}>
                 <div>Staking balance</div>
                 {
-                  !isAccountAll && <StakingMenu
+                  isCanSign && <StakingMenu
                     bondedAmount={activeStake as string}
                     networkKey={networkKey}
                     nextWithdrawal={nextWithdrawal}

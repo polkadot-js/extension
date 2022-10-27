@@ -50,12 +50,12 @@ function isJsonPayload (value: SignerPayloadJSON | SignerPayloadRaw): value is S
 }
 
 export default class Extension {
-  readonly #cachedUnlocks: CachedUnlocks;
+  protected readonly cachedUnlocks: CachedUnlocks;
 
   readonly #state: State;
 
   constructor (state: State) {
-    this.#cachedUnlocks = {};
+    this.cachedUnlocks = {};
     this.#state = state;
   }
 
@@ -126,11 +126,11 @@ export default class Extension {
   private refreshAccountPasswordCache (pair: KeyringPair): number {
     const { address } = pair;
 
-    const savedExpiry = this.#cachedUnlocks[address] || 0;
+    const savedExpiry = this.cachedUnlocks[address] || 0;
     const remainingTime = savedExpiry - Date.now();
 
     if (remainingTime < 0) {
-      this.#cachedUnlocks[address] = 0;
+      this.cachedUnlocks[address] = 0;
       pair.lock();
 
       return 0;
@@ -381,7 +381,7 @@ export default class Extension {
     const result = request.sign(registry, pair);
 
     if (savePass) {
-      this.#cachedUnlocks[address] = Date.now() + PASSWORD_EXPIRY_MS;
+      this.cachedUnlocks[address] = Date.now() + PASSWORD_EXPIRY_MS;
     } else {
       pair.lock();
     }
@@ -471,7 +471,7 @@ export default class Extension {
     const _address = pair.address;
 
     if (savePass) {
-      this.#cachedUnlocks[_address] = Date.now() + PASSWORD_EXPIRY_MS;
+      this.cachedUnlocks[_address] = Date.now() + PASSWORD_EXPIRY_MS;
     } else {
       pair.lock();
     }

@@ -5,7 +5,7 @@ import type { KeypairType } from '@polkadot/util-crypto/types';
 import type { Recoded, ThemeProps } from '../types';
 
 import { faUsb } from '@fortawesome/free-brands-svg-icons';
-import { faCodeBranch, faQrcode } from '@fortawesome/free-solid-svg-icons';
+import { faCodeBranch, faEye, faQrcode } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { NetworkJson } from '@subwallet/extension-base/background/KoniTypes';
 import cloneLogo from '@subwallet/extension-koni-ui/assets/clone.svg';
@@ -32,6 +32,7 @@ export interface Props {
   originGenesisHash?: string | null;
   isExternal?: boolean | null;
   isHardware?: boolean | null;
+  isReadOnly?: boolean | null;
   name?: string | null;
   parentName?: string | null;
   suri?: string;
@@ -45,7 +46,7 @@ export interface Props {
   accountSplitPart?: 'both' | 'left' | 'right';
 }
 
-function AccountInfo ({ accountSplitPart = 'both', address, addressHalfLength = 10, className, genesisHash, iconSize = 32, isEthereum, isExternal, isHardware, isShowAddress = true, isShowBanner = true, name, originGenesisHash, parentName, showCopyBtn = true, suri, type: givenType }: Props): React.ReactElement<Props> {
+function AccountInfo ({ accountSplitPart = 'both', address, addressHalfLength = 10, className, isReadOnly, genesisHash, iconSize = 32, isEthereum, isExternal, isHardware, isShowAddress = true, isShowBanner = true, name, originGenesisHash, parentName, showCopyBtn = true, suri, type: givenType }: Props): React.ReactElement<Props> {
   const { t } = useTranslation();
   const { accounts } = useContext(AccountContext);
   const [{ account,
@@ -136,29 +137,43 @@ function AccountInfo ({ accountSplitPart = 'both', address, addressHalfLength = 
     }
   };
 
+  const renderIcon = useCallback((): JSX.Element => {
+    if (account?.isExternal || isExternal) {
+      if (account?.isHardware || isHardware) {
+        return (
+          <FontAwesomeIcon
+            className='hardwareIcon'
+            icon={faUsb}
+            rotation={270}
+            title={t('hardware wallet account')}
+          />
+        );
+      } else if (account?.isReadOnly || isReadOnly) {
+        return (
+          <FontAwesomeIcon
+            className='externalIcon'
+            icon={faEye}
+            title={t('read only account')}
+          />
+        );
+      } else {
+        return (
+          <FontAwesomeIcon
+            className='externalIcon'
+            icon={faQrcode}
+            title={t('external account')}
+          />
+        );
+      }
+    } else {
+      return <></>;
+    }
+  }, [account?.isExternal, account?.isHardware, account?.isReadOnly, isExternal, isHardware, isReadOnly, t]);
+
   const Name = () => {
     return (
       <>
-        {!!accountName && (account?.isExternal || isExternal) && (
-          (account?.isHardware || isHardware)
-            ? (
-              <FontAwesomeIcon
-                className='hardwareIcon'
-                // @ts-ignore
-                icon={faUsb}
-                rotation={270}
-                title={t('hardware wallet account')}
-              />
-            )
-            : (
-              <FontAwesomeIcon
-                className='externalIcon'
-                // @ts-ignore
-                icon={faQrcode}
-                title={t('external account')}
-              />
-            )
-        )}
+        {!!accountName && renderIcon()}
         <span title={displayName}>{(_isAccountAll && (!name || name === 'All')) ? t<string>('All Accounts') : displayName}</span>
       </>);
   };

@@ -8,17 +8,17 @@ import styled from 'styled-components';
 
 interface Props extends ThemeProps {
   className?: string;
-  isAccountAll: boolean;
+  isCanSign: boolean;
 }
 
-function StakingEmptyList ({ className, isAccountAll }: Props): React.ReactElement {
+function StakingEmptyList ({ className, isCanSign }: Props): React.ReactElement {
   const getText = useCallback(() => {
-    if (isAccountAll) {
+    if (isCanSign) {
       return 'No staking data was recorded';
     }
 
     return '';
-  }, [isAccountAll]);
+  }, [isCanSign]);
 
   return (
     <div className={`${className || ''} empty-list stacking-empty-list`}>
@@ -28,7 +28,7 @@ function StakingEmptyList ({ className, isAccountAll }: Props): React.ReactEleme
         src={stackingEmptyData}
       />
       {
-        (isAccountAll) && <div className={'empty-list__text'}>{getText()}</div>
+        (isCanSign) && <div className={'empty-list__text'}>{getText()}</div>
       }
     </div>
   );

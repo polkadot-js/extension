@@ -2,8 +2,9 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { assetFromToken } from '@equilab/api';
-import { ApiProps, ResponseTransfer, SupportTransferResponse, TokenInfo, TransferErrorCode, TransferStep } from '@subwallet/extension-base/background/KoniTypes';
+import { ApiProps, CustomTokenType, ResponseTransfer, SupportTransferResponse, TokenInfo, TransferErrorCode, TransferStep } from '@subwallet/extension-base/background/KoniTypes';
 import { getTokenInfo } from '@subwallet/extension-koni-base/api/dotsama/registry';
+import { getPSP22ContractPromise } from '@subwallet/extension-koni-base/api/tokens/wasm';
 
 import { ApiPromise } from '@polkadot/api';
 import { SubmittableExtrinsic } from '@polkadot/api/promise/types';
@@ -76,6 +77,13 @@ export async function checkSupportTransfer (networkKey: string, token: string, d
 
   const tokenInfo = await getTokenInfo(networkKey, api, token);
 
+  if (tokenInfo && tokenInfo.type && !apiProps.isEthereum && api.query.contracts) { // for PSP tokens
+    return {
+      supportTransfer: true,
+      supportTransferAll: true
+    };
+  }
+
   if (['karura', 'acala', 'acala_testnet'].includes(networkKey) && tokenInfo && !tokenInfo.isMainToken && isTxCurrenciesSupported) {
     result.supportTransfer = true;
     result.supportTransferAll = false;
@@ -125,7 +133,13 @@ export async function estimateFee (
   const isTxTokensSupported = !!api && !!api.tx && !!api.tx.tokens;
   const isTxEqBalancesSupported = !!api && !!api.tx && !!api.tx.eqBalances;
 
-  if (['karura', 'acala', 'acala_testnet'].includes(networkKey) && tokenInfo && !tokenInfo.isMainToken && isTxCurrenciesSupported) {
+  if (tokenInfo && tokenInfo.contractAddress && tokenInfo.type && !apiProps.isEthereum && api.query.contracts) { // for PSP tokens
+    const contractPromise = getPSP22ContractPromise(api, tokenInfo.contractAddress);
+    const paymentInfo = await contractPromise.tx['psp22::transfer']({ gasLimit: '10000' }, to, value, {}) // gasLimit is arbitrary since it's only estimating fee
+      .paymentInfo(fromKeypair);
+
+    fee = paymentInfo.partialFee.toString();
+  } else if (['karura', 'acala', 'acala_testnet'].includes(networkKey) && tokenInfo && !tokenInfo.isMainToken && isTxCurrenciesSupported) {
     // Note: currently 'karura', 'acala', 'acala_testnet' do not support transfer all
     // if (transferAll) {
     //   const freeBalanceString = await getFreeBalance(networkKey, fromKeypair.address, tokenInfo.symbol);
@@ -207,9 +221,14 @@ export function updateResponseTxResult (
   networkKey: string,
   tokenInfo: undefined | TokenInfo,
   response: ResponseTransfer,
-  records: EventRecord[]): void {
+  records: EventRecord[],
+  transferAmount?: string): void {
   if (!response.txResult) {
-    response.txResult = { change: '0' };
+    if (tokenInfo && tokenInfo.type === CustomTokenType.psp22) {
+      response.txResult = { change: transferAmount || '0' };
+    } else {
+      response.txResult = { change: '0' };
+    }
   }
 
   let isFeeUseMainTokenSymbol = true;
@@ -287,8 +306,10 @@ export async function doSignAndSend (
     networkKey: string,
     tokenInfo: undefined | TokenInfo,
     response: ResponseTransfer,
-    records: EventRecord[]) => void,
-  callback: (data: ResponseTransfer) => void) {
+    records: EventRecord[],
+    transferAmount?: string) => void,
+  callback: (data: ResponseTransfer) => void,
+  transferAmount?: string) {
   const response: ResponseTransfer = {
     step: TransferStep.READY,
     errors: [],
@@ -342,7 +363,7 @@ export async function doSignAndSend (
       }
     });
 
-    _updateResponseTxResult(networkKey, tokenInfo, response, records);
+    _updateResponseTxResult(networkKey, tokenInfo, response, records, transferAmount);
   }
 
   await transfer.signAsync(fromKeypair, { nonce: -1 });
@@ -422,8 +443,16 @@ export async function makeTransfer (
   const isTxBalancesSupported = !!api && !!api.tx && !!api.tx.balances;
   const isTxTokensSupported = !!api && !!api.tx && !!api.tx.tokens;
   const isTxEqBalancesSupported = !!api && !!api.tx && !!api.tx.eqBalances;
+  let transferAmount; // for PSP-22 tokens, might be deprecated in the future
 
-  if (['karura', 'acala', 'acala_testnet'].includes(networkKey) && tokenInfo && !tokenInfo.isMainToken && isTxCurrenciesSupported) {
+  if (tokenInfo && tokenInfo.contractAddress && tokenInfo.type && !apiProps.isEthereum && api.query.contracts) {
+    const contractPromise = getPSP22ContractPromise(api, tokenInfo.contractAddress);
+    const transferQuery = await contractPromise.query['psp22::transfer'](fromKeypair.address, { gasLimit: -1 }, to, value, {});
+    const gasLimit = transferQuery.gasRequired.toString();
+
+    transfer = contractPromise.tx['psp22::transfer']({ gasLimit }, to, value, {});
+    transferAmount = value;
+  } else if (['karura', 'acala', 'acala_testnet'].includes(networkKey) && tokenInfo && !tokenInfo.isMainToken && isTxCurrenciesSupported) {
     if (transferAll) {
       // currently Acala, Karura, Acala testnet do not have transfer all method for sub token
     } else if (value) {
@@ -470,5 +499,5 @@ export async function makeTransfer (
     return;
   }
 
-  await doSignAndSend(api, networkKey, tokenInfo, transfer, fromKeypair, updateResponseTxResult, callback);
+  await doSignAndSend(api, networkKey, tokenInfo, transfer, fromKeypair, updateResponseTxResult, callback, transferAmount);
 }

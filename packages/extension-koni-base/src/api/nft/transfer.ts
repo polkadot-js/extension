@@ -4,7 +4,7 @@
 import { ApiProps, NetworkJson, SubstrateNftTransaction } from '@subwallet/extension-base/background/KoniTypes';
 import { getFreeBalance } from '@subwallet/extension-koni-base/api/dotsama/balance';
 import { SUPPORTED_TRANSFER_SUBSTRATE_CHAIN_NAME } from '@subwallet/extension-koni-base/api/nft/config';
-import { reformatAddress } from '@subwallet/extension-koni-base/utils';
+import { parseNumberToDisplay, reformatAddress } from '@subwallet/extension-koni-base/utils';
 import Web3 from 'web3';
 
 import { keyring } from '@polkadot/ui-keyring';
@@ -23,9 +23,11 @@ export async function acalaTransferHandler (networkKey: string, dotSamaApiMap: R
     const binaryBalance = new BN(balance);
     const balanceError = info.partialFee.gt(binaryBalance);
 
+    const feeString = parseNumberToDisplay(info.partialFee, networkJson.decimals) + ` ${networkJson.nativeToken ? networkJson.nativeToken : ''}`;
+
     return {
       error: false,
-      estimatedFee: info.partialFee.toHuman(),
+      estimatedFee: feeString,
       balanceError
     } as SubstrateNftTransaction;
   } catch (e) {
@@ -70,9 +72,11 @@ export async function rmrkTransferHandler (networkKey: string, dotSamaApiMap: Re
     const binaryBalance = new BN(balance);
     const balanceError = info.partialFee.gt(binaryBalance);
 
+    const feeString = parseNumberToDisplay(info.partialFee, networkJson.decimals) + ` ${networkJson.nativeToken ? networkJson.nativeToken : ''}`;
+
     return {
       error: false,
-      estimatedFee: info.partialFee.toHuman(),
+      estimatedFee: feeString,
       balanceError
     } as SubstrateNftTransaction;
   } catch (e) {
@@ -109,9 +113,11 @@ export async function uniqueTransferHandler (networkKey: string, dotSamaApiMap: 
     const binaryBalance = new BN(balance);
     const balanceError = info.partialFee.gt(binaryBalance);
 
+    const feeString = parseNumberToDisplay(info.partialFee, networkJson.decimals) + ` ${networkJson.nativeToken ? networkJson.nativeToken : ''}`;
+
     return {
       error: false,
-      estimatedFee: info.partialFee.toHuman(),
+      estimatedFee: feeString,
       balanceError
     } as SubstrateNftTransaction;
   } catch (e) {
@@ -148,9 +154,11 @@ export async function quartzTransferHandler (networkKey: string, dotSamaApiMap: 
     const binaryBalance = new BN(balance);
     const balanceError = info.partialFee.gt(binaryBalance);
 
+    const feeString = parseNumberToDisplay(info.partialFee, networkJson.decimals) + ` ${networkJson.nativeToken ? networkJson.nativeToken : ''}`;
+
     return {
       error: false,
-      estimatedFee: info.partialFee.toHuman(),
+      estimatedFee: feeString,
       balanceError
     } as SubstrateNftTransaction;
   } catch (e) {
@@ -187,9 +195,11 @@ export async function statemineTransferHandler (networkKey: string, dotSamaApiMa
     const binaryBalance = new BN(balance);
     const balanceError = info.partialFee.gt(binaryBalance);
 
+    const feeString = parseNumberToDisplay(info.partialFee, networkJson.decimals) + ` ${networkJson.nativeToken ? networkJson.nativeToken : ''}`;
+
     return {
       error: false,
-      estimatedFee: info.partialFee.toHuman(),
+      estimatedFee: feeString,
       balanceError
     } as SubstrateNftTransaction;
   } catch (e) {

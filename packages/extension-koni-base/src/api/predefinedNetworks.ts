@@ -272,7 +272,8 @@ export const PREDEFINED_NETWORKS: Record<string, NetworkJson> = {
     decimals: 18,
     getStakingOnChain: true,
     supportBonding: true,
-    coinGeckoKey: 'astar'
+    coinGeckoKey: 'astar',
+    supportSmartContract: [ContractType.wasm]
   },
   astarEvm: {
     key: 'astarEvm',
@@ -871,7 +872,8 @@ export const PREDEFINED_NETWORKS: Record<string, NetworkJson> = {
     nativeToken: 'SDN',
     crowdloanUrl: 'https://polkadot.js.org/apps/#/parachains/crowdloan',
     decimals: 18,
-    coinGeckoKey: 'shiden'
+    coinGeckoKey: 'shiden',
+    supportSmartContract: [ContractType.wasm]
   },
   shidenEvm: {
     key: 'shidenEvm',
@@ -907,7 +909,8 @@ export const PREDEFINED_NETWORKS: Record<string, NetworkJson> = {
     nativeToken: 'SBY',
     decimals: 18,
     getStakingOnChain: true,
-    supportBonding: true
+    supportBonding: true,
+    supportSmartContract: [ContractType.wasm]
   },
   shibuyaEvm: {
     key: 'shibuyaEvm',

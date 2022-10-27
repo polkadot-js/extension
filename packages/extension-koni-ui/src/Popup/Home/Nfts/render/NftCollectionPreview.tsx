@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import Spinner from '@subwallet/extension-koni-ui/components/Spinner';
-import { _NftCollection } from '@subwallet/extension-koni-ui/Popup/Home/Nfts/types';
+import { _NftCollection } from '@subwallet/extension-koni-ui/Popup/Home/Nfts/utils';
 import { Theme, ThemeProps } from '@subwallet/extension-koni-ui/types';
 import React, { useCallback, useContext, useState } from 'react';
 // @ts-ignore

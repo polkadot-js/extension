@@ -1,11 +1,11 @@
-     942	Nam Phạm                      	
-     594	AnhMTV                        	
+    1003	Nam Phạm                      	update configs
+     617	AnhMTV                        	Release version 0.6.7
      465	Jaco                          	0.42.5 (#969)
-     238	S2kael                        	[Issue-720] [DelegationItem] add icon
+     255	S2kael                        	[Issue-717] [QR] [EVM] fix wrong transaction gas
      151	lw-cdm                        	Update logo for Moonbeans
      142	quangdo                       	update some label and variable (original to origin)
      104	khainh                        	predefine metadata for Polkadot & Kusama chains
-      89	lw-cdm                        	
+      91	lw-cdm                        	
       82	Thibaut Sardan                	Add account filtering feature (#832)
       81	Hieu Dao                      	[CI Skip] Update subspace block explorer
       55	leewong                       	#118: update balance logic for Kintsugi testnet

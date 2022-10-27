@@ -283,6 +283,7 @@ export const SupportedCrossChainsMap: Record<string, CrossChainRelation> = {
 
 export const FOUR_INSTRUCTIONS_WEIGHT = 5000000000;
 export const POLKADOT_LIMITED_WEIGHT = 1000000000;
+export const POLKADOT_UNLIMITED_WEIGHT = 'Unlimited';
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires,@typescript-eslint/no-unsafe-assignment
 export const xTokenMoonbeamContract = require('./Xtokens.json');

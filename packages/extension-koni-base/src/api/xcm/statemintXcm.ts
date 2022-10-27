@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { ApiProps, NetworkJson, TokenInfo } from '@subwallet/extension-base/background/KoniTypes';
-import { getReceiverLocation, POLKADOT_LIMITED_WEIGHT, SupportedCrossChainsMap } from '@subwallet/extension-koni-base/api/xcm/utils';
+import { getReceiverLocation, POLKADOT_UNLIMITED_WEIGHT, SupportedCrossChainsMap } from '@subwallet/extension-koni-base/api/xcm/utils';
 import { parseNumberToDisplay } from '@subwallet/extension-koni-base/utils';
 
 import { ApiPromise } from '@polkadot/api';
@@ -86,7 +86,7 @@ export async function statemintEstimateCrossChainFee (
           ]
         },
         0, // FeeAssetItem
-        { Limited: POLKADOT_LIMITED_WEIGHT }
+        POLKADOT_UNLIMITED_WEIGHT
       );
 
       console.log('statemint xcm tx to p here', extrinsic.toHex());
@@ -125,7 +125,7 @@ export async function statemintEstimateCrossChainFee (
           ]
         },
         0, // FeeAssetItem
-        'Unlimited'
+        POLKADOT_UNLIMITED_WEIGHT
       );
 
       console.log('statemint xcm tx to r here', extrinsic.toHex());
@@ -197,7 +197,7 @@ export function statemintGetXcmExtrinsic (
         ]
       },
       0, // FeeAssetItem
-      { Limited: POLKADOT_LIMITED_WEIGHT }
+      POLKADOT_UNLIMITED_WEIGHT
     );
   } else {
     return api.tx.polkadotXcm.limitedTeleportAssets(
@@ -229,7 +229,7 @@ export function statemintGetXcmExtrinsic (
         ]
       },
       0, // FeeAssetItem
-      'Unlimited'
+      POLKADOT_UNLIMITED_WEIGHT
     );
   }
 }

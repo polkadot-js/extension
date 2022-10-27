@@ -95,8 +95,8 @@ export async function checkSupportTransfer (networkKey: string, token: string, d
     result.supportTransfer = true;
     result.supportTransferAll = true;
   } else if (['statemint', 'statemine'].includes(networkKey) && tokenInfo) {
-    result.supportTransfer = false;
-    result.supportTransferAll = false;
+    result.supportTransfer = true;
+    result.supportTransferAll = true;
   }
 
   return result;
@@ -246,6 +246,12 @@ export function updateResponseTxResult (
     } else if (['pioneer', 'bit.country'].includes(networkKey) && tokenInfo && !tokenInfo.isMainToken) {
       if (record.event.section === 'tokens' &&
         record.event.method.toLowerCase() === 'transfer') {
+        response.txResult.change = record.event.data[3]?.toString() || '0';
+        response.txResult.changeSymbol = tokenInfo.symbol;
+      }
+    } else if (['statemint', 'statemine'].includes(networkKey) && tokenInfo && !tokenInfo.isMainToken) {
+      if (record.event.section === 'assets' &&
+        record.event.method.toLowerCase() === 'transferred') {
         response.txResult.change = record.event.data[3]?.toString() || '0';
         response.txResult.changeSymbol = tokenInfo.symbol;
       }

@@ -77,7 +77,7 @@ const createBondingExtrinsic = async ({ amount,
   network,
   nominatorAddress,
   validatorInfo }: CreateBondingExtrinsicProps): Promise<SubmittableExtrinsic<'promise'>> => {
-  return await getBondingExtrinsic(network, network.key, amount, bondedValidators, validatorInfo, isBondedBefore, nominatorAddress, apiProp, lockPeriod);
+  return await getBondingExtrinsic(network, network.key, amount, bondedValidators, validatorInfo, isBondedBefore, nominatorAddress, apiProp);
 };
 
 const createUnBondingExtrinsic = async ({ address,

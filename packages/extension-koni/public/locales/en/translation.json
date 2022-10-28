@@ -433,5 +433,9 @@
   "Note that you cannot transfer all tokens out from this account.": "",
   "Via Text": "",
   "Via QR": "",
-  "Continue": ""
+  "Continue": "",
+  "QR": "",
+  "Manage Tokens": "",
+  "Configure Token": "",
+  "Token setting": ""
 }

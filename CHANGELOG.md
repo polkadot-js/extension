@@ -1,5 +1,25 @@
 # CHANGELOG
 
+## 0.6.7 (Koni)
+Build date: Oct 22, 2022.
+
+Update:
+- Support token import for PSP-22 and PSP-34 (#477)
+- Add USDT on Polkadot (#679)
+- Enable xcm transfer for Acala chain (#695)
+- Update provider URL for some chains (#697)
+- Support export account via QR (#709)
+- Support Ethereum and Binance Smart Chain (#426)
+- Support on-ramp for Binance & Etheneum network (#736)
+- Support Snow Parachain (#734)
+
+Bug fixes:
+- Still shows deleted NFTs (#497)
+- Some errors occurred when updating the caching mechanism (#583)
+- Do not show crowdloan status (#705)
+- An error occurs when a user deletes tokens in case the tokens to be deleted have the same address contract (#714)
+- Can't unstake, withdraw on parachain when using a QR signer account (#717)
+
 ## 0.6.6 (Koni)
 Build date: Sep 30, 2022.
 

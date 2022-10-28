@@ -81,6 +81,12 @@ function ValidatorItem ({ bondedValidators, className, isBondedBefore, maxNomina
       return;
     }
 
+    if (isMaxCommission || isOversubscribed) {
+      show('This validator is not looking for more nominations');
+
+      return;
+    }
+
     if (bondedValidators.length >= maxNominations && !bondedValidators.includes(validatorInfo.address)) {
       show('Please choose among the nominating validators only');
 

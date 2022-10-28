@@ -5,7 +5,7 @@ import Common from '@ethereumjs/common';
 import Extension, { SEED_DEFAULT_LENGTH, SEED_LENGTHS } from '@subwallet/extension-base/background/handlers/Extension';
 import { AuthUrls } from '@subwallet/extension-base/background/handlers/State';
 import { createSubscription, isSubscriptionRunning, unsubscribe } from '@subwallet/extension-base/background/handlers/subscriptions';
-import { AccountExternalError, AccountExternalErrorCode, AccountsWithCurrentAddress, ApiProps, BalanceJson, BaseTxError, BasicTxError, BasicTxErrorCode, BasicTxInfo, BasicTxResponse, BondingOptionInfo, BondingOptionParams, BondingSubmitParams, ChainBondingBasics, ChainRegistry, CheckExistingTuringCompoundParams, CrowdloanJson, CurrentAccountInfo, CustomToken, CustomTokenJson, DelegationItem, DeleteCustomTokenParams, DisableNetworkResponse, EvmNftSubmitTransaction, EvmNftTransaction, ExistingTuringCompoundTask, ExternalRequestPromise, ExternalRequestPromiseStatus, NETWORK_ERROR, NetWorkGroup, NetworkJson, NftCollection, NftJson, NftTransactionRequest, NftTransactionResponse, NftTransferExtra, OptionInputAddress, PriceJson, RequestAccountCreateExternalV2, RequestAccountCreateHardwareV2, RequestAccountCreateSuriV2, RequestAccountCreateWithSecretKey, RequestAccountExportPrivateKey, RequestAccountMeta, RequestAuthorization, RequestAuthorizationBlock, RequestAuthorizationPerAccount, RequestAuthorizationPerSite, RequestAuthorizeApproveV2, RequestBatchRestoreV2, RequestCheckCrossChainTransfer, RequestCheckPublicAndSecretKey, RequestCheckTransfer, RequestConfirmationComplete, RequestCrossChainTransfer, RequestCrossChainTransferExternal, RequestDeriveCreateV2, RequestForgetSite, RequestFreeBalance, RequestJsonRestoreV2, RequestNftForceUpdate, RequestNftTransferExternalEVM, RequestNftTransferExternalSubstrate, RequestParseEVMTransactionInput, RequestParseTransactionEVM, RequestQrSignEVM, RequestRejectExternalRequest, RequestResolveExternalRequest, RequestSaveRecentAccount, RequestSeedCreateV2, RequestSeedValidateV2, RequestSettingsType, RequestStakeExternal, RequestTransactionHistoryAdd, RequestTransfer, RequestTransferCheckReferenceCount, RequestTransferCheckSupporting, RequestTransferExistentialDeposit, RequestTransferExternal, RequestUnStakeExternal, RequestWithdrawStakeExternal, ResponseAccountCreateSuriV2, ResponseAccountCreateWithSecretKey, ResponseAccountExportPrivateKey, ResponseAccountMeta, ResponseCheckCrossChainTransfer, ResponseCheckPublicAndSecretKey, ResponseCheckTransfer, ResponseParseEVMTransactionInput, ResponseParseTransactionEVM, ResponsePrivateKeyValidateV2, ResponseQrSignEVM, ResponseRejectExternalRequest, ResponseResolveExternalRequest, ResponseSeedCreateV2, ResponseSeedValidateV2, ResponseTransfer, StakeClaimRewardParams, StakeDelegationRequest, StakeUnlockingJson, StakeWithdrawalParams, StakingJson, StakingRewardJson, SubstrateNftSubmitTransaction, SubstrateNftTransaction, SupportTransferResponse, ThemeTypes, TokenInfo, TransactionHistoryItemType, TransferError, TransferErrorCode, TransferStep, TuringCancelStakeCompoundParams, TuringStakeCompoundParams, UnbondingSubmitParams, ValidateCustomTokenRequest, ValidateCustomTokenResponse, ValidateNetworkRequest, ValidateNetworkResponse } from '@subwallet/extension-base/background/KoniTypes';
+import { AccountExternalError, AccountExternalErrorCode, AccountsWithCurrentAddress, ApiProps, BalanceJson, BaseTxError, BasicTxError, BasicTxErrorCode, BasicTxInfo, BasicTxResponse, BondingOptionInfo, BondingOptionParams, BondingSubmitParams, ChainBondingBasics, ChainRegistry, CheckExistingTuringCompoundParams, CrowdloanJson, CurrentAccountInfo, CustomToken, CustomTokenJson, DelegationItem, DeleteCustomTokenParams, DisableNetworkResponse, EvmNftSubmitTransaction, EvmNftTransaction, ExistingTuringCompoundTask, ExternalRequestPromise, ExternalRequestPromiseStatus, NETWORK_ERROR, NetWorkGroup, NetworkJson, NftCollection, NftJson, NftTransactionRequest, NftTransactionResponse, NftTransferExtra, OptionInputAddress, PriceJson, RequestAccountCreateExternalV2, RequestAccountCreateHardwareV2, RequestAccountCreateSuriV2, RequestAccountCreateWithSecretKey, RequestAccountExportPrivateKey, RequestAccountMeta, RequestAuthorization, RequestAuthorizationBlock, RequestAuthorizationPerAccount, RequestAuthorizationPerSite, RequestAuthorizeApproveV2, RequestBatchRestoreV2, RequestCancelCompoundStakeExternal, RequestCheckCrossChainTransfer, RequestCheckPublicAndSecretKey, RequestCheckTransfer, RequestClaimRewardExternal, RequestConfirmationComplete, RequestCreateCompoundStakeExternal, RequestCrossChainTransfer, RequestCrossChainTransferExternal, RequestDeriveCreateV2, RequestForgetSite, RequestFreeBalance, RequestJsonRestoreV2, RequestNftForceUpdate, RequestNftTransferExternalEVM, RequestNftTransferExternalSubstrate, RequestParseEVMTransactionInput, RequestParseTransactionEVM, RequestQrSignEVM, RequestRejectExternalRequest, RequestResolveExternalRequest, RequestSaveRecentAccount, RequestSeedCreateV2, RequestSeedValidateV2, RequestSettingsType, RequestStakeExternal, RequestTransactionHistoryAdd, RequestTransfer, RequestTransferCheckReferenceCount, RequestTransferCheckSupporting, RequestTransferExistentialDeposit, RequestTransferExternal, RequestUnStakeExternal, RequestWithdrawStakeExternal, ResponseAccountCreateSuriV2, ResponseAccountCreateWithSecretKey, ResponseAccountExportPrivateKey, ResponseAccountMeta, ResponseCheckCrossChainTransfer, ResponseCheckPublicAndSecretKey, ResponseCheckTransfer, ResponseParseEVMTransactionInput, ResponseParseTransactionEVM, ResponsePrivateKeyValidateV2, ResponseQrSignEVM, ResponseRejectExternalRequest, ResponseResolveExternalRequest, ResponseSeedCreateV2, ResponseSeedValidateV2, ResponseTransfer, StakeClaimRewardParams, StakeDelegationRequest, StakeUnlockingJson, StakeWithdrawalParams, StakingJson, StakingRewardJson, SubstrateNftSubmitTransaction, SubstrateNftTransaction, SupportTransferResponse, ThemeTypes, TokenInfo, TransactionHistoryItemType, TransferError, TransferErrorCode, TransferStep, TuringCancelStakeCompoundParams, TuringStakeCompoundParams, UnbondingSubmitParams, ValidateCustomTokenRequest, ValidateCustomTokenResponse, ValidateNetworkRequest, ValidateNetworkResponse } from '@subwallet/extension-base/background/KoniTypes';
 import { AccountJson, AuthorizeRequest, MessageTypes, RequestAccountForget, RequestAccountTie, RequestAuthorizeCancel, RequestAuthorizeReject, RequestCurrentAccountAddress, RequestParseTransactionSubstrate, RequestTypes, ResponseAuthorizeList, ResponseParseTransactionSubstrate, ResponseType } from '@subwallet/extension-base/background/types';
 import { getId } from '@subwallet/extension-base/utils/getId';
 import { getBondingExtrinsic, getBondingTxInfo, getChainBondingBasics, getClaimRewardExtrinsic, getClaimRewardTxInfo, getDelegationInfo, getUnbondingExtrinsic, getUnbondingTxInfo, getValidatorsInfo, getWithdrawalExtrinsic, getWithdrawalTxInfo } from '@subwallet/extension-koni-base/api/bonding';
@@ -13,6 +13,9 @@ import { checkTuringStakeCompoundingTask, getTuringCancelCompoundingExtrinsic, g
 import { initApi } from '@subwallet/extension-koni-base/api/dotsama';
 import { getFreeBalance, subscribeFreeBalance } from '@subwallet/extension-koni-base/api/dotsama/balance';
 import { createStakeLedger, createStakeQr, createUnStakeLedger, createUnStakeQr, createWithdrawStakeLedger, createWithdrawStakeQr } from '@subwallet/extension-koni-base/api/dotsama/external/stake';
+import { createClaimRewardLedger, createClaimRewardQr } from '@subwallet/extension-koni-base/api/dotsama/external/stake/claim';
+import { createCancelCompoundLedger, createCancelCompoundQr } from '@subwallet/extension-koni-base/api/dotsama/external/stake/compound/cancel';
+import { createCreateCompoundLedger, createCreateCompoundQr } from '@subwallet/extension-koni-base/api/dotsama/external/stake/compound/create';
 import { makeCrossChainTransferLedger, makeCrossChainTransferQr, makeNftTransferLedger, makeNftTransferQr, makeTransferLedger, makeTransferQr } from '@subwallet/extension-koni-base/api/dotsama/external/transfer';
 import { parseSubstratePayload } from '@subwallet/extension-koni-base/api/dotsama/parseSubstratePayload';
 import { getTokenInfo } from '@subwallet/extension-koni-base/api/dotsama/registry';
@@ -3022,6 +3025,199 @@ export default class KoniExtension extends Extension {
     return [];
   }
 
+  private claimRewardCreateQr (id: string, port: chrome.runtime.Port, { address,
+    networkKey,
+    validatorAddress }: RequestClaimRewardExternal): Array<BaseTxError> {
+    const callback = createSubscription<'pri(claimReward.qr.create)'>(id, port);
+
+    const network = state.getNetworkMapByKey(networkKey);
+
+    const apiProp = state.getDotSamaApi(networkKey);
+
+    try {
+      const id: string = getId();
+
+      state.cleanExternalRequest();
+
+      const setState = (promise: ExternalRequestPromise) => {
+        state.setExternalRequestMap(id, promise);
+      };
+
+      const updateState = (promise: Partial<ExternalRequestPromise>) => {
+        state.updateExternalRequest(id, { ...promise, resolve: undefined, reject: undefined });
+      };
+
+      const prom = createClaimRewardQr({
+        apiProp: apiProp,
+        id: id,
+        network: network,
+        updateState: updateState,
+        setState: setState,
+        callback: callback,
+        address: address,
+        validatorAddress: validatorAddress
+      });
+
+      prom.then(() => {
+        // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
+        console.log(`Start claim reward from ${address}`);
+      })
+        .catch((e) => {
+          // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment,node/no-callback-literal,@typescript-eslint/no-unsafe-member-access
+          if (!e) {
+            // eslint-disable-next-line node/no-callback-literal
+            callback({ txError: true });
+          } else {
+            // eslint-disable-next-line node/no-callback-literal
+            callback({ txError: true, status: false });
+          }
+
+          console.error('Error claim reward', e);
+          setTimeout(() => {
+            unsubscribe(id);
+          }, 500);
+        });
+    } catch (e) {
+      return [{ code: BasicTxErrorCode.CLAIM_REWARD_ERROR, message: (e as Error).message }];
+    }
+
+    port.onDisconnect.addListener((): void => {
+      unsubscribe(id);
+    });
+
+    return [];
+  }
+
+  private createCompoundCreateQr (id: string, port: chrome.runtime.Port, { accountMinimum,
+    address,
+    bondedAmount,
+    collatorAddress,
+    networkKey }: RequestCreateCompoundStakeExternal): Array<BaseTxError> {
+    const callback = createSubscription<'pri(createCompound.qr.create)'>(id, port);
+
+    const network = state.getNetworkMapByKey(networkKey);
+
+    const apiProp = state.getDotSamaApi(networkKey);
+
+    try {
+      const id: string = getId();
+
+      state.cleanExternalRequest();
+
+      const setState = (promise: ExternalRequestPromise) => {
+        state.setExternalRequestMap(id, promise);
+      };
+
+      const updateState = (promise: Partial<ExternalRequestPromise>) => {
+        state.updateExternalRequest(id, { ...promise, resolve: undefined, reject: undefined });
+      };
+
+      const prom = createCreateCompoundQr({
+        apiProp: apiProp,
+        id: id,
+        network: network,
+        updateState: updateState,
+        setState: setState,
+        callback: callback,
+        address: address,
+        collatorAddress: collatorAddress,
+        bondedAmount: bondedAmount,
+        accountMinimum: accountMinimum
+      });
+
+      prom.then(() => {
+        // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
+        console.log(`Start create compound from ${address}`);
+      })
+        .catch((e) => {
+          // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment,node/no-callback-literal,@typescript-eslint/no-unsafe-member-access
+          if (!e) {
+            // eslint-disable-next-line node/no-callback-literal
+            callback({ txError: true });
+          } else {
+            // eslint-disable-next-line node/no-callback-literal
+            callback({ txError: true, status: false });
+          }
+
+          console.error('Error compounding Turing stake', e);
+          setTimeout(() => {
+            unsubscribe(id);
+          }, 500);
+        });
+    } catch (e) {
+      return [{ code: BasicTxErrorCode.CREATE_COMPOUND_ERROR, message: (e as Error).message }];
+    }
+
+    port.onDisconnect.addListener((): void => {
+      unsubscribe(id);
+    });
+
+    return [];
+  }
+
+  private cancelCompoundCreateQr (id: string, port: chrome.runtime.Port, { address,
+    networkKey,
+    taskId }: RequestCancelCompoundStakeExternal): Array<BaseTxError> {
+    const callback = createSubscription<'pri(cancelCompound.qr.create)'>(id, port);
+
+    const network = state.getNetworkMapByKey(networkKey);
+
+    const apiProp = state.getDotSamaApi(networkKey);
+
+    try {
+      const id: string = getId();
+
+      state.cleanExternalRequest();
+
+      const setState = (promise: ExternalRequestPromise) => {
+        state.setExternalRequestMap(id, promise);
+      };
+
+      const updateState = (promise: Partial<ExternalRequestPromise>) => {
+        state.updateExternalRequest(id, { ...promise, resolve: undefined, reject: undefined });
+      };
+
+      const prom = createCancelCompoundQr({
+        apiProp: apiProp,
+        id: id,
+        network: network,
+        updateState: updateState,
+        setState: setState,
+        callback: callback,
+        address: address,
+        taskId: taskId
+      });
+
+      prom.then(() => {
+        // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
+        console.log(`Start cancel compound from ${address}`);
+      })
+        .catch((e) => {
+          // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment,node/no-callback-literal,@typescript-eslint/no-unsafe-member-access
+          if (!e) {
+            // eslint-disable-next-line node/no-callback-literal
+            callback({ txError: true });
+          } else {
+            // eslint-disable-next-line node/no-callback-literal
+            callback({ txError: true, status: false });
+          }
+
+          console.error('Error canceling Turing compounding task stake', e);
+          setTimeout(() => {
+            unsubscribe(id);
+          }, 500);
+        });
+    } catch (e) {
+      return [{ code: BasicTxErrorCode.CANCEL_COMPOUND_ERROR, message: (e as Error).message }];
+    }
+
+    port.onDisconnect.addListener((): void => {
+      unsubscribe(id);
+    });
+
+    return [];
+  }
+
   // External account Ledger
 
   private async makeTransferLedger (id: string, port: chrome.runtime.Port, { from,
@@ -3441,6 +3637,199 @@ export default class KoniExtension extends Extension {
         });
     } catch (e) {
       return [{ code: BasicTxErrorCode.WITHDRAW_STAKING_ERROR, message: (e as Error).message }];
+    }
+
+    port.onDisconnect.addListener((): void => {
+      unsubscribe(id);
+    });
+
+    return [];
+  }
+
+  private claimRewardCreateLedger (id: string, port: chrome.runtime.Port, { address,
+    networkKey,
+    validatorAddress }: RequestClaimRewardExternal): Array<BaseTxError> {
+    const callback = createSubscription<'pri(claimReward.ledger.create)'>(id, port);
+
+    const network = state.getNetworkMapByKey(networkKey);
+
+    const apiProp = state.getDotSamaApi(networkKey);
+
+    try {
+      const id: string = getId();
+
+      state.cleanExternalRequest();
+
+      const setState = (promise: ExternalRequestPromise) => {
+        state.setExternalRequestMap(id, promise);
+      };
+
+      const updateState = (promise: Partial<ExternalRequestPromise>) => {
+        state.updateExternalRequest(id, { ...promise, resolve: undefined, reject: undefined });
+      };
+
+      const prom = createClaimRewardLedger({
+        apiProp: apiProp,
+        id: id,
+        network: network,
+        updateState: updateState,
+        setState: setState,
+        callback: callback,
+        address: address,
+        validatorAddress: validatorAddress
+      });
+
+      prom.then(() => {
+        // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
+        console.log(`Start claim reward from ${address}`);
+      })
+        .catch((e) => {
+          // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment,node/no-callback-literal,@typescript-eslint/no-unsafe-member-access
+          if (!e) {
+            // eslint-disable-next-line node/no-callback-literal
+            callback({ txError: true });
+          } else {
+            // eslint-disable-next-line node/no-callback-literal
+            callback({ txError: true, status: false });
+          }
+
+          console.error('Error claim reward', e);
+          setTimeout(() => {
+            unsubscribe(id);
+          }, 500);
+        });
+    } catch (e) {
+      return [{ code: BasicTxErrorCode.CLAIM_REWARD_ERROR, message: (e as Error).message }];
+    }
+
+    port.onDisconnect.addListener((): void => {
+      unsubscribe(id);
+    });
+
+    return [];
+  }
+
+  private createCompoundCreateLedger (id: string, port: chrome.runtime.Port, { accountMinimum,
+    address,
+    bondedAmount,
+    collatorAddress,
+    networkKey }: RequestCreateCompoundStakeExternal): Array<BaseTxError> {
+    const callback = createSubscription<'pri(createCompound.ledger.create)'>(id, port);
+
+    const network = state.getNetworkMapByKey(networkKey);
+
+    const apiProp = state.getDotSamaApi(networkKey);
+
+    try {
+      const id: string = getId();
+
+      state.cleanExternalRequest();
+
+      const setState = (promise: ExternalRequestPromise) => {
+        state.setExternalRequestMap(id, promise);
+      };
+
+      const updateState = (promise: Partial<ExternalRequestPromise>) => {
+        state.updateExternalRequest(id, { ...promise, resolve: undefined, reject: undefined });
+      };
+
+      const prom = createCreateCompoundLedger({
+        apiProp: apiProp,
+        id: id,
+        network: network,
+        updateState: updateState,
+        setState: setState,
+        callback: callback,
+        address: address,
+        collatorAddress: collatorAddress,
+        bondedAmount: bondedAmount,
+        accountMinimum: accountMinimum
+      });
+
+      prom.then(() => {
+        // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
+        console.log(`Start create compound from ${address}`);
+      })
+        .catch((e) => {
+          // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment,node/no-callback-literal,@typescript-eslint/no-unsafe-member-access
+          if (!e) {
+            // eslint-disable-next-line node/no-callback-literal
+            callback({ txError: true });
+          } else {
+            // eslint-disable-next-line node/no-callback-literal
+            callback({ txError: true, status: false });
+          }
+
+          console.error('Error compounding Turing stake', e);
+          setTimeout(() => {
+            unsubscribe(id);
+          }, 500);
+        });
+    } catch (e) {
+      return [{ code: BasicTxErrorCode.CREATE_COMPOUND_ERROR, message: (e as Error).message }];
+    }
+
+    port.onDisconnect.addListener((): void => {
+      unsubscribe(id);
+    });
+
+    return [];
+  }
+
+  private cancelCompoundCreateLedger (id: string, port: chrome.runtime.Port, { address,
+    networkKey,
+    taskId }: RequestCancelCompoundStakeExternal): Array<BaseTxError> {
+    const callback = createSubscription<'pri(cancelCompound.ledger.create)'>(id, port);
+
+    const network = state.getNetworkMapByKey(networkKey);
+
+    const apiProp = state.getDotSamaApi(networkKey);
+
+    try {
+      const id: string = getId();
+
+      state.cleanExternalRequest();
+
+      const setState = (promise: ExternalRequestPromise) => {
+        state.setExternalRequestMap(id, promise);
+      };
+
+      const updateState = (promise: Partial<ExternalRequestPromise>) => {
+        state.updateExternalRequest(id, { ...promise, resolve: undefined, reject: undefined });
+      };
+
+      const prom = createCancelCompoundLedger({
+        apiProp: apiProp,
+        id: id,
+        network: network,
+        updateState: updateState,
+        setState: setState,
+        callback: callback,
+        address: address,
+        taskId: taskId
+      });
+
+      prom.then(() => {
+        // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
+        console.log(`Start cancel compound from ${address}`);
+      })
+        .catch((e) => {
+          // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment,node/no-callback-literal,@typescript-eslint/no-unsafe-member-access
+          if (!e) {
+            // eslint-disable-next-line node/no-callback-literal
+            callback({ txError: true });
+          } else {
+            // eslint-disable-next-line node/no-callback-literal
+            callback({ txError: true, status: false });
+          }
+
+          console.error('Error canceling Turing compounding task stake', e);
+          setTimeout(() => {
+            unsubscribe(id);
+          }, 500);
+        });
+    } catch (e) {
+      return [{ code: BasicTxErrorCode.CANCEL_COMPOUND_ERROR, message: (e as Error).message }];
     }
 
     port.onDisconnect.addListener((): void => {
@@ -3902,6 +4291,8 @@ export default class KoniExtension extends Extension {
     const extrinsic = await getClaimRewardExtrinsic(dotSamaApi, networkKey, address, validatorAddress);
     const passwordError: string | null = unlockAccount(address, password);
 
+    console.log(extrinsic);
+
     if (extrinsic !== null && passwordError === null) {
       const pair = keyring.getPair(address);
 
@@ -4009,6 +4400,8 @@ export default class KoniExtension extends Extension {
     const extrinsic = await getTuringCompoundExtrinsic(dotSamaApi, address, collatorAddress, parsedAccountMinimum.toString(), bondedAmount);
     const passwordError: string | null = unlockAccount(address, password);
 
+    console.log(extrinsic);
+
     if (extrinsic !== null && passwordError === null) {
       const pair = keyring.getPair(address);
 
@@ -4090,6 +4483,8 @@ export default class KoniExtension extends Extension {
     const dotSamaApi = state.getDotSamaApi(networkKey);
     const extrinsic = await getTuringCancelCompoundingExtrinsic(dotSamaApi, taskId);
     const passwordError: string | null = unlockAccount(address, password);
+
+    console.log(extrinsic);
 
     if (extrinsic !== null && passwordError === null) {
       const pair = keyring.getPair(address);
@@ -4354,6 +4749,12 @@ export default class KoniExtension extends Extension {
         return this.unStakeCreateQr(id, port, request as RequestUnStakeExternal);
       case 'pri(withdrawStake.qr.create)':
         return this.withdrawStakeCreateQr(id, port, request as RequestWithdrawStakeExternal);
+      case 'pri(claimReward.qr.create)':
+        return this.claimRewardCreateQr(id, port, request as RequestClaimRewardExternal);
+      case 'pri(createCompound.qr.create)':
+        return this.createCompoundCreateQr(id, port, request as RequestCreateCompoundStakeExternal);
+      case 'pri(cancelCompound.qr.create)':
+        return this.cancelCompoundCreateQr(id, port, request as RequestCancelCompoundStakeExternal);
 
       // External account ledger
       case 'pri(accounts.transfer.ledger.create)':
@@ -4368,6 +4769,12 @@ export default class KoniExtension extends Extension {
         return this.unStakeCreateLedger(id, port, request as RequestUnStakeExternal);
       case 'pri(withdrawStake.ledger.create)':
         return this.withdrawStakeCreateLedger(id, port, request as RequestWithdrawStakeExternal);
+      case 'pri(claimReward.ledger.create)':
+        return this.claimRewardCreateLedger(id, port, request as RequestClaimRewardExternal);
+      case 'pri(createCompound.ledger.create)':
+        return this.createCompoundCreateLedger(id, port, request as RequestCreateCompoundStakeExternal);
+      case 'pri(cancelCompound.ledger.create)':
+        return this.cancelCompoundCreateLedger(id, port, request as RequestCancelCompoundStakeExternal);
 
       // External account request
       case 'pri(account.external.reject)':

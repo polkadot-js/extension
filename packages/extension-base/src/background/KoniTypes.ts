@@ -672,6 +672,9 @@ export enum BasicTxErrorCode {
   STAKING_ERROR = 'stakingError',
   UN_STAKING_ERROR = 'unStakingError',
   WITHDRAW_STAKING_ERROR = 'withdrawStakingError',
+  CLAIM_REWARD_ERROR = 'claimRewardError',
+  CREATE_COMPOUND_ERROR = 'createCompoundError',
+  CANCEL_COMPOUND_ERROR = 'cancelCompoundError',
   TIMEOUT = 'timeout',
   UNSUPPORTED = 'unsupported'
 }
@@ -1299,6 +1302,51 @@ export interface ResponseWithdrawStakeLedger extends ResponseWithdrawStakeExtern
   ledgerState?: LedgerState;
 }
 
+export type RequestClaimRewardExternal = Omit<StakeClaimRewardParams, 'password'>
+
+export interface ResponseClaimRewardExternal extends BasicTxResponse{
+  externalState?: ExternalState;
+}
+
+export interface ResponseClaimRewardQr extends ResponseClaimRewardExternal{
+  qrState?: QrState;
+  isBusy?: boolean;
+}
+
+export interface ResponseClaimRewardLedger extends ResponseClaimRewardExternal{
+  ledgerState?: LedgerState;
+}
+
+export type RequestCreateCompoundStakeExternal = Omit<TuringStakeCompoundParams, 'password'>
+
+export interface ResponseCreateCompoundStakeExternal extends BasicTxResponse{
+  externalState?: ExternalState;
+}
+
+export interface ResponseCreateCompoundStakeQr extends ResponseCreateCompoundStakeExternal{
+  qrState?: QrState;
+  isBusy?: boolean;
+}
+
+export interface ResponseCreateCompoundStakeLedger extends ResponseCreateCompoundStakeExternal{
+  ledgerState?: LedgerState;
+}
+
+export type RequestCancelCompoundStakeExternal = Omit<TuringCancelStakeCompoundParams, 'password'>
+
+export interface ResponseCancelCompoundStakeExternal extends BasicTxResponse{
+  externalState?: ExternalState;
+}
+
+export interface ResponseCancelCompoundStakeQr extends ResponseCancelCompoundStakeExternal{
+  qrState?: QrState;
+  isBusy?: boolean;
+}
+
+export interface ResponseCancelCompoundStakeLedger extends ResponseCancelCompoundStakeExternal{
+  ledgerState?: LedgerState;
+}
+
 export interface StakeDelegationRequest {
   address: string,
   networkKey: string
@@ -1540,6 +1588,9 @@ export interface KoniRequestSignatures {
   'pri(stake.qr.create)': [RequestStakeExternal, Array<BaseTxError>, ResponseStakeQr];
   'pri(unStake.qr.create)': [RequestUnStakeExternal, Array<BaseTxError>, ResponseUnStakeQr];
   'pri(withdrawStake.qr.create)': [RequestWithdrawStakeExternal, Array<BaseTxError>, ResponseWithdrawStakeQr];
+  'pri(claimReward.qr.create)': [RequestClaimRewardExternal, Array<BaseTxError>, ResponseClaimRewardQr];
+  'pri(createCompound.qr.create)': [RequestCreateCompoundStakeExternal, Array<BaseTxError>, ResponseCreateCompoundStakeQr];
+  'pri(cancelCompound.qr.create)': [RequestCancelCompoundStakeExternal, Array<BaseTxError>, ResponseCancelCompoundStakeQr];
 
   // Create ledger request
   'pri(accounts.transfer.ledger.create)': [RequestTransferExternal, Array<TransferError>, ResponseTransferLedger];
@@ -1548,6 +1599,10 @@ export interface KoniRequestSignatures {
   'pri(stake.ledger.create)': [RequestStakeExternal, Array<BaseTxError>, ResponseStakeLedger];
   'pri(unStake.ledger.create)': [RequestUnStakeExternal, Array<BaseTxError>, ResponseUnStakeLedger];
   'pri(withdrawStake.ledger.create)': [RequestWithdrawStakeExternal, Array<BaseTxError>, ResponseWithdrawStakeLedger];
+  'pri(claimReward.ledger.create)': [RequestClaimRewardExternal, Array<BaseTxError>, ResponseClaimRewardLedger];
+  'pri(createCompound.ledger.create)': [RequestCreateCompoundStakeExternal, Array<BaseTxError>, ResponseCreateCompoundStakeLedger];
+  'pri(cancelCompound.ledger.create)': [RequestCancelCompoundStakeExternal, Array<BaseTxError>, ResponseCancelCompoundStakeLedger];
+
   // Authorize
   'pri(authorize.subscribe)': [null, AuthUrls, AuthUrls];
 }

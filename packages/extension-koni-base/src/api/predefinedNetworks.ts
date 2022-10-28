@@ -15,8 +15,10 @@ export const PREDEFINED_NETWORKS: Record<string, NetworkJson> = {
       OnFinality: 'wss://polkadot.api.onfinality.io/public-ws',
       // 'Geometry Labs': 'wss://polkadot.geometry.io/websockets', // https://github.com/polkadot-js/apps/pull/6746
       Dwellir: 'wss://polkadot-rpc.dwellir.com',
-      'light client': 'light://substrate-connect/polkadot'
-      // Pinknode: 'wss://rpc.pinknode.io/polkadot/explorer' // https://github.com/polkadot-js/apps/issues/5721
+      'light client': 'light://substrate-connect/polkadot',
+      RadiumBlock: 'wss://polkadot.public.curie.radiumblock.io/ws',
+      '1RPC': 'wss://1rpc.io/dot',
+      Pinknode: 'wss://public-rpc.pinknode.io/polkadot' // https://github.com/polkadot-js/apps/issues/5721
     },
     active: true,
     currentProvider: 'Parity',
@@ -39,8 +41,10 @@ export const PREDEFINED_NETWORKS: Record<string, NetworkJson> = {
       OnFinality: 'wss://kusama.api.onfinality.io/public-ws',
       // 'Geometry Labs': 'wss://kusama.geometry.io/websockets', // https://github.com/polkadot-js/apps/pull/6746
       Dwellir: 'wss://kusama-rpc.dwellir.com',
-      'light client': 'light://substrate-connect/kusama'
-      // Pinknode: 'wss://rpc.pinknode.io/kusama/explorer' // https://github.com/polkadot-js/apps/issues/5721
+      'light client': 'light://substrate-connect/kusama',
+      Pinknode: 'wss://public-rpc.pinknode.io/kusama',
+      RadiumBlock: 'wss://kusama.public.curie.radiumblock.xyz/ws',
+      '1RPC': 'wss://1rpc.io/ksm'
     },
     active: true,
     currentProvider: 'Parity',
@@ -102,7 +106,9 @@ export const PREDEFINED_NETWORKS: Record<string, NetworkJson> = {
     providers: {
       Parity: 'wss://statemint-rpc.polkadot.io',
       OnFinality: 'wss://statemint.api.onfinality.io/public-ws',
-      Dwellir: 'wss://statemint-rpc.dwellir.com'
+      Dwellir: 'wss://statemint-rpc.dwellir.com',
+      PinkNode: 'wss://public-rpc.pinknode.io/statemint',
+      RadiumBlock: 'wss://statemint.public.curie.radiumblock.xyz/ws'
     },
     active: false,
     currentProvider: 'Parity',
@@ -233,11 +239,14 @@ export const PREDEFINED_NETWORKS: Record<string, NetworkJson> = {
     providers: {
       'Moonbeam Foundation': 'wss://wss.api.moonbeam.network',
       OnFinality: 'wss://moonbeam.api.onfinality.io/public-ws',
-      Dwellir: 'wss://moonbeam-rpc.dwellir.com'
+      Dwellir: 'wss://moonbeam-rpc.dwellir.com',
+      '1rpc': 'wss://1rpc.io/glmr',
+      PinkNode: 'wss://public-rpc.pinknode.io/moonbeam',
+      Blast: 'wss://moonbeam.public.blastapi.io'
     },
     active: false,
     currentProviderMode: 'ws',
-    currentProvider: 'Dwellir',
+    currentProvider: 'Moonbeam Foundation',
     groups: ['POLKADOT_PARACHAIN'],
     paraId: 2004,
     isEthereum: true,
@@ -260,11 +269,13 @@ export const PREDEFINED_NETWORKS: Record<string, NetworkJson> = {
       OnFinality: 'wss://astar.api.onfinality.io/public-ws',
       Dwellir: 'wss://astar-rpc.dwellir.com',
       Astar: 'wss://rpc.astar.network',
-      PinkNode: 'wss://public-rpc.pinknode.io/astar'
+      PinkNode: 'wss://public-rpc.pinknode.io/astar',
+      Blast: 'wss://astar.public.blastapi.io',
+      '1rpc': 'wss://1rpc.io/astr'
     },
     active: false,
     currentProviderMode: 'ws',
-    currentProvider: 'Dwellir',
+    currentProvider: 'Astar',
     groups: ['POLKADOT_PARACHAIN'],
     paraId: 2006,
     nativeToken: 'ASTR',
@@ -284,7 +295,9 @@ export const PREDEFINED_NETWORKS: Record<string, NetworkJson> = {
       OnFinality: 'wss://astar.api.onfinality.io/public-ws',
       Dwellir: 'wss://astar-rpc.dwellir.com',
       Astar: 'wss://rpc.astar.network',
-      PinkNode: 'wss://public-rpc.pinknode.io/astar'
+      PinkNode: 'wss://public-rpc.pinknode.io/astar',
+      Blast: 'wss://astar.public.blastapi.io',
+      '1rpc': 'wss://1rpc.io/astr'
     },
     isEthereum: true,
     active: false,
@@ -315,7 +328,7 @@ export const PREDEFINED_NETWORKS: Record<string, NetworkJson> = {
     },
     active: false,
     currentProviderMode: 'ws',
-    currentProvider: 'Dwellir',
+    currentProvider: 'Acala Foundation 0',
     groups: ['POLKADOT_PARACHAIN'],
     paraId: 2000,
     nativeToken: 'ACA',
@@ -393,7 +406,7 @@ export const PREDEFINED_NETWORKS: Record<string, NetworkJson> = {
     },
     active: false,
     currentProviderMode: 'ws',
-    currentProvider: 'Dwellir',
+    currentProvider: 'Galactic Council',
     groups: ['POLKADOT_PARACHAIN'],
     paraId: 2034,
     nativeToken: 'HDX',
@@ -792,7 +805,9 @@ export const PREDEFINED_NETWORKS: Record<string, NetworkJson> = {
     providers: {
       Parity: 'wss://statemine-rpc.polkadot.io',
       OnFinality: 'wss://statemine.api.onfinality.io/public-ws',
-      Dwellir: 'wss://statemine-rpc.dwellir.com'
+      Dwellir: 'wss://statemine-rpc.dwellir.com',
+      RadiumBlock: 'wss://statemine.public.curie.radiumblock.xyz/ws',
+      PinkNode: 'wss://public-rpc.pinknode.io/statemine'
     },
     active: false,
     currentProviderMode: 'ws',
@@ -818,7 +833,7 @@ export const PREDEFINED_NETWORKS: Record<string, NetworkJson> = {
     },
     active: false,
     currentProviderMode: 'ws',
-    currentProvider: 'Dwellir',
+    currentProvider: 'Acala Foundation 2',
     groups: ['KUSAMA_PARACHAIN'],
     paraId: 2000,
     nativeToken: 'KAR',
@@ -834,8 +849,9 @@ export const PREDEFINED_NETWORKS: Record<string, NetworkJson> = {
     providers: {
       'Moonbeam Foundation': 'wss://wss.api.moonriver.moonbeam.network',
       OnFinality: 'wss://moonriver.api.onfinality.io/public-ws',
-      Dwellir: 'wss://moonriver-rpc.dwellir.com'
-      // Pinknode: 'wss://rpc.pinknode.io/moonriver/explorer' // https://github.com/polkadot-js/apps/issues/7058
+      Dwellir: 'wss://moonriver-rpc.dwellir.com',
+      Blast: 'wss://moonriver.public.blastapi.io',
+      Pinknode: 'wss://public-rpc.pinknode.io/moonriver' // https://github.com/polkadot-js/apps/issues/7058
     },
     active: false,
     currentProviderMode: 'ws',
@@ -862,11 +878,12 @@ export const PREDEFINED_NETWORKS: Record<string, NetworkJson> = {
       StakeTechnologies: 'wss://rpc.shiden.astar.network',
       OnFinality: 'wss://shiden.api.onfinality.io/public-ws',
       Pinknode: 'wss://rpc.pinknode.io/shiden/explorer',
-      Dwellir: 'wss://shiden-rpc.dwellir.com'
+      Dwellir: 'wss://shiden-rpc.dwellir.com',
+      Blast: 'wss://shiden.public.blastapi.io'
     },
     active: false,
     currentProviderMode: 'ws',
-    currentProvider: 'Pinknode',
+    currentProvider: 'StakeTechnologies',
     groups: ['KUSAMA_PARACHAIN'],
     paraId: 2007,
     nativeToken: 'SDN',
@@ -1020,7 +1037,7 @@ export const PREDEFINED_NETWORKS: Record<string, NetworkJson> = {
     },
     active: false,
     currentProviderMode: 'ws',
-    currentProvider: 'Dwellir',
+    currentProvider: 'KILT Protocol',
     groups: ['KUSAMA_PARACHAIN'],
     paraId: 2086,
     nativeToken: 'KILT',
@@ -1059,7 +1076,7 @@ export const PREDEFINED_NETWORKS: Record<string, NetworkJson> = {
     },
     active: false,
     currentProviderMode: 'ws',
-    currentProvider: 'Dwellir',
+    currentProvider: 'HydraDX',
     groups: ['KUSAMA_PARACHAIN'],
     paraId: 2090,
     coinGeckoKey: 'basilisk',
@@ -1751,7 +1768,7 @@ export const PREDEFINED_NETWORKS: Record<string, NetworkJson> = {
     },
     active: false,
     currentProviderMode: 'ws',
-    currentProvider: 'Dwellir',
+    currentProvider: 'AjunaNetwork',
     groups: ['KUSAMA_PARACHAIN'],
     paraId: 2119,
     nativeToken: 'BAJU',

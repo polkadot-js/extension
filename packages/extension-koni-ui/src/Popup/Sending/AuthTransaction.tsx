@@ -1,7 +1,7 @@
 // Copyright 2019-2022 @polkadot/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { NetworkJson, RequestCheckTransfer, ResponseTransfer, TransferError, TransferStep } from '@subwallet/extension-base/background/KoniTypes';
+import { NetworkJson, RequestCheckTransfer, ResponseTransfer, BasicTxError, TransferStep } from '@subwallet/extension-base/background/KoniTypes';
 import { LedgerState } from '@subwallet/extension-base/signers/types';
 import { InputWithLabel, Warning } from '@subwallet/extension-koni-ui/components';
 import Button from '@subwallet/extension-koni-ui/components/Button';
@@ -15,15 +15,15 @@ import { BalanceFormatType } from '@subwallet/extension-koni-ui/components/types
 import { SIGN_MODE } from '@subwallet/extension-koni-ui/constants/signing';
 import { ExternalRequestContext } from '@subwallet/extension-koni-ui/contexts/ExternalRequestContext';
 import { QrContext, QrContextState, QrStep } from '@subwallet/extension-koni-ui/contexts/QrContext';
+import useGetAccountByAddress from '@subwallet/extension-koni-ui/hooks/useGetAccountByAddress';
 import { useRejectExternalRequest } from '@subwallet/extension-koni-ui/hooks/useRejectExternalRequest';
 import { useSignMode } from '@subwallet/extension-koni-ui/hooks/useSignMode';
 import useTranslation from '@subwallet/extension-koni-ui/hooks/useTranslation';
-import { getAccountMeta, makeTransfer, makeTransferLedger, makeTransferQr } from '@subwallet/extension-koni-ui/messaging';
+import { makeTransfer, makeTransferLedger, makeTransferQr } from '@subwallet/extension-koni-ui/messaging';
 import { ThemeProps, TransferResultType } from '@subwallet/extension-koni-ui/types';
-import React, { useCallback, useContext, useEffect, useState } from 'react';
+import React, { useCallback, useContext, useState } from 'react';
 import styled from 'styled-components';
 
-import { KeyringPair$Meta } from '@polkadot/keyring/types';
 import { BN } from '@polkadot/util';
 
 interface Props extends ThemeProps {
@@ -86,11 +86,11 @@ function AuthTransaction ({ className, isDonation, feeInfo: [fee, feeDecimals, f
   const [password, setPassword] = useState<string>('');
   const [isKeyringErr, setKeyringErr] = useState<boolean>(false);
   const [errorArr, setErrorArr] = useState<string[]>([]);
-  const [accountMeta, setAccountMeta] = useState<KeyringPair$Meta>({});
   const networkPrefix = networkMap[requestPayload.networkKey].ss58Format;
   const genesisHash = networkMap[requestPayload.networkKey].genesisHash;
 
-  const signMode = useSignMode(accountMeta);
+  const account = useGetAccountByAddress(requestPayload.from);
+  const signMode = useSignMode(account);
 
   const _onCancel = useCallback(async () => {
     if (externalId) {
@@ -125,7 +125,7 @@ function AuthTransaction ({ className, isDonation, feeInfo: [fee, feeDecimals, f
     }
   }, [cleanQrState, onChangeResult, clearExternalState]);
 
-  const handlerResponseError = useCallback((errors: TransferError[]) => {
+  const handlerResponseError = useCallback((errors: BasicTxError[]) => {
     const errorMessage = errors.map((err) => err.message);
 
     if (errors.find((err) => err.code === 'keyringError')) {
@@ -327,7 +327,7 @@ function AuthTransaction ({ className, isDonation, feeInfo: [fee, feeDecimals, f
       case SIGN_MODE.LEDGER:
         return (
           <LedgerRequest
-            accountMeta={accountMeta}
+            accountMeta={account}
             errorArr={errorArr}
             genesisHash={genesisHash}
             handlerSignLedger={_doSignLedger}
@@ -365,26 +365,7 @@ function AuthTransaction ({ className, isDonation, feeInfo: [fee, feeDecimals, f
           </div>
         );
     }
-  }, [signMode, handlerClearError, errorArr, genesisHash, _doStartQr, isBusy, handlerErrorQr, handlerRenderInfo, accountMeta, _doSignLedger, isKeyringErr, t, _onChangePass, password, renderError, _doStart]);
-
-  useEffect(() => {
-    let unmount = false;
-
-    const handler = async () => {
-      const { meta } = await getAccountMeta({ address: requestPayload.from });
-
-      if (!unmount) {
-        setAccountMeta(meta);
-      }
-    };
-
-    // eslint-disable-next-line no-void
-    void handler();
-
-    return () => {
-      unmount = true;
-    };
-  }, [requestPayload.from]);
+  }, [signMode, handlerClearError, errorArr, genesisHash, _doStartQr, isBusy, handlerErrorQr, handlerRenderInfo, account, _doSignLedger, isKeyringErr, t, _onChangePass, password, renderError, _doStart]);
 
   return (
     <div className={className}>

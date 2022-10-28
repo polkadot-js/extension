@@ -2,18 +2,17 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { assetFromToken } from '@equilab/api';
-import { ApiProps, BasicTxResponse, ExternalRequestPromise, ExternalRequestPromiseStatus, NetworkJson, NftTransactionResponse, ResponseNftTransferLedger, ResponseNftTransferQr, ResponseTransfer, ResponseTransferLedger, ResponseTransferQr, TokenInfo, TransferErrorCode, TransferStep } from '@subwallet/extension-base/background/KoniTypes';
+import { ApiProps, BasicTxResponse, ExternalRequestPromise, ExternalRequestPromiseStatus, HandleBasicTx, NetworkJson, NftTransactionResponse, ResponseNftTransferLedger, ResponseNftTransferQr, ResponseTransfer, ResponseTransferLedger, ResponseTransferQr, TokenInfo, TransferErrorCode, TransferStep } from '@subwallet/extension-base/background/KoniTypes';
 import LedgerSigner from '@subwallet/extension-base/signers/substrates/LedgerSigner';
 import QrSigner from '@subwallet/extension-base/signers/substrates/QrSigner';
 import { LedgerState, QrState } from '@subwallet/extension-base/signers/types';
-import { sendExtrinsic } from '@subwallet/extension-koni-base/api/dotsama/external/shared';
-import { getNftTransferExtrinsic } from '@subwallet/extension-koni-base/api/nft/transfer';
+import { sendExtrinsic, signAndSendExtrinsic, SignerType } from '@subwallet/extension-koni-base/api/dotsama/signAndSend';
+import { getNftTransferExtrinsic, isRecipientSelf } from '@subwallet/extension-koni-base/api/nft/transfer';
 import { createXcmExtrinsic, isNetworksPairSupportedTransferCrossChain } from '@subwallet/extension-koni-base/api/xcm';
 
 import { ApiPromise } from '@polkadot/api';
 import { SubmittableExtrinsic } from '@polkadot/api/promise/types';
 import { EventRecord, ExtrinsicStatus } from '@polkadot/types/interfaces';
-import { AnyNumber } from '@polkadot/types/types';
 import { BN } from '@polkadot/util';
 
 // TODO: consider pass state.getApiMap() as a param
@@ -76,7 +75,7 @@ interface TransferNFTProps {
   recipientAddress: string;
   params: Record<string, any>;
   senderAddress: string;
-  qrId: string;
+  id: string;
   setState: (promise: ExternalRequestPromise) => void;
   updateState: (promise: Partial<ExternalRequestPromise>) => void;
   callback: (data: NftTransactionResponse) => void;
@@ -512,73 +511,44 @@ interface TransferNFTQrProps extends TransferNFTProps{
 
 export async function makeNftTransferQr ({ apiProp,
   callback,
+  id,
   networkKey,
   params,
-  qrId,
   recipientAddress,
   senderAddress,
   setState,
   updateState }: TransferNFTQrProps): Promise<void> {
-  const txState: ResponseNftTransferQr = { isSendingSelf: false };
+  const isSendingSelf = isRecipientSelf(senderAddress, recipientAddress);
   const extrinsic = getNftTransferExtrinsic(networkKey, apiProp, senderAddress, recipientAddress, params);
 
   if (!extrinsic) {
     // eslint-disable-next-line node/no-callback-literal
-    callback({ isSendingSelf: false, txError: true });
+    callback({ isSendingSelf: isSendingSelf, txError: true });
 
     return;
   }
 
-  let nonce: AnyNumber;
-
-  if (['genshiro_testnet', 'genshiro', 'equilibrium_parachain'].includes(networkKey)) {
-    nonce = -1;
-  } else {
-    // @ts-ignore
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-    nonce = await apiProp.api.query.system.account(senderAddress).nonce;
-  }
-
-  const qrCallback = ({ qrState }: {qrState: QrState}) => {
-    // eslint-disable-next-line node/no-callback-literal
-    callback({ isSendingSelf: false, qrState: qrState, externalState: { externalId: qrState.qrId } });
+  const txState: ResponseNftTransferQr = {
+    isSendingSelf: isSendingSelf,
+    callHash: extrinsic.method.hash.toHex()
   };
 
-  const qrResolver = () => {
+  const cb: HandleBasicTx = (data: BasicTxResponse) => {
     // eslint-disable-next-line node/no-callback-literal
-    callback({
-      isSendingSelf: false,
-      isBusy: true
-    });
+    callback({ ...txState, ...data });
   };
 
-  await extrinsic.signAsync(
-    senderAddress,
-    {
-      nonce,
-      signer: new QrSigner({
-        registry: apiProp.registry,
-        callback: qrCallback,
-        id: qrId,
-        setState,
-        resolver: qrResolver
-      })
-    }
-  );
-
-  const extrinsicCallback = (txState: BasicTxResponse) => {
-    // eslint-disable-next-line node/no-callback-literal
-    callback({
-      ...txState,
-      isSendingSelf: false
-    });
-  };
-
-  await sendExtrinsic({
-    callback: extrinsicCallback,
-    extrinsic,
-    txState,
-    updateState
+  await signAndSendExtrinsic({
+    type: SignerType.QR,
+    callback: cb,
+    id: id,
+    txState: txState,
+    setState: setState,
+    apiProp: apiProp,
+    addressOrPair: senderAddress,
+    updateState: updateState,
+    extrinsic: extrinsic,
+    errorMessage: 'error bonding'
   });
 }
 
@@ -719,9 +689,9 @@ interface TransferNFTLedgerProps extends TransferNFTProps{
 
 export async function makeNftTransferLedger ({ apiProp,
   callback,
+  id,
   networkKey,
   params,
-  qrId,
   recipientAddress,
   senderAddress,
   setState,
@@ -741,7 +711,7 @@ export async function makeNftTransferLedger ({ apiProp,
     callback({ isSendingSelf: false, ledgerState: ledgerState, externalState: { externalId: ledgerState.ledgerId } });
   };
 
-  await extrinsic.signAsync(senderAddress, { signer: new LedgerSigner(apiProp.registry, ledgerCallback, qrId, setState) });
+  await extrinsic.signAsync(senderAddress, { signer: new LedgerSigner(apiProp.registry, ledgerCallback, id, setState) });
 
   const extrinsicCallback = (txState: BasicTxResponse) => {
     // eslint-disable-next-line node/no-callback-literal

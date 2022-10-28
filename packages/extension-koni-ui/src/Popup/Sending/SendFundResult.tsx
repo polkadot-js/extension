@@ -1,7 +1,7 @@
 // Copyright 2019-2022 @polkadot/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { TransferError } from '@subwallet/extension-base/background/KoniTypes';
+import { BasicTxError } from '@subwallet/extension-base/background/KoniTypes';
 import failStatus from '@subwallet/extension-koni-ui/assets/fail-status.svg';
 import successStatus from '@subwallet/extension-koni-ui/assets/success-status.svg';
 import { ActionContext } from '@subwallet/extension-koni-ui/components';
@@ -59,7 +59,7 @@ function SendFundResult ({ className = '', isXcmTransfer, networkKey, onResend, 
     );
   };
 
-  const renderErrorMessage = (txError: Array<TransferError>) => {
+  const renderErrorMessage = (txError: Array<BasicTxError>) => {
     return txError.map((err) => (
       <div
         className={'send-fund-result__text-danger'}

@@ -1,7 +1,7 @@
 // Copyright 2019-2022 @subwallet/extension-koni authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { BaseTxError, BasicTxError, ResponseStakeExternal, ResponseStakeLedger, ResponseWithdrawStakeQr } from '@subwallet/extension-base/background/KoniTypes';
+import { BaseTxError, BasicExternalTxResponse, BasicTxResponse, BasicTxResponse, BasicTxError } from '@subwallet/extension-base/background/KoniTypes';
 import { LedgerState } from '@subwallet/extension-base/signers/types';
 import { InputWithLabel } from '@subwallet/extension-koni-ui/components';
 import { BalanceVal } from '@subwallet/extension-koni-ui/components/Balance';
@@ -16,17 +16,16 @@ import { SIGN_MODE } from '@subwallet/extension-koni-ui/constants/signing';
 import { ExternalRequestContext } from '@subwallet/extension-koni-ui/contexts/ExternalRequestContext';
 import { QrContext, QrContextState, QrStep } from '@subwallet/extension-koni-ui/contexts/QrContext';
 import useGetNetworkJson from '@subwallet/extension-koni-ui/hooks/screen/home/useGetNetworkJson';
+import useGetAccountByAddress from '@subwallet/extension-koni-ui/hooks/useGetAccountByAddress';
 import { useRejectExternalRequest } from '@subwallet/extension-koni-ui/hooks/useRejectExternalRequest';
 import { useSignMode } from '@subwallet/extension-koni-ui/hooks/useSignMode';
 import useToast from '@subwallet/extension-koni-ui/hooks/useToast';
 import useTranslation from '@subwallet/extension-koni-ui/hooks/useTranslation';
-import { getAccountMeta, getStakeWithdrawalTxInfo, stakeWithdrawLedger, stakeWithdrawQr, submitStakeWithdrawal } from '@subwallet/extension-koni-ui/messaging';
+import { getStakeWithdrawalTxInfo, stakeWithdrawLedger, stakeWithdrawQr, submitStakeWithdrawal } from '@subwallet/extension-koni-ui/messaging';
 import StakeWithdrawalResult from '@subwallet/extension-koni-ui/Popup/Home/Staking/components/StakeWithdrawalResult';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import React, { useCallback, useContext, useEffect, useState } from 'react';
 import styled from 'styled-components';
-
-import { KeyringPair$Meta } from '@polkadot/keyring/types';
 
 interface Props extends ThemeProps {
   className?: string;
@@ -62,10 +61,10 @@ function StakeAuthWithdrawal ({ address, amount, className, hideModal, networkKe
   const [isTxSuccess, setIsTxSuccess] = useState(false);
   const [txError, setTxError] = useState('');
   const [showResult, setShowResult] = useState(false);
-  const [accountMeta, setAccountMeta] = useState<KeyringPair$Meta>({});
   const [errorArr, setErrorArr] = useState<string[]>([]);
 
-  const signMode = useSignMode(accountMeta);
+  const account = useGetAccountByAddress(address);
+  const signMode = useSignMode(account);
 
   useEffect(() => {
     getStakeWithdrawalTxInfo({
@@ -171,7 +170,7 @@ function StakeAuthWithdrawal ({ address, amount, className, hideModal, networkKe
 
   // External
 
-  const handlerCallbackResponseResult = useCallback((data: ResponseStakeExternal) => {
+  const handlerCallbackResponseResult = useCallback((data: BasicExternalTxResponse) => {
     if (balanceError && !data.passwordError) {
       setLoading(false);
       setErrorArr(['Your balance is too low to cover fees']);
@@ -226,7 +225,7 @@ function StakeAuthWithdrawal ({ address, amount, className, hideModal, networkKe
 
   // Qr
 
-  const handlerCallbackResponseResultQr = useCallback((data: ResponseWithdrawStakeQr) => {
+  const handlerCallbackResponseResultQr = useCallback((data: BasicTxResponse) => {
     if (data.qrState) {
       const state: QrContextState = {
         ...data.qrState,
@@ -275,7 +274,7 @@ function StakeAuthWithdrawal ({ address, amount, className, hideModal, networkKe
 
   // Ledger
 
-  const handlerCallbackResponseResultLedger = useCallback((handlerSignLedger: (ledgerState: LedgerState) => void, data: ResponseStakeLedger) => {
+  const handlerCallbackResponseResultLedger = useCallback((handlerSignLedger: (ledgerState: LedgerState) => void, data: BasicTxResponse) => {
     if (data.ledgerState) {
       handlerSignLedger(data.ledgerState);
     }
@@ -288,7 +287,7 @@ function StakeAuthWithdrawal ({ address, amount, className, hideModal, networkKe
   }, [handlerCallbackResponseResult, updateExternalState]);
 
   const handlerSendLedgerSubstrate = useCallback((handlerSignLedger: (ledgerState: LedgerState) => void) => {
-    const callback = (data: ResponseStakeExternal) => {
+    const callback = (data: BasicExternalTxResponse) => {
       handlerCallbackResponseResultLedger(handlerSignLedger, data);
     };
 
@@ -398,7 +397,7 @@ function StakeAuthWithdrawal ({ address, amount, className, hideModal, networkKe
         return (
           <div className='external-wrapper'>
             <LedgerRequest
-              accountMeta={accountMeta}
+              accountMeta={account}
               errorArr={errorArr}
               genesisHash={networkJson.genesisHash}
               handlerSignLedger={handlerSendLedger}
@@ -448,26 +447,7 @@ function StakeAuthWithdrawal ({ address, amount, className, hideModal, networkKe
           </>
         );
     }
-  }, [_onChangePass, accountMeta, errorArr, handleConfirm, handlerClearError, handlerErrorQr, handlerSendLedger, handlerSubmitQr, hideConfirm, loading, networkJson.genesisHash, password, passwordError, renderInfo, signMode, t]);
-
-  useEffect(() => {
-    let unmount = false;
-
-    const handler = async () => {
-      const { meta } = await getAccountMeta({ address: address });
-
-      if (!unmount) {
-        setAccountMeta(meta);
-      }
-    };
-
-    // eslint-disable-next-line no-void
-    void handler();
-
-    return () => {
-      unmount = true;
-    };
-  }, [address]);
+  }, [_onChangePass, account, errorArr, handleConfirm, handlerClearError, handlerErrorQr, handlerSendLedger, handlerSubmitQr, hideConfirm, loading, networkJson.genesisHash, password, passwordError, renderInfo, signMode, t]);
 
   return (
     <div className={className}>

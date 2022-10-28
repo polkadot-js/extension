@@ -1,7 +1,7 @@
 // Copyright 2019-2022 @subwallet/extension-koni authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { BaseTxError, BasicTxError, ResponseUnStakeExternal, ResponseUnStakeLedger, ResponseUnStakeQr } from '@subwallet/extension-base/background/KoniTypes';
+import { BaseTxError, BasicExternalTxResponse, BasicTxResponse, BasicTxResponse, BasicTxError } from '@subwallet/extension-base/background/KoniTypes';
 import { LedgerState } from '@subwallet/extension-base/signers/types';
 import { InputWithLabel } from '@subwallet/extension-koni-ui/components';
 import { BalanceVal } from '@subwallet/extension-koni-ui/components/Balance';
@@ -150,7 +150,7 @@ function UnbondingAuthTransaction ({ amount, balanceError, className, fee, handl
     }
   }, []);
 
-  const handlerCallbackResponseResult = useCallback((data: ResponseUnStakeExternal) => {
+  const handlerCallbackResponseResult = useCallback((data: BasicExternalTxResponse) => {
     if (balanceError && !data.passwordError) {
       setLoading(false);
       setErrorArr(['Your balance is too low to cover fees']);
@@ -199,7 +199,7 @@ function UnbondingAuthTransaction ({ amount, balanceError, className, fee, handl
 
   // Qr
 
-  const handlerCallbackResponseResultQr = useCallback((data: ResponseUnStakeQr) => {
+  const handlerCallbackResponseResultQr = useCallback((data: BasicTxResponse) => {
     if (data.qrState) {
       const state: QrContextState = {
         ...data.qrState,
@@ -253,7 +253,7 @@ function UnbondingAuthTransaction ({ amount, balanceError, className, fee, handl
 
   // Ledger
 
-  const handlerCallbackResponseResultLedger = useCallback((handlerSignLedger: (ledgerState: LedgerState) => void, data: ResponseUnStakeLedger) => {
+  const handlerCallbackResponseResultLedger = useCallback((handlerSignLedger: (ledgerState: LedgerState) => void, data: BasicTxResponse) => {
     if (data.ledgerState) {
       handlerSignLedger(data.ledgerState);
     }
@@ -266,7 +266,7 @@ function UnbondingAuthTransaction ({ amount, balanceError, className, fee, handl
   }, [handlerCallbackResponseResult, updateExternalState]);
 
   const handlerSendLedgerSubstrate = useCallback((handlerSignLedger: (ledgerState: LedgerState) => void) => {
-    const callback = (data: ResponseUnStakeExternal) => {
+    const callback = (data: BasicExternalTxResponse) => {
       handlerCallbackResponseResultLedger(handlerSignLedger, data);
     };
 

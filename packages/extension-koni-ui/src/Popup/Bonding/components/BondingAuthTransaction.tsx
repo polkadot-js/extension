@@ -3,7 +3,7 @@
 
 import { faCircleCheck } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { BaseTxError, BasicTxError, ResponseStakeExternal, ResponseStakeLedger, ResponseStakeQr, ValidatorInfo } from '@subwallet/extension-base/background/KoniTypes';
+import { BaseTxError, BasicExternalTxResponse, BasicTxResponse, BasicTxResponse, BasicTxError, ValidatorInfo } from '@subwallet/extension-base/background/KoniTypes';
 import { LedgerState } from '@subwallet/extension-base/signers/types';
 import { InputWithLabel } from '@subwallet/extension-koni-ui/components';
 import { BalanceVal } from '@subwallet/extension-koni-ui/components/Balance';
@@ -166,7 +166,7 @@ function BondingAuthTransaction ({ amount, balanceError, bondedValidators, class
     }
   }, []);
 
-  const handlerCallbackResponseResult = useCallback((data: ResponseStakeExternal) => {
+  const handlerCallbackResponseResult = useCallback((data: BasicExternalTxResponse) => {
     if (balanceError && !data.passwordError) {
       setLoading(false);
       setErrorArr(['Your balance is too low to cover fees']);
@@ -215,7 +215,7 @@ function BondingAuthTransaction ({ amount, balanceError, bondedValidators, class
 
   // Qr
 
-  const handlerCallbackResponseResultQr = useCallback((data: ResponseStakeQr) => {
+  const handlerCallbackResponseResultQr = useCallback((data: BasicTxResponse) => {
     if (data.qrState) {
       const state: QrContextState = {
         ...data.qrState,
@@ -266,7 +266,7 @@ function BondingAuthTransaction ({ amount, balanceError, bondedValidators, class
 
   // Ledger
 
-  const handlerCallbackResponseResultLedger = useCallback((handlerSignLedger: (ledgerState: LedgerState) => void, data: ResponseStakeLedger) => {
+  const handlerCallbackResponseResultLedger = useCallback((handlerSignLedger: (ledgerState: LedgerState) => void, data: BasicTxResponse) => {
     if (data.ledgerState) {
       handlerSignLedger(data.ledgerState);
     }
@@ -279,7 +279,7 @@ function BondingAuthTransaction ({ amount, balanceError, bondedValidators, class
   }, [handlerCallbackResponseResult, updateExternalState]);
 
   const handlerSendLedgerSubstrate = useCallback((handlerSignLedger: (ledgerState: LedgerState) => void) => {
-    const callback = (data: ResponseStakeExternal) => {
+    const callback = (data: BasicExternalTxResponse) => {
       handlerCallbackResponseResultLedger(handlerSignLedger, data);
     };
 

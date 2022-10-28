@@ -5,20 +5,23 @@ import Common from '@ethereumjs/common';
 import Extension, { SEED_DEFAULT_LENGTH, SEED_LENGTHS } from '@subwallet/extension-base/background/handlers/Extension';
 import { AuthUrls } from '@subwallet/extension-base/background/handlers/State';
 import { createSubscription, isSubscriptionRunning, unsubscribe } from '@subwallet/extension-base/background/handlers/subscriptions';
-import { AccountExternalError, AccountExternalErrorCode, AccountsWithCurrentAddress, ApiProps, BalanceJson, BaseTxError, BasicTxError, BasicTxErrorCode, BasicTxInfo, BasicTxResponse, BondingOptionInfo, BondingOptionParams, BondingSubmitParams, ChainBondingBasics, ChainRegistry, CheckExistingTuringCompoundParams, CrowdloanJson, CurrentAccountInfo, CustomToken, CustomTokenJson, DelegationItem, DeleteCustomTokenParams, DisableNetworkResponse, EvmNftSubmitTransaction, EvmNftTransaction, ExistingTuringCompoundTask, ExternalRequestPromise, ExternalRequestPromiseStatus, NETWORK_ERROR, NetWorkGroup, NetworkJson, NftCollection, NftJson, NftTransactionRequest, NftTransactionResponse, NftTransferExtra, OptionInputAddress, PriceJson, RequestAccountCreateExternalV2, RequestAccountCreateHardwareV2, RequestAccountCreateSuriV2, RequestAccountCreateWithSecretKey, RequestAccountExportPrivateKey, RequestAccountMeta, RequestAuthorization, RequestAuthorizationBlock, RequestAuthorizationPerAccount, RequestAuthorizationPerSite, RequestAuthorizeApproveV2, RequestBatchRestoreV2, RequestCancelCompoundStakeExternal, RequestCheckCrossChainTransfer, RequestCheckPublicAndSecretKey, RequestCheckTransfer, RequestClaimRewardExternal, RequestConfirmationComplete, RequestCreateCompoundStakeExternal, RequestCrossChainTransfer, RequestCrossChainTransferExternal, RequestDeriveCreateV2, RequestForgetSite, RequestFreeBalance, RequestJsonRestoreV2, RequestNftForceUpdate, RequestNftTransferExternalEVM, RequestNftTransferExternalSubstrate, RequestParseEVMTransactionInput, RequestParseTransactionEVM, RequestQrSignEVM, RequestRejectExternalRequest, RequestResolveExternalRequest, RequestSaveRecentAccount, RequestSeedCreateV2, RequestSeedValidateV2, RequestSettingsType, RequestStakeExternal, RequestTransactionHistoryAdd, RequestTransfer, RequestTransferCheckReferenceCount, RequestTransferCheckSupporting, RequestTransferExistentialDeposit, RequestTransferExternal, RequestUnStakeExternal, RequestWithdrawStakeExternal, ResponseAccountCreateSuriV2, ResponseAccountCreateWithSecretKey, ResponseAccountExportPrivateKey, ResponseAccountMeta, ResponseCheckCrossChainTransfer, ResponseCheckPublicAndSecretKey, ResponseCheckTransfer, ResponseParseEVMTransactionInput, ResponseParseTransactionEVM, ResponsePrivateKeyValidateV2, ResponseQrSignEVM, ResponseRejectExternalRequest, ResponseResolveExternalRequest, ResponseSeedCreateV2, ResponseSeedValidateV2, ResponseTransfer, StakeClaimRewardParams, StakeDelegationRequest, StakeUnlockingJson, StakeWithdrawalParams, StakingJson, StakingRewardJson, SubstrateNftSubmitTransaction, SubstrateNftTransaction, SupportTransferResponse, ThemeTypes, TokenInfo, TransactionHistoryItemType, TransferError, TransferErrorCode, TransferStep, TuringCancelStakeCompoundParams, TuringStakeCompoundParams, UnbondingSubmitParams, ValidateCustomTokenRequest, ValidateCustomTokenResponse, ValidateNetworkRequest, ValidateNetworkResponse } from '@subwallet/extension-base/background/KoniTypes';
+import { AccountExternalError, AccountExternalErrorCode, AccountsWithCurrentAddress, ApiProps, BalanceJson, BasicTxError, BasicTxErrorCode, BasicTxInfo, BasicTxResponse, BondingOptionInfo, BondingOptionParams, BondingSubmitParams, ChainBondingBasics, ChainRegistry, CheckExistingTuringCompoundParams, CrowdloanJson, CurrentAccountInfo, CustomToken, CustomTokenJson, DelegationItem, DeleteCustomTokenParams, DisableNetworkResponse, EvmNftSubmitTransaction, EvmNftTransaction, ExistingTuringCompoundTask, ExternalRequestPromise, ExternalRequestPromiseStatus, HandleBasicTx, NETWORK_ERROR, NetWorkGroup, NetworkJson, NftCollection, NftJson, NftTransactionRequest, NftTransactionResponse, NftTransferExtra, OptionInputAddress, PrepareExternalRequest, PriceJson, RequestAccountCreateExternalV2, RequestAccountCreateHardwareV2, RequestAccountCreateSuriV2, RequestAccountCreateWithSecretKey, RequestAccountExportPrivateKey, RequestAccountMeta, RequestAuthorization, RequestAuthorizationBlock, RequestAuthorizationPerAccount, RequestAuthorizationPerSite, RequestAuthorizeApproveV2, RequestBatchRestoreV2, RequestCancelCompoundStakeExternal, RequestCheckCrossChainTransfer, RequestCheckPublicAndSecretKey, RequestCheckTransfer, RequestClaimRewardExternal, RequestConfirmationComplete, RequestCreateCompoundStakeExternal, RequestCrossChainTransfer, RequestCrossChainTransferExternal, RequestDeriveCreateV2, RequestForgetSite, RequestFreeBalance, RequestJsonRestoreV2, RequestNftForceUpdate, RequestNftTransferExternalEVM, RequestNftTransferExternalSubstrate, RequestParseEVMTransactionInput, RequestParseTransactionEVM, RequestQrSignEVM, RequestRejectExternalRequest, RequestResolveExternalRequest, RequestSaveRecentAccount, RequestSeedCreateV2, RequestSeedValidateV2, RequestSettingsType, RequestStakeExternal, RequestTransactionHistoryAdd, RequestTransfer, RequestTransferCheckReferenceCount, RequestTransferCheckSupporting, RequestTransferExistentialDeposit, RequestTransferExternal, RequestUnStakeExternal, RequestWithdrawStakeExternal, ResponseAccountCreateSuriV2, ResponseAccountCreateWithSecretKey, ResponseAccountExportPrivateKey, ResponseAccountMeta, ResponseCheckCrossChainTransfer, ResponseCheckPublicAndSecretKey, ResponseCheckTransfer, ResponseParseEVMTransactionInput, ResponseParseTransactionEVM, ResponsePrivateKeyValidateV2, ResponseQrSignEVM, ResponseRejectExternalRequest, ResponseResolveExternalRequest, ResponseSeedCreateV2, ResponseSeedValidateV2, ResponseTransfer, StakeClaimRewardParams, StakeDelegationRequest, StakeUnlockingJson, StakeWithdrawalParams, StakingJson, StakingRewardJson, SubstrateNftSubmitTransaction, SubstrateNftTransaction, SupportTransferResponse, ThemeTypes, TokenInfo, TransactionHistoryItemType, TransferErrorCode, TransferStep, TuringCancelStakeCompoundParams, TuringStakeCompoundParams, UnbondingSubmitParams, ValidateCustomTokenRequest, ValidateCustomTokenResponse, ValidateNetworkRequest, ValidateNetworkResponse } from '@subwallet/extension-base/background/KoniTypes';
 import { AccountJson, AuthorizeRequest, MessageTypes, RequestAccountForget, RequestAccountTie, RequestAuthorizeCancel, RequestAuthorizeReject, RequestCurrentAccountAddress, RequestParseTransactionSubstrate, RequestTypes, ResponseAuthorizeList, ResponseParseTransactionSubstrate, ResponseType } from '@subwallet/extension-base/background/types';
 import { getId } from '@subwallet/extension-base/utils/getId';
 import { getBondingExtrinsic, getBondingTxInfo, getChainBondingBasics, getClaimRewardExtrinsic, getClaimRewardTxInfo, getDelegationInfo, getUnbondingExtrinsic, getUnbondingTxInfo, getValidatorsInfo, getWithdrawalExtrinsic, getWithdrawalTxInfo } from '@subwallet/extension-koni-base/api/bonding';
 import { checkTuringStakeCompoundingTask, getTuringCancelCompoundingExtrinsic, getTuringCompoundExtrinsic, handleTuringCancelCompoundTxInfo, handleTuringCompoundTxInfo } from '@subwallet/extension-koni-base/api/bonding/paraChain';
 import { initApi } from '@subwallet/extension-koni-base/api/dotsama';
 import { getFreeBalance, subscribeFreeBalance } from '@subwallet/extension-koni-base/api/dotsama/balance';
-import { createStakeLedger, createStakeQr, createUnStakeLedger, createUnStakeQr, createWithdrawStakeLedger, createWithdrawStakeQr } from '@subwallet/extension-koni-base/api/dotsama/external/stake';
-import { createClaimRewardLedger, createClaimRewardQr } from '@subwallet/extension-koni-base/api/dotsama/external/stake/claim';
-import { createCancelCompoundLedger, createCancelCompoundQr } from '@subwallet/extension-koni-base/api/dotsama/external/stake/compound/cancel';
-import { createCreateCompoundLedger, createCreateCompoundQr } from '@subwallet/extension-koni-base/api/dotsama/external/stake/compound/create';
+import { createClaimRewardExternal } from '@subwallet/extension-koni-base/api/dotsama/external/stake/claim';
+import { createCancelCompoundExternal } from '@subwallet/extension-koni-base/api/dotsama/external/stake/compound/cancel';
+import { createCreateCompoundExternal } from '@subwallet/extension-koni-base/api/dotsama/external/stake/compound/create';
+import { createStakeExternal } from '@subwallet/extension-koni-base/api/dotsama/external/stake/stake';
+import { createUnStakeExternal } from '@subwallet/extension-koni-base/api/dotsama/external/stake/unStake';
+import { createWithdrawStakeExternal } from '@subwallet/extension-koni-base/api/dotsama/external/stake/withdraw';
 import { makeCrossChainTransferLedger, makeCrossChainTransferQr, makeNftTransferLedger, makeNftTransferQr, makeTransferLedger, makeTransferQr } from '@subwallet/extension-koni-base/api/dotsama/external/transfer';
 import { parseSubstratePayload } from '@subwallet/extension-koni-base/api/dotsama/parseSubstratePayload';
 import { getTokenInfo } from '@subwallet/extension-koni-base/api/dotsama/registry';
+import { signAndSendExtrinsic, SignerExternal, SignerType } from '@subwallet/extension-koni-base/api/dotsama/signAndSend';
 import { checkReferenceCount, checkSupportTransfer, estimateFee, getExistentialDeposit, makeTransfer } from '@subwallet/extension-koni-base/api/dotsama/transfer';
 import { SUPPORTED_TRANSFER_SUBSTRATE_CHAIN_NAME } from '@subwallet/extension-koni-base/api/nft/config';
 import { acalaTransferHandler, getNftTransferExtrinsic, isRecipientSelf, quartzTransferHandler, rmrkTransferHandler, statemineTransferHandler, uniqueTransferHandler, unlockAccount } from '@subwallet/extension-koni-base/api/nft/transfer';
@@ -1092,9 +1095,9 @@ export default class KoniExtension extends Extension {
     return true;
   }
 
-  private async validateTransfer (networkKey: string, token: string | undefined, from: string, to: string, password: string | undefined, value: string | undefined, transferAll: boolean | undefined): Promise<[Array<TransferError>, KeyringPair | undefined, BN | undefined, TokenInfo | undefined]> {
+  private async validateTransfer (networkKey: string, token: string | undefined, from: string, to: string, password: string | undefined, value: string | undefined, transferAll: boolean | undefined): Promise<[Array<BasicTxError>, KeyringPair | undefined, BN | undefined, TokenInfo | undefined]> {
     const dotSamaApiMap = state.getDotSamaApiMap();
-    const errors = [] as Array<TransferError>;
+    const errors = [] as Array<BasicTxError>;
     let keypair: KeyringPair | undefined;
     let transferValue;
 
@@ -1127,7 +1130,7 @@ export default class KoniExtension extends Extension {
       }
     } catch (e) {
       errors.push({
-        code: TransferErrorCode.KEYRING_ERROR,
+        code: BasicTxErrorCode.KEYRING_ERROR,
         // @ts-ignore
         message: String(e.message)
       });
@@ -1247,9 +1250,9 @@ export default class KoniExtension extends Extension {
     token: string,
     from: string, to: string,
     password: string | undefined,
-    value: string): Promise<[Array<TransferError>, KeyringPair | undefined, BN | undefined, TokenInfo | undefined]> {
+    value: string): Promise<[Array<BasicTxError>, KeyringPair | undefined, BN | undefined, TokenInfo | undefined]> {
     const dotSamaApiMap = state.getDotSamaApiMap();
-    const errors = [] as Array<TransferError>;
+    const errors = [] as Array<BasicTxError>;
     let keypair: KeyringPair | undefined;
     const transferValue = new BN(value);
 
@@ -1406,7 +1409,7 @@ export default class KoniExtension extends Extension {
     to,
     token,
     transferAll,
-    value }: RequestTransfer): Promise<Array<TransferError>> {
+    value }: RequestTransfer): Promise<Array<BasicTxError>> {
     const cb = createSubscription<'pri(accounts.transfer)'>(id, port);
     const [errors, fromKeyPair, , tokenInfo] = await this.validateTransfer(networkKey, token, from, to, password, value, transferAll);
 
@@ -1482,7 +1485,7 @@ export default class KoniExtension extends Extension {
       password,
       to,
       token,
-      value }: RequestCrossChainTransfer): Promise<Array<TransferError>> {
+      value }: RequestCrossChainTransfer): Promise<Array<BasicTxError>> {
     const cb = createSubscription<'pri(accounts.crossChainTransfer)'>(id, port);
     const [errors, fromKeyPair, , tokenInfo] = await this.validateCrossChainTransfer(
       originNetworkKey,
@@ -2382,92 +2385,27 @@ export default class KoniExtension extends Extension {
     }
   }
 
-  // External account QR
+  /// External account
 
-  private async validateExternalAccountTransfer (networkKey: string, token: string | undefined, from: string, to: string, value: string | undefined, transferAll: boolean | undefined): Promise<[Array<TransferError>, KeyringPair | undefined, BN | undefined, TokenInfo | undefined]> {
-    const dotSamaApiMap = state.getDotSamaApiMap();
-    const errors = [] as Array<TransferError>;
-    let keypair: KeyringPair | undefined;
-    let transferValue;
+  private prepareExternalRequest (): PrepareExternalRequest {
+    const id: string = getId();
 
-    if (!transferAll) {
-      try {
-        if (value === undefined) {
-          errors.push({
-            code: TransferErrorCode.INVALID_VALUE,
-            message: 'Require transfer value'
-          });
-        }
+    state.cleanExternalRequest();
 
-        if (value) {
-          transferValue = new BN(value);
-        }
-      } catch (e) {
-        errors.push({
-          code: TransferErrorCode.INVALID_VALUE,
-          // @ts-ignore
-          message: String(e.message)
-        });
-      }
-    }
+    const setState = (promise: ExternalRequestPromise) => {
+      state.setExternalRequestMap(id, promise);
+    };
 
-    try {
-      keypair = keyring.getPair(from);
-    } catch (e) {
-      errors.push({
-        code: TransferErrorCode.KEYRING_ERROR,
-        // @ts-ignore
-        message: String(e.message)
-      });
-    }
+    const updateState = (promise: Partial<ExternalRequestPromise>) => {
+      state.updateExternalRequest(id, { ...promise, resolve: undefined, reject: undefined });
+    };
 
-    let tokenInfo: TokenInfo | undefined;
-
-    if (token) {
-      tokenInfo = await getTokenInfo(networkKey, dotSamaApiMap[networkKey].api, token);
-
-      if (!tokenInfo) {
-        errors.push({
-          code: TransferErrorCode.INVALID_TOKEN,
-          message: 'Not found token from registry'
-        });
-      }
-
-      if (isEthereumAddress(from) && isEthereumAddress(to) && !tokenInfo?.isMainToken && !(tokenInfo?.contractAddress)) {
-        errors.push({
-          code: TransferErrorCode.INVALID_TOKEN,
-          message: 'Not found ERC20 address for this token'
-        });
-      }
-    }
-
-    return [errors, keypair, transferValue, tokenInfo];
+    return {
+      id,
+      setState,
+      updateState
+    };
   }
-
-  // private makeTransferQrCallback (
-  //   address: string,
-  //   networkKey: string,
-  //   token: string | undefined,
-  //   portCallback: (res: ResponseTransferQr) => void): (res: ResponseTransferQr) => void {
-  //   return (res: ResponseTransferQr) => {
-  //     // !res.isFinalized to prevent duplicate action
-  //     if (!res.isFinalized && res.txResult && res.extrinsicHash) {
-  //       state.setHistory(address, networkKey, {
-  //         time: Date.now(),
-  //         networkKey,
-  //         change: res.txResult.change,
-  //         changeSymbol: res.txResult.changeSymbol || token,
-  //         fee: res.txResult.fee,
-  //         feeSymbol: res.txResult.feeSymbol,
-  //         isSuccess: res.step.valueOf() === TransferStep.SUCCESS.valueOf(),
-  //         action: 'send',
-  //         extrinsicHash: res.extrinsicHash
-  //       });
-  //     }
-
-  //     portCallback(res);
-  //   };
-  // }
 
   private validateAccountExternal (address: string): [Array<BaseTxError>, KeyringPair | undefined] {
     const errors = [] as Array<BaseTxError>;
@@ -2486,14 +2424,374 @@ export default class KoniExtension extends Extension {
     return [errors, keypair];
   }
 
+  // Stake action
+
+  private stakeCreateExternal (
+    id: string,
+    { amount,
+      bondedValidators,
+      isBondedBefore,
+      lockPeriod,
+      networkKey,
+      nominatorAddress,
+      validatorInfo }: RequestStakeExternal,
+    callback: HandleBasicTx,
+    signerType: SignerExternal
+  ): BasicTxResponse {
+    const txState: BasicTxResponse = {};
+
+    if (!amount || !nominatorAddress || !validatorInfo) {
+      txState.txError = true;
+      txState.errors = [{ code: BasicTxErrorCode.INVALID_PARAM, message: 'Invalid params' }];
+
+      return txState;
+    }
+
+    const network = state.getNetworkMapByKey(networkKey);
+    const apiProp = state.getDotSamaApi(networkKey);
+
+    const { id: requestId, setState, updateState } = this.prepareExternalRequest();
+
+    const prom = createStakeExternal({
+      apiProp: apiProp,
+      id: requestId,
+      bondedValidators: bondedValidators,
+      network: network,
+      amount: amount,
+      isBondedBefore: isBondedBefore,
+      validatorInfo: validatorInfo,
+      nominatorAddress: nominatorAddress,
+      updateState: updateState,
+      setState: setState,
+      callback: callback,
+      lockPeriod: lockPeriod,
+      signerType: signerType
+    });
+
+    prom.then(() => {
+      // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
+      console.log(`Start staking from ${nominatorAddress}`);
+    })
+      .catch((e) => {
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment,node/no-callback-literal,@typescript-eslint/no-unsafe-member-access
+        if (!e) {
+          // eslint-disable-next-line node/no-callback-literal
+          callback({ txError: true });
+        } else {
+          // eslint-disable-next-line node/no-callback-literal
+          callback({ txError: true, status: false });
+        }
+
+        console.error('Error staking', e);
+        setTimeout(() => {
+          unsubscribe(id);
+        }, 500);
+      });
+
+    return txState;
+  }
+
+  private unStakeCreateExternal (
+    id: string,
+    { address,
+      amount,
+      networkKey,
+      unstakeAll,
+      validatorAddress }: RequestUnStakeExternal,
+    callback: HandleBasicTx,
+    signerType: SignerExternal): BasicTxResponse {
+    const txState: BasicTxResponse = {};
+
+    if (!amount || !address) {
+      txState.txError = true;
+      txState.errors = [{ code: BasicTxErrorCode.INVALID_PARAM, message: 'Invalid params' }];
+
+      return txState;
+    }
+
+    const network = state.getNetworkMapByKey(networkKey);
+    const apiProp = state.getDotSamaApi(networkKey);
+
+    const { id: requestId, setState, updateState } = this.prepareExternalRequest();
+
+    const prom = createUnStakeExternal({
+      apiProp: apiProp,
+      id: requestId,
+      address: address,
+      network: network,
+      amount: amount,
+      updateState: updateState,
+      setState: setState,
+      validatorAddress: validatorAddress,
+      unstakeAll: unstakeAll,
+      callback: callback,
+      signerType: signerType
+    });
+
+    prom.then(() => {
+      // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
+      console.log(`Start un-staking from ${address}`);
+    })
+      .catch((e) => {
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment,node/no-callback-literal,@typescript-eslint/no-unsafe-member-access
+        if (!e) {
+          // eslint-disable-next-line node/no-callback-literal
+          callback({ txError: true });
+        } else {
+          // eslint-disable-next-line node/no-callback-literal
+          callback({ txError: true, status: false });
+        }
+
+        console.error('Error un-staking', e);
+        setTimeout(() => {
+          unsubscribe(id);
+        }, 500);
+      });
+
+    return txState;
+  }
+
+  private withdrawStakeCreateExternal (
+    id: string,
+    { action,
+      address,
+      networkKey,
+      validatorAddress }: RequestWithdrawStakeExternal,
+    callback: HandleBasicTx,
+    signerType: SignerExternal): BasicTxResponse {
+    const txState: BasicTxResponse = {};
+
+    if (!address) {
+      txState.txError = true;
+      txState.errors = [{ code: BasicTxErrorCode.INVALID_PARAM, message: 'Invalid params' }];
+
+      return txState;
+    }
+
+    const apiProp = state.getDotSamaApi(networkKey);
+    const network = state.getNetworkMapByKey(networkKey);
+
+    const { id: requestId, setState, updateState } = this.prepareExternalRequest();
+
+    const prom = createWithdrawStakeExternal({
+      action: action,
+      address: address,
+      apiProp: apiProp,
+      callback: callback,
+      id: requestId,
+      network: network,
+      setState: setState,
+      updateState: updateState,
+      validatorAddress: validatorAddress,
+      signerType: signerType
+    });
+
+    prom.then(() => {
+      // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
+      console.log(`Start withdraw-staking from ${address}`);
+    })
+      .catch((e) => {
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment,node/no-callback-literal,@typescript-eslint/no-unsafe-member-access
+        if (!e) {
+          // eslint-disable-next-line node/no-callback-literal
+          callback({ txError: true });
+        } else {
+          // eslint-disable-next-line node/no-callback-literal
+          callback({ txError: true, status: false });
+        }
+
+        console.error('Error withdraw-staking', e);
+        setTimeout(() => {
+          unsubscribe(id);
+        }, 500);
+      });
+
+    return txState;
+  }
+
+  private claimRewardCreateExternal (
+    id: string,
+    { address,
+      networkKey,
+      validatorAddress }: RequestClaimRewardExternal,
+    callback: HandleBasicTx,
+    signerType: SignerExternal): BasicTxResponse {
+    const txState: BasicTxResponse = {};
+
+    if (!address) {
+      txState.txError = true;
+      txState.errors = [{ code: BasicTxErrorCode.INVALID_PARAM, message: 'Invalid params' }];
+
+      return txState;
+    }
+
+    const network = state.getNetworkMapByKey(networkKey);
+    const apiProp = state.getDotSamaApi(networkKey);
+
+    const { id: requestId, setState, updateState } = this.prepareExternalRequest();
+
+    const prom = createClaimRewardExternal({
+      apiProp: apiProp,
+      id: requestId,
+      network: network,
+      updateState: updateState,
+      setState: setState,
+      callback: callback,
+      address: address,
+      validatorAddress: validatorAddress,
+      signerType: signerType
+    });
+
+    prom.then(() => {
+      // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
+      console.log(`Start claim reward from ${address}`);
+    })
+      .catch((e) => {
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment,node/no-callback-literal,@typescript-eslint/no-unsafe-member-access
+        if (!e) {
+          // eslint-disable-next-line node/no-callback-literal
+          callback({ txError: true });
+        } else {
+          // eslint-disable-next-line node/no-callback-literal
+          callback({ txError: true, status: false });
+        }
+
+        console.error('Error claim reward', e);
+        setTimeout(() => {
+          unsubscribe(id);
+        }, 500);
+      });
+
+    return txState;
+  }
+
+  private createCompoundCreateExternal (
+    id: string,
+    { accountMinimum,
+      address,
+      bondedAmount,
+      collatorAddress,
+      networkKey }: RequestCreateCompoundStakeExternal,
+    callback: HandleBasicTx,
+    signerType: SignerExternal): BasicTxResponse {
+    const txState: BasicTxResponse = {};
+
+    if (!address) {
+      txState.txError = true;
+      txState.errors = [{ code: BasicTxErrorCode.INVALID_PARAM, message: 'Invalid params' }];
+
+      return txState;
+    }
+
+    const network = state.getNetworkMapByKey(networkKey);
+    const apiProp = state.getDotSamaApi(networkKey);
+
+    const { id: requestId, setState, updateState } = this.prepareExternalRequest();
+
+    const prom = createCreateCompoundExternal({
+      apiProp: apiProp,
+      id: requestId,
+      network: network,
+      updateState: updateState,
+      setState: setState,
+      callback: callback,
+      address: address,
+      collatorAddress: collatorAddress,
+      bondedAmount: bondedAmount,
+      accountMinimum: accountMinimum,
+      signerType: signerType
+    });
+
+    prom.then(() => {
+      // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
+      console.log(`Start create compound from ${address}`);
+    })
+      .catch((e) => {
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment,node/no-callback-literal,@typescript-eslint/no-unsafe-member-access
+        if (!e) {
+          // eslint-disable-next-line node/no-callback-literal
+          callback({ txError: true });
+        } else {
+          // eslint-disable-next-line node/no-callback-literal
+          callback({ txError: true, status: false });
+        }
+
+        console.error('Error compounding Turing stake', e);
+        setTimeout(() => {
+          unsubscribe(id);
+        }, 500);
+      });
+
+    return txState;
+  }
+
+  private cancelCompoundCreateExternal (
+    id: string,
+    { address,
+      networkKey,
+      taskId }: RequestCancelCompoundStakeExternal,
+    callback: HandleBasicTx,
+    signerType: SignerExternal): BasicTxResponse {
+    const txState: BasicTxResponse = {};
+
+    if (!address) {
+      txState.txError = true;
+      txState.errors = [{ code: BasicTxErrorCode.INVALID_PARAM, message: 'Invalid params' }];
+
+      return txState;
+    }
+
+    const network = state.getNetworkMapByKey(networkKey);
+
+    const apiProp = state.getDotSamaApi(networkKey);
+
+    const { id: requestId, setState, updateState } = this.prepareExternalRequest();
+
+    const prom = createCancelCompoundExternal({
+      apiProp: apiProp,
+      id: requestId,
+      network: network,
+      updateState: updateState,
+      setState: setState,
+      callback: callback,
+      address: address,
+      taskId: taskId,
+      signerType: signerType
+    });
+
+    prom.then(() => {
+      // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
+      console.log(`Start cancel compound from ${address}`);
+    })
+      .catch((e) => {
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment,node/no-callback-literal,@typescript-eslint/no-unsafe-member-access
+        if (!e) {
+          // eslint-disable-next-line node/no-callback-literal
+          callback({ txError: true });
+        } else {
+          // eslint-disable-next-line node/no-callback-literal
+          callback({ txError: true, status: false });
+        }
+
+        console.error('Error canceling Turing compounding task stake', e);
+        setTimeout(() => {
+          unsubscribe(id);
+        }, 500);
+      });
+
+    return txState;
+  }
+
+  // QR
+
   private async makeTransferQR (id: string, port: chrome.runtime.Port, { from,
     networkKey,
     to,
     token,
     transferAll,
-    value }: RequestTransferExternal): Promise<Array<TransferError>> {
+    value }: RequestTransferExternal): Promise<Array<BasicTxError>> {
     const cb = createSubscription<'pri(accounts.transfer.qr.create)'>(id, port);
-    const [errors, fromKeyPair, , tokenInfo] = await this.validateExternalAccountTransfer(networkKey, token, from, to, value, transferAll);
+    const [errors, fromKeyPair, , tokenInfo] = await this.validateTransfer(networkKey, token, from, to, undefined, value, transferAll);
 
     if (errors.length) {
       setTimeout(() => {
@@ -2504,17 +2802,7 @@ export default class KoniExtension extends Extension {
     }
 
     if (fromKeyPair) {
-      const id: string = getId();
-
-      state.cleanExternalRequest();
-
-      const setState = (promise: ExternalRequestPromise) => {
-        state.setExternalRequestMap(id, promise);
-      };
-
-      const updateState = (promise: Partial<ExternalRequestPromise>) => {
-        state.updateExternalRequest(id, { ...promise, resolve: undefined, reject: undefined });
-      };
+      const { id: requestId, setState, updateState } = this.prepareExternalRequest();
 
       const callback = this.makeTransferCallback(from, to, networkKey, token, cb);
 
@@ -2531,7 +2819,7 @@ export default class KoniExtension extends Extension {
               callback,
               chainId,
               from,
-              id,
+              id: requestId,
               networkKey,
               setState,
               updateState,
@@ -2546,7 +2834,7 @@ export default class KoniExtension extends Extension {
             callback,
             chainId,
             from,
-            id,
+            id: requestId,
             networkKey,
             setState,
             to,
@@ -2603,7 +2891,7 @@ export default class KoniExtension extends Extension {
     originNetworkKey,
     to,
     token,
-    value }: RequestCrossChainTransferExternal): Promise<Array<TransferError>> {
+    value }: RequestCrossChainTransferExternal): Promise<Array<BasicTxError>> {
     const cb = createSubscription<'pri(accounts.cross.transfer.qr.create)'>(id, port);
     const [errors, fromKeyPair, , tokenInfo] = await this.validateCrossChainTransfer(
       originNetworkKey,
@@ -2619,17 +2907,7 @@ export default class KoniExtension extends Extension {
     }
 
     if (fromKeyPair && tokenInfo) {
-      const id: string = getId();
-
-      state.cleanExternalRequest();
-
-      const setState = (promise: ExternalRequestPromise) => {
-        state.setExternalRequestMap(id, promise);
-      };
-
-      const updateState = (promise: Partial<ExternalRequestPromise>) => {
-        state.updateExternalRequest(id, { ...promise, resolve: undefined, reject: undefined });
-      };
+      const { id: requestId, setState, updateState } = this.prepareExternalRequest();
 
       const callback = this.makeCrossChainTransferCallback(from, to, originNetworkKey, value || '0', token, cb);
 
@@ -2642,7 +2920,7 @@ export default class KoniExtension extends Extension {
         dotSamaApiMap: state.getDotSamaApiMap(),
         tokenInfo,
         networkMap: state.getNetworkMap(),
-        id,
+        id: requestId,
         setState,
         updateState,
         callback
@@ -2690,17 +2968,7 @@ export default class KoniExtension extends Extension {
     }
 
     if (fromKeyPair) {
-      const id: string = getId();
-
-      state.cleanExternalRequest();
-
-      const setState = (promise: ExternalRequestPromise) => {
-        state.setExternalRequestMap(id, promise);
-      };
-
-      const updateState = (promise: Partial<ExternalRequestPromise>) => {
-        state.updateExternalRequest(id, { ...promise, resolve: undefined, reject: undefined });
-      };
+      const { id: requestId, setState, updateState } = this.prepareExternalRequest();
 
       const networkKey = params.networkKey as string;
       const apiProp = state.getDotSamaApi(networkKey);
@@ -2708,7 +2976,7 @@ export default class KoniExtension extends Extension {
       const transferProm = makeNftTransferQr({
         callback,
         senderAddress: fromKeyPair.address,
-        qrId: id,
+        id: requestId,
         setState,
         updateState,
         apiProp,
@@ -2759,17 +3027,7 @@ export default class KoniExtension extends Extension {
     try {
       const web3ApiMap = state.getWeb3ApiMap();
 
-      const id: string = getId();
-
-      state.cleanExternalRequest();
-
-      const setState = (promise: ExternalRequestPromise) => {
-        state.setExternalRequestMap(id, promise);
-      };
-
-      const updateState = (promise: Partial<ExternalRequestPromise>) => {
-        state.updateExternalRequest(id, { ...promise, resolve: undefined, reject: undefined });
-      };
+      const { id: requestId, setState, updateState } = this.prepareExternalRequest();
 
       const transferProm = handleTransferNftQr({
         callback,
@@ -2814,408 +3072,64 @@ export default class KoniExtension extends Extension {
     return [];
   }
 
-  private stakeCreateQr (id: string, port: chrome.runtime.Port, { amount,
-    bondedValidators,
-    isBondedBefore,
-    lockPeriod,
-    networkKey,
-    nominatorAddress,
-    validatorInfo }: RequestStakeExternal): Array<BaseTxError> {
+  private stakeCreateQr (id: string, port: chrome.runtime.Port, request: RequestStakeExternal): BasicTxResponse {
     const callback = createSubscription<'pri(stake.qr.create)'>(id, port);
 
-    const network = state.getNetworkMapByKey(networkKey);
-
-    if (!amount || !nominatorAddress || !validatorInfo) {
-      return [{ code: BasicTxErrorCode.INVALID_PARAM, message: 'Invalid params' }];
-    }
-
-    const apiProp = state.getDotSamaApi(networkKey);
-
-    try {
-      const id: string = getId();
-
-      state.cleanExternalRequest();
-
-      const setState = (promise: ExternalRequestPromise) => {
-        state.setExternalRequestMap(id, promise);
-      };
-
-      const updateState = (promise: Partial<ExternalRequestPromise>) => {
-        state.updateExternalRequest(id, { ...promise, resolve: undefined, reject: undefined });
-      };
-
-      const prom = createStakeQr({
-        apiProp: apiProp,
-        id: id,
-        bondedValidators: bondedValidators,
-        network: network,
-        amount: amount,
-        isBondedBefore: isBondedBefore,
-        validatorInfo: validatorInfo,
-        nominatorAddress: nominatorAddress,
-        updateState: updateState,
-        setState: setState,
-        callback: callback
-      });
-
-      prom.then(() => {
-        // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
-        console.log(`Start staking from ${nominatorAddress}`);
-      })
-        .catch((e) => {
-          // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment,node/no-callback-literal,@typescript-eslint/no-unsafe-member-access
-          if (!e) {
-            // eslint-disable-next-line node/no-callback-literal
-            callback({ txError: true });
-          } else {
-            // eslint-disable-next-line node/no-callback-literal
-            callback({ txError: true, status: false });
-          }
-
-          console.error('Error staking', e);
-          setTimeout(() => {
-            unsubscribe(id);
-          }, 500);
-        });
-    } catch (e) {
-      return [{ code: BasicTxErrorCode.STAKING_ERROR, message: (e as Error).message }];
-    }
-
     port.onDisconnect.addListener((): void => {
       unsubscribe(id);
     });
 
-    return [];
+    return this.stakeCreateExternal(id, request, callback, SignerType.QR);
   }
 
-  private unStakeCreateQr (id: string, port: chrome.runtime.Port, { address,
-    amount,
-    networkKey,
-    unstakeAll,
-    validatorAddress }: RequestUnStakeExternal): Array<BaseTxError> {
+  private unStakeCreateQr (id: string, port: chrome.runtime.Port, request: RequestUnStakeExternal): BasicTxResponse {
     const callback = createSubscription<'pri(unStake.qr.create)'>(id, port);
 
-    const network = state.getNetworkMapByKey(networkKey);
-
-    if (!amount || !address) {
-      return [{ code: BasicTxErrorCode.INVALID_PARAM, message: 'Invalid params' }];
-    }
-
-    const apiProp = state.getDotSamaApi(networkKey);
-
-    try {
-      const id: string = getId();
-
-      state.cleanExternalRequest();
-
-      const setState = (promise: ExternalRequestPromise) => {
-        state.setExternalRequestMap(id, promise);
-      };
-
-      const updateState = (promise: Partial<ExternalRequestPromise>) => {
-        state.updateExternalRequest(id, { ...promise, resolve: undefined, reject: undefined });
-      };
-
-      const prom = createUnStakeQr({
-        apiProp: apiProp,
-        id: id,
-        address: address,
-        network: network,
-        amount: amount,
-        updateState: updateState,
-        setState: setState,
-        validatorAddress: validatorAddress,
-        unstakeAll: unstakeAll,
-        callback: callback
-      });
-
-      prom.then(() => {
-        // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
-        console.log(`Start un-staking from ${address}`);
-      })
-        .catch((e) => {
-          // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment,node/no-callback-literal,@typescript-eslint/no-unsafe-member-access
-          if (!e) {
-            // eslint-disable-next-line node/no-callback-literal
-            callback({ txError: true });
-          } else {
-            // eslint-disable-next-line node/no-callback-literal
-            callback({ txError: true, status: false });
-          }
-
-          console.error('Error un-staking', e);
-          setTimeout(() => {
-            unsubscribe(id);
-          }, 500);
-        });
-    } catch (e) {
-      return [{ code: BasicTxErrorCode.UN_STAKING_ERROR, message: (e as Error).message }];
-    }
-
     port.onDisconnect.addListener((): void => {
       unsubscribe(id);
     });
 
-    return [];
+    return this.unStakeCreateExternal(id, request, callback, SignerType.QR);
   }
 
-  private withdrawStakeCreateQr (id: string, port: chrome.runtime.Port, { action,
-    address,
-    networkKey,
-    validatorAddress }: RequestWithdrawStakeExternal): Array<BaseTxError> {
+  private withdrawStakeCreateQr (id: string, port: chrome.runtime.Port, request: RequestWithdrawStakeExternal): BasicTxResponse {
     const callback = createSubscription<'pri(withdrawStake.qr.create)'>(id, port);
-    const apiProp = state.getDotSamaApi(networkKey);
-
-    if (!address) {
-      return [{ code: BasicTxErrorCode.INVALID_PARAM, message: 'Invalid params' }];
-    }
-
-    try {
-      const id: string = getId();
-
-      state.cleanExternalRequest();
-
-      const setState = (promise: ExternalRequestPromise) => {
-        state.setExternalRequestMap(id, promise);
-      };
-
-      const updateState = (promise: Partial<ExternalRequestPromise>) => {
-        state.updateExternalRequest(id, { ...promise, resolve: undefined, reject: undefined });
-      };
-
-      const prom = createWithdrawStakeQr({
-        action: action,
-        address: address,
-        apiProp: apiProp,
-        callback: callback,
-        id: id,
-        networkKey: networkKey,
-        setState: setState,
-        updateState: updateState,
-        validatorAddress: validatorAddress
-      });
-
-      prom.then(() => {
-        // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
-        console.log(`Start withdraw-staking from ${address}`);
-      })
-        .catch((e) => {
-          // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment,node/no-callback-literal,@typescript-eslint/no-unsafe-member-access
-          if (!e) {
-            // eslint-disable-next-line node/no-callback-literal
-            callback({ txError: true });
-          } else {
-            // eslint-disable-next-line node/no-callback-literal
-            callback({ txError: true, status: false });
-          }
-
-          console.error('Error withdraw-staking', e);
-          setTimeout(() => {
-            unsubscribe(id);
-          }, 500);
-        });
-    } catch (e) {
-      return [{ code: BasicTxErrorCode.WITHDRAW_STAKING_ERROR, message: (e as Error).message }];
-    }
 
     port.onDisconnect.addListener((): void => {
       unsubscribe(id);
     });
 
-    return [];
+    return this.withdrawStakeCreateExternal(id, request, callback, SignerType.QR);
   }
 
-  private claimRewardCreateQr (id: string, port: chrome.runtime.Port, { address,
-    networkKey,
-    validatorAddress }: RequestClaimRewardExternal): Array<BaseTxError> {
+  private claimRewardCreateQr (id: string, port: chrome.runtime.Port, request: RequestClaimRewardExternal): BasicTxResponse {
     const callback = createSubscription<'pri(claimReward.qr.create)'>(id, port);
 
-    const network = state.getNetworkMapByKey(networkKey);
-
-    const apiProp = state.getDotSamaApi(networkKey);
-
-    try {
-      const id: string = getId();
-
-      state.cleanExternalRequest();
-
-      const setState = (promise: ExternalRequestPromise) => {
-        state.setExternalRequestMap(id, promise);
-      };
-
-      const updateState = (promise: Partial<ExternalRequestPromise>) => {
-        state.updateExternalRequest(id, { ...promise, resolve: undefined, reject: undefined });
-      };
-
-      const prom = createClaimRewardQr({
-        apiProp: apiProp,
-        id: id,
-        network: network,
-        updateState: updateState,
-        setState: setState,
-        callback: callback,
-        address: address,
-        validatorAddress: validatorAddress
-      });
-
-      prom.then(() => {
-        // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
-        console.log(`Start claim reward from ${address}`);
-      })
-        .catch((e) => {
-          // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment,node/no-callback-literal,@typescript-eslint/no-unsafe-member-access
-          if (!e) {
-            // eslint-disable-next-line node/no-callback-literal
-            callback({ txError: true });
-          } else {
-            // eslint-disable-next-line node/no-callback-literal
-            callback({ txError: true, status: false });
-          }
-
-          console.error('Error claim reward', e);
-          setTimeout(() => {
-            unsubscribe(id);
-          }, 500);
-        });
-    } catch (e) {
-      return [{ code: BasicTxErrorCode.CLAIM_REWARD_ERROR, message: (e as Error).message }];
-    }
-
     port.onDisconnect.addListener((): void => {
       unsubscribe(id);
     });
 
-    return [];
+    return this.claimRewardCreateExternal(id, request, callback, SignerType.QR);
   }
 
-  private createCompoundCreateQr (id: string, port: chrome.runtime.Port, { accountMinimum,
-    address,
-    bondedAmount,
-    collatorAddress,
-    networkKey }: RequestCreateCompoundStakeExternal): Array<BaseTxError> {
+  private createCompoundCreateQr (id: string, port: chrome.runtime.Port, request: RequestCreateCompoundStakeExternal): BasicTxResponse {
     const callback = createSubscription<'pri(createCompound.qr.create)'>(id, port);
 
-    const network = state.getNetworkMapByKey(networkKey);
-
-    const apiProp = state.getDotSamaApi(networkKey);
-
-    try {
-      const id: string = getId();
-
-      state.cleanExternalRequest();
-
-      const setState = (promise: ExternalRequestPromise) => {
-        state.setExternalRequestMap(id, promise);
-      };
-
-      const updateState = (promise: Partial<ExternalRequestPromise>) => {
-        state.updateExternalRequest(id, { ...promise, resolve: undefined, reject: undefined });
-      };
-
-      const prom = createCreateCompoundQr({
-        apiProp: apiProp,
-        id: id,
-        network: network,
-        updateState: updateState,
-        setState: setState,
-        callback: callback,
-        address: address,
-        collatorAddress: collatorAddress,
-        bondedAmount: bondedAmount,
-        accountMinimum: accountMinimum
-      });
-
-      prom.then(() => {
-        // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
-        console.log(`Start create compound from ${address}`);
-      })
-        .catch((e) => {
-          // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment,node/no-callback-literal,@typescript-eslint/no-unsafe-member-access
-          if (!e) {
-            // eslint-disable-next-line node/no-callback-literal
-            callback({ txError: true });
-          } else {
-            // eslint-disable-next-line node/no-callback-literal
-            callback({ txError: true, status: false });
-          }
-
-          console.error('Error compounding Turing stake', e);
-          setTimeout(() => {
-            unsubscribe(id);
-          }, 500);
-        });
-    } catch (e) {
-      return [{ code: BasicTxErrorCode.CREATE_COMPOUND_ERROR, message: (e as Error).message }];
-    }
-
     port.onDisconnect.addListener((): void => {
       unsubscribe(id);
     });
 
-    return [];
+    return this.createCompoundCreateExternal(id, request, callback, SignerType.QR);
   }
 
-  private cancelCompoundCreateQr (id: string, port: chrome.runtime.Port, { address,
-    networkKey,
-    taskId }: RequestCancelCompoundStakeExternal): Array<BaseTxError> {
+  private cancelCompoundCreateQr (id: string, port: chrome.runtime.Port, request: RequestCancelCompoundStakeExternal): BasicTxResponse {
     const callback = createSubscription<'pri(cancelCompound.qr.create)'>(id, port);
-
-    const network = state.getNetworkMapByKey(networkKey);
-
-    const apiProp = state.getDotSamaApi(networkKey);
-
-    try {
-      const id: string = getId();
-
-      state.cleanExternalRequest();
-
-      const setState = (promise: ExternalRequestPromise) => {
-        state.setExternalRequestMap(id, promise);
-      };
-
-      const updateState = (promise: Partial<ExternalRequestPromise>) => {
-        state.updateExternalRequest(id, { ...promise, resolve: undefined, reject: undefined });
-      };
-
-      const prom = createCancelCompoundQr({
-        apiProp: apiProp,
-        id: id,
-        network: network,
-        updateState: updateState,
-        setState: setState,
-        callback: callback,
-        address: address,
-        taskId: taskId
-      });
-
-      prom.then(() => {
-        // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
-        console.log(`Start cancel compound from ${address}`);
-      })
-        .catch((e) => {
-          // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment,node/no-callback-literal,@typescript-eslint/no-unsafe-member-access
-          if (!e) {
-            // eslint-disable-next-line node/no-callback-literal
-            callback({ txError: true });
-          } else {
-            // eslint-disable-next-line node/no-callback-literal
-            callback({ txError: true, status: false });
-          }
-
-          console.error('Error canceling Turing compounding task stake', e);
-          setTimeout(() => {
-            unsubscribe(id);
-          }, 500);
-        });
-    } catch (e) {
-      return [{ code: BasicTxErrorCode.CANCEL_COMPOUND_ERROR, message: (e as Error).message }];
-    }
 
     port.onDisconnect.addListener((): void => {
       unsubscribe(id);
     });
 
-    return [];
+    return this.cancelCompoundCreateExternal(id, request, callback, SignerType.QR);
   }
 
   // External account Ledger
@@ -3225,9 +3139,9 @@ export default class KoniExtension extends Extension {
     to,
     token,
     transferAll,
-    value }: RequestTransferExternal): Promise<Array<TransferError>> {
+    value }: RequestTransferExternal): Promise<Array<BasicTxError>> {
     const cb = createSubscription<'pri(accounts.transfer.ledger.create)'>(id, port);
-    const [errors, fromKeyPair, , tokenInfo] = await this.validateExternalAccountTransfer(networkKey, token, from, to, value, transferAll);
+    const [errors, fromKeyPair, , tokenInfo] = await this.validateTransfer(networkKey, token, from, to, undefined, value, transferAll);
 
     if (errors.length) {
       setTimeout(() => {
@@ -3239,17 +3153,7 @@ export default class KoniExtension extends Extension {
 
     if (fromKeyPair) {
       // Make transfer with Dotsama API
-      const id: string = getId();
-
-      state.cleanExternalRequest();
-
-      const setState = (promise: ExternalRequestPromise) => {
-        state.setExternalRequestMap(id, promise);
-      };
-
-      const updateState = (promise: Partial<ExternalRequestPromise>) => {
-        state.updateExternalRequest(id, { ...promise, resolve: undefined, reject: undefined });
-      };
+      const { id: requestId, setState, updateState } = this.prepareExternalRequest();
 
       const callback = this.makeTransferCallback(from, to, networkKey, token, cb);
 
@@ -3298,7 +3202,7 @@ export default class KoniExtension extends Extension {
     originNetworkKey,
     to,
     token,
-    value }: RequestCrossChainTransferExternal): Promise<Array<TransferError>> {
+    value }: RequestCrossChainTransferExternal): Promise<Array<BasicTxError>> {
     const cb = createSubscription<'pri(accounts.cross.transfer.ledger.create)'>(id, port);
     const [errors, fromKeyPair, , tokenInfo] = await this.validateCrossChainTransfer(
       originNetworkKey,
@@ -3314,17 +3218,7 @@ export default class KoniExtension extends Extension {
     }
 
     if (fromKeyPair && tokenInfo) {
-      const id: string = getId();
-
-      state.cleanExternalRequest();
-
-      const setState = (promise: ExternalRequestPromise) => {
-        state.setExternalRequestMap(id, promise);
-      };
-
-      const updateState = (promise: Partial<ExternalRequestPromise>) => {
-        state.updateExternalRequest(id, { ...promise, resolve: undefined, reject: undefined });
-      };
+      const { id: requestId, setState, updateState } = this.prepareExternalRequest();
 
       const callback = this.makeCrossChainTransferCallback(from, to, originNetworkKey, value || '0', token, cb);
 
@@ -3385,17 +3279,7 @@ export default class KoniExtension extends Extension {
     }
 
     if (fromKeyPair) {
-      const id: string = getId();
-
-      state.cleanExternalRequest();
-
-      const setState = (promise: ExternalRequestPromise) => {
-        state.setExternalRequestMap(id, promise);
-      };
-
-      const updateState = (promise: Partial<ExternalRequestPromise>) => {
-        state.updateExternalRequest(id, { ...promise, resolve: undefined, reject: undefined });
-      };
+      const { id: requestId, setState, updateState } = this.prepareExternalRequest();
 
       const networkKey = params.networkKey as string;
       const apiProp = state.getDotSamaApi(networkKey);
@@ -3403,7 +3287,7 @@ export default class KoniExtension extends Extension {
       const transferProm = makeNftTransferLedger({
         callback,
         senderAddress: fromKeyPair.address,
-        qrId: id,
+        id: id,
         setState,
         updateState,
         apiProp,
@@ -3440,403 +3324,64 @@ export default class KoniExtension extends Extension {
     return errors;
   }
 
-  private stakeCreateLedger (id: string, port: chrome.runtime.Port, { amount,
-    bondedValidators,
-    isBondedBefore,
-    networkKey,
-    nominatorAddress,
-    validatorInfo }: RequestStakeExternal): Array<BaseTxError> {
+  private stakeCreateLedger (id: string, port: chrome.runtime.Port, request: RequestStakeExternal): BasicTxResponse {
     const callback = createSubscription<'pri(stake.ledger.create)'>(id, port);
 
-    const network = state.getNetworkMapByKey(networkKey);
-
-    if (!amount || !nominatorAddress || !validatorInfo) {
-      return [{ code: BasicTxErrorCode.INVALID_PARAM, message: 'Invalid params' }];
-    }
-
-    const apiProp = state.getDotSamaApi(networkKey);
-
-    try {
-      const id: string = getId();
-
-      state.cleanExternalRequest();
-
-      const setState = (promise: ExternalRequestPromise) => {
-        state.setExternalRequestMap(id, promise);
-      };
-
-      const updateState = (promise: Partial<ExternalRequestPromise>) => {
-        state.updateExternalRequest(id, { ...promise, resolve: undefined, reject: undefined });
-      };
-
-      const prom = createStakeLedger({
-        apiProp: apiProp,
-        id: id,
-        bondedValidators: bondedValidators,
-        network: network,
-        amount: amount,
-        isBondedBefore: isBondedBefore,
-        validatorInfo: validatorInfo,
-        nominatorAddress: nominatorAddress,
-        updateState: updateState,
-        setState: setState,
-        callback: callback
-      });
-
-      prom.then(() => {
-        // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
-        console.log(`Start staking from ${nominatorAddress}`);
-      })
-        .catch((e) => {
-          // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment,node/no-callback-literal,@typescript-eslint/no-unsafe-member-access
-          if (!e) {
-            // eslint-disable-next-line node/no-callback-literal
-            callback({ txError: true });
-          } else {
-            // eslint-disable-next-line node/no-callback-literal
-            callback({ txError: true, status: false });
-          }
-
-          console.error('Error transferring nft', e);
-          setTimeout(() => {
-            unsubscribe(id);
-          }, 500);
-        });
-    } catch (e) {
-      return [{ code: BasicTxErrorCode.STAKING_ERROR, message: (e as Error).message }];
-    }
-
     port.onDisconnect.addListener((): void => {
       unsubscribe(id);
     });
 
-    return [];
+    return this.stakeCreateExternal(id, request, callback, SignerType.LEDGER);
   }
 
-  private unStakeCreateLedger (id: string, port: chrome.runtime.Port, { address,
-    amount,
-    networkKey }: RequestUnStakeExternal): Array<BaseTxError> {
+  private unStakeCreateLedger (id: string, port: chrome.runtime.Port, request: RequestUnStakeExternal): BasicTxResponse {
     const callback = createSubscription<'pri(unStake.ledger.create)'>(id, port);
 
-    const network = state.getNetworkMapByKey(networkKey);
-
-    if (!amount || !address) {
-      return [{ code: BasicTxErrorCode.INVALID_PARAM, message: 'Invalid params' }];
-    }
-
-    const apiProp = state.getDotSamaApi(networkKey);
-
-    try {
-      const id: string = getId();
-
-      state.cleanExternalRequest();
-
-      const setState = (promise: ExternalRequestPromise) => {
-        state.setExternalRequestMap(id, promise);
-      };
-
-      const updateState = (promise: Partial<ExternalRequestPromise>) => {
-        state.updateExternalRequest(id, { ...promise, resolve: undefined, reject: undefined });
-      };
-
-      const prom = createUnStakeLedger({
-        apiProp: apiProp,
-        id: id,
-        address: address,
-        network: network,
-        amount: amount,
-        updateState: updateState,
-        setState: setState,
-        callback: callback
-      });
-
-      prom.then(() => {
-        // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
-        console.log(`Start un-staking from ${address}`);
-      })
-        .catch((e) => {
-          // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment,node/no-callback-literal,@typescript-eslint/no-unsafe-member-access
-          if (!e) {
-            // eslint-disable-next-line node/no-callback-literal
-            callback({ txError: true });
-          } else {
-            // eslint-disable-next-line node/no-callback-literal
-            callback({ txError: true, status: false });
-          }
-
-          console.error('Error un-staking', e);
-          setTimeout(() => {
-            unsubscribe(id);
-          }, 500);
-        });
-    } catch (e) {
-      return [{ code: BasicTxErrorCode.UN_STAKING_ERROR, message: (e as Error).message }];
-    }
-
     port.onDisconnect.addListener((): void => {
       unsubscribe(id);
     });
 
-    return [];
+    return this.unStakeCreateExternal(id, request, callback, SignerType.LEDGER);
   }
 
-  private withdrawStakeCreateLedger (id: string, port: chrome.runtime.Port, { action,
-    address,
-    networkKey,
-    validatorAddress }: RequestWithdrawStakeExternal): Array<BaseTxError> {
+  private withdrawStakeCreateLedger (id: string, port: chrome.runtime.Port, request: RequestWithdrawStakeExternal): BasicTxResponse {
     const callback = createSubscription<'pri(withdrawStake.ledger.create)'>(id, port);
-    const apiProp = state.getDotSamaApi(networkKey);
-
-    if (!address) {
-      return [{ code: BasicTxErrorCode.INVALID_PARAM, message: 'Invalid params' }];
-    }
-
-    try {
-      const id: string = getId();
-
-      state.cleanExternalRequest();
-
-      const setState = (promise: ExternalRequestPromise) => {
-        state.setExternalRequestMap(id, promise);
-      };
-
-      const updateState = (promise: Partial<ExternalRequestPromise>) => {
-        state.updateExternalRequest(id, { ...promise, resolve: undefined, reject: undefined });
-      };
-
-      const prom = createWithdrawStakeLedger({
-        action: action,
-        address: address,
-        apiProp: apiProp,
-        callback: callback,
-        id: id,
-        networkKey: networkKey,
-        setState: setState,
-        updateState: updateState,
-        validatorAddress: validatorAddress
-      });
-
-      prom.then(() => {
-        // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
-        console.log(`Start withdraw-staking from ${address}`);
-      })
-        .catch((e) => {
-          // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment,node/no-callback-literal,@typescript-eslint/no-unsafe-member-access
-          if (!e) {
-            // eslint-disable-next-line node/no-callback-literal
-            callback({ txError: true });
-          } else {
-            // eslint-disable-next-line node/no-callback-literal
-            callback({ txError: true, status: false });
-          }
-
-          console.error('Error withdraw-staking', e);
-          setTimeout(() => {
-            unsubscribe(id);
-          }, 500);
-        });
-    } catch (e) {
-      return [{ code: BasicTxErrorCode.WITHDRAW_STAKING_ERROR, message: (e as Error).message }];
-    }
 
     port.onDisconnect.addListener((): void => {
       unsubscribe(id);
     });
 
-    return [];
+    return this.withdrawStakeCreateExternal(id, request, callback, SignerType.LEDGER);
   }
 
-  private claimRewardCreateLedger (id: string, port: chrome.runtime.Port, { address,
-    networkKey,
-    validatorAddress }: RequestClaimRewardExternal): Array<BaseTxError> {
+  private claimRewardCreateLedger (id: string, port: chrome.runtime.Port, request: RequestClaimRewardExternal): BasicTxResponse {
     const callback = createSubscription<'pri(claimReward.ledger.create)'>(id, port);
 
-    const network = state.getNetworkMapByKey(networkKey);
-
-    const apiProp = state.getDotSamaApi(networkKey);
-
-    try {
-      const id: string = getId();
-
-      state.cleanExternalRequest();
-
-      const setState = (promise: ExternalRequestPromise) => {
-        state.setExternalRequestMap(id, promise);
-      };
-
-      const updateState = (promise: Partial<ExternalRequestPromise>) => {
-        state.updateExternalRequest(id, { ...promise, resolve: undefined, reject: undefined });
-      };
-
-      const prom = createClaimRewardLedger({
-        apiProp: apiProp,
-        id: id,
-        network: network,
-        updateState: updateState,
-        setState: setState,
-        callback: callback,
-        address: address,
-        validatorAddress: validatorAddress
-      });
-
-      prom.then(() => {
-        // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
-        console.log(`Start claim reward from ${address}`);
-      })
-        .catch((e) => {
-          // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment,node/no-callback-literal,@typescript-eslint/no-unsafe-member-access
-          if (!e) {
-            // eslint-disable-next-line node/no-callback-literal
-            callback({ txError: true });
-          } else {
-            // eslint-disable-next-line node/no-callback-literal
-            callback({ txError: true, status: false });
-          }
-
-          console.error('Error claim reward', e);
-          setTimeout(() => {
-            unsubscribe(id);
-          }, 500);
-        });
-    } catch (e) {
-      return [{ code: BasicTxErrorCode.CLAIM_REWARD_ERROR, message: (e as Error).message }];
-    }
-
     port.onDisconnect.addListener((): void => {
       unsubscribe(id);
     });
 
-    return [];
+    return this.claimRewardCreateExternal(id, request, callback, SignerType.LEDGER);
   }
 
-  private createCompoundCreateLedger (id: string, port: chrome.runtime.Port, { accountMinimum,
-    address,
-    bondedAmount,
-    collatorAddress,
-    networkKey }: RequestCreateCompoundStakeExternal): Array<BaseTxError> {
+  private createCompoundCreateLedger (id: string, port: chrome.runtime.Port, request: RequestCreateCompoundStakeExternal): BasicTxResponse {
     const callback = createSubscription<'pri(createCompound.ledger.create)'>(id, port);
 
-    const network = state.getNetworkMapByKey(networkKey);
-
-    const apiProp = state.getDotSamaApi(networkKey);
-
-    try {
-      const id: string = getId();
-
-      state.cleanExternalRequest();
-
-      const setState = (promise: ExternalRequestPromise) => {
-        state.setExternalRequestMap(id, promise);
-      };
-
-      const updateState = (promise: Partial<ExternalRequestPromise>) => {
-        state.updateExternalRequest(id, { ...promise, resolve: undefined, reject: undefined });
-      };
-
-      const prom = createCreateCompoundLedger({
-        apiProp: apiProp,
-        id: id,
-        network: network,
-        updateState: updateState,
-        setState: setState,
-        callback: callback,
-        address: address,
-        collatorAddress: collatorAddress,
-        bondedAmount: bondedAmount,
-        accountMinimum: accountMinimum
-      });
-
-      prom.then(() => {
-        // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
-        console.log(`Start create compound from ${address}`);
-      })
-        .catch((e) => {
-          // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment,node/no-callback-literal,@typescript-eslint/no-unsafe-member-access
-          if (!e) {
-            // eslint-disable-next-line node/no-callback-literal
-            callback({ txError: true });
-          } else {
-            // eslint-disable-next-line node/no-callback-literal
-            callback({ txError: true, status: false });
-          }
-
-          console.error('Error compounding Turing stake', e);
-          setTimeout(() => {
-            unsubscribe(id);
-          }, 500);
-        });
-    } catch (e) {
-      return [{ code: BasicTxErrorCode.CREATE_COMPOUND_ERROR, message: (e as Error).message }];
-    }
-
     port.onDisconnect.addListener((): void => {
       unsubscribe(id);
     });
 
-    return [];
+    return this.createCompoundCreateExternal(id, request, callback, SignerType.LEDGER);
   }
 
-  private cancelCompoundCreateLedger (id: string, port: chrome.runtime.Port, { address,
-    networkKey,
-    taskId }: RequestCancelCompoundStakeExternal): Array<BaseTxError> {
+  private cancelCompoundCreateLedger (id: string, port: chrome.runtime.Port, request: RequestCancelCompoundStakeExternal): BasicTxResponse {
     const callback = createSubscription<'pri(cancelCompound.ledger.create)'>(id, port);
-
-    const network = state.getNetworkMapByKey(networkKey);
-
-    const apiProp = state.getDotSamaApi(networkKey);
-
-    try {
-      const id: string = getId();
-
-      state.cleanExternalRequest();
-
-      const setState = (promise: ExternalRequestPromise) => {
-        state.setExternalRequestMap(id, promise);
-      };
-
-      const updateState = (promise: Partial<ExternalRequestPromise>) => {
-        state.updateExternalRequest(id, { ...promise, resolve: undefined, reject: undefined });
-      };
-
-      const prom = createCancelCompoundLedger({
-        apiProp: apiProp,
-        id: id,
-        network: network,
-        updateState: updateState,
-        setState: setState,
-        callback: callback,
-        address: address,
-        taskId: taskId
-      });
-
-      prom.then(() => {
-        // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
-        console.log(`Start cancel compound from ${address}`);
-      })
-        .catch((e) => {
-          // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment,node/no-callback-literal,@typescript-eslint/no-unsafe-member-access
-          if (!e) {
-            // eslint-disable-next-line node/no-callback-literal
-            callback({ txError: true });
-          } else {
-            // eslint-disable-next-line node/no-callback-literal
-            callback({ txError: true, status: false });
-          }
-
-          console.error('Error canceling Turing compounding task stake', e);
-          setTimeout(() => {
-            unsubscribe(id);
-          }, 500);
-        });
-    } catch (e) {
-      return [{ code: BasicTxErrorCode.CANCEL_COMPOUND_ERROR, message: (e as Error).message }];
-    }
 
     port.onDisconnect.addListener((): void => {
       unsubscribe(id);
     });
 
-    return [];
+    return this.cancelCompoundCreateExternal(id, request, callback, SignerType.LEDGER);
   }
 
   // External account request
@@ -4043,13 +3588,14 @@ export default class KoniExtension extends Extension {
     password,
     validatorInfo }: BondingSubmitParams): Promise<BasicTxResponse> {
     const txState: BasicTxResponse = {};
-    const networkJson = state.getNetworkMapByKey(networkKey);
 
     if (!amount || !nominatorAddress || !validatorInfo || !password) {
       txState.txError = true;
 
       return txState;
     }
+
+    const networkJson = state.getNetworkMapByKey(networkKey);
 
     const callback = createSubscription<'pri(bonding.submitTransaction)'>(id, port);
     const dotSamaApi = state.getDotSamaApi(networkKey);
@@ -4059,48 +3605,15 @@ export default class KoniExtension extends Extension {
     if (extrinsic !== null && passwordError === null) {
       const pair = keyring.getPair(nominatorAddress);
 
-      try {
-        const unsubscribe = await extrinsic.signAndSend(pair, (result) => {
-          if (!result || !result.status) {
-            return;
-          }
-
-          if (result.status.isInBlock || result.status.isFinalized) {
-            result.events
-              .filter(({ event: { section } }) => section === 'system')
-              .forEach(({ event: { method } }): void => {
-                txState.transactionHash = extrinsic.hash.toHex();
-                callback(txState);
-
-                if (method === 'ExtrinsicFailed') {
-                  txState.status = false;
-                  callback(txState);
-                } else if (method === 'ExtrinsicSuccess') {
-                  txState.status = true;
-                  callback(txState);
-                }
-              });
-          } else if (result.isError) {
-            txState.txError = true;
-            callback(txState);
-          }
-
-          if (result.isCompleted) {
-            unsubscribe();
-          }
-        });
-      } catch (e) {
-        console.error('error bonding', e);
-
-        // @ts-ignore
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-member-access
-        if (e.toString().includes('Invalid Transaction: Inability to pay some fees , e.g. account balance too low')) {
-          txState.errorMessage = BasicTxError.BalanceTooLow;
-        }
-
-        txState.txError = true;
-        callback(txState);
-      }
+      await signAndSendExtrinsic({
+        type: SignerType.PASSWORD,
+        callback: callback,
+        id: id,
+        addressOrPair: pair,
+        txState: txState,
+        extrinsic: extrinsic,
+        errorMessage: 'error bonding'
+      });
     } else {
       txState.passwordError = passwordError;
       callback(txState);
@@ -4142,48 +3655,15 @@ export default class KoniExtension extends Extension {
     if (extrinsic !== null && passwordError === null) {
       const pair = keyring.getPair(address);
 
-      try {
-        const unsubscribe = await extrinsic.signAndSend(pair, (result) => {
-          if (!result || !result.status) {
-            return;
-          }
-
-          if (result.status.isInBlock || result.status.isFinalized) {
-            result.events
-              .filter(({ event: { section } }) => section === 'system')
-              .forEach(({ event: { method } }): void => {
-                txState.transactionHash = extrinsic.hash.toHex();
-                callback(txState);
-
-                if (method === 'ExtrinsicFailed') {
-                  txState.status = false;
-                  callback(txState);
-                } else if (method === 'ExtrinsicSuccess') {
-                  txState.status = true;
-                  callback(txState);
-                }
-              });
-          } else if (result.isError) {
-            txState.txError = true;
-            callback(txState);
-          }
-
-          if (result.isCompleted) {
-            unsubscribe();
-          }
-        });
-      } catch (e) {
-        console.error('error unbonding', e);
-
-        // @ts-ignore
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-member-access
-        if (e.toString().includes('Invalid Transaction: Inability to pay some fees , e.g. account balance too low')) {
-          txState.errorMessage = BasicTxError.BalanceTooLow;
-        }
-
-        txState.txError = true;
-        callback(txState);
-      }
+      await signAndSendExtrinsic({
+        type: SignerType.PASSWORD,
+        callback: callback,
+        id: id,
+        addressOrPair: pair,
+        txState: txState,
+        extrinsic: extrinsic,
+        errorMessage: 'error unbonding'
+      });
     } else {
       txState.passwordError = passwordError;
       callback(txState);
@@ -4220,48 +3700,15 @@ export default class KoniExtension extends Extension {
     if (extrinsic !== null && passwordError === null) {
       const pair = keyring.getPair(address);
 
-      try {
-        const unsubscribe = await extrinsic.signAndSend(pair, (result) => {
-          if (!result || !result.status) {
-            return;
-          }
-
-          if (result.status.isInBlock || result.status.isFinalized) {
-            result.events
-              .filter(({ event: { section } }) => section === 'system')
-              .forEach(({ event: { method } }): void => {
-                txState.transactionHash = extrinsic.hash.toHex();
-                callback(txState);
-
-                if (method === 'ExtrinsicFailed') {
-                  txState.status = false;
-                  callback(txState);
-                } else if (method === 'ExtrinsicSuccess') {
-                  txState.status = true;
-                  callback(txState);
-                }
-              });
-          } else if (result.isError) {
-            txState.txError = true;
-            callback(txState);
-          }
-
-          if (result.isCompleted) {
-            unsubscribe();
-          }
-        });
-      } catch (e) {
-        console.error('error withdrawing', e);
-
-        // @ts-ignore
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-member-access
-        if (e.toString().includes('Invalid Transaction: Inability to pay some fees , e.g. account balance too low')) {
-          txState.errorMessage = BasicTxError.BalanceTooLow;
-        }
-
-        txState.txError = true;
-        callback(txState);
-      }
+      await signAndSendExtrinsic({
+        type: SignerType.PASSWORD,
+        callback: callback,
+        id: id,
+        addressOrPair: pair,
+        txState: txState,
+        extrinsic: extrinsic,
+        errorMessage: 'error withdrawing'
+      });
     } else {
       txState.passwordError = passwordError;
       callback(txState);
@@ -4291,53 +3738,18 @@ export default class KoniExtension extends Extension {
     const extrinsic = await getClaimRewardExtrinsic(dotSamaApi, networkKey, address, validatorAddress);
     const passwordError: string | null = unlockAccount(address, password);
 
-    console.log(extrinsic);
-
     if (extrinsic !== null && passwordError === null) {
       const pair = keyring.getPair(address);
 
-      try {
-        const unsubscribe = await extrinsic.signAndSend(pair, (result) => {
-          if (!result || !result.status) {
-            return;
-          }
-
-          if (result.status.isInBlock || result.status.isFinalized) {
-            result.events
-              .filter(({ event: { section } }) => section === 'system')
-              .forEach(({ event: { method } }): void => {
-                txState.transactionHash = extrinsic.hash.toHex();
-                callback(txState);
-
-                if (method === 'ExtrinsicFailed') {
-                  txState.status = false;
-                  callback(txState);
-                } else if (method === 'ExtrinsicSuccess') {
-                  txState.status = true;
-                  callback(txState);
-                }
-              });
-          } else if (result.isError) {
-            txState.txError = true;
-            callback(txState);
-          }
-
-          if (result.isCompleted) {
-            unsubscribe();
-          }
-        });
-      } catch (e) {
-        console.error('error withdrawing', e);
-
-        // @ts-ignore
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-member-access
-        if (e.toString().includes('Invalid Transaction: Inability to pay some fees , e.g. account balance too low')) {
-          txState.errorMessage = BasicTxError.BalanceTooLow;
-        }
-
-        txState.txError = true;
-        callback(txState);
-      }
+      await signAndSendExtrinsic({
+        type: SignerType.PASSWORD,
+        callback: callback,
+        id: id,
+        addressOrPair: pair,
+        txState: txState,
+        extrinsic: extrinsic,
+        errorMessage: 'error claimReward'
+      });
     } else {
       txState.passwordError = passwordError;
       callback(txState);
@@ -4400,46 +3812,18 @@ export default class KoniExtension extends Extension {
     const extrinsic = await getTuringCompoundExtrinsic(dotSamaApi, address, collatorAddress, parsedAccountMinimum.toString(), bondedAmount);
     const passwordError: string | null = unlockAccount(address, password);
 
-    console.log(extrinsic);
-
     if (extrinsic !== null && passwordError === null) {
       const pair = keyring.getPair(address);
 
-      try {
-        const unsubscribe = await extrinsic.signAndSend(pair, (result) => {
-          if (!result || !result.status) {
-            return;
-          }
-
-          if (result.status.isInBlock || result.status.isFinalized) {
-            result.events
-              .filter(({ event: { section } }) => section === 'system')
-              .forEach(({ event: { method } }): void => {
-                txState.transactionHash = extrinsic.hash.toHex();
-                callback(txState);
-
-                if (method === 'ExtrinsicFailed') {
-                  txState.status = false;
-                  callback(txState);
-                } else if (method === 'ExtrinsicSuccess') {
-                  txState.status = true;
-                  callback(txState);
-                }
-              });
-          } else if (result.isError) {
-            txState.txError = true;
-            callback(txState);
-          }
-
-          if (result.isCompleted) {
-            unsubscribe();
-          }
-        });
-      } catch (e) {
-        console.error('error compounding Turing stake', e);
-        txState.txError = true;
-        callback(txState);
-      }
+      await signAndSendExtrinsic({
+        type: SignerType.PASSWORD,
+        callback: callback,
+        id: id,
+        addressOrPair: pair,
+        txState: txState,
+        extrinsic: extrinsic,
+        errorMessage: 'error compounding Turing stake'
+      });
     } else {
       txState.passwordError = passwordError;
       callback(txState);
@@ -4484,46 +3868,18 @@ export default class KoniExtension extends Extension {
     const extrinsic = await getTuringCancelCompoundingExtrinsic(dotSamaApi, taskId);
     const passwordError: string | null = unlockAccount(address, password);
 
-    console.log(extrinsic);
-
     if (extrinsic !== null && passwordError === null) {
       const pair = keyring.getPair(address);
 
-      try {
-        const unsubscribe = await extrinsic.signAndSend(pair, (result) => {
-          if (!result || !result.status) {
-            return;
-          }
-
-          if (result.status.isInBlock || result.status.isFinalized) {
-            result.events
-              .filter(({ event: { section } }) => section === 'system')
-              .forEach(({ event: { method } }): void => {
-                txState.transactionHash = extrinsic.hash.toHex();
-                callback(txState);
-
-                if (method === 'ExtrinsicFailed') {
-                  txState.status = false;
-                  callback(txState);
-                } else if (method === 'ExtrinsicSuccess') {
-                  txState.status = true;
-                  callback(txState);
-                }
-              });
-          } else if (result.isError) {
-            txState.txError = true;
-            callback(txState);
-          }
-
-          if (result.isCompleted) {
-            unsubscribe();
-          }
-        });
-      } catch (e) {
-        console.error('error canceling Turing compounding task stake', e);
-        txState.txError = true;
-        callback(txState);
-      }
+      await signAndSendExtrinsic({
+        type: SignerType.PASSWORD,
+        callback: callback,
+        id: id,
+        addressOrPair: pair,
+        txState: txState,
+        extrinsic: extrinsic,
+        errorMessage: 'error canceling Turing compounding task stake'
+      });
     } else {
       txState.passwordError = passwordError;
       callback(txState);

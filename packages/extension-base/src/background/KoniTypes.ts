@@ -576,7 +576,7 @@ export interface RequestCrossChainTransfer extends RequestCheckCrossChainTransfe
 }
 
 export interface ResponseCheckCrossChainTransfer {
-  errors?: Array<TransferError>,
+  errors?: Array<BasicTxError>,
   feeString?: string,
   estimatedFee: string,
   feeSymbol: string
@@ -648,27 +648,15 @@ export enum NETWORK_STATUS {
 }
 
 export enum TransferErrorCode {
-  INVALID_FROM_ADDRESS = 'invalidFromAccount',
-  INVALID_TO_ADDRESS = 'invalidToAccount',
   NOT_ENOUGH_VALUE = 'notEnoughValue',
   INVALID_VALUE = 'invalidValue',
   INVALID_TOKEN = 'invalidToken',
-  INVALID_PARAM = 'invalidParam',
-  KEYRING_ERROR = 'keyringError',
   TRANSFER_ERROR = 'transferError',
-  TIMEOUT = 'timeout',
-  UNSUPPORTED = 'unsupported'
 }
 
 export enum BasicTxErrorCode {
-  INVALID_FROM_ADDRESS = 'invalidFromAccount',
-  INVALID_TO_ADDRESS = 'invalidToAccount',
-  NOT_ENOUGH_VALUE = 'notEnoughValue',
-  INVALID_VALUE = 'invalidValue',
-  INVALID_TOKEN = 'invalidToken',
   INVALID_PARAM = 'invalidParam',
   KEYRING_ERROR = 'keyringError',
-  TRANSFER_ERROR = 'transferError',
   STAKING_ERROR = 'stakingError',
   UN_STAKING_ERROR = 'unStakingError',
   WITHDRAW_STAKING_ERROR = 'withdrawStakingError',
@@ -676,22 +664,39 @@ export enum BasicTxErrorCode {
   CREATE_COMPOUND_ERROR = 'createCompoundError',
   CANCEL_COMPOUND_ERROR = 'cancelCompoundError',
   TIMEOUT = 'timeout',
-  UNSUPPORTED = 'unsupported'
+  UNSUPPORTED = 'unsupported',
+  BALANCE_TO_LOW = 'balanceTooLow1'
 }
 
-export type TransferError = {
-  code: TransferErrorCode,
+export type TxErrorCode = TransferErrorCode | BasicTxErrorCode
+
+export type BasicTxError = {
+  code: TxErrorCode,
   data?: object,
   message: string
 }
 
-export interface BaseTxError {
-  code: BasicTxErrorCode;
-  message: string;
+export interface BasicTxResponse {
+  passwordError?: string | null;
+  callHash?: string;
+  status?: boolean;
+  transactionHash?: string;
+  txError?: boolean;
+  errors?: BasicTxError[];
+  externalState?: ExternalState;
+  qrState?: QrState;
+  ledgerState?: LedgerState;
+  isBusy?: boolean;
 }
 
+export interface NftTransactionResponse extends BasicTxResponse {
+  isSendingSelf: boolean;
+}
+
+export type HandleBasicTx = (data: BasicTxResponse) => void;
+
 export interface ResponseCheckTransfer {
-  errors?: Array<TransferError>,
+  errors?: Array<BasicTxError>,
   fromAccountFree: string,
   toAccountFree: string,
   estimateFee?: string,
@@ -716,7 +721,7 @@ export type TxResultType = {
 
 export interface ResponseTransfer {
   step: TransferStep,
-  errors?: Array<TransferError>,
+  errors?: Array<BasicTxError>,
   extrinsicHash?: string,
   extrinsicStatus?: string,
   data?: object,
@@ -920,6 +925,12 @@ export interface ExternalRequestPromise {
   status: ExternalRequestPromiseStatus,
   message?: string;
   createdAt: number
+}
+
+export interface PrepareExternalRequest {
+  id: string;
+  setState: (promise: ExternalRequestPromise) => void;
+  updateState: (promise: Partial<ExternalRequestPromise>) => void;
 }
 
 export interface RequestAccountCreateExternalV2 {
@@ -1165,23 +1176,6 @@ export interface BondingSubmitParams {
   lockPeriod?: number // in month
 }
 
-export enum BasicTxError {
-  BalanceTooLow = 'BalanceTooLow'
-}
-
-export interface BasicTxResponse {
-  passwordError?: string | null,
-  callHash?: string,
-  status?: boolean,
-  transactionHash?: string,
-  txError?: boolean,
-  errorMessage?: BasicTxError
-}
-
-export interface NftTransactionResponse extends BasicTxResponse {
-  isSendingSelf: boolean
-}
-
 export interface BondingOptionParams {
   networkKey: string;
   address: string;
@@ -1259,93 +1253,15 @@ export type RequestNftTransferExternalEVM = Omit<EvmNftSubmitTransaction, 'passw
 
 export type RequestStakeExternal = Omit<BondingSubmitParams, 'password'>
 
-export interface ResponseStakeExternal extends BasicTxResponse{
-  externalState?: ExternalState;
-}
-
-export interface ResponseStakeQr extends ResponseStakeExternal{
-  qrState?: QrState;
-  isBusy?: boolean;
-}
-
-export interface ResponseStakeLedger extends ResponseStakeExternal{
-  ledgerState?: LedgerState;
-}
-
 export type RequestUnStakeExternal = Omit<UnbondingSubmitParams, 'password'>
-
-export interface ResponseUnStakeExternal extends BasicTxResponse{
-  externalState?: ExternalState;
-}
-
-export interface ResponseUnStakeQr extends ResponseUnStakeExternal{
-  qrState?: QrState;
-  isBusy?: boolean;
-}
-
-export interface ResponseUnStakeLedger extends ResponseUnStakeExternal{
-  ledgerState?: LedgerState;
-}
 
 export type RequestWithdrawStakeExternal = Omit<StakeWithdrawalParams, 'password'>
 
-export interface ResponseWithdrawStakeExternal extends BasicTxResponse{
-  externalState?: ExternalState;
-}
-
-export interface ResponseWithdrawStakeQr extends ResponseWithdrawStakeExternal{
-  qrState?: QrState;
-  isBusy?: boolean;
-}
-
-export interface ResponseWithdrawStakeLedger extends ResponseWithdrawStakeExternal{
-  ledgerState?: LedgerState;
-}
-
 export type RequestClaimRewardExternal = Omit<StakeClaimRewardParams, 'password'>
-
-export interface ResponseClaimRewardExternal extends BasicTxResponse{
-  externalState?: ExternalState;
-}
-
-export interface ResponseClaimRewardQr extends ResponseClaimRewardExternal{
-  qrState?: QrState;
-  isBusy?: boolean;
-}
-
-export interface ResponseClaimRewardLedger extends ResponseClaimRewardExternal{
-  ledgerState?: LedgerState;
-}
 
 export type RequestCreateCompoundStakeExternal = Omit<TuringStakeCompoundParams, 'password'>
 
-export interface ResponseCreateCompoundStakeExternal extends BasicTxResponse{
-  externalState?: ExternalState;
-}
-
-export interface ResponseCreateCompoundStakeQr extends ResponseCreateCompoundStakeExternal{
-  qrState?: QrState;
-  isBusy?: boolean;
-}
-
-export interface ResponseCreateCompoundStakeLedger extends ResponseCreateCompoundStakeExternal{
-  ledgerState?: LedgerState;
-}
-
 export type RequestCancelCompoundStakeExternal = Omit<TuringCancelStakeCompoundParams, 'password'>
-
-export interface ResponseCancelCompoundStakeExternal extends BasicTxResponse{
-  externalState?: ExternalState;
-}
-
-export interface ResponseCancelCompoundStakeQr extends ResponseCancelCompoundStakeExternal{
-  qrState?: QrState;
-  isBusy?: boolean;
-}
-
-export interface ResponseCancelCompoundStakeLedger extends ResponseCancelCompoundStakeExternal{
-  ledgerState?: LedgerState;
-}
 
 export interface StakeDelegationRequest {
   address: string,
@@ -1526,8 +1442,8 @@ export interface KoniRequestSignatures {
   'pri(accounts.create.withSecret)': [RequestAccountCreateWithSecretKey, ResponseAccountCreateWithSecretKey];
   'pri(accounts.checkTransfer)': [RequestCheckTransfer, ResponseCheckTransfer];
   'pri(accounts.checkCrossChainTransfer)': [RequestCheckCrossChainTransfer, ResponseCheckCrossChainTransfer];
-  'pri(accounts.transfer)': [RequestTransfer, Array<TransferError>, ResponseTransfer];
-  'pri(accounts.crossChainTransfer)': [RequestCrossChainTransfer, Array<TransferError>, ResponseTransfer];
+  'pri(accounts.transfer)': [RequestTransfer, BasicTxResponse, ResponseTransfer];
+  'pri(accounts.crossChainTransfer)': [RequestCrossChainTransfer, BasicTxResponse, ResponseTransfer];
   'pri(derivation.createV2)': [RequestDeriveCreateV2, boolean];
   'pri(json.restoreV2)': [RequestJsonRestoreV2, void];
   'pri(json.batchRestoreV2)': [RequestBatchRestoreV2, void];
@@ -1563,6 +1479,8 @@ export interface KoniRequestSignatures {
   'pub(utils.getRandom)': [RandomTestRequest, number];
   'pub(accounts.listV2)': [RequestAccountList, InjectedAccount[]];
   'pub(accounts.subscribeV2)': [RequestAccountSubscribe, boolean, InjectedAccount[]];
+
+  // Qr sign
   'pri(qr.transaction.parse.substrate)': [RequestParseTransactionSubstrate, ResponseParseTransactionSubstrate];
   'pri(qr.transaction.parse.evm)': [RequestParseTransactionEVM, ResponseParseTransactionEVM];
   'pri(qr.isLocked)': [RequestQRIsLocked, ResponseQRIsLocked];
@@ -1573,6 +1491,7 @@ export interface KoniRequestSignatures {
   'pri(account.external.reject)': [RequestRejectExternalRequest, ResponseRejectExternalRequest];
   'pri(account.external.resolve)': [RequestResolveExternalRequest, ResponseResolveExternalRequest];
 
+  // EVM
   'evm(events.subscribe)': [RequestEvmEvents, boolean, EvmEvent];
   'evm(request)': [RequestArguments, unknown];
   'evm(provider.send)': [RequestEvmProviderSend, string | number, ResponseEvmProviderSend]
@@ -1581,27 +1500,27 @@ export interface KoniRequestSignatures {
   'pri(evm.transaction.parse.input)': [RequestParseEVMTransactionInput, ResponseParseEVMTransactionInput];
 
   // Create qr request
-  'pri(accounts.transfer.qr.create)': [RequestTransferExternal, Array<TransferError>, ResponseTransferQr];
-  'pri(accounts.cross.transfer.qr.create)': [RequestCrossChainTransferExternal, Array<TransferError>, ResponseTransferQr];
-  'pri(nft.transfer.qr.create.substrate)': [RequestNftTransferExternalSubstrate, Array<BaseTxError>, ResponseNftTransferQr];
-  'pri(nft.transfer.qr.create.evm)': [RequestNftTransferExternalEVM, Array<BaseTxError>, ResponseNftTransferQr];
-  'pri(stake.qr.create)': [RequestStakeExternal, Array<BaseTxError>, ResponseStakeQr];
-  'pri(unStake.qr.create)': [RequestUnStakeExternal, Array<BaseTxError>, ResponseUnStakeQr];
-  'pri(withdrawStake.qr.create)': [RequestWithdrawStakeExternal, Array<BaseTxError>, ResponseWithdrawStakeQr];
-  'pri(claimReward.qr.create)': [RequestClaimRewardExternal, Array<BaseTxError>, ResponseClaimRewardQr];
-  'pri(createCompound.qr.create)': [RequestCreateCompoundStakeExternal, Array<BaseTxError>, ResponseCreateCompoundStakeQr];
-  'pri(cancelCompound.qr.create)': [RequestCancelCompoundStakeExternal, Array<BaseTxError>, ResponseCancelCompoundStakeQr];
+  'pri(accounts.transfer.qr.create)': [RequestTransferExternal, BasicTxResponse, ResponseTransferQr];
+  'pri(accounts.cross.transfer.qr.create)': [RequestCrossChainTransferExternal, BasicTxResponse, ResponseTransferQr];
+  'pri(nft.transfer.qr.create.substrate)': [RequestNftTransferExternalSubstrate, NftTransactionResponse, ResponseNftTransferQr];
+  'pri(nft.transfer.qr.create.evm)': [RequestNftTransferExternalEVM, NftTransactionResponse, ResponseNftTransferQr];
+  'pri(stake.qr.create)': [RequestStakeExternal, BasicTxResponse, BasicTxResponse];
+  'pri(unStake.qr.create)': [RequestUnStakeExternal, BasicTxResponse, BasicTxResponse];
+  'pri(withdrawStake.qr.create)': [RequestWithdrawStakeExternal, BasicTxResponse, BasicTxResponse];
+  'pri(claimReward.qr.create)': [RequestClaimRewardExternal, BasicTxResponse, BasicTxResponse];
+  'pri(createCompound.qr.create)': [RequestCreateCompoundStakeExternal, BasicTxResponse, BasicTxResponse];
+  'pri(cancelCompound.qr.create)': [RequestCancelCompoundStakeExternal, BasicTxResponse, BasicTxResponse];
 
   // Create ledger request
-  'pri(accounts.transfer.ledger.create)': [RequestTransferExternal, Array<TransferError>, ResponseTransferLedger];
-  'pri(accounts.cross.transfer.ledger.create)': [RequestCrossChainTransferExternal, Array<TransferError>, ResponseTransferLedger];
-  'pri(nft.transfer.ledger.create.substrate)': [RequestNftTransferExternalSubstrate, Array<BaseTxError>, ResponseNftTransferQr];
-  'pri(stake.ledger.create)': [RequestStakeExternal, Array<BaseTxError>, ResponseStakeLedger];
-  'pri(unStake.ledger.create)': [RequestUnStakeExternal, Array<BaseTxError>, ResponseUnStakeLedger];
-  'pri(withdrawStake.ledger.create)': [RequestWithdrawStakeExternal, Array<BaseTxError>, ResponseWithdrawStakeLedger];
-  'pri(claimReward.ledger.create)': [RequestClaimRewardExternal, Array<BaseTxError>, ResponseClaimRewardLedger];
-  'pri(createCompound.ledger.create)': [RequestCreateCompoundStakeExternal, Array<BaseTxError>, ResponseCreateCompoundStakeLedger];
-  'pri(cancelCompound.ledger.create)': [RequestCancelCompoundStakeExternal, Array<BaseTxError>, ResponseCancelCompoundStakeLedger];
+  'pri(accounts.transfer.ledger.create)': [RequestTransferExternal, BasicTxResponse, ResponseTransferLedger];
+  'pri(accounts.cross.transfer.ledger.create)': [RequestCrossChainTransferExternal, BasicTxResponse, ResponseTransferLedger];
+  'pri(nft.transfer.ledger.create.substrate)': [RequestNftTransferExternalSubstrate, NftTransactionResponse, ResponseNftTransferLedger];
+  'pri(stake.ledger.create)': [RequestStakeExternal, BasicTxResponse, BasicTxResponse];
+  'pri(unStake.ledger.create)': [RequestUnStakeExternal, BasicTxResponse, BasicTxResponse];
+  'pri(withdrawStake.ledger.create)': [RequestWithdrawStakeExternal, BasicTxResponse, BasicTxResponse];
+  'pri(claimReward.ledger.create)': [RequestClaimRewardExternal, BasicTxResponse, BasicTxResponse];
+  'pri(createCompound.ledger.create)': [RequestCreateCompoundStakeExternal, BasicTxResponse, BasicTxResponse];
+  'pri(cancelCompound.ledger.create)': [RequestCancelCompoundStakeExternal, BasicTxResponse, BasicTxResponse];
 
   // Authorize
   'pri(authorize.subscribe)': [null, AuthUrls, AuthUrls];

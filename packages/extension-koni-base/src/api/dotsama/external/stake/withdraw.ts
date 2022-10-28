@@ -2,26 +2,28 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { BasicTxResponse } from '@subwallet/extension-base/background/KoniTypes';
-import { getTuringCancelCompoundingExtrinsic } from '@subwallet/extension-koni-base/api/bonding/paraChain';
+import { getWithdrawalExtrinsic } from '@subwallet/extension-koni-base/api/bonding';
 import { ExternalProps } from '@subwallet/extension-koni-base/api/dotsama/external/shared';
 import { signAndSendExtrinsic } from '@subwallet/extension-koni-base/api/dotsama/signAndSend';
 
-interface CancelCompoundExternalProps extends ExternalProps {
+interface WithdrawStakeExternalProps extends ExternalProps {
+  action?: string;
   address: string;
-  taskId: string;
+  validatorAddress?: string;
 }
 
-export const createCancelCompoundExternal = async ({ address,
+export const createWithdrawStakeExternal = async ({ action,
+  address,
   apiProp,
   callback,
   id,
+  network,
   setState,
   signerType,
-  taskId,
-  updateState }: CancelCompoundExternalProps): Promise<void> => {
+  updateState,
+  validatorAddress }: WithdrawStakeExternalProps) => {
   const txState: BasicTxResponse = {};
-
-  const extrinsic = await getTuringCancelCompoundingExtrinsic(apiProp, taskId);
+  const extrinsic = await getWithdrawalExtrinsic(apiProp, network.key, address, validatorAddress, action);
 
   await signAndSendExtrinsic({
     type: signerType,
@@ -33,6 +35,6 @@ export const createCancelCompoundExternal = async ({ address,
     txState: txState,
     updateState: updateState,
     extrinsic: extrinsic,
-    errorMessage: 'error cancelCompound'
+    errorMessage: 'error withdrawing'
   });
 };

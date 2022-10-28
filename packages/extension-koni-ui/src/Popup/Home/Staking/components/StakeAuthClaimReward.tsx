@@ -1,7 +1,7 @@
 // Copyright 2019-2022 @subwallet/extension-koni authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { BaseTxError, BasicTxError, ResponseClaimRewardLedger, ResponseWithdrawStakeExternal, ResponseWithdrawStakeQr } from '@subwallet/extension-base/background/KoniTypes';
+import { BaseTxError, BasicTxError, ResponseClaimRewardLedger, ResponseWithdrawStakeExternal, BasicTxResponse } from '@subwallet/extension-base/background/KoniTypes';
 import { LedgerState } from '@subwallet/extension-base/signers/types';
 import { InputWithLabel } from '@subwallet/extension-koni-ui/components';
 import FeeValue from '@subwallet/extension-koni-ui/components/Balance/FeeValue';
@@ -213,7 +213,7 @@ function StakeAuthClaimReward ({ address, className, hideModal, networkKey }: Pr
 
   // Qr
 
-  const handlerCallbackResponseResultQr = useCallback((data: ResponseWithdrawStakeQr) => {
+  const handlerCallbackResponseResultQr = useCallback((data: BasicTxResponse) => {
     if (data.qrState) {
       const state: QrContextState = {
         ...data.qrState,

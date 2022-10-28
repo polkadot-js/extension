@@ -164,9 +164,9 @@ function NftContainer (
             data={chosenCollection}
             onClickBack={handleHideCollectionDetail}
             setChosenItem={setChosenItem}
+            setShowCollectionDetail={setShowCollectionDetail}
             setShowItemDetail={setShowItemDetail}
             showItemDetail={showItemDetail}
-            setShowCollectionDetail={setShowCollectionDetail}
           />
       }
 

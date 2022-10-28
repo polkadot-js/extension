@@ -4,8 +4,7 @@
 import { NetworkJson } from '@subwallet/extension-base/background/KoniTypes';
 import { AccountJson, FindAccountFunction } from '@subwallet/extension-base/background/types';
 import { ALL_ACCOUNT_KEY } from '@subwallet/extension-koni-base/constants';
-import { TYPE_ACCOUNT_CAN_SIGN } from '@subwallet/extension-koni-ui/constants/account';
-import { AccountSignType } from '@subwallet/extension-koni-ui/types/account';
+import { MODE_CAN_SIGN, SIGN_MODE } from '@subwallet/extension-koni-ui/constants/signing';
 import { getNetworkJsonByGenesisHash, getNetworkKeyByGenesisHash } from '@subwallet/extension-koni-ui/util/getNetworkJsonByGenesisHash';
 import { getLogoByNetworkKey } from '@subwallet/extension-koni-ui/util/index';
 import reformatAddress from '@subwallet/extension-koni-ui/util/reformatAddress';
@@ -57,7 +56,7 @@ export const getAccountInfoByNetwork = (networkMap: Record<string, NetworkJson>,
   };
 };
 
-export const findAccountByAddress = (accounts: AccountJson[], address: string): AccountJson | null => {
+export const findAccountByAddress = (accounts: AccountJson[], address?: string): AccountJson | null => {
   try {
     if (!address) {
       return null;
@@ -74,28 +73,28 @@ export const findAccountByAddress = (accounts: AccountJson[], address: string): 
   }
 };
 
-export const getAccountType = (account: AccountJson | null | undefined): AccountSignType => {
+export const getSignMode = (account: AccountJson | null | undefined): SIGN_MODE => {
   if (!account) {
-    return 'Unknown';
+    return SIGN_MODE.UNKNOWN;
   } else {
     if (account.address === ALL_ACCOUNT_KEY) {
-      return 'All';
+      return SIGN_MODE.ALL_ACCOUNT;
     } else {
       if (account.isExternal) {
         if (account.isHardware) {
-          return 'Ledger';
+          return SIGN_MODE.LEDGER;
         } else if (account.isReadOnly) {
-          return 'ReadOnly';
+          return SIGN_MODE.READ_ONLY;
         } else {
-          return 'Qr';
+          return SIGN_MODE.QR;
         }
       } else {
-        return 'Password';
+        return SIGN_MODE.PASSWORD;
       }
     }
   }
 };
 
-export const accountCanSign = (accountType: AccountSignType): boolean => {
-  return TYPE_ACCOUNT_CAN_SIGN.includes(accountType);
+export const accountCanSign = (signMode: SIGN_MODE): boolean => {
+  return MODE_CAN_SIGN.includes(signMode);
 };

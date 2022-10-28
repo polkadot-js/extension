@@ -408,7 +408,7 @@ function SendFund ({ chainRegistryMap, className, defaultValue, networkMap }: Co
               <Warning
                 className={'send-fund-warning'}
               >
-                {t<string>('The sender account is read only account')}
+                {t<string>('The sender account is readonly account')}
               </Warning>
             )}
 

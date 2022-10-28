@@ -222,7 +222,7 @@ function ImportQr ({ className }: Props): React.ReactElement<Props> {
                       { account.isAddress && (
                         <Checkbox
                           checked={isReadOnly}
-                          label={t<string>('Read only account')}
+                          label={t<string>('Readonly account')}
                           onChange={setIsReadOnly}
                         />
                       )}

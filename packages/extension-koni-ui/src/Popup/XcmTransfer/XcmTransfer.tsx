@@ -478,7 +478,7 @@ function XcmTransfer ({ chainRegistryMap, className, defaultValue, firstOriginCh
                     className='xcm-transfer-warning'
                     isDanger
                   >
-                    {t<string>('The sender account is read only account')}
+                    {t<string>('The sender account is readonly account')}
                   </Warning>
                 )}
 

@@ -11,7 +11,6 @@ import { AccountContext, Link } from '@subwallet/extension-koni-ui/components';
 import useGenesisHashOptions from '@subwallet/extension-koni-ui/hooks/useGenesisHashOptions';
 import useIsPopup from '@subwallet/extension-koni-ui/hooks/useIsPopup';
 import { showAccount, tieAccount, windowOpen } from '@subwallet/extension-koni-ui/messaging';
-import AccountMenuSettings from '@subwallet/extension-koni-ui/partials/AccountMenuSettings';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { updateCurrentNetwork } from '@subwallet/extension-koni-ui/stores/updater';
 import { accountAllRecoded, getGenesisOptionsByAddressType, isAccountAll } from '@subwallet/extension-koni-ui/util';
@@ -33,6 +32,7 @@ const Identicon = React.lazy(() => import('@subwallet/extension-koni-ui/componen
 const NetworkMenu = React.lazy(() => import('@subwallet/extension-koni-ui/components/NetworkMenu'));
 const DetailHeader = React.lazy(() => import('@subwallet/extension-koni-ui/partials/Header/DetailHeader'));
 const SubHeader = React.lazy(() => import('@subwallet/extension-koni-ui/partials/Header/SubHeader'));
+const AccountMenuSettings = React.lazy(() => import('@subwallet/extension-koni-ui/partials/AccountMenuSettings'));
 
 interface Props extends ThemeProps {
   changeAccountCallback?: (address: string) => void;

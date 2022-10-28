@@ -133,8 +133,8 @@ function StakeAuthCancelCompoundRequest ({ address, balanceError, className, fee
 
   // External
 
-  const handlerCallbackResponseResult = useCallback((dataCb: ResponseCancelCompoundStakeExternal) => {
-    if (balanceError && !dataCb.passwordError) {
+  const handlerCallbackResponseResult = useCallback((data: ResponseCancelCompoundStakeExternal) => {
+    if (balanceError && !data.passwordError) {
       setLoading(false);
       setErrorArr(['Your balance is too low to cover fees']);
       setIsTxSuccess(false);
@@ -145,7 +145,7 @@ function StakeAuthCancelCompoundRequest ({ address, balanceError, className, fee
       return;
     }
 
-    if (dataCb.txError && dataCb.status === undefined) {
+    if (data.txError && data.status === undefined) {
       setErrorArr(['Encountered an error, please try again.']);
       setLoading(false);
       setIsTxSuccess(false);
@@ -157,20 +157,20 @@ function StakeAuthCancelCompoundRequest ({ address, balanceError, className, fee
       return;
     }
 
-    if (dataCb.status !== undefined) {
+    if (data.status !== undefined) {
       setLoading(false);
 
-      if (dataCb.status) {
+      if (data.status) {
         setIsTxSuccess(true);
         setShowAuth(false);
         setShowResult(true);
-        setExtrinsicHash(dataCb.transactionHash as string);
+        setExtrinsicHash(data.transactionHash as string);
       } else {
         setIsTxSuccess(false);
         setTxError('Error submitting transaction');
         setShowAuth(false);
         setShowResult(true);
-        setExtrinsicHash(dataCb.transactionHash as string);
+        setExtrinsicHash(data.transactionHash as string);
       }
 
       cleanQrState();

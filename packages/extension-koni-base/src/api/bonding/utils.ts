@@ -3,7 +3,7 @@
 
 import { parseRawNumber } from '@subwallet/extension-koni-base/utils';
 
-import { BN } from '@polkadot/util';
+import { BN, BN_BILLION, BN_MILLION, BN_THOUSAND } from '@polkadot/util';
 
 export const REVOKE_ACTION = 'revoke';
 export const BOND_LESS_ACTION = 'bondLess';
@@ -70,7 +70,11 @@ export const PARACHAIN_INFLATION_DISTRIBUTION: Record<string, Record<string, num
 const DEFAULT_PARAMS: InflationParams = {
   auctionAdjust: 0,
   auctionMax: 0,
+  // 5% for falloff, as per the defaults, see
+  // https://github.com/paritytech/polkadot/blob/816cb64ea16102c6c79f6be2a917d832d98df757/runtime/kusama/src/lib.rs#L534
   falloff: 0.05,
+  // 10% max, 0.25% min, see
+  // https://github.com/paritytech/polkadot/blob/816cb64ea16102c6c79f6be2a917d832d98df757/runtime/kusama/src/lib.rs#L523
   maxInflation: 0.1,
   minInflation: 0.025,
   stakeTarget: 0.5
@@ -116,8 +120,8 @@ export function getInflationParams (networkKey: string): InflationParams {
   return KNOWN_PARAMS[networkKey] || DEFAULT_PARAMS;
 }
 
-export function calcInflationUniformEraPayout (totalIssuance: number, yearlyInflationInTokens: number): number {
-  const totalIssuanceInTokens = (totalIssuance / 1000000000) / 1000;
+export function calcInflationUniformEraPayout (totalIssuance: BN, yearlyInflationInTokens: number): number {
+  const totalIssuanceInTokens = totalIssuance.div(BN_BILLION).div(BN_THOUSAND).toNumber();
 
   return (totalIssuanceInTokens === 0 ? 0.0 : yearlyInflationInTokens / totalIssuanceInTokens);
 }
@@ -130,14 +134,14 @@ export function calcInflationRewardCurve (minInflation: number, stakedFraction: 
   ));
 }
 
-export function calculateInflation (totalEraStake: number, totalIssuance: number, numAuctions: number, networkKey: string) {
+export function calculateInflation (totalEraStake: BN, totalIssuance: BN, numAuctions: number, networkKey: string) {
   const inflationParams = getInflationParams(networkKey);
   const { auctionAdjust, auctionMax, falloff, maxInflation, minInflation, stakeTarget } = inflationParams;
   const idealStake = stakeTarget - (Math.min(auctionMax, numAuctions) * auctionAdjust);
   const idealInterest = maxInflation / idealStake;
-  const stakedFraction = totalEraStake / totalIssuance;
+  const stakedFraction = totalEraStake.mul(BN_MILLION).div(totalIssuance).toNumber() / BN_MILLION.toNumber();
 
-  if (networkKey === 'aleph') {
+  if (['aleph', 'alephTest'].includes(networkKey)) {
     if (inflationParams.yearlyInflationInTokens) {
       return 100 * calcInflationUniformEraPayout(totalIssuance, inflationParams.yearlyInflationInTokens);
     } else {
@@ -147,16 +151,16 @@ export function calculateInflation (totalEraStake: number, totalIssuance: number
     return 100 * (minInflation + (
       stakedFraction <= idealStake
         ? (stakedFraction * (idealInterest - (minInflation / idealStake)))
-        : calcInflationRewardCurve(minInflation, stakedFraction, idealStake, idealInterest, falloff)
+        : (((idealInterest * idealStake) - minInflation) * Math.pow(2, (idealStake - stakedFraction) / falloff))
     ));
   }
 }
 
-export function calculateChainStakedReturn (inflation: number, totalEraStake: number, totalIssuance: number, networkKey: string) {
-  const stakedFraction = totalEraStake / totalIssuance;
+export function calculateChainStakedReturn (inflation: number, totalEraStake: BN, totalIssuance: BN, networkKey: string) {
+  const stakedFraction = totalEraStake.mul(BN_MILLION).div(totalIssuance).toNumber() / BN_MILLION.toNumber();
   let stakedReturn = inflation / stakedFraction;
 
-  if (networkKey === 'aleph') {
+  if (['aleph', 'alephTest'].includes(networkKey)) {
     stakedReturn *= 0.9; // 10% goes to treasury
   }
 

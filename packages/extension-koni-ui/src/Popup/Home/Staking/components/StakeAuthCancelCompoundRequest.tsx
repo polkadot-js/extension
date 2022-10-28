@@ -1,8 +1,7 @@
 // Copyright 2019-2022 @subwallet/extension-koni authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { ResponseCancelCompoundStakeExternal, ResponseCancelCompoundStakeLedger, ResponseCancelCompoundStakeQr } from '@subwallet/extension-base/background/KoniTypes';
-import { BaseTxError } from '@subwallet/extension-base/build/background/KoniTypes';
+import { BaseTxError, ResponseCancelCompoundStakeExternal, ResponseCancelCompoundStakeLedger, ResponseCancelCompoundStakeQr } from '@subwallet/extension-base/background/KoniTypes';
 import { LedgerState } from '@subwallet/extension-base/build/signers/types';
 import { InputWithLabel } from '@subwallet/extension-koni-ui/components';
 import Button from '@subwallet/extension-koni-ui/components/Button';

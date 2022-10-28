@@ -105,12 +105,13 @@ export const PREDEFINED_NETWORKS: Record<string, NetworkJson> = {
       Dwellir: 'wss://statemint-rpc.dwellir.com'
     },
     active: false,
-    currentProvider: 'Dwellir',
+    currentProvider: 'Parity',
     currentProviderMode: 'ws',
     groups: ['POLKADOT_PARACHAIN'],
     paraId: 1000,
-    nativeToken: 'KSM',
-    decimals: 10
+    nativeToken: 'DOT',
+    decimals: 10,
+    coinGeckoKey: 'polkadot'
   },
   pioneer: {
     key: 'pioneer',

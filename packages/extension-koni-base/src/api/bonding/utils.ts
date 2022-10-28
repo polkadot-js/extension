@@ -160,7 +160,7 @@ export function calculateChainStakedReturn (inflation: number, totalEraStake: BN
   const stakedFraction = totalEraStake.mul(BN_MILLION).div(totalIssuance).toNumber() / BN_MILLION.toNumber();
   let stakedReturn = inflation / stakedFraction;
 
-  if (networkKey === 'aleph') {
+  if (['aleph', 'alephTest'].includes(networkKey)) {
     stakedReturn *= 0.9; // 10% goes to treasury
   }
 

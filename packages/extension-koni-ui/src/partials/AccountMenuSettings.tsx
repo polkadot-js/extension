@@ -193,7 +193,7 @@ function AccountMenuSettings ({ changeAccountCallback, className, closeSetting, 
             >
               {/* @ts-ignore */}
               <FontAwesomeIcon icon={faQrcode} />
-              <span>{t<string>('Attach external QR-signer account')}</span>
+              <span>{t<string>('Attach QR-signer (Parity Signer, Keystone)')}</span>
             </Link>
           </MenuSettingItem>
 

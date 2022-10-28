@@ -5,6 +5,7 @@ import { ApiProps, NetworkJson, ResponseTransfer, TokenInfo } from '@subwallet/e
 import { doSignAndSend, getUnsupportedResponse } from '@subwallet/extension-koni-base/api/dotsama/transfer';
 import { astarEstimateCrossChainFee, astarGetXcmExtrinsic } from '@subwallet/extension-koni-base/api/xcm/astar';
 import { moonbeamEstimateCrossChainFee, moonbeamGetXcmExtrinsic } from '@subwallet/extension-koni-base/api/xcm/moonbeamXcm';
+import { statemintEstimateCrossChainFee, statemintGetXcmExtrinsic } from '@subwallet/extension-koni-base/api/xcm/statemintXcm';
 import { substrateEstimateCrossChainFee, substrateGetXcmExtrinsic } from '@subwallet/extension-koni-base/api/xcm/substrateXcm';
 import { SupportedCrossChainsMap } from '@subwallet/extension-koni-base/api/xcm/utils';
 
@@ -50,6 +51,10 @@ export async function estimateCrossChainFee (
     return astarEstimateCrossChainFee(originNetworkKey, destinationNetworkKey, to, fromKeypair, value, dotSamaApiMap, tokenInfo, networkMap);
   }
 
+  if (['statemint', 'statemine'].includes(originNetworkKey)) {
+    return statemintEstimateCrossChainFee(originNetworkKey, destinationNetworkKey, to, fromKeypair, value, dotSamaApiMap, tokenInfo, networkMap);
+  }
+
   return substrateEstimateCrossChainFee(originNetworkKey, destinationNetworkKey, to, fromKeypair, value, dotSamaApiMap, tokenInfo, networkMap);
 }
 
@@ -76,6 +81,8 @@ export const createXcmExtrinsic = async ({ destinationNetworkKey,
     extrinsic = moonbeamGetXcmExtrinsic(originNetworkKey, destinationNetworkKey, to, value, api, tokenInfo, networkMap);
   } else if (['astar', 'shiden'].includes(originNetworkKey)) {
     extrinsic = astarGetXcmExtrinsic(originNetworkKey, destinationNetworkKey, to, value, api, tokenInfo, networkMap);
+  } else if (['statemint', 'statemine'].includes(originNetworkKey)) {
+    extrinsic = statemintGetXcmExtrinsic(originNetworkKey, destinationNetworkKey, to, value, api, tokenInfo, networkMap);
   } else {
     extrinsic = substrateGetXcmExtrinsic(originNetworkKey, destinationNetworkKey, to, value, api, tokenInfo, networkMap);
   }
@@ -186,6 +193,20 @@ function updateXcmResponseTxResult (
         record.event.method.toLowerCase() === 'burned') {
         response.txResult.change = record.event.data[2]?.toString() || '0';
         response.txResult.changeSymbol = tokenInfo.symbol;
+      }
+    } else if (['statemint', 'statemine'].includes(networkKey) && tokenInfo) {
+      if (!tokenInfo.isMainToken) {
+        if (record.event.section === 'assets' &&
+          record.event.method.toLowerCase() === 'transferred') {
+          response.txResult.change = record.event.data[3]?.toString() || '0';
+          response.txResult.changeSymbol = tokenInfo.symbol;
+        }
+      } else {
+        if (record.event.section === 'balances' &&
+          record.event.method.toLowerCase() === 'withdraw') {
+          response.txResult.change = record.event.data[1]?.toString() || '0';
+          response.txResult.changeSymbol = tokenInfo.symbol;
+        }
       }
     } else {
       if (record.event.section === 'balances' &&

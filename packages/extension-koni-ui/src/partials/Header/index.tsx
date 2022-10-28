@@ -11,7 +11,7 @@ import { AccountContext, Link } from '@subwallet/extension-koni-ui/components';
 import useGenesisHashOptions from '@subwallet/extension-koni-ui/hooks/useGenesisHashOptions';
 import useIsPopup from '@subwallet/extension-koni-ui/hooks/useIsPopup';
 import { showAccount, tieAccount, windowOpen } from '@subwallet/extension-koni-ui/messaging';
-import AccountMenuSettings from '@subwallet/extension-koni-ui/partials/AccountMenuSettings';
+import AccountMenuSettings from '@subwallet/extension-koni-ui/partials/AccountMenuSettings'; // lazy import will make the menu twitching
 import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { updateCurrentNetwork } from '@subwallet/extension-koni-ui/stores/updater';
 import { accountAllRecoded, getGenesisOptionsByAddressType, isAccountAll } from '@subwallet/extension-koni-ui/util';

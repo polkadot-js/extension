@@ -62,7 +62,7 @@ export async function astarEstimateCrossChainFee (
   };
 
   if (networkMap[destinationNetworkKey].isEthereum) {
-    receiverLocation = { AccountKey20: { network: 'Any', id: decodeAddress(to) } };
+    receiverLocation = { AccountKey20: { network: 'Any', id: to } };
   }
 
   if (SupportedCrossChainsMap[originNetworkKey].relationMap[destinationNetworkKey].type === 'r') {
@@ -131,7 +131,7 @@ export function astarGetXcmExtrinsic (
   };
 
   if (networkMap[destinationNetworkKey].isEthereum) {
-    receiverLocation = { AccountKey20: { network: 'Any', id: decodeAddress(to) } };
+    receiverLocation = { AccountKey20: { network: 'Any', id: to } };
   }
 
   if (SupportedCrossChainsMap[originNetworkKey].relationMap[destinationNetworkKey].type === 'r') {

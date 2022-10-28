@@ -9,7 +9,232 @@ interface EvmTokenJson {
 }
 
 export const DEFAULT_EVM_TOKENS: EvmTokenJson = {
-  erc20: [],
+  erc20: [
+    {
+      name: 'Tether USD',
+      symbol: 'USDT',
+      smartContract: '0xdAC17F958D2ee523a2206206994597C13D831ec7',
+      decimals: 6,
+      chain: 'ethereum',
+      type: CustomTokenType.erc20
+    },
+    {
+      name: 'BNB',
+      symbol: 'BNB',
+      smartContract: '0xB8c77482e45F1F44dE1745F52C74426C631bDD52',
+      decimals: 18,
+      chain: 'ethereum',
+      type: CustomTokenType.erc20
+    },
+    {
+      name: 'USD Coin',
+      symbol: 'USDC',
+      smartContract: '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48',
+      decimals: 6,
+      chain: 'ethereum',
+      type: CustomTokenType.erc20
+    },
+    {
+      name: 'Binance USD',
+      symbol: 'BUSD',
+      smartContract: '0x4Fabb145d64652a948d72533023f6E7A623C7C53',
+      decimals: 18,
+      chain: 'ethereum',
+      type: CustomTokenType.erc20
+    },
+    {
+      name: 'Lido DAO Token',
+      symbol: 'LDO',
+      smartContract: '0x5A98FcBEA516Cf06857215779Fd812CA3beF1B32',
+      decimals: 18,
+      chain: 'ethereum',
+      type: CustomTokenType.erc20
+    },
+    {
+      name: 'Wrapped liquid staked Ether 2.0',
+      symbol: 'wstETH',
+      smartContract: '0x7f39C581F595B53c5cb19bD0b3f8dA6c935E2Ca0',
+      decimals: 18,
+      chain: 'ethereum',
+      type: CustomTokenType.erc20
+    },
+    {
+      name: 'stETH',
+      symbol: 'stETH',
+      smartContract: '0xae7ab96520DE3A18E5e111B5EaAb095312D7fE84',
+      decimals: 18,
+      chain: 'ethereum',
+      type: CustomTokenType.erc20
+    },
+    {
+      name: 'Theta Token',
+      symbol: 'THETA',
+      smartContract: '0x3883f5e181fccaF8410FA61e12b59BAd963fb645',
+      decimals: 18,
+      chain: 'ethereum',
+      type: CustomTokenType.erc20
+    },
+    {
+      name: 'NEAR',
+      symbol: 'NEAR',
+      smartContract: '0x85F17Cf997934a597031b2E18a9aB6ebD4B9f6a4',
+      decimals: 24,
+      chain: 'ethereum',
+      type: CustomTokenType.erc20
+    },
+    {
+      name: 'ApeCoin',
+      symbol: 'APE',
+      smartContract: '0x4d224452801ACEd8B2F0aebE155379bb5D594381',
+      decimals: 18,
+      chain: 'ethereum',
+      type: CustomTokenType.erc20
+    },
+    {
+      name: 'ChainLink Token',
+      symbol: 'LINK',
+      smartContract: '0x514910771AF9Ca656af840dff83E8264EcF986CA',
+      decimals: 18,
+      chain: 'ethereum',
+      type: CustomTokenType.erc20
+    },
+    {
+      name: 'Dai Stablecoin',
+      symbol: 'DAI',
+      smartContract: '0x6B175474E89094C44Da98b954EedeAC495271d0F',
+      decimals: 18,
+      chain: 'ethereum',
+      type: CustomTokenType.erc20
+    },
+    {
+      name: 'BAT',
+      symbol: 'BAT',
+      smartContract: '0x0D8775F648430679A709E98d2b0Cb6250d2887EF',
+      decimals: 18,
+      chain: 'ethereum',
+      type: CustomTokenType.erc20
+    },
+    {
+      name: 'Cronos Coin',
+      symbol: 'CRO',
+      smartContract: '0xA0b73E1Ff0B80914AB6fe0444E65848C4C34450b',
+      decimals: 8,
+      chain: 'ethereum',
+      type: CustomTokenType.erc20
+    },
+    {
+      name: 'Compound',
+      symbol: 'COMP',
+      smartContract: '0xc00e94Cb662C3520282E6f5717214004A7f26888',
+      decimals: 18,
+      chain: 'ethereum',
+      type: CustomTokenType.erc20
+    },
+    {
+      name: 'EnjinCoin',
+      symbol: 'ENJ',
+      smartContract: '0xF629cBd94d3791C9250152BD8dfBDF380E2a3B9c',
+      decimals: 18,
+      chain: 'ethereum',
+      type: CustomTokenType.erc20
+    },
+    {
+      name: 'SAND',
+      symbol: 'SAND',
+      smartContract: '0x3845badAde8e6dFF049820680d1F14bD3903a5d0',
+      decimals: 18,
+      chain: 'ethereum',
+      type: CustomTokenType.erc20
+    },
+    {
+      name: 'GALA',
+      symbol: 'GALA',
+      smartContract: '0x15D4c048F83bd7e37d49eA4C83a07267Ec4203dA',
+      decimals: 8,
+      chain: 'ethereum',
+      type: CustomTokenType.erc20
+    },
+    {
+      name: 'chiliZ',
+      symbol: 'CHZ',
+      smartContract: '0x3506424F91fD33084466F402d5D97f05F8e3b4AF',
+      decimals: 18,
+      chain: 'ethereum',
+      type: CustomTokenType.erc20
+    },
+    {
+      name: '1INCH Token',
+      symbol: '1INCH',
+      smartContract: '0x111111111117dC0aa78b770fA6A738034120C302',
+      decimals: 18,
+      chain: 'ethereum',
+      type: CustomTokenType.erc20
+    },
+    {
+      name: 'Fantom Token',
+      symbol: 'FTM',
+      smartContract: '0x4E15361FD6b4BB609Fa63C81A2be19d873717870',
+      decimals: 18,
+      chain: 'ethereum',
+      type: CustomTokenType.erc20
+    },
+    {
+      name: 'Maker',
+      symbol: 'MKR',
+      smartContract: '0x9f8F72aA9304c8B593d555F12eF6589cC3A579A2',
+      decimals: 18,
+      chain: 'ethereum',
+      type: CustomTokenType.erc20
+    },
+    {
+      name: 'KyberNetwork',
+      symbol: 'KNC',
+      smartContract: '0xdd974D5C2e2928deA5F71b9825b8b646686BD200',
+      decimals: 18,
+      chain: 'ethereum',
+      type: CustomTokenType.erc20
+    },
+    {
+      name: 'Wrapped BTC',
+      symbol: 'WBTC',
+      smartContract: '0x2260FAC5E5542a773Aa44fBCfeDf7C193bc2C599',
+      decimals: 8,
+      chain: 'ethereum',
+      type: CustomTokenType.erc20
+    },
+    {
+      name: 'Ethereum Name Service',
+      symbol: 'ENS',
+      smartContract: '0xC18360217D8F7Ab5e7c516566761Ea12Ce7F9D72',
+      decimals: 18,
+      chain: 'ethereum',
+      type: CustomTokenType.erc20
+    },
+    {
+      name: 'Uniswap',
+      symbol: 'UNI',
+      smartContract: '0x1f9840a85d5aF5bf1D1762F925BDADdC4201F984',
+      decimals: 18,
+      chain: 'ethereum',
+      type: CustomTokenType.erc20
+    },
+    {
+      name: 'Matic Token',
+      symbol: 'MATIC',
+      smartContract: '0x7D1AfA7B718fb893dB30A3aBc0Cfc608AaCfeBB0',
+      decimals: 18,
+      chain: 'ethereum',
+      type: CustomTokenType.erc20
+    },
+    {
+      name: 'SHIBA INU',
+      symbol: 'SHIB',
+      smartContract: '0x95aD61b0a150d79219dCF64E1E6Cc01f0B64C4cE',
+      decimals: 18,
+      chain: 'ethereum',
+      type: CustomTokenType.erc20
+    }
+  ],
   erc721: [
     {
       name: 'MoonFit Mint Pass',

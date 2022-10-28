@@ -217,7 +217,7 @@ export const subscanByNetworkKey: Record<string, string> = {
   shibuya: 'https://shibuya.subscan.io',
   arctic_testnet: 'https://arctic.subscan.io',
   snow: 'https://snow.subscan.io',
-  subspace_gemini_2a: 'https://subspace.stg.subscan.io'
+  subspace_gemini_2a: 'https://subspace.subscan.io'
 };
 
 const evmBlockExplorer: Record<string, string> = {

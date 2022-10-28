@@ -103,8 +103,8 @@ export async function checkSupportTransfer (networkKey: string, token: string, d
     result.supportTransfer = true;
     result.supportTransferAll = true;
   } else if (['statemint', 'statemine'].includes(networkKey) && tokenInfo) {
-    result.supportTransfer = false;
-    result.supportTransferAll = false;
+    result.supportTransfer = true;
+    result.supportTransferAll = true;
   }
 
   return result;
@@ -184,7 +184,7 @@ export async function estimateFee (
     const paymentInfo = await api.tx.currencies.transfer(to, tokenInfo.specialOption, value).paymentInfo(fromKeypair);
 
     fee = paymentInfo.partialFee.toString();
-  } else if (['statemint', 'statemine'].includes(networkKey) && tokenInfo) {
+  } else if (['statemint', 'statemine'].includes(networkKey) && tokenInfo && !tokenInfo.isMainToken) {
     const paymentInfo = await api.tx.assets.transfer(tokenInfo.assetIndex, to, value).paymentInfo(fromKeypair);
 
     fee = paymentInfo.partialFee.toString();
@@ -265,6 +265,12 @@ export function updateResponseTxResult (
     } else if (['pioneer', 'bit.country'].includes(networkKey) && tokenInfo && !tokenInfo.isMainToken) {
       if (record.event.section === 'tokens' &&
         record.event.method.toLowerCase() === 'transfer') {
+        response.txResult.change = record.event.data[3]?.toString() || '0';
+        response.txResult.changeSymbol = tokenInfo.symbol;
+      }
+    } else if (['statemint', 'statemine'].includes(networkKey) && tokenInfo && !tokenInfo.isMainToken) {
+      if (record.event.section === 'assets' &&
+        record.event.method.toLowerCase() === 'transferred') {
         response.txResult.change = record.event.data[3]?.toString() || '0';
         response.txResult.changeSymbol = tokenInfo.symbol;
       }
@@ -477,6 +483,8 @@ export async function makeTransfer (
     }
   } else if (['pioneer'].includes(networkKey) && tokenInfo && tokenInfo.symbol === 'BIT') {
     transfer = api.tx.currencies.transfer(to, tokenInfo.specialOption, value);
+  } else if (['statemint', 'statemine'].includes(networkKey) && tokenInfo && !tokenInfo.isMainToken) {
+    transfer = api.tx.assets.transfer(tokenInfo.assetIndex, to, value);
   } else if (isTxBalancesSupported && (!tokenInfo || tokenInfo.isMainToken)) {
     if (transferAll) {
       transfer = api.tx.balances.transferAll(to, false);

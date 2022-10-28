@@ -52,18 +52,15 @@ export async function getParaBondingBasics (networkKey: string, dotSamaApi: ApiP
     unvestedAllocation = parseRawNumber(rawUnvestedAllocation);
   }
 
-  const rawTotalStake = _totalStake.toHuman() as string;
-  const totalStake = parseRawNumber(rawTotalStake);
-
-  const rawTotalIssuance = _totalIssuance.toHuman() as string;
-  let totalIssuance = parseRawNumber(rawTotalIssuance);
+  const totalStake = new BN(_totalStake.toString());
+  const totalIssuance = new BN(_totalIssuance.toString());
 
   if (unvestedAllocation) {
-    totalIssuance += unvestedAllocation; // for Turing network, read more at https://hackmd.io/@sbAqOuXkRvyiZPOB3Ryn6Q/Sypr3ZJh5
+    totalIssuance.addn(unvestedAllocation); // for Turing network, read more at https://hackmd.io/@sbAqOuXkRvyiZPOB3Ryn6Q/Sypr3ZJh5
   }
 
   const inflationConfig = _inflation.toHuman() as unknown as InflationConfig;
-  const currentInflation = getParaCurrentInflation(totalStake, inflationConfig);
+  const currentInflation = getParaCurrentInflation(parseRawNumber(totalStake.toString()), inflationConfig);
   const rewardDistribution = PARACHAIN_INFLATION_DISTRIBUTION[networkKey] ? PARACHAIN_INFLATION_DISTRIBUTION[networkKey].reward : PARACHAIN_INFLATION_DISTRIBUTION.default.reward;
   const rewardPool = currentInflation * rewardDistribution;
 

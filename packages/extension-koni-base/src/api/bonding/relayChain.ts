@@ -85,7 +85,7 @@ export async function getRelayValidatorsInfo (networkKey: string, dotSamaApi: Ap
   const rawMinBond = _minBond.toHuman() as string;
   const minBond = parseFloat(rawMinBond.replaceAll(',', ''));
 
-  const totalStakeMap: Record<string, number> = {};
+  const totalStakeMap: Record<string, BN> = {};
 
   for (const item of eraStakers) {
     // eslint-disable-next-line @typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-member-access
@@ -185,13 +185,15 @@ export async function getRelayValidatorsInfo (networkKey: string, dotSamaApi: Ap
 
   const inflation = calculateInflation(bnTotalEraStake, bnTotalIssuance, numAuctions, networkKey);
   const stakedReturn = calculateChainStakedReturn(inflation, bnTotalEraStake, bnTotalIssuance, networkKey);
-  const bnAvgStake = bnTotalEraStake.divn(result.length);
+  const bnDecimals = new BN((10 ** decimals).toString());
+  const bnAvgStake = bnTotalEraStake.divn(result.length).div(bnDecimals);
 
   for (const validator of result) {
     const commission = extraInfoMap[validator.address].commission;
 
     const bnStakedReturn = new BN(stakedReturn);
-    const bnValidatorStake = new BN(totalStakeMap[validator.address].toString()); // this is usually large, pass in string to avoid overflow
+    const parsedValidatorStake = totalStakeMap[validator.address] / (10 ** decimals);
+    const bnValidatorStake = new BN(parsedValidatorStake.toString()); // this is usually large, pass in string to avoid overflow
 
     validator.expectedReturn = calculateValidatorStakedReturn(bnStakedReturn, bnValidatorStake, bnAvgStake, getCommission(commission));
     validator.commission = parseFloat(commission.split('%')[0]);

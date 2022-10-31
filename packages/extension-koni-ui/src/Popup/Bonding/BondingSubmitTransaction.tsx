@@ -18,7 +18,7 @@ import useGetNetworkJson from '@subwallet/extension-koni-ui/hooks/screen/home/us
 import useToast from '@subwallet/extension-koni-ui/hooks/useToast';
 import { getBondingTxInfo } from '@subwallet/extension-koni-ui/messaging';
 import Header from '@subwallet/extension-koni-ui/partials/Header';
-import { BOND_DURATION_OPTIONS, getStakeUnit, parseBalanceString } from '@subwallet/extension-koni-ui/Popup/Bonding/utils';
+import { BOND_DURATION_OPTIONS, CHAIN_TYPE_MAP, getStakeUnit, parseBalanceString } from '@subwallet/extension-koni-ui/Popup/Bonding/utils';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { toShort } from '@subwallet/extension-koni-ui/util';
@@ -396,6 +396,16 @@ function BondingSubmitTransaction ({ className }: Props): React.ReactElement<Pro
     }
   }, [getMinBondTooltipText, hasOwnStake, isCurrentlyBonded, isMaxCommission, isOversubscribed, isSufficientFund, networkJson.nativeToken, selectedNetwork, unit, validatorInfo.commission, validatorInfo.minBond, validatorInfo.nominatorCount, validatorInfo.ownStake, validatorInfo.totalStake]);
 
+  const getSubHeaderTitle = useCallback(() => {
+    if (CHAIN_TYPE_MAP.astar.includes(bondingParams.selectedNetwork as string)) {
+      return 'Selected dApp';
+    } else if (CHAIN_TYPE_MAP.para.includes(bondingParams.selectedNetwork as string)) {
+      return 'Selected Collator';
+    }
+
+    return 'Selected Validator';
+  }, [bondingParams.selectedNetwork]);
+
   return (
     <div className={className}>
       <Header
@@ -410,7 +420,7 @@ function BondingSubmitTransaction ({ className }: Props): React.ReactElement<Pro
         className={'bonding-submit-container'}
         style={{ height: `${_height}px` }}
       >
-        <div className={'selected-validator'}>Selected Validator</div>
+        <div className={'selected-validator'}>{getSubHeaderTitle()}</div>
 
         <div className={'selected-validator-view'}>
           <div

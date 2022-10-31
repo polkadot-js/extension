@@ -1,7 +1,7 @@
-    1050	Nam Phạm                      	update staking return calculation for A0 testnet
-     625	AnhMTV                        	
+    1065	Nam Phạm                      	fix overflow error for validator info
+     633	AnhMTV                        	
      465	Jaco                          	0.42.5 (#969)
-     255	S2kael                        	[Issue-717] [QR] [EVM] fix wrong transaction gas
+     256	S2kael                        	[Issue-759] fix error when chain not selected
      151	lw-cdm                        	Update logo for Moonbeans
      142	quangdo                       	update some label and variable (original to origin)
      104	khainh                        	predefine metadata for Polkadot & Kusama chains

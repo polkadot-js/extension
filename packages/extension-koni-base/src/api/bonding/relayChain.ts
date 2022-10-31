@@ -185,12 +185,15 @@ export async function getRelayValidatorsInfo (networkKey: string, dotSamaApi: Ap
 
   const inflation = calculateInflation(bnTotalEraStake, bnTotalIssuance, numAuctions, networkKey);
   const stakedReturn = calculateChainStakedReturn(inflation, bnTotalEraStake, bnTotalIssuance, networkKey);
-  const avgStake = bnTotalEraStake.divn(result.length).toNumber();
+  const bnAvgStake = bnTotalEraStake.divn(result.length);
 
   for (const validator of result) {
     const commission = extraInfoMap[validator.address].commission;
 
-    validator.expectedReturn = calculateValidatorStakedReturn(stakedReturn, totalStakeMap[validator.address], avgStake, getCommission(commission));
+    const bnStakedReturn = new BN(stakedReturn);
+    const bnValidatorStake = new BN(totalStakeMap[validator.address].toString()); // this is usually large, pass in string to avoid overflow
+
+    validator.expectedReturn = calculateValidatorStakedReturn(bnStakedReturn, bnValidatorStake, bnAvgStake, getCommission(commission));
     validator.commission = parseFloat(commission.split('%')[0]);
     validator.blocked = extraInfoMap[validator.address].blocked;
     validator.identity = extraInfoMap[validator.address].identity;

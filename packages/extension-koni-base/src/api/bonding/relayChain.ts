@@ -85,7 +85,8 @@ export async function getRelayValidatorsInfo (networkKey: string, dotSamaApi: Ap
   const rawMinBond = _minBond.toHuman() as string;
   const minBond = parseFloat(rawMinBond.replaceAll(',', ''));
 
-  const totalStakeMap: Record<string, number> = {};
+  const totalStakeMap: Record<string, BN> = {};
+  const bnDecimals = new BN((10 ** decimals).toString());
 
   for (const item of eraStakers) {
     // eslint-disable-next-line @typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-member-access
@@ -97,12 +98,11 @@ export async function getRelayValidatorsInfo (networkKey: string, dotSamaApi: Ap
     const rawTotalStake = rawValidatorStat.total as string;
     const rawOwnStake = rawValidatorStat.own as string;
 
-    const parsedTotalStake = parseFloat(rawTotalStake.replaceAll(',', ''));
+    const bnTotalStake = new BN(rawTotalStake.replaceAll(',', ''));
+    const bnOwnStake = new BN(rawOwnStake.replaceAll(',', ''));
+    const otherStake = bnTotalStake.sub(bnOwnStake);
 
-    totalStakeMap[validatorAddress] = parsedTotalStake;
-
-    const parsedOwnStake = parseFloat(rawOwnStake.replaceAll(',', ''));
-    const otherStake = parsedTotalStake - parsedOwnStake;
+    totalStakeMap[validatorAddress] = bnTotalStake;
 
     let nominatorCount = 0;
 
@@ -116,9 +116,9 @@ export async function getRelayValidatorsInfo (networkKey: string, dotSamaApi: Ap
 
     result.push({
       address: validatorAddress,
-      totalStake: parsedTotalStake / 10 ** decimals,
-      ownStake: parsedOwnStake / 10 ** decimals,
-      otherStake: otherStake / 10 ** decimals,
+      totalStake: bnTotalStake.div(bnDecimals).toNumber(),
+      ownStake: bnOwnStake.div(bnDecimals).toNumber(),
+      otherStake: otherStake.div(bnDecimals).toNumber(),
       nominatorCount,
       // to be added later
       commission: 0,
@@ -185,12 +185,15 @@ export async function getRelayValidatorsInfo (networkKey: string, dotSamaApi: Ap
 
   const inflation = calculateInflation(bnTotalEraStake, bnTotalIssuance, numAuctions, networkKey);
   const stakedReturn = calculateChainStakedReturn(inflation, bnTotalEraStake, bnTotalIssuance, networkKey);
-  const avgStake = bnTotalEraStake.divn(result.length).toNumber();
+  const bnAvgStake = bnTotalEraStake.divn(result.length).div(bnDecimals);
 
   for (const validator of result) {
     const commission = extraInfoMap[validator.address].commission;
 
-    validator.expectedReturn = calculateValidatorStakedReturn(stakedReturn, totalStakeMap[validator.address], avgStake, getCommission(commission));
+    const bnStakedReturn = stakedReturn >= Infinity ? BN_ZERO : new BN(stakedReturn); // stakedReturn might be Infinity due to testnet params
+    const bnValidatorStake = totalStakeMap[validator.address].div(bnDecimals);
+
+    validator.expectedReturn = calculateValidatorStakedReturn(bnStakedReturn, bnValidatorStake, bnAvgStake, getCommission(commission));
     validator.commission = parseFloat(commission.split('%')[0]);
     validator.blocked = extraInfoMap[validator.address].blocked;
     validator.identity = extraInfoMap[validator.address].identity;

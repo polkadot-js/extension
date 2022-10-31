@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { APIItemState, ApiProps, NetworkJson, StakingItem } from '@subwallet/extension-base/background/KoniTypes';
+import { CHAIN_TYPES } from '@subwallet/extension-koni-base/api/bonding';
 import { PREDEFINED_NETWORKS } from '@subwallet/extension-koni-base/api/predefinedNetworks';
 import { IGNORE_GET_SUBSTRATE_FEATURES_LIST } from '@subwallet/extension-koni-base/constants';
 import { categoryAddresses, toUnit } from '@subwallet/extension-koni-base/utils';
@@ -60,11 +61,11 @@ export function stakingOnChainApi (addresses: string[], dotSamaAPIMap: Record<st
     const parentApi = await apiPromise.isReady;
     const useAddresses = apiPromise.isEthereum ? evmAddresses : substrateAddresses;
 
-    if (['astar', 'shiden', 'shibuya'].includes(chain)) {
+    if (CHAIN_TYPES.astar.includes(chain)) {
       return getAstarStakingOnChain(parentApi, useAddresses, networks, chain, callback);
-    } else if (['darwinia', 'crab', 'pangolin'].includes(chain)) {
+    } else if (CHAIN_TYPES.darwinia.includes(chain)) {
       return getDarwiniaStakingOnChain(parentApi, useAddresses, networks, chain, callback);
-    } else if (['moonbeam', 'moonriver', 'moonbase', 'turing', 'turingStaging', 'bifrost', 'bifrost_testnet'].includes(chain)) {
+    } else if (CHAIN_TYPES.para.includes(chain)) {
       return getParaStakingOnChain(parentApi, useAddresses, networks, chain, callback);
     }
 

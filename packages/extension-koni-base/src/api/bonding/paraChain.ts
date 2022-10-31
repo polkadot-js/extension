@@ -183,11 +183,11 @@ export async function getParaCollatorsInfo (networkKey: string, dotSamaApi: ApiP
   await Promise.all(allValidators.map(async (validator) => {
     const [_info, _identity] = await Promise.all([
       apiProps.api.query.parachainStaking.candidateInfo(validator.address),
-      apiProps.api.query.identity.identityOf(validator.address)
+      apiProps.api.query?.identity?.identityOf(validator.address) // some chains might not have identity pallet
     ]);
 
     const rawInfo = _info.toHuman() as Record<string, any>;
-    const rawIdentity = _identity.toHuman() as Record<string, any> | null;
+    const rawIdentity = _identity ? _identity.toHuman() as Record<string, any> | null : null;
 
     const bond = parseRawNumber(rawInfo?.bond as string);
     const delegationCount = parseRawNumber(rawInfo?.delegationCount as string);

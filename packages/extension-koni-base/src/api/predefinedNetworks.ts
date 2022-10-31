@@ -1934,6 +1934,23 @@ export const PREDEFINED_NETWORKS: Record<string, NetworkJson> = {
     decimals: 18,
     supportBonding: true,
     getStakingOnChain: true
+  },
+  calamari_test: {
+    key: 'calamari_test',
+    chain: 'Calamari Staging',
+    genesisHash: '0x2ae061f08422b6503b8aa5f401242a209999669c3b8945f814dc096fb1a977bd',
+    ss58Format: 78,
+    providers: {
+      calamari_test: 'wss://c1.calamari.seabird.systems'
+    },
+    active: false,
+    currentProviderMode: 'ws',
+    currentProvider: 'calamari_test',
+    nativeToken: 'KMA',
+    groups: ['TEST_NET'],
+    decimals: 12,
+    supportBonding: true,
+    getStakingOnChain: true
   }
 };
 

@@ -14,7 +14,7 @@ function acalaParser (nftItem: NftItem) {
   return {
     collectionId,
     itemId,
-    networkKey: SUPPORTED_TRANSFER_CHAIN_NAME.acala
+    networkKey: nftItem.chain
   };
 }
 
@@ -28,7 +28,7 @@ function rmrkParser (nftItem: NftItem) {
 
   return {
     remark,
-    networkKey: SUPPORTED_TRANSFER_CHAIN_NAME.kusama
+    networkKey: nftItem.chain
   };
 }
 
@@ -39,7 +39,7 @@ function uniqueParser (nftItem: NftItem) {
   return {
     collectionId,
     itemId,
-    networkKey: SUPPORTED_TRANSFER_CHAIN_NAME.unique_network
+    networkKey: nftItem.chain
   };
 }
 
@@ -50,7 +50,7 @@ function statemineParser (nftItem: NftItem) {
   return {
     collectionId,
     itemId,
-    networkKey: SUPPORTED_TRANSFER_CHAIN_NAME.statemine
+    networkKey: nftItem.chain
   };
 }
 

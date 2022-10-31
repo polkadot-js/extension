@@ -2095,6 +2095,8 @@ export default class KoniExtension extends Extension {
     const isPSP34 = params.isPsp34 as boolean | undefined;
     const updateState = createSubscription<'pri(substrateNft.submitTransaction)'>(id, port);
     const networkKey = params.networkKey as string;
+
+    console.log('networkKey', networkKey);
     const extrinsic = !isPSP34
       ? getNftTransferExtrinsic(networkKey, state.getDotSamaApi(networkKey), senderAddress, recipientAddress, params)
       : await getPSP34TransferExtrinsic(networkKey, state.getDotSamaApi(networkKey), senderAddress, recipientAddress, params);

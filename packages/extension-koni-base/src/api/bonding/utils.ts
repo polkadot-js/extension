@@ -3,7 +3,7 @@
 
 import { parseRawNumber } from '@subwallet/extension-koni-base/utils';
 
-import { BN, BN_BILLION, BN_MILLION, BN_THOUSAND } from '@polkadot/util';
+import { BN, BN_BILLION, BN_HUNDRED, BN_MILLION, BN_THOUSAND } from '@polkadot/util';
 
 export const REVOKE_ACTION = 'revoke';
 export const BOND_LESS_ACTION = 'bondLess';
@@ -167,8 +167,9 @@ export function calculateChainStakedReturn (inflation: number, totalEraStake: BN
   return stakedReturn;
 }
 
-export function calculateValidatorStakedReturn (chainStakedReturn: number, totalValidatorStake: number, avgStake: number, commission: number) {
-  const adjusted = (avgStake * 100 * chainStakedReturn) / totalValidatorStake;
+export function calculateValidatorStakedReturn (chainStakedReturn: BN, totalValidatorStake: BN, avgStake: BN, commission: number) {
+  const bnAdjusted = avgStake.mul(BN_HUNDRED).mul(chainStakedReturn).div(totalValidatorStake);
+  const adjusted = bnAdjusted.toNumber();
 
   const stakedReturn = (adjusted > Number.MAX_SAFE_INTEGER ? Number.MAX_SAFE_INTEGER : adjusted) / 100;
 

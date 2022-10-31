@@ -1231,6 +1231,15 @@ export const PREDEFINE_TOKEN_DATA_MAP: Record<string, Record<string, TokenInfo>>
       specialOption: { MiningResource: 0 }
     }
   },
+  bitcountry: {
+    BIT: {
+      isMainToken: false,
+      symbol: 'BIT',
+      decimals: 18,
+      name: 'BIT',
+      specialOption: { MiningResource: 0 }
+    }
+  },
   statemint: {
     USDt: {
       isMainToken: false,

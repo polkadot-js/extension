@@ -190,7 +190,7 @@ export async function getRelayValidatorsInfo (networkKey: string, dotSamaApi: Ap
   for (const validator of result) {
     const commission = extraInfoMap[validator.address].commission;
 
-    const bnStakedReturn = new BN(stakedReturn);
+    const bnStakedReturn = stakedReturn >= Infinity ? BN_ZERO : new BN(stakedReturn); // stakedReturn might be Infinity due to testnet params
     const bnValidatorStake = totalStakeMap[validator.address].div(bnDecimals);
 
     validator.expectedReturn = calculateValidatorStakedReturn(bnStakedReturn, bnValidatorStake, bnAvgStake, getCommission(commission));

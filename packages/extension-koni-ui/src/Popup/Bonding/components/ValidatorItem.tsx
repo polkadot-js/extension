@@ -81,6 +81,12 @@ function ValidatorItem ({ bondedValidators, className, isBondedBefore, maxNomina
       return;
     }
 
+    if (isMaxCommission || isOversubscribed) {
+      show('This validator is not looking for more nominations');
+
+      return;
+    }
+
     if (bondedValidators.length >= maxNominations && !bondedValidators.includes(validatorInfo.address)) {
       show('Please choose among the nominating validators only');
 
@@ -89,7 +95,7 @@ function ValidatorItem ({ bondedValidators, className, isBondedBefore, maxNomina
 
     store.dispatch({ type: 'bondingParams/update', payload: { selectedAccount: account?.address as string, selectedNetwork: networkKey, selectedValidator: validatorInfo, maxNominatorPerValidator, isBondedBefore, bondedValidators } as BondingParams });
     navigate('/account/bonding-auth');
-  }, [account?.address, bondedValidators, isBondedBefore, isCurrentlyBonded, isSufficientFund, maxNominations, maxNominatorPerValidator, navigate, networkKey, show, validatorInfo]);
+  }, [account?.address, bondedValidators, isBondedBefore, isCurrentlyBonded, isMaxCommission, isOversubscribed, isSufficientFund, maxNominations, maxNominatorPerValidator, navigate, networkKey, show, validatorInfo]);
 
   const handleGetValidatorDetail = useCallback(() => {
     if (['astar', 'shiden', 'shibuya'].includes(networkKey)) {

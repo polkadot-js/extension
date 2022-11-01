@@ -10,8 +10,8 @@ import BigN from 'bignumber.js';
 
 import { TypeRegistry } from '@polkadot/types';
 import { Call } from '@polkadot/types/interfaces';
-import { compactFromU8a, hexStripPrefix, hexToU8a, u8aToHex } from '@polkadot/util';
-import { blake2AsHex, encodeAddress } from '@polkadot/util-crypto';
+import { hexStripPrefix, hexToU8a, u8aToHex } from '@polkadot/util';
+import { encodeAddress } from '@polkadot/util-crypto';
 
 import strings from '../constants/strings';
 
@@ -205,15 +205,18 @@ export const constructDataFromBytes = (bytes: Uint8Array, multipartComplete = fa
               data.action = 'signTransaction';
               data.oversized = isOversized;
               data.isHash = isOversized;
+
+              // Need to review, new version cannot use blake2AsHex to encode data as dataToSign
               // eslint-disable-next-line no-case-declarations
-              const [offset] = compactFromU8a(rawPayload);
+              // const [offset] = compactFromU8a(rawPayload);
               // eslint-disable-next-line no-case-declarations
-              const payload: Uint8Array = rawPayload.subarray(offset);
+              // const payload = rawPayload.subarray(offset);
+              // data.data.data = isOversized
+              //   ? blake2AsHex(u8aToHex(payload, -1, false))
+              //   : rawPayload;
 
               data.data.rawPayload = rawPayload;
-              data.data.data = isOversized
-                ? blake2AsHex(u8aToHex(payload, -1, false))
-                : rawPayload;
+              data.data.data = rawPayload;
               // encode to the prefix;
 
               break;

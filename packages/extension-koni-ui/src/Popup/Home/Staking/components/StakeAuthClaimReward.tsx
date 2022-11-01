@@ -466,7 +466,7 @@ function StakeAuthClaimReward ({ address, className, hideModal, networkKey }: Pr
         </div>
         {
           !showResult
-            ? <div>
+            ? <>
               {
                 isTxReady
                   ? <div className={'claim-auth-container'}>
@@ -474,7 +474,7 @@ function StakeAuthClaimReward ({ address, className, hideModal, networkKey }: Pr
                   </div>
                   : <Spinner className={'container-spinner'} />
               }
-            </div>
+            </>
             : <StakeClaimRewardResult
               backToHome={hideModal}
               extrinsicHash={extrinsicHash}

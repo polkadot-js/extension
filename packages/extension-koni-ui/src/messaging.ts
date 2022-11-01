@@ -1,7 +1,7 @@
 // Copyright 2019-2022 @polkadot/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import type { AccountJson, AllowedPath, AuthorizeRequest, MessageTypes, MessageTypesWithNoSubscriptions, MessageTypesWithNullRequest, MessageTypesWithSubscriptions, MetadataRequest, RequestTypes, ResponseAuthorizeList, ResponseDeriveValidate, ResponseJsonGetAccountInfo, ResponseParseTransactionSubstrate, ResponseSigningIsLocked, ResponseTypes, SeedLengths, SigningRequest, SubscriptionMessageTypes } from '@subwallet/extension-base/background/types';
+import type { AccountJson, AllowedPath, AuthorizeRequest, MessageTypes, MessageTypesWithNoSubscriptions, MessageTypesWithNullRequest, MessageTypesWithSubscriptions, MetadataRequest, RequestQrSignSubstrate, RequestTypes, ResponseAuthorizeList, ResponseDeriveValidate, ResponseJsonGetAccountInfo, ResponseParseTransactionSubstrate, ResponseSigningIsLocked, ResponseTypes, SeedLengths, SigningRequest, SubscriptionMessageTypes } from '@subwallet/extension-base/background/types';
 import type { Message } from '@subwallet/extension-base/types';
 import type { Chain } from '@subwallet/extension-chains/types';
 import type { KeyringPair$Json } from '@polkadot/keyring/types';
@@ -148,8 +148,8 @@ export async function qrIsLocked (address: string): Promise<ResponseQRIsLocked> 
   return sendMessage('pri(qr.isLocked)', { address });
 }
 
-export async function qrSignSubstrate (address: string, message: string, savePass: boolean, password?: string): Promise<ResponseQrSignSubstrate> {
-  return sendMessage('pri(qr.sign.substrate)', { address, password, message, savePass });
+export async function qrSignSubstrate (request: RequestQrSignSubstrate): Promise<ResponseQrSignSubstrate> {
+  return sendMessage('pri(qr.sign.substrate)', request);
 }
 
 export async function qrSignEvm (address: string, password: string, message: string, type: 'message' | 'transaction', chainId?: number): Promise<ResponseQrSignEVM> {

@@ -3,7 +3,6 @@
 
 import { assetFromToken } from '@equilab/api';
 import { ApiProps, CustomTokenType, ResponseTransfer, SupportTransferResponse, TokenInfo, TransferErrorCode, TransferStep } from '@subwallet/extension-base/background/KoniTypes';
-import KeyringSigner from '@subwallet/extension-base/signers/substrates/KeyringSigner';
 import { getTokenInfo } from '@subwallet/extension-koni-base/api/dotsama/registry';
 import { getPSP22ContractPromise } from '@subwallet/extension-koni-base/api/tokens/wasm';
 
@@ -367,7 +366,7 @@ export async function doSignAndSend (
     _updateResponseTxResult(networkKey, tokenInfo, response, records, transferAmount);
   }
 
-  await transfer.signAsync(fromKeypair.address, { nonce: -1, signer: new KeyringSigner({ keyPair: fromKeypair, registry: api.registry }) });
+  await transfer.signAsync(fromKeypair, { nonce: -1 });
 
   await transfer.send(({ events = [], status }) => {
     console.log('Transaction status:', status.type, status.hash.toHex());

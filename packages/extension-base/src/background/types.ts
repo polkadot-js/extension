@@ -362,11 +362,15 @@ export interface RequestQRIsLocked{
   address: string;
 }
 
+export type SignerDataType = 'transaction' | 'message'
+
 export interface RequestQrSignSubstrate {
   address: string;
-  message: string;
+  data: string;
   savePass: boolean;
   password?: string;
+  type: SignerDataType;
+  networkKey: string;
 }
 
 // Responses

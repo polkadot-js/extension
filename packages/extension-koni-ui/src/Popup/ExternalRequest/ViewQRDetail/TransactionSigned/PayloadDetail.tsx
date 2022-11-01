@@ -113,11 +113,11 @@ const PayloadDetail = (props: Props) => {
           Detail
         </div>
         {
-          method.map(({ args, method }) => {
+          method.map(({ args, method }, index) => {
             return (
               <div
                 className={CN('group-body')}
-                key={method}
+                key={`${method}_${index}`}
               >
                 <div className='info-container'>
                   <div className={CN('info-title')}>

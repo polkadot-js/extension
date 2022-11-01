@@ -27,6 +27,8 @@ export default class KeyringSigner implements Signer {
       // limit size of the transaction
       const isQrHashed = (payload.method.length > 5000);
       const wrapper = this.#registry.createType('ExtrinsicPayload', payload);
+
+      // Data will be sent via QR
       const qrPayload = isQrHashed
         ? blake2AsU8a(wrapper.toU8a(true))
         : wrapper.toU8a();

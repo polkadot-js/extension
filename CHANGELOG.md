@@ -1,5 +1,19 @@
 # CHANGELOG
 
+## 0.6.8 (Koni)
+Build date: Oct 31, 2022.
+
+Update:
+- Support sending PSP tokens (#742)
+- Support transfer and XCM for Statemine/Statemint (#684)
+- Keystone - adding brand name (#752)
+
+Bug fixes:
+- Update the "expected return" to staking for some chain (#719)
+- Infinite load when stake/unstake in the following cases (#724)
+- Issue sending Bit.Country NFT and displaying BIT token (#747)
+- Unable to send NFT with QR Account in case of network not selected (#759)
+
 ## 0.6.7 (Koni)
 Build date: Oct 22, 2022.
 

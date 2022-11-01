@@ -445,6 +445,20 @@ const LogosMap: Record<string, string> = {
   // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
   wsteth: require('./156.wsteth.jpg'),
   // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+  xrp: require('./162.xrp.png'),
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+  vusdt: require('./161.vusdt.png'),
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+  vbusd: require('./160.vbusd.png'),
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+  cake: require('./159.pancake.png'),
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+  wbnb: require('./157.BNB.png'),
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+  btcb: require('./64.BTC.png'),
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+  'bsc-usd': require('./157.busdt.png'),
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
   default: require('./73.Default.png')
 };
 

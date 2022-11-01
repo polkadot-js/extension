@@ -122,7 +122,9 @@ function BondingSubmitTransaction ({ className }: Props): React.ReactElement<Pro
           }
         }
       } else {
-        if (amount >= validatorInfo.minBond && amount <= parsedFreeBalance) {
+        const minBond = validatorInfo.minBond > 0 ? validatorInfo.minBond : 0.01;
+
+        if (amount >= minBond && amount <= parsedFreeBalance) {
           setIsReadySubmit(true);
         } else {
           setIsReadySubmit(false);
@@ -130,7 +132,11 @@ function BondingSubmitTransaction ({ className }: Props): React.ReactElement<Pro
           if (amount > parsedFreeBalance) {
             show('You do not have enough balance');
           } else if (amount >= 0) {
-            show(`You must stake at least ${validatorInfo.minBond} ${networkJson.nativeToken as string}`);
+            if (validatorInfo.minBond > 0) {
+              show(`You must stake at least ${validatorInfo.minBond} ${networkJson.nativeToken as string}`);
+            } else {
+              show('The staking amount cannot be 0');
+            }
           }
         }
       }

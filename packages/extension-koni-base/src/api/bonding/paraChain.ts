@@ -189,7 +189,9 @@ export async function getParaCollatorsInfo (networkKey: string, dotSamaApi: ApiP
     const rawInfo = _info.toHuman() as Record<string, any>;
     const rawIdentity = _identity ? _identity.toHuman() as Record<string, any> | null : null;
 
-    const bond = parseRawNumber(rawInfo?.bond as string);
+    const bnDecimals = new BN((10 ** decimals).toString());
+    const rawBond = rawInfo?.bond as string;
+    const bond = new BN(rawBond.replaceAll(',', ''));
     const delegationCount = parseRawNumber(rawInfo?.delegationCount as string);
     const minDelegation = parseRawNumber(rawInfo?.lowestTopDelegationAmount as string);
     const active = rawInfo?.status === 'Active';
@@ -231,7 +233,7 @@ export async function getParaCollatorsInfo (networkKey: string, dotSamaApi: ApiP
     extraInfoMap[validator.address] = {
       identity,
       isVerified: isReasonable,
-      bond: bond / 10 ** decimals,
+      bond: bond.div(bnDecimals).toNumber(),
       minDelegation: Math.max(minDelegation, chainMinDelegation) / 10 ** decimals,
       delegationCount,
       active

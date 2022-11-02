@@ -6,7 +6,7 @@ import { AccountContext } from '@subwallet/extension-koni-ui/contexts';
 import { findAccountByAddress } from '@subwallet/extension-koni-ui/util/account';
 import { useContext, useMemo } from 'react';
 
-const useGetAccountByAddress = (address: string): AccountJson | null => {
+const useGetAccountByAddress = (address?: string): AccountJson | null => {
   const { accounts } = useContext(AccountContext);
 
   return useMemo((): AccountJson | null => {

@@ -16,8 +16,8 @@ import { SIGN_MODE } from '@subwallet/extension-koni-ui/constants/signing';
 import { ExternalRequestContext } from '@subwallet/extension-koni-ui/contexts/ExternalRequestContext';
 import { QrContext, QrContextState, QrStep } from '@subwallet/extension-koni-ui/contexts/QrContext';
 import useGetAccountByAddress from '@subwallet/extension-koni-ui/hooks/useGetAccountByAddress';
+import { useGetSignMode } from '@subwallet/extension-koni-ui/hooks/useGetSignMode';
 import { useRejectExternalRequest } from '@subwallet/extension-koni-ui/hooks/useRejectExternalRequest';
-import { useSignMode } from '@subwallet/extension-koni-ui/hooks/useSignMode';
 import useTranslation from '@subwallet/extension-koni-ui/hooks/useTranslation';
 import { makeCrossChainTransfer, makeCrossChainTransferLedger, makeCrossChainTransferQr } from '@subwallet/extension-koni-ui/messaging';
 import Dropdown from '@subwallet/extension-koni-ui/Popup/XcmTransfer/XcmDropdown/Dropdown';
@@ -68,7 +68,7 @@ function AuthTransaction ({ balanceFormat,
   const [errorArr, setErrorArr] = useState<string[]>([]);
 
   const account = useGetAccountByAddress(requestPayload.from);
-  const signMode = useSignMode(account);
+  const signMode = useGetSignMode(account);
 
   const _onCancel = useCallback(async () => {
     await handlerReject(externalId);

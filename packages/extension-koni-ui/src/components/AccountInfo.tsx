@@ -153,7 +153,7 @@ function AccountInfo ({ accountSplitPart = 'both', address, addressHalfLength = 
           <FontAwesomeIcon
             className='externalIcon'
             icon={faEye}
-            title={t('read only account')}
+            title={t('readonly account')}
           />
         );
       } else {

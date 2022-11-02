@@ -16,8 +16,8 @@ import { SIGN_MODE } from '@subwallet/extension-koni-ui/constants/signing';
 import { ExternalRequestContext } from '@subwallet/extension-koni-ui/contexts/ExternalRequestContext';
 import { QrContext, QrContextState, QrStep } from '@subwallet/extension-koni-ui/contexts/QrContext';
 import useGetAccountByAddress from '@subwallet/extension-koni-ui/hooks/useGetAccountByAddress';
+import { useGetSignMode } from '@subwallet/extension-koni-ui/hooks/useGetSignMode';
 import { useRejectExternalRequest } from '@subwallet/extension-koni-ui/hooks/useRejectExternalRequest';
-import { useSignMode } from '@subwallet/extension-koni-ui/hooks/useSignMode';
 import useTranslation from '@subwallet/extension-koni-ui/hooks/useTranslation';
 import { makeTransfer, makeTransferLedger, makeTransferQr } from '@subwallet/extension-koni-ui/messaging';
 import { ThemeProps, TransferResultType } from '@subwallet/extension-koni-ui/types';
@@ -90,7 +90,7 @@ function AuthTransaction ({ className, isDonation, feeInfo: [fee, feeDecimals, f
   const genesisHash = networkMap[requestPayload.networkKey].genesisHash;
 
   const account = useGetAccountByAddress(requestPayload.from);
-  const signMode = useSignMode(account);
+  const signMode = useGetSignMode(account);
 
   const _onCancel = useCallback(async () => {
     if (externalId) {

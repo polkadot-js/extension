@@ -16,8 +16,8 @@ import { SIGN_MODE } from '@subwallet/extension-koni-ui/constants/signing';
 import { ExternalRequestContext } from '@subwallet/extension-koni-ui/contexts/ExternalRequestContext';
 import { QrContext, QrContextState, QrStep } from '@subwallet/extension-koni-ui/contexts/QrContext';
 import useGetNetworkJson from '@subwallet/extension-koni-ui/hooks/screen/home/useGetNetworkJson';
+import { useGetSignMode } from '@subwallet/extension-koni-ui/hooks/useGetSignMode';
 import { useRejectExternalRequest } from '@subwallet/extension-koni-ui/hooks/useRejectExternalRequest';
-import { useSignMode } from '@subwallet/extension-koni-ui/hooks/useSignMode';
 import useToast from '@subwallet/extension-koni-ui/hooks/useToast';
 import useTranslation from '@subwallet/extension-koni-ui/hooks/useTranslation';
 import { makeUnBondingLedger, makeUnBondingQr, submitUnbonding } from '@subwallet/extension-koni-ui/messaging';
@@ -60,7 +60,7 @@ function UnbondingAuthTransaction ({ amount, balanceError, className, fee, handl
   const [passwordError, setPasswordError] = useState<string | null>('');
   const [errorArr, setErrorArr] = useState<string[]>([]);
 
-  const signMode = useSignMode(account);
+  const signMode = useGetSignMode(account);
 
   const _onChangePass = useCallback((value: string) => {
     setPassword(value);

@@ -17,8 +17,8 @@ import { ExternalRequestContext } from '@subwallet/extension-koni-ui/contexts/Ex
 import { QrContext, QrContextState, QrStep } from '@subwallet/extension-koni-ui/contexts/QrContext';
 import useGetNetworkJson from '@subwallet/extension-koni-ui/hooks/screen/home/useGetNetworkJson';
 import useGetAccountByAddress from '@subwallet/extension-koni-ui/hooks/useGetAccountByAddress';
+import { useGetSignMode } from '@subwallet/extension-koni-ui/hooks/useGetSignMode';
 import { useRejectExternalRequest } from '@subwallet/extension-koni-ui/hooks/useRejectExternalRequest';
-import { useSignMode } from '@subwallet/extension-koni-ui/hooks/useSignMode';
 import useToast from '@subwallet/extension-koni-ui/hooks/useToast';
 import useTranslation from '@subwallet/extension-koni-ui/hooks/useTranslation';
 import { getStakeWithdrawalTxInfo, stakeWithdrawLedger, stakeWithdrawQr, submitStakeWithdrawal } from '@subwallet/extension-koni-ui/messaging';
@@ -64,7 +64,7 @@ function StakeAuthWithdrawal ({ address, amount, className, hideModal, networkKe
   const [errorArr, setErrorArr] = useState<string[]>([]);
 
   const account = useGetAccountByAddress(address);
-  const signMode = useSignMode(account);
+  const signMode = useGetSignMode(account);
 
   useEffect(() => {
     getStakeWithdrawalTxInfo({

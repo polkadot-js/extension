@@ -1,9 +1,9 @@
 // Copyright 2019-2022 @subwallet/extension-koni authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { CustomTokenType } from '@subwallet/extension-base/background/KoniTypes';
+import { CustomTokenType, NftItem } from '@subwallet/extension-base/background/KoniTypes';
 import { evmNftGetTransaction, substrateNftGetTransaction, wasmNftGetTransaction } from '@subwallet/extension-koni-ui/messaging';
-import { _NftItem, SUPPORTED_TRANSFER_CHAIN_NAME, TransferResponse } from '@subwallet/extension-koni-ui/Popup/Home/Nfts/utils';
+import { SUPPORTED_TRANSFER_CHAIN_NAME, TransferResponse } from '@subwallet/extension-koni-ui/Popup/Home/Nfts/utils';
 
 async function substrateTransferHandler (networkKey: string, senderAddress: string, recipientAddress: string, params: Record<string, any>) {
   try {
@@ -72,7 +72,7 @@ async function psp34TransferHandler (networkKey: string, senderAddress: string, 
   }
 }
 
-export default async function transferHandler (networkKey: string, senderAddress: string, recipientAddress: string, params: Record<string, any>, nftItem: _NftItem): Promise<TransferResponse | null> {
+export default async function transferHandler (networkKey: string, senderAddress: string, recipientAddress: string, params: Record<string, any>, nftItem: NftItem): Promise<TransferResponse | null> {
   if (nftItem.type === CustomTokenType.erc721) {
     return await web3TransferHandler(networkKey, senderAddress, recipientAddress, params);
   } else if (nftItem.type === CustomTokenType.psp34) {

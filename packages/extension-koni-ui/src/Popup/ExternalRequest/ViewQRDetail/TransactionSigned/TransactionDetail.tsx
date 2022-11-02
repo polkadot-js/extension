@@ -1,8 +1,7 @@
 // Copyright 2019-2022 @polkadot/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { EVMTransactionArg, NetworkJson, ParseEVMTransactionData, ResponseParseTransactionEVM } from '@subwallet/extension-base/background/KoniTypes';
-import { ResponseParseTransactionSubstrate } from '@subwallet/extension-base/background/types';
+import { EVMTransactionArg, NetworkJson, ParseEVMTransactionData, ResponseParseTransactionEVM, ResponseParseTransactionSubstrate } from '@subwallet/extension-base/background/KoniTypes';
 import { Spinner } from '@subwallet/extension-koni-ui/components';
 import { ScannerContext, ScannerContextType } from '@subwallet/extension-koni-ui/contexts/ScannerContext';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';

@@ -16,7 +16,6 @@ import { accounts as accountsObservable } from '@polkadot/ui-keyring/observable/
 import { assert, isHex } from '@polkadot/util';
 import { keyExtractSuri, mnemonicGenerate, mnemonicValidate } from '@polkadot/util-crypto';
 
-import { RequestQRIsLocked, ResponseQRIsLocked } from '../types';
 import { withErrorLog } from './helpers';
 import State from './State';
 import { createSubscription, unsubscribe } from './subscriptions';
@@ -123,7 +122,7 @@ export default class Extension {
     return true;
   }
 
-  private refreshAccountPasswordCache (pair: KeyringPair): number {
+  protected refreshAccountPasswordCache (pair: KeyringPair): number {
     const { address } = pair;
 
     const savedExpiry = this.cachedUnlocks[address] || 0;
@@ -436,19 +435,6 @@ export default class Extension {
     };
   }
 
-  private qrIsLocked ({ address }: RequestQRIsLocked): ResponseQRIsLocked {
-    const pair = keyring.getPair(address);
-
-    assert(pair, 'Unable to find pair');
-
-    const remainingTime = this.refreshAccountPasswordCache(pair);
-
-    return {
-      isLocked: pair.isLocked,
-      remainingTime
-    };
-  }
-
   // FIXME This looks very much like what we have in authorization
   private signingSubscribe (id: string, port: chrome.runtime.Port): boolean {
     const cb = createSubscription<'pri(signing.requests)'>(id, port);
@@ -627,9 +613,6 @@ export default class Extension {
 
       case 'pri(signing.isLocked)':
         return this.signingIsLocked(request as RequestSigningIsLocked);
-
-      case 'pri(qr.isLocked)':
-        return this.qrIsLocked(request as RequestQRIsLocked);
 
       case 'pri(signing.requests)':
         return this.signingSubscribe(id, port);

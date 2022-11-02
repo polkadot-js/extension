@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { AuthUrls, Resolver } from '@subwallet/extension-base/background/handlers/State';
-import { AccountAuthType, AccountJson, AuthorizeRequest, RequestAccountList, RequestAccountSubscribe, RequestAuthorizeCancel, RequestAuthorizeReject, RequestAuthorizeSubscribe, RequestAuthorizeTab, RequestCurrentAccountAddress, RequestParseTransactionSubstrate, RequestQRIsLocked, RequestQrSignSubstrate, ResponseAuthorizeList, ResponseJsonGetAccountInfo, ResponseParseTransactionSubstrate, ResponseQRIsLocked, ResponseQrSignSubstrate, SeedLengths } from '@subwallet/extension-base/background/types';
+import { AccountAuthType, AccountJson, AuthorizeRequest, RequestAccountList, RequestAccountSubscribe, RequestAuthorizeCancel, RequestAuthorizeReject, RequestAuthorizeSubscribe, RequestAuthorizeTab, RequestCurrentAccountAddress, ResponseAuthorizeList, ResponseJsonGetAccountInfo, SeedLengths } from '@subwallet/extension-base/background/types';
 import { ExternalState, LedgerState, QrState } from '@subwallet/extension-base/signers/types';
 import { InjectedAccount, MetadataDefBase } from '@subwallet/extension-inject/types';
 import Web3 from 'web3';
@@ -1432,6 +1432,54 @@ export interface TuringCancelStakeCompoundParams {
   password?: string;
 }
 
+export interface FormattedMethod {
+  args?: ArgInfo[];
+  method: string;
+}
+
+export interface ArgInfo {
+  argName: string;
+  argValue: string | string[];
+}
+
+export interface EraInfo{
+  period: number;
+  phase: number;
+}
+
+export interface ResponseParseTransactionSubstrate {
+  era: EraInfo | string;
+  nonce: number;
+  method: string;
+  tip: number;
+  specVersion: number;
+}
+
+export interface ResponseQRIsLocked{
+  isLocked: boolean;
+  remainingTime: number;
+}
+
+export interface ResponseQrSignSubstrate {
+  signature: string;
+}
+
+export interface RequestQRIsLocked{
+  address: string;
+}
+
+export type SignerDataType = 'transaction' | 'message'
+
+export interface RequestQrSignSubstrate {
+  address: string;
+  data: string;
+  savePass: boolean;
+  password?: string;
+  type: SignerDataType;
+  networkKey: string;
+  transactionVersion?: number;
+}
+
 export interface KoniRequestSignatures {
   // Bonding functions
   'pri(staking.submitTuringCancelCompound)': [TuringCancelStakeCompoundParams, BasicTxResponse, BasicTxResponse];
@@ -1562,7 +1610,8 @@ export interface KoniRequestSignatures {
   'pub(utils.getRandom)': [RandomTestRequest, number];
   'pub(accounts.listV2)': [RequestAccountList, InjectedAccount[]];
   'pub(accounts.subscribeV2)': [RequestAccountSubscribe, boolean, InjectedAccount[]];
-  'pri(qr.transaction.parse.substrate)': [RequestParseTransactionSubstrate, ResponseParseTransactionSubstrate];
+
+  // Sign QR
   'pri(qr.transaction.parse.evm)': [RequestParseTransactionEVM, ResponseParseTransactionEVM];
   'pri(qr.isLocked)': [RequestQRIsLocked, ResponseQRIsLocked];
   'pri(qr.sign.substrate)': [RequestQrSignSubstrate, ResponseQrSignSubstrate];

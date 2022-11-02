@@ -1,31 +1,15 @@
 // Copyright 2019-2022 @subwallet/extension-koni authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { ContractType, CustomTokenType, NetworkJson, RMRK_VER } from '@subwallet/extension-base/background/KoniTypes';
+import { ContractType, NetworkJson, NftItem } from '@subwallet/extension-base/background/KoniTypes';
 
 // For rendering purposes only
-export interface _NftItem {
-  id?: string;
-  name?: string;
-  image?: string;
-  external_url?: string;
-  rarity?: string;
-  collectionId?: string;
-  description?: string;
-  properties?: Record<any, any> | null;
-  chain?: string;
-  type?: CustomTokenType.erc721 | CustomTokenType.psp34 | RMRK_VER; // for sending
-  rmrk_ver?: RMRK_VER;
-  owner?: string;
-  onChainOption?: any; // for sending PSP-34 tokens, should be done better
-}
-
 export interface _NftCollection {
   collectionId: string;
   collectionName?: string;
   image?: string;
   chain?: string;
-  nftItems: _NftItem[];
+  nftItems: NftItem[];
 }
 
 export interface _NftJson {

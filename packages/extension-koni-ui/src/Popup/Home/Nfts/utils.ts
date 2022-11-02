@@ -11,13 +11,6 @@ export interface _NftCollection {
   chain?: string;
   nftItems: NftItem[];
 }
-
-export interface _NftJson {
-  ready?: boolean;
-  total: number;
-  nftList: Array<_NftCollection>;
-}
-
 export interface Web3TransferParams {
   rawTx: Record<string, any>;
   estimatedGas: string;

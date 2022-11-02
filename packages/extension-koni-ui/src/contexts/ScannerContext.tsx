@@ -1,15 +1,14 @@
 // Copyright 2019-2022 @subwallet/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { ResponseParseTransactionEVM } from '@subwallet/extension-base/background/KoniTypes';
-import { ResponseParseTransactionSubstrate } from '@subwallet/extension-base/background/types';
+import { ResponseParseTransactionEVM, ResponseParseTransactionSubstrate, SignerDataType } from '@subwallet/extension-base/background/KoniTypes';
 import { createTransactionFromRLP, Transaction } from '@subwallet/extension-koni-base/utils/eth';
 import { SCANNER_QR_STEP } from '@subwallet/extension-koni-ui/constants/scanner';
 import { AccountContext } from '@subwallet/extension-koni-ui/contexts/index';
-import { parseEVMTransaction, parseSubstrateTransaction, qrSignEvm, qrSignSubstrate } from '@subwallet/extension-koni-ui/messaging';
+import { parseEVMTransaction, qrSignEvm, qrSignSubstrate } from '@subwallet/extension-koni-ui/messaging';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { CompletedParsedData, EthereumParsedData, MessageQRInfo, MultiFramesInfo, QrInfo, SubstrateCompletedParsedData, SubstrateMessageParsedData, SubstrateTransactionParsedData, TxQRInfo } from '@subwallet/extension-koni-ui/types/scanner';
-import { constructDataFromBytes, encodeNumber } from '@subwallet/extension-koni-ui/util/decoders';
+import { constructDataFromBytes, encodeNumber, parseSubstratePayload } from '@subwallet/extension-koni-ui/util/decoders';
 import { getNetworkJsonByGenesisHash } from '@subwallet/extension-koni-ui/util/getNetworkJsonByGenesisHash';
 import { isEthereumCompletedParsedData, isSubstrateMessageParsedData } from '@subwallet/extension-koni-ui/util/scanner';
 import BigN from 'bignumber.js';
@@ -17,7 +16,7 @@ import React, { useCallback, useContext, useReducer } from 'react';
 import { useSelector } from 'react-redux';
 
 import { GenericExtrinsicPayload } from '@polkadot/types';
-import { compactFromU8a, hexToU8a, isAscii, isHex, isString, isU8a, u8aConcat, u8aToHex } from '@polkadot/util';
+import { hexStripPrefix, isAscii, isHex, isString, isU8a, u8aConcat, u8aToHex } from '@polkadot/util';
 import { keccakAsHex } from '@polkadot/util-crypto';
 
 type ScannerStoreState = {
@@ -39,11 +38,10 @@ type ScannerStoreState = {
   recipientAddress: string | null;
   senderAddress: string | null;
   signedData: string;
-  specVersion: number;
   step: number;
   totalFrameCount: number;
   tx: Transaction | GenericExtrinsicPayload | string | Uint8Array | null;
-  type: 'transaction' | 'message' | null;
+  type: SignerDataType | null;
 };
 
 export type ScannerContextType = {
@@ -75,7 +73,6 @@ const DEFAULT_STATE: ScannerStoreState = {
   recipientAddress: null,
   senderAddress: null,
   signedData: '',
-  specVersion: Number.MAX_SAFE_INTEGER,
   step: SCANNER_QR_STEP.SCAN_STEP,
   totalFrameCount: 0,
   tx: null,
@@ -88,7 +85,7 @@ const MULTIPART = new Uint8Array([0]); // always mark as multipart for simplicit
 
 // const SIG_TYPE_NONE = new Uint8Array();
 // const SIG_TYPE_ED25519 = new Uint8Array([0]);
-const SIG_TYPE_SR25519 = new Uint8Array([1]);
+// const SIG_TYPE_SR25519 = new Uint8Array([1]);
 // const SIG_TYPE_ECDSA = new Uint8Array([2]);
 
 interface ScannerContextProviderProps {
@@ -242,15 +239,17 @@ export function ScannerContextProvider ({ children }: ScannerContextProviderProp
         dataToSign = keccakAsHex(txRequest.data.rlp);
       }
     } else {
-      if (txRequest.oversized) {
-        dataToSign = txRequest.data.data;
-      } else {
-        const payloadU8a = txRequest.data.data;
-        const [offset] = compactFromU8a(payloadU8a);
+      // Need to review
+      // if (txRequest.oversized) {
+      //   dataToSign = txRequest.data.data;
+      // } else {
+      //   const payloadU8a = txRequest.data.data;
+      //   const [offset] = compactFromU8a(payloadU8a);
+      //
+      //   dataToSign = payloadU8a.subarray(offset);
+      // }
 
-        dataToSign = payloadU8a.subarray(offset);
-      }
-
+      dataToSign = txRequest.data.data;
       // those 2 only make sense for ETH
       recipientAddress = '';
       tx = '';
@@ -273,12 +272,9 @@ export function ScannerContextProvider ({ children }: ScannerContextProviderProp
       type: 'transaction'
     };
 
-    const specVersion = (txRequest as SubstrateTransactionParsedData).data.specVersion || Number.MAX_SAFE_INTEGER;
-
     setState({
       ...qrInfo,
       rawPayload: (txRequest as SubstrateTransactionParsedData)?.data.rawPayload,
-      specVersion,
       genesisHash: genesisHash,
       isEthereum,
       evmChainId
@@ -354,8 +350,13 @@ export function ScannerContextProvider ({ children }: ScannerContextProviderProp
 
   // signing data with legacy account.
   const signDataLegacy = useCallback(async (savePass: boolean, password = ''): Promise<void> => {
-    const { dataToSign, evmChainId, genesisHash, isEthereum, isHash, rawPayload, senderAddress, specVersion, type } = state;
+    const { dataToSign, evmChainId, genesisHash, isEthereum, rawPayload, senderAddress, type } = state;
     const sender = !!senderAddress && getAccountByAddress(networkMap, senderAddress, genesisHash);
+    const senderNetwork = getNetworkJsonByGenesisHash(networkMap, genesisHash);
+
+    if (!senderNetwork || !senderNetwork.active) {
+      throw new Error('Signing Error: network could not be found.');
+    }
 
     if (!sender) {
       throw new Error('Signing Error: sender could not be found.');
@@ -364,9 +365,6 @@ export function ScannerContextProvider ({ children }: ScannerContextProviderProp
     if (!type) {
       throw new Error('Signing Error: type could not be found.');
     }
-
-    const senderNetwork = getNetworkJsonByGenesisHash(networkMap, genesisHash);
-    const networkIsEthereum = senderNetwork && (senderNetwork.isEthereum);
 
     const signData = async (): Promise<string> => {
       if (isEthereum) {
@@ -382,7 +380,13 @@ export function ScannerContextProvider ({ children }: ScannerContextProviderProp
           throw new Error('Signing Error: cannot signing message');
         }
 
-        const { signature } = await qrSignEvm(senderAddress, password, signable, type, evmChainId);
+        const { signature } = await qrSignEvm({
+          address: senderAddress,
+          password: password,
+          message: signable,
+          type: type,
+          chainId: evmChainId
+        });
 
         return signature;
       } else {
@@ -390,9 +394,6 @@ export function ScannerContextProvider ({ children }: ScannerContextProviderProp
 
         if (dataToSign instanceof GenericExtrinsicPayload) {
           signable = u8aToHex(dataToSign.toU8a(true));
-        } else if (isHash) {
-          console.log('sign legacy data type is', typeof dataToSign);
-          signable = dataToSign.toString();
         } else if (isU8a(dataToSign)) {
           signable = u8aToHex(dataToSign);
         } else if (isAscii(dataToSign)) {
@@ -401,23 +402,21 @@ export function ScannerContextProvider ({ children }: ScannerContextProviderProp
           throw new Error('Signing Error: cannot signing message');
         }
 
-        // signable is hex with prefix
-
-        let signed: string;
-
         try {
-          const { signature } = await qrSignSubstrate(senderAddress, signable, savePass, password);
+          const { signature } = await qrSignSubstrate({
+            address: senderAddress,
+            data: signable,
+            savePass: savePass,
+            password: password,
+            type: type,
+            networkKey: senderNetwork.key
+          });
 
-          signed = signature;
+          return hexStripPrefix(signature);
         } catch (e) {
           console.error(e);
           throw new Error((e as Error).message);
         }
-
-        // Tweak the first byte if and when network is evm
-        const sig = networkIsEthereum ? u8aConcat(hexToU8a(signed)) : u8aConcat(SIG_TYPE_SR25519, hexToU8a(signed));
-
-        return u8aToHex(sig, -1, false); // the false doesn't add 0x
       }
     };
 
@@ -426,10 +425,10 @@ export function ScannerContextProvider ({ children }: ScannerContextProviderProp
         return null;
       } else {
         if (!isEthereum) {
-          if (genesisHash && rawPayload && specVersion) {
+          if (genesisHash && rawPayload) {
             const _rawPayload = isString(rawPayload) ? rawPayload : u8aToHex(rawPayload);
 
-            return await parseSubstrateTransaction(genesisHash, _rawPayload, specVersion);
+            return parseSubstratePayload(_rawPayload);
           } else {
             return null;
           }

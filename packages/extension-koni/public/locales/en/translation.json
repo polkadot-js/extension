@@ -440,5 +440,6 @@
   "The sender account is read only account": "",
   "Manage Tokens": "",
   "Configure Token": "",
-  "Token setting": ""
+  "Token setting": "",
+  "Attach QR-signer (Parity Signer, Keystone)": ""
 }

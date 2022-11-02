@@ -1,8 +1,7 @@
 // Copyright 2019-2022 @polkadot/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { NetworkJson, ResponseParseTransactionEVM } from '@subwallet/extension-base/background/KoniTypes';
-import { EraInfo, ResponseParseTransactionSubstrate } from '@subwallet/extension-base/background/types';
+import { EraInfo, NetworkJson, ResponseParseTransactionEVM, ResponseParseTransactionSubstrate } from '@subwallet/extension-base/background/KoniTypes';
 import { Spinner, Warning } from '@subwallet/extension-koni-ui/components';
 import { ScannerContext, ScannerContextType } from '@subwallet/extension-koni-ui/contexts/ScannerContext';
 import useMetadataChain from '@subwallet/extension-koni-ui/hooks/useMetadataChain';
@@ -113,11 +112,11 @@ const PayloadDetail = (props: Props) => {
           Detail
         </div>
         {
-          method.map(({ args, method }) => {
+          method.map(({ args, method }, index) => {
             return (
               <div
                 className={CN('group-body')}
-                key={method}
+                key={`${method}_${index}`}
               >
                 <div className='info-container'>
                   <div className={CN('info-title')}>

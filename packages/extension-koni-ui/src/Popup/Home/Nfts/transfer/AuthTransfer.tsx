@@ -346,12 +346,6 @@ function AuthTransfer ({ chain, className, collectionId, nftItem, recipientAddre
       return;
     }
 
-    if (chain !== currentNetwork.networkKey) {
-      setErrorArr(['Incorrect network']);
-
-      return;
-    }
-
     setLoading(true);
 
     // eslint-disable-next-line @typescript-eslint/no-misused-promises
@@ -367,7 +361,7 @@ function AuthTransfer ({ chain, className, collectionId, nftItem, recipientAddre
         setLoading(false);
       }
     }, 10);
-  }, [chain, currentNetwork.networkKey, handlerSendLedgerSubstrate, loading, substrateParams, web3Tx]);
+  }, [handlerSendLedgerSubstrate, loading, substrateParams, web3Tx]);
 
   const handleSignAndSubmit = useCallback(() => {
     if (loading) {
@@ -391,17 +385,11 @@ function AuthTransfer ({ chain, className, collectionId, nftItem, recipientAddre
       return;
     }
 
-    if (chain !== currentNetwork.networkKey) {
-      setErrorArr(['Incorrect network']);
-
-      return;
-    }
-
     // eslint-disable-next-line @typescript-eslint/no-misused-promises
     setTimeout(() => {
       handlerSendQr();
     }, 10);
-  }, [loading, chain, currentNetwork.networkKey, handlerSendQr]);
+  }, [loading, handlerSendQr]);
 
   const hideConfirm = useCallback(async () => {
     if (!loading) {

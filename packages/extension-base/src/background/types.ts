@@ -353,23 +353,6 @@ export interface RequestSeedValidate {
   type?: KeypairType;
 }
 
-export interface RequestParseTransactionSubstrate {
-  genesisHash: string;
-  rawPayload: string;
-  specVersion: number;
-}
-
-export interface RequestQRIsLocked{
-  address: string;
-}
-
-export interface RequestQrSignSubstrate {
-  address: string;
-  message: string;
-  savePass: boolean;
-  password?: string;
-}
-
 // Responses
 
 export type ResponseTypes = {
@@ -474,36 +457,4 @@ export interface ResponseJsonGetAccountInfo {
 
 export interface ResponseAuthorizeList {
   list: AuthUrls;
-}
-
-export interface FormattedMethod {
-  args?: ArgInfo[];
-  method: string;
-}
-
-export interface ArgInfo {
-  argName: string;
-  argValue: string | string[];
-}
-
-export interface EraInfo{
-  period: number;
-  phase: number;
-}
-
-export interface ResponseParseTransactionSubstrate {
-  era: EraInfo | string;
-  nonce: number;
-  method: string;
-  tip: number;
-  specVersion: number;
-}
-
-export interface ResponseQRIsLocked{
-  isLocked: boolean;
-  remainingTime: number;
-}
-
-export interface ResponseQrSignSubstrate {
-  signature: string;
 }

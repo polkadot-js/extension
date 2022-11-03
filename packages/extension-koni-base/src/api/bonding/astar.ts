@@ -521,8 +521,8 @@ export async function getAstarDelegationInfo (dotSamaApi: ApiProps, address: str
       owner: dappAddress,
       amount: totalStake.toString(),
       minBond: minStake.toString(),
-      identity: dappMap[dappAddress].identity,
-      icon: dappMap[dappAddress].icon,
+      identity: dappMap[dappAddress] ? dappMap[dappAddress].identity : undefined,
+      icon: dappMap[dappAddress] ? dappMap[dappAddress].icon : undefined,
       hasScheduledRequest: false
     });
   }

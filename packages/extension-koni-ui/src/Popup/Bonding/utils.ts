@@ -17,18 +17,6 @@ export function parseBalanceString (balance: number, unit: string) {
   }
 }
 
-export function getChainType (networkKey: string | null) {
-  if (networkKey === null) {
-    return -1;
-  }
-
-  if (['moonbeam', 'moonriver', 'moonbase'].includes(networkKey)) {
-    return 1;
-  }
-
-  return 0;
-}
-
 export function getStakeUnit (networkKey: string, networkJson: NetworkJson) {
   if (['darwinia', 'crab', 'pangolin'].includes(networkKey)) {
     return 'POWER';
@@ -126,7 +114,7 @@ export const BOND_DURATION_OPTIONS: Record<string, any[]> = {
 };
 
 export const CHAIN_TYPE_MAP = {
-  relay: ['polkadot', 'kusama', 'aleph', 'alephTest', 'westend', 'polkadex', 'polkadexTest'],
-  para: ['moonbeam', 'moonbase', 'moonriver', 'turing', 'turingStaging', 'bifrost', 'bifrost_testnet'],
+  relay: ['polkadot', 'kusama', 'aleph', 'alephTest', 'westend', 'polkadex', 'polkadexTest', 'ternoa', 'ternoa', 'ternoa_alphanet'],
+  para: ['moonbeam', 'moonbase', 'moonriver', 'turing', 'turingStaging', 'bifrost', 'bifrost_testnet', 'calamari', 'calamari_test'],
   astar: ['astar', 'shiden', 'shibuya']
 };

@@ -1864,7 +1864,7 @@ export const PREDEFINED_NETWORKS: Record<string, NetworkJson> = {
     genesisHash: '0xcceae7f3b9947cdb67369c026ef78efa5f34a08fe5808d373c04421ecf4f1aaf',
     ss58Format: 57,
     providers: {
-      amplitude: 'wss://pencol-kus-01.pendulumchain.tech'
+      amplitude: 'wss://rpc-amplitude.pendulumchain.tech'
     },
     active: false,
     currentProviderMode: 'ws',

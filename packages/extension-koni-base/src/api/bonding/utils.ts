@@ -62,6 +62,12 @@ export const PARACHAIN_INFLATION_DISTRIBUTION: Record<string, Record<string, num
   bifrost_testnet: {
     reward: 0
   },
+  calamari_test: {
+    reward: 0.9
+  },
+  calamari: {
+    reward: 0.9
+  },
   default: {
     reward: 0
   }
@@ -98,7 +104,9 @@ export const ERA_LENGTH_MAP: Record<string, number> = { // in hours
   shibuya: 24,
   bifrost_testnet: 0.5,
   bifrost: 2,
-  ternoa: 24
+  ternoa: 24,
+  calamari: 6,
+  calamari_test: 6
 };
 
 const ALEPH_DEFAULT_UNIFORM_ERA_PAYOUT_PARAMS: UniformEraPayoutInflationParams = {

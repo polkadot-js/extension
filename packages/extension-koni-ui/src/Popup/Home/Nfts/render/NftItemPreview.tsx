@@ -3,8 +3,8 @@
 
 import '@google/model-viewer';
 
+import { NftItem } from '@subwallet/extension-base/background/KoniTypes';
 import Spinner from '@subwallet/extension-koni-ui/components/Spinner';
-import { _NftItem } from '@subwallet/extension-koni-ui/Popup/Home/Nfts/utils';
 import { Theme, ThemeProps } from '@subwallet/extension-koni-ui/types';
 import React, { useCallback, useContext, useState } from 'react';
 // @ts-ignore
@@ -13,7 +13,7 @@ import styled, { ThemeContext } from 'styled-components';
 
 interface Props {
   className?: string;
-  data: _NftItem;
+  data: NftItem;
   onClick: (data: any) => void;
   collectionImage?: string;
 }

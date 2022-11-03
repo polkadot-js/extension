@@ -3,15 +3,16 @@
 
 import { faArrowLeft } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { NftItem } from '@subwallet/extension-base/background/KoniTypes';
 import useGetNetworkJson from '@subwallet/extension-koni-ui/hooks/screen/home/useGetNetworkJson';
-import { _NftCollection, _NftItem } from '@subwallet/extension-koni-ui/Popup/Home/Nfts/utils';
+import { _NftCollection } from '@subwallet/extension-koni-ui/Popup/Home/Nfts/utils';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { NFT_PER_ROW } from '@subwallet/extension-koni-ui/util';
 import React, { useCallback, useEffect, useState } from 'react';
 import styled from 'styled-components';
 
 const NftItemPreview = React.lazy(() => import('@subwallet/extension-koni-ui/Popup/Home/Nfts/render/NftItemPreview'));
-const NftItem = React.lazy(() => import('@subwallet/extension-koni-ui/Popup/Home/Nfts/render/NftItem'));
+const _NftItem = React.lazy(() => import('@subwallet/extension-koni-ui/Popup/Home/Nfts/render/NftItem'));
 
 interface Props {
   className?: string;
@@ -19,8 +20,8 @@ interface Props {
   onClickBack: () => void;
   currentNetwork: string;
 
-  chosenItem: _NftItem;
-  setChosenItem: (val: _NftItem) => void;
+  chosenItem: NftItem;
+  setChosenItem: (val: NftItem) => void;
 
   showItemDetail: boolean;
   setShowItemDetail: (val: boolean) => void;
@@ -32,7 +33,7 @@ function NftCollection ({ chosenItem, className, currentNetwork, data, onClickBa
   const [networkKey, setNetworkKey] = useState(currentNetwork);
   const networkJson = useGetNetworkJson(data?.chain as string);
 
-  const handleShowItem = useCallback((data: _NftItem) => {
+  const handleShowItem = useCallback((data: NftItem) => {
     setChosenItem(data);
     setShowItemDetail(true);
   }, [setChosenItem, setShowItemDetail]);
@@ -97,7 +98,7 @@ function NftCollection ({ chosenItem, className, currentNetwork, data, onClickBa
               // @ts-ignore
               data?.nftItems.length > 0 &&
               // @ts-ignore
-              data?.nftItems.map((item: _NftItem, index: React.Key) => {
+              data?.nftItems.map((item: NftItem, index: React.Key) => {
                 return <div key={`${item.chain || index}/${item.collectionId || ''}/${item.id || ''}`}>
                   <NftItemPreview
                     collectionImage={data?.image}
@@ -113,7 +114,7 @@ function NftCollection ({ chosenItem, className, currentNetwork, data, onClickBa
 
       {
         showItemDetail &&
-        <NftItem
+        <_NftItem
           collectionId={data?.collectionId}
           collectionImage={data?.image}
           data={chosenItem}

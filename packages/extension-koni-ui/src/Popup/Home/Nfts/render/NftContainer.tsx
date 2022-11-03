@@ -3,9 +3,10 @@
 
 import { faArrowLeft, faArrowRight } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { NftItem } from '@subwallet/extension-base/background/KoniTypes';
 import Link from '@subwallet/extension-koni-ui/components/Link';
 import useFetchNftExtra from '@subwallet/extension-koni-ui/hooks/screen/home/useFetchNftTransferExtra';
-import { _NftCollection, _NftItem } from '@subwallet/extension-koni-ui/Popup/Home/Nfts/utils';
+import { _NftCollection } from '@subwallet/extension-koni-ui/Popup/Home/Nfts/utils';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { NFT_PER_ROW } from '@subwallet/extension-koni-ui/util';
 import React, { useCallback, useEffect, useState } from 'react';
@@ -36,8 +37,8 @@ interface Props extends ThemeProps {
   showCollectionDetail: boolean;
   setShowCollectionDetail: (val: boolean) => void;
 
-  chosenItem: _NftItem;
-  setChosenItem: (val: _NftItem) => void;
+  chosenItem: NftItem;
+  setChosenItem: (val: NftItem) => void;
 
   showItemDetail: boolean;
   setShowItemDetail: (val: boolean) => void;

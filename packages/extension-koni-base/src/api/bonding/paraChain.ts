@@ -183,11 +183,11 @@ export async function getParaCollatorsInfo (networkKey: string, dotSamaApi: ApiP
   await Promise.all(allValidators.map(async (validator) => {
     const [_info, _identity] = await Promise.all([
       apiProps.api.query.parachainStaking.candidateInfo(validator.address),
-      apiProps.api.query.identity.identityOf(validator.address)
+      apiProps.api.query?.identity?.identityOf(validator.address) // some chains might not have identity pallet
     ]);
 
     const rawInfo = _info.toHuman() as Record<string, any>;
-    const rawIdentity = _identity.toHuman() as Record<string, any> | null;
+    const rawIdentity = _identity ? _identity.toHuman() as Record<string, any> | null : null;
 
     const bnDecimals = new BN((10 ** decimals).toString());
     const rawBond = rawInfo?.bond as string;
@@ -464,7 +464,7 @@ export async function getParaUnlockingInfo (dotSamaApi: ApiProps, address: strin
 
   const currentRoundInfo = (await apiPromise.api.query.parachainStaking.round()).toHuman() as Record<string, string>;
   const currentRound = parseRawNumber(currentRoundInfo.current);
-  const nextWithdrawal = (nextWithdrawalRound - currentRound) * ERA_LENGTH_MAP[networkKey];
+  const nextWithdrawal = (nextWithdrawalRound - currentRound) * (ERA_LENGTH_MAP[networkKey] || ERA_LENGTH_MAP.default);
 
   return {
     nextWithdrawal: nextWithdrawal > 0 ? nextWithdrawal : 0,
@@ -561,12 +561,12 @@ export async function getParaDelegationInfo (dotSamaApi: ApiProps, address: stri
     await Promise.all(Object.entries(delegationMap).map(async ([owner, amount]) => {
       const [_info, _identity, _scheduledRequests] = await Promise.all([
         apiPromise.api.query.parachainStaking.candidateInfo(owner),
-        apiPromise.api.query.identity.identityOf(owner),
+        apiPromise.api.query?.identity?.identityOf(owner),
         apiPromise.api.query.parachainStaking.delegationScheduledRequests(owner)
       ]);
       const rawScheduledRequests = _scheduledRequests.toHuman() as Record<string, any>[];
       const rawInfo = _info.toHuman() as Record<string, any>;
-      const rawIdentity = _identity.toHuman() as Record<string, any> | null;
+      const rawIdentity = _identity ? _identity.toHuman() as Record<string, any> | null : null;
       let identity;
 
       const minDelegation = (rawInfo?.lowestTopDelegationAmount as string).replaceAll(',', '');
@@ -653,10 +653,10 @@ async function getBifrostDelegationInfo (dotSamaApi: ApiProps, address: string) 
     await Promise.all(Object.entries(delegationMap).map(async ([owner, amount]) => {
       const [_info, _identity] = await Promise.all([
         apiPromise.api.query.parachainStaking.candidateInfo(owner),
-        apiPromise.api.query.identity.identityOf(owner)
+        apiPromise.api.query?.identity?.identityOf(owner)
       ]);
       const rawInfo = _info.toHuman() as Record<string, any>;
-      const rawIdentity = _identity.toHuman() as Record<string, any> | null;
+      const rawIdentity = _identity ? _identity.toHuman() as Record<string, any> | null : null;
       let identity;
 
       const minDelegation = (rawInfo?.lowestTopDelegationAmount as string).replaceAll(',', '');

@@ -464,7 +464,7 @@ export async function getParaUnlockingInfo (dotSamaApi: ApiProps, address: strin
 
   const currentRoundInfo = (await apiPromise.api.query.parachainStaking.round()).toHuman() as Record<string, string>;
   const currentRound = parseRawNumber(currentRoundInfo.current);
-  const nextWithdrawal = (nextWithdrawalRound - currentRound) * ERA_LENGTH_MAP[networkKey];
+  const nextWithdrawal = (nextWithdrawalRound - currentRound) * (ERA_LENGTH_MAP[networkKey] || ERA_LENGTH_MAP.default);
 
   return {
     nextWithdrawal: nextWithdrawal > 0 ? nextWithdrawal : 0,

@@ -1062,7 +1062,9 @@ export const PREDEFINED_NETWORKS: Record<string, NetworkJson> = {
     nativeToken: 'KMA',
     crowdloanUrl: 'https://calamari.network/',
     decimals: 12,
-    coinGeckoKey: 'calamari-network'
+    coinGeckoKey: 'calamari-network',
+    getStakingOnChain: true,
+    supportBonding: true
   },
   basilisk: {
     key: 'basilisk',

@@ -344,7 +344,8 @@ export default styled(AccountInfo)(({ theme }: ThemeProps) => `
     flex-direction: row;
     justify-content: flex-start;
     align-items: center;
-    height: 72px;
+    min-height: 72px;
+    max-height: 72px;
     border-radius: 4px;
   }
 
@@ -360,7 +361,7 @@ export default styled(AccountInfo)(({ theme }: ThemeProps) => `
     white-space: nowrap;
 
     &.displaced {
-      padding-top: 10px;
+      padding-top: 16px;
     }
   }
 

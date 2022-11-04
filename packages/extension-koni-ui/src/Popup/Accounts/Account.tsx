@@ -183,7 +183,7 @@ export default styled(Account)(({ theme }: ThemeProps) => `
   .account__account-item {
     margin-left: 5px;
   }
-  
+
   .account-checked-item {
     color: ${theme.primaryColor};
     align-self: center;
@@ -237,5 +237,9 @@ export default styled(Account)(({ theme }: ThemeProps) => `
   .account__change-avatar-icon-hover {
     width: 20px;
     min-width: 20px;
+  }
+
+  .account-info-row {
+    min-height: 48px;
   }
 `);

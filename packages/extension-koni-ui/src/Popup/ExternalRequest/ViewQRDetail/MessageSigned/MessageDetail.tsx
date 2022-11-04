@@ -3,7 +3,7 @@
 
 import useTranslation from '@subwallet/extension-koni-ui/hooks/useTranslation';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
-import { unwrapMessage } from '@subwallet/extension-koni-ui/util/scanner';
+import { unwrapMessage } from '@subwallet/extension-koni-ui/util/scanner/sign';
 import CN from 'classnames';
 import React from 'react';
 import styled from 'styled-components';

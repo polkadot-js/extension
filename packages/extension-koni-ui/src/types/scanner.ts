@@ -117,3 +117,12 @@ export interface MultiFramesInfo {
 }
 
 export type QrInfo = MessageQRInfo | TxQRInfo;
+
+export interface QrAccount {
+  isAddress: boolean;
+  content: string;
+  genesisHash: string;
+  name?: string;
+  isEthereum: boolean;
+  isReadOnly: boolean;
+}

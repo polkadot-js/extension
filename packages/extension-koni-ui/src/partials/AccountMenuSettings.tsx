@@ -3,8 +3,7 @@
 
 import type { Theme, ThemeProps } from '../types';
 
-import { faUsb } from '@fortawesome/free-brands-svg-icons';
-import { faCog, faFileUpload, faKey, faPlusCircle, faQrcode, faSeedling } from '@fortawesome/free-solid-svg-icons';
+import { faCodeFork, faCog, faEye, faFileUpload, faKey, faPlusCircle, faQrcode } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import InputFilter from '@subwallet/extension-koni-ui/components/InputFilter';
 import Link from '@subwallet/extension-koni-ui/components/Link';
@@ -153,7 +152,7 @@ function AccountMenuSettings ({ changeAccountCallback, className, closeSetting, 
               to='/account/import-seed'
             >
               {/* @ts-ignore */}
-              <FontAwesomeIcon icon={faSeedling} />
+              <FontAwesomeIcon icon={faPlusCircle} />
               <span>{t<string>('Import account from Seed Phrase')}</span>
             </Link>
           </MenuSettingItem>
@@ -165,6 +164,21 @@ function AccountMenuSettings ({ changeAccountCallback, className, closeSetting, 
               {/* @ts-ignore */}
               <FontAwesomeIcon icon={faKey} />
               <span>{t<string>('Import private key from MetaMask')}</span>
+            </Link>
+          </MenuSettingItem>
+          <MenuSettingItem className='account-menu-settings__menu-item'>
+            <Link
+              className='account-menu-settings__menu-item-text'
+              isDisabled={!mediaAllowed}
+              title={!mediaAllowed
+                ? t<string>('Camera access must be first enabled in the settings')
+                : ''
+              }
+              to='/account/import-secret-qr'
+            >
+              {/* @ts-ignore */}
+              <FontAwesomeIcon icon={faQrcode} />
+              <span>{t<string>('Import account by QR code')}</span>
             </Link>
           </MenuSettingItem>
           <MenuSettingItem className='account-menu-settings__menu-item'>
@@ -189,7 +203,7 @@ function AccountMenuSettings ({ changeAccountCallback, className, closeSetting, 
                 ? t<string>('Camera access must be first enabled in the settings')
                 : ''
               }
-              to='/account/import-qr'
+              to='/account/attach-qr-signer'
             >
               {/* @ts-ignore */}
               <FontAwesomeIcon icon={faQrcode} />
@@ -208,10 +222,10 @@ function AccountMenuSettings ({ changeAccountCallback, className, closeSetting, 
                 >
                   <FontAwesomeIcon
                     // @ts-ignore
-                    icon={faUsb}
+                    icon={faCodeFork}
                     rotation={270}
                   />
-                  <span>{ t<string>('Attach ledger account')}</span>
+                  <span>{ t<string>('Connect Ledger device')}</span>
                 </Link>
               )
               : (
@@ -221,13 +235,28 @@ function AccountMenuSettings ({ changeAccountCallback, className, closeSetting, 
                 >
                   <FontAwesomeIcon
                   // @ts-ignore
-                    icon={faUsb}
+                    icon={faCodeFork}
                     rotation={270}
                   />
                   <span>{ t<string>('Connect Ledger device')}</span>
                 </Link>
               )
             }
+          </MenuSettingItem>
+          <MenuSettingItem className='account-menu-settings__menu-item'>
+            <Link
+              className='account-menu-settings__menu-item-text'
+              isDisabled={!mediaAllowed}
+              title={!mediaAllowed
+                ? t<string>('Camera access must be first enabled in the settings')
+                : ''
+              }
+              to='/account/attach-read-only'
+            >
+              {/* @ts-ignore */}
+              <FontAwesomeIcon icon={faEye} />
+              <span>{t<string>('Attach readonly account')}</span>
+            </Link>
           </MenuSettingItem>
         </div>
       </div>
@@ -254,7 +283,7 @@ export default React.memo(styled(AccountMenuSettings)(({ theme }: Props) => `
   user-select: none;
 
   .account-menu-settings {
-    max-height: 148px;
+    max-height: 100px;
     overflow-y: auto;
     scrollbar-width: none;
     padding: 0 15px;
@@ -368,7 +397,7 @@ export default React.memo(styled(AccountMenuSettings)(({ theme }: Props) => `
 
   .koni-menu-items-container {
     padding: 0 15px;
-    max-height: 260px;
+    max-height: 365px;
     overflow-y: auto;
 
     &:last-child {

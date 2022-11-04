@@ -2,83 +2,42 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import Scanner from '@subwallet/extension-koni-ui/components/Qr/Scanner';
+import { SCAN_TYPE } from '@subwallet/extension-koni-ui/constants/qr';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
+import { QrAccount } from '@subwallet/extension-koni-ui/types/scanner';
+import { getFunctionScan } from '@subwallet/extension-koni-ui/util/scanner/attach';
 import { Result } from '@zxing/library';
 import CN from 'classnames';
 import React, { useCallback } from 'react';
 import styled from 'styled-components';
 
-import { decodeAddress } from '@polkadot/util-crypto';
-
-interface ScanType {
-  isAddress: boolean;
-  content: string;
-  genesisHash: string;
-  name?: string;
-  isEthereum: boolean;
-}
-
-interface Props extends ThemeProps{
+interface Props extends ThemeProps {
   className?: string;
   onError?: (error?: Error) => void;
-  onScan: (scanned: ScanType) => void;
+  onScan: (scanned: QrAccount) => void;
+  type: SCAN_TYPE;
 }
-
-const SUBSTRATE_PREFIX = 'substrate';
-const ETHEREUM_PREFIX = 'ethereum';
-const SECRET_PREFIX = 'secret';
-
-// const ACCEPT_PREFIXES = [SUBSTRATE_PREFIX, SECRET_PREFIX];
 
 const PATH = '@subwallet/extension-koni-ui/components/Qr/ScanAddress';
 
 const ScanAddress = (props: Props) => {
-  const { className, onError, onScan } = props;
+  const { className, onError, onScan, type } = props;
 
   const _onScan = useCallback((result: Result | undefined | null, error: Error | undefined | null) => {
     if (result) {
       try {
         const data = result.getText();
-        const arr: string[] = data.split(':');
+        const funcRead = getFunctionScan(type);
+        const qrAccount = funcRead(data);
 
-        let prefix = arr[0];
-        let content = '';
-        let genesisHash = '';
-        let name: string[] = [];
-        let isEthereum = false;
-
-        if (prefix === SUBSTRATE_PREFIX || prefix === SECRET_PREFIX) {
-          [prefix, content, genesisHash, ...name] = arr;
-        } else if (prefix === ETHEREUM_PREFIX) {
-          [prefix, content, ...name] = arr;
-          genesisHash = content.split('@')[1] || '';
-          content = content.substring(0, 42);
-          isEthereum = true;
-
-          // Todo: Comment this again after finish #426
-          // onError && onError(new Error(`Invalid prefix received, expected '${ACCEPT_PREFIXES.join(' or ')}' , found '${prefix}'`));
-          //
-          // throw Error(`Invalid prefix received, expected '${SUBSTRATE_PREFIX} or ${SECRET_PREFIX} or ${ETHEREUM_PREFIX}' , found '${prefix}'`);
-        } else {
+        if (!qrAccount) {
           onError && onError(new Error('Invalid QR code'));
 
           throw Error('Invalid QR code');
         }
 
-        const isAddress = prefix !== SECRET_PREFIX;
-
-        if (isAddress && !isEthereum) {
-          decodeAddress(content);
-        }
-
         onError && onError();
-        onScan({
-          content,
-          genesisHash,
-          isAddress,
-          isEthereum,
-          name: name.length ? name.join(':') : undefined
-        });
+        onScan(qrAccount);
       } catch (error) {
         onError && onError(error as Error);
         console.error(PATH, (error as Error).message, result.getText());
@@ -89,7 +48,7 @@ const ScanAddress = (props: Props) => {
       error.message && onError && onError(error);
       error.message && console.error(PATH, error.message);
     }
-  }, [onScan, onError]);
+  }, [type, onError, onScan]);
 
   return (
     <div className={CN(className)}>

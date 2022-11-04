@@ -19,11 +19,13 @@ interface Props extends ThemeProps {
   showCancelButton?: boolean;
   subHeaderName?: string;
   to?: string;
+  isPreventGoHome?: boolean;
 }
 
 function SubHeader ({ cancelButtonText,
   className = '',
   isBusy,
+  isPreventGoHome,
   onBack,
   onCancel,
   showBackArrow,
@@ -57,14 +59,27 @@ function SubHeader ({ cancelButtonText,
       </div>
       <div className={'subheader-container__part-3'}>
         {showCancelButton && (
-          <Link
-            className='sub-header__cancel-btn'
-            to='/'
-          >
-            <span onClick={onCancel}>{cancelButtonText ? t<string>(cancelButtonText) : t<string>('Cancel')}</span>
-          </Link>
-        )
-        }
+          <>
+            {
+              isPreventGoHome
+                ? (
+                  <div
+                    className='sub-header__cancel-btn'
+                  >
+                    <span onClick={onCancel}>{cancelButtonText ? t<string>(cancelButtonText) : t<string>('Cancel')}</span>
+                  </div>
+                )
+                : (
+                  <Link
+                    className='sub-header__cancel-btn'
+                    to='/'
+                  >
+                    <span onClick={onCancel}>{cancelButtonText ? t<string>(cancelButtonText) : t<string>('Cancel')}</span>
+                  </Link>
+                )
+            }
+          </>
+        )}
       </div>
     </div>
   );
@@ -104,5 +119,6 @@ export default styled(SubHeader)(({ theme }: Props) => `
 
   .sub-header__cancel-btn {
     color: ${theme.buttonTextColor2};
+    cursor: pointer;
   }
 `);

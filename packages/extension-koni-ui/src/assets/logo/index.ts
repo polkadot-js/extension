@@ -461,6 +461,14 @@ const LogosMap: Record<string, string> = {
   // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
   ada: require('./158.cardano.png'),
   // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+  boba_rinkeby: require('./163.boba.png'),
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+  boba: require('./163.boba.png'),
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+  bobabase: require('./163.boba.png'),
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+  bobabeam: require('./163.boba.png'),
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
   default: require('./73.Default.png')
 };
 

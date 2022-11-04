@@ -227,7 +227,11 @@ const evmBlockExplorer: Record<string, string> = {
   ethereum: 'https://etherscan.io',
   ethereum_goerli: 'https://goerli.etherscan.io',
   binance: 'https://bscscan.com',
-  binance_test: 'https://testnet.bscscan.com'
+  binance_test: 'https://testnet.bscscan.com',
+  boba_rinkeby: 'https://blockexplorer.rinkeby.boba.network',
+  boba: 'https://blockexplorer.boba.network',
+  bobabase: 'https://blockexplorer.bobabase.boba.network',
+  bobabeam: 'https://blockexplorer.bobabeam.boba.network'
 };
 
 export function isSupportSubscan (networkKey: string): boolean {

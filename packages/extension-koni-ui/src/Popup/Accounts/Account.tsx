@@ -124,20 +124,11 @@ function Account ({ address, changeAccountCallback, className, closeSetting, gen
       className={className}
       onClick={_changeAccount}
     >
-      {isSelected
-        ? (
-          <div className='account-checked-item'>
-            {IconMaps.check}
-          </div>
-        )
-        : (
-          <div className='account-unchecked-item' />
-        )
-      }
       <AccountInfoEl
         address={address}
         className='account__account-item'
         genesisHash={genesisHash}
+        isSelected={isSelected}
         isShowBanner={!_isAllAccount}
         name={name}
         originGenesisHash={originGenesisHash}
@@ -159,7 +150,7 @@ function Account ({ address, changeAccountCallback, className, closeSetting, gen
             style={{ display: 'none' }}
             type='file'
           />
-          <span className='account__change-avatar-text'>{t<string>('Change Avatar')}</span>
+          {/* <span className='account__change-avatar-text'>{t<string>('Change Avatar')}</span> */}
           <div className='account__change-avatar-icon-btn'>
             {IconMaps.camera}
           </div>
@@ -171,7 +162,6 @@ function Account ({ address, changeAccountCallback, className, closeSetting, gen
 
 export default styled(Account)(({ theme }: ThemeProps) => `
   position: relative;
-  padding: 0 15px;
   border-radius: 8px;
   margin-top: 8px;
   display: flex;
@@ -181,23 +171,14 @@ export default styled(Account)(({ theme }: ThemeProps) => `
   }
 
   .account__account-item {
-    margin-left: 5px;
-  }
-
-  .account-checked-item {
-    color: ${theme.primaryColor};
-    align-self: center;
-  }
-
-  .account-unchecked-item {
-    width: 19px;
+    // margin-left: 5px;
   }
 
   .account__change-avatar {
     display: flex;
     position: absolute;
     align-items: center;
-    right: 15px;
+    right: 8px;
     height: 100%;
   }
 
@@ -240,6 +221,7 @@ export default styled(Account)(({ theme }: ThemeProps) => `
   }
 
   .account-info-row {
-    min-height: 48px;
+    height: 46px;
+    padding: 8px;
   }
 `);

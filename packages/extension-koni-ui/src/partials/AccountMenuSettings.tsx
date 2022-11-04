@@ -31,6 +31,8 @@ const jsonPath = '/account/restore-json';
 const createAccountPath = '/account/create';
 const ledgerPath = '/account/import-ledger';
 
+const transitionTime = '0.3s';
+
 function AccountMenuSettings ({ changeAccountCallback, className, closeSetting, onFilter, reference }: Props): React.ReactElement<Props> {
   const { t } = useTranslation();
   const [filter, setFilter] = useState('');
@@ -161,7 +163,6 @@ function AccountMenuSettings ({ changeAccountCallback, className, closeSetting, 
               className='account-menu-settings__menu-item-text'
               to='/account/import-metamask-private-key'
             >
-              {/* @ts-ignore */}
               <FontAwesomeIcon icon={faKey} />
               <span>{t<string>('Import private key from MetaMask')}</span>
             </Link>
@@ -176,7 +177,6 @@ function AccountMenuSettings ({ changeAccountCallback, className, closeSetting, 
               }
               to='/account/import-secret-qr'
             >
-              {/* @ts-ignore */}
               <FontAwesomeIcon icon={faQrcode} />
               <span>{t<string>('Import account by QR code')}</span>
             </Link>
@@ -187,7 +187,6 @@ function AccountMenuSettings ({ changeAccountCallback, className, closeSetting, 
               onClick={isPopup && (isFirefox || isLinux) ? _openJson : undefined}
               to={isPopup && (isFirefox || isLinux) ? undefined : jsonPath}
             >
-              {/* @ts-ignore */}
               <FontAwesomeIcon icon={faFileUpload} />
               <span>{t<string>('Restore account from Polkadot{.js}')}</span>
             </Link>
@@ -205,7 +204,6 @@ function AccountMenuSettings ({ changeAccountCallback, className, closeSetting, 
               }
               to='/account/attach-qr-signer'
             >
-              {/* @ts-ignore */}
               <FontAwesomeIcon icon={faQrcode} />
               <span>{t<string>('Attach QR-signer (Parity Signer, Keystone)')}</span>
             </Link>
@@ -221,7 +219,6 @@ function AccountMenuSettings ({ changeAccountCallback, className, closeSetting, 
                   to={ledgerPath}
                 >
                   <FontAwesomeIcon
-                    // @ts-ignore
                     icon={faCodeFork}
                     rotation={270}
                   />
@@ -234,7 +231,6 @@ function AccountMenuSettings ({ changeAccountCallback, className, closeSetting, 
                   onClick={_onOpenLedgerConnect}
                 >
                   <FontAwesomeIcon
-                  // @ts-ignore
                     icon={faCodeFork}
                     rotation={270}
                   />
@@ -253,26 +249,23 @@ function AccountMenuSettings ({ changeAccountCallback, className, closeSetting, 
               }
               to='/account/attach-read-only'
             >
-              {/* @ts-ignore */}
               <FontAwesomeIcon icon={faEye} />
               <span>{t<string>('Attach readonly account')}</span>
             </Link>
           </MenuSettingItem>
         </div>
       </div>
-
-      <div className='koni-menu-items-container'>
-        <MenuSettingItem className='account-menu-settings__menu-item'>
-          <Link
-            className='account-menu-settings__menu-item-text'
-            to={'/account/settings'}
-          >
-            {/* @ts-ignore */}
-            <FontAwesomeIcon icon={faCog} />
-            <span>{ t('Settings')}</span>
-          </Link>
-        </MenuSettingItem>
-      </div>
+      <Link
+        className='setting-button'
+        to={'/account/settings'}
+      >
+        <FontAwesomeIcon
+          className='setting-icon'
+          fontSize={24}
+          icon={faCog}
+        />
+        <span className='setting-label'>{t('Settings')}</span>
+      </Link>
     </Menu>
   );
 }
@@ -283,11 +276,10 @@ export default React.memo(styled(AccountMenuSettings)(({ theme }: Props) => `
   user-select: none;
 
   .account-menu-settings {
-    max-height: 100px;
+    height: 135px;
     overflow-y: auto;
     scrollbar-width: none;
     padding: 0 15px;
-    margin-bottom: 8px;
 
     &::-webkit-scrollbar {
       display: none;
@@ -396,7 +388,7 @@ export default React.memo(styled(AccountMenuSettings)(({ theme }: Props) => `
   }
 
   .koni-menu-items-container {
-    padding: 0 15px;
+    padding: 12px 15px 16px;
     max-height: 365px;
     overflow-y: auto;
 
@@ -413,7 +405,8 @@ export default React.memo(styled(AccountMenuSettings)(({ theme }: Props) => `
   .account-menu-settings-items-wrapper {
     border-radius: 8px;
     border: 2px solid ${theme.menuItemsBorder};
-    padding: 8px 12px;
+    // padding: 8px 12px; -2px because border
+    padding: 6px 10px;
     margin-bottom: 8px;
   }
 
@@ -428,4 +421,47 @@ export default React.memo(styled(AccountMenuSettings)(({ theme }: Props) => `
   .account-menu-settings__input-filter > input {
     height: 40px;
   }
+
+  .setting-button {
+    position: absolute;
+    padding: 8px;
+    bottom: 16px;
+    right: 16px;
+    height: 40px;
+    width: 40px;
+    border-radius: 40px;
+    background: ${theme.secondaryColor};
+    display: flex;
+    align-items: center;
+    overflow: hidden;
+    transition: all ease-in-out ${transitionTime};
+
+    .setting-icon {
+      transition: all ease-in-out ${transitionTime};
+      transform: rotate(0deg);
+    }
+
+    .setting-label {
+      margin-left: 8px;
+      opacity: 0;
+      color: ${theme.textColor};
+      font-size: 15px;
+      line-height: 26px;
+      font-weight: 500;
+      transition: all ease-in-out ${transitionTime};
+    }
+  }
+
+  .setting-button:hover {
+    width: 118px;
+
+    .setting-icon {
+      transform: rotate(360deg);
+    }
+
+    .setting-label {
+      opacity: 1;
+    }
+  }
+
 `));

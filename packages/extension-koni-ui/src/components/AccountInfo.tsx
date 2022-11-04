@@ -5,7 +5,7 @@ import type { KeypairType } from '@polkadot/util-crypto/types';
 import type { Recoded, ThemeProps } from '../types';
 
 import { faUsb } from '@fortawesome/free-brands-svg-icons';
-import { faCodeBranch, faEye, faQrcode } from '@fortawesome/free-solid-svg-icons';
+import { faCheck, faCodeMerge, faEye, faQrcode } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { NetworkJson } from '@subwallet/extension-base/background/KoniTypes';
 import cloneLogo from '@subwallet/extension-koni-ui/assets/clone.svg';
@@ -42,11 +42,12 @@ export interface Props {
   isShowBanner?: boolean;
   iconSize?: number;
   isEthereum?: boolean;
+  isSelected?: boolean;
   addressHalfLength?: number;
   accountSplitPart?: 'both' | 'left' | 'right';
 }
 
-function AccountInfo ({ accountSplitPart = 'both', address, addressHalfLength = 10, className, genesisHash, iconSize = 32, isEthereum, isExternal, isHardware, isReadOnly, isShowAddress = true, isShowBanner = true, name, originGenesisHash, parentName, showCopyBtn = true, suri, type: givenType }: Props): React.ReactElement<Props> {
+function AccountInfo ({ accountSplitPart = 'both', address, addressHalfLength = 10, className, genesisHash, iconSize = 32, isEthereum, isExternal, isHardware, isReadOnly, isSelected, isShowAddress = true, isShowBanner = true, name, originGenesisHash, parentName, showCopyBtn = true, suri, type: givenType }: Props): React.ReactElement<Props> {
   const { t } = useTranslation();
   const { accounts } = useContext(AccountContext);
   const [{ account,
@@ -175,6 +176,12 @@ function AccountInfo ({ accountSplitPart = 'both', address, addressHalfLength = 
       <>
         {!!accountName && renderIcon()}
         <span title={displayName}>{(_isAccountAll && (!name || name === 'All')) ? t<string>('All Accounts') : displayName}</span>
+        {!!isSelected && (
+          <FontAwesomeIcon
+            className='account-checked-item'
+            icon={faCheck}
+          />
+        )}
       </>);
   };
 
@@ -185,96 +192,102 @@ function AccountInfo ({ accountSplitPart = 'both', address, addressHalfLength = 
       <div className='account-info-row'>
         {_isAccountAll
           ? accountAllLogo
-            ? <img
-              alt='all-account-icon'
-              className='account-info__all-account-icon'
-              src={accountAllLogo}
-            />
-            : <div className='account-info__all-account-icon'>
-              <Avatar
-                colors={['#5F545C', '#EB7072', '#F5BA90', '#F5E2B8', '#A2CAA5']}
-                name={randomNameForLogo}
-                size={34}
-                variant={randomVariant}
-              />
-            </div>
-          : <Identicon
-            className='account-info-identity-icon'
-            iconTheme={iconTheme}
-            isExternal={isExternal}
-            prefix={prefix}
-            size={iconSize}
-            value={formatted || address}
-          />}
-        <div className='account-info'>
-          {parentName
             ? (
-              <>
-                <div className='account-info-derive-name'>
-                  <FontAwesomeIcon
-                    className='account-info-derive-icon'
-                    // @ts-ignore
-                    icon={faCodeBranch}
-                  />
-                  <div
-                    className='account-info-parent-name'
-                    data-field='parent'
-                    title={parentNameSuri}
-                  >
-                    {parentNameSuri}
-                  </div>
-                </div>
-                <div className='account-info__name displaced'>
-                  <Name />
-                </div>
-              </>
+              <img
+                alt='all-account-icon'
+                className='account-info__all-account-icon'
+                src={accountAllLogo}
+              />
             )
             : (
-              <div
-                className='account-info__name'
-                data-field='name'
-              >
-                <Name />
+              <div className='account-info__all-account-icon'>
+                <Avatar
+                  colors={['#5F545C', '#EB7072', '#F5BA90', '#F5E2B8', '#A2CAA5']}
+                  name={randomNameForLogo}
+                  size={34}
+                  variant={randomVariant}
+                />
               </div>
             )
-          }
-          {networkInfo?.genesisHash && isShowBanner && (
-            <div
-              className='account-info-banner account-info-chain'
-              data-field='chain'
-            >
-              {networkInfo.chain.replace(' Relay Chain', '')}
-            </div>
+          : (
+            <Identicon
+              className='account-info-identity-icon'
+              iconTheme={iconTheme}
+              isExternal={isExternal}
+              prefix={prefix}
+              size={iconSize}
+              value={formatted || address}
+            />
           )}
-          <div className='account-info-address-display'>
-            {isShowAddress && <div
-              className='account-info-full-address'
-              data-field='address'
+        <div className='account-info'>
+          <div className='info-part'>
+            <div
+              className='account-info__name'
+              data-field='name'
             >
-              {_isAccountAll ? t<string>('All Accounts') : toShortAddress(formatted || address || t('<unknown>'), addressHalfLength)}
-            </div>}
-            {showCopyBtn && <CopyToClipboard text={(formatted && formatted) || ''}>
-              <img
-                alt='copy'
-                className='account-info-copy-icon'
-                onClick={_onCopy}
-                src={cloneLogo}
-              />
-            </CopyToClipboard>}
+              <Name />
+            </div>
+            {networkInfo?.genesisHash && isShowBanner && (
+              <div
+                className='account-info-banner account-info-chain'
+                data-field='chain'
+              >
+                {networkInfo.chain.replace(' Relay Chain', '')}
+              </div>
+            )}
+          </div>
+          <div className='info-part'>
+            <div className='account-info-address-display'>
+              {isShowAddress && (
+                <div
+                  className='account-info-full-address'
+                  data-field='address'
+                >
+                  {_isAccountAll ? t<string>('All Accounts') : toShortAddress(formatted || address || t('<unknown>'), addressHalfLength)}
+                </div>
+              )}
+              {
+                showCopyBtn && (
+                  <CopyToClipboard text={(formatted && formatted) || ''}>
+                    <img
+                      alt='copy'
+                      className='account-info-copy-icon'
+                      onClick={_onCopy}
+                      src={cloneLogo}
+                    />
+                  </CopyToClipboard>
+                )
+              }
+            </div>
+            {parentName && (
+              <div className='account-info-derive-name'>
+                <FontAwesomeIcon
+                  className='account-info-derive-icon'
+                  fontSize={16}
+                  icon={faCodeMerge}
+                />
+                <div
+                  className='account-info-parent-name'
+                  data-field='parent'
+                  title={parentNameSuri}
+                >
+                  {parentNameSuri}
+                </div>
+              </div>
+            )}
           </div>
         </div>
       </div>
     </div>
-
   );
 }
 
 export default styled(AccountInfo)(({ theme }: ThemeProps) => `
+  flex: 1;
+
   .account-info-banner {
     font-size: 12px;
     line-height: 16px;
-    position: absolute;
-    top: 10px;
 
     &.account-info-chain {
       background: ${theme.chainBackgroundColor};
@@ -292,11 +305,18 @@ export default styled(AccountInfo)(({ theme }: ThemeProps) => `
     }
   }
 
+  .info-part {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+  }
+
   .account-info-derive-name {
     font-size: 12px;
     line-height: 16px;
-    position: absolute;
-    top: 0;
+    display: flex;
+    align-items: center;
   }
 
   .account-info-address-display {
@@ -339,13 +359,17 @@ export default styled(AccountInfo)(({ theme }: ThemeProps) => `
     width: 100%;
   }
 
+  .account-checked-item {
+    color: ${theme.primaryColor};
+    margin-left: 4px;
+  }
+
   .account-info-row {
     display: flex;
     flex-direction: row;
     justify-content: flex-start;
     align-items: center;
-    min-height: 72px;
-    max-height: 72px;
+    height: 72px;
     border-radius: 4px;
   }
 
@@ -366,12 +390,13 @@ export default styled(AccountInfo)(({ theme }: ThemeProps) => `
   }
 
   .account-info-parent-name {
-    position: absolute;
-    color: ${theme.labelColor};
+    color: ${theme.textColor2};
+    font-size: 12px;
+    line-height: 16px;
+    font-weight: 500;
     overflow: hidden;
-    padding: 2px 0 0 0.8rem;
+    margin-left: 2px;
     text-overflow: ellipsis;
-    width: 270px;
     white-space: nowrap;
   }
 
@@ -390,16 +415,12 @@ export default styled(AccountInfo)(({ theme }: ThemeProps) => `
   }
 
   .account-info-derive-icon {
-    color: ${theme.labelColor};
-    position: absolute;
-    top: 5px;
-    width: 9px;
-    height: 9px;
+    color: ${theme.textColor2};
   }
 
   .externalIcon, .hardwareIcon {
     margin-right: 0.3rem;
-    color: ${theme.labelColor};
+    color: ${theme.textColor2};
     width: 0.875em;
   }
 `);

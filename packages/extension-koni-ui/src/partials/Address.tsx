@@ -50,7 +50,10 @@ const Address = ({ className, isFocused, label, onBlur, onChange, onClickQr, val
         type='text'
         validator={isNameValid}
       />
-      <div className={'qr-icon'} onClick={onClickQr}>
+      <div
+        className={'qr-icon'}
+        onClick={onClickQr}
+      >
         <FontAwesomeIcon icon={faQrcode} />
       </div>
     </div>

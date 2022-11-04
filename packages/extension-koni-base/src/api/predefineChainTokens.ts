@@ -1264,5 +1264,32 @@ export const PREDEFINE_TOKEN_DATA_MAP: Record<string, Record<string, TokenInfo>>
       decimals: 18,
       name: 'BNB'
     }
+  },
+  boba: {
+    BOBA: {
+      isMainToken: false,
+      contractAddress: '0xa18bF3994C0Cc6E3b63ac420308E5383f53120D7',
+      symbol: 'BOBA',
+      decimals: 18,
+      name: 'BOBA'
+    }
+  },
+  boba_rinkeby: {
+    BOBA: {
+      isMainToken: false,
+      contractAddress: '0xF5B97a4860c1D81A1e915C40EcCB5E4a5E6b8309',
+      symbol: 'BOBA',
+      decimals: 18,
+      name: 'BOBA'
+    }
+  },
+  bobabeam: {
+    GLMR: {
+      isMainToken: false,
+      contractAddress: '0x4200000000000000000000000000000000000023',
+      symbol: 'GLMR',
+      decimals: 18,
+      name: 'GLMR'
+    }
   }
 };

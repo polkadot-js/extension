@@ -7,7 +7,7 @@ import { ERC721Contract, getERC20Contract } from '@subwallet/extension-koni-base
 import Web3 from 'web3';
 import { TransactionConfig, TransactionReceipt } from 'web3-core';
 
-import {BN, hexToBn} from '@polkadot/util';
+import { BN, hexToBn } from '@polkadot/util';
 
 export async function handleTransfer (
   transactionObject: TransactionConfig,

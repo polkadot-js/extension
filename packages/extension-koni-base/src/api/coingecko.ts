@@ -40,8 +40,6 @@ export const getTokenPrice = async (chains: Array<string> = Object.keys(PREDEFIN
       tokenPriceMap[val.symbol] = val.current_price !== null ? val.current_price : 0;
     });
 
-    console.log('azzz', tokenPriceMap);
-
     return {
       currency,
       priceMap,

@@ -7,7 +7,7 @@ import { ERC721Contract, getERC20Contract } from '@subwallet/extension-koni-base
 import Web3 from 'web3';
 import { TransactionConfig, TransactionReceipt } from 'web3-core';
 
-import { BN } from '@polkadot/util';
+import {BN, hexToBn} from '@polkadot/util';
 
 export async function handleTransfer (
   transactionObject: TransactionConfig,
@@ -41,9 +41,19 @@ export async function handleTransfer (
       // })
       .on('receipt', function (receipt: TransactionReceipt) {
         response.step = TransferStep.SUCCESS;
+        let fee = null;
+
+        if (['bobabase', 'bobabeam'].indexOf(networkKey) > -1) {
+          // @ts-ignore
+          // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
+          fee = hexToBn(receipt.l1Fee || '0x0').add(hexToBn(receipt.l2BobaFee || '0x0')).toString();
+        } else {
+          fee = (receipt.gasUsed * receipt.effectiveGasPrice).toString();
+        }
+
         response.txResult = {
           change: changeValue || '0',
-          fee: (receipt.gasUsed * receipt.effectiveGasPrice).toString()
+          fee
         };
         callback(response);
       }).catch((e) => {

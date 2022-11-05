@@ -31,7 +31,7 @@ function updateTransferNftParams (nftItem: _NftItem, collectionImage: string | u
   store.dispatch({ type: 'transferNftParams/update', payload: { nftItem, collectionImage, collectionId } as TransferNftParams });
 }
 
-const SHOW_3D_MODELS = ['pioneer', 'bit.country'];
+const SHOW_3D_MODELS = ['pioneer', 'bitcountry'];
 
 function NftItem ({ className, collectionId, collectionImage, data, onClickBack }: Props): React.ReactElement<Props> {
   const [loading, setLoading] = useState(true);

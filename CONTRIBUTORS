@@ -1,11 +1,11 @@
-    1065	Nam Phạm                      	fix overflow error for validator info
-     634	AnhMTV                        	Release version 0.6.8
+    1086	Nam Phạm                      	update price for KBTC
+     648	AnhMTV                        	Release version 0.6.9
      465	Jaco                          	0.42.5 (#969)
      256	S2kael                        	[Issue-759] fix error when chain not selected
      151	lw-cdm                        	Update logo for Moonbeans
      142	quangdo                       	update some label and variable (original to origin)
      104	khainh                        	predefine metadata for Polkadot & Kusama chains
-      91	lw-cdm                        	
+      94	lw-cdm                        	
       82	Thibaut Sardan                	Add account filtering feature (#832)
       81	Hieu Dao                      	[CI Skip] Update subspace block explorer
       55	leewong                       	#118: update balance logic for Kintsugi testnet

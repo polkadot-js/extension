@@ -29,7 +29,11 @@ const DEFAULT_TOKEN_REGISTRY: Record<string, { chainDecimals: number[], chainTok
   ethereum: { chainDecimals: [18], chainTokens: ['ETH'] },
   ethereum_goerli: { chainDecimals: [18], chainTokens: ['GoerliETH'] },
   binance: { chainDecimals: [18], chainTokens: ['BNB'] },
-  binance_test: { chainDecimals: [18], chainTokens: ['tBNB'] }
+  binance_test: { chainDecimals: [18], chainTokens: ['tBNB'] },
+  boba_rinkeby: { chainDecimals: [18], chainTokens: ['ETH'] },
+  boba: { chainDecimals: [18], chainTokens: ['ETH'] },
+  bobabase: { chainDecimals: [18], chainTokens: ['BOBA'] },
+  bobabeam: { chainDecimals: [18], chainTokens: ['BOBA'] }
 };
 
 export async function getMoonAssets (api: ApiPromise) {

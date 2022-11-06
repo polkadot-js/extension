@@ -279,7 +279,7 @@ export default React.memo(styled(AccountMenuSettings)(({ theme }: Props) => `
     height: 135px;
     overflow-y: auto;
     scrollbar-width: none;
-    padding: 0 15px;
+    padding: 0;
 
     &::-webkit-scrollbar {
       display: none;

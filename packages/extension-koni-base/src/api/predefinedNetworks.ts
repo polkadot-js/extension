@@ -1873,7 +1873,9 @@ export const PREDEFINED_NETWORKS: Record<string, NetworkJson> = {
     currentProvider: 'amplitude',
     nativeToken: 'AMPE',
     groups: ['KUSAMA_PARACHAIN'],
-    decimals: 12
+    decimals: 12,
+    supportBonding: true,
+    getStakingOnChain: true
   },
   gear_testnet: {
     key: 'gear_testnet',

@@ -9,7 +9,7 @@ import Web3 from 'web3';
 
 export const CHAIN_TYPES: Record<string, string[]> = {
   relay: ['polkadot', 'kusama', 'aleph', 'polkadex', 'ternoa', 'ternoa_alphanet'],
-  para: ['moonbeam', 'moonriver', 'moonbase', 'turing', 'turingStaging', 'bifrost', 'bifrost_testnet', 'calamari_test', 'calamari'],
+  para: ['moonbeam', 'moonriver', 'moonbase', 'turing', 'turingStaging', 'bifrost', 'bifrost_testnet', 'calamari_test', 'calamari', 'amplitude'],
   astar: ['astar', 'shiden', 'shibuya']
 };
 

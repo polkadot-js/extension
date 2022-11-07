@@ -47,7 +47,7 @@ function parseStakingBalance (balance: number, chain: string, network: Record<st
   return toUnit(balance, network[chain].decimals as number);
 }
 
-export function parseStakingItemKey (networkKey: string, type: string = StakingType.NOMINATED) {
+export function parseStakingItemKey (networkKey: string, type: StakingType = StakingType.NOMINATED) {
   return `${networkKey}_${type}`;
 }
 

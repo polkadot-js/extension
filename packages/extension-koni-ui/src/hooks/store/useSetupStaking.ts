@@ -7,6 +7,7 @@ import { store } from '@subwallet/extension-koni-ui/stores';
 import { useEffect } from 'react';
 
 function updateStaking (stakingData: StakingJson): void {
+  console.log('stakingData', stakingData);
   store.dispatch({ type: 'staking/update', payload: stakingData });
 }
 

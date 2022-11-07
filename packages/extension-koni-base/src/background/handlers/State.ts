@@ -3,56 +3,7 @@
 
 import { withErrorLog } from '@subwallet/extension-base/background/handlers/helpers';
 import State, { AuthUrls, Resolver } from '@subwallet/extension-base/background/handlers/State';
-import {
-  AccountRefMap,
-  APIItemState,
-  ApiMap,
-  AuthRequestV2,
-  BalanceItem,
-  BalanceJson,
-  ChainRegistry,
-  ConfirmationDefinitions,
-  ConfirmationsQueue,
-  ConfirmationsQueueItemOptions,
-  ConfirmationType,
-  CrowdloanItem,
-  CrowdloanJson,
-  CurrentAccountInfo,
-  CustomToken,
-  CustomTokenJson,
-  CustomTokenType,
-  DeleteCustomTokenParams,
-  EvmSendTransactionParams,
-  EvmSendTransactionRequestQr,
-  EvmSignatureRequestQr,
-  ExternalRequestPromise,
-  ExternalRequestPromiseStatus,
-  NETWORK_STATUS,
-  NetworkJson,
-  NftCollection,
-  NftItem,
-  NftJson,
-  NftTransferExtra,
-  PriceJson,
-  RequestAccountExportPrivateKey,
-  RequestCheckPublicAndSecretKey,
-  RequestConfirmationComplete,
-  RequestSettingsType,
-  ResponseAccountExportPrivateKey,
-  ResponseCheckPublicAndSecretKey,
-  ResponseSettingsType,
-  ResultResolver,
-  ServiceInfo,
-  SingleModeJson,
-  StakeUnlockingJson,
-  StakingItem,
-  StakingJson,
-  StakingRewardJson,
-  StakingType,
-  ThemeTypes,
-  TokenInfo,
-  TransactionHistoryItemType
-} from '@subwallet/extension-base/background/KoniTypes';
+import { AccountRefMap, APIItemState, ApiMap, AuthRequestV2, BalanceItem, BalanceJson, ChainRegistry, ConfirmationDefinitions, ConfirmationsQueue, ConfirmationsQueueItemOptions, ConfirmationType, CrowdloanItem, CrowdloanJson, CurrentAccountInfo, CustomToken, CustomTokenJson, CustomTokenType, DeleteCustomTokenParams, EvmSendTransactionParams, EvmSendTransactionRequestQr, EvmSignatureRequestQr, ExternalRequestPromise, ExternalRequestPromiseStatus, NETWORK_STATUS, NetworkJson, NftCollection, NftItem, NftJson, NftTransferExtra, PriceJson, RequestAccountExportPrivateKey, RequestCheckPublicAndSecretKey, RequestConfirmationComplete, RequestSettingsType, ResponseAccountExportPrivateKey, ResponseCheckPublicAndSecretKey, ResponseSettingsType, ResultResolver, ServiceInfo, SingleModeJson, StakeUnlockingJson, StakingItem, StakingJson, StakingRewardJson, ThemeTypes, TokenInfo, TransactionHistoryItemType } from '@subwallet/extension-base/background/KoniTypes';
 import { AuthorizeRequest, RequestAuthorizeTab } from '@subwallet/extension-base/background/types';
 import { Web3Transaction } from '@subwallet/extension-base/signers/types';
 import { getId } from '@subwallet/extension-base/utils/getId';
@@ -61,7 +12,7 @@ import { initApi } from '@subwallet/extension-koni-base/api/dotsama';
 import { cacheRegistryMap, getRegistry } from '@subwallet/extension-koni-base/api/dotsama/registry';
 import { PREDEFINED_GENESIS_HASHES, PREDEFINED_NETWORKS } from '@subwallet/extension-koni-base/api/predefinedNetworks';
 import { PREDEFINED_SINGLE_MODES } from '@subwallet/extension-koni-base/api/predefinedSingleMode';
-import { DEFAULT_STAKING_NETWORKS } from '@subwallet/extension-koni-base/api/staking';
+import { DEFAULT_STAKING_NETWORKS, parseStakingItemKey } from '@subwallet/extension-koni-base/api/staking';
 // eslint-disable-next-line camelcase
 import { DotSamaCrowdloan_crowdloans_nodes } from '@subwallet/extension-koni-base/api/subquery/__generated__/DotSamaCrowdloan';
 import { fetchDotSamaCrowdloan } from '@subwallet/extension-koni-base/api/subquery/crowdloan';
@@ -112,7 +63,7 @@ function generateDefaultStakingMap () {
   const stakingMap: Record<string, StakingItem> = {};
 
   Object.keys(DEFAULT_STAKING_NETWORKS).forEach((networkKey) => {
-    stakingMap[`${networkKey}_${StakingType.NOMINATED}`] = {
+    stakingMap[parseStakingItemKey(networkKey)] = {
       name: PREDEFINED_NETWORKS[networkKey].chain,
       chainId: networkKey,
       nativeToken: PREDEFINED_NETWORKS[networkKey].nativeToken,
@@ -592,7 +543,13 @@ export default class KoniState extends State {
   }
 
   public getStaking (reset?: boolean): StakingJson {
-    const activeData = this.removeInactiveNetworkData(this.stakingMap);
+    const activeData: Record<string, StakingItem> = {};
+
+    Object.entries(this.stakingMap).forEach(([networkKey, item]) => {
+      if (this.networkMap[networkKey]?.active) {
+        activeData[parseStakingItemKey(networkKey, item.type)] = item;
+      }
+    });
 
     return { ready: true, details: activeData, reset } as StakingJson;
   }
@@ -665,7 +622,7 @@ export default class KoniState extends State {
 
     if (this.hasUpdateStakingItem(networkKey, item)) {
       // Update staking map
-      this.stakingMap[networkKey] = itemData;
+      this.stakingMap[parseStakingItemKey(networkKey, item.type)] = itemData;
       // this.updateStakingStore(networkKey, item);
 
       this.lazyNext('setStakingItem', () => {

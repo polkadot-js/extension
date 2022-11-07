@@ -7,7 +7,7 @@ import { getFreeBalance } from '@subwallet/extension-koni-base/api/dotsama/balan
 import { parseNumberToDisplay, parseRawNumber, reformatAddress } from '@subwallet/extension-koni-base/utils';
 import Web3 from 'web3';
 
-import { BN } from '@polkadot/util';
+import { BN, BN_ZERO } from '@polkadot/util';
 
 interface CollatorExtraInfo {
   active: boolean,
@@ -36,7 +36,7 @@ export async function getParaBondingBasics (networkKey: string, dotSamaApi: ApiP
   }
 
   const [_totalStake, _totalIssuance, _inflation, _allCollators] = await Promise.all([
-    apiProps.api.query.parachainStaking.staked(round),
+    apiProps.api.query.parachainStaking.staked ? apiProps.api.query.parachainStaking?.staked(round) : undefined,
     apiProps.api.query.balances.totalIssuance(),
     apiProps.api.query.parachainStaking.inflationConfig(),
     apiProps.api.query.parachainStaking.candidatePool()
@@ -52,7 +52,7 @@ export async function getParaBondingBasics (networkKey: string, dotSamaApi: ApiP
     unvestedAllocation = parseRawNumber(rawUnvestedAllocation);
   }
 
-  const totalStake = new BN(_totalStake.toString());
+  const totalStake = _totalStake ? new BN(_totalStake.toString()) : BN_ZERO;
   const totalIssuance = new BN(_totalIssuance.toString());
 
   if (unvestedAllocation) {

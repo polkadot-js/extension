@@ -39,7 +39,7 @@ export default class KoniDatabase extends Dexie {
 
   private schemaVersion: number;
 
-  public constructor (name = DEFAULT_DATABASE, schemaVersion = 4) {
+  public constructor (name = DEFAULT_DATABASE, schemaVersion = 5) {
     super(name);
     this.schemaVersion = schemaVersion;
 
@@ -61,6 +61,10 @@ export default class KoniDatabase extends Dexie {
     });
 
     this.conditionalVersion(4, {
+      transactions: '[chainHash+address+extrinsicHash+eventIdx+action], &[chainHash+address+extrinsicHash+eventIdx+action], chainHash, chain, address, extrinsicHash, eventIdx, action'
+    });
+
+    this.conditionalVersion(5, {
       transactions: '[chainHash+address+extrinsicHash+eventIdx+action], &[chainHash+address+extrinsicHash+eventIdx+action], chainHash, chain, address, extrinsicHash, eventIdx, action'
     });
 

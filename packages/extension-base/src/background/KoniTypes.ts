@@ -100,16 +100,22 @@ export interface StakingRewardJson {
   details: Array<StakingRewardItem>;
 }
 
+export enum StakingType {
+  NOMINATED = 'nominated',
+  POOLED = 'pooled',
+}
+
 export interface StakingItem {
   name: string,
   chainId: string,
   balance?: string,
   activeBalance?: string,
-  unlockingBalance?: string
+  unlockingBalance?: string,
   nativeToken: string,
   unit?: string,
   state: APIItemState,
-  unlockingInfo?: UnlockingStakeInfo
+  unlockingInfo?: UnlockingStakeInfo,
+  type: StakingType
 }
 
 export interface StakingJson {

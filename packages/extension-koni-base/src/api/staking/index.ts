@@ -1,7 +1,7 @@
 // Copyright 2019-2022 @subwallet/extension-koni authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { APIItemState, ApiProps, NetworkJson, StakingItem } from '@subwallet/extension-base/background/KoniTypes';
+import { APIItemState, ApiProps, NetworkJson, StakingItem, StakingType } from '@subwallet/extension-base/background/KoniTypes';
 import { CHAIN_TYPES } from '@subwallet/extension-koni-base/api/bonding';
 import { PREDEFINED_NETWORKS } from '@subwallet/extension-koni-base/api/predefinedNetworks';
 import { IGNORE_GET_SUBSTRATE_FEATURES_LIST } from '@subwallet/extension-koni-base/constants';
@@ -47,6 +47,10 @@ function parseStakingBalance (balance: number, chain: string, network: Record<st
   return toUnit(balance, network[chain].decimals as number);
 }
 
+export function parseStakingItemKey (networkKey: string, type: string = StakingType.NOMINATED) {
+  return `${networkKey}_${type}`;
+}
+
 export function stakingOnChainApi (addresses: string[], dotSamaAPIMap: Record<string, ApiProps>, callback: (networkKey: string, rs: StakingItem) => void, networks: Record<string, NetworkJson> = DEFAULT_STAKING_NETWORKS) {
   const allApiPromise: PromiseMapping[] = [];
   const [substrateAddresses, evmAddresses] = categoryAddresses(addresses);
@@ -57,17 +61,24 @@ export function stakingOnChainApi (addresses: string[], dotSamaAPIMap: Record<st
     }
   });
 
-  const unsubList = allApiPromise.map(async ({ api: apiPromise, chain }) => {
+  const unsubList: Promise<VoidFunction>[] = [];
+
+  // eslint-disable-next-line @typescript-eslint/no-misused-promises
+  allApiPromise.forEach(async ({ api: apiPromise, chain }) => {
     const parentApi = await apiPromise.isReady;
     const useAddresses = apiPromise.isEthereum ? evmAddresses : substrateAddresses;
 
     if (CHAIN_TYPES.astar.includes(chain)) {
-      return getAstarStakingOnChain(parentApi, useAddresses, networks, chain, callback);
+      unsubList.push(getAstarStakingOnChain(parentApi, useAddresses, networks, chain, callback));
     } else if (CHAIN_TYPES.para.includes(chain)) {
-      return getParaStakingOnChain(parentApi, useAddresses, networks, chain, callback);
+      unsubList.push(getParaStakingOnChain(parentApi, useAddresses, networks, chain, callback));
     }
 
-    return getRelayStakingOnChain(parentApi, useAddresses, networks, chain, callback);
+    unsubList.push(getRelayStakingOnChain(parentApi, useAddresses, networks, chain, callback));
+
+    if (['polkadot', 'kusama', 'westend'].includes(chain)) {
+      unsubList.push(getRelayPoolingOnchain(parentApi, useAddresses, networks, chain, callback));
+    }
   });
 
   return () => {
@@ -121,7 +132,8 @@ function getParaStakingOnChain (parentApi: ApiProps, useAddresses: string[], net
         unlockingBalance: parsedUnlockingBalance.toString(),
         nativeToken: networks[chain].nativeToken,
         unit: networks[chain].nativeToken,
-        state: APIItemState.READY
+        state: APIItemState.READY,
+        type: StakingType.NOMINATED
       } as StakingItem;
 
       // eslint-disable-next-line node/no-callback-literal
@@ -131,7 +143,7 @@ function getParaStakingOnChain (parentApi: ApiProps, useAddresses: string[], net
 }
 
 function getRelayStakingOnChain (parentApi: ApiProps, useAddresses: string[], networks: Record<string, NetworkJson>, chain: string, callback: (networkKey: string, rs: StakingItem) => void) {
-  return parentApi.api.query.staking?.ledger.multi(useAddresses, async (ledgers: any[]) => {
+  return parentApi.api.query.staking?.ledger.multi(useAddresses, (ledgers: any[]) => {
     let totalBalance = new BN(0);
     let activeBalance = new BN(0);
     let unlockingBalance = new BN(0);
@@ -172,16 +184,44 @@ function getRelayStakingOnChain (parentApi: ApiProps, useAddresses: string[], ne
       }
     }
 
-    // TODO: improve getting staking info from nomination pools
-    const poolNominations = await parentApi.api.query?.nominationPools?.poolMembers.multi(useAddresses);
+    const formattedTotalBalance = parseFloat(totalBalance.toString());
+    const formattedActiveBalance = parseFloat(activeBalance.toString());
+    const formattedUnlockingBalance = parseFloat(unlockingBalance.toString());
 
-    if (poolNominations) {
-      for (const _poolNomination of poolNominations) {
-        const poolNomination = _poolNomination.toHuman() as Record<string, any>;
+    const parsedActiveBalance = parseStakingBalance(formattedActiveBalance, chain, networks);
+    const parsedUnlockingBalance = parseStakingBalance(formattedUnlockingBalance, chain, networks);
+    const parsedTotal = parseStakingBalance(formattedTotalBalance, chain, networks);
 
-        if (poolNomination !== null) {
-          const bondedBalance = poolNomination.points as string;
-          const unbondedBalance = poolNomination.unbondingEras as Record<string, string>;
+    const stakingItem = {
+      name: networks[chain].chain,
+      chainId: chain,
+      balance: parsedTotal.toString(),
+      activeBalance: parsedActiveBalance.toString(),
+      unlockingBalance: parsedUnlockingBalance.toString(),
+      nativeToken: networks[chain].nativeToken,
+      unit: unit || networks[chain].nativeToken,
+      state: APIItemState.READY,
+      type: StakingType.NOMINATED
+    } as StakingItem;
+
+    callback(chain, stakingItem);
+  });
+}
+
+function getRelayPoolingOnchain (parentApi: ApiProps, useAddresses: string[], networks: Record<string, NetworkJson>, chain: string, callback: (networkKey: string, rs: StakingItem) => void) {
+  return parentApi.api.query?.nominationPools?.poolMembers.multi(useAddresses, (ledgers: any[]) => {
+    let totalBalance = new BN(0);
+    let activeBalance = new BN(0);
+    let unlockingBalance = new BN(0);
+
+    if (ledgers) {
+      for (const ledger of ledgers) {
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-member-access
+        const data = ledger.toHuman() as Record<string, any>;
+
+        if (data !== null) {
+          const bondedBalance = data.points as string;
+          const unbondedBalance = data.unbondingEras as Record<string, string>;
 
           Object.entries(unbondedBalance).forEach(([era, value]) => {
             const bnUnbondedBalance = new BN(value.replaceAll(',', ''));
@@ -212,8 +252,9 @@ function getRelayStakingOnChain (parentApi: ApiProps, useAddresses: string[], ne
       activeBalance: parsedActiveBalance.toString(),
       unlockingBalance: parsedUnlockingBalance.toString(),
       nativeToken: networks[chain].nativeToken,
-      unit: unit || networks[chain].nativeToken,
-      state: APIItemState.READY
+      unit: networks[chain].nativeToken,
+      state: APIItemState.READY,
+      type: StakingType.POOLED
     } as StakingItem;
 
     callback(chain, stakingItem);
@@ -260,7 +301,8 @@ function getAstarStakingOnChain (parentApi: ApiProps, useAddresses: string[], ne
         unlockingBalance: parsedUnlockingBalance.toString(),
         nativeToken: networks[chain].nativeToken,
         unit: networks[chain].nativeToken,
-        state: APIItemState.READY
+        state: APIItemState.READY,
+        type: StakingType.NOMINATED
       } as StakingItem;
 
       // eslint-disable-next-line node/no-callback-literal

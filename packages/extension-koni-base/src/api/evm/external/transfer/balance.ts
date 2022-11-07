@@ -5,7 +5,7 @@ import { BasicTxResponse, ExternalRequestPromiseStatus, TransferErrorCode } from
 import { QrState, Web3Transaction } from '@subwallet/extension-base/signers/types';
 import QrSigner from '@subwallet/extension-base/signers/web3/QrSigner';
 import { EvmExternalProps, parseTxAndSignature } from '@subwallet/extension-koni-base/api/evm/external/shared';
-import { getERC20TransactionObject, getEVMTransactionObject } from '@subwallet/extension-koni-base/api/tokens/evm/transfer';
+import { getERC20TransactionObject, getEVMTransactionObject, handleTransferBalanceResult } from '@subwallet/extension-koni-base/api/tokens/evm/transfer';
 import { anyNumberToBN } from '@subwallet/extension-koni-base/utils/eth';
 import { TransactionConfig, TransactionReceipt } from 'web3-core';
 
@@ -78,14 +78,7 @@ export async function handleTransferQr ({ callback,
         callback(response);
       })
       .on('receipt', function (receipt: TransactionReceipt) {
-        response.status = receipt.status;
-        response.txResult = {
-          change: changeValue || '0',
-          fee: (receipt.gasUsed * receipt.effectiveGasPrice).toString()
-        };
-        response.isBusy = false;
-        updateState({ status: receipt.status ? ExternalRequestPromiseStatus.COMPLETED : ExternalRequestPromiseStatus.FAILED });
-        callback(response);
+        handleTransferBalanceResult({ receipt: receipt, response: response, callback: callback, networkKey: networkKey, changeValue: changeValue, updateState: updateState });
       }).catch((e) => {
         response.status = false;
         response.txError = false;

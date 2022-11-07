@@ -1,13 +1,47 @@
 // Copyright 2019-2022 @subwallet/extension-koni-base authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { ApiProps, BasicTxResponse, NetworkJson, TransferErrorCode } from '@subwallet/extension-base/background/KoniTypes';
+import { ApiProps, BasicTxResponse, ExternalRequestPromise, ExternalRequestPromiseStatus, HandleBasicTx, NetworkJson, TransferErrorCode } from '@subwallet/extension-base/background/KoniTypes';
 import { getFreeBalance } from '@subwallet/extension-koni-base/api/dotsama/balance';
 import { ERC721Contract, getERC20Contract } from '@subwallet/extension-koni-base/api/tokens/evm/web3';
 import Web3 from 'web3';
 import { TransactionConfig, TransactionReceipt } from 'web3-core';
 
 import { BN, hexToBn } from '@polkadot/util';
+
+interface HandleTransferBalanceResultProps {
+  callback: HandleBasicTx;
+  changeValue: string;
+  networkKey: string;
+  receipt: TransactionReceipt;
+  response: BasicTxResponse;
+  updateState?: (promise: Partial<ExternalRequestPromise>) => void;
+}
+
+export const handleTransferBalanceResult = ({ callback,
+  changeValue,
+  networkKey,
+  receipt,
+  response,
+  updateState }: HandleTransferBalanceResultProps) => {
+  response.status = true;
+  let fee: string;
+
+  if (['bobabase', 'bobabeam'].indexOf(networkKey) > -1) {
+    // @ts-ignore
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
+    fee = hexToBn(receipt.l1Fee || '0x0').add(hexToBn(receipt.l2BobaFee || '0x0')).toString();
+  } else {
+    fee = (receipt.gasUsed * receipt.effectiveGasPrice).toString();
+  }
+
+  response.txResult = {
+    change: changeValue || '0',
+    fee
+  };
+  updateState && updateState({ status: receipt.status ? ExternalRequestPromiseStatus.COMPLETED : ExternalRequestPromiseStatus.FAILED });
+  callback(response);
+};
 
 export async function handleTransfer (
   transactionObject: TransactionConfig,
@@ -36,22 +70,7 @@ export async function handleTransfer (
       //   callback(response);
       // })
       .on('receipt', function (receipt: TransactionReceipt) {
-        response.status = true;
-        let fee = null;
-
-        if (['bobabase', 'bobabeam'].indexOf(networkKey) > -1) {
-          // @ts-ignore
-          // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
-          fee = hexToBn(receipt.l1Fee || '0x0').add(hexToBn(receipt.l2BobaFee || '0x0')).toString();
-        } else {
-          fee = (receipt.gasUsed * receipt.effectiveGasPrice).toString();
-        }
-
-        response.txResult = {
-          change: changeValue || '0',
-          fee
-        };
-        callback(response);
+        handleTransferBalanceResult({ receipt: receipt, response: response, callback: callback, networkKey: networkKey, changeValue: changeValue });
       }).catch((e) => {
         response.status = false;
         response.errors?.push({

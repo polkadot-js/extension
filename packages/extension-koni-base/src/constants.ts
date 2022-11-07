@@ -23,7 +23,7 @@ export const CRON_REFRESH_STAKE_UNLOCKING_INFO = 10000;
 export const ALL_ACCOUNT_KEY = 'ALL';
 export const ALL_NETWORK_KEY = 'all';
 export const ALL_GENESIS_HASH = null;
-export const IGNORE_GET_SUBSTRATE_FEATURES_LIST: string[] = ['astarEvm', 'ethereum', 'ethereum_goerli', 'binance', 'binance_test'];
+export const IGNORE_GET_SUBSTRATE_FEATURES_LIST: string[] = ['astarEvm', 'ethereum', 'ethereum_goerli', 'binance', 'binance_test', 'boba_rinkeby', 'boba', 'bobabase', 'bobabeam'];
 
 export const DEFAULT_THEME = 'dark';
 

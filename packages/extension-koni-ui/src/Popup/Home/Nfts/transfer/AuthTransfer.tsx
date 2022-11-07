@@ -1,8 +1,8 @@
 // Copyright 2019-2022 @subwallet/extension-koni authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { LedgerState } from '@subwallet/extension-base/../../../../../../extension-koni-base/src/signers/types';
-import { BaseTxError, BasicTxError, NftTransactionResponse, NftTransactionResponse, RequestNftForceUpdate, ResponseNftTransferExternal } from '@subwallet/extension-base/background/KoniTypes';
+import { LedgerState } from '@subwallet/extension-base/signers/types';
+import { BaseTxError, BasicTxError, NftItem, NftTransactionResponse, NftTransactionResponse, RequestNftForceUpdate, ResponseNftTransferExternal } from '@subwallet/extension-base/background/KoniTypes';
 import { AccountJson } from '@subwallet/extension-base/background/types';
 import { Spinner, Theme } from '@subwallet/extension-koni-ui/components';
 import InputAddress from '@subwallet/extension-koni-ui/components/InputAddress';
@@ -17,7 +17,7 @@ import { useRejectExternalRequest } from '@subwallet/extension-koni-ui/hooks/use
 import useToast from '@subwallet/extension-koni-ui/hooks/useToast';
 import useTranslation from '@subwallet/extension-koni-ui/hooks/useTranslation';
 import { evmNftSubmitTransaction, makeTransferNftLedgerSubstrate, makeTransferNftQrEvm, makeTransferNftQrSubstrate, nftForceUpdate, substrateNftSubmitTransaction } from '@subwallet/extension-koni-ui/messaging';
-import { _NftItem, SubstrateTransferParams, Web3TransferParams } from '@subwallet/extension-koni-ui/Popup/Home/Nfts/utils';
+import { SubstrateTransferParams, Web3TransferParams } from '@subwallet/extension-koni-ui/Popup/Home/Nfts/utils';
 import Address from '@subwallet/extension-koni-ui/Popup/Sending/parts/Address';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
@@ -41,7 +41,7 @@ interface Props extends ThemeProps {
   setExtrinsicHash: (val: string) => void;
   setIsTxSuccess: (val: boolean) => void;
   setTxError: (val: string) => void;
-  nftItem: _NftItem;
+  nftItem: NftItem;
   collectionId: string;
   recipientAddress: string;
   chain: string;

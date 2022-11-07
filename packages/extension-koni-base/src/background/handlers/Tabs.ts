@@ -404,7 +404,7 @@ export default class KoniTabs extends Tabs {
 
     Object.entries(eventMap).forEach(([event, callback]) => {
       // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
-      provider?.on(event, callback);
+      provider?.on && provider?.on(event, callback);
     });
 
     // Add event emitter
@@ -421,7 +421,7 @@ export default class KoniTabs extends Tabs {
 
       Object.entries(eventMap).forEach(([event, callback]) => {
         // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
-        provider?.removeListener(event, callback);
+        provider?.removeListener && provider?.removeListener(event, callback);
       });
       unsubscribe(id);
       accountListSubscription.unsubscribe();

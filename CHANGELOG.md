@@ -1,5 +1,19 @@
 # CHANGELOG
 
+## 0.6.9 (Koni)
+Build date: Nov 3, 2022.
+
+Update:
+- Support staking for KMA (Calamari parachain) (#755)
+- Support Boba Networks (#730)
+- Add top token on ETH and BSC (#760)
+- Support sending BIT token for Bit.Country Alpha Net (#773)
+- Update Amplitude endpoint (#775)
+- Update price for KBTC (#785)
+
+Bug fixes:
+- Error while try to subscribe event data with ETH, BNB or another https provider (#783)
+
 ## 0.6.8 (Koni)
 Build date: Oct 31, 2022.
 

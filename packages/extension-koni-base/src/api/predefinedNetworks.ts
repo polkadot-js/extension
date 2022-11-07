@@ -1062,7 +1062,9 @@ export const PREDEFINED_NETWORKS: Record<string, NetworkJson> = {
     nativeToken: 'KMA',
     crowdloanUrl: 'https://calamari.network/',
     decimals: 12,
-    coinGeckoKey: 'calamari-network'
+    coinGeckoKey: 'calamari-network',
+    getStakingOnChain: true,
+    supportBonding: true
   },
   basilisk: {
     key: 'basilisk',
@@ -1864,7 +1866,7 @@ export const PREDEFINED_NETWORKS: Record<string, NetworkJson> = {
     genesisHash: '0xcceae7f3b9947cdb67369c026ef78efa5f34a08fe5808d373c04421ecf4f1aaf',
     ss58Format: 57,
     providers: {
-      amplitude: 'wss://pencol-kus-01.pendulumchain.tech'
+      amplitude: 'wss://rpc-amplitude.pendulumchain.tech'
     },
     active: false,
     currentProviderMode: 'ws',
@@ -1934,6 +1936,112 @@ export const PREDEFINED_NETWORKS: Record<string, NetworkJson> = {
     decimals: 18,
     supportBonding: true,
     getStakingOnChain: true
+  },
+  calamari_test: {
+    key: 'calamari_test',
+    chain: 'Calamari Staging',
+    genesisHash: '0x2ae061f08422b6503b8aa5f401242a209999669c3b8945f814dc096fb1a977bd',
+    ss58Format: 78,
+    providers: {
+      calamari_test: 'wss://c1.calamari.seabird.systems'
+    },
+    active: false,
+    currentProviderMode: 'ws',
+    currentProvider: 'calamari_test',
+    nativeToken: 'KMA',
+    groups: ['TEST_NET'],
+    decimals: 12,
+    supportBonding: true,
+    getStakingOnChain: true
+  },
+  boba: {
+    key: 'boba',
+    chain: 'Boba Network',
+    genesisHash: '0xc7d53ee64d57e783b539c09923069280b95a212a36e84b308e15ad6f09a6fd6e',
+    ss58Format: 0,
+    providers: {
+      'Read RPC': 'https://lightning-replica.boba.network',
+      'Write RPC': 'https://mainnet.boba.network'
+    },
+    active: false,
+    currentProviderMode: 'http',
+    currentProvider: 'Write RPC',
+    groups: ['MAIN_NET'],
+    isEthereum: true,
+    nativeToken: 'ETH',
+    coinGeckoKey: 'ethereum',
+    decimals: 18,
+    evmChainId: 288,
+    supportBonding: false,
+    getStakingOnChain: false,
+    abiExplorer: 'https://blockexplorer.boba.network',
+    supportSmartContract: [ContractType.evm]
+  },
+  boba_rinkeby: {
+    key: 'boba_rinkeby',
+    chain: 'Boba Rinkeby (Testnet)',
+    genesisHash: '0x6854c3f614bd5096f3b4cf142c9fbad8b95ced2eda2f5d64f97e8136b80e3677',
+    ss58Format: 0,
+    providers: {
+      RPC: 'https://rinkeby.boba.network'
+    },
+    active: false,
+    currentProviderMode: 'http',
+    currentProvider: 'RPC',
+    groups: ['TEST_NET'],
+    isEthereum: true,
+    nativeToken: 'ETH',
+    decimals: 18,
+    evmChainId: 28,
+    supportBonding: false,
+    getStakingOnChain: false,
+    abiExplorer: 'https://blockexplorer.rinkeby.boba.network',
+    supportSmartContract: [ContractType.evm]
+  },
+  bobabeam: {
+    key: 'bobabeam',
+    chain: 'Bobabeam',
+    genesisHash: '0x6330c695da0822ab704c71ec3e26e14999e8074754fa1923059dd9a3e0d39c07',
+    ss58Format: 0,
+    providers: {
+      RPC: 'https://bobabeam.boba.network',
+      'Replica RPC': 'https://replica.bobabeam.boba.network'
+    },
+    active: false,
+    currentProviderMode: 'http',
+    coinGeckoKey: 'boba-network',
+    currentProvider: 'RPC',
+    groups: ['MAIN_NET'],
+    isEthereum: true,
+    nativeToken: 'BOBA',
+    decimals: 18,
+    evmChainId: 1294,
+    supportBonding: false,
+    getStakingOnChain: false,
+    abiExplorer: 'https://blockexplorer.bobabeam.boba.network',
+    supportSmartContract: [ContractType.evm]
+  },
+  bobabase: {
+    key: 'bobabase',
+    chain: 'Bobabase (Testnet)',
+    genesisHash: '0x66482d8e7d148ce68bc546fc4e2f5e0631d4fc816d5327fb1f688a8fbad01d6a',
+    ss58Format: 0,
+    providers: {
+      RPC: 'https://bobabase.boba.network',
+      'Replica RPC': 'https://replica.bobabase.boba.network'
+    },
+    active: false,
+    currentProviderMode: 'http',
+    currentProvider: 'RPC',
+    groups: ['TEST_NET'],
+    isEthereum: true,
+    nativeToken: 'BOBA',
+    decimals: 18,
+    evmChainId: 1297,
+    supportBonding: false,
+    getStakingOnChain: false,
+    abiExplorer: 'https://blockexplorer.bobabase.boba.network',
+    supportSmartContract: [ContractType.evm]
   }
 };
 

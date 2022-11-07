@@ -5,12 +5,13 @@ import '@google/model-viewer';
 
 import { faArrowLeft } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { NftItem as _NftItem } from '@subwallet/extension-base/background/KoniTypes';
 import { ActionContext, Theme } from '@subwallet/extension-koni-ui/components';
 import Spinner from '@subwallet/extension-koni-ui/components/Spinner';
 import useGetNetworkJson from '@subwallet/extension-koni-ui/hooks/screen/home/useGetNetworkJson';
 import useCurrentAccountCanSign from '@subwallet/extension-koni-ui/hooks/useCurrentAccountCanSign';
 import useToast from '@subwallet/extension-koni-ui/hooks/useToast';
-import { _NftItem, isNftTransferSupported } from '@subwallet/extension-koni-ui/Popup/Home/Nfts/utils';
+import { isNftTransferSupported } from '@subwallet/extension-koni-ui/Popup/Home/Nfts/utils';
 import { RootState, store } from '@subwallet/extension-koni-ui/stores';
 import { TransferNftParams } from '@subwallet/extension-koni-ui/stores/types';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';

@@ -3,7 +3,7 @@
 
 import '@google/model-viewer';
 
-import { CustomTokenType } from '@subwallet/extension-base/background/KoniTypes';
+import { CustomTokenType, NftItem } from '@subwallet/extension-base/background/KoniTypes';
 import { isValidSubstrateAddress } from '@subwallet/extension-koni-base/utils';
 import { ActionContext, Spinner, Theme } from '@subwallet/extension-koni-ui/components';
 import InputAddress from '@subwallet/extension-koni-ui/components/InputAddress';
@@ -14,7 +14,7 @@ import paramsHandler from '@subwallet/extension-koni-ui/Popup/Home/Nfts/api/para
 import transferHandler from '@subwallet/extension-koni-ui/Popup/Home/Nfts/api/transferHandler';
 import AuthTransfer from '@subwallet/extension-koni-ui/Popup/Home/Nfts/transfer/AuthTransfer';
 import TransferResult from '@subwallet/extension-koni-ui/Popup/Home/Nfts/transfer/TransferResult';
-import { _NftItem, SubstrateTransferParams, SUPPORTED_TRANSFER_SUBSTRATE_CHAIN, Web3TransferParams } from '@subwallet/extension-koni-ui/Popup/Home/Nfts/utils';
+import { SubstrateTransferParams, SUPPORTED_TRANSFER_SUBSTRATE_CHAIN, Web3TransferParams } from '@subwallet/extension-koni-ui/Popup/Home/Nfts/utils';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { CurrentAccountType } from '@subwallet/extension-koni-ui/stores/types';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
@@ -30,7 +30,7 @@ interface Props extends ThemeProps {
 
 interface ContentProps {
   className?: string;
-  nftItem: _NftItem;
+  nftItem: NftItem;
   collectionImage?: string;
   collectionId: string;
 }

@@ -121,7 +121,7 @@ export interface StakingItem {
 export interface StakingJson {
   reset?: boolean,
   ready?: boolean,
-  details: Record<string, StakingItem>
+  details: StakingItem[]
 }
 
 export interface StakingStoreJson {

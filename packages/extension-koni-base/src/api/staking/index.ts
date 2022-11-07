@@ -204,6 +204,8 @@ function getRelayStakingOnChain (parentApi: ApiProps, useAddresses: string[], ne
       type: StakingType.NOMINATED
     } as StakingItem;
 
+    console.log('got relay data', stakingItem);
+
     callback(chain, stakingItem);
   });
 }
@@ -256,6 +258,8 @@ function getRelayPoolingOnchain (parentApi: ApiProps, useAddresses: string[], ne
       state: APIItemState.READY,
       type: StakingType.POOLED
     } as StakingItem;
+
+    console.log('got pooling data', stakingItem);
 
     callback(chain, stakingItem);
   });

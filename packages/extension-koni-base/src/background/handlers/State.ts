@@ -543,11 +543,11 @@ export default class KoniState extends State {
   }
 
   public getStaking (reset?: boolean): StakingJson {
-    const activeData: Record<string, StakingItem> = {};
+    const activeData: StakingItem[] = [];
 
     Object.entries(this.stakingMap).forEach(([networkKey, item]) => {
       if (this.networkMap[networkKey]?.active) {
-        activeData[parseStakingItemKey(networkKey, item.type)] = item;
+        activeData.push(item);
       }
     });
 

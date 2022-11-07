@@ -83,7 +83,6 @@ function getParaStakingOnChain (parentApi: ApiProps, useAddresses: string[], net
   return parentApi.api.query.parachainStaking.delegatorState.multi(useAddresses, (ledgers: any) => {
     let totalBalance = new BN(0);
     let unlockingBalance = new BN(0);
-    let stakingItem: StakingItem;
 
     if (ledgers) {
       for (const ledger of ledgers) {
@@ -114,29 +113,16 @@ function getParaStakingOnChain (parentApi: ApiProps, useAddresses: string[], net
       const parsedUnlockingBalance = parseStakingBalance(formattedUnlockingBalance, chain, networks);
       const parsedActiveBalance = parseStakingBalance(formattedActiveBalance, chain, networks);
 
-      if (totalBalance.gt(BN_ZERO)) {
-        stakingItem = {
-          name: networks[chain].chain,
-          chainId: chain,
-          balance: parsedTotalBalance.toString(),
-          activeBalance: parsedActiveBalance.toString(),
-          unlockingBalance: parsedUnlockingBalance.toString(),
-          nativeToken: networks[chain].nativeToken,
-          unit: networks[chain].nativeToken,
-          state: APIItemState.READY
-        } as StakingItem;
-      } else {
-        stakingItem = {
-          name: networks[chain].chain,
-          chainId: chain,
-          balance: parsedTotalBalance.toString(),
-          activeBalance: parsedActiveBalance.toString(),
-          unlockingBalance: parsedUnlockingBalance.toString(),
-          nativeToken: networks[chain].nativeToken,
-          unit: networks[chain].nativeToken,
-          state: APIItemState.READY
-        } as StakingItem;
-      }
+      const stakingItem = {
+        name: networks[chain].chain,
+        chainId: chain,
+        balance: parsedTotalBalance.toString(),
+        activeBalance: parsedActiveBalance.toString(),
+        unlockingBalance: parsedUnlockingBalance.toString(),
+        nativeToken: networks[chain].nativeToken,
+        unit: networks[chain].nativeToken,
+        state: APIItemState.READY
+      } as StakingItem;
 
       // eslint-disable-next-line node/no-callback-literal
       callback(chain, stakingItem);
@@ -150,7 +136,6 @@ function getRelayStakingOnChain (parentApi: ApiProps, useAddresses: string[], ne
     let activeBalance = new BN(0);
     let unlockingBalance = new BN(0);
     let unit = '';
-    let stakingItem: StakingItem;
 
     if (ledgers) {
       for (const ledger of ledgers) {
@@ -190,22 +175,24 @@ function getRelayStakingOnChain (parentApi: ApiProps, useAddresses: string[], ne
     // TODO: improve getting staking info from nomination pools
     const poolNominations = await parentApi.api.query?.nominationPools?.poolMembers.multi(useAddresses);
 
-    console.log('useAddresses', useAddresses, poolNominations, chain);
-
     if (poolNominations) {
       for (const _poolNomination of poolNominations) {
         const poolNomination = _poolNomination.toHuman() as Record<string, any>;
 
-        console.log(poolNomination);
+        if (poolNomination !== null) {
+          const bondedBalance = poolNomination.points as string;
+          const unbondedBalance = poolNomination.unbondingEras as Record<string, string>;
 
-        const bondedBalance = poolNomination.points as string;
+          Object.entries(unbondedBalance).forEach(([era, value]) => {
+            const bnUnbondedBalance = new BN(value.replaceAll(',', ''));
 
-        const bnBondedBalance = new BN(bondedBalance.replaceAll(',', ''));
+            unlockingBalance = unlockingBalance.add(bnUnbondedBalance);
+          });
 
-        // TODO: handle unstaking case as well
-        if (bnBondedBalance.gt(BN_ZERO)) {
-          totalBalance.add(bnBondedBalance);
-          activeBalance.add(bnBondedBalance);
+          const bnBondedBalance = new BN(bondedBalance.replaceAll(',', ''));
+
+          totalBalance = totalBalance.add(bnBondedBalance).add(unlockingBalance);
+          activeBalance = activeBalance.add(bnBondedBalance);
         }
       }
     }
@@ -218,29 +205,16 @@ function getRelayStakingOnChain (parentApi: ApiProps, useAddresses: string[], ne
     const parsedUnlockingBalance = parseStakingBalance(formattedUnlockingBalance, chain, networks);
     const parsedTotal = parseStakingBalance(formattedTotalBalance, chain, networks);
 
-    if (totalBalance.gt(BN_ZERO)) {
-      stakingItem = {
-        name: networks[chain].chain,
-        chainId: chain,
-        balance: parsedTotal.toString(),
-        activeBalance: parsedActiveBalance.toString(),
-        unlockingBalance: parsedUnlockingBalance.toString(),
-        nativeToken: networks[chain].nativeToken,
-        unit: unit || networks[chain].nativeToken,
-        state: APIItemState.READY
-      } as StakingItem;
-    } else {
-      stakingItem = {
-        name: networks[chain].chain,
-        chainId: chain,
-        balance: parsedTotal.toString(),
-        activeBalance: parsedActiveBalance.toString(),
-        unlockingBalance: parsedUnlockingBalance.toString(),
-        nativeToken: networks[chain].nativeToken,
-        unit: unit || networks[chain].nativeToken,
-        state: APIItemState.READY
-      } as StakingItem;
-    }
+    const stakingItem = {
+      name: networks[chain].chain,
+      chainId: chain,
+      balance: parsedTotal.toString(),
+      activeBalance: parsedActiveBalance.toString(),
+      unlockingBalance: parsedUnlockingBalance.toString(),
+      nativeToken: networks[chain].nativeToken,
+      unit: unit || networks[chain].nativeToken,
+      state: APIItemState.READY
+    } as StakingItem;
 
     callback(chain, stakingItem);
   });
@@ -250,7 +224,6 @@ function getAstarStakingOnChain (parentApi: ApiProps, useAddresses: string[], ne
   return parentApi.api.query.dappsStaking.ledger.multi(useAddresses, (ledgers: any[]) => {
     let totalBalance = BN_ZERO;
     let unlockingBalance = BN_ZERO;
-    let stakingItem: StakingItem;
 
     if (ledgers) {
       for (const ledger of ledgers) {
@@ -279,29 +252,16 @@ function getAstarStakingOnChain (parentApi: ApiProps, useAddresses: string[], ne
       const parsedActiveBalance = parseStakingBalance(formattedActiveBalance, chain, networks);
       const parsedUnlockingBalance = parseStakingBalance(formattedUnlockingBalance, chain, networks);
 
-      if (totalBalance.gt(BN_ZERO)) {
-        stakingItem = {
-          name: networks[chain].chain,
-          chainId: chain,
-          balance: parsedTotalBalance.toString(),
-          activeBalance: parsedActiveBalance.toString(),
-          unlockingBalance: parsedUnlockingBalance.toString(),
-          nativeToken: networks[chain].nativeToken,
-          unit: networks[chain].nativeToken,
-          state: APIItemState.READY
-        } as StakingItem;
-      } else {
-        stakingItem = {
-          name: networks[chain].chain,
-          chainId: chain,
-          balance: parsedTotalBalance.toString(),
-          activeBalance: parsedActiveBalance.toString(),
-          unlockingBalance: parsedUnlockingBalance.toString(),
-          nativeToken: networks[chain].nativeToken,
-          unit: networks[chain].nativeToken,
-          state: APIItemState.READY
-        } as StakingItem;
-      }
+      const stakingItem = {
+        name: networks[chain].chain,
+        chainId: chain,
+        balance: parsedTotalBalance.toString(),
+        activeBalance: parsedActiveBalance.toString(),
+        unlockingBalance: parsedUnlockingBalance.toString(),
+        nativeToken: networks[chain].nativeToken,
+        unit: networks[chain].nativeToken,
+        state: APIItemState.READY
+      } as StakingItem;
 
       // eslint-disable-next-line node/no-callback-literal
       callback(chain, stakingItem);

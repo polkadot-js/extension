@@ -140,7 +140,9 @@ function Request ({ authId, className, request: { accountAuthType, allowedAccoun
             </>
           )
           : <Warning>
-            {accountAuthType === 'evm' ? t<string>('You don\'t have any evm account. Please create, import or restore an account to continue') : t<string>('You don\'t have any substrate account. Please create, import or restore an account to continue')}
+            {accountAuthType === 'evm'
+              ? t<string>('This dApp requires an Evm account. Please create, import or restore an EVM account to continue')
+              : t<string>('This dApp requires a Substrate account. Please create, import or restore a Substrate account to continue')}
           </Warning>
         }
 

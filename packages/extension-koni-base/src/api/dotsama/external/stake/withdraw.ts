@@ -4,7 +4,7 @@
 import { BasicTxResponse } from '@subwallet/extension-base/background/KoniTypes';
 import { getWithdrawalExtrinsic } from '@subwallet/extension-koni-base/api/bonding';
 import { ExternalProps } from '@subwallet/extension-koni-base/api/dotsama/external/shared';
-import { signAndSendExtrinsic } from '@subwallet/extension-koni-base/api/dotsama/signAndSend';
+import { signAndSendExtrinsic } from '@subwallet/extension-koni-base/api/dotsama/shared/signAndSendExtrinsic';
 
 interface WithdrawStakeExternalProps extends ExternalProps {
   action?: string;
@@ -14,7 +14,7 @@ interface WithdrawStakeExternalProps extends ExternalProps {
 
 export const createWithdrawStakeExternal = async ({ action,
   address,
-  apiProp,
+  apiProps,
   callback,
   id,
   network,
@@ -23,14 +23,14 @@ export const createWithdrawStakeExternal = async ({ action,
   updateState,
   validatorAddress }: WithdrawStakeExternalProps) => {
   const txState: BasicTxResponse = {};
-  const extrinsic = await getWithdrawalExtrinsic(apiProp, network.key, address, validatorAddress, action);
+  const extrinsic = await getWithdrawalExtrinsic(apiProps, network.key, address, validatorAddress, action);
 
   await signAndSendExtrinsic({
     type: signerType,
     callback: callback,
     id: id,
     setState: setState,
-    apiProp: apiProp,
+    apiProps: apiProps,
     addressOrPair: address,
     txState: txState,
     updateState: updateState,

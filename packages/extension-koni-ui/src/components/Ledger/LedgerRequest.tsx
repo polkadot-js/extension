@@ -3,8 +3,8 @@
 
 import { faSync } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { LedgerState } from '@subwallet/extension-base/../../../../extension-koni-base/src/signers/types';
 import { AccountJson } from '@subwallet/extension-base/background/types';
-import { LedgerState } from '@subwallet/extension-base/signers/types';
 import { ExternalRequestContext } from '@subwallet/extension-koni-ui/contexts/ExternalRequestContext';
 import { rejectExternalRequest, resolveExternalRequest } from '@subwallet/extension-koni-ui/messaging';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';

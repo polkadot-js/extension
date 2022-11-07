@@ -652,6 +652,7 @@ export enum TransferErrorCode {
   INVALID_VALUE = 'invalidValue',
   INVALID_TOKEN = 'invalidToken',
   TRANSFER_ERROR = 'transferError',
+  UNSUPPORTED = 'unsupported'
 }
 
 export enum BasicTxErrorCode {
@@ -664,7 +665,6 @@ export enum BasicTxErrorCode {
   CREATE_COMPOUND_ERROR = 'createCompoundError',
   CANCEL_COMPOUND_ERROR = 'cancelCompoundError',
   TIMEOUT = 'timeout',
-  UNSUPPORTED = 'unsupported',
   BALANCE_TO_LOW = 'balanceTooLow1'
 }
 
@@ -680,13 +680,15 @@ export interface BasicTxResponse {
   passwordError?: string | null;
   callHash?: string;
   status?: boolean;
-  transactionHash?: string;
+  extrinsicHash?: string;
   txError?: boolean;
   errors?: BasicTxError[];
   externalState?: ExternalState;
   qrState?: QrState;
   ledgerState?: LedgerState;
   isBusy?: boolean;
+  txResult?: TxResultType,
+  isFinalized?: boolean
 }
 
 export interface NftTransactionResponse extends BasicTxResponse {
@@ -717,29 +719,6 @@ export type TxResultType = {
   changeSymbol?: string;
   fee?: string;
   feeSymbol?: string;
-}
-
-export interface ResponseTransfer {
-  step: TransferStep,
-  errors?: Array<BasicTxError>,
-  extrinsicHash?: string,
-  extrinsicStatus?: string,
-  data?: object,
-  txResult?: TxResultType,
-  isFinalized?: boolean
-}
-
-export interface ResponseTransferExternal extends ResponseTransfer{
-  externalState?: ExternalState;
-}
-
-export interface ResponseTransferQr extends ResponseTransferExternal{
-  qrState?: QrState;
-  isBusy?: boolean;
-}
-
-export interface ResponseTransferLedger extends ResponseTransferExternal{
-  ledgerState?: LedgerState;
 }
 
 export interface NftTransactionRequest {
@@ -1234,19 +1213,6 @@ export interface StakeClaimRewardParams {
   password?: string
 }
 
-export interface ResponseNftTransferExternal extends NftTransactionResponse{
-  externalState?: ExternalState;
-}
-
-export interface ResponseNftTransferQr extends ResponseNftTransferExternal{
-  qrState?: QrState;
-  isBusy?: boolean;
-}
-
-export interface ResponseNftTransferLedger extends ResponseNftTransferExternal{
-  ledgerState?: LedgerState;
-}
-
 export type RequestNftTransferExternalSubstrate = Omit<SubstrateNftSubmitTransaction, 'password'>
 
 export type RequestNftTransferExternalEVM = Omit<EvmNftSubmitTransaction, 'password'>
@@ -1490,8 +1456,8 @@ export interface KoniRequestSignatures {
   'pri(accounts.create.withSecret)': [RequestAccountCreateWithSecretKey, ResponseAccountCreateWithSecretKey];
   'pri(accounts.checkTransfer)': [RequestCheckTransfer, ResponseCheckTransfer];
   'pri(accounts.checkCrossChainTransfer)': [RequestCheckCrossChainTransfer, ResponseCheckCrossChainTransfer];
-  'pri(accounts.transfer)': [RequestTransfer, BasicTxResponse, ResponseTransfer];
-  'pri(accounts.crossChainTransfer)': [RequestCrossChainTransfer, BasicTxResponse, ResponseTransfer];
+  'pri(accounts.transfer)': [RequestTransfer, BasicTxResponse, BasicTxResponse];
+  'pri(accounts.crossChainTransfer)': [RequestCrossChainTransfer, BasicTxResponse, BasicTxResponse];
   'pri(derivation.createV2)': [RequestDeriveCreateV2, boolean];
   'pri(json.restoreV2)': [RequestJsonRestoreV2, void];
   'pri(json.batchRestoreV2)': [RequestBatchRestoreV2, void];
@@ -1547,10 +1513,10 @@ export interface KoniRequestSignatures {
   'pri(evm.transaction.parse.input)': [RequestParseEVMTransactionInput, ResponseParseEVMTransactionInput];
 
   // Create qr request
-  'pri(accounts.transfer.qr.create)': [RequestTransferExternal, BasicTxResponse, ResponseTransferQr];
-  'pri(accounts.cross.transfer.qr.create)': [RequestCrossChainTransferExternal, BasicTxResponse, ResponseTransferQr];
-  'pri(nft.transfer.qr.create.substrate)': [RequestNftTransferExternalSubstrate, NftTransactionResponse, ResponseNftTransferQr];
-  'pri(nft.transfer.qr.create.evm)': [RequestNftTransferExternalEVM, NftTransactionResponse, ResponseNftTransferQr];
+  'pri(accounts.transfer.qr.create)': [RequestTransferExternal, BasicTxResponse, BasicTxResponse];
+  'pri(accounts.cross.transfer.qr.create)': [RequestCrossChainTransferExternal, BasicTxResponse, BasicTxResponse];
+  'pri(nft.transfer.qr.create.substrate)': [RequestNftTransferExternalSubstrate, NftTransactionResponse, NftTransactionResponse];
+  'pri(nft.transfer.qr.create.evm)': [RequestNftTransferExternalEVM, NftTransactionResponse, NftTransactionResponse];
   'pri(stake.qr.create)': [RequestStakeExternal, BasicTxResponse, BasicTxResponse];
   'pri(unStake.qr.create)': [RequestUnStakeExternal, BasicTxResponse, BasicTxResponse];
   'pri(withdrawStake.qr.create)': [RequestWithdrawStakeExternal, BasicTxResponse, BasicTxResponse];
@@ -1559,9 +1525,9 @@ export interface KoniRequestSignatures {
   'pri(cancelCompound.qr.create)': [RequestCancelCompoundStakeExternal, BasicTxResponse, BasicTxResponse];
 
   // Create ledger request
-  'pri(accounts.transfer.ledger.create)': [RequestTransferExternal, BasicTxResponse, ResponseTransferLedger];
-  'pri(accounts.cross.transfer.ledger.create)': [RequestCrossChainTransferExternal, BasicTxResponse, ResponseTransferLedger];
-  'pri(nft.transfer.ledger.create.substrate)': [RequestNftTransferExternalSubstrate, NftTransactionResponse, ResponseNftTransferLedger];
+  'pri(accounts.transfer.ledger.create)': [RequestTransferExternal, BasicTxResponse, BasicTxResponse];
+  'pri(accounts.cross.transfer.ledger.create)': [RequestCrossChainTransferExternal, BasicTxResponse, BasicTxResponse];
+  'pri(nft.transfer.ledger.create.substrate)': [RequestNftTransferExternalSubstrate, NftTransactionResponse, NftTransactionResponse];
   'pri(stake.ledger.create)': [RequestStakeExternal, BasicTxResponse, BasicTxResponse];
   'pri(unStake.ledger.create)': [RequestUnStakeExternal, BasicTxResponse, BasicTxResponse];
   'pri(withdrawStake.ledger.create)': [RequestWithdrawStakeExternal, BasicTxResponse, BasicTxResponse];

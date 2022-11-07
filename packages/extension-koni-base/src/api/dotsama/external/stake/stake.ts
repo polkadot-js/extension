@@ -4,7 +4,7 @@
 import { BasicTxResponse, ValidatorInfo } from '@subwallet/extension-base/background/KoniTypes';
 import { getBondingExtrinsic } from '@subwallet/extension-koni-base/api/bonding';
 import { ExternalProps } from '@subwallet/extension-koni-base/api/dotsama/external/shared';
-import { signAndSendExtrinsic } from '@subwallet/extension-koni-base/api/dotsama/signAndSend';
+import { signAndSendExtrinsic } from '@subwallet/extension-koni-base/api/dotsama/shared/signAndSendExtrinsic';
 
 interface StakeExternalProps extends ExternalProps {
   amount: number;
@@ -16,7 +16,7 @@ interface StakeExternalProps extends ExternalProps {
 }
 
 export const createStakeExternal = async ({ amount,
-  apiProp,
+  apiProps,
   bondedValidators,
   callback,
   id,
@@ -30,15 +30,15 @@ export const createStakeExternal = async ({ amount,
   validatorInfo }: StakeExternalProps): Promise<void> => {
   const txState: BasicTxResponse = {};
 
-  const extrinsic = await getBondingExtrinsic(network, network.key, amount, bondedValidators, validatorInfo, isBondedBefore, nominatorAddress, apiProp);
+  const extrinsic = await getBondingExtrinsic(network, network.key, amount, bondedValidators, validatorInfo, isBondedBefore, nominatorAddress, apiProps);
 
   await signAndSendExtrinsic({
     type: signerType,
     callback: callback,
     id: id,
     setState: setState,
-    apiProp: apiProp,
-    addressOrPair: nominatorAddress,
+    apiProps: apiProps,
+    address: nominatorAddress,
     txState: txState,
     updateState: updateState,
     extrinsic: extrinsic,

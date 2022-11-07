@@ -109,13 +109,13 @@ function StakeAuthCancelCompoundRequest ({ address, balanceError, className, fee
           setIsTxSuccess(true);
           setShowAuth(false);
           setShowResult(true);
-          setExtrinsicHash(cbData.transactionHash as string);
+          setExtrinsicHash(cbData.extrinsicHash as string);
         } else {
           setIsTxSuccess(false);
           setTxError('Error submitting transaction');
           setShowAuth(false);
           setShowResult(true);
-          setExtrinsicHash(cbData.transactionHash as string);
+          setExtrinsicHash(cbData.extrinsicHash as string);
         }
       }
     });

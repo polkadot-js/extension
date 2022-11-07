@@ -1,8 +1,8 @@
 // Copyright 2019-2022 @subwallet/extension-koni authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { BaseTxError, BasicExternalTxResponse, BasicTxResponse, BasicTxResponse, BasicTxError } from '@subwallet/extension-base/background/KoniTypes';
-import { LedgerState } from '@subwallet/extension-base/signers/types';
+import { LedgerState } from '@subwallet/extension-base/../../../../../extension-koni-base/src/signers/types';
+import { BaseTxError, BasicExternalTxResponse, BasicTxError, BasicTxResponse, BasicTxResponse } from '@subwallet/extension-base/background/KoniTypes';
 import { InputWithLabel } from '@subwallet/extension-koni-ui/components';
 import { BalanceVal } from '@subwallet/extension-koni-ui/components/Balance';
 import FeeValue from '@subwallet/extension-koni-ui/components/Balance/FeeValue';
@@ -117,13 +117,13 @@ function UnbondingAuthTransaction ({ amount, balanceError, className, fee, handl
           setIsTxSuccess(true);
           setShowConfirm(false);
           setShowResult(true);
-          setExtrinsicHash(resp.transactionHash as string);
+          setExtrinsicHash(resp.extrinsicHash as string);
         } else {
           setIsTxSuccess(false);
           setTxError('Error submitting transaction');
           setShowConfirm(false);
           setShowResult(true);
-          setExtrinsicHash(resp.transactionHash as string);
+          setExtrinsicHash(resp.extrinsicHash as string);
         }
       }
     });

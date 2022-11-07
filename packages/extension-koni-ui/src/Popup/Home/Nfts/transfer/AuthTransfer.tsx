@@ -1,9 +1,9 @@
 // Copyright 2019-2022 @subwallet/extension-koni authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { BaseTxError, BasicTxError, RequestNftForceUpdate, ResponseNftTransferExternal, ResponseNftTransferLedger, ResponseNftTransferQr } from '@subwallet/extension-base/background/KoniTypes';
+import { LedgerState } from '@subwallet/extension-base/../../../../../../extension-koni-base/src/signers/types';
+import { BaseTxError, BasicTxError, NftTransactionResponse, NftTransactionResponse, RequestNftForceUpdate, ResponseNftTransferExternal } from '@subwallet/extension-base/background/KoniTypes';
 import { AccountJson } from '@subwallet/extension-base/background/types';
-import { LedgerState } from '@subwallet/extension-base/signers/types';
 import { Spinner, Theme } from '@subwallet/extension-koni-ui/components';
 import InputAddress from '@subwallet/extension-koni-ui/components/InputAddress';
 import LedgerRequest from '@subwallet/extension-koni-ui/components/Ledger/LedgerRequest';
@@ -126,7 +126,7 @@ function AuthTransfer ({ chain, className, collectionId, nftItem, recipientAddre
             setIsTxSuccess(true);
             setShowConfirm(false);
             setShowResult(true);
-            setExtrinsicHash(data.transactionHash as string);
+            setExtrinsicHash(data.extrinsicHash as string);
             nftForceUpdate({ nft: nftItem, collectionId, isSendingSelf: data.isSendingSelf, chain, senderAddress: account?.account?.address, recipientAddress } as RequestNftForceUpdate)
               .catch(console.error);
           } else {
@@ -134,7 +134,7 @@ function AuthTransfer ({ chain, className, collectionId, nftItem, recipientAddre
             setTxError('Error submitting transaction');
             setShowConfirm(false);
             setShowResult(true);
-            setExtrinsicHash(data.transactionHash as string);
+            setExtrinsicHash(data.extrinsicHash as string);
           }
         }
       });
@@ -185,7 +185,7 @@ function AuthTransfer ({ chain, className, collectionId, nftItem, recipientAddre
           setIsTxSuccess(true);
           setShowConfirm(false);
           setShowResult(true);
-          setExtrinsicHash(data.transactionHash as string);
+          setExtrinsicHash(data.extrinsicHash as string);
           nftForceUpdate({ nft: nftItem, collectionId, isSendingSelf: data.isSendingSelf, chain, senderAddress: senderAccount.address, recipientAddress } as RequestNftForceUpdate)
             .catch(console.error);
         } else {
@@ -193,7 +193,7 @@ function AuthTransfer ({ chain, className, collectionId, nftItem, recipientAddre
           setTxError('Error submitting transaction');
           setShowConfirm(false);
           setShowResult(true);
-          setExtrinsicHash(data.transactionHash as string);
+          setExtrinsicHash(data.extrinsicHash as string);
         }
       }
     });
@@ -232,7 +232,7 @@ function AuthTransfer ({ chain, className, collectionId, nftItem, recipientAddre
         setIsTxSuccess(true);
         setShowConfirm(false);
         setShowResult(true);
-        setExtrinsicHash(data.transactionHash as string);
+        setExtrinsicHash(data.extrinsicHash as string);
         nftForceUpdate({ nft: nftItem, collectionId, isSendingSelf: data.isSendingSelf, chain } as RequestNftForceUpdate)
           .catch(console.error);
       } else {
@@ -240,7 +240,7 @@ function AuthTransfer ({ chain, className, collectionId, nftItem, recipientAddre
         setTxError('Error submitting transaction');
         setShowConfirm(false);
         setShowResult(true);
-        setExtrinsicHash(data.transactionHash as string);
+        setExtrinsicHash(data.extrinsicHash as string);
       }
 
       cleanQrState();
@@ -248,7 +248,7 @@ function AuthTransfer ({ chain, className, collectionId, nftItem, recipientAddre
     }
   }, [balanceError, chain, cleanQrState, clearExternalState, collectionId, nftItem, setExtrinsicHash, setIsTxSuccess, setShowConfirm, setShowResult, setTxError]);
 
-  const handlerCallbackResponseResultQr = useCallback((data: ResponseNftTransferQr) => {
+  const handlerCallbackResponseResultQr = useCallback((data: NftTransactionResponse) => {
     if (data.qrState) {
       const state: QrContextState = {
         ...data.qrState,
@@ -315,7 +315,7 @@ function AuthTransfer ({ chain, className, collectionId, nftItem, recipientAddre
     }
   }, [handlerSendEvmQr, handlerSendSubstrateQr, substrateParams, web3Tx]);
 
-  const handlerCallbackResponseResultLedger = useCallback((handlerSignLedger: (ledgerState: LedgerState) => void, data: ResponseNftTransferLedger) => {
+  const handlerCallbackResponseResultLedger = useCallback((handlerSignLedger: (ledgerState: LedgerState) => void, data: NftTransactionResponse) => {
     if (data.ledgerState) {
       handlerSignLedger(data.ledgerState);
     }
@@ -328,7 +328,7 @@ function AuthTransfer ({ chain, className, collectionId, nftItem, recipientAddre
   }, [handlerCallbackResponseResult, updateExternalState]);
 
   const handlerSendLedgerSubstrate = useCallback((handlerSignLedger: (ledgerState: LedgerState) => void) => {
-    const callback = (data: ResponseNftTransferLedger) => {
+    const callback = (data: NftTransactionResponse) => {
       handlerCallbackResponseResultLedger(handlerSignLedger, data);
     };
 

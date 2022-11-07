@@ -4,7 +4,7 @@
 import { BasicTxResponse } from '@subwallet/extension-base/background/KoniTypes';
 import { getTuringCompoundExtrinsic } from '@subwallet/extension-koni-base/api/bonding/paraChain';
 import { ExternalProps } from '@subwallet/extension-koni-base/api/dotsama/external/shared';
-import { signAndSendExtrinsic } from '@subwallet/extension-koni-base/api/dotsama/signAndSend';
+import { signAndSendExtrinsic } from '@subwallet/extension-koni-base/api/dotsama/shared/signAndSendExtrinsic';
 
 interface CreateCompoundExternalProps extends ExternalProps {
   address: string;
@@ -15,7 +15,7 @@ interface CreateCompoundExternalProps extends ExternalProps {
 
 export const createCreateCompoundExternal = async ({ accountMinimum,
   address,
-  apiProp,
+  apiProps,
   bondedAmount,
   callback,
   collatorAddress,
@@ -27,15 +27,15 @@ export const createCreateCompoundExternal = async ({ accountMinimum,
   const txState: BasicTxResponse = {};
   const parsedAccountMinimum = parseFloat(accountMinimum) * 10 ** (network.decimals as number);
 
-  const extrinsic = await getTuringCompoundExtrinsic(apiProp, address, collatorAddress, parsedAccountMinimum.toString(), bondedAmount);
+  const extrinsic = await getTuringCompoundExtrinsic(apiProps, address, collatorAddress, parsedAccountMinimum.toString(), bondedAmount);
 
   await signAndSendExtrinsic({
     type: signerType,
     callback: callback,
     id: id,
     setState: setState,
-    apiProp: apiProp,
-    addressOrPair: address,
+    apiProps: apiProps,
+    address: address,
     txState: txState,
     updateState: updateState,
     extrinsic: extrinsic,

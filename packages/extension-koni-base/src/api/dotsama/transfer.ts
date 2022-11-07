@@ -2,12 +2,12 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { assetFromToken } from '@equilab/api';
-import { ApiProps, CustomTokenType, ResponseTransfer, SupportTransferResponse, TokenInfo, TransferErrorCode, TransferStep } from '@subwallet/extension-base/background/KoniTypes';
-import KeyringSigner from '@subwallet/extension-base/signers/substrates/KeyringSigner';
+import { ApiProps, BasicTxResponse, CustomTokenType, ExternalRequestPromise, ExternalRequestPromiseStatus, SupportTransferResponse, TokenInfo, TransferErrorCode } from '@subwallet/extension-base/background/KoniTypes';
+import { SignerType } from '@subwallet/extension-base/signers/types';
 import { getTokenInfo } from '@subwallet/extension-koni-base/api/dotsama/registry';
+import { signExtrinsic } from '@subwallet/extension-koni-base/api/dotsama/shared/signExtrinsic';
 import { getPSP22ContractPromise } from '@subwallet/extension-koni-base/api/tokens/wasm';
 
-import { ApiPromise } from '@polkadot/api';
 import { SubmittableExtrinsic } from '@polkadot/api/promise/types';
 import { KeyringPair } from '@polkadot/keyring/types';
 import { AccountInfoWithProviders, AccountInfoWithRefCount, EventRecord } from '@polkadot/types/interfaces';
@@ -204,24 +204,22 @@ export async function estimateFee (
   return [fee, feeSymbol];
 }
 
-export function getUnsupportedResponse (): ResponseTransfer {
+export function getUnsupportedResponse (): BasicTxResponse {
   return {
-    step: TransferStep.ERROR,
+    status: false,
     errors: [
       {
         code: TransferErrorCode.UNSUPPORTED,
         message: 'The transaction of current network is unsupported'
       }
-    ],
-    extrinsicStatus: undefined,
-    data: {}
+    ]
   };
 }
 
-export function updateResponseTxResult (
+export function updateTransferResponseTxResult (
   networkKey: string,
   tokenInfo: undefined | TokenInfo,
-  response: ResponseTransfer,
+  response: BasicTxResponse,
   records: EventRecord[],
   transferAmount?: string): void {
   if (!response.txResult) {
@@ -297,28 +295,38 @@ export function updateResponseTxResult (
   }
 }
 
-export async function doSignAndSend (
-  api: ApiPromise,
-  networkKey: string,
-  tokenInfo: TokenInfo | undefined,
-  transfer: SubmittableExtrinsic,
-  fromKeypair: KeyringPair,
+export interface TransferDoSignAndSendProps {
+  apiProps: ApiProps;
+  networkKey: string;
+  tokenInfo: TokenInfo | undefined;
+  extrinsic: SubmittableExtrinsic;
   _updateResponseTxResult: (
     networkKey: string,
     tokenInfo: undefined | TokenInfo,
-    response: ResponseTransfer,
+    response: BasicTxResponse,
     records: EventRecord[],
-    transferAmount?: string) => void,
-  callback: (data: ResponseTransfer) => void,
-  transferAmount?: string) {
-  const response: ResponseTransfer = {
-    step: TransferStep.READY,
-    errors: [],
-    extrinsicStatus: undefined,
-    data: {}
+    transferAmount?: string) => void
+  callback: (data: BasicTxResponse) => void;
+  transferAmount?: string;
+  signFunction: () => Promise<void>;
+  updateState?: (promise: Partial<ExternalRequestPromise>) => void;
+}
+
+export async function doSignAndSend ({ _updateResponseTxResult,
+  apiProps,
+  callback,
+  extrinsic,
+  networkKey,
+  signFunction,
+  tokenInfo,
+  transferAmount,
+  updateState }: TransferDoSignAndSendProps) {
+  const api = apiProps.api;
+  const response: BasicTxResponse = {
+    errors: []
   };
 
-  function updateResponseByEvents (response: ResponseTransfer, records: EventRecord[]) {
+  function updateResponseByEvents (response: BasicTxResponse, records: EventRecord[]) {
     records.forEach((record) => {
       const { event: { method, section, data: [error] } } = record;
 
@@ -330,7 +338,8 @@ export async function doSignAndSend (
       console.log('Transaction final: ', isFailed, isSuccess);
 
       if (isFailed) {
-        response.step = TransferStep.ERROR;
+        response.status = false;
+        response.txError = true;
 
         // @ts-ignore
         if (error.isModule) {
@@ -342,11 +351,11 @@ export async function doSignAndSend (
           const errorMessage = docs.join(' ');
 
           console.log(`${section}.${method}: ${errorMessage}`);
-          response.data = {
-            section,
-            method,
-            message: errorMessage
-          };
+          // response.data = {
+          //   section,
+          //   method,
+          //   message: errorMessage
+          // };
           response.errors?.push({
             code: TransferErrorCode.TRANSFER_ERROR,
             message: errorMessage
@@ -360,38 +369,25 @@ export async function doSignAndSend (
           });
         }
       } else if (isSuccess) {
-        response.step = TransferStep.SUCCESS;
+        response.status = true;
       }
     });
 
     _updateResponseTxResult(networkKey, tokenInfo, response, records, transferAmount);
   }
 
-  await transfer.signAsync(fromKeypair.address, { nonce: -1, signer: new KeyringSigner({ keyPair: fromKeypair, registry: api.registry }) });
+  await signFunction();
 
-  await transfer.send(({ events = [], status }) => {
+  await extrinsic.send(({ events = [], status }) => {
     console.log('Transaction status:', status.type, status.hash.toHex());
-    response.extrinsicStatus = status.type;
-
-    if (status.isBroadcast) {
-      response.step = TransferStep.START;
-    }
 
     if (status.isInBlock) {
-      const blockHash = status.asInBlock.toHex();
-
-      response.step = TransferStep.PROCESSING;
-      response.data = {
-        block: blockHash,
-        status: status.type
-      };
-
       callback(response);
 
       updateResponseByEvents(response, events);
       // @ts-ignore
       // eslint-disable-next-line @typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-member-access,@typescript-eslint/no-unsafe-assignment
-      response.extrinsicHash = transfer.hash.toHex();
+      response.extrinsicHash = extrinsic.hash.toHex();
       callback(response);
 
       // const extrinsicIndex = parseInt(events[0]?.phase.asApplyExtrinsic.toString());
@@ -406,18 +402,12 @@ export async function doSignAndSend (
       //     console.error('Transaction errors:', e);
       //     callback(response);
       //   });
+
+      if (response.status !== undefined) {
+        updateState && updateState({ status: response.status ? ExternalRequestPromiseStatus.COMPLETED : ExternalRequestPromiseStatus.FAILED });
+      }
     } else if (status.isFinalized) {
-      const blockHash = status.asFinalized.toHex();
-
       response.isFinalized = true;
-
-      response.data = {
-        block: blockHash,
-        status: status.type
-      };
-
-      // todo: may do something here
-
       callback(response);
     } else {
       callback(response);
@@ -425,30 +415,30 @@ export async function doSignAndSend (
   });
 }
 
-export async function makeTransfer (
+interface CreateTransferExtrinsicProps {
+  apiProp: ApiProps;
   networkKey: string,
   to: string,
-  fromKeypair: KeyringPair,
+  from: string,
   value: string,
   transferAll: boolean,
-  dotSamaApiMap: Record<string, ApiProps>,
   tokenInfo: undefined | TokenInfo,
-  callback: (data: ResponseTransfer) => void
-): Promise<void> {
-  const apiProps = await dotSamaApiMap[networkKey].isReady;
-  const api = apiProps.api;
+}
+
+export const createTransferExtrinsic = async ({ apiProp, from, networkKey, to, tokenInfo, transferAll, value }: CreateTransferExtrinsicProps): Promise<[SubmittableExtrinsic | null, string?]> => {
+  const api = apiProp.api;
 
   // @ts-ignore
-  let transfer;
+  let transfer: SubmittableExtrinsic<'promise'> | null = null;
   const isTxCurrenciesSupported = !!api && !!api.tx && !!api.tx.currencies;
   const isTxBalancesSupported = !!api && !!api.tx && !!api.tx.balances;
   const isTxTokensSupported = !!api && !!api.tx && !!api.tx.tokens;
   const isTxEqBalancesSupported = !!api && !!api.tx && !!api.tx.eqBalances;
   let transferAmount; // for PSP-22 tokens, might be deprecated in the future
 
-  if (tokenInfo && tokenInfo.contractAddress && tokenInfo.type && !apiProps.isEthereum && api.query.contracts) {
+  if (tokenInfo && tokenInfo.contractAddress && tokenInfo.type && !apiProp.isEthereum && api.query.contracts) {
     const contractPromise = getPSP22ContractPromise(api, tokenInfo.contractAddress);
-    const transferQuery = await contractPromise.query['psp22::transfer'](fromKeypair.address, { gasLimit: -1 }, to, value, {});
+    const transferQuery = await contractPromise.query['psp22::transfer'](from, { gasLimit: -1 }, to, value, {});
     const gasLimit = transferQuery.gasRequired.toString();
 
     transfer = contractPromise.tx['psp22::transfer']({ gasLimit }, to, value, {});
@@ -494,11 +484,64 @@ export async function makeTransfer (
     }
   }
 
-  if (!transfer) {
+  return [transfer, transferAmount];
+};
+
+export interface MakeTransferProps {
+  networkKey: string;
+  to: string;
+  from: string;
+  value: string;
+  transferAll: boolean;
+  dotSamaApiMap: Record<string, ApiProps>;
+  tokenInfo: undefined | TokenInfo;
+  callback: (data: BasicTxResponse) => void;
+}
+
+export async function makeTransfer ({ callback,
+  dotSamaApiMap,
+  from,
+  networkKey,
+  to,
+  tokenInfo,
+  transferAll,
+  value }: MakeTransferProps): Promise<void> {
+  const apiProps = await dotSamaApiMap[networkKey].isReady;
+
+  const [extrinsic, transferAmount] = await createTransferExtrinsic({
+    transferAll: transferAll,
+    value: value,
+    from: from,
+    networkKey: networkKey,
+    tokenInfo: tokenInfo,
+    to: to,
+    apiProp: apiProps
+  });
+
+  if (!extrinsic) {
     callback(getUnsupportedResponse());
 
     return;
   }
 
-  await doSignAndSend(api, networkKey, tokenInfo, transfer, fromKeypair, updateResponseTxResult, callback, transferAmount);
+  const signFunction = async () => {
+    await signExtrinsic({
+      type: SignerType.PASSWORD,
+      apiProps: apiProps,
+      callback: callback,
+      extrinsic: extrinsic,
+      address: from
+    });
+  };
+
+  await doSignAndSend({
+    apiProps,
+    networkKey,
+    tokenInfo,
+    extrinsic,
+    _updateResponseTxResult: updateTransferResponseTxResult,
+    callback,
+    transferAmount,
+    signFunction: signFunction
+  });
 }

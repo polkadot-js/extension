@@ -4,7 +4,7 @@
 import { BasicTxResponse } from '@subwallet/extension-base/background/KoniTypes';
 import { getClaimRewardExtrinsic } from '@subwallet/extension-koni-base/api/bonding';
 import { ExternalProps } from '@subwallet/extension-koni-base/api/dotsama/external/shared';
-import { signAndSendExtrinsic } from '@subwallet/extension-koni-base/api/dotsama/signAndSend';
+import { signAndSendExtrinsic } from '@subwallet/extension-koni-base/api/dotsama/shared/signAndSendExtrinsic';
 
 interface ClaimRewardExternalProps extends ExternalProps {
   address: string;
@@ -12,7 +12,7 @@ interface ClaimRewardExternalProps extends ExternalProps {
 }
 
 export const createClaimRewardExternal = async ({ address,
-  apiProp,
+  apiProps,
   callback,
   id,
   network,
@@ -22,15 +22,15 @@ export const createClaimRewardExternal = async ({ address,
   validatorAddress }: ClaimRewardExternalProps): Promise<void> => {
   const txState: BasicTxResponse = {};
 
-  const extrinsic = await getClaimRewardExtrinsic(apiProp, network.key, address, validatorAddress);
+  const extrinsic = await getClaimRewardExtrinsic(apiProps, network.key, address, validatorAddress);
 
   await signAndSendExtrinsic({
     type: signerType,
     callback: callback,
     id: id,
     setState: setState,
-    apiProp: apiProp,
-    addressOrPair: address,
+    apiProps: apiProps,
+    address: address,
     txState: txState,
     updateState: updateState,
     extrinsic: extrinsic,

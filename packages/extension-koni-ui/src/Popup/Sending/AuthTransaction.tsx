@@ -1,8 +1,8 @@
 // Copyright 2019-2022 @polkadot/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { NetworkJson, RequestCheckTransfer, ResponseTransfer, BasicTxError, TransferStep } from '@subwallet/extension-base/background/KoniTypes';
-import { LedgerState } from '@subwallet/extension-base/signers/types';
+import { LedgerState } from '@subwallet/extension-base/../../../../extension-koni-base/src/signers/types';
+import { BasicTxError, BasicTxResponse, NetworkJson, RequestCheckTransfer, TransferStep } from '@subwallet/extension-base/background/KoniTypes';
 import { InputWithLabel, Warning } from '@subwallet/extension-koni-ui/components';
 import Button from '@subwallet/extension-koni-ui/components/Button';
 import DonateInputAddress from '@subwallet/extension-koni-ui/components/DonateInputAddress';
@@ -100,7 +100,7 @@ function AuthTransaction ({ className, isDonation, feeInfo: [fee, feeDecimals, f
     onCancel();
   }, [handlerReject, onCancel, externalId]);
 
-  const handlerCallbackResponseResult = useCallback((rs: ResponseTransfer) => {
+  const handlerCallbackResponseResult = useCallback((rs: BasicTxResponse) => {
     if (!rs.isFinalized) {
       if (rs.step === TransferStep.SUCCESS.valueOf()) {
         onChangeResult({

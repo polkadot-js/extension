@@ -2,10 +2,10 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { ApiProps, HandleBasicTx, NetworkJson, PrepareExternalRequest } from '@subwallet/extension-base/background/KoniTypes';
-import { SignerExternal } from '@subwallet/extension-koni-base/api/dotsama/signAndSend';
+import { SignerExternal } from '@subwallet/extension-base/signers/types';
 
 export interface ExternalProps extends PrepareExternalRequest{
-  apiProp: ApiProps;
+  apiProps: ApiProps;
   network: NetworkJson;
   callback: HandleBasicTx;
   signerType: SignerExternal;

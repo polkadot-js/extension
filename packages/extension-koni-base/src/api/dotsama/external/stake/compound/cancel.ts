@@ -4,7 +4,7 @@
 import { BasicTxResponse } from '@subwallet/extension-base/background/KoniTypes';
 import { getTuringCancelCompoundingExtrinsic } from '@subwallet/extension-koni-base/api/bonding/paraChain';
 import { ExternalProps } from '@subwallet/extension-koni-base/api/dotsama/external/shared';
-import { signAndSendExtrinsic } from '@subwallet/extension-koni-base/api/dotsama/signAndSend';
+import { signAndSendExtrinsic } from '@subwallet/extension-koni-base/api/dotsama/shared/signAndSendExtrinsic';
 
 interface CancelCompoundExternalProps extends ExternalProps {
   address: string;
@@ -12,7 +12,7 @@ interface CancelCompoundExternalProps extends ExternalProps {
 }
 
 export const createCancelCompoundExternal = async ({ address,
-  apiProp,
+  apiProps,
   callback,
   id,
   setState,
@@ -21,15 +21,15 @@ export const createCancelCompoundExternal = async ({ address,
   updateState }: CancelCompoundExternalProps): Promise<void> => {
   const txState: BasicTxResponse = {};
 
-  const extrinsic = await getTuringCancelCompoundingExtrinsic(apiProp, taskId);
+  const extrinsic = await getTuringCancelCompoundingExtrinsic(apiProps, taskId);
 
   await signAndSendExtrinsic({
     type: signerType,
     callback: callback,
     id: id,
     setState: setState,
-    apiProp: apiProp,
-    addressOrPair: address,
+    apiProps: apiProps,
+    address: address,
     txState: txState,
     updateState: updateState,
     extrinsic: extrinsic,

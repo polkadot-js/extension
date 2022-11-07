@@ -3,8 +3,8 @@
 
 import { faCircleCheck } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { BaseTxError, BasicExternalTxResponse, BasicTxResponse, BasicTxResponse, BasicTxError, ValidatorInfo } from '@subwallet/extension-base/background/KoniTypes';
-import { LedgerState } from '@subwallet/extension-base/signers/types';
+import { LedgerState } from '@subwallet/extension-base/../../../../../extension-koni-base/src/signers/types';
+import { BaseTxError, BasicExternalTxResponse, BasicTxError, BasicTxResponse, BasicTxResponse, ValidatorInfo } from '@subwallet/extension-base/background/KoniTypes';
 import { InputWithLabel } from '@subwallet/extension-koni-ui/components';
 import { BalanceVal } from '@subwallet/extension-koni-ui/components/Balance';
 import FeeValue from '@subwallet/extension-koni-ui/components/Balance/FeeValue';
@@ -133,13 +133,13 @@ function BondingAuthTransaction ({ amount, balanceError, bondedValidators, class
           setIsTxSuccess(true);
           setShowConfirm(false);
           setShowResult(true);
-          setExtrinsicHash(data.transactionHash as string);
+          setExtrinsicHash(data.extrinsicHash as string);
         } else {
           setIsTxSuccess(false);
           setTxError('Error submitting transaction');
           setShowConfirm(false);
           setShowResult(true);
-          setExtrinsicHash(data.transactionHash as string);
+          setExtrinsicHash(data.extrinsicHash as string);
         }
       }
     });

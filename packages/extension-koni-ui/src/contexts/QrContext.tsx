@@ -1,7 +1,7 @@
 // Copyright 2019-2022 @subwallet/extension-koni-base authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { QrState } from '@subwallet/extension-base/signers/types';
+import { QrState } from '@subwallet/extension-base/../../../extension-koni-base/src/signers/types';
 import React, { useCallback, useReducer } from 'react';
 
 export enum QrStep {

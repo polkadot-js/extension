@@ -1,7 +1,7 @@
 // Copyright 2019-2022 @subwallet/extension-koni-base authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { ApiProps, NetworkJson, ResponseTransfer, TransferErrorCode, TransferStep } from '@subwallet/extension-base/background/KoniTypes';
+import { ApiProps, BasicTxResponse, NetworkJson, TransferErrorCode } from '@subwallet/extension-base/background/KoniTypes';
 import { getFreeBalance } from '@subwallet/extension-koni-base/api/dotsama/balance';
 import { ERC721Contract, getERC20Contract } from '@subwallet/extension-koni-base/api/tokens/evm/web3';
 import Web3 from 'web3';
@@ -15,21 +15,17 @@ export async function handleTransfer (
   networkKey: string,
   privateKey: string,
   web3ApiMap: Record<string, Web3>,
-  callback: (data: ResponseTransfer) => void) {
+  callback: (data: BasicTxResponse) => void) {
   const web3Api = web3ApiMap[networkKey];
   const signedTransaction = await web3Api.eth.accounts.signTransaction(transactionObject, privateKey);
-  const response: ResponseTransfer = {
-    step: TransferStep.READY,
-    errors: [],
-    extrinsicStatus: undefined,
-    data: {}
+  const response: BasicTxResponse = {
+    errors: []
   };
 
   try {
     signedTransaction?.rawTransaction && web3Api.eth.sendSignedTransaction(signedTransaction.rawTransaction)
       .on('transactionHash', function (hash: string) {
         console.log('transactionHash', hash);
-        response.step = TransferStep.READY;
         response.extrinsicHash = hash;
         callback(response);
       })
@@ -40,23 +36,23 @@ export async function handleTransfer (
       //   callback(response);
       // })
       .on('receipt', function (receipt: TransactionReceipt) {
-        response.step = TransferStep.SUCCESS;
+        response.status = true;
         response.txResult = {
           change: changeValue || '0',
           fee: (receipt.gasUsed * receipt.effectiveGasPrice).toString()
         };
         callback(response);
       }).catch((e) => {
-        response.step = TransferStep.ERROR;
+        response.status = false;
         response.errors?.push({
           code: TransferErrorCode.TRANSFER_ERROR,
-          // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access,@typescript-eslint/no-unsafe-assignment
-          message: e.message
+          message: (e as Error).message
         });
         callback(response);
       });
   } catch (error) {
-    response.step = TransferStep.ERROR;
+    response.status = false;
+    response.txError = true;
     response.errors?.push({
       code: TransferErrorCode.TRANSFER_ERROR,
       // @ts-ignore
@@ -98,7 +94,7 @@ export async function makeEVMTransfer (
   value: string,
   transferAll: boolean,
   web3ApiMap: Record<string, Web3>,
-  callback: (data: ResponseTransfer) => void): Promise<void> {
+  callback: (data: BasicTxResponse) => void): Promise<void> {
   const [transactionObject, changeValue] = await getEVMTransactionObject(networkKey, to, value, transferAll, web3ApiMap);
 
   await handleTransfer(transactionObject, changeValue, networkKey, privateKey, web3ApiMap, callback);
@@ -164,7 +160,7 @@ export async function makeERC20Transfer (
   value: string,
   transferAll: boolean,
   web3ApiMap: Record<string, Web3>,
-  callback: (data: ResponseTransfer) => void) {
+  callback: (data: BasicTxResponse) => void) {
   const [transactionObject, changeValue] = await getERC20TransactionObject(assetAddress, networkKey, from, to, value, transferAll, web3ApiMap);
 
   await handleTransfer(transactionObject, changeValue, networkKey, privateKey, web3ApiMap, callback);

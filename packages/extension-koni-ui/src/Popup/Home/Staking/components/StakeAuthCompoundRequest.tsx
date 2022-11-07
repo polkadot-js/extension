@@ -1,8 +1,8 @@
 // Copyright 2019-2022 @subwallet/extension-koni authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
+import { LedgerState } from '@subwallet/extension-base/../../../../../../extension-koni-base/src/signers/types';
 import { BaseTxError, ResponseCreateCompoundStakeExternal, ResponseCreateCompoundStakeLedger, ResponseCreateCompoundStakeQr } from '@subwallet/extension-base/background/KoniTypes';
-import { LedgerState } from '@subwallet/extension-base/signers/types';
 import { InputWithLabel } from '@subwallet/extension-koni-ui/components';
 import Button from '@subwallet/extension-koni-ui/components/Button';
 import InputAddress from '@subwallet/extension-koni-ui/components/InputAddress';
@@ -119,13 +119,13 @@ function StakeAuthCompoundRequest ({ accountMinimum, address, balanceError, bond
           setIsTxSuccess(true);
           setShowAuth(false);
           setShowResult(true);
-          setExtrinsicHash(cbData.transactionHash as string);
+          setExtrinsicHash(cbData.extrinsicHash as string);
         } else {
           setIsTxSuccess(false);
           setTxError('Error submitting transaction');
           setShowAuth(false);
           setShowResult(true);
-          setExtrinsicHash(cbData.transactionHash as string);
+          setExtrinsicHash(cbData.extrinsicHash as string);
         }
       }
     });

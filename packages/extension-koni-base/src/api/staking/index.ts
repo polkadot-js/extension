@@ -128,7 +128,7 @@ function getParaStakingOnChain (parentApi: ApiProps, useAddresses: string[], net
             unit: networks[chain].nativeToken,
             state: APIItemState.READY,
             type: StakingType.NOMINATED,
-            owner
+            address: owner
           } as StakingItem;
 
           // eslint-disable-next-line node/no-callback-literal
@@ -191,7 +191,7 @@ function getRelayStakingOnChain (parentApi: ApiProps, useAddresses: string[], ne
             unit: unit || networks[chain].nativeToken,
             state: APIItemState.READY,
             type: StakingType.NOMINATED,
-            owner
+            address: owner
           } as StakingItem;
 
           callback(chain, stakingItem);
@@ -244,7 +244,7 @@ function getRelayPoolingOnchain (parentApi: ApiProps, useAddresses: string[], ne
             unit: networks[chain].nativeToken,
             state: APIItemState.READY,
             type: StakingType.POOLED,
-            owner
+            address: owner
           } as StakingItem;
 
           callback(chain, stakingItem);
@@ -293,7 +293,7 @@ function getAstarStakingOnChain (parentApi: ApiProps, useAddresses: string[], ne
           unit: networks[chain].nativeToken,
           state: APIItemState.READY,
           type: StakingType.NOMINATED,
-          owner
+          address: owner
         } as StakingItem;
 
         // eslint-disable-next-line node/no-callback-literal

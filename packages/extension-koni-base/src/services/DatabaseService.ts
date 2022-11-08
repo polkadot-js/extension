@@ -7,7 +7,7 @@ import { Subscription } from 'dexie';
 import { logger as createLogger } from '@polkadot/util';
 import { Logger } from '@polkadot/util/types';
 
-import KoniDatabase, { INft } from '../databases';
+import KoniDatabase, { INft, IStakingItem } from '../databases';
 import { BalanceStore, CrowdloanStore, MigrationStore, NftCollectionStore, NftStore, StakingStore, TransactionStore } from '../db-stores';
 
 export default class DatabaseService {
@@ -15,6 +15,7 @@ export default class DatabaseService {
   public stores;
   private logger: Logger;
   private nftSubscription: Subscription | undefined;
+  private stakingSubscription: Subscription | undefined;
 
   constructor () {
     this.logger = createLogger('DB-Service');
@@ -61,8 +62,26 @@ export default class DatabaseService {
     if (item.state === APIItemState.READY) {
       this.logger.log(`Updating staking for [${chain}]`);
 
-      return this.stores.staking.upsert({ chainHash, address, ...item });
+      return this.stores.staking.upsert({ chainHash, ...item });
     }
+  }
+
+  async getStakings (addresses: string[], chainHashes?: string[]) {
+    const stakings = await this.stores.staking.getStakings(addresses, chainHashes);
+
+    this.logger.log('Get Stakings: ', stakings);
+
+    return stakings;
+  }
+
+  subscribeStaking (addresses: string[], chainHashes?: string[], callback?: (stakingItems: IStakingItem[]) => void) {
+    this.stakingSubscription && this.stakingSubscription.unsubscribe();
+
+    this.stakingSubscription = this.stores.staking.subscribeStaking(addresses, chainHashes).subscribe({
+      next: (stakings) => callback && callback(stakings)
+    });
+
+    return this.stakingSubscription;
   }
 
   // Transaction history

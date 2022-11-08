@@ -272,7 +272,7 @@ export class KoniCron {
   };
 
   resetStakingReward = (address: string) => {
-    this.state.resetStakingMap(address).catch((err) => this.logger.warn(err));
+    this.state.resetStaking(address).catch((err) => this.logger.warn(err));
     this.state.setStakingReward({
       ready: false,
       details: []

@@ -110,7 +110,7 @@ export interface UnlockingStakeInfo {
 export interface StakingItem {
   name: string,
   chain: string,
-  owner: string,
+  address: string,
 
   balance?: string,
   activeBalance?: string,
@@ -123,7 +123,6 @@ export interface StakingItem {
 
   type: StakingType,
   state: APIItemState,
-
 }
 
 export interface StakingJson {

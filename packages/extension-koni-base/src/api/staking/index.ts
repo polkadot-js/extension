@@ -126,7 +126,7 @@ function getParaStakingOnChain (parentApi: ApiProps, useAddresses: string[], net
 
       const stakingItem = {
         name: networks[chain].chain,
-        chainId: chain,
+        chain: chain,
         balance: parsedTotalBalance.toString(),
         activeBalance: parsedActiveBalance.toString(),
         unlockingBalance: parsedUnlockingBalance.toString(),
@@ -194,7 +194,7 @@ function getRelayStakingOnChain (parentApi: ApiProps, useAddresses: string[], ne
 
     const stakingItem = {
       name: networks[chain].chain,
-      chainId: chain,
+      chain: chain,
       balance: parsedTotal.toString(),
       activeBalance: parsedActiveBalance.toString(),
       unlockingBalance: parsedUnlockingBalance.toString(),
@@ -249,7 +249,7 @@ function getRelayPoolingOnchain (parentApi: ApiProps, useAddresses: string[], ne
 
     const stakingItem = {
       name: networks[chain].chain,
-      chainId: chain,
+      chain: chain,
       balance: parsedTotal.toString(),
       activeBalance: parsedActiveBalance.toString(),
       unlockingBalance: parsedUnlockingBalance.toString(),
@@ -299,7 +299,7 @@ function getAstarStakingOnChain (parentApi: ApiProps, useAddresses: string[], ne
 
       const stakingItem = {
         name: networks[chain].chain,
-        chainId: chain,
+        chain: chain,
         balance: parsedTotalBalance.toString(),
         activeBalance: parsedActiveBalance.toString(),
         unlockingBalance: parsedUnlockingBalance.toString(),

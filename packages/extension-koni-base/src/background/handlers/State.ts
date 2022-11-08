@@ -65,7 +65,7 @@ function generateDefaultStakingMap () {
   Object.keys(DEFAULT_STAKING_NETWORKS).forEach((networkKey) => {
     stakingMap[parseStakingItemKey(networkKey)] = {
       name: PREDEFINED_NETWORKS[networkKey].chain,
-      chainId: networkKey,
+      chain: networkKey,
       nativeToken: PREDEFINED_NETWORKS[networkKey].nativeToken,
       state: APIItemState.PENDING
     } as StakingItem;
@@ -146,6 +146,8 @@ export default class KoniState extends State {
   private nftSubject = new Subject<NftJson>();
 
   private stakingSubject = new Subject<StakingJson>();
+
+
   private stakingRewardSubject = new Subject<StakingRewardJson>();
   private stakingMap: Record<string, StakingItem> = generateDefaultStakingMap();
   private stakingRewardState: StakingRewardJson = {

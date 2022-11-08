@@ -85,6 +85,11 @@ export interface RequestForgetSite {
   url: string;
 }
 
+export enum StakingType {
+  NOMINATED = 'nominated',
+  POOLED = 'pooled',
+}
+
 export interface StakingRewardItem {
   state: APIItemState
   name: string,
@@ -94,20 +99,17 @@ export interface StakingRewardItem {
   totalSlash?: string,
   smartContract?: string
 }
-
-export interface StakingRewardJson {
-  ready: boolean;
-  details: Array<StakingRewardItem>;
-}
-
-export enum StakingType {
-  NOMINATED = 'nominated',
-  POOLED = 'pooled',
+export interface UnlockingStakeInfo {
+  nextWithdrawal: number,
+  redeemable: number,
+  nextWithdrawalAmount: number,
+  nextWithdrawalAction?: string,
+  validatorAddress?: string // validator to unstake from
 }
 
 export interface StakingItem {
   name: string,
-  chainId: string,
+  chain: string,
   balance?: string,
   activeBalance?: string,
   unlockingBalance?: string,
@@ -115,7 +117,8 @@ export interface StakingItem {
   unit?: string,
   state: APIItemState,
   unlockingInfo?: UnlockingStakeInfo,
-  type: StakingType
+  rewardInfo?: StakingRewardItem,
+  type: StakingType,
 }
 
 export interface StakingJson {
@@ -123,6 +126,16 @@ export interface StakingJson {
   ready?: boolean,
   details: StakingItem[]
 }
+
+// export interface StakingRewardJson {
+//   ready: boolean;
+//   details: Array<StakingRewardItem>;
+// }
+//
+// export interface StakeUnlockingJson {
+//   timestamp: number,
+//   details: Record<string, UnlockingStakeInfo>
+// }
 
 export interface PriceJson {
   ready?: boolean,
@@ -1207,19 +1220,6 @@ export interface DelegationItem {
   minBond: string,
   hasScheduledRequest: boolean
   icon?: string;
-}
-
-export interface UnlockingStakeInfo {
-  nextWithdrawal: number,
-  redeemable: number,
-  nextWithdrawalAmount: number,
-  nextWithdrawalAction?: string,
-  validatorAddress?: string // validator to unstake from
-}
-
-export interface StakeUnlockingJson {
-  timestamp: number,
-  details: Record<string, UnlockingStakeInfo>
 }
 
 export interface StakeWithdrawalParams {

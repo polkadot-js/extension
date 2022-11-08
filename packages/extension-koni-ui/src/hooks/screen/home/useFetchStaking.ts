@@ -39,7 +39,7 @@ export default function useFetchStaking (networkKey: string): StakingType {
     const filteredStakingItems: StakingItem[] = [];
 
     readyStakingItems.forEach((item) => {
-      if (item.chainId.toLowerCase() === networkKey.toLowerCase()) {
+      if (item.chain.toLowerCase() === networkKey.toLowerCase()) {
         filteredStakingItems.push(item);
       }
     });
@@ -48,13 +48,13 @@ export default function useFetchStaking (networkKey: string): StakingType {
       const stakingDataType = { staking: stakingItem } as StakingDataType;
 
       for (const reward of stakingRewardList) {
-        if (stakingItem.chainId === reward.chainId && reward.state === APIItemState.READY) {
+        if (stakingItem.chain === reward.chainId && reward.state === APIItemState.READY) {
           stakingDataType.reward = reward;
         }
       }
 
       Object.entries(stakeUnlockingInfo).forEach(([key, info]) => {
-        if (key === stakingItem.chainId) {
+        if (key === stakingItem.chain) {
           stakingDataType.staking = {
             ...stakingItem,
             unlockingInfo: info
@@ -69,13 +69,13 @@ export default function useFetchStaking (networkKey: string): StakingType {
       const stakingDataType = { staking: stakingItem } as StakingDataType;
 
       for (const reward of stakingRewardList) {
-        if (stakingItem.chainId === reward.chainId && reward.state === APIItemState.READY) {
+        if (stakingItem.chain === reward.chainId && reward.state === APIItemState.READY) {
           stakingDataType.reward = reward;
         }
       }
 
       Object.entries(stakeUnlockingInfo).forEach(([key, info]) => {
-        if (key === stakingItem.chainId) {
+        if (key === stakingItem.chain) {
           stakingDataType.staking = {
             ...stakingItem,
             unlockingInfo: info

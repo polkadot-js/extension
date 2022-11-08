@@ -8,6 +8,7 @@ import BaseStoreWithAddress from './BaseStoreWithAddress';
 
 export default class StakingStore extends BaseStoreWithAddress<IStakingItem> {
   getSingleRecord (chainHash: string, address: string, type: StakingType) {
+    console.log('querying', chainHash, address, type);
     return this.table.where('[chainHash+address+type]').equals([chainHash, address, type]).first();
   }
 }

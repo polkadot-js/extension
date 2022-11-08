@@ -7,6 +7,56 @@ import { StakingDataType, StakingType } from '@subwallet/extension-koni-ui/hooks
 import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { useSelector } from 'react-redux';
 
+function groupStakingItems (stakingItems: StakingItem[]) {
+  const itemGroups: string[] = [];
+
+  for (const stakingItem of stakingItems) {
+    const group = `${stakingItem.chain}-${stakingItem.type}`;
+
+    if (!itemGroups.includes(group)) {
+      itemGroups.push(group);
+    }
+  }
+
+  const groupedStakingItems: StakingItem[] = [];
+
+  for (const group of itemGroups) {
+    const [chain, type] = group.split('-');
+
+    const groupedStakingItem: Record<string, any> = {};
+
+    let groupedBalance = 0;
+    let groupedActiveBalance = 0;
+    let groupedUnlockingBalance = 0;
+
+    for (const stakingItem of stakingItems) {
+      if (stakingItem.type === type && stakingItem.chain === chain) {
+        groupedStakingItem.name = stakingItem.name;
+        groupedStakingItem.chain = stakingItem.chain;
+        groupedStakingItem.address = stakingItem.address;
+
+        groupedStakingItem.nativeToken = stakingItem.nativeToken;
+        groupedStakingItem.unit = stakingItem.unit;
+
+        groupedStakingItem.type = stakingItem.type;
+        groupedStakingItem.state = stakingItem.state;
+
+        groupedBalance += parseFloat(stakingItem.balance as string);
+        groupedActiveBalance += parseFloat(stakingItem.activeBalance as string);
+        groupedUnlockingBalance += parseFloat(stakingItem.unlockingBalance as string);
+      }
+    }
+
+    groupedStakingItem.balance = groupedBalance.toString();
+    groupedStakingItem.activeBalance = groupedActiveBalance.toString();
+    groupedStakingItem.unlockingBalance = groupedUnlockingBalance.toString();
+
+    groupedStakingItems.push(groupedStakingItem as StakingItem);
+  }
+
+  return groupedStakingItems;
+}
+
 export default function useFetchStaking (networkKey: string): StakingType {
   const { networkMap, price: priceReducer, stakeUnlockingInfo: stakeUnlockingInfoJson, staking: stakingReducer, stakingReward: stakingRewardReducer } = useSelector((state: RootState) => state);
 
@@ -37,12 +87,12 @@ export default function useFetchStaking (networkKey: string): StakingType {
     }
   });
 
-  console.log('readyStakingItems', readyStakingItems);
+  const groupedStakingItems = groupStakingItems(readyStakingItems);
 
   if (!showAll) {
     const filteredStakingItems: StakingItem[] = [];
 
-    readyStakingItems.forEach((item) => {
+    groupedStakingItems.forEach((item) => {
       if (item.chain.toLowerCase() === networkKey.toLowerCase()) {
         filteredStakingItems.push(item);
       }
@@ -52,7 +102,7 @@ export default function useFetchStaking (networkKey: string): StakingType {
       const stakingDataType = { staking: stakingItem } as StakingDataType;
 
       for (const reward of stakingRewardList) {
-        if (stakingItem.chain === reward.chainId && reward.state === APIItemState.READY) {
+        if (stakingItem.chain === reward.chain && reward.state === APIItemState.READY) {
           stakingDataType.reward = reward;
         }
       }
@@ -69,11 +119,11 @@ export default function useFetchStaking (networkKey: string): StakingType {
       stakingData.push(stakingDataType);
     }
   } else {
-    for (const stakingItem of readyStakingItems) {
+    for (const stakingItem of groupedStakingItems) {
       const stakingDataType = { staking: stakingItem } as StakingDataType;
 
       for (const reward of stakingRewardList) {
-        if (stakingItem.chain === reward.chainId && reward.state === APIItemState.READY) {
+        if (stakingItem.chain === reward.chain && reward.state === APIItemState.READY) {
           stakingDataType.reward = reward;
         }
       }

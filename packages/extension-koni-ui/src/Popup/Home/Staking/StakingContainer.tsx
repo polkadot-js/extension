@@ -136,9 +136,12 @@ function StakingContainer ({ className, data, loading, priceMap, stakeUnlockingT
             data.map((stakingDataType: StakingDataType, index: number) => {
               const item = stakingDataType.staking;
               const reward = stakingDataType?.reward;
+
               const name = item.name || item.chain;
               const icon = LogosMap[item.chain] || LogosMap.default;
               const price = priceMap[item.chain];
+              const owner = item.address;
+              const stakingType = item.type;
 
               let redeemable = 0;
               let nextWithdrawal = 0;
@@ -165,6 +168,7 @@ function StakingContainer ({ className, data, loading, priceMap, stakeUnlockingT
                 nextWithdrawal={nextWithdrawal}
                 nextWithdrawalAction={nextWithdrawalAction}
                 nextWithdrawalAmount={nextWithdrawalAmount}
+                owner={owner}
                 price={price}
                 redeemable={redeemable}
                 reward={reward}
@@ -174,6 +178,7 @@ function StakingContainer ({ className, data, loading, priceMap, stakeUnlockingT
                 setTargetNextWithdrawalAction={setTargetNextWithdrawalAction}
                 setTargetRedeemable={setTargetRedeemable}
                 setTargetValidator={setTargetValidator}
+                stakingType={stakingType}
                 targetValidator={targetValidator}
                 totalStake={item.balance}
                 unbondingStake={item.unlockingBalance}

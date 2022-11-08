@@ -3,6 +3,7 @@
 
 import { StakingRewardItem } from '@subwallet/extension-base/background/KoniTypes';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
+import { toShort } from '@subwallet/extension-koni-ui/util';
 import { formatLocaleNumber } from '@subwallet/extension-koni-ui/util/formatNumber';
 import React, { useCallback, useState } from 'react';
 import styled from 'styled-components';
@@ -20,6 +21,8 @@ interface Props extends ThemeProps {
   reward: StakingRewardItem;
   price: number;
   networkKey: string;
+  owner: string;
+  stakingType: string;
   activeStake: string | undefined;
   unbondingStake: string | undefined;
   isAccountAll: boolean;
@@ -42,7 +45,7 @@ interface Props extends ThemeProps {
   setTargetRedeemable: (val: number) => void;
 }
 
-function StakingRow ({ activeStake, chainName, className, index, isAccountAll, isExternalAccount, isHardwareAccount, logo, networkKey, nextWithdrawal, nextWithdrawalAction, nextWithdrawalAmount, price, redeemable, reward, setActionNetworkKey, setShowClaimRewardModal, setShowCompoundStakeModal, setShowWithdrawalModal, setTargetNextWithdrawalAction, setTargetRedeemable, setTargetValidator, targetValidator, totalStake, unbondingStake, unit }: Props): React.ReactElement<Props> {
+function StakingRow ({ activeStake, chainName, className, index, isAccountAll, isExternalAccount, isHardwareAccount, logo, networkKey, nextWithdrawal, nextWithdrawalAction, nextWithdrawalAmount, owner, price, redeemable, reward, setActionNetworkKey, setShowClaimRewardModal, setShowCompoundStakeModal, setShowWithdrawalModal, setTargetNextWithdrawalAction, setTargetRedeemable, setTargetValidator, stakingType, targetValidator, totalStake, unbondingStake, unit }: Props): React.ReactElement<Props> {
   const [showReward, setShowReward] = useState(false);
   const [showStakingMenu, setShowStakingMenu] = useState(false);
 
@@ -128,9 +131,11 @@ function StakingRow ({ activeStake, chainName, className, index, isAccountAll, i
             onClick={handleToggleReward}
           >
             <div className={'meta-container'}>
-              <div className={'chain-name'}>{chainName}</div>
+              <div className={'chain-name'}>
+                {chainName}
+              </div>
               <div className={'balance-description'}>
-                <div>Staking balance</div>
+                <div>{stakingType.charAt(0).toUpperCase() + stakingType.slice(1)} balance</div>
                 {
                   !isAccountAll && <StakingMenu
                     bondedAmount={activeStake as string}
@@ -172,6 +177,13 @@ function StakingRow ({ activeStake, chainName, className, index, isAccountAll, i
         <div className={'extra-info'}>
           <div className={'filler-div'}></div>
           <div className={'extra-container'}>
+            {!isAccountAll && <div className={'reward-container'}>
+              <div className={'reward-title'}>Owner</div>
+              <div className={'reward-amount'}>
+                <div>{toShort(owner)}</div>
+              </div>
+            </div>}
+
             <div className={'reward-container'}>
               <div className={'reward-title'}>Active stake</div>
               <div className={'reward-amount'}>
@@ -211,13 +223,6 @@ function StakingRow ({ activeStake, chainName, className, index, isAccountAll, i
                 <div className={'chain-unit'}>{unit}</div>
               </div>
             </div>
-
-            {/* <div className={'reward-container'}> */}
-            {/*  <div className={'reward-title'}>APR</div> */}
-            {/*  <div className={'reward-amount'}> */}
-            {/*    14% */}
-            {/*  </div> */}
-            {/* </div> */}
           </div>
         </div>
       }
@@ -226,6 +231,17 @@ function StakingRow ({ activeStake, chainName, className, index, isAccountAll, i
 }
 
 export default React.memo(styled(StakingRow)(({ theme }: Props) => `
+  .staking-item__type {
+    color: ${theme.crowdloanWinnerStatus};
+
+    padding: 2px 6px;
+    border-radius: 3px;
+    background-color: ${theme.backgroundAccountAddress};
+    margin-left: 8px;
+    font-size: 13px;
+    line-height: 20px;
+  }
+
   .extra-info {
     display: flex;
     gap: 12px;
@@ -357,6 +373,10 @@ export default React.memo(styled(StakingRow)(({ theme }: Props) => `
     font-size: 16px;
     font-weight: 500;
     text-transform: capitalize;
+
+    display: flex;
+    flex-direction: row;
+    gap: 3px;
   }
 
   .chain-symbol {

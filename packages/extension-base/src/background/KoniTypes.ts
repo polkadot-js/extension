@@ -126,11 +126,9 @@ export interface StakingItem {
 
   type: StakingType,
   state: APIItemState,
-}
 
-export interface AggregatedStakingItem extends StakingItem {
   unlockingInfo?: UnlockingStakeInfo,
-  rewardInfo?: StakingRewardItem,
+  rewardInfo?: StakingRewardItem
 }
 
 export interface StakingJson {

@@ -18,7 +18,7 @@ import Account from './Account';
 // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment,@typescript-eslint/no-unsafe-call
 configure({ adapter: new Adapter() });
 
-jest.spyOn(messaging, 'getAllMetatdata').mockResolvedValue([]);
+jest.spyOn(messaging, 'getAllMetadata').mockResolvedValue([]);
 
 describe('Account component', () => {
   let wrapper: ReactWrapper;

@@ -3,7 +3,7 @@
 
 import { useEffect, useMemo, useState } from 'react';
 
-import { getAllMetatdata } from '../messaging';
+import { getAllMetadata } from '../messaging';
 import chains from '../util/chains';
 import useTranslation from './useTranslation';
 
@@ -19,7 +19,7 @@ export default function (): Option[] {
   const [metadataChains, setMetadatachains] = useState<Option[]>([]);
 
   useEffect(() => {
-    getAllMetatdata().then((metadataDefs) => {
+    getAllMetadata().then((metadataDefs) => {
       const res = metadataDefs.map((metadata) => ({ text: metadata.chain, value: metadata.genesisHash }));
 
       setMetadatachains(res);

@@ -12,6 +12,7 @@ import QrRequest from '@subwallet/extension-koni-ui/components/Qr/QrRequest';
 import { SIGN_MODE } from '@subwallet/extension-koni-ui/constants/signing';
 import { ExternalRequestContext } from '@subwallet/extension-koni-ui/contexts/ExternalRequestContext';
 import { QrContext, QrContextState, QrStep } from '@subwallet/extension-koni-ui/contexts/QrContext';
+import useGetNetworkJson from '@subwallet/extension-koni-ui/hooks/screen/home/useGetNetworkJson';
 import { useRejectExternalRequest } from '@subwallet/extension-koni-ui/hooks/useRejectExternalRequest';
 import { useSignMode } from '@subwallet/extension-koni-ui/hooks/useSignMode';
 import useToast from '@subwallet/extension-koni-ui/hooks/useToast';
@@ -75,7 +76,8 @@ function AuthTransfer ({ chain, className, collectionId, nftItem, recipientAddre
   const web3BalanceError = web3TransferParams !== null ? web3TransferParams.balanceError : false;
 
   const [balanceError] = useState(substrateTransferParams !== null ? substrateBalanceError : web3BalanceError);
-  const { currentAccount: account, currentNetwork } = useSelector((state: RootState) => state);
+  const { currentAccount: account } = useSelector((state: RootState) => state);
+  const currentNetwork = useGetNetworkJson(chain);
 
   const signMode = useSignMode(account.account);
 

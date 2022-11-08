@@ -1,6 +1,8 @@
 // Copyright 2019-2022 @subwallet/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
+import { NetworkJson } from '@subwallet/extension-base/background/KoniTypes';
+import { IGNORE_QR_SIGNER } from '@subwallet/extension-koni-base/constants';
 import { LoadingContainer, Warning } from '@subwallet/extension-koni-ui/components';
 import Button from '@subwallet/extension-koni-ui/components/Button';
 import DisplayPayload from '@subwallet/extension-koni-ui/components/Qr/DisplayPayload';
@@ -8,10 +10,13 @@ import { ExternalRequestContext } from '@subwallet/extension-koni-ui/contexts/Ex
 import { QrContext, QrStep } from '@subwallet/extension-koni-ui/contexts/QrContext';
 import useTranslation from '@subwallet/extension-koni-ui/hooks/useTranslation';
 import { resolveExternalRequest } from '@subwallet/extension-koni-ui/messaging';
+import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { SigData } from '@subwallet/extension-koni-ui/types/accountExternalRequest';
+import { getNetworkJsonByGenesisHash } from '@subwallet/extension-koni-ui/util/getNetworkJsonByGenesisHash';
 import CN from 'classnames';
-import React, { useCallback, useContext, useState } from 'react';
+import React, { useCallback, useContext, useMemo, useState } from 'react';
+import { useSelector } from 'react-redux';
 import styled from 'styled-components';
 
 import { SignerResult } from '@polkadot/types/types';
@@ -33,6 +38,10 @@ interface Props extends ThemeProps{
 const QrRequest = (props: Props) => {
   const { t } = useTranslation();
   const { children, className, clearError, errorArr, genesisHash, handlerStart, isBusy, onError } = props;
+  const networkMap = useSelector((state: RootState) => state.networkMap);
+
+  const network = useMemo((): NetworkJson | null => getNetworkJsonByGenesisHash(networkMap, genesisHash), [genesisHash, networkMap]);
+  const isSupport = useMemo((): boolean => network ? !IGNORE_QR_SIGNER.includes(network.key) : false, [network]);
 
   const { QrState, updateQrState } = useContext(QrContext);
   const { createResolveExternalRequestData } = useContext(ExternalRequestContext);
@@ -148,10 +157,18 @@ const QrRequest = (props: Props) => {
             {children}
             <div className='auth-transaction__separator' />
             {renderError()}
+            {!isSupport && (
+              <Warning
+                className='auth-transaction-error'
+              >
+                {t<string>('This network does not support this feature with QR-signer account')}
+              </Warning>
+            )}
             <div className='auth-transaction__submit-wrapper'>
               <Button
                 className={'auth-transaction__submit-btn'}
                 isBusy={isBusy}
+                isDisabled={!isSupport}
                 onClick={handlerStart}
               >
                 {t<string>('Sign via QR')}
@@ -160,7 +177,7 @@ const QrRequest = (props: Props) => {
           </div>
         );
     }
-  }, [step, onError, handlerScanSignature, renderError, handlerChangeToDisplayQr, t, qrAddress, genesisHash, isEthereum, isQrHashed, qrPayload, handlerChangeToScan, children, isBusy, handlerStart]);
+  }, [step, onError, handlerScanSignature, renderError, handlerChangeToDisplayQr, t, qrAddress, genesisHash, isEthereum, isQrHashed, qrPayload, handlerChangeToScan, children, isSupport, isBusy, handlerStart]);
 
   return (
     <div className={CN(className)}>

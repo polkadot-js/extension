@@ -14,10 +14,10 @@
   },
   "sideEffects": false,
   "type": "module",
-  "version": "0.44.7-17-x",
+  "version": "0.44.7-20-x",
   "main": "index.js",
   "dependencies": {
-    "@babel/runtime": "^7.19.4",
+    "@babel/runtime": "^7.20.0",
     "sinon-chrome": "^3.0.1"
   }
 }

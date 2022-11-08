@@ -14,15 +14,15 @@
   },
   "sideEffects": false,
   "type": "module",
-  "version": "0.44.7-17-x",
+  "version": "0.44.7-20-x",
   "dependencies": {
-    "@babel/runtime": "^7.19.4",
-    "@polkadot/extension-base": "^0.44.7-17-x",
-    "@polkadot/extension-inject": "^0.44.7-17-x",
-    "@polkadot/extension-ui": "^0.44.7-17-x"
+    "@babel/runtime": "^7.20.0",
+    "@polkadot/extension-base": "^0.44.7-20-x",
+    "@polkadot/extension-inject": "^0.44.7-20-x",
+    "@polkadot/extension-ui": "^0.44.7-20-x"
   },
   "devDependencies": {
-    "@polkadot/dev": "^0.67.145",
+    "@polkadot/dev": "^0.67.150",
     "babel-loader": "^8.2.5",
     "browser-resolve": "^2.0.0",
     "buffer": "^6.0.3",

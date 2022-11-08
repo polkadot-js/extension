@@ -124,11 +124,6 @@ export interface StakingJson {
   details: StakingItem[]
 }
 
-export interface StakingStoreJson {
-  bonded: Record<string, StakingItem>,
-  reward: Array<StakingRewardItem>
-}
-
 export interface PriceJson {
   ready?: boolean,
   currency: string,

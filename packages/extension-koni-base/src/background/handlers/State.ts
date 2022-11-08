@@ -155,6 +155,8 @@ export default class KoniState extends State {
 
   private stakeUnlockingInfo: StakeUnlockingJson = { timestamp: -1, details: {} };
 
+  // TODO: remove states of staking, store everything in indexedDB
+
   // eslint-disable-next-line camelcase
   private stakeUnlockingInfoSubject = new Subject<StakeUnlockingJson>();
   private historyMap: Record<string, TransactionHistoryItemType[]> = {};
@@ -711,9 +713,9 @@ export default class KoniState extends State {
       return;
     }
 
-    const activeNetworkHashs = Object.values(this.activeNetworks).map((network) => network.genesisHash);
+    const activeNetworkHashes = Object.values(this.activeNetworks).map((network) => network.genesisHash);
 
-    const nfts = await this.dbService.getNft(addresses, activeNetworkHashs);
+    const nfts = await this.dbService.getNft(addresses, activeNetworkHashes);
 
     return {
       nftList: nfts,

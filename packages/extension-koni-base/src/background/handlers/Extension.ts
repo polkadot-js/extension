@@ -1016,8 +1016,8 @@ export default class KoniExtension extends Extension {
     return this.getStakingReward();
   }
 
-  private async getStaking (reset?: boolean): Promise<StakingJson> {
-    return state.getStaking(reset);
+  private async getStaking (): Promise<StakingJson> {
+    return state.getStaking();
   }
 
   private async subscribeStaking (id: string, port: chrome.runtime.Port): Promise<StakingJson> {
@@ -1033,7 +1033,7 @@ export default class KoniExtension extends Extension {
       stakingSubscription.unsubscribe();
     });
 
-    return await this.getStaking(true);
+    return await this.getStaking();
   }
 
   private subscribeHistory (id: string, port: chrome.runtime.Port): Record<string, TransactionHistoryItemType[]> {

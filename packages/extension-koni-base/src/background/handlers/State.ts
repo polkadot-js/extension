@@ -536,14 +536,14 @@ export default class KoniState extends State {
     });
   }
 
-  public async getStaking (reset?: boolean): Promise<StakingJson> {
+  public async getStaking (): Promise<StakingJson> {
     const addresses = await this.getDecodedAddresses();
 
     const activeNetworkHashes = Object.values(this.activeNetworks).map((network) => network.genesisHash);
 
     const stakings = await this.dbService.getStakings(addresses, activeNetworkHashes);
 
-    return { ready: true, details: stakings, reset } as StakingJson;
+    return { ready: true, details: stakings } as StakingJson;
   }
 
   public async getStakingRecordsByAddress (address: string): Promise<StakingItem[]> {

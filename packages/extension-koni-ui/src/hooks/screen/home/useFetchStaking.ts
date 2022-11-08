@@ -12,28 +12,32 @@ export default function useFetchStaking (networkKey: string): StakingType {
 
   const { priceMap } = priceReducer;
   const parsedPriceMap: Record<string, number> = {};
-  const stakingItemMap = stakingReducer.details;
+
+  const stakingItems = stakingReducer.details;
   const stakingRewardList = stakingRewardReducer.details;
-  const stakeUnlockingInfo = stakeUnlockingInfoJson.details;
+  const unlockingItems = stakeUnlockingInfoJson.details;
   const stakeUnlockingTimestamp = stakeUnlockingInfoJson.timestamp;
+
   const readyStakingItems: StakingItem[] = [];
   const stakingData: StakingDataType[] = [];
   let loading = !stakingRewardReducer.ready;
 
   const showAll = networkKey.toLowerCase() === ALL_ACCOUNT_KEY.toLowerCase();
 
-  Object.keys(stakingItemMap).forEach((key) => {
-    const stakingItem = stakingItemMap[key];
-
+  stakingItems.forEach((stakingItem) => {
     if (stakingItem.state === APIItemState.READY) {
       loading = false;
 
-      if (stakingItem.balance !== '0' && (Math.round(parseFloat(stakingItem.balance as string) * 100) / 100) !== 0) {
-        parsedPriceMap[stakingItem.chainId] = priceMap[networkMap[key]?.coinGeckoKey || stakingItem.chainId];
+      const networkJson = networkMap[stakingItem.chain];
+
+      if (stakingItem.balance && parseFloat(stakingItem.balance) > 0 && (Math.round(parseFloat(stakingItem.balance) * 100) / 100) !== 0) {
+        parsedPriceMap[stakingItem.chain] = priceMap[networkJson?.coinGeckoKey || stakingItem.chain];
         readyStakingItems.push(stakingItem);
       }
     }
   });
+
+  console.log('readyStakingItems', readyStakingItems);
 
   if (!showAll) {
     const filteredStakingItems: StakingItem[] = [];
@@ -53,7 +57,7 @@ export default function useFetchStaking (networkKey: string): StakingType {
         }
       }
 
-      Object.entries(stakeUnlockingInfo).forEach(([key, info]) => {
+      Object.entries(unlockingItems).forEach(([key, info]) => {
         if (key === stakingItem.chain) {
           stakingDataType.staking = {
             ...stakingItem,
@@ -74,7 +78,7 @@ export default function useFetchStaking (networkKey: string): StakingType {
         }
       }
 
-      Object.entries(stakeUnlockingInfo).forEach(([key, info]) => {
+      Object.entries(unlockingItems).forEach(([key, info]) => {
         if (key === stakingItem.chain) {
           stakingDataType.staking = {
             ...stakingItem,

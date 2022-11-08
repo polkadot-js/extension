@@ -429,7 +429,7 @@ function AuthTransfer ({ chain, className, collectionId, nftItem, recipientAddre
               isDisabled={true}
               isSetDefaultValue={true}
               label={t<string>('Send from account')}
-              networkPrefix={currentNetwork.networkPrefix}
+              networkPrefix={currentNetwork.ss58Format}
               type='account'
               withEllipsis
             />
@@ -454,7 +454,7 @@ function AuthTransfer ({ chain, className, collectionId, nftItem, recipientAddre
               isDisabled={true}
               isSetDefaultValue={true}
               label={t<string>('Send from account')}
-              networkPrefix={currentNetwork.networkPrefix}
+              networkPrefix={currentNetwork.ss58Format}
               type='account'
               withEllipsis
             />

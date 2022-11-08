@@ -36,6 +36,8 @@ export enum ApiInitStatus {
   NOT_EXIST
 }
 
+/// Request Auth
+
 export interface AuthRequestV2 extends Resolver<ResultResolver> {
   id: string;
   idStr: string;
@@ -44,31 +46,51 @@ export interface AuthRequestV2 extends Resolver<ResultResolver> {
   accountAuthType: AccountAuthType
 }
 
+/// Manage Auth
+
+// Get Auth
+
 export interface RequestAuthorizeApproveV2 {
   id: string;
   accounts: string[];
 }
 
+// Auth All site
+
 export interface RequestAuthorizationAll {
   connectValue: boolean;
 }
+
+// Manage site auth (all allowed/unAllowed)
 
 export interface RequestAuthorization extends RequestAuthorizationAll {
   url: string;
 }
 
+// Manage single auth with single account
+
 export interface RequestAuthorizationPerAccount extends RequestAuthorization {
   address: string;
 }
+
+// Manage single site with multi account
 
 export interface RequestAuthorizationPerSite {
   id: string;
   values: Record<string, boolean>;
 }
 
+// Manage site block
+
 export interface RequestAuthorizationBlock {
   id: string;
   connectedValue: boolean;
+}
+
+// Forget site auth
+
+export interface RequestForgetSite {
+  url: string;
 }
 
 export interface ResultResolver {
@@ -81,9 +103,7 @@ export interface RejectResolver {
   accounts: string[];
 }
 
-export interface RequestForgetSite {
-  url: string;
-}
+/// Staking subscribe
 
 export interface StakingRewardItem {
   state: APIItemState
@@ -478,6 +498,10 @@ export interface RequestApi {
   networkKey: string;
 }
 
+/// Manage account
+
+// Export private key
+
 export interface RequestAccountExportPrivateKey {
   address: string;
   password: string;
@@ -487,6 +511,8 @@ export interface ResponseAccountExportPrivateKey {
   privateKey: string;
   publicKey: string;
 }
+
+// Get account info with private key
 
 export interface RequestCheckPublicAndSecretKey {
   secretKey: string;
@@ -499,16 +525,29 @@ export interface ResponseCheckPublicAndSecretKey {
   isEthereum: boolean;
 }
 
+// Create seed phase
+
 export interface RequestSeedCreateV2 {
   length?: SeedLengths;
   seed?: string;
   types?: Array<KeypairType>;
 }
 
+export interface ResponseSeedCreateV2 {
+  seed: string,
+  addressMap: Record<KeypairType, string>
+}
+
+// Get account info with suri
+
 export interface RequestSeedValidateV2 {
   suri: string;
   types?: Array<KeypairType>;
 }
+
+export type ResponseSeedValidateV2 = ResponseSeedCreateV2
+
+// Create account with suri
 
 export interface RequestAccountCreateSuriV2 {
   name: string;
@@ -518,6 +557,10 @@ export interface RequestAccountCreateSuriV2 {
   types?: Array<KeypairType>;
   isAllowed: boolean;
 }
+
+export type ResponseAccountCreateSuriV2 = Record<KeypairType, string>
+
+// Create derive account
 
 export interface RequestDeriveCreateV2 {
   name: string;
@@ -529,12 +572,16 @@ export interface RequestDeriveCreateV2 {
   isAllowed: boolean;
 }
 
+// Restore account with json file (single account)
+
 export interface RequestJsonRestoreV2 {
   file: KeyringPair$Json;
   password: string;
   address: string;
   isAllowed: boolean;
 }
+
+// Restore account with json file (multi account)
 
 export interface RequestBatchRestoreV2 {
   file: KeyringPairs$Json;
@@ -543,50 +590,95 @@ export interface RequestBatchRestoreV2 {
   isAllowed: boolean;
 }
 
-export interface ResponseSeedCreateV2 {
-  seed: string,
-  addressMap: Record<KeypairType, string>
+// Restore account with privateKey
+
+export interface ResponsePrivateKeyValidateV2 {
+  addressMap: Record<KeypairType, string>,
+  autoAddPrefix: boolean
 }
 
-export interface RequestCheckTransfer {
-  networkKey: string,
-  from: string,
-  to: string,
-  value?: string,
-  transferAll?: boolean
-  token?: string
+// External account
+
+export enum AccountExternalErrorCode {
+  INVALID_ADDRESS = 'invalidToAccount',
+  KEYRING_ERROR = 'keyringError',
+  UNKNOWN_ERROR = 'unknownError'
 }
 
-export interface RequestTransfer extends RequestCheckTransfer {
+export interface AccountExternalError{
+  code: AccountExternalErrorCode;
+  message: string;
+}
+
+// Attach QR-signer account
+
+export interface RequestAccountCreateExternalV2 {
+  address: string;
+  genesisHash?: string | null;
+  name: string;
+  isEthereum: boolean;
+  isAllowed: boolean;
+  isReadOnly: boolean;
+}
+
+// Attach Ledger account
+
+export interface RequestAccountCreateHardwareV2 {
+  accountIndex: number;
+  address: string;
+  addressOffset: number;
+  genesisHash: string;
+  hardwareType: string;
+  name: string;
+  isAllowed?: boolean;
+}
+
+// Restore account with public and secret key
+
+export interface RequestAccountCreateWithSecretKey {
+  publicKey: string;
+  secretKey: string;
   password: string;
+  name: string;
+  isAllow: boolean;
+  isEthereum: boolean;
 }
 
-export interface RequestCheckCrossChainTransfer {
-  originNetworkKey: string,
-  destinationNetworkKey: string,
-  from: string,
-  to: string,
-  transferAll?: boolean,
-  value: string,
-  token: string
+export interface ResponseAccountCreateWithSecretKey {
+  errors: AccountExternalError[];
+  success: boolean;
 }
 
-export interface RequestCrossChainTransfer extends RequestCheckCrossChainTransfer {
-  password: string;
+/// Sign External Request
+
+// Status
+
+export enum ExternalRequestPromiseStatus {
+  PENDING,
+  REJECTED,
+  FAILED,
+  COMPLETED
 }
 
-export interface ResponseCheckCrossChainTransfer {
-  errors?: Array<BasicTxError>,
-  feeString?: string,
-  estimatedFee: string,
-  feeSymbol: string
+// Structure
+
+export interface ExternalRequestPromise {
+  resolve?: (result: SignerResult | PromiseLike<SignerResult>) => void,
+  reject?: (error?: Error) => void,
+  status: ExternalRequestPromiseStatus,
+  message?: string;
+  createdAt: number
 }
 
-export type RequestTransferExternal = RequestCheckTransfer
+// Prepare to create
 
-export type RequestCrossChainTransferExternal = RequestCheckCrossChainTransfer
+export interface PrepareExternalRequest {
+  id: string;
+  setState: (promise: ExternalRequestPromise) => void;
+  updateState: (promise: Partial<ExternalRequestPromise>) => void;
+}
 
-// External is account external (import via qr and hard wallet)
+// Reject
 
 export interface RequestRejectExternalRequest {
   id: string;
@@ -594,18 +686,19 @@ export interface RequestRejectExternalRequest {
   throwError?: boolean;
 }
 
+export type ResponseRejectExternalRequest = void
+
+// Resolve
+
 export interface RequestResolveExternalRequest {
   id: string;
   data: SignerResult;
 }
 
-export interface ResponsePrivateKeyValidateV2 {
-  addressMap: Record<KeypairType, string>,
-  autoAddPrefix: boolean
-}
+export type ResponseResolveExternalRequest = void
 
-export type ResponseSeedValidateV2 = ResponseSeedCreateV2
-export type ResponseAccountCreateSuriV2 = Record<KeypairType, string>
+///
+
 export type AccountRef = Array<string>
 export type AccountRefMap = Record<string, AccountRef>
 
@@ -696,14 +789,13 @@ export interface NftTransactionResponse extends BasicTxResponse {
 }
 
 export type HandleBasicTx = (data: BasicTxResponse) => void;
+export type HandleTxResponse<T extends BasicTxResponse> = (data: T) => void;
 
-export interface ResponseCheckTransfer {
-  errors?: Array<BasicTxError>,
-  fromAccountFree: string,
-  toAccountFree: string,
-  estimateFee?: string,
-  feeSymbol?: string // if undefined => use main token
-}
+export type BaseRequestSign = Record<string, unknown>;
+
+export type PasswordRequestSign<T> = T & { password: string; };
+
+export type ExternalRequestSign<T> = Omit<T, 'password'>;
 
 export enum TransferStep {
   READY = 'ready',
@@ -736,7 +828,6 @@ export interface EvmNftTransaction {
 
 export interface EvmNftSubmitTransaction {
   senderAddress: string,
-  password: string,
   recipientAddress: string,
   networkKey: string,
   rawTransaction: Record<string, any>
@@ -860,10 +951,12 @@ export interface SubstrateNftTransaction {
 
 export interface SubstrateNftSubmitTransaction {
   params: Record<string, any> | null;
-  password: string;
   senderAddress: string;
   recipientAddress: string;
 }
+
+export type RequestSubstrateNftSubmitTransaction = PasswordRequestSign<SubstrateNftSubmitTransaction>
+export type RequestEvmNftSubmitTransaction = PasswordRequestSign<EvmNftSubmitTransaction>
 
 export type ChainRelationType = 'p' | 'r'; // parachain | relaychain
 
@@ -885,75 +978,6 @@ export interface RequestAccountMeta{
 
 export interface ResponseAccountMeta{
   meta: KeyringPair$Meta;
-}
-
-export type ResponseRejectExternalRequest = void
-
-export type ResponseResolveExternalRequest = void
-
-export enum ExternalRequestPromiseStatus {
-  PENDING,
-  REJECTED,
-  FAILED,
-  COMPLETED
-}
-
-export interface ExternalRequestPromise {
-  resolve?: (result: SignerResult | PromiseLike<SignerResult>) => void,
-  reject?: (error?: Error) => void,
-  status: ExternalRequestPromiseStatus,
-  message?: string;
-  createdAt: number
-}
-
-export interface PrepareExternalRequest {
-  id: string;
-  setState: (promise: ExternalRequestPromise) => void;
-  updateState: (promise: Partial<ExternalRequestPromise>) => void;
-}
-
-export interface RequestAccountCreateExternalV2 {
-  address: string;
-  genesisHash?: string | null;
-  name: string;
-  isEthereum: boolean;
-  isAllowed: boolean;
-  isReadOnly: boolean;
-}
-
-export interface RequestAccountCreateHardwareV2 {
-  accountIndex: number;
-  address: string;
-  addressOffset: number;
-  genesisHash: string;
-  hardwareType: string;
-  name: string;
-  isAllowed?: boolean;
-}
-
-export enum AccountExternalErrorCode {
-  INVALID_ADDRESS = 'invalidToAccount',
-  KEYRING_ERROR = 'keyringError',
-  UNKNOWN_ERROR = 'unknownError'
-}
-
-export interface AccountExternalError{
-  code: AccountExternalErrorCode;
-  message: string;
-}
-
-export interface RequestAccountCreateWithSecretKey {
-  publicKey: string;
-  secretKey: string;
-  password: string;
-  name: string;
-  isAllow: boolean;
-  isEthereum: boolean;
-}
-
-export interface ResponseAccountCreateWithSecretKey {
-  errors: AccountExternalError[];
-  success: boolean;
 }
 
 export type RequestEvmEvents = null;
@@ -1066,32 +1090,6 @@ export interface ConfirmationDefinitions {
   evmSendTransactionRequestQr: [ConfirmationsQueueItem<EvmSendTransactionRequestQr>, ConfirmationResultQr<boolean>]
 }
 
-export interface RequestParseTransactionEVM {
-  data: string;
-}
-
-export interface ResponseParseTransactionEVM {
-  data: ParseEVMTransactionData | string;
-  input: string;
-  nonce: number;
-  to: string;
-  gas: number;
-  gasPrice: number;
-  value: number;
-}
-
-export interface RequestQrSignEVM {
-  address: string;
-  message: string;
-  type: 'message' | 'transaction'
-  chainId?: number;
-  password: string;
-}
-
-export interface ResponseQrSignEVM {
-  signature: string;
-}
-
 export type ConfirmationType = keyof ConfirmationDefinitions;
 
 export type ConfirmationsQueue = {
@@ -1122,37 +1120,10 @@ export interface ValidatorInfo {
   hasScheduledRequest?: boolean; // for parachain, can't stake more on a collator that has existing scheduled request
 }
 
-export interface BondingOptionInfo {
-  isBondedBefore: boolean,
-  era: number,
-  maxNominations: number,
-  maxNominatorPerValidator: number,
-  validators: ValidatorInfo[],
-  bondedValidators: string[]
-}
-
-export interface ChainBondingBasics {
-  stakedReturn: number,
-  // minBond: number,
-  isMaxNominators: boolean,
-  validatorCount: number
-}
-
 export interface BasicTxInfo {
   fee: string,
   balanceError: boolean,
   rawFee?: number
-}
-
-export interface BondingSubmitParams {
-  networkKey: string,
-  nominatorAddress: string,
-  amount: number,
-  validatorInfo: ValidatorInfo,
-  password?: string,
-  isBondedBefore: boolean,
-  bondedValidators: string[], // already delegated validators
-  lockPeriod?: number // in month
 }
 
 export interface BondingOptionParams {
@@ -1160,29 +1131,10 @@ export interface BondingOptionParams {
   address: string;
 }
 
-export interface UnbondingSubmitParams {
-  amount: number,
-  networkKey: string,
-  address: string,
-  password?: string,
-  // for some chains
-  validatorAddress?: string,
-  unstakeAll?: boolean
-}
-
 export interface UnlockingStakeParams {
   address: string,
   networkKey: string,
   validatorList?: string[]
-}
-
-export interface DelegationItem {
-  owner: string,
-  amount: string, // raw amount string
-  identity?: string,
-  minBond: string,
-  hasScheduledRequest: boolean
-  icon?: string;
 }
 
 export interface UnlockingStakeInfo {
@@ -1198,49 +1150,17 @@ export interface StakeUnlockingJson {
   details: Record<string, UnlockingStakeInfo>
 }
 
-export interface StakeWithdrawalParams {
-  address: string,
-  networkKey: string,
-  password?: string,
-  validatorAddress?: string,
-  action?: string
-}
-
-export interface StakeClaimRewardParams {
-  address: string,
-  networkKey: string,
-  validatorAddress?: string,
-  password?: string
-}
-
-export type RequestNftTransferExternalSubstrate = Omit<SubstrateNftSubmitTransaction, 'password'>
-
-export type RequestNftTransferExternalEVM = Omit<EvmNftSubmitTransaction, 'password'>
-
-export type RequestStakeExternal = Omit<BondingSubmitParams, 'password'>
-
-export type RequestUnStakeExternal = Omit<UnbondingSubmitParams, 'password'>
-
-export type RequestWithdrawStakeExternal = Omit<StakeWithdrawalParams, 'password'>
-
-export type RequestClaimRewardExternal = Omit<StakeClaimRewardParams, 'password'>
-
-export type RequestCreateCompoundStakeExternal = Omit<TuringStakeCompoundParams, 'password'>
-
-export type RequestCancelCompoundStakeExternal = Omit<TuringCancelStakeCompoundParams, 'password'>
-
-export interface StakeDelegationRequest {
-  address: string,
-  networkKey: string
-}
-
 export interface SingleModeJson {
   networkKeys: string[],
   theme: ThemeTypes,
   autoTriggerDomain: string // Regex for auto trigger single mode
 }
 
+/// EVM transaction
+
 export type NestedArray<T> = T | NestedArray<T>[];
+
+/// EVM Contract Input
 
 export interface EVMTransactionArg {
   name: string;
@@ -1255,15 +1175,17 @@ export interface ParseEVMTransactionData{
   args: EVMTransactionArg[];
 }
 
-export interface RequestParseEVMTransactionInput {
+export interface RequestParseEVMContractInput {
   data: string;
   contract: string;
   chainId: number;
 }
 
-export interface ResponseParseEVMTransactionInput {
+export interface ResponseParseEVMContractInput {
   result: ParseEVMTransactionData | string
 }
+
+/// Ledger
 
 export interface LedgerNetwork {
   genesisHash: string;
@@ -1273,47 +1195,16 @@ export interface LedgerNetwork {
   isDevMode: boolean;
 }
 
-export interface TuringStakeCompoundParams {
-  address: string,
-  collatorAddress: string,
-  networkKey: string,
-  accountMinimum: string,
-  bondedAmount: string,
-  password?: string
-}
-
-export interface TuringStakeCompoundResp {
-  txInfo: BasicTxInfo,
-  optimalFrequency: string,
-  initTime: number,
-  compoundFee: string,
-  rawCompoundFee?: number
-}
+/// On-ramp
 
 export interface TransakNetwork {
   networks: string[];
   tokens?: string[];
 }
 
-export interface CheckExistingTuringCompoundParams {
-  address: string;
-  collatorAddress: string;
-  networkKey: string;
-}
+/// Qr Sign
 
-export interface ExistingTuringCompoundTask {
-  exist: boolean;
-  taskId: string;
-  accountMinimum: number;
-  frequency: number;
-}
-
-export interface TuringCancelStakeCompoundParams {
-  taskId: string;
-  networkKey: string;
-  address: string;
-  password?: string;
-}
+// Parse Substrate
 
 export interface FormattedMethod {
   args?: ArgInfo[];
@@ -1338,18 +1229,34 @@ export interface ResponseParseTransactionSubstrate {
   specVersion: number;
 }
 
+// Parse EVM
+
+export interface RequestQrParseRLP {
+  data: string;
+}
+
+export interface ResponseQrParseRLP {
+  data: ParseEVMTransactionData | string;
+  input: string;
+  nonce: number;
+  to: string;
+  gas: number;
+  gasPrice: number;
+  value: number;
+}
+
+// Check lock
+
+export interface RequestQRIsLocked{
+  address: string;
+}
+
 export interface ResponseQRIsLocked{
   isLocked: boolean;
   remainingTime: number;
 }
 
-export interface ResponseQrSignSubstrate {
-  signature: string;
-}
-
-export interface RequestQRIsLocked{
-  address: string;
-}
+// Sign
 
 export type SignerDataType = 'transaction' | 'message'
 
@@ -1363,23 +1270,232 @@ export interface RequestQrSignSubstrate {
   transactionVersion?: number;
 }
 
+export interface ResponseQrSignSubstrate {
+  signature: string;
+}
+
+export interface RequestQrSignEVM {
+  address: string;
+  message: string;
+  type: 'message' | 'transaction'
+  chainId?: number;
+  password: string;
+}
+
+export interface ResponseQrSignEVM {
+  signature: string;
+}
+
+/// Transfer
+
+export interface RequestCheckTransfer {
+  networkKey: string,
+  from: string,
+  to: string,
+  value?: string,
+  transferAll?: boolean
+  token?: string
+}
+
+export interface ResponseCheckTransfer {
+  errors?: Array<BasicTxError>,
+  fromAccountFree: string,
+  toAccountFree: string,
+  estimateFee?: string,
+  feeSymbol?: string // if undefined => use main token
+}
+
+export type RequestTransfer = PasswordRequestSign<RequestCheckTransfer>
+
+export interface RequestCheckCrossChainTransfer {
+  originNetworkKey: string,
+  destinationNetworkKey: string,
+  from: string,
+  to: string,
+  transferAll?: boolean,
+  value: string,
+  token: string
+}
+
+export type RequestCrossChainTransfer = PasswordRequestSign<RequestCheckCrossChainTransfer>;
+
+export interface ResponseCheckCrossChainTransfer {
+  errors?: Array<BasicTxError>,
+  feeString?: string,
+  estimatedFee: string,
+  feeSymbol: string
+}
+
+/// Stake
+
+// Bonding
+
+export interface BondingOptionInfo {
+  isBondedBefore: boolean,
+  era: number,
+  maxNominations: number,
+  maxNominatorPerValidator: number,
+  validators: ValidatorInfo[],
+  bondedValidators: string[]
+}
+
+export interface ChainBondingBasics {
+  stakedReturn: number,
+  // minBond: number,
+  isMaxNominators: boolean,
+  validatorCount: number
+}
+
+export interface BondingSubmitParams {
+  networkKey: string,
+  nominatorAddress: string,
+  amount: number,
+  validatorInfo: ValidatorInfo,
+  isBondedBefore: boolean,
+  bondedValidators: string[], // already delegated validators
+  lockPeriod?: number // in month
+}
+
+export type RequestBondingSubmit = PasswordRequestSign<BondingSubmitParams>;
+
+// UnBonding
+
+export interface UnbondingSubmitParams {
+  amount: number,
+  networkKey: string,
+  address: string,
+  // for some chains
+  validatorAddress?: string,
+  unstakeAll?: boolean
+}
+
+export type RequestUnbondingSubmit = PasswordRequestSign<UnbondingSubmitParams>;
+
+// Withdraw
+
+export interface StakeWithdrawalParams {
+  address: string,
+  networkKey: string,
+  password?: string,
+  validatorAddress?: string,
+  action?: string
+}
+
+export type RequestStakeWithdrawal = PasswordRequestSign<StakeWithdrawalParams>;
+
+// Claim
+
+export interface StakeClaimRewardParams {
+  address: string,
+  networkKey: string,
+  validatorAddress?: string,
+  password?: string
+}
+
+export type RequestStakeClaimReward = PasswordRequestSign<StakeClaimRewardParams>;
+
+// Compound
+
+export interface DelegationItem {
+  owner: string,
+  amount: string, // raw amount string
+  identity?: string,
+  minBond: string,
+  hasScheduledRequest: boolean
+  icon?: string;
+}
+
+export interface StakeDelegationRequest {
+  address: string,
+  networkKey: string
+}
+
+export interface CheckExistingTuringCompoundParams {
+  address: string;
+  collatorAddress: string;
+  networkKey: string;
+}
+
+export interface ExistingTuringCompoundTask {
+  exist: boolean;
+  taskId: string;
+  accountMinimum: number;
+  frequency: number;
+}
+
+export interface TuringStakeCompoundResp {
+  txInfo: BasicTxInfo,
+  optimalFrequency: string,
+  initTime: number,
+  compoundFee: string,
+  rawCompoundFee?: number
+}
+
+export interface TuringStakeCompoundParams {
+  address: string,
+  collatorAddress: string,
+  networkKey: string,
+  accountMinimum: string,
+  bondedAmount: string,
+}
+
+export type RequestTuringStakeCompound = PasswordRequestSign<TuringStakeCompoundParams>;
+
+export interface TuringCancelStakeCompoundParams {
+  taskId: string;
+  networkKey: string;
+  address: string;
+}
+
+export type RequestTuringCancelStakeCompound = PasswordRequestSign<TuringCancelStakeCompoundParams>;
+
+/// Create QR
+
+// Transfer
+
+export type RequestTransferExternal = ExternalRequestSign<RequestCheckTransfer>;
+
+// XCM
+
+export type RequestCrossChainTransferExternal = ExternalRequestSign<RequestCheckCrossChainTransfer>;
+
+// NFT
+
+export type RequestNftTransferExternalSubstrate = ExternalRequestSign<SubstrateNftSubmitTransaction>;
+
+export type RequestNftTransferExternalEVM = ExternalRequestSign<EvmNftSubmitTransaction>;
+
+// Stake
+
+export type RequestStakeExternal = ExternalRequestSign<BondingSubmitParams>;
+
+export type RequestUnStakeExternal = ExternalRequestSign<UnbondingSubmitParams>;
+
+export type RequestWithdrawStakeExternal = ExternalRequestSign<StakeWithdrawalParams>;
+
+export type RequestClaimRewardExternal = ExternalRequestSign<StakeClaimRewardParams>;
+
+export type RequestCreateCompoundStakeExternal = ExternalRequestSign<TuringStakeCompoundParams>;
+
+export type RequestCancelCompoundStakeExternal = ExternalRequestSign<TuringCancelStakeCompoundParams>;
+
 export interface KoniRequestSignatures {
   // Bonding functions
-  'pri(staking.submitTuringCancelCompound)': [TuringCancelStakeCompoundParams, BasicTxResponse, BasicTxResponse];
+  'pri(staking.submitTuringCancelCompound)': [RequestTuringCancelStakeCompound, BasicTxResponse, BasicTxResponse];
   'pri(staking.turingCancelCompound)': [TuringCancelStakeCompoundParams, BasicTxInfo];
   'pri(staking.checkTuringCompoundTask)': [CheckExistingTuringCompoundParams, ExistingTuringCompoundTask];
-  'pri(staking.submitTuringCompound)': [TuringStakeCompoundParams, BasicTxResponse, BasicTxResponse];
+  'pri(staking.submitTuringCompound)': [RequestTuringStakeCompound, BasicTxResponse, BasicTxResponse];
   'pri(staking.turingCompound)': [TuringStakeCompoundParams, TuringStakeCompoundResp];
   'pri(staking.delegationInfo)': [StakeDelegationRequest, DelegationItem[]];
-  'pri(staking.submitClaimReward)': [StakeClaimRewardParams, BasicTxResponse, BasicTxResponse];
+  'pri(staking.submitClaimReward)': [RequestStakeClaimReward, BasicTxResponse, BasicTxResponse];
   'pri(staking.claimRewardTxInfo)': [StakeClaimRewardParams, BasicTxInfo];
-  'pri(unbonding.submitWithdrawal)': [StakeWithdrawalParams, BasicTxResponse, BasicTxResponse];
+  'pri(unbonding.submitWithdrawal)': [RequestStakeWithdrawal, BasicTxResponse, BasicTxResponse];
   'pri(unbonding.withdrawalTxInfo)': [StakeWithdrawalParams, BasicTxInfo];
   'pri(unbonding.subscribeUnlockingInfo)': [null, StakeUnlockingJson, StakeUnlockingJson];
-  'pri(unbonding.submitTransaction)': [UnbondingSubmitParams, BasicTxResponse, BasicTxResponse];
+  'pri(unbonding.submitTransaction)': [RequestUnbondingSubmit, BasicTxResponse, BasicTxResponse];
   'pri(unbonding.txInfo)': [UnbondingSubmitParams, BasicTxInfo];
   'pri(bonding.txInfo)': [BondingSubmitParams, BasicTxInfo];
-  'pri(bonding.submitTransaction)': [BondingSubmitParams, BasicTxResponse, BasicTxResponse];
+  'pri(bonding.submitTransaction)': [RequestBondingSubmit, BasicTxResponse, BasicTxResponse];
   'pri(bonding.getChainBondingBasics)': [NetworkJson[], Record<string, ChainBondingBasics>, Record<string, ChainBondingBasics>];
   'pri(bonding.getBondingOptions)': [BondingOptionParams, BondingOptionInfo];
 
@@ -1404,9 +1520,9 @@ export interface KoniRequestSignatures {
   'pri(customTokenState.getSubscription)': [null, CustomTokenJson, CustomTokenJson];
 
   // NFT functions
-  'pri(evmNft.submitTransaction)': [EvmNftSubmitTransaction, NftTransactionResponse, NftTransactionResponse];
+  'pri(evmNft.submitTransaction)': [RequestEvmNftSubmitTransaction, NftTransactionResponse, NftTransactionResponse];
   'pri(evmNft.getTransaction)': [NftTransactionRequest, EvmNftTransaction];
-  'pri(substrateNft.submitTransaction)': [SubstrateNftSubmitTransaction, NftTransactionResponse, NftTransactionResponse];
+  'pri(substrateNft.submitTransaction)': [RequestSubstrateNftSubmitTransaction, NftTransactionResponse, NftTransactionResponse];
   'pri(substrateNft.getTransaction)': [NftTransactionRequest, SubstrateNftTransaction];
   'pri(nftTransfer.setNftTransfer)': [NftTransferExtra, boolean];
   'pri(nftTransfer.getNftTransfer)': [null, NftTransferExtra];
@@ -1454,10 +1570,6 @@ export interface KoniRequestSignatures {
   'pri(accounts.create.externalV2)': [RequestAccountCreateExternalV2, AccountExternalError[]];
   'pri(accounts.create.hardwareV2)': [RequestAccountCreateHardwareV2, boolean];
   'pri(accounts.create.withSecret)': [RequestAccountCreateWithSecretKey, ResponseAccountCreateWithSecretKey];
-  'pri(accounts.checkTransfer)': [RequestCheckTransfer, ResponseCheckTransfer];
-  'pri(accounts.checkCrossChainTransfer)': [RequestCheckCrossChainTransfer, ResponseCheckCrossChainTransfer];
-  'pri(accounts.transfer)': [RequestTransfer, BasicTxResponse, BasicTxResponse];
-  'pri(accounts.crossChainTransfer)': [RequestCrossChainTransfer, BasicTxResponse, BasicTxResponse];
   'pri(derivation.createV2)': [RequestDeriveCreateV2, boolean];
   'pri(json.restoreV2)': [RequestJsonRestoreV2, void];
   'pri(json.batchRestoreV2)': [RequestBatchRestoreV2, void];
@@ -1486,6 +1598,13 @@ export interface KoniRequestSignatures {
   'pri(subscription.cancel)': [string, boolean];
   'pri(freeBalance.subscribe)': [RequestFreeBalance, string, string];
 
+  // Transfer
+  'pri(accounts.checkTransfer)': [RequestCheckTransfer, ResponseCheckTransfer];
+  'pri(accounts.transfer)': [RequestTransfer, BasicTxResponse, BasicTxResponse];
+
+  'pri(accounts.checkCrossChainTransfer)': [RequestCheckCrossChainTransfer, ResponseCheckCrossChainTransfer];
+  'pri(accounts.crossChainTransfer)': [RequestCrossChainTransfer, BasicTxResponse, BasicTxResponse];
+
   // Confirmation Queues
   'pri(confirmations.subscribe)': [RequestConfirmationsSubscribe, ConfirmationsQueue, ConfirmationsQueue];
   'pri(confirmations.complete)': [RequestConfirmationComplete, boolean];
@@ -1495,7 +1614,7 @@ export interface KoniRequestSignatures {
   'pub(accounts.subscribeV2)': [RequestAccountSubscribe, boolean, InjectedAccount[]];
 
   // Sign QR
-  'pri(qr.transaction.parse.evm)': [RequestParseTransactionEVM, ResponseParseTransactionEVM];
+  'pri(qr.transaction.parse.evm)': [RequestQrParseRLP, ResponseQrParseRLP];
   'pri(qr.isLocked)': [RequestQRIsLocked, ResponseQRIsLocked];
   'pri(qr.sign.substrate)': [RequestQrSignSubstrate, ResponseQrSignSubstrate];
   'pri(qr.sign.evm)': [RequestQrSignEVM, ResponseQrSignEVM];
@@ -1510,7 +1629,7 @@ export interface KoniRequestSignatures {
   'evm(provider.send)': [RequestEvmProviderSend, string | number, ResponseEvmProviderSend]
 
   // EVM Transaction
-  'pri(evm.transaction.parse.input)': [RequestParseEVMTransactionInput, ResponseParseEVMTransactionInput];
+  'pri(evm.transaction.parse.input)': [RequestParseEVMContractInput, ResponseParseEVMContractInput];
 
   // Create qr request
   'pri(accounts.transfer.qr.create)': [RequestTransferExternal, BasicTxResponse, BasicTxResponse];

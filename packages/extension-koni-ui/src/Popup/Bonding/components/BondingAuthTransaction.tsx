@@ -11,7 +11,7 @@ import FeeValue from '@subwallet/extension-koni-ui/components/Balance/FeeValue';
 import { BalanceFormatType } from '@subwallet/extension-koni-ui/components/types';
 import { SIGN_MODE } from '@subwallet/extension-koni-ui/constants/signing';
 import { ExternalRequestContext } from '@subwallet/extension-koni-ui/contexts/ExternalRequestContext';
-import { QrContext, QrContextState, QrStep } from '@subwallet/extension-koni-ui/contexts/QrContext';
+import { QrSignerContext, QrContextState, QrStep } from '@subwallet/extension-koni-ui/contexts/QrSignerContext';
 import useGetFreeBalance from '@subwallet/extension-koni-ui/hooks/screen/bonding/useGetFreeBalance';
 import useGetNetworkJson from '@subwallet/extension-koni-ui/hooks/screen/home/useGetNetworkJson';
 import { useGetSignMode } from '@subwallet/extension-koni-ui/hooks/useGetSignMode';
@@ -34,8 +34,8 @@ const Button = React.lazy(() => import('@subwallet/extension-koni-ui/components/
 const Modal = React.lazy(() => import('@subwallet/extension-koni-ui/components/Modal'));
 const ReceiverInputAddress = React.lazy(() => import('@subwallet/extension-koni-ui/components/ReceiverInputAddress'));
 const Tooltip = React.lazy(() => import('@subwallet/extension-koni-ui/components/Tooltip'));
-const QrRequest = React.lazy(() => import('@subwallet/extension-koni-ui/components/Qr/QrRequest'));
-const LedgerRequest = React.lazy(() => import('@subwallet/extension-koni-ui/components/Ledger/LedgerRequest'));
+const QrRequest = React.lazy(() => import('@subwallet/extension-koni-ui/components/Signing/QR/QrRequest'));
+const LedgerRequest = React.lazy(() => import('@subwallet/extension-koni-ui/components/Signing/Ledger/LedgerRequest'));
 
 interface Props extends ThemeProps {
   amount: number,
@@ -60,7 +60,7 @@ function BondingAuthTransaction ({ amount, balanceError, bondedValidators, class
   const { handlerReject } = useRejectExternalRequest();
 
   const { clearExternalState, externalState: { externalId }, updateExternalState } = useContext(ExternalRequestContext);
-  const { cleanQrState, updateQrState } = useContext(QrContext);
+  const { cleanQrState, updateQrState } = useContext(QrSignerContext);
 
   const networkJson = useGetNetworkJson(selectedNetwork);
   const freeBalance = useGetFreeBalance(selectedNetwork);

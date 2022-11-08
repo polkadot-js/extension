@@ -1,10 +1,12 @@
 // Copyright 2019-2022 @subwallet/extension-koni-base authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { TokenInfo } from '@subwallet/extension-base/background/KoniTypes';
+import { BasicTxResponse, TokenInfo } from '@subwallet/extension-base/background/KoniTypes';
 import { ExternalProps } from '@subwallet/extension-koni-base/api/dotsama/external/shared';
-import { signExtrinsic } from '@subwallet/extension-koni-base/api/dotsama/shared/signExtrinsic';
-import { createTransferExtrinsic, doSignAndSend, getUnsupportedResponse, updateTransferResponseTxResult } from '@subwallet/extension-koni-base/api/dotsama/transfer';
+import { signAndSendExtrinsic } from '@subwallet/extension-koni-base/api/dotsama/shared/signAndSendExtrinsic';
+import { createTransferExtrinsic, getUnsupportedResponse, updateTransferResponseTxResult } from '@subwallet/extension-koni-base/api/dotsama/transfer';
+
+import { EventRecord } from '@polkadot/types/interfaces';
 
 interface MakeTransferExternalProps extends ExternalProps {
   recipientAddress: string;
@@ -27,6 +29,7 @@ export const makeTransferExternal = async ({ apiProps,
   updateState,
   value }: MakeTransferExternalProps): Promise<void> => {
   const networkKey = network.key;
+  const txState: BasicTxResponse = {};
 
   const [extrinsic, transferAmount] = await createTransferExtrinsic({
     apiProp: apiProps,
@@ -44,27 +47,21 @@ export const makeTransferExternal = async ({ apiProps,
     return;
   }
 
-  const signFunction = async () => {
-    await signExtrinsic({
-      address: senderAddress,
-      apiProps: apiProps,
-      callback: callback,
-      extrinsic: extrinsic,
-      id: id,
-      setState: setState,
-      type: signerType
-    });
+  const updateResponseTxResult = (response: BasicTxResponse, records: EventRecord[]) => {
+    updateTransferResponseTxResult(networkKey, tokenInfo, response, records, transferAmount);
   };
 
-  await doSignAndSend({
-    _updateResponseTxResult: updateTransferResponseTxResult,
+  await signAndSendExtrinsic({
+    id: id,
+    setState: setState,
+    type: signerType,
+    updateState: updateState,
     apiProps: apiProps,
     callback: callback,
     extrinsic: extrinsic,
-    networkKey: networkKey,
-    signFunction: signFunction,
-    tokenInfo: tokenInfo,
-    transferAmount: transferAmount,
-    updateState: updateState
+    txState: txState,
+    address: senderAddress,
+    updateResponseTxResult: updateResponseTxResult,
+    errorMessage: 'error transfer'
   });
 };

@@ -1,20 +1,20 @@
 // Copyright 2019-2022 @subwallet/extension-koni authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { LedgerState } from '@subwallet/extension-base/../../../../../extension-koni-base/src/signers/types';
-import { BaseTxError, BasicExternalTxResponse, BasicTxError, BasicTxResponse, BasicTxResponse } from '@subwallet/extension-base/background/KoniTypes';
+import { BasicTxErrorCode, BasicTxResponse } from '@subwallet/extension-base/background/KoniTypes';
+import { LedgerState } from '@subwallet/extension-base/signers/types';
 import { InputWithLabel } from '@subwallet/extension-koni-ui/components';
 import { BalanceVal } from '@subwallet/extension-koni-ui/components/Balance';
 import FeeValue from '@subwallet/extension-koni-ui/components/Balance/FeeValue';
 import Button from '@subwallet/extension-koni-ui/components/Button';
 import InputAddress from '@subwallet/extension-koni-ui/components/InputAddress';
-import LedgerRequest from '@subwallet/extension-koni-ui/components/Ledger/LedgerRequest';
 import Modal from '@subwallet/extension-koni-ui/components/Modal';
-import QrRequest from '@subwallet/extension-koni-ui/components/Qr/QrRequest';
+import LedgerRequest from '@subwallet/extension-koni-ui/components/Signing/Ledger/LedgerRequest';
+import QrRequest from '@subwallet/extension-koni-ui/components/Signing/QR/QrRequest';
 import Spinner from '@subwallet/extension-koni-ui/components/Spinner';
 import { SIGN_MODE } from '@subwallet/extension-koni-ui/constants/signing';
 import { ExternalRequestContext } from '@subwallet/extension-koni-ui/contexts/ExternalRequestContext';
-import { QrContext, QrContextState, QrStep } from '@subwallet/extension-koni-ui/contexts/QrContext';
+import { QrContextState, QrSignerContext, QrStep } from '@subwallet/extension-koni-ui/contexts/QrSignerContext';
 import useGetNetworkJson from '@subwallet/extension-koni-ui/hooks/screen/home/useGetNetworkJson';
 import { useGetSignMode } from '@subwallet/extension-koni-ui/hooks/useGetSignMode';
 import { useRejectExternalRequest } from '@subwallet/extension-koni-ui/hooks/useRejectExternalRequest';
@@ -50,7 +50,7 @@ function UnbondingAuthTransaction ({ amount, balanceError, className, fee, handl
   const { handlerReject } = useRejectExternalRequest();
 
   const { clearExternalState, externalState: { externalId }, updateExternalState } = useContext(ExternalRequestContext);
-  const { cleanQrState, updateQrState } = useContext(QrContext);
+  const { cleanQrState, updateQrState } = useContext(QrSignerContext);
 
   const networkJson = useGetNetworkJson(selectedNetwork);
   const { currentAccount: { account } } = useSelector((state: RootState) => state);
@@ -99,7 +99,7 @@ function UnbondingAuthTransaction ({ amount, balanceError, className, fee, handl
       }
 
       if (resp.txError && resp.txError) {
-        if (resp.errorMessage && resp.errorMessage === BasicTxError.BalanceTooLow) {
+        if (resp.errors && resp.errors.find((e) => e.code === BasicTxErrorCode.BALANCE_TO_LOW)) {
           show('Your balance is too low to cover fees');
         } else {
           show('Encountered an error, please try again.');

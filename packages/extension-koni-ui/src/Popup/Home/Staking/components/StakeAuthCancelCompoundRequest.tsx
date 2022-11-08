@@ -6,13 +6,13 @@ import { LedgerState } from '@subwallet/extension-base/build/signers/types';
 import { InputWithLabel } from '@subwallet/extension-koni-ui/components';
 import Button from '@subwallet/extension-koni-ui/components/Button';
 import InputAddress from '@subwallet/extension-koni-ui/components/InputAddress';
-import LedgerRequest from '@subwallet/extension-koni-ui/components/Ledger/LedgerRequest';
+import LedgerRequest from '@subwallet/extension-koni-ui/components/Signing/Ledger/LedgerRequest';
 import Modal from '@subwallet/extension-koni-ui/components/Modal';
-import QrRequest from '@subwallet/extension-koni-ui/components/Qr/QrRequest';
+import QrRequest from '@subwallet/extension-koni-ui/components/Signing/QR/QrRequest';
 import Spinner from '@subwallet/extension-koni-ui/components/Spinner';
 import { SIGN_MODE } from '@subwallet/extension-koni-ui/constants/signing';
 import { ExternalRequestContext } from '@subwallet/extension-koni-ui/contexts/ExternalRequestContext';
-import { QrContext, QrContextState, QrStep } from '@subwallet/extension-koni-ui/contexts/QrContext';
+import { QrSignerContext, QrContextState, QrStep } from '@subwallet/extension-koni-ui/contexts/QrSignerContext';
 import useGetNetworkJson from '@subwallet/extension-koni-ui/hooks/screen/home/useGetNetworkJson';
 import { useRejectExternalRequest } from '@subwallet/extension-koni-ui/hooks/useRejectExternalRequest';
 import { useSignMode } from '@subwallet/extension-koni-ui/hooks/useSignMode';
@@ -46,7 +46,7 @@ function StakeAuthCancelCompoundRequest ({ address, balanceError, className, fee
   const { handlerReject } = useRejectExternalRequest();
 
   const { clearExternalState, externalState: { externalId }, updateExternalState } = useContext(ExternalRequestContext);
-  const { cleanQrState, updateQrState } = useContext(QrContext);
+  const { cleanQrState, updateQrState } = useContext(QrSignerContext);
 
   const [loading, setLoading] = useState(false);
   const [password, setPassword] = useState<string>('');

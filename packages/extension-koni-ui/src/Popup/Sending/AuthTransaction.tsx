@@ -8,13 +8,13 @@ import Button from '@subwallet/extension-koni-ui/components/Button';
 import DonateInputAddress from '@subwallet/extension-koni-ui/components/DonateInputAddress';
 import FormatBalance from '@subwallet/extension-koni-ui/components/FormatBalance';
 import InputAddress from '@subwallet/extension-koni-ui/components/InputAddress';
-import LedgerRequest from '@subwallet/extension-koni-ui/components/Ledger/LedgerRequest';
+import LedgerRequest from '@subwallet/extension-koni-ui/components/Signing/Ledger/LedgerRequest';
 import Modal from '@subwallet/extension-koni-ui/components/Modal';
-import QrRequest from '@subwallet/extension-koni-ui/components/Qr/QrRequest';
+import QrRequest from '@subwallet/extension-koni-ui/components/Signing/QR/QrRequest';
 import { BalanceFormatType } from '@subwallet/extension-koni-ui/components/types';
 import { SIGN_MODE } from '@subwallet/extension-koni-ui/constants/signing';
 import { ExternalRequestContext } from '@subwallet/extension-koni-ui/contexts/ExternalRequestContext';
-import { QrContext, QrContextState, QrStep } from '@subwallet/extension-koni-ui/contexts/QrContext';
+import { QrSignerContext, QrContextState, QrStep } from '@subwallet/extension-koni-ui/contexts/QrSignerContext';
 import useGetAccountByAddress from '@subwallet/extension-koni-ui/hooks/useGetAccountByAddress';
 import { useGetSignMode } from '@subwallet/extension-koni-ui/hooks/useGetSignMode';
 import { useRejectExternalRequest } from '@subwallet/extension-koni-ui/hooks/useRejectExternalRequest';
@@ -77,7 +77,7 @@ function AuthTransaction ({ className, isDonation, feeInfo: [fee, feeDecimals, f
   const { t } = useTranslation();
   const { handlerReject } = useRejectExternalRequest();
 
-  const { cleanQrState, updateQrState } = useContext(QrContext);
+  const { cleanQrState, updateQrState } = useContext(QrSignerContext);
   const { clearExternalState, externalState, updateExternalState } = useContext(ExternalRequestContext);
 
   const { externalId } = externalState;

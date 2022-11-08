@@ -6,12 +6,12 @@ import { BaseTxError, BasicTxError, NftItem, NftTransactionResponse, NftTransact
 import { AccountJson } from '@subwallet/extension-base/background/types';
 import { Spinner, Theme } from '@subwallet/extension-koni-ui/components';
 import InputAddress from '@subwallet/extension-koni-ui/components/InputAddress';
-import LedgerRequest from '@subwallet/extension-koni-ui/components/Ledger/LedgerRequest';
+import LedgerRequest from '@subwallet/extension-koni-ui/components/Signing/Ledger/LedgerRequest';
 import Modal from '@subwallet/extension-koni-ui/components/Modal';
-import QrRequest from '@subwallet/extension-koni-ui/components/Qr/QrRequest';
+import QrRequest from '@subwallet/extension-koni-ui/components/Signing/QR/QrRequest';
 import { SIGN_MODE } from '@subwallet/extension-koni-ui/constants/signing';
 import { ExternalRequestContext } from '@subwallet/extension-koni-ui/contexts/ExternalRequestContext';
-import { QrContext, QrContextState, QrStep } from '@subwallet/extension-koni-ui/contexts/QrContext';
+import { QrSignerContext, QrContextState, QrStep } from '@subwallet/extension-koni-ui/contexts/QrSignerContext';
 import { useGetSignMode } from '@subwallet/extension-koni-ui/hooks/useGetSignMode';
 import { useRejectExternalRequest } from '@subwallet/extension-koni-ui/hooks/useRejectExternalRequest';
 import useToast from '@subwallet/extension-koni-ui/hooks/useToast';
@@ -53,7 +53,7 @@ function AuthTransfer ({ chain, className, collectionId, nftItem, recipientAddre
 
   const { handlerReject } = useRejectExternalRequest();
 
-  const { cleanQrState, updateQrState } = useContext(QrContext);
+  const { cleanQrState, updateQrState } = useContext(QrSignerContext);
   const { clearExternalState, externalState, updateExternalState } = useContext(ExternalRequestContext);
   const themeContext = useContext(ThemeContext as React.Context<Theme>);
 

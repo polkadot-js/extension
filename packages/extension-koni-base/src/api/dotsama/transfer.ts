@@ -5,7 +5,7 @@ import { assetFromToken } from '@equilab/api';
 import { ApiProps, BasicTxResponse, CustomTokenType, ExternalRequestPromise, ExternalRequestPromiseStatus, SupportTransferResponse, TokenInfo, TransferErrorCode } from '@subwallet/extension-base/background/KoniTypes';
 import { SignerType } from '@subwallet/extension-base/signers/types';
 import { getTokenInfo } from '@subwallet/extension-koni-base/api/dotsama/registry';
-import { signExtrinsic } from '@subwallet/extension-koni-base/api/dotsama/shared/signExtrinsic';
+import { signAndSendExtrinsic } from '@subwallet/extension-koni-base/api/dotsama/shared/signAndSendExtrinsic';
 import { getPSP22ContractPromise } from '@subwallet/extension-koni-base/api/tokens/wasm';
 
 import { SubmittableExtrinsic } from '@polkadot/api/promise/types';
@@ -506,6 +506,7 @@ export async function makeTransfer ({ callback,
   tokenInfo,
   transferAll,
   value }: MakeTransferProps): Promise<void> {
+  const txState: BasicTxResponse = {};
   const apiProps = await dotSamaApiMap[networkKey].isReady;
 
   const [extrinsic, transferAmount] = await createTransferExtrinsic({
@@ -524,24 +525,18 @@ export async function makeTransfer ({ callback,
     return;
   }
 
-  const signFunction = async () => {
-    await signExtrinsic({
-      type: SignerType.PASSWORD,
-      apiProps: apiProps,
-      callback: callback,
-      extrinsic: extrinsic,
-      address: from
-    });
+  const updateResponseTxResult = (response: BasicTxResponse, records: EventRecord[]) => {
+    updateTransferResponseTxResult(networkKey, tokenInfo, response, records, transferAmount);
   };
 
-  await doSignAndSend({
-    apiProps,
-    networkKey,
-    tokenInfo,
-    extrinsic,
-    _updateResponseTxResult: updateTransferResponseTxResult,
-    callback,
-    transferAmount,
-    signFunction: signFunction
+  await signAndSendExtrinsic({
+    type: SignerType.PASSWORD,
+    apiProps: apiProps,
+    callback: callback,
+    extrinsic: extrinsic,
+    txState: txState,
+    address: from,
+    updateResponseTxResult: updateResponseTxResult,
+    errorMessage: 'error transfer'
   });
 }

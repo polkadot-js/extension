@@ -1,7 +1,7 @@
-// Copyright 2019-2022 @subwallet/extension-koni-base authors & contributors
+// Copyright 2019-2022 @subwallet/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { QrState } from '@subwallet/extension-base/../../../extension-koni-base/src/signers/types';
+import { QrState } from '@subwallet/extension-base/signers/types';
 import React, { useCallback, useReducer } from 'react';
 
 export enum QrStep {
@@ -30,7 +30,7 @@ const DEFAULT_STATE: QrContextState = {
   step: QrStep.TRANSACTION_INFO
 };
 
-export const QrContext = React.createContext({} as QrContextType);
+export const QrSignerContext = React.createContext({} as QrContextType);
 
 interface QrContextProviderProps {
   children?: React.ReactElement;
@@ -78,7 +78,7 @@ export const QRContextProvider = ({ children }: QrContextProviderProps) => {
   }, []);
 
   return (
-    <QrContext.Provider
+    <QrSignerContext.Provider
       value = {{
         QrState: QrState,
         updateQrState: updateQrState,
@@ -86,6 +86,6 @@ export const QRContextProvider = ({ children }: QrContextProviderProps) => {
       }}
     >
       {children}
-    </QrContext.Provider>
+    </QrSignerContext.Provider>
   );
 };

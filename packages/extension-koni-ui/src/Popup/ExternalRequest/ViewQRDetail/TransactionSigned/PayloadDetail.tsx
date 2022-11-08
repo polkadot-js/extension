@@ -1,7 +1,7 @@
 // Copyright 2019-2022 @polkadot/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { EraInfo, NetworkJson, ResponseParseTransactionEVM, ResponseParseTransactionSubstrate } from '@subwallet/extension-base/background/KoniTypes';
+import { EraInfo, NetworkJson, ResponseQrParseRLP, ResponseParseTransactionSubstrate } from '@subwallet/extension-base/background/KoniTypes';
 import { Spinner, Warning } from '@subwallet/extension-koni-ui/components';
 import { ScannerContext, ScannerContextType } from '@subwallet/extension-koni-ui/contexts/ScannerContext';
 import useMetadataChain from '@subwallet/extension-koni-ui/hooks/useMetadataChain';
@@ -19,7 +19,7 @@ interface Props extends ThemeProps {
   network: NetworkJson;
 }
 
-const isTransactionSubstrate = (tx: ResponseParseTransactionEVM | ResponseParseTransactionSubstrate): tx is ResponseParseTransactionSubstrate => {
+const isTransactionSubstrate = (tx: ResponseQrParseRLP | ResponseParseTransactionSubstrate): tx is ResponseParseTransactionSubstrate => {
   return 'era' in tx;
 };
 

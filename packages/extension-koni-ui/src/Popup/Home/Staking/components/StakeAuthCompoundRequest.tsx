@@ -6,9 +6,9 @@ import { BaseTxError, ResponseCreateCompoundStakeExternal, ResponseCreateCompoun
 import { InputWithLabel } from '@subwallet/extension-koni-ui/components';
 import Button from '@subwallet/extension-koni-ui/components/Button';
 import InputAddress from '@subwallet/extension-koni-ui/components/InputAddress';
-import LedgerRequest from '@subwallet/extension-koni-ui/components/Ledger/LedgerRequest';
+import LedgerRequest from '@subwallet/extension-koni-ui/components/Signing/Ledger/LedgerRequest';
 import Modal from '@subwallet/extension-koni-ui/components/Modal';
-import QrRequest from '@subwallet/extension-koni-ui/components/Qr/QrRequest';
+import QrRequest from '@subwallet/extension-koni-ui/components/Signing/QR/QrRequest';
 import { SIGN_MODE } from '@subwallet/extension-koni-ui/constants/signing';
 import useGetNetworkJson from '@subwallet/extension-koni-ui/hooks/screen/home/useGetNetworkJson';
 import useToast from '@subwallet/extension-koni-ui/hooks/useToast';
@@ -23,7 +23,7 @@ import styled from 'styled-components';
 import { KeyringPair$Meta } from '@polkadot/keyring/types';
 
 import { ExternalRequestContext } from '../../../../contexts/ExternalRequestContext';
-import { QrContext, QrContextState, QrStep } from '../../../../contexts/QrContext';
+import { QrSignerContext, QrContextState, QrStep } from '../../../../contexts/QrSignerContext';
 import { useRejectExternalRequest } from '../../../../hooks/useRejectExternalRequest';
 import { useSignMode } from '../../../../hooks/useSignMode';
 
@@ -57,7 +57,7 @@ function StakeAuthCompoundRequest ({ accountMinimum, address, balanceError, bond
   const { handlerReject } = useRejectExternalRequest();
 
   const { clearExternalState, externalState: { externalId }, updateExternalState } = useContext(ExternalRequestContext);
-  const { cleanQrState, updateQrState } = useContext(QrContext);
+  const { cleanQrState, updateQrState } = useContext(QrSignerContext);
 
   const networkJson = useGetNetworkJson(networkKey);
   const { t } = useTranslation();

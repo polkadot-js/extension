@@ -10,7 +10,7 @@ import { canDerive } from '@subwallet/extension-base/utils';
 import { ALL_ACCOUNT_KEY } from '@subwallet/extension-koni-base/constants';
 import { AccountContext, ActionContext, AuthorizeReqContext, ConfirmationsQueueContext, MediaContext, MetadataReqContext, SettingsContext, SigningReqContext } from '@subwallet/extension-koni-ui/contexts';
 import { ExternalRequestContextProvider } from '@subwallet/extension-koni-ui/contexts/ExternalRequestContext';
-import { QRContextProvider } from '@subwallet/extension-koni-ui/contexts/QrContext';
+import { QRContextProvider } from '@subwallet/extension-koni-ui/contexts/QrSignerContext';
 import useSetupStore from '@subwallet/extension-koni-ui/hooks/store/useSetupStore';
 import ExternalRequest from '@subwallet/extension-koni-ui/Popup/ExternalRequest';
 import Home from '@subwallet/extension-koni-ui/Popup/Home';

@@ -4,15 +4,17 @@
 import { BasicTxResponse, ExternalRequestPromise, ExternalRequestPromiseStatus, HandleBasicTx } from '@subwallet/extension-base/background/KoniTypes';
 
 import { SubmittableExtrinsic } from '@polkadot/api/types';
+import { EventRecord } from '@polkadot/types/interfaces';
 
 interface SendExtrinsicProps {
   extrinsic: SubmittableExtrinsic<'promise'>;
   callback: HandleBasicTx;
   txState: BasicTxResponse;
   updateState?: (promise: Partial<ExternalRequestPromise>) => void;
+  updateResponseTxResult?: (response: BasicTxResponse, records: EventRecord[]) => void;
 }
 
-export const sendExtrinsic = async ({ callback, extrinsic, txState, updateState }: SendExtrinsicProps) => {
+export const sendExtrinsic = async ({ callback, extrinsic, txState, updateResponseTxResult, updateState }: SendExtrinsicProps) => {
   const unsubscribe = await extrinsic.send((result) => {
     if (!result || !result.status) {
       return;
@@ -20,6 +22,8 @@ export const sendExtrinsic = async ({ callback, extrinsic, txState, updateState 
 
     if (result.status.isInBlock || result.status.isFinalized) {
       txState.isFinalized = result.status.isFinalized;
+      updateResponseTxResult && updateResponseTxResult(txState, result.events);
+
       result.events
         .filter(({ event: { section } }) => section === 'system')
         .forEach(({ event: { method } }): void => {

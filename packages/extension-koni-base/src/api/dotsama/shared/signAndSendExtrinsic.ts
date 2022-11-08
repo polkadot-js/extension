@@ -8,6 +8,7 @@ import { signExtrinsic } from '@subwallet/extension-koni-base/api/dotsama/shared
 import { lockAccount } from '@subwallet/extension-koni-base/utils/keyring';
 
 import { SubmittableExtrinsic } from '@polkadot/api/types';
+import { EventRecord } from '@polkadot/types/interfaces';
 
 interface AbstractSignAndSendExtrinsicProps extends Partial<PrepareExternalRequest>{
   extrinsic: SubmittableExtrinsic<'promise'> | null;
@@ -18,6 +19,7 @@ interface AbstractSignAndSendExtrinsicProps extends Partial<PrepareExternalReque
   errorMessage: string;
   apiProps: ApiProps;
   password?: string;
+  updateResponseTxResult?: (response: BasicTxResponse, records: EventRecord[]) => void;
 }
 
 interface PasswordSignAndSendExtrinsicProps extends AbstractSignAndSendExtrinsicProps {
@@ -33,7 +35,18 @@ interface ExternalSignAndSendExtrinsicProps extends AbstractSignAndSendExtrinsic
 
 type SignAndSendExtrinsicProps = ExternalSignAndSendExtrinsicProps | PasswordSignAndSendExtrinsicProps;
 
-export const signAndSendExtrinsic = async ({ address, apiProps, callback, errorMessage, extrinsic, id, password, setState, txState, type, updateState }: SignAndSendExtrinsicProps) => {
+export const signAndSendExtrinsic = async ({ address,
+  apiProps,
+  callback,
+  errorMessage,
+  extrinsic,
+  id,
+  password,
+  setState,
+  txState,
+  type,
+  updateResponseTxResult,
+  updateState }: SignAndSendExtrinsicProps) => {
   if (extrinsic !== null) {
     const passwordError = await signExtrinsic(type === SignerType.PASSWORD
       ? {
@@ -66,7 +79,8 @@ export const signAndSendExtrinsic = async ({ address, apiProps, callback, errorM
         callback,
         extrinsic,
         txState,
-        updateState
+        updateState,
+        updateResponseTxResult
       });
 
       if (type === SignerType.PASSWORD) {

@@ -3,8 +3,8 @@
 
 import { ApiProps, BasicTxResponse, NetworkJson, TokenInfo } from '@subwallet/extension-base/background/KoniTypes';
 import { SignerType } from '@subwallet/extension-base/signers/types';
-import { signExtrinsic } from '@subwallet/extension-koni-base/api/dotsama/shared/signExtrinsic';
-import { doSignAndSend, getUnsupportedResponse } from '@subwallet/extension-koni-base/api/dotsama/transfer';
+import { signAndSendExtrinsic } from '@subwallet/extension-koni-base/api/dotsama/shared/signAndSendExtrinsic';
+import { getUnsupportedResponse } from '@subwallet/extension-koni-base/api/dotsama/transfer';
 import { astarEstimateCrossChainFee, astarGetXcmExtrinsic } from '@subwallet/extension-koni-base/api/xcm/astar';
 import { moonbeamEstimateCrossChainFee, moonbeamGetXcmExtrinsic } from '@subwallet/extension-koni-base/api/xcm/moonbeamXcm';
 import { statemintEstimateCrossChainFee, statemintGetXcmExtrinsic } from '@subwallet/extension-koni-base/api/xcm/statemintXcm';
@@ -113,6 +113,8 @@ export async function makeCrossChainTransfer ({ callback,
   to,
   tokenInfo,
   value }: MakeCrossChainTransferProps): Promise<void> {
+  const txState: BasicTxResponse = {};
+
   if (!isNetworksPairSupportedTransferCrossChain(originNetworkKey, destinationNetworkKey, tokenInfo.symbol, networkMap)) {
     callback(getUnsupportedResponse());
 
@@ -131,24 +133,19 @@ export async function makeCrossChainTransfer ({ callback,
     tokenInfo: tokenInfo
   });
 
-  const signFunction = async () => {
-    await signExtrinsic({
-      address: fromKeypair.address,
-      apiProps: apiProps,
-      callback: callback,
-      type: SignerType.PASSWORD,
-      extrinsic: extrinsic
-    });
+  const updateResponseTxResult = (response: BasicTxResponse, records: EventRecord[]) => {
+    updateXcmResponseTxResult(originNetworkKey, tokenInfo, response, records);
   };
 
-  await doSignAndSend({
+  await signAndSendExtrinsic({
+    type: SignerType.PASSWORD,
     apiProps: apiProps,
-    networkKey: originNetworkKey,
-    tokenInfo: tokenInfo,
-    extrinsic: extrinsic,
-    _updateResponseTxResult: updateXcmResponseTxResult,
     callback: callback,
-    signFunction: signFunction
+    extrinsic: extrinsic,
+    txState: txState,
+    address: fromKeypair.address,
+    updateResponseTxResult: updateResponseTxResult,
+    errorMessage: 'error xcm transfer'
   });
 }
 

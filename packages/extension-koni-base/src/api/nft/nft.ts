@@ -95,15 +95,19 @@ export abstract class BaseNftApi {
       return input;
     }
 
-    if (!input.includes('ipfs://') && !input.includes('ipfs://ipfs/')) {
+    if (input.startsWith('/ipfs/')) {
+      return getRandomIpfsGateway() + input.split('/ipfs/')[1];
+    }
+
+    if (!input.includes('ipfs://') && !input.includes('ipfs://ipfs/')) { // just the IPFS hash
       return getRandomIpfsGateway() + input;
     }
 
-    if (input.includes('ipfs://')) {
+    if (input.includes('ipfs://') && !input.includes('ipfs://ipfs/')) { // starts with ipfs://
       return getRandomIpfsGateway() + input.split('ipfs://')[1];
     }
 
-    return getRandomIpfsGateway() + input.split('ipfs://ipfs/')[1];
+    return getRandomIpfsGateway() + input.split('ipfs://ipfs/')[1]; // starts with ipfs://ipfs/
   }
 
   // Sub-class implements this function to parse data into prop result

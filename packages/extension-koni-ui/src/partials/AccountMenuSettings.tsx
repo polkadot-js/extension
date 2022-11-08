@@ -3,8 +3,7 @@
 
 import type { Theme, ThemeProps } from '../types';
 
-import { faUsb } from '@fortawesome/free-brands-svg-icons';
-import { faCog, faFileUpload, faKey, faPlusCircle, faQrcode, faSeedling } from '@fortawesome/free-solid-svg-icons';
+import { faCodeFork, faCog, faEye, faFileUpload, faKey, faPlusCircle, faQrcode } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import InputFilter from '@subwallet/extension-koni-ui/components/InputFilter';
 import Link from '@subwallet/extension-koni-ui/components/Link';
@@ -31,6 +30,8 @@ interface Props extends ThemeProps {
 const jsonPath = '/account/restore-json';
 const createAccountPath = '/account/create';
 const ledgerPath = '/account/import-ledger';
+
+const transitionTime = '0.3s';
 
 function AccountMenuSettings ({ changeAccountCallback, className, closeSetting, onFilter, reference }: Props): React.ReactElement<Props> {
   const { t } = useTranslation();
@@ -153,7 +154,7 @@ function AccountMenuSettings ({ changeAccountCallback, className, closeSetting, 
               to='/account/import-seed'
             >
               {/* @ts-ignore */}
-              <FontAwesomeIcon icon={faSeedling} />
+              <FontAwesomeIcon icon={faPlusCircle} />
               <span>{t<string>('Import account from Seed Phrase')}</span>
             </Link>
           </MenuSettingItem>
@@ -162,9 +163,22 @@ function AccountMenuSettings ({ changeAccountCallback, className, closeSetting, 
               className='account-menu-settings__menu-item-text'
               to='/account/import-metamask-private-key'
             >
-              {/* @ts-ignore */}
               <FontAwesomeIcon icon={faKey} />
               <span>{t<string>('Import private key from MetaMask')}</span>
+            </Link>
+          </MenuSettingItem>
+          <MenuSettingItem className='account-menu-settings__menu-item'>
+            <Link
+              className='account-menu-settings__menu-item-text'
+              isDisabled={!mediaAllowed}
+              title={!mediaAllowed
+                ? t<string>('Camera access must be first enabled in the settings')
+                : ''
+              }
+              to='/account/import-secret-qr'
+            >
+              <FontAwesomeIcon icon={faQrcode} />
+              <span>{t<string>('Import account by QR code')}</span>
             </Link>
           </MenuSettingItem>
           <MenuSettingItem className='account-menu-settings__menu-item'>
@@ -173,7 +187,6 @@ function AccountMenuSettings ({ changeAccountCallback, className, closeSetting, 
               onClick={isPopup && (isFirefox || isLinux) ? _openJson : undefined}
               to={isPopup && (isFirefox || isLinux) ? undefined : jsonPath}
             >
-              {/* @ts-ignore */}
               <FontAwesomeIcon icon={faFileUpload} />
               <span>{t<string>('Restore account from Polkadot{.js}')}</span>
             </Link>
@@ -189,9 +202,8 @@ function AccountMenuSettings ({ changeAccountCallback, className, closeSetting, 
                 ? t<string>('Camera access must be first enabled in the settings')
                 : ''
               }
-              to='/account/import-qr'
+              to='/account/attach-qr-signer'
             >
-              {/* @ts-ignore */}
               <FontAwesomeIcon icon={faQrcode} />
               <span>{t<string>('Attach QR-signer (Parity Signer, Keystone)')}</span>
             </Link>
@@ -207,11 +219,10 @@ function AccountMenuSettings ({ changeAccountCallback, className, closeSetting, 
                   to={ledgerPath}
                 >
                   <FontAwesomeIcon
-                    // @ts-ignore
-                    icon={faUsb}
+                    icon={faCodeFork}
                     rotation={270}
                   />
-                  <span>{ t<string>('Attach ledger account')}</span>
+                  <span>{ t<string>('Connect Ledger device')}</span>
                 </Link>
               )
               : (
@@ -220,8 +231,7 @@ function AccountMenuSettings ({ changeAccountCallback, className, closeSetting, 
                   onClick={_onOpenLedgerConnect}
                 >
                   <FontAwesomeIcon
-                  // @ts-ignore
-                    icon={faUsb}
+                    icon={faCodeFork}
                     rotation={270}
                   />
                   <span>{ t<string>('Connect Ledger device')}</span>
@@ -229,21 +239,33 @@ function AccountMenuSettings ({ changeAccountCallback, className, closeSetting, 
               )
             }
           </MenuSettingItem>
+          <MenuSettingItem className='account-menu-settings__menu-item'>
+            <Link
+              className='account-menu-settings__menu-item-text'
+              isDisabled={!mediaAllowed}
+              title={!mediaAllowed
+                ? t<string>('Camera access must be first enabled in the settings')
+                : ''
+              }
+              to='/account/attach-read-only'
+            >
+              <FontAwesomeIcon icon={faEye} />
+              <span>{t<string>('Attach readonly account')}</span>
+            </Link>
+          </MenuSettingItem>
         </div>
       </div>
-
-      <div className='koni-menu-items-container'>
-        <MenuSettingItem className='account-menu-settings__menu-item'>
-          <Link
-            className='account-menu-settings__menu-item-text'
-            to={'/account/settings'}
-          >
-            {/* @ts-ignore */}
-            <FontAwesomeIcon icon={faCog} />
-            <span>{ t('Settings')}</span>
-          </Link>
-        </MenuSettingItem>
-      </div>
+      <Link
+        className='setting-button'
+        to={'/account/settings'}
+      >
+        <FontAwesomeIcon
+          className='setting-icon'
+          fontSize={24}
+          icon={faCog}
+        />
+        <span className='setting-label'>{t('Settings')}</span>
+      </Link>
     </Menu>
   );
 }
@@ -254,11 +276,10 @@ export default React.memo(styled(AccountMenuSettings)(({ theme }: Props) => `
   user-select: none;
 
   .account-menu-settings {
-    max-height: 148px;
+    height: 135px;
     overflow-y: auto;
     scrollbar-width: none;
-    padding: 0 15px;
-    margin-bottom: 8px;
+    padding: 0;
 
     &::-webkit-scrollbar {
       display: none;
@@ -367,8 +388,8 @@ export default React.memo(styled(AccountMenuSettings)(({ theme }: Props) => `
   }
 
   .koni-menu-items-container {
-    padding: 0 15px;
-    max-height: 260px;
+    padding: 12px 15px 16px;
+    max-height: 365px;
     overflow-y: auto;
 
     &:last-child {
@@ -384,7 +405,8 @@ export default React.memo(styled(AccountMenuSettings)(({ theme }: Props) => `
   .account-menu-settings-items-wrapper {
     border-radius: 8px;
     border: 2px solid ${theme.menuItemsBorder};
-    padding: 8px 12px;
+    // padding: 8px 12px; -2px because border
+    padding: 6px 10px;
     margin-bottom: 8px;
   }
 
@@ -399,4 +421,47 @@ export default React.memo(styled(AccountMenuSettings)(({ theme }: Props) => `
   .account-menu-settings__input-filter > input {
     height: 40px;
   }
+
+  .setting-button {
+    position: absolute;
+    padding: 8px;
+    bottom: 16px;
+    right: 16px;
+    height: 40px;
+    width: 40px;
+    border-radius: 40px;
+    background: ${theme.secondaryColor};
+    display: flex;
+    align-items: center;
+    overflow: hidden;
+    transition: all ease-in-out ${transitionTime};
+
+    .setting-icon {
+      transition: all ease-in-out ${transitionTime};
+      transform: rotate(0deg);
+    }
+
+    .setting-label {
+      margin-left: 8px;
+      opacity: 0;
+      color: ${theme.textColor};
+      font-size: 15px;
+      line-height: 26px;
+      font-weight: 500;
+      transition: all ease-in-out ${transitionTime};
+    }
+  }
+
+  .setting-button:hover {
+    width: 118px;
+
+    .setting-icon {
+      transform: rotate(360deg);
+    }
+
+    .setting-label {
+      opacity: 1;
+    }
+  }
+
 `));

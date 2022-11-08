@@ -124,20 +124,11 @@ function Account ({ address, changeAccountCallback, className, closeSetting, gen
       className={className}
       onClick={_changeAccount}
     >
-      {isSelected
-        ? (
-          <div className='account-checked-item'>
-            {IconMaps.check}
-          </div>
-        )
-        : (
-          <div className='account-unchecked-item' />
-        )
-      }
       <AccountInfoEl
         address={address}
         className='account__account-item'
         genesisHash={genesisHash}
+        isSelected={isSelected}
         isShowBanner={!_isAllAccount}
         name={name}
         originGenesisHash={originGenesisHash}
@@ -159,7 +150,7 @@ function Account ({ address, changeAccountCallback, className, closeSetting, gen
             style={{ display: 'none' }}
             type='file'
           />
-          <span className='account__change-avatar-text'>{t<string>('Change Avatar')}</span>
+          {/* <span className='account__change-avatar-text'>{t<string>('Change Avatar')}</span> */}
           <div className='account__change-avatar-icon-btn'>
             {IconMaps.camera}
           </div>
@@ -171,33 +162,26 @@ function Account ({ address, changeAccountCallback, className, closeSetting, gen
 
 export default styled(Account)(({ theme }: ThemeProps) => `
   position: relative;
-  padding: 0 15px;
-  border-radius: 8px;
-  margin-top: 8px;
+  // border-radius: 8px;
+  // margin-top: 8px;
   display: flex;
+  padding: 8px 16px;
+
   &:hover {
     background-color: ${theme.accountHoverBackground};
     cursor: pointer;
   }
 
   .account__account-item {
-    margin-left: 5px;
-  }
-  
-  .account-checked-item {
-    color: ${theme.primaryColor};
-    align-self: center;
-  }
-
-  .account-unchecked-item {
-    width: 19px;
+    // margin-left: 5px;
   }
 
   .account__change-avatar {
     display: flex;
     position: absolute;
     align-items: center;
-    right: 15px;
+    right: 16px;
+    top: 0;
     height: 100%;
   }
 
@@ -237,5 +221,10 @@ export default styled(Account)(({ theme }: ThemeProps) => `
   .account__change-avatar-icon-hover {
     width: 20px;
     min-width: 20px;
+  }
+
+  .account-info-row {
+    height: 48px;
+    // padding: 8px;
   }
 `);

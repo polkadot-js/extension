@@ -98,3 +98,7 @@ export const getSignMode = (account: AccountJson | null | undefined): SIGN_MODE 
 export const accountCanSign = (signMode: SIGN_MODE): boolean => {
   return MODE_CAN_SIGN.includes(signMode);
 };
+
+export const filterNotReadOnlyAccount = (accounts: AccountJson[]): AccountJson[] => {
+  return accounts.filter((acc) => !acc.isReadOnly);
+};

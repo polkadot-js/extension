@@ -3,7 +3,7 @@
 
 import { withErrorLog } from '@subwallet/extension-base/background/handlers/helpers';
 import State, { AuthUrls, Resolver } from '@subwallet/extension-base/background/handlers/State';
-import { AccountRefMap, APIItemState, ApiMap, AuthRequestV2, BalanceItem, BalanceJson, ChainRegistry, ConfirmationDefinitions, ConfirmationsQueue, ConfirmationsQueueItemOptions, ConfirmationType, CrowdloanItem, CrowdloanJson, CurrentAccountInfo, CustomToken, CustomTokenJson, CustomTokenType, DeleteCustomTokenParams, EvmSendTransactionParams, EvmSendTransactionRequestQr, EvmSignatureRequestQr, ExternalRequestPromise, ExternalRequestPromiseStatus, NETWORK_STATUS, NetworkJson, NftCollection, NftItem, NftJson, NftTransferExtra, PriceJson, RequestAccountExportPrivateKey, RequestCheckPublicAndSecretKey, RequestConfirmationComplete, RequestSettingsType, ResponseAccountExportPrivateKey, ResponseCheckPublicAndSecretKey, ResponseSettingsType, ResultResolver, ServiceInfo, SingleModeJson, StakingItem, StakingJson, ThemeTypes, TokenInfo, TransactionHistoryItemType } from '@subwallet/extension-base/background/KoniTypes';
+import { AccountRefMap, APIItemState, ApiMap, AuthRequestV2, BalanceItem, BalanceJson, ChainRegistry, ConfirmationDefinitions, ConfirmationsQueue, ConfirmationsQueueItemOptions, ConfirmationType, CrowdloanItem, CrowdloanJson, CurrentAccountInfo, CustomToken, CustomTokenJson, CustomTokenType, DeleteCustomTokenParams, EvmSendTransactionParams, EvmSendTransactionRequestQr, EvmSignatureRequestQr, ExternalRequestPromise, ExternalRequestPromiseStatus, NETWORK_STATUS, NetworkJson, NftCollection, NftItem, NftJson, NftTransferExtra, PriceJson, RequestAccountExportPrivateKey, RequestCheckPublicAndSecretKey, RequestConfirmationComplete, RequestSettingsType, ResponseAccountExportPrivateKey, ResponseCheckPublicAndSecretKey, ResponseSettingsType, ResultResolver, ServiceInfo, SingleModeJson, StakeUnlockingJson, StakingItem, StakingJson, StakingRewardJson, ThemeTypes, TokenInfo, TransactionHistoryItemType } from '@subwallet/extension-base/background/KoniTypes';
 import { AuthorizeRequest, RequestAuthorizeTab } from '@subwallet/extension-base/background/types';
 import { Web3Transaction } from '@subwallet/extension-base/signers/types';
 import { getId } from '@subwallet/extension-base/utils/getId';
@@ -12,7 +12,6 @@ import { initApi } from '@subwallet/extension-koni-base/api/dotsama';
 import { cacheRegistryMap, getRegistry } from '@subwallet/extension-koni-base/api/dotsama/registry';
 import { PREDEFINED_GENESIS_HASHES, PREDEFINED_NETWORKS } from '@subwallet/extension-koni-base/api/predefinedNetworks';
 import { PREDEFINED_SINGLE_MODES } from '@subwallet/extension-koni-base/api/predefinedSingleMode';
-import { DEFAULT_STAKING_NETWORKS, parseStakingItemKey } from '@subwallet/extension-koni-base/api/staking';
 // eslint-disable-next-line camelcase
 import { DotSamaCrowdloan_crowdloans_nodes } from '@subwallet/extension-koni-base/api/subquery/__generated__/DotSamaCrowdloan';
 import { fetchDotSamaCrowdloan } from '@subwallet/extension-koni-base/api/subquery/crowdloan';
@@ -59,20 +58,20 @@ function getSuri (seed: string, type?: KeypairType): string {
     : seed;
 }
 
-function generateDefaultStakingMap () {
-  const stakingMap: Record<string, StakingItem> = {};
-
-  Object.keys(DEFAULT_STAKING_NETWORKS).forEach((networkKey) => {
-    stakingMap[parseStakingItemKey(networkKey)] = {
-      name: PREDEFINED_NETWORKS[networkKey].chain,
-      chain: networkKey,
-      nativeToken: PREDEFINED_NETWORKS[networkKey].nativeToken,
-      state: APIItemState.PENDING
-    } as StakingItem;
-  });
-
-  return stakingMap;
-}
+// function generateDefaultStakingMap () {
+//   const stakingMap: Record<string, StakingItem> = {};
+//
+//   Object.keys(DEFAULT_STAKING_NETWORKS).forEach((networkKey) => {
+//     stakingMap[parseStakingItemKey(networkKey)] = {
+//       name: PREDEFINED_NETWORKS[networkKey].chain,
+//       chain: networkKey,
+//       nativeToken: PREDEFINED_NETWORKS[networkKey].nativeToken,
+//       state: APIItemState.PENDING
+//     } as StakingItem;
+//   });
+//
+//   return stakingMap;
+// }
 
 function generateDefaultCrowdloanMap () {
   const crowdloanMap: Record<string, CrowdloanItem> = {};
@@ -146,16 +145,11 @@ export default class KoniState extends State {
   private nftSubject = new Subject<NftJson>();
   private stakingSubject = new Subject<StakingJson>();
 
-  // private stakingRewardSubject = new Subject<StakingRewardJson>();
-  // private stakingMap: Record<string, StakingItem> = generateDefaultStakingMap();
-  // private stakingRewardState: StakingRewardJson = {
-  //   ready: false,
-  //   details: []
-  // } as StakingRewardJson;
-  // private stakeUnlockingInfo: StakeUnlockingJson = { timestamp: -1, details: {} };
-  // eslint-disable-next-line camelcase
-  // private stakeUnlockingInfoSubject = new Subject<StakeUnlockingJson>();
-  // TODO: remove states of staking, store everything in indexedDB
+  private stakingRewardSubject = new Subject<StakingRewardJson>();
+  private stakingRewardState: StakingRewardJson = { ready: false, details: [] } as StakingRewardJson;
+
+  private stakeUnlockingInfoSubject = new Subject<StakeUnlockingJson>();
+  private stakeUnlockingInfo: StakeUnlockingJson = { timestamp: -1, details: [] };
 
   private historyMap: Record<string, TransactionHistoryItemType[]> = {};
   private historySubject = new Subject<Record<string, TransactionHistoryItemType[]>>();
@@ -552,6 +546,12 @@ export default class KoniState extends State {
     return { ready: true, details: stakings, reset } as StakingJson;
   }
 
+  public async getStakingRecordsByAddress (address: string): Promise<StakingItem[]> {
+    const activeNetworkHashes = Object.values(this.activeNetworks).map((network) => network.genesisHash);
+
+    return await this.dbService.getStakings([address], activeNetworkHashes);
+  }
+
   public async getStoredStaking (address: string) {
     const items = await this.dbService.stores.staking.getDataByAddressAsObject(address);
 
@@ -627,6 +627,7 @@ export default class KoniState extends State {
   // }
 
   public setStakingItem (networkKey: string, item: StakingItem): void {
+    // TODO: be careful of staking reward and unlocking data
     this.dbService.updateStaking(networkKey, this.getNetworkGenesisHashByKey(networkKey), item.address, item).catch((e) => this.logger.warn(e));
   }
 

@@ -14,7 +14,6 @@ import Web3 from 'web3';
 
 import { logger as createLogger } from '@polkadot/util';
 import { Logger } from '@polkadot/util/types';
-import { isEthereumAddress } from '@polkadot/util-crypto';
 
 import DatabaseService from '../services/DatabaseService';
 import KoniState from './handlers/State';
@@ -73,7 +72,7 @@ export class KoniSubscription {
   }
 
   start () {
-    this.logger.log('Stating subscrition');
+    this.logger.log('Stating subscription');
     this.state.getCurrentAccount((currentAccountInfo) => {
       if (currentAccountInfo) {
         const { address } = currentAccountInfo;
@@ -291,29 +290,22 @@ export class KoniSubscription {
     const addresses = await this.state.getDecodedAddresses(address);
     const currentAddress = addresses[0]; // only get info for the current account
 
-    const stakeUnlockingInfo: Record<string, UnlockingStakeInfo> = {};
+    const stakeUnlockingInfo: UnlockingStakeInfo[] = [];
 
     if (!addresses.length) {
       return;
     }
 
-    const currentStakingInfo = this.state.getStaking().details;
+    const stakingItems = await this.state.getStakingRecordsByAddress(currentAddress); // only get records of active networks
 
-    if (!addresses.length) {
-      return;
-    }
+    await Promise.all(stakingItems.map(async (stakingItem) => {
+      const needUpdateUnlockingStake = parseFloat(stakingItem.balance as string) > 0;
+      const networkJson = networkMap[stakingItem.chain];
 
-    await Promise.all(Object.entries(networkMap).map(async ([networkKey, networkJson]) => {
-      const needUpdateUnlockingStake = currentStakingInfo[networkKey] && currentStakingInfo[networkKey].balance && parseFloat(currentStakingInfo[networkKey].balance as string) > 0;
+      if (needUpdateUnlockingStake) {
+        const unlockingInfo = await getUnlockingInfo(dotSamaApiMap[stakingItem.chain], networkJson, stakingItem.chain, currentAddress, stakingItem.type);
 
-      if (isEthereumAddress(currentAddress)) {
-        if (networkJson.supportBonding && networkJson.active && networkJson.isEthereum && needUpdateUnlockingStake) {
-          stakeUnlockingInfo[networkKey] = await getUnlockingInfo(dotSamaApiMap[networkKey], networkJson, networkKey, currentAddress);
-        }
-      } else {
-        if (networkJson.supportBonding && networkJson.active && !networkJson.isEthereum && needUpdateUnlockingStake) {
-          stakeUnlockingInfo[networkKey] = await getUnlockingInfo(dotSamaApiMap[networkKey], networkJson, networkKey, currentAddress);
-        }
+        stakeUnlockingInfo.push(unlockingInfo);
       }
     }));
 

@@ -163,7 +163,7 @@ const getSubsquidStaking = async (accounts: string[], chain: string): Promise<St
 
     return {
       name: PREDEFINED_NETWORKS[chain].chain,
-      chainId: chain,
+      chain: chain,
       totalReward: parsedResult.totalReward ? parsedResult.totalReward.toString() : '0',
       latestReward: parsedResult.latestReward ? parsedResult.latestReward.toString() : '0',
       totalSlash: parsedResult.totalSlash ? parsedResult.totalSlash.toString() : '0',
@@ -175,7 +175,7 @@ const getSubsquidStaking = async (accounts: string[], chain: string): Promise<St
 
     return {
       name: PREDEFINED_NETWORKS[chain].chain,
-      chainId: chain,
+      chain: chain,
       totalReward: '0',
       latestReward: '0',
       totalSlash: '0',

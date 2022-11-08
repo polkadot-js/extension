@@ -93,13 +93,20 @@ export enum StakingType {
 export interface StakingRewardItem {
   state: APIItemState
   name: string,
-  chainId: string,
+  chain: string,
+  address: string,
+  type: StakingType,
+
   latestReward?: string,
   totalReward?: string,
   totalSlash?: string,
   smartContract?: string
 }
 export interface UnlockingStakeInfo {
+  chain: string,
+  address: string,
+  type: StakingType,
+
   nextWithdrawal: number,
   redeemable: number,
   nextWithdrawalAmount: number,
@@ -118,11 +125,13 @@ export interface StakingItem {
   nativeToken: string,
   unit?: string,
 
-  unlockingInfo?: UnlockingStakeInfo,
-  rewardInfo?: StakingRewardItem,
-
   type: StakingType,
   state: APIItemState,
+}
+
+export interface AggregatedStakingItem extends StakingItem {
+  unlockingInfo?: UnlockingStakeInfo,
+  rewardInfo?: StakingRewardItem,
 }
 
 export interface StakingJson {
@@ -131,15 +140,15 @@ export interface StakingJson {
   details: StakingItem[]
 }
 
-// export interface StakingRewardJson {
-//   ready: boolean;
-//   details: Array<StakingRewardItem>;
-// }
-//
-// export interface StakeUnlockingJson {
-//   timestamp: number,
-//   details: Record<string, UnlockingStakeInfo>
-// }
+export interface StakingRewardJson {
+  ready: boolean;
+  details: Array<StakingRewardItem>;
+}
+
+export interface StakeUnlockingJson {
+  timestamp: number,
+  details: UnlockingStakeInfo[]
+}
 
 export interface PriceJson {
   ready?: boolean,

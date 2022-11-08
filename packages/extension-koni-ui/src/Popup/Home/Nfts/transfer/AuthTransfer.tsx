@@ -491,7 +491,7 @@ function AuthTransfer ({ chain, className, collectionId, nftItem, recipientAddre
           </div>
         );
     }
-  }, [account, currentNetwork.networkPrefix, errorArr, genesisHash, handleSignAndSubmit, handlerClearError, handlerCreateQr, handlerErrorQr, handlerSendLedger, loading, passwordError, senderAccount.address, signMode, substrateGas, t, themeContext.secondaryColor, web3Gas]);
+  }, [account, currentNetwork.ss58Format, errorArr, genesisHash, handleSignAndSubmit, handlerClearError, handlerCreateQr, handlerErrorQr, handlerSendLedger, loading, passwordError, senderAccount.address, signMode, substrateGas, t, themeContext.secondaryColor, web3Gas]);
 
   return (
     <div className={className}>

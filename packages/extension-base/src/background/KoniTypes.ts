@@ -110,15 +110,20 @@ export interface UnlockingStakeInfo {
 export interface StakingItem {
   name: string,
   chain: string,
+  owner: string,
+
   balance?: string,
   activeBalance?: string,
   unlockingBalance?: string,
   nativeToken: string,
   unit?: string,
-  state: APIItemState,
+
   unlockingInfo?: UnlockingStakeInfo,
   rewardInfo?: StakingRewardItem,
+
   type: StakingType,
+  state: APIItemState,
+
 }
 
 export interface StakingJson {

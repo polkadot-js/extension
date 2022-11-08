@@ -57,11 +57,11 @@ export default class DatabaseService {
   }
 
   // Staking
-  async updateStakingStore (chain: string, chainHash: string, address: string, item: StakingItem) {
+  async updateStaking (chain: string, chainHash: string, address: string, item: StakingItem) {
     if (item.state === APIItemState.READY) {
       this.logger.log(`Updating staking for [${chain}]`);
 
-      return this.stores.staking.upsert({ chainHash, chain, address, ...item });
+      return this.stores.staking.upsert({ chainHash, address, ...item });
     }
   }
 
@@ -84,10 +84,10 @@ export default class DatabaseService {
   }
 
   // NFT
-  subscribeNft (addresses: string[], chainHashs?: string[], callback?: (nfts: INft[]) => void) {
+  subscribeNft (addresses: string[], chainHashes?: string[], callback?: (nfts: INft[]) => void) {
     this.nftSubscription && this.nftSubscription.unsubscribe();
 
-    this.nftSubscription = this.stores.nft.subscribeNft(addresses, chainHashs).subscribe({
+    this.nftSubscription = this.stores.nft.subscribeNft(addresses, chainHashes).subscribe({
       next: (nfts) => callback && callback(nfts)
     });
 

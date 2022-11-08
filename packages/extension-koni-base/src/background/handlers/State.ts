@@ -3,7 +3,7 @@
 
 import { withErrorLog } from '@subwallet/extension-base/background/handlers/helpers';
 import State, { AuthUrls, Resolver } from '@subwallet/extension-base/background/handlers/State';
-import { AccountRefMap, APIItemState, ApiMap, AuthRequestV2, BalanceItem, BalanceJson, ChainRegistry, ConfirmationDefinitions, ConfirmationsQueue, ConfirmationsQueueItemOptions, ConfirmationType, CrowdloanItem, CrowdloanJson, CurrentAccountInfo, CustomToken, CustomTokenJson, CustomTokenType, DeleteCustomTokenParams, EvmSendTransactionParams, EvmSendTransactionRequestQr, EvmSignatureRequestQr, ExternalRequestPromise, ExternalRequestPromiseStatus, NETWORK_STATUS, NetworkJson, NftCollection, NftItem, NftJson, NftTransferExtra, PriceJson, RequestAccountExportPrivateKey, RequestCheckPublicAndSecretKey, RequestConfirmationComplete, RequestSettingsType, ResponseAccountExportPrivateKey, ResponseCheckPublicAndSecretKey, ResponseSettingsType, ResultResolver, ServiceInfo, SingleModeJson, StakeUnlockingJson, StakingItem, StakingJson, StakingRewardJson, ThemeTypes, TokenInfo, TransactionHistoryItemType } from '@subwallet/extension-base/background/KoniTypes';
+import { AccountRefMap, APIItemState, ApiMap, AuthRequestV2, BalanceItem, BalanceJson, ChainRegistry, ConfirmationDefinitions, ConfirmationsQueue, ConfirmationsQueueItemOptions, ConfirmationType, CrowdloanItem, CrowdloanJson, CurrentAccountInfo, CustomToken, CustomTokenJson, CustomTokenType, DeleteCustomTokenParams, EvmSendTransactionParams, EvmSendTransactionRequestQr, EvmSignatureRequestQr, ExternalRequestPromise, ExternalRequestPromiseStatus, NETWORK_STATUS, NetworkJson, NftCollection, NftItem, NftJson, NftTransferExtra, PriceJson, RequestAccountExportPrivateKey, RequestCheckPublicAndSecretKey, RequestConfirmationComplete, RequestSettingsType, ResponseAccountExportPrivateKey, ResponseCheckPublicAndSecretKey, ResponseSettingsType, ResultResolver, ServiceInfo, SingleModeJson, StakingItem, StakingJson, ThemeTypes, TokenInfo, TransactionHistoryItemType } from '@subwallet/extension-base/background/KoniTypes';
 import { AuthorizeRequest, RequestAuthorizeTab } from '@subwallet/extension-base/background/types';
 import { Web3Transaction } from '@subwallet/extension-base/signers/types';
 import { getId } from '@subwallet/extension-base/utils/getId';
@@ -147,20 +147,17 @@ export default class KoniState extends State {
 
   private stakingSubject = new Subject<StakingJson>();
 
-
-  private stakingRewardSubject = new Subject<StakingRewardJson>();
-  private stakingMap: Record<string, StakingItem> = generateDefaultStakingMap();
-  private stakingRewardState: StakingRewardJson = {
-    ready: false,
-    details: []
-  } as StakingRewardJson;
-
-  private stakeUnlockingInfo: StakeUnlockingJson = { timestamp: -1, details: {} };
-
+  // private stakingRewardSubject = new Subject<StakingRewardJson>();
+  // private stakingMap: Record<string, StakingItem> = generateDefaultStakingMap();
+  // private stakingRewardState: StakingRewardJson = {
+  //   ready: false,
+  //   details: []
+  // } as StakingRewardJson;
+  // private stakeUnlockingInfo: StakeUnlockingJson = { timestamp: -1, details: {} };
+  // eslint-disable-next-line camelcase
+  // private stakeUnlockingInfoSubject = new Subject<StakeUnlockingJson>();
   // TODO: remove states of staking, store everything in indexedDB
 
-  // eslint-disable-next-line camelcase
-  private stakeUnlockingInfoSubject = new Subject<StakeUnlockingJson>();
   private historyMap: Record<string, TransactionHistoryItemType[]> = {};
   private historySubject = new Subject<Record<string, TransactionHistoryItemType[]>>();
 
@@ -614,31 +611,26 @@ export default class KoniState extends State {
       return false;
     }
 
-    const oldItem = this.stakingMap[networkKey];
+    this.dbService.stores.staking.getSingleRecord(this.getNetworkGenesisHashByKey(networkKey), item.owner, item.type)
+      .then((oldItem) => {
+        console.log('There a change to staking');
+        return !oldItem || oldItem.state === APIItemState.PENDING ||
+          oldItem.balance !== item.balance || oldItem.activeBalance !== item.activeBalance ||
+          oldItem.unlockingBalance !== item.unlockingBalance;
+      })
+      .catch((e) => {
+        this.logger.warn(e);
 
-    return !oldItem || oldItem.state === APIItemState.PENDING ||
-      oldItem.balance !== item.balance || oldItem.activeBalance !== item.activeBalance ||
-      oldItem.unlockingBalance !== item.unlockingBalance;
+        return false;
+      });
+
+    return false;
   }
 
   public setStakingItem (networkKey: string, item: StakingItem): void {
-    const itemData = { ...item, timestamp: +new Date() };
-
     if (this.hasUpdateStakingItem(networkKey, item)) {
-      // Update staking map
-      this.stakingMap[parseStakingItemKey(networkKey, item.type)] = itemData;
-      // this.updateStakingStore(networkKey, item);
-
-      this.lazyNext('setStakingItem', () => {
-        this.publishStaking();
-      });
+      this.dbService.updateStaking(networkKey, this.getNetworkGenesisHashByKey(networkKey), item.owner, item).catch((e) => this.logger.warn(e));
     }
-  }
-
-  private updateStakingStore (networkKey: string, item: StakingItem) {
-    this.getCurrentAccount((currentAccountInfo) => {
-      this.dbService.updateStakingStore(networkKey, this.getNetworkGenesisHashByKey(networkKey), currentAccountInfo.address, item).catch((e) => this.logger.warn(e));
-    });
   }
 
   public setNftTransfer (data: NftTransferExtra, callback?: (data: NftTransferExtra) => void): void {

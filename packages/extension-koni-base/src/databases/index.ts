@@ -65,7 +65,7 @@ export default class KoniDatabase extends Dexie {
     });
 
     this.conditionalVersion(5, {
-      transactions: '[chainHash+address+extrinsicHash+eventIdx+action], &[chainHash+address+extrinsicHash+eventIdx+action], chainHash, chain, address, extrinsicHash, eventIdx, action'
+      stakings: '[chainHash+address+type], &[chainHash+address+type], [chainHash+address], chainHash, chain, address, type'
     });
 
     // this.conditionalVersion(4, {

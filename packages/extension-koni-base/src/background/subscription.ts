@@ -281,7 +281,7 @@ export class KoniSubscription {
     getAllSubsquidStaking(addresses, activeNetworks)
       .then((result) => {
         this.state.setStakingReward(result);
-        this.logger.log('set staking reward state done', result);
+        this.logger.log('Set staking reward state done', result);
       })
       .catch(this.logger.error);
   }

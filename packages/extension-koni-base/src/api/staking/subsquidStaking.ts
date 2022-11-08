@@ -1,14 +1,15 @@
 // Copyright 2019-2022 @subwallet/extension-koni authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { APIItemState, StakingRewardItem, StakingRewardJson } from '@subwallet/extension-base/background/KoniTypes';
+import { APIItemState, StakingRewardItem, StakingRewardJson, StakingType } from '@subwallet/extension-base/background/KoniTypes';
 import { PREDEFINED_NETWORKS } from '@subwallet/extension-koni-base/api/predefinedNetworks';
 import { SUBSQUID_ENDPOINTS, SUPPORTED_STAKING_CHAINS } from '@subwallet/extension-koni-base/api/staking/config';
 import { reformatAddress, toUnit } from '@subwallet/extension-koni-base/utils';
 import axios from 'axios';
 
+import { isEthereumAddress } from '@polkadot/util-crypto';
+
 interface RewardResponseItem {
-  smartContract: string;
   amount: string,
   blockNumber: string
 }
@@ -20,30 +21,8 @@ interface StakingResponseItem {
   rewards: RewardResponseItem[]
 }
 
-interface StakingAmount {
-  smartContract?: string;
-  totalReward?: number,
-  totalSlash?: number,
-  totalBond?: number,
-  latestReward?: number
-}
-
 const getSubsquidQuery = (account: string, chain: string) => {
-  if (chain === 'astar') {
-    return `
-    query MyQuery {
-      accountById(id: "${account}") {
-        totalReward
-        totalBond
-        rewards(limit: 1, orderBy: blockNumber_DESC) {
-          amount
-          smartContract
-        }
-      }
-    }`;
-  }
-
-  if (chain === 'moonbeam' || chain === 'moonriver') {
+  if (chain === 'moonbeam' || chain === 'moonriver' || chain === 'astar') {
     return `
     query MyQuery {
       accountById(id: "${account}") {
@@ -69,118 +48,64 @@ const getSubsquidQuery = (account: string, chain: string) => {
   }`;
 };
 
-const getSubsquidStaking = async (accounts: string[], chain: string): Promise<StakingRewardItem> => {
+const getSubsquidStaking = async (accounts: string[], chain: string): Promise<StakingRewardItem[]> => {
   try {
-    const parsedResult: StakingAmount = {};
+    const result: StakingRewardItem[] = [];
 
-    const rewards = await Promise.all(accounts.map(async (account) => {
-      const parsedAccount = reformatAddress(account, PREDEFINED_NETWORKS[chain].ss58Format);
-      const result: Record<string, any> = {};
+    await Promise.all(accounts.map(async (account) => {
+      if ((PREDEFINED_NETWORKS[chain].isEthereum && isEthereumAddress(account)) || (!PREDEFINED_NETWORKS[chain].isEthereum && !isEthereumAddress(account))) {
+        const parsedAccount = reformatAddress(account, PREDEFINED_NETWORKS[chain].ss58Format);
+        const stakingRewardItem: StakingRewardItem = {
+          chain: chain,
+          name: PREDEFINED_NETWORKS[chain].chain,
+          state: APIItemState.READY,
+          type: StakingType.NOMINATED,
+          address: reformatAddress(account, 42)
+        };
 
-      const resp = await axios({ url: SUBSQUID_ENDPOINTS[chain],
-        method: 'post',
-        data: { query: getSubsquidQuery(parsedAccount, chain) } });
+        const resp = await axios({ url: SUBSQUID_ENDPOINTS[chain],
+          method: 'post',
+          data: { query: getSubsquidQuery(parsedAccount, chain) } });
 
-      if (resp.status === 200) {
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-        const respData = resp.data.data as Record<string, any>;
-        const rewardItem = respData.accountById as StakingResponseItem;
+        if (resp.status === 200) {
+          // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+          const respData = resp.data.data as Record<string, any>;
+          const rewardItem = respData.accountById as StakingResponseItem;
 
-        if (rewardItem) {
-          const latestReward = rewardItem.rewards[0];
+          if (rewardItem) {
+            const latestReward = rewardItem.rewards[0];
 
-          if (rewardItem.totalReward) {
-            result.totalReward = parseFloat(rewardItem.totalReward);
-          }
+            if (rewardItem.totalReward) {
+              const totalReward = parseFloat(rewardItem.totalReward);
 
-          if (rewardItem.totalSlash) {
-            result.totalSlash = parseFloat(rewardItem.totalSlash);
-          }
+              stakingRewardItem.totalReward = toUnit(totalReward, PREDEFINED_NETWORKS[chain].decimals as number).toString();
+            }
 
-          if (rewardItem.totalBond) {
-            result.totalBond = parseFloat(rewardItem.totalBond);
-          }
+            if (rewardItem.totalSlash) {
+              const totalSlash = parseFloat(rewardItem.totalSlash);
 
-          if (latestReward && latestReward.amount) {
-            result.latestReward = parseFloat(latestReward.amount);
-          }
+              stakingRewardItem.totalSlash = toUnit(totalSlash, PREDEFINED_NETWORKS[chain].decimals as number).toString();
+            }
 
-          if (latestReward && latestReward.smartContract) {
-            result.smartContract = latestReward.smartContract;
+            if (latestReward && latestReward.amount) {
+              const _latestReward = parseFloat(latestReward.amount);
+
+              stakingRewardItem.latestReward = toUnit(_latestReward, PREDEFINED_NETWORKS[chain].decimals as number).toString();
+            }
           }
         }
-      }
 
-      return result as StakingAmount;
+        if (stakingRewardItem.totalReward && parseFloat(stakingRewardItem.totalReward) > 0) {
+          result.push(stakingRewardItem);
+        }
+      }
     }));
 
-    for (const reward of rewards) {
-      if (reward.smartContract) {
-        parsedResult.smartContract = reward.smartContract;
-      }
-
-      if (reward.totalReward) {
-        if (parsedResult.totalReward) {
-          parsedResult.totalReward += toUnit(reward.totalReward, PREDEFINED_NETWORKS[chain].decimals as number);
-        } else {
-          parsedResult.totalReward = toUnit(reward.totalReward, PREDEFINED_NETWORKS[chain].decimals as number);
-        }
-      }
-
-      if (reward.totalSlash) {
-        if (parsedResult.totalSlash) {
-          parsedResult.totalSlash += toUnit(reward.totalSlash, PREDEFINED_NETWORKS[chain].decimals as number);
-        } else {
-          parsedResult.totalSlash = toUnit(reward.totalSlash, PREDEFINED_NETWORKS[chain].decimals as number);
-        }
-      }
-
-      if (reward.totalBond) {
-        if (parsedResult.totalBond) {
-          parsedResult.totalBond += toUnit(reward.totalBond, PREDEFINED_NETWORKS[chain].decimals as number);
-        } else {
-          parsedResult.totalBond = toUnit(reward.totalBond, PREDEFINED_NETWORKS[chain].decimals as number);
-        }
-      }
-
-      if (reward.latestReward) {
-        if (parsedResult.latestReward) {
-          parsedResult.latestReward += toUnit(reward.latestReward, PREDEFINED_NETWORKS[chain].decimals as number);
-        } else {
-          parsedResult.latestReward = toUnit(reward.latestReward, PREDEFINED_NETWORKS[chain].decimals as number);
-        }
-      }
-    }
-
-    // callback(chain, {
-    //   name: PREDEFINED_NETWORKS[chain].chain,
-    //   chainId: chain,
-    //   balance: parsedResult.totalBond ? parsedResult.totalBond.toString() : '0',
-    //   nativeToken: PREDEFINED_NETWORKS[chain].nativeToken,
-    //   unit: PREDEFINED_NETWORKS[chain].nativeToken,
-    //   state: APIItemState.READY
-    // } as StakingItem);
-
-    return {
-      name: PREDEFINED_NETWORKS[chain].chain,
-      chain: chain,
-      totalReward: parsedResult.totalReward ? parsedResult.totalReward.toString() : '0',
-      latestReward: parsedResult.latestReward ? parsedResult.latestReward.toString() : '0',
-      totalSlash: parsedResult.totalSlash ? parsedResult.totalSlash.toString() : '0',
-      smartContract: parsedResult.smartContract,
-      state: APIItemState.READY
-    } as StakingRewardItem;
+    return result;
   } catch (e) {
-    console.log(`error getting ${chain} staking reward from subsquid`, e);
+    console.error(`error getting ${chain} staking reward from subsquid`, e);
 
-    return {
-      name: PREDEFINED_NETWORKS[chain].chain,
-      chain: chain,
-      totalReward: '0',
-      latestReward: '0',
-      totalSlash: '0',
-      state: APIItemState.READY
-    } as StakingRewardItem;
+    return [];
   }
 };
 
@@ -195,11 +120,11 @@ export const getAllSubsquidStaking = async (accounts: string[], activeNetworks: 
     }
   });
 
-  const rewardItems = await Promise.all(filteredNetworks.map(async (network) => {
-    return await getSubsquidStaking(accounts, network);
-  }));
+  await Promise.all(filteredNetworks.map(async (network) => {
+    const rewardItems = await getSubsquidStaking(accounts, network);
 
-  rewardList = rewardList.concat(rewardItems);
+    rewardList = rewardList.concat(rewardItems);
+  }));
 
   return {
     ready: true,

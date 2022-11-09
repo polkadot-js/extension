@@ -791,7 +791,8 @@ export interface NftTransactionResponse extends BasicTxResponse {
 export type HandleBasicTx = (data: BasicTxResponse) => void;
 export type HandleTxResponse<T extends BasicTxResponse> = (data: T) => void;
 
-export type BaseRequestSign = Record<string, unknown>;
+// eslint-disable-next-line @typescript-eslint/ban-types
+export type BaseRequestSign = {};
 
 export type PasswordRequestSign<T extends BaseRequestSign> = T & { password: string; };
 

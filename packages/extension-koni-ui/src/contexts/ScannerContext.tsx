@@ -9,7 +9,7 @@ import { parseEVMTransaction, qrSignEvm, qrSignSubstrate } from '@subwallet/exte
 import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { CompletedParsedData, EthereumParsedData, MessageQRInfo, MultiFramesInfo, QrInfo, SubstrateCompletedParsedData, SubstrateMessageParsedData, SubstrateTransactionParsedData, TxQRInfo } from '@subwallet/extension-koni-ui/types/scanner';
 import { constructDataFromBytes, encodeNumber, parseSubstratePayload } from '@subwallet/extension-koni-ui/util/decoders';
-import { getNetworkJsonByGenesisHash, getNetworkJsonByInfo } from '@subwallet/extension-koni-ui/util/getNetworkJsonByGenesisHash';
+import { getNetworkJsonByInfo } from '@subwallet/extension-koni-ui/util/getNetworkJsonByGenesisHash';
 import { isEthereumCompletedParsedData, isSubstrateMessageParsedData } from '@subwallet/extension-koni-ui/util/scanner/sign';
 import BigN from 'bignumber.js';
 import React, { useCallback, useContext, useReducer } from 'react';

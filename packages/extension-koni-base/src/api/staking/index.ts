@@ -102,10 +102,10 @@ function getParaStakingOnChain (parentApi: ApiProps, useAddresses: string[], net
     if (ledgers) {
       for (let i = 0; i < ledgers.length; i++) {
         const ledger = ledgers[i];
+        const owner = reformatAddress(useAddresses[i], 42);
         const data = ledger.toHuman() as Record<string, any> | null;
 
         if (data !== null) {
-          const owner = reformatAddress(useAddresses[i], 42) || undefined;
           let _totalBalance = data.total as string;
           // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
           let _unlockingBalance = data.lessTotal ? data.lessTotal as string : data.requests.lessTotal as string;
@@ -137,7 +137,21 @@ function getParaStakingOnChain (parentApi: ApiProps, useAddresses: string[], net
             address: owner
           } as StakingItem;
 
-          // eslint-disable-next-line node/no-callback-literal
+          callback(chain, stakingItem);
+        } else {
+          const stakingItem = {
+            name: networks[chain].chain,
+            chain: chain,
+            balance: '0',
+            activeBalance: '0',
+            unlockingBalance: '0',
+            nativeToken: networks[chain].nativeToken,
+            unit: networks[chain].nativeToken,
+            state: APIItemState.READY,
+            type: StakingType.NOMINATED,
+            address: owner
+          } as StakingItem;
+
           callback(chain, stakingItem);
         }
       }
@@ -152,10 +166,10 @@ function getRelayStakingOnChain (parentApi: ApiProps, useAddresses: string[], ne
     if (ledgers) {
       for (let i = 0; i < ledgers.length; i++) {
         const ledger = ledgers[i];
+        const owner = reformatAddress(useAddresses[i], 42) || undefined;
         const data = ledger.toHuman() as unknown as LedgerData;
 
         if (data && data.active) {
-          const owner = reformatAddress(useAddresses[i], 42) || undefined;
           const _totalBalance = data.total;
           const _activeBalance = data.active;
           let unlockingBalance = new BN(0);
@@ -201,6 +215,21 @@ function getRelayStakingOnChain (parentApi: ApiProps, useAddresses: string[], ne
           } as StakingItem;
 
           callback(chain, stakingItem);
+        } else {
+          const stakingItem = {
+            name: networks[chain].chain,
+            chain: chain,
+            balance: '0',
+            activeBalance: '0',
+            unlockingBalance: '0',
+            nativeToken: networks[chain].nativeToken,
+            unit: unit || networks[chain].nativeToken,
+            state: APIItemState.READY,
+            type: StakingType.NOMINATED,
+            address: owner
+          } as StakingItem;
+
+          callback(chain, stakingItem);
         }
       }
     }
@@ -212,10 +241,10 @@ function getRelayPoolingOnchain (parentApi: ApiProps, useAddresses: string[], ne
     if (ledgers) {
       for (let i = 0; i < ledgers.length; i++) {
         const ledger = ledgers[i];
+        const owner = reformatAddress(useAddresses[i], 42);
         const data = ledger.toHuman() as Record<string, any>;
 
         if (data !== null) {
-          const owner = reformatAddress(useAddresses[i], 42);
           const bondedBalance = data.points as string;
           const unbondedBalance = data.unbondingEras as Record<string, string>;
 
@@ -246,6 +275,21 @@ function getRelayPoolingOnchain (parentApi: ApiProps, useAddresses: string[], ne
             balance: parsedTotal.toString(),
             activeBalance: parsedActiveBalance.toString(),
             unlockingBalance: parsedUnlockingBalance.toString(),
+            nativeToken: networks[chain].nativeToken,
+            unit: networks[chain].nativeToken,
+            state: APIItemState.READY,
+            type: StakingType.POOLED,
+            address: owner
+          } as StakingItem;
+
+          callback(chain, stakingItem);
+        } else {
+          const stakingItem = {
+            name: networks[chain].chain,
+            chain: chain,
+            balance: '0',
+            activeBalance: '0',
+            unlockingBalance: '0',
             nativeToken: networks[chain].nativeToken,
             unit: networks[chain].nativeToken,
             state: APIItemState.READY,

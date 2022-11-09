@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { APIItemState, StakingItem } from '@subwallet/extension-base/background/KoniTypes';
-import { ALL_ACCOUNT_KEY } from '@subwallet/extension-koni-base/constants';
+import { ALL_ACCOUNT_KEY, ALL_NETWORK_KEY } from '@subwallet/extension-koni-base/constants';
 import { StakingDataType, StakingType } from '@subwallet/extension-koni-ui/hooks/screen/home/types';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { useSelector } from 'react-redux';
@@ -58,8 +58,9 @@ function groupStakingItems (stakingItems: StakingItem[]) {
 }
 
 export default function useFetchStaking (networkKey: string): StakingType {
-  const { networkMap, price: priceReducer, stakeUnlockingInfo: stakeUnlockingInfoJson, staking: stakingReducer, stakingReward: stakingRewardReducer } = useSelector((state: RootState) => state);
+  const { currentAccount: { account }, networkMap, price: priceReducer, stakeUnlockingInfo: stakeUnlockingInfoJson, staking: stakingReducer, stakingReward: stakingRewardReducer } = useSelector((state: RootState) => state);
 
+  const currentAddress = account?.address;
   const { priceMap } = priceReducer;
   const parsedPriceMap: Record<string, number> = {};
 
@@ -68,11 +69,12 @@ export default function useFetchStaking (networkKey: string): StakingType {
   const unlockingItems = stakeUnlockingInfoJson.details;
   const stakeUnlockingTimestamp = stakeUnlockingInfoJson.timestamp;
 
-  const readyStakingItems: StakingItem[] = [];
+  let readyStakingItems: StakingItem[] = [];
   const stakingData: StakingDataType[] = [];
   let loading = !stakingRewardReducer.ready;
 
-  const showAll = networkKey.toLowerCase() === ALL_ACCOUNT_KEY.toLowerCase();
+  const showAll = networkKey.toLowerCase() === ALL_NETWORK_KEY.toLowerCase();
+  const isAccountAll = currentAddress && currentAddress.toLowerCase() === ALL_ACCOUNT_KEY.toLowerCase();
 
   stakingItems.forEach((stakingItem) => {
     if (stakingItem.state === APIItemState.READY) {
@@ -87,58 +89,43 @@ export default function useFetchStaking (networkKey: string): StakingType {
     }
   });
 
-  const groupedStakingItems = groupStakingItems(readyStakingItems);
+  if (isAccountAll) {
+    readyStakingItems = groupStakingItems(readyStakingItems);
+  }
 
   if (!showAll) {
     const filteredStakingItems: StakingItem[] = [];
 
-    groupedStakingItems.forEach((item) => {
+    readyStakingItems.forEach((item) => {
       if (item.chain.toLowerCase() === networkKey.toLowerCase()) {
         filteredStakingItems.push(item);
       }
     });
 
-    for (const stakingItem of filteredStakingItems) {
-      const stakingDataType = { staking: stakingItem } as StakingDataType;
+    readyStakingItems = filteredStakingItems;
+  }
 
-      for (const reward of stakingRewardList) {
-        if (stakingItem.chain === reward.chain && reward.state === APIItemState.READY) {
-          stakingDataType.reward = reward;
-        }
+  for (const stakingItem of readyStakingItems) {
+    const stakingDataType = { staking: stakingItem } as StakingDataType;
+
+    for (const reward of stakingRewardList) {
+      if (stakingItem.chain === reward.chain && reward.state === APIItemState.READY) {
+        stakingDataType.reward = reward;
       }
+    }
 
-      Object.entries(unlockingItems).forEach(([key, info]) => {
-        if (key === stakingItem.chain) {
+    if (!isAccountAll) {
+      unlockingItems.forEach((unlockingInfo) => {
+        if (unlockingInfo.chain === stakingItem.chain && unlockingInfo.type === stakingItem.type && unlockingInfo.address === stakingItem.address) {
           stakingDataType.staking = {
             ...stakingItem,
-            unlockingInfo: info
+            unlockingInfo
           } as StakingItem;
         }
       });
-
-      stakingData.push(stakingDataType);
     }
-  } else {
-    for (const stakingItem of groupedStakingItems) {
-      const stakingDataType = { staking: stakingItem } as StakingDataType;
 
-      for (const reward of stakingRewardList) {
-        if (stakingItem.chain === reward.chain && reward.state === APIItemState.READY) {
-          stakingDataType.reward = reward;
-        }
-      }
-
-      Object.entries(unlockingItems).forEach(([key, info]) => {
-        if (key === stakingItem.chain) {
-          stakingDataType.staking = {
-            ...stakingItem,
-            unlockingInfo: info
-          } as StakingItem;
-        }
-      });
-
-      stakingData.push(stakingDataType);
-    }
+    stakingData.push(stakingDataType);
   }
 
   return {

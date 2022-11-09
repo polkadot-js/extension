@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { AuthUrls } from '@subwallet/extension-base/background/handlers/State';
-import { ApiProps, CustomToken, NetworkJson, NftTransferExtra, UnlockingStakeInfo } from '@subwallet/extension-base/background/KoniTypes';
+import { ApiProps, CustomToken, NetworkJson, NftTransferExtra, StakingType, UnlockingStakeInfo } from '@subwallet/extension-base/background/KoniTypes';
 import { getUnlockingInfo } from '@subwallet/extension-koni-base/api/bonding';
 import { subscribeBalance } from '@subwallet/extension-koni-base/api/dotsama/balance';
 import { subscribeCrowdloan } from '@subwallet/extension-koni-base/api/dotsama/crowdloan';
@@ -95,7 +95,7 @@ export class KoniSubscription {
   }
 
   stop () {
-    this.logger.log('Stopping subscrition');
+    this.logger.log('Stopping subscription');
 
     if (this.serviceSubscription) {
       this.serviceSubscription.unsubscribe();
@@ -299,7 +299,7 @@ export class KoniSubscription {
     const stakingItems = await this.state.getStakingRecordsByAddress(currentAddress); // only get records of active networks
 
     await Promise.all(stakingItems.map(async (stakingItem) => {
-      const needUpdateUnlockingStake = parseFloat(stakingItem.balance as string) > 0;
+      const needUpdateUnlockingStake = parseFloat(stakingItem.balance as string) > 0 && stakingItem.type === StakingType.NOMINATED;
       const networkJson = networkMap[stakingItem.chain];
 
       if (needUpdateUnlockingStake) {

@@ -140,7 +140,6 @@ function StakingContainer ({ className, data, loading, priceMap, stakeUnlockingT
               const name = item.name || item.chain;
               const icon = LogosMap[item.chain] || LogosMap.default;
               const price = priceMap[item.chain];
-              const owner = item.address;
               const stakingType = item.type;
 
               let redeemable = 0;
@@ -168,7 +167,6 @@ function StakingContainer ({ className, data, loading, priceMap, stakeUnlockingT
                 nextWithdrawal={nextWithdrawal}
                 nextWithdrawalAction={nextWithdrawalAction}
                 nextWithdrawalAmount={nextWithdrawalAmount}
-                owner={owner}
                 price={price}
                 redeemable={redeemable}
                 reward={reward}

@@ -1,9 +1,8 @@
 // Copyright 2019-2022 @subwallet/extension-koni authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { StakingRewardItem } from '@subwallet/extension-base/background/KoniTypes';
+import { StakingRewardItem, StakingType } from '@subwallet/extension-base/background/KoniTypes';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
-import { toShort } from '@subwallet/extension-koni-ui/util';
 import { formatLocaleNumber } from '@subwallet/extension-koni-ui/util/formatNumber';
 import React, { useCallback, useState } from 'react';
 import styled from 'styled-components';
@@ -21,8 +20,7 @@ interface Props extends ThemeProps {
   reward: StakingRewardItem;
   price: number;
   networkKey: string;
-  owner: string;
-  stakingType: string;
+  stakingType: StakingType;
   activeStake: string | undefined;
   unbondingStake: string | undefined;
   isAccountAll: boolean;
@@ -45,7 +43,7 @@ interface Props extends ThemeProps {
   setTargetRedeemable: (val: number) => void;
 }
 
-function StakingRow ({ activeStake, chainName, className, index, isAccountAll, isExternalAccount, isHardwareAccount, logo, networkKey, nextWithdrawal, nextWithdrawalAction, nextWithdrawalAmount, owner, price, redeemable, reward, setActionNetworkKey, setShowClaimRewardModal, setShowCompoundStakeModal, setShowWithdrawalModal, setTargetNextWithdrawalAction, setTargetRedeemable, setTargetValidator, stakingType, targetValidator, totalStake, unbondingStake, unit }: Props): React.ReactElement<Props> {
+function StakingRow ({ activeStake, chainName, className, index, isAccountAll, isExternalAccount, isHardwareAccount, logo, networkKey, nextWithdrawal, nextWithdrawalAction, nextWithdrawalAmount, price, redeemable, reward, setActionNetworkKey, setShowClaimRewardModal, setShowCompoundStakeModal, setShowWithdrawalModal, setTargetNextWithdrawalAction, setTargetRedeemable, setTargetValidator, stakingType, targetValidator, totalStake, unbondingStake, unit }: Props): React.ReactElement<Props> {
   const [showReward, setShowReward] = useState(false);
   const [showStakingMenu, setShowStakingMenu] = useState(false);
 
@@ -137,7 +135,7 @@ function StakingRow ({ activeStake, chainName, className, index, isAccountAll, i
               <div className={'balance-description'}>
                 <div>{stakingType.charAt(0).toUpperCase() + stakingType.slice(1)} balance</div>
                 {
-                  !isAccountAll && <StakingMenu
+                  !isAccountAll && stakingType !== StakingType.POOLED && <StakingMenu
                     bondedAmount={activeStake as string}
                     networkKey={networkKey}
                     nextWithdrawal={nextWithdrawal}
@@ -177,13 +175,6 @@ function StakingRow ({ activeStake, chainName, className, index, isAccountAll, i
         <div className={'extra-info'}>
           <div className={'filler-div'}></div>
           <div className={'extra-container'}>
-            {!isAccountAll && <div className={'reward-container'}>
-              <div className={'reward-title'}>Owner</div>
-              <div className={'reward-amount'}>
-                <div>{toShort(owner)}</div>
-              </div>
-            </div>}
-
             <div className={'reward-container'}>
               <div className={'reward-title'}>Active stake</div>
               <div className={'reward-amount'}>

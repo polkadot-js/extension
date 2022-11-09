@@ -220,7 +220,7 @@ function AuthTransfer ({ chain, className, collectionId, nftItem, recipientAddre
       setIsTxSuccess(false);
       setTxError('Encountered an error, please try again.');
       setShowConfirm(false);
-      setShowResult(false);
+      setShowResult(true);
       cleanQrState();
       clearExternalState();
 

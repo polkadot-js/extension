@@ -36,7 +36,7 @@ export async function getParaBondingBasics (networkKey: string, dotSamaApi: ApiP
   }
 
   const [_totalStake, _totalIssuance, _inflation, _allCollators] = await Promise.all([
-    apiProps.api.query.parachainStaking.staked ? apiProps.api.query.parachainStaking?.staked(round) : undefined,
+    apiProps.api.query.parachainStaking.staked(round),
     apiProps.api.query.balances.totalIssuance(),
     apiProps.api.query.parachainStaking.inflationConfig(),
     apiProps.api.query.parachainStaking.candidatePool()

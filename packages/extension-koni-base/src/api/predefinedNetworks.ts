@@ -2044,6 +2044,23 @@ export const PREDEFINED_NETWORKS: Record<string, NetworkJson> = {
     getStakingOnChain: false,
     abiExplorer: 'https://blockexplorer.bobabase.boba.network',
     supportSmartContract: [ContractType.evm]
+  },
+  amplitude_test: {
+    key: 'amplitude_test',
+    chain: 'Amplitude Testnet',
+    genesisHash: '0x67221cd96c1551b72d55f65164d6a39f31b570c77a05c90e31931b0e2f379e13',
+    ss58Format: 57,
+    providers: {
+      pendulum: 'wss://rpc-foucoco.pendulumchain.tech'
+    },
+    active: false,
+    currentProviderMode: 'ws',
+    currentProvider: 'pendulum',
+    groups: ['TEST_NET'],
+    nativeToken: 'AMPE',
+    decimals: 12,
+    supportBonding: true,
+    getStakingOnChain: true
   }
 };
 

@@ -72,7 +72,7 @@ export class KoniSubscription {
   }
 
   start () {
-    this.logger.log('Stating subscription');
+    this.logger.log('Starting subscription');
     this.state.getCurrentAccount((currentAccountInfo) => {
       if (currentAccountInfo) {
         const { address } = currentAccountInfo;

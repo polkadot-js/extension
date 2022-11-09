@@ -599,7 +599,6 @@ export default class KoniExtension extends Extension {
 
     const balanceSubscription = state.subscribeBalance().subscribe({
       next: (rs) => {
-        console.log('Balance changed: ', rs);
         cb(rs);
       }
     });

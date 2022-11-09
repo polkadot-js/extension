@@ -62,7 +62,7 @@ export function stakingOnChainApi (addresses: string[], dotSamaAPIMap: Record<st
     }
   });
 
-  const unsubList: Promise<VoidFunction>[] = [];
+  const unsubList: VoidFunction[] = [];
 
   // eslint-disable-next-line @typescript-eslint/no-misused-promises
   allApiPromise.forEach(async ({ api: apiPromise, chain }) => {
@@ -70,23 +70,29 @@ export function stakingOnChainApi (addresses: string[], dotSamaAPIMap: Record<st
     const useAddresses = apiPromise.isEthereum ? evmAddresses : substrateAddresses;
 
     if (CHAIN_TYPES.astar.includes(chain)) {
-      unsubList.push(getAstarStakingOnChain(parentApi, useAddresses, networks, chain, callback));
+      const unsub = await getAstarStakingOnChain(parentApi, useAddresses, networks, chain, callback);
+
+      unsubList.push(unsub);
     } else if (CHAIN_TYPES.para.includes(chain)) {
-      unsubList.push(getParaStakingOnChain(parentApi, useAddresses, networks, chain, callback));
+      const unsub = await getParaStakingOnChain(parentApi, useAddresses, networks, chain, callback);
+
+      unsubList.push(unsub);
     }
 
-    unsubList.push(getRelayStakingOnChain(parentApi, useAddresses, networks, chain, callback));
+    const unsubRelay = await getRelayStakingOnChain(parentApi, useAddresses, networks, chain, callback);
+
+    unsubList.push(unsubRelay);
 
     if (['polkadot', 'kusama', 'westend'].includes(chain)) {
-      unsubList.push(getRelayPoolingOnchain(parentApi, useAddresses, networks, chain, callback));
+      const unsub = await getRelayPoolingOnchain(parentApi, useAddresses, networks, chain, callback);
+
+      unsubList.push(unsub);
     }
   });
 
   return () => {
-    unsubList.forEach((subProm) => {
-      subProm.then((unsub) => {
-        unsub && unsub();
-      }).catch(console.error);
+    unsubList.forEach((unsub) => {
+      unsub && unsub();
     });
   };
 }

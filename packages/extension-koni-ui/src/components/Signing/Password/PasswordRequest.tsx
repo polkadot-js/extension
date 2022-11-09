@@ -73,6 +73,12 @@ const PasswordRequest = ({ children,
 };
 
 export default React.memo(styled(PasswordRequest)(({ theme }: Props) => `
+  padding-left: 15px;
+  padding-right: 15px;
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+
   .signing-error {
     margin-top: 10px;
   }

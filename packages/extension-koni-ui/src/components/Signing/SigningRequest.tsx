@@ -13,16 +13,13 @@ import { ExternalRequestContext } from '@subwallet/extension-koni-ui/contexts/Ex
 import { QrContextState, QrSignerContext, QrStep } from '@subwallet/extension-koni-ui/contexts/QrSignerContext';
 import { SigningContext } from '@subwallet/extension-koni-ui/contexts/SigningContext';
 import { useGetSignMode } from '@subwallet/extension-koni-ui/hooks/useGetSignMode';
-import { ThemeProps } from '@subwallet/extension-koni-ui/types';
-import CN from 'classnames';
 import React, { useCallback, useContext, useEffect } from 'react';
 import styled from 'styled-components';
 
-interface Props<T extends BaseRequestSign, V extends BasicTxResponse> extends ThemeProps {
+interface Props<T extends BaseRequestSign, V extends BasicTxResponse> {
   account?: AccountJson | null;
   balanceError?: boolean;
   children: JSX.Element;
-  className?: string;
   handleSignLedger?: (params: ExternalRequestSign<T>, callback: HandleTxResponse<V>) => Promise<V>;
   handleSignPassword?: (params: PasswordRequestSign<T>, callback: HandleTxResponse<V>) => Promise<V>;
   handleSignQr?: (params: ExternalRequestSign<T>, callback: HandleTxResponse<V>) => Promise<V>;
@@ -34,10 +31,24 @@ interface Props<T extends BaseRequestSign, V extends BasicTxResponse> extends Th
   message: string;
 }
 
+const Wrapper = styled.div`
+  padding-left: 15px;
+  padding-right: 15px;
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+`;
+
+const ExternalContainer = styled.div`
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  margin: -15px -15px 0;
+`;
+
 const SigningRequest = <T extends BaseRequestSign, V extends BasicTxResponse>({ account,
   balanceError,
   children,
-  className,
   handleSignLedger,
   handleSignPassword,
   handleSignQr,
@@ -230,16 +241,16 @@ const SigningRequest = <T extends BaseRequestSign, V extends BasicTxResponse>({ 
       case SIGN_MODE.QR:
         if (network && handleSignQr) {
           return (
-            <div className={CN(className)}>
-              <div className='external-wrapper'>
+            <Wrapper>
+              <ExternalContainer>
                 <QrRequest
                   genesisHash={network.genesisHash}
                   handlerStart={onSubmitQr}
                 >
                   { children }
                 </QrRequest>
-              </div>
-            </div>
+              </ExternalContainer>
+            </Wrapper>
           );
         } else {
           break;
@@ -248,8 +259,8 @@ const SigningRequest = <T extends BaseRequestSign, V extends BasicTxResponse>({ 
       case SIGN_MODE.LEDGER:
         if (network && handleSignLedger) {
           return (
-            <div className={CN(className)}>
-              <div className='external-wrapper'>
+            <Wrapper>
+              <ExternalContainer>
                 <LedgerRequest
                   account={account}
                   genesisHash={network.genesisHash}
@@ -257,8 +268,8 @@ const SigningRequest = <T extends BaseRequestSign, V extends BasicTxResponse>({ 
                 >
                   { children }
                 </LedgerRequest>
-              </div>
-            </div>
+              </ExternalContainer>
+            </Wrapper>
           );
         } else {
           break;
@@ -268,7 +279,6 @@ const SigningRequest = <T extends BaseRequestSign, V extends BasicTxResponse>({ 
         if (handleSignPassword) {
           return (
             <PasswordRequest
-              className={className}
               handlerStart={onSubmitPassword}
               hideConfirm={hideConfirm}
             >
@@ -282,13 +292,12 @@ const SigningRequest = <T extends BaseRequestSign, V extends BasicTxResponse>({ 
 
     return (
       <UnknownRequest
-        className={className}
         hideConfirm={hideConfirm}
       >
         { children }
       </UnknownRequest>
     );
-  }, [account, children, className, handleSignLedger, handleSignPassword, handleSignQr, hideConfirm, network, onSubmitLedger, onSubmitPassword, onSubmitQr, signMode]);
+  }, [account, children, handleSignLedger, handleSignPassword, handleSignQr, hideConfirm, network, onSubmitLedger, onSubmitPassword, onSubmitQr, signMode]);
 
   useEffect(() => {
     cleanSigningState();
@@ -301,19 +310,4 @@ const SigningRequest = <T extends BaseRequestSign, V extends BasicTxResponse>({ 
   return renderContent();
 };
 
-export default React.memo(SigningRequest);
-//
-// export default React.memo(styled(SigningRequest)`
-//   padding-left: 15px;
-//   padding-right: 15px;
-//   display: flex;
-//   flex-direction: column;
-//   flex: 1;
-//
-//   .external-wrapper {
-//     display: flex;
-//     flex: 1;
-//     flex-direction: column;
-//     margin: -15px -15px 0;
-//   }
-// `);
+export default SigningRequest;

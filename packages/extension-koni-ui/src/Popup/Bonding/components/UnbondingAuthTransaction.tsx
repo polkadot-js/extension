@@ -35,7 +35,7 @@ interface Props extends ThemeProps {
   handleRevertClickNext: () => void
 }
 
-function UnbondingAuthTransaction ({ amount, balanceError, className, fee, handleRevertClickNext, selectedNetwork, selectedValidator, setExtrinsicHash, setIsTxSuccess, setShowConfirm, setShowResult, setTxError, unbondAll }: Props): React.ReactElement<Props> {
+function UnbondingAuthTransaction ({ amount, balanceError, className, fee, handleRevertClickNext, selectedNetwork, selectedValidator, setExtrinsicHash, setIsTxSuccess, setShowConfirm, setShowResult, setTxError, theme, unbondAll }: Props): React.ReactElement<Props> {
   const { t } = useTranslation();
 
   const { handlerReject } = useRejectExternalRequest();
@@ -315,12 +315,5 @@ export default React.memo(styled(UnbondingAuthTransaction)(({ theme }: Props) =>
     flex-direction: column;
     overflow: hidden;
     border: 1px solid ${theme.extensionBorder};
-  }
-
-  .external-wrapper {
-    display: flex;
-    flex: 1;
-    flex-direction: column;
-    margin: -15px -15px 0;
   }
 `));

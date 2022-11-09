@@ -78,7 +78,7 @@ function BondingAuthTransaction ({ amount, balanceError, bondedValidators, class
   }, [isBusy, handlerReject, externalId, handleRevertClickNext, setShowConfirm]);
 
   const onFail = useCallback((error: string, extrinsicHash?: string) => {
-    setIsTxSuccess(true);
+    setIsTxSuccess(false);
     setShowConfirm(false);
     setShowResult(true);
     setTxError(error);

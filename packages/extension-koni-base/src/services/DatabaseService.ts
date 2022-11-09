@@ -25,7 +25,7 @@ export default class DatabaseService {
       nft: new NftStore(this._db.nfts),
       nftCollection: new NftCollectionStore(this._db.nftCollections),
       crowdloan: new CrowdloanStore(this._db.crowdloans),
-      staking: new StakingStore(this._db.stakings),
+      staking: new StakingStore(this._db.stakingsV2),
       transaction: new TransactionStore(this._db.transactions),
       migration: new MigrationStore(this._db.migrations)
     };

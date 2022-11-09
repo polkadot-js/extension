@@ -7,7 +7,6 @@ import { store } from '@subwallet/extension-koni-ui/stores';
 import { useEffect } from 'react';
 
 function updateStakeUnlockingInfo (data: StakeUnlockingJson) {
-  console.log('StakeUnlocking', data);
   store.dispatch({ type: 'stakeUnlockingInfo/update', payload: data });
 }
 

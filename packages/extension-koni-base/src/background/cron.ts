@@ -5,16 +5,7 @@ import { ApiMap, ApiProps, CustomToken, NETWORK_STATUS, NetworkJson, NftTransfer
 import { getTokenPrice } from '@subwallet/extension-koni-base/api/coingecko';
 import { fetchDotSamaHistory } from '@subwallet/extension-koni-base/api/subquery/history';
 import { KoniSubscription } from '@subwallet/extension-koni-base/background/subscription';
-import {
-  ALL_ACCOUNT_KEY,
-  CRON_AUTO_RECOVER_DOTSAMA_INTERVAL,
-  CRON_GET_API_MAP_STATUS,
-  CRON_REFRESH_HISTORY_INTERVAL,
-  CRON_REFRESH_NFT_INTERVAL,
-  CRON_REFRESH_PRICE_INTERVAL,
-  CRON_REFRESH_STAKE_UNLOCKING_INFO,
-  CRON_REFRESH_STAKING_REWARD_INTERVAL
-} from '@subwallet/extension-koni-base/constants';
+import { ALL_ACCOUNT_KEY, CRON_AUTO_RECOVER_DOTSAMA_INTERVAL, CRON_GET_API_MAP_STATUS, CRON_REFRESH_HISTORY_INTERVAL, CRON_REFRESH_NFT_INTERVAL, CRON_REFRESH_PRICE_INTERVAL, CRON_REFRESH_STAKE_UNLOCKING_INFO, CRON_REFRESH_STAKING_REWARD_INTERVAL } from '@subwallet/extension-koni-base/constants';
 import { Subject, Subscription } from 'rxjs';
 
 import { logger as createLogger } from '@polkadot/util';

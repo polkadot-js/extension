@@ -1,7 +1,7 @@
 // Copyright 2019-2022 @polkadot/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { APIItemState, StakingItem } from '@subwallet/extension-base/background/KoniTypes';
+import { APIItemState, StakingItem, StakingRewardItem } from '@subwallet/extension-base/background/KoniTypes';
 import { ALL_ACCOUNT_KEY, ALL_NETWORK_KEY } from '@subwallet/extension-koni-base/constants';
 import { StakingDataType, StakingType } from '@subwallet/extension-koni-ui/hooks/screen/home/types';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
@@ -33,7 +33,7 @@ function groupStakingItems (stakingItems: StakingItem[]) {
       if (stakingItem.type === type && stakingItem.chain === chain) {
         groupedStakingItem.name = stakingItem.name;
         groupedStakingItem.chain = stakingItem.chain;
-        groupedStakingItem.address = stakingItem.address;
+        groupedStakingItem.address = ALL_ACCOUNT_KEY;
 
         groupedStakingItem.nativeToken = stakingItem.nativeToken;
         groupedStakingItem.unit = stakingItem.unit;
@@ -57,6 +57,52 @@ function groupStakingItems (stakingItems: StakingItem[]) {
   return groupedStakingItems;
 }
 
+function groupStakingRewardItems (stakingRewardItems: StakingRewardItem[]) {
+  const itemGroups: string[] = [];
+
+  for (const stakingRewardItem of stakingRewardItems) {
+    const group = `${stakingRewardItem.chain}-${stakingRewardItem.type}`;
+
+    if (!itemGroups.includes(group)) {
+      itemGroups.push(group);
+    }
+  }
+
+  const groupedStakingRewardItems: StakingRewardItem[] = [];
+
+  for (const group of itemGroups) {
+    const [chain, type] = group.split('-');
+
+    const groupedStakingRewardItem: Record<string, any> = {};
+
+    let groupedLatestReward = 0;
+    let groupedTotalReward = 0;
+    let groupedTotalSlash = 0;
+
+    for (const stakingRewardItem of stakingRewardItems) {
+      if (stakingRewardItem.type === type && stakingRewardItem.chain === chain) {
+        groupedStakingRewardItem.state = stakingRewardItem.state;
+        groupedStakingRewardItem.name = stakingRewardItem.name;
+        groupedStakingRewardItem.chain = stakingRewardItem.chain;
+        groupedStakingRewardItem.type = stakingRewardItem.type;
+        groupedStakingRewardItem.address = ALL_ACCOUNT_KEY;
+
+        groupedLatestReward += parseFloat(stakingRewardItem.latestReward as string);
+        groupedTotalReward += parseFloat(stakingRewardItem.totalReward as string);
+        groupedTotalSlash += parseFloat(stakingRewardItem.totalSlash as string);
+      }
+    }
+
+    groupedStakingRewardItem.latestReward = groupedLatestReward.toString();
+    groupedStakingRewardItem.totalReward = groupedTotalReward.toString();
+    groupedStakingRewardItem.totalSlash = groupedTotalSlash.toString();
+
+    groupedStakingRewardItems.push(groupedStakingRewardItem as StakingRewardItem);
+  }
+
+  return groupedStakingRewardItems;
+}
+
 export default function useFetchStaking (networkKey: string): StakingType {
   const { currentAccount: { account }, networkMap, price: priceReducer, stakeUnlockingInfo: stakeUnlockingInfoJson, staking: stakingReducer, stakingReward: stakingRewardReducer } = useSelector((state: RootState) => state);
 
@@ -65,7 +111,7 @@ export default function useFetchStaking (networkKey: string): StakingType {
   const parsedPriceMap: Record<string, number> = {};
 
   const stakingItems = stakingReducer.details;
-  const stakingRewardList = stakingRewardReducer.details;
+  let stakingRewardList = stakingRewardReducer.details;
   const unlockingItems = stakeUnlockingInfoJson.details;
   const stakeUnlockingTimestamp = stakeUnlockingInfoJson.timestamp;
 
@@ -91,6 +137,7 @@ export default function useFetchStaking (networkKey: string): StakingType {
 
   if (isAccountAll) {
     readyStakingItems = groupStakingItems(readyStakingItems);
+    stakingRewardList = groupStakingRewardItems(stakingRewardList);
   }
 
   if (!showAll) {
@@ -109,7 +156,7 @@ export default function useFetchStaking (networkKey: string): StakingType {
     const stakingDataType = { staking: stakingItem } as StakingDataType;
 
     for (const reward of stakingRewardList) {
-      if (stakingItem.chain === reward.chain && reward.state === APIItemState.READY) {
+      if (stakingItem.chain === reward.chain && reward.state === APIItemState.READY && stakingItem.type === reward.type && stakingItem.address === reward.address) {
         stakingDataType.reward = reward;
       }
     }

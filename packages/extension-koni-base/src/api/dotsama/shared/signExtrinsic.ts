@@ -90,7 +90,13 @@ export const signExtrinsic = async ({ address, apiProps, callback, extrinsic, id
     signer = new KeyringSigner({ registry: apiProps.registry, keyPair: pair });
   }
 
-  await extrinsic.signAsync(address, { signer: signer });
+  if (type === SignerType.PASSWORD) {
+    const pair = keyring.getPair(address);
+
+    await extrinsic.signAsync(pair);
+  } else {
+    await extrinsic.signAsync(address, { signer: signer });
+  }
 
   return null;
 };

@@ -57,7 +57,7 @@ function AuthTransaction ({ balanceFormat,
   const account = useGetAccountByAddress(requestPayload.from);
 
   const _onCancel = useCallback(async () => {
-    if (isBusy) {
+    if (!isBusy) {
       await handlerReject(externalId);
 
       onCancel();

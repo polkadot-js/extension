@@ -48,6 +48,7 @@ export const signAndSendExtrinsic = async ({ address,
   updateResponseTxResult,
   updateState }: SignAndSendExtrinsicProps) => {
   if (extrinsic !== null) {
+    console.log(extrinsic.toHex());
     const passwordError = await signExtrinsic(type === SignerType.PASSWORD
       ? {
         address: address,
@@ -76,11 +77,12 @@ export const signAndSendExtrinsic = async ({ address,
 
     try {
       await sendExtrinsic({
-        callback,
-        extrinsic,
-        txState,
-        updateState,
-        updateResponseTxResult
+        apiProps: apiProps,
+        callback: callback,
+        extrinsic: extrinsic,
+        txState: txState,
+        updateResponseTxResult: updateResponseTxResult,
+        updateState: updateState
       });
 
       if (type === SignerType.PASSWORD) {
@@ -93,6 +95,8 @@ export const signAndSendExtrinsic = async ({ address,
       // eslint-disable-next-line @typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-member-access
       if (e.toString().message.includes('Invalid Transaction: Inability to pay some fees , e.g. account balance too low')) {
         txState.errors = [{ code: BasicTxErrorCode.BALANCE_TO_LOW, message: (e as Error).message }];
+      } else {
+        txState.errors = [{ code: BasicTxErrorCode.INVALID_PARAM, message: (e as Error).message }];
       }
 
       txState.txError = true;

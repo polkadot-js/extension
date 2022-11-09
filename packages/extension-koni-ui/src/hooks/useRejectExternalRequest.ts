@@ -13,7 +13,7 @@ interface Result {
 
 export const useRejectExternalRequest = (): Result => {
   const { cleanQrState } = useContext(QrSignerContext);
-  const { clearExternalState } = useContext(ExternalRequestContext);
+  const { cleanExternalState } = useContext(ExternalRequestContext);
 
   const handlerReject = useCallback(async (externalId: string) => {
     if (externalId) {
@@ -21,8 +21,8 @@ export const useRejectExternalRequest = (): Result => {
     }
 
     cleanQrState();
-    clearExternalState();
-  }, [cleanQrState, clearExternalState]);
+    cleanExternalState();
+  }, [cleanQrState, cleanExternalState]);
 
   return {
     handlerReject: handlerReject

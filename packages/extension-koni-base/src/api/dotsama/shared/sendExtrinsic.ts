@@ -1,7 +1,7 @@
 // Copyright 2019-2022 @subwallet/extension-koni-base authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { BasicTxResponse, ExternalRequestPromise, ExternalRequestPromiseStatus, HandleBasicTx } from '@subwallet/extension-base/background/KoniTypes';
+import { ApiProps, BasicTxResponse, ExternalRequestPromise, ExternalRequestPromiseStatus, HandleBasicTx, TransferErrorCode } from '@subwallet/extension-base/background/KoniTypes';
 
 import { SubmittableExtrinsic } from '@polkadot/api/types';
 import { EventRecord } from '@polkadot/types/interfaces';
@@ -12,9 +12,10 @@ interface SendExtrinsicProps {
   txState: BasicTxResponse;
   updateState?: (promise: Partial<ExternalRequestPromise>) => void;
   updateResponseTxResult?: (response: BasicTxResponse, records: EventRecord[]) => void;
+  apiProps: ApiProps;
 }
 
-export const sendExtrinsic = async ({ callback, extrinsic, txState, updateResponseTxResult, updateState }: SendExtrinsicProps) => {
+export const sendExtrinsic = async ({ apiProps, callback, extrinsic, txState, updateResponseTxResult, updateState }: SendExtrinsicProps) => {
   const unsubscribe = await extrinsic.send((result) => {
     if (!result || !result.status) {
       return;
@@ -22,16 +23,63 @@ export const sendExtrinsic = async ({ callback, extrinsic, txState, updateRespon
 
     if (result.status.isInBlock || result.status.isFinalized) {
       txState.isFinalized = result.status.isFinalized;
-      updateResponseTxResult && updateResponseTxResult(txState, result.events);
+
+      if (result.status.isInBlock) {
+        updateResponseTxResult && updateResponseTxResult(txState, result.events);
+      }
 
       result.events
         .filter(({ event: { section } }) => section === 'system')
-        .forEach(({ event: { method } }): void => {
+        .forEach(({ event: { method, data: [error] } }): void => {
           txState.extrinsicHash = extrinsic.hash.toHex();
           callback(txState);
 
           if (method === 'ExtrinsicFailed') {
             txState.status = false;
+
+            txState.txError = true;
+
+            // @ts-ignore
+            if (error.isModule) {
+              const api = apiProps.api;
+
+              try {
+                // @ts-ignore
+                // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
+                const decoded = api.registry.findMetaError(error.asModule);
+                const { docs, method, section } = decoded;
+
+                const errorMessage = docs.join(' ');
+
+                console.log(`${section}.${method}: ${errorMessage}`);
+                // response.data = {
+                //   section,
+                //   method,
+                //   message: errorMessage
+                // };
+                txState.errors?.push({
+                  code: TransferErrorCode.TRANSFER_ERROR,
+                  message: errorMessage
+                });
+              } catch (e) {
+                const errorMessage = error.toString();
+
+                txState.errors?.push({
+                  code: TransferErrorCode.TRANSFER_ERROR,
+                  message: errorMessage
+                });
+              }
+            } else {
+              // Other, CannotLookup, BadOrigin, no extra info
+              const errorMessage = error.toString();
+
+              console.log(errorMessage);
+              txState.errors?.push({
+                code: TransferErrorCode.TRANSFER_ERROR,
+                message: errorMessage
+              });
+            }
+
             callback(txState);
             updateState && updateState({ status: ExternalRequestPromiseStatus.FAILED });
           } else if (method === 'ExtrinsicSuccess') {

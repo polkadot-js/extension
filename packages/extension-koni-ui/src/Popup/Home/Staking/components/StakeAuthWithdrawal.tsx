@@ -61,9 +61,9 @@ function StakeAuthWithdrawal ({ address, amount, className, hideModal, networkKe
 
   }), [address, networkKey, nextWithdrawalAction, targetValidator]);
 
-  const onFail = useCallback((error: string, extrinsicHash?: string) => {
+  const onFail = useCallback((errors: string[], extrinsicHash?: string) => {
     setIsTxSuccess(false);
-    setTxError(error);
+    setTxError(errors[0]);
     setShowResult(true);
     setExtrinsicHash(extrinsicHash || '');
     setWithdrawalTimestamp(actionTimestamp);

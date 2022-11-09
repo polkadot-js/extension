@@ -57,9 +57,9 @@ function StakeAuthCancelCompoundRequest ({ address, balanceError, className, fee
     }
   }, [externalId, handlerReject, isBusy, setShowAuth]);
 
-  const onFail = useCallback((error: string, extrinsicHash?: string) => {
+  const onFail = useCallback((errors: string[], extrinsicHash?: string) => {
     setIsTxSuccess(false);
-    setTxError(error);
+    setTxError(errors[0]);
     setShowAuth(false);
     setShowResult(true);
     setExtrinsicHash(extrinsicHash || '');

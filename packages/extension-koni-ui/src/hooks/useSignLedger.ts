@@ -1,7 +1,7 @@
 // Copyright 2019-2022 @subwallet/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { LedgerState } from '@subwallet/extension-base/../../../extension-koni-base/src/signers/types';
+import { LedgerState } from '@subwallet/extension-base/signers/types';
 import { ExternalRequestContext } from '@subwallet/extension-koni-ui/contexts/ExternalRequestContext';
 import { useLedger } from '@subwallet/extension-koni-ui/hooks/useLedger';
 import { resolveExternalRequest } from '@subwallet/extension-koni-ui/messaging';

@@ -1,7 +1,6 @@
 // Copyright 2019-2022 @polkadot/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { BasicTxError } from '@subwallet/extension-base/background/KoniTypes';
 import { AccountJson } from '@subwallet/extension-base/background/types';
 
 import { Theme } from '../components/themes';
@@ -57,7 +56,7 @@ export interface TxResult {
 export interface TransferResultType {
   isShowTxResult: boolean;
   isTxSuccess: boolean;
-  txError?: Array<BasicTxError>;
+  txError?: string[];
   extrinsicHash?: string;
 }
 

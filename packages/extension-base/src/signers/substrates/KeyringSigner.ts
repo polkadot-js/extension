@@ -24,7 +24,8 @@ export default class KeyringSigner implements Signer {
 
   public async signPayload (payload: SignerPayloadJSON): Promise<SignerResult> {
     return new Promise((resolve) => {
-      const wrapper = this.#registry.createType('ExtrinsicPayload', payload);
+      const wrapper = this.#registry.createType('ExtrinsicPayload', payload, { version: payload.version });
+      console.log(wrapper.toHuman());
 
       const signature = wrapper.sign(this.#pair).signature;
 

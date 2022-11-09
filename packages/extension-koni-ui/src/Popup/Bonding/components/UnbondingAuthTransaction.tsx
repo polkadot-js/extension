@@ -63,9 +63,9 @@ function UnbondingAuthTransaction ({ amount, balanceError, className, fee, handl
     }
   }, [externalId, handleRevertClickNext, handlerReject, isBusy, setShowConfirm]);
 
-  const onFail = useCallback((error: string, extrinsicHash?: string) => {
+  const onFail = useCallback((errors: string[], extrinsicHash?: string) => {
     setIsTxSuccess(false);
-    setTxError(error);
+    setTxError(errors[0]);
     setShowConfirm(false);
     setShowResult(true);
     setExtrinsicHash(extrinsicHash || '');

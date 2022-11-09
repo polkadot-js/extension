@@ -59,9 +59,9 @@ function StakeAuthClaimReward ({ address, className, hideModal, networkKey }: Pr
     }
   }, [isBusy, handlerReject, externalId, hideModal]);
 
-  const onFail = useCallback((error: string, extrinsicHash?: string) => {
+  const onFail = useCallback((errors: string[], extrinsicHash?: string) => {
     setIsTxSuccess(false);
-    setTxError(error);
+    setTxError(errors[0]);
     setShowResult(true);
     setExtrinsicHash(extrinsicHash || '');
   }, [setExtrinsicHash, setIsTxSuccess, setShowResult, setTxError]);

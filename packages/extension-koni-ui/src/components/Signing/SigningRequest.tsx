@@ -20,15 +20,17 @@ interface Props<T extends BaseRequestSign, V extends BasicTxResponse> {
   account?: AccountJson | null;
   balanceError?: boolean;
   children: JSX.Element;
+  detailError?: boolean;
   handleSignLedger?: (params: ExternalRequestSign<T>, callback: HandleTxResponse<V>) => Promise<V>;
   handleSignPassword?: (params: PasswordRequestSign<T>, callback: HandleTxResponse<V>) => Promise<V>;
   handleSignQr?: (params: ExternalRequestSign<T>, callback: HandleTxResponse<V>) => Promise<V>;
   hideConfirm: () => Promise<void> | void;
+  message: string;
   network?: NetworkJson | null;
-  onFail: (error: string, extrinsicHash?: string) => void;
+  onAfterSuccess?: (res: V) => void;
+  onFail: (errors: string[], extrinsicHash?: string) => void;
   onSuccess: (extrinsicHash: string) => void;
   params: T;
-  message: string;
 }
 
 const Wrapper = styled.div`
@@ -49,12 +51,14 @@ const ExternalContainer = styled.div`
 const SigningRequest = <T extends BaseRequestSign, V extends BasicTxResponse>({ account,
   balanceError,
   children,
+  detailError,
   handleSignLedger,
   handleSignPassword,
   handleSignQr,
   hideConfirm,
   message,
   network,
+  onAfterSuccess,
   onFail,
   onSuccess,
   params }: Props<T, V>) => {
@@ -83,7 +87,7 @@ const SigningRequest = <T extends BaseRequestSign, V extends BasicTxResponse>({ 
     if (balanceError && !data.passwordError) {
       setBusy(false);
       onErrors(['Your balance is too low to cover fees']);
-      onFail('Your balance is too low to cover fees');
+      onFail(['Your balance is too low to cover fees']);
       cleanQrState();
       cleanExternalState();
 
@@ -93,7 +97,7 @@ const SigningRequest = <T extends BaseRequestSign, V extends BasicTxResponse>({ 
     if (data.txError && data.status === undefined) {
       setBusy(false);
       onErrors(['Encountered an error, please try again.']);
-      onFail('Encountered an error, please try again.', data.extrinsicHash);
+      onFail(['Encountered an error, please try again.'], data.extrinsicHash);
       cleanQrState();
       cleanExternalState();
 
@@ -105,14 +109,17 @@ const SigningRequest = <T extends BaseRequestSign, V extends BasicTxResponse>({ 
 
       if (data.status) {
         onSuccess(data.extrinsicHash as string);
+        onAfterSuccess && onAfterSuccess(data);
       } else {
-        onFail('Error submitting transaction', data.extrinsicHash);
+        const errors = (detailError && data.errors) ? data.errors.map((e) => e.message) : ['Error submitting transaction'];
+
+        onFail(errors, data.extrinsicHash);
       }
 
       cleanQrState();
       cleanExternalState();
     }
-  }, [balanceError, cleanExternalState, cleanQrState, onErrors, onFail, onSuccess, setBusy, setPasswordError]);
+  }, [balanceError, cleanExternalState, cleanQrState, detailError, onAfterSuccess, onErrors, onFail, onSuccess, setBusy, setPasswordError]);
 
   // Error
 
@@ -239,12 +246,12 @@ const SigningRequest = <T extends BaseRequestSign, V extends BasicTxResponse>({ 
   const renderContent = useCallback(() => {
     switch (signMode) {
       case SIGN_MODE.QR:
-        if (network && handleSignQr) {
+        if (handleSignQr) {
           return (
             <Wrapper>
               <ExternalContainer>
                 <QrRequest
-                  genesisHash={network.genesisHash}
+                  genesisHash={network?.genesisHash || ''}
                   handlerStart={onSubmitQr}
                 >
                   { children }
@@ -257,13 +264,13 @@ const SigningRequest = <T extends BaseRequestSign, V extends BasicTxResponse>({ 
         }
 
       case SIGN_MODE.LEDGER:
-        if (network && handleSignLedger) {
+        if (handleSignLedger) {
           return (
             <Wrapper>
               <ExternalContainer>
                 <LedgerRequest
                   account={account}
-                  genesisHash={network.genesisHash}
+                  genesisHash={network?.genesisHash || ''}
                   handlerSignLedger={onSubmitLedger}
                 >
                   { children }

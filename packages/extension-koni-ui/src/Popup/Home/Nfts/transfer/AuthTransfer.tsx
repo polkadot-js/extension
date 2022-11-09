@@ -13,6 +13,7 @@ import { SIGN_MODE } from '@subwallet/extension-koni-ui/constants/signing';
 import { ExternalRequestContext } from '@subwallet/extension-koni-ui/contexts/ExternalRequestContext';
 import { QrSignerContext, QrContextState, QrStep } from '@subwallet/extension-koni-ui/contexts/QrSignerContext';
 import { useGetSignMode } from '@subwallet/extension-koni-ui/hooks/useGetSignMode';
+import useGetNetworkJson from '@subwallet/extension-koni-ui/hooks/screen/home/useGetNetworkJson';
 import { useRejectExternalRequest } from '@subwallet/extension-koni-ui/hooks/useRejectExternalRequest';
 import useToast from '@subwallet/extension-koni-ui/hooks/useToast';
 import useTranslation from '@subwallet/extension-koni-ui/hooks/useTranslation';
@@ -75,7 +76,8 @@ function AuthTransfer ({ chain, className, collectionId, nftItem, recipientAddre
   const web3BalanceError = web3TransferParams !== null ? web3TransferParams.balanceError : false;
 
   const [balanceError] = useState(substrateTransferParams !== null ? substrateBalanceError : web3BalanceError);
-  const { currentAccount: account, currentNetwork } = useSelector((state: RootState) => state);
+  const { currentAccount: account } = useSelector((state: RootState) => state);
+  const currentNetwork = useGetNetworkJson(chain);
 
   const signMode = useGetSignMode(account.account);
 
@@ -427,7 +429,7 @@ function AuthTransfer ({ chain, className, collectionId, nftItem, recipientAddre
               isDisabled={true}
               isSetDefaultValue={true}
               label={t<string>('Send from account')}
-              networkPrefix={currentNetwork.networkPrefix}
+              networkPrefix={currentNetwork.ss58Format}
               type='account'
               withEllipsis
             />
@@ -452,7 +454,7 @@ function AuthTransfer ({ chain, className, collectionId, nftItem, recipientAddre
               isDisabled={true}
               isSetDefaultValue={true}
               label={t<string>('Send from account')}
-              networkPrefix={currentNetwork.networkPrefix}
+              networkPrefix={currentNetwork.ss58Format}
               type='account'
               withEllipsis
             />
@@ -489,7 +491,7 @@ function AuthTransfer ({ chain, className, collectionId, nftItem, recipientAddre
           </div>
         );
     }
-  }, [account, currentNetwork.networkPrefix, errorArr, genesisHash, handleSignAndSubmit, handlerClearError, handlerCreateQr, handlerErrorQr, handlerSendLedger, loading, passwordError, senderAccount.address, signMode, substrateGas, t, themeContext.secondaryColor, web3Gas]);
+  }, [account, currentNetwork.ss58Format, errorArr, genesisHash, handleSignAndSubmit, handlerClearError, handlerCreateQr, handlerErrorQr, handlerSendLedger, loading, passwordError, senderAccount.address, signMode, substrateGas, t, themeContext.secondaryColor, web3Gas]);
 
   return (
     <div className={className}>

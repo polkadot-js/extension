@@ -9,7 +9,7 @@ import { parseEVMTransaction, qrSignEvm, qrSignSubstrate } from '@subwallet/exte
 import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { CompletedParsedData, EthereumParsedData, MessageQRInfo, MultiFramesInfo, QrInfo, SubstrateCompletedParsedData, SubstrateMessageParsedData, SubstrateTransactionParsedData, TxQRInfo } from '@subwallet/extension-koni-ui/types/scanner';
 import { constructDataFromBytes, encodeNumber, parseSubstratePayload } from '@subwallet/extension-koni-ui/util/decoders';
-import { getNetworkJsonByGenesisHash } from '@subwallet/extension-koni-ui/util/getNetworkJsonByGenesisHash';
+import { getNetworkJsonByGenesisHash, getNetworkJsonByInfo } from '@subwallet/extension-koni-ui/util/getNetworkJsonByGenesisHash';
 import { isEthereumCompletedParsedData, isSubstrateMessageParsedData } from '@subwallet/extension-koni-ui/util/scanner/sign';
 import BigN from 'bignumber.js';
 import React, { useCallback, useContext, useReducer } from 'react';
@@ -352,7 +352,8 @@ export function ScannerContextProvider ({ children }: ScannerContextProviderProp
   const signDataLegacy = useCallback(async (savePass: boolean, password = ''): Promise<void> => {
     const { dataToSign, evmChainId, genesisHash, isEthereum, rawPayload, senderAddress, type } = state;
     const sender = !!senderAddress && getAccountByAddress(networkMap, senderAddress, genesisHash);
-    const senderNetwork = getNetworkJsonByGenesisHash(networkMap, genesisHash);
+    const info: undefined | number | string = isEthereum ? evmChainId : genesisHash;
+    const senderNetwork = getNetworkJsonByInfo(networkMap, isEthereum, info);
 
     if (!senderNetwork || !senderNetwork.active) {
       throw new Error('Signing Error: network could not be found.');

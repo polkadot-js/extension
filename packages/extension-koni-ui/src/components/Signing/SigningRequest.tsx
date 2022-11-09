@@ -298,12 +298,22 @@ const SigningRequest = <T extends BaseRequestSign, V extends BasicTxResponse>({ 
     };
   }, [cleanSigningState]);
 
-  return (
-    <>
-      {renderContent()}
-    </>
-  );
+  return renderContent();
 };
 
-export default React.memo(styled(SigningRequest)(({ theme }: Props<BaseRequestSign, BasicTxResponse>) => `
-`));
+export default React.memo(SigningRequest);
+//
+// export default React.memo(styled(SigningRequest)`
+//   padding-left: 15px;
+//   padding-right: 15px;
+//   display: flex;
+//   flex-direction: column;
+//   flex: 1;
+//
+//   .external-wrapper {
+//     display: flex;
+//     flex: 1;
+//     flex-direction: column;
+//     margin: -15px -15px 0;
+//   }
+// `);

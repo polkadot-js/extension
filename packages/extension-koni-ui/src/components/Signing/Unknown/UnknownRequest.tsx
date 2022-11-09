@@ -28,16 +28,16 @@ const UnknownRequest = ({ children,
     <div className={CN(className)}>
       { children }
 
-      <div className='bonding-auth__separator' />
+      <div className='unknown-signing__separator' />
       <Warning
-        className='auth-transaction-error'
+        className='signing-error'
       >
         {t('This type account does not support this feature')}
       </Warning>
 
-      <div className={'bonding-auth-btn-container'}>
+      <div className={'unknown-signing-btn-container'}>
         <Button
-          className={'bonding-auth-cancel-button'}
+          className={'unknown-signing-cancel-button'}
           onClick={hideConfirm}
         >
           {t('Reject')}
@@ -54,4 +54,32 @@ const UnknownRequest = ({ children,
 };
 
 export default React.memo(styled(UnknownRequest)(({ theme }: Props) => `
+  .signing-error {
+    margin-top: 10px;
+  }
+
+  .unknown-signing__separator {
+    margin-top: 30px;
+    margin-bottom: 18px;
+  }
+
+  .unknown-signing__separator:before {
+    content: "";
+    height: 1px;
+    display: block;
+    background: ${theme.boxBorderColor};
+  }
+
+  .unknown-signing-btn-container {
+    margin-top: 20px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 20px;
+  }
+
+  .unknown-signing-cancel-button {
+    color: ${theme.textColor3};
+    background: ${theme.buttonBackground1};
+  }
 `));

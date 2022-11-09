@@ -3,39 +3,30 @@
 
 import { faCircleCheck } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { LedgerState } from '@subwallet/extension-base/../../../../../extension-koni-base/src/signers/types';
-import { BaseTxError, BasicExternalTxResponse, BasicTxError, BasicTxResponse, BasicTxResponse, ValidatorInfo } from '@subwallet/extension-base/background/KoniTypes';
-import { InputWithLabel } from '@subwallet/extension-koni-ui/components';
+import { BondingSubmitParams, ValidatorInfo } from '@subwallet/extension-base/background/KoniTypes';
 import { BalanceVal } from '@subwallet/extension-koni-ui/components/Balance';
 import FeeValue from '@subwallet/extension-koni-ui/components/Balance/FeeValue';
+import SigningRequest from '@subwallet/extension-koni-ui/components/Signing/SigningRequest';
 import { BalanceFormatType } from '@subwallet/extension-koni-ui/components/types';
-import { SIGN_MODE } from '@subwallet/extension-koni-ui/constants/signing';
 import { ExternalRequestContext } from '@subwallet/extension-koni-ui/contexts/ExternalRequestContext';
-import { QrSignerContext, QrContextState, QrStep } from '@subwallet/extension-koni-ui/contexts/QrSignerContext';
+import { SigningContext } from '@subwallet/extension-koni-ui/contexts/SigningContext';
 import useGetFreeBalance from '@subwallet/extension-koni-ui/hooks/screen/bonding/useGetFreeBalance';
 import useGetNetworkJson from '@subwallet/extension-koni-ui/hooks/screen/home/useGetNetworkJson';
-import { useGetSignMode } from '@subwallet/extension-koni-ui/hooks/useGetSignMode';
 import { useRejectExternalRequest } from '@subwallet/extension-koni-ui/hooks/useRejectExternalRequest';
-import useToast from '@subwallet/extension-koni-ui/hooks/useToast';
-import useTranslation from '@subwallet/extension-koni-ui/hooks/useTranslation';
 import { makeBondingLedger, makeBondingQr, submitBonding } from '@subwallet/extension-koni-ui/messaging';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { toShort } from '@subwallet/extension-koni-ui/util';
-import React, { useCallback, useContext, useMemo, useState } from 'react';
+import React, { useCallback, useContext, useMemo } from 'react';
 import { useSelector } from 'react-redux';
 import styled from 'styled-components';
 
 import { isEthereumAddress } from '@polkadot/util-crypto';
 
-const Spinner = React.lazy(() => import('@subwallet/extension-koni-ui/components/Spinner'));
 const Identicon = React.lazy(() => import('@subwallet/extension-koni-ui/components/Identicon'));
-const Button = React.lazy(() => import('@subwallet/extension-koni-ui/components/Button'));
 const Modal = React.lazy(() => import('@subwallet/extension-koni-ui/components/Modal'));
 const ReceiverInputAddress = React.lazy(() => import('@subwallet/extension-koni-ui/components/ReceiverInputAddress'));
 const Tooltip = React.lazy(() => import('@subwallet/extension-koni-ui/components/Tooltip'));
-const QrRequest = React.lazy(() => import('@subwallet/extension-koni-ui/components/Signing/QR/QrRequest'));
-const LedgerRequest = React.lazy(() => import('@subwallet/extension-koni-ui/components/Signing/Ledger/LedgerRequest'));
 
 interface Props extends ThemeProps {
   amount: number,
@@ -55,12 +46,10 @@ interface Props extends ThemeProps {
 }
 
 function BondingAuthTransaction ({ amount, balanceError, bondedValidators, className, fee, handleRevertClickNext, isBondedBefore, selectedNetwork, setExtrinsicHash, setIsTxSuccess, setShowConfirm, setShowResult, setTxError, validatorInfo }: Props): React.ReactElement<Props> {
-  const { t } = useTranslation();
-  const { show } = useToast();
   const { handlerReject } = useRejectExternalRequest();
 
-  const { clearExternalState, externalState: { externalId }, updateExternalState } = useContext(ExternalRequestContext);
-  const { cleanQrState, updateQrState } = useContext(QrSignerContext);
+  const { externalState: { externalId } } = useContext(ExternalRequestContext);
+  const { signingState: { isBusy } } = useContext(SigningContext);
 
   const networkJson = useGetNetworkJson(selectedNetwork);
   const freeBalance = useGetFreeBalance(selectedNetwork);
@@ -70,247 +59,38 @@ function BondingAuthTransaction ({ amount, balanceError, bondedValidators, class
   }, [networkJson]);
   const { currentAccount: { account }, networkMap } = useSelector((state: RootState) => state);
 
-  const [password, setPassword] = useState<string>('');
-  const [loading, setLoading] = useState(false);
-  const [passwordError, setPasswordError] = useState<string | null>('');
-  const [errorArr, setErrorArr] = useState<string[]>([]);
-
-  const signMode = useGetSignMode(account);
-
-  const _onChangePass = useCallback((value: string) => {
-    setPassword(value);
-    setPasswordError(null);
-  }, []);
+  const params = useMemo((): BondingSubmitParams => ({
+    networkKey: selectedNetwork,
+    nominatorAddress: account?.address as string,
+    amount: amount,
+    validatorInfo: validatorInfo,
+    isBondedBefore: isBondedBefore,
+    bondedValidators: bondedValidators
+  }), [account?.address, amount, bondedValidators, isBondedBefore, selectedNetwork, validatorInfo]);
 
   const hideConfirm = useCallback(async () => {
-    if (!loading) {
+    if (!isBusy) {
       await handlerReject(externalId);
 
       handleRevertClickNext();
       setShowConfirm(false);
     }
-  }, [loading, handlerReject, externalId, handleRevertClickNext, setShowConfirm]);
+  }, [isBusy, handlerReject, externalId, handleRevertClickNext, setShowConfirm]);
 
-  const handleOnSubmit = useCallback(async () => {
-    await submitBonding({
-      networkKey: selectedNetwork,
-      nominatorAddress: account?.address as string,
-      amount,
-      validatorInfo,
-      password,
-      isBondedBefore,
-      bondedValidators
-    }, (data) => {
-      if (data.passwordError) {
-        show(data.passwordError);
-        setPasswordError(data.passwordError);
-        setLoading(false);
-      }
+  const onFail = useCallback((error: string, extrinsicHash?: string) => {
+    setIsTxSuccess(true);
+    setShowConfirm(false);
+    setShowResult(true);
+    setTxError(error);
+    setExtrinsicHash(extrinsicHash || '');
+  }, [setExtrinsicHash, setIsTxSuccess, setShowConfirm, setShowResult, setTxError]);
 
-      if (balanceError && !data.passwordError) {
-        setLoading(false);
-        show('Your balance is too low to cover fees');
-
-        return;
-      }
-
-      if (data.txError && data.txError) {
-        if (data.errorMessage && data.errorMessage === BasicTxError.BalanceTooLow) {
-          show('Your balance is too low to cover fees');
-        } else {
-          show('Encountered an error, please try again.');
-        }
-
-        setLoading(false);
-
-        return;
-      }
-
-      if (data.status) {
-        setLoading(false);
-
-        if (data.status) {
-          setIsTxSuccess(true);
-          setShowConfirm(false);
-          setShowResult(true);
-          setExtrinsicHash(data.extrinsicHash as string);
-        } else {
-          setIsTxSuccess(false);
-          setTxError('Error submitting transaction');
-          setShowConfirm(false);
-          setShowResult(true);
-          setExtrinsicHash(data.extrinsicHash as string);
-        }
-      }
-    });
-  }, [account?.address, amount, balanceError, bondedValidators, isBondedBefore, password, selectedNetwork, setExtrinsicHash, setIsTxSuccess, setShowConfirm, setShowResult, setTxError, show, validatorInfo]);
-
-  const handleConfirm = useCallback(() => {
-    setLoading(true);
-
-    // eslint-disable-next-line @typescript-eslint/no-misused-promises
-    setTimeout(async () => {
-      await handleOnSubmit();
-    }, 10);
-  }, [handleOnSubmit]);
-
-  // External
-
-  const handlerResponseError = useCallback((errors: BaseTxError[]) => {
-    const errorMessage = errors.map((err) => err.message);
-
-    setErrorArr(errorMessage);
-
-    if (errorMessage && errorMessage.length) {
-      setLoading(false);
-    }
-  }, []);
-
-  const handlerCallbackResponseResult = useCallback((data: BasicExternalTxResponse) => {
-    if (balanceError && !data.passwordError) {
-      setLoading(false);
-      setErrorArr(['Your balance is too low to cover fees']);
-      setIsTxSuccess(false);
-      setTxError('Your balance is too low to cover fees');
-      setShowConfirm(false);
-      setShowResult(true);
-      cleanQrState();
-
-      return;
-    }
-
-    if (data.txError && data.status === undefined) {
-      setErrorArr(['Encountered an error, please try again.']);
-      setLoading(false);
-      setIsTxSuccess(false);
-      setTxError('Encountered an error, please try again.');
-      setShowConfirm(false);
-      setShowResult(false);
-      cleanQrState();
-      clearExternalState();
-
-      return;
-    }
-
-    if (data.status !== undefined) {
-      setLoading(false);
-
-      if (data.status) {
-        setIsTxSuccess(true);
-        setShowConfirm(false);
-        setShowResult(true);
-        setExtrinsicHash(data.transactionHash as string);
-      } else {
-        setIsTxSuccess(false);
-        setTxError('Error submitting transaction');
-        setShowConfirm(false);
-        setShowResult(true);
-        setExtrinsicHash(data.transactionHash as string);
-      }
-
-      cleanQrState();
-      clearExternalState();
-    }
-  }, [balanceError, cleanQrState, clearExternalState, setExtrinsicHash, setIsTxSuccess, setShowConfirm, setShowResult, setTxError]);
-
-  // Qr
-
-  const handlerCallbackResponseResultQr = useCallback((data: BasicTxResponse) => {
-    if (data.qrState) {
-      const state: QrContextState = {
-        ...data.qrState,
-        step: QrStep.DISPLAY_PAYLOAD
-      };
-
-      setLoading(false);
-      updateQrState(state);
-    }
-
-    if (data.externalState) {
-      updateExternalState(data.externalState);
-    }
-
-    if (data.isBusy) {
-      updateQrState({ step: QrStep.SENDING_TX });
-      setLoading(true);
-    }
-
-    handlerCallbackResponseResult(data);
-  }, [handlerCallbackResponseResult, updateExternalState, updateQrState]);
-
-  const handlerOnSubmitQr = useCallback(() => {
-    makeBondingQr({
-      networkKey: selectedNetwork,
-      nominatorAddress: account?.address as string,
-      amount,
-      validatorInfo,
-      isBondedBefore,
-      bondedValidators
-    }, handlerCallbackResponseResultQr)
-      .then(handlerResponseError)
-      .catch((e) => console.log('There is problem when makeBondingQr', e));
-  }, [account?.address, amount, bondedValidators, handlerCallbackResponseResultQr, handlerResponseError, isBondedBefore, selectedNetwork, validatorInfo]);
-
-  const handlerErrorQr = useCallback((error: Error) => {
-    setErrorArr([error.message]);
-  }, []);
-
-  const handlerSubmitQr = useCallback(() => {
-    setLoading(true);
-
-    // eslint-disable-next-line @typescript-eslint/no-misused-promises
-    setTimeout(() => {
-      handlerOnSubmitQr();
-    }, 10);
-  }, [handlerOnSubmitQr]);
-
-  // Ledger
-
-  const handlerCallbackResponseResultLedger = useCallback((handlerSignLedger: (ledgerState: LedgerState) => void, data: BasicTxResponse) => {
-    if (data.ledgerState) {
-      handlerSignLedger(data.ledgerState);
-    }
-
-    if (data.externalState) {
-      updateExternalState(data.externalState);
-    }
-
-    handlerCallbackResponseResult(data);
-  }, [handlerCallbackResponseResult, updateExternalState]);
-
-  const handlerSendLedgerSubstrate = useCallback((handlerSignLedger: (ledgerState: LedgerState) => void) => {
-    const callback = (data: BasicExternalTxResponse) => {
-      handlerCallbackResponseResultLedger(handlerSignLedger, data);
-    };
-
-    makeBondingLedger({
-      networkKey: selectedNetwork,
-      nominatorAddress: account?.address as string,
-      amount,
-      validatorInfo,
-      isBondedBefore,
-      bondedValidators
-    }, callback)
-      .then(handlerResponseError)
-      .catch((e) => console.log('There is problem when makeTransferNftQrSubstrate', e));
-  }, [account?.address, amount, bondedValidators, handlerCallbackResponseResultLedger, handlerResponseError, isBondedBefore, selectedNetwork, validatorInfo]);
-
-  const handlerSendLedger = useCallback((handlerSignLedger: (ledgerState: LedgerState) => void) => {
-    if (loading) {
-      return;
-    }
-
-    setLoading(true);
-
-    // eslint-disable-next-line @typescript-eslint/no-misused-promises
-    setTimeout(() => {
-      const sendSubstrate = () => {
-        handlerSendLedgerSubstrate(handlerSignLedger);
-      };
-
-      sendSubstrate();
-    }, 10);
-  }, [handlerSendLedgerSubstrate, loading]);
+  const onSuccess = useCallback((extrinsicHash: string) => {
+    setIsTxSuccess(true);
+    setShowConfirm(false);
+    setShowResult(true);
+    setExtrinsicHash(extrinsicHash);
+  }, [setExtrinsicHash, setIsTxSuccess, setShowConfirm, setShowResult]);
 
   const renderInfo = useCallback(() => {
     return (
@@ -435,78 +215,6 @@ function BondingAuthTransaction ({ amount, balanceError, bondedValidators, class
     );
   }, [account?.address, amount, balanceFormat, fee, freeBalance, networkJson, networkMap, selectedNetwork, validatorInfo]);
 
-  const renderContent = useCallback(() => {
-    switch (signMode) {
-      case SIGN_MODE.QR:
-        return (
-          <div className='external-wrapper'>
-            <QrRequest
-              errorArr={errorArr}
-              genesisHash={networkJson.genesisHash}
-              handlerStart={handlerSubmitQr}
-              isBusy={loading}
-              onError={handlerErrorQr}
-            >
-              { renderInfo() }
-            </QrRequest>
-          </div>
-        );
-      case SIGN_MODE.LEDGER:
-        return (
-          <div className='external-wrapper'>
-            <LedgerRequest
-              accountMeta={account}
-              errorArr={errorArr}
-              genesisHash={networkJson.genesisHash}
-              handlerSignLedger={handlerSendLedger}
-              isBusy={loading}
-              setBusy={setLoading}
-              setErrorArr={setErrorArr}
-            >
-              { renderInfo() }
-            </LedgerRequest>
-          </div>
-        );
-      case SIGN_MODE.PASSWORD:
-      default:
-        return (
-          <>
-            { renderInfo() }
-
-            <div className='bonding-auth__separator' />
-
-            <InputWithLabel
-              isError={passwordError !== null}
-              label={t<string>('Unlock account with password')}
-              onChange={_onChangePass}
-              type='password'
-              value={password}
-            />
-
-            <div className={'bonding-auth-btn-container'}>
-              <Button
-                className={'bonding-auth-cancel-button'}
-                isDisabled={loading}
-                onClick={hideConfirm}
-              >
-                Reject
-              </Button>
-              <Button
-                isDisabled={password === ''}
-                onClick={handleConfirm}
-              >
-                {
-                  loading
-                    ? <Spinner />
-                    : <span>Confirm</span>
-                }
-              </Button>
-            </div>
-          </>
-        );
-    }
-  }, [_onChangePass, account, errorArr, handleConfirm, handlerErrorQr, handlerSendLedger, handlerSubmitQr, hideConfirm, loading, networkJson.genesisHash, password, passwordError, renderInfo, signMode, t]);
-
   return (
     <div className={className}>
       <Modal>
@@ -526,40 +234,27 @@ function BondingAuthTransaction ({ amount, balanceError, bondedValidators, class
           </div>
         </div>
 
-        <div className={'bonding-auth-container'}>
-          { renderContent() }
-        </div>
+        <SigningRequest
+          account={account}
+          balanceError={balanceError}
+          handleSignLedger={makeBondingLedger}
+          handleSignPassword={submitBonding}
+          handleSignQr={makeBondingQr}
+          hideConfirm={hideConfirm}
+          message={'There is problem when bonding'}
+          network={networkJson}
+          onFail={onFail}
+          onSuccess={onSuccess}
+          params={params}
+        >
+          { renderInfo() }
+        </SigningRequest>
       </Modal>
     </div>
   );
 }
 
 export default React.memo(styled(BondingAuthTransaction)(({ theme }: Props) => `
-  .bonding-auth-cancel-button {
-    color: ${theme.textColor3};
-    background: ${theme.buttonBackground1};
-  }
-
-  .bonding-auth-btn-container {
-    margin-top: 20px;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    gap: 20px;
-  }
-
-  .bonding-auth__separator {
-    margin-top: 30px;
-    margin-bottom: 18px;
-  }
-
-  .bonding-auth__separator:before {
-    content: "";
-    height: 1px;
-    display: block;
-    background: ${theme.boxBorderColor};
-  }
-
   .transaction-info-container {
     margin-top: 10px;
     width: 100%;
@@ -592,14 +287,6 @@ export default React.memo(styled(BondingAuthTransaction)(({ theme }: Props) => `
     margin-top: 5px;
   }
 
-  .bonding-auth-container {
-    padding-left: 15px;
-    padding-right: 15px;
-    display: flex;
-    flex-direction: column;
-    flex: 1;
-  }
-
   .validator-expected-return {
     font-size: 14px;
     color: ${theme.textColor3};
@@ -622,6 +309,7 @@ export default React.memo(styled(BondingAuthTransaction)(({ theme }: Props) => `
   .identityIcon {
     border: 2px solid ${theme.checkDotColor};
   }
+
   .validator-item-container {
     margin-top: 10px;
     display: flex;
@@ -677,12 +365,5 @@ export default React.memo(styled(BondingAuthTransaction)(({ theme }: Props) => `
     flex-direction: column;
     overflow: hidden;
     border: 1px solid ${theme.extensionBorder};
-  }
-
-  .external-wrapper {
-    display: flex;
-    flex: 1;
-    flex-direction: column;
-    margin: -15px -15px 0;
   }
 `));

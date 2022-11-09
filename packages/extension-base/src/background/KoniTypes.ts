@@ -793,9 +793,9 @@ export type HandleTxResponse<T extends BasicTxResponse> = (data: T) => void;
 
 export type BaseRequestSign = Record<string, unknown>;
 
-export type PasswordRequestSign<T> = T & { password: string; };
+export type PasswordRequestSign<T extends BaseRequestSign> = T & { password: string; };
 
-export type ExternalRequestSign<T> = Omit<T, 'password'>;
+export type ExternalRequestSign<T extends BaseRequestSign> = Omit<T, 'password'>;
 
 export enum TransferStep {
   READY = 'ready',
@@ -826,7 +826,7 @@ export interface EvmNftTransaction {
   balanceError: boolean
 }
 
-export interface EvmNftSubmitTransaction {
+export interface EvmNftSubmitTransaction extends BaseRequestSign {
   senderAddress: string,
   recipientAddress: string,
   networkKey: string,
@@ -949,7 +949,7 @@ export interface SubstrateNftTransaction {
   balanceError: boolean;
 }
 
-export interface SubstrateNftSubmitTransaction {
+export interface SubstrateNftSubmitTransaction extends BaseRequestSign {
   params: Record<string, any> | null;
   senderAddress: string;
   recipientAddress: string;
@@ -1288,7 +1288,7 @@ export interface ResponseQrSignEVM {
 
 /// Transfer
 
-export interface RequestCheckTransfer {
+export interface RequestCheckTransfer extends BaseRequestSign{
   networkKey: string,
   from: string,
   to: string,
@@ -1297,7 +1297,7 @@ export interface RequestCheckTransfer {
   token?: string
 }
 
-export interface ResponseCheckTransfer {
+export interface ResponseCheckTransfer{
   errors?: Array<BasicTxError>,
   fromAccountFree: string,
   toAccountFree: string,
@@ -1307,7 +1307,7 @@ export interface ResponseCheckTransfer {
 
 export type RequestTransfer = PasswordRequestSign<RequestCheckTransfer>
 
-export interface RequestCheckCrossChainTransfer {
+export interface RequestCheckCrossChainTransfer extends BaseRequestSign {
   originNetworkKey: string,
   destinationNetworkKey: string,
   from: string,
@@ -1346,7 +1346,7 @@ export interface ChainBondingBasics {
   validatorCount: number
 }
 
-export interface BondingSubmitParams {
+export interface BondingSubmitParams extends BaseRequestSign {
   networkKey: string,
   nominatorAddress: string,
   amount: number,
@@ -1360,7 +1360,7 @@ export type RequestBondingSubmit = PasswordRequestSign<BondingSubmitParams>;
 
 // UnBonding
 
-export interface UnbondingSubmitParams {
+export interface UnbondingSubmitParams extends BaseRequestSign {
   amount: number,
   networkKey: string,
   address: string,
@@ -1373,10 +1373,9 @@ export type RequestUnbondingSubmit = PasswordRequestSign<UnbondingSubmitParams>;
 
 // Withdraw
 
-export interface StakeWithdrawalParams {
+export interface StakeWithdrawalParams extends BaseRequestSign {
   address: string,
   networkKey: string,
-  password?: string,
   validatorAddress?: string,
   action?: string
 }
@@ -1385,11 +1384,10 @@ export type RequestStakeWithdrawal = PasswordRequestSign<StakeWithdrawalParams>;
 
 // Claim
 
-export interface StakeClaimRewardParams {
+export interface StakeClaimRewardParams extends BaseRequestSign {
   address: string,
   networkKey: string,
   validatorAddress?: string,
-  password?: string
 }
 
 export type RequestStakeClaimReward = PasswordRequestSign<StakeClaimRewardParams>;
@@ -1431,7 +1429,7 @@ export interface TuringStakeCompoundResp {
   rawCompoundFee?: number
 }
 
-export interface TuringStakeCompoundParams {
+export interface TuringStakeCompoundParams extends BaseRequestSign {
   address: string,
   collatorAddress: string,
   networkKey: string,
@@ -1441,7 +1439,7 @@ export interface TuringStakeCompoundParams {
 
 export type RequestTuringStakeCompound = PasswordRequestSign<TuringStakeCompoundParams>;
 
-export interface TuringCancelStakeCompoundParams {
+export interface TuringCancelStakeCompoundParams extends BaseRequestSign {
   taskId: string;
   networkKey: string;
   address: string;

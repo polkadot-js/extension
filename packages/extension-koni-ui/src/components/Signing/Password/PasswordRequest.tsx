@@ -42,7 +42,7 @@ const PasswordRequest = ({ children,
     <div className={CN(className)}>
       { children }
 
-      <div className='bonding-auth__separator' />
+      <div className='password-signing__separator' />
 
       <InputWithLabel
         isError={passwordError}
@@ -52,20 +52,20 @@ const PasswordRequest = ({ children,
         value={password}
       />
 
-      <div className={'bonding-auth-btn-container'}>
+      <div className={'password-signing-btn-container'}>
         <Button
-          className={'bonding-auth-cancel-button'}
+          className={'password-signing-cancel-button'}
           isDisabled={isBusy}
           onClick={hideConfirm}
         >
-          Reject
+          {t('Reject')}
         </Button>
         <Button
           isBusy={isBusy}
           isDisabled={!password || passwordError}
           onClick={onSubmit}
         >
-          Confirm
+          {t('Confirm')}
         </Button>
       </div>
     </div>
@@ -73,4 +73,32 @@ const PasswordRequest = ({ children,
 };
 
 export default React.memo(styled(PasswordRequest)(({ theme }: Props) => `
+  .signing-error {
+    margin-top: 10px;
+  }
+
+  .password-signing__separator {
+    margin-top: 30px;
+    margin-bottom: 18px;
+  }
+
+  .password-signing__separator:before {
+    content: "";
+    height: 1px;
+    display: block;
+    background: ${theme.boxBorderColor};
+  }
+
+  .password-signing-btn-container {
+    margin-top: 20px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 20px;
+  }
+
+  .password-signing-cancel-button {
+    color: ${theme.textColor3};
+    background: ${theme.buttonBackground1};
+  }
 `));

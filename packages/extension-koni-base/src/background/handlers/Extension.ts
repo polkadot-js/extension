@@ -3416,7 +3416,7 @@ export default class KoniExtension extends Extension {
     } else {
       const apiProp = state.getDotSamaApi(networkKey);
 
-      const wrapper = apiProp.registry.createType('ExtrinsicPayload', hexToU8a(data));
+      const wrapper = apiProp.api.registry.createType('ExtrinsicPayload', hexToU8a(data));
 
       signed = wrapper.sign(pair).signature;
     }

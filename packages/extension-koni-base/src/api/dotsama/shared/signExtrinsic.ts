@@ -46,6 +46,8 @@ export const signExtrinsic = async ({ address, apiProps, callback, extrinsic, id
 
   let signer: Signer | undefined;
 
+  const registry = apiProps.api.registry;
+
   if (type === SignerType.QR) {
     const qrCallBack = ({ qrState }: {qrState: QrState}) => {
       // eslint-disable-next-line node/no-callback-literal
@@ -65,7 +67,7 @@ export const signExtrinsic = async ({ address, apiProps, callback, extrinsic, id
     };
 
     signer = new QrSigner({
-      registry: apiProps.registry,
+      registry: registry,
       callback: qrCallBack,
       id,
       setState,
@@ -82,21 +84,15 @@ export const signExtrinsic = async ({ address, apiProps, callback, extrinsic, id
       });
     };
 
-    signer = new LedgerSigner(apiProps.registry, ledgerCallback, id, setState);
+    signer = new LedgerSigner(registry, ledgerCallback, id, setState);
   } else if (type === SignerType.PASSWORD) {
     const pair = keyring.getPair(address);
 
     assert(pair, 'Unable to find pair');
-    signer = new KeyringSigner({ registry: apiProps.registry, keyPair: pair });
+    signer = new KeyringSigner({ registry: registry, keyPair: pair });
   }
 
-  if (type === SignerType.PASSWORD) {
-    const pair = keyring.getPair(address);
-
-    await extrinsic.signAsync(pair);
-  } else {
-    await extrinsic.signAsync(address, { signer: signer });
-  }
+  await extrinsic.signAsync(address, { signer: signer });
 
   return null;
 };

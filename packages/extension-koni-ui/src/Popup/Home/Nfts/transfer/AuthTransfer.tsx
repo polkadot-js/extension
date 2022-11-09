@@ -49,7 +49,7 @@ function AuthTransfer ({ chain, className, collectionId, nftItem, recipientAddre
   const network = useGetNetworkJson(chain);
 
   const evmParams = useMemo((): EvmNftSubmitTransaction | null => {
-    return web3TransferParams.rawTx
+    return web3TransferParams?.rawTx
       ? {
         senderAddress: senderAccount.address,
         recipientAddress: recipientAddress,
@@ -57,7 +57,7 @@ function AuthTransfer ({ chain, className, collectionId, nftItem, recipientAddre
         rawTransaction: web3TransferParams.rawTx
       }
       : null;
-  }, [senderAccount.address, chain, recipientAddress, web3TransferParams.rawTx]);
+  }, [senderAccount.address, chain, recipientAddress, web3TransferParams?.rawTx]);
 
   const substrateParams = useMemo((): SubstrateNftSubmitTransaction | null => {
     return substrateTransferParams?.params
@@ -67,7 +67,7 @@ function AuthTransfer ({ chain, className, collectionId, nftItem, recipientAddre
         recipientAddress: recipientAddress
       }
       : null;
-  }, [recipientAddress, senderAccount.address, substrateTransferParams.params]);
+  }, [recipientAddress, senderAccount.address, substrateTransferParams?.params]);
 
   const onAfterSuccess = useCallback((res: NftTransactionResponse) => {
     nftForceUpdate({
@@ -145,7 +145,7 @@ function AuthTransfer ({ chain, className, collectionId, nftItem, recipientAddre
           evmParams && (
             <SigningRequest
               account={senderAccount}
-              balanceError={web3TransferParams.balanceError}
+              balanceError={web3TransferParams?.balanceError}
               handleSignPassword={evmNftSubmitTransaction}
               handleSignQr={makeTransferNftQrEvm}
               hideConfirm={hideConfirm}
@@ -165,7 +165,7 @@ function AuthTransfer ({ chain, className, collectionId, nftItem, recipientAddre
           substrateParams && (
             <SigningRequest
               account={senderAccount}
-              balanceError={web3TransferParams.balanceError}
+              balanceError={substrateTransferParams?.balanceError}
               handleSignLedger={makeTransferNftLedgerSubstrate}
               handleSignPassword={substrateNftSubmitTransaction}
               handleSignQr={makeTransferNftQrSubstrate}

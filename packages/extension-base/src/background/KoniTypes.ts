@@ -1266,8 +1266,6 @@ export interface RequestQrSignSubstrate {
   data: string;
   savePass: boolean;
   password?: string;
-  type: SignerDataType;
-  networkKey: string;
   transactionVersion?: number;
 }
 

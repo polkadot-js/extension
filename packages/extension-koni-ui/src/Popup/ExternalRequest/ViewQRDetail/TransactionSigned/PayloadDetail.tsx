@@ -6,7 +6,7 @@ import { Spinner, Warning } from '@subwallet/extension-koni-ui/components';
 import { ScannerContext, ScannerContextType } from '@subwallet/extension-koni-ui/contexts/ScannerContext';
 import useMetadataChain from '@subwallet/extension-koni-ui/hooks/useMetadataChain';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
-import { DecodedMethod, decodeMethod } from '@subwallet/extension-koni-ui/util/decoders';
+import { DecodedMethod, decodeMethod } from '@subwallet/extension-koni-ui/util/scanner/decoders';
 import BigN from 'bignumber.js';
 import CN from 'classnames';
 import React, { useCallback, useContext, useMemo, useState } from 'react';

@@ -8,16 +8,17 @@ import { AccountContext } from '@subwallet/extension-koni-ui/contexts/index';
 import { parseEVMTransaction, qrSignEvm, qrSignSubstrate } from '@subwallet/extension-koni-ui/messaging';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { CompletedParsedData, EthereumParsedData, MessageQRInfo, MultiFramesInfo, QrInfo, SubstrateCompletedParsedData, SubstrateMessageParsedData, SubstrateTransactionParsedData, TxQRInfo } from '@subwallet/extension-koni-ui/types/scanner';
-import { constructDataFromBytes, encodeNumber, parseSubstratePayload } from '@subwallet/extension-koni-ui/util/decoders';
+import { findAccountByAddress } from '@subwallet/extension-koni-ui/util/account';
 import { getNetworkJsonByInfo } from '@subwallet/extension-koni-ui/util/getNetworkJsonByGenesisHash';
+import { constructDataFromBytes, encodeNumber, parseSubstratePayload } from '@subwallet/extension-koni-ui/util/scanner/decoders';
 import { isEthereumCompletedParsedData, isSubstrateMessageParsedData } from '@subwallet/extension-koni-ui/util/scanner/sign';
 import BigN from 'bignumber.js';
 import React, { useCallback, useContext, useReducer } from 'react';
 import { useSelector } from 'react-redux';
 
 import { GenericExtrinsicPayload } from '@polkadot/types';
-import { hexStripPrefix, isAscii, isHex, isString, isU8a, u8aConcat, u8aToHex } from '@polkadot/util';
-import { keccakAsHex } from '@polkadot/util-crypto';
+import { compactFromU8a, hexStripPrefix, isAscii, isHex, isString, isU8a, u8aConcat, u8aToHex } from '@polkadot/util';
+import { isEthereumAddress, keccakAsHex } from '@polkadot/util-crypto';
 
 type ScannerStoreState = {
   busy: boolean;
@@ -25,7 +26,7 @@ type ScannerStoreState = {
   dataToSign: string | Uint8Array;
   evmChainId?: number;
   genesisHash?: string;
-  isEthereum: boolean;
+  isEthereumStructure: boolean;
   isHash: boolean;
   isOversized: boolean;
   latestFrame: number | null;
@@ -60,7 +61,7 @@ const DEFAULT_STATE: ScannerStoreState = {
   busy: false,
   completedFramesCount: 0,
   dataToSign: '',
-  isEthereum: false,
+  isEthereumStructure: false,
   isHash: false,
   isOversized: false,
   latestFrame: null,
@@ -93,7 +94,7 @@ interface ScannerContextProviderProps {
 }
 
 export function ScannerContextProvider ({ children }: ScannerContextProviderProps): React.ReactElement {
-  const { getAccountByAddress } = useContext(AccountContext);
+  const { accounts } = useContext(AccountContext);
   const { networkMap } = useSelector((state: RootState) => state);
 
   const initialState = DEFAULT_STATE;
@@ -239,24 +240,22 @@ export function ScannerContextProvider ({ children }: ScannerContextProviderProp
         dataToSign = keccakAsHex(txRequest.data.rlp);
       }
     } else {
-      // Need to review
-      // if (txRequest.oversized) {
-      //   dataToSign = txRequest.data.data;
-      // } else {
-      //   const payloadU8a = txRequest.data.data;
-      //   const [offset] = compactFromU8a(payloadU8a);
-      //
-      //   dataToSign = payloadU8a.subarray(offset);
-      // }
+      if (txRequest.oversized) {
+        dataToSign = txRequest.data.data;
+      } else {
+        const payloadU8a = txRequest.data.data;
+        const [offset] = compactFromU8a(payloadU8a);
 
-      dataToSign = txRequest.data.data;
+        dataToSign = payloadU8a.subarray(offset);
+      }
+
       // those 2 only make sense for ETH
       recipientAddress = '';
       tx = '';
       genesisHash = txRequest.data.genesisHash;
     }
 
-    const sender = getAccountByAddress(networkMap, txRequest.data.account, genesisHash);
+    const sender = findAccountByAddress(accounts, txRequest.data.account);
 
     if (!sender) {
       throw new Error(`No private key found for account ${txRequest.data.account}.`);
@@ -276,12 +275,12 @@ export function ScannerContextProvider ({ children }: ScannerContextProviderProp
       ...qrInfo,
       rawPayload: (txRequest as SubstrateTransactionParsedData)?.data.rawPayload,
       genesisHash: genesisHash,
-      isEthereum,
+      isEthereumStructure: isEthereum,
       evmChainId
     });
 
     return qrInfo;
-  }, [networkMap, getAccountByAddress, setBusy]);
+  }, [accounts, setBusy]);
 
   const _setDataToSign = useCallback((signRequest: SubstrateMessageParsedData | EthereumParsedData): MessageQRInfo => {
     setBusy();
@@ -292,7 +291,7 @@ export function ScannerContextProvider ({ children }: ScannerContextProviderProp
     let isHash = false;
     let isOversized = false;
     let dataToSign = '';
-    let isEthereum = false;
+    let isEthereumStructure = false;
 
     if (isSubstrateMessageParsedData(signRequest)) {
       if (signRequest.data.crypto !== 'sr25519') {
@@ -306,10 +305,10 @@ export function ScannerContextProvider ({ children }: ScannerContextProviderProp
     } else {
       dataToSign = signRequest.data.data;
       message = signRequest.data.data;
-      isEthereum = true;
+      isEthereumStructure = true;
     }
 
-    const sender = getAccountByAddress(networkMap, address, genesisHash);
+    const sender = findAccountByAddress(accounts, address);
 
     if (!sender) {
       throw new Error(`No account found in Stylo for: ${address}.`);
@@ -327,11 +326,11 @@ export function ScannerContextProvider ({ children }: ScannerContextProviderProp
     setState({
       ...qrInfo,
       genesisHash: genesisHash,
-      isEthereum
+      isEthereumStructure: isEthereumStructure
     });
 
     return qrInfo;
-  }, [networkMap, getAccountByAddress, setBusy]);
+  }, [accounts, setBusy]);
 
   const setData = useCallback((unsignedData: CompletedParsedData): QrInfo => {
     if (unsignedData !== null) {
@@ -350,13 +349,17 @@ export function ScannerContextProvider ({ children }: ScannerContextProviderProp
 
   // signing data with legacy account.
   const signDataLegacy = useCallback(async (savePass: boolean, password = ''): Promise<void> => {
-    const { dataToSign, evmChainId, genesisHash, isEthereum, rawPayload, senderAddress, type } = state;
-    const sender = !!senderAddress && getAccountByAddress(networkMap, senderAddress, genesisHash);
-    const info: undefined | number | string = isEthereum ? evmChainId : genesisHash;
-    const senderNetwork = getNetworkJsonByInfo(networkMap, isEthereum, info);
+    const { dataToSign, evmChainId, genesisHash, isEthereumStructure, rawPayload, senderAddress, type } = state;
+    const sender = !!senderAddress && findAccountByAddress(accounts, senderAddress);
+    const info: undefined | number | string = isEthereumStructure ? evmChainId : genesisHash;
+    const senderNetwork = getNetworkJsonByInfo(networkMap, isEthereumAddress(senderAddress || ''), isEthereumStructure, info);
 
-    if (!senderNetwork || !senderNetwork.active) {
+    if (!senderNetwork) {
       throw new Error('Signing Error: network could not be found.');
+    }
+
+    if (!senderNetwork.active) {
+      throw new Error('Signing Error: Network is not active.');
     }
 
     if (!sender) {
@@ -368,7 +371,7 @@ export function ScannerContextProvider ({ children }: ScannerContextProviderProp
     }
 
     const signData = async (): Promise<string> => {
-      if (isEthereum) {
+      if (isEthereumStructure) {
         let signable;
 
         if (isU8a(dataToSign)) {
@@ -408,9 +411,7 @@ export function ScannerContextProvider ({ children }: ScannerContextProviderProp
             address: senderAddress,
             data: signable,
             savePass: savePass,
-            password: password,
-            type: type,
-            networkKey: senderNetwork.key
+            password: password
           });
 
           return hexStripPrefix(signature);
@@ -425,7 +426,7 @@ export function ScannerContextProvider ({ children }: ScannerContextProviderProp
       if (type === 'message') {
         return null;
       } else {
-        if (!isEthereum) {
+        if (!isEthereumStructure) {
           if (genesisHash && rawPayload) {
             const _rawPayload = isString(rawPayload) ? rawPayload : u8aToHex(rawPayload);
 
@@ -448,7 +449,7 @@ export function ScannerContextProvider ({ children }: ScannerContextProviderProp
     const [signedData, parsedTx] = await Promise.all([signData(), parseTransaction()]);
 
     setState({ signedData, parsedTx, step: SCANNER_QR_STEP.FINAL_STEP });
-  }, [getAccountByAddress, networkMap, state]);
+  }, [accounts, networkMap, state]);
 
   const clearMultipartProgress = useCallback((): void => {
     setState({

@@ -6,8 +6,9 @@ import { SCANNER_QR_STEP } from '@subwallet/extension-koni-ui/constants/qr';
 import strings from '@subwallet/extension-koni-ui/constants/strings';
 import { ScannerContext } from '@subwallet/extension-koni-ui/contexts/ScannerContext';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
-import { CompletedParsedData, EthereumParsedData, NetworkParsedData, ParsedData, SubstrateCompletedParsedData, SubstrateParsedData } from '@subwallet/extension-koni-ui/types/scanner';
-import { constructDataFromBytes, isAddressString, isJsonString, rawDataToU8A } from '@subwallet/extension-koni-ui/util/decoders';
+import { CompletedParsedData, EthereumParsedData, NetworkParsedData, ParsedData, SubstrateParsedData } from '@subwallet/extension-koni-ui/types/scanner';
+import { findAccountByAddress } from '@subwallet/extension-koni-ui/util/account';
+import { constructDataFromBytes, isAddressString, isJsonString, rawDataToU8A } from '@subwallet/extension-koni-ui/util/scanner/decoders';
 import { isMultiFramesInfo, isMultipartData, isNetworkParsedData } from '@subwallet/extension-koni-ui/util/scanner/sign';
 import { Result as TxRequestData } from '@zxing/library';
 import { useCallback, useContext } from 'react';
@@ -20,7 +21,7 @@ interface ProcessBarcodeFunction {
 }
 
 const useScanner = (showAlertMessage: (message: string) => void): ProcessBarcodeFunction => {
-  const { getAccountByAddress } = useContext(AccountContext);
+  const { accounts } = useContext(AccountContext);
   const scannerStore = useContext(ScannerContext);
 
   const { networkMap } = useSelector((state: RootState) => state);
@@ -77,11 +78,9 @@ const useScanner = (showAlertMessage: (message: string) => void): ProcessBarcode
     }
   }, [scannerStore]);
 
-  const processBarCode = useCallback((txRequestData: TxRequestData): void => {
+  return useCallback((txRequestData: TxRequestData): void => {
     try {
       const parsedData = parseQrData(txRequestData);
-
-      const genesisHash = (parsedData as SubstrateCompletedParsedData)?.data?.genesisHash;
 
       if (isNetworkParsedData(parsedData)) {
         return showAlertMessage('Adding a network is not supported in this screen');
@@ -98,7 +97,7 @@ const useScanner = (showAlertMessage: (message: string) => void): ProcessBarcode
       clearMultipartProgress();
 
       const { senderAddress } = qrInfo;
-      const senderAccount = getAccountByAddress(networkMap, senderAddress, genesisHash);
+      const senderAccount = findAccountByAddress(accounts, senderAddress);
 
       if (!senderAccount) {
         cleanup();
@@ -121,9 +120,7 @@ const useScanner = (showAlertMessage: (message: string) => void): ProcessBarcode
 
       return showAlertMessage(message);
     }
-  }, [parseQrData, checkMultiFramesData, setData, clearMultipartProgress, getAccountByAddress, networkMap, setStep, showAlertMessage, cleanup]);
-
-  return processBarCode;
+  }, [parseQrData, checkMultiFramesData, setData, clearMultipartProgress, accounts, setStep, showAlertMessage, cleanup]);
 };
 
 export default useScanner;

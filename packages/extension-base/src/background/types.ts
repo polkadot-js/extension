@@ -69,7 +69,6 @@ export type AccountsContext = {
   accounts: AccountJson[];
   hierarchy: AccountWithChildren[];
   master?: AccountJson;
-  getAccountByAddress: FindAccountFunction;
 }
 
 export type CurrentAccContext = {

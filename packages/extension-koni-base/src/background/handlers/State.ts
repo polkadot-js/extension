@@ -1844,7 +1844,7 @@ export default class KoniState extends State {
     return Promise.all(Object.values(this.apiMap.dotSama).map(async (network) => {
       if (network.api.isConnected) {
         this.logger.log(`[Dotsama] Stopping network [${network.specName}]`);
-        await network.api?.disconnect();
+        network.api?.disconnect && await network.api?.disconnect();
       }
     }));
   }

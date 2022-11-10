@@ -603,31 +603,7 @@ export default class KoniState extends State {
     });
   }
 
-  // TODO: need review
-  // private hasUpdateStakingItem (networkKey: string, item: StakingItem): boolean {
-  //   if (item.state !== APIItemState.READY) {
-  //     return false;
-  //   }
-  //
-  //   this.dbService.stores.staking.getSingleRecord(this.getNetworkGenesisHashByKey(networkKey), item.owner, item.type)
-  //     .then((oldItem) => {
-  //       console.log('oldItem', oldItem);
-  //       return oldItem?.state === APIItemState.PENDING ||
-  //         oldItem?.balance !== item.balance || oldItem?.activeBalance !== item.activeBalance ||
-  //         oldItem?.unlockingBalance !== item.unlockingBalance;
-  //     })
-  //     .catch((e) => {
-  //       this.logger.warn(e);
-  //
-  //       return false;
-  //     });
-  //
-  //   console.log('run here');
-  //   return false;
-  // }
-
   public setStakingItem (networkKey: string, item: StakingItem): void {
-    // TODO: be careful of staking reward and unlocking data
     this.dbService.updateStaking(networkKey, this.getNetworkGenesisHashByKey(networkKey), item.address, item).catch((e) => this.logger.warn(e));
   }
 

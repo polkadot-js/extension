@@ -14,10 +14,10 @@ export default class StakingStore extends BaseStoreWithAddress<IStakingItem> {
 
   getStakings (addresses: string[], chainHashes: string[] = []) {
     if (addresses.length) {
-      return this.table.where('address').anyOfIgnoreCase(addresses).and((item) => !chainHashes.length || chainHashes.includes(item.chainHash)).toArray();
+      return this.table.where('address').anyOfIgnoreCase(addresses).and((item) => (!chainHashes.length || chainHashes.includes(item.chainHash)) && parseFloat(item.balance as string) > 0).toArray();
     }
 
-    return this.table.filter((item) => !chainHashes.length || chainHashes.includes(item.chainHash)).toArray();
+    return this.table.filter((item) => (!chainHashes.length || chainHashes.includes(item.chainHash)) && parseFloat(item.balance as string) > 0).toArray();
   }
 
   subscribeStaking (addresses: string[], chainHashes: string[] = []) {

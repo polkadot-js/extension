@@ -14,8 +14,20 @@ function compareByCreation (a: AccountJson, b: AccountJson): number {
 }
 
 function compareByName (a: AccountJson, b: AccountJson): number {
-  const nameA = a.name?.toUpperCase() || '';
-  const nameB = b.name?.toUpperCase() || '';
+  if (!a.name && !b.name) {
+    return 0;
+  }
+
+  if (!a.name) {
+    return 1;
+  }
+
+  if (!b.name) {
+    return -1;
+  }
+
+  const nameA = a.name.toUpperCase();
+  const nameB = b.name.toUpperCase();
 
   return nameA.localeCompare(nameB);
 }

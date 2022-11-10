@@ -207,6 +207,10 @@ export class KoniCron {
     const networkMap = this.state.getNetworkMap();
 
     for (const [key, apiProp] of Object.entries(apiMap.dotSama)) {
+      if (apiProp.isEthereumOnly) {
+        continue;
+      }
+
       let status: NETWORK_STATUS = NETWORK_STATUS.CONNECTING;
 
       if (apiProp.isApiConnected) {

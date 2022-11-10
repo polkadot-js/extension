@@ -456,32 +456,6 @@ function XcmTransfer ({ chainRegistryMap, className, defaultValue, firstOriginCh
                   siDecimals={balanceFormat[0]}
                   siSymbol={balanceFormat[2] || balanceFormat[1]}
                 />
-
-                {senderBlockHardwareState !== BLOCK_HARDWARE_STATE.ACCEPTED && (
-                  <Warning
-                    className={'xcm-transfer-warning'}
-                  >
-                    {getLedgerXCMText(senderBlockHardwareState, true)}
-                  </Warning>
-                )}
-
-                {receiverBlockHardwareState !== BLOCK_HARDWARE_STATE.ACCEPTED && (
-                  <Warning
-                    className={'xcm-transfer-warning'}
-                  >
-                    {getLedgerXCMText(receiverBlockHardwareState, false)}
-                  </Warning>
-                )}
-
-                {isReadOnly && (
-                  <Warning
-                    className='xcm-transfer-warning'
-                    isDanger
-                  >
-                    {t<string>('The sender account is readonly account')}
-                  </Warning>
-                )}
-
                 {!checkOriginChainAndSenderIdType &&
                 <Warning
                   className='xcm-transfer-warning'
@@ -506,6 +480,30 @@ function XcmTransfer ({ chainRegistryMap, className, defaultValue, firstOriginCh
                     isDanger
                   >
                     {t<string>('The amount you want to transfer is greater than your available balance.')}
+                  </Warning>
+                )}
+                {senderBlockHardwareState !== BLOCK_HARDWARE_STATE.ACCEPTED && (
+                  <Warning
+                    className={'xcm-transfer-warning'}
+                    isDanger
+                  >
+                    {getLedgerXCMText(senderBlockHardwareState, true)}
+                  </Warning>
+                )}
+                {receiverBlockHardwareState !== BLOCK_HARDWARE_STATE.ACCEPTED && (
+                  <Warning
+                    className={'xcm-transfer-warning'}
+                    isDanger
+                  >
+                    {getLedgerXCMText(receiverBlockHardwareState, false)}
+                  </Warning>
+                )}
+                {isReadOnly && (
+                  <Warning
+                    className='xcm-transfer-warning'
+                    isDanger
+                  >
+                    {t<string>('The account you are using is read-only, you cannot send assets with it')}
                   </Warning>
                 )}
               </>

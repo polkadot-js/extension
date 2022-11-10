@@ -162,10 +162,10 @@ function Account ({ address, changeAccountCallback, className, closeSetting, gen
 
 export default styled(Account)(({ theme }: ThemeProps) => `
   position: relative;
-  // border-radius: 8px;
+  border-radius: 8px;
   // margin-top: 8px;
   display: flex;
-  padding: 8px 16px;
+  padding: 8px 12px;
 
   &:hover {
     background-color: ${theme.accountHoverBackground};
@@ -180,7 +180,7 @@ export default styled(Account)(({ theme }: ThemeProps) => `
     display: flex;
     position: absolute;
     align-items: center;
-    right: 16px;
+    right: 12px;
     top: 0;
     height: 100%;
   }
@@ -225,6 +225,16 @@ export default styled(Account)(({ theme }: ThemeProps) => `
 
   .account-info-row {
     height: 48px;
-    // padding: 8px;
+    width: 334px;
+  }
+
+  .account-info-identity-icon {
+    padding: 0;
+    border: 0;
+  }
+
+  .account-info__all-account-icon {
+    padding: 0;
+    border: 0;
   }
 `);

@@ -133,6 +133,7 @@ function AttachReadOnly ({ className }: Props): React.ReactElement<Props> {
 
   const onCancelScanning = useCallback(() => {
     setIsScanning(false);
+    setErrors([]);
   }, []);
 
   const onOpenScanning = useCallback(() => {

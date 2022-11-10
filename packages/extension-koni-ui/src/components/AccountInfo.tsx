@@ -204,7 +204,7 @@ function AccountInfo ({ accountSplitPart = 'both', address, addressHalfLength = 
                 <Avatar
                   colors={['#5F545C', '#EB7072', '#F5BA90', '#F5E2B8', '#A2CAA5']}
                   name={randomNameForLogo}
-                  size={34}
+                  size={iconSize}
                   variant={randomVariant}
                 />
               </div>
@@ -271,7 +271,8 @@ function AccountInfo ({ accountSplitPart = 'both', address, addressHalfLength = 
                   data-field='parent'
                   title={parentNameSuri}
                 >
-                  {parentNameSuri}
+                  <span className='account-parent-name'>{parentName}</span>
+                  <span className='account-suri'>&nbsp;{suri}</span>
                 </div>
               </div>
             )}
@@ -317,6 +318,10 @@ export default styled(AccountInfo)(({ theme }: ThemeProps) => `
     line-height: 16px;
     display: flex;
     align-items: center;
+    margin-left: 8px;
+    flex-grow: 0;
+    flex-shrink: 1;
+    overflow: hidden;
   }
 
   .account-info-address-display {
@@ -324,12 +329,14 @@ export default styled(AccountInfo)(({ theme }: ThemeProps) => `
     justify-content: space-between;
     align-items: center;
     position: relative;
+    flex-grow: 1;
+    white-space: nowrap;
   }
 
   .account-info__all-account-icon {
-    width: 40px;
-    min-width: 40px;
-    height: 40px;
+    // width: 40px;
+    // min-width: 40px;
+    // height: 40px;
     border: 2px solid ${theme.checkDotColor};
     margin-right: 10px;
     padding: 2px;
@@ -352,11 +359,12 @@ export default styled(AccountInfo)(({ theme }: ThemeProps) => `
 
   .account-info-identity-icon {
     border: 2px solid ${theme.checkDotColor};
-    margin-right: 10px;
+    margin-right: 12px;
   }
 
   .account-info {
     width: 100%;
+    overflow: hidden;
   }
 
   .account-checked-item {
@@ -371,6 +379,7 @@ export default styled(AccountInfo)(({ theme }: ThemeProps) => `
     align-items: center;
     height: 72px;
     border-radius: 4px;
+    overflow: hidden;
   }
 
   .account-info__name {
@@ -396,8 +405,20 @@ export default styled(AccountInfo)(({ theme }: ThemeProps) => `
     font-weight: 500;
     overflow: hidden;
     margin-left: 2px;
-    text-overflow: ellipsis;
-    white-space: nowrap;
+    flex-direction: row;
+    display: flex;
+
+    .account-parent-name {
+      flex-grow: 0;
+      flex-shrink: 1;
+      text-overflow: ellipsis;
+      overflow: hidden;
+      white-space: nowrap;
+    }
+
+    .account-suri {
+      flex-grow: 1;
+    }
   }
 
   .account-info-full-address {

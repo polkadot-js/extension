@@ -308,16 +308,18 @@ function Request ({ account,
               <div className='signing-request__text-wrapper'>
                 {
                   account &&
-                  <AccountInfoEl
-                    address={account.address}
-                    className='signing-request__account'
-                    genesisHash={account.genesisHash}
-                    iconSize={20}
-                    isShowAddress={false}
-                    isShowBanner={false}
-                    name={account.name}
-                    showCopyBtn={false}
-                  />
+                  <div>
+                    <AccountInfoEl
+                      address={account.address}
+                      className='signing-request__account'
+                      genesisHash={account.genesisHash}
+                      iconSize={20}
+                      isShowAddress={false}
+                      isShowBanner={false}
+                      name={account.name}
+                      showCopyBtn={false}
+                    />
+                  </div>
                 }
                 {
                   network && (

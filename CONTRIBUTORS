@@ -1,8 +1,8 @@
-    1086	Nam Phạm                      	update price for KBTC
-     648	AnhMTV                        	Release version 0.6.9
+    1111	Nam Phạm                      	update UI for nomination pool
+     653	AnhMTV                        	
      465	Jaco                          	0.42.5 (#969)
      256	S2kael                        	[Issue-759] fix error when chain not selected
-     151	lw-cdm                        	Update logo for Moonbeans
+     152	lw-cdm                        	Fix issue that causes networkMap store subject fires many times.
      142	quangdo                       	update some label and variable (original to origin)
      104	khainh                        	predefine metadata for Polkadot & Kusama chains
       94	lw-cdm                        	

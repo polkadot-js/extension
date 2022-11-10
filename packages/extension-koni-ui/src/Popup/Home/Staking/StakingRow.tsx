@@ -2,6 +2,8 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { StakingRewardItem, StakingType } from '@subwallet/extension-base/background/KoniTypes';
+import UserIcon from '@subwallet/extension-koni-ui/assets/user.svg';
+import UsersIcon from '@subwallet/extension-koni-ui/assets/users.svg';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { formatLocaleNumber } from '@subwallet/extension-koni-ui/util/formatNumber';
 import React, { useCallback, useState } from 'react';
@@ -110,6 +112,22 @@ function StakingRow ({ activeStake, chainName, className, index, isAccountAll, i
     return editBalance(balance.toString());
   };
 
+  const getStakingTypeClassName = () => {
+    if (stakingType === StakingType.POOLED) {
+      return '-pooled';
+    }
+
+    return '-nominated';
+  };
+
+  const getStakingTypeIcon = () => {
+    if (stakingType === StakingType.POOLED) {
+      return UsersIcon;
+    }
+
+    return UserIcon;
+  };
+
   return (
     <div className={`${className || ''} ${showReward ? '-show-detail' : ''}`}>
       <div
@@ -133,7 +151,14 @@ function StakingRow ({ activeStake, chainName, className, index, isAccountAll, i
                 {chainName}
               </div>
               <div className={'balance-description'}>
-                <div>{stakingType.charAt(0).toUpperCase() + stakingType.slice(1)} balance</div>
+                <div className={`staking-type__container ${getStakingTypeClassName()}`}>
+                  <img
+                    height={16}
+                    src={getStakingTypeIcon()}
+                    width={16}
+                  />
+                  {stakingType.charAt(0).toUpperCase() + stakingType.slice(1)} balance
+                </div>
                 {
                   !isAccountAll && stakingType !== StakingType.POOLED && <StakingMenu
                     bondedAmount={activeStake as string}
@@ -222,6 +247,28 @@ function StakingRow ({ activeStake, chainName, className, index, isAccountAll, i
 }
 
 export default React.memo(styled(StakingRow)(({ theme }: Props) => `
+  .-pooled {
+    color: ${theme.primaryColor};
+    background-color: #42C59A33;
+  }
+
+  .-nominated {
+    color: ${theme.iconNeutralColor};
+    background-color: #7B809833;
+  }
+
+  .staking-type__container {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 2px;
+    padding: 0 4px 0 4px;
+    font-weight: 400;
+    font-size: 14px;
+    line-height: 24px;
+    border-radius: 4px;
+  }
+
   .staking-item__type {
     color: ${theme.crowdloanWinnerStatus};
 
@@ -271,8 +318,6 @@ export default React.memo(styled(StakingRow)(({ theme }: Props) => `
   }
 
   .balance-description {
-    font-size: 14px;
-    color: #7B8098;
     display: flex;
     gap: 5px;
     align-items: center;

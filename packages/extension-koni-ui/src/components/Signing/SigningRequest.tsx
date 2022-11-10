@@ -76,6 +76,7 @@ const SigningRequest = <T extends BaseRequestSign, V extends BasicTxResponse>({ 
 
   const handleCallbackResponseResult = useCallback((data: V) => {
     if (data.passwordError) {
+      setBusy(false);
       setPasswordError(!!data.passwordError);
       onErrors([data.passwordError]);
       cleanQrState();
@@ -124,12 +125,17 @@ const SigningRequest = <T extends BaseRequestSign, V extends BasicTxResponse>({ 
   // Error
 
   const handleResponseError = useCallback((response: V) => {
-    const errorMessage = response.errors?.map((err) => err.message);
-
-    onErrors(errorMessage || []);
-
-    if (errorMessage && errorMessage.length) {
+    if (response.passwordError) {
+      onErrors(['Invalid password']);
       setBusy(false);
+    } else {
+      const errorMessage = response.errors?.map((err) => err.message);
+
+      onErrors(errorMessage || []);
+
+      if (errorMessage && errorMessage.length) {
+        setBusy(false);
+      }
     }
   }, [onErrors, setBusy]);
 

@@ -1,7 +1,7 @@
 // Copyright 2019-2022 @subwallet/extension-koni authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { InputWithLabel } from '@subwallet/extension-koni-ui/components';
+import { InputWithLabel, Warning } from '@subwallet/extension-koni-ui/components';
 import Button from '@subwallet/extension-koni-ui/components/Button';
 import { SigningContext } from '@subwallet/extension-koni-ui/contexts/SigningContext';
 import useTranslation from '@subwallet/extension-koni-ui/hooks/useTranslation';
@@ -23,9 +23,9 @@ const PasswordRequest = ({ children,
   hideConfirm }: Props) => {
   const { t } = useTranslation();
 
-  const { setPasswordError, signingState } = useContext(SigningContext);
+  const { onErrors, setPasswordError, signingState } = useContext(SigningContext);
 
-  const { isBusy, passwordError } = signingState;
+  const { errors, isBusy, passwordError } = signingState;
 
   const [password, setPassword] = useState<string>('');
 
@@ -36,7 +36,26 @@ const PasswordRequest = ({ children,
   const _onChangePass = useCallback((value: string) => {
     setPassword(value);
     setPasswordError(false);
-  }, [setPasswordError]);
+    onErrors([]);
+  }, [onErrors, setPasswordError]);
+
+  const renderError = useCallback(() => {
+    if (errors && errors.length) {
+      return errors.map((err) =>
+        (
+          <Warning
+            className='auth-transaction-error'
+            isDanger
+            key={err}
+          >
+            {t<string>(err)}
+          </Warning>
+        )
+      );
+    } else {
+      return <></>;
+    }
+  }, [errors, t]);
 
   return (
     <div className={CN(className)}>
@@ -45,13 +64,14 @@ const PasswordRequest = ({ children,
       <div className='password-signing__separator' />
 
       <InputWithLabel
+        disabled={isBusy}
         isError={passwordError}
         label={t<string>('Unlock account with password')}
         onChange={_onChangePass}
         type='password'
         value={password}
       />
-
+      { renderError() }
       <div className={'password-signing-btn-container'}>
         <Button
           className={'password-signing-cancel-button'}
@@ -106,5 +126,9 @@ export default React.memo(styled(PasswordRequest)(({ theme }: Props) => `
   .password-signing-cancel-button {
     color: ${theme.textColor3};
     background: ${theme.buttonBackground1};
+  }
+
+  .auth-transaction-error {
+    margin-top: 10px
   }
 `));

@@ -69,7 +69,7 @@ export const readOnlyScan = (data: string): QrAccount | null => {
   if (isEthereumAddress(data)) {
     return {
       content: data,
-      genesisHash: '',
+      genesisHash: data,
       isAddress: true,
       isEthereum: true,
       name: undefined,

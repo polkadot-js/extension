@@ -5,19 +5,18 @@ import type { Theme, ThemeProps } from '../types';
 
 import { faCodeFork, faCog, faEye, faFileUpload, faKey, faPlusCircle, faQrcode } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { AccountContext, MediaContext, Svg } from '@subwallet/extension-koni-ui/components';
 import InputFilter from '@subwallet/extension-koni-ui/components/InputFilter';
 import Link from '@subwallet/extension-koni-ui/components/Link';
 import Menu from '@subwallet/extension-koni-ui/components/Menu';
 import MenuSettingItem from '@subwallet/extension-koni-ui/components/MenuSettingItem';
 import useIsPopup from '@subwallet/extension-koni-ui/hooks/useIsPopup';
 import { useLedger } from '@subwallet/extension-koni-ui/hooks/useLedger';
+import useTranslation from '@subwallet/extension-koni-ui/hooks/useTranslation';
 import { windowOpen } from '@subwallet/extension-koni-ui/messaging';
 import AccountsTree from '@subwallet/extension-koni-ui/Popup/Accounts/AccountsTree';
 import React, { useCallback, useContext, useState } from 'react';
 import styled, { ThemeContext } from 'styled-components';
-
-import { AccountContext, MediaContext, Svg } from '../components';
-import useTranslation from '../hooks/useTranslation';
 
 interface Props extends ThemeProps {
   className?: string;
@@ -38,6 +37,7 @@ function AccountMenuSettings ({ changeAccountCallback, className, closeSetting, 
   const [filter, setFilter] = useState('');
   const { isLedgerCapable, isLedgerEnabled } = useLedger();
   const { hierarchy } = useContext(AccountContext);
+
   const filteredAccount = filter
     ? hierarchy.filter((account) =>
       account.name?.toLowerCase().includes(filter.toLowerCase())
@@ -108,8 +108,14 @@ function AccountMenuSettings ({ changeAccountCallback, className, closeSetting, 
             key={`${index}:${json.address}`}
           />
         ))}
+        {!filteredAccount.length && (
+          <div className='no-account-warning'>
+            <span className='no-account-text'>
+              {t('No results found. Please change your search criteria and try again.')}
+            </span>
+          </div>
+        )}
       </div>
-
       <div className='koni-menu-items-container'>
         <div className='account-menu-settings-items-wrapper'>
           <MenuSettingItem className='account-menu-settings__menu-item'>
@@ -275,11 +281,29 @@ export default React.memo(styled(AccountMenuSettings)(({ theme }: Props) => `
   right: 5px;
   user-select: none;
 
+  .no-account-warning {
+    margin: 0 8px;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    height: 100%;
+
+    .no-account-text {
+      font-style: normal;
+      font-weight: 400;
+      font-size: 14px;
+      line-height: 24px;
+      color: ${theme.textColor2};
+    }
+  }
+
   .account-menu-settings {
-    height: 135px;
+    height: 140px;
     overflow-y: auto;
     scrollbar-width: none;
-    padding: 0;
+    padding: 0 16px;
 
     &::-webkit-scrollbar {
       display: none;
@@ -294,19 +318,19 @@ export default React.memo(styled(AccountMenuSettings)(({ theme }: Props) => `
   }
 
   .account-menu-settings__branding {
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      color: ${theme.labelColor};
-      font-family: ${theme.fontFamily};
-      text-align: center;
-      margin-right: 15px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    color: ${theme.labelColor};
+    font-family: ${theme.fontFamily};
+    text-align: center;
+    margin-right: 15px;
 
-      .logo {
-        height: 32px;
-        width: 32px;
-        margin-right: 10px;
-      }
+    .logo {
+      height: 32px;
+      width: 32px;
+      margin-right: 10px;
+    }
   }
 
   .account-menu-settings-header {
@@ -363,8 +387,8 @@ export default React.memo(styled(AccountMenuSettings)(({ theme }: Props) => `
 
     .svg-inline--fa {
       color: ${theme.iconNeutralColor};
-      margin-right: 0.3rem;
-      width: 0.875em;
+      margin-right: 12px;
+      width: 16px;
     }
   }
 
@@ -388,7 +412,7 @@ export default React.memo(styled(AccountMenuSettings)(({ theme }: Props) => `
   }
 
   .koni-menu-items-container {
-    padding: 12px 15px 16px;
+    padding: 8px 16px 14px;
     max-height: 365px;
     overflow-y: auto;
 
@@ -438,6 +462,7 @@ export default React.memo(styled(AccountMenuSettings)(({ theme }: Props) => `
 
     .setting-icon {
       transition: all ease-in-out ${transitionTime};
+      color: ${theme.textColor};
       transform: rotate(0deg);
     }
 

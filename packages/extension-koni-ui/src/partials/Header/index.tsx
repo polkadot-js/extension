@@ -374,7 +374,7 @@ export default React.memo(styled(Header)(({ theme }: Props) => `
   }
 
   .account-menu-setting {
-    min-width: 390px;
+    width: 390px;
   }
 
   .network-menu {

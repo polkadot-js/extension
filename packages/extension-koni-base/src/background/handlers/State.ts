@@ -1665,6 +1665,10 @@ export default class KoniState extends State {
   }
 
   public updateNetworkStatus (networkKey: string, status: NETWORK_STATUS) {
+    if (this.networkMap[networkKey].apiStatus === status) {
+      return;
+    }
+
     this.networkMap[networkKey].apiStatus = status;
 
     this.networkMapSubject.next(this.networkMap);
@@ -1840,7 +1844,7 @@ export default class KoniState extends State {
     return Promise.all(Object.values(this.apiMap.dotSama).map(async (network) => {
       if (network.api.isConnected) {
         this.logger.log(`[Dotsama] Stopping network [${network.specName}]`);
-        await network.api?.disconnect();
+        network.api?.disconnect && await network.api?.disconnect();
       }
     }));
   }
@@ -2227,7 +2231,7 @@ export default class KoniState extends State {
         networkKey,
         change: transaction.value?.toString() || '0',
         changeSymbol: undefined,
-        fee: receipt.effectiveGasPrice.toString(),
+        fee: (receipt.gasUsed * receipt.effectiveGasPrice).toString(),
         feeSymbol: network?.nativeToken,
         action: 'send',
         extrinsicHash: receipt.transactionHash

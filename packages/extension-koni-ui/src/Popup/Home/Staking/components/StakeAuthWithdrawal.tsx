@@ -90,60 +90,6 @@ function StakeAuthWithdrawal ({ address, amount, className, hideModal, networkKe
     setShowResult(false);
   }, []);
 
-  const renderInfo = useCallback(() => {
-    return (
-      <>
-        <InputAddress
-          autoPrefill={false}
-          className={'receive-input-address'}
-          defaultValue={address}
-          help={t<string>('The account which you will withdraw stake')}
-          isDisabled={true}
-          isSetDefaultValue={true}
-          label={t<string>('Withdraw stake from account')}
-          networkPrefix={networkJson.ss58Format}
-          type='allPlus'
-          withEllipsis
-        />
-
-        <div className={'transaction-info-container'}>
-          <div className={'transaction-info-row'}>
-            <div className={'transaction-info-title'}>Withdrawal amount</div>
-            <div className={'transaction-info-value'}>
-              <BalanceVal
-                newRule={false}
-                symbol={networkJson.nativeToken}
-                value={amount}
-                withSymbol={true}
-              />
-            </div>
-          </div>
-
-          <div className={'transaction-info-row'}>
-            <div className={'transaction-info-title'}>Withdrawal fee</div>
-            <div className={'transaction-info-value'}>
-              <FeeValue feeString={fee} />
-            </div>
-          </div>
-
-          <div className={'transaction-info-row'}>
-            <div className={'transaction-info-title'}>Total</div>
-            <div className={'transaction-info-value'}>
-              <BalanceVal
-                newRule={false}
-                symbol={networkJson.nativeToken}
-                value={amount}
-                withSymbol={true}
-              />
-              &nbsp;+&nbsp;
-              <FeeValue feeString={fee} />
-            </div>
-          </div>
-        </div>
-      </>
-    );
-  }, [address, amount, fee, networkJson, t]);
-
   useEffect(() => {
     getStakeWithdrawalTxInfo({
       address,
@@ -204,7 +150,53 @@ function StakeAuthWithdrawal ({ address, amount, className, hideModal, networkKe
                         onSuccess={onSuccess}
                         params={params}
                       >
-                        { renderInfo() }
+                        <InputAddress
+                          autoPrefill={false}
+                          className={'receive-input-address'}
+                          defaultValue={address}
+                          help={t<string>('The account which you will withdraw stake')}
+                          isDisabled={true}
+                          isSetDefaultValue={true}
+                          label={t<string>('Withdraw stake from account')}
+                          networkPrefix={networkJson.ss58Format}
+                          type='allPlus'
+                          withEllipsis
+                        />
+
+                        <div className={'transaction-info-container'}>
+                          <div className={'transaction-info-row'}>
+                            <div className={'transaction-info-title'}>Withdrawal amount</div>
+                            <div className={'transaction-info-value'}>
+                              <BalanceVal
+                                newRule={false}
+                                symbol={networkJson.nativeToken}
+                                value={amount}
+                                withSymbol={true}
+                              />
+                            </div>
+                          </div>
+
+                          <div className={'transaction-info-row'}>
+                            <div className={'transaction-info-title'}>Withdrawal fee</div>
+                            <div className={'transaction-info-value'}>
+                              <FeeValue feeString={fee} />
+                            </div>
+                          </div>
+
+                          <div className={'transaction-info-row'}>
+                            <div className={'transaction-info-title'}>Total</div>
+                            <div className={'transaction-info-value'}>
+                              <BalanceVal
+                                newRule={false}
+                                symbol={networkJson.nativeToken}
+                                value={amount}
+                                withSymbol={true}
+                              />
+                              &nbsp;+&nbsp;
+                              <FeeValue feeString={fee} />
+                            </div>
+                          </div>
+                        </div>
                       </SigningRequest>
                     )
                     : <Spinner className={'container-spinner'} />
@@ -236,6 +228,13 @@ export default React.memo(styled(StakeAuthWithdrawal)(({ theme }: Props) => `
   .transaction-info-container {
     margin-top: 20px;
     width: 100%;
+  }
+
+  .transaction-info-row {
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
   }
 
   .transaction-info-title {

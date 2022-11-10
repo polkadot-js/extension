@@ -72,41 +72,6 @@ function StakeAuthCancelCompoundRequest ({ address, balanceError, className, fee
     setExtrinsicHash(extrinsicHash);
   }, [setExtrinsicHash, setIsTxSuccess, setShowAuth, setShowResult]);
 
-  const renderInfo = useCallback(() => {
-    return (
-      <>
-        <InputAddress
-          autoPrefill={false}
-          className={'receive-input-address'}
-          defaultValue={address}
-          help={t<string>('The account which you will cancel the compounding task')}
-          isDisabled={true}
-          isSetDefaultValue={true}
-          label={t<string>('Cancel compounding task of account')}
-          networkPrefix={networkJson.ss58Format}
-          type='allPlus'
-          withEllipsis
-        />
-
-        <div className={'transaction-info-container'}>
-          <div className={'transaction-info-row'}>
-            <div className={'transaction-info-title'}>Task ID</div>
-            <div className={'transaction-info-value'}>{toShort(taskId)}</div>
-          </div>
-          <div className={'transaction-info-row'}>
-            <div className={'transaction-info-title'}>Transaction fee</div>
-            <div className={'transaction-info-value'}>{fee}</div>
-          </div>
-
-          <div className={'transaction-info-row'}>
-            <div className={'transaction-info-title'}>Total</div>
-            <div className={'transaction-info-value'}>{fee}</div>
-          </div>
-        </div>
-      </>
-    );
-  }, [address, fee, networkJson.ss58Format, t, taskId]);
-
   return (
     <div className={className}>
       <Modal>
@@ -139,7 +104,34 @@ function StakeAuthCancelCompoundRequest ({ address, balanceError, className, fee
           onSuccess={onSuccess}
           params={params}
         >
-          { renderInfo() }
+          <InputAddress
+            autoPrefill={false}
+            className={'receive-input-address'}
+            defaultValue={address}
+            help={t<string>('The account which you will cancel the compounding task')}
+            isDisabled={true}
+            isSetDefaultValue={true}
+            label={t<string>('Cancel compounding task of account')}
+            networkPrefix={networkJson.ss58Format}
+            type='allPlus'
+            withEllipsis
+          />
+
+          <div className={'transaction-info-container'}>
+            <div className={'transaction-info-row'}>
+              <div className={'transaction-info-title'}>Task ID</div>
+              <div className={'transaction-info-value'}>{toShort(taskId)}</div>
+            </div>
+            <div className={'transaction-info-row'}>
+              <div className={'transaction-info-title'}>Transaction fee</div>
+              <div className={'transaction-info-value'}>{fee}</div>
+            </div>
+
+            <div className={'transaction-info-row'}>
+              <div className={'transaction-info-title'}>Total</div>
+              <div className={'transaction-info-value'}>{fee}</div>
+            </div>
+          </div>
         </SigningRequest>
       </Modal>
     </div>

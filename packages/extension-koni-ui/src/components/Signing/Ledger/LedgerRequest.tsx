@@ -24,7 +24,7 @@ interface OnSignLedgerFunction {
 
 interface Props extends ThemeProps{
   account?: AccountJson;
-  children: JSX.Element;
+  children: JSX.Element | JSX.Element[];
   className?: string;
   genesisHash: string;
   handlerSignLedger: (onSignLedger: OnSignLedgerFunction) => void;

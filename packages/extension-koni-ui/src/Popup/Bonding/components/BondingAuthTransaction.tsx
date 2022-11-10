@@ -92,129 +92,6 @@ function BondingAuthTransaction ({ amount, balanceError, bondedValidators, class
     setExtrinsicHash(extrinsicHash);
   }, [setExtrinsicHash, setIsTxSuccess, setShowConfirm, setShowResult]);
 
-  const renderInfo = useCallback(() => {
-    return (
-      <>
-        <div className={'selected-validator'}>Selected Validator</div>
-
-        <div className={'validator-item-container'}>
-          <div className={'validator-header'}>
-            {
-              validatorInfo.icon
-                ? <img
-                  className='imgIcon'
-                  height={28}
-                  src={validatorInfo.icon}
-                  width={28}
-                />
-                : <Identicon
-                  className='identityIcon'
-                  genesisHash={networkJson.genesisHash}
-                  iconTheme={isEthereumAddress(validatorInfo.address) ? 'ethereum' : 'substrate'}
-                  prefix={networkJson.ss58Format}
-                  size={20}
-                  value={validatorInfo.address}
-                />
-            }
-
-            <div
-              data-for={`identity-tooltip-${validatorInfo.address}`}
-              data-tip={true}
-            >
-              {validatorInfo.identity ? validatorInfo.identity : toShort(validatorInfo.address)}
-            </div>
-            {
-              validatorInfo.identity && <Tooltip
-                place={'top'}
-                text={toShort(validatorInfo.address)}
-                trigger={`identity-tooltip-${validatorInfo.address}`}
-              />
-            }
-            {
-              validatorInfo.isVerified && <FontAwesomeIcon
-                className={'validator-verified'}
-                data-for={`verify-tooltip-${validatorInfo.address}`}
-                data-tip={true}
-                icon={faCircleCheck}
-              />
-            }
-            {
-              validatorInfo.isVerified && <Tooltip
-                place={'top'}
-                text={'Verified'}
-                trigger={`verify-tooltip-${validatorInfo.address}`}
-              />
-            }
-          </div>
-          <div className={'validator-footer'}>
-            {
-              validatorInfo.expectedReturn > 0 && <div
-                className={'validator-expected-return'}
-                data-for={`validator-return-tooltip-${validatorInfo.address}`}
-                data-tip={true}
-              >
-                {validatorInfo.expectedReturn.toFixed(1)}%
-              </div>
-            }
-            <Tooltip
-              place={'top'}
-              text={'Expected return'}
-              trigger={`validator-return-tooltip-${validatorInfo.address}`}
-            />
-          </div>
-        </div>
-
-        <ReceiverInputAddress
-          balance={freeBalance}
-          balanceFormat={balanceFormat}
-          className={'auth-bonding__input-address'}
-          defaultAddress={account?.address}
-          inputAddressHelp={'The account which you will stake with'}
-          inputAddressLabel={'Stake with account'}
-          isDisabled={true}
-          isSetDefaultValue={true}
-          networkKey={selectedNetwork}
-          networkMap={networkMap}
-        />
-
-        <div className={'transaction-info-container'}>
-          <div className={'transaction-info-row'}>
-            <div className={'transaction-info-title'}>Staking amount</div>
-            <div className={'transaction-info-value'}>
-              <BalanceVal
-                newRule={false}
-                symbol={networkJson.nativeToken}
-                value={amount}
-                withSymbol={true}
-              />
-            </div>
-          </div>
-
-          <div className={'transaction-info-row'}>
-            <div className={'transaction-info-title'}>Staking fee</div>
-            <div className={'transaction-info-value'}>
-              <FeeValue feeString={fee} />
-            </div>
-          </div>
-
-          <div className={'transaction-info-row'}>
-            <div className={'transaction-info-title'}>Total</div>
-            <div className={'transaction-info-value'}>
-              <BalanceVal
-                newRule={false}
-                symbol={networkJson.nativeToken}
-                value={amount}
-                withSymbol={true}
-              />
-              &nbsp;+&nbsp;
-              <FeeValue feeString={fee} />
-            </div>
-          </div>
-        </div>
-      </>
-    );
-  }, [account?.address, amount, balanceFormat, fee, freeBalance, networkJson, networkMap, selectedNetwork, validatorInfo]);
-
   return (
     <div className={className}>
       <Modal>
@@ -247,7 +124,121 @@ function BondingAuthTransaction ({ amount, balanceError, bondedValidators, class
           onSuccess={onSuccess}
           params={params}
         >
-          { renderInfo() }
+          <div className={'selected-validator'}>Selected Validator</div>
+          <div className={'validator-item-container'}>
+            <div className={'validator-header'}>
+              {
+                validatorInfo.icon
+                  ? <img
+                    className='imgIcon'
+                    height={28}
+                    src={validatorInfo.icon}
+                    width={28}
+                  />
+                  : <Identicon
+                    className='identityIcon'
+                    genesisHash={networkJson.genesisHash}
+                    iconTheme={isEthereumAddress(validatorInfo.address) ? 'ethereum' : 'substrate'}
+                    prefix={networkJson.ss58Format}
+                    size={20}
+                    value={validatorInfo.address}
+                  />
+              }
+
+              <div
+                data-for={`identity-tooltip-${validatorInfo.address}`}
+                data-tip={true}
+              >
+                {validatorInfo.identity ? validatorInfo.identity : toShort(validatorInfo.address)}
+              </div>
+              {
+                validatorInfo.identity && <Tooltip
+                  place={'top'}
+                  text={toShort(validatorInfo.address)}
+                  trigger={`identity-tooltip-${validatorInfo.address}`}
+                />
+              }
+              {
+                validatorInfo.isVerified && <FontAwesomeIcon
+                  className={'validator-verified'}
+                  data-for={`verify-tooltip-${validatorInfo.address}`}
+                  data-tip={true}
+                  icon={faCircleCheck}
+                />
+              }
+              {
+                validatorInfo.isVerified && <Tooltip
+                  place={'top'}
+                  text={'Verified'}
+                  trigger={`verify-tooltip-${validatorInfo.address}`}
+                />
+              }
+            </div>
+            <div className={'validator-footer'}>
+              {
+                validatorInfo.expectedReturn > 0 && <div
+                  className={'validator-expected-return'}
+                  data-for={`validator-return-tooltip-${validatorInfo.address}`}
+                  data-tip={true}
+                >
+                  {validatorInfo.expectedReturn.toFixed(1)}%
+                </div>
+              }
+              <Tooltip
+                place={'top'}
+                text={'Expected return'}
+                trigger={`validator-return-tooltip-${validatorInfo.address}`}
+              />
+            </div>
+          </div>
+
+          <ReceiverInputAddress
+            balance={freeBalance}
+            balanceFormat={balanceFormat}
+            className={'auth-bonding__input-address'}
+            defaultAddress={account?.address}
+            inputAddressHelp={'The account which you will stake with'}
+            inputAddressLabel={'Stake with account'}
+            isDisabled={true}
+            isSetDefaultValue={true}
+            networkKey={selectedNetwork}
+            networkMap={networkMap}
+          />
+
+          <div className={'transaction-info-container'}>
+            <div className={'transaction-info-row'}>
+              <div className={'transaction-info-title'}>Staking amount</div>
+              <div className={'transaction-info-value'}>
+                <BalanceVal
+                  newRule={false}
+                  symbol={networkJson.nativeToken}
+                  value={amount}
+                  withSymbol={true}
+                />
+              </div>
+            </div>
+
+            <div className={'transaction-info-row'}>
+              <div className={'transaction-info-title'}>Staking fee</div>
+              <div className={'transaction-info-value'}>
+                <FeeValue feeString={fee} />
+              </div>
+            </div>
+
+            <div className={'transaction-info-row'}>
+              <div className={'transaction-info-title'}>Total</div>
+              <div className={'transaction-info-value'}>
+                <BalanceVal
+                  newRule={false}
+                  symbol={networkJson.nativeToken}
+                  value={amount}
+                  withSymbol={true}
+                />
+                &nbsp;+&nbsp;
+                <FeeValue feeString={fee} />
+              </div>
+            </div>
+          </div>
         </SigningRequest>
       </Modal>
     </div>

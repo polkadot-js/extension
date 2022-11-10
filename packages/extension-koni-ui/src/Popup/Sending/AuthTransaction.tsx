@@ -105,87 +105,6 @@ function AuthTransaction ({ className, isDonation, feeInfo: [fee, feeDecimals, f
     });
   }, [onChangeResult]);
 
-  const handlerRenderInfo = useCallback(() => {
-    return (
-      <>
-        <InputAddress
-          className={'auth-transaction__input-address'}
-          defaultValue={requestPayload.from}
-          help={t<string>(isDonation ? 'The account you will donate from.' : 'The account you will send funds from.')}
-          isDisabled={true}
-          isSetDefaultValue={true}
-          label={t<string>(isDonation ? 'Donate from account' : 'Send from account')}
-          networkPrefix={networkPrefix}
-          type='account'
-          withEllipsis
-        />
-
-        {isDonation
-          ? (
-            <DonateInputAddress
-              className={'auth-transaction__input-address'}
-              defaultValue={requestPayload.to}
-              help={t<string>('The address you want to donate to.')}
-              isDisabled={true}
-              isSetDefaultValue={true}
-              label={t<string>('Donate to address')}
-              networkPrefix={networkPrefix}
-              type='allPlus'
-              withEllipsis
-            />
-          )
-          : (
-            <InputAddress
-              className={'auth-transaction__input-address'}
-              defaultValue={requestPayload.to}
-              help={t<string>('The address you want to send funds to.')}
-              isDisabled={true}
-              isSetDefaultValue={true}
-              label={t<string>('Send to address')}
-              networkPrefix={networkPrefix}
-              type='allPlus'
-              withEllipsis
-            />
-          )
-        }
-
-        <div className='auth-transaction__info'>
-          <div className='auth-transaction__info-text'>Amount</div>
-          <div className='auth-transaction__info-value'>
-            <FormatBalance
-              format={balanceFormat}
-              value={requestPayload.value}
-            />
-          </div>
-        </div>
-
-        <div className='auth-transaction__info'>
-          <div className='auth-transaction__info-text'>Estimated fee</div>
-          <div className='auth-transaction__info-value'>
-            <FormatBalance
-              format={[feeDecimals, feeSymbol]}
-              value={fee}
-            />
-          </div>
-        </div>
-
-        <div className='auth-transaction__info'>
-          <div className='auth-transaction__info-text'>Total (Amount + Fee)</div>
-          <div className='auth-transaction__info-value'>
-            {renderTotal({
-              fee,
-              feeDecimals,
-              feeSymbol,
-              amount: requestPayload.value,
-              amountDecimals: balanceFormat[0],
-              amountSymbol: balanceFormat[2] || balanceFormat[1]
-            })}
-          </div>
-        </div>
-      </>
-    );
-  }, [balanceFormat, fee, feeDecimals, feeSymbol, isDonation, networkPrefix, requestPayload, t]);
-
   return (
     <div className={className}>
       <Modal className={'signer-modal'}>
@@ -223,7 +142,80 @@ function AuthTransaction ({ className, isDonation, feeInfo: [fee, feeDecimals, f
           onSuccess={onSuccess}
           params={requestPayload}
         >
-          { handlerRenderInfo() }
+          <InputAddress
+            className={'auth-transaction__input-address'}
+            defaultValue={requestPayload.from}
+            help={t<string>(isDonation ? 'The account you will donate from.' : 'The account you will send funds from.')}
+            isDisabled={true}
+            isSetDefaultValue={true}
+            label={t<string>(isDonation ? 'Donate from account' : 'Send from account')}
+            networkPrefix={networkPrefix}
+            type='account'
+            withEllipsis
+          />
+
+          {isDonation
+            ? (
+              <DonateInputAddress
+                className={'auth-transaction__input-address'}
+                defaultValue={requestPayload.to}
+                help={t<string>('The address you want to donate to.')}
+                isDisabled={true}
+                isSetDefaultValue={true}
+                label={t<string>('Donate to address')}
+                networkPrefix={networkPrefix}
+                type='allPlus'
+                withEllipsis
+              />
+            )
+            : (
+              <InputAddress
+                className={'auth-transaction__input-address'}
+                defaultValue={requestPayload.to}
+                help={t<string>('The address you want to send funds to.')}
+                isDisabled={true}
+                isSetDefaultValue={true}
+                label={t<string>('Send to address')}
+                networkPrefix={networkPrefix}
+                type='allPlus'
+                withEllipsis
+              />
+            )
+          }
+
+          <div className='auth-transaction__info'>
+            <div className='auth-transaction__info-text'>Amount</div>
+            <div className='auth-transaction__info-value'>
+              <FormatBalance
+                format={balanceFormat}
+                value={requestPayload.value}
+              />
+            </div>
+          </div>
+
+          <div className='auth-transaction__info'>
+            <div className='auth-transaction__info-text'>Estimated fee</div>
+            <div className='auth-transaction__info-value'>
+              <FormatBalance
+                format={[feeDecimals, feeSymbol]}
+                value={fee}
+              />
+            </div>
+          </div>
+
+          <div className='auth-transaction__info'>
+            <div className='auth-transaction__info-text'>Total (Amount + Fee)</div>
+            <div className='auth-transaction__info-value'>
+              {renderTotal({
+                fee,
+                feeDecimals,
+                feeSymbol,
+                amount: requestPayload.value,
+                amountDecimals: balanceFormat[0],
+                amountSymbol: balanceFormat[2] || balanceFormat[1]
+              })}
+            </div>
+          </div>
         </SigningRequest>
 
       </Modal>

@@ -26,7 +26,7 @@ import { hexToU8a, isHex } from '@polkadot/util';
 import ScanSignature from './ScanSignature';
 
 interface Props extends ThemeProps{
-  children: JSX.Element;
+  children: JSX.Element | JSX.Element[];
   className?: string;
   genesisHash: string;
   handlerStart: () => void;

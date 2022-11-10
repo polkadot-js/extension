@@ -81,92 +81,6 @@ function AuthTransaction ({ balanceFormat,
     });
   }, [onChangeResult]);
 
-  const handlerRenderInfo = useCallback(() => {
-    return (
-      <>
-        <div className='bridge__chain-selector-area'>
-          <Dropdown
-            className='bridge__chain-selector'
-            isDisabled={true}
-            label={'Original Chain'}
-            options={originChainOptions}
-            value={requestPayload.originNetworkKey}
-          />
-
-          <div className='bridge__chain-swap'>
-            <img
-              alt='Icon'
-              src={arrowRight}
-            />
-          </div>
-
-          <Dropdown
-            className='bridge__chain-selector'
-            isDisabled={true}
-            label={'Destination Chain'}
-            options={destinationChainOptions}
-            value={requestPayload.destinationNetworkKey}
-          />
-        </div>
-
-        <InputAddress
-          className={'auth-transaction__input-address'}
-          defaultValue={requestPayload.from}
-          help={t<string>('The account you will transfer from.')}
-          isDisabled={true}
-          isSetDefaultValue={true}
-          label={t<string>('Origin Account')}
-          networkPrefix={originNetworkPrefix}
-          type='account'
-          withEllipsis
-        />
-
-        <InputAddress
-          className={'auth-transaction__input-address auth-transaction__destination-account'}
-          defaultValue={requestPayload.to}
-          help={t<string>('The account you want to transfer to.')}
-          isDisabled={true}
-          isSetDefaultValue={true}
-          label={t<string>('Destination Account')}
-          networkPrefix={destinationNetworkPrefix}
-          type='allPlus'
-          withEllipsis
-        />
-
-        <div className='auth-transaction__separator' />
-
-        <div className='auth-transaction__info'>
-          <div className='auth-transaction__info-text'>Amount</div>
-          <div className='auth-transaction__info-value'>
-            <FormatBalance
-              format={balanceFormat}
-              value={requestPayload.value}
-            />
-          </div>
-        </div>
-
-        <div className='auth-transaction__info'>
-          <div className='auth-transaction__info-text'>Origin Chain Fee</div>
-          <div className='auth-transaction__info-value'>
-            <FeeValue feeString={feeString} />
-          </div>
-        </div>
-
-        <div className='auth-transaction__info'>
-          <div className='auth-transaction__info-text'>Total</div>
-          <div className='auth-transaction__info-value'>
-            <FormatBalance
-              format={balanceFormat}
-              value={requestPayload.value}
-            />
-            <span> + </span>
-            <FeeValue feeString={feeString} />
-          </div>
-        </div>
-      </>
-    );
-  }, [balanceFormat, destinationChainOptions, destinationNetworkPrefix, feeString, originChainOptions, originNetworkPrefix, requestPayload.destinationNetworkKey, requestPayload.from, requestPayload.originNetworkKey, requestPayload.to, requestPayload.value, t]);
-
   return (
     <div className={className}>
       <Modal className={'signer-modal'}>
@@ -198,9 +112,86 @@ function AuthTransaction ({ balanceFormat,
           onSuccess={onSuccess}
           params={requestPayload}
         >
-          { handlerRenderInfo() }
-        </SigningRequest>
+          <div className='bridge__chain-selector-area'>
+            <Dropdown
+              className='bridge__chain-selector'
+              isDisabled={true}
+              label={'Original Chain'}
+              options={originChainOptions}
+              value={requestPayload.originNetworkKey}
+            />
 
+            <div className='bridge__chain-swap'>
+              <img
+                alt='Icon'
+                src={arrowRight}
+              />
+            </div>
+
+            <Dropdown
+              className='bridge__chain-selector'
+              isDisabled={true}
+              label={'Destination Chain'}
+              options={destinationChainOptions}
+              value={requestPayload.destinationNetworkKey}
+            />
+          </div>
+
+          <InputAddress
+            className={'auth-transaction__input-address'}
+            defaultValue={requestPayload.from}
+            help={t<string>('The account you will transfer from.')}
+            isDisabled={true}
+            isSetDefaultValue={true}
+            label={t<string>('Origin Account')}
+            networkPrefix={originNetworkPrefix}
+            type='account'
+            withEllipsis
+          />
+
+          <InputAddress
+            className={'auth-transaction__input-address auth-transaction__destination-account'}
+            defaultValue={requestPayload.to}
+            help={t<string>('The account you want to transfer to.')}
+            isDisabled={true}
+            isSetDefaultValue={true}
+            label={t<string>('Destination Account')}
+            networkPrefix={destinationNetworkPrefix}
+            type='allPlus'
+            withEllipsis
+          />
+
+          <div className='auth-transaction__separator' />
+
+          <div className='auth-transaction__info'>
+            <div className='auth-transaction__info-text'>Amount</div>
+            <div className='auth-transaction__info-value'>
+              <FormatBalance
+                format={balanceFormat}
+                value={requestPayload.value}
+              />
+            </div>
+          </div>
+
+          <div className='auth-transaction__info'>
+            <div className='auth-transaction__info-text'>Origin Chain Fee</div>
+            <div className='auth-transaction__info-value'>
+              <FeeValue feeString={feeString} />
+            </div>
+          </div>
+
+          <div className='auth-transaction__info'>
+            <div className='auth-transaction__info-text'>Total</div>
+            <div className='auth-transaction__info-value'>
+              <FormatBalance
+                format={balanceFormat}
+                value={requestPayload.value}
+              />
+              <span> + </span>
+              <FeeValue feeString={feeString} />
+            </div>
+          </div>
+        </SigningRequest>
       </Modal>
     </div>
   );

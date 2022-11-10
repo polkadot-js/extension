@@ -19,7 +19,7 @@ import styled from 'styled-components';
 interface Props<T extends BaseRequestSign, V extends BasicTxResponse> {
   account?: AccountJson | null;
   balanceError?: boolean;
-  children: JSX.Element;
+  children: JSX.Element | JSX.Element[];
   detailError?: boolean;
   handleSignLedger?: (params: ExternalRequestSign<T>, callback: HandleTxResponse<V>) => Promise<V>;
   handleSignPassword?: (params: PasswordRequestSign<T>, callback: HandleTxResponse<V>) => Promise<V>;

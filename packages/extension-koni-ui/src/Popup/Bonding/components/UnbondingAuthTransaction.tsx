@@ -78,60 +78,6 @@ function UnbondingAuthTransaction ({ amount, balanceError, className, fee, handl
     setExtrinsicHash(extrinsicHash);
   }, [setExtrinsicHash, setIsTxSuccess, setShowConfirm, setShowResult]);
 
-  const renderInfo = useCallback(() => {
-    return (
-      <>
-        <InputAddress
-          autoPrefill={false}
-          className={'receive-input-address'}
-          defaultValue={account?.address}
-          help={t<string>('The account which you will unstake')}
-          isDisabled={true}
-          isSetDefaultValue={true}
-          label={t<string>('Unstake from account')}
-          networkPrefix={networkJson.ss58Format}
-          type='allPlus'
-          withEllipsis
-        />
-
-        <div className={'transaction-info-container'}>
-          <div className={'transaction-info-row'}>
-            <div className={'transaction-info-title'}>Unstaking amount</div>
-            <div className={'transaction-info-value'}>
-              <BalanceVal
-                newRule={false}
-                symbol={networkJson.nativeToken}
-                value={amount}
-                withSymbol={true}
-              />
-            </div>
-          </div>
-
-          <div className={'transaction-info-row'}>
-            <div className={'transaction-info-title'}>Unstaking fee</div>
-            <div className={'transaction-info-value'}>
-              <FeeValue feeString={fee} />
-            </div>
-          </div>
-
-          <div className={'transaction-info-row'}>
-            <div className={'transaction-info-title'}>Total</div>
-            <div className={'transaction-info-value'}>
-              <BalanceVal
-                newRule={false}
-                symbol={networkJson.nativeToken}
-                value={amount}
-                withSymbol={true}
-              />
-              &nbsp;+&nbsp;
-              <FeeValue feeString={fee} />
-            </div>
-          </div>
-        </div>
-      </>
-    );
-  }, [account?.address, amount, fee, networkJson, t]);
-
   return (
     <div className={className}>
       <Modal>
@@ -164,7 +110,53 @@ function UnbondingAuthTransaction ({ amount, balanceError, className, fee, handl
           onSuccess={onSuccess}
           params={params}
         >
-          { renderInfo() }
+          <InputAddress
+            autoPrefill={false}
+            className={'receive-input-address'}
+            defaultValue={account?.address}
+            help={t<string>('The account which you will unstake')}
+            isDisabled={true}
+            isSetDefaultValue={true}
+            label={t<string>('Unstake from account')}
+            networkPrefix={networkJson.ss58Format}
+            type='allPlus'
+            withEllipsis
+          />
+
+          <div className={'transaction-info-container'}>
+            <div className={'transaction-info-row'}>
+              <div className={'transaction-info-title'}>Unstaking amount</div>
+              <div className={'transaction-info-value'}>
+                <BalanceVal
+                  newRule={false}
+                  symbol={networkJson.nativeToken}
+                  value={amount}
+                  withSymbol={true}
+                />
+              </div>
+            </div>
+
+            <div className={'transaction-info-row'}>
+              <div className={'transaction-info-title'}>Unstaking fee</div>
+              <div className={'transaction-info-value'}>
+                <FeeValue feeString={fee} />
+              </div>
+            </div>
+
+            <div className={'transaction-info-row'}>
+              <div className={'transaction-info-title'}>Total</div>
+              <div className={'transaction-info-value'}>
+                <BalanceVal
+                  newRule={false}
+                  symbol={networkJson.nativeToken}
+                  value={amount}
+                  withSymbol={true}
+                />
+                &nbsp;+&nbsp;
+                <FeeValue feeString={fee} />
+              </div>
+            </div>
+          </div>
         </SigningRequest>
       </Modal>
     </div>

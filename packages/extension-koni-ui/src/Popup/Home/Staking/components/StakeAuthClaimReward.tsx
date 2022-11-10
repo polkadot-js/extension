@@ -79,41 +79,6 @@ function StakeAuthClaimReward ({ address, className, hideModal, networkKey }: Pr
     setShowResult(false);
   }, []);
 
-  const renderInfo = useCallback(() => {
-    return (
-      <>
-        <InputAddress
-          autoPrefill={false}
-          className={'receive-input-address'}
-          defaultValue={address}
-          help={t<string>('The account which you will claim reward')}
-          isDisabled={true}
-          isSetDefaultValue={true}
-          label={t<string>('Claim staking reward from account')}
-          networkPrefix={networkJson.ss58Format}
-          type='allPlus'
-          withEllipsis
-        />
-
-        <div className={'transaction-info-container'}>
-          <div className={'transaction-info-row'}>
-            <div className={'transaction-info-title'}>Reward claiming fee</div>
-            <div className={'transaction-info-value'}>
-              <FeeValue feeString={fee} />
-            </div>
-          </div>
-
-          <div className={'transaction-info-row'}>
-            <div className={'transaction-info-title'}>Total</div>
-            <div className={'transaction-info-value'}>
-              <FeeValue feeString={fee} />
-            </div>
-          </div>
-        </div>
-      </>
-    );
-  }, [address, fee, networkJson.ss58Format, t]);
-
   useEffect(() => {
     getStakeClaimRewardTxInfo({
       address,
@@ -170,7 +135,34 @@ function StakeAuthClaimReward ({ address, className, hideModal, networkKey }: Pr
                       onSuccess={onSuccess}
                       params={params}
                     >
-                      { renderInfo() }
+                      <InputAddress
+                        autoPrefill={false}
+                        className={'receive-input-address'}
+                        defaultValue={address}
+                        help={t<string>('The account which you will claim reward')}
+                        isDisabled={true}
+                        isSetDefaultValue={true}
+                        label={t<string>('Claim staking reward from account')}
+                        networkPrefix={networkJson.ss58Format}
+                        type='allPlus'
+                        withEllipsis
+                      />
+
+                      <div className={'transaction-info-container'}>
+                        <div className={'transaction-info-row'}>
+                          <div className={'transaction-info-title'}>Reward claiming fee</div>
+                          <div className={'transaction-info-value'}>
+                            <FeeValue feeString={fee} />
+                          </div>
+                        </div>
+
+                        <div className={'transaction-info-row'}>
+                          <div className={'transaction-info-title'}>Total</div>
+                          <div className={'transaction-info-value'}>
+                            <FeeValue feeString={fee} />
+                          </div>
+                        </div>
+                      </div>
                     </SigningRequest>
                   )
                   : <Spinner className={'container-spinner'} />

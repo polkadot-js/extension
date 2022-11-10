@@ -82,57 +82,6 @@ function StakeAuthCompoundRequest ({ accountMinimum, address, balanceError, bond
     setExtrinsicHash(extrinsicHash);
   }, [setExtrinsicHash, setIsTxSuccess, setShowAuth, setShowResult]);
 
-  const renderInfo = useCallback(() => {
-    return (
-      <>
-        <InputAddress
-          autoPrefill={false}
-          className={'receive-input-address'}
-          defaultValue={address}
-          help={t<string>('The account which you will compound the stake')}
-          isDisabled={true}
-          isSetDefaultValue={true}
-          label={t<string>('Compound the stake from account')}
-          networkPrefix={networkJson.ss58Format}
-          type='allPlus'
-          withEllipsis
-        />
-
-        <div className={'transaction-info-container'}>
-          <div className={'transaction-info-row'}>
-            <div className={'transaction-info-title'}>Compounding threshold</div>
-            <div className={'transaction-info-value'}>{formatLocaleNumber(parseFloat(accountMinimum), 4)} TUR</div>
-          </div>
-          <div className={'transaction-info-row'}>
-            <div className={'transaction-info-title'}>Compounding starts in</div>
-            <div className={'transaction-info-value'}>About {moment.duration(initTime, 'days').humanize()}</div>
-          </div>
-          <div className={'transaction-info-row'}>
-            <div className={'transaction-info-title'}>Optimal compounding time</div>
-            <div className={'transaction-info-value'}>{moment.duration(optimalTime, 'days').humanize()}</div>
-          </div>
-        </div>
-
-        <div className={'transaction-info-container'}>
-          <div className={'transaction-info-row'}>
-            <div className={'transaction-info-title'}>Transaction fee</div>
-            <div className={'transaction-info-value'}>{fee}</div>
-          </div>
-
-          <div className={'transaction-info-row'}>
-            <div className={'transaction-info-title'}>Compounding fee</div>
-            <div className={'transaction-info-value'}>{compoundFee}</div>
-          </div>
-
-          <div className={'transaction-info-row'}>
-            <div className={'transaction-info-title'}>Total</div>
-            <div className={'transaction-info-value'}>{fee} + {compoundFee}</div>
-          </div>
-        </div>
-      </>
-    );
-  }, [accountMinimum, address, compoundFee, fee, initTime, networkJson.ss58Format, optimalTime, t]);
-
   return (
     <div className={className}>
       <Modal>
@@ -165,7 +114,50 @@ function StakeAuthCompoundRequest ({ accountMinimum, address, balanceError, bond
           onSuccess={onSuccess}
           params={params}
         >
-          { renderInfo() }
+          <InputAddress
+            autoPrefill={false}
+            className={'receive-input-address'}
+            defaultValue={address}
+            help={t<string>('The account which you will compound the stake')}
+            isDisabled={true}
+            isSetDefaultValue={true}
+            label={t<string>('Compound the stake from account')}
+            networkPrefix={networkJson.ss58Format}
+            type='allPlus'
+            withEllipsis
+          />
+
+          <div className={'transaction-info-container'}>
+            <div className={'transaction-info-row'}>
+              <div className={'transaction-info-title'}>Compounding threshold</div>
+              <div className={'transaction-info-value'}>{formatLocaleNumber(parseFloat(accountMinimum), 4)} TUR</div>
+            </div>
+            <div className={'transaction-info-row'}>
+              <div className={'transaction-info-title'}>Compounding starts in</div>
+              <div className={'transaction-info-value'}>About {moment.duration(initTime, 'days').humanize()}</div>
+            </div>
+            <div className={'transaction-info-row'}>
+              <div className={'transaction-info-title'}>Optimal compounding time</div>
+              <div className={'transaction-info-value'}>{moment.duration(optimalTime, 'days').humanize()}</div>
+            </div>
+          </div>
+
+          <div className={'transaction-info-container'}>
+            <div className={'transaction-info-row'}>
+              <div className={'transaction-info-title'}>Transaction fee</div>
+              <div className={'transaction-info-value'}>{fee}</div>
+            </div>
+
+            <div className={'transaction-info-row'}>
+              <div className={'transaction-info-title'}>Compounding fee</div>
+              <div className={'transaction-info-value'}>{compoundFee}</div>
+            </div>
+
+            <div className={'transaction-info-row'}>
+              <div className={'transaction-info-title'}>Total</div>
+              <div className={'transaction-info-value'}>{fee} + {compoundFee}</div>
+            </div>
+          </div>
         </SigningRequest>
       </Modal>
     </div>

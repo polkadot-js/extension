@@ -12,7 +12,7 @@ import styled from 'styled-components';
 
 interface Props extends ThemeProps {
   className?: string;
-  children: JSX.Element;
+  children: JSX.Element | JSX.Element[];
   hideConfirm: () => Promise<void> | void;
 }
 

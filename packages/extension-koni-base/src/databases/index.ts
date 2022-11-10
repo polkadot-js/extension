@@ -34,12 +34,13 @@ export default class KoniDatabase extends Dexie {
   public balances!: Table<IBalance, object>;
   public crowdloans!: Table<ICrowdloanItem, object>;
   public stakings!: Table<IStakingItem, object>;
+  public stakingsV2!: Table<IStakingItem, object>;
   public transactions!: Table<ITransactionHistoryItem, object>;
   public migrations!: Table<IMigration, object>;
 
   private schemaVersion: number;
 
-  public constructor (name = DEFAULT_DATABASE, schemaVersion = 4) {
+  public constructor (name = DEFAULT_DATABASE, schemaVersion = 5) {
     super(name);
     this.schemaVersion = schemaVersion;
 
@@ -62,6 +63,10 @@ export default class KoniDatabase extends Dexie {
 
     this.conditionalVersion(4, {
       transactions: '[chainHash+address+extrinsicHash+eventIdx+action], &[chainHash+address+extrinsicHash+eventIdx+action], chainHash, chain, address, extrinsicHash, eventIdx, action'
+    });
+
+    this.conditionalVersion(5, {
+      stakingsV2: '[chainHash+address+type], &[chainHash+address+type], [chainHash+address], chainHash, chain, address, type'
     });
 
     // this.conditionalVersion(4, {

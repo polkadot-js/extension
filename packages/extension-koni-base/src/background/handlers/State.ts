@@ -12,7 +12,6 @@ import { initApi } from '@subwallet/extension-koni-base/api/dotsama';
 import { cacheRegistryMap, getRegistry } from '@subwallet/extension-koni-base/api/dotsama/registry';
 import { PREDEFINED_GENESIS_HASHES, PREDEFINED_NETWORKS } from '@subwallet/extension-koni-base/api/predefinedNetworks';
 import { PREDEFINED_SINGLE_MODES } from '@subwallet/extension-koni-base/api/predefinedSingleMode';
-import { DEFAULT_STAKING_NETWORKS } from '@subwallet/extension-koni-base/api/staking';
 // eslint-disable-next-line camelcase
 import { DotSamaCrowdloan_crowdloans_nodes } from '@subwallet/extension-koni-base/api/subquery/__generated__/DotSamaCrowdloan';
 import { fetchDotSamaCrowdloan } from '@subwallet/extension-koni-base/api/subquery/crowdloan';
@@ -59,20 +58,20 @@ function getSuri (seed: string, type?: KeypairType): string {
     : seed;
 }
 
-function generateDefaultStakingMap () {
-  const stakingMap: Record<string, StakingItem> = {};
-
-  Object.keys(DEFAULT_STAKING_NETWORKS).forEach((networkKey) => {
-    stakingMap[networkKey] = {
-      name: PREDEFINED_NETWORKS[networkKey].chain,
-      chainId: networkKey,
-      nativeToken: PREDEFINED_NETWORKS[networkKey].nativeToken,
-      state: APIItemState.PENDING
-    } as StakingItem;
-  });
-
-  return stakingMap;
-}
+// function generateDefaultStakingMap () {
+//   const stakingMap: Record<string, StakingItem> = {};
+//
+//   Object.keys(DEFAULT_STAKING_NETWORKS).forEach((networkKey) => {
+//     stakingMap[parseStakingItemKey(networkKey)] = {
+//       name: PREDEFINED_NETWORKS[networkKey].chain,
+//       chain: networkKey,
+//       nativeToken: PREDEFINED_NETWORKS[networkKey].nativeToken,
+//       state: APIItemState.PENDING
+//     } as StakingItem;
+//   });
+//
+//   return stakingMap;
+// }
 
 function generateDefaultCrowdloanMap () {
   const crowdloanMap: Record<string, CrowdloanItem> = {};
@@ -144,19 +143,14 @@ export default class KoniState extends State {
   };
 
   private nftSubject = new Subject<NftJson>();
-
   private stakingSubject = new Subject<StakingJson>();
+
   private stakingRewardSubject = new Subject<StakingRewardJson>();
-  private stakingMap: Record<string, StakingItem> = generateDefaultStakingMap();
-  private stakingRewardState: StakingRewardJson = {
-    ready: false,
-    details: []
-  } as StakingRewardJson;
+  private stakingRewardState: StakingRewardJson = { ready: false, details: [] } as StakingRewardJson;
 
-  private stakeUnlockingInfo: StakeUnlockingJson = { timestamp: -1, details: {} };
-
-  // eslint-disable-next-line camelcase
   private stakeUnlockingInfoSubject = new Subject<StakeUnlockingJson>();
+  private stakeUnlockingInfo: StakeUnlockingJson = { timestamp: -1, details: [] };
+
   private historyMap: Record<string, TransactionHistoryItemType[]> = {};
   private historySubject = new Subject<Record<string, TransactionHistoryItemType[]>>();
 
@@ -542,10 +536,20 @@ export default class KoniState extends State {
     });
   }
 
-  public getStaking (reset?: boolean): StakingJson {
-    const activeData = this.removeInactiveNetworkData(this.stakingMap);
+  public async getStaking (): Promise<StakingJson> {
+    const addresses = await this.getDecodedAddresses();
 
-    return { ready: true, details: activeData, reset } as StakingJson;
+    const activeNetworkHashes = Object.values(this.activeNetworks).map((network) => network.genesisHash);
+
+    const stakings = await this.dbService.getStakings(addresses, activeNetworkHashes);
+
+    return { ready: true, details: stakings } as StakingJson;
+  }
+
+  public async getStakingRecordsByAddress (address: string): Promise<StakingItem[]> {
+    const activeNetworkHashes = Object.values(this.activeNetworks).map((network) => network.genesisHash);
+
+    return await this.dbService.getStakings([address], activeNetworkHashes);
   }
 
   public async getStoredStaking (address: string) {
@@ -599,36 +603,8 @@ export default class KoniState extends State {
     });
   }
 
-  private hasUpdateStakingItem (networkKey: string, item: StakingItem): boolean {
-    if (item.state !== APIItemState.READY) {
-      return false;
-    }
-
-    const oldItem = this.stakingMap[networkKey];
-
-    return !oldItem || oldItem.state === APIItemState.PENDING ||
-      oldItem.balance !== item.balance || oldItem.activeBalance !== item.activeBalance ||
-      oldItem.unlockingBalance !== item.unlockingBalance;
-  }
-
   public setStakingItem (networkKey: string, item: StakingItem): void {
-    const itemData = { ...item, timestamp: +new Date() };
-
-    if (this.hasUpdateStakingItem(networkKey, item)) {
-      // Update staking map
-      this.stakingMap[networkKey] = itemData;
-      this.updateStakingStore(networkKey, item);
-
-      this.lazyNext('setStakingItem', () => {
-        this.publishStaking();
-      });
-    }
-  }
-
-  private updateStakingStore (networkKey: string, item: StakingItem) {
-    this.getCurrentAccount((currentAccountInfo) => {
-      this.dbService.updateStakingStore(networkKey, this.getNetworkGenesisHashByKey(networkKey), currentAccountInfo.address, item).catch((e) => this.logger.warn(e));
-    });
+    this.dbService.updateStaking(networkKey, this.getNetworkGenesisHashByKey(networkKey), item.address, item).catch((e) => this.logger.warn(e));
   }
 
   public setNftTransfer (data: NftTransferExtra, callback?: (data: NftTransferExtra) => void): void {
@@ -705,9 +681,9 @@ export default class KoniState extends State {
       return;
     }
 
-    const activeNetworkHashs = Object.values(this.activeNetworks).map((network) => network.genesisHash);
+    const activeNetworkHashes = Object.values(this.activeNetworks).map((network) => network.genesisHash);
 
-    const nfts = await this.dbService.getNft(addresses, activeNetworkHashs);
+    const nfts = await this.dbService.getNft(addresses, activeNetworkHashes);
 
     return {
       nftList: nfts,
@@ -1026,22 +1002,26 @@ export default class KoniState extends State {
 
     // storedData = this.removeInactiveNetworkData(storedData);
 
-    const merge = { ...defaultData, ...storedData } as Record<string, CrowdloanItem>;
-
-    this.crowdloanMap = merge;
+    this.crowdloanMap = { ...defaultData, ...storedData } as Record<string, CrowdloanItem>;
     this.publishCrowdloan(true);
   }
 
-  public async resetStakingMap (newAddress: string) {
-    const defaultData = generateDefaultStakingMap();
-    let storedData = await this.getStoredStaking(newAddress);
+  public async resetStaking (newAddress: string) {
+    this.getStaking()
+      .then((data) => {
+        this.stakingSubject.next(data);
+      })
+      .catch((e) => this.logger.warn(e));
 
-    storedData = this.removeInactiveNetworkData(storedData);
+    const activeNetworkHashes = Object.values(this.activeNetworks).map((network) => network.genesisHash);
+    const addresses = await this.getDecodedAddresses(newAddress);
 
-    const merge = { ...defaultData, ...storedData } as Record<string, StakingItem>;
-
-    this.stakingMap = merge;
-    this.publishStaking(true);
+    this.dbService.subscribeStaking(addresses, activeNetworkHashes, (stakings) => {
+      this.stakingSubject.next({
+        ready: true,
+        details: stakings
+      });
+    });
   }
 
   public setBalanceItem (networkKey: string, item: BalanceItem) {
@@ -1878,10 +1858,6 @@ export default class KoniState extends State {
 
   private publishCrowdloan (reset?: boolean) {
     this.crowdloanSubject.next(this.getCrowdloan(reset));
-  }
-
-  private publishStaking (reset?: boolean) {
-    this.stakingSubject.next(this.getStaking(reset));
   }
 
   private publishHistory () {

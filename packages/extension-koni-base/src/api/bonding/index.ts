@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { ApiProps, NetworkJson, UnlockingStakeInfo, ValidatorInfo } from '@subwallet/extension-base/background/KoniTypes';
+import { getAmplitudeBondingBasics, getAmplitudeBondingExtrinsic, getAmplitudeCollatorsInfo, getAmplitudeUnbondingExtrinsic, handleAmplitudeBondingTxInfo, handleAmplitudeUnbondingTxInfo } from '@subwallet/extension-koni-base/api/bonding/amplitude';
 import { getAstarBondingBasics, getAstarBondingExtrinsic, getAstarClaimRewardExtrinsic, getAstarDappsInfo, getAstarDelegationInfo, getAstarUnbondingExtrinsic, getAstarWithdrawalExtrinsic, handleAstarBondingTxInfo, handleAstarClaimRewardTxInfo, handleAstarUnbondingTxInfo, handleAstarUnlockingInfo, handleAstarWithdrawalTxInfo } from '@subwallet/extension-koni-base/api/bonding/astar';
 import { getParaBondingBasics, getParaBondingExtrinsic, getParaCollatorsInfo, getParaDelegationInfo, getParaUnbondingExtrinsic, getParaWithdrawalExtrinsic, handleParaBondingTxInfo, handleParaUnbondingTxInfo, handleParaUnlockingInfo, handleParaWithdrawalTxInfo } from '@subwallet/extension-koni-base/api/bonding/paraChain';
 import { getRelayBondingExtrinsic, getRelayChainBondingBasics, getRelayUnbondingExtrinsic, getRelayValidatorsInfo, getRelayWithdrawalExtrinsic, getTargetValidators, handleRelayBondingTxInfo, handleRelayUnbondingTxInfo, handleRelayUnlockingInfo, handleRelayWithdrawalTxInfo } from '@subwallet/extension-koni-base/api/bonding/relayChain';
@@ -9,8 +10,9 @@ import Web3 from 'web3';
 
 export const CHAIN_TYPES: Record<string, string[]> = {
   relay: ['polkadot', 'kusama', 'aleph', 'polkadex', 'ternoa', 'ternoa_alphanet'],
-  para: ['moonbeam', 'moonriver', 'moonbase', 'turing', 'turingStaging', 'bifrost', 'bifrost_testnet', 'calamari_test', 'calamari', 'amplitude', 'amplitude_test'],
-  astar: ['astar', 'shiden', 'shibuya']
+  para: ['moonbeam', 'moonriver', 'moonbase', 'turing', 'turingStaging', 'bifrost', 'bifrost_testnet', 'calamari_test', 'calamari'],
+  astar: ['astar', 'shiden', 'shibuya'],
+  amplitude: ['amplitude', 'amplitude_test', 'kilt']
 };
 
 export async function getChainBondingBasics (networkKey: string, dotSamaApi: ApiProps) {
@@ -18,6 +20,8 @@ export async function getChainBondingBasics (networkKey: string, dotSamaApi: Api
     return getAstarBondingBasics(networkKey);
   } else if (CHAIN_TYPES.para.includes(networkKey)) {
     return getParaBondingBasics(networkKey, dotSamaApi);
+  } else if (CHAIN_TYPES.amplitude.includes(networkKey)) {
+    return getAmplitudeBondingBasics(networkKey, dotSamaApi);
   }
 
   return getRelayChainBondingBasics(networkKey, dotSamaApi);
@@ -28,6 +32,8 @@ export async function getValidatorsInfo (networkKey: string, dotSamaApi: ApiProp
     return getParaCollatorsInfo(networkKey, dotSamaApi, decimals, address);
   } else if (CHAIN_TYPES.astar.includes(networkKey)) {
     return getAstarDappsInfo(networkKey, dotSamaApi, decimals, address);
+  } else if (CHAIN_TYPES.amplitude.includes(networkKey)) {
+    return getAmplitudeCollatorsInfo(networkKey, dotSamaApi, decimals, address);
   }
 
   return getRelayValidatorsInfo(networkKey, dotSamaApi, decimals, address);
@@ -38,6 +44,8 @@ export async function getBondingTxInfo (networkJson: NetworkJson, amount: number
     return handleParaBondingTxInfo(networkJson, amount, networkKey, nominatorAddress, validatorInfo, dotSamaApiMap, web3ApiMap, bondedValidators.length);
   } else if (CHAIN_TYPES.astar.includes(networkKey)) {
     return handleAstarBondingTxInfo(networkJson, amount, networkKey, nominatorAddress, validatorInfo, dotSamaApiMap, web3ApiMap);
+  } else if (CHAIN_TYPES.amplitude.includes(networkKey)) {
+    return handleAmplitudeBondingTxInfo(networkJson, amount, networkKey, nominatorAddress, validatorInfo, dotSamaApiMap, web3ApiMap);
   }
 
   const targetValidators: string[] = getTargetValidators(bondedValidators, validatorInfo.address);
@@ -50,6 +58,8 @@ export async function getBondingExtrinsic (networkJson: NetworkJson, networkKey:
     return getParaBondingExtrinsic(nominatorAddress, networkJson, dotSamaApi, amount, validatorInfo, bondedValidators.length);
   } else if (CHAIN_TYPES.astar.includes(networkKey)) {
     return getAstarBondingExtrinsic(dotSamaApi, networkJson, amount, networkKey, nominatorAddress, validatorInfo);
+  } else if (CHAIN_TYPES.amplitude.includes(networkKey)) {
+    return getAmplitudeBondingExtrinsic(nominatorAddress, networkJson, dotSamaApi, amount, validatorInfo);
   }
 
   const targetValidators: string[] = getTargetValidators(bondedValidators, validatorInfo.address);
@@ -62,6 +72,8 @@ export async function getUnbondingTxInfo (address: string, amount: number, netwo
     return handleParaUnbondingTxInfo(address, amount, networkKey, dotSamaApiMap, web3ApiMap, networkJson, validatorAddress as string, unstakeAll as boolean);
   } else if (CHAIN_TYPES.astar.includes(networkKey)) {
     return handleAstarUnbondingTxInfo(networkJson, amount, networkKey, address, validatorAddress as string, dotSamaApiMap, web3ApiMap);
+  } else if (CHAIN_TYPES.amplitude.includes(networkKey)) {
+    return handleAmplitudeUnbondingTxInfo(address, amount, networkKey, dotSamaApiMap, web3ApiMap, networkJson, validatorAddress as string, unstakeAll as boolean);
   }
 
   return handleRelayUnbondingTxInfo(address, amount, networkKey, dotSamaApiMap, web3ApiMap, networkJson);
@@ -72,6 +84,8 @@ export async function getUnbondingExtrinsic (address: string, amount: number, ne
     return getParaUnbondingExtrinsic(dotSamaApi, amount, networkJson, validatorAddress as string, unstakeAll as boolean);
   } else if (CHAIN_TYPES.astar.includes(networkKey)) {
     return getAstarUnbondingExtrinsic(dotSamaApi, networkJson, amount, networkKey, address, validatorAddress as string);
+  } else if (CHAIN_TYPES.amplitude.includes(networkKey)) {
+    return getAmplitudeUnbondingExtrinsic(dotSamaApi, amount, networkJson, validatorAddress as string, unstakeAll as boolean);
   }
 
   return getRelayUnbondingExtrinsic(dotSamaApi, amount, networkJson);

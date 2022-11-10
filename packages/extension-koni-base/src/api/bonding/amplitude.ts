@@ -1,35 +1,257 @@
 // Copyright 2019-2022 @subwallet/extension-koni authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { ApiProps, ValidatorInfo } from '@subwallet/extension-base/background/KoniTypes';
-import { parseRawNumber } from '@subwallet/extension-koni-base/utils';
+import { ApiProps, BasicTxInfo, ChainBondingBasics, NetworkJson, ValidatorInfo } from '@subwallet/extension-base/background/KoniTypes';
+import { getFreeBalance } from '@subwallet/extension-koni-base/api/dotsama/balance';
+import { parseNumberToDisplay, parseRawNumber } from '@subwallet/extension-koni-base/utils';
+import Web3 from 'web3';
+
+import { BN } from '@polkadot/util';
+
+// interface InflationConfig {
+//   collator: {
+//     maxRate: string,
+//     rewardRate: {
+//       annual: string,
+//       perBlock: string
+//     }
+//   },
+//   delegator: {
+//     maxRate: string,
+//     rewardRate: {
+//       annual: string,
+//       perBlock: string
+//     }
+//   }
+// }
+
+interface CollatorInfo {
+  id: string,
+  stake: string,
+  delegators: any[],
+  total: string,
+  status: string
+}
 
 export async function getAmplitudeBondingBasics (networkKey: string, dotSamaApi: ApiProps) {
   const apiProps = await dotSamaApi.isReady;
 
-  const _round = (await apiProps.api.query.parachainStaking.round()).toHuman() as Record<string, string>;
-  const round = parseRawNumber(_round.current);
-
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [_totalStake, _totalIssuance, _inflation, _allCollators] = await Promise.all([
-    apiProps.api.query.parachainStaking.totalCollatorStake(round),
+    apiProps.api.query.parachainStaking.totalCollatorStake(),
     apiProps.api.query.balances.totalIssuance(),
     apiProps.api.query.parachainStaking.inflationConfig(),
-    apiProps.api.query.parachainStaking.candidatePool()
+    apiProps.api.query.parachainStaking.candidatePool.entries()
   ]);
 
+  // const totalStake = _totalStake ? new BN(_totalStake.toString()) : BN_ZERO;
+  // const totalIssuance = new BN(_totalIssuance.toString());
+  //
+  // const inflationConfig = _inflation.toHuman() as unknown as InflationConfig;
 
+  return {
+    isMaxNominators: false,
+    stakedReturn: 0,
+    validatorCount: _allCollators.length
+  } as ChainBondingBasics;
 }
 
 export async function getAmplitudeCollatorsInfo (networkKey: string, dotSamaApi: ApiProps, decimals: number, address: string) {
   const apiProps = await dotSamaApi.isReady;
-
-  const _round = (await apiProps.api.query.parachainStaking.round()).toHuman() as Record<string, string>;
-  const round = parseRawNumber(_round.current);
 
   const [_allCollators, _delegatorState] = await Promise.all([
     apiProps.api.query.parachainStaking.candidatePool.entries(),
     apiProps.api.query.parachainStaking.delegatorState(address)
   ]);
 
+  const _maxDelegatorPerCandidate = apiProps.api.consts.parachainStaking.maxDelegatorsPerCollator.toHuman() as string;
+  const maxDelegatorPerCandidate = parseRawNumber(_maxDelegatorPerCandidate);
 
+  const _maxDelegationCount = apiProps.api.consts.parachainStaking.maxDelegationsPerRound.toHuman() as string;
+  const maxDelegationCount = parseRawNumber(_maxDelegationCount);
+
+  const _chainMinDelegation = apiProps.api.consts.parachainStaking.minDelegatorStake.toHuman() as string;
+  const chainMinDelegation = parseRawNumber(_chainMinDelegation) / 10 ** decimals;
+
+  const rawDelegatorState = _delegatorState.toHuman() as Record<string, any> | null;
+
+  const allCollators: ValidatorInfo[] = [];
+
+  for (const _collator of _allCollators) {
+    const collatorInfo = _collator[1].toHuman() as unknown as CollatorInfo;
+
+    if (collatorInfo.status.toLowerCase() === 'active') {
+      allCollators.push({
+        address: collatorInfo.id,
+        totalStake: parseRawNumber(collatorInfo.total) / 10 ** decimals,
+        ownStake: parseRawNumber(collatorInfo.stake) / 10 ** decimals,
+        otherStake: (parseRawNumber(collatorInfo.total) - parseRawNumber(collatorInfo.stake)) / 10 ** decimals,
+
+        nominatorCount: collatorInfo.delegators.length,
+        commission: 0,
+        expectedReturn: 0,
+        blocked: false,
+        isVerified: false,
+        minBond: chainMinDelegation,
+        isNominated: false
+      });
+    }
+  }
+
+  const bondedCollators: string[] = [];
+
+  if (rawDelegatorState !== null) {
+    const collatorList = rawDelegatorState.delegations as Record<string, any>[];
+
+    for (const _collator of collatorList) {
+      bondedCollators.push(_collator.owner as string);
+    }
+  }
+
+  for (const collator of allCollators) {
+    if (bondedCollators.includes(collator.address)) {
+      collator.isNominated = true;
+    }
+  }
+
+  return {
+    maxNominatorPerValidator: maxDelegatorPerCandidate,
+    era: -1,
+    validatorsInfo: allCollators,
+    isBondedBefore: rawDelegatorState !== null,
+    bondedValidators: bondedCollators,
+    maxNominations: maxDelegationCount
+  };
+}
+
+export async function getAmplitudeBondingTxInfo (networkJson: NetworkJson, dotSamaApi: ApiProps, delegatorAddress: string, amount: number, collatorInfo: ValidatorInfo) {
+  const apiPromise = await dotSamaApi.isReady;
+  const parsedAmount = amount * (10 ** (networkJson.decimals as number));
+  const binaryAmount = new BN(parsedAmount.toString());
+
+  const rawDelegatorState = (await apiPromise.api.query.parachainStaking.delegatorState(delegatorAddress)).toHuman() as Record<string, any> | null;
+
+  const bondedValidators: string[] = [];
+
+  if (rawDelegatorState !== null) {
+    const validatorList = rawDelegatorState.delegations as Record<string, any>[];
+
+    for (const _validator of validatorList) {
+      bondedValidators.push(_validator.owner as string);
+    }
+  }
+
+  let extrinsic;
+
+  if (!bondedValidators.includes(collatorInfo.address)) {
+    extrinsic = apiPromise.api.tx.parachainStaking.joinDelegators(collatorInfo.address, binaryAmount);
+  } else {
+    extrinsic = apiPromise.api.tx.parachainStaking.delegatorStakeMore(collatorInfo.address, binaryAmount);
+  }
+
+  return extrinsic.paymentInfo(delegatorAddress);
+}
+
+export async function handleAmplitudeBondingTxInfo (networkJson: NetworkJson, amount: number, networkKey: string, nominatorAddress: string, validatorInfo: ValidatorInfo, dotSamaApiMap: Record<string, ApiProps>, web3ApiMap: Record<string, Web3>) {
+  try {
+    const [txInfo, balance] = await Promise.all([
+      getAmplitudeBondingTxInfo(networkJson, dotSamaApiMap[networkKey], nominatorAddress, amount, validatorInfo),
+      getFreeBalance(networkKey, nominatorAddress, dotSamaApiMap, web3ApiMap)
+    ]);
+
+    const feeString = parseNumberToDisplay(txInfo.partialFee, networkJson.decimals) + ` ${networkJson.nativeToken ? networkJson.nativeToken : ''}`;
+    const rawFee = parseRawNumber(txInfo.partialFee.toString());
+    const binaryBalance = new BN(balance);
+
+    const sumAmount = txInfo.partialFee.addn(amount);
+    const balanceError = sumAmount.gt(binaryBalance);
+
+    return {
+      rawFee,
+      fee: feeString,
+      balanceError
+    } as BasicTxInfo;
+  } catch (e) {
+    return {
+      fee: `0.0000 ${networkJson.nativeToken as string}`,
+      balanceError: false
+    } as BasicTxInfo;
+  }
+}
+
+export async function getAmplitudeUnbondingTxInfo (networkJson: NetworkJson, dotSamaApi: ApiProps, address: string, amount: number, collatorAddress: string, unstakeAll: boolean) {
+  const apiPromise = await dotSamaApi.isReady;
+  const parsedAmount = amount * (10 ** (networkJson.decimals as number));
+  const binaryAmount = new BN(parsedAmount.toString());
+
+  let extrinsic;
+
+  if (!unstakeAll) {
+    extrinsic = apiPromise.api.tx.parachainStaking.delegatorStakeLess(collatorAddress, binaryAmount);
+  } else {
+    extrinsic = apiPromise.api.tx.parachainStaking.leaveDelegators();
+  }
+
+  return extrinsic.paymentInfo(address);
+}
+
+export async function handleAmplitudeUnbondingTxInfo (address: string, amount: number, networkKey: string, dotSamaApiMap: Record<string, ApiProps>, web3ApiMap: Record<string, Web3>, networkJson: NetworkJson, collatorAddress: string, unstakeAll: boolean) {
+  try {
+    const [txInfo, balance] = await Promise.all([
+      getAmplitudeUnbondingTxInfo(networkJson, dotSamaApiMap[networkKey], address, amount, collatorAddress, unstakeAll),
+      getFreeBalance(networkKey, address, dotSamaApiMap, web3ApiMap)
+    ]);
+
+    const feeString = parseNumberToDisplay(txInfo.partialFee, networkJson.decimals) + ` ${networkJson.nativeToken ? networkJson.nativeToken : ''}`;
+    const rawFee = parseRawNumber(txInfo.partialFee.toString());
+    const binaryBalance = new BN(balance);
+
+    const balanceError = txInfo.partialFee.gt(binaryBalance);
+
+    return {
+      rawFee,
+      fee: feeString,
+      balanceError
+    } as BasicTxInfo;
+  } catch (e) {
+    return {
+      fee: `0.0000 ${networkJson.nativeToken as string}`,
+      balanceError: false
+    } as BasicTxInfo;
+  }
+}
+
+export async function getAmplitudeBondingExtrinsic (delegatorAddress: string, networkJson: NetworkJson, dotSamaApi: ApiProps, amount: number, collatorInfo: ValidatorInfo) {
+  const apiPromise = await dotSamaApi.isReady;
+  const parsedAmount = amount * (10 ** (networkJson.decimals as number));
+  const binaryAmount = new BN(parsedAmount.toString());
+  const rawDelegatorState = (await apiPromise.api.query.parachainStaking.delegatorState(delegatorAddress)).toHuman() as Record<string, any> | null;
+
+  const bondedValidators: string[] = [];
+
+  if (rawDelegatorState !== null) {
+    const validatorList = rawDelegatorState.delegations as Record<string, any>[];
+
+    for (const _validator of validatorList) {
+      bondedValidators.push(_validator.owner as string);
+    }
+  }
+
+  if (!bondedValidators.includes(collatorInfo.address)) {
+    return apiPromise.api.tx.parachainStaking.joinDelegators(collatorInfo.address, binaryAmount);
+  } else {
+    return apiPromise.api.tx.parachainStaking.delegatorStakeMore(collatorInfo.address, binaryAmount);
+  }
+}
+
+export async function getAmplitudeUnbondingExtrinsic (dotSamaApi: ApiProps, amount: number, networkJson: NetworkJson, collatorAddress: string, unstakeAll: boolean) {
+  const apiPromise = await dotSamaApi.isReady;
+  const parsedAmount = amount * (10 ** (networkJson.decimals as number));
+  const binaryAmount = new BN(parsedAmount.toString());
+
+  if (!unstakeAll) {
+    return apiPromise.api.tx.parachainStaking.delegatorStakeLess(collatorAddress, binaryAmount);
+  } else {
+    return apiPromise.api.tx.parachainStaking.leaveDelegators();
+  }
 }

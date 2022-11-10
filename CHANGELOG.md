@@ -1,5 +1,14 @@
 # CHANGELOG
 
+## 0.7.1 (Koni)
+Build date: Nov 10, 2022.
+
+Update:
+- Show nomination pool stake balance (#796)
+
+Bug fixes:
+- Bug parsing IPFS link (#794)
+
 ## 0.6.9 (Koni)
 Build date: Nov 3, 2022.
 

@@ -1665,6 +1665,10 @@ export default class KoniState extends State {
   }
 
   public updateNetworkStatus (networkKey: string, status: NETWORK_STATUS) {
+    if (this.networkMap[networkKey].apiStatus === status) {
+      return;
+    }
+
     this.networkMap[networkKey].apiStatus = status;
 
     this.networkMapSubject.next(this.networkMap);
@@ -2227,7 +2231,7 @@ export default class KoniState extends State {
         networkKey,
         change: transaction.value?.toString() || '0',
         changeSymbol: undefined,
-        fee: receipt.effectiveGasPrice.toString(),
+        fee: (receipt.gasUsed * receipt.effectiveGasPrice).toString(),
         feeSymbol: network?.nativeToken,
         action: 'send',
         extrinsicHash: receipt.transactionHash

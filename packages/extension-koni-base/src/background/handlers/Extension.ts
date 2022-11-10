@@ -2952,7 +2952,7 @@ export default class KoniExtension extends Extension {
           value: value || '0',
           transferAll: !!transferAll,
           tokenInfo: tokenInfo,
-          id: id,
+          id: requestId,
           setState: setState,
           updateState: updateState,
           callback: callback,

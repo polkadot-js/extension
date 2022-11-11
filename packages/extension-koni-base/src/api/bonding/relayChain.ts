@@ -406,7 +406,7 @@ export async function getRelayWithdrawalTxInfo (dotSamaAPi: ApiProps, address: s
 
   if (apiPromise.api.tx.staking.withdrawUnbonded.meta.args.length === 1) {
     const _slashingSpans = (await apiPromise.api.query.staking.slashingSpans(address)).toHuman() as Record<string, any>;
-    const slashingSpanCount = _slashingSpans.spanIndex as string;
+    const slashingSpanCount = _slashingSpans !== null ? _slashingSpans.spanIndex as string : '0';
     const extrinsic = apiPromise.api.tx.staking.withdrawUnbonded(slashingSpanCount);
 
     return extrinsic.paymentInfo(address);
@@ -449,7 +449,7 @@ export async function getRelayWithdrawalExtrinsic (dotSamaAPi: ApiProps, address
 
   if (apiPromise.api.tx.staking.withdrawUnbonded.meta.args.length === 1) {
     const _slashingSpans = (await apiPromise.api.query.staking.slashingSpans(address)).toHuman() as Record<string, any>;
-    const slashingSpanCount = _slashingSpans.spanIndex as string;
+    const slashingSpanCount = _slashingSpans !== null ? _slashingSpans.spanIndex as string : '0';
 
     return apiPromise.api.tx.staking.withdrawUnbonded(slashingSpanCount);
   } else {

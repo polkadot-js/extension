@@ -105,14 +105,56 @@ export interface RejectResolver {
 
 /// Staking subscribe
 
+export enum StakingType {
+  NOMINATED = 'nominated',
+  POOLED = 'pooled',
+}
+
 export interface StakingRewardItem {
   state: APIItemState
   name: string,
-  chainId: string,
+  chain: string,
+  address: string,
+  type: StakingType,
+
   latestReward?: string,
   totalReward?: string,
-  totalSlash?: string,
-  smartContract?: string
+  totalSlash?: string
+}
+export interface UnlockingStakeInfo {
+  chain: string,
+  address: string,
+  type: StakingType,
+
+  nextWithdrawal: number,
+  redeemable: number,
+  nextWithdrawalAmount: number,
+  nextWithdrawalAction?: string,
+  validatorAddress?: string // validator to unstake from
+}
+
+export interface StakingItem {
+  name: string,
+  chain: string,
+  address: string,
+
+  balance?: string,
+  activeBalance?: string,
+  unlockingBalance?: string,
+  nativeToken: string,
+  unit?: string,
+
+  type: StakingType,
+  state: APIItemState,
+
+  unlockingInfo?: UnlockingStakeInfo,
+  rewardInfo?: StakingRewardItem
+}
+
+export interface StakingJson {
+  reset?: boolean,
+  ready?: boolean,
+  details: StakingItem[]
 }
 
 export interface StakingRewardJson {
@@ -120,27 +162,9 @@ export interface StakingRewardJson {
   details: Array<StakingRewardItem>;
 }
 
-export interface StakingItem {
-  name: string,
-  chainId: string,
-  balance?: string,
-  activeBalance?: string,
-  unlockingBalance?: string
-  nativeToken: string,
-  unit?: string,
-  state: APIItemState,
-  unlockingInfo?: UnlockingStakeInfo
-}
-
-export interface StakingJson {
-  reset?: boolean,
-  ready?: boolean,
-  details: Record<string, StakingItem>
-}
-
-export interface StakingStoreJson {
-  bonded: Record<string, StakingItem>,
-  reward: Array<StakingRewardItem>
+export interface StakeUnlockingJson {
+  timestamp: number,
+  details: UnlockingStakeInfo[]
 }
 
 export interface PriceJson {
@@ -1145,11 +1169,6 @@ export interface UnlockingStakeInfo {
   nextWithdrawalAmount: number,
   nextWithdrawalAction?: string,
   validatorAddress?: string // validator to unstake from
-}
-
-export interface StakeUnlockingJson {
-  timestamp: number,
-  details: Record<string, UnlockingStakeInfo>
 }
 
 export interface SingleModeJson {

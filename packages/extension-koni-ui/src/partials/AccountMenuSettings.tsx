@@ -248,11 +248,6 @@ function AccountMenuSettings ({ changeAccountCallback, className, closeSetting, 
           <MenuSettingItem className='account-menu-settings__menu-item'>
             <Link
               className='account-menu-settings__menu-item-text'
-              isDisabled={!mediaAllowed}
-              title={!mediaAllowed
-                ? t<string>('Camera access must be first enabled in the settings')
-                : ''
-              }
               to='/account/attach-read-only'
             >
               <FontAwesomeIcon icon={faEye} />

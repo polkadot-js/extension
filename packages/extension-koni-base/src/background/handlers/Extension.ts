@@ -609,7 +609,6 @@ export default class KoniExtension extends Extension {
 
     const balanceSubscription = state.subscribeBalance().subscribe({
       next: (rs) => {
-        console.log('Balance changed: ', rs);
         cb(rs);
       }
     });
@@ -1026,11 +1025,11 @@ export default class KoniExtension extends Extension {
     return this.getStakingReward();
   }
 
-  private getStaking (reset?: boolean): StakingJson {
-    return state.getStaking(reset);
+  private async getStaking (): Promise<StakingJson> {
+    return state.getStaking();
   }
 
-  private subscribeStaking (id: string, port: chrome.runtime.Port): StakingJson {
+  private async subscribeStaking (id: string, port: chrome.runtime.Port): Promise<StakingJson> {
     const cb = createSubscription<'pri(staking.getSubscription)'>(id, port);
     const stakingSubscription = state.subscribeStaking().subscribe({
       next: (rs) => {
@@ -1043,7 +1042,7 @@ export default class KoniExtension extends Extension {
       stakingSubscription.unsubscribe();
     });
 
-    return this.getStaking(true);
+    return await this.getStaking();
   }
 
   private subscribeHistory (id: string, port: chrome.runtime.Port): Record<string, TransactionHistoryItemType[]> {
@@ -3907,7 +3906,7 @@ export default class KoniExtension extends Extension {
       case 'pri(staking.getStaking)':
         return this.getStaking();
       case 'pri(staking.getSubscription)':
-        return this.subscribeStaking(id, port);
+        return await this.subscribeStaking(id, port);
       case 'pri(stakingReward.getStakingReward)':
         return this.getStakingReward();
       case 'pri(stakingReward.getSubscription)':

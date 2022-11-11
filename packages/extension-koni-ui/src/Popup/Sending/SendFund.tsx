@@ -396,19 +396,15 @@ function SendFund ({ chainRegistryMap, className, defaultValue, networkMap }: Co
               </div>
             )}
 
-            {isBlockHardware && (
-              <Warning
-                className={'send-fund-warning'}
-              >
-                {t<string>('The sender account is Ledger account. This is not support {{chain}}', { replace: { chain: selectedNetwork.chain } })}
+            {reference && (
+              <Warning className={'send-fund-warning'}>
+                {t<string>('Note that you cannot transfer all tokens out from this account.')}
               </Warning>
             )}
 
-            {isReadOnly && (
-              <Warning
-                className={'send-fund-warning'}
-              >
-                {t<string>('The sender account is readonly account')}
+            {senderFreeBalance !== '0' && !amountGtAvailableBalance && !isSameAddress && noFees && (
+              <Warning className={'send-fund-warning'}>
+                {t<string>('The transaction, after application of the transfer fees, will drop the available balance below the existential deposit. As such the transfer will fail. The account needs more free funds to cover the transaction fees.')}
               </Warning>
             )}
 
@@ -475,15 +471,21 @@ function SendFund ({ chainRegistryMap, className, defaultValue, networkMap }: Co
               </Warning>
             )}
 
-            {reference && (
-              <Warning className={'send-fund-warning'}>
-                {t<string>('Note that you cannot transfer all tokens out from this account.')}
+            {isBlockHardware && (
+              <Warning
+                className={'send-fund-warning'}
+                isDanger
+              >
+                {t<string>('The sender account is Ledger account. This is not support {{chain}}', { replace: { chain: selectedNetwork.chain } })}
               </Warning>
             )}
 
-            {senderFreeBalance !== '0' && !amountGtAvailableBalance && !isSameAddress && noFees && (
-              <Warning className={'send-fund-warning'}>
-                {t<string>('The transaction, after application of the transfer fees, will drop the available balance below the existential deposit. As such the transfer will fail. The account needs more free funds to cover the transaction fees.')}
+            {isReadOnly && (
+              <Warning
+                className={'send-fund-warning'}
+                isDanger
+              >
+                {t<string>('The account you are using is read-only, you cannot send assets with it')}
               </Warning>
             )}
 

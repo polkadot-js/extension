@@ -7,7 +7,7 @@ import { Subscription } from 'dexie';
 import { logger as createLogger } from '@polkadot/util';
 import { Logger } from '@polkadot/util/types';
 
-import KoniDatabase, { INft } from '../databases';
+import KoniDatabase, { INft, IStakingItem } from '../databases';
 import { BalanceStore, CrowdloanStore, MigrationStore, NftCollectionStore, NftStore, StakingStore, TransactionStore } from '../db-stores';
 
 export default class DatabaseService {
@@ -15,6 +15,7 @@ export default class DatabaseService {
   public stores;
   private logger: Logger;
   private nftSubscription: Subscription | undefined;
+  private stakingSubscription: Subscription | undefined;
 
   constructor () {
     this.logger = createLogger('DB-Service');
@@ -24,7 +25,7 @@ export default class DatabaseService {
       nft: new NftStore(this._db.nfts),
       nftCollection: new NftCollectionStore(this._db.nftCollections),
       crowdloan: new CrowdloanStore(this._db.crowdloans),
-      staking: new StakingStore(this._db.stakings),
+      staking: new StakingStore(this._db.stakingsV2),
       transaction: new TransactionStore(this._db.transactions),
       migration: new MigrationStore(this._db.migrations)
     };
@@ -57,12 +58,30 @@ export default class DatabaseService {
   }
 
   // Staking
-  async updateStakingStore (chain: string, chainHash: string, address: string, item: StakingItem) {
+  async updateStaking (chain: string, chainHash: string, address: string, item: StakingItem) {
     if (item.state === APIItemState.READY) {
       this.logger.log(`Updating staking for [${chain}]`);
 
-      return this.stores.staking.upsert({ chainHash, chain, address, ...item });
+      return this.stores.staking.upsert({ chainHash, ...item });
     }
+  }
+
+  async getStakings (addresses: string[], chainHashes?: string[]) {
+    const stakings = await this.stores.staking.getStakings(addresses, chainHashes);
+
+    this.logger.log('Get Stakings: ', stakings);
+
+    return stakings;
+  }
+
+  subscribeStaking (addresses: string[], chainHashes?: string[], callback?: (stakingItems: IStakingItem[]) => void) {
+    this.stakingSubscription && this.stakingSubscription.unsubscribe();
+
+    this.stakingSubscription = this.stores.staking.subscribeStaking(addresses, chainHashes).subscribe({
+      next: (stakings) => callback && callback(stakings)
+    });
+
+    return this.stakingSubscription;
   }
 
   // Transaction history
@@ -84,10 +103,10 @@ export default class DatabaseService {
   }
 
   // NFT
-  subscribeNft (addresses: string[], chainHashs?: string[], callback?: (nfts: INft[]) => void) {
+  subscribeNft (addresses: string[], chainHashes?: string[], callback?: (nfts: INft[]) => void) {
     this.nftSubscription && this.nftSubscription.unsubscribe();
 
-    this.nftSubscription = this.stores.nft.subscribeNft(addresses, chainHashs).subscribe({
+    this.nftSubscription = this.stores.nft.subscribeNft(addresses, chainHashes).subscribe({
       next: (nfts) => callback && callback(nfts)
     });
 

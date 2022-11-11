@@ -7,18 +7,18 @@ import { INft } from '../databases';
 import BaseStoreWithAddress from '../db-stores/BaseStoreWithAddress';
 
 export default class NftStore extends BaseStoreWithAddress<INft> {
-  getNft (addresses: string[], chainHashs: string[] = []) {
+  getNft (addresses: string[], chainHashes: string[] = []) {
     if (addresses.length) {
-      return this.table.where('address').anyOfIgnoreCase(addresses).and((item) => !chainHashs.length || chainHashs.includes(item.chainHash)).toArray();
+      return this.table.where('address').anyOfIgnoreCase(addresses).and((item) => !chainHashes.length || chainHashes.includes(item.chainHash)).toArray();
     }
 
-    // return this.table.filter((item) => !chainHashs.length || chainHashs.includes(item.chainHash)).toArray();
-    return this.table.filter((item) => !chainHashs.length || chainHashs.includes(item.chainHash)).toArray();
+    // return this.table.filter((item) => !chainHashes.length || chainHashes.includes(item.chainHash)).toArray();
+    return this.table.filter((item) => !chainHashes.length || chainHashes.includes(item.chainHash)).toArray();
   }
 
-  subscribeNft (addresses: string[], chainHashs: string[] = []) {
+  subscribeNft (addresses: string[], chainHashes: string[] = []) {
     return liveQuery(
-      () => this.getNft(addresses, chainHashs)
+      () => this.getNft(addresses, chainHashes)
     );
   }
 

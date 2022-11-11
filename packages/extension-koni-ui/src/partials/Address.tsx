@@ -5,11 +5,12 @@ import { faQrcode } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import InputWithLabel from '@subwallet/extension-koni-ui/components/InputWithLabel';
 import ValidatedInput from '@subwallet/extension-koni-ui/components/ValidatedInput';
+import { MediaContext } from '@subwallet/extension-koni-ui/contexts';
 import useTranslation from '@subwallet/extension-koni-ui/hooks/useTranslation';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { readOnlyScan } from '@subwallet/extension-koni-ui/util/scanner/attach';
 import { Result, Validator } from '@subwallet/extension-koni-ui/util/validators';
-import React, { useMemo } from 'react';
+import React, { useContext, useMemo } from 'react';
 import styled from 'styled-components';
 
 interface Props extends ThemeProps{
@@ -33,6 +34,9 @@ function validatorAddress (errorText: string): Validator<string> {
 
 const Address = ({ className, isFocused, label, onBlur, onChange, onClickQr, value }: Props) => {
   const { t } = useTranslation();
+
+  const mediaAllowed = useContext(MediaContext);
+
   const isNameValid = useMemo(() => validatorAddress(t<string>('Invalid Address')), [t]);
 
   return (
@@ -52,7 +56,11 @@ const Address = ({ className, isFocused, label, onBlur, onChange, onClickQr, val
       />
       <div
         className={'qr-icon'}
-        onClick={onClickQr}
+        onClick={mediaAllowed ? onClickQr : undefined}
+        title={!mediaAllowed
+          ? t<string>('Camera access must be first enabled in the settings')
+          : ''
+        }
       >
         <FontAwesomeIcon icon={faQrcode} />
       </div>

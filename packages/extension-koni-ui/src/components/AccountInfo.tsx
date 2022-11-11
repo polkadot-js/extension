@@ -175,7 +175,7 @@ function AccountInfo ({ accountSplitPart = 'both', address, addressHalfLength = 
     return (
       <>
         {!!accountName && renderIcon()}
-        <span title={displayName}>{(_isAccountAll && (!name || name === 'All')) ? t<string>('All Accounts') : displayName}</span>
+        <span className='account-name-text' title={displayName}>{(_isAccountAll && (!name || name === 'All')) ? t<string>('All Accounts') : displayName}</span>
         {!!isSelected && (
           <FontAwesomeIcon
             className='account-checked-item'
@@ -197,6 +197,10 @@ function AccountInfo ({ accountSplitPart = 'both', address, addressHalfLength = 
                 alt='all-account-icon'
                 className='account-info__all-account-icon'
                 src={accountAllLogo}
+                style={{
+                  width: iconSize,
+                  height: iconSize
+                }}
               />
             )
             : (
@@ -389,9 +393,18 @@ export default styled(AccountInfo)(({ theme }: ThemeProps) => `
     color: ${theme.textColor};
     margin: 2px 0;
     overflow: hidden;
-    text-overflow: ellipsis;
     max-width: 150px;
     white-space: nowrap;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+
+    .account-name-text {
+      flex-grow: 0;
+      flex-shrink: 1;
+      text-overflow: ellipsis;
+      overflow: hidden;
+    }
 
     &.displaced {
       padding-top: 16px;

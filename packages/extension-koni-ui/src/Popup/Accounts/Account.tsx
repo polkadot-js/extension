@@ -227,14 +227,4 @@ export default styled(Account)(({ theme }: ThemeProps) => `
     height: 48px;
     width: 334px;
   }
-
-  .account-info-identity-icon {
-    padding: 0;
-    border: 0;
-  }
-
-  .account-info__all-account-icon {
-    padding: 0;
-    border: 0;
-  }
 `);

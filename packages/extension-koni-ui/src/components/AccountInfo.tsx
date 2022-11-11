@@ -198,8 +198,8 @@ function AccountInfo ({ accountSplitPart = 'both', address, addressHalfLength = 
                 className='account-info__all-account-icon'
                 src={accountAllLogo}
                 style={{
-                  width: iconSize,
-                  height: iconSize
+                  width: iconSize + 8,
+                  height: iconSize + 8
                 }}
               />
             )
@@ -322,7 +322,7 @@ export default styled(AccountInfo)(({ theme }: ThemeProps) => `
     line-height: 16px;
     display: flex;
     align-items: center;
-    margin-left: 8px;
+    margin-left: 16px;
     flex-grow: 0;
     flex-shrink: 1;
     overflow: hidden;

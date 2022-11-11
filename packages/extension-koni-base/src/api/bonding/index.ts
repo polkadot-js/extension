@@ -1,7 +1,7 @@
 // Copyright 2019-2022 @subwallet/extension-koni authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { ApiProps, NetworkJson, UnlockingStakeInfo, ValidatorInfo } from '@subwallet/extension-base/background/KoniTypes';
+import { ApiProps, NetworkJson, StakingType, UnlockingStakeInfo, ValidatorInfo } from '@subwallet/extension-base/background/KoniTypes';
 import { getAstarBondingBasics, getAstarBondingExtrinsic, getAstarClaimRewardExtrinsic, getAstarDappsInfo, getAstarDelegationInfo, getAstarUnbondingExtrinsic, getAstarWithdrawalExtrinsic, handleAstarBondingTxInfo, handleAstarClaimRewardTxInfo, handleAstarUnbondingTxInfo, handleAstarUnlockingInfo, handleAstarWithdrawalTxInfo } from '@subwallet/extension-koni-base/api/bonding/astar';
 import { getParaBondingBasics, getParaBondingExtrinsic, getParaCollatorsInfo, getParaDelegationInfo, getParaUnbondingExtrinsic, getParaWithdrawalExtrinsic, handleParaBondingTxInfo, handleParaUnbondingTxInfo, handleParaUnlockingInfo, handleParaWithdrawalTxInfo } from '@subwallet/extension-koni-base/api/bonding/paraChain';
 import { getRelayBondingExtrinsic, getRelayChainBondingBasics, getRelayUnbondingExtrinsic, getRelayValidatorsInfo, getRelayWithdrawalExtrinsic, getTargetValidators, handleRelayBondingTxInfo, handleRelayUnbondingTxInfo, handleRelayUnlockingInfo, handleRelayWithdrawalTxInfo } from '@subwallet/extension-koni-base/api/bonding/relayChain';
@@ -77,14 +77,14 @@ export async function getUnbondingExtrinsic (address: string, amount: number, ne
   return getRelayUnbondingExtrinsic(dotSamaApi, amount, networkJson);
 }
 
-export async function getUnlockingInfo (dotSamaApi: ApiProps, networkJson: NetworkJson, networkKey: string, address: string): Promise<UnlockingStakeInfo> {
+export async function getUnlockingInfo (dotSamaApi: ApiProps, networkJson: NetworkJson, networkKey: string, address: string, type: StakingType): Promise<UnlockingStakeInfo> {
   if (CHAIN_TYPES.para.includes(networkKey)) {
-    return handleParaUnlockingInfo(dotSamaApi, networkJson, networkKey, address);
+    return handleParaUnlockingInfo(dotSamaApi, networkJson, networkKey, address, type);
   } else if (CHAIN_TYPES.astar.includes(networkKey)) {
-    return handleAstarUnlockingInfo(dotSamaApi, networkJson, networkKey, address);
+    return handleAstarUnlockingInfo(dotSamaApi, networkJson, networkKey, address, type);
   }
 
-  return handleRelayUnlockingInfo(dotSamaApi, networkJson, networkKey, address);
+  return handleRelayUnlockingInfo(dotSamaApi, networkJson, networkKey, address, type);
 }
 
 export async function getWithdrawalTxInfo (address: string, networkKey: string, networkJson: NetworkJson, dotSamaApiMap: Record<string, ApiProps>, web3ApiMap: Record<string, Web3>, validatorAddress?: string, action?: string) {

@@ -5,7 +5,7 @@ import { ApiMap, ApiProps, CustomToken, NETWORK_STATUS, NetworkJson, NftTransfer
 import { getTokenPrice } from '@subwallet/extension-koni-base/api/coingecko';
 import { fetchDotSamaHistory } from '@subwallet/extension-koni-base/api/subquery/history';
 import { KoniSubscription } from '@subwallet/extension-koni-base/background/subscription';
-import { CRON_AUTO_RECOVER_DOTSAMA_INTERVAL, CRON_GET_API_MAP_STATUS, CRON_REFRESH_HISTORY_INTERVAL, CRON_REFRESH_NFT_INTERVAL, CRON_REFRESH_PRICE_INTERVAL, CRON_REFRESH_STAKE_UNLOCKING_INFO, CRON_REFRESH_STAKING_REWARD_INTERVAL } from '@subwallet/extension-koni-base/constants';
+import { ALL_ACCOUNT_KEY, CRON_AUTO_RECOVER_DOTSAMA_INTERVAL, CRON_GET_API_MAP_STATUS, CRON_REFRESH_HISTORY_INTERVAL, CRON_REFRESH_NFT_INTERVAL, CRON_REFRESH_PRICE_INTERVAL, CRON_REFRESH_STAKE_UNLOCKING_INFO, CRON_REFRESH_STAKING_REWARD_INTERVAL } from '@subwallet/extension-koni-base/constants';
 import { Subject, Subscription } from 'rxjs';
 
 import { logger as createLogger } from '@polkadot/util';
@@ -207,6 +207,10 @@ export class KoniCron {
     const networkMap = this.state.getNetworkMap();
 
     for (const [key, apiProp] of Object.entries(apiMap.dotSama)) {
+      if (apiProp.isEthereumOnly) {
+        continue;
+      }
+
       let status: NETWORK_STATUS = NETWORK_STATUS.CONNECTING;
 
       if (apiProp.isApiConnected) {
@@ -272,7 +276,7 @@ export class KoniCron {
   };
 
   resetStakingReward = (address: string) => {
-    this.state.resetStakingMap(address).catch((err) => this.logger.warn(err));
+    this.state.resetStaking(address).catch((err) => this.logger.warn(err));
     this.state.setStakingReward({
       ready: false,
       details: []
@@ -298,15 +302,13 @@ export class KoniCron {
     };
   };
 
-  // setNftReady = (address: string) => {
-  //   this.state.updateNftReady(address, true);
-  // };
-
   refreshStakeUnlockingInfo (address: string, networkMap: Record<string, NetworkJson>, dotSamaApiMap: Record<string, ApiProps>) {
     return () => {
-      this.subscriptions.subscribeStakeUnlockingInfo(address, networkMap, dotSamaApiMap)
-        .then(() => this.logger.log('Refresh staking unlocking info done'))
-        .catch(this.logger.error);
+      if (address.toLowerCase() !== ALL_ACCOUNT_KEY) {
+        this.subscriptions.subscribeStakeUnlockingInfo(address, networkMap, dotSamaApiMap)
+          .then(() => this.logger.log('Refresh staking unlocking info done'))
+          .catch(this.logger.error);
+      }
     };
   }
 

@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { AuthUrls } from '@subwallet/extension-base/background/handlers/State';
-import { ApiProps, CustomToken, NetworkJson, NftTransferExtra, UnlockingStakeInfo } from '@subwallet/extension-base/background/KoniTypes';
+import { ApiProps, CustomToken, NetworkJson, NftTransferExtra, StakingType, UnlockingStakeInfo } from '@subwallet/extension-base/background/KoniTypes';
 import { getUnlockingInfo } from '@subwallet/extension-koni-base/api/bonding';
 import { subscribeBalance } from '@subwallet/extension-koni-base/api/dotsama/balance';
 import { subscribeCrowdloan } from '@subwallet/extension-koni-base/api/dotsama/crowdloan';
@@ -14,7 +14,6 @@ import Web3 from 'web3';
 
 import { logger as createLogger } from '@polkadot/util';
 import { Logger } from '@polkadot/util/types';
-import { isEthereumAddress } from '@polkadot/util-crypto';
 
 import DatabaseService from '../services/DatabaseService';
 import KoniState from './handlers/State';
@@ -73,7 +72,7 @@ export class KoniSubscription {
   }
 
   start () {
-    this.logger.log('Stating subscrition');
+    this.logger.log('Starting subscription');
     this.state.getCurrentAccount((currentAccountInfo) => {
       if (currentAccountInfo) {
         const { address } = currentAccountInfo;
@@ -96,7 +95,7 @@ export class KoniSubscription {
   }
 
   stop () {
-    this.logger.log('Stopping subscrition');
+    this.logger.log('Stopping subscription');
 
     if (this.serviceSubscription) {
       this.serviceSubscription.unsubscribe();
@@ -156,7 +155,7 @@ export class KoniSubscription {
   }
 
   subscribeStakingOnChain (address: string, dotSamaApiMap: Record<string, ApiProps>, onlyRunOnFirstTime?: boolean) {
-    this.state.resetStakingMap(address).then(() => {
+    this.state.resetStaking(address).then(() => {
       this.state.getDecodedAddresses(address)
         .then((addresses) => {
           if (!addresses.length) {
@@ -282,7 +281,7 @@ export class KoniSubscription {
     getAllSubsquidStaking(addresses, activeNetworks)
       .then((result) => {
         this.state.setStakingReward(result);
-        this.logger.log('set staking reward state done', result);
+        this.logger.log('Set staking reward state done', result);
       })
       .catch(this.logger.error);
   }
@@ -291,29 +290,22 @@ export class KoniSubscription {
     const addresses = await this.state.getDecodedAddresses(address);
     const currentAddress = addresses[0]; // only get info for the current account
 
-    const stakeUnlockingInfo: Record<string, UnlockingStakeInfo> = {};
+    const stakeUnlockingInfo: UnlockingStakeInfo[] = [];
 
     if (!addresses.length) {
       return;
     }
 
-    const currentStakingInfo = this.state.getStaking().details;
+    const stakingItems = await this.state.getStakingRecordsByAddress(currentAddress); // only get records of active networks
 
-    if (!addresses.length) {
-      return;
-    }
+    await Promise.all(stakingItems.map(async (stakingItem) => {
+      const needUpdateUnlockingStake = parseFloat(stakingItem.balance as string) > 0 && stakingItem.type === StakingType.NOMINATED;
+      const networkJson = networkMap[stakingItem.chain];
 
-    await Promise.all(Object.entries(networkMap).map(async ([networkKey, networkJson]) => {
-      const needUpdateUnlockingStake = currentStakingInfo[networkKey] && currentStakingInfo[networkKey].balance && parseFloat(currentStakingInfo[networkKey].balance as string) > 0;
+      if (needUpdateUnlockingStake) {
+        const unlockingInfo = await getUnlockingInfo(dotSamaApiMap[stakingItem.chain], networkJson, stakingItem.chain, currentAddress, stakingItem.type);
 
-      if (isEthereumAddress(currentAddress)) {
-        if (networkJson.supportBonding && networkJson.active && networkJson.isEthereum && needUpdateUnlockingStake) {
-          stakeUnlockingInfo[networkKey] = await getUnlockingInfo(dotSamaApiMap[networkKey], networkJson, networkKey, currentAddress);
-        }
-      } else {
-        if (networkJson.supportBonding && networkJson.active && !networkJson.isEthereum && needUpdateUnlockingStake) {
-          stakeUnlockingInfo[networkKey] = await getUnlockingInfo(dotSamaApiMap[networkKey], networkJson, networkKey, currentAddress);
-        }
+        stakeUnlockingInfo.push(unlockingInfo);
       }
     }));
 

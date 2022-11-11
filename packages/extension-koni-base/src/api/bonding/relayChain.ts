@@ -405,8 +405,9 @@ export async function getRelayWithdrawalTxInfo (dotSamaAPi: ApiProps, address: s
   const apiPromise = await dotSamaAPi.isReady;
 
   if (apiPromise.api.tx.staking.withdrawUnbonded.meta.args.length === 1) {
-    const slashingSpans = await apiPromise.api.query.staking.slashingSpans(address);
-    const extrinsic = apiPromise.api.tx.staking.withdrawUnbonded(slashingSpans.toHuman());
+    const _slashingSpans = (await apiPromise.api.query.staking.slashingSpans(address)).toHuman() as Record<string, any>;
+    const slashingSpanCount = _slashingSpans.spanIndex as string;
+    const extrinsic = apiPromise.api.tx.staking.withdrawUnbonded(slashingSpanCount);
 
     return extrinsic.paymentInfo(address);
   } else {
@@ -434,6 +435,8 @@ export async function handleRelayWithdrawalTxInfo (address: string, networkKey: 
       balanceError
     } as BasicTxInfo;
   } catch (e) {
+    console.error('Error estimating fee for staking withdrawal', e);
+
     return {
       fee: `0.0000 ${networkJson.nativeToken as string}`,
       balanceError: false
@@ -445,9 +448,10 @@ export async function getRelayWithdrawalExtrinsic (dotSamaAPi: ApiProps, address
   const apiPromise = await dotSamaAPi.isReady;
 
   if (apiPromise.api.tx.staking.withdrawUnbonded.meta.args.length === 1) {
-    const slashingSpans = await apiPromise.api.query.staking.slashingSpans(address);
+    const _slashingSpans = (await apiPromise.api.query.staking.slashingSpans(address)).toHuman() as Record<string, any>;
+    const slashingSpanCount = _slashingSpans.spanIndex as string;
 
-    return apiPromise.api.tx.staking.withdrawUnbonded(slashingSpans.toHuman());
+    return apiPromise.api.tx.staking.withdrawUnbonded(slashingSpanCount);
   } else {
     return apiPromise.api.tx.staking.withdrawUnbonded();
   }

@@ -109,7 +109,7 @@ const getSubsquidStaking = async (accounts: string[], chain: string): Promise<St
   }
 };
 
-export const getAllSubsquidStaking = async (accounts: string[], activeNetworks: string[]): Promise<StakingRewardJson> => {
+export const getAllSubsquidStaking = async (accounts: string[], activeNetworks: string[]): Promise<StakingRewardItem[]> => {
   let rewardList: StakingRewardItem[] = [];
 
   const filteredNetworks: string[] = [];
@@ -126,8 +126,5 @@ export const getAllSubsquidStaking = async (accounts: string[], activeNetworks: 
     rewardList = rewardList.concat(rewardItems);
   }));
 
-  return {
-    ready: true,
-    details: rewardList
-  } as StakingRewardJson;
+  return rewardList;
 };

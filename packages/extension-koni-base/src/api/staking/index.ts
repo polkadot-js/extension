@@ -1,7 +1,14 @@
 // Copyright 2019-2022 @subwallet/extension-koni authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { APIItemState, ApiProps, NetworkJson, StakingItem, StakingType } from '@subwallet/extension-base/background/KoniTypes';
+import {
+  APIItemState,
+  ApiProps,
+  NetworkJson,
+  StakingItem, StakingRewardItem,
+  StakingRewardJson,
+  StakingType
+} from '@subwallet/extension-base/background/KoniTypes';
 import { CHAIN_TYPES } from '@subwallet/extension-koni-base/api/bonding';
 import { PREDEFINED_NETWORKS } from '@subwallet/extension-koni-base/api/predefinedNetworks';
 import { IGNORE_GET_SUBSTRATE_FEATURES_LIST } from '@subwallet/extension-koni-base/constants';
@@ -9,6 +16,7 @@ import { categoryAddresses, reformatAddress, toUnit } from '@subwallet/extension
 
 import { Codec } from '@polkadot/types/types';
 import { BN, BN_ZERO } from '@polkadot/util';
+import {getAllSubsquidStaking} from "@subwallet/extension-koni-base/api/staking/subsquidStaking";
 
 interface LedgerData {
   active: string,
@@ -351,6 +359,28 @@ function getAstarStakingOnChain (parentApi: ApiProps, useAddresses: string[], ne
       }
     }
   });
+}
+
+async function getNominationPoolReward (addresses: string[], networkMap: Record<string, NetworkJson>, dotSamaApiMap: Record<string, ApiProps>): Promise<StakingRewardItem[]> {
+
+  for ()
+}
+
+export async function getStakingRewardData (addresses: string[], networkMap: Record<string, NetworkJson>, dotSamaApiMap: Record<string, ApiProps>): Promise<StakingRewardJson> {
+  const activeNetworks: string[] = [];
+
+  Object.keys(networkMap).forEach((key) => {
+    activeNetworks.push(key);
+  });
+
+  const rewardList = await getAllSubsquidStaking(addresses, activeNetworks);
+
+
+
+  return {
+    ready: true,
+    details: rewardList
+  } as StakingRewardJson;
 }
 
 // function getDarwiniaStakingOnChain (parentApi: ApiProps, useAddresses: string[], networks: Record<string, NetworkJson>, chain: string, callback: (networkKey: string, rs: StakingItem) => void) {

@@ -6,8 +6,7 @@ import { ApiProps, CustomToken, NetworkJson, NftTransferExtra, StakingType, Unlo
 import { getUnlockingInfo } from '@subwallet/extension-koni-base/api/bonding';
 import { subscribeBalance } from '@subwallet/extension-koni-base/api/dotsama/balance';
 import { subscribeCrowdloan } from '@subwallet/extension-koni-base/api/dotsama/crowdloan';
-import { stakingOnChainApi } from '@subwallet/extension-koni-base/api/staking';
-import { getAllSubsquidStaking } from '@subwallet/extension-koni-base/api/staking/subsquidStaking';
+import { getStakingRewardData, stakingOnChainApi } from '@subwallet/extension-koni-base/api/staking';
 import { nftHandler } from '@subwallet/extension-koni-base/background/handlers';
 import { Subscription } from 'rxjs';
 import Web3 from 'web3';
@@ -265,25 +264,24 @@ export class KoniSubscription {
 
   async subscribeStakingReward (address: string) {
     const addresses = await this.state.getDecodedAddresses(address);
-    const networkMap = this.state.getNetworkMap();
-    const activeNetworks: string[] = [];
 
     if (!addresses.length) {
       return;
     }
 
+    const networkMap = this.state.getNetworkMap();
+    const targetNetworkMap: Record<string, NetworkJson> = {};
+
     Object.entries(networkMap).forEach(([key, network]) => {
-      if (network.active) {
-        activeNetworks.push(key);
+      if (network.active && network.getStakingOnChain) {
+        targetNetworkMap[key] = network;
       }
     });
 
-    getAllSubsquidStaking(addresses, activeNetworks)
-      .then((result) => {
-        this.state.setStakingReward(result);
-        this.logger.log('Set staking reward state done', result);
-      })
-      .catch(this.logger.error);
+    const result = await getStakingRewardData(addresses, targetNetworkMap, this.state.getDotSamaApiMap());
+
+    this.state.setStakingReward(result);
+    this.logger.log('Set staking reward state done', result);
   }
 
   async subscribeStakeUnlockingInfo (address: string, networkMap: Record<string, NetworkJson>, dotSamaApiMap: Record<string, ApiProps>) {

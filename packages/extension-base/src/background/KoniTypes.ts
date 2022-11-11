@@ -1157,20 +1157,6 @@ export interface BondingOptionParams {
   address: string;
 }
 
-export interface UnlockingStakeParams {
-  address: string,
-  networkKey: string,
-  validatorList?: string[]
-}
-
-export interface UnlockingStakeInfo {
-  nextWithdrawal: number,
-  redeemable: number,
-  nextWithdrawalAmount: number,
-  nextWithdrawalAction?: string,
-  validatorAddress?: string // validator to unstake from
-}
-
 export interface SingleModeJson {
   networkKeys: string[],
   theme: ThemeTypes,

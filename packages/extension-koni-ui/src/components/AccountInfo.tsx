@@ -175,7 +175,10 @@ function AccountInfo ({ accountSplitPart = 'both', address, addressHalfLength = 
     return (
       <>
         {!!accountName && renderIcon()}
-        <span className='account-name-text' title={displayName}>{(_isAccountAll && (!name || name === 'All')) ? t<string>('All Accounts') : displayName}</span>
+        <span
+          className='account-name-text'
+          title={displayName}
+        >{(_isAccountAll && (!name || name === 'All')) ? t<string>('All Accounts') : displayName}</span>
         {!!isSelected && (
           <FontAwesomeIcon
             className='account-checked-item'

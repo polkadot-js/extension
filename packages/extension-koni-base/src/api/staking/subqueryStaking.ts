@@ -59,7 +59,7 @@ const getSubqueryStakingReward = async (accounts: string[], chain: string): Prom
 
   return {
     name: PREDEFINED_NETWORKS[chain].chain,
-    chainId: chain,
+    chain: chain,
     totalReward: parsedAmount.toString(),
     state: APIItemState.READY
   } as StakingRewardItem;

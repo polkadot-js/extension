@@ -5,8 +5,8 @@ import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 import { StakeUnlockingJson } from '@subwallet/extension-base/background/KoniTypes';
 
 const initialState = {
-  details: {}
-} as StakeUnlockingJson;
+  details: []
+} as unknown as StakeUnlockingJson;
 
 const stakeUnlockingSlice = createSlice({
   initialState,

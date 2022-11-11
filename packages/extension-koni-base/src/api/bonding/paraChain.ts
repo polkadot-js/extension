@@ -1,7 +1,7 @@
 // Copyright 2019-2022 @subwallet/extension-koni authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { ApiProps, BasicTxInfo, ChainBondingBasics, DelegationItem, NetworkJson, TuringStakeCompoundResp, UnlockingStakeInfo, ValidatorInfo } from '@subwallet/extension-base/background/KoniTypes';
+import { ApiProps, BasicTxInfo, ChainBondingBasics, DelegationItem, NetworkJson, StakingType, TuringStakeCompoundResp, UnlockingStakeInfo, ValidatorInfo } from '@subwallet/extension-base/background/KoniTypes';
 import { BOND_LESS_ACTION, calculateChainStakedReturn, ERA_LENGTH_MAP, getParaCurrentInflation, InflationConfig, PARACHAIN_INFLATION_DISTRIBUTION, REVOKE_ACTION, TuringOptimalCompoundFormat } from '@subwallet/extension-koni-base/api/bonding/utils';
 import { getFreeBalance } from '@subwallet/extension-koni-base/api/dotsama/balance';
 import { parseNumberToDisplay, parseRawNumber, reformatAddress } from '@subwallet/extension-koni-base/utils';
@@ -475,7 +475,7 @@ export async function getParaUnlockingInfo (dotSamaApi: ApiProps, address: strin
   };
 }
 
-export async function handleParaUnlockingInfo (dotSamaApi: ApiProps, networkJson: NetworkJson, networkKey: string, address: string) {
+export async function handleParaUnlockingInfo (dotSamaApi: ApiProps, networkJson: NetworkJson, networkKey: string, address: string, type: StakingType) {
   if (['bifrost', 'bifrost_testnet'].includes(networkKey)) {
     return handleBifrostUnlockingInfo(dotSamaApi, networkJson, networkKey, address);
   }
@@ -486,6 +486,10 @@ export async function handleParaUnlockingInfo (dotSamaApi: ApiProps, networkJson
   const parsedNextWithdrawalAmount = nextWithdrawalAmount / (10 ** (networkJson.decimals as number));
 
   return {
+    address,
+    chain: networkKey,
+    type,
+
     nextWithdrawal,
     redeemable: parsedRedeemable,
     nextWithdrawalAmount: parsedNextWithdrawalAmount,

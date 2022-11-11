@@ -48,28 +48,35 @@ export const signAndSendExtrinsic = async ({ address,
   updateResponseTxResult,
   updateState }: SignAndSendExtrinsicProps) => {
   if (extrinsic !== null) {
-    console.log(extrinsic.toHex());
-    const passwordError = await signExtrinsic(type === SignerType.PASSWORD
-      ? {
-        address: address,
-        apiProps: apiProps,
-        callback: callback,
-        extrinsic: extrinsic,
-        password: password,
-        type: type
-      }
-      : {
-        address: address,
-        apiProps: apiProps,
-        callback: callback,
-        extrinsic: extrinsic,
-        id: id,
-        setState: setState,
-        type: type
-      });
+    try {
+      const passwordError = await signExtrinsic(type === SignerType.PASSWORD
+        ? {
+          address: address,
+          apiProps: apiProps,
+          callback: callback,
+          extrinsic: extrinsic,
+          password: password,
+          type: type
+        }
+        : {
+          address: address,
+          apiProps: apiProps,
+          callback: callback,
+          extrinsic: extrinsic,
+          id: id,
+          setState: setState,
+          type: type
+        });
 
-    if (passwordError) {
-      txState.passwordError = passwordError;
+      if (passwordError) {
+        txState.passwordError = passwordError;
+        callback(txState);
+
+        return;
+      }
+    } catch (e) {
+      console.error(errorMessage, e);
+      txState.errors = [{ code: BasicTxErrorCode.KEYRING_ERROR, message: (e as Error).message }];
       callback(txState);
 
       return;
@@ -93,7 +100,7 @@ export const signAndSendExtrinsic = async ({ address,
 
       // @ts-ignore
       // eslint-disable-next-line @typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-member-access
-      if (e.toString().message.includes('Invalid Transaction: Inability to pay some fees , e.g. account balance too low')) {
+      if ((e as Error).message.includes('Invalid Transaction: Inability to pay some fees , e.g. account balance too low')) {
         txState.errors = [{ code: BasicTxErrorCode.BALANCE_TO_LOW, message: (e as Error).message }];
       } else {
         txState.errors = [{ code: BasicTxErrorCode.INVALID_PARAM, message: (e as Error).message }];

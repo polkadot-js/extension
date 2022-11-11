@@ -1,7 +1,7 @@
 // Copyright 2019-2022 @subwallet/extension-koni-base authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { ApiProps, BasicTxResponse, ExternalRequestPromise, ExternalRequestPromiseStatus, HandleBasicTx, TransferErrorCode } from '@subwallet/extension-base/background/KoniTypes';
+import { ApiProps, BasicTxErrorCode, BasicTxResponse, ExternalRequestPromise, ExternalRequestPromiseStatus, HandleBasicTx } from '@subwallet/extension-base/background/KoniTypes';
 
 import { SubmittableExtrinsic } from '@polkadot/api/types';
 import { EventRecord } from '@polkadot/types/interfaces';
@@ -58,14 +58,14 @@ export const sendExtrinsic = async ({ apiProps, callback, extrinsic, txState, up
                 //   message: errorMessage
                 // };
                 txState.errors?.push({
-                  code: TransferErrorCode.TRANSFER_ERROR,
+                  code: BasicTxErrorCode.UNKNOWN_ERROR,
                   message: errorMessage
                 });
               } catch (e) {
                 const errorMessage = error.toString();
 
                 txState.errors?.push({
-                  code: TransferErrorCode.TRANSFER_ERROR,
+                  code: BasicTxErrorCode.UNKNOWN_ERROR,
                   message: errorMessage
                 });
               }
@@ -75,7 +75,7 @@ export const sendExtrinsic = async ({ apiProps, callback, extrinsic, txState, up
 
               console.log(errorMessage);
               txState.errors?.push({
-                code: TransferErrorCode.TRANSFER_ERROR,
+                code: BasicTxErrorCode.UNKNOWN_ERROR,
                 message: errorMessage
               });
             }

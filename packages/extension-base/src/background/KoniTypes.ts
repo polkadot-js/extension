@@ -758,7 +758,8 @@ export enum BasicTxErrorCode {
   CREATE_COMPOUND_ERROR = 'createCompoundError',
   CANCEL_COMPOUND_ERROR = 'cancelCompoundError',
   TIMEOUT = 'timeout',
-  BALANCE_TO_LOW = 'balanceTooLow1'
+  BALANCE_TO_LOW = 'balanceTooLow1',
+  UNKNOWN_ERROR = 'unknownError'
 }
 
 export type TxErrorCode = TransferErrorCode | BasicTxErrorCode

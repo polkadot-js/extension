@@ -4,6 +4,7 @@
 import { ETHEREUM_PREFIX, SCAN_TYPE, SECRET_PREFIX, SUBSTRATE_PREFIX } from '@subwallet/extension-koni-ui/constants/qr';
 import { QrAccount } from '@subwallet/extension-koni-ui/types/scanner';
 
+import { isHex } from '@polkadot/util';
 import { decodeAddress, encodeAddress, isEthereumAddress } from '@polkadot/util-crypto';
 
 export const qrSignerScan = (data: string): QrAccount | null => {
@@ -78,6 +79,10 @@ export const readOnlyScan = (data: string): QrAccount | null => {
   }
 
   try {
+    if (isHex(data)) {
+      return null;
+    }
+
     const address = encodeAddress(decodeAddress(data));
 
     return {

@@ -49,6 +49,10 @@ export default class PostMessageProvider implements InjectedProvider {
     sendRequest = _sendRequest;
   }
 
+  public get isClonable (): boolean {
+    return true;
+  }
+
   /**
    * @description Returns a clone of the object
    */

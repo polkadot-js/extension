@@ -20,7 +20,7 @@
   "version": "0.44.7-21-x",
   "main": "index.js",
   "dependencies": {
-    "@babel/runtime": "^7.20.0",
+    "@babel/runtime": "^7.20.1",
     "@polkadot/extension-inject": "^0.44.7-21-x",
     "@polkadot/networks": "^10.1.12",
     "@polkadot/util": "^10.1.12",

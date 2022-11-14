@@ -2706,6 +2706,7 @@ export default class KoniExtension extends Extension {
     id: string,
     { address,
       networkKey,
+      stakingType,
       validatorAddress }: RequestClaimRewardExternal,
     callback: HandleBasicTx,
     signerType: SignerExternal): BasicTxResponse {
@@ -2732,7 +2733,8 @@ export default class KoniExtension extends Extension {
       callback: callback,
       address: address,
       validatorAddress: validatorAddress,
-      signerType: signerType
+      signerType: signerType,
+      stakingType: stakingType
     });
 
     prom.then(() => {

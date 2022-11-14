@@ -10,7 +10,7 @@ import { SignerResult } from '@polkadot/types/types/extrinsic';
 interface ExternalRequestContextType {
   createResolveExternalRequestData: (data: SigData) => SignerResult;
   externalState: ExternalState;
-  clearExternalState: () => void;
+  cleanExternalState: () => void;
   updateExternalState: (state: ExternalState) => void;
 }
 
@@ -63,7 +63,7 @@ export const ExternalRequestContextProvider = ({ children }: ExternalRequestCont
     dispatchExternalState({ type: ExternalRequestReducerType.UPDATE, payload: data });
   }, []);
 
-  const clearExternalState = useCallback(() => {
+  const cleanExternalState = useCallback(() => {
     dispatchExternalState({ type: ExternalRequestReducerType.INIT, payload: DEFAULT_STATE });
   }, []);
 
@@ -79,7 +79,7 @@ export const ExternalRequestContextProvider = ({ children }: ExternalRequestCont
       value = {{
         createResolveExternalRequestData: createResolveExternalRequestData,
         externalState: externalState,
-        clearExternalState: clearExternalState,
+        cleanExternalState: cleanExternalState,
         updateExternalState: updateExternalState
       }}
     >

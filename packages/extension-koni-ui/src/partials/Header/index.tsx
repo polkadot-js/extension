@@ -58,9 +58,10 @@ interface Props extends ThemeProps {
   cancelButtonText?: string;
   to?: string;
   toggleZeroBalances?: () => void;
+  isPreventGoHome?: boolean;
 }
 
-function Header ({ cancelButtonText, changeAccountCallback, children, className = '', isBusy, isContainDetailHeader, isShowNetworkSelect = true, isShowZeroBalances, isWelcomeScreen, onBack, onCancel, setShowBalanceDetail, showBackArrow, showCancelButton, showSubHeader, smallMargin = false, subHeaderName, to, toggleZeroBalances }: Props): React.ReactElement<Props> {
+function Header ({ cancelButtonText, changeAccountCallback, children, className = '', isBusy, isContainDetailHeader, isPreventGoHome, isShowNetworkSelect = true, isShowZeroBalances, isWelcomeScreen, onBack, onCancel, setShowBalanceDetail, showBackArrow, showCancelButton, showSubHeader, smallMargin = false, subHeaderName, to, toggleZeroBalances }: Props): React.ReactElement<Props> {
   const [isSettingsOpen, setShowSettings] = useState(false);
   const [isActionOpen, setShowAccountAction] = useState(false);
   const [isNetworkSelectOpen, setShowNetworkSelect] = useState(false);
@@ -346,6 +347,7 @@ function Header ({ cancelButtonText, changeAccountCallback, children, className 
           <SubHeader
             cancelButtonText={cancelButtonText}
             isBusy={isBusy}
+            isPreventGoHome={isPreventGoHome}
             onBack={onBack}
             onCancel={onCancel}
             showBackArrow={showBackArrow}
@@ -372,7 +374,7 @@ export default React.memo(styled(Header)(({ theme }: Props) => `
   }
 
   .account-menu-setting {
-    min-width: 390px;
+    width: 390px;
   }
 
   .network-menu {

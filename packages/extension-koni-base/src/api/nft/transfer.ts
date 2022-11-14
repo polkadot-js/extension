@@ -7,7 +7,6 @@ import { SUPPORTED_TRANSFER_SUBSTRATE_CHAIN_NAME } from '@subwallet/extension-ko
 import { parseNumberToDisplay, reformatAddress } from '@subwallet/extension-koni-base/utils';
 import Web3 from 'web3';
 
-import { keyring } from '@polkadot/ui-keyring';
 import { BN } from '@polkadot/util';
 
 export async function acalaTransferHandler (networkKey: string, dotSamaApiMap: Record<string, ApiProps>, web3ApiMap: Record<string, Web3>, senderAddress: string, recipientAddress: string, params: Record<string, any>, networkJson: NetworkJson) {
@@ -224,31 +223,6 @@ export async function statemineTransferHandler (networkKey: string, dotSamaApiMa
 
 export function isRecipientSelf (currentAddress: string, recipientAddress: string) {
   return reformatAddress(currentAddress, 1) === reformatAddress(recipientAddress, 1);
-}
-
-export function unlockAccount (signAddress: string, signPassword: string): string | null {
-  let publicKey;
-
-  try {
-    publicKey = keyring.decodeAddress(signAddress);
-  } catch (error) {
-    console.error(error);
-
-    return 'unable to decode address';
-  }
-
-  const pair = keyring.getPair(publicKey);
-
-  try {
-    pair.decodePkcs8(signPassword);
-    // isUnlockCached && cacheUnlock(pair);
-  } catch (error) {
-    console.error(error);
-
-    return (error as Error).message;
-  }
-
-  return null;
 }
 
 export function acalaGetExtrinsic (apiProp: ApiProps, senderAddress: string, recipientAddress: string, params: Record<string, any>) {

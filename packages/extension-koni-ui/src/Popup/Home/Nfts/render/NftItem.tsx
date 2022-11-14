@@ -9,7 +9,7 @@ import { NftItem as _NftItem } from '@subwallet/extension-base/background/KoniTy
 import { ActionContext, Theme } from '@subwallet/extension-koni-ui/components';
 import Spinner from '@subwallet/extension-koni-ui/components/Spinner';
 import useGetNetworkJson from '@subwallet/extension-koni-ui/hooks/screen/home/useGetNetworkJson';
-import useIsAccountAll from '@subwallet/extension-koni-ui/hooks/screen/home/useIsAccountAll';
+import useCurrentAccountCanSign from '@subwallet/extension-koni-ui/hooks/useCurrentAccountCanSign';
 import useToast from '@subwallet/extension-koni-ui/hooks/useToast';
 import { isNftTransferSupported } from '@subwallet/extension-koni-ui/Popup/Home/Nfts/utils';
 import { RootState, store } from '@subwallet/extension-koni-ui/stores';
@@ -42,7 +42,7 @@ function NftItem ({ className, collectionId, collectionImage, data, onClickBack 
   // const networkMetadata = useGetNetworkMetadata();
   const networkJson = useGetNetworkJson(data.chain as string);
   const themeContext = useContext(ThemeContext as React.Context<Theme>);
-  const _isAccountAll = useIsAccountAll();
+  const canSign = useCurrentAccountCanSign();
 
   const navigate = useContext(ActionContext);
   const { show } = useToast();
@@ -75,7 +75,7 @@ function NftItem ({ className, collectionId, collectionImage, data, onClickBack 
   };
 
   const handleClickTransfer = useCallback(() => {
-    if (!account.account || _isAccountAll || !data.chain) {
+    if (!account.account || !canSign || !data.chain) {
       show('An error has occurred.');
 
       return;
@@ -89,7 +89,7 @@ function NftItem ({ className, collectionId, collectionImage, data, onClickBack 
 
     updateTransferNftParams(data, collectionImage, collectionId);
     navigate('/account/send-nft');
-  }, [_isAccountAll, account.account, collectionId, collectionImage, data, navigate, networkJson, show]);
+  }, [canSign, account.account, collectionId, collectionImage, data, navigate, networkJson, show]);
 
   const handleClickBack = useCallback(() => {
     onClickBack();
@@ -244,7 +244,7 @@ function NftItem ({ className, collectionId, collectionImage, data, onClickBack 
           </div>
 
           {
-            !_isAccountAll &&
+            canSign &&
             <div className={'send-container'}>
               <div
                 className={'send-button'}

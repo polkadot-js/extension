@@ -13,10 +13,9 @@ import { ALLOWED_PATH, PASSWORD_EXPIRY_MS } from '@subwallet/extension-base/defa
 import { TypeRegistry } from '@polkadot/types';
 import keyring from '@polkadot/ui-keyring';
 import { accounts as accountsObservable } from '@polkadot/ui-keyring/observable/accounts';
-import { assert, isHex, u8aToHex } from '@polkadot/util';
+import { assert, isHex } from '@polkadot/util';
 import { keyExtractSuri, mnemonicGenerate, mnemonicValidate } from '@polkadot/util-crypto';
 
-import { RequestQRIsLocked, RequestQrSignSubstrate, ResponseQRIsLocked, ResponseQrSignSubstrate } from '../types';
 import { withErrorLog } from './helpers';
 import State from './State';
 import { createSubscription, unsubscribe } from './subscriptions';
@@ -50,12 +49,12 @@ function isJsonPayload (value: SignerPayloadJSON | SignerPayloadRaw): value is S
 }
 
 export default class Extension {
-  readonly #cachedUnlocks: CachedUnlocks;
+  protected readonly cachedUnlocks: CachedUnlocks;
 
   readonly #state: State;
 
   constructor (state: State) {
-    this.#cachedUnlocks = {};
+    this.cachedUnlocks = {};
     this.#state = state;
   }
 
@@ -123,14 +122,14 @@ export default class Extension {
     return true;
   }
 
-  private refreshAccountPasswordCache (pair: KeyringPair): number {
+  protected refreshAccountPasswordCache (pair: KeyringPair): number {
     const { address } = pair;
 
-    const savedExpiry = this.#cachedUnlocks[address] || 0;
+    const savedExpiry = this.cachedUnlocks[address] || 0;
     const remainingTime = savedExpiry - Date.now();
 
     if (remainingTime < 0) {
-      this.#cachedUnlocks[address] = 0;
+      this.cachedUnlocks[address] = 0;
       pair.lock();
 
       return 0;
@@ -381,7 +380,7 @@ export default class Extension {
     const result = request.sign(registry, pair);
 
     if (savePass) {
-      this.#cachedUnlocks[address] = Date.now() + PASSWORD_EXPIRY_MS;
+      this.cachedUnlocks[address] = Date.now() + PASSWORD_EXPIRY_MS;
     } else {
       pair.lock();
     }
@@ -433,51 +432,6 @@ export default class Extension {
     return {
       isLocked: pair.isLocked,
       remainingTime
-    };
-  }
-
-  private qrIsLocked ({ address }: RequestQRIsLocked): ResponseQRIsLocked {
-    const pair = keyring.getPair(address);
-
-    assert(pair, 'Unable to find pair');
-
-    const remainingTime = this.refreshAccountPasswordCache(pair);
-
-    return {
-      isLocked: pair.isLocked,
-      remainingTime
-    };
-  }
-
-  private qrSignSubstrate ({ address, message, password, savePass }: RequestQrSignSubstrate): ResponseQrSignSubstrate {
-    const pair = keyring.getPair(address);
-
-    assert(pair, 'Unable to find pair');
-
-    if (pair.isLocked && !password) {
-      throw new Error('Password needed to unlock the account');
-    }
-
-    if (pair.isLocked) {
-      try {
-        pair.decodePkcs8(password);
-      } catch (e) {
-        throw new Error('invalid password');
-      }
-    }
-
-    const signed: string = u8aToHex(pair.sign(message));
-
-    const _address = pair.address;
-
-    if (savePass) {
-      this.#cachedUnlocks[_address] = Date.now() + PASSWORD_EXPIRY_MS;
-    } else {
-      pair.lock();
-    }
-
-    return {
-      signature: signed
     };
   }
 
@@ -659,12 +613,6 @@ export default class Extension {
 
       case 'pri(signing.isLocked)':
         return this.signingIsLocked(request as RequestSigningIsLocked);
-
-      case 'pri(qr.isLocked)':
-        return this.qrIsLocked(request as RequestQRIsLocked);
-
-      case 'pri(qr.sign.substrate)':
-        return this.qrSignSubstrate(request as RequestQrSignSubstrate);
 
       case 'pri(signing.requests)':
         return this.signingSubscribe(id, port);

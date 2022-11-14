@@ -25,7 +25,7 @@ const ViewQRDetail = (props: Props) => {
 
   const scannerStore = useContext<ScannerContextType>(ScannerContext);
   const { state } = scannerStore;
-  const { evmChainId, isEthereum, type } = state;
+  const { evmChainId, isEthereumStructure, type } = state;
 
   const { loading, network } = useGetNetworkQrRequest();
 
@@ -77,7 +77,7 @@ const ViewQRDetail = (props: Props) => {
           (!loading && network) && (
             <div className='network-info-container'>
               <NetworkInfo
-                forceEthereum={isEthereum && !evmChainId}
+                forceEthereum={isEthereumStructure && !evmChainId}
                 network={network}
               />
             </div>

@@ -8,6 +8,8 @@ import { getNetworkJsonByInfo } from '@subwallet/extension-koni-ui/util/getNetwo
 import { useContext, useMemo } from 'react';
 import { useSelector } from 'react-redux';
 
+import { isEthereumAddress } from '@polkadot/util-crypto';
+
 interface ResultProps {
   network: NetworkJson | null;
   loading: boolean
@@ -16,15 +18,15 @@ interface ResultProps {
 export const useGetNetworkQrRequest = (): ResultProps => {
   const { networkMap } = useSelector((state: RootState) => state);
 
-  const { state: { evmChainId, genesisHash, isEthereum } } = useContext(ScannerContext);
+  const { state: { evmChainId, genesisHash, isEthereumStructure, senderAddress } } = useContext(ScannerContext);
 
   return useMemo((): ResultProps => {
-    const info: undefined | number | string = isEthereum ? evmChainId : genesisHash;
-    const network = getNetworkJsonByInfo(networkMap, isEthereum, info);
+    const info: undefined | number | string = isEthereumStructure ? evmChainId : genesisHash;
+    const network = getNetworkJsonByInfo(networkMap, isEthereumAddress(senderAddress || ''), isEthereumStructure, info);
 
     return {
       loading: !network,
       network: network
     };
-  }, [isEthereum, evmChainId, genesisHash, networkMap]);
+  }, [isEthereumStructure, evmChainId, genesisHash, networkMap, senderAddress]);
 };

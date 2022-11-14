@@ -31,3 +31,11 @@ export interface LedgerState {
 export interface ExternalState {
   externalId: string;
 }
+
+export enum SignerType {
+  PASSWORD = 'PASSWORD',
+  QR = 'QR',
+  LEDGER = 'LEDGER',
+}
+
+export type SignerExternal = SignerType.LEDGER | SignerType.QR;

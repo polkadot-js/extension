@@ -1,18 +1,19 @@
 // Copyright 2019-2022 @polkadot/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import type { ThemeProps } from '../../types';
+import type { ThemeProps } from '@subwallet/extension-koni-ui/types';
 
 import { AuthUrlInfo, AuthUrls } from '@subwallet/extension-base/background/handlers/State';
+import { AccountJson } from '@subwallet/extension-base/background/types';
 import { filterAndSortingAccountByAuthType } from '@subwallet/extension-koni-base/utils';
 import { AccountContext } from '@subwallet/extension-koni-ui/components';
+import useTranslation from '@subwallet/extension-koni-ui/hooks/useTranslation';
 import { forgetSite, toggleAuthorization } from '@subwallet/extension-koni-ui/messaging';
 import WebsiteEntryAccount from '@subwallet/extension-koni-ui/Popup/AuthManagement/WebsiteEntryAccount';
+import { filterNotReadOnlyAccount } from '@subwallet/extension-koni-ui/util/account';
 import { waitForElement } from '@subwallet/extension-koni-ui/util/dom';
-import React, { useCallback, useContext, useState } from 'react';
+import React, { useCallback, useContext, useMemo, useState } from 'react';
 import styled from 'styled-components';
-
-import useTranslation from '../../hooks/useTranslation';
 
 interface Props extends ThemeProps {
   className?: string;
@@ -27,7 +28,7 @@ function WebsiteEntry ({ changeConnectSite, className = '', info, setList, url }
   const [isShowDetail, setShowDetail] = useState<boolean>(false);
   const { hostname } = new URL(info.url);
   const { accounts } = useContext(AccountContext);
-  const accountList = filterAndSortingAccountByAuthType(accounts, info?.accountAuthType || 'substrate', true);
+  const accountList = useMemo((): AccountJson[] => filterNotReadOnlyAccount(filterAndSortingAccountByAuthType(accounts, info?.accountAuthType || 'substrate', true)), [accounts, info?.accountAuthType]);
   const addressList = accountList.map((account) => account.address);
 
   const transformId = info.id.replace(/\./g, '-');

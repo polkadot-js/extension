@@ -14,8 +14,20 @@ function compareByCreation (a: AccountJson, b: AccountJson): number {
 }
 
 function compareByName (a: AccountJson, b: AccountJson): number {
-  const nameA = a.name?.toUpperCase() || '';
-  const nameB = b.name?.toUpperCase() || '';
+  if (!a.name && !b.name) {
+    return 0;
+  }
+
+  if (!a.name) {
+    return 1;
+  }
+
+  if (!b.name) {
+    return -1;
+  }
+
+  const nameA = a.name.toUpperCase();
+  const nameB = b.name.toUpperCase();
 
   return nameA.localeCompare(nameB);
 }
@@ -41,12 +53,6 @@ function compareByPathThenCreation (a: AccountJson, b: AccountJson): number {
 }
 
 function compareByNameThenPathThenCreation (a: AccountJson, b: AccountJson): number {
-  // This comparison happens after an initial sorting by network.
-  // if the 2 accounts are from different networks, don't touch their order
-  if (a.genesisHash !== b.genesisHash) {
-    return 0;
-  }
-
   // if the names are equal, compare by path then creation time
   return compareByName(a, b) || compareByPathThenCreation(a, b);
 }

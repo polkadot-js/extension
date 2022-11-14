@@ -1,7 +1,7 @@
 // Copyright 2019-2022 @subwallet/extension-koni authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { EVMTransactionArg, NestedArray, NetworkJson, ParseEVMTransactionData, ResponseParseEVMTransactionInput, ResponseParseTransactionEVM } from '@subwallet/extension-base/background/KoniTypes';
+import { EVMTransactionArg, NestedArray, NetworkJson, ParseEVMTransactionData, ResponseParseEVMContractInput, ResponseQrParseRLP } from '@subwallet/extension-base/background/KoniTypes';
 import { ERC20Contract, ERC721Contract, initWeb3Api } from '@subwallet/extension-koni-base/api/tokens/evm/web3';
 import { createTransactionFromRLP, Transaction as QrTransaction } from '@subwallet/extension-koni-base/utils/eth';
 import { InputDataDecoder } from '@subwallet/extension-koni-base/utils/eth/parseTransactionData';
@@ -122,7 +122,7 @@ const isContractAddress = async (address: string, network: NetworkJson): Promise
   }
 };
 
-export const parseTransactionData = async (input: string, contractAddress: string, network: NetworkJson | null): Promise<ResponseParseEVMTransactionInput> => {
+export const parseContractInput = async (input: string, contractAddress: string, network: NetworkJson | null): Promise<ResponseParseEVMContractInput> => {
   let result: ParseEVMTransactionData | string = input;
 
   // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
@@ -201,14 +201,14 @@ const getNetworkJsonByChainId = (networkMap: Record<string, NetworkJson>, chainI
   return null;
 };
 
-export const parseEVMTransaction = async (data: string, networkMap: Record<string, NetworkJson>): Promise<ResponseParseTransactionEVM> => {
+export const parseEvmRlp = async (data: string, networkMap: Record<string, NetworkJson>): Promise<ResponseQrParseRLP> => {
   const tx: QrTransaction | null = createTransactionFromRLP(data);
 
   if (!tx) {
     throw new Error(`Cannot create tx from ${data}`);
   }
 
-  const result: ResponseParseTransactionEVM = {
+  const result: ResponseQrParseRLP = {
     input: tx.data,
     data: tx.data,
     gasPrice: new BigN(tx.gasPrice).toNumber(),

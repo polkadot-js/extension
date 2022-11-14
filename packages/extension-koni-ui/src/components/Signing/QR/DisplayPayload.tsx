@@ -14,7 +14,7 @@ interface Props extends ThemeProps{
   address: string;
   className?: string;
   isHash: boolean;
-  genesisHash: Uint8Array | string;
+  genesisHash: string;
   payload: Uint8Array;
   isEthereum: boolean;
   isMessage?: boolean;
@@ -61,7 +61,10 @@ const DisplayPayload = (props: Props) => {
     if (isEthereum) {
       return u8aConcat(ETHEREUM_ID, numberToU8a(cmd), decodeAddress(address), u8aToU8a(payload));
     } else {
-      return createSignPayload(address, cmd, payload, genesisHash);
+      // EVM genesisHash have _evm or _anyString at end
+      const genesis = genesisHash.split('_')[0];
+
+      return createSignPayload(address, cmd, payload, genesis);
     }
   }, [address, cmd, payload, genesisHash, isEthereum]);
 
@@ -79,6 +82,4 @@ const DisplayPayload = (props: Props) => {
   );
 };
 
-export default React.memo(styled(DisplayPayload)(({ theme }: Props) => `
-
-`));
+export default React.memo(styled(DisplayPayload)``);

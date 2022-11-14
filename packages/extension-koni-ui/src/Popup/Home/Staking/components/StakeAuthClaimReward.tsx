@@ -1,20 +1,22 @@
 // Copyright 2019-2022 @subwallet/extension-koni authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { BasicTxError } from '@subwallet/extension-base/background/KoniTypes';
-import { InputWithLabel } from '@subwallet/extension-koni-ui/components';
+import { StakeClaimRewardParams } from '@subwallet/extension-base/background/KoniTypes';
 import FeeValue from '@subwallet/extension-koni-ui/components/Balance/FeeValue';
-import Button from '@subwallet/extension-koni-ui/components/Button';
 import InputAddress from '@subwallet/extension-koni-ui/components/InputAddress';
 import Modal from '@subwallet/extension-koni-ui/components/Modal';
+import SigningRequest from '@subwallet/extension-koni-ui/components/Signing/SigningRequest';
 import Spinner from '@subwallet/extension-koni-ui/components/Spinner';
+import { ExternalRequestContext } from '@subwallet/extension-koni-ui/contexts/ExternalRequestContext';
+import { SigningContext } from '@subwallet/extension-koni-ui/contexts/SigningContext';
 import useGetNetworkJson from '@subwallet/extension-koni-ui/hooks/screen/home/useGetNetworkJson';
-import useToast from '@subwallet/extension-koni-ui/hooks/useToast';
+import useGetAccountByAddress from '@subwallet/extension-koni-ui/hooks/useGetAccountByAddress';
+import { useRejectExternalRequest } from '@subwallet/extension-koni-ui/hooks/useRejectExternalRequest';
 import useTranslation from '@subwallet/extension-koni-ui/hooks/useTranslation';
-import { getStakeClaimRewardTxInfo, submitStakeClaimReward } from '@subwallet/extension-koni-ui/messaging';
+import { claimRewardLedger, claimRewardQr, getStakeClaimRewardTxInfo, submitStakeClaimReward } from '@subwallet/extension-koni-ui/messaging';
 import StakeClaimRewardResult from '@subwallet/extension-koni-ui/Popup/Home/Staking/components/StakeClaimRewardResult';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import styled from 'styled-components';
 
 interface Props extends ThemeProps {
@@ -27,13 +29,18 @@ interface Props extends ThemeProps {
 function StakeAuthClaimReward ({ address, className, hideModal, networkKey }: Props): React.ReactElement<Props> {
   const networkJson = useGetNetworkJson(networkKey);
   const { t } = useTranslation();
-  const { show } = useToast();
 
-  const [loading, setLoading] = useState(false);
-  const [password, setPassword] = useState<string>('');
-  const [passwordError, setPasswordError] = useState<string | null>('');
+  const { handlerReject } = useRejectExternalRequest();
+
+  const { externalState: { externalId } } = useContext(ExternalRequestContext);
+  const { signingState: { isBusy } } = useContext(SigningContext);
+
+  const params = useMemo((): StakeClaimRewardParams => ({
+    address: address,
+    networkKey: networkKey
+  }), [address, networkKey]);
+
   const [isTxReady, setIsTxReady] = useState(false);
-  // const [targetValidator, setTargetValidator] = useState(delegation ? delegation[0].owner : ''); // enable this if any chain requires
 
   const [balanceError, setBalanceError] = useState(false);
   const [fee, setFee] = useState('');
@@ -43,9 +50,34 @@ function StakeAuthClaimReward ({ address, className, hideModal, networkKey }: Pr
   const [txError, setTxError] = useState('');
   const [showResult, setShowResult] = useState(false);
 
-  // const handleSelectValidator = useCallback((val: string) => {
-  //   setTargetValidator(val);
-  // }, []);
+  const account = useGetAccountByAddress(address);
+
+  const hideConfirm = useCallback(async () => {
+    if (!isBusy) {
+      await handlerReject(externalId);
+      hideModal();
+    }
+  }, [isBusy, handlerReject, externalId, hideModal]);
+
+  const onFail = useCallback((errors: string[], extrinsicHash?: string) => {
+    setIsTxSuccess(false);
+    setTxError(errors[0]);
+    setShowResult(true);
+    setExtrinsicHash(extrinsicHash || '');
+  }, [setExtrinsicHash, setIsTxSuccess, setShowResult, setTxError]);
+
+  const onSuccess = useCallback((extrinsicHash: string) => {
+    setIsTxSuccess(true);
+    setShowResult(true);
+    setExtrinsicHash(extrinsicHash);
+  }, [setExtrinsicHash, setIsTxSuccess, setShowResult]);
+
+  const handleResend = useCallback(() => {
+    setExtrinsicHash('');
+    setIsTxSuccess(false);
+    setTxError('');
+    setShowResult(false);
+  }, []);
 
   useEffect(() => {
     getStakeClaimRewardTxInfo({
@@ -66,92 +98,6 @@ function StakeAuthClaimReward ({ address, className, hideModal, networkKey }: Pr
     };
   }, [address, networkKey]);
 
-  const _onChangePass = useCallback((value: string) => {
-    setPassword(value);
-    setPasswordError(null);
-  }, []);
-
-  const handleOnSubmit = useCallback(async () => {
-    setLoading(true);
-    await submitStakeClaimReward({
-      address,
-      networkKey,
-      password
-    }, (cbData) => {
-      if (cbData.passwordError) {
-        show(cbData.passwordError);
-        setPasswordError(cbData.passwordError);
-        setLoading(false);
-      }
-
-      if (balanceError && !cbData.passwordError) {
-        setLoading(false);
-        show('Your balance is too low to cover fees');
-
-        return;
-      }
-
-      if (cbData.txError && cbData.txError) {
-        if (cbData.errorMessage && cbData.errorMessage === BasicTxError.BalanceTooLow) {
-          show('Your balance is too low to cover fees');
-        } else {
-          show('Encountered an error, please try again.');
-        }
-
-        setLoading(false);
-
-        return;
-      }
-
-      if (cbData.status) {
-        setLoading(false);
-
-        if (cbData.status) {
-          setIsTxSuccess(true);
-          setShowResult(true);
-          setExtrinsicHash(cbData.transactionHash as string);
-        } else {
-          setIsTxSuccess(false);
-          setTxError('Error submitting transaction');
-          setShowResult(true);
-          setExtrinsicHash(cbData.transactionHash as string);
-        }
-      }
-    });
-  }, [address, balanceError, networkKey, password, show]);
-
-  const handleConfirm = useCallback(() => {
-    setLoading(true);
-
-    // eslint-disable-next-line @typescript-eslint/no-misused-promises
-    setTimeout(async () => {
-      await handleOnSubmit();
-    }, 10);
-  }, [handleOnSubmit]);
-
-  const handleResend = useCallback(() => {
-    setExtrinsicHash('');
-    setIsTxSuccess(false);
-    setTxError('');
-    setShowResult(false);
-  }, []);
-
-  // const getDropdownTitle = useCallback(() => {
-  //   if (CHAIN_TYPE_MAP.astar.includes(networkKey)) {
-  //     return 'Select a dApp';
-  //   } else if (CHAIN_TYPE_MAP.para.includes(networkKey)) {
-  //     return 'Select a collator';
-  //   }
-  //
-  //   return 'Select a validator';
-  // }, [networkKey]);
-
-  const handleClickCancel = useCallback(() => {
-    if (!loading) {
-      hideModal();
-    }
-  }, [hideModal, loading]);
-
   return (
     <div className={className}>
       <Modal>
@@ -164,93 +110,64 @@ function StakeAuthClaimReward ({ address, className, hideModal, networkKey }: Pr
           </div>
           <div
             className={'close-button-confirm header-alignment'}
-            onClick={handleClickCancel}
+            // eslint-disable-next-line @typescript-eslint/no-misused-promises
+            onClick={hideConfirm}
           >
             Cancel
           </div>
         </div>
         {
           !showResult
-            ? <div>
+            ? <>
               {
                 isTxReady
-                  ? <div className={'claim-auth-container'}>
-                    <InputAddress
-                      autoPrefill={false}
-                      className={'receive-input-address'}
-                      defaultValue={address}
-                      help={t<string>('The account which you will claim reward')}
-                      isDisabled={true}
-                      isSetDefaultValue={true}
-                      label={t<string>('Claim staking reward from account')}
-                      networkPrefix={networkJson.ss58Format}
-                      type='allPlus'
-                      withEllipsis
-                    />
+                  ? (
+                    <SigningRequest
+                      account={account}
+                      balanceError={balanceError}
+                      handleSignLedger={claimRewardLedger}
+                      handleSignPassword={submitStakeClaimReward}
+                      handleSignQr={claimRewardQr}
+                      hideConfirm={hideConfirm}
+                      message={'There is problem when claimReward'}
+                      network={networkJson}
+                      onFail={onFail}
+                      onSuccess={onSuccess}
+                      params={params}
+                    >
+                      <InputAddress
+                        autoPrefill={false}
+                        className={'receive-input-address'}
+                        defaultValue={address}
+                        help={t<string>('The account which you will claim reward')}
+                        isDisabled={true}
+                        isSetDefaultValue={true}
+                        label={t<string>('Claim staking reward from account')}
+                        networkPrefix={networkJson.ss58Format}
+                        type='allPlus'
+                        withEllipsis
+                      />
 
-                    {/* { */}
-                    {/*  delegation && <ValidatorsDropdown */}
-                    {/*    className={'stake-claim-dropdown'} */}
-                    {/*    delegations={delegation} */}
-                    {/*    handleSelectValidator={handleSelectValidator} */}
-                    {/*    isDisabled={loading} */}
-                    {/*    label={getDropdownTitle()} */}
-                    {/*  /> */}
-                    {/* } */}
+                      <div className={'transaction-info-container'}>
+                        <div className={'transaction-info-row'}>
+                          <div className={'transaction-info-title'}>Reward claiming fee</div>
+                          <div className={'transaction-info-value'}>
+                            <FeeValue feeString={fee} />
+                          </div>
+                        </div>
 
-                    <div className={'transaction-info-container'}>
-                      {/* <div className={'transaction-info-row'}> */}
-                      {/*  <div className={'transaction-info-title'}>claim amount</div> */}
-                      {/*  <div className={'transaction-info-value'}>{amount} {networkJson.nativeToken}</div> */}
-                      {/* </div> */}
-                      <div className={'transaction-info-row'}>
-                        <div className={'transaction-info-title'}>Reward claiming fee</div>
-                        <div className={'transaction-info-value'}>
-                          <FeeValue feeString={fee} />
+                        <div className={'transaction-info-row'}>
+                          <div className={'transaction-info-title'}>Total</div>
+                          <div className={'transaction-info-value'}>
+                            <FeeValue feeString={fee} />
+                          </div>
                         </div>
                       </div>
-
-                      <div className={'transaction-info-row'}>
-                        <div className={'transaction-info-title'}>Total</div>
-                        <div className={'transaction-info-value'}>
-                          <FeeValue feeString={fee} />
-                        </div>
-                      </div>
-                    </div>
-
-                    <div className='claim-auth__separator' />
-
-                    <InputWithLabel
-                      isError={passwordError !== null}
-                      label={t<string>('Unlock account with password')}
-                      onChange={_onChangePass}
-                      type='password'
-                      value={password}
-                    />
-
-                    <div className={'claim-auth-btn-container'}>
-                      <Button
-                        className={'claim-auth-cancel-button'}
-                        isDisabled={loading}
-                        onClick={hideModal}
-                      >
-                        Reject
-                      </Button>
-                      <Button
-                        isDisabled={password === ''}
-                        onClick={handleConfirm}
-                      >
-                        {
-                          loading
-                            ? <Spinner />
-                            : <span>Confirm</span>
-                        }
-                      </Button>
-                    </div>
-                  </div>
+                    </SigningRequest>
+                  )
                   : <Spinner className={'container-spinner'} />
               }
-            </div>
+            </>
             : <StakeClaimRewardResult
               backToHome={hideModal}
               extrinsicHash={extrinsicHash}
@@ -269,31 +186,6 @@ export default React.memo(styled(StakeAuthClaimReward)(({ theme }: Props) => `
   .container-spinner {
     height: 65px;
     width: 65px;
-  }
-
-  .claim-auth-cancel-button {
-    color: ${theme.textColor3};
-    background: ${theme.buttonBackground1};
-  }
-
-  .claim-auth-btn-container {
-    margin-top: 20px;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    gap: 20px;
-  }
-
-  .claim-auth__separator {
-    margin-top: 30px;
-    margin-bottom: 18px;
-  }
-
-  .claim-auth__separator:before {
-    content: "";
-    height: 1px;
-    display: block;
-    background: ${theme.boxBorderColor};
   }
 
   .transaction-info-container {
@@ -319,52 +211,6 @@ export default React.memo(styled(StakeAuthClaimReward)(({ theme }: Props) => `
     font-weight: 500;
     font-size: 15px;
     line-height: 26px;
-  }
-
-  .selected-validator {
-    font-weight: 500;
-    font-size: 18px;
-    line-height: 28px;
-    margin-top: 5px;
-  }
-
-  .claim-auth-container {
-    padding-left: 15px;
-    padding-right: 15px;
-  }
-
-  .validator-expected-return {
-    font-size: 14px;
-    color: ${theme.textColor3};
-  }
-
-  .validator-footer {
-    display: flex;
-    align-items: center;
-    justify-content: flex-end;
-    gap: 10px;
-  }
-
-  .validator-header {
-    font-size: 14px;
-    display: flex;
-    align-items: center;
-    gap: 10px;
-  }
-
-  .identityIcon {
-    border: 2px solid ${theme.checkDotColor};
-  }
-  .validator-item-container {
-    margin-top: 10px;
-    margin-bottom: 28px;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    background-color: ${theme.backgroundAccountAddress};
-    padding: 10px 15px;
-    border-radius: 8px;
-    gap: 10px;
   }
 
   .close-button-confirm {

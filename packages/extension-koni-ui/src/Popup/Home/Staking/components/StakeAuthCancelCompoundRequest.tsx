@@ -1,18 +1,20 @@
 // Copyright 2019-2022 @subwallet/extension-koni authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { InputWithLabel } from '@subwallet/extension-koni-ui/components';
-import Button from '@subwallet/extension-koni-ui/components/Button';
+import { TuringCancelStakeCompoundParams } from '@subwallet/extension-base/background/KoniTypes';
 import InputAddress from '@subwallet/extension-koni-ui/components/InputAddress';
 import Modal from '@subwallet/extension-koni-ui/components/Modal';
-import Spinner from '@subwallet/extension-koni-ui/components/Spinner';
+import SigningRequest from '@subwallet/extension-koni-ui/components/Signing/SigningRequest';
+import { ExternalRequestContext } from '@subwallet/extension-koni-ui/contexts/ExternalRequestContext';
+import { SigningContext } from '@subwallet/extension-koni-ui/contexts/SigningContext';
 import useGetNetworkJson from '@subwallet/extension-koni-ui/hooks/screen/home/useGetNetworkJson';
-import useToast from '@subwallet/extension-koni-ui/hooks/useToast';
+import useGetAccountByAddress from '@subwallet/extension-koni-ui/hooks/useGetAccountByAddress';
+import { useRejectExternalRequest } from '@subwallet/extension-koni-ui/hooks/useRejectExternalRequest';
 import useTranslation from '@subwallet/extension-koni-ui/hooks/useTranslation';
-import { submitTuringCancelStakeCompounding } from '@subwallet/extension-koni-ui/messaging';
+import { cancelCompoundLedger, cancelCompoundQr, submitTuringCancelStakeCompounding } from '@subwallet/extension-koni-ui/messaging';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { toShort } from '@subwallet/extension-koni-ui/util';
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useContext, useMemo } from 'react';
 import styled from 'styled-components';
 
 interface Props extends ThemeProps {
@@ -32,81 +34,43 @@ interface Props extends ThemeProps {
 }
 
 function StakeAuthCancelCompoundRequest ({ address, balanceError, className, fee, networkKey, setExtrinsicHash, setIsTxSuccess, setShowAuth, setShowResult, setTxError, taskId }: Props): React.ReactElement<Props> {
-  const [loading, setLoading] = useState(false);
-  const [password, setPassword] = useState<string>('');
-  const [passwordError, setPasswordError] = useState<string | null>('');
+  const { handlerReject } = useRejectExternalRequest();
+
+  const { externalState: { externalId } } = useContext(ExternalRequestContext);
+  const { signingState: { isBusy } } = useContext(SigningContext);
+
+  const account = useGetAccountByAddress(address);
 
   const networkJson = useGetNetworkJson(networkKey);
   const { t } = useTranslation();
-  const { show } = useToast();
 
-  const _onChangePass = useCallback((value: string) => {
-    setPassword(value);
-    setPasswordError(null);
-  }, []);
+  const params = useMemo((): TuringCancelStakeCompoundParams => ({
+    address: address,
+    taskId: taskId,
+    networkKey: networkKey
+  }), [address, networkKey, taskId]);
 
-  const handleClickCancel = useCallback(() => {
-    if (!loading) {
+  const handleClickCancel = useCallback(async () => {
+    if (!isBusy) {
+      await handlerReject(externalId);
       setShowAuth(false);
     }
-  }, [loading, setShowAuth]);
+  }, [externalId, handlerReject, isBusy, setShowAuth]);
 
-  const handleOnSubmit = useCallback(async () => {
-    setLoading(true);
+  const onFail = useCallback((errors: string[], extrinsicHash?: string) => {
+    setIsTxSuccess(false);
+    setTxError(errors[0]);
+    setShowAuth(false);
+    setShowResult(true);
+    setExtrinsicHash(extrinsicHash || '');
+  }, [setExtrinsicHash, setIsTxSuccess, setShowAuth, setShowResult, setTxError]);
 
-    await submitTuringCancelStakeCompounding({
-      address,
-      password,
-      taskId,
-      networkKey
-    }, (cbData) => {
-      if (cbData.passwordError) {
-        show(cbData.passwordError);
-        setPasswordError(cbData.passwordError);
-        setLoading(false);
-      }
-
-      if (balanceError && !cbData.passwordError) {
-        setLoading(false);
-        show('Your balance is too low to cover fees');
-
-        return;
-      }
-
-      if (cbData.txError && cbData.txError) {
-        show('Encountered an error, please try again.');
-        setLoading(false);
-
-        return;
-      }
-
-      if (cbData.status) {
-        setLoading(false);
-
-        if (cbData.status) {
-          setIsTxSuccess(true);
-          setShowAuth(false);
-          setShowResult(true);
-          setExtrinsicHash(cbData.transactionHash as string);
-        } else {
-          setIsTxSuccess(false);
-          setTxError('Error submitting transaction');
-          setShowAuth(false);
-          setShowResult(true);
-          setExtrinsicHash(cbData.transactionHash as string);
-        }
-      }
-    });
-  }, [address, balanceError, networkKey, password, setExtrinsicHash, setIsTxSuccess, setShowAuth, setShowResult, setTxError, show, taskId]);
-
-  const handleConfirm = useCallback(() => {
-    setLoading(true);
-
-    // eslint-disable-next-line @typescript-eslint/no-misused-promises
-    setTimeout(async () => {
-      await handleOnSubmit();
-    }, 10);
-  }, [handleOnSubmit]);
+  const onSuccess = useCallback((extrinsicHash: string) => {
+    setIsTxSuccess(true);
+    setShowAuth(false);
+    setShowResult(true);
+    setExtrinsicHash(extrinsicHash);
+  }, [setExtrinsicHash, setIsTxSuccess, setShowAuth, setShowResult]);
 
   return (
     <div className={className}>
@@ -120,13 +84,26 @@ function StakeAuthCancelCompoundRequest ({ address, balanceError, className, fee
           </div>
           <div
             className={'close-button-confirm header-alignment'}
+            // eslint-disable-next-line @typescript-eslint/no-misused-promises
             onClick={handleClickCancel}
           >
             Cancel
           </div>
         </div>
 
-        <div className={'cancel-compound-auth-container'}>
+        <SigningRequest
+          account={account}
+          balanceError={balanceError}
+          handleSignLedger={cancelCompoundLedger}
+          handleSignPassword={submitTuringCancelStakeCompounding}
+          handleSignQr={cancelCompoundQr}
+          hideConfirm={handleClickCancel}
+          message={'There is problem when cancelCompound'}
+          network={networkJson}
+          onFail={onFail}
+          onSuccess={onSuccess}
+          params={params}
+        >
           <InputAddress
             autoPrefill={false}
             className={'receive-input-address'}
@@ -155,73 +132,13 @@ function StakeAuthCancelCompoundRequest ({ address, balanceError, className, fee
               <div className={'transaction-info-value'}>{fee}</div>
             </div>
           </div>
-
-          <div className='cancel-compound-auth__separator' />
-
-          <InputWithLabel
-            isError={passwordError !== null}
-            label={t<string>('Unlock account with password')}
-            onChange={_onChangePass}
-            type='password'
-            value={password}
-          />
-
-          <div className={'cancel-compound-auth-btn-container'}>
-            <Button
-              className={'cancel-compound-auth-cancel-button'}
-              isDisabled={loading}
-              onClick={handleClickCancel}
-            >
-              Reject
-            </Button>
-            <Button
-              isDisabled={password === ''}
-              onClick={handleConfirm}
-            >
-              {
-                loading
-                  ? <Spinner />
-                  : <span>Confirm</span>
-              }
-            </Button>
-          </div>
-        </div>
+        </SigningRequest>
       </Modal>
     </div>
   );
 }
 
 export default React.memo(styled(StakeAuthCancelCompoundRequest)(({ theme }: Props) => `
-  .container-spinner {
-    height: 65px;
-    width: 65px;
-  }
-
-  .cancel-compound-auth-cancel-button {
-    color: ${theme.textColor3};
-    background: ${theme.buttonBackground1};
-  }
-
-  .cancel-compound-auth-btn-container {
-    margin-top: 20px;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    gap: 20px;
-  }
-
-  .cancel-compound-auth__separator {
-    margin-top: 30px;
-    margin-bottom: 18px;
-  }
-
-  .cancel-compound-auth__separator:before {
-    content: "";
-    height: 1px;
-    display: block;
-    background: ${theme.boxBorderColor};
-  }
-
   .transaction-info-container {
     margin-top: 20px;
     width: 100%;
@@ -246,46 +163,6 @@ export default React.memo(styled(StakeAuthCancelCompoundRequest)(({ theme }: Pro
     font-size: 15px;
     line-height: 26px;
   }
-
-  .cancel-compound-auth-container {
-    padding-left: 15px;
-    padding-right: 15px;
-  }
-
-  .validator-expected-return {
-    font-size: 14px;
-    color: ${theme.textColor3};
-  }
-
-  .validator-footer {
-    display: flex;
-    align-items: center;
-    justify-content: flex-end;
-    gap: 10px;
-  }
-
-  .validator-header {
-    font-size: 14px;
-    display: flex;
-    align-items: center;
-    gap: 10px;
-  }
-
-  .identityIcon {
-    border: 2px solid ${theme.checkDotColor};
-  }
-  .validator-item-container {
-    margin-top: 10px;
-    margin-bottom: 28px;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    background-color: ${theme.backgroundAccountAddress};
-    padding: 10px 15px;
-    border-radius: 8px;
-    gap: 10px;
-  }
-
   .close-button-confirm {
     text-align: right;
     font-size: 14px;

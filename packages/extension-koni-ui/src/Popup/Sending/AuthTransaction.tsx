@@ -1,29 +1,24 @@
 // Copyright 2019-2022 @polkadot/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { NetworkJson, RequestCheckTransfer, ResponseTransfer, TransferError, TransferStep } from '@subwallet/extension-base/background/KoniTypes';
-import { LedgerState } from '@subwallet/extension-base/signers/types';
-import { InputWithLabel, Warning } from '@subwallet/extension-koni-ui/components';
-import Button from '@subwallet/extension-koni-ui/components/Button';
+import { NetworkJson, RequestCheckTransfer } from '@subwallet/extension-base/background/KoniTypes';
 import DonateInputAddress from '@subwallet/extension-koni-ui/components/DonateInputAddress';
 import FormatBalance from '@subwallet/extension-koni-ui/components/FormatBalance';
 import InputAddress from '@subwallet/extension-koni-ui/components/InputAddress';
-import LedgerRequest from '@subwallet/extension-koni-ui/components/Ledger/LedgerRequest';
 import Modal from '@subwallet/extension-koni-ui/components/Modal';
-import QrRequest from '@subwallet/extension-koni-ui/components/Qr/QrRequest';
+import SigningRequest from '@subwallet/extension-koni-ui/components/Signing/SigningRequest';
 import { BalanceFormatType } from '@subwallet/extension-koni-ui/components/types';
-import { SIGN_MODE } from '@subwallet/extension-koni-ui/constants/signing';
 import { ExternalRequestContext } from '@subwallet/extension-koni-ui/contexts/ExternalRequestContext';
-import { QrContext, QrContextState, QrStep } from '@subwallet/extension-koni-ui/contexts/QrContext';
+import { SigningContext } from '@subwallet/extension-koni-ui/contexts/SigningContext';
+import useGetNetworkJson from '@subwallet/extension-koni-ui/hooks/screen/home/useGetNetworkJson';
+import useGetAccountByAddress from '@subwallet/extension-koni-ui/hooks/useGetAccountByAddress';
 import { useRejectExternalRequest } from '@subwallet/extension-koni-ui/hooks/useRejectExternalRequest';
-import { useSignMode } from '@subwallet/extension-koni-ui/hooks/useSignMode';
 import useTranslation from '@subwallet/extension-koni-ui/hooks/useTranslation';
-import { getAccountMeta, makeTransfer, makeTransferLedger, makeTransferQr } from '@subwallet/extension-koni-ui/messaging';
+import { makeTransfer, makeTransferLedger, makeTransferQr } from '@subwallet/extension-koni-ui/messaging';
 import { ThemeProps, TransferResultType } from '@subwallet/extension-koni-ui/types';
-import React, { useCallback, useContext, useEffect, useState } from 'react';
+import React, { useCallback, useContext } from 'react';
 import styled from 'styled-components';
 
-import { KeyringPair$Meta } from '@polkadot/keyring/types';
 import { BN } from '@polkadot/util';
 
 interface Props extends ThemeProps {
@@ -77,314 +72,38 @@ function AuthTransaction ({ className, isDonation, feeInfo: [fee, feeDecimals, f
   const { t } = useTranslation();
   const { handlerReject } = useRejectExternalRequest();
 
-  const { cleanQrState, updateQrState } = useContext(QrContext);
-  const { clearExternalState, externalState, updateExternalState } = useContext(ExternalRequestContext);
+  const { externalState: { externalId } } = useContext(ExternalRequestContext);
+  const { signingState: { isBusy } } = useContext(SigningContext);
 
-  const { externalId } = externalState;
-
-  const [isBusy, setBusy] = useState(false);
-  const [password, setPassword] = useState<string>('');
-  const [isKeyringErr, setKeyringErr] = useState<boolean>(false);
-  const [errorArr, setErrorArr] = useState<string[]>([]);
-  const [accountMeta, setAccountMeta] = useState<KeyringPair$Meta>({});
   const networkPrefix = networkMap[requestPayload.networkKey].ss58Format;
-  const genesisHash = networkMap[requestPayload.networkKey].genesisHash;
+  const networkJson = useGetNetworkJson(requestPayload.networkKey);
 
-  const signMode = useSignMode(accountMeta);
+  const account = useGetAccountByAddress(requestPayload.from);
 
   const _onCancel = useCallback(async () => {
-    if (externalId) {
+    if (!isBusy) {
       await handlerReject(externalId);
+
+      onCancel();
     }
+  }, [isBusy, handlerReject, externalId, onCancel]);
 
-    onCancel();
-  }, [handlerReject, onCancel, externalId]);
+  const onFail = useCallback((errors: string[], extrinsicHash?: string) => {
+    onChangeResult({
+      isShowTxResult: true,
+      isTxSuccess: false,
+      extrinsicHash: extrinsicHash,
+      txError: errors
+    });
+  }, [onChangeResult]);
 
-  const handlerCallbackResponseResult = useCallback((rs: ResponseTransfer) => {
-    if (!rs.isFinalized) {
-      if (rs.step === TransferStep.SUCCESS.valueOf()) {
-        onChangeResult({
-          isShowTxResult: true,
-          isTxSuccess: rs.step === TransferStep.SUCCESS.valueOf(),
-          extrinsicHash: rs.extrinsicHash
-        });
-        cleanQrState();
-        clearExternalState();
-        setBusy(false);
-      } else if (rs.step === TransferStep.ERROR.valueOf()) {
-        onChangeResult({
-          isShowTxResult: true,
-          isTxSuccess: rs.step === TransferStep.SUCCESS.valueOf(),
-          extrinsicHash: rs.extrinsicHash,
-          txError: rs.errors
-        });
-        cleanQrState();
-        clearExternalState();
-        setBusy(false);
-      }
-    }
-  }, [cleanQrState, onChangeResult, clearExternalState]);
-
-  const handlerResponseError = useCallback((errors: TransferError[]) => {
-    const errorMessage = errors.map((err) => err.message);
-
-    if (errors.find((err) => err.code === 'keyringError')) {
-      setKeyringErr(true);
-    }
-
-    setErrorArr(errorMessage);
-
-    if (errorMessage && errorMessage.length) {
-      setBusy(false);
-    }
-  }, []);
-
-  const _doStart = useCallback((): void => {
-    setBusy(true);
-    makeTransfer({
-      ...requestPayload,
-      password
-    }, handlerCallbackResponseResult).then(handlerResponseError)
-      .catch((e) => console.log('There is problem when makeTransfer', e));
-  }, [requestPayload, password, handlerCallbackResponseResult, handlerResponseError]);
-
-  const _doStartQr = useCallback((): void => {
-    setBusy(true);
-    makeTransferQr({
-      ...requestPayload
-    }, (rs) => {
-      if (rs.qrState) {
-        const state: QrContextState = {
-          ...rs.qrState,
-          step: QrStep.DISPLAY_PAYLOAD
-        };
-
-        updateQrState(state);
-        setBusy(false);
-      }
-
-      if (rs.externalState) {
-        updateExternalState(rs.externalState);
-      }
-
-      if (rs.isBusy && rs.step !== TransferStep.SUCCESS.valueOf()) {
-        updateQrState({ step: QrStep.SENDING_TX });
-        setBusy(true);
-      }
-
-      handlerCallbackResponseResult(rs);
-    }).then(handlerResponseError)
-      .catch((e) => console.log('There is problem when makeTransferQr', e));
-  }, [requestPayload, handlerCallbackResponseResult, handlerResponseError, updateQrState, updateExternalState]);
-
-  const _doSignLedger = useCallback((handlerSignLedger: (ledgerState: LedgerState) => void): void => {
-    setBusy(true);
-    makeTransferLedger({
-      ...requestPayload
-    }, (rs) => {
-      if (rs.externalState) {
-        updateExternalState(rs.externalState);
-      }
-
-      if (rs.ledgerState) {
-        handlerSignLedger(rs.ledgerState);
-      }
-
-      handlerCallbackResponseResult(rs);
-    }).then(handlerResponseError)
-      .catch((e) => console.log('There is problem when makeTransferLedger', e));
-  }, [updateExternalState, requestPayload, handlerCallbackResponseResult, handlerResponseError]);
-
-  const _onChangePass = useCallback((value: string): void => {
-    setPassword(value);
-    setErrorArr([]);
-    setKeyringErr(false);
-  }, []);
-
-  const renderError = useCallback(() => {
-    if (errorArr && errorArr.length) {
-      return errorArr.map((err) =>
-        (
-          <Warning
-            className='auth-transaction-error'
-            isDanger
-            key={err}
-          >
-            {t<string>(err)}
-          </Warning>
-        )
-      );
-    } else {
-      return <></>;
-    }
-  }, [errorArr, t]);
-
-  const handlerRenderInfo = useCallback(() => {
-    return (
-      <>
-        <InputAddress
-          className={'auth-transaction__input-address'}
-          defaultValue={requestPayload.from}
-          help={t<string>(isDonation ? 'The account you will donate from.' : 'The account you will send funds from.')}
-          isDisabled={true}
-          isSetDefaultValue={true}
-          label={t<string>(isDonation ? 'Donate from account' : 'Send from account')}
-          networkPrefix={networkPrefix}
-          type='account'
-          withEllipsis
-        />
-
-        {isDonation
-          ? (
-            <DonateInputAddress
-              className={'auth-transaction__input-address'}
-              defaultValue={requestPayload.to}
-              help={t<string>('The address you want to donate to.')}
-              isDisabled={true}
-              isSetDefaultValue={true}
-              label={t<string>('Donate to address')}
-              networkPrefix={networkPrefix}
-              type='allPlus'
-              withEllipsis
-            />
-          )
-          : (
-            <InputAddress
-              className={'auth-transaction__input-address'}
-              defaultValue={requestPayload.to}
-              help={t<string>('The address you want to send funds to.')}
-              isDisabled={true}
-              isSetDefaultValue={true}
-              label={t<string>('Send to address')}
-              networkPrefix={networkPrefix}
-              type='allPlus'
-              withEllipsis
-            />
-          )
-        }
-
-        <div className='auth-transaction__info'>
-          <div className='auth-transaction__info-text'>Amount</div>
-          <div className='auth-transaction__info-value'>
-            <FormatBalance
-              format={balanceFormat}
-              value={requestPayload.value}
-            />
-          </div>
-        </div>
-
-        <div className='auth-transaction__info'>
-          <div className='auth-transaction__info-text'>Estimated fee</div>
-          <div className='auth-transaction__info-value'>
-            <FormatBalance
-              format={[feeDecimals, feeSymbol]}
-              value={fee}
-            />
-          </div>
-        </div>
-
-        <div className='auth-transaction__info'>
-          <div className='auth-transaction__info-text'>Total (Amount + Fee)</div>
-          <div className='auth-transaction__info-value'>
-            {renderTotal({
-              fee,
-              feeDecimals,
-              feeSymbol,
-              amount: requestPayload.value,
-              amountDecimals: balanceFormat[0],
-              amountSymbol: balanceFormat[2] || balanceFormat[1]
-            })}
-          </div>
-        </div>
-      </>
-    );
-  }, [balanceFormat, fee, feeDecimals, feeSymbol, isDonation, networkPrefix, requestPayload, t]);
-
-  const handlerErrorQr = useCallback((error: Error) => {
-    setErrorArr([error.message]);
-  }, []);
-
-  const handlerClearError = useCallback(() => {
-    setErrorArr([]);
-  }, []);
-
-  const handlerRenderContent = useCallback(() => {
-    switch (signMode) {
-      case SIGN_MODE.QR:
-        return (
-          <QrRequest
-            clearError={handlerClearError}
-            errorArr={errorArr}
-            genesisHash={genesisHash}
-            handlerStart={_doStartQr}
-            isBusy={isBusy}
-            onError={handlerErrorQr}
-          >
-            { handlerRenderInfo() }
-          </QrRequest>
-        );
-
-      case SIGN_MODE.LEDGER:
-        return (
-          <LedgerRequest
-            accountMeta={accountMeta}
-            errorArr={errorArr}
-            genesisHash={genesisHash}
-            handlerSignLedger={_doSignLedger}
-            isBusy={isBusy}
-            setBusy={setBusy}
-            setErrorArr={setErrorArr}
-          >
-            { handlerRenderInfo() }
-          </LedgerRequest>
-        );
-      case SIGN_MODE.PASSWORD:
-      default:
-        return (
-          <div className='auth-transaction-body'>
-            { handlerRenderInfo() }
-            <div className='auth-transaction__separator' />
-            <InputWithLabel
-              isError={isKeyringErr}
-              label={t<string>('Unlock account with password')}
-              onChange={_onChangePass}
-              type='password'
-              value={password}
-            />
-            { renderError() }
-            <div className='auth-transaction__submit-wrapper'>
-              <Button
-                className={'auth-transaction__submit-btn'}
-                isBusy={isBusy}
-                isDisabled={!password || !!(errorArr && errorArr.length)}
-                onClick={_doStart}
-              >
-                {t<string>('Sign and Submit')}
-              </Button>
-            </div>
-          </div>
-        );
-    }
-  }, [signMode, handlerClearError, errorArr, genesisHash, _doStartQr, isBusy, handlerErrorQr, handlerRenderInfo, accountMeta, _doSignLedger, isKeyringErr, t, _onChangePass, password, renderError, _doStart]);
-
-  useEffect(() => {
-    let unmount = false;
-
-    const handler = async () => {
-      const { meta } = await getAccountMeta({ address: requestPayload.from });
-
-      if (!unmount) {
-        setAccountMeta(meta);
-      }
-    };
-
-    // eslint-disable-next-line no-void
-    void handler();
-
-    return () => {
-      unmount = true;
-    };
-  }, [requestPayload.from]);
+  const onSuccess = useCallback((extrinsicHash: string) => {
+    onChangeResult({
+      isShowTxResult: true,
+      isTxSuccess: true,
+      extrinsicHash: extrinsicHash
+    });
+  }, [onChangeResult]);
 
   return (
     <div className={className}>
@@ -409,7 +128,95 @@ function AuthTransaction ({ className, isDonation, feeInfo: [fee, feeDecimals, f
             }
           </div>
         </div>
-        { handlerRenderContent() }
+        <SigningRequest
+          account={account}
+          balanceError={false}
+          detailError={true}
+          handleSignLedger={makeTransferLedger}
+          handleSignPassword={makeTransfer}
+          handleSignQr={makeTransferQr}
+          hideConfirm={_onCancel}
+          message={'There is problem when makeTransfer'}
+          network={networkJson}
+          onFail={onFail}
+          onSuccess={onSuccess}
+          params={requestPayload}
+        >
+          <InputAddress
+            className={'auth-transaction__input-address'}
+            defaultValue={requestPayload.from}
+            help={t<string>(isDonation ? 'The account you will donate from.' : 'The account you will send funds from.')}
+            isDisabled={true}
+            isSetDefaultValue={true}
+            label={t<string>(isDonation ? 'Donate from account' : 'Send from account')}
+            networkPrefix={networkPrefix}
+            type='account'
+            withEllipsis
+          />
+
+          {isDonation
+            ? (
+              <DonateInputAddress
+                className={'auth-transaction__input-address'}
+                defaultValue={requestPayload.to}
+                help={t<string>('The address you want to donate to.')}
+                isDisabled={true}
+                isSetDefaultValue={true}
+                label={t<string>('Donate to address')}
+                networkPrefix={networkPrefix}
+                type='allPlus'
+                withEllipsis
+              />
+            )
+            : (
+              <InputAddress
+                className={'auth-transaction__input-address'}
+                defaultValue={requestPayload.to}
+                help={t<string>('The address you want to send funds to.')}
+                isDisabled={true}
+                isSetDefaultValue={true}
+                label={t<string>('Send to address')}
+                networkPrefix={networkPrefix}
+                type='allPlus'
+                withEllipsis
+              />
+            )
+          }
+
+          <div className='auth-transaction__info'>
+            <div className='auth-transaction__info-text'>Amount</div>
+            <div className='auth-transaction__info-value'>
+              <FormatBalance
+                format={balanceFormat}
+                value={requestPayload.value}
+              />
+            </div>
+          </div>
+
+          <div className='auth-transaction__info'>
+            <div className='auth-transaction__info-text'>Estimated fee</div>
+            <div className='auth-transaction__info-value'>
+              <FormatBalance
+                format={[feeDecimals, feeSymbol]}
+                value={fee}
+              />
+            </div>
+          </div>
+
+          <div className='auth-transaction__info'>
+            <div className='auth-transaction__info-text'>Total (Amount + Fee)</div>
+            <div className='auth-transaction__info-value'>
+              {renderTotal({
+                fee,
+                feeDecimals,
+                feeSymbol,
+                amount: requestPayload.value,
+                amountDecimals: balanceFormat[0],
+                amountSymbol: balanceFormat[2] || balanceFormat[1]
+              })}
+            </div>
+          </div>
+        </SigningRequest>
 
       </Modal>
     </div>

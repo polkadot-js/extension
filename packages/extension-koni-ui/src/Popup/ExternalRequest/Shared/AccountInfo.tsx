@@ -10,7 +10,7 @@ import useToast from '@subwallet/extension-koni-ui/hooks/useToast';
 import useTranslation from '@subwallet/extension-koni-ui/hooks/useTranslation';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
-import { getAccountInfoByNetwork } from '@subwallet/extension-koni-ui/util/findAccount';
+import { getAccountInfoByNetwork } from '@subwallet/extension-koni-ui/util/account';
 import { AccountInfoByNetwork } from '@subwallet/extension-koni-ui/util/types';
 import CN from 'classnames';
 import React, { useCallback, useContext, useMemo } from 'react';

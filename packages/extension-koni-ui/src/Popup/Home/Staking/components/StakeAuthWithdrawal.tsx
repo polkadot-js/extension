@@ -16,17 +16,16 @@ import { SIGN_MODE } from '@subwallet/extension-koni-ui/constants/signing';
 import { ExternalRequestContext } from '@subwallet/extension-koni-ui/contexts/ExternalRequestContext';
 import { QrContext, QrContextState, QrStep } from '@subwallet/extension-koni-ui/contexts/QrContext';
 import useGetNetworkJson from '@subwallet/extension-koni-ui/hooks/screen/home/useGetNetworkJson';
+import useGetAccountByAddress from '@subwallet/extension-koni-ui/hooks/useGetAccountByAddress';
+import { useGetSignMode } from '@subwallet/extension-koni-ui/hooks/useGetSignMode';
 import { useRejectExternalRequest } from '@subwallet/extension-koni-ui/hooks/useRejectExternalRequest';
-import { useSignMode } from '@subwallet/extension-koni-ui/hooks/useSignMode';
 import useToast from '@subwallet/extension-koni-ui/hooks/useToast';
 import useTranslation from '@subwallet/extension-koni-ui/hooks/useTranslation';
-import { getAccountMeta, getStakeWithdrawalTxInfo, stakeWithdrawLedger, stakeWithdrawQr, submitStakeWithdrawal } from '@subwallet/extension-koni-ui/messaging';
+import { getStakeWithdrawalTxInfo, stakeWithdrawLedger, stakeWithdrawQr, submitStakeWithdrawal } from '@subwallet/extension-koni-ui/messaging';
 import StakeWithdrawalResult from '@subwallet/extension-koni-ui/Popup/Home/Staking/components/StakeWithdrawalResult';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import React, { useCallback, useContext, useEffect, useState } from 'react';
 import styled from 'styled-components';
-
-import { KeyringPair$Meta } from '@polkadot/keyring/types';
 
 interface Props extends ThemeProps {
   className?: string;
@@ -62,10 +61,10 @@ function StakeAuthWithdrawal ({ address, amount, className, hideModal, networkKe
   const [isTxSuccess, setIsTxSuccess] = useState(false);
   const [txError, setTxError] = useState('');
   const [showResult, setShowResult] = useState(false);
-  const [accountMeta, setAccountMeta] = useState<KeyringPair$Meta>({});
   const [errorArr, setErrorArr] = useState<string[]>([]);
 
-  const signMode = useSignMode(accountMeta);
+  const account = useGetAccountByAddress(address);
+  const signMode = useGetSignMode(account);
 
   useEffect(() => {
     getStakeWithdrawalTxInfo({
@@ -398,7 +397,7 @@ function StakeAuthWithdrawal ({ address, amount, className, hideModal, networkKe
         return (
           <div className='external-wrapper'>
             <LedgerRequest
-              accountMeta={accountMeta}
+              accountMeta={account}
               errorArr={errorArr}
               genesisHash={networkJson.genesisHash}
               handlerSignLedger={handlerSendLedger}
@@ -448,26 +447,7 @@ function StakeAuthWithdrawal ({ address, amount, className, hideModal, networkKe
           </>
         );
     }
-  }, [_onChangePass, accountMeta, errorArr, handleConfirm, handlerClearError, handlerErrorQr, handlerSendLedger, handlerSubmitQr, hideConfirm, loading, networkJson.genesisHash, password, passwordError, renderInfo, signMode, t]);
-
-  useEffect(() => {
-    let unmount = false;
-
-    const handler = async () => {
-      const { meta } = await getAccountMeta({ address: address });
-
-      if (!unmount) {
-        setAccountMeta(meta);
-      }
-    };
-
-    // eslint-disable-next-line no-void
-    void handler();
-
-    return () => {
-      unmount = true;
-    };
-  }, [address]);
+  }, [_onChangePass, account, errorArr, handleConfirm, handlerClearError, handlerErrorQr, handlerSendLedger, handlerSubmitQr, hideConfirm, loading, networkJson.genesisHash, password, passwordError, renderInfo, signMode, t]);
 
   return (
     <div className={className}>

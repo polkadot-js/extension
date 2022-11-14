@@ -12,7 +12,7 @@ import { MemoryRouter } from 'react-router';
 import { Button } from '../components';
 import * as messaging from '../messaging';
 import { flushAllPromises } from '../testHelpers';
-import ImportQr from './ImportQr';
+import ImportQr from './Attach/AttachQrSigner';
 
 const mockedAccount = {
   content: '12bxf6QJS5hMJgwbJMDjFot1sq93EvgQwyuPWENr9SzJfxtN',

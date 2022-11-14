@@ -27,8 +27,8 @@ import ToastProvider from '../components/Toast/ToastProvider';
 import { ScannerContextProvider } from '../contexts/ScannerContext';
 import { saveCurrentAccountAddress, subscribeAccountsWithCurrentAddress, subscribeAuthorizeRequestsV2, subscribeConfirmations, subscribeMetadataRequests, subscribeSigningRequests } from '../messaging';
 import { store } from '../stores';
+import { createFindAccountHandler } from '../util/account';
 import { buildHierarchy } from '../util/buildHierarchy';
-import { createFindAccountHandler } from '../util/findAccount';
 // import Home from './Home';
 
 const StakeCompoundSubmitTransaction = React.lazy(() => import('@subwallet/extension-koni-ui/Popup/Home/Staking/StakeCompoundSubmitTransaction'));
@@ -45,7 +45,9 @@ const RestoreJson = React.lazy(() => import('./RestoreJson'));
 const PhishingDetected = React.lazy(() => import('./PhishingDetected'));
 const Metadata = React.lazy(() => import('./Metadata'));
 const ImportSeed = React.lazy(() => import('./ImportSeed'));
-const ImportQr = React.lazy(() => import('./ImportQr'));
+const AttachQrSigner = React.lazy(() => import('./Attach/AttachQrSigner'));
+const ImportSecretQr = React.lazy(() => import('./Attach/ImportSecretQr'));
+const AttachReadOnly = React.lazy(() => import('./Attach/AttachReadOnly'));
 const ImportMetamaskPrivateKey = React.lazy(() => import('./ImportMetamaskPrivateKey'));
 const Forget = React.lazy(() => import('./Forget'));
 const Export = React.lazy(() => import('./Export'));
@@ -290,7 +292,9 @@ export default function Popup (): React.ReactElement {
                                   <Route path='/account/export/:address'>{wrapWithErrorBoundary(<Export />, 'export-address')}</Route>
                                   {/* <Route path='/account/export-all'>{wrapWithErrorBoundary(<ExportAll />, 'export-all-address')}</Route> */}
                                   <Route path='/account/import-ledger'>{wrapWithErrorBoundary(<ImportLedger />, 'import-ledger')}</Route>
-                                  <Route path='/account/import-qr'>{wrapWithErrorBoundary(<ImportQr />, 'import-qr')}</Route>
+                                  <Route path='/account/attach-qr-signer'>{wrapWithErrorBoundary(<AttachQrSigner />, 'attach-qr-signer')}</Route>
+                                  <Route path='/account/attach-read-only'>{wrapWithErrorBoundary(<AttachReadOnly />, 'attach-read-only')}</Route>
+                                  <Route path='/account/import-secret-qr'>{wrapWithErrorBoundary(<ImportSecretQr />, 'import-secret-qr')}</Route>
                                   <Route path='/account/scan-qr'>{wrapWithErrorBoundary(<ExternalRequest />, 'scan-qr')}</Route>
                                   <Route path='/account/import-seed'>{wrapWithErrorBoundary(<ImportSeed />, 'import-seed')}</Route>
                                   <Route path='/account/import-metamask-private-key'>{wrapWithErrorBoundary(<ImportMetamaskPrivateKey />, 'import-metamask-private-key')}</Route>

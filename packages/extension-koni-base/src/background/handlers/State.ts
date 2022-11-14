@@ -2047,7 +2047,7 @@ export default class KoniState extends State {
       throw new EvmRpcError('INVALID_PARAMS', 'Cannot find pair with address: ' + address);
     }
 
-    if (!meta.isExternal) {
+    if (!meta.isExternal || (meta.isExternal && (meta.isHardware || meta.isReadOnly))) {
       // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
       const signPayload = { address, type: method, payload };
 
@@ -2230,7 +2230,7 @@ export default class KoniState extends State {
       });
     };
 
-    if (!meta.isExternal) {
+    if (!meta.isExternal || (meta.isExternal && (meta.isHardware || meta.isReadOnly))) {
       return this.addConfirmation(id, url, 'evmSendTransactionRequest', requestPayload, { requiredPassword: true, address: fromAddress, networkKey }, validateConfirmationResponsePayload)
         .then(async ({ isApproved }) => {
           if (isApproved) {

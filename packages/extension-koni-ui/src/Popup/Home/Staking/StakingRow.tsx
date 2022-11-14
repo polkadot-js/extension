@@ -25,9 +25,7 @@ interface Props extends ThemeProps {
   stakingType: StakingType;
   activeStake: string | undefined;
   unbondingStake: string | undefined;
-  isAccountAll: boolean;
-  isExternalAccount: boolean;
-  isHardwareAccount: boolean;
+  isCanSign: boolean;
 
   redeemable: number;
   nextWithdrawal: number;
@@ -45,7 +43,7 @@ interface Props extends ThemeProps {
   setTargetRedeemable: (val: number) => void;
 }
 
-function StakingRow ({ activeStake, chainName, className, index, isAccountAll, isExternalAccount, isHardwareAccount, logo, networkKey, nextWithdrawal, nextWithdrawalAction, nextWithdrawalAmount, price, redeemable, reward, setActionNetworkKey, setShowClaimRewardModal, setShowCompoundStakeModal, setShowWithdrawalModal, setTargetNextWithdrawalAction, setTargetRedeemable, setTargetValidator, stakingType, targetValidator, totalStake, unbondingStake, unit }: Props): React.ReactElement<Props> {
+function StakingRow ({ activeStake, chainName, className, index, isCanSign, logo, networkKey, nextWithdrawal, nextWithdrawalAction, nextWithdrawalAmount, price, redeemable, reward, setActionNetworkKey, setShowClaimRewardModal, setShowCompoundStakeModal, setShowWithdrawalModal, setTargetNextWithdrawalAction, setTargetRedeemable, setTargetValidator, stakingType, targetValidator, totalStake, unbondingStake, unit }: Props): React.ReactElement<Props> {
   const [showReward, setShowReward] = useState(false);
   const [showStakingMenu, setShowStakingMenu] = useState(false);
 
@@ -160,7 +158,7 @@ function StakingRow ({ activeStake, chainName, className, index, isAccountAll, i
                   {stakingType.charAt(0).toUpperCase() + stakingType.slice(1)} balance
                 </div>
                 {
-                  !isAccountAll && stakingType !== StakingType.POOLED && <StakingMenu
+                  isCanSign && stakingType !== StakingType.POOLED && <StakingMenu
                     bondedAmount={activeStake as string}
                     networkKey={networkKey}
                     nextWithdrawal={nextWithdrawal}

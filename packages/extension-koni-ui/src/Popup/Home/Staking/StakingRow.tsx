@@ -1,7 +1,9 @@
 // Copyright 2019-2022 @subwallet/extension-koni authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { StakingRewardItem } from '@subwallet/extension-base/background/KoniTypes';
+import { StakingRewardItem, StakingType } from '@subwallet/extension-base/background/KoniTypes';
+import UserIcon from '@subwallet/extension-koni-ui/assets/user.svg';
+import UsersIcon from '@subwallet/extension-koni-ui/assets/users.svg';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { formatLocaleNumber } from '@subwallet/extension-koni-ui/util/formatNumber';
 import React, { useCallback, useState } from 'react';
@@ -20,6 +22,7 @@ interface Props extends ThemeProps {
   reward: StakingRewardItem;
   price: number;
   networkKey: string;
+  stakingType: StakingType;
   activeStake: string | undefined;
   unbondingStake: string | undefined;
   isAccountAll: boolean;
@@ -42,7 +45,7 @@ interface Props extends ThemeProps {
   setTargetRedeemable: (val: number) => void;
 }
 
-function StakingRow ({ activeStake, chainName, className, index, isAccountAll, isExternalAccount, isHardwareAccount, logo, networkKey, nextWithdrawal, nextWithdrawalAction, nextWithdrawalAmount, price, redeemable, reward, setActionNetworkKey, setShowClaimRewardModal, setShowCompoundStakeModal, setShowWithdrawalModal, setTargetNextWithdrawalAction, setTargetRedeemable, setTargetValidator, targetValidator, totalStake, unbondingStake, unit }: Props): React.ReactElement<Props> {
+function StakingRow ({ activeStake, chainName, className, index, isAccountAll, isExternalAccount, isHardwareAccount, logo, networkKey, nextWithdrawal, nextWithdrawalAction, nextWithdrawalAmount, price, redeemable, reward, setActionNetworkKey, setShowClaimRewardModal, setShowCompoundStakeModal, setShowWithdrawalModal, setTargetNextWithdrawalAction, setTargetRedeemable, setTargetValidator, stakingType, targetValidator, totalStake, unbondingStake, unit }: Props): React.ReactElement<Props> {
   const [showReward, setShowReward] = useState(false);
   const [showStakingMenu, setShowStakingMenu] = useState(false);
 
@@ -109,6 +112,22 @@ function StakingRow ({ activeStake, chainName, className, index, isAccountAll, i
     return editBalance(balance.toString());
   };
 
+  const getStakingTypeClassName = () => {
+    if (stakingType === StakingType.POOLED) {
+      return '-pooled';
+    }
+
+    return '-nominated';
+  };
+
+  const getStakingTypeIcon = () => {
+    if (stakingType === StakingType.POOLED) {
+      return UsersIcon;
+    }
+
+    return UserIcon;
+  };
+
   return (
     <div className={`${className || ''} ${showReward ? '-show-detail' : ''}`}>
       <div
@@ -128,11 +147,20 @@ function StakingRow ({ activeStake, chainName, className, index, isAccountAll, i
             onClick={handleToggleReward}
           >
             <div className={'meta-container'}>
-              <div className={'chain-name'}>{chainName}</div>
+              <div className={'chain-name'}>
+                {chainName}
+              </div>
               <div className={'balance-description'}>
-                <div>Staking balance</div>
+                <div className={`staking-type__container ${getStakingTypeClassName()}`}>
+                  <img
+                    height={16}
+                    src={getStakingTypeIcon()}
+                    width={16}
+                  />
+                  {stakingType.charAt(0).toUpperCase() + stakingType.slice(1)} balance
+                </div>
                 {
-                  !isAccountAll && <StakingMenu
+                  !isAccountAll && stakingType !== StakingType.POOLED && <StakingMenu
                     bondedAmount={activeStake as string}
                     networkKey={networkKey}
                     nextWithdrawal={nextWithdrawal}
@@ -211,13 +239,6 @@ function StakingRow ({ activeStake, chainName, className, index, isAccountAll, i
                 <div className={'chain-unit'}>{unit}</div>
               </div>
             </div>
-
-            {/* <div className={'reward-container'}> */}
-            {/*  <div className={'reward-title'}>APR</div> */}
-            {/*  <div className={'reward-amount'}> */}
-            {/*    14% */}
-            {/*  </div> */}
-            {/* </div> */}
           </div>
         </div>
       }
@@ -226,6 +247,39 @@ function StakingRow ({ activeStake, chainName, className, index, isAccountAll, i
 }
 
 export default React.memo(styled(StakingRow)(({ theme }: Props) => `
+  .-pooled {
+    color: ${theme.primaryColor};
+    background-color: #42C59A33;
+  }
+
+  .-nominated {
+    color: ${theme.iconNeutralColor};
+    background-color: #7B809833;
+  }
+
+  .staking-type__container {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 2px;
+    padding: 0 4px 0 4px;
+    font-weight: 400;
+    font-size: 14px;
+    line-height: 24px;
+    border-radius: 4px;
+  }
+
+  .staking-item__type {
+    color: ${theme.crowdloanWinnerStatus};
+
+    padding: 2px 6px;
+    border-radius: 3px;
+    background-color: ${theme.backgroundAccountAddress};
+    margin-left: 8px;
+    font-size: 13px;
+    line-height: 20px;
+  }
+
   .extra-info {
     display: flex;
     gap: 12px;
@@ -264,8 +318,6 @@ export default React.memo(styled(StakingRow)(({ theme }: Props) => `
   }
 
   .balance-description {
-    font-size: 14px;
-    color: #7B8098;
     display: flex;
     gap: 5px;
     align-items: center;
@@ -357,6 +409,10 @@ export default React.memo(styled(StakingRow)(({ theme }: Props) => `
     font-size: 16px;
     font-weight: 500;
     text-transform: capitalize;
+
+    display: flex;
+    flex-direction: row;
+    gap: 3px;
   }
 
   .chain-symbol {

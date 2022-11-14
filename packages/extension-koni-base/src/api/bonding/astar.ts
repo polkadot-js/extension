@@ -1,7 +1,7 @@
 // Copyright 2019-2022 @subwallet/extension-koni authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { ApiProps, BasicTxInfo, DelegationItem, NetworkJson, UnlockingStakeInfo, ValidatorInfo } from '@subwallet/extension-base/background/KoniTypes';
+import { ApiProps, BasicTxInfo, DelegationItem, NetworkJson, StakingType, UnlockingStakeInfo, ValidatorInfo } from '@subwallet/extension-base/background/KoniTypes';
 import { ERA_LENGTH_MAP } from '@subwallet/extension-koni-base/api/bonding/utils';
 import { getFreeBalance } from '@subwallet/extension-koni-base/api/dotsama/balance';
 import { isUrl, parseNumberToDisplay, parseRawNumber } from '@subwallet/extension-koni-base/utils';
@@ -286,13 +286,16 @@ async function getAstarUnlockingInfo (dotSamaApi: ApiProps, address: string, net
   };
 }
 
-export async function handleAstarUnlockingInfo (dotSamaApi: ApiProps, networkJson: NetworkJson, networkKey: string, address: string) {
+export async function handleAstarUnlockingInfo (dotSamaApi: ApiProps, networkJson: NetworkJson, networkKey: string, address: string, type: StakingType) {
   const { nextWithdrawal, nextWithdrawalAmount, redeemable } = await getAstarUnlockingInfo(dotSamaApi, address, networkKey);
 
   const parsedRedeemable = redeemable / (10 ** (networkJson.decimals as number));
   const parsedNextWithdrawalAmount = nextWithdrawalAmount / (10 ** (networkJson.decimals as number));
 
   return {
+    address,
+    type,
+    chain: networkKey,
     nextWithdrawal: nextWithdrawal,
     redeemable: parsedRedeemable,
     nextWithdrawalAmount: parsedNextWithdrawalAmount

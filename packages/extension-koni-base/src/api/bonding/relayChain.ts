@@ -1,7 +1,7 @@
 // Copyright 2019-2022 @subwallet/extension-koni authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { ApiProps, BasicTxInfo, ChainBondingBasics, NetworkJson, UnlockingStakeInfo, ValidatorInfo } from '@subwallet/extension-base/background/KoniTypes';
+import { ApiProps, BasicTxInfo, ChainBondingBasics, NetworkJson, StakingType, UnlockingStakeInfo, ValidatorInfo } from '@subwallet/extension-base/background/KoniTypes';
 import { calculateChainStakedReturn, calculateInflation, calculateValidatorStakedReturn, ERA_LENGTH_MAP, getCommission, Unlocking, ValidatorExtraInfo } from '@subwallet/extension-koni-base/api/bonding/utils';
 import { getFreeBalance } from '@subwallet/extension-koni-base/api/dotsama/balance';
 import { parseNumberToDisplay, parseRawNumber } from '@subwallet/extension-koni-base/utils';
@@ -384,13 +384,17 @@ export async function getRelayUnlockingInfo (dotSamaApi: ApiProps, address: stri
   };
 }
 
-export async function handleRelayUnlockingInfo (dotSamaApi: ApiProps, networkJson: NetworkJson, networkKey: string, address: string) {
+export async function handleRelayUnlockingInfo (dotSamaApi: ApiProps, networkJson: NetworkJson, networkKey: string, address: string, type: StakingType) {
   const { nextWithdrawal, nextWithdrawalAmount, redeemable } = await getRelayUnlockingInfo(dotSamaApi, address, networkKey);
 
   const parsedRedeemable = redeemable ? parseFloat(redeemable.toString()) / (10 ** (networkJson.decimals as number)) : 0;
   const parsedNextWithdrawalAmount = parseFloat(nextWithdrawalAmount.toString()) / (10 ** (networkJson.decimals as number));
 
   return {
+    chain: networkKey,
+    address,
+    type,
+
     nextWithdrawal: parseFloat(nextWithdrawal.toString()),
     redeemable: parsedRedeemable,
     nextWithdrawalAmount: parsedNextWithdrawalAmount
@@ -401,8 +405,9 @@ export async function getRelayWithdrawalTxInfo (dotSamaAPi: ApiProps, address: s
   const apiPromise = await dotSamaAPi.isReady;
 
   if (apiPromise.api.tx.staking.withdrawUnbonded.meta.args.length === 1) {
-    const slashingSpans = await apiPromise.api.query.staking.slashingSpans(address);
-    const extrinsic = apiPromise.api.tx.staking.withdrawUnbonded(slashingSpans.toHuman());
+    const _slashingSpans = (await apiPromise.api.query.staking.slashingSpans(address)).toHuman() as Record<string, any>;
+    const slashingSpanCount = _slashingSpans !== null ? _slashingSpans.spanIndex as string : '0';
+    const extrinsic = apiPromise.api.tx.staking.withdrawUnbonded(slashingSpanCount);
 
     return extrinsic.paymentInfo(address);
   } else {
@@ -430,6 +435,8 @@ export async function handleRelayWithdrawalTxInfo (address: string, networkKey: 
       balanceError
     } as BasicTxInfo;
   } catch (e) {
+    console.error('Error estimating fee for staking withdrawal', e);
+
     return {
       fee: `0.0000 ${networkJson.nativeToken as string}`,
       balanceError: false
@@ -441,9 +448,10 @@ export async function getRelayWithdrawalExtrinsic (dotSamaAPi: ApiProps, address
   const apiPromise = await dotSamaAPi.isReady;
 
   if (apiPromise.api.tx.staking.withdrawUnbonded.meta.args.length === 1) {
-    const slashingSpans = await apiPromise.api.query.staking.slashingSpans(address);
+    const _slashingSpans = (await apiPromise.api.query.staking.slashingSpans(address)).toHuman() as Record<string, any>;
+    const slashingSpanCount = _slashingSpans !== null ? _slashingSpans.spanIndex as string : '0';
 
-    return apiPromise.api.tx.staking.withdrawUnbonded(slashingSpans.toHuman());
+    return apiPromise.api.tx.staking.withdrawUnbonded(slashingSpanCount);
   } else {
     return apiPromise.api.tx.staking.withdrawUnbonded();
   }

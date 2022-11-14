@@ -6,7 +6,7 @@ import { StakingJson } from '@subwallet/extension-base/background/KoniTypes';
 
 const initialState = {
   ready: false,
-  details: {}
+  details: []
 } as StakingJson;
 
 const stakingSlice = createSlice({
@@ -20,11 +20,7 @@ const stakingSlice = createSlice({
         state.ready = payload.ready;
       }
 
-      if (payload.reset) {
-        state.details = payload.details;
-      } else {
-        state.details = { ...state.details, ...payload.details };
-      }
+      state.details = payload.details;
     }
   }
 });

@@ -1,8 +1,10 @@
 // Copyright 2019-2022 @subwallet/extension-koni-base authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { ApiProps, NetworkJson, ResponseTransfer, TokenInfo } from '@subwallet/extension-base/background/KoniTypes';
-import { doSignAndSend, getUnsupportedResponse } from '@subwallet/extension-koni-base/api/dotsama/transfer';
+import { ApiProps, BasicTxResponse, NetworkJson, TokenInfo } from '@subwallet/extension-base/background/KoniTypes';
+import { SignerType } from '@subwallet/extension-base/signers/types';
+import { signAndSendExtrinsic } from '@subwallet/extension-koni-base/api/dotsama/shared/signAndSendExtrinsic';
+import { getUnsupportedResponse } from '@subwallet/extension-koni-base/api/dotsama/transfer';
 import { astarEstimateCrossChainFee, astarGetXcmExtrinsic } from '@subwallet/extension-koni-base/api/xcm/astar';
 import { moonbeamEstimateCrossChainFee, moonbeamGetXcmExtrinsic } from '@subwallet/extension-koni-base/api/xcm/moonbeamXcm';
 import { statemintEstimateCrossChainFee, statemintGetXcmExtrinsic } from '@subwallet/extension-koni-base/api/xcm/statemintXcm';
@@ -90,17 +92,29 @@ export const createXcmExtrinsic = async ({ destinationNetworkKey,
   return extrinsic;
 };
 
-export async function makeCrossChainTransfer (
-  originNetworkKey: string,
-  destinationNetworkKey: string,
-  to: string,
-  fromKeypair: KeyringPair,
-  value: string,
-  dotSamaApiMap: Record<string, ApiProps>,
-  tokenInfo: TokenInfo,
-  networkMap: Record<string, NetworkJson>,
-  callback: (data: ResponseTransfer) => void
-): Promise<void> {
+interface MakeCrossChainTransferProps {
+  originNetworkKey: string;
+  destinationNetworkKey: string;
+  to: string;
+  fromKeypair: KeyringPair;
+  value: string;
+  dotSamaApiMap: Record<string, ApiProps>;
+  tokenInfo: TokenInfo;
+  networkMap: Record<string, NetworkJson>;
+  callback: (data: BasicTxResponse) => void;
+}
+
+export async function makeCrossChainTransfer ({ callback,
+  destinationNetworkKey,
+  dotSamaApiMap,
+  fromKeypair,
+  networkMap,
+  originNetworkKey,
+  to,
+  tokenInfo,
+  value }: MakeCrossChainTransferProps): Promise<void> {
+  const txState: BasicTxResponse = {};
+
   if (!isNetworksPairSupportedTransferCrossChain(originNetworkKey, destinationNetworkKey, tokenInfo.symbol, networkMap)) {
     callback(getUnsupportedResponse());
 
@@ -108,7 +122,6 @@ export async function makeCrossChainTransfer (
   }
 
   const apiProps = await dotSamaApiMap[originNetworkKey].isReady;
-  const api = apiProps.api;
 
   const extrinsic = await createXcmExtrinsic({
     value: value,
@@ -120,14 +133,27 @@ export async function makeCrossChainTransfer (
     tokenInfo: tokenInfo
   });
 
-  await doSignAndSend(api, originNetworkKey, tokenInfo, extrinsic, fromKeypair, updateXcmResponseTxResult, callback);
+  const updateResponseTxResult = (response: BasicTxResponse, records: EventRecord[]) => {
+    updateXcmResponseTxResult(originNetworkKey, tokenInfo, response, records);
+  };
+
+  await signAndSendExtrinsic({
+    type: SignerType.PASSWORD,
+    apiProps: apiProps,
+    callback: callback,
+    extrinsic: extrinsic,
+    txState: txState,
+    address: fromKeypair.address,
+    updateResponseTxResult: updateResponseTxResult,
+    errorMessage: 'error xcm transfer'
+  });
 }
 
 // TODO: add + refine logic for more chains
-function updateXcmResponseTxResult (
+export function updateXcmResponseTxResult (
   networkKey: string,
   tokenInfo: undefined | TokenInfo,
-  response: ResponseTransfer,
+  response: BasicTxResponse,
   records: EventRecord[]
 ) {
   if (!response.txResult) {

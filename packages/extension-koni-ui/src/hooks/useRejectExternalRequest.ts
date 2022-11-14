@@ -3,7 +3,7 @@
 
 import { MANUAL_CANCEL_EXTERNAL_REQUEST } from '@subwallet/extension-koni-ui/constants/signing';
 import { ExternalRequestContext } from '@subwallet/extension-koni-ui/contexts/ExternalRequestContext';
-import { QrContext } from '@subwallet/extension-koni-ui/contexts/QrContext';
+import { QrSignerContext } from '@subwallet/extension-koni-ui/contexts/QrSignerContext';
 import { rejectExternalRequest } from '@subwallet/extension-koni-ui/messaging';
 import { useCallback, useContext } from 'react';
 
@@ -12,8 +12,8 @@ interface Result {
 }
 
 export const useRejectExternalRequest = (): Result => {
-  const { cleanQrState } = useContext(QrContext);
-  const { clearExternalState } = useContext(ExternalRequestContext);
+  const { cleanQrState } = useContext(QrSignerContext);
+  const { cleanExternalState } = useContext(ExternalRequestContext);
 
   const handlerReject = useCallback(async (externalId: string) => {
     if (externalId) {
@@ -21,8 +21,8 @@ export const useRejectExternalRequest = (): Result => {
     }
 
     cleanQrState();
-    clearExternalState();
-  }, [cleanQrState, clearExternalState]);
+    cleanExternalState();
+  }, [cleanQrState, cleanExternalState]);
 
   return {
     handlerReject: handlerReject

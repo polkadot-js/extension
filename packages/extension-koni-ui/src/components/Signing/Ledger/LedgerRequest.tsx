@@ -5,63 +5,59 @@ import { faSync } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { AccountJson } from '@subwallet/extension-base/background/types';
 import { LedgerState } from '@subwallet/extension-base/signers/types';
+import { Button, Warning } from '@subwallet/extension-koni-ui/components';
 import { ExternalRequestContext } from '@subwallet/extension-koni-ui/contexts/ExternalRequestContext';
+import { SigningContext } from '@subwallet/extension-koni-ui/contexts/SigningContext';
+import { useLedger } from '@subwallet/extension-koni-ui/hooks/useLedger';
+import useTranslation from '@subwallet/extension-koni-ui/hooks/useTranslation';
 import { rejectExternalRequest, resolveExternalRequest } from '@subwallet/extension-koni-ui/messaging';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import React, { useCallback, useContext, useEffect, useState } from 'react';
 import styled from 'styled-components';
 
 import { Ledger } from '@polkadot/hw-ledger';
-import { KeyringPair$Meta } from '@polkadot/keyring/types';
 import { hexToU8a } from '@polkadot/util';
-
-import { Button, Warning } from '../../components';
-import { useLedger } from '../../hooks/useLedger';
-import useTranslation from '../../hooks/useTranslation';
 
 interface OnSignLedgerFunction {
   (ledgerState: LedgerState): void
 }
 
 interface Props extends ThemeProps{
-  accountMeta?: KeyringPair$Meta | AccountJson;
-  children: JSX.Element;
+  account?: AccountJson;
+  children: JSX.Element | JSX.Element[];
   className?: string;
-  errorArr: string[];
   genesisHash: string;
   handlerSignLedger: (onSignLedger: OnSignLedgerFunction) => void;
-  isBusy: boolean;
-  setBusy: (val: boolean) => void;
-  setErrorArr: (errors: string[]) => void;
-  onCancel: () => void;
 }
 
-const LedgerSign = (props: Props) => {
-  const { accountMeta, children, className, errorArr, genesisHash, handlerSignLedger, isBusy, setBusy, setErrorArr } = props;
+const LedgerRequest = (props: Props) => {
+  const { account, children, className, genesisHash, handlerSignLedger } = props;
 
   const { t } = useTranslation();
 
+  const { clearError, onErrors, setBusy, signingState } = useContext(SigningContext);
   const { createResolveExternalRequestData } = useContext(ExternalRequestContext);
 
-  const { error: ledgerError, isLoading: ledgerLoading, isLocked: ledgerLocked, ledger, refresh, warning: ledgerWarning } = useLedger(genesisHash, accountMeta?.accountIndex as number, accountMeta?.addressOffset as number);
+  const { errors, isBusy } = signingState;
+
+  const { error: ledgerError, isLoading: ledgerLoading, isLocked: ledgerLocked, ledger, refresh, warning: ledgerWarning } = useLedger(genesisHash, account?.accountIndex as number, account?.addressOffset as number);
 
   const [loading, setLoading] = useState(false);
-
   const [, setUpdate] = useState({});
 
   const handlerOnErrorLedger = useCallback((id: string, error: string) => {
-    setErrorArr([error]);
+    onErrors([error]);
     rejectExternalRequest({ id: id, message: error })
       .finally(() => setBusy(false));
-  }, [setErrorArr, setBusy]);
+  }, [onErrors, setBusy]);
 
   const _onRefresh = useCallback(() => {
     refresh();
-    setErrorArr([]);
-  }, [refresh, setErrorArr]);
+    clearError();
+  }, [refresh, clearError]);
 
   const onSignLedger = useCallback((ledger: Ledger, ledgerState: LedgerState) => {
-    ledger.sign(hexToU8a(ledgerState.ledgerPayload), accountMeta?.accountIndex as number, accountMeta?.accountOffset as number)
+    ledger.sign(hexToU8a(ledgerState.ledgerPayload), account?.accountIndex as number, account?.accountOffset as number)
       .then(({ signature }) => {
         const resolveData = createResolveExternalRequestData({ signature });
 
@@ -71,7 +67,7 @@ const LedgerSign = (props: Props) => {
       .catch((e) => {
         handlerOnErrorLedger(ledgerState.ledgerId, (e as Error).message);
       });
-  }, [accountMeta, createResolveExternalRequestData, handlerOnErrorLedger]);
+  }, [account, createResolveExternalRequestData, handlerOnErrorLedger]);
 
   const onSign = useCallback((ledgerState: LedgerState) => {
     if (ledger) {
@@ -94,8 +90,8 @@ const LedgerSign = (props: Props) => {
   }, [loading, isBusy, ledger, handlerSignLedger, onSign]);
 
   const renderError = useCallback(() => {
-    if (errorArr && errorArr.length) {
-      return errorArr.map((err) =>
+    if (errors && errors.length) {
+      return errors.map((err) =>
         (
           <Warning
             className='auth-transaction-error'
@@ -109,13 +105,13 @@ const LedgerSign = (props: Props) => {
     } else {
       return <></>;
     }
-  }, [errorArr, t]);
+  }, [errors, t]);
 
   useEffect(() => {
     if (ledgerError) {
-      setErrorArr([ledgerError]);
+      onErrors([ledgerError]);
     }
-  }, [ledgerError, setErrorArr]);
+  }, [ledgerError, onErrors]);
 
   return (
     <div className={className}>
@@ -129,7 +125,7 @@ const LedgerSign = (props: Props) => {
         )}
         { renderError() }
         <div className={'button-wrapper'}>
-          {(ledgerLocked || errorArr.length)
+          {(ledgerLocked || errors.length)
             ? (
               <Button
                 isBusy={isBusy || ledgerLoading || loading}
@@ -154,7 +150,7 @@ const LedgerSign = (props: Props) => {
   );
 };
 
-export default React.memo(styled(LedgerSign)(({ theme }: Props) => `
+export default React.memo(styled(LedgerRequest)(({ theme }: Props) => `
   display: flex;
   flex: 1;
   position: relative;

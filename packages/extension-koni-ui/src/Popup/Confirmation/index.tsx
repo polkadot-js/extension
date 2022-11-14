@@ -16,6 +16,7 @@ import { RootState, store } from '@subwallet/extension-koni-ui/stores';
 import { NetworkConfigParams } from '@subwallet/extension-koni-ui/stores/types';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { SigData } from '@subwallet/extension-koni-ui/types/accountExternalRequest';
+import { findAccountByAddress } from '@subwallet/extension-koni-ui/util/account';
 import React, { useCallback, useContext, useEffect, useState } from 'react';
 import { useSelector } from 'react-redux';
 import { RouteComponentProps, withRouter } from 'react-router';
@@ -48,6 +49,8 @@ function Confirmation ({ className, match: { params: { address } } }: Props): Re
   const [error, setError] = useState('');
   const [isWarning, setIsWarning] = useState(false);
   const [isScanning, setIsScanning] = useState(false);
+  const [isReadOnly, setIsReadOnly] = useState(false);
+  const [blockReadOnly, setBlockReadOnly] = useState(false);
 
   const checkConfirmation = useCallback(
     (type?: ConfirmationType) => {
@@ -63,10 +66,13 @@ function Confirmation ({ className, match: { params: { address } } }: Props): Re
   const setConfirmation = useCallback(
     (confirmation: ConfirmationDefinitions['addNetworkRequest' | 'addTokenRequest' | 'switchNetworkRequest' | 'evmSignatureRequest' | 'evmSendTransactionRequest' | 'evmSignatureRequestQr' | 'evmSendTransactionRequestQr'][0]) => {
       if (confirmation) {
+        const account = findAccountByAddress(accounts, confirmation.address);
+
+        setIsReadOnly(!!account?.isReadOnly);
         setCurrentConfirmation(confirmation);
         setNetwork(networkMap[confirmation.networkKey || '']);
-        setAccount(accounts.find((a) => (a.address === confirmation.address)));
-        setRequirePassword(!!confirmation.requiredPassword);
+        setAccount(account || undefined);
+        setRequirePassword(!!account && !!confirmation.requiredPassword && !account.isReadOnly);
       }
     },
     [accounts, networkMap]
@@ -131,9 +137,9 @@ function Confirmation ({ className, match: { params: { address } } }: Props): Re
 
   const disableConfirm = useCallback(
     () => {
-      return (requirePassword && password === '') || isLoading;
+      return (requirePassword && password === '') || isLoading || (blockReadOnly && isReadOnly);
     },
-    [requirePassword, password, isLoading]
+    [requirePassword, password, isLoading, blockReadOnly, isReadOnly]
   );
 
   useEffect(() => {
@@ -141,6 +147,7 @@ function Confirmation ({ className, match: { params: { address } } }: Props): Re
       const confirmation = Object.values(confirmations.evmSignatureRequest)[0];
 
       setConfirmation(confirmation);
+      setBlockReadOnly(true);
       setCurrentConfirmationType('evmSignatureRequest');
       setHeader(t<string>('Sign Message'));
       setRequestActionText('request to sign message with');
@@ -153,6 +160,7 @@ function Confirmation ({ className, match: { params: { address } } }: Props): Re
       const confirmation = Object.values(confirmations.evmSignatureRequestQr)[0];
 
       setConfirmation(confirmation);
+      setBlockReadOnly(true);
       setCurrentConfirmationType('evmSignatureRequestQr');
       setHeader(t<string>('Sign Message'));
       setRequestActionText('request to sign message with');
@@ -165,6 +173,7 @@ function Confirmation ({ className, match: { params: { address } } }: Props): Re
       const confirmation = Object.values(confirmations.evmSendTransactionRequest)[0];
 
       setConfirmation(confirmation);
+      setBlockReadOnly(true);
       setCurrentConfirmationType('evmSendTransactionRequest');
       setHeader(t<string>('Send Transaction'));
       setRequestActionText(t<string>('request to send transaction from'));
@@ -179,6 +188,7 @@ function Confirmation ({ className, match: { params: { address } } }: Props): Re
       const confirmation = Object.values(confirmations.evmSendTransactionRequestQr)[0];
 
       setConfirmation(confirmation);
+      setBlockReadOnly(true);
       setCurrentConfirmationType('evmSendTransactionRequestQr');
       setHeader(t<string>('Send Transaction'));
       setRequestActionText(t<string>('request to send transaction from'));
@@ -196,6 +206,7 @@ function Confirmation ({ className, match: { params: { address } } }: Props): Re
       const { id, payload } = confirmation;
 
       setConfirmation(confirmation);
+      setBlockReadOnly(false);
       setCurrentConfirmationType('addNetworkRequest');
 
       payload.requestId = id;
@@ -206,6 +217,7 @@ function Confirmation ({ className, match: { params: { address } } }: Props): Re
       const { payload } = confirmation;
 
       setConfirmation(confirmation);
+      setBlockReadOnly(false);
       setCurrentConfirmationType('addTokenRequest');
 
       if (payload.type === 'erc20') {
@@ -217,6 +229,7 @@ function Confirmation ({ className, match: { params: { address } } }: Props): Re
       const confirmation = Object.values(confirmations.switchNetworkRequest)[0];
 
       setConfirmation(confirmation);
+      setBlockReadOnly(false);
       setCurrentConfirmationType('switchNetworkRequest');
       setHeader(t<string>('Switch network'));
       setRequestActionText(t<string>('request to switch network of'));
@@ -227,27 +240,15 @@ function Confirmation ({ className, match: { params: { address } } }: Props): Re
       />);
     }
 
-    if (checkConfirmation('evmSendTransactionRequestQr')) {
-      const confirmation = Object.values(confirmations.evmSendTransactionRequestQr)[0];
+    if (checkConfirmation('evmSendTransactionRequestQr') || checkConfirmation('evmSignatureRequestQr')) {
+      const confirmation = checkConfirmation('evmSendTransactionRequestQr') ? Object.values(confirmations.evmSendTransactionRequestQr)[0] : Object.values(confirmations.evmSignatureRequestQr)[0];
+      const isMessage = !checkConfirmation('evmSendTransactionRequestQr');
 
       setQrArea(
         <Qr
           confirmation={confirmation}
           isLoading={isLoading}
-          isScanning={isScanning}
-          onError={setError}
-          onScan={onSignature}
-        />
-      );
-      setIsWarning(!confirmation.payload.canSign);
-    } else if (checkConfirmation('evmSignatureRequestQr')) {
-      const confirmation = Object.values(confirmations.evmSignatureRequestQr)[0];
-
-      setQrArea(
-        <Qr
-          confirmation={confirmation}
-          isLoading={isLoading}
-          isMessage={true}
+          isMessage={isMessage}
           isScanning={isScanning}
           onError={setError}
           onScan={onSignature}
@@ -286,6 +287,15 @@ function Confirmation ({ className, match: { params: { address } } }: Props): Re
             <div className='warning-area'>
               <Warning>
                 This method is not currently supported
+              </Warning>
+            </div>
+          )
+        }
+        {blockReadOnly && isReadOnly &&
+          (
+            <div className='warning-area'>
+              <Warning>
+                {t('You are using readonly account.')}
               </Warning>
             </div>
           )

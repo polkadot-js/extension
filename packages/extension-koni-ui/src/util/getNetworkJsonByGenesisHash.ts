@@ -43,9 +43,9 @@ export const getNetworkKeyByGenesisHash = (networkMap: Record<string, NetworkJso
   return null;
 };
 
-export const getNetworkJsonByInfo = (networkMap: Record<string, NetworkJson>, isEthereum: boolean, info?: string | null | number): NetworkJson | null => {
+export const getNetworkJsonByInfo = (networkMap: Record<string, NetworkJson>, isEthereumAddress: boolean, isEthereumNetwork: boolean, info?: string | null | number): NetworkJson | null => {
   if (!info) {
-    if (isEthereum) {
+    if (isEthereumNetwork) {
       for (const n in networkMap) {
         if (!Object.prototype.hasOwnProperty.call(networkMap, n)) {
           continue;
@@ -69,12 +69,12 @@ export const getNetworkJsonByInfo = (networkMap: Record<string, NetworkJson>, is
 
     const networkInfo = networkMap[n];
 
-    if (isEthereum) {
+    if (isEthereumNetwork) {
       if (networkInfo.evmChainId === info) {
         return networkInfo;
       }
     } else {
-      if (networkInfo.genesisHash === info) {
+      if (networkInfo.genesisHash.includes(info as string) && !!networkInfo.isEthereum === isEthereumAddress) {
         return networkInfo;
       }
     }

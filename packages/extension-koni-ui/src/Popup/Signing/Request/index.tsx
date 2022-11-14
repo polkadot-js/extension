@@ -8,21 +8,21 @@ import type { HexString } from '@polkadot/util/types';
 
 import { NetworkJson } from '@subwallet/extension-base/background/KoniTypes';
 import { SIGN_MODE } from '@subwallet/extension-koni-ui/constants/signing';
+import { useGetSignMode } from '@subwallet/extension-koni-ui/hooks/useGetSignMode';
 import useTranslation from '@subwallet/extension-koni-ui/hooks/useTranslation';
 import LedgerSign from '@subwallet/extension-koni-ui/Popup/Signing/LedgerSign';
 import Qr from '@subwallet/extension-koni-ui/Popup/Signing/Qr';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
-import { isAccountAll } from '@subwallet/extension-koni-ui/util';
 import CN from 'classnames';
 import React, { useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { useSelector } from 'react-redux';
 import styled from 'styled-components';
 
 import { TypeRegistry } from '@polkadot/types';
-import { decodeAddress, encodeAddress } from '@polkadot/util-crypto';
+import { encodeAddress } from '@polkadot/util-crypto';
 
-import { AccountContext, AccountInfoEl, ActionContext, Button, Modal, Warning } from '../../../components';
+import { AccountInfoEl, ActionContext, Button, Modal, Warning } from '../../../components';
 import { approveSignSignature } from '../../../messaging';
 import Bytes from '../Bytes';
 import Extrinsic from '../Extrinsic';
@@ -53,38 +53,27 @@ function isRawPayload (payload: SignerPayloadJSON | SignerPayloadRaw): payload i
   return !!(payload as SignerPayloadRaw).data;
 }
 
-function Request ({ account: { accountIndex, addressOffset, isExternal, isHardware },
+function Request ({ account,
   buttonText,
   className,
   isFirst,
   request,
   signId,
   url }: Props): React.ReactElement<Props> | null {
+  const { accountIndex, addressOffset, isExternal } = account;
+
   const { t } = useTranslation();
   const onAction = useContext(ActionContext);
   const [{ hexBytes, payload }, setData] = useState<Data>({ hexBytes: null, payload: null });
   const [error, setError] = useState<string | null>(null);
   const [isShowDetails, setShowDetails] = useState<boolean>(false);
-  const { accounts } = useContext(AccountContext);
   const { hostname } = new URL(url);
 
   const { networkMap } = useSelector((state: RootState) => state);
 
   const { address } = request.payload as SignerPayloadRaw;
 
-  const signMode = useMemo((): SIGN_MODE => {
-    if (isExternal) {
-      return isHardware ? SIGN_MODE.LEDGER : SIGN_MODE.QR;
-    } else {
-      return SIGN_MODE.PASSWORD;
-    }
-  }, [isExternal, isHardware]);
-
-  const account = useMemo(() => {
-    return accounts
-      .filter((a) => !isAccountAll(a.address))
-      .find((account) => decodeAddress(account.address).toString() === decodeAddress(address).toString());
-  }, [accounts, address]);
+  const signMode = useGetSignMode(account);
 
   const network = useMemo((): null | NetworkJson => {
     let result: null | NetworkJson = null;
@@ -176,40 +165,52 @@ function Request ({ account: { accountIndex, addressOffset, isExternal, isHardwa
     if (payload !== null) {
       const json = request.payload as SignerPayloadJSON;
 
-      return (
-        <>
-          {signMode === SIGN_MODE.QR
-            ? (
-              <Qr
-                address={json.address}
-                cmd={CMD_MORTAL}
-                genesisHash={json.genesisHash}
-                // eslint-disable-next-line @typescript-eslint/no-misused-promises
-                onSignature={_onSignature}
-                payload={payload}
-                signId={signId}
-              >
-                {buttonDetail}
-              </Qr>
-            )
-            : (
-              <LedgerSign
-                accountIndex={accountIndex as number || 0}
-                addressOffset={addressOffset as number || 0}
+      switch (signMode) {
+        case SIGN_MODE.LEDGER:
+          return (
+            <LedgerSign
+              accountIndex={accountIndex as number || 0}
+              addressOffset={addressOffset as number || 0}
+              error={error}
+              genesisHash={json.genesisHash}
+              // eslint-disable-next-line @typescript-eslint/no-misused-promises
+              onSignature={_onSignature}
+              payload={payload}
+              setError={setError}
+              signId={signId}
+            >
+              {buttonDetail}
+            </LedgerSign>
+          );
+        case SIGN_MODE.QR:
+          return (
+            <Qr
+              address={json.address}
+              cmd={CMD_MORTAL}
+              genesisHash={json.genesisHash}
+              // eslint-disable-next-line @typescript-eslint/no-misused-promises
+              onSignature={_onSignature}
+              payload={payload}
+              signId={signId}
+            >
+              {buttonDetail}
+            </Qr>
+          );
+        default:
+          return (
+            <>
+              {buttonDetail}
+              <SignArea
+                buttonText={buttonText}
                 error={error}
-                genesisHash={json.genesisHash}
-                // eslint-disable-next-line @typescript-eslint/no-misused-promises
-                onSignature={_onSignature}
-                payload={payload}
+                isExternal={isExternal}
+                isFirst={isFirst}
                 setError={setError}
                 signId={signId}
-              >
-                {buttonDetail}
-              </LedgerSign>
-            )
-          }
-        </>
-      );
+              />
+            </>
+          );
+      }
     } else if (hexBytes !== null) {
       const { data } = request.payload as SignerPayloadRaw;
 
@@ -224,38 +225,36 @@ function Request ({ account: { accountIndex, addressOffset, isExternal, isHardwa
         }
       }
 
-      return (
-        <>
-          {signMode === SIGN_MODE.QR
-            ? (
-              <Qr
-                address={address}
-                cmd={CMD_SIGN_MESSAGE}
-                genesisHash={genesisHash}
-                // eslint-disable-next-line @typescript-eslint/no-misused-promises
-                onSignature={_onSignature}
-                payload={data}
+      switch (signMode) {
+        case SIGN_MODE.QR:
+          return (
+            <Qr
+              address={address}
+              cmd={CMD_SIGN_MESSAGE}
+              genesisHash={genesisHash}
+              // eslint-disable-next-line @typescript-eslint/no-misused-promises
+              onSignature={_onSignature}
+              payload={data}
+              signId={signId}
+            >
+              {buttonDetail}
+            </Qr>
+          );
+        default:
+          return (
+            <>
+              {buttonDetail}
+              <SignArea
+                buttonText={buttonText}
+                error={error}
+                isExternal={true}
+                isFirst={isFirst}
+                setError={setError}
                 signId={signId}
-              >
-                {buttonDetail}
-              </Qr>
-            )
-            : (
-              <>
-                {buttonDetail}
-                <SignArea
-                  buttonText={buttonText}
-                  error={error}
-                  isExternal={true}
-                  isFirst={isFirst}
-                  setError={setError}
-                  signId={signId}
-                />
-              </>
-            )
-          }
-        </>
-      );
+              />
+            </>
+          );
+      }
     }
 
     return null;
@@ -309,16 +308,18 @@ function Request ({ account: { accountIndex, addressOffset, isExternal, isHardwa
               <div className='signing-request__text-wrapper'>
                 {
                   account &&
-                  <AccountInfoEl
-                    address={account.address}
-                    className='signing-request__account'
-                    genesisHash={account.genesisHash}
-                    iconSize={20}
-                    isShowAddress={false}
-                    isShowBanner={false}
-                    name={account.name}
-                    showCopyBtn={false}
-                  />
+                  <div>
+                    <AccountInfoEl
+                      address={account.address}
+                      className='signing-request__account'
+                      genesisHash={account.genesisHash}
+                      iconSize={20}
+                      isShowAddress={false}
+                      isShowBanner={false}
+                      name={account.name}
+                      showCopyBtn={false}
+                    />
+                  </div>
                 }
                 {
                   network && (
@@ -337,6 +338,15 @@ function Request ({ account: { accountIndex, addressOffset, isExternal, isHardwa
           (
             <Warning>
               {t('Message signing is not supported for hardware wallets.')}
+            </Warning>
+          )
+        }
+
+        {
+          signMode === SIGN_MODE.READ_ONLY &&
+          (
+            <Warning>
+              {t('You are using readonly account.')}
             </Warning>
           )
         }

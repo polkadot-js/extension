@@ -56,7 +56,6 @@ export interface SubstrateTransactionParsedData {
     crypto: 'ed25519' | 'sr25519' | null;
     data: Uint8Array;
     genesisHash: string;
-    specVersion?: number;
     rawPayload?: Uint8Array;
   };
   action: 'signTransaction';
@@ -70,7 +69,6 @@ export interface SubstrateMessageParsedData {
     crypto: 'ed25519' | 'sr25519' | null;
     data: string;
     genesisHash: string;
-    specVersion?: number;
     rawPayload?: string;
   };
   action: 'signData';
@@ -117,3 +115,12 @@ export interface MultiFramesInfo {
 }
 
 export type QrInfo = MessageQRInfo | TxQRInfo;
+
+export interface QrAccount {
+  isAddress: boolean;
+  content: string;
+  genesisHash: string;
+  name?: string;
+  isEthereum: boolean;
+  isReadOnly: boolean;
+}

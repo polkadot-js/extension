@@ -14,6 +14,7 @@ import { changeAuthorizationBlock, changeAuthorizationPerSite } from '@subwallet
 import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { isAccountAll } from '@subwallet/extension-koni-ui/util';
+import { accountCanSign, findAccountByAddress, getSignMode } from '@subwallet/extension-koni-ui/util/account';
 import CN from 'classnames';
 import React, { useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
 import { useSelector } from 'react-redux';
@@ -117,7 +118,8 @@ const AccountVisibleModal = (props: Props) => {
         </>
       );
     } else {
-      const list = Object.entries(allowedMap).map(([address, value]) => ({ address, value }));
+      const origin = Object.entries(allowedMap).map(([address, value]) => ({ address, value }));
+      const list = origin.filter(({ address }) => accountCanSign(getSignMode(findAccountByAddress(accounts, address))));
 
       const current = list.find(({ address }) => address === currentAccount.account?.address);
 

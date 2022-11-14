@@ -1,14 +1,15 @@
 // Copyright 2019-2022 @polkadot/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import type { RequestAuthorizeTab } from '@subwallet/extension-base/background/types';
+import type { AccountJson, RequestAuthorizeTab } from '@subwallet/extension-base/background/types';
 import type { ThemeProps } from '../../types';
 
 import { ALL_ACCOUNT_KEY } from '@subwallet/extension-koni-base/constants';
 import { filterAndSortingAccountByAuthType } from '@subwallet/extension-koni-base/utils';
 import ConfirmModal from '@subwallet/extension-koni-ui/components/ConfirmModal';
 import ConnectAccount from '@subwallet/extension-koni-ui/Popup/Authorize/ConnectAccount';
-import React, { useCallback, useContext, useEffect, useState } from 'react';
+import { filterNotReadOnlyAccount } from '@subwallet/extension-koni-ui/util/account';
+import React, { useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import styled from 'styled-components';
 
 import rejectIcon from '../../assets/reject-icon.svg';
@@ -38,7 +39,7 @@ function Request ({ authId, className, request: { accountAuthType, allowedAccoun
   const { t } = useTranslation();
   const onAction = useContext(ActionContext);
   const { accounts } = useContext(AccountContext);
-  const accountList = filterAndSortingAccountByAuthType(accounts, accountAuthType || 'substrate', true);
+  const accountList = useMemo((): AccountJson[] => filterNotReadOnlyAccount(filterAndSortingAccountByAuthType(accounts, accountAuthType || 'substrate', true)), [accountAuthType, accounts]);
 
   const [isShowConfirmRejectModal, setShowConfirmModal] = useState(false);
 
@@ -140,7 +141,9 @@ function Request ({ authId, className, request: { accountAuthType, allowedAccoun
             </>
           )
           : <Warning>
-            {accountAuthType === 'evm' ? t<string>('You don\'t have any evm account. Please create, import or restore an account to continue') : t<string>('You don\'t have any substrate account. Please create, import or restore an account to continue')}
+            {accountAuthType === 'evm'
+              ? t<string>('This dApp requires an EVM account. Please create, import, or restore a EVM account and retry')
+              : t<string>('This dApp requires a Substrate account. Please create, import, or restore a Substrate account and retry')}
           </Warning>
         }
 

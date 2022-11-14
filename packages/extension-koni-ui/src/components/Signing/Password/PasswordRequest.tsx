@@ -68,6 +68,7 @@ const PasswordRequest = ({ children,
         isError={passwordError}
         label={t<string>('Unlock account with password')}
         onChange={_onChangePass}
+        onEnter={onSubmit}
         type='password'
         value={password}
       />

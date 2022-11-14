@@ -17,7 +17,7 @@ interface RewardResponseItem {
 interface StakingResponseItem {
   totalReward: string,
   totalSlash: string,
-  totalBond: string,
+  activeBond: string,
   rewards: RewardResponseItem[]
 }
 
@@ -25,9 +25,9 @@ const getSubsquidQuery = (account: string, chain: string) => {
   if (chain === 'moonbeam' || chain === 'moonriver' || chain === 'astar') {
     return `
     query MyQuery {
-      accountById(id: "${account}") {
+      stakerById(id: "${account}") {
         totalReward
-        totalBond
+        activeBond
         rewards(limit: 1, orderBy: blockNumber_DESC) {
           amount
         }
@@ -37,10 +37,10 @@ const getSubsquidQuery = (account: string, chain: string) => {
 
   return `
   query MyQuery {
-    accountById(id: "${account}") {
+    stakerById(id: "${account}") {
       totalReward
       totalSlash
-      totalBond
+      activeBond
       rewards(limit: 1, orderBy: blockNumber_DESC) {
         amount
       }
@@ -70,7 +70,9 @@ const getSubsquidStaking = async (accounts: string[], chain: string): Promise<St
         if (resp.status === 200) {
           // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
           const respData = resp.data.data as Record<string, any>;
-          const rewardItem = respData.accountById as StakingResponseItem;
+          const rewardItem = respData.stakerById as StakingResponseItem;
+
+          console.log('got here', respData, chain);
 
           if (rewardItem) {
             const latestReward = rewardItem.rewards[0];
@@ -96,6 +98,7 @@ const getSubsquidStaking = async (accounts: string[], chain: string): Promise<St
         }
 
         if (stakingRewardItem.totalReward && parseFloat(stakingRewardItem.totalReward) > 0) {
+          console.log('stakingRewardItem', stakingRewardItem);
           result.push(stakingRewardItem);
         }
       }

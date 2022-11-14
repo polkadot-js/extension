@@ -169,7 +169,7 @@ const LogosMap: Record<string, string> = {
   // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
   ukraine: require('./03.Ukraine.png'),
   // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-  bitcountry: require('./61.Bit.Country.png'),
+  bitcountry: require('./61.Bit.Country.jpg'),
   // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
   unique_network: require('./104.UniqueNetwork.png'),
   // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment

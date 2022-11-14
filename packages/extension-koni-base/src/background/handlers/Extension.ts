@@ -3388,7 +3388,7 @@ export default class KoniExtension extends Extension {
     };
   }
 
-  private qrSignSubstrate ({ address, data, password, savePass }: RequestQrSignSubstrate): ResponseQrSignSubstrate {
+  private qrSignSubstrate ({ address, data, networkKey, password, savePass }: RequestQrSignSubstrate): ResponseQrSignSubstrate {
     const pair = keyring.getPair(address);
 
     assert(pair, 'Unable to find pair');
@@ -3405,7 +3405,13 @@ export default class KoniExtension extends Extension {
       }
     }
 
-    const signed = hexStripPrefix(u8aToHex(pair.sign(data, { withType: true })));
+    let signed = hexStripPrefix(u8aToHex(pair.sign(data, { withType: true })));
+    const network = state.getNetworkMapByKey(networkKey);
+
+    if (network.isEthereum) {
+      signed = signed.substring(2);
+    }
+
     const _address = pair.address;
 
     if (savePass) {

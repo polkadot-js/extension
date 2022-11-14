@@ -99,7 +99,8 @@ export interface StakingRewardItem {
 
   latestReward?: string,
   totalReward?: string,
-  totalSlash?: string
+  totalSlash?: string,
+  unclaimedReward?: string
 }
 export interface UnlockingStakeInfo {
   chain: string,

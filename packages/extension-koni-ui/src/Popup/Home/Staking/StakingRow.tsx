@@ -80,7 +80,7 @@ function StakingRow ({ activeStake, chainName, className, index, isAccountAll, i
       return <span className={'major-balance'}>{balance}</span>;
     }
 
-    if (parseFloat(balance) <= 0.0001) { // in case the balance is too small
+    if (parseFloat(balance) <= 0.00001) { // in case the balance is too small
       return <span className={'major-balance'}>0</span>;
     }
 
@@ -97,7 +97,7 @@ function StakingRow ({ activeStake, chainName, className, index, isAccountAll, i
       <span>
         <span className={'major-balance'}>{formatLocaleNumber(parseInt(number))}</span>
         {balance.includes('.') && '.'}
-        <span className={'decimal-balance'}>{decimal ? decimal.slice(0, 2) : ''}</span>
+        <span className={'decimal-balance'}>{decimal ? decimal.slice(0, 5) : ''}</span>
       </span>
     );
   };
@@ -216,29 +216,43 @@ function StakingRow ({ activeStake, chainName, className, index, isAccountAll, i
               </div>
             </div>
 
-            <div className={'reward-container'}>
-              <div className={'reward-title'}>Total reward</div>
-              <div className={'reward-amount'}>
-                <div>{editBalance(reward?.totalReward || '')}</div>
-                <div className={'chain-unit'}>{unit}</div>
-              </div>
-            </div>
+            {
+              stakingType === StakingType.NOMINATED
+                ? <div>
+                  <div className={'reward-container'}>
+                    <div className={'reward-title'}>Total reward</div>
+                    <div className={'reward-amount'}>
+                      <div>{editBalance(reward?.totalReward || '')}</div>
+                      <div className={'chain-unit'}>{unit}</div>
+                    </div>
+                  </div>
 
-            <div className={'reward-container'}>
-              <div className={'reward-title'}>Latest reward</div>
-              <div className={'reward-amount'}>
-                <div>{editBalance(reward?.latestReward || '')}</div>
-                <div className={'chain-unit'}>{unit}</div>
-              </div>
-            </div>
+                  <div className={'reward-container'}>
+                    <div className={'reward-title'}>Latest reward</div>
+                    <div className={'reward-amount'}>
+                      <div>{editBalance(reward?.latestReward || '')}</div>
+                      <div className={'chain-unit'}>{unit}</div>
+                    </div>
+                  </div>
 
-            <div className={'reward-container'}>
-              <div className={'reward-title'}>Total slash</div>
-              <div className={'reward-amount'}>
-                <div>{editBalance(reward?.totalSlash || '')}</div>
-                <div className={'chain-unit'}>{unit}</div>
-              </div>
-            </div>
+                  <div className={'reward-container'}>
+                    <div className={'reward-title'}>Total slash</div>
+                    <div className={'reward-amount'}>
+                      <div>{editBalance(reward?.totalSlash || '')}</div>
+                      <div className={'chain-unit'}>{unit}</div>
+                    </div>
+                  </div>
+                </div>
+                : <div>
+                  <div className={'reward-container'}>
+                    <div className={'reward-title'}>Unclaimed reward</div>
+                    <div className={'reward-amount'}>
+                      <div>{editBalance(reward?.unclaimedReward || '')}</div>
+                      <div className={'chain-unit'}>{unit}</div>
+                    </div>
+                  </div>
+                </div>
+            }
           </div>
         </div>
       }

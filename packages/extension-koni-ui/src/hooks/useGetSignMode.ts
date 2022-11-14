@@ -5,17 +5,19 @@ import { AccountJson } from '@subwallet/extension-base/background/types';
 import { SIGN_MODE } from '@subwallet/extension-koni-ui/constants/signing';
 import { useMemo } from 'react';
 
-import { KeyringPair$Meta } from '@polkadot/keyring/types';
-
-export const useSignMode = (account?: KeyringPair$Meta | AccountJson | null) => {
-  const signMode = useMemo((): SIGN_MODE => {
+export const useGetSignMode = (account?: AccountJson | null) => {
+  return useMemo((): SIGN_MODE => {
     if (!account) {
-      return SIGN_MODE.PASSWORD;
+      return SIGN_MODE.UNKNOWN;
     }
 
-    if (account.isExternal && !!account.isExternal) {
-      if (account.isHardware && !!account.isHardware) {
+    if (account.isExternal && account.isExternal) {
+      if (account.isHardware && account.isHardware) {
         return SIGN_MODE.LEDGER;
+      }
+
+      if (account.isReadOnly && account.isReadOnly) {
+        return SIGN_MODE.READ_ONLY;
       }
 
       return SIGN_MODE.QR;
@@ -23,6 +25,4 @@ export const useSignMode = (account?: KeyringPair$Meta | AccountJson | null) => 
 
     return SIGN_MODE.PASSWORD;
   }, [account]);
-
-  return signMode;
 };

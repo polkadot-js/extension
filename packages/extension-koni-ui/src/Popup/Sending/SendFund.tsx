@@ -2,7 +2,6 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { ChainRegistry, NetworkJson } from '@subwallet/extension-base/background/KoniTypes';
-import { reformatAddress } from '@subwallet/extension-koni-base/utils';
 import { AccountContext, ActionContext, Warning } from '@subwallet/extension-koni-ui/components';
 import Button from '@subwallet/extension-koni-ui/components/Button';
 import InputBalance from '@subwallet/extension-koni-ui/components/InputBalance';
@@ -13,6 +12,7 @@ import Toggle from '@subwallet/extension-koni-ui/components/Toggle';
 import { useTranslation } from '@subwallet/extension-koni-ui/components/translate';
 import { BalanceFormatType, SenderInputAddressType } from '@subwallet/extension-koni-ui/components/types';
 import useFreeBalance from '@subwallet/extension-koni-ui/hooks/screen/sending/useFreeBalance';
+import useGetAccountByAddress from '@subwallet/extension-koni-ui/hooks/useGetAccountByAddress';
 import { checkTransfer, transferCheckReferenceCount, transferCheckSupporting, transferGetExistentialDeposit } from '@subwallet/extension-koni-ui/messaging';
 import Header from '@subwallet/extension-koni-ui/partials/Header';
 import AuthTransaction from '@subwallet/extension-koni-ui/Popup/Sending/AuthTransaction';
@@ -88,8 +88,6 @@ function Wrapper ({ className = '', theme }: Props): React.ReactElement<Props> {
 function SendFund ({ chainRegistryMap, className, defaultValue, networkMap }: ContentProps): React.ReactElement {
   const { t } = useTranslation();
 
-  const { accounts } = useContext(AccountContext);
-
   const [amount, setAmount] = useState<BN | undefined>(BN_ZERO);
   const [recipientId, setRecipientId] = useState<string | null>(null);
   const [isShowTxModal, setShowTxModal] = useState<boolean>(false);
@@ -132,24 +130,29 @@ function SendFund ({ chainRegistryMap, className, defaultValue, networkMap }: Co
     return networkMap[selectedNetworkKey];
   }, [networkMap, selectedNetworkKey]);
 
+  const senderAccount = useGetAccountByAddress(senderId);
+
   const isBlockHardware = useMemo((): boolean => {
-    if (senderId) {
-      const prefix = 42;
-      const account = accounts.find((acc) => reformatAddress(acc.address, prefix) === reformatAddress(senderId, prefix));
+    if (!senderAccount) {
+      return false;
+    } else {
+      if (senderAccount.isHardware) {
+        const network = networkMap[selectedNetworkKey];
 
-      if (!account) {
-        return false;
+        return network.genesisHash !== senderAccount.originGenesisHash;
       } else {
-        if (account.isHardware) {
-          const network = networkMap[selectedNetworkKey];
-
-          return network.genesisHash !== account.originGenesisHash;
-        }
+        return false;
       }
     }
+  }, [senderAccount, networkMap, selectedNetworkKey]);
 
-    return false;
-  }, [senderId, accounts, networkMap, selectedNetworkKey]);
+  const isReadOnly = useMemo((): boolean => {
+    if (!senderAccount) {
+      return false;
+    } else {
+      return !!senderAccount.isReadOnly;
+    }
+  }, [senderAccount]);
 
   const canMakeTransfer = isSupportTransfer &&
     !isBlockHardware &&
@@ -159,7 +162,8 @@ function SendFund ({ chainRegistryMap, className, defaultValue, networkMap }: Co
     !isSameAddress &&
     !isNotSameAddressAndTokenType &&
     !isNotSameAddressType &&
-    !amountGtAvailableBalance;
+    !amountGtAvailableBalance &&
+    !isReadOnly;
 
   const navigate = useContext(ActionContext);
 
@@ -392,11 +396,15 @@ function SendFund ({ chainRegistryMap, className, defaultValue, networkMap }: Co
               </div>
             )}
 
-            {isBlockHardware && (
-              <Warning
-                className={'send-fund-warning'}
-              >
-                {t<string>('The sender account is Ledger account. This is not support {{chain}}', { replace: { chain: selectedNetwork.chain } })}
+            {reference && (
+              <Warning className={'send-fund-warning'}>
+                {t<string>('Note that you cannot transfer all tokens out from this account.')}
+              </Warning>
+            )}
+
+            {senderFreeBalance !== '0' && !amountGtAvailableBalance && !isSameAddress && noFees && (
+              <Warning className={'send-fund-warning'}>
+                {t<string>('The transaction, after application of the transfer fees, will drop the available balance below the existential deposit. As such the transfer will fail. The account needs more free funds to cover the transaction fees.')}
               </Warning>
             )}
 
@@ -463,15 +471,21 @@ function SendFund ({ chainRegistryMap, className, defaultValue, networkMap }: Co
               </Warning>
             )}
 
-            {reference && (
-              <Warning className={'send-fund-warning'}>
-                {t<string>('Note that you cannot transfer all tokens out from this account.')}
+            {isBlockHardware && (
+              <Warning
+                className={'send-fund-warning'}
+                isDanger
+              >
+                {t<string>('The sender account is Ledger account. This is not support {{chain}}', { replace: { chain: selectedNetwork.chain } })}
               </Warning>
             )}
 
-            {senderFreeBalance !== '0' && !amountGtAvailableBalance && !isSameAddress && noFees && (
-              <Warning className={'send-fund-warning'}>
-                {t<string>('The transaction, after application of the transfer fees, will drop the available balance below the existential deposit. As such the transfer will fail. The account needs more free funds to cover the transaction fees.')}
+            {isReadOnly && (
+              <Warning
+                className={'send-fund-warning'}
+                isDanger
+              >
+                {t<string>('The account you are using is read-only, you cannot send assets with it')}
               </Warning>
             )}
 

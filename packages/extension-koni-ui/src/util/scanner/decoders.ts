@@ -1,8 +1,7 @@
 // Copyright 2019-2022 @polkadot/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { NetworkJson } from '@subwallet/extension-base/background/KoniTypes';
-import { ArgInfo, FormattedMethod } from '@subwallet/extension-base/background/types';
+import { ArgInfo, EraInfo, FormattedMethod, NetworkJson, ResponseParseTransactionSubstrate } from '@subwallet/extension-base/background/KoniTypes';
 import { Chain } from '@subwallet/extension-chains/types';
 import { EthereumParsedData, ParsedData, SubstrateCompletedParsedData, SubstrateMultiParsedData } from '@subwallet/extension-koni-ui/types/scanner';
 import { getNetworkJsonByGenesisHash } from '@subwallet/extension-koni-ui/util/getNetworkJsonByGenesisHash';
@@ -13,7 +12,7 @@ import { Call } from '@polkadot/types/interfaces';
 import { compactFromU8a, hexStripPrefix, hexToU8a, u8aToHex } from '@polkadot/util';
 import { blake2AsHex, encodeAddress } from '@polkadot/util-crypto';
 
-import strings from '../constants/strings';
+import strings from '../../constants/strings';
 
 // from https://github.com/maciejhirsz/uos#substrate-payload
 const SUBSTRATE_SIGN = '53';
@@ -185,16 +184,6 @@ export const constructDataFromBytes = (bytes: Uint8Array, multipartComplete = fa
 
           const rawPayload = hexToU8a(hexPayload);
 
-          try {
-            const registry = new TypeRegistry();
-            const raw = registry.createType('ExtrinsicPayload', rawPayload);
-
-            // @ts-ignore
-            data.data.specVersion = raw?.specVersion ? raw.specVersion.toNumber() : Number.MAX_SAFE_INTEGER;
-          } catch (e) {
-            data.data.specVersion = Number.MAX_SAFE_INTEGER;
-          }
-
           data.data.genesisHash = genesisHash;
 
           const isOversized = rawPayload.length > 256;
@@ -205,16 +194,18 @@ export const constructDataFromBytes = (bytes: Uint8Array, multipartComplete = fa
               data.action = 'signTransaction';
               data.oversized = isOversized;
               data.isHash = isOversized;
+
+              // Need to review, new version cannot use blake2AsHex to encode data as dataToSign
               // eslint-disable-next-line no-case-declarations
               const [offset] = compactFromU8a(rawPayload);
               // eslint-disable-next-line no-case-declarations
-              const payload: Uint8Array = rawPayload.subarray(offset);
+              const payload = rawPayload.subarray(offset);
 
-              data.data.rawPayload = rawPayload;
               data.data.data = isOversized
                 ? blake2AsHex(u8aToHex(payload, -1, false))
                 : rawPayload;
-              // encode to the prefix;
+
+              data.data.rawPayload = rawPayload;
 
               break;
             case CMD_SIGN_HASH:
@@ -249,20 +240,27 @@ export const constructDataFromBytes = (bytes: Uint8Array, multipartComplete = fa
   }
 };
 
-export const intFromStringWithCommas = (str: string): number => {
-  const arr = str.split(',');
-  let result = 0;
+export const parseSubstratePayload = (rawPayload: string): ResponseParseTransactionSubstrate => {
+  const registry = new TypeRegistry();
 
-  let pow = 0;
+  const payload = registry.createType('ExtrinsicPayload', hexToU8a(rawPayload));
+  const nonce = payload.nonce.toNumber();
+  const tip = payload.tip.toNumber();
+  const specVer = payload.specVersion.toNumber();
 
-  for (let i = 0; i < arr.length; i++) {
-    const idx = arr.length - 1 - i;
+  const _era = payload.era;
+  let era: string | EraInfo = _era.toString();
 
-    result += parseInt(arr[idx]) * Math.pow(10, pow);
-    pow += arr[idx].length;
+  if (_era.isMortalEra) {
+    era = {
+      period: _era.asMortalEra.period.toNumber(),
+      phase: _era.asMortalEra.phase.toNumber()
+    };
   }
 
-  return result;
+  const _method = payload.method.toString();
+
+  return { era: era, tip: tip, method: _method, nonce: nonce, specVersion: specVer };
 };
 
 export const encodeNumber = (value: number): Uint8Array => {

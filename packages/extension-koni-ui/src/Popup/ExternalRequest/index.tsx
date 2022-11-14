@@ -1,7 +1,7 @@
 // Copyright 2019-2022 @subwallet/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { SCANNER_QR_STEP } from '@subwallet/extension-koni-ui/constants/scanner';
+import { SCANNER_QR_STEP } from '@subwallet/extension-koni-ui/constants/qr';
 import { ScannerContext, ScannerContextType } from '@subwallet/extension-koni-ui/contexts/ScannerContext';
 import useTranslation from '@subwallet/extension-koni-ui/hooks/useTranslation';
 import { Header } from '@subwallet/extension-koni-ui/partials';

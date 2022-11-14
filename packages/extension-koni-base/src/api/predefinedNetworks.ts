@@ -890,7 +890,9 @@ export const PREDEFINED_NETWORKS: Record<string, NetworkJson> = {
     crowdloanUrl: 'https://polkadot.js.org/apps/#/parachains/crowdloan',
     decimals: 18,
     coinGeckoKey: 'shiden',
-    supportSmartContract: [ContractType.wasm]
+    supportSmartContract: [ContractType.wasm],
+    supportBonding: true,
+    getStakingOnChain: true
   },
   shidenEvm: {
     key: 'shidenEvm',

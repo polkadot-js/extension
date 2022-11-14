@@ -449,26 +449,28 @@ export default React.memo(styled(AccountMenuSettings)(({ theme }: Props) => `
     height: 40px;
     width: 40px;
     border-radius: 40px;
-    background: ${theme.secondaryColor};
+    opacity: 1;
+    background: ${theme.buttonSetting};
+    filter: drop-shadow(-4px 8px 8px #00072C);
     display: flex;
     align-items: center;
     overflow: hidden;
-    transition: all ease-in-out ${transitionTime};
+    transition: all linear ${transitionTime};
 
     .setting-icon {
-      transition: all ease-in-out ${transitionTime};
-      color: ${theme.textColor};
+      transition: all linear ${transitionTime};
+      color: ${theme.textSettingButton};
       transform: rotate(0deg);
     }
 
     .setting-label {
       margin-left: 8px;
       opacity: 0;
-      color: ${theme.textColor};
+      color: ${theme.textSettingButton};
       font-size: 15px;
       line-height: 26px;
       font-weight: 500;
-      transition: all ease-in-out ${transitionTime};
+      transition: all linear ${transitionTime};
     }
   }
 

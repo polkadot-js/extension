@@ -1,6 +1,7 @@
 // Copyright 2019-2022 @subwallet/extension-koni authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
+import { StakingType } from '@subwallet/extension-base/background/KoniTypes';
 import LogosMap from '@subwallet/extension-koni-ui/assets/logo';
 import { ActionContext } from '@subwallet/extension-koni-ui/components';
 import Button from '@subwallet/extension-koni-ui/components/Button';
@@ -44,6 +45,7 @@ function StakingContainer ({ className, data, loading, priceMap, stakeUnlockingT
   const [targetNextWithdrawalAction, setTargetNextWithdrawalAction] = useState<string | undefined>(undefined);
   const [targetRedeemable, setTargetRedeemable] = useState(0);
   const [withdrawalTimestamp, setWithdrawalTimestamp] = useState(-1);
+  const [targetStakingType, setTargetStakingType] = useState<StakingType | undefined>(undefined);
 
   const handleHideWithdrawalModal = useCallback(() => {
     setShowWithdrawalModal(false);
@@ -175,6 +177,7 @@ function StakingContainer ({ className, data, loading, priceMap, stakeUnlockingT
                 setShowWithdrawalModal={setShowWithdrawalModal}
                 setTargetNextWithdrawalAction={setTargetNextWithdrawalAction}
                 setTargetRedeemable={setTargetRedeemable}
+                setTargetStakingType={setTargetStakingType}
                 setTargetValidator={setTargetValidator}
                 stakingType={stakingType}
                 targetValidator={targetValidator}
@@ -217,6 +220,7 @@ function StakingContainer ({ className, data, loading, priceMap, stakeUnlockingT
           address={account?.address as string}
           hideModal={handleHideClaimRewardModal}
           networkKey={targetNetworkKey}
+          stakingType={targetStakingType}
         />
       }
     </div>

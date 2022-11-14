@@ -41,9 +41,10 @@ interface Props extends ThemeProps {
   setTargetValidator: (val: string) => void;
   setTargetNextWithdrawalAction: (val: string | undefined) => void;
   setTargetRedeemable: (val: number) => void;
+  setTargetStakingType: (val: StakingType) => void;
 }
 
-function StakingRow ({ activeStake, chainName, className, index, isCanSign, logo, networkKey, nextWithdrawal, nextWithdrawalAction, nextWithdrawalAmount, price, redeemable, reward, setActionNetworkKey, setShowClaimRewardModal, setShowCompoundStakeModal, setShowWithdrawalModal, setTargetNextWithdrawalAction, setTargetRedeemable, setTargetValidator, stakingType, targetValidator, totalStake, unbondingStake, unit }: Props): React.ReactElement<Props> {
+function StakingRow ({ activeStake, chainName, className, index, isCanSign, logo, networkKey, nextWithdrawal, nextWithdrawalAction, nextWithdrawalAmount, price, redeemable, reward, setActionNetworkKey, setShowClaimRewardModal, setShowCompoundStakeModal, setShowWithdrawalModal, setTargetNextWithdrawalAction, setTargetRedeemable, setTargetStakingType, setTargetValidator, stakingType, targetValidator, totalStake, unbondingStake, unit }: Props): React.ReactElement<Props> {
   const [showReward, setShowReward] = useState(false);
   const [showStakingMenu, setShowStakingMenu] = useState(false);
 
@@ -62,7 +63,8 @@ function StakingRow ({ activeStake, chainName, className, index, isCanSign, logo
   const handleShowClaimRewardModal = useCallback(() => {
     setActionNetworkKey(networkKey);
     setShowClaimRewardModal(true);
-  }, [networkKey, setActionNetworkKey, setShowClaimRewardModal]);
+    setTargetStakingType(stakingType);
+  }, [networkKey, setActionNetworkKey, setShowClaimRewardModal, setTargetStakingType, stakingType]);
 
   const handleShowCompoundStakeModal = useCallback(() => {
     setActionNetworkKey(networkKey);
@@ -158,7 +160,7 @@ function StakingRow ({ activeStake, chainName, className, index, isCanSign, logo
                   {stakingType.charAt(0).toUpperCase() + stakingType.slice(1)} balance
                 </div>
                 {
-                  isCanSign && stakingType !== StakingType.POOLED && <StakingMenu
+                  isCanSign && <StakingMenu
                     bondedAmount={activeStake as string}
                     networkKey={networkKey}
                     nextWithdrawal={nextWithdrawal}
@@ -168,6 +170,7 @@ function StakingRow ({ activeStake, chainName, className, index, isCanSign, logo
                     showMenu={showStakingMenu}
                     showStakeCompoundModal={handleShowCompoundStakeModal}
                     showWithdrawalModal={handleShowWithdrawalModal}
+                    stakingType={stakingType}
                     toggleMenu={handleToggleBondingMenu}
                     unbondingStake={unbondingStake}
                   />

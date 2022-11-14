@@ -1394,6 +1394,7 @@ export interface StakeClaimRewardParams extends BaseRequestSign {
   address: string,
   networkKey: string,
   validatorAddress?: string,
+  stakingType: StakingType
 }
 
 export type RequestStakeClaimReward = PasswordRequestSign<StakeClaimRewardParams>;

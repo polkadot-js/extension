@@ -1,7 +1,7 @@
 // Copyright 2019-2022 @polkadot/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import type { AccountJson, AllowedPath, AuthorizeRequest, MessageTypes, MessageTypesWithNoSubscriptions, MessageTypesWithNullRequest, MessageTypesWithSubscriptions, MetadataRequest, RequestTypes, ResponseAuthorizeList, ResponseDeriveValidate, ResponseJsonGetAccountInfo, ResponseParseTransactionSubstrate, ResponseSigningIsLocked, ResponseTypes, SeedLengths, SigningRequest, SubscriptionMessageTypes } from '@subwallet/extension-base/background/types';
+import type { AccountJson, AllowedPath, AuthorizeRequest, MessageTypes, MessageTypesWithNoSubscriptions, MessageTypesWithNullRequest, MessageTypesWithSubscriptions, MetadataRequest, RequestTypes, ResponseAuthorizeList, ResponseDeriveValidate, ResponseJsonGetAccountInfo, ResponseSigningIsLocked, ResponseTypes, SeedLengths, SigningRequest, SubscriptionMessageTypes } from '@subwallet/extension-base/background/types';
 import type { Message } from '@subwallet/extension-base/types';
 import type { Chain } from '@subwallet/extension-chains/types';
 import type { KeyringPair$Json } from '@polkadot/keyring/types';
@@ -10,8 +10,8 @@ import type { HexString } from '@polkadot/util/types';
 import type { KeypairType } from '@polkadot/util-crypto/types';
 
 import { AuthUrls } from '@subwallet/extension-base/background/handlers/State';
-import { AccountExternalError, AccountsWithCurrentAddress, BalanceJson, BaseTxError, BasicTxInfo, BasicTxResponse, BondingOptionInfo, BondingSubmitParams, ChainBondingBasics, ChainRegistry, CheckExistingTuringCompoundParams, ConfirmationDefinitions, ConfirmationsQueue, ConfirmationType, CrowdloanJson, CurrentAccountInfo, CustomToken, CustomTokenJson, DelegationItem, DeleteCustomTokenParams, DisableNetworkResponse, EvmNftSubmitTransaction, EvmNftTransaction, ExistingTuringCompoundTask, NetworkJson, NftCollection, NftJson, NftTransactionRequest, NftTransactionResponse, NftTransferExtra, OptionInputAddress, PriceJson, RequestAccountCreateExternalV2, RequestAccountCreateHardwareV2, RequestAccountCreateWithSecretKey, RequestAccountMeta, RequestAuthorizationBlock, RequestAuthorizationPerSite, RequestCheckCrossChainTransfer, RequestCheckTransfer, RequestCrossChainTransfer, RequestCrossChainTransferExternal, RequestFreeBalance, RequestNftForceUpdate, RequestNftTransferExternalEVM, RequestNftTransferExternalSubstrate, RequestParseEVMTransactionInput, RequestRejectExternalRequest, RequestResolveExternalRequest, RequestSettingsType, RequestStakeExternal, RequestSubscribeBalance, RequestSubscribeBalancesVisibility, RequestSubscribeCrowdloan, RequestSubscribeNft, RequestSubscribePrice, RequestSubscribeStaking, RequestSubscribeStakingReward, RequestTransfer, RequestTransferCheckReferenceCount, RequestTransferCheckSupporting, RequestTransferExistentialDeposit, RequestTransferExternal, RequestUnStakeExternal, RequestWithdrawStakeExternal, ResponseAccountCreateSuriV2, ResponseAccountCreateWithSecretKey, ResponseAccountExportPrivateKey, ResponseAccountMeta, ResponseCheckCrossChainTransfer, ResponseCheckPublicAndSecretKey, ResponseCheckTransfer, ResponseNftTransferLedger, ResponseNftTransferQr, ResponseParseEVMTransactionInput, ResponseParseTransactionEVM, ResponsePrivateKeyValidateV2, ResponseQrSignEVM, ResponseRejectExternalRequest, ResponseResolveExternalRequest, ResponseSeedCreateV2, ResponseSeedValidateV2, ResponseSettingsType, ResponseStakeLedger, ResponseStakeQr, ResponseTransfer, ResponseTransferLedger, ResponseTransferQr, ResponseUnStakeLedger, ResponseUnStakeQr, ResponseWithdrawStakeLedger, ResponseWithdrawStakeQr, StakeClaimRewardParams, StakeDelegationRequest, StakeUnlockingJson, StakeWithdrawalParams, StakingJson, StakingRewardJson, SubstrateNftSubmitTransaction, SubstrateNftTransaction, SupportTransferResponse, ThemeTypes, TransactionHistoryItemType, TransferError, TuringCancelStakeCompoundParams, TuringStakeCompoundParams, TuringStakeCompoundResp, UnbondingSubmitParams, ValidateCustomTokenRequest, ValidateCustomTokenResponse, ValidateNetworkResponse } from '@subwallet/extension-base/background/KoniTypes';
-import { RequestCurrentAccountAddress, ResponseQRIsLocked, ResponseQrSignSubstrate } from '@subwallet/extension-base/background/types';
+import { AccountExternalError, AccountsWithCurrentAddress, BalanceJson, BasicTxInfo, BasicTxResponse, BondingOptionInfo, BondingSubmitParams, ChainBondingBasics, ChainRegistry, CheckExistingTuringCompoundParams, ConfirmationDefinitions, ConfirmationsQueue, ConfirmationType, CrowdloanJson, CurrentAccountInfo, CustomToken, CustomTokenJson, DelegationItem, DeleteCustomTokenParams, DisableNetworkResponse, EvmNftTransaction, ExistingTuringCompoundTask, NetworkJson, NftCollection, NftJson, NftTransactionRequest, NftTransactionResponse, NftTransferExtra, OptionInputAddress, PriceJson, RequestAccountCreateExternalV2, RequestAccountCreateHardwareV2, RequestAccountCreateWithSecretKey, RequestAccountMeta, RequestAuthorizationBlock, RequestAuthorizationPerSite, RequestBondingSubmit, RequestCancelCompoundStakeExternal, RequestCheckCrossChainTransfer, RequestCheckTransfer, RequestClaimRewardExternal, RequestCreateCompoundStakeExternal, RequestCrossChainTransfer, RequestCrossChainTransferExternal, RequestEvmNftSubmitTransaction, RequestFreeBalance, RequestNftForceUpdate, RequestNftTransferExternalEVM, RequestNftTransferExternalSubstrate, RequestParseEVMContractInput, RequestQrSignEVM, RequestQrSignSubstrate, RequestRejectExternalRequest, RequestResolveExternalRequest, RequestSettingsType, RequestStakeClaimReward, RequestStakeExternal, RequestStakeWithdrawal, RequestSubscribeBalance, RequestSubscribeBalancesVisibility, RequestSubscribeCrowdloan, RequestSubscribeNft, RequestSubscribePrice, RequestSubscribeStaking, RequestSubscribeStakingReward, RequestSubstrateNftSubmitTransaction, RequestTransfer, RequestTransferCheckReferenceCount, RequestTransferCheckSupporting, RequestTransferExistentialDeposit, RequestTransferExternal, RequestTuringCancelStakeCompound, RequestTuringStakeCompound, RequestUnbondingSubmit, RequestUnStakeExternal, RequestWithdrawStakeExternal, ResponseAccountCreateSuriV2, ResponseAccountCreateWithSecretKey, ResponseAccountExportPrivateKey, ResponseAccountMeta, ResponseCheckCrossChainTransfer, ResponseCheckPublicAndSecretKey, ResponseCheckTransfer, ResponseParseEVMContractInput, ResponsePrivateKeyValidateV2, ResponseQRIsLocked, ResponseQrParseRLP, ResponseQrSignEVM, ResponseQrSignSubstrate, ResponseRejectExternalRequest, ResponseResolveExternalRequest, ResponseSeedCreateV2, ResponseSeedValidateV2, ResponseSettingsType, StakeClaimRewardParams, StakeDelegationRequest, StakeUnlockingJson, StakeWithdrawalParams, StakingJson, StakingRewardJson, SubstrateNftTransaction, SupportTransferResponse, ThemeTypes, TransactionHistoryItemType, TuringCancelStakeCompoundParams, TuringStakeCompoundParams, TuringStakeCompoundResp, UnbondingSubmitParams, ValidateCustomTokenRequest, ValidateCustomTokenResponse, ValidateNetworkResponse } from '@subwallet/extension-base/background/KoniTypes';
+import { RequestCurrentAccountAddress } from '@subwallet/extension-base/background/types';
 import { PORT_EXTENSION } from '@subwallet/extension-base/defaults';
 import { getId } from '@subwallet/extension-base/utils/getId';
 import { metadataExpand } from '@subwallet/extension-chains';
@@ -142,18 +142,6 @@ export async function approveMetaRequest (id: string): Promise<boolean> {
 
 export async function cancelSignRequest (id: string): Promise<boolean> {
   return sendMessage('pri(signing.cancel)', { id });
-}
-
-export async function qrIsLocked (address: string): Promise<ResponseQRIsLocked> {
-  return sendMessage('pri(qr.isLocked)', { address });
-}
-
-export async function qrSignSubstrate (address: string, message: string, savePass: boolean, password?: string): Promise<ResponseQrSignSubstrate> {
-  return sendMessage('pri(qr.sign.substrate)', { address, password, message, savePass });
-}
-
-export async function qrSignEvm (address: string, password: string, message: string, type: 'message' | 'transaction', chainId?: number): Promise<ResponseQrSignEVM> {
-  return sendMessage('pri(qr.sign.evm)', { address, password, message, chainId, type });
 }
 
 export async function isSignLocked (id: string): Promise<ResponseSigningIsLocked> {
@@ -514,11 +502,11 @@ export async function checkCrossChainTransfer (request: RequestCheckCrossChainTr
   return sendMessage('pri(accounts.checkCrossChainTransfer)', request);
 }
 
-export async function makeTransfer (request: RequestTransfer, callback: (data: ResponseTransfer) => void): Promise<Array<TransferError>> {
+export async function makeTransfer (request: RequestTransfer, callback: (data: BasicTxResponse) => void): Promise<BasicTxResponse> {
   return sendMessage('pri(accounts.transfer)', request, callback);
 }
 
-export async function makeCrossChainTransfer (request: RequestCrossChainTransfer, callback: (data: ResponseTransfer) => void): Promise<Array<TransferError>> {
+export async function makeCrossChainTransfer (request: RequestCrossChainTransfer, callback: (data: BasicTxResponse) => void): Promise<BasicTxResponse> {
   return sendMessage('pri(accounts.crossChainTransfer)', request, callback);
 }
 
@@ -526,7 +514,7 @@ export async function evmNftGetTransaction (request: NftTransactionRequest): Pro
   return sendMessage('pri(evmNft.getTransaction)', request);
 }
 
-export async function evmNftSubmitTransaction (request: EvmNftSubmitTransaction, callback: (data: NftTransactionResponse) => void): Promise<NftTransactionResponse> {
+export async function evmNftSubmitTransaction (request: RequestEvmNftSubmitTransaction, callback: (data: NftTransactionResponse) => void): Promise<NftTransactionResponse> {
   return sendMessage('pri(evmNft.submitTransaction)', request, callback);
 }
 
@@ -622,7 +610,7 @@ export async function substrateNftGetTransaction (request: NftTransactionRequest
   return sendMessage('pri(substrateNft.getTransaction)', request);
 }
 
-export async function substrateNftSubmitTransaction (request: SubstrateNftSubmitTransaction, callback: (data: NftTransactionResponse) => void): Promise<NftTransactionResponse> {
+export async function substrateNftSubmitTransaction (request: RequestSubstrateNftSubmitTransaction, callback: (data: NftTransactionResponse) => void): Promise<NftTransactionResponse> {
   return sendMessage('pri(substrateNft.submitTransaction)', request, callback);
 }
 
@@ -630,68 +618,102 @@ export async function recoverDotSamaApi (request: string): Promise<boolean> {
   return sendMessage('pri(networkMap.recoverDotSama)', request);
 }
 
-export async function parseSubstrateTransaction (genesisHash: string, rawPayload: string, specVersion: number): Promise<ResponseParseTransactionSubstrate> {
-  return sendMessage('pri(qr.transaction.parse.substrate)', { genesisHash: genesisHash, rawPayload: rawPayload, specVersion: specVersion });
+// Sign Qr
+
+export async function qrIsLocked (address: string): Promise<ResponseQRIsLocked> {
+  return sendMessage('pri(qr.isLocked)', { address });
 }
 
-export async function parseEVMTransaction (data: string): Promise<ResponseParseTransactionEVM> {
+export async function qrSignSubstrate (request: RequestQrSignSubstrate): Promise<ResponseQrSignSubstrate> {
+  return sendMessage('pri(qr.sign.substrate)', request);
+}
+
+export async function qrSignEvm (request: RequestQrSignEVM): Promise<ResponseQrSignEVM> {
+  return sendMessage('pri(qr.sign.evm)', request);
+}
+
+export async function parseEVMTransaction (data: string): Promise<ResponseQrParseRLP> {
   return sendMessage('pri(qr.transaction.parse.evm)', { data });
 }
 
 // External with Qr
 
-export async function makeTransferQr (request: RequestTransferExternal, callback: (data: ResponseTransferQr) => void): Promise<Array<TransferError>> {
+export async function makeTransferQr (request: RequestTransferExternal, callback: (data: BasicTxResponse) => void): Promise<BasicTxResponse> {
   return sendMessage('pri(accounts.transfer.qr.create)', request, callback);
 }
 
-export async function makeCrossChainTransferQr (request: RequestCrossChainTransferExternal, callback: (data: ResponseTransferQr) => void): Promise<Array<TransferError>> {
+export async function makeCrossChainTransferQr (request: RequestCrossChainTransferExternal, callback: (data: BasicTxResponse) => void): Promise<BasicTxResponse> {
   return sendMessage('pri(accounts.cross.transfer.qr.create)', request, callback);
 }
 
-export async function makeTransferNftQrSubstrate (request: RequestNftTransferExternalSubstrate, callback: (data: ResponseNftTransferQr) => void): Promise<Array<BaseTxError>> {
+export async function makeTransferNftQrSubstrate (request: RequestNftTransferExternalSubstrate, callback: (data: NftTransactionResponse) => void): Promise<NftTransactionResponse> {
   return sendMessage('pri(nft.transfer.qr.create.substrate)', request, callback);
 }
 
-export async function makeTransferNftQrEvm (request: RequestNftTransferExternalEVM, callback: (data: ResponseNftTransferQr) => void): Promise<Array<BaseTxError>> {
+export async function makeTransferNftQrEvm (request: RequestNftTransferExternalEVM, callback: (data: NftTransactionResponse) => void): Promise<NftTransactionResponse> {
   return sendMessage('pri(nft.transfer.qr.create.evm)', request, callback);
 }
 
-export async function makeBondingQr (request: RequestStakeExternal, callback: (data: ResponseStakeQr) => void): Promise<Array<BaseTxError>> {
+export async function makeBondingQr (request: RequestStakeExternal, callback: (data: BasicTxResponse) => void): Promise<BasicTxResponse> {
   return sendMessage('pri(stake.qr.create)', request, callback);
 }
 
-export async function makeUnBondingQr (request: RequestUnStakeExternal, callback: (data: ResponseUnStakeQr) => void): Promise<Array<BaseTxError>> {
+export async function makeUnBondingQr (request: RequestUnStakeExternal, callback: (data: BasicTxResponse) => void): Promise<BasicTxResponse> {
   return sendMessage('pri(unStake.qr.create)', request, callback);
 }
 
-export async function stakeWithdrawQr (request: RequestWithdrawStakeExternal, callback: (data: ResponseWithdrawStakeQr) => void): Promise<Array<BaseTxError>> {
+export async function stakeWithdrawQr (request: RequestWithdrawStakeExternal, callback: (data: BasicTxResponse) => void): Promise<BasicTxResponse> {
   return sendMessage('pri(withdrawStake.qr.create)', request, callback);
+}
+
+export async function claimRewardQr (request: RequestClaimRewardExternal, callback: (data: BasicTxResponse) => void): Promise<BasicTxResponse> {
+  return sendMessage('pri(claimReward.qr.create)', request, callback);
+}
+
+export async function createCompoundQr (request: RequestCreateCompoundStakeExternal, callback: (data: BasicTxResponse) => void): Promise<BasicTxResponse> {
+  return sendMessage('pri(createCompound.qr.create)', request, callback);
+}
+
+export async function cancelCompoundQr (request: RequestCancelCompoundStakeExternal, callback: (data: BasicTxResponse) => void): Promise<BasicTxResponse> {
+  return sendMessage('pri(cancelCompound.qr.create)', request, callback);
 }
 
 // External with Ledger
 
-export async function makeTransferLedger (request: RequestTransferExternal, callback: (data: ResponseTransferLedger) => void): Promise<Array<TransferError>> {
+export async function makeTransferLedger (request: RequestTransferExternal, callback: (data: BasicTxResponse) => void): Promise<BasicTxResponse> {
   return sendMessage('pri(accounts.transfer.ledger.create)', request, callback);
 }
 
-export async function makeCrossChainTransferLedger (request: RequestCrossChainTransferExternal, callback: (data: ResponseTransferLedger) => void): Promise<Array<TransferError>> {
+export async function makeCrossChainTransferLedger (request: RequestCrossChainTransferExternal, callback: (data: BasicTxResponse) => void): Promise<BasicTxResponse> {
   return sendMessage('pri(accounts.cross.transfer.ledger.create)', request, callback);
 }
 
-export async function makeTransferNftLedgerSubstrate (request: RequestNftTransferExternalSubstrate, callback: (data: ResponseNftTransferLedger) => void): Promise<Array<BaseTxError>> {
+export async function makeTransferNftLedgerSubstrate (request: RequestNftTransferExternalSubstrate, callback: (data: NftTransactionResponse) => void): Promise<NftTransactionResponse> {
   return sendMessage('pri(nft.transfer.ledger.create.substrate)', request, callback);
 }
 
-export async function makeBondingLedger (request: RequestStakeExternal, callback: (data: ResponseStakeLedger) => void): Promise<Array<BaseTxError>> {
+export async function makeBondingLedger (request: RequestStakeExternal, callback: (data: BasicTxResponse) => void): Promise<BasicTxResponse> {
   return sendMessage('pri(stake.ledger.create)', request, callback);
 }
 
-export async function makeUnBondingLedger (request: RequestUnStakeExternal, callback: (data: ResponseUnStakeLedger) => void): Promise<Array<BaseTxError>> {
+export async function makeUnBondingLedger (request: RequestUnStakeExternal, callback: (data: BasicTxResponse) => void): Promise<BasicTxResponse> {
   return sendMessage('pri(unStake.ledger.create)', request, callback);
 }
 
-export async function stakeWithdrawLedger (request: RequestWithdrawStakeExternal, callback: (data: ResponseWithdrawStakeLedger) => void): Promise<Array<BaseTxError>> {
+export async function stakeWithdrawLedger (request: RequestWithdrawStakeExternal, callback: (data: BasicTxResponse) => void): Promise<BasicTxResponse> {
   return sendMessage('pri(withdrawStake.ledger.create)', request, callback);
+}
+
+export async function claimRewardLedger (request: RequestClaimRewardExternal, callback: (data: BasicTxResponse) => void): Promise<BasicTxResponse> {
+  return sendMessage('pri(claimReward.ledger.create)', request, callback);
+}
+
+export async function createCompoundLedger (request: RequestCreateCompoundStakeExternal, callback: (data: BasicTxResponse) => void): Promise<BasicTxResponse> {
+  return sendMessage('pri(createCompound.ledger.create)', request, callback);
+}
+
+export async function cancelCompoundLedger (request: RequestCancelCompoundStakeExternal, callback: (data: BasicTxResponse) => void): Promise<BasicTxResponse> {
+  return sendMessage('pri(cancelCompound.ledger.create)', request, callback);
 }
 
 // External request
@@ -724,8 +746,8 @@ export async function getChainBondingBasics (networkJsons: NetworkJson[], callba
   return sendMessage('pri(bonding.getChainBondingBasics)', networkJsons, callback);
 }
 
-export async function submitBonding (bondingSubmitParams: BondingSubmitParams, callback: (data: BasicTxResponse) => void): Promise<BasicTxResponse> {
-  return sendMessage('pri(bonding.submitTransaction)', bondingSubmitParams, callback);
+export async function submitBonding (request: RequestBondingSubmit, callback: (data: BasicTxResponse) => void): Promise<BasicTxResponse> {
+  return sendMessage('pri(bonding.submitTransaction)', request, callback);
 }
 
 export async function getBondingTxInfo (bondingSubmitParams: BondingSubmitParams): Promise<BasicTxInfo> {
@@ -736,8 +758,8 @@ export async function getUnbondingTxInfo (unbondingSubmitParams: UnbondingSubmit
   return sendMessage('pri(unbonding.txInfo)', unbondingSubmitParams);
 }
 
-export async function submitUnbonding (unbondingSubmitParams: UnbondingSubmitParams, callback: (data: BasicTxResponse) => void): Promise<BasicTxResponse> {
-  return sendMessage('pri(unbonding.submitTransaction)', unbondingSubmitParams, callback);
+export async function submitUnbonding (request: RequestUnbondingSubmit, callback: (data: BasicTxResponse) => void): Promise<BasicTxResponse> {
+  return sendMessage('pri(unbonding.submitTransaction)', request, callback);
 }
 
 export async function subscribeStakeUnlockingInfo (callback: (data: StakeUnlockingJson) => void): Promise<StakeUnlockingJson> {
@@ -748,7 +770,7 @@ export async function getStakeWithdrawalTxInfo (params: StakeWithdrawalParams): 
   return sendMessage('pri(unbonding.withdrawalTxInfo)', params);
 }
 
-export async function submitStakeWithdrawal (params: StakeWithdrawalParams, callback: (data: BasicTxResponse) => void): Promise<BasicTxResponse> {
+export async function submitStakeWithdrawal (params: RequestStakeWithdrawal, callback: (data: BasicTxResponse) => void): Promise<BasicTxResponse> {
   return sendMessage('pri(unbonding.submitWithdrawal)', params, callback);
 }
 
@@ -756,15 +778,15 @@ export async function getStakeClaimRewardTxInfo (params: StakeClaimRewardParams)
   return sendMessage('pri(staking.claimRewardTxInfo)', params);
 }
 
-export async function submitStakeClaimReward (params: StakeClaimRewardParams, callback: (data: BasicTxResponse) => void): Promise<BasicTxResponse> {
-  return sendMessage('pri(staking.submitClaimReward)', params, callback);
+export async function submitStakeClaimReward (request: RequestStakeClaimReward, callback: (data: BasicTxResponse) => void): Promise<BasicTxResponse> {
+  return sendMessage('pri(staking.submitClaimReward)', request, callback);
 }
 
 export async function getStakeDelegationInfo (params: StakeDelegationRequest): Promise<DelegationItem[]> {
   return sendMessage('pri(staking.delegationInfo)', params);
 }
 
-export async function parseEVMTransactionInput (request: RequestParseEVMTransactionInput): Promise<ResponseParseEVMTransactionInput> {
+export async function parseEVMTransactionInput (request: RequestParseEVMContractInput): Promise<ResponseParseEVMContractInput> {
   return sendMessage('pri(evm.transaction.parse.input)', request);
 }
 
@@ -776,7 +798,7 @@ export async function getTuringStakeCompoundTxInfo (request: TuringStakeCompound
   return sendMessage('pri(staking.turingCompound)', request);
 }
 
-export async function submitTuringStakeCompounding (request: TuringStakeCompoundParams, callback: (data: BasicTxResponse) => void): Promise<BasicTxResponse> {
+export async function submitTuringStakeCompounding (request: RequestTuringStakeCompound, callback: (data: BasicTxResponse) => void): Promise<BasicTxResponse> {
   return sendMessage('pri(staking.submitTuringCompound)', request, callback);
 }
 
@@ -788,8 +810,8 @@ export async function getTuringCancelStakeCompoundTxInfo (params: TuringCancelSt
   return sendMessage('pri(staking.turingCancelCompound)', params);
 }
 
-export async function submitTuringCancelStakeCompounding (params: TuringCancelStakeCompoundParams, callback: (data: BasicTxResponse) => void): Promise<BasicTxResponse> {
-  return sendMessage('pri(staking.submitTuringCancelCompound)', params, callback);
+export async function submitTuringCancelStakeCompounding (request: RequestTuringCancelStakeCompound, callback: (data: BasicTxResponse) => void): Promise<BasicTxResponse> {
+  return sendMessage('pri(staking.submitTuringCancelCompound)', request, callback);
 }
 
 export async function wasmNftGetTransaction (request: NftTransactionRequest): Promise<SubstrateNftTransaction> {

@@ -1,7 +1,7 @@
 // Copyright 2019-2022 @subwallet/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { ConfirmationsQueue, CustomTokenType, EVMTransactionArg, NetworkJson, ResponseParseEVMTransactionInput } from '@subwallet/extension-base/background/KoniTypes';
+import { ConfirmationsQueue, CustomTokenType, EVMTransactionArg, NetworkJson, ResponseParseEVMContractInput } from '@subwallet/extension-base/background/KoniTypes';
 import { AccountInfoEl } from '@subwallet/extension-koni-ui/components';
 import FormatBalance from '@subwallet/extension-koni-ui/components/FormatBalance';
 import useTranslation from '@subwallet/extension-koni-ui/hooks/useTranslation';
@@ -46,7 +46,7 @@ function SendEvmTransactionConfirmationInfo ({ className, confirmation: { payloa
 
   const { chainRegistry: chainRegistryMap } = useSelector((state: RootState) => state);
 
-  const [inputInfo, setInputInfo] = useState<ResponseParseEVMTransactionInput | null>(null);
+  const [inputInfo, setInputInfo] = useState<ResponseParseEVMContractInput | null>(null);
   const [XCMToken, setXCMToken] = useState<XCMTokenProps | null>(null);
 
   const [selectedTab, setSelectedTab] = useState<TAB_SELECTION_TYPE>(TAB_SELECTION_TYPE.BASIC);
@@ -110,7 +110,7 @@ function SendEvmTransactionConfirmationInfo ({ className, confirmation: { payloa
     );
   }, [XCMToken]);
 
-  const handlerRenderInputInfo = useCallback((response: ResponseParseEVMTransactionInput) => {
+  const handlerRenderInputInfo = useCallback((response: ResponseParseEVMContractInput) => {
     const info = response.result;
 
     if (typeof info === 'string') {

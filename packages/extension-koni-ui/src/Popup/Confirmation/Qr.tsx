@@ -3,8 +3,8 @@
 
 import { ConfirmationDefinitions } from '@subwallet/extension-base/background/KoniTypes';
 import { LoadingContainer } from '@subwallet/extension-koni-ui/components';
-import DisplayPayload from '@subwallet/extension-koni-ui/components/Qr/DisplayPayload';
-import ScanSignature from '@subwallet/extension-koni-ui/components/Qr/ScanSignature';
+import DisplayPayload from '@subwallet/extension-koni-ui/components/Signing/QR/DisplayPayload';
+import ScanSignature from '@subwallet/extension-koni-ui/components/Signing/QR/ScanSignature';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { SigData } from '@subwallet/extension-koni-ui/types/accountExternalRequest';
 import CN from 'classnames';

@@ -24,6 +24,7 @@ export const ALL_ACCOUNT_KEY = 'ALL';
 export const ALL_NETWORK_KEY = 'all';
 export const ALL_GENESIS_HASH = null;
 export const IGNORE_GET_SUBSTRATE_FEATURES_LIST: string[] = ['astarEvm', 'ethereum', 'ethereum_goerli', 'binance', 'binance_test', 'boba_rinkeby', 'boba', 'bobabase', 'bobabeam'];
+export const IGNORE_QR_SIGNER: string[] = [];
 
 export const DEFAULT_THEME = 'dark';
 

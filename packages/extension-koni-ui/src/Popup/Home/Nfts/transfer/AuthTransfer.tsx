@@ -1,36 +1,22 @@
 // Copyright 2019-2022 @subwallet/extension-koni authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { BaseTxError, BasicTxError, NftItem, RequestNftForceUpdate, ResponseNftTransferExternal, ResponseNftTransferLedger, ResponseNftTransferQr } from '@subwallet/extension-base/background/KoniTypes';
+import { EvmNftSubmitTransaction, NftItem, NftTransactionResponse, SubstrateNftSubmitTransaction } from '@subwallet/extension-base/background/KoniTypes';
 import { AccountJson } from '@subwallet/extension-base/background/types';
-import { LedgerState } from '@subwallet/extension-base/signers/types';
-import { Spinner, Theme } from '@subwallet/extension-koni-ui/components';
 import InputAddress from '@subwallet/extension-koni-ui/components/InputAddress';
-import LedgerRequest from '@subwallet/extension-koni-ui/components/Ledger/LedgerRequest';
 import Modal from '@subwallet/extension-koni-ui/components/Modal';
-import QrRequest from '@subwallet/extension-koni-ui/components/Qr/QrRequest';
-import { SIGN_MODE } from '@subwallet/extension-koni-ui/constants/signing';
+import SigningRequest from '@subwallet/extension-koni-ui/components/Signing/SigningRequest';
 import { ExternalRequestContext } from '@subwallet/extension-koni-ui/contexts/ExternalRequestContext';
-import { QrContext, QrContextState, QrStep } from '@subwallet/extension-koni-ui/contexts/QrContext';
-import { useGetSignMode } from '@subwallet/extension-koni-ui/hooks/useGetSignMode';
+import { SigningContext } from '@subwallet/extension-koni-ui/contexts/SigningContext';
+import useGetNetworkJson from '@subwallet/extension-koni-ui/hooks/screen/home/useGetNetworkJson';
 import { useRejectExternalRequest } from '@subwallet/extension-koni-ui/hooks/useRejectExternalRequest';
-import useToast from '@subwallet/extension-koni-ui/hooks/useToast';
 import useTranslation from '@subwallet/extension-koni-ui/hooks/useTranslation';
 import { evmNftSubmitTransaction, makeTransferNftLedgerSubstrate, makeTransferNftQrEvm, makeTransferNftQrSubstrate, nftForceUpdate, substrateNftSubmitTransaction } from '@subwallet/extension-koni-ui/messaging';
 import { SubstrateTransferParams, Web3TransferParams } from '@subwallet/extension-koni-ui/Popup/Home/Nfts/utils';
-import Address from '@subwallet/extension-koni-ui/Popup/Sending/parts/Address';
-import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import CN from 'classnames';
-import React, { useCallback, useContext, useEffect, useState } from 'react';
-import { useSelector } from 'react-redux';
-import styled, { ThemeContext } from 'styled-components';
-
-interface AddressProxy {
-  isUnlockCached: boolean;
-  signAddress: string | null;
-  signPassword: string;
-}
+import React, { useCallback, useContext, useMemo } from 'react';
+import styled from 'styled-components';
 
 interface Props extends ThemeProps {
   className?: string;
@@ -53,443 +39,89 @@ function AuthTransfer ({ chain, className, collectionId, nftItem, recipientAddre
 
   const { handlerReject } = useRejectExternalRequest();
 
-  const { cleanQrState, updateQrState } = useContext(QrContext);
-  const { clearExternalState, externalState, updateExternalState } = useContext(ExternalRequestContext);
-  const themeContext = useContext(ThemeContext as React.Context<Theme>);
+  const { externalState: { externalId } } = useContext(ExternalRequestContext);
+  const { signingState: { isBusy } } = useContext(SigningContext);
 
-  const { externalId } = externalState;
-
-  const [errorArr, setErrorArr] = useState<string[]>([]);
-  const [passwordError, setPasswordError] = useState<string | null>(null);
-  // const [callHash, setCallHash] = useState<string | null>(null);
-
-  const [loading, setLoading] = useState(false);
-  const [senderInfoSubstrate, setSenderInfoSubstrate] = useState<AddressProxy>(() => ({ isUnlockCached: false, signAddress: senderAccount.address, signPassword: '' }));
-
-  const substrateParams = substrateTransferParams !== null ? substrateTransferParams.params : null;
   const substrateGas = substrateTransferParams !== null ? substrateTransferParams.estimatedFee : null;
-  const substrateBalanceError = substrateTransferParams !== null ? substrateTransferParams.balanceError : false;
 
-  const web3Tx = web3TransferParams !== null ? web3TransferParams.rawTx : null;
   const web3Gas = web3TransferParams !== null ? web3TransferParams.estimatedGas : null;
-  const web3BalanceError = web3TransferParams !== null ? web3TransferParams.balanceError : false;
 
-  const [balanceError] = useState(substrateTransferParams !== null ? substrateBalanceError : web3BalanceError);
-  const { currentAccount: account, currentNetwork } = useSelector((state: RootState) => state);
+  const network = useGetNetworkJson(chain);
 
-  const signMode = useGetSignMode(account.account);
-
-  const genesisHash = currentNetwork.genesisHash;
-
-  const { show } = useToast();
-
-  useEffect((): void => {
-    setPasswordError(null);
-  }, [senderInfoSubstrate]);
-
-  const onSendEvm = useCallback(async () => {
-    if (web3Tx) {
-      await evmNftSubmitTransaction({
-        senderAddress: account?.account?.address as string,
-        recipientAddress,
-        password: senderInfoSubstrate.signPassword,
+  const evmParams = useMemo((): EvmNftSubmitTransaction | null => {
+    return web3TransferParams?.rawTx
+      ? {
+        senderAddress: senderAccount.address,
+        recipientAddress: recipientAddress,
         networkKey: chain,
-        rawTransaction: web3Tx
-      }, (data) => {
-        if (data.passwordError) {
-          setPasswordError(data.passwordError);
-          setLoading(false);
-        }
-
-        if (balanceError && !data.passwordError) {
-          setLoading(false);
-          show('Your balance is too low to cover fees');
-
-          return;
-        }
-
-        // if (data.callHash) {
-        //   setCallHash(data.callHash);
-        // }
-
-        if (data.txError) {
-          show('Encountered an error, please try again.');
-          setLoading(false);
-
-          return;
-        }
-
-        if (data.status) {
-          setLoading(false);
-
-          if (data.status) {
-            setIsTxSuccess(true);
-            setShowConfirm(false);
-            setShowResult(true);
-            setExtrinsicHash(data.transactionHash as string);
-            nftForceUpdate({ nft: nftItem, collectionId, isSendingSelf: data.isSendingSelf, chain, senderAddress: account?.account?.address, recipientAddress } as RequestNftForceUpdate)
-              .catch(console.error);
-          } else {
-            setIsTxSuccess(false);
-            setTxError('Error submitting transaction');
-            setShowConfirm(false);
-            setShowResult(true);
-            setExtrinsicHash(data.transactionHash as string);
-          }
-        }
-      });
-    } else {
-      show('Encountered an error, please try again.');
-    }
-  }, [account?.account?.address, balanceError, chain, collectionId, nftItem, recipientAddress, senderInfoSubstrate.signPassword, setExtrinsicHash, setIsTxSuccess, setShowConfirm, setShowResult, setTxError, show, web3Tx]);
-
-  const onSendSubstrate = useCallback(async () => {
-    await substrateNftSubmitTransaction({
-      params: substrateParams,
-      password: senderInfoSubstrate.signPassword,
-      senderAddress: senderAccount.address,
-      recipientAddress
-    }, (data) => {
-      if (data.passwordError && data.passwordError) {
-        setPasswordError(data.passwordError);
-        setLoading(false);
+        rawTransaction: web3TransferParams.rawTx
       }
+      : null;
+  }, [senderAccount.address, chain, recipientAddress, web3TransferParams?.rawTx]);
 
-      if (balanceError && !data.passwordError) {
-        setLoading(false);
-        show('Your balance is too low to cover fees');
-
-        return;
+  const substrateParams = useMemo((): SubstrateNftSubmitTransaction | null => {
+    return substrateTransferParams?.params
+      ? {
+        params: substrateTransferParams.params,
+        senderAddress: senderAccount.address,
+        recipientAddress: recipientAddress
       }
+      : null;
+  }, [recipientAddress, senderAccount.address, substrateTransferParams?.params]);
 
-      // if (data.callHash) {
-      //   setCallHash(data.callHash);
-      // }
-
-      if (data.txError && data.txError) {
-        if (data.errorMessage && data.errorMessage === BasicTxError.BalanceTooLow) {
-          show('Your balance is too low to cover fees');
-        } else {
-          show('Encountered an error, please try again.');
-        }
-
-        setLoading(false);
-
-        return;
-      }
-
-      if (data.status) {
-        setLoading(false);
-
-        if (data.status) {
-          setIsTxSuccess(true);
-          setShowConfirm(false);
-          setShowResult(true);
-          setExtrinsicHash(data.transactionHash as string);
-          nftForceUpdate({ nft: nftItem, collectionId, isSendingSelf: data.isSendingSelf, chain, senderAddress: senderAccount.address, recipientAddress } as RequestNftForceUpdate)
-            .catch(console.error);
-        } else {
-          setIsTxSuccess(false);
-          setTxError('Error submitting transaction');
-          setShowConfirm(false);
-          setShowResult(true);
-          setExtrinsicHash(data.transactionHash as string);
-        }
-      }
-    });
-  }, [substrateParams, senderInfoSubstrate.signPassword, senderAccount.address, recipientAddress, balanceError, show, setIsTxSuccess, setShowConfirm, setShowResult, setExtrinsicHash, nftItem, collectionId, chain, setTxError]);
-
-  const handlerCallbackResponseResult = useCallback((data: ResponseNftTransferExternal) => {
-    if (balanceError && !data.passwordError) {
-      setLoading(false);
-      setErrorArr(['Your balance is too low to cover fees']);
-      setIsTxSuccess(false);
-      setTxError('Your balance is too low to cover fees');
-      setShowConfirm(false);
-      setShowResult(true);
-      cleanQrState();
-
-      return;
-    }
-
-    if (data.txError && data.status === undefined) {
-      setErrorArr(['Encountered an error, please try again.']);
-      setLoading(false);
-      setIsTxSuccess(false);
-      setTxError('Encountered an error, please try again.');
-      setShowConfirm(false);
-      setShowResult(false);
-      cleanQrState();
-      clearExternalState();
-
-      return;
-    }
-
-    if (data.status !== undefined) {
-      setLoading(false);
-
-      if (data.status) {
-        setIsTxSuccess(true);
-        setShowConfirm(false);
-        setShowResult(true);
-        setExtrinsicHash(data.transactionHash as string);
-        nftForceUpdate({ nft: nftItem, collectionId, isSendingSelf: data.isSendingSelf, chain } as RequestNftForceUpdate)
-          .catch(console.error);
-      } else {
-        setIsTxSuccess(false);
-        setTxError('Error submitting transaction');
-        setShowConfirm(false);
-        setShowResult(true);
-        setExtrinsicHash(data.transactionHash as string);
-      }
-
-      cleanQrState();
-      clearExternalState();
-    }
-  }, [balanceError, chain, cleanQrState, clearExternalState, collectionId, nftItem, setExtrinsicHash, setIsTxSuccess, setShowConfirm, setShowResult, setTxError]);
-
-  const handlerCallbackResponseResultQr = useCallback((data: ResponseNftTransferQr) => {
-    if (data.qrState) {
-      const state: QrContextState = {
-        ...data.qrState,
-        step: QrStep.DISPLAY_PAYLOAD
-      };
-
-      setLoading(false);
-      updateQrState(state);
-    }
-
-    if (data.externalState) {
-      updateExternalState(data.externalState);
-    }
-
-    if (data.isBusy) {
-      updateQrState({ step: QrStep.SENDING_TX });
-      setLoading(true);
-    }
-
-    handlerCallbackResponseResult(data);
-  }, [handlerCallbackResponseResult, updateExternalState, updateQrState]);
-
-  const handlerResponseError = useCallback((errors: BaseTxError[]) => {
-    const errorMessage = errors.map((err) => err.message);
-
-    setErrorArr(errorMessage);
-
-    if (errorMessage && errorMessage.length) {
-      setLoading(false);
-    }
-  }, []);
-
-  const handlerSendSubstrateQr = useCallback(() => {
-    setLoading(true);
-    makeTransferNftQrSubstrate({
+  const onAfterSuccess = useCallback((res: NftTransactionResponse) => {
+    nftForceUpdate({
+      chain: chain,
+      collectionId: collectionId,
+      isSendingSelf: res.isSendingSelf,
+      nft: nftItem,
       recipientAddress: recipientAddress,
-      senderAddress: senderAccount.address,
-      params: substrateParams
-    }, handlerCallbackResponseResultQr)
-      .then(handlerResponseError)
-      .catch((e) => console.log('There is problem when makeTransferNftQrSubstrate', e));
-  }, [handlerCallbackResponseResultQr, handlerResponseError, recipientAddress, senderAccount.address, substrateParams]);
+      senderAddress: senderAccount.address
+    })
+      .catch(console.error);
+  }, [senderAccount.address, chain, collectionId, nftItem, recipientAddress]);
 
-  const handlerSendEvmQr = useCallback(() => {
-    setLoading(true);
+  const onFail = useCallback((errors: string[], extrinsicHash?: string) => {
+    setIsTxSuccess(false);
+    setTxError(errors[0]);
+    setShowConfirm(false);
+    setShowResult(true);
+    setExtrinsicHash(extrinsicHash || '');
+  }, [setExtrinsicHash, setIsTxSuccess, setShowConfirm, setShowResult, setTxError]);
 
-    if (web3Tx) {
-      makeTransferNftQrEvm({
-        senderAddress: account?.account?.address as string,
-        recipientAddress,
-        networkKey: chain,
-        rawTransaction: web3Tx
-      }, handlerCallbackResponseResultQr)
-        .then(handlerResponseError)
-        .catch((e) => console.log('There is problem when makeTransferNftQrEvm', e));
-    }
-  }, [account?.account?.address, chain, handlerCallbackResponseResultQr, handlerResponseError, recipientAddress, web3Tx]);
-
-  const handlerSendQr = useCallback(() => {
-    if (substrateParams !== null) {
-      handlerSendSubstrateQr();
-    } else if (web3Tx !== null) {
-      handlerSendEvmQr();
-    }
-  }, [handlerSendEvmQr, handlerSendSubstrateQr, substrateParams, web3Tx]);
-
-  const handlerCallbackResponseResultLedger = useCallback((handlerSignLedger: (ledgerState: LedgerState) => void, data: ResponseNftTransferLedger) => {
-    if (data.ledgerState) {
-      handlerSignLedger(data.ledgerState);
-    }
-
-    if (data.externalState) {
-      updateExternalState(data.externalState);
-    }
-
-    handlerCallbackResponseResult(data);
-  }, [handlerCallbackResponseResult, updateExternalState]);
-
-  const handlerSendLedgerSubstrate = useCallback((handlerSignLedger: (ledgerState: LedgerState) => void) => {
-    const callback = (data: ResponseNftTransferLedger) => {
-      handlerCallbackResponseResultLedger(handlerSignLedger, data);
-    };
-
-    makeTransferNftLedgerSubstrate({
-      recipientAddress: recipientAddress,
-      senderAddress: senderAccount.address,
-      params: substrateParams
-    }, callback)
-      .then(handlerResponseError)
-      .catch((e) => console.log('There is problem when makeTransferNftQrSubstrate', e));
-  }, [handlerCallbackResponseResultLedger, handlerResponseError, recipientAddress, senderAccount.address, substrateParams]);
-
-  const handlerSendLedger = useCallback((handlerSignLedger: (ledgerState: LedgerState) => void) => {
-    if (loading) {
-      return;
-    }
-
-    setLoading(true);
-
-    // eslint-disable-next-line @typescript-eslint/no-misused-promises
-    setTimeout(() => {
-      if (substrateParams !== null) {
-        const sendSubstrate = () => {
-          handlerSendLedgerSubstrate(handlerSignLedger);
-        };
-
-        sendSubstrate();
-      } else if (web3Tx !== null) {
-        setErrorArr(['We don\'t support transfer NFT with ledger at the moment']);
-        setLoading(false);
-      }
-    }, 10);
-  }, [handlerSendLedgerSubstrate, loading, substrateParams, web3Tx]);
-
-  const handleSignAndSubmit = useCallback(() => {
-    if (loading) {
-      return;
-    }
-
-    setLoading(true);
-
-    // eslint-disable-next-line @typescript-eslint/no-misused-promises
-    setTimeout(async () => {
-      if (substrateParams !== null) {
-        await onSendSubstrate();
-      } else if (web3Tx !== null) {
-        await onSendEvm();
-      }
-    }, 10);
-  }, [loading, substrateParams, web3Tx, onSendSubstrate, onSendEvm]);
-
-  const handlerCreateQr = useCallback(() => {
-    if (loading) {
-      return;
-    }
-
-    // eslint-disable-next-line @typescript-eslint/no-misused-promises
-    setTimeout(() => {
-      handlerSendQr();
-    }, 10);
-  }, [loading, handlerSendQr]);
+  const onSuccess = useCallback((extrinsicHash: string) => {
+    setIsTxSuccess(true);
+    setShowConfirm(false);
+    setShowResult(true);
+    setExtrinsicHash(extrinsicHash);
+  }, [setExtrinsicHash, setIsTxSuccess, setShowConfirm, setShowResult]);
 
   const hideConfirm = useCallback(async () => {
-    if (!loading) {
+    if (!isBusy) {
       await handlerReject(externalId);
 
       setShowConfirm(false);
     }
-  }, [externalId, handlerReject, loading, setShowConfirm]);
+  }, [externalId, handlerReject, isBusy, setShowConfirm]);
 
-  const handlerErrorQr = useCallback((error: Error) => {
-    setErrorArr([error.message]);
-  }, []);
-
-  const handlerClearError = useCallback(() => {
-    setErrorArr([]);
-  }, []);
-
-  const handlerRenderContent = useCallback(() => {
-    switch (signMode) {
-      case SIGN_MODE.QR:
-        return (
-          <QrRequest
-            clearError={handlerClearError}
-            errorArr={errorArr}
-            genesisHash={genesisHash}
-            handlerStart={handlerCreateQr}
-            isBusy={loading}
-            onError={handlerErrorQr}
-          >
-            <div className={'fee'}>Fees of {substrateGas || web3Gas} will be applied to the submission</div>
-            <InputAddress
-              className={'sender-container'}
-              defaultValue={senderAccount.address}
-              help={t<string>('The account you will send NFT from.')}
-              isDisabled={true}
-              isSetDefaultValue={true}
-              label={t<string>('Send from account')}
-              networkPrefix={currentNetwork.networkPrefix}
-              type='account'
-              withEllipsis
-            />
-          </QrRequest>
-        );
-      case SIGN_MODE.LEDGER:
-        return (
-          <LedgerRequest
-            accountMeta={account}
-            errorArr={errorArr}
-            genesisHash={genesisHash}
-            handlerSignLedger={handlerSendLedger}
-            isBusy={loading}
-            setBusy={setLoading}
-            setErrorArr={setErrorArr}
-          >
-            <div className={'fee'}>Fees of {substrateGas || web3Gas} will be applied to the submission</div>
-            <InputAddress
-              className={'sender-container'}
-              defaultValue={senderAccount.address}
-              help={t<string>('The account you will send NFT from.')}
-              isDisabled={true}
-              isSetDefaultValue={true}
-              label={t<string>('Send from account')}
-              networkPrefix={currentNetwork.networkPrefix}
-              type='account'
-              withEllipsis
-            />
-          </LedgerRequest>
-        );
-      case SIGN_MODE.PASSWORD:
-      default:
-        return (
-          <div
-            className={'auth-container'}
-          >
-            <div className={'fee'}>Fees of {substrateGas || web3Gas} will be applied to the submission</div>
-
-            <Address
-              className={'sender-container'}
-              onChange={setSenderInfoSubstrate}
-              onEnter={handleSignAndSubmit}
-              passwordError={passwordError}
-              requestAddress={senderAccount.address}
-            />
-
-            <div
-              className={'submit-btn'}
-              // eslint-disable-next-line @typescript-eslint/no-misused-promises
-              onClick={handleSignAndSubmit}
-              style={{ marginTop: '40px', background: loading ? 'rgba(0, 75, 255, 0.25)' : themeContext.secondaryColor, cursor: loading ? 'default' : 'pointer' }}
-            >
-              {
-                !loading
-                  ? 'Sign and Submit'
-                  : <Spinner className={'spinner-loading'} />
-              }
-            </div>
-          </div>
-        );
-    }
-  }, [account, currentNetwork.networkPrefix, errorArr, genesisHash, handleSignAndSubmit, handlerClearError, handlerCreateQr, handlerErrorQr, handlerSendLedger, loading, passwordError, senderAccount.address, signMode, substrateGas, t, themeContext.secondaryColor, web3Gas]);
+  const renderInfo = useCallback(() => {
+    return (
+      <>
+        <div className={'fee'}>Fees of {substrateGas || web3Gas} will be applied to the submission</div>
+        <InputAddress
+          className={'sender-container'}
+          defaultValue={senderAccount.address}
+          help={t<string>('The account you will send NFT from.')}
+          isDisabled={true}
+          isSetDefaultValue={true}
+          label={t<string>('Send from account')}
+          networkPrefix={network.ss58Format}
+          type='account'
+          withEllipsis
+        />
+      </>
+    );
+  }, [network.ss58Format, senderAccount.address, substrateGas, t, web3Gas]);
 
   return (
     <div className={className}>
@@ -501,15 +133,55 @@ function AuthTransfer ({ chain, className, collectionId, nftItem, recipientAddre
             Authorize transaction
           </div>
           <div
-            className={CN('close-button-confirm', { disable: loading })}
+            className={CN('close-button-confirm', { disable: isBusy })}
             // eslint-disable-next-line @typescript-eslint/no-misused-promises
-            onClick={!loading ? hideConfirm : undefined}
+            onClick={!isBusy ? hideConfirm : undefined}
           >
             {t('Cancel')}
           </div>
         </div>
 
-        { handlerRenderContent() }
+        {
+          evmParams && (
+            <SigningRequest
+              account={senderAccount}
+              balanceError={web3TransferParams?.balanceError}
+              handleSignPassword={evmNftSubmitTransaction}
+              handleSignQr={makeTransferNftQrEvm}
+              hideConfirm={hideConfirm}
+              message={'There is problem when transferNft'}
+              network={network}
+              onAfterSuccess={onAfterSuccess}
+              onFail={onFail}
+              onSuccess={onSuccess}
+              params={evmParams}
+            >
+              { renderInfo() }
+            </SigningRequest>
+          )
+        }
+
+        {
+          substrateParams && (
+            <SigningRequest
+              account={senderAccount}
+              balanceError={substrateTransferParams?.balanceError}
+              handleSignLedger={makeTransferNftLedgerSubstrate}
+              handleSignPassword={substrateNftSubmitTransaction}
+              handleSignQr={makeTransferNftQrSubstrate}
+              hideConfirm={hideConfirm}
+              message={'There is problem when transferNft'}
+              network={network}
+              onAfterSuccess={onAfterSuccess}
+              onFail={onFail}
+              onSuccess={onSuccess}
+              params={substrateParams}
+            >
+              { renderInfo() }
+            </SigningRequest>
+          )
+        }
+
       </Modal>
     </div>
   );

@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { AccountExternalError, AccountExternalErrorCode } from '@subwallet/extension-base/background/KoniTypes';
-import ScanAddress from '@subwallet/extension-koni-ui/components/Qr/ScanAddress';
+import ScanAddress from '@subwallet/extension-koni-ui/components/Attach/ScanAddress';
 import { SCAN_TYPE } from '@subwallet/extension-koni-ui/constants/qr';
 import Address from '@subwallet/extension-koni-ui/partials/Address';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';

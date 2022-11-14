@@ -441,5 +441,16 @@
   "Manage Tokens": "",
   "Configure Token": "",
   "Token setting": "",
-  "Attach QR-signer (Parity Signer, Keystone)": ""
+  "Attach QR-signer (Parity Signer, Keystone)": "",
+  "This network does not support this feature with QR-signer account": "",
+  "This type account does not support this feature": "",
+  "Import account by QR code": "",
+  "Attach readonly account": "",
+  "Invalid Address": "",
+  "Account Address": "",
+  "Scan Address QR": "",
+  "Address QR  Signer": "",
+  "Address Readonly Account": "",
+  "Import By QR Code": "",
+  "You are using readonly account.": ""
 }

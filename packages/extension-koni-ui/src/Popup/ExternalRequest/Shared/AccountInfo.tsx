@@ -2,10 +2,9 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { NetworkJson } from '@subwallet/extension-base/background/KoniTypes';
-import { AccountJson } from '@subwallet/extension-base/background/types';
 import cloneLogo from '@subwallet/extension-koni-ui/assets/clone.svg';
-import { AccountContext } from '@subwallet/extension-koni-ui/components';
 import Identicon from '@subwallet/extension-koni-ui/components/Identicon';
+import useGetAccountByAddress from '@subwallet/extension-koni-ui/hooks/useGetAccountByAddress';
 import useToast from '@subwallet/extension-koni-ui/hooks/useToast';
 import useTranslation from '@subwallet/extension-koni-ui/hooks/useTranslation';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
@@ -13,7 +12,7 @@ import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { getAccountInfoByNetwork } from '@subwallet/extension-koni-ui/util/account';
 import { AccountInfoByNetwork } from '@subwallet/extension-koni-ui/util/types';
 import CN from 'classnames';
-import React, { useCallback, useContext, useMemo } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import CopyToClipboard from 'react-copy-to-clipboard';
 import { useSelector } from 'react-redux';
 import styled from 'styled-components';
@@ -33,13 +32,9 @@ const AccountInfo = (props: Props) => {
   const { show } = useToast();
   const { t } = useTranslation();
 
-  const { getAccountByAddress } = useContext(AccountContext);
-
   const { networkMap } = useSelector((state: RootState) => state);
 
-  const account = useMemo((): AccountJson | undefined => {
-    return getAccountByAddress(networkMap, address, network.genesisHash);
-  }, [networkMap, getAccountByAddress, address, network.genesisHash]);
+  const account = useGetAccountByAddress(address);
 
   const info = useMemo((): AccountInfoByNetwork => {
     return getAccountInfoByNetwork(networkMap, address, network);

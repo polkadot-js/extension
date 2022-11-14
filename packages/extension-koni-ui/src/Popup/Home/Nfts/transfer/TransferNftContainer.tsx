@@ -324,7 +324,7 @@ function TransferNftContainer ({ className, collectionId, collectionImage, nftIt
       }
 
       {
-        showTransferResult && extrinsicHash !== '' &&
+        showTransferResult &&
         <TransferResult
           backToHome={goBack}
           extrinsicHash={extrinsicHash}

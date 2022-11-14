@@ -27,7 +27,7 @@ const SignQR = (props: Props) => {
   const { loading, network } = useGetNetworkQrRequest();
 
   const { cleanup, signDataLegacy, state: scannerState } = useContext(ScannerContext);
-  const { evmChainId, isEthereum, senderAddress, type } = scannerState;
+  const { evmChainId, isEthereumStructure, senderAddress, type } = scannerState;
 
   const [error, setError] = useState<string | null>(null);
   const [savePass, setSavePass] = useState(false);
@@ -130,7 +130,7 @@ const SignQR = (props: Props) => {
               </div>
               <AccountInfo
                 address={senderAddress}
-                forceEthereum={isEthereum && !evmChainId}
+                forceEthereum={isEthereumStructure && !evmChainId}
                 network={network}
               />
             </>
@@ -149,7 +149,7 @@ const SignQR = (props: Props) => {
           />
         )}
 
-        {!isEthereum ? <RememberPasswordCheckbox /> : <div className={'separator'} />}
+        {!isEthereumStructure ? <RememberPasswordCheckbox /> : <div className={'separator'} />}
 
         <div className={CN('sign-button-container')}>
           <Button

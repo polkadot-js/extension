@@ -2747,6 +2747,7 @@ export default class KoniExtension extends Extension {
     id: string,
     { address,
       networkKey,
+      stakingType,
       validatorAddress }: RequestClaimRewardExternal,
     callback: HandleBasicTx,
     signerType: SignerExternal): BasicTxResponse {
@@ -2773,7 +2774,8 @@ export default class KoniExtension extends Extension {
       callback: callback,
       address: address,
       validatorAddress: validatorAddress,
-      signerType: signerType
+      signerType: signerType,
+      stakingType: stakingType
     });
 
     prom.then(() => {
@@ -3696,13 +3698,14 @@ export default class KoniExtension extends Extension {
     return txState;
   }
 
-  private async getStakeClaimRewardTxInfo ({ address, networkKey }: StakeClaimRewardParams): Promise<BasicTxInfo> {
-    return await getClaimRewardTxInfo(address, networkKey, state.getNetworkMapByKey(networkKey), state.getDotSamaApiMap(), state.getWeb3ApiMap());
+  private async getStakeClaimRewardTxInfo ({ address, networkKey, stakingType }: StakeClaimRewardParams): Promise<BasicTxInfo> {
+    return await getClaimRewardTxInfo(address, networkKey, state.getNetworkMapByKey(networkKey), state.getDotSamaApiMap(), state.getWeb3ApiMap(), stakingType);
   }
 
   private async submitStakeClaimReward (id: string, port: chrome.runtime.Port, { address,
     networkKey,
     password,
+    stakingType,
     validatorAddress }: RequestStakeClaimReward): Promise<BasicTxResponse> {
     const txState: BasicTxResponse = {};
 
@@ -3714,7 +3717,7 @@ export default class KoniExtension extends Extension {
 
     const callback = createSubscription<'pri(staking.submitClaimReward)'>(id, port);
     const dotSamaApi = state.getDotSamaApi(networkKey);
-    const extrinsic = await getClaimRewardExtrinsic(dotSamaApi, networkKey, address, validatorAddress);
+    const extrinsic = await getClaimRewardExtrinsic(dotSamaApi, networkKey, address, stakingType, validatorAddress);
 
     await signAndSendExtrinsic({
       type: SignerType.PASSWORD,

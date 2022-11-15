@@ -286,6 +286,7 @@ export class KoniCron {
 
   refreshStakingReward = (address: string) => {
     return () => {
+      this.logger.log('Fetching staking reward data');
       this.subscriptions.subscribeStakingReward(address)
         .then(() => this.logger.log('Refresh staking reward state'))
         .catch(this.logger.error);

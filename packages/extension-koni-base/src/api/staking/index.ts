@@ -1,14 +1,16 @@
 // Copyright 2019-2022 @subwallet/extension-koni authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { APIItemState, ApiProps, NetworkJson, StakingItem, StakingType } from '@subwallet/extension-base/background/KoniTypes';
+import { APIItemState, ApiProps, NetworkJson, StakingItem, StakingRewardItem, StakingRewardJson, StakingType } from '@subwallet/extension-base/background/KoniTypes';
 import { CHAIN_TYPES } from '@subwallet/extension-koni-base/api/bonding';
 import { PREDEFINED_NETWORKS } from '@subwallet/extension-koni-base/api/predefinedNetworks';
+import { getAllSubsquidStaking } from '@subwallet/extension-koni-base/api/staking/subsquidStaking';
 import { IGNORE_GET_SUBSTRATE_FEATURES_LIST } from '@subwallet/extension-koni-base/constants';
 import { categoryAddresses, reformatAddress, toUnit } from '@subwallet/extension-koni-base/utils';
 
 import { Codec } from '@polkadot/types/types';
 import { BN, BN_ZERO } from '@polkadot/util';
+import { isEthereumAddress } from '@polkadot/util-crypto';
 
 interface LedgerData {
   active: string,
@@ -77,11 +79,11 @@ export function stakingOnChainApi (addresses: string[], dotSamaAPIMap: Record<st
       const unsub = await getParaStakingOnChain(parentApi, useAddresses, networks, chain, callback);
 
       unsubList.push(unsub);
+    } else if (CHAIN_TYPES.relay.includes(chain)) {
+      const unsub = await getRelayStakingOnChain(parentApi, useAddresses, networks, chain, callback);
+
+      unsubList.push(unsub);
     }
-
-    const unsubRelay = await getRelayStakingOnChain(parentApi, useAddresses, networks, chain, callback);
-
-    unsubList.push(unsubRelay);
 
     if (['polkadot', 'kusama', 'westend'].includes(chain)) {
       const unsub = await getRelayPoolingOnchain(parentApi, useAddresses, networks, chain, callback);
@@ -351,6 +353,80 @@ function getAstarStakingOnChain (parentApi: ApiProps, useAddresses: string[], ne
       }
     }
   });
+}
+
+async function getNominationPoolReward (addresses: string[], networkMap: Record<string, NetworkJson>, dotSamaApiMap: Record<string, ApiProps>): Promise<StakingRewardItem[]> {
+  const targetNetworks: string[] = [];
+  const validAddresses: string[] = [];
+
+  Object.keys(networkMap).forEach((key) => {
+    targetNetworks.push(key);
+  });
+
+  addresses.forEach((address) => {
+    if (!isEthereumAddress(address)) {
+      validAddresses.push(address);
+    }
+  });
+
+  const rewardList: StakingRewardItem[] = [];
+
+  try {
+    await Promise.all(targetNetworks.map(async (networkKey) => {
+      const apiProps = await dotSamaApiMap[networkKey].isReady;
+
+      await Promise.all(validAddresses.map(async (address) => {
+        const _unclaimedReward = await apiProps.api.call?.nominationPoolsApi?.pendingRewards(address);
+
+        if (_unclaimedReward) {
+          const unclaimedReward = _unclaimedReward.toString();
+          const parsedUnclaimedReward = toUnit(parseFloat(unclaimedReward), networkMap[networkKey].decimals as number);
+
+          rewardList.push({
+            address: address,
+            chain: networkKey,
+            unclaimedReward: parsedUnclaimedReward.toString(),
+            name: networkMap[networkKey].chain,
+            state: APIItemState.READY,
+            type: StakingType.POOLED
+          });
+        }
+      }));
+    }));
+  } catch (e) {
+    console.error('Error fetching unclaimed reward for nomination pool', e);
+
+    return rewardList;
+  }
+
+  return rewardList;
+}
+
+export async function getStakingRewardData (addresses: string[], pooledAddress: string[], networkMap: Record<string, NetworkJson>, dotSamaApiMap: Record<string, ApiProps>): Promise<StakingRewardJson> {
+  const activeNetworks: string[] = [];
+
+  Object.keys(networkMap).forEach((key) => {
+    activeNetworks.push(key);
+  });
+
+  if (activeNetworks.length === 0) {
+    return {
+      ready: true,
+      details: []
+    } as StakingRewardJson;
+  }
+
+  const [nominationRewards, poolingRewards] = await Promise.all([
+    getAllSubsquidStaking(addresses, activeNetworks),
+    getNominationPoolReward(pooledAddress, networkMap, dotSamaApiMap)
+  ]);
+
+  const rewardList = [...nominationRewards, ...poolingRewards];
+
+  return {
+    ready: true,
+    details: rewardList
+  } as StakingRewardJson;
 }
 
 // function getDarwiniaStakingOnChain (parentApi: ApiProps, useAddresses: string[], networks: Record<string, NetworkJson>, chain: string, callback: (networkKey: string, rs: StakingItem) => void) {

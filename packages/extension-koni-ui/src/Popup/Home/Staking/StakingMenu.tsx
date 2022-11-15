@@ -3,6 +3,7 @@
 
 import { faMinus, faPlus } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { StakingType } from '@subwallet/extension-base/background/KoniTypes';
 import ArchiveTray from '@subwallet/extension-koni-ui/assets/ArchiveTray.svg';
 import ClockAfternoon from '@subwallet/extension-koni-ui/assets/ClockAfternoon.svg';
 import ClockAfternoonGreen from '@subwallet/extension-koni-ui/assets/ClockAfternoonGreen.svg';
@@ -32,6 +33,7 @@ interface Props extends ThemeProps {
   unbondingStake: string | undefined;
   showWithdrawalModal: () => void;
   showClaimRewardModal: () => void;
+  stakingType: StakingType;
 }
 
 const MANUAL_CLAIM_CHAINS = [
@@ -45,11 +47,12 @@ const MANUAL_COMPOUND_CHAINS = [
   'turingStaging'
 ];
 
-function StakingMenu ({ bondedAmount, className, networkKey, nextWithdrawal, nextWithdrawalAmount, redeemable, showClaimRewardModal, showMenu, showWithdrawalModal, toggleMenu, unbondingStake }: Props): React.ReactElement<Props> {
+function StakingMenu ({ bondedAmount, className, networkKey, nextWithdrawal, nextWithdrawalAmount, redeemable, showClaimRewardModal, showMenu, showWithdrawalModal, stakingType, toggleMenu, unbondingStake }: Props): React.ReactElement<Props> {
   const stakingMenuRef = useRef(null);
   const navigate = useContext(ActionContext);
   const networkJson = useGetNetworkJson(networkKey);
-  const showClaimButton = MANUAL_CLAIM_CHAINS.includes(networkKey);
+  const isNominationPool = stakingType === StakingType.POOLED;
+  const showClaimButton = MANUAL_CLAIM_CHAINS.includes(networkKey) || isNominationPool;
   const showCompoundButton = MANUAL_COMPOUND_CHAINS.includes(networkKey);
   const account = useSelector((state: RootState) => state.currentAccount.account);
 
@@ -109,6 +112,18 @@ function StakingMenu ({ bondedAmount, className, networkKey, nextWithdrawal, nex
     }
   }, [bondedAmount, showClaimRewardModal]);
 
+  const getMenuTopMargin = useCallback(() => {
+    if (isNominationPool) {
+      return '65px';
+    }
+
+    if (showClaimButton || showCompoundButton) {
+      return '200px';
+    }
+
+    return '160px';
+  }, [isNominationPool, showClaimButton, showCompoundButton]);
+
   return (
     <div className={className}>
       <div
@@ -126,50 +141,54 @@ function StakingMenu ({ bondedAmount, className, networkKey, nextWithdrawal, nex
           showMenu && <Menu
             className={'bonding-menu'}
             reference={stakingMenuRef}
-            style={{ marginTop: showClaimButton || showCompoundButton ? '200px' : '160px' }}
+            style={{ marginTop: `${getMenuTopMargin()}` }}
           >
-            <div
-              className={'bonding-menu-item'}
-              onClick={handleClickStakeMore}
-            >
-              <FontAwesomeIcon
-                className={'staking-menu-icon'}
-                icon={faPlus}
-              />
-              Stake more
-            </div>
+            {
+              !isNominationPool && <div>
+                <div
+                  className={'bonding-menu-item'}
+                  onClick={handleClickStakeMore}
+                >
+                  <FontAwesomeIcon
+                    className={'staking-menu-icon'}
+                    icon={faPlus}
+                  />
+                  Stake more
+                </div>
 
-            <div
-              className={`${parseFloat(bondedAmount) > 0 ? 'bonding-menu-item' : 'disabled-menu-item'}`}
-              onClick={handleUnstake}
-            >
-              <FontAwesomeIcon
-                className={'staking-menu-icon'}
-                icon={faMinus}
-              />
-              Unstake funds
-            </div>
+                <div
+                  className={`${parseFloat(bondedAmount) > 0 ? 'bonding-menu-item' : 'disabled-menu-item'}`}
+                  onClick={handleUnstake}
+                >
+                  <FontAwesomeIcon
+                    className={'staking-menu-icon'}
+                    icon={faMinus}
+                  />
+                  Unstake funds
+                </div>
 
-            <div
-              className={`${redeemable > 0 ? 'bonding-menu-item' : 'disabled-menu-item'}`}
-              onClick={handleClickWithdraw}
-            >
-              <img
-                data-for={`bonding-menu-tooltip-${networkKey}`}
-                data-tip={true}
-                height={18}
-                src={nextWithdrawal > 0 && parseFloat(unbondingStake as string) > 0 ? ClockAfternoonGreen : ClockAfternoon}
-                width={18}
-              />
-              Withdraw
-              {
-                unbondingStake && parseFloat(unbondingStake) !== 0 && <Tooltip
-                  place={'top'}
-                  text={getTooltipText()}
-                  trigger={`bonding-menu-tooltip-${networkKey}`}
-                />
-              }
-            </div>
+                <div
+                  className={`${redeemable > 0 ? 'bonding-menu-item' : 'disabled-menu-item'}`}
+                  onClick={handleClickWithdraw}
+                >
+                  <img
+                    data-for={`bonding-menu-tooltip-${networkKey}`}
+                    data-tip={true}
+                    height={18}
+                    src={nextWithdrawal > 0 && parseFloat(unbondingStake as string) > 0 ? ClockAfternoonGreen : ClockAfternoon}
+                    width={18}
+                  />
+                  Withdraw
+                  {
+                    unbondingStake && parseFloat(unbondingStake) !== 0 && <Tooltip
+                      place={'top'}
+                      text={getTooltipText()}
+                      trigger={`bonding-menu-tooltip-${networkKey}`}
+                    />
+                  }
+                </div>
+              </div>
+            }
 
             {
               showClaimButton && <div
@@ -293,7 +312,6 @@ export default React.memo(styled(StakingMenu)(({ theme }: Props) => `
   .bonding-menu {
     left: 5px;
     right: auto;
-    margin-top: 160px;
     width: 190px;
     border-radius: 8px;
   }

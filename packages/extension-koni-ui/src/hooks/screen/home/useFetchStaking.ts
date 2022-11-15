@@ -78,6 +78,7 @@ function groupStakingRewardItems (stakingRewardItems: StakingRewardItem[]) {
     let groupedLatestReward = 0;
     let groupedTotalReward = 0;
     let groupedTotalSlash = 0;
+    let groupedUnclaimedReward = 0;
 
     for (const stakingRewardItem of stakingRewardItems) {
       if (stakingRewardItem.type === type && stakingRewardItem.chain === chain) {
@@ -90,12 +91,14 @@ function groupStakingRewardItems (stakingRewardItems: StakingRewardItem[]) {
         groupedLatestReward += parseFloat(stakingRewardItem.latestReward as string);
         groupedTotalReward += parseFloat(stakingRewardItem.totalReward as string);
         groupedTotalSlash += parseFloat(stakingRewardItem.totalSlash as string);
+        groupedUnclaimedReward += parseFloat(stakingRewardItem.unclaimedReward as string);
       }
     }
 
     groupedStakingRewardItem.latestReward = groupedLatestReward.toString();
     groupedStakingRewardItem.totalReward = groupedTotalReward.toString();
     groupedStakingRewardItem.totalSlash = groupedTotalSlash.toString();
+    groupedStakingRewardItem.unclaimedReward = groupedUnclaimedReward.toString();
 
     groupedStakingRewardItems.push(groupedStakingRewardItem as StakingRewardItem);
   }

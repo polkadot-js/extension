@@ -129,21 +129,21 @@ export async function getAmplitudeBondingTxInfo (networkJson: NetworkJson, dotSa
   const parsedAmount = amount * (10 ** (networkJson.decimals as number));
   const binaryAmount = new BN(parsedAmount.toString());
 
-  const rawDelegatorState = (await apiPromise.api.query.parachainStaking.delegatorState(delegatorAddress)).toHuman() as Record<string, any> | null;
+  const rawDelegatorState = (await apiPromise.api.query.parachainStaking.delegatorState(delegatorAddress)).toHuman() as Record<string, string> | null;
 
-  const bondedValidators: string[] = [];
+  const bondedCollators: string[] = [];
 
   if (rawDelegatorState !== null) {
-    const validatorList = rawDelegatorState.delegations as Record<string, any>[];
-
-    for (const _validator of validatorList) {
-      bondedValidators.push(_validator.owner as string);
-    }
+    Object.entries(rawDelegatorState).forEach(([key, value]) => {
+      if (key === 'owner') {
+        bondedCollators.push(value);
+      }
+    });
   }
 
   let extrinsic;
 
-  if (!bondedValidators.includes(collatorInfo.address)) {
+  if (!bondedCollators.includes(collatorInfo.address)) {
     extrinsic = apiPromise.api.tx.parachainStaking.joinDelegators(collatorInfo.address, binaryAmount);
   } else {
     extrinsic = apiPromise.api.tx.parachainStaking.delegatorStakeMore(collatorInfo.address, binaryAmount);
@@ -225,19 +225,19 @@ export async function getAmplitudeBondingExtrinsic (delegatorAddress: string, ne
   const apiPromise = await dotSamaApi.isReady;
   const parsedAmount = amount * (10 ** (networkJson.decimals as number));
   const binaryAmount = new BN(parsedAmount.toString());
-  const rawDelegatorState = (await apiPromise.api.query.parachainStaking.delegatorState(delegatorAddress)).toHuman() as Record<string, any> | null;
+  const rawDelegatorState = (await apiPromise.api.query.parachainStaking.delegatorState(delegatorAddress)).toHuman() as Record<string, string> | null;
 
-  const bondedValidators: string[] = [];
+  const bondedCollators: string[] = [];
 
   if (rawDelegatorState !== null) {
-    const validatorList = rawDelegatorState.delegations as Record<string, any>[];
-
-    for (const _validator of validatorList) {
-      bondedValidators.push(_validator.owner as string);
-    }
+    Object.entries(rawDelegatorState).forEach(([key, value]) => {
+      if (key === 'owner') {
+        bondedCollators.push(value);
+      }
+    });
   }
 
-  if (!bondedValidators.includes(collatorInfo.address)) {
+  if (!bondedCollators.includes(collatorInfo.address)) {
     return apiPromise.api.tx.parachainStaking.joinDelegators(collatorInfo.address, binaryAmount);
   } else {
     return apiPromise.api.tx.parachainStaking.delegatorStakeMore(collatorInfo.address, binaryAmount);

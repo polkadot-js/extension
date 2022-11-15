@@ -71,7 +71,11 @@ export function stakingOnChainApi (addresses: string[], dotSamaAPIMap: Record<st
     const parentApi = await apiPromise.isReady;
     const useAddresses = apiPromise.isEthereum ? evmAddresses : substrateAddresses;
 
-    if (CHAIN_TYPES.astar.includes(chain)) {
+    if (CHAIN_TYPES.amplitude.includes(chain)) {
+      const unsub = await getAmplitudeStakingOnChain(parentApi, useAddresses, networks, chain, callback);
+
+      unsubList.push(unsub);
+    } else if (CHAIN_TYPES.astar.includes(chain)) {
       const unsub = await getAstarStakingOnChain(parentApi, useAddresses, networks, chain, callback);
 
       unsubList.push(unsub);
@@ -97,6 +101,78 @@ export function stakingOnChainApi (addresses: string[], dotSamaAPIMap: Record<st
       unsub && unsub();
     });
   };
+}
+
+function getAmplitudeStakingOnChain (parentApi: ApiProps, useAddresses: string[], networks: Record<string, NetworkJson>, chain: string, callback: (networkKey: string, rs: StakingItem) => void) {
+  return parentApi.api.query.parachainStaking.delegatorState.multi(useAddresses, async (ledgers: Codec[]) => {
+    if (ledgers) {
+      const _unstakingStates = await parentApi.api.query.parachainStaking.unstaking.multi(useAddresses);
+
+      for (let i = 0; i < ledgers.length; i++) {
+        const ledger = ledgers[i];
+        const _unstakingData = _unstakingStates[i].toHuman() as Record<string, string> | null;
+        const owner = reformatAddress(useAddresses[i], 42);
+        const _stakingData = ledger.toHuman() as Record<string, string> | null;
+
+        if (_stakingData !== null) {
+          let _activeBalance = _stakingData.amount;
+
+          _activeBalance = _activeBalance.replaceAll(',', '');
+
+          const activeBalance = new BN(_activeBalance);
+          let unstakingBalance = BN_ZERO;
+
+          if (_unstakingData !== null) {
+            Object.values(_unstakingData).forEach((_unstakingAmount) => {
+              const bnUnstakingAmount = new BN(_unstakingAmount.replaceAll(',', ''));
+
+              unstakingBalance = unstakingBalance.add(bnUnstakingAmount);
+            });
+          }
+
+          const totalBalance = activeBalance.add(unstakingBalance);
+
+          const formattedTotalBalance = parseFloat(totalBalance.toString());
+          const formattedActiveBalance = parseFloat(activeBalance.toString());
+          const formattedUnstakingBalance = parseFloat(unstakingBalance.toString());
+
+          const parsedTotalBalance = parseStakingBalance(formattedTotalBalance, chain, networks);
+          const parsedUnstakingBalance = parseStakingBalance(formattedUnstakingBalance, chain, networks);
+          const parsedActiveBalance = parseStakingBalance(formattedActiveBalance, chain, networks);
+
+          const stakingItem = {
+            name: networks[chain].chain,
+            chain: chain,
+            balance: parsedTotalBalance.toString(),
+            activeBalance: parsedActiveBalance.toString(),
+            unlockingBalance: parsedUnstakingBalance.toString(),
+            nativeToken: networks[chain].nativeToken,
+            unit: networks[chain].nativeToken,
+            state: APIItemState.READY,
+            type: StakingType.NOMINATED,
+            address: owner
+          } as StakingItem;
+
+          callback(chain, stakingItem);
+        } else {
+          const stakingItem = {
+            name: networks[chain].chain,
+            chain: chain,
+            balance: '0',
+            activeBalance: '0',
+            unlockingBalance: '0',
+            nativeToken: networks[chain].nativeToken,
+            unit: networks[chain].nativeToken,
+            state: APIItemState.READY,
+            type: StakingType.NOMINATED,
+            address: owner
+          } as StakingItem;
+
+          callback(chain, stakingItem);
+        }
+      }
+    }
+  });
 }
 
 function getParaStakingOnChain (parentApi: ApiProps, useAddresses: string[], networks: Record<string, NetworkJson>, chain: string, callback: (networkKey: string, rs: StakingItem) => void) {

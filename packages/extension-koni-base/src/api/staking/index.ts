@@ -79,11 +79,11 @@ export function stakingOnChainApi (addresses: string[], dotSamaAPIMap: Record<st
       const unsub = await getParaStakingOnChain(parentApi, useAddresses, networks, chain, callback);
 
       unsubList.push(unsub);
+    } else if (CHAIN_TYPES.relay.includes(chain)) {
+      const unsub = await getRelayStakingOnChain(parentApi, useAddresses, networks, chain, callback);
+
+      unsubList.push(unsub);
     }
-
-    const unsubRelay = await getRelayStakingOnChain(parentApi, useAddresses, networks, chain, callback);
-
-    unsubList.push(unsubRelay);
 
     if (['polkadot', 'kusama', 'westend'].includes(chain)) {
       const unsub = await getRelayPoolingOnchain(parentApi, useAddresses, networks, chain, callback);

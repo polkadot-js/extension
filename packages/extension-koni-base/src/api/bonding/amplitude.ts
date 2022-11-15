@@ -73,7 +73,7 @@ export async function getAmplitudeCollatorsInfo (networkKey: string, dotSamaApi:
   const _chainMinDelegation = apiProps.api.consts.parachainStaking.minDelegatorStake.toHuman() as string;
   const chainMinDelegation = parseRawNumber(_chainMinDelegation) / 10 ** decimals;
 
-  const rawDelegatorState = _delegatorState.toHuman() as Record<string, any> | null;
+  const rawDelegatorState = _delegatorState.toHuman() as Record<string, string> | null;
 
   const allCollators: ValidatorInfo[] = [];
 
@@ -101,11 +101,11 @@ export async function getAmplitudeCollatorsInfo (networkKey: string, dotSamaApi:
   const bondedCollators: string[] = [];
 
   if (rawDelegatorState !== null) {
-    const collatorList = rawDelegatorState.delegations as Record<string, any>[];
-
-    for (const _collator of collatorList) {
-      bondedCollators.push(_collator.owner as string);
-    }
+    Object.entries(rawDelegatorState).forEach(([key, value]) => {
+      if (key === 'owner') {
+        bondedCollators.push(value);
+      }
+    });
   }
 
   for (const collator of allCollators) {

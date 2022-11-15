@@ -10,11 +10,11 @@ export enum SUPPORTED_STAKING_CHAIN_NAMES {
 }
 
 export const SUBSQUID_ENDPOINTS: Record<string, string> = {
-  [SUPPORTED_STAKING_CHAIN_NAMES.kusama]: 'https://app.gc.subsquid.io/beta/kusama-explorer/v1/graphql',
-  [SUPPORTED_STAKING_CHAIN_NAMES.polkadot]: 'https://app.gc.subsquid.io/beta/polkadot-explorer/v1/graphql',
-  [SUPPORTED_STAKING_CHAIN_NAMES.astar]: 'https://app.gc.subsquid.io/beta/astar-explorer/v1/graphql',
-  [SUPPORTED_STAKING_CHAIN_NAMES.moonriver]: 'https://app.gc.subsquid.io/beta/moonriver-explorer/v1/graphql',
-  [SUPPORTED_STAKING_CHAIN_NAMES.moonbeam]: 'https://app.gc.subsquid.io/beta/moonbeam-explorer/v1/graphql'
+  [SUPPORTED_STAKING_CHAIN_NAMES.kusama]: 'https://squid.subsquid.io/kusama-explorer/graphql',
+  [SUPPORTED_STAKING_CHAIN_NAMES.polkadot]: 'https://squid.subsquid.io/polkadot-explorer/graphql',
+  [SUPPORTED_STAKING_CHAIN_NAMES.astar]: 'https://squid.subsquid.io/astar-explorer/graphql',
+  [SUPPORTED_STAKING_CHAIN_NAMES.moonriver]: 'https://squid.subsquid.io/moonriver-explorer/graphql',
+  [SUPPORTED_STAKING_CHAIN_NAMES.moonbeam]: 'https://squid.subsquid.io/moonbeam-explorer/graphql'
 };
 
 export const SUPPORTED_STAKING_CHAINS = [

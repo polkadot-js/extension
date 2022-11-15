@@ -72,8 +72,6 @@ const getSubsquidStaking = async (accounts: string[], chain: string): Promise<St
           const respData = resp.data.data as Record<string, any>;
           const rewardItem = respData.stakerById as StakingResponseItem;
 
-          console.log('got here', respData, chain);
-
           if (rewardItem) {
             const latestReward = rewardItem.rewards[0];
 
@@ -98,7 +96,6 @@ const getSubsquidStaking = async (accounts: string[], chain: string): Promise<St
         }
 
         if (stakingRewardItem.totalReward && parseFloat(stakingRewardItem.totalReward) > 0) {
-          console.log('stakingRewardItem', stakingRewardItem);
           result.push(stakingRewardItem);
         }
       }

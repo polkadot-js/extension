@@ -288,11 +288,7 @@ export class KoniSubscription {
       }
     });
 
-    console.log('begin this shit');
-
     const result = await getStakingRewardData(addresses, pooledAddresses, targetNetworkMap, this.state.getDotSamaApiMap());
-
-    console.log('got result', result);
 
     this.state.setStakingReward(result);
     this.logger.log('Set staking reward state done', result);

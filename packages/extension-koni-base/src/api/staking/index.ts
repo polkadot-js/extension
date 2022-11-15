@@ -399,8 +399,6 @@ async function getNominationPoolReward (addresses: string[], networkMap: Record<
     return rewardList;
   }
 
-  console.log('done pooling', rewardList);
-
   return rewardList;
 }
 
@@ -423,11 +421,7 @@ export async function getStakingRewardData (addresses: string[], pooledAddress: 
     getNominationPoolReward(pooledAddress, networkMap, dotSamaApiMap)
   ]);
 
-  console.log('done promise all');
-
   const rewardList = [...nominationRewards, ...poolingRewards];
-
-  console.log('rewardList', rewardList);
 
   return {
     ready: true,

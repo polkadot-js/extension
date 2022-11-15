@@ -132,7 +132,5 @@ export const getAllSubsquidStaking = async (accounts: string[], activeNetworks: 
     return rewardList;
   }
 
-  console.log('done squid', rewardList);
-
   return rewardList;
 };

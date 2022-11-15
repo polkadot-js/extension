@@ -74,6 +74,14 @@ export default class DatabaseService {
     return stakings;
   }
 
+  async getPooledStakings (addresses: string[], chainHashes?: string[]) {
+    const stakings = await this.stores.staking.getPooledStakings(addresses, chainHashes);
+
+    this.logger.log('Get Pooled Stakings: ', stakings);
+
+    return stakings;
+  }
+
   subscribeStaking (addresses: string[], chainHashes?: string[], callback?: (stakingItems: IStakingItem[]) => void) {
     this.stakingSubscription && this.stakingSubscription.unsubscribe();
 

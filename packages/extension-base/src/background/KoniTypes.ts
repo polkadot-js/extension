@@ -119,7 +119,8 @@ export interface StakingRewardItem {
 
   latestReward?: string,
   totalReward?: string,
-  totalSlash?: string
+  totalSlash?: string,
+  unclaimedReward?: string
 }
 export interface UnlockingStakeInfo {
   chain: string,
@@ -1393,6 +1394,7 @@ export interface StakeClaimRewardParams extends BaseRequestSign {
   address: string,
   networkKey: string,
   validatorAddress?: string,
+  stakingType: StakingType
 }
 
 export type RequestStakeClaimReward = PasswordRequestSign<StakeClaimRewardParams>;

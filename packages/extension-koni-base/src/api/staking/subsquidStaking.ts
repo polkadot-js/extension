@@ -1,7 +1,7 @@
 // Copyright 2019-2022 @subwallet/extension-koni authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { APIItemState, StakingRewardItem, StakingRewardJson, StakingType } from '@subwallet/extension-base/background/KoniTypes';
+import { APIItemState, StakingRewardItem, StakingType } from '@subwallet/extension-base/background/KoniTypes';
 import { PREDEFINED_NETWORKS } from '@subwallet/extension-koni-base/api/predefinedNetworks';
 import { SUBSQUID_ENDPOINTS, SUPPORTED_STAKING_CHAINS } from '@subwallet/extension-koni-base/api/staking/config';
 import { reformatAddress, toUnit } from '@subwallet/extension-koni-base/utils';
@@ -17,7 +17,7 @@ interface RewardResponseItem {
 interface StakingResponseItem {
   totalReward: string,
   totalSlash: string,
-  totalBond: string,
+  activeBond: string,
   rewards: RewardResponseItem[]
 }
 
@@ -25,9 +25,9 @@ const getSubsquidQuery = (account: string, chain: string) => {
   if (chain === 'moonbeam' || chain === 'moonriver' || chain === 'astar') {
     return `
     query MyQuery {
-      accountById(id: "${account}") {
+      stakerById(id: "${account}") {
         totalReward
-        totalBond
+        activeBond
         rewards(limit: 1, orderBy: blockNumber_DESC) {
           amount
         }
@@ -37,10 +37,10 @@ const getSubsquidQuery = (account: string, chain: string) => {
 
   return `
   query MyQuery {
-    accountById(id: "${account}") {
+    stakerById(id: "${account}") {
       totalReward
       totalSlash
-      totalBond
+      activeBond
       rewards(limit: 1, orderBy: blockNumber_DESC) {
         amount
       }
@@ -70,7 +70,7 @@ const getSubsquidStaking = async (accounts: string[], chain: string): Promise<St
         if (resp.status === 200) {
           // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
           const respData = resp.data.data as Record<string, any>;
-          const rewardItem = respData.accountById as StakingResponseItem;
+          const rewardItem = respData.stakerById as StakingResponseItem;
 
           if (rewardItem) {
             const latestReward = rewardItem.rewards[0];
@@ -109,7 +109,7 @@ const getSubsquidStaking = async (accounts: string[], chain: string): Promise<St
   }
 };
 
-export const getAllSubsquidStaking = async (accounts: string[], activeNetworks: string[]): Promise<StakingRewardJson> => {
+export const getAllSubsquidStaking = async (accounts: string[], activeNetworks: string[]): Promise<StakingRewardItem[]> => {
   let rewardList: StakingRewardItem[] = [];
 
   const filteredNetworks: string[] = [];
@@ -120,14 +120,17 @@ export const getAllSubsquidStaking = async (accounts: string[], activeNetworks: 
     }
   });
 
-  await Promise.all(filteredNetworks.map(async (network) => {
-    const rewardItems = await getSubsquidStaking(accounts, network);
+  try {
+    await Promise.all(filteredNetworks.map(async (network) => {
+      const rewardItems = await getSubsquidStaking(accounts, network);
 
-    rewardList = rewardList.concat(rewardItems);
-  }));
+      rewardList = rewardList.concat(rewardItems);
+    }));
+  } catch (e) {
+    console.error('Error fetching staking reward from SubSquid', e);
 
-  return {
-    ready: true,
-    details: rewardList
-  } as StakingRewardJson;
+    return rewardList;
+  }
+
+  return rewardList;
 };

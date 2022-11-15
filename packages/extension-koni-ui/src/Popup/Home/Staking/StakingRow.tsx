@@ -41,9 +41,10 @@ interface Props extends ThemeProps {
   setTargetValidator: (val: string) => void;
   setTargetNextWithdrawalAction: (val: string | undefined) => void;
   setTargetRedeemable: (val: number) => void;
+  setTargetStakingType: (val: StakingType) => void;
 }
 
-function StakingRow ({ activeStake, chainName, className, index, isCanSign, logo, networkKey, nextWithdrawal, nextWithdrawalAction, nextWithdrawalAmount, price, redeemable, reward, setActionNetworkKey, setShowClaimRewardModal, setShowCompoundStakeModal, setShowWithdrawalModal, setTargetNextWithdrawalAction, setTargetRedeemable, setTargetValidator, stakingType, targetValidator, totalStake, unbondingStake, unit }: Props): React.ReactElement<Props> {
+function StakingRow ({ activeStake, chainName, className, index, isCanSign, logo, networkKey, nextWithdrawal, nextWithdrawalAction, nextWithdrawalAmount, price, redeemable, reward, setActionNetworkKey, setShowClaimRewardModal, setShowCompoundStakeModal, setShowWithdrawalModal, setTargetNextWithdrawalAction, setTargetRedeemable, setTargetStakingType, setTargetValidator, stakingType, targetValidator, totalStake, unbondingStake, unit }: Props): React.ReactElement<Props> {
   const [showReward, setShowReward] = useState(false);
   const [showStakingMenu, setShowStakingMenu] = useState(false);
 
@@ -62,7 +63,8 @@ function StakingRow ({ activeStake, chainName, className, index, isCanSign, logo
   const handleShowClaimRewardModal = useCallback(() => {
     setActionNetworkKey(networkKey);
     setShowClaimRewardModal(true);
-  }, [networkKey, setActionNetworkKey, setShowClaimRewardModal]);
+    setTargetStakingType(stakingType);
+  }, [networkKey, setActionNetworkKey, setShowClaimRewardModal, setTargetStakingType, stakingType]);
 
   const handleShowCompoundStakeModal = useCallback(() => {
     setActionNetworkKey(networkKey);
@@ -73,12 +75,12 @@ function StakingRow ({ activeStake, chainName, className, index, isCanSign, logo
     setShowStakingMenu(!showStakingMenu);
   }, [showStakingMenu]);
 
-  const editBalance = (balance: string) => {
+  const editBalance = (balance: string, roundTo = 2) => {
     if (parseFloat(balance) === 0) {
       return <span className={'major-balance'}>{balance}</span>;
     }
 
-    if (parseFloat(balance) <= 0.0001) { // in case the balance is too small
+    if (parseFloat(balance) <= 0.00001) { // in case the balance is too small
       return <span className={'major-balance'}>0</span>;
     }
 
@@ -95,7 +97,7 @@ function StakingRow ({ activeStake, chainName, className, index, isCanSign, logo
       <span>
         <span className={'major-balance'}>{formatLocaleNumber(parseInt(number))}</span>
         {balance.includes('.') && '.'}
-        <span className={'decimal-balance'}>{decimal ? decimal.slice(0, 2) : ''}</span>
+        <span className={'decimal-balance'}>{decimal ? decimal.slice(0, roundTo) : ''}</span>
       </span>
     );
   };
@@ -158,7 +160,7 @@ function StakingRow ({ activeStake, chainName, className, index, isCanSign, logo
                   {stakingType.charAt(0).toUpperCase() + stakingType.slice(1)} balance
                 </div>
                 {
-                  isCanSign && stakingType !== StakingType.POOLED && <StakingMenu
+                  isCanSign && <StakingMenu
                     bondedAmount={activeStake as string}
                     networkKey={networkKey}
                     nextWithdrawal={nextWithdrawal}
@@ -168,6 +170,7 @@ function StakingRow ({ activeStake, chainName, className, index, isCanSign, logo
                     showMenu={showStakingMenu}
                     showStakeCompoundModal={handleShowCompoundStakeModal}
                     showWithdrawalModal={handleShowWithdrawalModal}
+                    stakingType={stakingType}
                     toggleMenu={handleToggleBondingMenu}
                     unbondingStake={unbondingStake}
                   />
@@ -214,29 +217,52 @@ function StakingRow ({ activeStake, chainName, className, index, isCanSign, logo
               </div>
             </div>
 
-            <div className={'reward-container'}>
-              <div className={'reward-title'}>Total reward</div>
-              <div className={'reward-amount'}>
-                <div>{editBalance(reward?.totalReward || '')}</div>
-                <div className={'chain-unit'}>{unit}</div>
-              </div>
-            </div>
+            {
+              stakingType === StakingType.NOMINATED
+                ? <div>
 
-            <div className={'reward-container'}>
-              <div className={'reward-title'}>Latest reward</div>
-              <div className={'reward-amount'}>
-                <div>{editBalance(reward?.latestReward || '')}</div>
-                <div className={'chain-unit'}>{unit}</div>
-              </div>
-            </div>
+                  {
+                    reward?.totalReward && <div className={'reward-container'}>
+                      <div className={'reward-title'}>Total reward</div>
+                      <div className={'reward-amount'}>
+                        <div>{editBalance(reward?.totalReward || '', 9)}</div>
+                        <div className={'chain-unit'}>{unit}</div>
+                      </div>
+                    </div>
+                  }
 
-            <div className={'reward-container'}>
-              <div className={'reward-title'}>Total slash</div>
-              <div className={'reward-amount'}>
-                <div>{editBalance(reward?.totalSlash || '')}</div>
-                <div className={'chain-unit'}>{unit}</div>
-              </div>
-            </div>
+                  {
+                    reward?.latestReward && <div className={'reward-container'}>
+                      <div className={'reward-title'}>Latest reward</div>
+                      <div className={'reward-amount'}>
+                        <div>{editBalance(reward?.latestReward || '', 9)}</div>
+                        <div className={'chain-unit'}>{unit}</div>
+                      </div>
+                    </div>
+                  }
+
+                  {
+                    reward?.totalSlash && <div className={'reward-container'}>
+                      <div className={'reward-title'}>Total slash</div>
+                      <div className={'reward-amount'}>
+                        <div>{editBalance(reward?.totalSlash || '', 9)}</div>
+                        <div className={'chain-unit'}>{unit}</div>
+                      </div>
+                    </div>
+                  }
+                </div>
+                : <div>
+                  {
+                    reward?.unclaimedReward && <div className={'reward-container'}>
+                      <div className={'reward-title'}>Unclaimed reward</div>
+                      <div className={'reward-amount'}>
+                        <div>{editBalance(reward?.unclaimedReward || '', 9)}</div>
+                        <div className={'chain-unit'}>{unit}</div>
+                      </div>
+                    </div>
+                  }
+                </div>
+            }
           </div>
         </div>
       }

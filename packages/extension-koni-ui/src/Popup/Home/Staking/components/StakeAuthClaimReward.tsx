@@ -1,7 +1,7 @@
 // Copyright 2019-2022 @subwallet/extension-koni authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { StakeClaimRewardParams } from '@subwallet/extension-base/background/KoniTypes';
+import { StakeClaimRewardParams, StakingType } from '@subwallet/extension-base/background/KoniTypes';
 import FeeValue from '@subwallet/extension-koni-ui/components/Balance/FeeValue';
 import InputAddress from '@subwallet/extension-koni-ui/components/InputAddress';
 import Modal from '@subwallet/extension-koni-ui/components/Modal';
@@ -24,9 +24,10 @@ interface Props extends ThemeProps {
   hideModal: () => void;
   address: string;
   networkKey: string;
+  stakingType: StakingType;
 }
 
-function StakeAuthClaimReward ({ address, className, hideModal, networkKey }: Props): React.ReactElement<Props> {
+function StakeAuthClaimReward ({ address, className, hideModal, networkKey, stakingType }: Props): React.ReactElement<Props> {
   const networkJson = useGetNetworkJson(networkKey);
   const { t } = useTranslation();
 
@@ -37,8 +38,9 @@ function StakeAuthClaimReward ({ address, className, hideModal, networkKey }: Pr
 
   const params = useMemo((): StakeClaimRewardParams => ({
     address: address,
-    networkKey: networkKey
-  }), [address, networkKey]);
+    networkKey: networkKey,
+    stakingType
+  }), [stakingType, address, networkKey]);
 
   const [isTxReady, setIsTxReady] = useState(false);
 
@@ -82,7 +84,8 @@ function StakeAuthClaimReward ({ address, className, hideModal, networkKey }: Pr
   useEffect(() => {
     getStakeClaimRewardTxInfo({
       address,
-      networkKey
+      networkKey,
+      stakingType
     })
       .then((resp) => {
         setIsTxReady(true);
@@ -96,7 +99,7 @@ function StakeAuthClaimReward ({ address, className, hideModal, networkKey }: Pr
       setBalanceError(false);
       setFee('');
     };
-  }, [address, networkKey]);
+  }, [stakingType, address, networkKey]);
 
   return (
     <div className={className}>

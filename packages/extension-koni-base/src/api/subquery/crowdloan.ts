@@ -62,9 +62,11 @@ export const fetchDotSamaCrowdloan = async () => {
 
   const [polkadotCrowdloan, kusamaCrowdloan] = await Promise.all([
     CrowdloanClientMap.polkadotCrowdloan.query<DotSamaCrowdloan, DotSamaCrowdloanVariables>({
+      // @ts-ignore
       query: DOTSAMA_CROWDLOAN_QUERY
     }),
     CrowdloanClientMap.kusamaCrowdloan.query<DotSamaCrowdloan, DotSamaCrowdloanVariables>({
+      // @ts-ignore
       query: DOTSAMA_CROWDLOAN_QUERY
     })
   ]);

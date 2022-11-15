@@ -10,6 +10,7 @@ import { categoryAddresses, reformatAddress, toUnit } from '@subwallet/extension
 
 import { Codec } from '@polkadot/types/types';
 import { BN, BN_ZERO } from '@polkadot/util';
+import { isEthereumAddress } from '@polkadot/util-crypto';
 
 interface LedgerData {
   active: string,
@@ -355,40 +356,55 @@ function getAstarStakingOnChain (parentApi: ApiProps, useAddresses: string[], ne
 }
 
 async function getNominationPoolReward (addresses: string[], networkMap: Record<string, NetworkJson>, dotSamaApiMap: Record<string, ApiProps>): Promise<StakingRewardItem[]> {
-  const activeNetworks: string[] = [];
+  const targetNetworks: string[] = [];
+  const validAddresses: string[] = [];
 
   Object.keys(networkMap).forEach((key) => {
-    activeNetworks.push(key);
+    targetNetworks.push(key);
+  });
+
+  addresses.forEach((address) => {
+    if (!isEthereumAddress(address)) {
+      validAddresses.push(address);
+    }
   });
 
   const rewardList: StakingRewardItem[] = [];
 
-  await Promise.all(activeNetworks.map(async (networkKey) => {
-    const apiProps = await dotSamaApiMap[networkKey].isReady;
+  try {
+    await Promise.all(targetNetworks.map(async (networkKey) => {
+      const apiProps = await dotSamaApiMap[networkKey].isReady;
 
-    await Promise.all(addresses.map(async (address) => {
-      const _unclaimedReward = await apiProps.api.call?.nominationPoolsApi?.pendingRewards(address);
+      await Promise.all(validAddresses.map(async (address) => {
+        const _unclaimedReward = await apiProps.api.call?.nominationPoolsApi?.pendingRewards(address);
 
-      if (_unclaimedReward) {
-        const unclaimedReward = _unclaimedReward.toString();
-        const parsedUnclaimedReward = toUnit(parseFloat(unclaimedReward), networkMap[networkKey].decimals as number);
+        if (_unclaimedReward) {
+          const unclaimedReward = _unclaimedReward.toString();
+          const parsedUnclaimedReward = toUnit(parseFloat(unclaimedReward), networkMap[networkKey].decimals as number);
 
-        rewardList.push({
-          address: address,
-          chain: networkKey,
-          unclaimedReward: parsedUnclaimedReward.toString(),
-          name: networkMap[networkKey].chain,
-          state: APIItemState.READY,
-          type: StakingType.POOLED
-        });
-      }
+          rewardList.push({
+            address: address,
+            chain: networkKey,
+            unclaimedReward: parsedUnclaimedReward.toString(),
+            name: networkMap[networkKey].chain,
+            state: APIItemState.READY,
+            type: StakingType.POOLED
+          });
+        }
+      }));
     }));
-  }));
+  } catch (e) {
+    console.error('Error fetching unclaimed reward for nomination pool', e);
+
+    return rewardList;
+  }
+
+  console.log('done pooling', rewardList);
 
   return rewardList;
 }
 
-export async function getStakingRewardData (addresses: string[], networkMap: Record<string, NetworkJson>, dotSamaApiMap: Record<string, ApiProps>): Promise<StakingRewardJson> {
+export async function getStakingRewardData (addresses: string[], pooledAddress: string[], networkMap: Record<string, NetworkJson>, dotSamaApiMap: Record<string, ApiProps>): Promise<StakingRewardJson> {
   const activeNetworks: string[] = [];
 
   Object.keys(networkMap).forEach((key) => {
@@ -404,10 +420,14 @@ export async function getStakingRewardData (addresses: string[], networkMap: Rec
 
   const [nominationRewards, poolingRewards] = await Promise.all([
     getAllSubsquidStaking(addresses, activeNetworks),
-    getNominationPoolReward(addresses, networkMap, dotSamaApiMap)
+    getNominationPoolReward(pooledAddress, networkMap, dotSamaApiMap)
   ]);
 
+  console.log('done promise all');
+
   const rewardList = [...nominationRewards, ...poolingRewards];
+
+  console.log('rewardList', rewardList);
 
   return {
     ready: true,

@@ -120,11 +120,19 @@ export const getAllSubsquidStaking = async (accounts: string[], activeNetworks: 
     }
   });
 
-  await Promise.all(filteredNetworks.map(async (network) => {
-    const rewardItems = await getSubsquidStaking(accounts, network);
+  try {
+    await Promise.all(filteredNetworks.map(async (network) => {
+      const rewardItems = await getSubsquidStaking(accounts, network);
 
-    rewardList = rewardList.concat(rewardItems);
-  }));
+      rewardList = rewardList.concat(rewardItems);
+    }));
+  } catch (e) {
+    console.error('Error fetching staking reward from SubSquid', e);
+
+    return rewardList;
+  }
+
+  console.log('done squid', rewardList);
 
   return rewardList;
 };

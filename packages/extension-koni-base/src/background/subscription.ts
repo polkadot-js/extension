@@ -269,6 +269,16 @@ export class KoniSubscription {
       return;
     }
 
+    const pooledStakingItems = await this.state.getPooledStakingRecordsByAddress(addresses);
+
+    const pooledAddresses: string[] = [];
+
+    pooledStakingItems.forEach((pooledItem) => {
+      if (!pooledAddresses.includes(pooledItem.address)) {
+        pooledAddresses.push(pooledItem.address);
+      }
+    });
+
     const networkMap = this.state.getNetworkMap();
     const targetNetworkMap: Record<string, NetworkJson> = {};
 
@@ -278,7 +288,11 @@ export class KoniSubscription {
       }
     });
 
-    const result = await getStakingRewardData(addresses, targetNetworkMap, this.state.getDotSamaApiMap());
+    console.log('begin this shit');
+
+    const result = await getStakingRewardData(addresses, pooledAddresses, targetNetworkMap, this.state.getDotSamaApiMap());
+
+    console.log('got result', result);
 
     this.state.setStakingReward(result);
     this.logger.log('Set staking reward state done', result);

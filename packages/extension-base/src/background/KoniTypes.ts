@@ -1271,8 +1271,8 @@ export interface RequestQrSignSubstrate {
   address: string;
   data: string;
   savePass: boolean;
+  networkKey: string;
   password?: string;
-  transactionVersion?: number;
 }
 
 export interface ResponseQrSignSubstrate {

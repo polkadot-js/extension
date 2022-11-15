@@ -411,7 +411,8 @@ export function ScannerContextProvider ({ children }: ScannerContextProviderProp
             address: senderAddress,
             data: signable,
             savePass: savePass,
-            password: password
+            password: password,
+            networkKey: senderNetwork.key
           });
 
           return hexStripPrefix(signature);

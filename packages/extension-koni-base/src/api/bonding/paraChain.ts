@@ -397,7 +397,7 @@ export async function getParaUnbondingExtrinsic (dotSamaApi: ApiProps, amount: n
   }
 }
 
-export async function getParaUnlockingInfo (dotSamaApi: ApiProps, address: string, networkKey: string) {
+async function getParaUnlockingInfo (dotSamaApi: ApiProps, address: string, networkKey: string) {
   const apiPromise = await dotSamaApi.isReady;
   const allRequests: Record<string, Record<string, any>> = {};
   const collatorList: string[] = [];

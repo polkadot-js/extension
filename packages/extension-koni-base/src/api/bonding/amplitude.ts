@@ -1,7 +1,8 @@
 // Copyright 2019-2022 @subwallet/extension-koni authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { ApiProps, BasicTxInfo, ChainBondingBasics, DelegationItem, NetworkJson, ValidatorInfo } from '@subwallet/extension-base/background/KoniTypes';
+import { ApiProps, BasicTxInfo, ChainBondingBasics, DelegationItem, NetworkJson, StakingType, UnlockingStakeInfo, ValidatorInfo } from '@subwallet/extension-base/background/KoniTypes';
+import { ERA_LENGTH_MAP } from '@subwallet/extension-koni-base/api/bonding/utils';
 import { getFreeBalance } from '@subwallet/extension-koni-base/api/dotsama/balance';
 import { parseNumberToDisplay, parseRawNumber } from '@subwallet/extension-koni-base/utils';
 import Web3 from 'web3';
@@ -284,4 +285,66 @@ export async function getAmplitudeDelegationInfo (dotSamaApi: ApiProps, address:
   }
 
   return delegationsList;
+}
+
+async function getAmplitudeUnlockingInfo (dotSamaApi: ApiProps, address: string, networkKey: string) {
+  const apiProps = await dotSamaApi.isReady;
+
+  const [_unstakingInfo, _stakingInfo, _currentBlockInfo] = await Promise.all([
+    apiProps.api.query.parachainStaking.unstaking(address),
+    apiProps.api.query.parachainStaking.delegatorState(address),
+    apiProps.api.rpc.chain.getHeader()
+  ]);
+
+  const _blockPerRound = apiProps.api.consts.parachainStaking.defaultBlocksPerRound.toHuman() as string;
+  const blockPerRound = parseFloat(_blockPerRound);
+
+  const unstakingInfo = _unstakingInfo.toHuman() as Record<string, string> | null;
+  const stakingInfo = _stakingInfo.toHuman() as Record<string, string>;
+  const currentBlockInfo = _currentBlockInfo.toHuman() as Record<string, any>;
+  const currentBlock = parseRawNumber(currentBlockInfo.number as string);
+
+  if (unstakingInfo === null) {
+    return {
+      nextWithdrawal: 0,
+      redeemable: 0,
+      nextWithdrawalAmount: 0
+    };
+  }
+
+  const _nextWithdrawalAmount = Object.values(unstakingInfo)[0].replaceAll(',', '');
+  const _nextWithdrawalBlock = Object.keys(unstakingInfo)[0].replaceAll(',', '');
+
+  const nextWithdrawalAmount = parseFloat(_nextWithdrawalAmount);
+  const nextWithdrawalBlock = parseFloat(_nextWithdrawalBlock);
+
+  const blockDuration = (ERA_LENGTH_MAP[networkKey] || ERA_LENGTH_MAP.default) / blockPerRound;
+
+  const nextWithdrawal = (nextWithdrawalBlock - currentBlock) * blockDuration;
+  const validatorAddress = stakingInfo.owner;
+
+  return {
+    nextWithdrawal: nextWithdrawal > 0 ? nextWithdrawal : 0,
+    redeemable: nextWithdrawal <= 0 ? nextWithdrawalAmount : 0,
+    nextWithdrawalAmount,
+    validatorAddress
+  };
+}
+
+export async function handleAmplitudeUnlockingInfo (dotSamaApi: ApiProps, networkJson: NetworkJson, networkKey: string, address: string, type: StakingType) {
+  const { nextWithdrawal, nextWithdrawalAmount, redeemable, validatorAddress } = await getAmplitudeUnlockingInfo(dotSamaApi, address, networkKey);
+
+  const parsedRedeemable = redeemable / (10 ** (networkJson.decimals as number));
+  const parsedNextWithdrawalAmount = nextWithdrawalAmount / (10 ** (networkJson.decimals as number));
+
+  return {
+    address,
+    chain: networkKey,
+    type,
+
+    nextWithdrawal,
+    redeemable: parsedRedeemable,
+    nextWithdrawalAmount: parsedNextWithdrawalAmount,
+    validatorAddress
+  } as UnlockingStakeInfo;
 }

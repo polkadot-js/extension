@@ -84,7 +84,7 @@ export default React.memo(styled(Tooltip)(({ theme }: Props) => `
   }
 
   &.__react_component_tooltip.place-top:before {
-    border-top: 8px solid #2D365C;
+    // border-top: 8px solid #2D365C;
   }
 
   &.__react_component_tooltip.place-right:before {

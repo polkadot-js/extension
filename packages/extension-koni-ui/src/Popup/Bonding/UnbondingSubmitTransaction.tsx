@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { DelegationItem } from '@subwallet/extension-base/background/KoniTypes';
+import { CHAIN_TYPES } from '@subwallet/extension-koni-base/api/bonding';
 import { ActionContext } from '@subwallet/extension-koni-ui/components';
 import Button from '@subwallet/extension-koni-ui/components/Button';
 import InputAddress from '@subwallet/extension-koni-ui/components/InputAddress';
@@ -12,8 +13,6 @@ import useToast from '@subwallet/extension-koni-ui/hooks/useToast';
 import useTranslation from '@subwallet/extension-koni-ui/hooks/useTranslation';
 import { getStakeDelegationInfo, getUnbondingTxInfo } from '@subwallet/extension-koni-ui/messaging';
 import Header from '@subwallet/extension-koni-ui/partials/Header';
-// @ts-ignore
-import { CHAIN_TYPE_MAP } from '@subwallet/extension-koni-ui/Popup/Bonding/utils';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import React, { useCallback, useContext, useEffect, useState } from 'react';
@@ -74,7 +73,7 @@ function UnbondingSubmitTransaction ({ className }: Props): React.ReactElement<P
   const [minBond, setMinBond] = useState<string>('0');
 
   useEffect(() => {
-    if (CHAIN_TYPE_MAP.astar.includes(selectedNetwork) || CHAIN_TYPE_MAP.para.includes(selectedNetwork)) {
+    if (CHAIN_TYPES.astar.includes(selectedNetwork) || CHAIN_TYPES.para.includes(selectedNetwork) || CHAIN_TYPES.amplitude.includes(selectedNetwork)) {
       getStakeDelegationInfo({
         address: account?.address as string,
         networkKey: selectedNetwork
@@ -275,9 +274,9 @@ function UnbondingSubmitTransaction ({ className }: Props): React.ReactElement<P
   // }, [bondedAmount, networkJson.decimals, nominatedAmount, delegations]);
 
   const getDropdownTitle = useCallback(() => {
-    if (CHAIN_TYPE_MAP.astar.includes(unbondingParams.selectedNetwork as string)) {
+    if (CHAIN_TYPES.astar.includes(unbondingParams.selectedNetwork as string)) {
       return 'Select a dApp';
-    } else if (CHAIN_TYPE_MAP.para.includes(unbondingParams.selectedNetwork as string)) {
+    } else if (CHAIN_TYPES.para.includes(unbondingParams.selectedNetwork as string)) {
       return 'Select a collator';
     }
 

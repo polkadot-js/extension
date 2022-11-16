@@ -4,6 +4,7 @@
 import { faCircleCheck, faCircleExclamation } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { ValidatorInfo } from '@subwallet/extension-base/background/KoniTypes';
+import { CHAIN_TYPES } from '@subwallet/extension-koni-base/api/bonding';
 import { ActionContext } from '@subwallet/extension-koni-ui/components';
 import Button from '@subwallet/extension-koni-ui/components/Button';
 import Identicon from '@subwallet/extension-koni-ui/components/Identicon';
@@ -18,7 +19,7 @@ import useGetNetworkJson from '@subwallet/extension-koni-ui/hooks/screen/home/us
 import useToast from '@subwallet/extension-koni-ui/hooks/useToast';
 import { getBondingTxInfo } from '@subwallet/extension-koni-ui/messaging';
 import Header from '@subwallet/extension-koni-ui/partials/Header';
-import { BOND_DURATION_OPTIONS, CHAIN_TYPE_MAP, getStakeUnit, parseBalanceString } from '@subwallet/extension-koni-ui/Popup/Bonding/utils';
+import { BOND_DURATION_OPTIONS, getStakeUnit, parseBalanceString } from '@subwallet/extension-koni-ui/Popup/Bonding/utils';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { toShort } from '@subwallet/extension-koni-ui/util';
@@ -403,9 +404,9 @@ function BondingSubmitTransaction ({ className }: Props): React.ReactElement<Pro
   }, [getMinBondTooltipText, hasOwnStake, isCurrentlyBonded, isMaxCommission, isOversubscribed, isSufficientFund, networkJson.nativeToken, selectedNetwork, unit, validatorInfo.commission, validatorInfo.minBond, validatorInfo.nominatorCount, validatorInfo.ownStake, validatorInfo.totalStake]);
 
   const getSubHeaderTitle = useCallback(() => {
-    if (CHAIN_TYPE_MAP.astar.includes(bondingParams.selectedNetwork as string)) {
+    if (CHAIN_TYPES.astar.includes(bondingParams.selectedNetwork as string)) {
       return 'Selected dApp';
-    } else if (CHAIN_TYPE_MAP.para.includes(bondingParams.selectedNetwork as string)) {
+    } else if (CHAIN_TYPES.para.includes(bondingParams.selectedNetwork as string)) {
       return 'Selected Collator';
     }
 

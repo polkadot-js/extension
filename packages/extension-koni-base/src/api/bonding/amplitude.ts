@@ -1,14 +1,7 @@
 // Copyright 2019-2022 @subwallet/extension-koni authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import {
-  ApiProps,
-  BasicTxInfo,
-  ChainBondingBasics,
-  DelegationItem,
-  NetworkJson,
-  ValidatorInfo
-} from '@subwallet/extension-base/background/KoniTypes';
+import { ApiProps, BasicTxInfo, ChainBondingBasics, DelegationItem, NetworkJson, ValidatorInfo } from '@subwallet/extension-base/background/KoniTypes';
 import { getFreeBalance } from '@subwallet/extension-koni-base/api/dotsama/balance';
 import { parseNumberToDisplay, parseRawNumber } from '@subwallet/extension-koni-base/utils';
 import Web3 from 'web3';
@@ -263,23 +256,32 @@ export async function getAmplitudeUnbondingExtrinsic (dotSamaApi: ApiProps, amou
   }
 }
 
-export async function getAmplitudeDelegationInfo (dotSamaApi: ApiProps, address: string, networkKey: string) {
-  const apiPromise = await dotSamaApi.isReady;
+export async function getAmplitudeDelegationInfo (dotSamaApi: ApiProps, address: string) {
+  const apiProps = await dotSamaApi.isReady;
   const delegationsList: DelegationItem[] = [];
 
+  const _chainMinDelegation = apiProps.api.consts.parachainStaking.minDelegatorStake.toHuman() as string;
+  const chainMinDelegation = _chainMinDelegation.replaceAll(',', '');
+
   const [_delegatorState, _unstakingInfo] = await Promise.all([
-    apiPromise.api.query.parachainStaking.delegatorState(address),
-    apiPromise.api.query.parachainStaking.unstaking(address)
+    apiProps.api.query.parachainStaking.delegatorState(address),
+    apiProps.api.query.parachainStaking.unstaking(address)
   ]);
 
   const delegationState = _delegatorState.toHuman() as Record<string, string> | null;
   const unstakingInfo = _unstakingInfo.toHuman() as Record<string, string> | null;
 
   if (delegationState !== null) {
-    Object.entries(delegationState).forEach(([key, value]) => {
-      if (key === 'owner') {
-        delegationsList.push(value);
-      }
+    const owner = delegationState.owner;
+    const activeStake = parseRawNumber(delegationState.amount);
+
+    delegationsList.push({
+      owner,
+      amount: activeStake.toString(),
+      minBond: chainMinDelegation,
+      hasScheduledRequest: unstakingInfo !== null
     });
   }
+
+  return delegationsList;
 }

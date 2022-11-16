@@ -32,7 +32,7 @@ export const sendExtrinsic = async ({ apiProps, callback, extrinsic, txState, up
         .filter(({ event: { section } }) => section === 'system')
         .forEach(({ event: { method, data: [error] } }): void => {
           txState.extrinsicHash = extrinsic.hash.toHex();
-          callback(txState);
+          // callback(txState);
 
           if (method === 'ExtrinsicFailed') {
             txState.status = false;

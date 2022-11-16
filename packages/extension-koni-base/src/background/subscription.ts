@@ -6,7 +6,7 @@ import { ApiProps, CustomToken, NetworkJson, NftTransferExtra, StakingType, Unlo
 import { getUnlockingInfo } from '@subwallet/extension-koni-base/api/bonding';
 import { subscribeBalance } from '@subwallet/extension-koni-base/api/dotsama/balance';
 import { subscribeCrowdloan } from '@subwallet/extension-koni-base/api/dotsama/crowdloan';
-import { getStakingRewardData, stakingOnChainApi } from '@subwallet/extension-koni-base/api/staking';
+import { getNominationStakingRewardData, getPoolingStakingRewardData, stakingOnChainApi } from '@subwallet/extension-koni-base/api/staking';
 import { nftHandler } from '@subwallet/extension-koni-base/background/handlers';
 import { Subscription } from 'rxjs';
 import Web3 from 'web3';
@@ -269,6 +269,28 @@ export class KoniSubscription {
       return;
     }
 
+    const networkMap = this.state.getNetworkMap();
+    const targetNetworkMap: Record<string, NetworkJson> = {};
+
+    Object.entries(networkMap).forEach(([key, network]) => {
+      if (network.active && network.getStakingOnChain) {
+        targetNetworkMap[key] = network;
+      }
+    });
+
+    const result = await getNominationStakingRewardData(addresses, targetNetworkMap);
+
+    this.state.updateStakingReward(result);
+    this.logger.log('Set staking reward state done', result);
+  }
+
+  async subscribeNominationPoolReward (address: string) {
+    const addresses = await this.state.getDecodedAddresses(address);
+
+    if (!addresses.length) {
+      return;
+    }
+
     const pooledStakingItems = await this.state.getPooledStakingRecordsByAddress(addresses);
 
     const pooledAddresses: string[] = [];
@@ -279,6 +301,10 @@ export class KoniSubscription {
       }
     });
 
+    if (pooledAddresses.length === 0) {
+      return;
+    }
+
     const networkMap = this.state.getNetworkMap();
     const targetNetworkMap: Record<string, NetworkJson> = {};
 
@@ -288,10 +314,10 @@ export class KoniSubscription {
       }
     });
 
-    const result = await getStakingRewardData(addresses, pooledAddresses, targetNetworkMap, this.state.getDotSamaApiMap());
+    const result = await getPoolingStakingRewardData(pooledAddresses, targetNetworkMap, this.state.getDotSamaApiMap());
 
-    this.state.setStakingReward(result);
-    this.logger.log('Set staking reward state done', result);
+    this.state.updateStakingReward(result);
+    this.logger.log('Set pooling staking reward state done', result);
   }
 
   async subscribeStakeUnlockingInfo (address: string, networkMap: Record<string, NetworkJson>, dotSamaApiMap: Record<string, ApiProps>) {

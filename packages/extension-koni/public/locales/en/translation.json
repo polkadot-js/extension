@@ -452,5 +452,9 @@
   "Address QR  Signer": "",
   "Address Readonly Account": "",
   "Import By QR Code": "",
-  "You are using readonly account.": ""
+  "You are using readonly account.": "",
+  "No results found. Please change your search criteria and try again.": "",
+  "This dApp requires an EVM account. Please create, import, or restore a EVM account and retry": "",
+  "This dApp requires a Substrate account. Please create, import, or restore a Substrate account and retry": "",
+  "The account you are using is read-only, you cannot send assets with it": ""
 }

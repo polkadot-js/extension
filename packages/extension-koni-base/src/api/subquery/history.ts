@@ -76,8 +76,8 @@ export const fetchDotSamaHistory = (address: string, networkMap: Record<string, 
       const formattedAddress = reformatAddress(address, networkInfo.ss58Format, networkInfo.isEthereum);
 
       // eslint-disable-next-line @typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-member-access
-      // @ts-ignore
       getApolloClient(networkKey).query<DotSamaHistory, DotSamaHistoryVariables>({
+        // @ts-ignore
         query: DOTSAMA_HISTORY_QUERY,
         variables: {
           last: 100,

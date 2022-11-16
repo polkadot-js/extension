@@ -1,11 +1,11 @@
 // Copyright 2019-2022 @subwallet/extension-koni authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { ApiMap, ApiProps, CustomToken, NETWORK_STATUS, NetworkJson, NftTransferExtra, ServiceInfo, StakingRewardJson } from '@subwallet/extension-base/background/KoniTypes';
+import { ApiMap, ApiProps, CustomToken, NETWORK_STATUS, NetworkJson, NftTransferExtra, ServiceInfo } from '@subwallet/extension-base/background/KoniTypes';
 import { getTokenPrice } from '@subwallet/extension-koni-base/api/coingecko';
 import { fetchDotSamaHistory } from '@subwallet/extension-koni-base/api/subquery/history';
 import { KoniSubscription } from '@subwallet/extension-koni-base/background/subscription';
-import { ALL_ACCOUNT_KEY, CRON_AUTO_RECOVER_DOTSAMA_INTERVAL, CRON_GET_API_MAP_STATUS, CRON_REFRESH_HISTORY_INTERVAL, CRON_REFRESH_NFT_INTERVAL, CRON_REFRESH_PRICE_INTERVAL, CRON_REFRESH_STAKE_UNLOCKING_INFO, CRON_REFRESH_STAKING_REWARD_INTERVAL } from '@subwallet/extension-koni-base/constants';
+import { ALL_ACCOUNT_KEY, CRON_AUTO_RECOVER_DOTSAMA_INTERVAL, CRON_GET_API_MAP_STATUS, CRON_REFRESH_HISTORY_INTERVAL, CRON_REFRESH_NFT_INTERVAL, CRON_REFRESH_POOLING_STAKING_REWARD_INTERVAL, CRON_REFRESH_PRICE_INTERVAL, CRON_REFRESH_STAKE_UNLOCKING_INFO, CRON_REFRESH_STAKING_REWARD_INTERVAL } from '@subwallet/extension-koni-base/constants';
 import { Subject, Subscription } from 'rxjs';
 
 import { logger as createLogger } from '@polkadot/util';
@@ -84,6 +84,7 @@ export class KoniCron {
         this.updateApiMapStatus();
         this.refreshNft(currentAccountInfo.address, this.state.getApiMap(), this.state.getActiveNftContracts(), this.state.getActiveContractSupportedNetworks());
         this.refreshStakingReward(currentAccountInfo.address);
+        this.refreshPoolingStakingReward(currentAccountInfo.address);
         this.resetHistory(currentAccountInfo.address).then(() => {
           this.refreshHistory(currentAccountInfo.address, this.state.getNetworkMap());
         }).catch((err) => this.logger.warn(err));
@@ -111,6 +112,7 @@ export class KoniCron {
         this.addCron('checkStatusApiMap', this.updateApiMapStatus, CRON_GET_API_MAP_STATUS);
         this.addCron('recoverApiMap', this.recoverApiMap, CRON_AUTO_RECOVER_DOTSAMA_INTERVAL, false);
         this.addCron('refreshStakingReward', this.refreshStakingReward(currentAccountInfo.address), CRON_REFRESH_STAKING_REWARD_INTERVAL);
+        this.addCron('refreshPoolingStakingReward', this.refreshPoolingStakingReward(currentAccountInfo.address), CRON_REFRESH_POOLING_STAKING_REWARD_INTERVAL);
         this.addCron('refreshStakeUnlockingInfo', this.refreshStakeUnlockingInfo(currentAccountInfo.address, this.state.getNetworkMap(), this.state.getDotSamaApiMap()), CRON_REFRESH_STAKE_UNLOCKING_INFO);
 
         this.resetHistory(currentAccountInfo.address).then(() => {
@@ -145,6 +147,7 @@ export class KoniCron {
 
         this.removeCron('refreshStakeUnlockingInfo');
         this.removeCron('refreshStakingReward');
+        this.removeCron('refreshPoolingStakingReward');
         this.removeCron('refreshPrice');
         this.removeCron('checkStatusApiMap');
         this.removeCron('recoverApiMap');
@@ -154,6 +157,7 @@ export class KoniCron {
           this.addCron('checkStatusApiMap', this.updateApiMapStatus, CRON_GET_API_MAP_STATUS);
           this.addCron('recoverApiMap', this.recoverApiMap, CRON_AUTO_RECOVER_DOTSAMA_INTERVAL, false);
           this.addCron('refreshStakingReward', this.refreshStakingReward(address), CRON_REFRESH_STAKING_REWARD_INTERVAL);
+          this.addCron('refreshPoolingStakingReward', this.refreshPoolingStakingReward(address), CRON_REFRESH_POOLING_STAKING_REWARD_INTERVAL);
           this.addCron('refreshStakeUnlockingInfo', this.refreshStakeUnlockingInfo(address, serviceInfo.networkMap, serviceInfo.apiMap.dotSama), CRON_REFRESH_STAKE_UNLOCKING_INFO);
         } else {
           // this.setNftReady(address);
@@ -275,20 +279,20 @@ export class KoniCron {
     } as NftTransferExtra);
   };
 
-  resetStakingReward = (address: string) => {
-    this.state.resetStaking(address).catch((err) => this.logger.warn(err));
-    this.state.setStakingReward({
-      ready: false,
-      details: []
-    } as StakingRewardJson);
-    // this.logger.log('Reset Staking reward state');
-  };
-
   refreshStakingReward = (address: string) => {
     return () => {
       this.logger.log('Fetching staking reward data');
       this.subscriptions.subscribeStakingReward(address)
         .then(() => this.logger.log('Refresh staking reward state'))
+        .catch(this.logger.error);
+    };
+  };
+
+  refreshPoolingStakingReward = (address: string) => {
+    return () => {
+      this.logger.log('Fetching staking reward data');
+      this.subscriptions.subscribeNominationPoolReward(address)
+        .then(() => this.logger.log('Refresh pooling staking reward state'))
         .catch(this.logger.error);
     };
   };

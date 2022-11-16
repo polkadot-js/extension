@@ -3,7 +3,8 @@
 
 import { withErrorLog } from '@subwallet/extension-base/background/handlers/helpers';
 import State, { AuthUrls, Resolver } from '@subwallet/extension-base/background/handlers/State';
-import { AccountRefMap, APIItemState, ApiMap, AuthRequestV2, BalanceItem, BalanceJson, ChainRegistry, ConfirmationDefinitions, ConfirmationsQueue, ConfirmationsQueueItemOptions, ConfirmationType, CrowdloanItem, CrowdloanJson, CurrentAccountInfo, CustomToken, CustomTokenJson, CustomTokenType, DeleteCustomTokenParams, EvmSendTransactionParams, EvmSendTransactionRequestQr, EvmSignatureRequestQr, ExternalRequestPromise, ExternalRequestPromiseStatus, NETWORK_STATUS, NetworkJson, NftCollection, NftItem, NftJson, NftTransferExtra, PriceJson, RequestAccountExportPrivateKey, RequestCheckPublicAndSecretKey, RequestConfirmationComplete, RequestSettingsType, ResponseAccountExportPrivateKey, ResponseCheckPublicAndSecretKey, ResponseSettingsType, ResultResolver, ServiceInfo, SingleModeJson, StakeUnlockingJson, StakingItem, StakingJson, StakingRewardJson, ThemeTypes, TokenInfo, TransactionHistoryItemType } from '@subwallet/extension-base/background/KoniTypes';
+import { isSubscriptionRunning, unsubscribe } from '@subwallet/extension-base/background/handlers/subscriptions';
+import { AccountRefMap, APIItemState, ApiMap, AuthRequestV2, BalanceItem, BalanceJson, ChainRegistry, ConfirmationDefinitions, ConfirmationsQueue, ConfirmationsQueueItemOptions, ConfirmationType, CrowdloanItem, CrowdloanJson, CurrentAccountInfo, CustomToken, CustomTokenJson, CustomTokenType, DeleteCustomTokenParams, EvmSendTransactionParams, EvmSendTransactionRequestQr, EvmSignatureRequestQr, ExternalRequestPromise, ExternalRequestPromiseStatus, NETWORK_STATUS, NetworkJson, NftCollection, NftItem, NftJson, NftTransferExtra, PriceJson, RequestAccountExportPrivateKey, RequestCheckPublicAndSecretKey, RequestConfirmationComplete, RequestSettingsType, ResponseAccountExportPrivateKey, ResponseCheckPublicAndSecretKey, ResponseSettingsType, ResultResolver, ServiceInfo, SingleModeJson, StakeUnlockingJson, StakingItem, StakingJson, StakingRewardItem, StakingRewardJson, ThemeTypes, TokenInfo, TransactionHistoryItemType } from '@subwallet/extension-base/background/KoniTypes';
 import { AuthorizeRequest, RequestAuthorizeTab } from '@subwallet/extension-base/background/types';
 import { Web3Transaction } from '@subwallet/extension-base/signers/types';
 import { getId } from '@subwallet/extension-base/utils/getId';
@@ -87,6 +88,8 @@ function generateDefaultCrowdloanMap () {
 }
 
 export default class KoniState extends State {
+  private readonly unsubscriptionMap: Record<string, () => void> = {};
+
   public readonly authSubjectV2: BehaviorSubject<AuthorizeRequest[]> = new BehaviorSubject<AuthorizeRequest[]>([]);
 
   private readonly networkMapStore = new NetworkMapStore(); // persist custom networkMap by user
@@ -701,14 +704,15 @@ export default class KoniState extends State {
     return this.nftSubject;
   }
 
-  public setStakingReward (stakingRewardData: StakingRewardJson, callback?: (stakingRewardData: StakingRewardJson) => void): void {
-    this.stakingRewardState = stakingRewardData;
+  public updateStakingReward (stakingRewardData: StakingRewardItem[], callback?: (stakingRewardData: StakingRewardJson) => void): void {
+    this.stakingRewardState.ready = true;
+    this.stakingRewardState.details = stakingRewardData;
 
     if (callback) {
-      callback(stakingRewardData);
+      callback(this.stakingRewardState);
     }
 
-    this.stakingRewardSubject.next(stakingRewardData);
+    this.stakingRewardSubject.next(this.stakingRewardState);
   }
 
   public updateStakingRewardReady (ready: boolean) {
@@ -2497,5 +2501,23 @@ export default class KoniState extends State {
     await this.resumeAllNetworks();
     this.cron.start();
     this.subscription.start();
+  }
+
+  public cancelSubscription (id: string): boolean {
+    if (isSubscriptionRunning(id)) {
+      unsubscribe(id);
+    }
+
+    if (this.unsubscriptionMap[id]) {
+      this.unsubscriptionMap[id]();
+
+      delete this.unsubscriptionMap[id];
+    }
+
+    return true;
+  }
+
+  public createUnsubscriptionHandle (id: string, unsubscribe: () => void): void {
+    this.unsubscriptionMap[id] = unsubscribe;
   }
 }

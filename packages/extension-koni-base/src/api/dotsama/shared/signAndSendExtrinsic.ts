@@ -75,11 +75,13 @@ export const signAndSendExtrinsic = async ({ address,
         return;
       }
     } catch (e) {
-      console.error(errorMessage, e);
-      txState.errors = [{ code: BasicTxErrorCode.KEYRING_ERROR, message: (e as Error).message }];
-      txState.txError = true;
-      txState.status = false;
-      callback(txState);
+      if (e) {
+        console.error(errorMessage, e);
+        txState.errors = [{ code: BasicTxErrorCode.KEYRING_ERROR, message: (e as Error).message }];
+        txState.txError = true;
+        txState.status = false;
+        callback(txState);
+      }
 
       return;
     }

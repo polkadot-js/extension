@@ -8,7 +8,7 @@ import { getPoolingClaimRewardExtrinsic, getRelayBondingExtrinsic, getRelayChain
 import Web3 from 'web3';
 
 export const CHAIN_TYPES: Record<string, string[]> = {
-  relay: ['polkadot', 'kusama', 'aleph', 'polkadex', 'ternoa', 'ternoa_alphanet'],
+  relay: ['polkadot', 'kusama', 'aleph', 'polkadex', 'ternoa', 'ternoa_alphanet', 'alephTest', 'polkadexTest', 'westend'],
   para: ['moonbeam', 'moonriver', 'moonbase', 'turing', 'turingStaging', 'bifrost', 'bifrost_testnet', 'calamari_test', 'calamari'],
   astar: ['astar', 'shiden', 'shibuya']
 };

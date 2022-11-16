@@ -1,7 +1,14 @@
 // Copyright 2019-2022 @subwallet/extension-koni authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { ApiProps, BasicTxInfo, ChainBondingBasics, NetworkJson, ValidatorInfo } from '@subwallet/extension-base/background/KoniTypes';
+import {
+  ApiProps,
+  BasicTxInfo,
+  ChainBondingBasics,
+  DelegationItem,
+  NetworkJson,
+  ValidatorInfo
+} from '@subwallet/extension-base/background/KoniTypes';
 import { getFreeBalance } from '@subwallet/extension-koni-base/api/dotsama/balance';
 import { parseNumberToDisplay, parseRawNumber } from '@subwallet/extension-koni-base/utils';
 import Web3 from 'web3';
@@ -253,5 +260,26 @@ export async function getAmplitudeUnbondingExtrinsic (dotSamaApi: ApiProps, amou
     return apiPromise.api.tx.parachainStaking.delegatorStakeLess(collatorAddress, binaryAmount);
   } else {
     return apiPromise.api.tx.parachainStaking.leaveDelegators();
+  }
+}
+
+export async function getAmplitudeDelegationInfo (dotSamaApi: ApiProps, address: string, networkKey: string) {
+  const apiPromise = await dotSamaApi.isReady;
+  const delegationsList: DelegationItem[] = [];
+
+  const [_delegatorState, _unstakingInfo] = await Promise.all([
+    apiPromise.api.query.parachainStaking.delegatorState(address),
+    apiPromise.api.query.parachainStaking.unstaking(address)
+  ]);
+
+  const delegationState = _delegatorState.toHuman() as Record<string, string> | null;
+  const unstakingInfo = _unstakingInfo.toHuman() as Record<string, string> | null;
+
+  if (delegationState !== null) {
+    Object.entries(delegationState).forEach(([key, value]) => {
+      if (key === 'owner') {
+        delegationsList.push(value);
+      }
+    });
   }
 }

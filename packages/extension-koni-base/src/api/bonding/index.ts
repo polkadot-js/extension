@@ -2,7 +2,15 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { ApiProps, NetworkJson, StakingType, UnlockingStakeInfo, ValidatorInfo } from '@subwallet/extension-base/background/KoniTypes';
-import { getAmplitudeBondingBasics, getAmplitudeBondingExtrinsic, getAmplitudeCollatorsInfo, getAmplitudeUnbondingExtrinsic, handleAmplitudeBondingTxInfo, handleAmplitudeUnbondingTxInfo } from '@subwallet/extension-koni-base/api/bonding/amplitude';
+import {
+  getAmplitudeBondingBasics,
+  getAmplitudeBondingExtrinsic,
+  getAmplitudeCollatorsInfo,
+  getAmplitudeDelegationInfo,
+  getAmplitudeUnbondingExtrinsic,
+  handleAmplitudeBondingTxInfo,
+  handleAmplitudeUnbondingTxInfo
+} from '@subwallet/extension-koni-base/api/bonding/amplitude';
 import { getAstarBondingBasics, getAstarBondingExtrinsic, getAstarClaimRewardExtrinsic, getAstarDappsInfo, getAstarDelegationInfo, getAstarUnbondingExtrinsic, getAstarWithdrawalExtrinsic, handleAstarBondingTxInfo, handleAstarClaimRewardTxInfo, handleAstarUnbondingTxInfo, handleAstarUnlockingInfo, handleAstarWithdrawalTxInfo } from '@subwallet/extension-koni-base/api/bonding/astar';
 import { getParaBondingBasics, getParaBondingExtrinsic, getParaCollatorsInfo, getParaDelegationInfo, getParaUnbondingExtrinsic, getParaWithdrawalExtrinsic, handleParaBondingTxInfo, handleParaUnbondingTxInfo, handleParaUnlockingInfo, handleParaWithdrawalTxInfo } from '@subwallet/extension-koni-base/api/bonding/paraChain';
 import { getPoolingClaimRewardExtrinsic, getRelayBondingExtrinsic, getRelayChainBondingBasics, getRelayUnbondingExtrinsic, getRelayValidatorsInfo, getRelayWithdrawalExtrinsic, getTargetValidators, handlePoolingClaimRewardTxInfo, handleRelayBondingTxInfo, handleRelayUnbondingTxInfo, handleRelayUnlockingInfo, handleRelayWithdrawalTxInfo } from '@subwallet/extension-koni-base/api/bonding/relayChain';
@@ -140,6 +148,8 @@ export async function getClaimRewardExtrinsic (dotSamaApi: ApiProps, networkKey:
 export async function getDelegationInfo (dotSamaApi: ApiProps, address: string, networkKey: string) {
   if (CHAIN_TYPES.para.includes(networkKey)) {
     return getParaDelegationInfo(dotSamaApi, address, networkKey);
+  } else if (CHAIN_TYPES.amplitude.includes(networkKey)) {
+    return getAmplitudeDelegationInfo(dotSamaApi, address, networkKey);
   }
 
   return getAstarDelegationInfo(dotSamaApi, address, networkKey);

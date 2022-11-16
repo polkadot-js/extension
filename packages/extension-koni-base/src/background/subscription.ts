@@ -294,6 +294,10 @@ export class KoniSubscription {
     this.logger.log('Set staking reward state done', result);
   }
 
+  async subscribeNominationPoolReward (address: string) {
+
+  }
+
   async subscribeStakeUnlockingInfo (address: string, networkMap: Record<string, NetworkJson>, dotSamaApiMap: Record<string, ApiProps>) {
     const addresses = await this.state.getDecodedAddresses(address);
     const currentAddress = addresses[0]; // only get info for the current account

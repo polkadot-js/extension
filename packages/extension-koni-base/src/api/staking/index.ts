@@ -3,7 +3,6 @@
 
 import { APIItemState, ApiProps, NetworkJson, StakingItem, StakingRewardItem, StakingRewardJson, StakingType } from '@subwallet/extension-base/background/KoniTypes';
 import { CHAIN_TYPES } from '@subwallet/extension-koni-base/api/bonding';
-import { PREDEFINED_NETWORKS } from '@subwallet/extension-koni-base/api/predefinedNetworks';
 import { getAllSubsquidStaking } from '@subwallet/extension-koni-base/api/staking/subsquidStaking';
 import { IGNORE_GET_SUBSTRATE_FEATURES_LIST } from '@subwallet/extension-koni-base/constants';
 import { categoryAddresses, reformatAddress, toUnit } from '@subwallet/extension-koni-base/utils';
@@ -20,27 +19,6 @@ interface LedgerData {
   unlocking: Record<string, string>[]
 }
 
-export const DEFAULT_STAKING_NETWORKS = {
-  polkadot: PREDEFINED_NETWORKS.polkadot,
-  kusama: PREDEFINED_NETWORKS.kusama,
-  aleph: PREDEFINED_NETWORKS.aleph,
-  alephTest: PREDEFINED_NETWORKS.alephTest,
-  moonbeam: PREDEFINED_NETWORKS.moonbeam,
-  moonbase: PREDEFINED_NETWORKS.moonbase,
-  polkadex: PREDEFINED_NETWORKS.polkadex,
-  turing: PREDEFINED_NETWORKS.turing,
-  turingStaging: PREDEFINED_NETWORKS.turingStaging,
-  astar: PREDEFINED_NETWORKS.astar,
-  shibuya: PREDEFINED_NETWORKS.shibuya,
-  shiden: PREDEFINED_NETWORKS.shiden,
-  bifrost: PREDEFINED_NETWORKS.bifrost,
-  bifrost_testnet: PREDEFINED_NETWORKS.bifrost_testnet
-  // acala: PREDEFINED_NETWORKS.acala,
-  // darwinia: PREDEFINED_NETWORKS.darwinia,
-  // pangolin: PREDEFINED_NETWORKS.pangolin,
-  // crab: PREDEFINED_NETWORKS.crab,
-};
-
 interface PromiseMapping {
   api: ApiProps,
   chain: string
@@ -54,7 +32,7 @@ export function parseStakingItemKey (networkKey: string, type: StakingType = Sta
   return `${networkKey}_${type}`;
 }
 
-export function stakingOnChainApi (addresses: string[], dotSamaAPIMap: Record<string, ApiProps>, callback: (networkKey: string, rs: StakingItem) => void, networks: Record<string, NetworkJson> = DEFAULT_STAKING_NETWORKS) {
+export function stakingOnChainApi (addresses: string[], dotSamaAPIMap: Record<string, ApiProps>, callback: (networkKey: string, rs: StakingItem) => void, networks: Record<string, NetworkJson>) {
   const allApiPromise: PromiseMapping[] = [];
   const [substrateAddresses, evmAddresses] = categoryAddresses(addresses);
 

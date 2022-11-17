@@ -25,9 +25,9 @@ const ConfirmationsQueueContext = React.createContext<ConfirmationsQueue>({
   addTokenRequest: {},
   switchNetworkRequest: {},
   evmSignatureRequest: {},
-  evmSignatureRequestQr: {},
+  evmSignatureRequestExternal: {},
   evmSendTransactionRequest: {},
-  evmSendTransactionRequestQr: {}
+  evmSendTransactionRequestExternal: {}
 });
 const ThemeSwitchContext = React.createContext<(theme: AvailableThemes) => void>(noop);
 const ToastContext = React.createContext<({show: (message: string, isError?: boolean) => void})>({ show: noop });

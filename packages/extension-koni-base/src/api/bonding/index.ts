@@ -12,7 +12,7 @@ export const CHAIN_TYPES: Record<string, string[]> = {
   relay: ['polkadot', 'kusama', 'aleph', 'polkadex', 'ternoa', 'ternoa_alphanet', 'alephTest', 'polkadexTest', 'westend'],
   para: ['moonbeam', 'moonriver', 'moonbase', 'turing', 'turingStaging', 'bifrost', 'bifrost_testnet', 'calamari_test', 'calamari'],
   astar: ['astar', 'shiden', 'shibuya'],
-  amplitude: ['amplitude', 'amplitude_test', 'kilt']
+  amplitude: ['amplitude', 'amplitude_test', 'kilt', 'kilt_peregrine']
 };
 
 export async function getChainBondingBasics (networkKey: string, dotSamaApi: ApiProps) {

@@ -2063,6 +2063,23 @@ export const PREDEFINED_NETWORKS: Record<string, NetworkJson> = {
     decimals: 12,
     supportBonding: true,
     getStakingOnChain: true
+  },
+  kilt_peregrine: {
+    key: 'kilt_peregrine',
+    chain: 'KILT Peregrine',
+    genesisHash: '0xa0c6e3bac382b316a68bca7141af1fba507207594c761076847ce358aeedcc21',
+    ss58Format: 38,
+    providers: {
+      kilt: 'wss://peregrine.kilt.io/parachain-public-ws/'
+    },
+    active: false,
+    currentProviderMode: 'ws',
+    currentProvider: 'kilt',
+    groups: ['TEST_NET'],
+    nativeToken: 'PILT',
+    decimals: 15,
+    supportBonding: true,
+    getStakingOnChain: true
   }
 };
 

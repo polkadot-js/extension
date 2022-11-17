@@ -279,12 +279,13 @@ export async function getAmplitudeDelegationInfo (dotSamaApi: ApiProps, address:
     apiProps.api.query.parachainStaking.unstaking(address)
   ]);
 
-  const delegationState = _delegatorState.toHuman() as Record<string, string> | null;
+  const delegationState = _delegatorState.toHuman() as Record<string, any> | null;
   const unstakingInfo = _unstakingInfo.toHuman() as Record<string, string> | null;
 
   if (delegationState !== null) {
-    const owner = delegationState.owner;
-    const activeStake = parseRawNumber(delegationState.amount);
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+    const owner = delegationState.owner as string || delegationState.delegations[0].owner as string;
+    const activeStake = parseRawNumber(delegationState.amount as string || delegationState.total as string);
 
     delegationsList.push({
       owner,

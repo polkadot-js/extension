@@ -3,7 +3,7 @@
 
 import { AuthUrls } from '@subwallet/extension-base/background/handlers/State';
 import { ApiProps, CustomToken, NetworkJson, NftTransferExtra, StakingType, UnlockingStakeInfo } from '@subwallet/extension-base/background/KoniTypes';
-import { getUnlockingInfo } from '@subwallet/extension-koni-base/api/bonding';
+import { CHAIN_TYPES, getUnlockingInfo } from '@subwallet/extension-koni-base/api/bonding';
 import { subscribeBalance } from '@subwallet/extension-koni-base/api/dotsama/balance';
 import { subscribeCrowdloan } from '@subwallet/extension-koni-base/api/dotsama/crowdloan';
 import { getNominationStakingRewardData, getPoolingStakingRewardData, stakingOnChainApi } from '@subwallet/extension-koni-base/api/staking';
@@ -337,7 +337,17 @@ export class KoniSubscription {
       const networkJson = networkMap[stakingItem.chain];
 
       if (needUpdateUnlockingStake) {
-        const unlockingInfo = await getUnlockingInfo(dotSamaApiMap[stakingItem.chain], networkJson, stakingItem.chain, currentAddress, stakingItem.type);
+        let extraCollatorAddress;
+
+        if (CHAIN_TYPES.amplitude.includes(stakingItem.chain)) {
+          const extraDelegationInfo = await this.state.getExtraDelegationInfo(stakingItem.chain, stakingItem.address);
+
+          if (extraDelegationInfo) {
+            extraCollatorAddress = extraDelegationInfo.collatorAddress;
+          }
+        }
+
+        const unlockingInfo = await getUnlockingInfo(dotSamaApiMap[stakingItem.chain], networkJson, stakingItem.chain, currentAddress, stakingItem.type, extraCollatorAddress);
 
         stakeUnlockingInfo.push(unlockingInfo);
       }

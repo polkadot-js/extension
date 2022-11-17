@@ -108,7 +108,9 @@ export const ERA_LENGTH_MAP: Record<string, number> = { // in hours
   calamari: 6,
   calamari_test: 6,
   amplitude: 2,
-  amplitude_test: 2
+  amplitude_test: 2,
+  kilt: 2,
+  kilt_peregrine: 2
 };
 
 const ALEPH_DEFAULT_UNIFORM_ERA_PAYOUT_PARAMS: UniformEraPayoutInflationParams = {

@@ -91,13 +91,13 @@ export async function getUnbondingExtrinsic (address: string, amount: number, ne
   return getRelayUnbondingExtrinsic(dotSamaApi, amount, networkJson);
 }
 
-export async function getUnlockingInfo (dotSamaApi: ApiProps, networkJson: NetworkJson, networkKey: string, address: string, type: StakingType): Promise<UnlockingStakeInfo> {
+export async function getUnlockingInfo (dotSamaApi: ApiProps, networkJson: NetworkJson, networkKey: string, address: string, type: StakingType, extraCollatorAddress?: string): Promise<UnlockingStakeInfo> {
   if (CHAIN_TYPES.para.includes(networkKey)) {
     return handleParaUnlockingInfo(dotSamaApi, networkJson, networkKey, address, type);
   } else if (CHAIN_TYPES.astar.includes(networkKey)) {
     return handleAstarUnlockingInfo(dotSamaApi, networkJson, networkKey, address, type);
   } else if (CHAIN_TYPES.amplitude.includes(networkKey)) {
-    return handleAmplitudeUnlockingInfo(dotSamaApi, networkJson, networkKey, address, type);
+    return handleAmplitudeUnlockingInfo(dotSamaApi, networkJson, networkKey, address, type, extraCollatorAddress as string);
   }
 
   return handleRelayUnlockingInfo(dotSamaApi, networkJson, networkKey, address, type);

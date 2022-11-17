@@ -276,7 +276,7 @@ function UnbondingSubmitTransaction ({ className }: Props): React.ReactElement<P
   const getDropdownTitle = useCallback(() => {
     if (CHAIN_TYPES.astar.includes(unbondingParams.selectedNetwork as string)) {
       return 'Select a dApp';
-    } else if (CHAIN_TYPES.para.includes(unbondingParams.selectedNetwork as string)) {
+    } else if (CHAIN_TYPES.para.includes(unbondingParams.selectedNetwork as string) || CHAIN_TYPES.amplitude.includes(unbondingParams.selectedNetwork as string)) {
       return 'Select a collator';
     }
 

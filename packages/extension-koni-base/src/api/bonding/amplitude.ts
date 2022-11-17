@@ -298,7 +298,7 @@ export async function getAmplitudeDelegationInfo (dotSamaApi: ApiProps, address:
   return delegationsList;
 }
 
-async function getAmplitudeUnlockingInfo (dotSamaApi: ApiProps, address: string, networkKey: string) {
+async function getAmplitudeUnlockingInfo (dotSamaApi: ApiProps, address: string, networkKey: string, extraCollatorAddress: string) {
   const apiProps = await dotSamaApi.isReady;
 
   const [_unstakingInfo, _stakingInfo, _currentBlockInfo] = await Promise.all([
@@ -311,7 +311,7 @@ async function getAmplitudeUnlockingInfo (dotSamaApi: ApiProps, address: string,
   const blockPerRound = parseFloat(_blockPerRound);
 
   const unstakingInfo = _unstakingInfo.toHuman() as Record<string, string> | null;
-  const stakingInfo = _stakingInfo.toHuman() as Record<string, string>;
+  const stakingInfo = _stakingInfo.toHuman() as Record<string, string> | null;
   const currentBlockInfo = _currentBlockInfo.toHuman() as Record<string, any>;
   const currentBlock = parseRawNumber(currentBlockInfo.number as string);
 
@@ -332,7 +332,7 @@ async function getAmplitudeUnlockingInfo (dotSamaApi: ApiProps, address: string,
   const blockDuration = (ERA_LENGTH_MAP[networkKey] || ERA_LENGTH_MAP.default) / blockPerRound;
 
   const nextWithdrawal = (nextWithdrawalBlock - currentBlock) * blockDuration;
-  const validatorAddress = stakingInfo.owner;
+  const validatorAddress = stakingInfo !== null ? stakingInfo.owner : extraCollatorAddress;
 
   return {
     nextWithdrawal: nextWithdrawal > 0 ? nextWithdrawal : 0,
@@ -342,8 +342,8 @@ async function getAmplitudeUnlockingInfo (dotSamaApi: ApiProps, address: string,
   };
 }
 
-export async function handleAmplitudeUnlockingInfo (dotSamaApi: ApiProps, networkJson: NetworkJson, networkKey: string, address: string, type: StakingType) {
-  const { nextWithdrawal, nextWithdrawalAmount, redeemable, validatorAddress } = await getAmplitudeUnlockingInfo(dotSamaApi, address, networkKey);
+export async function handleAmplitudeUnlockingInfo (dotSamaApi: ApiProps, networkJson: NetworkJson, networkKey: string, address: string, type: StakingType, extraCollatorAddress: string) {
+  const { nextWithdrawal, nextWithdrawalAmount, redeemable, validatorAddress } = await getAmplitudeUnlockingInfo(dotSamaApi, address, networkKey, extraCollatorAddress);
 
   const parsedRedeemable = redeemable / (10 ** (networkJson.decimals as number));
   const parsedNextWithdrawalAmount = nextWithdrawalAmount / (10 ** (networkJson.decimals as number));

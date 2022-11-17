@@ -2520,4 +2520,12 @@ export default class KoniState extends State {
   public createUnsubscriptionHandle (id: string, unsubscribe: () => void): void {
     this.unsubscriptionMap[id] = unsubscribe;
   }
+
+  public setExtraDelegationInfo (networkKey: string, address: string, collatorAddress: string): void {
+    this.dbService.updateExtraDelegationInfo(networkKey, this.getNetworkGenesisHashByKey(networkKey), address, collatorAddress).catch((e) => this.logger.warn(e));
+  }
+
+  public async getExtraDelegationInfo (networkKey: string, address: string) {
+    return await this.dbService.getExtraDelegationInfo(networkKey, address);
+  }
 }

@@ -288,16 +288,7 @@ function Confirmation ({ className, match: { params: { address } } }: Props): Re
           {informationBlock}
           {qrArea}
         </div>
-        {(isWarning) &&
-          (
-            <div className='warning-area'>
-              <Warning>
-                This method is not currently supported
-              </Warning>
-            </div>
-          )
-        }
-        {(requiredSign && ![...CAN_SIGN_MODE, SIGN_MODE.READ_ONLY].includes(signMode)) &&
+        {(isWarning || (requiredSign && ![...CAN_SIGN_MODE, SIGN_MODE.READ_ONLY].includes(signMode))) &&
           (
             <div className='warning-area'>
               <Warning>

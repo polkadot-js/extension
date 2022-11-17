@@ -60,9 +60,10 @@ export async function getAmplitudeBondingBasics (networkKey: string, dotSamaApi:
 export async function getAmplitudeCollatorsInfo (networkKey: string, dotSamaApi: ApiProps, decimals: number, address: string) {
   const apiProps = await dotSamaApi.isReady;
 
-  const [_allCollators, _delegatorState] = await Promise.all([
+  const [_allCollators, _delegatorState, _unstakingInfo] = await Promise.all([
     apiProps.api.query.parachainStaking.candidatePool.entries(),
-    apiProps.api.query.parachainStaking.delegatorState(address)
+    apiProps.api.query.parachainStaking.delegatorState(address),
+    apiProps.api.query.parachainStaking.unstaking(address)
   ]);
 
   const _maxDelegatorPerCandidate = apiProps.api.consts.parachainStaking.maxDelegatorsPerCollator.toHuman() as string;
@@ -74,7 +75,8 @@ export async function getAmplitudeCollatorsInfo (networkKey: string, dotSamaApi:
   const _chainMinDelegation = apiProps.api.consts.parachainStaking.minDelegatorStake.toHuman() as string;
   const chainMinDelegation = parseRawNumber(_chainMinDelegation) / 10 ** decimals;
 
-  const rawDelegatorState = _delegatorState.toHuman() as Record<string, string> | null;
+  const delegatorState = _delegatorState.toHuman() as Record<string, string> | null;
+  const unstakingInfo = _unstakingInfo.toHuman() as Record<string, string> | null;
 
   const allCollators: ValidatorInfo[] = [];
 
@@ -101,8 +103,8 @@ export async function getAmplitudeCollatorsInfo (networkKey: string, dotSamaApi:
 
   const bondedCollators: string[] = [];
 
-  if (rawDelegatorState !== null) {
-    Object.entries(rawDelegatorState).forEach(([key, value]) => {
+  if (delegatorState !== null) {
+    Object.entries(delegatorState).forEach(([key, value]) => {
       if (key === 'owner') {
         bondedCollators.push(value);
       }
@@ -115,11 +117,19 @@ export async function getAmplitudeCollatorsInfo (networkKey: string, dotSamaApi:
     }
   }
 
+  if (unstakingInfo !== null && Object.values(unstakingInfo).length > 0) {
+    for (const collator of allCollators) {
+      if (bondedCollators.includes(collator.address)) {
+        collator.hasScheduledRequest = true;
+      }
+    }
+  }
+
   return {
     maxNominatorPerValidator: maxDelegatorPerCandidate,
     era: -1,
     validatorsInfo: allCollators,
-    isBondedBefore: rawDelegatorState !== null,
+    isBondedBefore: delegatorState !== null,
     bondedValidators: bondedCollators,
     maxNominations: maxDelegationCount
   };
@@ -280,7 +290,7 @@ export async function getAmplitudeDelegationInfo (dotSamaApi: ApiProps, address:
       owner,
       amount: activeStake.toString(),
       minBond: chainMinDelegation,
-      hasScheduledRequest: unstakingInfo !== null
+      hasScheduledRequest: unstakingInfo !== null && Object.values(unstakingInfo).length > 0
     });
   }
 
@@ -304,7 +314,7 @@ async function getAmplitudeUnlockingInfo (dotSamaApi: ApiProps, address: string,
   const currentBlockInfo = _currentBlockInfo.toHuman() as Record<string, any>;
   const currentBlock = parseRawNumber(currentBlockInfo.number as string);
 
-  if (unstakingInfo === null) {
+  if (unstakingInfo === null || Object.values(unstakingInfo).length === 0) {
     return {
       nextWithdrawal: 0,
       redeemable: 0,
@@ -347,4 +357,43 @@ export async function handleAmplitudeUnlockingInfo (dotSamaApi: ApiProps, networ
     nextWithdrawalAmount: parsedNextWithdrawalAmount,
     validatorAddress
   } as UnlockingStakeInfo;
+}
+
+async function getAmplitudeWithdrawalTxInfo (dotSamaApi: ApiProps, address: string, collatorAddress: string) {
+  const apiProps = await dotSamaApi.isReady;
+
+  const extrinsic = apiProps.api.tx.parachainStaking.unlockUnstaked(collatorAddress);
+
+  return extrinsic.paymentInfo(address);
+}
+
+export async function handleAmplitudeWithdrawalTxInfo (networkKey: string, networkJson: NetworkJson, dotSamaApiMap: Record<string, ApiProps>, web3ApiMap: Record<string, Web3>, address: string, collatorAddress: string) {
+  try {
+    const [txInfo, balance] = await Promise.all([
+      getAmplitudeWithdrawalTxInfo(dotSamaApiMap[networkKey], address, collatorAddress),
+      getFreeBalance(networkKey, address, dotSamaApiMap, web3ApiMap)
+    ]);
+
+    const feeString = parseNumberToDisplay(txInfo.partialFee, networkJson.decimals) + ` ${networkJson.nativeToken ? networkJson.nativeToken : ''}`;
+    const rawFee = parseRawNumber(txInfo.partialFee.toString());
+    const binaryBalance = new BN(balance);
+    const balanceError = txInfo.partialFee.gt(binaryBalance);
+
+    return {
+      rawFee,
+      fee: feeString,
+      balanceError
+    } as BasicTxInfo;
+  } catch (e) {
+    return {
+      fee: `0.0000 ${networkJson.nativeToken as string}`,
+      balanceError: false
+    } as BasicTxInfo;
+  }
+}
+
+export async function getAmplitudeWithdrawalExtrinsic (dotSamaApi: ApiProps, collatorAddress: string) {
+  const apiProps = await dotSamaApi.isReady;
+
+  return apiProps.api.tx.parachainStaking.unlockUnstaked(collatorAddress);
 }

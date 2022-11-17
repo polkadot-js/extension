@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { ApiProps, NetworkJson, StakingType, UnlockingStakeInfo, ValidatorInfo } from '@subwallet/extension-base/background/KoniTypes';
-import { getAmplitudeBondingBasics, getAmplitudeBondingExtrinsic, getAmplitudeCollatorsInfo, getAmplitudeDelegationInfo, getAmplitudeUnbondingExtrinsic, handleAmplitudeBondingTxInfo, handleAmplitudeUnbondingTxInfo, handleAmplitudeUnlockingInfo } from '@subwallet/extension-koni-base/api/bonding/amplitude';
+import { getAmplitudeBondingBasics, getAmplitudeBondingExtrinsic, getAmplitudeCollatorsInfo, getAmplitudeDelegationInfo, getAmplitudeUnbondingExtrinsic, getAmplitudeWithdrawalExtrinsic, handleAmplitudeBondingTxInfo, handleAmplitudeUnbondingTxInfo, handleAmplitudeUnlockingInfo, handleAmplitudeWithdrawalTxInfo } from '@subwallet/extension-koni-base/api/bonding/amplitude';
 import { getAstarBondingBasics, getAstarBondingExtrinsic, getAstarClaimRewardExtrinsic, getAstarDappsInfo, getAstarDelegationInfo, getAstarUnbondingExtrinsic, getAstarWithdrawalExtrinsic, handleAstarBondingTxInfo, handleAstarClaimRewardTxInfo, handleAstarUnbondingTxInfo, handleAstarUnlockingInfo, handleAstarWithdrawalTxInfo } from '@subwallet/extension-koni-base/api/bonding/astar';
 import { getParaBondingBasics, getParaBondingExtrinsic, getParaCollatorsInfo, getParaDelegationInfo, getParaUnbondingExtrinsic, getParaWithdrawalExtrinsic, handleParaBondingTxInfo, handleParaUnbondingTxInfo, handleParaUnlockingInfo, handleParaWithdrawalTxInfo } from '@subwallet/extension-koni-base/api/bonding/paraChain';
 import { getPoolingClaimRewardExtrinsic, getRelayBondingExtrinsic, getRelayChainBondingBasics, getRelayUnbondingExtrinsic, getRelayValidatorsInfo, getRelayWithdrawalExtrinsic, getTargetValidators, handlePoolingClaimRewardTxInfo, handleRelayBondingTxInfo, handleRelayUnbondingTxInfo, handleRelayUnlockingInfo, handleRelayWithdrawalTxInfo } from '@subwallet/extension-koni-base/api/bonding/relayChain';
@@ -108,6 +108,8 @@ export async function getWithdrawalTxInfo (address: string, networkKey: string, 
     return handleParaWithdrawalTxInfo(networkKey, networkJson, dotSamaApiMap, web3ApiMap, address, validatorAddress as string, action as string);
   } else if (CHAIN_TYPES.astar.includes(networkKey)) {
     return handleAstarWithdrawalTxInfo(networkKey, networkJson, dotSamaApiMap, web3ApiMap, address);
+  } else if (CHAIN_TYPES.amplitude.includes(networkKey)) {
+    return handleAmplitudeWithdrawalTxInfo(networkKey, networkJson, dotSamaApiMap, web3ApiMap, address, validatorAddress as string);
   }
 
   return handleRelayWithdrawalTxInfo(address, networkKey, networkJson, dotSamaApiMap, web3ApiMap);
@@ -118,6 +120,8 @@ export async function getWithdrawalExtrinsic (dotSamaApi: ApiProps, networkKey: 
     return getParaWithdrawalExtrinsic(dotSamaApi, address, validatorAddress as string, action as string);
   } else if (CHAIN_TYPES.astar.includes(networkKey)) {
     return getAstarWithdrawalExtrinsic(dotSamaApi);
+  } else if (CHAIN_TYPES.amplitude.includes(networkKey)) {
+    return getAmplitudeWithdrawalExtrinsic(dotSamaApi, validatorAddress as string);
   }
 
   return getRelayWithdrawalExtrinsic(dotSamaApi, address);

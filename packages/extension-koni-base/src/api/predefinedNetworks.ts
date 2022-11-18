@@ -1045,7 +1045,9 @@ export const PREDEFINED_NETWORKS: Record<string, NetworkJson> = {
     nativeToken: 'KILT',
     crowdloanUrl: 'https://polkadot.js.org/apps/#/parachains/crowdloan',
     decimals: 12,
-    coinGeckoKey: 'kilt-protocol'
+    coinGeckoKey: 'kilt-protocol',
+    supportBonding: true,
+    getStakingOnChain: true
   },
   calamari: {
     key: 'calamari',

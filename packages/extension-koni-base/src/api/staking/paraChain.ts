@@ -8,7 +8,64 @@ import { reformatAddress } from '@subwallet/extension-koni-base/utils';
 import { Codec } from '@polkadot/types/types';
 import { BN, BN_ZERO } from '@polkadot/util';
 
-export function getAmplitudeStakingOnChain (parentApi: ApiProps, useAddresses: string[], networks: Record<string, NetworkJson>, chain: string, callback: (networkKey: string, rs: StakingItem) => void) {
+function getSingleStakingAmplitude (parentApi: ApiProps, address: string, networks: Record<string, NetworkJson>, chain: string, callback: (networkKey: string, rs: StakingItem) => void) {
+  console.log('subscribe single amplitude');
+
+  return parentApi.api.queryMulti([
+    [parentApi.api.query.parachainStaking.delegatorState, address],
+    [parentApi.api.query.parachainStaking.unstaking, address]
+  ], ([_delegatorState, _unstaking]) => {
+    const _stakingData = _delegatorState.toHuman() as Record<string, string> | null;
+    const _unstakingData = _unstaking.toHuman() as Record<string, string> | null;
+    let _activeBalance = '0';
+
+    if (_stakingData !== null) {
+      _activeBalance = _stakingData.amount || _stakingData.total;
+
+      _activeBalance = _activeBalance.replaceAll(',', '');
+    }
+
+    const activeBalance = new BN(_activeBalance);
+    let unstakingBalance = BN_ZERO;
+
+    if (_unstakingData !== null) {
+      Object.values(_unstakingData).forEach((_unstakingAmount) => {
+        const bnUnstakingAmount = new BN(_unstakingAmount.replaceAll(',', ''));
+
+        unstakingBalance = unstakingBalance.add(bnUnstakingAmount);
+      });
+    }
+
+    const totalBalance = activeBalance.add(unstakingBalance);
+
+    const formattedTotalBalance = parseFloat(totalBalance.toString());
+    const formattedActiveBalance = parseFloat(activeBalance.toString());
+    const formattedUnstakingBalance = parseFloat(unstakingBalance.toString());
+
+    const parsedTotalBalance = parseStakingBalance(formattedTotalBalance, chain, networks);
+    const parsedUnstakingBalance = parseStakingBalance(formattedUnstakingBalance, chain, networks);
+    const parsedActiveBalance = parseStakingBalance(formattedActiveBalance, chain, networks);
+
+    const stakingItem = {
+      name: networks[chain].chain,
+      chain: chain,
+      balance: parsedTotalBalance.toString(),
+      activeBalance: parsedActiveBalance.toString(),
+      unlockingBalance: parsedUnstakingBalance.toString(),
+      nativeToken: networks[chain].nativeToken,
+      unit: networks[chain].nativeToken,
+      state: APIItemState.READY,
+      type: StakingType.NOMINATED,
+      address
+    } as StakingItem;
+
+    callback(chain, stakingItem);
+  });
+}
+
+function getMultiStakingAmplitude (parentApi: ApiProps, useAddresses: string[], networks: Record<string, NetworkJson>, chain: string, callback: (networkKey: string, rs: StakingItem) => void) {
+  console.log('subscribe multi amplitude');
+
   return parentApi.api.query.parachainStaking.delegatorState.multi(useAddresses, async (ledgers: Codec[]) => {
     if (ledgers) {
       const _unstakingStates = await parentApi.api.query.parachainStaking.unstaking.multi(useAddresses);
@@ -64,6 +121,14 @@ export function getAmplitudeStakingOnChain (parentApi: ApiProps, useAddresses: s
       }
     }
   });
+}
+
+export function getAmplitudeStakingOnChain (parentApi: ApiProps, useAddresses: string[], networks: Record<string, NetworkJson>, chain: string, callback: (networkKey: string, rs: StakingItem) => void) {
+  if (useAddresses.length === 1) {
+    return getSingleStakingAmplitude(parentApi, useAddresses[0], networks, chain, callback);
+  }
+
+  return getMultiStakingAmplitude(parentApi, useAddresses, networks, chain, callback);
 }
 
 export function getParaStakingOnChain (parentApi: ApiProps, useAddresses: string[], networks: Record<string, NetworkJson>, chain: string, callback: (networkKey: string, rs: StakingItem) => void) {

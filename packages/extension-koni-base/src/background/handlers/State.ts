@@ -4,7 +4,7 @@
 import { withErrorLog } from '@subwallet/extension-base/background/handlers/helpers';
 import State, { AuthUrls, Resolver } from '@subwallet/extension-base/background/handlers/State';
 import { isSubscriptionRunning, unsubscribe } from '@subwallet/extension-base/background/handlers/subscriptions';
-import { AccountRefMap, APIItemState, ApiMap, AuthRequestV2, BalanceItem, BalanceJson, ChainRegistry, ConfirmationDefinitions, ConfirmationsQueue, ConfirmationsQueueItemOptions, ConfirmationType, CrowdloanItem, CrowdloanJson, CurrentAccountInfo, CustomToken, CustomTokenJson, CustomTokenType, DeleteCustomTokenParams, EvmSendTransactionParams, EvmSendTransactionRequestQr, EvmSignatureRequestQr, ExternalRequestPromise, ExternalRequestPromiseStatus, NETWORK_STATUS, NetworkJson, NftCollection, NftItem, NftJson, NftTransferExtra, PriceJson, RequestAccountExportPrivateKey, RequestCheckPublicAndSecretKey, RequestConfirmationComplete, RequestSettingsType, ResponseAccountExportPrivateKey, ResponseCheckPublicAndSecretKey, ResponseSettingsType, ResultResolver, ServiceInfo, SingleModeJson, StakeUnlockingJson, StakingItem, StakingJson, StakingRewardItem, StakingRewardJson, ThemeTypes, TokenInfo, TransactionHistoryItemType } from '@subwallet/extension-base/background/KoniTypes';
+import { AccountRefMap, APIItemState, ApiMap, AuthRequestV2, BalanceItem, BalanceJson, ChainRegistry, ConfirmationDefinitions, ConfirmationsQueue, ConfirmationsQueueItemOptions, ConfirmationType, CrowdloanItem, CrowdloanJson, CurrentAccountInfo, CustomToken, CustomTokenJson, CustomTokenType, DeleteCustomTokenParams, EvmSendTransactionParams, EvmSendTransactionRequestExternal, EvmSignatureRequestExternal, ExternalRequestPromise, ExternalRequestPromiseStatus, NETWORK_STATUS, NetworkJson, NftCollection, NftItem, NftJson, NftTransferExtra, PriceJson, RequestAccountExportPrivateKey, RequestCheckPublicAndSecretKey, RequestConfirmationComplete, RequestSettingsType, ResponseAccountExportPrivateKey, ResponseCheckPublicAndSecretKey, ResponseSettingsType, ResultResolver, ServiceInfo, SingleModeJson, StakeUnlockingJson, StakingItem, StakingJson, StakingRewardItem, StakingRewardJson, ThemeTypes, TokenInfo, TransactionHistoryItemType } from '@subwallet/extension-base/background/KoniTypes';
 import { AuthorizeRequest, RequestAuthorizeTab } from '@subwallet/extension-base/background/types';
 import { Web3Transaction } from '@subwallet/extension-base/signers/types';
 import { getId } from '@subwallet/extension-base/utils/getId';
@@ -112,9 +112,9 @@ export default class KoniState extends State {
     addTokenRequest: {},
     switchNetworkRequest: {},
     evmSignatureRequest: {},
-    evmSignatureRequestQr: {},
+    evmSignatureRequestExternal: {},
     evmSendTransactionRequest: {},
-    evmSendTransactionRequestQr: {}
+    evmSendTransactionRequestExternal: {}
   });
 
   private readonly confirmationsPromiseMap: Record<string, { resolver: Resolver<any>, validator?: (rs: any) => Error | undefined }> = {};
@@ -2057,7 +2057,7 @@ export default class KoniState extends State {
       throw new EvmRpcError('INVALID_PARAMS', 'Cannot find pair with address: ' + address);
     }
 
-    if (!meta.isExternal || (meta.isExternal && (meta.isHardware || meta.isReadOnly))) {
+    if (!meta.isExternal) {
       // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
       const signPayload = { address, type: method, payload };
 
@@ -2105,9 +2105,9 @@ export default class KoniState extends State {
           break;
       }
 
-      const signPayload: EvmSignatureRequestQr = { address, type: method, payload: payload as unknown, qrPayload: qrPayload, canSign: canSign };
+      const signPayload: EvmSignatureRequestExternal = { address, type: method, payload: payload as unknown, hashPayload: qrPayload, canSign: canSign };
 
-      return this.addConfirmation(id, url, 'evmSignatureRequestQr', signPayload, { requiredPassword: false, address })
+      return this.addConfirmation(id, url, 'evmSignatureRequestExternal', signPayload, { requiredPassword: false, address })
         .then(({ isApproved, signature }) => {
           if (isApproved) {
             return signature;
@@ -2240,7 +2240,7 @@ export default class KoniState extends State {
       });
     };
 
-    if (!meta.isExternal || (meta.isExternal && (meta.isHardware || meta.isReadOnly))) {
+    if (!meta.isExternal) {
       return this.addConfirmation(id, url, 'evmSendTransactionRequest', requestPayload, { requiredPassword: true, address: fromAddress, networkKey }, validateConfirmationResponsePayload)
         .then(async ({ isApproved }) => {
           if (isApproved) {
@@ -2292,14 +2292,14 @@ export default class KoniState extends State {
 
       const encoded = RLP.encode(data);
 
-      const requestPayload: EvmSendTransactionRequestQr = {
+      const requestPayload: EvmSendTransactionRequestExternal = {
         ...transaction,
         estimateGas,
-        qrPayload: u8aToHex(encoded),
+        hashPayload: u8aToHex(encoded),
         canSign: true
       };
 
-      return this.addConfirmation(id, url, 'evmSendTransactionRequestQr', requestPayload, { requiredPassword: false, address: fromAddress, networkKey })
+      return this.addConfirmation(id, url, 'evmSendTransactionRequestExternal', requestPayload, { requiredPassword: false, address: fromAddress, networkKey })
         .then(async ({ isApproved, signature }) => {
           if (isApproved) {
             let transactionHash = '';
@@ -2437,12 +2437,12 @@ export default class KoniState extends State {
         _completeConfirmation(type, result as ConfirmationDefinitions['switchNetworkRequest'][1]);
       } else if (type === 'evmSignatureRequest') {
         _completeConfirmation(type, result as ConfirmationDefinitions['evmSignatureRequest'][1]);
-      } else if (type === 'evmSignatureRequestQr') {
-        _completeConfirmation(type, result as ConfirmationDefinitions['evmSignatureRequestQr'][1]);
+      } else if (type === 'evmSignatureRequestExternal') {
+        _completeConfirmation(type, result as ConfirmationDefinitions['evmSignatureRequestExternal'][1]);
       } else if (type === 'evmSendTransactionRequest') {
         _completeConfirmation(type, result as ConfirmationDefinitions['evmSendTransactionRequest'][1]);
-      } else if (type === 'evmSendTransactionRequestQr') {
-        _completeConfirmation(type, result as ConfirmationDefinitions['evmSendTransactionRequestQr'][1]);
+      } else if (type === 'evmSendTransactionRequestExternal') {
+        _completeConfirmation(type, result as ConfirmationDefinitions['evmSendTransactionRequestExternal'][1]);
       }
     });
 

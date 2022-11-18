@@ -1045,7 +1045,9 @@ export const PREDEFINED_NETWORKS: Record<string, NetworkJson> = {
     nativeToken: 'KILT',
     crowdloanUrl: 'https://polkadot.js.org/apps/#/parachains/crowdloan',
     decimals: 12,
-    coinGeckoKey: 'kilt-protocol'
+    coinGeckoKey: 'kilt-protocol',
+    supportBonding: true,
+    getStakingOnChain: true
   },
   calamari: {
     key: 'calamari',
@@ -1875,7 +1877,9 @@ export const PREDEFINED_NETWORKS: Record<string, NetworkJson> = {
     currentProvider: 'amplitude',
     nativeToken: 'AMPE',
     groups: ['KUSAMA_PARACHAIN'],
-    decimals: 12
+    decimals: 12,
+    supportBonding: true,
+    getStakingOnChain: true
   },
   gear_testnet: {
     key: 'gear_testnet',
@@ -2044,6 +2048,40 @@ export const PREDEFINED_NETWORKS: Record<string, NetworkJson> = {
     getStakingOnChain: false,
     abiExplorer: 'https://blockexplorer.bobabase.boba.network',
     supportSmartContract: [ContractType.evm]
+  },
+  amplitude_test: {
+    key: 'amplitude_test',
+    chain: 'Amplitude Testnet',
+    genesisHash: '0x67221cd96c1551b72d55f65164d6a39f31b570c77a05c90e31931b0e2f379e13',
+    ss58Format: 57,
+    providers: {
+      pendulum: 'wss://rpc-foucoco.pendulumchain.tech'
+    },
+    active: false,
+    currentProviderMode: 'ws',
+    currentProvider: 'pendulum',
+    groups: ['TEST_NET'],
+    nativeToken: 'AMPE',
+    decimals: 12,
+    supportBonding: true,
+    getStakingOnChain: true
+  },
+  kilt_peregrine: {
+    key: 'kilt_peregrine',
+    chain: 'KILT Peregrine',
+    genesisHash: '0xa0c6e3bac382b316a68bca7141af1fba507207594c761076847ce358aeedcc21',
+    ss58Format: 38,
+    providers: {
+      kilt: 'wss://peregrine.kilt.io/parachain-public-ws/'
+    },
+    active: false,
+    currentProviderMode: 'ws',
+    currentProvider: 'kilt',
+    groups: ['TEST_NET'],
+    nativeToken: 'PILT',
+    decimals: 15,
+    supportBonding: true,
+    getStakingOnChain: true
   }
 };
 

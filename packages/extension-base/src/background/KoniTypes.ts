@@ -1145,6 +1145,12 @@ export interface ValidatorInfo {
   hasScheduledRequest?: boolean; // for parachain, can't stake more on a collator that has existing scheduled request
 }
 
+export interface ExtraDelegationInfo {
+  chain: string;
+  address: string;
+  collatorAddress: string;
+}
+
 export interface BasicTxInfo {
   fee: string,
   balanceError: boolean,

@@ -8,7 +8,7 @@ import { logger as createLogger } from '@polkadot/util';
 import { Logger } from '@polkadot/util/types';
 
 import KoniDatabase, { INft, IStakingItem } from '../databases';
-import { BalanceStore, CrowdloanStore, MigrationStore, NftCollectionStore, NftStore, StakingStore, TransactionStore } from '../db-stores';
+import { BalanceStore, CrowdloanStore, ExtraDelegationInfoStore, MigrationStore, NftCollectionStore, NftStore, StakingStore, TransactionStore } from '../db-stores';
 
 export default class DatabaseService {
   private _db: KoniDatabase;
@@ -27,7 +27,8 @@ export default class DatabaseService {
       crowdloan: new CrowdloanStore(this._db.crowdloans),
       staking: new StakingStore(this._db.stakingsV2),
       transaction: new TransactionStore(this._db.transactions),
-      migration: new MigrationStore(this._db.migrations)
+      migration: new MigrationStore(this._db.migrations),
+      extraDelegationInfo: new ExtraDelegationInfoStore(this._db.extraDelegationInfo)
     };
   }
 
@@ -151,5 +152,18 @@ export default class DatabaseService {
     this.logger.log(`Remove NFTs [${nftIds.join(', ')}]`);
 
     return this.stores.nft.removeNfts(chainHash, address, collectionId, nftIds);
+  }
+
+  // Delegation info
+  async updateExtraDelegationInfo (chain: string, chainHash: string, address: string, collatorAddress: string) {
+    return this.stores.extraDelegationInfo.upsert({ chain, chainHash, address, collatorAddress });
+  }
+
+  async getExtraDelegationInfo (chain: string, address: string) {
+    const delegationInfo = await this.stores.extraDelegationInfo.getDelegationInfo(chain, address);
+
+    this.logger.log('Get extra delegation info: ', delegationInfo);
+
+    return delegationInfo;
   }
 }

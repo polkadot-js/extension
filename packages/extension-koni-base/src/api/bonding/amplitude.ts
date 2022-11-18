@@ -57,7 +57,7 @@ export async function getAmplitudeBondingBasics (networkKey: string, dotSamaApi:
   } as ChainBondingBasics;
 }
 
-export async function getAmplitudeCollatorsInfo (networkKey: string, dotSamaApi: ApiProps, decimals: number, address: string) {
+export async function getAmplitudeCollatorsInfo (networkKey: string, dotSamaApi: ApiProps, decimals: number, address: string, extraCollatorAddress?: string) {
   const apiProps = await dotSamaApi.isReady;
 
   const [_allCollators, _delegatorState, _unstakingInfo] = await Promise.all([
@@ -102,6 +102,10 @@ export async function getAmplitudeCollatorsInfo (networkKey: string, dotSamaApi:
   }
 
   const bondedCollators: string[] = [];
+
+  if (extraCollatorAddress) {
+    bondedCollators.push(extraCollatorAddress);
+  }
 
   if (delegatorState !== null) {
     Object.entries(delegatorState).forEach(([key, value]) => {
@@ -157,7 +161,14 @@ export async function getAmplitudeBondingTxInfo (networkJson: NetworkJson, dotSa
   if (!bondedCollators.includes(collatorInfo.address)) {
     extrinsic = apiPromise.api.tx.parachainStaking.joinDelegators(collatorInfo.address, binaryAmount);
   } else {
-    extrinsic = apiPromise.api.tx.parachainStaking.delegatorStakeMore(collatorInfo.address, binaryAmount);
+    const _params = apiPromise.api.tx.parachainStaking.delegatorStakeMore.toJSON() as Record<string, any>;
+    const paramsCount = (_params.args as any[]).length;
+
+    if (paramsCount === 2) {
+      extrinsic = apiPromise.api.tx.parachainStaking.delegatorStakeMore(collatorInfo.address, binaryAmount);
+    } else {
+      extrinsic = apiPromise.api.tx.parachainStaking.delegatorStakeMore(binaryAmount);
+    }
   }
 
   return extrinsic.paymentInfo(delegatorAddress);
@@ -198,7 +209,14 @@ export async function getAmplitudeUnbondingTxInfo (networkJson: NetworkJson, dot
   let extrinsic;
 
   if (!unstakeAll) {
-    extrinsic = apiPromise.api.tx.parachainStaking.delegatorStakeLess(collatorAddress, binaryAmount);
+    const _params = apiPromise.api.tx.parachainStaking.delegatorStakeMore.toJSON() as Record<string, any>;
+    const paramsCount = (_params.args as any[]).length;
+
+    if (paramsCount === 2) {
+      extrinsic = apiPromise.api.tx.parachainStaking.delegatorStakeLess(collatorAddress, binaryAmount);
+    } else {
+      extrinsic = apiPromise.api.tx.parachainStaking.delegatorStakeLess(binaryAmount);
+    }
   } else {
     extrinsic = apiPromise.api.tx.parachainStaking.leaveDelegators();
   }
@@ -251,7 +269,14 @@ export async function getAmplitudeBondingExtrinsic (delegatorAddress: string, ne
   if (!bondedCollators.includes(collatorInfo.address)) {
     return apiPromise.api.tx.parachainStaking.joinDelegators(collatorInfo.address, binaryAmount);
   } else {
-    return apiPromise.api.tx.parachainStaking.delegatorStakeMore(collatorInfo.address, binaryAmount);
+    const _params = apiPromise.api.tx.parachainStaking.delegatorStakeMore.toJSON() as Record<string, any>;
+    const paramsCount = (_params.args as any[]).length;
+
+    if (paramsCount === 2) {
+      return apiPromise.api.tx.parachainStaking.delegatorStakeMore(collatorInfo.address, binaryAmount);
+    } else {
+      return apiPromise.api.tx.parachainStaking.delegatorStakeMore(binaryAmount);
+    }
   }
 }
 
@@ -261,7 +286,14 @@ export async function getAmplitudeUnbondingExtrinsic (dotSamaApi: ApiProps, amou
   const binaryAmount = new BN(parsedAmount.toString());
 
   if (!unstakeAll) {
-    return apiPromise.api.tx.parachainStaking.delegatorStakeLess(collatorAddress, binaryAmount);
+    const _params = apiPromise.api.tx.parachainStaking.delegatorStakeMore.toJSON() as Record<string, any>;
+    const paramsCount = (_params.args as any[]).length;
+
+    if (paramsCount === 2) {
+      return apiPromise.api.tx.parachainStaking.delegatorStakeLess(collatorAddress, binaryAmount);
+    } else {
+      return apiPromise.api.tx.parachainStaking.delegatorStakeLess(binaryAmount);
+    }
   } else {
     return apiPromise.api.tx.parachainStaking.leaveDelegators();
   }

@@ -27,13 +27,13 @@ export async function getChainBondingBasics (networkKey: string, dotSamaApi: Api
   return getRelayChainBondingBasics(networkKey, dotSamaApi);
 }
 
-export async function getValidatorsInfo (networkKey: string, dotSamaApi: ApiProps, decimals: number, address: string) {
+export async function getValidatorsInfo (networkKey: string, dotSamaApi: ApiProps, decimals: number, address: string, extraCollatorAddress?: string) {
   if (CHAIN_TYPES.para.includes(networkKey)) {
     return getParaCollatorsInfo(networkKey, dotSamaApi, decimals, address);
   } else if (CHAIN_TYPES.astar.includes(networkKey)) {
     return getAstarDappsInfo(networkKey, dotSamaApi, decimals, address);
   } else if (CHAIN_TYPES.amplitude.includes(networkKey)) {
-    return getAmplitudeCollatorsInfo(networkKey, dotSamaApi, decimals, address);
+    return getAmplitudeCollatorsInfo(networkKey, dotSamaApi, decimals, address, extraCollatorAddress);
   }
 
   return getRelayValidatorsInfo(networkKey, dotSamaApi, decimals, address);

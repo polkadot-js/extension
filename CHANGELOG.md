@@ -1,5 +1,27 @@
 # CHANGELOG
 
+## 0.7.2 (Koni)
+Build date: Nov 19, 2022.
+
+Update:
+- Add support staking for Amplitude/Kilt (#653)
+- Support staking for Shiden (#801)
+- Support claim reward feature for QR Account (#690)
+- Support sending PSP tokens for QR-signer account (#751)
+- Support ReadOnly account (#757)
+- Show nomination pool stake balance (#796)
+- Add unclaimed reward info/Support reward withdrawing for nomination pool (#812)
+- Update message when having no account to connect to dApp (#798)
+- Update BIT token logo (#816)
+
+Bug fixes:
+- Minor bugs on staking (#824)
+- Error when use stake action on Turing Staging/ Turing network with QR signer account (#743)
+- Error withdrawing stake with slashing spans (#809)
+- Show incorrect the transfer result on the transaction history screen (#827)
+- Incorrect navigation when cancel transaction with QR signer account (#825)
+- Can not sign the Claim reward transaction with QR-signer account (#838)
+
 ## 0.7.1 (Koni)
 Build date: Nov 10, 2022.
 

@@ -13,7 +13,7 @@ import { EvmRpcError } from '@subwallet/extension-koni-base/background/errors/Ev
 import KoniState from '@subwallet/extension-koni-base/background/handlers/State';
 import { ALL_ACCOUNT_KEY, CRON_GET_API_MAP_STATUS } from '@subwallet/extension-koni-base/constants';
 import Web3 from 'web3';
-import { RequestArguments, WebsocketProvider } from 'web3-core';
+import { HttpProvider, RequestArguments, WebsocketProvider } from 'web3-core';
 import { JsonRpcPayload } from 'web3-core-helpers';
 
 import { accounts as accountsObservable } from '@polkadot/ui-keyring/observable/accounts';
@@ -443,8 +443,8 @@ export default class KoniTabs extends Tabs {
     return true;
   }
 
-  private checkAndHandleProviderStatus (provider: WebsocketProvider | undefined) {
-    if (!provider || !provider?.connected) {
+  private checkAndHandleProviderStatus (provider: WebsocketProvider | HttpProvider | undefined) {
+    if ((!provider || !provider?.connected) && provider?.supportsSubscriptions()) { // excludes HttpProvider
       Object.values(this.evmEventEmitterMap).forEach((m) => {
         Object.values(m).forEach((emitter) => {
           emitter('disconnect', new EvmRpcError('CHAIN_DISCONNECTED'));

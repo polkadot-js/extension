@@ -5289,7 +5289,7 @@ __metadata:
     react-router: ^5.2.1
     react-router-dom: ^5.3.0
     react-select: ^5.2.2
-    react-tooltip: ^4.2.21
+    react-tooltip: 4.2.21
     redux: ^4.2.0
     redux-toolkit: ^1.1.2
     rlp: ^3.0.0
@@ -19788,6 +19788,19 @@ __metadata:
   languageName: node
   linkType: hard
 
+"react-tooltip@npm:4.2.21":
+  version: 4.2.21
+  resolution: "react-tooltip@npm:4.2.21"
+  dependencies:
+    prop-types: ^15.7.2
+    uuid: ^7.0.3
+  peerDependencies:
+    react: ">=16.0.0"
+    react-dom: ">=16.0.0"
+  checksum: dd145ae90768a8af5518672bfd91b985a57ff021b50a60044caedd872b457ea5134793cf8d5426bd45587fa6f722320936009f5c6533a4f94d665c0a23589222
+  languageName: node
+  linkType: hard
+
 "react-tooltip@npm:^3.11.2":
   version: 3.11.6
   resolution: "react-tooltip@npm:3.11.6"
@@ -19797,19 +19810,6 @@ __metadata:
     react: "*"
     react-dom: "*"
   checksum: b107fb82919fa2431b7847f13a61bd2550d131abe49d65885c4f5245c7b2930da422c2e85c96bfd7a82c2a1b95f028d36dca3153d879647121d97cee9372e024
-  languageName: node
-  linkType: hard
-
-"react-tooltip@npm:^4.2.21":
-  version: 4.5.0
-  resolution: "react-tooltip@npm:4.5.0"
-  dependencies:
-    prop-types: ^15.8.1
-    uuid: ^7.0.3
-  peerDependencies:
-    react: ">=16.0.0"
-    react-dom: ">=16.0.0"
-  checksum: 94b22b73332fc6b1b4889a3e4103d431b2f067bf2891d76effb54f3ad7fb8d8934f134a3dca50332415d9536ce9b98bdb460732dfa68d046adccca088ee723f7
   languageName: node
   linkType: hard
 

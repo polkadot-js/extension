@@ -349,7 +349,7 @@ export function ScannerContextProvider ({ children }: ScannerContextProviderProp
 
   // signing data with legacy account.
   const signDataLegacy = useCallback(async (savePass: boolean, password = ''): Promise<void> => {
-    const { dataToSign, evmChainId, genesisHash, isEthereumStructure, rawPayload, senderAddress, type } = state;
+    const { dataToSign, evmChainId, genesisHash, isEthereumStructure, isHash, rawPayload, senderAddress, type } = state;
     const sender = !!senderAddress && findAccountByAddress(accounts, senderAddress);
     const info: undefined | number | string = isEthereumStructure ? evmChainId : genesisHash;
     const senderNetwork = getNetworkJsonByInfo(networkMap, isEthereumAddress(senderAddress || ''), isEthereumStructure, info);
@@ -380,6 +380,8 @@ export function ScannerContextProvider ({ children }: ScannerContextProviderProp
           signable = dataToSign;
         } else if (isAscii(dataToSign)) {
           signable = dataToSign;
+        } else if (isHash) {
+          signable = dataToSign;
         } else {
           throw new Error('Signing Error: cannot signing message');
         }
@@ -400,7 +402,7 @@ export function ScannerContextProvider ({ children }: ScannerContextProviderProp
           signable = u8aToHex(dataToSign.toU8a(true));
         } else if (isU8a(dataToSign)) {
           signable = u8aToHex(dataToSign);
-        } else if (isAscii(dataToSign)) {
+        } else if (isAscii(dataToSign) || isHash) {
           signable = dataToSign;
         } else {
           throw new Error('Signing Error: cannot signing message');

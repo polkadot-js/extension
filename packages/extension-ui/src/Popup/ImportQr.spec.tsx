@@ -66,6 +66,7 @@ describe('ImportQr component', () => {
       </MemoryRouter>
     );
 
+    // eslint-disable-next-line @typescript-eslint/no-floating-promises
     act(() => {
       // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
       (wrapper.find('QrScanAddress').first().prop('onScan') as unknown as QrScanAddressProps['onScan'])(mockedAccount);

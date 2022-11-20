@@ -23,8 +23,8 @@
     "@babel/runtime": "^7.20.1",
     "@metamask/detect-provider": "^1.2.0",
     "@polkadot/extension-inject": "^0.44.7-22-x",
-    "@polkadot/types": "^9.8.1",
-    "@polkadot/util": "^10.1.12",
+    "@polkadot/types": "^9.8.2",
+    "@polkadot/util": "^10.1.13",
     "web3": "^1.8.1"
   },
   "peerDependencies": {

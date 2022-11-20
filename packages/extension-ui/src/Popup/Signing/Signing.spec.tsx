@@ -332,6 +332,7 @@ describe('Signing requests', () => {
       wrapper.find('FontAwesomeIcon.arrowRight').simulate('click');
       await act(flushAllPromises);
 
+      // eslint-disable-next-line @typescript-eslint/no-floating-promises
       act(() => {
         emitter.emit('request', [signRequests[0]]);
       });

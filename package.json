@@ -38,8 +38,8 @@
   },
   "devDependencies": {
     "@babel/core": "^7.20.2",
-    "@polkadot/dev": "^0.67.156",
-    "@types/jest": "^29.2.2",
+    "@polkadot/dev": "^0.67.161",
+    "@types/jest": "^29.2.3",
     "i18next-scanner": "^4.1.0",
     "sinon-chrome": "^3.0.1"
   },
@@ -53,6 +53,6 @@
     "@polkadot/x-fetch": "^10.1.12",
     "babel-core": "^7.0.0-bridge.0",
     "safe-buffer": "^5.2.1",
-    "typescript": "^4.8.4"
+    "typescript": "^4.9.3"
   }
 }

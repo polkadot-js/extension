@@ -52,7 +52,7 @@
   "devDependencies": {
     "@babel/cli": "^7.19.3",
     "@babel/core": "^7.19.3",
-    "@polkadot/dev": "^0.65.23",
+    "@polkadot/dev": "^0.67.162",
     "@types/jest": "^27.4.0",
     "axios": "^0.27.2",
     "discord-webhook-node": "^1.1.8",
@@ -62,7 +62,7 @@
     "sinon-chrome": "^3.0.1"
   },
   "resolutions": {
-    "@polkadot/api": "^9.4.3",
+    "@polkadot/api": "^9.9.1",
     "@polkadot/api-contract": "^9.4.3",
     "@polkadot/keyring": "^10.1.9",
     "@polkadot/networks": "^10.1.9",

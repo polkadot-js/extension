@@ -163,7 +163,7 @@ export default class KoniTabs extends Tabs {
 
       if (web3.currentProvider instanceof Web3.providers.WebsocketProvider) {
         if (!web3.currentProvider.connected) {
-          console.log(`[Web3] ${key} is disconected, trying to connect...`);
+          console.log(`[Web3] ${key} is disconnected, trying to connect...`);
           web3.currentProvider.connect();
 
           const poll = (resolve: (value: unknown) => void) => {

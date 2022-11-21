@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { ValidatorInfo } from '@subwallet/extension-base/background/KoniTypes';
+import { CHAIN_TYPES } from '@subwallet/extension-koni-base/api/bonding';
 import { IconMaps } from '@subwallet/extension-koni-ui/assets/icon';
 import { ActionContext, InputFilter } from '@subwallet/extension-koni-ui/components';
 import Spinner from '@subwallet/extension-koni-ui/components/Spinner';
@@ -10,7 +11,6 @@ import useIsNetworkActive from '@subwallet/extension-koni-ui/hooks/screen/home/u
 import { getBondingOptions } from '@subwallet/extension-koni-ui/messaging';
 import Header from '@subwallet/extension-koni-ui/partials/Header';
 import ValidatorItem from '@subwallet/extension-koni-ui/Popup/Bonding/components/ValidatorItem';
-import { CHAIN_TYPE_MAP } from '@subwallet/extension-koni-ui/Popup/Bonding/utils';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import React, { useCallback, useContext, useEffect, useState } from 'react';
@@ -172,9 +172,9 @@ function BondingValidatorSelection ({ className }: Props): React.ReactElement<Pr
   }, [filteredValidators, sliceIndex]);
 
   const getSubHeaderTitle = useCallback(() => {
-    if (CHAIN_TYPE_MAP.astar.includes(bondingParams.selectedNetwork as string)) {
+    if (CHAIN_TYPES.astar.includes(bondingParams.selectedNetwork as string)) {
       return 'Select a dApp';
-    } else if (CHAIN_TYPE_MAP.para.includes(bondingParams.selectedNetwork as string)) {
+    } else if (CHAIN_TYPES.para.includes(bondingParams.selectedNetwork as string)) {
       return 'Select a collator';
     }
 
@@ -281,11 +281,11 @@ export default React.memo(styled(BondingValidatorSelection)(({ theme }: Props) =
     display: flex;
     align-items: center;
   }
-  
+
   .helper-icon {
     color: ${theme.primaryColor}
   }
-  
+
   .helper-icon svg {
     display: block;
     width: 24px;

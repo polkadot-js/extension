@@ -4,6 +4,7 @@
 import { ConfirmationDefinitions, ConfirmationType, NetworkJson } from '@subwallet/extension-base/background/KoniTypes';
 import { AccountJson } from '@subwallet/extension-base/background/types';
 import { AccountContext, ActionContext, Button, ButtonArea, ConfirmationsQueueContext, InputWithLabel, Warning } from '@subwallet/extension-koni-ui/components';
+import { SIGN_MODE } from '@subwallet/extension-koni-ui/constants/signing';
 import useTranslation from '@subwallet/extension-koni-ui/hooks/useTranslation';
 import { completeConfirmation } from '@subwallet/extension-koni-ui/messaging';
 import { Header } from '@subwallet/extension-koni-ui/partials';
@@ -16,7 +17,7 @@ import { RootState, store } from '@subwallet/extension-koni-ui/stores';
 import { NetworkConfigParams } from '@subwallet/extension-koni-ui/stores/types';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { SigData } from '@subwallet/extension-koni-ui/types/accountExternalRequest';
-import { findAccountByAddress } from '@subwallet/extension-koni-ui/util/account';
+import { findAccountByAddress, getSignMode } from '@subwallet/extension-koni-ui/util/account';
 import React, { useCallback, useContext, useEffect, useState } from 'react';
 import { useSelector } from 'react-redux';
 import { RouteComponentProps, withRouter } from 'react-router';
@@ -25,6 +26,8 @@ import styled from 'styled-components';
 interface Props extends RouteComponentProps<{ address: string }>, ThemeProps {
   className?: string;
 }
+
+const CAN_SIGN_MODE: SIGN_MODE[] = [SIGN_MODE.PASSWORD, SIGN_MODE.QR];
 
 function Confirmation ({ className, match: { params: { address } } }: Props): React.ReactElement<Props> {
   const { t } = useTranslation();
@@ -39,7 +42,7 @@ function Confirmation ({ className, match: { params: { address } } }: Props): Re
   const [requestActionText2] = useState<string | undefined>(undefined);
   const [cancelLabel] = useState<string>('Cancel');
   const [confirmLabel, setConfirmLabel] = useState<string>('Confirm');
-  const [currentConfirmation, setCurrentConfirmation] = useState<ConfirmationDefinitions['addNetworkRequest' | 'addTokenRequest' | 'switchNetworkRequest' | 'evmSignatureRequest' | 'evmSignatureRequestQr' | 'evmSendTransactionRequest' | 'evmSendTransactionRequestQr'][0] | undefined>(undefined);
+  const [currentConfirmation, setCurrentConfirmation] = useState<ConfirmationDefinitions['addNetworkRequest' | 'addTokenRequest' | 'switchNetworkRequest' | 'evmSignatureRequest' | 'evmSignatureRequestExternal' | 'evmSendTransactionRequest' | 'evmSendTransactionRequestExternal'][0] | undefined>(undefined);
   const [currentConfirmationType, setCurrentConfirmationType] = useState<ConfirmationType | undefined>(undefined);
   const [informationBlock, setInformationBlock] = useState<React.ReactElement>(<></>);
   const [qrArea, setQrArea] = useState<React.ReactElement>(<></>);
@@ -49,8 +52,8 @@ function Confirmation ({ className, match: { params: { address } } }: Props): Re
   const [error, setError] = useState('');
   const [isWarning, setIsWarning] = useState(false);
   const [isScanning, setIsScanning] = useState(false);
-  const [isReadOnly, setIsReadOnly] = useState(false);
-  const [blockReadOnly, setBlockReadOnly] = useState(false);
+  const [requiredSign, setRequiredSign] = useState(false);
+  const [signMode, setSignMode] = useState<SIGN_MODE>(SIGN_MODE.PASSWORD);
 
   const checkConfirmation = useCallback(
     (type?: ConfirmationType) => {
@@ -64,11 +67,11 @@ function Confirmation ({ className, match: { params: { address } } }: Props): Re
   );
 
   const setConfirmation = useCallback(
-    (confirmation: ConfirmationDefinitions['addNetworkRequest' | 'addTokenRequest' | 'switchNetworkRequest' | 'evmSignatureRequest' | 'evmSendTransactionRequest' | 'evmSignatureRequestQr' | 'evmSendTransactionRequestQr'][0]) => {
+    (confirmation: ConfirmationDefinitions['addNetworkRequest' | 'addTokenRequest' | 'switchNetworkRequest' | 'evmSignatureRequest' | 'evmSendTransactionRequest' | 'evmSignatureRequestExternal' | 'evmSendTransactionRequestExternal'][0]) => {
       if (confirmation) {
         const account = findAccountByAddress(accounts, confirmation.address);
 
-        setIsReadOnly(!!account?.isReadOnly);
+        setSignMode(getSignMode(account));
         setCurrentConfirmation(confirmation);
         setNetwork(networkMap[confirmation.networkKey || '']);
         setAccount(account || undefined);
@@ -137,9 +140,9 @@ function Confirmation ({ className, match: { params: { address } } }: Props): Re
 
   const disableConfirm = useCallback(
     () => {
-      return (requirePassword && password === '') || isLoading || (blockReadOnly && isReadOnly);
+      return (requirePassword && password === '') || isLoading || (requiredSign && !CAN_SIGN_MODE.includes(signMode));
     },
-    [requirePassword, password, isLoading, blockReadOnly, isReadOnly]
+    [requirePassword, password, isLoading, requiredSign, signMode]
   );
 
   useEffect(() => {
@@ -147,7 +150,7 @@ function Confirmation ({ className, match: { params: { address } } }: Props): Re
       const confirmation = Object.values(confirmations.evmSignatureRequest)[0];
 
       setConfirmation(confirmation);
-      setBlockReadOnly(true);
+      setRequiredSign(true);
       setCurrentConfirmationType('evmSignatureRequest');
       setHeader(t<string>('Sign Message'));
       setRequestActionText('request to sign message with');
@@ -156,12 +159,12 @@ function Confirmation ({ className, match: { params: { address } } }: Props): Re
         className='confirmation-info'
         confirmation={confirmation}
       />);
-    } else if (checkConfirmation('evmSignatureRequestQr')) {
-      const confirmation = Object.values(confirmations.evmSignatureRequestQr)[0];
+    } else if (checkConfirmation('evmSignatureRequestExternal')) {
+      const confirmation = Object.values(confirmations.evmSignatureRequestExternal)[0];
 
       setConfirmation(confirmation);
-      setBlockReadOnly(true);
-      setCurrentConfirmationType('evmSignatureRequestQr');
+      setRequiredSign(true);
+      setCurrentConfirmationType('evmSignatureRequestExternal');
       setHeader(t<string>('Sign Message'));
       setRequestActionText('request to sign message with');
       setConfirmLabel(isScanning ? t<string>('Display Payload') : t('Scan Qr'));
@@ -173,7 +176,7 @@ function Confirmation ({ className, match: { params: { address } } }: Props): Re
       const confirmation = Object.values(confirmations.evmSendTransactionRequest)[0];
 
       setConfirmation(confirmation);
-      setBlockReadOnly(true);
+      setRequiredSign(true);
       setCurrentConfirmationType('evmSendTransactionRequest');
       setHeader(t<string>('Send Transaction'));
       setRequestActionText(t<string>('request to send transaction from'));
@@ -184,12 +187,12 @@ function Confirmation ({ className, match: { params: { address } } }: Props): Re
         confirmation={confirmation}
         network={network}
       />);
-    } else if (checkConfirmation('evmSendTransactionRequestQr')) {
-      const confirmation = Object.values(confirmations.evmSendTransactionRequestQr)[0];
+    } else if (checkConfirmation('evmSendTransactionRequestExternal')) {
+      const confirmation = Object.values(confirmations.evmSendTransactionRequestExternal)[0];
 
       setConfirmation(confirmation);
-      setBlockReadOnly(true);
-      setCurrentConfirmationType('evmSendTransactionRequestQr');
+      setRequiredSign(true);
+      setCurrentConfirmationType('evmSendTransactionRequestExternal');
       setHeader(t<string>('Send Transaction'));
       setRequestActionText(t<string>('request to send transaction from'));
       setHeader(t<string>('Send Transaction'));
@@ -206,7 +209,7 @@ function Confirmation ({ className, match: { params: { address } } }: Props): Re
       const { id, payload } = confirmation;
 
       setConfirmation(confirmation);
-      setBlockReadOnly(false);
+      setRequiredSign(false);
       setCurrentConfirmationType('addNetworkRequest');
 
       payload.requestId = id;
@@ -217,7 +220,7 @@ function Confirmation ({ className, match: { params: { address } } }: Props): Re
       const { payload } = confirmation;
 
       setConfirmation(confirmation);
-      setBlockReadOnly(false);
+      setRequiredSign(false);
       setCurrentConfirmationType('addTokenRequest');
 
       if (payload.type === 'erc20') {
@@ -229,7 +232,7 @@ function Confirmation ({ className, match: { params: { address } } }: Props): Re
       const confirmation = Object.values(confirmations.switchNetworkRequest)[0];
 
       setConfirmation(confirmation);
-      setBlockReadOnly(false);
+      setRequiredSign(false);
       setCurrentConfirmationType('switchNetworkRequest');
       setHeader(t<string>('Switch network'));
       setRequestActionText(t<string>('request to switch network of'));
@@ -240,20 +243,23 @@ function Confirmation ({ className, match: { params: { address } } }: Props): Re
       />);
     }
 
-    if (checkConfirmation('evmSendTransactionRequestQr') || checkConfirmation('evmSignatureRequestQr')) {
-      const confirmation = checkConfirmation('evmSendTransactionRequestQr') ? Object.values(confirmations.evmSendTransactionRequestQr)[0] : Object.values(confirmations.evmSignatureRequestQr)[0];
-      const isMessage = !checkConfirmation('evmSendTransactionRequestQr');
+    if (checkConfirmation('evmSendTransactionRequestExternal') || checkConfirmation('evmSignatureRequestExternal')) {
+      const confirmation = checkConfirmation('evmSendTransactionRequestExternal') ? Object.values(confirmations.evmSendTransactionRequestExternal)[0] : Object.values(confirmations.evmSignatureRequestExternal)[0];
+      const isMessage = !checkConfirmation('evmSendTransactionRequestExternal');
 
-      setQrArea(
-        <Qr
-          confirmation={confirmation}
-          isLoading={isLoading}
-          isMessage={isMessage}
-          isScanning={isScanning}
-          onError={setError}
-          onScan={onSignature}
-        />
-      );
+      if (signMode === SIGN_MODE.QR) {
+        setQrArea(
+          <Qr
+            confirmation={confirmation}
+            isLoading={isLoading}
+            isMessage={isMessage}
+            isScanning={isScanning}
+            onError={setError}
+            onScan={onSignature}
+          />
+        );
+      }
+
       setIsWarning(!confirmation.payload.canSign);
     } else {
       setQrArea(
@@ -261,7 +267,7 @@ function Confirmation ({ className, match: { params: { address } } }: Props): Re
       );
       setIsWarning(false);
     }
-  }, [confirmations, checkConfirmation, onAction, t, networkMap, accounts, network, setConfirmation, isLoading, isScanning, onSignature]);
+  }, [confirmations, checkConfirmation, onAction, t, networkMap, accounts, network, setConfirmation, isLoading, isScanning, onSignature, signMode]);
 
   return (<>
     <div className={className}>
@@ -282,16 +288,16 @@ function Confirmation ({ className, match: { params: { address } } }: Props): Re
           {informationBlock}
           {qrArea}
         </div>
-        {isWarning &&
+        {(isWarning || (requiredSign && ![...CAN_SIGN_MODE, SIGN_MODE.READ_ONLY].includes(signMode))) &&
           (
             <div className='warning-area'>
               <Warning>
-                This method is not currently supported
+                {t('This feature is not available for the chosen account.')}
               </Warning>
             </div>
           )
         }
-        {blockReadOnly && isReadOnly &&
+        {(requiredSign && signMode === SIGN_MODE.READ_ONLY) &&
           (
             <div className='warning-area'>
               <Warning>

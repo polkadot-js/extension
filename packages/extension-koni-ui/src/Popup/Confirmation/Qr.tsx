@@ -20,7 +20,7 @@ interface Props extends ThemeProps {
   isLoading: boolean;
   isScanning: boolean;
   isMessage: boolean;
-  confirmation: ConfirmationDefinitions['evmSendTransactionRequestQr' | 'evmSignatureRequestQr'][0];
+  confirmation: ConfirmationDefinitions['evmSendTransactionRequestExternal' | 'evmSignatureRequestExternal'][0];
 }
 
 const Qr = (props: Props) => {
@@ -33,7 +33,7 @@ const Qr = (props: Props) => {
   const payload = useMemo((): Uint8Array => {
     const _raw = confirmation.payload;
 
-    return u8aToU8a(_raw.qrPayload);
+    return u8aToU8a(_raw.hashPayload);
   }, [confirmation]);
 
   const canSign = useMemo((): boolean => {

@@ -1088,7 +1088,7 @@ export interface ConfirmationResult<T> {
   password?: string;
 }
 
-export interface ConfirmationResultQr<T> extends ConfirmationResult<T>{
+export interface ConfirmationResultExternal<T> extends ConfirmationResult<T>{
   signature: `0x${string}`;
 }
 
@@ -1096,25 +1096,23 @@ export interface EvmSendTransactionRequest extends TransactionConfig {
   estimateGas: string;
 }
 
-export interface EvmRequestQr {
-  qrPayload: string;
+export interface EvmRequestExternal {
+  hashPayload: string;
   canSign: boolean;
 }
 
-export interface EvmSendTransactionRequestQr extends TransactionConfig, EvmRequestQr {
-  estimateGas: string;
-}
+export interface EvmSendTransactionRequestExternal extends EvmSendTransactionRequest, EvmRequestExternal {}
 
-export interface EvmSignatureRequestQr extends EvmSignatureRequest, EvmRequestQr {}
+export interface EvmSignatureRequestExternal extends EvmSignatureRequest, EvmRequestExternal {}
 
 export interface ConfirmationDefinitions {
   addNetworkRequest: [ConfirmationsQueueItem<NetworkJson>, ConfirmationResult<NetworkJson>],
   addTokenRequest: [ConfirmationsQueueItem<CustomToken>, ConfirmationResult<boolean>],
   switchNetworkRequest: [ConfirmationsQueueItem<SwitchNetworkRequest>, ConfirmationResult<boolean>],
   evmSignatureRequest: [ConfirmationsQueueItem<EvmSignatureRequest>, ConfirmationResult<string>],
-  evmSignatureRequestQr: [ConfirmationsQueueItem<EvmSignatureRequestQr>, ConfirmationResultQr<string>],
+  evmSignatureRequestExternal: [ConfirmationsQueueItem<EvmSignatureRequestExternal>, ConfirmationResultExternal<string>],
   evmSendTransactionRequest: [ConfirmationsQueueItem<EvmSendTransactionRequest>, ConfirmationResult<boolean>]
-  evmSendTransactionRequestQr: [ConfirmationsQueueItem<EvmSendTransactionRequestQr>, ConfirmationResultQr<boolean>]
+  evmSendTransactionRequestExternal: [ConfirmationsQueueItem<EvmSendTransactionRequestExternal>, ConfirmationResultExternal<boolean>]
 }
 
 export type ConfirmationType = keyof ConfirmationDefinitions;
@@ -1145,6 +1143,12 @@ export interface ValidatorInfo {
   isNominated: boolean; // this validator has been staked to before
   icon?: string;
   hasScheduledRequest?: boolean; // for parachain, can't stake more on a collator that has existing scheduled request
+}
+
+export interface ExtraDelegationInfo {
+  chain: string;
+  address: string;
+  collatorAddress: string;
 }
 
 export interface BasicTxInfo {

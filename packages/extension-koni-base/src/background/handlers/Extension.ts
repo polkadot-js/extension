@@ -10,7 +10,7 @@ import { AccountJson, AuthorizeRequest, MessageTypes, RequestAccountForget, Requ
 import { PASSWORD_EXPIRY_MS } from '@subwallet/extension-base/defaults';
 import { SignerExternal, SignerType } from '@subwallet/extension-base/signers/types';
 import { getId } from '@subwallet/extension-base/utils/getId';
-import { getBondingExtrinsic, getBondingTxInfo, getChainBondingBasics, getClaimRewardExtrinsic, getClaimRewardTxInfo, getDelegationInfo, getUnbondingExtrinsic, getUnbondingTxInfo, getValidatorsInfo, getWithdrawalExtrinsic, getWithdrawalTxInfo } from '@subwallet/extension-koni-base/api/bonding';
+import { CHAIN_TYPES, getBondingExtrinsic, getBondingTxInfo, getChainBondingBasics, getClaimRewardExtrinsic, getClaimRewardTxInfo, getDelegationInfo, getUnbondingExtrinsic, getUnbondingTxInfo, getValidatorsInfo, getWithdrawalExtrinsic, getWithdrawalTxInfo } from '@subwallet/extension-koni-base/api/bonding';
 import { checkTuringStakeCompoundingTask, getTuringCancelCompoundingExtrinsic, getTuringCompoundExtrinsic, handleTuringCancelCompoundTxInfo, handleTuringCompoundTxInfo } from '@subwallet/extension-koni-base/api/bonding/paraChain';
 import { initApi } from '@subwallet/extension-koni-base/api/dotsama';
 import { getFreeBalance, subscribeFreeBalance } from '@subwallet/extension-koni-base/api/dotsama/balance';
@@ -3552,12 +3552,22 @@ export default class KoniExtension extends Extension {
   private async getBondingOption ({ address, networkKey }: BondingOptionParams): Promise<BondingOptionInfo> {
     const apiProps = state.getDotSamaApi(networkKey);
     const networkJson = state.getNetworkMapByKey(networkKey);
+    let extraCollatorAddress;
+
+    if (CHAIN_TYPES.amplitude.includes(networkKey)) {
+      const extraDelegationInfo = await state.getExtraDelegationInfo(networkKey, address);
+
+      if (extraDelegationInfo) {
+        extraCollatorAddress = extraDelegationInfo.collatorAddress;
+      }
+    }
+
     const { bondedValidators,
       era,
       isBondedBefore,
       maxNominations,
       maxNominatorPerValidator,
-      validatorsInfo } = await getValidatorsInfo(networkKey, apiProps, networkJson.decimals as number, address);
+      validatorsInfo } = await getValidatorsInfo(networkKey, apiProps, networkJson.decimals as number, address, extraCollatorAddress);
 
     return {
       maxNominatorPerValidator,
@@ -3572,7 +3582,6 @@ export default class KoniExtension extends Extension {
   private async getBondingTxInfo ({ amount,
     bondedValidators,
     isBondedBefore,
-    lockPeriod,
     networkKey,
     nominatorAddress,
     validatorInfo }: BondingSubmitParams): Promise<BasicTxInfo> {
@@ -3584,7 +3593,6 @@ export default class KoniExtension extends Extension {
   private async submitBonding (id: string, port: chrome.runtime.Port, { amount,
     bondedValidators,
     isBondedBefore,
-    lockPeriod,
     networkKey,
     nominatorAddress,
     password,
@@ -3639,6 +3647,10 @@ export default class KoniExtension extends Extension {
       txState.txError = true;
 
       return txState;
+    }
+
+    if (CHAIN_TYPES.amplitude.includes(networkKey)) {
+      state.setExtraDelegationInfo(networkKey, address, validatorAddress as string);
     }
 
     const callback = createSubscription<'pri(unbonding.submitTransaction)'>(id, port);

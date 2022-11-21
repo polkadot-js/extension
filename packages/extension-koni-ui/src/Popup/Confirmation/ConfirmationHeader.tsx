@@ -40,17 +40,19 @@ function ConfirmationHeader ({ account, className, confirmation, network, reques
     </div>}
     <div className='header__acc-network'>
       {account &&
-      <AccountInfoEl
-        address={account.address}
-        className='header__account'
-        genesisHash={network?.genesisHash}
-        iconSize={20}
-        isEthereum={true}
-        isShowAddress={false}
-        isShowBanner={false}
-        name={account.name}
-        showCopyBtn={false}
-      />
+        <div>
+          <AccountInfoEl
+            address={account.address}
+            className='header__account'
+            genesisHash={network?.genesisHash}
+            iconSize={20}
+            isEthereum={true}
+            isShowAddress={false}
+            isShowBanner={false}
+            name={account.name}
+            showCopyBtn={false}
+          />
+        </div>
       }
       {account && network && <div className='acc-network-connector'>{t<string>('on')}</div>}
       {network && networkKey && <div className='header__network'>

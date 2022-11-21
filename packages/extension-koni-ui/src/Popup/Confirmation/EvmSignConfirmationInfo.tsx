@@ -8,6 +8,8 @@ import CN from 'classnames';
 import React, { useCallback, useEffect, useState } from 'react';
 import styled from 'styled-components';
 
+import { isAscii, u8aToString, u8aUnwrapBytes } from '@polkadot/util';
+
 interface Props extends ThemeProps {
   className?: string;
   confirmation: ConfirmationsQueue['evmSignatureRequest'][0];
@@ -48,9 +50,14 @@ function EvmSignConfirmationInfo ({ className, confirmation: { payload } }: Prop
 
   const renderData = useCallback((data: any, needFilter?: boolean) => {
     if (typeof data !== 'object') {
+      const raw = data as string;
+      const text = isAscii(raw)
+        ? u8aToString(u8aUnwrapBytes(raw))
+        : raw;
+
       return (
         <div className='content'>
-          {data as string}
+          {text}
         </div>
       );
     } else {

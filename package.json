@@ -52,7 +52,7 @@
   "devDependencies": {
     "@babel/cli": "^7.19.3",
     "@babel/core": "^7.19.3",
-    "@polkadot/dev": "^0.67.162",
+    "@polkadot/dev": "^0.65.23",
     "@types/jest": "^27.4.0",
     "axios": "^0.27.2",
     "discord-webhook-node": "^1.1.8",

@@ -9,8 +9,6 @@ import { Codec } from '@polkadot/types/types';
 import { BN, BN_ZERO } from '@polkadot/util';
 
 function getSingleStakingAmplitude (parentApi: ApiProps, address: string, networks: Record<string, NetworkJson>, chain: string, callback: (networkKey: string, rs: StakingItem) => void) {
-  console.log('subscribe single amplitude');
-
   return parentApi.api.queryMulti([
     [parentApi.api.query.parachainStaking.delegatorState, address],
     [parentApi.api.query.parachainStaking.unstaking, address]
@@ -64,8 +62,6 @@ function getSingleStakingAmplitude (parentApi: ApiProps, address: string, networ
 }
 
 function getMultiStakingAmplitude (parentApi: ApiProps, useAddresses: string[], networks: Record<string, NetworkJson>, chain: string, callback: (networkKey: string, rs: StakingItem) => void) {
-  console.log('subscribe multi amplitude');
-
   return parentApi.api.query.parachainStaking.delegatorState.multi(useAddresses, async (ledgers: Codec[]) => {
     if (ledgers) {
       const _unstakingStates = await parentApi.api.query.parachainStaking.unstaking.multi(useAddresses);

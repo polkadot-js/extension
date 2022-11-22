@@ -418,6 +418,16 @@ export default class KoniState extends State {
         });
       }
 
+      let defaultEvmNetworkKey: string | undefined;
+
+      if (accountAuthType === 'both' || accountAuthType === 'evm') {
+        const defaultNetworkJson = Object.values(this.getNetworkMap()).find((network) => (network.isEthereum && network.active));
+
+        if (defaultNetworkJson) {
+          defaultEvmNetworkKey = defaultNetworkJson.key;
+        }
+      }
+
       this.getAuthorize((value) => {
         let authorizeList = {} as AuthUrls;
 
@@ -443,7 +453,8 @@ export default class KoniState extends State {
           isAllowedMap,
           origin,
           url,
-          accountAuthType: (existed && existed.accountAuthType !== accountAuthType) ? 'both' : accountAuthType
+          accountAuthType: (existed && existed.accountAuthType !== accountAuthType) ? 'both' : accountAuthType,
+          currentEvmNetworkKey: existed ? existed.currentEvmNetworkKey : defaultEvmNetworkKey
         };
 
         this.setAuthorize(authorizeList, () => {

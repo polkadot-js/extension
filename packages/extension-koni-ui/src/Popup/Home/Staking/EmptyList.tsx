@@ -13,7 +13,7 @@ interface Props extends ThemeProps {
 
 function StakingEmptyList ({ className, isCanSign }: Props): React.ReactElement {
   const getText = useCallback(() => {
-    if (isCanSign) {
+    if (!isCanSign) {
       return 'No staking data was recorded';
     }
 

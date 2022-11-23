@@ -7,7 +7,7 @@ import { Button, Checkbox, Spinner } from '@subwallet/extension-koni-ui/componen
 import { ScannerContext } from '@subwallet/extension-koni-ui/contexts/ScannerContext';
 import { useGetNetworkQrRequest } from '@subwallet/extension-koni-ui/hooks/useGetNetworkQrRequest';
 import useTranslation from '@subwallet/extension-koni-ui/hooks/useTranslation';
-import { qrIsLocked } from '@subwallet/extension-koni-ui/messaging';
+import { accountIsLocked } from '@subwallet/extension-koni-ui/messaging';
 import AccountInfo from '@subwallet/extension-koni-ui/Popup/ExternalRequest/Shared/AccountInfo';
 import Unlock from '@subwallet/extension-koni-ui/Popup/Signing/Unlock';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
@@ -65,7 +65,7 @@ const SignQR = (props: Props) => {
     setIsLocked(true);
     let timeout: NodeJS.Timeout;
 
-    senderAddress && qrIsLocked(senderAddress)
+    senderAddress && accountIsLocked(senderAddress)
       .then(({ isLocked, remainingTime }) => {
         setIsLocked(isLocked);
         timeout = setTimeout(() => {

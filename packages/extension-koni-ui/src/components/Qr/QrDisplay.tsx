@@ -7,8 +7,8 @@ import React, { useEffect, useMemo, useRef, useState } from 'react';
 import styled from 'styled-components';
 
 import { qrcode } from '@polkadot/react-qr/qrcode';
-import { createFrames, createImgSize } from '@polkadot/react-qr/util';
-import { objectSpread } from '@polkadot/util';
+import { createImgSize, encodeNumber } from '@polkadot/react-qr/util';
+import { objectSpread, u8aConcat } from '@polkadot/util';
 import { xxhashAsHex } from '@polkadot/util-crypto';
 
 interface Props extends ThemeProps{
@@ -21,6 +21,20 @@ interface Props extends ThemeProps{
 
 const FRAME_DELAY = 2500;
 const TIMER_INC = 500;
+const MULTIPART = new Uint8Array([0]);
+const FRAME_SIZE = 512;
+
+function createFrames (input: Uint8Array): Uint8Array[] {
+  const frames = [];
+  let idx = 0;
+
+  while (idx < input.length) {
+    frames.push(input.subarray(idx, idx + FRAME_SIZE));
+    idx += FRAME_SIZE;
+  }
+
+  return frames.map((frame, index) => u8aConcat(MULTIPART, encodeNumber(frames.length), encodeNumber(index), frame));
+}
 
 function getDataUrl (value: Uint8Array): string {
   const qr = qrcode(0, 'M'); // HACK See our qrcode stringToBytes override as used internally. This

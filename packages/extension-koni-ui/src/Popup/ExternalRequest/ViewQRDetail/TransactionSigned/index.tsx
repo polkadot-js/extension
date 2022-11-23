@@ -18,7 +18,6 @@ interface Props extends ThemeProps{
 
 const TransactionSigned = (props: Props) => {
   const { className, network } = props;
-  // eslint-disable-next-line no-empty-pattern
   const { state: { isEthereumStructure } } = useContext<ScannerContextType>(ScannerContext);
 
   return (
@@ -26,7 +25,7 @@ const TransactionSigned = (props: Props) => {
       {
         isEthereumStructure
           ? (
-            <TransactionDetail network={network} />
+            <TransactionDetail />
           )
           : (
             <PayloadDetail network={network} />

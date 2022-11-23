@@ -47,7 +47,25 @@ export interface Props {
   accountSplitPart?: 'both' | 'left' | 'right';
 }
 
-function AccountInfo ({ accountSplitPart = 'both', address, addressHalfLength = 10, className, genesisHash, iconSize = 32, isEthereum, isExternal, isHardware, isReadOnly, isSelected, isShowAddress = true, isShowBanner = true, name, originGenesisHash, parentName, showCopyBtn = true, suri, type: givenType }: Props): React.ReactElement<Props> {
+function AccountInfo ({ accountSplitPart = 'both',
+  address,
+  addressHalfLength = 10,
+  className,
+  genesisHash,
+  iconSize = 32,
+  isEthereum,
+  isExternal,
+  isHardware,
+  isReadOnly,
+  isSelected,
+  isShowAddress = true,
+  isShowBanner = true,
+  name,
+  originGenesisHash,
+  parentName,
+  showCopyBtn = true,
+  suri,
+  type: givenType }: Props): React.ReactElement<Props> {
   const { t } = useTranslation();
   const { accounts } = useContext(AccountContext);
   const [{ account,
@@ -243,47 +261,51 @@ function AccountInfo ({ accountSplitPart = 'both', address, addressHalfLength = 
               </div>
             )}
           </div>
-          <div className='info-part'>
-            <div className='account-info-address-display'>
-              {isShowAddress && (
-                <div
-                  className='account-info-full-address'
-                  data-field='address'
-                >
-                  {_isAccountAll ? t<string>('All Accounts') : toShortAddress(formatted || address || t('<unknown>'), addressHalfLength)}
+          {
+            !_isAccountAll && (
+              <div className='info-part'>
+                <div className='account-info-address-display'>
+                  {isShowAddress && (
+                    <div
+                      className='account-info-full-address'
+                      data-field='address'
+                    >
+                      {toShortAddress(formatted || address || t('<unknown>'), addressHalfLength)}
+                    </div>
+                  )}
+                  {
+                    showCopyBtn && (
+                      <CopyToClipboard text={(formatted && formatted) || ''}>
+                        <img
+                          alt='copy'
+                          className='account-info-copy-icon'
+                          onClick={_onCopy}
+                          src={cloneLogo}
+                        />
+                      </CopyToClipboard>
+                    )
+                  }
                 </div>
-              )}
-              {
-                showCopyBtn && (
-                  <CopyToClipboard text={(formatted && formatted) || ''}>
-                    <img
-                      alt='copy'
-                      className='account-info-copy-icon'
-                      onClick={_onCopy}
-                      src={cloneLogo}
+                {parentName && (
+                  <div className='account-info-derive-name'>
+                    <FontAwesomeIcon
+                      className='account-info-derive-icon'
+                      fontSize={16}
+                      icon={faCodeMerge}
                     />
-                  </CopyToClipboard>
-                )
-              }
-            </div>
-            {parentName && (
-              <div className='account-info-derive-name'>
-                <FontAwesomeIcon
-                  className='account-info-derive-icon'
-                  fontSize={16}
-                  icon={faCodeMerge}
-                />
-                <div
-                  className='account-info-parent-name'
-                  data-field='parent'
-                  title={parentNameSuri}
-                >
-                  <span className='account-parent-name'>{parentName}</span>
-                  <span className='account-suri'>&nbsp;{suri}</span>
-                </div>
+                    <div
+                      className='account-info-parent-name'
+                      data-field='parent'
+                      title={parentNameSuri}
+                    >
+                      <span className='account-parent-name'>{parentName}</span>
+                      <span className='account-suri'>&nbsp;{suri}</span>
+                    </div>
+                  </div>
+                )}
               </div>
-            )}
-          </div>
+            )
+          }
         </div>
       </div>
     </div>

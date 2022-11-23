@@ -3,7 +3,7 @@
 
 import stackingEmptyData from '@subwallet/extension-koni-ui/assets/stacking-empty-list.png';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
-import React, { useCallback } from 'react';
+import React from 'react';
 import styled from 'styled-components';
 
 interface Props extends ThemeProps {
@@ -12,14 +12,6 @@ interface Props extends ThemeProps {
 }
 
 function StakingEmptyList ({ className, isCanSign }: Props): React.ReactElement {
-  const getText = useCallback(() => {
-    if (!isCanSign) {
-      return 'No staking data was recorded';
-    }
-
-    return '';
-  }, [isCanSign]);
-
   return (
     <div className={`${className || ''} empty-list stacking-empty-list`}>
       <img
@@ -27,9 +19,7 @@ function StakingEmptyList ({ className, isCanSign }: Props): React.ReactElement 
         className='empty-list__img'
         src={stackingEmptyData}
       />
-      {
-        (isCanSign) && <div className={'empty-list__text'}>{getText()}</div>
-      }
+      {!isCanSign && <div className={'empty-list__text'}>No staking data was recorded</div>}
     </div>
   );
 }

@@ -27,7 +27,7 @@ const QRScanner = (props: Props) => {
 
   const { t } = useTranslation();
 
-  const { clearMultipartProgress, state: { completedFramesCount, totalFrameCount } } = useContext(ScannerContext);
+  const { cleanup, clearMultipartProgress, state: { completedFramesCount, totalFrameCount } } = useContext(ScannerContext);
 
   const [error, setError] = useState<string>('');
 
@@ -61,8 +61,22 @@ const QRScanner = (props: Props) => {
     }
   }, []);
 
+  useEffect(() => {
+    cleanup();
+  }, [cleanup]);
+
   return (
     <div className={CN(className)}>
+      {
+        error && (
+          <Warning
+            className='item-error'
+            isDanger
+          >
+            {t<string>(error)}
+          </Warning>
+        )
+      }
       <div className={'scanner-wrapper'}>
         <div className={'scanner'}>
           <QrReader
@@ -86,18 +100,8 @@ const QRScanner = (props: Props) => {
             <div className='progress-text'>
               {completedFramesCount} / { totalFrameCount}
             </div>
-            <Button onClick={onStartOver}>Start over</Button>
+            <Button className='start-over-button' onClick={onStartOver}>Start over</Button>
           </div>
-        )
-      }
-      {
-        error && (
-          <Warning
-            className='item-error'
-            isDanger
-          >
-            {t<string>(error)}
-          </Warning>
         )
       }
     </div>
@@ -107,11 +111,11 @@ const QRScanner = (props: Props) => {
 export default React.memo(styled(QRScanner)(({ theme }: Props) => `
 
   .item-error {
-    margin: 10px 15px;
+    margin: 16px 15px 8px;
   }
 
   .scanner-wrapper {
-    padding: 5px 40px 0 40px;
+    padding: 5px 15px 0;
     position: relative;
 
     .scanner{
@@ -142,8 +146,8 @@ export default React.memo(styled(QRScanner)(({ theme }: Props) => `
   }
 
   .progress-container {
-    width: 380px;
-    margin: 20px auto 0;
+    width: 100%;
+    padding: 8px 15px 16px;
 
     .progress-text {
       font-style: normal;
@@ -153,6 +157,11 @@ export default React.memo(styled(QRScanner)(({ theme }: Props) => `
       text-align: right;
       color: ${theme.textColor};
       margin-bottom: 8px;
+    }
+
+    .start-over-button {
+      width: 170px;
+      margin: auto;
     }
   }
 `));

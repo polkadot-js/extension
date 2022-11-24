@@ -18,15 +18,6 @@ export const DEFAULT_WASM_TOKENS: WasmTokenJson = {
       decimals: 12,
       type: CustomTokenType.psp22,
       isCustom: true
-    },
-    {
-      name: 'ZSTAKE',
-      smartContract: '5DCkBARoK2GhoaA1HmoqMGdB1wuevCSA4dpMKGNGomh9S9r6',
-      chain: 'alephTest',
-      symbol: 'ZSTAKE',
-      decimals: 12,
-      type: CustomTokenType.psp22,
-      isCustom: true
     }
   ],
   psp34: [

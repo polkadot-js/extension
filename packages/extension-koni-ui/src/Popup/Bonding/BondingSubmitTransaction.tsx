@@ -159,6 +159,7 @@ function BondingSubmitTransaction ({ className }: Props): React.ReactElement<Pro
 
   const goHome = useCallback(() => {
     navigate('/');
+    window.localStorage.setItem('popupNavigation', '/');
   }, [navigate]);
 
   const handleClickCancel = useCallback(() => {

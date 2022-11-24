@@ -197,7 +197,7 @@ function UnbondingSubmitTransaction ({ className }: Props): React.ReactElement<P
   }, [navigate]);
 
   const _getUnbondAll = useCallback(() => {
-    const _amount = amount * (10 ** (networkJson.decimals as number));
+    const _amount = Math.round(amount * (10 ** (networkJson.decimals as number)));
     const bnAmount = new BN(_amount.toString());
     const isAmountEqualAll = bnAmount.eq(new BN(nominatedAmount));
 
@@ -206,7 +206,7 @@ function UnbondingSubmitTransaction ({ className }: Props): React.ReactElement<P
 
   const handleConfirm = useCallback(() => {
     setLoading(true);
-    const _amount = amount * (10 ** (networkJson.decimals as number));
+    const _amount = Math.round(amount * (10 ** (networkJson.decimals as number)));
     const bnAmount = new BN(_amount.toString());
     const isAmountEqualAll = bnAmount.eq(new BN(nominatedAmount));
 

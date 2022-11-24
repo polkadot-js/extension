@@ -299,7 +299,7 @@ export async function getRelayUnbondingTxInfo (dotSamaApi: ApiProps, amount: BN,
 
 export async function getRelayUnbondingExtrinsic (dotSamaApi: ApiProps, amount: number, networkJson: NetworkJson) {
   const apiPromise = await dotSamaApi.isReady;
-  const parsedAmount = amount * (10 ** (networkJson.decimals as number));
+  const parsedAmount = Math.floor(amount * (10 ** (networkJson.decimals as number)));
   const binaryAmount = new BN(parsedAmount.toString());
 
   const chillTx = apiPromise.api.tx.staking.chill();
@@ -311,7 +311,7 @@ export async function getRelayUnbondingExtrinsic (dotSamaApi: ApiProps, amount: 
 export async function handleRelayUnbondingTxInfo (address: string, amount: number, networkKey: string, dotSamaApiMap: Record<string, ApiProps>, web3ApiMap: Record<string, Web3>, networkJson: NetworkJson) {
   try {
     const dotSamaApi = dotSamaApiMap[networkKey];
-    const parsedAmount = amount * (10 ** (networkJson.decimals as number));
+    const parsedAmount = Math.floor(amount * (10 ** (networkJson.decimals as number)));
     const binaryAmount = new BN(parsedAmount.toString());
 
     const [txInfo, balance] = await Promise.all([

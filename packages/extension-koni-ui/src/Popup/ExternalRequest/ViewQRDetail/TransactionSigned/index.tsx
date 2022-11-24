@@ -25,10 +25,10 @@ const TransactionSigned = (props: Props) => {
       {
         isEthereumStructure
           ? (
-            <TransactionDetail />
+            <TransactionDetail network={network} />
           )
           : (
-            <PayloadDetail network={network} />
+            <PayloadDetail />
           )
       }
     </div>

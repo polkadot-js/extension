@@ -72,8 +72,8 @@ const useCreateQrPayload = (value: Uint8Array, skipEncoding?: boolean): { images
         clearTimeout(
           typeof timerRef.current.timerId === 'number'
             ? timerRef.current.timerId
-            : // eslint-disable-next-line react-hooks/exhaustive-deps
-            timerRef.current.timerId[Symbol.toPrimitive]()
+            // eslint-disable-next-line react-hooks/exhaustive-deps
+            : timerRef.current.timerId[Symbol.toPrimitive]()
         );
     };
   }, []);

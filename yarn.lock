@@ -5098,6 +5098,16 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@ramonak/react-progress-bar@npm:^5.0.3":
+  version: 5.0.3
+  resolution: "@ramonak/react-progress-bar@npm:5.0.3"
+  peerDependencies:
+    react: ^16.0.0 || ^17 || ^18
+    react-dom: ^16.0.0 || ^17 || ^18
+  checksum: e041fa20749448eb46ef4a4abb6e6b7a1fd0dee4e75005e838a6cf7f0f42f1c8096c6a237986a5bfd531dd75995d3268ca713f1a5a5146496b8baaf99b2ddf3d
+  languageName: node
+  linkType: hard
+
 "@reduxjs/toolkit@npm:^1.8.5":
   version: 1.9.0
   resolution: "@reduxjs/toolkit@npm:1.9.0"
@@ -5797,6 +5807,7 @@ __metadata:
     "@polkadot/ui-settings": ^2.9.13
     "@polkadot/util": ^10.1.13
     "@polkadot/util-crypto": ^10.1.13
+    "@ramonak/react-progress-bar": ^5.0.3
     "@reduxjs/toolkit": ^1.8.5
     "@subwallet/extension-base": ^0.7.2-1
     "@subwallet/extension-chains": ^0.7.2-1

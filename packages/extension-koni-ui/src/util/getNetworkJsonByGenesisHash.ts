@@ -23,6 +23,28 @@ export const getNetworkJsonByGenesisHash = (networkMap: Record<string, NetworkJs
   return null;
 };
 
+export const findNetworkJsonByGenesisHash = (
+  networkMap: Record<string, NetworkJson>,
+  hash?: string | null,
+  forceEthereum?: boolean
+): NetworkJson | null => {
+  if (!hash) {
+    return null;
+  }
+
+  const networks = Object.values(networkMap);
+
+  const filtered = networks.filter((network) => network.genesisHash.toLowerCase().includes(hash.toLowerCase()));
+
+  if (filtered.length === 1) {
+    return filtered[0];
+  } else if (filtered.length > 1) {
+    return filtered.find((network) => !!network.isEthereum === !!forceEthereum) || null;
+  }
+
+  return null;
+};
+
 export const getNetworkKeyByGenesisHash = (networkMap: Record<string, NetworkJson>, hash?: string | null): string | null => {
   if (!hash) {
     return null;

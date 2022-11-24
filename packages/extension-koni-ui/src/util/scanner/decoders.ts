@@ -2,11 +2,13 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { NetworkJson } from '@subwallet/extension-base/background/KoniTypes';
+import { AccountJson } from '@subwallet/extension-base/background/types';
 import { EthereumParsedData, ParsedData, SubstrateCompletedParsedData, SubstrateMultiParsedData } from '@subwallet/extension-koni-ui/types/scanner';
-import { getNetworkJsonByGenesisHash } from '@subwallet/extension-koni-ui/util/getNetworkJsonByGenesisHash';
+import { findAccountByAddress } from '@subwallet/extension-koni-ui/util/account';
+import { findNetworkJsonByGenesisHash } from '@subwallet/extension-koni-ui/util/getNetworkJsonByGenesisHash';
 
 import { compactFromU8a, hexStripPrefix, hexToU8a, u8aToHex } from '@polkadot/util';
-import { blake2AsHex, encodeAddress } from '@polkadot/util-crypto';
+import { blake2AsHex } from '@polkadot/util-crypto';
 
 import strings from '../../constants/strings';
 
@@ -72,7 +74,7 @@ export const rawDataToU8A = (rawData: string): Uint8Array | null => {
   return bytes;
 };
 
-export const constructDataFromBytes = (bytes: Uint8Array, multipartComplete = false, networkMap: Record<string, NetworkJson>): ParsedData => {
+export const constructDataFromBytes = (bytes: Uint8Array, multipartComplete = false, networkMap: Record<string, NetworkJson>, accounts: AccountJson[]): ParsedData => {
   const frameInfo = hexStripPrefix(u8aToHex(bytes.slice(0, 5)));
   const frameCount = parseInt(frameInfo.substr(2, 4), 16);
   const isMultipart = frameCount > 1; // for simplicity, even single frame payloads are marked as multipart.
@@ -153,28 +155,28 @@ export const constructDataFromBytes = (bytes: Uint8Array, multipartComplete = fa
          */
 
         try {
-          data.data.crypto =
-            firstByte === CRYPTO_ED25519
-              ? 'ed25519'
-              : firstByte === CRYPTO_SR25519
-                ? 'sr25519'
-                : null;
+          data.data.crypto = firstByte === CRYPTO_ED25519 ? 'ed25519' : firstByte === CRYPTO_SR25519 ? 'sr25519' : null;
           const genesisHash = `0x${uosAfterFrames.substr(-64)}`;
 
-          const network: NetworkJson | null = getNetworkJsonByGenesisHash(networkMap, genesisHash);
+          const pubKeyHex = uosAfterFrames.substr(6, 64);
+
+          const { account, addressLength, network } = findNetworkAndAccountByGenesisHash(
+            networkMap,
+            accounts,
+            genesisHash,
+            pubKeyHex
+          );
 
           if (!network) {
             console.error(strings.ERROR_NO_NETWORK);
             throw new Error(strings.ERROR_NO_NETWORK);
           }
 
-          const isEthereum = !!network.isEthereum;
+          if (!account) {
+            console.error(strings.ERROR_NO_SENDER_FOUND);
+            throw new Error(strings.ERROR_NO_SENDER_FOUND);
+          }
 
-          const addressLength = isEthereum ? 40 : 64;
-
-          const pubKeyHex = uosAfterFrames.substr(6, addressLength);
-
-          const publicKeyAsBytes = hexToU8a('0x' + pubKeyHex);
           const hexEncodedData = '0x' + uosAfterFrames.slice(6 + addressLength);
           const hexPayload = hexEncodedData.slice(0, -64);
 
@@ -215,10 +217,15 @@ export const constructDataFromBytes = (bytes: Uint8Array, multipartComplete = fa
               break;
           }
 
-          data.data.account = isEthereum ? ('0x' + pubKeyHex) : encodeAddress(publicKeyAsBytes, network.ss58Format);
+          data.data.account = account.address;
         } catch (e) {
           console.log(e);
-          throw new Error('Something went wrong decoding the Substrate UOS payload: ' + uosAfterFrames);
+
+          if (e instanceof Error) {
+            throw new Error(e.message);
+          } else {
+            throw new Error('Something went wrong decoding the Substrate UOS payload: ' + uosAfterFrames);
+          }
         }
 
         return data;
@@ -265,4 +272,37 @@ export const isAddressString = (str: string): boolean => {
     str.substr(0, 9) === 'ethereum:' ||
     str.substr(0, 10) === 'substrate:'
   );
+};
+
+const findNetworkAndAccountByGenesisHash = (
+  networkMap: Record<string, NetworkJson>,
+  accounts: AccountJson[],
+  genesisHash: string,
+  pubKeyHex: string
+): { network: NetworkJson | null; account: AccountJson | null; addressLength: number } => {
+  for (const forceEthereum of [false, true]) {
+    const network = findNetworkJsonByGenesisHash(networkMap, genesisHash, forceEthereum);
+
+    if (!network) {
+      continue;
+    }
+
+    const addressLength = !network.isEthereum ? 64 : 40;
+    const address = pubKeyHex.substring(0, addressLength);
+    const account = findAccountByAddress(accounts, '0x' + address);
+
+    if (account) {
+      return {
+        account: account,
+        network: network,
+        addressLength: addressLength
+      };
+    }
+  }
+
+  return {
+    network: null,
+    addressLength: 0,
+    account: null
+  };
 };

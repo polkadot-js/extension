@@ -1,27 +1,33 @@
 // Copyright 2019-2022 @polkadot/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { Warning } from '@subwallet/extension-koni-ui/components';
-import useScanner from '@subwallet/extension-koni-ui/hooks/useScanner';
+import ProgressBar from '@ramonak/react-progress-bar';
+import { Button, Warning } from '@subwallet/extension-koni-ui/components';
+import { ScannerContext } from '@subwallet/extension-koni-ui/contexts/ScannerContext';
+import usePayloadScanner from '@subwallet/extension-koni-ui/hooks/qr/usePayloadScanner';
 import useTranslation from '@subwallet/extension-koni-ui/hooks/useTranslation';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
+import { noop } from '@subwallet/extension-koni-ui/util/function';
 import { Result } from '@zxing/library';
 import CN from 'classnames';
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useContext, useEffect, useState } from 'react';
 import { QrReader } from 'react-qr-reader';
 import styled from 'styled-components';
 
 interface Props extends ThemeProps{
   className?: string;
-  onError?: (error: Error) => void;
   size?: string | number;
   style?: React.CSSProperties;
 }
 
+let onSuccess: (result: Result) => void = noop;
+
 const QRScanner = (props: Props) => {
-  const { className, onError } = props;
+  const { className } = props;
 
   const { t } = useTranslation();
+
+  const { clearMultipartProgress, state: { completedFramesCount, totalFrameCount } } = useContext(ScannerContext);
 
   const [error, setError] = useState<string>('');
 
@@ -29,22 +35,31 @@ const QRScanner = (props: Props) => {
     setError(message);
   }, []);
 
-  const handlerOnProcessQrCode = useScanner(handlerAlertMessage);
+  const onStartOver = useCallback(() => {
+    clearMultipartProgress();
+    setError('');
+  }, [clearMultipartProgress]);
 
-  const handlerOnResult = useCallback((result: Result | undefined | null, error: Error | undefined | null) => {
+  const handlerOnProcessQrCode = usePayloadScanner(handlerAlertMessage);
+
+  useEffect(() => {
+    onSuccess = handlerOnProcessQrCode;
+
+    return () => {
+      onSuccess = noop;
+    };
+  }, [handlerOnProcessQrCode]);
+
+  const handlerOnResult = useCallback((result: Result | undefined | null) => {
     if (result) {
       try {
-        handlerOnProcessQrCode(result);
+        // QrReader not replace onResult function so use the 'let' variable to store the handler function address
+        onSuccess(result);
       } catch (e) {
 
       }
     }
-
-    if (error && error.message) {
-      onError && onError(error);
-      setError(error.message);
-    }
-  }, [handlerOnProcessQrCode, onError]);
+  }, []);
 
   return (
     <div className={CN(className)}>
@@ -54,10 +69,27 @@ const QRScanner = (props: Props) => {
             className={'qr-scanner-container'}
             constraints={{ facingMode: 'user' }}
             onResult={handlerOnResult}
-            scanDelay={150}
+            scanDelay={100}
           />
         </div>
       </div>
+      {
+        !!totalFrameCount && (
+          <div className='progress-container'>
+            <ProgressBar
+              baseBgColor={'#FFF'}
+              bgColor={'#004BFF'}
+              completed={completedFramesCount / totalFrameCount * 100}
+              customLabel={' '}
+              height={'4px'}
+            />
+            <div className='progress-text'>
+              {completedFramesCount} / { totalFrameCount}
+            </div>
+            <Button onClick={onStartOver}>Start over</Button>
+          </div>
+        )
+      }
       {
         error && (
           <Warning
@@ -106,6 +138,21 @@ export default React.memo(styled(QRScanner)(({ theme }: Props) => `
           height: 100%;
         }
       }
+    }
+  }
+
+  .progress-container {
+    width: 380px;
+    margin: 20px auto 0;
+
+    .progress-text {
+      font-style: normal;
+      font-weight: 500;
+      font-size: 12px;
+      line-height: 24px;
+      text-align: right;
+      color: ${theme.textColor};
+      margin-bottom: 8px;
     }
   }
 `));

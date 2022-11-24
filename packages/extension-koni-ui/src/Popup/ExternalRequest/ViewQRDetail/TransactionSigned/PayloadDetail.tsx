@@ -1,22 +1,18 @@
 // Copyright 2019-2022 @polkadot/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { EraInfo, NetworkJson, ResponseParseTransactionSubstrate, ResponseQrParseRLP } from '@subwallet/extension-base/background/KoniTypes';
+import { EraInfo, ResponseParseTransactionSubstrate, ResponseQrParseRLP } from '@subwallet/extension-base/background/KoniTypes';
 import { Spinner, Warning } from '@subwallet/extension-koni-ui/components';
 import { ScannerContext, ScannerContextType } from '@subwallet/extension-koni-ui/contexts/ScannerContext';
-import useMetadataChain from '@subwallet/extension-koni-ui/hooks/useMetadataChain';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
-import { DecodedMethod, decodeMethod } from '@subwallet/extension-koni-ui/util/scanner/decoders';
-import BigN from 'bignumber.js';
 import CN from 'classnames';
-import React, { useCallback, useContext, useMemo, useState } from 'react';
+import React, { useCallback, useContext, useMemo } from 'react';
 import styled from 'styled-components';
 
 import { isArray, isString, u8aToHex } from '@polkadot/util';
 
 interface Props extends ThemeProps {
   className?: string;
-  network: NetworkJson;
 }
 
 const isTransactionSubstrate = (tx: ResponseQrParseRLP | ResponseParseTransactionSubstrate): tx is ResponseParseTransactionSubstrate => {
@@ -24,33 +20,15 @@ const isTransactionSubstrate = (tx: ResponseQrParseRLP | ResponseParseTransactio
 };
 
 const PayloadDetail = (props: Props) => {
-  const { className, network } = props;
+  const { className } = props;
 
   const scannerStore = useContext<ScannerContextType>(ScannerContext);
   const { state } = scannerStore;
-  const { genesisHash, parsedTx, rawPayload, signedData } = state;
-
-  const [chainLoading, setChainLoading] = useState<boolean>(true);
-
-  const chain = useMetadataChain(genesisHash, setChainLoading);
+  const { parsedTx, rawPayload, signedData } = state;
 
   const payloadDetail = useMemo((): ResponseParseTransactionSubstrate | null => {
     return (!parsedTx || !isTransactionSubstrate(parsedTx)) ? null : parsedTx;
   }, [parsedTx]);
-
-  const decoded = useMemo((): DecodedMethod | null => {
-    if (!payloadDetail || chainLoading) {
-      return null;
-    } else {
-      if (chain && chain.hasMetadata) {
-        return decodeMethod(payloadDetail.method, chain, new BigN(payloadDetail.specVersion));
-      } else {
-        const message = `Error decoding method: chain=${network.chain}, no metadata`;
-
-        return { warning: true, message: message, result: payloadDetail.method };
-      }
-    }
-  }, [payloadDetail, chainLoading, chain, network.chain]);
 
   const handlerRenderEraDetail = useCallback(() => {
     if (!payloadDetail?.era) {
@@ -94,7 +72,7 @@ const PayloadDetail = (props: Props) => {
   }, [payloadDetail?.era]);
 
   const handlerRenderMethod = useCallback(() => {
-    const method = decoded?.result;
+    const method = payloadDetail?.method;
 
     if (!method) {
       return <></>;
@@ -112,18 +90,18 @@ const PayloadDetail = (props: Props) => {
           Detail
         </div>
         {
-          method.map(({ args, method }, index) => {
+          method.map(({ args, methodName }, index) => {
             return (
               <div
                 className={CN('group-body')}
-                key={`${method}_${index}`}
+                key={`${methodName}_${index}`}
               >
                 <div className='info-container'>
                   <div className={CN('info-title')}>
                     Method:
                   </div>
                   <div className='info-detail'>
-                    {method}({args && !!args.length && args.map(({ argName }) => argName).join(', ')})
+                    {methodName}({args && !!args.length && args.map(({ argName }) => argName).join(', ')})
                   </div>
                 </div>
                 {args && !!args.length && (
@@ -150,11 +128,11 @@ const PayloadDetail = (props: Props) => {
         }
       </div>
     );
-  }, [decoded]);
+  }, [payloadDetail]);
 
   return (
     <div className={CN(className)}>
-      {!decoded &&
+      {!payloadDetail &&
         (
           <div className={CN('info-loading')}>
             <Spinner />
@@ -162,13 +140,13 @@ const PayloadDetail = (props: Props) => {
         )
       }
       {
-        decoded && payloadDetail && (
+        payloadDetail && (
           <>
             {
-              decoded.message && decoded.warning &&
+              payloadDetail.message &&
               (
                 <Warning className={'decode-warning'}>
-                  {decoded.message}
+                  {payloadDetail.message}
                 </Warning>
               )
             }

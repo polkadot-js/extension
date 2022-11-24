@@ -20,13 +20,11 @@ interface ProcessBarcodeFunction {
   (txRequestData: TxRequestData): void
 }
 
-const useScanner = (showAlertMessage: (message: string) => void): ProcessBarcodeFunction => {
+const usePayloadScanner = (showAlertMessage: (message: string) => void): ProcessBarcodeFunction => {
   const { accounts } = useContext(AccountContext);
-  const scannerStore = useContext(ScannerContext);
+  const { cleanup, clearMultipartProgress, setData, setPartData, setStep, state } = useContext(ScannerContext);
 
   const { networkMap } = useSelector((state: RootState) => state);
-
-  const { cleanup, clearMultipartProgress, setData, setStep } = scannerStore;
 
   const parseQrData = useCallback((txRequestData: TxRequestData): ParsedData => {
     if (isAddressString(txRequestData.getText())) {
@@ -48,7 +46,7 @@ const useScanner = (showAlertMessage: (message: string) => void): ProcessBarcode
       // Ethereum Legacy
       // eslint-disable-next-line @typescript-eslint/no-unsafe-return
       return parsedJsonData;
-    } else if (!scannerStore.state.multipartComplete) {
+    } else if (!state.multipartComplete) {
       const bytes = txRequestData.getRawBytes();
       const _raw = hexStripPrefix(u8aToHex(bytes));
       const strippedData = rawDataToU8A(_raw);
@@ -57,15 +55,15 @@ const useScanner = (showAlertMessage: (message: string) => void): ProcessBarcode
         throw new Error(strings.ERROR_NO_RAW_DATA);
       }
 
-      return constructDataFromBytes(strippedData, false, networkMap);
+      return constructDataFromBytes(strippedData, false, networkMap, accounts);
     } else {
       throw new Error(strings.ERROR_NO_RAW_DATA);
     }
-  }, [scannerStore.state.multipartComplete, networkMap]);
+  }, [state.multipartComplete, networkMap, accounts]);
 
   const checkMultiFramesData = useCallback((parsedData: SubstrateParsedData | EthereumParsedData): null | CompletedParsedData => {
     if (isMultipartData(parsedData)) {
-      const multiFramesResult = scannerStore.setPartData(parsedData.currentFrame, parsedData.frameCount, parsedData.partData);
+      const multiFramesResult = setPartData(parsedData.currentFrame, parsedData.frameCount, parsedData.partData);
 
       if (isMultiFramesInfo(multiFramesResult)) {
         return null;
@@ -76,7 +74,7 @@ const useScanner = (showAlertMessage: (message: string) => void): ProcessBarcode
     } else {
       return parsedData;
     }
-  }, [scannerStore]);
+  }, [setPartData]);
 
   return useCallback((txRequestData: TxRequestData): void => {
     try {
@@ -89,7 +87,9 @@ const useScanner = (showAlertMessage: (message: string) => void): ProcessBarcode
       const unsignedData = checkMultiFramesData(parsedData);
 
       if (unsignedData === null) {
-        return showAlertMessage('Unsigned data is null');
+        console.log('Unsigned data is null');
+
+        return showAlertMessage('');
       }
 
       const qrInfo = setData(unsignedData);
@@ -123,4 +123,4 @@ const useScanner = (showAlertMessage: (message: string) => void): ProcessBarcode
   }, [parseQrData, checkMultiFramesData, setData, clearMultipartProgress, accounts, setStep, showAlertMessage, cleanup]);
 };
 
-export default useScanner;
+export default usePayloadScanner;

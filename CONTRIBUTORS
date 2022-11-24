@@ -1,11 +1,11 @@
-    1160	Nam Phạm                      	add config for kilt staking
-     682	AnhMTV                        	Release version 0.7.2
+    1178	Nam Phạm                      	remove zstake token
+     692	AnhMTV                        	
      465	Jaco                          	0.42.5 (#969)
-     339	S2kael                        	[Issue-838] Update qr scanner
+     343	S2kael                        	
      154	lw-cdm                        	Fix tslint issues
      142	quangdo                       	update some label and variable (original to origin)
      104	khainh                        	predefine metadata for Polkadot & Kusama chains
-      95	lw-cdm                        	
+      96	lw-cdm                        	
       82	Thibaut Sardan                	Add account filtering feature (#832)
       81	Hieu Dao                      	[CI Skip] Update subspace block explorer
       55	leewong                       	#118: update balance logic for Kintsugi testnet

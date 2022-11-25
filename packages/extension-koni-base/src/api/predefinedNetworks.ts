@@ -309,7 +309,6 @@ export const PREDEFINED_NETWORKS: Record<string, NetworkJson> = {
     decimals: 18,
     coinGeckoKey: 'astar',
     evmChainId: 592,
-    paraId: 2006,
     supportSmartContract: [ContractType.evm]
   },
   acala: {
@@ -387,7 +386,6 @@ export const PREDEFINED_NETWORKS: Record<string, NetworkJson> = {
     currentProviderMode: 'ws',
     currentProvider: 'Clover',
     groups: ['POLKADOT_PARACHAIN'],
-    paraId: 2002,
     evmChainId: 1024,
     nativeToken: 'CLV',
     crowdloanUrl: 'https://lucky.clover.finance/?type=support',
@@ -909,7 +907,6 @@ export const PREDEFINED_NETWORKS: Record<string, NetworkJson> = {
     nativeToken: 'SDN',
     evmChainId: 336,
     isEthereum: true,
-    paraId: 2007,
     supportSmartContract: [ContractType.evm]
   },
   shibuya: {

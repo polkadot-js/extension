@@ -1220,7 +1220,7 @@ export interface TransakNetwork {
 
 export interface FormattedMethod {
   args?: ArgInfo[];
-  method: string;
+  methodName: string;
 }
 
 export interface ArgInfo {
@@ -1236,9 +1236,15 @@ export interface EraInfo{
 export interface ResponseParseTransactionSubstrate {
   era: EraInfo | string;
   nonce: number;
-  method: string;
+  method: string | FormattedMethod[];
   tip: number;
   specVersion: number;
+  message: string;
+}
+
+export interface RequestParseTransactionSubstrate {
+  data: string;
+  networkKey: string;
 }
 
 // Parse EVM
@@ -1259,11 +1265,11 @@ export interface ResponseQrParseRLP {
 
 // Check lock
 
-export interface RequestQRIsLocked{
+export interface RequestAccountIsLocked {
   address: string;
 }
 
-export interface ResponseQRIsLocked{
+export interface ResponseAccountIsLocked {
   isLocked: boolean;
   remainingTime: number;
 }
@@ -1624,8 +1630,9 @@ export interface KoniRequestSignatures {
   'pub(accounts.subscribeV2)': [RequestAccountSubscribe, boolean, InjectedAccount[]];
 
   // Sign QR
+  'pri(account.isLocked)': [RequestAccountIsLocked, ResponseAccountIsLocked];
+  'pri(qr.transaction.parse.substrate)': [RequestParseTransactionSubstrate, ResponseParseTransactionSubstrate];
   'pri(qr.transaction.parse.evm)': [RequestQrParseRLP, ResponseQrParseRLP];
-  'pri(qr.isLocked)': [RequestQRIsLocked, ResponseQRIsLocked];
   'pri(qr.sign.substrate)': [RequestQrSignSubstrate, ResponseQrSignSubstrate];
   'pri(qr.sign.evm)': [RequestQrSignEVM, ResponseQrSignEVM];
 

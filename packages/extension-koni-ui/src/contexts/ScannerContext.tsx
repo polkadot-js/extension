@@ -5,12 +5,12 @@ import { ResponseParseTransactionSubstrate, ResponseQrParseRLP, SignerDataType }
 import { createTransactionFromRLP, Transaction } from '@subwallet/extension-koni-base/utils/eth';
 import { SCANNER_QR_STEP } from '@subwallet/extension-koni-ui/constants/qr';
 import { AccountContext } from '@subwallet/extension-koni-ui/contexts/index';
-import { parseEVMTransaction, qrSignEvm, qrSignSubstrate } from '@subwallet/extension-koni-ui/messaging';
+import { parseEVMTransaction, parseSubstrateTransaction, qrSignEvm, qrSignSubstrate } from '@subwallet/extension-koni-ui/messaging';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { CompletedParsedData, EthereumParsedData, MessageQRInfo, MultiFramesInfo, QrInfo, SubstrateCompletedParsedData, SubstrateMessageParsedData, SubstrateTransactionParsedData, TxQRInfo } from '@subwallet/extension-koni-ui/types/scanner';
 import { findAccountByAddress } from '@subwallet/extension-koni-ui/util/account';
 import { getNetworkJsonByInfo } from '@subwallet/extension-koni-ui/util/getNetworkJsonByGenesisHash';
-import { constructDataFromBytes, encodeNumber, parseSubstratePayload } from '@subwallet/extension-koni-ui/util/scanner/decoders';
+import { constructDataFromBytes, encodeNumber } from '@subwallet/extension-koni-ui/util/scanner/decoders';
 import { isEthereumCompletedParsedData, isSubstrateMessageParsedData } from '@subwallet/extension-koni-ui/util/scanner/sign';
 import BigN from 'bignumber.js';
 import React, { useCallback, useContext, useReducer } from 'react';
@@ -93,17 +93,17 @@ interface ScannerContextProviderProps {
   children?: React.ReactElement;
 }
 
+const initialState = DEFAULT_STATE;
+
+const reducer = (state: ScannerStoreState,
+  delta: Partial<ScannerStoreState>): ScannerStoreState => {
+  return Object.assign({}, state, delta);
+};
+
 export function ScannerContextProvider ({ children }: ScannerContextProviderProps): React.ReactElement {
   const { accounts } = useContext(AccountContext);
   const { networkMap } = useSelector((state: RootState) => state);
 
-  const initialState = DEFAULT_STATE;
-
-  const reducer = (state: ScannerStoreState,
-    delta: Partial<ScannerStoreState>): ScannerStoreState => ({
-    ...state,
-    ...delta
-  });
   const [state, setState] = useReducer(reducer, initialState);
 
   const setStep = useCallback((value: number) => {
@@ -137,21 +137,15 @@ export function ScannerContextProvider ({ children }: ScannerContextProviderProp
 
     concatMultipartData = u8aConcat(frameInfo, concatMultipartData);
 
-    return (constructDataFromBytes(concatMultipartData, true, networkMap)) as SubstrateCompletedParsedData;
-  }, [networkMap]);
+    return (constructDataFromBytes(concatMultipartData, true, networkMap, accounts)) as SubstrateCompletedParsedData;
+  }, [networkMap, accounts]);
 
   const setPartData = useCallback((currentFrame: number, frameCount: number, partData: string): MultiFramesInfo | SubstrateCompletedParsedData => {
     const newArray = Array.from({ length: frameCount }, () => null);
     const totalFrameCount = frameCount;
 
-    if (!state.multipartData) {
-      throw Error('');
-    }
-
     // set it once only
-    const multipartData = !state.totalFrameCount
-      ? newArray
-      : state.multipartData;
+    const multipartData = !state.totalFrameCount ? newArray : state.multipartData || newArray;
     const { completedFramesCount, multipartComplete } = state;
     const partDataAsBytes = new Uint8Array(partData.length / 2);
 
@@ -177,6 +171,7 @@ export function ScannerContextProvider ({ children }: ScannerContextProviderProp
           nextMissedFrames.push(index + 1);
         }
       });
+
       const nextCompletedFramesCount = totalFrameCount - nextMissedFrames.length;
 
       setState({
@@ -433,7 +428,7 @@ export function ScannerContextProvider ({ children }: ScannerContextProviderProp
           if (genesisHash && rawPayload) {
             const _rawPayload = isString(rawPayload) ? rawPayload : u8aToHex(rawPayload);
 
-            return parseSubstratePayload(_rawPayload);
+            return parseSubstrateTransaction({ data: _rawPayload, networkKey: senderNetwork.key });
           } else {
             return null;
           }

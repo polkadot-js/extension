@@ -97,9 +97,9 @@ export async function subscribeCrowdloan (addresses: string[], dotSamaAPIMap: Re
 
       if (networkKey === 'acala') {
         unsubMap.acala = subscribeAcalaContributeInterval(substrateAddresses.map((address) => reformatAddress(address, networkInfo.ss58Format, networkInfo.isEthereum)), crowdloanCb);
-      } else if (networkInfo.groups.includes('POLKADOT_PARACHAIN')) {
+      } else if (networkInfo.groups.includes('POLKADOT_PARACHAIN') && networkInfo.paraId) {
         unsubMap[networkKey] = getRPCCrowdloan(polkadotAPI, networkInfo.paraId, hexAddresses, crowdloanCb);
-      } else if (networkInfo.groups.includes('KUSAMA_PARACHAIN')) {
+      } else if (networkInfo.groups.includes('KUSAMA_PARACHAIN') && networkInfo.paraId) {
         unsubMap[networkKey] = getRPCCrowdloan(kusamaAPI, networkInfo.paraId, hexAddresses, crowdloanCb);
       }
     });

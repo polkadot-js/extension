@@ -100,7 +100,10 @@ const QRScanner = (props: Props) => {
             <div className='progress-text'>
               {completedFramesCount} / { totalFrameCount}
             </div>
-            <Button className='start-over-button' onClick={onStartOver}>Start over</Button>
+            <Button
+              className='start-over-button'
+              onClick={onStartOver}
+            >Start over</Button>
           </div>
         )
       }

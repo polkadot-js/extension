@@ -25,9 +25,10 @@ interface Props extends ThemeProps {
   address: string;
   networkKey: string;
   stakingType: StakingType;
+  claimable: string | undefined;
 }
 
-function StakeAuthClaimReward ({ address, className, hideModal, networkKey, stakingType }: Props): React.ReactElement<Props> {
+function StakeAuthClaimReward ({ address, claimable, className, hideModal, networkKey, stakingType }: Props): React.ReactElement<Props> {
   const networkJson = useGetNetworkJson(networkKey);
   const { t } = useTranslation();
 
@@ -152,6 +153,16 @@ function StakeAuthClaimReward ({ address, className, hideModal, networkKey, stak
                       />
 
                       <div className={'transaction-info-container'}>
+                        <div className={'transaction-info-row'}>
+                          <div className={'transaction-info-title'}>Claimable staking reward</div>
+                          <div className={'transaction-info-value'}>
+                            {claimable && <FeeValue
+                              _length={9}
+                              feeString={`${claimable} ${networkJson.nativeToken as string}`}
+                            />}
+                          </div>
+                        </div>
+
                         <div className={'transaction-info-row'}>
                           <div className={'transaction-info-title'}>Reward claiming fee</div>
                           <div className={'transaction-info-value'}>

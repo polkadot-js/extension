@@ -34,12 +34,18 @@ interface Props extends ThemeProps {
   showWithdrawalModal: () => void;
   showClaimRewardModal: () => void;
   stakingType: StakingType;
+  claimable: string | undefined;
+  setTargetClaimable: (val: string | undefined) => void;
 }
 
 const MANUAL_CLAIM_CHAINS = [
   'astar',
   'shibuya',
-  'shiden'
+  'shiden',
+  'amplitude',
+  'amplitude_test',
+  'kilt',
+  'kilt_peregrine'
 ];
 
 const MANUAL_COMPOUND_CHAINS = [
@@ -47,7 +53,7 @@ const MANUAL_COMPOUND_CHAINS = [
   'turingStaging'
 ];
 
-function StakingMenu ({ bondedAmount, className, networkKey, nextWithdrawal, nextWithdrawalAmount, redeemable, showClaimRewardModal, showMenu, showWithdrawalModal, stakingType, toggleMenu, unbondingStake }: Props): React.ReactElement<Props> {
+function StakingMenu ({ bondedAmount, claimable, className, networkKey, nextWithdrawal, nextWithdrawalAmount, redeemable, setTargetClaimable, showClaimRewardModal, showMenu, showWithdrawalModal, stakingType, toggleMenu, unbondingStake }: Props): React.ReactElement<Props> {
   const stakingMenuRef = useRef(null);
   const navigate = useContext(ActionContext);
   const networkJson = useGetNetworkJson(networkKey);
@@ -108,9 +114,10 @@ function StakingMenu ({ bondedAmount, className, networkKey, nextWithdrawal, nex
 
   const handleClickClaimReward = useCallback(() => {
     if (parseFloat(bondedAmount) > 0) {
+      setTargetClaimable(claimable);
       showClaimRewardModal();
     }
-  }, [bondedAmount, showClaimRewardModal]);
+  }, [bondedAmount, claimable, setTargetClaimable, showClaimRewardModal]);
 
   const getMenuTopMargin = useCallback(() => {
     if (isNominationPool) {

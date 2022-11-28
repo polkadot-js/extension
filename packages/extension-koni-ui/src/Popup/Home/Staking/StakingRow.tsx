@@ -42,9 +42,10 @@ interface Props extends ThemeProps {
   setTargetNextWithdrawalAction: (val: string | undefined) => void;
   setTargetRedeemable: (val: number) => void;
   setTargetStakingType: (val: StakingType) => void;
+  setTargetClaimable: (val: string | undefined) => void;
 }
 
-function StakingRow ({ activeStake, chainName, className, index, isCanSign, logo, networkKey, nextWithdrawal, nextWithdrawalAction, nextWithdrawalAmount, price, redeemable, reward, setActionNetworkKey, setShowClaimRewardModal, setShowCompoundStakeModal, setShowWithdrawalModal, setTargetNextWithdrawalAction, setTargetRedeemable, setTargetStakingType, setTargetValidator, stakingType, targetValidator, totalStake, unbondingStake, unit }: Props): React.ReactElement<Props> {
+function StakingRow ({ activeStake, chainName, className, index, isCanSign, logo, networkKey, nextWithdrawal, nextWithdrawalAction, nextWithdrawalAmount, price, redeemable, reward, setActionNetworkKey, setShowClaimRewardModal, setShowCompoundStakeModal, setShowWithdrawalModal, setTargetClaimable, setTargetNextWithdrawalAction, setTargetRedeemable, setTargetStakingType, setTargetValidator, stakingType, targetValidator, totalStake, unbondingStake, unit }: Props): React.ReactElement<Props> {
   const [showReward, setShowReward] = useState(false);
   const [showStakingMenu, setShowStakingMenu] = useState(false);
 
@@ -162,10 +163,12 @@ function StakingRow ({ activeStake, chainName, className, index, isCanSign, logo
                 {
                   isCanSign && <StakingMenu
                     bondedAmount={activeStake as string}
+                    claimable={reward?.unclaimedReward}
                     networkKey={networkKey}
                     nextWithdrawal={nextWithdrawal}
                     nextWithdrawalAmount={nextWithdrawalAmount}
                     redeemable={redeemable}
+                    setTargetClaimable={setTargetClaimable}
                     showClaimRewardModal={handleShowClaimRewardModal}
                     showMenu={showStakingMenu}
                     showStakeCompoundModal={handleShowCompoundStakeModal}

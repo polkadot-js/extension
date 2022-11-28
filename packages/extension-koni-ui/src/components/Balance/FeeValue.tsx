@@ -9,16 +9,17 @@ import styled from 'styled-components';
 interface Props extends ThemeProps {
   className?: string;
   feeString?: string;
+  _length?: number;
 }
 
-const FeeValue = ({ className, feeString }: Props) => {
+const FeeValue = ({ _length, className, feeString }: Props) => {
   if (!feeString) {
     return null;
   }
 
   const [value, symbol] = feeString.split(' ');
   const [prefix, postfix] = value.split('.');
-  const length = 4;
+  const length = _length || 4;
 
   const postfixValue = postfix.substring(0, length);
 

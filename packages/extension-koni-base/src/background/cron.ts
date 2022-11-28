@@ -128,13 +128,10 @@ export class KoniCron {
       next: (serviceInfo) => {
         const { address } = serviceInfo.currentAccountInfo;
 
+        this.resetStakingReward();
         this.resetNft(address);
         this.resetNftTransferMeta();
         this.removeCron('refreshNft');
-
-        if (this.checkNetworkAvailable(serviceInfo)) { // only add cron job if there's at least 1 active network
-          this.addCron('refreshNft', this.refreshNft(address, serviceInfo.apiMap, serviceInfo.customNftRegistry, this.getActiveContractSupportedNetworks(serviceInfo.networkMap)), CRON_REFRESH_NFT_INTERVAL);
-        }
 
         // this.resetStakingReward(address);
         this.resetHistory(address).then(() => {
@@ -153,6 +150,7 @@ export class KoniCron {
         this.removeCron('recoverApiMap');
 
         if (this.checkNetworkAvailable(serviceInfo)) { // only add cron job if there's at least 1 active network
+          this.addCron('refreshNft', this.refreshNft(address, serviceInfo.apiMap, serviceInfo.customNftRegistry, this.getActiveContractSupportedNetworks(serviceInfo.networkMap)), CRON_REFRESH_NFT_INTERVAL);
           this.addCron('refreshPrice', this.refreshPrice, CRON_REFRESH_PRICE_INTERVAL);
           this.addCron('checkStatusApiMap', this.updateApiMapStatus, CRON_GET_API_MAP_STATUS);
           this.addCron('recoverApiMap', this.recoverApiMap, CRON_AUTO_RECOVER_DOTSAMA_INTERVAL, false);
@@ -270,6 +268,11 @@ export class KoniCron {
   resetNft = (newAddress: string) => {
     this.logger.log('Reset Nft state');
     this.state.resetNft(newAddress).catch((e) => this.logger.warn(e));
+  };
+
+  resetStakingReward = () => {
+    this.logger.log('Reset Staking Reward State');
+    this.state.resetStakingReward();
   };
 
   resetNftTransferMeta = () => {

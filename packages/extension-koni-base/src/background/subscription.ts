@@ -278,7 +278,7 @@ export class KoniSubscription {
       }
     });
 
-    const result = await getNominationStakingRewardData(addresses, targetNetworkMap);
+    const result = await getNominationStakingRewardData(addresses, targetNetworkMap, this.state.getDotSamaApiMap());
 
     this.state.updateStakingReward(result);
     this.logger.log('Set staking reward state done', result);

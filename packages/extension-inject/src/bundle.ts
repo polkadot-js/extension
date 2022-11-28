@@ -14,6 +14,7 @@ export { packageInfo } from './packageInfo';
 // As shared in https://stackoverflow.com/a/52171480
 //
 // Small changes made to the code as linked above:
+// . - Seed value is required (expected as Date.now() in usage, could change)
 //   - Return value is a hex string (as per comment in SO answer)
 //   - TS typings added
 //   - Non-intrusive coding-style variable declaration changes

@@ -109,7 +109,7 @@ export async function getWithdrawalTxInfo (address: string, networkKey: string, 
   } else if (CHAIN_TYPES.astar.includes(networkKey)) {
     return handleAstarWithdrawalTxInfo(networkKey, networkJson, dotSamaApiMap, web3ApiMap, address);
   } else if (CHAIN_TYPES.amplitude.includes(networkKey)) {
-    return handleAmplitudeWithdrawalTxInfo(networkKey, networkJson, dotSamaApiMap, web3ApiMap, address, validatorAddress as string);
+    return handleAmplitudeWithdrawalTxInfo(networkKey, networkJson, dotSamaApiMap, web3ApiMap, address);
   }
 
   return handleRelayWithdrawalTxInfo(address, networkKey, networkJson, dotSamaApiMap, web3ApiMap);
@@ -121,7 +121,7 @@ export async function getWithdrawalExtrinsic (dotSamaApi: ApiProps, networkKey: 
   } else if (CHAIN_TYPES.astar.includes(networkKey)) {
     return getAstarWithdrawalExtrinsic(dotSamaApi);
   } else if (CHAIN_TYPES.amplitude.includes(networkKey)) {
-    return getAmplitudeWithdrawalExtrinsic(dotSamaApi, validatorAddress as string);
+    return getAmplitudeWithdrawalExtrinsic(dotSamaApi, address);
   }
 
   return getRelayWithdrawalExtrinsic(dotSamaApi, address);

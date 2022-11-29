@@ -392,18 +392,18 @@ export async function handleAmplitudeUnlockingInfo (dotSamaApi: ApiProps, networ
   } as UnlockingStakeInfo;
 }
 
-async function getAmplitudeWithdrawalTxInfo (dotSamaApi: ApiProps, address: string, collatorAddress: string) {
+async function getAmplitudeWithdrawalTxInfo (dotSamaApi: ApiProps, address: string) {
   const apiProps = await dotSamaApi.isReady;
 
-  const extrinsic = apiProps.api.tx.parachainStaking.unlockUnstaked(collatorAddress);
+  const extrinsic = apiProps.api.tx.parachainStaking.unlockUnstaked(address);
 
   return extrinsic.paymentInfo(address);
 }
 
-export async function handleAmplitudeWithdrawalTxInfo (networkKey: string, networkJson: NetworkJson, dotSamaApiMap: Record<string, ApiProps>, web3ApiMap: Record<string, Web3>, address: string, collatorAddress: string) {
+export async function handleAmplitudeWithdrawalTxInfo (networkKey: string, networkJson: NetworkJson, dotSamaApiMap: Record<string, ApiProps>, web3ApiMap: Record<string, Web3>, address: string) {
   try {
     const [txInfo, balance] = await Promise.all([
-      getAmplitudeWithdrawalTxInfo(dotSamaApiMap[networkKey], address, collatorAddress),
+      getAmplitudeWithdrawalTxInfo(dotSamaApiMap[networkKey], address),
       getFreeBalance(networkKey, address, dotSamaApiMap, web3ApiMap)
     ]);
 
@@ -425,10 +425,10 @@ export async function handleAmplitudeWithdrawalTxInfo (networkKey: string, netwo
   }
 }
 
-export async function getAmplitudeWithdrawalExtrinsic (dotSamaApi: ApiProps, collatorAddress: string) {
+export async function getAmplitudeWithdrawalExtrinsic (dotSamaApi: ApiProps, address: string) {
   const apiProps = await dotSamaApi.isReady;
 
-  return apiProps.api.tx.parachainStaking.unlockUnstaked(collatorAddress);
+  return apiProps.api.tx.parachainStaking.unlockUnstaked(address);
 }
 
 async function getAmplitudeClaimRewardTxInfo (dotSamaApi: ApiProps, address: string) {

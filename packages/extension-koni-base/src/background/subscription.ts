@@ -302,10 +302,6 @@ export class KoniSubscription {
       }
     });
 
-    if (pooledAddresses.length === 0) {
-      return;
-    }
-
     const networkMap = this.state.getNetworkMap();
     const targetNetworkMap: Record<string, NetworkJson> = {};
 

@@ -129,6 +129,10 @@ export function getAmplitudeStakingOnChain (parentApi: ApiProps, useAddresses: s
 }
 
 export async function getAmplitudeUnclaimedStakingReward (dotSamaApiMap: Record<string, ApiProps>, useAddresses: string[], networks: Record<string, NetworkJson>, chains: string[]): Promise<StakingRewardItem[]> {
+  if (chains.length === 0) {
+    return [];
+  }
+
   const unclaimedRewardList: StakingRewardItem[] = [];
 
   await Promise.all(chains.map(async (chain) => {

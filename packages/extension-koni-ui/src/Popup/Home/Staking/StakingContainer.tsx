@@ -46,6 +46,7 @@ function StakingContainer ({ className, data, loading, priceMap, stakeUnlockingT
   const [targetRedeemable, setTargetRedeemable] = useState(0);
   const [withdrawalTimestamp, setWithdrawalTimestamp] = useState(-1);
   const [targetStakingType, setTargetStakingType] = useState<StakingType | undefined>(undefined);
+  const [targetClaimable, setTargetClaimable] = useState<string | undefined>(undefined);
 
   const handleHideWithdrawalModal = useCallback(() => {
     setShowWithdrawalModal(false);
@@ -175,6 +176,7 @@ function StakingContainer ({ className, data, loading, priceMap, stakeUnlockingT
                 setActionNetworkKey={setTargetNetworkKey}
                 setShowClaimRewardModal={setShowClaimRewardModal}
                 setShowWithdrawalModal={setShowWithdrawalModal}
+                setTargetClaimable={setTargetClaimable}
                 setTargetNextWithdrawalAction={setTargetNextWithdrawalAction}
                 setTargetRedeemable={setTargetRedeemable}
                 setTargetStakingType={setTargetStakingType}
@@ -218,6 +220,7 @@ function StakingContainer ({ className, data, loading, priceMap, stakeUnlockingT
       {
         showClaimRewardModal && <StakeAuthClaimReward
           address={account?.address as string}
+          claimable={targetClaimable}
           hideModal={handleHideClaimRewardModal}
           networkKey={targetNetworkKey}
           stakingType={targetStakingType}

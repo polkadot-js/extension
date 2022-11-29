@@ -719,9 +719,15 @@ export default class KoniState extends State {
     return this.nftSubject;
   }
 
+  public resetStakingReward () {
+    this.stakingRewardState.details = [];
+
+    this.stakingRewardSubject.next(this.stakingRewardState);
+  }
+
   public updateStakingReward (stakingRewardData: StakingRewardItem[], callback?: (stakingRewardData: StakingRewardJson) => void): void {
     this.stakingRewardState.ready = true;
-    this.stakingRewardState.details = stakingRewardData;
+    this.stakingRewardState.details = this.stakingRewardState.details.concat(stakingRewardData);
 
     if (callback) {
       callback(this.stakingRewardState);

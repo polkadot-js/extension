@@ -7,6 +7,7 @@ import { CHAIN_TYPES, getUnlockingInfo } from '@subwallet/extension-koni-base/ap
 import { subscribeBalance } from '@subwallet/extension-koni-base/api/dotsama/balance';
 import { subscribeCrowdloan } from '@subwallet/extension-koni-base/api/dotsama/crowdloan';
 import { getNominationStakingRewardData, getPoolingStakingRewardData, stakingOnChainApi } from '@subwallet/extension-koni-base/api/staking';
+import { getAmplitudeUnclaimedStakingReward } from '@subwallet/extension-koni-base/api/staking/paraChain';
 import { nftHandler } from '@subwallet/extension-koni-base/background/handlers';
 import { Subscription } from 'rxjs';
 import Web3 from 'web3';
@@ -278,13 +279,13 @@ export class KoniSubscription {
       }
     });
 
-    const result = await getNominationStakingRewardData(addresses, targetNetworkMap, this.state.getDotSamaApiMap());
+    const result = await getNominationStakingRewardData(addresses, targetNetworkMap);
 
     this.state.updateStakingReward(result);
     this.logger.log('Set staking reward state done', result);
   }
 
-  async subscribeNominationPoolReward (address: string) {
+  async subscribeStakingRewardFastInterval (address: string) {
     const addresses = await this.state.getDecodedAddresses(address);
 
     if (!addresses.length) {
@@ -314,10 +315,21 @@ export class KoniSubscription {
       }
     });
 
-    const result = await getPoolingStakingRewardData(pooledAddresses, targetNetworkMap, this.state.getDotSamaApiMap());
+    const activeNetworks: string[] = [];
+
+    Object.keys(targetNetworkMap).forEach((key) => {
+      activeNetworks.push(key);
+    });
+
+    const [poolingStakingRewards, amplitudeUnclaimedStakingRewards] = await Promise.all([
+      getPoolingStakingRewardData(pooledAddresses, targetNetworkMap, this.state.getDotSamaApiMap()),
+      getAmplitudeUnclaimedStakingReward(this.state.getDotSamaApiMap(), addresses, networkMap, activeNetworks)
+    ]);
+
+    const result = [...poolingStakingRewards, ...amplitudeUnclaimedStakingRewards];
 
     this.state.updateStakingReward(result);
-    this.logger.log('Set pooling staking reward state done', result);
+    this.logger.log('Set staking reward state with fast interval done', result);
   }
 
   async subscribeStakeUnlockingInfo (address: string, networkMap: Record<string, NetworkJson>, dotSamaApiMap: Record<string, ApiProps>) {

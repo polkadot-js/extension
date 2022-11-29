@@ -3,7 +3,7 @@
 
 import { ApiProps, NetworkJson, StakingItem, StakingRewardItem } from '@subwallet/extension-base/background/KoniTypes';
 import { CHAIN_TYPES } from '@subwallet/extension-koni-base/api/bonding';
-import { getAmplitudeStakingOnChain, getAmplitudeUnclaimedStakingReward, getAstarStakingOnChain, getParaStakingOnChain } from '@subwallet/extension-koni-base/api/staking/paraChain';
+import { getAmplitudeStakingOnChain, getAstarStakingOnChain, getParaStakingOnChain } from '@subwallet/extension-koni-base/api/staking/paraChain';
 import { getNominationPoolReward, getRelayPoolingOnchain, getRelayStakingOnChain } from '@subwallet/extension-koni-base/api/staking/relayChain';
 import { getAllSubsquidStaking } from '@subwallet/extension-koni-base/api/staking/subsquidStaking';
 import { IGNORE_GET_SUBSTRATE_FEATURES_LIST } from '@subwallet/extension-koni-base/constants';
@@ -63,7 +63,7 @@ export function stakingOnChainApi (addresses: string[], dotSamaAPIMap: Record<st
   };
 }
 
-export async function getNominationStakingRewardData (addresses: string[], networkMap: Record<string, NetworkJson>, dotSamaApiMap: Record<string, ApiProps>): Promise<StakingRewardItem[]> {
+export async function getNominationStakingRewardData (addresses: string[], networkMap: Record<string, NetworkJson>): Promise<StakingRewardItem[]> {
   const activeNetworks: string[] = [];
 
   Object.keys(networkMap).forEach((key) => {
@@ -74,12 +74,7 @@ export async function getNominationStakingRewardData (addresses: string[], netwo
     return [];
   }
 
-  const [nominationStakingReward, amplitudeStakingReward] = await Promise.all([
-    getAllSubsquidStaking(addresses, activeNetworks),
-    getAmplitudeUnclaimedStakingReward(dotSamaApiMap, addresses, networkMap, activeNetworks)
-  ]);
-
-  return [...nominationStakingReward, ...amplitudeStakingReward];
+  return await getAllSubsquidStaking(addresses, activeNetworks);
 }
 
 export async function getPoolingStakingRewardData (addresses: string[], networkMap: Record<string, NetworkJson>, dotSamaApiMap: Record<string, ApiProps>): Promise<StakingRewardItem[]> {

@@ -220,10 +220,10 @@ function StakingContainer ({ className, data, loading, priceMap, stakeUnlockingT
       {
         showClaimRewardModal && <StakeAuthClaimReward
           address={account?.address as string}
+          claimable={targetClaimable}
           hideModal={handleHideClaimRewardModal}
           networkKey={targetNetworkKey}
           stakingType={targetStakingType}
-          claimable={targetClaimable}
         />
       }
     </div>

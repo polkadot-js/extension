@@ -153,15 +153,17 @@ function StakeAuthClaimReward ({ address, claimable, className, hideModal, netwo
                       />
 
                       <div className={'transaction-info-container'}>
-                        <div className={'transaction-info-row'}>
-                          <div className={'transaction-info-title'}>Claimable staking reward</div>
-                          <div className={'transaction-info-value'}>
-                            {claimable && <FeeValue
-                              _length={9}
-                              feeString={`${claimable} ${networkJson.nativeToken as string}`}
-                            />}
+                        {
+                          claimable && <div className={'transaction-info-row'}>
+                            <div className={'transaction-info-title'}>Claimable staking reward</div>
+                            <div className={'transaction-info-value'}>
+                              <FeeValue
+                                _length={9}
+                                feeString={`${claimable} ${networkJson.nativeToken as string}`}
+                              />
+                            </div>
                           </div>
-                        </div>
+                        }
 
                         <div className={'transaction-info-row'}>
                           <div className={'transaction-info-title'}>Reward claiming fee</div>

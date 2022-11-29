@@ -290,7 +290,7 @@ export function ScannerContextProvider ({ children }: ScannerContextProviderProp
 
     if (isSubstrateMessageParsedData(signRequest)) {
       if (signRequest.data.crypto !== 'sr25519') {
-        throw new Error('Stylo only supports accounts using sr25519 crypto');
+        throw new Error('Subwallet only supports accounts using sr25519 crypto');
       }
 
       isHash = signRequest.isHash;
@@ -306,7 +306,7 @@ export function ScannerContextProvider ({ children }: ScannerContextProviderProp
     const sender = findAccountByAddress(accounts, address);
 
     if (!sender) {
-      throw new Error(`No account found in Stylo for: ${address}.`);
+      throw new Error(`No account found in Subwallet for: ${address}.`);
     }
 
     const qrInfo: MessageQRInfo = {

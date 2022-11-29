@@ -107,8 +107,8 @@ export default class DatabaseService {
     return this.stores.nftCollection.upsert({ chainHash, chain, ...collection });
   }
 
-  getAllNftCollection () {
-    return this.stores.nftCollection.getNftCollection();
+  getAllNftCollection (chainHashes?: string[]) {
+    return this.stores.nftCollection.getNftCollection(chainHashes);
   }
 
   // NFT

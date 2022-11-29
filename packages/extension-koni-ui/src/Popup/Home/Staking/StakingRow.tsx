@@ -61,8 +61,6 @@ function StakingRow ({ activeStake, chainName, className, index, isCanSign, logo
     setShowWithdrawalModal(true);
   }, [nextWithdrawalAction, redeemable, targetValidator, networkKey, setActionNetworkKey, setShowWithdrawalModal, setTargetNextWithdrawalAction, setTargetRedeemable, setTargetValidator]);
 
-  console.log('reward', reward);
-
   const handleShowClaimRewardModal = useCallback(() => {
     setActionNetworkKey(networkKey);
     setShowClaimRewardModal(true);

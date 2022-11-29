@@ -225,7 +225,7 @@ function StakingRow ({ activeStake, chainName, className, index, isCanSign, logo
                 ? <div>
 
                   {
-                    reward?.totalReward && <div className={'reward-container'}>
+                    reward?.totalReward && !isNaN(parseFloat(reward?.totalReward)) && <div className={'reward-container'}>
                       <div className={'reward-title'}>Total reward</div>
                       <div className={'reward-amount'}>
                         <div>{editBalance(reward?.totalReward || '', 9)}</div>
@@ -235,7 +235,7 @@ function StakingRow ({ activeStake, chainName, className, index, isCanSign, logo
                   }
 
                   {
-                    reward?.latestReward && <div className={'reward-container'}>
+                    reward?.latestReward && !isNaN(parseFloat(reward?.latestReward)) && <div className={'reward-container'}>
                       <div className={'reward-title'}>Latest reward</div>
                       <div className={'reward-amount'}>
                         <div>{editBalance(reward?.latestReward || '', 9)}</div>
@@ -245,7 +245,7 @@ function StakingRow ({ activeStake, chainName, className, index, isCanSign, logo
                   }
 
                   {
-                    reward?.totalSlash && <div className={'reward-container'}>
+                    reward?.totalSlash && !isNaN(parseFloat(reward?.totalSlash)) && <div className={'reward-container'}>
                       <div className={'reward-title'}>Total slash</div>
                       <div className={'reward-amount'}>
                         <div>{editBalance(reward?.totalSlash || '', 9)}</div>

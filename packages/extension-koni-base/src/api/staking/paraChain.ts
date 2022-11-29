@@ -8,6 +8,7 @@ import { reformatAddress } from '@subwallet/extension-koni-base/utils';
 
 import { Codec } from '@polkadot/types/types';
 import { BN, BN_ZERO } from '@polkadot/util';
+import { isEthereumAddress } from '@polkadot/util-crypto';
 
 function getSingleStakingAmplitude (parentApi: ApiProps, address: string, networks: Record<string, NetworkJson>, chain: string, callback: (networkKey: string, rs: StakingItem) => void) {
   return parentApi.api.queryMulti([
@@ -128,15 +129,23 @@ export function getAmplitudeStakingOnChain (parentApi: ApiProps, useAddresses: s
   return getMultiStakingAmplitude(parentApi, useAddresses, networks, chain, callback);
 }
 
-export async function getAmplitudeUnclaimedStakingReward (dotSamaApiMap: Record<string, ApiProps>, useAddresses: string[], networks: Record<string, NetworkJson>, chains: string[]): Promise<StakingRewardItem[]> {
+export async function getAmplitudeUnclaimedStakingReward (dotSamaApiMap: Record<string, ApiProps>, addresses: string[], networks: Record<string, NetworkJson>, chains: string[]): Promise<StakingRewardItem[]> {
   if (chains.length === 0) {
     return [];
   }
 
+  const useAddresses: string[] = [];
+
+  addresses.forEach((address) => {
+    if (!isEthereumAddress(address)) {
+      useAddresses.push(address);
+    }
+  });
+
   const unclaimedRewardList: StakingRewardItem[] = [];
 
   await Promise.all(chains.map(async (chain) => {
-    if (CHAIN_TYPES.amplitude.includes(chain)) {
+    if (CHAIN_TYPES.amplitude.includes(chain) && !['kilt', 'kilt_peregrine'].includes(chain)) {
       const networkJson = networks[chain];
       const apiProps = await dotSamaApiMap[chain].isReady;
 

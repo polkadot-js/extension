@@ -43,9 +43,7 @@ const MANUAL_CLAIM_CHAINS = [
   'shibuya',
   'shiden',
   'amplitude',
-  'amplitude_test',
-  'kilt',
-  'kilt_peregrine'
+  'amplitude_test'
 ];
 
 const MANUAL_COMPOUND_CHAINS = [

@@ -40,13 +40,13 @@ function SubHeader ({ cancelButtonText,
         {showBackArrow && (
           <Link
             className='backlink'
+            onClick={onBack}
             to={to}
           >
             <FontAwesomeIcon
               className={`arrowLeftIcon ${isBusy ? 'disabled-btn' : ''}`}
               // @ts-ignore
               icon={faArrowLeft}
-              onClick={onBack}
             />
           </Link>
         )

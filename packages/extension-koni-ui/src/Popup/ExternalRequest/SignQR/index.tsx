@@ -138,7 +138,7 @@ const SignQR = (props: Props) => {
         }
       </div>
       <div className='action-container'>
-        {isLocked && (
+        {(isLocked || isEthereumStructure) && (
           <Unlock
             error={error}
             isBusy={isBusy}

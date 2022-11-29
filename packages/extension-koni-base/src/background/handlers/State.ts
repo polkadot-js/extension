@@ -655,11 +655,15 @@ export default class KoniState extends State {
   }
 
   public getNftCollection () {
-    return this.dbService.getAllNftCollection();
+    const activeNetworkHashes = Object.values(this.activeNetworks).map((network) => network.genesisHash);
+
+    return this.dbService.getAllNftCollection(activeNetworkHashes);
   }
 
   public subscribeNftCollection () {
-    return this.dbService.stores.nftCollection.subscribeNftCollection();
+    const activeNetworkHashes = Object.values(this.activeNetworks).map((network) => network.genesisHash);
+
+    return this.dbService.stores.nftCollection.subscribeNftCollection(activeNetworkHashes);
   }
 
   public async resetNft (newAddress: string): Promise<void> {

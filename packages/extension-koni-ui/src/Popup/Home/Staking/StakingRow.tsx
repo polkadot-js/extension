@@ -76,12 +76,12 @@ function StakingRow ({ activeStake, chainName, className, index, isCanSign, logo
     setShowStakingMenu(!showStakingMenu);
   }, [showStakingMenu]);
 
-  const editBalance = (balance: string, roundTo = 2) => {
+  const editBalance = (balance: string, roundTo = 2, omitSmallBalance = true) => {
     if (parseFloat(balance) === 0) {
       return <span className={'major-balance'}>{balance}</span>;
     }
 
-    if (parseFloat(balance) <= 0.00001) { // in case the balance is too small
+    if (omitSmallBalance && parseFloat(balance) <= 0.00001) { // in case the balance is too small
       return <span className={'major-balance'}>0</span>;
     }
 
@@ -258,7 +258,7 @@ function StakingRow ({ activeStake, chainName, className, index, isCanSign, logo
                     reward?.unclaimedReward && <div className={'reward-container'}>
                       <div className={'reward-title'}>Unclaimed reward</div>
                       <div className={'reward-amount'}>
-                        <div>{editBalance(reward?.unclaimedReward || '', 9)}</div>
+                        <div>{editBalance(reward?.unclaimedReward || '', 9, false)}</div>
                         <div className={'chain-unit'}>{unit}</div>
                       </div>
                     </div>
@@ -269,7 +269,7 @@ function StakingRow ({ activeStake, chainName, className, index, isCanSign, logo
                     reward?.unclaimedReward && <div className={'reward-container'}>
                       <div className={'reward-title'}>Unclaimed reward</div>
                       <div className={'reward-amount'}>
-                        <div>{editBalance(reward?.unclaimedReward || '', 9)}</div>
+                        <div>{editBalance(reward?.unclaimedReward || '', 9, false)}</div>
                         <div className={'chain-unit'}>{unit}</div>
                       </div>
                     </div>

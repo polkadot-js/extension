@@ -110,12 +110,20 @@ function StakingMenu ({ bondedAmount, claimable, className, networkKey, nextWith
     }
   }, [redeemable, showWithdrawalModal]);
 
+  const isRewardClaimable = useCallback(() => {
+    if (claimable) {
+      return parseFloat(bondedAmount) > 0 && parseFloat(claimable) > 0;
+    }
+
+    return parseFloat(bondedAmount) > 0;
+  }, [bondedAmount, claimable]);
+
   const handleClickClaimReward = useCallback(() => {
-    if (parseFloat(bondedAmount) > 0) {
+    if (isRewardClaimable()) {
       setTargetClaimable(claimable);
       showClaimRewardModal();
     }
-  }, [bondedAmount, claimable, setTargetClaimable, showClaimRewardModal]);
+  }, [claimable, isRewardClaimable, setTargetClaimable, showClaimRewardModal]);
 
   const getMenuTopMargin = useCallback(() => {
     if (isNominationPool) {
@@ -197,7 +205,7 @@ function StakingMenu ({ bondedAmount, claimable, className, networkKey, nextWith
 
             {
               showClaimButton && <div
-                className={`${parseFloat(bondedAmount) > 0 ? 'bonding-menu-item' : 'disabled-menu-item'}`}
+                className={`${isRewardClaimable() ? 'bonding-menu-item' : 'disabled-menu-item'}`}
                 onClick={handleClickClaimReward}
               >
                 <img
@@ -209,7 +217,7 @@ function StakingMenu ({ bondedAmount, claimable, className, networkKey, nextWith
                 />
                 Claim rewards
                 {
-                  parseFloat(bondedAmount) > 0 && <Tooltip
+                  isRewardClaimable() && <Tooltip
                     place={'top'}
                     text={'Make sure you claim all rewards regularly and before you unstake'}
                     trigger={`claim-button-tooltip-${networkKey}`}

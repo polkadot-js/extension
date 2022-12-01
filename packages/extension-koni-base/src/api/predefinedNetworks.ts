@@ -646,7 +646,7 @@ export const PREDEFINED_NETWORKS: Record<string, NetworkJson> = {
   alephTest: {
     key: 'alephTest',
     chain: 'Aleph Zero Testnet',
-    genesisHash: '0x49574664f45654c043c2690b76b5bf4a05c49160e112d32b8b71b0dfb023169c',
+    genesisHash: '0x05d5279c52c484cc80396535a316add7d47b1c5b9e0398dd1f584149341460c5',
     ss58Format: 42,
     providers: {
       'Aleph Zero Foundation': 'wss://ws.test.azero.dev'

@@ -2093,7 +2093,8 @@ export const PREDEFINED_NETWORKS: Record<string, NetworkJson> = {
     currentProvider: 'watr',
     groups: ['TEST_NET'],
     nativeToken: 'WATRD',
-    decimals: 18
+    decimals: 18,
+    coinGeckoKey: 'watr'
   }
 };
 

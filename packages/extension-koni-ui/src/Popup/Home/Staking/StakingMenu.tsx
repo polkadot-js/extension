@@ -34,12 +34,16 @@ interface Props extends ThemeProps {
   showWithdrawalModal: () => void;
   showClaimRewardModal: () => void;
   stakingType: StakingType;
+  claimable: string | undefined;
+  setTargetClaimable: (val: string | undefined) => void;
 }
 
 const MANUAL_CLAIM_CHAINS = [
   'astar',
   'shibuya',
-  'shiden'
+  'shiden',
+  'amplitude',
+  'amplitude_test'
 ];
 
 const MANUAL_COMPOUND_CHAINS = [
@@ -47,7 +51,7 @@ const MANUAL_COMPOUND_CHAINS = [
   'turingStaging'
 ];
 
-function StakingMenu ({ bondedAmount, className, networkKey, nextWithdrawal, nextWithdrawalAmount, redeemable, showClaimRewardModal, showMenu, showWithdrawalModal, stakingType, toggleMenu, unbondingStake }: Props): React.ReactElement<Props> {
+function StakingMenu ({ bondedAmount, claimable, className, networkKey, nextWithdrawal, nextWithdrawalAmount, redeemable, setTargetClaimable, showClaimRewardModal, showMenu, showWithdrawalModal, stakingType, toggleMenu, unbondingStake }: Props): React.ReactElement<Props> {
   const stakingMenuRef = useRef(null);
   const navigate = useContext(ActionContext);
   const networkJson = useGetNetworkJson(networkKey);
@@ -106,11 +110,20 @@ function StakingMenu ({ bondedAmount, className, networkKey, nextWithdrawal, nex
     }
   }, [redeemable, showWithdrawalModal]);
 
+  const isRewardClaimable = useCallback(() => {
+    if (claimable) {
+      return parseFloat(bondedAmount) > 0 && parseFloat(claimable) > 0;
+    }
+
+    return parseFloat(bondedAmount) > 0;
+  }, [bondedAmount, claimable]);
+
   const handleClickClaimReward = useCallback(() => {
-    if (parseFloat(bondedAmount) > 0) {
+    if (isRewardClaimable()) {
+      setTargetClaimable(claimable);
       showClaimRewardModal();
     }
-  }, [bondedAmount, showClaimRewardModal]);
+  }, [claimable, isRewardClaimable, setTargetClaimable, showClaimRewardModal]);
 
   const getMenuTopMargin = useCallback(() => {
     if (isNominationPool) {
@@ -192,7 +205,7 @@ function StakingMenu ({ bondedAmount, className, networkKey, nextWithdrawal, nex
 
             {
               showClaimButton && <div
-                className={`${parseFloat(bondedAmount) > 0 ? 'bonding-menu-item' : 'disabled-menu-item'}`}
+                className={`${isRewardClaimable() ? 'bonding-menu-item' : 'disabled-menu-item'}`}
                 onClick={handleClickClaimReward}
               >
                 <img
@@ -204,7 +217,7 @@ function StakingMenu ({ bondedAmount, className, networkKey, nextWithdrawal, nex
                 />
                 Claim rewards
                 {
-                  parseFloat(bondedAmount) > 0 && <Tooltip
+                  isRewardClaimable() && <Tooltip
                     place={'top'}
                     text={'Make sure you claim all rewards regularly and before you unstake'}
                     trigger={`claim-button-tooltip-${networkKey}`}

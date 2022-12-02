@@ -42,9 +42,10 @@ interface Props extends ThemeProps {
   setTargetNextWithdrawalAction: (val: string | undefined) => void;
   setTargetRedeemable: (val: number) => void;
   setTargetStakingType: (val: StakingType) => void;
+  setTargetClaimable: (val: string | undefined) => void;
 }
 
-function StakingRow ({ activeStake, chainName, className, index, isCanSign, logo, networkKey, nextWithdrawal, nextWithdrawalAction, nextWithdrawalAmount, price, redeemable, reward, setActionNetworkKey, setShowClaimRewardModal, setShowCompoundStakeModal, setShowWithdrawalModal, setTargetNextWithdrawalAction, setTargetRedeemable, setTargetStakingType, setTargetValidator, stakingType, targetValidator, totalStake, unbondingStake, unit }: Props): React.ReactElement<Props> {
+function StakingRow ({ activeStake, chainName, className, index, isCanSign, logo, networkKey, nextWithdrawal, nextWithdrawalAction, nextWithdrawalAmount, price, redeemable, reward, setActionNetworkKey, setShowClaimRewardModal, setShowCompoundStakeModal, setShowWithdrawalModal, setTargetClaimable, setTargetNextWithdrawalAction, setTargetRedeemable, setTargetStakingType, setTargetValidator, stakingType, targetValidator, totalStake, unbondingStake, unit }: Props): React.ReactElement<Props> {
   const [showReward, setShowReward] = useState(false);
   const [showStakingMenu, setShowStakingMenu] = useState(false);
 
@@ -75,12 +76,12 @@ function StakingRow ({ activeStake, chainName, className, index, isCanSign, logo
     setShowStakingMenu(!showStakingMenu);
   }, [showStakingMenu]);
 
-  const editBalance = (balance: string, roundTo = 2) => {
+  const editBalance = (balance: string, roundTo = 2, omitSmallBalance = true) => {
     if (parseFloat(balance) === 0) {
       return <span className={'major-balance'}>{balance}</span>;
     }
 
-    if (parseFloat(balance) <= 0.00001) { // in case the balance is too small
+    if (omitSmallBalance && parseFloat(balance) <= 0.00001) { // in case the balance is too small
       return <span className={'major-balance'}>0</span>;
     }
 
@@ -162,10 +163,12 @@ function StakingRow ({ activeStake, chainName, className, index, isCanSign, logo
                 {
                   isCanSign && <StakingMenu
                     bondedAmount={activeStake as string}
+                    claimable={reward?.unclaimedReward}
                     networkKey={networkKey}
                     nextWithdrawal={nextWithdrawal}
                     nextWithdrawalAmount={nextWithdrawalAmount}
                     redeemable={redeemable}
+                    setTargetClaimable={setTargetClaimable}
                     showClaimRewardModal={handleShowClaimRewardModal}
                     showMenu={showStakingMenu}
                     showStakeCompoundModal={handleShowCompoundStakeModal}
@@ -222,7 +225,7 @@ function StakingRow ({ activeStake, chainName, className, index, isCanSign, logo
                 ? <div>
 
                   {
-                    reward?.totalReward && <div className={'reward-container'}>
+                    reward?.totalReward && !isNaN(parseFloat(reward?.totalReward)) && <div className={'reward-container'}>
                       <div className={'reward-title'}>Total reward</div>
                       <div className={'reward-amount'}>
                         <div>{editBalance(reward?.totalReward || '', 9)}</div>
@@ -232,7 +235,7 @@ function StakingRow ({ activeStake, chainName, className, index, isCanSign, logo
                   }
 
                   {
-                    reward?.latestReward && <div className={'reward-container'}>
+                    reward?.latestReward && !isNaN(parseFloat(reward?.latestReward)) && <div className={'reward-container'}>
                       <div className={'reward-title'}>Latest reward</div>
                       <div className={'reward-amount'}>
                         <div>{editBalance(reward?.latestReward || '', 9)}</div>
@@ -242,10 +245,20 @@ function StakingRow ({ activeStake, chainName, className, index, isCanSign, logo
                   }
 
                   {
-                    reward?.totalSlash && <div className={'reward-container'}>
+                    reward?.totalSlash && !isNaN(parseFloat(reward?.totalSlash)) && <div className={'reward-container'}>
                       <div className={'reward-title'}>Total slash</div>
                       <div className={'reward-amount'}>
                         <div>{editBalance(reward?.totalSlash || '', 9)}</div>
+                        <div className={'chain-unit'}>{unit}</div>
+                      </div>
+                    </div>
+                  }
+
+                  {
+                    reward?.unclaimedReward && <div className={'reward-container'}>
+                      <div className={'reward-title'}>Unclaimed reward</div>
+                      <div className={'reward-amount'}>
+                        <div>{editBalance(reward?.unclaimedReward || '', 9, false)}</div>
                         <div className={'chain-unit'}>{unit}</div>
                       </div>
                     </div>
@@ -256,7 +269,7 @@ function StakingRow ({ activeStake, chainName, className, index, isCanSign, logo
                     reward?.unclaimedReward && <div className={'reward-container'}>
                       <div className={'reward-title'}>Unclaimed reward</div>
                       <div className={'reward-amount'}>
-                        <div>{editBalance(reward?.unclaimedReward || '', 9)}</div>
+                        <div>{editBalance(reward?.unclaimedReward || '', 9, false)}</div>
                         <div className={'chain-unit'}>{unit}</div>
                       </div>
                     </div>

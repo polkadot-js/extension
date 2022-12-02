@@ -655,11 +655,15 @@ export default class KoniState extends State {
   }
 
   public getNftCollection () {
-    return this.dbService.getAllNftCollection();
+    const activeNetworkHashes = Object.values(this.activeNetworks).map((network) => network.genesisHash);
+
+    return this.dbService.getAllNftCollection(activeNetworkHashes);
   }
 
   public subscribeNftCollection () {
-    return this.dbService.stores.nftCollection.subscribeNftCollection();
+    const activeNetworkHashes = Object.values(this.activeNetworks).map((network) => network.genesisHash);
+
+    return this.dbService.stores.nftCollection.subscribeNftCollection(activeNetworkHashes);
   }
 
   public async resetNft (newAddress: string): Promise<void> {
@@ -715,9 +719,15 @@ export default class KoniState extends State {
     return this.nftSubject;
   }
 
+  public resetStakingReward () {
+    this.stakingRewardState.details = [];
+
+    this.stakingRewardSubject.next(this.stakingRewardState);
+  }
+
   public updateStakingReward (stakingRewardData: StakingRewardItem[], callback?: (stakingRewardData: StakingRewardJson) => void): void {
     this.stakingRewardState.ready = true;
-    this.stakingRewardState.details = stakingRewardData;
+    this.stakingRewardState.details = this.stakingRewardState.details.concat(stakingRewardData);
 
     if (callback) {
       callback(this.stakingRewardState);

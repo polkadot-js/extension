@@ -1,12 +1,14 @@
 // Copyright 2019-2022 @subwallet/extension-koni authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { APIItemState, ApiProps, NetworkJson, StakingItem, StakingType } from '@subwallet/extension-base/background/KoniTypes';
+import { APIItemState, ApiProps, NetworkJson, StakingItem, StakingRewardItem, StakingType } from '@subwallet/extension-base/background/KoniTypes';
+import { CHAIN_TYPES } from '@subwallet/extension-koni-base/api/bonding';
 import { parseStakingBalance } from '@subwallet/extension-koni-base/api/staking/utils';
 import { reformatAddress } from '@subwallet/extension-koni-base/utils';
 
 import { Codec } from '@polkadot/types/types';
 import { BN, BN_ZERO } from '@polkadot/util';
+import { isEthereumAddress } from '@polkadot/util-crypto';
 
 function getSingleStakingAmplitude (parentApi: ApiProps, address: string, networks: Record<string, NetworkJson>, chain: string, callback: (networkKey: string, rs: StakingItem) => void) {
   return parentApi.api.queryMulti([
@@ -125,6 +127,51 @@ export function getAmplitudeStakingOnChain (parentApi: ApiProps, useAddresses: s
   }
 
   return getMultiStakingAmplitude(parentApi, useAddresses, networks, chain, callback);
+}
+
+export async function getAmplitudeUnclaimedStakingReward (dotSamaApiMap: Record<string, ApiProps>, addresses: string[], networks: Record<string, NetworkJson>, chains: string[]): Promise<StakingRewardItem[]> {
+  if (chains.length === 0) {
+    return [];
+  }
+
+  const useAddresses: string[] = [];
+
+  addresses.forEach((address) => {
+    if (!isEthereumAddress(address)) {
+      useAddresses.push(address);
+    }
+  });
+
+  const unclaimedRewardList: StakingRewardItem[] = [];
+
+  await Promise.all(chains.map(async (chain) => {
+    if (CHAIN_TYPES.amplitude.includes(chain) && !['kilt', 'kilt_peregrine'].includes(chain)) {
+      const networkJson = networks[chain];
+      const apiProps = await dotSamaApiMap[chain].isReady;
+
+      await Promise.all(useAddresses.map(async (address) => {
+        const _unclaimedReward = await apiProps.api.query.parachainStaking.rewards(address);
+
+        const unclaimedReward = _unclaimedReward.toString();
+
+        const rewardItem = {
+          chain,
+          name: networkJson.chain,
+          state: APIItemState.READY,
+          type: StakingType.NOMINATED,
+          address: reformatAddress(address, 42)
+        } as StakingRewardItem;
+
+        const parsedUnclaimedReward = parseFloat(unclaimedReward) / (10 ** (networkJson.decimals as number));
+
+        rewardItem.unclaimedReward = parsedUnclaimedReward.toString();
+
+        unclaimedRewardList.push(rewardItem);
+      }));
+    }
+  }));
+
+  return unclaimedRewardList;
 }
 
 export function getParaStakingOnChain (parentApi: ApiProps, useAddresses: string[], networks: Record<string, NetworkJson>, chain: string, callback: (networkKey: string, rs: StakingItem) => void) {

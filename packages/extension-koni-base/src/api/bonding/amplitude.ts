@@ -392,18 +392,18 @@ export async function handleAmplitudeUnlockingInfo (dotSamaApi: ApiProps, networ
   } as UnlockingStakeInfo;
 }
 
-async function getAmplitudeWithdrawalTxInfo (dotSamaApi: ApiProps, address: string, collatorAddress: string) {
+async function getAmplitudeWithdrawalTxInfo (dotSamaApi: ApiProps, address: string) {
   const apiProps = await dotSamaApi.isReady;
 
-  const extrinsic = apiProps.api.tx.parachainStaking.unlockUnstaked(collatorAddress);
+  const extrinsic = apiProps.api.tx.parachainStaking.unlockUnstaked(address);
 
   return extrinsic.paymentInfo(address);
 }
 
-export async function handleAmplitudeWithdrawalTxInfo (networkKey: string, networkJson: NetworkJson, dotSamaApiMap: Record<string, ApiProps>, web3ApiMap: Record<string, Web3>, address: string, collatorAddress: string) {
+export async function handleAmplitudeWithdrawalTxInfo (networkKey: string, networkJson: NetworkJson, dotSamaApiMap: Record<string, ApiProps>, web3ApiMap: Record<string, Web3>, address: string) {
   try {
     const [txInfo, balance] = await Promise.all([
-      getAmplitudeWithdrawalTxInfo(dotSamaApiMap[networkKey], address, collatorAddress),
+      getAmplitudeWithdrawalTxInfo(dotSamaApiMap[networkKey], address),
       getFreeBalance(networkKey, address, dotSamaApiMap, web3ApiMap)
     ]);
 
@@ -425,8 +425,47 @@ export async function handleAmplitudeWithdrawalTxInfo (networkKey: string, netwo
   }
 }
 
-export async function getAmplitudeWithdrawalExtrinsic (dotSamaApi: ApiProps, collatorAddress: string) {
+export async function getAmplitudeWithdrawalExtrinsic (dotSamaApi: ApiProps, address: string) {
   const apiProps = await dotSamaApi.isReady;
 
-  return apiProps.api.tx.parachainStaking.unlockUnstaked(collatorAddress);
+  return apiProps.api.tx.parachainStaking.unlockUnstaked(address);
+}
+
+async function getAmplitudeClaimRewardTxInfo (dotSamaApi: ApiProps, address: string) {
+  const apiProps = await dotSamaApi.isReady;
+
+  const extrinsic = apiProps.api.tx.parachainStaking.claimRewards();
+
+  return extrinsic.paymentInfo(address);
+}
+
+export async function handleAmplitudeClaimRewardTxInfo (address: string, networkKey: string, networkJson: NetworkJson, dotSamaApiMap: Record<string, ApiProps>, web3ApiMap: Record<string, Web3>) {
+  try {
+    const [txInfo, balance] = await Promise.all([
+      getAmplitudeClaimRewardTxInfo(dotSamaApiMap[networkKey], address),
+      getFreeBalance(networkKey, address, dotSamaApiMap, web3ApiMap)
+    ]);
+
+    const feeString = parseNumberToDisplay(txInfo.partialFee, networkJson.decimals) + ` ${networkJson.nativeToken ? networkJson.nativeToken : ''}`;
+    const rawFee = parseRawNumber(txInfo.partialFee.toString());
+    const binaryBalance = new BN(balance);
+    const balanceError = txInfo.partialFee.gt(binaryBalance);
+
+    return {
+      rawFee,
+      fee: feeString,
+      balanceError
+    } as BasicTxInfo;
+  } catch (e) {
+    return {
+      fee: `0.0000 ${networkJson.nativeToken as string}`,
+      balanceError: false
+    } as BasicTxInfo;
+  }
+}
+
+export async function getAmplitudeClaimRewardExtrinsic (dotSamaApi: ApiProps) {
+  const apiProps = await dotSamaApi.isReady;
+
+  return apiProps.api.tx.parachainStaking.claimRewards();
 }

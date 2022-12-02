@@ -2079,6 +2079,21 @@ export const PREDEFINED_NETWORKS: Record<string, NetworkJson> = {
     decimals: 15,
     supportBonding: true,
     getStakingOnChain: true
+  },
+  watr_network: {
+    key: 'watr_network',
+    chain: 'Watr Network',
+    genesisHash: '0xb53c620c41860278fa3068a5367c8eedceefce8a7c29237d830bc09a71737b5d',
+    ss58Format: 19,
+    providers: {
+      watr: 'wss://rpc.dev.watr.org'
+    },
+    active: false,
+    currentProviderMode: 'ws',
+    currentProvider: 'watr',
+    groups: ['TEST_NET'],
+    nativeToken: 'WATRD',
+    decimals: 18
   }
 };
 

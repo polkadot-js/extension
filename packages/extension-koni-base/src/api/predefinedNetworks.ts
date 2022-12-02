@@ -2094,7 +2094,8 @@ export const PREDEFINED_NETWORKS: Record<string, NetworkJson> = {
     currentProvider: 'XX Foundation',
     groups: ['MAIN_NET'],
     nativeToken: 'xx',
-    decimals: 9
+    decimals: 9,
+    coinGeckoKey: 'xxcoin'
   }
 };
 

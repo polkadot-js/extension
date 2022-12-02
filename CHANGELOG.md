@@ -1,5 +1,19 @@
 # CHANGELOG
 
+## 0.7.3 (Koni)
+Build date: Nov 19, 2022.
+
+Update:
+- Remove EVM crowdloan record (#865)
+
+Bug fixes:
+- Bug automatically redirects to the Ethereum network when requesting permission (#789)
+- Fix other bug in case unstake (#804)
+- Do not show tooltip on the Firefox browser (#830)
+- Show incorrect screen when re-open the extension after staking successfully (#845)
+- Do not show message when staking record does not exist yet (#849)
+
+
 ## 0.7.2 (Koni)
 Build date: Nov 19, 2022.
 

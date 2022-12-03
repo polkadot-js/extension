@@ -2080,6 +2080,58 @@ export const PREDEFINED_NETWORKS: Record<string, NetworkJson> = {
     supportBonding: true,
     getStakingOnChain: true
   },
+  xx_network: {
+    key: 'xx_network',
+    chain: 'XX Network',
+    genesisHash: '0x50dd5d206917bf10502c68fb4d18a59fc8aa31586f4e8856b493e43544aa82aa',
+    ss58Format: 55,
+    providers: {
+      'XX Foundation': 'wss://rpc.xx.network',
+      dwellir: 'wss://xxnetwork-rpc.dwellir.com'
+    },
+    active: false,
+    currentProviderMode: 'ws',
+    currentProvider: 'XX Foundation',
+    groups: ['MAIN_NET'],
+    nativeToken: 'xx',
+    decimals: 9,
+    coinGeckoKey: 'xxcoin'
+  },
+  watr_network: {
+    key: 'watr_network',
+    chain: 'Watr Network',
+    genesisHash: '0xb53c620c41860278fa3068a5367c8eedceefce8a7c29237d830bc09a71737b5d',
+    ss58Format: 19,
+    providers: {
+      watr: 'wss://rpc.dev.watr.org'
+    },
+    active: false,
+    currentProviderMode: 'ws',
+    currentProvider: 'watr',
+    groups: ['TEST_NET'],
+    nativeToken: 'WATRD',
+    decimals: 18,
+    coinGeckoKey: 'watr'
+  },
+  watr_network_evm: {
+    key: 'watr_network_evm',
+    chain: 'Watr Network - EVM',
+    genesisHash: '0xb53c620c41860278fa3068a5367c8eedceefce8a7c29237d830bc09a71737b5d_evm',
+    ss58Format: 19,
+    providers: {
+      watr: 'https://rpc.dev.watr.org'
+    },
+    active: false,
+    isEthereum: true,
+    currentProviderMode: 'http',
+    currentProvider: 'watr',
+    groups: ['TEST_NET'],
+    nativeToken: 'WATRD',
+    decimals: 18,
+    evmChainId: 688,
+    coinGeckoKey: 'watr',
+    supportSmartContract: [ContractType.evm]
+  },
   subspace_gemini_3a: {
     key: 'subspace_gemini_3a',
     chain: 'Subspace Gemini 3a',

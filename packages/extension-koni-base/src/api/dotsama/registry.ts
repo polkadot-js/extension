@@ -160,7 +160,6 @@ export const getRegistry = async (networkKey: string, api: ApiPromise, customTok
   await api.isReady;
 
   const { chainDecimals, chainTokens } = api.registry || DEFAULT_TOKEN_REGISTRY[networkKey] || { chainDecimals: [], chainTokens: [] };
-  console.log('=======================', api.registry, networkKey);
 
   // Hotfix for these network because substrate and evm response different decimal
   if (['pangolinEvm', 'crabEvm'].includes(networkKey)) {

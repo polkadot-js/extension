@@ -2095,6 +2095,23 @@ export const PREDEFINED_NETWORKS: Record<string, NetworkJson> = {
     nativeToken: 'WATRD',
     decimals: 18,
     coinGeckoKey: 'watr'
+  },
+  watr_network_evm: {
+    key: 'watr_network_evm',
+    chain: 'Watr Network - EVM',
+    genesisHash: '0xb53c620c41860278fa3068a5367c8eedceefce8a7c29237d830bc09a71737b5d_evm',
+    ss58Format: 19,
+    providers: {
+      watr: 'https://rpc.dev.watr.org'
+    },
+    active: false,
+    isEthereum: true,
+    currentProviderMode: 'http',
+    currentProvider: 'watr',
+    groups: ['TEST_NET'],
+    nativeToken: 'WATRD',
+    decimals: 18,
+    coinGeckoKey: 'watr'
   }
 };
 

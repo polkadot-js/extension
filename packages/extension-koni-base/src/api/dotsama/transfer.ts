@@ -62,6 +62,13 @@ export async function checkSupportTransfer (networkKey: string, token: string, d
     };
   }
 
+  if (networkKey === 'subspace_gemini_3a') {
+    return {
+      supportTransfer: false,
+      supportTransferAll: false
+    };
+  }
+
   const api = apiProps.api;
   const isTxCurrenciesSupported = !!api && !!api.tx && !!api.tx.currencies;
   const isTxBalancesSupported = !!api && !!api.tx && !!api.tx.balances;

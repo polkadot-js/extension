@@ -11,6 +11,7 @@ interface ToastProviderProps {
 }
 
 const TOAST_TIMEOUT = 1500;
+let timerId: NodeJS.Timeout;
 
 const ToastProvider = ({ children }: ToastProviderProps): React.ReactElement<ToastProviderProps> => {
   const [content, setContent] = useState('');
@@ -18,7 +19,10 @@ const ToastProvider = ({ children }: ToastProviderProps): React.ReactElement<Toa
   const [isError, setError] = useState(false);
 
   const show = useCallback((message: string, isError?: boolean): () => void => {
-    const timerId = setTimeout(() => setVisible(false), TOAST_TIMEOUT);
+    // clear the previous timer and add new set timer
+    clearTimeout(timerId);
+
+    timerId = setTimeout(() => setVisible(false), TOAST_TIMEOUT);
 
     setError(!!isError);
     setContent(message);

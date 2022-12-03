@@ -436,7 +436,7 @@ function AccountQrModal (props: Props): React.ReactElement<Props> {
           {showExportButton && !isAccountAll(address) && !isExternal && (
             <Link
               className='account-qr-modal-button'
-              to={`/account/export/${formatted}`}
+              to={`/account/export/${address}`}
             >
               <div className='account-qr-modal-button__text'>
                 {t<string>('Export Private Key')}

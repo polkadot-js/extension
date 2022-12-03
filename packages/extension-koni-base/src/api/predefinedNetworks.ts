@@ -2080,6 +2080,23 @@ export const PREDEFINED_NETWORKS: Record<string, NetworkJson> = {
     supportBonding: true,
     getStakingOnChain: true
   },
+  xx_network: {
+    key: 'xx_network',
+    chain: 'XX Network',
+    genesisHash: '0x50dd5d206917bf10502c68fb4d18a59fc8aa31586f4e8856b493e43544aa82aa',
+    ss58Format: 55,
+    providers: {
+      'XX Foundation': 'wss://rpc.xx.network',
+      dwellir: 'wss://xxnetwork-rpc.dwellir.com'
+    },
+    active: false,
+    currentProviderMode: 'ws',
+    currentProvider: 'XX Foundation',
+    groups: ['MAIN_NET'],
+    nativeToken: 'xx',
+    decimals: 9,
+    coinGeckoKey: 'xxcoin'
+  },
   watr_network: {
     key: 'watr_network',
     chain: 'Watr Network',

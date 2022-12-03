@@ -1,9 +1,9 @@
-    1178	Nam Phạm                      	remove zstake token
-     700	AnhMTV                        	Release version 0.7.3
+    1193	Nam Phạm                      	fix bug parsing collator status and add APR for Amplitude
+     717	AnhMTV                        	
      465	Jaco                          	0.42.5 (#969)
-     348	S2kael                        	[Issue-859] Update UI
+     350	S2kael                        	[Issue-859] update Aleph Zero Testnet genesisHash
      154	lw-cdm                        	Fix tslint issues
-     142	quangdo                       	update some label and variable (original to origin)
+     154	quangdo                       	
      104	khainh                        	predefine metadata for Polkadot & Kusama chains
       97	lw-cdm                        	
       82	Thibaut Sardan                	Add account filtering feature (#832)
@@ -29,6 +29,7 @@
        2	Shawn Tabrizi                 	Add configurable notifications (#767)
        2	WoeOm                         	add darwinia network (#493)
        1	Aleksandr Ishchenko           	[#897] signer.signRaw signing doesn't work with Ledger Nano X (#905)
+       1	Amit Chauhan                  	Fixed toast flicker effect when multiple show toast method called
        1	Andrei Eres                   	Add extension prefix (#891)
        1	Arthur Chiu                   	update subspace_gemini_2a to use prod subscan
        1	Caio                          	Implement signRaw (#196)

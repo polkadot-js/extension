@@ -2111,7 +2111,9 @@ export const PREDEFINED_NETWORKS: Record<string, NetworkJson> = {
     groups: ['TEST_NET'],
     nativeToken: 'WATRD',
     decimals: 18,
-    coinGeckoKey: 'watr'
+    evmChainId: 688,
+    coinGeckoKey: 'watr',
+    supportSmartContract: [ContractType.evm]
   }
 };
 

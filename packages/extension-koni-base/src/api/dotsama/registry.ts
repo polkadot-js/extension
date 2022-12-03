@@ -33,7 +33,8 @@ const DEFAULT_TOKEN_REGISTRY: Record<string, { chainDecimals: number[], chainTok
   boba_rinkeby: { chainDecimals: [18], chainTokens: ['ETH'] },
   boba: { chainDecimals: [18], chainTokens: ['ETH'] },
   bobabase: { chainDecimals: [18], chainTokens: ['BOBA'] },
-  bobabeam: { chainDecimals: [18], chainTokens: ['BOBA'] }
+  bobabeam: { chainDecimals: [18], chainTokens: ['BOBA'] },
+  watr_network_evm: { chainDecimals: [18], chainTokens: ['WATRD'] }
 };
 
 export async function getMoonAssets (api: ApiPromise) {
@@ -159,6 +160,7 @@ export const getRegistry = async (networkKey: string, api: ApiPromise, customTok
   await api.isReady;
 
   const { chainDecimals, chainTokens } = api.registry || DEFAULT_TOKEN_REGISTRY[networkKey] || { chainDecimals: [], chainTokens: [] };
+  console.log('=======================', api.registry, networkKey);
 
   // Hotfix for these network because substrate and evm response different decimal
   if (['pangolinEvm', 'crabEvm'].includes(networkKey)) {

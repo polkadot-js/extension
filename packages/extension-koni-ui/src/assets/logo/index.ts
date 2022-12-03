@@ -473,6 +473,10 @@ const LogosMap: Record<string, string> = {
   // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
   xx_network: require('./164.xxnetwork.png'),
   // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+  watr_network: require('./165.watr.png'),
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+  watr_network_evm: require('./165.watr.png'),
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
   default: require('./73.Default.png')
 };
 

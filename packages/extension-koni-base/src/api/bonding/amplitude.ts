@@ -9,29 +9,29 @@ import Web3 from 'web3';
 
 import { BN } from '@polkadot/util';
 
-// interface InflationConfig {
-//   collator: {
-//     maxRate: string,
-//     rewardRate: {
-//       annual: string,
-//       perBlock: string
-//     }
-//   },
-//   delegator: {
-//     maxRate: string,
-//     rewardRate: {
-//       annual: string,
-//       perBlock: string
-//     }
-//   }
-// }
+interface InflationConfig {
+  collator: {
+    maxRate: string,
+    rewardRate: {
+      annual: string,
+      perBlock: string
+    }
+  },
+  delegator: {
+    maxRate: string,
+    rewardRate: {
+      annual: string,
+      perBlock: string
+    }
+  }
+}
 
 interface CollatorInfo {
   id: string,
   stake: string,
   delegators: any[],
   total: string,
-  status: string
+  status: string | Record<string, string>
 }
 
 export async function getAmplitudeBondingBasics (networkKey: string, dotSamaApi: ApiProps) {
@@ -60,12 +60,16 @@ export async function getAmplitudeBondingBasics (networkKey: string, dotSamaApi:
 export async function getAmplitudeCollatorsInfo (networkKey: string, dotSamaApi: ApiProps, decimals: number, address: string, extraCollatorAddress?: string) {
   const apiProps = await dotSamaApi.isReady;
 
-  const [_allCollators, _delegatorState, _unstakingInfo] = await Promise.all([
+  const [_allCollators, _delegatorState, _unstakingInfo, _inflationConfig] = await Promise.all([
     apiProps.api.query.parachainStaking.candidatePool.entries(),
     apiProps.api.query.parachainStaking.delegatorState(address),
-    apiProps.api.query.parachainStaking.unstaking(address)
+    apiProps.api.query.parachainStaking.unstaking(address),
+    apiProps.api.query.parachainStaking.inflationConfig()
   ]);
 
+  const inflationConfig = _inflationConfig.toHuman() as unknown as InflationConfig;
+  const rawDelegatorReturn = inflationConfig.delegator.rewardRate.annual;
+  const delegatorReturn = parseFloat(rawDelegatorReturn.split('%')[0]);
   const _maxDelegatorPerCandidate = apiProps.api.consts.parachainStaking.maxDelegatorsPerCollator.toHuman() as string;
   const maxDelegatorPerCandidate = parseRawNumber(_maxDelegatorPerCandidate);
 
@@ -83,7 +87,7 @@ export async function getAmplitudeCollatorsInfo (networkKey: string, dotSamaApi:
   for (const _collator of _allCollators) {
     const collatorInfo = _collator[1].toHuman() as unknown as CollatorInfo;
 
-    if (collatorInfo.status.toLowerCase() === 'active') {
+    if (typeof collatorInfo.status === 'string' && collatorInfo.status.toLowerCase() === 'active') {
       allCollators.push({
         address: collatorInfo.id,
         totalStake: parseRawNumber(collatorInfo.total) / 10 ** decimals,
@@ -92,7 +96,7 @@ export async function getAmplitudeCollatorsInfo (networkKey: string, dotSamaApi:
 
         nominatorCount: collatorInfo.delegators.length,
         commission: 0,
-        expectedReturn: 0,
+        expectedReturn: delegatorReturn,
         blocked: false,
         isVerified: false,
         minBond: chainMinDelegation,

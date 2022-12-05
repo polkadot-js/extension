@@ -2256,7 +2256,8 @@ export const PREDEFINED_NETWORKS: Record<string, NetworkJson> = {
     currentProvider: 'barnacle_evm',
     groups: ['TEST_NET'],
     nativeToken: 'EBAR',
-    decimals: 18
+    decimals: 18,
+    isEthereum: true
   }
 };
 

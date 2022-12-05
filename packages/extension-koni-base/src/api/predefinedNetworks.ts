@@ -2180,6 +2180,21 @@ export const PREDEFINED_NETWORKS: Record<string, NetworkJson> = {
     nativeToken: 'DISC',
     decimals: 14
   },
+  discovol_testnet: {
+    key: 'discovol_testnet',
+    chain: 'Discovol (Testnet)',
+    genesisHash: '0xdc1922b7f60b4925091bbfdd912684c449de7a7cdc5592e9eab11fee55fa53ec',
+    ss58Format: 42,
+    providers: {
+      discovol_testnet: 'wss://gateway.testnet.octopus.network/discovol/o4urcey87y4n1qimhfrad92gzs315z9h'
+    },
+    active: false,
+    currentProviderMode: 'ws',
+    currentProvider: 'discovol_testnet',
+    groups: ['TEST_NET'],
+    nativeToken: 'DISC',
+    decimals: 14
+  },
   atocha: {
     key: 'atocha',
     chain: 'Atocha',

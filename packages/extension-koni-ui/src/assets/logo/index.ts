@@ -483,6 +483,8 @@ const LogosMap: Record<string, string> = {
   // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
   discovol: require('./167.discovol.png'),
   // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+  discovol_testnet: require('./167.discovol.png'),
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
   atocha: require('./168.atocha.png'),
   // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
   myriad: require('./169.myriad.png'),

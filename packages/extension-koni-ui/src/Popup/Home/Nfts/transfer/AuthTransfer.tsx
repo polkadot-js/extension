@@ -146,6 +146,7 @@ function AuthTransfer ({ chain, className, collectionId, nftItem, recipientAddre
             <SigningRequest
               account={senderAccount}
               balanceError={web3TransferParams?.balanceError}
+              className='signing-request-wrapper'
               handleSignPassword={evmNftSubmitTransaction}
               handleSignQr={makeTransferNftQrEvm}
               hideConfirm={hideConfirm}
@@ -166,6 +167,7 @@ function AuthTransfer ({ chain, className, collectionId, nftItem, recipientAddre
             <SigningRequest
               account={senderAccount}
               balanceError={substrateTransferParams?.balanceError}
+              className='signing-request-wrapper'
               handleSignLedger={makeTransferNftLedgerSubstrate}
               handleSignPassword={substrateNftSubmitTransaction}
               handleSignQr={makeTransferNftQrSubstrate}
@@ -193,6 +195,10 @@ export default React.memo(styled(AuthTransfer)(({ theme }: Props) => `
     padding-right: 15px;
     padding-bottom: 15px;
     padding-top: 10px;
+  }
+
+  .signing-request-wrapper {
+    overflow: auto;
   }
 
   .auth-transaction-body {

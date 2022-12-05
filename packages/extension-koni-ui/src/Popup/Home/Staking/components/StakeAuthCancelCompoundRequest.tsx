@@ -94,6 +94,7 @@ function StakeAuthCancelCompoundRequest ({ address, balanceError, className, fee
         <SigningRequest
           account={account}
           balanceError={balanceError}
+          className='signing-request-wrapper'
           handleSignLedger={cancelCompoundLedger}
           handleSignPassword={submitTuringCancelStakeCompounding}
           handleSignQr={cancelCompoundQr}
@@ -142,6 +143,10 @@ export default React.memo(styled(StakeAuthCancelCompoundRequest)(({ theme }: Pro
   .transaction-info-container {
     margin-top: 20px;
     width: 100%;
+  }
+
+  .signing-request-wrapper {
+    overflow: auto;
   }
 
   .transaction-info-row {

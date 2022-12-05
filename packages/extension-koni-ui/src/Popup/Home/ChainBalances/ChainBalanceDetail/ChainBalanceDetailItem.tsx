@@ -260,6 +260,7 @@ export default React.memo(styled(ChainBalanceDetailItem)(({ theme }: Props) => `
     overflow: hidden;
     margin-right: 12px;
     margin-top:10px;
+    background-color: #FFF;
   }
 
   .chain-balance-item__meta-wrapper {

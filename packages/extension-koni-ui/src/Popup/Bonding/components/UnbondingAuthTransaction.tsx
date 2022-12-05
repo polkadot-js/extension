@@ -100,6 +100,7 @@ function UnbondingAuthTransaction ({ amount, balanceError, className, fee, handl
         <SigningRequest
           account={account}
           balanceError={balanceError}
+          className='signing-request-wrapper'
           handleSignLedger={makeUnBondingLedger}
           handleSignPassword={submitUnbonding}
           handleSignQr={makeUnBondingQr}
@@ -167,6 +168,10 @@ export default React.memo(styled(UnbondingAuthTransaction)(({ theme }: Props) =>
   .bonding-auth-cancel-button {
     color: ${theme.textColor3};
     background: ${theme.buttonBackground1};
+  }
+
+  .signing-request-wrapper {
+    overflow: auto;
   }
 
   .bonding-auth-btn-container {

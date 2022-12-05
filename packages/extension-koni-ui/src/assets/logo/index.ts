@@ -479,6 +479,20 @@ const LogosMap: Record<string, string> = {
   // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
   watr_network_evm: require('./165.watr.png'),
   // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+  fusotao: require('./166.fusotao.png'),
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+  discovol: require('./167.discovol.png'),
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+  atocha: require('./168.atocha.png'),
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+  myriad: require('./169.myriad.png'),
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+  deBio: require('./170.dbio.png'),
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+  barnacle: require('./171.barnacle.png'),
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+  barnacle_evm: require('./171.barnacle.png'),
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
   default: require('./73.Default.png')
 };
 

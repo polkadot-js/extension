@@ -16,13 +16,13 @@
   "type": "module",
   "version": "0.44.7-23-x",
   "dependencies": {
-    "@babel/runtime": "^7.20.1",
+    "@babel/runtime": "^7.20.6",
     "@polkadot/extension-base": "^0.44.7-23-x",
     "@polkadot/extension-inject": "^0.44.7-23-x",
     "@polkadot/extension-ui": "^0.44.7-23-x"
   },
   "devDependencies": {
-    "@polkadot/dev": "^0.67.161",
+    "@polkadot/dev": "^0.67.167",
     "babel-loader": "^8.2.5",
     "browser-resolve": "^2.0.0",
     "buffer": "^6.0.3",

@@ -101,6 +101,7 @@ function AuthTransaction ({ balanceFormat,
         <SigningRequest
           account={account}
           balanceError={false}
+          className='signing-request-wrapper'
           detailError={true}
           handleSignLedger={makeCrossChainTransferLedger}
           handleSignPassword={makeCrossChainTransfer}
@@ -209,6 +210,10 @@ export default React.memo(styled(AuthTransaction)(({ theme }: ThemeProps) => `
     display: flex;
     flex-direction: column;
     overflow: hidden;
+  }
+
+  .signing-request-wrapper {
+    overflow: auto;
   }
 
   .signer-modal {

@@ -140,6 +140,7 @@ function StakeAuthWithdrawal ({ address, amount, className, hideModal, networkKe
                       <SigningRequest
                         account={account}
                         balanceError={balanceError}
+                        className='signing-request-wrapper'
                         handleSignLedger={stakeWithdrawLedger}
                         handleSignPassword={submitStakeWithdrawal}
                         handleSignQr={stakeWithdrawQr}
@@ -223,6 +224,10 @@ export default React.memo(styled(StakeAuthWithdrawal)(({ theme }: Props) => `
   .container-spinner {
     height: 65px;
     width: 65px;
+  }
+
+  .signing-request-wrapper {
+    overflow: auto;
   }
 
   .transaction-info-container {

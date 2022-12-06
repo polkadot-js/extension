@@ -6,7 +6,6 @@ import Button from '@subwallet/extension-koni-ui/components/Button';
 import { SigningContext } from '@subwallet/extension-koni-ui/contexts/SigningContext';
 import useTranslation from '@subwallet/extension-koni-ui/hooks/useTranslation';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
-import CN from 'classnames';
 import React, { useCallback, useContext, useState } from 'react';
 import styled from 'styled-components';
 
@@ -58,7 +57,7 @@ const PasswordRequest = ({ children,
   }, [errors, t]);
 
   return (
-    <div className={CN(className)}>
+    <div className={className}>
       { children }
 
       <div className='password-signing__separator' />
@@ -117,11 +116,19 @@ export default React.memo(styled(PasswordRequest)(({ theme }: Props) => `
   }
 
   .password-signing-btn-container {
-    margin-top: 20px;
     display: flex;
     justify-content: center;
     align-items: center;
     gap: 20px;
+    position: sticky;
+    bottom: 0;
+    background-color: ${theme.background};
+    margin-left: -15px;
+    margin-right: -15px;
+    padding-left: 15px;
+    padding-right: 15px;
+    padding-top: 15px;
+    padding-bottom: 15px;
   }
 
   .password-signing-cancel-button {

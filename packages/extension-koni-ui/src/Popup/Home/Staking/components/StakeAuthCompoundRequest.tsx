@@ -104,6 +104,7 @@ function StakeAuthCompoundRequest ({ accountMinimum, address, balanceError, bond
         <SigningRequest
           account={account}
           balanceError={balanceError}
+          className='signing-request-wrapper'
           handleSignLedger={createCompoundLedger}
           handleSignPassword={submitTuringStakeCompounding}
           handleSignQr={createCompoundQr}
@@ -168,6 +169,10 @@ export default React.memo(styled(StakeAuthCompoundRequest)(({ theme }: Props) =>
   .transaction-info-container {
     margin-top: 20px;
     width: 100%;
+  }
+
+  .signing-request-wrapper {
+    overflow: auto;
   }
 
   .transaction-info-row {

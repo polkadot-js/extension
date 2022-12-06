@@ -2148,6 +2148,131 @@ export const PREDEFINED_NETWORKS: Record<string, NetworkJson> = {
     groups: ['TEST_NET'],
     nativeToken: 'tSSC',
     decimals: 18
+  },
+  fusotao: {
+    key: 'fusotao',
+    chain: 'Fusotao',
+    genesisHash: '0xa7113159e275582ee71ee499b24378a2416f34dc5aaf714443f0d11c6c3d99d3',
+    ss58Format: 42,
+    providers: {
+      fusotao: 'wss://gateway.mainnet.octopus.network/fusotao/0efwa9v0crdx4dg3uj8jdmc5y7dj4ir2'
+    },
+    active: false,
+    currentProviderMode: 'ws',
+    currentProvider: 'fusotao',
+    groups: ['MAIN_NET'],
+    nativeToken: 'TAO',
+    decimals: 18,
+    coinGeckoKey: 'fusotao'
+  },
+  discovol: {
+    key: 'discovol',
+    chain: 'Discovol',
+    genesisHash: '0x2dfbcf7700297bd8ce07a4665ab39e2ed1a3790df783b936988c85eb87e38bee',
+    ss58Format: 42,
+    providers: {
+      discovol: 'wss://gateway.mainnet.octopus.network/discovol/afpft46l1egfhrv8at5pfyrld03zseo1'
+    },
+    active: false,
+    currentProviderMode: 'ws',
+    currentProvider: 'discovol',
+    groups: ['MAIN_NET'],
+    nativeToken: 'DISC',
+    decimals: 14
+  },
+  discovol_testnet: {
+    key: 'discovol_testnet',
+    chain: 'Discovol (Testnet)',
+    genesisHash: '0xdc1922b7f60b4925091bbfdd912684c449de7a7cdc5592e9eab11fee55fa53ec',
+    ss58Format: 42,
+    providers: {
+      discovol_testnet: 'wss://gateway.testnet.octopus.network/discovol/o4urcey87y4n1qimhfrad92gzs315z9h'
+    },
+    active: false,
+    currentProviderMode: 'ws',
+    currentProvider: 'discovol_testnet',
+    groups: ['TEST_NET'],
+    nativeToken: 'DISC',
+    decimals: 14
+  },
+  atocha: {
+    key: 'atocha',
+    chain: 'Atocha',
+    genesisHash: '0x1f11f745be512a17f39b571a9391b5ee6747b900c1db98176828e4a1346dbe9b',
+    ss58Format: 42,
+    providers: {
+      atocha: 'wss://gateway.mainnet.octopus.network/atocha/jungxomf4hdcfocwcalgoiz64g9avjim'
+    },
+    active: false,
+    currentProviderMode: 'ws',
+    currentProvider: 'atocha',
+    groups: ['MAIN_NET'],
+    nativeToken: 'ATO',
+    decimals: 18,
+    coinGeckoKey: 'atocha-coin'
+  },
+  myriad: {
+    key: 'myriad',
+    chain: 'Myriad',
+    genesisHash: '0x74ed91fbc18497f011290f9119a2217908649170337b6414a2d44923ade07063',
+    ss58Format: 42,
+    providers: {
+      myriad: 'wss://gateway.mainnet.octopus.network/myriad/a4cb0a6e30ff5233a3567eb4e8cb71e0'
+    },
+    active: false,
+    currentProviderMode: 'ws',
+    currentProvider: 'myriad',
+    groups: ['MAIN_NET'],
+    nativeToken: 'MYRIA',
+    decimals: 18,
+    coinGeckoKey: 'myriad-social'
+  },
+  deBio: {
+    key: 'deBio',
+    chain: 'DeBio',
+    genesisHash: '0x996800af345b3109acdada9913e36d1efa98b89e7dcd0b61b70fdbfc13b2fa50',
+    ss58Format: 42,
+    providers: {
+      deBio: 'wss://gateway.mainnet.octopus.network/debionetwork/ae48005a0c7ecb4053394559a7f4069e'
+    },
+    active: false,
+    currentProviderMode: 'ws',
+    currentProvider: 'deBio',
+    groups: ['MAIN_NET'],
+    nativeToken: 'DBIO',
+    decimals: 18,
+    coinGeckoKey: 'debio-network'
+  },
+  barnacle: {
+    key: 'barnacle',
+    chain: 'Barnacle',
+    genesisHash: '0xb3d6017fd8f67d1d9970a010ee1bbf0bc12c5ff2d2c7b9c311a11332cb7b3a53',
+    ss58Format: 42,
+    providers: {
+      barnacle: 'wss://gateway.testnet.octopus.network/barnacle0928/9mw012zuf27soh7nrrq3a4p0s2ti3cyn'
+    },
+    active: false,
+    currentProviderMode: 'ws',
+    currentProvider: 'barnacle',
+    groups: ['TEST_NET'],
+    nativeToken: 'BAR',
+    decimals: 18
+  },
+  barnacle_evm: {
+    key: 'barnacle_evm',
+    chain: 'Barnacle EVM',
+    genesisHash: '0x49c76ef3ec0e3931db706b8df850b3e57bf0637a74ac72d0ae3d8242bc0c2a35',
+    ss58Format: 42,
+    providers: {
+      barnacle_evm: 'wss://gateway.testnet.octopus.network/barnacle-evm/wj1hhcverunusc35jifki19otd4od1n5'
+    },
+    active: false,
+    currentProviderMode: 'ws',
+    currentProvider: 'barnacle_evm',
+    groups: ['TEST_NET'],
+    nativeToken: 'EBAR',
+    decimals: 18,
+    isEthereum: true
   }
 };
 

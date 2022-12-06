@@ -129,6 +129,7 @@ function StakeAuthClaimReward ({ address, claimable, className, hideModal, netwo
                     <SigningRequest
                       account={account}
                       balanceError={balanceError}
+                      className='signing-request-wrapper'
                       handleSignLedger={claimRewardLedger}
                       handleSignPassword={submitStakeClaimReward}
                       handleSignQr={claimRewardQr}
@@ -202,6 +203,10 @@ export default React.memo(styled(StakeAuthClaimReward)(({ theme }: Props) => `
   .container-spinner {
     height: 65px;
     width: 65px;
+  }
+
+  .signing-request-wrapper {
+    overflow: auto;
   }
 
   .transaction-info-container {

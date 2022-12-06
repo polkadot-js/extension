@@ -114,6 +114,7 @@ function BondingAuthTransaction ({ amount, balanceError, bondedValidators, class
         <SigningRequest
           account={account}
           balanceError={balanceError}
+          className='signing-request-wrapper'
           handleSignLedger={makeBondingLedger}
           handleSignPassword={submitBonding}
           handleSignQr={makeBondingQr}
@@ -246,6 +247,10 @@ function BondingAuthTransaction ({ amount, balanceError, bondedValidators, class
 }
 
 export default React.memo(styled(BondingAuthTransaction)(({ theme }: Props) => `
+  .signing-request-wrapper {
+    overflow: auto;
+  }
+
   .transaction-info-container {
     margin-top: 10px;
     width: 100%;

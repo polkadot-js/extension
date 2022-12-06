@@ -19,6 +19,7 @@ import styled from 'styled-components';
 interface Props<T extends BaseRequestSign, V extends BasicTxResponse> {
   account?: AccountJson | null;
   balanceError?: boolean;
+  className?: string;
   children: JSX.Element | JSX.Element[];
   detailError?: boolean;
   handleSignLedger?: (params: ExternalRequestSign<T>, callback: HandleTxResponse<V>) => Promise<V>;
@@ -51,6 +52,7 @@ const ExternalContainer = styled.div`
 const SigningRequest = <T extends BaseRequestSign, V extends BasicTxResponse>({ account,
   balanceError,
   children,
+  className,
   detailError,
   handleSignLedger,
   handleSignPassword,
@@ -292,6 +294,7 @@ const SigningRequest = <T extends BaseRequestSign, V extends BasicTxResponse>({ 
         if (handleSignPassword) {
           return (
             <PasswordRequest
+              className={className}
               handlerStart={onSubmitPassword}
               hideConfirm={hideConfirm}
             >
@@ -310,7 +313,7 @@ const SigningRequest = <T extends BaseRequestSign, V extends BasicTxResponse>({ 
         { children }
       </UnknownRequest>
     );
-  }, [account, children, handleSignLedger, handleSignPassword, handleSignQr, hideConfirm, network, onSubmitLedger, onSubmitPassword, onSubmitQr, signMode]);
+  }, [account, children, className, handleSignLedger, handleSignPassword, handleSignQr, hideConfirm, network?.genesisHash, onSubmitLedger, onSubmitPassword, onSubmitQr, signMode]);
 
   useEffect(() => {
     cleanSigningState();

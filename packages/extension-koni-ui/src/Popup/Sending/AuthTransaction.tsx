@@ -131,6 +131,7 @@ function AuthTransaction ({ className, isDonation, feeInfo: [fee, feeDecimals, f
         <SigningRequest
           account={account}
           balanceError={false}
+          className='signing-request-wrapper'
           detailError={true}
           handleSignLedger={makeTransferLedger}
           handleSignPassword={makeTransfer}
@@ -235,6 +236,10 @@ export default React.memo(styled(AuthTransaction)(({ theme }: ThemeProps) => `
     display: flex;
     flex-direction: column;
     overflow: hidden;
+  }
+
+  .signing-request-wrapper {
+    overflow: auto;
   }
 
   .display-qr {

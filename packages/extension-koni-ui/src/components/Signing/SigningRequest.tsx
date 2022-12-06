@@ -313,7 +313,7 @@ const SigningRequest = <T extends BaseRequestSign, V extends BasicTxResponse>({ 
         { children }
       </UnknownRequest>
     );
-  }, [account, children, handleSignLedger, handleSignPassword, handleSignQr, hideConfirm, network, onSubmitLedger, onSubmitPassword, onSubmitQr, signMode]);
+  }, [account, children, className, handleSignLedger, handleSignPassword, handleSignQr, hideConfirm, network?.genesisHash, onSubmitLedger, onSubmitPassword, onSubmitQr, signMode]);
 
   useEffect(() => {
     cleanSigningState();

@@ -1,7 +1,7 @@
 // Copyright 2019-2022 @polkadot/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { ChainRegistry, NetworkJson } from '@subwallet/extension-base/background/KoniTypes';
+import { BasicTxError, BasicTxWarning, ChainRegistry, NetworkJson } from '@subwallet/extension-base/background/KoniTypes';
 import { AccountContext, ActionContext, Warning } from '@subwallet/extension-koni-ui/components';
 import Button from '@subwallet/extension-koni-ui/components/Button';
 import InputBalance from '@subwallet/extension-koni-ui/components/InputBalance';
@@ -104,6 +104,8 @@ function SendFund ({ chainRegistryMap, className, defaultValue, networkMap }: Co
   // const [[maxTransfer, noFees], setMaxTransfer] = useState<[BN | null, boolean]>([null, false]);
   const [existentialDeposit, setExistentialDeposit] = useState<string>('0');
   const [txResult, setTxResult] = useState<TransferResultType>({ isShowTxResult: false, isTxSuccess: false });
+  const [errors, setErrors] = useState<BasicTxError[] | undefined>(undefined);
+  const [warnings, setWarnings] = useState<BasicTxWarning[] | undefined>(undefined);
   const { isShowTxResult } = txResult;
   const senderFreeBalance = useFreeBalance(selectedNetworkKey, senderId, selectedToken);
   const recipientFreeBalance = useFreeBalance(selectedNetworkKey, recipientId, selectedToken);
@@ -186,6 +188,8 @@ function SendFund ({ chainRegistryMap, className, defaultValue, networkMap }: Co
         value: valueToTransfer
       }).then((rs) => {
         if (isSync) {
+          setErrors(rs.errors);
+          setWarnings(rs.warnings);
           setFeeInfo([
             rs.estimateFee && rs.estimateFee !== '0' ? rs.estimateFee : null,
             rs.feeSymbol
@@ -395,6 +399,29 @@ function SendFund ({ chainRegistryMap, className, defaultValue, networkMap }: Co
                 />
               </div>
             )}
+
+            {warnings && warnings.length
+              ? warnings.map((w, index) => (
+                <Warning
+                  className='send-fund-warning'
+                  key={index}
+                >
+                  {t<string>(w.message)}
+                </Warning>
+              ))
+              : <></>}
+
+            {!amountGtAvailableBalance && errors && errors.length
+              ? errors.map((w, index) => (
+                <Warning
+                  className='send-fund-warning'
+                  isDanger
+                  key={index}
+                >
+                  {t<string>(w.message)}
+                </Warning>
+              ))
+              : <></>}
 
             {reference && (
               <Warning className={'send-fund-warning'}>

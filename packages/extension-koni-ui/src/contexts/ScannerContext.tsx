@@ -192,6 +192,8 @@ export function ScannerContextProvider ({ children }: ScannerContextProviderProp
         missedFrames: nextMissedFrames,
         totalFrameCount
       };
+    } else {
+      return _integrateMultiPartData(multipartData, totalFrameCount);
     }
 
     return {
@@ -354,7 +356,7 @@ export function ScannerContextProvider ({ children }: ScannerContextProviderProp
     }
 
     if (!senderNetwork.active) {
-      throw new Error('Signing Error: Network is not active.');
+      throw new Error(`Signing Error: Network ${senderNetwork.chain?.replace(' Relay Chain', '')} is not active.`);
     }
 
     if (!sender) {

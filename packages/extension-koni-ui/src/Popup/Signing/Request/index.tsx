@@ -20,7 +20,6 @@ import { useSelector } from 'react-redux';
 import styled from 'styled-components';
 
 import { TypeRegistry } from '@polkadot/types';
-import { encodeAddress } from '@polkadot/util-crypto';
 
 import { AccountInfoEl, ActionContext, Button, Modal, Warning } from '../../../components';
 import { approveSignSignature } from '../../../messaging';
@@ -214,16 +213,7 @@ function Request ({ account,
     } else if (hexBytes !== null) {
       const { data } = request.payload as SignerPayloadRaw;
 
-      let genesisHash = '';
-
-      for (const network of Object.values(networkMap)) {
-        const condition = encodeAddress(address, network.ss58Format) === encodeAddress(address);
-
-        if (condition) {
-          genesisHash = network.genesisHash;
-          break;
-        }
-      }
+      const genesisHash = networkMap.polkadot.genesisHash;
 
       switch (signMode) {
         case SIGN_MODE.QR:

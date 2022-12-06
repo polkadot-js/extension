@@ -280,8 +280,11 @@ const findNetworkAndAccountByGenesisHash = (
   genesisHash: string,
   pubKeyHex: string
 ): { network: NetworkJson | null; account: AccountJson | null; addressLength: number } => {
+  let network: null | NetworkJson = null;
+  let account: AccountJson | null = null;
+
   for (const forceEthereum of [false, true]) {
-    const network = findNetworkJsonByGenesisHash(networkMap, genesisHash, forceEthereum);
+    network = findNetworkJsonByGenesisHash(networkMap, genesisHash, forceEthereum);
 
     if (!network) {
       continue;
@@ -289,7 +292,8 @@ const findNetworkAndAccountByGenesisHash = (
 
     const addressLength = !network.isEthereum ? 64 : 40;
     const address = pubKeyHex.substring(0, addressLength);
-    const account = findAccountByAddress(accounts, '0x' + address);
+
+    account = findAccountByAddress(accounts, '0x' + address);
 
     if (account) {
       return {
@@ -301,8 +305,8 @@ const findNetworkAndAccountByGenesisHash = (
   }
 
   return {
-    network: null,
+    network: network,
     addressLength: 0,
-    account: null
+    account: account
   };
 };

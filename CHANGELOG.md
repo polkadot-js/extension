@@ -1,5 +1,20 @@
 # CHANGELOG
 
+## 0.7.4 (Koni)
+Build date: Dec 4, 2022.
+
+Update:
+- Integrate Watr Protocol and Token (#854)
+- Support claim staking reward for Amplitude (#867)
+- Integrate xx.network - a L1 Substrate-based network (#873)
+- Add Subspace Gemini 3 Testnet (#875)
+
+Bug fixes:
+- Fix bug NFT displays an error after update function parses transaction in case upgrade version (#864)
+- Fix bug don't show the QR code to sign an approved transaction after remembering the password with the QR-signer account (#871)
+- Fix bug don't show validator on the Amplitude network and update expected return (#884)
+- Fix bug don't show the Export account screen when visit it from the get wallet address screen (#885)
+
 ## 0.7.3 (Koni)
 Build date: Nov 19, 2022.
 

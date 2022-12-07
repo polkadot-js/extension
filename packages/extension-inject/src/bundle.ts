@@ -30,7 +30,11 @@ export function injectExtension (enable: (origin: string) => Promise<Injected>, 
       connect: (origin: string): Promise<InjectedExtension> =>
         enable(origin).then(({ accounts, metadata, provider, signer }) => ({
           accounts, metadata, name, provider, signer, version
-        }))
+        })),
+      enable: (): Promise<Injected> =>
+        Promise.reject(
+          new Error('This extension does not have support for enable(origin), rather is only supports the new connect(origin) variant (without extension metadata leaks without specific user-approval)')
+        )
     };
   } else {
     // expose our extension on the window object, old-style with enable(origin)

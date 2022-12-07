@@ -38,7 +38,7 @@ export default class Signer implements SignerInterface {
   }
 
   // NOTE We don't listen to updates at all, if we do we can interpret the
-  // resuklt as provided by the API here
+  // result as provided by the API here
   // public update (id: number, status: Hash | SubmittableResult): void {
   //   // ignore
   // }

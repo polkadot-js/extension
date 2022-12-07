@@ -129,8 +129,8 @@ function SendFund ({ chainRegistryMap, className, defaultValue, networkMap }: Co
   const selectedNetwork = useMemo((): NetworkJson => {
     return networkMap[selectedNetworkKey];
   }, [networkMap, selectedNetworkKey]);
-
   const senderAccount = useGetAccountByAddress(senderId);
+  const isValidHardwareAccount = senderAccount && senderAccount.isHardware && senderAccount.addressOffset === 0;
 
   const isBlockHardware = useMemo((): boolean => {
     if (!senderAccount) {
@@ -163,7 +163,8 @@ function SendFund ({ chainRegistryMap, className, defaultValue, networkMap }: Co
     !isNotSameAddressAndTokenType &&
     !isNotSameAddressType &&
     !amountGtAvailableBalance &&
-    !isReadOnly;
+    !isReadOnly &&
+    isValidHardwareAccount;
 
   const navigate = useContext(ActionContext);
 
@@ -394,6 +395,15 @@ function SendFund ({ chainRegistryMap, className, defaultValue, networkMap }: Co
                   value={isAll}
                 />
               </div>
+            )}
+
+            {!isValidHardwareAccount && (
+              <Warning
+                className={'send-fund-warning'}
+                isDanger
+              >
+                {t<string>('This feature is not available for the chosen account type')}
+              </Warning>
             )}
 
             {reference && (

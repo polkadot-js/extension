@@ -160,6 +160,7 @@ export const constructDataFromBytes = (bytes: Uint8Array, multipartComplete = fa
 
           const pubKeyHex = uosAfterFrames.substr(6, 64);
 
+
           const { account, addressLength, network } = findNetworkAndAccountByGenesisHash(
             networkMap,
             accounts,
@@ -170,6 +171,11 @@ export const constructDataFromBytes = (bytes: Uint8Array, multipartComplete = fa
           if (!network) {
             console.error(strings.ERROR_NO_NETWORK);
             throw new Error(strings.ERROR_NO_NETWORK);
+          }
+
+          if (network && !network.active) {
+            console.error(strings.ERROR_NETWORK_INACTIVE.replace('(network name)', network.chain));
+            throw new Error(strings.ERROR_NETWORK_INACTIVE.replace('(network name)', network.chain));
           }
 
           if (!account) {

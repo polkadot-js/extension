@@ -160,7 +160,6 @@ export const constructDataFromBytes = (bytes: Uint8Array, multipartComplete = fa
 
           const pubKeyHex = uosAfterFrames.substr(6, 64);
 
-
           const { account, addressLength, network } = findNetworkAndAccountByGenesisHash(
             networkMap,
             accounts,

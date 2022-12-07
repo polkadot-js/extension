@@ -33,7 +33,7 @@ export function injectExtension (enable: (origin: string) => Promise<Injected>, 
         })),
       enable: (): Promise<Injected> =>
         Promise.reject(
-          new Error('This extension does not have support for enable(origin), rather is only supports the new connect(origin) variant (without extension metadata leaks without specific user-approval)')
+          new Error('This extension does not have support for enable(...), rather is only supports the new connect(...) variant (no extension name/version metadata without specific user-approval)')
         )
     };
   } else {

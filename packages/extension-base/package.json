@@ -35,7 +35,7 @@
     "@polkadot/util": "^10.2.1",
     "@polkadot/util-crypto": "^10.2.1",
     "eventemitter3": "^4.0.7",
-    "rxjs": "^7.5.7"
+    "rxjs": "^7.6.0"
   },
   "devDependencies": {
     "@polkadot/extension-mocks": "^0.44.7-25-x"

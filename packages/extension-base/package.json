@@ -17,14 +17,14 @@
     "./detectPackage.cjs"
   ],
   "type": "module",
-  "version": "0.44.7-25-x",
+  "version": "0.44.7-26-x",
   "main": "index.js",
   "dependencies": {
     "@babel/runtime": "^7.20.6",
     "@polkadot/api": "^9.10.1",
-    "@polkadot/extension-chains": "^0.44.7-25-x",
-    "@polkadot/extension-dapp": "^0.44.7-25-x",
-    "@polkadot/extension-inject": "^0.44.7-25-x",
+    "@polkadot/extension-chains": "^0.44.7-26-x",
+    "@polkadot/extension-dapp": "^0.44.7-26-x",
+    "@polkadot/extension-inject": "^0.44.7-26-x",
     "@polkadot/keyring": "^10.2.1",
     "@polkadot/networks": "^10.2.1",
     "@polkadot/phishing": "^0.18.12",
@@ -38,6 +38,6 @@
     "rxjs": "^7.6.0"
   },
   "devDependencies": {
-    "@polkadot/extension-mocks": "^0.44.7-25-x"
+    "@polkadot/extension-mocks": "^0.44.7-26-x"
   }
 }

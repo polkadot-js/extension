@@ -22,7 +22,7 @@
     "@polkadot/extension-ui": "^0.44.7-25-x"
   },
   "devDependencies": {
-    "@polkadot/dev": "^0.67.167",
+    "@polkadot/dev": "^0.67.169",
     "babel-loader": "^8.2.5",
     "browser-resolve": "^2.0.0",
     "buffer": "^6.0.3",

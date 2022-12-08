@@ -1,4 +1,4 @@
-     563	Jaco                          	Bump TS (#1181)
+     564	Jaco                          	Remove CC (#1182)
       89	Thibaut Sardan                	Allow QR signing and add error when the account has no genesis (#1155)
        7	Ivan Rukhavets                	Mention derivation in FAQ (#334)
        4	Amaury Martiny                	PostMessageProvider with on('connected' | 'disconnected') (#279)

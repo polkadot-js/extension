@@ -255,7 +255,7 @@ export function ScannerContextProvider ({ children }: ScannerContextProviderProp
     const sender = findAccountByAddress(accounts, txRequest.data.account);
 
     if (!sender) {
-      throw new Error(`No private key found for account ${txRequest.data.account}.`);
+      throw new Error('Account has not been imported into this device. Please import an account and try again.');
     }
 
     const qrInfo: TxQRInfo = {
@@ -356,7 +356,7 @@ export function ScannerContextProvider ({ children }: ScannerContextProviderProp
     }
 
     if (!senderNetwork.active) {
-      throw new Error(`Signing Error: Network ${senderNetwork.chain?.replace(' Relay Chain', '')} is not active.`);
+      throw new Error(`Inactive network. Please activate ${senderNetwork.chain?.replace(' Relay Chain', '')} on this device and try again.`);
     }
 
     if (!sender) {

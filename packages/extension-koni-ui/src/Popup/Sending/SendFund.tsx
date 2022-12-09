@@ -130,7 +130,8 @@ function SendFund ({ chainRegistryMap, className, defaultValue, networkMap }: Co
     return networkMap[selectedNetworkKey];
   }, [networkMap, selectedNetworkKey]);
   const senderAccount = useGetAccountByAddress(senderId);
-  const isValidHardwareAccount = senderAccount && senderAccount.isHardware && senderAccount.addressOffset === 0;
+  const isHardwareAccount = !!(senderAccount && senderAccount.isHardware);
+  const isValidHardwareAccount = isHardwareAccount && senderAccount.addressOffset === 0;
 
   const isBlockHardware = useMemo((): boolean => {
     if (!senderAccount) {
@@ -397,7 +398,7 @@ function SendFund ({ chainRegistryMap, className, defaultValue, networkMap }: Co
               </div>
             )}
 
-            {!isValidHardwareAccount && (
+            {isHardwareAccount && !isValidHardwareAccount && (
               <Warning
                 className={'send-fund-warning'}
                 isDanger

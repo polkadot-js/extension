@@ -244,6 +244,9 @@ export default class Tabs {
       case 'pub(metadata.provide)':
         return this.metadataProvide(url, request as MetadataDef);
 
+      case 'pub(ping)':
+        return Promise.resolve(true);
+
       case 'pub(rpc.listProviders)':
         return this.rpcListProviders();
 

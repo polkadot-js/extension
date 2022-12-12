@@ -5,7 +5,7 @@ import Common from '@ethereumjs/common';
 import Extension, { SEED_DEFAULT_LENGTH, SEED_LENGTHS } from '@subwallet/extension-base/background/handlers/Extension';
 import { AuthUrls } from '@subwallet/extension-base/background/handlers/State';
 import { createSubscription } from '@subwallet/extension-base/background/handlers/subscriptions';
-import { AccountExternalError, AccountExternalErrorCode, AccountsWithCurrentAddress, ApiProps, BalanceJson, BasicTxError, BasicTxErrorCode, BasicTxInfo, BasicTxResponse, BondingOptionInfo, BondingOptionParams, BondingSubmitParams, ChainBondingBasics, ChainRegistry, CheckExistingTuringCompoundParams, CrowdloanJson, CurrentAccountInfo, CustomToken, CustomTokenJson, DelegationItem, DeleteCustomTokenParams, DisableNetworkResponse, EvmNftTransaction, ExistingTuringCompoundTask, ExternalRequestPromise, ExternalRequestPromiseStatus, HandleBasicTx, NETWORK_ERROR, NetWorkGroup, NetworkJson, NftCollection, NftJson, NftTransactionRequest, NftTransactionResponse, NftTransferExtra, OptionInputAddress, PrepareExternalRequest, PriceJson, RequestAccountCreateExternalV2, RequestAccountCreateHardwareV2, RequestAccountCreateSuriV2, RequestAccountCreateWithSecretKey, RequestAccountExportPrivateKey, RequestAccountIsLocked, RequestAccountMeta, RequestAuthorization, RequestAuthorizationBlock, RequestAuthorizationPerAccount, RequestAuthorizationPerSite, RequestAuthorizeApproveV2, RequestBatchRestoreV2, RequestBondingSubmit, RequestCancelCompoundStakeExternal, RequestCheckCrossChainTransfer, RequestCheckPublicAndSecretKey, RequestCheckTransfer, RequestClaimRewardExternal, RequestConfirmationComplete, RequestCreateCompoundStakeExternal, RequestCrossChainTransfer, RequestCrossChainTransferExternal, RequestDeriveCreateV2, RequestEvmNftSubmitTransaction, RequestForgetSite, RequestFreeBalance, RequestJsonRestoreV2, RequestNftForceUpdate, RequestNftTransferExternalEVM, RequestNftTransferExternalSubstrate, RequestParseEVMContractInput, RequestParseTransactionSubstrate, RequestQrParseRLP, RequestQrSignEVM, RequestQrSignSubstrate, RequestRejectExternalRequest, RequestResolveExternalRequest, RequestSaveRecentAccount, RequestSeedCreateV2, RequestSeedValidateV2, RequestSettingsType, RequestStakeClaimReward, RequestStakeExternal, RequestStakeWithdrawal, RequestSubstrateNftSubmitTransaction, RequestTransactionHistoryAdd, RequestTransfer, RequestTransferCheckReferenceCount, RequestTransferCheckSupporting, RequestTransferExistentialDeposit, RequestTransferExternal, RequestTuringCancelStakeCompound, RequestTuringStakeCompound, RequestUnbondingSubmit, RequestUnStakeExternal, RequestWithdrawStakeExternal, ResponseAccountCreateSuriV2, ResponseAccountCreateWithSecretKey, ResponseAccountExportPrivateKey, ResponseAccountIsLocked, ResponseAccountMeta, ResponseCheckCrossChainTransfer, ResponseCheckPublicAndSecretKey, ResponseCheckTransfer, ResponseParseEVMContractInput, ResponseParseTransactionSubstrate, ResponsePrivateKeyValidateV2, ResponseQrParseRLP, ResponseQrSignEVM, ResponseQrSignSubstrate, ResponseRejectExternalRequest, ResponseResolveExternalRequest, ResponseSeedCreateV2, ResponseSeedValidateV2, StakeClaimRewardParams, StakeDelegationRequest, StakeUnlockingJson, StakeWithdrawalParams, StakingJson, StakingRewardJson, SubstrateNftTransaction, SupportTransferResponse, ThemeTypes, TokenInfo, TransactionHistoryItemType, TransferErrorCode, TuringCancelStakeCompoundParams, TuringStakeCompoundParams, UnbondingSubmitParams, ValidateCustomTokenRequest, ValidateCustomTokenResponse, ValidateNetworkRequest, ValidateNetworkResponse } from '@subwallet/extension-base/background/KoniTypes';
+import { AccountExternalError, AccountExternalErrorCode, AccountsWithCurrentAddress, ApiProps, BalanceJson, BasicTxError, BasicTxErrorCode, BasicTxInfo, BasicTxResponse, BondingOptionInfo, BondingOptionParams, BondingSubmitParams, ChainBondingBasics, ChainRegistry, CheckExistingTuringCompoundParams, CrowdloanJson, CurrentAccountInfo, CustomToken, CustomTokenJson, DelegationItem, DeleteCustomTokenParams, DisableNetworkResponse, EvmNftTransaction, ExistingTuringCompoundTask, ExternalRequestPromise, ExternalRequestPromiseStatus, HandleBasicTx, KeyringState, NETWORK_ERROR, NetWorkGroup, NetworkJson, NftCollection, NftJson, NftTransactionRequest, NftTransactionResponse, NftTransferExtra, OptionInputAddress, PrepareExternalRequest, PriceJson, RequestAccountCreateExternalV2, RequestAccountCreateHardwareV2, RequestAccountCreateSuriV2, RequestAccountCreateWithSecretKey, RequestAccountExportPrivateKey, RequestAccountIsLocked, RequestAccountMeta, RequestAuthorization, RequestAuthorizationBlock, RequestAuthorizationPerAccount, RequestAuthorizationPerSite, RequestAuthorizeApproveV2, RequestBatchRestoreV2, RequestBondingSubmit, RequestCancelCompoundStakeExternal, RequestChangeMasterPassword, RequestCheckCrossChainTransfer, RequestCheckPublicAndSecretKey, RequestCheckTransfer, RequestClaimRewardExternal, RequestConfirmationComplete, RequestCreateCompoundStakeExternal, RequestCrossChainTransfer, RequestCrossChainTransferExternal, RequestDeriveCreateV2, RequestEvmNftSubmitTransaction, RequestForgetSite, RequestFreeBalance, RequestJsonRestoreV2, RequestMigratePassword, RequestNftForceUpdate, RequestNftTransferExternalEVM, RequestNftTransferExternalSubstrate, RequestParseEVMContractInput, RequestParseTransactionSubstrate, RequestQrParseRLP, RequestQrSignEVM, RequestQrSignSubstrate, RequestRejectExternalRequest, RequestResolveExternalRequest, RequestSaveRecentAccount, RequestSeedCreateV2, RequestSeedValidateV2, RequestSettingsType, RequestStakeClaimReward, RequestStakeExternal, RequestStakeWithdrawal, RequestSubstrateNftSubmitTransaction, RequestTransactionHistoryAdd, RequestTransfer, RequestTransferCheckReferenceCount, RequestTransferCheckSupporting, RequestTransferExistentialDeposit, RequestTransferExternal, RequestTuringCancelStakeCompound, RequestTuringStakeCompound, RequestUnbondingSubmit, RequestUnlockKeyring, RequestUnStakeExternal, RequestWithdrawStakeExternal, ResponseAccountCreateSuriV2, ResponseAccountCreateWithSecretKey, ResponseAccountExportPrivateKey, ResponseAccountIsLocked, ResponseAccountMeta, ResponseChangeMasterPassword, ResponseCheckCrossChainTransfer, ResponseCheckPublicAndSecretKey, ResponseCheckTransfer, ResponseMigratePassword, ResponseParseEVMContractInput, ResponseParseTransactionSubstrate, ResponsePrivateKeyValidateV2, ResponseQrParseRLP, ResponseQrSignEVM, ResponseQrSignSubstrate, ResponseRejectExternalRequest, ResponseResolveExternalRequest, ResponseSeedCreateV2, ResponseSeedValidateV2, ResponseUnlockKeyring, StakeClaimRewardParams, StakeDelegationRequest, StakeUnlockingJson, StakeWithdrawalParams, StakingJson, StakingRewardJson, SubstrateNftTransaction, SupportTransferResponse, ThemeTypes, TokenInfo, TransactionHistoryItemType, TransferErrorCode, TuringCancelStakeCompoundParams, TuringStakeCompoundParams, UnbondingSubmitParams, ValidateCustomTokenRequest, ValidateCustomTokenResponse, ValidateNetworkRequest, ValidateNetworkResponse } from '@subwallet/extension-base/background/KoniTypes';
 import { AccountJson, AuthorizeRequest, MessageTypes, RequestAccountForget, RequestAccountTie, RequestAuthorizeCancel, RequestAuthorizeReject, RequestCurrentAccountAddress, RequestTypes, ResponseAuthorizeList, ResponseType } from '@subwallet/extension-base/background/types';
 import { PASSWORD_EXPIRY_MS } from '@subwallet/extension-base/defaults';
 import { SignerExternal, SignerType } from '@subwallet/extension-base/signers/types';
@@ -41,17 +41,17 @@ import { state } from '@subwallet/extension-koni-base/background/handlers/index'
 import { ALL_ACCOUNT_KEY, ALL_GENESIS_HASH } from '@subwallet/extension-koni-base/constants';
 import { getCurrentProvider, isValidProvider } from '@subwallet/extension-koni-base/utils';
 import { createTransactionFromRLP, signatureToHex, Transaction as QrTransaction } from '@subwallet/extension-koni-base/utils/eth';
+import { createPair } from '@subwallet/keyring';
+import { KeyringPair, KeyringPair$Json, KeyringPair$Meta } from '@subwallet/keyring/types';
+import { keyring } from '@subwallet/ui-keyring';
+import { accounts as accountsObservable } from '@subwallet/ui-keyring/observable/accounts';
+import { SingleAddress, SubjectInfo } from '@subwallet/ui-keyring/observable/types';
 import BigN from 'bignumber.js';
 import { Transaction } from 'ethereumjs-tx';
 import Web3 from 'web3';
 import { SignedTransaction as Web3SignedTransaction, TransactionConfig } from 'web3-core';
 
-import { createPair } from '@polkadot/keyring';
-import { KeyringPair, KeyringPair$Json, KeyringPair$Meta } from '@polkadot/keyring/types';
 import { ChainType } from '@polkadot/types/interfaces';
-import { keyring } from '@polkadot/ui-keyring';
-import { accounts as accountsObservable } from '@polkadot/ui-keyring/observable/accounts';
-import { SingleAddress, SubjectInfo } from '@polkadot/ui-keyring/observable/types';
 import { assert, BN, hexStripPrefix, hexToU8a, isAscii, isHex, u8aToHex, u8aToString } from '@polkadot/util';
 import { base64Decode, isEthereumAddress, jsonDecrypt, keyExtractSuri, mnemonicGenerate, mnemonicValidate } from '@polkadot/util-crypto';
 import { EncryptedJson, KeypairType, Prefix } from '@polkadot/util-crypto/types';
@@ -1505,9 +1505,6 @@ export default class KoniExtension extends Extension {
       transferProm.then(() => {
         // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
         console.log(`Start transfer ${transferAll ? 'all' : value} from ${from} to ${to}`);
-
-        // todo: add condition to lock KeyPair
-        fromKeyPair.lock();
       })
         .catch((e) => {
           // eslint-disable-next-line node/no-callback-literal
@@ -1516,9 +1513,6 @@ export default class KoniExtension extends Extension {
           setTimeout(() => {
             this.cancelSubscription(id);
           }, 500);
-
-          // todo: add condition to lock KeyPair
-          fromKeyPair.lock();
         });
     }
 
@@ -1551,9 +1545,6 @@ export default class KoniExtension extends Extension {
         this.cancelSubscription(id);
       }, 500);
 
-      // todo: add condition to lock KeyPair (for example: not remember password)
-      fromKeyPair && fromKeyPair.lock();
-
       return txState;
     }
 
@@ -1578,8 +1569,6 @@ export default class KoniExtension extends Extension {
 
       transferProm.then(() => {
         console.log(`Start cross-chain transfer ${value} from ${from} to ${to}`);
-
-        fromKeyPair.lock();
       })
         .catch((e) => {
           // eslint-disable-next-line node/no-callback-literal
@@ -1588,9 +1577,6 @@ export default class KoniExtension extends Extension {
           setTimeout(() => {
             this.cancelSubscription(id);
           }, 500);
-
-          // todo: add condition to lock KeyPair
-          fromKeyPair.lock();
         });
     }
 
@@ -3891,6 +3877,81 @@ export default class KoniExtension extends Extension {
     }
   }
 
+  private keyringStateSubscribe (id: string, port: chrome.runtime.Port): KeyringState {
+    const cb = createSubscription<'pri(keyring.subscribe)'>(id, port);
+    const subscription = state.subscribeKeyringState().subscribe((value): void =>
+      cb(value)
+    );
+
+    this.createUnsubscriptionHandle(id, subscription.unsubscribe);
+
+    port.onDisconnect.addListener((): void => {
+      this.cancelSubscription(id);
+    });
+
+    return state.getKeyringState();
+  }
+
+  private keyringChangeMasterPassword ({ newPassword, oldPassword }: RequestChangeMasterPassword): ResponseChangeMasterPassword {
+    try {
+      keyring.changeMasterPassword(newPassword, oldPassword);
+    } catch (e) {
+      return {
+        errors: [(e as Error).message],
+        status: false
+      };
+    }
+
+    state.setKeyringState({
+      hasMasterPassword: true,
+      isLocked: false,
+      isReady: true
+    });
+
+    return {
+      status: true,
+      errors: []
+    };
+  }
+
+  private keyringMigrateMasterPassword ({ address, password }: RequestMigratePassword): ResponseMigratePassword {
+    try {
+      keyring.migrateWithMasterPassword(address, password);
+    } catch (e) {
+      return {
+        errors: [(e as Error).message],
+        status: false
+      };
+    }
+
+    return {
+      status: true,
+      errors: []
+    };
+  }
+
+  private keyringUnlock ({ password }: RequestUnlockKeyring): ResponseUnlockKeyring {
+    try {
+      keyring.unlockKeyring(password);
+    } catch (e) {
+      return {
+        errors: [(e as Error).message],
+        status: false
+      };
+    }
+
+    state.setKeyringState({
+      isReady: true,
+      hasMasterPassword: true,
+      isLocked: false
+    });
+
+    return {
+      status: true,
+      errors: []
+    };
+  }
+
   // eslint-disable-next-line @typescript-eslint/require-await
   public override async handle<TMessageType extends MessageTypes> (id: string, type: TMessageType, request: RequestTypes[TMessageType], port: chrome.runtime.Port): Promise<ResponseType<TMessageType>> {
     switch (type) {
@@ -4193,6 +4254,17 @@ export default class KoniExtension extends Extension {
         return await this.subscribeAuthUrls(id, port);
       case 'pri(wasmNft.getTransaction)':
         return await this.wasmNftGetTransaction(request as NftTransactionRequest);
+
+      /// Keyring state
+      case 'pri(keyring.subscribe)':
+        return this.keyringStateSubscribe(id, port);
+      case 'pri(keyring.change)':
+        return this.keyringChangeMasterPassword(request as RequestChangeMasterPassword);
+      case 'pri(keyring.migrate)':
+        return this.keyringMigrateMasterPassword(request as RequestMigratePassword);
+      case 'pri(keyring.unlock)':
+        return this.keyringUnlock(request as RequestUnlockKeyring);
+
       // Default
       default:
         return super.handle(id, type, request, port);

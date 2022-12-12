@@ -4,8 +4,7 @@
 import { TransactionHistoryItemJson } from '@subwallet/extension-base/background/KoniTypes';
 import BaseMigrationJob from '@subwallet/extension-koni-base/migration/Base';
 import TransactionHistoryStoreV2 from '@subwallet/extension-koni-base/stores/TransactionHistoryV3';
-
-import { accounts } from '@polkadot/ui-keyring/observable/accounts';
+import { accounts } from '@subwallet/ui-keyring/observable/accounts';
 
 export default class RemoveWrongTransactionHistoriesFromStore extends BaseMigrationJob {
   public override async run (): Promise<void> {

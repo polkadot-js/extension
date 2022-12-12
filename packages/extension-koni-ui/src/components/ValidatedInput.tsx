@@ -60,6 +60,7 @@ function ValidatedInput<T extends Record<string, unknown>> ({ className, compone
     <div className={className}>
       <Input
         {...props as unknown as T}
+        className={className}
         isError={Result.isError(validationResult)}
         onChange={setValue}
         onFocus={onFocus}

@@ -5,6 +5,7 @@ import type { ThemeProps } from '../../types';
 
 import { faChevronDown } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { ALL_ACCOUNT_KEY } from '@subwallet/extension-koni-base/constants';
 import ExpandDarkIcon from '@subwallet/extension-koni-ui/assets/icon/expand-dark.svg';
 import ExpandLightIcon from '@subwallet/extension-koni-ui/assets/icon/expand-light.svg';
 import { AccountContext, Link } from '@subwallet/extension-koni-ui/components';
@@ -18,7 +19,7 @@ import { accountAllRecoded, getGenesisOptionsByAddressType, isAccountAll } from 
 import { getLogoByGenesisHash } from '@subwallet/extension-koni-ui/util/logoByGenesisHashMap';
 import reformatAddress from '@subwallet/extension-koni-ui/util/reformatAddress';
 import Avatar from 'boring-avatars';
-import React, { useCallback, useContext, useEffect, useRef, useState } from 'react';
+import React, { useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
 import { useSelector } from 'react-redux';
 import styled, { ThemeContext } from 'styled-components';
 
@@ -81,6 +82,10 @@ function Header ({ cancelButtonText, changeAccountCallback, children, className 
     () => windowOpen('/').catch(console.error),
     []
   );
+
+  const { hasMasterPassword, isLocked } = useSelector((state: RootState) => state.keyringState);
+
+  const hasAccount = useMemo((): boolean => accounts.filter((acc) => acc.address !== ALL_ACCOUNT_KEY).length !== 0, [accounts]);
 
   const genesisOptions = getGenesisOptionsByAddressType(account?.address, accounts, useGenesisHashOptions());
   const _isAccountAll = account && isAccountAll(account.address);
@@ -256,7 +261,7 @@ function Header ({ cancelButtonText, changeAccountCallback, children, className 
               />
             </div>
 
-            {!isWelcomeScreen && (
+            {(!isWelcomeScreen && hasAccount && (!hasMasterPassword || (!isLocked && hasMasterPassword))) && (
               <div
                 className={`setting-icon-wrapper ${isSettingsOpen ? 'pointer-events-none' : ''}`}
                 onClick={_toggleSettings}

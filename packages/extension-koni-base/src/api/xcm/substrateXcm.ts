@@ -4,9 +4,9 @@
 import { ApiProps, NetworkJson, TokenInfo } from '@subwallet/extension-base/background/KoniTypes';
 import { FOUR_INSTRUCTIONS_WEIGHT, getMultiLocationFromParachain, getReceiverLocation, SupportedCrossChainsMap } from '@subwallet/extension-koni-base/api/xcm/utils';
 import { parseNumberToDisplay } from '@subwallet/extension-koni-base/utils';
+import { KeyringPair } from '@subwallet/keyring/types';
 
 import { ApiPromise } from '@polkadot/api';
-import { KeyringPair } from '@polkadot/keyring/types';
 
 function getTokenIdentity (originNetworkKey: string, tokenInfo: TokenInfo) {
   // TODO: find a better way to handle kUSD on karura

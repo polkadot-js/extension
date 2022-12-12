@@ -5,13 +5,14 @@ import '@subwallet/extension-mocks/chrome';
 
 import type { ResponseSigning } from '@subwallet/extension-base/background/types';
 import type { MetadataDef } from '@subwallet/extension-inject/types';
-import type { KeyringPair } from '@polkadot/keyring/types';
+import type { KeyringPair } from '@subwallet/keyring/types';
 import type { ExtDef } from '@polkadot/types/extrinsic/signedExtensions/types';
 import type { SignerPayloadJSON } from '@polkadot/types/types';
 import type { KeypairType } from '@polkadot/util-crypto/types';
 
+import keyring from '@subwallet/ui-keyring';
+
 import { TypeRegistry } from '@polkadot/types';
-import keyring from '@polkadot/ui-keyring';
 import { cryptoWaitReady } from '@polkadot/util-crypto';
 
 import { AccountsStore } from '../../stores';

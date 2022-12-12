@@ -5,9 +5,9 @@ import { LedgerState } from '@subwallet/extension-base/signers/types';
 import { ExternalRequestContext } from '@subwallet/extension-koni-ui/contexts/ExternalRequestContext';
 import { useLedger } from '@subwallet/extension-koni-ui/hooks/useLedger';
 import { resolveExternalRequest } from '@subwallet/extension-koni-ui/messaging';
+import { KeyringPair$Meta } from '@subwallet/keyring/types';
 import { useCallback, useContext } from 'react';
 
-import { KeyringPair$Meta } from '@polkadot/keyring/types';
 import { hexToU8a } from '@polkadot/util';
 
 interface Props {

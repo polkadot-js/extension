@@ -4,7 +4,7 @@
 import { withErrorLog } from '@subwallet/extension-base/background/handlers/helpers';
 import State, { AuthUrls, Resolver } from '@subwallet/extension-base/background/handlers/State';
 import { isSubscriptionRunning, unsubscribe } from '@subwallet/extension-base/background/handlers/subscriptions';
-import { AccountRefMap, APIItemState, ApiMap, AuthRequestV2, BalanceItem, BalanceJson, ChainRegistry, ConfirmationDefinitions, ConfirmationsQueue, ConfirmationsQueueItemOptions, ConfirmationType, CrowdloanItem, CrowdloanJson, CurrentAccountInfo, CustomToken, CustomTokenJson, CustomTokenType, DeleteCustomTokenParams, EvmSendTransactionParams, EvmSendTransactionRequestExternal, EvmSignatureRequestExternal, ExternalRequestPromise, ExternalRequestPromiseStatus, NETWORK_STATUS, NetworkJson, NftCollection, NftItem, NftJson, NftTransferExtra, PriceJson, RequestAccountExportPrivateKey, RequestCheckPublicAndSecretKey, RequestConfirmationComplete, RequestSettingsType, ResponseAccountExportPrivateKey, ResponseCheckPublicAndSecretKey, ResponseSettingsType, ResultResolver, ServiceInfo, SingleModeJson, StakeUnlockingJson, StakingItem, StakingJson, StakingRewardItem, StakingRewardJson, ThemeTypes, TokenInfo, TransactionHistoryItemType } from '@subwallet/extension-base/background/KoniTypes';
+import { AccountRefMap, APIItemState, ApiMap, AuthRequestV2, BalanceItem, BalanceJson, ChainRegistry, ConfirmationDefinitions, ConfirmationsQueue, ConfirmationsQueueItemOptions, ConfirmationType, CrowdloanItem, CrowdloanJson, CurrentAccountInfo, CustomToken, CustomTokenJson, CustomTokenType, DeleteCustomTokenParams, EvmSendTransactionParams, EvmSendTransactionRequestExternal, EvmSignatureRequestExternal, ExternalRequestPromise, ExternalRequestPromiseStatus, KeyringState, NETWORK_STATUS, NetworkJson, NftCollection, NftItem, NftJson, NftTransferExtra, PriceJson, RequestAccountExportPrivateKey, RequestCheckPublicAndSecretKey, RequestConfirmationComplete, RequestSettingsType, ResponseAccountExportPrivateKey, ResponseCheckPublicAndSecretKey, ResponseSettingsType, ResultResolver, ServiceInfo, SingleModeJson, StakeUnlockingJson, StakingItem, StakingJson, StakingRewardItem, StakingRewardJson, ThemeTypes, TokenInfo, TransactionHistoryItemType } from '@subwallet/extension-base/background/KoniTypes';
 import { AuthorizeRequest, RequestAuthorizeTab } from '@subwallet/extension-base/background/types';
 import { Web3Transaction } from '@subwallet/extension-base/signers/types';
 import { getId } from '@subwallet/extension-base/utils/getId';
@@ -33,16 +33,16 @@ import CustomTokenStore from '@subwallet/extension-koni-base/stores/CustomEvmTok
 import SettingsStore from '@subwallet/extension-koni-base/stores/Settings';
 import { convertFundStatus, getCurrentProvider, mergeNetworkProviders } from '@subwallet/extension-koni-base/utils';
 import { anyNumberToBN } from '@subwallet/extension-koni-base/utils/eth';
+import { decodePair } from '@subwallet/keyring/pair/decode';
+import { KeyringPair$Meta } from '@subwallet/keyring/types';
+import { keyring } from '@subwallet/ui-keyring';
+import { accounts } from '@subwallet/ui-keyring/observable/accounts';
 import SimpleKeyring from 'eth-simple-keyring';
 import RLP, { Input } from 'rlp';
 import { BehaviorSubject, Subject } from 'rxjs';
 import Web3 from 'web3';
 import { TransactionConfig, TransactionReceipt } from 'web3-core';
 
-import { decodePair } from '@polkadot/keyring/pair/decode';
-import { KeyringPair$Meta } from '@polkadot/keyring/types';
-import { keyring } from '@polkadot/ui-keyring';
-import { accounts } from '@polkadot/ui-keyring/observable/accounts';
 import { assert, BN, hexStripPrefix, hexToU8a, isHex, logger as createLogger, u8aToHex } from '@polkadot/util';
 import { Logger } from '@polkadot/util/types';
 import { base64Decode, isEthereumAddress, keyExtractSuri } from '@polkadot/util-crypto';
@@ -102,10 +102,17 @@ export default class KoniState extends State {
   readonly #authRequestsV2: Record<string, AuthRequestV2> = {};
   private readonly evmChainSubject = new Subject<AuthUrls>();
   private readonly authorizeUrlSubject = new Subject<AuthUrls>();
+  private readonly keyringStateSubject = new Subject<KeyringState>();
   private authorizeCached: AuthUrls | undefined = undefined;
 
   private priceStoreReady = false;
   private externalRequest: Record<string, ExternalRequestPromise> = {};
+
+  private keyringState: KeyringState = {
+    isReady: false,
+    isLocked: true,
+    hasMasterPassword: false
+  };
 
   private readonly confirmationsQueueSubject = new BehaviorSubject<ConfirmationsQueue>({
     addNetworkRequest: {},
@@ -288,6 +295,20 @@ export default class KoniState extends State {
 
       this.initChainRegistry();
     });
+  }
+
+  public getKeyringState (): KeyringState {
+    return this.keyringState;
+  }
+
+  public subscribeKeyringState (): Subject<KeyringState> {
+    return this.keyringStateSubject;
+  }
+
+  public setKeyringState (data: KeyringState, callback?: () => void): void {
+    this.keyringStateSubject.next(data);
+    this.keyringState = data;
+    callback && callback();
   }
 
   private lazyNext = (key: string, callback: () => void) => {

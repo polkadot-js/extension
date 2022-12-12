@@ -294,6 +294,7 @@ const SigningRequest = <T extends BaseRequestSign, V extends BasicTxResponse>({ 
         if (handleSignPassword) {
           return (
             <PasswordRequest
+              account={account}
               className={className}
               handlerStart={onSubmitPassword}
               hideConfirm={hideConfirm}

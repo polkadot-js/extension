@@ -5,18 +5,18 @@ import { AuthUrls, Resolver } from '@subwallet/extension-base/background/handler
 import { AccountAuthType, AccountJson, AuthorizeRequest, RequestAccountList, RequestAccountSubscribe, RequestAuthorizeCancel, RequestAuthorizeReject, RequestAuthorizeSubscribe, RequestAuthorizeTab, RequestCurrentAccountAddress, ResponseAuthorizeList, ResponseJsonGetAccountInfo, SeedLengths } from '@subwallet/extension-base/background/types';
 import { ExternalState, LedgerState, QrState } from '@subwallet/extension-base/signers/types';
 import { InjectedAccount, MetadataDefBase } from '@subwallet/extension-inject/types';
+import { KeyringPair$Json, KeyringPair$Meta } from '@subwallet/keyring/types';
+import { SingleAddress } from '@subwallet/ui-keyring/observable/types';
+import { KeyringOptions } from '@subwallet/ui-keyring/options/types';
+import { KeyringPairs$Json } from '@subwallet/ui-keyring/types';
 import Web3 from 'web3';
 import { RequestArguments, TransactionConfig } from 'web3-core';
 import { JsonRpcPayload, JsonRpcResponse } from 'web3-core-helpers';
 
 import { ApiPromise } from '@polkadot/api';
 import { SubmittableExtrinsicFunction } from '@polkadot/api/promise/types';
-import { KeyringPair$Json, KeyringPair$Meta } from '@polkadot/keyring/types';
 import { Registry } from '@polkadot/types/types';
 import { SignerResult } from '@polkadot/types/types/extrinsic';
-import { SingleAddress } from '@polkadot/ui-keyring/observable/types';
-import { KeyringOptions } from '@polkadot/ui-keyring/options/types';
-import { KeyringPairs$Json } from '@polkadot/ui-keyring/types';
 import { BN } from '@polkadot/util';
 import { KeypairType } from '@polkadot/util-crypto/types';
 
@@ -1494,6 +1494,42 @@ export type RequestCreateCompoundStakeExternal = ExternalRequestSign<TuringStake
 
 export type RequestCancelCompoundStakeExternal = ExternalRequestSign<TuringCancelStakeCompoundParams>;
 
+/// Keyring state
+
+export interface KeyringState {
+  isReady: boolean;
+  hasMasterPassword: boolean;
+  isLocked: boolean;
+}
+
+export interface RequestChangeMasterPassword {
+  oldPassword?: string;
+  newPassword: string;
+}
+
+export interface ResponseChangeMasterPassword {
+  status: boolean;
+  errors: string[];
+}
+
+export interface RequestMigratePassword {
+  address: string;
+  password: string;
+}
+
+export interface ResponseMigratePassword {
+  status: boolean;
+  errors: string[];
+}
+
+export interface RequestUnlockKeyring {
+  password: string;
+}
+
+export interface ResponseUnlockKeyring {
+  status: boolean;
+  errors: string[];
+}
 export interface KoniRequestSignatures {
   // Bonding functions
   'pri(staking.submitTuringCancelCompound)': [RequestTuringCancelStakeCompound, BasicTxResponse, BasicTxResponse];
@@ -1673,6 +1709,12 @@ export interface KoniRequestSignatures {
 
   // Authorize
   'pri(authorize.subscribe)': [null, AuthUrls, AuthUrls];
+
+  // Keyring state
+  'pri(keyring.subscribe)': [null, KeyringState, KeyringState];
+  'pri(keyring.change)': [RequestChangeMasterPassword, ResponseChangeMasterPassword];
+  'pri(keyring.migrate)': [RequestMigratePassword, ResponseMigratePassword];
+  'pri(keyring.unlock)': [RequestUnlockKeyring, ResponseUnlockKeyring];
 }
 
 export interface ApplicationMetadataType {

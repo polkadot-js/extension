@@ -12,6 +12,7 @@ import CrowdloanReducer from './Crowdloan';
 import CurrentAccountReducer from './CurrentAccount';
 import CurrentNetworkReducer from './CurrentNetwork';
 import CustomTokenReducer from './CustomToken';
+import KeyringStateReducer from './KeyringState';
 import NetworkConfigParamsReducer from './NetworkConfigParams';
 import NetworkMapReducer from './NetworkMap';
 import NftReducer from './Nft';
@@ -52,7 +53,8 @@ const reducers = {
   chainRegistry: ChainRegistryReducer,
   allAccount: AllAccountReducer,
   settings: SettingsReducer,
-  authUrl: AuthUrlReducer
+  authUrl: AuthUrlReducer,
+  keyringState: KeyringStateReducer
 };
 
 export const store = configureStore({

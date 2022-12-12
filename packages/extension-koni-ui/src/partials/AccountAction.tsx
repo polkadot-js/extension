@@ -25,9 +25,10 @@ interface Props extends ThemeProps {
   isShowZeroBalances?: boolean;
   toggleZeroBalances?: () => void;
   setImgSelected?: (imgSelected: string | null) => void;
+  openMigrateModal: () => void;
 }
 
-function AccountAction ({ className, isShowZeroBalances, reference, setImgSelected, toggleEdit, toggleZeroBalances }: Props): React.ReactElement<Props> {
+function AccountAction ({ className, isShowZeroBalances, reference, setImgSelected, toggleEdit, toggleZeroBalances, openMigrateModal }: Props): React.ReactElement<Props> {
   const { t } = useTranslation();
   const currentAccount = useSelector((state: RootState) => state.currentAccount.account);
   const currentNetwork = useSelector((state: RootState) => state.currentNetwork);
@@ -77,6 +78,19 @@ function AccountAction ({ className, isShowZeroBalances, reference, setImgSelect
             {t<string>('Forget Account')}
           </Link>
         </div>
+        {!currentAccount?.isExternal && !currentAccount?.isMasterPassword && (
+          <>
+            <MenuDivider />
+            <div className='actions-wrapper'>
+              <div
+                className='account-action__menu-item migrate-item'
+                onClick={openMigrateModal}
+              >
+                {t<string>('Apply master password')}
+              </div>
+            </div>
+          </>
+        )}
       </div>
       }
 
@@ -108,22 +122,53 @@ export default React.memo(styled(AccountAction)(({ theme }: Props) => `
   top: 60px;
 
   .actions-wrapper {
-    margin: 10px;
+    margin: 8px;
   }
 
   .account-action__menu-item {
     border-radius: 8px;
     display: block;
     font-size: 15px;
-    line-height: 20px;
+    line-height: 26px;
+    width: 200px;
     margin: 0;
-    padding: 10px 16px;
+    padding: 6px 12px;
     cursor: pointer;
     color: ${theme.textColor2};
+
+    &.migrate-item {
+      color: ${theme.buttonBackground2};
+      position: relative;
+
+      &:after {
+        content: '';
+        position: absolute;
+        top: 0px;
+        right: 4px;
+        width: 8px;
+        height: 8px;
+        border: 1px solid ${theme.buttonBackgroundDanger};
+        border-radius: 8px;
+      }
+      &:before {
+        content: '';
+        position: absolute;
+        top: 2px;
+        right: 6px;
+        width: 4px;
+        height: 4px;
+        background: ${theme.buttonBackgroundDanger};
+        border-radius: 4px;
+      }
+    }
 
     &:hover {
       background-color: ${theme.accountHoverBackground};
       color: ${theme.textColor};
+
+      &.migrate-item {
+        color: ${theme.buttonBackground2};
+      }
     }
   }
 

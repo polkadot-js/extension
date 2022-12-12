@@ -9,6 +9,7 @@ import EyeIcon from '@subwallet/extension-koni-ui/assets/icon/eye.svg';
 import EyeSlashIcon from '@subwallet/extension-koni-ui/assets/icon/eye-slash.svg';
 import { AccountContext } from '@subwallet/extension-koni-ui/components';
 import AccountVisibleModal from '@subwallet/extension-koni-ui/components/Modal/AccountVisibleModal';
+import MigrateMasterPasswordModal from '@subwallet/extension-koni-ui/components/Modal/MigrateMasterPasswordModal';
 import Tooltip from '@subwallet/extension-koni-ui/components/Tooltip';
 import { useGetCurrentAuth } from '@subwallet/extension-koni-ui/hooks/useGetCurrentAuth';
 import useIsPopup from '@subwallet/extension-koni-ui/hooks/useIsPopup';
@@ -81,7 +82,8 @@ function DetailHeader ({ className = '',
   const [isActionOpen, setShowAccountAction] = useState(false);
   const { show } = useToast();
   const [trigger] = useState(() => `overview-btn-${++tooltipId}`);
-  const [modalVisible, setModalVisible] = useState(false);
+  const [authorizeModalVisible, setAuthorizeModalVisible] = useState(false);
+  const [migrateModalVisible, setMigrateModalVisible] = useState(false);
 
   const _toggleEdit = useCallback(
     (): void => {
@@ -99,12 +101,21 @@ function DetailHeader ({ className = '',
     [toggleZeroBalances]
   );
 
+  const openMigrateModal = useCallback(() => {
+    setShowAccountAction(false);
+    setMigrateModalVisible(true);
+  }, []);
+
+  const closeMigrateModal = useCallback(() => {
+    setMigrateModalVisible(false);
+  }, []);
+
   const openModal = useCallback(() => {
-    setModalVisible(true);
+    setAuthorizeModalVisible(true);
   }, []);
 
   const closeModal = useCallback(() => {
-    setModalVisible(false);
+    setAuthorizeModalVisible(false);
   }, []);
 
   useOutsideClick(actionsRef, (): void => {
@@ -336,7 +347,15 @@ function DetailHeader ({ className = '',
       <div className='detail-header__part-3'>
         {!(isAllAccount && currentNetwork.networkKey !== 'all') &&
         <div
-          className={`detail-header-more-button ${isActionOpen ? 'pointer-events-none' : ''}`}
+          className={
+            CN(
+              'detail-header-more-button',
+              {
+                'pointer-events-none': isActionOpen,
+                'must-migrate': !currentAccount?.isExternal && !currentAccount?.isMasterPassword && !isActionOpen
+              }
+            )
+          }
           onClick={_toggleAccountAction}
         >
           <img
@@ -350,6 +369,7 @@ function DetailHeader ({ className = '',
       {isActionOpen && (
         <AccountAction
           isShowZeroBalances={isShowZeroBalances}
+          openMigrateModal={openMigrateModal}
           reference={actionsRef}
           toggleEdit={_toggleEdit}
           toggleZeroBalances={_toggleZeroBalances}
@@ -360,8 +380,16 @@ function DetailHeader ({ className = '',
         isBlocked={connectionState === ConnectionStatement.BLOCKED}
         isNotConnected={connectionState === ConnectionStatement.NOT_CONNECTED}
         onClose={closeModal}
-        visible={modalVisible}
+        visible={authorizeModalVisible}
       />
+      {
+        migrateModalVisible && (
+          <MigrateMasterPasswordModal
+            address={currentAccount?.address || ''}
+            closeModal={closeMigrateModal}
+          />
+        )
+      }
     </div>
   );
 }
@@ -444,7 +472,7 @@ export default styled(DetailHeader)(({ theme }: Props) => `
   .detail-header-account-info-wrapper {
     display: flex;
   }
-  
+
   .kn-l-edit-name input{
     border: 1px solid ${theme.group === 'dark' ? 'transparent' : theme.primaryColor};
   }
@@ -470,6 +498,30 @@ export default styled(DetailHeader)(({ theme }: Props) => `
     align-items: center;
     justify-content: center;
     cursor: pointer;
+    position: relative;
+  }
+
+  .must-migrate {
+    &:after {
+      content: '';
+      position: absolute;
+      top: 0;
+      right: 8px;
+      width: 8px;
+      height: 8px;
+      border: 1px solid ${theme.buttonBackgroundDanger};
+      border-radius: 8px;
+    }
+    &:before {
+      content: '';
+      position: absolute;
+      top: 2px;
+      right: 10px;
+      width: 4px;
+      height: 4px;
+      background: ${theme.buttonBackgroundDanger};
+      border-radius: 4px;
+    }
   }
 
   .detail-header-more-button__icon {

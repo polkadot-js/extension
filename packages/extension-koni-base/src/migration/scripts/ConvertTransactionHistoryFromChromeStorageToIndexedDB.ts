@@ -6,8 +6,7 @@ import BaseMigrationJob from '@subwallet/extension-koni-base/migration/Base';
 import TransactionHistoryStore from '@subwallet/extension-koni-base/stores/TransactionHistory';
 import TransactionHistoryStoreV2 from '@subwallet/extension-koni-base/stores/TransactionHistoryV2';
 import TransactionHistoryStoreV3 from '@subwallet/extension-koni-base/stores/TransactionHistoryV3';
-
-import { accounts } from '@polkadot/ui-keyring/observable/accounts';
+import { accounts } from '@subwallet/ui-keyring/observable/accounts';
 
 const getOldKey = (address: string, networkKey: string) => {
   return `${address}_${networkKey}`;

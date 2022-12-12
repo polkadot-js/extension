@@ -3,6 +3,7 @@
 
 import type { ThemeProps } from '../types';
 
+import question from '@subwallet/extension-koni-ui/assets/Question.svg';
 import warning from '@subwallet/extension-koni-ui/assets/warning.svg';
 import Tooltip from '@subwallet/extension-koni-ui/components/Tooltip';
 import React, { useState } from 'react';
@@ -13,12 +14,13 @@ interface Props {
   className?: string;
   label: string;
   showWarningIcon?: boolean;
+  showQuestionIcon?: boolean;
   tooltipContent?: string;
 }
 
 let tooltipId = 0;
 
-function Label ({ children, className, label, showWarningIcon = false, tooltipContent }: Props): React.ReactElement<Props> {
+function Label ({ children, className, label, showQuestionIcon = false, showWarningIcon = false, tooltipContent }: Props): React.ReactElement<Props> {
   const [trigger] = useState(() => `label-${++tooltipId}`);
 
   return (
@@ -28,14 +30,23 @@ function Label ({ children, className, label, showWarningIcon = false, tooltipCo
         {showWarningIcon &&
         <img
           alt='warning'
-          className='warning-image'
+          className='icon-image'
           data-for={trigger}
           data-tip={true}
           src={warning}
         />}
+        {showQuestionIcon &&
+        <img
+          alt='info'
+          className='icon-image'
+          data-for={trigger}
+          data-tip={true}
+          src={question}
+        />}
 
         {tooltipContent && (
           <Tooltip
+            className={className}
             offset={{ bottom: 8 }}
             place={'bottom'}
             text={tooltipContent}
@@ -66,7 +77,7 @@ export default styled(Label)(({ theme }: ThemeProps) => `
     font-weight: 400;
   }
 
-  .warning-image {
+  .icon-image {
     min-height: 18px;
     height: 18px;
     padding-left: 5px;

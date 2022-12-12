@@ -46,3 +46,8 @@ export type StakeCompoundParams = {
   selectedAccount: string;
   selectedNetwork: string;
 }
+
+export type KeyringStateParams = {
+  mode: 'create' | 'edit' | 'init',
+  data: NetworkJson;
+}

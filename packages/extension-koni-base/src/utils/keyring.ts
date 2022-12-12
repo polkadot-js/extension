@@ -1,8 +1,8 @@
 // Copyright 2019-2022 @subwallet/extension-koni-base authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { Keyring } from '@polkadot/keyring';
-import { keyring } from '@polkadot/ui-keyring';
+import { Keyring } from '@subwallet/keyring';
+import { keyring } from '@subwallet/ui-keyring';
 
 // import _decode from '@polkadot/keyring/pair/decode';
 
@@ -19,7 +19,7 @@ export function extractPrivateKey (keyring: Keyring, address: string, password: 
   extract.call(keyring, address);
 }
 
-export const unlockAccount = (signAddress: string, signPassword?: string): string | null => {
+export const unlockAccount = (signAddress: string): string | null => {
   let publicKey;
 
   try {
@@ -36,15 +36,11 @@ export const unlockAccount = (signAddress: string, signPassword?: string): strin
     return 'Unable to find pair';
   }
 
-  if (pair.isLocked && !signPassword) {
-    return 'Password needed to unlock the account';
-  }
-
   if (pair.isLocked) {
     try {
-      pair.decodePkcs8(signPassword);
+      keyring.unlockPair(pair.address);
     } catch (e) {
-      return 'Invalid password';
+      return (e as Error).message;
     }
   }
 

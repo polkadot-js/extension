@@ -6,6 +6,7 @@ import { AccountJson } from '@subwallet/extension-base/background/types';
 import { ALL_ACCOUNT_KEY } from '@subwallet/extension-koni-base/constants';
 import { AccountContext } from '@subwallet/extension-koni-ui/components';
 import ReceiveButton from '@subwallet/extension-koni-ui/components/Button/ReceiveButton';
+import CreateMasterPasswordModal from '@subwallet/extension-koni-ui/components/Modal/CreateMasterPasswordModal';
 import useAccountBalance from '@subwallet/extension-koni-ui/hooks/screen/home/useAccountBalance';
 import useCrowdloanNetworks from '@subwallet/extension-koni-ui/hooks/screen/home/useCrowdloanNetworks';
 import useFetchNft from '@subwallet/extension-koni-ui/hooks/screen/home/useFetchNft';
@@ -229,6 +230,10 @@ function Home ({ chainRegistryMap, className = '', currentAccount, historyMap, n
   const [showNetworkSelection, setShowNetworkSelection] = useState(isSetNetwork);
   const [isVisibleBuyModal, setIsVisibleBuyModal] = useState<boolean>(false);
 
+  const [isVisibleCreateMasterPassword, setIsVisibleCreateMasterPassword] = useState(false);
+
+  const hasMasterPassword = useSelector((state: RootState) => state.keyringState.hasMasterPassword);
+
   const updateModalQr = useCallback((newValue: Partial<ModalQrProps>) => {
     setModalQrProp((oldValue) => {
       return {
@@ -355,6 +360,16 @@ function Home ({ chainRegistryMap, className = '', currentAccount, historyMap, n
     setShowNftCollectionDetail(false);
     setNftPage(1);
   }, []);
+
+  const onCloseMasterPasswordModal = useCallback(() => {
+    setIsVisibleCreateMasterPassword(false);
+  }, []);
+
+  useEffect(() => {
+    if (!hasMasterPassword && accounts.filter((acc) => acc.address !== ALL_ACCOUNT_KEY).length !== 0) {
+      setIsVisibleCreateMasterPassword(true);
+    }
+  }, [hasMasterPassword, accounts]);
 
   return (
     <div className={`home-screen home ${className}`}>
@@ -523,6 +538,14 @@ function Home ({ chainRegistryMap, className = '', currentAccount, historyMap, n
             closeModal={_closeBuyModal}
             modalQrProp={modalQrProp}
             updateModalQr={updateModalQr}
+          />
+        )
+      }
+      {
+        isVisibleCreateMasterPassword && (
+          <CreateMasterPasswordModal
+            className='home__account-qr-modal'
+            closeModal={onCloseMasterPasswordModal}
           />
         )
       }

@@ -13,22 +13,30 @@ interface Props extends ThemeProps {
   className?: string;
   isBelowInput?: boolean;
   isDanger?: boolean;
+  noIcon?: boolean;
 }
 
-function Warning ({ children, className = '', isBelowInput, isDanger }: Props): React.ReactElement<Props> {
+function Warning ({ children, className = '', isBelowInput, isDanger, noIcon }: Props): React.ReactElement<Props> {
   return (
     <div className={`${className} ${isDanger ? 'danger' : ''} ${isBelowInput ? 'belowInput' : ''}`}>
-      {isDanger
-        ? (<img
-          alt='danger'
-          className='warning-image'
-          src={danger}
-        />)
-        : (<img
-          alt='warning'
-          className='warning-image'
-          src={warning}
-        />)
+      {
+        !noIcon && (
+          isDanger
+            ? (
+              <img
+                alt='danger'
+                className='warning-image'
+                src={danger}
+              />
+            )
+            : (
+              <img
+                alt='warning'
+                className='warning-image'
+                src={warning}
+              />
+            )
+        )
       }
       <div className='warning-message'>{children}</div>
     </div>

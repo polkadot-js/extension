@@ -1,8 +1,10 @@
 // Copyright 2019-2022 @subwallet/extension-koni authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { InputWithLabel, Warning } from '@subwallet/extension-koni-ui/components';
+import { AccountJson } from '@subwallet/extension-base/background/types';
+import { Warning } from '@subwallet/extension-koni-ui/components';
 import Button from '@subwallet/extension-koni-ui/components/Button';
+import MigrateMasterPasswordModal from '@subwallet/extension-koni-ui/components/Modal/MigrateMasterPasswordModal';
 import { SigningContext } from '@subwallet/extension-koni-ui/contexts/SigningContext';
 import useTranslation from '@subwallet/extension-koni-ui/hooks/useTranslation';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
@@ -10,33 +12,29 @@ import React, { useCallback, useContext, useState } from 'react';
 import styled from 'styled-components';
 
 interface Props extends ThemeProps {
+  account: AccountJson;
   className?: string;
   children: JSX.Element | JSX.Element[];
-  handlerStart: (password: string) => void;
+  handlerStart: () => void;
   hideConfirm: () => Promise<void> | void;
 }
 
-const PasswordRequest = ({ children,
+const PasswordRequest = ({ account,
+  children,
   className,
   handlerStart,
   hideConfirm }: Props) => {
   const { t } = useTranslation();
 
-  const { onErrors, setPasswordError, signingState } = useContext(SigningContext);
+  const { signingState } = useContext(SigningContext);
 
-  const { errors, isBusy, passwordError } = signingState;
+  const { errors, isBusy } = signingState;
 
-  const [password, setPassword] = useState<string>('');
+  const [isVisible, setIsVisible] = useState<boolean>(false);
 
   const onSubmit = useCallback(() => {
-    handlerStart(password);
-  }, [handlerStart, password]);
-
-  const _onChangePass = useCallback((value: string) => {
-    setPassword(value);
-    setPasswordError(false);
-    onErrors([]);
-  }, [onErrors, setPasswordError]);
+    handlerStart();
+  }, [handlerStart]);
 
   const renderError = useCallback(() => {
     if (errors && errors.length) {
@@ -56,21 +54,37 @@ const PasswordRequest = ({ children,
     }
   }, [errors, t]);
 
+  const onOpenModal = useCallback(() => {
+    setIsVisible(true);
+  }, []);
+
+  const onCloseModal = useCallback(() => {
+    setIsVisible(false);
+  }, []);
+
   return (
     <div className={className}>
       { children }
 
       <div className='password-signing__separator' />
-
-      <InputWithLabel
-        disabled={isBusy}
-        isError={passwordError}
-        label={t<string>('Unlock account with password')}
-        onChange={_onChangePass}
-        onEnter={onSubmit}
-        type='password'
-        value={password}
-      />
+      {
+        !account.isMasterPassword && (
+          <Warning
+            className='auth-transaction-error migrate-notification'
+            noIcon={true}
+          >
+            <div>
+              {t<string>('Your must migrate password before signing')}
+            </div>
+            <Button
+              className='button-migrate'
+              onClick={onOpenModal}
+            >
+              {t('Migrate')}
+            </Button>
+          </Warning>
+        )
+      }
       { renderError() }
       <div className={'password-signing-btn-container'}>
         <Button
@@ -82,12 +96,21 @@ const PasswordRequest = ({ children,
         </Button>
         <Button
           isBusy={isBusy}
-          isDisabled={!password || passwordError}
+          isDisabled={!account.isMasterPassword}
           onClick={onSubmit}
         >
           {t('Confirm')}
         </Button>
       </div>
+      {
+        isVisible && (
+          <MigrateMasterPasswordModal
+            address={account.address}
+            className='migrate-modal'
+            closeModal={onCloseModal}
+          />
+        )
+      }
     </div>
   );
 };
@@ -138,5 +161,17 @@ export default React.memo(styled(PasswordRequest)(({ theme }: Props) => `
 
   .auth-transaction-error {
     margin-top: 10px
+  }
+
+  .migrate-notification {
+    .warning-message {
+      flex: 1;
+      justify-content: space-between;
+    }
+  }
+
+  .button-migrate {
+    width: 90px;
+    height: 30px;
   }
 `));

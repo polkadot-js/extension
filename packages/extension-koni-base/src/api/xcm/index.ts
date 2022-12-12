@@ -10,9 +10,9 @@ import { moonbeamEstimateCrossChainFee, moonbeamGetXcmExtrinsic } from '@subwall
 import { statemintEstimateCrossChainFee, statemintGetXcmExtrinsic } from '@subwallet/extension-koni-base/api/xcm/statemintXcm';
 import { substrateEstimateCrossChainFee, substrateGetXcmExtrinsic } from '@subwallet/extension-koni-base/api/xcm/substrateXcm';
 import { SupportedCrossChainsMap } from '@subwallet/extension-koni-base/api/xcm/utils';
+import { KeyringPair } from '@subwallet/keyring/types';
 
 import { SubmittableExtrinsic } from '@polkadot/api/types';
-import { KeyringPair } from '@polkadot/keyring/types';
 import { EventRecord } from '@polkadot/types/interfaces';
 
 export function isNetworksPairSupportedTransferCrossChain (originNetworkKey: string, destinationNetworkKey: string, token: string, networkMap: Record<string, NetworkJson>): boolean {

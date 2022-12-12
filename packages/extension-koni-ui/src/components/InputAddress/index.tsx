@@ -1,7 +1,7 @@
 // Copyright 2019-2022 @polkadot/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import type { KeyringOption$Type, KeyringSectionOption } from '@polkadot/ui-keyring/options/types';
+import type { KeyringOption$Type, KeyringSectionOption } from '@subwallet/ui-keyring/options/types';
 import type { Option } from './types';
 
 import { DropdownTransformGroupOptionType, DropdownTransformOptionType, OptionInputAddress } from '@subwallet/extension-base/background/KoniTypes';
@@ -12,14 +12,13 @@ import LabelHelp from '@subwallet/extension-koni-ui/components/LabelHelp';
 import { cancelSubscription, saveRecentAccountId, subscribeAccountsInputAddress } from '@subwallet/extension-koni-ui/messaging';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { toAddress } from '@subwallet/extension-koni-ui/util';
+//
+// import Dropdown from '../AdvanceDropdown';
+import { keyring } from '@subwallet/ui-keyring';
+import { createOptionItem } from '@subwallet/ui-keyring/options/item';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import store from 'store';
 import styled from 'styled-components';
-
-//
-// import Dropdown from '../AdvanceDropdown';
-import { keyring } from '@polkadot/ui-keyring';
-import { createOptionItem } from '@polkadot/ui-keyring/options/item';
 
 import { AccountOption } from './types';
 

@@ -4,9 +4,9 @@
 import { ApiProps, NetworkJson, TokenInfo } from '@subwallet/extension-base/background/KoniTypes';
 import { SupportedCrossChainsMap } from '@subwallet/extension-koni-base/api/xcm/utils';
 import { parseNumberToDisplay } from '@subwallet/extension-koni-base/utils';
+import { KeyringPair } from '@subwallet/keyring/types';
 
 import { ApiPromise } from '@polkadot/api';
-import { KeyringPair } from '@polkadot/keyring/types';
 import { decodeAddress } from '@polkadot/util-crypto';
 
 const ASSET_TO_LOCATION_MAP: Record<string, Record<string, Record<string, any>>> = {

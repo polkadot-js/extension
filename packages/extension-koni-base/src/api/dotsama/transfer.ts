@@ -7,9 +7,9 @@ import { SignerType } from '@subwallet/extension-base/signers/types';
 import { getTokenInfo } from '@subwallet/extension-koni-base/api/dotsama/registry';
 import { signAndSendExtrinsic } from '@subwallet/extension-koni-base/api/dotsama/shared/signAndSendExtrinsic';
 import { getPSP22ContractPromise } from '@subwallet/extension-koni-base/api/tokens/wasm';
+import { KeyringPair } from '@subwallet/keyring/types';
 
 import { SubmittableExtrinsic } from '@polkadot/api/promise/types';
-import { KeyringPair } from '@polkadot/keyring/types';
 import { AccountInfoWithProviders, AccountInfoWithRefCount, EventRecord } from '@polkadot/types/interfaces';
 import { BN } from '@polkadot/util';
 

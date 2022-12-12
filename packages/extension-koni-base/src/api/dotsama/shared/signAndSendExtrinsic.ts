@@ -5,7 +5,6 @@ import { ApiProps, BasicTxErrorCode, BasicTxResponse, ExternalRequestPromise, Ha
 import { SignerExternal, SignerType } from '@subwallet/extension-base/signers/types';
 import { sendExtrinsic } from '@subwallet/extension-koni-base/api/dotsama/shared/sendExtrinsic';
 import { signExtrinsic } from '@subwallet/extension-koni-base/api/dotsama/shared/signExtrinsic';
-import { lockAccount } from '@subwallet/extension-koni-base/utils/keyring';
 
 import { SubmittableExtrinsic } from '@polkadot/api/types';
 import { EventRecord } from '@polkadot/types/interfaces';
@@ -95,10 +94,6 @@ export const signAndSendExtrinsic = async ({ address,
         updateResponseTxResult: updateResponseTxResult,
         updateState: updateState
       });
-
-      if (type === SignerType.PASSWORD) {
-        lockAccount(address);
-      }
     } catch (e) {
       console.error(errorMessage, e);
 

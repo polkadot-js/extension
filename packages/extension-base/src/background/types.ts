@@ -4,10 +4,10 @@
 /* eslint-disable no-use-before-define */
 
 import type { InjectedAccount, InjectedMetadataKnown, MetadataDef, ProviderList, ProviderMeta } from '@subwallet/extension-inject/types';
-import type { KeyringPair, KeyringPair$Json, KeyringPair$Meta } from '@polkadot/keyring/types';
+import type { KeyringPair, KeyringPair$Json, KeyringPair$Meta } from '@subwallet/keyring/types';
+import type { KeyringPairs$Json } from '@subwallet/ui-keyring/types';
 import type { JsonRpcResponse } from '@polkadot/rpc-provider/types';
 import type { SignerPayloadJSON, SignerPayloadRaw } from '@polkadot/types/types';
-import type { KeyringPairs$Json } from '@polkadot/ui-keyring/types';
 import type { HexString } from '@polkadot/util/types';
 import type { KeypairType } from '@polkadot/util-crypto/types';
 
@@ -45,6 +45,8 @@ export interface AccountJson extends KeyringPair$Meta {
   type?: KeypairType;
   whenCreated?: number;
   isReadOnly?: boolean;
+  isMasterAccount?: boolean;
+  isMasterPassword?: boolean;
 }
 
 // all Accounts and the address of the current Account

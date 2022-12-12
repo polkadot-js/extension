@@ -25,9 +25,27 @@ interface Props {
   type?: 'text' | 'password';
   value?: string;
   withoutMargin?: boolean;
+  labelTooltip?: string;
+  labelQuestionIcon?: boolean;
 }
 
-function InputWithLabel ({ className, defaultValue, disabled, isError, isFocused, isReadOnly, label = '', onBlur, onChange, onEnter, onFocus, placeholder, type = 'text', value, withoutMargin }: Props): React.ReactElement<Props> {
+function InputWithLabel ({ className,
+  defaultValue,
+  disabled,
+  isError,
+  isFocused,
+  isReadOnly,
+  label = '',
+  labelQuestionIcon,
+  labelTooltip,
+  onBlur,
+  onChange,
+  onEnter,
+  onFocus,
+  placeholder,
+  type = 'text',
+  value,
+  withoutMargin }: Props): React.ReactElement<Props> {
   const [isCapsLock, setIsCapsLock] = useState(false);
   const { t } = useTranslation();
 
@@ -73,6 +91,8 @@ function InputWithLabel ({ className, defaultValue, disabled, isError, isFocused
     <Label
       className={`${className || ''} ${withoutMargin ? 'withoutMargin' : ''}`}
       label={label}
+      showQuestionIcon={labelQuestionIcon}
+      tooltipContent={labelTooltip}
     >
       <Input
         autoCapitalize='off'

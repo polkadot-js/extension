@@ -1,7 +1,7 @@
 // Copyright 2019-2022 @polkadot/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import type { KeyringSectionOption } from '@polkadot/ui-keyring/options/types';
+import type { KeyringSectionOption } from '@subwallet/ui-keyring/options/types';
 import type { Option } from './types';
 
 import React from 'react';

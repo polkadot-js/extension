@@ -25,6 +25,7 @@ import { initWasmTokenState } from '@subwallet/extension-koni-base/api/tokens/wa
 import { EvmRpcError } from '@subwallet/extension-koni-base/background/errors/EvmRpcError';
 import { state } from '@subwallet/extension-koni-base/background/handlers/index';
 import { ALL_ACCOUNT_KEY, ALL_GENESIS_HASH } from '@subwallet/extension-koni-base/constants';
+import { ChainService } from '@subwallet/extension-koni-base/services/chain-service';
 import DatabaseService from '@subwallet/extension-koni-base/services/DatabaseService';
 import { CurrentAccountStore, NetworkMapStore, PriceStore } from '@subwallet/extension-koni-base/stores';
 import AccountRefStore from '@subwallet/extension-koni-base/stores/AccountRef';
@@ -119,6 +120,7 @@ export default class KoniState extends State {
 
   private readonly confirmationsPromiseMap: Record<string, { resolver: Resolver<any>, validator?: (rs: any) => Error | undefined }> = {};
 
+  // TODO: move into chain-service
   private networkMap: Record<string, NetworkJson> = {}; // mapping to networkMapStore, for uses in background
   private networkMapSubject = new Subject<Record<string, NetworkJson>>();
   private lockNetworkMap = false;
@@ -161,6 +163,8 @@ export default class KoniState extends State {
   private chainRegistrySubject = new Subject<Record<string, ChainRegistry>>();
 
   private lazyMap: Record<string, unknown> = {};
+
+  private chainService: ChainService;
   public dbService: DatabaseService;
   private cron: KoniCron;
   private subscription: KoniSubscription;
@@ -171,6 +175,7 @@ export default class KoniState extends State {
   constructor (...args: any) {
     // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
     super(args);
+    this.chainService = new ChainService();
     this.dbService = new DatabaseService();
     this.subscription = new KoniSubscription(this, this.dbService);
     this.cron = new KoniCron(this, this.subscription, this.dbService);
@@ -1360,6 +1365,7 @@ export default class KoniState extends State {
     this.updateServiceInfo();
   }
 
+  // TODO: move into chain-service
   public getNetworkMap () {
     return this.networkMap;
   }
@@ -1370,6 +1376,20 @@ export default class KoniState extends State {
 
   public subscribeNetworkMap () {
     return this.networkMapStore.getSubject();
+  }
+
+  // ------------------------------------------------
+
+  public getChainInfoMap () {
+    return this.chainService.getChainInfoMap();
+  }
+
+  public getChainInfoByKey (key: string) {
+    return this.chainService.getChainInfoMapByKey(key);
+  }
+
+  public subscribeChainInfoMap () {
+    return this.chainService.subscribeChainInfo();
   }
 
   public getActiveContractSupportedNetworks () {

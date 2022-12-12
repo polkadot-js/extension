@@ -1,0 +1,102 @@
+{
+  "polkadot": {
+    "slug": "polkadot",
+    "name": "Polkadot Relay Chain",
+    "logo": "./71.Polkadot.png",
+    "providers": {
+      "Parity": "wss://rpc.polkadot.io",
+      "OnFinality": "wss://polkadot.api.onfinality.io/public-ws",
+      "Dwellir": "wss://polkadot-rpc.dwellir.com",
+      "Light Client": "light://substrate-connect/polkadot",
+      "RadiumBlock": "wss://polkadot.public.curie.radiumblock.io/ws",
+      "1RPC": "wss://1rpc.io/dot",
+      "PinkNode": "wss://public-rpc.pinknode.io/polkadot"
+    },
+    "substrateInfo": {
+      "paraId": null,
+      "relaySlug": null,
+      "genesisHash": "0x91b171bb158e2d3848fa23a9f1c25182fb8e20313b2c1eb49219da7a70ce90c3",
+      "addressPrefix": 0,
+      "crowdloanUrl": null,
+      "category": ["RELAYCHAIN"],
+      "supportStaking": true,
+      "supportSmartContract": false,
+      "blockExplorer": "https://polkadot.subscan.io/"
+    },
+    "evmInfo": null
+  },
+  "kusama": {
+    "slug": "kusama",
+    "name": "Kusama Relay Chain",
+    "logo": "./72.Kusama.png",
+    "providers": {
+      "Parity": "wss://kusama-rpc.polkadot.io",
+      "OnFinality": "wss://kusama.api.onfinality.io/public-ws",
+      "Dwellir": "wss://kusama-rpc.dwellir.com",
+      "Light Client": "light://substrate-connect/kusama",
+      "PinkNode": "wss://public-rpc.pinknode.io/kusama",
+      "RadiumBlock": "wss://kusama.public.curie.radiumblock.xyz/ws",
+      "1RPC": "wss://1rpc.io/ksm"
+    },
+    "substrateInfo": {
+      "paraId": null,
+      "relaySlug": null,
+      "genesisHash": "0xb0a8d493285c2df73290dfb7e61f870f17b41801197a149ca93654499ea3dafe",
+      "addressPrefix": 2,
+      "crowdloanUrl": null,
+      "category": ["RELAYCHAIN"],
+      "supportStaking": true,
+      "supportSmartContract": false,
+      "blockExplorer": "https://kusama.subscan.io/"
+    },
+    "evmInfo": null
+  },
+  "moonbeam": {
+    "slug": "moonbeam",
+    "name": "Moonbeam",
+    "logo": "./34.Moonbeam.png",
+    "providers": {
+      "Moonbeam Foundation": "wss://wss.api.moonbeam.network",
+      "OnFinality": "wss://moonbeam.api.onfinality.io/public-ws",
+      "Dwellir": "wss://moonbeam-rpc.dwellir.com",
+      "1rpc": "wss://1rpc.io/glmr",
+      "PinkNode": "wss://public-rpc.pinknode.io/moonbeam",
+      "Blast": "wss://moonbeam.public.blastapi.io"
+    },
+    "substrateInfo": {
+      "paraId": 2004,
+      "relaySlug": "polkadot",
+      "genesisHash": "0xfe58ea77779b7abda7da4ec526d14db9b1e9cd40a217c34892af80a9b332b76d",
+      "addressPrefix": 1284,
+      "crowdloanUrl": "https://moonbeam.foundation/moonbeam-crowdloan/",
+      "category": ["PARACHAIN"],
+      "supportStaking": true,
+      "supportSmartContract": true,
+      "blockExplorer": "https://moonbeam.subscan.io/"
+    },
+    "evmInfo": {
+      "evmChainId": 1284,
+      "blockExplorer": "https://moonscan.io/"
+    }
+  },
+  "alephZeroTest": {
+    "slug": "alephZeroTest",
+    "name": "Aleph Zero Testnet",
+    "logo": "./55.Aleph.png",
+    "providers": {
+      "Aleph Zero Foundation": "wss://ws.test.azero.dev"
+    },
+    "substrateInfo": {
+      "paraId": null,
+      "relayId": null,
+      "genesisHash": "0x05d5279c52c484cc80396535a316add7d47b1c5b9e0398dd1f584149341460c5",
+      "addressPrefix": 42,
+      "crowdloanUrl": null,
+      "category": ["TEST_NET"],
+      "supportStaking": true,
+      "supportSmartContract": false,
+      "blockExplorer": null
+    },
+    "evmInfo": null
+  }
+}

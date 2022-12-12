@@ -1,0 +1,23 @@
+{
+  "1": {
+    "id_": 1,
+    "originChainAssetId_": 1,
+    "name": "Polkadot",
+    "symbol": "DOT",
+    "priceId": "polkadot"
+  },
+  "2": {
+    "id_": 2,
+    "originChainAssetId_": 2,
+    "name": "Kusama",
+    "symbol": "KSM",
+    "priceId": "kusama"
+  },
+  "3": {
+    "id_": 3,
+    "originChainAssetId_": 3,
+    "name": "Moonbeam",
+    "symbol": "GLMR",
+    "priceId": "moonbeam"
+  }
+}

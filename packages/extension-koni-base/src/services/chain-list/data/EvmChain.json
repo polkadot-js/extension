@@ -1,0 +1,8 @@
+{
+  "1": {
+    "id_": 1,
+    "chainId_": 3,
+    "evmChainId": 1284,
+    "blockExplorer": "https://moonscan.io/"
+  }
+}

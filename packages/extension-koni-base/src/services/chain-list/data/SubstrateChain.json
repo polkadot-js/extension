@@ -1,0 +1,54 @@
+{
+  "1": {
+    "id_": 1,
+    "chainId_": 1,
+    "paraId": null,
+    "genesisHash": "0x91b171bb158e2d3848fa23a9f1c25182fb8e20313b2c1eb49219da7a70ce90c3",
+    "addressPrefix": 0,
+    "crowdloanUrl": null,
+    "category": ["RELAY_CHAIN"],
+    "relayId": null,
+    "supportStaking": true,
+    "supportSmartContract": false,
+    "blockExplorer": "https://polkadot.subscan.io/"
+  },
+  "2": {
+    "id_": 2,
+    "chainId_": 2,
+    "paraId": null,
+    "genesisHash": "0xb0a8d493285c2df73290dfb7e61f870f17b41801197a149ca93654499ea3dafe",
+    "addressPrefix": 2,
+    "crowdloanUrl": null,
+    "category": ["RELAY_CHAIN"],
+    "relayId": null,
+    "supportStaking": true,
+    "supportSmartContract": false,
+    "blockExplorer": "https://kusama.subscan.io/"
+  },
+  "3": {
+    "id_": 3,
+    "chainId_": 3,
+    "paraId": 2004,
+    "genesisHash": "0xfe58ea77779b7abda7da4ec526d14db9b1e9cd40a217c34892af80a9b332b76d",
+    "addressPrefix": 1284,
+    "crowdloanUrl": "https://moonbeam.foundation/moonbeam-crowdloan/",
+    "category": ["PARACHAIN"],
+    "relayId": 1,
+    "supportStaking": true,
+    "supportSmartContract": true,
+    "blockExplorer": "https://moonbeam.subscan.io/"
+  },
+  "4": {
+    "id_": 4,
+    "chainId_": 4,
+    "paraId": -1,
+    "genesisHash": "0x05d5279c52c484cc80396535a316add7d47b1c5b9e0398dd1f584149341460c5",
+    "addressPrefix": 42,
+    "crowdloanUrl": null,
+    "category": ["TEST_NET"],
+    "relayId": null,
+    "supportStaking": true,
+    "supportSmartContract": false,
+    "blockExplorer": null
+  }
+}

@@ -414,6 +414,10 @@ export function ScannerContextProvider ({ children }: ScannerContextProviderProp
             networkKey: senderNetwork.key
           });
 
+          if (type === 'message') {
+            return hexStripPrefix(signature).substring(2);
+          }
+
           return hexStripPrefix(signature);
         } catch (e) {
           console.error(e);

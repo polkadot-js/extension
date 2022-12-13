@@ -35,14 +35,13 @@ interface Props extends ThemeProps {
 function ImportLedger ({ className }: Props): React.ReactElement {
   const { t } = useTranslation();
   const [accountIndex, setAccountIndex] = useState<number>(0);
-  const [addressOffset, setAddressOffset] = useState<number>(0);
   const [error, setError] = useState<string | null>(null);
   const [isBusy, setIsBusy] = useState(false);
   const [genesis, setGenesis] = useState<string | null>(null);
   const [isAllowed, setIsAllowed] = useState<boolean>(true);
   const onAction = useContext(ActionContext);
   const [name, setName] = useState<string | null>(null);
-  const { address, error: ledgerError, isLoading: ledgerLoading, isLocked: ledgerLocked, refresh, warning: ledgerWarning } = useLedger(genesis, accountIndex, addressOffset);
+  const { address, error: ledgerError, isLoading: ledgerLoading, isLocked: ledgerLocked, refresh, warning: ledgerWarning } = useLedger(genesis, accountIndex, 0);
   const ledgerChains = useGetSupportedLedger();
 
   useEffect(() => {
@@ -53,11 +52,6 @@ function ImportLedger ({ className }: Props): React.ReactElement {
 
   const accOps = useRef(AVAIL.map((value): AccOption => ({
     text: t('Account type {{index}}', { replace: { index: value } }),
-    value: value.toString()
-  })));
-
-  const addOps = useRef(AVAIL.map((value): AccOption => ({
-    text: t('Address index {{index}}', { replace: { index: value } }),
     value: value.toString()
   })));
 
@@ -82,7 +76,7 @@ function ImportLedger ({ className }: Props): React.ReactElement {
           address: address,
           hardwareType: 'ledger',
           accountIndex: accountIndex,
-          addressOffset: addressOffset,
+          addressOffset: 0,
           name: name,
           genesisHash: genesis,
           isAllowed: isAllowed
@@ -96,12 +90,11 @@ function ImportLedger ({ className }: Props): React.ReactElement {
           });
       }
     },
-    [accountIndex, address, addressOffset, genesis, isAllowed, name, onAction]
+    [accountIndex, address, genesis, isAllowed, name, onAction]
   );
 
   // select element is returning a string
   const _onSetAccountIndex = useCallback((value: number) => setAccountIndex(Number(value)), []);
-  const _onSetAddressOffset = useCallback((value: number) => setAddressOffset(Number(value)), []);
 
   return (
     <div className={className}>
@@ -142,14 +135,6 @@ function ImportLedger ({ className }: Props): React.ReactElement {
               onChange={_onSetAccountIndex}
               options={accOps.current}
               value={accountIndex}
-            />
-            <Dropdown
-              className='import-ledger__item'
-              isDisabled={ledgerLoading}
-              label={t<string>('address index')}
-              onChange={_onSetAddressOffset}
-              options={addOps.current}
-              value={addressOffset}
             />
           </>
         )}

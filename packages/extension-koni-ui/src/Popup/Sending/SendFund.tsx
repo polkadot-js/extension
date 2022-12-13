@@ -123,6 +123,7 @@ function SendFund ({ chainRegistryMap, className, defaultValue, networkMap }: Co
     (!isEthereumAddress(senderId) && ethereumChains.includes(selectedNetworkKey));
   const isNotSameAddressType = (isEthereumAddress(senderId) && !!recipientId && !isEthereumAddress(recipientId)) ||
     (!isEthereumAddress(senderId) && !!recipientId && isEthereumAddress(recipientId));
+  const isValidTransferAmount = (new BN(recipientFreeBalance)).add(amount || BN_ZERO).gte(new BN(existentialDeposit));
   const [isGasRequiredExceedsError, setGasRequiredExceedsError] = useState<boolean>(false);
   const amountGtAvailableBalance = amount && senderFreeBalance && amount.gt(new BN(senderFreeBalance));
   const [maxTransfer, noFees] = getMaxTransferAndNoFees(fee, feeSymbol, selectedToken, mainTokenInfo.symbol, senderFreeBalance, existentialDeposit);
@@ -166,6 +167,8 @@ function SendFund ({ chainRegistryMap, className, defaultValue, networkMap }: Co
     !isNotSameAddressAndTokenType &&
     !isNotSameAddressType &&
     !amountGtAvailableBalance &&
+    !(errors && errors.length) &&
+    isValidTransferAmount &&
     !isReadOnly &&
     (!isHardwareAccount || isValidHardwareAccount);
 
@@ -402,7 +405,7 @@ function SendFund ({ chainRegistryMap, className, defaultValue, networkMap }: Co
               </div>
             )}
 
-            {warnings && warnings.length
+            {!(errors && errors.length) && warnings && warnings.length
               ? warnings.map((w, index) => (
                 <Warning
                   className='send-fund-warning'
@@ -452,6 +455,15 @@ function SendFund ({ chainRegistryMap, className, defaultValue, networkMap }: Co
                 isDanger
               >
                 {t<string>('The recipient is associated with a known phishing site on {{url}}', { replace: { url: recipientPhish } })}
+              </Warning>
+            )}
+
+            {recipientId && amount && !isValidTransferAmount && (
+              <Warning
+                className={'send-fund-warning'}
+                isDanger
+              >
+                {t<string>('Beware! The transaction amount is too small to keep the destination account alive.')}
               </Warning>
             )}
 

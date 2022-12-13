@@ -52,7 +52,7 @@ import { ChainType } from '@polkadot/types/interfaces';
 import { keyring } from '@polkadot/ui-keyring';
 import { accounts as accountsObservable } from '@polkadot/ui-keyring/observable/accounts';
 import { SingleAddress, SubjectInfo } from '@polkadot/ui-keyring/observable/types';
-import { assert, BN, BN_TEN, BN_ZERO, hexStripPrefix, hexToU8a, isAscii, isHex, u8aToHex, u8aToString } from '@polkadot/util';
+import { assert, BN, BN_ZERO, hexStripPrefix, hexToU8a, isAscii, isHex, u8aToHex, u8aToString } from '@polkadot/util';
 import { base64Decode, isEthereumAddress, jsonDecrypt, keyExtractSuri, mnemonicGenerate, mnemonicValidate } from '@polkadot/util-crypto';
 import { EncryptedJson, KeypairType, Prefix } from '@polkadot/util-crypto/types';
 
@@ -1198,15 +1198,20 @@ export default class KoniExtension extends Extension {
 
   private async checkTransfer ({ from, networkKey, to, token, transferAll, value }: RequestCheckTransfer): Promise<ResponseCheckTransfer> {
     const [errors, fromKeyPair, valueNumber, tokenInfo] = await this.validateTransfer(networkKey, token, from, to, undefined, value, transferAll);
-    const existentialDeposit = await getExistentialDeposit(networkKey, token || '', state.getDotSamaApiMap());
     const dotSamaApiMap = state.getDotSamaApiMap();
     const web3ApiMap = state.getApiMap().web3;
     let mainToken: string | undefined;
+    let mainTokenDecimals: number | undefined;
     const warnings: BasicTxWarning[] = [];
 
     if (tokenInfo && !tokenInfo.isMainToken) {
-      mainToken = state.getNetworkMapByKey(networkKey).nativeToken as string;
+      const mainNetwork = state.getNetworkMapByKey(networkKey);
+
+      mainToken = mainNetwork.nativeToken as string;
+      mainTokenDecimals = mainNetwork.decimals;
     }
+
+    const existentialDeposit = await getExistentialDeposit(networkKey, tokenInfo && !tokenInfo.isMainToken ? (mainToken || '') : (token || ''), state.getDotSamaApiMap());
 
     let fee = '0';
     let feeSymbol;
@@ -1254,7 +1259,7 @@ export default class KoniExtension extends Extension {
     const feeNumber = fee ? new BN(fee) : undefined;
     const fromAccountNativeBalanceNumber = new BN(fromAccountNativeBalance);
     const existentialDepositNumber = new BN(existentialDeposit);
-    const rawExistentialDeposit = existentialDepositNumber.div(BN_TEN.pow(new BN(tokenInfo?.decimals || '0'))).toString();
+    const rawExistentialDeposit = Number(existentialDeposit) / Math.pow(10, (mainTokenDecimals || tokenInfo?.decimals || 0));
 
     if (!transferAll && value && feeNumber && valueNumber && valueNumber.gt(BN_ZERO)) {
       if (tokenInfo && tokenInfo.isMainToken) {

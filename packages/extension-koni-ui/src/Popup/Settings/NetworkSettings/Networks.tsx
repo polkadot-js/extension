@@ -1,16 +1,14 @@
 // Copyright 2019-2022 @polkadot/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { NetworkJson } from '@subwallet/extension-base/background/KoniTypes';
+import { _ChainInfo } from '@subwallet/extension-koni-base/services/chain-list/types';
 import { InputFilter } from '@subwallet/extension-koni-ui/components';
-import useFetchNetworkMap from '@subwallet/extension-koni-ui/hooks/screen/setting/useFetchNetworkMap';
+import useFetchChainInfoMap from '@subwallet/extension-koni-ui/hooks/screen/setting/useFetchChainInfoMap';
 import useToast from '@subwallet/extension-koni-ui/hooks/useToast';
 import useTranslation from '@subwallet/extension-koni-ui/hooks/useTranslation';
 import { disableAllNetwork, resetDefaultNetwork } from '@subwallet/extension-koni-ui/messaging';
 import Header from '@subwallet/extension-koni-ui/partials/Header';
 import NetworkItem from '@subwallet/extension-koni-ui/Popup/Settings/NetworkSettings/NetworkItem';
-// import { store } from '@subwallet/extension-koni-ui/stores';
-// import { NetworkConfigParams } from '@subwallet/extension-koni-ui/stores/types';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import React, { useCallback, useState } from 'react';
 import styled from 'styled-components';
@@ -23,20 +21,20 @@ function Networks ({ className }: Props): React.ReactElement {
   const { t } = useTranslation();
   const { show } = useToast();
 
-  const { parsedNetworkMap: networkMap } = useFetchNetworkMap();
+  const { chainInfoMap } = useFetchChainInfoMap();
   const [searchString, setSearchString] = useState('');
 
   const filterNetwork = useCallback(() => {
-    const _filteredNetworkMap: Record<string, NetworkJson> = {};
+    const _filteredNetworkMap: Record<string, _ChainInfo> = {};
 
-    Object.entries(networkMap).forEach(([key, network]) => {
-      if (network.chain.toLowerCase().includes(searchString.toLowerCase())) {
-        _filteredNetworkMap[key] = network;
+    Object.entries(chainInfoMap).forEach(([key, chain]) => {
+      if (chain.name.toLowerCase().includes(searchString.toLowerCase())) {
+        _filteredNetworkMap[key] = chain;
       }
     });
 
     return _filteredNetworkMap;
-  }, [networkMap, searchString]);
+  }, [chainInfoMap, searchString]);
 
   const filteredNetworkMap = filterNetwork();
 

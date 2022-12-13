@@ -51,6 +51,7 @@ import { KeypairType } from '@polkadot/util-crypto/types';
 
 import { KoniCron } from '../cron';
 import { KoniSubscription } from '../subscription';
+import {_ChainInfo} from "@subwallet/extension-koni-base/services/chain-list/types";
 
 const ETH_DERIVE_DEFAULT = '/m/44\'/60\'/0\'/0/0';
 
@@ -1388,7 +1389,7 @@ export default class KoniState extends State {
     return this.chainService.getChainInfoMapByKey(key);
   }
 
-  public subscribeChainInfoMap () {
+  public subscribeChainInfoMap (): Subject<Record<string, _ChainInfo>> {
     return this.chainService.subscribeChainInfo();
   }
 

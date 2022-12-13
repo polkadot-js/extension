@@ -3,7 +3,7 @@
 
 import { faTrashAlt } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { NetworkJson } from '@subwallet/extension-base/background/KoniTypes';
+import { _ChainInfo } from '@subwallet/extension-koni-base/services/chain-list/types';
 import { AccountContext, ActionContext, Button, ButtonArea, HorizontalLabelToggle } from '@subwallet/extension-koni-ui/components';
 import Modal from '@subwallet/extension-koni-ui/components/Modal';
 import useToast from '@subwallet/extension-koni-ui/hooks/useToast';
@@ -17,7 +17,7 @@ import styled from 'styled-components';
 
 interface Props extends ThemeProps {
   className?: string;
-  item: NetworkJson;
+  item: _ChainInfo;
 }
 
 function NetworkItem ({ className, item }: Props): React.ReactElement {
@@ -51,9 +51,9 @@ function NetworkItem ({ className, item }: Props): React.ReactElement {
 
   const handleShowStateConfirm = useCallback((resp: boolean) => {
     if (resp) {
-      show(`${item.chain} has ${item.active ? 'disconnected' : 'connected'} successfully`);
+      show(`${item.name} has ${item.active ? 'disconnected' : 'connected'} successfully`);
     } else {
-      show(`${item.chain} has failed to ${item.active ? 'disconnect' : 'connect'}`);
+      show(`${item.name} has failed to ${item.active ? 'disconnect' : 'connect'}`);
     }
   }, [item, show]);
 

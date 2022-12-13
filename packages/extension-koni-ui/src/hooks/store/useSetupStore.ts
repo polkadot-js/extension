@@ -3,6 +3,7 @@
 
 import useSetupAuthUrl from '@subwallet/extension-koni-ui/hooks/store/useSetupAuthUrl';
 import useSetupBalance from '@subwallet/extension-koni-ui/hooks/store/useSetupBalance';
+import useSetupChainInfoMap from '@subwallet/extension-koni-ui/hooks/store/useSetupChainInfoMap';
 import useSetupChainRegistry from '@subwallet/extension-koni-ui/hooks/store/useSetupChainRegistry';
 import useSetupCrowdloan from '@subwallet/extension-koni-ui/hooks/store/useSetupCrowdloan';
 import useSetupCustomToken from '@subwallet/extension-koni-ui/hooks/store/useSetupCustomToken';
@@ -33,4 +34,6 @@ export default function useSetupStore (): void {
   useSetupCustomToken();
   useSetupStakeUnlockingInfo();
   useSetupAuthUrl();
+
+  useSetupChainInfoMap();
 }

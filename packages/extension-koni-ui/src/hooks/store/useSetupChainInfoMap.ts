@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { _ChainInfo } from '@subwallet/extension-koni-base/services/chain-list/types';
-import { subscribeNetworkMap } from '@subwallet/extension-koni-ui/messaging';
+import { subscribeChainInfoMap } from '@subwallet/extension-koni-ui/messaging';
 import { store } from '@subwallet/extension-koni-ui/stores';
 import { useEffect } from 'react';
 

@@ -4,7 +4,7 @@
 import { faRightLong } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { ConfirmationsQueue } from '@subwallet/extension-base/background/KoniTypes';
-import useFetchNetworkMap from '@subwallet/extension-koni-ui/hooks/screen/setting/useFetchNetworkMap';
+import useFetchChainInfoMap from '@subwallet/extension-koni-ui/hooks/screen/setting/useFetchChainInfoMap';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { getLogoByNetworkKey } from '@subwallet/extension-koni-ui/util';
@@ -20,11 +20,11 @@ interface Props extends ThemeProps {
 
 function SwitchNetworkConfirmationInfo ({ className, confirmation }: Props): React.ReactElement {
   const { t } = useTranslation();
-  const { parsedNetworkMap: networkMap } = useFetchNetworkMap();
+  const { chainInfoMap } = useFetchChainInfoMap();
   const { payload } = confirmation;
-  const newNetwork = networkMap[payload.networkKey];
+  const newNetwork = chainInfoMap[payload.networkKey];
   const { networkKey } = useSelector((state: RootState) => state.currentNetwork);
-  const currentNetwork = networkMap[networkKey];
+  const currentNetwork = chainInfoMap[networkKey];
 
   return <div className={className}>
     <div className='network-wrapper'>
@@ -37,7 +37,7 @@ function SwitchNetworkConfirmationInfo ({ className, confirmation }: Props): Rea
             width={64}
           />
         </div>
-        <div>{currentNetwork?.chain || t<string>('Any chain')}</div>
+        <div>{currentNetwork?.name || t<string>('Any chain')}</div>
 
       </div>
       <div className='swap-icon'>
@@ -51,7 +51,7 @@ function SwitchNetworkConfirmationInfo ({ className, confirmation }: Props): Rea
             width={64}
           />
         </div>
-        <div>{newNetwork.chain}</div>
+        <div>{newNetwork.name}</div>
       </div>
     </div>
   </div>;
@@ -66,27 +66,27 @@ export default styled(SwitchNetworkConfirmationInfo)(({ theme }: Props) => `
   position: relative;
   padding-top: 16px;
   padding-botom: 16px;
-  
+
   .network-wrapper {
-    width: 100%;  
+    width: 100%;
     display: flex;
     justify-content: space-evenly;
     align-items: center;
   }
-  
+
   .swap-icon {
     padding-bottom: 40px;
     font-size: 32px;
   }
-  
+
   .from-network, .to-network {
-    flex: 1;  
+    flex: 1;
   }
-  
+
   .img-wrapper {
     width: 100%;
   }
-  
+
   .img-circle {
     overflow: hidden;
     border-radius: 50%;

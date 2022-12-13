@@ -39,6 +39,7 @@ import { getPSP34Transaction, getPSP34TransferExtrinsic } from '@subwallet/exten
 import { estimateCrossChainFee, makeCrossChainTransfer } from '@subwallet/extension-koni-base/api/xcm';
 import { state } from '@subwallet/extension-koni-base/background/handlers/index';
 import { ALL_ACCOUNT_KEY, ALL_GENESIS_HASH } from '@subwallet/extension-koni-base/constants';
+import { _ChainInfo } from '@subwallet/extension-koni-base/services/chain-list/types';
 import { getCurrentProvider, isValidProvider } from '@subwallet/extension-koni-base/utils';
 import { createTransactionFromRLP, signatureToHex, Transaction as QrTransaction } from '@subwallet/extension-koni-base/utils/eth';
 import BigN from 'bignumber.js';
@@ -3891,6 +3892,24 @@ export default class KoniExtension extends Extension {
     }
   }
 
+  // ChainService
+  private subscribeChainInfoMap (id: string, port: chrome.runtime.Port): Record<string, _ChainInfo> {
+    const cb = createSubscription<'pri(chainService.subscribeChainInfoMap)'>(id, port);
+    const chainInfoMapSubscription = state.subscribeChainInfoMap().subscribe({
+      next: (rs) => {
+        cb(rs);
+      }
+    });
+
+    this.createUnsubscriptionHandle(id, chainInfoMapSubscription.unsubscribe);
+
+    port.onDisconnect.addListener((): void => {
+      this.cancelSubscription(id);
+    });
+
+    return state.getChainInfoMap();
+  }
+
   // eslint-disable-next-line @typescript-eslint/require-await
   public override async handle<TMessageType extends MessageTypes> (id: string, type: TMessageType, request: RequestTypes[TMessageType], port: chrome.runtime.Port): Promise<ResponseType<TMessageType>> {
     switch (type) {
@@ -4000,6 +4019,8 @@ export default class KoniExtension extends Extension {
         return this.updateTransactionHistory(request as RequestTransactionHistoryAdd, id, port);
       case 'pri(transaction.history.getSubscription)':
         return this.subscribeHistory(id, port);
+
+        // NetworkMap, TokenState
       case 'pri(networkMap.getSubscription)':
         return this.subscribeNetworkMap(id, port);
       case 'pri(networkMap.upsert)':
@@ -4028,6 +4049,11 @@ export default class KoniExtension extends Extension {
         return this.upsertCustomToken(request as CustomToken);
       case 'pri(customTokenState.deleteMany)':
         return this.deleteCustomToken(request as DeleteCustomTokenParams[]);
+
+        // ChainService
+      case 'pri(chainService.subscribeChainInfoMap)':
+        return this.subscribeChainInfoMap(id, port);
+
       case 'pri(transfer.checkReferenceCount)':
         return await this.transferCheckReferenceCount(request as RequestTransferCheckReferenceCount);
       case 'pri(transfer.checkSupporting)':

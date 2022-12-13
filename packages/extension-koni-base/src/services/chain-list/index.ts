@@ -6,3 +6,8 @@
 import { _ChainInfo } from '@subwallet/extension-koni-base/services/chain-list/types';
 
 export const ChainInfoMap = require('./data/ChainInfo.json') as Record<string, _ChainInfo>;
+
+export const _DEFAULT_CHAINS = [
+  'polkadot',
+  'kusama'
+];

@@ -1,9 +1,9 @@
 // Copyright 2019-2022 @subwallet/extension-koni authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-export const SINGULAR_V1_ENDPOINT = 'https://singular.rmrk.app/api/rmrk1/account/';
+export const SINGULAR_V1_ENDPOINT = 'https://singular.rmrk-api.xyz/api/account-rmrk1/';
 
-export const SINGULAR_V2_ENDPOINT = 'https://singular.app/api/rmrk2/account/';
+export const SINGULAR_V2_ENDPOINT = 'https://singular.rmrk-api.xyz/api/account/';
 
 export const KANARIA_ENDPOINT = 'https://kanaria.rmrk.app/api/rmrk2/';
 

@@ -18,6 +18,7 @@
       "@polkadot/extension-ui": ["extension-ui/src"],
       "@polkadot/extension-ui/*": ["extension-ui/src/*"]
     },
-    "skipLibCheck": true
+    "skipLibCheck": true,
+    "target": "es2015"
 	}
  }

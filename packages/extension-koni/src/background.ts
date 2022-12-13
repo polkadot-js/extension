@@ -17,7 +17,7 @@ import keyring from '@polkadot/ui-keyring';
 import { assert } from '@polkadot/util';
 import { cryptoWaitReady } from '@polkadot/util-crypto';
 
-const IDLE_TIME = 15000 * 2; // 2 minutes
+const IDLE_TIME = 60000 * 2; // 2 minutes
 
 let idleTimer: NodeJS.Timeout;
 let waitingToStop = false;

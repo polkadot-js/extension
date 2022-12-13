@@ -624,8 +624,18 @@ export async function getFreeBalance (networkKey: string, address: string, dotSa
       const balance = _balance.toHuman();
 
       // @ts-ignore
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-argument,@typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-member-access
+      const freeBalance = new BN(balance.data?.free.replaceAll(',', ''));
+
+      // @ts-ignore
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-argument,@typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-member-access
+      const miscFrozen = new BN(balance.data?.miscFrozen.replaceAll(',', ''));
+
+      const transferable = freeBalance.sub(miscFrozen);
+
+      // @ts-ignore
       // eslint-disable-next-line @typescript-eslint/no-unsafe-argument,@typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-member-access,@typescript-eslint/no-unsafe-return
-      return balance.data?.free.replaceAll(',', '') || '0';
+      return transferable.toString() || '0';
     }
 
     const balance = await api.derive.balances.all(address);
@@ -766,9 +776,15 @@ export async function subscribeFreeBalance (
       const unsub = await api.query.system.account(address, (_balance) => {
         // eslint-disable-next-line @typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-member-access,@typescript-eslint/no-unsafe-assignment
         const balance = _balance.toHuman();
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-argument,@typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-member-access
+        const freeBalance = new BN(balance.data?.free.replaceAll(',', ''));
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-argument,@typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-member-access
+        const miscFrozen = new BN(balance.data?.miscFrozen.replaceAll(',', ''));
+
+        const transferable = freeBalance.sub(miscFrozen);
 
         // eslint-disable-next-line @typescript-eslint/no-unsafe-argument,@typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-member-access
-        update(balance.data?.free.replaceAll(',', '') || '0');
+        update(transferable.toString() || '0');
       });
 
       return () => {

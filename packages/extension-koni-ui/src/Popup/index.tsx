@@ -10,7 +10,7 @@ import { canDerive } from '@subwallet/extension-base/utils';
 import { ALL_ACCOUNT_KEY } from '@subwallet/extension-koni-base/constants';
 import ToastProvider from '@subwallet/extension-koni-ui/components/Toast/ToastProvider';
 import { AccountContext, ActionContext, AuthorizeReqContext, ConfirmationsQueueContext, MediaContext, MetadataReqContext, SettingsContext, SigningReqContext } from '@subwallet/extension-koni-ui/contexts';
-import { ExternalRequestContextProvider } from '@subwallet/extension-koni-ui/contexts/ExternalRequestContext';
+import { InternalRequestContextProvider } from '@subwallet/extension-koni-ui/contexts/InternalRequestContext';
 import { QRContextProvider } from '@subwallet/extension-koni-ui/contexts/QrSignerContext';
 import { ScannerContextProvider } from '@subwallet/extension-koni-ui/contexts/ScannerContext';
 import { SigningContextProvider } from '@subwallet/extension-koni-ui/contexts/SigningContext';
@@ -29,7 +29,6 @@ import { Route, Switch } from 'react-router';
 
 import uiSettings from '@polkadot/ui-settings';
 
-import Login from './Login';
 // import Home from './Home';
 
 const StakeCompoundSubmitTransaction = React.lazy(() => import('@subwallet/extension-koni-ui/Popup/Home/Staking/StakeCompoundSubmitTransaction'));
@@ -68,6 +67,8 @@ const NetworkCreate = React.lazy(() => import('@subwallet/extension-koni-ui/Popu
 const Networks = React.lazy(() => import('@subwallet/extension-koni-ui/Popup/Settings/NetworkSettings/Networks'));
 const Rendering = React.lazy(() => import('@subwallet/extension-koni-ui/Popup/Rendering'));
 const Donate = React.lazy(() => import('@subwallet/extension-koni-ui/Popup/Sending/Donate'));
+const Login = React.lazy(() => import('@subwallet/extension-koni-ui/Popup/Keyring/Login'));
+const ChangeMasterPassword = React.lazy(() => import('@subwallet/extension-koni-ui/Popup/Keyring/ChangeMasterPassword'));
 const ErrorBoundary = React.lazy(() => import('@subwallet/extension-koni-ui/components/ErrorBoundary'));
 
 const startSettings = uiSettings.get();
@@ -295,7 +296,7 @@ export default function Popup (): React.ReactElement {
                     <SigningReqContext.Provider value={signRequests}>
                       <ConfirmationsQueueContext.Provider value={confirmations}>
                         <SigningContextProvider>
-                          <ExternalRequestContextProvider>
+                          <InternalRequestContextProvider>
                             <ScannerContextProvider>
                               <QRContextProvider>
                                 <ToastProvider>
@@ -338,6 +339,7 @@ export default function Popup (): React.ReactElement {
                                           <Route path='/account/bonding-auth'>{wrapWithErrorBoundary(<BondingSubmitTransaction />, 'bonding-auth')}</Route>
                                           <Route path='/account/unbonding-auth'>{wrapWithErrorBoundary(<UnbondingSubmitTransaction />, 'unbonding-auth')}</Route>
                                           <Route path='/account/stake-compounding-auth'>{wrapWithErrorBoundary(<StakeCompoundSubmitTransaction />, 'stake-compounding-auth')}</Route>
+                                          <Route path='/keyring/change'>{wrapWithErrorBoundary(<ChangeMasterPassword />, 'change-master-password')}</Route>
                                           <Route path={`${PHISHING_PAGE_REDIRECT}/:website`}>{wrapWithErrorBoundary(<PhishingDetected />, 'phishing-page-redirect')}</Route>
                                           <Route
                                             exact
@@ -351,7 +353,7 @@ export default function Popup (): React.ReactElement {
                                 </ToastProvider>
                               </QRContextProvider>
                             </ScannerContextProvider>
-                          </ExternalRequestContextProvider>
+                          </InternalRequestContextProvider>
                         </SigningContextProvider>
                       </ConfirmationsQueueContext.Provider>
                     </SigningReqContext.Provider>

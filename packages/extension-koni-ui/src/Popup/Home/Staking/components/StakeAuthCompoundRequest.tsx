@@ -5,7 +5,7 @@ import { TuringStakeCompoundParams } from '@subwallet/extension-base/background/
 import InputAddress from '@subwallet/extension-koni-ui/components/InputAddress';
 import Modal from '@subwallet/extension-koni-ui/components/Modal';
 import SigningRequest from '@subwallet/extension-koni-ui/components/Signing/SigningRequest';
-import { ExternalRequestContext } from '@subwallet/extension-koni-ui/contexts/ExternalRequestContext';
+import { InternalRequestContext } from '@subwallet/extension-koni-ui/contexts/InternalRequestContext';
 import { SigningContext } from '@subwallet/extension-koni-ui/contexts/SigningContext';
 import useGetNetworkJson from '@subwallet/extension-koni-ui/hooks/screen/home/useGetNetworkJson';
 import useGetAccountByAddress from '@subwallet/extension-koni-ui/hooks/useGetAccountByAddress';
@@ -43,7 +43,7 @@ interface Props extends ThemeProps {
 function StakeAuthCompoundRequest ({ accountMinimum, address, balanceError, bondedAmount, className, compoundFee, fee, handleRevertClickNext, initTime, networkKey, optimalTime, selectedCollator, setExtrinsicHash, setIsTxSuccess, setShowAuth, setShowResult, setTxError }: Props): React.ReactElement<Props> {
   const { handlerReject } = useRejectExternalRequest();
 
-  const { externalState: { externalId } } = useContext(ExternalRequestContext);
+  const { externalState: { externalId } } = useContext(InternalRequestContext);
   const { signingState: { isBusy } } = useContext(SigningContext);
 
   const networkJson = useGetNetworkJson(networkKey);

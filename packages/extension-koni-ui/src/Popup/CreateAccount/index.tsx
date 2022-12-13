@@ -4,7 +4,9 @@
 // eslint-disable-next-line header/header
 import LoadingContainer from '@subwallet/extension-koni-ui/components/LoadingContainer';
 import HeaderWithSteps from '@subwallet/extension-koni-ui/partials/HeaderWithSteps';
+import { RootState } from '@subwallet/extension-koni-ui/stores';
 import React, { useCallback, useContext, useEffect, useState } from 'react';
+import { useSelector } from 'react-redux';
 import styled from 'styled-components';
 
 import { KeypairType } from '@polkadot/util-crypto/types';
@@ -25,6 +27,10 @@ export const EVM_ACCOUNT_TYPE: KeypairType = 'ethereum';
 function CreateAccount ({ className, defaultClassName }: Props): React.ReactElement {
   const { t } = useTranslation();
   const onAction = useContext(ActionContext);
+  const { accounts } = useContext(AccountContext);
+
+  const hasMasterPassword = useSelector((state: RootState) => state.keyringState.hasMasterPassword);
+
   const [isBusy, setIsBusy] = useState(false);
   const [step, setStep] = useState(1);
   const [keyTypes, setKeyTypes] = useState<Array<KeypairType>>([SUBSTRATE_ACCOUNT_TYPE, EVM_ACCOUNT_TYPE]);
@@ -33,10 +39,10 @@ function CreateAccount ({ className, defaultClassName }: Props): React.ReactElem
   const [evmAddress, setEvmAddress] = useState<null | string>(null);
   const [seed, setSeed] = useState<null | string>(null);
   const [isConnectWhenCreate, setConnectWhenCreate] = useState(true);
-  const { accounts } = useContext(AccountContext);
+
   const accountsWithoutAll = accounts.filter((acc: { address: string; }) => acc.address !== 'ALL');
-  const name = `Account ${accountsWithoutAll.length + 1}`;
-  const evmName = `Account ${accountsWithoutAll.length + 1} - EVM`;
+  const [name, setName] = useState<string>(`Account ${accountsWithoutAll.length + 1}`);
+
   const isFirefox = window.localStorage.getItem('browserInfo') === 'Firefox';
   const isLinux = window.localStorage.getItem('osInfo') === 'Linux';
 
@@ -68,11 +74,17 @@ function CreateAccount ({ className, defaultClassName }: Props): React.ReactElem
   }, [seed]);
 
   const _onCreate = useCallback(
-    (name: string, password: string): void => {
+    (name: string, password?: string): void => {
       // this should always be the case
-      if (name && password && seed) {
+      if (name && seed && (hasMasterPassword || (!hasMasterPassword && password))) {
         setIsBusy(true);
-        createAccountSuriV2(name, password, seed, isConnectWhenCreate, keyTypes)
+        createAccountSuriV2({
+          name: name,
+          password: password,
+          suri: seed,
+          isAllowed: isConnectWhenCreate,
+          types: keyTypes
+        })
           .then((response) => {
             window.localStorage.setItem('popupNavigation', '/');
             onAction('/');
@@ -84,7 +96,7 @@ function CreateAccount ({ className, defaultClassName }: Props): React.ReactElem
       }
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [isConnectWhenCreate, onAction, seed, dep]
+    [isConnectWhenCreate, onAction, seed, dep, hasMasterPassword]
   );
 
   const _onNextStep = useCallback(
@@ -112,8 +124,8 @@ function CreateAccount ({ className, defaultClassName }: Props): React.ReactElem
               <Mnemonic
                 address={address}
                 evmAddress={evmAddress}
-                evmName={evmName}
                 isConnectWhenCreate={isConnectWhenCreate}
+                keyTypes={keyTypes}
                 name={name}
                 onConnectWhenCreate={setConnectWhenCreate}
                 onNextStep={_onNextStep}
@@ -131,6 +143,7 @@ function CreateAccount ({ className, defaultClassName }: Props): React.ReactElem
                   keyTypes={keyTypes}
                   name={name}
                   onCreate={_onCreate}
+                  setName={setName}
                 />
               </>
             )

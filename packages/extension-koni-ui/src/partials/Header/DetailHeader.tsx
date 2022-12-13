@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { AccountJson } from '@subwallet/extension-base/background/types';
+import { ALL_ACCOUNT_KEY } from '@subwallet/extension-koni-base/constants';
 import cloneLogo from '@subwallet/extension-koni-ui/assets/clone.svg';
 import moreButtonDark from '@subwallet/extension-koni-ui/assets/dots-three-vertical-dark.svg';
 import moreButtonLight from '@subwallet/extension-koni-ui/assets/dots-three-vertical-light.svg';
@@ -9,6 +10,7 @@ import EyeIcon from '@subwallet/extension-koni-ui/assets/icon/eye.svg';
 import EyeSlashIcon from '@subwallet/extension-koni-ui/assets/icon/eye-slash.svg';
 import { AccountContext } from '@subwallet/extension-koni-ui/components';
 import AccountVisibleModal from '@subwallet/extension-koni-ui/components/Modal/AccountVisibleModal';
+import ExportMnemonicModal from '@subwallet/extension-koni-ui/components/Modal/ExportMnemonicModal';
 import MigrateMasterPasswordModal from '@subwallet/extension-koni-ui/components/Modal/MigrateMasterPasswordModal';
 import Tooltip from '@subwallet/extension-koni-ui/components/Tooltip';
 import { useGetCurrentAuth } from '@subwallet/extension-koni-ui/hooks/useGetCurrentAuth';
@@ -84,6 +86,7 @@ function DetailHeader ({ className = '',
   const [trigger] = useState(() => `overview-btn-${++tooltipId}`);
   const [authorizeModalVisible, setAuthorizeModalVisible] = useState(false);
   const [migrateModalVisible, setMigrateModalVisible] = useState(false);
+  const [exportModalVisible, setExportModalVisible] = useState(false);
 
   const _toggleEdit = useCallback(
     (): void => {
@@ -100,6 +103,15 @@ function DetailHeader ({ className = '',
     },
     [toggleZeroBalances]
   );
+
+  const openExportModal = useCallback(() => {
+    setShowAccountAction(false);
+    setExportModalVisible(true);
+  }, []);
+
+  const closeExportModal = useCallback(() => {
+    setExportModalVisible(false);
+  }, []);
 
   const openMigrateModal = useCallback(() => {
     setShowAccountAction(false);
@@ -352,7 +364,7 @@ function DetailHeader ({ className = '',
               'detail-header-more-button',
               {
                 'pointer-events-none': isActionOpen,
-                'must-migrate': !currentAccount?.isExternal && !currentAccount?.isMasterPassword && !isActionOpen
+                'must-migrate': currentAccount?.address !== ALL_ACCOUNT_KEY && !currentAccount?.isExternal && !currentAccount?.isMasterPassword && !isActionOpen
               }
             )
           }
@@ -369,6 +381,7 @@ function DetailHeader ({ className = '',
       {isActionOpen && (
         <AccountAction
           isShowZeroBalances={isShowZeroBalances}
+          openExportModal={openExportModal}
           openMigrateModal={openMigrateModal}
           reference={actionsRef}
           toggleEdit={_toggleEdit}
@@ -386,6 +399,14 @@ function DetailHeader ({ className = '',
         migrateModalVisible && (
           <MigrateMasterPasswordModal
             address={currentAccount?.address || ''}
+            closeModal={closeMigrateModal}
+          />
+        )
+      }
+      {
+        exportModalVisible && (
+          <ExportMnemonicModal
+            // address={currentAccount?.address || ''}
             closeModal={closeMigrateModal}
           />
         )

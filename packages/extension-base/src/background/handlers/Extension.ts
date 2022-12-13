@@ -70,8 +70,8 @@ export default class Extension {
     return true;
   }
 
-  private accountsCreateSuri ({ genesisHash, name, password, suri, type }: RequestAccountCreateSuri): boolean {
-    keyring.addUri(getSuri(suri, type), password, { genesisHash, name }, type);
+  private accountsCreateSuri ({ genesisHash, name, suri, type }: RequestAccountCreateSuri): boolean {
+    keyring.addUri(getSuri(suri, type), { genesisHash, name }, type);
 
     return true;
   }
@@ -489,7 +489,7 @@ export default class Extension {
     };
   }
 
-  private derivationCreate ({ genesisHash, name, parentAddress, parentPassword, password, suri }: RequestDeriveCreate): boolean {
+  private derivationCreate ({ genesisHash, name, parentAddress, parentPassword, suri }: RequestDeriveCreate): boolean {
     const childPair = this.derive(parentAddress, suri, parentPassword, {
       genesisHash,
       name,
@@ -497,7 +497,7 @@ export default class Extension {
       suri
     });
 
-    keyring.addPair(childPair, password);
+    keyring.addPair(childPair);
 
     return true;
   }

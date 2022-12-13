@@ -133,8 +133,6 @@ function NetworkSelection ({ className, handleShow }: Props): React.ReactElement
               const logo = LogosMap[networkKey] || LogosMap.default;
               const isSelected = selected.includes(networkKey);
 
-              console.log(networkKey, isSelected);
-
               return (<NetworkSelectionItem
                 handleSelect={handleSelect}
                 isSelected={isSelected}

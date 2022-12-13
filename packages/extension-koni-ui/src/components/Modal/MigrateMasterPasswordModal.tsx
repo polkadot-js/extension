@@ -18,11 +18,12 @@ interface Props extends ThemeProps {
   className?: string;
   closeModal: () => void;
   address: string;
+  withSubTitle?: boolean;
 }
 
 const MIN_LENGTH = 6;
 
-const MigrateMasterPasswordModal = ({ address, className, closeModal }: Props) => {
+const MigrateMasterPasswordModal = ({ address, className, closeModal, withSubTitle }: Props) => {
   const { t } = useTranslation();
   const [loading, setLoading] = useState<boolean>(false);
   const [password, setPassword] = useState<string | null>(null);
@@ -64,8 +65,7 @@ const MigrateMasterPasswordModal = ({ address, className, closeModal }: Props) =
   return (
     <Modal
       className={CN(className)}
-      maskClosable={true}
-      onClose={closeModal}
+      maskClosable={false}
       wrapperClassName={'master-password-modal'}
     >
       <div className={'modal-header'}>
@@ -79,17 +79,22 @@ const MigrateMasterPasswordModal = ({ address, className, closeModal }: Props) =
         />
       </div>
       <div className={'modal-body'}>
+        {withSubTitle && (
+          <div className={CN('sub-title')}>
+            {t('To continue with the transaction, please apply the master password')}
+          </div>
+        )}
         <ValidatedInput
           className={className}
           component={InputWithLabel}
           data-input-password
-          label={t('Older Password')}
+          label={t('Old Password')}
           labelQuestionIcon={true}
-          labelTooltip={t('Your master password is the password that allows access to multiple accounts. Once a master password is confirmed, you will not need to manually type your password with every transaction.')}
+          labelTooltip={t('Your old password is the password you used before creating the master password. Please enter your old password to confirm your application of the master password.')}
+          onEnter={handleOnSubmit}
           onValidatedChange={onChangePassword}
           type='password'
           validator={isFirstPasswordValid}
-          onEnter={handleOnSubmit}
         />
         {
           errors.map((err, index) =>
@@ -107,6 +112,13 @@ const MigrateMasterPasswordModal = ({ address, className, closeModal }: Props) =
         <div className='separator' />
       </div>
       <div className='modal-footer'>
+        <Button
+          className='cancel-button'
+          isDisabled={loading}
+          onClick={closeModal}
+        >
+          {t('Cancel')}
+        </Button>
         <Button
           className='save-button'
           isBusy={loading}
@@ -164,10 +176,17 @@ export default React.memo(styled(MigrateMasterPasswordModal)(({ theme }: Props) 
     }
 
     .modal-body {
-      padding-top: 8px;
+      .sub-title {
+        font-weight: 500;
+        font-size: 15px;
+        line-height: 26px;
+        color: ${theme.textColor2};
+        margin-bottom: 4px;
+        margin-top: 20px;
+      }
 
       .separator {
-        margin-top: 32px;
+        margin-top: 24px;
         margin-bottom: 16px;
       }
 
@@ -189,9 +208,26 @@ export default React.memo(styled(MigrateMasterPasswordModal)(({ theme }: Props) 
       flex-direction: row;
       align-items: center;
       justify-content: center;
+      flex: 1;
+      margin: 0 -8px;
 
       .save-button {
-        width: 200px;
+        flex: 1;
+        margin: 0 8px;
+      }
+
+      .button__disabled-overlay {
+        background: ${theme.popupBackground};
+      }
+
+      .cancel-button {
+        flex: 1;
+        margin: 0 8px;
+        background-color: ${theme.toggleInactiveBgc};
+
+        .children {
+          color: ${theme.buttonTextColor2};
+        }
       }
     }
   }

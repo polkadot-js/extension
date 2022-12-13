@@ -7,53 +7,40 @@ import type { KeypairType } from '@polkadot/util-crypto/types';
 import type { ThemeProps } from '../../types';
 import type { AccountInfo } from '.';
 
-import RadioStatus from '@subwallet/extension-koni-ui/components/RadioStatus';
 import { validateSeedV2 } from '@subwallet/extension-koni-ui/messaging';
 import { EVM_ACCOUNT_TYPE, SUBSTRATE_ACCOUNT_TYPE } from '@subwallet/extension-koni-ui/Popup/CreateAccount';
-import React, { useCallback, useContext, useEffect, useRef, useState } from 'react';
+import React, { useCallback, useContext, useEffect, useState } from 'react';
 import styled, { ThemeContext } from 'styled-components';
 
 import { objectSpread } from '@polkadot/util';
 
-import { AccountInfoEl, ButtonArea, Checkbox, Dropdown, NextStepButton, TextAreaWithLabel, Warning } from '../../components';
-import useGenesisHashOptions from '../../hooks/useGenesisHashOptions';
+import { AccountInfoEl, ButtonArea, Checkbox, NextStepButton, TextAreaWithLabel, Warning } from '../../components';
 import useTranslation from '../../hooks/useTranslation';
 import { Theme } from '../../types';
 
 interface Props {
-  className?: string;
-  onNextStep: () => void;
-  onAccountChange: (account: AccountInfo | null) => void;
-  onEvmAccountChange: (evmAccount: AccountInfo | null) => void;
-  keyTypes: KeypairType[];
-  onSelectAccountImported?: (keyTypes: KeypairType[]) => void
-  type: KeypairType;
   account: AccountInfo | null;
+  className?: string;
   evmAccount: AccountInfo | null;
   isConnectWhenImport: boolean;
-  onConnectWhenImport: (isConnectWhenImport: boolean) => void;
+  keyTypes: KeypairType[];
   name: string | null;
-  evmName: string | null;
+  onAccountChange: (account: AccountInfo | null) => void;
+  onConnectWhenImport: (isConnectWhenImport: boolean) => void;
+  onEvmAccountChange: (evmAccount: AccountInfo | null) => void;
+  onNextStep: () => void;
+  onSelectAccountImported?: (keyTypes: KeypairType[]) => void
   setSelectedGenesis: (genesis: string) => void;
 }
 
-function SeedAndPath ({ account, className, evmAccount, evmName, isConnectWhenImport, keyTypes, name, onAccountChange, onConnectWhenImport, onEvmAccountChange, onNextStep, onSelectAccountImported, setSelectedGenesis, type }: Props): React.ReactElement {
+function SeedAndPath ({ account, className, evmAccount, isConnectWhenImport, keyTypes, name, onAccountChange, onConnectWhenImport, onEvmAccountChange, onNextStep, onSelectAccountImported }: Props): React.ReactElement {
   const { t } = useTranslation();
   const [address, setAddress] = useState('');
   const [evmAddress, setEvmAddress] = useState<null | string>(null);
-  const options = useGenesisHashOptions();
   const [seed, setSeed] = useState<string | null>(null);
-  // const [advanced, setAdvances] = useState(false);
   const [error, setError] = useState('');
-  const [genesis, setGenesis] = useState('');
-  const [evmGenesis, setEvmGenesis] = useState('');
   const themeContext = useContext(ThemeContext as React.Context<Theme>);
-  const [selectedAccType, setSelectedAccType] = useState<string>('');
-  const networkRef = useRef(null);
-  const evmNetworkRef = useRef(null);
   const dep = keyTypes.toString();
-  const sustrateGenesisHashOption = options.filter((opt) => !opt.isEthereum);
-  const ethGenesisHashOption = options.filter((opt) => opt.isEthereum || opt.networkKey === 'all');
 
   useEffect(() => {
     // No need to validate an empty seed
@@ -74,20 +61,18 @@ function SeedAndPath ({ account, className, evmAccount, evmName, isConnectWhenIm
 
         if (address) {
           setAddress(address);
-          setSelectedGenesis(genesis);
         }
 
         if (evmAddress) {
           setEvmAddress(evmAddress);
-          setSelectedGenesis(evmGenesis);
         }
 
         onAccountChange(
-          objectSpread<AccountInfo>({}, { address, suri, genesis, type })
+          objectSpread<AccountInfo>({}, { address, suri, type: SUBSTRATE_ACCOUNT_TYPE })
         );
 
         onEvmAccountChange(
-          objectSpread<AccountInfo>({}, { address: evmAddress, suri, genesis: evmGenesis, type: EVM_ACCOUNT_TYPE })
+          objectSpread<AccountInfo>({}, { address: evmAddress, suri, type: EVM_ACCOUNT_TYPE })
         );
 
         setError('');
@@ -99,51 +84,41 @@ function SeedAndPath ({ account, className, evmAccount, evmName, isConnectWhenIm
         onEvmAccountChange(null);
         setError(t<string>('Invalid mnemonic seed'));
       });
-  }, [t, genesis, seed, onAccountChange, onEvmAccountChange, type, dep, evmGenesis]);
+  }, [t, seed, onAccountChange, onEvmAccountChange, dep]);
 
-  const _onSelectNormalAccount = useCallback(() => {
-    if (selectedAccType !== SUBSTRATE_ACCOUNT_TYPE) {
-      onSelectAccountImported && onSelectAccountImported([SUBSTRATE_ACCOUNT_TYPE]);
-      setSelectedAccType(SUBSTRATE_ACCOUNT_TYPE);
-      setEvmGenesis('');
-    } else {
-      onSelectAccountImported && onSelectAccountImported([]);
-      setSelectedAccType('');
-      setGenesis('');
+  const _onSelectAccountType = useCallback((type: KeypairType) => {
+    if (!onSelectAccountImported) {
+      return;
     }
-  }, [onSelectAccountImported, selectedAccType]);
+
+    const result = [...keyTypes];
+    const exist = keyTypes.find((val) => val === type);
+
+    if (exist) {
+      onSelectAccountImported(result.filter((val) => val !== type));
+    } else {
+      result.push(type);
+      onSelectAccountImported(result);
+    }
+  }, [onSelectAccountImported, keyTypes]);
+
+  const _onSelectSubstrateAccount = useCallback(() => {
+    _onSelectAccountType(SUBSTRATE_ACCOUNT_TYPE);
+  }, [_onSelectAccountType]);
 
   const _onSelectEvmAccount = useCallback(() => {
-    if (selectedAccType !== EVM_ACCOUNT_TYPE) {
-      onSelectAccountImported && onSelectAccountImported([EVM_ACCOUNT_TYPE]);
-      setSelectedAccType(EVM_ACCOUNT_TYPE);
-      setGenesis('');
-    } else {
-      onSelectAccountImported && onSelectAccountImported([]);
-      setSelectedAccType('');
-      setEvmGenesis('');
-    }
-  }, [onSelectAccountImported, selectedAccType]);
-
-  const onChangeAccountGenesis = useCallback((genesis: string) => {
-    setGenesis(genesis);
-    setSelectedGenesis(genesis);
-  }, [setSelectedGenesis]);
-
-  const onChangeEvmAccountGenesis = useCallback((genesis: string) => {
-    setEvmGenesis(genesis);
-    setSelectedGenesis(genesis);
-  }, [setSelectedGenesis]);
+    _onSelectAccountType(SUBSTRATE_ACCOUNT_TYPE);
+  }, [_onSelectAccountType]);
 
   return (
     <div className={className}>
       <div className='account-info-wrapper'>
         <div className={`account-info-container ${themeContext.id === 'dark' ? '-dark' : '-light'} seed-and-path-wrapper`}>
           <div className='account-info-item'>
-            <RadioStatus
-              checked={selectedAccType === SUBSTRATE_ACCOUNT_TYPE}
-              className='account-info-item__radio-btn'
-              onChange={_onSelectNormalAccount}
+            <Checkbox
+              checked={keyTypes.includes(SUBSTRATE_ACCOUNT_TYPE)}
+              label=''
+              onChange={_onSelectSubstrateAccount}
             />
             <AccountInfoEl
               address={address}
@@ -154,16 +129,16 @@ function SeedAndPath ({ account, className, evmAccount, evmName, isConnectWhenIm
           </div>
 
           <div className='account-info-item'>
-            <RadioStatus
-              checked={selectedAccType === EVM_ACCOUNT_TYPE}
-              className='account-info-item__radio-btn'
+            <Checkbox
+              checked={keyTypes.includes(EVM_ACCOUNT_TYPE)}
+              label=''
               onChange={_onSelectEvmAccount}
             />
             <AccountInfoEl
               address={evmAddress}
               className='account-info'
               genesisHash={evmAccount?.genesis}
-              name={evmName}
+              name={`${name || '<unknown>'} - EVM`}
               type={EVM_ACCOUNT_TYPE}
             />
           </div>
@@ -195,28 +170,6 @@ function SeedAndPath ({ account, className, evmAccount, evmName, isConnectWhenIm
               {error}
             </Warning>
           )}
-          {selectedAccType === SUBSTRATE_ACCOUNT_TYPE && seed &&
-            <Dropdown
-              className='seed-and-path__genesis-selection'
-              label={t<string>('Network')}
-              onChange={onChangeAccountGenesis}
-              options={sustrateGenesisHashOption}
-              reference={networkRef}
-              value={genesis}
-            />
-          }
-
-          {selectedAccType === EVM_ACCOUNT_TYPE && seed &&
-            <Dropdown
-              className='seed-and-path__genesis-selection'
-              label={t<string>('Network')}
-              onChange={onChangeEvmAccountGenesis}
-              options={ethGenesisHashOption}
-              reference={evmNetworkRef}
-              value={evmGenesis}
-            />
-          }
-
           <Checkbox
             checked={isConnectWhenImport}
             label={t<string>('Auto connect to all DApps after importing')}
@@ -227,7 +180,7 @@ function SeedAndPath ({ account, className, evmAccount, evmName, isConnectWhenIm
       <ButtonArea>
         <NextStepButton
           className='next-step-btn'
-          isDisabled={(!address && !evmAddress) || !!error || !seed || (!selectedAccType)}
+          isDisabled={(!address && !evmAddress) || !!error || !seed}
           onClick={onNextStep}
         >
           {t<string>('Next Step')}

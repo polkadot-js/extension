@@ -14,11 +14,12 @@ interface Props {
   onFocusPasswordInput?: (value: string) => void;
   onFocusRepeatPasswordInput?: (value: string) => void;
   onScrollToError?: () => void;
+  disable?: boolean;
 }
 
 const MIN_LENGTH = 6;
 
-export default function Password ({ isFocussed, onChange, onFocusPasswordInput, onFocusRepeatPasswordInput, onScrollToError }: Props): React.ReactElement<Props> {
+export default function Password ({ disable, isFocussed, onChange, onFocusPasswordInput, onFocusRepeatPasswordInput, onScrollToError }: Props): React.ReactElement<Props> {
   const { t } = useTranslation();
   const [pass1, setPass1] = useState<string | null>(null);
   const [pass2, setPass2] = useState<string | null>(null);
@@ -38,6 +39,7 @@ export default function Password ({ isFocussed, onChange, onFocusPasswordInput, 
       <ValidatedInput
         component={InputWithLabel}
         data-input-password
+        disable={disable}
         isFocused={isFocussed}
         label={t<string>('A new password for this account')}
         onFocus={onFocusPasswordInput}
@@ -50,6 +52,7 @@ export default function Password ({ isFocussed, onChange, onFocusPasswordInput, 
         <ValidatedInput
           component={InputWithLabel}
           data-input-repeat-password
+          disable={disable}
           label={t<string>('Repeat password for verification')}
           onFocus={onFocusRepeatPasswordInput}
           onScrollToError={onScrollToError}

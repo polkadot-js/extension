@@ -20,15 +20,16 @@ import { IconMaps } from '@subwallet/extension-koni-ui/assets/icon';
 
 interface Props extends ThemeProps {
   className?: string;
-  reference: React.MutableRefObject<null>;
-  toggleEdit?: () => void;
   isShowZeroBalances?: boolean;
-  toggleZeroBalances?: () => void;
-  setImgSelected?: (imgSelected: string | null) => void;
+  openExportModal: () => void;
   openMigrateModal: () => void;
+  reference: React.MutableRefObject<null>;
+  setImgSelected?: (imgSelected: string | null) => void;
+  toggleEdit?: () => void;
+  toggleZeroBalances?: () => void;
 }
 
-function AccountAction ({ className, isShowZeroBalances, reference, setImgSelected, toggleEdit, toggleZeroBalances, openMigrateModal }: Props): React.ReactElement<Props> {
+function AccountAction ({ className, isShowZeroBalances, reference, setImgSelected, toggleEdit, toggleZeroBalances, openExportModal, openMigrateModal }: Props): React.ReactElement<Props> {
   const { t } = useTranslation();
   const currentAccount = useSelector((state: RootState) => state.currentAccount.account);
   const currentNetwork = useSelector((state: RootState) => state.currentNetwork);
@@ -50,7 +51,7 @@ function AccountAction ({ className, isShowZeroBalances, reference, setImgSelect
           {!currentAccount?.isExternal && canDerive(currentAccount?.type) && (
             <Link
               className='account-action__menu-item'
-              isDisabled={currentAccount.type === EVM_ACCOUNT_TYPE}
+              isDisabled={!currentAccount.isMasterAccount && currentAccount.type === EVM_ACCOUNT_TYPE}
               to={`/account/derive/${currentAccount?.address}/locked`}
             >
               {t<string>('Derive New Account')}
@@ -87,6 +88,19 @@ function AccountAction ({ className, isShowZeroBalances, reference, setImgSelect
                 onClick={openMigrateModal}
               >
                 {t<string>('Apply master password')}
+              </div>
+            </div>
+          </>
+        )}
+        {currentAccount?.isMasterAccount && (
+          <>
+            <MenuDivider />
+            <div className='actions-wrapper'>
+              <div
+                className='account-action__menu-item'
+                onClick={openExportModal}
+              >
+                {t<string>('Export seed phrase')}
               </div>
             </div>
           </>

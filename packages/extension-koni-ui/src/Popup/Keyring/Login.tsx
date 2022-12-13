@@ -180,6 +180,7 @@ export default React.memo(styled(Login)(({ theme }: Props) => `
 
     .item-error {
       margin: 10px 0;
+      width: 360px;
     }
   }
 `));

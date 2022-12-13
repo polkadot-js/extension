@@ -577,7 +577,7 @@ export type ResponseSeedValidateV2 = ResponseSeedCreateV2
 export interface RequestAccountCreateSuriV2 {
   name: string;
   genesisHash?: string | null;
-  password: string;
+  password?: string;
   suri: string;
   types?: Array<KeypairType>;
   isAllowed: boolean;
@@ -592,8 +592,6 @@ export interface RequestDeriveCreateV2 {
   genesisHash?: string | null;
   suri: string;
   parentAddress: string;
-  parentPassword: string;
-  password: string;
   isAllowed: boolean;
 }
 
@@ -663,7 +661,6 @@ export interface RequestAccountCreateHardwareV2 {
 export interface RequestAccountCreateWithSecretKey {
   publicKey: string;
   secretKey: string;
-  password: string;
   name: string;
   isAllow: boolean;
   isEthereum: boolean;
@@ -820,9 +817,8 @@ export type HandleTxResponse<T extends BasicTxResponse> = (data: T) => void;
 // eslint-disable-next-line @typescript-eslint/ban-types
 export type BaseRequestSign = {};
 
-export type PasswordRequestSign<T extends BaseRequestSign> = T & { password: string; };
-
-export type ExternalRequestSign<T extends BaseRequestSign> = Omit<T, 'password'>;
+// Internal request: request from extension, not dApp.
+export type InternalRequestSign<T extends BaseRequestSign> = Omit<T, 'password'>;
 
 export enum TransferStep {
   READY = 'ready',
@@ -982,8 +978,8 @@ export interface SubstrateNftSubmitTransaction extends BaseRequestSign {
   recipientAddress: string;
 }
 
-export type RequestSubstrateNftSubmitTransaction = PasswordRequestSign<SubstrateNftSubmitTransaction>
-export type RequestEvmNftSubmitTransaction = PasswordRequestSign<EvmNftSubmitTransaction>
+export type RequestSubstrateNftSubmitTransaction = InternalRequestSign<SubstrateNftSubmitTransaction>
+export type RequestEvmNftSubmitTransaction = InternalRequestSign<EvmNftSubmitTransaction>
 
 export type ChainRelationType = 'p' | 'r'; // parachain | relaychain
 
@@ -1085,7 +1081,6 @@ export interface ConfirmationResult<T> {
   isApproved: boolean;
   url?: string;
   payload?: T;
-  password?: string;
 }
 
 export interface ConfirmationResultExternal<T> extends ConfirmationResult<T>{
@@ -1281,9 +1276,7 @@ export type SignerDataType = 'transaction' | 'message'
 export interface RequestQrSignSubstrate {
   address: string;
   data: string;
-  savePass: boolean;
   networkKey: string;
-  password?: string;
 }
 
 export interface ResponseQrSignSubstrate {
@@ -1295,7 +1288,6 @@ export interface RequestQrSignEVM {
   message: string;
   type: 'message' | 'transaction'
   chainId?: number;
-  password: string;
 }
 
 export interface ResponseQrSignEVM {
@@ -1321,7 +1313,7 @@ export interface ResponseCheckTransfer{
   feeSymbol?: string // if undefined => use main token
 }
 
-export type RequestTransfer = PasswordRequestSign<RequestCheckTransfer>
+export type RequestTransfer = InternalRequestSign<RequestCheckTransfer>
 
 export interface RequestCheckCrossChainTransfer extends BaseRequestSign {
   originNetworkKey: string,
@@ -1333,7 +1325,7 @@ export interface RequestCheckCrossChainTransfer extends BaseRequestSign {
   token: string
 }
 
-export type RequestCrossChainTransfer = PasswordRequestSign<RequestCheckCrossChainTransfer>;
+export type RequestCrossChainTransfer = InternalRequestSign<RequestCheckCrossChainTransfer>;
 
 export interface ResponseCheckCrossChainTransfer {
   errors?: Array<BasicTxError>,
@@ -1372,7 +1364,7 @@ export interface BondingSubmitParams extends BaseRequestSign {
   lockPeriod?: number // in month
 }
 
-export type RequestBondingSubmit = PasswordRequestSign<BondingSubmitParams>;
+export type RequestBondingSubmit = InternalRequestSign<BondingSubmitParams>;
 
 // UnBonding
 
@@ -1385,7 +1377,7 @@ export interface UnbondingSubmitParams extends BaseRequestSign {
   unstakeAll?: boolean
 }
 
-export type RequestUnbondingSubmit = PasswordRequestSign<UnbondingSubmitParams>;
+export type RequestUnbondingSubmit = InternalRequestSign<UnbondingSubmitParams>;
 
 // Withdraw
 
@@ -1396,7 +1388,7 @@ export interface StakeWithdrawalParams extends BaseRequestSign {
   action?: string
 }
 
-export type RequestStakeWithdrawal = PasswordRequestSign<StakeWithdrawalParams>;
+export type RequestStakeWithdrawal = InternalRequestSign<StakeWithdrawalParams>;
 
 // Claim
 
@@ -1407,7 +1399,7 @@ export interface StakeClaimRewardParams extends BaseRequestSign {
   stakingType: StakingType
 }
 
-export type RequestStakeClaimReward = PasswordRequestSign<StakeClaimRewardParams>;
+export type RequestStakeClaimReward = InternalRequestSign<StakeClaimRewardParams>;
 
 // Compound
 
@@ -1454,7 +1446,7 @@ export interface TuringStakeCompoundParams extends BaseRequestSign {
   bondedAmount: string,
 }
 
-export type RequestTuringStakeCompound = PasswordRequestSign<TuringStakeCompoundParams>;
+export type RequestTuringStakeCompound = InternalRequestSign<TuringStakeCompoundParams>;
 
 export interface TuringCancelStakeCompoundParams extends BaseRequestSign {
   taskId: string;
@@ -1462,37 +1454,37 @@ export interface TuringCancelStakeCompoundParams extends BaseRequestSign {
   address: string;
 }
 
-export type RequestTuringCancelStakeCompound = PasswordRequestSign<TuringCancelStakeCompoundParams>;
+export type RequestTuringCancelStakeCompound = InternalRequestSign<TuringCancelStakeCompoundParams>;
 
 /// Create QR
 
 // Transfer
 
-export type RequestTransferExternal = ExternalRequestSign<RequestCheckTransfer>;
+export type RequestTransferExternal = InternalRequestSign<RequestCheckTransfer>;
 
 // XCM
 
-export type RequestCrossChainTransferExternal = ExternalRequestSign<RequestCheckCrossChainTransfer>;
+export type RequestCrossChainTransferExternal = InternalRequestSign<RequestCheckCrossChainTransfer>;
 
 // NFT
 
-export type RequestNftTransferExternalSubstrate = ExternalRequestSign<SubstrateNftSubmitTransaction>;
+export type RequestNftTransferExternalSubstrate = InternalRequestSign<SubstrateNftSubmitTransaction>;
 
-export type RequestNftTransferExternalEVM = ExternalRequestSign<EvmNftSubmitTransaction>;
+export type RequestNftTransferExternalEVM = InternalRequestSign<EvmNftSubmitTransaction>;
 
 // Stake
 
-export type RequestStakeExternal = ExternalRequestSign<BondingSubmitParams>;
+export type RequestStakeExternal = InternalRequestSign<BondingSubmitParams>;
 
-export type RequestUnStakeExternal = ExternalRequestSign<UnbondingSubmitParams>;
+export type RequestUnStakeExternal = InternalRequestSign<UnbondingSubmitParams>;
 
-export type RequestWithdrawStakeExternal = ExternalRequestSign<StakeWithdrawalParams>;
+export type RequestWithdrawStakeExternal = InternalRequestSign<StakeWithdrawalParams>;
 
-export type RequestClaimRewardExternal = ExternalRequestSign<StakeClaimRewardParams>;
+export type RequestClaimRewardExternal = InternalRequestSign<StakeClaimRewardParams>;
 
-export type RequestCreateCompoundStakeExternal = ExternalRequestSign<TuringStakeCompoundParams>;
+export type RequestCreateCompoundStakeExternal = InternalRequestSign<TuringStakeCompoundParams>;
 
-export type RequestCancelCompoundStakeExternal = ExternalRequestSign<TuringCancelStakeCompoundParams>;
+export type RequestCancelCompoundStakeExternal = InternalRequestSign<TuringCancelStakeCompoundParams>;
 
 /// Keyring state
 
@@ -1505,6 +1497,8 @@ export interface KeyringState {
 export interface RequestChangeMasterPassword {
   oldPassword?: string;
   newPassword: string;
+
+  createNew: boolean;
 }
 
 export interface ResponseChangeMasterPassword {
@@ -1715,6 +1709,7 @@ export interface KoniRequestSignatures {
   'pri(keyring.change)': [RequestChangeMasterPassword, ResponseChangeMasterPassword];
   'pri(keyring.migrate)': [RequestMigratePassword, ResponseMigratePassword];
   'pri(keyring.unlock)': [RequestUnlockKeyring, ResponseUnlockKeyring];
+  'pri(keyring.lock)': [null, void];
 }
 
 export interface ApplicationMetadataType {

@@ -1,7 +1,7 @@
 // Copyright 2019-2022 @subwallet/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { BaseRequestSign, BasicTxResponse, ExternalRequestSign, HandleTxResponse, NetworkJson, PasswordRequestSign } from '@subwallet/extension-base/background/KoniTypes';
+import { BaseRequestSign, BasicTxResponse, HandleTxResponse, InternalRequestSign, NetworkJson } from '@subwallet/extension-base/background/KoniTypes';
 import { AccountJson } from '@subwallet/extension-base/background/types';
 import { LedgerState } from '@subwallet/extension-base/signers/types';
 import LedgerRequest from '@subwallet/extension-koni-ui/components/Signing/Ledger/LedgerRequest';
@@ -9,7 +9,7 @@ import PasswordRequest from '@subwallet/extension-koni-ui/components/Signing/Pas
 import QrRequest from '@subwallet/extension-koni-ui/components/Signing/QR/QrRequest';
 import UnknownRequest from '@subwallet/extension-koni-ui/components/Signing/Unknown/UnknownRequest';
 import { SIGN_MODE } from '@subwallet/extension-koni-ui/constants/signing';
-import { ExternalRequestContext } from '@subwallet/extension-koni-ui/contexts/ExternalRequestContext';
+import { InternalRequestContext } from '@subwallet/extension-koni-ui/contexts/InternalRequestContext';
 import { QrContextState, QrSignerContext, QrStep } from '@subwallet/extension-koni-ui/contexts/QrSignerContext';
 import { SigningContext } from '@subwallet/extension-koni-ui/contexts/SigningContext';
 import { useGetSignMode } from '@subwallet/extension-koni-ui/hooks/useGetSignMode';
@@ -22,9 +22,9 @@ interface Props<T extends BaseRequestSign, V extends BasicTxResponse> {
   className?: string;
   children: JSX.Element | JSX.Element[];
   detailError?: boolean;
-  handleSignLedger?: (params: ExternalRequestSign<T>, callback: HandleTxResponse<V>) => Promise<V>;
-  handleSignPassword?: (params: PasswordRequestSign<T>, callback: HandleTxResponse<V>) => Promise<V>;
-  handleSignQr?: (params: ExternalRequestSign<T>, callback: HandleTxResponse<V>) => Promise<V>;
+  handleSignLedger?: (params: InternalRequestSign<T>, callback: HandleTxResponse<V>) => Promise<V>;
+  handleSignPassword?: (params: InternalRequestSign<T>, callback: HandleTxResponse<V>) => Promise<V>;
+  handleSignQr?: (params: InternalRequestSign<T>, callback: HandleTxResponse<V>) => Promise<V>;
   hideConfirm: () => Promise<void> | void;
   message: string;
   network?: NetworkJson | null;
@@ -66,7 +66,7 @@ const SigningRequest = <T extends BaseRequestSign, V extends BasicTxResponse>({ 
   params }: Props<T, V>) => {
   const { cleanSigningState, onErrors, setBusy, setPasswordError, signingState } = useContext(SigningContext);
   const { cleanQrState, updateQrState } = useContext(QrSignerContext);
-  const { cleanExternalState, updateExternalState } = useContext(ExternalRequestContext);
+  const { cleanExternalState, updateExternalState } = useContext(InternalRequestContext);
 
   const { isBusy } = signingState;
 

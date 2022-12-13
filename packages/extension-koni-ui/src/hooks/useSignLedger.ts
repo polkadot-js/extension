@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { LedgerState } from '@subwallet/extension-base/signers/types';
-import { ExternalRequestContext } from '@subwallet/extension-koni-ui/contexts/ExternalRequestContext';
+import { InternalRequestContext } from '@subwallet/extension-koni-ui/contexts/InternalRequestContext';
 import { useLedger } from '@subwallet/extension-koni-ui/hooks/useLedger';
 import { resolveExternalRequest } from '@subwallet/extension-koni-ui/messaging';
 import { KeyringPair$Meta } from '@subwallet/keyring/types';
@@ -23,7 +23,7 @@ interface Result {
 export const useSignLedger = (props: Props): Result => {
   const { accountMeta, genesisHash, onError } = props;
 
-  const { createResolveExternalRequestData } = useContext(ExternalRequestContext);
+  const { createResolveExternalRequestData } = useContext(InternalRequestContext);
 
   const { error: ledgerError, ledger } = useLedger(genesisHash, accountMeta.accountIndex as number, accountMeta.addressOffset as number);
 

@@ -527,7 +527,7 @@ function Home ({ chainRegistryMap, className = '', currentAccount, historyMap, n
         />
       )}
       {
-        showNetworkSelection && <NetworkSelection
+        showNetworkSelection && !isVisibleCreateMasterPassword && <NetworkSelection
           handleShow={setShowNetworkSelection}
         />
       }

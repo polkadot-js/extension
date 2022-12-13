@@ -6,7 +6,7 @@ import { IGNORE_QR_SIGNER } from '@subwallet/extension-koni-base/constants';
 import { LoadingContainer, Warning } from '@subwallet/extension-koni-ui/components';
 import Button from '@subwallet/extension-koni-ui/components/Button';
 import DisplayPayload from '@subwallet/extension-koni-ui/components/Signing/QR/DisplayPayload';
-import { ExternalRequestContext } from '@subwallet/extension-koni-ui/contexts/ExternalRequestContext';
+import { InternalRequestContext } from '@subwallet/extension-koni-ui/contexts/InternalRequestContext';
 import { QrSignerContext, QrStep } from '@subwallet/extension-koni-ui/contexts/QrSignerContext';
 import { SigningContext } from '@subwallet/extension-koni-ui/contexts/SigningContext';
 import useTranslation from '@subwallet/extension-koni-ui/hooks/useTranslation';
@@ -43,7 +43,7 @@ const QrRequest = (props: Props) => {
 
   const { clearError, onErrors, signingState } = useContext(SigningContext);
   const { QrState, updateQrState } = useContext(QrSignerContext);
-  const { createResolveExternalRequestData } = useContext(ExternalRequestContext);
+  const { createResolveExternalRequestData } = useContext(InternalRequestContext);
 
   const { errors, isBusy } = signingState;
   const { isEthereum, isQrHashed, qrAddress, qrId, qrPayload, step } = QrState;

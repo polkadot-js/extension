@@ -46,6 +46,7 @@ function Warning ({ children, className = '', isBelowInput, isDanger, noIcon }: 
 export default React.memo(styled(Warning)<Props>(({ isDanger, theme }: Props) => `
   display: flex;
   flex-direction: row;
+  align-items: center;
   color: ${theme.subTextColor};
   background-color: ${theme.warningBackgroundColor};
   border-radius: 8px;

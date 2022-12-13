@@ -7,7 +7,7 @@ import React, { useCallback, useReducer } from 'react';
 
 import { SignerResult } from '@polkadot/types/types/extrinsic';
 
-interface ExternalRequestContextType {
+interface InternalRequestContextType {
   createResolveExternalRequestData: (data: SigData) => SignerResult;
   externalState: ExternalState;
   cleanExternalState: () => void;
@@ -18,19 +18,19 @@ const DEFAULT_STATE: ExternalState = {
   externalId: ''
 };
 
-export const ExternalRequestContext = React.createContext({} as ExternalRequestContextType);
+export const InternalRequestContext = React.createContext({} as InternalRequestContextType);
 
-interface ExternalRequestContextProviderProps {
+interface InternalRequestContextProviderProps {
   children?: React.ReactElement;
 }
 
-enum ExternalRequestReducerType{
+enum InternalRequestReducerType{
   UPDATE,
   INIT
 }
 
 interface ExternalRequestReducerPayload {
-  type: ExternalRequestReducerType,
+  type: InternalRequestReducerType,
   payload: ExternalState
 }
 
@@ -42,12 +42,12 @@ const initState = (state: ExternalState): ExternalState => {
 
 const reducer = (oldState: ExternalState, data: ExternalRequestReducerPayload): ExternalState => {
   switch (data.type) {
-    case ExternalRequestReducerType.UPDATE:
+    case InternalRequestReducerType.UPDATE:
       return {
         ...oldState,
         ...data.payload
       };
-    case ExternalRequestReducerType.INIT:
+    case InternalRequestReducerType.INIT:
       return initState(data.payload);
     default:
       return oldState;
@@ -56,15 +56,15 @@ const reducer = (oldState: ExternalState, data: ExternalRequestReducerPayload): 
 
 let id = 1;
 
-export const ExternalRequestContextProvider = ({ children }: ExternalRequestContextProviderProps) => {
+export const InternalRequestContextProvider = ({ children }: InternalRequestContextProviderProps) => {
   const [externalState, dispatchExternalState] = useReducer(reducer, DEFAULT_STATE, initState);
 
   const updateExternalState = useCallback((data: ExternalState) => {
-    dispatchExternalState({ type: ExternalRequestReducerType.UPDATE, payload: data });
+    dispatchExternalState({ type: InternalRequestReducerType.UPDATE, payload: data });
   }, []);
 
   const cleanExternalState = useCallback(() => {
-    dispatchExternalState({ type: ExternalRequestReducerType.INIT, payload: DEFAULT_STATE });
+    dispatchExternalState({ type: InternalRequestReducerType.INIT, payload: DEFAULT_STATE });
   }, []);
 
   const createResolveExternalRequestData = useCallback((data: SigData): SignerResult => {
@@ -75,7 +75,7 @@ export const ExternalRequestContextProvider = ({ children }: ExternalRequestCont
   }, []);
 
   return (
-    <ExternalRequestContext.Provider
+    <InternalRequestContext.Provider
       value = {{
         createResolveExternalRequestData: createResolveExternalRequestData,
         externalState: externalState,
@@ -84,6 +84,6 @@ export const ExternalRequestContextProvider = ({ children }: ExternalRequestCont
       }}
     >
       {children}
-    </ExternalRequestContext.Provider>
+    </InternalRequestContext.Provider>
   );
 };

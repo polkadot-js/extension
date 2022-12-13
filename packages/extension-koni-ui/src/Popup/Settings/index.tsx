@@ -1,6 +1,7 @@
 // Copyright 2019-2022 @polkadot/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
+import { faDiagramProject, faPowerOff } from '@fortawesome/free-solid-svg-icons';
 import { faCog } from '@fortawesome/free-solid-svg-icons/faCog';
 import { faCoins } from '@fortawesome/free-solid-svg-icons/faCoins';
 import { faExpand } from '@fortawesome/free-solid-svg-icons/faExpand';
@@ -11,13 +12,16 @@ import { faPlug } from '@fortawesome/free-solid-svg-icons/faPlug';
 import { faQrcode } from '@fortawesome/free-solid-svg-icons/faQrcode';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { IconMaps } from '@subwallet/extension-koni-ui/assets/icon';
-import { Link } from '@subwallet/extension-koni-ui/components';
+import { ActionContext, Link } from '@subwallet/extension-koni-ui/components';
 import useIsPopup from '@subwallet/extension-koni-ui/hooks/useIsPopup';
 import useTranslation from '@subwallet/extension-koni-ui/hooks/useTranslation';
-import { windowOpen } from '@subwallet/extension-koni-ui/messaging';
+import { keyringLock, windowOpen } from '@subwallet/extension-koni-ui/messaging';
 import Header from '@subwallet/extension-koni-ui/partials/Header';
+import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
-import React, { useCallback, useEffect, useState } from 'react';
+import { noop } from '@subwallet/extension-koni-ui/util/function';
+import React, { useCallback, useContext, useEffect, useState } from 'react';
+import { useSelector } from 'react-redux';
 import styled from 'styled-components';
 
 import settings from '@polkadot/ui-settings';
@@ -30,6 +34,12 @@ const SettingPath = '/account/settings';
 
 function Settings ({ className }: Props): React.ReactElement {
   const { t } = useTranslation();
+
+  const onAction = useContext(ActionContext);
+
+  const isLocked = useSelector((state: RootState) => state.keyringState.isLocked);
+  const hasMasterPassword = useSelector((state: RootState) => state.keyringState.hasMasterPassword);
+
   const [camera, setCamera] = useState(settings.camera === 'on');
   const isPopup = useIsPopup();
   const _onWindowOpen = useCallback(
@@ -49,6 +59,13 @@ function Settings ({ className }: Props): React.ReactElement {
       windowOpen(SettingPath).catch(console.error);
     }
   }, [camera, isPopup]);
+
+  const onLogout = useCallback(() => {
+    keyringLock().then(() => {
+      window.localStorage.setItem('popupNavigation', '/');
+      onAction('/');
+    }).catch(noop);
+  }, [onAction]);
 
   return (
     <div className={className}>
@@ -190,6 +207,29 @@ function Settings ({ className }: Props): React.ReactElement {
         {/*  <div className='menu-setting-item__text'>{t<string>('Alerts')}</div> */}
         {/*  <div className='menu-setting-item__toggle' /> */}
         {/* </Link> */}
+        {
+          hasMasterPassword && !isLocked && (
+            <Link
+              className='menu-setting-item'
+              to={'/keyring/change'}
+            >
+              <FontAwesomeIcon icon={faDiagramProject} />
+              <div className='menu-setting-item__text'>{t<string>('Change master password')}</div>
+              <div className='menu-setting-item__toggle' />
+            </Link>
+          )
+        }
+        {
+          hasMasterPassword && !isLocked && (
+            <div
+              className='menu-setting-item'
+              onClick={onLogout}
+            >
+              <FontAwesomeIcon icon={faPowerOff} />
+              <div className='menu-setting-item__text'>{t<string>('Logout')}</div>
+            </div>
+          )
+        }
       </div>
 
     </div>
@@ -202,7 +242,7 @@ export default styled(Settings)(({ theme }: Props) => `
   height: 100%;
 
   .menu-setting-item-list {
-    padding: 25px 22px;
+    padding: 12px 22px;
     flex: 1;
     overflow: auto;
   }

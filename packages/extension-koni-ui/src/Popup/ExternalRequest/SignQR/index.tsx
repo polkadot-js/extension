@@ -3,7 +3,7 @@
 
 import { PASSWORD_EXPIRY_MIN } from '@subwallet/extension-base/defaults';
 import SignTransactionIcon from '@subwallet/extension-koni-ui/assets/icon/sign-transacion.svg';
-import { Button, Checkbox, Spinner } from '@subwallet/extension-koni-ui/components';
+import { Button, Checkbox, Spinner, Warning } from '@subwallet/extension-koni-ui/components';
 import { ScannerContext } from '@subwallet/extension-koni-ui/contexts/ScannerContext';
 import { useGetNetworkQrRequest } from '@subwallet/extension-koni-ui/hooks/useGetNetworkQrRequest';
 import useTranslation from '@subwallet/extension-koni-ui/hooks/useTranslation';
@@ -30,9 +30,6 @@ const SignQR = (props: Props) => {
   const { evmChainId, isEthereumStructure, senderAddress, type } = scannerState;
 
   const [error, setError] = useState<string | null>(null);
-  const [savePass, setSavePass] = useState(false);
-  const [isLocked, setIsLocked] = useState<boolean>(true);
-  const [password, setPassword] = useState('');
   const [isBusy, setIsBusy] = useState(false);
 
   const _onSign = useCallback(
@@ -41,7 +38,7 @@ const SignQR = (props: Props) => {
 
       return new Promise((resolve) => {
         setTimeout(() => {
-          signDataLegacy(savePass, password)
+          signDataLegacy()
             .catch((error: Error): void => {
               setIsBusy(false);
               setError(error.message);
@@ -54,52 +51,12 @@ const SignQR = (props: Props) => {
         }, 100);
       });
     },
-    [password, savePass, signDataLegacy]
+    [signDataLegacy]
   );
 
   const _onCancel = useCallback(() => {
     cleanup();
   }, [cleanup]);
-
-  useEffect(() => {
-    setIsLocked(true);
-    let timeout: NodeJS.Timeout;
-
-    senderAddress && accountIsLocked(senderAddress)
-      .then(({ isLocked, remainingTime }) => {
-        setIsLocked(isLocked);
-        timeout = setTimeout(() => {
-          setIsLocked(true);
-        }, remainingTime);
-
-        // if the account was unlocked check the remember me
-        // automatically to prolong the unlock period
-        !isLocked && setSavePass(true);
-      })
-      .catch((error: Error) => console.error(error));
-
-    return () => {
-      !!timeout && clearTimeout(timeout);
-    };
-  }, [senderAddress]);
-
-  const RememberPasswordCheckbox = () => (
-    <Checkbox
-      checked={savePass}
-      className={'save-password-container'}
-      label={isLocked
-        ? t<string>(
-          'Remember my password for the next {{expiration}} minutes',
-          { replace: { expiration: PASSWORD_EXPIRY_MIN } }
-        )
-        : t<string>(
-          'Extend the period without password by {{expiration}} minutes',
-          { replace: { expiration: PASSWORD_EXPIRY_MIN } }
-        )
-      }
-      onChange={setSavePass}
-    />
-  );
 
   return (
     <div className={CN(className)}>
@@ -138,19 +95,14 @@ const SignQR = (props: Props) => {
         }
       </div>
       <div className='action-container'>
-        {(isLocked || isEthereumStructure) && (
-          <Unlock
-            error={error}
-            isBusy={isBusy}
-            onSign={_onSign}
-            password={password}
-            setError={setError}
-            setPassword={setPassword}
-          />
+        {error && (
+          <Warning
+            className='signing-error'
+            isDanger
+          >
+            {error}
+          </Warning>
         )}
-
-        {!isEthereumStructure ? <RememberPasswordCheckbox /> : <div className={'separator'} />}
-
         <div className={CN('sign-button-container')}>
           <Button
             className={CN('sign-button')}
@@ -163,7 +115,7 @@ const SignQR = (props: Props) => {
           <Button
             className={CN('sign-button')}
             isBusy={isBusy}
-            isDisabled={(isLocked && !password) || !!error || loading}
+            isDisabled={!!error || loading}
             onClick={_onSign}
           >
             {t('Approve')}
@@ -237,6 +189,7 @@ export default React.memo(styled(SignQR)(({ theme }: Props) => `
 
     .sign-button-container {
       display: flex;
+      margin-top: 10px;
     }
 
     .sign-button {
@@ -255,5 +208,9 @@ export default React.memo(styled(SignQR)(({ theme }: Props) => `
     .sign-button:last-child {
       margin-left: 8px;
     }
+  }
+
+  .signing-error {
+    margin-top: 10px;
   }
 `));

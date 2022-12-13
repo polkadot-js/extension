@@ -30,7 +30,7 @@ const PasswordRequest = ({ account,
 
   const { errors, isBusy } = signingState;
 
-  const [isVisible, setIsVisible] = useState<boolean>(false);
+  const [isVisible, setIsVisible] = useState<boolean>(!account.isMasterPassword);
 
   const onSubmit = useCallback(() => {
     handlerStart();
@@ -69,20 +69,17 @@ const PasswordRequest = ({ account,
       <div className='password-signing__separator' />
       {
         !account.isMasterPassword && (
-          <Warning
-            className='auth-transaction-error migrate-notification'
-            noIcon={true}
-          >
-            <div>
-              {t<string>('Your must migrate password before signing')}
-            </div>
-            <Button
-              className='button-migrate'
+          <div className='migrate-notification'>
+            <span>
+              {t<string>('To continue with the transaction, please apply the master password')}&nbsp;
+            </span>
+            <span
+              className='highlight-migrate'
               onClick={onOpenModal}
             >
-              {t('Migrate')}
-            </Button>
-          </Warning>
+              {t('Migrate now')}
+            </span>
+          </div>
         )
       }
       { renderError() }
@@ -108,6 +105,7 @@ const PasswordRequest = ({ account,
             address={account.address}
             className='migrate-modal'
             closeModal={onCloseModal}
+            withSubTitle={true}
           />
         )
       }
@@ -164,9 +162,17 @@ export default React.memo(styled(PasswordRequest)(({ theme }: Props) => `
   }
 
   .migrate-notification {
-    .warning-message {
-      flex: 1;
-      justify-content: space-between;
+    font-style: normal;
+    font-weight: 500;
+    font-size: 15px;
+    line-height: 26px;
+    color: ${theme.textColor2};
+    margin-bottom: 8px;
+
+    .highlight-migrate {
+      text-decoration: underline;
+      cursor: pointer;
+      color: ${theme.buttonTextColor2};
     }
   }
 

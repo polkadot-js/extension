@@ -7,7 +7,7 @@ import FeeValue from '@subwallet/extension-koni-ui/components/Balance/FeeValue';
 import InputAddress from '@subwallet/extension-koni-ui/components/InputAddress';
 import Modal from '@subwallet/extension-koni-ui/components/Modal';
 import SigningRequest from '@subwallet/extension-koni-ui/components/Signing/SigningRequest';
-import { ExternalRequestContext } from '@subwallet/extension-koni-ui/contexts/ExternalRequestContext';
+import { InternalRequestContext } from '@subwallet/extension-koni-ui/contexts/InternalRequestContext';
 import { SigningContext } from '@subwallet/extension-koni-ui/contexts/SigningContext';
 import useGetNetworkJson from '@subwallet/extension-koni-ui/hooks/screen/home/useGetNetworkJson';
 import { useRejectExternalRequest } from '@subwallet/extension-koni-ui/hooks/useRejectExternalRequest';
@@ -40,7 +40,7 @@ function UnbondingAuthTransaction ({ amount, balanceError, className, fee, handl
 
   const { handlerReject } = useRejectExternalRequest();
 
-  const { externalState: { externalId } } = useContext(ExternalRequestContext);
+  const { externalState: { externalId } } = useContext(InternalRequestContext);
   const { signingState: { isBusy } } = useContext(SigningContext);
 
   const networkJson = useGetNetworkJson(selectedNetwork);

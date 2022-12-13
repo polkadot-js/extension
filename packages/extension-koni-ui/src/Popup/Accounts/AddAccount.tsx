@@ -17,7 +17,6 @@ interface Props extends ThemeProps {
   className?: string;
 }
 
-const jsonPath = '/account/restore-json';
 const createAccountPath = '/account/create';
 
 function AddAccount ({ className }: Props): React.ReactElement<Props> {
@@ -25,13 +24,6 @@ function AddAccount ({ className }: Props): React.ReactElement<Props> {
   const isPopup = useIsPopup();
   const isFirefox = window.localStorage.getItem('browserInfo') === 'Firefox';
   const isLinux = window.localStorage.getItem('osInfo') === 'Linux';
-
-  const _openJson = useCallback(
-    () => {
-      window.localStorage.setItem('popupNavigation', jsonPath);
-      windowOpen(jsonPath).catch((e) => console.log('error', e));
-    }, []
-  );
 
   const _openCreateAccount = useCallback(
     () => {
@@ -77,31 +69,6 @@ function AddAccount ({ className }: Props): React.ReactElement<Props> {
               to={'/account/import-seed'}
             >
               {t<string>('Import account from pre-existing seed')}
-            </Link>
-          </Button>
-
-          <Button
-            className='add-account-btn'
-            data-export-button
-          >
-            <Link
-              className='add-account-link'
-              to='/account/import-metamask-private-key'
-            >
-              {t<string>('Import private key from MetaMask')}
-            </Link>
-          </Button>
-
-          <Button
-            className='add-account-btn'
-            data-export-button
-          >
-            <Link
-              className='add-account-link'
-              onClick={isPopup && (isFirefox || isLinux) ? _openJson : undefined}
-              to={isPopup && (isFirefox || isLinux) ? undefined : jsonPath}
-            >
-              {t<string>('Restore account from JSON backup file')}
             </Link>
           </Button>
         </div>

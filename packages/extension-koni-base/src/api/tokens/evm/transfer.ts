@@ -1,9 +1,12 @@
 // Copyright 2019-2022 @subwallet/extension-koni-base authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
+import Common from '@ethereumjs/common';
 import { ApiProps, BasicTxResponse, ExternalRequestPromise, ExternalRequestPromiseStatus, HandleBasicTx, NetworkJson, TransferErrorCode } from '@subwallet/extension-base/background/KoniTypes';
 import { getFreeBalance } from '@subwallet/extension-koni-base/api/dotsama/balance';
 import { ERC721Contract, getERC20Contract } from '@subwallet/extension-koni-base/api/tokens/evm/web3';
+import { keyring } from '@subwallet/ui-keyring';
+import { Transaction } from 'ethereumjs-tx';
 import Web3 from 'web3';
 import { TransactionConfig, TransactionReceipt } from 'web3-core';
 
@@ -43,21 +46,43 @@ export const handleTransferBalanceResult = ({ callback,
   callback(response);
 };
 
-export async function handleTransfer (
-  transactionObject: TransactionConfig,
-  changeValue: string,
-  networkKey: string,
-  privateKey: string,
-  web3ApiMap: Record<string, Web3>,
-  callback: (data: BasicTxResponse) => void) {
+interface HandleTransferProps {
+  address: string;
+  callback: (data: BasicTxResponse) => void;
+  changeValue: string;
+  network: NetworkJson;
+  transactionObject: TransactionConfig;
+  web3ApiMap: Record<string, Web3 >;
+}
+
+export function handleTransfer ({ address,
+  callback,
+  changeValue,
+  network,
+  transactionObject,
+  web3ApiMap }: HandleTransferProps) {
+  const networkKey = network.key;
   const web3Api = web3ApiMap[networkKey];
-  const signedTransaction = await web3Api.eth.accounts.signTransaction(transactionObject, privateKey);
+
+  const common = Common.forCustomChain('mainnet', {
+    name: networkKey,
+    networkId: network.evmChainId as number,
+    chainId: network.evmChainId as number
+  }, 'petersburg');
+  // @ts-ignore
+  const tx = new Transaction(transactionObject, { common });
+
+  const pair = keyring.getPair(address);
+
+  pair.evmSigner.signTransaction(tx);
+  const callHash = tx.serialize().toString('hex');
+
   const response: BasicTxResponse = {
     errors: []
   };
 
   try {
-    signedTransaction?.rawTransaction && web3Api.eth.sendSignedTransaction(signedTransaction.rawTransaction)
+    web3Api.eth.sendSignedTransaction(callHash)
       .on('transactionHash', function (hash: string) {
         console.log('transactionHash', hash);
         response.extrinsicHash = hash;
@@ -93,12 +118,13 @@ export async function handleTransfer (
 }
 
 export async function getEVMTransactionObject (
-  networkKey: string,
+  network: NetworkJson,
   to: string,
   value: string,
   transferAll: boolean,
   web3ApiMap: Record<string, Web3>
 ): Promise<[TransactionConfig, string, string]> {
+  const networkKey = network.key;
   const web3Api = web3ApiMap[networkKey];
   const gasPrice = await web3Api.eth.getGasPrice();
   const transactionObject = {
@@ -116,28 +142,45 @@ export async function getEVMTransactionObject (
   return [transactionObject, transactionObject.value.toString(), estimateFee.toString()];
 }
 
-export async function makeEVMTransfer (
-  networkKey: string,
-  to: string,
-  privateKey: string,
-  value: string,
-  transferAll: boolean,
-  web3ApiMap: Record<string, Web3>,
-  callback: (data: BasicTxResponse) => void): Promise<void> {
-  const [transactionObject, changeValue] = await getEVMTransactionObject(networkKey, to, value, transferAll, web3ApiMap);
+interface EVMTransferProps {
+  from: string;
+  callback: (data: BasicTxResponse) => void;
+  network: NetworkJson;
+  to: string;
+  transferAll: boolean;
+  value: string;
+  web3ApiMap: Record<string, Web3>;
+}
 
-  await handleTransfer(transactionObject, changeValue, networkKey, privateKey, web3ApiMap, callback);
+export async function makeEVMTransfer ({ callback,
+  from,
+  network,
+  to,
+  transferAll,
+  value,
+  web3ApiMap }: EVMTransferProps): Promise<void> {
+  const [transactionObject, changeValue] = await getEVMTransactionObject(network, to, value, transferAll, web3ApiMap);
+
+  handleTransfer({
+    address: from,
+    callback: callback,
+    changeValue: changeValue,
+    network: network,
+    web3ApiMap: web3ApiMap,
+    transactionObject: transactionObject
+  });
 }
 
 export async function getERC20TransactionObject (
   assetAddress: string,
-  networkKey: string,
+  network: NetworkJson,
   from: string,
   to: string,
   value: string,
   transferAll: boolean,
   web3ApiMap: Record<string, Web3>
 ): Promise<[TransactionConfig, string, string]> {
+  const networkKey = network.key;
   const web3Api = web3ApiMap[networkKey];
   const erc20Contract = getERC20Contract(networkKey, assetAddress, web3ApiMap);
 
@@ -180,19 +223,35 @@ export async function getERC20TransactionObject (
   return [transactionObject, transferValue, estimateFee.toString()];
 }
 
-export async function makeERC20Transfer (
-  assetAddress: string,
-  networkKey: string,
-  from: string,
-  to: string,
-  privateKey: string,
-  value: string,
-  transferAll: boolean,
-  web3ApiMap: Record<string, Web3>,
-  callback: (data: BasicTxResponse) => void) {
-  const [transactionObject, changeValue] = await getERC20TransactionObject(assetAddress, networkKey, from, to, value, transferAll, web3ApiMap);
+interface ERC20TransferProps {
+  assetAddress: string;
+  callback: (data: BasicTxResponse) => void;
+  from: string;
+  network: NetworkJson;
+  to: string;
+  transferAll: boolean;
+  value: string;
+  web3ApiMap: Record<string, Web3>;
+}
 
-  await handleTransfer(transactionObject, changeValue, networkKey, privateKey, web3ApiMap, callback);
+export async function makeERC20Transfer ({ assetAddress,
+  callback,
+  from,
+  network,
+  to,
+  transferAll,
+  value,
+  web3ApiMap }: ERC20TransferProps) {
+  const [transactionObject, changeValue] = await getERC20TransactionObject(assetAddress, network, from, to, value, transferAll, web3ApiMap);
+
+  handleTransfer({
+    address: from,
+    callback: callback,
+    changeValue: changeValue,
+    network: network,
+    web3ApiMap: web3ApiMap,
+    transactionObject: transactionObject
+  });
 }
 
 export async function getERC721Transaction (

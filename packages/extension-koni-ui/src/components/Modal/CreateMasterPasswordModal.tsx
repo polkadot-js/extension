@@ -43,6 +43,7 @@ const CreateMasterPasswordModal = ({ className, closeModal }: Props) => {
       setLoading(true);
 
       keyringChangeMasterPassword({
+        createNew: true,
         newPassword: password
       }).then((res) => {
         if (!res.status) {

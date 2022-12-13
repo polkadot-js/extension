@@ -75,6 +75,6 @@ export const getAllSubqueryStakingReward = async (accounts: string[]): Promise<S
   rewardList = rewardList.concat(rewardItems);
 
   return {
-    details: rewardList
+    slowInterval: rewardList
   } as StakingRewardJson;
 };

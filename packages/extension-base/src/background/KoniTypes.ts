@@ -1534,6 +1534,9 @@ export interface KoniRequestSignatures {
   'pri(customTokenState.getCustomTokenState)': [null, CustomTokenJson];
   'pri(customTokenState.getSubscription)': [null, CustomTokenJson, CustomTokenJson];
 
+  // ChainService
+  'pri(chainService.subscribeChainInfoMap)': [null, Record<string, any>, Record<string, any>];
+
   // NFT functions
   'pri(evmNft.submitTransaction)': [RequestEvmNftSubmitTransaction, NftTransactionResponse, NftTransactionResponse];
   'pri(evmNft.getTransaction)': [NftTransactionRequest, EvmNftTransaction];

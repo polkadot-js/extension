@@ -16,12 +16,12 @@ import { PORT_EXTENSION } from '@subwallet/extension-base/defaults';
 import { getId } from '@subwallet/extension-base/utils/getId';
 import { metadataExpand } from '@subwallet/extension-chains';
 import { MetadataDef } from '@subwallet/extension-inject/types';
+import { _ChainInfo } from '@subwallet/extension-koni-base/services/chain-list/types';
 
 import { SingleAddress } from '@polkadot/ui-keyring/observable/types';
 
 import { _getKnownHashes, _getKnownNetworks } from './util/defaultChains';
 import { getSavedMeta, setSavedMeta } from './MetadataCache';
-import {_ChainInfo} from "@subwallet/extension-koni-base/services/chain-list/types";
 
 interface Handler {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -555,7 +555,7 @@ export async function disableNetworks (targetKeys: string[]): Promise<boolean> {
 // -------------------------------------------------------------------------------------
 
 export async function subscribeChainInfoMap (callback: (data: Record<string, _ChainInfo>) => void): Promise<Record<string, _ChainInfo>> {
-
+  return sendMessage('pri(chainService.subscribeChainInfoMap)', null, callback);
 }
 
 export async function validateNetwork (provider: string, isEthereum: boolean, existedNetwork?: NetworkJson): Promise<ValidateNetworkResponse> {

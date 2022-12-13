@@ -438,7 +438,10 @@ export async function getAmplitudeWithdrawalExtrinsic (dotSamaApi: ApiProps, add
 async function getAmplitudeClaimRewardTxInfo (dotSamaApi: ApiProps, address: string) {
   const apiProps = await dotSamaApi.isReady;
 
-  const extrinsic = apiProps.api.tx.parachainStaking.claimRewards();
+  const extrinsic = apiProps.api.tx.utility.batch([
+    apiProps.api.tx.parachainStaking.incrementDelegatorRewards(),
+    apiProps.api.tx.parachainStaking.claimRewards()
+  ]);
 
   return extrinsic.paymentInfo(address);
 }
@@ -471,5 +474,8 @@ export async function handleAmplitudeClaimRewardTxInfo (address: string, network
 export async function getAmplitudeClaimRewardExtrinsic (dotSamaApi: ApiProps) {
   const apiProps = await dotSamaApi.isReady;
 
-  return apiProps.api.tx.parachainStaking.claimRewards();
+  return apiProps.api.tx.utility.batch([
+    apiProps.api.tx.parachainStaking.incrementDelegatorRewards(),
+    apiProps.api.tx.parachainStaking.claimRewards()
+  ]);
 }

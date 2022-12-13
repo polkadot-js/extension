@@ -616,6 +616,28 @@ export async function getFreeBalance (networkKey: string, address: string, dotSa
       }
     }
 
+    if (['kusama'].includes(networkKey)) {
+      // @ts-ignore
+      const _balance = await api.query.system.account(address);
+
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-member-access,@typescript-eslint/no-unsafe-assignment
+      const balance = _balance.toHuman();
+
+      // @ts-ignore
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-argument,@typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-member-access
+      const freeBalance = new BN(balance.data?.free.replaceAll(',', ''));
+
+      // @ts-ignore
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-argument,@typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-member-access
+      const miscFrozen = new BN(balance.data?.miscFrozen.replaceAll(',', ''));
+
+      const transferable = freeBalance.sub(miscFrozen);
+
+      // @ts-ignore
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-argument,@typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-member-access,@typescript-eslint/no-unsafe-return
+      return transferable.toString() || '0';
+    }
+
     const balance = await api.derive.balances.all(address);
 
     return balance.availableBalance?.toBn()?.toString() || '0';
@@ -747,6 +769,28 @@ export async function subscribeFreeBalance (
           unsub && unsub();
         };
       }
+    }
+
+    if (['kusama'].includes(networkKey)) {
+      // @ts-ignore
+      const unsub = await api.query.system.account(address, (_balance) => {
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-member-access,@typescript-eslint/no-unsafe-assignment
+        const balance = _balance.toHuman();
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-argument,@typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-member-access
+        const freeBalance = new BN(balance.data?.free.replaceAll(',', ''));
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-argument,@typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-member-access
+        const miscFrozen = new BN(balance.data?.miscFrozen.replaceAll(',', ''));
+
+        const transferable = freeBalance.sub(miscFrozen);
+
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-argument,@typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-member-access
+        update(transferable.toString() || '0');
+      });
+
+      return () => {
+        // @ts-ignore
+        unsub && unsub();
+      };
     }
 
     const unsub = await api.derive.balances?.all(address, (balance: DeriveBalancesAll) => {

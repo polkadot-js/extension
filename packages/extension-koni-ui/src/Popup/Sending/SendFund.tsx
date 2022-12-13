@@ -165,7 +165,7 @@ function SendFund ({ chainRegistryMap, className, defaultValue, networkMap }: Co
     !isNotSameAddressType &&
     !amountGtAvailableBalance &&
     !isReadOnly &&
-    !(isHardwareAccount && !isValidHardwareAccount);
+    (!isHardwareAccount || isValidHardwareAccount);
 
   const navigate = useContext(ActionContext);
 

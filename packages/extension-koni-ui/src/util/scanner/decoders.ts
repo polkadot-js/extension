@@ -3,12 +3,14 @@
 
 import { NetworkJson } from '@subwallet/extension-base/background/KoniTypes';
 import { AccountJson } from '@subwallet/extension-base/background/types';
+import { createTransactionFromRLP } from '@subwallet/extension-koni-base/utils/eth';
 import { EthereumParsedData, ParsedData, SubstrateCompletedParsedData, SubstrateMultiParsedData } from '@subwallet/extension-koni-ui/types/scanner';
 import { findAccountByAddress } from '@subwallet/extension-koni-ui/util/account';
-import { findNetworkJsonByGenesisHash } from '@subwallet/extension-koni-ui/util/getNetworkJsonByGenesisHash';
+import { findNetworkJsonByGenesisHash, getNetworkJsonByInfo } from '@subwallet/extension-koni-ui/util/getNetworkJsonByGenesisHash';
+import BigN from 'bignumber.js';
 
 import { compactFromU8a, hexStripPrefix, hexToU8a, u8aToHex } from '@polkadot/util';
-import { blake2AsHex } from '@polkadot/util-crypto';
+import { blake2AsHex, isEthereumAddress } from '@polkadot/util-crypto';
 
 import strings from '../../constants/strings';
 
@@ -119,9 +121,30 @@ export const constructDataFromBytes = (bytes: Uint8Array, multipartComplete = fa
 
         data.action = action;
         data.data.account = address;
+        const sender = findAccountByAddress(accounts, data.data.account);
 
         if (action === 'signTransaction') {
           data.data.rlp = '0x' + uosAfterFrames.slice(44);
+          const tx = createTransactionFromRLP(data.data.rlp);
+
+          if (!tx) {
+            throw new Error('Cannot parse rlp transaction');
+          }
+
+          const evmChainId = new BigN(tx.ethereumChainId).toNumber();
+          const senderNetwork = getNetworkJsonByInfo(networkMap, isEthereumAddress(address), true, evmChainId);
+
+          if (!senderNetwork) {
+            throw new Error('Signing Error: network could not be found.');
+          }
+
+          if (!senderNetwork.active) {
+            throw new Error(`Inactive network. Please activate ${senderNetwork.chain?.replace(' Relay Chain', '')} on this device and try again.`);
+          }
+
+          if (!sender) {
+            throw new Error('Account has not been imported into this device. Please import an account and try again.');
+          }
         } else if (action === 'signData') {
           if (firstByte === EVM_SIGN_HASH) {
             data.isHash = true;
@@ -170,6 +193,11 @@ export const constructDataFromBytes = (bytes: Uint8Array, multipartComplete = fa
           if (!network) {
             console.error(strings.ERROR_NO_NETWORK);
             throw new Error(strings.ERROR_NO_NETWORK);
+          }
+
+          if (network && !network.active) {
+            console.error(strings.ERROR_NETWORK_INACTIVE.replace('(network name)', network.chain));
+            throw new Error(strings.ERROR_NETWORK_INACTIVE.replace('(network name)', network.chain));
           }
 
           if (!account) {

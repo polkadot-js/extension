@@ -10,7 +10,7 @@ import axios from 'axios';
 
 import { ApiPromise } from '@polkadot/api';
 import { DeriveOwnContributions } from '@polkadot/api-derive/types';
-import {Option, u32, Vec} from '@polkadot/types';
+import { Option, u32, Vec } from '@polkadot/types';
 import { ParaId } from '@polkadot/types/interfaces';
 import { BN } from '@polkadot/util';
 

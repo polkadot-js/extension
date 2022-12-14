@@ -22,8 +22,8 @@
     "@polkadot/extension-ui": "^0.44.7-28-x"
   },
   "devDependencies": {
-    "@polkadot/dev": "^0.67.169",
-    "babel-loader": "^8.2.5",
+    "@polkadot/dev": "^0.67.173",
+    "babel-loader": "^8.3.0",
     "browser-resolve": "^2.0.0",
     "buffer": "^6.0.3",
     "copy-webpack-plugin": "^11.0.0",

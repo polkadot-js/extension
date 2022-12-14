@@ -20,6 +20,8 @@ const onCopy = (): void => {
   }
 
   mnemonicSeedTextElement.select();
+
+  // eslint-disable-next-line deprecation/deprecation
   document.execCommand('copy');
 };
 

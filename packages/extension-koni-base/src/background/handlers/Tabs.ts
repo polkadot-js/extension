@@ -6,7 +6,7 @@ import type { InjectedAccount } from '@subwallet/extension-inject/types';
 import { AuthUrlInfo } from '@subwallet/extension-base/background/handlers/State';
 import { createSubscription } from '@subwallet/extension-base/background/handlers/subscriptions';
 import Tabs from '@subwallet/extension-base/background/handlers/Tabs';
-import { CustomToken, CustomTokenType, EvmAppState, EvmEventType, EvmSendTransactionParams, NetworkJson, RequestEvmProviderSend } from '@subwallet/extension-base/background/KoniTypes';
+import { AddNetworkRequestExternal, CustomToken, CustomTokenType, EvmAppState, EvmEventType, EvmSendTransactionParams, NetworkJson, RequestEvmProviderSend } from '@subwallet/extension-base/background/KoniTypes';
 import { AccountAuthType, MessageTypes, RequestAccountList, RequestAccountSubscribe, RequestAuthorizeTab, RequestTypes, ResponseTypes } from '@subwallet/extension-base/background/types';
 import { canDerive } from '@subwallet/extension-base/utils';
 import { EvmRpcError } from '@subwallet/extension-koni-base/background/errors/EvmRpcError';
@@ -262,12 +262,7 @@ export default class KoniTabs extends Tabs {
   }
 
   private async addEvmChain (id: string, url: string, { params }: RequestArguments) {
-    const input = params as {
-      chainId: string,
-      rpcUrls: string[],
-      chainName: string,
-      blockExplorerUrls?: string[]
-    }[];
+    const input = params as AddNetworkRequestExternal[];
 
     if (input && input.length > 0) {
       const { blockExplorerUrls, chainId, chainName, rpcUrls } = input[0];
@@ -281,25 +276,11 @@ export default class KoniTabs extends Tabs {
         }
 
         if (rpcUrls && chainName) {
-          const providers: Record<string, string> = {};
-
-          rpcUrls.forEach((url) => {
-            providers[url] = url;
-          });
-
           const ok = await this.#koniState.addNetworkConfirm(id, url, {
-            key: '',
-            genesisHash: '',
-            groups: [],
-            ss58Format: 0,
-            isEthereum: true,
-            chain: chainName,
-            evmChainId: chainIdNum,
-            active: true,
-            providers,
-            currentProvider: rpcUrls[0],
-            currentProviderMode: 'ws',
-            blockExplorer: blockExplorerUrls && blockExplorerUrls[0]
+            chainName,
+            chainId: chainIdNum.toString(),
+            rpcUrls,
+            blockExplorerUrls
           });
 
           if (!ok) {

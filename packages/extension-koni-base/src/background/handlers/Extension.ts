@@ -40,6 +40,7 @@ import { estimateCrossChainFee, makeCrossChainTransfer } from '@subwallet/extens
 import { state } from '@subwallet/extension-koni-base/background/handlers/index';
 import { ALL_ACCOUNT_KEY, ALL_GENESIS_HASH } from '@subwallet/extension-koni-base/constants';
 import { _ChainInfo } from '@subwallet/extension-koni-base/services/chain-list/types';
+import { _ChainState } from '@subwallet/extension-koni-base/services/chain-service/types';
 import { getCurrentProvider, isValidProvider } from '@subwallet/extension-koni-base/utils';
 import { createTransactionFromRLP, signatureToHex, Transaction as QrTransaction } from '@subwallet/extension-koni-base/utils/eth';
 import BigN from 'bignumber.js';
@@ -3892,7 +3893,7 @@ export default class KoniExtension extends Extension {
     }
   }
 
-  // ChainService
+  // ChainService -------------------------------------------------
   private subscribeChainInfoMap (id: string, port: chrome.runtime.Port): Record<string, _ChainInfo> {
     const cb = createSubscription<'pri(chainService.subscribeChainInfoMap)'>(id, port);
     const chainInfoMapSubscription = state.subscribeChainInfoMap().subscribe({
@@ -3909,6 +3910,25 @@ export default class KoniExtension extends Extension {
 
     return state.getChainInfoMap();
   }
+
+  private subscribeChainStateMap (id: string, port: chrome.runtime.Port): Record<string, _ChainState> {
+    const cb = createSubscription<'pri(chainService.subscribeChainStateMap)'>(id, port);
+    const chainStateMapSubscription = state.subscribeChainStateMap().subscribe({
+      next: (rs) => {
+        cb(rs);
+      }
+    });
+
+    this.createUnsubscriptionHandle(id, chainStateMapSubscription.unsubscribe);
+
+    port.onDisconnect.addListener((): void => {
+      this.cancelSubscription(id);
+    });
+
+    return state.getChainStateMap();
+  }
+
+  // --------------------------------------------------------------
 
   // eslint-disable-next-line @typescript-eslint/require-await
   public override async handle<TMessageType extends MessageTypes> (id: string, type: TMessageType, request: RequestTypes[TMessageType], port: chrome.runtime.Port): Promise<ResponseType<TMessageType>> {
@@ -4053,6 +4073,8 @@ export default class KoniExtension extends Extension {
         // ChainService
       case 'pri(chainService.subscribeChainInfoMap)':
         return this.subscribeChainInfoMap(id, port);
+      case 'pri(chainService.subscribeChainStateMap)':
+        return this.subscribeChainStateMap(id, port);
 
       case 'pri(transfer.checkReferenceCount)':
         return await this.transferCheckReferenceCount(request as RequestTransferCheckReferenceCount);

@@ -4,7 +4,7 @@
 import { withErrorLog } from '@subwallet/extension-base/background/handlers/helpers';
 import State, { AuthUrls, Resolver } from '@subwallet/extension-base/background/handlers/State';
 import { isSubscriptionRunning, unsubscribe } from '@subwallet/extension-base/background/handlers/subscriptions';
-import { AccountRefMap, APIItemState, ApiMap, AuthRequestV2, BalanceItem, BalanceJson, ChainRegistry, ConfirmationDefinitions, ConfirmationsQueue, ConfirmationsQueueItemOptions, ConfirmationType, CrowdloanItem, CrowdloanJson, CurrentAccountInfo, CustomToken, CustomTokenJson, CustomTokenType, DeleteCustomTokenParams, EvmSendTransactionParams, EvmSendTransactionRequestExternal, EvmSignatureRequestExternal, ExternalRequestPromise, ExternalRequestPromiseStatus, NETWORK_STATUS, NetworkJson, NftCollection, NftItem, NftJson, NftTransferExtra, PriceJson, RequestAccountExportPrivateKey, RequestCheckPublicAndSecretKey, RequestConfirmationComplete, RequestSettingsType, ResponseAccountExportPrivateKey, ResponseCheckPublicAndSecretKey, ResponseSettingsType, ResultResolver, ServiceInfo, SingleModeJson, StakeUnlockingJson, StakingItem, StakingJson, StakingRewardItem, StakingRewardJson, ThemeTypes, TokenInfo, TransactionHistoryItemType } from '@subwallet/extension-base/background/KoniTypes';
+import { AccountRefMap, AddNetworkRequestExternal, APIItemState, ApiMap, AuthRequestV2, BalanceItem, BalanceJson, ChainRegistry, ConfirmationDefinitions, ConfirmationsQueue, ConfirmationsQueueItemOptions, ConfirmationType, CrowdloanItem, CrowdloanJson, CurrentAccountInfo, CustomToken, CustomTokenJson, CustomTokenType, DeleteCustomTokenParams, EvmSendTransactionParams, EvmSendTransactionRequestExternal, EvmSignatureRequestExternal, ExternalRequestPromise, ExternalRequestPromiseStatus, NETWORK_STATUS, NetworkJson, NftCollection, NftItem, NftJson, NftTransferExtra, PriceJson, RequestAccountExportPrivateKey, RequestCheckPublicAndSecretKey, RequestConfirmationComplete, RequestSettingsType, ResponseAccountExportPrivateKey, ResponseCheckPublicAndSecretKey, ResponseSettingsType, ResultResolver, ServiceInfo, SingleModeJson, StakeUnlockingJson, StakingItem, StakingJson, StakingRewardItem, StakingRewardJson, ThemeTypes, TokenInfo, TransactionHistoryItemType } from '@subwallet/extension-base/background/KoniTypes';
 import { AuthorizeRequest, RequestAuthorizeTab } from '@subwallet/extension-base/background/types';
 import { Web3Transaction } from '@subwallet/extension-base/signers/types';
 import { getId } from '@subwallet/extension-base/utils/getId';
@@ -25,7 +25,9 @@ import { initWasmTokenState } from '@subwallet/extension-koni-base/api/tokens/wa
 import { EvmRpcError } from '@subwallet/extension-koni-base/background/errors/EvmRpcError';
 import { state } from '@subwallet/extension-koni-base/background/handlers/index';
 import { ALL_ACCOUNT_KEY, ALL_GENESIS_HASH } from '@subwallet/extension-koni-base/constants';
+import { _ChainInfo } from '@subwallet/extension-koni-base/services/chain-list/types';
 import { ChainService } from '@subwallet/extension-koni-base/services/chain-service';
+import { _ChainState } from '@subwallet/extension-koni-base/services/chain-service/types';
 import DatabaseService from '@subwallet/extension-koni-base/services/DatabaseService';
 import { CurrentAccountStore, NetworkMapStore, PriceStore } from '@subwallet/extension-koni-base/stores';
 import AccountRefStore from '@subwallet/extension-koni-base/stores/AccountRef';
@@ -51,7 +53,6 @@ import { KeypairType } from '@polkadot/util-crypto/types';
 
 import { KoniCron } from '../cron';
 import { KoniSubscription } from '../subscription';
-import {_ChainInfo} from "@subwallet/extension-koni-base/services/chain-list/types";
 
 const ETH_DERIVE_DEFAULT = '/m/44\'/60\'/0\'/0/0';
 
@@ -201,6 +202,7 @@ export default class KoniState extends State {
   public init () {
     this.initNetworkStates();
     this.updateServiceInfo();
+    this.chainService.initChainMap();
   }
 
   private onReady () {
@@ -921,7 +923,7 @@ export default class KoniState extends State {
       });
   }
 
-  public async addNetworkConfirm (id: string, url: string, networkData: NetworkJson) {
+  public async addNetworkConfirm (id: string, url: string, networkData: AddNetworkRequestExternal) {
     networkData.requestId = id;
 
     return this.addConfirmation(id, url, 'addNetworkRequest', networkData)
@@ -1385,13 +1387,23 @@ export default class KoniState extends State {
     return this.chainService.getChainInfoMap();
   }
 
+  public getChainStateMap () {
+    return this.chainService.getChainStateMap();
+  }
+
   public getChainInfoByKey (key: string) {
     return this.chainService.getChainInfoMapByKey(key);
   }
 
   public subscribeChainInfoMap (): Subject<Record<string, _ChainInfo>> {
-    return this.chainService.subscribeChainInfo();
+    return this.chainService.subscribeChainInfoMap();
   }
+
+  public subscribeChainStateMap (): Subject<Record<string, _ChainState>> {
+    return this.chainService.subscribeChainStateMap();
+  }
+
+  // ------------------------------------------------
 
   public getActiveContractSupportedNetworks () {
     const contractSupportedNetworkMap: Record<string, NetworkJson> = {};

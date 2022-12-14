@@ -4,7 +4,7 @@
 import { CustomToken, DeleteCustomTokenParams } from '@subwallet/extension-base/background/KoniTypes';
 import { Button, ButtonArea, InputFilter } from '@subwallet/extension-koni-ui/components';
 import Modal from '@subwallet/extension-koni-ui/components/Modal';
-import useFetchCustomToken from '@subwallet/extension-koni-ui/hooks/screen/setting/useFetchCustomToken';
+import useFetchCustomToken from '@subwallet/extension-koni-ui/hooks/screen/common/useFetchCustomToken';
 import useToast from '@subwallet/extension-koni-ui/hooks/useToast';
 import useTranslation from '@subwallet/extension-koni-ui/hooks/useTranslation';
 import { deleteCustomTokens } from '@subwallet/extension-koni-ui/messaging';

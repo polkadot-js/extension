@@ -1105,8 +1105,16 @@ export interface EvmSendTransactionRequestExternal extends EvmSendTransactionReq
 
 export interface EvmSignatureRequestExternal extends EvmSignatureRequest, EvmRequestExternal {}
 
+export interface AddNetworkRequestExternal { // currently only support adding pure EVM network
+  chainId: string,
+  rpcUrls: string[],
+  chainName: string,
+  blockExplorerUrls?: string[],
+  requestId?: string
+}
+
 export interface ConfirmationDefinitions {
-  addNetworkRequest: [ConfirmationsQueueItem<NetworkJson>, ConfirmationResult<NetworkJson>],
+  addNetworkRequest: [ConfirmationsQueueItem<AddNetworkRequestExternal>, ConfirmationResult<AddNetworkRequestExternal>],
   addTokenRequest: [ConfirmationsQueueItem<CustomToken>, ConfirmationResult<boolean>],
   switchNetworkRequest: [ConfirmationsQueueItem<SwitchNetworkRequest>, ConfirmationResult<boolean>],
   evmSignatureRequest: [ConfirmationsQueueItem<EvmSignatureRequest>, ConfirmationResult<string>],
@@ -1536,6 +1544,7 @@ export interface KoniRequestSignatures {
 
   // ChainService
   'pri(chainService.subscribeChainInfoMap)': [null, Record<string, any>, Record<string, any>];
+  'pri(chainService.subscribeChainStateMap)': [null, Record<string, any>, Record<string, any>];
 
   // NFT functions
   'pri(evmNft.submitTransaction)': [RequestEvmNftSubmitTransaction, NftTransactionResponse, NftTransactionResponse];

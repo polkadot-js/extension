@@ -213,7 +213,7 @@ function Confirmation ({ className, match: { params: { address } } }: Props): Re
       setCurrentConfirmationType('addNetworkRequest');
 
       payload.requestId = id;
-      store.dispatch({ type: 'networkConfigParams/update', payload: { data: payload, mode: 'create' } as NetworkConfigParams });
+      store.dispatch({ type: 'networkConfigParams/update', payload: { externalData: payload, mode: 'create' } as NetworkConfigParams });
       onAction('/account/config-network');
     } else if (checkConfirmation('addTokenRequest')) {
       const confirmation = Object.values(confirmations.addTokenRequest)[0];

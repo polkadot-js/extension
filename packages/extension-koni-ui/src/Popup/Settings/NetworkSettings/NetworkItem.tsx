@@ -3,7 +3,10 @@
 
 import { faTrashAlt } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { _DEFAULT_CHAINS } from '@subwallet/extension-koni-base/services/chain-list';
 import { _ChainInfo } from '@subwallet/extension-koni-base/services/chain-list/types';
+import { _ChainState } from '@subwallet/extension-koni-base/services/chain-service/types';
+import { _isCustomNetwork } from '@subwallet/extension-koni-base/services/chain-service/utils';
 import { AccountContext, ActionContext, Button, ButtonArea, HorizontalLabelToggle } from '@subwallet/extension-koni-ui/components';
 import Modal from '@subwallet/extension-koni-ui/components/Modal';
 import useToast from '@subwallet/extension-koni-ui/hooks/useToast';
@@ -17,10 +20,11 @@ import styled from 'styled-components';
 
 interface Props extends ThemeProps {
   className?: string;
-  item: _ChainInfo;
+  chainInfo: _ChainInfo;
+  chainState: _ChainState;
 }
 
-function NetworkItem ({ className, item }: Props): React.ReactElement {
+function NetworkItem ({ chainInfo, chainState, className }: Props): React.ReactElement {
   const { show } = useToast();
   const { accounts } = useContext(AccountContext);
   const navigate = useContext(ActionContext);
@@ -51,11 +55,11 @@ function NetworkItem ({ className, item }: Props): React.ReactElement {
 
   const handleShowStateConfirm = useCallback((resp: boolean) => {
     if (resp) {
-      show(`${item.name} has ${item.active ? 'disconnected' : 'connected'} successfully`);
+      show(`${chainInfo.name} has ${chainState.active ? 'disconnected' : 'connected'} successfully`);
     } else {
-      show(`${item.name} has failed to ${item.active ? 'disconnect' : 'connect'}`);
+      show(`${chainInfo.name} has failed to ${chainState.active ? 'disconnect' : 'connect'}`);
     }
-  }, [item, show]);
+  }, [chainInfo.name, chainState.active, show]);
 
   const handleShowDeleteConfirm = useCallback((resp: boolean) => {
     if (resp) {
@@ -66,40 +70,40 @@ function NetworkItem ({ className, item }: Props): React.ReactElement {
   }, [show]);
 
   const toggleActive = useCallback((val: boolean) => {
-    if (item.key === 'polkadot' || item.key === 'kusama') {
+    if (_DEFAULT_CHAINS.includes(chainInfo.slug)) {
       show('This network is active by default');
 
       return;
     }
 
-    if (originGenesisHashes.includes(item.genesisHash)) {
+    if (chainInfo.substrateInfo && originGenesisHashes.includes(chainInfo.substrateInfo?.genesisHash)) {
       show('You have a ledger account connected to this network');
 
       return;
     }
 
     if (!val) {
-      disableNetworkMap(item.key)
+      disableNetworkMap(chainInfo.slug)
         .then(({ success }) => handleShowStateConfirm(success))
         .catch(console.error);
     } else {
-      enableNetworkMap(item.key)
+      enableNetworkMap(chainInfo.slug)
         .then((resp) => handleShowStateConfirm(resp))
         .catch(console.error);
     }
-  }, [handleShowStateConfirm, item.genesisHash, item.key, originGenesisHashes, show]);
+  }, [chainInfo.slug, chainInfo.substrateInfo, originGenesisHashes, show, handleShowStateConfirm]);
 
   const handleNetworkEdit = useCallback(() => {
-    store.dispatch({ type: 'networkConfigParams/update', payload: { data: item, mode: 'edit' } as NetworkConfigParams });
+    store.dispatch({ type: 'networkConfigParams/update', payload: { data: chainInfo, mode: 'edit' } as NetworkConfigParams });
     navigate('/account/config-network');
-  }, [item, navigate]);
+  }, [chainInfo, navigate]);
 
   const handleDeleteNetwork = useCallback(() => {
-    removeNetworkMap(item.key)
+    removeNetworkMap(chainInfo.slug)
       .then((result) => handleShowDeleteConfirm(result))
       .catch(console.error);
     handleHideModal();
-  }, [handleHideModal, handleShowDeleteConfirm, item.key]);
+  }, [handleHideModal, handleShowDeleteConfirm, chainInfo.slug]);
 
   const handleMouseEnterChain = useCallback(() => {
     setIsHover(true);
@@ -120,7 +124,7 @@ function NetworkItem ({ className, item }: Props): React.ReactElement {
           className='info'
           toggleFunc={toggleActive}
           uncheckedLabel={''}
-          value={item.active}
+          value={chainState.active}
         />
         <div
           className={'link-edit'}
@@ -131,10 +135,10 @@ function NetworkItem ({ className, item }: Props): React.ReactElement {
           <div
             className={`${isHover ? 'hover-toggle' : 'unhover-toggle'} network-item__text`}
           >
-            {item.chain}
+            {chainInfo.name}
           </div>
           {
-            item.key.startsWith('custom_')
+            _isCustomNetwork(chainInfo.slug)
               ? <div className={'network-icon-container'}>
                 <FontAwesomeIcon
                   className='network-delete-icon'

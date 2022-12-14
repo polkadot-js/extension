@@ -4,7 +4,7 @@
 import { faRightLong } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { ConfirmationsQueue } from '@subwallet/extension-base/background/KoniTypes';
-import useFetchChainInfoMap from '@subwallet/extension-koni-ui/hooks/screen/setting/useFetchChainInfoMap';
+import useFetchChainInfoMap from '@subwallet/extension-koni-ui/hooks/screen/common/useFetchChainInfoMap';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { getLogoByNetworkKey } from '@subwallet/extension-koni-ui/util';

@@ -7,7 +7,7 @@ import { _ChainInfo } from '@subwallet/extension-koni-base/services/chain-list/t
 const initialState = {
 } as Record<string, _ChainInfo>;
 
-const networkMapSlice = createSlice({
+const chainInfoMapSlice = createSlice({
   initialState,
   name: 'chainInfoMap',
   reducers: {
@@ -17,5 +17,5 @@ const networkMapSlice = createSlice({
   }
 });
 
-export const { update } = networkMapSlice.actions;
-export default networkMapSlice.reducer;
+export const { update } = chainInfoMapSlice.actions;
+export default chainInfoMapSlice.reducer;

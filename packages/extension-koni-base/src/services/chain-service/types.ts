@@ -7,7 +7,7 @@ import { _ChainInfo } from '@subwallet/extension-koni-base/services/chain-list/t
 
 export interface _DataMap {
   chainInfoMap: Record<string, _ChainInfo>,
-  chainStateMap: Record<string, ChainState>
+  chainStateMap: Record<string, _ChainState>
 }
 
 export enum ConnectionStatus {
@@ -16,7 +16,7 @@ export enum ConnectionStatus {
   UNSTABLE = 'UNSTABLE'
 }
 
-export interface ChainState {
+export interface _ChainState {
   slug: string,
   active: boolean,
   currentProvider: string,

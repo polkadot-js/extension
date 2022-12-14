@@ -17,6 +17,7 @@ import { getId } from '@subwallet/extension-base/utils/getId';
 import { metadataExpand } from '@subwallet/extension-chains';
 import { MetadataDef } from '@subwallet/extension-inject/types';
 import { _ChainInfo } from '@subwallet/extension-koni-base/services/chain-list/types';
+import { _ChainState } from '@subwallet/extension-koni-base/services/chain-service/types';
 
 import { SingleAddress } from '@polkadot/ui-keyring/observable/types';
 
@@ -552,11 +553,17 @@ export async function disableNetworks (targetKeys: string[]): Promise<boolean> {
   return sendMessage('pri(networkMap.disableMany)', targetKeys);
 }
 
-// -------------------------------------------------------------------------------------
+// ChainService -------------------------------------------------------------------------------------
 
 export async function subscribeChainInfoMap (callback: (data: Record<string, _ChainInfo>) => void): Promise<Record<string, _ChainInfo>> {
   return sendMessage('pri(chainService.subscribeChainInfoMap)', null, callback);
 }
+
+export async function subscribeChainStateMap (callback: (data: Record<string, _ChainState>) => void): Promise<Record<string, _ChainState>> {
+  return sendMessage('pri(chainService.subscribeChainStateMap)', null, callback);
+}
+
+// -------------------------------------------------------------------------------------
 
 export async function validateNetwork (provider: string, isEthereum: boolean, existedNetwork?: NetworkJson): Promise<ValidateNetworkResponse> {
   return sendMessage('pri(apiMap.validate)', { provider, isEthereum, existedNetwork });

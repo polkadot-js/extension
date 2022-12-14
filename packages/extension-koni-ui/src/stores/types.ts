@@ -1,8 +1,9 @@
 // Copyright 2019-2022 @polkadot/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { CustomToken, NetworkJson, NftItem, TransactionHistoryItemType, ValidatorInfo } from '@subwallet/extension-base/background/KoniTypes';
+import { AddNetworkRequestExternal, CustomToken, NftItem, TransactionHistoryItemType, ValidatorInfo } from '@subwallet/extension-base/background/KoniTypes';
 import { AccountJson } from '@subwallet/extension-base/background/types';
+import { _ChainInfo } from '@subwallet/extension-koni-base/services/chain-list/types';
 
 export type CurrentAccountType = {
   account?: AccountJson | null;
@@ -24,7 +25,8 @@ export type TokenConfigParams = {
 
 export type NetworkConfigParams = {
   mode: 'create' | 'edit' | 'init',
-  data: NetworkJson;
+  data?: _ChainInfo;
+  externalData?: AddNetworkRequestExternal;
 }
 
 export type BondingParams = {

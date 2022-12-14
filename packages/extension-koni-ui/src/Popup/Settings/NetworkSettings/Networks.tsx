@@ -3,7 +3,8 @@
 
 import { _ChainInfo } from '@subwallet/extension-koni-base/services/chain-list/types';
 import { InputFilter } from '@subwallet/extension-koni-ui/components';
-import useFetchChainInfoMap from '@subwallet/extension-koni-ui/hooks/screen/setting/useFetchChainInfoMap';
+import useFetchChainInfoMap from '@subwallet/extension-koni-ui/hooks/screen/common/useFetchChainInfoMap';
+import useFetchChainStateMap from '@subwallet/extension-koni-ui/hooks/screen/common/useFetchChainStateMap';
 import useToast from '@subwallet/extension-koni-ui/hooks/useToast';
 import useTranslation from '@subwallet/extension-koni-ui/hooks/useTranslation';
 import { disableAllNetwork, resetDefaultNetwork } from '@subwallet/extension-koni-ui/messaging';
@@ -22,7 +23,10 @@ function Networks ({ className }: Props): React.ReactElement {
   const { show } = useToast();
 
   const { chainInfoMap } = useFetchChainInfoMap();
+  const chainStateMap = useFetchChainStateMap();
   const [searchString, setSearchString] = useState('');
+
+  console.log('chainStateMap', chainStateMap);
 
   const filterNetwork = useCallback(() => {
     const _filteredNetworkMap: Record<string, _ChainInfo> = {};
@@ -139,7 +143,8 @@ function Networks ({ className }: Props): React.ReactElement {
 
       <div className='networks-list'>
         {Object.values(filteredNetworkMap).map((item, index) => <NetworkItem
-          item={item}
+          chainInfo={item}
+          chainState={chainStateMap[item.slug]}
           key={index}
         />)}
       </div>

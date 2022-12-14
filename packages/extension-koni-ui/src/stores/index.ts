@@ -9,6 +9,7 @@ import BalanceReducer from './Balance';
 import BondingParamsReducer from './BondingParams';
 import ChainInfoMapReducer from './ChainInfoMap';
 import ChainRegistryReducer from './ChainRegistry';
+import ChainStateMapReducer from './ChainStateMap';
 import CrowdloanReducer from './Crowdloan';
 import CurrentAccountReducer from './CurrentAccount';
 import CurrentNetworkReducer from './CurrentNetwork';
@@ -55,7 +56,8 @@ const reducers = {
   settings: SettingsReducer,
   authUrl: AuthUrlReducer,
 
-  chainInfoMap: ChainInfoMapReducer
+  chainInfoMap: ChainInfoMapReducer,
+  chainStateMap: ChainStateMapReducer
 };
 
 export const store = configureStore({

@@ -59,7 +59,7 @@
     "@subwallet/extension-chains": "^0.7.4-0",
     "@subwallet/extension-dapp": "^0.7.4-0",
     "@subwallet/extension-inject": "^0.7.4-0",
-    "@subwallet/keyring": "^10.1.13",
+    "@subwallet/keyring": "^0.0.1",
     "@subwallet/ui-keyring": "^0.0.1",
     "@unique-nft/types": "^0.6.0-4",
     "@zeitgeistpm/type-defs": "^0.8.0",

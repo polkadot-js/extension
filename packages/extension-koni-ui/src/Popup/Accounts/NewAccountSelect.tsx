@@ -7,10 +7,9 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { Link } from '@subwallet/extension-koni-ui/components';
 import useIsPopup from '@subwallet/extension-koni-ui/hooks/useIsPopup';
 import useTranslation from '@subwallet/extension-koni-ui/hooks/useTranslation';
+import { windowOpen } from '@subwallet/extension-koni-ui/messaging';
 import { Header } from '@subwallet/extension-koni-ui/partials';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
-import { windowOpen } from '@subwallet/extension-koni-ui/messaging';
-
 import CN from 'classnames';
 import React, { useCallback } from 'react';
 import styled from 'styled-components';

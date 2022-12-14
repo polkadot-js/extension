@@ -1585,6 +1585,15 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@babel/runtime@npm:^7.20.6":
+  version: 7.20.6
+  resolution: "@babel/runtime@npm:7.20.6"
+  dependencies:
+    regenerator-runtime: ^0.13.11
+  checksum: 42a8504db21031b1859fbc0f52d698a3d2f5ada9519eb76c6f96a7e657d8d555732a18fe71ef428a67cc9fc81ca0d3562fb7afdc70549c5fec343190cbaa9b03
+  languageName: node
+  linkType: hard
+
 "@babel/template@npm:^7.18.10, @babel/template@npm:^7.3.3":
   version: 7.18.10
   resolution: "@babel/template@npm:7.18.10"
@@ -4718,26 +4727,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@polkadot/ui-keyring@npm:^2.9.13":
-  version: 2.9.13
-  resolution: "@polkadot/ui-keyring@npm:2.9.13"
-  dependencies:
-    "@babel/runtime": ^7.20.1
-    "@polkadot/keyring": ^10.1.12
-    "@polkadot/ui-settings": 2.9.13
-    "@polkadot/util": ^10.1.12
-    "@polkadot/util-crypto": ^10.1.12
-    mkdirp: ^1.0.4
-    rxjs: ^7.5.7
-    store: ^2.0.12
-  peerDependencies:
-    "@polkadot/keyring": "*"
-    "@polkadot/ui-settings": "*"
-    "@polkadot/util": "*"
-  checksum: 25d466b32473dc6627fba774ace6eacf2b5424f881b41ec7cc87be02b7f1018b68e1f0063a71dce28ad5b03a65afda084ba67dcab57593d77536b90c538a7e87
-  languageName: node
-  linkType: hard
-
 "@polkadot/ui-settings@npm:2.9.13, @polkadot/ui-settings@npm:^2.9.13":
   version: 2.9.13
   resolution: "@polkadot/ui-settings@npm:2.9.13"
@@ -4751,6 +4740,22 @@ __metadata:
     "@polkadot/networks": "*"
     "@polkadot/util": "*"
   checksum: 0f7ac209768afd5ddafabf45671cbc5b4111f64be91345c31a4988f24934dda737158aed1716ac901c4d5fd5004519553649c6fe207f722ef576014086d14d77
+  languageName: node
+  linkType: hard
+
+"@polkadot/ui-settings@npm:2.9.14":
+  version: 2.9.14
+  resolution: "@polkadot/ui-settings@npm:2.9.14"
+  dependencies:
+    "@babel/runtime": ^7.20.6
+    "@polkadot/networks": ^10.2.1
+    "@polkadot/util": ^10.2.1
+    eventemitter3: ^4.0.7
+    store: ^2.0.12
+  peerDependencies:
+    "@polkadot/networks": "*"
+    "@polkadot/util": "*"
+  checksum: 5877dfdda7b2a3fc6274520f9d3ea7c4836dd2b4a58fc75f55fd2b2311f9dafb24882e3e9ae6bf003f0e90dd426e5dce87c4d313b2bf6cde2cc52c47e153af5a
   languageName: node
   linkType: hard
 
@@ -5617,19 +5622,19 @@ __metadata:
     "@babel/runtime": ^7.19.0
     "@ethereumjs/common": ^2.6.5
     "@polkadot/api": ^9.9.1
-    "@polkadot/keyring": ^10.1.13
     "@polkadot/networks": ^10.1.13
     "@polkadot/phishing": ^0.18.11
     "@polkadot/rpc-provider": ^9.9.1
     "@polkadot/types": ^9.9.1
-    "@polkadot/ui-keyring": ^2.9.13
     "@polkadot/ui-settings": ^2.9.13
-    "@polkadot/util": ^10.1.13
+    "@polkadot/util": ^10.2.1
     "@polkadot/util-crypto": ^10.1.13
     "@subwallet/extension-chains": ^0.7.4-0
     "@subwallet/extension-dapp": ^0.7.4-0
     "@subwallet/extension-inject": ^0.7.4-0
     "@subwallet/extension-mocks": ^0.7.4-0
+    "@subwallet/keyring": ^0.0.1
+    "@subwallet/ui-keyring": ^0.0.1
     ethereumjs-tx: ^2.1.2
     eventemitter3: ^4.0.7
     rlp: ^3.0.0
@@ -5646,7 +5651,7 @@ __metadata:
   dependencies:
     "@babel/runtime": ^7.19.0
     "@polkadot/networks": ^10.1.13
-    "@polkadot/util": ^10.1.13
+    "@polkadot/util": ^10.2.1
     "@polkadot/util-crypto": ^10.1.13
     "@subwallet/extension-inject": ^0.7.4-0
   peerDependencies:
@@ -5662,7 +5667,7 @@ __metadata:
     "@babel/runtime": ^7.19.0
     "@metamask/detect-provider": ^1.2.0
     "@polkadot/types": ^9.9.1
-    "@polkadot/util": ^10.1.13
+    "@polkadot/util": ^10.2.1
     "@subwallet/extension-inject": ^0.7.4-0
     web3: ^1.8.0
   peerDependencies:
@@ -5675,7 +5680,7 @@ __metadata:
   resolution: "@subwallet/extension-dapp@workspace:packages/extension-dapp"
   dependencies:
     "@babel/runtime": ^7.19.0
-    "@polkadot/util": ^10.1.13
+    "@polkadot/util": ^10.2.1
     "@polkadot/util-crypto": ^10.1.13
     "@subwallet/extension-inject": ^0.7.4-0
   peerDependencies:
@@ -5692,7 +5697,7 @@ __metadata:
     "@babel/runtime": ^7.19.0
     "@polkadot/rpc-provider": ^9.9.1
     "@polkadot/types": ^9.9.1
-    "@polkadot/util": ^10.1.13
+    "@polkadot/util": ^10.2.1
     "@polkadot/util-crypto": ^10.1.13
     "@polkadot/x-global": ^10.1.13
     "@types/chrome": ^0.0.197
@@ -5734,14 +5739,12 @@ __metadata:
     "@polkadot/api": ^9.9.1
     "@polkadot/api-contract": ^9.9.1
     "@polkadot/api-derive": ^9.9.1
-    "@polkadot/keyring": ^10.1.13
     "@polkadot/networks": ^10.1.13
     "@polkadot/phishing": ^0.18.11
     "@polkadot/rpc-provider": ^9.9.1
     "@polkadot/types": ^9.9.1
-    "@polkadot/ui-keyring": ^2.9.13
     "@polkadot/ui-settings": ^2.9.13
-    "@polkadot/util": ^10.1.13
+    "@polkadot/util": ^10.2.1
     "@polkadot/util-crypto": ^10.1.13
     "@polymathnetwork/polymesh-types": ^0.0.2
     "@snowfork/snowbridge-types": ^0.2.7
@@ -5752,6 +5755,8 @@ __metadata:
     "@subwallet/extension-dapp": ^0.7.4-0
     "@subwallet/extension-inject": ^0.7.4-0
     "@subwallet/extension-mocks": ^0.7.4-0
+    "@subwallet/keyring": ^0.0.1
+    "@subwallet/ui-keyring": ^0.0.1
     "@unique-nft/types": ^0.6.0-4
     "@zeitgeistpm/type-defs": ^0.8.0
     "@zeroio/type-definitions": ^0.0.14
@@ -5796,16 +5801,14 @@ __metadata:
     "@google/model-viewer": ^2.0.2
     "@polkadot/api-contract": ^9.9.1
     "@polkadot/hw-ledger": ^10.1.9
-    "@polkadot/keyring": ^10.1.13
     "@polkadot/networks": ^10.1.13
     "@polkadot/react-identicon": ^2.9.10
     "@polkadot/react-qr": ^2.9.10
     "@polkadot/react-signer": ^0.39.1
     "@polkadot/types": ^9.9.1
     "@polkadot/types-augment": ^9.4.3
-    "@polkadot/ui-keyring": ^2.9.13
     "@polkadot/ui-settings": ^2.9.13
-    "@polkadot/util": ^10.1.13
+    "@polkadot/util": ^10.2.1
     "@polkadot/util-crypto": ^10.1.13
     "@ramonak/react-progress-bar": ^5.0.3
     "@reduxjs/toolkit": ^1.8.5
@@ -5815,6 +5818,8 @@ __metadata:
     "@subwallet/extension-inject": ^0.7.4-0
     "@subwallet/extension-koni-base": ^0.7.4-0
     "@subwallet/extension-mocks": ^0.7.4-0
+    "@subwallet/keyring": ^0.0.1
+    "@subwallet/ui-keyring": ^0.0.1
     "@types/bn.js": ^4.11.6
     "@types/enzyme": ^3.10.12
     "@types/enzyme-adapter-react-16": ^1.0.6
@@ -5906,6 +5911,36 @@ __metadata:
     sinon-chrome: ^3.0.1
   languageName: unknown
   linkType: soft
+
+"@subwallet/keyring@npm:^0.0.1":
+  version: 0.0.1
+  resolution: "@subwallet/keyring@npm:0.0.1"
+  dependencies:
+    "@polkadot/util": ^10.1.7
+    "@polkadot/util-crypto": ^10.1.7
+    eth-simple-keyring: ^4.2.0
+    ethereumjs-tx: ^2.1.2
+    eventemitter3: ^4.0.7
+    rxjs: ^7.5.6
+  checksum: 2ecc1d0640c9185e0db53de4d53b54b06da3ec9f4d445b54fe976834ea9be02c90fd7094aa470b443b1d615023c24666abfdf411b39505620627541ac326fa1f
+  languageName: node
+  linkType: hard
+
+"@subwallet/ui-keyring@npm:^0.0.1":
+  version: 0.0.1
+  resolution: "@subwallet/ui-keyring@npm:0.0.1"
+  dependencies:
+    "@babel/runtime": ^7.20.1
+    "@polkadot/ui-settings": 2.9.14
+    "@polkadot/util": ^10.1.13
+    "@polkadot/util-crypto": ^10.1.13
+    "@subwallet/keyring": ^0.0.1
+    mkdirp: ^1.0.4
+    rxjs: ^7.5.7
+    store: ^2.0.12
+  checksum: 69241d96734d47d4b0f85aa0e539d32aeef3e2222deca7b831ad46f2b6160a88bd7bdce97d218758d0889f976b4eef638cce6044d4c0e9f88198b25d5bf6abb0
+  languageName: node
+  linkType: hard
 
 "@subwallet/web-runner@workspace:packages/web-runner":
   version: 0.0.0-use.local
@@ -21442,6 +21477,13 @@ __metadata:
   version: 0.13.10
   resolution: "regenerator-runtime@npm:0.13.10"
   checksum: 09893f5a9e82932642d9a999716b6c626dc53ef2a01307c952ebbf8e011802360163a37c304c18a6c358548be5a72b448e37209954a18696f21e438c81cbb4b9
+  languageName: node
+  linkType: hard
+
+"regenerator-runtime@npm:^0.13.11":
+  version: 0.13.11
+  resolution: "regenerator-runtime@npm:0.13.11"
+  checksum: 27481628d22a1c4e3ff551096a683b424242a216fee44685467307f14d58020af1e19660bf2e26064de946bad7eff28950eae9f8209d55723e2d9351e632bbb4
   languageName: node
   linkType: hard
 

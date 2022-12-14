@@ -150,7 +150,6 @@ function SelectParent ({ className, isBusy, isConnectWhenDerive, isLocked, onCon
                   allAddresses={allAddresses}
                   onSelect={_onParentChange}
                   selectedAddress={parentAddress}
-                  selectedGenesis={parentGenesis}
                 />
               </Label>
             )

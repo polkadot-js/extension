@@ -107,7 +107,7 @@ function SeedAndPath ({ account, className, evmAccount, isConnectWhenImport, key
   }, [_onSelectAccountType]);
 
   const _onSelectEvmAccount = useCallback(() => {
-    _onSelectAccountType(SUBSTRATE_ACCOUNT_TYPE);
+    _onSelectAccountType(EVM_ACCOUNT_TYPE);
   }, [_onSelectAccountType]);
 
   return (

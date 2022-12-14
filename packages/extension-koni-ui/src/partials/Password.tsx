@@ -41,7 +41,7 @@ export default function Password ({ disable, isFocussed, onChange, onFocusPasswo
         data-input-password
         disable={disable}
         isFocused={isFocussed}
-        label={t<string>('A new password for this account')}
+        label={t<string>('A new master password for wallet')}
         onFocus={onFocusPasswordInput}
         onScrollToError={onScrollToError}
         onValidatedChange={setPass1}

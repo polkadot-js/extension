@@ -407,7 +407,7 @@ function DetailHeader ({ className = '',
         exportModalVisible && (
           <ExportMnemonicModal
             // address={currentAccount?.address || ''}
-            closeModal={closeMigrateModal}
+            closeModal={closeExportModal}
           />
         )
       }

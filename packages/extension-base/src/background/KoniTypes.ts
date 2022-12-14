@@ -595,6 +595,11 @@ export interface RequestDeriveCreateV2 {
   isAllowed: boolean;
 }
 
+export interface RequestDeriveCreateV3 {
+  address: string;
+  isAllowed: boolean;
+}
+
 // Restore account with json file (single account)
 
 export interface RequestJsonRestoreV2 {
@@ -1524,6 +1529,11 @@ export interface ResponseUnlockKeyring {
   status: boolean;
   errors: string[];
 }
+
+/// Signing
+export interface RequestSigningApprovePasswordV2 {
+  id: string;
+}
 export interface KoniRequestSignatures {
   // Bonding functions
   'pri(staking.submitTuringCancelCompound)': [RequestTuringCancelStakeCompound, BasicTxResponse, BasicTxResponse];
@@ -1615,7 +1625,8 @@ export interface KoniRequestSignatures {
   'pri(accounts.create.externalV2)': [RequestAccountCreateExternalV2, AccountExternalError[]];
   'pri(accounts.create.hardwareV2)': [RequestAccountCreateHardwareV2, boolean];
   'pri(accounts.create.withSecret)': [RequestAccountCreateWithSecretKey, ResponseAccountCreateWithSecretKey];
-  'pri(derivation.createV2)': [RequestDeriveCreateV2, boolean];
+  'pri(derivation.createV2)': [RequestDeriveCreateV2, boolean]; // Substrate
+  'pri(derivation.createV3)': [RequestDeriveCreateV3, boolean]; // EVM
   'pri(json.restoreV2)': [RequestJsonRestoreV2, void];
   'pri(json.batchRestoreV2)': [RequestBatchRestoreV2, void];
   'pri(accounts.exportPrivateKey)': [RequestAccountExportPrivateKey, ResponseAccountExportPrivateKey];
@@ -1710,6 +1721,10 @@ export interface KoniRequestSignatures {
   'pri(keyring.migrate)': [RequestMigratePassword, ResponseMigratePassword];
   'pri(keyring.unlock)': [RequestUnlockKeyring, ResponseUnlockKeyring];
   'pri(keyring.lock)': [null, void];
+
+  // Signing
+  'pri(signing.approve.passwordV2)': [RequestSigningApprovePasswordV2, boolean];
+
 }
 
 export interface ApplicationMetadataType {

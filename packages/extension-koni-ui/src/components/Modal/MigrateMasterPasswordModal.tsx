@@ -88,6 +88,7 @@ const MigrateMasterPasswordModal = ({ address, className, closeModal, withSubTit
           className={className}
           component={InputWithLabel}
           data-input-password
+          isFocused={true}
           label={t('Old Password')}
           labelQuestionIcon={true}
           labelTooltip={t('Your old password is the password you used before creating the master password. Please enter your old password to confirm your application of the master password.')}
@@ -229,6 +230,22 @@ export default React.memo(styled(MigrateMasterPasswordModal)(({ theme }: Props) 
           color: ${theme.buttonTextColor2};
         }
       }
+    }
+  }
+
+  .validated-input__warning, .item-error {
+    background: transparent;
+    margin-top: 8px;
+    padding: 0;
+
+    .warning-image {
+      width: 20px;
+      margin-right: 8px;
+      transform: translateY(2px);
+    }
+
+    .warning-message {
+      color: ${theme.crowdloanFailStatus};
     }
   }
 

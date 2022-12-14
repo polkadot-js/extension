@@ -9,13 +9,15 @@ import styled from 'styled-components';
 
 interface Props extends ThemeProps {
   className?: string;
+  closeModal: () => void;
 }
 
-const ExportMnemonicModal = ({ className }: Props) => {
+const ExportMnemonicModal = ({ className, closeModal }: Props) => {
   return (
     <Modal
       className={CN(className)}
-      maskClosable={false}
+      maskClosable={true}
+      onClose={closeModal}
       wrapperClassName={'export-mnemonic-modal'}
     >
 

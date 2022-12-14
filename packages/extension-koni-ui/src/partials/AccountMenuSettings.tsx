@@ -27,7 +27,7 @@ interface Props extends ThemeProps {
 }
 
 const jsonPath = '/account/restore-json';
-const createAccountPath = '/account/create';
+const createAccountPath = '/account/new';
 const ledgerPath = '/account/import-ledger';
 
 const transitionTime = '0.3s';

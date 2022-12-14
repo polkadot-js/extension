@@ -6,6 +6,8 @@ import { ApiProps, BasicTxResponse, ExternalRequestPromise, ExternalRequestPromi
 import { getFreeBalance } from '@subwallet/extension-koni-base/api/dotsama/balance';
 import { ERC721Contract, getERC20Contract } from '@subwallet/extension-koni-base/api/tokens/evm/web3';
 import { keyring } from '@subwallet/ui-keyring';
+import BigN from 'bignumber.js';
+import BNEther from 'bn.js';
 import { Transaction } from 'ethereumjs-tx';
 import Web3 from 'web3';
 import { TransactionConfig, TransactionReceipt } from 'web3-core';
@@ -55,7 +57,19 @@ interface HandleTransferProps {
   web3ApiMap: Record<string, Web3 >;
 }
 
-export function handleTransfer ({ address,
+const convertValueToNumber = (value?: number | string | BNEther): number => {
+  if (!value) {
+    return 0;
+  }
+
+  if (typeof value === 'string' || typeof value === 'number') {
+    return new BigN(value).toNumber();
+  } else {
+    return value.toNumber();
+  }
+};
+
+export async function handleTransfer ({ address,
   callback,
   changeValue,
   network,
@@ -63,19 +77,31 @@ export function handleTransfer ({ address,
   web3ApiMap }: HandleTransferProps) {
   const networkKey = network.key;
   const web3Api = web3ApiMap[networkKey];
+  const nonce = await web3Api.eth.getTransactionCount(address);
 
   const common = Common.forCustomChain('mainnet', {
     name: networkKey,
     networkId: network.evmChainId as number,
     chainId: network.evmChainId as number
   }, 'petersburg');
+  const txObject: TransactionConfig = {
+    gasPrice: convertValueToNumber(transactionObject.gasPrice),
+    to: transactionObject.to,
+    value: convertValueToNumber(transactionObject.value),
+    data: transactionObject.data,
+    gas: convertValueToNumber(transactionObject.gas),
+    nonce: nonce
+  };
   // @ts-ignore
-  const tx = new Transaction(transactionObject, { common });
+  const tx = new Transaction(txObject, { common });
 
   const pair = keyring.getPair(address);
 
-  pair.evmSigner.signTransaction(tx);
-  const callHash = tx.serialize().toString('hex');
+  if (pair.isLocked) {
+    keyring.unlockPair(pair.address);
+  }
+
+  const callHash = pair.evmSigner.signTransaction(tx);
 
   const response: BasicTxResponse = {
     errors: []
@@ -161,7 +187,7 @@ export async function makeEVMTransfer ({ callback,
   web3ApiMap }: EVMTransferProps): Promise<void> {
   const [transactionObject, changeValue] = await getEVMTransactionObject(network, to, value, transferAll, web3ApiMap);
 
-  handleTransfer({
+  await handleTransfer({
     address: from,
     callback: callback,
     changeValue: changeValue,
@@ -244,7 +270,7 @@ export async function makeERC20Transfer ({ assetAddress,
   web3ApiMap }: ERC20TransferProps) {
   const [transactionObject, changeValue] = await getERC20TransactionObject(assetAddress, network, from, to, value, transferAll, web3ApiMap);
 
-  handleTransfer({
+  await handleTransfer({
     address: from,
     callback: callback,
     changeValue: changeValue,

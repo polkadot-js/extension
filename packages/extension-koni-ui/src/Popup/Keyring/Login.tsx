@@ -58,7 +58,7 @@ const Login = ({ className }: Props) => {
       <Header />
       <div className='body'>
         <img
-          alt=''
+          alt='logo'
           className='logo'
           src={themeContext.logo}
         />
@@ -69,6 +69,7 @@ const Login = ({ className }: Props) => {
           component={InputWithLabel}
           data-input-password
           disabled={loading}
+          isFocused={true}
           onEnter={onSubmit}
           onValidatedChange={onChangePassword}
           placeholder={t('Password')}
@@ -122,9 +123,9 @@ export default React.memo(styled(Login)(({ theme }: Props) => `
 
     .logo {
       margin-top: 40px;
-      height: 146px;
-      width: 146px;
-      margin-bottom: 16px;
+      height: 120px;
+      width: 120px;
+      margin-bottom: 20px;
     }
 
     .title {
@@ -156,12 +157,13 @@ export default React.memo(styled(Login)(({ theme }: Props) => `
       font-weight: 400;
       font-size: 15px;
       line-height: 26px;
+      height: 56px;
     }
 
     .button-unlock {
       width: 360px;
-      margin-top: 26px;
-      margin-bottom: 40px;
+      margin-top: 32px;
+      margin-bottom: 36px;
     }
 
     .help {
@@ -181,6 +183,22 @@ export default React.memo(styled(Login)(({ theme }: Props) => `
     .item-error {
       margin: 10px 0;
       width: 360px;
+    }
+  }
+
+  .validated-input__warning, .item-error {
+    background: transparent;
+    margin-top: 8px;
+    padding: 0;
+
+    .warning-image {
+      width: 20px;
+      margin-right: 8px;
+      transform: translateY(2px);
+    }
+
+    .warning-message {
+      color: ${theme.crowdloanFailStatus};
     }
   }
 `));

@@ -44,7 +44,7 @@ function transformAccounts (accounts: SubjectInfo): AccountJson[] {
   }));
 }
 
-function isJsonPayload (value: SignerPayloadJSON | SignerPayloadRaw): value is SignerPayloadJSON {
+export function isJsonPayload (value: SignerPayloadJSON | SignerPayloadRaw): value is SignerPayloadJSON {
   return (value as SignerPayloadJSON).genesisHash !== undefined;
 }
 

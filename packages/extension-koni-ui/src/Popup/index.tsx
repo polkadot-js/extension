@@ -69,6 +69,7 @@ const Rendering = React.lazy(() => import('@subwallet/extension-koni-ui/Popup/Re
 const Donate = React.lazy(() => import('@subwallet/extension-koni-ui/Popup/Sending/Donate'));
 const Login = React.lazy(() => import('@subwallet/extension-koni-ui/Popup/Keyring/Login'));
 const ChangeMasterPassword = React.lazy(() => import('@subwallet/extension-koni-ui/Popup/Keyring/ChangeMasterPassword'));
+const NewAccountSelect = React.lazy(() => import('@subwallet/extension-koni-ui/Popup/Accounts/NewAccountSelect'));
 const ErrorBoundary = React.lazy(() => import('@subwallet/extension-koni-ui/components/ErrorBoundary'));
 
 const startSettings = uiSettings.get();
@@ -308,6 +309,7 @@ export default function Popup (): React.ReactElement {
                                         <Switch>
                                           <Route path='/auth-list'>{wrapWithErrorBoundary(<AuthList />, 'auth-list')}</Route>
                                           <Route path='/confirmation'>{wrapWithErrorBoundary(<AuthList />, 'confirmation')}</Route>
+                                          <Route path='/account/new'>{wrapWithErrorBoundary(<NewAccountSelect />, 'new-account-select')}</Route>
                                           <Route path='/account/create'>{wrapWithErrorBoundary(<CreateAccount />, 'account-creation')}</Route>
                                           <Route path='/account/forget/:address'>{wrapWithErrorBoundary(<Forget />, 'forget-address')}</Route>
                                           <Route path='/account/export/:address'>{wrapWithErrorBoundary(<Export />, 'export-address')}</Route>
@@ -320,8 +322,7 @@ export default function Popup (): React.ReactElement {
                                           <Route path='/account/import-seed'>{wrapWithErrorBoundary(<ImportSeed />, 'import-seed')}</Route>
                                           <Route path='/account/import-metamask-private-key'>{wrapWithErrorBoundary(<ImportMetamaskPrivateKey />, 'import-metamask-private-key')}</Route>
                                           <Route path='/account/restore-json'>{wrapWithErrorBoundary(<RestoreJson />, 'restore-json')}</Route>
-                                          <Route path='/account/derive/:address/locked'>{wrapWithErrorBoundary(<Derive isLocked />, 'derived-address-locked')}</Route>
-                                          <Route path='/account/derive/:address'>{wrapWithErrorBoundary(<Derive />, 'derive-address')}</Route>
+                                          <Route path='/account/derive'>{wrapWithErrorBoundary(<Derive />, 'derive-account')}</Route>
                                           <Route path='/account/settings'>{wrapWithErrorBoundary(<Settings />, 'account-settings')}</Route>
                                           <Route path='/account/general-setting'>{wrapWithErrorBoundary(<GeneralSetting />, 'account-general-settings')}</Route>
                                           <Route path='/account/networks'>{wrapWithErrorBoundary(<Networks />, 'account-networks')}</Route>

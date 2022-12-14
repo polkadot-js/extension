@@ -177,9 +177,9 @@ export default React.memo(styled(CreateMasterPasswordModal)(({ theme }: Props) =
         background: ${theme.boxBorderColor};
       }
 
-        .item-error {
-          margin: 10px 0;
-        }
+      .item-error {
+        margin: 10px 0;
+      }
     }
 
     .modal-footer {
@@ -202,5 +202,21 @@ export default React.memo(styled(CreateMasterPasswordModal)(({ theme }: Props) =
     font-weight: 400;
     font-size: 13px;
     line-height: 24px;
+  }
+
+  .validated-input__warning, .item-error {
+    background: transparent;
+    margin-top: 8px;
+    padding: 0;
+
+    .warning-image {
+      width: 20px;
+      margin-right: 8px;
+      transform: translateY(2px);
+    }
+
+    .warning-message {
+      color: ${theme.crowdloanFailStatus};
+    }
   }
 `));

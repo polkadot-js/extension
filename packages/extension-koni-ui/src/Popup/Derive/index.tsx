@@ -1,68 +1,44 @@
 // Copyright 2019-2022 @polkadot/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import HeaderWithSteps from '@subwallet/extension-koni-ui/partials/HeaderWithSteps';
-import { EVM_ACCOUNT_TYPE, SUBSTRATE_ACCOUNT_TYPE } from '@subwallet/extension-koni-ui/Popup/CreateAccount';
+import { canDerive } from '@subwallet/extension-base/utils';
+import { Header } from '@subwallet/extension-koni-ui/partials';
+import { EVM_ACCOUNT_TYPE } from '@subwallet/extension-koni-ui/Popup/CreateAccount';
+import AddressDropdown from '@subwallet/extension-koni-ui/Popup/Derive/AddressDropdown';
+import CN from 'classnames';
 import React, { useCallback, useContext, useMemo, useState } from 'react';
-import { useParams } from 'react-router';
 import styled from 'styled-components';
 
-import { AccountContext, AccountNamePasswordCreation, ActionContext } from '../../components';
+import { AccountContext, ActionContext, ButtonArea, Checkbox, Label, NextStepButton } from '../../components';
 import useTranslation from '../../hooks/useTranslation';
-import { deriveAccountV2 } from '../../messaging';
-import SelectParent from './SelectParent';
+import { deriveAccountV3 } from '../../messaging';
 
 interface Props {
-  isLocked?: boolean;
   className?: string;
 }
 
-interface AddressState {
-  address: string;
-}
-
-interface PathState extends AddressState {
-  suri: string;
-}
-
-interface ConfirmState {
-  account: PathState;
-  parentPassword: string;
-}
-
-function Derive ({ className, isLocked }: Props): React.ReactElement<Props> {
+function Derive ({ className }: Props): React.ReactElement<Props> {
   const { t } = useTranslation();
   const onAction = useContext(ActionContext);
   const { accounts } = useContext(AccountContext);
-  const { address } = useParams<AddressState>();
   const [isBusy, setIsBusy] = useState(false);
-  const [account, setAccount] = useState<null | PathState>(null);
-  const [parentPassword, setParentPassword] = useState<string | null>(null);
   const [isConnectWhenDerive, setConnectWhenDerive] = useState(true);
-  const accountsWithoutAll = accounts.filter((acc: { address: string; }) => acc.address !== 'ALL');
-  const accountsWithoutEtheriumType = accountsWithoutAll.filter((acc) => acc.type !== EVM_ACCOUNT_TYPE);
-  const name = `Account ${accountsWithoutAll.length + 1}`;
-  const parentAccount = accounts.find((a) => a.address === address);
-  let parentAddress: string;
+  const [parentAddress, setParentAddress] = useState('');
 
-  if (parentAccount && parentAccount.type === EVM_ACCOUNT_TYPE) {
-    parentAddress = accountsWithoutEtheriumType[0].address;
-  } else {
-    parentAddress = address;
-  }
+  const _onParentChange = useCallback((address: string) => {
+    setParentAddress(address);
+  }, []);
 
-  const parentGenesis = useMemo(
-    () => accounts.find((a) => a.address === parentAddress)?.genesisHash || null,
-    [accounts, parentAddress]
-  );
-
-  const _onCreate = useCallback((name: string, password: string) => {
-    if (!account || !name || !password || !parentPassword) {
+  const _onCreate = useCallback(() => {
+    if (!parentAddress) {
       return;
     }
 
     setIsBusy(true);
-    deriveAccountV2(parentAddress, account.suri, parentPassword, name, password, parentGenesis, isConnectWhenDerive)
+    deriveAccountV3({
+      address: parentAddress,
+      isAllowed: isConnectWhenDerive
+    })
       .then(() => {
         window.localStorage.setItem('popupNavigation', '/');
         onAction('/');
@@ -71,53 +47,73 @@ function Derive ({ className, isLocked }: Props): React.ReactElement<Props> {
         setIsBusy(false);
         console.error(error);
       });
-  }, [account, isConnectWhenDerive, onAction, parentAddress, parentGenesis, parentPassword]);
+  }, [isConnectWhenDerive, onAction, parentAddress]);
 
-  const _onDerivationConfirmed = useCallback(({ account, parentPassword }: ConfirmState) => {
-    setAccount(account);
-    setParentPassword(parentPassword);
-  }, []);
-
-  const _onBackClick = useCallback(() => {
-    setAccount(null);
-  }, []);
+  const allAddresses = useMemo(
+    () => accounts
+      .filter(({ isExternal }) => !isExternal)
+      .filter(({ isMasterAccount, type }) => canDerive(type) && (type !== EVM_ACCOUNT_TYPE || (isMasterAccount && type === EVM_ACCOUNT_TYPE)))
+      .map(({ address, genesisHash }): [string, string | null] => [address, genesisHash || null]),
+    [accounts]
+  );
 
   return (
-    <>
-      <HeaderWithSteps
+    <div className={className}>
+      <Header
         isBusy={isBusy}
-        onBackClick={_onBackClick}
-        step={account ? 2 : 1}
-        text={t<string>('Add new account')}
+        showBackArrow={true}
+        showSubHeader={true}
+        subHeaderName={t<string>('Derive account')}
       />
-      {!account && (
-        <SelectParent
-          isBusy={isBusy}
-          isConnectWhenDerive={isConnectWhenDerive}
-          isLocked={isLocked}
-          onConnectWhenDerive={setConnectWhenDerive}
-          onDerivationConfirmed={_onDerivationConfirmed}
-          parentAddress={parentAddress}
-          parentGenesis={parentGenesis}
-          setBusy={setIsBusy}
+      <div className={CN('body-container')}>
+        <div className='derive-account'>
+          <Label label={t<string>('Choose Parent Account:')}>
+            <AddressDropdown
+              allAddresses={allAddresses}
+              onSelect={_onParentChange}
+              selectedAddress={parentAddress}
+            />
+          </Label>
+        </div>
+
+        <Checkbox
+          checked={isConnectWhenDerive}
+          label={t<string>('Auto connect to all DApps after create')}
+          onChange={setConnectWhenDerive}
         />
-      )}
-      {account && (
-        <>
-          <AccountNamePasswordCreation
-            address={account?.address}
-            buttonLabel={t<string>('Create derived account')}
-            className='koni-import-seed-content'
+        <ButtonArea>
+          <NextStepButton
+            className='next-step-btn'
+            data-button-action='create derived account'
             isBusy={isBusy}
-            keyTypes={[SUBSTRATE_ACCOUNT_TYPE]}
-            name={name}
-            onCreate={_onCreate}
-          />
-        </>
-      )}
-    </>
+            isDisabled={!parentAddress}
+            onClick={_onCreate}
+          >
+            {t<string>('Create a derived account')}
+          </NextStepButton>
+        </ButtonArea>
+      </div>
+    </div>
   );
 }
 
 export default styled(React.memo(Derive))`
+  .body-container {
+    padding: 25px 15px 15px;
+    flex: 1;
+    overflow-y: auto;
+
+    .next-step-btn {
+      > .children {
+        display: flex;
+        align-items: center;
+        position: relative;
+        justify-content: center;
+      }
+    }
+
+    .select-parent-warning {
+      margin-top: 10px;
+    }
+  }
 `;

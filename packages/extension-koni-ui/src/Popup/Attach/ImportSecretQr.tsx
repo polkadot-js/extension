@@ -13,7 +13,6 @@ import { AccountContext, AccountInfoEl, ActionContext, ButtonArea, Checkbox, Loa
 import useTranslation from '../../hooks/useTranslation';
 import { checkPublicAndPrivateKey, createAccountWithSecret } from '../../messaging';
 import { Header, Name } from '../../partials';
-import Password from '../../partials/Password';
 
 interface Props {
   className?: string;
@@ -34,7 +33,6 @@ function ImportSecretQr ({ className }: Props): React.ReactElement<Props> {
   const [address, setAddress] = useState<string | null>(null);
   const [isEthereum, setIsEthereum] = useState(false);
   const [name, setName] = useState<string | null>(defaultName);
-  const [password, setPassword] = useState<string | null>(null);
   const [errors, setErrors] = useState<AccountExternalError[]>([]);
   const [isConnectWhenCreate, setIsConnectWhenCreate] = useState<boolean>(true);
 
@@ -74,9 +72,8 @@ function ImportSecretQr ({ className }: Props): React.ReactElement<Props> {
     (): void => {
       setIsBusy(true);
 
-      if (account && name && password) {
+      if (account && name) {
         createAccountWithSecret({ name: name,
-          password: password,
           isAllow: isConnectWhenCreate,
           secretKey: account.content,
           publicKey: account.genesisHash,
@@ -100,7 +97,7 @@ function ImportSecretQr ({ className }: Props): React.ReactElement<Props> {
         setIsBusy(false);
       }
     },
-    [account, isConnectWhenCreate, isEthereum, name, onAction, password]
+    [account, isConnectWhenCreate, isEthereum, name, onAction]
   );
 
   const renderErrors = useCallback((): JSX.Element => {
@@ -180,7 +177,6 @@ function ImportSecretQr ({ className }: Props): React.ReactElement<Props> {
                         onChange={setName}
                         value={name || ''}
                       />
-                      <Password onChange={setPassword} />
                       <Checkbox
                         checked={isConnectWhenCreate}
                         label={t<string>('Auto connect to all DApps after importing')}
@@ -194,7 +190,7 @@ function ImportSecretQr ({ className }: Props): React.ReactElement<Props> {
                       <NextStepButton
                         className='next-step-btn'
                         isBusy={isBusy}
-                        isDisabled={!name || !password}
+                        isDisabled={!name}
                         onClick={_onCreate}
                       >
                         {t<string>('Add the account with identified address')}

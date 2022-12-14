@@ -5,19 +5,7 @@ import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 import { NetworkConfigParams } from '@subwallet/extension-koni-ui/stores/types';
 
 const initialState = {
-  mode: 'init',
-  data: {
-    active: false,
-    currentProvider: '',
-    currentProviderMode: 'ws',
-    genesisHash: '',
-    groups: [],
-    providers: {},
-    ss58Format: 0,
-    key: '',
-    chain: '',
-    isEthereum: false
-  }
+  mode: 'init'
 } as NetworkConfigParams;
 
 const networkConfigParamsSlice = createSlice({
@@ -27,6 +15,7 @@ const networkConfigParamsSlice = createSlice({
     update (state, action: PayloadAction<NetworkConfigParams>) {
       const payload = action.payload;
 
+      state.externalData = payload.externalData;
       state.data = payload.data;
       state.mode = payload.mode;
     }

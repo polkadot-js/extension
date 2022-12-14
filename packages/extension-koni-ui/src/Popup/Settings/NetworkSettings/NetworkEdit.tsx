@@ -2,36 +2,24 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { NETWORK_ERROR, NetworkJson } from '@subwallet/extension-base/background/KoniTypes';
+import { _ChainInfo } from '@subwallet/extension-koni-base/services/chain-list/types';
 import { isUrl, isValidProvider } from '@subwallet/extension-koni-base/utils';
 import { ActionContext, Button, ButtonArea, Dropdown, HorizontalLabelToggle, InputWithLabel } from '@subwallet/extension-koni-ui/components';
+import useGetChainState from '@subwallet/extension-koni-ui/hooks/screen/common/useGetChainState';
+import useGetNetworkInfoForConfig from '@subwallet/extension-koni-ui/hooks/screen/setting/useGetNetworkInfoForConfig';
 import useToast from '@subwallet/extension-koni-ui/hooks/useToast';
 import useTranslation from '@subwallet/extension-koni-ui/hooks/useTranslation';
 import { completeConfirmation, upsertNetworkMap, validateNetwork } from '@subwallet/extension-koni-ui/messaging';
 import Header from '@subwallet/extension-koni-ui/partials/Header';
-import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import React, { useCallback, useContext, useEffect, useState } from 'react';
-import { useSelector } from 'react-redux';
 import styled from 'styled-components';
 
 interface Props extends ThemeProps {
   className?: string;
 }
 
-function getCurrentEndpoint (data: NetworkJson) {
-  if (!data) {
-    return null;
-  }
-
-  if (data.currentProvider.includes('custom')) {
-    // @ts-ignore
-    return data?.customProviders[data.currentProvider];
-  } else {
-    return data.providers[data.currentProvider];
-  }
-}
-
-function getAllProviders (data: NetworkJson) {
+function getAllProviders (data: _ChainInfo) {
   const allProviders: Record<string, string>[] = [];
 
   for (const [key, provider] of Object.entries(data.providers)) {
@@ -41,71 +29,63 @@ function getAllProviders (data: NetworkJson) {
     });
   }
 
-  if (data.customProviders) {
-    for (const [key, provider] of Object.entries(data.customProviders)) {
-      allProviders.push({
-        text: provider,
-        value: key
-      });
-    }
-  }
-
   return allProviders;
 }
 
-function getAllProviderKeys (data: NetworkJson) {
+function getAllProviderKeys (data: _ChainInfo) {
   const allProviderKeys: string[] = [];
 
   for (const key of Object.keys(data.providers)) {
     allProviderKeys.push(key);
   }
 
-  if (data.customProviders) {
-    for (const key of Object.keys(data.customProviders)) {
-      allProviderKeys.push(key);
-    }
-  }
-
   return allProviderKeys;
+}
+
+function getCurrentProvider (key: string, chainInfo: _ChainInfo) {
+  return
 }
 
 function NetworkEdit ({ className }: Props): React.ReactElement {
   const { t } = useTranslation();
   const { show } = useToast();
-  const { networkConfigParams: { data, mode } } = useSelector((state: RootState) => state);
+  const { data, mode, requestId } = useGetNetworkInfoForConfig();
+
+  const chainState = useGetChainState(data?.slug || '');
   const [networkInfo, setNetworkInfo] = useState(data);
   const [_isValidProvider, _setIsvalidProvider] = useState(false);
   const [isProviderConnected, setIsProviderConnected] = useState(false);
-  const [provider, setProvider] = useState<string | null>(getCurrentEndpoint(data) || null);
+  const [provider, setProvider] = useState<string | null>(chainState.currentProvider || null);
+  const [priceId, setPriceId] = useState('');
+  const [providerKey, setProviderKey] = useState(chainState.currentProvider);
+
   const [loading, setLoading] = useState(false);
   const [needValidate, setNeedValidate] = useState(false);
-  const isCurrentEndpoint = provider === getCurrentEndpoint(data);
-  const [validateError, setValidateError] = useState<NETWORK_ERROR>(NETWORK_ERROR.NONE);
-  const [isEthereum, setIsEthereum] = useState(data.isEthereum || false);
+  const isCurrentEndpoint = provider === chainState.currentProvider;
   const [showMore, setShowMore] = useState(false);
+
+  const [validateError, setValidateError] = useState<NETWORK_ERROR>(NETWORK_ERROR.NONE);
+  const [isEthereum, setIsEthereum] = useState((data && data.evmInfo !== undefined) || false);
   const [isValidBlockExplorer, setIsValidBlockExplorer] = useState(true);
   const [isValidCrowdloanUrl, setIsValidCrowdloanUrl] = useState(true);
   const [isValidChain, setIsValidChain] = useState(true);
   const [isProviderPredefined, setIsProviderPredefined] = useState(true);
 
   const onAction = useContext(ActionContext);
-  const _goBack = useCallback(
-    () => {
-      if (networkInfo.requestId) {
-        completeConfirmation('addNetworkRequest', { id: networkInfo.requestId, isApproved: true }).catch(console.error);
-      }
+  const _goBack = useCallback(() => {
+    if (requestId) {
+      completeConfirmation('addNetworkRequest', { id: requestId, isApproved: true }).catch(console.error);
+    }
 
-      window.localStorage.setItem('popupNavigation', '/account/networks');
-      onAction('/account/networks');
-    },
-    [networkInfo.requestId, onAction]
-  );
+    window.localStorage.setItem('popupNavigation', '/account/networks');
+    onAction('/account/networks');
+  }, [onAction, requestId]);
 
   useEffect(() => {
     if (mode === 'init') {
       _goBack();
     }
-  }, [_goBack, mode, networkInfo.currentProvider]);
+  }, [_goBack, mode, chainState.currentProvider]);
 
   const getValidateErrorMessage = useCallback((input?: string) => {
     if (validateError === NETWORK_ERROR.EXISTED_NETWORK || input === NETWORK_ERROR.EXISTED_NETWORK) {
@@ -143,35 +123,35 @@ function NetworkEdit ({ className }: Props): React.ReactElement {
             if (resp.success) {
               if (isEthereum) {
                 setNetworkInfo({
-                  ...networkInfo,
-                  key: resp.key,
-                  active: true,
-                  customProviders: { custom: provider },
-                  currentProvider: 'custom',
-                  groups: resp.networkGroup,
-                  currentProviderMode: provider.startsWith('http') ? 'http' : 'ws',
-                  genesisHash: resp.genesisHash,
-                  ss58Format: -1,
-                  chain: resp.chain,
-                  isEthereum,
-                  evmChainId: resp.evmChainId,
-                  nativeToken: resp.nativeToken,
-                  decimals: resp.decimal
+                  ...networkInfo
+                  // key: resp.key,
+                  // active: true,
+                  // customProviders: { custom: provider },
+                  // currentProvider: 'custom',
+                  // groups: resp.networkGroup,
+                  // currentProviderMode: provider.startsWith('http') ? 'http' : 'ws',
+                  // genesisHash: resp.genesisHash,
+                  // ss58Format: -1,
+                  // chain: resp.chain,
+                  // isEthereum,
+                  // evmChainId: resp.evmChainId,
+                  // nativeToken: resp.nativeToken,
+                  // decimals: resp.decimal
                 });
               } else {
                 setNetworkInfo({
-                  ...networkInfo,
-                  key: resp.key,
-                  active: true,
-                  customProviders: { custom: provider },
-                  currentProvider: 'custom',
-                  groups: resp.networkGroup,
-                  currentProviderMode: provider.startsWith('http') ? 'http' : 'ws',
-                  genesisHash: resp.genesisHash,
-                  ss58Format: parseInt(resp.ss58Prefix),
-                  chain: resp.chain,
-                  nativeToken: resp.nativeToken,
-                  decimals: resp.decimal
+                  ...networkInfo
+                  // key: resp.key,
+                  // active: true,
+                  // customProviders: { custom: provider },
+                  // currentProvider: 'custom',
+                  // groups: resp.networkGroup,
+                  // currentProviderMode: provider.startsWith('http') ? 'http' : 'ws',
+                  // genesisHash: resp.genesisHash,
+                  // ss58Format: parseInt(resp.ss58Prefix),
+                  // chain: resp.chain,
+                  // nativeToken: resp.nativeToken,
+                  // decimals: resp.decimal
                 });
               }
             }
@@ -331,12 +311,9 @@ function NetworkEdit ({ className }: Props): React.ReactElement {
     });
   }, [networkInfo]);
 
-  const onChangeCoingeckoKey = useCallback((val: string) => {
-    setNetworkInfo({
-      ...networkInfo,
-      coinGeckoKey: val
-    });
-  }, [networkInfo]);
+  const onChangePriceKey = useCallback((val: string) => {
+    setPriceId(val);
+  }, []);
 
   const onChangeCrowdloanUrl = useCallback((val: string) => {
     if (!isUrl(val) && val !== '') {
@@ -368,11 +345,27 @@ function NetworkEdit ({ className }: Props): React.ReactElement {
 
   const isDisableSave = useCallback((): boolean => {
     if (mode === 'create') {
-      return !isValidChain || needValidate || !isProviderConnected || !_isValidProvider || !isValidBlockExplorer || !isValidCrowdloanUrl || !networkInfo.chain || networkInfo.chain === '';
+      return !isValidChain || needValidate || !isProviderConnected || !_isValidProvider || !isValidBlockExplorer || !isValidCrowdloanUrl || !networkInfo.name || networkInfo.name === '';
     } else {
-      return !_isValidProvider || !isValidChain || needValidate || (!isProviderPredefined && !isProviderConnected) || !isValidBlockExplorer || !isValidCrowdloanUrl || !networkInfo.chain || networkInfo.chain === '' || loading;
+      return !_isValidProvider || !isValidChain || needValidate || (!isProviderPredefined && !isProviderConnected) || !isValidBlockExplorer || !isValidCrowdloanUrl || !networkInfo.name || networkInfo.name === '' || loading;
     }
-  }, [_isValidProvider, isProviderConnected, isProviderPredefined, isValidBlockExplorer, isValidChain, isValidCrowdloanUrl, loading, mode, needValidate, networkInfo.chain]);
+  }, [_isValidProvider, isProviderConnected, isProviderPredefined, isValidBlockExplorer, isValidChain, isValidCrowdloanUrl, loading, mode, needValidate, networkInfo.name]);
+
+  const getNetworkBlockExplorer = useCallback(() => {
+    if (networkInfo.evmInfo !== null && networkInfo.substrateInfo !== null) {
+      return networkInfo.substrateInfo.blockExplorer || '';
+    }
+
+    if (networkInfo.evmInfo !== null && networkInfo.substrateInfo === null) {
+      return networkInfo.evmInfo.blockExplorer || '';
+    }
+
+    if (networkInfo.substrateInfo !== null && networkInfo.evmInfo === null) {
+      return networkInfo.substrateInfo.blockExplorer || '';
+    }
+
+    return '';
+  }, [networkInfo.evmInfo, networkInfo.substrateInfo]);
 
   return (
     <>
@@ -402,7 +395,7 @@ function NetworkEdit ({ className }: Props): React.ReactElement {
               label={'Provider URL (*)'}
               onChange={onSelectProvider}
               options={getAllProviders(networkInfo)}
-              value={networkInfo.currentProvider}
+              value={chainState.currentProvider}
             />
           </div>
         }
@@ -410,13 +403,13 @@ function NetworkEdit ({ className }: Props): React.ReactElement {
         <InputWithLabel
           label={t<string>('Network name (*)')}
           onChange={onChangeChain}
-          value={networkInfo.chain || ''}
+          value={networkInfo.name || ''}
         />
 
         <InputWithLabel
           label={t<string>('paraId')}
           onChange={onChangeParaId}
-          value={networkInfo?.paraId?.toString() || ''}
+          value={networkInfo?.substrateInfo?.paraId?.toString() || ''}
         />
 
         {
@@ -460,19 +453,19 @@ function NetworkEdit ({ className }: Props): React.ReactElement {
             <InputWithLabel
               label={t<string>('Block Explorer (Optional)')}
               onChange={onChangeExplorer}
-              value={networkInfo?.blockExplorer || ''}
+              value={getNetworkBlockExplorer()}
             />
 
             <InputWithLabel
               label={t<string>('Crowdloan Url (Optional)')}
               onChange={onChangeCrowdloanUrl}
-              value={networkInfo?.crowdloanUrl || ''}
+              value={networkInfo.substrateInfo?.crowdloanUrl || ''}
             />
 
             <InputWithLabel
-              label={t<string>('Coingecko key (Optional)')}
-              onChange={onChangeCoingeckoKey}
-              value={networkInfo?.coinGeckoKey || ''}
+              label={t<string>('Price ID (Optional - from CoinGecko)')}
+              onChange={onChangePriceKey}
+              value={priceId}
             />
           </div>
         }

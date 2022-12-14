@@ -34,7 +34,7 @@ export interface _ChainInfo {
   logo: string,
   providers: Record<string, string>,
   substrateInfo: _SubstrateInfo | null,
-  evmInfo: _EvmChain | null
+  evmInfo: _EvmInfo | null
 }
 
 export interface _ChainAsset {
@@ -60,8 +60,7 @@ export interface _ChainProvider {
   status: _ChainProviderStatus
 }
 
-export interface _EvmChain {
-  chainId_: number,
+export interface _EvmInfo {
   evmChainId: number,
   blockExplorer: string | null,
 }
@@ -71,7 +70,8 @@ export interface _SubstrateInfo {
   genesisHash: string,
   addressPrefix: number,
   crowdloanUrl: string | null,
-  category: SubstrateChainCategory[]
+  category: SubstrateChainCategory[],
+  blockExplorer: string | null
 }
 
 export interface _MultiChainAsset {

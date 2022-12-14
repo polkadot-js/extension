@@ -5,7 +5,7 @@ import arrowCounterClockWise from '@subwallet/extension-koni-ui/assets/arrow-cou
 import { IconMaps } from '@subwallet/extension-koni-ui/assets/icon';
 import Tooltip from '@subwallet/extension-koni-ui/components/Tooltip';
 import { ActionContext } from '@subwallet/extension-koni-ui/contexts';
-import useGetNetworkJson from '@subwallet/extension-koni-ui/hooks/screen/home/useGetNetworkJson';
+import useFetchChainInfo from '@subwallet/extension-koni-ui/hooks/screen/common/useGetChainInfo';
 import useToast from '@subwallet/extension-koni-ui/hooks/useToast';
 import { recoverDotSamaApi } from '@subwallet/extension-koni-ui/messaging';
 import { store } from '@subwallet/extension-koni-ui/stores';
@@ -20,7 +20,7 @@ interface Props extends ThemeProps {
 }
 
 function NetworkTools ({ className, networkKey }: Props): React.ReactElement<Props> {
-  const networkJson = useGetNetworkJson(networkKey);
+  const chainInfo = useFetchChainInfo(networkKey);
   const navigate = useContext(ActionContext);
   const { show } = useToast();
   const handleClickReload = useCallback((e: React.MouseEvent<HTMLElement>) => {
@@ -38,9 +38,9 @@ function NetworkTools ({ className, networkKey }: Props): React.ReactElement<Pro
 
   const handleClickEdit = useCallback((e: React.MouseEvent<HTMLElement>) => {
     e.stopPropagation();
-    store.dispatch({ type: 'networkConfigParams/update', payload: { data: networkJson, mode: 'edit' } as NetworkConfigParams });
+    store.dispatch({ type: 'networkConfigParams/update', payload: { data: chainInfo, mode: 'edit' } as NetworkConfigParams });
     navigate('/account/config-network');
-  }, [navigate, networkJson]);
+  }, [navigate, chainInfo]);
 
   return (
     <div className={className}>
@@ -85,7 +85,7 @@ export default React.memo(styled(NetworkTools)(() => `
     cursor: pointer;
     color: '#7B8098'
   }
-  
+
   svg {
     display: block;
   }

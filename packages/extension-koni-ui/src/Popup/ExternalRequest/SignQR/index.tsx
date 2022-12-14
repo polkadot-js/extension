@@ -1,18 +1,15 @@
 // Copyright 2019-2022 @polkadot/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { PASSWORD_EXPIRY_MIN } from '@subwallet/extension-base/defaults';
 import SignTransactionIcon from '@subwallet/extension-koni-ui/assets/icon/sign-transacion.svg';
-import { Button, Checkbox, Spinner, Warning } from '@subwallet/extension-koni-ui/components';
+import { Button, Spinner, Warning } from '@subwallet/extension-koni-ui/components';
 import { ScannerContext } from '@subwallet/extension-koni-ui/contexts/ScannerContext';
 import { useGetNetworkQrRequest } from '@subwallet/extension-koni-ui/hooks/useGetNetworkQrRequest';
 import useTranslation from '@subwallet/extension-koni-ui/hooks/useTranslation';
-import { accountIsLocked } from '@subwallet/extension-koni-ui/messaging';
 import AccountInfo from '@subwallet/extension-koni-ui/Popup/ExternalRequest/Shared/AccountInfo';
-import Unlock from '@subwallet/extension-koni-ui/Popup/Signing/Unlock';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import CN from 'classnames';
-import React, { useCallback, useContext, useEffect, useState } from 'react';
+import React, { useCallback, useContext, useState } from 'react';
 import styled from 'styled-components';
 
 interface Props extends ThemeProps {

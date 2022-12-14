@@ -75,10 +75,14 @@ describe('Extension', () => {
 
   beforeAll(async () => {
     extension = await createExtension();
+    await extension.handle('id', 'pri(keyring.change)', {
+      createNew: true,
+      newPassword: password
+    }, {} as chrome.runtime.Port);
   });
 
   test('exports account from keyring', async () => {
-    const { pair: { address } } = keyring.addUri(suri, password);
+    const { pair: { address } } = keyring.addUri(suri);
     const result = await extension.handle('id', 'pri(accounts.export)', {
       address,
       password

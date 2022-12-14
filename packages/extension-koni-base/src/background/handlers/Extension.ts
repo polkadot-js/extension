@@ -2954,6 +2954,7 @@ export default class KoniExtension extends Extension {
     if (fromKeyPair) {
       const { id: requestId, setState, updateState } = this.prepareExternalRequest();
       const callback = this.makeTransferCallback(from, to, networkKey, token, cb);
+      const network = state.getNetworkMapByKey(networkKey);
 
       let transferProm: Promise<void>;
 
@@ -2965,37 +2966,36 @@ export default class KoniExtension extends Extension {
           transferProm = makeERC20TransferQr(
             {
               assetAddress: tokenInfo.contractAddress,
-              callback,
-              chainId,
-              from,
+              callback: callback,
+              chainId: chainId,
+              from: from,
               id: requestId,
-              networkKey,
-              setState,
-              updateState,
-              to,
+              network: network,
+              setState: setState,
+              updateState: updateState,
+              to: to,
               transferAll: !!transferAll,
               value: value || '0',
-              web3ApiMap
+              web3ApiMap: web3ApiMap
             }
           );
         } else {
           transferProm = makeEVMTransferQr({
-            callback,
-            chainId,
-            from,
+            callback: callback,
+            chainId: chainId,
+            from: from,
             id: requestId,
-            networkKey,
-            setState,
-            to,
-            updateState,
+            network: network,
+            setState: setState,
+            to: to,
+            updateState: updateState,
             transferAll: !!transferAll,
             value: value || '0',
-            web3ApiMap
+            web3ApiMap: web3ApiMap
           });
         }
       } else {
         const apiProps = await state.getDotSamaApiMap()[networkKey].isReady;
-        const network = state.getNetworkMapByKey(networkKey);
 
         transferProm = makeTransferExternal({
           network: network,
@@ -3086,7 +3086,7 @@ export default class KoniExtension extends Extension {
         updateState: updateState,
         web3ApiMap: web3ApiMap,
         rawTransaction: rawTransaction,
-        networkKey: networkKey,
+        network: network,
         from: senderAddress
       });
 

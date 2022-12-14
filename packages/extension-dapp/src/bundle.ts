@@ -53,19 +53,22 @@ function getWindowExtensions (originName: string): Promise<InjectedExtension[]> 
       Object
         .entries(win.injectedWeb3)
         .map(([nameOrHash, { connect, enable, version }]): Promise<(InjectedExtension | void)> =>
-          (
-            connect
-              // new style, returning all info
-              ? connect(originName)
-              : nameOrHash && version && enable
-                // previous interface, leakages on name/version
-                ? enable(originName).then((e) =>
-                  objectSpread<InjectedExtension>({ name: nameOrHash, version }, e)
-                )
-                : Promise.resolve()
-          ).catch(({ message }: Error): void => {
-            console.error(`Error initializing ${nameOrHash}: ${message}`);
-          })
+          Promise
+            .resolve()
+            .then(() =>
+              connect
+                // new style, returning all info
+                ? connect(originName)
+                : enable
+                  // previous interface, leakages on name/version
+                  ? enable(originName).then((e) =>
+                    objectSpread<InjectedExtension>({ name: nameOrHash, version: version || 'unknown' }, e)
+                  )
+                  : Promise.reject(new Error('No connect(..) or enable(...) hook found'))
+            )
+            .catch(({ message }: Error): void => {
+              console.error(`Error initializing ${nameOrHash}: ${message}`);
+            })
         )
     )
     .then((exts) => exts.filter((e): e is InjectedExtension => !!e));

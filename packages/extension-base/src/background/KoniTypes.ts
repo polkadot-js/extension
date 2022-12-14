@@ -160,7 +160,8 @@ export interface StakingJson {
 
 export interface StakingRewardJson {
   ready: boolean;
-  details: Array<StakingRewardItem>;
+  slowInterval: Array<StakingRewardItem>;
+  fastInterval: Array<StakingRewardItem>;
 }
 
 export interface StakeUnlockingJson {

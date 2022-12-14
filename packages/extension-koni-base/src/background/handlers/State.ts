@@ -145,7 +145,7 @@ export default class KoniState extends State {
   private stakingSubject = new Subject<StakingJson>();
 
   private stakingRewardSubject = new Subject<StakingRewardJson>();
-  private stakingRewardState: StakingRewardJson = { ready: false, details: [] } as StakingRewardJson;
+  private stakingRewardState: StakingRewardJson = { ready: false, slowInterval: [], fastInterval: [] } as StakingRewardJson;
 
   private stakeUnlockingInfoSubject = new Subject<StakeUnlockingJson>();
   private stakeUnlockingInfo: StakeUnlockingJson = { timestamp: -1, details: [] };
@@ -716,14 +716,14 @@ export default class KoniState extends State {
   }
 
   public resetStakingReward () {
-    this.stakingRewardState.details = [];
+    this.stakingRewardState.slowInterval = [];
 
     this.stakingRewardSubject.next(this.stakingRewardState);
   }
 
-  public updateStakingReward (stakingRewardData: StakingRewardItem[], callback?: (stakingRewardData: StakingRewardJson) => void): void {
+  public updateStakingReward (stakingRewardData: StakingRewardItem[], type: 'slowInterval' | 'fastInterval', callback?: (stakingRewardData: StakingRewardJson) => void): void {
     this.stakingRewardState.ready = true;
-    this.stakingRewardState.details = this.stakingRewardState.details.concat(stakingRewardData);
+    this.stakingRewardState[type] = stakingRewardData;
 
     if (callback) {
       callback(this.stakingRewardState);

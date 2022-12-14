@@ -279,7 +279,7 @@ export class KoniSubscription {
 
     const result = await getNominationStakingRewardData(addresses, targetNetworkMap);
 
-    this.state.updateStakingReward(result);
+    this.state.updateStakingReward(result, 'slowInterval');
     this.logger.log('Set staking reward state done', result);
   }
 
@@ -322,7 +322,7 @@ export class KoniSubscription {
 
     const result = [...poolingStakingRewards, ...amplitudeUnclaimedStakingRewards];
 
-    this.state.updateStakingReward(result);
+    this.state.updateStakingReward(result, 'fastInterval');
     this.logger.log('Set staking reward state with fast interval done', result);
   }
 

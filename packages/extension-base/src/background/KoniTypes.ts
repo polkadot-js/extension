@@ -1530,6 +1530,15 @@ export interface ResponseUnlockKeyring {
   errors: string[];
 }
 
+export interface RequestKeyringExportMnemonic {
+  address: string;
+  password: string;
+}
+
+export interface ResponseKeyringExportMnemonic {
+  result: string;
+}
+
 /// Signing
 export interface RequestSigningApprovePasswordV2 {
   id: string;
@@ -1721,6 +1730,7 @@ export interface KoniRequestSignatures {
   'pri(keyring.migrate)': [RequestMigratePassword, ResponseMigratePassword];
   'pri(keyring.unlock)': [RequestUnlockKeyring, ResponseUnlockKeyring];
   'pri(keyring.lock)': [null, void];
+  'pri(keyring.export.mnemonic)': [RequestKeyringExportMnemonic, ResponseKeyringExportMnemonic];
 
   // Signing
   'pri(signing.approve.passwordV2)': [RequestSigningApprovePasswordV2, boolean];

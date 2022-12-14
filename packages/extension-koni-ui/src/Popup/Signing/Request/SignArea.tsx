@@ -1,7 +1,7 @@
 // Copyright 2019-2022 @polkadot/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import RequireMigratePasswordModal from '@subwallet/extension-koni-ui/components/Modal/RequireMigratePasswordModal';
+import RequireMigratePasswordModal from '@subwallet/extension-koni-ui/components/Signing/RequireMigratePassword';
 import { SIGN_MODE } from '@subwallet/extension-koni-ui/constants/signing';
 import useGetAccountByAddress from '@subwallet/extension-koni-ui/hooks/useGetAccountByAddress';
 import { useGetSignMode } from '@subwallet/extension-koni-ui/hooks/useGetSignMode';

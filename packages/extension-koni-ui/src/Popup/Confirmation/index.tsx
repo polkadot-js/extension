@@ -4,7 +4,7 @@
 import { ConfirmationDefinitions, ConfirmationType, NetworkJson } from '@subwallet/extension-base/background/KoniTypes';
 import { AccountJson } from '@subwallet/extension-base/background/types';
 import { AccountContext, ActionContext, Button, ButtonArea, ConfirmationsQueueContext, Warning } from '@subwallet/extension-koni-ui/components';
-import RequireMigratePasswordModal from '@subwallet/extension-koni-ui/components/Modal/RequireMigratePasswordModal';
+import RequireMigratePasswordModal from '@subwallet/extension-koni-ui/components/Signing/RequireMigratePassword';
 import { SIGN_MODE } from '@subwallet/extension-koni-ui/constants/signing';
 import useTranslation from '@subwallet/extension-koni-ui/hooks/useTranslation';
 import { completeConfirmation } from '@subwallet/extension-koni-ui/messaging';

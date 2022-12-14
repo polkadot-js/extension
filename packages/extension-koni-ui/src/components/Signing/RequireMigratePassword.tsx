@@ -16,7 +16,7 @@ interface Props extends ThemeProps{
   address?: string;
 }
 
-const RequireMigratePasswordModal = ({ address, className }: Props) => {
+const RequireMigratePassword = ({ address, className }: Props) => {
   const { t } = useTranslation();
 
   const account = useGetAccountByAddress(address);
@@ -72,7 +72,7 @@ const RequireMigratePasswordModal = ({ address, className }: Props) => {
   );
 };
 
-export default React.memo(styled(RequireMigratePasswordModal)(({ theme }: Props) => `
+export default React.memo(styled(RequireMigratePassword)(({ theme }: Props) => `
   .migrate-notification {
     font-style: normal;
     font-weight: 500;

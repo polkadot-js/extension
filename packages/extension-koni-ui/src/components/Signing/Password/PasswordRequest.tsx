@@ -4,7 +4,7 @@
 import { AccountJson } from '@subwallet/extension-base/background/types';
 import { Warning } from '@subwallet/extension-koni-ui/components';
 import Button from '@subwallet/extension-koni-ui/components/Button';
-import RequireMigratePasswordModal from '@subwallet/extension-koni-ui/components/Modal/RequireMigratePasswordModal';
+import RequireMigratePasswordModal from '@subwallet/extension-koni-ui/components/Signing/RequireMigratePassword';
 import { SigningContext } from '@subwallet/extension-koni-ui/contexts/SigningContext';
 import useTranslation from '@subwallet/extension-koni-ui/hooks/useTranslation';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';

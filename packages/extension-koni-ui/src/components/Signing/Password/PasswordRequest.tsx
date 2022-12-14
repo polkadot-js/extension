@@ -4,11 +4,11 @@
 import { AccountJson } from '@subwallet/extension-base/background/types';
 import { Warning } from '@subwallet/extension-koni-ui/components';
 import Button from '@subwallet/extension-koni-ui/components/Button';
-import MigrateMasterPasswordModal from '@subwallet/extension-koni-ui/components/Modal/MigrateMasterPasswordModal';
+import RequireMigratePasswordModal from '@subwallet/extension-koni-ui/components/Modal/RequireMigratePasswordModal';
 import { SigningContext } from '@subwallet/extension-koni-ui/contexts/SigningContext';
 import useTranslation from '@subwallet/extension-koni-ui/hooks/useTranslation';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
-import React, { useCallback, useContext, useState } from 'react';
+import React, { useCallback, useContext } from 'react';
 import styled from 'styled-components';
 
 interface Props extends ThemeProps {
@@ -29,8 +29,6 @@ const PasswordRequest = ({ account,
   const { signingState } = useContext(SigningContext);
 
   const { errors, isBusy } = signingState;
-
-  const [isVisible, setIsVisible] = useState<boolean>(!account.isMasterPassword);
 
   const onSubmit = useCallback(() => {
     handlerStart();
@@ -54,34 +52,12 @@ const PasswordRequest = ({ account,
     }
   }, [errors, t]);
 
-  const onOpenModal = useCallback(() => {
-    setIsVisible(true);
-  }, []);
-
-  const onCloseModal = useCallback(() => {
-    setIsVisible(false);
-  }, []);
-
   return (
     <div className={className}>
       { children }
 
       <div className='password-signing__separator' />
-      {
-        !account.isMasterPassword && (
-          <div className='migrate-notification'>
-            <span>
-              {t<string>('To continue with the transaction, please apply the master password')}&nbsp;
-            </span>
-            <span
-              className='highlight-migrate'
-              onClick={onOpenModal}
-            >
-              {t('Migrate now')}
-            </span>
-          </div>
-        )
-      }
+      <RequireMigratePasswordModal address={account.address} />
       { renderError() }
       <div className={'password-signing-btn-container'}>
         <Button
@@ -99,16 +75,6 @@ const PasswordRequest = ({ account,
           {t('Confirm')}
         </Button>
       </div>
-      {
-        isVisible && (
-          <MigrateMasterPasswordModal
-            address={account.address}
-            className='migrate-modal'
-            closeModal={onCloseModal}
-            withSubTitle={true}
-          />
-        )
-      }
     </div>
   );
 };
@@ -159,25 +125,5 @@ export default React.memo(styled(PasswordRequest)(({ theme }: Props) => `
 
   .auth-transaction-error {
     margin-top: 10px
-  }
-
-  .migrate-notification {
-    font-style: normal;
-    font-weight: 500;
-    font-size: 15px;
-    line-height: 26px;
-    color: ${theme.textColor2};
-    margin-bottom: 8px;
-
-    .highlight-migrate {
-      text-decoration: underline;
-      cursor: pointer;
-      color: ${theme.buttonTextColor2};
-    }
-  }
-
-  .button-migrate {
-    width: 90px;
-    height: 30px;
   }
 `));

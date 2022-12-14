@@ -1,6 +1,7 @@
 // Copyright 2019-2022 @subwallet/extension-koni authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
+import Common from '@ethereumjs/common';
 import { withErrorLog } from '@subwallet/extension-base/background/handlers/helpers';
 import State, { AuthUrls, Resolver } from '@subwallet/extension-base/background/handlers/State';
 import { isSubscriptionRunning, unsubscribe } from '@subwallet/extension-base/background/handlers/subscriptions';
@@ -38,6 +39,7 @@ import { KeyringPair$Meta } from '@subwallet/keyring/types';
 import { keyring } from '@subwallet/ui-keyring';
 import { accounts } from '@subwallet/ui-keyring/observable/accounts';
 import SimpleKeyring from 'eth-simple-keyring';
+import { Transaction } from 'ethereumjs-tx';
 import RLP, { Input } from 'rlp';
 import { BehaviorSubject, Subject } from 'rxjs';
 import Web3 from 'web3';
@@ -86,6 +88,24 @@ function generateDefaultCrowdloanMap () {
 
   return crowdloanMap;
 }
+
+const createValidateConfirmationResponsePayload = <CT extends ConfirmationType>(fromAddress: string): (result: ConfirmationDefinitions[CT][1]) => Error | undefined => {
+  return (result: ConfirmationDefinitions[CT][1]) => {
+    if (result.isApproved) {
+      const pair = keyring.getPair(fromAddress);
+
+      if (pair.isLocked) {
+        keyring.unlockPair(pair.address);
+      }
+
+      if (pair.isLocked) {
+        return Error('Cannot unlock pair');
+      }
+    }
+
+    return undefined;
+  };
+};
 
 export default class KoniState extends State {
   private readonly unsubscriptionMap: Record<string, () => void> = {};
@@ -2066,24 +2086,7 @@ export default class KoniState extends State {
       throw new EvmRpcError('INVALID_PARAMS', 'Account ' + address + ' not in allowed list');
     }
 
-    const requiredPassword = true;
-    let privateKey = '';
-
-    const validateConfirmationResponsePayload = (result: ConfirmationDefinitions['evmSignatureRequest'][1]) => {
-      if (result.isApproved) {
-        if (requiredPassword && !result?.password) {
-          return Error('Password is required');
-        }
-
-        privateKey = (result?.password && this.accountExportPrivateKey({ address: address, password: result.password }).privateKey) || '';
-
-        if (privateKey === '') {
-          return Error('Cannot export private key');
-        }
-      }
-
-      return undefined;
-    };
+    const validateConfirmationResponsePayload = createValidateConfirmationResponsePayload<'evmSignatureRequest'>(address);
 
     let meta: KeyringPair$Meta;
 
@@ -2103,37 +2106,26 @@ export default class KoniState extends State {
       // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
       const signPayload = { address, type: method, payload };
 
-      await this.addConfirmation(id, url, 'evmSignatureRequest', signPayload, { requiredPassword: true, address }, validateConfirmationResponsePayload)
-        .then(({ isApproved, password }) => {
-          if (isApproved && password) {
-            return password;
+      return this.addConfirmation(id, url, 'evmSignatureRequest', signPayload, { requiredPassword: true, address }, validateConfirmationResponsePayload)
+        .then(async ({ isApproved }) => {
+          if (isApproved) {
+            const pair = keyring.getPair(address);
+
+            switch (method) {
+              case 'eth_sign':
+              case 'personal_sign':
+              case 'eth_signTypedData':
+              case 'eth_signTypedData_v1':
+              case 'eth_signTypedData_v3':
+              case 'eth_signTypedData_v4':
+                return await pair.evmSigner.signMessage(payload, method);
+              default:
+                throw new EvmRpcError('INVALID_PARAMS', 'Not found sign method');
+            }
+          } else {
+            throw new EvmRpcError('USER_REJECTED_REQUEST');
           }
-
-          throw new EvmRpcError('USER_REJECTED_REQUEST');
         });
-
-      if (privateKey === '') {
-        throw Error('Cannot export private key');
-      }
-
-      const simpleKeyring = new SimpleKeyring([privateKey]);
-
-      switch (method) {
-        case 'eth_sign':
-          return await simpleKeyring.signMessage(address, payload as string);
-        case 'personal_sign':
-          return await simpleKeyring.signPersonalMessage(address, payload as string);
-        case 'eth_signTypedData':
-          return await simpleKeyring.signTypedData(address, payload as any[]);
-        case 'eth_signTypedData_v1':
-          return await simpleKeyring.signTypedData_v1(address, payload as any[]);
-        case 'eth_signTypedData_v3':
-          return await simpleKeyring.signTypedData_v3(address, payload);
-        case 'eth_signTypedData_v4':
-          return await simpleKeyring.signTypedData_v4(address, payload);
-        default:
-          throw new EvmRpcError('INVALID_PARAMS', 'Not found sign method');
-      }
     } else {
       let qrPayload = '';
       let canSign = false;
@@ -2228,25 +2220,7 @@ export default class KoniState extends State {
       throw new EvmRpcError('INVALID_PARAMS', 'Balance can be not enough to send transaction');
     }
 
-    const requiredPassword = true; // password is always required for to export private, we have planning to save password 15 min like sign keypair.isLocked;
-
-    let privateKey = '';
-
-    const validateConfirmationResponsePayload = (result: ConfirmationDefinitions['evmSendTransactionRequest'][1]) => {
-      if (result.isApproved) {
-        if (requiredPassword && !result?.password) {
-          return Error('Password is required');
-        }
-
-        privateKey = (result?.password && this.accountExportPrivateKey({ address: fromAddress, password: result.password }).privateKey) || '';
-
-        if (privateKey === '') {
-          return Error('Cannot export private key');
-        }
-      }
-
-      return undefined;
-    };
+    const validateConfirmationResponsePayload = createValidateConfirmationResponsePayload<'evmSendTransactionRequest'>(fromAddress);
 
     const requestPayload = { ...transaction, estimateGas };
 
@@ -2286,17 +2260,45 @@ export default class KoniState extends State {
       return this.addConfirmation(id, url, 'evmSendTransactionRequest', requestPayload, { requiredPassword: true, address: fromAddress, networkKey }, validateConfirmationResponsePayload)
         .then(async ({ isApproved }) => {
           if (isApproved) {
-            const signTransaction = await web3.eth.accounts.signTransaction(transaction, privateKey);
+            const pair = keyring.getPair(fromAddress);
+
+            const params = {
+              ...transaction,
+              gasPrice: anyNumberToBN(gasPrice).toNumber(),
+              gasLimit: anyNumberToBN(estimateGas).toNumber(),
+              nonce: await web3.eth.getTransactionCount(fromAddress)
+            };
+
+            console.log(params);
+
+            const network = this.getNetworkMapByKey(networkKey);
+
+            const common = Common.forCustomChain('mainnet', {
+              name: networkKey,
+              networkId: network.evmChainId as number,
+              chainId: network.evmChainId as number
+            }, 'petersburg');
+
+            // @ts-ignore
+            const tx = new Transaction(params, { common });
+
+            const callHash = pair.evmSigner.signTransaction(tx);
             let transactionHash = '';
 
             return new Promise<string>((resolve, reject) => {
-              signTransaction.rawTransaction && web3.eth.sendSignedTransaction(signTransaction.rawTransaction)
+              web3.eth.sendSignedTransaction(callHash)
                 .once('transactionHash', (hash) => {
                   transactionHash = hash;
                   resolve(hash);
                 })
                 .once('receipt', setTransactionHistory)
                 .once('error', (e) => {
+                  console.error(e);
+                  setFailedHistory(transactionHash);
+                  reject(e);
+                })
+                .catch((e) => {
+                  console.error(e);
                   setFailedHistory(transactionHash);
                   reject(e);
                 });

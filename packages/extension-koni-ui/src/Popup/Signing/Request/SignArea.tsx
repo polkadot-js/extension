@@ -1,6 +1,10 @@
 // Copyright 2019-2022 @polkadot/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
+import RequireMigratePasswordModal from '@subwallet/extension-koni-ui/components/Modal/RequireMigratePasswordModal';
+import { SIGN_MODE } from '@subwallet/extension-koni-ui/constants/signing';
+import useGetAccountByAddress from '@subwallet/extension-koni-ui/hooks/useGetAccountByAddress';
+import { useGetSignMode } from '@subwallet/extension-koni-ui/hooks/useGetSignMode';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import CN from 'classnames';
 import React, { useCallback, useContext, useState } from 'react';
@@ -11,17 +15,21 @@ import useTranslation from '../../../hooks/useTranslation';
 import { approveSignPasswordV2, cancelSignRequest } from '../../../messaging';
 
 interface Props extends ThemeProps {
+  address: string;
   buttonText: string;
+  children?: React.ReactElement
   className?: string;
   error: string | null;
   isExternal?: boolean;
   isFirst: boolean;
   setError: (value: string | null) => void;
   signId: string;
-  children?: React.ReactElement
 }
 
-function SignArea ({ buttonText, children, className, error, isExternal, isFirst, setError, signId }: Props): JSX.Element {
+function SignArea ({ address, buttonText, children, className, error, isExternal, isFirst, setError, signId }: Props): JSX.Element {
+  const account = useGetAccountByAddress(address);
+  const signMode = useGetSignMode(account);
+
   const [isBusy, setIsBusy] = useState(false);
   const onAction = useContext(ActionContext);
   const { t } = useTranslation();
@@ -56,6 +64,7 @@ function SignArea ({ buttonText, children, className, error, isExternal, isFirst
       {children}
       {isFirst && !isExternal && (
         <>
+          <RequireMigratePasswordModal address={address} />
           <div className='sign-button-container'>
             <Button
               className='sign-button __cancel'
@@ -69,7 +78,7 @@ function SignArea ({ buttonText, children, className, error, isExternal, isFirst
             <Button
               className='sign-button __sign'
               isBusy={isBusy}
-              isDisabled={!!error}
+              isDisabled={!!error || signMode !== SIGN_MODE.PASSWORD || !account?.isMasterPassword}
               onClick={_onSign}
             >
               {buttonText}

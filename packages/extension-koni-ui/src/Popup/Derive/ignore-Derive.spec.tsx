@@ -58,7 +58,7 @@ describe('Derive', () => {
           >
             <ThemeProvider theme={themes.dark}>
               <Route path='/account/derive/:address'>
-                <Derive isLocked={locked} />
+                <Derive />
               </Route>
             </ThemeProvider>
           </AccountContext.Provider>

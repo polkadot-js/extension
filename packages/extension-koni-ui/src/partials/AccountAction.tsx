@@ -8,12 +8,10 @@ import React from 'react';
 import { useSelector } from 'react-redux';
 import styled from 'styled-components';
 
-import { canDerive } from '@subwallet/extension-base/utils';
 import Link from '@subwallet/extension-koni-ui/components/Link';
 import Menu from '@subwallet/extension-koni-ui/components/Menu';
 import MenuDivider from '@subwallet/extension-koni-ui/components/MenuDivider';
 import useTranslation from '@subwallet/extension-koni-ui/hooks/useTranslation';
-import { EVM_ACCOUNT_TYPE } from '@subwallet/extension-koni-ui/Popup/CreateAccount';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { isAccountAll } from '@subwallet/extension-koni-ui/util';
 import { IconMaps } from '@subwallet/extension-koni-ui/assets/icon';
@@ -48,15 +46,6 @@ function AccountAction ({ className, isShowZeroBalances, reference, setImgSelect
           >
             {t<string>('Rename')}
           </Link>
-          {!currentAccount?.isExternal && canDerive(currentAccount?.type) && (
-            <Link
-              className='account-action__menu-item'
-              isDisabled={!currentAccount.isMasterAccount && currentAccount.type === EVM_ACCOUNT_TYPE}
-              to={`/account/derive/${currentAccount?.address}/locked`}
-            >
-              {t<string>('Derive New Account')}
-            </Link>
-          )}
         </div>
 
         <MenuDivider />

@@ -598,6 +598,8 @@ export interface RequestDeriveCreateV2 {
 
 export interface RequestDeriveCreateV3 {
   address: string;
+
+  name: string;
   isAllowed: boolean;
 }
 

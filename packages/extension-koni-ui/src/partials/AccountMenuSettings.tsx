@@ -68,7 +68,6 @@ function AccountMenuSettings ({ changeAccountCallback, className, closeSetting, 
   const _openCreateAccount = useCallback(
     () => {
       window.localStorage.setItem('popupNavigation', createAccountPath);
-      windowOpen(createAccountPath).catch((e) => console.log('error', e));
     }, []
   );
 
@@ -121,8 +120,8 @@ function AccountMenuSettings ({ changeAccountCallback, className, closeSetting, 
           <MenuSettingItem className='account-menu-settings__menu-item'>
             <Link
               className='account-menu-settings__menu-item-text'
-              onClick={isPopup && (isFirefox || isLinux) ? _openCreateAccount : undefined}
-              to={isPopup && (isFirefox || isLinux) ? undefined : createAccountPath}
+              onClick={_openCreateAccount}
+              to={createAccountPath}
             >
               {/* @ts-ignore */}
               <FontAwesomeIcon icon={faPlusCircle} />

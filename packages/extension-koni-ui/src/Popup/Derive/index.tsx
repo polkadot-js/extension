@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { canDerive } from '@subwallet/extension-base/utils';
-import { Header } from '@subwallet/extension-koni-ui/partials';
+import { Header, Name } from '@subwallet/extension-koni-ui/partials';
 import { EVM_ACCOUNT_TYPE } from '@subwallet/extension-koni-ui/Popup/CreateAccount';
 import AddressDropdown from '@subwallet/extension-koni-ui/Popup/Derive/AddressDropdown';
 import CN from 'classnames';
@@ -21,6 +21,11 @@ function Derive ({ className }: Props): React.ReactElement<Props> {
   const { t } = useTranslation();
   const onAction = useContext(ActionContext);
   const { accounts } = useContext(AccountContext);
+
+  const accountsWithoutAll = accounts.filter((acc: { address: string; }) => acc.address !== 'ALL');
+  const defaultName = useMemo((): string => `Account ${accountsWithoutAll.length + 1}`, [accountsWithoutAll.length]);
+
+  const [name, setName] = useState<string | null>(defaultName);
   const [isBusy, setIsBusy] = useState(false);
   const [isConnectWhenDerive, setConnectWhenDerive] = useState(true);
   const [parentAddress, setParentAddress] = useState('');
@@ -30,14 +35,15 @@ function Derive ({ className }: Props): React.ReactElement<Props> {
   }, []);
 
   const _onCreate = useCallback(() => {
-    if (!parentAddress) {
+    if (!parentAddress || !name) {
       return;
     }
 
     setIsBusy(true);
     deriveAccountV3({
       address: parentAddress,
-      isAllowed: isConnectWhenDerive
+      isAllowed: isConnectWhenDerive,
+      name: name
     })
       .then(() => {
         window.localStorage.setItem('popupNavigation', '/');
@@ -47,7 +53,7 @@ function Derive ({ className }: Props): React.ReactElement<Props> {
         setIsBusy(false);
         console.error(error);
       });
-  }, [isConnectWhenDerive, onAction, parentAddress]);
+  }, [isConnectWhenDerive, onAction, parentAddress, name]);
 
   const allAddresses = useMemo(
     () => accounts
@@ -75,7 +81,11 @@ function Derive ({ className }: Props): React.ReactElement<Props> {
             />
           </Label>
         </div>
-
+        <Name
+          isFocused
+          onChange={setName}
+          value={name || ''}
+        />
         <Checkbox
           checked={isConnectWhenDerive}
           label={t<string>('Auto connect to all DApps after create')}

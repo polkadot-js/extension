@@ -9,8 +9,8 @@ import { newApolloClient } from '@subwallet/extension-koni-base/api/subquery/sub
 import { isAccountAll, reformatAddress } from '@subwallet/extension-koni-base/utils';
 
 export const HistoryApiMapSubsquid: Record<string, string> = {
-  polkadot: 'https://squid.subsquid.io/polkadot-explorer/graphql',
-  kusama: 'https://squid.subsquid.io/kusama-explorer/graphql'
+  // polkadot: 'https://squid.subsquid.io/polkadot-explorer/graphql',
+  // kusama: 'https://squid.subsquid.io/kusama-explorer/graphql'
   // moonriver: 'https://squid.subsquid.io/moonriver-explorer/graphql',
   // moonbeam: 'https://squid.subsquid.io/moonbeam-explorer/graphql',
 };
@@ -67,7 +67,7 @@ export const DOTSAMA_HISTORY_QUERY = gql`
 
 export const DOTSAMA_SUBSQUID_HISTORY_QUERY = gql`
     query DotsamaSubquidQuery($address: String = null, $last: Int = 100) {
-        transfers(limit: $last, where: {id_eq: $address, OR: {to: {id_eq: $address}}}) {
+        transfers(limit: $last, where: {id_eq: $address, OR: {to: {id_eq: $address}}}, orderBy: blockNumber_DESC) {
         id
         asset {
           ... on TransferAssetToken {

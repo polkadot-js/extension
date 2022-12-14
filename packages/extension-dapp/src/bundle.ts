@@ -20,7 +20,10 @@ win.injectedWeb3 = win.injectedWeb3 || {};
 
 // true when anything has been injected and is available
 function web3IsInjected (): boolean {
-  return Object.keys(win.injectedWeb3).length !== 0;
+  return Object
+    .values(win.injectedWeb3)
+    .filter(({ connect, enable }) => !!(connect || enable))
+    .length !== 0;
 }
 
 // helper to throw a consistent error when not enabled

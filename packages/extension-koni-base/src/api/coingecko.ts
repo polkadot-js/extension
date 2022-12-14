@@ -16,7 +16,7 @@ export const getTokenPrice = async (chains: Array<string> = Object.keys(PREDEFIN
   try {
     const inverseMap: Record<string, string> = {};
 
-    chains.push(...['ethereum', 'bitcoin', 'tether', 'usd-coin', 'binancecoin', 'binance-usd', 'xrp', 'solana', 'dai', 'acala-dollar', 'kolibri-usd', 'zenlink-network-token', 'darwinia-commitment-token', 'kintsugi-btc', 'moonbeam']);
+    chains.push(...['ethereum', 'bitcoin', 'tether', 'usd-coin', 'binancecoin', 'binance-usd', 'xrp', 'solana', 'dai', 'acala-dollar', 'kolibri-usd', 'zenlink-network-token', 'darwinia-commitment-token', 'kintsugi-btc', 'moonbeam', 'interbtc']);
 
     const chainsStr = chains.join(',');
     const res = await axios.get(`https://api.coingecko.com/api/v3/coins/markets?vs_currency=${currency}&per_page=1000&ids=${chainsStr}`);

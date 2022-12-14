@@ -126,8 +126,6 @@ export class KoniSubscription {
       localStorage.setItem('authUrls', '{}');
     });
 
-    this.state.fetchCrowdloanFundMap().then(this.logger.log).catch(this.logger.error);
-
     this.state.getCurrentAccount((currentAccountInfo) => {
       if (currentAccountInfo) {
         const { address } = currentAccountInfo;

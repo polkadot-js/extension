@@ -67,7 +67,9 @@ function getItems (networkKey: string, historyMap: Record<string, TransactionHis
 function Wrapper ({ className, historyMap, networkKey, registryMap }: Props): React.ReactElement<Props> {
   const readyNetworks = getReadyNetwork(registryMap);
   const items = getItems(networkKey, historyMap);
-  const readyItems = items.filter((i) => readyNetworks.includes(i.networkKey));
+  const readyItems = items
+    .filter((i) => readyNetworks.includes(i.networkKey))
+    .sort((a, b) => (a.time < b.time) ? 1 : -1);
 
   if (!readyItems.length) {
     return (<TransactionHistoryEmptyList />);

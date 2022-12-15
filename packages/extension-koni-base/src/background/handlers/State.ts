@@ -795,6 +795,11 @@ export default class KoniState extends State {
 
   public setHistory (address: string, network: string, item: TransactionHistoryItemType | TransactionHistoryItemType[], callback?: (items: TransactionHistoryItemType[]) => void): void {
     let items: TransactionHistoryItemType[];
+    const networkInfo = this.getNetworkMap()[network];
+
+    if (!networkInfo) {
+      return;
+    }
 
     if (item && !Array.isArray(item)) {
       item.origin = 'app';
@@ -802,6 +807,14 @@ export default class KoniState extends State {
     } else {
       items = item;
     }
+
+    items.forEach((item) => {
+      item.feeSymbol = networkInfo.nativeToken;
+
+      if (!item.changeSymbol) {
+        item.changeSymbol = networkInfo.nativeToken;
+      }
+    });
 
     if (items.length) {
       this.getAccountAddress().then((currentAddress) => {
@@ -990,6 +1003,10 @@ export default class KoniState extends State {
     }
 
     return [checkingAddress];
+  }
+
+  public getAllAddresses (): string[] {
+    return Object.keys(accounts.subject.value);
   }
 
   public getBalance (reset?: boolean): BalanceJson {

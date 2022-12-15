@@ -1,5 +1,23 @@
 # CHANGELOG
 
+## 0.7.5 (Koni)
+Build date: Dec 15, 2022.
+
+Update:
+- Add support for the Octopus Network ecosystem (#788)
+- Handle case attach and send asset for Ledger account with addess index #0 (#846)
+- Update default network for sign message request (#890)
+- Update RMRK NFT endpoints (#893)
+- Turn off background in case extension reloaded and popup never opened (#912)
+- Update price for iBTC (#921)
+
+- Bug fixes:
+- Fix showing incorrect Unclaim reward information on "All Accounts" mode (#907)
+- Fix wrong signature when signing raw with QR Signer account (#897)
+- Add incrementDelegatorRewards call to Amplitude reward claiming (#914)
+- Update message when scan QR code with QR signer account in case the account does not exist (#889)
+- Update get balance function for Kusama (#916)
+
 ## 0.7.4 (Koni)
 Build date: Dec 4, 2022.
 

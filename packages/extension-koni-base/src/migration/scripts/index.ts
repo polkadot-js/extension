@@ -7,6 +7,8 @@ import RemoveWrongCrowdloan from '@subwallet/extension-koni-base/migration/scrip
 import BaseMigrationJob from '../Base';
 import ClearOldStorage from './ClearOldStorage';
 import ConvertTransactionHistoryFromChromeStorageToIndexedDB from './ConvertTransactionHistoryFromChromeStorageToIndexedDB';
+import ResetTransactionHistoryEventIdx
+  from "@subwallet/extension-koni-base/migration/scripts/ResetTransactionHistoryEventIdx";
 
 export default <Record<string, typeof BaseMigrationJob>> {
   // '0.5.3-2': FixMissingTransactionHistory,
@@ -14,5 +16,6 @@ export default <Record<string, typeof BaseMigrationJob>> {
   // '0.5.3-3-1': ConvertTransactionHistoryFromChromeStorageToIndexedDB, // Can run multiple times with diffrent key
   '0.5.6-1': ClearOldStorage,
   '0.6.6-1': ChangeRouteToHome,
-  '0.7.2-1': RemoveWrongCrowdloan
+  '0.7.2-1': RemoveWrongCrowdloan,
+  '0.7.5-0': ResetTransactionHistoryEventIdx
 };

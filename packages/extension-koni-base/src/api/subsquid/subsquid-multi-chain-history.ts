@@ -69,47 +69,34 @@ const query = gql`query transactionQuery($addresses: [String!], $limit: Float = 
   }
 }`;
 
-const CACHE_TIMEOUT = 60000;
-const cacheData = {
-  beforeRequestInputArgs: '',
-  cache: {} as Record<string, TransactionHistoryItemType[]>,
-  timeout: new Date().getTime() + CACHE_TIMEOUT
-};
-
 export async function fetchMultiChainHistories (addresses: string[], limit = 500) {
   const response = await client.query<TransactionByAddress, QueryInput>({ query, variables: { addresses, limit } });
   const responseData = response.data.transactionsByAddress;
+  const histories = {} as Record<string, TransactionHistoryItemType[]>;
 
-  if (JSON.stringify(addresses) !== cacheData.beforeRequestInputArgs) {
-    addresses.forEach((address) => {
-      const addressData: TransactionHistoryItemType[] = [];
+  addresses.forEach((address) => {
+    const addressData: TransactionHistoryItemType[] = [];
 
-      responseData.forEach(({ _data, args, blockNumber, chainId, name, relatedAddresses, signer, timestamp }) => {
-        if ((address === signer || relatedAddresses.indexOf(address) > -1) && name === 'Balances.Transfer') {
-          const { extrinsic: { fee, hash, success } } = JSON.parse(_data) as HistoryData;
-          const { amount } = JSON.parse(args) as HistoryArgs;
+    responseData.forEach(({ _data, args, blockNumber, chainId, name, relatedAddresses, signer, timestamp }) => {
+      if ((address === signer || relatedAddresses.indexOf(address) > -1) && name === 'Balances.Transfer') {
+        const { extrinsic: { fee, hash, success } } = JSON.parse(_data) as HistoryData;
+        const { amount } = JSON.parse(args) as HistoryArgs;
 
-          addressData.push({
-            time: timestamp,
-            networkKey: chainId,
-            change: amount,
-            fee,
-            isSuccess: success,
-            action: address === signer ? 'send' : 'received',
-            extrinsicHash: hash,
-            origin: 'network',
-            eventIdx: blockNumber
-          });
-        }
-      });
-      cacheData.cache[address] = addressData;
-    }, {} as Record<string, TransactionHistoryItemType[]>);
+        addressData.push({
+          time: timestamp,
+          networkKey: chainId,
+          change: amount,
+          fee,
+          isSuccess: success,
+          action: address === signer ? 'send' : 'received',
+          extrinsicHash: hash,
+          origin: 'network',
+          eventIdx: 0
+        });
+      }
+    });
+    histories[address] = addressData;
+  }, {} as Record<string, TransactionHistoryItemType[]>);
 
-    cacheData.beforeRequestInputArgs = JSON.stringify(addresses);
-    cacheData.timeout = new Date().getTime() + CACHE_TIMEOUT;
-  }
-
-  console.debug(cacheData.cache);
-
-  return cacheData.cache;
+  return histories;
 }

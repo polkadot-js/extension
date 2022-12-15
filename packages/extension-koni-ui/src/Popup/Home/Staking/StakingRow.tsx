@@ -255,7 +255,7 @@ function StakingRow ({ activeStake, chainName, className, index, isCanSign, logo
                   }
 
                   {
-                    reward?.unclaimedReward && <div className={'reward-container'}>
+                    reward?.unclaimedReward && !isNaN(parseFloat(reward?.unclaimedReward)) && <div className={'reward-container'}>
                       <div className={'reward-title'}>Unclaimed reward</div>
                       <div className={'reward-amount'}>
                         <div>{editBalance(reward?.unclaimedReward || '', 9, false)}</div>
@@ -266,7 +266,7 @@ function StakingRow ({ activeStake, chainName, className, index, isCanSign, logo
                 </div>
                 : <div>
                   {
-                    reward?.unclaimedReward && <div className={'reward-container'}>
+                    reward?.unclaimedReward && !isNaN(parseFloat(reward?.unclaimedReward)) && <div className={'reward-container'}>
                       <div className={'reward-title'}>Unclaimed reward</div>
                       <div className={'reward-amount'}>
                         <div>{editBalance(reward?.unclaimedReward || '', 9, false)}</div>

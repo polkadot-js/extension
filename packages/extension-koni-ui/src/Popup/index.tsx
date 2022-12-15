@@ -310,7 +310,11 @@ export default function Popup (): React.ReactElement {
                                       : (
                                         (!keyringState.hasMasterPassword && !noAccount)
                                           ? (
-                                            wrapWithErrorBoundary(<Home />, 'Home')
+                                            <Switch>
+                                              <Route path='/account/create'>{wrapWithErrorBoundary(<CreateAccount />, 'account-creation')}</Route>
+                                              <Route path='/account/import-seed'>{wrapWithErrorBoundary(<ImportSeed />, 'import-seed')}</Route>
+                                              <Route path='/'>{wrapWithErrorBoundary(<Home />, 'Home')}</Route>
+                                            </Switch>
                                           )
                                           : <Switch>
                                             <Route path='/auth-list'>{wrapWithErrorBoundary(<AuthList />, 'auth-list')}</Route>

@@ -131,12 +131,13 @@ enum ValidationStateActionType {
   UPDATE_PROVIDER_VALIDATION = 'UPDATE_PROVIDER_VALIDATION',
   UPDATE_PROVIDER_CONNECTED = 'UPDATE_PROVIDER_CONNECTED',
   UPDATE_IS_CURRENT_ENDPOINT = 'UPDATE_IS_CURRENT_ENDPOINT',
-  UPDATE_PROVIDER_PREDEFINED = 'UPDATE_PROVIDER_PREDEFINED'
+  UPDATE_PROVIDER_PREDEFINED = 'UPDATE_PROVIDER_PREDEFINED',
+  UPDATE_PROVIDER_SELECTION = 'UPDATE_PROVIDER_SELECTION'
 }
 
 interface ValidationStateAction {
   type: ValidationStateActionType,
-  payload: NETWORK_ERROR | boolean
+  payload: NETWORK_ERROR | boolean | Record<string, any>
 }
 
 function validationStateReducer (state: ValidationState, action: ValidationStateAction) {
@@ -146,6 +147,17 @@ function validationStateReducer (state: ValidationState, action: ValidationState
         ...state,
         validationError: action.payload as NETWORK_ERROR
       };
+
+    case ValidationStateActionType.UPDATE_PROVIDER_SELECTION: {
+      const { isProviderPredefined, needValidating } = action.payload as Record<string, boolean>;
+
+      return {
+        ...state,
+        isProviderPredefined,
+        needValidating
+      };
+    }
+
     default:
       throw new Error();
   }
@@ -372,24 +384,6 @@ function NetworkEdit ({ className }: Props): React.ReactElement {
   //   }).catch(console.error);
   // }, [_goBack, _isValidProvider, isCurrentEndpoint, isProviderConnected, networkInfo, show]);
 
-  // const onChangeChain = useCallback((val: string) => {
-  //   if (val.split(' ').join('') === '') {
-  //     setIsValidChain(false);
-  //   } else {
-  //     setIsValidChain(true);
-  //   }
-  //
-  //   setNetworkInfo({
-  //     ...networkInfo,
-  //     chain: val
-  //   });
-  // }, [networkInfo]);
-
-  // const onChangeProvider = useCallback((val: string) => {
-  //   setProvider(val);
-  //   setNeedValidate(true);
-  // }, []);
-
   // const onChangeParaId = useCallback((val: string) => {
   //   if (val === '') {
   //     setNetworkInfo({
@@ -453,9 +447,16 @@ function NetworkEdit ({ className }: Props): React.ReactElement {
 
   const onChangeProvider = useCallback((value: string) => {
     setProvider(value);
+    dispatchValidationState({ type: ValidationStateActionType.UPDATE_NEED_VALIDATING, payload: true });
   }, []);
 
   const onChangeChainName = useCallback((value: string) => {
+    if (value.split(' ').join('') === '') {
+      dispatchValidationState({ type: ValidationStateActionType.UPDATE_NAME_VALIDATION, payload: false });
+    } else {
+      dispatchValidationState({ type: ValidationStateActionType.UPDATE_NAME_VALIDATION, payload: false });
+    }
+
     dispatchChainEditInfo({ type: ChainEditActionType.UPDATE_NAME, payload: value });
   }, []);
 
@@ -479,9 +480,19 @@ function NetworkEdit ({ className }: Props): React.ReactElement {
     dispatchChainEditInfo({ type: ChainEditActionType.UPDATE_PRICE_ID, payload: value });
   }, []);
 
-  const onSelectProvider = useCallback((value: any) => {
-    dispatchChainEditInfo({ type: ChainEditActionType.UPDATE_CURRENT_PROVIDER, payload: (value as string) });
-  }, []);
+  const onSelectProvider = useCallback((value: string) => {
+    if (Object.keys(chainEditInfo.providers).includes(value)) {
+      dispatchValidationState({
+        type: ValidationStateActionType.UPDATE_PROVIDER_SELECTION,
+        payload: {
+          needValidating: false,
+          isProviderPredefined: true
+        }
+      });
+
+      dispatchChainEditInfo({ type: ChainEditActionType.UPDATE_CURRENT_PROVIDER, payload: value });
+    }
+  }, [chainEditInfo.providers]);
 
   const _onSaveNetwork = useCallback(() => {
     console.log('on save');

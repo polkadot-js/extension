@@ -4,5 +4,9 @@
 import { CUSTOM_NETWORK_PREFIX } from '@subwallet/extension-koni-base/services/chain-service/types';
 
 export function _isCustomNetwork (slug: string) {
+  if (slug.length === 0) {
+    return true;
+  }
+
   return slug.startsWith(CUSTOM_NETWORK_PREFIX);
 }

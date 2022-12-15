@@ -1502,6 +1502,27 @@ export type RequestCreateCompoundStakeExternal = ExternalRequestSign<TuringStake
 
 export type RequestCancelCompoundStakeExternal = ExternalRequestSign<TuringCancelStakeCompoundParams>;
 
+export enum ChainEditStandard {
+  EVM = 'EVM',
+  SUBSTRATE = 'SUBSTRATE',
+  UNKNOWN = 'UNKNOWN',
+  MIXED = 'MIXED'
+}
+
+// ChainService
+export type ChainEditInfo = { // only support pure substrate or EVM network
+  slug: string;
+  currentProvider: string;
+  providers: Record<string, string>;
+  name: string;
+  paraId: number;
+  chainType: ChainEditStandard;
+  evmChainId: number;
+  blockExplorer?: string;
+  crowdloanUrl?: string;
+  priceId?: string;
+}
+
 export interface KoniRequestSignatures {
   // Bonding functions
   'pri(staking.submitTuringCancelCompound)': [RequestTuringCancelStakeCompound, BasicTxResponse, BasicTxResponse];

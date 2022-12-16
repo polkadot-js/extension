@@ -337,7 +337,7 @@ export const DEFAULT_EVM_TOKENS: EvmTokenJson = {
       symbol: 'TFA',
       smartContract: '0xE065ffaf3f7dED69BB5cf5FDd1Fd1dDA2EEe8493',
       decimals: 18,
-      chain: 'ethereum',
+      chain: 'moonbeam',
       type: CustomTokenType.erc20
     }
   ],

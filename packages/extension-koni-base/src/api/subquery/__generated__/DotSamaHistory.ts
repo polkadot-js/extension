@@ -28,6 +28,32 @@ export interface DotSamaHistory_historyElements {
   nodes: (DotSamaHistory_historyElements_nodes | null)[];
 }
 
+export interface DotSamaHistory_transfers_nodes {
+  __typename: "SubsquidTransfersElement";
+
+  from: { id: string };
+  to: { id: string };
+  asset: { amount: string };
+  success: boolean | false;
+  fee: string;
+  id: string;
+  blockNumber: number;
+  extrinsicHash: string | null;
+  timestamp: any;
+  address: string;
+  reward: any | null;
+  extrinsic: any | null;
+  transfer: any | null;
+}
+
+export interface DotSamaHistory_transfers {
+  __typename: "SubsquidTransfersConnection";
+  /**
+   * A list of `HistoryElement` objects.
+   */
+  transfers: (DotSamaHistory_transfers_nodes | null)[];
+}
+
 export interface DotSamaHistory {
   /**
    * Reads and enables pagination through a set of `HistoryElement`.

@@ -1,7 +1,7 @@
 // Copyright 2019-2022 @polkadot/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { AddNetworkRequestExternal, CustomToken, NftItem, TransactionHistoryItemType, ValidatorInfo } from '@subwallet/extension-base/background/KoniTypes';
+import { CustomToken, NetworkJson, NftItem, StakingRewardItem, TransactionHistoryItemType, ValidatorInfo } from '@subwallet/extension-base/background/KoniTypes';
 import { AccountJson } from '@subwallet/extension-base/background/types';
 import { _ChainInfo } from '@subwallet/extension-koni-base/services/chain-list/types';
 
@@ -47,4 +47,9 @@ export type UnbondingParams = {
 export type StakeCompoundParams = {
   selectedAccount: string;
   selectedNetwork: string;
+}
+
+export type StakingRewardJson_ = {
+  details: StakingRewardItem[],
+  ready: boolean
 }

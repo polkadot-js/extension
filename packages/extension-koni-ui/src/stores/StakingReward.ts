@@ -3,11 +3,12 @@
 
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 import { StakingRewardJson } from '@subwallet/extension-base/background/KoniTypes';
+import { StakingRewardJson_ } from '@subwallet/extension-koni-ui/stores/types';
 
 const initialState = {
-  details: {},
+  details: [],
   ready: false
-} as StakingRewardJson;
+} as StakingRewardJson_;
 
 const stakingRewardSlice = createSlice({
   initialState,
@@ -16,7 +17,7 @@ const stakingRewardSlice = createSlice({
     update (state, action: PayloadAction<StakingRewardJson>) {
       const payload = action.payload;
 
-      state.details = payload.details;
+      state.details = [...payload.slowInterval, ...payload.fastInterval];
       state.ready = payload.ready;
     }
   }

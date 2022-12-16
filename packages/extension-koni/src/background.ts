@@ -19,12 +19,25 @@ import { cryptoWaitReady } from '@polkadot/util-crypto';
 
 const IDLE_TIME = 60000 * 2; // 2 minutes
 
-let timer: NodeJS.Timeout;
+let idleTimer: NodeJS.Timeout;
 let waitingToStop = false;
 let openCount = 0;
 
 // setup the notification (same a FF default background, white text)
 withErrorLog(() => chrome.browserAction.setBadgeBackgroundColor({ color: '#d90000' }));
+
+function handleExtensionIdling () { // handle extension being idle since the init of the extension/browser
+  waitingToStop = true;
+  idleTimer = setTimeout(() => {
+    if (openCount <= 0) {
+      koniState.sleep().then(() => {
+        waitingToStop = false;
+
+        console.log('Shut down due to popup never opened since init ---------------------------------');
+      }).catch((err) => console.warn(err));
+    }
+  }, IDLE_TIME);
+}
 
 // listen to all messages and handle appropriately
 chrome.runtime.onConnect.addListener((port): void => {
@@ -35,8 +48,10 @@ chrome.runtime.onConnect.addListener((port): void => {
     openCount += 1;
     koniState.wakeup().catch((err) => console.warn(err));
 
+    console.log('Wake up due to popup open ---------------------------------');
+
     if (waitingToStop) {
-      clearTimeout(timer);
+      clearTimeout(idleTimer);
       waitingToStop = false;
     }
   }
@@ -49,9 +64,11 @@ chrome.runtime.onConnect.addListener((port): void => {
 
       if (openCount <= 0) {
         waitingToStop = true;
-        timer = setTimeout(() => {
+        idleTimer = setTimeout(() => {
           koniState.sleep().then(() => {
             waitingToStop = false;
+
+            console.log('Shut down due to popup getting closed---------------------------------');
           }).catch((err) => console.warn(err));
         }, IDLE_TIME);
       }
@@ -66,6 +83,12 @@ chrome.runtime.onInstalled.addListener(function (details) {
   if (details.reason === 'install') {
     onExtensionInstall();
   }
+
+  handleExtensionIdling();
+});
+
+chrome.runtime.onStartup.addListener(function () {
+  handleExtensionIdling();
 });
 
 // initial setup

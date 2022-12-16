@@ -15,8 +15,6 @@ import { parseTxAndSignature } from '@subwallet/extension-koni-base/api/evm/exte
 import { PREDEFINED_GENESIS_HASHES, PREDEFINED_NETWORKS } from '@subwallet/extension-koni-base/api/predefinedNetworks';
 import { PREDEFINED_SINGLE_MODES } from '@subwallet/extension-koni-base/api/predefinedSingleMode';
 // eslint-disable-next-line camelcase
-import { DotSamaCrowdloan_crowdloans_nodes } from '@subwallet/extension-koni-base/api/subquery/__generated__/DotSamaCrowdloan';
-import { fetchDotSamaCrowdloan } from '@subwallet/extension-koni-base/api/subquery/crowdloan';
 import { deleteCustomTokens, FUNGIBLE_TOKEN_STANDARDS, getTokensForChainRegistry, upsertCustomToken } from '@subwallet/extension-koni-base/api/tokens';
 import { DEFAULT_SUPPORTED_TOKENS } from '@subwallet/extension-koni-base/api/tokens/defaultSupportedTokens';
 import { initEvmTokenState } from '@subwallet/extension-koni-base/api/tokens/evm/utils';
@@ -34,7 +32,7 @@ import AccountRefStore from '@subwallet/extension-koni-base/stores/AccountRef';
 import AuthorizeStore from '@subwallet/extension-koni-base/stores/Authorize';
 import CustomTokenStore from '@subwallet/extension-koni-base/stores/CustomEvmToken';
 import SettingsStore from '@subwallet/extension-koni-base/stores/Settings';
-import { convertFundStatus, getCurrentProvider, mergeNetworkProviders } from '@subwallet/extension-koni-base/utils';
+import { getCurrentProvider, mergeNetworkProviders } from '@subwallet/extension-koni-base/utils';
 import { anyNumberToBN } from '@subwallet/extension-koni-base/utils/eth';
 import SimpleKeyring from 'eth-simple-keyring';
 import RLP, { Input } from 'rlp';
@@ -137,8 +135,6 @@ export default class KoniState extends State {
   private balanceMap: Record<string, BalanceItem> = this.generateDefaultBalanceMap();
   private balanceSubject = new Subject<BalanceJson>();
 
-  // eslint-disable-next-line camelcase
-  private crowdloanFundMap: Record<string, DotSamaCrowdloan_crowdloans_nodes> = {};
   private crowdloanMap: Record<string, CrowdloanItem> = generateDefaultCrowdloanMap();
   private crowdloanSubject = new Subject<CrowdloanJson>();
 
@@ -153,7 +149,7 @@ export default class KoniState extends State {
   private stakingSubject = new Subject<StakingJson>();
 
   private stakingRewardSubject = new Subject<StakingRewardJson>();
-  private stakingRewardState: StakingRewardJson = { ready: false, details: [] } as StakingRewardJson;
+  private stakingRewardState: StakingRewardJson = { ready: false, slowInterval: [], fastInterval: [] } as StakingRewardJson;
 
   private stakeUnlockingInfoSubject = new Subject<StakeUnlockingJson>();
   private stakeUnlockingInfo: StakeUnlockingJson = { timestamp: -1, details: [] };
@@ -728,14 +724,14 @@ export default class KoniState extends State {
   }
 
   public resetStakingReward () {
-    this.stakingRewardState.details = [];
+    this.stakingRewardState.slowInterval = [];
 
     this.stakingRewardSubject.next(this.stakingRewardState);
   }
 
-  public updateStakingReward (stakingRewardData: StakingRewardItem[], callback?: (stakingRewardData: StakingRewardJson) => void): void {
+  public updateStakingReward (stakingRewardData: StakingRewardItem[], type: 'slowInterval' | 'fastInterval', callback?: (stakingRewardData: StakingRewardJson) => void): void {
     this.stakingRewardState.ready = true;
-    this.stakingRewardState.details = this.stakingRewardState.details.concat(stakingRewardData);
+    this.stakingRewardState[type] = stakingRewardData;
 
     if (callback) {
       callback(this.stakingRewardState);
@@ -1089,10 +1085,6 @@ export default class KoniState extends State {
     return this.balanceSubject;
   }
 
-  public async fetchCrowdloanFundMap () {
-    this.crowdloanFundMap = await fetchDotSamaCrowdloan();
-  }
-
   public getCrowdloan (reset?: boolean): CrowdloanJson {
     // const activeData = this.removeInactiveNetworkData(this.crowdloanMap);
 
@@ -1107,12 +1099,6 @@ export default class KoniState extends State {
 
   public setCrowdloanItem (networkKey: string, item: CrowdloanItem) {
     const itemData = { ...item, timestamp: +new Date() };
-    // Fill para state
-    const crowdloanFundNode = this.crowdloanFundMap[networkKey];
-
-    if (crowdloanFundNode) {
-      itemData.paraState = convertFundStatus(crowdloanFundNode.status);
-    }
 
     // Update crowdloan map
     this.crowdloanMap[networkKey] = itemData;

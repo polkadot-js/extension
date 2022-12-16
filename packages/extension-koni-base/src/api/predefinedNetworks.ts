@@ -1416,6 +1416,7 @@ export const PREDEFINED_NETWORKS: Record<string, NetworkJson> = {
     currentProviderMode: 'ws',
     currentProvider: 'Crab',
     groups: ['KUSAMA_PARACHAIN'],
+    paraId: 2105,
     nativeToken: 'CRAB',
     crowdloanUrl: 'https://crab.network/plo',
     decimals: 18,
@@ -1859,6 +1860,7 @@ export const PREDEFINED_NETWORKS: Record<string, NetworkJson> = {
     currentProviderMode: 'ws',
     nativeToken: 'DHX',
     groups: ['KUSAMA_PARACHAIN'],
+    paraId: 2116,
     decimals: 18
   },
   amplitude: {
@@ -1875,8 +1877,23 @@ export const PREDEFINED_NETWORKS: Record<string, NetworkJson> = {
     nativeToken: 'AMPE',
     groups: ['KUSAMA_PARACHAIN'],
     decimals: 12,
+    paraId: 2124,
     supportBonding: true,
     getStakingOnChain: true
+  },
+  pendulum: {
+    key: 'pendulum',
+    chain: 'Pendulum',
+    genesisHash: '0xcceae7f3b9947cdb67369c026ef78efa5f34a08fe5808d373c04421ecf4f1aaf',
+    ss58Format: 56,
+    providers: {},
+    active: false,
+    currentProviderMode: 'ws',
+    currentProvider: null,
+    nativeToken: 'PEN',
+    groups: ['POLKADOT_PARACHAIN'],
+    paraId: 2094,
+    decimals: 12
   },
   gear_testnet: {
     key: 'gear_testnet',
@@ -1906,6 +1923,7 @@ export const PREDEFINED_NETWORKS: Record<string, NetworkJson> = {
     currentProviderMode: 'ws',
     nativeToken: 'ICZ',
     decimals: 18,
+    paraId: 2129,
     groups: ['KUSAMA_PARACHAIN']
   },
   arctic_testnet: {

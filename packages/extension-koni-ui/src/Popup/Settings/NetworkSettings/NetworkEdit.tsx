@@ -1,13 +1,15 @@
 // Copyright 2019-2022 @polkadot/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { ChainEditInfo, ChainEditStandard, NETWORK_ERROR } from '@subwallet/extension-base/background/KoniTypes';
+import { ChainEditInfo, ChainEditStandard, NETWORK_ERROR, ValidateNetworkResponse } from '@subwallet/extension-base/background/KoniTypes';
+import { CUSTOM_NETWORK_PREFIX } from '@subwallet/extension-koni-base/services/chain-service/types';
 import { _isCustomNetwork } from '@subwallet/extension-koni-base/services/chain-service/utils';
+import { isUrl, isValidProvider as _isValidProvider } from '@subwallet/extension-koni-base/utils';
 import { ActionContext, Button, ButtonArea, Dropdown, HorizontalLabelToggle, InputWithLabel } from '@subwallet/extension-koni-ui/components';
 import useGetChainInfoForConfig from '@subwallet/extension-koni-ui/hooks/screen/setting/useGetChainInfoForConfig';
 import useToast from '@subwallet/extension-koni-ui/hooks/useToast';
 import useTranslation from '@subwallet/extension-koni-ui/hooks/useTranslation';
-import { completeConfirmation } from '@subwallet/extension-koni-ui/messaging';
+import { completeConfirmation, validateNetwork } from '@subwallet/extension-koni-ui/messaging';
 import Header from '@subwallet/extension-koni-ui/partials/Header';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import React, { useCallback, useContext, useEffect, useReducer, useState } from 'react';
@@ -38,7 +40,8 @@ enum ChainEditActionType {
   UPDATE_CROWDLOAN_URL = 'UPDATE_CROWDLOAN_URL',
   UPDATE_PRICE_ID = 'UPDATE_PRICE_ID',
   UPDATE_PARA_ID = 'UPDATE_PARA_ID',
-  UPDATE_EVM_CHAIN_ID = 'UPDATE_EVM_CHAIN_ID'
+  UPDATE_EVM_CHAIN_ID = 'UPDATE_EVM_CHAIN_ID',
+  UPDATE_NEW_PROVIDER = 'UPDATE_NEW_PROVIDER'
 }
 
 interface ChainEditAction {
@@ -60,6 +63,11 @@ function chainEditInfoReducer (state: ChainEditInfo, action: ChainEditAction) {
   switch (action.type) {
     case ChainEditActionType.ADD_PROVIDER:
       return initChainEditInfo;
+    case ChainEditActionType.UPDATE_PARA_ID:
+      return {
+        ...state,
+        paraId: parseInt(action.payload as string)
+      };
     case ChainEditActionType.UPDATE_EVM_CHAIN_ID:
       return {
         ...state,
@@ -90,6 +98,14 @@ function chainEditInfoReducer (state: ChainEditInfo, action: ChainEditAction) {
         ...state,
         currentProvider: action.payload as string
       };
+    case ChainEditActionType.UPDATE_NEW_PROVIDER:
+      return {
+        ...state,
+        providers: {
+          ...state.providers,
+          ...(action.payload as Record<string, string>)
+        }
+      };
     default:
       throw new Error();
   }
@@ -102,10 +118,15 @@ interface ValidationState {
   isValidBlockExplorer: boolean,
   needValidating: boolean,
   loading: boolean,
-  isValidProvider: boolean,
-  isProviderConnected: boolean,
+
+  // handle provider selection
   isCurrentEndpoint: boolean,
-  isProviderPredefined: boolean
+  isProviderPredefined: boolean,
+
+  // handle provider creation
+  isNewProviderValid: boolean,
+  isProviderConnected: boolean,
+  isNewProvider: boolean
 }
 
 const initValidationState: ValidationState = {
@@ -115,10 +136,11 @@ const initValidationState: ValidationState = {
   isValidCrowdloanUrl: true,
   needValidating: false,
   loading: false,
-  isValidProvider: false,
+  isNewProviderValid: false,
   isProviderConnected: false,
   isCurrentEndpoint: false,
-  isProviderPredefined: true
+  isProviderPredefined: true,
+  isNewProvider: false
 };
 
 enum ValidationStateActionType {
@@ -130,9 +152,9 @@ enum ValidationStateActionType {
   UPDATE_LOADING = 'UPDATE_LOADING',
   UPDATE_PROVIDER_VALIDATION = 'UPDATE_PROVIDER_VALIDATION',
   UPDATE_PROVIDER_CONNECTED = 'UPDATE_PROVIDER_CONNECTED',
-  UPDATE_IS_CURRENT_ENDPOINT = 'UPDATE_IS_CURRENT_ENDPOINT',
-  UPDATE_PROVIDER_PREDEFINED = 'UPDATE_PROVIDER_PREDEFINED',
-  UPDATE_PROVIDER_SELECTION = 'UPDATE_PROVIDER_SELECTION'
+  UPDATE_PROVIDER_SELECTION = 'UPDATE_PROVIDER_SELECTION',
+  UPDATE_VALIDATION_PASSED = 'UPDATE_VALIDATION_PASSED',
+  UPDATE_NEW_PROVIDER = 'UPDATE_NEW_PROVIDER'
 }
 
 interface ValidationStateAction {
@@ -149,14 +171,71 @@ function validationStateReducer (state: ValidationState, action: ValidationState
       };
 
     case ValidationStateActionType.UPDATE_PROVIDER_SELECTION: {
-      const { isProviderPredefined, needValidating } = action.payload as Record<string, boolean>;
+      const { isCurrentEndpoint, isProviderPredefined, needValidating } = action.payload as Record<string, boolean>;
 
       return {
         ...state,
         isProviderPredefined,
-        needValidating
+        needValidating,
+        isCurrentEndpoint
       };
     }
+
+    case ValidationStateActionType.UPDATE_BLOCK_EXPLORER_VALIDATION:
+      return {
+        ...state,
+        isValidBlockExplorer: action.payload as boolean
+      };
+
+    case ValidationStateActionType.UPDATE_CROWDLOAN_URL_VALIDATION:
+      return {
+        ...state,
+        isValidCrowdloanUrl: action.payload as boolean
+      };
+
+    case ValidationStateActionType.UPDATE_LOADING:
+      return {
+        ...state,
+        loading: action.payload as boolean
+      };
+
+    case ValidationStateActionType.UPDATE_PROVIDER_CONNECTED:
+      return {
+        ...state,
+        isProviderConnected: action.payload as boolean
+      };
+
+    case ValidationStateActionType.UPDATE_PROVIDER_VALIDATION:
+      return {
+        ...state,
+        isNewProviderValid: action.payload as boolean
+      };
+
+    case ValidationStateActionType.UPDATE_VALIDATION_PASSED: {
+      const { isProviderConnected, needValidating } = action.payload as Record<string, boolean>;
+
+      return {
+        ...state,
+        needValidating,
+        isProviderConnected
+      };
+    }
+
+    case ValidationStateActionType.UPDATE_NEW_PROVIDER: {
+      const { isCurrentEndpoint, isProviderConnected } = action.payload as Record<string, boolean>;
+
+      return {
+        ...state,
+        isProviderConnected,
+        isCurrentEndpoint
+      };
+    }
+
+    case ValidationStateActionType.UPDATE_NAME_VALIDATION:
+      return {
+        ...state,
+        isValidName: action.payload as boolean
+      };
 
     default:
       throw new Error();
@@ -172,24 +251,7 @@ function NetworkEdit ({ className }: Props): React.ReactElement {
   const [chainEditInfo, dispatchChainEditInfo] = useReducer(chainEditInfoReducer, data || initChainEditInfo);
   const [validationState, dispatchValidationState] = useReducer(validationStateReducer, initValidationState);
 
-  const [provider, setProvider] = useState<string>('');
-
-  // const [networkInfo, setNetworkInfo] = useState(data);
-  // const [_isValidProvider, _setIsvalidProvider] = useState(false);
-  // const [isProviderConnected, setIsProviderConnected] = useState(false);
-  // const [priceId, setPriceId] = useState('');
-  // const [providerKey, setProviderKey] = useState(chainState.currentProvider);
-
-  // const [loading, setLoading] = useState(false);
-  // const [needValidate, setNeedValidate] = useState(false);
-  // const isCurrentEndpoint = provider === chainState.currentProvider;
-
-  // const [validateError, setValidateError] = useState<NETWORK_ERROR>(NETWORK_ERROR.NONE);
-  // const [isEthereum, setIsEthereum] = useState(false);
-  // const [isValidBlockExplorer, setIsValidBlockExplorer] = useState(true);
-  // const [isValidCrowdloanUrl, setIsValidCrowdloanUrl] = useState(true);
-  // const [isValidChain, setIsValidChain] = useState(true);
-  // const [isProviderPredefined, setIsProviderPredefined] = useState(true);
+  const [provider, setProvider] = useState<string | null>(null);
 
   const onAction = useContext(ActionContext);
   const _goBack = useCallback(() => {
@@ -229,140 +291,75 @@ function NetworkEdit ({ className }: Props): React.ReactElement {
     setShowMore(val);
   }, []);
 
-  // useEffect(() => { // check provider for network creation
-  //   if (provider) {
-  //     if (!isValidProvider(provider)) {
-  //       show('Provider URL requires http/https or wss prefix');
-  //       _setIsvalidProvider(false);
-  //     } else {
-  //       _setIsvalidProvider(true);
-  //
-  //       if (needValidate && !isCurrentEndpoint) {
-  //         setLoading(true);
-  //
-  //         validateNetwork(provider, isEthereum).then((resp) => {
-  //           setLoading(false);
-  //
-  //           if (resp.error) {
-  //             setValidateError(resp.error);
-  //           }
-  //
-  //           setNeedValidate(false);
-  //           setIsProviderConnected(resp.success);
-  //
-  //           if (resp.success) {
-  //             if (isEthereum) {
-  //               setNetworkInfo({
-  //                 ...networkInfo
-  //                 // key: resp.key,
-  //                 // active: true,
-  //                 // customProviders: { custom: provider },
-  //                 // currentProvider: 'custom',
-  //                 // groups: resp.networkGroup,
-  //                 // currentProviderMode: provider.startsWith('http') ? 'http' : 'ws',
-  //                 // genesisHash: resp.genesisHash,
-  //                 // ss58Format: -1,
-  //                 // chain: resp.chain,
-  //                 // isEthereum,
-  //                 // evmChainId: resp.evmChainId,
-  //                 // nativeToken: resp.nativeToken,
-  //                 // decimals: resp.decimal
-  //               });
-  //             } else {
-  //               setNetworkInfo({
-  //                 ...networkInfo
-  //                 // key: resp.key,
-  //                 // active: true,
-  //                 // customProviders: { custom: provider },
-  //                 // currentProvider: 'custom',
-  //                 // groups: resp.networkGroup,
-  //                 // currentProviderMode: provider.startsWith('http') ? 'http' : 'ws',
-  //                 // genesisHash: resp.genesisHash,
-  //                 // ss58Format: parseInt(resp.ss58Prefix),
-  //                 // chain: resp.chain,
-  //                 // nativeToken: resp.nativeToken,
-  //                 // decimals: resp.decimal
-  //               });
-  //             }
-  //           }
-  //         }).catch(console.error);
-  //       }
-  //     }
-  //   }
-  // }, [data, isCurrentEndpoint, isEthereum, needValidate, networkInfo, provider, show]);
+  useEffect(() => { // check provider for network creation
+    if (provider) {
+      if (!_isValidProvider(provider)) {
+        show('Provider URL requires http/https or wss prefix');
 
-  // const handleCreateProvider = useCallback(async (newProvider: string) => { // handle add provider for network edit
-  //   if (!isValidProvider(newProvider)) {
-  //     show('Provider URL requires http/https or wss prefix');
-  //
-  //     return '';
-  //   }
-  //
-  //   setLoading(true);
-  //   const resp = await validateNetwork(newProvider, isEthereum, networkInfo);
-  //
-  //   setLoading(false);
-  //
-  //   if (resp.error) {
-  //     show(getValidateErrorMessage(resp.error));
-  //
-  //     return '';
-  //   }
-  //
-  //   setIsProviderConnected(resp.success);
-  //
-  //   if (resp.success) {
-  //     show('Successfully added a new custom provider');
-  //
-  //     if (networkInfo.customProviders) {
-  //       const providerLength = Object.values(networkInfo.customProviders).length;
-  //
-  //       const newCustomProvider = { [`custom_${providerLength}`]: newProvider };
-  //
-  //       setNetworkInfo({
-  //         ...networkInfo,
-  //         currentProvider: `custom_${providerLength}`,
-  //         customProviders: {
-  //           ...networkInfo.customProviders,
-  //           ...newCustomProvider
-  //         }
-  //       });
-  //
-  //       return `custom_${providerLength}`;
-  //     } else {
-  //       setNetworkInfo({
-  //         ...networkInfo,
-  //         currentProvider: 'custom',
-  //         customProviders: { custom: newProvider }
-  //       });
-  //
-  //       return 'custom';
-  //     }
-  //   }
-  //
-  //   return '';
-  // }, [getValidateErrorMessage, isEthereum, networkInfo, show]);
+        dispatchValidationState({ type: ValidationStateActionType.UPDATE_PROVIDER_VALIDATION, payload: false });
+      } else {
+        console.log('jump into useEffect');
+        dispatchValidationState({ type: ValidationStateActionType.UPDATE_PROVIDER_VALIDATION, payload: true });
 
-  // const onSelectProvider = useCallback((val: any) => {
-  //   const providerKey = val as string;
-  //
-  //   if (getAllProviderKeys(networkInfo).includes(providerKey)) {
-  //     setNeedValidate(false);
-  //     setIsProviderPredefined(true);
-  //     setNetworkInfo({
-  //       ...networkInfo,
-  //       currentProvider: providerKey
-  //     });
-  //   }
-  // }, [networkInfo]);
+        if (validationState.needValidating && !validationState.isCurrentEndpoint) {
+          dispatchValidationState({ type: ValidationStateActionType.UPDATE_LOADING, payload: true });
 
-  // const toggleEthereum = useCallback((val: boolean) => {
-  //   setIsEthereum(val);
-  //   setNetworkInfo({
-  //     ...networkInfo,
-  //     isEthereum: val
-  //   });
-  // }, [networkInfo]);
+          validateNetwork(provider, false).then((resp) => {
+            dispatchValidationState({ type: ValidationStateActionType.UPDATE_LOADING, payload: false });
+
+            if (resp.error) {
+              dispatchValidationState({ type: ValidationStateActionType.UPDATE_VALIDATION_ERROR, payload: resp.error });
+            }
+
+            dispatchValidationState({
+              type: ValidationStateActionType.UPDATE_VALIDATION_PASSED,
+              payload: {
+                needValidating: false,
+                isProviderConnected: resp.success
+              }
+            });
+
+            if (resp.success) {
+              console.log('validate provider ok', resp);
+              // if (isEthereum) {
+              //   setNetworkInfo({
+              //     ...networkInfo
+              //     // key: resp.key,
+              //     // active: true,
+              //     // customProviders: { custom: provider },
+              //     // currentProvider: 'custom',
+              //     // groups: resp.networkGroup,
+              //     // currentProviderMode: provider.startsWith('http') ? 'http' : 'ws',
+              //     // genesisHash: resp.genesisHash,
+              //     // ss58Format: -1,
+              //     // chain: resp.chain,
+              //     // isEthereum,
+              //     // evmChainId: resp.evmChainId,
+              //     // nativeToken: resp.nativeToken,
+              //     // decimals: resp.decimal
+              //   });
+              // } else {
+              //   setNetworkInfo({
+              //     ...networkInfo
+              //     // key: resp.key,
+              //     // active: true,
+              //     // customProviders: { custom: provider },
+              //     // currentProvider: 'custom',
+              //     // groups: resp.networkGroup,
+              //     // currentProviderMode: provider.startsWith('http') ? 'http' : 'ws',
+              //     // genesisHash: resp.genesisHash,
+              //     // ss58Format: parseInt(resp.ss58Prefix),
+              //     // chain: resp.chain,
+              //     // nativeToken: resp.nativeToken,
+              //     // decimals: resp.decimal
+              //   });
+              // }
+            }
+          }).catch(console.error);
+        }
+      }
+    }
+  }, [data, provider, show, validationState.isCurrentEndpoint, validationState.needValidating]);
 
   // const _onSaveNetwork = useCallback(() => {
   //   if ((!_isValidProvider || !isProviderConnected) && !isCurrentEndpoint) {
@@ -384,67 +381,6 @@ function NetworkEdit ({ className }: Props): React.ReactElement {
   //   }).catch(console.error);
   // }, [_goBack, _isValidProvider, isCurrentEndpoint, isProviderConnected, networkInfo, show]);
 
-  // const onChangeParaId = useCallback((val: string) => {
-  //   if (val === '') {
-  //     setNetworkInfo({
-  //       ...networkInfo,
-  //       paraId: undefined
-  //     });
-  //
-  //     return;
-  //   }
-  //
-  //   const paraId = parseInt(val);
-  //
-  //   if (isNaN(paraId)) {
-  //     show('ParaId can only be number');
-  //   } else {
-  //     setNetworkInfo({
-  //       ...networkInfo,
-  //       paraId
-  //     });
-  //   }
-  // }, [networkInfo, show]);
-
-  // const onChangeEthChainId = useCallback((val: string) => {
-  //   setNetworkInfo({
-  //     ...networkInfo,
-  //     evmChainId: parseInt(val)
-  //   });
-  // }, [networkInfo]);
-  //
-  // const onChangePriceKey = useCallback((val: string) => {
-  //   setPriceId(val);
-  // }, []);
-  //
-  // const onChangeCrowdloanUrl = useCallback((val: string) => {
-  //   if (!isUrl(val) && val !== '') {
-  //     show('Crowdloan URL must be an URL');
-  //     setIsValidCrowdloanUrl(false);
-  //   } else {
-  //     setIsValidCrowdloanUrl(true);
-  //   }
-  //
-  //   setNetworkInfo({
-  //     ...networkInfo,
-  //     crowdloanUrl: val
-  //   });
-  // }, [networkInfo, show]);
-  //
-  // const onChangeExplorer = useCallback((val: string) => {
-  //   if (!isUrl(val) && val !== '') {
-  //     setIsValidBlockExplorer(false);
-  //     show('Block explorer must be an URL');
-  //   } else {
-  //     setIsValidBlockExplorer(true);
-  //   }
-  //
-  //   setNetworkInfo({
-  //     ...networkInfo,
-  //     blockExplorer: val
-  //   });
-  // }, [networkInfo, show]);
-
   const onChangeProvider = useCallback((value: string) => {
     setProvider(value);
     dispatchValidationState({ type: ValidationStateActionType.UPDATE_NEED_VALIDATING, payload: true });
@@ -454,27 +390,65 @@ function NetworkEdit ({ className }: Props): React.ReactElement {
     if (value.split(' ').join('') === '') {
       dispatchValidationState({ type: ValidationStateActionType.UPDATE_NAME_VALIDATION, payload: false });
     } else {
-      dispatchValidationState({ type: ValidationStateActionType.UPDATE_NAME_VALIDATION, payload: false });
+      dispatchValidationState({ type: ValidationStateActionType.UPDATE_NAME_VALIDATION, payload: true });
     }
 
     dispatchChainEditInfo({ type: ChainEditActionType.UPDATE_NAME, payload: value });
   }, []);
 
   const onChangeExplorer = useCallback((value: string) => {
+    if (!isUrl(value) && value !== '') {
+      dispatchValidationState({ type: ValidationStateActionType.UPDATE_BLOCK_EXPLORER_VALIDATION, payload: false });
+      show('Block explorer must be an URL');
+    } else {
+      dispatchValidationState({ type: ValidationStateActionType.UPDATE_BLOCK_EXPLORER_VALIDATION, payload: true });
+    }
+
     dispatchChainEditInfo({ type: ChainEditActionType.UPDATE_BLOCK_EXPLORER, payload: value });
-  }, []);
+  }, [show]);
 
   const onChangeCrowdloanUrl = useCallback((value: string) => {
+    if (!isUrl(value) && value !== '') {
+      show('Crowdloan URL must be an URL');
+      dispatchValidationState({ type: ValidationStateActionType.UPDATE_CROWDLOAN_URL_VALIDATION, payload: false });
+    } else {
+      dispatchValidationState({ type: ValidationStateActionType.UPDATE_CROWDLOAN_URL_VALIDATION, payload: true });
+    }
+
     dispatchChainEditInfo({ type: ChainEditActionType.UPDATE_CROWDLOAN_URL, payload: value });
-  }, []);
+  }, [show]);
 
   const onChangeParaId = useCallback((value: string) => {
-    dispatchChainEditInfo({ type: ChainEditActionType.UPDATE_PARA_ID, payload: value });
-  }, []);
+    if (value === '') {
+      dispatchChainEditInfo({ type: ChainEditActionType.UPDATE_PARA_ID, payload: '-1' });
+
+      return;
+    }
+
+    const paraId = parseInt(value);
+
+    if (isNaN(paraId)) {
+      show('ParaId can only be number');
+    } else {
+      dispatchChainEditInfo({ type: ChainEditActionType.UPDATE_PARA_ID, payload: value });
+    }
+  }, [show]);
 
   const onChangeEvmChainId = useCallback((value: string) => {
-    dispatchChainEditInfo({ type: ChainEditActionType.UPDATE_EVM_CHAIN_ID, payload: value });
-  }, []);
+    if (value === '') {
+      dispatchChainEditInfo({ type: ChainEditActionType.UPDATE_EVM_CHAIN_ID, payload: '-1' });
+
+      return;
+    }
+
+    const paraId = parseInt(value);
+
+    if (isNaN(paraId)) {
+      show('EVM Chain ID can only be number');
+    } else {
+      dispatchChainEditInfo({ type: ChainEditActionType.UPDATE_EVM_CHAIN_ID, payload: value });
+    }
+  }, [show]);
 
   const onChangePriceId = useCallback((value: string) => {
     dispatchChainEditInfo({ type: ChainEditActionType.UPDATE_PRICE_ID, payload: value });
@@ -486,29 +460,85 @@ function NetworkEdit ({ className }: Props): React.ReactElement {
         type: ValidationStateActionType.UPDATE_PROVIDER_SELECTION,
         payload: {
           needValidating: false,
-          isProviderPredefined: true
+          isProviderPredefined: true,
+          isCurrentEndpoint: value === data.currentProvider
         }
       });
 
       dispatchChainEditInfo({ type: ChainEditActionType.UPDATE_CURRENT_PROVIDER, payload: value });
     }
-  }, [chainEditInfo.providers]);
+  }, [chainEditInfo.providers, data.currentProvider]);
 
   const _onSaveNetwork = useCallback(() => {
     console.log('on save');
   }, []);
 
-  const handleCreateProvider = useCallback((newProvider: string) => {
-    console.log(newProvider);
-  }, []);
+  const handleCreateProvider = useCallback((newProvider: string): string => {
+    if (!_isValidProvider(newProvider)) {
+      show('Provider URL requires http/https or wss prefix');
+
+      return '';
+    }
+
+    dispatchValidationState({ type: ValidationStateActionType.UPDATE_LOADING, payload: true });
+    // const resp = await validateNetwork(newProvider, isEthereum, networkInfo);
+
+    const resp: ValidateNetworkResponse = {
+      chain: '',
+      evmChainId: 0,
+      genesisHash: '',
+      key: '',
+      networkGroup: [],
+      ss58Prefix: '',
+      success: true
+    };
+
+    dispatchValidationState({ type: ValidationStateActionType.UPDATE_LOADING, payload: false });
+
+    if (resp.error) {
+      show(getValidateErrorMessage(resp.error));
+
+      return '';
+    }
+
+    dispatchValidationState({
+      type: ValidationStateActionType.UPDATE_NEW_PROVIDER,
+      payload: {
+        isProviderConnected: resp.success,
+        isCurrentEndpoint: false
+      }
+    });
+
+    if (resp.success) {
+      show('Successfully added a new custom provider');
+
+      const providerCount = Object.values(chainEditInfo.providers).length;
+      const newProviderKey = CUSTOM_NETWORK_PREFIX + `${providerCount + 1}`;
+
+      dispatchChainEditInfo({ type: ChainEditActionType.UPDATE_NEW_PROVIDER, payload: { [newProviderKey]: newProvider } });
+
+      return newProviderKey;
+    }
+
+    return '';
+  }, [chainEditInfo.providers, getValidateErrorMessage, show]);
 
   const isDisableSave = useCallback((): boolean => {
     if (mode === 'create') {
-      return !validationState.isValidName || validationState.needValidating || !validationState.isProviderConnected || !validationState.isValidProvider || !validationState.isValidBlockExplorer || !validationState.isValidCrowdloanUrl || !chainEditInfo.name || chainEditInfo.name === '';
+      return !validationState.isValidName || validationState.needValidating || !validationState.isProviderConnected || !validationState.isNewProviderValid || !validationState.isValidBlockExplorer || !validationState.isValidCrowdloanUrl || !chainEditInfo.name || chainEditInfo.name === '';
     } else {
-      return !validationState.isValidProvider || !validationState.isValidName || validationState.needValidating || (!validationState.isProviderPredefined && !validationState.isProviderConnected) || !validationState.isValidBlockExplorer || !validationState.isValidCrowdloanUrl || !chainEditInfo.name || chainEditInfo.name === '' || validationState.loading;
+      const isDisabled = !validationState.isValidName || !validationState.isValidBlockExplorer || !validationState.isValidCrowdloanUrl || !chainEditInfo.name || chainEditInfo.name === '' || validationState.loading;
+
+      if (validationState.isNewProvider) {
+        return !validationState.isNewProviderValid || validationState.needValidating || (!validationState.isProviderPredefined && !validationState.isProviderConnected) || isDisabled;
+      } else {
+        return isDisabled;
+      }
     }
-  }, [chainEditInfo.name, mode, validationState.isProviderConnected, validationState.isProviderPredefined, validationState.isValidBlockExplorer, validationState.isValidCrowdloanUrl, validationState.isValidName, validationState.isValidProvider, validationState.loading, validationState.needValidating]);
+  }, [mode, validationState.isValidName, validationState.needValidating, validationState.isProviderConnected, validationState.isNewProviderValid, validationState.isValidBlockExplorer, validationState.isValidCrowdloanUrl, validationState.isProviderPredefined, validationState.loading, validationState.isNewProvider, chainEditInfo.name]);
+
+  console.log('validationState', validationState);
+  console.log('chainEditInfo', chainEditInfo);
 
   return (
     <>
@@ -525,7 +555,7 @@ function NetworkEdit ({ className }: Props): React.ReactElement {
           <InputWithLabel
             label={t<string>('Provider URL (*)')}
             onChange={onChangeProvider}
-            value={provider}
+            value={provider || ''}
           />
         }
 
@@ -550,7 +580,7 @@ function NetworkEdit ({ className }: Props): React.ReactElement {
         />
 
         {
-          chainEditInfo.paraId !== 1 && <InputWithLabel
+          chainEditInfo.paraId !== -1 && <InputWithLabel
             disabled
             label={t<string>('paraId')}
             onChange={onChangeParaId}
@@ -617,9 +647,9 @@ function NetworkEdit ({ className }: Props): React.ReactElement {
           </div>
         }
 
-        {!validationState.isCurrentEndpoint && validationState.isProviderConnected && validationState.isValidProvider && !validationState.loading && <div className={'connect-success'}>Provider connected successfully</div>}
+        {!validationState.isCurrentEndpoint && validationState.isProviderConnected && validationState.isNewProviderValid && !validationState.loading && <div className={'connect-success'}>Provider connected successfully</div>}
 
-        {!validationState.isCurrentEndpoint && !validationState.isProviderConnected && validationState.isValidProvider && !validationState.loading && <div className={'connect-fail'}>{getValidateErrorMessage()}</div>}
+        {!validationState.isCurrentEndpoint && !validationState.isProviderConnected && validationState.isNewProviderValid && !validationState.loading && <div className={'connect-fail'}>{getValidateErrorMessage()}</div>}
 
         {!validationState.isCurrentEndpoint && validationState.loading && <div className={'connect-info'}>Connecting to the provider...</div>}
 

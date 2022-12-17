@@ -547,6 +547,8 @@ const LogosMap: Record<string, string> = {
   // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
   kulupu: require('./194.kulupu.png'),
   // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+  joystream: require('./195.joystream.png'),
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
   default: require('./73.Default.png')
 };
 

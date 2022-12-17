@@ -2532,7 +2532,7 @@ export const PREDEFINED_NETWORKS: Record<string, NetworkJson> = {
     nativeToken: 'DOCK',
     decimals: 6,
     coinGeckoKey: 'dock',
-    blockExplorer: 'https://dock.subscan.io/'
+    blockExplorer: 'https://dock.subscan.io'
   },
   kusari: {
     key: 'kusari',
@@ -2610,7 +2610,7 @@ export const PREDEFINED_NETWORKS: Record<string, NetworkJson> = {
     nativeToken: 'POLYX',
     decimals: 6,
     coinGeckoKey: 'polymesh',
-    blockExplorer: 'https://polymesh.subscan.io/'
+    blockExplorer: 'https://polymesh.subscan.io'
   },
   riochain: {
     key: 'riochain',
@@ -2661,7 +2661,7 @@ export const PREDEFINED_NETWORKS: Record<string, NetworkJson> = {
     nativeToken: 'XOR',
     decimals: 18,
     coinGeckoKey: 'sora',
-    blockExplorer: 'https://sora.subscan.io/'
+    blockExplorer: 'https://sora.subscan.io'
   },
   swapdex: {
     key: 'swapdex',
@@ -2723,7 +2723,23 @@ export const PREDEFINED_NETWORKS: Record<string, NetworkJson> = {
     groups: ['MAIN_NET'],
     nativeToken: 'KLP',
     decimals: 12,
-    coinGeckoKey: 'kulupu'
+    coinGeckoKey: 'kulupu',
+    blockExplorer: 'https://kulupu.subscan.io'
+  },
+  joystream: {
+    key: 'joystream',
+    chain: 'Joystream',
+    genesisHash: '0x6b5e488e0fa8f9821110d5c13f4c468abcd43ce5e297e62b34c53c3346465956',
+    ss58Format: 126,
+    providers: {
+      Jsgenesis: 'wss://rpc.joystream.org'
+    },
+    active: false,
+    currentProviderMode: 'ws',
+    currentProvider: 'Jsgenesis',
+    groups: ['MAIN_NET'],
+    nativeToken: 'JOY',
+    decimals: 10
   }
 };
 

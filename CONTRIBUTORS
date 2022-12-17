@@ -1,8 +1,8 @@
-    1201	Nam Phạm                      	fix NaN error on staking reward
-     747	AnhMTV                        	Release version 0.7.5
+    1202	Nam Phạm                      	support aleph zero nomination pool
+     765	AnhMTV                        	
      465	Jaco                          	0.42.5 (#969)
      353	S2kael                        	[Issue-274] Update message network not active
-     172	quangdo                       	Update price for iBTC
+     180	quangdo                       	
      154	lw-cdm                        	Fix tslint issues
      104	khainh                        	predefine metadata for Polkadot & Kusama chains
       98	lw-cdm                        	

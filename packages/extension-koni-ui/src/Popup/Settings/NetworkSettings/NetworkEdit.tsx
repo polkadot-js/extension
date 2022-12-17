@@ -19,7 +19,7 @@ interface Props extends ThemeProps {
 }
 
 function getCurrentEndpoint (data: NetworkJson) {
-  if (!data) {
+  if (!data?.currentProvider) {
     return null;
   }
 

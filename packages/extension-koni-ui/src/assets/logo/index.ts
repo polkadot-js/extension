@@ -549,6 +549,8 @@ const LogosMap: Record<string, string> = {
   // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
   joystream: require('./195.joystream.png'),
   // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+  pendulum: require('./172.Pendulum.png'),
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
   default: require('./73.Default.png')
 };
 

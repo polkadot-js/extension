@@ -457,5 +457,6 @@
   "This dApp requires an EVM account. Please create, import, or restore a EVM account and retry": "",
   "This dApp requires a Substrate account. Please create, import, or restore a Substrate account and retry": "",
   "The account you are using is read-only, you cannot send assets with it": "",
-  "This feature is not available for the chosen account.": ""
+  "This feature is not available for the chosen account.": "",
+  "This feature is not available for the chosen account type": ""
 }

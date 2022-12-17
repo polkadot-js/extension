@@ -495,6 +495,8 @@ const LogosMap: Record<string, string> = {
   // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
   barnacle_evm: require('./171.barnacle.png'),
   // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+  pendulum: require('./172.Pendulum.png'),
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
   default: require('./73.Default.png')
 };
 

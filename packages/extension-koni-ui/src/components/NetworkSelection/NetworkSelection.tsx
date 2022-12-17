@@ -62,7 +62,8 @@ function NetworkSelection ({ className, handleShow }: Props): React.ReactElement
   }, [selected]);
 
   useEffect(() => {
-    const _filteredNetworkList = Object.values(networkMap).filter((network) => network.chain.toLowerCase().includes(searchString.toLowerCase()));
+    const _filteredNetworkList = Object.values(networkMap)
+      .filter((network) => ((Object.keys(network.providers).length > 0 || Object.keys(network.customProviders || []).length > 0) && network.chain.toLowerCase().includes(searchString.toLowerCase())));
     const _sortedNetworkList = _filteredNetworkList.filter(({ active }) => active).concat(_filteredNetworkList.filter(({ active }) => !active));
 
     setFilteredNetworkList(_sortedNetworkList);

@@ -163,6 +163,8 @@ const LogosMap: Record<string, string> = {
   // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
   alephTest: require('./55.Aleph.png'),
   // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+  alephSmartNet: require('./55.Aleph.png'),
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
   opal: require('./36.Opal.png'),
   // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
   moonbase: require('./33.Moonbase.png'),
@@ -277,7 +279,7 @@ const LogosMap: Record<string, string> = {
   // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
   aris: require('./04.Aris.png'),
   // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-  kico: require('./25.Kico.png'),
+  // kico: require('./25.Kico.png'),
   // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
   hko: require('./21.HKO.png'),
   // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
@@ -494,6 +496,62 @@ const LogosMap: Record<string, string> = {
   barnacle: require('./171.barnacle.png'),
   // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
   barnacle_evm: require('./171.barnacle.png'),
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+  collectives: require('./172.collectives.png'),
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+  ajunaPolkadot: require('./173.ajuna.png'),
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+  bitgreen: require('./174.bitgreen.png'),
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+  frequency: require('./175.frequency.png'),
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+  hashedNetwork: require('./176.hashed.png'),
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+  kylinNetwork: require('./177.kylin.png'),
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+  ipci: require('./178.ipci.png'),
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+  kico: require('./179.kico.png'),
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+  luhnNetwork: require('./180.luhn.png'),
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+  riodefi: require('./181.riodefi.png'),
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+  automata: require('./182.automata.png'),
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+  creditcoin: require('./183.creditcoin.png'),
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+  crownSterling: require('./184.crownSterling.png'),
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+  dockPosMainnet: require('./185.dockMainnet.png'),
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+  kusari: require('./186.kusari.png'),
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+  logion: require('./187.logion.png'),
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+  nftmart: require('./188.nftmart.png'),
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+  riochain: require('./190.riochain.png'),
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+  sherpax: require('./191.sherpax.png'),
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+  sora_ksm: require('./99.Sora.png'),
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+  'sora-substrate': require('./99.Sora.png'),
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+  polymesh: require('./189.polymesh.png'),
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+  swapdex: require('./192.swapdex.png'),
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+  '3dpass': require('./193.3dpass.png'),
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+  kulupu: require('./194.kulupu.png'),
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+  joystream: require('./195.joystream.png'),
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+  pendulum: require('./172.Pendulum.png'),
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+  tfa: require('./196.tfa.png'),
   // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
   default: require('./73.Default.png')
 };

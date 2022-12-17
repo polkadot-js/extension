@@ -16,8 +16,6 @@ import { parseTxAndSignature } from '@subwallet/extension-koni-base/api/evm/exte
 import { PREDEFINED_GENESIS_HASHES, PREDEFINED_NETWORKS } from '@subwallet/extension-koni-base/api/predefinedNetworks';
 import { PREDEFINED_SINGLE_MODES } from '@subwallet/extension-koni-base/api/predefinedSingleMode';
 // eslint-disable-next-line camelcase
-import { DotSamaCrowdloan_crowdloans_nodes } from '@subwallet/extension-koni-base/api/subquery/__generated__/DotSamaCrowdloan';
-import { fetchDotSamaCrowdloan } from '@subwallet/extension-koni-base/api/subquery/crowdloan';
 import { deleteCustomTokens, FUNGIBLE_TOKEN_STANDARDS, getTokensForChainRegistry, upsertCustomToken } from '@subwallet/extension-koni-base/api/tokens';
 import { DEFAULT_SUPPORTED_TOKENS } from '@subwallet/extension-koni-base/api/tokens/defaultSupportedTokens';
 import { initEvmTokenState } from '@subwallet/extension-koni-base/api/tokens/evm/utils';
@@ -32,7 +30,7 @@ import AccountRefStore from '@subwallet/extension-koni-base/stores/AccountRef';
 import AuthorizeStore from '@subwallet/extension-koni-base/stores/Authorize';
 import CustomTokenStore from '@subwallet/extension-koni-base/stores/CustomEvmToken';
 import SettingsStore from '@subwallet/extension-koni-base/stores/Settings';
-import { convertFundStatus, getCurrentProvider, mergeNetworkProviders } from '@subwallet/extension-koni-base/utils';
+import { getCurrentProvider, mergeNetworkProviders } from '@subwallet/extension-koni-base/utils';
 import { anyNumberToBN } from '@subwallet/extension-koni-base/utils/eth';
 import { decodePair } from '@subwallet/keyring/pair/decode';
 import { KeyringPair$Meta } from '@subwallet/keyring/types';
@@ -160,8 +158,6 @@ export default class KoniState extends State {
   private balanceMap: Record<string, BalanceItem> = this.generateDefaultBalanceMap();
   private balanceSubject = new Subject<BalanceJson>();
 
-  // eslint-disable-next-line camelcase
-  private crowdloanFundMap: Record<string, DotSamaCrowdloan_crowdloans_nodes> = {};
   private crowdloanMap: Record<string, CrowdloanItem> = generateDefaultCrowdloanMap();
   private crowdloanSubject = new Subject<CrowdloanJson>();
 
@@ -259,7 +255,7 @@ export default class KoniState extends State {
 
             mergedNetworkMap[key].crowdloanUrl = storedNetwork.crowdloanUrl;
             mergedNetworkMap[key].blockExplorer = storedNetwork.blockExplorer;
-            mergedNetworkMap[key].currentProviderMode = mergedNetworkMap[key].currentProvider.startsWith('http') ? 'http' : 'ws';
+            mergedNetworkMap[key].currentProviderMode = (mergedNetworkMap[key].currentProvider || '').startsWith('http') ? 'http' : 'ws';
           } else {
             if (Object.keys(PREDEFINED_GENESIS_HASHES).includes(storedNetwork.genesisHash)) { // merge networks with same genesis hash
               // @ts-ignore
@@ -285,11 +281,17 @@ export default class KoniState extends State {
       }
 
       for (const [key, network] of Object.entries(this.networkMap)) {
+        const currentProvider = getCurrentProvider(network);
+
+        if (!currentProvider) {
+          continue;
+        }
+
         if (network.active) {
-          this.apiMap.dotSama[key] = initApi(key, getCurrentProvider(network), network.isEthereum);
+          this.apiMap.dotSama[key] = initApi(key, currentProvider, network.isEthereum);
 
           if (network.isEthereum && network.isEthereum) {
-            this.apiMap.web3[key] = initWeb3Api(getCurrentProvider(network));
+            this.apiMap.web3[key] = initWeb3Api(currentProvider);
           }
         }
       }
@@ -840,6 +842,11 @@ export default class KoniState extends State {
 
   public setHistory (address: string, network: string, item: TransactionHistoryItemType | TransactionHistoryItemType[], callback?: (items: TransactionHistoryItemType[]) => void): void {
     let items: TransactionHistoryItemType[];
+    const networkInfo = this.getNetworkMap()[network];
+
+    if (!networkInfo) {
+      return;
+    }
 
     if (item && !Array.isArray(item)) {
       item.origin = 'app';
@@ -847,6 +854,14 @@ export default class KoniState extends State {
     } else {
       items = item;
     }
+
+    items.forEach((item) => {
+      item.feeSymbol = networkInfo.nativeToken;
+
+      if (!item.changeSymbol) {
+        item.changeSymbol = networkInfo.nativeToken;
+      }
+    });
 
     if (items.length) {
       this.getAccountAddress().then((currentAddress) => {
@@ -1037,6 +1052,10 @@ export default class KoniState extends State {
     return [checkingAddress];
   }
 
+  public getAllAddresses (): string[] {
+    return Object.keys(accounts.subject.value);
+  }
+
   public getBalance (reset?: boolean): BalanceJson {
     const activeData = this.removeInactiveNetworkData(this.balanceMap);
 
@@ -1122,10 +1141,6 @@ export default class KoniState extends State {
     return this.balanceSubject;
   }
 
-  public async fetchCrowdloanFundMap () {
-    this.crowdloanFundMap = await fetchDotSamaCrowdloan();
-  }
-
   public getCrowdloan (reset?: boolean): CrowdloanJson {
     // const activeData = this.removeInactiveNetworkData(this.crowdloanMap);
 
@@ -1140,12 +1155,6 @@ export default class KoniState extends State {
 
   public setCrowdloanItem (networkKey: string, item: CrowdloanItem) {
     const itemData = { ...item, timestamp: +new Date() };
-    // Fill para state
-    const crowdloanFundNode = this.crowdloanFundMap[networkKey];
-
-    if (crowdloanFundNode) {
-      itemData.paraState = convertFundStatus(crowdloanFundNode.status);
-    }
 
     // Update crowdloan map
     this.crowdloanMap[networkKey] = itemData;
@@ -1437,7 +1446,7 @@ export default class KoniState extends State {
         this.networkMap[data.key].customProviders = data.customProviders;
       }
 
-      if (data.currentProvider !== this.networkMap[data.key].currentProvider) {
+      if (data.currentProvider !== this.networkMap[data.key].currentProvider && data.currentProvider) {
         this.networkMap[data.key].currentProvider = data.currentProvider;
         this.networkMap[data.key].currentProviderMode = data.currentProvider.startsWith('ws') ? 'ws' : 'http';
       }
@@ -1474,10 +1483,14 @@ export default class KoniState extends State {
         delete this.apiMap.web3[data.key];
       }
 
-      this.apiMap.dotSama[data.key] = initApi(data.key, getCurrentProvider(data), data.isEthereum);
+      const currentProvider = getCurrentProvider(data);
 
-      if (data.isEthereum && data.isEthereum) {
-        this.apiMap.web3[data.key] = initWeb3Api(getCurrentProvider(data));
+      if (currentProvider) {
+        this.apiMap.dotSama[data.key] = initApi(data.key, currentProvider, data.isEthereum);
+
+        if (data.isEthereum && data.isEthereum) {
+          this.apiMap.web3[data.key] = initWeb3Api(currentProvider);
+        }
       }
     }
 
@@ -1614,10 +1627,14 @@ export default class KoniState extends State {
     const networkData = this.networkMap[networkKey];
 
     this.lockNetworkMap = true;
-    this.apiMap.dotSama[networkKey] = initApi(networkKey, getCurrentProvider(networkData), networkData.isEthereum);
+    const currentProvider = getCurrentProvider(networkData);
 
-    if (networkData.isEthereum && networkData.isEthereum) {
-      this.apiMap.web3[networkKey] = initWeb3Api(getCurrentProvider(networkData));
+    if (currentProvider) {
+      this.apiMap.dotSama[networkKey] = initApi(networkKey, currentProvider, networkData.isEthereum);
+
+      if (networkData.isEthereum && networkData.isEthereum) {
+        this.apiMap.web3[networkKey] = initWeb3Api(currentProvider);
+      }
     }
 
     networkData.active = true;
@@ -1656,10 +1673,14 @@ export default class KoniState extends State {
     this.networkMapStore.set('NetworkMap', this.networkMap);
 
     for (const key of targetNetworkKeys) {
-      this.apiMap.dotSama[key] = initApi(key, getCurrentProvider(this.networkMap[key]), this.networkMap[key].isEthereum);
+      const currentProvider = getCurrentProvider(this.networkMap[key]);
 
-      if (this.networkMap[key].isEthereum && this.networkMap[key].isEthereum) {
-        this.apiMap.web3[key] = initWeb3Api(getCurrentProvider(this.networkMap[key]));
+      if (currentProvider) {
+        this.apiMap.dotSama[key] = initApi(key, currentProvider, this.networkMap[key].isEthereum);
+
+        if (this.networkMap[key].isEthereum && this.networkMap[key].isEthereum) {
+          this.apiMap.web3[key] = initWeb3Api(currentProvider);
+        }
       }
     }
 
@@ -1685,8 +1706,10 @@ export default class KoniState extends State {
 
     for (const [key, network] of Object.entries(this.networkMap)) {
       if (!network.active) {
-        if (networkKeys.includes(key)) {
-          this.apiMap.dotSama[key] = initApi(key, getCurrentProvider(this.networkMap[key]), this.networkMap[key].isEthereum);
+        const currentProvider = getCurrentProvider(this.networkMap[key]);
+
+        if (networkKeys.includes(key) && currentProvider) {
+          this.apiMap.dotSama[key] = initApi(key, currentProvider, this.networkMap[key].isEthereum);
           this.networkMap[key].active = true;
         }
       } else {
@@ -1760,7 +1783,11 @@ export default class KoniState extends State {
   }
 
   public refreshWeb3Api (key: string) {
-    this.apiMap.web3[key] = initWeb3Api(getCurrentProvider(this.networkMap[key]));
+    const currentProvider = getCurrentProvider(this.networkMap[key]);
+
+    if (currentProvider) {
+      this.apiMap.web3[key] = initWeb3Api(currentProvider);
+    }
   }
 
   public subscribeServiceInfo () {
@@ -1865,7 +1892,7 @@ export default class KoniState extends State {
   private combineHistories (oldItems: TransactionHistoryItemType[], newItems: TransactionHistoryItemType[]): TransactionHistoryItemType[] {
     const newHistories = newItems.filter((item) => !oldItems.some((old) => this.isSameHistory(old, item)));
 
-    return [...oldItems, ...newHistories].filter((his) => his.origin === 'app' || his.eventIdx).sort((a, b) => b.time - a.time);
+    return [...oldItems, ...newHistories].filter((his) => his.origin === 'app' || his.eventIdx);
   }
 
   public isSameHistory (oldItem: TransactionHistoryItemType, newItem: TransactionHistoryItemType): boolean {

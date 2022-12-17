@@ -30,7 +30,7 @@ function Networks ({ className }: Props): React.ReactElement {
     const _filteredNetworkMap: Record<string, NetworkJson> = {};
 
     Object.entries(networkMap).forEach(([key, network]) => {
-      if (network.chain.toLowerCase().includes(searchString.toLowerCase())) {
+      if ((Object.keys(network.providers).length > 0 || Object.keys(network.customProviders || []).length > 0) && network.chain.toLowerCase().includes(searchString.toLowerCase())) {
         _filteredNetworkMap[key] = network;
       }
     });

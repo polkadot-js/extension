@@ -3503,7 +3503,13 @@ export default class KoniExtension extends Extension {
       web3 = web3Api[network.key];
       exists = true;
     } else {
-      web3 = initWeb3Api(getCurrentProvider(network));
+      const currentProvider = getCurrentProvider(network);
+
+      if (!currentProvider) {
+        throw new Error('Not found current provider');
+      }
+
+      web3 = initWeb3Api(currentProvider);
     }
 
     if (type === 'message') {

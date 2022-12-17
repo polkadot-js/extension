@@ -484,7 +484,7 @@ export interface RandomTestRequest {
 }
 
 export interface TransactionHistoryItemType {
-  time: number;
+  time: number | string;
   networkKey: string;
   change: string;
   changeSymbol?: string; // if undefined => main token

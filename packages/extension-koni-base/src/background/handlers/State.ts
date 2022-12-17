@@ -1851,7 +1851,7 @@ export default class KoniState extends State {
   private combineHistories (oldItems: TransactionHistoryItemType[], newItems: TransactionHistoryItemType[]): TransactionHistoryItemType[] {
     const newHistories = newItems.filter((item) => !oldItems.some((old) => this.isSameHistory(old, item)));
 
-    return [...oldItems, ...newHistories].filter((his) => his.origin === 'app' || his.eventIdx).sort((a, b) => b.time - a.time);
+    return [...oldItems, ...newHistories].filter((his) => his.origin === 'app' || his.eventIdx);
   }
 
   public isSameHistory (oldItem: TransactionHistoryItemType, newItem: TransactionHistoryItemType): boolean {

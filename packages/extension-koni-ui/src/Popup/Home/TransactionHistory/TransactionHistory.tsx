@@ -46,6 +46,19 @@ function getReadyNetwork (registryMap: Record<string, ChainRegistry>): string[] 
   return result;
 }
 
+function compareHistoryFn (a: TransactionHistoryItemType, b: TransactionHistoryItemType) {
+  try {
+    const atime = typeof a.time === 'number' ? new Date(a.time).toISOString() : a.time;
+    const btime = typeof b.time === 'number' ? new Date(b.time).toISOString() : b.time;
+
+    return (atime < btime) ? 1 : -1;
+  } catch (e) {
+    console.warn(e);
+
+    return 0;
+  }
+}
+
 function getItems (networkKey: string, historyMap: Record<string, TransactionHistoryItemType[]>): TransactionHistoryItemType[] {
   const result: TransactionHistoryItemType[] = [];
 
@@ -61,7 +74,7 @@ function getItems (networkKey: string, historyMap: Record<string, TransactionHis
     result.push(...historyMap[networkKey]);
   }
 
-  return result.sort((a, b) => b.time - a.time);
+  return result.sort(compareHistoryFn);
 }
 
 function Wrapper ({ className, historyMap, networkKey, registryMap }: Props): React.ReactElement<Props> {
@@ -69,7 +82,7 @@ function Wrapper ({ className, historyMap, networkKey, registryMap }: Props): Re
   const items = getItems(networkKey, historyMap);
   const readyItems = items
     .filter((i) => readyNetworks.includes(i.networkKey))
-    .sort((a, b) => (a.time < b.time) ? 1 : -1);
+    .sort(compareHistoryFn);
 
   if (!readyItems.length) {
     return (<TransactionHistoryEmptyList />);

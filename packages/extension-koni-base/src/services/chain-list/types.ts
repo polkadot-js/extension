@@ -63,6 +63,11 @@ export interface _ChainProvider {
 export interface _EvmInfo {
   evmChainId: number,
   blockExplorer: string | null,
+
+  // some info about native tokens (for convenience)
+  existentialDeposit: string,
+  decimals: number,
+  symbol: string
 }
 
 export interface _SubstrateInfo {
@@ -71,7 +76,12 @@ export interface _SubstrateInfo {
   addressPrefix: number,
   crowdloanUrl: string | null,
   category: SubstrateChainCategory[],
-  blockExplorer: string | null
+  blockExplorer: string | null,
+
+  // some info about native tokens (for convenience)
+  existentialDeposit: string,
+  decimals: number,
+  symbol: string
 }
 
 export interface _MultiChainAsset {

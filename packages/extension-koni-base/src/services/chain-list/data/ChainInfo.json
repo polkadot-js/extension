@@ -21,7 +21,11 @@
       "category": ["RELAYCHAIN"],
       "supportStaking": true,
       "supportSmartContract": false,
-      "blockExplorer": "https://polkadot.subscan.io/"
+      "blockExplorer": "https://polkadot.subscan.io/",
+
+      "symbol": "DOT",
+      "existentialDeposit": "10000000000",
+      "decimals": 10
     },
     "evmInfo": null
   },
@@ -47,7 +51,11 @@
       "category": ["RELAYCHAIN"],
       "supportStaking": true,
       "supportSmartContract": false,
-      "blockExplorer": "https://kusama.subscan.io/"
+      "blockExplorer": "https://kusama.subscan.io/",
+
+      "symbol": "KSM",
+      "existentialDeposit": "333333333",
+      "decimals": 12
     },
     "evmInfo": null
   },
@@ -72,11 +80,19 @@
       "category": ["PARACHAIN"],
       "supportStaking": true,
       "supportSmartContract": true,
-      "blockExplorer": "https://moonbeam.subscan.io/"
+      "blockExplorer": "https://moonbeam.subscan.io/",
+
+      "symbol": "GLMR",
+      "existentialDeposit": "0",
+      "decimals": 18
     },
     "evmInfo": {
       "evmChainId": 1284,
-      "blockExplorer": "https://moonscan.io/"
+      "blockExplorer": "https://moonscan.io/",
+
+      "symbol": "GLMR",
+      "decimals": 18,
+      "existentialDeposit": "0"
     }
   },
   "alephZeroTest": {
@@ -95,8 +111,31 @@
       "category": ["TEST_NET"],
       "supportStaking": true,
       "supportSmartContract": false,
-      "blockExplorer": null
+      "blockExplorer": null,
+
+      "symbol": "TZERO",
+      "existentialDeposit": "500",
+      "decimals": 12
     },
     "evmInfo": null
+  },
+  "ethereum": {
+    "slug": "ethereum",
+    "name": "Ethereum Mainnet",
+    "logo": "./77.Ethereum.png",
+    "providers": {
+      "Cloudflare": "https://cloudflare-eth.com",
+      "BlastApi": "https://eth-mainnet.public.blastapi.io",
+      "Infura": "https://mainnet.infura.io/v3/b6bf7d3508c941499b10025c0776eaf8"
+    },
+    "substrateInfo": null,
+    "evmInfo": {
+      "evmChainId": 1,
+      "blockExplorer": "https://etherscan.io",
+
+      "symbol": "ETH",
+      "decimals": 18,
+      "existentialDeposit": "0"
+    }
   }
 }

@@ -1,7 +1,7 @@
 // Copyright 2019-2022 @polkadot/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { ChainEditInfo, ChainEditStandard } from '@subwallet/extension-base/background/KoniTypes';
+import { ChainEditInfo, ChainEditStandard, ChainSpecInfo } from '@subwallet/extension-base/background/KoniTypes';
 import { _ChainInfo } from '@subwallet/extension-koni-base/services/chain-list/types';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { useSelector } from 'react-redux';
@@ -22,6 +22,22 @@ function getChainType (chainInfo: _ChainInfo) {
   return ChainEditStandard.UNKNOWN;
 }
 
+function getSymbol (chainInfo: _ChainInfo) {
+  if (chainInfo.substrateInfo !== null && chainInfo.evmInfo !== null) {
+    return chainInfo.substrateInfo.symbol;
+  }
+
+  if (chainInfo.substrateInfo !== null && chainInfo.evmInfo === null) {
+    return chainInfo.substrateInfo.symbol;
+  }
+
+  if (chainInfo.evmInfo !== null && chainInfo.substrateInfo === null) {
+    return chainInfo.evmInfo.symbol;
+  }
+
+  return '';
+}
+
 export default function useGetChainInfoForConfig () {
   const { data, externalData, mode } = useSelector((state: RootState) => state.networkConfigParams);
   const chainStateMap = useSelector((state: RootState) => state.chainStateMap);
@@ -30,18 +46,27 @@ export default function useGetChainInfoForConfig () {
     chainType: ChainEditStandard.UNKNOWN,
     currentProvider: '',
     name: '',
-    evmChainId: -1,
-    paraId: -1,
     providers: {},
-    slug: ''
+    slug: '',
+    symbol: ''
+  };
+
+  const chainSpec: ChainSpecInfo = {
+    decimals: -1,
+    existentialDeposit: '',
+    genesisHash: '',
+    paraId: null,
+    addressPrefix: -1,
+    evmChainId: null
   };
 
   if (data) {
     chainEditInfo.chainType = getChainType(data);
     chainEditInfo.currentProvider = chainStateMap[data.slug].currentProvider;
+    chainEditInfo.symbol = getSymbol(data);
 
     if (data.evmInfo !== null) {
-      chainEditInfo.evmChainId = data.evmInfo.evmChainId;
+      chainSpec.evmChainId = data.evmInfo.evmChainId;
 
       if (data.evmInfo.blockExplorer !== null) {
         chainEditInfo.blockExplorer = data.evmInfo.blockExplorer;
@@ -49,9 +74,11 @@ export default function useGetChainInfoForConfig () {
     }
 
     if (data.substrateInfo !== null) {
-      if (data.substrateInfo.paraId !== null) {
-        chainEditInfo.paraId = data.substrateInfo.paraId;
-      }
+      chainSpec.existentialDeposit = data.substrateInfo.existentialDeposit;
+      chainSpec.addressPrefix = data.substrateInfo.addressPrefix;
+      chainSpec.genesisHash = data.substrateInfo.genesisHash;
+      chainSpec.decimals = data.substrateInfo.decimals;
+      chainSpec.paraId = data.substrateInfo.paraId;
 
       if (data.substrateInfo.blockExplorer !== null) {
         chainEditInfo.blockExplorer = data.substrateInfo.blockExplorer;
@@ -73,7 +100,7 @@ export default function useGetChainInfoForConfig () {
     }
 
     chainEditInfo.providers = providers;
-    chainEditInfo.evmChainId = parseInt(externalData.chainId);
+    chainSpec.evmChainId = parseInt(externalData.chainId);
     chainEditInfo.name = externalData.chainName;
 
     if (externalData.blockExplorerUrls) {
@@ -82,7 +109,8 @@ export default function useGetChainInfoForConfig () {
   }
 
   return {
-    data: chainEditInfo,
+    editInfo: chainEditInfo,
+    spec: chainSpec,
     requestId: externalData?.requestId,
     mode
   };

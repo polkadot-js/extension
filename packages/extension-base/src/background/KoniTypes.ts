@@ -1507,21 +1507,36 @@ export enum ChainEditStandard {
   EVM = 'EVM',
   SUBSTRATE = 'SUBSTRATE',
   UNKNOWN = 'UNKNOWN',
-  MIXED = 'MIXED'
+  MIXED = 'MIXED' // takes root in a standard (Substrate, EVM,...) but also compatible with other standards
 }
 
 // ChainService
+
+// for custom network
 export type ChainEditInfo = { // only support pure substrate or EVM network
   slug: string;
   currentProvider: string;
   providers: Record<string, string>;
   name: string;
-  paraId: number;
   chainType: ChainEditStandard;
-  evmChainId: number;
   blockExplorer?: string;
   crowdloanUrl?: string;
   priceId?: string;
+  symbol: string;
+}
+
+export interface ChainSpecInfo {
+  // Substrate
+  addressPrefix: number,
+  genesisHash: string,
+  paraId: number | null,
+
+  // EVM
+  evmChainId: number | null // null means not EVM
+
+  // Common
+  existentialDeposit: string,
+  decimals: number
 }
 
 export interface KoniRequestSignatures {

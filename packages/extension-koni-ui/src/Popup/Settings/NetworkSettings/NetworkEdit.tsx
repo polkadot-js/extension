@@ -1,7 +1,7 @@
 // Copyright 2019-2022 @polkadot/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { ChainEditInfo, ChainEditStandard, NETWORK_ERROR, ValidateNetworkResponse } from '@subwallet/extension-base/background/KoniTypes';
+import { ChainEditInfo, ChainEditStandard, ChainSpecInfo, NETWORK_ERROR, ValidateNetworkResponse } from '@subwallet/extension-base/background/KoniTypes';
 import { CUSTOM_NETWORK_PREFIX } from '@subwallet/extension-koni-base/services/chain-service/types';
 import { _isCustomNetwork } from '@subwallet/extension-koni-base/services/chain-service/utils';
 import { isUrl, isValidProvider as _isValidProvider } from '@subwallet/extension-koni-base/utils';
@@ -34,14 +34,12 @@ function getAllProviders (data: Record<string, string>) {
 
 enum ChainEditActionType {
   UPDATE_NAME = 'UPDATE_NAME',
-  ADD_PROVIDER = 'ADD_PROVIDER',
   UPDATE_CURRENT_PROVIDER = 'UPDATE_CURRENT_PROVIDER',
   UPDATE_BLOCK_EXPLORER = 'UPDATE_BLOCK_EXPLORER',
   UPDATE_CROWDLOAN_URL = 'UPDATE_CROWDLOAN_URL',
   UPDATE_PRICE_ID = 'UPDATE_PRICE_ID',
-  UPDATE_PARA_ID = 'UPDATE_PARA_ID',
-  UPDATE_EVM_CHAIN_ID = 'UPDATE_EVM_CHAIN_ID',
-  UPDATE_NEW_PROVIDER = 'UPDATE_NEW_PROVIDER'
+  UPDATE_NEW_PROVIDER = 'UPDATE_NEW_PROVIDER',
+  UPDATE_SYMBOL = 'UPDATE_SYMBOL'
 }
 
 interface ChainEditAction {
@@ -52,27 +50,14 @@ interface ChainEditAction {
 const initChainEditInfo: ChainEditInfo = {
   chainType: ChainEditStandard.UNKNOWN,
   currentProvider: '',
-  evmChainId: -1,
   name: '',
-  paraId: -1,
   providers: {},
-  slug: ''
+  slug: '',
+  symbol: ''
 };
 
 function chainEditInfoReducer (state: ChainEditInfo, action: ChainEditAction) {
   switch (action.type) {
-    case ChainEditActionType.ADD_PROVIDER:
-      return initChainEditInfo;
-    case ChainEditActionType.UPDATE_PARA_ID:
-      return {
-        ...state,
-        paraId: parseInt(action.payload as string)
-      };
-    case ChainEditActionType.UPDATE_EVM_CHAIN_ID:
-      return {
-        ...state,
-        evmChainId: parseInt(action.payload as string)
-      };
     case ChainEditActionType.UPDATE_NAME:
       return {
         ...state,
@@ -98,14 +83,26 @@ function chainEditInfoReducer (state: ChainEditInfo, action: ChainEditAction) {
         ...state,
         currentProvider: action.payload as string
       };
-    case ChainEditActionType.UPDATE_NEW_PROVIDER:
+
+    case ChainEditActionType.UPDATE_NEW_PROVIDER: {
+      const { newProvider, newProviderKey } = action.payload as Record<string, string>;
+
       return {
         ...state,
         providers: {
           ...state.providers,
-          ...(action.payload as Record<string, string>)
-        }
+          [newProviderKey]: newProvider
+        },
+        currentProvider: newProviderKey
       };
+    }
+
+    case ChainEditActionType.UPDATE_SYMBOL:
+      return {
+        ...state,
+        symbol: action.payload as string
+      };
+
     default:
       throw new Error();
   }
@@ -115,6 +112,7 @@ interface ValidationState {
   validationError: NETWORK_ERROR,
   isValidCrowdloanUrl: boolean,
   isValidName: boolean,
+  isValidSymbol: boolean,
   isValidBlockExplorer: boolean,
   needValidating: boolean,
   loading: boolean,
@@ -140,7 +138,8 @@ const initValidationState: ValidationState = {
   isProviderConnected: false,
   isCurrentEndpoint: false,
   isProviderPredefined: true,
-  isNewProvider: false
+  isNewProvider: false,
+  isValidSymbol: false
 };
 
 enum ValidationStateActionType {
@@ -154,7 +153,8 @@ enum ValidationStateActionType {
   UPDATE_PROVIDER_CONNECTED = 'UPDATE_PROVIDER_CONNECTED',
   UPDATE_PROVIDER_SELECTION = 'UPDATE_PROVIDER_SELECTION',
   UPDATE_VALIDATION_PASSED = 'UPDATE_VALIDATION_PASSED',
-  UPDATE_NEW_PROVIDER = 'UPDATE_NEW_PROVIDER'
+  UPDATE_NEW_PROVIDER = 'UPDATE_NEW_PROVIDER',
+  UPDATE_SYMBOL_VALIDATION = 'UPDATE_SYMBOL_VALIDATION'
 }
 
 interface ValidationStateAction {
@@ -237,6 +237,43 @@ function validationStateReducer (state: ValidationState, action: ValidationState
         isValidName: action.payload as boolean
       };
 
+    case ValidationStateActionType.UPDATE_SYMBOL_VALIDATION:
+      return {
+        ...state,
+        isValidSymbol: action.payload as boolean
+      };
+
+    default:
+      throw new Error();
+  }
+}
+
+enum ChainSpecActionType {
+  UPDATE_SPEC = 'UPDATE_SPEC'
+}
+
+interface ChainSpecAction {
+  type: ChainSpecActionType,
+  payload: Record<string, any>
+}
+
+const initChainSpec: ChainSpecInfo = {
+  decimals: -1,
+  existentialDeposit: '',
+  genesisHash: '',
+  paraId: null,
+  addressPrefix: -1,
+
+  evmChainId: null
+};
+
+function chainSpecReducer (state: ChainSpecInfo, action: ChainSpecAction) {
+  switch (action.type) {
+    case ChainSpecActionType.UPDATE_SPEC:
+      return {
+        ...state,
+        ...action.payload
+      };
     default:
       throw new Error();
   }
@@ -246,10 +283,11 @@ function NetworkEdit ({ className }: Props): React.ReactElement {
   const { t } = useTranslation();
   const { show } = useToast();
   const [showMore, setShowMore] = useState(false);
-  const { data, mode, requestId } = useGetChainInfoForConfig();
+  const { editInfo, mode, requestId, spec } = useGetChainInfoForConfig();
 
-  const [chainEditInfo, dispatchChainEditInfo] = useReducer(chainEditInfoReducer, data || initChainEditInfo);
-  const [validationState, dispatchValidationState] = useReducer(validationStateReducer, initValidationState);
+  const [chainEditInfo, dispatchChainEditInfo] = useReducer(chainEditInfoReducer, editInfo || initChainEditInfo);
+  const [validationState, dispatchValidationState] = useReducer(validationStateReducer, { ...initValidationState, isValidSymbol: editInfo.symbol !== '' });
+  const [chainSpec, dispatchChainSpec] = useReducer(chainSpecReducer, spec || initChainSpec);
 
   const [provider, setProvider] = useState<string | null>(null);
 
@@ -298,7 +336,6 @@ function NetworkEdit ({ className }: Props): React.ReactElement {
 
         dispatchValidationState({ type: ValidationStateActionType.UPDATE_PROVIDER_VALIDATION, payload: false });
       } else {
-        console.log('jump into useEffect');
         dispatchValidationState({ type: ValidationStateActionType.UPDATE_PROVIDER_VALIDATION, payload: true });
 
         if (validationState.needValidating && !validationState.isCurrentEndpoint) {
@@ -359,7 +396,7 @@ function NetworkEdit ({ className }: Props): React.ReactElement {
         }
       }
     }
-  }, [data, provider, show, validationState.isCurrentEndpoint, validationState.needValidating]);
+  }, [editInfo, provider, show, validationState.isCurrentEndpoint, validationState.needValidating]);
 
   // const _onSaveNetwork = useCallback(() => {
   //   if ((!_isValidProvider || !isProviderConnected) && !isCurrentEndpoint) {
@@ -396,6 +433,22 @@ function NetworkEdit ({ className }: Props): React.ReactElement {
     dispatchChainEditInfo({ type: ChainEditActionType.UPDATE_NAME, payload: value });
   }, []);
 
+  const onChangeChainSymbol = useCallback((value: string) => {
+    if (value.split(' ').join('') === '' || value.length > 5) {
+      if (value.length > 5) {
+        show(t<string>('Symbol cannot exceed 5 characters'));
+      } else {
+        show(t<string>('Symbol cannot be empty'));
+      }
+
+      dispatchValidationState({ type: ValidationStateActionType.UPDATE_SYMBOL_VALIDATION, payload: false });
+    } else {
+      dispatchValidationState({ type: ValidationStateActionType.UPDATE_SYMBOL_VALIDATION, payload: true });
+    }
+
+    dispatchChainEditInfo({ type: ChainEditActionType.UPDATE_SYMBOL, payload: value });
+  }, [show, t]);
+
   const onChangeExplorer = useCallback((value: string) => {
     if (!isUrl(value) && value !== '') {
       dispatchValidationState({ type: ValidationStateActionType.UPDATE_BLOCK_EXPLORER_VALIDATION, payload: false });
@@ -418,38 +471,6 @@ function NetworkEdit ({ className }: Props): React.ReactElement {
     dispatchChainEditInfo({ type: ChainEditActionType.UPDATE_CROWDLOAN_URL, payload: value });
   }, [show]);
 
-  const onChangeParaId = useCallback((value: string) => {
-    if (value === '') {
-      dispatchChainEditInfo({ type: ChainEditActionType.UPDATE_PARA_ID, payload: '-1' });
-
-      return;
-    }
-
-    const paraId = parseInt(value);
-
-    if (isNaN(paraId)) {
-      show('ParaId can only be number');
-    } else {
-      dispatchChainEditInfo({ type: ChainEditActionType.UPDATE_PARA_ID, payload: value });
-    }
-  }, [show]);
-
-  const onChangeEvmChainId = useCallback((value: string) => {
-    if (value === '') {
-      dispatchChainEditInfo({ type: ChainEditActionType.UPDATE_EVM_CHAIN_ID, payload: '-1' });
-
-      return;
-    }
-
-    const paraId = parseInt(value);
-
-    if (isNaN(paraId)) {
-      show('EVM Chain ID can only be number');
-    } else {
-      dispatchChainEditInfo({ type: ChainEditActionType.UPDATE_EVM_CHAIN_ID, payload: value });
-    }
-  }, [show]);
-
   const onChangePriceId = useCallback((value: string) => {
     dispatchChainEditInfo({ type: ChainEditActionType.UPDATE_PRICE_ID, payload: value });
   }, []);
@@ -461,17 +482,17 @@ function NetworkEdit ({ className }: Props): React.ReactElement {
         payload: {
           needValidating: false,
           isProviderPredefined: true,
-          isCurrentEndpoint: value === data.currentProvider
+          isCurrentEndpoint: value === editInfo.currentProvider
         }
       });
 
       dispatchChainEditInfo({ type: ChainEditActionType.UPDATE_CURRENT_PROVIDER, payload: value });
     }
-  }, [chainEditInfo.providers, data.currentProvider]);
+  }, [chainEditInfo.providers, editInfo.currentProvider]);
 
   const _onSaveNetwork = useCallback(() => {
-    console.log('on save');
-  }, []);
+    console.log('on save', validationState, chainEditInfo);
+  }, [chainEditInfo, validationState]);
 
   const handleCreateProvider = useCallback((newProvider: string): string => {
     if (!_isValidProvider(newProvider)) {
@@ -490,12 +511,12 @@ function NetworkEdit ({ className }: Props): React.ReactElement {
       key: '',
       networkGroup: [],
       ss58Prefix: '',
-      success: true
+      success: false
     };
 
     dispatchValidationState({ type: ValidationStateActionType.UPDATE_LOADING, payload: false });
 
-    if (resp.error) {
+    if (resp.error || !resp.success) {
       show(getValidateErrorMessage(resp.error));
 
       return '';
@@ -515,7 +536,13 @@ function NetworkEdit ({ className }: Props): React.ReactElement {
       const providerCount = Object.values(chainEditInfo.providers).length;
       const newProviderKey = CUSTOM_NETWORK_PREFIX + `${providerCount + 1}`;
 
-      dispatchChainEditInfo({ type: ChainEditActionType.UPDATE_NEW_PROVIDER, payload: { [newProviderKey]: newProvider } });
+      dispatchChainEditInfo({
+        type: ChainEditActionType.UPDATE_NEW_PROVIDER,
+        payload: {
+          newProvider: newProvider,
+          newProviderKey: newProviderKey
+        }
+      });
 
       return newProviderKey;
     }
@@ -527,7 +554,7 @@ function NetworkEdit ({ className }: Props): React.ReactElement {
     if (mode === 'create') {
       return !validationState.isValidName || validationState.needValidating || !validationState.isProviderConnected || !validationState.isNewProviderValid || !validationState.isValidBlockExplorer || !validationState.isValidCrowdloanUrl || !chainEditInfo.name || chainEditInfo.name === '';
     } else {
-      const isDisabled = !validationState.isValidName || !validationState.isValidBlockExplorer || !validationState.isValidCrowdloanUrl || !chainEditInfo.name || chainEditInfo.name === '' || validationState.loading;
+      const isDisabled = !validationState.isValidName || !validationState.isValidSymbol || !validationState.isValidBlockExplorer || !validationState.isValidCrowdloanUrl || validationState.loading;
 
       if (validationState.isNewProvider) {
         return !validationState.isNewProviderValid || validationState.needValidating || (!validationState.isProviderPredefined && !validationState.isProviderConnected) || isDisabled;
@@ -535,10 +562,105 @@ function NetworkEdit ({ className }: Props): React.ReactElement {
         return isDisabled;
       }
     }
-  }, [mode, validationState.isValidName, validationState.needValidating, validationState.isProviderConnected, validationState.isNewProviderValid, validationState.isValidBlockExplorer, validationState.isValidCrowdloanUrl, validationState.isProviderPredefined, validationState.loading, validationState.isNewProvider, chainEditInfo.name]);
+  }, [mode, validationState.isValidName, validationState.needValidating, validationState.isProviderConnected, validationState.isNewProviderValid, validationState.isValidBlockExplorer, validationState.isValidCrowdloanUrl, validationState.isValidSymbol, validationState.loading, validationState.isNewProvider, validationState.isProviderPredefined, chainEditInfo.name]);
 
-  console.log('validationState', validationState);
-  console.log('chainEditInfo', chainEditInfo);
+  const displayChainSpec = useCallback(() => {
+    if (chainEditInfo.chainType === ChainEditStandard.EVM) {
+      return (
+        <div>
+          {
+            chainSpec.evmChainId !== null && <InputWithLabel
+              disabled
+              label={t<string>('EVM Chain ID')}
+              value={chainSpec?.evmChainId?.toString() || ''}
+            />
+          }
+        </div>
+      );
+    }
+
+    if (chainEditInfo.chainType === ChainEditStandard.SUBSTRATE) {
+      return (
+        <div>
+          {
+            chainSpec.paraId !== null && <InputWithLabel
+              disabled
+              label={t<string>('paraId')}
+              value={chainSpec?.paraId?.toString() || ''}
+            />
+          }
+
+          {
+            chainSpec.genesisHash.length > 0 && <InputWithLabel
+              disabled
+              label={t<string>('Genesis Hash')}
+              value={chainSpec.genesisHash || ''}
+            />
+          }
+
+          {
+            chainSpec.addressPrefix > -1 && <InputWithLabel
+              disabled
+              label={t<string>('Address Prefix')}
+              value={chainSpec.addressPrefix.toString() || ''}
+            />
+          }
+
+          {
+            chainSpec.decimals > -1 && <InputWithLabel
+              disabled
+              label={t<string>('Decimals')}
+              value={chainSpec.decimals.toString() || ''}
+            />
+          }
+        </div>
+      );
+    }
+
+    return (<div>
+      <div>
+        {
+          chainSpec.paraId !== null && <InputWithLabel
+            disabled
+            label={t<string>('ParaId')}
+            value={chainSpec?.paraId?.toString() || ''}
+          />
+        }
+
+        {
+          chainSpec.evmChainId !== null && <InputWithLabel
+            disabled
+            label={t<string>('EVM Chain ID')}
+            value={chainSpec?.evmChainId?.toString() || ''}
+          />
+        }
+
+        {
+          chainSpec.genesisHash.length > 0 && <InputWithLabel
+            disabled
+            label={t<string>('Genesis Hash')}
+            value={chainSpec.genesisHash || ''}
+          />
+        }
+
+        {
+          chainSpec.addressPrefix > -1 && <InputWithLabel
+            disabled
+            label={t<string>('Address Prefix')}
+            value={chainSpec.addressPrefix.toString() || ''}
+          />
+        }
+
+        {
+          chainSpec.decimals > -1 && <InputWithLabel
+            disabled
+            label={t<string>('Decimals')}
+            value={chainSpec.decimals.toString() || ''}
+          />
+        }
+      </div>
+    </div>);
+  }, [chainEditInfo.chainType, chainSpec.addressPrefix, chainSpec.decimals, chainSpec.evmChainId, chainSpec.genesisHash, chainSpec.paraId, t]);
 
   return (
     <>
@@ -579,37 +701,19 @@ function NetworkEdit ({ className }: Props): React.ReactElement {
           value={chainEditInfo.name || ''}
         />
 
-        {
-          chainEditInfo.paraId !== -1 && <InputWithLabel
-            disabled
-            label={t<string>('paraId')}
-            onChange={onChangeParaId}
-            value={chainEditInfo.paraId.toString() || ''}
-          />
-        }
+        <InputWithLabel
+          label={t<string>('Symbol (*)')}
+          onChange={onChangeChainSymbol}
+          value={chainEditInfo.symbol || ''}
+        />
 
-        {/* { */}
-        {/*  mode === 'create' && */}
-        {/*  <div className={'toggle-container'}> */}
-        {/*    <div>EVM chain</div> */}
-        {/*    <HorizontalLabelToggle */}
-        {/*      checkedLabel={''} */}
-        {/*      className='info' */}
-        {/*      toggleFunc={toggleEthereum} */}
-        {/*      uncheckedLabel={''} */}
-        {/*      value={isEthereum} */}
-        {/*    /> */}
-        {/*  </div> */}
-        {/* } */}
+        {displayChainSpec()}
 
-        {
-          chainEditInfo.evmChainId !== -1 && <InputWithLabel
-            disabled
-            label={t<string>('Ethereum Chain ID')}
-            onChange={onChangeEvmChainId}
-            value={chainEditInfo.evmChainId.toString() || ''}
-          />
-        }
+        <InputWithLabel
+          disabled
+          label={t<string>('Chain Type')}
+          value={chainEditInfo.chainType || ''}
+        />
 
         <div className={'option-toggle-container'}>
           <div>Advanced options</div>

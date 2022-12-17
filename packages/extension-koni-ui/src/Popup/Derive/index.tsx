@@ -2,6 +2,8 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { canDerive } from '@subwallet/extension-base/utils';
+import RequireMigratePassword from '@subwallet/extension-koni-ui/components/Signing/RequireMigratePassword';
+import useNeedMigratePassword from '@subwallet/extension-koni-ui/hooks/useNeedMigratePassword';
 import { Header, Name } from '@subwallet/extension-koni-ui/partials';
 import { EVM_ACCOUNT_TYPE } from '@subwallet/extension-koni-ui/Popup/CreateAccount';
 import AddressDropdown from '@subwallet/extension-koni-ui/Popup/Derive/AddressDropdown';
@@ -29,6 +31,8 @@ function Derive ({ className }: Props): React.ReactElement<Props> {
   const [isBusy, setIsBusy] = useState(false);
   const [isConnectWhenDerive, setConnectWhenDerive] = useState(true);
   const [parentAddress, setParentAddress] = useState('');
+
+  const needMigratePassword = useNeedMigratePassword(parentAddress);
 
   const _onParentChange = useCallback((address: string) => {
     setParentAddress(address);
@@ -91,12 +95,13 @@ function Derive ({ className }: Props): React.ReactElement<Props> {
           label={t<string>('Auto connect to all DApps after create')}
           onChange={setConnectWhenDerive}
         />
+        <RequireMigratePassword address={parentAddress} />
         <ButtonArea>
           <NextStepButton
             className='next-step-btn'
             data-button-action='create derived account'
             isBusy={isBusy}
-            isDisabled={!parentAddress}
+            isDisabled={!parentAddress || needMigratePassword}
             onClick={_onCreate}
           >
             {t<string>('Create a derived account')}

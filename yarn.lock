@@ -5633,8 +5633,8 @@ __metadata:
     "@subwallet/extension-dapp": ^0.7.4-0
     "@subwallet/extension-inject": ^0.7.4-0
     "@subwallet/extension-mocks": ^0.7.4-0
-    "@subwallet/keyring": ^0.0.1
-    "@subwallet/ui-keyring": ^0.0.1
+    "@subwallet/keyring": ^0.0.2
+    "@subwallet/ui-keyring": ^0.0.2
     ethereumjs-tx: ^2.1.2
     eventemitter3: ^4.0.7
     rlp: ^3.0.0
@@ -5755,8 +5755,8 @@ __metadata:
     "@subwallet/extension-dapp": ^0.7.4-0
     "@subwallet/extension-inject": ^0.7.4-0
     "@subwallet/extension-mocks": ^0.7.4-0
-    "@subwallet/keyring": ^0.0.1
-    "@subwallet/ui-keyring": ^0.0.1
+    "@subwallet/keyring": ^0.0.2
+    "@subwallet/ui-keyring": ^0.0.2
     "@unique-nft/types": ^0.6.0-4
     "@zeitgeistpm/type-defs": ^0.8.0
     "@zeroio/type-definitions": ^0.0.14
@@ -5818,8 +5818,8 @@ __metadata:
     "@subwallet/extension-inject": ^0.7.4-0
     "@subwallet/extension-koni-base": ^0.7.4-0
     "@subwallet/extension-mocks": ^0.7.4-0
-    "@subwallet/keyring": ^0.0.1
-    "@subwallet/ui-keyring": ^0.0.1
+    "@subwallet/keyring": ^0.0.2
+    "@subwallet/ui-keyring": ^0.0.2
     "@types/bn.js": ^4.11.6
     "@types/enzyme": ^3.10.12
     "@types/enzyme-adapter-react-16": ^1.0.6
@@ -5912,23 +5912,24 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@subwallet/keyring@npm:^0.0.1":
+"@subwallet/keyring@file:../SubWallet-Base/packages/keyring/build::locator=root-workspace-0b6124%40workspace%3A.":
   version: 0.0.1
-  resolution: "@subwallet/keyring@npm:0.0.1"
+  resolution: "@subwallet/keyring@file:../SubWallet-Base/packages/keyring/build#../SubWallet-Base/packages/keyring/build::hash=cf1219&locator=root-workspace-0b6124%40workspace%3A."
   dependencies:
     "@polkadot/util": ^10.1.7
     "@polkadot/util-crypto": ^10.1.7
+    bcryptjs: ^2.4.3
     eth-simple-keyring: ^4.2.0
     ethereumjs-tx: ^2.1.2
     eventemitter3: ^4.0.7
     rxjs: ^7.5.6
-  checksum: 2ecc1d0640c9185e0db53de4d53b54b06da3ec9f4d445b54fe976834ea9be02c90fd7094aa470b443b1d615023c24666abfdf411b39505620627541ac326fa1f
+  checksum: 6c271cb947f28d2f478dbdfaa385ea437e856072281174bd8f70886773edafbe2b7cf2738fd6fcfc2f5160e9088acfb6d3a01dc2e1b64434d15fff50fa9974a7
   languageName: node
   linkType: hard
 
-"@subwallet/ui-keyring@npm:^0.0.1":
+"@subwallet/ui-keyring@file:../SubWallet-Base/packages/ui-keyring/build::locator=root-workspace-0b6124%40workspace%3A.":
   version: 0.0.1
-  resolution: "@subwallet/ui-keyring@npm:0.0.1"
+  resolution: "@subwallet/ui-keyring@file:../SubWallet-Base/packages/ui-keyring/build#../SubWallet-Base/packages/ui-keyring/build::hash=b59c37&locator=root-workspace-0b6124%40workspace%3A."
   dependencies:
     "@babel/runtime": ^7.20.1
     "@polkadot/ui-settings": 2.9.14
@@ -5938,7 +5939,7 @@ __metadata:
     mkdirp: ^1.0.4
     rxjs: ^7.5.7
     store: ^2.0.12
-  checksum: 69241d96734d47d4b0f85aa0e539d32aeef3e2222deca7b831ad46f2b6160a88bd7bdce97d218758d0889f976b4eef638cce6044d4c0e9f88198b25d5bf6abb0
+  checksum: 682e609a64ff46c94b48c08547784afdef754f05b32b5e299b751a1066153c9451f1121885c98612abfaa68f57ca2d48d87e14e4088541f13229ae4f9c7cffd7
   languageName: node
   linkType: hard
 
@@ -9477,6 +9478,13 @@ __metadata:
   dependencies:
     tweetnacl: ^0.14.3
   checksum: 4edfc9fe7d07019609ccf797a2af28351736e9d012c8402a07120c4453a3b789a15f2ee1530dc49eee8f7eb9379331a8dd4b3766042b9e502f74a68e7f662291
+  languageName: node
+  linkType: hard
+
+"bcryptjs@npm:^2.4.3":
+  version: 2.4.3
+  resolution: "bcryptjs@npm:2.4.3"
+  checksum: 0e80ed852a41f5dfb1853f53ee14a7390b0ef263ce05dba6e2ef3cd919dfad025a7c21ebcfe5bc7fa04b100990edf90c7a877ff7fe623d3e479753253131b629
   languageName: node
   linkType: hard
 

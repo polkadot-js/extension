@@ -18,12 +18,11 @@ interface Props extends ThemeProps {
   className?: string;
   closeModal: () => void;
   address: string;
-  withSubTitle?: boolean;
 }
 
 const MIN_LENGTH = 6;
 
-const MigrateMasterPasswordModal = ({ address, className, closeModal, withSubTitle }: Props) => {
+const MigrateMasterPasswordModal = ({ address, className, closeModal }: Props) => {
   const { t } = useTranslation();
   const [loading, setLoading] = useState<boolean>(false);
   const [password, setPassword] = useState<string | null>(null);
@@ -79,11 +78,9 @@ const MigrateMasterPasswordModal = ({ address, className, closeModal, withSubTit
         />
       </div>
       <div className={'modal-body'}>
-        {withSubTitle && (
-          <div className={CN('sub-title')}>
-            {t('To continue with the transaction, please apply the master password')}
-          </div>
-        )}
+        <div className={CN('sub-title')}>
+          {t('To continue, please apply the master password')}
+        </div>
         <ValidatedInput
           className={className}
           component={InputWithLabel}

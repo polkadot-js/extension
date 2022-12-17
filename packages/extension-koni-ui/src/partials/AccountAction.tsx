@@ -19,16 +19,16 @@ import { IconMaps } from '@subwallet/extension-koni-ui/assets/icon';
 interface Props extends ThemeProps {
   className?: string;
   isShowZeroBalances?: boolean;
-  openExportModal: () => void;
-  openMigrateModal: () => void;
+  clickMigrate: () => void;
   reference: React.MutableRefObject<null>;
   setImgSelected?: (imgSelected: string | null) => void;
   toggleEdit?: () => void;
   toggleZeroBalances?: () => void;
 }
 
-function AccountAction ({ className, isShowZeroBalances, reference, setImgSelected, toggleEdit, toggleZeroBalances, openExportModal, openMigrateModal }: Props): React.ReactElement<Props> {
+function AccountAction ({ className, isShowZeroBalances, reference, setImgSelected, toggleEdit, toggleZeroBalances, clickMigrate }: Props): React.ReactElement<Props> {
   const { t } = useTranslation();
+
   const currentAccount = useSelector((state: RootState) => state.currentAccount.account);
   const currentNetwork = useSelector((state: RootState) => state.currentNetwork);
 
@@ -74,22 +74,9 @@ function AccountAction ({ className, isShowZeroBalances, reference, setImgSelect
             <div className='actions-wrapper'>
               <div
                 className='account-action__menu-item migrate-item'
-                onClick={openMigrateModal}
+                onClick={clickMigrate}
               >
                 {t<string>('Apply master password')}
-              </div>
-            </div>
-          </>
-        )}
-        {currentAccount?.isMasterAccount && (
-          <>
-            <MenuDivider />
-            <div className='actions-wrapper'>
-              <div
-                className='account-action__menu-item'
-                onClick={openExportModal}
-              >
-                {t<string>('Export seed phrase')}
               </div>
             </div>
           </>

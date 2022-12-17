@@ -8,10 +8,8 @@ import moreButtonDark from '@subwallet/extension-koni-ui/assets/dots-three-verti
 import moreButtonLight from '@subwallet/extension-koni-ui/assets/dots-three-vertical-light.svg';
 import EyeIcon from '@subwallet/extension-koni-ui/assets/icon/eye.svg';
 import EyeSlashIcon from '@subwallet/extension-koni-ui/assets/icon/eye-slash.svg';
-import { AccountContext } from '@subwallet/extension-koni-ui/components';
+import { AccountContext, ActionContext } from '@subwallet/extension-koni-ui/components';
 import AccountVisibleModal from '@subwallet/extension-koni-ui/components/Modal/AccountVisibleModal';
-import ExportMnemonicModal from '@subwallet/extension-koni-ui/components/Modal/ExportMnemonicModal';
-import MigrateMasterPasswordModal from '@subwallet/extension-koni-ui/components/Modal/MigrateMasterPasswordModal';
 import Tooltip from '@subwallet/extension-koni-ui/components/Tooltip';
 import { useGetCurrentAuth } from '@subwallet/extension-koni-ui/hooks/useGetCurrentAuth';
 import useIsPopup from '@subwallet/extension-koni-ui/hooks/useIsPopup';
@@ -71,7 +69,9 @@ function DetailHeader ({ className = '',
   const currentAuth = useGetCurrentAuth();
 
   const { currentNetwork } = useSelector((state: RootState) => state);
+
   const { accounts } = useContext(AccountContext);
+  const onAction = useContext(ActionContext);
 
   const [connected, setConnected] = useState(0);
   const [canConnect, setCanConnect] = useState(0);
@@ -85,8 +85,6 @@ function DetailHeader ({ className = '',
   const { show } = useToast();
   const [trigger] = useState(() => `overview-btn-${++tooltipId}`);
   const [authorizeModalVisible, setAuthorizeModalVisible] = useState(false);
-  const [migrateModalVisible, setMigrateModalVisible] = useState(false);
-  const [exportModalVisible, setExportModalVisible] = useState(false);
 
   const _toggleEdit = useCallback(
     (): void => {
@@ -104,24 +102,6 @@ function DetailHeader ({ className = '',
     [toggleZeroBalances]
   );
 
-  const openExportModal = useCallback(() => {
-    setShowAccountAction(false);
-    setExportModalVisible(true);
-  }, []);
-
-  const closeExportModal = useCallback(() => {
-    setExportModalVisible(false);
-  }, []);
-
-  const openMigrateModal = useCallback(() => {
-    setShowAccountAction(false);
-    setMigrateModalVisible(true);
-  }, []);
-
-  const closeMigrateModal = useCallback(() => {
-    setMigrateModalVisible(false);
-  }, []);
-
   const openModal = useCallback(() => {
     setAuthorizeModalVisible(true);
   }, []);
@@ -129,6 +109,12 @@ function DetailHeader ({ className = '',
   const closeModal = useCallback(() => {
     setAuthorizeModalVisible(false);
   }, []);
+
+  const clickMigrate = useCallback(() => {
+    onAction('/keyring/migrate');
+    window.localStorage.setItem('popupNavigation', '/keyring/migrate');
+    window.localStorage.setItem('migrateAddress', currentAccount?.address || '');
+  }, [onAction, currentAccount?.address]);
 
   useOutsideClick(actionsRef, (): void => {
     isActionOpen && setShowAccountAction(!isActionOpen);
@@ -380,9 +366,8 @@ function DetailHeader ({ className = '',
 
       {isActionOpen && (
         <AccountAction
+          clickMigrate={clickMigrate}
           isShowZeroBalances={isShowZeroBalances}
-          openExportModal={openExportModal}
-          openMigrateModal={openMigrateModal}
           reference={actionsRef}
           toggleEdit={_toggleEdit}
           toggleZeroBalances={_toggleZeroBalances}
@@ -395,22 +380,6 @@ function DetailHeader ({ className = '',
         onClose={closeModal}
         visible={authorizeModalVisible}
       />
-      {
-        migrateModalVisible && (
-          <MigrateMasterPasswordModal
-            address={currentAccount?.address || ''}
-            closeModal={closeMigrateModal}
-          />
-        )
-      }
-      {
-        exportModalVisible && (
-          <ExportMnemonicModal
-            address={currentAccount?.address || ''}
-            closeModal={closeExportModal}
-          />
-        )
-      }
     </div>
   );
 }

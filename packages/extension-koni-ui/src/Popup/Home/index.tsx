@@ -5,8 +5,6 @@ import { ChainRegistry, CurrentNetworkInfo, NftCollection as _NftCollection, Nft
 import { AccountJson } from '@subwallet/extension-base/background/types';
 import { ALL_ACCOUNT_KEY } from '@subwallet/extension-koni-base/constants';
 import { AccountContext } from '@subwallet/extension-koni-ui/components';
-import ReceiveButton from '@subwallet/extension-koni-ui/components/Button/ReceiveButton';
-import CreateMasterPasswordModal from '@subwallet/extension-koni-ui/components/Modal/CreateMasterPasswordModal';
 import useAccountBalance from '@subwallet/extension-koni-ui/hooks/screen/home/useAccountBalance';
 import useCrowdloanNetworks from '@subwallet/extension-koni-ui/hooks/screen/home/useCrowdloanNetworks';
 import useFetchNft from '@subwallet/extension-koni-ui/hooks/screen/home/useFetchNft';
@@ -42,6 +40,9 @@ const BuyModal = React.lazy(() => import('@subwallet/extension-koni-ui/component
 const ExportAccountQrModal = React.lazy(() => import('@subwallet/extension-koni-ui/components/Modal/ExportAccountQrModal'));
 const Link = React.lazy(() => import('@subwallet/extension-koni-ui/components/Link'));
 const Header = React.lazy(() => import('@subwallet/extension-koni-ui/partials/Header'));
+const ReceiveButton = React.lazy(() => import('@subwallet/extension-koni-ui/components/Button/ReceiveButton'));
+const CreateMasterPasswordModal = React.lazy(() => import('@subwallet/extension-koni-ui/components/Modal/CreateMasterPasswordModal'));
+const MigrateNotificationModal = React.lazy(() => import('@subwallet/extension-koni-ui/components/Modal/MigrateNotificationModal'));
 
 interface WrapperProps extends ThemeProps {
   className?: string;
@@ -231,6 +232,7 @@ function Home ({ chainRegistryMap, className = '', currentAccount, historyMap, n
   const [isVisibleBuyModal, setIsVisibleBuyModal] = useState<boolean>(false);
 
   const [isVisibleCreateMasterPassword, setIsVisibleCreateMasterPassword] = useState(false);
+  const [confirmMigrateVisibleModal, setConfirmMigrateVisibleModal] = useState(false);
 
   const hasMasterPassword = useSelector((state: RootState) => state.keyringState.hasMasterPassword);
 
@@ -363,6 +365,11 @@ function Home ({ chainRegistryMap, className = '', currentAccount, historyMap, n
 
   const onCloseMasterPasswordModal = useCallback(() => {
     setIsVisibleCreateMasterPassword(false);
+    setConfirmMigrateVisibleModal(true);
+  }, []);
+
+  const onCloseConfirmMigrateModal = useCallback(() => {
+    setConfirmMigrateVisibleModal(false);
   }, []);
 
   useEffect(() => {
@@ -546,6 +553,14 @@ function Home ({ chainRegistryMap, className = '', currentAccount, historyMap, n
           <CreateMasterPasswordModal
             className='home__account-qr-modal'
             closeModal={onCloseMasterPasswordModal}
+          />
+        )
+      }
+      {
+        confirmMigrateVisibleModal && (
+          <MigrateNotificationModal
+            className='home__account-qr-modal'
+            closeModal={onCloseConfirmMigrateModal}
           />
         )
       }

@@ -934,7 +934,7 @@ export default class KoniExtension extends Extension {
     const address = childPair.address;
 
     this._saveCurrentAccountAddress(address, () => {
-      keyring.addPair(childPair);
+      keyring.addPair(childPair, true);
       this._addAddressToAuthList(address, isAllowed);
     });
 
@@ -975,20 +975,20 @@ export default class KoniExtension extends Extension {
     const address = childPair.address;
 
     this._saveCurrentAccountAddress(address, () => {
-      keyring.addPair(childPair);
+      keyring.addPair(childPair, true);
       this._addAddressToAuthList(address, isAllowed);
     });
 
     return true;
   }
 
-  private jsonRestoreV2 ({ address, file, isAllowed, password }: RequestJsonRestoreV2): void {
+  private jsonRestoreV2 ({ address, file, isAllowed, password, withMasterPassword }: RequestJsonRestoreV2): void {
     const isPasswordValidated = this.validatePassword(file, password);
 
     if (isPasswordValidated) {
       try {
         this._saveCurrentAccountAddress(address, () => {
-          keyring.restoreAccount(file, password);
+          keyring.restoreAccount(file, password, withMasterPassword);
           this._addAddressToAuthList(address, isAllowed);
         });
       } catch (error) {
@@ -2374,7 +2374,7 @@ export default class KoniExtension extends Extension {
         }
       } else {
         keyringPair = keyring.keyring.addFromPair({ publicKey: hexToU8a(publicKey), secretKey: hexToU8a(secretKey) }, { name });
-        keyring.addPair(keyringPair);
+        keyring.addPair(keyringPair, true);
       }
 
       if (!keyringPair) {
@@ -3951,6 +3951,8 @@ export default class KoniExtension extends Extension {
     try {
       keyring.migrateWithMasterPassword(address, password);
     } catch (e) {
+      console.error(e);
+
       return {
         errors: [(e as Error).message],
         status: false

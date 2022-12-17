@@ -6,6 +6,7 @@ import { AccountJson } from '@subwallet/extension-base/background/types';
 import { AccountContext, ActionContext, Button, ButtonArea, ConfirmationsQueueContext, Warning } from '@subwallet/extension-koni-ui/components';
 import RequireMigratePasswordModal from '@subwallet/extension-koni-ui/components/Signing/RequireMigratePassword';
 import { SIGN_MODE } from '@subwallet/extension-koni-ui/constants/signing';
+import useNeedMigratePassword from '@subwallet/extension-koni-ui/hooks/useNeedMigratePassword';
 import useTranslation from '@subwallet/extension-koni-ui/hooks/useTranslation';
 import { completeConfirmation } from '@subwallet/extension-koni-ui/messaging';
 import { Header } from '@subwallet/extension-koni-ui/partials';
@@ -53,6 +54,7 @@ function Confirmation ({ className, match: { params: { address } } }: Props): Re
   const [isScanning, setIsScanning] = useState(false);
   const [requiredSign, setRequiredSign] = useState(false);
   const [signMode, setSignMode] = useState<SIGN_MODE>(SIGN_MODE.PASSWORD);
+  const needMigratePassword = useNeedMigratePassword(account?.address);
 
   const checkConfirmation = useCallback(
     (type?: ConfirmationType) => {
@@ -128,7 +130,7 @@ function Confirmation ({ className, match: { params: { address } } }: Props): Re
     }
   }, [account?.isExternal, complete]);
 
-  const disableConfirm = useMemo(() => isLoading || (requiredSign && (!CAN_SIGN_MODE.includes(signMode) || (signMode === SIGN_MODE.PASSWORD && !account?.isMasterPassword))), [account?.isMasterPassword, isLoading, requiredSign, signMode]);
+  const disableConfirm = useMemo(() => isLoading || (requiredSign && (!CAN_SIGN_MODE.includes(signMode) || needMigratePassword)), [needMigratePassword, isLoading, requiredSign, signMode]);
 
   useEffect(() => {
     if (checkConfirmation('evmSignatureRequest')) {

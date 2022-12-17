@@ -31,6 +31,7 @@ const ConfirmationsQueueContext = React.createContext<ConfirmationsQueue>({
 });
 const ThemeSwitchContext = React.createContext<(theme: AvailableThemes) => void>(noop);
 const ToastContext = React.createContext<({show: (message: string, isError?: boolean) => void})>({ show: noop });
+const WaitAtHomeContext = React.createContext<{ wait: boolean, setWait: (val: boolean) => void }>({ setWait: noop, wait: false });
 
 export {
   AccountContext,
@@ -42,5 +43,6 @@ export {
   SigningReqContext,
   ConfirmationsQueueContext,
   ThemeSwitchContext,
-  ToastContext
+  ToastContext,
+  WaitAtHomeContext
 };

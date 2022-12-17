@@ -143,7 +143,6 @@ const ChangeMasterPassword = ({ className }: Props) => {
         </Button>
         <Button
           className={CN('btn')}
-          data-export-button
           isBusy={isBusy}
           isDisabled={!oldPassword || !newPassword || errors.length > 0}
           onClick={handleOnSubmit}

@@ -6,6 +6,7 @@ import { Warning } from '@subwallet/extension-koni-ui/components';
 import Button from '@subwallet/extension-koni-ui/components/Button';
 import RequireMigratePasswordModal from '@subwallet/extension-koni-ui/components/Signing/RequireMigratePassword';
 import { SigningContext } from '@subwallet/extension-koni-ui/contexts/SigningContext';
+import useNeedMigratePassword from '@subwallet/extension-koni-ui/hooks/useNeedMigratePassword';
 import useTranslation from '@subwallet/extension-koni-ui/hooks/useTranslation';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import React, { useCallback, useContext } from 'react';
@@ -25,6 +26,8 @@ const PasswordRequest = ({ account,
   handlerStart,
   hideConfirm }: Props) => {
   const { t } = useTranslation();
+
+  const needMigratePassword = useNeedMigratePassword(account.address);
 
   const { signingState } = useContext(SigningContext);
 
@@ -69,7 +72,7 @@ const PasswordRequest = ({ account,
         </Button>
         <Button
           isBusy={isBusy}
-          isDisabled={!account.isMasterPassword}
+          isDisabled={needMigratePassword}
           onClick={onSubmit}
         >
           {t('Confirm')}

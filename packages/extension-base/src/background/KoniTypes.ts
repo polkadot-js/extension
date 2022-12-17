@@ -610,6 +610,7 @@ export interface RequestJsonRestoreV2 {
   password: string;
   address: string;
   isAllowed: boolean;
+  withMasterPassword: boolean;
 }
 
 // Restore account with json file (multi account)

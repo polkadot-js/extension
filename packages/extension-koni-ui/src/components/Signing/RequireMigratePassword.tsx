@@ -47,7 +47,7 @@ const RequireMigratePassword = ({ address, className }: Props) => {
         signMode === SIGN_MODE.PASSWORD && !account?.isMasterPassword && (
           <div className='migrate-notification'>
             <span>
-              {t<string>('To continue with the transaction, please apply the master password')}&nbsp;
+              {t<string>('To continue, please apply the master password')}&nbsp;
             </span>
             <span
               className='highlight-migrate'
@@ -64,7 +64,6 @@ const RequireMigratePassword = ({ address, className }: Props) => {
             address={address}
             className='migrate-modal'
             closeModal={onCloseModal}
-            withSubTitle={true}
           />
         )
       }

@@ -49,7 +49,7 @@ export function stakingOnChainApi (addresses: string[], dotSamaAPIMap: Record<st
       unsubList.push(unsub);
     }
 
-    if (['polkadot', 'kusama', 'westend'].includes(chain)) {
+    if (['polkadot', 'kusama', 'westend', 'alephTest', 'aleph'].includes(chain)) {
       const unsub = await getRelayPoolingOnchain(parentApi, useAddresses, networks, chain, callback);
 
       unsubList.push(unsub);

@@ -505,12 +505,12 @@ function NetworkEdit ({ className }: Props): React.ReactElement {
     // const resp = await validateNetwork(newProvider, isEthereum, networkInfo);
 
     const resp: ValidateNetworkResponse = {
-      chain: '',
+      name: '',
       evmChainId: 0,
       genesisHash: '',
-      key: '',
+      slug: '',
       networkGroup: [],
-      ss58Prefix: '',
+      addressPrefix: '',
       success: false
     };
 

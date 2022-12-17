@@ -862,25 +862,27 @@ export interface EvmNftSubmitTransaction extends BaseRequestSign {
 }
 
 export interface ValidateNetworkResponse {
+  // validation state
   success: boolean,
-  key: string,
-  genesisHash: string,
-  ss58Prefix: string,
-  networkGroup: NetWorkGroup[],
-  chain: string,
-  evmChainId: number,
-  nativeToken?: string,
-  decimal?: number
-
   error?: NETWORK_ERROR,
   conflictChain?: string,
   conflictKey?: string,
+
+  // chain spec
+  slug: string,
+  genesisHash: string,
+  addressPrefix: string,
+  name: string,
+  paraId: number | null,
+  evmChainId: number | null, // null if not evm compatible
+  symbol: string,
+  decimals: number,
+  existentialDeposit: string
 }
 
 export interface ValidateNetworkRequest {
   provider: string,
-  isEthereum: boolean,
-  existedNetwork?: NetworkJson
+  existedChainSlug?: string
 }
 
 export interface ApiMap {

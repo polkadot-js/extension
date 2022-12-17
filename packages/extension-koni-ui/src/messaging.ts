@@ -565,8 +565,8 @@ export async function subscribeChainStateMap (callback: (data: Record<string, _C
 
 // -------------------------------------------------------------------------------------
 
-export async function validateNetwork (provider: string, isEthereum: boolean, existedNetwork?: NetworkJson): Promise<ValidateNetworkResponse> {
-  return sendMessage('pri(apiMap.validate)', { provider, isEthereum, existedNetwork });
+export async function validateNetwork (provider: string, existedChainSlug?: string): Promise<ValidateNetworkResponse> {
+  return sendMessage('pri(apiMap.validate)', { provider, existedChainSlug });
 }
 
 export async function disableAllNetwork (): Promise<boolean> {

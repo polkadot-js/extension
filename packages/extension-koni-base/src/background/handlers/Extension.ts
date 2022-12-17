@@ -1826,17 +1826,18 @@ export default class KoniExtension extends Extension {
     return state.enableNetworkMap(networkKey);
   }
 
-  private async validateNetwork ({ existedNetwork,
-    isEthereum,
-    provider }: ValidateNetworkRequest): Promise<ValidateNetworkResponse> {
+  private async validateNetwork ({ existedChainSlug, provider }: ValidateNetworkRequest): Promise<ValidateNetworkResponse> {
     let result: ValidateNetworkResponse = {
+      decimals: 0,
+      existentialDeposit: '',
+      paraId: null,
+      symbol: '',
       success: false,
-      key: '',
+      slug: '',
       genesisHash: '',
-      ss58Prefix: '',
-      networkGroup: [],
-      chain: '',
-      evmChainId: -1
+      addressPrefix: '',
+      name: '',
+      evmChainId: null
     };
 
     try {
@@ -1884,7 +1885,7 @@ export default class KoniExtension extends Extension {
             chain = _chain.toString();
             ethChainId = _ethChainId;
 
-            if (existedNetwork && existedNetwork.evmChainId && existedNetwork.evmChainId !== ethChainId) {
+            if (existedChainSlug && existedChainSlug.evmChainId && existedChainSlug.evmChainId !== ethChainId) {
               result.error = NETWORK_ERROR.PROVIDER_NOT_SAME_NETWORK;
 
               return result;
@@ -1911,22 +1912,22 @@ export default class KoniExtension extends Extension {
           }
 
           // handle result
-          if (existedNetwork) {
-            if (existedNetwork.genesisHash !== genesisHash) {
+          if (existedChainSlug) {
+            if (existedChainSlug.genesisHash !== genesisHash) {
               result.error = NETWORK_ERROR.PROVIDER_NOT_SAME_NETWORK;
 
               return result;
             } else { // no need to validate genesisHash
               result = {
                 success: true,
-                key: networkKey,
+                slug: networkKey,
                 genesisHash,
-                ss58Prefix,
+                addressPrefix: ss58Prefix,
                 networkGroup: [parsedChainType],
-                chain: chain ? chain.toString() : '',
+                name: chain ? chain.toString() : '',
                 evmChainId: ethChainId,
-                nativeToken: defaultToken,
-                decimal: defaultDecimal
+                symbol: defaultToken,
+                decimals: defaultDecimal
               };
             }
           } else {
@@ -1937,14 +1938,14 @@ export default class KoniExtension extends Extension {
             if (genesisError === NETWORK_ERROR.NONE) { // check genesisHash ok
               result = {
                 success: true,
-                key: networkKey,
+                slug: networkKey,
                 genesisHash,
-                ss58Prefix,
+                addressPrefix: ss58Prefix,
                 networkGroup: [parsedChainType],
-                chain: chain ? chain.toString() : '',
+                name: chain ? chain.toString() : '',
                 evmChainId: ethChainId,
-                nativeToken: defaultToken,
-                decimal: defaultDecimal
+                symbol: defaultToken,
+                decimals: defaultDecimal
               };
             } else {
               result.error = genesisError;

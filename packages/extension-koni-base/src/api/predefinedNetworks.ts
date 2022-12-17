@@ -399,7 +399,7 @@ export const PREDEFINED_NETWORKS: Record<string, NetworkJson> = {
     genesisHash: '0xafdc188f45c71dacbaa0b62e16a91f726c7b8699a9748cdf715459de6b7f366d',
     ss58Format: 63,
     providers: {
-      'Galactic Council': 'wss://rpc-01.hydradx.io',
+      'Galactic Council': 'wss://rpc.hydradx.cloud',
       Dwellir: 'wss://hydradx-rpc.dwellir.com'
     },
     active: false,
@@ -1073,13 +1073,12 @@ export const PREDEFINED_NETWORKS: Record<string, NetworkJson> = {
     genesisHash: '0xa85cfb9b9fd4d622a5b28289a02347af987d8f73fa3108450e2b4a11c1ce5755',
     ss58Format: 10041,
     providers: {
-      HydraDX: 'wss://rpc-01.basilisk.hydradx.io',
-      OnFinality: 'wss://basilisk.api.onfinality.io/public-ws',
+      Basilisk: 'wss://rpc.basilisk.cloud',
       Dwellir: 'wss://basilisk-rpc.dwellir.com'
     },
     active: false,
     currentProviderMode: 'ws',
-    currentProvider: 'HydraDX',
+    currentProvider: 'Basilisk',
     groups: ['KUSAMA_PARACHAIN'],
     paraId: 2090,
     coinGeckoKey: 'basilisk',
@@ -2709,6 +2708,22 @@ export const PREDEFINED_NETWORKS: Record<string, NetworkJson> = {
     groups: ['TEST_NET'],
     nativeToken: 'SZERO',
     decimals: 12
+  },
+  kulupu: {
+    key: 'kulupu',
+    chain: 'Kulupu',
+    genesisHash: '0xf7a99d3cb92853d00d5275c971c132c074636256583fee53b3bbe60d7b8769ba',
+    ss58Format: 16,
+    providers: {
+      Kulupu: 'wss://rpc.kulupu.corepaper.org/ws'
+    },
+    active: false,
+    currentProviderMode: 'ws',
+    currentProvider: 'Kulupu',
+    groups: ['MAIN_NET'],
+    nativeToken: 'KLP',
+    decimals: 12,
+    coinGeckoKey: 'kulupu'
   }
 };
 

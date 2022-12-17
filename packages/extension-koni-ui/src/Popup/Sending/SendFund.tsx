@@ -123,7 +123,7 @@ function SendFund ({ chainRegistryMap, className, defaultValue, networkMap }: Co
     (!isEthereumAddress(senderId) && !!recipientId && isEthereumAddress(recipientId));
   const [isGasRequiredExceedsError, setGasRequiredExceedsError] = useState<boolean>(false);
   const amountGtAvailableBalance = amount && senderFreeBalance && amount.gt(new BN(senderFreeBalance));
-  const [maxTransfer, noFees] = getMaxTransferAndNoFees(fee, feeSymbol, selectedToken, mainTokenInfo.symbol, senderFreeBalance, existentialDeposit);
+  const [maxTransfer] = getMaxTransferAndNoFees(fee, feeSymbol, selectedToken, mainTokenInfo.symbol, senderFreeBalance, existentialDeposit);
   const canToggleAll = !!isSupportTransferAll && !!maxTransfer && !reference && !!recipientId;
   const valueToTransfer = canToggleAll && isAll ? maxTransfer.toString() : (amount?.toString() || '0');
   const selectedNetwork = useMemo((): NetworkJson => {
@@ -410,12 +410,6 @@ function SendFund ({ chainRegistryMap, className, defaultValue, networkMap }: Co
             {reference && (
               <Warning className={'send-fund-warning'}>
                 {t<string>('Note that you cannot transfer all tokens out from this account.')}
-              </Warning>
-            )}
-
-            {senderFreeBalance !== '0' && !amountGtAvailableBalance && !isSameAddress && noFees && (
-              <Warning className={'send-fund-warning'}>
-                {t<string>('The transaction, after application of the transfer fees, will drop the available balance below the existential deposit. As such the transfer will fail. The account needs more free funds to cover the transaction fees.')}
               </Warning>
             )}
 

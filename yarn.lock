@@ -5912,9 +5912,9 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@subwallet/keyring@file:../SubWallet-Base/packages/keyring/build::locator=root-workspace-0b6124%40workspace%3A.":
-  version: 0.0.1
-  resolution: "@subwallet/keyring@file:../SubWallet-Base/packages/keyring/build#../SubWallet-Base/packages/keyring/build::hash=cf1219&locator=root-workspace-0b6124%40workspace%3A."
+"@subwallet/keyring@npm:^0.0.2":
+  version: 0.0.2
+  resolution: "@subwallet/keyring@npm:0.0.2"
   dependencies:
     "@polkadot/util": ^10.1.7
     "@polkadot/util-crypto": ^10.1.7
@@ -5923,23 +5923,23 @@ __metadata:
     ethereumjs-tx: ^2.1.2
     eventemitter3: ^4.0.7
     rxjs: ^7.5.6
-  checksum: 6c271cb947f28d2f478dbdfaa385ea437e856072281174bd8f70886773edafbe2b7cf2738fd6fcfc2f5160e9088acfb6d3a01dc2e1b64434d15fff50fa9974a7
+  checksum: e464875fec5ad864518071936146a5375ef0f75d929f7318de089d5aab8cbe91b738920cd159822204a07f9841c070908aa75503eef466ede72ebbd28c0e056b
   languageName: node
   linkType: hard
 
-"@subwallet/ui-keyring@file:../SubWallet-Base/packages/ui-keyring/build::locator=root-workspace-0b6124%40workspace%3A.":
-  version: 0.0.1
-  resolution: "@subwallet/ui-keyring@file:../SubWallet-Base/packages/ui-keyring/build#../SubWallet-Base/packages/ui-keyring/build::hash=b59c37&locator=root-workspace-0b6124%40workspace%3A."
+"@subwallet/ui-keyring@npm:^0.0.2":
+  version: 0.0.2
+  resolution: "@subwallet/ui-keyring@npm:0.0.2"
   dependencies:
     "@babel/runtime": ^7.20.1
     "@polkadot/ui-settings": 2.9.14
     "@polkadot/util": ^10.1.13
     "@polkadot/util-crypto": ^10.1.13
-    "@subwallet/keyring": ^0.0.1
+    "@subwallet/keyring": ^0.0.2
     mkdirp: ^1.0.4
     rxjs: ^7.5.7
     store: ^2.0.12
-  checksum: 682e609a64ff46c94b48c08547784afdef754f05b32b5e299b751a1066153c9451f1121885c98612abfaa68f57ca2d48d87e14e4088541f13229ae4f9c7cffd7
+  checksum: 29d8cc718d1bcca89215767d58f93c886870294a21aef7c8987bcd02c1bfe9b38dc635a52b5d6e19147db86eed25e82e346812ff74c35bf9662bc089b2c67304
   languageName: node
   linkType: hard
 

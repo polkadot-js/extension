@@ -5,8 +5,13 @@ import { ChainInfoMap } from '@subwallet/extension-koni-base/services/chain-list
 import { _ChainInfo, _DEFAULT_NETWORKS } from '@subwallet/extension-koni-base/services/chain-list/types';
 import { EvmChainHandler } from '@subwallet/extension-koni-base/services/chain-service/handler/EvmChainHandler';
 import { SubstrateChainHandler } from '@subwallet/extension-koni-base/services/chain-service/handler/SubstrateChainHandler';
-import { _ChainState, _DataMap, ConnectionStatus } from '@subwallet/extension-koni-base/services/chain-service/types';
+import {
+  _CHAIN_VALIDATION_ERROR,
+  _SubstrateChainSpec
+} from '@subwallet/extension-koni-base/services/chain-service/handler/types';
+import { _ChainState, _DataMap, _EvmApi, _SubstrateApi, ConnectionStatus } from '@subwallet/extension-koni-base/services/chain-service/types';
 import { Subject } from 'rxjs';
+import Web3 from 'web3';
 
 import { logger as createLogger } from '@polkadot/util/logger';
 import { Logger } from '@polkadot/util/types';
@@ -85,13 +90,35 @@ export class ChainService {
     return activeChains;
   }
 
+  private validateProvider (targetProvider: string) {
+    let error: _CHAIN_VALIDATION_ERROR = _CHAIN_VALIDATION_ERROR.NONE;
+    const chainInfoMap = this.getChainInfoMap();
+    const allExistedProviders: Record<string, string | boolean>[] = [];
+    let conflictChainSlug = '';
+    let conflictChainName = '';
+
+    // get all providers
+    for (const [key, value] of Object.entries(chainInfoMap)) {
+      Object.values(value.providers).forEach((provider) => {
+        allExistedProviders.push({ key, provider });
+      });
+    }
+
+    for (const { key, provider } of allExistedProviders) {
+      if (provider === targetProvider) {
+        error = _CHAIN_VALIDATION_ERROR.EXISTED_PROVIDER;
+        conflictChainSlug = key as string;
+        conflictChainName = chainInfoMap[key as string].name;
+        break;
+      }
+    }
+
+    return { error, conflictChainSlug, conflictChainName };
+  }
+
   public async validateCustomChain (provider: string, existedChainSlug?: string) {
-    const substrateApi = this.substrateChainHandler.initApi('custom', provider);
-    const evmApi = this.evmChainHandler.initApi('custom', provider);
-
-    console.log(evmApi.api.eth.net.getId());
-
-    return {
+    // currently only supports WS provider for Substrate and HTTP provider for EVM
+    const result: Record<string, any> = {
       decimals: 0,
       existentialDeposit: '',
       paraId: null,
@@ -103,9 +130,58 @@ export class ChainService {
       name: '',
       evmChainId: null
     };
+
+    try {
+      const { conflictChainName: providerConflictChainName, conflictChainSlug: providerConflictChainSlug, error: providerError } = this.validateProvider(provider);
+
+      if (providerError === _CHAIN_VALIDATION_ERROR.NONE) {
+        let api: _EvmApi | _SubstrateApi;
+
+        if (provider.startsWith('http')) {
+          // EVM by default
+          api = this.evmChainHandler.initApi('custom', provider);
+        } else {
+          api = this.substrateChainHandler.initApi('custom', provider);
+        }
+
+        const connectionTimeout = new Promise((resolve) => {
+          const id = setTimeout(() => {
+            clearTimeout(id);
+            resolve(null);
+          }, 3000);
+        });
+
+        const connectionTrial = await Promise.race([
+          connectionTimeout,
+          api.isReady
+        ]); // check connection
+
+        if (connectionTrial !== null) {
+          const _api = connectionTrial as _SubstrateApi | _EvmApi;
+
+          const chainSpec = await this.getChainSpecByProvider(_api);
+
+          console.log(chainSpec);
+        }
+      } else {
+        result.error = providerError;
+        result.conflictChainName = providerConflictChainName;
+        result.conflictChainSlug = providerConflictChainSlug;
+      }
+
+      return result;
+    } catch (e) {
+      console.error('Error connecting to provider', e);
+
+      return result;
+    }
   }
 
-  private async getChainInfoByProvider (provider: string) {
+  private async getChainSpecByProvider (api: _EvmApi | _SubstrateApi) {
+    if (api.api instanceof Web3) {
+      return await this.evmChainHandler.getChainSpec(api as _EvmApi);
+    }
 
+    return await this.substrateChainHandler.getChainSpec(api as _SubstrateApi);
   }
 }

@@ -82,8 +82,6 @@ export interface _EvmApi extends _ChainBaseApi {
   api: Web3;
 
   isReady: Promise<_EvmApi>;
-
-  chainId: number;
 }
 
 export const CUSTOM_NETWORK_PREFIX = 'custom-';

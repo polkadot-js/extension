@@ -6,6 +6,7 @@ import { rpc as oakRpc, types as oakTypes } from '@oak-foundation/types';
 import { DEFAULT_AUX } from '@subwallet/extension-koni-base/api/dotsama';
 import { DOTSAMA_AUTO_CONNECT_MS, DOTSAMA_MAX_CONTINUE_RETRY } from '@subwallet/extension-koni-base/constants';
 import { typesBundle, typesChain } from '@subwallet/extension-koni-base/services/chain-list/api-helper';
+import { _SubstrateChainSpec } from '@subwallet/extension-koni-base/services/chain-service/handler/types';
 import { _SubstrateApi, _SubstrateChainMetadata } from '@subwallet/extension-koni-base/services/chain-service/types';
 import { inJestTest } from '@subwallet/extension-koni-base/utils';
 
@@ -36,6 +37,23 @@ export class SubstrateChainHandler {
 
   constructor () {
     console.log(this.substrateApiMap);
+  }
+
+  public async getChainSpec (substrateApi: _SubstrateApi) {
+    const result: _SubstrateChainSpec = {
+      addressPrefix: -1,
+      decimals: 0,
+      existentialDeposit: '',
+      genesisHash: substrateApi.api.genesisHash?.toHex(),
+      name: '',
+      symbol: ''
+    };
+
+    const addressPrefix = substrateApi.api?.consts?.system?.ss58Prefix?.toPrimitive() as number;
+
+    result.addressPrefix = addressPrefix;
+
+    return result;
   }
 
   public initApi (chainSlug: string, apiUrl: string): _SubstrateApi {

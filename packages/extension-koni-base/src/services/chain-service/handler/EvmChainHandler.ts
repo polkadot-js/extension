@@ -1,7 +1,8 @@
 // Copyright 2019-2022 @subwallet/extension-koni-base authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import {_EvmApi} from '@subwallet/extension-koni-base/services/chain-service/types';
+import { _EvmChainSpec } from '@subwallet/extension-koni-base/services/chain-service/handler/types';
+import { _EvmApi } from '@subwallet/extension-koni-base/services/chain-service/types';
 import Web3 from 'web3';
 
 export class EvmChainHandler {
@@ -20,15 +21,8 @@ export class EvmChainHandler {
       api = new Web3(new Web3.providers.WebsocketProvider(apiUrl));
     }
 
-    let chainId = -1;
-
-    api.eth.net.getId().then((_chainId) => {
-      chainId = _chainId;
-    }).catch(console.error);
-
     return ({
       api,
-      chainId,
 
       chainSlug,
       apiUrl,
@@ -41,9 +35,9 @@ export class EvmChainHandler {
       get isReady () {
         const self = this as _EvmApi;
 
-        async function f(): Promise<_EvmApi> {
+        async function f (): Promise<_EvmApi> {
           return new Promise<_EvmApi>((resolve, reject) => {
-            (function wait() {
+            (function wait () {
               if (self.isApiReady) {
                 return resolve(self);
               }
@@ -56,5 +50,37 @@ export class EvmChainHandler {
         return f();
       }
     }) as unknown as _EvmApi;
+  }
+
+  public async getChainSpec (evmApi: _EvmApi) {
+    const chainId = await evmApi.api.eth.getChainId();
+    let chainInfoList: Record<string, any>[] | undefined;
+    const result: _EvmChainSpec = {
+      chainId,
+      name: '',
+      symbol: '',
+      decimals: 18, // by default, might change
+      existentialDeposit: '0'
+    };
+
+    await fetch('https://chainid.network/chains.json')
+      .then((resp) => resp.json())
+      .then((data: Record<string, any>[]) => {
+        chainInfoList = data;
+      });
+
+    if (chainInfoList) {
+      chainInfoList.forEach((_chainInfo) => {
+        const _chainId = _chainInfo.chainId as number;
+
+        if (chainId === _chainId) {
+          result.name = _chainInfo.name as string;
+          // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+          result.symbol = _chainInfo.nativeCurrency.symbol as string;
+        }
+      });
+    }
+
+    return result;
   }
 }

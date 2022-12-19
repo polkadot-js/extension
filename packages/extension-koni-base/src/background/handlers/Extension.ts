@@ -1827,7 +1827,7 @@ export default class KoniExtension extends Extension {
   }
 
   private async validateNetwork ({ existedChainSlug, provider }: ValidateNetworkRequest): Promise<ValidateNetworkResponse> {
-    return await state.validateCustomChain(provider, existedChainSlug);
+    return await state.validateCustomChain(provider, existedChainSlug) as ValidateNetworkResponse;
 
     // let result: ValidateNetworkResponse = {
     //   decimals: 0,

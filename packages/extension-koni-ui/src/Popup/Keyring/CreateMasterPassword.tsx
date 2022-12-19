@@ -2,7 +2,6 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { Button, InputWithLabel, ValidatedInput, Warning } from '@subwallet/extension-koni-ui/components';
-import Modal from '@subwallet/extension-koni-ui/components/Modal/index';
 import useTranslation from '@subwallet/extension-koni-ui/hooks/useTranslation';
 import { keyringChangeMasterPassword } from '@subwallet/extension-koni-ui/messaging';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
@@ -16,12 +15,12 @@ import bg from '../../assets/MasterPassword_bg.png';
 
 interface Props extends ThemeProps {
   className?: string;
-  closeModal: () => void;
+  onComplete: () => void;
 }
 
 const MIN_LENGTH = 6;
 
-const CreateMasterPasswordModal = ({ className, closeModal }: Props) => {
+const CreateMasterPassword = ({ className, onComplete }: Props) => {
   const { t } = useTranslation();
   const [password, setPassword] = useState<string | null>(null);
   const [loading, setLoading] = useState<boolean>(false);
@@ -49,7 +48,7 @@ const CreateMasterPasswordModal = ({ className, closeModal }: Props) => {
         if (!res.status) {
           setErrors(res.errors);
         } else {
-          closeModal();
+          onComplete();
         }
       }).catch((e) => {
         setErrors([(e as Error).message]);
@@ -57,29 +56,27 @@ const CreateMasterPasswordModal = ({ className, closeModal }: Props) => {
         setLoading(false);
       });
     }
-  }, [closeModal, password]);
+  }, [password, onComplete]);
 
   useEffect((): void => {
     setPassword(pass1 && pass2 ? pass1 : null);
   }, [pass1, pass2]);
 
   return (
-    <Modal
+    <div
       className={CN(className)}
-      maskClosable={false}
-      wrapperClassName={'master-password-modal'}
     >
-      <div className={'modal-header'}>
-        <div className='modal-title'>
+      <div className={'header-container'}>
+        <div className='header-title'>
           {t('Create master password')}
         </div>
         <img
           alt='shield'
-          className='modal-icon'
+          className='header-icon'
           src={icon}
         />
       </div>
-      <div className={'modal-body'}>
+      <div className={'body-container'}>
         <ValidatedInput
           className={className}
           component={InputWithLabel}
@@ -115,7 +112,7 @@ const CreateMasterPasswordModal = ({ className, closeModal }: Props) => {
         }
         <div className='separator' />
       </div>
-      <div className='modal-footer'>
+      <div className='footer-container'>
         <Button
           className='save-button'
           isBusy={loading}
@@ -125,73 +122,70 @@ const CreateMasterPasswordModal = ({ className, closeModal }: Props) => {
           {t('Save')}
         </Button>
       </div>
-    </Modal>
+    </div>
   );
 };
 
-export default React.memo(styled(CreateMasterPasswordModal)(({ theme }: Props) => `
-  .master-password-modal {
-    width: 400px;
-    background-color: ${theme.popupBackground};
+export default React.memo(styled(CreateMasterPassword)(({ theme }: Props) => `
+  background-color: ${theme.popupBackground};
 
-    .modal-header {
-      height: 100px;
-      margin: -15px -15px 0;
-      padding: 12px;
-      background-image: url(${bg});
-      display: flex;
-      flex-direction: row;
-      align-items: center;
-      justify-content: space-between;
-      border-radius: 8px 8px 0 0;
-      background-color: ${theme.background};
+  .header-container {
+    height: 100px;
+    padding: 12px;
+    background-image: url(${bg});
+    background-size: cover;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    border-radius: 8px 8px 0 0;
+    background-color: ${theme.background};
 
 
-      .modal-title {
-        font-style: normal;
-        font-weight: 500;
-        font-size: 20px;
-        line-height: 32px;
-        color: ${theme.textColor};
-        margin-left: 4px;
-      }
-
-      .modal-icon {
-        height: 79px;
-        width: 96px;
-      }
+    .header-title {
+      font-style: normal;
+      font-weight: 500;
+      font-size: 20px;
+      line-height: 32px;
+      color: ${theme.textColor};
+      margin-left: 4px;
     }
 
-    .modal-body {
-      padding-top: 8px;
+    .header-icon {
+      height: 79px;
+      width: 96px;
+    }
+  }
 
-      .separator {
-        margin-top: 32px;
-        margin-bottom: 16px;
-      }
+  .body-container {
+    padding-top: 8px;
 
-      .separator:before {
-        content: "";
-        height: 1px;
-        display: block;
-        background: ${theme.boxBorderColor};
-      }
-
-      .item-error {
-        margin: 10px 0;
-      }
+    .separator {
+      margin-top: 32px;
+      margin-bottom: 16px;
     }
 
-    .modal-footer {
-      padding-bottom: 5px;
-      display: flex;
-      flex-direction: row;
-      align-items: center;
-      justify-content: center;
+    .separator:before {
+      content: "";
+      height: 1px;
+      display: block;
+      background: ${theme.boxBorderColor};
+    }
 
-      .save-button {
-        width: 200px;
-      }
+    .item-error {
+      margin: 10px 0;
+    }
+  }
+
+  .footer-container {
+    padding-bottom: 5px;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+
+    .save-button {
+      width: 200px;
     }
   }
 

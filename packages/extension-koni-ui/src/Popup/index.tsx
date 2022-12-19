@@ -21,6 +21,7 @@ import Home from '@subwallet/extension-koni-ui/Popup/Home';
 import XcmTransfer from '@subwallet/extension-koni-ui/Popup/XcmTransfer/XcmTransfer';
 import { store } from '@subwallet/extension-koni-ui/stores';
 import { updateCurrentAccount } from '@subwallet/extension-koni-ui/stores/updater';
+import { isNoAccount } from '@subwallet/extension-koni-ui/util/account';
 import { buildHierarchy } from '@subwallet/extension-koni-ui/util/buildHierarchy';
 import * as Bowser from 'bowser';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
@@ -139,7 +140,7 @@ export default function Popup (): React.ReactElement {
   const [waitAtHome, setWaitAtHome] = useState(false);
   const browser = Bowser.getParser(window.navigator.userAgent);
 
-  const noAccount = useMemo((): boolean => accounts ? !accounts.filter((acc) => acc.address === ALL_ACCOUNT_KEY).length : false, [accounts]);
+  const noAccount = useMemo((): boolean => isNoAccount(accounts), [accounts]);
 
   if (!window.localStorage.getItem('randomVariant') || !window.localStorage.getItem('randomNameForLogo')) {
     const randomVariant = getRandomVariant();
@@ -274,7 +275,8 @@ export default function Popup (): React.ReactElement {
     return () => {
       unSubscribe();
     };
-  }, [cameraOn]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   function wrapWithErrorBoundary (component: React.ReactElement, trigger?: string): React.ReactElement {
     return <ErrorBoundary trigger={trigger}>{component}</ErrorBoundary>;
@@ -315,7 +317,7 @@ export default function Popup (): React.ReactElement {
                                       (keyringState.hasMasterPassword && keyringState.isLocked)
                                         ? wrapWithErrorBoundary(<Login />, 'Login')
                                         : (
-                                          ((!keyringState.hasMasterPassword && !noAccount) || waitAtHome)
+                                          (!keyringState.hasMasterPassword || waitAtHome || noAccount)
                                             ? (
                                               <Switch>
                                                 <Route path='/account/create'>{wrapWithErrorBoundary(<CreateAccount />, 'account-creation')}</Route>

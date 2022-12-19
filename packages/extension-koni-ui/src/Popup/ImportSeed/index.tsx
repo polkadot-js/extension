@@ -42,7 +42,6 @@ function ImportSeed ({ className = '' }: Props): React.ReactElement {
   const accountsWithoutAll = accounts.filter((acc: { address: string; }) => acc.address !== 'ALL');
   const [name, setName] = useState(`Account ${accountsWithoutAll.length + 1}`);
   const [step1, setStep1] = useState(true);
-  const hasMasterPassword = useSelector((state: RootState) => state.keyringState.hasMasterPassword);
 
   useEffect(() => {
     setSelectedGenesis(genesisHash);
@@ -52,14 +51,13 @@ function ImportSeed ({ className = '' }: Props): React.ReactElement {
     !accounts.length && onAction();
   }, [accounts, onAction]);
 
-  const _onCreate = useCallback((name: string, password?: string): void => {
+  const _onCreate = useCallback((name: string): void => {
     // this should always be the case
-    if (name && (hasMasterPassword || (!hasMasterPassword && password)) && account) {
+    if (name && account) {
       setIsBusy(true);
 
       createAccountSuriV2({
         name: name,
-        password: password,
         suri: account.suri,
         isAllowed: isConnectWhenImport,
         types: keyTypes,

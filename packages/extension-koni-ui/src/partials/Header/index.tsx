@@ -5,7 +5,6 @@ import type { ThemeProps } from '../../types';
 
 import { faChevronDown } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { ALL_ACCOUNT_KEY } from '@subwallet/extension-koni-base/constants';
 import ExpandDarkIcon from '@subwallet/extension-koni-ui/assets/icon/expand-dark.svg';
 import ExpandLightIcon from '@subwallet/extension-koni-ui/assets/icon/expand-light.svg';
 import { AccountContext, Link } from '@subwallet/extension-koni-ui/components';
@@ -16,6 +15,7 @@ import AccountMenuSettings from '@subwallet/extension-koni-ui/partials/AccountMe
 import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { updateCurrentNetwork } from '@subwallet/extension-koni-ui/stores/updater';
 import { accountAllRecoded, getGenesisOptionsByAddressType, isAccountAll } from '@subwallet/extension-koni-ui/util';
+import { isNoAccount } from '@subwallet/extension-koni-ui/util/account';
 import { getLogoByGenesisHash } from '@subwallet/extension-koni-ui/util/logoByGenesisHashMap';
 import reformatAddress from '@subwallet/extension-koni-ui/util/reformatAddress';
 import Avatar from 'boring-avatars';
@@ -85,7 +85,7 @@ function Header ({ cancelButtonText, changeAccountCallback, children, className 
 
   const { hasMasterPassword, isLocked } = useSelector((state: RootState) => state.keyringState);
 
-  const hasAccount = useMemo((): boolean => accounts.filter((acc) => acc.address !== ALL_ACCOUNT_KEY).length !== 0, [accounts]);
+  const hasAccount = useMemo((): boolean => !isNoAccount(accounts), [accounts]);
 
   const genesisOptions = getGenesisOptionsByAddressType(account?.address, accounts, useGenesisHashOptions());
   const _isAccountAll = account && isAccountAll(account.address);

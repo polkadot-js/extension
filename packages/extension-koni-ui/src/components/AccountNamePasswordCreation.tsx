@@ -3,12 +3,9 @@
 
 import useTranslation from '@subwallet/extension-koni-ui/hooks/useTranslation';
 import { Name } from '@subwallet/extension-koni-ui/partials';
-import Password from '@subwallet/extension-koni-ui/partials/Password';
 import { EVM_ACCOUNT_TYPE, SUBSTRATE_ACCOUNT_TYPE } from '@subwallet/extension-koni-ui/Popup/CreateAccount';
-import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { Theme, ThemeProps } from '@subwallet/extension-koni-ui/types';
-import React, { useCallback, useContext, useState } from 'react';
-import { useSelector } from 'react-redux';
+import React, { useCallback, useContext } from 'react';
 import styled, { ThemeContext } from 'styled-components';
 
 import { KeypairType } from '@polkadot/util-crypto/types';
@@ -25,8 +22,7 @@ interface Props {
   isBusy: boolean;
   keyTypes: KeypairType[];
   name: string;
-  onCreate: (name: string, password?: string) => void | Promise<void | boolean>;
-  onPasswordChange?: (password: string | null) => void;
+  onCreate: (name: string) => void | Promise<void | boolean>;
   renderErrors?: () => JSX.Element;
   selectedGenesis?: string;
   setChecked?: (val: boolean) => void;
@@ -43,28 +39,19 @@ function AccountNamePasswordCreation ({ address,
   keyTypes,
   name,
   onCreate,
-  onPasswordChange,
   renderErrors,
   selectedGenesis,
   setChecked,
   setName }: Props): React.ReactElement<Props> {
   const { t } = useTranslation();
-  const [password, setPassword] = useState<string | null>(null);
-
-  const hasMasterPassword = useSelector((state: RootState) => state.keyringState.hasMasterPassword);
 
   const themeContext = useContext(ThemeContext as React.Context<Theme>);
   const _onCreate = useCallback(
     () => {
-      name && (hasMasterPassword || (!hasMasterPassword && password)) && onCreate(name, password || '');
+      name && onCreate(name);
     },
-    [name, password, onCreate, hasMasterPassword]
+    [name, onCreate]
   );
-
-  const handleChangePassword = useCallback((val: string | null) => {
-    setPassword(val);
-    onPasswordChange && onPasswordChange(val);
-  }, [onPasswordChange]);
 
   const onChangeName = useCallback((val: string | null) => {
     setName && setName(val || '');
@@ -104,10 +91,6 @@ function AccountNamePasswordCreation ({ address,
               />
             )
             }
-            {!hasMasterPassword && <Password
-              disable={isBusy}
-              onChange={handleChangePassword}
-            />}
           </div>
         </div>
         {
@@ -125,7 +108,7 @@ function AccountNamePasswordCreation ({ address,
             className='next-step-btn'
             data-button-action='add new root'
             isBusy={isBusy}
-            isDisabled={(!hasMasterPassword && !password) || !name}
+            isDisabled={!name}
             onClick={_onCreate}
           >
             {buttonLabel}

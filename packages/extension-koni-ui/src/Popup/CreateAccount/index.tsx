@@ -4,9 +4,7 @@
 // eslint-disable-next-line header/header
 import LoadingContainer from '@subwallet/extension-koni-ui/components/LoadingContainer';
 import HeaderWithSteps from '@subwallet/extension-koni-ui/partials/HeaderWithSteps';
-import { RootState } from '@subwallet/extension-koni-ui/stores';
 import React, { useCallback, useContext, useEffect, useState } from 'react';
-import { useSelector } from 'react-redux';
 import styled from 'styled-components';
 
 import { KeypairType } from '@polkadot/util-crypto/types';
@@ -28,8 +26,6 @@ function CreateAccount ({ className, defaultClassName }: Props): React.ReactElem
   const { t } = useTranslation();
   const onAction = useContext(ActionContext);
   const { accounts } = useContext(AccountContext);
-
-  const hasMasterPassword = useSelector((state: RootState) => state.keyringState.hasMasterPassword);
 
   const [isBusy, setIsBusy] = useState(false);
   const [step, setStep] = useState(1);
@@ -74,13 +70,12 @@ function CreateAccount ({ className, defaultClassName }: Props): React.ReactElem
   }, [seed]);
 
   const _onCreate = useCallback(
-    (name: string, password?: string): void => {
+    (name: string): void => {
       // this should always be the case
-      if (name && seed && (hasMasterPassword || (!hasMasterPassword && password))) {
+      if (name && seed) {
         setIsBusy(true);
         createAccountSuriV2({
           name: name,
-          password: password,
           suri: seed,
           isAllowed: isConnectWhenCreate,
           types: keyTypes
@@ -96,7 +91,7 @@ function CreateAccount ({ className, defaultClassName }: Props): React.ReactElem
       }
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [isConnectWhenCreate, onAction, seed, dep, hasMasterPassword]
+    [isConnectWhenCreate, onAction, seed, dep]
   );
 
   const _onNextStep = useCallback(

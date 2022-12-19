@@ -3,8 +3,7 @@
 
 import { ChainRegistry, CurrentNetworkInfo, NftCollection as _NftCollection, NftItem as _NftItem, TransactionHistoryItemType } from '@subwallet/extension-base/background/KoniTypes';
 import { AccountJson } from '@subwallet/extension-base/background/types';
-import { ALL_ACCOUNT_KEY } from '@subwallet/extension-koni-base/constants';
-import { AccountContext } from '@subwallet/extension-koni-ui/components';
+import { AccountContext, Modal, WaitAtHomeContext } from '@subwallet/extension-koni-ui/components';
 import useAccountBalance from '@subwallet/extension-koni-ui/hooks/screen/home/useAccountBalance';
 import useCrowdloanNetworks from '@subwallet/extension-koni-ui/hooks/screen/home/useCrowdloanNetworks';
 import useFetchNft from '@subwallet/extension-koni-ui/hooks/screen/home/useFetchNft';
@@ -13,9 +12,11 @@ import useGetNetworkMetadata from '@subwallet/extension-koni-ui/hooks/screen/hom
 import useShowedNetworks from '@subwallet/extension-koni-ui/hooks/screen/home/useShowedNetworks';
 import useTranslation from '@subwallet/extension-koni-ui/hooks/useTranslation';
 import { TabHeaderItemType } from '@subwallet/extension-koni-ui/Popup/Home/types';
+import CreateMasterPassword from '@subwallet/extension-koni-ui/Popup/Keyring/CreateMasterPassword';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { ModalQrProps, ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { BN_ZERO, isAccountAll, NFT_DEFAULT_GRID_SIZE, NFT_GRID_HEIGHT_THRESHOLD, NFT_HEADER_HEIGHT, NFT_PER_ROW, NFT_PREVIEW_HEIGHT } from '@subwallet/extension-koni-ui/util';
+import { isNoAccount } from '@subwallet/extension-koni-ui/util/account';
 import BigN from 'bignumber.js';
 import React, { useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { TFunction } from 'react-i18next';
@@ -41,7 +42,7 @@ const ExportAccountQrModal = React.lazy(() => import('@subwallet/extension-koni-
 const Link = React.lazy(() => import('@subwallet/extension-koni-ui/components/Link'));
 const Header = React.lazy(() => import('@subwallet/extension-koni-ui/partials/Header'));
 const ReceiveButton = React.lazy(() => import('@subwallet/extension-koni-ui/components/Button/ReceiveButton'));
-const CreateMasterPasswordModal = React.lazy(() => import('@subwallet/extension-koni-ui/components/Modal/CreateMasterPasswordModal'));
+const CreatePasswordNotificationModal = React.lazy(() => import('@subwallet/extension-koni-ui/components/Modal/CreatePasswordNotificationModal'));
 const MigrateNotificationModal = React.lazy(() => import('@subwallet/extension-koni-ui/components/Modal/MigrateNotificationModal'));
 
 interface WrapperProps extends ThemeProps {
@@ -161,9 +162,19 @@ function Wrapper ({ className, theme }: WrapperProps): React.ReactElement {
     currentAccount: { account: currentAccount },
     currentNetwork,
     transactionHistory: { historyMap } } = useSelector((state: RootState) => state);
+  const hasMasterPassword = useSelector((state: RootState) => state.keyringState.hasMasterPassword);
+  const { setWait } = useContext(WaitAtHomeContext);
 
-  if (accounts.length === 1 && accounts.filter((acc) => (acc.address !== ALL_ACCOUNT_KEY)).length === 0) {
-    return (<AddAccount />);
+  const onCreateComplete = useCallback(() => {
+    setWait(false);
+  }, [setWait]);
+
+  if (isNoAccount(accounts)) {
+    if (!hasMasterPassword) {
+      return (<CreateMasterPassword onComplete={onCreateComplete} />);
+    } else {
+      return (<AddAccount />);
+    }
   }
 
   if (!currentAccount || !currentNetwork.isReady) {
@@ -231,7 +242,8 @@ function Home ({ chainRegistryMap, className = '', currentAccount, historyMap, n
   const [showNetworkSelection, setShowNetworkSelection] = useState(isSetNetwork);
   const [isVisibleBuyModal, setIsVisibleBuyModal] = useState<boolean>(false);
 
-  const [isVisibleCreateMasterPassword, setIsVisibleCreateMasterPassword] = useState(false);
+  const [noticeCreateMasterPassword, setNoticeCreateMasterPassword] = useState(false);
+  const [createMasterPasswordVisible, setCreateMasterPasswordVisible] = useState(false);
   const [confirmMigrateVisibleModal, setConfirmMigrateVisibleModal] = useState(false);
 
   const hasMasterPassword = useSelector((state: RootState) => state.keyringState.hasMasterPassword);
@@ -364,7 +376,12 @@ function Home ({ chainRegistryMap, className = '', currentAccount, historyMap, n
   }, []);
 
   const onCloseMasterPasswordModal = useCallback(() => {
-    setIsVisibleCreateMasterPassword(false);
+    setNoticeCreateMasterPassword(false);
+    setCreateMasterPasswordVisible(true);
+  }, []);
+
+  const onCloseCreatePasswordModal = useCallback(() => {
+    setCreateMasterPasswordVisible(false);
     setConfirmMigrateVisibleModal(true);
   }, []);
 
@@ -373,8 +390,8 @@ function Home ({ chainRegistryMap, className = '', currentAccount, historyMap, n
   }, []);
 
   useEffect(() => {
-    if (!hasMasterPassword && accounts.filter((acc) => acc.address !== ALL_ACCOUNT_KEY).length !== 0) {
-      setIsVisibleCreateMasterPassword(true);
+    if (!hasMasterPassword && !isNoAccount(accounts)) {
+      setNoticeCreateMasterPassword(true);
     }
   }, [hasMasterPassword, accounts]);
 
@@ -534,7 +551,7 @@ function Home ({ chainRegistryMap, className = '', currentAccount, historyMap, n
         />
       )}
       {
-        showNetworkSelection && !isVisibleCreateMasterPassword && <NetworkSelection
+        showNetworkSelection && !noticeCreateMasterPassword && <NetworkSelection
           handleShow={setShowNetworkSelection}
         />
       }
@@ -549,11 +566,18 @@ function Home ({ chainRegistryMap, className = '', currentAccount, historyMap, n
         )
       }
       {
-        isVisibleCreateMasterPassword && (
-          <CreateMasterPasswordModal
+        noticeCreateMasterPassword && (
+          <CreatePasswordNotificationModal
             className='home__account-qr-modal'
             closeModal={onCloseMasterPasswordModal}
           />
+        )
+      }
+      {
+        createMasterPasswordVisible && (
+          <Modal className='full-size-modal'>
+            <CreateMasterPassword onComplete={onCloseCreatePasswordModal} />
+          </Modal>
         )
       }
       {
@@ -572,6 +596,20 @@ export default React.memo(styled(Wrapper)(({ theme }: WrapperProps) => `
   display: flex;
   flex-direction: column;
   height: 100%;
+
+  .full-size-modal .subwallet-modal {
+    max-width: 460px;
+    left: 0;
+    right: 0;
+    top: 0;
+    bottom: 0;
+    border-radius: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    border: 1px solid ${theme.extensionBorder};
+  }
 
   .home-tab-contents {
     flex: 1;

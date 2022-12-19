@@ -485,5 +485,22 @@
   "SubWallet Support": "",
   "This feature is not available for the chosen account type": "",
   "Change master password": "",
-  "Logout": ""
+  "Logout": "",
+  "To continue, please apply the master password": "",
+  "Success": "",
+  "Later": "",
+  "Apply now": "",
+  "Master password created successfully. Please": "",
+  "apply the new password to your existing": "",
+  "accounts": "",
+  "Derive from another account": "",
+  "Import account from MetaMask": "",
+  "Attach account": "",
+  "Attach QR - signer (Parity Signer, Keystone)": "",
+  "Add account": "",
+  "Master password applied successfully:": "",
+  "Failed to apply master password": "",
+  "Apply Master Password": "",
+  "All Account": "",
+  "Auto migrate master password ": ""
 }

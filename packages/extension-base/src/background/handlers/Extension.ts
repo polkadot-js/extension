@@ -276,7 +276,7 @@ export default class Extension {
 
   private jsonRestore ({ file, password }: RequestJsonRestore): void {
     try {
-      keyring.restoreAccount(file, password);
+      keyring.restoreAccount(file, password, true);
     } catch (error) {
       throw new Error((error as Error).message);
     }
@@ -497,7 +497,7 @@ export default class Extension {
       suri
     });
 
-    keyring.addPair(childPair);
+    keyring.addPair(childPair, true);
 
     return true;
   }

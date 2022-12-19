@@ -86,6 +86,11 @@ export class ChainService {
   }
 
   public async validateCustomChain (provider: string, existedChainSlug?: string) {
+    const substrateApi = this.substrateChainHandler.initApi('custom', provider);
+    const evmApi = this.evmChainHandler.initApi('custom', provider);
+
+    console.log(evmApi.api.eth.net.getId());
+
     return {
       decimals: 0,
       existentialDeposit: '',

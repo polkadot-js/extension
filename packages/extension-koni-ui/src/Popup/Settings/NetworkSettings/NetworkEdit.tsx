@@ -350,6 +350,8 @@ function NetworkEdit ({ className }: Props): React.ReactElement {
           validateNetwork(provider, '').then((resp) => {
             dispatchValidationState({ type: ValidationStateActionType.UPDATE_LOADING, payload: false });
 
+            console.log('resp', resp);
+
             if (resp.error) {
               dispatchValidationState({ type: ValidationStateActionType.UPDATE_VALIDATION_ERROR, payload: resp.error });
             }
@@ -402,7 +404,7 @@ function NetworkEdit ({ className }: Props): React.ReactElement {
         }
       }
     }
-  }, [editInfo, provider, show, validationState.isCurrentEndpoint, validationState.needValidating]);
+  }, [provider, show, validationState.isCurrentEndpoint, validationState.needValidating]);
 
   // const _onSaveNetwork = useCallback(() => {
   //   if ((!_isValidProvider || !isProviderConnected) && !isCurrentEndpoint) {
@@ -705,11 +707,13 @@ function NetworkEdit ({ className }: Props): React.ReactElement {
 
         {displayChainSpec()}
 
-        <InputWithLabel
-          disabled
-          label={t<string>('Chain Type')}
-          value={chainEditInfo.chainType || ''}
-        />
+        {
+          chainEditInfo.chainType !== ChainEditStandard.UNKNOWN && <InputWithLabel
+            disabled
+            label={t<string>('Chain Type')}
+            value={chainEditInfo.chainType || ''}
+          />
+        }
 
         <div className={'option-toggle-container'}>
           <div>Advanced options</div>

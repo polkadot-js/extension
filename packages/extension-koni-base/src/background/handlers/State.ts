@@ -1390,7 +1390,7 @@ export default class KoniState extends State {
     return this.networkMapStore.getSubject();
   }
 
-  // ------------------------------------------------
+  // ChainService ------------------------------------------------
 
   public getChainInfoMap () {
     return this.chainService.getChainInfoMap();
@@ -1410,6 +1410,10 @@ export default class KoniState extends State {
 
   public subscribeChainStateMap (): Subject<Record<string, _ChainState>> {
     return this.chainService.subscribeChainStateMap();
+  }
+
+  public async validateCustomChain (provider: string, existedChainSlug?: string) {
+    return await this.chainService.validateCustomChain(provider, existedChainSlug);
   }
 
   // ------------------------------------------------

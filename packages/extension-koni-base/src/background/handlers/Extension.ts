@@ -1719,6 +1719,56 @@ export default class KoniExtension extends Extension {
     return this.getNetworkMap();
   }
 
+  private async upsertNetworkMap (data: NetworkJson): Promise<boolean> {
+    try {
+      return await state.upsertNetworkMap(data);
+    } catch (e) {
+      console.error(e);
+
+      return false;
+    }
+  }
+
+  private removeNetworkMap (networkKey: string): boolean {
+    const currentNetworkMap = this.getNetworkMap();
+
+    if (!(networkKey in currentNetworkMap)) {
+      return false;
+    }
+
+    if (currentNetworkMap[networkKey].active) {
+      return false;
+    }
+
+    return state.removeNetworkMap(networkKey);
+  }
+
+  private async disableNetworkMap (networkKey: string): Promise<DisableNetworkResponse> {
+    const currentNetworkMap = this.getNetworkMap();
+
+    if (!(networkKey in currentNetworkMap)) {
+      return {
+        success: false
+      };
+    }
+
+    const success = await state.disableNetworkMap(networkKey);
+
+    return {
+      success
+    };
+  }
+
+  private enableNetworkMap (networkKey: string): boolean {
+    const networkMap = this.getNetworkMap();
+
+    if (!(networkKey in networkMap)) {
+      return false;
+    }
+
+    return state.enableNetworkMap(networkKey);
+  }
+
   private validateProvider (targetProviders: string[], _isEthereum: boolean) {
     let error: NETWORK_ERROR = NETWORK_ERROR.NONE;
     const currentNetworks = this.getNetworkMap();
@@ -1776,200 +1826,152 @@ export default class KoniExtension extends Extension {
     return { error, conflictKey, conflictChain };
   }
 
-  private async upsertNetworkMap (data: NetworkJson): Promise<boolean> {
-    try {
-      return await state.upsertNetworkMap(data);
-    } catch (e) {
-      console.error(e);
-
-      return false;
-    }
-  }
-
-  private removeNetworkMap (networkKey: string): boolean {
-    const currentNetworkMap = this.getNetworkMap();
-
-    if (!(networkKey in currentNetworkMap)) {
-      return false;
-    }
-
-    if (currentNetworkMap[networkKey].active) {
-      return false;
-    }
-
-    return state.removeNetworkMap(networkKey);
-  }
-
-  private async disableNetworkMap (networkKey: string): Promise<DisableNetworkResponse> {
-    const currentNetworkMap = this.getNetworkMap();
-
-    if (!(networkKey in currentNetworkMap)) {
-      return {
-        success: false
-      };
-    }
-
-    const success = await state.disableNetworkMap(networkKey);
-
-    return {
-      success
-    };
-  }
-
-  private enableNetworkMap (networkKey: string): boolean {
-    const networkMap = this.getNetworkMap();
-
-    if (!(networkKey in networkMap)) {
-      return false;
-    }
-
-    return state.enableNetworkMap(networkKey);
-  }
-
   private async validateNetwork ({ existedChainSlug, provider }: ValidateNetworkRequest): Promise<ValidateNetworkResponse> {
-    let result: ValidateNetworkResponse = {
-      decimals: 0,
-      existentialDeposit: '',
-      paraId: null,
-      symbol: '',
-      success: false,
-      slug: '',
-      genesisHash: '',
-      addressPrefix: '',
-      name: '',
-      evmChainId: null
-    };
+    return await state.validateCustomChain(provider, existedChainSlug);
 
-    try {
-      const { conflictChain: providerConflictChain,
-        conflictKey: providerConflictKey,
-        error: providerError } = this.validateProvider([provider], false);
-
-      if (providerError === NETWORK_ERROR.NONE) { // provider not duplicate
-        let networkKey = '';
-        const apiProps = initApi('custom', provider, isEthereum);
-        const timeout = new Promise((resolve) => {
-          const id = setTimeout(() => {
-            clearTimeout(id);
-            resolve(null);
-          }, 5000);
-        });
-
-        const res = await Promise.race([
-          timeout,
-          apiProps.isReady
-        ]); // check connection
-
-        if (res !== null) { // test connection ok
-          // get all necessary information
-          const api = res as ApiProps;
-          const { chainDecimals, chainTokens } = api.api.registry;
-          const defaultToken = chainTokens[0];
-          const defaultDecimal = chainDecimals[0];
-          const genesisHash = api.api.genesisHash?.toHex();
-          const ss58Prefix = api.api?.consts?.system?.ss58Prefix?.toString();
-          let chainType: ChainType;
-          let chain = '';
-          let ethChainId = -1;
-
-          if (isEthereum) {
-            const web3 = initWeb3Api(provider);
-
-            const [_chainType, _chain, _ethChainId] = await Promise.all([
-              api.api.rpc.system.chainType(),
-              api.api.rpc.system.chain(),
-              web3.eth.getChainId()
-            ]);
-
-            chainType = _chainType;
-            chain = _chain.toString();
-            ethChainId = _ethChainId;
-
-            if (existedChainSlug && existedChainSlug.evmChainId && existedChainSlug.evmChainId !== ethChainId) {
-              result.error = NETWORK_ERROR.PROVIDER_NOT_SAME_NETWORK;
-
-              return result;
-            }
-          } else {
-            const [_chainType, _chain] = await Promise.all([
-              api.api.rpc.system.chainType(),
-              api.api.rpc.system.chain()
-            ]);
-
-            chainType = _chainType;
-            chain = _chain.toString();
-          }
-
-          networkKey = 'custom_' + genesisHash.toString();
-          let parsedChainType: NetWorkGroup = 'UNKNOWN';
-
-          if (chainType) {
-            if (chainType.type === 'Development') {
-              parsedChainType = 'TEST_NET';
-            } else if (chainType.type === 'Live') {
-              parsedChainType = 'MAIN_NET';
-            }
-          }
-
-          // handle result
-          if (existedChainSlug) {
-            if (existedChainSlug.genesisHash !== genesisHash) {
-              result.error = NETWORK_ERROR.PROVIDER_NOT_SAME_NETWORK;
-
-              return result;
-            } else { // no need to validate genesisHash
-              result = {
-                success: true,
-                slug: networkKey,
-                genesisHash,
-                addressPrefix: ss58Prefix,
-                networkGroup: [parsedChainType],
-                name: chain ? chain.toString() : '',
-                evmChainId: ethChainId,
-                symbol: defaultToken,
-                decimals: defaultDecimal
-              };
-            }
-          } else {
-            const { conflictChain: genesisConflictChain,
-              conflictKey: genesisConflictKey,
-              error: genesisError } = this.validateGenesisHash(genesisHash);
-
-            if (genesisError === NETWORK_ERROR.NONE) { // check genesisHash ok
-              result = {
-                success: true,
-                slug: networkKey,
-                genesisHash,
-                addressPrefix: ss58Prefix,
-                networkGroup: [parsedChainType],
-                name: chain ? chain.toString() : '',
-                evmChainId: ethChainId,
-                symbol: defaultToken,
-                decimals: defaultDecimal
-              };
-            } else {
-              result.error = genesisError;
-              result.conflictKey = genesisConflictKey;
-              result.conflictChain = genesisConflictChain;
-            }
-          }
-
-          await api.api.disconnect();
-        } else {
-          result.error = NETWORK_ERROR.CONNECTION_FAILURE;
-        }
-      } else {
-        result.error = providerError;
-        result.conflictChain = providerConflictChain;
-        result.conflictKey = providerConflictKey;
-      }
-
-      return result;
-    } catch (e) {
-      console.error('Error connecting to provider', e);
-
-      return result;
-    }
+    // let result: ValidateNetworkResponse = {
+    //   decimals: 0,
+    //   existentialDeposit: '',
+    //   paraId: null,
+    //   symbol: '',
+    //   success: false,
+    //   slug: '',
+    //   genesisHash: '',
+    //   addressPrefix: '',
+    //   name: '',
+    //   evmChainId: null
+    // };
+    //
+    // try {
+    //   const { conflictChain: providerConflictChain,
+    //     conflictKey: providerConflictKey,
+    //     error: providerError } = this.validateProvider([provider], false);
+    //
+    //   if (providerError === NETWORK_ERROR.NONE) { // provider not duplicate
+    //     let networkKey = '';
+    //     const apiProps = initApi('custom', provider, isEthereum);
+    //     const timeout = new Promise((resolve) => {
+    //       const id = setTimeout(() => {
+    //         clearTimeout(id);
+    //         resolve(null);
+    //       }, 5000);
+    //     });
+    //
+    //     const res = await Promise.race([
+    //       timeout,
+    //       apiProps.isReady
+    //     ]); // check connection
+    //
+    //     if (res !== null) { // test connection ok
+    //       // get all necessary information
+    //       const api = res as ApiProps;
+    //       const { chainDecimals, chainTokens } = api.api.registry;
+    //       const defaultToken = chainTokens[0];
+    //       const defaultDecimal = chainDecimals[0];
+    //       const genesisHash = api.api.genesisHash?.toHex();
+    //       const ss58Prefix = api.api?.consts?.system?.ss58Prefix?.toString();
+    //       let chainType: ChainType;
+    //       let chain = '';
+    //       let ethChainId = -1;
+    //
+    //       if (isEthereum) {
+    //         const web3 = initWeb3Api(provider);
+    //
+    //         const [_chainType, _chain, _ethChainId] = await Promise.all([
+    //           api.api.rpc.system.chainType(),
+    //           api.api.rpc.system.chain(),
+    //           web3.eth.getChainId()
+    //         ]);
+    //
+    //         chainType = _chainType;
+    //         chain = _chain.toString();
+    //         ethChainId = _ethChainId;
+    //
+    //         if (existedChainSlug && existedChainSlug.evmChainId && existedChainSlug.evmChainId !== ethChainId) {
+    //           result.error = NETWORK_ERROR.PROVIDER_NOT_SAME_NETWORK;
+    //
+    //           return result;
+    //         }
+    //       } else {
+    //         const [_chainType, _chain] = await Promise.all([
+    //           api.api.rpc.system.chainType(),
+    //           api.api.rpc.system.chain()
+    //         ]);
+    //
+    //         chainType = _chainType;
+    //         chain = _chain.toString();
+    //       }
+    //
+    //       networkKey = 'custom_' + genesisHash.toString();
+    //       let parsedChainType: NetWorkGroup = 'UNKNOWN';
+    //
+    //       if (chainType) {
+    //         if (chainType.type === 'Development') {
+    //           parsedChainType = 'TEST_NET';
+    //         } else if (chainType.type === 'Live') {
+    //           parsedChainType = 'MAIN_NET';
+    //         }
+    //       }
+    //
+    //       // handle result
+    //       if (existedChainSlug) {
+    //         if (existedChainSlug.genesisHash !== genesisHash) {
+    //           result.error = NETWORK_ERROR.PROVIDER_NOT_SAME_NETWORK;
+    //
+    //           return result;
+    //         } else { // no need to validate genesisHash
+    //           result = {
+    //             success: true,
+    //             slug: networkKey,
+    //             genesisHash,
+    //             addressPrefix: ss58Prefix,
+    //             networkGroup: [parsedChainType],
+    //             name: chain ? chain.toString() : '',
+    //             evmChainId: ethChainId,
+    //             symbol: defaultToken,
+    //             decimals: defaultDecimal
+    //           };
+    //         }
+    //       } else {
+    //         const { conflictChain: genesisConflictChain,
+    //           conflictKey: genesisConflictKey,
+    //           error: genesisError } = this.validateGenesisHash(genesisHash);
+    //
+    //         if (genesisError === NETWORK_ERROR.NONE) { // check genesisHash ok
+    //           result = {
+    //             success: true,
+    //             slug: networkKey,
+    //             genesisHash,
+    //             addressPrefix: ss58Prefix,
+    //             networkGroup: [parsedChainType],
+    //             name: chain ? chain.toString() : '',
+    //             evmChainId: ethChainId,
+    //             symbol: defaultToken,
+    //             decimals: defaultDecimal
+    //           };
+    //         } else {
+    //           result.error = genesisError;
+    //           result.conflictKey = genesisConflictKey;
+    //           result.conflictChain = genesisConflictChain;
+    //         }
+    //       }
+    //
+    //       await api.api.disconnect();
+    //     } else {
+    //       result.error = NETWORK_ERROR.CONNECTION_FAILURE;
+    //     }
+    //   } else {
+    //     result.error = providerError;
+    //     result.conflictChain = providerConflictChain;
+    //     result.conflictKey = providerConflictKey;
+    //   }
+    //
+    //   return result;
+    // } catch (e) {
+    //   console.error('Error connecting to provider', e);
+    //
+    //   return result;
+    // }
   }
 
   private enableAllNetwork (): boolean {

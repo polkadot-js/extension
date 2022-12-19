@@ -3,6 +3,8 @@
 
 import { ChainInfoMap } from '@subwallet/extension-koni-base/services/chain-list';
 import { _ChainInfo, _DEFAULT_NETWORKS } from '@subwallet/extension-koni-base/services/chain-list/types';
+import { EvmChainHandler } from '@subwallet/extension-koni-base/services/chain-service/handler/EvmChainHandler';
+import { SubstrateChainHandler } from '@subwallet/extension-koni-base/services/chain-service/handler/SubstrateChainHandler';
 import { _ChainState, _DataMap, ConnectionStatus } from '@subwallet/extension-koni-base/services/chain-service/types';
 import { Subject } from 'rxjs';
 
@@ -14,6 +16,9 @@ export class ChainService {
     chainInfoMap: {},
     chainStateMap: {}
   };
+
+  private substrateChainHandler: SubstrateChainHandler;
+  private evmChainHandler: EvmChainHandler;
 
   private chainInfoMapSubject = new Subject<Record<string, _ChainInfo>>();
   private chainStateMapSubject = new Subject<Record<string, _ChainState>>();
@@ -30,6 +35,9 @@ export class ChainService {
         active: false
       };
     });
+
+    this.substrateChainHandler = new SubstrateChainHandler();
+    this.evmChainHandler = new EvmChainHandler();
 
     this.chainInfoMapSubject.next(this.dataMap.chainInfoMap);
     this.chainStateMapSubject.next(this.dataMap.chainStateMap);
@@ -75,5 +83,24 @@ export class ChainService {
     });
 
     return activeChains;
+  }
+
+  public async validateCustomChain (provider: string, existedChainSlug?: string) {
+    return {
+      decimals: 0,
+      existentialDeposit: '',
+      paraId: null,
+      symbol: '',
+      success: false,
+      slug: '',
+      genesisHash: '',
+      addressPrefix: '',
+      name: '',
+      evmChainId: null
+    };
+  }
+
+  private async getChainInfoByProvider (provider: string) {
+
   }
 }

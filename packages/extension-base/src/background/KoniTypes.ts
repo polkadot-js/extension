@@ -295,7 +295,6 @@ export interface ApiState {
   apiDefaultTx: SubmittableExtrinsicFunction;
   apiDefaultTxSudo: SubmittableExtrinsicFunction;
   isApiReady: boolean;
-  isApiReadyOnce: boolean;
   isDevelopment?: boolean;
   isEthereum?: boolean;
   specName: string;

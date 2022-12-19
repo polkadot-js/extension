@@ -1576,12 +1576,21 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@babel/runtime@npm:^7.1.2, @babel/runtime@npm:^7.10.2, @babel/runtime@npm:^7.10.4, @babel/runtime@npm:^7.10.5, @babel/runtime@npm:^7.12.0, @babel/runtime@npm:^7.12.13, @babel/runtime@npm:^7.12.5, @babel/runtime@npm:^7.14.5, @babel/runtime@npm:^7.15.4, @babel/runtime@npm:^7.17.2, @babel/runtime@npm:^7.17.9, @babel/runtime@npm:^7.18.3, @babel/runtime@npm:^7.18.9, @babel/runtime@npm:^7.19.0, @babel/runtime@npm:^7.20.0, @babel/runtime@npm:^7.20.1, @babel/runtime@npm:^7.4.4, @babel/runtime@npm:^7.5.5, @babel/runtime@npm:^7.8.3, @babel/runtime@npm:^7.8.4, @babel/runtime@npm:^7.8.7, @babel/runtime@npm:^7.9.2":
+"@babel/runtime@npm:^7.1.2, @babel/runtime@npm:^7.10.2, @babel/runtime@npm:^7.10.4, @babel/runtime@npm:^7.10.5, @babel/runtime@npm:^7.12.0, @babel/runtime@npm:^7.12.13, @babel/runtime@npm:^7.12.5, @babel/runtime@npm:^7.14.5, @babel/runtime@npm:^7.15.4, @babel/runtime@npm:^7.17.2, @babel/runtime@npm:^7.17.9, @babel/runtime@npm:^7.18.3, @babel/runtime@npm:^7.18.9, @babel/runtime@npm:^7.19.0, @babel/runtime@npm:^7.20.1, @babel/runtime@npm:^7.4.4, @babel/runtime@npm:^7.5.5, @babel/runtime@npm:^7.8.3, @babel/runtime@npm:^7.8.4, @babel/runtime@npm:^7.8.7, @babel/runtime@npm:^7.9.2":
   version: 7.20.1
   resolution: "@babel/runtime@npm:7.20.1"
   dependencies:
     regenerator-runtime: ^0.13.10
   checksum: 00567a333d3357925742a6f5e39394dcc0af6e6029103fe188158bf7ae8b0b3ee3c6c0f68fccc217f0a6cfa455f6be252298baf56b3f5ff37b34313b170cd9f6
+  languageName: node
+  linkType: hard
+
+"@babel/runtime@npm:^7.20.6":
+  version: 7.20.6
+  resolution: "@babel/runtime@npm:7.20.6"
+  dependencies:
+    regenerator-runtime: ^0.13.11
+  checksum: 42a8504db21031b1859fbc0f52d698a3d2f5ada9519eb76c6f96a7e657d8d555732a18fe71ef428a67cc9fc81ca0d3562fb7afdc70549c5fec343190cbaa9b03
   languageName: node
   linkType: hard
 
@@ -4268,15 +4277,15 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@polkadot/phishing@npm:^0.18.11":
-  version: 0.18.11
-  resolution: "@polkadot/phishing@npm:0.18.11"
+"@polkadot/phishing@npm:^0.18.12":
+  version: 0.18.12
+  resolution: "@polkadot/phishing@npm:0.18.12"
   dependencies:
-    "@babel/runtime": ^7.20.0
-    "@polkadot/util": ^10.1.12
-    "@polkadot/util-crypto": ^10.1.12
-    "@polkadot/x-fetch": ^10.1.12
-  checksum: b0f4da5ce2ad317035bb1bc28762996df0e3fc0c31385f14c4b520e150f2a23751d6f82665054f33e1eb6efcc65ac6fa4f654435386f9764e75a1eeb803b96b3
+    "@babel/runtime": ^7.20.1
+    "@polkadot/util": ^10.2.1
+    "@polkadot/util-crypto": ^10.2.1
+    "@polkadot/x-fetch": ^10.2.1
+  checksum: 3424b87bf524a4422c25bb9b5d15434dfa01556821fbaceef3612aef715ab48aa198d3047de933bc69fe445eddac8a0541a2456bacc37775b6c8f65112b0aa51
   languageName: node
   linkType: hard
 
@@ -4507,7 +4516,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@polkadot/rpc-provider@npm:9.9.1, @polkadot/rpc-provider@npm:^9.9.1":
+"@polkadot/rpc-provider@npm:9.9.1":
   version: 9.9.1
   resolution: "@polkadot/rpc-provider@npm:9.9.1"
   dependencies:
@@ -4525,6 +4534,27 @@ __metadata:
     mock-socket: ^9.1.5
     nock: ^13.2.9
   checksum: c6a7bb8628cb1671f204d6ba7f6e0688b8e0f33c272d735857bdbea9439790f76d98b66207cbffcb3a6509d06faff397e2d5029d09fc27467c0690cab759b9e5
+  languageName: node
+  linkType: hard
+
+"@polkadot/rpc-provider@npm:^9.10.2":
+  version: 9.10.2
+  resolution: "@polkadot/rpc-provider@npm:9.10.2"
+  dependencies:
+    "@babel/runtime": ^7.20.6
+    "@polkadot/keyring": ^10.2.1
+    "@polkadot/types": 9.10.2
+    "@polkadot/types-support": 9.10.2
+    "@polkadot/util": ^10.2.1
+    "@polkadot/util-crypto": ^10.2.1
+    "@polkadot/x-fetch": ^10.2.1
+    "@polkadot/x-global": ^10.2.1
+    "@polkadot/x-ws": ^10.2.1
+    "@substrate/connect": 0.7.17
+    eventemitter3: ^4.0.7
+    mock-socket: ^9.1.5
+    nock: ^13.2.9
+  checksum: b3fdc1fdcde27d57af542fad30af441328fc8270f9bef7e5537dc253c96b660894e20c109b177b7ba2d82e050c5ae5ff2929a9c6fb985de7a0b90f5bb6e3f867
   languageName: node
   linkType: hard
 
@@ -4664,6 +4694,16 @@ __metadata:
     "@babel/runtime": ^7.18.9
     "@polkadot/util": ^10.1.1
   checksum: 0397efb3c91b512c8189b072c9d0dfa38b0bd0461db5e55a130b11bf47a5b88b79040c95337e054bc54db4d9df2af1a86b4cddb3c1cbe859872292a1448769f8
+  languageName: node
+  linkType: hard
+
+"@polkadot/types-support@npm:9.10.2":
+  version: 9.10.2
+  resolution: "@polkadot/types-support@npm:9.10.2"
+  dependencies:
+    "@babel/runtime": ^7.20.6
+    "@polkadot/util": ^10.2.1
+  checksum: 8e00f42211a7d8155a36ab8662b3ddf5b6b849e4e16a36213b12d6cb2030b47664fc7433d29a7bab61808142e9c03e68ddfe30d33fa70dee5d10333a37faaf5d
   languageName: node
   linkType: hard
 
@@ -4957,6 +4997,15 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@polkadot/x-global@npm:10.2.1, @polkadot/x-global@npm:^10.2.1":
+  version: 10.2.1
+  resolution: "@polkadot/x-global@npm:10.2.1"
+  dependencies:
+    "@babel/runtime": ^7.20.6
+  checksum: 7032f7677916b402ff6bc0ee438ae18aa860909310aec7de535ddd45c40a4b46b26f2ddf78f2178a9a978f97ab8110b9e5fbce3701ea36183eb122cb4136c366
+  languageName: node
+  linkType: hard
+
 "@polkadot/x-randomvalues@npm:10.1.13":
   version: 10.1.13
   resolution: "@polkadot/x-randomvalues@npm:10.1.13"
@@ -5008,6 +5057,18 @@ __metadata:
     "@types/websocket": ^1.0.5
     websocket: ^1.0.34
   checksum: 4e0734a0ecf84bd97736b78693c22ce5ac9ddc5813f5c58d33b73d19ffd4753748a57c377064c99783e930a0e6221c9d7052c16e0460518c4164860017febdd0
+  languageName: node
+  linkType: hard
+
+"@polkadot/x-ws@npm:^10.2.1":
+  version: 10.2.1
+  resolution: "@polkadot/x-ws@npm:10.2.1"
+  dependencies:
+    "@babel/runtime": ^7.20.6
+    "@polkadot/x-global": 10.2.1
+    "@types/websocket": ^1.0.5
+    websocket: ^1.0.34
+  checksum: 888426bf894f5f1be041cd8f26c7ad665dec3631be19e31938291714dee92a4be940b03d2969f2ccafe38c371900e04fc0758bbe0e81afea81769353d473e3b6
   languageName: node
   linkType: hard
 
@@ -5619,8 +5680,8 @@ __metadata:
     "@polkadot/api": ^9.9.1
     "@polkadot/keyring": ^10.1.13
     "@polkadot/networks": ^10.1.13
-    "@polkadot/phishing": ^0.18.11
-    "@polkadot/rpc-provider": ^9.9.1
+    "@polkadot/phishing": ^0.18.12
+    "@polkadot/rpc-provider": ^9.10.2
     "@polkadot/types": ^9.9.1
     "@polkadot/ui-keyring": ^2.9.13
     "@polkadot/ui-settings": ^2.9.13
@@ -5690,7 +5751,7 @@ __metadata:
   resolution: "@subwallet/extension-inject@workspace:packages/extension-inject"
   dependencies:
     "@babel/runtime": ^7.19.0
-    "@polkadot/rpc-provider": ^9.9.1
+    "@polkadot/rpc-provider": ^9.10.2
     "@polkadot/types": ^9.9.1
     "@polkadot/util": ^10.1.13
     "@polkadot/util-crypto": ^10.1.13
@@ -5736,8 +5797,8 @@ __metadata:
     "@polkadot/api-derive": ^9.9.1
     "@polkadot/keyring": ^10.1.13
     "@polkadot/networks": ^10.1.13
-    "@polkadot/phishing": ^0.18.11
-    "@polkadot/rpc-provider": ^9.9.1
+    "@polkadot/phishing": ^0.18.12
+    "@polkadot/rpc-provider": ^9.10.2
     "@polkadot/types": ^9.9.1
     "@polkadot/ui-keyring": ^2.9.13
     "@polkadot/ui-settings": ^2.9.13
@@ -21442,6 +21503,13 @@ __metadata:
   version: 0.13.10
   resolution: "regenerator-runtime@npm:0.13.10"
   checksum: 09893f5a9e82932642d9a999716b6c626dc53ef2a01307c952ebbf8e011802360163a37c304c18a6c358548be5a72b448e37209954a18696f21e438c81cbb4b9
+  languageName: node
+  linkType: hard
+
+"regenerator-runtime@npm:^0.13.11":
+  version: 0.13.11
+  resolution: "regenerator-runtime@npm:0.13.11"
+  checksum: 27481628d22a1c4e3ff551096a683b424242a216fee44685467307f14d58020af1e19660bf2e26064de946bad7eff28950eae9f8209d55723e2d9351e632bbb4
   languageName: node
   linkType: hard
 

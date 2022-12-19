@@ -1,7 +1,7 @@
 // Copyright 2019-2022 @polkadot/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { ChainEditInfo, ChainEditStandard, ChainSpecInfo, NETWORK_ERROR, ValidateNetworkResponse } from '@subwallet/extension-base/background/KoniTypes';
+import { ChainEditInfo, ChainEditStandard, ChainSpecInfo, NETWORK_ERROR } from '@subwallet/extension-base/background/KoniTypes';
 import { CUSTOM_NETWORK_PREFIX } from '@subwallet/extension-koni-base/services/chain-service/types';
 import { _isCustomNetwork } from '@subwallet/extension-koni-base/services/chain-service/utils';
 import { isUrl, isValidProvider as _isValidProvider } from '@subwallet/extension-koni-base/utils';
@@ -243,6 +243,12 @@ function validationStateReducer (state: ValidationState, action: ValidationState
         isValidSymbol: action.payload as boolean
       };
 
+    case ValidationStateActionType.UPDATE_NEED_VALIDATING:
+      return {
+        ...state,
+        needValidating: action.payload as boolean
+      };
+
     default:
       throw new Error();
   }
@@ -341,7 +347,7 @@ function NetworkEdit ({ className }: Props): React.ReactElement {
         if (validationState.needValidating && !validationState.isCurrentEndpoint) {
           dispatchValidationState({ type: ValidationStateActionType.UPDATE_LOADING, payload: true });
 
-          validateNetwork(provider, false).then((resp) => {
+          validateNetwork(provider, '').then((resp) => {
             dispatchValidationState({ type: ValidationStateActionType.UPDATE_LOADING, payload: false });
 
             if (resp.error) {
@@ -494,7 +500,7 @@ function NetworkEdit ({ className }: Props): React.ReactElement {
     console.log('on save', validationState, chainEditInfo);
   }, [chainEditInfo, validationState]);
 
-  const handleCreateProvider = useCallback((newProvider: string): string => {
+  const handleCreateProvider = useCallback(async (newProvider: string): Promise<string> => {
     if (!_isValidProvider(newProvider)) {
       show('Provider URL requires http/https or wss prefix');
 
@@ -502,17 +508,7 @@ function NetworkEdit ({ className }: Props): React.ReactElement {
     }
 
     dispatchValidationState({ type: ValidationStateActionType.UPDATE_LOADING, payload: true });
-    // const resp = await validateNetwork(newProvider, isEthereum, networkInfo);
-
-    const resp: ValidateNetworkResponse = {
-      name: '',
-      evmChainId: 0,
-      genesisHash: '',
-      slug: '',
-      networkGroup: [],
-      addressPrefix: '',
-      success: false
-    };
+    const resp = await validateNetwork(newProvider, '');
 
     dispatchValidationState({ type: ValidationStateActionType.UPDATE_LOADING, payload: false });
 

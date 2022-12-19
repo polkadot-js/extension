@@ -62,7 +62,7 @@ export default function useGetChainInfoForConfig () {
 
   if (data) {
     chainEditInfo.chainType = getChainType(data);
-    chainEditInfo.currentProvider = chainStateMap[data.slug].currentProvider;
+    chainEditInfo.currentProvider = data.slug !== '' ? chainStateMap[data.slug].currentProvider : '';
     chainEditInfo.symbol = getSymbol(data);
 
     if (data.evmInfo !== null) {

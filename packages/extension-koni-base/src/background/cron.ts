@@ -3,7 +3,7 @@
 
 import { ApiMap, ApiProps, CustomToken, NETWORK_STATUS, NetworkJson, NftTransferExtra, ServiceInfo } from '@subwallet/extension-base/background/KoniTypes';
 import { getTokenPrice } from '@subwallet/extension-koni-base/api/coingecko';
-import { fetchDotSamaHistory } from '@subwallet/extension-koni-base/api/subquery/history';
+import { fetchMultiChainHistories } from '@subwallet/extension-koni-base/api/subsquid/subsquid-multi-chain-history';
 import { KoniSubscription } from '@subwallet/extension-koni-base/background/subscription';
 import { ALL_ACCOUNT_KEY, CRON_AUTO_RECOVER_DOTSAMA_INTERVAL, CRON_GET_API_MAP_STATUS, CRON_REFRESH_HISTORY_INTERVAL, CRON_REFRESH_NFT_INTERVAL, CRON_REFRESH_PRICE_INTERVAL, CRON_REFRESH_STAKE_UNLOCKING_INFO, CRON_REFRESH_STAKING_REWARD_FAST_INTERVAL, CRON_REFRESH_STAKING_REWARD_INTERVAL } from '@subwallet/extension-koni-base/constants';
 import { Subject, Subscription } from 'rxjs';
@@ -86,7 +86,7 @@ export class KoniCron {
         this.refreshStakingReward(currentAccountInfo.address);
         this.refreshStakingRewardFastInterval(currentAccountInfo.address);
         this.resetHistory(currentAccountInfo.address).then(() => {
-          this.refreshHistory(currentAccountInfo.address, this.state.getNetworkMap());
+          this.refreshHistory2(currentAccountInfo.address);
         }).catch((err) => this.logger.warn(err));
       } else {
         this.setStakingRewardReady();
@@ -116,7 +116,7 @@ export class KoniCron {
         this.addCron('refreshStakeUnlockingInfo', this.refreshStakeUnlockingInfo(currentAccountInfo.address, this.state.getNetworkMap(), this.state.getDotSamaApiMap()), CRON_REFRESH_STAKE_UNLOCKING_INFO);
 
         this.resetHistory(currentAccountInfo.address).then(() => {
-          this.addCron('refreshHistory', this.refreshHistory(currentAccountInfo.address, this.state.getNetworkMap()), CRON_REFRESH_HISTORY_INTERVAL);
+          this.addCron('refreshHistory', this.refreshHistory2(currentAccountInfo.address), CRON_REFRESH_HISTORY_INTERVAL);
         }).catch((err) => this.logger.warn(err));
       } else {
         // this.setNftReady(currentAccountInfo.address);
@@ -138,7 +138,7 @@ export class KoniCron {
           this.removeCron('refreshHistory');
 
           if (this.checkNetworkAvailable(serviceInfo)) { // only add cron job if there's at least 1 active network
-            this.addCron('refreshHistory', this.refreshHistory(address, serviceInfo.networkMap), CRON_REFRESH_HISTORY_INTERVAL);
+            this.addCron('refreshHistory', this.refreshHistory2(address), CRON_REFRESH_HISTORY_INTERVAL);
           }
         }).catch((err) => this.logger.warn(err));
 
@@ -300,13 +300,28 @@ export class KoniCron {
     };
   };
 
-  refreshHistory = (address: string, networkMap: Record<string, NetworkJson>) => {
+  // refreshHistory = (address: string, networkMap: Record<string, NetworkJson>) => {
+  //   return () => {
+  //     this.logger.log('Refresh History state');
+  //     fetchDotSamaHistory(address, networkMap, (network, historyMap) => {
+  //       this.logger.log(`[${network}] historyMap: `, historyMap);
+  //       this.state.setHistory(address, network, historyMap);
+  //     });
+  //   };
+  // };
+
+  refreshHistory2 = (currentAddress: string) => {
     return () => {
+      const addresses = currentAddress === ALL_ACCOUNT_KEY ? [currentAddress] : Object.values(this.state.getAllAddresses());
+
       this.logger.log('Refresh History state');
-      fetchDotSamaHistory(address, networkMap, (network, historyMap) => {
-        this.logger.log(`[${network}] historyMap: `, historyMap);
-        this.state.setHistory(address, network, historyMap);
-      });
+      fetchMultiChainHistories(addresses).then((historiesMap) => {
+        Object.entries(historiesMap).forEach(([address, data]) => {
+          data.forEach((item) => {
+            this.state.setHistory(address, item.networkKey, item);
+          });
+        });
+      }).catch((err) => this.logger.warn(err));
     };
   };
 

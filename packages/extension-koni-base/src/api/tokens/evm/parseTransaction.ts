@@ -110,7 +110,7 @@ const parseResult = (type: string, input: NestedArray<any>, name: NestedArray<st
 };
 
 const isContractAddress = async (address: string, network: NetworkJson): Promise<boolean> => {
-  const provider = network.providers[network.currentProvider];
+  const provider = network.currentProvider && network.providers[network.currentProvider];
 
   if (!provider) {
     return false;

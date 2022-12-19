@@ -1,5 +1,18 @@
 # CHANGELOG
 
+## 0.7.6 (Koni)
+Build date: Dec 17, 2022.
+
+Update:
+- Update default endpoint for Basilisk, HydraDX (#936)
+- Add support for $AZERO nomination pool staking (Aleph Zero) (#933)
+- Showing crowdloan contribution in case the network is not live yet (#932)
+- Integrate $TFA token into SubWallet(#928)
+- Add the missing networks in Polkadot & Parachain group (#908)
+- Add the missing networks in Kusama & Parachain group (#909)
+- Add the missing networks in Live Networks group (#910)
+- Update new way to get transaction history (#820)
+
 ## 0.7.5 (Koni)
 Build date: Dec 15, 2022.
 

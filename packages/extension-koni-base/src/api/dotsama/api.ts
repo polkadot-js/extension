@@ -194,8 +194,9 @@ export function initApi (networkKey: string, apiUrl: string, isEthereum?: boolea
     apiRetry: 0,
     recoverConnect: async () => {
       result.apiRetry = 0;
-      console.log('Recover connect to', apiUrl);
+
       if (!apiUrl.startsWith('light')) {
+        console.log('Recover connect to', apiUrl);
         await result.api.disconnect();
         await result.api.connect();
       }

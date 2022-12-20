@@ -272,7 +272,7 @@ export const PREDEFINED_NETWORKS: Record<string, NetworkJson> = {
       PinkNode: 'wss://public-rpc.pinknode.io/astar',
       Blast: 'wss://astar.public.blastapi.io',
       '1rpc': 'wss://1rpc.io/astr',
-      'light client': 'light://substrate-connect/polkadot/astar',
+      'light client': 'light://substrate-connect/polkadot/astar'
     },
     active: false,
     currentProviderMode: 'ws',

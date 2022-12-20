@@ -87,42 +87,10 @@ export class ChainService {
     return activeChains;
   }
 
-  private validateProvider (targetProvider: string, existingChainSlug?: string) {
-    let error: _CHAIN_VALIDATION_ERROR = _CHAIN_VALIDATION_ERROR.NONE;
-    const chainInfoMap = this.getChainInfoMap();
-    const allExistedProviders: Record<string, string | boolean>[] = [];
-    let conflictChainSlug = '';
-    let conflictChainName = '';
+  public upsertChainInfo (data: Record<string, any>) {
+    console.log('got data', data);
 
-    if (existingChainSlug) {
-      const chainInfo = chainInfoMap[existingChainSlug];
-
-      if (Object.values(chainInfo.providers).includes(targetProvider)) {
-        error = _CHAIN_VALIDATION_ERROR.EXISTED_CHAIN;
-        conflictChainSlug = chainInfo.slug;
-        conflictChainName = chainInfo.name;
-      }
-
-      return { error, conflictChainSlug, conflictChainName };
-    }
-
-    // get all providers
-    for (const [key, value] of Object.entries(chainInfoMap)) {
-      Object.values(value.providers).forEach((provider) => {
-        allExistedProviders.push({ key, provider });
-      });
-    }
-
-    for (const { key, provider } of allExistedProviders) {
-      if (provider === targetProvider) {
-        error = _CHAIN_VALIDATION_ERROR.EXISTED_CHAIN;
-        conflictChainSlug = key as string;
-        conflictChainName = chainInfoMap[key as string].name;
-        break;
-      }
-    }
-
-    return { error, conflictChainSlug, conflictChainName };
+    return false;
   }
 
   public async validateCustomChain (provider: string, existingChainSlug?: string) {
@@ -240,5 +208,43 @@ export class ChainService {
     }
 
     return await this.substrateChainHandler.getChainSpec(api as _SubstrateApi);
+  }
+
+  private validateProvider (targetProvider: string, existingChainSlug?: string) {
+    let error: _CHAIN_VALIDATION_ERROR = _CHAIN_VALIDATION_ERROR.NONE;
+    const chainInfoMap = this.getChainInfoMap();
+    const allExistedProviders: Record<string, string | boolean>[] = [];
+    let conflictChainSlug = '';
+    let conflictChainName = '';
+
+    if (existingChainSlug) {
+      const chainInfo = chainInfoMap[existingChainSlug];
+
+      if (Object.values(chainInfo.providers).includes(targetProvider)) {
+        error = _CHAIN_VALIDATION_ERROR.EXISTED_CHAIN;
+        conflictChainSlug = chainInfo.slug;
+        conflictChainName = chainInfo.name;
+      }
+
+      return { error, conflictChainSlug, conflictChainName };
+    }
+
+    // get all providers
+    for (const [key, value] of Object.entries(chainInfoMap)) {
+      Object.values(value.providers).forEach((provider) => {
+        allExistedProviders.push({ key, provider });
+      });
+    }
+
+    for (const { key, provider } of allExistedProviders) {
+      if (provider === targetProvider) {
+        error = _CHAIN_VALIDATION_ERROR.EXISTED_CHAIN;
+        conflictChainSlug = key as string;
+        conflictChainName = chainInfoMap[key as string].name;
+        break;
+      }
+    }
+
+    return { error, conflictChainSlug, conflictChainName };
   }
 }

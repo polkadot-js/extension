@@ -1571,7 +1571,7 @@ export interface KoniRequestSignatures {
   'pri(networkMap.enableOne)': [string, boolean];
   'pri(networkMap.disableOne)': [string, DisableNetworkResponse];
   'pri(networkMap.removeOne)': [string, boolean];
-  'pri(networkMap.upsert)': [NetworkJson, boolean];
+  'pri(networkMap.upsert)': [Record<string, any>, boolean];
   'pri(networkMap.getNetworkMap)': [null, Record<string, NetworkJson>];
   'pri(networkMap.getSubscription)': [null, Record<string, NetworkJson>, Record<string, NetworkJson>];
   'pri(customTokenState.validateCustomToken)': [ValidateCustomTokenRequest, ValidateCustomTokenResponse];

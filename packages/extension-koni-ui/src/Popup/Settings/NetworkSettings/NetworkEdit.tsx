@@ -10,7 +10,7 @@ import { ActionContext, Button, ButtonArea, Dropdown, HorizontalLabelToggle, Inp
 import useGetChainInfoForConfig from '@subwallet/extension-koni-ui/hooks/screen/setting/useGetChainInfoForConfig';
 import useToast from '@subwallet/extension-koni-ui/hooks/useToast';
 import useTranslation from '@subwallet/extension-koni-ui/hooks/useTranslation';
-import { completeConfirmation, validateNetwork } from '@subwallet/extension-koni-ui/messaging';
+import { completeConfirmation, upsertNetworkMap, validateNetwork } from '@subwallet/extension-koni-ui/messaging';
 import Header from '@subwallet/extension-koni-ui/partials/Header';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import React, { useCallback, useContext, useEffect, useReducer, useState } from 'react';
@@ -371,9 +371,6 @@ function NetworkEdit ({ className }: Props): React.ReactElement {
     }
   }, [validationState.validationError]);
 
-  console.log('validationState', validationState);
-  console.log('chainEditInfo', chainEditInfo);
-
   useEffect(() => {
     if (mode === 'create') {
       dispatchValidationState({ type: ValidationStateActionType.UPDATE_NEED_VALIDATING, payload: true });
@@ -429,26 +426,6 @@ function NetworkEdit ({ className }: Props): React.ReactElement {
       dispatchChainSpec({ type: ChainSpecActionType.RESET_STATE, payload: {} });
     }
   }, [chainEditInfo.slug, provider, show, validationState.isCurrentEndpoint, validationState.needValidating]);
-
-  // const _onSaveNetwork = useCallback(() => {
-  //   if ((!_isValidProvider || !isProviderConnected) && !isCurrentEndpoint) {
-  //     return;
-  //   }
-  //
-  //   upsertNetworkMap(networkInfo).then((resp) => {
-  //     if (resp) {
-  //       if (networkInfo.requestId) {
-  //         completeConfirmation('addNetworkRequest', { id: networkInfo.requestId, isApproved: true }).catch(console.error);
-  //       }
-  //
-  //       show('Your changes are saved successfully');
-  //       window.localStorage.setItem('popupNavigation', '/');
-  //       _goBack();
-  //     } else {
-  //       show('Error trying to configure network');
-  //     }
-  //   }).catch(console.error);
-  // }, [_goBack, _isValidProvider, isCurrentEndpoint, isProviderConnected, networkInfo, show]);
 
   const onChangeProvider = useCallback((value: string) => {
     setProvider(value);
@@ -524,7 +501,28 @@ function NetworkEdit ({ className }: Props): React.ReactElement {
 
   const _onSaveNetwork = useCallback(() => {
     console.log('on save', validationState, chainEditInfo);
-  }, [chainEditInfo, validationState]);
+
+    if ((!validationState.validationError || !validationState.isProviderConnected) && !validationState.isCurrentEndpoint) {
+      return;
+    }
+
+    upsertNetworkMap({
+      chainEditInfo,
+      chainSpec
+    }).then((resp) => {
+      if (resp) {
+        if (requestId) {
+          completeConfirmation('addNetworkRequest', { id: requestId, isApproved: true }).catch(console.error);
+        }
+
+        show('Your changes are saved successfully');
+        window.localStorage.setItem('popupNavigation', '/');
+        _goBack();
+      } else {
+        show('Error trying to configure network');
+      }
+    }).catch(console.error);
+  }, [_goBack, chainEditInfo, chainSpec, requestId, show, validationState]);
 
   const handleCreateProvider = useCallback(async (newProvider: string): Promise<string> => {
     if (!_isValidProvider(newProvider)) {
@@ -605,10 +603,10 @@ function NetworkEdit ({ className }: Props): React.ReactElement {
       return (
         <div>
           {
-            chainSpec.paraId !== null && <InputWithLabel
+            chainSpec.decimals > -1 && <InputWithLabel
               disabled
-              label={t<string>('paraId')}
-              value={chainSpec?.paraId?.toString() || ''}
+              label={t<string>('Decimals')}
+              value={chainSpec.decimals.toString() || ''}
             />
           }
 
@@ -629,10 +627,10 @@ function NetworkEdit ({ className }: Props): React.ReactElement {
           }
 
           {
-            chainSpec.decimals > -1 && <InputWithLabel
+            chainSpec.paraId !== null && <InputWithLabel
               disabled
-              label={t<string>('Decimals')}
-              value={chainSpec.decimals.toString() || ''}
+              label={t<string>('paraId')}
+              value={chainSpec?.paraId?.toString() || ''}
             />
           }
         </div>

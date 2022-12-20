@@ -525,7 +525,7 @@ export async function subscribeNetworkMap (callback: (data: Record<string, Netwo
   return sendMessage('pri(networkMap.getSubscription)', null, callback);
 }
 
-export async function upsertNetworkMap (data: NetworkJson): Promise<boolean> {
+export async function upsertNetworkMap (data: Record<string, any>): Promise<boolean> {
   return sendMessage('pri(networkMap.upsert)', data);
 }
 

@@ -4,7 +4,7 @@
 import { withErrorLog } from '@subwallet/extension-base/background/handlers/helpers';
 import State, { AuthUrls, Resolver } from '@subwallet/extension-base/background/handlers/State';
 import { isSubscriptionRunning, unsubscribe } from '@subwallet/extension-base/background/handlers/subscriptions';
-import { AccountRefMap, AddNetworkRequestExternal, APIItemState, ApiMap, AuthRequestV2, BalanceItem, BalanceJson, ChainRegistry, ConfirmationDefinitions, ConfirmationsQueue, ConfirmationsQueueItemOptions, ConfirmationType, CrowdloanItem, CrowdloanJson, CurrentAccountInfo, CustomToken, CustomTokenJson, CustomTokenType, DeleteCustomTokenParams, EvmSendTransactionParams, EvmSendTransactionRequestExternal, EvmSignatureRequestExternal, ExternalRequestPromise, ExternalRequestPromiseStatus, NETWORK_STATUS, NetworkJson, NftCollection, NftItem, NftJson, NftTransferExtra, PriceJson, RequestAccountExportPrivateKey, RequestCheckPublicAndSecretKey, RequestConfirmationComplete, RequestSettingsType, ResponseAccountExportPrivateKey, ResponseCheckPublicAndSecretKey, ResponseSettingsType, ResultResolver, ServiceInfo, SingleModeJson, StakeUnlockingJson, StakingItem, StakingJson, StakingRewardItem, StakingRewardJson, ThemeTypes, TokenInfo, TransactionHistoryItemType } from '@subwallet/extension-base/background/KoniTypes';
+import { AccountRefMap, AddNetworkRequestExternal, APIItemState, ApiMap, AuthRequestV2, BalanceItem, BalanceJson, ChainEditInfo, ChainRegistry, ChainSpecInfo, ConfirmationDefinitions, ConfirmationsQueue, ConfirmationsQueueItemOptions, ConfirmationType, CrowdloanItem, CrowdloanJson, CurrentAccountInfo, CustomToken, CustomTokenJson, CustomTokenType, DeleteCustomTokenParams, EvmSendTransactionParams, EvmSendTransactionRequestExternal, EvmSignatureRequestExternal, ExternalRequestPromise, ExternalRequestPromiseStatus, NETWORK_STATUS, NetworkJson, NftCollection, NftItem, NftJson, NftTransferExtra, PriceJson, RequestAccountExportPrivateKey, RequestCheckPublicAndSecretKey, RequestConfirmationComplete, RequestSettingsType, ResponseAccountExportPrivateKey, ResponseCheckPublicAndSecretKey, ResponseSettingsType, ResultResolver, ServiceInfo, SingleModeJson, StakeUnlockingJson, StakingItem, StakingJson, StakingRewardItem, StakingRewardJson, ThemeTypes, TokenInfo, TransactionHistoryItemType } from '@subwallet/extension-base/background/KoniTypes';
 import { AuthorizeRequest, RequestAuthorizeTab } from '@subwallet/extension-base/background/types';
 import { Web3Transaction } from '@subwallet/extension-base/signers/types';
 import { getId } from '@subwallet/extension-base/utils/getId';
@@ -1430,72 +1430,73 @@ export default class KoniState extends State {
     return contractSupportedNetworkMap;
   }
 
-  public async upsertNetworkMap (data: NetworkJson): Promise<boolean> {
-    if (this.lockNetworkMap) {
-      return false;
-    }
-
-    this.lockNetworkMap = true;
-
-    if (data.key in this.networkMap) { // update provider for existed network
-      if (data.customProviders) {
-        this.networkMap[data.key].customProviders = data.customProviders;
-      }
-
-      if (data.currentProvider !== this.networkMap[data.key].currentProvider && data.currentProvider) {
-        this.networkMap[data.key].currentProvider = data.currentProvider;
-        this.networkMap[data.key].currentProviderMode = data.currentProvider.startsWith('ws') ? 'ws' : 'http';
-      }
-
-      this.networkMap[data.key].chain = data.chain;
-
-      if (data.nativeToken) {
-        this.networkMap[data.key].nativeToken = data.nativeToken;
-      }
-
-      if (data.decimals) {
-        this.networkMap[data.key].decimals = data.decimals;
-      }
-
-      this.networkMap[data.key].crowdloanUrl = data.crowdloanUrl;
-
-      this.networkMap[data.key].coinGeckoKey = data.coinGeckoKey;
-
-      this.networkMap[data.key].paraId = data.paraId;
-
-      this.networkMap[data.key].blockExplorer = data.blockExplorer;
-    } else { // insert
-      this.networkMap[data.key] = data;
-      this.networkMap[data.key].getStakingOnChain = true; // try to fetch staking on chain for custom network by default
-    }
-
-    if (this.networkMap[data.key].active) { // update API map if network is active
-      if (data.key in this.apiMap.dotSama) {
-        this.apiMap.dotSama[data.key].api?.disconnect && await this.apiMap.dotSama[data.key].api.disconnect();
-        delete this.apiMap.dotSama[data.key];
-      }
-
-      if (data.isEthereum && data.key in this.apiMap.web3) {
-        delete this.apiMap.web3[data.key];
-      }
-
-      const currentProvider = getCurrentProvider(data);
-
-      if (currentProvider) {
-        this.apiMap.dotSama[data.key] = initApi(data.key, currentProvider, data.isEthereum);
-
-        if (data.isEthereum && data.isEthereum) {
-          this.apiMap.web3[data.key] = initWeb3Api(currentProvider);
-        }
-      }
-    }
-
-    this.networkMapSubject.next(this.networkMap);
-    this.networkMapStore.set('NetworkMap', this.networkMap);
-    this.updateServiceInfo();
-    this.lockNetworkMap = false;
-
-    return true;
+  public upsertNetworkMap (data: Record<string, ChainEditInfo | ChainSpecInfo>): boolean {
+    return this.chainService.upsertChainInfo(data);
+    // if (this.lockNetworkMap) {
+    //   return false;
+    // }
+    //
+    // this.lockNetworkMap = true;
+    //
+    // if (data.key in this.networkMap) { // update provider for existed network
+    //   if (data.customProviders) {
+    //     this.networkMap[data.key].customProviders = data.customProviders;
+    //   }
+    //
+    //   if (data.currentProvider !== this.networkMap[data.key].currentProvider && data.currentProvider) {
+    //     this.networkMap[data.key].currentProvider = data.currentProvider;
+    //     this.networkMap[data.key].currentProviderMode = data.currentProvider.startsWith('ws') ? 'ws' : 'http';
+    //   }
+    //
+    //   this.networkMap[data.key].chain = data.chain;
+    //
+    //   if (data.nativeToken) {
+    //     this.networkMap[data.key].nativeToken = data.nativeToken;
+    //   }
+    //
+    //   if (data.decimals) {
+    //     this.networkMap[data.key].decimals = data.decimals;
+    //   }
+    //
+    //   this.networkMap[data.key].crowdloanUrl = data.crowdloanUrl;
+    //
+    //   this.networkMap[data.key].coinGeckoKey = data.coinGeckoKey;
+    //
+    //   this.networkMap[data.key].paraId = data.paraId;
+    //
+    //   this.networkMap[data.key].blockExplorer = data.blockExplorer;
+    // } else { // insert
+    //   this.networkMap[data.key] = data;
+    //   this.networkMap[data.key].getStakingOnChain = true; // try to fetch staking on chain for custom network by default
+    // }
+    //
+    // if (this.networkMap[data.key].active) { // update API map if network is active
+    //   if (data.key in this.apiMap.dotSama) {
+    //     this.apiMap.dotSama[data.key].api?.disconnect && await this.apiMap.dotSama[data.key].api.disconnect();
+    //     delete this.apiMap.dotSama[data.key];
+    //   }
+    //
+    //   if (data.isEthereum && data.key in this.apiMap.web3) {
+    //     delete this.apiMap.web3[data.key];
+    //   }
+    //
+    //   const currentProvider = getCurrentProvider(data);
+    //
+    //   if (currentProvider) {
+    //     this.apiMap.dotSama[data.key] = initApi(data.key, currentProvider, data.isEthereum);
+    //
+    //     if (data.isEthereum && data.isEthereum) {
+    //       this.apiMap.web3[data.key] = initWeb3Api(currentProvider);
+    //     }
+    //   }
+    // }
+    //
+    // this.networkMapSubject.next(this.networkMap);
+    // this.networkMapStore.set('NetworkMap', this.networkMap);
+    // this.updateServiceInfo();
+    // this.lockNetworkMap = false;
+    //
+    // return true;
   }
 
   public removeNetworkMap (networkKey: string): boolean {

@@ -46,12 +46,22 @@ export class SubstrateChainHandler {
       existentialDeposit: '',
       genesisHash: substrateApi.api.genesisHash?.toHex(),
       name: '',
-      symbol: ''
+      symbol: '',
+      paraId: null
     };
 
-    const addressPrefix = substrateApi.api?.consts?.system?.ss58Prefix?.toPrimitive() as number;
+    const { chainDecimals, chainTokens } = substrateApi.api.registry;
 
-    result.addressPrefix = addressPrefix;
+    if (substrateApi.api.query.parachainInfo) {
+      result.paraId = (await substrateApi.api.query.parachainInfo.parachainId()).toPrimitive() as number;
+    }
+
+    // get first token by default, might change
+    result.name = (await substrateApi.api.rpc.system.chain()).toPrimitive();
+    result.symbol = chainTokens[0];
+    result.decimals = chainDecimals[0];
+    result.addressPrefix = substrateApi.api?.consts?.system?.ss58Prefix?.toPrimitive() as number;
+    result.existentialDeposit = substrateApi.api.consts.balances.existentialDeposit.toString();
 
     return result;
   }
@@ -171,8 +181,6 @@ export class SubstrateChainHandler {
           substrateApi.apiError = (error as Error).message;
         });
     });
-
-    console.log(substrateApi);
 
     return substrateApi;
   }

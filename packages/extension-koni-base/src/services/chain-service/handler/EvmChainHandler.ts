@@ -56,7 +56,7 @@ export class EvmChainHandler {
     const chainId = await evmApi.api.eth.getChainId();
     let chainInfoList: Record<string, any>[] | undefined;
     const result: _EvmChainSpec = {
-      chainId,
+      evmChainId: chainId,
       name: '',
       symbol: '',
       decimals: 18, // by default, might change

@@ -7,7 +7,13 @@ import { _ChainInfo } from '@subwallet/extension-koni-base/services/chain-list/t
 
 export const ChainInfoMap = require('./data/ChainInfo.json') as Record<string, _ChainInfo>;
 
+export enum COMMON_CHAIN_SLUGS {
+  POLKADOT = 'polkadot',
+  KUSAMA = 'kusama',
+  MOONBEAM = 'moonbeam'
+}
+
 export const _DEFAULT_CHAINS = [
-  'polkadot',
-  'kusama'
+  COMMON_CHAIN_SLUGS.POLKADOT as string,
+  COMMON_CHAIN_SLUGS.KUSAMA as string
 ];

@@ -869,7 +869,6 @@ export interface ValidateNetworkResponse {
   conflictKey?: string,
 
   // chain spec
-  slug: string,
   genesisHash: string,
   addressPrefix: string,
   name: string,

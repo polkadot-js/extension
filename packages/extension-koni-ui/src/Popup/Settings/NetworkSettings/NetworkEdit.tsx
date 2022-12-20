@@ -347,7 +347,7 @@ function NetworkEdit ({ className }: Props): React.ReactElement {
         if (validationState.needValidating && !validationState.isCurrentEndpoint) {
           dispatchValidationState({ type: ValidationStateActionType.UPDATE_LOADING, payload: true });
 
-          validateNetwork(provider, '').then((resp) => {
+          validateNetwork(provider, chainEditInfo.slug).then((resp) => {
             dispatchValidationState({ type: ValidationStateActionType.UPDATE_LOADING, payload: false });
 
             console.log('resp', resp);
@@ -404,7 +404,7 @@ function NetworkEdit ({ className }: Props): React.ReactElement {
         }
       }
     }
-  }, [provider, show, validationState.isCurrentEndpoint, validationState.needValidating]);
+  }, [chainEditInfo.slug, provider, show, validationState.isCurrentEndpoint, validationState.needValidating]);
 
   // const _onSaveNetwork = useCallback(() => {
   //   if ((!_isValidProvider || !isProviderConnected) && !isCurrentEndpoint) {
@@ -510,7 +510,7 @@ function NetworkEdit ({ className }: Props): React.ReactElement {
     }
 
     dispatchValidationState({ type: ValidationStateActionType.UPDATE_LOADING, payload: true });
-    const resp = await validateNetwork(newProvider, '');
+    const resp = await validateNetwork(newProvider, chainEditInfo.slug);
 
     dispatchValidationState({ type: ValidationStateActionType.UPDATE_LOADING, payload: false });
 
@@ -546,7 +546,7 @@ function NetworkEdit ({ className }: Props): React.ReactElement {
     }
 
     return '';
-  }, [chainEditInfo.providers, getValidateErrorMessage, show]);
+  }, [chainEditInfo.providers, chainEditInfo.slug, getValidateErrorMessage, show]);
 
   const isDisableSave = useCallback((): boolean => {
     if (mode === 'create') {

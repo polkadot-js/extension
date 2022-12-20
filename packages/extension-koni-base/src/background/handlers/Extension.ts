@@ -5,14 +5,13 @@ import Common from '@ethereumjs/common';
 import Extension, { SEED_DEFAULT_LENGTH, SEED_LENGTHS } from '@subwallet/extension-base/background/handlers/Extension';
 import { AuthUrls } from '@subwallet/extension-base/background/handlers/State';
 import { createSubscription } from '@subwallet/extension-base/background/handlers/subscriptions';
-import { AccountExternalError, AccountExternalErrorCode, AccountsWithCurrentAddress, ApiProps, BalanceJson, BasicTxError, BasicTxErrorCode, BasicTxInfo, BasicTxResponse, BondingOptionInfo, BondingOptionParams, BondingSubmitParams, ChainBondingBasics, ChainRegistry, CheckExistingTuringCompoundParams, CrowdloanJson, CurrentAccountInfo, CustomToken, CustomTokenJson, DelegationItem, DeleteCustomTokenParams, DisableNetworkResponse, EvmNftTransaction, ExistingTuringCompoundTask, ExternalRequestPromise, ExternalRequestPromiseStatus, HandleBasicTx, NETWORK_ERROR, NetWorkGroup, NetworkJson, NftCollection, NftJson, NftTransactionRequest, NftTransactionResponse, NftTransferExtra, OptionInputAddress, PrepareExternalRequest, PriceJson, RequestAccountCreateExternalV2, RequestAccountCreateHardwareV2, RequestAccountCreateSuriV2, RequestAccountCreateWithSecretKey, RequestAccountExportPrivateKey, RequestAccountIsLocked, RequestAccountMeta, RequestAuthorization, RequestAuthorizationBlock, RequestAuthorizationPerAccount, RequestAuthorizationPerSite, RequestAuthorizeApproveV2, RequestBatchRestoreV2, RequestBondingSubmit, RequestCancelCompoundStakeExternal, RequestCheckCrossChainTransfer, RequestCheckPublicAndSecretKey, RequestCheckTransfer, RequestClaimRewardExternal, RequestConfirmationComplete, RequestCreateCompoundStakeExternal, RequestCrossChainTransfer, RequestCrossChainTransferExternal, RequestDeriveCreateV2, RequestEvmNftSubmitTransaction, RequestForgetSite, RequestFreeBalance, RequestJsonRestoreV2, RequestNftForceUpdate, RequestNftTransferExternalEVM, RequestNftTransferExternalSubstrate, RequestParseEVMContractInput, RequestParseTransactionSubstrate, RequestQrParseRLP, RequestQrSignEVM, RequestQrSignSubstrate, RequestRejectExternalRequest, RequestResolveExternalRequest, RequestSaveRecentAccount, RequestSeedCreateV2, RequestSeedValidateV2, RequestSettingsType, RequestStakeClaimReward, RequestStakeExternal, RequestStakeWithdrawal, RequestSubstrateNftSubmitTransaction, RequestTransactionHistoryAdd, RequestTransfer, RequestTransferCheckReferenceCount, RequestTransferCheckSupporting, RequestTransferExistentialDeposit, RequestTransferExternal, RequestTuringCancelStakeCompound, RequestTuringStakeCompound, RequestUnbondingSubmit, RequestUnStakeExternal, RequestWithdrawStakeExternal, ResponseAccountCreateSuriV2, ResponseAccountCreateWithSecretKey, ResponseAccountExportPrivateKey, ResponseAccountIsLocked, ResponseAccountMeta, ResponseCheckCrossChainTransfer, ResponseCheckPublicAndSecretKey, ResponseCheckTransfer, ResponseParseEVMContractInput, ResponseParseTransactionSubstrate, ResponsePrivateKeyValidateV2, ResponseQrParseRLP, ResponseQrSignEVM, ResponseQrSignSubstrate, ResponseRejectExternalRequest, ResponseResolveExternalRequest, ResponseSeedCreateV2, ResponseSeedValidateV2, StakeClaimRewardParams, StakeDelegationRequest, StakeUnlockingJson, StakeWithdrawalParams, StakingJson, StakingRewardJson, SubstrateNftTransaction, SupportTransferResponse, ThemeTypes, TokenInfo, TransactionHistoryItemType, TransferErrorCode, TuringCancelStakeCompoundParams, TuringStakeCompoundParams, UnbondingSubmitParams, ValidateCustomTokenRequest, ValidateCustomTokenResponse, ValidateNetworkRequest, ValidateNetworkResponse } from '@subwallet/extension-base/background/KoniTypes';
+import { AccountExternalError, AccountExternalErrorCode, AccountsWithCurrentAddress, BalanceJson, BasicTxError, BasicTxErrorCode, BasicTxInfo, BasicTxResponse, BondingOptionInfo, BondingOptionParams, BondingSubmitParams, ChainBondingBasics, ChainRegistry, CheckExistingTuringCompoundParams, CrowdloanJson, CurrentAccountInfo, CustomToken, CustomTokenJson, DelegationItem, DeleteCustomTokenParams, DisableNetworkResponse, EvmNftTransaction, ExistingTuringCompoundTask, ExternalRequestPromise, ExternalRequestPromiseStatus, HandleBasicTx, NetworkJson, NftCollection, NftJson, NftTransactionRequest, NftTransactionResponse, NftTransferExtra, OptionInputAddress, PrepareExternalRequest, PriceJson, RequestAccountCreateExternalV2, RequestAccountCreateHardwareV2, RequestAccountCreateSuriV2, RequestAccountCreateWithSecretKey, RequestAccountExportPrivateKey, RequestAccountIsLocked, RequestAccountMeta, RequestAuthorization, RequestAuthorizationBlock, RequestAuthorizationPerAccount, RequestAuthorizationPerSite, RequestAuthorizeApproveV2, RequestBatchRestoreV2, RequestBondingSubmit, RequestCancelCompoundStakeExternal, RequestCheckCrossChainTransfer, RequestCheckPublicAndSecretKey, RequestCheckTransfer, RequestClaimRewardExternal, RequestConfirmationComplete, RequestCreateCompoundStakeExternal, RequestCrossChainTransfer, RequestCrossChainTransferExternal, RequestDeriveCreateV2, RequestEvmNftSubmitTransaction, RequestForgetSite, RequestFreeBalance, RequestJsonRestoreV2, RequestNftForceUpdate, RequestNftTransferExternalEVM, RequestNftTransferExternalSubstrate, RequestParseEVMContractInput, RequestParseTransactionSubstrate, RequestQrParseRLP, RequestQrSignEVM, RequestQrSignSubstrate, RequestRejectExternalRequest, RequestResolveExternalRequest, RequestSaveRecentAccount, RequestSeedCreateV2, RequestSeedValidateV2, RequestSettingsType, RequestStakeClaimReward, RequestStakeExternal, RequestStakeWithdrawal, RequestSubstrateNftSubmitTransaction, RequestTransactionHistoryAdd, RequestTransfer, RequestTransferCheckReferenceCount, RequestTransferCheckSupporting, RequestTransferExistentialDeposit, RequestTransferExternal, RequestTuringCancelStakeCompound, RequestTuringStakeCompound, RequestUnbondingSubmit, RequestUnStakeExternal, RequestWithdrawStakeExternal, ResponseAccountCreateSuriV2, ResponseAccountCreateWithSecretKey, ResponseAccountExportPrivateKey, ResponseAccountIsLocked, ResponseAccountMeta, ResponseCheckCrossChainTransfer, ResponseCheckPublicAndSecretKey, ResponseCheckTransfer, ResponseParseEVMContractInput, ResponseParseTransactionSubstrate, ResponsePrivateKeyValidateV2, ResponseQrParseRLP, ResponseQrSignEVM, ResponseQrSignSubstrate, ResponseRejectExternalRequest, ResponseResolveExternalRequest, ResponseSeedCreateV2, ResponseSeedValidateV2, StakeClaimRewardParams, StakeDelegationRequest, StakeUnlockingJson, StakeWithdrawalParams, StakingJson, StakingRewardJson, SubstrateNftTransaction, SupportTransferResponse, ThemeTypes, TokenInfo, TransactionHistoryItemType, TransferErrorCode, TuringCancelStakeCompoundParams, TuringStakeCompoundParams, UnbondingSubmitParams, ValidateCustomTokenRequest, ValidateCustomTokenResponse, ValidateNetworkRequest, ValidateNetworkResponse } from '@subwallet/extension-base/background/KoniTypes';
 import { AccountJson, AuthorizeRequest, MessageTypes, RequestAccountForget, RequestAccountTie, RequestAuthorizeCancel, RequestAuthorizeReject, RequestCurrentAccountAddress, RequestTypes, ResponseAuthorizeList, ResponseType } from '@subwallet/extension-base/background/types';
 import { PASSWORD_EXPIRY_MS } from '@subwallet/extension-base/defaults';
 import { SignerExternal, SignerType } from '@subwallet/extension-base/signers/types';
 import { getId } from '@subwallet/extension-base/utils/getId';
 import { CHAIN_TYPES, getBondingExtrinsic, getBondingTxInfo, getChainBondingBasics, getClaimRewardExtrinsic, getClaimRewardTxInfo, getDelegationInfo, getUnbondingExtrinsic, getUnbondingTxInfo, getValidatorsInfo, getWithdrawalExtrinsic, getWithdrawalTxInfo } from '@subwallet/extension-koni-base/api/bonding';
 import { checkTuringStakeCompoundingTask, getTuringCancelCompoundingExtrinsic, getTuringCompoundExtrinsic, handleTuringCancelCompoundTxInfo, handleTuringCompoundTxInfo } from '@subwallet/extension-koni-base/api/bonding/paraChain';
-import { initApi } from '@subwallet/extension-koni-base/api/dotsama';
 import { getFreeBalance, subscribeFreeBalance } from '@subwallet/extension-koni-base/api/dotsama/balance';
 import { createClaimRewardExternal } from '@subwallet/extension-koni-base/api/dotsama/external/stake/claim';
 import { createCancelCompoundExternal } from '@subwallet/extension-koni-base/api/dotsama/external/stake/compound/cancel';
@@ -41,7 +40,7 @@ import { state } from '@subwallet/extension-koni-base/background/handlers/index'
 import { ALL_ACCOUNT_KEY, ALL_GENESIS_HASH } from '@subwallet/extension-koni-base/constants';
 import { _ChainInfo } from '@subwallet/extension-koni-base/services/chain-list/types';
 import { _ChainState } from '@subwallet/extension-koni-base/services/chain-service/types';
-import { getCurrentProvider, isValidProvider } from '@subwallet/extension-koni-base/utils';
+import { getCurrentProvider } from '@subwallet/extension-koni-base/utils';
 import { createTransactionFromRLP, signatureToHex, Transaction as QrTransaction } from '@subwallet/extension-koni-base/utils/eth';
 import BigN from 'bignumber.js';
 import { Transaction } from 'ethereumjs-tx';
@@ -50,7 +49,6 @@ import { SignedTransaction as Web3SignedTransaction, TransactionConfig } from 'w
 
 import { createPair } from '@polkadot/keyring';
 import { KeyringPair, KeyringPair$Json, KeyringPair$Meta } from '@polkadot/keyring/types';
-import { ChainType } from '@polkadot/types/interfaces';
 import { keyring } from '@polkadot/ui-keyring';
 import { accounts as accountsObservable } from '@polkadot/ui-keyring/observable/accounts';
 import { SingleAddress, SubjectInfo } from '@polkadot/ui-keyring/observable/types';
@@ -1769,209 +1767,8 @@ export default class KoniExtension extends Extension {
     return state.enableNetworkMap(networkKey);
   }
 
-  private validateProvider (targetProviders: string[], _isEthereum: boolean) {
-    let error: NETWORK_ERROR = NETWORK_ERROR.NONE;
-    const currentNetworks = this.getNetworkMap();
-    const allExistedProviders: Record<string, string | boolean>[] = [];
-    let conflictKey = '';
-    let conflictChain = '';
-
-    // get all providers
-    for (const [key, value] of Object.entries(currentNetworks)) {
-      Object.values(value.providers).forEach((provider) => {
-        allExistedProviders.push({ key, provider, isEthereum: value.isEthereum || false });
-      });
-
-      if (value.customProviders) {
-        Object.values(value.customProviders).forEach((provider) => {
-          allExistedProviders.push({ key, provider, isEthereum: value.isEthereum || false });
-        });
-      }
-    }
-
-    for (const _provider of targetProviders) {
-      if (!isValidProvider(_provider)) {
-        error = NETWORK_ERROR.INVALID_PROVIDER;
-        break;
-      }
-
-      for (const { isEthereum, key, provider } of allExistedProviders) {
-        if (provider === _provider && isEthereum === _isEthereum) {
-          error = NETWORK_ERROR.EXISTED_PROVIDER;
-          conflictKey = key as string;
-          conflictChain = currentNetworks[key as string].chain;
-          break;
-        }
-      }
-    }
-
-    return { error, conflictKey, conflictChain };
-  }
-
-  private validateGenesisHash (genesisHash: string) {
-    let error: NETWORK_ERROR = NETWORK_ERROR.NONE;
-    let conflictKey = '';
-    let conflictChain = '';
-    const currentNetworks = this.getNetworkMap();
-
-    for (const network of Object.values(currentNetworks)) {
-      if (network.genesisHash === genesisHash) {
-        error = NETWORK_ERROR.EXISTED_NETWORK;
-        conflictKey = network.key;
-        conflictChain = network.chain;
-        break;
-      }
-    }
-
-    return { error, conflictKey, conflictChain };
-  }
-
   private async validateNetwork ({ existedChainSlug, provider }: ValidateNetworkRequest): Promise<ValidateNetworkResponse> {
     return await state.validateCustomChain(provider, existedChainSlug) as ValidateNetworkResponse;
-
-    // let result: ValidateNetworkResponse = {
-    //   decimals: 0,
-    //   existentialDeposit: '',
-    //   paraId: null,
-    //   symbol: '',
-    //   success: false,
-    //   slug: '',
-    //   genesisHash: '',
-    //   addressPrefix: '',
-    //   name: '',
-    //   evmChainId: null
-    // };
-    //
-    // try {
-    //   const { conflictChain: providerConflictChain,
-    //     conflictKey: providerConflictKey,
-    //     error: providerError } = this.validateProvider([provider], false);
-    //
-    //   if (providerError === NETWORK_ERROR.NONE) { // provider not duplicate
-    //     let networkKey = '';
-    //     const apiProps = initApi('custom', provider, isEthereum);
-    //     const timeout = new Promise((resolve) => {
-    //       const id = setTimeout(() => {
-    //         clearTimeout(id);
-    //         resolve(null);
-    //       }, 5000);
-    //     });
-    //
-    //     const res = await Promise.race([
-    //       timeout,
-    //       apiProps.isReady
-    //     ]); // check connection
-    //
-    //     if (res !== null) { // test connection ok
-    //       // get all necessary information
-    //       const api = res as ApiProps;
-    //       const { chainDecimals, chainTokens } = api.api.registry;
-    //       const defaultToken = chainTokens[0];
-    //       const defaultDecimal = chainDecimals[0];
-    //       const genesisHash = api.api.genesisHash?.toHex();
-    //       const ss58Prefix = api.api?.consts?.system?.ss58Prefix?.toString();
-    //       let chainType: ChainType;
-    //       let chain = '';
-    //       let ethChainId = -1;
-    //
-    //       if (isEthereum) {
-    //         const web3 = initWeb3Api(provider);
-    //
-    //         const [_chainType, _chain, _ethChainId] = await Promise.all([
-    //           api.api.rpc.system.chainType(),
-    //           api.api.rpc.system.chain(),
-    //           web3.eth.getChainId()
-    //         ]);
-    //
-    //         chainType = _chainType;
-    //         chain = _chain.toString();
-    //         ethChainId = _ethChainId;
-    //
-    //         if (existedChainSlug && existedChainSlug.evmChainId && existedChainSlug.evmChainId !== ethChainId) {
-    //           result.error = NETWORK_ERROR.PROVIDER_NOT_SAME_NETWORK;
-    //
-    //           return result;
-    //         }
-    //       } else {
-    //         const [_chainType, _chain] = await Promise.all([
-    //           api.api.rpc.system.chainType(),
-    //           api.api.rpc.system.chain()
-    //         ]);
-    //
-    //         chainType = _chainType;
-    //         chain = _chain.toString();
-    //       }
-    //
-    //       networkKey = 'custom_' + genesisHash.toString();
-    //       let parsedChainType: NetWorkGroup = 'UNKNOWN';
-    //
-    //       if (chainType) {
-    //         if (chainType.type === 'Development') {
-    //           parsedChainType = 'TEST_NET';
-    //         } else if (chainType.type === 'Live') {
-    //           parsedChainType = 'MAIN_NET';
-    //         }
-    //       }
-    //
-    //       // handle result
-    //       if (existedChainSlug) {
-    //         if (existedChainSlug.genesisHash !== genesisHash) {
-    //           result.error = NETWORK_ERROR.PROVIDER_NOT_SAME_NETWORK;
-    //
-    //           return result;
-    //         } else { // no need to validate genesisHash
-    //           result = {
-    //             success: true,
-    //             slug: networkKey,
-    //             genesisHash,
-    //             addressPrefix: ss58Prefix,
-    //             networkGroup: [parsedChainType],
-    //             name: chain ? chain.toString() : '',
-    //             evmChainId: ethChainId,
-    //             symbol: defaultToken,
-    //             decimals: defaultDecimal
-    //           };
-    //         }
-    //       } else {
-    //         const { conflictChain: genesisConflictChain,
-    //           conflictKey: genesisConflictKey,
-    //           error: genesisError } = this.validateGenesisHash(genesisHash);
-    //
-    //         if (genesisError === NETWORK_ERROR.NONE) { // check genesisHash ok
-    //           result = {
-    //             success: true,
-    //             slug: networkKey,
-    //             genesisHash,
-    //             addressPrefix: ss58Prefix,
-    //             networkGroup: [parsedChainType],
-    //             name: chain ? chain.toString() : '',
-    //             evmChainId: ethChainId,
-    //             symbol: defaultToken,
-    //             decimals: defaultDecimal
-    //           };
-    //         } else {
-    //           result.error = genesisError;
-    //           result.conflictKey = genesisConflictKey;
-    //           result.conflictChain = genesisConflictChain;
-    //         }
-    //       }
-    //
-    //       await api.api.disconnect();
-    //     } else {
-    //       result.error = NETWORK_ERROR.CONNECTION_FAILURE;
-    //     }
-    //   } else {
-    //     result.error = providerError;
-    //     result.conflictChain = providerConflictChain;
-    //     result.conflictKey = providerConflictKey;
-    //   }
-    //
-    //   return result;
-    // } catch (e) {
-    //   console.error('Error connecting to provider', e);
-    //
-    //   return result;
-    // }
   }
 
   private enableAllNetwork (): boolean {

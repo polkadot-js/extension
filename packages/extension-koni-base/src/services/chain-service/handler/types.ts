@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 export interface _EvmChainSpec {
-  chainId: number,
+  evmChainId: number,
   name: string,
   symbol: string,
   decimals: number,
@@ -15,7 +15,8 @@ export interface _SubstrateChainSpec {
   genesisHash: string,
   symbol: string,
   decimals: number,
-  existentialDeposit: string
+  existentialDeposit: string,
+  paraId: number | null
 }
 
 export enum _CHAIN_VALIDATION_ERROR {

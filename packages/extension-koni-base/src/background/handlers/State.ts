@@ -1401,7 +1401,7 @@ export default class KoniState extends State {
   }
 
   public getChainInfoByKey (key: string) {
-    return this.chainService.getChainInfoMapByKey(key);
+    return this.chainService.getChainInfoByKey(key);
   }
 
   public subscribeChainInfoMap (): Subject<Record<string, _ChainInfo>> {

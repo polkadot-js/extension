@@ -294,6 +294,7 @@ export interface DefaultFormatBalance {
 export interface ApiState {
   apiDefaultTx: SubmittableExtrinsicFunction;
   apiDefaultTxSudo: SubmittableExtrinsicFunction;
+  isApiInitialized: boolean;
   isApiReady: boolean;
   isDevelopment?: boolean;
   isEthereum?: boolean;
@@ -311,7 +312,6 @@ export interface ApiProps extends ApiState {
   apiError?: string;
   apiUrl: string;
   isNotSupport?: boolean;
-  isApiReadyOnce: boolean;
   isApiConnected: boolean;
   isEthereum: boolean;
   isEthereumOnly: boolean;

@@ -10,6 +10,7 @@ import { DOTSAMA_AUTO_CONNECT_MS, DOTSAMA_MAX_CONTINUE_RETRY } from '@subwallet/
 import { inJestTest } from '@subwallet/extension-koni-base/utils';
 
 import { ApiPromise, WsProvider } from '@polkadot/api';
+import { ApiOptions } from '@polkadot/api/types';
 import { TypeRegistry } from '@polkadot/types/create';
 import { ChainProperties, ChainType } from '@polkadot/types/interfaces';
 import { Registry } from '@polkadot/types/types';
@@ -91,6 +92,7 @@ async function loadOnReady (registry: Registry, api: ApiPromise): Promise<ApiSta
     apiDefaultTx,
     apiDefaultTxSudo,
     isApiReady: true,
+    isApiInitialized: true,
     isDevelopment: isDevelopment,
     specName: api.runtimeVersion.specName.toString(),
     specVersion: api.runtimeVersion.specVersion.toString(),
@@ -135,7 +137,7 @@ function generateEvmHttpApi (apiUrl: string): ApiProps {
   }) as unknown as ApiProps;
 }
 
-export async function initApi (networkKey: string, apiUrl: string, isEthereum?: boolean): Promise<ApiProps> {
+export function initApi (networkKey: string, apiUrl: string, isEthereum?: boolean): ApiProps {
   if (isEthereum && apiUrl.startsWith('http')) {
     // return EVM HTTP Placeholder
     return generateEvmHttpApi(apiUrl);
@@ -144,18 +146,19 @@ export async function initApi (networkKey: string, apiUrl: string, isEthereum?: 
   const registry = new TypeRegistry();
 
   const provider = apiUrl.startsWith('light://')
-    ? await getSubstrateConnectProvider(apiUrl.replace('light://substrate-connect/', ''))
+    ? getSubstrateConnectProvider(apiUrl.replace('light://substrate-connect/', ''))
     : new WsProvider(apiUrl, DOTSAMA_AUTO_CONNECT_MS);
 
-  const apiOption = { provider, typesBundle, typesChain: typesChain };
+  console.log(provider);
+
+  // Init ApiPromise with selected provider
+  let api: ApiPromise;
+  const apiOption = { provider, typesBundle, typesChain: typesChain } as ApiOptions;
 
   if (!inJestTest()) {
     // @ts-ignore
     apiOption.registry = registry;
   }
-
-  // Init ApiPromise with selected provider
-  let api: ApiPromise;
 
   if (['acala', 'karura', 'origintrail', 'kintsugi'].includes(networkKey)) {
     api = new ApiPromise(acalaOptions({ provider }));
@@ -168,31 +171,6 @@ export async function initApi (networkKey: string, apiUrl: string, isEthereum?: 
   } else {
     api = new ApiPromise(apiOption);
   }
-
-  const connectionPromise: {
-    promise: Promise<void>,
-    resolve: (value: void) => void,
-    reject: () => void,
-    renew: () => void
-  } = {
-    promise: new Promise(() => {
-      throw new Error('Function not implemented.');
-    }),
-    resolve: function (): void {
-      throw new Error('Function not implemented.');
-    },
-    reject: function (): void {
-      throw new Error('Function not implemented.');
-    },
-    renew: function (): void {
-      connectionPromise.promise = new Promise<void>((resolve, reject) => {
-        connectionPromise.resolve = resolve;
-        connectionPromise.reject = reject;
-      });
-    }
-  };
-
-  connectionPromise.renew();
 
   // Create APIProps Object
   const result: ApiProps = ({
@@ -214,26 +192,35 @@ export async function initApi (networkKey: string, apiUrl: string, isEthereum?: 
     systemName: '',
     systemVersion: '',
     apiRetry: 0,
-    recoverConnect: () => {
+    recoverConnect: async () => {
       result.apiRetry = 0;
       console.log('Recover connect to', apiUrl);
-      provider.connect().then(console.log).catch(console.error);
+      if (!apiUrl.startsWith('light')) {
+        await result.api.disconnect();
+        await result.api.connect();
+      }
     },
     get isReady () {
       const self = this as ApiProps;
 
-      return async function f (): Promise<ApiProps> {
-        if (!self.isApiReady) {
+      return (async function (): Promise<ApiProps> {
+        if (!result.isApiInitialized) {
           await self.api.isReady;
-          await connectionPromise.promise;
         }
 
-        return self;
-      };
+        return new Promise<ApiProps>((resolve, reject) => {
+          (function wait () {
+            if (self.isApiReady) {
+              return resolve(self);
+            }
+
+            setTimeout(wait, 33);
+          })();
+        });
+      }
+      )();
     }
   }) as unknown as ApiProps;
-
-  // Todo: Create reconnect method
 
   // Listen ApiPromise events
   // On connected: provider is connected
@@ -242,7 +229,6 @@ export async function initApi (networkKey: string, apiUrl: string, isEthereum?: 
     result.apiRetry = 0;
     result.isApiConnected = true;
     result.isApiReady = result.isApiInitialized; // result.isApiInitialized && result.isApiConnected
-    connectionPromise.resolve();
   });
 
   // On disconnected: provider is disconnected
@@ -250,7 +236,6 @@ export async function initApi (networkKey: string, apiUrl: string, isEthereum?: 
     result.apiRetry = (result.apiRetry || 0) + 1;
     result.isApiConnected = false;
     result.isApiReady = false; // result.isApiInitialized && result.isApiConnected
-    connectionPromise.renew();
 
     console.log(`DotSamaAPI disconnected from ${JSON.stringify(apiUrl)} ${JSON.stringify(result.apiRetry)} times`);
 
@@ -275,8 +260,9 @@ export async function initApi (networkKey: string, apiUrl: string, isEthereum?: 
         result.apiError = (error as Error).message;
       });
   });
-  // Todo: On error: provider connection get error
-  // Todo: On decorated: implement all basic methods
+
+  // On ready: Load all metadata and ready to init data
+  api.on('error', console.error);
 
   return result;
 }

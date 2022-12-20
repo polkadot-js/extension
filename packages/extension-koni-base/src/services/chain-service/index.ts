@@ -1,7 +1,6 @@
 // Copyright 2019-2022 @subwallet/extension-koni-base authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { NETWORK_ERROR } from '@subwallet/extension-base/background/KoniTypes';
 import { ChainInfoMap } from '@subwallet/extension-koni-base/services/chain-list';
 import { _ChainInfo, _DEFAULT_NETWORKS } from '@subwallet/extension-koni-base/services/chain-list/types';
 import { EvmChainHandler } from '@subwallet/extension-koni-base/services/chain-service/handler/EvmChainHandler';
@@ -99,7 +98,7 @@ export class ChainService {
       const chainInfo = chainInfoMap[existingChainSlug];
 
       if (Object.values(chainInfo.providers).includes(targetProvider)) {
-        error = _CHAIN_VALIDATION_ERROR.EXISTED_PROVIDER;
+        error = _CHAIN_VALIDATION_ERROR.EXISTED_CHAIN;
         conflictChainSlug = chainInfo.slug;
         conflictChainName = chainInfo.name;
       }
@@ -116,7 +115,7 @@ export class ChainService {
 
     for (const { key, provider } of allExistedProviders) {
       if (provider === targetProvider) {
-        error = _CHAIN_VALIDATION_ERROR.EXISTED_PROVIDER;
+        error = _CHAIN_VALIDATION_ERROR.EXISTED_CHAIN;
         conflictChainSlug = key as string;
         conflictChainName = chainInfoMap[key as string].name;
         break;
@@ -157,7 +156,7 @@ export class ChainService {
           const id = setTimeout(() => {
             clearTimeout(id);
             resolve(null);
-          }, 3000);
+          }, 5000);
         });
 
         const connectionTrial = await Promise.race([
@@ -171,47 +170,51 @@ export class ChainService {
           const chainSpec = await this.getChainSpecByProvider(_api);
 
           result = Object.assign(result, chainSpec);
-        }
 
-        if (existingChainSlug) {
-          // check if same network (with existingChainSlug)
-          const existedChainInfo = this.getChainInfoByKey(existingChainSlug);
+          if (existingChainSlug) {
+            // check if same network (with existingChainSlug)
+            const existedChainInfo = this.getChainInfoByKey(existingChainSlug);
 
-          if (existedChainInfo.evmInfo !== null) {
-            if (result.evmChainId !== existedChainInfo.evmInfo.evmChainId) {
-              result.error = NETWORK_ERROR.PROVIDER_NOT_SAME_NETWORK;
+            if (existedChainInfo.evmInfo !== null) {
+              if (result.evmChainId !== existedChainInfo.evmInfo.evmChainId) {
+                result.error = _CHAIN_VALIDATION_ERROR.PROVIDER_NOT_SAME_CHAIN as string;
+              }
+            } else if (existedChainInfo.substrateInfo !== null) {
+              if (result.genesisHash !== existedChainInfo.substrateInfo.genesisHash) {
+                result.error = _CHAIN_VALIDATION_ERROR.PROVIDER_NOT_SAME_CHAIN as string;
+              }
             }
-          } else if (existedChainInfo.substrateInfo !== null) {
-            if (result.genesisHash !== existedChainInfo.substrateInfo.genesisHash) {
-              result.error = NETWORK_ERROR.PROVIDER_NOT_SAME_NETWORK;
+          } else {
+            // check if network existed
+            if (result.evmChainId !== null) {
+              for (const chainInfo of Object.values(this.getChainInfoMap())) {
+                if (chainInfo.evmInfo !== null && chainInfo.evmInfo.evmChainId === result.evmChainId) {
+                  result.error = _CHAIN_VALIDATION_ERROR.EXISTED_CHAIN as string;
+                  result.conflictChainName = chainInfo.name;
+                  result.conflictChainSlug = chainInfo.slug;
+
+                  break;
+                }
+              }
+            } else if (result.genesisHash !== '') {
+              for (const chainInfo of Object.values(this.getChainInfoMap())) {
+                if (chainInfo.substrateInfo !== null && chainInfo.substrateInfo.genesisHash === result.genesisHash) {
+                  result.error = _CHAIN_VALIDATION_ERROR.EXISTED_CHAIN as string;
+                  result.conflictChainName = chainInfo.name;
+                  result.conflictChainSlug = chainInfo.slug;
+
+                  break;
+                }
+              }
             }
           }
         } else {
-          // check if network existed
-          if (result.evmChainId !== null) {
-            for (const chainInfo of Object.values(this.getChainInfoMap())) {
-              if (chainInfo.evmInfo !== null && chainInfo.evmInfo.evmChainId === result.evmChainId) {
-                result.error = NETWORK_ERROR.EXISTED_NETWORK;
-                result.conflictChainName = chainInfo.name;
-                result.conflictChainSlug = chainInfo.slug;
-
-                break;
-              }
-            }
-          } else if (result.genesisHash !== '') {
-            for (const chainInfo of Object.values(this.getChainInfoMap())) {
-              if (chainInfo.substrateInfo !== null && chainInfo.substrateInfo.genesisHash === result.genesisHash) {
-                result.error = NETWORK_ERROR.EXISTED_NETWORK;
-                result.conflictChainName = chainInfo.name;
-                result.conflictChainSlug = chainInfo.slug;
-
-                break;
-              }
-            }
-          }
+          result.error = _CHAIN_VALIDATION_ERROR.CONNECTION_FAILURE as string;
+          result.success = false;
         }
       } else {
-        result.error = providerError;
+        result.success = false;
+        result.error = providerError as string;
         result.conflictChainName = providerConflictChainName;
         result.conflictChainSlug = providerConflictChainSlug;
       }
@@ -224,7 +227,8 @@ export class ChainService {
     } catch (e) {
       console.error('Error connecting to provider', e);
 
-      result.error = NETWORK_ERROR.CONNECTION_FAILURE;
+      result.success = false;
+      result.error = _CHAIN_VALIDATION_ERROR.CONNECTION_FAILURE as string;
 
       return result;
     }

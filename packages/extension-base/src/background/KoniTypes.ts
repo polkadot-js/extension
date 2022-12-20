@@ -864,7 +864,7 @@ export interface EvmNftSubmitTransaction extends BaseRequestSign {
 export interface ValidateNetworkResponse {
   // validation state
   success: boolean,
-  error?: NETWORK_ERROR,
+  error?: string,
   conflictChain?: string,
   conflictKey?: string,
 

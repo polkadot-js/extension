@@ -596,11 +596,36 @@ export interface RequestDeriveCreateV2 {
   isAllowed: boolean;
 }
 
-export interface RequestDeriveCreateV3 {
-  address: string;
-
+export interface CreateDeriveAccountInfo {
   name: string;
+  suri: string;
+}
+
+export interface RequestDeriveCreateMultiple {
+  parentAddress: string;
   isAllowed: boolean;
+  items: CreateDeriveAccountInfo[];
+}
+
+export interface DeriveAccountInfo {
+  address: string;
+  suri: string;
+}
+
+export interface RequestDeriveValidateV2 {
+  suri: string;
+  parentAddress: string;
+}
+
+export type ResponseDeriveValidateV2 = DeriveAccountInfo;
+export interface RequestGetDeriveAccounts {
+  page: number;
+  limit: number;
+  parentAddress: string;
+}
+
+export interface ResponseGetDeriveAccounts {
+  result: DeriveAccountInfo[];
 }
 
 // Restore account with json file (single account)
@@ -1639,7 +1664,6 @@ export interface KoniRequestSignatures {
   'pri(accounts.create.hardwareV2)': [RequestAccountCreateHardwareV2, boolean];
   'pri(accounts.create.withSecret)': [RequestAccountCreateWithSecretKey, ResponseAccountCreateWithSecretKey];
   'pri(derivation.createV2)': [RequestDeriveCreateV2, boolean]; // Substrate
-  'pri(derivation.createV3)': [RequestDeriveCreateV3, boolean]; // EVM
   'pri(json.restoreV2)': [RequestJsonRestoreV2, void];
   'pri(json.batchRestoreV2)': [RequestBatchRestoreV2, void];
   'pri(accounts.exportPrivateKey)': [RequestAccountExportPrivateKey, ResponseAccountExportPrivateKey];
@@ -1738,6 +1762,11 @@ export interface KoniRequestSignatures {
 
   // Signing
   'pri(signing.approve.passwordV2)': [RequestSigningApprovePasswordV2, boolean];
+
+  // Derive
+  'pri(derivation.validateV2)': [RequestDeriveValidateV2, ResponseDeriveValidateV2];
+  'pri(derivation.getList)': [RequestGetDeriveAccounts, ResponseGetDeriveAccounts];
+  'pri(derivation.create.multiple)': [RequestDeriveCreateMultiple, boolean];
 
 }
 

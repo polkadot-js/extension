@@ -9,6 +9,7 @@ export { Theme };
 
 export interface ThemeProps {
   theme: Theme;
+  className?: string;
 }
 
 export interface Recoded {

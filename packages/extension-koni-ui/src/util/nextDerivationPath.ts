@@ -4,7 +4,8 @@
 import type { AccountJson } from '@subwallet/extension-base/background/types';
 
 export function nextDerivationPath (accounts: AccountJson[], parentAddress: string): string {
-  const siblingsCount = accounts.filter((account) => account.parentAddress === parentAddress).length;
+  const account = accounts.find((acc) => acc.address === parentAddress);
+  const siblingsCount = accounts.filter((account) => account.parentAddress === parentAddress).length + (account?.type === 'ethereum' ? 1 : 0);
 
   return `//${siblingsCount}`;
 }

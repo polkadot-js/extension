@@ -100,7 +100,7 @@ const Login = ({ className }: Props) => {
         <div className='help'>
           <span>{t('Need help? Contact ')}</span>
           <span className='contact'>{t('SubWallet Support')}</span>
-        </div>
+        </div>`
       </div>
     </div>
   );

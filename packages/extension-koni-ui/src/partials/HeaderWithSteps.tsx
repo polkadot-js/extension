@@ -8,6 +8,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import Link from '@subwallet/extension-koni-ui/components/Link';
 import useTranslation from '@subwallet/extension-koni-ui/hooks/useTranslation';
 import Header from '@subwallet/extension-koni-ui/partials/Header';
+import CN from 'classnames';
 import React from 'react';
 import styled from 'styled-components';
 
@@ -17,9 +18,11 @@ interface Props extends ThemeProps {
   text: string;
   onBackClick: () => void;
   isBusy: boolean;
+  showStep?: boolean;
+  maxStep?: number;
 }
 
-function HeaderWithSteps ({ className, isBusy, onBackClick, step, text }: Props): React.ReactElement<Props> {
+function HeaderWithSteps ({ className, isBusy, maxStep = 2, onBackClick, showStep = true, step, text }: Props): React.ReactElement<Props> {
   const { t } = useTranslation();
 
   return (
@@ -30,7 +33,7 @@ function HeaderWithSteps ({ className, isBusy, onBackClick, step, text }: Props)
     >
       <div className='header-with-steps'>
         <div className='header-with-steps-left-content'>
-          {step === 2 && (
+          {step > 1 && (
             <FontAwesomeIcon
               className={`back-button-icon ${isBusy ? 'disabled-button' : ''}`}
               // @ts-ignore
@@ -41,9 +44,9 @@ function HeaderWithSteps ({ className, isBusy, onBackClick, step, text }: Props)
         </div>
         <div className='header-with-steps-title'>{text}</div>
         <div className='steps'>
-          <div>
+          <div className={CN({ 'opacity-0': !showStep })}>
             <span className='current'>{step}</span>
-            <span className='total'>/2</span>
+            <span className='total'>/{maxStep}</span>
           </div>
           <Link
             className={`header-with-steps-cancel-btn ${isBusy ? 'disabled-button' : ''}`}
@@ -64,6 +67,10 @@ export default React.memo(styled(HeaderWithSteps)(({ theme }: Props) => `
     display: flex;
     align-items: center;
     padding: 7px 0;
+  }
+
+  .opacity-0 {
+    opacity: 0;
   }
 
   .disabled-button {

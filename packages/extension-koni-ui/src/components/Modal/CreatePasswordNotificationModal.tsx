@@ -40,7 +40,7 @@ const CreatePasswordNotificationModal = ({ className, closeModal }: Props) => {
         <div
           className='notification-text'
         >
-          {t<string>('You must create wallet password before continue')}
+          {t<string>('A master password is required to continue using the wallet. Please create a master password.')}
         </div>
         <div className='separator' />
       </div>
@@ -49,7 +49,7 @@ const CreatePasswordNotificationModal = ({ className, closeModal }: Props) => {
           className='save-button'
           onClick={closeModal}
         >
-          {t('Create')}
+          {t('Create master password')}
         </Button>
       </div>
     </Modal>
@@ -58,7 +58,7 @@ const CreatePasswordNotificationModal = ({ className, closeModal }: Props) => {
 
 export default React.memo(styled(CreatePasswordNotificationModal)(({ theme }: Props) => `
   .master-password-modal {
-    width: 400px;
+    width: 390px;
     background-color: ${theme.popupBackground};
 
     .modal-header {
@@ -90,10 +90,18 @@ export default React.memo(styled(CreatePasswordNotificationModal)(({ theme }: Pr
     }
 
     .modal-body {
-      padding-top: 8px;
+      padding-top: 16px;
+
+      .notification-text {
+        font-style: normal;
+        font-weight: 400;
+        font-size: 14px;
+        line-height: 24px;
+        color: ${theme.textColor2};
+      }
 
       .separator {
-        margin-top: 32px;
+        margin-top: 24px;
         margin-bottom: 16px;
       }
 
@@ -122,7 +130,7 @@ export default React.memo(styled(CreatePasswordNotificationModal)(({ theme }: Pr
       justify-content: center;
 
       .save-button {
-        width: 200px;
+        width: 260px;
       }
     }
   }

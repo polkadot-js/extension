@@ -77,13 +77,14 @@ const CreateMasterPassword = ({ className, onComplete }: Props) => {
         />
       </div>
       <div className={'body-container'}>
+        <div className='description'>
+          {t('Your master password is the password that allows access to multiple accounts. Once a master password is confirmed, you will not need to manually type your password with every transaction.')}
+        </div>
         <ValidatedInput
           className={className}
           component={InputWithLabel}
           data-input-password
           label={t('Master Password')}
-          labelQuestionIcon={true}
-          labelTooltip={t('Your master password is the password that allows access to multiple accounts. Once a master password is confirmed, you will not need to manually type your password with every transaction.')}
           onValidatedChange={setPass1}
           type='password'
           validator={isFirstPasswordValid}
@@ -110,7 +111,6 @@ const CreateMasterPassword = ({ className, onComplete }: Props) => {
             )
           )
         }
-        <div className='separator' />
       </div>
       <div className='footer-container'>
         <Button
@@ -119,26 +119,27 @@ const CreateMasterPassword = ({ className, onComplete }: Props) => {
           isDisabled={!password}
           onClick={handleOnSubmit}
         >
-          {t('Save')}
+          {t('Create master password')}
         </Button>
+        <div className='help'>
+          <span>{t('Need help? Contact ')}</span>
+          <span className='contact'>{t('SubWallet Support')}</span>
+        </div>
       </div>
     </div>
   );
 };
 
 export default React.memo(styled(CreateMasterPassword)(({ theme }: Props) => `
-  background-color: ${theme.popupBackground};
-
   .header-container {
     height: 100px;
-    padding: 12px;
+    padding: 12px 28px;
     background-image: url(${bg});
     background-size: cover;
     display: flex;
     flex-direction: row;
     align-items: center;
     justify-content: space-between;
-    border-radius: 8px 8px 0 0;
     background-color: ${theme.background};
 
 
@@ -148,7 +149,7 @@ export default React.memo(styled(CreateMasterPassword)(({ theme }: Props) => `
       font-size: 20px;
       line-height: 32px;
       color: ${theme.textColor};
-      margin-left: 4px;
+      margin-left: 12px;
     }
 
     .header-icon {
@@ -158,18 +159,15 @@ export default React.memo(styled(CreateMasterPassword)(({ theme }: Props) => `
   }
 
   .body-container {
-    padding-top: 8px;
+    padding: 24px 40px 0;
 
-    .separator {
-      margin-top: 32px;
-      margin-bottom: 16px;
-    }
-
-    .separator:before {
-      content: "";
-      height: 1px;
-      display: block;
-      background: ${theme.boxBorderColor};
+    .description {
+      font-style: normal;
+      font-weight: 400;
+      font-size: 14px;
+      line-height: 24px;
+      color: ${theme.textColor2};
+      margin-bottom: 8px;
     }
 
     .item-error {
@@ -178,14 +176,29 @@ export default React.memo(styled(CreateMasterPassword)(({ theme }: Props) => `
   }
 
   .footer-container {
-    padding-bottom: 5px;
+    padding: 24px 40px 16px;
     display: flex;
-    flex-direction: row;
+    flex-direction: column;
     align-items: center;
     justify-content: center;
 
     .save-button {
-      width: 200px;
+      // width: 200px;
+    }
+
+    .help {
+      margin-top: 36px;
+      font-style: normal;
+      font-weight: 400;
+      font-size: 14px;
+      line-height: 24px;
+      text-align: center;
+      color: ${theme.textColor};
+
+      .contact {
+        color: ${theme.primaryColor};
+        cursor: pointer;
+      }
     }
   }
 

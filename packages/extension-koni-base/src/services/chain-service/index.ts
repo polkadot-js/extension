@@ -2,11 +2,11 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { ChainInfoMap } from '@subwallet/extension-koni-base/services/chain-list';
-import { _ChainInfo, _DEFAULT_NETWORKS } from '@subwallet/extension-koni-base/services/chain-list/types';
+import { _ChainInfo, _DEFAULT_NETWORKS, _EvmInfo, _SubstrateInfo } from '@subwallet/extension-koni-base/services/chain-list/types';
 import { EvmChainHandler } from '@subwallet/extension-koni-base/services/chain-service/handler/EvmChainHandler';
 import { SubstrateChainHandler } from '@subwallet/extension-koni-base/services/chain-service/handler/SubstrateChainHandler';
 import { _CHAIN_VALIDATION_ERROR } from '@subwallet/extension-koni-base/services/chain-service/handler/types';
-import { _ChainState, _DataMap, _EvmApi, _SubstrateApi, ConnectionStatus } from '@subwallet/extension-koni-base/services/chain-service/types';
+import { _ChainState, _ConnectionStatus, _CUSTOM_NETWORK_PREFIX, _DataMap, _EvmApi, _NetworkUpsertParams, _SubstrateApi } from '@subwallet/extension-koni-base/services/chain-service/types';
 import { Subject } from 'rxjs';
 import Web3 from 'web3';
 
@@ -18,6 +18,8 @@ export class ChainService {
     chainInfoMap: {},
     chainStateMap: {}
   };
+
+  private lockChainInfoMap = false; // prevent unwanted changes (edit, enable, disable) to chainInfoMap
 
   private substrateChainHandler: SubstrateChainHandler;
   private evmChainHandler: EvmChainHandler;
@@ -33,7 +35,7 @@ export class ChainService {
       this.dataMap.chainStateMap[chainInfo.slug] = {
         currentProvider: Object.keys(chainInfo.providers)[0],
         slug: chainInfo.slug,
-        connectionStatus: ConnectionStatus.DISCONNECTED,
+        connectionStatus: _ConnectionStatus.DISCONNECTED,
         active: false
       };
     });
@@ -87,10 +89,117 @@ export class ChainService {
     return activeChains;
   }
 
-  public upsertChainInfo (data: Record<string, any>) {
-    console.log('got data', data);
+  public updateChainState (slug: string, active: boolean | null, currentProvider: string | null) {
+    const chainStateMap = this.getChainStateMap();
 
-    return false;
+    if (active) {
+      chainStateMap[slug].active = active;
+    }
+
+    if (currentProvider) {
+      chainStateMap[slug].currentProvider = currentProvider;
+    }
+
+    this.chainStateMapSubject.next(this.getChainStateMap());
+  }
+
+  public upsertChainInfo (data: Record<string, any>) {
+    const params = data as _NetworkUpsertParams;
+
+    if (this.lockChainInfoMap) {
+      return false;
+    }
+
+    const chainInfoMap = this.getChainInfoMap();
+    const slug = params.chainEditInfo.slug;
+
+    this.lockChainInfoMap = true;
+
+    if (slug !== '' && slug in chainInfoMap) { // update existing chainInfo
+      const targetChainInfo = chainInfoMap[slug];
+
+      targetChainInfo.providers = params.chainEditInfo.providers;
+      targetChainInfo.name = params.chainEditInfo.name;
+
+      if (targetChainInfo.substrateInfo) {
+        targetChainInfo.substrateInfo.symbol = params.chainEditInfo.symbol;
+      } else if (targetChainInfo.evmInfo) {
+        targetChainInfo.evmInfo.symbol = params.chainEditInfo.symbol;
+      }
+
+      this.updateChainState(params.chainEditInfo.slug, null, params.chainEditInfo.currentProvider);
+    } else { // insert custom network
+      const newSlug = this.generateSlugWithChainSpec(params.chainEditInfo.chainType, params.chainEditInfo.name, params.chainSpec.paraId, params.chainSpec.evmChainId);
+
+      let substrateInfo: _SubstrateInfo | null = null;
+      let evmInfo: _EvmInfo | null = null;
+
+      if (params.chainSpec.genesisHash !== '') {
+        substrateInfo = {
+          addressPrefix: params.chainSpec.addressPrefix,
+          blockExplorer: params.chainEditInfo.blockExplorer || null,
+          category: [],
+          crowdloanUrl: params.chainEditInfo.crowdloanUrl || null,
+          decimals: params.chainSpec.decimals,
+          existentialDeposit: params.chainSpec.existentialDeposit,
+          paraId: params.chainSpec.paraId,
+          symbol: params.chainEditInfo.symbol,
+          genesisHash: params.chainSpec.genesisHash
+        };
+      } else if (params.chainSpec.evmChainId !== null) {
+        evmInfo = {
+          blockExplorer: params.chainEditInfo.blockExplorer || null,
+          decimals: params.chainSpec.decimals,
+          evmChainId: params.chainSpec.evmChainId,
+          existentialDeposit: params.chainSpec.existentialDeposit,
+          symbol: params.chainEditInfo.symbol
+        };
+      }
+
+      // insert new chainInfo
+      chainInfoMap[newSlug] = {
+        slug: newSlug,
+        name: params.chainEditInfo.name,
+        providers: params.chainEditInfo.providers,
+        substrateInfo,
+        evmInfo,
+        logo: ''
+      };
+
+      // insert new chainState
+      const chainStateMap = this.getChainStateMap();
+
+      chainStateMap[newSlug] = {
+        active: true,
+        connectionStatus: _ConnectionStatus.CONNECTED,
+        currentProvider: params.chainEditInfo.currentProvider,
+        slug: newSlug
+      };
+
+      this.chainStateMapSubject.next(this.getChainStateMap());
+    }
+
+    this.chainInfoMapSubject.next(this.getChainInfoMap());
+
+    this.lockChainInfoMap = false;
+
+    return true;
+  }
+
+  private generateSlugWithChainSpec (chainType: string, name: string, paraId: number | null, evmChainId: number | null) {
+    const parsedName = name.replaceAll(' ', '').toLowerCase();
+
+    if (evmChainId !== null) {
+      return `${_CUSTOM_NETWORK_PREFIX}${chainType}-${parsedName}-${evmChainId}`;
+    } else {
+      let slug = `${_CUSTOM_NETWORK_PREFIX}${chainType}-${parsedName}`;
+
+      if (paraId !== null) {
+        slug = slug.concat(`-${paraId}`);
+      }
+
+      return slug;
+    }
   }
 
   public async validateCustomChain (provider: string, existingChainSlug?: string) {

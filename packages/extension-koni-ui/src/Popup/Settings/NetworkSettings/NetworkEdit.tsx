@@ -3,7 +3,7 @@
 
 import { ChainEditInfo, ChainEditStandard, ChainSpecInfo } from '@subwallet/extension-base/background/KoniTypes';
 import { _CHAIN_VALIDATION_ERROR } from '@subwallet/extension-koni-base/services/chain-service/handler/types';
-import { CUSTOM_NETWORK_PREFIX } from '@subwallet/extension-koni-base/services/chain-service/types';
+import { _CUSTOM_NETWORK_PREFIX } from '@subwallet/extension-koni-base/services/chain-service/types';
 import { _isCustomNetwork } from '@subwallet/extension-koni-base/services/chain-service/utils';
 import { isUrl, isValidProvider as _isValidProvider } from '@subwallet/extension-koni-base/utils';
 import { ActionContext, Button, ButtonArea, Dropdown, HorizontalLabelToggle, InputWithLabel } from '@subwallet/extension-koni-ui/components';
@@ -68,13 +68,15 @@ function chainEditInfoReducer (state: ChainEditInfo, action: ChainEditAction) {
       };
 
     case ChainEditActionType.UPDATE_BASIC_INFO: {
-      const { chainType, name, symbol } = action.payload as Record<string, string>;
+      const { chainType, currentProvider, name, providers, symbol } = action.payload as Record<string, any>;
 
       return {
         ...state,
-        name,
-        symbol,
-        chainType: chainType as ChainEditStandard
+        name: name as string,
+        symbol: symbol as string,
+        providers: providers as Record<string, string>,
+        chainType: chainType as ChainEditStandard,
+        currentProvider: currentProvider as string
       };
     }
 
@@ -341,7 +343,7 @@ function NetworkEdit ({ className }: Props): React.ReactElement {
   const [validationState, dispatchValidationState] = useReducer(validationStateReducer, { ...initValidationState, isValidSymbol: editInfo.symbol !== '' });
   const [chainSpec, dispatchChainSpec] = useReducer(chainSpecReducer, spec || initChainSpec);
 
-  const [provider, setProvider] = useState<string | null>(null);
+  const [provider, setProvider] = useState<string | null>(null); // only for network creation
 
   const onAction = useContext(ActionContext);
   const _goBack = useCallback(() => {
@@ -382,7 +384,7 @@ function NetworkEdit ({ className }: Props): React.ReactElement {
   }, []);
 
   useEffect(() => { // check provider for network creation
-    if (provider) {
+    if (provider !== null && provider.length > 0) {
       if (!_isValidProvider(provider)) {
         show('Provider URL requires http/https or wss prefix');
 
@@ -412,15 +414,25 @@ function NetworkEdit ({ className }: Props): React.ReactElement {
               const chainType = resp.evmChainId !== null ? ChainEditStandard.EVM : ChainEditStandard.SUBSTRATE; // update when's there more
               const isNameValid = resp.name !== '';
               const isSymbolValid = resp.symbol !== '';
+              const providerKey = `${_CUSTOM_NETWORK_PREFIX}0`;
 
               dispatchChainSpec({ type: ChainSpecActionType.UPDATE_SPEC, payload: resp });
-              dispatchChainEditInfo({ type: ChainEditActionType.UPDATE_BASIC_INFO, payload: { name: resp.name, symbol: resp.symbol, chainType } });
+              dispatchChainEditInfo({ type: ChainEditActionType.UPDATE_BASIC_INFO,
+                payload: {
+                  name: resp.name,
+                  symbol: resp.symbol,
+                  chainType,
+                  providers: { [providerKey]: provider },
+                  currentProvider: providerKey
+                } });
               dispatchValidationState({ type: ValidationStateActionType.UPDATE_BASIC_INFO_VALIDATION, payload: { isNameValid, isSymbolValid } });
             }
           }).catch(console.error);
         }
       }
-    } else {
+    }
+
+    if (provider === '') {
       dispatchValidationState({ type: ValidationStateActionType.RESET_STATE, payload: {} });
       dispatchChainEditInfo({ type: ChainEditActionType.RESET_STATE, payload: {} });
       dispatchChainSpec({ type: ChainSpecActionType.RESET_STATE, payload: {} });
@@ -500,12 +512,6 @@ function NetworkEdit ({ className }: Props): React.ReactElement {
   }, [chainEditInfo.providers, editInfo.currentProvider]);
 
   const _onSaveNetwork = useCallback(() => {
-    console.log('on save', validationState, chainEditInfo);
-
-    if ((!validationState.validationError || !validationState.isProviderConnected) && !validationState.isCurrentEndpoint) {
-      return;
-    }
-
     upsertNetworkMap({
       chainEditInfo,
       chainSpec
@@ -522,7 +528,7 @@ function NetworkEdit ({ className }: Props): React.ReactElement {
         show('Error trying to configure network');
       }
     }).catch(console.error);
-  }, [_goBack, chainEditInfo, chainSpec, requestId, show, validationState]);
+  }, [_goBack, chainEditInfo, chainSpec, requestId, show]);
 
   const handleCreateProvider = useCallback(async (newProvider: string): Promise<string> => {
     if (!_isValidProvider(newProvider)) {
@@ -554,7 +560,7 @@ function NetworkEdit ({ className }: Props): React.ReactElement {
       show(t<string>('Successfully added a new custom provider'));
 
       const providerCount = Object.values(chainEditInfo.providers).length;
-      const newProviderKey = CUSTOM_NETWORK_PREFIX + `${providerCount + 1}`;
+      const newProviderKey = _CUSTOM_NETWORK_PREFIX + `${providerCount + 1}`;
 
       dispatchChainEditInfo({
         type: ChainEditActionType.UPDATE_NEW_PROVIDER,

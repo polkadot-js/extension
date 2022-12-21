@@ -16,7 +16,7 @@ export interface _DataMap {
   chainStateMap: Record<string, _ChainState>
 }
 
-export enum ConnectionStatus {
+export enum _ConnectionStatus {
   CONNECTED = 'CONNECTED',
   DISCONNECTED = 'DISCONNECTED',
   UNSTABLE = 'UNSTABLE'
@@ -26,7 +26,7 @@ export interface _ChainState {
   slug: string,
   active: boolean,
   currentProvider: string,
-  connectionStatus: ConnectionStatus
+  connectionStatus: _ConnectionStatus
 }
 
 export interface _SubstrateDefaultFormatBalance {
@@ -84,4 +84,31 @@ export interface _EvmApi extends _ChainBaseApi {
   isReady: Promise<_EvmApi>;
 }
 
-export const CUSTOM_NETWORK_PREFIX = 'custom-';
+export type _NetworkUpsertParams = {
+  chainEditInfo: {
+    chainType: string,
+    currentProvider: string,
+    name: string,
+    providers: Record<string, string>,
+    slug: string,
+    symbol: string,
+    blockExplorer?: string,
+    crowdloanUrl?: string,
+    priceId?: string
+  },
+  chainSpec: {
+    // Substrate
+    genesisHash: string,
+    paraId: number | null
+    addressPrefix: number,
+
+    // EVM
+    evmChainId: number | null,
+
+    // Common
+    existentialDeposit: string,
+    decimals: number
+  }
+}
+
+export const _CUSTOM_NETWORK_PREFIX = 'custom-';

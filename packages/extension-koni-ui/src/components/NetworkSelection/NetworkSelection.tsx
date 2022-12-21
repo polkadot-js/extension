@@ -10,7 +10,7 @@ import NetworkSelectionItem from '@subwallet/extension-koni-ui/components/Networ
 import Tooltip from '@subwallet/extension-koni-ui/components/Tooltip';
 import useToast from '@subwallet/extension-koni-ui/hooks/useToast';
 import useTranslation from '@subwallet/extension-koni-ui/hooks/useTranslation';
-import { disableNetworks, enableNetworks } from '@subwallet/extension-koni-ui/messaging';
+import { disableChains, enableChains } from '@subwallet/extension-koni-ui/messaging';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import React, { useCallback, useEffect, useState } from 'react';
@@ -82,8 +82,8 @@ function NetworkSelection ({ className, handleShow }: Props): React.ReactElement
 
     const promList = [];
 
-    enableList.length > 0 && promList.push(enableNetworks(enableList));
-    disableList.length > 0 && promList.push(disableNetworks(disableList));
+    enableList.length > 0 && promList.push(enableChains(enableList));
+    disableList.length > 0 && promList.push(disableChains(disableList));
 
     Promise.all(promList)
       .then((rs) => {

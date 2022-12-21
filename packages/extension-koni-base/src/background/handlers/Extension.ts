@@ -1719,7 +1719,7 @@ export default class KoniExtension extends Extension {
 
   private upsertNetworkMap (data: Record<string, any>): boolean {
     try {
-      return state.upsertNetworkMap(data);
+      return state.upsertChainInfo(data);
     } catch (e) {
       console.error(e);
 
@@ -1728,43 +1728,19 @@ export default class KoniExtension extends Extension {
   }
 
   private removeNetworkMap (networkKey: string): boolean {
-    const currentNetworkMap = this.getNetworkMap();
-
-    if (!(networkKey in currentNetworkMap)) {
-      return false;
-    }
-
-    if (currentNetworkMap[networkKey].active) {
-      return false;
-    }
-
-    return state.removeNetworkMap(networkKey);
+    return state.removeChain(networkKey);
   }
 
-  private async disableNetworkMap (networkKey: string): Promise<DisableNetworkResponse> {
-    const currentNetworkMap = this.getNetworkMap();
-
-    if (!(networkKey in currentNetworkMap)) {
-      return {
-        success: false
-      };
-    }
-
-    const success = await state.disableNetworkMap(networkKey);
+  private disableChain (networkKey: string): DisableNetworkResponse {
+    const success = state.disableChain(networkKey);
 
     return {
       success
     };
   }
 
-  private enableNetworkMap (networkKey: string): boolean {
-    const networkMap = this.getNetworkMap();
-
-    if (!(networkKey in networkMap)) {
-      return false;
-    }
-
-    return state.enableNetworkMap(networkKey);
+  private enableChain (networkKey: string): boolean {
+    return state.enableChain(networkKey);
   }
 
   private async validateNetwork ({ existedChainSlug, provider }: ValidateNetworkRequest): Promise<ValidateNetworkResponse> {
@@ -1779,8 +1755,8 @@ export default class KoniExtension extends Extension {
     return await state.disableAllNetworks();
   }
 
-  private async resetDefaultNetwork (): Promise<boolean> {
-    return await state.resetDefaultNetwork();
+  private resetDefaultNetwork (): boolean {
+    return state.resetDefaultChains();
   }
 
   private recoverDotSamaApi (networkKey: string): boolean {
@@ -1989,10 +1965,10 @@ export default class KoniExtension extends Extension {
     return txState;
   }
 
-  private enableNetworks (targetKeys: string[]) {
+  private enableChains (targetKeys: string[]) {
     try {
       for (const networkKey of targetKeys) {
-        this.enableNetworkMap(networkKey);
+        this.enableChain(networkKey);
       }
     } catch (e) {
       return false;
@@ -2001,10 +1977,10 @@ export default class KoniExtension extends Extension {
     return true;
   }
 
-  private async disableNetworks (targetKeys: string[]) {
+  private disableChains (targetKeys: string[]) {
     try {
       for (const key of targetKeys) {
-        await this.disableNetworkMap(key);
+        this.disableChain(key);
       }
     } catch (e) {
       return false;
@@ -3849,16 +3825,9 @@ export default class KoniExtension extends Extension {
         // NetworkMap, TokenState
       case 'pri(networkMap.getSubscription)':
         return this.subscribeNetworkMap(id, port);
-      case 'pri(networkMap.upsert)':
-        return this.upsertNetworkMap(request as Record<string, any>);
       case 'pri(networkMap.getNetworkMap)':
         return this.getNetworkMap();
-      case 'pri(networkMap.disableOne)':
-        return await this.disableNetworkMap(request as string);
-      case 'pri(networkMap.removeOne)':
-        return this.removeNetworkMap(request as string);
-      case 'pri(networkMap.enableOne)':
-        return this.enableNetworkMap(request as string);
+
       case 'pri(apiMap.validate)':
         return await this.validateNetwork(request as ValidateNetworkRequest);
       case 'pri(networkMap.disableAll)':
@@ -3881,6 +3850,18 @@ export default class KoniExtension extends Extension {
         return this.subscribeChainInfoMap(id, port);
       case 'pri(chainService.subscribeChainStateMap)':
         return this.subscribeChainStateMap(id, port);
+      case 'pri(networkMap.enableOne)':
+        return this.enableChain(request as string);
+      case 'pri(networkMap.disableOne)':
+        return this.disableChain(request as string);
+      case 'pri(networkMap.removeOne)':
+        return this.removeNetworkMap(request as string);
+      case 'pri(networkMap.upsert)':
+        return this.upsertNetworkMap(request as Record<string, any>);
+      case 'pri(networkMap.enableMany)':
+        return this.enableChains(request as string[]);
+      case 'pri(networkMap.disableMany)':
+        return this.disableChains(request as string[]);
 
       case 'pri(transfer.checkReferenceCount)':
         return await this.transferCheckReferenceCount(request as RequestTransferCheckReferenceCount);
@@ -3896,10 +3877,7 @@ export default class KoniExtension extends Extension {
         return await this.validateCustomToken(request as ValidateCustomTokenRequest);
       case 'pri(networkMap.recoverDotSama)':
         return this.recoverDotSamaApi(request as string);
-      case 'pri(networkMap.enableMany)':
-        return this.enableNetworks(request as string[]);
-      case 'pri(networkMap.disableMany)':
-        return await this.disableNetworks(request as string[]);
+
       case 'pri(accounts.get.meta)':
         return this.getAccountMeta(request as RequestAccountMeta);
 

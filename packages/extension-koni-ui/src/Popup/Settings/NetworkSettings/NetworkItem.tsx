@@ -11,7 +11,7 @@ import { AccountContext, ActionContext, Button, ButtonArea, HorizontalLabelToggl
 import Modal from '@subwallet/extension-koni-ui/components/Modal';
 import useToast from '@subwallet/extension-koni-ui/hooks/useToast';
 import useTranslation from '@subwallet/extension-koni-ui/hooks/useTranslation';
-import { disableNetworkMap, enableNetworkMap, removeNetworkMap } from '@subwallet/extension-koni-ui/messaging';
+import { disableChain, enableChain, removeChain } from '@subwallet/extension-koni-ui/messaging';
 import { store } from '@subwallet/extension-koni-ui/stores';
 import { NetworkConfigParams } from '@subwallet/extension-koni-ui/stores/types';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
@@ -83,11 +83,11 @@ function NetworkItem ({ chainInfo, chainState, className }: Props): React.ReactE
     }
 
     if (!val) {
-      disableNetworkMap(chainInfo.slug)
+      disableChain(chainInfo.slug)
         .then(({ success }) => handleShowStateConfirm(success))
         .catch(console.error);
     } else {
-      enableNetworkMap(chainInfo.slug)
+      enableChain(chainInfo.slug)
         .then((resp) => handleShowStateConfirm(resp))
         .catch(console.error);
     }
@@ -99,7 +99,7 @@ function NetworkItem ({ chainInfo, chainState, className }: Props): React.ReactE
   }, [chainInfo, navigate]);
 
   const handleDeleteNetwork = useCallback(() => {
-    removeNetworkMap(chainInfo.slug)
+    removeChain(chainInfo.slug)
       .then((result) => handleShowDeleteConfirm(result))
       .catch(console.error);
     handleHideModal();

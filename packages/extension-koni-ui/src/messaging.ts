@@ -533,23 +533,23 @@ export async function getNetworkMap (): Promise<Record<string, NetworkJson>> {
   return sendMessage('pri(networkMap.getNetworkMap)');
 }
 
-export async function removeNetworkMap (networkKey: string): Promise<boolean> {
+export async function removeChain (networkKey: string): Promise<boolean> {
   return sendMessage('pri(networkMap.removeOne)', networkKey);
 }
 
-export async function disableNetworkMap (networkKey: string): Promise<DisableNetworkResponse> {
+export async function disableChain (networkKey: string): Promise<DisableNetworkResponse> {
   return sendMessage('pri(networkMap.disableOne)', networkKey);
 }
 
-export async function enableNetworkMap (networkKey: string): Promise<boolean> {
+export async function enableChain (networkKey: string): Promise<boolean> {
   return sendMessage('pri(networkMap.enableOne)', networkKey);
 }
 
-export async function enableNetworks (targetKeys: string[]): Promise<boolean> {
+export async function enableChains (targetKeys: string[]): Promise<boolean> {
   return sendMessage('pri(networkMap.enableMany)', targetKeys);
 }
 
-export async function disableNetworks (targetKeys: string[]): Promise<boolean> {
+export async function disableChains (targetKeys: string[]): Promise<boolean> {
   return sendMessage('pri(networkMap.disableMany)', targetKeys);
 }
 

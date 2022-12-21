@@ -8,7 +8,7 @@ import useFetchChainInfoMap from '@subwallet/extension-koni-ui/hooks/screen/comm
 import useFetchChainStateMap from '@subwallet/extension-koni-ui/hooks/screen/common/useFetchChainStateMap';
 import useToast from '@subwallet/extension-koni-ui/hooks/useToast';
 import useTranslation from '@subwallet/extension-koni-ui/hooks/useTranslation';
-import { disableAllNetwork, resetDefaultNetwork } from '@subwallet/extension-koni-ui/messaging';
+import { resetDefaultNetwork } from '@subwallet/extension-koni-ui/messaging';
 import Header from '@subwallet/extension-koni-ui/partials/Header';
 import NetworkItem from '@subwallet/extension-koni-ui/Popup/Settings/NetworkSettings/NetworkItem';
 import { store } from '@subwallet/extension-koni-ui/stores';
@@ -28,8 +28,6 @@ function Networks ({ className }: Props): React.ReactElement {
   const { chainInfoMap } = useFetchChainInfoMap();
   const chainStateMap = useFetchChainStateMap();
   const [searchString, setSearchString] = useState('');
-
-  console.log('chainStateMap', chainStateMap);
 
   const filterNetwork = useCallback(() => {
     const _filteredNetworkMap: Record<string, _ChainInfo> = {};
@@ -62,23 +60,11 @@ function Networks ({ className }: Props): React.ReactElement {
     store.dispatch({ type: 'networkConfigParams/update', payload: { data: item, mode: 'create' } as NetworkConfigParams });
   }, []);
 
-  const handleDisableAll = useCallback(() => {
-    disableAllNetwork()
-      .then((resp) => {
-        if (resp) {
-          show('All networks are disabled');
-        } else {
-          show('Please wait a moment for the networks to update');
-        }
-      })
-      .catch(console.error);
-  }, [show]);
-
-  // const handleEnableAll = useCallback(() => {
-  //   enableAllNetwork()
+  // const handleDisableAll = useCallback(() => {
+  //   disableAllNetwork()
   //     .then((resp) => {
   //       if (resp) {
-  //         show('All networks are enabled');
+  //         show('All networks are disabled');
   //       } else {
   //         show('Please wait a moment for the networks to update');
   //       }
@@ -120,17 +106,11 @@ function Networks ({ className }: Props): React.ReactElement {
       </Header>
 
       <div className='networks__button-area'>
-        <div
-          className='networks__btn networks__disconnect-btn'
-          onClick={handleDisableAll}
-        >
-          {t<string>('Disconnect all')}
-        </div>
         {/* <div */}
-        {/*  className='networks__btn networks__connect-btn' */}
-        {/*  onClick={handleEnableAll} */}
+        {/*  className='networks__btn networks__disconnect-btn' */}
+        {/*  onClick={handleDisableAll} */}
         {/* > */}
-        {/*  {t<string>('Connect all')} */}
+        {/*  {t<string>('Disconnect all')} */}
         {/* </div> */}
         <div
           className='networks__btn networks__connect-btn'
@@ -218,7 +198,7 @@ export default styled(Networks)(({ theme }: Props) => `
     padding-left: 17px;
   }
 
-  .networks__connect-btn:before {
+  ./networks__connect-btn:before {
     content: '';
     position: absolute;
     width: 4px;

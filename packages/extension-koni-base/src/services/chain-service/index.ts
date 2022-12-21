@@ -54,8 +54,10 @@ export class ChainService {
   }
 
   public initChainMap () {
+    const chainStateMap = this.getChainStateMap();
+
     _DEFAULT_NETWORKS.forEach((slug) => {
-      this.dataMap.chainStateMap[slug].active = true;
+      chainStateMap[slug].active = true;
     });
 
     this.logger.log('Initiated with default networks');
@@ -77,16 +79,77 @@ export class ChainService {
     return this.dataMap.chainStateMap;
   }
 
-  public getActiveChains (): string[] {
-    const activeChains: string[] = [];
+  public removeChain (slug: string) {
+    if (this.lockChainInfoMap) {
+      return false;
+    }
 
-    Object.values(this.dataMap.chainStateMap).forEach((chainState) => {
-      if (chainState.active) {
-        activeChains.push(chainState.slug);
+    this.lockChainInfoMap = true;
+
+    const chainInfoMap = this.getChainInfoMap();
+    const chainStateMap = this.getChainStateMap();
+
+    if (!(slug in chainInfoMap)) {
+      return false;
+    }
+
+    if (chainStateMap[slug].active) {
+      return false;
+    }
+
+    delete chainStateMap[slug];
+    delete chainInfoMap[slug];
+
+    this.chainInfoMapSubject.next(this.getChainInfoMap());
+    this.chainStateMapSubject.next(this.getChainStateMap());
+
+    this.lockChainInfoMap = false;
+
+    return true;
+  }
+
+  public updateChainActiveStatus (slug: string, active: boolean) {
+    const chainStateMap = this.getChainStateMap();
+
+    if (!Object.keys(chainStateMap).includes(slug)) {
+      return false;
+    }
+
+    if (this.lockChainInfoMap) {
+      return false;
+    }
+
+    this.lockChainInfoMap = true;
+
+    chainStateMap[slug].active = active;
+
+    this.chainStateMapSubject.next(this.getChainStateMap());
+
+    this.lockChainInfoMap = false;
+
+    return true;
+  }
+
+  public resetChainInfoMap () {
+    if (this.lockChainInfoMap) {
+      return false;
+    }
+
+    this.lockChainInfoMap = true;
+
+    const chainStateMap = this.getChainStateMap();
+
+    for (const [slug, chainState] of Object.entries(chainStateMap)) {
+      if (!_DEFAULT_NETWORKS.includes(slug)) {
+        chainState.active = false;
       }
-    });
+    }
 
-    return activeChains;
+    this.chainStateMapSubject.next(this.getChainStateMap());
+
+    this.lockChainInfoMap = false;
+
+    return true;
   }
 
   public updateChainState (slug: string, active: boolean | null, currentProvider: string | null) {
@@ -171,7 +234,7 @@ export class ChainService {
 
       chainStateMap[newSlug] = {
         active: true,
-        connectionStatus: _ConnectionStatus.CONNECTED,
+        connectionStatus: _ConnectionStatus.DISCONNECTED,
         currentProvider: params.chainEditInfo.currentProvider,
         slug: newSlug
       };

@@ -892,7 +892,7 @@ export default class KoniState extends State {
 
     if (authUrls[shortenUrl]) {
       if (this.networkMap[networkKey] && !this.networkMap[networkKey].active) {
-        this.enableNetworkMap(networkKey);
+        this.enableChain(networkKey);
       }
 
       authUrls[shortenUrl].currentEvmNetworkKey = networkKey;
@@ -915,7 +915,7 @@ export default class KoniState extends State {
           const useAddress = changeAddress || address;
 
           if (this.networkMap[networkKey] && !this.networkMap[networkKey].active) {
-            this.enableNetworkMap(networkKey);
+            this.enableChain(networkKey);
           }
 
           if (useAddress !== ALL_ACCOUNT_KEY) {
@@ -1430,120 +1430,16 @@ export default class KoniState extends State {
     return contractSupportedNetworkMap;
   }
 
-  public upsertNetworkMap (data: Record<string, any>): boolean {
+  public upsertChainInfo (data: Record<string, any>): boolean {
     return this.chainService.upsertChainInfo(data);
-    // if (this.lockNetworkMap) {
-    //   return false;
-    // }
-    //
-    // this.lockNetworkMap = true;
-    //
-    // if (data.key in this.networkMap) { // update provider for existed network
-    //   if (data.customProviders) {
-    //     this.networkMap[data.key].customProviders = data.customProviders;
-    //   }
-    //
-    //   if (data.currentProvider !== this.networkMap[data.key].currentProvider && data.currentProvider) {
-    //     this.networkMap[data.key].currentProvider = data.currentProvider;
-    //     this.networkMap[data.key].currentProviderMode = data.currentProvider.startsWith('ws') ? 'ws' : 'http';
-    //   }
-    //
-    //   this.networkMap[data.key].chain = data.chain;
-    //
-    //   if (data.nativeToken) {
-    //     this.networkMap[data.key].nativeToken = data.nativeToken;
-    //   }
-    //
-    //   if (data.decimals) {
-    //     this.networkMap[data.key].decimals = data.decimals;
-    //   }
-    //
-    //   this.networkMap[data.key].crowdloanUrl = data.crowdloanUrl;
-    //
-    //   this.networkMap[data.key].coinGeckoKey = data.coinGeckoKey;
-    //
-    //   this.networkMap[data.key].paraId = data.paraId;
-    //
-    //   this.networkMap[data.key].blockExplorer = data.blockExplorer;
-    // } else { // insert
-    //   this.networkMap[data.key] = data;
-    //   this.networkMap[data.key].getStakingOnChain = true; // try to fetch staking on chain for custom network by default
-    // }
-    //
-    // if (this.networkMap[data.key].active) { // update API map if network is active
-    //   if (data.key in this.apiMap.dotSama) {
-    //     this.apiMap.dotSama[data.key].api?.disconnect && await this.apiMap.dotSama[data.key].api.disconnect();
-    //     delete this.apiMap.dotSama[data.key];
-    //   }
-    //
-    //   if (data.isEthereum && data.key in this.apiMap.web3) {
-    //     delete this.apiMap.web3[data.key];
-    //   }
-    //
-    //   const currentProvider = getCurrentProvider(data);
-    //
-    //   if (currentProvider) {
-    //     this.apiMap.dotSama[data.key] = initApi(data.key, currentProvider, data.isEthereum);
-    //
-    //     if (data.isEthereum && data.isEthereum) {
-    //       this.apiMap.web3[data.key] = initWeb3Api(currentProvider);
-    //     }
-    //   }
-    // }
-    //
-    // this.networkMapSubject.next(this.networkMap);
-    // this.networkMapStore.set('NetworkMap', this.networkMap);
-    // this.updateServiceInfo();
-    // this.lockNetworkMap = false;
-    //
-    // return true;
   }
 
-  public removeNetworkMap (networkKey: string): boolean {
-    if (this.lockNetworkMap) {
-      return false;
-    }
-
-    this.lockNetworkMap = true;
-    delete this.networkMap[networkKey];
-
-    this.networkMapSubject.next(this.networkMap);
-    this.networkMapStore.set('NetworkMap', this.networkMap);
-    this.updateServiceInfo();
-    this.lockNetworkMap = false;
-
-    return true;
+  public removeChain (networkKey: string): boolean {
+    return this.chainService.removeChain(networkKey);
   }
 
-  public async disableNetworkMap (networkKey: string): Promise<boolean> {
-    if (this.lockNetworkMap) {
-      return false;
-    }
-
-    this.lockNetworkMap = true;
-    this.apiMap.dotSama[networkKey].api.disconnect && await this.apiMap.dotSama[networkKey].api.disconnect();
-    delete this.apiMap.dotSama[networkKey];
-
-    if (this.networkMap[networkKey].isEthereum && this.networkMap[networkKey].isEthereum) {
-      delete this.apiMap.web3[networkKey];
-    }
-
-    this.networkMap[networkKey].active = false;
-    this.networkMap[networkKey].apiStatus = NETWORK_STATUS.DISCONNECTED;
-    this.networkMapSubject.next(this.networkMap);
-    this.networkMapStore.set('NetworkMap', this.networkMap);
-    this.updateServiceInfo();
-    this.lockNetworkMap = false;
-
-    this.getAuthorize((data) => {
-      if (this.networkMap[networkKey].isEthereum) {
-        this.evmChainSubject.next(data);
-      }
-
-      this.authorizeUrlSubject.next(data);
-    });
-
-    return true;
+  public disableChain (networkKey: string): boolean {
+    return this.chainService.updateChainActiveStatus(networkKey, false);
   }
 
   private getDefaultNetworkKey = (): string[] => {
@@ -1616,39 +1512,8 @@ export default class KoniState extends State {
     return true;
   }
 
-  public enableNetworkMap (networkKey: string) {
-    if (this.lockNetworkMap) {
-      return false;
-    }
-
-    const networkData = this.networkMap[networkKey];
-
-    this.lockNetworkMap = true;
-    const currentProvider = getCurrentProvider(networkData);
-
-    if (currentProvider) {
-      this.apiMap.dotSama[networkKey] = initApi(networkKey, currentProvider, networkData.isEthereum);
-
-      if (networkData.isEthereum && networkData.isEthereum) {
-        this.apiMap.web3[networkKey] = initWeb3Api(currentProvider);
-      }
-    }
-
-    networkData.active = true;
-    this.networkMapSubject.next(this.networkMap);
-    this.networkMapStore.set('NetworkMap', this.networkMap);
-    this.updateServiceInfo();
-    this.lockNetworkMap = false;
-
-    this.getAuthorize((data) => {
-      if (this.networkMap[networkKey].isEthereum) {
-        this.evmChainSubject.next(data);
-      }
-
-      this.authorizeUrlSubject.next(data);
-    });
-
-    return true;
+  public enableChain (networkKey: string) {
+    return this.chainService.updateChainActiveStatus(networkKey, true);
   }
 
   public enableAllNetworks () {
@@ -1692,48 +1557,8 @@ export default class KoniState extends State {
     return true;
   }
 
-  public async resetDefaultNetwork () {
-    if (this.lockNetworkMap) {
-      return false;
-    }
-
-    this.lockNetworkMap = true;
-    const targetNetworkKeys: string[] = [];
-    const networkKeys = this.getDefaultNetworkKey();
-
-    for (const [key, network] of Object.entries(this.networkMap)) {
-      if (!network.active) {
-        const currentProvider = getCurrentProvider(this.networkMap[key]);
-
-        if (networkKeys.includes(key) && currentProvider) {
-          this.apiMap.dotSama[key] = initApi(key, currentProvider, this.networkMap[key].isEthereum);
-          this.networkMap[key].active = true;
-        }
-      } else {
-        if (!networkKeys.includes(key)) {
-          targetNetworkKeys.push(key);
-          this.networkMap[key].active = false;
-          this.networkMap[key].apiStatus = NETWORK_STATUS.DISCONNECTED;
-        }
-      }
-    }
-
-    this.networkMapSubject.next(this.networkMap);
-    this.networkMapStore.set('NetworkMap', this.networkMap);
-
-    for (const key of targetNetworkKeys) {
-      this.apiMap.dotSama[key].api.disconnect && await this.apiMap.dotSama[key].api.disconnect();
-      delete this.apiMap.dotSama[key];
-
-      if (this.networkMap[key].isEthereum && this.networkMap[key].isEthereum) {
-        delete this.apiMap.web3[key];
-      }
-    }
-
-    this.updateServiceInfo();
-    this.lockNetworkMap = false;
-
-    return true;
+  public resetDefaultChains () {
+    return this.chainService.resetChainInfoMap();
   }
 
   public updateNetworkStatus (networkKey: string, status: NETWORK_STATUS) {
@@ -2540,7 +2365,7 @@ export default class KoniState extends State {
 
     const setUpSingleMode = ({ networkKeys, theme }: SingleModeJson) => {
       networkKeys.forEach((key) => {
-        this.enableNetworkMap(key);
+        this.enableChain(key);
       });
 
       const { genesisHash } = this.getNetworkMapByKey(networkKeys[0]);

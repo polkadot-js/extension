@@ -7,6 +7,7 @@ import { store } from '@subwallet/extension-koni-ui/stores';
 import { useEffect } from 'react';
 
 function updateChainStateMap (data: Record<string, _ChainState>): void {
+  console.log('chainState', data);
   store.dispatch({ type: 'chainStateMap/update', payload: data });
 }
 

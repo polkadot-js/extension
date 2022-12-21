@@ -89,6 +89,8 @@ const Login = ({ className }: Props) => {
             )
           )
         }
+      </div>
+      <div className='footer'>
         <Button
           className='button-unlock'
           isBusy={loading}
@@ -100,7 +102,7 @@ const Login = ({ className }: Props) => {
         <div className='help'>
           <span>{t('Need help? Contact ')}</span>
           <span className='contact'>{t('SubWallet Support')}</span>
-        </div>`
+        </div>
       </div>
     </div>
   );
@@ -116,10 +118,10 @@ export default React.memo(styled(Login)(({ theme }: Props) => `
   }
 
   .body {
-    flex: 1;
     display: flex;
     flex-direction: column;
     align-items: center;
+    height: 380px;
 
     .logo {
       margin-top: 40px;
@@ -160,6 +162,17 @@ export default React.memo(styled(Login)(({ theme }: Props) => `
       height: 56px;
     }
 
+    .item-error {
+      margin: 10px 0;
+      width: 360px;
+    }
+  }
+
+  .footer {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+
     .button-unlock {
       width: 360px;
       margin-top: 32px;
@@ -178,11 +191,6 @@ export default React.memo(styled(Login)(({ theme }: Props) => `
         color: ${theme.primaryColor};
         cursor: pointer;
       }
-    }
-
-    .item-error {
-      margin: 10px 0;
-      width: 360px;
     }
   }
 

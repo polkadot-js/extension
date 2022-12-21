@@ -3,7 +3,7 @@
 
 import { ChainRegistry, CurrentNetworkInfo, NftCollection as _NftCollection, NftItem as _NftItem, TransactionHistoryItemType } from '@subwallet/extension-base/background/KoniTypes';
 import { AccountJson } from '@subwallet/extension-base/background/types';
-import { AccountContext, Modal, WaitAtHomeContext } from '@subwallet/extension-koni-ui/components';
+import { AccountContext, ConfirmationsQueueContext, Modal, SigningReqContext, WaitAtHomeContext } from '@subwallet/extension-koni-ui/components';
 import useAccountBalance from '@subwallet/extension-koni-ui/hooks/screen/home/useAccountBalance';
 import useCrowdloanNetworks from '@subwallet/extension-koni-ui/hooks/screen/home/useCrowdloanNetworks';
 import useFetchNft from '@subwallet/extension-koni-ui/hooks/screen/home/useFetchNft';
@@ -197,6 +197,9 @@ function Home ({ chainRegistryMap, className = '', currentAccount, historyMap, n
   const { address } = currentAccount;
 
   const { t } = useTranslation();
+  const requests = useContext(SigningReqContext);
+  const confirmations = useContext(ConfirmationsQueueContext);
+  const { setWait } = useContext(WaitAtHomeContext);
 
   const [isShowBalanceDetail, setShowBalanceDetail] = useState<boolean>(false);
   const backupTabId = window.localStorage.getItem('homeActiveTab') || '1';
@@ -381,9 +384,20 @@ function Home ({ chainRegistryMap, className = '', currentAccount, historyMap, n
   }, []);
 
   const onCloseCreatePasswordModal = useCallback(() => {
-    setCreateMasterPasswordVisible(false);
-    setConfirmMigrateVisibleModal(true);
-  }, []);
+    let confirmationLength = 0;
+
+    for (const req of Object.values(confirmations)) {
+      confirmationLength += Object.values(req).length;
+    }
+
+    if (requests.length || confirmationLength) {
+      setCreateMasterPasswordVisible(false);
+      setWait(false);
+    } else {
+      setCreateMasterPasswordVisible(false);
+      setConfirmMigrateVisibleModal(true);
+    }
+  }, [setWait, requests, confirmations]);
 
   const onCloseConfirmMigrateModal = useCallback(() => {
     setConfirmMigrateVisibleModal(false);
@@ -551,7 +565,11 @@ function Home ({ chainRegistryMap, className = '', currentAccount, historyMap, n
         />
       )}
       {
-        showNetworkSelection && !noticeCreateMasterPassword && <NetworkSelection
+        showNetworkSelection &&
+        !noticeCreateMasterPassword &&
+        !createMasterPasswordVisible &&
+        !confirmMigrateVisibleModal &&
+        <NetworkSelection
           handleShow={setShowNetworkSelection}
         />
       }

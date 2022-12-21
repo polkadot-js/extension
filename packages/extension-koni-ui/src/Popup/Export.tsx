@@ -9,15 +9,14 @@ import cloneLogo from '@subwallet/extension-koni-ui/assets/clone.svg';
 import download from '@subwallet/extension-koni-ui/assets/icon/download.svg';
 import Checkbox from '@subwallet/extension-koni-ui/components/Checkbox';
 import TextField from '@subwallet/extension-koni-ui/components/Field/TextField';
+import useGetAccountByAddress from '@subwallet/extension-koni-ui/hooks/useGetAccountByAddress';
 import useToast from '@subwallet/extension-koni-ui/hooks/useToast';
 import Header from '@subwallet/extension-koni-ui/partials/Header';
-import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { isAccountAll, toShort } from '@subwallet/extension-koni-ui/util';
 import { KeyringPair$Json } from '@subwallet/keyring/types';
 import { saveAs } from 'file-saver';
 import React, { useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import QRCode from 'react-qr-code';
-import { useSelector } from 'react-redux';
 import { RouteComponentProps, withRouter } from 'react-router';
 import styled from 'styled-components';
 
@@ -90,7 +89,7 @@ function ExportAccount ({ className, match: { params: { address } } }: Props): R
   const { show } = useToast();
   const [error, setError] = useState('');
   const _isAllAccount = isAccountAll(address);
-  const currentAccount = useSelector((state: RootState) => state.currentAccount);
+  const account = useGetAccountByAddress(address);
 
   const accountName = useMemo((): string | undefined => {
     return accounts.accounts.find((acc) => acc.address === address)?.name;
@@ -200,13 +199,13 @@ function ExportAccount ({ className, match: { params: { address } } }: Props): R
           setPublicKey(res.publicKey);
         }
 
-        if (exportState.mnemonic.isSelected) {
+        if (exportState.mnemonic?.isSelected && account?.isMasterAccount) {
           const res = await keyringExportMnemonic({ address, password: pass });
 
           setMnemonic(res.result);
         }
 
-        if (exportState.mnemonic.isSelected) {
+        if (exportState.jsonFile.isSelected) {
           const res = await exportAccount(address, pass);
 
           setJsonData(res.exportedJson);
@@ -220,7 +219,7 @@ function ExportAccount ({ className, match: { params: { address } } }: Props): R
         setIsBusy(false);
       }
     }
-  }, [pass, exportState, address]);
+  }, [pass, exportState, address, account]);
 
   const onChangeSelected = useCallback((key: string): (value: boolean) => void => {
     return (value: boolean) => {
@@ -240,6 +239,28 @@ function ExportAccount ({ className, match: { params: { address } } }: Props): R
       onAction('/');
     }
   }, [isValidAccount, onAction]);
+
+  useEffect(() => {
+    const exportState: Record<string, ExportItem> = {};
+
+    for (const [key, value] of Object.entries(defaultState)) {
+      exportState[key] = { ...value };
+    }
+
+    if (!account?.isMasterAccount) {
+      delete exportState.mnemonic;
+    }
+
+    setExportState(exportState);
+    setPass('');
+    setError('');
+    setIsExported(false);
+    setMnemonic('');
+    setJsonData(null);
+    setPublicKey('');
+    setPrivateKey('');
+    setIsBusy(false);
+  }, [account?.isMasterAccount, account?.address]);
 
   if (_isAllAccount) {
     return (
@@ -280,7 +301,7 @@ function ExportAccount ({ className, match: { params: { address } } }: Props): R
       <div className='body-container'>
         <AccountInfoEl
           address={address}
-          type={currentAccount.account?.type}
+          type={account?.type}
         />
         <Warning className='export-warning'>
           {t<string>('You are exporting your account. Keep it safe and don\'t share it with anyone.')}
@@ -389,7 +410,7 @@ function ExportAccount ({ className, match: { params: { address } } }: Props): R
                 )
               }
               {
-                (exportState.mnemonic.isSelected && mnemonic) && (
+                (exportState.mnemonic?.isSelected && mnemonic) && (
                   <div className='result-container'>
                     <div
                       className='result-info'

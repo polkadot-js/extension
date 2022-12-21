@@ -287,11 +287,13 @@ export default function Popup (): React.ReactElement {
       ? wrapWithErrorBoundary(<Authorize />, 'authorize')
       : metaRequests && metaRequests.length
         ? wrapWithErrorBoundary(<Metadata />, 'metadata')
-        : signRequests && signRequests.length
-          ? wrapWithErrorBoundary(<Signing />, 'signing')
-          : checkConfirmation()
-            ? wrapWithErrorBoundary(<Confirmation />, 'confirmation')
-            : wrapWithErrorBoundary(<Home />, 'Home')
+        : (!keyringState.hasMasterPassword || waitAtHome)
+          ? wrapWithErrorBoundary(<Home />, 'Home')
+          : (signRequests && signRequests.length)
+            ? wrapWithErrorBoundary(<Signing />, 'signing')
+            : checkConfirmation()
+              ? wrapWithErrorBoundary(<Confirmation />, 'confirmation')
+              : wrapWithErrorBoundary(<Home />, 'Home')
     : wrapWithErrorBoundary(<Welcome />, 'welcome');
 
   return (

@@ -26,6 +26,8 @@ const CreateMasterPassword = ({ className, onComplete }: Props) => {
   const [loading, setLoading] = useState<boolean>(false);
   const [pass1, setPass1] = useState<string | null>(null);
   const [pass2, setPass2] = useState<string | null>(null);
+  const [resetPass2, setResetPass2] = useState(false);
+  const [firstChange, setFirstChange] = useState(true);
 
   const [errors, setErrors] = useState<string[]>([]);
 
@@ -58,9 +60,23 @@ const CreateMasterPassword = ({ className, onComplete }: Props) => {
     }
   }, [password, onComplete]);
 
+  const onChangePass2 = useCallback((value: string | null) => {
+    setFirstChange(false);
+    setPass2(value);
+  }, []);
+
   useEffect((): void => {
     setPassword(pass1 && pass2 ? pass1 : null);
   }, [pass1, pass2]);
+
+  useEffect((): void => {
+    if (!pass1 && !firstChange) {
+      setResetPass2(true);
+    } else {
+      setResetPass2(false);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [pass1]);
 
   return (
     <div
@@ -78,7 +94,7 @@ const CreateMasterPassword = ({ className, onComplete }: Props) => {
       </div>
       <div className={'body-container'}>
         <div className='description'>
-          {t('Your master password is the password that allows access to multiple accounts. Once a master password is confirmed, you will not need to manually type your password with every transaction.')}
+          {t('Once a master password is confirmed, you will not need to manually type your password with every transaction.')}
         </div>
         <ValidatedInput
           className={className}
@@ -93,8 +109,10 @@ const CreateMasterPassword = ({ className, onComplete }: Props) => {
           className={className}
           component={InputWithLabel}
           data-input-repeat-password
+          defaultValue={pass2}
           label={t('Confirm master Password')}
-          onValidatedChange={setPass2}
+          onValidatedChange={onChangePass2}
+          resetValue={resetPass2}
           type='password'
           validator={isSecondPasswordValid(pass1 || '')}
         />
@@ -160,6 +178,7 @@ export default React.memo(styled(CreateMasterPassword)(({ theme }: Props) => `
 
   .body-container {
     padding: 24px 40px 0;
+    height: 340px;
 
     .description {
       font-style: normal;

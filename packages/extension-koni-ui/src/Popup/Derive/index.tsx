@@ -37,7 +37,7 @@ function Derive ({ className }: Props): React.ReactElement<Props> {
         onBackClick={onBackClick}
         showStep={false}
         step={step}
-        text={t<string>('Derive account')}
+        text={t<string>('Create a derived account')}
       />
       {
         step === 1 && (

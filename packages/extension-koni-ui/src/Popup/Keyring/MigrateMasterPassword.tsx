@@ -246,14 +246,18 @@ const MigrateMasterPassword = ({ className }: Props) => {
         subHeaderName={t<string>('Apply Master Password')}
       />
       <div className='body-container'>
-        <div className={CN('item-container')}>
-          <Checkbox
-            checked={selectedAll}
-            className='checkbox'
-            label={t<string>('All Account')}
-            onChange={onSelectAll}
-          />
-        </div>
+        {
+          !!items.length && (
+            <div className={CN('item-container')}>
+              <Checkbox
+                checked={selectedAll}
+                className='checkbox'
+                label={t<string>('All Account')}
+                onChange={onSelectAll}
+              />
+            </div>
+          )
+        }
         {
           items.map((item) => {
             const data: Omit<MigrateItem, 'password'> = {
@@ -271,23 +275,46 @@ const MigrateMasterPassword = ({ className }: Props) => {
             );
           })
         }
+        {
+          !items.length && (
+            <div>
+              {t('Success! The master password has been applied to all accounts.')}
+            </div>
+          )
+        }
       </div>
       <div className='footer-container'>
-        <Button
-          className={CN('cancel-btn btn')}
-          isDisabled={isBusy}
-          onClick={onCancel}
-        >
-          <span>{t<string>('Cancel')}</span>
-        </Button>
-        <Button
-          className={CN('btn')}
-          isBusy={isBusy}
-          isDisabled={disableButton}
-          onClick={onSubmit}
-        >
-          {t<string>('Apply')}
-        </Button>
+        {
+          !items.length
+            ? (
+              <Button
+                className={CN('btn')}
+                isDisabled={isBusy}
+                onClick={onCancel}
+              >
+                <span>{t<string>('Close')}</span>
+              </Button>
+            )
+            : (
+              <>
+                <Button
+                  className={CN('cancel-btn btn')}
+                  isDisabled={isBusy}
+                  onClick={onCancel}
+                >
+                  <span>{t<string>('Cancel')}</span>
+                </Button>
+                <Button
+                  className={CN('btn')}
+                  isBusy={isBusy}
+                  isDisabled={disableButton}
+                  onClick={onSubmit}
+                >
+                  {t<string>('Apply')}
+                </Button>
+              </>
+            )
+        }
       </div>
     </div>
   );
@@ -297,10 +324,13 @@ export default React.memo(styled(MigrateMasterPassword)(({ theme }: Props) => `
   display: flex;
   flex-direction: column;
   flex: 1;
+  overflow: hidden;
 
   .body-container {
     padding: 4px 22px;
     flex: 1;
+    overflow: auto;
+    scrollbar-width: thin;
 
     .item-container {
       margin-top: 4px;

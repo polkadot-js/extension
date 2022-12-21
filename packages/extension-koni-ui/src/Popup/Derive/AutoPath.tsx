@@ -3,6 +3,7 @@
 
 import { Button, Checkbox } from '@subwallet/extension-koni-ui/components';
 import AccountInfo from '@subwallet/extension-koni-ui/components/AccountInfo';
+import Loading from '@subwallet/extension-koni-ui/components/Loading';
 import useGetAccountByAddress from '@subwallet/extension-koni-ui/hooks/useGetAccountByAddress';
 import useTranslation from '@subwallet/extension-koni-ui/hooks/useTranslation';
 import { getListDeriveAccounts } from '@subwallet/extension-koni-ui/messaging';
@@ -10,6 +11,7 @@ import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { DeriveAccount } from '@subwallet/extension-koni-ui/types/derive';
 import CN from 'classnames';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import InfiniteScroll from 'react-infinite-scroll-component';
 import styled from 'styled-components';
 
 interface Props extends ThemeProps {
@@ -30,6 +32,7 @@ const AutoPath = ({ className, parentAddress, setDeriveAccounts, setStep }: Prop
   const parentAccount = useGetAccountByAddress(parentAddress);
   const parentName = useMemo((): string => parentAccount?.name || '', [parentAccount]);
 
+  const [loading, setLoading] = useState(true);
   const [page, setPage] = useState(1);
   const [items, setItems] = useState<DeriveItem[]>([]);
 
@@ -61,6 +64,13 @@ const AutoPath = ({ className, parentAddress, setDeriveAccounts, setStep }: Prop
     setDeriveAccounts(result);
     setStep(3);
   }, [setStep, items, setDeriveAccounts]);
+
+  const onLoadMore = useCallback(() => {
+    if (!loading) {
+      setLoading(true);
+      setPage((page) => page + 1);
+    }
+  }, [loading]);
 
   useEffect(() => {
     setPage(1);
@@ -97,7 +107,12 @@ const AutoPath = ({ className, parentAddress, setDeriveAccounts, setStep }: Prop
           });
         }
       })
-      .catch(console.error);
+      .catch(console.error)
+      .finally(() => {
+        if (amount) {
+          setLoading(false);
+        }
+      });
 
     return () => {
       amount = false;
@@ -107,8 +122,18 @@ const AutoPath = ({ className, parentAddress, setDeriveAccounts, setStep }: Prop
 
   return (
     <div className={CN(className)}>
-      <div className={CN('body-container')}>
-        <div className='items-container'>
+      <div
+        className={CN('body-container')}
+        id='scrollableDiv'
+      >
+        <InfiniteScroll
+          className={'items-container'}
+          dataLength={items.length}
+          hasMore={true}
+          loader={<div />}
+          next={onLoadMore}
+          scrollableTarget='scrollableDiv'
+        >
           {
             items.map((item) => {
               return (
@@ -120,6 +145,7 @@ const AutoPath = ({ className, parentAddress, setDeriveAccounts, setStep }: Prop
                   <Checkbox
                     checked={item.selected}
                     label={''}
+                    onClick={onClickItem(item.address)}
                   />
                   <AccountInfo
                     address={item.address}
@@ -133,7 +159,8 @@ const AutoPath = ({ className, parentAddress, setDeriveAccounts, setStep }: Prop
               );
             })
           }
-        </div>
+          {loading && <Loading className={'loading'} />}
+        </InfiniteScroll>
       </div>
       <div className={CN('footer-container')}>
         <Button
@@ -164,11 +191,11 @@ export default React.memo(styled(AutoPath)(({ theme }: Props) => `
     border-bottom: solid 1px ${theme.boxBorderColor};
     display: flex;
     flex-direction: column;
-    overflow: hidden;
+    overflow: auto;
+    scrollbar-width: thin;
   }
 
   .items-container {
-    overflow-y: auto;
     padding: 0 15px;
     margin: 0 -15px;
 
@@ -184,6 +211,13 @@ export default React.memo(styled(AutoPath)(({ theme }: Props) => `
       padding: 2px 14px;
       border: 2px solid ${theme.borderColor2};
       border-radius: 8px;
+    }
+
+    .loading {
+      height: 32px;
+      width: 32px;
+      margin: auto;
+      margin-bottom: 8px;
     }
   }
 

@@ -69,7 +69,7 @@ const SelectParent = ({ autoPath, className, parentAddress, setAutoPath, setPare
             className='account-info-item__radio-btn'
             onChange={onSelectAutoPath}
           />
-          <div className={CN('select-label')}>Auto generate derivation path</div>
+          <div className={CN('select-label')}>{t('Automatically create derived accounts')}</div>
         </div>
         <div
           className={CN('select-row')}
@@ -79,7 +79,7 @@ const SelectParent = ({ autoPath, className, parentAddress, setAutoPath, setPare
             checked={!autoPath}
             className='account-info-item__radio-btn'
           />
-          <div className={CN('select-label')}>Custom derivation path</div>
+          <div className={CN('select-label')}>{t('Manually create a derived account')}</div>
         </div>
       </div>
       <div className={CN('footer-container')}>
@@ -138,6 +138,11 @@ export default React.memo(styled(SelectParent)(({ theme }: Props) => `
 
     .select-label {
       margin-left: 8px;
+      font-style: normal;
+      font-weight: 400;
+      font-size: 15px;
+      line-height: 26px;
+      color: ${theme.textColor2};
     }
   }
 `));

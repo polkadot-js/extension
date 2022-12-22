@@ -1,8 +1,8 @@
 // Copyright 2019-2022 @subwallet/extension-koni-base authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { ChainInfoMap } from '@subwallet/extension-koni-base/services/chain-list';
-import { _ChainInfo, _DEFAULT_NETWORKS, _EvmInfo, _SubstrateInfo } from '@subwallet/extension-koni-base/services/chain-list/types';
+import { ChainAssetMap, ChainInfoMap } from '@subwallet/extension-koni-base/services/chain-list';
+import { _ChainAsset, _ChainInfo, _DEFAULT_NETWORKS, _EvmInfo, _SubstrateInfo } from '@subwallet/extension-koni-base/services/chain-list/types';
 import { EvmChainHandler } from '@subwallet/extension-koni-base/services/chain-service/handler/EvmChainHandler';
 import { SubstrateChainHandler } from '@subwallet/extension-koni-base/services/chain-service/handler/SubstrateChainHandler';
 import { _CHAIN_VALIDATION_ERROR } from '@subwallet/extension-koni-base/services/chain-service/handler/types';
@@ -16,7 +16,8 @@ import { Logger } from '@polkadot/util/types';
 export class ChainService {
   private dataMap: _DataMap = {
     chainInfoMap: {},
-    chainStateMap: {}
+    chainStateMap: {},
+    assetRegistry: {}
   };
 
   private lockChainInfoMap = false; // prevent unwanted changes (edit, enable, disable) to chainInfoMap
@@ -26,6 +27,7 @@ export class ChainService {
 
   private chainInfoMapSubject = new Subject<Record<string, _ChainInfo>>();
   private chainStateMapSubject = new Subject<Record<string, _ChainState>>();
+  private assetRegistrySubject = new Subject<Record<string, _ChainAsset>>();
 
   private logger: Logger;
 
@@ -40,11 +42,14 @@ export class ChainService {
       };
     });
 
+    this.dataMap.assetRegistry = ChainAssetMap;
+
     this.substrateChainHandler = new SubstrateChainHandler();
     this.evmChainHandler = new EvmChainHandler();
 
     this.chainInfoMapSubject.next(this.dataMap.chainInfoMap);
     this.chainStateMapSubject.next(this.dataMap.chainStateMap);
+    this.assetRegistrySubject.next(this.dataMap.assetRegistry);
 
     this.logger = createLogger('chain-service');
   }
@@ -53,7 +58,7 @@ export class ChainService {
     return this.dataMap.chainInfoMap[key];
   }
 
-  public initChainMap () {
+  public initChainState () {
     const chainStateMap = this.getChainStateMap();
 
     _DEFAULT_NETWORKS.forEach((slug) => {
@@ -67,8 +72,16 @@ export class ChainService {
     return this.chainInfoMapSubject;
   }
 
+  public subscribeAssetRegistry () {
+    return this.assetRegistrySubject;
+  }
+
   public subscribeChainStateMap () {
     return this.chainStateMapSubject;
+  }
+
+  public getAssetRegistry () {
+    return this.dataMap.assetRegistry;
   }
 
   public getChainInfoMap () {

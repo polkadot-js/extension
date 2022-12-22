@@ -23,7 +23,7 @@ import { initWasmTokenState } from '@subwallet/extension-koni-base/api/tokens/wa
 import { EvmRpcError } from '@subwallet/extension-koni-base/background/errors/EvmRpcError';
 import { state } from '@subwallet/extension-koni-base/background/handlers/index';
 import { ALL_ACCOUNT_KEY, ALL_GENESIS_HASH } from '@subwallet/extension-koni-base/constants';
-import { _ChainInfo } from '@subwallet/extension-koni-base/services/chain-list/types';
+import {_ChainAsset, _ChainInfo} from '@subwallet/extension-koni-base/services/chain-list/types';
 import { ChainService } from '@subwallet/extension-koni-base/services/chain-service';
 import { _ChainState } from '@subwallet/extension-koni-base/services/chain-service/types';
 import DatabaseService from '@subwallet/extension-koni-base/services/DatabaseService';
@@ -198,7 +198,7 @@ export default class KoniState extends State {
   public init () {
     this.initNetworkStates();
     this.updateServiceInfo();
-    this.chainService.initChainMap();
+    this.chainService.initChainState();
   }
 
   private onReady () {
@@ -1400,6 +1400,10 @@ export default class KoniState extends State {
     return this.chainService.getChainStateMap();
   }
 
+  public getAssetRegistry () {
+    return this.chainService.getAssetRegistry();
+  }
+
   public getChainInfoByKey (key: string) {
     return this.chainService.getChainInfoByKey(key);
   }
@@ -1410,6 +1414,10 @@ export default class KoniState extends State {
 
   public subscribeChainStateMap (): Subject<Record<string, _ChainState>> {
     return this.chainService.subscribeChainStateMap();
+  }
+
+  public subscribeAssetRegistry (): Subject<Record<string, _ChainAsset>> {
+    return this.chainService.subscribeAssetRegistry();
   }
 
   public async validateCustomChain (provider: string, existedChainSlug?: string) {

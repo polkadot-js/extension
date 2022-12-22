@@ -3,9 +3,10 @@
 
 /* eslint @typescript-eslint/no-var-requires: "off" */
 
-import { _ChainInfo } from '@subwallet/extension-koni-base/services/chain-list/types';
+import {_ChainAsset, _ChainInfo} from '@subwallet/extension-koni-base/services/chain-list/types';
 
 export const ChainInfoMap = require('./data/ChainInfo.json') as Record<string, _ChainInfo>;
+export const ChainAssetMap = require('./data/ChainAsset.json') as Record<string, _ChainAsset>;
 
 export enum COMMON_CHAIN_SLUGS {
   POLKADOT = 'polkadot',

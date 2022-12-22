@@ -16,7 +16,7 @@ import { PORT_EXTENSION } from '@subwallet/extension-base/defaults';
 import { getId } from '@subwallet/extension-base/utils/getId';
 import { metadataExpand } from '@subwallet/extension-chains';
 import { MetadataDef } from '@subwallet/extension-inject/types';
-import { _ChainInfo } from '@subwallet/extension-koni-base/services/chain-list/types';
+import {_ChainAsset, _ChainInfo} from '@subwallet/extension-koni-base/services/chain-list/types';
 import { _ChainState } from '@subwallet/extension-koni-base/services/chain-service/types';
 
 import { SingleAddress } from '@polkadot/ui-keyring/observable/types';
@@ -438,8 +438,13 @@ export async function subscribeCrowdloan (request: RequestSubscribeCrowdloan, ca
   return sendMessage('pri(crowdloan.getSubscription)', request, callback);
 }
 
+// TODO: remove, deprecated
 export async function subscribeChainRegistry (callback: (map: Record<string, ChainRegistry>) => void): Promise<Record<string, ChainRegistry>> {
   return sendMessage('pri(chainRegistry.getSubscription)', null, callback);
+}
+
+export async function subscribeAssetRegistry (callback: (map: Record<string, _ChainAsset>) => void): Promise<Record<string, _ChainAsset>> {
+  return sendMessage('pri(chainService.subscribeAssetRegistry)', null, callback);
 }
 
 export async function subscribeHistory (callback: (historyMap: Record<string, TransactionHistoryItemType[]>) => void): Promise<Record<string, TransactionHistoryItemType[]>> {

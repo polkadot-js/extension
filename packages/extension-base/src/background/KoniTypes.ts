@@ -1583,6 +1583,7 @@ export interface KoniRequestSignatures {
   // ChainService
   'pri(chainService.subscribeChainInfoMap)': [null, Record<string, any>, Record<string, any>];
   'pri(chainService.subscribeChainStateMap)': [null, Record<string, any>, Record<string, any>];
+  'pri(chainService.subscribeAssetRegistry)': [null, Record<string, any>, Record<string, any>];
 
   // NFT functions
   'pri(evmNft.submitTransaction)': [RequestEvmNftSubmitTransaction, NftTransactionResponse, NftTransactionResponse];

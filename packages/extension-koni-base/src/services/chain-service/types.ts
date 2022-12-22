@@ -3,7 +3,7 @@
 
 /* eslint @typescript-eslint/no-empty-interface: "off" */
 
-import { _ChainInfo } from '@subwallet/extension-koni-base/services/chain-list/types';
+import {_ChainAsset, _ChainInfo} from '@subwallet/extension-koni-base/services/chain-list/types';
 import Web3 from 'web3';
 
 import { ApiPromise } from '@polkadot/api';
@@ -13,7 +13,8 @@ import { Registry } from '@polkadot/types/types';
 
 export interface _DataMap {
   chainInfoMap: Record<string, _ChainInfo>,
-  chainStateMap: Record<string, _ChainState>
+  chainStateMap: Record<string, _ChainState>,
+  assetRegistry: Record<string, _ChainAsset>
 }
 
 export enum _ConnectionStatus {

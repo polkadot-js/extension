@@ -38,8 +38,7 @@ export interface _ChainInfo {
 }
 
 export interface _ChainAsset {
-  id_: number,
-  chainId_: number,
+  originChain: string,
   slug: string,
   name: string,
   symbol: string,
@@ -48,7 +47,7 @@ export interface _ChainAsset {
   minAmount: string | null,
   assetType: _AssetType,
   metadata: Record<any, any>,
-  multiChainAssetId_: number
+  multiChainAsset: string | null
 }
 
 export interface _ChainProvider {

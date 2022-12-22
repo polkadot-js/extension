@@ -38,7 +38,7 @@ import { getPSP34Transaction, getPSP34TransferExtrinsic } from '@subwallet/exten
 import { estimateCrossChainFee, makeCrossChainTransfer } from '@subwallet/extension-koni-base/api/xcm';
 import { state } from '@subwallet/extension-koni-base/background/handlers/index';
 import { ALL_ACCOUNT_KEY, ALL_GENESIS_HASH } from '@subwallet/extension-koni-base/constants';
-import { _ChainInfo } from '@subwallet/extension-koni-base/services/chain-list/types';
+import { _ChainAsset, _ChainInfo } from '@subwallet/extension-koni-base/services/chain-list/types';
 import { _ChainState } from '@subwallet/extension-koni-base/services/chain-service/types';
 import { getCurrentProvider } from '@subwallet/extension-koni-base/utils';
 import { createTransactionFromRLP, signatureToHex, Transaction as QrTransaction } from '@subwallet/extension-koni-base/utils/eth';
@@ -3710,6 +3710,23 @@ export default class KoniExtension extends Extension {
     return state.getChainStateMap();
   }
 
+  private subscribeAssetRegistry (id: string, port: chrome.runtime.Port): Record<string, _ChainAsset> {
+    const cb = createSubscription<'pri(chainService.subscribeAssetRegistry)'>(id, port);
+    const assetRegistrySubscription = state.subscribeAssetRegistry().subscribe({
+      next: (rs) => {
+        cb(rs);
+      }
+    });
+
+    this.createUnsubscriptionHandle(id, assetRegistrySubscription.unsubscribe);
+
+    port.onDisconnect.addListener((): void => {
+      this.cancelSubscription(id);
+    });
+
+    return state.getAssetRegistry();
+  }
+
   // --------------------------------------------------------------
 
   // eslint-disable-next-line @typescript-eslint/require-await
@@ -3862,6 +3879,8 @@ export default class KoniExtension extends Extension {
         return this.enableChains(request as string[]);
       case 'pri(networkMap.disableMany)':
         return this.disableChains(request as string[]);
+      case 'pri(chainService.subscribeAssetRegistry)':
+        return this.subscribeAssetRegistry(id, port);
 
       case 'pri(transfer.checkReferenceCount)':
         return await this.transferCheckReferenceCount(request as RequestTransferCheckReferenceCount);

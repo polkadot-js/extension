@@ -1,7 +1,7 @@
 // Copyright 2019-2022 @subwallet/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { Button, Checkbox, InputWithLabel, Warning } from '@subwallet/extension-koni-ui/components';
+import { Button, InputWithLabel, Warning } from '@subwallet/extension-koni-ui/components';
 import AccountInfo from '@subwallet/extension-koni-ui/components/AccountInfo';
 import Spinner from '@subwallet/extension-koni-ui/components/Spinner';
 import { AccountContext } from '@subwallet/extension-koni-ui/contexts';
@@ -43,7 +43,6 @@ const CustomPath = ({ className, parentAddress, setDeriveAccounts, setStep }: Pr
   const [accountInfo, setAccountInfo] = useState<{ address: string, suri: string }>({ address: '', suri: '' });
   const [name, setName] = useState<string | null>(defaultName);
   const [error, setError] = useState('');
-  const [isConnectWhenCreate, setIsConnectWhenCreate] = useState<boolean>(true);
 
   const onChangePath = useCallback((value?: string) => {
     clearTimeout(timeout);
@@ -85,6 +84,8 @@ const CustomPath = ({ className, parentAddress, setDeriveAccounts, setStep }: Pr
     let amount = true;
 
     if (!delay) {
+      console.log(path);
+
       setLoading(true);
       validateDerivePathV2({
         suri: path,
@@ -111,6 +112,8 @@ const CustomPath = ({ className, parentAddress, setDeriveAccounts, setStep }: Pr
             setError((e as Error).message);
             setLoading(false);
           }
+        }).finally(() => {
+          console.log(amount);
         });
     }
 
@@ -165,17 +168,12 @@ const CustomPath = ({ className, parentAddress, setDeriveAccounts, setStep }: Pr
             </Warning>
           )
         }
-        <Checkbox
-          checked={isConnectWhenCreate}
-          label={t<string>('Auto connect to all DApps after creating')}
-          onChange={setIsConnectWhenCreate}
-        />
       </div>
       <div className={CN('footer-container')}>
         <Button
           className='next-step-btn'
           data-button-action='create derived account'
-          isDisabled={!!error || !path || !name}
+          isDisabled={!!error || !path || !name || delay}
           onClick={onSubmit}
         >
           {t<string>('Next')}

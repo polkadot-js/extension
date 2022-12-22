@@ -9,6 +9,7 @@ import useTranslation from '@subwallet/extension-koni-ui/hooks/useTranslation';
 import { keyringMigrateMasterPassword } from '@subwallet/extension-koni-ui/messaging';
 import { Header } from '@subwallet/extension-koni-ui/partials';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
+import { toShort } from '@subwallet/extension-koni-ui/util';
 import { isNotShorterThan } from '@subwallet/extension-koni-ui/util/validators';
 import CN from 'classnames';
 import React, { useCallback, useContext, useEffect, useMemo, useState } from 'react';
@@ -53,14 +54,14 @@ const MigrateMasterPassword = ({ className }: Props) => {
     onAction('/');
   }, [onAction]);
 
-  const onChangeSelectedItem = useCallback((address: string): (val: boolean) => void => {
-    return (val: boolean) => {
+  const onClickChangeSelected = useCallback((address: string): () => void => {
+    return () => {
       setItems((items) => {
         const result = [...items];
         const exist = result.find((acc) => acc.address === address);
 
         if (exist) {
-          exist.selected = val;
+          exist.selected = !exist.selected;
           exist.password = null;
           exist.errors = [];
         }
@@ -100,12 +101,21 @@ const MigrateMasterPassword = ({ className }: Props) => {
           )}
           id={`address-${address}`}
         >
-          <Checkbox
-            checked={selected}
-            className='checkbox'
-            label={name || address}
-            onChange={onChangeSelectedItem(address)}
-          />
+          <div
+            className={'info-row'}
+            onClick={onClickChangeSelected(address)}
+          >
+            <Checkbox
+              checked={selected}
+              className='checkbox'
+              label=''
+              onClick={onClickChangeSelected(address)}
+            />
+            <div className='account-info'>
+              <div className='account-name'>{name}</div>
+              <div className='account-address'>{toShort(address, 8, 8)}</div>
+            </div>
+          </div>
           {
             selected && (
               <>
@@ -141,7 +151,7 @@ const MigrateMasterPassword = ({ className }: Props) => {
     };
 
     return React.memo(Component);
-  }, [isPasswordValid, onChangePassword, onChangeSelectedItem, t]);
+  }, [isPasswordValid, onChangePassword, onClickChangeSelected, t]);
 
   const onSelectAll = useCallback((val: boolean) => {
     const result = [...items];
@@ -248,13 +258,15 @@ const MigrateMasterPassword = ({ className }: Props) => {
       <div className='body-container'>
         {
           !!items.length && (
-            <div className={CN('item-container')}>
-              <Checkbox
-                checked={selectedAll}
-                className='checkbox'
-                label={t<string>('All Account')}
-                onChange={onSelectAll}
-              />
+            <div className={CN('item-container info-row')}>
+              <div className={'info-row'}>
+                <Checkbox
+                  checked={selectedAll}
+                  className='checkbox'
+                  label={t<string>('All Account')}
+                  onChange={onSelectAll}
+                />
+              </div>
             </div>
           )
         }
@@ -277,7 +289,7 @@ const MigrateMasterPassword = ({ className }: Props) => {
         }
         {
           !items.length && (
-            <div>
+            <div className='success-notice'>
               {t('Success! The master password has been applied to all accounts.')}
             </div>
           )
@@ -344,13 +356,38 @@ export default React.memo(styled(MigrateMasterPassword)(({ theme }: Props) => `
         padding-bottom: 0;
       }
 
-      .checkbox {
-        label {
+      .info-row {
+        display: flex;
+        flex-direction: row;
+        cursor: pointer;
+
+        .account-info {
+          display: flex;
+          flex-direction: column;
           font-style: normal;
-          font-weight: 500;
-          font-size: 16px;
           line-height: 24px;
-          color: ${theme.textColor};
+
+          .account-name {
+            font-weight: 500;
+            font-size: 16px;
+            color: ${theme.textColor};
+          }
+
+          .account-address {
+            font-weight: 400;
+            font-size: 14px;
+            color: ${theme.textColor2};
+          }
+        }
+
+        .checkbox {
+          label {
+            font-style: normal;
+            font-weight: 500;
+            font-size: 16px;
+            line-height: 24px;
+            color: ${theme.textColor};
+          }
         }
       }
 
@@ -369,6 +406,15 @@ export default React.memo(styled(MigrateMasterPassword)(({ theme }: Props) => `
           color: ${theme.crowdloanFailStatus};
         }
       }
+    }
+
+    .success-notice {
+      margin-top: 20px;
+      font-style: normal;
+      font-weight: 400;
+      font-size: 14px;
+      line-height: 24px;
+      color: ${theme.textColor2};
     }
   }
 

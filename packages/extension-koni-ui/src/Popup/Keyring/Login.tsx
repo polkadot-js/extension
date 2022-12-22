@@ -32,7 +32,7 @@ const Login = ({ className }: Props) => {
   }, []);
 
   const onSubmit = useCallback((password: string | null) => {
-    if (password) {
+    if (password && MIN_LENGTH <= password.length) {
       setLoading(true);
 
       keyringUnlock({

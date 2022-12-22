@@ -4041,9 +4041,12 @@ export default class KoniExtension extends Extension {
         let index = 0;
 
         try {
-          const paths = suri.split('//');
+          const reg = /^\d+$/;
+          const path = suri.split('//')[1];
 
-          index = parseInt(paths[1] || '0');
+          if (reg.test(path)) {
+            index = parseInt(path);
+          }
         } catch (e) {
 
         }
@@ -4095,7 +4098,6 @@ export default class KoniExtension extends Extension {
     }
 
     const meta: KeyringPair$Meta = {
-      name: name,
       parentAddress
     };
 
@@ -4105,7 +4107,12 @@ export default class KoniExtension extends Extension {
       let index = 0;
 
       try {
-        index = parseInt(suri.split('//')[1]);
+        const reg = /^\d+$/;
+        const path = suri.split('//')[1];
+
+        if (reg.test(path)) {
+          index = parseInt(path);
+        }
       } catch (e) {
 
       }

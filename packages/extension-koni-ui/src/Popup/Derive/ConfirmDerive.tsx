@@ -128,6 +128,8 @@ export default React.memo(styled(ConfirmDerive)(({ theme }: Props) => `
     padding: 0 15px;
     margin: 0 -15px;
     border-bottom: solid 1px ${theme.boxBorderColor};
+    overflow: auto;
+    scrollbar-width: thin;
 
     .items-container {
       overflow-y: auto;

@@ -502,5 +502,13 @@
   "Failed to apply master password": "",
   "Apply Master Password": "",
   "All Account": "",
-  "Auto migrate master password ": ""
+  "Auto migrate master password ": "",
+  "A master password is required to continue using the wallet. Please create a master password.": "",
+  "Auto connect to all DApps after creating": "",
+  "Derived Account Name": "",
+  "The derivation path must be in numbers": "",
+  "Automatically create derived accounts": "",
+  "Manually create a derived account": "",
+  "Once a master password is confirmed, you will not need to manually type your password with every transaction.": "",
+  "Success! The master password has been applied to all accounts.": ""
 }

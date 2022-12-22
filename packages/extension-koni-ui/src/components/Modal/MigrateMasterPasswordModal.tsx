@@ -1,8 +1,9 @@
 // Copyright 2019-2022 @subwallet/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { Button, InputWithLabel, ValidatedInput, Warning } from '@subwallet/extension-koni-ui/components';
+import { AccountInfoEl, Button, InputWithLabel, ValidatedInput, Warning } from '@subwallet/extension-koni-ui/components';
 import Modal from '@subwallet/extension-koni-ui/components/Modal/index';
+import useGetAccountByAddress from '@subwallet/extension-koni-ui/hooks/useGetAccountByAddress';
 import useTranslation from '@subwallet/extension-koni-ui/hooks/useTranslation';
 import { keyringMigrateMasterPassword } from '@subwallet/extension-koni-ui/messaging';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
@@ -30,9 +31,10 @@ const MigrateMasterPasswordModal = ({ address, className, closeModal }: Props) =
   const [errors, setErrors] = useState<string[]>([]);
 
   const isFirstPasswordValid = useMemo(() => isNotShorterThan(MIN_LENGTH, t<string>('Password is too short')), [t]);
+  const account = useGetAccountByAddress(address);
 
   const handleOnSubmit = useCallback((password: string | null) => {
-    if (password) {
+    if (password && MIN_LENGTH <= password.length) {
       setLoading(true);
 
       keyringMigrateMasterPassword({
@@ -81,6 +83,14 @@ const MigrateMasterPasswordModal = ({ address, className, closeModal }: Props) =
         <div className={CN('sub-title')}>
           {t('To continue, please apply the master password')}
         </div>
+        <AccountInfoEl
+          address={account?.address}
+          className='account-info-container'
+          genesisHash={account?.genesisHash}
+          name={account?.name}
+          showCopyBtn={false}
+          type={account?.type}
+        />
         <ValidatedInput
           className={className}
           component={InputWithLabel}
@@ -181,6 +191,13 @@ export default React.memo(styled(MigrateMasterPasswordModal)(({ theme }: Props) 
         color: ${theme.textColor2};
         margin-bottom: 4px;
         margin-top: 20px;
+      }
+
+      .account-info-container {
+        border: 2px solid ${theme.borderColor2};
+        border-radius: 8px;
+        padding: 0 12px;
+        margin-top: 12px;
       }
 
       .separator {

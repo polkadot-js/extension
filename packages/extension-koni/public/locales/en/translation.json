@@ -458,5 +458,14 @@
   "This dApp requires a Substrate account. Please create, import, or restore a Substrate account and retry": "",
   "The account you are using is read-only, you cannot send assets with it": "",
   "This feature is not available for the chosen account.": "",
-  "This feature is not available for the chosen account type": ""
+  "This feature is not available for the chosen account type": "",
+  "Symbol cannot exceed 5 characters": "",
+  "Symbol cannot be empty": "",
+  "Successfully added a new custom provider": "",
+  "EVM Chain ID": "",
+  "Genesis Hash": "",
+  "Address Prefix": "",
+  "ParaId": "",
+  "Chain Type": "",
+  "Price ID (Optional - from CoinGecko)": ""
 }

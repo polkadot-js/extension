@@ -20,7 +20,7 @@
   "version": "0.7.6-0",
   "main": "index.js",
   "dependencies": {
-    "@babel/runtime": "^7.19.0",
+    "@babel/runtime": "^7.20.6",
     "@ethereumjs/common": "^2.6.5",
     "@polkadot/api": "^9.10.3",
     "@polkadot/keyring": "^10.2.1",
@@ -36,12 +36,12 @@
     "@subwallet/extension-dapp": "^0.7.6-0",
     "@subwallet/extension-inject": "^0.7.6-0",
     "ethereumjs-tx": "^2.1.2",
-    "eventemitter3": "^4.0.7",
+    "eventemitter3": "^5.0.0",
     "rlp": "^3.0.0",
-    "rxjs": "^7.5.7",
-    "web3": "^1.8.0",
+    "rxjs": "^7.8.0",
+    "web3": "^1.8.1",
     "web3-core": "^1.8.1",
-    "web3-core-helpers": "^1.8.0"
+    "web3-core-helpers": "^1.8.1"
   },
   "devDependencies": {
     "@subwallet/extension-mocks": "^0.7.6-0"

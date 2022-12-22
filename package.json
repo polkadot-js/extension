@@ -54,7 +54,7 @@
     "@babel/core": "^7.19.3",
     "@polkadot/dev": "^0.65.23",
     "@types/jest": "^27.4.0",
-    "axios": "^0.27.2",
+    "axios": "^1.2.1",
     "discord-webhook-node": "^1.1.8",
     "i18next-scanner": "^4.0.0",
     "patch-package": "^6.4.7",
@@ -72,7 +72,7 @@
     "@polkadot/util-crypto": "^10.2.1",
     "@polkadot/x-fetch": "^10.2.1",
     "babel-core": "^7.0.0-bridge.0",
-    "rxjs": "^7.5.7",
+    "rxjs": "^7.8.0",
     "safe-buffer": "^5.2.1",
     "typescript": "^4.8.4"
   }

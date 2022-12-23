@@ -94,7 +94,7 @@ export function initWasmTokenState (customTokenState: CustomTokenJson, networkMa
     let exist = false;
 
     for (const storedToken of wasmTokenState.psp22) {
-      if (isEqualContractAddress(defaultToken.smartContract, storedToken.smartContract) && defaultToken.chain === storedToken.chain) {
+      if (isEqualContractAddress(defaultToken.contractAddress, storedToken.contractAddress) && defaultToken.chain === storedToken.chain) {
         if (storedToken.isCustom) {
           // if existed, migrate the custom token -> default token
           delete storedToken.isCustom;
@@ -114,7 +114,7 @@ export function initWasmTokenState (customTokenState: CustomTokenJson, networkMa
     let exist = false;
 
     for (const storedToken of wasmTokenState.psp34) {
-      if (isEqualContractAddress(defaultToken.smartContract, storedToken.smartContract) && defaultToken.chain === storedToken.chain) {
+      if (isEqualContractAddress(defaultToken.contractAddress, storedToken.contractAddress) && defaultToken.chain === storedToken.chain) {
         if (storedToken.isCustom) {
           // if existed, migrate the custom token -> default token
           delete storedToken.isCustom;

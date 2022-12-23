@@ -1,7 +1,8 @@
 // Copyright 2019-2022 @polkadot/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { CustomToken, DeleteCustomTokenParams } from '@subwallet/extension-base/background/KoniTypes';
+import { _ChainAsset } from '@subwallet/extension-koni-base/services/chain-list/types';
+import { _DeleteCustomTokenParams } from '@subwallet/extension-koni-base/services/chain-service/types';
 import { Button, ButtonArea, InputFilter } from '@subwallet/extension-koni-ui/components';
 import Modal from '@subwallet/extension-koni-ui/components/Modal';
 import useFetchCustomToken from '@subwallet/extension-koni-ui/hooks/screen/common/useFetchCustomToken';
@@ -24,7 +25,7 @@ function CustomTokenSetting ({ className }: Props): React.ReactElement {
 
   const customTokens = useFetchCustomToken();
   const [searchString, setSearchString] = useState('');
-  const [selectedTokens, setSelectedTokens] = useState<DeleteCustomTokenParams[]>([]);
+  const [selectedTokens, setSelectedTokens] = useState<_DeleteCustomTokenParams[]>([]);
   const [showModal, setShowModal] = useState(false);
 
   const _onChangeFilter = useCallback((val: string) => {
@@ -32,10 +33,10 @@ function CustomTokenSetting ({ className }: Props): React.ReactElement {
   }, []);
 
   const filterToken = useCallback(() => {
-    const _filteredTokens: CustomToken[] = [];
+    const _filteredTokens: _ChainAsset[] = [];
 
     customTokens.forEach((token) => {
-      if ((token.symbol && token.symbol.toLowerCase().includes(searchString.toLowerCase())) || (token.name && token.name.toLowerCase().includes(searchString.toLowerCase()))) {
+      if (token.symbol.toLowerCase().includes(searchString.toLowerCase()) || token.name.toLowerCase().includes(searchString.toLowerCase())) {
         _filteredTokens.push(token);
       }
     });
@@ -43,19 +44,19 @@ function CustomTokenSetting ({ className }: Props): React.ReactElement {
     return _filteredTokens;
   }, [customTokens, searchString]);
 
-  const handleSelected = useCallback((data: DeleteCustomTokenParams) => {
+  const handleSelected = useCallback((data: _DeleteCustomTokenParams) => {
     setSelectedTokens([
       ...selectedTokens,
       data
     ]);
   }, [selectedTokens]);
 
-  const handleUnselected = useCallback((data: DeleteCustomTokenParams) => {
+  const handleUnselected = useCallback((data: _DeleteCustomTokenParams) => {
     const _selectedTokens = [];
 
     for (const token of selectedTokens) {
-      if (token.chain === data.chain) {
-        if (token.smartContract !== data.smartContract) {
+      if (token.originChain === data.originChain) {
+        if (token.contractAddress !== data.contractAddress) {
           _selectedTokens.push(token);
         }
       } else {
@@ -128,7 +129,7 @@ function CustomTokenSetting ({ className }: Props): React.ReactElement {
           handleSelected={handleSelected}
           handleUnselected={handleUnselected}
           item={item}
-          key={`${item.smartContract}-${item.chain}-${item.type}`}
+          key={`${item?.metadata?.contractAddress as string}-${item.originChain}-${item.assetType}`}
         />)}
       </div>
 

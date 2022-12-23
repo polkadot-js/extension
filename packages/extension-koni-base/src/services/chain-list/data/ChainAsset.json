@@ -1,7 +1,7 @@
 {
   "polkadot-NATIVE-DOT": {
     "originChain": "polkadot",
-    "slug": "polkadot/NATIVE/DOT",
+    "slug": "polkadot-NATIVE-DOT",
     "name": "Polkadot",
     "symbol": "DOT",
     "decimals": 10,

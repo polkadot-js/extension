@@ -35,7 +35,7 @@ interface TokenInfoAction {
 
 const initTokenInfo: CustomToken = {
   chain: '',
-  smartContract: '',
+  contractAddress: '',
   type: CustomTokenType.erc20,
   isCustom: true,
   symbol: '',
@@ -53,12 +53,12 @@ function tokenInfoReducer (state: CustomToken, action: TokenInfoAction) {
     case TokenInfoActionType.UPDATE_CONTRACT:
       return {
         ...state,
-        smartContract: action.payload as string
+        contractAddress: action.payload as string
       };
     case TokenInfoActionType.RESET_METADATA:
       return {
         ...initTokenInfo,
-        smartContract: state.smartContract,
+        contractAddress: state.contractAddress,
         type: state.type,
         chain: state.chain
       };
@@ -102,14 +102,14 @@ function ImportToken ({ className = '' }: Props): React.ReactElement<Props> {
   }, []);
 
   useEffect(() => {
-    if (tokenInfo.smartContract !== '') {
+    if (tokenInfo.contractAddress !== '') {
       let tokenType: CustomTokenType | undefined; // set token type
       const isValidContractCaller = isValidSubstrateAddress(currentAccount?.address as string);
 
       // TODO: this should be done manually by user when there are more token standards
-      if (isEthereumAddress(tokenInfo.smartContract)) {
+      if (isEthereumAddress(tokenInfo.contractAddress)) {
         tokenType = CustomTokenType.erc20;
-      } else if (isValidSubstrateAddress(tokenInfo.smartContract)) {
+      } else if (isValidSubstrateAddress(tokenInfo.contractAddress)) {
         tokenType = CustomTokenType.psp22;
       }
 
@@ -119,7 +119,7 @@ function ImportToken ({ className = '' }: Props): React.ReactElement<Props> {
         setWarning('Invalid contract address');
       } else {
         validateCustomToken({
-          smartContract: tokenInfo.smartContract,
+          contractAddress: tokenInfo.contractAddress,
           chain: tokenInfo.chain,
           type: tokenType,
           contractCaller: isValidContractCaller ? currentAccount?.address as string : undefined
@@ -157,7 +157,7 @@ function ImportToken ({ className = '' }: Props): React.ReactElement<Props> {
           });
       }
     }
-  }, [tokenInfo.smartContract, tokenInfo.chain, currentAccount?.address]);
+  }, [tokenInfo.contractAddress, tokenInfo.chain, currentAccount?.address]);
 
   const onChangeSymbol = useCallback((val: string) => {
     if ((val.length > 11 && val !== '') || (val.split(' ').join('') === '')) {
@@ -240,7 +240,7 @@ function ImportToken ({ className = '' }: Props): React.ReactElement<Props> {
         <InputWithLabel
           label={'Contract Address (*)'}
           onChange={onChangeContractAddress}
-          value={tokenInfo.smartContract}
+          value={tokenInfo.contractAddress}
         />
 
         <div style={{ marginTop: '12px' }}>
@@ -276,7 +276,7 @@ function ImportToken ({ className = '' }: Props): React.ReactElement<Props> {
         </Button>
         <Button
           className={'add-token-button'}
-          isDisabled={!isValidSymbol || !isValidDecimals || !isValidContract || tokenInfo.smartContract === '' || tokenInfo.symbol === '' || chainOptions.length === 0}
+          isDisabled={!isValidSymbol || !isValidDecimals || !isValidContract || tokenInfo.contractAddress === '' || tokenInfo.symbol === '' || chainOptions.length === 0}
           onClick={handleAddToken}
         >
           {t<string>('Add Token')}

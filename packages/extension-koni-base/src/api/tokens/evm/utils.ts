@@ -74,7 +74,7 @@ export function initEvmTokenState (customTokenState: CustomTokenJson, networkMap
     let exist = false;
 
     for (const storedToken of evmTokenState.erc20) {
-      if (isEqualContractAddress(defaultToken.smartContract, storedToken.smartContract) && defaultToken.chain === storedToken.chain) {
+      if (isEqualContractAddress(defaultToken.contractAddress, storedToken.contractAddress) && defaultToken.chain === storedToken.chain) {
         if (storedToken.isCustom) {
           // if existed, migrate the custom token -> default token
           delete storedToken.isCustom;
@@ -94,7 +94,7 @@ export function initEvmTokenState (customTokenState: CustomTokenJson, networkMap
     let exist = false;
 
     for (const storedToken of evmTokenState.erc721) {
-      if (isEqualContractAddress(defaultToken.smartContract, storedToken.smartContract) && defaultToken.chain === storedToken.chain) {
+      if (isEqualContractAddress(defaultToken.contractAddress, storedToken.contractAddress) && defaultToken.chain === storedToken.chain) {
         if (storedToken.isCustom) {
           // if existed custom token before, migrate the custom token -> default token
           delete storedToken.isCustom;

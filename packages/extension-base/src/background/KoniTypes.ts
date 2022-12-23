@@ -902,7 +902,7 @@ export enum CustomTokenType {
 }
 
 export interface CustomToken { // general interface for all kinds of tokens
-  smartContract: string,
+  contractAddress: string,
   chain: string,
   type: CustomTokenType,
 
@@ -1115,9 +1115,19 @@ export interface AddNetworkRequestExternal { // currently only support adding pu
   requestId?: string
 }
 
+export interface AddTokenRequestExternal {
+  contractAddress: string,
+  originChain: string,
+  type: string,
+
+  name: string,
+  symbol: string,
+  decimals: number
+}
+
 export interface ConfirmationDefinitions {
   addNetworkRequest: [ConfirmationsQueueItem<AddNetworkRequestExternal>, ConfirmationResult<AddNetworkRequestExternal>],
-  addTokenRequest: [ConfirmationsQueueItem<CustomToken>, ConfirmationResult<boolean>],
+  addTokenRequest: [ConfirmationsQueueItem<AddTokenRequestExternal>, ConfirmationResult<boolean>],
   switchNetworkRequest: [ConfirmationsQueueItem<SwitchNetworkRequest>, ConfirmationResult<boolean>],
   evmSignatureRequest: [ConfirmationsQueueItem<EvmSignatureRequest>, ConfirmationResult<string>],
   evmSignatureRequestExternal: [ConfirmationsQueueItem<EvmSignatureRequestExternal>, ConfirmationResultExternal<string>],
@@ -1564,26 +1574,28 @@ export interface KoniRequestSignatures {
   'pri(networkMap.recoverDotSama)': [string, boolean];
   'pri(networkMap.disableAll)': [null, boolean];
   'pri(networkMap.enableAll)': [null, boolean];
-  'pri(networkMap.resetDefault)': [null, boolean];
-  'pri(apiMap.validate)': [ValidateNetworkRequest, ValidateNetworkResponse];
-  'pri(networkMap.enableMany)': [string[], boolean];
-  'pri(networkMap.disableMany)': [string[], boolean];
-  'pri(networkMap.enableOne)': [string, boolean];
-  'pri(networkMap.disableOne)': [string, DisableNetworkResponse];
-  'pri(networkMap.removeOne)': [string, boolean];
+
+  // deprecated
+  'pri(customTokenState.getCustomTokenState)': [null, CustomTokenJson];
+  'pri(customTokenState.getSubscription)': [null, CustomTokenJson, CustomTokenJson];
   'pri(networkMap.upsert)': [Record<string, any>, boolean];
   'pri(networkMap.getNetworkMap)': [null, Record<string, NetworkJson>];
   'pri(networkMap.getSubscription)': [null, Record<string, NetworkJson>, Record<string, NetworkJson>];
-  'pri(customTokenState.validateCustomToken)': [ValidateCustomTokenRequest, ValidateCustomTokenResponse];
-  'pri(customTokenState.deleteMany)': [DeleteCustomTokenParams[], boolean];
-  'pri(customTokenState.upsertCustomTokenState)': [CustomToken, boolean];
-  'pri(customTokenState.getCustomTokenState)': [null, CustomTokenJson];
-  'pri(customTokenState.getSubscription)': [null, CustomTokenJson, CustomTokenJson];
+  'pri(apiMap.validate)': [ValidateNetworkRequest, ValidateNetworkResponse];
 
   // ChainService
   'pri(chainService.subscribeChainInfoMap)': [null, Record<string, any>, Record<string, any>];
   'pri(chainService.subscribeChainStateMap)': [null, Record<string, any>, Record<string, any>];
   'pri(chainService.subscribeAssetRegistry)': [null, Record<string, any>, Record<string, any>];
+  'pri(networkMap.enableMany)': [string[], boolean];
+  'pri(networkMap.disableMany)': [string[], boolean];
+  'pri(networkMap.enableOne)': [string, boolean];
+  'pri(networkMap.disableOne)': [string, DisableNetworkResponse];
+  'pri(networkMap.removeOne)': [string, boolean];
+  'pri(customTokenState.deleteMany)': [Record<string, any>[], boolean];
+  'pri(customTokenState.upsertCustomTokenState)': [Record<string, any>, boolean];
+  'pri(customTokenState.validateCustomToken)': [Record<string, any>, Record<string, any>];
+  'pri(networkMap.resetDefault)': [null, boolean];
 
   // NFT functions
   'pri(evmNft.submitTransaction)': [RequestEvmNftSubmitTransaction, NftTransactionResponse, NftTransactionResponse];

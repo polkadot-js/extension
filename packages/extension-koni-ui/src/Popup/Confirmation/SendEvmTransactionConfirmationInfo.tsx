@@ -322,7 +322,7 @@ function SendEvmTransactionConfirmationInfo ({ className, confirmation: { payloa
       }
 
       if (!xcmToken) {
-        validateCustomToken({ smartContract: contract, type: CustomTokenType.erc20, chain })
+        validateCustomToken({ contractAddress: contract, type: CustomTokenType.erc20, chain })
           .then((token) => {
             if (token.decimals && amount) {
               xcmToken = { symbol: token.symbol, decimals: token.decimals };

@@ -6,7 +6,7 @@ import type { InjectedAccount } from '@subwallet/extension-inject/types';
 import { AuthUrlInfo } from '@subwallet/extension-base/background/handlers/State';
 import { createSubscription } from '@subwallet/extension-base/background/handlers/subscriptions';
 import Tabs from '@subwallet/extension-base/background/handlers/Tabs';
-import { AddNetworkRequestExternal, CustomToken, CustomTokenType, EvmAppState, EvmEventType, EvmSendTransactionParams, NetworkJson, RequestEvmProviderSend } from '@subwallet/extension-base/background/KoniTypes';
+import { AddNetworkRequestExternal, AddTokenRequestExternal, EvmAppState, EvmEventType, EvmSendTransactionParams, NetworkJson, RequestEvmProviderSend } from '@subwallet/extension-base/background/KoniTypes';
 import { AccountAuthType, MessageTypes, RequestAccountList, RequestAccountSubscribe, RequestAuthorizeTab, RequestTypes, ResponseTypes } from '@subwallet/extension-base/background/types';
 import { canDerive } from '@subwallet/extension-base/utils';
 import { EvmRpcError } from '@subwallet/extension-koni-base/background/errors/EvmRpcError';
@@ -228,9 +228,9 @@ export default class KoniTabs extends Tabs {
       }
     };
 
-    const tokenType = input?.type?.toLowerCase() as CustomTokenType || '';
+    const tokenType = input?.type?.toLowerCase() || '';
 
-    if (tokenType !== CustomTokenType.erc20 && tokenType !== CustomTokenType.erc721) {
+    if (tokenType !== 'erc20' && tokenType !== 'erc721') {
       throw new EvmRpcError('INVALID_PARAMS', `Assets type ${tokenType} is not supported`);
     }
 
@@ -246,13 +246,13 @@ export default class KoniTabs extends Tabs {
     }
 
     try {
-      const tokenInfo: CustomToken = {
+      const tokenInfo: AddTokenRequestExternal = {
         type: tokenType,
-        smartContract: input.options?.address,
+        name: input.options?.symbol,
+        contractAddress: input.options?.address,
         symbol: input.options?.symbol,
         decimals: input.options?.decimals,
-        image: input.options?.image,
-        chain
+        originChain: chain
       };
 
       return await this.#koniState.addTokenConfirm(id, url, tokenInfo);

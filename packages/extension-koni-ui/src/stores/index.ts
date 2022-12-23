@@ -4,6 +4,7 @@
 import { configureStore } from '@reduxjs/toolkit/dist';
 
 import AllAccountReducer from './AllAccount';
+import AssetRegistryReducer from './AssetRegistry';
 import AuthUrlReducer from './AuthUrl';
 import BalanceReducer from './Balance';
 import BondingParamsReducer from './BondingParams';
@@ -31,33 +32,49 @@ import TransferNftParamsReducer from './TransferNftParams';
 import UnbondingParamsReducer from './UnbondingParams';
 
 const reducers = {
+  // tx history
+  transactionHistory: TransactionHistoryReducer,
+
+  // crowdloan
+  crowdloan: CrowdloanReducer,
+
+  // nft
+  nftCollection: NftCollectionReducer,
+  nft: NftReducer,
+  transferNftExtra: TransferNftExtraReducer,
+  transferNftParams: TransferNftParamsReducer,
+
+  // staking
+  stakingReward: StakingRewardReducer,
+  staking: StakingReducer,
   stakeCompoundParams: stakeCompoundParamsReducer,
   stakeUnlockingInfo: StakeUnlockingReducer,
   unbondingParams: UnbondingParamsReducer,
   bondingParams: BondingParamsReducer,
+
+  // custom network, custom token
   networkConfigParams: NetworkConfigParamsReducer,
-  networkMap: NetworkMapReducer,
   tokenConfigParams: TokenConfigReducer,
   customToken: CustomTokenReducer,
-  transferNftExtra: TransferNftExtraReducer,
-  transferNftParams: TransferNftParamsReducer,
-  stakingReward: StakingRewardReducer,
-  staking: StakingReducer,
-  nftCollection: NftCollectionReducer,
-  nft: NftReducer,
+
+  // balance
   price: PriceReducer,
   balance: BalanceReducer,
-  crowdloan: CrowdloanReducer,
-  transactionHistory: TransactionHistoryReducer,
+
+  // deprecated
+  networkMap: NetworkMapReducer,
+  chainRegistry: ChainRegistryReducer,
+
+  // general stores
+  chainInfoMap: ChainInfoMapReducer,
+  chainStateMap: ChainStateMapReducer,
+  assetRegistry: AssetRegistryReducer,
+
   currentAccount: CurrentAccountReducer,
   currentNetwork: CurrentNetworkReducer,
-  chainRegistry: ChainRegistryReducer,
   allAccount: AllAccountReducer,
   settings: SettingsReducer,
-  authUrl: AuthUrlReducer,
-
-  chainInfoMap: ChainInfoMapReducer,
-  chainStateMap: ChainStateMapReducer
+  authUrl: AuthUrlReducer
 };
 
 export const store = configureStore({

@@ -1787,10 +1787,6 @@ export default class KoniExtension extends Extension {
     return state.getCustomTokenState();
   }
 
-  private getEvmTokenState () {
-    return state.getCustomTokenState();
-  }
-
   private upsertCustomToken (data: CustomToken) {
     try {
       state.upsertCustomToken(data);
@@ -1815,7 +1811,7 @@ export default class KoniExtension extends Extension {
 
     // check exist in customTokenState
     for (const token of customTokenState[data.type]) {
-      if (isEqualContractAddress(token.smartContract, data.smartContract) && token.type === data.type && token.chain === data.chain && !token.isDeleted) {
+      if (isEqualContractAddress(token.contractAddress, data.contractAddress) && token.type === data.type && token.chain === data.chain && !token.isDeleted) {
         isExist = true;
         break;
       }
@@ -1827,7 +1823,7 @@ export default class KoniExtension extends Extension {
       const tokenMap = chainRegistryMap[data.chain].tokenMap;
 
       for (const token of Object.values(tokenMap)) {
-        if (token?.contractAddress?.toLowerCase() === data.smartContract.toLowerCase()) {
+        if (token?.contractAddress?.toLowerCase() === data.contractAddress.toLowerCase()) {
           isExist = true;
           break;
         }
@@ -1843,7 +1839,7 @@ export default class KoniExtension extends Extension {
       };
     }
 
-    const { contractError, decimals, name, symbol } = await validateCustomToken(data.smartContract, data.type, state.getWeb3Api(data.chain), state.getDotSamaApi(data.chain), data.contractCaller);
+    const { contractError, decimals, name, symbol } = await validateCustomToken(data.contractAddress, data.type, state.getWeb3Api(data.chain), state.getDotSamaApi(data.chain), data.contractCaller);
 
     return {
       name,
@@ -3855,8 +3851,6 @@ export default class KoniExtension extends Extension {
         return this.resetDefaultNetwork();
       case 'pri(customTokenState.getSubscription)':
         return this.subscribeCustomTokenState(id, port);
-      case 'pri(customTokenState.getCustomTokenState)':
-        return this.getEvmTokenState();
       case 'pri(customTokenState.upsertCustomTokenState)':
         return this.upsertCustomToken(request as CustomToken);
       case 'pri(customTokenState.deleteMany)':

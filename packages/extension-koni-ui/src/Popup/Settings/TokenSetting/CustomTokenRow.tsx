@@ -1,7 +1,8 @@
 // Copyright 2019-2022 @polkadot/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { CustomToken, DeleteCustomTokenParams } from '@subwallet/extension-base/background/KoniTypes';
+import { _ChainAsset } from '@subwallet/extension-koni-base/services/chain-list/types';
+import { _DeleteCustomTokenParams } from '@subwallet/extension-koni-base/services/chain-service/types';
 import { ActionContext } from '@subwallet/extension-koni-ui/components';
 import Checkbox from '@subwallet/extension-koni-ui/components/Checkbox';
 import { store } from '@subwallet/extension-koni-ui/stores';
@@ -12,9 +13,9 @@ import styled from 'styled-components';
 
 interface Props extends ThemeProps {
   className?: string;
-  item: CustomToken;
-  handleSelected: (val: DeleteCustomTokenParams) => void;
-  handleUnselected: (val: DeleteCustomTokenParams) => void;
+  item: _ChainAsset;
+  handleSelected: (val: _DeleteCustomTokenParams) => void;
+  handleUnselected: (val: _DeleteCustomTokenParams) => void;
 }
 
 function CustomTokenRow ({ className, handleSelected, handleUnselected, item }: Props): React.ReactElement {
@@ -31,18 +32,18 @@ function CustomTokenRow ({ className, handleSelected, handleUnselected, item }: 
 
     if (checked) {
       handleSelected({
-        smartContract: item.smartContract,
-        chain: item.chain,
-        type: item.type
+        contractAddress: item?.metadata?.contractAddress as string,
+        originChain: item.originChain,
+        type: item.assetType
       });
     } else {
       handleUnselected({
-        smartContract: item.smartContract,
-        chain: item.chain,
-        type: item.type
+        contractAddress: item?.metadata?.contractAddress as string,
+        originChain: item.originChain,
+        type: item.assetType
       });
     }
-  }, [handleSelected, handleUnselected, item.chain, item.smartContract, item.type]);
+  }, [handleSelected, handleUnselected, item.assetType, item?.metadata?.contractAddress, item.originChain]);
 
   return (
     <div

@@ -42,7 +42,7 @@ export function upsertCustomToken (targetToken: CustomToken, customTokenState: C
   let newTokenList = tokenList;
 
   for (const token of tokenList) {
-    if (isEqualContractAddress(token.smartContract, targetToken.smartContract) && token.chain === targetToken.chain) {
+    if (isEqualContractAddress(token.contractAddress, targetToken.contractAddress) && token.chain === targetToken.chain) {
       isExisted = true;
       break;
     }
@@ -52,11 +52,11 @@ export function upsertCustomToken (targetToken: CustomToken, customTokenState: C
     newTokenList.push(targetToken);
   } else {
     newTokenList = tokenList.map((token) => {
-      if (isEqualContractAddress(token.smartContract, targetToken.smartContract)) {
+      if (isEqualContractAddress(token.contractAddress, targetToken.contractAddress)) {
         if (token.isDeleted) {
           return {
             name: token.name,
-            smartContract: token.smartContract,
+            contractAddress: token.contractAddress,
             chain: token.chain,
             type: token.type
           };
@@ -107,7 +107,7 @@ export function deleteCustomTokens (targetTokens: DeleteCustomTokenParams[], cus
     let processed = false;
 
     for (let index = 0; index < tokenList.length; index++) {
-      if (isEqualContractAddress(tokenList[index].smartContract, targetToken.smartContract) &&
+      if (isEqualContractAddress(tokenList[index].contractAddress, targetToken.contractAddress) &&
         tokenList[index].chain === targetToken.chain &&
         tokenList[index].type === targetToken.type) {
         if (tokenList[index].isCustom) {
@@ -139,7 +139,7 @@ export function deleteCustomTokens (targetTokens: DeleteCustomTokenParams[], cus
         let deleteKey = '';
 
         for (const [key, token] of Object.entries(chainRegistry.tokenMap)) {
-          if (token.contractAddress && isEqualContractAddress(token.contractAddress, targetToken.smartContract) && token.type === targetToken.type) {
+          if (token.contractAddress && isEqualContractAddress(token.contractAddress, targetToken.contractAddress) && token.type === targetToken.type) {
             deleteKey = key;
             break;
           }

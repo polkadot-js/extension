@@ -3,13 +3,13 @@
 
 /* eslint @typescript-eslint/no-empty-interface: "off" */
 
-import {_ChainAsset, _ChainInfo} from '@subwallet/extension-koni-base/services/chain-list/types';
+import {_AssetType, _ChainAsset, _ChainInfo} from '@subwallet/extension-koni-base/services/chain-list/types';
 import Web3 from 'web3';
 
-import { ApiPromise } from '@polkadot/api';
-import { SubmittableExtrinsicFunction } from '@polkadot/api/promise/types';
-import { ChainProperties, ChainType } from '@polkadot/types/interfaces';
-import { Registry } from '@polkadot/types/types';
+import {ApiPromise} from '@polkadot/api';
+import {SubmittableExtrinsicFunction} from '@polkadot/api/promise/types';
+import {ChainProperties, ChainType} from '@polkadot/types/interfaces';
+import {Registry} from '@polkadot/types/types';
 
 export interface _DataMap {
   chainInfoMap: Record<string, _ChainInfo>,
@@ -100,7 +100,7 @@ export type _NetworkUpsertParams = {
   chainSpec: {
     // Substrate
     genesisHash: string,
-    paraId: number | null
+    paraId: number | null,
     addressPrefix: number,
 
     // EVM
@@ -113,3 +113,29 @@ export type _NetworkUpsertParams = {
 }
 
 export const _CUSTOM_NETWORK_PREFIX = 'custom-';
+
+export interface _DeleteCustomTokenParams {
+  contractAddress: string,
+  originChain: string,
+  type: _AssetType
+}
+
+export interface _ValidateCustomTokenRequest {
+  contractAddress: string,
+  originChain: string,
+  type: _AssetType,
+  contractCaller?: string
+}
+
+export interface ValidateCustomTokenResponse {
+  name: string,
+  symbol: string,
+  decimals: number | null,
+  isExist: boolean,
+  contractError: boolean
+}
+
+export const _FUNGIBLE_CONTRACT_STANDARDS = [
+  _AssetType.ERC20,
+  _AssetType.PSP22
+];

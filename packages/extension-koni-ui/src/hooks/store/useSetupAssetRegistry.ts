@@ -8,7 +8,7 @@ import { useEffect } from 'react';
 
 function updateAssetRegistry (map: Record<string, _ChainAsset>): void {
   console.log('assetRegistry', map);
-  // store.dispatch({ type: 'assetRegistry/update', payload: map });
+  store.dispatch({ type: 'assetRegistry/update', payload: map });
 }
 
 export default function useSetupAssetRegistry (): void {

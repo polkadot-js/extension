@@ -728,6 +728,7 @@ function NetworkEdit ({ className }: Props): React.ReactElement {
         />
 
         <InputWithLabel
+          disabled={mode === 'edit'}
           label={t<string>('Symbol (*)')}
           onChange={onChangeChainSymbol}
           value={chainEditInfo.symbol || ''}

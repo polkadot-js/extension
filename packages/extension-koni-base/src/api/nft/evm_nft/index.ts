@@ -101,9 +101,12 @@ export class EvmNftApi extends BaseNftApi {
       if (Number(balance) === 0) {
         // nftParams.updateReady(true);
         nftParams.updateNftIds(this.chain, address, smartContract, nftIds);
+        console.log('no balance for ', address, smartContract);
 
         return;
       }
+
+      console.log('balance for ', balance);
 
       const itemIndexes: number[] = [];
 
@@ -117,6 +120,8 @@ export class EvmNftApi extends BaseNftApi {
           const tokenId = await contract.methods.tokenOfOwnerByIndex(address, i).call() as number;
           // eslint-disable-next-line @typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-member-access
           const tokenURI = await contract.methods.tokenURI(tokenId).call() as string;
+
+          console.log('token Id, tokenURI', tokenId, tokenURI);
 
           const detailUrl = this.parseUrl(tokenURI);
 
@@ -180,8 +185,8 @@ export class EvmNftApi extends BaseNftApi {
       return;
     }
 
-    await Promise.all(this.evmContracts.map(async ({ name, smartContract }) => {
-      return await this.getItemsByCollection(smartContract, name, params);
+    await Promise.all(this.evmContracts.map(async ({ name, contractAddress }) => {
+      return await this.getItemsByCollection(contractAddress, name, params);
     }));
   }
 

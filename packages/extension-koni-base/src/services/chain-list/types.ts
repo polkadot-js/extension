@@ -46,7 +46,7 @@ export interface _ChainAsset {
   priceId: string | null,
   minAmount: string | null,
   assetType: _AssetType,
-  metadata: Record<any, any>,
+  metadata: Record<any, any> | null,
   multiChainAsset: string | null
 }
 

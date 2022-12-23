@@ -1,9 +1,9 @@
 // Copyright 2019-2022 @polkadot/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { FUNGIBLE_TOKEN_STANDARDS } from '@subwallet/extension-koni-base/api/tokens';
+import { _FUNGIBLE_CONTRACT_STANDARDS } from '@subwallet/extension-koni-base/services/chain-service/types';
 import { ActionContext, Button, ButtonArea, InputWithLabel } from '@subwallet/extension-koni-ui/components';
-import useGetNetworkJson from '@subwallet/extension-koni-ui/hooks/screen/home/useGetNetworkJson';
+import useFetchChainInfo from '@subwallet/extension-koni-ui/hooks/screen/common/useGetChainInfo';
 import useToast from '@subwallet/extension-koni-ui/hooks/useToast';
 import useTranslation from '@subwallet/extension-koni-ui/hooks/useTranslation';
 import { upsertCustomToken } from '@subwallet/extension-koni-ui/messaging';
@@ -35,13 +35,13 @@ function CustomTokenEdit ({ className }: Props): React.ReactElement {
   const [isValidSymbol, setIsValidSymbol] = useState(true);
   const [isValidDecimals, setIsValidDecimals] = useState(true);
   const [isValidName, setIsValidName] = useState(true);
-  const networkJson = useGetNetworkJson(tokenInfo?.chain);
+  const chainInfo = useFetchChainInfo(tokenInfo.originChain);
 
   useEffect(() => {
-    if (!_tokenInfo.smartContract) {
+    if (!_tokenInfo?.metadata?.contractAddress) {
       _goBack();
     }
-  }, [_goBack, _tokenInfo.smartContract]);
+  }, [_goBack, _tokenInfo?.metadata]);
 
   const _onEditToken = useCallback(() => {
     if (isValidDecimals && isValidSymbol) {
@@ -115,11 +115,11 @@ function CustomTokenEdit ({ className }: Props): React.ReactElement {
         <InputWithLabel
           disabled={true}
           label={t<string>('Contract Address (*)')}
-          value={tokenInfo.smartContract || ''}
+          value={tokenInfo.metadata?.contractAddress as string || ''}
         />
 
         {
-          !FUNGIBLE_TOKEN_STANDARDS.includes(tokenInfo.type) &&
+          !_FUNGIBLE_CONTRACT_STANDARDS.includes(tokenInfo.assetType) &&
           <InputWithLabel
             label={t<string>('Token Name (*)')}
             onChange={onChangeName}
@@ -128,7 +128,7 @@ function CustomTokenEdit ({ className }: Props): React.ReactElement {
         }
 
         {
-          FUNGIBLE_TOKEN_STANDARDS.includes(tokenInfo.type) &&
+          _FUNGIBLE_CONTRACT_STANDARDS.includes(tokenInfo.assetType) &&
           <InputWithLabel
             disabled={true}
             label={t<string>('Symbol (*)')}
@@ -138,7 +138,7 @@ function CustomTokenEdit ({ className }: Props): React.ReactElement {
         }
 
         {
-          FUNGIBLE_TOKEN_STANDARDS.includes(tokenInfo.type) &&
+          _FUNGIBLE_CONTRACT_STANDARDS.includes(tokenInfo.assetType) &&
           <InputWithLabel
             disabled={true}
             label={t<string>('Decimals (*)')}
@@ -150,13 +150,13 @@ function CustomTokenEdit ({ className }: Props): React.ReactElement {
         <InputWithLabel
           disabled={true}
           label={t<string>('Chain')}
-          value={networkJson?.chain || ''}
+          value={chainInfo?.name || ''}
         />
 
         <InputWithLabel
           disabled={true}
           label={t<string>('Token Type')}
-          value={tokenInfo?.type?.toUpperCase() || ''}
+          value={tokenInfo?.assetType?.toUpperCase() || ''}
         />
 
         <ButtonArea>

@@ -216,7 +216,7 @@ export const getRegistry = async (networkKey: string, api: ApiPromise, customTok
     for (const customToken of customTokens) {
       if (customToken.chain === networkKey && customToken.symbol && !(customToken.symbol in tokenMap)) {
         tokenMap[customToken.symbol] = {
-          contractAddress: customToken.smartContract,
+          contractAddress: customToken.contractAddress,
           isMainToken: false,
           name: customToken.name,
           symbol: customToken.symbol,

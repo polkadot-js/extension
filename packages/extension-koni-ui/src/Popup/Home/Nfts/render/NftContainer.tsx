@@ -148,6 +148,7 @@ function NftContainer (
               // @ts-ignore
               return <div key={`${item.chain || index}/${item.collectionId}`}>
                 <NftCollectionPreview
+                  collectionImage={item.image}
                   data={item}
                   onClick={handleShowCollectionDetail}
                 />

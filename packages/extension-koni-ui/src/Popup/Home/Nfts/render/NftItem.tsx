@@ -118,12 +118,12 @@ function NftItem ({ className, collectionId, collectionImage, data, onClickBack 
         void chrome.tabs.create({ url: data?.external_url, active: true }).then(() => console.log('redirecting'));
       } else if (!loading) {
         // eslint-disable-next-line no-void
-        void chrome.tabs.create({ url: data?.image, active: true }).then(() => console.log('redirecting'));
+        void chrome.tabs.create({ url: data?.image || collectionImage, active: true }).then(() => console.log('redirecting'));
       }
     } catch (e) {
       console.log('redirecting to a new tab');
     }
-  }, [data.external_url, data?.image, loading]);
+  }, [collectionImage, data.external_url, data?.image, loading]);
 
   const getItemImage = useCallback(() => {
     if (data.image) {

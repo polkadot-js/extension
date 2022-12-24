@@ -2,6 +2,12 @@
 
 ## master
 
+Contributed:
+
+- Fix naming of `getAllMetadata` message (Thanks to https://github.com/Nick-1979)
+- Add more zh translations (Thanks to https://github.com/chendatony31)
+- Typo fix (Thanks to https://github.com/Nick-1979)
+
 Changes:
 
 - Ensure that `EXTENSION_PREFIX` is always set as part of `@polkadot/extension-base`

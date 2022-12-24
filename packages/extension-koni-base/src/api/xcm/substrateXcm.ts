@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { ApiProps, NetworkJson, TokenInfo } from '@subwallet/extension-base/background/KoniTypes';
-import { POLKADOT_UNLIMITED_WEIGHT, getMultiLocationFromParachain, getReceiverLocation, SupportedCrossChainsMap } from '@subwallet/extension-koni-base/api/xcm/utils';
+import { getMultiLocationFromParachain, getReceiverLocation, POLKADOT_UNLIMITED_WEIGHT, SupportedCrossChainsMap } from '@subwallet/extension-koni-base/api/xcm/utils';
 import { parseNumberToDisplay } from '@subwallet/extension-koni-base/utils';
 
 import { ApiPromise } from '@polkadot/api';

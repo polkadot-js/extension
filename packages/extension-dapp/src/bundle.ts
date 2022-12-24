@@ -143,18 +143,21 @@ export async function web3Accounts ({ accountType, extensions, genesisHash, ss58
   const injected = await web3EnablePromise;
 
   const retrieved = await Promise.all(
-    injected.filter(
-      ({ name: source }) => !extensions || extensions.includes(source)
-    ).map(async ({ accounts, name: source }): Promise<InjectedAccountWithMeta[]> => {
-      try {
-        const list = await accounts.get();
+    injected
+      .filter(({ name: source }) =>
+        !extensions ||
+        extensions.includes(source)
+      )
+      .map(async ({ accounts, name: source }): Promise<InjectedAccountWithMeta[]> => {
+        try {
+          const list = await accounts.get();
 
-        return mapAccounts(source, filterAccounts(list, genesisHash, accountType), ss58Format);
-      } catch (error) {
-        // cannot handle this one
-        return [];
-      }
-    })
+          return mapAccounts(source, filterAccounts(list, genesisHash, accountType), ss58Format);
+        } catch (error) {
+          // cannot handle this one
+          return [];
+        }
+      })
   );
 
   retrieved.forEach((result): void => {

@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { ApiProps, NetworkJson, TokenInfo } from '@subwallet/extension-base/background/KoniTypes';
-import { FOUR_INSTRUCTIONS_WEIGHT, getMultiLocationFromParachain, getReceiverLocation, SupportedCrossChainsMap } from '@subwallet/extension-koni-base/api/xcm/utils';
+import { POLKADOT_UNLIMITED_WEIGHT, getMultiLocationFromParachain, getReceiverLocation, SupportedCrossChainsMap } from '@subwallet/extension-koni-base/api/xcm/utils';
 import { parseNumberToDisplay } from '@subwallet/extension-koni-base/utils';
 
 import { ApiPromise } from '@polkadot/api';
@@ -52,7 +52,7 @@ export async function substrateEstimateCrossChainFee (
         tokenIdentity,
         value,
         getMultiLocationFromParachain(originNetworkKey, destinationNetworkKey, networkMap, to),
-        FOUR_INSTRUCTIONS_WEIGHT
+        POLKADOT_UNLIMITED_WEIGHT
       );
 
       const paymentInfo = await extrinsic.paymentInfo(fromKeypair);
@@ -92,7 +92,7 @@ export async function substrateEstimateCrossChainFee (
             ]
           },
           0,
-          'Unlimited'
+          POLKADOT_UNLIMITED_WEIGHT
         );
 
         const paymentInfo = await extrinsic.paymentInfo(fromKeypair);
@@ -168,7 +168,7 @@ export function substrateGetXcmExtrinsic (
       tokenIdentity,
       value,
       getMultiLocationFromParachain(originNetworkKey, destinationNetworkKey, networkMap, to),
-      FOUR_INSTRUCTIONS_WEIGHT
+      POLKADOT_UNLIMITED_WEIGHT
     );
   }
 
@@ -203,7 +203,7 @@ export function substrateGetXcmExtrinsic (
         ]
       },
       0,
-      'Unlimited'
+      POLKADOT_UNLIMITED_WEIGHT
     );
   }
 

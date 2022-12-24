@@ -5,6 +5,9 @@
 Changes:
 
 - Ensure that `EXTENSION_PREFIX` is always set as part of `@polkadot/extension-base`
+- Allow for `genesisHash` filter to both `web3{Accounts, AccountsSubscribe}`
+- Allow for transparent extension `ping` (as available)
+- Support for new privacy-preserving `connect(<source>)` interfaces (non-default)
 
 
 ## 0.44.6 Aug 21, 2022

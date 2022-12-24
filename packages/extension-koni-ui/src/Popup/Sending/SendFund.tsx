@@ -337,6 +337,11 @@ function SendFund ({ chainRegistryMap, className, defaultValue, networkMap }: Co
     setShowTxModal(false);
   }, []);
 
+  const onToggleIsAll = useCallback(() => {
+    setAmount(BN_ZERO);
+    setIsAll(!isAll);
+  }, [isAll]);
+
   return (
     <>
       {!isShowTxResult
@@ -399,13 +404,13 @@ function SendFund ({ chainRegistryMap, className, defaultValue, networkMap }: Co
                 <Toggle
                   className='typeToggle'
                   label={t<string>('Transfer the full account balance, reap the sender')}
-                  onChange={setIsAll}
+                  onChange={onToggleIsAll}
                   value={isAll}
                 />
               </div>
             )}
 
-            {!(errors && errors.length) && warnings && warnings.length
+            {canMakeTransfer && warnings && warnings.length
               ? warnings.map((w, index) => (
                 <Warning
                   className='send-fund-warning'

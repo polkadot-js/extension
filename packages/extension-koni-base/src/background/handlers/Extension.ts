@@ -1221,9 +1221,10 @@ export default class KoniExtension extends Extension {
 
     if (isEthereumAddress(from) && isEthereumAddress(to)) {
       // @ts-ignore
-      [fromAccountFreeBalance, toAccountFreeBalance] = await Promise.all([
+      [fromAccountFreeBalance, toAccountFreeBalance, fromAccountNativeBalance] = await Promise.all([
         getFreeBalance(networkKey, from, dotSamaApiMap, web3ApiMap, token),
-        getFreeBalance(networkKey, to, dotSamaApiMap, web3ApiMap, token)
+        getFreeBalance(networkKey, to, dotSamaApiMap, web3ApiMap, token),
+        getFreeBalance(networkKey, from, dotSamaApiMap, web3ApiMap, mainToken)
       ]);
       const txVal: string = transferAll ? fromAccountFreeBalance : (value || '0');
 

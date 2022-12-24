@@ -243,3 +243,7 @@ export async function batchRestore (file: KeyringPairs$Json, password: string): 
 export async function setNotification (notification: string): Promise<boolean> {
   return sendMessage('pri(settings.notification)', notification);
 }
+
+export async function ping (): Promise<boolean> {
+  return sendMessage('pri(ping)', null);
+}

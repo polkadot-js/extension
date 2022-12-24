@@ -99,8 +99,9 @@ export interface Injected {
 }
 
 export interface InjectedWindowProvider {
-  enable: (origin: string) => Promise<Injected>;
-  version: string;
+  connect?: (origin: string) => Promise<InjectedExtension>;
+  enable?: (origin: string) => Promise<Injected>;
+  version?: string;
 }
 
 export interface InjectedWindow extends This {

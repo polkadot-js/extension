@@ -1,9 +1,9 @@
 // Copyright 2019-2022 @polkadot/extension-dapp authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import type { Injected, InjectedAccount, InjectedAccountWithMeta, InjectedExtension, InjectedExtensionInfo, InjectedProviderWithMeta, InjectedWindow, ProviderList, Unsubcall, Web3AccountsOptions } from '@polkadot/extension-inject/types';
+import type { InjectedAccount, InjectedAccountWithMeta, InjectedExtension, InjectedProviderWithMeta, InjectedWindow, ProviderList, Unsubcall, Web3AccountsOptions } from '@polkadot/extension-inject/types';
 
-import { isPromise, u8aEq } from '@polkadot/util';
+import { isPromise, objectSpread, u8aEq } from '@polkadot/util';
 import { decodeAddress, encodeAddress } from '@polkadot/util-crypto';
 
 import { documentReadyPromise } from './util';
@@ -20,7 +20,10 @@ win.injectedWeb3 = win.injectedWeb3 || {};
 
 // true when anything has been injected and is available
 function web3IsInjected (): boolean {
-  return Object.keys(win.injectedWeb3).length !== 0;
+  return Object
+    .values(win.injectedWeb3)
+    .filter(({ connect, enable }) => !!(connect || enable))
+    .length !== 0;
 }
 
 // helper to throw a consistent error when not enabled
@@ -55,18 +58,31 @@ let web3EnablePromise: Promise<InjectedExtension[]> | null = null;
 
 export { isWeb3Injected, web3EnablePromise };
 
-function getWindowExtensions (originName: string): Promise<[InjectedExtensionInfo, Injected | void][]> {
-  return Promise.all(
-    Object.entries(win.injectedWeb3).map(
-      ([name, { enable, version }]): Promise<[InjectedExtensionInfo, Injected | void]> =>
-        Promise.all([
-          Promise.resolve({ name, version }),
-          enable(originName).catch((error: Error): void => {
-            console.error(`Error initializing ${name}: ${error.message}`);
-          })
-        ])
+function getWindowExtensions (originName: string): Promise<InjectedExtension[]> {
+  return Promise
+    .all(
+      Object
+        .entries(win.injectedWeb3)
+        .map(([nameOrHash, { connect, enable, version }]): Promise<(InjectedExtension | void)> =>
+          Promise
+            .resolve()
+            .then(() =>
+              connect
+                // new style, returning all info
+                ? connect(originName)
+                : enable
+                  // previous interface, leakages on name/version
+                  ? enable(originName).then((e) =>
+                    objectSpread<InjectedExtension>({ name: nameOrHash, version: version || 'unknown' }, e)
+                  )
+                  : Promise.reject(new Error('No connect(..) or enable(...) hook found'))
+            )
+            .catch(({ message }: Error): void => {
+              console.error(`Error initializing ${nameOrHash}: ${message}`);
+            })
+        )
     )
-  );
+    .then((exts) => exts.filter((e): e is InjectedExtension => !!e));
 }
 
 // enables all the providers found on the injected window interface
@@ -84,29 +100,30 @@ export function web3Enable (originName: string, compatInits: (() => Promise<bool
       initCompat.then(() =>
         getWindowExtensions(originName)
           .then((values): InjectedExtension[] =>
-            values
-              .filter((value): value is [InjectedExtensionInfo, Injected] => !!value[1])
-              .map(([info, ext]): InjectedExtension => {
-                // if we don't have an accounts subscriber, add a single-shot version
-                if (!ext.accounts.subscribe) {
-                  ext.accounts.subscribe = (cb: (accounts: InjectedAccount[]) => void | Promise<void>): Unsubcall => {
-                    ext.accounts.get().then(cb).catch(console.error);
+            values.map((e): InjectedExtension => {
+              // if we don't have an accounts subscriber, add a single-shot version
+              if (!e.accounts.subscribe) {
+                e.accounts.subscribe = (cb: (accounts: InjectedAccount[]) => void | Promise<void>): Unsubcall => {
+                  e.accounts
+                    .get()
+                    .then(cb)
+                    .catch(console.error);
 
-                    return (): void => {
-                      // no ubsubscribe needed, this is a single-shot
-                    };
+                  return (): void => {
+                    // no ubsubscribe needed, this is a single-shot
                   };
-                }
+                };
+              }
 
-                return { ...info, ...ext };
-              })
+              return e;
+            })
           )
           .catch((): InjectedExtension[] => [])
           .then((values): InjectedExtension[] => {
             const names = values.map(({ name, version }): string => `${name}/${version}`);
 
             isWeb3Injected = web3IsInjected();
-            console.log(`web3Enable: Enabled ${values.length} extension${values.length !== 1 ? 's' : ''}: ${names.join(', ')}`);
+            console.info(`web3Enable: Enabled ${values.length} extension${values.length !== 1 ? 's' : ''}: ${names.join(', ')}`);
 
             return values;
           })
@@ -144,9 +161,7 @@ export async function web3Accounts ({ accountType, extensions, genesisHash, ss58
     accounts.push(...result);
   });
 
-  const addresses = accounts.map(({ address }) => address);
-
-  console.log(`web3Accounts: Found ${accounts.length} address${accounts.length !== 1 ? 'es' : ''}: ${addresses.join(', ')}`);
+  console.info(`web3Accounts: Found ${accounts.length} address${accounts.length !== 1 ? 'es' : ''}`);
 
   return accounts;
 }

@@ -625,6 +625,9 @@ export default class Extension {
       case 'pri(json.account.info)':
         return this.jsonGetAccountInfo(request as KeyringPair$Json);
 
+      case 'pri(ping)':
+        return Promise.resolve(true);
+
       case 'pri(seed.create)':
         return this.seedCreate(request as RequestSeedCreate);
 

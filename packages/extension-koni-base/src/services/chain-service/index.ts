@@ -1,17 +1,34 @@
 // Copyright 2019-2022 @subwallet/extension-koni-base authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { ChainAssetMap, ChainInfoMap } from '@subwallet/extension-koni-base/services/chain-list';
-import { _ChainAsset, _ChainInfo, _DEFAULT_NETWORKS, _EvmInfo, _SubstrateInfo } from '@subwallet/extension-koni-base/services/chain-list/types';
-import { EvmChainHandler } from '@subwallet/extension-koni-base/services/chain-service/handler/EvmChainHandler';
-import { SubstrateChainHandler } from '@subwallet/extension-koni-base/services/chain-service/handler/SubstrateChainHandler';
-import { _CHAIN_VALIDATION_ERROR } from '@subwallet/extension-koni-base/services/chain-service/handler/types';
-import { _ChainState, _ConnectionStatus, _CUSTOM_NETWORK_PREFIX, _DataMap, _EvmApi, _NetworkUpsertParams, _SubstrateApi } from '@subwallet/extension-koni-base/services/chain-service/types';
-import { Subject } from 'rxjs';
+import {ChainAssetMap, ChainInfoMap} from '@subwallet/extension-koni-base/services/chain-list';
+import {
+  _AssetType,
+  _ChainAsset,
+  _ChainInfo,
+  _DEFAULT_NETWORKS,
+  _EvmInfo,
+  _SubstrateInfo
+} from '@subwallet/extension-koni-base/services/chain-list/types';
+import {EvmChainHandler} from '@subwallet/extension-koni-base/services/chain-service/handler/EvmChainHandler';
+import {
+  SubstrateChainHandler
+} from '@subwallet/extension-koni-base/services/chain-service/handler/SubstrateChainHandler';
+import {_CHAIN_VALIDATION_ERROR} from '@subwallet/extension-koni-base/services/chain-service/handler/types';
+import {
+  _ChainState,
+  _ConnectionStatus,
+  _CUSTOM_NETWORK_PREFIX,
+  _DataMap,
+  _EvmApi,
+  _NetworkUpsertParams,
+  _SubstrateApi
+} from '@subwallet/extension-koni-base/services/chain-service/types';
+import {Subject} from 'rxjs';
 import Web3 from 'web3';
 
-import { logger as createLogger } from '@polkadot/util/logger';
-import { Logger } from '@polkadot/util/types';
+import {logger as createLogger} from '@polkadot/util/logger';
+import {Logger} from '@polkadot/util/types';
 
 export class ChainService {
   private dataMap: _DataMap = {
@@ -143,6 +160,10 @@ export class ChainService {
     return true;
   }
 
+  public getSupportedSmartContractTypes () {
+    return [_AssetType.ERC20, _AssetType.ERC721, _AssetType.PSP22, _AssetType.PSP34];
+  }
+
   public resetChainInfoMap () {
     if (this.lockChainInfoMap) {
       return false;
@@ -220,10 +241,14 @@ export class ChainService {
           existentialDeposit: params.chainSpec.existentialDeposit,
           paraId: params.chainSpec.paraId,
           symbol: params.chainEditInfo.symbol,
-          genesisHash: params.chainSpec.genesisHash
+          genesisHash: params.chainSpec.genesisHash,
+          relaySlug: null,
+          supportStaking: params.chainSpec.paraId === null,
+          supportSmartContract: null
         };
       } else if (params.chainSpec.evmChainId !== null) {
         evmInfo = {
+          supportSmartContract: [_AssetType.ERC20, _AssetType.ERC721],
           blockExplorer: params.chainEditInfo.blockExplorer || null,
           decimals: params.chainSpec.decimals,
           evmChainId: params.chainSpec.evmChainId,

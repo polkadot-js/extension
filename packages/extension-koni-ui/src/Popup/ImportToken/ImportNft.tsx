@@ -3,11 +3,12 @@
 
 import { AddTokenRequestExternal, ConfirmationsQueueItem } from '@subwallet/extension-base/background/KoniTypes';
 import { _AssetType, _ChainAsset } from '@subwallet/extension-koni-base/services/chain-list/types';
+import { ValidateCustomTokenResponse } from '@subwallet/extension-koni-base/services/chain-service/types';
 import { isValidSubstrateAddress } from '@subwallet/extension-koni-base/utils';
 import { ActionContext, Button, ConfirmationsQueueContext, Dropdown, InputWithLabel } from '@subwallet/extension-koni-ui/components';
 import useGetContractSupportedChains from '@subwallet/extension-koni-ui/hooks/screen/import/useGetContractSupportedChains';
 import useTranslation from '@subwallet/extension-koni-ui/hooks/useTranslation';
-import { completeConfirmation, upsertCustomToken, validateCustomToken } from '@subwallet/extension-koni-ui/messaging';
+import { completeConfirmation, getSupportedContractTypes, upsertCustomToken, validateCustomToken } from '@subwallet/extension-koni-ui/messaging';
 import { Header } from '@subwallet/extension-koni-ui/partials';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
@@ -26,7 +27,8 @@ enum NftInfoActionType {
   UPDATE_CHAIN = 'UPDATE_CHAIN',
   UPDATE_CONTRACT = 'UPDATE_CONTRACT',
   UPDATE_METADATA = 'UPDATE_METADATA',
-  RESET_METADATA = 'RESET_METADATA'
+  RESET_METADATA = 'RESET_METADATA',
+  UPDATE_CONTRACT_TYPE = 'UPDATE_CONTRACT_TYPE'
 }
 
 interface NftInfoAction {
@@ -49,24 +51,90 @@ const initNftInfo: _ChainAsset = {
   assetType: _AssetType.ERC721
 };
 
+interface ValidationState {
+  isValidContract: boolean,
+  isValidName: boolean,
+  warning: string,
+  isValidContractType: boolean
+}
+
+enum ValidationStateActionType {
+  UPDATE_CONTRACT_VALIDATION = 'UPDATE_CONTRACT_VALIDATION',
+  UPDATE_NAME_VALIDATION = 'UPDATE_NAME_VALIDATION',
+  UPDATE_WARNING = 'UPDATE_WARNING',
+  UPDATE_CONTRACT_TYPE_VALIDATION = 'UPDATE_CONTRACT_TYPE_VALIDATION',
+  UPDATE_VALIDATION_INFO = 'UPDATE_VALIDATION_INFO'
+}
+
+interface ValidationStateAction {
+  type: ValidationStateActionType,
+  payload: Record<string, any> | boolean | string
+}
+
+const initValidationState: ValidationState = {
+  isValidContract: false,
+  isValidContractType: false,
+  isValidName: false,
+  warning: ''
+};
+
+function validationStateReducer (state: ValidationState, action: ValidationStateAction) {
+  switch (action.type) {
+    case ValidationStateActionType.UPDATE_NAME_VALIDATION:
+      return {
+        ...state,
+        isValidName: action.payload as boolean
+      };
+    case ValidationStateActionType.UPDATE_CONTRACT_VALIDATION:
+      return {
+        ...state,
+        isValidContract: action.payload as boolean
+      };
+    case ValidationStateActionType.UPDATE_WARNING:
+      return {
+        ...state,
+        warning: action.payload as string
+      };
+
+    case ValidationStateActionType.UPDATE_VALIDATION_INFO: {
+      const { isValidContract, warning } = action.payload as Record<string, any>;
+
+      return {
+        ...state,
+        isValidContract: isValidContract as boolean,
+        warning: warning as string
+      };
+    }
+
+    case ValidationStateActionType.UPDATE_CONTRACT_TYPE_VALIDATION:
+      return {
+        ...state,
+        isValidContractType: action.payload as boolean
+      };
+
+    default:
+      throw new Error();
+  }
+}
+
 function nftInfoReducer (state: _ChainAsset, action: NftInfoAction) {
   switch (action.type) {
     case NftInfoActionType.UPDATE_CHAIN:
       return {
         ...state,
-        chain: action.payload as string
+        originChain: action.payload as string
       } as _ChainAsset;
     case NftInfoActionType.UPDATE_CONTRACT:
       return {
         ...state,
-        contractAddress: action.payload as string
+        metadata: action.payload as Record<string, any>
       };
     case NftInfoActionType.RESET_METADATA:
       return {
         ...initNftInfo,
-        contractAddress: state.contractAddress,
-        type: state.type,
-        chain: state.chain
+        metadata: state.metadata,
+        assetType: state.assetType,
+        originChain: state.originChain
       };
 
     case NftInfoActionType.UPDATE_METADATA: {
@@ -75,9 +143,15 @@ function nftInfoReducer (state: _ChainAsset, action: NftInfoAction) {
       return {
         ...state,
         name: (payload.name || payload.name === '') ? payload.name as string : state.name,
-        type: payload.type as _AssetType || state.type
+        assetType: payload.type as _AssetType || state.assetType
       } as _ChainAsset;
     }
+
+    case NftInfoActionType.UPDATE_CONTRACT_TYPE:
+      return {
+        ...state,
+        assetType: action.payload as _AssetType
+      };
 
     default:
       throw new Error();
@@ -86,6 +160,14 @@ function nftInfoReducer (state: _ChainAsset, action: NftInfoAction) {
 
 function parseAddTokenRequests (requestMap: Record<string, ConfirmationsQueueItem<AddTokenRequestExternal>>) {
   const currentRequest = Object.values(requestMap)[0];
+
+  if (!currentRequest) {
+    return {
+      requestId: '',
+      externalNftInfo: initNftInfo
+    };
+  }
+
   const externalTokenInfo = currentRequest?.payload;
 
   const externalNftInfo: _ChainAsset = {
@@ -96,7 +178,7 @@ function parseAddTokenRequests (requestMap: Record<string, ConfirmationsQueueIte
       contractAddress: externalTokenInfo?.contractAddress || ''
     },
     name: externalTokenInfo?.name || '',
-    decimals: externalTokenInfo?.decimals || '',
+    decimals: externalTokenInfo?.decimals || null,
     minAmount: null,
     multiChainAsset: null,
     priceId: null,
@@ -109,95 +191,142 @@ function parseAddTokenRequests (requestMap: Record<string, ConfirmationsQueueIte
   };
 }
 
+interface ContractOptions {
+  text: string;
+  value: string;
+}
+
+function getContractOptions (contractTypes: string[]) {
+  const result: ContractOptions[] = [];
+
+  contractTypes.forEach((type) => {
+    result.push({
+      text: type,
+      value: type
+    });
+  });
+
+  return result;
+}
+
 function ImportNft ({ className = '' }: Props): React.ReactElement<Props> {
   const { t } = useTranslation();
   const addTokenRequest = useContext(ConfirmationsQueueContext).addTokenRequest;
-  console.log('addTokenRequest', addTokenRequest);
-  const {externalNftInfo, requestId} = parseAddTokenRequests(addTokenRequest);
-
-  console.log(requestId);
-
-  const chainOptions = useGetContractSupportedChains();
+  const { externalNftInfo, requestId } = parseAddTokenRequests(addTokenRequest);
   const { account: currentAccount } = useSelector((state: RootState) => state.currentAccount);
 
-  const [nftInfo, dispatchNftInfo] = useReducer(nftInfoReducer, externalNftInfo || { ...initNftInfo, originChain: chainOptions[0].value || '' });
+  const [nftInfo, dispatchNftInfo] = useReducer(nftInfoReducer, externalNftInfo || initNftInfo);
+  const [validationState, dispatchValidationState] = useReducer(validationStateReducer, initValidationState);
 
-  const [isValidContract, setIsValidContract] = useState(true);
-  const [isValidName, setIsValidName] = useState(true);
-  const [warning, setWarning] = useState('');
+  const [contractOptions, setContractOptions] = useState<ContractOptions[]>([]);
+  const chainOptions = useGetContractSupportedChains(nftInfo.assetType);
+
+  // const [isValidContract, setIsValidContract] = useState(true);
+  // const [isValidName, setIsValidName] = useState(true);
+  // const [warning, setWarning] = useState('');
+
+  useEffect(() => {
+    const getContractTypes = async () => {
+      const resp = await getSupportedContractTypes();
+
+      const contractOptions = getContractOptions(resp);
+
+      setContractOptions(contractOptions);
+    };
+
+    let needUpdate = true;
+
+    if (needUpdate) {
+      getContractTypes().then().catch(console.error);
+    }
+
+    return () => {
+      needUpdate = false;
+    };
+  }, []);
 
   const onAction = useContext(ActionContext);
   const _goBack = useCallback(
     () => {
-      if (currentRequest) {
+      if (requestId !== '') {
         completeConfirmation('addTokenRequest', { id: requestId, isApproved: false }).catch(console.error);
       }
 
       window.localStorage.setItem('popupNavigation', '/');
       onAction('/');
-    },
-    [currentRequest, onAction]
+    }, [onAction, requestId]
   );
 
   const onChangeContractAddress = useCallback((val: string) => {
-    setWarning('');
-    dispatchNftInfo({ type: NftInfoActionType.UPDATE_CONTRACT, payload: val }); // ss58 address is case-sensitive but ETH address is not
+    // setWarning('');
+    dispatchValidationState({ type: ValidationStateActionType.UPDATE_WARNING, payload: '' });
+    dispatchNftInfo({ type: NftInfoActionType.UPDATE_CONTRACT, payload: { contractAddress: val } }); // ss58 address is case-sensitive but ETH address is not
   }, []);
 
   useEffect(() => {
-    if (nftInfo.contractAddress !== '') {
+    if (nftInfo.metadata?.contractAddress !== '') {
       let tokenType: _AssetType | undefined; // set token type
       const isValidContractCaller = isValidSubstrateAddress(currentAccount?.address as string);
 
-      // TODO: this should be done manually by user when there are more token standards
-      if (isEthereumAddress(nftInfo.contractAddress)) {
+      // TODO: setting tokenType should be done manually by user when there are more token standards
+      if (isEthereumAddress(nftInfo.metadata?.contractAddress as string)) {
         tokenType = _AssetType.ERC721;
-      } else if (isValidSubstrateAddress(nftInfo.contractAddress)) {
+      } else if (isValidSubstrateAddress(nftInfo.metadata?.contractAddress as string)) {
         tokenType = _AssetType.PSP34;
       }
 
       if (!tokenType) { // if not valid EVM contract or WASM contract
-        setIsValidContract(false);
+        // setIsValidContract(false);
+        // setWarning('Invalid contract address');
+        dispatchValidationState({ type: ValidationStateActionType.UPDATE_VALIDATION_INFO, payload: { isValidContract: false, warning: 'Invalid contract address' } });
         dispatchNftInfo({ type: NftInfoActionType.UPDATE_METADATA, payload: { name: '' } });
-        setWarning('Invalid contract address');
       } else {
         validateCustomToken({
-          contractAddress: nftInfo.contractAddress,
-          chain: nftInfo.chain,
+          originChain: nftInfo.originChain,
+          contractAddress: nftInfo.metadata?.contractAddress as string,
           type: tokenType,
           contractCaller: isValidContractCaller ? currentAccount?.address as string : undefined
         })
-          .then((resp) => {
+          .then((_resp) => {
+            const resp = _resp as ValidateCustomTokenResponse;
+
             if (resp.isExist) {
-              setWarning('This token has already been added');
-              setIsValidContract(false);
+              // setWarning('This token has already been added');
+              // setIsValidContract(false);
+              dispatchValidationState({ type: ValidationStateActionType.UPDATE_VALIDATION_INFO, payload: { isValidContract: false, warning: 'This token has already been added' } });
             } else {
               if (resp.contractError) {
-                setIsValidContract(false);
-                setWarning('Invalid contract for the selected chain');
+                // setIsValidContract(false);
+                // setWarning('Invalid contract for the selected chain');
 
+                dispatchValidationState({ type: ValidationStateActionType.UPDATE_VALIDATION_INFO, payload: { isValidContract: false, warning: 'Invalid contract for the selected chain' } });
                 dispatchNftInfo({ type: NftInfoActionType.RESET_METADATA, payload: {} });
               } else {
-                setIsValidContract(true);
+                // setIsValidContract(true);
+
+                dispatchValidationState({ type: ValidationStateActionType.UPDATE_CONTRACT_VALIDATION, payload: true });
                 dispatchNftInfo({ type: NftInfoActionType.UPDATE_METADATA, payload: { name: resp.name, type: tokenType } });
               }
             }
           })
           .catch(() => {
-            setWarning('Invalid contract for the selected chain');
-            setIsValidContract(false);
+            // setWarning('Invalid contract for the selected chain');
+            // setIsValidContract(false);
 
+            dispatchValidationState({ type: ValidationStateActionType.UPDATE_VALIDATION_INFO, payload: { isValidContract: false, warning: 'Invalid contract for the selected chain' } });
             dispatchNftInfo({ type: NftInfoActionType.RESET_METADATA, payload: {} });
           });
       }
     }
-  }, [nftInfo.contractAddress, nftInfo.chain, currentAccount?.address]);
+  }, [currentAccount?.address, nftInfo.metadata?.contractAddress, nftInfo.originChain]);
 
   const onChangeName = useCallback((val: string) => {
     if (val.split(' ').join('') === '') {
-      setIsValidName(false);
+      // setIsValidName(false);
+      dispatchValidationState({ type: ValidationStateActionType.UPDATE_NAME_VALIDATION, payload: false });
     } else {
-      setIsValidName(true);
+      // setIsValidName(true);
+      dispatchValidationState({ type: ValidationStateActionType.UPDATE_NAME_VALIDATION, payload: false });
     }
 
     dispatchNftInfo({ type: NftInfoActionType.UPDATE_METADATA, payload: { name: val } });
@@ -206,33 +335,50 @@ function ImportNft ({ className = '' }: Props): React.ReactElement<Props> {
   const onSelectChain = useCallback((val: any) => {
     const _chain = val as string;
 
-    if (_chain !== nftInfo.chain) {
-      setWarning('');
+    if (_chain !== nftInfo.originChain) {
+      // setWarning('');
+      dispatchValidationState({ type: ValidationStateActionType.UPDATE_WARNING, payload: '' });
     }
 
     dispatchNftInfo({ type: NftInfoActionType.UPDATE_CHAIN, payload: _chain });
-  }, [nftInfo.chain]);
+  }, [nftInfo.originChain]);
+
+  const onSelectContractType = useCallback((val: any) => {
+    const contractType = val as _AssetType;
+
+    if (contractType !== nftInfo.assetType) {
+      dispatchValidationState({ type: ValidationStateActionType.UPDATE_WARNING, payload: '' });
+    }
+
+    dispatchNftInfo({ type: NftInfoActionType.UPDATE_CONTRACT_TYPE, payload: contractType });
+  }, [nftInfo.assetType]);
 
   const handleAddToken = useCallback(() => {
-    setWarning('');
+    // setWarning('');
+    dispatchValidationState({ type: ValidationStateActionType.UPDATE_WARNING, payload: '' });
 
-    if (currentRequest) {
-      completeConfirmation('addTokenRequest', { id: currentRequest.id, isApproved: true }).catch(console.error);
+    if (requestId.length > 0) {
+      completeConfirmation('addTokenRequest', { id: requestId, isApproved: true }).catch(console.error);
     }
 
     upsertCustomToken(nftInfo)
       .then((resp) => {
         if (resp) {
-          setWarning(`Successfully added a NFT collection on ${nftInfo.chain}`);
+          // setWarning(`Successfully added a NFT collection on ${nftInfo.originChain}`);
+          dispatchValidationState({ type: ValidationStateActionType.UPDATE_WARNING, payload: `Successfully added a NFT collection on ${nftInfo.originChain}` });
           _goBack();
         } else {
-          setWarning('An error has occurred. Please try again later');
+          // setWarning('An error has occurred. Please try again later');
+          dispatchValidationState({ type: ValidationStateActionType.UPDATE_WARNING, payload: 'An error has occurred. Please try again later' });
         }
       })
       .catch(() => {
-        setWarning('An error has occurred. Please try again later');
+        // setWarning('An error has occurred. Please try again later');
+        dispatchValidationState({ type: ValidationStateActionType.UPDATE_WARNING, payload: 'An error has occurred. Please try again later' });
       });
-  }, [_goBack, currentRequest, nftInfo]);
+  }, [_goBack, nftInfo, requestId]);
+
+  console.log(nftInfo);
 
   return (
     <div className={className}>
@@ -246,15 +392,24 @@ function ImportNft ({ className = '' }: Props): React.ReactElement<Props> {
         <InputWithLabel
           label={'NFT Contract Address (*)'}
           onChange={onChangeContractAddress}
-          value={nftInfo.contractAddress}
+          value={nftInfo.metadata?.contractAddress as string}
         />
 
         <div style={{ marginTop: '12px' }}>
           <Dropdown
-            label={'Chain (*)'}
+            label={t<string>('Contract type (*)')}
+            onChange={onSelectContractType}
+            options={contractOptions}
+            value={nftInfo.assetType as string}
+          />
+        </div>
+
+        <div style={{ marginTop: '12px' }}>
+          <Dropdown
+            label={t<string>('Chain (*)')}
             onChange={onSelectChain}
             options={chainOptions}
-            value={nftInfo.chain}
+            value={nftInfo.originChain}
           />
         </div>
 
@@ -265,7 +420,7 @@ function ImportNft ({ className = '' }: Props): React.ReactElement<Props> {
         />
       </div>
       <div className={'add-token-container'}>
-        <div className='warning'>{warning}</div>
+        <div className='warning'>{validationState.warning}</div>
         <Button
           className={'cancel-button'}
           onClick={_goBack}
@@ -274,7 +429,7 @@ function ImportNft ({ className = '' }: Props): React.ReactElement<Props> {
         </Button>
         <Button
           className={'add-token-button'}
-          isDisabled={!isValidContract || !isValidName || nftInfo.contractAddress === '' || nftInfo.name === '' || chainOptions.length === 0}
+          isDisabled={!validationState.isValidContractType || !validationState.isValidContract || !validationState.isValidName || nftInfo.metadata?.contractAddress === '' || nftInfo.name === '' || chainOptions.length === 0}
           onClick={handleAddToken}
         >
           {t<string>('Add NFT')}

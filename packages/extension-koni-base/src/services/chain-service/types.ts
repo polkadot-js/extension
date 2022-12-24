@@ -3,13 +3,13 @@
 
 /* eslint @typescript-eslint/no-empty-interface: "off" */
 
-import {_AssetType, _ChainAsset, _ChainInfo} from '@subwallet/extension-koni-base/services/chain-list/types';
+import { _AssetType, _ChainAsset, _ChainInfo } from '@subwallet/extension-koni-base/services/chain-list/types';
 import Web3 from 'web3';
 
-import {ApiPromise} from '@polkadot/api';
-import {SubmittableExtrinsicFunction} from '@polkadot/api/promise/types';
-import {ChainProperties, ChainType} from '@polkadot/types/interfaces';
-import {Registry} from '@polkadot/types/types';
+import { ApiPromise } from '@polkadot/api';
+import { SubmittableExtrinsicFunction } from '@polkadot/api/promise/types';
+import { ChainProperties, ChainType } from '@polkadot/types/interfaces';
+import { Registry } from '@polkadot/types/types';
 
 export interface _DataMap {
   chainInfoMap: Record<string, _ChainInfo>,

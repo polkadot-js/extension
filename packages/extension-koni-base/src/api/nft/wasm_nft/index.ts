@@ -330,7 +330,7 @@ export class WasmNftApi extends BaseNftApi {
 
     const apiPromise = this.dotSamaApi?.api as ApiPromise;
 
-    await Promise.all(this.wasmContracts.map(async ({ name, contractAddress }) => {
+    await Promise.all(this.wasmContracts.map(async ({ contractAddress, name }) => {
       const contractPromise = getPSP34ContractPromise(apiPromise, contractAddress);
 
       const { attributeList, storedOnChain } = await this.getCollectionAttributes(contractPromise);

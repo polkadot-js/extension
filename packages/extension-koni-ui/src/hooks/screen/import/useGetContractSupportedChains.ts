@@ -1,6 +1,7 @@
 // Copyright 2019-2022 @polkadot/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
+import { _AssetType } from '@subwallet/extension-koni-base/services/chain-list/types';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { useSelector } from 'react-redux';
 
@@ -9,14 +10,18 @@ export interface ChainOptions {
   value: string;
 }
 
-export default function useGetContractSupportedChains () {
-  const networkMap = useSelector((state: RootState) => state.networkMap);
+export default function useGetContractSupportedChains (contractType: _AssetType) {
+  const chainInfoMap = useSelector((state: RootState) => state.chainInfoMap);
+  const chainStateMap = useSelector((state: RootState) => state.chainStateMap);
   const result: ChainOptions[] = [];
 
-  for (const [key, network] of Object.entries(networkMap)) {
-    if (network.active && network.supportSmartContract && network.supportSmartContract.length > 0) {
+  for (const [key, chainInfo] of Object.entries(chainInfoMap)) {
+    const isSupportedSubstrate = chainInfo?.substrateInfo?.supportSmartContract && chainInfo.substrateInfo.supportSmartContract.includes(contractType);
+    const isSupportedEvm = chainInfo?.evmInfo?.supportSmartContract && chainInfo.evmInfo.supportSmartContract.includes(contractType);
+
+    if (chainStateMap[key].active && (isSupportedSubstrate || isSupportedEvm)) {
       result.push({
-        text: network.chain,
+        text: chainInfo.name,
         value: key
       });
     }

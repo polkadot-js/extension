@@ -185,7 +185,7 @@ export class EvmNftApi extends BaseNftApi {
       return;
     }
 
-    await Promise.all(this.evmContracts.map(async ({ name, contractAddress }) => {
+    await Promise.all(this.evmContracts.map(async ({ contractAddress, name }) => {
       return await this.getItemsByCollection(contractAddress, name, params);
     }));
   }

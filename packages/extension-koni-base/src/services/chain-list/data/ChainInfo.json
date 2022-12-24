@@ -19,13 +19,14 @@
       "addressPrefix": 0,
       "crowdloanUrl": null,
       "category": ["RELAYCHAIN"],
-      "supportStaking": true,
-      "supportSmartContract": false,
       "blockExplorer": "https://polkadot.subscan.io/",
 
       "symbol": "DOT",
       "existentialDeposit": "10000000000",
-      "decimals": 10
+      "decimals": 10,
+
+      "supportStaking": true,
+      "supportSmartContract": null
     },
     "evmInfo": null
   },
@@ -49,13 +50,14 @@
       "addressPrefix": 2,
       "crowdloanUrl": null,
       "category": ["RELAYCHAIN"],
-      "supportStaking": true,
-      "supportSmartContract": false,
       "blockExplorer": "https://kusama.subscan.io/",
 
       "symbol": "KSM",
       "existentialDeposit": "333333333",
-      "decimals": 12
+      "decimals": 12,
+
+      "supportStaking": true,
+      "supportSmartContract": null
     },
     "evmInfo": null
   },
@@ -78,13 +80,14 @@
       "addressPrefix": 1284,
       "crowdloanUrl": "https://moonbeam.foundation/moonbeam-crowdloan/",
       "category": ["PARACHAIN"],
-      "supportStaking": true,
-      "supportSmartContract": true,
       "blockExplorer": "https://moonbeam.subscan.io/",
 
       "symbol": "GLMR",
       "existentialDeposit": "0",
-      "decimals": 18
+      "decimals": 18,
+
+      "supportStaking": true,
+      "supportSmartContract": null
     },
     "evmInfo": {
       "evmChainId": 1284,
@@ -92,7 +95,9 @@
 
       "symbol": "GLMR",
       "decimals": 18,
-      "existentialDeposit": "0"
+      "existentialDeposit": "0",
+
+      "supportSmartContract": ["ERC721", "ERC20"]
     }
   },
   "alephZeroTest": {
@@ -110,12 +115,13 @@
       "crowdloanUrl": null,
       "category": ["TEST_NET"],
       "supportStaking": true,
-      "supportSmartContract": false,
       "blockExplorer": null,
 
       "symbol": "TZERO",
       "existentialDeposit": "500",
-      "decimals": 12
+      "decimals": 12,
+
+      "supportSmartContract": ["PSP34", "PSP22"]
     },
     "evmInfo": null
   },
@@ -135,7 +141,8 @@
 
       "symbol": "ETH",
       "decimals": 18,
-      "existentialDeposit": "0"
+      "existentialDeposit": "0",
+      "supportSmartContract": ["ERC20", "ERC721"]
     }
   }
 }

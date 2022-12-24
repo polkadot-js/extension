@@ -23,7 +23,7 @@ export enum _ChainProviderStatus {
 }
 
 export enum SubstrateChainCategory {
-  RELAY_CHAIN = 'RELAY_CHAIN',
+  RELAYCHAIN = 'RELAYCHAIN',
   PARACHAIN = 'PARACHAIN',
   TEST_NET = 'TEST_NET'
 }
@@ -66,10 +66,13 @@ export interface _EvmInfo {
   // some info about native tokens (for convenience)
   existentialDeposit: string,
   decimals: number,
-  symbol: string
+  symbol: string,
+
+  supportSmartContract: _AssetType[] | null
 }
 
 export interface _SubstrateInfo {
+  relaySlug: string | null,
   paraId: number | null,
   genesisHash: string,
   addressPrefix: number,
@@ -80,7 +83,10 @@ export interface _SubstrateInfo {
   // some info about native tokens (for convenience)
   existentialDeposit: string,
   decimals: number,
-  symbol: string
+  symbol: string,
+
+  supportStaking: boolean,
+  supportSmartContract: _AssetType[] | null
 }
 
 export interface _MultiChainAsset {

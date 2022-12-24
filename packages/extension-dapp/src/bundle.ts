@@ -140,10 +140,9 @@ export async function web3Accounts ({ accountType, extensions, genesisHash, ss58
   }
 
   const accounts: InjectedAccountWithMeta[] = [];
-  const injected = await web3EnablePromise;
-
+  const sources = await web3EnablePromise;
   const retrieved = await Promise.all(
-    injected
+    sources
       .filter(({ name: source }) =>
         !extensions ||
         extensions.includes(source)

@@ -113,7 +113,8 @@ export type InjectedExtension = InjectedExtensionInfo & Injected;
 export type InjectOptions = InjectedExtensionInfo;
 
 export interface Web3AccountsOptions {
-  ss58Format?: number,
-  accountType?: KeypairType[],
-  extensions?: string[]
+  accountType?: KeypairType[];
+  extensions?: string[];
+  genesisHash?: string | null;
+  ss58Format?: number;
 }

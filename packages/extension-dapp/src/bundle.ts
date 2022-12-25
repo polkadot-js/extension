@@ -3,7 +3,7 @@
 
 import type { InjectedAccount, InjectedAccountWithMeta, InjectedExtension, InjectedProviderWithMeta, InjectedWindow, ProviderList, Unsubcall, Web3AccountsOptions } from '@polkadot/extension-inject/types';
 
-import { objectSpread, u8aEq } from '@polkadot/util';
+import { isPromise, objectSpread, u8aEq } from '@polkadot/util';
 import { decodeAddress, encodeAddress } from '@polkadot/util-crypto';
 
 import { documentReadyPromise } from './util';
@@ -40,6 +40,14 @@ function mapAccounts (source: string, list: InjectedAccount[], ss58Format?: numb
     meta: { genesisHash, name, source },
     type
   }));
+}
+
+// internal helper to filter accounts
+function filterAccounts (list: InjectedAccount[], genesisHash?: string | null, type?: string[]): InjectedAccount[] {
+  return list.filter((a) =>
+    (!a.type || !type || type.includes(a.type)) &&
+    (!a.genesisHash || !genesisHash || a.genesisHash === genesisHash)
+  );
 }
 
 // have we found a properly constructed window.injectedWeb3
@@ -126,22 +134,24 @@ export function web3Enable (originName: string, compatInits: (() => Promise<bool
 }
 
 // retrieve all the accounts across all providers
-export async function web3Accounts ({ accountType, extensions, ss58Format }: Web3AccountsOptions = {}): Promise<InjectedAccountWithMeta[]> {
+export async function web3Accounts ({ accountType, extensions, genesisHash, ss58Format }: Web3AccountsOptions = {}): Promise<InjectedAccountWithMeta[]> {
   if (!web3EnablePromise) {
     return throwError('web3Accounts');
   }
 
   const accounts: InjectedAccountWithMeta[] = [];
-  const injected = await web3EnablePromise;
-
+  const sources = await web3EnablePromise;
   const retrieved = await Promise.all(
-    injected
-      .filter(({ name: source }) => !extensions || extensions.includes(source))
+    sources
+      .filter(({ name: source }) =>
+        !extensions ||
+        extensions.includes(source)
+      )
       .map(async ({ accounts, name: source }): Promise<InjectedAccountWithMeta[]> => {
         try {
           const list = await accounts.get();
 
-          return mapAccounts(source, list.filter(({ type }) => type && accountType ? accountType.includes(type) : true), ss58Format);
+          return mapAccounts(source, filterAccounts(list, genesisHash, accountType), ss58Format);
         } catch (error) {
           // cannot handle this one
           return [];
@@ -158,7 +168,7 @@ export async function web3Accounts ({ accountType, extensions, ss58Format }: Web
   return accounts;
 }
 
-export async function web3AccountsSubscribe (cb: (accounts: InjectedAccountWithMeta[]) => void | Promise<void>, { extensions, ss58Format }: Web3AccountsOptions = {}): Promise<Unsubcall> {
+export async function web3AccountsSubscribe (cb: (accounts: InjectedAccountWithMeta[]) => void | Promise<void>, { accountType, extensions, genesisHash, ss58Format }: Web3AccountsOptions = {}): Promise<Unsubcall> {
   if (!web3EnablePromise) {
     return throwError('web3AccountsSubscribe');
   }
@@ -170,20 +180,28 @@ export async function web3AccountsSubscribe (cb: (accounts: InjectedAccountWithM
       Object
         .entries(accounts)
         .reduce((result: InjectedAccountWithMeta[], [source, list]): InjectedAccountWithMeta[] => {
-          result.push(...mapAccounts(source, list, ss58Format));
+          result.push(...mapAccounts(source, filterAccounts(list, genesisHash, accountType), ss58Format));
 
           return result;
         }, [])
     );
 
-  const unsubs = (await web3EnablePromise)
-    .filter(({ name: source }) => !extensions || extensions.includes(source))
+  const sources = await web3EnablePromise;
+  const unsubs = sources
+    .filter(({ name: source }) =>
+      !extensions ||
+      extensions.includes(source)
+    )
     .map(({ accounts: { subscribe }, name: source }): Unsubcall =>
       subscribe((result): void => {
         accounts[source] = result;
 
         try {
-          triggerUpdate()?.catch(console.error);
+          const result = triggerUpdate();
+
+          if (result && isPromise(result)) {
+            result.catch(console.error);
+          }
         } catch (error) {
           console.error(error);
         }
@@ -204,7 +222,7 @@ export async function web3FromSource (source: string): Promise<InjectedExtension
   }
 
   const sources = await web3EnablePromise;
-  const found = source && sources.find(({ name }): boolean => name === source);
+  const found = source && sources.find(({ name }) => name === source);
 
   if (!found) {
     throw new Error(`web3FromSource: Unable to find an injected ${source}`);

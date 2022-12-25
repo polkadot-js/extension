@@ -7,6 +7,9 @@ Contributed:
 - Fix naming of `getAllMetadata` message (Thanks to https://github.com/Nick-1979)
 - Add more zh translations (Thanks to https://github.com/chendatony31)
 - Typo fix (Thanks to https://github.com/Nick-1979)
+- Re-add QR signing support (Thanks to https://github.com/Tbaut)
+- Adjust flow of auth management screens (Thanks to https://github.com/Tbaut)
+- Add links to connected accounts in header (Thanks to https://github.com/Tbaut)
 
 Changes:
 
@@ -14,6 +17,7 @@ Changes:
 - Allow for `genesisHash` filter to both `web3{Accounts, AccountsSubscribe}`
 - Allow for transparent extension `ping` (as available)
 - Support for new privacy-preserving `connect(<source>)` interfaces (non-default)
+- Always set metadata before signing (fixes for ETH-compat chains)
 
 
 ## 0.44.6 Aug 21, 2022

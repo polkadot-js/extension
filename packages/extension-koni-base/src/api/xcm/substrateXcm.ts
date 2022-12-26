@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { ApiProps, NetworkJson, TokenInfo } from '@subwallet/extension-base/background/KoniTypes';
-import { getMultiLocationFromParachain, getReceiverLocation, POLKADOT_UNLIMITED_WEIGHT, SupportedCrossChainsMap } from '@subwallet/extension-koni-base/api/xcm/utils';
+import { FOUR_INSTRUCTIONS_WEIGHT, getMultiLocationFromParachain, getReceiverLocation, POLKADOT_UNLIMITED_WEIGHT, SupportedCrossChainsMap } from '@subwallet/extension-koni-base/api/xcm/utils';
 import { parseNumberToDisplay } from '@subwallet/extension-koni-base/utils';
 
 import { ApiPromise } from '@polkadot/api';
@@ -44,6 +44,7 @@ export async function substrateEstimateCrossChainFee (
   const originNetworkJson = networkMap[originNetworkKey];
   const destinationNetworkJson = networkMap[destinationNetworkKey];
   const tokenIdentity = getTokenIdentity(originNetworkKey, tokenInfo);
+  const usesUnlimited = ['acala', 'karura', 'statemint'].includes(originNetworkKey);
 
   try {
     if (SupportedCrossChainsMap[originNetworkKey].type === 'p') {
@@ -52,7 +53,7 @@ export async function substrateEstimateCrossChainFee (
         tokenIdentity,
         value,
         getMultiLocationFromParachain(originNetworkKey, destinationNetworkKey, networkMap, to),
-        POLKADOT_UNLIMITED_WEIGHT
+        usesUnlimited ? POLKADOT_UNLIMITED_WEIGHT : FOUR_INSTRUCTIONS_WEIGHT
       );
 
       const paymentInfo = await extrinsic.paymentInfo(fromKeypair);
@@ -163,12 +164,13 @@ export function substrateGetXcmExtrinsic (
   // Case ParaChain -> RelayChain && Parachain -> Parachain
   if (SupportedCrossChainsMap[originNetworkKey].type === 'p') {
     const tokenIdentity = getTokenIdentity(originNetworkKey, tokenInfo);
+    const usesUnlimited = ['acala', 'karura', 'statemint'].includes(originNetworkKey);
 
     return api.tx.xTokens.transfer(
       tokenIdentity,
       value,
       getMultiLocationFromParachain(originNetworkKey, destinationNetworkKey, networkMap, to),
-      POLKADOT_UNLIMITED_WEIGHT
+      usesUnlimited ? POLKADOT_UNLIMITED_WEIGHT : FOUR_INSTRUCTIONS_WEIGHT
     );
   }
 

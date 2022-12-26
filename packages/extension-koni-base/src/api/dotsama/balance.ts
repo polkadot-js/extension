@@ -1,7 +1,6 @@
 // Copyright 2019-2022 @subwallet/extension-koni-base authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { assetFromToken } from '@equilab/api';
 import { APIItemState, ApiProps, BalanceChildItem, BalanceItem, TokenBalanceRaw, TokenInfo } from '@subwallet/extension-base/background/KoniTypes';
 import { moonbeamBaseChains } from '@subwallet/extension-koni-base/api/dotsama/api-helper';
 import { getRegistry, getTokenInfo } from '@subwallet/extension-koni-base/api/dotsama/registry';
@@ -21,7 +20,7 @@ import { AccountInfo, Balance } from '@polkadot/types/interfaces';
 import { BN } from '@polkadot/util';
 import { isEthereumAddress } from '@polkadot/util-crypto';
 
-type eqBalanceItem = [number, { positive: number }];
+type EqBalanceItem = [number, { positive: number }];
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 // @ts-ignore
@@ -177,11 +176,11 @@ async function subscribeGenshiroTokenBalance (addresses: string[], networkKey: s
 
   const unsub = await api.query.system.account.multi(addresses, (balances: Record<string, any>[]) => {
     // eslint-disable-next-line @typescript-eslint/no-unsafe-argument,@typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-member-access
-    const balancesData = JSON.parse(balances[0].data.toString()) as eqBalanceItem[];
+    const balancesData = JSON.parse(balances[0].data.toString()) as EqBalanceItem[];
 
     tokenList.map(({ decimals, specialOption, symbol }) => {
       // @ts-ignore
-      const freeTokenBalance = balancesData.find((data: eqBalanceItem) => data[0] === specialOption?.assetId);
+      const freeTokenBalance = balancesData.find((data: EqBalanceItem) => data[0] === specialOption?.assetId);
       const tokenBalance = {
         reserved: '0',
         frozen: '0',
@@ -585,12 +584,20 @@ export async function getFreeBalance (networkKey: string, address: string, dotSa
 
         return balanceOf.output ? balanceOf.output.toString() : '0';
       } else if (['genshiro_testnet', 'genshiro', 'equilibrium_parachain'].includes(networkKey)) {
-        const asset = networkKey === 'equilibrium_parachain' ? assetFromToken(token)[0] : assetFromToken(token);
-        const balance = await api.query.eqBalances.account(address, asset);
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+        const balance = await api.query.system.account(address) as any;
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-argument,@typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-member-access
+        const balancesData = JSON.parse(balance.data.toString()) as EqBalanceItem[];
+        let freeTokenBalance: EqBalanceItem | undefined;
 
-        // @ts-ignore
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-member-access,@typescript-eslint/no-unsafe-return
-        return balance.asPositive?.toString() || '0';
+        if (tokenInfo && tokenInfo.specialOption) {
+          // @ts-ignore
+          freeTokenBalance = balancesData.find((data: EqBalanceItem) => data[0] === tokenInfo.specialOption?.assetId);
+        } else {
+          freeTokenBalance = balancesData[0];
+        }
+
+        return freeTokenBalance ? freeTokenBalance[1].positive.toString() : '0';
       } else if (tokenInfo && ((networkKey === 'crab' && tokenInfo.symbol === 'CKTON') || (networkKey === 'pangolin' && tokenInfo.symbol === 'PKTON'))) {
         // @ts-ignore
         const balance = await api.query.system.account(address) as { data: { freeKton: Balance } };
@@ -713,11 +720,20 @@ export async function subscribeFreeBalance (
 
         return responseIntervalSubscription(getPSP22FreeBalance);
       } else if (['genshiro_testnet', 'genshiro', 'equilibrium_parachain'].includes(networkKey)) {
-        const asset = networkKey === 'equilibrium_parachain' ? assetFromToken(token)[0] : assetFromToken(token);
         // @ts-ignore
-        const unsub = await api.query.eqBalances.account(address, asset, (balance) => {
-          // eslint-disable-next-line node/no-callback-literal,@typescript-eslint/no-unsafe-argument,@typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-member-access
-          update(balance.asPositive.toString() || '0');
+        const unsub = await api.query.system.account(address, (balance) => {
+          // eslint-disable-next-line @typescript-eslint/no-unsafe-argument,@typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-member-access
+          const balancesData = JSON.parse(balance.data.toString()) as EqBalanceItem[];
+          let freeTokenBalance: EqBalanceItem | undefined;
+
+          if (tokenInfo && tokenInfo.specialOption) {
+            // @ts-ignore
+            freeTokenBalance = balancesData.find((data: EqBalanceItem) => data[0] === tokenInfo.specialOption?.assetId);
+          } else {
+            freeTokenBalance = balancesData[0];
+          }
+
+          update(freeTokenBalance ? freeTokenBalance[1].positive.toString() : '0');
         });
 
         return () => {

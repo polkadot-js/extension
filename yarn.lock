@@ -5907,7 +5907,7 @@ __metadata:
     graphql: ^16.6.0
     is-buffer: ^2.0.5
     json-rpc-engine: ^6.1.0
-    moonbeam-types-bundle: ^2.0.8
+    moonbeam-types-bundle: ^2.0.9
     pontem-types-bundle: ^1.0.15
     protobufjs: ^7.1.2
     rlp: ^3.0.0
@@ -19115,7 +19115,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"moonbeam-types-bundle@npm:^2.0.8":
+"moonbeam-types-bundle@npm:^2.0.9":
   version: 2.0.9
   resolution: "moonbeam-types-bundle@npm:2.0.9"
   dependencies:

@@ -15,7 +15,7 @@ import { parseTxAndSignature } from '@subwallet/extension-koni-base/api/evm/exte
 import { PREDEFINED_GENESIS_HASHES, PREDEFINED_NETWORKS } from '@subwallet/extension-koni-base/api/predefinedNetworks';
 import { PREDEFINED_SINGLE_MODES } from '@subwallet/extension-koni-base/api/predefinedSingleMode';
 // eslint-disable-next-line camelcase
-import { deleteCustomTokens, FUNGIBLE_TOKEN_STANDARDS, getTokensForChainRegistry, upsertCustomToken } from '@subwallet/extension-koni-base/api/tokens';
+import { FUNGIBLE_TOKEN_STANDARDS, getTokensForChainRegistry } from '@subwallet/extension-koni-base/api/tokens';
 import { DEFAULT_SUPPORTED_TOKENS } from '@subwallet/extension-koni-base/api/tokens/defaultSupportedTokens';
 import { initEvmTokenState } from '@subwallet/extension-koni-base/api/tokens/evm/utils';
 import { initWeb3Api } from '@subwallet/extension-koni-base/api/tokens/evm/web3';
@@ -25,7 +25,7 @@ import { state } from '@subwallet/extension-koni-base/background/handlers/index'
 import { ALL_ACCOUNT_KEY, ALL_GENESIS_HASH } from '@subwallet/extension-koni-base/constants';
 import { _ChainAsset, _ChainInfo } from '@subwallet/extension-koni-base/services/chain-list/types';
 import { ChainService } from '@subwallet/extension-koni-base/services/chain-service';
-import { _ChainState, _DeleteCustomTokenParams } from '@subwallet/extension-koni-base/services/chain-service/types';
+import { _ChainState, _ValidateCustomTokenRequest } from '@subwallet/extension-koni-base/services/chain-service/types';
 import DatabaseService from '@subwallet/extension-koni-base/services/DatabaseService';
 import { CurrentAccountStore, NetworkMapStore, PriceStore } from '@subwallet/extension-koni-base/stores';
 import AccountRefStore from '@subwallet/extension-koni-base/stores/AccountRef';
@@ -1167,38 +1167,6 @@ export default class KoniState extends State {
     return tokenKey;
   }
 
-  public upsertChainRegistry (tokenData: CustomToken) {
-    const chainRegistry = this.chainRegistryMap[tokenData.chain];
-
-    if (chainRegistry) {
-      const tokenKey = this.checkTokenKey(tokenData);
-
-      if (tokenKey !== '') {
-        chainRegistry.tokenMap[tokenKey] = {
-          isMainToken: false,
-          symbol: tokenData.symbol,
-          name: tokenData.name,
-          contractAddress: tokenData.contractAddress,
-          decimals: tokenData.decimals,
-          type: tokenData.type
-        } as TokenInfo;
-      } else {
-        // @ts-ignore
-        chainRegistry.tokenMap[tokenData.symbol] = {
-          isMainToken: false,
-          symbol: tokenData.symbol,
-          name: tokenData.name,
-          contractAddress: tokenData.contractAddress,
-          decimals: tokenData.decimals,
-          type: tokenData.type
-        } as TokenInfo;
-      }
-
-      cacheRegistryMap[tokenData.chain] = chainRegistry;
-      this.chainRegistrySubject.next(this.getChainRegistryMap());
-    }
-  }
-
   public initChainRegistry () {
     this.chainRegistryMap = cacheRegistryMap; // prevents deleting token registry even when network is disabled
     this.getCustomTokenStore((storedCustomTokens) => {
@@ -1342,39 +1310,30 @@ export default class KoniState extends State {
     });
   }
 
-  public upsertCustomToken (data: CustomToken) {
-    const { needUpdateChainRegistry, newCustomTokenState } = upsertCustomToken(data, this.customTokenState);
-
-    this.customTokenState = newCustomTokenState;
-
-    if (needUpdateChainRegistry) {
-      this.upsertChainRegistry(data);
-    }
-
-    this.customTokenSubject.next(this.customTokenState);
-    this.customTokenStore.set('EvmToken', this.customTokenState);
-    this.updateServiceInfo();
+  public upsertCustomToken (data: _ChainAsset) {
+    this.chainService.upsertCustomToken(data);
   }
 
-  public deleteCustomTokens (targetTokens: _DeleteCustomTokenParams[]) {
-    const { deletedNfts, newChainRegistryMap, newCustomTokenState } = deleteCustomTokens(targetTokens, this.customTokenState, this.chainRegistryMap);
-
-    // Delete stored nfts
-    for (const targetToken of deletedNfts) {
-      this.dbService.deleteNftsByCustomToken(this.getNetworkGenesisHashByKey(targetToken.chain), targetToken.smartContract).catch((e) => this.logger.warn(e));
-    }
-
-    this.chainRegistryMap = newChainRegistryMap;
-
-    Object.entries(newChainRegistryMap).forEach(([key, chainRegistry]) => {
-      cacheRegistryMap[key] = chainRegistry;
-    });
-
-    this.customTokenState = newCustomTokenState;
-    this.customTokenSubject.next(this.customTokenState);
-    this.chainRegistrySubject.next(this.getChainRegistryMap());
-    this.customTokenStore.set('EvmToken', this.customTokenState);
-    this.updateServiceInfo();
+  public deleteCustomTokens (targetTokens: string[]) {
+    this.chainService.deleteCustomTokens(targetTokens);
+    // const { deletedNfts, newChainRegistryMap, newCustomTokenState } = deleteCustomTokens(targetTokens, this.customTokenState, this.chainRegistryMap);
+    //
+    // // Delete stored nfts
+    // for (const targetToken of deletedNfts) {
+    //   this.dbService.deleteNftsByCustomToken(this.getNetworkGenesisHashByKey(targetToken.chain), targetToken.smartContract).catch((e) => this.logger.warn(e));
+    // }
+    //
+    // this.chainRegistryMap = newChainRegistryMap;
+    //
+    // Object.entries(newChainRegistryMap).forEach(([key, chainRegistry]) => {
+    //   cacheRegistryMap[key] = chainRegistry;
+    // });
+    //
+    // this.customTokenState = newCustomTokenState;
+    // this.customTokenSubject.next(this.customTokenState);
+    // this.chainRegistrySubject.next(this.getChainRegistryMap());
+    // this.customTokenStore.set('EvmToken', this.customTokenState);
+    // this.updateServiceInfo();
   }
 
   // TODO: move into chain-service
@@ -1426,6 +1385,10 @@ export default class KoniState extends State {
 
   public getSupportedSmartContractTypes () {
     return this.chainService.getSupportedSmartContractTypes();
+  }
+
+  public async validateCustomToken (data: _ValidateCustomTokenRequest) {
+    return await this.chainService.validateCustomToken(data);
   }
 
   // ------------------------------------------------

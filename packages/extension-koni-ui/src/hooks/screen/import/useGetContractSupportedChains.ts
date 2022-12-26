@@ -16,12 +16,12 @@ export default function useGetContractSupportedChains (contractType: _AssetType)
   const result: ChainOptions[] = [];
 
   for (const [key, chainInfo] of Object.entries(chainInfoMap)) {
-    const isSupportedSubstrate = chainInfo?.substrateInfo?.supportSmartContract && chainInfo.substrateInfo.supportSmartContract.includes(contractType);
-    const isSupportedEvm = chainInfo?.evmInfo?.supportSmartContract && chainInfo.evmInfo.supportSmartContract.includes(contractType);
+    const isSupportedSubstrate = chainInfo !== null && chainInfo?.substrateInfo?.supportSmartContract !== null && chainInfo?.substrateInfo?.supportSmartContract.includes(contractType);
+    const isSupportedEvm = chainInfo !== null && chainInfo?.evmInfo?.supportSmartContract !== null && chainInfo?.evmInfo?.supportSmartContract.includes(contractType);
 
     if (chainStateMap[key].active && (isSupportedSubstrate || isSupportedEvm)) {
       result.push({
-        text: chainInfo.name,
+        text: chainInfo?.name,
         value: key
       });
     }

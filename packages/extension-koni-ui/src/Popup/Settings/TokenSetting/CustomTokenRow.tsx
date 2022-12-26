@@ -2,7 +2,6 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { _ChainAsset } from '@subwallet/extension-koni-base/services/chain-list/types';
-import { _DeleteCustomTokenParams } from '@subwallet/extension-koni-base/services/chain-service/types';
 import { ActionContext } from '@subwallet/extension-koni-ui/components';
 import Checkbox from '@subwallet/extension-koni-ui/components/Checkbox';
 import { store } from '@subwallet/extension-koni-ui/stores';
@@ -14,8 +13,8 @@ import styled from 'styled-components';
 interface Props extends ThemeProps {
   className?: string;
   item: _ChainAsset;
-  handleSelected: (val: _DeleteCustomTokenParams) => void;
-  handleUnselected: (val: _DeleteCustomTokenParams) => void;
+  handleSelected: (val: string) => void;
+  handleUnselected: (val: string) => void;
 }
 
 function CustomTokenRow ({ className, handleSelected, handleUnselected, item }: Props): React.ReactElement {
@@ -31,19 +30,11 @@ function CustomTokenRow ({ className, handleSelected, handleUnselected, item }: 
     setIsChecked(checked);
 
     if (checked) {
-      handleSelected({
-        contractAddress: item?.metadata?.contractAddress as string,
-        originChain: item.originChain,
-        type: item.assetType
-      });
+      handleSelected(item.slug);
     } else {
-      handleUnselected({
-        contractAddress: item?.metadata?.contractAddress as string,
-        originChain: item.originChain,
-        type: item.assetType
-      });
+      handleUnselected(item.slug);
     }
-  }, [handleSelected, handleUnselected, item.assetType, item?.metadata?.contractAddress, item.originChain]);
+  }, [handleSelected, handleUnselected, item.slug]);
 
   return (
     <div

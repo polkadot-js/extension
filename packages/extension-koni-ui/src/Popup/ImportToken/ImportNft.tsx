@@ -3,7 +3,7 @@
 
 import { AddTokenRequestExternal, ConfirmationsQueueItem } from '@subwallet/extension-base/background/KoniTypes';
 import { _AssetType, _ChainAsset } from '@subwallet/extension-koni-base/services/chain-list/types';
-import { ValidateCustomTokenResponse } from '@subwallet/extension-koni-base/services/chain-service/types';
+import { _ValidateCustomTokenResponse } from '@subwallet/extension-koni-base/services/chain-service/types';
 import { isValidSubstrateAddress } from '@subwallet/extension-koni-base/utils';
 import { ActionContext, Button, ConfirmationsQueueContext, Dropdown, InputWithLabel } from '@subwallet/extension-koni-ui/components';
 import useGetContractSupportedChains from '@subwallet/extension-koni-ui/hooks/screen/import/useGetContractSupportedChains';
@@ -48,7 +48,7 @@ const initNftInfo: _ChainAsset = {
   minAmount: null,
   multiChainAsset: null,
   priceId: null,
-  assetType: _AssetType.ERC721
+  assetType: _AssetType.UNKNOWN
 };
 
 interface ValidationState {
@@ -182,7 +182,7 @@ function parseAddTokenRequests (requestMap: Record<string, ConfirmationsQueueIte
     minAmount: null,
     multiChainAsset: null,
     priceId: null,
-    assetType: _AssetType.ERC721 // only supports EVM NFTs from external requests for now
+    assetType: _AssetType.UNKNOWN // only supports EVM NFTs from external requests for now
   };
 
   return {
@@ -288,7 +288,7 @@ function ImportNft ({ className = '' }: Props): React.ReactElement<Props> {
           contractCaller: isValidContractCaller ? currentAccount?.address as string : undefined
         })
           .then((_resp) => {
-            const resp = _resp as ValidateCustomTokenResponse;
+            const resp = _resp as _ValidateCustomTokenResponse;
 
             if (resp.isExist) {
               // setWarning('This token has already been added');
@@ -377,8 +377,6 @@ function ImportNft ({ className = '' }: Props): React.ReactElement<Props> {
         dispatchValidationState({ type: ValidationStateActionType.UPDATE_WARNING, payload: 'An error has occurred. Please try again later' });
       });
   }, [_goBack, nftInfo, requestId]);
-
-  console.log(nftInfo);
 
   return (
     <div className={className}>

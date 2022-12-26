@@ -2,7 +2,6 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { _ChainAsset } from '@subwallet/extension-koni-base/services/chain-list/types';
-import { _DeleteCustomTokenParams } from '@subwallet/extension-koni-base/services/chain-service/types';
 import { Button, ButtonArea, InputFilter } from '@subwallet/extension-koni-ui/components';
 import Modal from '@subwallet/extension-koni-ui/components/Modal';
 import useFetchCustomToken from '@subwallet/extension-koni-ui/hooks/screen/common/useFetchCustomToken';
@@ -25,7 +24,7 @@ function CustomTokenSetting ({ className }: Props): React.ReactElement {
 
   const customTokens = useFetchCustomToken();
   const [searchString, setSearchString] = useState('');
-  const [selectedTokens, setSelectedTokens] = useState<_DeleteCustomTokenParams[]>([]);
+  const [selectedTokens, setSelectedTokens] = useState<string[]>([]);
   const [showModal, setShowModal] = useState(false);
 
   const _onChangeFilter = useCallback((val: string) => {
@@ -44,28 +43,30 @@ function CustomTokenSetting ({ className }: Props): React.ReactElement {
     return _filteredTokens;
   }, [customTokens, searchString]);
 
-  const handleSelected = useCallback((data: _DeleteCustomTokenParams) => {
+  const handleSelected = useCallback((data: string) => {
     setSelectedTokens([
       ...selectedTokens,
       data
     ]);
   }, [selectedTokens]);
 
-  const handleUnselected = useCallback((data: _DeleteCustomTokenParams) => {
-    const _selectedTokens = [];
+  const handleUnselected = useCallback((data: string) => {
+    const _selectedTokens: string[] = [];
 
-    for (const token of selectedTokens) {
-      if (token.originChain === data.originChain) {
-        if (token.contractAddress !== data.contractAddress) {
-          _selectedTokens.push(token);
-        }
-      } else {
-        _selectedTokens.push(token);
-      }
-    }
+    console.log('unselected', data);
+
+    // for (const token of selectedTokens) {
+    //   if (token.originChain === data.originChain) {
+    //     if (token.contractAddress !== data.contractAddress) {
+    //       _selectedTokens.push(token);
+    //     }
+    //   } else {
+    //     _selectedTokens.push(token);
+    //   }
+    // }
 
     setSelectedTokens(_selectedTokens);
-  }, [selectedTokens]);
+  }, []);
 
   const handleShowModal = useCallback(() => {
     if (selectedTokens.length === 0) {

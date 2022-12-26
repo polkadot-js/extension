@@ -1,15 +1,27 @@
 // Copyright 2019-2022 @subwallet/extension-koni-base authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
+import { _AssetType } from '@subwallet/extension-koni-base/services/chain-list/types';
 import { _EvmChainSpec } from '@subwallet/extension-koni-base/services/chain-service/handler/types';
-import { _EvmApi } from '@subwallet/extension-koni-base/services/chain-service/types';
+import { _ERC20_ABI, _ERC721_ABI } from '@subwallet/extension-koni-base/services/chain-service/helper';
+import { _EvmApi, _SmartContractTokenInfo } from '@subwallet/extension-koni-base/services/chain-service/types';
 import Web3 from 'web3';
+import { Contract } from 'web3-eth-contract';
+
+import { logger as createLogger } from '@polkadot/util/logger';
+import { Logger } from '@polkadot/util/types';
 
 export class EvmChainHandler {
   private evmApiMap: Record<string, _EvmApi> = {};
+  private logger: Logger;
 
   constructor () {
+    this.logger = createLogger('evm-chain-handler');
     console.log(this.evmApiMap);
+  }
+
+  public getEvmApiByChain (chainSlug: string) {
+    return this.evmApiMap[chainSlug];
   }
 
   public initApi (chainSlug: string, apiUrl: string): _EvmApi {
@@ -82,5 +94,66 @@ export class EvmChainHandler {
     }
 
     return result;
+  }
+
+  public async getSmartContractTokenInfo (contractAddress: string, tokenType: _AssetType, originChain: string): Promise<_SmartContractTokenInfo> {
+    let tokenContract: Contract;
+    let name = '';
+    let decimals: number | undefined = -1;
+    let symbol = '';
+    let contractError = false;
+
+    const evmApi = this.getEvmApiByChain(originChain);
+
+    try {
+      if (tokenType === _AssetType.ERC721) {
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-argument,@typescript-eslint/no-unsafe-member-access
+        tokenContract = new evmApi.api.eth.Contract(_ERC721_ABI, contractAddress);
+
+        const [_name, _symbol] = await Promise.all([
+          // eslint-disable-next-line @typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-member-access
+          tokenContract.methods.name().call() as string,
+          // eslint-disable-next-line @typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-member-access
+          tokenContract.methods.symbol().call() as string
+        ]);
+
+        name = _name;
+        symbol = _symbol;
+      } else {
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-argument,@typescript-eslint/no-unsafe-member-access
+        tokenContract = new evmApi.api.eth.Contract(_ERC20_ABI, contractAddress);
+
+        const [_decimals, _symbol] = await Promise.all([
+          // eslint-disable-next-line @typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-member-access
+          tokenContract.methods.decimals().call() as number,
+          // eslint-disable-next-line @typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-member-access
+          tokenContract.methods.symbol().call() as string
+        ]);
+
+        name = _symbol;
+        decimals = _decimals;
+        symbol = _symbol;
+      }
+
+      if (name === '' || symbol === '') {
+        contractError = true;
+      }
+
+      return {
+        name,
+        decimals,
+        symbol,
+        contractError
+      };
+    } catch (e) {
+      this.logger.error('Error response while validating EVM contract', e);
+
+      return {
+        name,
+        decimals,
+        symbol,
+        contractError: true
+      };
+    }
   }
 }

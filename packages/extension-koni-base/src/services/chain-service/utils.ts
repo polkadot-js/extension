@@ -4,6 +4,8 @@
 import { _ChainAsset } from '@subwallet/extension-koni-base/services/chain-list/types';
 import { _CUSTOM_NETWORK_PREFIX } from '@subwallet/extension-koni-base/services/chain-service/types';
 
+import { isEthereumAddress } from '@polkadot/util-crypto';
+
 export function _isCustomNetwork (slug: string) {
   if (slug.length === 0) {
     return true;
@@ -30,4 +32,12 @@ export function _getCustomAssets (assetRegistry: Record<string, _ChainAsset>): R
   });
 
   return filteredAssetMap;
+}
+
+export function _isEqualContractAddress (address1: string, address2: string) {
+  if (isEthereumAddress(address1) && isEthereumAddress(address2)) {
+    return address1.toLowerCase() === address2.toLowerCase(); // EVM address is case-insensitive
+  }
+
+  return address2 === address1;
 }

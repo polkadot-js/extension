@@ -13,7 +13,8 @@ export enum _AssetType {
   ERC20 = 'ERC20',
   ERC721 = 'ERC721',
   PSP22 = 'PSP22',
-  PSP34 = 'PSP34'
+  PSP34 = 'PSP34',
+  UNKNOWN = 'UNKNOWN'
 }
 
 export enum _ChainProviderStatus {

@@ -1,34 +1,18 @@
 // Copyright 2019-2022 @subwallet/extension-koni-base authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import {ChainAssetMap, ChainInfoMap} from '@subwallet/extension-koni-base/services/chain-list';
-import {
-  _AssetType,
-  _ChainAsset,
-  _ChainInfo,
-  _DEFAULT_NETWORKS,
-  _EvmInfo,
-  _SubstrateInfo
-} from '@subwallet/extension-koni-base/services/chain-list/types';
-import {EvmChainHandler} from '@subwallet/extension-koni-base/services/chain-service/handler/EvmChainHandler';
-import {
-  SubstrateChainHandler
-} from '@subwallet/extension-koni-base/services/chain-service/handler/SubstrateChainHandler';
-import {_CHAIN_VALIDATION_ERROR} from '@subwallet/extension-koni-base/services/chain-service/handler/types';
-import {
-  _ChainState,
-  _ConnectionStatus,
-  _CUSTOM_NETWORK_PREFIX,
-  _DataMap,
-  _EvmApi,
-  _NetworkUpsertParams,
-  _SubstrateApi
-} from '@subwallet/extension-koni-base/services/chain-service/types';
-import {Subject} from 'rxjs';
+import { ChainAssetMap, ChainInfoMap } from '@subwallet/extension-koni-base/services/chain-list';
+import { _AssetType, _ChainAsset, _ChainInfo, _DEFAULT_NETWORKS, _EvmInfo, _SubstrateInfo } from '@subwallet/extension-koni-base/services/chain-list/types';
+import { EvmChainHandler } from '@subwallet/extension-koni-base/services/chain-service/handler/EvmChainHandler';
+import { SubstrateChainHandler } from '@subwallet/extension-koni-base/services/chain-service/handler/SubstrateChainHandler';
+import { _CHAIN_VALIDATION_ERROR } from '@subwallet/extension-koni-base/services/chain-service/handler/types';
+import { _ChainState, _ConnectionStatus, _CUSTOM_NETWORK_PREFIX, _DataMap, _EvmApi, _NetworkUpsertParams, _SMART_CONTRACT_STANDARDS, _SmartContractTokenInfo, _SubstrateApi, _ValidateCustomTokenRequest, _ValidateCustomTokenResponse } from '@subwallet/extension-koni-base/services/chain-service/types';
+import { _isEqualContractAddress } from '@subwallet/extension-koni-base/services/chain-service/utils';
+import { Subject } from 'rxjs';
 import Web3 from 'web3';
 
-import {logger as createLogger} from '@polkadot/util/logger';
-import {Logger} from '@polkadot/util/types';
+import { logger as createLogger } from '@polkadot/util/logger';
+import { Logger } from '@polkadot/util/types';
 
 export class ChainService {
   private dataMap: _DataMap = {
@@ -99,6 +83,18 @@ export class ChainService {
 
   public getAssetRegistry () {
     return this.dataMap.assetRegistry;
+  }
+
+  public getSmartContractTokens () {
+    const filteredAssetRegistry: Record<string, _ChainAsset> = {};
+
+    Object.values(this.getAssetRegistry()).forEach((asset) => {
+      if (_SMART_CONTRACT_STANDARDS.includes(asset.assetType)) {
+        filteredAssetRegistry[asset.slug] = asset;
+      }
+    });
+
+    return filteredAssetRegistry;
   }
 
   public getChainInfoMap () {
@@ -456,5 +452,72 @@ export class ChainService {
     }
 
     return { error, conflictChainSlug, conflictChainName };
+  }
+
+  private async getSmartContractTokenInfo (contractAddress: string, tokenType: _AssetType, originChain: string, contractCaller?: string): Promise<_SmartContractTokenInfo> {
+    if ([_AssetType.ERC721, _AssetType.ERC20].includes(tokenType)) {
+      return await this.evmChainHandler.getSmartContractTokenInfo(contractAddress, tokenType, originChain);
+    } else if ([_AssetType.PSP34, _AssetType.PSP22].includes(tokenType)) {
+      return await this.substrateChainHandler.getSmartContractTokenInfo(contractAddress, tokenType, originChain, contractCaller);
+    }
+
+    return {
+      decimals: -1,
+      name: '',
+      symbol: '',
+      contractError: false
+    };
+  }
+
+  public async validateCustomToken (data: _ValidateCustomTokenRequest): Promise<_ValidateCustomTokenResponse> {
+    const assetRegistry = this.getSmartContractTokens();
+    let isExist = false;
+
+    for (const token of Object.values(assetRegistry)) {
+      const contractAddress = token?.metadata?.contractAddress as string;
+
+      if (_isEqualContractAddress(contractAddress, data.contractAddress) && token.assetType === data.type && token.originChain === data.originChain) {
+        isExist = true;
+        break;
+      }
+    }
+
+    if (isExist) {
+      return {
+        decimals: -1,
+        name: '',
+        symbol: '',
+        isExist,
+        contractError: false
+      };
+    }
+
+    const { contractError, decimals, name, symbol } = await this.getSmartContractTokenInfo(data.contractAddress, data.type, data.originChain, data.contractCaller);
+
+    return {
+      name,
+      decimals,
+      symbol,
+      isExist,
+      contractError
+    };
+  }
+
+  public upsertCustomToken (token: _ChainAsset) {
+    const assetRegistry = this.getAssetRegistry();
+
+    assetRegistry[token.slug] = token;
+
+    this.assetRegistrySubject.next(assetRegistry);
+  }
+
+  public deleteCustomTokens (targetTokens: string[]) {
+    const assetRegistry = this.getAssetRegistry();
+
+    targetTokens.forEach((targetToken) => {
+      delete assetRegistry[targetToken];
+    });
+
+    this.assetRegistrySubject.next(assetRegistry);
   }
 }

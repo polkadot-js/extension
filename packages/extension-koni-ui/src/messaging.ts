@@ -16,8 +16,8 @@ import { PORT_EXTENSION } from '@subwallet/extension-base/defaults';
 import { getId } from '@subwallet/extension-base/utils/getId';
 import { metadataExpand } from '@subwallet/extension-chains';
 import { MetadataDef } from '@subwallet/extension-inject/types';
-import {_AssetType, _ChainAsset, _ChainInfo} from '@subwallet/extension-koni-base/services/chain-list/types';
-import { _ChainState, _DeleteCustomTokenParams, _ValidateCustomTokenRequest } from '@subwallet/extension-koni-base/services/chain-service/types';
+import { _ChainAsset, _ChainInfo } from '@subwallet/extension-koni-base/services/chain-list/types';
+import { _ChainState, _ValidateCustomTokenRequest } from '@subwallet/extension-koni-base/services/chain-service/types';
 
 import { SingleAddress } from '@polkadot/ui-keyring/observable/types';
 
@@ -598,7 +598,7 @@ export async function upsertCustomToken (data: _ChainAsset): Promise<boolean> {
   return sendMessage('pri(customTokenState.upsertCustomTokenState)', data);
 }
 
-export async function deleteCustomTokens (data: _DeleteCustomTokenParams[]) {
+export async function deleteCustomTokens (data: string[]) {
   return sendMessage('pri(customTokenState.deleteMany)', data);
 }
 

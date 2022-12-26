@@ -114,12 +114,6 @@ export type _NetworkUpsertParams = {
 
 export const _CUSTOM_NETWORK_PREFIX = 'custom-';
 
-export interface _DeleteCustomTokenParams {
-  contractAddress: string,
-  originChain: string,
-  type: _AssetType
-}
-
 export interface _ValidateCustomTokenRequest {
   contractAddress: string,
   originChain: string,
@@ -127,15 +121,25 @@ export interface _ValidateCustomTokenRequest {
   contractCaller?: string
 }
 
-export interface ValidateCustomTokenResponse {
+export interface _SmartContractTokenInfo {
   name: string,
   symbol: string,
-  decimals: number | null,
-  isExist: boolean,
+  decimals: number,
   contractError: boolean
+}
+
+export interface _ValidateCustomTokenResponse extends _SmartContractTokenInfo {
+  isExist: boolean
 }
 
 export const _FUNGIBLE_CONTRACT_STANDARDS = [
   _AssetType.ERC20,
   _AssetType.PSP22
 ];
+
+export const _NFT_CONTRACT_STANDARDS = [
+  _AssetType.PSP34,
+  _AssetType.ERC721
+];
+
+export const _SMART_CONTRACT_STANDARDS = [..._FUNGIBLE_CONTRACT_STANDARDS, ..._NFT_CONTRACT_STANDARDS];

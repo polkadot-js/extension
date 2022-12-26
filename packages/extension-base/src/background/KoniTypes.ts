@@ -1592,7 +1592,7 @@ export interface KoniRequestSignatures {
   'pri(networkMap.enableOne)': [string, boolean];
   'pri(networkMap.disableOne)': [string, DisableNetworkResponse];
   'pri(networkMap.removeOne)': [string, boolean];
-  'pri(customTokenState.deleteMany)': [Record<string, any>[], boolean];
+  'pri(customTokenState.deleteMany)': [string[], boolean];
   'pri(customTokenState.upsertCustomTokenState)': [Record<string, any>, boolean];
   'pri(customTokenState.validateCustomToken)': [Record<string, any>, Record<string, any>];
   'pri(networkMap.resetDefault)': [null, boolean];

@@ -6,15 +6,19 @@ import { rpc as oakRpc, types as oakTypes } from '@oak-foundation/types';
 import { DEFAULT_AUX } from '@subwallet/extension-koni-base/api/dotsama';
 import { DOTSAMA_AUTO_CONNECT_MS, DOTSAMA_MAX_CONTINUE_RETRY } from '@subwallet/extension-koni-base/constants';
 import { typesBundle, typesChain } from '@subwallet/extension-koni-base/services/chain-list/api-helper';
+import { _AssetType } from '@subwallet/extension-koni-base/services/chain-list/types';
 import { _SubstrateChainSpec } from '@subwallet/extension-koni-base/services/chain-service/handler/types';
-import { _SubstrateApi, _SubstrateChainMetadata } from '@subwallet/extension-koni-base/services/chain-service/types';
-import { inJestTest } from '@subwallet/extension-koni-base/utils';
+import { _PSP22_ABI, _PSP34_ABI } from '@subwallet/extension-koni-base/services/chain-service/helper';
+import { _SmartContractTokenInfo, _SubstrateApi, _SubstrateChainMetadata } from '@subwallet/extension-koni-base/services/chain-service/types';
 
 import { ApiPromise, WsProvider } from '@polkadot/api';
+import { ContractPromise } from '@polkadot/api-contract';
 import { ScProvider, WellKnownChain } from '@polkadot/rpc-provider/substrate-connect';
 import { TypeRegistry } from '@polkadot/types/create';
 import { Registry } from '@polkadot/types/types';
 import { formatBalance, isTestChain, objectSpread, stringify } from '@polkadot/util';
+import { logger as createLogger } from '@polkadot/util/logger';
+import { Logger } from '@polkadot/util/types';
 import { defaults as addressDefaults } from '@polkadot/util-crypto/address/defaults';
 
 function getWellKnownChain (chain = 'polkadot'): string {
@@ -34,9 +38,15 @@ function getWellKnownChain (chain = 'polkadot'): string {
 
 export class SubstrateChainHandler {
   private substrateApiMap: Record<string, _SubstrateApi> = {};
+  private logger: Logger;
 
   constructor () {
+    this.logger = createLogger('substrate-chain-handler');
     console.log(this.substrateApiMap);
+  }
+
+  public getSubstrateApiByChain (chainSlug: string) {
+    return this.substrateApiMap[chainSlug];
   }
 
   public async getChainSpec (substrateApi: _SubstrateApi) {
@@ -66,6 +76,86 @@ export class SubstrateChainHandler {
     return result;
   }
 
+  public async getSmartContractTokenInfo (contractAddress: string, tokenType: _AssetType, originChain: string, contractCaller?: string): Promise<_SmartContractTokenInfo> {
+    let tokenContract: ContractPromise;
+    let name = '';
+    let decimals: number | undefined = -1;
+    let symbol = '';
+    let contractError = false;
+
+    const substrateApi = this.getSubstrateApiByChain(originChain);
+
+    try {
+      if (tokenType === _AssetType.PSP22) {
+        tokenContract = new ContractPromise(substrateApi.api, _PSP22_ABI, contractAddress);
+
+        const [nameResp, symbolResp, decimalsResp] = await Promise.all([
+          tokenContract.query['psp22Metadata::tokenName'](contractCaller || contractAddress, { gasLimit: -1 }), // read-only operation so no gas limit
+          tokenContract.query['psp22Metadata::tokenSymbol'](contractCaller || contractAddress, { gasLimit: -1 }),
+          tokenContract.query['psp22Metadata::tokenDecimals'](contractCaller || contractAddress, { gasLimit: -1 })
+        ]);
+
+        if (!(nameResp.result.isOk && symbolResp.result.isOk && decimalsResp.result.isOk) || !nameResp.output || !decimalsResp.output || !symbolResp.output) {
+          this.logger.error('Error response while validating WASM contract');
+
+          return {
+            name: '',
+            decimals: -1,
+            symbol: '',
+            contractError: true
+          };
+        } else {
+          name = symbolResp.output?.toHuman() as string;
+          decimals = parseInt(decimalsResp.output?.toHuman() as string);
+          symbol = symbolResp.output?.toHuman() as string;
+
+          if (name === '' || symbol === '') {
+            contractError = true;
+          }
+        }
+      } else {
+        tokenContract = new ContractPromise(substrateApi.api, _PSP34_ABI, contractAddress);
+
+        const collectionIdResp = await tokenContract.query['psp34::collectionId'](contractCaller || contractAddress, { gasLimit: -1 }); // read-only operation so no gas limit
+
+        if (!collectionIdResp.result.isOk || !collectionIdResp.output) {
+          this.logger.error('Error response while validating WASM contract');
+
+          return {
+            name: '',
+            decimals: -1,
+            symbol: '',
+            contractError: true
+          };
+        } else {
+          const collectionIdDict = collectionIdResp.output?.toHuman() as Record<string, string>;
+
+          if (collectionIdDict.Bytes === '') {
+            contractError = true;
+          } else {
+            name = ''; // no function to get collection name, let user manually put in the name
+          }
+        }
+      }
+
+      return {
+        name,
+        decimals,
+        symbol,
+        contractError
+      };
+    } catch (e) {
+      this.logger.error('Error validating WASM contract', e);
+
+      return {
+        name: '',
+        decimals: -1,
+        symbol: '',
+        contractError: true
+      };
+    }
+  }
+
   public initApi (chainSlug: string, apiUrl: string): _SubstrateApi {
     const registry = new TypeRegistry();
 
@@ -75,10 +165,8 @@ export class SubstrateChainHandler {
 
     const apiOption = { provider, typesBundle, typesChain: typesChain };
 
-    if (!inJestTest()) {
-      // @ts-ignore
-      apiOption.registry = registry;
-    }
+    // @ts-ignore
+    apiOption.registry = registry;
 
     let api: ApiPromise;
 
@@ -119,7 +207,7 @@ export class SubstrateChainHandler {
 
       recoverConnect: () => {
         substrateApi.apiRetry = 0;
-        console.log('Recover connect to ', apiUrl);
+        this.logger.log('Recover connect to ', apiUrl);
         provider.connect().then(console.log).catch(console.error);
       },
       get isReady () {
@@ -146,7 +234,7 @@ export class SubstrateChainHandler {
     }) as unknown as _SubstrateApi;
 
     api.on('connected', () => {
-      console.log('Substrate API connected to ', apiUrl);
+      this.logger.log('Substrate API connected to ', apiUrl);
       substrateApi.apiRetry = 0;
 
       if (substrateApi.isApiReadyOnce) {
@@ -161,18 +249,18 @@ export class SubstrateChainHandler {
       substrateApi.isApiReady = false;
       substrateApi.apiRetry = (substrateApi.apiRetry || 0) + 1;
 
-      console.log(`Substrate API disconnected from ${JSON.stringify(apiUrl)} ${JSON.stringify(substrateApi.apiRetry)} times`);
+      this.logger.log(`Substrate API disconnected from ${JSON.stringify(apiUrl)} ${JSON.stringify(substrateApi.apiRetry)} times`);
 
       if (substrateApi.apiRetry > DOTSAMA_MAX_CONTINUE_RETRY) {
         console.log(`Disconnect from provider ${JSON.stringify(apiUrl)} because retry maxed out`);
         provider.disconnect()
-          .then(console.log)
-          .catch(console.error);
+          .then(this.logger.log)
+          .catch(this.logger.error);
       }
     });
 
     api.on('ready', () => {
-      console.log('Substrate API ready with', apiUrl);
+      this.logger.log('Substrate API ready with', apiUrl);
       this.loadOnReady(registry, api)
         .then((rs) => {
           objectSpread(substrateApi, rs);
@@ -226,7 +314,7 @@ export class SubstrateChainHandler {
     const tokenDecimals = properties.tokenDecimals.unwrapOr([DEFAULT_DECIMALS]);
     const isDevelopment = (systemChainType.isDevelopment || systemChainType.isLocal || isTestChain(systemChain));
 
-    console.log(`chain: ${systemChain} (${systemChainType.toString()}), ${stringify(properties)}`);
+    this.logger.log(`chain: ${systemChain} (${systemChainType.toString()}), ${stringify(properties)}`);
 
     // explicitly override the ss58Format as specified
     // eslint-disable-next-line @typescript-eslint/ban-ts-comment

@@ -2,7 +2,6 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { assetFromToken } from '@equilab/api';
-import { SignedBalance } from '@equilab/api/genshiro/interfaces';
 import { APIItemState, ApiProps, BalanceChildItem, BalanceItem, TokenBalanceRaw, TokenInfo } from '@subwallet/extension-base/background/KoniTypes';
 import { moonbeamBaseChains } from '@subwallet/extension-koni-base/api/dotsama/api-helper';
 import { getRegistry, getTokenInfo } from '@subwallet/extension-koni-base/api/dotsama/registry';
@@ -21,6 +20,8 @@ import { DeriveBalancesAll } from '@polkadot/api-derive/types';
 import { AccountInfo, Balance } from '@polkadot/types/interfaces';
 import { BN } from '@polkadot/util';
 import { isEthereumAddress } from '@polkadot/util-crypto';
+
+type eqBalanceItem = [number, { positive: number }];
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 // @ts-ignore
@@ -174,43 +175,35 @@ async function subscribeGenshiroTokenBalance (addresses: string[], networkKey: s
     console.log('Get tokens balance of', networkKey, tokenList);
   }
 
-  const unsubList = tokenList.map(async ({ decimals, symbol }) => {
-    try {
-      const asset = networkKey === 'equilibrium_parachain' ? assetFromToken(symbol)[0] : assetFromToken(symbol);
-      // Get Token Balance
+  const unsub = await api.query.system.account.multi(addresses, (balances: Record<string, any>[]) => {
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-argument,@typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-member-access
+    const balancesData = JSON.parse(balances[0].data.toString()) as eqBalanceItem[];
+
+    tokenList.map(({ decimals, specialOption, symbol }) => {
       // @ts-ignore
-      const unsub = await api.query.eqBalances.account.multi(addresses.map((address) => [address, asset]), (balances: SignedBalance[]) => {
-        const tokenBalance = {
-          reserved: '0',
-          frozen: '0',
-          free: sumBN(balances.map((b) => (b.asPositive))).toString(),
-          decimals
-        };
+      const freeTokenBalance = balancesData.find((data: eqBalanceItem) => data[0] === specialOption?.assetId);
+      const tokenBalance = {
+        reserved: '0',
+        frozen: '0',
+        free: freeTokenBalance ? freeTokenBalance[1].positive.toString() : '0',
+        decimals
+      };
 
-        if (includeMainToken && tokenMap[symbol].isMainToken) {
-          mainCallback({
-            state: APIItemState.READY,
-            free: tokenBalance.free
-          });
-        } else {
-          subCallback({ [symbol]: tokenBalance });
-        }
-      });
-
-      return unsub;
-    } catch (err) {
-      console.warn(err);
+      if (includeMainToken && tokenMap[symbol].isMainToken) {
+        mainCallback({
+          state: APIItemState.READY,
+          free: tokenBalance.free
+        });
+      } else {
+        subCallback({ [symbol]: tokenBalance });
+      }
 
       return undefined;
-    }
+    });
   });
 
   return () => {
-    unsubList.forEach((subProm) => {
-      subProm.then((unsub) => {
-        unsub && unsub();
-      }).catch(console.error);
-    });
+    unsub();
   };
 }
 

@@ -3809,7 +3809,7 @@ export default class KoniExtension extends Extension {
         return this.disableAllNetwork();
       case 'pri(networkMap.enableAll)':
         return this.enableAllNetwork();
-      case 'pri(networkMap.resetDefault)':
+      case 'pri(chainService.resetDefaultChains)':
         return this.resetDefaultNetwork();
       case 'pri(customTokenState.getSubscription)':
         return this.subscribeCustomTokenState(id, port);
@@ -3821,23 +3821,23 @@ export default class KoniExtension extends Extension {
         return this.subscribeChainStateMap(id, port);
       case 'pri(chainService.getSupportedContractTypes)':
         return this.getSupportedSmartContractTypes();
-      case 'pri(networkMap.enableOne)':
+      case 'pri(chainService.enableChain)':
         return this.enableChain(request as string);
-      case 'pri(networkMap.disableOne)':
+      case 'pri(chainService.disableChain)':
         return this.disableChain(request as string);
-      case 'pri(networkMap.removeOne)':
+      case 'pri(chainService.removeChain)':
         return this.removeNetworkMap(request as string);
-      case 'pri(networkMap.upsert)':
+      case 'pri(chainService.upsertCustomChain)':
         return this.upsertNetworkMap(request as Record<string, any>);
-      case 'pri(networkMap.enableMany)':
+      case 'pri(chainService.enableChains)':
         return this.enableChains(request as string[]);
-      case 'pri(networkMap.disableMany)':
+      case 'pri(chainService.disableChains)':
         return this.disableChains(request as string[]);
       case 'pri(chainService.subscribeAssetRegistry)':
         return this.subscribeAssetRegistry(id, port);
-      case 'pri(customTokenState.upsertCustomTokenState)':
+      case 'pri(chainService.upsertCustomToken)':
         return this.upsertCustomToken(request as _ChainAsset);
-      case 'pri(customTokenState.deleteMany)':
+      case 'pri(chainService.deleteCustomTokens)':
         return this.deleteCustomToken(request as string[]);
 
       case 'pri(transfer.checkReferenceCount)':
@@ -3850,7 +3850,7 @@ export default class KoniExtension extends Extension {
         return this.subscribeAddressFreeBalance(request as RequestFreeBalance, id, port);
       case 'pri(subscription.cancel)':
         return this.cancelSubscription(request as string);
-      case 'pri(customTokenState.validateCustomToken)':
+      case 'pri(chainService.validateCustomToken)':
         return await this.validateCustomToken(request as _ValidateCustomTokenRequest);
       case 'pri(networkMap.recoverDotSama)':
         return this.recoverDotSamaApi(request as string);

@@ -1578,7 +1578,6 @@ export interface KoniRequestSignatures {
   // deprecated
   'pri(customTokenState.getCustomTokenState)': [null, CustomTokenJson];
   'pri(customTokenState.getSubscription)': [null, CustomTokenJson, CustomTokenJson];
-  'pri(networkMap.upsert)': [Record<string, any>, boolean];
   'pri(networkMap.getNetworkMap)': [null, Record<string, NetworkJson>];
   'pri(networkMap.getSubscription)': [null, Record<string, NetworkJson>, Record<string, NetworkJson>];
   'pri(apiMap.validate)': [ValidateNetworkRequest, ValidateNetworkResponse];
@@ -1587,15 +1586,16 @@ export interface KoniRequestSignatures {
   'pri(chainService.subscribeChainInfoMap)': [null, Record<string, any>, Record<string, any>];
   'pri(chainService.subscribeChainStateMap)': [null, Record<string, any>, Record<string, any>];
   'pri(chainService.subscribeAssetRegistry)': [null, Record<string, any>, Record<string, any>];
-  'pri(networkMap.enableMany)': [string[], boolean];
-  'pri(networkMap.disableMany)': [string[], boolean];
-  'pri(networkMap.enableOne)': [string, boolean];
-  'pri(networkMap.disableOne)': [string, DisableNetworkResponse];
-  'pri(networkMap.removeOne)': [string, boolean];
-  'pri(customTokenState.deleteMany)': [string[], boolean];
-  'pri(customTokenState.upsertCustomTokenState)': [Record<string, any>, boolean];
-  'pri(customTokenState.validateCustomToken)': [Record<string, any>, Record<string, any>];
-  'pri(networkMap.resetDefault)': [null, boolean];
+  'pri(chainService.upsertCustomChain)': [Record<string, any>, boolean];
+  'pri(chainService.enableChains)': [string[], boolean];
+  'pri(chainService.disableChains)': [string[], boolean];
+  'pri(chainService.enableChain)': [string, boolean];
+  'pri(chainService.disableChain)': [string, DisableNetworkResponse];
+  'pri(chainService.removeChain)': [string, boolean];
+  'pri(chainService.deleteCustomTokens)': [string[], boolean];
+  'pri(chainService.upsertCustomToken)': [Record<string, any>, boolean];
+  'pri(chainService.validateCustomToken)': [Record<string, any>, Record<string, any>];
+  'pri(chainService.resetDefaultChains)': [null, boolean];
   'pri(chainService.getSupportedContractTypes)': [null, string[]];
 
   // NFT functions

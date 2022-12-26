@@ -545,27 +545,27 @@ export async function subscribeChainStateMap (callback: (data: Record<string, _C
 }
 
 export async function removeChain (networkKey: string): Promise<boolean> {
-  return sendMessage('pri(networkMap.removeOne)', networkKey);
+  return sendMessage('pri(chainService.removeChain)', networkKey);
 }
 
 export async function disableChain (networkKey: string): Promise<DisableNetworkResponse> {
-  return sendMessage('pri(networkMap.disableOne)', networkKey);
+  return sendMessage('pri(chainService.disableChain)', networkKey);
 }
 
 export async function enableChain (networkKey: string): Promise<boolean> {
-  return sendMessage('pri(networkMap.enableOne)', networkKey);
+  return sendMessage('pri(chainService.enableChain)', networkKey);
 }
 
 export async function enableChains (targetKeys: string[]): Promise<boolean> {
-  return sendMessage('pri(networkMap.enableMany)', targetKeys);
+  return sendMessage('pri(chainService.enableChains)', targetKeys);
 }
 
 export async function disableChains (targetKeys: string[]): Promise<boolean> {
-  return sendMessage('pri(networkMap.disableMany)', targetKeys);
+  return sendMessage('pri(chainService.disableChains)', targetKeys);
 }
 
 export async function upsertNetworkMap (data: Record<string, any>): Promise<boolean> {
-  return sendMessage('pri(networkMap.upsert)', data);
+  return sendMessage('pri(chainService.upsertCustomChain)', data);
 }
 
 export async function getSupportedContractTypes (): Promise<string[]> {
@@ -587,7 +587,7 @@ export async function enableAllNetwork (): Promise<boolean> {
 }
 
 export async function resetDefaultNetwork (): Promise<boolean> {
-  return sendMessage('pri(networkMap.resetDefault)', null);
+  return sendMessage('pri(chainService.resetDefaultChains)', null);
 }
 
 export async function subscribeCustomToken (callback: (data: CustomTokenJson) => void): Promise<CustomTokenJson> {
@@ -595,15 +595,15 @@ export async function subscribeCustomToken (callback: (data: CustomTokenJson) =>
 }
 
 export async function upsertCustomToken (data: _ChainAsset): Promise<boolean> {
-  return sendMessage('pri(customTokenState.upsertCustomTokenState)', data);
+  return sendMessage('pri(chainService.upsertCustomToken)', data);
 }
 
 export async function deleteCustomTokens (data: string[]) {
-  return sendMessage('pri(customTokenState.deleteMany)', data);
+  return sendMessage('pri(chainService.deleteCustomTokens)', data);
 }
 
 export async function validateCustomToken (data: _ValidateCustomTokenRequest): Promise<Record<string, any>> {
-  return sendMessage('pri(customTokenState.validateCustomToken)', data);
+  return sendMessage('pri(chainService.validateCustomToken)', data);
 }
 
 export async function transferCheckReferenceCount (request: RequestTransferCheckReferenceCount): Promise<boolean> {

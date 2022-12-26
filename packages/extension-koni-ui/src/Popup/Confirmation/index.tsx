@@ -224,9 +224,9 @@ function Confirmation ({ className, match: { params: { address } } }: Props): Re
       setCurrentConfirmationType('addTokenRequest');
 
       if (payload.type === 'erc20') {
-        onAction('/account/import-evm-token');
+        onAction('/account/import-token');
       } else if (payload.type === 'erc721') {
-        onAction('/account/import-evm-nft');
+        onAction('/account/import-nft');
       }
     } else if (checkConfirmation('switchNetworkRequest')) {
       const confirmation = Object.values(confirmations.switchNetworkRequest)[0];

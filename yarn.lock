@@ -2521,10 +2521,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@interlay/interbtc-types@npm:^1.9.0":
-  version: 1.9.0
-  resolution: "@interlay/interbtc-types@npm:1.9.0"
-  checksum: bcf931bf1ea85bdc7d093101ce8eabdd9f592f31292063960b55190e29ff96f0823d020d63b7a9dc408f998eb5f381747f6a3a8d2accf07ae8d900dfae1de04f
+"@interlay/interbtc-types@npm:^1.11.0":
+  version: 1.11.0
+  resolution: "@interlay/interbtc-types@npm:1.11.0"
+  checksum: 29e6d410ce7b11a7de6f3f9800e57441f966a3ca246ff10f6f5634e450aa2845cfaa35b902697588c39bc7b0e37addfce7ae5040e5d58aa628f05a13f21c5ba8
   languageName: node
   linkType: hard
 
@@ -5861,7 +5861,7 @@ __metadata:
     "@equilab/definitions": ^1.4.13
     "@ethereumjs/common": ^2.6.5
     "@ethersproject/abi": ^5.7.0
-    "@interlay/interbtc-types": ^1.9.0
+    "@interlay/interbtc-types": ^1.11.0
     "@kiltprotocol/type-definitions": ^0.2.1
     "@laminar/type-definitions": ^0.3.1
     "@metamask/safe-event-emitter": ^2.0.0

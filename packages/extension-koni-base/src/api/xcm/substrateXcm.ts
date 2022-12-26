@@ -8,6 +8,8 @@ import { parseNumberToDisplay } from '@subwallet/extension-koni-base/utils';
 import { ApiPromise } from '@polkadot/api';
 import { KeyringPair } from '@polkadot/keyring/types';
 
+const NETWORK_USE_UNLIMIT_WEIGHT: string[] = ['acala', 'karura', 'statemint'];
+
 function getTokenIdentity (originNetworkKey: string, tokenInfo: TokenInfo) {
   // TODO: find a better way to handle kUSD on karura
   const tokenSymbol = tokenInfo.symbol.toUpperCase() === 'AUSD' && originNetworkKey === 'karura' ? 'KUSD' : tokenInfo.symbol.toUpperCase();
@@ -44,22 +46,35 @@ export async function substrateEstimateCrossChainFee (
   const originNetworkJson = networkMap[originNetworkKey];
   const destinationNetworkJson = networkMap[destinationNetworkKey];
   const tokenIdentity = getTokenIdentity(originNetworkKey, tokenInfo);
-  const usesUnlimited = ['acala', 'karura', 'statemint'].includes(originNetworkKey);
+  const weightParam = NETWORK_USE_UNLIMIT_WEIGHT.includes(originNetworkKey) ? POLKADOT_UNLIMITED_WEIGHT : FOUR_INSTRUCTIONS_WEIGHT;
 
   try {
     if (SupportedCrossChainsMap[originNetworkKey].type === 'p') {
+      console.log(tokenIdentity,
+        value,
+        getMultiLocationFromParachain(originNetworkKey, destinationNetworkKey, networkMap, to),
+        weightParam
+      );
+
       // Case ParaChain -> ParaChain && ParaChain -> RelayChain
+      console.log(1);
       const extrinsic = api.tx.xTokens.transfer(
         tokenIdentity,
         value,
         getMultiLocationFromParachain(originNetworkKey, destinationNetworkKey, networkMap, to),
-        usesUnlimited ? POLKADOT_UNLIMITED_WEIGHT : FOUR_INSTRUCTIONS_WEIGHT
+        weightParam
       );
+      console.log(2);
+      console.log(extrinsic.toHex());
+      console.log(fromKeypair);
 
-      const paymentInfo = await extrinsic.paymentInfo(fromKeypair);
-
+      const paymentInfo = await extrinsic.paymentInfo(fromKeypair.address);
+      console.log(3);
       fee = paymentInfo.partialFee.toString();
+      console.log(4);
+
       feeString = parseNumberToDisplay(paymentInfo.partialFee, originNetworkJson.decimals) + ` ${originNetworkJson.nativeToken ? originNetworkJson.nativeToken : ''}`;
+      console.log(5);
 
       console.log('substrate xcm tx p-p or p-r here', extrinsic.toHex());
     } else {
@@ -164,13 +179,13 @@ export function substrateGetXcmExtrinsic (
   // Case ParaChain -> RelayChain && Parachain -> Parachain
   if (SupportedCrossChainsMap[originNetworkKey].type === 'p') {
     const tokenIdentity = getTokenIdentity(originNetworkKey, tokenInfo);
-    const usesUnlimited = ['acala', 'karura', 'statemint'].includes(originNetworkKey);
+    const weightParam = NETWORK_USE_UNLIMIT_WEIGHT.includes(originNetworkKey) ? POLKADOT_UNLIMITED_WEIGHT : FOUR_INSTRUCTIONS_WEIGHT;
 
     return api.tx.xTokens.transfer(
       tokenIdentity,
       value,
       getMultiLocationFromParachain(originNetworkKey, destinationNetworkKey, networkMap, to),
-      usesUnlimited ? POLKADOT_UNLIMITED_WEIGHT : FOUR_INSTRUCTIONS_WEIGHT
+      weightParam
     );
   }
 

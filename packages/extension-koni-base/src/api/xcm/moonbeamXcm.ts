@@ -68,11 +68,13 @@ export async function moonbeamEstimateCrossChainFee (
   const tokenType = TOKEN_TYPE_MAP[originNetworkKey][tokenInfo.symbol];
   const networkJson = networkMap[originNetworkKey];
 
+  const weightParam = originNetworkKey === 'moonriver' ? POLKADOT_UNLIMITED_WEIGHT : FOUR_INSTRUCTIONS_WEIGHT;
+
   const extrinsic = apiProps.api.tx.xTokens.transfer(
     { [tokenType]: new BN(tokenInfo.assetId as string) },
     value,
     getMultiLocationFromParachain(originNetworkKey, destinationNetworkKey, networkMap, to),
-    POLKADOT_UNLIMITED_WEIGHT
+    weightParam
   );
 
   console.log('moon xcm tx here', extrinsic.toHex());
@@ -95,11 +97,12 @@ export function moonbeamGetXcmExtrinsic (
   networkMap: Record<string, NetworkJson>
 ) {
   const tokenType = TOKEN_TYPE_MAP[originNetworkKey][tokenInfo.symbol];
+  const weightParam = originNetworkKey === 'moonriver' ? POLKADOT_UNLIMITED_WEIGHT : FOUR_INSTRUCTIONS_WEIGHT;
 
   return api.tx.xTokens.transfer(
     { [tokenType]: new BN(tokenInfo.assetId as string) },
     value,
     getMultiLocationFromParachain(originNetworkKey, destinationNetworkKey, networkMap, to),
-    FOUR_INSTRUCTIONS_WEIGHT
+    weightParam
   );
 }

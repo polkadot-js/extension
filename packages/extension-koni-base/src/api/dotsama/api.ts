@@ -3,13 +3,14 @@
 
 import { options as acalaOptions } from '@acala-network/api';
 import { rpc as oakRpc, types as oakTypes } from '@oak-foundation/types';
+import { WellKnownChain } from '@substrate/connect';
 import { ApiProps, ApiState } from '@subwallet/extension-base/background/KoniTypes';
 import { typesBundle, typesChain } from '@subwallet/extension-koni-base/api/dotsama/api-helper';
 import { DOTSAMA_AUTO_CONNECT_MS, DOTSAMA_MAX_CONTINUE_RETRY } from '@subwallet/extension-koni-base/constants';
 import { inJestTest } from '@subwallet/extension-koni-base/utils';
 
 import { ApiPromise, WsProvider } from '@polkadot/api';
-import { ScProvider, WellKnownChain } from '@polkadot/rpc-provider/substrate-connect';
+import { ScProvider } from '@polkadot/rpc-provider/substrate-connect';
 import { TypeRegistry } from '@polkadot/types/create';
 import { ChainProperties, ChainType } from '@polkadot/types/interfaces';
 import { Registry } from '@polkadot/types/types';

@@ -399,7 +399,7 @@ export const PREDEFINED_NETWORKS: Record<string, NetworkJson> = {
     genesisHash: '0xafdc188f45c71dacbaa0b62e16a91f726c7b8699a9748cdf715459de6b7f366d',
     ss58Format: 63,
     providers: {
-      'Galactic Council': 'wss://rpc-01.hydradx.io',
+      'Galactic Council': 'wss://rpc.hydradx.cloud',
       Dwellir: 'wss://hydradx-rpc.dwellir.com'
     },
     active: false,
@@ -520,10 +520,10 @@ export const PREDEFINED_NETWORKS: Record<string, NetworkJson> = {
     decimals: 9,
     coinGeckoKey: 'darwinia-network-native-token'
   },
-  'sora-substrate': {
-    key: 'sora-substrate',
-    chain: 'SORA',
-    genesisHash: '0x7e4e32d0feafd4f9c9414b0be86373f9a1efa904809b683453a9af6856d38ad5',
+  sora_ksm: {
+    key: 'sora_ksm',
+    chain: 'SORA Kusama',
+    genesisHash: '0x6d8d9f145c2177fa83512492cdd80a71e29f22473f4a8943a6292149ac319fb9',
     ss58Format: 420,
     providers: {
       Soramitsu: 'wss://ws.parachain-collator-1.c1.sora2.soramitsu.co.jp'
@@ -532,7 +532,7 @@ export const PREDEFINED_NETWORKS: Record<string, NetworkJson> = {
     currentProviderMode: 'ws',
     currentProvider: 'Soramitsu',
     groups: ['KUSAMA_PARACHAIN'],
-    nativeToken: 'XOR',
+    nativeToken: 'Unit',
     crowdloanUrl: 'https://polkadot.js.org/apps/#/parachains/crowdloan',
     decimals: 12,
     paraId: 2011
@@ -1073,13 +1073,12 @@ export const PREDEFINED_NETWORKS: Record<string, NetworkJson> = {
     genesisHash: '0xa85cfb9b9fd4d622a5b28289a02347af987d8f73fa3108450e2b4a11c1ce5755',
     ss58Format: 10041,
     providers: {
-      HydraDX: 'wss://rpc-01.basilisk.hydradx.io',
-      OnFinality: 'wss://basilisk.api.onfinality.io/public-ws',
+      Basilisk: 'wss://rpc.basilisk.cloud',
       Dwellir: 'wss://basilisk-rpc.dwellir.com'
     },
     active: false,
     currentProviderMode: 'ws',
-    currentProvider: 'HydraDX',
+    currentProvider: 'Basilisk',
     groups: ['KUSAMA_PARACHAIN'],
     paraId: 2090,
     coinGeckoKey: 'basilisk',
@@ -1416,6 +1415,7 @@ export const PREDEFINED_NETWORKS: Record<string, NetworkJson> = {
     currentProviderMode: 'ws',
     currentProvider: 'Crab',
     groups: ['KUSAMA_PARACHAIN'],
+    paraId: 2105,
     nativeToken: 'CRAB',
     crowdloanUrl: 'https://crab.network/plo',
     decimals: 18,
@@ -1859,6 +1859,7 @@ export const PREDEFINED_NETWORKS: Record<string, NetworkJson> = {
     currentProviderMode: 'ws',
     nativeToken: 'DHX',
     groups: ['KUSAMA_PARACHAIN'],
+    paraId: 2116,
     decimals: 18
   },
   amplitude: {
@@ -1875,8 +1876,23 @@ export const PREDEFINED_NETWORKS: Record<string, NetworkJson> = {
     nativeToken: 'AMPE',
     groups: ['KUSAMA_PARACHAIN'],
     decimals: 12,
+    paraId: 2124,
     supportBonding: true,
     getStakingOnChain: true
+  },
+  pendulum: {
+    key: 'pendulum',
+    chain: 'Pendulum',
+    genesisHash: '0xcceae7f3b9947cdb67369c026ef78efa5f34a08fe5808d373c04421ecf4f1aaf',
+    ss58Format: 56,
+    providers: {},
+    active: false,
+    currentProviderMode: 'ws',
+    currentProvider: null,
+    nativeToken: 'PEN',
+    groups: ['POLKADOT_PARACHAIN'],
+    paraId: 2094,
+    decimals: 12
   },
   gear_testnet: {
     key: 'gear_testnet',
@@ -1906,6 +1922,7 @@ export const PREDEFINED_NETWORKS: Record<string, NetworkJson> = {
     currentProviderMode: 'ws',
     nativeToken: 'ICZ',
     decimals: 18,
+    paraId: 2129,
     groups: ['KUSAMA_PARACHAIN']
   },
   arctic_testnet: {
@@ -2273,6 +2290,474 @@ export const PREDEFINED_NETWORKS: Record<string, NetworkJson> = {
     nativeToken: 'EBAR',
     decimals: 18,
     isEthereum: true
+  },
+  collectives: {
+    key: 'collectives',
+    chain: 'Collectives',
+    genesisHash: '0x46ee89aa2eedd13e988962630ec9fb7565964cf5023bb351f2b6b25c1b68b0b2',
+    ss58Format: 0,
+    providers: {
+      viaParity: 'wss://polkadot-collectives-rpc.polkadot.io'
+    },
+    paraId: 1001,
+    active: false,
+    currentProviderMode: 'ws',
+    currentProvider: 'viaParity',
+    groups: ['POLKADOT_PARACHAIN'],
+    nativeToken: 'DOT',
+    decimals: 10
+  },
+  ajunaPolkadot: {
+    key: 'ajunaPolkadot',
+    chain: 'Ajuna Network',
+    genesisHash: '0xe358eb1d11b31255a286c12e44fe6780b7edb171d657905a97e39f71d9c6c3ee',
+    ss58Format: 1328,
+    providers: {
+      viaAjunaNetwork: 'wss://rpc-parachain.ajuna.network'
+    },
+    paraId: 2028,
+    active: false,
+    currentProviderMode: 'ws',
+    currentProvider: 'viaAjunaNetwork',
+    groups: ['POLKADOT_PARACHAIN'],
+    nativeToken: 'AJUN',
+    decimals: 12
+  },
+  bitgreen: {
+    key: 'bitgreen',
+    chain: 'Bitgreen',
+    genesisHash: '0xc14597baeccb232d662770d2d50ae832ca8c3192693d2b0814e6433f2888ddd6',
+    ss58Format: 42,
+    providers: {
+      viaBitgreen: 'wss://mainnet.bitgreen.org'
+    },
+    paraId: 2048,
+    active: false,
+    currentProviderMode: 'ws',
+    currentProvider: 'viaBitgreen',
+    groups: ['POLKADOT_PARACHAIN'],
+    nativeToken: 'BBB',
+    decimals: 18
+  },
+  frequency: {
+    key: 'frequency',
+    chain: 'Frequency',
+    genesisHash: '0x4a587bf17a404e3572747add7aab7bbe56e805a5479c6c436f07f36fcc8d3ae1',
+    ss58Format: 90,
+    providers: {
+      'Frequency 0': 'wss://0.rpc.frequency.xyz',
+      'Frequency 1': 'wss://1.rpc.frequency.xyz'
+    },
+    paraId: 2091,
+    active: false,
+    currentProviderMode: 'ws',
+    currentProvider: 'Frequency 1',
+    groups: ['POLKADOT_PARACHAIN'],
+    nativeToken: 'FRQCY',
+    decimals: 8
+  },
+  hashedNetwork: {
+    key: 'hashedNetwork',
+    chain: 'Hashed Network',
+    genesisHash: '0x331645ae3db556c7754a82f79cece12cce3420975d5b0219d51b1cb4f6ddc21c',
+    ss58Format: 42,
+    providers: {
+      'Hashed Systems': 'wss://c1.hashed.network'
+    },
+    paraId: 2093,
+    active: false,
+    currentProviderMode: 'ws',
+    currentProvider: 'Hashed Systems',
+    groups: ['POLKADOT_PARACHAIN'],
+    nativeToken: 'HASH',
+    decimals: 18
+  },
+  kapex: {
+    key: 'kapex',
+    chain: 'Kapex',
+    genesisHash: '0x7838c3c774e887c0a53bcba9e64f702361a1a852d5550b86b58cd73827fa1e1e',
+    ss58Format: 2007,
+    providers: {
+      viaTotem: 'wss://k-ui.kapex.network'
+    },
+    paraId: 2007,
+    active: false,
+    currentProviderMode: 'ws',
+    currentProvider: 'viaTotem',
+    groups: ['POLKADOT_PARACHAIN'],
+    nativeToken: 'KPX',
+    decimals: 12
+  },
+  kylinNetwork: {
+    key: 'kylinNetwork',
+    chain: 'Kylin Network',
+    genesisHash: '0xf2584690455deda322214e97edfffaf4c1233b6e4625e39478496b3e2f5a44c5',
+    ss58Format: 42,
+    providers: {
+      'Kylin Network': 'wss://polkadot.kylin-node.co.uk'
+    },
+    paraId: 2052,
+    active: false,
+    currentProviderMode: 'ws',
+    currentProvider: 'Kylin Network',
+    groups: ['POLKADOT_PARACHAIN'],
+    nativeToken: 'KYL',
+    decimals: 18,
+    coinGeckoKey: 'kylin-network'
+  },
+  ipci: {
+    key: 'ipci',
+    chain: 'DAO IPCI',
+    genesisHash: '0x6f0f071506de39058fe9a95bbca983ac0e9c5da3443909574e95d52eb078d348',
+    ss58Format: 32,
+    providers: {
+      viaAiralab: 'wss://kusama.rpc.ipci.io'
+    },
+    paraId: 2222,
+    active: false,
+    currentProviderMode: 'ws',
+    currentProvider: 'viaAiralab',
+    groups: ['KUSAMA_PARACHAIN'],
+    nativeToken: 'MITO',
+    decimals: 12
+  },
+  kico: {
+    key: 'kico',
+    chain: 'KICO',
+    genesisHash: '0x52149c30c1eb11460dce6c08b73df8d53bb93b4a15d0a2e7fd5dafe86a73c0da',
+    ss58Format: 42,
+    providers: {
+      'DICO Foundation': 'wss://rpc.kico.dico.io'
+    },
+    paraId: 2107,
+    active: false,
+    currentProviderMode: 'ws',
+    currentProvider: 'DICO Foundation',
+    groups: ['KUSAMA_PARACHAIN'],
+    nativeToken: 'KICO',
+    decimals: 14
+  },
+  luhnNetwork: {
+    key: 'luhnNetwork',
+    chain: 'Luhn Network',
+    genesisHash: '0xba713fdbf674083c5541c1439b83d8e593e1105f35f11954bcc50d0bf9607873',
+    ss58Format: 42,
+    providers: {
+      'Hashed Systems': 'wss://c1.luhn.network'
+    },
+    paraId: 2232,
+    active: false,
+    currentProviderMode: 'ws',
+    currentProvider: 'Hashed Systems',
+    groups: ['KUSAMA_PARACHAIN'],
+    nativeToken: 'LUHN',
+    decimals: 18
+  },
+  pichiu: {
+    key: 'pichiu',
+    chain: 'Pichiu Network',
+    genesisHash: '0x0e06260459b4f9034aba0a75108c08ed73ea51d2763562749b1d3600986c4ea5',
+    ss58Format: 42,
+    providers: {
+      'Kylin Network': 'wss://kusama.kylin-node.co.uk',
+      OnFinality: 'wss://pichiu.api.onfinality.io/public-ws'
+    },
+    paraId: 2102,
+    active: false,
+    currentProviderMode: 'ws',
+    currentProvider: 'OnFinality',
+    groups: ['KUSAMA_PARACHAIN'],
+    nativeToken: 'PCHU',
+    decimals: 18
+  },
+  riodefi: {
+    key: 'riodefi',
+    chain: 'RioDeFi',
+    genesisHash: '0x70310f31bdb878e9920121807ee46236bda2e00c10eb105a40b386bd7ad16906',
+    ss58Format: 42,
+    providers: {
+      RioProtocol: 'wss://rio-kusama.riocorenetwork.com'
+    },
+    paraId: 2227,
+    active: false,
+    currentProviderMode: 'ws',
+    currentProvider: 'RioProtocol',
+    groups: ['KUSAMA_PARACHAIN'],
+    nativeToken: 'UNIT',
+    decimals: 12
+  },
+  automata: {
+    key: 'automata',
+    chain: 'Automata',
+    genesisHash: '0xc8eda34601b5a48c73f47ee39a3a86a858c34f044185b17dc7d5ad155813dc63',
+    ss58Format: 42,
+    providers: {
+      'Automata Network': 'wss://api.ata.network',
+      OnFinality: 'wss://automata.api.onfinality.io/public-ws'
+    },
+    active: false,
+    currentProviderMode: 'ws',
+    currentProvider: 'OnFinality',
+    groups: ['MAIN_NET'],
+    nativeToken: 'ATA',
+    decimals: 18,
+    coinGeckoKey: 'automata'
+  },
+  creditcoin: {
+    key: 'creditcoin',
+    chain: 'Creditcoin',
+    genesisHash: '0xdd954cbf4000542ef1a15bca509cd89684330bee5e23766c527cdb0d7275e9c2',
+    ss58Format: 42,
+    providers: {
+      'Creditcoin Foundation': 'wss://rpc.mainnet.creditcoin.network/ws'
+    },
+    active: false,
+    currentProviderMode: 'ws',
+    currentProvider: 'Creditcoin Foundation',
+    groups: ['MAIN_NET'],
+    nativeToken: 'CTC',
+    decimals: 18,
+    coinGeckoKey: 'creditcoin-2'
+  },
+  crownSterling: {
+    key: 'crownSterling',
+    chain: 'Crown Sterling',
+    genesisHash: '0xce24ecf534daea9cd46e425659ef4950a57dd29d07272b423220129c323a64b7',
+    ss58Format: 0,
+    providers: {
+      'Crown Sterling': 'wss://blockchain.crownsterling.io'
+    },
+    active: false,
+    currentProviderMode: 'ws',
+    currentProvider: 'Crown Sterling',
+    groups: ['MAIN_NET'],
+    nativeToken: 'CSOV',
+    decimals: 12,
+    coinGeckoKey: 'crownsterling'
+  },
+  dockPosMainnet: {
+    key: 'dockPosMainnet',
+    chain: 'Dock',
+    genesisHash: '0x6bfe24dca2a3be10f22212678ac13a6446ec764103c0f3471c71609eac384aae',
+    ss58Format: 22,
+    providers: {
+      'Dock Association': 'wss://mainnet-node.dock.io'
+    },
+    active: false,
+    currentProviderMode: 'ws',
+    currentProvider: 'Dock Association',
+    groups: ['MAIN_NET'],
+    nativeToken: 'DOCK',
+    decimals: 6,
+    coinGeckoKey: 'dock',
+    blockExplorer: 'https://dock.subscan.io'
+  },
+  kusari: {
+    key: 'kusari',
+    chain: 'Kusari',
+    genesisHash: '0x4959f8d87d40d9ef516459ff177111bb03d875e5a7ed69282f6b689a707b69f5',
+    ss58Format: 42,
+    providers: {
+      Swapdex: 'wss://ws.kusari.network'
+    },
+    active: false,
+    currentProviderMode: 'ws',
+    currentProvider: 'Swapdex',
+    groups: ['MAIN_NET'],
+    nativeToken: 'KSI',
+    decimals: 18
+  },
+  logion: {
+    key: 'logion',
+    chain: 'logion Standalone',
+    genesisHash: '0xe9d7420a5f73edef005ccb8e043500aa5b2458f173912184ea93c14dc035a203',
+    ss58Format: 42,
+    providers: {
+      Logion: 'wss://rpc01.logion.network'
+    },
+    active: false,
+    currentProviderMode: 'ws',
+    currentProvider: 'Logion',
+    groups: ['MAIN_NET'],
+    nativeToken: 'LGNT',
+    decimals: 18
+  },
+  neatcoin: {
+    key: 'neatcoin',
+    chain: 'Neatcoin',
+    genesisHash: '0xfbb541421d30423c9a753ffa844b64fd44d823f513bf49e3b73b3a656309a595',
+    ss58Format: 48,
+    providers: {
+      Neatcoin: 'wss://rpc.neatcoin.org/ws'
+    },
+    active: false,
+    currentProviderMode: 'ws',
+    currentProvider: 'Neatcoin',
+    groups: ['MAIN_NET'],
+    nativeToken: 'NEAT',
+    decimals: 12
+  },
+  nftmart: {
+    key: 'nftmart',
+    chain: 'NFTMart',
+    genesisHash: '0xfcf9074303d8f319ad1bf0195b145871977e7c375883b834247cb01ff22f51f9',
+    ss58Format: 12191,
+    providers: {
+      NFTMart: 'wss://mainnet.nftmart.io/rpc/ws'
+    },
+    active: false,
+    currentProviderMode: 'ws',
+    currentProvider: 'NFTMart',
+    groups: ['MAIN_NET'],
+    nativeToken: 'NMT',
+    decimals: 12,
+    coinGeckoKey: 'nftmart-token'
+  },
+  polymesh: {
+    key: 'polymesh',
+    chain: 'Polymesh Mainnet',
+    genesisHash: '0x6fbd74e5e1d0a61d52ccfe9d4adaed16dd3a7caa37c6bc4d0c2fa12e8b2f4063',
+    ss58Format: 12,
+    providers: {
+      Polymath: 'wss://mainnet-rpc.polymesh.network'
+    },
+    active: false,
+    currentProviderMode: 'ws',
+    currentProvider: 'Polymath',
+    groups: ['MAIN_NET'],
+    nativeToken: 'POLYX',
+    decimals: 6,
+    coinGeckoKey: 'polymesh',
+    blockExplorer: 'https://polymesh.subscan.io'
+  },
+  riochain: {
+    key: 'riochain',
+    chain: 'RioChain',
+    genesisHash: '0xd8c6dc2e057b94d05c870a7b39bfb30ae10202ed9cf7731d28dafcfe9458e307',
+    ss58Format: 42,
+    providers: {
+      RioChain: 'wss://node.v1.riochain.io'
+    },
+    active: false,
+    currentProviderMode: 'ws',
+    currentProvider: 'RioChain',
+    groups: ['MAIN_NET'],
+    nativeToken: 'RFUEL',
+    decimals: 12,
+    coinGeckoKey: 'rio-defi'
+  },
+  sherpax: {
+    key: 'sherpax',
+    chain: 'SherpaX',
+    genesisHash: '0xe195ef16d0c628b5cab1486a233865def6e71f8b7814dd058a6b93a85118b796',
+    ss58Format: 44,
+    providers: {
+      ChainX: 'wss://mainnet.sherpax.io'
+    },
+    active: false,
+    currentProviderMode: 'ws',
+    currentProvider: 'ChainX',
+    groups: ['MAIN_NET'],
+    nativeToken: 'KSX',
+    decimals: 18
+  },
+  'sora-substrate': {
+    key: 'sora-substrate',
+    chain: 'SORA',
+    genesisHash: '0x7e4e32d0feafd4f9c9414b0be86373f9a1efa904809b683453a9af6856d38ad5',
+    ss58Format: 69,
+    providers: {
+      'SORA Parliament Ministry of Finance #2': 'wss://mof2.sora.org',
+      'SORA Parliament Ministry of Finance': 'wss://ws.mof.sora.org',
+      'SORA Parliament Ministry of Finance #3': 'wss://mof3.sora.org',
+      OnFinality: 'wss://sora.api.onfinality.io/public-ws'
+    },
+    active: false,
+    currentProviderMode: 'ws',
+    currentProvider: 'SORA Parliament Ministry of Finance #2',
+    groups: ['MAIN_NET'],
+    nativeToken: 'XOR',
+    decimals: 18,
+    coinGeckoKey: 'sora',
+    blockExplorer: 'https://sora.subscan.io'
+  },
+  swapdex: {
+    key: 'swapdex',
+    chain: 'Swapdex',
+    genesisHash: '0x15bac4f0a9aad3f46c5fc067fdb59b3ff29738dcd491fe5e37b4b76121163471',
+    ss58Format: 42,
+    providers: {
+      Swapdex: 'wss://ws.swapdex.network'
+    },
+    active: false,
+    currentProviderMode: 'ws',
+    currentProvider: 'Swapdex',
+    groups: ['MAIN_NET'],
+    nativeToken: 'SDX',
+    decimals: 18,
+    coinGeckoKey: 'swapdex'
+  },
+  '3dpass': {
+    key: '3dpass',
+    chain: '3DPass',
+    genesisHash: '0x6c5894837ad89b6d92b114a2fb3eafa8fe3d26a54848e3447015442cd6ef4e66',
+    ss58Format: 71,
+    providers: {
+      '3dpass': 'wss://rpc2.3dpass.org'
+    },
+    active: false,
+    currentProviderMode: 'ws',
+    currentProvider: '3dpass',
+    groups: ['MAIN_NET'],
+    nativeToken: 'P3D',
+    decimals: 12
+  },
+  alephSmartNet: {
+    key: 'alephSmartNet',
+    chain: 'Aleph Zero Smartnet',
+    genesisHash: '0x6153e2745a56d188365372b5cce283dfddbb96b17e9bb396cceb4630103ff92b',
+    ss58Format: 42,
+    providers: {
+      alephSmartNet: 'wss://ws-smartnet.test.azero.dev'
+    },
+    active: false,
+    currentProviderMode: 'ws',
+    currentProvider: 'alephSmartNet',
+    groups: ['TEST_NET'],
+    nativeToken: 'SZERO',
+    decimals: 12
+  },
+  kulupu: {
+    key: 'kulupu',
+    chain: 'Kulupu',
+    genesisHash: '0xf7a99d3cb92853d00d5275c971c132c074636256583fee53b3bbe60d7b8769ba',
+    ss58Format: 16,
+    providers: {
+      Kulupu: 'wss://rpc.kulupu.corepaper.org/ws'
+    },
+    active: false,
+    currentProviderMode: 'ws',
+    currentProvider: 'Kulupu',
+    groups: ['MAIN_NET'],
+    nativeToken: 'KLP',
+    decimals: 12,
+    coinGeckoKey: 'kulupu',
+    blockExplorer: 'https://kulupu.subscan.io'
+  },
+  joystream: {
+    key: 'joystream',
+    chain: 'Joystream',
+    genesisHash: '0x6b5e488e0fa8f9821110d5c13f4c468abcd43ce5e297e62b34c53c3346465956',
+    ss58Format: 126,
+    providers: {
+      Jsgenesis: 'wss://rpc.joystream.org'
+    },
+    active: false,
+    currentProviderMode: 'ws',
+    currentProvider: 'Jsgenesis',
+    groups: ['MAIN_NET'],
+    nativeToken: 'JOY',
+    decimals: 10
   }
 };
 

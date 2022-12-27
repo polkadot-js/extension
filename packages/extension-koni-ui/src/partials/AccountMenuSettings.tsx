@@ -251,7 +251,7 @@ function AccountMenuSettings ({ changeAccountCallback, className, closeSetting, 
               to='/account/attach-read-only'
             >
               <FontAwesomeIcon icon={faEye} />
-              <span>{t<string>('Attach readonly account')}</span>
+              <span>{t<string>('Attach read-only account')}</span>
             </Link>
           </MenuSettingItem>
         </div>

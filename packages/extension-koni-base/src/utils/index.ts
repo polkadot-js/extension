@@ -231,6 +231,10 @@ export const isValidProvider = (provider: string) => {
 };
 
 export const getCurrentProvider = (data: NetworkJson) => {
+  if (!data?.currentProvider) {
+    return null;
+  }
+
   if (data.currentProvider.startsWith('custom') && data.customProviders) {
     return data.customProviders[data.currentProvider];
   } else {
@@ -249,7 +253,7 @@ export const getNftProvider = (data: NetworkJson) => {
 export function mergeNetworkProviders (customNetwork: NetworkJson, predefinedNetwork: NetworkJson) { // merge providers for 2 networks with the same genesisHash
   if (customNetwork.customProviders) {
     const parsedCustomProviders: Record<string, string> = {};
-    const currentProvider = customNetwork.customProviders[customNetwork.currentProvider];
+    const currentProvider = customNetwork.customProviders[customNetwork.currentProvider || ''] || '';
     const currentProviderMethod = currentProvider.startsWith('http') ? 'http' : 'ws';
     let parsedProviderKey = '';
 

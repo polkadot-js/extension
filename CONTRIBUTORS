@@ -1,11 +1,11 @@
-    1193	Nam Phạm                      	fix bug parsing collator status and add APR for Amplitude
-     718	AnhMTV                        	Release version 0.7.4
+    1202	Nam Phạm                      	support aleph zero nomination pool
+     766	AnhMTV                        	Release version 0.7.6
      465	Jaco                          	0.42.5 (#969)
-     350	S2kael                        	[Issue-859] update Aleph Zero Testnet genesisHash
+     353	S2kael                        	[Issue-274] Update message network not active
+     180	quangdo                       	
      154	lw-cdm                        	Fix tslint issues
-     154	quangdo                       	
      104	khainh                        	predefine metadata for Polkadot & Kusama chains
-      97	lw-cdm                        	
+      98	lw-cdm                        	
       82	Thibaut Sardan                	Add account filtering feature (#832)
       81	Hieu Dao                      	[CI Skip] Update subspace block explorer
       55	leewong                       	#118: update balance logic for Kintsugi testnet
@@ -45,5 +45,6 @@
        1	Nikos Kontakis                	Fix issue that was breaking extension ui (height collapsed and non-visible); Fixes #720 (#731)
        1	Stéphane P                    	README Fix typo (#700)
        1	Tore19                        	Add Stafi network (#454)
+       1	trieunhu                      	Load transfer history polkadot and kusama by subquid
        1	Vlad Proshchavaiev            	Update extension with Subsocial SS58 included (#416)
        1	雪霁                            	Batch export (#666)

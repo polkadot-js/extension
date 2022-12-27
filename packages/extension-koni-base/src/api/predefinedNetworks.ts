@@ -309,6 +309,7 @@ export const PREDEFINED_NETWORKS: Record<string, NetworkJson> = {
     decimals: 18,
     coinGeckoKey: 'astar',
     evmChainId: 592,
+    paraId: 2006,
     supportSmartContract: [ContractType.evm]
   },
   acala: {
@@ -908,6 +909,7 @@ export const PREDEFINED_NETWORKS: Record<string, NetworkJson> = {
     nativeToken: 'SDN',
     evmChainId: 336,
     isEthereum: true,
+    paraId: 2007,
     supportSmartContract: [ContractType.evm]
   },
   shibuya: {

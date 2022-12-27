@@ -10,7 +10,7 @@
     "url": "https://github.com/polkadot-js/extension.git"
   },
   "sideEffects": false,
-  "version": "0.44.7-33-x",
+  "version": "0.44.7",
   "versions": {
     "git": "0.44.7-33-x",
     "npm": "0.44.6"
@@ -37,7 +37,7 @@
     "watch": "cd packages/extension && yarn polkadot-exec-webpack --config webpack.watch.cjs --mode development --watch"
   },
   "devDependencies": {
-    "@babel/core": "^7.20.5",
+    "@babel/core": "^7.20.7",
     "@polkadot/dev": "^0.67.175",
     "@types/jest": "^29.2.4",
     "i18next-scanner": "^4.1.0",

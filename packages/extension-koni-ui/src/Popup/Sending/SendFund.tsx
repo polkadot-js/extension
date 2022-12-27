@@ -88,7 +88,7 @@ function Wrapper ({ className = '', theme }: Props): React.ReactElement<Props> {
 function SendFund ({ chainRegistryMap, className, defaultValue, networkMap }: ContentProps): React.ReactElement {
   const { t } = useTranslation();
 
-  const [amount, setAmount] = useState<BN | undefined>(BN_ZERO);
+  const [amount, setAmount] = useState<BN | undefined>(undefined);
   const [recipientId, setRecipientId] = useState<string | null>(null);
   const [isShowTxModal, setShowTxModal] = useState<boolean>(false);
   const [{ address: senderId,
@@ -170,7 +170,9 @@ function SendFund ({ chainRegistryMap, className, defaultValue, networkMap }: Co
     !(errors && errors.length) &&
     isValidTransferAmount &&
     !isReadOnly &&
-    (!isHardwareAccount || isValidHardwareAccount);
+    (!isHardwareAccount || isValidHardwareAccount) &&
+    amount !== undefined
+  ;
 
   const navigate = useContext(ActionContext);
 
@@ -338,6 +340,7 @@ function SendFund ({ chainRegistryMap, className, defaultValue, networkMap }: Co
   }, []);
 
   const onToggleIsAll = useCallback(() => {
+    setErrors(undefined);
     setAmount(BN_ZERO);
     setIsAll(!isAll);
   }, [isAll]);

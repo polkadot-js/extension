@@ -271,7 +271,8 @@ export const PREDEFINED_NETWORKS: Record<string, NetworkJson> = {
       Astar: 'wss://rpc.astar.network',
       PinkNode: 'wss://public-rpc.pinknode.io/astar',
       Blast: 'wss://astar.public.blastapi.io',
-      '1rpc': 'wss://1rpc.io/astr'
+      '1rpc': 'wss://1rpc.io/astr',
+      'light client': 'light://substrate-connect/polkadot/astar'
     },
     active: false,
     currentProviderMode: 'ws',
@@ -879,7 +880,8 @@ export const PREDEFINED_NETWORKS: Record<string, NetworkJson> = {
       OnFinality: 'wss://shiden.api.onfinality.io/public-ws',
       Pinknode: 'wss://rpc.pinknode.io/shiden/explorer',
       Dwellir: 'wss://shiden-rpc.dwellir.com',
-      Blast: 'wss://shiden.public.blastapi.io'
+      Blast: 'wss://shiden.public.blastapi.io',
+      'light client': 'light://substrate-connect/kusama/shiden'
     },
     active: false,
     currentProviderMode: 'ws',
@@ -1654,7 +1656,8 @@ export const PREDEFINED_NETWORKS: Record<string, NetworkJson> = {
     genesisHash: '0xd42e9606a995dfe433dc7955dc2a70f495f350f373daa200098ae84437816ad2',
     ss58Format: 117,
     providers: {
-      Invarch: 'wss://tinker.invarch.network'
+      Invarch: 'wss://tinker.invarch.network',
+      'light client': 'light://substrate-connect/kusama/tinkernet'
     },
     active: false,
     currentProviderMode: 'ws',

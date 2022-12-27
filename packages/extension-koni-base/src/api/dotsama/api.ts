@@ -3,15 +3,15 @@
 
 import { options as acalaOptions } from '@acala-network/api';
 import { rpc as oakRpc, types as oakTypes } from '@oak-foundation/types';
-import { WellKnownChain } from '@substrate/connect';
 import { ApiProps, ApiState } from '@subwallet/extension-base/background/KoniTypes';
 import { typesBundle, typesChain } from '@subwallet/extension-koni-base/api/dotsama/api-helper';
+import { getSubstrateConnectProvider } from '@subwallet/extension-koni-base/api/dotsama/light-client';
 import { DOTSAMA_AUTO_CONNECT_MS, DOTSAMA_MAX_CONTINUE_RETRY } from '@subwallet/extension-koni-base/constants';
 import { inJestTest } from '@subwallet/extension-koni-base/utils';
 
 import { ApiPromise, WsProvider } from '@polkadot/api';
-import { ScProvider } from '@polkadot/rpc-provider/substrate-connect';
 import { TypeRegistry } from '@polkadot/types/create';
+import { ApiOptions } from '@polkadot/api/types';
 import { ChainProperties, ChainType } from '@polkadot/types/interfaces';
 import { Registry } from '@polkadot/types/types';
 import { formatBalance, isTestChain, objectSpread, stringify } from '@polkadot/util';
@@ -92,7 +92,7 @@ async function loadOnReady (registry: Registry, api: ApiPromise): Promise<ApiSta
     apiDefaultTx,
     apiDefaultTxSudo,
     isApiReady: true,
-    isApiReadyOnce: true,
+    isApiInitialized: true,
     isDevelopment: isDevelopment,
     specName: api.runtimeVersion.specName.toString(),
     specVersion: api.runtimeVersion.specVersion.toString(),
@@ -100,21 +100,6 @@ async function loadOnReady (registry: Registry, api: ApiPromise): Promise<ApiSta
     systemName,
     systemVersion
   };
-}
-
-function getWellKnownChain (chain = 'polkadot'): string {
-  switch (chain) {
-    case 'kusama':
-      return WellKnownChain.ksmcc3;
-    case 'polkadot':
-      return WellKnownChain.polkadot;
-    case 'rococo':
-      return WellKnownChain.rococo_v2_2;
-    case 'westend':
-      return WellKnownChain.westend2;
-    default:
-      return chain;
-  }
 }
 
 function generateEvmHttpApi (apiUrl: string): ApiProps {
@@ -132,9 +117,8 @@ function generateEvmHttpApi (apiUrl: string): ApiProps {
     apiUrl,
     defaultFormatBalance: undefined,
     isApiConnected: true,
-    isApiReadyOnce: true,
-    isApiInitialized: true,
     isApiReady: true,
+    isApiInitialized: true,
     isEthereum: true,
     isEthereumOnly: true,
     registry,
@@ -162,17 +146,19 @@ export function initApi (networkKey: string, apiUrl: string, isEthereum?: boolea
   const registry = new TypeRegistry();
 
   const provider = apiUrl.startsWith('light://')
-    ? new ScProvider(getWellKnownChain(apiUrl.replace('light://substrate-connect/', '')))
+    ? getSubstrateConnectProvider(apiUrl.replace('light://substrate-connect/', ''))
     : new WsProvider(apiUrl, DOTSAMA_AUTO_CONNECT_MS);
 
-  const apiOption = { provider, typesBundle, typesChain: typesChain };
+  console.log(provider);
+
+  // Init ApiPromise with selected provider
+  let api: ApiPromise;
+  const apiOption = { provider, typesBundle, typesChain: typesChain } as ApiOptions;
 
   if (!inJestTest()) {
     // @ts-ignore
     apiOption.registry = registry;
   }
-
-  let api: ApiPromise;
 
   if (['acala', 'karura', 'origintrail', 'kintsugi'].includes(networkKey)) {
     api = new ApiPromise(acalaOptions({ provider }));
@@ -186,6 +172,7 @@ export function initApi (networkKey: string, apiUrl: string, isEthereum?: boolea
     api = new ApiPromise(apiOption);
   }
 
+  // Create APIProps Object
   const result: ApiProps = ({
     api,
     apiDefaultTx: undefined,
@@ -194,9 +181,8 @@ export function initApi (networkKey: string, apiUrl: string, isEthereum?: boolea
     apiUrl,
     defaultFormatBalance: undefined,
     isApiConnected: false,
-    isApiReadyOnce: false,
-    isApiInitialized: true,
     isApiReady: false,
+    isApiInitialized: false,
     isEthereum,
     isEthereumOnly: false,
     registry,
@@ -206,16 +192,20 @@ export function initApi (networkKey: string, apiUrl: string, isEthereum?: boolea
     systemName: '',
     systemVersion: '',
     apiRetry: 0,
-    recoverConnect: () => {
+    recoverConnect: async () => {
       result.apiRetry = 0;
-      console.log('Recover connect to', apiUrl);
-      provider.connect().then(console.log).catch(console.error);
+
+      if (!apiUrl.startsWith('light')) {
+        console.log('Recover connect to', apiUrl);
+        await result.api.disconnect();
+        await result.api.connect();
+      }
     },
     get isReady () {
       const self = this as ApiProps;
 
-      async function f (): Promise<ApiProps> {
-        if (!result.isApiReadyOnce) {
+      return (async function (): Promise<ApiProps> {
+        if (!result.isApiInitialized) {
           await self.api.isReady;
         }
 
@@ -225,30 +215,28 @@ export function initApi (networkKey: string, apiUrl: string, isEthereum?: boolea
               return resolve(self);
             }
 
-            setTimeout(wait, 10);
+            setTimeout(wait, 33);
           })();
         });
       }
-
-      return f();
+      )();
     }
   }) as unknown as ApiProps;
 
+  // Listen ApiPromise events
+  // On connected: provider is connected
   api.on('connected', () => {
     console.log('DotSamaAPI connected to', apiUrl);
     result.apiRetry = 0;
-
-    if (result.isApiReadyOnce) {
-      result.isApiReady = true;
-    }
-
     result.isApiConnected = true;
+    result.isApiReady = result.isApiInitialized; // result.isApiInitialized && result.isApiConnected
   });
 
+  // On disconnected: provider is disconnected
   api.on('disconnected', () => {
-    result.isApiConnected = false;
-    result.isApiReady = false;
     result.apiRetry = (result.apiRetry || 0) + 1;
+    result.isApiConnected = false;
+    result.isApiReady = false; // result.isApiInitialized && result.isApiConnected
 
     console.log(`DotSamaAPI disconnected from ${JSON.stringify(apiUrl)} ${JSON.stringify(result.apiRetry)} times`);
 
@@ -257,9 +245,12 @@ export function initApi (networkKey: string, apiUrl: string, isEthereum?: boolea
       provider.disconnect()
         .then(console.log)
         .catch(console.error);
+    } else {
+      // Todo: Implement reconnect api here
     }
   });
 
+  // On ready: Load all metadata and ready to init data
   api.on('ready', () => {
     console.log('DotSamaAPI ready with', apiUrl);
     loadOnReady(registry, api)
@@ -270,6 +261,9 @@ export function initApi (networkKey: string, apiUrl: string, isEthereum?: boolea
         result.apiError = (error as Error).message;
       });
   });
+
+  // On ready: Load all metadata and ready to init data
+  api.on('error', console.error);
 
   return result;
 }

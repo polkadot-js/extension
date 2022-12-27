@@ -1228,7 +1228,8 @@ export const PREDEFINED_NETWORKS: Record<string, NetworkJson> = {
     nativeToken: 'GENS',
     crowdloanUrl: 'https://genshiro.equilibrium.io/en',
     decimals: 10,
-    coinGeckoKey: 'genshiro'
+    coinGeckoKey: 'genshiro',
+    blockExplorer: 'https://genshiro.subscan.io'
   },
   genshiro_testnet: {
     key: 'genshiro_testnet',

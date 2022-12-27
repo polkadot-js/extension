@@ -221,7 +221,8 @@ export const subscanByNetworkKey: Record<string, string> = {
   equilibrium_parachain: 'https://equilibrium.subscan.io',
   polymesh: 'https://polymesh.subscan.io',
   'sora-substrate': 'https://sora.subscan.io',
-  kulupu: 'https://kulupu.subscan.io'
+  kulupu: 'https://kulupu.subscan.io',
+  genshiro: 'https://genshiro.subscan.io'
 };
 
 const evmBlockExplorer: Record<string, string> = {

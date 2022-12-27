@@ -22,6 +22,8 @@ function getTokenIdentity (originNetworkKey: string, tokenInfo: TokenInfo) {
     };
   } else if (originNetworkKey === 'karura' && tokenSymbol.toUpperCase() === 'NEER') { // TODO: modify later with different assets on Karura
     return tokenInfo.specialOption as Record<string, any>;
+  } else if (originNetworkKey === 'acala' && tokenSymbol.toUpperCase() === 'GLMR') { // TODO: modify later with different assets on Acala
+    return tokenInfo.specialOption as Record<string, any>;
   }
 
   return {
@@ -50,31 +52,23 @@ export async function substrateEstimateCrossChainFee (
 
   try {
     if (SupportedCrossChainsMap[originNetworkKey].type === 'p') {
-      console.log(tokenIdentity,
-        value,
-        getMultiLocationFromParachain(originNetworkKey, destinationNetworkKey, networkMap, to),
-        weightParam
-      );
-
       // Case ParaChain -> ParaChain && ParaChain -> RelayChain
-      console.log(1);
       const extrinsic = api.tx.xTokens.transfer(
         tokenIdentity,
         value,
         getMultiLocationFromParachain(originNetworkKey, destinationNetworkKey, networkMap, to),
         weightParam
       );
-      console.log(2);
-      console.log(extrinsic.toHex());
-      console.log(fromKeypair);
 
-      const paymentInfo = await extrinsic.paymentInfo(fromKeypair.address);
-      console.log(3);
-      fee = paymentInfo.partialFee.toString();
-      console.log(4);
+      try {
+        const paymentInfo = await extrinsic.paymentInfo(fromKeypair.address);
 
-      feeString = parseNumberToDisplay(paymentInfo.partialFee, originNetworkJson.decimals) + ` ${originNetworkJson.nativeToken ? originNetworkJson.nativeToken : ''}`;
-      console.log(5);
+        fee = paymentInfo.partialFee.toString();
+
+        feeString = parseNumberToDisplay(paymentInfo.partialFee, originNetworkJson.decimals) + ` ${originNetworkJson.nativeToken ? originNetworkJson.nativeToken : ''}`;
+      } catch (e) {
+        feeString = `0.0000 ${originNetworkJson.nativeToken ? originNetworkJson.nativeToken : ''}`;
+      }
 
       console.log('substrate xcm tx p-p or p-r here', extrinsic.toHex());
     } else {

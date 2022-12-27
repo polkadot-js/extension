@@ -616,7 +616,7 @@ export async function getFreeBalance (networkKey: string, address: string, dotSa
       }
     }
 
-    if (['kusama'].includes(networkKey)) {
+    if (['kusama', 'kintsugi', 'kintsugi_test', 'interlay', 'acala', 'statemint', 'karura', 'bifrost'].includes(networkKey)) {
       // @ts-ignore
       const _balance = await api.query.system.account(address);
 
@@ -771,7 +771,7 @@ export async function subscribeFreeBalance (
       }
     }
 
-    if (['kusama'].includes(networkKey)) {
+    if (['kusama', 'kintsugi', 'kintsugi_test', 'interlay', 'acala', 'statemint', 'karura', 'bifrost'].includes(networkKey)) {
       // @ts-ignore
       const unsub = await api.query.system.account(address, (_balance) => {
         // eslint-disable-next-line @typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-member-access,@typescript-eslint/no-unsafe-assignment

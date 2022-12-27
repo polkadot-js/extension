@@ -1,6 +1,8 @@
 # CHANGELOG
 
-## master
+## 0.44.7 Dec 27, 2021
+
+- **Important** Not published to the stores, aligns with latest released packages.
 
 Contributed:
 
@@ -18,6 +20,8 @@ Changes:
 - Allow for transparent extension `ping` (as available)
 - Support for new privacy-preserving `connect(<source>)` interfaces (non-default)
 - Always set metadata before signing (fixes for ETH-compat chains)
+- Updated to `@polkadot/api` 9.10.4
+- Updated to `@polkadot/util` 10.2.1
 
 
 ## 0.44.6 Aug 21, 2022

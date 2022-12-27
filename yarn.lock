@@ -57,7 +57,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@babel/core@npm:^7.11.6, @babel/core@npm:^7.12.3, @babel/core@npm:^7.20.5, @babel/core@npm:^7.20.7":
+"@babel/core@npm:^7.11.6, @babel/core@npm:^7.12.3, @babel/core@npm:^7.20.7":
   version: 7.20.7
   resolution: "@babel/core@npm:7.20.7"
   dependencies:
@@ -2637,16 +2637,16 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@polkadot/extension-base@^0.44.7-33-x, @polkadot/extension-base@workspace:packages/extension-base":
+"@polkadot/extension-base@^0.44.7, @polkadot/extension-base@workspace:packages/extension-base":
   version: 0.0.0-use.local
   resolution: "@polkadot/extension-base@workspace:packages/extension-base"
   dependencies:
-    "@babel/runtime": ^7.20.6
+    "@babel/runtime": ^7.20.7
     "@polkadot/api": ^9.10.4
-    "@polkadot/extension-chains": ^0.44.7-33-x
-    "@polkadot/extension-dapp": ^0.44.7-33-x
-    "@polkadot/extension-inject": ^0.44.7-33-x
-    "@polkadot/extension-mocks": ^0.44.7-33-x
+    "@polkadot/extension-chains": ^0.44.7
+    "@polkadot/extension-dapp": ^0.44.7
+    "@polkadot/extension-inject": ^0.44.7
+    "@polkadot/extension-mocks": ^0.44.7
     "@polkadot/keyring": ^10.2.1
     "@polkadot/networks": ^10.2.1
     "@polkadot/phishing": ^0.18.12
@@ -2657,16 +2657,16 @@ __metadata:
     "@polkadot/util": ^10.2.1
     "@polkadot/util-crypto": ^10.2.1
     eventemitter3: ^4.0.7
-    rxjs: ^7.6.0
+    rxjs: ^7.8.0
   languageName: unknown
   linkType: soft
 
-"@polkadot/extension-chains@^0.44.7-33-x, @polkadot/extension-chains@workspace:packages/extension-chains":
+"@polkadot/extension-chains@^0.44.7, @polkadot/extension-chains@workspace:packages/extension-chains":
   version: 0.0.0-use.local
   resolution: "@polkadot/extension-chains@workspace:packages/extension-chains"
   dependencies:
-    "@babel/runtime": ^7.20.6
-    "@polkadot/extension-inject": ^0.44.7-33-x
+    "@babel/runtime": ^7.20.7
+    "@polkadot/extension-inject": ^0.44.7
     "@polkadot/networks": ^10.2.1
     "@polkadot/util": ^10.2.1
     "@polkadot/util-crypto": ^10.2.1
@@ -2680,9 +2680,9 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@polkadot/extension-compat-metamask@workspace:packages/extension-compat-metamask"
   dependencies:
-    "@babel/runtime": ^7.20.6
+    "@babel/runtime": ^7.20.7
     "@metamask/detect-provider": ^1.2.0
-    "@polkadot/extension-inject": ^0.44.7-33-x
+    "@polkadot/extension-inject": ^0.44.7
     "@polkadot/types": ^9.10.4
     "@polkadot/util": ^10.2.1
     web3: ^1.8.1
@@ -2691,12 +2691,12 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@polkadot/extension-dapp@^0.44.7-33-x, @polkadot/extension-dapp@workspace:packages/extension-dapp":
+"@polkadot/extension-dapp@^0.44.7, @polkadot/extension-dapp@workspace:packages/extension-dapp":
   version: 0.0.0-use.local
   resolution: "@polkadot/extension-dapp@workspace:packages/extension-dapp"
   dependencies:
-    "@babel/runtime": ^7.20.6
-    "@polkadot/extension-inject": ^0.44.7-33-x
+    "@babel/runtime": ^7.20.7
+    "@polkadot/extension-inject": ^0.44.7
     "@polkadot/util": ^10.2.1
     "@polkadot/util-crypto": ^10.2.1
   peerDependencies:
@@ -2706,47 +2706,47 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@polkadot/extension-inject@^0.44.7-33-x, @polkadot/extension-inject@workspace:packages/extension-inject":
+"@polkadot/extension-inject@^0.44.7, @polkadot/extension-inject@workspace:packages/extension-inject":
   version: 0.0.0-use.local
   resolution: "@polkadot/extension-inject@workspace:packages/extension-inject"
   dependencies:
-    "@babel/runtime": ^7.20.6
+    "@babel/runtime": ^7.20.7
     "@polkadot/rpc-provider": ^9.10.4
     "@polkadot/types": ^9.10.4
     "@polkadot/util": ^10.2.1
     "@polkadot/util-crypto": ^10.2.1
     "@polkadot/x-global": ^10.2.1
-    "@types/chrome": ^0.0.204
+    "@types/chrome": ^0.0.206
     "@types/firefox-webext-browser": ^94.0.1
   peerDependencies:
     "@polkadot/api": "*"
   languageName: unknown
   linkType: soft
 
-"@polkadot/extension-mocks@^0.44.7-33-x, @polkadot/extension-mocks@workspace:packages/extension-mocks":
+"@polkadot/extension-mocks@^0.44.7, @polkadot/extension-mocks@workspace:packages/extension-mocks":
   version: 0.0.0-use.local
   resolution: "@polkadot/extension-mocks@workspace:packages/extension-mocks"
   dependencies:
-    "@babel/runtime": ^7.20.6
+    "@babel/runtime": ^7.20.7
     sinon-chrome: ^3.0.1
   languageName: unknown
   linkType: soft
 
-"@polkadot/extension-ui@^0.44.7-33-x, @polkadot/extension-ui@workspace:packages/extension-ui":
+"@polkadot/extension-ui@^0.44.7, @polkadot/extension-ui@workspace:packages/extension-ui":
   version: 0.0.0-use.local
   resolution: "@polkadot/extension-ui@workspace:packages/extension-ui"
   dependencies:
-    "@babel/runtime": ^7.20.6
+    "@babel/runtime": ^7.20.7
     "@fortawesome/fontawesome-svg-core": ^6.2.1
     "@fortawesome/free-brands-svg-icons": ^6.2.1
     "@fortawesome/free-regular-svg-icons": ^6.2.1
     "@fortawesome/free-solid-svg-icons": ^6.2.1
     "@fortawesome/react-fontawesome": ^0.2.0
-    "@polkadot/extension-base": ^0.44.7-33-x
-    "@polkadot/extension-chains": ^0.44.7-33-x
-    "@polkadot/extension-dapp": ^0.44.7-33-x
-    "@polkadot/extension-inject": ^0.44.7-33-x
-    "@polkadot/extension-mocks": ^0.44.7-33-x
+    "@polkadot/extension-base": ^0.44.7
+    "@polkadot/extension-chains": ^0.44.7
+    "@polkadot/extension-dapp": ^0.44.7
+    "@polkadot/extension-inject": ^0.44.7
+    "@polkadot/extension-mocks": ^0.44.7
     "@polkadot/hw-ledger": ^10.2.1
     "@polkadot/keyring": ^10.2.1
     "@polkadot/networks": ^10.2.1
@@ -2762,8 +2762,8 @@ __metadata:
     "@types/enzyme-adapter-react-16": ^1.0.6
     "@types/file-saver": ^2.0.5
     "@types/react-copy-to-clipboard": ^5.0.4
-    "@types/react-dom": ^18.0.9
-    "@types/react-router": ^5.1.19
+    "@types/react-dom": ^18.0.10
+    "@types/react-router": ^5.1.20
     "@types/react-router-dom": ^5.3.3
     "@types/sinon-chrome": ^2.2.11
     "@types/styled-components": ^5.1.26
@@ -2771,7 +2771,7 @@ __metadata:
     enzyme: ^3.11.0
     enzyme-adapter-react-16: ^1.15.7
     file-saver: ^2.0.5
-    i18next: ^22.4.5
+    i18next: ^22.4.6
     react: ^18.2.0
     react-dom: ^18.2.0
     react-dropzone: ^11.7.1
@@ -2788,11 +2788,11 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@polkadot/extension@workspace:packages/extension"
   dependencies:
-    "@babel/runtime": ^7.20.6
+    "@babel/runtime": ^7.20.7
     "@polkadot/dev": ^0.67.175
-    "@polkadot/extension-base": ^0.44.7-33-x
-    "@polkadot/extension-inject": ^0.44.7-33-x
-    "@polkadot/extension-ui": ^0.44.7-33-x
+    "@polkadot/extension-base": ^0.44.7
+    "@polkadot/extension-inject": ^0.44.7
+    "@polkadot/extension-ui": ^0.44.7
     babel-loader: ^8.3.0
     browser-resolve: ^2.0.0
     buffer: ^6.0.3
@@ -3645,13 +3645,13 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/chrome@npm:*, @types/chrome@npm:^0.0.204":
-  version: 0.0.204
-  resolution: "@types/chrome@npm:0.0.204"
+"@types/chrome@npm:*, @types/chrome@npm:^0.0.206":
+  version: 0.0.206
+  resolution: "@types/chrome@npm:0.0.206"
   dependencies:
     "@types/filesystem": "*"
     "@types/har-format": "*"
-  checksum: d26fd9f20008fdaed1004ca6e2dd0614aa0fa86a81d414c83554fd95f86b71ab6ec5709fda9f91e25f2d29290e069056da471545c1a9da951d1b1fcf1bcb02a2
+  checksum: 002af40b339ca0f665bf6e52af1fd2ecfdd4cffb6d10d891b0b4394c2a94d758e94e0d5497d38e9b45033eb8620ffa1a63e42294f88612507d9e74ddf3f6ce40
   languageName: node
   linkType: hard
 
@@ -3996,12 +3996,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/react-dom@npm:^18.0.9":
-  version: 18.0.9
-  resolution: "@types/react-dom@npm:18.0.9"
+"@types/react-dom@npm:^18.0.10":
+  version: 18.0.10
+  resolution: "@types/react-dom@npm:18.0.10"
   dependencies:
     "@types/react": "*"
-  checksum: e744e3feba25fc43733289d4df4d9c0e59fcca7f34e8c89d75f81a339accb2bd70236d69382d47d2c0ad06a1529b2e56aa6171fe175854d60e07156ddceedfcb
+  checksum: ff8282d5005a0b1cd95fb65bf79d3d8485e4cfe2aaf052129033a178684b940014a3f4536bc20d573f8a01cf4c6f4770c74988cef7c2b5cac3041d9f172647e3
   languageName: node
   linkType: hard
 
@@ -4016,13 +4016,13 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/react-router@npm:*, @types/react-router@npm:^5.1.19":
-  version: 5.1.19
-  resolution: "@types/react-router@npm:5.1.19"
+"@types/react-router@npm:*, @types/react-router@npm:^5.1.20":
+  version: 5.1.20
+  resolution: "@types/react-router@npm:5.1.20"
   dependencies:
     "@types/history": ^4.7.11
     "@types/react": "*"
-  checksum: 3536c3dec7af1f12fed2bea246eb143bd893ee66d4e58c1d3fe734cbd67d8a0aedac0bba9255c58fc69dbd32ae17ad280d6866916aee32653a705178e4a544dc
+  checksum: 128764143473a5e9457ddc715436b5d49814b1c214dde48939b9bef23f0e77f52ffcdfa97eb8d3cc27e2c229869c0cdd90f637d887b62f2c9f065a87d6425419
   languageName: node
   linkType: hard
 
@@ -10662,12 +10662,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"i18next@npm:*, i18next@npm:^22.4.5":
-  version: 22.4.5
-  resolution: "i18next@npm:22.4.5"
+"i18next@npm:*, i18next@npm:^22.4.6":
+  version: 22.4.6
+  resolution: "i18next@npm:22.4.6"
   dependencies:
     "@babel/runtime": ^7.20.6
-  checksum: 37942b6ef1dcc9a6451fda9ed18d9ecc55954bd40b615b6f9b27772ae70a8cb2b140344de75fd02069ca72f8e337ba9f2ebca162170e33cc0af55ea42169ebf7
+  checksum: 1b7cffc65fec5612986a749f7f11bd4923ce05b9c79fe8c47b71142baadcc7eadddaceba7cca1ad8ff569f0d14d23fd4c2da04155d4708a1865ec4cf5ca88966
   languageName: node
   linkType: hard
 
@@ -15479,7 +15479,7 @@ resolve@^2.0.0-next.3:
   version: 0.0.0-use.local
   resolution: "root-workspace-0b6124@workspace:."
   dependencies:
-    "@babel/core": ^7.20.5
+    "@babel/core": ^7.20.7
     "@polkadot/dev": ^0.67.175
     "@types/jest": ^29.2.4
     i18next-scanner: ^4.1.0
@@ -15531,7 +15531,7 @@ resolve@^2.0.0-next.3:
   languageName: node
   linkType: hard
 
-"rxjs@npm:^7.2.0, rxjs@npm:^7.5.7, rxjs@npm:^7.6.0, rxjs@npm:^7.8.0":
+"rxjs@npm:^7.2.0, rxjs@npm:^7.5.7, rxjs@npm:^7.8.0":
   version: 7.8.0
   resolution: "rxjs@npm:7.8.0"
   dependencies:

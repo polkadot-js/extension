@@ -14,10 +14,10 @@
   },
   "sideEffects": true,
   "type": "module",
-  "version": "0.44.7-33-x",
+  "version": "0.44.7",
   "main": "index.js",
   "dependencies": {
-    "@babel/runtime": "^7.20.6",
+    "@babel/runtime": "^7.20.7",
     "@polkadot/rpc-provider": "^9.10.4",
     "@polkadot/types": "^9.10.4",
     "@polkadot/util": "^10.2.1",
@@ -25,7 +25,7 @@
     "@polkadot/x-global": "^10.2.1"
   },
   "devDependencies": {
-    "@types/chrome": "^0.0.204",
+    "@types/chrome": "^0.0.206",
     "@types/firefox-webext-browser": "^94.0.1"
   },
   "peerDependencies": {

@@ -49,10 +49,12 @@ function NftItemPreview ({ className, collectionImage, data, onClick }: Props): 
   const getItemImage = useCallback(() => {
     if (data.image) {
       return data.image;
+    } else if (collectionImage) {
+      return collectionImage;
     }
 
     return themeContext.logo;
-  }, [data.image, themeContext.logo]);
+  }, [collectionImage, data.image, themeContext.logo]);
 
   const getNftImage = useCallback(() => {
     if (showImage) {

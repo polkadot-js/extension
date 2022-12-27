@@ -10,8 +10,8 @@ import { DOTSAMA_AUTO_CONNECT_MS, DOTSAMA_MAX_CONTINUE_RETRY } from '@subwallet/
 import { inJestTest } from '@subwallet/extension-koni-base/utils';
 
 import { ApiPromise, WsProvider } from '@polkadot/api';
-import { ApiOptions } from '@polkadot/api/types';
 import { TypeRegistry } from '@polkadot/types/create';
+import { ApiOptions } from '@polkadot/api/types';
 import { ChainProperties, ChainType } from '@polkadot/types/interfaces';
 import { Registry } from '@polkadot/types/types';
 import { formatBalance, isTestChain, objectSpread, stringify } from '@polkadot/util';

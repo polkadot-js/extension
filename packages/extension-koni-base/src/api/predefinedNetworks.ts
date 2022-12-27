@@ -310,6 +310,7 @@ export const PREDEFINED_NETWORKS: Record<string, NetworkJson> = {
     decimals: 18,
     coinGeckoKey: 'astar',
     evmChainId: 592,
+    paraId: 2006,
     supportSmartContract: [ContractType.evm]
   },
   acala: {
@@ -482,6 +483,7 @@ export const PREDEFINED_NETWORKS: Record<string, NetworkJson> = {
     nativeToken: 'TOKEN',
     crowdloanUrl: 'https://equilibrium.io/en/crowdloan#bid',
     decimals: 10,
+    blockExplorer: 'https://equilibrium.subscan.io',
     coinGeckoKey: 'equilibrium-token'
   },
   nodle: {
@@ -909,6 +911,7 @@ export const PREDEFINED_NETWORKS: Record<string, NetworkJson> = {
     nativeToken: 'SDN',
     evmChainId: 336,
     isEthereum: true,
+    paraId: 2007,
     supportSmartContract: [ContractType.evm]
   },
   shibuya: {
@@ -1229,7 +1232,8 @@ export const PREDEFINED_NETWORKS: Record<string, NetworkJson> = {
     nativeToken: 'GENS',
     crowdloanUrl: 'https://genshiro.equilibrium.io/en',
     decimals: 10,
-    coinGeckoKey: 'genshiro'
+    coinGeckoKey: 'genshiro',
+    blockExplorer: 'https://genshiro.subscan.io'
   },
   genshiro_testnet: {
     key: 'genshiro_testnet',

@@ -91,7 +91,7 @@ export const SupportedCrossChainsMap: Record<string, CrossChainRelation> = {
       moonbeam: {
         type: 'p',
         isEthereum: true,
-        supportedToken: ['ACA', 'aUSD']
+        supportedToken: ['ACA', 'aUSD', 'GLMR']
       },
       astar: {
         type: 'p',

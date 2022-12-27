@@ -148,7 +148,7 @@ function AttachReadOnly ({ className }: Props): React.ReactElement<Props> {
         showBackArrow
         showCancelButton={isScanning}
         showSubHeader
-        subHeaderName={t<string>('Address Readonly Account')}
+        subHeaderName={t<string>('Address Read-only Account')}
       />
       <div
         className={CN(

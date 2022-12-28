@@ -1,8 +1,8 @@
     1202	Nam Phạm                      	support aleph zero nomination pool
-     766	AnhMTV                        	Release version 0.7.6
+     788	AnhMTV                        	Fix eslint problems
      465	Jaco                          	0.42.5 (#969)
-     353	S2kael                        	[Issue-274] Update message network not active
-     180	quangdo                       	
+     363	S2kael                        	[Issue-945] [XCM] Add GMLR xcm from Acala to Moonbeam
+     185	quangdo                       	
      154	lw-cdm                        	Fix tslint issues
      104	khainh                        	predefine metadata for Polkadot & Kusama chains
       98	lw-cdm                        	
@@ -10,6 +10,7 @@
       81	Hieu Dao                      	[CI Skip] Update subspace block explorer
       55	leewong                       	#118: update balance logic for Kintsugi testnet
       53	Dominhquangdev                	update Bridge code
+      11	dominhquang                   	Fix bug transfer error with Genshiro and Genshiro Testnet
       10	Trang Trịnh                   	api get karura and acala nfts
        9	Minh Le                       	
        9	minhld1029                    	[#115] [ForgetAccount] catch exception refList undefined

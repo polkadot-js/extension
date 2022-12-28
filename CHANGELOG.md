@@ -1,5 +1,20 @@
 # CHANGELOG
 
+## 0.7.7 (Koni)
+Build date: Dec 28, 2022.
+
+Update:
+- Add the warning message for invalid Amount input cases (for send fund feature) (#874)
+- Update balance logic for Equilibrium (#902)
+- Add support for Astar, Shiden Light Client (#911)
+- Update APR for Turing Network (#951)
+
+Bug fixes:
+- Fix XCM transfer feature for the some chain (#945)
+- Update "readonly account" to "read-only account" (#949)
+- Do not show sub0 Lisbon 2022 NFT (#950)
+- Fix the error when adding a token from dApp (#959)
+
 ## 0.7.6 (Koni)
 Build date: Dec 17, 2022.
 
@@ -24,7 +39,7 @@ Update:
 - Turn off background in case extension reloaded and popup never opened (#912)
 - Update price for iBTC (#921)
 
-- Bug fixes:
+Bug fixes:
 - Fix showing incorrect Unclaim reward information on "All Accounts" mode (#907)
 - Fix wrong signature when signing raw with QR Signer account (#897)
 - Add incrementDelegatorRewards call to Amplitude reward claiming (#914)

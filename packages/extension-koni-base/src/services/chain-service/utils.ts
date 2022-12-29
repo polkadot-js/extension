@@ -1,7 +1,7 @@
 // Copyright 2019-2022 @subwallet/extension-koni-base authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { _ChainAsset } from '@subwallet/extension-koni-base/services/chain-list/types';
+import { _ChainAsset } from '@subwallet/chain/types';
 import { _CUSTOM_NETWORK_PREFIX } from '@subwallet/extension-koni-base/services/chain-service/types';
 
 import { isEthereumAddress } from '@polkadot/util-crypto';

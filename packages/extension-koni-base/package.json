@@ -57,6 +57,7 @@
     "@snowfork/snowbridge-types": "^0.2.7",
     "@sora-substrate/type-definitions": "^1.10.0-beta.16",
     "@subsocial/types": "^0.6.8",
+    "@subwallet/chain": "^0.0.1",
     "@subwallet/extension-base": "^0.7.6-0",
     "@subwallet/extension-chains": "^0.7.6-0",
     "@subwallet/extension-dapp": "^0.7.6-0",

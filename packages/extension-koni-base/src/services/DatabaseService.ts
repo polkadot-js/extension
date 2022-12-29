@@ -1,14 +1,15 @@
 // Copyright 2019-2022 @subwallet/extension-koni authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
+import {_ChainAsset, _ChainInfo} from '@subwallet/chain/types';
 import { APIItemState, BalanceItem, BalanceJson, CrowdloanItem, NftCollection, NftItem, StakingItem, TransactionHistoryItemType } from '@subwallet/extension-base/background/KoniTypes';
 import { Subscription } from 'dexie';
 
 import { logger as createLogger } from '@polkadot/util';
 import { Logger } from '@polkadot/util/types';
 
-import KoniDatabase, { INft, IStakingItem } from '../databases';
-import { BalanceStore, CrowdloanStore, ExtraDelegationInfoStore, MigrationStore, NftCollectionStore, NftStore, StakingStore, TransactionStore } from '../db-stores';
+import KoniDatabase, {IChain, INft, IStakingItem} from '../databases';
+import { AssetStore, BalanceStore, ChainStore, CrowdloanStore, ExtraDelegationInfoStore, MigrationStore, NftCollectionStore, NftStore, StakingStore, TransactionStore } from '../db-stores';
 
 export default class DatabaseService {
   private _db: KoniDatabase;
@@ -28,7 +29,10 @@ export default class DatabaseService {
       staking: new StakingStore(this._db.stakingsV2),
       transaction: new TransactionStore(this._db.transactions),
       migration: new MigrationStore(this._db.migrations),
-      extraDelegationInfo: new ExtraDelegationInfoStore(this._db.extraDelegationInfo)
+      extraDelegationInfo: new ExtraDelegationInfoStore(this._db.extraDelegationInfo),
+
+      chain: new ChainStore(this._db.chain),
+      asset: new AssetStore(this._db.asset)
     };
   }
 
@@ -165,5 +169,39 @@ export default class DatabaseService {
     this.logger.log('Get extra delegation info: ', delegationInfo);
 
     return delegationInfo;
+  }
+
+  // Chain
+  async updateChainStore (_chain: string, item: IChain) {
+    this.logger.log(`Updating storageInfo for chain [${_chain}]`);
+
+    return this.stores.chain.upsert(item);
+  }
+
+  async bulkUpdateChainStore (data: IChain[]) {
+    this.logger.log('Bulk updating ChainStore');
+
+    return this.stores.chain.bulkUpsert(data);
+  }
+
+  async getAllChainStore () {
+    const allChains = await this.stores.chain.getAll();
+
+    this.logger.log('Get all chains: ', allChains);
+
+    return allChains;
+  }
+
+  // Asset
+  async updateAssetStore (_chain: string, item: _ChainAsset) {
+    this.logger.log(`Updating storageInfo for chain [${_chain}]`);
+
+    return this.stores.asset.upsert(item);
+  }
+
+  async bulkUpdateAssetStore (items: _ChainAsset[]) {
+    this.logger.log('Bulk updating AssetStore');
+
+    return this.stores.asset.bulkUpsert(items);
   }
 }

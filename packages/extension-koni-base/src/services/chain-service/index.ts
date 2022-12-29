@@ -1,13 +1,15 @@
 // Copyright 2019-2022 @subwallet/extension-koni-base authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { ChainAssetMap, ChainInfoMap } from '@subwallet/extension-koni-base/services/chain-list';
-import { _AssetType, _ChainAsset, _ChainInfo, _DEFAULT_NETWORKS, _EvmInfo, _SubstrateInfo } from '@subwallet/extension-koni-base/services/chain-list/types';
+import { _DEFAULT_CHAINS, ChainAssetMap, ChainInfoMap } from '@subwallet/chain';
+import { _AssetType, _ChainAsset, _ChainInfo, _EvmInfo, _SubstrateInfo } from '@subwallet/chain/types';
+import { IChain } from '@subwallet/extension-koni-base/databases';
 import { EvmChainHandler } from '@subwallet/extension-koni-base/services/chain-service/handler/EvmChainHandler';
 import { SubstrateChainHandler } from '@subwallet/extension-koni-base/services/chain-service/handler/SubstrateChainHandler';
 import { _CHAIN_VALIDATION_ERROR } from '@subwallet/extension-koni-base/services/chain-service/handler/types';
-import { _ChainState, _ConnectionStatus, _CUSTOM_NETWORK_PREFIX, _DataMap, _EvmApi, _NetworkUpsertParams, _SMART_CONTRACT_STANDARDS, _SmartContractTokenInfo, _SubstrateApi, _ValidateCustomTokenRequest, _ValidateCustomTokenResponse } from '@subwallet/extension-koni-base/services/chain-service/types';
+import { _ChainState, _ChainStorageInfo, _ConnectionStatus, _CUSTOM_NETWORK_PREFIX, _DataMap, _EvmApi, _NetworkUpsertParams, _SMART_CONTRACT_STANDARDS, _SmartContractTokenInfo, _SubstrateApi, _ValidateCustomTokenRequest, _ValidateCustomTokenResponse } from '@subwallet/extension-koni-base/services/chain-service/types';
 import { _isEqualContractAddress } from '@subwallet/extension-koni-base/services/chain-service/utils';
+import DatabaseService from '@subwallet/extension-koni-base/services/DatabaseService';
 import { Subject } from 'rxjs';
 import Web3 from 'web3';
 
@@ -21,6 +23,8 @@ export class ChainService {
     assetRegistry: {}
   };
 
+  private dbService: DatabaseService; // to save chain, token settings from user
+
   private lockChainInfoMap = false; // prevent unwanted changes (edit, enable, disable) to chainInfoMap
 
   private substrateChainHandler: SubstrateChainHandler;
@@ -32,18 +36,8 @@ export class ChainService {
 
   private logger: Logger;
 
-  constructor () {
-    this.dataMap.chainInfoMap = ChainInfoMap;
-    Object.values(this.dataMap.chainInfoMap).forEach((chainInfo) => {
-      this.dataMap.chainStateMap[chainInfo.slug] = {
-        currentProvider: Object.keys(chainInfo.providers)[0],
-        slug: chainInfo.slug,
-        connectionStatus: _ConnectionStatus.DISCONNECTED,
-        active: false
-      };
-    });
-
-    this.dataMap.assetRegistry = ChainAssetMap;
+  constructor (dbService: DatabaseService) {
+    this.dbService = dbService;
 
     this.substrateChainHandler = new SubstrateChainHandler();
     this.evmChainHandler = new EvmChainHandler();
@@ -55,18 +49,152 @@ export class ChainService {
     this.logger = createLogger('chain-service');
   }
 
-  public getChainInfoByKey (key: string) {
+  public getChainInfoByKey (key: string): _ChainInfo {
     return this.dataMap.chainInfoMap[key];
   }
 
-  public initChainState () {
-    const chainStateMap = this.getChainStateMap();
+  public init () {
+    this.initChains().catch((e) => this.logger.error(e));
+    this.dataMap.assetRegistry = ChainAssetMap;
 
-    _DEFAULT_NETWORKS.forEach((slug) => {
-      chainStateMap[slug].active = true;
-    });
+    this.initStorage().catch((e) => this.logger.error(e));
 
     this.logger.log('Initiated with default networks');
+  }
+
+  private async initChains () {
+    const chainStoredSettings = await this.dbService.getAllChainStore();
+
+    console.log('chainStoredSettings', chainStoredSettings);
+
+    const chainStoredSettingMap: Record<string, IChain> = {};
+
+    chainStoredSettings.forEach((chainStoredSetting) => {
+      chainStoredSettingMap[chainStoredSetting.slug] = chainStoredSetting;
+    });
+
+    console.log('processing');
+
+    if (chainStoredSettings.length === 0) {
+      const storageData: IChain[] = [];
+
+      this.dataMap.chainInfoMap = ChainInfoMap;
+      Object.values(ChainInfoMap).forEach((chainInfo) => {
+        this.dataMap.chainStateMap[chainInfo.slug] = {
+          currentProvider: Object.keys(chainInfo.providers)[0],
+          slug: chainInfo.slug,
+          connectionStatus: _ConnectionStatus.DISCONNECTED,
+          active: _DEFAULT_CHAINS.includes(chainInfo.slug)
+        };
+
+        // create data for storage
+        storageData.push({
+          ...chainInfo,
+          active: _DEFAULT_CHAINS.includes(chainInfo.slug),
+          currentProvider: Object.keys(chainInfo.providers)[0]
+        });
+      });
+
+      await this.dbService.bulkUpdateChainStore(storageData);
+    } else {
+      const mergedChainInfoMap: Record<string, _ChainInfo> = ChainInfoMap;
+
+      for (const [storedSlug, storedChainInfo] of Object.entries(chainStoredSettingMap)) {
+        if (storedSlug in ChainInfoMap) { // check predefined chains first, update providers, active and currentProvider
+          mergedChainInfoMap[storedSlug].providers = { ...storedChainInfo.providers, ...mergedChainInfoMap[storedSlug].providers };
+          this.dataMap.chainStateMap[storedSlug] = {
+            currentProvider: storedChainInfo.currentProvider,
+            slug: storedSlug,
+            connectionStatus: _ConnectionStatus.DISCONNECTED,
+            active: _DEFAULT_CHAINS.includes(storedSlug) || storedChainInfo.active
+          };
+
+          console.log('got predefined', mergedChainInfoMap[storedSlug], this.dataMap.chainStateMap[storedSlug]);
+        } else { // only custom chains are left
+          // check custom chain duplicated with predefined chain => merge into predefined chain
+          const duplicatedPredefinedSlug = this.checkExistedPredefinedChain(storedChainInfo.substrateInfo?.genesisHash, storedChainInfo.evmInfo?.evmChainId);
+
+          if (duplicatedPredefinedSlug.length > 0) { // merge custom chain with existed chain
+            mergedChainInfoMap[duplicatedPredefinedSlug].providers = { ...storedChainInfo.providers, ...mergedChainInfoMap[duplicatedPredefinedSlug].providers };
+            this.dataMap.chainStateMap[duplicatedPredefinedSlug] = {
+              currentProvider: storedChainInfo.currentProvider,
+              slug: duplicatedPredefinedSlug,
+              connectionStatus: _ConnectionStatus.DISCONNECTED,
+              active: _DEFAULT_CHAINS.includes(storedSlug) || storedChainInfo.active
+            };
+
+            console.log('got duplicated', mergedChainInfoMap[duplicatedPredefinedSlug], this.dataMap.chainStateMap[duplicatedPredefinedSlug]);
+          } else {
+            mergedChainInfoMap[storedSlug] = {
+              slug: storedSlug,
+              name: storedChainInfo.name,
+              providers: storedChainInfo.providers,
+              logo: storedChainInfo.logo,
+              evmInfo: storedChainInfo.evmInfo,
+              substrateInfo: storedChainInfo.substrateInfo
+            };
+            this.dataMap.chainStateMap[storedSlug] = {
+              currentProvider: storedChainInfo.currentProvider,
+              slug: storedSlug,
+              connectionStatus: _ConnectionStatus.DISCONNECTED,
+              active: _DEFAULT_CHAINS.includes(storedSlug) || storedChainInfo.active
+            };
+
+            console.log('got custom', mergedChainInfoMap[storedSlug], this.dataMap.chainStateMap[storedSlug]);
+          }
+        }
+      }
+
+      console.log('mergedChainInfoMap', mergedChainInfoMap);
+    }
+  }
+
+  private checkExistedPredefinedChain (genesisHash?: string, evmChainId?: number) {
+    let duplicatedSlug = '';
+
+    if (genesisHash) {
+      Object.values(ChainInfoMap).forEach((chainInfo) => {
+        if (chainInfo.substrateInfo && chainInfo.substrateInfo.genesisHash === genesisHash) {
+          duplicatedSlug = chainInfo.slug;
+        }
+      });
+    } else if (evmChainId) {
+      Object.values(ChainInfoMap).forEach((chainInfo) => {
+        if (chainInfo.evmInfo && chainInfo.evmInfo.evmChainId === evmChainId) {
+          duplicatedSlug = chainInfo.slug;
+        }
+      });
+    }
+
+    return duplicatedSlug;
+  }
+
+  private async initAssetRegistry () {
+
+  }
+
+  private async initStorage () {
+    const chainStoreData: _ChainStorageInfo[] = [];
+    const chainInfoMap = this.getChainInfoMap();
+    const assetRegistryMap = this.getAssetRegistry();
+
+    Object.values(chainInfoMap).forEach((chainInfo) => {
+      chainStoreData.push({
+        slug: chainInfo.slug,
+        name: chainInfo.name,
+        providers: chainInfo.providers,
+        currentProvider: this.getChainCurrentProviderByKey(chainInfo.slug)
+      });
+    });
+
+    await Promise.all([
+      this.dbService.bulkUpdateChainStore(chainStoreData),
+      this.dbService.bulkUpdateAssetStore(Object.values(assetRegistryMap))
+    ]);
+  }
+
+  public getChainCurrentProviderByKey (slug: string) {
+    return this.getChainStateMap()[slug].currentProvider;
   }
 
   public subscribeChainInfoMap () {
@@ -97,7 +225,7 @@ export class ChainService {
     return filteredAssetRegistry;
   }
 
-  public getChainInfoMap () {
+  public getChainInfoMap (): Record<string, _ChainInfo> {
     return this.dataMap.chainInfoMap;
   }
 
@@ -170,7 +298,7 @@ export class ChainService {
     const chainStateMap = this.getChainStateMap();
 
     for (const [slug, chainState] of Object.entries(chainStateMap)) {
-      if (!_DEFAULT_NETWORKS.includes(slug)) {
+      if (!_DEFAULT_CHAINS.includes(slug)) {
         chainState.active = false;
       }
     }
@@ -222,7 +350,7 @@ export class ChainService {
 
       this.updateChainState(params.chainEditInfo.slug, null, params.chainEditInfo.currentProvider);
     } else { // insert custom network
-      const newSlug = this.generateSlugWithChainSpec(params.chainEditInfo.chainType, params.chainEditInfo.name, params.chainSpec.paraId, params.chainSpec.evmChainId);
+      const newSlug = this.generateSlugForChain(params.chainEditInfo.chainType, params.chainEditInfo.name, params.chainSpec.paraId, params.chainSpec.evmChainId);
 
       let substrateInfo: _SubstrateInfo | null = null;
       let evmInfo: _EvmInfo | null = null;
@@ -266,6 +394,20 @@ export class ChainService {
       // insert new chainState
       const chainStateMap = this.getChainStateMap();
 
+      // create a record in assetRegistry for native token
+      this.upsertCustomToken({
+        assetType: _AssetType.NATIVE,
+        decimals: params.chainSpec.decimals,
+        metadata: null,
+        minAmount: params.chainSpec.existentialDeposit,
+        multiChainAsset: null,
+        name: params.chainEditInfo.name,
+        originChain: newSlug,
+        priceId: null,
+        slug: '',
+        symbol: params.chainEditInfo.symbol
+      });
+
       chainStateMap[newSlug] = {
         active: true,
         connectionStatus: _ConnectionStatus.DISCONNECTED,
@@ -283,7 +425,7 @@ export class ChainService {
     return true;
   }
 
-  private generateSlugWithChainSpec (chainType: string, name: string, paraId: number | null, evmChainId: number | null) {
+  private generateSlugForChain (chainType: string, name: string, paraId: number | null, evmChainId: number | null) {
     const parsedName = name.replaceAll(' ', '').toLowerCase();
 
     if (evmChainId !== null) {
@@ -503,7 +645,15 @@ export class ChainService {
     };
   }
 
+  private generateSlugForToken (originChain: string, assetType: _AssetType, symbol: string, contractAddress: string) {
+    return `${originChain}-${assetType}-${symbol}-${contractAddress}`;
+  }
+
   public upsertCustomToken (token: _ChainAsset) {
+    if (token.slug.length === 0) { // new token
+      token.slug = this.generateSlugForToken(token.originChain, token.assetType, token.symbol, token.metadata?.contractAddress as string);
+    }
+
     const assetRegistry = this.getAssetRegistry();
 
     assetRegistry[token.slug] = token;

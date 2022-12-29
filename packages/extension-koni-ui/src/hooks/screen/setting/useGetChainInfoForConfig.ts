@@ -1,8 +1,8 @@
 // Copyright 2019-2022 @polkadot/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
+import { _ChainInfo } from '@subwallet/chain/types';
 import { ChainEditInfo, ChainEditStandard, ChainSpecInfo } from '@subwallet/extension-base/background/KoniTypes';
-import { _ChainInfo } from '@subwallet/extension-koni-base/services/chain-list/types';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { useSelector } from 'react-redux';
 

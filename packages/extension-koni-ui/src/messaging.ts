@@ -9,6 +9,7 @@ import type { KeyringPairs$Json } from '@polkadot/ui-keyring/types';
 import type { HexString } from '@polkadot/util/types';
 import type { KeypairType } from '@polkadot/util-crypto/types';
 
+import { _ChainAsset, _ChainInfo } from '@subwallet/chain/types';
 import { AuthUrls } from '@subwallet/extension-base/background/handlers/State';
 import { AccountExternalError, AccountsWithCurrentAddress, BalanceJson, BasicTxInfo, BasicTxResponse, BondingOptionInfo, BondingSubmitParams, ChainBondingBasics, ChainRegistry, CheckExistingTuringCompoundParams, ConfirmationDefinitions, ConfirmationsQueue, ConfirmationType, CrowdloanJson, CurrentAccountInfo, CustomTokenJson, DelegationItem, DisableNetworkResponse, EvmNftTransaction, ExistingTuringCompoundTask, NetworkJson, NftCollection, NftJson, NftTransactionRequest, NftTransactionResponse, NftTransferExtra, OptionInputAddress, PriceJson, RequestAccountCreateExternalV2, RequestAccountCreateHardwareV2, RequestAccountCreateWithSecretKey, RequestAccountMeta, RequestAuthorizationBlock, RequestAuthorizationPerSite, RequestBondingSubmit, RequestCancelCompoundStakeExternal, RequestCheckCrossChainTransfer, RequestCheckTransfer, RequestClaimRewardExternal, RequestCreateCompoundStakeExternal, RequestCrossChainTransfer, RequestCrossChainTransferExternal, RequestEvmNftSubmitTransaction, RequestFreeBalance, RequestNftForceUpdate, RequestNftTransferExternalEVM, RequestNftTransferExternalSubstrate, RequestParseEVMContractInput, RequestParseTransactionSubstrate, RequestQrSignEVM, RequestQrSignSubstrate, RequestRejectExternalRequest, RequestResolveExternalRequest, RequestSettingsType, RequestStakeClaimReward, RequestStakeExternal, RequestStakeWithdrawal, RequestSubscribeBalance, RequestSubscribeBalancesVisibility, RequestSubscribeCrowdloan, RequestSubscribeNft, RequestSubscribePrice, RequestSubscribeStaking, RequestSubscribeStakingReward, RequestSubstrateNftSubmitTransaction, RequestTransfer, RequestTransferCheckReferenceCount, RequestTransferCheckSupporting, RequestTransferExistentialDeposit, RequestTransferExternal, RequestTuringCancelStakeCompound, RequestTuringStakeCompound, RequestUnbondingSubmit, RequestUnStakeExternal, RequestWithdrawStakeExternal, ResponseAccountCreateSuriV2, ResponseAccountCreateWithSecretKey, ResponseAccountExportPrivateKey, ResponseAccountIsLocked, ResponseAccountMeta, ResponseCheckCrossChainTransfer, ResponseCheckPublicAndSecretKey, ResponseCheckTransfer, ResponseParseEVMContractInput, ResponseParseTransactionSubstrate, ResponsePrivateKeyValidateV2, ResponseQrParseRLP, ResponseQrSignEVM, ResponseQrSignSubstrate, ResponseRejectExternalRequest, ResponseResolveExternalRequest, ResponseSeedCreateV2, ResponseSeedValidateV2, ResponseSettingsType, StakeClaimRewardParams, StakeDelegationRequest, StakeUnlockingJson, StakeWithdrawalParams, StakingJson, StakingRewardJson, SubstrateNftTransaction, SupportTransferResponse, ThemeTypes, TransactionHistoryItemType, TuringCancelStakeCompoundParams, TuringStakeCompoundParams, TuringStakeCompoundResp, UnbondingSubmitParams, ValidateNetworkResponse } from '@subwallet/extension-base/background/KoniTypes';
 import { RequestCurrentAccountAddress } from '@subwallet/extension-base/background/types';
@@ -16,7 +17,6 @@ import { PORT_EXTENSION } from '@subwallet/extension-base/defaults';
 import { getId } from '@subwallet/extension-base/utils/getId';
 import { metadataExpand } from '@subwallet/extension-chains';
 import { MetadataDef } from '@subwallet/extension-inject/types';
-import { _ChainAsset, _ChainInfo } from '@subwallet/extension-koni-base/services/chain-list/types';
 import { _ChainState, _ValidateCustomTokenRequest } from '@subwallet/extension-koni-base/services/chain-service/types';
 
 import { SingleAddress } from '@polkadot/ui-keyring/observable/types';
@@ -525,7 +525,7 @@ export async function evmNftSubmitTransaction (request: RequestEvmNftSubmitTrans
   return sendMessage('pri(evmNft.submitTransaction)', request, callback);
 }
 
-// TODO: chain-service
+// TODO: remove this
 export async function subscribeNetworkMap (callback: (data: Record<string, NetworkJson>) => void): Promise<Record<string, NetworkJson>> {
   return sendMessage('pri(networkMap.getSubscription)', null, callback);
 }
@@ -572,6 +572,22 @@ export async function getSupportedContractTypes (): Promise<string[]> {
   return sendMessage('pri(chainService.getSupportedContractTypes)', null);
 }
 
+export async function upsertCustomToken (data: _ChainAsset): Promise<boolean> {
+  return sendMessage('pri(chainService.upsertCustomToken)', data);
+}
+
+export async function deleteCustomTokens (data: string[]) {
+  return sendMessage('pri(chainService.deleteCustomTokens)', data);
+}
+
+export async function validateCustomToken (data: _ValidateCustomTokenRequest): Promise<Record<string, any>> {
+  return sendMessage('pri(chainService.validateCustomToken)', data);
+}
+
+export async function resetDefaultNetwork (): Promise<boolean> {
+  return sendMessage('pri(chainService.resetDefaultChains)', null);
+}
+
 // -------------------------------------------------------------------------------------
 
 export async function validateNetwork (provider: string, existedChainSlug?: string): Promise<ValidateNetworkResponse> {
@@ -586,24 +602,8 @@ export async function enableAllNetwork (): Promise<boolean> {
   return sendMessage('pri(networkMap.enableAll)', null);
 }
 
-export async function resetDefaultNetwork (): Promise<boolean> {
-  return sendMessage('pri(chainService.resetDefaultChains)', null);
-}
-
 export async function subscribeCustomToken (callback: (data: CustomTokenJson) => void): Promise<CustomTokenJson> {
   return sendMessage('pri(customTokenState.getSubscription)', null, callback);
-}
-
-export async function upsertCustomToken (data: _ChainAsset): Promise<boolean> {
-  return sendMessage('pri(chainService.upsertCustomToken)', data);
-}
-
-export async function deleteCustomTokens (data: string[]) {
-  return sendMessage('pri(chainService.deleteCustomTokens)', data);
-}
-
-export async function validateCustomToken (data: _ValidateCustomTokenRequest): Promise<Record<string, any>> {
-  return sendMessage('pri(chainService.validateCustomToken)', data);
 }
 
 export async function transferCheckReferenceCount (request: RequestTransferCheckReferenceCount): Promise<boolean> {

@@ -3,7 +3,7 @@
 
 /* eslint @typescript-eslint/no-empty-interface: "off" */
 
-import { _AssetType, _ChainAsset, _ChainInfo } from '@subwallet/extension-koni-base/services/chain-list/types';
+import { _AssetType, _ChainAsset, _ChainInfo } from '@subwallet/chain/types';
 import Web3 from 'web3';
 
 import { ApiPromise } from '@polkadot/api';

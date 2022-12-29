@@ -1,7 +1,7 @@
 // Copyright 2019-2022 @subwallet/extension-koni-base authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { _AssetType } from '@subwallet/extension-koni-base/services/chain-list/types';
+import { _AssetType } from '@subwallet/chain/types';
 import { _EvmChainSpec } from '@subwallet/extension-koni-base/services/chain-service/handler/types';
 import { _ERC20_ABI, _ERC721_ABI } from '@subwallet/extension-koni-base/services/chain-service/helper';
 import { _EvmApi, _SmartContractTokenInfo } from '@subwallet/extension-koni-base/services/chain-service/types';
@@ -17,7 +17,6 @@ export class EvmChainHandler {
 
   constructor () {
     this.logger = createLogger('evm-chain-handler');
-    console.log(this.evmApiMap);
   }
 
   public getEvmApiByChain (chainSlug: string) {

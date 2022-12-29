@@ -1,10 +1,20 @@
 // Copyright 2019-2022 @subwallet/extension-koni authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
+import {_ChainAsset, _ChainInfo} from '@subwallet/chain/types';
 import { BalanceItem, CrowdloanItem, ExtraDelegationInfo, NftCollection, NftItem, StakingItem, TransactionHistoryItemType } from '@subwallet/extension-base/background/KoniTypes';
 import Dexie, { Table, Transaction } from 'dexie';
+import {_ChainState} from "@subwallet/extension-koni-base/services/chain-service/types";
 
 const DEFAULT_DATABASE = 'SubWalletDB';
+
+export interface DefaultChainDocV2 {
+  _chain: string
+}
+
+export interface DefaultAddressDocV2 extends DefaultChainDocV2 {
+  _address: string
+}
 
 export interface DefaultDoc {
   chain: string,
@@ -22,6 +32,10 @@ export interface ICrowdloanItem extends CrowdloanItem, DefaultAddressDoc {}
 export interface IStakingItem extends StakingItem, DefaultAddressDoc {}
 export interface ITransactionHistoryItem extends TransactionHistoryItemType, DefaultAddressDoc { }
 export interface IExtraDelegationInfo extends ExtraDelegationInfo, DefaultAddressDoc {}
+export interface IChain extends _ChainInfo {
+  active: boolean,
+  currentProvider: string
+}
 
 export interface IMigration {
   key: string,
@@ -35,15 +49,18 @@ export default class KoniDatabase extends Dexie {
   public balances!: Table<IBalance, object>;
   public crowdloans!: Table<ICrowdloanItem, object>;
   public stakings!: Table<IStakingItem, object>;
-  public stakingsV2!: Table<IStakingItem, object>;
   public transactions!: Table<ITransactionHistoryItem, object>;
   public migrations!: Table<IMigration, object>;
 
+  public stakingsV2!: Table<IStakingItem, object>;
   public extraDelegationInfo!: Table<IExtraDelegationInfo, object>;
+
+  public chain!: Table<IChain, object>;
+  public asset!: Table<_ChainAsset, object>;
 
   private schemaVersion: number;
 
-  public constructor (name = DEFAULT_DATABASE, schemaVersion = 6) {
+  public constructor (name = DEFAULT_DATABASE, schemaVersion = 7) {
     super(name);
     this.schemaVersion = schemaVersion;
 
@@ -74,6 +91,11 @@ export default class KoniDatabase extends Dexie {
 
     this.conditionalVersion(6, {
       extraDelegationInfo: '[chain+address], &[chain+address], chain, chainHash, address, collatorAddress'
+    });
+
+    this.conditionalVersion(7, {
+      chain: '[slug], &[slug], slug, name, logo, providers, substrateInfo, evmInfo, active, currentProvider',
+      asset: '[slug], &[slug], slug, originChain, name, symbol, decimals, priceId, minAmount, assetType, metadata, multiChainAsset'
     });
 
     // this.conditionalVersion(4, {

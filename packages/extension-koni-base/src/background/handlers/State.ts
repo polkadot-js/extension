@@ -1,6 +1,7 @@
 // Copyright 2019-2022 @subwallet/extension-koni authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
+import { _ChainAsset, _ChainInfo } from '@subwallet/chain/types';
 import { withErrorLog } from '@subwallet/extension-base/background/handlers/helpers';
 import State, { AuthUrls, Resolver } from '@subwallet/extension-base/background/handlers/State';
 import { isSubscriptionRunning, unsubscribe } from '@subwallet/extension-base/background/handlers/subscriptions';
@@ -23,7 +24,6 @@ import { initWasmTokenState } from '@subwallet/extension-koni-base/api/tokens/wa
 import { EvmRpcError } from '@subwallet/extension-koni-base/background/errors/EvmRpcError';
 import { state } from '@subwallet/extension-koni-base/background/handlers/index';
 import { ALL_ACCOUNT_KEY, ALL_GENESIS_HASH } from '@subwallet/extension-koni-base/constants';
-import { _ChainAsset, _ChainInfo } from '@subwallet/extension-koni-base/services/chain-list/types';
 import { ChainService } from '@subwallet/extension-koni-base/services/chain-service';
 import { _ChainState, _ValidateCustomTokenRequest } from '@subwallet/extension-koni-base/services/chain-service/types';
 import DatabaseService from '@subwallet/extension-koni-base/services/DatabaseService';
@@ -173,8 +173,9 @@ export default class KoniState extends State {
   constructor (...args: any) {
     // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
     super(args);
-    this.chainService = new ChainService();
     this.dbService = new DatabaseService();
+
+    this.chainService = new ChainService(this.dbService);
     this.subscription = new KoniSubscription(this, this.dbService);
     this.cron = new KoniCron(this, this.subscription, this.dbService);
     this.logger = createLogger('State');
@@ -198,7 +199,7 @@ export default class KoniState extends State {
   public init () {
     this.initNetworkStates();
     this.updateServiceInfo();
-    this.chainService.initChainState();
+    this.chainService.init();
   }
 
   private onReady () {

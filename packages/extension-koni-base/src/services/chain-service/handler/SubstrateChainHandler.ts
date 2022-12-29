@@ -3,10 +3,10 @@
 
 import { options as acalaOptions } from '@acala-network/api';
 import { rpc as oakRpc, types as oakTypes } from '@oak-foundation/types';
+import { _AssetType } from '@subwallet/chain/types';
 import { DEFAULT_AUX } from '@subwallet/extension-koni-base/api/dotsama';
+import { typesBundle, typesChain } from '@subwallet/extension-koni-base/api/dotsama/api-helper';
 import { DOTSAMA_AUTO_CONNECT_MS, DOTSAMA_MAX_CONTINUE_RETRY } from '@subwallet/extension-koni-base/constants';
-import { typesBundle, typesChain } from '@subwallet/extension-koni-base/services/chain-list/api-helper';
-import { _AssetType } from '@subwallet/extension-koni-base/services/chain-list/types';
 import { _SubstrateChainSpec } from '@subwallet/extension-koni-base/services/chain-service/handler/types';
 import { _PSP22_ABI, _PSP34_ABI } from '@subwallet/extension-koni-base/services/chain-service/helper';
 import { _SmartContractTokenInfo, _SubstrateApi, _SubstrateChainMetadata } from '@subwallet/extension-koni-base/services/chain-service/types';
@@ -42,7 +42,6 @@ export class SubstrateChainHandler {
 
   constructor () {
     this.logger = createLogger('substrate-chain-handler');
-    console.log(this.substrateApiMap);
   }
 
   public getSubstrateApiByChain (chainSlug: string) {

@@ -184,6 +184,12 @@ export default class DatabaseService {
     return this.stores.chain.bulkUpsert(data);
   }
 
+  async bulkRemoveChainStore (chains: string[]) {
+    this.logger.log('Bulk removing ChainStore');
+
+    return this.stores.chain.removeChains(chains);
+  }
+
   async getAllChainStore () {
     const allChains = await this.stores.chain.getAll();
 

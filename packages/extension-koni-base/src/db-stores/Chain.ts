@@ -8,4 +8,8 @@ export default class ChainStore extends BaseStore<IChain> {
   async getAll () {
     return this.table.toArray();
   }
+
+  async removeChains (chains: string[]) {
+    return this.table.where('slug').anyOfIgnoreCase(chains).delete();
+  }
 }

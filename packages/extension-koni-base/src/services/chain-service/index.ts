@@ -65,19 +65,16 @@ export class ChainService {
   private async initChains () {
     const chainStoredSettings = await this.dbService.getAllChainStore();
 
-    console.log('chainStoredSettings', chainStoredSettings);
-
     const chainStoredSettingMap: Record<string, IChain> = {};
 
     chainStoredSettings.forEach((chainStoredSetting) => {
       chainStoredSettingMap[chainStoredSetting.slug] = chainStoredSetting;
     });
 
-    console.log('processing');
+    const newStorageData: IChain[] = [];
+    const deprecatedChains: string[] = [];
 
     if (chainStoredSettings.length === 0) {
-      const storageData: IChain[] = [];
-
       this.dataMap.chainInfoMap = ChainInfoMap;
       Object.values(ChainInfoMap).forEach((chainInfo) => {
         this.dataMap.chainStateMap[chainInfo.slug] = {
@@ -88,14 +85,12 @@ export class ChainService {
         };
 
         // create data for storage
-        storageData.push({
+        newStorageData.push({
           ...chainInfo,
           active: _DEFAULT_CHAINS.includes(chainInfo.slug),
           currentProvider: Object.keys(chainInfo.providers)[0]
         });
       });
-
-      await this.dbService.bulkUpdateChainStore(storageData);
     } else {
       const mergedChainInfoMap: Record<string, _ChainInfo> = ChainInfoMap;
 
@@ -109,21 +104,31 @@ export class ChainService {
             active: _DEFAULT_CHAINS.includes(storedSlug) || storedChainInfo.active
           };
 
-          console.log('got predefined', mergedChainInfoMap[storedSlug], this.dataMap.chainStateMap[storedSlug]);
+          newStorageData.push({
+            ...mergedChainInfoMap[storedSlug],
+            active: _DEFAULT_CHAINS.includes(storedSlug),
+            currentProvider: storedChainInfo.currentProvider
+          });
         } else { // only custom chains are left
           // check custom chain duplicated with predefined chain => merge into predefined chain
-          const duplicatedPredefinedSlug = this.checkExistedPredefinedChain(storedChainInfo.substrateInfo?.genesisHash, storedChainInfo.evmInfo?.evmChainId);
+          const duplicatedDefaultSlug = this.checkExistedPredefinedChain(storedChainInfo.substrateInfo?.genesisHash, storedChainInfo.evmInfo?.evmChainId);
 
-          if (duplicatedPredefinedSlug.length > 0) { // merge custom chain with existed chain
-            mergedChainInfoMap[duplicatedPredefinedSlug].providers = { ...storedChainInfo.providers, ...mergedChainInfoMap[duplicatedPredefinedSlug].providers };
-            this.dataMap.chainStateMap[duplicatedPredefinedSlug] = {
+          if (duplicatedDefaultSlug.length > 0) { // merge custom chain with existed chain
+            mergedChainInfoMap[duplicatedDefaultSlug].providers = { ...storedChainInfo.providers, ...mergedChainInfoMap[duplicatedDefaultSlug].providers };
+            this.dataMap.chainStateMap[duplicatedDefaultSlug] = {
               currentProvider: storedChainInfo.currentProvider,
-              slug: duplicatedPredefinedSlug,
+              slug: duplicatedDefaultSlug,
               connectionStatus: _ConnectionStatus.DISCONNECTED,
-              active: _DEFAULT_CHAINS.includes(storedSlug) || storedChainInfo.active
+              active: _DEFAULT_CHAINS.includes(duplicatedDefaultSlug) || storedChainInfo.active
             };
 
-            console.log('got duplicated', mergedChainInfoMap[duplicatedPredefinedSlug], this.dataMap.chainStateMap[duplicatedPredefinedSlug]);
+            newStorageData.push({
+              ...mergedChainInfoMap[duplicatedDefaultSlug],
+              active: _DEFAULT_CHAINS.includes(duplicatedDefaultSlug) || storedChainInfo.active,
+              currentProvider: storedChainInfo.currentProvider
+            });
+
+            deprecatedChains.push(storedSlug);
           } else {
             mergedChainInfoMap[storedSlug] = {
               slug: storedSlug,
@@ -140,11 +145,22 @@ export class ChainService {
               active: _DEFAULT_CHAINS.includes(storedSlug) || storedChainInfo.active
             };
 
-            console.log('got custom', mergedChainInfoMap[storedSlug], this.dataMap.chainStateMap[storedSlug]);
+            newStorageData.push({
+              ...mergedChainInfoMap[storedSlug],
+              active: _DEFAULT_CHAINS.includes(storedSlug) || storedChainInfo.active,
+              currentProvider: storedChainInfo.currentProvider
+            });
           }
         }
       }
 
+      console.log('aoscim', deprecatedChains);
+      console.log('newStorageData', newStorageData);
+
+      // await this.dbService.bulkUpdateChainStore(newStorageData);
+      // await this.dbService.bulkRemoveChainStore([]);
+      // TODO: update storage (changing keys + upsert)
+      this.dataMap.chainInfoMap = mergedChainInfoMap;
       console.log('mergedChainInfoMap', mergedChainInfoMap);
     }
   }

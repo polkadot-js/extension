@@ -7,8 +7,8 @@ import { IChain } from '@subwallet/extension-koni-base/databases';
 import { EvmChainHandler } from '@subwallet/extension-koni-base/services/chain-service/handler/EvmChainHandler';
 import { SubstrateChainHandler } from '@subwallet/extension-koni-base/services/chain-service/handler/SubstrateChainHandler';
 import { _CHAIN_VALIDATION_ERROR } from '@subwallet/extension-koni-base/services/chain-service/handler/types';
-import { _ChainState, _ChainStorageInfo, _ConnectionStatus, _CUSTOM_NETWORK_PREFIX, _DataMap, _EvmApi, _NetworkUpsertParams, _SMART_CONTRACT_STANDARDS, _SmartContractTokenInfo, _SubstrateApi, _ValidateCustomTokenRequest, _ValidateCustomTokenResponse } from '@subwallet/extension-koni-base/services/chain-service/types';
-import { _isEqualContractAddress } from '@subwallet/extension-koni-base/services/chain-service/utils';
+import { _ChainState, _ConnectionStatus, _CUSTOM_NETWORK_PREFIX, _DataMap, _EvmApi, _NetworkUpsertParams, _SMART_CONTRACT_STANDARDS, _SmartContractTokenInfo, _SubstrateApi, _ValidateCustomTokenRequest, _ValidateCustomTokenResponse } from '@subwallet/extension-koni-base/services/chain-service/types';
+import { _isCustomAsset, _isEqualContractAddress, _isEqualSmartContractAsset } from '@subwallet/extension-koni-base/services/chain-service/utils';
 import DatabaseService from '@subwallet/extension-koni-base/services/DatabaseService';
 import { Subject } from 'rxjs';
 import Web3 from 'web3';
@@ -54,10 +54,11 @@ export class ChainService {
   }
 
   public init () {
-    this.initChains().catch((e) => this.logger.error(e));
-    this.dataMap.assetRegistry = ChainAssetMap;
-
-    this.initStorage().catch((e) => this.logger.error(e));
+    this.initChains().then(() => {
+      this.chainInfoMapSubject.next(this.getChainInfoMap());
+      this.chainStateMapSubject.next(this.getChainStateMap());
+      this.assetRegistrySubject.next(this.getAssetRegistry());
+    }).catch((e) => this.logger.error(e));
 
     this.logger.log('Initiated with default networks');
   }
@@ -73,6 +74,7 @@ export class ChainService {
 
     const newStorageData: IChain[] = [];
     const deprecatedChains: string[] = [];
+    const deprecatedChainMap: Record<string, string> = {};
 
     if (chainStoredSettings.length === 0) {
       this.dataMap.chainInfoMap = ChainInfoMap;
@@ -128,6 +130,8 @@ export class ChainService {
               currentProvider: storedChainInfo.currentProvider
             });
 
+            deprecatedChainMap[storedSlug] = duplicatedDefaultSlug;
+
             deprecatedChains.push(storedSlug);
           } else {
             mergedChainInfoMap[storedSlug] = {
@@ -154,15 +158,31 @@ export class ChainService {
         }
       }
 
-      console.log('aoscim', deprecatedChains);
-      console.log('newStorageData', newStorageData);
+      // Fill in the missing chainState and storageData (new chains never before seen)
+      Object.entries(mergedChainInfoMap).forEach(([slug, chainInfo]) => {
+        if (!(slug in this.dataMap.chainStateMap)) {
+          this.dataMap.chainStateMap[slug] = {
+            currentProvider: Object.keys(chainInfo.providers)[0],
+            slug,
+            connectionStatus: _ConnectionStatus.DISCONNECTED,
+            active: _DEFAULT_CHAINS.includes(slug)
+          };
 
-      // await this.dbService.bulkUpdateChainStore(newStorageData);
-      // await this.dbService.bulkRemoveChainStore([]);
-      // TODO: update storage (changing keys + upsert)
+          newStorageData.push({
+            ...mergedChainInfoMap[slug],
+            active: _DEFAULT_CHAINS.includes(slug),
+            currentProvider: Object.keys(chainInfo.providers)[0]
+          });
+        }
+      });
+
       this.dataMap.chainInfoMap = mergedChainInfoMap;
-      console.log('mergedChainInfoMap', mergedChainInfoMap);
+
+      await this.dbService.bulkUpdateChainStore(newStorageData);
+      await this.dbService.bulkRemoveChainStore(deprecatedChains); // remove outdated records
     }
+
+    await this.initAssetRegistry(deprecatedChainMap);
   }
 
   private checkExistedPredefinedChain (genesisHash?: string, evmChainId?: number) {
@@ -185,28 +205,54 @@ export class ChainService {
     return duplicatedSlug;
   }
 
-  private async initAssetRegistry () {
+  private async initAssetRegistry (deprecatedCustomChainMap: Record<string, string>) {
+    const storedAssetRegistry = await this.dbService.getAllAssetStore();
 
-  }
+    if (storedAssetRegistry.length === 0) {
+      this.dataMap.assetRegistry = ChainAssetMap;
+    } else {
+      const mergedAssetRegistry: Record<string, _ChainAsset> = ChainAssetMap;
 
-  private async initStorage () {
-    const chainStoreData: _ChainStorageInfo[] = [];
-    const chainInfoMap = this.getChainInfoMap();
-    const assetRegistryMap = this.getAssetRegistry();
+      const parsedStoredAssetRegistry: Record<string, _ChainAsset> = {};
+      const deprecatedAssets: string[] = [];
 
-    Object.values(chainInfoMap).forEach((chainInfo) => {
-      chainStoreData.push({
-        slug: chainInfo.slug,
-        name: chainInfo.name,
-        providers: chainInfo.providers,
-        currentProvider: this.getChainCurrentProviderByKey(chainInfo.slug)
+      // Update custom assets of merged custom chains
+      Object.values(storedAssetRegistry).forEach((storedAsset) => {
+        if (_isCustomAsset(storedAsset.slug) && Object.keys(deprecatedCustomChainMap).includes(storedAsset.originChain)) {
+          const newOriginChain = deprecatedCustomChainMap[storedAsset.originChain];
+          const newSlug = this.generateSlugForSmartContractAsset(newOriginChain, storedAsset.assetType, storedAsset.symbol, storedAsset.metadata?.contractAddress as string);
+
+          deprecatedAssets.push(storedAsset.slug);
+          parsedStoredAssetRegistry[newSlug] = {
+            ...storedAsset,
+            originChain: newOriginChain,
+            slug: newSlug
+          };
+        } else {
+          parsedStoredAssetRegistry[storedAsset.slug] = storedAsset;
+        }
       });
-    });
 
-    await Promise.all([
-      this.dbService.bulkUpdateChainStore(chainStoreData),
-      this.dbService.bulkUpdateAssetStore(Object.values(assetRegistryMap))
-    ]);
+      for (const assetInfo of Object.values(parsedStoredAssetRegistry)) {
+        let duplicated = false;
+
+        for (const defaultChainAsset of Object.values(ChainAssetMap)) {
+          // case merge custom asset with default asset
+          if (_isEqualSmartContractAsset(assetInfo, defaultChainAsset)) {
+            duplicated = true;
+            break;
+          }
+        }
+
+        if (!duplicated) {
+          mergedAssetRegistry[assetInfo.slug] = assetInfo;
+        }
+      }
+
+      this.dataMap.assetRegistry = mergedAssetRegistry;
+
+      await this.dbService.bulkRemoveAssetStore(deprecatedAssets);
+    }
   }
 
   public getChainCurrentProviderByKey (slug: string) {
@@ -388,7 +434,7 @@ export class ChainService {
         };
       } else if (params.chainSpec.evmChainId !== null) {
         evmInfo = {
-          supportSmartContract: [_AssetType.ERC20, _AssetType.ERC721],
+          supportSmartContract: [_AssetType.ERC20, _AssetType.ERC721], // set support for ERC token by default
           blockExplorer: params.chainEditInfo.blockExplorer || null,
           decimals: params.chainSpec.decimals,
           evmChainId: params.chainSpec.evmChainId,
@@ -661,13 +707,13 @@ export class ChainService {
     };
   }
 
-  private generateSlugForToken (originChain: string, assetType: _AssetType, symbol: string, contractAddress: string) {
+  private generateSlugForSmartContractAsset (originChain: string, assetType: _AssetType, symbol: string, contractAddress: string) {
     return `${originChain}-${assetType}-${symbol}-${contractAddress}`;
   }
 
   public upsertCustomToken (token: _ChainAsset) {
     if (token.slug.length === 0) { // new token
-      token.slug = this.generateSlugForToken(token.originChain, token.assetType, token.symbol, token.metadata?.contractAddress as string);
+      token.slug = this.generateSlugForSmartContractAsset(token.originChain, token.assetType, token.symbol, token.metadata?.contractAddress as string);
     }
 
     const assetRegistry = this.getAssetRegistry();

@@ -1,14 +1,14 @@
 // Copyright 2019-2022 @subwallet/extension-koni authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import {_ChainAsset, _ChainInfo} from '@subwallet/chain/types';
+import { _ChainAsset } from '@subwallet/chain/types';
 import { APIItemState, BalanceItem, BalanceJson, CrowdloanItem, NftCollection, NftItem, StakingItem, TransactionHistoryItemType } from '@subwallet/extension-base/background/KoniTypes';
 import { Subscription } from 'dexie';
 
 import { logger as createLogger } from '@polkadot/util';
 import { Logger } from '@polkadot/util/types';
 
-import KoniDatabase, {IChain, INft, IStakingItem} from '../databases';
+import KoniDatabase, { IChain, INft, IStakingItem } from '../databases';
 import { AssetStore, BalanceStore, ChainStore, CrowdloanStore, ExtraDelegationInfoStore, MigrationStore, NftCollectionStore, NftStore, StakingStore, TransactionStore } from '../db-stores';
 
 export default class DatabaseService {
@@ -205,9 +205,17 @@ export default class DatabaseService {
     return this.stores.asset.upsert(item);
   }
 
-  async bulkUpdateAssetStore (items: _ChainAsset[]) {
-    this.logger.log('Bulk updating AssetStore');
+  async getAllAssetStore () {
+    const allAssets = await this.stores.asset.getAll();
 
-    return this.stores.asset.bulkUpsert(items);
+    this.logger.log('Get all stored assets: ', allAssets);
+
+    return allAssets;
+  }
+
+  async bulkRemoveAssetStore (items: string[]) {
+    this.logger.log('Bulk removing AssetStore');
+
+    return this.stores.asset.removeAssets(items);
   }
 }

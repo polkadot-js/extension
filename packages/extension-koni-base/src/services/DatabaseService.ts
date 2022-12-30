@@ -172,8 +172,8 @@ export default class DatabaseService {
   }
 
   // Chain
-  async updateChainStore (_chain: string, item: IChain) {
-    this.logger.log(`Updating storageInfo for chain [${_chain}]`);
+  async updateChainStore (item: IChain) {
+    this.logger.log(`Updating storageInfo for chain [${item.slug}]`);
 
     return this.stores.chain.upsert(item);
   }
@@ -184,7 +184,7 @@ export default class DatabaseService {
     return this.stores.chain.bulkUpsert(data);
   }
 
-  async bulkRemoveChainStore (chains: string[]) {
+  async removeFromChainStore (chains: string[]) {
     this.logger.log('Bulk removing ChainStore');
 
     return this.stores.chain.removeChains(chains);
@@ -199,8 +199,8 @@ export default class DatabaseService {
   }
 
   // Asset
-  async updateAssetStore (_chain: string, item: _ChainAsset) {
-    this.logger.log(`Updating storageInfo for chain [${_chain}]`);
+  async updateAssetStore (item: _ChainAsset) {
+    this.logger.log(`Updating storageInfo for chainAsset [${item.originChain}]`);
 
     return this.stores.asset.upsert(item);
   }
@@ -213,7 +213,7 @@ export default class DatabaseService {
     return allAssets;
   }
 
-  async bulkRemoveAssetStore (items: string[]) {
+  async removeFromAssetStore (items: string[]) {
     this.logger.log('Bulk removing AssetStore');
 
     return this.stores.asset.removeAssets(items);

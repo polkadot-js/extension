@@ -179,7 +179,7 @@ export class ChainService {
       this.dataMap.chainInfoMap = mergedChainInfoMap;
 
       await this.dbService.bulkUpdateChainStore(newStorageData);
-      await this.dbService.bulkRemoveChainStore(deprecatedChains); // remove outdated records
+      await this.dbService.removeFromChainStore(deprecatedChains); // remove outdated records
     }
 
     await this.initAssetRegistry(deprecatedChainMap);
@@ -251,7 +251,7 @@ export class ChainService {
 
       this.dataMap.assetRegistry = mergedAssetRegistry;
 
-      await this.dbService.bulkRemoveAssetStore(deprecatedAssets);
+      await this.dbService.removeFromAssetStore(deprecatedAssets);
     }
   }
 
@@ -312,6 +312,8 @@ export class ChainService {
     if (chainStateMap[slug].active) {
       return false;
     }
+
+    this.dbService.removeFromChainStore([slug]).catch((e) => this.logger.error(e));
 
     delete chainStateMap[slug];
     delete chainInfoMap[slug];
@@ -412,7 +414,7 @@ export class ChainService {
 
       this.updateChainState(params.chainEditInfo.slug, null, params.chainEditInfo.currentProvider);
     } else { // insert custom network
-      const newSlug = this.generateSlugForChain(params.chainEditInfo.chainType, params.chainEditInfo.name, params.chainSpec.paraId, params.chainSpec.evmChainId);
+      const newSlug = this.generateSlugForCustomChain(params.chainEditInfo.chainType, params.chainEditInfo.name, params.chainSpec.paraId, params.chainSpec.evmChainId);
 
       let substrateInfo: _SubstrateInfo | null = null;
       let evmInfo: _EvmInfo | null = null;
@@ -477,6 +479,17 @@ export class ChainService {
         slug: newSlug
       };
 
+      this.dbService.updateChainStore({
+        active: false,
+        currentProvider: params.chainEditInfo.currentProvider,
+        evmInfo,
+        logo: '',
+        name: params.chainEditInfo.name,
+        providers: params.chainEditInfo.providers,
+        slug: newSlug,
+        substrateInfo
+      }).catch((e) => this.logger.error(e));
+
       this.chainStateMapSubject.next(this.getChainStateMap());
     }
 
@@ -487,7 +500,7 @@ export class ChainService {
     return true;
   }
 
-  private generateSlugForChain (chainType: string, name: string, paraId: number | null, evmChainId: number | null) {
+  private generateSlugForCustomChain (chainType: string, name: string, paraId: number | null, evmChainId: number | null) {
     const parsedName = name.replaceAll(' ', '').toLowerCase();
 
     if (evmChainId !== null) {
@@ -720,6 +733,8 @@ export class ChainService {
 
     assetRegistry[token.slug] = token;
 
+    this.dbService.updateAssetStore(token).catch((e) => this.logger.error(e));
+
     this.assetRegistrySubject.next(assetRegistry);
   }
 
@@ -729,6 +744,8 @@ export class ChainService {
     targetTokens.forEach((targetToken) => {
       delete assetRegistry[targetToken];
     });
+
+    this.dbService.removeFromAssetStore(targetTokens).catch((e) => this.logger.error(e));
 
     this.assetRegistrySubject.next(assetRegistry);
   }

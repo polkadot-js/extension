@@ -1,4 +1,4 @@
-// Copyright 2019-2022 @polkadot/extension-ui authors & contributors
+// Copyright 2019-2023 @polkadot/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
 import type { ThemeProps } from '../../types';
@@ -59,7 +59,7 @@ export default styled(Bytes)(({ theme }: ThemeProps) => `
 
     &.pre {
       padding: 0px;
-      
+
       div {
         padding: 0.15rem;
         font-family: inherit;

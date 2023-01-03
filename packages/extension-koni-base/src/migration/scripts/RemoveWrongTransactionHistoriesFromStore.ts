@@ -2,14 +2,14 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { TransactionHistoryItemJson } from '@subwallet/extension-base/background/KoniTypes';
+import TransactionHistoryStoreV3 from '@subwallet/extension-base/stores/TransactionHistoryV3';
 import BaseMigrationJob from '@subwallet/extension-koni-base/migration/Base';
-import TransactionHistoryStoreV2 from '@subwallet/extension-koni-base/stores/TransactionHistoryV3';
 
 import { accounts } from '@polkadot/ui-keyring/observable/accounts';
 
 export default class RemoveWrongTransactionHistoriesFromStore extends BaseMigrationJob {
   public override async run (): Promise<void> {
-    const newStore = new TransactionHistoryStoreV2();
+    const newStore = new TransactionHistoryStoreV3();
 
     const addressList = Object.keys(accounts.subject.value);
 

@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { ApiMap, ApiProps, CustomToken, NETWORK_STATUS, NetworkJson, NftTransferExtra, ServiceInfo } from '@subwallet/extension-base/background/KoniTypes';
+import DatabaseService from '@subwallet/extension-base/services/storage-service/DatabaseService';
 import { getTokenPrice } from '@subwallet/extension-koni-base/api/coingecko';
 import { fetchMultiChainHistories } from '@subwallet/extension-koni-base/api/subsquid/subsquid-multi-chain-history';
 import { KoniSubscription } from '@subwallet/extension-koni-base/background/subscription';
@@ -11,7 +12,6 @@ import { Subject, Subscription } from 'rxjs';
 import { logger as createLogger } from '@polkadot/util';
 import { Logger } from '@polkadot/util/types';
 
-import DatabaseService from '../services/DatabaseService';
 import KoniState from './handlers/State';
 
 export class KoniCron {

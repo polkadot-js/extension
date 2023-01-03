@@ -1,12 +1,12 @@
 // Copyright 2019-2022 @subwallet/extension-koni authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
+import BalanceStore from '@subwallet/extension-base/stores/Balance';
+import CrowdloanStore from '@subwallet/extension-base/stores/Crowdloan';
+import NftStore from '@subwallet/extension-base/stores/Nft';
+import NftCollectionStore from '@subwallet/extension-base/stores/NftCollection';
+import StakingStore from '@subwallet/extension-base/stores/Staking';
 import BaseMigrationJob from '@subwallet/extension-koni-base/migration/Base';
-import BalanceStore from '@subwallet/extension-koni-base/stores/Balance';
-import CrowdloanStore from '@subwallet/extension-koni-base/stores/Crowdloan';
-import NftStore from '@subwallet/extension-koni-base/stores/Nft';
-import NftCollectionStore from '@subwallet/extension-koni-base/stores/NftCollection';
-import StakingStore from '@subwallet/extension-koni-base/stores/Staking';
 
 export default class ClearOldStorage extends BaseMigrationJob {
   public override async run (): Promise<void> {

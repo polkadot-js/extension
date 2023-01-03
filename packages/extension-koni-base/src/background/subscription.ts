@@ -3,6 +3,7 @@
 
 import { AuthUrls } from '@subwallet/extension-base/background/handlers/State';
 import { ApiProps, CustomToken, NetworkJson, NftTransferExtra, StakingType, UnlockingStakeInfo } from '@subwallet/extension-base/background/KoniTypes';
+import DatabaseService from '@subwallet/extension-base/services/storage-service/DatabaseService';
 import { CHAIN_TYPES, getUnlockingInfo } from '@subwallet/extension-koni-base/api/bonding';
 import { subscribeBalance } from '@subwallet/extension-koni-base/api/dotsama/balance';
 import { subscribeCrowdloan } from '@subwallet/extension-koni-base/api/dotsama/crowdloan';
@@ -15,7 +16,6 @@ import Web3 from 'web3';
 import { logger as createLogger } from '@polkadot/util';
 import { Logger } from '@polkadot/util/types';
 
-import DatabaseService from '../services/DatabaseService';
 import KoniState from './handlers/State';
 
 type SubscriptionName = 'balance' | 'crowdloan' | 'stakingOnChain';

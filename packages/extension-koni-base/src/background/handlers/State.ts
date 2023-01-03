@@ -197,7 +197,7 @@ export default class KoniState extends State {
   }
 
   public init () {
-    this.initNetworkStates();
+    // this.initNetworkStates();
     this.updateServiceInfo();
     this.chainService.init();
   }

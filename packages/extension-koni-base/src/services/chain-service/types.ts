@@ -17,7 +17,7 @@ export interface _DataMap {
   assetRegistry: Record<string, _ChainAsset>
 }
 
-export enum _ConnectionStatus {
+export enum _ChainConnectionStatus {
   CONNECTED = 'CONNECTED',
   DISCONNECTED = 'DISCONNECTED',
   UNSTABLE = 'UNSTABLE'
@@ -27,7 +27,7 @@ export interface _ChainState {
   slug: string,
   active: boolean,
   currentProvider: string,
-  connectionStatus: _ConnectionStatus
+  connectionStatus: _ChainConnectionStatus
 }
 
 export interface _SubstrateDefaultFormatBalance {
@@ -38,6 +38,7 @@ export interface _SubstrateDefaultFormatBalance {
 export interface _ChainBaseApi {
   chainSlug: string;
   apiUrl: string;
+  providerName?: string;
 
   apiError?: string;
   apiRetry?: number;

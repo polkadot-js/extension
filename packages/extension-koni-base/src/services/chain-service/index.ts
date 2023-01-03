@@ -7,7 +7,7 @@ import { IChain } from '@subwallet/extension-koni-base/databases';
 import { EvmChainHandler } from '@subwallet/extension-koni-base/services/chain-service/handler/EvmChainHandler';
 import { SubstrateChainHandler } from '@subwallet/extension-koni-base/services/chain-service/handler/SubstrateChainHandler';
 import { _CHAIN_VALIDATION_ERROR } from '@subwallet/extension-koni-base/services/chain-service/handler/types';
-import { _ChainState, _ConnectionStatus, _CUSTOM_NETWORK_PREFIX, _DataMap, _EvmApi, _NetworkUpsertParams, _SMART_CONTRACT_STANDARDS, _SmartContractTokenInfo, _SubstrateApi, _ValidateCustomTokenRequest, _ValidateCustomTokenResponse } from '@subwallet/extension-koni-base/services/chain-service/types';
+import { _ChainBaseApi, _ChainConnectionStatus, _ChainState, _CUSTOM_NETWORK_PREFIX, _DataMap, _EvmApi, _NetworkUpsertParams, _SMART_CONTRACT_STANDARDS, _SmartContractTokenInfo, _SubstrateApi, _ValidateCustomTokenRequest, _ValidateCustomTokenResponse } from '@subwallet/extension-koni-base/services/chain-service/types';
 import { _isCustomAsset, _isEqualContractAddress, _isEqualSmartContractAsset } from '@subwallet/extension-koni-base/services/chain-service/utils';
 import DatabaseService from '@subwallet/extension-koni-base/services/DatabaseService';
 import { Subject } from 'rxjs';
@@ -53,14 +53,69 @@ export class ChainService {
     return this.dataMap.chainInfoMap[key];
   }
 
-  public init () {
+  public init () { // TODO: reconsider the flow of initiation
     this.initChains().then(() => {
       this.chainInfoMapSubject.next(this.getChainInfoMap());
       this.chainStateMapSubject.next(this.getChainStateMap());
       this.assetRegistrySubject.next(this.getAssetRegistry());
-    }).catch((e) => this.logger.error(e));
 
-    this.logger.log('Initiated with default networks');
+      this.initApis();
+
+      this.logger.log('Initiated chains, assets and APIs');
+    }).catch((e) => this.logger.error(e));
+  }
+
+  // init Apis
+  private initApis () { // TODO: this might be async
+    Object.entries(this.getChainInfoMap()).forEach(([slug, chainInfo]) => {
+      if (this.getChainStateByKey(slug).active) {
+        const { endpoint, providerName } = this.getChainCurrentProviderByKey(slug);
+
+        if (chainInfo.substrateInfo !== null) {
+          const chainApi = this.initApi(slug, endpoint, 'substrate', providerName);
+
+          this.substrateChainHandler.setSubstrateApi(slug, chainApi as _SubstrateApi);
+          this.updateChainConnectionStatus(slug, _ChainConnectionStatus.CONNECTED); // TODO: might not be needed, can be updated by cron
+        }
+
+        if (chainInfo.evmInfo !== null) {
+          const chainApi = this.initApi(slug, endpoint, 'evm', providerName);
+
+          this.evmChainHandler.setEvmApi(slug, chainApi as _EvmApi);
+          this.updateChainConnectionStatus(slug, _ChainConnectionStatus.CONNECTED);
+        }
+      }
+    });
+  }
+
+  private initApi (slug: string, endpoint: string, type = 'substrate', providerName?: string): _ChainBaseApi {
+    switch (type) {
+      case 'evm':
+        return this.evmChainHandler.initApi(slug, endpoint, providerName);
+      default: // substrate by default
+        return this.substrateChainHandler.initApi(slug, endpoint, providerName);
+    }
+  }
+
+  // init chains + assets
+  private checkExistedPredefinedChain (genesisHash?: string, evmChainId?: number) {
+    let duplicatedSlug = '';
+
+    if (genesisHash) {
+      Object.values(ChainInfoMap).forEach((chainInfo) => {
+        if (chainInfo.substrateInfo && chainInfo.substrateInfo.genesisHash === genesisHash) {
+          duplicatedSlug = chainInfo.slug;
+        }
+      });
+    } else if (evmChainId) {
+      Object.values(ChainInfoMap).forEach((chainInfo) => {
+        if (chainInfo.evmInfo && chainInfo.evmInfo.evmChainId === evmChainId) {
+          duplicatedSlug = chainInfo.slug;
+        }
+      });
+    }
+
+    return duplicatedSlug;
   }
 
   private async initChains () {
@@ -82,7 +137,7 @@ export class ChainService {
         this.dataMap.chainStateMap[chainInfo.slug] = {
           currentProvider: Object.keys(chainInfo.providers)[0],
           slug: chainInfo.slug,
-          connectionStatus: _ConnectionStatus.DISCONNECTED,
+          connectionStatus: _ChainConnectionStatus.DISCONNECTED,
           active: _DEFAULT_CHAINS.includes(chainInfo.slug)
         };
 
@@ -102,7 +157,7 @@ export class ChainService {
           this.dataMap.chainStateMap[storedSlug] = {
             currentProvider: storedChainInfo.currentProvider,
             slug: storedSlug,
-            connectionStatus: _ConnectionStatus.DISCONNECTED,
+            connectionStatus: _ChainConnectionStatus.DISCONNECTED,
             active: _DEFAULT_CHAINS.includes(storedSlug) || storedChainInfo.active
           };
 
@@ -120,7 +175,7 @@ export class ChainService {
             this.dataMap.chainStateMap[duplicatedDefaultSlug] = {
               currentProvider: storedChainInfo.currentProvider,
               slug: duplicatedDefaultSlug,
-              connectionStatus: _ConnectionStatus.DISCONNECTED,
+              connectionStatus: _ChainConnectionStatus.DISCONNECTED,
               active: _DEFAULT_CHAINS.includes(duplicatedDefaultSlug) || storedChainInfo.active
             };
 
@@ -145,7 +200,7 @@ export class ChainService {
             this.dataMap.chainStateMap[storedSlug] = {
               currentProvider: storedChainInfo.currentProvider,
               slug: storedSlug,
-              connectionStatus: _ConnectionStatus.DISCONNECTED,
+              connectionStatus: _ChainConnectionStatus.DISCONNECTED,
               active: _DEFAULT_CHAINS.includes(storedSlug) || storedChainInfo.active
             };
 
@@ -164,7 +219,7 @@ export class ChainService {
           this.dataMap.chainStateMap[slug] = {
             currentProvider: Object.keys(chainInfo.providers)[0],
             slug,
-            connectionStatus: _ConnectionStatus.DISCONNECTED,
+            connectionStatus: _ChainConnectionStatus.DISCONNECTED,
             active: _DEFAULT_CHAINS.includes(slug)
           };
 
@@ -183,26 +238,6 @@ export class ChainService {
     }
 
     await this.initAssetRegistry(deprecatedChainMap);
-  }
-
-  private checkExistedPredefinedChain (genesisHash?: string, evmChainId?: number) {
-    let duplicatedSlug = '';
-
-    if (genesisHash) {
-      Object.values(ChainInfoMap).forEach((chainInfo) => {
-        if (chainInfo.substrateInfo && chainInfo.substrateInfo.genesisHash === genesisHash) {
-          duplicatedSlug = chainInfo.slug;
-        }
-      });
-    } else if (evmChainId) {
-      Object.values(ChainInfoMap).forEach((chainInfo) => {
-        if (chainInfo.evmInfo && chainInfo.evmInfo.evmChainId === evmChainId) {
-          duplicatedSlug = chainInfo.slug;
-        }
-      });
-    }
-
-    return duplicatedSlug;
   }
 
   private async initAssetRegistry (deprecatedCustomChainMap: Record<string, string>) {
@@ -256,7 +291,14 @@ export class ChainService {
   }
 
   public getChainCurrentProviderByKey (slug: string) {
-    return this.getChainStateMap()[slug].currentProvider;
+    const providerName = this.getChainStateByKey(slug).currentProvider;
+    const providerMap = this.getChainInfoByKey(slug).providers;
+    const endpoint = providerMap[providerName];
+
+    return {
+      endpoint,
+      providerName
+    };
   }
 
   public subscribeChainInfoMap () {
@@ -293,6 +335,10 @@ export class ChainService {
 
   public getChainStateMap () {
     return this.dataMap.chainStateMap;
+  }
+
+  public getChainStateByKey (key: string) {
+    return this.dataMap.chainStateMap[key];
   }
 
   public removeChain (slug: string) {
@@ -372,6 +418,12 @@ export class ChainService {
     this.lockChainInfoMap = false;
 
     return true;
+  }
+
+  public updateChainConnectionStatus (slug: string, connectionStatus: _ChainConnectionStatus) {
+    const chainStateMap = this.getChainStateMap();
+
+    chainStateMap[slug].connectionStatus = connectionStatus;
   }
 
   public updateChainState (slug: string, active: boolean | null, currentProvider: string | null) {
@@ -474,7 +526,7 @@ export class ChainService {
 
       chainStateMap[newSlug] = {
         active: true,
-        connectionStatus: _ConnectionStatus.DISCONNECTED,
+        connectionStatus: _ChainConnectionStatus.DISCONNECTED,
         currentProvider: params.chainEditInfo.currentProvider,
         slug: newSlug
       };

@@ -20,7 +20,7 @@ export const PREDEFINED_NETWORKS: Record<string, NetworkJson> = {
       '1RPC': 'wss://1rpc.io/dot',
       Pinknode: 'wss://public-rpc.pinknode.io/polkadot' // https://github.com/polkadot-js/apps/issues/5721
     },
-    active: true,
+    active: false,
     currentProvider: 'Parity',
     currentProviderMode: 'ws',
     groups: ['RELAY_CHAIN'],
@@ -46,7 +46,7 @@ export const PREDEFINED_NETWORKS: Record<string, NetworkJson> = {
       RadiumBlock: 'wss://kusama.public.curie.radiumblock.xyz/ws',
       '1RPC': 'wss://1rpc.io/ksm'
     },
-    active: true,
+    active: false,
     currentProvider: 'Parity',
     currentProviderMode: 'ws',
     groups: ['RELAY_CHAIN'],

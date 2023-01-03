@@ -6,7 +6,7 @@ import { rpc as oakRpc, types as oakTypes } from '@oak-foundation/types';
 import { _AssetType } from '@subwallet/chain/types';
 import { DEFAULT_AUX } from '@subwallet/extension-koni-base/api/dotsama';
 import { typesBundle, typesChain } from '@subwallet/extension-koni-base/api/dotsama/api-helper';
-import { DOTSAMA_AUTO_CONNECT_MS, DOTSAMA_MAX_CONTINUE_RETRY } from '@subwallet/extension-koni-base/constants';
+import { _API_OPTIONS_GROUP, API_AUTO_CONNECT_MS, API_MAX_RETRY } from '@subwallet/extension-koni-base/services/chain-service/constants';
 import { _SubstrateChainSpec } from '@subwallet/extension-koni-base/services/chain-service/handler/types';
 import { _PSP22_ABI, _PSP34_ABI } from '@subwallet/extension-koni-base/services/chain-service/helper';
 import { _SmartContractTokenInfo, _SubstrateApi, _SubstrateChainMetadata } from '@subwallet/extension-koni-base/services/chain-service/types';
@@ -21,7 +21,7 @@ import { logger as createLogger } from '@polkadot/util/logger';
 import { Logger } from '@polkadot/util/types';
 import { defaults as addressDefaults } from '@polkadot/util-crypto/address/defaults';
 
-function getWellKnownChain (chain = 'polkadot'): string {
+function getSubstrateConnectChain (chain = 'polkadot'): string {
   switch (chain) {
     case 'kusama':
       return WellKnownChain.ksmcc3;
@@ -42,6 +42,10 @@ export class SubstrateChainHandler {
 
   constructor () {
     this.logger = createLogger('substrate-chain-handler');
+  }
+
+  public getSubstrateApiMap () {
+    return this.substrateApiMap;
   }
 
   public getSubstrateApiByChain (chainSlug: string) {
@@ -155,12 +159,16 @@ export class SubstrateChainHandler {
     }
   }
 
-  public initApi (chainSlug: string, apiUrl: string): _SubstrateApi {
+  public setSubstrateApi (chainSlug: string, substrateApi: _SubstrateApi) {
+    this.substrateApiMap[chainSlug] = substrateApi;
+  }
+
+  public initApi (chainSlug: string, apiUrl: string, providerName?: string): _SubstrateApi {
     const registry = new TypeRegistry();
 
     const provider = apiUrl.startsWith('light://')
-      ? new ScProvider(getWellKnownChain(apiUrl.replace('light://substrate-connect/', '')))
-      : new WsProvider(apiUrl, DOTSAMA_AUTO_CONNECT_MS);
+      ? new ScProvider(getSubstrateConnectChain(apiUrl.replace('light://substrate-connect/', '')))
+      : new WsProvider(apiUrl, API_AUTO_CONNECT_MS);
 
     const apiOption = { provider, typesBundle, typesChain: typesChain };
 
@@ -169,9 +177,9 @@ export class SubstrateChainHandler {
 
     let api: ApiPromise;
 
-    if (['acala', 'karura', 'origintrail', 'kintsugi'].includes(chainSlug)) {
+    if (_API_OPTIONS_GROUP.acala.includes(chainSlug)) {
       api = new ApiPromise(acalaOptions({ provider }));
-    } else if (['turingStaging', 'turing'].includes(chainSlug)) {
+    } else if (_API_OPTIONS_GROUP.turing.includes(chainSlug)) {
       api = new ApiPromise({
         provider,
         rpc: oakRpc,
@@ -183,6 +191,7 @@ export class SubstrateChainHandler {
 
     const substrateApi: _SubstrateApi = ({
       api,
+      providerName,
 
       chainSlug,
       apiUrl,
@@ -207,7 +216,7 @@ export class SubstrateChainHandler {
       recoverConnect: () => {
         substrateApi.apiRetry = 0;
         this.logger.log('Recover connect to ', apiUrl);
-        provider.connect().then(console.log).catch(console.error);
+        provider.connect().then(this.logger.log).catch(this.logger.error);
       },
       get isReady () {
         const self = this as _SubstrateApi;
@@ -250,8 +259,8 @@ export class SubstrateChainHandler {
 
       this.logger.log(`Substrate API disconnected from ${JSON.stringify(apiUrl)} ${JSON.stringify(substrateApi.apiRetry)} times`);
 
-      if (substrateApi.apiRetry > DOTSAMA_MAX_CONTINUE_RETRY) {
-        console.log(`Disconnect from provider ${JSON.stringify(apiUrl)} because retry maxed out`);
+      if (substrateApi.apiRetry > API_MAX_RETRY) {
+        this.logger.log(`Disconnect from provider ${JSON.stringify(apiUrl)} because retry maxed out`);
         provider.disconnect()
           .then(this.logger.log)
           .catch(this.logger.error);

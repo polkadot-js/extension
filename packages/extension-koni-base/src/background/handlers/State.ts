@@ -1311,32 +1311,6 @@ export default class KoniState extends State {
     });
   }
 
-  public upsertCustomToken (data: _ChainAsset) {
-    this.chainService.upsertCustomToken(data);
-  }
-
-  public deleteCustomTokens (targetTokens: string[]) {
-    this.chainService.deleteCustomTokens(targetTokens);
-    // const { deletedNfts, newChainRegistryMap, newCustomTokenState } = deleteCustomTokens(targetTokens, this.customTokenState, this.chainRegistryMap);
-    //
-    // // Delete stored nfts
-    // for (const targetToken of deletedNfts) {
-    //   this.dbService.deleteNftsByCustomToken(this.getNetworkGenesisHashByKey(targetToken.chain), targetToken.smartContract).catch((e) => this.logger.warn(e));
-    // }
-    //
-    // this.chainRegistryMap = newChainRegistryMap;
-    //
-    // Object.entries(newChainRegistryMap).forEach(([key, chainRegistry]) => {
-    //   cacheRegistryMap[key] = chainRegistry;
-    // });
-    //
-    // this.customTokenState = newCustomTokenState;
-    // this.customTokenSubject.next(this.customTokenState);
-    // this.chainRegistrySubject.next(this.getChainRegistryMap());
-    // this.customTokenStore.set('EvmToken', this.customTokenState);
-    // this.updateServiceInfo();
-  }
-
   // TODO: move into chain-service
   public getNetworkMap () {
     return this.networkMap;
@@ -1378,6 +1352,32 @@ export default class KoniState extends State {
 
   public subscribeAssetRegistry (): Subject<Record<string, _ChainAsset>> {
     return this.chainService.subscribeAssetRegistry();
+  }
+
+  public upsertCustomToken (data: _ChainAsset) {
+    this.chainService.upsertCustomToken(data);
+  }
+
+  public deleteCustomTokens (targetTokens: string[]) {
+    this.chainService.deleteCustomTokens(targetTokens);
+    // const { deletedNfts, newChainRegistryMap, newCustomTokenState } = deleteCustomTokens(targetTokens, this.customTokenState, this.chainRegistryMap);
+    //
+    // // Delete stored nfts
+    // for (const targetToken of deletedNfts) {
+    //   this.dbService.deleteNftsByCustomToken(this.getNetworkGenesisHashByKey(targetToken.chain), targetToken.smartContract).catch((e) => this.logger.warn(e));
+    // }
+    //
+    // this.chainRegistryMap = newChainRegistryMap;
+    //
+    // Object.entries(newChainRegistryMap).forEach(([key, chainRegistry]) => {
+    //   cacheRegistryMap[key] = chainRegistry;
+    // });
+    //
+    // this.customTokenState = newCustomTokenState;
+    // this.customTokenSubject.next(this.customTokenState);
+    // this.chainRegistrySubject.next(this.getChainRegistryMap());
+    // this.customTokenStore.set('EvmToken', this.customTokenState);
+    // this.updateServiceInfo();
   }
 
   public async validateCustomChain (provider: string, existedChainSlug?: string) {

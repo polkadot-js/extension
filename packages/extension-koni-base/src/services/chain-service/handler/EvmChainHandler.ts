@@ -19,11 +19,19 @@ export class EvmChainHandler {
     this.logger = createLogger('evm-chain-handler');
   }
 
+  public getEvmApiMap () {
+    return this.evmApiMap;
+  }
+
   public getEvmApiByChain (chainSlug: string) {
     return this.evmApiMap[chainSlug];
   }
 
-  public initApi (chainSlug: string, apiUrl: string): _EvmApi {
+  public setEvmApi (chainSlug: string, evmApi: _EvmApi) {
+    this.evmApiMap[chainSlug] = evmApi;
+  }
+
+  public initApi (chainSlug: string, apiUrl: string, providerName?: string): _EvmApi {
     let api: Web3;
 
     if (apiUrl.startsWith('http')) {
@@ -34,7 +42,7 @@ export class EvmChainHandler {
 
     return ({
       api,
-
+      providerName,
       chainSlug,
       apiUrl,
 

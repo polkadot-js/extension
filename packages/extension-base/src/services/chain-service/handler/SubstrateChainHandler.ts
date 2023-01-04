@@ -54,6 +54,32 @@ export class SubstrateChainHandler {
     return this.substrateApiMap[chainSlug];
   }
 
+  public resumeAllApis () {
+    return Promise.all(Object.values(this.getSubstrateApiMap()).map(async (substrateApi) => {
+      if (!substrateApi.api.isConnected && substrateApi.api.connect) {
+        this.logger.log(`[Substrate] Resuming network [${substrateApi.specName}]`);
+        await substrateApi.api.connect();
+      }
+    }));
+  }
+
+  public disconnectAllApis () {
+    return Promise.all(Object.values(this.getSubstrateApiMap()).map(async (substrateApi) => {
+      if (substrateApi.api.isConnected) {
+        this.logger.log(`[Substrate] Stopping network [${substrateApi.specName}]`);
+        substrateApi.api?.disconnect && await substrateApi.api?.disconnect();
+      }
+    }));
+  }
+
+  public refreshApi (slug: string) {
+    const substrateApi = this.getSubstrateApiByChain(slug);
+
+    if (substrateApi && !substrateApi.isApiConnected) {
+      substrateApi.recoverConnect && substrateApi.recoverConnect();
+    }
+  }
+
   public async getChainSpec (substrateApi: _SubstrateApi) {
     const result: _SubstrateChainSpec = {
       addressPrefix: -1,

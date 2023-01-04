@@ -5,62 +5,11 @@ import { _ChainAsset, _ChainInfo } from '@subwallet/chain/types';
 import { withErrorLog } from '@subwallet/extension-base/background/handlers/helpers';
 import State, { AuthUrls, Resolver } from '@subwallet/extension-base/background/handlers/State';
 import { isSubscriptionRunning, unsubscribe } from '@subwallet/extension-base/background/handlers/subscriptions';
-import {
-  AccountRefMap,
-  AddNetworkRequestExternal,
-  AddTokenRequestExternal,
-  APIItemState,
-  ApiMap,
-  AuthRequestV2,
-  BalanceItem,
-  BalanceJson,
-  ChainRegistry,
-  ConfirmationDefinitions,
-  ConfirmationsQueue,
-  ConfirmationsQueueItemOptions,
-  ConfirmationType,
-  CrowdloanItem,
-  CrowdloanJson,
-  CurrentAccountInfo,
-  CustomToken,
-  CustomTokenJson,
-  CustomTokenType,
-  EvmSendTransactionParams,
-  EvmSendTransactionRequestExternal,
-  EvmSignatureRequestExternal,
-  ExternalRequestPromise,
-  ExternalRequestPromiseStatus,
-  NetworkJson,
-  NftCollection,
-  NftItem,
-  NftJson,
-  NftTransferExtra,
-  PriceJson,
-  RequestAccountExportPrivateKey,
-  RequestCheckPublicAndSecretKey,
-  RequestConfirmationComplete,
-  RequestSettingsType,
-  ResponseAccountExportPrivateKey,
-  ResponseCheckPublicAndSecretKey,
-  ResponseSettingsType,
-  ResultResolver,
-  ServiceInfo,
-  SingleModeJson,
-  StakeUnlockingJson,
-  StakingItem,
-  StakingJson,
-  StakingRewardItem,
-  StakingRewardJson,
-  ThemeTypes,
-  TransactionHistoryItemType
-} from '@subwallet/extension-base/background/KoniTypes';
+import { AccountRefMap, AddNetworkRequestExternal, AddTokenRequestExternal, APIItemState, ApiMap, AuthRequestV2, BalanceItem, BalanceJson, ChainRegistry, ConfirmationDefinitions, ConfirmationsQueue, ConfirmationsQueueItemOptions, ConfirmationType, CrowdloanItem, CrowdloanJson, CurrentAccountInfo, CustomToken, CustomTokenJson, CustomTokenType, EvmSendTransactionParams, EvmSendTransactionRequestExternal, EvmSignatureRequestExternal, ExternalRequestPromise, ExternalRequestPromiseStatus, NftCollection, NftItem, NftJson, NftTransferExtra, PriceJson, RequestAccountExportPrivateKey, RequestCheckPublicAndSecretKey, RequestConfirmationComplete, RequestSettingsType, ResponseAccountExportPrivateKey, ResponseCheckPublicAndSecretKey, ResponseSettingsType, ResultResolver, ServiceInfo, SingleModeJson, StakeUnlockingJson, StakingItem, StakingJson, StakingRewardItem, StakingRewardJson, ThemeTypes, TransactionHistoryItemType } from '@subwallet/extension-base/background/KoniTypes';
 import { AuthorizeRequest, RequestAuthorizeTab } from '@subwallet/extension-base/background/types';
 import { ChainService } from '@subwallet/extension-base/services/chain-service';
-import {
-  _ChainConnectionStatus,
-  _ChainState,
-  _ValidateCustomTokenRequest
-} from '@subwallet/extension-base/services/chain-service/types';
+import { _PREDEFINED_SINGLE_MODES } from '@subwallet/extension-base/services/chain-service/constants';
+import { _ChainConnectionStatus, _ChainState, _ValidateCustomTokenRequest } from '@subwallet/extension-base/services/chain-service/types';
 import DatabaseService from '@subwallet/extension-base/services/storage-service/DatabaseService';
 import { Web3Transaction } from '@subwallet/extension-base/signers/types';
 import { CurrentAccountStore, PriceStore } from '@subwallet/extension-base/stores';
@@ -71,18 +20,14 @@ import { getId } from '@subwallet/extension-base/utils/getId';
 import { getTokenPrice } from '@subwallet/extension-koni-base/api/coingecko';
 import { parseTxAndSignature } from '@subwallet/extension-koni-base/api/evm/external/shared';
 import { PREDEFINED_NETWORKS } from '@subwallet/extension-koni-base/api/predefinedNetworks';
-import { PREDEFINED_SINGLE_MODES } from '@subwallet/extension-koni-base/api/predefinedSingleMode';
 // eslint-disable-next-line camelcase
 import { FUNGIBLE_TOKEN_STANDARDS } from '@subwallet/extension-koni-base/api/tokens';
-import { initWeb3Api } from '@subwallet/extension-koni-base/api/tokens/evm/web3';
 import { EvmRpcError } from '@subwallet/extension-koni-base/background/errors/EvmRpcError';
 import { ALL_ACCOUNT_KEY, ALL_GENESIS_HASH } from '@subwallet/extension-koni-base/constants';
-import { getCurrentProvider } from '@subwallet/extension-koni-base/utils';
 import { anyNumberToBN } from '@subwallet/extension-koni-base/utils/eth';
 import SimpleKeyring from 'eth-simple-keyring';
 import RLP, { Input } from 'rlp';
 import { BehaviorSubject, Subject } from 'rxjs';
-import Web3 from 'web3';
 import { TransactionConfig, TransactionReceipt } from 'web3-core';
 
 import { decodePair } from '@polkadot/keyring/pair/decode';
@@ -515,23 +460,17 @@ export default class KoniState extends State {
   public async getStaking (): Promise<StakingJson> {
     const addresses = await this.getDecodedAddresses();
 
-    const activeNetworkHashes = Object.values(this.activeNetworks).map((network) => network.genesisHash);
-
-    const stakings = await this.dbService.getStakings(addresses, activeNetworkHashes);
+    const stakings = await this.dbService.getStakings(addresses, this.activeChainSlugs);
 
     return { ready: true, details: stakings } as StakingJson;
   }
 
   public async getStakingRecordsByAddress (address: string): Promise<StakingItem[]> {
-    const activeNetworkHashes = Object.values(this.activeNetworks).map((network) => network.genesisHash);
-
-    return await this.dbService.getStakings([address], activeNetworkHashes);
+    return await this.dbService.getStakings([address], this.activeChainSlugs);
   }
 
   public async getPooledStakingRecordsByAddress (addresses: string[]): Promise<StakingItem[]> {
-    const activeNetworkHashes = Object.values(this.activeNetworks).map((network) => network.genesisHash);
-
-    return await this.dbService.getPooledStakings(addresses, activeNetworkHashes);
+    return await this.dbService.getPooledStakings(addresses, this.activeChainSlugs);
   }
 
   public async getStoredStaking (address: string) {
@@ -617,24 +556,19 @@ export default class KoniState extends State {
   }
 
   public getNftCollection () {
-    const activeNetworkHashes = Object.values(this.activeNetworks).map((network) => network.genesisHash);
-
-    return this.dbService.getAllNftCollection(activeNetworkHashes);
+    return this.dbService.getAllNftCollection(this.activeChainSlugs);
   }
 
   public subscribeNftCollection () {
-    const activeNetworkHashes = Object.values(this.activeNetworks).map((network) => network.genesisHash);
-
-    return this.dbService.stores.nftCollection.subscribeNftCollection(activeNetworkHashes);
+    return this.dbService.stores.nftCollection.subscribeNftCollection(this.activeChainSlugs);
   }
 
   public async resetNft (newAddress: string): Promise<void> {
     this.getNft().then((data) => this.nftSubject.next(data || { nftList: [], total: 0 })).catch((e) => this.logger.warn(e));
 
-    const activeNetworkHashes = Object.values(this.activeNetworks).map((network) => network.genesisHash);
     const addresses = await this.getDecodedAddresses(newAddress);
 
-    this.dbService.subscribeNft(addresses, activeNetworkHashes, (nfts) => {
+    this.dbService.subscribeNft(addresses, this.activeChainSlugs, (nfts) => {
       this.nftSubject.next({
         nftList: nfts,
         total: nfts.length
@@ -667,9 +601,7 @@ export default class KoniState extends State {
       return;
     }
 
-    const activeNetworkHashes = Object.values(this.activeNetworks).map((network) => network.genesisHash);
-
-    const nfts = await this.dbService.getNft(addresses, activeNetworkHashes);
+    const nfts = await this.dbService.getNft(addresses, this.activeChainSlugs);
 
     return {
       nftList: nfts,
@@ -1026,10 +958,9 @@ export default class KoniState extends State {
       })
       .catch((e) => this.logger.warn(e));
 
-    const activeNetworkHashes = Object.values(this.activeNetworks).map((network) => network.genesisHash);
     const addresses = await this.getDecodedAddresses(newAddress);
 
-    this.dbService.subscribeStaking(addresses, activeNetworkHashes, (stakings) => {
+    this.dbService.subscribeStaking(addresses, this.activeChainSlugs, (stakings) => {
       this.stakingSubject.next({
         ready: true,
         details: stakings
@@ -1378,23 +1309,13 @@ export default class KoniState extends State {
   }
 
   public refreshSubstrateApi (key: string) {
-    const apiProps = this.apiMap.dotSama[key];
-
-    if (key in this.apiMap.dotSama) {
-      if (!apiProps.isApiConnected) {
-        apiProps.recoverConnect && apiProps.recoverConnect();
-      }
-    }
+    this.chainService.refreshSubstrateApi(key);
 
     return true;
   }
 
   public refreshWeb3Api (key: string) {
-    const currentProvider = getCurrentProvider(this.networkMap[key]);
-
-    if (currentProvider) {
-      this.apiMap.web3[key] = initWeb3Api(currentProvider);
-    }
+    this.chainService.refreshEvmApi(key);
   }
 
   public subscribeServiceInfo () {
@@ -1405,11 +1326,10 @@ export default class KoniState extends State {
     this.logger.log('<---Update serviceInfo--->');
     this.getCurrentAccount((value) => {
       this.serviceInfoSubject.next({
-        networkMap: this.networkMap,
-        apiMap: this.apiMap,
+        chainInfoMap: this.chainService.getChainInfoMap(),
+        chainApiMap: this.getApiMap(),
         currentAccountInfo: value,
-        chainRegistry: this.chainRegistryMap,
-        customNftRegistry: this.getActiveNftContracts()
+        assetRegistry: this.chainService.getAssetRegistry()
       });
     });
   }
@@ -1516,48 +1436,12 @@ export default class KoniState extends State {
     return false;
   }
 
-  public pauseAllNetworks (code?: number, reason?: string) {
-    // Disconnect web3 networks
-    // Object.entries(this.apiMap.web3).forEach(([key, network]) => {
-    //   if (network.currentProvider instanceof Web3.providers.WebsocketProvider) {
-    //     if (network.currentProvider?.connected) {
-    //       console.log(`[Web3] ${key} is conected`);
-    //       network.currentProvider?.disconnect(code, reason);
-    //       console.log(`[Web3] ${key} is ${network.currentProvider.connected ? 'connected' : 'disconnected'} now`);
-    //     }
-    //   }
-    // });
-
-    // Disconnect dotsama networks
-    return Promise.all(Object.values(this.apiMap.dotSama).map(async (network) => {
-      if (network.api.isConnected) {
-        this.logger.log(`[Dotsama] Stopping network [${network.specName}]`);
-        network.api?.disconnect && await network.api?.disconnect();
-      }
-    }));
+  public pauseAllNetworks (code?: number, reason?: string): Promise<void[]> {
+    return this.chainService.stopAllChainApis();
   }
 
   async resumeAllNetworks () {
-    // Reconnect web3 networks
-    // Object.entries(this.apiMap.web3).forEach(([key, network]) => {
-    //   const currentProvider = network.currentProvider;
-
-    //   if (currentProvider instanceof Web3.providers.WebsocketProvider) {
-    //     if (!currentProvider.connected) {
-    //       console.log(`[Web3] ${key} is disconected`);
-    //       currentProvider?.connect();
-    //       setTimeout(() => console.log(`[Web3] ${key} is ${currentProvider.connected ? 'connected' : 'disconnected'} now`), 500);
-    //     }
-    //   }
-    // });
-
-    // Reconnect dotsama networks
-    return Promise.all(Object.values(this.apiMap.dotSama).map(async (network) => {
-      if (!network.api.isConnected && network.api.connect) {
-        this.logger.log(`[Dotsama] Resumming network [${network.specName}]`);
-        await network.api.connect();
-      }
-    }));
+    return this.chainService.resumeAllChainApis();
   }
 
   private publishBalance (reset?: boolean) {
@@ -1576,7 +1460,7 @@ export default class KoniState extends State {
     const activeData: Record<string, T> = {};
 
     Object.entries(data).forEach(([networkKey, items]) => {
-      if (this.networkMap[networkKey]?.active) {
+      if (this.chainService.getChainStateByKey(networkKey).active) {
         activeData[networkKey] = items;
       }
     });
@@ -1584,12 +1468,12 @@ export default class KoniState extends State {
     return activeData;
   }
 
-  findNetworkKeyByGenesisHash (genesisHash?: string | null): [string | undefined, NetworkJson | undefined] {
+  findNetworkKeyByGenesisHash (genesisHash?: string | null): [string | undefined, _ChainInfo | undefined] {
     if (!genesisHash) {
       return [undefined, undefined];
     }
 
-    const rs = Object.entries(this.networkMap).find(([networkKey, value]) => (value.genesisHash === genesisHash));
+    const rs = Object.entries(this.chainService.getChainInfoMap()).find(([networkKey, chainInfo]) => (chainInfo.substrateInfo?.genesisHash === genesisHash));
 
     if (rs) {
       return rs;
@@ -1599,15 +1483,15 @@ export default class KoniState extends State {
   }
 
   findChainIdGenesisHash (genesisHash?: string | null): number | undefined {
-    return this.findNetworkKeyByGenesisHash(genesisHash)[1]?.evmChainId;
+    return this.findNetworkKeyByGenesisHash(genesisHash)[1]?.evmInfo?.evmChainId;
   }
 
-  findNetworkKeyByChainId (chainId?: number | null): [string | undefined, NetworkJson | undefined] {
+  findNetworkKeyByChainId (chainId?: number | null): [string | undefined, _ChainInfo | undefined] {
     if (!chainId) {
       return [undefined, undefined];
     }
 
-    const rs = Object.entries(this.networkMap).find(([networkKey, value]) => (value.evmChainId === chainId));
+    const rs = Object.entries(this.chainService.getChainInfoMap()).find(([networkKey, chainInfo]) => (chainInfo.evmInfo?.evmChainId === chainId));
 
     if (rs) {
       return rs;
@@ -1623,7 +1507,7 @@ export default class KoniState extends State {
       return undefined;
     }
 
-    return (Object.values(PREDEFINED_SINGLE_MODES)).find((item) => (item.networkKeys.includes(networkKey)));
+    return (Object.values(_PREDEFINED_SINGLE_MODES)).find((item) => (item.networkKeys.includes(networkKey)));
   }
 
   public accountExportPrivateKey ({ address, password }: RequestAccountExportPrivateKey): ResponseAccountExportPrivateKey {
@@ -1817,7 +1701,8 @@ export default class KoniState extends State {
   }
 
   public async evmSendTransaction (id: string, url: string, networkKey: string, allowedAccounts: string[], transactionParams: EvmSendTransactionParams): Promise<string | undefined> {
-    const web3 = this.getWeb3ApiMap()[networkKey];
+    const evmApi = this.getWeb3ApiMap()[networkKey];
+    const web3 = evmApi.api;
 
     const autoFormatNumber = (val?: string | number): string | undefined => {
       if (typeof val === 'string' && val.startsWith('0x')) {
@@ -1907,7 +1792,7 @@ export default class KoniState extends State {
     const requestPayload = { ...transaction, estimateGas };
 
     const setTransactionHistory = (receipt: TransactionReceipt) => {
-      const network = this.getNetworkMapByKey(networkKey);
+      const nativeTokenInfo = this.chainService.getNativeTokenInfo(networkKey);
 
       this.setHistory(fromAddress, networkKey, {
         isSuccess: true,
@@ -1916,14 +1801,14 @@ export default class KoniState extends State {
         change: transaction.value?.toString() || '0',
         changeSymbol: undefined,
         fee: (receipt.gasUsed * receipt.effectiveGasPrice).toString(),
-        feeSymbol: network?.nativeToken,
+        feeSymbol: nativeTokenInfo.symbol,
         action: 'send',
         extrinsicHash: receipt.transactionHash
       });
     };
 
     const setFailedHistory = (transactionHash: string) => {
-      const network = this.getNetworkMapByKey(networkKey);
+      const nativeTokenInfo = this.chainService.getNativeTokenInfo(networkKey);
 
       this.setHistory(fromAddress, networkKey, {
         isSuccess: false,
@@ -1932,7 +1817,7 @@ export default class KoniState extends State {
         change: transaction.value?.toString() || '0',
         changeSymbol: undefined,
         fee: undefined,
-        feeSymbol: network?.nativeToken,
+        feeSymbol: nativeTokenInfo.symbol,
         action: 'send',
         extrinsicHash: transactionHash
       });
@@ -1962,7 +1847,7 @@ export default class KoniState extends State {
           }
         });
     } else {
-      const network = this.getNetworkMapByKey(networkKey);
+      const chainInfo = this.getChainInfoByKey(networkKey);
       const nonce = await web3.eth.getTransactionCount(fromAddress);
 
       const txObject: Web3Transaction = {
@@ -1973,7 +1858,7 @@ export default class KoniState extends State {
         to: transaction.to !== undefined ? transaction.to : '',
         value: anyNumberToBN(transaction.value).toNumber(),
         data: transaction.data ? transaction.data : '',
-        chainId: network?.evmChainId || 1
+        chainId: chainInfo.evmInfo?.evmChainId || 1
       };
 
       const data: Input = [
@@ -2148,16 +2033,16 @@ export default class KoniState extends State {
   }
 
   public onInstall () {
-    const singleModes = Object.values(PREDEFINED_SINGLE_MODES);
+    const singleModes = Object.values(_PREDEFINED_SINGLE_MODES);
 
     const setUpSingleMode = ({ networkKeys, theme }: SingleModeJson) => {
       networkKeys.forEach((key) => {
         this.enableChain(key);
       });
 
-      const { genesisHash } = this.getNetworkMapByKey(networkKeys[0]);
+      const chainInfo = this.chainService.getChainInfoByKey(networkKeys[0]);
 
-      this.setCurrentAccount({ address: ALL_ACCOUNT_KEY, currentGenesisHash: genesisHash });
+      this.setCurrentAccount({ address: ALL_ACCOUNT_KEY, currentGenesisHash: chainInfo.substrateInfo?.genesisHash || null });
       this.setTheme(theme);
     };
 
@@ -2182,11 +2067,13 @@ export default class KoniState extends State {
   }
 
   public get activeNetworks () {
-    return Object.entries(this.networkMap).filter(([, network]) => network.active).reduce((obj, [key, network]) => {
-      obj[key] = network;
+    return this.chainService.getActiveChainInfos();
+  }
 
-      return obj;
-    }, {} as Record<string, NetworkJson>);
+  public get activeChainSlugs () {
+    return Object.values(this.activeNetworks).map((chainInfo) => {
+      return chainInfo.slug;
+    });
   }
 
   public async sleep () {

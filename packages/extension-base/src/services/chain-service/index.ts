@@ -174,6 +174,18 @@ export class ChainService {
     return this.dataMap.chainInfoMap[key];
   }
 
+  public getActiveChainInfos () {
+    const result: Record<string, _ChainInfo> = {};
+
+    Object.values(this.getChainStateMap()).forEach((chainState) => {
+      if (chainState.active) {
+        result[chainState.slug] = this.getChainInfoByKey(chainState.slug);
+      }
+    });
+
+    return result;
+  }
+
   // Setter
   public setChainActiveStatus (slug: string, active: boolean, excludedChains?: string[]) {
     const chainStateMap = this.getChainStateMap();
@@ -874,5 +886,47 @@ export class ChainService {
 
   private generateSlugForSmartContractAsset (originChain: string, assetType: _AssetType, symbol: string, contractAddress: string) {
     return `${originChain}-${assetType}-${symbol}-${contractAddress}`;
+  }
+
+  public refreshSubstrateApi (slug: string) {
+    this.substrateChainHandler.refreshApi(slug);
+  }
+
+  public refreshEvmApi (slug: string) {
+    const { endpoint, providerName } = this.getChainCurrentProviderByKey(slug);
+
+    this.evmChainHandler.refreshApi(slug, endpoint, providerName);
+  }
+
+  public stopAllChainApis () {
+    // TODO: add logic for EvmApi
+    // Object.entries(this.apiMap.web3).forEach(([key, network]) => {
+    //   if (network.currentProvider instanceof Web3.providers.WebsocketProvider) {
+    //     if (network.currentProvider?.connected) {
+    //       console.log(`[Web3] ${key} is connected`);
+    //       network.currentProvider?.disconnect(code, reason);
+    //       console.log(`[Web3] ${key} is ${network.currentProvider.connected ? 'connected' : 'disconnected'} now`);
+    //     }
+    //   }
+    // });
+
+    return this.substrateChainHandler.disconnectAllApis();
+  }
+
+  public resumeAllChainApis () {
+    // TODO: add logic for EvmApi
+    // Object.entries(this.apiMap.web3).forEach(([key, network]) => {
+    //   const currentProvider = network.currentProvider;
+
+    //   if (currentProvider instanceof Web3.providers.WebsocketProvider) {
+    //     if (!currentProvider.connected) {
+    //       console.log(`[Web3] ${key} is disconnected`);
+    //       currentProvider?.connect();
+    //       setTimeout(() => console.log(`[Web3] ${key} is ${currentProvider.connected ? 'connected' : 'disconnected'} now`), 500);
+    //     }
+    //   }
+    // });
+
+    return this.substrateChainHandler.resumeAllApis();
   }
 }

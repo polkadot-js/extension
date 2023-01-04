@@ -28,7 +28,6 @@ export interface ServiceInfo {
   isLock?: boolean;
   currentAccountInfo: CurrentAccountInfo;
   assetRegistry: Record<string, _ChainAsset>;
-  customNftRegistry: CustomToken[];
 }
 
 /// Request Auth

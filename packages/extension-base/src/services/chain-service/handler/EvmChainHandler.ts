@@ -31,6 +31,10 @@ export class EvmChainHandler {
     this.evmApiMap[chainSlug] = evmApi;
   }
 
+  public refreshApi (slug: string, endpoint: string, providerName?: string) {
+    this.evmApiMap[slug] = this.initApi(slug, endpoint, providerName);
+  }
+
   public initApi (chainSlug: string, apiUrl: string, providerName?: string): _EvmApi {
     let api: Web3;
 

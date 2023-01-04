@@ -3,10 +3,11 @@
 
 import type { InjectedAccount } from '@subwallet/extension-inject/types';
 
+import { _ChainInfo } from '@subwallet/chain/types';
 import { AuthUrlInfo } from '@subwallet/extension-base/background/handlers/State';
 import { createSubscription } from '@subwallet/extension-base/background/handlers/subscriptions';
 import Tabs from '@subwallet/extension-base/background/handlers/Tabs';
-import { AddNetworkRequestExternal, AddTokenRequestExternal, EvmAppState, EvmEventType, EvmSendTransactionParams, NetworkJson, RequestEvmProviderSend } from '@subwallet/extension-base/background/KoniTypes';
+import { AddNetworkRequestExternal, AddTokenRequestExternal, EvmAppState, EvmEventType, EvmSendTransactionParams, RequestEvmProviderSend } from '@subwallet/extension-base/background/KoniTypes';
 import { AccountAuthType, MessageTypes, RequestAccountList, RequestAccountSubscribe, RequestAuthorizeTab, RequestTypes, ResponseTypes } from '@subwallet/extension-base/background/types';
 import { canDerive } from '@subwallet/extension-base/utils';
 import { EvmRpcError } from '@subwallet/extension-koni-base/background/errors/EvmRpcError';
@@ -151,27 +152,30 @@ export default class KoniTabs extends Tabs {
       currentEvmNetworkKey = authInfo?.currentEvmNetworkKey;
     }
 
-    let currentEvmNetwork: NetworkJson | undefined = currentEvmNetworkKey ? this.#koniState.getNetworkMap()[currentEvmNetworkKey] : undefined;
+    let currentEvmNetwork: _ChainInfo | undefined = currentEvmNetworkKey ? this.#koniState.getChainInfoByKey(currentEvmNetworkKey) : undefined;
 
-    if (!currentEvmNetwork?.active) {
-      currentEvmNetwork = Object.values(this.#koniState.getNetworkMap()).find((network) => (network.isEthereum && network.active));
+    if (currentEvmNetworkKey && !this.#koniState.getChainStateByKey(currentEvmNetworkKey).active) {
+      currentEvmNetwork = Object.values(this.#koniState.getChainInfoMap()).find((network) => {
+        return network.evmInfo !== null && this.#koniState.getChainStateByKey(network.slug).active;
+      });
     }
 
     if (currentEvmNetwork) {
-      const { evmChainId, key } = currentEvmNetwork;
-      const web3 = this.#koniState.getWeb3ApiMap()[key];
+      const { evmInfo, slug } = currentEvmNetwork;
+      const evmApi = this.#koniState.getWeb3Api(slug);
+      const web3 = evmApi.api;
 
       if (web3.currentProvider instanceof Web3.providers.WebsocketProvider) {
         if (!web3.currentProvider.connected) {
-          console.log(`[Web3] ${key} is disconnected, trying to connect...`);
-          web3.currentProvider.connect();
+          console.log(`[Web3] ${slug} is disconnected, trying to connect...`);
+          this.#koniState.refreshWeb3Api(slug);
 
           const poll = (resolve: (value: unknown) => void) => {
             if ((web3.currentProvider as WebsocketProvider).connected) {
-              console.log(`Network [${key}] is connected.`);
+              console.log(`Network [${slug}] is connected.`);
               resolve(true);
             } else {
-              console.log(`Connecting to network [${key}]`);
+              console.log(`Connecting to network [${slug}]`);
               setTimeout(() => poll(resolve), 400);
             }
           };
@@ -181,8 +185,8 @@ export default class KoniTabs extends Tabs {
       }
 
       return {
-        networkKey: key,
-        chainId: `0x${(evmChainId || 0).toString(16)}`,
+        networkKey: slug,
+        chainId: `0x${(evmInfo?.evmChainId || 0).toString(16)}`,
         web3
       };
     } else {

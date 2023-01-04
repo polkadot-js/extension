@@ -1,8 +1,10 @@
 // Copyright 2019-2022 @polkadot/extension-koni authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
+import { _ChainAsset, _ChainInfo } from '@subwallet/chain/types';
 import { AuthUrls, Resolver } from '@subwallet/extension-base/background/handlers/State';
 import { AccountAuthType, AccountJson, AuthorizeRequest, RequestAccountList, RequestAccountSubscribe, RequestAuthorizeCancel, RequestAuthorizeReject, RequestAuthorizeSubscribe, RequestAuthorizeTab, RequestCurrentAccountAddress, ResponseAuthorizeList, ResponseJsonGetAccountInfo, SeedLengths } from '@subwallet/extension-base/background/types';
+import { _EvmApi, _SubstrateApi } from '@subwallet/extension-base/services/chain-service/types';
 import { ExternalState, LedgerState, QrState } from '@subwallet/extension-base/signers/types';
 import { InjectedAccount, MetadataDefBase } from '@subwallet/extension-inject/types';
 import Web3 from 'web3';
@@ -21,19 +23,12 @@ import { BN } from '@polkadot/util';
 import { KeypairType } from '@polkadot/util-crypto/types';
 
 export interface ServiceInfo {
-  networkMap: Record<string, NetworkJson>;
-  apiMap: ApiMap;
+  chainInfoMap: Record<string, _ChainInfo>;
+  chainApiMap: ApiMap;
   isLock?: boolean;
   currentAccountInfo: CurrentAccountInfo;
-  chainRegistry: Record<string, ChainRegistry>;
+  assetRegistry: Record<string, _ChainAsset>;
   customNftRegistry: CustomToken[];
-}
-
-export enum ApiInitStatus {
-  SUCCESS,
-  ALREADY_EXIST,
-  NOT_SUPPORT,
-  NOT_EXIST
 }
 
 /// Request Auth
@@ -885,8 +880,8 @@ export interface ValidateNetworkRequest {
 }
 
 export interface ApiMap {
-  dotSama: Record<string, ApiProps>;
-  web3: Record<string, Web3>;
+  substrate: Record<string, _SubstrateApi>;
+  evm: Record<string, _EvmApi>;
 }
 
 export interface DisableNetworkResponse {

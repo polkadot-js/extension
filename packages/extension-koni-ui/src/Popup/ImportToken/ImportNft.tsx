@@ -3,7 +3,7 @@
 
 import { _AssetType, _ChainAsset } from '@subwallet/chain/types';
 import { AddTokenRequestExternal, ConfirmationsQueueItem } from '@subwallet/extension-base/background/KoniTypes';
-import { _ValidateCustomTokenResponse } from '@subwallet/extension-koni-base/services/chain-service/types';
+import { _ValidateCustomTokenResponse } from '@subwallet/extension-base/services/chain-service/types';
 import { isValidSubstrateAddress } from '@subwallet/extension-koni-base/utils';
 import { ActionContext, Button, ConfirmationsQueueContext, Dropdown, InputWithLabel } from '@subwallet/extension-koni-ui/components';
 import useGetContractSupportedChains from '@subwallet/extension-koni-ui/hooks/screen/import/useGetContractSupportedChains';

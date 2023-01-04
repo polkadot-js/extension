@@ -3,7 +3,7 @@
 
 import { NftJson } from '@subwallet/extension-base/background/KoniTypes';
 import { EXTENSION_PREFIX } from '@subwallet/extension-base/defaults';
-import SubscribableStore from '@subwallet/extension-koni-base/stores/SubscribableStore';
+import SubscribableStore from '@subwallet/extension-base/stores/SubscribableStore';
 
 export default class NftStore extends SubscribableStore<NftJson> {
   constructor () {

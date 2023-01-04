@@ -49,11 +49,259 @@ export class ChainService {
     this.logger = createLogger('chain-service');
   }
 
+  // Getter
+  public getEvmApi (slug: string) {
+    return this.evmChainHandler.getEvmApiByChain(slug);
+  }
+
+  public getEvmApiMap () {
+    return this.evmChainHandler.getEvmApiMap();
+  }
+
+  public getSubstrateApiMap () {
+    return this.substrateChainHandler.getSubstrateApiMap();
+  }
+
+  public getSubstrateApi (slug: string) {
+    return this.substrateChainHandler.getSubstrateApiByChain(slug);
+  }
+
+  public getChainCurrentProviderByKey (slug: string) {
+    const providerName = this.getChainStateByKey(slug).currentProvider;
+    const providerMap = this.getChainInfoByKey(slug).providers;
+    const endpoint = providerMap[providerName];
+
+    return {
+      endpoint,
+      providerName
+    };
+  }
+
+  public subscribeChainInfoMap () {
+    return this.chainInfoMapSubject;
+  }
+
+  public subscribeAssetRegistry () {
+    return this.assetRegistrySubject;
+  }
+
+  public subscribeChainStateMap () {
+    return this.chainStateMapSubject;
+  }
+
+  public getAssetRegistry () {
+    return this.dataMap.assetRegistry;
+  }
+
+  public getSmartContractTokens () {
+    const filteredAssetRegistry: Record<string, _ChainAsset> = {};
+
+    Object.values(this.getAssetRegistry()).forEach((asset) => {
+      if (_SMART_CONTRACT_STANDARDS.includes(asset.assetType)) {
+        filteredAssetRegistry[asset.slug] = asset;
+      }
+    });
+
+    return filteredAssetRegistry;
+  }
+
+  public getChainInfoMap (): Record<string, _ChainInfo> {
+    return this.dataMap.chainInfoMap;
+  }
+
+  public getAllPriceIds () {
+    const result: string[] = [];
+
+    Object.values(this.getAssetRegistry()).forEach((assetInfo) => {
+      if (assetInfo.priceId !== null) {
+        result.push(assetInfo.priceId);
+      }
+    });
+
+    return result;
+  }
+
+  public getNativeTokenInfo (chainSlug: string) {
+    let nativeTokenInfo: _ChainAsset = {
+      assetType: _AssetType.NATIVE,
+      decimals: 0,
+      metadata: null,
+      minAmount: '',
+      multiChainAsset: '',
+      name: '',
+      originChain: '',
+      priceId: '',
+      slug: '',
+      symbol: ''
+    };
+
+    for (const assetInfo of Object.values(this.getAssetRegistry())) {
+      if (assetInfo.assetType === _AssetType.NATIVE && assetInfo.originChain === chainSlug) {
+        nativeTokenInfo = assetInfo;
+        break;
+      }
+    }
+
+    return nativeTokenInfo;
+  }
+
+  public getChainStateMap () {
+    return this.dataMap.chainStateMap;
+  }
+
+  public getChainStateByKey (key: string) {
+    return this.dataMap.chainStateMap[key];
+  }
+
+  public getSupportedSmartContractTypes () {
+    return [_AssetType.ERC20, _AssetType.ERC721, _AssetType.PSP22, _AssetType.PSP34];
+  }
+
+  public getSupportedSmartContractChains () {
+    const result: Record<string, _ChainInfo> = {};
+
+    Object.values(this.getChainInfoMap()).forEach((chainInfo) => {
+      if ((chainInfo.substrateInfo !== null && chainInfo.substrateInfo.supportSmartContract !== null) ||
+        (chainInfo.evmInfo !== null && chainInfo.evmInfo.supportSmartContract !== null)) {
+        result[chainInfo.slug] = chainInfo;
+      }
+    });
+
+    return result;
+  }
+
   public getChainInfoByKey (key: string): _ChainInfo {
     return this.dataMap.chainInfoMap[key];
   }
 
-  public init () { // TODO: reconsider the flow of initiation
+  // Setter
+  public setChainActiveStatus (slug: string, active: boolean, excludedChains?: string[]) {
+    const chainStateMap = this.getChainStateMap();
+
+    if (!Object.keys(chainStateMap).includes(slug)) {
+      return false;
+    }
+
+    if (excludedChains && excludedChains.includes(slug)) {
+      return false;
+    }
+
+    if (this.lockChainInfoMap) {
+      return false;
+    }
+
+    this.lockChainInfoMap = true;
+
+    chainStateMap[slug].active = active;
+
+    this.chainStateMapSubject.next(this.getChainStateMap());
+
+    this.lockChainInfoMap = false;
+
+    return true;
+  }
+
+  public removeChain (slug: string) {
+    if (this.lockChainInfoMap) {
+      return false;
+    }
+
+    this.lockChainInfoMap = true;
+
+    const chainInfoMap = this.getChainInfoMap();
+    const chainStateMap = this.getChainStateMap();
+
+    if (!(slug in chainInfoMap)) {
+      return false;
+    }
+
+    if (chainStateMap[slug].active) {
+      return false;
+    }
+
+    this.dbService.removeFromChainStore([slug]).catch((e) => this.logger.error(e));
+
+    delete chainStateMap[slug];
+    delete chainInfoMap[slug];
+
+    this.chainInfoMapSubject.next(this.getChainInfoMap());
+    this.chainStateMapSubject.next(this.getChainStateMap());
+
+    this.lockChainInfoMap = false;
+
+    return true;
+  }
+
+  public resetChainInfoMap (excludedChains?: string[]) {
+    if (this.lockChainInfoMap) {
+      return false;
+    }
+
+    this.lockChainInfoMap = true;
+
+    const chainStateMap = this.getChainStateMap();
+
+    for (const [slug, chainState] of Object.entries(chainStateMap)) {
+      if (!_DEFAULT_CHAINS.includes(slug) && !excludedChains?.includes(slug)) {
+        chainState.active = false;
+      }
+    }
+
+    this.chainStateMapSubject.next(this.getChainStateMap());
+
+    this.lockChainInfoMap = false;
+
+    return true;
+  }
+
+  public setChainConnectionStatus (slug: string, connectionStatus: _ChainConnectionStatus) {
+    const chainStateMap = this.getChainStateMap();
+
+    chainStateMap[slug].connectionStatus = connectionStatus;
+  }
+
+  public updateChainState (slug: string, active: boolean | null, currentProvider: string | null) {
+    const chainStateMap = this.getChainStateMap();
+
+    if (active) {
+      chainStateMap[slug].active = active;
+    }
+
+    if (currentProvider) {
+      chainStateMap[slug].currentProvider = currentProvider;
+    }
+
+    this.chainStateMapSubject.next(this.getChainStateMap());
+  }
+
+  public upsertCustomToken (token: _ChainAsset) {
+    if (token.slug.length === 0) { // new token
+      token.slug = this.generateSlugForSmartContractAsset(token.originChain, token.assetType, token.symbol, token.metadata?.contractAddress as string);
+    }
+
+    const assetRegistry = this.getAssetRegistry();
+
+    assetRegistry[token.slug] = token;
+
+    this.dbService.updateAssetStore(token).catch((e) => this.logger.error(e));
+
+    this.assetRegistrySubject.next(assetRegistry);
+  }
+
+  public deleteCustomTokens (targetTokens: string[]) {
+    const assetRegistry = this.getAssetRegistry();
+
+    targetTokens.forEach((targetToken) => {
+      delete assetRegistry[targetToken];
+    });
+
+    this.dbService.removeFromAssetStore(targetTokens).catch((e) => this.logger.error(e));
+
+    this.assetRegistrySubject.next(assetRegistry);
+  }
+
+  // Business logic
+  public init (callback?: () => void) { // TODO: reconsider the flow of initiation
     this.initChains().then(() => {
       this.chainInfoMapSubject.next(this.getChainInfoMap());
       this.chainStateMapSubject.next(this.getChainStateMap());
@@ -62,10 +310,13 @@ export class ChainService {
       this.initApis();
 
       this.logger.log('Initiated chains, assets and APIs');
+
+      if (callback) {
+        callback();
+      }
     }).catch((e) => this.logger.error(e));
   }
 
-  // init Apis
   private initApis () { // TODO: this might be async
     Object.entries(this.getChainInfoMap()).forEach(([slug, chainInfo]) => {
       if (this.getChainStateByKey(slug).active) {
@@ -75,14 +326,14 @@ export class ChainService {
           const chainApi = this.initApi(slug, endpoint, 'substrate', providerName);
 
           this.substrateChainHandler.setSubstrateApi(slug, chainApi as _SubstrateApi);
-          this.updateChainConnectionStatus(slug, _ChainConnectionStatus.CONNECTED); // TODO: might not be needed, can be updated by cron
+          this.setChainConnectionStatus(slug, _ChainConnectionStatus.CONNECTED); // TODO: might not be needed, can be updated by cron
         }
 
         if (chainInfo.evmInfo !== null) {
           const chainApi = this.initApi(slug, endpoint, 'evm', providerName);
 
           this.evmChainHandler.setEvmApi(slug, chainApi as _EvmApi);
-          this.updateChainConnectionStatus(slug, _ChainConnectionStatus.CONNECTED);
+          this.setChainConnectionStatus(slug, _ChainConnectionStatus.CONNECTED);
         }
       }
     });
@@ -97,7 +348,6 @@ export class ChainService {
     }
   }
 
-  // init chains + assets
   private checkExistedPredefinedChain (genesisHash?: string, evmChainId?: number) {
     let duplicatedSlug = '';
 
@@ -288,156 +538,6 @@ export class ChainService {
 
       await this.dbService.removeFromAssetStore(deprecatedAssets);
     }
-  }
-
-  public getChainCurrentProviderByKey (slug: string) {
-    const providerName = this.getChainStateByKey(slug).currentProvider;
-    const providerMap = this.getChainInfoByKey(slug).providers;
-    const endpoint = providerMap[providerName];
-
-    return {
-      endpoint,
-      providerName
-    };
-  }
-
-  public subscribeChainInfoMap () {
-    return this.chainInfoMapSubject;
-  }
-
-  public subscribeAssetRegistry () {
-    return this.assetRegistrySubject;
-  }
-
-  public subscribeChainStateMap () {
-    return this.chainStateMapSubject;
-  }
-
-  public getAssetRegistry () {
-    return this.dataMap.assetRegistry;
-  }
-
-  public getSmartContractTokens () {
-    const filteredAssetRegistry: Record<string, _ChainAsset> = {};
-
-    Object.values(this.getAssetRegistry()).forEach((asset) => {
-      if (_SMART_CONTRACT_STANDARDS.includes(asset.assetType)) {
-        filteredAssetRegistry[asset.slug] = asset;
-      }
-    });
-
-    return filteredAssetRegistry;
-  }
-
-  public getChainInfoMap (): Record<string, _ChainInfo> {
-    return this.dataMap.chainInfoMap;
-  }
-
-  public getChainStateMap () {
-    return this.dataMap.chainStateMap;
-  }
-
-  public getChainStateByKey (key: string) {
-    return this.dataMap.chainStateMap[key];
-  }
-
-  public removeChain (slug: string) {
-    if (this.lockChainInfoMap) {
-      return false;
-    }
-
-    this.lockChainInfoMap = true;
-
-    const chainInfoMap = this.getChainInfoMap();
-    const chainStateMap = this.getChainStateMap();
-
-    if (!(slug in chainInfoMap)) {
-      return false;
-    }
-
-    if (chainStateMap[slug].active) {
-      return false;
-    }
-
-    this.dbService.removeFromChainStore([slug]).catch((e) => this.logger.error(e));
-
-    delete chainStateMap[slug];
-    delete chainInfoMap[slug];
-
-    this.chainInfoMapSubject.next(this.getChainInfoMap());
-    this.chainStateMapSubject.next(this.getChainStateMap());
-
-    this.lockChainInfoMap = false;
-
-    return true;
-  }
-
-  public updateChainActiveStatus (slug: string, active: boolean) {
-    const chainStateMap = this.getChainStateMap();
-
-    if (!Object.keys(chainStateMap).includes(slug)) {
-      return false;
-    }
-
-    if (this.lockChainInfoMap) {
-      return false;
-    }
-
-    this.lockChainInfoMap = true;
-
-    chainStateMap[slug].active = active;
-
-    this.chainStateMapSubject.next(this.getChainStateMap());
-
-    this.lockChainInfoMap = false;
-
-    return true;
-  }
-
-  public getSupportedSmartContractTypes () {
-    return [_AssetType.ERC20, _AssetType.ERC721, _AssetType.PSP22, _AssetType.PSP34];
-  }
-
-  public resetChainInfoMap () {
-    if (this.lockChainInfoMap) {
-      return false;
-    }
-
-    this.lockChainInfoMap = true;
-
-    const chainStateMap = this.getChainStateMap();
-
-    for (const [slug, chainState] of Object.entries(chainStateMap)) {
-      if (!_DEFAULT_CHAINS.includes(slug)) {
-        chainState.active = false;
-      }
-    }
-
-    this.chainStateMapSubject.next(this.getChainStateMap());
-
-    this.lockChainInfoMap = false;
-
-    return true;
-  }
-
-  public updateChainConnectionStatus (slug: string, connectionStatus: _ChainConnectionStatus) {
-    const chainStateMap = this.getChainStateMap();
-
-    chainStateMap[slug].connectionStatus = connectionStatus;
-  }
-
-  public updateChainState (slug: string, active: boolean | null, currentProvider: string | null) {
-    const chainStateMap = this.getChainStateMap();
-
-    if (active) {
-      chainStateMap[slug].active = active;
-    }
-
-    if (currentProvider) {
-      chainStateMap[slug].currentProvider = currentProvider;
-    }
-
-    this.chainStateMapSubject.next(this.getChainStateMap());
   }
 
   public upsertChainInfo (data: Record<string, any>) {
@@ -774,31 +874,5 @@ export class ChainService {
 
   private generateSlugForSmartContractAsset (originChain: string, assetType: _AssetType, symbol: string, contractAddress: string) {
     return `${originChain}-${assetType}-${symbol}-${contractAddress}`;
-  }
-
-  public upsertCustomToken (token: _ChainAsset) {
-    if (token.slug.length === 0) { // new token
-      token.slug = this.generateSlugForSmartContractAsset(token.originChain, token.assetType, token.symbol, token.metadata?.contractAddress as string);
-    }
-
-    const assetRegistry = this.getAssetRegistry();
-
-    assetRegistry[token.slug] = token;
-
-    this.dbService.updateAssetStore(token).catch((e) => this.logger.error(e));
-
-    this.assetRegistrySubject.next(assetRegistry);
-  }
-
-  public deleteCustomTokens (targetTokens: string[]) {
-    const assetRegistry = this.getAssetRegistry();
-
-    targetTokens.forEach((targetToken) => {
-      delete assetRegistry[targetToken];
-    });
-
-    this.dbService.removeFromAssetStore(targetTokens).catch((e) => this.logger.error(e));
-
-    this.assetRegistrySubject.next(assetRegistry);
   }
 }

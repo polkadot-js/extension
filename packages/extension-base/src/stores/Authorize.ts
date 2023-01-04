@@ -3,7 +3,7 @@
 
 import { AuthUrls } from '@subwallet/extension-base/background/handlers/State';
 import { EXTENSION_PREFIX } from '@subwallet/extension-base/defaults';
-import SubscribableStore from '@subwallet/extension-koni-base/stores/SubscribableStore';
+import SubscribableStore from '@subwallet/extension-base/stores/SubscribableStore';
 
 export default class AuthorizeStore extends SubscribableStore<AuthUrls> {
   constructor () {

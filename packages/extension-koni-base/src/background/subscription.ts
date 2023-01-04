@@ -77,8 +77,8 @@ export class KoniSubscription {
       if (currentAccountInfo) {
         const { address } = currentAccountInfo;
 
-        this.subscribeBalancesAndCrowdloans(address, this.state.getDotSamaApiMap(), this.state.getWeb3ApiMap());
-        this.subscribeStakingOnChain(address, this.state.getDotSamaApiMap());
+        this.subscribeBalancesAndCrowdloans(address, this.state.getSubstrateApiMap(), this.state.getWeb3ApiMap());
+        this.subscribeStakingOnChain(address, this.state.getSubstrateApiMap());
       }
     });
 
@@ -130,8 +130,8 @@ export class KoniSubscription {
       if (currentAccountInfo) {
         const { address } = currentAccountInfo;
 
-        this.subscribeBalancesAndCrowdloans(address, this.state.getDotSamaApiMap(), this.state.getWeb3ApiMap(), true);
-        this.subscribeStakingOnChain(address, this.state.getDotSamaApiMap(), true);
+        this.subscribeBalancesAndCrowdloans(address, this.state.getSubstrateApiMap(), this.state.getWeb3ApiMap(), true);
+        this.subscribeStakingOnChain(address, this.state.getSubstrateApiMap(), true);
         // this.stopAllSubscription();
       }
     });
@@ -316,8 +316,8 @@ export class KoniSubscription {
     });
 
     const [poolingStakingRewards, amplitudeUnclaimedStakingRewards] = await Promise.all([
-      getPoolingStakingRewardData(pooledAddresses, targetNetworkMap, this.state.getDotSamaApiMap()),
-      getAmplitudeUnclaimedStakingReward(this.state.getDotSamaApiMap(), addresses, networkMap, activeNetworks)
+      getPoolingStakingRewardData(pooledAddresses, targetNetworkMap, this.state.getSubstrateApiMap()),
+      getAmplitudeUnclaimedStakingReward(this.state.getSubstrateApiMap(), addresses, networkMap, activeNetworks)
     ]);
 
     const result = [...poolingStakingRewards, ...amplitudeUnclaimedStakingRewards];

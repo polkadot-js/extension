@@ -2,12 +2,14 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import Common from '@ethereumjs/common';
+import { _ChainAsset, _ChainInfo } from '@subwallet/chain/types';
 import Extension, { SEED_DEFAULT_LENGTH, SEED_LENGTHS } from '@subwallet/extension-base/background/handlers/Extension';
 import { AuthUrls } from '@subwallet/extension-base/background/handlers/State';
 import { createSubscription } from '@subwallet/extension-base/background/handlers/subscriptions';
 import { AccountExternalError, AccountExternalErrorCode, AccountsWithCurrentAddress, BalanceJson, BasicTxError, BasicTxErrorCode, BasicTxInfo, BasicTxResponse, BondingOptionInfo, BondingOptionParams, BondingSubmitParams, ChainBondingBasics, ChainRegistry, CheckExistingTuringCompoundParams, CrowdloanJson, CurrentAccountInfo, CustomTokenJson, DelegationItem, DisableNetworkResponse, EvmNftTransaction, ExistingTuringCompoundTask, ExternalRequestPromise, ExternalRequestPromiseStatus, HandleBasicTx, NetworkJson, NftCollection, NftJson, NftTransactionRequest, NftTransactionResponse, NftTransferExtra, OptionInputAddress, PrepareExternalRequest, PriceJson, RequestAccountCreateExternalV2, RequestAccountCreateHardwareV2, RequestAccountCreateSuriV2, RequestAccountCreateWithSecretKey, RequestAccountExportPrivateKey, RequestAccountIsLocked, RequestAccountMeta, RequestAuthorization, RequestAuthorizationBlock, RequestAuthorizationPerAccount, RequestAuthorizationPerSite, RequestAuthorizeApproveV2, RequestBatchRestoreV2, RequestBondingSubmit, RequestCancelCompoundStakeExternal, RequestCheckCrossChainTransfer, RequestCheckPublicAndSecretKey, RequestCheckTransfer, RequestClaimRewardExternal, RequestConfirmationComplete, RequestCreateCompoundStakeExternal, RequestCrossChainTransfer, RequestCrossChainTransferExternal, RequestDeriveCreateV2, RequestEvmNftSubmitTransaction, RequestForgetSite, RequestFreeBalance, RequestJsonRestoreV2, RequestNftForceUpdate, RequestNftTransferExternalEVM, RequestNftTransferExternalSubstrate, RequestParseEVMContractInput, RequestParseTransactionSubstrate, RequestQrParseRLP, RequestQrSignEVM, RequestQrSignSubstrate, RequestRejectExternalRequest, RequestResolveExternalRequest, RequestSaveRecentAccount, RequestSeedCreateV2, RequestSeedValidateV2, RequestSettingsType, RequestStakeClaimReward, RequestStakeExternal, RequestStakeWithdrawal, RequestSubstrateNftSubmitTransaction, RequestTransactionHistoryAdd, RequestTransfer, RequestTransferCheckReferenceCount, RequestTransferCheckSupporting, RequestTransferExistentialDeposit, RequestTransferExternal, RequestTuringCancelStakeCompound, RequestTuringStakeCompound, RequestUnbondingSubmit, RequestUnStakeExternal, RequestWithdrawStakeExternal, ResponseAccountCreateSuriV2, ResponseAccountCreateWithSecretKey, ResponseAccountExportPrivateKey, ResponseAccountIsLocked, ResponseAccountMeta, ResponseCheckCrossChainTransfer, ResponseCheckPublicAndSecretKey, ResponseCheckTransfer, ResponseParseEVMContractInput, ResponseParseTransactionSubstrate, ResponsePrivateKeyValidateV2, ResponseQrParseRLP, ResponseQrSignEVM, ResponseQrSignSubstrate, ResponseRejectExternalRequest, ResponseResolveExternalRequest, ResponseSeedCreateV2, ResponseSeedValidateV2, StakeClaimRewardParams, StakeDelegationRequest, StakeUnlockingJson, StakeWithdrawalParams, StakingJson, StakingRewardJson, SubstrateNftTransaction, SupportTransferResponse, ThemeTypes, TokenInfo, TransactionHistoryItemType, TransferErrorCode, TuringCancelStakeCompoundParams, TuringStakeCompoundParams, UnbondingSubmitParams, ValidateNetworkRequest, ValidateNetworkResponse } from '@subwallet/extension-base/background/KoniTypes';
 import { AccountJson, AuthorizeRequest, MessageTypes, RequestAccountForget, RequestAccountTie, RequestAuthorizeCancel, RequestAuthorizeReject, RequestCurrentAccountAddress, RequestTypes, ResponseAuthorizeList, ResponseType } from '@subwallet/extension-base/background/types';
 import { PASSWORD_EXPIRY_MS } from '@subwallet/extension-base/defaults';
+import { _ChainState, _ValidateCustomTokenRequest, _ValidateCustomTokenResponse } from '@subwallet/extension-base/services/chain-service/types';
 import { SignerExternal, SignerType } from '@subwallet/extension-base/signers/types';
 import { getId } from '@subwallet/extension-base/utils/getId';
 import { CHAIN_TYPES, getBondingExtrinsic, getBondingTxInfo, getChainBondingBasics, getClaimRewardExtrinsic, getClaimRewardTxInfo, getDelegationInfo, getUnbondingExtrinsic, getUnbondingTxInfo, getValidatorsInfo, getWithdrawalExtrinsic, getWithdrawalTxInfo } from '@subwallet/extension-koni-base/api/bonding';
@@ -37,8 +39,6 @@ import { getPSP34Transaction, getPSP34TransferExtrinsic } from '@subwallet/exten
 import { estimateCrossChainFee, makeCrossChainTransfer } from '@subwallet/extension-koni-base/api/xcm';
 import { state } from '@subwallet/extension-koni-base/background/handlers/index';
 import { ALL_ACCOUNT_KEY, ALL_GENESIS_HASH } from '@subwallet/extension-koni-base/constants';
-import { _ChainAsset, _ChainInfo } from '@subwallet/extension-koni-base/services/chain-list/types';
-import { _ChainState, _ValidateCustomTokenRequest, _ValidateCustomTokenResponse } from '@subwallet/extension-koni-base/services/chain-service/types';
 import { getCurrentProvider } from '@subwallet/extension-koni-base/utils';
 import { createTransactionFromRLP, signatureToHex, Transaction as QrTransaction } from '@subwallet/extension-koni-base/utils/eth';
 import BigN from 'bignumber.js';
@@ -1132,7 +1132,7 @@ export default class KoniExtension extends Extension {
   }
 
   private async validateTransfer (networkKey: string, token: string | undefined, from: string, to: string, password: string | undefined, value: string | undefined, transferAll: boolean | undefined): Promise<[Array<BasicTxError>, KeyringPair | undefined, BN | undefined, TokenInfo | undefined]> {
-    const dotSamaApiMap = state.getDotSamaApiMap();
+    const dotSamaApiMap = state.getSubstrateApiMap();
     const errors = [] as Array<BasicTxError>;
     let keypair: KeyringPair | undefined;
     let transferValue;
@@ -1197,8 +1197,8 @@ export default class KoniExtension extends Extension {
 
   private async checkTransfer ({ from, networkKey, to, token, transferAll, value }: RequestCheckTransfer): Promise<ResponseCheckTransfer> {
     const [errors, fromKeyPair, valueNumber, tokenInfo] = await this.validateTransfer(networkKey, token, from, to, undefined, value, transferAll);
-    const dotSamaApiMap = state.getDotSamaApiMap();
-    const web3ApiMap = state.getApiMap().web3;
+    const dotSamaApiMap = state.getSubstrateApiMap();
+    const web3ApiMap = state.getApiMap().evm;
     let mainToken: string | undefined;
 
     if (tokenInfo && !tokenInfo.isMainToken) {
@@ -1287,7 +1287,7 @@ export default class KoniExtension extends Extension {
     from: string, to: string,
     password: string | undefined,
     value: string): Promise<[Array<BasicTxError>, KeyringPair | undefined, BN | undefined, TokenInfo | undefined]> {
-    const dotSamaApiMap = state.getDotSamaApiMap();
+    const dotSamaApiMap = state.getSubstrateApiMap();
     const errors = [] as Array<BasicTxError>;
     let keypair: KeyringPair | undefined;
     const transferValue = new BN(value);
@@ -1320,8 +1320,8 @@ export default class KoniExtension extends Extension {
 
   private async checkCrossChainTransfer ({ destinationNetworkKey, from, originNetworkKey, to, token, value }: RequestCheckCrossChainTransfer): Promise<ResponseCheckCrossChainTransfer> {
     const [errors, fromKeyPair, valueNumber, tokenInfo] = await this.validateCrossChainTransfer(originNetworkKey, destinationNetworkKey, token, from, to, undefined, value);
-    const dotSamaApiMap = state.getDotSamaApiMap();
-    const web3ApiMap = state.getApiMap().web3;
+    const dotSamaApiMap = state.getSubstrateApiMap();
+    const web3ApiMap = state.getApiMap().evm;
     let fee = '0';
     let feeString;
     let fromAccountFree = '0';
@@ -1472,7 +1472,7 @@ export default class KoniExtension extends Extension {
       if (isEthereumAddress(from) && isEthereumAddress(to)) {
         // Make transfer with EVM API
         const { privateKey } = this.accountExportPrivateKey({ address: from, password });
-        const web3ApiMap = state.getApiMap().web3;
+        const web3ApiMap = state.getApiMap().evm;
 
         if (tokenInfo && !tokenInfo.isMainToken && tokenInfo.contractAddress) {
           transferProm = makeERC20Transfer(
@@ -1486,7 +1486,7 @@ export default class KoniExtension extends Extension {
           );
         }
       } else {
-        const dotSamaApiMap = state.getDotSamaApiMap();
+        const dotSamaApiMap = state.getSubstrateApiMap();
 
         // Make transfer with Dotsama API
         transferProm = makeTransfer({
@@ -1560,7 +1560,7 @@ export default class KoniExtension extends Extension {
       const cb = createSubscription<'pri(accounts.crossChainTransfer)'>(id, port);
       const callback = this.makeCrossChainTransferCallback(from, to, originNetworkKey, value || '0', token, cb);
 
-      const dotSamaApiMap = state.getDotSamaApiMap();
+      const dotSamaApiMap = state.getSubstrateApiMap();
       const networkMap = state.getNetworkMap();
 
       const transferProm = makeCrossChainTransfer({
@@ -1606,7 +1606,7 @@ export default class KoniExtension extends Extension {
     const networkJson = state.getNetworkMapByKey(networkKey);
 
     try {
-      return await getERC721Transaction(state.getWeb3ApiMap(), state.getDotSamaApiMap(), networkJson, networkKey, contractAddress, senderAddress, recipientAddress, tokenId);
+      return await getERC721Transaction(state.getWeb3ApiMap(), state.getSubstrateApiMap(), networkJson, networkKey, contractAddress, senderAddress, recipientAddress, tokenId);
     } catch (e) {
       console.error('error handling web3 transfer nft', e);
 
@@ -1760,7 +1760,7 @@ export default class KoniExtension extends Extension {
 
   private recoverDotSamaApi (networkKey: string): boolean {
     try {
-      return state.refreshDotSamaApi(networkKey);
+      return state.refreshSubstrateApi(networkKey);
     } catch (e) {
       console.error('error recovering dotsama api', e);
 
@@ -1815,7 +1815,7 @@ export default class KoniExtension extends Extension {
 
     this.createUnsubscriptionHandle(
       id,
-      await subscribeFreeBalance(networkKey, address, state.getDotSamaApiMap(), state.getWeb3ApiMap(), token, cb)
+      await subscribeFreeBalance(networkKey, address, state.getSubstrateApiMap(), state.getWeb3ApiMap(), token, cb)
     );
 
     port.onDisconnect.addListener((): void => {
@@ -1828,18 +1828,18 @@ export default class KoniExtension extends Extension {
   private async transferCheckReferenceCount ({ address,
     networkKey }: RequestTransferCheckReferenceCount): Promise<boolean> {
     // eslint-disable-next-line @typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-return
-    return await checkReferenceCount(networkKey, address, state.getDotSamaApiMap());
+    return await checkReferenceCount(networkKey, address, state.getSubstrateApiMap());
   }
 
   private async transferCheckSupporting ({ networkKey,
     token }: RequestTransferCheckSupporting): Promise<SupportTransferResponse> {
     // eslint-disable-next-line @typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-return
-    return await checkSupportTransfer(networkKey, token, state.getDotSamaApiMap());
+    return await checkSupportTransfer(networkKey, token, state.getSubstrateApiMap());
   }
 
   private async transferGetExistentialDeposit ({ networkKey, token }: RequestTransferExistentialDeposit): Promise<string> {
     // eslint-disable-next-line @typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-return
-    return await getExistentialDeposit(networkKey, token, state.getDotSamaApiMap());
+    return await getExistentialDeposit(networkKey, token, state.getSubstrateApiMap());
   }
 
   private async substrateNftGetTransaction ({ networkKey, params, recipientAddress, senderAddress }: NftTransactionRequest): Promise<SubstrateNftTransaction> {
@@ -1847,25 +1847,25 @@ export default class KoniExtension extends Extension {
 
     switch (networkKey) {
       case SUPPORTED_TRANSFER_SUBSTRATE_CHAIN_NAME.acala:
-        return await acalaTransferHandler(networkKey, state.getDotSamaApiMap(), state.getWeb3ApiMap(), senderAddress, recipientAddress, params, networkJson);
+        return await acalaTransferHandler(networkKey, state.getSubstrateApiMap(), state.getWeb3ApiMap(), senderAddress, recipientAddress, params, networkJson);
       case SUPPORTED_TRANSFER_SUBSTRATE_CHAIN_NAME.karura:
-        return await acalaTransferHandler(networkKey, state.getDotSamaApiMap(), state.getWeb3ApiMap(), senderAddress, recipientAddress, params, networkJson);
+        return await acalaTransferHandler(networkKey, state.getSubstrateApiMap(), state.getWeb3ApiMap(), senderAddress, recipientAddress, params, networkJson);
       case SUPPORTED_TRANSFER_SUBSTRATE_CHAIN_NAME.kusama:
-        return await rmrkTransferHandler(networkKey, state.getDotSamaApiMap(), state.getWeb3ApiMap(), senderAddress, recipientAddress, params, networkJson);
+        return await rmrkTransferHandler(networkKey, state.getSubstrateApiMap(), state.getWeb3ApiMap(), senderAddress, recipientAddress, params, networkJson);
       case SUPPORTED_TRANSFER_SUBSTRATE_CHAIN_NAME.uniqueNft:
-        return await uniqueTransferHandler(networkKey, state.getDotSamaApiMap(), state.getWeb3ApiMap(), senderAddress, recipientAddress, params, networkJson);
+        return await uniqueTransferHandler(networkKey, state.getSubstrateApiMap(), state.getWeb3ApiMap(), senderAddress, recipientAddress, params, networkJson);
       case SUPPORTED_TRANSFER_SUBSTRATE_CHAIN_NAME.quartz:
-        return await quartzTransferHandler(networkKey, state.getDotSamaApiMap(), state.getWeb3ApiMap(), senderAddress, recipientAddress, params, networkJson);
+        return await quartzTransferHandler(networkKey, state.getSubstrateApiMap(), state.getWeb3ApiMap(), senderAddress, recipientAddress, params, networkJson);
       case SUPPORTED_TRANSFER_SUBSTRATE_CHAIN_NAME.opal:
-        return await quartzTransferHandler(networkKey, state.getDotSamaApiMap(), state.getWeb3ApiMap(), senderAddress, recipientAddress, params, networkJson);
+        return await quartzTransferHandler(networkKey, state.getSubstrateApiMap(), state.getWeb3ApiMap(), senderAddress, recipientAddress, params, networkJson);
       case SUPPORTED_TRANSFER_SUBSTRATE_CHAIN_NAME.statemine:
-        return await statemineTransferHandler(networkKey, state.getDotSamaApiMap(), state.getWeb3ApiMap(), senderAddress, recipientAddress, params, networkJson);
+        return await statemineTransferHandler(networkKey, state.getSubstrateApiMap(), state.getWeb3ApiMap(), senderAddress, recipientAddress, params, networkJson);
       case SUPPORTED_TRANSFER_SUBSTRATE_CHAIN_NAME.statemint:
-        return await statemineTransferHandler(networkKey, state.getDotSamaApiMap(), state.getWeb3ApiMap(), senderAddress, recipientAddress, params, networkJson);
+        return await statemineTransferHandler(networkKey, state.getSubstrateApiMap(), state.getWeb3ApiMap(), senderAddress, recipientAddress, params, networkJson);
       case SUPPORTED_TRANSFER_SUBSTRATE_CHAIN_NAME.bitcountry:
-        return await acalaTransferHandler(networkKey, state.getDotSamaApiMap(), state.getWeb3ApiMap(), senderAddress, recipientAddress, params, networkJson);
+        return await acalaTransferHandler(networkKey, state.getSubstrateApiMap(), state.getWeb3ApiMap(), senderAddress, recipientAddress, params, networkJson);
       case SUPPORTED_TRANSFER_SUBSTRATE_CHAIN_NAME.pioneer:
-        return await acalaTransferHandler(networkKey, state.getDotSamaApiMap(), state.getWeb3ApiMap(), senderAddress, recipientAddress, params, networkJson);
+        return await acalaTransferHandler(networkKey, state.getSubstrateApiMap(), state.getWeb3ApiMap(), senderAddress, recipientAddress, params, networkJson);
     }
 
     return {
@@ -2193,7 +2193,7 @@ export default class KoniExtension extends Extension {
         recipientAddress: to,
         senderAddress: fromKeyPair.address,
         value: value || '0',
-        dotSamaApiMap: state.getDotSamaApiMap(),
+        dotSamaApiMap: state.getSubstrateApiMap(),
         tokenInfo: tokenInfo,
         networkMap: state.getNetworkMap(),
         id: requestId,
@@ -2677,7 +2677,7 @@ export default class KoniExtension extends Extension {
       let transferProm: Promise<void>;
 
       if (isEthereumAddress(from) && isEthereumAddress(to)) {
-        const web3ApiMap = state.getApiMap().web3;
+        const web3ApiMap = state.getApiMap().evm;
         const chainId = state.getNetworkMap()[networkKey].evmChainId || 1;
 
         if (tokenInfo && !tokenInfo.isMainToken && tokenInfo.contractAddress) {
@@ -2713,7 +2713,7 @@ export default class KoniExtension extends Extension {
           });
         }
       } else {
-        const apiProps = await state.getDotSamaApiMap()[networkKey].isReady;
+        const apiProps = await state.getSubstrateApiMap()[networkKey].isReady;
         const network = state.getNetworkMapByKey(networkKey);
 
         transferProm = makeTransferExternal({
@@ -2935,7 +2935,7 @@ export default class KoniExtension extends Extension {
 
       const callback = this.makeTransferCallback(from, to, networkKey, token, cb);
       const network = state.getNetworkMapByKey(networkKey);
-      const apiProps = await state.getDotSamaApiMap()[networkKey].isReady;
+      const apiProps = await state.getSubstrateApiMap()[networkKey].isReady;
 
       const transferProm = makeTransferExternal({
         network: network,
@@ -3338,7 +3338,7 @@ export default class KoniExtension extends Extension {
     validatorInfo }: BondingSubmitParams): Promise<BasicTxInfo> {
     const networkJson = state.getNetworkMapByKey(networkKey);
 
-    return await getBondingTxInfo(networkJson, amount, bondedValidators, isBondedBefore, networkKey, nominatorAddress, validatorInfo, state.getDotSamaApiMap(), state.getWeb3ApiMap());
+    return await getBondingTxInfo(networkJson, amount, bondedValidators, isBondedBefore, networkKey, nominatorAddress, validatorInfo, state.getSubstrateApiMap(), state.getWeb3ApiMap());
   }
 
   private async submitBonding (id: string, port: chrome.runtime.Port, { amount,
@@ -3383,7 +3383,7 @@ export default class KoniExtension extends Extension {
     validatorAddress }: UnbondingSubmitParams): Promise<BasicTxInfo> {
     const networkJson = state.getNetworkMapByKey(networkKey);
 
-    return await getUnbondingTxInfo(address, amount, networkKey, state.getDotSamaApiMap(), state.getWeb3ApiMap(), networkJson, validatorAddress, unstakeAll);
+    return await getUnbondingTxInfo(address, amount, networkKey, state.getSubstrateApiMap(), state.getWeb3ApiMap(), networkJson, validatorAddress, unstakeAll);
   }
 
   private async submitUnbonding (id: string, port: chrome.runtime.Port, { address,
@@ -3427,7 +3427,7 @@ export default class KoniExtension extends Extension {
     address,
     networkKey,
     validatorAddress }: StakeWithdrawalParams): Promise<BasicTxInfo> {
-    return await getWithdrawalTxInfo(address, networkKey, state.getNetworkMapByKey(networkKey), state.getDotSamaApiMap(), state.getWeb3ApiMap(), validatorAddress, action);
+    return await getWithdrawalTxInfo(address, networkKey, state.getNetworkMapByKey(networkKey), state.getSubstrateApiMap(), state.getWeb3ApiMap(), validatorAddress, action);
   }
 
   private async submitStakeWithdrawal (id: string, port: chrome.runtime.Port, { action,
@@ -3462,7 +3462,7 @@ export default class KoniExtension extends Extension {
   }
 
   private async getStakeClaimRewardTxInfo ({ address, networkKey, stakingType }: StakeClaimRewardParams): Promise<BasicTxInfo> {
-    return await getClaimRewardTxInfo(address, networkKey, state.getNetworkMapByKey(networkKey), state.getDotSamaApiMap(), state.getWeb3ApiMap(), stakingType);
+    return await getClaimRewardTxInfo(address, networkKey, state.getNetworkMapByKey(networkKey), state.getSubstrateApiMap(), state.getWeb3ApiMap(), stakingType);
   }
 
   private async submitStakeClaimReward (id: string, port: chrome.runtime.Port, { address,
@@ -3532,7 +3532,7 @@ export default class KoniExtension extends Extension {
     const networkJson = state.getNetworkMapByKey(networkKey);
     const parsedAccountMinimum = parseFloat(accountMinimum) * 10 ** (networkJson.decimals as number);
 
-    return await handleTuringCompoundTxInfo(networkKey, networkJson, state.getDotSamaApiMap(), state.getWeb3ApiMap(), address, collatorAddress, parsedAccountMinimum.toString(), bondedAmount);
+    return await handleTuringCompoundTxInfo(networkKey, networkJson, state.getSubstrateApiMap(), state.getWeb3ApiMap(), address, collatorAddress, parsedAccountMinimum.toString(), bondedAmount);
   }
 
   private async submitTuringStakeCompounding (id: string, port: chrome.runtime.Port, { accountMinimum, address, bondedAmount, collatorAddress, networkKey, password }: RequestTuringStakeCompound) {
@@ -3583,7 +3583,7 @@ export default class KoniExtension extends Extension {
   private async getTuringCancelStakeCompoundTxInfo ({ address, networkKey, taskId }: TuringCancelStakeCompoundParams): Promise<BasicTxInfo> {
     const networkJson = state.getNetworkMapByKey(networkKey);
 
-    return await handleTuringCancelCompoundTxInfo(state.getDotSamaApiMap(), state.getWeb3ApiMap(), taskId, address, networkKey, networkJson);
+    return await handleTuringCancelCompoundTxInfo(state.getSubstrateApiMap(), state.getWeb3ApiMap(), taskId, address, networkKey, networkJson);
   }
 
   private async submitTuringCancelStakeCompound (id: string, port: chrome.runtime.Port, { address, networkKey, password, taskId }: RequestTuringCancelStakeCompound) {
@@ -3618,7 +3618,7 @@ export default class KoniExtension extends Extension {
     const onChainOption = params.onChainOption as Record<string, string>;
 
     try {
-      return await getPSP34Transaction(state.getWeb3ApiMap(), state.getDotSamaApiMap(), state.getNetworkMapByKey(networkKey), networkKey, contractAddress, senderAddress, recipientAddress, onChainOption);
+      return await getPSP34Transaction(state.getWeb3ApiMap(), state.getSubstrateApiMap(), state.getNetworkMapByKey(networkKey), networkKey, contractAddress, senderAddress, recipientAddress, onChainOption);
     } catch (e) {
       console.error('Error getting WASM NFT transaction', e);
 

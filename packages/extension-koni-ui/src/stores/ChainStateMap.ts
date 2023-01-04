@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
-import { _ChainState } from '@subwallet/extension-koni-base/services/chain-service/types';
+import { _ChainState } from '@subwallet/extension-base/services/chain-service/types';
 
 const initialState = {
 } as Record<string, _ChainState>;

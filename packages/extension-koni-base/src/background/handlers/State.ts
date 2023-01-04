@@ -5,34 +5,79 @@ import { _ChainAsset, _ChainInfo } from '@subwallet/chain/types';
 import { withErrorLog } from '@subwallet/extension-base/background/handlers/helpers';
 import State, { AuthUrls, Resolver } from '@subwallet/extension-base/background/handlers/State';
 import { isSubscriptionRunning, unsubscribe } from '@subwallet/extension-base/background/handlers/subscriptions';
-import { AccountRefMap, AddNetworkRequestExternal, AddTokenRequestExternal, APIItemState, ApiMap, AuthRequestV2, BalanceItem, BalanceJson, ChainRegistry, ConfirmationDefinitions, ConfirmationsQueue, ConfirmationsQueueItemOptions, ConfirmationType, CrowdloanItem, CrowdloanJson, CurrentAccountInfo, CustomToken, CustomTokenJson, CustomTokenType, EvmSendTransactionParams, EvmSendTransactionRequestExternal, EvmSignatureRequestExternal, ExternalRequestPromise, ExternalRequestPromiseStatus, NETWORK_STATUS, NetworkJson, NftCollection, NftItem, NftJson, NftTransferExtra, PriceJson, RequestAccountExportPrivateKey, RequestCheckPublicAndSecretKey, RequestConfirmationComplete, RequestSettingsType, ResponseAccountExportPrivateKey, ResponseCheckPublicAndSecretKey, ResponseSettingsType, ResultResolver, ServiceInfo, SingleModeJson, StakeUnlockingJson, StakingItem, StakingJson, StakingRewardItem, StakingRewardJson, ThemeTypes, TransactionHistoryItemType } from '@subwallet/extension-base/background/KoniTypes';
+import {
+  AccountRefMap,
+  AddNetworkRequestExternal,
+  AddTokenRequestExternal,
+  APIItemState,
+  ApiMap,
+  AuthRequestV2,
+  BalanceItem,
+  BalanceJson,
+  ChainRegistry,
+  ConfirmationDefinitions,
+  ConfirmationsQueue,
+  ConfirmationsQueueItemOptions,
+  ConfirmationType,
+  CrowdloanItem,
+  CrowdloanJson,
+  CurrentAccountInfo,
+  CustomToken,
+  CustomTokenJson,
+  CustomTokenType,
+  EvmSendTransactionParams,
+  EvmSendTransactionRequestExternal,
+  EvmSignatureRequestExternal,
+  ExternalRequestPromise,
+  ExternalRequestPromiseStatus,
+  NetworkJson,
+  NftCollection,
+  NftItem,
+  NftJson,
+  NftTransferExtra,
+  PriceJson,
+  RequestAccountExportPrivateKey,
+  RequestCheckPublicAndSecretKey,
+  RequestConfirmationComplete,
+  RequestSettingsType,
+  ResponseAccountExportPrivateKey,
+  ResponseCheckPublicAndSecretKey,
+  ResponseSettingsType,
+  ResultResolver,
+  ServiceInfo,
+  SingleModeJson,
+  StakeUnlockingJson,
+  StakingItem,
+  StakingJson,
+  StakingRewardItem,
+  StakingRewardJson,
+  ThemeTypes,
+  TransactionHistoryItemType
+} from '@subwallet/extension-base/background/KoniTypes';
 import { AuthorizeRequest, RequestAuthorizeTab } from '@subwallet/extension-base/background/types';
 import { ChainService } from '@subwallet/extension-base/services/chain-service';
-import { _ChainState, _ValidateCustomTokenRequest } from '@subwallet/extension-base/services/chain-service/types';
+import {
+  _ChainConnectionStatus,
+  _ChainState,
+  _ValidateCustomTokenRequest
+} from '@subwallet/extension-base/services/chain-service/types';
 import DatabaseService from '@subwallet/extension-base/services/storage-service/DatabaseService';
 import { Web3Transaction } from '@subwallet/extension-base/signers/types';
-import { CurrentAccountStore, NetworkMapStore, PriceStore } from '@subwallet/extension-base/stores';
+import { CurrentAccountStore, PriceStore } from '@subwallet/extension-base/stores';
 import AccountRefStore from '@subwallet/extension-base/stores/AccountRef';
 import AuthorizeStore from '@subwallet/extension-base/stores/Authorize';
-import CustomTokenStore from '@subwallet/extension-base/stores/CustomEvmToken';
 import SettingsStore from '@subwallet/extension-base/stores/Settings';
 import { getId } from '@subwallet/extension-base/utils/getId';
 import { getTokenPrice } from '@subwallet/extension-koni-base/api/coingecko';
-import { initApi } from '@subwallet/extension-koni-base/api/dotsama';
-import { cacheRegistryMap, getRegistry } from '@subwallet/extension-koni-base/api/dotsama/registry';
 import { parseTxAndSignature } from '@subwallet/extension-koni-base/api/evm/external/shared';
-import { PREDEFINED_GENESIS_HASHES, PREDEFINED_NETWORKS } from '@subwallet/extension-koni-base/api/predefinedNetworks';
+import { PREDEFINED_NETWORKS } from '@subwallet/extension-koni-base/api/predefinedNetworks';
 import { PREDEFINED_SINGLE_MODES } from '@subwallet/extension-koni-base/api/predefinedSingleMode';
 // eslint-disable-next-line camelcase
-import { FUNGIBLE_TOKEN_STANDARDS, getTokensForChainRegistry } from '@subwallet/extension-koni-base/api/tokens';
-import { DEFAULT_SUPPORTED_TOKENS } from '@subwallet/extension-koni-base/api/tokens/defaultSupportedTokens';
-import { initEvmTokenState } from '@subwallet/extension-koni-base/api/tokens/evm/utils';
+import { FUNGIBLE_TOKEN_STANDARDS } from '@subwallet/extension-koni-base/api/tokens';
 import { initWeb3Api } from '@subwallet/extension-koni-base/api/tokens/evm/web3';
-import { initWasmTokenState } from '@subwallet/extension-koni-base/api/tokens/wasm/utils';
 import { EvmRpcError } from '@subwallet/extension-koni-base/background/errors/EvmRpcError';
-import { state } from '@subwallet/extension-koni-base/background/handlers/index';
 import { ALL_ACCOUNT_KEY, ALL_GENESIS_HASH } from '@subwallet/extension-koni-base/constants';
-import { getCurrentProvider, mergeNetworkProviders } from '@subwallet/extension-koni-base/utils';
+import { getCurrentProvider } from '@subwallet/extension-koni-base/utils';
 import { anyNumberToBN } from '@subwallet/extension-koni-base/utils/eth';
 import SimpleKeyring from 'eth-simple-keyring';
 import RLP, { Input } from 'rlp';
@@ -60,21 +105,6 @@ function getSuri (seed: string, type?: KeypairType): string {
     : seed;
 }
 
-// function generateDefaultStakingMap () {
-//   const stakingMap: Record<string, StakingItem> = {};
-//
-//   Object.keys(DEFAULT_STAKING_NETWORKS).forEach((networkKey) => {
-//     stakingMap[parseStakingItemKey(networkKey)] = {
-//       name: PREDEFINED_NETWORKS[networkKey].chain,
-//       chain: networkKey,
-//       nativeToken: PREDEFINED_NETWORKS[networkKey].nativeToken,
-//       state: APIItemState.PENDING
-//     } as StakingItem;
-//   });
-//
-//   return stakingMap;
-// }
-
 function generateDefaultCrowdloanMap () {
   const crowdloanMap: Record<string, CrowdloanItem> = {};
 
@@ -93,8 +123,8 @@ export default class KoniState extends State {
 
   public readonly authSubjectV2: BehaviorSubject<AuthorizeRequest[]> = new BehaviorSubject<AuthorizeRequest[]>([]);
 
-  private readonly networkMapStore = new NetworkMapStore(); // persist custom networkMap by user
-  private readonly customTokenStore = new CustomTokenStore();
+  // private readonly networkMapStore = new NetworkMapStore(); // persist custom networkMap by user
+  // private readonly customTokenStore = new CustomTokenStore();
   private readonly priceStore = new PriceStore();
   private readonly currentAccountStore = new CurrentAccountStore();
   private readonly settingsStore = new SettingsStore();
@@ -121,11 +151,11 @@ export default class KoniState extends State {
   private readonly confirmationsPromiseMap: Record<string, { resolver: Resolver<any>, validator?: (rs: any) => Error | undefined }> = {};
 
   // TODO: move into chain-service
-  private networkMap: Record<string, NetworkJson> = {}; // mapping to networkMapStore, for uses in background
-  private networkMapSubject = new Subject<Record<string, NetworkJson>>();
-  private lockNetworkMap = false;
+  // private networkMap: Record<string, NetworkJson> = {}; // mapping to networkMapStore, for uses in background
+  // private networkMapSubject = new Subject<Record<string, NetworkJson>>();
+  // private lockNetworkMap = false;
 
-  private apiMap: ApiMap = { dotSama: {}, web3: {} };
+  // private apiMap: ApiMap = { dotSama: {}, web3: {} };
 
   private serviceInfoSubject = new Subject<ServiceInfo>();
 
@@ -185,9 +215,11 @@ export default class KoniState extends State {
   public generateDefaultBalanceMap () {
     const balanceMap: Record<string, BalanceItem> = {};
 
-    Object.values(this.networkMap).forEach((networkJson) => {
-      if (networkJson.active) {
-        balanceMap[networkJson.key] = {
+    Object.values(this.chainService.getChainInfoMap()).forEach((chainInfo) => {
+      const chainState = this.chainService.getChainStateByKey(chainInfo.slug);
+
+      if (chainState.active) {
+        balanceMap[chainInfo.slug] = {
           state: APIItemState.PENDING
         };
       }
@@ -197,108 +229,23 @@ export default class KoniState extends State {
   }
 
   public init () {
-    // this.initNetworkStates();
-    this.updateServiceInfo();
-    this.chainService.init();
+    this.chainService.init(() => {
+      this.onReady(); // TODO: do better than a callback
+      this.updateServiceInfo();
+    });
   }
 
-  private onReady () {
+  public onReady () {
     this.subscription.start();
     this.cron.start();
 
     this.ready = true;
+
+    this.logger.log('State is ready');
   }
 
   public isReady () {
     return this.ready;
-  }
-
-  // init networkMap, apiMap and chainRegistry (first time only)
-  // TODO: merge transactionHistory when custom network -> predefined network
-  public initNetworkStates () {
-    this.networkMapStore.get('NetworkMap', (storedNetworkMap) => {
-      if (!storedNetworkMap) { // first time init extension
-        this.networkMapStore.set('NetworkMap', PREDEFINED_NETWORKS);
-        this.networkMap = PREDEFINED_NETWORKS;
-      } else { // merge custom providers in stored data with predefined data
-        const mergedNetworkMap: Record<string, NetworkJson> = PREDEFINED_NETWORKS;
-
-        for (const [key, storedNetwork] of Object.entries(storedNetworkMap)) {
-          if (key in PREDEFINED_NETWORKS) {
-            // check change and override custom providers if exist
-            if ('customProviders' in storedNetwork) {
-              mergedNetworkMap[key].customProviders = storedNetwork.customProviders;
-              mergedNetworkMap[key].currentProvider = storedNetwork.currentProvider;
-            }
-
-            if (key !== 'polkadot' && key !== 'kusama') {
-              mergedNetworkMap[key].active = storedNetwork.active;
-            }
-
-            mergedNetworkMap[key].crowdloanUrl = storedNetwork.crowdloanUrl;
-            mergedNetworkMap[key].blockExplorer = storedNetwork.blockExplorer;
-            mergedNetworkMap[key].currentProviderMode = (mergedNetworkMap[key].currentProvider || '').startsWith('http') ? 'http' : 'ws';
-          } else {
-            if (Object.keys(PREDEFINED_GENESIS_HASHES).includes(storedNetwork.genesisHash)) { // merge networks with same genesis hash
-              // @ts-ignore
-              const targetKey = PREDEFINED_GENESIS_HASHES[storedNetwork.genesisHash];
-
-              const { currentProviderMethod, parsedCustomProviders, parsedProviderKey } = mergeNetworkProviders(storedNetwork, PREDEFINED_NETWORKS[targetKey]);
-
-              mergedNetworkMap[targetKey].customProviders = parsedCustomProviders;
-              mergedNetworkMap[targetKey].currentProvider = parsedProviderKey;
-              mergedNetworkMap[targetKey].active = storedNetwork.active;
-              // @ts-ignore
-              mergedNetworkMap[targetKey].currentProviderMode = currentProviderMethod;
-            } else {
-              if (key.startsWith('custom')) { // in case a predefined network is removed, it will be discarded
-                mergedNetworkMap[key] = storedNetwork;
-              }
-            }
-          }
-        }
-
-        this.networkMapStore.set('NetworkMap', mergedNetworkMap);
-        this.networkMap = mergedNetworkMap; // init networkMap state
-      }
-
-      for (const [key, network] of Object.entries(this.networkMap)) {
-        const currentProvider = getCurrentProvider(network);
-
-        if (!currentProvider) {
-          continue;
-        }
-
-        if (network.active) {
-          this.apiMap.dotSama[key] = initApi(key, currentProvider, network.isEthereum);
-
-          if (network.isEthereum && network.isEthereum) {
-            this.apiMap.web3[key] = initWeb3Api(currentProvider);
-          }
-        }
-      }
-
-      this.initCustomTokenState();
-    });
-  }
-
-  public initCustomTokenState () {
-    this.customTokenStore.get('EvmToken', (storedCustomTokens) => {
-      if (!storedCustomTokens) {
-        this.customTokenState = DEFAULT_SUPPORTED_TOKENS;
-      } else {
-        const processedEvmTokens = initEvmTokenState(storedCustomTokens, this.networkMap);
-
-        const processedWasmTokens = initWasmTokenState(storedCustomTokens, this.networkMap);
-
-        this.customTokenState = { ...processedEvmTokens, ...processedWasmTokens };
-      }
-
-      this.customTokenStore.set('EvmToken', this.customTokenState);
-      this.customTokenSubject.next(this.customTokenState);
-
-      this.initChainRegistry();
-    });
   }
 
   private lazyNext = (key: string, callback: () => void) => {
@@ -432,10 +379,14 @@ export default class KoniState extends State {
       let defaultEvmNetworkKey: string | undefined;
 
       if (accountAuthType === 'both' || accountAuthType === 'evm') {
-        const defaultNetworkJson = Object.values(this.getNetworkMap()).find((network) => (network.isEthereum && network.active));
+        const defaultChain = Object.values(this.chainService.getChainInfoMap()).find((chainInfo) => {
+          const chainState = this.chainService.getChainStateByKey(chainInfo.slug);
 
-        if (defaultNetworkJson) {
-          defaultEvmNetworkKey = defaultNetworkJson.key;
+          return chainInfo.evmInfo !== null && chainState.active;
+        });
+
+        if (defaultChain) {
+          defaultEvmNetworkKey = defaultChain.slug;
         }
       }
 
@@ -810,9 +761,9 @@ export default class KoniState extends State {
 
   public setHistory (address: string, network: string, item: TransactionHistoryItemType | TransactionHistoryItemType[], callback?: (items: TransactionHistoryItemType[]) => void): void {
     let items: TransactionHistoryItemType[];
-    const networkInfo = this.getNetworkMap()[network];
+    const nativeTokenInfo = this.chainService.getNativeTokenInfo(network);
 
-    if (!networkInfo) {
+    if (!nativeTokenInfo) {
       return;
     }
 
@@ -824,10 +775,10 @@ export default class KoniState extends State {
     }
 
     items.forEach((item) => {
-      item.feeSymbol = networkInfo.nativeToken;
+      item.feeSymbol = nativeTokenInfo.symbol;
 
       if (!item.changeSymbol) {
-        item.changeSymbol = networkInfo.nativeToken;
+        item.changeSymbol = nativeTokenInfo.symbol;
       }
     });
 
@@ -890,9 +841,11 @@ export default class KoniState extends State {
 
   public async switchEvmNetworkByUrl (shortenUrl: string, networkKey: string): Promise<void> {
     const authUrls = await this.getAuthList();
+    const chainInfo = this.chainService.getChainInfoByKey(networkKey);
+    const chainState = this.chainService.getChainStateByKey(networkKey);
 
     if (authUrls[shortenUrl]) {
-      if (this.networkMap[networkKey] && !this.networkMap[networkKey].active) {
+      if (chainInfo && !chainState.active) {
         this.enableChain(networkKey);
       }
 
@@ -904,7 +857,8 @@ export default class KoniState extends State {
   }
 
   public async switchNetworkAccount (id: string, url: string, networkKey: string, changeAddress?: string): Promise<boolean> {
-    const selectNetwork = this.getNetworkMap()[networkKey];
+    const chainInfo = this.chainService.getChainInfoByKey(networkKey);
+    const chainState = this.chainService.getChainStateByKey(networkKey);
 
     const { address, currentGenesisHash } = await new Promise<CurrentAccountInfo>((resolve) => {
       this.getCurrentAccount(resolve);
@@ -915,7 +869,7 @@ export default class KoniState extends State {
         if (isApproved) {
           const useAddress = changeAddress || address;
 
-          if (this.networkMap[networkKey] && !this.networkMap[networkKey].active) {
+          if (chainInfo && !chainState.active) {
             this.enableChain(networkKey);
           }
 
@@ -924,13 +878,13 @@ export default class KoniState extends State {
 
             assert(pair, 'Unable to find pair');
 
-            keyring.saveAccountMeta(pair, { ...pair.meta, genesisHash: selectNetwork?.genesisHash });
+            keyring.saveAccountMeta(pair, { ...pair.meta, genesisHash: chainInfo.substrateInfo?.genesisHash });
           }
 
-          if (address !== changeAddress || selectNetwork?.genesisHash !== currentGenesisHash || isApproved) {
+          if (address !== changeAddress || chainInfo.substrateInfo?.genesisHash !== currentGenesisHash || isApproved) {
             this.setCurrentAccount({
               address: useAddress,
-              currentGenesisHash: selectNetwork?.genesisHash
+              currentGenesisHash: chainInfo.substrateInfo?.genesisHash || null
             });
           }
         }
@@ -1168,49 +1122,6 @@ export default class KoniState extends State {
     return tokenKey;
   }
 
-  public initChainRegistry () {
-    this.chainRegistryMap = cacheRegistryMap; // prevents deleting token registry even when network is disabled
-    this.getCustomTokenStore((storedCustomTokens) => {
-      const customTokens = getTokensForChainRegistry(storedCustomTokens);
-
-      this.setChainRegistryItem('polkadot', {
-        chainDecimals: [10],
-        chainTokens: ['DOT'],
-        tokenMap: {
-          DOT: {
-            isMainToken: true,
-            name: 'DOT',
-            symbol: 'DOT',
-            decimals: 10
-          }
-        }
-      });
-
-      this.setChainRegistryItem('kusama', {
-        chainDecimals: [12],
-        chainTokens: ['KSM'],
-        tokenMap: {
-          KSM: {
-            isMainToken: true,
-            name: 'KSM',
-            symbol: 'KSM',
-            decimals: 12
-          }
-        }
-      });
-
-      Object.entries(this.apiMap.dotSama).forEach(([networkKey, { api }]) => {
-        getRegistry(networkKey, api, customTokens)
-          .then((rs) => {
-            this.setChainRegistryItem(networkKey, rs);
-          })
-          .catch(this.logger.error);
-      });
-
-      this.onReady();
-    });
-  }
-
   public subscribeChainRegistryMap () {
     return this.chainRegistrySubject;
   }
@@ -1247,9 +1158,9 @@ export default class KoniState extends State {
       if (this.priceStoreReady) {
         update(rs);
       } else {
-        const activeNetworks = Object.values(state.getNetworkMap()).map((network) => network.coinGeckoKey).filter((key) => key) as string[];
+        const allPriceIds = this.chainService.getAllPriceIds();
 
-        getTokenPrice(activeNetworks)
+        getTokenPrice(allPriceIds)
           .then((rs) => {
             this.setPrice(rs);
             update(rs);
@@ -1305,24 +1216,24 @@ export default class KoniState extends State {
     return filteredNftContracts;
   }
 
-  public getCustomTokenStore (callback: (data: CustomTokenJson) => void) {
-    return this.customTokenStore.get('EvmToken', (data) => {
-      callback(data);
-    });
-  }
+  // public getCustomTokenStore (callback: (data: CustomTokenJson) => void) {
+  //   return this.customTokenStore.get('EvmToken', (data) => {
+  //     callback(data);
+  //   });
+  // }
 
   // TODO: move into chain-service
-  public getNetworkMap () {
-    return this.networkMap;
-  }
-
-  public getNetworkMapByKey (key: string) {
-    return this.networkMap[key];
-  }
-
-  public subscribeNetworkMap () {
-    return this.networkMapStore.getSubject();
-  }
+  // public getNetworkMap () {
+  //   return this.networkMap;
+  // }
+  //
+  // public getNetworkMapByKey (key: string) {
+  //   return this.networkMap[key];
+  // }
+  //
+  // public subscribeNetworkMap () {
+  //   return this.networkMapStore.getSubject();
+  // }
 
   // ChainService ------------------------------------------------
 
@@ -1360,24 +1271,6 @@ export default class KoniState extends State {
 
   public deleteCustomTokens (targetTokens: string[]) {
     this.chainService.deleteCustomTokens(targetTokens);
-    // const { deletedNfts, newChainRegistryMap, newCustomTokenState } = deleteCustomTokens(targetTokens, this.customTokenState, this.chainRegistryMap);
-    //
-    // // Delete stored nfts
-    // for (const targetToken of deletedNfts) {
-    //   this.dbService.deleteNftsByCustomToken(this.getNetworkGenesisHashByKey(targetToken.chain), targetToken.smartContract).catch((e) => this.logger.warn(e));
-    // }
-    //
-    // this.chainRegistryMap = newChainRegistryMap;
-    //
-    // Object.entries(newChainRegistryMap).forEach(([key, chainRegistry]) => {
-    //   cacheRegistryMap[key] = chainRegistry;
-    // });
-    //
-    // this.customTokenState = newCustomTokenState;
-    // this.customTokenSubject.next(this.customTokenState);
-    // this.chainRegistrySubject.next(this.getChainRegistryMap());
-    // this.customTokenStore.set('EvmToken', this.customTokenState);
-    // this.updateServiceInfo();
   }
 
   public async validateCustomChain (provider: string, existedChainSlug?: string) {
@@ -1395,15 +1288,7 @@ export default class KoniState extends State {
   // ------------------------------------------------
 
   public getActiveContractSupportedNetworks () {
-    const contractSupportedNetworkMap: Record<string, NetworkJson> = {};
-
-    Object.entries(this.networkMap).forEach(([key, network]) => {
-      if (network.active && network.supportSmartContract && network.supportSmartContract.length > 0) {
-        contractSupportedNetworkMap[key] = network;
-      }
-    });
-
-    return contractSupportedNetworkMap;
+    return this.chainService.getSupportedSmartContractChains();
   }
 
   public upsertChainInfo (data: Record<string, any>): boolean {
@@ -1415,10 +1300,13 @@ export default class KoniState extends State {
   }
 
   public disableChain (networkKey: string): boolean {
-    return this.chainService.updateChainActiveStatus(networkKey, false);
+    const defaultChains = this.getDefaultNetworkKeys();
+
+    return this.chainService.setChainActiveStatus(networkKey, false, defaultChains);
   }
 
-  private getDefaultNetworkKey = (): string[] => {
+  // TODO: avoids turning off chains related to ledger account
+  private getDefaultNetworkKeys = (): string[] => {
     const genesisHashes: Record<string, string> = {};
 
     const pairs = keyring.getPairs();
@@ -1435,8 +1323,8 @@ export default class KoniState extends State {
 
     const result: string[] = [];
 
-    for (const [key, network] of Object.entries(this.networkMap)) {
-      const condition = key === 'polkadot' || key === 'kusama' || hashes.includes(network.genesisHash);
+    for (const [key, network] of Object.entries(this.chainService.getChainInfoMap())) {
+      const condition = hashes.includes(network.substrateInfo?.genesisHash || '');
 
       if (condition) {
         result.push(key);
@@ -1446,129 +1334,50 @@ export default class KoniState extends State {
     return result;
   };
 
-  public async disableAllNetworks (): Promise<boolean> {
-    if (this.lockNetworkMap) {
-      return false;
-    }
-
-    this.lockNetworkMap = true;
-    const targetNetworkKeys: string[] = [];
-
-    const networkKeys = this.getDefaultNetworkKey();
-
-    for (const [key, network] of Object.entries(this.networkMap)) {
-      if (network.active && !networkKeys.includes(key)) {
-        targetNetworkKeys.push(key);
-        this.networkMap[key].active = false;
-      }
-    }
-
-    this.networkMapSubject.next(this.networkMap);
-    this.networkMapStore.set('NetworkMap', this.networkMap);
-
-    for (const key of targetNetworkKeys) {
-      this.apiMap.dotSama[key].api.disconnect && await this.apiMap.dotSama[key].api.disconnect();
-      delete this.apiMap.dotSama[key];
-
-      if (this.networkMap[key].isEthereum && this.networkMap[key].isEthereum) {
-        delete this.apiMap.web3[key];
-      }
-
-      this.networkMap[key].apiStatus = NETWORK_STATUS.DISCONNECTED;
-    }
-
-    this.updateServiceInfo();
-    this.lockNetworkMap = false;
-
-    this.getAuthorize((data) => {
-      this.evmChainSubject.next(data);
-      this.authorizeUrlSubject.next(data);
-    });
-
-    return true;
-  }
-
   public enableChain (networkKey: string) {
-    return this.chainService.updateChainActiveStatus(networkKey, true);
-  }
-
-  public enableAllNetworks () {
-    if (this.lockNetworkMap) {
-      return false;
-    }
-
-    this.lockNetworkMap = true;
-    const targetNetworkKeys: string[] = [];
-
-    for (const [key, network] of Object.entries(this.networkMap)) {
-      if (!network.active) {
-        targetNetworkKeys.push(key);
-        this.networkMap[key].active = true;
-      }
-    }
-
-    this.networkMapSubject.next(this.networkMap);
-    this.networkMapStore.set('NetworkMap', this.networkMap);
-
-    for (const key of targetNetworkKeys) {
-      const currentProvider = getCurrentProvider(this.networkMap[key]);
-
-      if (currentProvider) {
-        this.apiMap.dotSama[key] = initApi(key, currentProvider, this.networkMap[key].isEthereum);
-
-        if (this.networkMap[key].isEthereum && this.networkMap[key].isEthereum) {
-          this.apiMap.web3[key] = initWeb3Api(currentProvider);
-        }
-      }
-    }
-
-    this.updateServiceInfo();
-    this.lockNetworkMap = false;
-
-    this.getAuthorize((data) => {
-      this.evmChainSubject.next(data);
-      this.authorizeUrlSubject.next(data);
-    });
-
-    return true;
+    return this.chainService.setChainActiveStatus(networkKey, true);
   }
 
   public resetDefaultChains () {
-    return this.chainService.resetChainInfoMap();
+    const defaultChains = this.getDefaultNetworkKeys();
+
+    return this.chainService.resetChainInfoMap(defaultChains);
   }
 
-  public updateNetworkStatus (networkKey: string, status: NETWORK_STATUS) {
-    if (this.networkMap[networkKey].apiStatus === status) {
+  public updateNetworkStatus (networkKey: string, status: _ChainConnectionStatus) {
+    const chainState = this.chainService.getChainStateByKey(networkKey);
+
+    if (chainState.connectionStatus === status) {
       return;
     }
 
-    this.networkMap[networkKey].apiStatus = status;
-
-    this.networkMapSubject.next(this.networkMap);
-    this.networkMapStore.set('NetworkMap', this.networkMap);
+    this.chainService.setChainConnectionStatus(networkKey, status);
   }
 
-  public getDotSamaApiMap () {
-    return this.apiMap.dotSama;
+  public getSubstrateApiMap () {
+    return this.chainService.getSubstrateApiMap();
   }
 
   public getDotSamaApi (networkKey: string) {
-    return this.apiMap.dotSama[networkKey];
+    return this.chainService.getSubstrateApi(networkKey);
   }
 
-  public getWeb3ApiMap (): Record<string, Web3> {
-    return this.apiMap.web3;
+  public getWeb3ApiMap () {
+    return this.chainService.getEvmApiMap();
   }
 
   public getWeb3Api (networkKey: string) {
-    return this.apiMap.web3[networkKey];
+    return this.chainService.getEvmApi(networkKey);
   }
 
   public getApiMap () {
-    return this.apiMap;
+    return {
+      substrate: this.chainService.getSubstrateApiMap(),
+      evm: this.chainService.getEvmApiMap()
+    } as ApiMap;
   }
 
-  public refreshDotSamaApi (key: string) {
+  public refreshSubstrateApi (key: string) {
     const apiProps = this.apiMap.dotSama[key];
 
     if (key in this.apiMap.dotSama) {
@@ -1656,13 +1465,15 @@ export default class KoniState extends State {
   }
 
   public getNetworkGenesisHashByKey (key: string) {
-    const network = this.networkMap[key];
+    const chainInfo = this.chainService.getChainInfoByKey(key);
 
-    return network && network.genesisHash;
+    return chainInfo && chainInfo.substrateInfo ? chainInfo.substrateInfo.genesisHash : '';
   }
 
   public getNetworkKeyByGenesisHash (hash: string) {
-    return Object.values(this.networkMap).find((network) => network.genesisHash === hash)?.key;
+    return Object.values(this.chainService.getChainInfoMap()).find((chainInfo) => {
+      return chainInfo.substrateInfo && chainInfo.substrateInfo.genesisHash === hash;
+    })?.slug;
   }
 
   public async resetHistoryMap (newAddress: string): Promise<void> {

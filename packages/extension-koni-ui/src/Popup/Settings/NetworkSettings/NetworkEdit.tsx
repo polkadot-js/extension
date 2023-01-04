@@ -2,9 +2,9 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { ChainEditInfo, ChainEditStandard, ChainSpecInfo } from '@subwallet/extension-base/background/KoniTypes';
-import { _CHAIN_VALIDATION_ERROR } from '@subwallet/extension-koni-base/services/chain-service/handler/types';
-import { _CUSTOM_NETWORK_PREFIX } from '@subwallet/extension-koni-base/services/chain-service/types';
-import { _isCustomNetwork } from '@subwallet/extension-koni-base/services/chain-service/utils';
+import { _CHAIN_VALIDATION_ERROR } from '@subwallet/extension-base/services/chain-service/handler/types';
+import { _CUSTOM_NETWORK_PREFIX } from '@subwallet/extension-base/services/chain-service/types';
+import { _isCustomNetwork } from '@subwallet/extension-base/services/chain-service/utils';
 import { isUrl, isValidProvider as _isValidProvider } from '@subwallet/extension-koni-base/utils';
 import { ActionContext, Button, ButtonArea, Dropdown, HorizontalLabelToggle, InputWithLabel } from '@subwallet/extension-koni-ui/components';
 import useGetChainInfoForConfig from '@subwallet/extension-koni-ui/hooks/screen/setting/useGetChainInfoForConfig';

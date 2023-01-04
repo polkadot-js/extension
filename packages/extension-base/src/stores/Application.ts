@@ -3,7 +3,7 @@
 
 import { ApplicationMetadataType } from '@subwallet/extension-base/background/KoniTypes';
 import { EXTENSION_PREFIX } from '@subwallet/extension-base/defaults';
-import SubscribableStore from '@subwallet/extension-koni-base/stores/SubscribableStore';
+import SubscribableStore from '@subwallet/extension-base/stores/SubscribableStore';
 
 const APPLICATION_METADATA_KEY = 'application';
 

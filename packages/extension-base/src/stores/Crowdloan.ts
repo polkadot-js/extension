@@ -3,7 +3,7 @@
 
 import { CrowdloanItem } from '@subwallet/extension-base/background/KoniTypes';
 import { EXTENSION_PREFIX } from '@subwallet/extension-base/defaults';
-import SubscribableStore from '@subwallet/extension-koni-base/stores/SubscribableStore';
+import SubscribableStore from '@subwallet/extension-base/stores/SubscribableStore';
 
 export default class CrowdloanStore extends SubscribableStore<Record<string, CrowdloanItem>> {
   constructor () {

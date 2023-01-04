@@ -20,7 +20,8 @@ export interface _DataMap {
 export enum _ChainConnectionStatus {
   CONNECTED = 'CONNECTED',
   DISCONNECTED = 'DISCONNECTED',
-  UNSTABLE = 'UNSTABLE'
+  UNSTABLE = 'UNSTABLE',
+  CONNECTING = 'CONNECTING',
 }
 
 export interface _ChainState {

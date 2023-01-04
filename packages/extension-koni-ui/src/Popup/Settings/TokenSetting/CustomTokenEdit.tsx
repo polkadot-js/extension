@@ -1,7 +1,7 @@
 // Copyright 2019-2022 @polkadot/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { _FUNGIBLE_CONTRACT_STANDARDS } from '@subwallet/extension-koni-base/services/chain-service/types';
+import { _FUNGIBLE_CONTRACT_STANDARDS } from '@subwallet/extension-base/services/chain-service/types';
 import { ActionContext, Button, ButtonArea, InputWithLabel } from '@subwallet/extension-koni-ui/components';
 import useFetchChainInfo from '@subwallet/extension-koni-ui/hooks/screen/common/useGetChainInfo';
 import useToast from '@subwallet/extension-koni-ui/hooks/useToast';

@@ -3,7 +3,7 @@
 
 import { CustomTokenJson } from '@subwallet/extension-base/background/KoniTypes';
 import { EXTENSION_PREFIX } from '@subwallet/extension-base/defaults';
-import SubscribableStore from '@subwallet/extension-koni-base/stores/SubscribableStore';
+import SubscribableStore from '@subwallet/extension-base/stores/SubscribableStore';
 
 export default class CustomTokenStore extends SubscribableStore<CustomTokenJson> {
   constructor () {

@@ -73,3 +73,7 @@ export const accountCanSign = (signMode: SIGN_MODE): boolean => {
 export const filterNotReadOnlyAccount = (accounts: AccountJson[]): AccountJson[] => {
   return accounts.filter((acc) => !acc.isReadOnly);
 };
+
+export const isNoAccount = (accounts: AccountJson[] | null): boolean => {
+  return accounts ? !accounts.filter((acc) => acc.address !== ALL_ACCOUNT_KEY).length : false;
+};

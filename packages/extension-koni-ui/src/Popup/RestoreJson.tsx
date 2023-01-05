@@ -2,12 +2,12 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import type { ResponseJsonGetAccountInfo } from '@subwallet/extension-base/background/types';
-import type { KeyringPair$Json } from '@polkadot/keyring/types';
-import type { KeyringPairs$Json } from '@polkadot/ui-keyring/types';
+import type { KeyringPair$Json } from '@subwallet/keyring/types';
+import type { KeyringPairs$Json } from '@subwallet/ui-keyring/types';
 
 import Header from '@subwallet/extension-koni-ui/partials/Header';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
-import React, { useCallback, useContext, useEffect, useState } from 'react';
+import React, { useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import styled, { ThemeContext } from 'styled-components';
 
 import { u8aToString } from '@polkadot/util';
@@ -35,12 +35,14 @@ function Upload ({ className }: Props): React.ReactElement {
   const [isFileError, setFileError] = useState(false);
   const [requirePassword, setRequirePassword] = useState(false);
   const [isPasswordError, setIsPasswordError] = useState(false);
+  const [withMasterPassword, setWithMasterPassword] = useState(true);
   const themeContext = useContext(ThemeContext as React.Context<Theme>);
   // don't use the info from the file directly
   // rather use what comes from the background from jsonGetAccountInfo
   const [file, setFile] = useState<KeyringPair$Json | KeyringPairs$Json | undefined>(undefined);
   const isFirefox = window.localStorage.getItem('browserInfo') === 'Firefox';
   const isLinux = window.localStorage.getItem('osInfo') === 'Linux';
+  const showMasterPasswordCheckbox = useMemo((): boolean => !!file && !isKeyringPairs$Json(file), [file]);
 
   useEffect((): void => {
     (isFirefox || isLinux) && window.localStorage.setItem('popupNavigation', '');
@@ -115,7 +117,15 @@ function Upload ({ className }: Props): React.ReactElement {
 
       setIsBusy(true);
 
-      (isKeyringPairs$Json(file) ? batchRestoreV2(file, password, accountsInfo, isConnectWhenRestore) : jsonRestoreV2(file, password, accountsInfo[0].address, isConnectWhenRestore))
+      (isKeyringPairs$Json(file)
+        ? batchRestoreV2(file, password, accountsInfo, isConnectWhenRestore)
+        : jsonRestoreV2({
+          file: file,
+          password: password,
+          address: accountsInfo[0].address,
+          isAllowed: isConnectWhenRestore,
+          withMasterPassword: withMasterPassword
+        }))
         .then(() => {
           window.localStorage.setItem('popupNavigation', '/');
           onAction('/');
@@ -126,7 +136,7 @@ function Upload ({ className }: Props): React.ReactElement {
             setIsPasswordError(true);
           });
     },
-    [accountsInfo, file, isConnectWhenRestore, onAction, password, requirePassword]
+    [accountsInfo, file, isConnectWhenRestore, onAction, password, requirePassword, withMasterPassword]
   );
 
   return (
@@ -195,6 +205,15 @@ function Upload ({ className }: Props): React.ReactElement {
           label={t<string>('Auto connect to all DApp after restore')}
           onChange={setConnectWhenRestore}
         />
+        {
+          showMasterPasswordCheckbox && (
+            <Checkbox
+              checked={withMasterPassword}
+              label={t<string>('Auto migrate master password ')}
+              onChange={setWithMasterPassword}
+            />
+          )
+        }
         <ButtonArea className='restore-json-button-area'>
           <Button
             className='restoreButton'

@@ -5,7 +5,7 @@ import { TuringCancelStakeCompoundParams } from '@subwallet/extension-base/backg
 import InputAddress from '@subwallet/extension-koni-ui/components/InputAddress';
 import Modal from '@subwallet/extension-koni-ui/components/Modal';
 import SigningRequest from '@subwallet/extension-koni-ui/components/Signing/SigningRequest';
-import { ExternalRequestContext } from '@subwallet/extension-koni-ui/contexts/ExternalRequestContext';
+import { InternalRequestContext } from '@subwallet/extension-koni-ui/contexts/InternalRequestContext';
 import { SigningContext } from '@subwallet/extension-koni-ui/contexts/SigningContext';
 import useGetNetworkJson from '@subwallet/extension-koni-ui/hooks/screen/home/useGetNetworkJson';
 import useGetAccountByAddress from '@subwallet/extension-koni-ui/hooks/useGetAccountByAddress';
@@ -36,7 +36,7 @@ interface Props extends ThemeProps {
 function StakeAuthCancelCompoundRequest ({ address, balanceError, className, fee, networkKey, setExtrinsicHash, setIsTxSuccess, setShowAuth, setShowResult, setTxError, taskId }: Props): React.ReactElement<Props> {
   const { handlerReject } = useRejectExternalRequest();
 
-  const { externalState: { externalId } } = useContext(ExternalRequestContext);
+  const { externalState: { externalId } } = useContext(InternalRequestContext);
   const { signingState: { isBusy } } = useContext(SigningContext);
 
   const account = useGetAccountByAddress(address);

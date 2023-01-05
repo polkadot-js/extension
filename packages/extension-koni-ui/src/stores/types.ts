@@ -49,6 +49,11 @@ export type StakeCompoundParams = {
   selectedNetwork: string;
 }
 
+export type KeyringStateParams = {
+  mode: 'create' | 'edit' | 'init',
+  data: NetworkJson;
+}
+
 export type StakingRewardJson_ = {
   details: StakingRewardItem[],
   ready: boolean

@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 // eslint-disable-next-line header/header
-import type { KeyringOption$Type, KeyringSectionOption } from '@polkadot/ui-keyring/options/types';
+import type { KeyringOption$Type, KeyringSectionOption } from '@subwallet/ui-keyring/options/types';
 import type { DonateTransformOptionType, Option } from './types';
 
 import { DropdownTransformGroupOptionType, DropdownTransformOptionType, OptionInputAddress } from '@subwallet/extension-base/background/KoniTypes';
@@ -14,12 +14,11 @@ import LabelHelp from '@subwallet/extension-koni-ui/components/LabelHelp';
 import { cancelSubscription, saveRecentAccountId, subscribeAccountsInputAddress } from '@subwallet/extension-koni-ui/messaging';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { toAddress } from '@subwallet/extension-koni-ui/util';
+import { keyring } from '@subwallet/ui-keyring';
+import { createOptionItem } from '@subwallet/ui-keyring/options/item';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import store from 'store';
 import styled from 'styled-components';
-
-import { keyring } from '@polkadot/ui-keyring';
-import { createOptionItem } from '@polkadot/ui-keyring/options/item';
 
 interface Props {
   className?: string;

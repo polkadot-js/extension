@@ -15,7 +15,6 @@ import { AccountContext, ActionContext } from '../../components';
 import AccountNamePasswordCreation from '../../components/AccountNamePasswordCreation';
 import useTranslation from '../../hooks/useTranslation';
 import { createAccountSuriV2 } from '../../messaging';
-import { DEFAULT_TYPE } from '../../util/defaultType';
 import SeedAndPath from './SeedAndPath';
 
 export interface AccountInfo {
@@ -41,10 +40,8 @@ function ImportSeed ({ className = '' }: Props): React.ReactElement {
   const [keyTypes, setKeyTypes] = useState<Array<KeypairType>>([SUBSTRATE_ACCOUNT_TYPE, EVM_ACCOUNT_TYPE]);
   const dep = keyTypes.toString();
   const accountsWithoutAll = accounts.filter((acc: { address: string; }) => acc.address !== 'ALL');
-  const name = `Account ${accountsWithoutAll.length + 1}`;
-  const evmName = `Account ${accountsWithoutAll.length + 1} - EVM`;
+  const [name, setName] = useState(`Account ${accountsWithoutAll.length + 1}`);
   const [step1, setStep1] = useState(true);
-  const type = DEFAULT_TYPE;
 
   useEffect(() => {
     setSelectedGenesis(genesisHash);
@@ -54,12 +51,18 @@ function ImportSeed ({ className = '' }: Props): React.ReactElement {
     !accounts.length && onAction();
   }, [accounts, onAction]);
 
-  const _onCreate = useCallback((name: string, password: string): void => {
+  const _onCreate = useCallback((name: string): void => {
     // this should always be the case
-    if (name && password && account) {
+    if (name && account) {
       setIsBusy(true);
 
-      createAccountSuriV2(name, password, account.suri, isConnectWhenImport, keyTypes, selectedGenesis)
+      createAccountSuriV2({
+        name: name,
+        suri: account.suri,
+        isAllowed: isConnectWhenImport,
+        types: keyTypes,
+        genesisHash: selectedGenesis
+      })
         .then(() => {
           window.localStorage.setItem('popupNavigation', '/');
           onAction('/');
@@ -96,7 +99,6 @@ function ImportSeed ({ className = '' }: Props): React.ReactElement {
             account={account}
             className='import-seed-content-wrapper'
             evmAccount={evmAccount}
-            evmName={evmName}
             isConnectWhenImport={isConnectWhenImport}
             keyTypes={keyTypes}
             name={name}
@@ -106,7 +108,6 @@ function ImportSeed ({ className = '' }: Props): React.ReactElement {
             onNextStep={_onNextStep}
             onSelectAccountImported={setKeyTypes}
             setSelectedGenesis={setSelectedGenesis}
-            type={type}
           />
         )
         : (
@@ -120,6 +121,7 @@ function ImportSeed ({ className = '' }: Props): React.ReactElement {
             name={name}
             onCreate={_onCreate}
             selectedGenesis={selectedGenesis}
+            setName={setName}
           />
         )
       }

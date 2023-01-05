@@ -42,11 +42,16 @@ function ImportMetamaskPrivateKey ({ className = '' }: Props): React.ReactElemen
     !accounts.length && onAction();
   }, [accounts, onAction]);
 
-  const _onCreate = useCallback((name: string, password: string): void => {
-    if (name && password && account) {
+  const _onCreate = useCallback((name: string): void => {
+    if (name && account) {
       setIsBusy(true);
 
-      createAccountSuriV2(name, password, account.suri, isConnectWhenImport, KEYTYPES)
+      createAccountSuriV2({
+        types: KEYTYPES,
+        suri: account.suri,
+        isAllowed: isConnectWhenImport,
+        name: name
+      })
         .then(() => {
           window.localStorage.setItem('popupNavigation', '/');
           onAction('/');

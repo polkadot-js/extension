@@ -4,7 +4,7 @@
 import type { Signer, SignerResult } from '@polkadot/api/types';
 import type { Registry, SignerPayloadJSON } from '@polkadot/types/types';
 
-import { KeyringPair } from '@polkadot/keyring/types';
+import { KeyringPair } from '@subwallet/keyring/types';
 
 interface KeyringSignerProps {
   registry: Registry;

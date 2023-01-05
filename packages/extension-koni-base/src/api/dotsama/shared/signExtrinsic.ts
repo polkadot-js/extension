@@ -7,9 +7,9 @@ import LedgerSigner from '@subwallet/extension-base/signers/substrates/LedgerSig
 import QrSigner from '@subwallet/extension-base/signers/substrates/QrSigner';
 import { LedgerState, QrState, SignerExternal, SignerType } from '@subwallet/extension-base/signers/types';
 import { unlockAccount } from '@subwallet/extension-koni-base/utils/keyring';
+import { keyring } from '@subwallet/ui-keyring';
 
 import { Signer, SubmittableExtrinsic } from '@polkadot/api/types';
-import { keyring } from '@polkadot/ui-keyring';
 import { assert } from '@polkadot/util';
 
 interface AbstractSignExtrinsicProps {
@@ -35,9 +35,9 @@ interface ExternalSignExtrinsicProps extends AbstractSignExtrinsicProps {
 
 type SignExtrinsicProps = PasswordSignExtrinsicProps | ExternalSignExtrinsicProps;
 
-export const signExtrinsic = async ({ address, apiProps, callback, extrinsic, id, password, setState, type }: SignExtrinsicProps): Promise<string | null> => {
+export const signExtrinsic = async ({ address, apiProps, callback, extrinsic, id, setState, type }: SignExtrinsicProps): Promise<string | null> => {
   if (type === SignerType.PASSWORD) {
-    const passwordError: string | null = unlockAccount(address, password);
+    const passwordError: string | null = unlockAccount(address);
 
     if (passwordError) {
       return passwordError;

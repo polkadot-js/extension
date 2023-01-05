@@ -2,12 +2,13 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { AccountJson } from '@subwallet/extension-base/background/types';
+import { ALL_ACCOUNT_KEY } from '@subwallet/extension-koni-base/constants';
 import cloneLogo from '@subwallet/extension-koni-ui/assets/clone.svg';
 import moreButtonDark from '@subwallet/extension-koni-ui/assets/dots-three-vertical-dark.svg';
 import moreButtonLight from '@subwallet/extension-koni-ui/assets/dots-three-vertical-light.svg';
 import EyeIcon from '@subwallet/extension-koni-ui/assets/icon/eye.svg';
 import EyeSlashIcon from '@subwallet/extension-koni-ui/assets/icon/eye-slash.svg';
-import { AccountContext } from '@subwallet/extension-koni-ui/components';
+import { AccountContext, ActionContext } from '@subwallet/extension-koni-ui/components';
 import AccountVisibleModal from '@subwallet/extension-koni-ui/components/Modal/AccountVisibleModal';
 import Tooltip from '@subwallet/extension-koni-ui/components/Tooltip';
 import { useGetCurrentAuth } from '@subwallet/extension-koni-ui/hooks/useGetCurrentAuth';
@@ -68,7 +69,9 @@ function DetailHeader ({ className = '',
   const currentAuth = useGetCurrentAuth();
 
   const { currentNetwork } = useSelector((state: RootState) => state);
+
   const { accounts } = useContext(AccountContext);
+  const onAction = useContext(ActionContext);
 
   const [connected, setConnected] = useState(0);
   const [canConnect, setCanConnect] = useState(0);
@@ -81,7 +84,7 @@ function DetailHeader ({ className = '',
   const [isActionOpen, setShowAccountAction] = useState(false);
   const { show } = useToast();
   const [trigger] = useState(() => `overview-btn-${++tooltipId}`);
-  const [modalVisible, setModalVisible] = useState(false);
+  const [authorizeModalVisible, setAuthorizeModalVisible] = useState(false);
 
   const _toggleEdit = useCallback(
     (): void => {
@@ -100,12 +103,18 @@ function DetailHeader ({ className = '',
   );
 
   const openModal = useCallback(() => {
-    setModalVisible(true);
+    setAuthorizeModalVisible(true);
   }, []);
 
   const closeModal = useCallback(() => {
-    setModalVisible(false);
+    setAuthorizeModalVisible(false);
   }, []);
+
+  const clickMigrate = useCallback(() => {
+    onAction('/keyring/migrate');
+    window.localStorage.setItem('popupNavigation', '/keyring/migrate');
+    window.localStorage.setItem('migrateAddress', currentAccount?.address || '');
+  }, [onAction, currentAccount?.address]);
 
   useOutsideClick(actionsRef, (): void => {
     isActionOpen && setShowAccountAction(!isActionOpen);
@@ -336,7 +345,15 @@ function DetailHeader ({ className = '',
       <div className='detail-header__part-3'>
         {!(isAllAccount && currentNetwork.networkKey !== 'all') &&
         <div
-          className={`detail-header-more-button ${isActionOpen ? 'pointer-events-none' : ''}`}
+          className={
+            CN(
+              'detail-header-more-button',
+              {
+                'pointer-events-none': isActionOpen,
+                'must-migrate': currentAccount?.address !== ALL_ACCOUNT_KEY && !currentAccount?.isExternal && !currentAccount?.isMasterPassword && !isActionOpen
+              }
+            )
+          }
           onClick={_toggleAccountAction}
         >
           <img
@@ -349,6 +366,7 @@ function DetailHeader ({ className = '',
 
       {isActionOpen && (
         <AccountAction
+          clickMigrate={clickMigrate}
           isShowZeroBalances={isShowZeroBalances}
           reference={actionsRef}
           toggleEdit={_toggleEdit}
@@ -360,7 +378,7 @@ function DetailHeader ({ className = '',
         isBlocked={connectionState === ConnectionStatement.BLOCKED}
         isNotConnected={connectionState === ConnectionStatement.NOT_CONNECTED}
         onClose={closeModal}
-        visible={modalVisible}
+        visible={authorizeModalVisible}
       />
     </div>
   );
@@ -444,7 +462,7 @@ export default styled(DetailHeader)(({ theme }: Props) => `
   .detail-header-account-info-wrapper {
     display: flex;
   }
-  
+
   .kn-l-edit-name input{
     border: 1px solid ${theme.group === 'dark' ? 'transparent' : theme.primaryColor};
   }
@@ -470,6 +488,30 @@ export default styled(DetailHeader)(({ theme }: Props) => `
     align-items: center;
     justify-content: center;
     cursor: pointer;
+    position: relative;
+  }
+
+  .must-migrate {
+    &:after {
+      content: '';
+      position: absolute;
+      top: 0;
+      right: 8px;
+      width: 8px;
+      height: 8px;
+      border: 1px solid ${theme.buttonBackgroundDanger};
+      border-radius: 8px;
+    }
+    &:before {
+      content: '';
+      position: absolute;
+      top: 2px;
+      right: 10px;
+      width: 4px;
+      height: 4px;
+      background: ${theme.buttonBackgroundDanger};
+      border-radius: 4px;
+    }
   }
 
   .detail-header-more-button__icon {

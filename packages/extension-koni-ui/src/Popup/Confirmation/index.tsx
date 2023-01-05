@@ -3,8 +3,10 @@
 
 import { ConfirmationDefinitions, ConfirmationType, NetworkJson } from '@subwallet/extension-base/background/KoniTypes';
 import { AccountJson } from '@subwallet/extension-base/background/types';
-import { AccountContext, ActionContext, Button, ButtonArea, ConfirmationsQueueContext, InputWithLabel, Warning } from '@subwallet/extension-koni-ui/components';
+import { AccountContext, ActionContext, Button, ButtonArea, ConfirmationsQueueContext, Warning } from '@subwallet/extension-koni-ui/components';
+import RequireMigratePasswordModal from '@subwallet/extension-koni-ui/components/Signing/RequireMigratePassword';
 import { SIGN_MODE } from '@subwallet/extension-koni-ui/constants/signing';
+import useNeedMigratePassword from '@subwallet/extension-koni-ui/hooks/useNeedMigratePassword';
 import useTranslation from '@subwallet/extension-koni-ui/hooks/useTranslation';
 import { completeConfirmation } from '@subwallet/extension-koni-ui/messaging';
 import { Header } from '@subwallet/extension-koni-ui/partials';
@@ -18,7 +20,7 @@ import { NetworkConfigParams } from '@subwallet/extension-koni-ui/stores/types';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { SigData } from '@subwallet/extension-koni-ui/types/accountExternalRequest';
 import { findAccountByAddress, getSignMode } from '@subwallet/extension-koni-ui/util/account';
-import React, { useCallback, useContext, useEffect, useState } from 'react';
+import React, { useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { useSelector } from 'react-redux';
 import { RouteComponentProps, withRouter } from 'react-router';
 import styled from 'styled-components';
@@ -46,14 +48,13 @@ function Confirmation ({ className, match: { params: { address } } }: Props): Re
   const [currentConfirmationType, setCurrentConfirmationType] = useState<ConfirmationType | undefined>(undefined);
   const [informationBlock, setInformationBlock] = useState<React.ReactElement>(<></>);
   const [qrArea, setQrArea] = useState<React.ReactElement>(<></>);
-  const [requirePassword, setRequirePassword] = useState(false);
-  const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
   const [isWarning, setIsWarning] = useState(false);
   const [isScanning, setIsScanning] = useState(false);
   const [requiredSign, setRequiredSign] = useState(false);
   const [signMode, setSignMode] = useState<SIGN_MODE>(SIGN_MODE.PASSWORD);
+  const needMigratePassword = useNeedMigratePassword(account?.address);
 
   const checkConfirmation = useCallback(
     (type?: ConfirmationType) => {
@@ -75,17 +76,9 @@ function Confirmation ({ className, match: { params: { address } } }: Props): Re
         setCurrentConfirmation(confirmation);
         setNetwork(networkMap[confirmation.networkKey || '']);
         setAccount(account || undefined);
-        setRequirePassword(!!account && !!confirmation.requiredPassword && !account.isReadOnly);
       }
     },
     [accounts, networkMap]
-  );
-
-  const _onPasswordChange = useCallback(
-    (p: string) => {
-      setPassword(p);
-    },
-    []
   );
 
   const complete = useCallback(
@@ -96,7 +89,6 @@ function Confirmation ({ className, match: { params: { address } } }: Props): Re
         completeConfirmation(currentConfirmationType, {
           id: currentConfirmation?.id,
           isApproved: result,
-          password: result ? password : undefined,
           payload: result
         }).then(() => {
           setIsLoading(false);
@@ -106,7 +98,7 @@ function Confirmation ({ className, match: { params: { address } } }: Props): Re
         });
       }
     },
-    [currentConfirmation, currentConfirmationType, password]
+    [currentConfirmation, currentConfirmationType]
   );
 
   const onSignature = useCallback((sigData: SigData) => {
@@ -138,12 +130,7 @@ function Confirmation ({ className, match: { params: { address } } }: Props): Re
     }
   }, [account?.isExternal, complete]);
 
-  const disableConfirm = useCallback(
-    () => {
-      return (requirePassword && password === '') || isLoading || (requiredSign && !CAN_SIGN_MODE.includes(signMode));
-    },
-    [requirePassword, password, isLoading, requiredSign, signMode]
-  );
+  const disableConfirm = useMemo(() => isLoading || (requiredSign && (!CAN_SIGN_MODE.includes(signMode) || needMigratePassword)), [needMigratePassword, isLoading, requiredSign, signMode]);
 
   useEffect(() => {
     if (checkConfirmation('evmSignatureRequest')) {
@@ -307,13 +294,7 @@ function Confirmation ({ className, match: { params: { address } } }: Props): Re
           )
         }
         <div className='action-area'>
-          {requirePassword && (<InputWithLabel
-            className='password'
-            label={''}
-            onChange={_onPasswordChange}
-            placeholder={t<string>('Password')}
-            type='password'
-          />)}
+          <RequireMigratePasswordModal address={account?.address} />
           {error && (
             <Warning
               className='confirmation-error'
@@ -330,7 +311,7 @@ function Confirmation ({ className, match: { params: { address } } }: Props): Re
             >{cancelLabel}</Button>
             <Button
               className='confirm-button'
-              isDisabled={disableConfirm()}
+              isDisabled={disableConfirm}
               onClick={_onApprove}
             >{confirmLabel}</Button>
           </ButtonArea>

@@ -4,22 +4,21 @@
 import type { AccountJson, AllowedPath, AuthorizeRequest, MessageTypes, MessageTypesWithNoSubscriptions, MessageTypesWithNullRequest, MessageTypesWithSubscriptions, MetadataRequest, RequestTypes, ResponseAuthorizeList, ResponseDeriveValidate, ResponseJsonGetAccountInfo, ResponseSigningIsLocked, ResponseTypes, SeedLengths, SigningRequest, SubscriptionMessageTypes } from '@subwallet/extension-base/background/types';
 import type { Message } from '@subwallet/extension-base/types';
 import type { Chain } from '@subwallet/extension-chains/types';
-import type { KeyringPair$Json } from '@polkadot/keyring/types';
-import type { KeyringPairs$Json } from '@polkadot/ui-keyring/types';
+import type { KeyringPair$Json } from '@subwallet/keyring/types';
+import type { KeyringPairs$Json } from '@subwallet/ui-keyring/types';
 import type { HexString } from '@polkadot/util/types';
 import type { KeypairType } from '@polkadot/util-crypto/types';
 
 import { _ChainAsset, _ChainInfo } from '@subwallet/chain/types';
 import { AuthUrls } from '@subwallet/extension-base/background/handlers/State';
-import { AccountExternalError, AccountsWithCurrentAddress, BalanceJson, BasicTxInfo, BasicTxResponse, BondingOptionInfo, BondingSubmitParams, ChainBondingBasics, ChainRegistry, CheckExistingTuringCompoundParams, ConfirmationDefinitions, ConfirmationsQueue, ConfirmationType, CrowdloanJson, CurrentAccountInfo, CustomTokenJson, DelegationItem, DisableNetworkResponse, EvmNftTransaction, ExistingTuringCompoundTask, NetworkJson, NftCollection, NftJson, NftTransactionRequest, NftTransactionResponse, NftTransferExtra, OptionInputAddress, PriceJson, RequestAccountCreateExternalV2, RequestAccountCreateHardwareV2, RequestAccountCreateWithSecretKey, RequestAccountMeta, RequestAuthorizationBlock, RequestAuthorizationPerSite, RequestBondingSubmit, RequestCancelCompoundStakeExternal, RequestCheckCrossChainTransfer, RequestCheckTransfer, RequestClaimRewardExternal, RequestCreateCompoundStakeExternal, RequestCrossChainTransfer, RequestCrossChainTransferExternal, RequestEvmNftSubmitTransaction, RequestFreeBalance, RequestNftForceUpdate, RequestNftTransferExternalEVM, RequestNftTransferExternalSubstrate, RequestParseEVMContractInput, RequestParseTransactionSubstrate, RequestQrSignEVM, RequestQrSignSubstrate, RequestRejectExternalRequest, RequestResolveExternalRequest, RequestSettingsType, RequestStakeClaimReward, RequestStakeExternal, RequestStakeWithdrawal, RequestSubscribeBalance, RequestSubscribeBalancesVisibility, RequestSubscribeCrowdloan, RequestSubscribeNft, RequestSubscribePrice, RequestSubscribeStaking, RequestSubscribeStakingReward, RequestSubstrateNftSubmitTransaction, RequestTransfer, RequestTransferCheckReferenceCount, RequestTransferCheckSupporting, RequestTransferExistentialDeposit, RequestTransferExternal, RequestTuringCancelStakeCompound, RequestTuringStakeCompound, RequestUnbondingSubmit, RequestUnStakeExternal, RequestWithdrawStakeExternal, ResponseAccountCreateSuriV2, ResponseAccountCreateWithSecretKey, ResponseAccountExportPrivateKey, ResponseAccountIsLocked, ResponseAccountMeta, ResponseCheckCrossChainTransfer, ResponseCheckPublicAndSecretKey, ResponseCheckTransfer, ResponseParseEVMContractInput, ResponseParseTransactionSubstrate, ResponsePrivateKeyValidateV2, ResponseQrParseRLP, ResponseQrSignEVM, ResponseQrSignSubstrate, ResponseRejectExternalRequest, ResponseResolveExternalRequest, ResponseSeedCreateV2, ResponseSeedValidateV2, ResponseSettingsType, StakeClaimRewardParams, StakeDelegationRequest, StakeUnlockingJson, StakeWithdrawalParams, StakingJson, StakingRewardJson, SubstrateNftTransaction, SupportTransferResponse, ThemeTypes, TransactionHistoryItemType, TuringCancelStakeCompoundParams, TuringStakeCompoundParams, TuringStakeCompoundResp, UnbondingSubmitParams, ValidateNetworkResponse } from '@subwallet/extension-base/background/KoniTypes';
+import { AccountExternalError, AccountsWithCurrentAddress, BalanceJson, BasicTxInfo, BasicTxResponse, BondingOptionInfo, BondingSubmitParams, ChainBondingBasics, ChainRegistry, CheckExistingTuringCompoundParams, ConfirmationDefinitions, ConfirmationsQueue, ConfirmationType, CrowdloanJson, CurrentAccountInfo, CustomTokenJson, DelegationItem, DisableNetworkResponse, EvmNftTransaction, ExistingTuringCompoundTask, KeyringState, NetworkJson, NftCollection, NftJson, NftTransactionRequest, NftTransactionResponse, NftTransferExtra, OptionInputAddress, PriceJson, RequestAccountCreateExternalV2, RequestAccountCreateHardwareV2, RequestAccountCreateSuriV2, RequestAccountCreateWithSecretKey, RequestAccountMeta, RequestAuthorizationBlock, RequestAuthorizationPerSite, RequestBondingSubmit, RequestCancelCompoundStakeExternal, RequestChangeMasterPassword, RequestCheckCrossChainTransfer, RequestCheckTransfer, RequestClaimRewardExternal, RequestCreateCompoundStakeExternal, RequestCrossChainTransfer, RequestCrossChainTransferExternal, RequestDeriveCreateMultiple, RequestDeriveValidateV2, RequestEvmNftSubmitTransaction, RequestFreeBalance, RequestGetDeriveAccounts, RequestJsonRestoreV2, RequestKeyringExportMnemonic, RequestMigratePassword, RequestNftForceUpdate, RequestNftTransferExternalEVM, RequestNftTransferExternalSubstrate, RequestParseEVMContractInput, RequestParseTransactionSubstrate, RequestQrSignEVM, RequestQrSignSubstrate, RequestRejectExternalRequest, RequestResolveExternalRequest, RequestSettingsType, RequestSigningApprovePasswordV2, RequestStakeClaimReward, RequestStakeExternal, RequestStakeWithdrawal, RequestSubscribeBalance, RequestSubscribeBalancesVisibility, RequestSubscribeCrowdloan, RequestSubscribeNft, RequestSubscribePrice, RequestSubscribeStaking, RequestSubscribeStakingReward, RequestSubstrateNftSubmitTransaction, RequestTransfer, RequestTransferCheckReferenceCount, RequestTransferCheckSupporting, RequestTransferExistentialDeposit, RequestTransferExternal, RequestTuringCancelStakeCompound, RequestTuringStakeCompound, RequestUnbondingSubmit, RequestUnlockKeyring, RequestUnStakeExternal, RequestWithdrawStakeExternal, ResponseAccountCreateSuriV2, ResponseAccountCreateWithSecretKey, ResponseAccountExportPrivateKey, ResponseAccountIsLocked, ResponseAccountMeta, ResponseChangeMasterPassword, ResponseCheckCrossChainTransfer, ResponseCheckPublicAndSecretKey, ResponseCheckTransfer, ResponseDeriveValidateV2, ResponseGetDeriveAccounts, ResponseKeyringExportMnemonic, ResponseMigratePassword, ResponseParseEVMContractInput, ResponseParseTransactionSubstrate, ResponsePrivateKeyValidateV2, ResponseQrParseRLP, ResponseQrSignEVM, ResponseQrSignSubstrate, ResponseRejectExternalRequest, ResponseResolveExternalRequest, ResponseSeedCreateV2, ResponseSeedValidateV2, ResponseSettingsType, ResponseUnlockKeyring, StakeClaimRewardParams, StakeDelegationRequest, StakeUnlockingJson, StakeWithdrawalParams, StakingJson, StakingRewardJson, SubstrateNftTransaction, SupportTransferResponse, ThemeTypes, TransactionHistoryItemType, TuringCancelStakeCompoundParams, TuringStakeCompoundParams, TuringStakeCompoundResp, UnbondingSubmitParams, ValidateNetworkResponse } from '@subwallet/extension-base/background/KoniTypes';
 import { RequestCurrentAccountAddress } from '@subwallet/extension-base/background/types';
 import { PORT_EXTENSION } from '@subwallet/extension-base/defaults';
 import { _ChainState, _ValidateCustomTokenRequest } from '@subwallet/extension-base/services/chain-service/types';
 import { getId } from '@subwallet/extension-base/utils/getId';
 import { metadataExpand } from '@subwallet/extension-chains';
 import { MetadataDef } from '@subwallet/extension-inject/types';
-
-import { SingleAddress } from '@polkadot/ui-keyring/observable/types';
+import { SingleAddress } from '@subwallet/ui-keyring/observable/types';
 
 import { _getKnownHashes, _getKnownNetworks } from './util/defaultChains';
 import { getSavedMeta, setSavedMeta } from './MetadataCache';
@@ -154,6 +153,10 @@ export async function approveSignPassword (id: string, savePass: boolean, passwo
   return sendMessage('pri(signing.approve.password)', { id, password, savePass });
 }
 
+export async function approveSignPasswordV2 (request: RequestSigningApprovePasswordV2): Promise<boolean> {
+  return sendMessage('pri(signing.approve.passwordV2)', request);
+}
+
 export async function approveSignSignature (id: string, signature: HexString): Promise<boolean> {
   return sendMessage('pri(signing.approve.signature)', { id, signature });
 }
@@ -178,8 +181,8 @@ export async function createAccountSuri (name: string, password: string, suri: s
   return sendMessage('pri(accounts.create.suri)', { genesisHash, name, password, suri, type });
 }
 
-export async function createAccountSuriV2 (name: string, password: string, suri: string, isAllowed: boolean, types?: Array<KeypairType>, genesisHash?: string): Promise<ResponseAccountCreateSuriV2> {
-  return sendMessage('pri(accounts.create.suriV2)', { genesisHash, name, password, suri, types, isAllowed });
+export async function createAccountSuriV2 (request: RequestAccountCreateSuriV2): Promise<ResponseAccountCreateSuriV2> {
+  return sendMessage('pri(accounts.create.suriV2)', request);
 }
 
 export async function createSeed (length?: SeedLengths, seed?: string, type?: KeypairType): Promise<{ address: string; seed: string }> {
@@ -383,7 +386,7 @@ export async function deriveAccount (parentAddress: string, suri: string, parent
 }
 
 export async function deriveAccountV2 (parentAddress: string, suri: string, parentPassword: string, name: string, password: string, genesisHash: string | null, isAllowed: boolean): Promise<boolean> {
-  return sendMessage('pri(derivation.createV2)', { genesisHash, name, parentAddress, parentPassword, password, suri, isAllowed });
+  return sendMessage('pri(derivation.createV2)', { genesisHash, name, parentAddress, suri, isAllowed });
 }
 
 export async function windowOpen (path: AllowedPath): Promise<boolean> {
@@ -402,8 +405,8 @@ export async function batchRestore (file: KeyringPairs$Json, password: string, a
   return sendMessage('pri(json.batchRestore)', { file, password, address });
 }
 
-export async function jsonRestoreV2 (file: KeyringPair$Json, password: string, address: string, isAllowed: boolean): Promise<void> {
-  return sendMessage('pri(json.restoreV2)', { file, password, address, isAllowed });
+export async function jsonRestoreV2 (request: RequestJsonRestoreV2): Promise<void> {
+  return sendMessage('pri(json.restoreV2)', request);
 }
 
 export async function batchRestoreV2 (file: KeyringPairs$Json, password: string, accountsInfo: ResponseJsonGetAccountInfo[], isAllowed: boolean): Promise<void> {
@@ -840,4 +843,42 @@ export async function submitTuringCancelStakeCompounding (request: RequestTuring
 
 export async function wasmNftGetTransaction (request: NftTransactionRequest): Promise<SubstrateNftTransaction> {
   return sendMessage('pri(wasmNft.getTransaction)', request);
+}
+
+// Keyring state
+export async function keyringStateSubscribe (cb: (value: KeyringState) => void): Promise<KeyringState> {
+  return sendMessage('pri(keyring.subscribe)', null, cb);
+}
+
+export async function keyringChangeMasterPassword (request: RequestChangeMasterPassword): Promise<ResponseChangeMasterPassword> {
+  return sendMessage('pri(keyring.change)', request);
+}
+
+export async function keyringMigrateMasterPassword (request: RequestMigratePassword): Promise<ResponseMigratePassword> {
+  return sendMessage('pri(keyring.migrate)', request);
+}
+
+export async function keyringUnlock (request: RequestUnlockKeyring): Promise<ResponseUnlockKeyring> {
+  return sendMessage('pri(keyring.unlock)', request);
+}
+
+export async function keyringLock (): Promise<void> {
+  return sendMessage('pri(keyring.lock)', null);
+}
+
+export async function keyringExportMnemonic (request: RequestKeyringExportMnemonic): Promise<ResponseKeyringExportMnemonic> {
+  return sendMessage('pri(keyring.export.mnemonic)', request);
+}
+
+/// Derive
+export async function validateDerivePathV2 (request: RequestDeriveValidateV2): Promise<ResponseDeriveValidateV2> {
+  return sendMessage('pri(derivation.validateV2)', request);
+}
+
+export async function getListDeriveAccounts (request: RequestGetDeriveAccounts): Promise<ResponseGetDeriveAccounts> {
+  return sendMessage('pri(derivation.getList)', request);
+}
+
+export async function deriveMultiple (request: RequestDeriveCreateMultiple): Promise<boolean> {
+  return sendMessage('pri(derivation.create.multiple)', request);
 }

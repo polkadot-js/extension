@@ -10,10 +10,11 @@ import type { RequestSignatures, TransportRequestMessage } from '@subwallet/exte
 import { withErrorLog } from '@subwallet/extension-base/background/handlers/helpers';
 import { PORT_CONTENT, PORT_EXTENSION } from '@subwallet/extension-base/defaults';
 import { AccountsStore } from '@subwallet/extension-base/stores';
+import KeyringStore from '@subwallet/extension-base/stores/Keyring';
 import { onExtensionInstall } from '@subwallet/extension-koni-base/background/events';
 import handlers, { state as koniState } from '@subwallet/extension-koni-base/background/handlers';
+import keyring from '@subwallet/ui-keyring';
 
-import keyring from '@polkadot/ui-keyring';
 import { assert } from '@polkadot/util';
 import { cryptoWaitReady } from '@polkadot/util-crypto';
 
@@ -97,7 +98,15 @@ cryptoWaitReady()
     console.log('crypto initialized');
 
     // load all the keyring data
-    keyring.loadAll({ store: new AccountsStore(), type: 'sr25519' });
+    keyring.loadAll({ store: new AccountsStore(), type: 'sr25519', password_store: new KeyringStore() });
+
+    keyring.restoreKeyringPassword().finally(() => {
+      koniState.setKeyringState({
+        hasMasterPassword: !!keyring.keyring?.hasMasterPassword,
+        isLocked: !!keyring.keyring?.isLocked,
+        isReady: true
+      });
+    });
 
     console.log('initialization completed');
   })

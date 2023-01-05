@@ -2,10 +2,10 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import useTranslation from '@subwallet/extension-koni-ui/hooks/useTranslation';
-import Password from '@subwallet/extension-koni-ui/partials/Password';
+import { Name } from '@subwallet/extension-koni-ui/partials';
 import { EVM_ACCOUNT_TYPE, SUBSTRATE_ACCOUNT_TYPE } from '@subwallet/extension-koni-ui/Popup/CreateAccount';
 import { Theme, ThemeProps } from '@subwallet/extension-koni-ui/types';
-import React, { useCallback, useContext, useState } from 'react';
+import React, { useCallback, useContext } from 'react';
 import styled, { ThemeContext } from 'styled-components';
 
 import { KeypairType } from '@polkadot/util-crypto/types';
@@ -13,37 +13,49 @@ import { KeypairType } from '@polkadot/util-crypto/types';
 import { AccountInfoEl, ButtonArea, Checkbox, NextStepButton } from './index';
 
 interface Props {
-  buttonLabel?: string;
-  isBusy: boolean;
-  onCreate: (name: string, password: string) => void | Promise<void | boolean>;
-  className?: string;
-  children?: any;
-  evmAddress?: string | null;
   address?: string | null;
-  onPasswordChange?: (password: string | null) => void;
-  name: string;
-  keyTypes: KeypairType[];
-  selectedGenesis?: string;
+  buttonLabel?: string;
   checked?: boolean | null;
-  setChecked?: (val: boolean) => void;
+  children?: any;
+  className?: string;
+  evmAddress?: string | null;
+  isBusy: boolean;
+  keyTypes: KeypairType[];
+  name: string;
+  onCreate: (name: string) => void | Promise<void | boolean>;
   renderErrors?: () => JSX.Element;
+  selectedGenesis?: string;
+  setChecked?: (val: boolean) => void;
+  setName?: (val: string) => void;
 }
 
-function AccountNamePasswordCreation ({ address, buttonLabel, checked = null, children, className, evmAddress, isBusy, keyTypes, name, onCreate, onPasswordChange, renderErrors, selectedGenesis, setChecked }: Props): React.ReactElement<Props> {
+function AccountNamePasswordCreation ({ address,
+  buttonLabel,
+  checked = null,
+  children,
+  className,
+  evmAddress,
+  isBusy,
+  keyTypes,
+  name,
+  onCreate,
+  renderErrors,
+  selectedGenesis,
+  setChecked,
+  setName }: Props): React.ReactElement<Props> {
   const { t } = useTranslation();
-  const [password, setPassword] = useState<string | null>(null);
+
   const themeContext = useContext(ThemeContext as React.Context<Theme>);
   const _onCreate = useCallback(
     () => {
-      name && password && onCreate(name, password);
+      name && onCreate(name);
     },
-    [name, password, onCreate]
+    [name, onCreate]
   );
 
-  const handleChangePassword = useCallback((val: string | null) => {
-    setPassword(val);
-    onPasswordChange && onPasswordChange(val);
-  }, [onPasswordChange]);
+  const onChangeName = useCallback((val: string | null) => {
+    setName && setName(val || '');
+  }, [setName]);
 
   return (
     <>
@@ -69,7 +81,16 @@ function AccountNamePasswordCreation ({ address, buttonLabel, checked = null, ch
             <div className={ children ? 'children-wrapper' : ''}>
               {children}
             </div>
-            <Password onChange={handleChangePassword} />
+            {setName && (
+              <Name
+                className='name-margin-bottom'
+                disabled={isBusy}
+                isFocused
+                onChange={onChangeName}
+                value={name || ''}
+              />
+            )
+            }
           </div>
         </div>
         {
@@ -87,7 +108,7 @@ function AccountNamePasswordCreation ({ address, buttonLabel, checked = null, ch
             className='next-step-btn'
             data-button-action='add new root'
             isBusy={isBusy}
-            isDisabled={!password || !name}
+            isDisabled={!name}
             onClick={_onCreate}
           >
             {buttonLabel}

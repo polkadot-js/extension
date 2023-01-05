@@ -8,7 +8,7 @@ import InputAddress from '@subwallet/extension-koni-ui/components/InputAddress';
 import Modal from '@subwallet/extension-koni-ui/components/Modal';
 import SigningRequest from '@subwallet/extension-koni-ui/components/Signing/SigningRequest';
 import Spinner from '@subwallet/extension-koni-ui/components/Spinner';
-import { ExternalRequestContext } from '@subwallet/extension-koni-ui/contexts/ExternalRequestContext';
+import { InternalRequestContext } from '@subwallet/extension-koni-ui/contexts/InternalRequestContext';
 import { SigningContext } from '@subwallet/extension-koni-ui/contexts/SigningContext';
 import useGetNetworkJson from '@subwallet/extension-koni-ui/hooks/screen/home/useGetNetworkJson';
 import useGetAccountByAddress from '@subwallet/extension-koni-ui/hooks/useGetAccountByAddress';
@@ -37,7 +37,7 @@ function StakeAuthWithdrawal ({ address, amount, className, hideModal, networkKe
   const { t } = useTranslation();
   const { handlerReject } = useRejectExternalRequest();
 
-  const { externalState: { externalId } } = useContext(ExternalRequestContext);
+  const { externalState: { externalId } } = useContext(InternalRequestContext);
   const { signingState: { isBusy } } = useContext(SigningContext);
 
   const [isTxReady, setIsTxReady] = useState(false);

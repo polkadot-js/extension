@@ -1,7 +1,7 @@
 // Copyright 2019-2022 @polkadot/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-// import { keyring } from '@polkadot/ui-keyring';
+// import { keyring } from '@subwallet/ui-keyring';
 import { assert, hexToU8a, isHex } from '@polkadot/util';
 import { decodeAddress, encodeAddress, ethereumEncode } from '@polkadot/util-crypto';
 

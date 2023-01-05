@@ -8,7 +8,7 @@ import { BalanceVal } from '@subwallet/extension-koni-ui/components/Balance';
 import FeeValue from '@subwallet/extension-koni-ui/components/Balance/FeeValue';
 import SigningRequest from '@subwallet/extension-koni-ui/components/Signing/SigningRequest';
 import { BalanceFormatType } from '@subwallet/extension-koni-ui/components/types';
-import { ExternalRequestContext } from '@subwallet/extension-koni-ui/contexts/ExternalRequestContext';
+import { InternalRequestContext } from '@subwallet/extension-koni-ui/contexts/InternalRequestContext';
 import { SigningContext } from '@subwallet/extension-koni-ui/contexts/SigningContext';
 import useGetFreeBalance from '@subwallet/extension-koni-ui/hooks/screen/bonding/useGetFreeBalance';
 import useGetNetworkJson from '@subwallet/extension-koni-ui/hooks/screen/home/useGetNetworkJson';
@@ -48,7 +48,7 @@ interface Props extends ThemeProps {
 function BondingAuthTransaction ({ amount, balanceError, bondedValidators, className, fee, handleRevertClickNext, isBondedBefore, selectedNetwork, setExtrinsicHash, setIsTxSuccess, setShowConfirm, setShowResult, setTxError, validatorInfo }: Props): React.ReactElement<Props> {
   const { handlerReject } = useRejectExternalRequest();
 
-  const { externalState: { externalId } } = useContext(ExternalRequestContext);
+  const { externalState: { externalId } } = useContext(InternalRequestContext);
   const { signingState: { isBusy } } = useContext(SigningContext);
 
   const networkJson = useGetNetworkJson(selectedNetwork);

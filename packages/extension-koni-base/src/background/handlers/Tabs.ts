@@ -13,12 +13,12 @@ import { canDerive } from '@subwallet/extension-base/utils';
 import { EvmRpcError } from '@subwallet/extension-koni-base/background/errors/EvmRpcError';
 import KoniState from '@subwallet/extension-koni-base/background/handlers/State';
 import { ALL_ACCOUNT_KEY, CRON_GET_API_MAP_STATUS } from '@subwallet/extension-koni-base/constants';
+import { accounts as accountsObservable } from '@subwallet/ui-keyring/observable/accounts';
+import { SingleAddress, SubjectInfo } from '@subwallet/ui-keyring/observable/types';
 import Web3 from 'web3';
 import { HttpProvider, RequestArguments, WebsocketProvider } from 'web3-core';
 import { JsonRpcPayload } from 'web3-core-helpers';
 
-import { accounts as accountsObservable } from '@polkadot/ui-keyring/observable/accounts';
-import { SingleAddress, SubjectInfo } from '@polkadot/ui-keyring/observable/types';
 import { assert } from '@polkadot/util';
 
 function stripUrl (url: string): string {

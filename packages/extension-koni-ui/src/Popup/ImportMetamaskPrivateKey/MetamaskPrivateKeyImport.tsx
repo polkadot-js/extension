@@ -6,7 +6,6 @@ import type { ThemeProps } from '../../types';
 import type { AccountInfo } from '.';
 
 import { validateMetamaskPrivateKeyV2 } from '@subwallet/extension-koni-ui/messaging';
-import { Password } from '@subwallet/extension-koni-ui/partials';
 import { EVM_ACCOUNT_TYPE } from '@subwallet/extension-koni-ui/Popup/CreateAccount';
 import React, { useCallback, useContext, useEffect, useRef, useState } from 'react';
 import styled, { ThemeContext } from 'styled-components';
@@ -19,7 +18,7 @@ import { Theme } from '../../types';
 
 interface Props {
   className?: string;
-  onCreate: (name: string, password: string) => void | Promise<void | boolean>;
+  onCreate: (name: string) => void | Promise<void | boolean>;
   onAccountChange: (account: AccountInfo | null) => void;
   keyTypes: KeypairType[];
   type: KeypairType;
@@ -42,7 +41,6 @@ function MetamaskPrivateKeyImport ({ account, changeConnectWhenImport, className
   const [autoCorrectedSeed, setAutoCorrectedSeed] = useState<string | null>(null);
   const genesis = '';
   const themeContext = useContext(ThemeContext as React.Context<Theme>);
-  const [password, setPassword] = useState<string | null>(null);
   const ref = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -87,30 +85,10 @@ function MetamaskPrivateKeyImport ({ account, changeConnectWhenImport, className
 
   const _onCreate = useCallback(
     () => {
-      name && password && onCreate(name, password);
+      name && onCreate(name);
     },
-    [name, password, onCreate]
+    [name, onCreate]
   );
-
-  const _onChange = useCallback(
-    (password: string | null) => {
-      ref.current?.scrollIntoView({ behavior: 'smooth', block: 'end' });
-      setPassword(password);
-    },
-    []
-  );
-
-  const _onFocusPasswordInput = useCallback(() => {
-    ref.current?.scrollIntoView({ behavior: 'smooth', block: 'end' });
-  }, []);
-
-  const _onFocusRepeatPasswordInput = useCallback(() => {
-    ref.current?.scrollIntoView({ behavior: 'smooth', block: 'end' });
-  }, []);
-
-  const _onScrollToError = useCallback(() => {
-    ref.current?.scrollIntoView({ behavior: 'smooth', block: 'end' });
-  }, []);
 
   const onChangeSeed = useCallback((text: string | null) => {
     setAutoCorrectedSeed(null);
@@ -154,12 +132,6 @@ function MetamaskPrivateKeyImport ({ account, changeConnectWhenImport, className
               {error}
             </Warning>
           )}
-          <Password
-            onChange={_onChange}
-            onFocusPasswordInput={_onFocusPasswordInput}
-            onFocusRepeatPasswordInput={_onFocusRepeatPasswordInput}
-            onScrollToError={_onScrollToError}
-          />
           <Checkbox
             checked={isConnectWhenImport}
             label={t<string>('Auto connect to all DApps after importing')}
@@ -171,7 +143,7 @@ function MetamaskPrivateKeyImport ({ account, changeConnectWhenImport, className
         <NextStepButton
           className='next-step-btn'
           isBusy={isBusy}
-          isDisabled={!address || !!error || !seed || !password}
+          isDisabled={!address || !!error || !seed}
           onClick={_onCreate}
         >
           {t<string>('Add the account with the supplied private key')}

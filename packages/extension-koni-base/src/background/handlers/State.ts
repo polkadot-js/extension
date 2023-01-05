@@ -3,6 +3,7 @@
 
 import { ChainInfoMap } from '@subwallet/chain';
 import { _ChainAsset, _ChainInfo } from '@subwallet/chain/types';
+import Common from '@ethereumjs/common';
 import { withErrorLog } from '@subwallet/extension-base/background/handlers/helpers';
 import State, { AuthUrls, Resolver } from '@subwallet/extension-base/background/handlers/State';
 import { isSubscriptionRunning, unsubscribe } from '@subwallet/extension-base/background/handlers/subscriptions';
@@ -25,15 +26,16 @@ import { FUNGIBLE_TOKEN_STANDARDS } from '@subwallet/extension-koni-base/api/tok
 import { EvmRpcError } from '@subwallet/extension-koni-base/background/errors/EvmRpcError';
 import { ALL_ACCOUNT_KEY, ALL_GENESIS_HASH } from '@subwallet/extension-koni-base/constants';
 import { anyNumberToBN } from '@subwallet/extension-koni-base/utils/eth';
+import { decodePair } from '@subwallet/keyring/pair/decode';
+import { KeyringPair$Meta } from '@subwallet/keyring/types';
+import { keyring } from '@subwallet/ui-keyring';
+import { accounts } from '@subwallet/ui-keyring/observable/accounts';
 import SimpleKeyring from 'eth-simple-keyring';
+import { Transaction } from 'ethereumjs-tx';
 import RLP, { Input } from 'rlp';
 import { BehaviorSubject, Subject } from 'rxjs';
 import { TransactionConfig, TransactionReceipt } from 'web3-core';
 
-import { decodePair } from '@polkadot/keyring/pair/decode';
-import { KeyringPair$Meta } from '@polkadot/keyring/types';
-import { keyring } from '@polkadot/ui-keyring';
-import { accounts } from '@polkadot/ui-keyring/observable/accounts';
 import { assert, BN, hexStripPrefix, hexToU8a, isHex, logger as createLogger, u8aToHex } from '@polkadot/util';
 import { Logger } from '@polkadot/util/types';
 import { base64Decode, isEthereumAddress, keyExtractSuri } from '@polkadot/util-crypto';
@@ -63,6 +65,24 @@ function generateDefaultCrowdloanMap () {
   return crowdloanMap;
 }
 
+const createValidateConfirmationResponsePayload = <CT extends ConfirmationType>(fromAddress: string): (result: ConfirmationDefinitions[CT][1]) => Error | undefined => {
+  return (result: ConfirmationDefinitions[CT][1]) => {
+    if (result.isApproved) {
+      const pair = keyring.getPair(fromAddress);
+
+      if (pair.isLocked) {
+        keyring.unlockPair(pair.address);
+      }
+
+      if (pair.isLocked) {
+        return Error('Cannot unlock pair');
+      }
+    }
+
+    return undefined;
+  };
+};
+
 export default class KoniState extends State {
   private readonly unsubscriptionMap: Record<string, () => void> = {};
 
@@ -78,10 +98,17 @@ export default class KoniState extends State {
   readonly #authRequestsV2: Record<string, AuthRequestV2> = {};
   private readonly evmChainSubject = new Subject<AuthUrls>();
   private readonly authorizeUrlSubject = new Subject<AuthUrls>();
+  private readonly keyringStateSubject = new Subject<KeyringState>();
   private authorizeCached: AuthUrls | undefined = undefined;
 
   private priceStoreReady = false;
   private externalRequest: Record<string, ExternalRequestPromise> = {};
+
+  private keyringState: KeyringState = {
+    isReady: false,
+    isLocked: true,
+    hasMasterPassword: false
+  };
 
   private readonly confirmationsQueueSubject = new BehaviorSubject<ConfirmationsQueue>({
     addNetworkRequest: {},
@@ -184,6 +211,20 @@ export default class KoniState extends State {
 
   public isReady () {
     return this.ready;
+  }
+
+  public getKeyringState (): KeyringState {
+    return this.keyringState;
+  }
+
+  public subscribeKeyringState (): Subject<KeyringState> {
+    return this.keyringStateSubject;
+  }
+
+  public setKeyringState (data: KeyringState, callback?: () => void): void {
+    this.keyringStateSubject.next(data);
+    this.keyringState = data;
+    callback && callback();
   }
 
   private lazyNext = (key: string, callback: () => void) => {
@@ -1592,24 +1633,7 @@ export default class KoniState extends State {
       throw new EvmRpcError('INVALID_PARAMS', 'Account ' + address + ' not in allowed list');
     }
 
-    const requiredPassword = true;
-    let privateKey = '';
-
-    const validateConfirmationResponsePayload = (result: ConfirmationDefinitions['evmSignatureRequest'][1]) => {
-      if (result.isApproved) {
-        if (requiredPassword && !result?.password) {
-          return Error('Password is required');
-        }
-
-        privateKey = (result?.password && this.accountExportPrivateKey({ address: address, password: result.password }).privateKey) || '';
-
-        if (privateKey === '') {
-          return Error('Cannot export private key');
-        }
-      }
-
-      return undefined;
-    };
+    const validateConfirmationResponsePayload = createValidateConfirmationResponsePayload<'evmSignatureRequest'>(address);
 
     let meta: KeyringPair$Meta;
 
@@ -1629,37 +1653,26 @@ export default class KoniState extends State {
       // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
       const signPayload = { address, type: method, payload };
 
-      await this.addConfirmation(id, url, 'evmSignatureRequest', signPayload, { requiredPassword: true, address }, validateConfirmationResponsePayload)
-        .then(({ isApproved, password }) => {
-          if (isApproved && password) {
-            return password;
+      return this.addConfirmation(id, url, 'evmSignatureRequest', signPayload, { requiredPassword: true, address }, validateConfirmationResponsePayload)
+        .then(async ({ isApproved }) => {
+          if (isApproved) {
+            const pair = keyring.getPair(address);
+
+            switch (method) {
+              case 'eth_sign':
+              case 'personal_sign':
+              case 'eth_signTypedData':
+              case 'eth_signTypedData_v1':
+              case 'eth_signTypedData_v3':
+              case 'eth_signTypedData_v4':
+                return await pair.evmSigner.signMessage(payload, method);
+              default:
+                throw new EvmRpcError('INVALID_PARAMS', 'Not found sign method');
+            }
+          } else {
+            throw new EvmRpcError('USER_REJECTED_REQUEST');
           }
-
-          throw new EvmRpcError('USER_REJECTED_REQUEST');
         });
-
-      if (privateKey === '') {
-        throw Error('Cannot export private key');
-      }
-
-      const simpleKeyring = new SimpleKeyring([privateKey]);
-
-      switch (method) {
-        case 'eth_sign':
-          return await simpleKeyring.signMessage(address, payload as string);
-        case 'personal_sign':
-          return await simpleKeyring.signPersonalMessage(address, payload as string);
-        case 'eth_signTypedData':
-          return await simpleKeyring.signTypedData(address, payload as any[]);
-        case 'eth_signTypedData_v1':
-          return await simpleKeyring.signTypedData_v1(address, payload as any[]);
-        case 'eth_signTypedData_v3':
-          return await simpleKeyring.signTypedData_v3(address, payload);
-        case 'eth_signTypedData_v4':
-          return await simpleKeyring.signTypedData_v4(address, payload);
-        default:
-          throw new EvmRpcError('INVALID_PARAMS', 'Not found sign method');
-      }
     } else {
       let qrPayload = '';
       let canSign = false;
@@ -1755,25 +1768,7 @@ export default class KoniState extends State {
       throw new EvmRpcError('INVALID_PARAMS', 'Balance can be not enough to send transaction');
     }
 
-    const requiredPassword = true; // password is always required for to export private, we have planning to save password 15 min like sign keypair.isLocked;
-
-    let privateKey = '';
-
-    const validateConfirmationResponsePayload = (result: ConfirmationDefinitions['evmSendTransactionRequest'][1]) => {
-      if (result.isApproved) {
-        if (requiredPassword && !result?.password) {
-          return Error('Password is required');
-        }
-
-        privateKey = (result?.password && this.accountExportPrivateKey({ address: fromAddress, password: result.password }).privateKey) || '';
-
-        if (privateKey === '') {
-          return Error('Cannot export private key');
-        }
-      }
-
-      return undefined;
-    };
+    const validateConfirmationResponsePayload = createValidateConfirmationResponsePayload<'evmSendTransactionRequest'>(fromAddress);
 
     const requestPayload = { ...transaction, estimateGas };
 
@@ -1813,17 +1808,45 @@ export default class KoniState extends State {
       return this.addConfirmation(id, url, 'evmSendTransactionRequest', requestPayload, { requiredPassword: true, address: fromAddress, networkKey }, validateConfirmationResponsePayload)
         .then(async ({ isApproved }) => {
           if (isApproved) {
-            const signTransaction = await web3.eth.accounts.signTransaction(transaction, privateKey);
+            const pair = keyring.getPair(fromAddress);
+
+            const params = {
+              ...transaction,
+              gasPrice: anyNumberToBN(gasPrice).toNumber(),
+              gasLimit: anyNumberToBN(estimateGas).toNumber(),
+              nonce: await web3.eth.getTransactionCount(fromAddress)
+            };
+
+            console.log(params);
+
+            const network = this.getNetworkMapByKey(networkKey);
+
+            const common = Common.forCustomChain('mainnet', {
+              name: networkKey,
+              networkId: network.evmChainId as number,
+              chainId: network.evmChainId as number
+            }, 'petersburg');
+
+            // @ts-ignore
+            const tx = new Transaction(params, { common });
+
+            const callHash = pair.evmSigner.signTransaction(tx);
             let transactionHash = '';
 
             return new Promise<string>((resolve, reject) => {
-              signTransaction.rawTransaction && web3.eth.sendSignedTransaction(signTransaction.rawTransaction)
+              web3.eth.sendSignedTransaction(callHash)
                 .once('transactionHash', (hash) => {
                   transactionHash = hash;
                   resolve(hash);
                 })
                 .once('receipt', setTransactionHistory)
                 .once('error', (e) => {
+                  console.error(e);
+                  setFailedHistory(transactionHash);
+                  reject(e);
+                })
+                .catch((e) => {
+                  console.error(e);
                   setFailedHistory(transactionHash);
                   reject(e);
                 });

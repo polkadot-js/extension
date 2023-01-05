@@ -15,10 +15,11 @@ import AccountMenuSettings from '@subwallet/extension-koni-ui/partials/AccountMe
 import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { updateCurrentNetwork } from '@subwallet/extension-koni-ui/stores/updater';
 import { accountAllRecoded, getGenesisOptionsByAddressType, isAccountAll } from '@subwallet/extension-koni-ui/util';
+import { isNoAccount } from '@subwallet/extension-koni-ui/util/account';
 import { getLogoByGenesisHash } from '@subwallet/extension-koni-ui/util/logoByGenesisHashMap';
 import reformatAddress from '@subwallet/extension-koni-ui/util/reformatAddress';
 import Avatar from 'boring-avatars';
-import React, { useCallback, useContext, useEffect, useRef, useState } from 'react';
+import React, { useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
 import { useSelector } from 'react-redux';
 import styled, { ThemeContext } from 'styled-components';
 
@@ -81,6 +82,10 @@ function Header ({ cancelButtonText, changeAccountCallback, children, className 
     () => windowOpen('/').catch(console.error),
     []
   );
+
+  const { hasMasterPassword, isLocked } = useSelector((state: RootState) => state.keyringState);
+
+  const hasAccount = useMemo((): boolean => !isNoAccount(accounts), [accounts]);
 
   const genesisOptions = getGenesisOptionsByAddressType(account?.address, accounts, useGenesisHashOptions());
   const _isAccountAll = account && isAccountAll(account.address);
@@ -256,7 +261,7 @@ function Header ({ cancelButtonText, changeAccountCallback, children, className 
               />
             </div>
 
-            {!isWelcomeScreen && (
+            {(!isWelcomeScreen && hasAccount && (!hasMasterPassword || (!isLocked && hasMasterPassword))) && (
               <div
                 className={`setting-icon-wrapper ${isSettingsOpen ? 'pointer-events-none' : ''}`}
                 onClick={_toggleSettings}

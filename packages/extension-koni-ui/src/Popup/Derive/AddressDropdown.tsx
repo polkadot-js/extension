@@ -16,10 +16,9 @@ interface Props {
   className?: string;
   onSelect: (address: string) => void;
   selectedAddress: string;
-  selectedGenesis: string | null;
 }
 
-function AddressDropdown ({ allAddresses, className, onSelect, selectedAddress, selectedGenesis }: Props): React.ReactElement<Props> {
+function AddressDropdown ({ allAddresses, className, onSelect, selectedAddress }: Props): React.ReactElement<Props> {
   const [isDropdownVisible, setDropdownVisible] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
   const themeContext = useContext(ThemeContext as React.Context<Theme>);
@@ -44,7 +43,6 @@ function AddressDropdown ({ allAddresses, className, onSelect, selectedAddress, 
         <AccountInfo
           address={selectedAddress}
           className='address'
-          genesisHash={selectedGenesis}
         />
       </div>
       <div className={`dropdown ${isDropdownVisible ? 'visible' : ''}`}>

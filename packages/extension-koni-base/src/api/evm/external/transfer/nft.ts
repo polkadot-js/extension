@@ -17,11 +17,12 @@ export async function handleTransferNftQr ({ callback,
   chainId,
   from,
   id,
-  networkKey,
+  network,
   rawTransaction,
   setState,
   updateState,
   web3ApiMap }: TransferNftExternalArg) {
+  const networkKey = network.key;
   const web3 = web3ApiMap[networkKey];
   const response: BasicTxResponse = {};
 

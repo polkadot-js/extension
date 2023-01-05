@@ -6,7 +6,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { AccountJson } from '@subwallet/extension-base/background/types';
 import { LedgerState } from '@subwallet/extension-base/signers/types';
 import { Button, Warning } from '@subwallet/extension-koni-ui/components';
-import { ExternalRequestContext } from '@subwallet/extension-koni-ui/contexts/ExternalRequestContext';
+import { InternalRequestContext } from '@subwallet/extension-koni-ui/contexts/InternalRequestContext';
 import { SigningContext } from '@subwallet/extension-koni-ui/contexts/SigningContext';
 import { useLedger } from '@subwallet/extension-koni-ui/hooks/useLedger';
 import useTranslation from '@subwallet/extension-koni-ui/hooks/useTranslation';
@@ -36,7 +36,7 @@ const LedgerRequest = (props: Props) => {
   const { t } = useTranslation();
 
   const { clearError, onErrors, setBusy, signingState } = useContext(SigningContext);
-  const { createResolveExternalRequestData } = useContext(ExternalRequestContext);
+  const { createResolveExternalRequestData } = useContext(InternalRequestContext);
 
   const { errors, isBusy } = signingState;
 

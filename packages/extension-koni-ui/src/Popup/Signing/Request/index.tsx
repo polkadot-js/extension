@@ -150,6 +150,7 @@ function Request ({ account,
         <>
           {buttonDetail}
           <SignArea
+            address={account.address}
             buttonText={buttonText}
             error={error}
             isExternal={isExternal}
@@ -200,6 +201,7 @@ function Request ({ account,
             <>
               {buttonDetail}
               <SignArea
+                address={account.address}
                 buttonText={buttonText}
                 error={error}
                 isExternal={isExternal}
@@ -235,6 +237,7 @@ function Request ({ account,
             <>
               {buttonDetail}
               <SignArea
+                address={account.address}
                 buttonText={buttonText}
                 error={error}
                 isExternal={true}
@@ -248,7 +251,7 @@ function Request ({ account,
     }
 
     return null;
-  }, [_onSignature, accountIndex, address, addressOffset, buttonDetail, buttonText, error, hexBytes, isExternal, isFirst, networkMap, payload, request.payload, signId, signMode]);
+  }, [_onSignature, account.address, accountIndex, address, addressOffset, buttonDetail, buttonText, error, hexBytes, isExternal, isFirst, networkMap.polkadot.genesisHash, payload, request.payload, signId, signMode]);
 
   useEffect((): void => {
     const payload = request.payload;

@@ -54,7 +54,7 @@ export type ScannerContextType = {
   setPartData: (currentFrame: number, frameCount: number, partData: string) => MultiFramesInfo | SubstrateCompletedParsedData;
   setData: (unsignedData: CompletedParsedData) => QrInfo;
   setStep: (step: number) => void;
-  signDataLegacy: (savePass: boolean, password: string) => Promise<void>;
+  signDataLegacy: () => Promise<void>;
 };
 
 const DEFAULT_STATE: ScannerStoreState = {
@@ -345,7 +345,7 @@ export function ScannerContextProvider ({ children }: ScannerContextProviderProp
   }, [_setDataToSign, _setTXRequest]);
 
   // signing data with legacy account.
-  const signDataLegacy = useCallback(async (savePass: boolean, password = ''): Promise<void> => {
+  const signDataLegacy = useCallback(async (): Promise<void> => {
     const { dataToSign, evmChainId, genesisHash, isEthereumStructure, isHash, rawPayload, senderAddress, type } = state;
     const sender = !!senderAddress && findAccountByAddress(accounts, senderAddress);
     const info: undefined | number | string = isEthereumStructure ? evmChainId : genesisHash;
@@ -385,7 +385,6 @@ export function ScannerContextProvider ({ children }: ScannerContextProviderProp
 
         const { signature } = await qrSignEvm({
           address: senderAddress,
-          password: password,
           message: signable,
           type: type,
           chainId: evmChainId
@@ -409,8 +408,6 @@ export function ScannerContextProvider ({ children }: ScannerContextProviderProp
           const { signature } = await qrSignSubstrate({
             address: senderAddress,
             data: signable,
-            savePass: savePass,
-            password: password,
             networkKey: senderNetwork.key
           });
 

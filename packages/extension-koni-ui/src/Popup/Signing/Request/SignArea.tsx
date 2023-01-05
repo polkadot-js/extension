@@ -1,63 +1,41 @@
 // Copyright 2019-2022 @polkadot/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { PASSWORD_EXPIRY_MIN } from '@subwallet/extension-base/defaults';
+import RequireMigratePasswordModal from '@subwallet/extension-koni-ui/components/Signing/RequireMigratePassword';
+import useNeedMigratePassword from '@subwallet/extension-koni-ui/hooks/useNeedMigratePassword';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import CN from 'classnames';
-import React, { useCallback, useContext, useEffect, useState } from 'react';
+import React, { useCallback, useContext, useState } from 'react';
 import styled from 'styled-components';
 
-import { ActionContext, Button, Checkbox } from '../../../components';
+import { ActionContext, Button } from '../../../components';
 import useTranslation from '../../../hooks/useTranslation';
-import { approveSignPassword, cancelSignRequest, isSignLocked } from '../../../messaging';
-import Unlock from '../Unlock';
+import { approveSignPasswordV2, cancelSignRequest } from '../../../messaging';
 
 interface Props extends ThemeProps {
+  address: string;
   buttonText: string;
+  children?: React.ReactElement
   className?: string;
   error: string | null;
   isExternal?: boolean;
   isFirst: boolean;
   setError: (value: string | null) => void;
   signId: string;
-  children?: React.ReactElement
 }
 
-function SignArea ({ buttonText, children, className, error, isExternal, isFirst, setError, signId }: Props): JSX.Element {
-  const [savePass, setSavePass] = useState(false);
-  const [isLocked, setIsLocked] = useState<boolean | null>(null);
-  const [password, setPassword] = useState('');
+function SignArea ({ address, buttonText, children, className, error, isExternal, isFirst, setError, signId }: Props): JSX.Element {
+  const needMigratePassword = useNeedMigratePassword(address);
+
   const [isBusy, setIsBusy] = useState(false);
   const onAction = useContext(ActionContext);
   const { t } = useTranslation();
-
-  useEffect(() => {
-    setIsLocked(null);
-    let timeout: NodeJS.Timeout;
-
-    !isExternal && isSignLocked(signId)
-      .then(({ isLocked, remainingTime }) => {
-        setIsLocked(isLocked);
-        timeout = setTimeout(() => {
-          setIsLocked(true);
-        }, remainingTime);
-
-        // if the account was unlocked check the remember me
-        // automatically to prolong the unlock period
-        !isLocked && setSavePass(true);
-      })
-      .catch((error: Error) => console.error(error));
-
-    return () => {
-      !!timeout && clearTimeout(timeout);
-    };
-  }, [isExternal, signId]);
 
   const _onSign = useCallback(
     (): Promise<void> => {
       setIsBusy(true);
 
-      return approveSignPassword(signId, savePass, password)
+      return approveSignPasswordV2({ id: signId })
         .then((): void => {
           setIsBusy(false);
           onAction();
@@ -68,7 +46,7 @@ function SignArea ({ buttonText, children, className, error, isExternal, isFirst
           console.error(error);
         });
     },
-    [onAction, password, savePass, setError, setIsBusy, signId]
+    [onAction, setError, setIsBusy, signId]
   );
 
   const _onCancel = useCallback(
@@ -78,40 +56,12 @@ function SignArea ({ buttonText, children, className, error, isExternal, isFirst
     [onAction, signId]
   );
 
-  const RememberPasswordCheckbox = () => (
-    <Checkbox
-      checked={savePass}
-      label={ isLocked
-        ? t<string>(
-          'Remember my password for the next {{expiration}} minutes',
-          { replace: { expiration: PASSWORD_EXPIRY_MIN } }
-        )
-        : t<string>(
-          'Extend the period without password by {{expiration}} minutes',
-          { replace: { expiration: PASSWORD_EXPIRY_MIN } }
-        )
-      }
-      onChange={setSavePass}
-    />
-  );
-
   return (
     <div className={CN(className, { external: isExternal })}>
       {children}
       {isFirst && !isExternal && (
         <>
-          { isLocked && (
-            <Unlock
-              error={error}
-              isBusy={isBusy}
-              onSign={_onSign}
-              password={password}
-              setError={setError}
-              setPassword={setPassword}
-            />
-          )}
-          <RememberPasswordCheckbox />
-
+          <RequireMigratePasswordModal address={address} />
           <div className='sign-button-container'>
             <Button
               className='sign-button __cancel'
@@ -125,7 +75,7 @@ function SignArea ({ buttonText, children, className, error, isExternal, isFirst
             <Button
               className='sign-button __sign'
               isBusy={isBusy}
-              isDisabled={(!!isLocked && !password) || !!error}
+              isDisabled={!!error || needMigratePassword}
               onClick={_onSign}
             >
               {buttonText}
@@ -177,18 +127,18 @@ export default styled(SignArea)(({ theme }: Props) => `
 
   .sign-button {
     flex: 1;
-    
+
     &.__cancel {
       background-color: ${theme.buttonBackground1};
-  
+
       span {
         color: ${theme.buttonTextColor2};
       }
     }
-    
+
     &.__sign {
      margin-left: 15px;
     }
   }
-  
+
 `);

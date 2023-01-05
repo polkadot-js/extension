@@ -1,6 +1,7 @@
 // Copyright 2019-2022 @polkadot/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
+import { faDiagramProject } from '@fortawesome/free-solid-svg-icons';
 import { faCog } from '@fortawesome/free-solid-svg-icons/faCog';
 import { faCoins } from '@fortawesome/free-solid-svg-icons/faCoins';
 import { faExpand } from '@fortawesome/free-solid-svg-icons/faExpand';
@@ -16,8 +17,10 @@ import useIsPopup from '@subwallet/extension-koni-ui/hooks/useIsPopup';
 import useTranslation from '@subwallet/extension-koni-ui/hooks/useTranslation';
 import { windowOpen } from '@subwallet/extension-koni-ui/messaging';
 import Header from '@subwallet/extension-koni-ui/partials/Header';
+import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import React, { useCallback, useEffect, useState } from 'react';
+import { useSelector } from 'react-redux';
 import styled from 'styled-components';
 
 import settings from '@polkadot/ui-settings';
@@ -30,6 +33,10 @@ const SettingPath = '/account/settings';
 
 function Settings ({ className }: Props): React.ReactElement {
   const { t } = useTranslation();
+
+  const isLocked = useSelector((state: RootState) => state.keyringState.isLocked);
+  const hasMasterPassword = useSelector((state: RootState) => state.keyringState.hasMasterPassword);
+
   const [camera, setCamera] = useState(settings.camera === 'on');
   const isPopup = useIsPopup();
   const _onWindowOpen = useCallback(
@@ -180,16 +187,18 @@ function Settings ({ className }: Props): React.ReactElement {
           <div className='menu-setting-item__toggle' />
         </a>
 
-        {/* <Link */}
-        {/*  className='menu-setting-item' */}
-        {/*  isDisabled */}
-        {/*  to='' */}
-        {/* > */}
-        {/*  /!* @ts-ignore *!/ */}
-        {/*  <FontAwesomeIcon icon={faBell} /> */}
-        {/*  <div className='menu-setting-item__text'>{t<string>('Alerts')}</div> */}
-        {/*  <div className='menu-setting-item__toggle' /> */}
-        {/* </Link> */}
+        {
+          hasMasterPassword && !isLocked && (
+            <Link
+              className='menu-setting-item'
+              to={'/keyring/change'}
+            >
+              <FontAwesomeIcon icon={faDiagramProject} />
+              <div className='menu-setting-item__text'>{t<string>('Change master password')}</div>
+              <div className='menu-setting-item__toggle' />
+            </Link>
+          )
+        }
       </div>
 
     </div>
@@ -202,7 +211,7 @@ export default styled(Settings)(({ theme }: Props) => `
   height: 100%;
 
   .menu-setting-item-list {
-    padding: 25px 22px;
+    padding: 12px 22px;
     flex: 1;
     overflow: auto;
   }
@@ -212,7 +221,7 @@ export default styled(Settings)(({ theme }: Props) => `
     border-radius: 5px;
     display: flex;
     align-items: center;
-    padding: 11px;
+    padding: 9px 11px;
     opacity: 1;
 
     .svg-inline--fa {

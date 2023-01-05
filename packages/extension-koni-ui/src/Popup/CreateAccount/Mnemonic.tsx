@@ -14,16 +14,16 @@ import useToast from '../../hooks/useToast';
 import useTranslation from '../../hooks/useTranslation';
 
 interface Props extends ThemeProps {
-  onNextStep: () => void;
-  seed: string;
   address?: string;
-  evmAddress?: string,
-  evmName?: string,
-  isConnectWhenCreate: boolean,
-  onConnectWhenCreate: (isConnectWhenCreate: boolean) => void;
-  name?: string;
   className?: string;
-  onSelectAccountCreated?: (keyTypes: KeypairType[]) => void
+  evmAddress?: string,
+  isConnectWhenCreate: boolean,
+  keyTypes: KeypairType[];
+  name?: string;
+  onConnectWhenCreate: (isConnectWhenCreate: boolean) => void;
+  onNextStep: () => void;
+  onSelectAccountCreated?: (keyTypes: KeypairType[]) => void;
+  seed: string;
 }
 
 const onCopy = (): void => {
@@ -37,11 +37,11 @@ const onCopy = (): void => {
   document.execCommand('copy');
 };
 
-function Mnemonic ({ address, className, evmAddress, evmName, isConnectWhenCreate, name, onConnectWhenCreate, onNextStep, onSelectAccountCreated, seed }: Props): React.ReactElement<Props> {
+function Mnemonic ({ address, className, evmAddress, isConnectWhenCreate, keyTypes, name, onConnectWhenCreate, onNextStep, onSelectAccountCreated, seed }: Props): React.ReactElement<Props> {
   const { t } = useTranslation();
   const [isMnemonicSaved, setIsMnemonicSaved] = useState(false);
-  const [isNormalAccountSelected, setNormalAccountSelected] = useState(false);
-  const [isEvmAccountSelected, setEvmAccountSelected] = useState(false);
+  const [isNormalAccountSelected, setNormalAccountSelected] = useState(keyTypes.includes(SUBSTRATE_ACCOUNT_TYPE));
+  const [isEvmAccountSelected, setEvmAccountSelected] = useState(keyTypes.includes(EVM_ACCOUNT_TYPE));
   const { show } = useToast();
   const themeContext = useContext(ThemeContext as React.Context<Theme>);
 
@@ -121,7 +121,7 @@ function Mnemonic ({ address, className, evmAddress, evmName, isConnectWhenCreat
                 <AccountInfoEl
                   address={evmAddress}
                   className='account-info-item__info'
-                  name={evmName}
+                  name={`${name || '<unknown>'} - EVM`}
                   type={EVM_ACCOUNT_TYPE}
                 />
               </div>

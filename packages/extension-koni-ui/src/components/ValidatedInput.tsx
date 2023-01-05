@@ -11,6 +11,7 @@ interface BasicProps {
   isError?: boolean;
   value?: string | null;
   onChange?: (value: string) => void;
+  resetValue?: boolean;
 }
 
 type Props<T extends BasicProps> = T & {
@@ -23,7 +24,7 @@ type Props<T extends BasicProps> = T & {
   onScrollToError?: () => void;
 }
 
-function ValidatedInput<T extends Record<string, unknown>> ({ className, component: Input, defaultValue, onFocus, onScrollToError, onValidatedChange, validator, ...props }: Props<T>): React.ReactElement<Props<T>> {
+function ValidatedInput<T extends Record<string, unknown>> ({ className, component: Input, defaultValue, onFocus, onScrollToError, onValidatedChange, resetValue, validator, ...props }: Props<T>): React.ReactElement<Props<T>> {
   const [value, setValue] = useState(defaultValue || '');
   const [validationResult, setValidationResult] = useState<Result<string>>(Result.ok(''));
   const isMounted = useIsMounted();
@@ -39,6 +40,12 @@ function ValidatedInput<T extends Record<string, unknown>> ({ className, compone
       setValue(defaultValue);
     }
   }, [defaultValue]);
+
+  useEffect(() => {
+    if (resetValue) {
+      setValue('');
+    }
+  }, [resetValue]);
 
   useEffect(() => {
     // Do not show any error on first mount
@@ -60,6 +67,7 @@ function ValidatedInput<T extends Record<string, unknown>> ({ className, compone
     <div className={className}>
       <Input
         {...props as unknown as T}
+        className={className}
         isError={Result.isError(validationResult)}
         onChange={setValue}
         onFocus={onFocus}

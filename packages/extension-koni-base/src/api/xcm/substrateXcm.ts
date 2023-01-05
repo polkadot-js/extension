@@ -2,11 +2,13 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { ApiProps, NetworkJson, TokenInfo } from '@subwallet/extension-base/background/KoniTypes';
-import { FOUR_INSTRUCTIONS_WEIGHT, getMultiLocationFromParachain, getReceiverLocation, SupportedCrossChainsMap } from '@subwallet/extension-koni-base/api/xcm/utils';
+import { FOUR_INSTRUCTIONS_WEIGHT, getMultiLocationFromParachain, getReceiverLocation, POLKADOT_UNLIMITED_WEIGHT, SupportedCrossChainsMap } from '@subwallet/extension-koni-base/api/xcm/utils';
 import { parseNumberToDisplay } from '@subwallet/extension-koni-base/utils';
 import { KeyringPair } from '@subwallet/keyring/types';
 
 import { ApiPromise } from '@polkadot/api';
+
+const NETWORK_USE_UNLIMIT_WEIGHT: string[] = ['acala', 'karura', 'statemint'];
 
 function getTokenIdentity (originNetworkKey: string, tokenInfo: TokenInfo) {
   // TODO: find a better way to handle kUSD on karura
@@ -19,6 +21,8 @@ function getTokenIdentity (originNetworkKey: string, tokenInfo: TokenInfo) {
       NativeToken: 0
     };
   } else if (originNetworkKey === 'karura' && tokenSymbol.toUpperCase() === 'NEER') { // TODO: modify later with different assets on Karura
+    return tokenInfo.specialOption as Record<string, any>;
+  } else if (originNetworkKey === 'acala' && tokenSymbol.toUpperCase() === 'GLMR') { // TODO: modify later with different assets on Acala
     return tokenInfo.specialOption as Record<string, any>;
   }
 
@@ -44,6 +48,7 @@ export async function substrateEstimateCrossChainFee (
   const originNetworkJson = networkMap[originNetworkKey];
   const destinationNetworkJson = networkMap[destinationNetworkKey];
   const tokenIdentity = getTokenIdentity(originNetworkKey, tokenInfo);
+  const weightParam = NETWORK_USE_UNLIMIT_WEIGHT.includes(originNetworkKey) ? POLKADOT_UNLIMITED_WEIGHT : FOUR_INSTRUCTIONS_WEIGHT;
 
   try {
     if (SupportedCrossChainsMap[originNetworkKey].type === 'p') {
@@ -52,13 +57,18 @@ export async function substrateEstimateCrossChainFee (
         tokenIdentity,
         value,
         getMultiLocationFromParachain(originNetworkKey, destinationNetworkKey, networkMap, to),
-        FOUR_INSTRUCTIONS_WEIGHT
+        weightParam
       );
 
-      const paymentInfo = await extrinsic.paymentInfo(fromKeypair);
+      try {
+        const paymentInfo = await extrinsic.paymentInfo(fromKeypair.address);
 
-      fee = paymentInfo.partialFee.toString();
-      feeString = parseNumberToDisplay(paymentInfo.partialFee, originNetworkJson.decimals) + ` ${originNetworkJson.nativeToken ? originNetworkJson.nativeToken : ''}`;
+        fee = paymentInfo.partialFee.toString();
+
+        feeString = parseNumberToDisplay(paymentInfo.partialFee, originNetworkJson.decimals) + ` ${originNetworkJson.nativeToken ? originNetworkJson.nativeToken : ''}`;
+      } catch (e) {
+        feeString = `0.0000 ${originNetworkJson.nativeToken ? originNetworkJson.nativeToken : ''}`;
+      }
 
       console.log('substrate xcm tx p-p or p-r here', extrinsic.toHex());
     } else {
@@ -92,7 +102,7 @@ export async function substrateEstimateCrossChainFee (
             ]
           },
           0,
-          'Unlimited'
+          POLKADOT_UNLIMITED_WEIGHT
         );
 
         const paymentInfo = await extrinsic.paymentInfo(fromKeypair);
@@ -163,12 +173,13 @@ export function substrateGetXcmExtrinsic (
   // Case ParaChain -> RelayChain && Parachain -> Parachain
   if (SupportedCrossChainsMap[originNetworkKey].type === 'p') {
     const tokenIdentity = getTokenIdentity(originNetworkKey, tokenInfo);
+    const weightParam = NETWORK_USE_UNLIMIT_WEIGHT.includes(originNetworkKey) ? POLKADOT_UNLIMITED_WEIGHT : FOUR_INSTRUCTIONS_WEIGHT;
 
     return api.tx.xTokens.transfer(
       tokenIdentity,
       value,
       getMultiLocationFromParachain(originNetworkKey, destinationNetworkKey, networkMap, to),
-      FOUR_INSTRUCTIONS_WEIGHT
+      weightParam
     );
   }
 
@@ -203,7 +214,7 @@ export function substrateGetXcmExtrinsic (
         ]
       },
       0,
-      'Unlimited'
+      POLKADOT_UNLIMITED_WEIGHT
     );
   }
 

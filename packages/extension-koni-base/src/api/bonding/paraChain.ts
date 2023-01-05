@@ -47,16 +47,16 @@ export async function getParaBondingBasics (networkKey: string, dotSamaApi: ApiP
   let unvestedAllocation;
 
   if (_unvestedAllocation) {
-    const rawUnvestedAllocation = _unvestedAllocation.toHuman() as string;
+    const rawUnvestedAllocation = _unvestedAllocation.toString();
 
-    unvestedAllocation = parseRawNumber(rawUnvestedAllocation);
+    unvestedAllocation = new BN(rawUnvestedAllocation);
   }
 
   const totalStake = _totalStake ? new BN(_totalStake.toString()) : BN_ZERO;
   const totalIssuance = new BN(_totalIssuance.toString());
 
   if (unvestedAllocation) {
-    totalIssuance.addn(unvestedAllocation); // for Turing network, read more at https://hackmd.io/@sbAqOuXkRvyiZPOB3Ryn6Q/Sypr3ZJh5
+    totalIssuance.add(unvestedAllocation); // for Turing network, read more at https://hackmd.io/@sbAqOuXkRvyiZPOB3Ryn6Q/Sypr3ZJh5
   }
 
   const inflationConfig = _inflation.toHuman() as unknown as InflationConfig;

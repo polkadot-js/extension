@@ -1,7 +1,7 @@
 // Copyright 2019-2022 @polkadot/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { ChainRegistry, NetworkJson } from '@subwallet/extension-base/background/KoniTypes';
+import { BasicTxError, BasicTxWarning, ChainRegistry, NetworkJson } from '@subwallet/extension-base/background/KoniTypes';
 import { AccountContext, ActionContext, Warning } from '@subwallet/extension-koni-ui/components';
 import Button from '@subwallet/extension-koni-ui/components/Button';
 import InputBalance from '@subwallet/extension-koni-ui/components/InputBalance';
@@ -88,7 +88,7 @@ function Wrapper ({ className = '', theme }: Props): React.ReactElement<Props> {
 function SendFund ({ chainRegistryMap, className, defaultValue, networkMap }: ContentProps): React.ReactElement {
   const { t } = useTranslation();
 
-  const [amount, setAmount] = useState<BN | undefined>(BN_ZERO);
+  const [amount, setAmount] = useState<BN | undefined>(undefined);
   const [recipientId, setRecipientId] = useState<string | null>(null);
   const [isShowTxModal, setShowTxModal] = useState<boolean>(false);
   const [{ address: senderId,
@@ -104,6 +104,8 @@ function SendFund ({ chainRegistryMap, className, defaultValue, networkMap }: Co
   // const [[maxTransfer, noFees], setMaxTransfer] = useState<[BN | null, boolean]>([null, false]);
   const [existentialDeposit, setExistentialDeposit] = useState<string>('0');
   const [txResult, setTxResult] = useState<TransferResultType>({ isShowTxResult: false, isTxSuccess: false });
+  const [errors, setErrors] = useState<BasicTxError[] | undefined>(undefined);
+  const [warnings, setWarnings] = useState<BasicTxWarning[] | undefined>(undefined);
   const { isShowTxResult } = txResult;
   const senderFreeBalance = useFreeBalance(selectedNetworkKey, senderId, selectedToken);
   const recipientFreeBalance = useFreeBalance(selectedNetworkKey, recipientId, selectedToken);
@@ -126,6 +128,7 @@ function SendFund ({ chainRegistryMap, className, defaultValue, networkMap }: Co
   const [maxTransfer] = getMaxTransferAndNoFees(fee, feeSymbol, selectedToken, mainTokenInfo.symbol, senderFreeBalance, existentialDeposit);
   const canToggleAll = !!isSupportTransferAll && !!maxTransfer && !reference && !!recipientId;
   const valueToTransfer = canToggleAll && isAll ? maxTransfer.toString() : (amount?.toString() || '0');
+  const isValidTransferAmount = (new BN(recipientFreeBalance)).add(canToggleAll && isAll ? maxTransfer : amount || BN_ZERO).gte(new BN(existentialDeposit));
   const selectedNetwork = useMemo((): NetworkJson => {
     return networkMap[selectedNetworkKey];
   }, [networkMap, selectedNetworkKey]);
@@ -164,8 +167,12 @@ function SendFund ({ chainRegistryMap, className, defaultValue, networkMap }: Co
     !isNotSameAddressAndTokenType &&
     !isNotSameAddressType &&
     !amountGtAvailableBalance &&
+    !(errors && errors.length) &&
+    isValidTransferAmount &&
     !isReadOnly &&
-    (!isHardwareAccount || isValidHardwareAccount);
+    (!isHardwareAccount || isValidHardwareAccount) &&
+    amount !== undefined
+  ;
 
   const navigate = useContext(ActionContext);
 
@@ -188,6 +195,8 @@ function SendFund ({ chainRegistryMap, className, defaultValue, networkMap }: Co
         value: valueToTransfer
       }).then((rs) => {
         if (isSync) {
+          setErrors(rs.errors);
+          setWarnings(rs.warnings);
           setFeeInfo([
             rs.estimateFee && rs.estimateFee !== '0' ? rs.estimateFee : null,
             rs.feeSymbol
@@ -330,6 +339,12 @@ function SendFund ({ chainRegistryMap, className, defaultValue, networkMap }: Co
     setShowTxModal(false);
   }, []);
 
+  const onToggleIsAll = useCallback(() => {
+    setErrors(undefined);
+    setAmount(BN_ZERO);
+    setIsAll(!isAll);
+  }, [isAll]);
+
   return (
     <>
       {!isShowTxResult
@@ -392,11 +407,34 @@ function SendFund ({ chainRegistryMap, className, defaultValue, networkMap }: Co
                 <Toggle
                   className='typeToggle'
                   label={t<string>('Transfer the full account balance, reap the sender')}
-                  onChange={setIsAll}
+                  onChange={onToggleIsAll}
                   value={isAll}
                 />
               </div>
             )}
+
+            {canMakeTransfer && warnings && warnings.length
+              ? warnings.map((w, index) => (
+                <Warning
+                  className='send-fund-warning'
+                  key={index}
+                >
+                  {t<string>(w.message)}
+                </Warning>
+              ))
+              : <></>}
+
+            {!amountGtAvailableBalance && errors && errors.length
+              ? errors.map((w, index) => (
+                <Warning
+                  className='send-fund-warning'
+                  isDanger
+                  key={index}
+                >
+                  {t<string>(w.message)}
+                </Warning>
+              ))
+              : <></>}
 
             {isHardwareAccount && !isValidHardwareAccount && (
               <Warning
@@ -419,6 +457,15 @@ function SendFund ({ chainRegistryMap, className, defaultValue, networkMap }: Co
                 isDanger
               >
                 {t<string>('The recipient is associated with a known phishing site on {{url}}', { replace: { url: recipientPhish } })}
+              </Warning>
+            )}
+
+            {recipientId && amount && !isValidTransferAmount && (
+              <Warning
+                className={'send-fund-warning'}
+                isDanger
+              >
+                {t<string>('Beware! The transaction amount is too small to keep the destination account alive.')}
               </Warning>
             )}
 

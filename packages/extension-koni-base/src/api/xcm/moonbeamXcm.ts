@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { ApiProps, NetworkJson, TokenInfo } from '@subwallet/extension-base/background/KoniTypes';
-import { FOUR_INSTRUCTIONS_WEIGHT, getMultiLocationFromParachain } from '@subwallet/extension-koni-base/api/xcm/utils';
+import { FOUR_INSTRUCTIONS_WEIGHT, getMultiLocationFromParachain, POLKADOT_UNLIMITED_WEIGHT } from '@subwallet/extension-koni-base/api/xcm/utils';
 import { parseNumberToDisplay } from '@subwallet/extension-koni-base/utils';
 import { KeyringPair } from '@subwallet/keyring/types';
 
@@ -68,11 +68,13 @@ export async function moonbeamEstimateCrossChainFee (
   const tokenType = TOKEN_TYPE_MAP[originNetworkKey][tokenInfo.symbol];
   const networkJson = networkMap[originNetworkKey];
 
+  const weightParam = originNetworkKey === 'moonriver' ? POLKADOT_UNLIMITED_WEIGHT : FOUR_INSTRUCTIONS_WEIGHT;
+
   const extrinsic = apiProps.api.tx.xTokens.transfer(
     { [tokenType]: new BN(tokenInfo.assetId as string) },
     value,
     getMultiLocationFromParachain(originNetworkKey, destinationNetworkKey, networkMap, to),
-    FOUR_INSTRUCTIONS_WEIGHT
+    weightParam
   );
 
   console.log('moon xcm tx here', extrinsic.toHex());
@@ -95,11 +97,12 @@ export function moonbeamGetXcmExtrinsic (
   networkMap: Record<string, NetworkJson>
 ) {
   const tokenType = TOKEN_TYPE_MAP[originNetworkKey][tokenInfo.symbol];
+  const weightParam = originNetworkKey === 'moonriver' ? POLKADOT_UNLIMITED_WEIGHT : FOUR_INSTRUCTIONS_WEIGHT;
 
   return api.tx.xTokens.transfer(
     { [tokenType]: new BN(tokenInfo.assetId as string) },
     value,
     getMultiLocationFromParachain(originNetworkKey, destinationNetworkKey, networkMap, to),
-    FOUR_INSTRUCTIONS_WEIGHT
+    weightParam
   );
 }

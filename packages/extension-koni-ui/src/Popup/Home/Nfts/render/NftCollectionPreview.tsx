@@ -13,11 +13,14 @@ interface Props {
   className?: string;
   data: _NftCollection;
   onClick: (data: _NftCollection) => void;
+  collectionImage?: string;
 }
 
-function NftCollectionPreview ({ className, data, onClick }: Props): React.ReactElement<Props> {
+function NftCollectionPreview ({ className, collectionImage, data, onClick }: Props): React.ReactElement<Props> {
   const [loading, setLoading] = useState(true);
-  const [showDefaultImage, setShowDefaultImage] = useState(false);
+  const [showImage, setShowImage] = useState(true);
+  const [showVideo, setShowVideo] = useState(false);
+  const [showCollectionImage, setShowCollectionImage] = useState(false);
   const themeContext = useContext(ThemeContext as React.Context<Theme>);
 
   const handleOnLoad = useCallback(() => {
@@ -30,8 +33,92 @@ function NftCollectionPreview ({ className, data, onClick }: Props): React.React
 
   const handleImageError = useCallback(() => {
     setLoading(false);
-    setShowDefaultImage(true);
+    setShowImage(false);
+    setShowVideo(true);
   }, []);
+
+  const handleVideoError = useCallback(() => {
+    setLoading(false);
+    setShowVideo(false);
+    setShowCollectionImage(true);
+  }, []);
+
+  const getItemImage = useCallback(() => {
+    if (data.image) {
+      return data.image;
+    } else if (collectionImage) {
+      return collectionImage;
+    }
+
+    return themeContext.logo;
+  }, [collectionImage, data.image, themeContext.logo]);
+
+  const getNftImage = useCallback(() => {
+    if (showImage) {
+      return (
+        <LazyLoad
+          scrollContainer={'.home-tab-contents'}
+        >
+          <img
+            alt={'collection-thumbnail'}
+            className={'collection-thumbnail'}
+            onError={handleImageError}
+            onLoad={handleOnLoad}
+            src={getItemImage()}
+            style={{ borderRadius: '5px 5px 0 0', opacity: loading ? '0.3' : '1' }}
+          />
+        </LazyLoad>
+      );
+    }
+
+    if (showVideo) {
+      return (
+        <LazyLoad
+          scrollContainer={'.home-tab-contents'}
+        >
+          <video
+            autoPlay
+            height='124'
+            loop={true}
+            muted
+            onError={handleVideoError}
+            width='124'
+          >
+            <source
+              src={getItemImage()}
+              type='video/mp4'
+            />
+          </video>
+        </LazyLoad>
+      );
+    }
+
+    if (showCollectionImage) {
+      return (
+        <LazyLoad
+          scrollContainer={'.home-tab-contents'}
+        >
+          <img
+            alt={'collection-thumbnail'}
+            className={'collection-thumbnail'}
+            onError={handleImageError}
+            onLoad={handleOnLoad}
+            src={collectionImage}
+            style={{ borderRadius: '5px 5px 0 0' }}
+          />
+        </LazyLoad>
+      );
+    }
+
+    return (
+      <img
+        alt={'default-img'}
+        className={'collection-thumbnail'}
+        src={themeContext.logo}
+        style={{ borderRadius: '5px 5px 0 0' }}
+      />
+    );
+  }, [collectionImage, getItemImage, handleImageError, handleOnLoad, handleVideoError, loading, showCollectionImage, showImage, showVideo, themeContext.logo]);
 
   return (
     <div className={className}>
@@ -43,27 +130,7 @@ function NftCollectionPreview ({ className, data, onClick }: Props): React.React
           {
             loading && <Spinner className={'img-spinner'} />
           }
-          <LazyLoad
-            scrollContainer={'.home-tab-contents'}
-          >
-            {
-              !showDefaultImage
-                ? <img
-                  alt={'collection-thumbnail'}
-                  className={'collection-thumbnail'}
-                  onError={handleImageError}
-                  onLoad={handleOnLoad}
-                  src={data.image ? data?.image : themeContext.logo}
-                  style={{ borderRadius: '5px 5px 0 0', opacity: loading ? '0.3' : '1' }}
-                />
-                : <img
-                  alt={'default-img'}
-                  className={'collection-thumbnail'}
-                  src={themeContext.logo}
-                  style={{ borderRadius: '5px 5px 0 0' }}
-                />
-            }
-          </LazyLoad>
+          {getNftImage()}
         </div>
 
         <div className={'collection-title'}>

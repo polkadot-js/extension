@@ -1062,114 +1062,135 @@ export const PREDEFINE_TOKEN_DATA_MAP: Record<string, Record<string, TokenInfo>>
     }
   },
   equilibrium_parachain: {
-    EQD: {
-      isMainToken: false,
-      symbol: 'EQD',
-      name: 'EQD',
-      decimals: 9
-    },
-    BTC: {
-      isMainToken: false,
-      symbol: 'BTC',
-      name: 'BTC',
-      decimals: 9
-    },
-    ETH: {
-      isMainToken: false,
-      symbol: 'ETH',
-      name: 'ETH',
-      decimals: 9
+    EQ: {
+      isMainToken: true,
+      symbol: 'EQ',
+      name: 'EQ',
+      decimals: 9,
+      specialOption: {
+        assetId: 25969
+      }
     },
     DOT: {
       isMainToken: false,
       symbol: 'DOT',
       name: 'DOT',
-      decimals: 9
+      decimals: 9,
+      specialOption: {
+        assetId: 6582132
+      }
     },
-    EOS: {
+    EQD: {
       isMainToken: false,
-      symbol: 'EOS',
-      name: 'EOS',
-      decimals: 9
+      symbol: 'EQD',
+      name: 'EQD',
+      decimals: 9,
+      specialOption: {
+        assetId: 6648164
+      }
     },
-    KSM: {
+    EQDOT: {
       isMainToken: false,
-      symbol: 'KSM',
-      name: 'KSM',
-      decimals: 9
-    },
-    CRV: {
-      isMainToken: false,
-      symbol: 'CRV',
-      name: 'CRV',
-      decimals: 9
-    },
-    EQ: {
-      isMainToken: true,
-      symbol: 'EQ',
-      name: 'EQ',
-      decimals: 9
-    },
-    GENS: {
-      isMainToken: false,
-      symbol: 'GENS',
-      name: 'GENS',
-      decimals: 9
-    },
-    DAI: {
-      isMainToken: false,
-      symbol: 'DAI',
-      name: 'DAI',
-      decimals: 9
-    },
-    USDT: {
-      isMainToken: false,
-      symbol: 'USDT',
-      name: 'USDT',
-      decimals: 9
-    },
-    BUSD: {
-      isMainToken: false,
-      symbol: 'BUSD',
-      name: 'BUSD',
-      decimals: 9
-    },
-    USDC: {
-      isMainToken: false,
-      symbol: 'USDC',
-      name: 'USDC',
-      decimals: 9
-    },
-    BNB: {
-      isMainToken: false,
-      symbol: 'BNB',
-      name: 'BNB',
-      decimals: 9
-    },
-    WBTC: {
-      isMainToken: false,
-      symbol: 'WBTC',
-      name: 'WBTC',
-      decimals: 9
-    },
-    HDOT: {
-      isMainToken: false,
-      symbol: 'HDOT',
-      name: 'HDOT',
-      decimals: 9
-    },
-    XDOT: {
-      isMainToken: false,
-      symbol: 'XDOT',
-      name: 'XDOT',
-      decimals: 9
-    },
-    XDOT2: {
-      isMainToken: false,
-      symbol: 'XDOT2',
-      name: 'XDOT2',
-      decimals: 9
+      symbol: 'EQDOT',
+      name: 'EQDOT',
+      decimals: 9,
+      specialOption: {
+        assetId: 435694104436
+      }
     }
+    // BTC: {
+    //   isMainToken: false,
+    //   symbol: 'BTC',
+    //   name: 'BTC',
+    //   decimals: 9
+    // },
+    // ETH: {
+    //   isMainToken: false,
+    //   symbol: 'ETH',
+    //   name: 'ETH',
+    //   decimals: 9
+    // },
+    // EOS: {
+    //   isMainToken: false,
+    //   symbol: 'EOS',
+    //   name: 'EOS',
+    //   decimals: 9
+    // },
+    // KSM: {
+    //   isMainToken: false,
+    //   symbol: 'KSM',
+    //   name: 'KSM',
+    //   decimals: 9
+    // },
+    // CRV: {
+    //   isMainToken: false,
+    //   symbol: 'CRV',
+    //   name: 'CRV',
+    //   decimals: 9
+    // },
+    // GENS: {
+    //   isMainToken: false,
+    //   symbol: 'GENS',
+    //   name: 'GENS',
+    //   decimals: 9
+    // },
+    // DAI: {
+    //   isMainToken: false,
+    //   symbol: 'DAI',
+    //   name: 'DAI',
+    //   decimals: 9
+    // },
+    // USDT: {
+    //   isMainToken: false,
+    //   symbol: 'USDT',
+    //   name: 'USDT',
+    //   decimals: 9,
+    //   specialOption: {
+    //     assetId: 1970496628
+    //   }
+    // },
+    // BUSD: {
+    //   isMainToken: false,
+    //   symbol: 'BUSD',
+    //   name: 'BUSD',
+    //   decimals: 9
+    // },
+    // USDC: {
+    //   isMainToken: false,
+    //   symbol: 'USDC',
+    //   name: 'USDC',
+    //   decimals: 9
+    // },
+    // BNB: {
+    //   isMainToken: false,
+    //   symbol: 'BNB',
+    //   name: 'BNB',
+    //   decimals: 9
+    // },
+    // WBTC: {
+    //   isMainToken: false,
+    //   symbol: 'WBTC',
+    //   name: 'WBTC',
+    //   decimals: 9
+    // },
+    // HDOT: {
+    //   isMainToken: false,
+    //   symbol: 'HDOT',
+    //   name: 'HDOT',
+    //   decimals: 9
+    // },
+    // XDOT: {
+    //   isMainToken: false,
+    //   symbol: 'XDOT',
+    //   name: 'XDOT',
+    //   decimals: 9
+    // },
+    // XDOT2: {
+    //   isMainToken: false,
+    //   symbol: 'XDOT2',
+    //   name: 'XDOT2',
+    //   decimals: 9
+    // }
   },
   crabEvm: {
     CRAB: {

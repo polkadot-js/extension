@@ -288,8 +288,8 @@ export interface DefaultFormatBalance {
 export interface ApiState {
   apiDefaultTx: SubmittableExtrinsicFunction;
   apiDefaultTxSudo: SubmittableExtrinsicFunction;
+  isApiInitialized: boolean;
   isApiReady: boolean;
-  isApiReadyOnce: boolean;
   isDevelopment?: boolean;
   isEthereum?: boolean;
   specName: string;
@@ -306,7 +306,6 @@ export interface ApiProps extends ApiState {
   apiError?: string;
   apiUrl: string;
   isNotSupport?: boolean;
-  isApiReadyOnce: boolean;
   isApiConnected: boolean;
   isEthereum: boolean;
   isEthereumOnly: boolean;
@@ -762,6 +761,7 @@ export enum NETWORK_STATUS {
 
 export enum TransferErrorCode {
   NOT_ENOUGH_VALUE = 'notEnoughValue',
+  NOT_ENOUGH_FEE = 'notEnoughValue',
   INVALID_VALUE = 'invalidValue',
   INVALID_TOKEN = 'invalidToken',
   TRANSFER_ERROR = 'transferError',
@@ -782,10 +782,22 @@ export enum BasicTxErrorCode {
   UNKNOWN_ERROR = 'unknownError'
 }
 
+export enum BasicTxWarningCode {
+  NOT_ENOUGH_EXISTENTIAL_DEPOSIT = 'notEnoughExistentialDeposit'
+}
+
 export type TxErrorCode = TransferErrorCode | BasicTxErrorCode
+
+export type TxWarningCode = BasicTxWarningCode
 
 export type BasicTxError = {
   code: TxErrorCode,
+  data?: object,
+  message: string
+}
+
+export type BasicTxWarning = {
+  code: TxWarningCode,
   data?: object,
   message: string
 }
@@ -1329,6 +1341,7 @@ export interface RequestCheckTransfer extends BaseRequestSign{
 
 export interface ResponseCheckTransfer{
   errors?: Array<BasicTxError>,
+  warnings?: Array<BasicTxWarning>,
   fromAccountFree: string,
   toAccountFree: string,
   estimateFee?: string,

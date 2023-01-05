@@ -21,6 +21,7 @@ import { DeriveBalancesAll } from '@polkadot/api-derive/types';
 import { AccountInfo, Balance } from '@polkadot/types/interfaces';
 import { BN } from '@polkadot/util';
 import { isEthereumAddress } from '@polkadot/util-crypto';
+import {_EvmApi, _SubstrateApi} from "@subwallet/extension-base/services/chain-service/types";
 
 type EqBalanceItem = [number, { positive: number }];
 
@@ -558,15 +559,15 @@ export function subscribeEVMBalance (networkKey: string, api: ApiPromise, addres
   };
 }
 
-export function subscribeBalance (addresses: string[], dotSamaAPIMap: Record<string, ApiProps>, web3ApiMap: Record<string, Web3>, callback: (networkKey: string, rs: BalanceItem) => void) {
+export function subscribeBalance (addresses: string[], substrateApiMap: Record<string, _SubstrateApi>, evmApiMap: Record<string, _EvmApi>, callback: (networkKey: string, rs: BalanceItem) => void) {
   const [substrateAddresses, evmAddresses] = categoryAddresses(addresses);
 
-  const unsubList = Object.entries(dotSamaAPIMap).map(async ([networkKey, apiProps]) => {
+  const unsubList = Object.entries(substrateApiMap).map(async ([networkKey, apiProps]) => {
     const networkAPI = await apiProps.isReady;
     const useAddresses = apiProps.isEthereum ? evmAddresses : substrateAddresses;
 
     if (['binance', 'binance_test', 'ethereum', 'ethereum_goerli', 'astarEvm', 'shidenEvm', 'shibuyaEvm', 'crabEvm', 'pangolinEvm', 'cloverEvm', 'boba_rinkeby', 'boba', 'bobabase', 'bobabeam', 'watr_network_evm'].includes(networkKey)) {
-      return subscribeEVMBalance(networkKey, networkAPI.api, useAddresses, web3ApiMap, callback);
+      return subscribeEVMBalance(networkKey, networkAPI.api, useAddresses, evmApiMap, callback);
     }
 
     if (!useAddresses || useAddresses.length === 0 || IGNORE_GET_SUBSTRATE_FEATURES_LIST.indexOf(networkKey) > -1) {
@@ -585,7 +586,7 @@ export function subscribeBalance (addresses: string[], dotSamaAPIMap: Record<str
     }
 
     // eslint-disable-next-line @typescript-eslint/no-misused-promises
-    return subscribeWithAccountMulti(useAddresses, networkKey, networkAPI, web3ApiMap, callback);
+    return subscribeWithAccountMulti(useAddresses, networkKey, networkAPI, evmApiMap, callback);
   });
 
   return () => {

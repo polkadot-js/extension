@@ -9,7 +9,7 @@ import { _SmartContractTokenInfo, _SubstrateApi, _SubstrateChainMetadata } from 
 
 import { ApiPromise, WsProvider } from '@polkadot/api';
 import { ContractPromise } from '@polkadot/api-contract';
-import { ScProvider, WellKnownChain } from '@polkadot/rpc-provider/substrate-connect';
+import { ScProvider } from '@polkadot/rpc-provider/substrate-connect';
 import { TypeRegistry } from '@polkadot/types/create';
 import { Registry } from '@polkadot/types/types';
 import { formatBalance, isTestChain, objectSpread, stringify } from '@polkadot/util';
@@ -26,13 +26,13 @@ export const DEFAULT_AUX = ['Aux1', 'Aux2', 'Aux3', 'Aux4', 'Aux5', 'Aux6', 'Aux
 function getSubstrateConnectChain (chain = 'polkadot'): string {
   switch (chain) {
     case 'kusama':
-      return WellKnownChain.ksmcc3;
+      return ScProvider.WellKnownChain.ksmcc3;
     case 'polkadot':
-      return WellKnownChain.polkadot;
+      return ScProvider.WellKnownChain.polkadot;
     case 'rococo':
-      return WellKnownChain.rococo_v2_2;
+      return ScProvider.WellKnownChain.rococo_v2_2;
     case 'westend':
-      return WellKnownChain.westend2;
+      return ScProvider.WellKnownChain.westend2;
     default:
       return chain;
   }

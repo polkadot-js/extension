@@ -2,7 +2,6 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { PriceJson } from '@subwallet/extension-base/background/KoniTypes';
-import { PREDEFINED_NETWORKS } from '@subwallet/extension-koni-base/api/predefinedNetworks';
 import axios from 'axios';
 
 interface GeckoItem {
@@ -12,7 +11,7 @@ interface GeckoItem {
   symbol: string
 }
 
-export const getTokenPrice = async (chains: Array<string> = Object.keys(PREDEFINED_NETWORKS), currency = 'usd'): Promise<PriceJson> => {
+export const getTokenPrice = async (chains: Array<string>, currency = 'usd'): Promise<PriceJson> => {
   try {
     const inverseMap: Record<string, string> = {};
 

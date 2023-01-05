@@ -162,7 +162,7 @@ export default class KoniTabs extends Tabs {
 
     if (currentEvmNetwork) {
       const { evmInfo, slug } = currentEvmNetwork;
-      const evmApi = this.#koniState.getWeb3Api(slug);
+      const evmApi = this.#koniState.getEvmApi(slug);
       const web3 = evmApi.api;
 
       if (web3.currentProvider instanceof Web3.providers.WebsocketProvider) {

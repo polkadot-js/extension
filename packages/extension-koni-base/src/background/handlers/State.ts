@@ -1,6 +1,7 @@
 // Copyright 2019-2022 @subwallet/extension-koni authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
+import { ChainInfoMap } from '@subwallet/chain';
 import { _ChainAsset, _ChainInfo } from '@subwallet/chain/types';
 import { withErrorLog } from '@subwallet/extension-base/background/handlers/helpers';
 import State, { AuthUrls, Resolver } from '@subwallet/extension-base/background/handlers/State';
@@ -19,7 +20,6 @@ import SettingsStore from '@subwallet/extension-base/stores/Settings';
 import { getId } from '@subwallet/extension-base/utils/getId';
 import { getTokenPrice } from '@subwallet/extension-koni-base/api/coingecko';
 import { parseTxAndSignature } from '@subwallet/extension-koni-base/api/evm/external/shared';
-import { PREDEFINED_NETWORKS } from '@subwallet/extension-koni-base/api/predefinedNetworks';
 // eslint-disable-next-line camelcase
 import { FUNGIBLE_TOKEN_STANDARDS } from '@subwallet/extension-koni-base/api/tokens';
 import { EvmRpcError } from '@subwallet/extension-koni-base/background/errors/EvmRpcError';
@@ -53,7 +53,7 @@ function getSuri (seed: string, type?: KeypairType): string {
 function generateDefaultCrowdloanMap () {
   const crowdloanMap: Record<string, CrowdloanItem> = {};
 
-  Object.keys(PREDEFINED_NETWORKS).forEach((networkKey) => {
+  Object.keys(ChainInfoMap).forEach((networkKey) => {
     crowdloanMap[networkKey] = {
       state: APIItemState.PENDING,
       contribute: '0'
@@ -94,13 +94,6 @@ export default class KoniState extends State {
   });
 
   private readonly confirmationsPromiseMap: Record<string, { resolver: Resolver<any>, validator?: (rs: any) => Error | undefined }> = {};
-
-  // TODO: move into chain-service
-  // private networkMap: Record<string, NetworkJson> = {}; // mapping to networkMapStore, for uses in background
-  // private networkMapSubject = new Subject<Record<string, NetworkJson>>();
-  // private lockNetworkMap = false;
-
-  // private apiMap: ApiMap = { dotSama: {}, web3: {} };
 
   private serviceInfoSubject = new Subject<ServiceInfo>();
 
@@ -455,6 +448,14 @@ export default class KoniState extends State {
         this.popupOpen();
       }
     });
+  }
+
+  public getNativeTokenInfo (networkKey: string) {
+    return this.chainService.getNativeTokenInfo(networkKey);
+  }
+
+  public getChainInfo (networkKey: string) {
+    return this.chainService.getChainInfoByKey(networkKey);
   }
 
   public async getStaking (): Promise<StakingJson> {
@@ -1147,25 +1148,6 @@ export default class KoniState extends State {
     return filteredNftContracts;
   }
 
-  // public getCustomTokenStore (callback: (data: CustomTokenJson) => void) {
-  //   return this.customTokenStore.get('EvmToken', (data) => {
-  //     callback(data);
-  //   });
-  // }
-
-  // TODO: move into chain-service
-  // public getNetworkMap () {
-  //   return this.networkMap;
-  // }
-  //
-  // public getNetworkMapByKey (key: string) {
-  //   return this.networkMap[key];
-  // }
-  //
-  // public subscribeNetworkMap () {
-  //   return this.networkMapStore.getSubject();
-  // }
-
   // ChainService ------------------------------------------------
 
   public getChainInfoMap () {
@@ -1297,11 +1279,11 @@ export default class KoniState extends State {
     return this.chainService.getSubstrateApi(networkKey);
   }
 
-  public getWeb3ApiMap () {
+  public getEvmApiMap () {
     return this.chainService.getEvmApiMap();
   }
 
-  public getWeb3Api (networkKey: string) {
+  public getEvmApi (networkKey: string) {
     return this.chainService.getEvmApi(networkKey);
   }
 
@@ -1705,7 +1687,7 @@ export default class KoniState extends State {
   }
 
   public async evmSendTransaction (id: string, url: string, networkKey: string, allowedAccounts: string[], transactionParams: EvmSendTransactionParams): Promise<string | undefined> {
-    const evmApi = this.getWeb3ApiMap()[networkKey];
+    const evmApi = this.getEvmApiMap()[networkKey];
     const web3 = evmApi.api;
 
     const autoFormatNumber = (val?: string | number): string | undefined => {

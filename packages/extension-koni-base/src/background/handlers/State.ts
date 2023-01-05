@@ -1,61 +1,13 @@
 // Copyright 2019-2022 @subwallet/extension-koni authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { ChainInfoMap } from '@subwallet/chain';
-import { _ChainAsset, _ChainInfo } from '@subwallet/chain/types';
 import Common from '@ethereumjs/common';
+import { ChainInfoMap } from '@subwallet/chain';
+import { _AssetType, _ChainAsset, _ChainInfo } from '@subwallet/chain/types';
 import { withErrorLog } from '@subwallet/extension-base/background/handlers/helpers';
 import State, { AuthUrls, Resolver } from '@subwallet/extension-base/background/handlers/State';
 import { isSubscriptionRunning, unsubscribe } from '@subwallet/extension-base/background/handlers/subscriptions';
-import {
-  AccountRefMap,
-  AddNetworkRequestExternal,
-  AddTokenRequestExternal,
-  APIItemState,
-  ApiMap,
-  AuthRequestV2,
-  BalanceItem,
-  BalanceJson,
-  ChainRegistry,
-  ConfirmationDefinitions,
-  ConfirmationsQueue,
-  ConfirmationsQueueItemOptions,
-  ConfirmationType,
-  CrowdloanItem,
-  CrowdloanJson,
-  CurrentAccountInfo,
-  CustomToken,
-  CustomTokenJson,
-  CustomTokenType,
-  EvmSendTransactionParams,
-  EvmSendTransactionRequestExternal,
-  EvmSignatureRequestExternal,
-  ExternalRequestPromise,
-  ExternalRequestPromiseStatus,
-  KeyringState,
-  NftCollection,
-  NftItem,
-  NftJson,
-  NftTransferExtra,
-  PriceJson,
-  RequestAccountExportPrivateKey,
-  RequestCheckPublicAndSecretKey,
-  RequestConfirmationComplete,
-  RequestSettingsType,
-  ResponseAccountExportPrivateKey,
-  ResponseCheckPublicAndSecretKey,
-  ResponseSettingsType,
-  ResultResolver,
-  ServiceInfo,
-  SingleModeJson,
-  StakeUnlockingJson,
-  StakingItem,
-  StakingJson,
-  StakingRewardItem,
-  StakingRewardJson,
-  ThemeTypes,
-  TransactionHistoryItemType
-} from '@subwallet/extension-base/background/KoniTypes';
+import { AccountRefMap, AddNetworkRequestExternal, AddTokenRequestExternal, APIItemState, ApiMap, AuthRequestV2, BalanceItem, BalanceJson, ChainRegistry, ConfirmationDefinitions, ConfirmationsQueue, ConfirmationsQueueItemOptions, ConfirmationType, CrowdloanItem, CrowdloanJson, CurrentAccountInfo, CustomToken, CustomTokenJson, CustomTokenType, EvmSendTransactionParams, EvmSendTransactionRequestExternal, EvmSignatureRequestExternal, ExternalRequestPromise, ExternalRequestPromiseStatus, KeyringState, NftCollection, NftItem, NftJson, NftTransferExtra, PriceJson, RequestAccountExportPrivateKey, RequestCheckPublicAndSecretKey, RequestConfirmationComplete, RequestSettingsType, ResponseAccountExportPrivateKey, ResponseCheckPublicAndSecretKey, ResponseSettingsType, ResultResolver, ServiceInfo, SingleModeJson, StakeUnlockingJson, StakingItem, StakingJson, StakingRewardItem, StakingRewardJson, ThemeTypes, TransactionHistoryItemType } from '@subwallet/extension-base/background/KoniTypes';
 import { AuthorizeRequest, RequestAuthorizeTab } from '@subwallet/extension-base/background/types';
 import { ChainService } from '@subwallet/extension-base/services/chain-service';
 import { _PREDEFINED_SINGLE_MODES } from '@subwallet/extension-base/services/chain-service/constants';
@@ -1255,6 +1207,10 @@ export default class KoniState extends State {
     return this.chainService.getAssetRegistry();
   }
 
+  public getAssetByChainAndAsset (chain: string, assetType: _AssetType) {
+    return this.chainService.getAssetByChainAndType(chain, assetType);
+  }
+
   public getChainInfoByKey (key: string) {
     return this.chainService.getChainInfoByKey(key);
   }
@@ -1867,12 +1823,12 @@ export default class KoniState extends State {
 
             console.log(params);
 
-            const network = this.getNetworkMapByKey(networkKey);
+            const chainInfo = this.getChainInfoByKey(networkKey);
 
             const common = Common.forCustomChain('mainnet', {
               name: networkKey,
-              networkId: network.evmChainId as number,
-              chainId: network.evmChainId as number
+              networkId: chainInfo.evmInfo?.evmChainId as number,
+              chainId: chainInfo.evmInfo?.evmChainId as number
             }, 'petersburg');
 
             // @ts-ignore

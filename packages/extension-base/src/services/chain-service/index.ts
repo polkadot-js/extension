@@ -186,6 +186,18 @@ export class ChainService {
     return result;
   }
 
+  public getAssetByChainAndType (chainSlug: string, assetType: _AssetType) {
+    const result: Record<string, _ChainAsset> = {};
+
+    Object.values(this.getAssetRegistry()).forEach((assetInfo) => {
+      if (assetInfo.assetType === assetType && assetInfo.originChain === chainSlug) {
+        result[assetInfo.slug] = assetInfo;
+      }
+    });
+
+    return result;
+  }
+
   // Setter
   public setChainActiveStatus (slug: string, active: boolean, excludedChains?: string[]) {
     const chainStateMap = this.getChainStateMap();

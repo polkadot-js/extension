@@ -18,3 +18,14 @@ export const _PREDEFINED_SINGLE_MODES: Record<string, SingleModeJson> = {
     autoTriggerDomain: 'subspace.network'
   }
 };
+
+export const _PURE_EVM_CHAINS = ['binance', 'binance_test', 'ethereum', 'ethereum_goerli', 'astarEvm', 'shidenEvm', 'shibuyaEvm', 'crabEvm', 'pangolinEvm', 'cloverEvm', 'boba_rinkeby', 'boba', 'bobabase', 'bobabeam', 'watr_network_evm'];
+
+export const _BALANCE_GROUP = {
+  kintsugi: ['kintsugi', 'interlay', 'kintsugi_test'],
+  crab: ['crab', 'pangolin'],
+  genshiro: ['genshiro_testnet', 'genshiro'],
+  equilibrium_parachain: ['equilibrium_parachain'],
+  bifrost: ['bifrost', 'acala', 'karura', 'acala_testnet', 'pioneer', 'bitcountry'],
+  statemine: ['statemine', 'astar', 'shiden', 'statemint']
+};

@@ -1,7 +1,7 @@
 // Copyright 2019-2022 @subwallet/extension-koni-base authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { _ChainAsset } from '@subwallet/chain/types';
+import {_ChainAsset, _ChainInfo} from '@subwallet/chain/types';
 import { _CUSTOM_NETWORK_PREFIX } from '@subwallet/extension-base/services/chain-service/types';
 
 import { isEthereumAddress } from '@polkadot/util-crypto';
@@ -56,3 +56,9 @@ export function _isEqualSmartContractAsset (asset1: _ChainAsset, asset2: _ChainA
 
   return false;
 }
+
+export function _isPureEvmChain (chainInfo: _ChainInfo) {
+  return (chainInfo.evmInfo !== null && chainInfo.substrateInfo === null);
+}
+
+export function getContractAddressOf

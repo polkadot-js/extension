@@ -1,27 +1,42 @@
 // Copyright 2019-2022 @subwallet/extension-koni-base authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { assetFromToken } from '@equilab/api';
-import { SignedBalance } from '@equilab/api/genshiro/interfaces';
-import { APIItemState, ApiProps, BalanceChildItem, BalanceItem, TokenBalanceRaw, TokenInfo } from '@subwallet/extension-base/background/KoniTypes';
-import { moonbeamBaseChains } from '@subwallet/extension-koni-base/api/dotsama/api-helper';
-import { getRegistry, getTokenInfo } from '@subwallet/extension-koni-base/api/dotsama/registry';
-import { getEVMBalance } from '@subwallet/extension-koni-base/api/tokens/evm/balance';
-import { getERC20Contract } from '@subwallet/extension-koni-base/api/tokens/evm/web3';
-import { getPSP22ContractPromise } from '@subwallet/extension-koni-base/api/tokens/wasm';
-import { state } from '@subwallet/extension-koni-base/background/handlers';
-import { ASTAR_REFRESH_BALANCE_INTERVAL, IGNORE_GET_SUBSTRATE_FEATURES_LIST, SUB_TOKEN_REFRESH_BALANCE_INTERVAL, SUBSCRIBE_BALANCE_FAST_INTERVAL } from '@subwallet/extension-koni-base/constants';
-import { categoryAddresses, sumBN } from '@subwallet/extension-koni-base/utils';
+import {assetFromToken} from '@equilab/api';
+import {SignedBalance} from '@equilab/api/genshiro/interfaces';
+import {
+  APIItemState,
+  ApiProps,
+  BalanceChildItem,
+  BalanceItem,
+  TokenBalanceRaw,
+  TokenInfo
+} from '@subwallet/extension-base/background/KoniTypes';
+import {moonbeamBaseChains} from '@subwallet/extension-koni-base/api/dotsama/api-helper';
+import {getRegistry, getTokenInfo} from '@subwallet/extension-koni-base/api/dotsama/registry';
+import {getEVMBalance} from '@subwallet/extension-koni-base/api/tokens/evm/balance';
+import {getERC20Contract} from '@subwallet/extension-koni-base/api/tokens/evm/web3';
+import {getPSP22ContractPromise} from '@subwallet/extension-koni-base/api/tokens/wasm';
+import {state} from '@subwallet/extension-koni-base/background/handlers';
+import {
+  ASTAR_REFRESH_BALANCE_INTERVAL,
+  IGNORE_GET_SUBSTRATE_FEATURES_LIST,
+  SUB_TOKEN_REFRESH_BALANCE_INTERVAL,
+  SUBSCRIBE_BALANCE_FAST_INTERVAL
+} from '@subwallet/extension-koni-base/constants';
+import {categoryAddresses, sumBN} from '@subwallet/extension-koni-base/utils';
 import Web3 from 'web3';
-import { Contract } from 'web3-eth-contract';
+import {Contract} from 'web3-eth-contract';
 
-import { ApiPromise } from '@polkadot/api';
-import { ContractPromise } from '@polkadot/api-contract';
-import { DeriveBalancesAll } from '@polkadot/api-derive/types';
-import { AccountInfo, Balance } from '@polkadot/types/interfaces';
-import { BN } from '@polkadot/util';
-import { isEthereumAddress } from '@polkadot/util-crypto';
+import {ApiPromise} from '@polkadot/api';
+import {ContractPromise} from '@polkadot/api-contract';
+import {DeriveBalancesAll} from '@polkadot/api-derive/types';
+import {AccountInfo, Balance} from '@polkadot/types/interfaces';
+import {BN} from '@polkadot/util';
+import {isEthereumAddress} from '@polkadot/util-crypto';
 import {_EvmApi, _SubstrateApi} from "@subwallet/extension-base/services/chain-service/types";
+import {_AssetType, _ChainAsset, _ChainInfo} from "@subwallet/chain/types";
+import {_isPureEvmChain} from "@subwallet/extension-base/services/chain-service/utils";
+import {_BALANCE_GROUP} from "@subwallet/extension-base/services/chain-service/constants";
 
 type EqBalanceItem = [number, { positive: number }];
 
@@ -62,16 +77,16 @@ function subscribeWithDerive (addresses: string[], networkKey: string, networkAP
   };
 }
 
-function subscribeERC20Interval (addresses: string[], networkKey: string, api: ApiPromise, web3ApiMap: Record<string, Web3>, subCallback: (rs: Record<string, BalanceChildItem>) => void): () => void {
-  let tokenList = {} as TokenInfo[];
-  const ERC20ContractMap = {} as Record<string, Contract>;
+function subscribeERC20Interval (addresses: string[], networkKey: string, api: ApiPromise, evmApiMap: Record<string, _EvmApi>, subCallback: (rs: Record<string, BalanceChildItem>) => void): () => void {
+  let tokenList = {} as Record<string, _ChainAsset>;
+  const erc20ContractMap = {} as Record<string, Contract>;
 
   const getTokenBalances = () => {
-    Object.values(tokenList).map(async ({ decimals, symbol }) => {
+    Object.values(tokenList).map(async (tokenInfo) => {
       let free = new BN(0);
 
       try {
-        const contract = ERC20ContractMap[symbol];
+        const contract = erc20ContractMap[tokenInfo.symbol];
         const bals = await Promise.all(addresses.map((address): Promise<string> => {
           // eslint-disable-next-line @typescript-eslint/no-unsafe-return,@typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-member-access
           return contract.methods.balanceOf(address).call();
@@ -81,29 +96,36 @@ function subscribeERC20Interval (addresses: string[], networkKey: string, api: A
         // console.log('TokenBals', symbol, addresses, bals, free);
 
         subCallback({
-          [symbol]: {
+          [tokenInfo.slug]: {
             reserved: '0',
             frozen: '0',
             free: free.toString(),
-            decimals
+            decimals: tokenInfo.decimals || 0
           }
         });
       } catch (err) {
-        console.log('There is problem when fetching ' + symbol + ' token balance', err);
+        console.log('There is problem when fetching ' + tokenInfo.slug + ' token balance', err);
       }
     });
   };
 
-  getRegistry(networkKey, api, state.getActiveErc20Tokens())
-    .then(({ tokenMap }) => {
-      tokenList = Object.values(tokenMap).filter(({ contractAddress }) => (!!contractAddress));
-      tokenList.forEach(({ contractAddress, symbol }) => {
-        if (contractAddress) {
-          ERC20ContractMap[symbol] = getERC20Contract(networkKey, contractAddress, web3ApiMap);
-        }
-      });
-      getTokenBalances();
-    }).catch(console.warn);
+  tokenList = state.getAssetByChainAndAsset(networkKey, _AssetType.ERC20);
+  Object.entries(tokenList).forEach(([slug, tokenInfo]) => {
+    erc20ContractMap[slug] = getERC20Contract(networkKey, tokenInfo.metadata.contractAddress, evmApiMap);
+  });
+
+  getTokenBalances();
+
+  // getRegistry(networkKey, api, state.getActiveErc20Tokens())
+  //   .then(({ tokenMap }) => {
+  //     tokenList = Object.values(tokenMap).filter(({ contractAddress }) => (!!contractAddress));
+  //     tokenList.forEach(({ contractAddress, symbol }) => {
+  //       if (contractAddress) {
+  //         erc20ContractMap[symbol] = getERC20Contract(networkKey, contractAddress, evmApiMap);
+  //       }
+  //     });
+  //
+  //   }).catch(console.warn);
 
   const interval = setInterval(getTokenBalances, SUB_TOKEN_REFRESH_BALANCE_INTERVAL);
 
@@ -376,7 +398,7 @@ async function subscribeAssetsBalance (addresses: string[], networkKey: string, 
   };
 }
 
-async function subscribeWithAccountMulti (addresses: string[], networkKey: string, networkAPI: ApiProps, web3ApiMap: Record<string, Web3>, callback: (networkKey: string, rs: BalanceItem) => void) {
+async function subscribeWithAccountMulti (addresses: string[], networkKey: string, networkAPI: _SubstrateApi, evmApiMap: Record<string, _EvmApi>, callback: (networkKey: string, rs: BalanceItem) => void) {
   const balanceItem: BalanceItem = {
     state: APIItemState.PENDING,
     free: '0',
@@ -389,7 +411,7 @@ async function subscribeWithAccountMulti (addresses: string[], networkKey: strin
   // @ts-ignore
   let unsub;
 
-  if (!['kintsugi', 'interlay', 'kintsugi_test', 'genshiro_testnet', 'genshiro', 'equilibrium_parachain', 'crab', 'pangolin'].includes(networkKey)) {
+  if (!_BALANCE_GROUP.kintsugi.includes(networkKey) && !_BALANCE_GROUP.crab.includes(networkKey) && !_BALANCE_GROUP.genshiro.includes(networkKey) && !_BALANCE_GROUP.equilibrium_parachain.includes(networkKey)) {
     unsub = await networkAPI.api.query.system.account.multi(addresses, (balances: AccountInfo[]) => {
       let [free, reserved, miscFrozen, feeFrozen] = [new BN(0), new BN(0), new BN(0), new BN(0)];
 
@@ -410,7 +432,7 @@ async function subscribeWithAccountMulti (addresses: string[], networkKey: strin
     });
   }
 
-  if (['crab', 'pangolin'].includes(networkKey)) {
+  if (_BALANCE_GROUP.crab.includes(networkKey)) {
     const { chainDecimals, chainTokens } = await getRegistry(networkKey, networkAPI.api);
 
     let totalBalance: BN = new BN(0);
@@ -491,18 +513,18 @@ async function subscribeWithAccountMulti (addresses: string[], networkKey: strin
   let unsub3: () => void;
 
   try {
-    if (['bifrost', 'acala', 'karura', 'acala_testnet', 'pioneer', 'bitcountry'].includes(networkKey)) {
+    if (_BALANCE_GROUP.bifrost.includes(networkKey)) {
       unsub2 = await subscribeTokensBalance(addresses, networkKey, networkAPI.api, mainCallback, subCallback);
-    } else if (['kintsugi', 'interlay', 'kintsugi_test'].includes(networkKey)) {
+    } else if (_BALANCE_GROUP.kintsugi.includes(networkKey)) {
       unsub2 = await subscribeTokensBalance(addresses, networkKey, networkAPI.api, mainCallback, subCallback, true);
-    } else if (['statemine', 'astar', 'shiden', 'statemint'].indexOf(networkKey) > -1) {
+    } else if (_BALANCE_GROUP.statemine.indexOf(networkKey) > -1) {
       unsub2 = await subscribeAssetsBalance(addresses, networkKey, networkAPI.api, subCallback);
-    } else if (['genshiro_testnet', 'genshiro'].includes(networkKey)) {
+    } else if (_BALANCE_GROUP.genshiro.includes(networkKey)) {
       unsub2 = await subscribeGenshiroTokenBalance(addresses, networkKey, networkAPI.api, mainCallback, subCallback, true);
-    } else if (['equilibrium_parachain'].includes(networkKey)) {
+    } else if (_BALANCE_GROUP.equilibrium_parachain.includes(networkKey)) {
       unsub2 = await subscribeEquilibriumTokenBalance(addresses, networkKey, networkAPI.api, mainCallback, subCallback, true);
     } else if (moonbeamBaseChains.includes(networkKey) || networkAPI.isEthereum) {
-      unsub2 = subscribeERC20Interval(addresses, networkKey, networkAPI.api, web3ApiMap, subCallback);
+      unsub2 = subscribeERC20Interval(addresses, networkKey, networkAPI.api, evmApiMap, subCallback);
     }
 
     if (!networkAPI.isEthereum && networkAPI.api.query.contracts) { // Get sub-token for substrate-based chains
@@ -521,7 +543,7 @@ async function subscribeWithAccountMulti (addresses: string[], networkKey: strin
   };
 }
 
-export function subscribeEVMBalance (networkKey: string, api: ApiPromise, addresses: string[], web3ApiMap: Record<string, Web3>, callback: (networkKey: string, rs: BalanceItem) => void) {
+export function subscribeEVMBalance (networkKey: string, api: ApiPromise, addresses: string[], evmApiMap: Record<string, _EvmApi>, callback: (networkKey: string, rs: BalanceItem) => void) {
   const balanceItem = {
     state: APIItemState.PENDING,
     free: '0',
@@ -531,7 +553,7 @@ export function subscribeEVMBalance (networkKey: string, api: ApiPromise, addres
   } as BalanceItem;
 
   function getBalance () {
-    getEVMBalance(networkKey, addresses, web3ApiMap)
+    getEVMBalance(networkKey, addresses, evmApiMap)
       .then((balances) => {
         balanceItem.free = sumBN(balances.map((b) => (new BN(b || '0')))).toString();
         balanceItem.state = APIItemState.READY;
@@ -551,7 +573,7 @@ export function subscribeEVMBalance (networkKey: string, api: ApiPromise, addres
 
   getBalance();
   const interval = setInterval(getBalance, ASTAR_REFRESH_BALANCE_INTERVAL);
-  const unsub2 = subscribeERC20Interval(addresses, networkKey, api, web3ApiMap, subCallback);
+  const unsub2 = subscribeERC20Interval(addresses, networkKey, api, evmApiMap, subCallback);
 
   return () => {
     clearInterval(interval);
@@ -559,14 +581,15 @@ export function subscribeEVMBalance (networkKey: string, api: ApiPromise, addres
   };
 }
 
-export function subscribeBalance (addresses: string[], substrateApiMap: Record<string, _SubstrateApi>, evmApiMap: Record<string, _EvmApi>, callback: (networkKey: string, rs: BalanceItem) => void) {
+export function subscribeBalance (addresses: string[], chainInfoMap: Record<string, _ChainInfo>, substrateApiMap: Record<string, _SubstrateApi>, evmApiMap: Record<string, _EvmApi>, callback: (networkKey: string, rs: BalanceItem) => void) {
   const [substrateAddresses, evmAddresses] = categoryAddresses(addresses);
 
-  const unsubList = Object.entries(substrateApiMap).map(async ([networkKey, apiProps]) => {
-    const networkAPI = await apiProps.isReady;
-    const useAddresses = apiProps.isEthereum ? evmAddresses : substrateAddresses;
+  const unsubList = Object.entries(substrateApiMap).map(async ([networkKey, substrateApi]) => {
+    const networkAPI = await substrateApi.isReady;
+    const chainInfo = chainInfoMap[networkKey];
+    const useAddresses = chainInfo.evmInfo !== null ? evmAddresses : substrateAddresses;
 
-    if (['binance', 'binance_test', 'ethereum', 'ethereum_goerli', 'astarEvm', 'shidenEvm', 'shibuyaEvm', 'crabEvm', 'pangolinEvm', 'cloverEvm', 'boba_rinkeby', 'boba', 'bobabase', 'bobabeam', 'watr_network_evm'].includes(networkKey)) {
+    if (_isPureEvmChain(chainInfo)) {
       return subscribeEVMBalance(networkKey, networkAPI.api, useAddresses, evmApiMap, callback);
     }
 
@@ -598,10 +621,10 @@ export function subscribeBalance (addresses: string[], substrateApiMap: Record<s
   };
 }
 
-export async function getFreeBalance (networkKey: string, address: string, dotSamaApiMap: Record<string, ApiProps>, web3ApiMap: Record<string, Web3>, token?: string): Promise<string> {
+export async function getFreeBalance (networkKey: string, address: string, dotSamaApiMap: Record<string, ApiProps>, evmApiMap: Record<string, Web3>, token?: string): Promise<string> {
   const apiProps = await dotSamaApiMap[networkKey].isReady;
   const api = apiProps.api;
-  const web3Api = web3ApiMap[networkKey];
+  const web3Api = evmApiMap[networkKey];
   const tokenInfo = token ? await getTokenInfo(networkKey, api, token) : undefined;
   const isMainToken = tokenInfo ? tokenInfo.isMainToken : true;
 
@@ -621,7 +644,7 @@ export async function getFreeBalance (networkKey: string, address: string, dotSa
         return '0';
       }
 
-      const contract = getERC20Contract(networkKey, tokenInfo.contractAddress, web3ApiMap);
+      const contract = getERC20Contract(networkKey, tokenInfo.contractAddress, evmApiMap);
       // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment,@typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-member-access
       const free = await contract.methods.balanceOf(address).call();
 
@@ -712,12 +735,12 @@ export async function subscribeFreeBalance (
   networkKey: string,
   address: string,
   dotSamaApiMap: Record<string, ApiProps>,
-  web3ApiMap: Record<string, Web3>,
+  evmApiMap: Record<string, Web3>,
   token: string | undefined,
   update: (balance: string) => void): Promise<() => void> {
   const apiProps = await dotSamaApiMap[networkKey].isReady;
   const api = apiProps.api;
-  const web3Api = web3ApiMap[networkKey];
+  const web3Api = evmApiMap[networkKey];
   const tokenInfo = token ? await getTokenInfo(networkKey, api, token) : undefined;
   const isMainToken = tokenInfo ? tokenInfo.isMainToken : true;
 
@@ -753,7 +776,7 @@ export async function subscribeFreeBalance (
           return;
         }
 
-        const contract = getERC20Contract(networkKey, tokenInfo.contractAddress, web3ApiMap);
+        const contract = getERC20Contract(networkKey, tokenInfo.contractAddress, evmApiMap);
 
         // @ts-ignore
         // eslint-disable-next-line @typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-member-access

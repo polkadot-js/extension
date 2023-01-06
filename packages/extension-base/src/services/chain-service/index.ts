@@ -186,11 +186,15 @@ export class ChainService {
     return result;
   }
 
-  public getAssetByChainAndType (chainSlug: string, assetType: _AssetType) {
+  public getAssetBySlug (slug: string) {
+    return this.getAssetRegistry()[slug];
+  }
+
+  public getAssetByChainAndType (chainSlug: string, assetTypes: _AssetType[]) {
     const result: Record<string, _ChainAsset> = {};
 
     Object.values(this.getAssetRegistry()).forEach((assetInfo) => {
-      if (assetInfo.assetType === assetType && assetInfo.originChain === chainSlug) {
+      if (assetTypes.includes(assetInfo.assetType) && assetInfo.originChain === chainSlug) {
         result[assetInfo.slug] = assetInfo;
       }
     });

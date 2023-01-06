@@ -1207,8 +1207,12 @@ export default class KoniState extends State {
     return this.chainService.getAssetRegistry();
   }
 
-  public getAssetByChainAndAsset (chain: string, assetType: _AssetType) {
-    return this.chainService.getAssetByChainAndType(chain, assetType);
+  public getAssetByChainAndAsset (chain: string, assetTypes: _AssetType[]) {
+    return this.chainService.getAssetByChainAndType(chain, assetTypes);
+  }
+
+  public getAssetBySlug (slug: string) {
+    return this.chainService.getAssetBySlug(slug);
   }
 
   public getChainInfoByKey (key: string) {

@@ -17,7 +17,7 @@ import { logger as createLogger } from '@polkadot/util/logger';
 import { Logger } from '@polkadot/util/types';
 import { defaults as addressDefaults } from '@polkadot/util-crypto/address/defaults';
 
-import { _API_OPTIONS_GROUP, API_AUTO_CONNECT_MS, API_MAX_RETRY } from '../constants';
+import { _API_OPTIONS_CHAIN_GROUP, API_AUTO_CONNECT_MS, API_MAX_RETRY } from '../constants';
 import { _PSP22_ABI, _PSP34_ABI } from '../helper';
 import { typesBundle, typesChain } from '../helper/api-helper';
 
@@ -205,9 +205,9 @@ export class SubstrateChainHandler {
 
     let api: ApiPromise;
 
-    if (_API_OPTIONS_GROUP.acala.includes(chainSlug)) {
+    if (_API_OPTIONS_CHAIN_GROUP.acala.includes(chainSlug)) {
       api = new ApiPromise(acalaOptions({ provider }));
-    } else if (_API_OPTIONS_GROUP.turing.includes(chainSlug)) {
+    } else if (_API_OPTIONS_CHAIN_GROUP.turing.includes(chainSlug)) {
       api = new ApiPromise({
         provider,
         rpc: oakRpc,

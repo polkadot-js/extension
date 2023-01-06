@@ -1,8 +1,8 @@
 // Copyright 2019-2022 @subwallet/extension-koni-base authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import {_ChainAsset, _ChainInfo} from '@subwallet/chain/types';
-import { _CUSTOM_NETWORK_PREFIX } from '@subwallet/extension-base/services/chain-service/types';
+import { _AssetType, _ChainAsset, _ChainInfo } from '@subwallet/chain/types';
+import { _CUSTOM_NETWORK_PREFIX, _SMART_CONTRACT_STANDARDS } from '@subwallet/extension-base/services/chain-service/types';
 
 import { isEthereumAddress } from '@polkadot/util-crypto';
 
@@ -61,4 +61,36 @@ export function _isPureEvmChain (chainInfo: _ChainInfo) {
   return (chainInfo.evmInfo !== null && chainInfo.substrateInfo === null);
 }
 
-export function getContractAddressOf
+export function _getContractAddressOfToken (tokenInfo: _ChainAsset) {
+  return tokenInfo.metadata?.contractAddress as string || '';
+}
+
+export function _checkSmartContractSupportByChain (chainInfo: _ChainInfo, contractType: _AssetType) {
+  // EVM chains support smart contract by default so just checking Substrate chains
+  if (chainInfo.substrateInfo === null || (chainInfo.substrateInfo && chainInfo.substrateInfo.supportSmartContract === null)) {
+    return false;
+  }
+
+  return (chainInfo.substrateInfo.supportSmartContract !== null && chainInfo.substrateInfo.supportSmartContract.includes(contractType));
+}
+
+// Utils for balance functions
+export function _getTokenOnChainAssetId (tokenInfo: _ChainAsset): string {
+  return tokenInfo.metadata?.assetId as string || '-1';
+}
+
+export function _getTokenOnChainInfo (tokenInfo: _ChainAsset): Record<string, any> {
+  return tokenInfo.metadata?.onChainInfo as Record<string, any>;
+}
+
+export function _isChainEvmCompatible (chainInfo: _ChainInfo) {
+  return chainInfo.evmInfo !== null;
+}
+
+export function _isNativeToken (tokenInfo: _ChainAsset) {
+  return tokenInfo.assetType === _AssetType.NATIVE;
+}
+
+export function _isSmartContractToken (tokenInfo: _ChainAsset) {
+  return _SMART_CONTRACT_STANDARDS.includes(tokenInfo.assetType);
+}

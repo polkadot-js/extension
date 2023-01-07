@@ -6,8 +6,8 @@ import { _AssetType, _ChainAsset, _ChainInfo, _EvmInfo, _SubstrateInfo } from '@
 import { EvmChainHandler } from '@subwallet/extension-base/services/chain-service/handler/EvmChainHandler';
 import { SubstrateChainHandler } from '@subwallet/extension-base/services/chain-service/handler/SubstrateChainHandler';
 import { _CHAIN_VALIDATION_ERROR } from '@subwallet/extension-base/services/chain-service/handler/types';
-import { _ChainBaseApi, _ChainConnectionStatus, _ChainState, _CUSTOM_PREFIX, _DataMap, _EvmApi, _NetworkUpsertParams, _SMART_CONTRACT_STANDARDS, _SmartContractTokenInfo, _SubstrateApi, _ValidateCustomTokenRequest, _ValidateCustomTokenResponse } from '@subwallet/extension-base/services/chain-service/types';
-import { _isCustomAsset, _isEqualContractAddress, _isEqualSmartContractAsset } from '@subwallet/extension-base/services/chain-service/utils';
+import { _ChainBaseApi, _ChainConnectionStatus, _ChainState, _CUSTOM_PREFIX, _DataMap, _EvmApi, _NetworkUpsertParams, _NFT_CONTRACT_STANDARDS, _SMART_CONTRACT_STANDARDS, _SmartContractTokenInfo, _SubstrateApi, _ValidateCustomTokenRequest, _ValidateCustomTokenResponse } from '@subwallet/extension-base/services/chain-service/types';
+import { _isChainEnabled, _isCustomAsset, _isEqualContractAddress, _isEqualSmartContractAsset } from '@subwallet/extension-base/services/chain-service/utils';
 import { IChain } from '@subwallet/extension-base/services/storage-service/databases';
 import DatabaseService from '@subwallet/extension-base/services/storage-service/DatabaseService';
 import { Subject } from 'rxjs';
@@ -158,12 +158,11 @@ export class ChainService {
     return [_AssetType.ERC20, _AssetType.ERC721, _AssetType.PSP22, _AssetType.PSP34];
   }
 
-  public getSupportedSmartContractChains () {
+  public getActiveChainInfoMap () {
     const result: Record<string, _ChainInfo> = {};
 
     Object.values(this.getChainInfoMap()).forEach((chainInfo) => {
-      if ((chainInfo.substrateInfo !== null && chainInfo.substrateInfo.supportSmartContract !== null) ||
-        (chainInfo.evmInfo !== null && chainInfo.evmInfo.supportSmartContract !== null)) {
+      if (_isChainEnabled(this.getChainStateByKey(chainInfo.slug))) {
         result[chainInfo.slug] = chainInfo;
       }
     });
@@ -197,6 +196,18 @@ export class ChainService {
     Object.values(this.getAssetRegistry()).forEach((assetInfo) => {
       if (assetTypes.includes(assetInfo.assetType) && assetInfo.originChain === chainSlug) {
         result[assetInfo.slug] = assetInfo;
+      }
+    });
+
+    return result;
+  }
+
+  public getSmartContractNfts () {
+    const result: _ChainAsset[] = [];
+
+    Object.values(this.getAssetRegistry()).forEach((assetInfo) => {
+      if (_NFT_CONTRACT_STANDARDS.includes(assetInfo.assetType)) {
+        result.push(assetInfo);
       }
     });
 
@@ -612,6 +623,7 @@ export class ChainService {
           symbol: params.chainEditInfo.symbol,
           genesisHash: params.chainSpec.genesisHash,
           relaySlug: null,
+          supportNft: false,
           supportStaking: params.chainSpec.paraId === null,
           supportSmartContract: null
         };

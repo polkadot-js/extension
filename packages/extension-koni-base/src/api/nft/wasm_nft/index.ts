@@ -1,7 +1,10 @@
 // Copyright 2019-2022 @subwallet/extension-koni authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { ApiProps, CustomToken, CustomTokenType, NftCollection, NftItem } from '@subwallet/extension-base/background/KoniTypes';
+import { _ChainAsset } from '@subwallet/chain/types';
+import { CustomTokenType, NftCollection, NftItem } from '@subwallet/extension-base/background/KoniTypes';
+import { _SubstrateApi } from '@subwallet/extension-base/services/chain-service/types';
+import { _getContractAddressOfToken } from '@subwallet/extension-base/services/chain-service/utils';
 import { BaseNftApi, HandleNftParams } from '@subwallet/extension-koni-base/api/nft/nft';
 import { ART_ZERO_COLLECTION_API, ART_ZERO_CONTRACTS, ART_ZERO_EXTERNAL_URL, ART_ZERO_IMAGE_API, ART_ZERO_IPFS_API } from '@subwallet/extension-koni-base/api/nft/wasm_nft/utils';
 import { getPSP34ContractPromise } from '@subwallet/extension-koni-base/api/tokens/wasm';
@@ -17,13 +20,13 @@ interface CollectionAttributes {
 }
 
 export class WasmNftApi extends BaseNftApi {
-  private wasmContracts: CustomToken[] = [];
+  private wasmContracts: _ChainAsset[] = [];
 
-  constructor (api: ApiProps | null, addresses: string[], chain: string) {
+  constructor (api: _SubstrateApi | null, addresses: string[], chain: string) {
     super(chain, api, addresses);
   }
 
-  setWasmContracts (wasmContracts: CustomToken[]) {
+  setSmartContractNfts (wasmContracts: _ChainAsset[]) {
     this.wasmContracts = wasmContracts;
   }
 
@@ -328,14 +331,14 @@ export class WasmNftApi extends BaseNftApi {
 
     await this.connect(); // might not be necessary
 
-    const apiPromise = this.dotSamaApi?.api as ApiPromise;
+    const apiPromise = this.substrateApi?.api as ApiPromise;
 
-    await Promise.all(this.wasmContracts.map(async ({ contractAddress, name }) => {
-      const contractPromise = getPSP34ContractPromise(apiPromise, contractAddress);
+    await Promise.all(this.wasmContracts.map(async (tokenInfo) => {
+      const contractPromise = getPSP34ContractPromise(apiPromise, _getContractAddressOfToken(tokenInfo));
 
       const { attributeList, storedOnChain } = await this.getCollectionAttributes(contractPromise);
 
-      return await this.getItemsByCollection(contractPromise, attributeList, storedOnChain, contractAddress, name, params);
+      return await this.getItemsByCollection(contractPromise, attributeList, storedOnChain, _getContractAddressOfToken(tokenInfo), tokenInfo.name, params);
     }));
   }
 }

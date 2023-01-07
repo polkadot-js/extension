@@ -1,27 +1,29 @@
 // Copyright 2019-2022 @subwallet/extension-koni authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { CustomToken, CustomTokenType, NftCollection, NftItem } from '@subwallet/extension-base/background/KoniTypes';
+import { _ChainAsset } from '@subwallet/chain/types';
+import { CustomTokenType, NftCollection, NftItem } from '@subwallet/extension-base/background/KoniTypes';
+import { _ERC721_ABI } from '@subwallet/extension-base/services/chain-service/helper';
+import { _EvmApi } from '@subwallet/extension-base/services/chain-service/types';
+import { _getContractAddressOfToken } from '@subwallet/extension-base/services/chain-service/utils';
 import { getRandomIpfsGateway } from '@subwallet/extension-koni-base/api/nft/config';
 import { BaseNftApi, HandleNftParams } from '@subwallet/extension-koni-base/api/nft/nft';
-import { ERC721Contract } from '@subwallet/extension-koni-base/api/tokens/evm/web3';
 import { isUrl } from '@subwallet/extension-koni-base/utils';
 import fetch from 'cross-fetch';
-import Web3 from 'web3';
 
 import { isEthereumAddress } from '@polkadot/util-crypto';
 
 export class EvmNftApi extends BaseNftApi {
-  evmContracts: CustomToken[] = [];
+  evmContracts: _ChainAsset[] = [];
 
-  constructor (web3: Web3 | null, addresses: string[], chain: string) {
+  constructor (evmApi: _EvmApi | null, addresses: string[], chain: string) {
     super(chain, undefined, addresses);
 
-    this.web3 = web3;
+    this.evmApi = evmApi;
     this.isEthereum = true;
   }
 
-  setEvmContracts (evmContracts: CustomToken[]) {
+  setSmartContractNfts (evmContracts: _ChainAsset[]) {
     this.evmContracts = evmContracts;
   }
 
@@ -78,12 +80,12 @@ export class EvmNftApi extends BaseNftApi {
   }
 
   private async getItemsByCollection (smartContract: string, collectionName: string | undefined, nftParams: HandleNftParams) {
-    if (!this.web3) {
+    if (!this.evmApi) {
       return;
     }
 
     // eslint-disable-next-line @typescript-eslint/no-unsafe-argument,@typescript-eslint/no-unsafe-member-access,@typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-assignment
-    const contract = new this.web3.eth.Contract(ERC721Contract, smartContract);
+    const contract = new this.evmApi.api.eth.Contract(_ERC721_ABI, smartContract);
     let ownItem = false;
 
     let collectionImage: string | undefined;
@@ -106,8 +108,6 @@ export class EvmNftApi extends BaseNftApi {
         return;
       }
 
-      console.log('balance for ', balance);
-
       const itemIndexes: number[] = [];
 
       for (let i = 0; i < Number(balance); i++) {
@@ -120,8 +120,6 @@ export class EvmNftApi extends BaseNftApi {
           const tokenId = await contract.methods.tokenOfOwnerByIndex(address, i).call() as number;
           // eslint-disable-next-line @typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-member-access
           const tokenURI = await contract.methods.tokenURI(tokenId).call() as string;
-
-          console.log('token Id, tokenURI', tokenId, tokenURI);
 
           const detailUrl = this.parseUrl(tokenURI);
 
@@ -185,8 +183,8 @@ export class EvmNftApi extends BaseNftApi {
       return;
     }
 
-    await Promise.all(this.evmContracts.map(async ({ contractAddress, name }) => {
-      return await this.getItemsByCollection(contractAddress, name, params);
+    await Promise.all(this.evmContracts.map(async (tokenInfo) => {
+      return await this.getItemsByCollection(_getContractAddressOfToken(tokenInfo), tokenInfo.name, params);
     }));
   }
 

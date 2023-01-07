@@ -34,3 +34,12 @@ export const _BALANCE_CHAIN_GROUP = {
 export const _BALANCE_TOKEN_GROUP = {
   crab: ['CKTON', 'PKTON']
 };
+
+export const _NFT_CHAIN_GROUP = {
+  acala: ['acala'],
+  karura: ['karura'], // TODO: karura and acala should be the same
+  rmrk: ['kusama'],
+  statemine: ['statemine', 'statemint'],
+  unique_network: ['unique_network'],
+  bitcountry: ['bitcountry', 'pioneer']
+};

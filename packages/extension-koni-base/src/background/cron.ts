@@ -1,8 +1,8 @@
 // Copyright 2019-2022 @subwallet/extension-koni authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { _ChainInfo } from '@subwallet/chain/types';
-import { ApiMap, ApiProps, CustomToken, NetworkJson, NftTransferExtra, ServiceInfo } from '@subwallet/extension-base/background/KoniTypes';
+import { _ChainAsset, _ChainInfo } from '@subwallet/chain/types';
+import { ApiMap, ApiProps, NetworkJson, NftTransferExtra, ServiceInfo } from '@subwallet/extension-base/background/KoniTypes';
 import { _ChainConnectionStatus } from '@subwallet/extension-base/services/chain-service/types';
 import DatabaseService from '@subwallet/extension-base/services/storage-service/DatabaseService';
 import { getTokenPrice } from '@subwallet/extension-koni-base/api/coingecko';
@@ -84,7 +84,7 @@ export class KoniCron {
       if (Object.keys(this.state.getSubstrateApiMap()).length !== 0 || Object.keys(this.state.getEvmApiMap()).length !== 0) {
         this.refreshPrice();
         this.updateApiMapStatus();
-        this.refreshNft(currentAccountInfo.address, this.state.getApiMap(), this.state.getActiveNftContracts(), this.state.getActiveContractSupportedNetworks());
+        this.refreshNft(currentAccountInfo.address, this.state.getApiMap(), this.state.getSmartContractNfts(), this.state.getActiveChainInfoMap());
         this.refreshStakingReward(currentAccountInfo.address);
         this.refreshStakingRewardFastInterval(currentAccountInfo.address);
         this.resetHistory(currentAccountInfo.address).then(() => {
@@ -109,7 +109,7 @@ export class KoniCron {
 
       if (Object.keys(this.state.getSubstrateApiMap()).length !== 0 || Object.keys(this.state.getEvmApiMap()).length !== 0) {
         this.resetNft(currentAccountInfo.address);
-        this.addCron('refreshNft', this.refreshNft(currentAccountInfo.address, this.state.getApiMap(), this.state.getActiveNftContracts(), this.state.getActiveContractSupportedNetworks()), CRON_REFRESH_NFT_INTERVAL);
+        this.addCron('refreshNft', this.refreshNft(currentAccountInfo.address, this.state.getApiMap(), this.state.getSmartContractNfts(), this.state.getActiveChainInfoMap()), CRON_REFRESH_NFT_INTERVAL);
         this.addCron('refreshPrice', this.refreshPrice, CRON_REFRESH_PRICE_INTERVAL);
         this.addCron('checkStatusApiMap', this.updateApiMapStatus, CRON_GET_API_MAP_STATUS);
         this.addCron('recoverApiMap', this.recoverApiMap, CRON_AUTO_RECOVER_DOTSAMA_INTERVAL, false);
@@ -152,7 +152,7 @@ export class KoniCron {
         this.removeCron('recoverApiMap');
 
         if (this.checkNetworkAvailable(serviceInfo)) { // only add cron job if there's at least 1 active network
-          this.addCron('refreshNft', this.refreshNft(address, serviceInfo.chainApiMap, serviceInfo.customNftRegistry, this.getActiveContractSupportedNetworks(serviceInfo.networkMap)), CRON_REFRESH_NFT_INTERVAL);
+          this.addCron('refreshNft', this.refreshNft(address, serviceInfo.chainApiMap, this.state.getSmartContractNfts(), this.state.getActiveChainInfoMap()), CRON_REFRESH_NFT_INTERVAL);
           this.addCron('refreshPrice', this.refreshPrice, CRON_REFRESH_PRICE_INTERVAL);
           this.addCron('checkStatusApiMap', this.updateApiMapStatus, CRON_GET_API_MAP_STATUS);
           this.addCron('recoverApiMap', this.recoverApiMap, CRON_AUTO_RECOVER_DOTSAMA_INTERVAL, false);
@@ -258,10 +258,10 @@ export class KoniCron {
       .catch((err) => this.logger.log(err));
   };
 
-  refreshNft = (address: string, apiMap: ApiMap, customNftRegistry: CustomToken[], contractSupportedNetworkMap: Record<string, _ChainInfo>) => {
+  refreshNft = (address: string, apiMap: ApiMap, smartContractNfts: _ChainAsset[], chainInfoMap: Record<string, _ChainInfo>) => {
     return () => {
       this.logger.log('Refresh Nft state');
-      this.subscriptions.subscribeNft(address, apiMap.substrate, apiMap.evm, customNftRegistry, contractSupportedNetworkMap);
+      this.subscriptions.subscribeNft(address, apiMap.substrate, apiMap.evm, smartContractNfts, chainInfoMap);
     };
   };
 

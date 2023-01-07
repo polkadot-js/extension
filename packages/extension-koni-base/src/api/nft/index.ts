@@ -1,10 +1,13 @@
 // Copyright 2019-2022 @subwallet/extension-koni authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { ApiProps, ContractType, CustomToken, NetworkJson, NftCollection, NftItem } from '@subwallet/extension-base/background/KoniTypes';
+import { _ChainAsset, _ChainInfo } from '@subwallet/chain/types';
+import { NftCollection, NftItem } from '@subwallet/extension-base/background/KoniTypes';
+import { _NFT_CHAIN_GROUP } from '@subwallet/extension-base/services/chain-service/constants';
+import { _EvmApi, _SubstrateApi } from '@subwallet/extension-base/services/chain-service/types';
+import { _isChainSupportEvmNft, _isChainSupportNativeNft, _isChainSupportWasmNft } from '@subwallet/extension-base/services/chain-service/utils';
 import { AcalaNftApi } from '@subwallet/extension-koni-base/api/nft/acala_nft';
 import { BitCountryNftApi } from '@subwallet/extension-koni-base/api/nft/bit.country';
-import { SUPPORTED_NFT_NETWORKS } from '@subwallet/extension-koni-base/api/nft/config';
 import { EvmNftApi } from '@subwallet/extension-koni-base/api/nft/evm_nft';
 import { KaruraNftApi } from '@subwallet/extension-koni-base/api/nft/karura_nft';
 import { BaseNftApi } from '@subwallet/extension-koni-base/api/nft/nft';
@@ -13,72 +16,66 @@ import StatemineNftApi from '@subwallet/extension-koni-base/api/nft/statemine_nf
 import UniqueNftApi from '@subwallet/extension-koni-base/api/nft/unique_nft';
 import { WasmNftApi } from '@subwallet/extension-koni-base/api/nft/wasm_nft';
 import { categoryAddresses } from '@subwallet/extension-koni-base/utils';
-import Web3 from 'web3';
 
-function createSubstrateNftApi (chain: string, apiProps: ApiProps | null, addresses: string[]): BaseNftApi | null {
+function createSubstrateNftApi (chain: string, substrateApi: _SubstrateApi | null, addresses: string[]): BaseNftApi | null {
   const [substrateAddresses] = categoryAddresses(addresses);
 
-  switch (chain) {
-    case SUPPORTED_NFT_NETWORKS.karura:
-      return new KaruraNftApi(apiProps, substrateAddresses, chain);
-    case SUPPORTED_NFT_NETWORKS.acala:
-      return new AcalaNftApi(apiProps, substrateAddresses, chain);
-    case SUPPORTED_NFT_NETWORKS.kusama:
-      return new RmrkNftApi(apiProps, substrateAddresses, chain);
-    case SUPPORTED_NFT_NETWORKS.statemine:
-      return new StatemineNftApi(apiProps, substrateAddresses, chain);
-    case SUPPORTED_NFT_NETWORKS.unique_network:
-      return new UniqueNftApi(apiProps, substrateAddresses, chain);
-    // case SUPPORTED_NFT_NETWORKS.quartz:
-    //   return new QuartzNftApi(api, substrateAddresses, chain);
-    case SUPPORTED_NFT_NETWORKS.bitcountry:
-      return new BitCountryNftApi(apiProps, substrateAddresses, chain);
-    case SUPPORTED_NFT_NETWORKS.pioneer:
-      return new BitCountryNftApi(apiProps, substrateAddresses, chain);
+  if (_NFT_CHAIN_GROUP.acala.includes(chain)) {
+    return new AcalaNftApi(substrateApi, substrateAddresses, chain);
+  } else if (_NFT_CHAIN_GROUP.karura.includes(chain)) {
+    return new KaruraNftApi(substrateApi, substrateAddresses, chain);
+  } else if (_NFT_CHAIN_GROUP.rmrk.includes(chain)) {
+    return new RmrkNftApi(substrateAddresses, chain);
+  } else if (_NFT_CHAIN_GROUP.statemine.includes(chain)) {
+    return new StatemineNftApi(substrateApi, substrateAddresses, chain);
+  } else if (_NFT_CHAIN_GROUP.unique_network.includes(chain)) {
+    return new UniqueNftApi(substrateApi, substrateAddresses, chain);
+  } else if (_NFT_CHAIN_GROUP.bitcountry.includes(chain)) {
+    return new BitCountryNftApi(substrateApi, substrateAddresses, chain);
   }
 
   return null;
 }
 
-function createWasmNftApi (chain: string, apiProps: ApiProps | null, addresses: string[]): BaseNftApi | null {
+function createWasmNftApi (chain: string, apiProps: _SubstrateApi | null, addresses: string[]): BaseNftApi | null {
   const [substrateAddresses] = categoryAddresses(addresses);
 
   return new WasmNftApi(apiProps, substrateAddresses, chain);
 }
 
-function createWeb3NftApi (chain: string, web3: Web3 | null, addresses: string[]): BaseNftApi | null {
+function createWeb3NftApi (chain: string, evmApi: _EvmApi | null, addresses: string[]): BaseNftApi | null {
   const [, evmAddresses] = categoryAddresses(addresses);
 
-  return new EvmNftApi(web3, evmAddresses, chain);
+  return new EvmNftApi(evmApi, evmAddresses, chain);
 }
 
 export class NftHandler {
   // General settings
-  contractSupportedNetworkMap: Record<string, NetworkJson> = {};
+  chainInfoMap: Record<string, _ChainInfo> = {};
   addresses: string[] = [];
-  nftContracts: Record<string, CustomToken[]> = {};
+  smartContractNfts: _ChainAsset[] = [];
 
   // Provider API needed
-  dotSamaApiMap: Record<string, ApiProps> = {};
-  web3ApiMap: Record<string, Web3> = {};
+  substrateApiMap: Record<string, _SubstrateApi> = {};
+  evmApiMap: Record<string, _EvmApi> = {};
 
   // Logic handling
   handlers: BaseNftApi[] = []; // 1 chain can have multiple handlers (to support multiple token standards)
   total = 0;
   needSetupApi = true;
 
-  setContractSupportedNetworkMap (contractSupportedNetworkMap: Record<string, NetworkJson>) {
-    this.contractSupportedNetworkMap = contractSupportedNetworkMap;
+  setChainInfoMap (chainInfoMap: Record<string, _ChainInfo>) {
+    this.chainInfoMap = chainInfoMap;
     this.needSetupApi = true;
   }
 
-  setWeb3ApiMap (web3ApiMap: Record<string, Web3>) {
-    this.web3ApiMap = web3ApiMap;
+  setWeb3ApiMap (web3ApiMap: Record<string, _EvmApi>) {
+    this.evmApiMap = web3ApiMap;
     this.needSetupApi = true;
   }
 
-  setDotSamaApiMap (dotSamaAPIMap: Record<string, ApiProps>) {
-    this.dotSamaApiMap = dotSamaAPIMap;
+  setDotSamaApiMap (dotSamaAPIMap: Record<string, _SubstrateApi>) {
+    this.substrateApiMap = dotSamaAPIMap;
     this.needSetupApi = true;
   }
 
@@ -94,23 +91,20 @@ export class NftHandler {
     }
   }
 
-  private setupNftContracts (customTokens: CustomToken[]) {
-    this.nftContracts = {};
+  private setupNftContracts (smartContractNfts: _ChainAsset[]) {
+    this.smartContractNfts = smartContractNfts;
 
-    for (const contract of customTokens) {
-      if (contract.chain in this.nftContracts) {
-        this.nftContracts[contract.chain].push(contract);
-      } else {
-        this.nftContracts[contract.chain] = [contract];
-      }
-    }
-
-    // TODO: consider classifying by token types as well
     for (const handler of this.handlers) {
-      if (handler instanceof EvmNftApi) {
-        handler.setEvmContracts(this.nftContracts[handler.chain]);
-      } else if (handler instanceof WasmNftApi) {
-        handler.setWasmContracts(this.nftContracts[handler.chain]);
+      if (handler instanceof EvmNftApi || handler instanceof WasmNftApi) {
+        const filteredNfts: _ChainAsset[] = [];
+
+        for (const nft of smartContractNfts) {
+          if (nft.originChain === handler.chain) {
+            filteredNfts.push(nft);
+          }
+        }
+
+        handler.setSmartContractNfts(filteredNfts);
       }
     }
   }
@@ -121,29 +115,30 @@ export class NftHandler {
         this.handlers = [];
         const [substrateAddresses, evmAddresses] = categoryAddresses(this.addresses);
 
-        for (const chain in SUPPORTED_NFT_NETWORKS) { // create handlers for default networks
-          if (this.dotSamaApiMap[chain]) {
-            const handler = createSubstrateNftApi(chain, this.dotSamaApiMap[chain], substrateAddresses);
-
-            if (handler) {
-              this.handlers.push(handler);
-            }
-          }
-        }
-
-        // TODO: 1 network might support WASM, EVM and more
-        Object.entries(this.contractSupportedNetworkMap).forEach(([chain, networkJson]) => {
-          if (networkJson.supportSmartContract && networkJson.supportSmartContract.includes(ContractType.evm)) {
-            if (this.web3ApiMap[chain]) {
-              const handler = createWeb3NftApi(chain, this.web3ApiMap[chain], evmAddresses);
+        Object.entries(this.chainInfoMap).forEach(([chain, chainInfo]) => {
+          if (_isChainSupportNativeNft(chainInfo)) {
+            if (this.substrateApiMap[chain]) {
+              const handler = createSubstrateNftApi(chain, this.substrateApiMap[chain], substrateAddresses);
 
               if (handler) {
                 this.handlers.push(handler);
               }
             }
-          } else if (networkJson.supportSmartContract && networkJson.supportSmartContract.includes(ContractType.wasm)) {
-            if (this.dotSamaApiMap[chain]) {
-              const handler = createWasmNftApi(chain, this.dotSamaApiMap[chain], substrateAddresses);
+          }
+
+          if (_isChainSupportEvmNft(chainInfo)) {
+            if (this.evmApiMap[chain]) {
+              const handler = createWeb3NftApi(chain, this.evmApiMap[chain], evmAddresses);
+
+              if (handler) {
+                this.handlers.push(handler);
+              }
+            }
+          }
+
+          if (_isChainSupportWasmNft(chainInfo)) {
+            if (this.substrateApiMap[chain]) {
+              const handler = createWasmNftApi(chain, this.substrateApiMap[chain], substrateAddresses);
 
               if (handler && !this.handlers.includes(handler)) {
                 this.handlers.push(handler);
@@ -161,7 +156,7 @@ export class NftHandler {
   }
 
   public async handleNfts (
-    nftContracts: CustomToken[],
+    nftContracts: _ChainAsset[],
     updateItem: (chain: string, data: NftItem, owner: string) => void,
     updateCollection: (chain: string, data: NftCollection) => void,
     updateIds: (chain: string, owner: string, collectionId?: string, nftIds?: string[]) => void,

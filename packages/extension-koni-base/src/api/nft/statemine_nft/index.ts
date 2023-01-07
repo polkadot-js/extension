@@ -1,7 +1,8 @@
 // Copyright 2019-2022 @subwallet/extension-koni authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { ApiProps, NftCollection, NftItem } from '@subwallet/extension-base/background/KoniTypes';
+import { NftCollection, NftItem } from '@subwallet/extension-base/background/KoniTypes';
+import { _SubstrateApi } from '@subwallet/extension-base/services/chain-service/types';
 import { BaseNftApi, HandleNftParams } from '@subwallet/extension-koni-base/api/nft/nft';
 import { isUrl } from '@subwallet/extension-koni-base/utils';
 import fetch from 'cross-fetch';
@@ -33,7 +34,7 @@ interface CollectionDetail {
 
 export default class StatemineNftApi extends BaseNftApi {
   // eslint-disable-next-line no-useless-constructor
-  constructor (api: ApiProps | null, addresses: string[], chain: string) {
+  constructor (api: _SubstrateApi | null, addresses: string[], chain: string) {
     super(chain, api, addresses);
   }
 
@@ -62,7 +63,7 @@ export default class StatemineNftApi extends BaseNftApi {
    * @param addresses
    */
   private async getNfts (addresses: string[]): Promise<AssetId[]> {
-    if (!this.dotSamaApi) {
+    if (!this.substrateApi) {
       return [];
     }
 
@@ -70,7 +71,7 @@ export default class StatemineNftApi extends BaseNftApi {
 
     await Promise.all(addresses.map(async (address) => {
       // @ts-ignore
-      const resp = await this.dotSamaApi.api.query.uniques.account.keys(address);
+      const resp = await this.substrateApi.api.query.uniques.account.keys(address);
 
       if (resp) {
         for (const key of resp) {
@@ -86,12 +87,12 @@ export default class StatemineNftApi extends BaseNftApi {
   }
 
   private async getTokenDetails (assetId: AssetId): Promise<TokenDetail | null> {
-    if (!this.dotSamaApi) {
+    if (!this.substrateApi) {
       return null;
     }
 
     const { classId, tokenId } = assetId;
-    const metadataNft = (await this.dotSamaApi.api.query.uniques.instanceMetadataOf(this.parseTokenId(classId as string), this.parseTokenId(tokenId as string))).toHuman() as MetadataResponse;
+    const metadataNft = (await this.substrateApi.api.query.uniques.instanceMetadataOf(this.parseTokenId(classId as string), this.parseTokenId(tokenId as string))).toHuman() as MetadataResponse;
 
     if (!metadataNft?.data) {
       return null;
@@ -102,11 +103,11 @@ export default class StatemineNftApi extends BaseNftApi {
   }
 
   private async getCollectionDetail (collectionId: number): Promise<CollectionDetail | null> {
-    if (!this.dotSamaApi) {
+    if (!this.substrateApi) {
       return null;
     }
 
-    const collectionMetadata = (await this.dotSamaApi.api.query.uniques.classMetadataOf(collectionId)).toHuman() as MetadataResponse;
+    const collectionMetadata = (await this.substrateApi.api.query.uniques.classMetadataOf(collectionId)).toHuman() as MetadataResponse;
 
     if (!collectionMetadata?.data) {
       return null;

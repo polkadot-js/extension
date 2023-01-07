@@ -1,7 +1,8 @@
 // Copyright 2019-2022 @subwallet/extension-koni authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { ApiProps, NftCollection, NftItem } from '@subwallet/extension-base/background/KoniTypes';
+import { NftCollection, NftItem } from '@subwallet/extension-base/background/KoniTypes';
+import { _SubstrateApi } from '@subwallet/extension-base/services/chain-service/types';
 import { getRandomIpfsGateway } from '@subwallet/extension-koni-base/api/nft/config';
 import { BaseNftApi, HandleNftParams } from '@subwallet/extension-koni-base/api/nft/nft';
 import { isUrl } from '@subwallet/extension-koni-base/utils';
@@ -30,7 +31,7 @@ interface Token {
 
 export class KaruraNftApi extends BaseNftApi {
   // eslint-disable-next-line no-useless-constructor
-  constructor (api: ApiProps | null, addresses: string[], chain: string) {
+  constructor (api: _SubstrateApi | null, addresses: string[], chain: string) {
     super(chain, api, addresses);
   }
 
@@ -57,7 +58,7 @@ export class KaruraNftApi extends BaseNftApi {
    * @param addresses
    */
   private async getNfts (addresses: string[]): Promise<AssetId[]> {
-    if (!this.dotSamaApi) {
+    if (!this.substrateApi) {
       return [];
     }
 
@@ -65,7 +66,7 @@ export class KaruraNftApi extends BaseNftApi {
 
     await Promise.all(addresses.map(async (address) => {
       // @ts-ignore
-      const resp = await this.dotSamaApi.api.query.ormlNFT.tokensByOwner.keys(address);
+      const resp = await this.substrateApi.api.query.ormlNFT.tokensByOwner.keys(address);
 
       if (address in accountAssets) {
         accountAssets[address].concat(resp);
@@ -89,11 +90,11 @@ export class KaruraNftApi extends BaseNftApi {
   }
 
   private async getCollectionDetails (collectionId: number | string): Promise<Record<string, any> | null> {
-    if (!this.dotSamaApi) {
+    if (!this.substrateApi) {
       return null;
     }
 
-    const metadataCollection = (await this.dotSamaApi.api.query.ormlNFT.classes(collectionId)).toHuman() as Record<string, any>;
+    const metadataCollection = (await this.substrateApi.api.query.ormlNFT.classes(collectionId)).toHuman() as Record<string, any>;
 
     if (!metadataCollection?.metadata) {
       return null;
@@ -105,11 +106,11 @@ export class KaruraNftApi extends BaseNftApi {
   }
 
   private async getTokenDetails (assetId: AssetId): Promise<Token | null> {
-    if (!this.dotSamaApi) {
+    if (!this.substrateApi) {
       return null;
     }
 
-    return (await this.dotSamaApi.api.query.ormlNFT.tokens(assetId.classId, assetId.tokenId)).toHuman() as unknown as Token;
+    return (await this.substrateApi.api.query.ormlNFT.tokens(assetId.classId, assetId.tokenId)).toHuman() as unknown as Token;
   }
 
   public async handleNft (address: string, params: HandleNftParams) {

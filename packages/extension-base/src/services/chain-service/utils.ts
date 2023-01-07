@@ -126,3 +126,15 @@ export function _isSubstrateParachain (chainInfo: _ChainInfo) {
 export function _getChainSubstrateAddressPrefix (chainInfo: _ChainInfo) {
   return chainInfo.substrateInfo?.addressPrefix || -1;
 }
+
+export function _isChainSupportNativeNft (chainInfo: _ChainInfo) {
+  return chainInfo.substrateInfo?.supportNft || false;
+}
+
+export function _isChainSupportEvmNft (chainInfo: _ChainInfo) {
+  return chainInfo.substrateInfo?.supportSmartContract?.includes(_AssetType.ERC721) || false;
+}
+
+export function _isChainSupportWasmNft (chainInfo: _ChainInfo) {
+  return chainInfo.substrateInfo?.supportSmartContract?.includes(_AssetType.PSP34) || false;
+}

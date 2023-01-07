@@ -1,10 +1,10 @@
 // Copyright 2019-2022 @subwallet/extension-koni authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { ApiProps, NftCollection, NftItem } from '@subwallet/extension-base/background/KoniTypes';
+import { NftCollection, NftItem } from '@subwallet/extension-base/background/KoniTypes';
+import { _EvmApi, _SubstrateApi } from '@subwallet/extension-base/services/chain-service/types';
 import { getRandomIpfsGateway } from '@subwallet/extension-koni-base/api/nft/config';
 import { isUrl } from '@subwallet/extension-koni-base/utils';
-import Web3 from 'web3';
 
 export interface HandleNftParams {
   updateItem: (chain: string, data: NftItem, owner: string) => void,
@@ -15,16 +15,16 @@ export interface HandleNftParams {
 
 export abstract class BaseNftApi {
   chain = '';
-  dotSamaApi: ApiProps | null = null;
-  web3: Web3 | null = null;
+  substrateApi: _SubstrateApi | null = null;
+  evmApi: _EvmApi | null = null;
   data: NftCollection[] = [];
   total = 0;
   addresses: string[] = [];
   isEthereum = false;
 
-  protected constructor (chain: string, api?: ApiProps | null, addresses?: string[], web3?: Web3) {
-    if (api) {
-      this.dotSamaApi = api;
+  protected constructor (chain: string, substrateApi?: _SubstrateApi | null, addresses?: string[], evmApi?: _EvmApi) {
+    if (substrateApi) {
+      this.substrateApi = substrateApi;
     }
 
     if (addresses) {
@@ -33,25 +33,25 @@ export abstract class BaseNftApi {
 
     this.chain = chain;
 
-    if (web3) {
-      this.web3 = web3;
+    if (evmApi) {
+      this.evmApi = evmApi;
     }
   }
 
   async connect () {
-    if (!this.dotSamaApi?.isApiConnected) {
-      this.dotSamaApi = await this.dotSamaApi?.isReady as ApiProps;
+    if (!this.substrateApi?.isApiConnected) {
+      this.substrateApi = await this.substrateApi?.isReady as _SubstrateApi;
     }
   }
 
   recoverConnection () {
-    if (!this.dotSamaApi?.isApiConnected) {
-      this.dotSamaApi?.recoverConnect && this.dotSamaApi.recoverConnect();
+    if (!this.substrateApi?.isApiConnected) {
+      this.substrateApi?.recoverConnect && this.substrateApi.recoverConnect();
     }
   }
 
-  getDotSamaApi () {
-    return this.dotSamaApi;
+  getSubstrateApi () {
+    return this.substrateApi;
   }
 
   getChain () {
@@ -66,8 +66,8 @@ export abstract class BaseNftApi {
     return this.data;
   }
 
-  setApi (api: ApiProps) {
-    this.dotSamaApi = api;
+  setSubstrateApi (api: _SubstrateApi) {
+    this.substrateApi = api;
   }
 
   setChain (chain: string) {

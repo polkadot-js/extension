@@ -1,7 +1,7 @@
 // Copyright 2019-2022 @subwallet/extension-koni authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { ApiProps, NftCollection, NftItem, RMRK_VER } from '@subwallet/extension-base/background/KoniTypes';
+import { NftCollection, NftItem, RMRK_VER } from '@subwallet/extension-base/background/KoniTypes';
 import { BaseNftApi, HandleNftParams } from '@subwallet/extension-koni-base/api/nft/nft';
 import { isUrl, reformatAddress } from '@subwallet/extension-koni-base/utils';
 import fetch from 'cross-fetch';
@@ -34,8 +34,8 @@ interface NFTResource {
 }
 
 export class RmrkNftApi extends BaseNftApi {
-  constructor (api: ApiProps | null, addresses: string[], chain: string) {
-    super(chain, api, addresses);
+  constructor (addresses: string[], chain: string) {
+    super(chain, null, addresses);
   }
 
   override parseUrl (input: string): string | undefined {

@@ -32,14 +32,14 @@ export default class QuartzNftApi extends BaseNftApi {
    * @returns number of created collection
    */
   public async getCreatedCollectionCount (): Promise<number> {
-    if (!this.dotSamaApi) {
+    if (!this.substrateApi) {
       return 0;
     }
 
     // @ts-ignore
     // noinspection TypeScriptValidateJSTypes
     // eslint-disable-next-line @typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-member-access
-    return (await this.dotSamaApi.api.rpc.unique.collectionStats()).toJSON().created as number;
+    return (await this.substrateApi.api.rpc.unique.collectionStats()).toJSON().created as number;
   }
 
   /**
@@ -50,14 +50,14 @@ export default class QuartzNftApi extends BaseNftApi {
     * @returns the array of NFT token IDs
     */
   public async getAddressTokens (collectionId: number, address: string): Promise<any> {
-    if (!this.dotSamaApi) {
+    if (!this.substrateApi) {
       return;
     }
 
     // noinspection TypeScriptValidateJSTypes
     // @ts-ignore
     // eslint-disable-next-line @typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-member-access,@typescript-eslint/no-unsafe-return
-    return (await this.dotSamaApi.api.rpc.unique.accountTokens(collectionId, { Substrate: address })).toJSON();
+    return (await this.substrateApi.api.rpc.unique.accountTokens(collectionId, { Substrate: address })).toJSON();
   }
 
   /**
@@ -67,14 +67,14 @@ export default class QuartzNftApi extends BaseNftApi {
    * @returns collection properties
    */
   public async getCollectionProperties (collectionId: number) {
-    if (!this.dotSamaApi) {
+    if (!this.substrateApi) {
       return;
     }
 
     // @ts-ignore
     // noinspection TypeScriptValidateJSTypes
     // eslint-disable-next-line @typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-member-access
-    return (await this.dotSamaApi.api.rpc.unique.collectionById(collectionId)).toJSON() as CollectionProperties;
+    return (await this.substrateApi.api.rpc.unique.collectionById(collectionId)).toJSON() as CollectionProperties;
   }
 
   /**
@@ -88,13 +88,13 @@ export default class QuartzNftApi extends BaseNftApi {
     * @returns tokenData: Token data object
     */
   public async getNftData (collectionProperties: CollectionProperties, collectionId: number, tokenId: number, locale = 'en') {
-    if (!this.dotSamaApi) {
+    if (!this.substrateApi) {
       return;
     }
 
     // @ts-ignore
     // eslint-disable-next-line @typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-member-access
-    const constMetadata = (await this.dotSamaApi.api.rpc.unique.constMetadata(collectionId, tokenId)).toHuman() as string;
+    const constMetadata = (await this.substrateApi.api.rpc.unique.constMetadata(collectionId, tokenId)).toHuman() as string;
     const schemaRead = hexToStr(collectionProperties.constOnChainSchema);
     const nftProps = hexToUTF16(constMetadata);
     const properties = deserializeNft(schemaRead, nftProps, locale);

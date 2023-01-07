@@ -1,7 +1,8 @@
 // Copyright 2019-2022 @subwallet/extension-koni authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { ApiProps, NftCollection, NftItem } from '@subwallet/extension-base/background/KoniTypes';
+import { NftCollection, NftItem } from '@subwallet/extension-base/background/KoniTypes';
+import { _SubstrateApi } from '@subwallet/extension-base/services/chain-service/types';
 import { BaseNftApi, HandleNftParams } from '@subwallet/extension-koni-base/api/nft/nft';
 import { hexToStr, hexToUTF16, parseIpfsLink, utf16ToString } from '@subwallet/extension-koni-base/utils';
 
@@ -24,16 +25,16 @@ interface Token {
 // deprecated
 export default class UniqueNftApi extends BaseNftApi {
   // eslint-disable-next-line no-useless-constructor
-  constructor (api: ApiProps | null, addresses: string[], chain: string) {
+  constructor (api: _SubstrateApi | null, addresses: string[], chain: string) {
     super(chain, api, addresses);
   }
 
   public async getCollectionCount (): Promise<number> {
-    if (!this.dotSamaApi) {
+    if (!this.substrateApi) {
       return 0;
     }
 
-    return (await this.dotSamaApi.api.query.nft.createdCollectionCount()) as unknown as number;
+    return (await this.substrateApi.api.query.nft.createdCollectionCount()) as unknown as number;
   }
 
   /**
@@ -44,11 +45,11 @@ export default class UniqueNftApi extends BaseNftApi {
     * @returns the array of NFTs
     */
   public async getAddressTokens (collectionId: number, owner: string): Promise<any> {
-    if (!this.dotSamaApi) {
+    if (!this.substrateApi) {
       return;
     }
 
-    return (await this.dotSamaApi.api.query.nft.addressTokens(collectionId, owner)).toJSON();
+    return (await this.substrateApi.api.query.nft.addressTokens(collectionId, owner)).toJSON();
   }
 
   /**
@@ -59,7 +60,7 @@ export default class UniqueNftApi extends BaseNftApi {
    * @returns the URL of the token image
    */
   public getNftImageUrl (collection: Collection, tokenId: string) {
-    if (!this.dotSamaApi) {
+    if (!this.substrateApi) {
       return;
     }
 
@@ -95,12 +96,12 @@ export default class UniqueNftApi extends BaseNftApi {
    * @returns tokenData: Token data object
    */
   public async getNftData (collection: Collection, tokenId: string, locale = 'en', collectionId: number) {
-    if (!this.dotSamaApi) {
+    if (!this.substrateApi) {
       return;
     }
 
     const schemaRead = hexToStr(collection.ConstOnChainSchema);
-    const token = (await this.dotSamaApi.api.query.nft.nftItemList(collectionId, tokenId)).toJSON() as unknown as Token;
+    const token = (await this.substrateApi.api.query.nft.nftItemList(collectionId, tokenId)).toJSON() as unknown as Token;
     const nftProps = hexToUTF16(token.ConstData);
     const properties = deserializeNft(schemaRead, nftProps, locale);
 
@@ -170,7 +171,7 @@ export default class UniqueNftApi extends BaseNftApi {
         const collectionIdStr = collectionId.toString();
 
         // @ts-ignore
-        const collection = (await this.dotSamaApi.api.query.nft.collectionById(collectionId)).toJSON() as unknown as Collection;
+        const collection = (await this.substrateApi.api.query.nft.collectionById(collectionId)).toJSON() as unknown as Collection;
 
         collectionMap[collectionIdStr] = collection;
         const nftIds = Object.entries(nftMap).filter((item) => item[1] === collectionId).map((item) => item[0]);

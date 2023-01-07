@@ -1,7 +1,8 @@
 // Copyright 2019-2022 @subwallet/extension-koni-base authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { ApiProps, NftCollection, NftItem } from '@subwallet/extension-base/background/KoniTypes';
+import { NftCollection, NftItem } from '@subwallet/extension-base/background/KoniTypes';
+import { _SubstrateApi } from '@subwallet/extension-base/services/chain-service/types';
 import { BIT_COUNTRY_SERVER } from '@subwallet/extension-koni-base/api/nft/config';
 import { BaseNftApi, HandleNftParams } from '@subwallet/extension-koni-base/api/nft/nft';
 import { isUrl } from '@subwallet/extension-koni-base/utils';
@@ -27,7 +28,7 @@ interface Collection {
 }
 
 export class BitCountryNftApi extends BaseNftApi {
-  constructor (api: ApiProps | null, addresses: string[], chain: string) {
+  constructor (api: _SubstrateApi | null, addresses: string[], chain: string) {
     super(chain, api, addresses);
   }
 
@@ -48,7 +49,7 @@ export class BitCountryNftApi extends BaseNftApi {
   }
 
   private async getNfts (addresses: string[]): Promise<AssetId[]> {
-    if (!this.dotSamaApi) {
+    if (!this.substrateApi) {
       return [];
     }
 
@@ -56,7 +57,7 @@ export class BitCountryNftApi extends BaseNftApi {
 
     await Promise.all(addresses.map(async (address) => {
       // @ts-ignore
-      const resp = await this.dotSamaApi.api.query.ormlNFT.tokensByOwner.entries(address);
+      const resp = await this.substrateApi.api.query.ormlNFT.tokensByOwner.entries(address);
 
       for (const item of resp) {
         const data = item[0].toHuman() as string[];
@@ -69,11 +70,11 @@ export class BitCountryNftApi extends BaseNftApi {
   }
 
   private async getTokenDetails (assetId: AssetId): Promise<Record<string, any> | null> {
-    if (!this.dotSamaApi) {
+    if (!this.substrateApi) {
       return null;
     }
 
-    const onChainMeta = (await this.dotSamaApi.api.query.ormlNFT.tokens(assetId.classId, assetId.tokenId)).toHuman() as unknown as Token;
+    const onChainMeta = (await this.substrateApi.api.query.ormlNFT.tokens(assetId.classId, assetId.tokenId)).toHuman() as unknown as Token;
 
     if (!onChainMeta.metadata) {
       return null;
@@ -84,11 +85,11 @@ export class BitCountryNftApi extends BaseNftApi {
   }
 
   private async getCollectionDetails (collectionId: string | number): Promise<Record<string, any> | null> {
-    if (!this.dotSamaApi) {
+    if (!this.substrateApi) {
       return null;
     }
 
-    const metadataCollection = (await this.dotSamaApi.api.query.ormlNFT.classes(collectionId)).toHuman() as unknown as Collection;
+    const metadataCollection = (await this.substrateApi.api.query.ormlNFT.classes(collectionId)).toHuman() as unknown as Collection;
 
     if (!metadataCollection.metadata) {
       return null;

@@ -1,9 +1,9 @@
 // Copyright 2019-2022 @subwallet/extension-koni authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { _ChainInfo } from '@subwallet/chain/types';
+import { _ChainAsset, _ChainInfo } from '@subwallet/chain/types';
 import { AuthUrls } from '@subwallet/extension-base/background/handlers/State';
-import { ApiProps, CustomToken, NetworkJson, NftTransferExtra, StakingType, UnlockingStakeInfo } from '@subwallet/extension-base/background/KoniTypes';
+import { ApiProps, NetworkJson, NftTransferExtra, StakingType, UnlockingStakeInfo } from '@subwallet/extension-base/background/KoniTypes';
 import { _EvmApi, _SubstrateApi } from '@subwallet/extension-base/services/chain-service/types';
 import { _isChainEnabled, _isChainSupportSubstrateStaking } from '@subwallet/extension-base/services/chain-service/utils';
 import DatabaseService from '@subwallet/extension-base/services/storage-service/DatabaseService';
@@ -215,19 +215,19 @@ export class KoniSubscription {
     };
   }
 
-  subscribeNft (address: string, substrateApiMap: Record<string, _SubstrateApi>, evmApiMap: Record<string, _EvmApi>, customErc721Registry: CustomToken[], contractSupportedNetworkMap: Record<string, _ChainInfo>) {
+  subscribeNft (address: string, substrateApiMap: Record<string, _SubstrateApi>, evmApiMap: Record<string, _EvmApi>, smartContractNfts: _ChainAsset[], chainInfoMap: Record<string, _ChainInfo>) {
     this.state.getDecodedAddresses(address)
       .then((addresses) => {
         if (!addresses.length) {
           return;
         }
 
-        this.initNftSubscription(addresses, substrateApiMap, evmApiMap, customErc721Registry, contractSupportedNetworkMap);
+        this.initNftSubscription(addresses, substrateApiMap, evmApiMap, smartContractNfts, chainInfoMap);
       })
       .catch(this.logger.error);
   }
 
-  initNftSubscription (addresses: string[], substrateApiMap: Record<string, _SubstrateApi>, evmApiMap: Record<string, _EvmApi>, customNftRegistry: CustomToken[], contractSupportedNetworkMap: Record<string, _ChainInfo>) {
+  initNftSubscription (addresses: string[], substrateApiMap: Record<string, _SubstrateApi>, evmApiMap: Record<string, _EvmApi>, smartContractNfts: _ChainAsset[], chainInfoMap: Record<string, _ChainInfo>) {
     const { cronUpdate, forceUpdate, selectedNftCollection } = this.state.getNftTransfer();
 
     if (forceUpdate && !cronUpdate) {
@@ -244,13 +244,13 @@ export class KoniSubscription {
         selectedNftCollection
       } as NftTransferExtra);
 
-      nftHandler.setContractSupportedNetworkMap(contractSupportedNetworkMap);
+      nftHandler.setChainInfoMap(chainInfoMap);
       nftHandler.setDotSamaApiMap(substrateApiMap);
       nftHandler.setWeb3ApiMap(evmApiMap);
       nftHandler.setAddresses(addresses);
 
       nftHandler.handleNfts(
-        customNftRegistry,
+        smartContractNfts,
         (...args) => this.state.updateNftData(...args),
         (...args) => this.state.setNftCollection(...args),
         (...args) => this.state.updateNftIds(...args),

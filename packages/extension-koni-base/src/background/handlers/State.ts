@@ -125,8 +125,6 @@ export default class KoniState extends State {
 
   private serviceInfoSubject = new Subject<ServiceInfo>();
 
-  private customTokenState: CustomTokenJson = { erc20: [], erc721: [], psp22: [], psp34: [] };
-  private customTokenSubject = new Subject<CustomTokenJson>();
 
   private balanceMap: Record<string, BalanceItem> = this.generateDefaultBalanceMap();
   private balanceSubject = new Subject<BalanceJson>();
@@ -1153,43 +1151,8 @@ export default class KoniState extends State {
     return this.priceStore.getSubject();
   }
 
-  public subscribeCustomToken () {
-    return this.customTokenSubject;
-  }
-
-  public getCustomTokenState () {
-    return this.customTokenState;
-  }
-
-  public getActiveErc20Tokens () {
-    const filteredErc20Tokens: CustomToken[] = [];
-
-    this.customTokenState.erc20.forEach((token) => {
-      if (!token.isDeleted) {
-        filteredErc20Tokens.push(token);
-      }
-    });
-
-    return filteredErc20Tokens;
-  }
-
-  public getActiveNftContracts () {
-    const filteredNftContracts: CustomToken[] = [];
-
-    Object.entries(this.customTokenState).forEach(([_tokenType, _tokenList]) => {
-      const tokenType = _tokenType as CustomTokenType;
-      const tokenList = _tokenList as CustomToken[];
-
-      if (!FUNGIBLE_TOKEN_STANDARDS.includes(tokenType)) {
-        for (const token of tokenList) {
-          if (!token.isDeleted) {
-            filteredNftContracts.push(token);
-          }
-        }
-      }
-    });
-
-    return filteredNftContracts;
+  public getSmartContractNfts () {
+    return this.chainService.getSmartContractNfts();
   }
 
   // ChainService ------------------------------------------------
@@ -1256,8 +1219,8 @@ export default class KoniState extends State {
 
   // ------------------------------------------------
 
-  public getActiveContractSupportedNetworks () {
-    return this.chainService.getSupportedSmartContractChains();
+  public getActiveChainInfoMap () {
+    return this.chainService.getActiveChainInfoMap();
   }
 
   public upsertChainInfo (data: Record<string, any>): boolean {

@@ -99,6 +99,14 @@ export function _getEvmChainId (chainInfo: _ChainInfo) {
   return chainInfo.evmInfo?.evmChainId || 1; // fallback to Ethereum
 }
 
+export function _getSubstrateParaId (chainInfo: _ChainInfo) {
+  return chainInfo.substrateInfo?.paraId || -1;
+}
+
+export function _getSubstrateRelayParent (chainInfo: _ChainInfo) {
+  return chainInfo.substrateInfo?.relaySlug || '';
+}
+
 export function _getSubstrateGenesisHash (chainInfo: _ChainInfo) {
   return chainInfo.substrateInfo?.genesisHash || '';
 }
@@ -109,4 +117,12 @@ export function _isChainSupportSubstrateStaking (chainInfo: _ChainInfo) {
 
 export function _isChainEnabled (chainState: _ChainState) {
   return chainState.active;
+}
+
+export function _isSubstrateParachain (chainInfo: _ChainInfo) {
+  return chainInfo.substrateInfo !== null && chainInfo.substrateInfo.paraId !== null;
+}
+
+export function _getChainSubstrateAddressPrefix (chainInfo: _ChainInfo) {
+  return chainInfo.substrateInfo?.addressPrefix || -1;
 }

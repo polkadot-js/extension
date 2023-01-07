@@ -1,10 +1,12 @@
 // Copyright 2019-2022 @subwallet/extension-koni-base authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
+import { COMMON_CHAIN_SLUGS } from '@subwallet/chain';
+import { _ChainInfo } from '@subwallet/chain/types';
 import { APIItemState, CrowdloanItem, CrowdloanParaState } from '@subwallet/extension-base/background/KoniTypes';
 import { _SubstrateApi } from '@subwallet/extension-base/services/chain-service/types';
+import { _getChainSubstrateAddressPrefix, _getSubstrateParaId, _getSubstrateRelayParent, _isChainEvmCompatible, _isSubstrateParachain } from '@subwallet/extension-base/services/chain-service/utils';
 import registry from '@subwallet/extension-koni-base/api/dotsama/typeRegistry';
-import { PREDEFINED_NETWORKS } from '@subwallet/extension-koni-base/api/predefinedNetworks';
 import { ACALA_REFRESH_CROWDLOAN_INTERVAL } from '@subwallet/extension-koni-base/constants';
 import { categoryAddresses, reformatAddress } from '@subwallet/extension-koni-base/utils';
 import axios from 'axios';
@@ -14,8 +16,6 @@ import { DeriveOwnContributions } from '@polkadot/api-derive/types';
 import { Option, u32, Vec } from '@polkadot/types';
 import { ParaId } from '@polkadot/types/interfaces';
 import { BN } from '@polkadot/util';
-import {COMMON_CHAIN_SLUGS} from "@subwallet/chain";
-import {_ChainInfo} from "@subwallet/chain/types";
 
 function getRPCCrowdloan (parentAPI: _SubstrateApi, paraId: number, hexAddresses: string[], paraState: CrowdloanParaState, callback: (rs: CrowdloanItem) => void) {
   const unsubPromise = parentAPI.api.derive.crowdloan.ownContributions(paraId, hexAddresses, (result: DeriveOwnContributions) => {
@@ -125,23 +125,27 @@ export async function subscribeCrowdloan (addresses: string[], substrateApiMap: 
       return registry.createType('AccountId', address).toHex();
     });
 
-    Object.entries(chainInfoMap).forEach(([networkKey, networkInfo]) => {
-      const crowdloanCb = (rs: CrowdloanItem) => {
-        callback(networkKey, rs);
-      };
+    Object.entries(chainInfoMap).forEach(([networkKey, chainInfo]) => {
+      if (_isSubstrateParachain(chainInfo)) {
+        const parentChain = _getSubstrateRelayParent(chainInfo);
 
-      const paraId = networkInfo.paraId;
+        const crowdloanCb = (rs: CrowdloanItem) => {
+          callback(networkKey, rs);
+        };
 
-      if (paraId === undefined || addresses.length === 0) {
-        return;
-      }
+        const paraId = _getSubstrateParaId(chainInfo);
 
-      if (networkKey === COMMON_CHAIN_SLUGS.ACALA) {
-        unsubMap.acala = subscribeAcalaContributeInterval(substrateAddresses.map((address) => reformatAddress(address, networkInfo.ss58Format, networkInfo.isEthereum)), polkadotFundsStatusMap[paraId], crowdloanCb);
-      } else if (networkInfo.groups.includes('POLKADOT_PARACHAIN') && networkInfo.paraId && polkadotFundsStatusMap[paraId]) {
-        unsubMap[networkKey] = getRPCCrowdloan(polkadotAPI, paraId, hexAddresses, polkadotFundsStatusMap[paraId], crowdloanCb);
-      } else if (networkInfo.groups.includes('KUSAMA_PARACHAIN') && paraId && kusamaFundsStatusMap[paraId]) {
-        unsubMap[networkKey] = getRPCCrowdloan(kusamaAPI, paraId, hexAddresses, kusamaFundsStatusMap[paraId], crowdloanCb);
+        if (paraId <= -1 || addresses.length === 0 || parentChain.length === 0) {
+          return;
+        }
+
+        if (networkKey === COMMON_CHAIN_SLUGS.ACALA) {
+          unsubMap.acala = subscribeAcalaContributeInterval(substrateAddresses.map((address) => reformatAddress(address, _getChainSubstrateAddressPrefix(chainInfo), _isChainEvmCompatible(chainInfo))), polkadotFundsStatusMap[paraId], crowdloanCb);
+        } else if (parentChain === COMMON_CHAIN_SLUGS.POLKADOT && polkadotFundsStatusMap[paraId]) {
+          unsubMap[networkKey] = getRPCCrowdloan(polkadotAPI, paraId, hexAddresses, polkadotFundsStatusMap[paraId], crowdloanCb);
+        } else if (parentChain === COMMON_CHAIN_SLUGS.KUSAMA && kusamaFundsStatusMap[paraId]) {
+          unsubMap[networkKey] = getRPCCrowdloan(kusamaAPI, paraId, hexAddresses, kusamaFundsStatusMap[paraId], crowdloanCb);
+        }
       }
     });
   }

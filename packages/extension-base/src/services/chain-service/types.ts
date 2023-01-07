@@ -114,7 +114,7 @@ export type _NetworkUpsertParams = {
   }
 }
 
-export const _CUSTOM_NETWORK_PREFIX = 'custom-';
+export const _CUSTOM_PREFIX = 'custom-';
 
 export interface _ValidateCustomTokenRequest {
   contractAddress: string,

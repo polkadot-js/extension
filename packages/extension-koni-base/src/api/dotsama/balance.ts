@@ -500,13 +500,13 @@ async function subscribeWithAccountMulti (addresses: string[], chainInfo: _Chain
       unsub2 = await subscribeTokensBalance(addresses, networkKey, networkAPI.api, mainCallback, subCallback);
     } else if (_BALANCE_CHAIN_GROUP.kintsugi.includes(networkKey)) {
       unsub2 = await subscribeTokensBalance(addresses, networkKey, networkAPI.api, mainCallback, subCallback, true);
-    } else if (_BALANCE_CHAIN_GROUP.statemine.indexOf(networkKey) > -1) {
+    } else if (_BALANCE_CHAIN_GROUP.statemine.includes(networkKey)) {
       unsub2 = await subscribeAssetsBalance(addresses, networkKey, networkAPI.api, subCallback);
     } else if (_BALANCE_CHAIN_GROUP.genshiro.includes(networkKey)) {
       unsub2 = await subscribeGenshiroTokenBalance(addresses, networkKey, networkAPI.api, mainCallback, subCallback, true);
     } else if (_BALANCE_CHAIN_GROUP.equilibrium_parachain.includes(networkKey)) {
       unsub2 = await subscribeEquilibriumTokenBalance(addresses, networkKey, networkAPI.api, mainCallback, subCallback, true);
-    } else if (chainInfo.evmInfo !== null) {
+    } else if (_isChainEvmCompatible(chainInfo)) {
       unsub2 = subscribeERC20Interval(addresses, networkKey, networkAPI.api, evmApiMap, subCallback);
     }
 
@@ -570,7 +570,7 @@ export function subscribeBalance (addresses: string[], chainInfoMap: Record<stri
   const unsubList = Object.entries(substrateApiMap).map(async ([networkKey, substrateApi]) => {
     const networkAPI = await substrateApi.isReady;
     const chainInfo = chainInfoMap[networkKey];
-    const useAddresses = chainInfo.evmInfo !== null ? evmAddresses : substrateAddresses;
+    const useAddresses = _isChainEvmCompatible(chainInfo) ? evmAddresses : substrateAddresses;
 
     if (_isPureEvmChain(chainInfo)) {
       return subscribeEVMBalance(networkKey, networkAPI.api, useAddresses, evmApiMap, callback);

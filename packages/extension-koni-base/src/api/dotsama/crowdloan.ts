@@ -1,7 +1,8 @@
 // Copyright 2019-2022 @subwallet/extension-koni-base authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { APIItemState, ApiProps, CrowdloanItem, CrowdloanParaState } from '@subwallet/extension-base/background/KoniTypes';
+import { APIItemState, CrowdloanItem, CrowdloanParaState } from '@subwallet/extension-base/background/KoniTypes';
+import { _SubstrateApi } from '@subwallet/extension-base/services/chain-service/types';
 import registry from '@subwallet/extension-koni-base/api/dotsama/typeRegistry';
 import { PREDEFINED_NETWORKS } from '@subwallet/extension-koni-base/api/predefinedNetworks';
 import { ACALA_REFRESH_CROWDLOAN_INTERVAL } from '@subwallet/extension-koni-base/constants';
@@ -13,8 +14,10 @@ import { DeriveOwnContributions } from '@polkadot/api-derive/types';
 import { Option, u32, Vec } from '@polkadot/types';
 import { ParaId } from '@polkadot/types/interfaces';
 import { BN } from '@polkadot/util';
+import {COMMON_CHAIN_SLUGS} from "@subwallet/chain";
+import {_ChainInfo} from "@subwallet/chain/types";
 
-function getRPCCrowdloan (parentAPI: ApiProps, paraId: number, hexAddresses: string[], paraState: CrowdloanParaState, callback: (rs: CrowdloanItem) => void) {
+function getRPCCrowdloan (parentAPI: _SubstrateApi, paraId: number, hexAddresses: string[], paraState: CrowdloanParaState, callback: (rs: CrowdloanItem) => void) {
   const unsubPromise = parentAPI.api.derive.crowdloan.ownContributions(paraId, hexAddresses, (result: DeriveOwnContributions) => {
     let contribute = new BN(0);
 
@@ -105,14 +108,16 @@ export async function getCrowdloanFundsStatus (api: ApiPromise) {
 }
 
 // Get All crowdloan
-export async function subscribeCrowdloan (addresses: string[], dotSamaAPIMap: Record<string, ApiProps>, callback: (networkKey: string, rs: CrowdloanItem) => void, networks = PREDEFINED_NETWORKS) {
+export async function subscribeCrowdloan (addresses: string[], substrateApiMap: Record<string, _SubstrateApi>, callback: (networkKey: string, rs: CrowdloanItem) => void, chainInfoMap: Record<string, _ChainInfo>) {
   const unsubMap: Record<string, any> = {};
 
-  if (dotSamaAPIMap.polkadot && dotSamaAPIMap.kusama) {
-    const polkadotAPI = await dotSamaAPIMap.polkadot.isReady;
+  if (Object.keys(substrateApiMap).includes(COMMON_CHAIN_SLUGS.KUSAMA) && Object.keys(substrateApiMap).includes(COMMON_CHAIN_SLUGS.POLKADOT)) {
+    const polkadotAPI = await substrateApiMap[COMMON_CHAIN_SLUGS.POLKADOT].isReady;
     const polkadotFundsStatusMap = await getCrowdloanFundsStatus(polkadotAPI.api);
-    const kusamaAPI = await dotSamaAPIMap.kusama.isReady;
+    const kusamaAPI = await substrateApiMap[COMMON_CHAIN_SLUGS.KUSAMA].isReady;
     const kusamaFundsStatusMap = await getCrowdloanFundsStatus(kusamaAPI.api);
+
+    // TODO: find all crowdloan valid networks: parachains, in-crowdloan, crowdloan but failed
 
     const substrateAddresses = categoryAddresses(addresses)[0];
 
@@ -120,7 +125,7 @@ export async function subscribeCrowdloan (addresses: string[], dotSamaAPIMap: Re
       return registry.createType('AccountId', address).toHex();
     });
 
-    Object.entries(networks).forEach(([networkKey, networkInfo]) => {
+    Object.entries(chainInfoMap).forEach(([networkKey, networkInfo]) => {
       const crowdloanCb = (rs: CrowdloanItem) => {
         callback(networkKey, rs);
       };
@@ -131,7 +136,7 @@ export async function subscribeCrowdloan (addresses: string[], dotSamaAPIMap: Re
         return;
       }
 
-      if (networkKey === 'acala') {
+      if (networkKey === COMMON_CHAIN_SLUGS.ACALA) {
         unsubMap.acala = subscribeAcalaContributeInterval(substrateAddresses.map((address) => reformatAddress(address, networkInfo.ss58Format, networkInfo.isEthereum)), polkadotFundsStatusMap[paraId], crowdloanCb);
       } else if (networkInfo.groups.includes('POLKADOT_PARACHAIN') && networkInfo.paraId && polkadotFundsStatusMap[paraId]) {
         unsubMap[networkKey] = getRPCCrowdloan(polkadotAPI, paraId, hexAddresses, polkadotFundsStatusMap[paraId], crowdloanCb);

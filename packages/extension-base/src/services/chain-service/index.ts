@@ -6,7 +6,7 @@ import { _AssetType, _ChainAsset, _ChainInfo, _EvmInfo, _SubstrateInfo } from '@
 import { EvmChainHandler } from '@subwallet/extension-base/services/chain-service/handler/EvmChainHandler';
 import { SubstrateChainHandler } from '@subwallet/extension-base/services/chain-service/handler/SubstrateChainHandler';
 import { _CHAIN_VALIDATION_ERROR } from '@subwallet/extension-base/services/chain-service/handler/types';
-import { _ChainBaseApi, _ChainConnectionStatus, _ChainState, _CUSTOM_NETWORK_PREFIX, _DataMap, _EvmApi, _NetworkUpsertParams, _SMART_CONTRACT_STANDARDS, _SmartContractTokenInfo, _SubstrateApi, _ValidateCustomTokenRequest, _ValidateCustomTokenResponse } from '@subwallet/extension-base/services/chain-service/types';
+import { _ChainBaseApi, _ChainConnectionStatus, _ChainState, _CUSTOM_PREFIX, _DataMap, _EvmApi, _NetworkUpsertParams, _SMART_CONTRACT_STANDARDS, _SmartContractTokenInfo, _SubstrateApi, _ValidateCustomTokenRequest, _ValidateCustomTokenResponse } from '@subwallet/extension-base/services/chain-service/types';
 import { _isCustomAsset, _isEqualContractAddress, _isEqualSmartContractAsset } from '@subwallet/extension-base/services/chain-service/utils';
 import { IChain } from '@subwallet/extension-base/services/storage-service/databases';
 import DatabaseService from '@subwallet/extension-base/services/storage-service/DatabaseService';
@@ -30,6 +30,7 @@ export class ChainService {
   private substrateChainHandler: SubstrateChainHandler;
   private evmChainHandler: EvmChainHandler;
 
+  // TODO: consider BehaviorSubject
   private chainInfoMapSubject = new Subject<Record<string, _ChainInfo>>();
   private chainStateMapSubject = new Subject<Record<string, _ChainState>>();
   private assetRegistrySubject = new Subject<Record<string, _ChainAsset>>();
@@ -659,6 +660,7 @@ export class ChainService {
         slug: newSlug
       };
 
+      // TODO: add try, catch, move storage update and subject update to somewhere else
       this.dbService.updateChainStore({
         active: false,
         currentProvider: params.chainEditInfo.currentProvider,
@@ -684,9 +686,9 @@ export class ChainService {
     const parsedName = name.replaceAll(' ', '').toLowerCase();
 
     if (evmChainId !== null) {
-      return `${_CUSTOM_NETWORK_PREFIX}${chainType}-${parsedName}-${evmChainId}`;
+      return `${_CUSTOM_PREFIX}${chainType}-${parsedName}-${evmChainId}`;
     } else {
-      let slug = `${_CUSTOM_NETWORK_PREFIX}${chainType}-${parsedName}`;
+      let slug = `${_CUSTOM_PREFIX}${chainType}-${parsedName}`;
 
       if (paraId !== null) {
         slug = slug.concat(`-${paraId}`);
@@ -716,6 +718,7 @@ export class ChainService {
       if (providerError === _CHAIN_VALIDATION_ERROR.NONE) {
         let api: _EvmApi | _SubstrateApi;
 
+        // TODO: EVM chain might have WS provider
         if (provider.startsWith('http')) {
           // HTTP provider is EVM by default
           api = this.evmChainHandler.initApi('custom', provider);

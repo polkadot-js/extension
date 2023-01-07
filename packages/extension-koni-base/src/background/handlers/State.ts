@@ -12,6 +12,7 @@ import { AuthorizeRequest, RequestAuthorizeTab } from '@subwallet/extension-base
 import { ChainService } from '@subwallet/extension-base/services/chain-service';
 import { _PREDEFINED_SINGLE_MODES } from '@subwallet/extension-base/services/chain-service/constants';
 import { _ChainConnectionStatus, _ChainState, _ValidateCustomTokenRequest } from '@subwallet/extension-base/services/chain-service/types';
+import { _getEvmChainId, _getSubstrateGenesisHash, _isChainEnabled, _isChainEvmCompatible } from '@subwallet/extension-base/services/chain-service/utils';
 import DatabaseService from '@subwallet/extension-base/services/storage-service/DatabaseService';
 import { Web3Transaction } from '@subwallet/extension-base/signers/types';
 import { CurrentAccountStore, PriceStore } from '@subwallet/extension-base/stores';
@@ -157,6 +158,7 @@ export default class KoniState extends State {
 
   private lazyMap: Record<string, unknown> = {};
 
+  // TODO: consider making chainService public (or getter) and call function directly
   private chainService: ChainService;
   public dbService: DatabaseService;
   private cron: KoniCron;
@@ -183,7 +185,8 @@ export default class KoniState extends State {
     Object.values(this.chainService.getChainInfoMap()).forEach((chainInfo) => {
       const chainState = this.chainService.getChainStateByKey(chainInfo.slug);
 
-      if (chainState.active) {
+      if (_isChainEnabled(chainState)) {
+        // TODO: refactor balanceMap
         balanceMap[chainInfo.slug] = {
           state: APIItemState.PENDING
         };
@@ -361,7 +364,7 @@ export default class KoniState extends State {
         const defaultChain = Object.values(this.chainService.getChainInfoMap()).find((chainInfo) => {
           const chainState = this.chainService.getChainStateByKey(chainInfo.slug);
 
-          return chainInfo.evmInfo !== null && chainState.active;
+          return _isChainEvmCompatible(chainInfo) && _isChainEnabled(chainState);
         });
 
         if (defaultChain) {
@@ -819,7 +822,7 @@ export default class KoniState extends State {
     const chainState = this.chainService.getChainStateByKey(networkKey);
 
     if (authUrls[shortenUrl]) {
-      if (chainInfo && !chainState.active) {
+      if (chainInfo && !_isChainEnabled(chainState)) {
         this.enableChain(networkKey);
       }
 
@@ -843,7 +846,7 @@ export default class KoniState extends State {
         if (isApproved) {
           const useAddress = changeAddress || address;
 
-          if (chainInfo && !chainState.active) {
+          if (chainInfo && !_isChainEnabled(chainState)) {
             this.enableChain(networkKey);
           }
 
@@ -852,13 +855,13 @@ export default class KoniState extends State {
 
             assert(pair, 'Unable to find pair');
 
-            keyring.saveAccountMeta(pair, { ...pair.meta, genesisHash: chainInfo.substrateInfo?.genesisHash });
+            keyring.saveAccountMeta(pair, { ...pair.meta, genesisHash: _getSubstrateGenesisHash(chainInfo) });
           }
 
-          if (address !== changeAddress || chainInfo.substrateInfo?.genesisHash !== currentGenesisHash || isApproved) {
+          if (address !== changeAddress || _getSubstrateGenesisHash(chainInfo) !== currentGenesisHash || isApproved) {
             this.setCurrentAccount({
               address: useAddress,
-              currentGenesisHash: chainInfo.substrateInfo?.genesisHash || null
+              currentGenesisHash: _getSubstrateGenesisHash(chainInfo)
             });
           }
         }
@@ -1290,7 +1293,7 @@ export default class KoniState extends State {
     const result: string[] = [];
 
     for (const [key, network] of Object.entries(this.chainService.getChainInfoMap())) {
-      const condition = hashes.includes(network.substrateInfo?.genesisHash || '');
+      const condition = hashes.includes(_getSubstrateGenesisHash(network) || '');
 
       if (condition) {
         result.push(key);
@@ -1364,7 +1367,8 @@ export default class KoniState extends State {
         chainInfoMap: this.chainService.getChainInfoMap(),
         chainApiMap: this.getApiMap(),
         currentAccountInfo: value,
-        assetRegistry: this.chainService.getAssetRegistry()
+        assetRegistry: this.chainService.getAssetRegistry(),
+        chainStateMap: this.chainService.getChainStateMap()
       });
     });
   }
@@ -1422,12 +1426,12 @@ export default class KoniState extends State {
   public getNetworkGenesisHashByKey (key: string) {
     const chainInfo = this.chainService.getChainInfoByKey(key);
 
-    return chainInfo && chainInfo.substrateInfo ? chainInfo.substrateInfo.genesisHash : '';
+    return _getSubstrateGenesisHash(chainInfo);
   }
 
   public getNetworkKeyByGenesisHash (hash: string) {
     return Object.values(this.chainService.getChainInfoMap()).find((chainInfo) => {
-      return chainInfo.substrateInfo && chainInfo.substrateInfo.genesisHash === hash;
+      return _getSubstrateGenesisHash(chainInfo) === hash;
     })?.slug;
   }
 
@@ -1508,7 +1512,7 @@ export default class KoniState extends State {
       return [undefined, undefined];
     }
 
-    const rs = Object.entries(this.chainService.getChainInfoMap()).find(([networkKey, chainInfo]) => (chainInfo.substrateInfo?.genesisHash === genesisHash));
+    const rs = Object.entries(this.chainService.getChainInfoMap()).find(([networkKey, chainInfo]) => (_getSubstrateGenesisHash(chainInfo) === genesisHash));
 
     if (rs) {
       return rs;
@@ -1518,7 +1522,9 @@ export default class KoniState extends State {
   }
 
   findChainIdGenesisHash (genesisHash?: string | null): number | undefined {
-    return this.findNetworkKeyByGenesisHash(genesisHash)[1]?.evmInfo?.evmChainId;
+    const chainInfo = this.findNetworkKeyByGenesisHash(genesisHash)[1];
+
+    return chainInfo ? _getEvmChainId(chainInfo) : undefined;
   }
 
   findNetworkKeyByChainId (chainId?: number | null): [string | undefined, _ChainInfo | undefined] {
@@ -1526,7 +1532,7 @@ export default class KoniState extends State {
       return [undefined, undefined];
     }
 
-    const rs = Object.entries(this.chainService.getChainInfoMap()).find(([networkKey, chainInfo]) => (chainInfo.evmInfo?.evmChainId === chainId));
+    const rs = Object.entries(this.chainService.getChainInfoMap()).find(([networkKey, chainInfo]) => (_getEvmChainId(chainInfo) === chainId));
 
     if (rs) {
       return rs;
@@ -1831,8 +1837,8 @@ export default class KoniState extends State {
 
             const common = Common.forCustomChain('mainnet', {
               name: networkKey,
-              networkId: chainInfo.evmInfo?.evmChainId as number,
-              chainId: chainInfo.evmInfo?.evmChainId as number
+              networkId: _getEvmChainId(chainInfo),
+              chainId: _getEvmChainId(chainInfo)
             }, 'petersburg');
 
             // @ts-ignore
@@ -1875,7 +1881,7 @@ export default class KoniState extends State {
         to: transaction.to !== undefined ? transaction.to : '',
         value: anyNumberToBN(transaction.value).toNumber(),
         data: transaction.data ? transaction.data : '',
-        chainId: chainInfo.evmInfo?.evmChainId || 1
+        chainId: _getEvmChainId(chainInfo)
       };
 
       const data: Input = [
@@ -2058,8 +2064,9 @@ export default class KoniState extends State {
       });
 
       const chainInfo = this.chainService.getChainInfoByKey(networkKeys[0]);
+      const genesisHash = _getSubstrateGenesisHash(chainInfo);
 
-      this.setCurrentAccount({ address: ALL_ACCOUNT_KEY, currentGenesisHash: chainInfo.substrateInfo?.genesisHash || null });
+      this.setCurrentAccount({ address: ALL_ACCOUNT_KEY, currentGenesisHash: genesisHash.length > 0 ? genesisHash : null });
       this.setTheme(theme);
     };
 

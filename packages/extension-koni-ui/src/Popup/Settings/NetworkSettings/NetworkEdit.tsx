@@ -3,7 +3,7 @@
 
 import { ChainEditInfo, ChainEditStandard, ChainSpecInfo } from '@subwallet/extension-base/background/KoniTypes';
 import { _CHAIN_VALIDATION_ERROR } from '@subwallet/extension-base/services/chain-service/handler/types';
-import { _CUSTOM_NETWORK_PREFIX } from '@subwallet/extension-base/services/chain-service/types';
+import { _CUSTOM_PREFIX } from '@subwallet/extension-base/services/chain-service/types';
 import { _isCustomNetwork } from '@subwallet/extension-base/services/chain-service/utils';
 import { isUrl, isValidProvider as _isValidProvider } from '@subwallet/extension-koni-base/utils';
 import { ActionContext, Button, ButtonArea, Dropdown, HorizontalLabelToggle, InputWithLabel } from '@subwallet/extension-koni-ui/components';
@@ -414,7 +414,7 @@ function NetworkEdit ({ className }: Props): React.ReactElement {
               const chainType = resp.evmChainId !== null ? ChainEditStandard.EVM : ChainEditStandard.SUBSTRATE; // update when's there more
               const isNameValid = resp.name !== '';
               const isSymbolValid = resp.symbol !== '';
-              const providerKey = `${_CUSTOM_NETWORK_PREFIX}0`;
+              const providerKey = `${_CUSTOM_PREFIX}0`;
 
               dispatchChainSpec({ type: ChainSpecActionType.UPDATE_SPEC, payload: resp });
               dispatchChainEditInfo({ type: ChainEditActionType.UPDATE_BASIC_INFO,
@@ -560,7 +560,7 @@ function NetworkEdit ({ className }: Props): React.ReactElement {
       show(t<string>('Successfully added a new custom provider'));
 
       const providerCount = Object.values(chainEditInfo.providers).length;
-      const newProviderKey = _CUSTOM_NETWORK_PREFIX + `${providerCount + 1}`;
+      const newProviderKey = _CUSTOM_PREFIX + `${providerCount + 1}`;
 
       dispatchChainEditInfo({
         type: ChainEditActionType.UPDATE_NEW_PROVIDER,

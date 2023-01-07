@@ -4,7 +4,7 @@
 import { _ChainAsset, _ChainInfo } from '@subwallet/chain/types';
 import { AuthUrls, Resolver } from '@subwallet/extension-base/background/handlers/State';
 import { AccountAuthType, AccountJson, AuthorizeRequest, RequestAccountList, RequestAccountSubscribe, RequestAuthorizeCancel, RequestAuthorizeReject, RequestAuthorizeSubscribe, RequestAuthorizeTab, RequestCurrentAccountAddress, ResponseAuthorizeList, ResponseJsonGetAccountInfo, SeedLengths } from '@subwallet/extension-base/background/types';
-import { _EvmApi, _SubstrateApi } from '@subwallet/extension-base/services/chain-service/types';
+import { _ChainState, _EvmApi, _SubstrateApi } from '@subwallet/extension-base/services/chain-service/types';
 import { ExternalState, LedgerState, QrState } from '@subwallet/extension-base/signers/types';
 import { InjectedAccount, MetadataDefBase } from '@subwallet/extension-inject/types';
 import { KeyringPair$Json, KeyringPair$Meta } from '@subwallet/keyring/types';
@@ -24,8 +24,8 @@ import { KeypairType } from '@polkadot/util-crypto/types';
 
 export interface ServiceInfo {
   chainInfoMap: Record<string, _ChainInfo>;
+  chainStateMap: Record<string, _ChainState>;
   chainApiMap: ApiMap;
-  isLock?: boolean;
   currentAccountInfo: CurrentAccountInfo;
   assetRegistry: Record<string, _ChainAsset>;
 }

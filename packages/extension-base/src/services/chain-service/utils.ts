@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { _AssetType, _ChainAsset, _ChainInfo } from '@subwallet/chain/types';
-import { _CUSTOM_NETWORK_PREFIX, _SMART_CONTRACT_STANDARDS } from '@subwallet/extension-base/services/chain-service/types';
+import { _ChainState, _CUSTOM_PREFIX, _SMART_CONTRACT_STANDARDS } from '@subwallet/extension-base/services/chain-service/types';
 
 import { isEthereumAddress } from '@polkadot/util-crypto';
 
@@ -11,7 +11,7 @@ export function _isCustomNetwork (slug: string) {
     return true;
   }
 
-  return slug.startsWith(_CUSTOM_NETWORK_PREFIX);
+  return slug.startsWith(_CUSTOM_PREFIX);
 }
 
 export function _isCustomAsset (slug: string) { // might be different from _isCustomNetwork
@@ -19,7 +19,7 @@ export function _isCustomAsset (slug: string) { // might be different from _isCu
     return true;
   }
 
-  return slug.startsWith(_CUSTOM_NETWORK_PREFIX);
+  return slug.startsWith(_CUSTOM_PREFIX);
 }
 
 export function _getCustomAssets (assetRegistry: Record<string, _ChainAsset>): Record<string, _ChainAsset> {
@@ -93,4 +93,20 @@ export function _isNativeToken (tokenInfo: _ChainAsset) {
 
 export function _isSmartContractToken (tokenInfo: _ChainAsset) {
   return _SMART_CONTRACT_STANDARDS.includes(tokenInfo.assetType);
+}
+
+export function _getEvmChainId (chainInfo: _ChainInfo) {
+  return chainInfo.evmInfo?.evmChainId || 1; // fallback to Ethereum
+}
+
+export function _getSubstrateGenesisHash (chainInfo: _ChainInfo) {
+  return chainInfo.substrateInfo?.genesisHash || '';
+}
+
+export function _isChainSupportSubstrateStaking (chainInfo: _ChainInfo) {
+  return chainInfo.substrateInfo?.supportStaking || false;
+}
+
+export function _isChainEnabled (chainState: _ChainState) {
+  return chainState.active;
 }

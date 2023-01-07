@@ -5651,12 +5651,12 @@ __metadata:
 
 "@subwallet/chain@file:../subwallet/SubWallet-Chain/packages/chain-list/build/::locator=root-workspace-0b6124%40workspace%3A.":
   version: 0.0.1
-  resolution: "@subwallet/chain@file:../subwallet/SubWallet-Chain/packages/chain-list/build/#../subwallet/SubWallet-Chain/packages/chain-list/build/::hash=6c6005&locator=root-workspace-0b6124%40workspace%3A."
+  resolution: "@subwallet/chain@file:../subwallet/SubWallet-Chain/packages/chain-list/build/#../subwallet/SubWallet-Chain/packages/chain-list/build/::hash=4a0bb4&locator=root-workspace-0b6124%40workspace%3A."
   dependencies:
     "@polkadot/dev": 0.67.167
     "@polkadot/util": ^10.2.1
     eventemitter3: ^4.0.7
-  checksum: d1af9564c99cacc5276a1be405442c85a8cfa820b560c9b1e75f77ba13964cc218643403913cdffbce7c2c2d657b1d77ade20239b8033a1fd65b83ab14569e5d
+  checksum: dfcbfca9667f6f339cb9a6b327a6a8a6d1a051a6b9ad59159e01cb86bf3b68213f447eaea9ea6d6f1e2cb964ddedff35f915c9c9b9ac7ffa11bd21f015ef0133
   languageName: node
   linkType: hard
 

@@ -50,5 +50,115 @@ export const _STAKING_CHAIN_GROUP = {
   astar: ['astar', 'shiden', 'shibuya'],
   amplitude: ['amplitude', 'amplitude_test', 'kilt', 'kilt_peregrine'], // amplitude and kilt only share some common logic
   kilt: ['kilt', 'kilt_peregrine'],
-  nominationPool: ['polkadot', 'kusama', 'westend', 'alephTest', 'aleph']
+  nominationPool: ['polkadot', 'kusama', 'westend', 'alephTest', 'aleph'],
+  bifrost: ['bifrost', 'bifrost_testnet'],
+  aleph: ['aleph, alephTest'] // A0 has distinct tokenomics
+};
+
+export const _STAKING_ERA_LENGTH_MAP: Record<string, number> = { // in hours
+  alephTest: 24,
+  aleph: 24,
+  polkadot: 24,
+  kusama: 6,
+  westend: 24,
+  hydradx: 24,
+  default: 24,
+  moonbeam: 6,
+  moonriver: 2,
+  moonbase: 2,
+  turing: 2,
+  turingStaging: 2,
+  astar: 24,
+  shiden: 24,
+  shibuya: 24,
+  bifrost_testnet: 0.5,
+  bifrost: 2,
+  ternoa: 24,
+  calamari: 6,
+  calamari_test: 6,
+  amplitude: 2,
+  amplitude_test: 2,
+  kilt: 2,
+  kilt_peregrine: 2
+};
+
+export const _PARACHAIN_INFLATION_DISTRIBUTION: Record<string, Record<string, number>> = {
+  moonbeam: { // https://docs.moonbeam.network/learn/features/staking/#annual-inflation
+    reward: 0.5,
+    collatorCommission: 0.2,
+    bondReserve: 0.3
+  },
+  moonriver: {
+    reward: 0.5,
+    collatorCommission: 0.2,
+    bondReserve: 0.3
+  },
+  moonbase: {
+    reward: 0.5,
+    collatorCommission: 0.2,
+    bondReserve: 0.3
+  },
+  turing: { // https://docs.oak.tech/docs/delegators/
+    reward: 0.5
+  },
+  turingStaging: { // https://docs.oak.tech/docs/delegators/
+    reward: 0.5
+  },
+  bifrost: {
+    reward: 0
+  },
+  bifrost_testnet: {
+    reward: 0
+  },
+  calamari_test: {
+    reward: 0.9
+  },
+  calamari: {
+    reward: 0.9
+  },
+  default: {
+    reward: 0
+  }
+};
+
+export interface _SubstrateInflationParams {
+  auctionAdjust: number;
+  auctionMax: number;
+  falloff: number;
+  maxInflation: number;
+  minInflation: number;
+  stakeTarget: number;
+  yearlyInflationInTokens?: number;
+}
+
+export interface _SubstrateUniformEraPayoutInflationParams extends _SubstrateInflationParams {
+  yearlyInflationInTokens: number;
+}
+
+export const _SUBSTRATE_DEFAULT_INFLATION_PARAMS: _SubstrateInflationParams = {
+  auctionAdjust: 0,
+  auctionMax: 0,
+  // 5% for falloff, as per the defaults, see
+  // https://github.com/paritytech/polkadot/blob/816cb64ea16102c6c79f6be2a917d832d98df757/runtime/kusama/src/lib.rs#L534
+  falloff: 0.05,
+  // 10% max, 0.25% min, see
+  // https://github.com/paritytech/polkadot/blob/816cb64ea16102c6c79f6be2a917d832d98df757/runtime/kusama/src/lib.rs#L523
+  maxInflation: 0.1,
+  minInflation: 0.025,
+  stakeTarget: 0.5
+};
+
+const _ALEPH_DEFAULT_UNIFORM_ERA_PAYOUT_PARAMS: _SubstrateUniformEraPayoutInflationParams = {
+  ..._SUBSTRATE_DEFAULT_INFLATION_PARAMS,
+  yearlyInflationInTokens: 30000000
+};
+
+export const _KNOWN_CHAIN_INFLATION_PARAMS: Record<string, _SubstrateInflationParams> = {
+  aleph: _ALEPH_DEFAULT_UNIFORM_ERA_PAYOUT_PARAMS,
+  alephTest: _ALEPH_DEFAULT_UNIFORM_ERA_PAYOUT_PARAMS,
+  dock_pos: { ..._SUBSTRATE_DEFAULT_INFLATION_PARAMS, stakeTarget: 0.75 },
+  kusama: { ..._SUBSTRATE_DEFAULT_INFLATION_PARAMS, auctionAdjust: (0.3 / 60), auctionMax: 60, stakeTarget: 0.75 },
+  neatcoin: { ..._SUBSTRATE_DEFAULT_INFLATION_PARAMS, stakeTarget: 0.75 },
+  nft_mart: { ..._SUBSTRATE_DEFAULT_INFLATION_PARAMS, falloff: 0.04, stakeTarget: 0.60 },
+  polkadot: { ..._SUBSTRATE_DEFAULT_INFLATION_PARAMS, stakeTarget: 0.75 }
 };

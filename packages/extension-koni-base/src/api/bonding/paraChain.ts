@@ -1,11 +1,14 @@
 // Copyright 2019-2022 @subwallet/extension-koni authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { ApiProps, BasicTxInfo, ChainBondingBasics, DelegationItem, NetworkJson, StakingType, TuringStakeCompoundResp, UnlockingStakeInfo, ValidatorInfo } from '@subwallet/extension-base/background/KoniTypes';
-import { BOND_LESS_ACTION, calculateChainStakedReturn, ERA_LENGTH_MAP, getParaCurrentInflation, InflationConfig, PARACHAIN_INFLATION_DISTRIBUTION, REVOKE_ACTION, TuringOptimalCompoundFormat } from '@subwallet/extension-koni-base/api/bonding/utils';
+import { _ChainInfo } from '@subwallet/chain/types';
+import { BasicTxInfo, ChainBondingBasics, DelegationItem, StakingType, TuringStakeCompoundResp, UnlockingStakeInfo, ValidatorInfo } from '@subwallet/extension-base/background/KoniTypes';
+import { _PARACHAIN_INFLATION_DISTRIBUTION, _STAKING_CHAIN_GROUP, _STAKING_ERA_LENGTH_MAP } from '@subwallet/extension-base/services/chain-service/constants';
+import { _EvmApi, _SubstrateApi } from '@subwallet/extension-base/services/chain-service/types';
+import { _getChainNativeTokenInfo } from '@subwallet/extension-base/services/chain-service/utils';
+import { BOND_LESS_ACTION, calculateChainStakedReturn, getParaCurrentInflation, InflationConfig, REVOKE_ACTION, TuringOptimalCompoundFormat } from '@subwallet/extension-koni-base/api/bonding/utils';
 import { getFreeBalance } from '@subwallet/extension-koni-base/api/dotsama/balance';
 import { parseNumberToDisplay, parseRawNumber, reformatAddress } from '@subwallet/extension-koni-base/utils';
-import Web3 from 'web3';
 
 import { BN, BN_ZERO } from '@polkadot/util';
 
@@ -23,8 +26,8 @@ interface CollatorInfo {
   amount: string;
 }
 
-export async function getParaBondingBasics (networkKey: string, dotSamaApi: ApiProps) {
-  const apiProps = await dotSamaApi.isReady;
+export async function getParaBondingBasics (networkKey: string, substrateApi: _SubstrateApi) {
+  const apiProps = await substrateApi.isReady;
 
   const _round = (await apiProps.api.query.parachainStaking.round()).toHuman() as Record<string, string>;
   const round = parseRawNumber(_round.current);
@@ -61,7 +64,7 @@ export async function getParaBondingBasics (networkKey: string, dotSamaApi: ApiP
 
   const inflationConfig = _inflation.toHuman() as unknown as InflationConfig;
   const currentInflation = getParaCurrentInflation(parseRawNumber(totalStake.toString()), inflationConfig);
-  const rewardDistribution = PARACHAIN_INFLATION_DISTRIBUTION[networkKey] ? PARACHAIN_INFLATION_DISTRIBUTION[networkKey].reward : PARACHAIN_INFLATION_DISTRIBUTION.default.reward;
+  const rewardDistribution = _PARACHAIN_INFLATION_DISTRIBUTION[networkKey] ? _PARACHAIN_INFLATION_DISTRIBUTION[networkKey].reward : _PARACHAIN_INFLATION_DISTRIBUTION.default.reward;
   const rewardPool = currentInflation * rewardDistribution;
 
   const stakedReturn = calculateChainStakedReturn(rewardPool, totalStake, totalIssuance, networkKey);
@@ -73,8 +76,8 @@ export async function getParaBondingBasics (networkKey: string, dotSamaApi: ApiP
   } as ChainBondingBasics;
 }
 
-export async function getParaCollatorsInfo (networkKey: string, dotSamaApi: ApiProps, decimals: number, address: string) {
-  const apiProps = await dotSamaApi.isReady;
+export async function getParaCollatorsInfo (networkKey: string, substrateApi: _SubstrateApi, decimals: number, address: string) {
+  const apiProps = await substrateApi.isReady;
 
   const allValidators: ValidatorInfo[] = [];
 
@@ -266,9 +269,10 @@ export async function getParaCollatorsInfo (networkKey: string, dotSamaApi: ApiP
   };
 }
 
-export async function getParaBondingTxInfo (networkJson: NetworkJson, dotSamaApi: ApiProps, delegatorAddress: string, amount: number, collatorInfo: ValidatorInfo, currentNominationCount: number) {
-  const apiPromise = await dotSamaApi.isReady;
-  const parsedAmount = amount * (10 ** (networkJson.decimals as number));
+export async function getParaBondingTxInfo (chainInfo: _ChainInfo, substrateApi: _SubstrateApi, delegatorAddress: string, amount: number, collatorInfo: ValidatorInfo, currentNominationCount: number) {
+  const apiPromise = await substrateApi.isReady;
+  const { decimals } = _getChainNativeTokenInfo(chainInfo);
+  const parsedAmount = amount * (10 ** decimals);
   const binaryAmount = new BN(parsedAmount.toString());
   const rawDelegatorState = (await apiPromise.api.query.parachainStaking.delegatorState(delegatorAddress)).toHuman() as Record<string, any> | null;
 
@@ -293,14 +297,16 @@ export async function getParaBondingTxInfo (networkJson: NetworkJson, dotSamaApi
   return extrinsic.paymentInfo(delegatorAddress);
 }
 
-export async function handleParaBondingTxInfo (networkJson: NetworkJson, amount: number, networkKey: string, nominatorAddress: string, validatorInfo: ValidatorInfo, dotSamaApiMap: Record<string, ApiProps>, web3ApiMap: Record<string, Web3>, currentNominationCount: number) {
+export async function handleParaBondingTxInfo (chainInfo: _ChainInfo, amount: number, networkKey: string, nominatorAddress: string, validatorInfo: ValidatorInfo, substrateApiMap: Record<string, _SubstrateApi>, evmApiMap: Record<string, _EvmApi>, currentNominationCount: number) {
+  const { decimals, symbol } = _getChainNativeTokenInfo(chainInfo);
+
   try {
     const [txInfo, balance] = await Promise.all([
-      getParaBondingTxInfo(networkJson, dotSamaApiMap[networkKey], nominatorAddress, amount, validatorInfo, currentNominationCount),
-      getFreeBalance(networkKey, nominatorAddress, dotSamaApiMap, web3ApiMap)
+      getParaBondingTxInfo(chainInfo, substrateApiMap[networkKey], nominatorAddress, amount, validatorInfo, currentNominationCount),
+      getFreeBalance(networkKey, nominatorAddress, substrateApiMap, evmApiMap)
     ]);
 
-    const feeString = parseNumberToDisplay(txInfo.partialFee, networkJson.decimals) + ` ${networkJson.nativeToken ? networkJson.nativeToken : ''}`;
+    const feeString = parseNumberToDisplay(txInfo.partialFee, decimals) + ` ${symbol}`;
     const rawFee = parseRawNumber(txInfo.partialFee.toString());
     const binaryBalance = new BN(balance);
 
@@ -314,15 +320,16 @@ export async function handleParaBondingTxInfo (networkJson: NetworkJson, amount:
     } as BasicTxInfo;
   } catch (e) {
     return {
-      fee: `0.0000 ${networkJson.nativeToken as string}`,
+      fee: `0.0000 ${symbol}`,
       balanceError: false
     } as BasicTxInfo;
   }
 }
 
-export async function getParaUnbondingTxInfo (networkJson: NetworkJson, dotSamaApi: ApiProps, address: string, amount: number, collatorAddress: string, unstakeAll: boolean) {
-  const apiPromise = await dotSamaApi.isReady;
-  const parsedAmount = amount * (10 ** (networkJson.decimals as number));
+export async function getParaUnbondingTxInfo (chainInfo: _ChainInfo, substrateApi: _SubstrateApi, address: string, amount: number, collatorAddress: string, unstakeAll: boolean) {
+  const apiPromise = await substrateApi.isReady;
+  const { decimals } = _getChainNativeTokenInfo(chainInfo);
+  const parsedAmount = amount * (10 ** decimals);
   const binaryAmount = new BN(parsedAmount.toString());
 
   let extrinsic;
@@ -336,14 +343,16 @@ export async function getParaUnbondingTxInfo (networkJson: NetworkJson, dotSamaA
   return extrinsic.paymentInfo(address);
 }
 
-export async function handleParaUnbondingTxInfo (address: string, amount: number, networkKey: string, dotSamaApiMap: Record<string, ApiProps>, web3ApiMap: Record<string, Web3>, networkJson: NetworkJson, collatorAddress: string, unstakeAll: boolean) {
+export async function handleParaUnbondingTxInfo (address: string, amount: number, networkKey: string, substrateApiMap: Record<string, _SubstrateApi>, evmApiMap: Record<string, _EvmApi>, chainInfo: _ChainInfo, collatorAddress: string, unstakeAll: boolean) {
+  const { decimals, symbol } = _getChainNativeTokenInfo(chainInfo);
+
   try {
     const [txInfo, balance] = await Promise.all([
-      getParaUnbondingTxInfo(networkJson, dotSamaApiMap[networkKey], address, amount, collatorAddress, unstakeAll),
-      getFreeBalance(networkKey, address, dotSamaApiMap, web3ApiMap)
+      getParaUnbondingTxInfo(chainInfo, substrateApiMap[networkKey], address, amount, collatorAddress, unstakeAll),
+      getFreeBalance(networkKey, address, substrateApiMap, evmApiMap)
     ]);
 
-    const feeString = parseNumberToDisplay(txInfo.partialFee, networkJson.decimals) + ` ${networkJson.nativeToken ? networkJson.nativeToken : ''}`;
+    const feeString = parseNumberToDisplay(txInfo.partialFee, decimals) + ` ${symbol}`;
     const rawFee = parseRawNumber(txInfo.partialFee.toString());
     const binaryBalance = new BN(balance);
 
@@ -356,15 +365,16 @@ export async function handleParaUnbondingTxInfo (address: string, amount: number
     } as BasicTxInfo;
   } catch (e) {
     return {
-      fee: `0.0000 ${networkJson.nativeToken as string}`,
+      fee: `0.0000 ${symbol}`,
       balanceError: false
     } as BasicTxInfo;
   }
 }
 
-export async function getParaBondingExtrinsic (delegatorAddress: string, networkJson: NetworkJson, dotSamaApi: ApiProps, amount: number, collatorInfo: ValidatorInfo, currentNominationCount: number) {
-  const apiPromise = await dotSamaApi.isReady;
-  const parsedAmount = amount * (10 ** (networkJson.decimals as number));
+export async function getParaBondingExtrinsic (delegatorAddress: string, chainInfo: _ChainInfo, substrateApi: _SubstrateApi, amount: number, collatorInfo: ValidatorInfo, currentNominationCount: number) {
+  const apiPromise = await substrateApi.isReady;
+  const { decimals } = _getChainNativeTokenInfo(chainInfo);
+  const parsedAmount = amount * (10 ** decimals);
   const binaryAmount = new BN(parsedAmount.toString());
   const rawDelegatorState = (await apiPromise.api.query.parachainStaking.delegatorState(delegatorAddress)).toHuman() as Record<string, any> | null;
 
@@ -385,9 +395,10 @@ export async function getParaBondingExtrinsic (delegatorAddress: string, network
   }
 }
 
-export async function getParaUnbondingExtrinsic (dotSamaApi: ApiProps, amount: number, networkJson: NetworkJson, collatorAddress: string, unstakeAll: boolean) {
-  const apiPromise = await dotSamaApi.isReady;
-  const parsedAmount = amount * (10 ** (networkJson.decimals as number));
+export async function getParaUnbondingExtrinsic (substrateApi: _SubstrateApi, amount: number, chainInfo: _ChainInfo, collatorAddress: string, unstakeAll: boolean) {
+  const apiPromise = await substrateApi.isReady;
+  const { decimals } = _getChainNativeTokenInfo(chainInfo);
+  const parsedAmount = amount * (10 ** decimals);
   const binaryAmount = new BN(parsedAmount.toString());
 
   if (!unstakeAll) {
@@ -397,12 +408,12 @@ export async function getParaUnbondingExtrinsic (dotSamaApi: ApiProps, amount: n
   }
 }
 
-async function getParaUnlockingInfo (dotSamaApi: ApiProps, address: string, networkKey: string) {
-  const apiPromise = await dotSamaApi.isReady;
+async function getParaUnlockingInfo (substrateApi: _SubstrateApi, address: string, networkKey: string) {
+  const chainApi = await substrateApi.isReady;
   const allRequests: Record<string, Record<string, any>> = {};
   const collatorList: string[] = [];
 
-  const rawDelegatorState = (await apiPromise.api.query.parachainStaking.delegatorState(address)).toHuman() as Record<string, any> | null;
+  const rawDelegatorState = (await chainApi.api.query.parachainStaking.delegatorState(address)).toHuman() as Record<string, any> | null;
 
   if (rawDelegatorState !== null) {
     const _delegations = rawDelegatorState.delegations as Record<string, string>[];
@@ -412,7 +423,7 @@ async function getParaUnlockingInfo (dotSamaApi: ApiProps, address: string, netw
     }
 
     await Promise.all(collatorList.map(async (validator) => {
-      const scheduledRequests = (await apiPromise.api.query.parachainStaking.delegationScheduledRequests(validator)).toHuman() as Record<string, any>[];
+      const scheduledRequests = (await chainApi.api.query.parachainStaking.delegationScheduledRequests(validator)).toHuman() as Record<string, any>[];
 
       scheduledRequests.forEach((request) => {
         if (reformatAddress(request.delegator as string, 0).toLowerCase() === reformatAddress(address, 0).toLowerCase()) { // need to reformat address
@@ -462,9 +473,9 @@ async function getParaUnlockingInfo (dotSamaApi: ApiProps, address: string, netw
     }
   });
 
-  const currentRoundInfo = (await apiPromise.api.query.parachainStaking.round()).toHuman() as Record<string, string>;
+  const currentRoundInfo = (await chainApi.api.query.parachainStaking.round()).toHuman() as Record<string, string>;
   const currentRound = parseRawNumber(currentRoundInfo.current);
-  const nextWithdrawal = (nextWithdrawalRound - currentRound) * (ERA_LENGTH_MAP[networkKey] || ERA_LENGTH_MAP.default);
+  const nextWithdrawal = (nextWithdrawalRound - currentRound) * (_STAKING_ERA_LENGTH_MAP[networkKey] || _STAKING_ERA_LENGTH_MAP.default);
 
   return {
     nextWithdrawal: nextWithdrawal > 0 ? nextWithdrawal : 0,
@@ -475,15 +486,16 @@ async function getParaUnlockingInfo (dotSamaApi: ApiProps, address: string, netw
   };
 }
 
-export async function handleParaUnlockingInfo (dotSamaApi: ApiProps, networkJson: NetworkJson, networkKey: string, address: string, type: StakingType) {
-  if (['bifrost', 'bifrost_testnet'].includes(networkKey)) {
-    return handleBifrostUnlockingInfo(dotSamaApi, networkJson, networkKey, address);
+export async function handleParaUnlockingInfo (substrateApi: _SubstrateApi, chainInfo: _ChainInfo, networkKey: string, address: string, type: StakingType) {
+  if (_STAKING_CHAIN_GROUP.bifrost.includes(networkKey)) {
+    return handleBifrostUnlockingInfo(substrateApi, chainInfo, networkKey, address);
   }
 
-  const { nextWithdrawal, nextWithdrawalAction, nextWithdrawalAmount, redeemable, validatorAddress } = await getParaUnlockingInfo(dotSamaApi, address, networkKey);
+  const { nextWithdrawal, nextWithdrawalAction, nextWithdrawalAmount, redeemable, validatorAddress } = await getParaUnlockingInfo(substrateApi, address, networkKey);
+  const { decimals } = _getChainNativeTokenInfo(chainInfo);
 
-  const parsedRedeemable = redeemable / (10 ** (networkJson.decimals as number));
-  const parsedNextWithdrawalAmount = nextWithdrawalAmount / (10 ** (networkJson.decimals as number));
+  const parsedRedeemable = redeemable / (10 ** decimals);
+  const parsedNextWithdrawalAmount = nextWithdrawalAmount / (10 ** decimals);
 
   return {
     address,
@@ -498,8 +510,8 @@ export async function handleParaUnlockingInfo (dotSamaApi: ApiProps, networkJson
   } as UnlockingStakeInfo;
 }
 
-export async function getParaWithdrawalTxInfo (dotSamaApi: ApiProps, address: string, collatorAddress: string, action: string) {
-  const apiPromise = await dotSamaApi.isReady;
+export async function getParaWithdrawalTxInfo (substrateApi: _SubstrateApi, address: string, collatorAddress: string, action: string) {
+  const apiPromise = await substrateApi.isReady;
 
   console.log(`executing ${action}`, address, collatorAddress);
   const extrinsic = apiPromise.api.tx.parachainStaking.executeDelegationRequest(address, collatorAddress);
@@ -507,14 +519,16 @@ export async function getParaWithdrawalTxInfo (dotSamaApi: ApiProps, address: st
   return extrinsic.paymentInfo(address);
 }
 
-export async function handleParaWithdrawalTxInfo (networkKey: string, networkJson: NetworkJson, dotSamaApiMap: Record<string, ApiProps>, web3ApiMap: Record<string, Web3>, address: string, collatorAddress: string, action: string) {
+export async function handleParaWithdrawalTxInfo (networkKey: string, chainInfo: _ChainInfo, substrateApiMap: Record<string, _SubstrateApi>, evmApiMap: Record<string, _EvmApi>, address: string, collatorAddress: string, action: string) {
+  const { decimals, symbol } = _getChainNativeTokenInfo(chainInfo);
+
   try {
     const [txInfo, balance] = await Promise.all([
-      getParaWithdrawalTxInfo(dotSamaApiMap[networkKey], address, collatorAddress, action),
-      getFreeBalance(networkKey, address, dotSamaApiMap, web3ApiMap)
+      getParaWithdrawalTxInfo(substrateApiMap[networkKey], address, collatorAddress, action),
+      getFreeBalance(networkKey, address, substrateApiMap, evmApiMap)
     ]);
 
-    const feeString = parseNumberToDisplay(txInfo.partialFee, networkJson.decimals) + ` ${networkJson.nativeToken ? networkJson.nativeToken : ''}`;
+    const feeString = parseNumberToDisplay(txInfo.partialFee, decimals) + ` ${symbol}`;
     const rawFee = parseRawNumber(txInfo.partialFee.toString());
     const binaryBalance = new BN(balance);
     const balanceError = txInfo.partialFee.gt(binaryBalance);
@@ -526,26 +540,26 @@ export async function handleParaWithdrawalTxInfo (networkKey: string, networkJso
     } as BasicTxInfo;
   } catch (e) {
     return {
-      fee: `0.0000 ${networkJson.nativeToken as string}`,
+      fee: `0.0000 ${symbol}`,
       balanceError: false
     } as BasicTxInfo;
   }
 }
 
-export async function getParaWithdrawalExtrinsic (dotSamaApi: ApiProps, address: string, collatorAddress: string, action: string) {
-  const apiPromise = await dotSamaApi.isReady;
+export async function getParaWithdrawalExtrinsic (substrateApi: _SubstrateApi, address: string, collatorAddress: string, action: string) {
+  const apiPromise = await substrateApi.isReady;
 
   console.log(`executing ${action}`, address, collatorAddress);
 
   return apiPromise.api.tx.parachainStaking.executeDelegationRequest(address, collatorAddress);
 }
 
-export async function getParaDelegationInfo (dotSamaApi: ApiProps, address: string, networkKey: string) {
-  if (['bifrost', 'bifrost_testnet'].includes(networkKey)) {
-    return getBifrostDelegationInfo(dotSamaApi, address);
+export async function getParaDelegationInfo (substrateApi: _SubstrateApi, address: string, networkKey: string) {
+  if (_STAKING_CHAIN_GROUP.bifrost.includes(networkKey)) {
+    return getBifrostDelegationInfo(substrateApi, address);
   }
 
-  const apiPromise = await dotSamaApi.isReady;
+  const apiPromise = await substrateApi.isReady;
   const delegationsList: DelegationItem[] = [];
 
   const rawDelegatorState = (await apiPromise.api.query.parachainStaking.delegatorState(address)).toHuman() as Record<string, any> | null;
@@ -634,8 +648,8 @@ export async function getParaDelegationInfo (dotSamaApi: ApiProps, address: stri
   return delegationsList;
 }
 
-async function getBifrostDelegationInfo (dotSamaApi: ApiProps, address: string) {
-  const apiPromise = await dotSamaApi.isReady;
+async function getBifrostDelegationInfo (substrateApi: _SubstrateApi, address: string) {
+  const apiPromise = await substrateApi.isReady;
   const delegationsList: DelegationItem[] = [];
 
   const rawDelegatorState = (await apiPromise.api.query.parachainStaking.delegatorState(address)).toHuman() as Record<string, any> | null;
@@ -742,10 +756,10 @@ function getBifrostBondedValidators (bondedCollators: string[], unbondingRequest
   };
 }
 
-async function handleBifrostUnlockingInfo (dotSamaApi: ApiProps, networkJson: NetworkJson, networkKey: string, address: string) {
-  const apiPromise = await dotSamaApi.isReady;
+async function handleBifrostUnlockingInfo (substrateApi: _SubstrateApi, chainInfo: _ChainInfo, networkKey: string, address: string) {
+  const api = await substrateApi.isReady;
 
-  const rawDelegatorState = (await apiPromise.api.query.parachainStaking.delegatorState(address)).toHuman() as Record<string, any> | null;
+  const rawDelegatorState = (await api.api.query.parachainStaking.delegatorState(address)).toHuman() as Record<string, any> | null;
 
   let nextWithdrawalAmount = -1;
   let nextWithdrawalAction = '';
@@ -773,13 +787,15 @@ async function handleBifrostUnlockingInfo (dotSamaApi: ApiProps, networkJson: Ne
     });
   }
 
-  const currentRoundInfo = (await apiPromise.api.query.parachainStaking.round()).toHuman() as Record<string, string>;
+  const currentRoundInfo = (await api.api.query.parachainStaking.round()).toHuman() as Record<string, string>;
   const currentRound = parseRawNumber(currentRoundInfo.current);
-  const nextWithdrawal = (nextWithdrawalRound - currentRound) * ERA_LENGTH_MAP[networkKey];
+  const nextWithdrawal = (nextWithdrawalRound - currentRound) * _STAKING_ERA_LENGTH_MAP[networkKey];
+
+  const { decimals } = _getChainNativeTokenInfo(chainInfo);
 
   const redeemable = nextWithdrawal <= 0 ? nextWithdrawalAmount : 0;
-  const parsedRedeemable = redeemable / (10 ** (networkJson.decimals as number));
-  const parsedNextWithdrawalAmount = nextWithdrawalAmount / (10 ** (networkJson.decimals as number));
+  const parsedRedeemable = redeemable / (10 ** decimals);
+  const parsedNextWithdrawalAmount = nextWithdrawalAmount / (10 ** decimals);
 
   return {
     nextWithdrawal: nextWithdrawal > 0 ? nextWithdrawal : 0,
@@ -790,8 +806,10 @@ async function handleBifrostUnlockingInfo (dotSamaApi: ApiProps, networkJson: Ne
   } as UnlockingStakeInfo;
 }
 
-async function getTuringCompoundTxInfo (dotSamaApi: ApiProps, address: string, collatorAddress: string, accountMinimum: string, bondedAmount: string, networkJson: NetworkJson) {
-  const apiPromise = await dotSamaApi.isReady;
+async function getTuringCompoundTxInfo (substrateApi: _SubstrateApi, address: string, collatorAddress: string, accountMinimum: string, bondedAmount: string, chainInfo: _ChainInfo) {
+  const apiPromise = await substrateApi.isReady;
+
+  const { decimals, symbol } = _getChainNativeTokenInfo(chainInfo);
 
   // @ts-ignore
   // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment,@typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-member-access
@@ -823,7 +841,7 @@ async function getTuringCompoundTxInfo (dotSamaApi: ApiProps, address: string, c
   // eslint-disable-next-line @typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-member-access
   const bnCompoundFee = _compoundFee as BN;
 
-  const compoundFee = parseNumberToDisplay(bnCompoundFee, networkJson.decimals) + ` ${networkJson.nativeToken ? networkJson.nativeToken : ''}`;
+  const compoundFee = parseNumberToDisplay(bnCompoundFee, decimals) + ` ${symbol}`;
 
   return {
     optimalTime: optimalCompounding.period, // in days
@@ -834,13 +852,15 @@ async function getTuringCompoundTxInfo (dotSamaApi: ApiProps, address: string, c
   };
 }
 
-export async function handleTuringCompoundTxInfo (networkKey: string, networkJson: NetworkJson, dotSamaApiMap: Record<string, ApiProps>, web3ApiMap: Record<string, Web3>, address: string, collatorAddress: string, accountMinimum: string, bondedAmount: string) {
+export async function handleTuringCompoundTxInfo (networkKey: string, chainInfo: _ChainInfo, substrateApiMap: Record<string, _SubstrateApi>, evmApiMap: Record<string, _EvmApi>, address: string, collatorAddress: string, accountMinimum: string, bondedAmount: string) {
   const [txInfo, balance] = await Promise.all([
-    getTuringCompoundTxInfo(dotSamaApiMap[networkKey], address, collatorAddress, accountMinimum, bondedAmount, networkJson),
-    getFreeBalance(networkKey, address, dotSamaApiMap, web3ApiMap)
+    getTuringCompoundTxInfo(substrateApiMap[networkKey], address, collatorAddress, accountMinimum, bondedAmount, chainInfo),
+    getFreeBalance(networkKey, address, substrateApiMap, evmApiMap)
   ]);
 
-  const feeString = parseNumberToDisplay(txInfo.paymentInfo.partialFee, networkJson.decimals) + ` ${networkJson.nativeToken ? networkJson.nativeToken : ''}`;
+  const { decimals, symbol } = _getChainNativeTokenInfo(chainInfo);
+
+  const feeString = parseNumberToDisplay(txInfo.paymentInfo.partialFee, decimals) + ` ${symbol}`;
   const rawFee = parseRawNumber(txInfo.paymentInfo.toString());
   const binaryBalance = new BN(balance);
   const totalFee = txInfo.paymentInfo.partialFee.add(txInfo.bnCompoundFee);
@@ -862,8 +882,8 @@ export async function handleTuringCompoundTxInfo (networkKey: string, networkJso
   } as TuringStakeCompoundResp;
 }
 
-export async function getTuringCompoundExtrinsic (dotSamaApi: ApiProps, address: string, collatorAddress: string, accountMinimum: string, bondedAmount: string) {
-  const apiPromise = await dotSamaApi.isReady;
+export async function getTuringCompoundExtrinsic (substrateApi: _SubstrateApi, address: string, collatorAddress: string, accountMinimum: string, bondedAmount: string) {
+  const apiPromise = await substrateApi.isReady;
 
   // @ts-ignore
   // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment,@typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-member-access
@@ -885,8 +905,8 @@ export async function getTuringCompoundExtrinsic (dotSamaApi: ApiProps, address:
   return apiPromise.api.tx.automationTime.scheduleAutoCompoundDelegatedStakeTask(startTime.toString(), frequency.toString(), collatorAddress, accountMinimum);
 }
 
-export async function checkTuringStakeCompoundingTask (dotSamaApi: ApiProps, address: string, collatorAddress: string) {
-  const apiPromise = await dotSamaApi.isReady;
+export async function checkTuringStakeCompoundingTask (substrateApi: _SubstrateApi, address: string, collatorAddress: string) {
+  const apiPromise = await substrateApi.isReady;
 
   const _allTasks = await apiPromise.api.query.automationTime.accountTasks.entries(address);
   let taskId = '';
@@ -917,18 +937,20 @@ export async function checkTuringStakeCompoundingTask (dotSamaApi: ApiProps, add
   };
 }
 
-export async function handleTuringCancelCompoundTxInfo (dotSamaApiMap: Record<string, ApiProps>, web3ApiMap: Record<string, Web3>, taskId: string, address: string, networkKey: string, networkJson: NetworkJson) {
-  const dotSamaApi = dotSamaApiMap[networkKey];
-  const apiPromise = await dotSamaApi.isReady;
+export async function handleTuringCancelCompoundTxInfo (substrateApiMap: Record<string, _SubstrateApi>, evmApiMap: Record<string, _EvmApi>, taskId: string, address: string, networkKey: string, chainInfo: _ChainInfo) {
+  const substrateApi = substrateApiMap[networkKey];
+  const apiPromise = await substrateApi.isReady;
 
   const extrinsic = apiPromise.api.tx.automationTime.cancelTask(taskId);
 
   const [paymentInfo, balance] = await Promise.all([
     extrinsic.paymentInfo(address),
-    getFreeBalance(networkKey, address, dotSamaApiMap, web3ApiMap)
+    getFreeBalance(networkKey, address, substrateApiMap, evmApiMap)
   ]);
 
-  const feeString = parseNumberToDisplay(paymentInfo.partialFee, networkJson.decimals) + ` ${networkJson.nativeToken ? networkJson.nativeToken : ''}`;
+  const { decimals, symbol } = _getChainNativeTokenInfo(chainInfo);
+
+  const feeString = parseNumberToDisplay(paymentInfo.partialFee, decimals) + ` ${symbol}`;
   const rawFee = parseRawNumber(paymentInfo.partialFee.toString());
   const binaryBalance = new BN(balance);
   const balanceError = paymentInfo.partialFee.gt(binaryBalance);
@@ -942,8 +964,8 @@ export async function handleTuringCancelCompoundTxInfo (dotSamaApiMap: Record<st
   return basicTxInfo;
 }
 
-export async function getTuringCancelCompoundingExtrinsic (dotSamaApi: ApiProps, taskId: string) {
-  const apiPromise = await dotSamaApi.isReady;
+export async function getTuringCancelCompoundingExtrinsic (substrateApi: _SubstrateApi, taskId: string) {
+  const apiPromise = await substrateApi.isReady;
 
   return apiPromise.api.tx.automationTime.cancelTask(taskId);
 }

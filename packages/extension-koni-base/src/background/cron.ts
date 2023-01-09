@@ -2,8 +2,8 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { _ChainAsset, _ChainInfo } from '@subwallet/chain/types';
-import { ApiMap, ApiProps, NetworkJson, NftTransferExtra, ServiceInfo } from '@subwallet/extension-base/background/KoniTypes';
-import { _ChainConnectionStatus } from '@subwallet/extension-base/services/chain-service/types';
+import { ApiMap, NetworkJson, NftTransferExtra, ServiceInfo } from '@subwallet/extension-base/background/KoniTypes';
+import { _ChainConnectionStatus, _SubstrateApi } from '@subwallet/extension-base/services/chain-service/types';
 import DatabaseService from '@subwallet/extension-base/services/storage-service/DatabaseService';
 import { getTokenPrice } from '@subwallet/extension-koni-base/api/coingecko';
 import { fetchMultiChainHistories } from '@subwallet/extension-koni-base/api/subsquid/subsquid-multi-chain-history';
@@ -158,7 +158,7 @@ export class KoniCron {
           this.addCron('recoverApiMap', this.recoverApiMap, CRON_AUTO_RECOVER_DOTSAMA_INTERVAL, false);
           this.addCron('refreshStakingReward', this.refreshStakingReward(address), CRON_REFRESH_STAKING_REWARD_INTERVAL);
           this.addCron('refreshPoolingStakingReward', this.refreshStakingRewardFastInterval(address), CRON_REFRESH_STAKING_REWARD_FAST_INTERVAL);
-          this.addCron('refreshStakeUnlockingInfo', this.refreshStakeUnlockingInfo(address, serviceInfo.networkMap, serviceInfo.chainApiMap.substrate), CRON_REFRESH_STAKE_UNLOCKING_INFO);
+          this.addCron('refreshStakeUnlockingInfo', this.refreshStakeUnlockingInfo(address, serviceInfo.chainInfoMap, serviceInfo.chainApiMap.substrate), CRON_REFRESH_STAKE_UNLOCKING_INFO);
         } else {
           // this.setNftReady(address);
           this.setStakingRewardReady();
@@ -318,6 +318,7 @@ export class KoniCron {
       fetchMultiChainHistories(addresses).then((historiesMap) => {
         Object.entries(historiesMap).forEach(([address, data]) => {
           data.forEach((item) => {
+            // TODO: networkKey from indexer API might not be the same as in ChainService
             this.state.setHistory(address, item.networkKey, item);
           });
         });
@@ -325,10 +326,10 @@ export class KoniCron {
     };
   };
 
-  refreshStakeUnlockingInfo (address: string, networkMap: Record<string, _ChainInfo>, dotSamaApiMap: Record<string, ApiProps>) {
+  refreshStakeUnlockingInfo (address: string, networkMap: Record<string, _ChainInfo>, substrateApiMap: Record<string, _SubstrateApi>) {
     return () => {
       if (address.toLowerCase() !== ALL_ACCOUNT_KEY) {
-        this.subscriptions.subscribeStakeUnlockingInfo(address, networkMap, dotSamaApiMap)
+        this.subscriptions.subscribeStakeUnlockingInfo(address, networkMap, substrateApiMap)
           .then(() => this.logger.log('Refresh staking unlocking info done'))
           .catch(this.logger.error);
       }

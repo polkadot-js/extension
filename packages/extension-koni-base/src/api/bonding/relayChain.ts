@@ -1,26 +1,29 @@
 // Copyright 2019-2022 @subwallet/extension-koni authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { ApiProps, BasicTxInfo, ChainBondingBasics, NetworkJson, StakingType, UnlockingStakeInfo, ValidatorInfo } from '@subwallet/extension-base/background/KoniTypes';
-import { calculateChainStakedReturn, calculateInflation, calculateValidatorStakedReturn, ERA_LENGTH_MAP, getCommission, Unlocking, ValidatorExtraInfo } from '@subwallet/extension-koni-base/api/bonding/utils';
+import { _ChainInfo } from '@subwallet/chain/types';
+import { BasicTxInfo, ChainBondingBasics, StakingType, UnlockingStakeInfo, ValidatorInfo } from '@subwallet/extension-base/background/KoniTypes';
+import { _STAKING_ERA_LENGTH_MAP } from '@subwallet/extension-base/services/chain-service/constants';
+import { _EvmApi, _SubstrateApi } from '@subwallet/extension-base/services/chain-service/types';
+import { _getChainNativeTokenInfo } from '@subwallet/extension-base/services/chain-service/utils';
+import { calculateChainStakedReturn, calculateInflation, calculateValidatorStakedReturn, getCommission, Unlocking, ValidatorExtraInfo } from '@subwallet/extension-koni-base/api/bonding/utils';
 import { getFreeBalance } from '@subwallet/extension-koni-base/api/dotsama/balance';
 import { parseNumberToDisplay, parseRawNumber } from '@subwallet/extension-koni-base/utils';
-import Web3 from 'web3';
 
 import { BN, BN_ONE, BN_ZERO } from '@polkadot/util';
 
-export async function getRelayChainBondingBasics (networkKey: string, dotSamaApi: ApiProps) {
-  const apiProps = await dotSamaApi.isReady;
-  const _era = await apiProps.api.query.staking.currentEra();
+export async function getRelayChainBondingBasics (networkKey: string, substrateApi: _SubstrateApi) {
+  const chainApi = await substrateApi.isReady;
+  const _era = await chainApi.api.query.staking.currentEra();
   const currentEra = _era.toString();
 
   const [_totalEraStake, _totalIssuance, _auctionCounter, _maxNominator, _nominatorCount, _eraStakers] = await Promise.all([
-    apiProps.api.query.staking.erasTotalStake(parseInt(currentEra)),
-    apiProps.api.query.balances.totalIssuance(),
-    apiProps.api.query.auctions?.auctionCounter(),
-    apiProps.api.query.staking.maxNominatorsCount(),
-    apiProps.api.query.staking.counterForNominators(),
-    apiProps.api.query.staking.erasStakers.entries(parseInt(currentEra))
+    chainApi.api.query.staking.erasTotalStake(parseInt(currentEra)),
+    chainApi.api.query.balances.totalIssuance(),
+    chainApi.api.query.auctions?.auctionCounter(),
+    chainApi.api.query.staking.maxNominatorsCount(),
+    chainApi.api.query.staking.counterForNominators(),
+    chainApi.api.query.staking.erasStakers.entries(parseInt(currentEra))
   ]);
 
   const eraStakers = _eraStakers as any[];
@@ -49,31 +52,31 @@ export async function getRelayChainBondingBasics (networkKey: string, dotSamaApi
   } as ChainBondingBasics;
 }
 
-export async function getRelayValidatorsInfo (networkKey: string, dotSamaApi: ApiProps, decimals: number, address: string) {
-  const apiProps = await dotSamaApi.isReady;
+export async function getRelayValidatorsInfo (networkKey: string, substrateApi: _SubstrateApi, decimals: number, address: string) {
+  const chainApi = await substrateApi.isReady;
 
-  const _era = await apiProps.api.query.staking.currentEra();
+  const _era = await chainApi.api.query.staking.currentEra();
   const currentEra = _era.toString();
 
   const allValidators: string[] = [];
   const result: ValidatorInfo[] = [];
 
   const [_totalEraStake, _eraStakers, _totalIssuance, _auctionCounter, _minBond, _existedValidators, _bondedInfo] = await Promise.all([
-    apiProps.api.query.staking.erasTotalStake(parseInt(currentEra)),
-    apiProps.api.query.staking.erasStakers.entries(parseInt(currentEra)),
-    apiProps.api.query.balances.totalIssuance(),
-    apiProps.api.query.auctions?.auctionCounter(),
-    apiProps.api.query.staking.minNominatorBond(),
-    apiProps.api.query.staking.nominators(address),
-    apiProps.api.query.staking.bonded(address)
+    chainApi.api.query.staking.erasTotalStake(parseInt(currentEra)),
+    chainApi.api.query.staking.erasStakers.entries(parseInt(currentEra)),
+    chainApi.api.query.balances.totalIssuance(),
+    chainApi.api.query.auctions?.auctionCounter(),
+    chainApi.api.query.staking.minNominatorBond(),
+    chainApi.api.query.staking.nominators(address),
+    chainApi.api.query.staking.bonded(address)
   ]);
 
   const bnTotalEraStake = new BN(_totalEraStake.toString());
   const bnTotalIssuance = new BN(_totalIssuance.toString());
 
-  const rawMaxNominations = (apiProps.api.consts.staking.maxNominations).toHuman() as string;
+  const rawMaxNominations = (chainApi.api.consts.staking.maxNominations).toHuman() as string;
   const maxNominations = parseFloat(rawMaxNominations.replaceAll(',', ''));
-  const rawMaxNominatorPerValidator = (apiProps.api.consts.staking.maxNominatorRewardedPerValidator).toHuman() as string;
+  const rawMaxNominatorPerValidator = (chainApi.api.consts.staking.maxNominatorRewardedPerValidator).toHuman() as string;
   const maxNominatorPerValidator = parseFloat(rawMaxNominatorPerValidator.replaceAll(',', ''));
 
   const bondedInfo = _bondedInfo.toHuman();
@@ -135,8 +138,8 @@ export async function getRelayValidatorsInfo (networkKey: string, dotSamaApi: Ap
   await Promise.all(allValidators.map(async (address) => {
     // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
     const [_commissionInfo, _identityInfo] = await Promise.all([
-      apiProps.api.query.staking.validators(address),
-      apiProps.api.query?.identity?.identityOf(address)
+      chainApi.api.query.staking.validators(address),
+      chainApi.api.query?.identity?.identityOf(address)
     ]);
 
     const commissionInfo = _commissionInfo.toHuman() as Record<string, any>;
@@ -210,8 +213,8 @@ export async function getRelayValidatorsInfo (networkKey: string, dotSamaApi: Ap
   };
 }
 
-export async function getRelayBondingTxInfo (dotSamaApi: ApiProps, controllerId: string, amount: BN, validators: string[], isBondedBefore: boolean, bondDest = 'Staked') {
-  const apiPromise = await dotSamaApi.isReady;
+export async function getRelayBondingTxInfo (substrateApi: _SubstrateApi, controllerId: string, amount: BN, validators: string[], isBondedBefore: boolean, bondDest = 'Staked') {
+  const apiPromise = await substrateApi.isReady;
 
   if (!isBondedBefore) {
     const bondTx = apiPromise.api.tx.staking.bond(controllerId, amount, bondDest);
@@ -228,16 +231,18 @@ export async function getRelayBondingTxInfo (dotSamaApi: ApiProps, controllerId:
   }
 }
 
-export async function handleRelayBondingTxInfo (networkJson: NetworkJson, amount: number, targetValidators: string[], isBondedBefore: boolean, networkKey: string, nominatorAddress: string, dotSamaApiMap: Record<string, ApiProps>, web3ApiMap: Record<string, Web3>) {
+export async function handleRelayBondingTxInfo (chainInfo: _ChainInfo, amount: number, targetValidators: string[], isBondedBefore: boolean, networkKey: string, nominatorAddress: string, substrateApiMap: Record<string, _SubstrateApi>, evmApiMap: Record<string, _EvmApi>) {
+  const { decimals, symbol } = _getChainNativeTokenInfo(chainInfo);
+
   try {
-    const parsedAmount = amount * (10 ** (networkJson.decimals as number));
+    const parsedAmount = amount * (10 ** decimals);
     const binaryAmount = new BN(parsedAmount.toString());
     const [txInfo, balance] = await Promise.all([
-      getRelayBondingTxInfo(dotSamaApiMap[networkKey], nominatorAddress, binaryAmount, targetValidators, isBondedBefore),
-      getFreeBalance(networkKey, nominatorAddress, dotSamaApiMap, web3ApiMap)
+      getRelayBondingTxInfo(substrateApiMap[networkKey], nominatorAddress, binaryAmount, targetValidators, isBondedBefore),
+      getFreeBalance(networkKey, nominatorAddress, substrateApiMap, evmApiMap)
     ]);
 
-    const feeString = parseNumberToDisplay(txInfo.partialFee, networkJson.decimals) + ` ${networkJson.nativeToken ? networkJson.nativeToken : ''}`;
+    const feeString = parseNumberToDisplay(txInfo.partialFee, decimals) + ` ${symbol}`;
     const rawFee = parseRawNumber(txInfo.partialFee.toString());
     const binaryBalance = new BN(balance);
 
@@ -251,27 +256,28 @@ export async function handleRelayBondingTxInfo (networkJson: NetworkJson, amount
     } as BasicTxInfo;
   } catch (e) {
     return {
-      fee: `0.0000 ${networkJson.nativeToken as string}`,
+      fee: `0.0000 ${symbol}`,
       balanceError: false
     };
   }
 }
 
-export async function getRelayBondingExtrinsic (dotSamaApi: ApiProps, controllerId: string, amount: number, validators: string[], isBondedBefore: boolean, networkJson: NetworkJson, bondDest = 'Staked') {
-  const apiPromise = await dotSamaApi.isReady;
-  const parsedAmount = amount * (10 ** (networkJson.decimals as number));
+export async function getRelayBondingExtrinsic (substrateApi: _SubstrateApi, controllerId: string, amount: number, validators: string[], isBondedBefore: boolean, chainInfo: _ChainInfo, bondDest = 'Staked') {
+  const chainApi = await substrateApi.isReady;
+  const { decimals } = _getChainNativeTokenInfo(chainInfo);
+  const parsedAmount = amount * (10 ** decimals);
   const binaryAmount = new BN(parsedAmount.toString());
 
   let bondTx;
-  const nominateTx = apiPromise.api.tx.staking.nominate(validators);
+  const nominateTx = chainApi.api.tx.staking.nominate(validators);
 
   if (!isBondedBefore) {
-    bondTx = apiPromise.api.tx.staking.bond(controllerId, binaryAmount, bondDest);
+    bondTx = chainApi.api.tx.staking.bond(controllerId, binaryAmount, bondDest);
   } else {
-    bondTx = apiPromise.api.tx.staking.bondExtra(binaryAmount);
+    bondTx = chainApi.api.tx.staking.bondExtra(binaryAmount);
   }
 
-  return apiPromise.api.tx.utility.batchAll([bondTx, nominateTx]);
+  return chainApi.api.tx.utility.batchAll([bondTx, nominateTx]);
 }
 
 export function getTargetValidators (bondedValidators: string[], selectedValidator: string) {
@@ -286,40 +292,43 @@ export function getTargetValidators (bondedValidators: string[], selectedValidat
   }
 }
 
-export async function getRelayUnbondingTxInfo (dotSamaApi: ApiProps, amount: BN, address: string) {
-  const apiPromise = await dotSamaApi.isReady;
+export async function getRelayUnbondingTxInfo (substrateApi: _SubstrateApi, amount: BN, address: string) {
+  const chainApi = await substrateApi.isReady;
 
-  const chillTx = apiPromise.api.tx.staking.chill();
-  const unbondTx = apiPromise.api.tx.staking.unbond(amount);
+  const chillTx = chainApi.api.tx.staking.chill();
+  const unbondTx = chainApi.api.tx.staking.unbond(amount);
 
-  const extrinsic = apiPromise.api.tx.utility.batchAll([chillTx, unbondTx]);
+  const extrinsic = chainApi.api.tx.utility.batchAll([chillTx, unbondTx]);
 
   return extrinsic.paymentInfo(address);
 }
 
-export async function getRelayUnbondingExtrinsic (dotSamaApi: ApiProps, amount: number, networkJson: NetworkJson) {
-  const apiPromise = await dotSamaApi.isReady;
-  const parsedAmount = Math.floor(amount * (10 ** (networkJson.decimals as number)));
+export async function getRelayUnbondingExtrinsic (substrateApi: _SubstrateApi, amount: number, chainInfo: _ChainInfo) {
+  const chainApi = await substrateApi.isReady;
+  const { decimals } = _getChainNativeTokenInfo(chainInfo);
+  const parsedAmount = Math.floor(amount * (10 ** decimals));
   const binaryAmount = new BN(parsedAmount.toString());
 
-  const chillTx = apiPromise.api.tx.staking.chill();
-  const unbondTx = apiPromise.api.tx.staking.unbond(binaryAmount);
+  const chillTx = chainApi.api.tx.staking.chill();
+  const unbondTx = chainApi.api.tx.staking.unbond(binaryAmount);
 
-  return apiPromise.api.tx.utility.batchAll([chillTx, unbondTx]);
+  return chainApi.api.tx.utility.batchAll([chillTx, unbondTx]);
 }
 
-export async function handleRelayUnbondingTxInfo (address: string, amount: number, networkKey: string, dotSamaApiMap: Record<string, ApiProps>, web3ApiMap: Record<string, Web3>, networkJson: NetworkJson) {
+export async function handleRelayUnbondingTxInfo (address: string, amount: number, networkKey: string, substrateApiMap: Record<string, _SubstrateApi>, evmApiMap: Record<string, _EvmApi>, chainInfo: _ChainInfo) {
+  const { decimals, symbol } = _getChainNativeTokenInfo(chainInfo);
+
   try {
-    const dotSamaApi = dotSamaApiMap[networkKey];
-    const parsedAmount = Math.floor(amount * (10 ** (networkJson.decimals as number)));
+    const substrateApi = substrateApiMap[networkKey];
+    const parsedAmount = Math.floor(amount * (10 ** decimals));
     const binaryAmount = new BN(parsedAmount.toString());
 
     const [txInfo, balance] = await Promise.all([
-      getRelayUnbondingTxInfo(dotSamaApi, binaryAmount, address),
-      getFreeBalance(networkKey, address, dotSamaApiMap, web3ApiMap)
+      getRelayUnbondingTxInfo(substrateApi, binaryAmount, address),
+      getFreeBalance(networkKey, address, substrateApiMap, evmApiMap)
     ]);
 
-    const feeString = parseNumberToDisplay(txInfo.partialFee, networkJson.decimals) + ` ${networkJson.nativeToken ? networkJson.nativeToken : ''}`;
+    const feeString = parseNumberToDisplay(txInfo.partialFee, decimals) + ` ${symbol}`;
     const rawFee = parseRawNumber(txInfo.partialFee.toString());
     const binaryBalance = new BN(balance);
 
@@ -332,18 +341,18 @@ export async function handleRelayUnbondingTxInfo (address: string, amount: numbe
     } as BasicTxInfo;
   } catch (e) {
     return {
-      fee: `0.0000 ${networkJson.nativeToken as string}`,
+      fee: `0.0000 ${symbol}`,
       balanceError: false
     } as BasicTxInfo;
   }
 }
 
-export async function getRelayUnlockingInfo (dotSamaApi: ApiProps, address: string, networkKey: string) {
-  const apiPromise = await dotSamaApi.isReady;
+export async function getRelayUnlockingInfo (substrateApi: _SubstrateApi, address: string, networkKey: string) {
+  const chainApi = await substrateApi.isReady;
 
   const [stakingInfo, progress] = await Promise.all([
-    apiPromise.api.derive.staking.account(address),
-    apiPromise.api.derive.session.progress()
+    chainApi.api.derive.staking.account(address),
+    chainApi.api.derive.session.progress()
   ]);
 
   // Only get the nearest redeemable
@@ -378,17 +387,19 @@ export async function getRelayUnlockingInfo (dotSamaApi: ApiProps, address: stri
   }
 
   return {
-    nextWithdrawal: minRemainingEra.muln(ERA_LENGTH_MAP[networkKey] || ERA_LENGTH_MAP.default),
+    nextWithdrawal: minRemainingEra.muln(_STAKING_ERA_LENGTH_MAP[networkKey] || _STAKING_ERA_LENGTH_MAP.default),
     redeemable: stakingInfo.redeemable,
     nextWithdrawalAmount
   };
 }
 
-export async function handleRelayUnlockingInfo (dotSamaApi: ApiProps, networkJson: NetworkJson, networkKey: string, address: string, type: StakingType) {
-  const { nextWithdrawal, nextWithdrawalAmount, redeemable } = await getRelayUnlockingInfo(dotSamaApi, address, networkKey);
+export async function handleRelayUnlockingInfo (substrateApi: _SubstrateApi, chainInfo: _ChainInfo, networkKey: string, address: string, type: StakingType) {
+  const { nextWithdrawal, nextWithdrawalAmount, redeemable } = await getRelayUnlockingInfo(substrateApi, address, networkKey);
 
-  const parsedRedeemable = redeemable ? parseFloat(redeemable.toString()) / (10 ** (networkJson.decimals as number)) : 0;
-  const parsedNextWithdrawalAmount = parseFloat(nextWithdrawalAmount.toString()) / (10 ** (networkJson.decimals as number));
+  const { decimals } = _getChainNativeTokenInfo(chainInfo);
+
+  const parsedRedeemable = redeemable ? parseFloat(redeemable.toString()) / (10 ** decimals) : 0;
+  const parsedNextWithdrawalAmount = parseFloat(nextWithdrawalAmount.toString()) / (10 ** decimals);
 
   return {
     chain: networkKey,
@@ -401,30 +412,32 @@ export async function handleRelayUnlockingInfo (dotSamaApi: ApiProps, networkJso
   } as UnlockingStakeInfo;
 }
 
-export async function getRelayWithdrawalTxInfo (dotSamaAPi: ApiProps, address: string) {
-  const apiPromise = await dotSamaAPi.isReady;
+export async function getRelayWithdrawalTxInfo (substrateApi: _SubstrateApi, address: string) {
+  const chainApi = await substrateApi.isReady;
 
-  if (apiPromise.api.tx.staking.withdrawUnbonded.meta.args.length === 1) {
-    const _slashingSpans = (await apiPromise.api.query.staking.slashingSpans(address)).toHuman() as Record<string, any>;
+  if (chainApi.api.tx.staking.withdrawUnbonded.meta.args.length === 1) {
+    const _slashingSpans = (await chainApi.api.query.staking.slashingSpans(address)).toHuman() as Record<string, any>;
     const slashingSpanCount = _slashingSpans !== null ? _slashingSpans.spanIndex as string : '0';
-    const extrinsic = apiPromise.api.tx.staking.withdrawUnbonded(slashingSpanCount);
+    const extrinsic = chainApi.api.tx.staking.withdrawUnbonded(slashingSpanCount);
 
     return extrinsic.paymentInfo(address);
   } else {
-    const extrinsic = apiPromise.api.tx.staking.withdrawUnbonded();
+    const extrinsic = chainApi.api.tx.staking.withdrawUnbonded();
 
     return extrinsic.paymentInfo(address);
   }
 }
 
-export async function handleRelayWithdrawalTxInfo (address: string, networkKey: string, networkJson: NetworkJson, dotSamaApiMap: Record<string, ApiProps>, web3ApiMap: Record<string, Web3>) {
+export async function handleRelayWithdrawalTxInfo (address: string, networkKey: string, chainInfo: _ChainInfo, substrateApiMap: Record<string, _SubstrateApi>, evmApiMap: Record<string, _EvmApi>) {
+  const { decimals, symbol } = _getChainNativeTokenInfo(chainInfo);
+
   try {
     const [txInfo, balance] = await Promise.all([
-      getRelayWithdrawalTxInfo(dotSamaApiMap[networkKey], address),
-      getFreeBalance(networkKey, address, dotSamaApiMap, web3ApiMap)
+      getRelayWithdrawalTxInfo(substrateApiMap[networkKey], address),
+      getFreeBalance(networkKey, address, substrateApiMap, evmApiMap)
     ]);
 
-    const feeString = parseNumberToDisplay(txInfo.partialFee, networkJson.decimals) + ` ${networkJson.nativeToken ? networkJson.nativeToken : ''}`;
+    const feeString = parseNumberToDisplay(txInfo.partialFee, decimals) + ` ${symbol}`;
     const rawFee = parseRawNumber(txInfo.partialFee.toString());
     const binaryBalance = new BN(balance);
     const balanceError = txInfo.partialFee.gt(binaryBalance);
@@ -438,41 +451,43 @@ export async function handleRelayWithdrawalTxInfo (address: string, networkKey: 
     console.error('Error estimating fee for staking withdrawal', e);
 
     return {
-      fee: `0.0000 ${networkJson.nativeToken as string}`,
+      fee: `0.0000 ${symbol}`,
       balanceError: false
     } as BasicTxInfo;
   }
 }
 
-export async function getRelayWithdrawalExtrinsic (dotSamaAPi: ApiProps, address: string) {
-  const apiPromise = await dotSamaAPi.isReady;
+export async function getRelayWithdrawalExtrinsic (substrateApi: _SubstrateApi, address: string) {
+  const chainApi = await substrateApi.isReady;
 
-  if (apiPromise.api.tx.staking.withdrawUnbonded.meta.args.length === 1) {
-    const _slashingSpans = (await apiPromise.api.query.staking.slashingSpans(address)).toHuman() as Record<string, any>;
+  if (chainApi.api.tx.staking.withdrawUnbonded.meta.args.length === 1) {
+    const _slashingSpans = (await chainApi.api.query.staking.slashingSpans(address)).toHuman() as Record<string, any>;
     const slashingSpanCount = _slashingSpans !== null ? _slashingSpans.spanIndex as string : '0';
 
-    return apiPromise.api.tx.staking.withdrawUnbonded(slashingSpanCount);
+    return chainApi.api.tx.staking.withdrawUnbonded(slashingSpanCount);
   } else {
-    return apiPromise.api.tx.staking.withdrawUnbonded();
+    return chainApi.api.tx.staking.withdrawUnbonded();
   }
 }
 
-async function getPoolingClaimRewardTxInfo (dotSamaApi: ApiProps, address: string) {
-  const apiProps = await dotSamaApi.isReady;
+async function getPoolingClaimRewardTxInfo (substrateApi: _SubstrateApi, address: string) {
+  const chainApi = await substrateApi.isReady;
 
-  const extrinsic = apiProps.api.tx.nominationPools.claimPayout();
+  const extrinsic = chainApi.api.tx.nominationPools.claimPayout();
 
   return extrinsic.paymentInfo(address);
 }
 
-export async function handlePoolingClaimRewardTxInfo (address: string, networkKey: string, networkJson: NetworkJson, dotSamaApiMap: Record<string, ApiProps>, web3ApiMap: Record<string, Web3>) {
+export async function handlePoolingClaimRewardTxInfo (address: string, networkKey: string, chainInfo: _ChainInfo, substrateApiMap: Record<string, _SubstrateApi>, evmApiMap: Record<string, _EvmApi>) {
+  const { decimals, symbol } = _getChainNativeTokenInfo(chainInfo);
+
   try {
     const [txInfo, balance] = await Promise.all([
-      getPoolingClaimRewardTxInfo(dotSamaApiMap[networkKey], address),
-      getFreeBalance(networkKey, address, dotSamaApiMap, web3ApiMap)
+      getPoolingClaimRewardTxInfo(substrateApiMap[networkKey], address),
+      getFreeBalance(networkKey, address, substrateApiMap, evmApiMap)
     ]);
 
-    const feeString = parseNumberToDisplay(txInfo.partialFee, networkJson.decimals) + ` ${networkJson.nativeToken ? networkJson.nativeToken : ''}`;
+    const feeString = parseNumberToDisplay(txInfo.partialFee, decimals) + ` ${symbol}`;
     const rawFee = parseRawNumber(txInfo.partialFee.toString());
     const binaryBalance = new BN(balance);
     const balanceError = txInfo.partialFee.gt(binaryBalance);
@@ -486,14 +501,14 @@ export async function handlePoolingClaimRewardTxInfo (address: string, networkKe
     console.error('Error handling nomination pool reward claiming', e);
 
     return {
-      fee: `0.0000 ${networkJson.nativeToken as string}`,
+      fee: `0.0000 ${symbol}`,
       balanceError: false
     } as BasicTxInfo;
   }
 }
 
-export async function getPoolingClaimRewardExtrinsic (dotSamaApi: ApiProps) {
-  const apiProps = await dotSamaApi.isReady;
+export async function getPoolingClaimRewardExtrinsic (substrateApi: _SubstrateApi) {
+  const chainApi = await substrateApi.isReady;
 
-  return apiProps.api.tx.nominationPools.claimPayout();
+  return chainApi.api.tx.nominationPools.claimPayout();
 }

@@ -3,11 +3,12 @@
 
 import { _ChainAsset, _ChainInfo } from '@subwallet/chain/types';
 import { AuthUrls } from '@subwallet/extension-base/background/handlers/State';
-import { ApiProps, NetworkJson, NftTransferExtra, StakingType, UnlockingStakeInfo } from '@subwallet/extension-base/background/KoniTypes';
+import { NftTransferExtra, StakingType, UnlockingStakeInfo } from '@subwallet/extension-base/background/KoniTypes';
+import { _STAKING_CHAIN_GROUP } from '@subwallet/extension-base/services/chain-service/constants';
 import { _EvmApi, _SubstrateApi } from '@subwallet/extension-base/services/chain-service/types';
 import { _isChainEnabled, _isChainSupportSubstrateStaking } from '@subwallet/extension-base/services/chain-service/utils';
 import DatabaseService from '@subwallet/extension-base/services/storage-service/DatabaseService';
-import { CHAIN_TYPES, getUnlockingInfo } from '@subwallet/extension-koni-base/api/bonding';
+import { getUnlockingInfo } from '@subwallet/extension-koni-base/api/bonding';
 import { subscribeBalance } from '@subwallet/extension-koni-base/api/dotsama/balance';
 import { subscribeCrowdloan } from '@subwallet/extension-koni-base/api/dotsama/crowdloan';
 import { getNominationStakingRewardData, getPoolingStakingRewardData, stakingOnChainApi } from '@subwallet/extension-koni-base/api/staking';
@@ -331,7 +332,7 @@ export class KoniSubscription {
     this.logger.log('Set staking reward state with fast interval done', result);
   }
 
-  async subscribeStakeUnlockingInfo (address: string, networkMap: Record<string, NetworkJson>, dotSamaApiMap: Record<string, ApiProps>) {
+  async subscribeStakeUnlockingInfo (address: string, networkMap: Record<string, _ChainInfo>, substrateApiMap: Record<string, _SubstrateApi>) {
     const addresses = await this.state.getDecodedAddresses(address);
     const currentAddress = addresses[0]; // only get info for the current account
 
@@ -345,12 +346,12 @@ export class KoniSubscription {
 
     await Promise.all(stakingItems.map(async (stakingItem) => {
       const needUpdateUnlockingStake = parseFloat(stakingItem.balance as string) > 0 && stakingItem.type === StakingType.NOMINATED;
-      const networkJson = networkMap[stakingItem.chain];
+      const chainInfo = networkMap[stakingItem.chain];
 
       if (needUpdateUnlockingStake) {
         let extraCollatorAddress;
 
-        if (CHAIN_TYPES.amplitude.includes(stakingItem.chain)) {
+        if (_STAKING_CHAIN_GROUP.amplitude.includes(stakingItem.chain)) {
           const extraDelegationInfo = await this.state.getExtraDelegationInfo(stakingItem.chain, stakingItem.address);
 
           if (extraDelegationInfo) {
@@ -358,7 +359,7 @@ export class KoniSubscription {
           }
         }
 
-        const unlockingInfo = await getUnlockingInfo(dotSamaApiMap[stakingItem.chain], networkJson, stakingItem.chain, currentAddress, stakingItem.type, extraCollatorAddress);
+        const unlockingInfo = await getUnlockingInfo(substrateApiMap[stakingItem.chain], chainInfo, stakingItem.chain, currentAddress, stakingItem.type, extraCollatorAddress);
 
         stakeUnlockingInfo.push(unlockingInfo);
       }

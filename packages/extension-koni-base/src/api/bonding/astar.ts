@@ -1,12 +1,14 @@
 // Copyright 2019-2022 @subwallet/extension-koni authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { ApiProps, BasicTxInfo, DelegationItem, NetworkJson, StakingType, UnlockingStakeInfo, ValidatorInfo } from '@subwallet/extension-base/background/KoniTypes';
-import { ERA_LENGTH_MAP } from '@subwallet/extension-koni-base/api/bonding/utils';
+import { _ChainInfo } from '@subwallet/chain/types';
+import { BasicTxInfo, DelegationItem, StakingType, UnlockingStakeInfo, ValidatorInfo } from '@subwallet/extension-base/background/KoniTypes';
+import { _STAKING_ERA_LENGTH_MAP } from '@subwallet/extension-base/services/chain-service/constants';
+import { _EvmApi, _SubstrateApi } from '@subwallet/extension-base/services/chain-service/types';
+import { _getChainNativeTokenInfo } from '@subwallet/extension-base/services/chain-service/utils';
 import { getFreeBalance } from '@subwallet/extension-koni-base/api/dotsama/balance';
 import { isUrl, parseNumberToDisplay, parseRawNumber } from '@subwallet/extension-koni-base/utils';
 import fetch from 'cross-fetch';
-import Web3 from 'web3';
 
 import { SubmittableExtrinsic } from '@polkadot/api/promise/types';
 import { BN } from '@polkadot/util';
@@ -72,10 +74,10 @@ export async function getAstarBondingBasics (networkKey: string) {
   };
 }
 
-export async function getAstarDappsInfo (networkKey: string, dotSamaApi: ApiProps, decimals: number, address: string) {
-  const apiProps = await dotSamaApi.isReady;
-  const rawMaxStakerPerContract = (apiProps.api.consts.dappsStaking.maxNumberOfStakersPerContract).toHuman() as string;
-  const rawMinStake = (apiProps.api.consts.dappsStaking.minimumStakingAmount).toHuman() as string;
+export async function getAstarDappsInfo (networkKey: string, substrateApi: _SubstrateApi, decimals: number, address: string) {
+  const chainApi = await substrateApi.isReady;
+  const rawMaxStakerPerContract = (chainApi.api.consts.dappsStaking.maxNumberOfStakersPerContract).toHuman() as string;
+  const rawMinStake = (chainApi.api.consts.dappsStaking.minimumStakingAmount).toHuman() as string;
 
   const allDappsInfo: ValidatorInfo[] = [];
   const minStake = parseRawNumber(rawMinStake);
@@ -90,8 +92,8 @@ export async function getAstarDappsInfo (networkKey: string, dotSamaApi: ApiProp
   });
 
   const [_stakedDapps, _era, _allDapps] = await Promise.all([
-    apiProps.api.query.dappsStaking.generalStakerInfo.entries(address),
-    apiProps.api.query.dappsStaking.currentEra(),
+    chainApi.api.query.dappsStaking.generalStakerInfo.entries(address),
+    chainApi.api.query.dappsStaking.currentEra(),
     allDappsReq
   ]);
 
@@ -116,7 +118,7 @@ export async function getAstarDappsInfo (networkKey: string, dotSamaApi: ApiProp
     const dappName = dapp.name as string;
     const dappAddress = dapp.address as string;
     const dappIcon = isUrl(dapp.iconUrl as string) ? dapp.iconUrl as string : undefined;
-    const _contractInfo = await apiProps.api.query.dappsStaking.contractEraStake({ Evm: dappAddress }, era);
+    const _contractInfo = await chainApi.api.query.dappsStaking.contractEraStake({ Evm: dappAddress }, era);
     const contractInfo = _contractInfo.toHuman() as Record<string, any>;
     let totalStake = 0;
     let stakerCount = 0;
@@ -153,9 +155,10 @@ export async function getAstarDappsInfo (networkKey: string, dotSamaApi: ApiProp
   };
 }
 
-export async function getAstarBondingTxInfo (networkJson: NetworkJson, dotSamaApi: ApiProps, stakerAddress: string, amount: number, dappInfo: ValidatorInfo) {
-  const apiPromise = await dotSamaApi.isReady;
-  const parsedAmount = amount * (10 ** (networkJson.decimals as number));
+export async function getAstarBondingTxInfo (chainInfo: _ChainInfo, substrateApi: _SubstrateApi, stakerAddress: string, amount: number, dappInfo: ValidatorInfo) {
+  const apiPromise = await substrateApi.isReady;
+  const { decimals } = _getChainNativeTokenInfo(chainInfo);
+  const parsedAmount = amount * (10 ** decimals);
   const binaryAmount = new BN(parsedAmount.toString());
 
   const extrinsic = apiPromise.api.tx.dappsStaking.bondAndStake({ Evm: dappInfo.address }, binaryAmount);
@@ -163,14 +166,16 @@ export async function getAstarBondingTxInfo (networkJson: NetworkJson, dotSamaAp
   return extrinsic.paymentInfo(stakerAddress);
 }
 
-export async function handleAstarBondingTxInfo (networkJson: NetworkJson, amount: number, networkKey: string, stakerAddress: string, dappInfo: ValidatorInfo, dotSamaApiMap: Record<string, ApiProps>, web3ApiMap: Record<string, Web3>) {
+export async function handleAstarBondingTxInfo (chainInfo: _ChainInfo, amount: number, networkKey: string, stakerAddress: string, dappInfo: ValidatorInfo, substrateApiMap: Record<string, _SubstrateApi>, evmApiMap: Record<string, _EvmApi>) {
+  const { decimals, symbol } = _getChainNativeTokenInfo(chainInfo);
+
   try {
     const [txInfo, balance] = await Promise.all([
-      getAstarBondingTxInfo(networkJson, dotSamaApiMap[networkKey], stakerAddress, amount, dappInfo),
-      getFreeBalance(networkKey, stakerAddress, dotSamaApiMap, web3ApiMap)
+      getAstarBondingTxInfo(chainInfo, substrateApiMap[networkKey], stakerAddress, amount, dappInfo),
+      getFreeBalance(networkKey, stakerAddress, substrateApiMap, evmApiMap)
     ]);
 
-    const feeString = parseNumberToDisplay(txInfo.partialFee, networkJson.decimals) + ` ${networkJson.nativeToken ? networkJson.nativeToken : ''}`;
+    const feeString = parseNumberToDisplay(txInfo.partialFee, decimals) + ` ${symbol}`;
     const rawFee = parseRawNumber(txInfo.partialFee.toString());
     const binaryBalance = new BN(balance);
 
@@ -184,23 +189,25 @@ export async function handleAstarBondingTxInfo (networkJson: NetworkJson, amount
     } as BasicTxInfo;
   } catch (e) {
     return {
-      fee: `0.0000 ${networkJson.nativeToken as string}`,
+      fee: `0.0000 ${symbol}`,
       balanceError: false
     } as BasicTxInfo;
   }
 }
 
-export async function getAstarBondingExtrinsic (dotSamaApi: ApiProps, networkJson: NetworkJson, amount: number, networkKey: string, stakerAddress: string, dappInfo: ValidatorInfo) {
-  const apiPromise = await dotSamaApi.isReady;
-  const parsedAmount = amount * (10 ** (networkJson.decimals as number));
+export async function getAstarBondingExtrinsic (substrateApi: _SubstrateApi, chainInfo: _ChainInfo, amount: number, networkKey: string, stakerAddress: string, dappInfo: ValidatorInfo) {
+  const apiPromise = await substrateApi.isReady;
+  const { decimals } = _getChainNativeTokenInfo(chainInfo);
+  const parsedAmount = amount * (10 ** decimals);
   const binaryAmount = new BN(parsedAmount.toString());
 
   return apiPromise.api.tx.dappsStaking.bondAndStake({ Evm: dappInfo.address }, binaryAmount);
 }
 
-export async function getAstarUnbondingTxInfo (networkJson: NetworkJson, dotSamaApi: ApiProps, stakerAddress: string, amount: number, dappAddress: string) {
-  const apiPromise = await dotSamaApi.isReady;
-  const parsedAmount = amount * (10 ** (networkJson.decimals as number));
+export async function getAstarUnbondingTxInfo (chainInfo: _ChainInfo, substrateApi: _SubstrateApi, stakerAddress: string, amount: number, dappAddress: string) {
+  const apiPromise = await substrateApi.isReady;
+  const { decimals } = _getChainNativeTokenInfo(chainInfo);
+  const parsedAmount = amount * (10 ** decimals);
   const binaryAmount = new BN(parsedAmount.toString());
 
   const extrinsic = apiPromise.api.tx.dappsStaking.unbondAndUnstake({ Evm: dappAddress }, binaryAmount);
@@ -208,14 +215,16 @@ export async function getAstarUnbondingTxInfo (networkJson: NetworkJson, dotSama
   return extrinsic.paymentInfo(stakerAddress);
 }
 
-export async function handleAstarUnbondingTxInfo (networkJson: NetworkJson, amount: number, networkKey: string, stakerAddress: string, dappAddress: string, dotSamaApiMap: Record<string, ApiProps>, web3ApiMap: Record<string, Web3>) {
+export async function handleAstarUnbondingTxInfo (chainInfo: _ChainInfo, amount: number, networkKey: string, stakerAddress: string, dappAddress: string, substrateApiMap: Record<string, _SubstrateApi>, evmApiMap: Record<string, _EvmApi>) {
+  const { decimals, symbol } = _getChainNativeTokenInfo(chainInfo);
+
   try {
     const [txInfo, balance] = await Promise.all([
-      getAstarUnbondingTxInfo(networkJson, dotSamaApiMap[networkKey], stakerAddress, amount, dappAddress),
-      getFreeBalance(networkKey, stakerAddress, dotSamaApiMap, web3ApiMap)
+      getAstarUnbondingTxInfo(chainInfo, substrateApiMap[networkKey], stakerAddress, amount, dappAddress),
+      getFreeBalance(networkKey, stakerAddress, substrateApiMap, evmApiMap)
     ]);
 
-    const feeString = parseNumberToDisplay(txInfo.partialFee, networkJson.decimals) + ` ${networkJson.nativeToken ? networkJson.nativeToken : ''}`;
+    const feeString = parseNumberToDisplay(txInfo.partialFee, decimals) + ` ${symbol}`;
     const rawFee = parseRawNumber(txInfo.partialFee.toString());
     const binaryBalance = new BN(balance);
     const balanceError = txInfo.partialFee.gt(binaryBalance);
@@ -227,26 +236,27 @@ export async function handleAstarUnbondingTxInfo (networkJson: NetworkJson, amou
     } as BasicTxInfo;
   } catch (e) {
     return {
-      fee: `0.0000 ${networkJson.nativeToken as string}`,
+      fee: `0.0000 ${symbol}`,
       balanceError: false
     } as BasicTxInfo;
   }
 }
 
-export async function getAstarUnbondingExtrinsic (dotSamaApi: ApiProps, networkJson: NetworkJson, amount: number, networkKey: string, stakerAddress: string, dappAddress: string) {
-  const apiPromise = await dotSamaApi.isReady;
-  const parsedAmount = amount * (10 ** (networkJson.decimals as number));
+export async function getAstarUnbondingExtrinsic (substrateApi: _SubstrateApi, chainInfo: _ChainInfo, amount: number, networkKey: string, stakerAddress: string, dappAddress: string) {
+  const apiPromise = await substrateApi.isReady;
+  const { decimals } = _getChainNativeTokenInfo(chainInfo);
+  const parsedAmount = amount * (10 ** decimals);
   const binaryAmount = new BN(parsedAmount.toString());
 
   return apiPromise.api.tx.dappsStaking.unbondAndUnstake({ Evm: dappAddress }, binaryAmount);
 }
 
-async function getAstarUnlockingInfo (dotSamaApi: ApiProps, address: string, networkKey: string) {
-  const apiPromise = await dotSamaApi.isReady;
+async function getAstarUnlockingInfo (substrateApi: _SubstrateApi, address: string, networkKey: string) {
+  const chainApi = await substrateApi.isReady;
 
   const [_stakingInfo, _era] = await Promise.all([
-    apiPromise.api.query.dappsStaking.ledger(address),
-    apiPromise.api.query.dappsStaking.currentEra()
+    chainApi.api.query.dappsStaking.ledger(address),
+    chainApi.api.query.dappsStaking.currentEra()
   ]);
 
   const currentEra = parseRawNumber(_era.toHuman() as string);
@@ -277,7 +287,7 @@ async function getAstarUnlockingInfo (dotSamaApi: ApiProps, address: string, net
     }
   }
 
-  const nextWithdrawal = (nextWithdrawalEra - currentEra) * ERA_LENGTH_MAP[networkKey];
+  const nextWithdrawal = (nextWithdrawalEra - currentEra) * _STAKING_ERA_LENGTH_MAP[networkKey];
 
   return {
     nextWithdrawal,
@@ -286,11 +296,13 @@ async function getAstarUnlockingInfo (dotSamaApi: ApiProps, address: string, net
   };
 }
 
-export async function handleAstarUnlockingInfo (dotSamaApi: ApiProps, networkJson: NetworkJson, networkKey: string, address: string, type: StakingType) {
-  const { nextWithdrawal, nextWithdrawalAmount, redeemable } = await getAstarUnlockingInfo(dotSamaApi, address, networkKey);
+export async function handleAstarUnlockingInfo (substrateApi: _SubstrateApi, chainInfo: _ChainInfo, networkKey: string, address: string, type: StakingType) {
+  const { nextWithdrawal, nextWithdrawalAmount, redeemable } = await getAstarUnlockingInfo(substrateApi, address, networkKey);
 
-  const parsedRedeemable = redeemable / (10 ** (networkJson.decimals as number));
-  const parsedNextWithdrawalAmount = nextWithdrawalAmount / (10 ** (networkJson.decimals as number));
+  const { decimals } = _getChainNativeTokenInfo(chainInfo);
+
+  const parsedRedeemable = redeemable / (10 ** decimals);
+  const parsedNextWithdrawalAmount = nextWithdrawalAmount / (10 ** decimals);
 
   return {
     address,
@@ -302,21 +314,23 @@ export async function handleAstarUnlockingInfo (dotSamaApi: ApiProps, networkJso
   } as UnlockingStakeInfo;
 }
 
-export async function getAstarWithdrawalTxInfo (dotSamaApi: ApiProps, address: string) {
-  const apiPromise = await dotSamaApi.isReady;
+export async function getAstarWithdrawalTxInfo (substrateApi: _SubstrateApi, address: string) {
+  const apiPromise = await substrateApi.isReady;
 
   const extrinsic = apiPromise.api.tx.dappsStaking.withdrawUnbonded();
 
   return extrinsic.paymentInfo(address);
 }
 
-export async function handleAstarWithdrawalTxInfo (networkKey: string, networkJson: NetworkJson, dotSamaApiMap: Record<string, ApiProps>, web3ApiMap: Record<string, Web3>, address: string) {
+export async function handleAstarWithdrawalTxInfo (networkKey: string, chainInfo: _ChainInfo, substrateApiMap: Record<string, _SubstrateApi>, evmApiMap: Record<string, _EvmApi>, address: string) {
   const [txInfo, balance] = await Promise.all([
-    getAstarWithdrawalTxInfo(dotSamaApiMap[networkKey], address),
-    getFreeBalance(networkKey, address, dotSamaApiMap, web3ApiMap)
+    getAstarWithdrawalTxInfo(substrateApiMap[networkKey], address),
+    getFreeBalance(networkKey, address, substrateApiMap, evmApiMap)
   ]);
 
-  const feeString = parseNumberToDisplay(txInfo.partialFee, networkJson.decimals) + ` ${networkJson.nativeToken ? networkJson.nativeToken : ''}`;
+  const { decimals, symbol } = _getChainNativeTokenInfo(chainInfo);
+
+  const feeString = parseNumberToDisplay(txInfo.partialFee, decimals) + ` ${symbol}`;
   const rawFee = parseRawNumber(txInfo.partialFee.toString());
   const binaryBalance = new BN(balance);
   const balanceError = txInfo.partialFee.gt(binaryBalance);
@@ -328,14 +342,14 @@ export async function handleAstarWithdrawalTxInfo (networkKey: string, networkJs
   } as BasicTxInfo;
 }
 
-export async function getAstarWithdrawalExtrinsic (dotSamaApi: ApiProps) {
-  const apiPromise = await dotSamaApi.isReady;
+export async function getAstarWithdrawalExtrinsic (substrateApi: _SubstrateApi) {
+  const apiPromise = await substrateApi.isReady;
 
   return apiPromise.api.tx.dappsStaking.withdrawUnbonded();
 }
 
-export async function getAstarClaimRewardTxInfo (dotSamaApi: ApiProps, address: string) {
-  const apiPromise = await dotSamaApi.isReady;
+export async function getAstarClaimRewardTxInfo (substrateApi: _SubstrateApi, address: string) {
+  const apiPromise = await substrateApi.isReady;
 
   const [_stakedDapps, _currentEra] = await Promise.all([
     apiPromise.api.query.dappsStaking.generalStakerInfo.entries(address),
@@ -385,14 +399,16 @@ export async function getAstarClaimRewardTxInfo (dotSamaApi: ApiProps, address: 
   return extrinsic.paymentInfo(address);
 }
 
-export async function handleAstarClaimRewardTxInfo (address: string, networkKey: string, networkJson: NetworkJson, dotSamaApiMap: Record<string, ApiProps>, web3ApiMap: Record<string, Web3>) {
+export async function handleAstarClaimRewardTxInfo (address: string, networkKey: string, chainInfo: _ChainInfo, substrateApiMap: Record<string, _SubstrateApi>, evmApiMap: Record<string, _EvmApi>) {
+  const { decimals, symbol } = _getChainNativeTokenInfo(chainInfo);
+
   try {
     const [txInfo, balance] = await Promise.all([
-      getAstarClaimRewardTxInfo(dotSamaApiMap[networkKey], address),
-      getFreeBalance(networkKey, address, dotSamaApiMap, web3ApiMap)
+      getAstarClaimRewardTxInfo(substrateApiMap[networkKey], address),
+      getFreeBalance(networkKey, address, substrateApiMap, evmApiMap)
     ]);
 
-    const feeString = parseNumberToDisplay(txInfo.partialFee, networkJson.decimals) + ` ${networkJson.nativeToken ? networkJson.nativeToken : ''}`;
+    const feeString = parseNumberToDisplay(txInfo.partialFee, decimals) + ` ${symbol}`;
     const rawFee = parseRawNumber(txInfo.partialFee.toString());
     const binaryBalance = new BN(balance);
     const balanceError = txInfo.partialFee.gt(binaryBalance);
@@ -404,14 +420,14 @@ export async function handleAstarClaimRewardTxInfo (address: string, networkKey:
     } as BasicTxInfo;
   } catch (e) {
     return {
-      fee: `0.0000 ${networkJson.nativeToken as string}`,
+      fee: `0.0000 ${symbol}`,
       balanceError: false
     } as BasicTxInfo;
   }
 }
 
-export async function getAstarClaimRewardExtrinsic (dotSamaApi: ApiProps, dappAddress: string, address: string) {
-  const apiPromise = await dotSamaApi.isReady;
+export async function getAstarClaimRewardExtrinsic (substrateApi: _SubstrateApi, dappAddress: string, address: string) {
+  const apiPromise = await substrateApi.isReady;
 
   const [_stakedDapps, _currentEra] = await Promise.all([
     apiPromise.api.query.dappsStaking.generalStakerInfo.entries(address),
@@ -459,7 +475,7 @@ export async function getAstarClaimRewardExtrinsic (dotSamaApi: ApiProps, dappAd
   return apiPromise.api.tx.utility.batch(transactions);
 }
 
-export async function getAstarDelegationInfo (dotSamaApi: ApiProps, address: string, networkKey: string) {
+export async function getAstarDelegationInfo (substrateApi: _SubstrateApi, address: string, networkKey: string) {
   const allDappsReq = new Promise(function (resolve) {
     fetch(`https://api.astar.network/api/v1/${networkKey}/dapps-staking/dapps`, {
       method: 'GET'
@@ -480,11 +496,11 @@ export async function getAstarDelegationInfo (dotSamaApi: ApiProps, address: str
   ]);
 
   const [_stakedDapps, _allDapps] = await Promise.all([
-    dotSamaApi.api.query.dappsStaking.generalStakerInfo.entries(address),
+    substrateApi.api.query.dappsStaking.generalStakerInfo.entries(address),
     racePromise
   ]);
 
-  const rawMinStake = (dotSamaApi.api.consts.dappsStaking.minimumStakingAmount).toHuman() as string;
+  const rawMinStake = (substrateApi.api.consts.dappsStaking.minimumStakingAmount).toHuman() as string;
   const minStake = parseRawNumber(rawMinStake);
 
   let allDapps: Record<string, any>[] | null = null;

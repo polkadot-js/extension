@@ -1,11 +1,13 @@
 // Copyright 2019-2022 @subwallet/extension-koni authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { ApiProps, BasicTxInfo, ChainBondingBasics, DelegationItem, NetworkJson, StakingType, UnlockingStakeInfo, ValidatorInfo } from '@subwallet/extension-base/background/KoniTypes';
-import { ERA_LENGTH_MAP } from '@subwallet/extension-koni-base/api/bonding/utils';
+import { _ChainInfo } from '@subwallet/chain/types';
+import { BasicTxInfo, ChainBondingBasics, DelegationItem, StakingType, UnlockingStakeInfo, ValidatorInfo } from '@subwallet/extension-base/background/KoniTypes';
+import { _STAKING_ERA_LENGTH_MAP } from '@subwallet/extension-base/services/chain-service/constants';
+import { _EvmApi, _SubstrateApi } from '@subwallet/extension-base/services/chain-service/types';
+import { _getChainNativeTokenInfo } from '@subwallet/extension-base/services/chain-service/utils';
 import { getFreeBalance } from '@subwallet/extension-koni-base/api/dotsama/balance';
 import { parseNumberToDisplay, parseRawNumber } from '@subwallet/extension-koni-base/utils';
-import Web3 from 'web3';
 
 import { BN } from '@polkadot/util';
 
@@ -34,15 +36,15 @@ interface CollatorInfo {
   status: string | Record<string, string>
 }
 
-export async function getAmplitudeBondingBasics (networkKey: string, dotSamaApi: ApiProps) {
-  const apiProps = await dotSamaApi.isReady;
+export async function getAmplitudeBondingBasics (networkKey: string, substrateApi: _SubstrateApi) {
+  const chainApi = await substrateApi.isReady;
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [_totalStake, _totalIssuance, _inflation, _allCollators] = await Promise.all([
-    apiProps.api.query.parachainStaking.totalCollatorStake(),
-    apiProps.api.query.balances.totalIssuance(),
-    apiProps.api.query.parachainStaking.inflationConfig(),
-    apiProps.api.query.parachainStaking.candidatePool.entries()
+    chainApi.api.query.parachainStaking.totalCollatorStake(),
+    chainApi.api.query.balances.totalIssuance(),
+    chainApi.api.query.parachainStaking.inflationConfig(),
+    chainApi.api.query.parachainStaking.candidatePool.entries()
   ]);
 
   // const totalStake = _totalStake ? new BN(_totalStake.toString()) : BN_ZERO;
@@ -57,26 +59,26 @@ export async function getAmplitudeBondingBasics (networkKey: string, dotSamaApi:
   } as ChainBondingBasics;
 }
 
-export async function getAmplitudeCollatorsInfo (networkKey: string, dotSamaApi: ApiProps, decimals: number, address: string, extraCollatorAddress?: string) {
-  const apiProps = await dotSamaApi.isReady;
+export async function getAmplitudeCollatorsInfo (networkKey: string, substrateApi: _SubstrateApi, decimals: number, address: string, extraCollatorAddress?: string) {
+  const chainApi = await substrateApi.isReady;
 
   const [_allCollators, _delegatorState, _unstakingInfo, _inflationConfig] = await Promise.all([
-    apiProps.api.query.parachainStaking.candidatePool.entries(),
-    apiProps.api.query.parachainStaking.delegatorState(address),
-    apiProps.api.query.parachainStaking.unstaking(address),
-    apiProps.api.query.parachainStaking.inflationConfig()
+    chainApi.api.query.parachainStaking.candidatePool.entries(),
+    chainApi.api.query.parachainStaking.delegatorState(address),
+    chainApi.api.query.parachainStaking.unstaking(address),
+    chainApi.api.query.parachainStaking.inflationConfig()
   ]);
 
   const inflationConfig = _inflationConfig.toHuman() as unknown as InflationConfig;
   const rawDelegatorReturn = inflationConfig.delegator.rewardRate.annual;
   const delegatorReturn = parseFloat(rawDelegatorReturn.split('%')[0]);
-  const _maxDelegatorPerCandidate = apiProps.api.consts.parachainStaking.maxDelegatorsPerCollator.toHuman() as string;
+  const _maxDelegatorPerCandidate = chainApi.api.consts.parachainStaking.maxDelegatorsPerCollator.toHuman() as string;
   const maxDelegatorPerCandidate = parseRawNumber(_maxDelegatorPerCandidate);
 
-  const _maxDelegationCount = apiProps.api.consts.parachainStaking.maxDelegationsPerRound.toHuman() as string;
+  const _maxDelegationCount = chainApi.api.consts.parachainStaking.maxDelegationsPerRound.toHuman() as string;
   const maxDelegationCount = parseRawNumber(_maxDelegationCount);
 
-  const _chainMinDelegation = apiProps.api.consts.parachainStaking.minDelegatorStake.toHuman() as string;
+  const _chainMinDelegation = chainApi.api.consts.parachainStaking.minDelegatorStake.toHuman() as string;
   const chainMinDelegation = parseRawNumber(_chainMinDelegation) / 10 ** decimals;
 
   const delegatorState = _delegatorState.toHuman() as Record<string, string> | null;
@@ -143,12 +145,13 @@ export async function getAmplitudeCollatorsInfo (networkKey: string, dotSamaApi:
   };
 }
 
-export async function getAmplitudeBondingTxInfo (networkJson: NetworkJson, dotSamaApi: ApiProps, delegatorAddress: string, amount: number, collatorInfo: ValidatorInfo) {
-  const apiPromise = await dotSamaApi.isReady;
-  const parsedAmount = amount * (10 ** (networkJson.decimals as number));
+export async function getAmplitudeBondingTxInfo (chainInfo: _ChainInfo, substrateApi: _SubstrateApi, delegatorAddress: string, amount: number, collatorInfo: ValidatorInfo) {
+  const chainApi = await substrateApi.isReady;
+  const { decimals } = _getChainNativeTokenInfo(chainInfo);
+  const parsedAmount = amount * (10 ** decimals);
   const binaryAmount = new BN(parsedAmount.toString());
 
-  const rawDelegatorState = (await apiPromise.api.query.parachainStaking.delegatorState(delegatorAddress)).toHuman() as Record<string, string> | null;
+  const rawDelegatorState = (await chainApi.api.query.parachainStaking.delegatorState(delegatorAddress)).toHuman() as Record<string, string> | null;
 
   const bondedCollators: string[] = [];
 
@@ -163,29 +166,31 @@ export async function getAmplitudeBondingTxInfo (networkJson: NetworkJson, dotSa
   let extrinsic;
 
   if (!bondedCollators.includes(collatorInfo.address)) {
-    extrinsic = apiPromise.api.tx.parachainStaking.joinDelegators(collatorInfo.address, binaryAmount);
+    extrinsic = chainApi.api.tx.parachainStaking.joinDelegators(collatorInfo.address, binaryAmount);
   } else {
-    const _params = apiPromise.api.tx.parachainStaking.delegatorStakeMore.toJSON() as Record<string, any>;
+    const _params = chainApi.api.tx.parachainStaking.delegatorStakeMore.toJSON() as Record<string, any>;
     const paramsCount = (_params.args as any[]).length;
 
     if (paramsCount === 2) {
-      extrinsic = apiPromise.api.tx.parachainStaking.delegatorStakeMore(collatorInfo.address, binaryAmount);
+      extrinsic = chainApi.api.tx.parachainStaking.delegatorStakeMore(collatorInfo.address, binaryAmount);
     } else {
-      extrinsic = apiPromise.api.tx.parachainStaking.delegatorStakeMore(binaryAmount);
+      extrinsic = chainApi.api.tx.parachainStaking.delegatorStakeMore(binaryAmount);
     }
   }
 
   return extrinsic.paymentInfo(delegatorAddress);
 }
 
-export async function handleAmplitudeBondingTxInfo (networkJson: NetworkJson, amount: number, networkKey: string, nominatorAddress: string, validatorInfo: ValidatorInfo, dotSamaApiMap: Record<string, ApiProps>, web3ApiMap: Record<string, Web3>) {
+export async function handleAmplitudeBondingTxInfo (chainInfo: _ChainInfo, amount: number, networkKey: string, nominatorAddress: string, validatorInfo: ValidatorInfo, substrateApiMap: Record<string, _SubstrateApi>, evmApiMap: Record<string, _EvmApi>) {
+  const { decimals, symbol } = _getChainNativeTokenInfo(chainInfo);
+
   try {
     const [txInfo, balance] = await Promise.all([
-      getAmplitudeBondingTxInfo(networkJson, dotSamaApiMap[networkKey], nominatorAddress, amount, validatorInfo),
-      getFreeBalance(networkKey, nominatorAddress, dotSamaApiMap, web3ApiMap)
+      getAmplitudeBondingTxInfo(chainInfo, substrateApiMap[networkKey], nominatorAddress, amount, validatorInfo),
+      getFreeBalance(networkKey, nominatorAddress, substrateApiMap, evmApiMap)
     ]);
 
-    const feeString = parseNumberToDisplay(txInfo.partialFee, networkJson.decimals) + ` ${networkJson.nativeToken ? networkJson.nativeToken : ''}`;
+    const feeString = parseNumberToDisplay(txInfo.partialFee, decimals) + ` ${symbol}`;
     const rawFee = parseRawNumber(txInfo.partialFee.toString());
     const binaryBalance = new BN(balance);
 
@@ -199,15 +204,16 @@ export async function handleAmplitudeBondingTxInfo (networkJson: NetworkJson, am
     } as BasicTxInfo;
   } catch (e) {
     return {
-      fee: `0.0000 ${networkJson.nativeToken as string}`,
+      fee: `0.0000 ${symbol}`,
       balanceError: false
     } as BasicTxInfo;
   }
 }
 
-export async function getAmplitudeUnbondingTxInfo (networkJson: NetworkJson, dotSamaApi: ApiProps, address: string, amount: number, collatorAddress: string, unstakeAll: boolean) {
-  const apiPromise = await dotSamaApi.isReady;
-  const parsedAmount = amount * (10 ** (networkJson.decimals as number));
+export async function getAmplitudeUnbondingTxInfo (chainInfo: _ChainInfo, substrateApi: _SubstrateApi, address: string, amount: number, collatorAddress: string, unstakeAll: boolean) {
+  const apiPromise = await substrateApi.isReady;
+  const { decimals } = _getChainNativeTokenInfo(chainInfo);
+  const parsedAmount = amount * (10 ** decimals);
   const binaryAmount = new BN(parsedAmount.toString());
 
   let extrinsic;
@@ -228,14 +234,16 @@ export async function getAmplitudeUnbondingTxInfo (networkJson: NetworkJson, dot
   return extrinsic.paymentInfo(address);
 }
 
-export async function handleAmplitudeUnbondingTxInfo (address: string, amount: number, networkKey: string, dotSamaApiMap: Record<string, ApiProps>, web3ApiMap: Record<string, Web3>, networkJson: NetworkJson, collatorAddress: string, unstakeAll: boolean) {
+export async function handleAmplitudeUnbondingTxInfo (address: string, amount: number, networkKey: string, substrateApiMap: Record<string, _SubstrateApi>, web3ApiMap: Record<string, _EvmApi>, chainInfo: _ChainInfo, collatorAddress: string, unstakeAll: boolean) {
+  const { decimals, symbol } = _getChainNativeTokenInfo(chainInfo);
+
   try {
     const [txInfo, balance] = await Promise.all([
-      getAmplitudeUnbondingTxInfo(networkJson, dotSamaApiMap[networkKey], address, amount, collatorAddress, unstakeAll),
-      getFreeBalance(networkKey, address, dotSamaApiMap, web3ApiMap)
+      getAmplitudeUnbondingTxInfo(chainInfo, substrateApiMap[networkKey], address, amount, collatorAddress, unstakeAll),
+      getFreeBalance(networkKey, address, substrateApiMap, web3ApiMap)
     ]);
 
-    const feeString = parseNumberToDisplay(txInfo.partialFee, networkJson.decimals) + ` ${networkJson.nativeToken ? networkJson.nativeToken : ''}`;
+    const feeString = parseNumberToDisplay(txInfo.partialFee, decimals) + ` ${symbol}`;
     const rawFee = parseRawNumber(txInfo.partialFee.toString());
     const binaryBalance = new BN(balance);
 
@@ -248,17 +256,18 @@ export async function handleAmplitudeUnbondingTxInfo (address: string, amount: n
     } as BasicTxInfo;
   } catch (e) {
     return {
-      fee: `0.0000 ${networkJson.nativeToken as string}`,
+      fee: `0.0000 ${symbol}`,
       balanceError: false
     } as BasicTxInfo;
   }
 }
 
-export async function getAmplitudeBondingExtrinsic (delegatorAddress: string, networkJson: NetworkJson, dotSamaApi: ApiProps, amount: number, collatorInfo: ValidatorInfo) {
-  const apiPromise = await dotSamaApi.isReady;
-  const parsedAmount = amount * (10 ** (networkJson.decimals as number));
+export async function getAmplitudeBondingExtrinsic (delegatorAddress: string, chainInfo: _ChainInfo, substrateApi: _SubstrateApi, amount: number, collatorInfo: ValidatorInfo) {
+  const chainApi = await substrateApi.isReady;
+  const { decimals } = _getChainNativeTokenInfo(chainInfo);
+  const parsedAmount = amount * (10 ** decimals);
   const binaryAmount = new BN(parsedAmount.toString());
-  const rawDelegatorState = (await apiPromise.api.query.parachainStaking.delegatorState(delegatorAddress)).toHuman() as Record<string, string> | null;
+  const rawDelegatorState = (await chainApi.api.query.parachainStaking.delegatorState(delegatorAddress)).toHuman() as Record<string, string> | null;
 
   const bondedCollators: string[] = [];
 
@@ -271,48 +280,49 @@ export async function getAmplitudeBondingExtrinsic (delegatorAddress: string, ne
   }
 
   if (!bondedCollators.includes(collatorInfo.address)) {
-    return apiPromise.api.tx.parachainStaking.joinDelegators(collatorInfo.address, binaryAmount);
+    return chainApi.api.tx.parachainStaking.joinDelegators(collatorInfo.address, binaryAmount);
   } else {
-    const _params = apiPromise.api.tx.parachainStaking.delegatorStakeMore.toJSON() as Record<string, any>;
+    const _params = chainApi.api.tx.parachainStaking.delegatorStakeMore.toJSON() as Record<string, any>;
     const paramsCount = (_params.args as any[]).length;
 
     if (paramsCount === 2) {
-      return apiPromise.api.tx.parachainStaking.delegatorStakeMore(collatorInfo.address, binaryAmount);
+      return chainApi.api.tx.parachainStaking.delegatorStakeMore(collatorInfo.address, binaryAmount);
     } else {
-      return apiPromise.api.tx.parachainStaking.delegatorStakeMore(binaryAmount);
+      return chainApi.api.tx.parachainStaking.delegatorStakeMore(binaryAmount);
     }
   }
 }
 
-export async function getAmplitudeUnbondingExtrinsic (dotSamaApi: ApiProps, amount: number, networkJson: NetworkJson, collatorAddress: string, unstakeAll: boolean) {
-  const apiPromise = await dotSamaApi.isReady;
-  const parsedAmount = amount * (10 ** (networkJson.decimals as number));
+export async function getAmplitudeUnbondingExtrinsic (substrateApi: _SubstrateApi, amount: number, chainInfo: _ChainInfo, collatorAddress: string, unstakeAll: boolean) {
+  const chainApi = await substrateApi.isReady;
+  const { decimals } = _getChainNativeTokenInfo(chainInfo);
+  const parsedAmount = amount * (10 ** decimals);
   const binaryAmount = new BN(parsedAmount.toString());
 
   if (!unstakeAll) {
-    const _params = apiPromise.api.tx.parachainStaking.delegatorStakeMore.toJSON() as Record<string, any>;
+    const _params = chainApi.api.tx.parachainStaking.delegatorStakeMore.toJSON() as Record<string, any>;
     const paramsCount = (_params.args as any[]).length;
 
     if (paramsCount === 2) {
-      return apiPromise.api.tx.parachainStaking.delegatorStakeLess(collatorAddress, binaryAmount);
+      return chainApi.api.tx.parachainStaking.delegatorStakeLess(collatorAddress, binaryAmount);
     } else {
-      return apiPromise.api.tx.parachainStaking.delegatorStakeLess(binaryAmount);
+      return chainApi.api.tx.parachainStaking.delegatorStakeLess(binaryAmount);
     }
   } else {
-    return apiPromise.api.tx.parachainStaking.leaveDelegators();
+    return chainApi.api.tx.parachainStaking.leaveDelegators();
   }
 }
 
-export async function getAmplitudeDelegationInfo (dotSamaApi: ApiProps, address: string) {
-  const apiProps = await dotSamaApi.isReady;
+export async function getAmplitudeDelegationInfo (substrateApi: _SubstrateApi, address: string) {
+  const chainApi = await substrateApi.isReady;
   const delegationsList: DelegationItem[] = [];
 
-  const _chainMinDelegation = apiProps.api.consts.parachainStaking.minDelegatorStake.toHuman() as string;
+  const _chainMinDelegation = chainApi.api.consts.parachainStaking.minDelegatorStake.toHuman() as string;
   const chainMinDelegation = _chainMinDelegation.replaceAll(',', '');
 
   const [_delegatorState, _unstakingInfo] = await Promise.all([
-    apiProps.api.query.parachainStaking.delegatorState(address),
-    apiProps.api.query.parachainStaking.unstaking(address)
+    chainApi.api.query.parachainStaking.delegatorState(address),
+    chainApi.api.query.parachainStaking.unstaking(address)
   ]);
 
   const delegationState = _delegatorState.toHuman() as Record<string, any> | null;
@@ -334,16 +344,16 @@ export async function getAmplitudeDelegationInfo (dotSamaApi: ApiProps, address:
   return delegationsList;
 }
 
-async function getAmplitudeUnlockingInfo (dotSamaApi: ApiProps, address: string, networkKey: string, extraCollatorAddress: string) {
-  const apiProps = await dotSamaApi.isReady;
+async function getAmplitudeUnlockingInfo (substrateApi: _SubstrateApi, address: string, networkKey: string, extraCollatorAddress: string) {
+  const chainApi = await substrateApi.isReady;
 
   const [_unstakingInfo, _stakingInfo, _currentBlockInfo] = await Promise.all([
-    apiProps.api.query.parachainStaking.unstaking(address),
-    apiProps.api.query.parachainStaking.delegatorState(address),
-    apiProps.api.rpc.chain.getHeader()
+    chainApi.api.query.parachainStaking.unstaking(address),
+    chainApi.api.query.parachainStaking.delegatorState(address),
+    chainApi.api.rpc.chain.getHeader()
   ]);
 
-  const _blockPerRound = apiProps.api.consts.parachainStaking.defaultBlocksPerRound.toHuman() as string;
+  const _blockPerRound = chainApi.api.consts.parachainStaking.defaultBlocksPerRound.toHuman() as string;
   const blockPerRound = parseFloat(_blockPerRound);
 
   const unstakingInfo = _unstakingInfo.toHuman() as Record<string, string> | null;
@@ -365,7 +375,7 @@ async function getAmplitudeUnlockingInfo (dotSamaApi: ApiProps, address: string,
   const nextWithdrawalAmount = parseFloat(_nextWithdrawalAmount);
   const nextWithdrawalBlock = parseFloat(_nextWithdrawalBlock);
 
-  const blockDuration = (ERA_LENGTH_MAP[networkKey] || ERA_LENGTH_MAP.default) / blockPerRound;
+  const blockDuration = (_STAKING_ERA_LENGTH_MAP[networkKey] || _STAKING_ERA_LENGTH_MAP.default) / blockPerRound;
 
   const nextWithdrawal = (nextWithdrawalBlock - currentBlock) * blockDuration;
   const validatorAddress = stakingInfo !== null ? stakingInfo.owner : extraCollatorAddress;
@@ -378,11 +388,13 @@ async function getAmplitudeUnlockingInfo (dotSamaApi: ApiProps, address: string,
   };
 }
 
-export async function handleAmplitudeUnlockingInfo (dotSamaApi: ApiProps, networkJson: NetworkJson, networkKey: string, address: string, type: StakingType, extraCollatorAddress: string) {
-  const { nextWithdrawal, nextWithdrawalAmount, redeemable, validatorAddress } = await getAmplitudeUnlockingInfo(dotSamaApi, address, networkKey, extraCollatorAddress);
+export async function handleAmplitudeUnlockingInfo (substrateApi: _SubstrateApi, chainInfo: _ChainInfo, networkKey: string, address: string, type: StakingType, extraCollatorAddress: string) {
+  const { nextWithdrawal, nextWithdrawalAmount, redeemable, validatorAddress } = await getAmplitudeUnlockingInfo(substrateApi, address, networkKey, extraCollatorAddress);
 
-  const parsedRedeemable = redeemable / (10 ** (networkJson.decimals as number));
-  const parsedNextWithdrawalAmount = nextWithdrawalAmount / (10 ** (networkJson.decimals as number));
+  const { decimals } = _getChainNativeTokenInfo(chainInfo);
+
+  const parsedRedeemable = redeemable / (10 ** decimals);
+  const parsedNextWithdrawalAmount = nextWithdrawalAmount / (10 ** decimals);
 
   return {
     address,
@@ -396,22 +408,24 @@ export async function handleAmplitudeUnlockingInfo (dotSamaApi: ApiProps, networ
   } as UnlockingStakeInfo;
 }
 
-async function getAmplitudeWithdrawalTxInfo (dotSamaApi: ApiProps, address: string) {
-  const apiProps = await dotSamaApi.isReady;
+async function getAmplitudeWithdrawalTxInfo (substrateApi: _SubstrateApi, address: string) {
+  const chainApi = await substrateApi.isReady;
 
-  const extrinsic = apiProps.api.tx.parachainStaking.unlockUnstaked(address);
+  const extrinsic = chainApi.api.tx.parachainStaking.unlockUnstaked(address);
 
   return extrinsic.paymentInfo(address);
 }
 
-export async function handleAmplitudeWithdrawalTxInfo (networkKey: string, networkJson: NetworkJson, dotSamaApiMap: Record<string, ApiProps>, web3ApiMap: Record<string, Web3>, address: string) {
+export async function handleAmplitudeWithdrawalTxInfo (networkKey: string, chainInfo: _ChainInfo, substrateApiMap: Record<string, _SubstrateApi>, evmApiMap: Record<string, _EvmApi>, address: string) {
+  const { decimals, symbol } = _getChainNativeTokenInfo(chainInfo);
+
   try {
     const [txInfo, balance] = await Promise.all([
-      getAmplitudeWithdrawalTxInfo(dotSamaApiMap[networkKey], address),
-      getFreeBalance(networkKey, address, dotSamaApiMap, web3ApiMap)
+      getAmplitudeWithdrawalTxInfo(substrateApiMap[networkKey], address),
+      getFreeBalance(networkKey, address, substrateApiMap, evmApiMap)
     ]);
 
-    const feeString = parseNumberToDisplay(txInfo.partialFee, networkJson.decimals) + ` ${networkJson.nativeToken ? networkJson.nativeToken : ''}`;
+    const feeString = parseNumberToDisplay(txInfo.partialFee, decimals) + ` ${symbol}`;
     const rawFee = parseRawNumber(txInfo.partialFee.toString());
     const binaryBalance = new BN(balance);
     const balanceError = txInfo.partialFee.gt(binaryBalance);
@@ -423,37 +437,39 @@ export async function handleAmplitudeWithdrawalTxInfo (networkKey: string, netwo
     } as BasicTxInfo;
   } catch (e) {
     return {
-      fee: `0.0000 ${networkJson.nativeToken as string}`,
+      fee: `0.0000 ${symbol}`,
       balanceError: false
     } as BasicTxInfo;
   }
 }
 
-export async function getAmplitudeWithdrawalExtrinsic (dotSamaApi: ApiProps, address: string) {
-  const apiProps = await dotSamaApi.isReady;
+export async function getAmplitudeWithdrawalExtrinsic (substrateApi: _SubstrateApi, address: string) {
+  const chainApi = await substrateApi.isReady;
 
-  return apiProps.api.tx.parachainStaking.unlockUnstaked(address);
+  return chainApi.api.tx.parachainStaking.unlockUnstaked(address);
 }
 
-async function getAmplitudeClaimRewardTxInfo (dotSamaApi: ApiProps, address: string) {
-  const apiProps = await dotSamaApi.isReady;
+async function getAmplitudeClaimRewardTxInfo (substrateApi: _SubstrateApi, address: string) {
+  const chainApi = await substrateApi.isReady;
 
-  const extrinsic = apiProps.api.tx.utility.batch([
-    apiProps.api.tx.parachainStaking.incrementDelegatorRewards(),
-    apiProps.api.tx.parachainStaking.claimRewards()
+  const extrinsic = chainApi.api.tx.utility.batch([
+    chainApi.api.tx.parachainStaking.incrementDelegatorRewards(),
+    chainApi.api.tx.parachainStaking.claimRewards()
   ]);
 
   return extrinsic.paymentInfo(address);
 }
 
-export async function handleAmplitudeClaimRewardTxInfo (address: string, networkKey: string, networkJson: NetworkJson, dotSamaApiMap: Record<string, ApiProps>, web3ApiMap: Record<string, Web3>) {
+export async function handleAmplitudeClaimRewardTxInfo (address: string, networkKey: string, chainInfo: _ChainInfo, substrateApiMap: Record<string, _SubstrateApi>, evmApiMap: Record<string, _EvmApi>) {
+  const { decimals, symbol } = _getChainNativeTokenInfo(chainInfo);
+
   try {
     const [txInfo, balance] = await Promise.all([
-      getAmplitudeClaimRewardTxInfo(dotSamaApiMap[networkKey], address),
-      getFreeBalance(networkKey, address, dotSamaApiMap, web3ApiMap)
+      getAmplitudeClaimRewardTxInfo(substrateApiMap[networkKey], address),
+      getFreeBalance(networkKey, address, substrateApiMap, evmApiMap)
     ]);
 
-    const feeString = parseNumberToDisplay(txInfo.partialFee, networkJson.decimals) + ` ${networkJson.nativeToken ? networkJson.nativeToken : ''}`;
+    const feeString = parseNumberToDisplay(txInfo.partialFee, decimals) + ` ${symbol}`;
     const rawFee = parseRawNumber(txInfo.partialFee.toString());
     const binaryBalance = new BN(balance);
     const balanceError = txInfo.partialFee.gt(binaryBalance);
@@ -465,17 +481,17 @@ export async function handleAmplitudeClaimRewardTxInfo (address: string, network
     } as BasicTxInfo;
   } catch (e) {
     return {
-      fee: `0.0000 ${networkJson.nativeToken as string}`,
+      fee: `0.0000 ${symbol}`,
       balanceError: false
     } as BasicTxInfo;
   }
 }
 
-export async function getAmplitudeClaimRewardExtrinsic (dotSamaApi: ApiProps) {
-  const apiProps = await dotSamaApi.isReady;
+export async function getAmplitudeClaimRewardExtrinsic (substrateApi: _SubstrateApi) {
+  const chainApi = await substrateApi.isReady;
 
-  return apiProps.api.tx.utility.batch([
-    apiProps.api.tx.parachainStaking.incrementDelegatorRewards(),
-    apiProps.api.tx.parachainStaking.claimRewards()
+  return chainApi.api.tx.utility.batch([
+    chainApi.api.tx.parachainStaking.incrementDelegatorRewards(),
+    chainApi.api.tx.parachainStaking.claimRewards()
   ]);
 }

@@ -1,8 +1,11 @@
 // Copyright 2019-2022 @subwallet/extension-koni authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { APIItemState, ApiProps, NetworkJson, StakingItem, StakingRewardItem, StakingType } from '@subwallet/extension-base/background/KoniTypes';
-import { CHAIN_TYPES } from '@subwallet/extension-koni-base/api/bonding';
+import { _ChainInfo } from '@subwallet/chain/types';
+import { APIItemState, StakingItem, StakingRewardItem, StakingType } from '@subwallet/extension-base/background/KoniTypes';
+import { _STAKING_CHAIN_GROUP } from '@subwallet/extension-base/services/chain-service/constants';
+import { _SubstrateApi } from '@subwallet/extension-base/services/chain-service/types';
+import { _getChainNativeTokenInfo } from '@subwallet/extension-base/services/chain-service/utils';
 import { parseStakingBalance } from '@subwallet/extension-koni-base/api/staking/utils';
 import { reformatAddress } from '@subwallet/extension-koni-base/utils';
 
@@ -10,7 +13,7 @@ import { Codec } from '@polkadot/types/types';
 import { BN, BN_ZERO } from '@polkadot/util';
 import { isEthereumAddress } from '@polkadot/util-crypto';
 
-function getSingleStakingAmplitude (parentApi: ApiProps, address: string, networks: Record<string, NetworkJson>, chain: string, callback: (networkKey: string, rs: StakingItem) => void) {
+function getSingleStakingAmplitude (parentApi: _SubstrateApi, address: string, networks: Record<string, _ChainInfo>, chain: string, callback: (networkKey: string, rs: StakingItem) => void) {
   return parentApi.api.queryMulti([
     [parentApi.api.query.parachainStaking.delegatorState, address],
     [parentApi.api.query.parachainStaking.unstaking, address]
@@ -46,14 +49,16 @@ function getSingleStakingAmplitude (parentApi: ApiProps, address: string, networ
     const parsedUnstakingBalance = parseStakingBalance(formattedUnstakingBalance, chain, networks);
     const parsedActiveBalance = parseStakingBalance(formattedActiveBalance, chain, networks);
 
+    const { symbol } = _getChainNativeTokenInfo(networks[chain]);
+
     const stakingItem = {
-      name: networks[chain].chain,
+      name: networks[chain].name,
       chain: chain,
       balance: parsedTotalBalance.toString(),
       activeBalance: parsedActiveBalance.toString(),
       unlockingBalance: parsedUnstakingBalance.toString(),
-      nativeToken: networks[chain].nativeToken,
-      unit: networks[chain].nativeToken,
+      nativeToken: symbol,
+      unit: symbol,
       state: APIItemState.READY,
       type: StakingType.NOMINATED,
       address
@@ -63,7 +68,7 @@ function getSingleStakingAmplitude (parentApi: ApiProps, address: string, networ
   });
 }
 
-function getMultiStakingAmplitude (parentApi: ApiProps, useAddresses: string[], networks: Record<string, NetworkJson>, chain: string, callback: (networkKey: string, rs: StakingItem) => void) {
+function getMultiStakingAmplitude (parentApi: _SubstrateApi, useAddresses: string[], networks: Record<string, _ChainInfo>, chain: string, callback: (networkKey: string, rs: StakingItem) => void) {
   return parentApi.api.query.parachainStaking.delegatorState.multi(useAddresses, async (ledgers: Codec[]) => {
     if (ledgers) {
       const _unstakingStates = await parentApi.api.query.parachainStaking.unstaking.multi(useAddresses);
@@ -102,14 +107,16 @@ function getMultiStakingAmplitude (parentApi: ApiProps, useAddresses: string[], 
         const parsedUnstakingBalance = parseStakingBalance(formattedUnstakingBalance, chain, networks);
         const parsedActiveBalance = parseStakingBalance(formattedActiveBalance, chain, networks);
 
+        const { symbol } = _getChainNativeTokenInfo(networks[chain]);
+
         const stakingItem = {
-          name: networks[chain].chain,
+          name: networks[chain].name,
           chain: chain,
           balance: parsedTotalBalance.toString(),
           activeBalance: parsedActiveBalance.toString(),
           unlockingBalance: parsedUnstakingBalance.toString(),
-          nativeToken: networks[chain].nativeToken,
-          unit: networks[chain].nativeToken,
+          nativeToken: symbol,
+          unit: symbol,
           state: APIItemState.READY,
           type: StakingType.NOMINATED,
           address: owner
@@ -121,7 +128,7 @@ function getMultiStakingAmplitude (parentApi: ApiProps, useAddresses: string[], 
   });
 }
 
-export function getAmplitudeStakingOnChain (parentApi: ApiProps, useAddresses: string[], networks: Record<string, NetworkJson>, chain: string, callback: (networkKey: string, rs: StakingItem) => void) {
+export function getAmplitudeStakingOnChain (parentApi: _SubstrateApi, useAddresses: string[], networks: Record<string, _ChainInfo>, chain: string, callback: (networkKey: string, rs: StakingItem) => void) {
   if (useAddresses.length === 1) {
     return getSingleStakingAmplitude(parentApi, useAddresses[0], networks, chain, callback);
   }
@@ -129,7 +136,7 @@ export function getAmplitudeStakingOnChain (parentApi: ApiProps, useAddresses: s
   return getMultiStakingAmplitude(parentApi, useAddresses, networks, chain, callback);
 }
 
-export async function getAmplitudeUnclaimedStakingReward (dotSamaApiMap: Record<string, ApiProps>, addresses: string[], networks: Record<string, NetworkJson>, chains: string[]): Promise<StakingRewardItem[]> {
+export async function getAmplitudeUnclaimedStakingReward (substrateApiMap: Record<string, _SubstrateApi>, addresses: string[], networks: Record<string, _ChainInfo>, chains: string[]): Promise<StakingRewardItem[]> {
   if (chains.length === 0) {
     return [];
   }
@@ -145,9 +152,10 @@ export async function getAmplitudeUnclaimedStakingReward (dotSamaApiMap: Record<
   const unclaimedRewardList: StakingRewardItem[] = [];
 
   await Promise.all(chains.map(async (chain) => {
-    if (CHAIN_TYPES.amplitude.includes(chain) && !['kilt', 'kilt_peregrine'].includes(chain)) {
-      const networkJson = networks[chain];
-      const apiProps = await dotSamaApiMap[chain].isReady;
+    if (_STAKING_CHAIN_GROUP.amplitude.includes(chain) && !_STAKING_CHAIN_GROUP.kilt.includes(chain)) {
+      const networkInfo = networks[chain];
+      const { decimals } = _getChainNativeTokenInfo(networkInfo);
+      const apiProps = await substrateApiMap[chain].isReady;
 
       await Promise.all(useAddresses.map(async (address) => {
         const _unclaimedReward = await apiProps.api.query.parachainStaking.rewards(address);
@@ -156,13 +164,13 @@ export async function getAmplitudeUnclaimedStakingReward (dotSamaApiMap: Record<
 
         const rewardItem = {
           chain,
-          name: networkJson.chain,
+          name: networkInfo.name,
           state: APIItemState.READY,
           type: StakingType.NOMINATED,
           address: reformatAddress(address, 42)
         } as StakingRewardItem;
 
-        const parsedUnclaimedReward = parseFloat(unclaimedReward) / (10 ** (networkJson.decimals as number));
+        const parsedUnclaimedReward = parseFloat(unclaimedReward) / (10 ** decimals);
 
         rewardItem.unclaimedReward = parsedUnclaimedReward.toString();
 
@@ -174,7 +182,9 @@ export async function getAmplitudeUnclaimedStakingReward (dotSamaApiMap: Record<
   return unclaimedRewardList;
 }
 
-export function getParaStakingOnChain (parentApi: ApiProps, useAddresses: string[], networks: Record<string, NetworkJson>, chain: string, callback: (networkKey: string, rs: StakingItem) => void) {
+export function getParaStakingOnChain (parentApi: _SubstrateApi, useAddresses: string[], networks: Record<string, _ChainInfo>, chain: string, callback: (networkKey: string, rs: StakingItem) => void) {
+  const { symbol } = _getChainNativeTokenInfo(networks[chain]);
+
   return parentApi.api.query.parachainStaking.delegatorState.multi(useAddresses, (ledgers: Codec[]) => {
     if (ledgers) {
       for (let i = 0; i < ledgers.length; i++) {
@@ -202,13 +212,13 @@ export function getParaStakingOnChain (parentApi: ApiProps, useAddresses: string
           const parsedActiveBalance = parseStakingBalance(formattedActiveBalance, chain, networks);
 
           const stakingItem = {
-            name: networks[chain].chain,
+            name: networks[chain].name,
             chain: chain,
             balance: parsedTotalBalance.toString(),
             activeBalance: parsedActiveBalance.toString(),
             unlockingBalance: parsedUnlockingBalance.toString(),
-            nativeToken: networks[chain].nativeToken,
-            unit: networks[chain].nativeToken,
+            nativeToken: symbol,
+            unit: symbol,
             state: APIItemState.READY,
             type: StakingType.NOMINATED,
             address: owner
@@ -217,13 +227,13 @@ export function getParaStakingOnChain (parentApi: ApiProps, useAddresses: string
           callback(chain, stakingItem);
         } else {
           const stakingItem = {
-            name: networks[chain].chain,
+            name: networks[chain].name,
             chain: chain,
             balance: '0',
             activeBalance: '0',
             unlockingBalance: '0',
-            nativeToken: networks[chain].nativeToken,
-            unit: networks[chain].nativeToken,
+            nativeToken: symbol,
+            unit: symbol,
             state: APIItemState.READY,
             type: StakingType.NOMINATED,
             address: owner
@@ -236,7 +246,9 @@ export function getParaStakingOnChain (parentApi: ApiProps, useAddresses: string
   });
 }
 
-export function getAstarStakingOnChain (parentApi: ApiProps, useAddresses: string[], networks: Record<string, NetworkJson>, chain: string, callback: (networkKey: string, rs: StakingItem) => void) {
+export function getAstarStakingOnChain (parentApi: _SubstrateApi, useAddresses: string[], networks: Record<string, _ChainInfo>, chain: string, callback: (networkKey: string, rs: StakingItem) => void) {
+  const { symbol } = _getChainNativeTokenInfo(networks[chain]);
+
   return parentApi.api.query.dappsStaking.ledger.multi(useAddresses, (ledgers: Codec[]) => {
     if (ledgers) {
       for (let i = 0; i < ledgers.length; i++) {
@@ -266,13 +278,13 @@ export function getAstarStakingOnChain (parentApi: ApiProps, useAddresses: strin
         const parsedUnlockingBalance = parseStakingBalance(formattedUnlockingBalance, chain, networks);
 
         const stakingItem = {
-          name: networks[chain].chain,
+          name: networks[chain].name,
           chain: chain,
           balance: parsedTotalBalance.toString(),
           activeBalance: parsedActiveBalance.toString(),
           unlockingBalance: parsedUnlockingBalance.toString(),
-          nativeToken: networks[chain].nativeToken,
-          unit: networks[chain].nativeToken,
+          nativeToken: symbol,
+          unit: symbol,
           state: APIItemState.READY,
           type: StakingType.NOMINATED,
           address: owner

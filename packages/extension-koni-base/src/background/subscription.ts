@@ -153,7 +153,7 @@ export class KoniSubscription {
     }).catch((err) => this.logger.warn(err));
   }
 
-  subscribeStakingOnChain (address: string, dotSamaApiMap: Record<string, ApiProps>, onlyRunOnFirstTime?: boolean) {
+  subscribeStakingOnChain (address: string, substrateApiMap: Record<string, _SubstrateApi>, onlyRunOnFirstTime?: boolean) {
     this.state.resetStaking(address).then(() => {
       this.state.getDecodedAddresses(address)
         .then((addresses) => {
@@ -161,16 +161,16 @@ export class KoniSubscription {
             return;
           }
 
-          this.updateSubscription('stakingOnChain', this.initStakingOnChainSubscription(addresses, dotSamaApiMap, onlyRunOnFirstTime));
+          this.updateSubscription('stakingOnChain', this.initStakingOnChainSubscription(addresses, substrateApiMap, onlyRunOnFirstTime));
         })
         .catch(this.logger.error);
     }).catch((err) => this.logger.warn(err));
   }
 
-  initStakingOnChainSubscription (addresses: string[], dotSamaApiMap: Record<string, ApiProps>, onlyRunOnFirstTime?: boolean) {
-    const unsub = stakingOnChainApi(addresses, dotSamaApiMap, (networkKey, rs) => {
+  initStakingOnChainSubscription (addresses: string[], substrateApiMap: Record<string, _SubstrateApi>, onlyRunOnFirstTime?: boolean) {
+    const unsub = stakingOnChainApi(addresses, substrateApiMap, (networkKey, rs) => {
       this.state.setStakingItem(networkKey, rs);
-    }, this.state.getNetworkMap());
+    }, this.state.getActiveChainInfoMap());
 
     if (onlyRunOnFirstTime) {
       unsub && unsub();

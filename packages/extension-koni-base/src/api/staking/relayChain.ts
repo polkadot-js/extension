@@ -1,7 +1,10 @@
 // Copyright 2019-2022 @subwallet/extension-koni authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { APIItemState, ApiProps, NetworkJson, StakingItem, StakingRewardItem, StakingType } from '@subwallet/extension-base/background/KoniTypes';
+import { _ChainInfo } from '@subwallet/chain/types';
+import { APIItemState, StakingItem, StakingRewardItem, StakingType } from '@subwallet/extension-base/background/KoniTypes';
+import { _SubstrateApi } from '@subwallet/extension-base/services/chain-service/types';
+import { _getChainNativeTokenInfo } from '@subwallet/extension-base/services/chain-service/utils';
 import { parseStakingBalance } from '@subwallet/extension-koni-base/api/staking/utils';
 import { reformatAddress, toUnit } from '@subwallet/extension-koni-base/utils';
 
@@ -17,7 +20,9 @@ interface LedgerData {
   unlocking: Record<string, string>[]
 }
 
-export function getRelayStakingOnChain (parentApi: ApiProps, useAddresses: string[], networks: Record<string, NetworkJson>, chain: string, callback: (networkKey: string, rs: StakingItem) => void) {
+export function getRelayStakingOnChain (parentApi: _SubstrateApi, useAddresses: string[], networks: Record<string, _ChainInfo>, chain: string, callback: (networkKey: string, rs: StakingItem) => void) {
+  const { symbol } = _getChainNativeTokenInfo(networks[chain]);
+
   return parentApi.api.query.staking?.ledger.multi(useAddresses, (ledgers: Codec[]) => {
     let unit = '';
 
@@ -60,13 +65,13 @@ export function getRelayStakingOnChain (parentApi: ApiProps, useAddresses: strin
           const parsedTotal = parseStakingBalance(formattedTotalBalance, chain, networks);
 
           const stakingItem = {
-            name: networks[chain].chain,
+            name: networks[chain].name,
             chain: chain,
             balance: parsedTotal.toString(),
             activeBalance: parsedActiveBalance.toString(),
             unlockingBalance: parsedUnlockingBalance.toString(),
-            nativeToken: networks[chain].nativeToken,
-            unit: unit || networks[chain].nativeToken,
+            nativeToken: symbol,
+            unit: unit || symbol,
             state: APIItemState.READY,
             type: StakingType.NOMINATED,
             address: owner
@@ -75,13 +80,13 @@ export function getRelayStakingOnChain (parentApi: ApiProps, useAddresses: strin
           callback(chain, stakingItem);
         } else {
           const stakingItem = {
-            name: networks[chain].chain,
+            name: networks[chain].name,
             chain: chain,
             balance: '0',
             activeBalance: '0',
             unlockingBalance: '0',
-            nativeToken: networks[chain].nativeToken,
-            unit: unit || networks[chain].nativeToken,
+            nativeToken: symbol,
+            unit: unit || symbol,
             state: APIItemState.READY,
             type: StakingType.NOMINATED,
             address: owner
@@ -94,7 +99,9 @@ export function getRelayStakingOnChain (parentApi: ApiProps, useAddresses: strin
   });
 }
 
-export function getRelayPoolingOnchain (parentApi: ApiProps, useAddresses: string[], networks: Record<string, NetworkJson>, chain: string, callback: (networkKey: string, rs: StakingItem) => void) {
+export function getRelayPoolingOnchain (parentApi: _SubstrateApi, useAddresses: string[], networks: Record<string, _ChainInfo>, chain: string, callback: (networkKey: string, rs: StakingItem) => void) {
+  const { symbol } = _getChainNativeTokenInfo(networks[chain]);
+
   return parentApi.api.query?.nominationPools?.poolMembers.multi(useAddresses, (ledgers: Codec[]) => {
     if (ledgers) {
       for (let i = 0; i < ledgers.length; i++) {
@@ -128,13 +135,13 @@ export function getRelayPoolingOnchain (parentApi: ApiProps, useAddresses: strin
           const parsedTotal = parseStakingBalance(formattedTotalBalance, chain, networks);
 
           const stakingItem = {
-            name: networks[chain].chain,
+            name: networks[chain].name,
             chain: chain,
             balance: parsedTotal.toString(),
             activeBalance: parsedActiveBalance.toString(),
             unlockingBalance: parsedUnlockingBalance.toString(),
-            nativeToken: networks[chain].nativeToken,
-            unit: networks[chain].nativeToken,
+            nativeToken: symbol,
+            unit: symbol,
             state: APIItemState.READY,
             type: StakingType.POOLED,
             address: owner
@@ -143,13 +150,13 @@ export function getRelayPoolingOnchain (parentApi: ApiProps, useAddresses: strin
           callback(chain, stakingItem);
         } else {
           const stakingItem = {
-            name: networks[chain].chain,
+            name: networks[chain].name,
             chain: chain,
             balance: '0',
             activeBalance: '0',
             unlockingBalance: '0',
-            nativeToken: networks[chain].nativeToken,
-            unit: networks[chain].nativeToken,
+            nativeToken: symbol,
+            unit: symbol,
             state: APIItemState.READY,
             type: StakingType.POOLED,
             address: owner
@@ -162,11 +169,11 @@ export function getRelayPoolingOnchain (parentApi: ApiProps, useAddresses: strin
   });
 }
 
-export async function getNominationPoolReward (addresses: string[], networkMap: Record<string, NetworkJson>, dotSamaApiMap: Record<string, ApiProps>): Promise<StakingRewardItem[]> {
+export async function getNominationPoolReward (addresses: string[], chainInfoMap: Record<string, _ChainInfo>, substrateApiMap: Record<string, _SubstrateApi>): Promise<StakingRewardItem[]> {
   const targetNetworks: string[] = [];
   const validAddresses: string[] = [];
 
-  Object.keys(networkMap).forEach((key) => {
+  Object.keys(chainInfoMap).forEach((key) => {
     targetNetworks.push(key);
   });
 
@@ -180,20 +187,21 @@ export async function getNominationPoolReward (addresses: string[], networkMap: 
 
   try {
     await Promise.all(targetNetworks.map(async (networkKey) => {
-      const apiProps = await dotSamaApiMap[networkKey].isReady;
+      const substrateApi = await substrateApiMap[networkKey].isReady;
 
       await Promise.all(validAddresses.map(async (address) => {
-        const _unclaimedReward = await apiProps.api.call?.nominationPoolsApi?.pendingRewards(address);
+        const _unclaimedReward = await substrateApi.api.call?.nominationPoolsApi?.pendingRewards(address);
 
         if (_unclaimedReward) {
           const unclaimedReward = _unclaimedReward.toString();
-          const parsedUnclaimedReward = toUnit(parseFloat(unclaimedReward), networkMap[networkKey].decimals as number);
+          const { decimals } = _getChainNativeTokenInfo(chainInfoMap[networkKey]);
+          const parsedUnclaimedReward = toUnit(parseFloat(unclaimedReward), decimals);
 
           rewardList.push({
             address: address,
             chain: networkKey,
             unclaimedReward: parsedUnclaimedReward.toString(),
-            name: networkMap[networkKey].chain,
+            name: chainInfoMap[networkKey].name,
             state: APIItemState.READY,
             type: StakingType.POOLED
           });

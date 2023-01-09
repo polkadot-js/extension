@@ -1,28 +1,22 @@
 // Copyright 2019-2022 @subwallet/extension-koni authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-export enum SUPPORTED_STAKING_CHAIN_NAMES {
-  kusama = 'kusama',
-  polkadot = 'polkadot',
-  astar = 'astar',
-  moonbeam = 'moonbeam',
-  moonriver = 'moonriver'
-}
+import { COMMON_CHAIN_SLUGS } from '@subwallet/chain';
 
 export const SUBSQUID_ENDPOINTS: Record<string, string> = {
-  [SUPPORTED_STAKING_CHAIN_NAMES.kusama]: 'https://squid.subsquid.io/kusama-explorer/graphql',
-  [SUPPORTED_STAKING_CHAIN_NAMES.polkadot]: 'https://squid.subsquid.io/polkadot-explorer/graphql',
-  [SUPPORTED_STAKING_CHAIN_NAMES.astar]: 'https://squid.subsquid.io/astar-explorer/graphql',
-  [SUPPORTED_STAKING_CHAIN_NAMES.moonriver]: 'https://squid.subsquid.io/moonriver-explorer/graphql',
-  [SUPPORTED_STAKING_CHAIN_NAMES.moonbeam]: 'https://squid.subsquid.io/moonbeam-explorer/graphql'
+  [COMMON_CHAIN_SLUGS.KUSAMA]: 'https://squid.subsquid.io/kusama-explorer/graphql',
+  [COMMON_CHAIN_SLUGS.POLKADOT]: 'https://squid.subsquid.io/polkadot-explorer/graphql',
+  [COMMON_CHAIN_SLUGS.ASTAR]: 'https://squid.subsquid.io/astar-explorer/graphql',
+  [COMMON_CHAIN_SLUGS.MOONRIVER]: 'https://squid.subsquid.io/moonriver-explorer/graphql',
+  [COMMON_CHAIN_SLUGS.MOONBEAM]: 'https://squid.subsquid.io/moonbeam-explorer/graphql'
 };
 
-export const SUPPORTED_STAKING_CHAINS = [
-  SUPPORTED_STAKING_CHAIN_NAMES.polkadot as string,
-  SUPPORTED_STAKING_CHAIN_NAMES.kusama as string,
-  SUPPORTED_STAKING_CHAIN_NAMES.astar as string,
-  SUPPORTED_STAKING_CHAIN_NAMES.moonbeam as string,
-  SUPPORTED_STAKING_CHAIN_NAMES.moonriver as string
+export const INDEXER_SUPPORTED_STAKING_CHAINS = [
+  COMMON_CHAIN_SLUGS.POLKADOT as string,
+  COMMON_CHAIN_SLUGS.KUSAMA as string,
+  COMMON_CHAIN_SLUGS.ASTAR as string,
+  COMMON_CHAIN_SLUGS.MOONRIVER as string,
+  COMMON_CHAIN_SLUGS.MOONBEAM as string
 ];
 
 export const SUBQUERY_ENDPOINTS: Record<string, string> = {

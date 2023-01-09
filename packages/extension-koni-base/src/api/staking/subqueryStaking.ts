@@ -3,7 +3,7 @@
 
 import { APIItemState, StakingRewardItem, StakingRewardJson } from '@subwallet/extension-base/background/KoniTypes';
 import { PREDEFINED_NETWORKS } from '@subwallet/extension-koni-base/api/predefinedNetworks';
-import { SUBQUERY_ENDPOINTS, SUPPORTED_STAKING_CHAINS } from '@subwallet/extension-koni-base/api/staking/config';
+import { INDEXER_SUPPORTED_STAKING_CHAINS, SUBQUERY_ENDPOINTS } from '@subwallet/extension-koni-base/api/staking/config';
 import { reformatAddress, toUnit } from '@subwallet/extension-koni-base/utils';
 import axios from 'axios';
 
@@ -68,7 +68,7 @@ const getSubqueryStakingReward = async (accounts: string[], chain: string): Prom
 export const getAllSubqueryStakingReward = async (accounts: string[]): Promise<StakingRewardJson> => {
   let rewardList: StakingRewardItem[] = [];
 
-  const rewardItems = await Promise.all(SUPPORTED_STAKING_CHAINS.map(async (chain) => {
+  const rewardItems = await Promise.all(INDEXER_SUPPORTED_STAKING_CHAINS.map(async (chain) => {
     return await getSubqueryStakingReward(accounts, chain);
   }));
 

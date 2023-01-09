@@ -138,3 +138,22 @@ export function _isChainSupportEvmNft (chainInfo: _ChainInfo) {
 export function _isChainSupportWasmNft (chainInfo: _ChainInfo) {
   return chainInfo.substrateInfo?.supportSmartContract?.includes(_AssetType.PSP34) || false;
 }
+
+export function _getChainNativeTokenInfo (chainInfo: _ChainInfo) {
+  if (chainInfo.substrateInfo !== null) { // substrate by default
+    return {
+      symbol: chainInfo.substrateInfo.symbol,
+      decimals: chainInfo.substrateInfo.decimals
+    };
+  } else if (chainInfo.evmInfo !== null) {
+    return {
+      symbol: chainInfo.evmInfo.symbol,
+      decimals: chainInfo.evmInfo.decimals
+    };
+  }
+
+  return {
+    symbol: '',
+    decimals: -1
+  };
+}

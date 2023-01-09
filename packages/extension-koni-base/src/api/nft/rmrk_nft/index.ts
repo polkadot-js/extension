@@ -6,7 +6,7 @@ import { BaseNftApi, HandleNftParams } from '@subwallet/extension-koni-base/api/
 import { isUrl, reformatAddress } from '@subwallet/extension-koni-base/utils';
 import fetch from 'cross-fetch';
 
-import { getRandomIpfsGateway, KANARIA_ENDPOINT, KANARIA_EXTERNAL_SERVER, SINGULAR_V1_COLLECTION_ENDPOINT, SINGULAR_V1_ENDPOINT, SINGULAR_V1_EXTERNAL_SERVER, SINGULAR_V2_COLLECTION_ENDPOINT, SINGULAR_V2_ENDPOINT, SINGULAR_V2_EXTERNAL_SERVER } from '../config';
+import { KANARIA_ENDPOINT, KANARIA_EXTERNAL_SERVER, SINGULAR_V1_COLLECTION_ENDPOINT, SINGULAR_V1_ENDPOINT, SINGULAR_V1_EXTERNAL_SERVER, SINGULAR_V2_COLLECTION_ENDPOINT, SINGULAR_V2_ENDPOINT, SINGULAR_V2_EXTERNAL_SERVER } from '../config';
 
 enum RMRK_SOURCE {
   BIRD_KANARIA = 'bird_kanaria',
@@ -48,10 +48,10 @@ export class RmrkNftApi extends BaseNftApi {
     }
 
     if (!input.includes('ipfs://ipfs/')) {
-      return getRandomIpfsGateway() + input;
+      return input;
     }
 
-    return getRandomIpfsGateway() + input.split('ipfs://ipfs/')[1];
+    return input.split('ipfs://ipfs/')[1];
   }
 
   private async getMetadata (metadataUrl: string): Promise<NFTMetadata | undefined> {

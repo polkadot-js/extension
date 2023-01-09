@@ -46,10 +46,10 @@ export class AcalaNftApi extends BaseNftApi {
     }
 
     if (!input.includes('ipfs://')) {
-      return getRandomIpfsGateway() + input;
+      return input;
     }
 
-    return getRandomIpfsGateway() + input.split('ipfs://')[1];
+    return input.split('ipfs://')[1];
   }
 
   /**

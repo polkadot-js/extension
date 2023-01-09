@@ -3,7 +3,6 @@
 
 import { CrowdloanParaState, NetworkJson } from '@subwallet/extension-base/background/KoniTypes';
 import { AccountAuthType, AccountJson } from '@subwallet/extension-base/background/types';
-import { getRandomIpfsGateway } from '@subwallet/extension-koni-base/api/nft/config';
 import { ALL_ACCOUNT_KEY } from '@subwallet/extension-koni-base/constants';
 import BigNumber from 'bignumber.js';
 
@@ -102,7 +101,7 @@ export const parseIpfsLink = (ipfsLink: string) => {
     return ipfsLink;
   }
 
-  return getRandomIpfsGateway() + ipfsLink.split('ipfs://ipfs/')[1];
+  return ipfsLink.split('ipfs://ipfs/')[1];
 };
 
 export function hexToStr (buf: string): string {

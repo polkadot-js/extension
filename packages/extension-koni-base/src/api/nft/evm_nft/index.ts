@@ -6,7 +6,6 @@ import { CustomTokenType, NftCollection, NftItem } from '@subwallet/extension-ba
 import { _ERC721_ABI } from '@subwallet/extension-base/services/chain-service/helper';
 import { _EvmApi } from '@subwallet/extension-base/services/chain-service/types';
 import { _getContractAddressOfToken } from '@subwallet/extension-base/services/chain-service/utils';
-import { getRandomIpfsGateway } from '@subwallet/extension-koni-base/api/nft/config';
 import { BaseNftApi, HandleNftParams } from '@subwallet/extension-koni-base/api/nft/nft';
 import { isUrl } from '@subwallet/extension-koni-base/utils';
 import fetch from 'cross-fetch';
@@ -37,10 +36,10 @@ export class EvmNftApi extends BaseNftApi {
     }
 
     if (input.includes('ipfs://')) {
-      return getRandomIpfsGateway() + input.split('ipfs://')[1];
+      return input.split('ipfs://')[1];
     }
 
-    return getRandomIpfsGateway() + input.split('ipfs://ipfs/')[1];
+    return input.split('ipfs://ipfs/')[1];
   }
 
   private parseMetadata (data: Record<string, any>): NftItem {

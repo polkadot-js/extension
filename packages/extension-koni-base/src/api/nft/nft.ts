@@ -3,7 +3,6 @@
 
 import { NftCollection, NftItem } from '@subwallet/extension-base/background/KoniTypes';
 import { _EvmApi, _SubstrateApi } from '@subwallet/extension-base/services/chain-service/types';
-import { getRandomIpfsGateway } from '@subwallet/extension-koni-base/api/nft/config';
 import { isUrl } from '@subwallet/extension-koni-base/utils';
 
 export interface HandleNftParams {
@@ -96,21 +95,21 @@ export abstract class BaseNftApi {
     }
 
     if (input.startsWith('/ipfs/')) {
-      return getRandomIpfsGateway() + input.split('/ipfs/')[1];
+      return input.split('/ipfs/')[1];
     }
 
     if (!input.includes('ipfs://') && !input.includes('ipfs://ipfs/')) { // just the IPFS hash
-      return getRandomIpfsGateway() + input;
+      return input;
     }
 
     if (input.includes('ipfs://') && !input.includes('ipfs://ipfs/')) { // starts with ipfs://
-      return getRandomIpfsGateway() + input.split('ipfs://')[1];
+      return input.split('ipfs://')[1];
     }
 
-    return getRandomIpfsGateway() + input.split('ipfs://ipfs/')[1]; // starts with ipfs://ipfs/
+    return input.split('ipfs://ipfs/')[1]; // starts with ipfs://ipfs/
   }
 
-  // Sub-class implements this function to parse data into prop result
+  // Subclass implements this function to parse data into prop result
   abstract handleNfts(params: HandleNftParams): void;
 
   abstract fetchNfts(params: HandleNftParams): Promise<number>;

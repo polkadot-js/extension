@@ -4,7 +4,6 @@
 import { assetFromToken } from '@equilab/api';
 import { ApiProps, BasicTxResponse, CustomTokenType, ExternalRequestPromise, ExternalRequestPromiseStatus, SupportTransferResponse, TokenInfo, TransferErrorCode } from '@subwallet/extension-base/background/KoniTypes';
 import { SignerType } from '@subwallet/extension-base/signers/types';
-import { getTokenInfo } from '@subwallet/extension-koni-base/api/dotsama/registry';
 import { signAndSendExtrinsic } from '@subwallet/extension-koni-base/api/dotsama/shared/signAndSendExtrinsic';
 import { getPSP22ContractPromise } from '@subwallet/extension-koni-base/api/tokens/wasm';
 import { KeyringPair } from '@subwallet/keyring/types';
@@ -12,10 +11,23 @@ import { KeyringPair } from '@subwallet/keyring/types';
 import { SubmittableExtrinsic } from '@polkadot/api/promise/types';
 import { AccountInfoWithProviders, AccountInfoWithRefCount, EventRecord } from '@polkadot/types/interfaces';
 import { BN } from '@polkadot/util';
+import {_SubstrateApi} from "@subwallet/extension-base/services/chain-service/types";
+import {_ChainAsset, _ChainInfo} from "@subwallet/chain/types";
+import {
+  _isChainEvmCompatible,
+  _isNativeToken,
+  _isTokenWasmSmartContract
+} from "@subwallet/extension-base/services/chain-service/utils";
+import {
+  _BALANCE_TOKEN_GROUP,
+  _TRANSFER_CHAIN_GROUP,
+  _TRANSFER_NOT_SUPPORTED_CHAINS
+} from "@subwallet/extension-base/services/chain-service/constants";
 
-export async function getExistentialDeposit (networkKey: string, token: string, dotSamaApiMap: Record<string, ApiProps>): Promise<string> {
-  const apiProps = await dotSamaApiMap[networkKey].isReady;
-  const api = apiProps.api;
+// to be removed
+export async function getExistentialDeposit (networkKey: string, token: string, substrateApiMap: Record<string, _SubstrateApi>): Promise<string> {
+  const chainApi = await substrateApiMap[networkKey].isReady;
+  const api = chainApi.api;
 
   const tokenInfo = await getTokenInfo(networkKey, api, token);
 
@@ -34,11 +46,11 @@ function isRefCount (accountInfo: AccountInfoWithProviders | AccountInfoWithRefC
   return !!(accountInfo as AccountInfoWithRefCount).refcount;
 }
 
-export async function checkReferenceCount (networkKey: string, address: string, dotSamaApiMap: Record<string, ApiProps>): Promise<boolean> {
-  const apiProps = await dotSamaApiMap[networkKey].isReady;
+export async function checkReferenceCount (networkKey: string, address: string, substrateApiMap: Record<string, _SubstrateApi>, chainInfo: _ChainInfo): Promise<boolean> {
+  const apiProps = await substrateApiMap[networkKey].isReady;
   const api = apiProps.api;
 
-  if (apiProps.isEthereum) {
+  if (_isChainEvmCompatible(chainInfo)) {
     return false;
   }
 
@@ -52,24 +64,24 @@ export async function checkReferenceCount (networkKey: string, address: string, 
     : false;
 }
 
-export async function checkSupportTransfer (networkKey: string, token: string, dotSamaApiMap: Record<string, ApiProps>): Promise<SupportTransferResponse> {
-  const apiProps = await dotSamaApiMap[networkKey].isReady;
+export async function checkSupportTransfer (networkKey: string, tokenInfo: _ChainAsset, substrateApiMap: Record<string, _SubstrateApi>, chainInfo: _ChainInfo): Promise<SupportTransferResponse> {
+  const substrateApi = await substrateApiMap[networkKey].isReady;
 
-  if (apiProps.isEthereum) {
+  if (_isChainEvmCompatible(chainInfo)) {
     return {
       supportTransfer: true,
       supportTransferAll: true
     };
   }
 
-  if (['subspace_gemini_3a', 'kulupu', 'joystream', 'equilibrium_parachain', 'genshiro_testnet', 'genshiro'].includes(networkKey)) {
+  if (_TRANSFER_NOT_SUPPORTED_CHAINS.includes(networkKey)) {
     return {
       supportTransfer: false,
       supportTransferAll: false
     };
   }
 
-  const api = apiProps.api;
+  const api = substrateApi.api;
   const isTxCurrenciesSupported = !!api && !!api.tx && !!api.tx.currencies;
   const isTxBalancesSupported = !!api && !!api.tx && !!api.tx.balances;
   const isTxTokensSupported = !!api && !!api.tx && !!api.tx.tokens;
@@ -83,34 +95,32 @@ export async function checkSupportTransfer (networkKey: string, token: string, d
     return result;
   }
 
-  const tokenInfo = await getTokenInfo(networkKey, api, token);
-
-  if (tokenInfo && tokenInfo.type && !apiProps.isEthereum && api.query.contracts) { // for PSP tokens
+  if (_isTokenWasmSmartContract(tokenInfo) && api.query.contracts) { // for PSP tokens
     return {
       supportTransfer: true,
       supportTransferAll: true
     };
   }
 
-  if (['karura', 'acala', 'acala_testnet'].includes(networkKey) && tokenInfo && !tokenInfo.isMainToken && isTxCurrenciesSupported) {
+  if (_TRANSFER_CHAIN_GROUP.acala.includes(networkKey) && tokenInfo && !_isNativeToken(tokenInfo) && isTxCurrenciesSupported) {
     result.supportTransfer = true;
     result.supportTransferAll = false;
-  } else if (['kintsugi', 'kintsugi_test', 'interlay'].includes(networkKey) && tokenInfo && isTxTokensSupported) {
+  } else if (_TRANSFER_CHAIN_GROUP.kintsugi.includes(networkKey) && tokenInfo && isTxTokensSupported) {
     result.supportTransfer = true;
     result.supportTransferAll = true;
-  } else if (['genshiro_testnet', 'genshiro', 'equilibrium_parachain'].includes(networkKey) && tokenInfo && isTxEqBalancesSupported) {
+  } else if (_TRANSFER_CHAIN_GROUP.genshiro.includes(networkKey) && tokenInfo && isTxEqBalancesSupported) {
     result.supportTransfer = true;
     result.supportTransferAll = false;
-  } else if (tokenInfo && ((networkKey === 'crab' && tokenInfo.symbol === 'CKTON') || (networkKey === 'pangolin' && tokenInfo.symbol === 'PKTON'))) {
+  } else if (tokenInfo && _TRANSFER_CHAIN_GROUP.crab.includes(networkKey) && _BALANCE_TOKEN_GROUP.crab.includes(tokenInfo.symbol)) {
     result.supportTransfer = true;
     result.supportTransferAll = true;
   } else if (isTxBalancesSupported && (!tokenInfo || tokenInfo.isMainToken)) {
     result.supportTransfer = true;
     result.supportTransferAll = true;
-  } else if (['pioneer', 'bitcountry'].includes(networkKey) && tokenInfo && tokenInfo.symbol === 'BIT') {
+  } else if (_TRANSFER_CHAIN_GROUP.bitcountry.includes(networkKey) && tokenInfo && tokenInfo.symbol === 'BIT') {
     result.supportTransfer = true;
     result.supportTransferAll = true;
-  } else if (['statemint', 'statemine'].includes(networkKey) && tokenInfo) {
+  } else if (_TRANSFER_CHAIN_GROUP.statemine.includes(networkKey) && tokenInfo) {
     result.supportTransfer = true;
     result.supportTransferAll = true;
   }
@@ -123,7 +133,7 @@ export async function estimateFee (
   fromKeypair: KeyringPair | undefined,
   to: string, value: string | undefined,
   transferAll: boolean,
-  dotSamaApiMap: Record<string, ApiProps>,
+  substrateApiMap: Record<string, ApiProps>,
   tokenInfo?: TokenInfo
 ): Promise<[string, string | undefined]> {
   let fee = '0';
@@ -134,7 +144,7 @@ export async function estimateFee (
     return [fee, feeSymbol];
   }
 
-  const apiProps = await dotSamaApiMap[networkKey].isReady;
+  const apiProps = await substrateApiMap[networkKey].isReady;
   const api = apiProps.api;
   const isTxCurrenciesSupported = !!api && !!api.tx && !!api.tx.currencies;
   const isTxBalancesSupported = !!api && !!api.tx && !!api.tx.balances;
@@ -500,13 +510,13 @@ export interface MakeTransferProps {
   from: string;
   value: string;
   transferAll: boolean;
-  dotSamaApiMap: Record<string, ApiProps>;
+  substrateApiMap: Record<string, ApiProps>;
   tokenInfo: undefined | TokenInfo;
   callback: (data: BasicTxResponse) => void;
 }
 
 export async function makeTransfer ({ callback,
-  dotSamaApiMap,
+  substrateApiMap,
   from,
   networkKey,
   to,
@@ -514,7 +524,7 @@ export async function makeTransfer ({ callback,
   transferAll,
   value }: MakeTransferProps): Promise<void> {
   const txState: BasicTxResponse = {};
-  const apiProps = await dotSamaApiMap[networkKey].isReady;
+  const apiProps = await substrateApiMap[networkKey].isReady;
 
   const [extrinsic, transferAmount] = await createTransferExtrinsic({
     transferAll: transferAll,

@@ -1,10 +1,14 @@
 // Copyright 2019-2022 @subwallet/extension-koni-base authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { _AssetType, _ChainAsset, _ChainInfo } from '@subwallet/chain/types';
-import { _ChainState, _CUSTOM_PREFIX, _SMART_CONTRACT_STANDARDS } from '@subwallet/extension-base/services/chain-service/types';
+import {_AssetType, _ChainAsset, _ChainInfo} from '@subwallet/chain/types';
+import {
+  _ChainState,
+  _CUSTOM_PREFIX,
+  _SMART_CONTRACT_STANDARDS
+} from '@subwallet/extension-base/services/chain-service/types';
 
-import { isEthereumAddress } from '@polkadot/util-crypto';
+import {isEthereumAddress} from '@polkadot/util-crypto';
 
 export function _isCustomNetwork (slug: string) {
   if (slug.length === 0) {
@@ -157,3 +161,13 @@ export function _getChainNativeTokenInfo (chainInfo: _ChainInfo) {
     decimals: -1
   };
 }
+
+export function _isTokenWasmSmartContract (tokenInfo: _ChainAsset) {
+  if ([_AssetType.PSP22, _AssetType.PSP34].includes(tokenInfo.assetType)) {
+    return true;
+  }
+
+  return false;
+}
+
+

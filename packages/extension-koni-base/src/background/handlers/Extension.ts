@@ -1844,10 +1844,9 @@ export default class KoniExtension extends Extension {
     return id;
   }
 
-  private async transferCheckReferenceCount ({ address,
-    networkKey }: RequestTransferCheckReferenceCount): Promise<boolean> {
+  private async transferCheckReferenceCount ({ address, networkKey }: RequestTransferCheckReferenceCount): Promise<boolean> {
     // eslint-disable-next-line @typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-return
-    return await checkReferenceCount(networkKey, address, state.getSubstrateApiMap());
+    return await checkReferenceCount(networkKey, address, state.getSubstrateApiMap(), state.getChainInfoByKey(networkKey));
   }
 
   private async transferCheckSupporting ({ networkKey,

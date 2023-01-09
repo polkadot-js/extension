@@ -21,6 +21,8 @@ export const _PREDEFINED_SINGLE_MODES: Record<string, SingleModeJson> = {
 
 export const _PURE_EVM_CHAINS = ['binance', 'binance_test', 'ethereum', 'ethereum_goerli', 'astarEvm', 'shidenEvm', 'shibuyaEvm', 'crabEvm', 'pangolinEvm', 'cloverEvm', 'boba_rinkeby', 'boba', 'bobabase', 'bobabeam', 'watr_network_evm'];
 
+// Get balance----------------------------------------------------------------------------------------------------------
+
 export const _BALANCE_CHAIN_GROUP = {
   kintsugi: ['kintsugi', 'interlay', 'kintsugi_test'],
   crab: ['crab', 'pangolin'],
@@ -43,6 +45,8 @@ export const _NFT_CHAIN_GROUP = {
   unique_network: ['unique_network'],
   bitcountry: ['bitcountry', 'pioneer']
 };
+
+// Staking--------------------------------------------------------------------------------------------------------------
 
 export const _STAKING_CHAIN_GROUP = {
   relay: ['polkadot', 'kusama', 'aleph', 'polkadex', 'ternoa', 'ternoa_alphanet', 'alephTest', 'polkadexTest', 'westend'],
@@ -162,3 +166,17 @@ export const _KNOWN_CHAIN_INFLATION_PARAMS: Record<string, _SubstrateInflationPa
   nft_mart: { ..._SUBSTRATE_DEFAULT_INFLATION_PARAMS, falloff: 0.04, stakeTarget: 0.60 },
   polkadot: { ..._SUBSTRATE_DEFAULT_INFLATION_PARAMS, stakeTarget: 0.75 }
 };
+
+// Send fund------------------------------------------------------------------------------------------------------------
+
+export const _TRANSFER_NOT_SUPPORTED_CHAINS = ['subspace_gemini_3a', 'kulupu', 'joystream', 'equilibrium_parachain', 'genshiro_testnet', 'genshiro'];
+
+export const _TRANSFER_CHAIN_GROUP = {
+  acala: ['karura', 'acala', 'acala_testnet'],
+  kintsugi: ['kintsugi', 'kintsugi_test', 'interlay'],
+  genshiro: ['genshiro_testnet', 'genshiro', 'equilibrium_parachain'],
+  crab: ['crab', 'pangolin'],
+  bitcountry: ['pioneer', 'bitcountry'],
+  statemine: ['statemint', 'statemine']
+}
+

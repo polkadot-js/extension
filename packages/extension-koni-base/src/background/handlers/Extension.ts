@@ -1593,13 +1593,13 @@ export default class KoniExtension extends Extension {
       const transferProm = makeCrossChainTransfer({
         callback: callback,
         tokenInfo: tokenInfo,
-        value: value || '0',
-        fromKeypair: fromKeyPair,
-        to: to,
+        sendingValue: value || '0',
+        sender: fromKeyPair,
+        recipient: to,
         substrateApiMap: substrateApiMap,
         originNetworkKey: originNetworkKey,
         destinationNetworkKey: destinationNetworkKey,
-        networkMap: chainInfoMap
+        chainInfoMap: chainInfoMap
       });
 
       transferProm.then(() => {

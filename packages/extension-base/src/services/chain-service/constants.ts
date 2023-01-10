@@ -180,3 +180,13 @@ export const _TRANSFER_CHAIN_GROUP = {
   bitcountry: ['pioneer', 'bitcountry'],
   statemine: ['statemint', 'statemine']
 };
+
+export const _XCM_CHAIN_GROUP = {
+  moonbeam: ['moonbeam', 'moonriver', 'moonbase'],
+  astar: ['astar', 'shiden'],
+  statemine: ['statemint', 'statemine'],
+  bifrost: ['bifrost'],
+  genshiro: ['genshiro_testnet', 'genshiro', 'equilibrium_parachain'],
+  kintsugi: ['kintsugi', 'kintsugi_test', 'interlay'],
+  acala: ['karura', 'acala', 'acala_testnet']
+};

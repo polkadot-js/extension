@@ -2,7 +2,6 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { NetWorkInfo } from '@subwallet/extension-base/background/KoniTypes';
-import { ethereumChains } from '@subwallet/extension-koni-base/api/dotsama/api-helper';
 
 // deprecated
 const NETWORKS: Record<string, NetWorkInfo> = {
@@ -734,11 +733,4 @@ const NETWORKS: Record<string, NetWorkInfo> = {
   }
 };
 
-export const EVM_NETWORKS = ethereumChains.reduce((previousValue, currentValue) => {
-  if (NETWORKS[currentValue]) {
-    previousValue[currentValue] = NETWORKS[currentValue];
-  }
-
-  return previousValue;
-}, {} as Record<string, NetWorkInfo>);
 export default NETWORKS;

@@ -46,11 +46,11 @@ export const makeCrossChainTransferExternal = async ({ callback,
   const extrinsic = await createXcmExtrinsic({
     destinationNetworkKey: destinationNetworkKey,
     dotSamaApiMap: dotSamaApiMap,
-    networkMap: networkMap,
+    chainInfoMap: networkMap,
     originNetworkKey: originalNetworkKey,
-    to: recipientAddress,
+    recipient: recipientAddress,
     tokenInfo: tokenInfo,
-    value: value
+    sendingValue: value
   });
 
   const updateResponseTxResult = (response: BasicTxResponse, records: EventRecord[]) => {

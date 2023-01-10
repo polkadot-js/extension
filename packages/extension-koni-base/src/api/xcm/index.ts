@@ -1,7 +1,11 @@
 // Copyright 2019-2022 @subwallet/extension-koni-base authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { ApiProps, BasicTxResponse, NetworkJson, TokenInfo } from '@subwallet/extension-base/background/KoniTypes';
+import { _AssetRef, _ChainAsset, _ChainInfo } from '@subwallet/chain/types';
+import { BasicTxResponse, NetworkJson } from '@subwallet/extension-base/background/KoniTypes';
+import { _XCM_CHAIN_GROUP } from '@subwallet/extension-base/services/chain-service/constants';
+import { _SubstrateApi } from '@subwallet/extension-base/services/chain-service/types';
+import { _isNativeToken, _isXcmPathSupported } from '@subwallet/extension-base/services/chain-service/utils';
 import { SignerType } from '@subwallet/extension-base/signers/types';
 import { signAndSendExtrinsic } from '@subwallet/extension-koni-base/api/dotsama/shared/signAndSendExtrinsic';
 import { getUnsupportedResponse } from '@subwallet/extension-koni-base/api/dotsama/transfer';
@@ -30,120 +34,129 @@ export function isNetworksPairSupportedTransferCrossChain (originNetworkKey: str
 }
 
 export async function estimateCrossChainFee (
-  originNetworkKey: string,
-  destinationNetworkKey: string,
-  to: string,
-  fromKeypair: KeyringPair,
-  value: string,
-  dotSamaApiMap: Record<string, ApiProps>,
-  tokenInfo: TokenInfo,
-  networkMap: Record<string, NetworkJson>
+  sender: KeyringPair,
+  recipient: string,
+  sendingValue: string,
+  originTokenInfo: _ChainAsset,
+  destinationTokenInfo: _ChainAsset,
+  chainInfoMap: Record<string, _ChainInfo>,
+  substrateApiMap: Record<string, _SubstrateApi>,
+  assetRefMap: Record<string, _AssetRef>
 ): Promise<[string, string | undefined]> {
-  if (!isNetworksPairSupportedTransferCrossChain(originNetworkKey, destinationNetworkKey, tokenInfo.symbol, networkMap)) {
-    console.log('unsupported xcm');
+  if (!_isXcmPathSupported(originTokenInfo.slug, destinationTokenInfo.slug, assetRefMap)) {
+    console.log('Unsupported xcm');
 
     return ['0', ''];
   }
 
-  if (['moonbase', 'moonriver', 'moonbeam'].includes(originNetworkKey)) {
-    return moonbeamEstimateCrossChainFee(originNetworkKey, destinationNetworkKey, to, fromKeypair, value, dotSamaApiMap, tokenInfo, networkMap);
+  const originNetworkKey = originTokenInfo.originChain;
+  const destinationNetworkKey = destinationTokenInfo.originChain;
+
+  if (_XCM_CHAIN_GROUP.moonbeam.includes(originNetworkKey)) {
+    return moonbeamEstimateCrossChainFee(originNetworkKey, destinationNetworkKey, recipient, sender, sendingValue, substrateApiMap, originTokenInfo, chainInfoMap);
   }
 
-  if (['astar', 'shiden'].includes(originNetworkKey)) {
-    return astarEstimateCrossChainFee(originNetworkKey, destinationNetworkKey, to, fromKeypair, value, dotSamaApiMap, tokenInfo, networkMap);
+  if (_XCM_CHAIN_GROUP.astar.includes(originNetworkKey)) {
+    return astarEstimateCrossChainFee(originNetworkKey, destinationNetworkKey, recipient, sender, sendingValue, substrateApiMap, originTokenInfo, chainInfoMap);
   }
 
-  if (['statemint', 'statemine'].includes(originNetworkKey)) {
-    return statemintEstimateCrossChainFee(originNetworkKey, destinationNetworkKey, to, fromKeypair, value, dotSamaApiMap, tokenInfo, networkMap);
+  if (_XCM_CHAIN_GROUP.statemine.includes(originNetworkKey)) {
+    return statemintEstimateCrossChainFee(originNetworkKey, destinationNetworkKey, recipient, sender, sendingValue, substrateApiMap, originTokenInfo, chainInfoMap);
   }
 
-  return substrateEstimateCrossChainFee(originNetworkKey, destinationNetworkKey, to, fromKeypair, value, dotSamaApiMap, tokenInfo, networkMap);
+  return substrateEstimateCrossChainFee(originNetworkKey, destinationNetworkKey, recipient, sender, sendingValue, substrateApiMap, originTokenInfo, chainInfoMap);
 }
 
 interface CreateXcmExtrinsicProps {
-  destinationNetworkKey: string;
-  dotSamaApiMap: Record<string, ApiProps>;
-  networkMap: Record<string, NetworkJson>;
-  originNetworkKey: string;
-  to: string;
-  tokenInfo: TokenInfo;
-  value: string;
+  originTokenInfo: _ChainAsset;
+  destinationTokenInfo: _ChainAsset;
+  recipient: string;
+  sendingValue: string;
+
+  substrateApiMap: Record<string, _SubstrateApi>;
+  chainInfoMap: Record<string, _ChainInfo>;
 }
 
-export const createXcmExtrinsic = async ({ destinationNetworkKey,
-  dotSamaApiMap,
-  networkMap,
-  originNetworkKey, to, tokenInfo, value }: CreateXcmExtrinsicProps): Promise<SubmittableExtrinsic<'promise'>> => {
-  const apiProps = await dotSamaApiMap[originNetworkKey].isReady;
-  const api = apiProps.api;
+export const createXcmExtrinsic = async ({ chainInfoMap,
+  destinationTokenInfo,
+  originTokenInfo,
+  recipient,
+  sendingValue,
+  substrateApiMap }: CreateXcmExtrinsicProps): Promise<SubmittableExtrinsic<'promise'>> => {
+  const originNetworkKey = originTokenInfo.originChain;
+  const destinationNetworkKey = destinationTokenInfo.originChain;
+
+  const substrateApi = await substrateApiMap[originNetworkKey].isReady;
+  const api = substrateApi.api;
 
   let extrinsic;
 
-  if (['moonbase', 'moonriver', 'moonbeam'].includes(originNetworkKey)) {
-    extrinsic = moonbeamGetXcmExtrinsic(originNetworkKey, destinationNetworkKey, to, value, api, tokenInfo, networkMap);
-  } else if (['astar', 'shiden'].includes(originNetworkKey)) {
-    extrinsic = astarGetXcmExtrinsic(originNetworkKey, destinationNetworkKey, to, value, api, tokenInfo, networkMap);
-  } else if (['statemint', 'statemine'].includes(originNetworkKey)) {
-    extrinsic = statemintGetXcmExtrinsic(originNetworkKey, destinationNetworkKey, to, value, api, tokenInfo, networkMap);
+  if (_XCM_CHAIN_GROUP.moonbeam.includes(originNetworkKey)) {
+    extrinsic = moonbeamGetXcmExtrinsic(originNetworkKey, destinationNetworkKey, recipient, sendingValue, api, originTokenInfo, chainInfoMap);
+  } else if (_XCM_CHAIN_GROUP.astar.includes(originNetworkKey)) {
+    extrinsic = astarGetXcmExtrinsic(originNetworkKey, destinationNetworkKey, recipient, sendingValue, api, originTokenInfo, chainInfoMap);
+  } else if (_XCM_CHAIN_GROUP.statemine.includes(originNetworkKey)) {
+    extrinsic = statemintGetXcmExtrinsic(originNetworkKey, destinationNetworkKey, recipient, sendingValue, api, originTokenInfo, chainInfoMap);
   } else {
-    extrinsic = substrateGetXcmExtrinsic(originNetworkKey, destinationNetworkKey, to, value, api, tokenInfo, networkMap);
+    extrinsic = substrateGetXcmExtrinsic(originNetworkKey, destinationNetworkKey, recipient, sendingValue, api, originTokenInfo, chainInfoMap);
   }
 
   return extrinsic;
 };
 
 interface MakeCrossChainTransferProps {
-  originNetworkKey: string;
-  destinationNetworkKey: string;
-  to: string;
-  fromKeypair: KeyringPair;
-  value: string;
-  dotSamaApiMap: Record<string, ApiProps>;
-  tokenInfo: TokenInfo;
-  networkMap: Record<string, NetworkJson>;
+  originTokenInfo: _ChainAsset;
+  destinationTokenInfo: _ChainAsset;
+  recipient: string;
+  sender: KeyringPair;
+  sendingValue: string;
+  substrateApiMap: Record<string, _SubstrateApi>;
+  chainInfoMap: Record<string, _ChainInfo>;
+  assetRefMap: Record<string, _AssetRef>;
   callback: (data: BasicTxResponse) => void;
 }
 
-export async function makeCrossChainTransfer ({ callback,
-  destinationNetworkKey,
-  dotSamaApiMap,
-  fromKeypair,
-  networkMap,
-  originNetworkKey,
-  to,
-  tokenInfo,
-  value }: MakeCrossChainTransferProps): Promise<void> {
+export async function makeCrossChainTransfer ({ assetRefMap,
+  callback,
+  chainInfoMap,
+  destinationTokenInfo,
+  originTokenInfo,
+  recipient,
+  sender,
+  sendingValue,
+  substrateApiMap }: MakeCrossChainTransferProps): Promise<void> {
   const txState: BasicTxResponse = {};
 
-  if (!isNetworksPairSupportedTransferCrossChain(originNetworkKey, destinationNetworkKey, tokenInfo.symbol, networkMap)) {
+  const originNetworkKey = originTokenInfo.originChain;
+
+  if (!_isXcmPathSupported(originTokenInfo.slug, destinationTokenInfo.slug, assetRefMap)) {
     callback(getUnsupportedResponse());
 
     return;
   }
 
-  const apiProps = await dotSamaApiMap[originNetworkKey].isReady;
+  const substrateApi = await substrateApiMap[originNetworkKey].isReady;
 
   const extrinsic = await createXcmExtrinsic({
-    value: value,
-    to: to,
-    networkMap: networkMap,
-    originNetworkKey: originNetworkKey,
-    destinationNetworkKey: destinationNetworkKey,
-    dotSamaApiMap: dotSamaApiMap,
-    tokenInfo: tokenInfo
+    destinationTokenInfo,
+    originTokenInfo,
+    sendingValue: sendingValue,
+    recipient: recipient,
+    chainInfoMap: chainInfoMap,
+    substrateApiMap: substrateApiMap
   });
 
   const updateResponseTxResult = (response: BasicTxResponse, records: EventRecord[]) => {
-    updateXcmResponseTxResult(originNetworkKey, tokenInfo, response, records);
+    updateXcmResponseTxResult(originNetworkKey, originTokenInfo, response, records);
   };
 
   await signAndSendExtrinsic({
     type: SignerType.PASSWORD,
-    substrateApi: apiProps,
+    substrateApi: substrateApi,
     callback: callback,
     extrinsic: extrinsic,
     txState: txState,
-    address: fromKeypair.address,
+    address: sender.address,
     updateResponseTxResult: updateResponseTxResult,
     errorMessage: 'error xcm transfer'
   });
@@ -152,7 +165,7 @@ export async function makeCrossChainTransfer ({ callback,
 // TODO: add + refine logic for more chains
 export function updateXcmResponseTxResult (
   networkKey: string,
-  tokenInfo: undefined | TokenInfo,
+  tokenInfo: _ChainAsset,
   response: BasicTxResponse,
   records: EventRecord[]
 ) {
@@ -165,7 +178,7 @@ export function updateXcmResponseTxResult (
   for (let index = 0; index < records.length; index++) {
     const record = records[index];
 
-    if (['karura', 'acala', 'acala_testnet'].includes(networkKey) && tokenInfo && !tokenInfo.isMainToken) {
+    if (_XCM_CHAIN_GROUP.acala.includes(networkKey) && !_isNativeToken(tokenInfo)) {
       if (record.event.section === 'currencies' &&
         record.event.method.toLowerCase() === 'transferred') {
         if (index === 0) {
@@ -185,19 +198,19 @@ export function updateXcmResponseTxResult (
         response.txResult.change = record.event.data[2]?.toString() || '0';
         response.txResult.changeSymbol = tokenInfo.symbol;
       }
-    } else if (['kintsugi', 'kintsugi_test', 'interlay'].includes(networkKey) && tokenInfo) {
+    } else if (_XCM_CHAIN_GROUP.kintsugi.includes(networkKey) && !_isNativeToken(tokenInfo)) {
       if (record.event.section === 'tokens' &&
         record.event.method.toLowerCase() === 'transfer') {
         response.txResult.change = record.event.data[3]?.toString() || '0';
         response.txResult.changeSymbol = tokenInfo.symbol;
       }
-    } else if (['genshiro_testnet', 'genshiro', 'equilibrium_parachain'].includes(networkKey) && tokenInfo) {
+    } else if (_XCM_CHAIN_GROUP.genshiro.includes(networkKey) && !_isNativeToken(tokenInfo)) {
       if (record.event.section === 'eqBalances' &&
         record.event.method.toLowerCase() === 'transfer') {
         response.txResult.change = record.event.data[3]?.toString() || '0';
         response.txResult.changeSymbol = tokenInfo.symbol;
       }
-    } else if (['bifrost'].includes(networkKey) && tokenInfo) {
+    } else if (_XCM_CHAIN_GROUP.bifrost.includes(networkKey) && !_isNativeToken(tokenInfo)) {
       if (record.event.section === 'tokens' &&
         record.event.method.toLowerCase() === 'withdrawn') {
         response.txResult.change = record.event.data[2]?.toString() || '0';
@@ -208,20 +221,20 @@ export function updateXcmResponseTxResult (
         response.txResult.change = record.event.data[2]?.toString() || '0';
         response.txResult.changeSymbol = tokenInfo.symbol;
       }
-    } else if (['astar', 'shiden'].includes(networkKey) && tokenInfo) {
+    } else if (_XCM_CHAIN_GROUP.astar.includes(networkKey) && !_isNativeToken(tokenInfo)) {
       if (record.event.section === 'assets' &&
         record.event.method.toLowerCase() === 'burned') {
         response.txResult.change = record.event.data[2]?.toString() || '0';
         response.txResult.changeSymbol = tokenInfo.symbol;
       }
-    } else if (['moonbeam', 'moonriver'].includes(networkKey) && tokenInfo) {
+    } else if (_XCM_CHAIN_GROUP.moonbeam.includes(networkKey) && !_isNativeToken(tokenInfo)) {
       if (record.event.section === 'assets' &&
         record.event.method.toLowerCase() === 'burned') {
         response.txResult.change = record.event.data[2]?.toString() || '0';
         response.txResult.changeSymbol = tokenInfo.symbol;
       }
-    } else if (['statemint', 'statemine'].includes(networkKey) && tokenInfo) {
-      if (!tokenInfo.isMainToken) {
+    } else if (_XCM_CHAIN_GROUP.statemine.includes(networkKey)) {
+      if (!_isNativeToken(tokenInfo)) {
         if (record.event.section === 'assets' &&
           record.event.method.toLowerCase() === 'transferred') {
           response.txResult.change = record.event.data[3]?.toString() || '0';

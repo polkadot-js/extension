@@ -24,7 +24,7 @@ export async function makeNftTransferExternal ({ callback,
   substrateApi,
   updateState }: TransferNFTExternalProps): Promise<void> {
   const txState: BasicTxResponse = {};
-  const networkKey = chainInfo.key;
+  const networkKey = chainInfo.slug;
   const isPSP34 = params.isPsp34 as boolean | undefined;
   const extrinsic = !isPSP34
     ? getNftTransferExtrinsic(networkKey, substrateApi, senderAddress, recipientAddress, params)

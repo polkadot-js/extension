@@ -1,8 +1,8 @@
 // Copyright 2019-2022 @subwallet/extension-koni-base authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { COMMON_CHAIN_SLUGS } from '@subwallet/chain';
-import { _ChainAsset, _ChainInfo } from '@subwallet/chain/types';
+import { COMMON_CHAIN_SLUGS } from '@subwallet/chain-list';
+import { _ChainAsset, _ChainInfo } from '@subwallet/chain-list/types';
 import { _SubstrateApi } from '@subwallet/extension-base/services/chain-service/types';
 import { _getChainNativeTokenInfo, _getXcmAssetId, _getXcmAssetType } from '@subwallet/extension-base/services/chain-service/utils';
 import { FOUR_INSTRUCTIONS_WEIGHT, getMultiLocationFromParachain, POLKADOT_UNLIMITED_WEIGHT } from '@subwallet/extension-koni-base/api/xcm/utils';

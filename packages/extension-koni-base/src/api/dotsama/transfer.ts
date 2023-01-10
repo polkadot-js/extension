@@ -1,7 +1,7 @@
 // Copyright 2019-2022 @subwallet/extension-koni-base authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { _ChainAsset, _ChainInfo } from '@subwallet/chain/types';
+import { _ChainAsset, _ChainInfo } from '@subwallet/chain-list/types';
 import { BasicTxResponse, ExternalRequestPromise, ExternalRequestPromiseStatus, SupportTransferResponse, TransferErrorCode } from '@subwallet/extension-base/background/KoniTypes';
 import { _BALANCE_TOKEN_GROUP, _TRANSFER_CHAIN_GROUP, _TRANSFER_NOT_SUPPORTED_CHAINS } from '@subwallet/extension-base/services/chain-service/constants';
 import { _SubstrateApi } from '@subwallet/extension-base/services/chain-service/types';

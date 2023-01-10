@@ -1,7 +1,7 @@
 // Copyright 2019-2022 @subwallet/extension-koni authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { _AssetType, _ChainAsset } from '@subwallet/chain/types';
+import { _AssetType, _ChainAsset } from '@subwallet/chain-list/types';
 import { AddTokenRequestExternal, ConfirmationsQueueItem } from '@subwallet/extension-base/background/KoniTypes';
 import { _ValidateCustomTokenResponse } from '@subwallet/extension-base/services/chain-service/types';
 import { isValidSubstrateAddress } from '@subwallet/extension-koni-base/utils';

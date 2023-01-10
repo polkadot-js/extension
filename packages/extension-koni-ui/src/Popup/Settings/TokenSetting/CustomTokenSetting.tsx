@@ -1,7 +1,7 @@
 // Copyright 2019-2022 @polkadot/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { _ChainAsset } from '@subwallet/chain/types';
+import { _ChainAsset } from '@subwallet/chain-list/types';
 import { Button, ButtonArea, InputFilter } from '@subwallet/extension-koni-ui/components';
 import Modal from '@subwallet/extension-koni-ui/components/Modal';
 import useFetchCustomToken from '@subwallet/extension-koni-ui/hooks/screen/common/useFetchCustomToken';

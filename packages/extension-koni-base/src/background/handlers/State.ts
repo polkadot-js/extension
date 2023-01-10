@@ -2,8 +2,8 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import Common from '@ethereumjs/common';
-import { ChainInfoMap } from '@subwallet/chain';
-import { _AssetType, _ChainAsset, _ChainInfo } from '@subwallet/chain/types';
+import { ChainInfoMap } from '@subwallet/chain-list';
+import { _AssetType, _ChainAsset, _ChainInfo } from '@subwallet/chain-list/types';
 import { withErrorLog } from '@subwallet/extension-base/background/handlers/helpers';
 import State, { AuthUrls, Resolver } from '@subwallet/extension-base/background/handlers/State';
 import { isSubscriptionRunning, unsubscribe } from '@subwallet/extension-base/background/handlers/subscriptions';

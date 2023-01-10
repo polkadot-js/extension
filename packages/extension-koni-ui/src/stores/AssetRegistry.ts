@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
-import { _ChainAsset } from '@subwallet/chain/types';
+import { _ChainAsset } from '@subwallet/chain-list/types';
 
 const initialState: Record<string, _ChainAsset> = {};
 

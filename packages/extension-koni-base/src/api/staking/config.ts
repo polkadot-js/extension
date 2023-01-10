@@ -1,7 +1,7 @@
 // Copyright 2019-2022 @subwallet/extension-koni authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { COMMON_CHAIN_SLUGS } from '@subwallet/chain';
+import { COMMON_CHAIN_SLUGS } from '@subwallet/chain-list';
 
 export const SUBSQUID_ENDPOINTS: Record<string, string> = {
   [COMMON_CHAIN_SLUGS.KUSAMA]: 'https://squid.subsquid.io/kusama-explorer/graphql',

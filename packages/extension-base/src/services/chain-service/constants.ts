@@ -1,7 +1,7 @@
 // Copyright 2019-2022 @subwallet/extension-koni-base authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { _SubstrateChainType } from '@subwallet/chain/types';
+import { _SubstrateChainType } from '@subwallet/chain-list/types';
 import { SingleModeJson } from '@subwallet/extension-base/background/KoniTypes';
 
 export const API_AUTO_CONNECT_MS = 3000;

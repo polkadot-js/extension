@@ -3,8 +3,8 @@
 
 import { faTrashAlt } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { _DEFAULT_CHAINS } from '@subwallet/chain';
-import { _ChainInfo } from '@subwallet/chain/types';
+import { _DEFAULT_CHAINS } from '@subwallet/chain-list';
+import { _ChainInfo } from '@subwallet/chain-list/types';
 import { _ChainState } from '@subwallet/extension-base/services/chain-service/types';
 import { _isCustomNetwork } from '@subwallet/extension-base/services/chain-service/utils';
 import { AccountContext, ActionContext, Button, ButtonArea, HorizontalLabelToggle } from '@subwallet/extension-koni-ui/components';

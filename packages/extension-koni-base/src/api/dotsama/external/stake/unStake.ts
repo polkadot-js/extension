@@ -15,24 +15,24 @@ interface UnStakeExternalProps extends ExternalProps {
 
 export const createUnStakeExternal = async ({ address,
   amount,
-  apiProps,
   callback,
+  chainInfo,
   id,
-  network,
   setState,
   signerType,
+  substrateApi,
   unstakeAll,
   updateState,
   validatorAddress }: UnStakeExternalProps): Promise<void> => {
   const txState: BasicTxResponse = {};
-  const extrinsic = await getUnbondingExtrinsic(address, amount, network.key, network, apiProps, validatorAddress, unstakeAll);
+  const extrinsic = await getUnbondingExtrinsic(address, amount, chainInfo.slug, chainInfo, substrateApi, validatorAddress, unstakeAll);
 
   await signAndSendExtrinsic({
     type: signerType,
     callback: callback,
     id: id,
     setState: setState,
-    apiProps: apiProps,
+    substrateApi: substrateApi,
     address: address,
     txState: txState,
     updateState: updateState,

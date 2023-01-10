@@ -1,7 +1,8 @@
 // Copyright 2019-2022 @subwallet/extension-koni-base authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { ApiProps, BasicTxErrorCode, BasicTxResponse, ExternalRequestPromise, ExternalRequestPromiseStatus, HandleBasicTx } from '@subwallet/extension-base/background/KoniTypes';
+import { BasicTxErrorCode, BasicTxResponse, ExternalRequestPromise, ExternalRequestPromiseStatus, HandleBasicTx } from '@subwallet/extension-base/background/KoniTypes';
+import { _SubstrateApi } from '@subwallet/extension-base/services/chain-service/types';
 
 import { SubmittableExtrinsic } from '@polkadot/api/types';
 import { EventRecord } from '@polkadot/types/interfaces';
@@ -12,10 +13,10 @@ interface SendExtrinsicProps {
   txState: BasicTxResponse;
   updateState?: (promise: Partial<ExternalRequestPromise>) => void;
   updateResponseTxResult?: (response: BasicTxResponse, records: EventRecord[]) => void;
-  apiProps: ApiProps;
+  substrateApi: _SubstrateApi;
 }
 
-export const sendExtrinsic = async ({ apiProps, callback, extrinsic, txState, updateResponseTxResult, updateState }: SendExtrinsicProps) => {
+export const sendExtrinsic = async ({ callback, extrinsic, substrateApi, txState, updateResponseTxResult, updateState }: SendExtrinsicProps) => {
   const unsubscribe = await extrinsic.send((result) => {
     if (!result || !result.status) {
       return;
@@ -41,7 +42,7 @@ export const sendExtrinsic = async ({ apiProps, callback, extrinsic, txState, up
 
             // @ts-ignore
             if (error.isModule) {
-              const api = apiProps.api;
+              const api = substrateApi.api;
 
               try {
                 // @ts-ignore

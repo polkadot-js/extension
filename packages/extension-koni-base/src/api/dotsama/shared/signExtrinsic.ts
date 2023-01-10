@@ -1,7 +1,8 @@
 // Copyright 2019-2022 @subwallet/extension-koni-base authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { ApiProps, ExternalRequestPromise, HandleBasicTx } from '@subwallet/extension-base/background/KoniTypes';
+import { ExternalRequestPromise, HandleBasicTx } from '@subwallet/extension-base/background/KoniTypes';
+import { _SubstrateApi } from '@subwallet/extension-base/services/chain-service/types';
 import KeyringSigner from '@subwallet/extension-base/signers/substrates/KeyringSigner';
 import LedgerSigner from '@subwallet/extension-base/signers/substrates/LedgerSigner';
 import QrSigner from '@subwallet/extension-base/signers/substrates/QrSigner';
@@ -14,7 +15,7 @@ import { assert } from '@polkadot/util';
 
 interface AbstractSignExtrinsicProps {
   address: string;
-  apiProps: ApiProps;
+  substrateApi: _SubstrateApi;
   callback: HandleBasicTx;
   extrinsic: SubmittableExtrinsic<'promise'>;
   id?: string;
@@ -35,7 +36,7 @@ interface ExternalSignExtrinsicProps extends AbstractSignExtrinsicProps {
 
 type SignExtrinsicProps = PasswordSignExtrinsicProps | ExternalSignExtrinsicProps;
 
-export const signExtrinsic = async ({ address, apiProps, callback, extrinsic, id, setState, type }: SignExtrinsicProps): Promise<string | null> => {
+export const signExtrinsic = async ({ address, callback, extrinsic, id, setState, substrateApi, type }: SignExtrinsicProps): Promise<string | null> => {
   if (type === SignerType.PASSWORD) {
     const passwordError: string | null = unlockAccount(address);
 
@@ -46,7 +47,7 @@ export const signExtrinsic = async ({ address, apiProps, callback, extrinsic, id
 
   let signer: Signer | undefined;
 
-  const registry = apiProps.api.registry;
+  const registry = substrateApi.api.registry;
 
   if (type === SignerType.QR) {
     const qrCallBack = ({ qrState }: {qrState: QrState}) => {

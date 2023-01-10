@@ -14,23 +14,23 @@ interface WithdrawStakeExternalProps extends ExternalProps {
 
 export const createWithdrawStakeExternal = async ({ action,
   address,
-  apiProps,
   callback,
+  chainInfo,
   id,
-  network,
   setState,
   signerType,
+  substrateApi,
   updateState,
   validatorAddress }: WithdrawStakeExternalProps) => {
   const txState: BasicTxResponse = {};
-  const extrinsic = await getWithdrawalExtrinsic(apiProps, network.key, address, validatorAddress, action);
+  const extrinsic = await getWithdrawalExtrinsic(substrateApi, chainInfo.slug, address, validatorAddress, action);
 
   await signAndSendExtrinsic({
     type: signerType,
     callback: callback,
     id: id,
     setState: setState,
-    apiProps: apiProps,
+    substrateApi: substrateApi,
     address: address,
     txState: txState,
     updateState: updateState,

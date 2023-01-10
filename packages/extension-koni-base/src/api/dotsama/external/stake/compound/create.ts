@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { BasicTxResponse } from '@subwallet/extension-base/background/KoniTypes';
+import { _getChainNativeTokenInfo } from '@subwallet/extension-base/services/chain-service/utils';
 import { getTuringCompoundExtrinsic } from '@subwallet/extension-koni-base/api/bonding/paraChain';
 import { ExternalProps } from '@subwallet/extension-koni-base/api/dotsama/external/shared';
 import { signAndSendExtrinsic } from '@subwallet/extension-koni-base/api/dotsama/shared/signAndSendExtrinsic';
@@ -15,26 +16,27 @@ interface CreateCompoundExternalProps extends ExternalProps {
 
 export const createCreateCompoundExternal = async ({ accountMinimum,
   address,
-  apiProps,
   bondedAmount,
   callback,
+  chainInfo,
   collatorAddress,
   id,
-  network,
   setState,
   signerType,
+  substrateApi,
   updateState }: CreateCompoundExternalProps): Promise<void> => {
   const txState: BasicTxResponse = {};
-  const parsedAccountMinimum = parseFloat(accountMinimum) * 10 ** (network.decimals as number);
+  const { decimals } = _getChainNativeTokenInfo(chainInfo);
+  const parsedAccountMinimum = parseFloat(accountMinimum) * 10 ** decimals;
 
-  const extrinsic = await getTuringCompoundExtrinsic(apiProps, address, collatorAddress, parsedAccountMinimum.toString(), bondedAmount);
+  const extrinsic = await getTuringCompoundExtrinsic(substrateApi, address, collatorAddress, parsedAccountMinimum.toString(), bondedAmount);
 
   await signAndSendExtrinsic({
     type: signerType,
     callback: callback,
     id: id,
     setState: setState,
-    apiProps: apiProps,
+    substrateApi: substrateApi,
     address: address,
     txState: txState,
     updateState: updateState,

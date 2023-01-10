@@ -13,25 +13,25 @@ interface ClaimRewardExternalProps extends ExternalProps {
 }
 
 export const createClaimRewardExternal = async ({ address,
-  apiProps,
   callback,
+  chainInfo,
   id,
-  network,
   setState,
   signerType,
   stakingType,
+  substrateApi,
   updateState,
   validatorAddress }: ClaimRewardExternalProps): Promise<void> => {
   const txState: BasicTxResponse = {};
 
-  const extrinsic = await getClaimRewardExtrinsic(apiProps, network.key, address, stakingType, validatorAddress);
+  const extrinsic = await getClaimRewardExtrinsic(substrateApi, chainInfo.slug, address, stakingType, validatorAddress);
 
   await signAndSendExtrinsic({
     type: signerType,
     callback: callback,
     id: id,
     setState: setState,
-    apiProps: apiProps,
+    substrateApi: substrateApi,
     address: address,
     txState: txState,
     updateState: updateState,

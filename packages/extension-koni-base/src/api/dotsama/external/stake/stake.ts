@@ -16,28 +16,28 @@ interface StakeExternalProps extends ExternalProps {
 }
 
 export const createStakeExternal = async ({ amount,
-  apiProps,
   bondedValidators,
   callback,
+  chainInfo,
   id,
   isBondedBefore,
   lockPeriod,
-  network,
   nominatorAddress,
   setState,
   signerType,
+  substrateApi,
   updateState,
   validatorInfo }: StakeExternalProps): Promise<void> => {
   const txState: BasicTxResponse = {};
 
-  const extrinsic = await getBondingExtrinsic(network, network.key, amount, bondedValidators, validatorInfo, isBondedBefore, nominatorAddress, apiProps);
+  const extrinsic = await getBondingExtrinsic(chainInfo, chainInfo.slug, amount, bondedValidators, validatorInfo, isBondedBefore, nominatorAddress, substrateApi);
 
   await signAndSendExtrinsic({
     type: signerType,
     callback: callback,
     id: id,
     setState: setState,
-    apiProps: apiProps,
+    substrateApi: substrateApi,
     address: nominatorAddress,
     txState: txState,
     updateState: updateState,

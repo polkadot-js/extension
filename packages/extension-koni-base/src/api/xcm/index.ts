@@ -139,7 +139,7 @@ export async function makeCrossChainTransfer ({ callback,
 
   await signAndSendExtrinsic({
     type: SignerType.PASSWORD,
-    apiProps: apiProps,
+    substrateApi: apiProps,
     callback: callback,
     extrinsic: extrinsic,
     txState: txState,

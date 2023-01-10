@@ -1921,7 +1921,7 @@ export default class KoniExtension extends Extension {
     await signAndSendExtrinsic({
       type: SignerType.PASSWORD,
       callback: callback,
-      apiProps: apiProps,
+      substrateApi: apiProps,
       address: senderAddress,
       txState: txState,
       extrinsic: extrinsic,
@@ -2203,7 +2203,7 @@ export default class KoniExtension extends Extension {
       const apiProps = state.getDotSamaApi(originNetworkKey);
 
       const transferProm = makeCrossChainTransferExternal({
-        network: network,
+        chainInfo: network,
         destinationNetworkKey: destinationNetworkKey,
         recipientAddress: to,
         senderAddress: fromKeyPair.address,
@@ -2216,7 +2216,7 @@ export default class KoniExtension extends Extension {
         updateState: updateState,
         callback: callback,
         signerType: signerType,
-        apiProps: apiProps
+        substrateApi: apiProps
       });
 
       transferProm.then(() => {
@@ -2273,10 +2273,10 @@ export default class KoniExtension extends Extension {
       id: requestId,
       setState: setState,
       updateState: updateState,
-      apiProps: apiProps,
+      substrateApi: apiProps,
       recipientAddress: recipientAddress,
       params: params,
-      network: network,
+      chainInfo: network,
       signerType: signerType
     });
 
@@ -2331,10 +2331,10 @@ export default class KoniExtension extends Extension {
     const { id: requestId, setState, updateState } = this.prepareExternalRequest();
 
     const prom = createStakeExternal({
-      apiProps: apiProp,
+      substrateApi: apiProp,
       id: requestId,
       bondedValidators: bondedValidators,
-      network: network,
+      chainInfo: network,
       amount: amount,
       isBondedBefore: isBondedBefore,
       validatorInfo: validatorInfo,
@@ -2393,10 +2393,10 @@ export default class KoniExtension extends Extension {
     const { id: requestId, setState, updateState } = this.prepareExternalRequest();
 
     const prom = createUnStakeExternal({
-      apiProps: apiProp,
+      substrateApi: apiProp,
       id: requestId,
       address: address,
-      network: network,
+      chainInfo: network,
       amount: amount,
       updateState: updateState,
       setState: setState,
@@ -2454,10 +2454,10 @@ export default class KoniExtension extends Extension {
     const prom = createWithdrawStakeExternal({
       action: action,
       address: address,
-      apiProps: apiProp,
+      substrateApi: apiProp,
       callback: callback,
       id: requestId,
-      network: network,
+      chainInfo: network,
       setState: setState,
       updateState: updateState,
       validatorAddress: validatorAddress,
@@ -2510,9 +2510,9 @@ export default class KoniExtension extends Extension {
     const { id: requestId, setState, updateState } = this.prepareExternalRequest();
 
     const prom = createClaimRewardExternal({
-      apiProps: apiProp,
+      substrateApi: apiProp,
       id: requestId,
-      network: network,
+      chainInfo: network,
       updateState: updateState,
       setState: setState,
       callback: callback,
@@ -2569,9 +2569,9 @@ export default class KoniExtension extends Extension {
     const { id: requestId, setState, updateState } = this.prepareExternalRequest();
 
     const prom = createCreateCompoundExternal({
-      apiProps: apiProp,
+      substrateApi: apiProp,
       id: requestId,
-      network: network,
+      chainInfo: network,
       updateState: updateState,
       setState: setState,
       callback: callback,
@@ -2628,9 +2628,9 @@ export default class KoniExtension extends Extension {
     const { id: requestId, setState, updateState } = this.prepareExternalRequest();
 
     const prom = createCancelCompoundExternal({
-      apiProps: apiProp,
+      substrateApi: apiProp,
       id: requestId,
-      network: network,
+      chainInfo: network,
       updateState: updateState,
       setState: setState,
       callback: callback,
@@ -2732,7 +2732,7 @@ export default class KoniExtension extends Extension {
         const apiProps = await state.getSubstrateApiMap()[networkKey].isReady;
 
         transferProm = makeTransferExternal({
-          network: network,
+          chainInfo: network,
           recipientAddress: to,
           senderAddress: fromKeyPair.address,
           value: value || '0',
@@ -2742,7 +2742,7 @@ export default class KoniExtension extends Extension {
           setState: setState,
           updateState: updateState,
           callback: callback,
-          apiProps: apiProps,
+          substrateApi: apiProps,
           signerType: SignerType.QR
         });
       }
@@ -2953,7 +2953,7 @@ export default class KoniExtension extends Extension {
       const apiProps = await state.getSubstrateApiMap()[networkKey].isReady;
 
       const transferProm = makeTransferExternal({
-        network: network,
+        chainInfo: network,
         recipientAddress: to,
         senderAddress: fromKeyPair.address,
         value: value || '0',
@@ -2963,7 +2963,7 @@ export default class KoniExtension extends Extension {
         setState: setState,
         updateState: updateState,
         callback: callback,
-        apiProps: apiProps,
+        substrateApi: apiProps,
         signerType: SignerType.LEDGER
       });
 
@@ -3383,7 +3383,7 @@ export default class KoniExtension extends Extension {
     await signAndSendExtrinsic({
       type: SignerType.PASSWORD,
       callback: callback,
-      apiProps: dotSamaApi,
+      substrateApi: dotSamaApi,
       address: nominatorAddress,
       txState: txState,
       extrinsic: extrinsic,
@@ -3428,7 +3428,7 @@ export default class KoniExtension extends Extension {
     await signAndSendExtrinsic({
       type: SignerType.PASSWORD,
       callback: callback,
-      apiProps: dotSamaApi,
+      substrateApi: dotSamaApi,
       address: address,
       txState: txState,
       extrinsic: extrinsic,
@@ -3464,7 +3464,7 @@ export default class KoniExtension extends Extension {
     await signAndSendExtrinsic({
       type: SignerType.PASSWORD,
       callback: callback,
-      apiProps: dotSamaApi,
+      substrateApi: dotSamaApi,
       address: address,
       txState: txState,
       extrinsic: extrinsic,
@@ -3497,7 +3497,7 @@ export default class KoniExtension extends Extension {
     await signAndSendExtrinsic({
       type: SignerType.PASSWORD,
       callback: callback,
-      apiProps: dotSamaApi,
+      substrateApi: dotSamaApi,
       address: address,
       txState: txState,
       extrinsic: extrinsic,
@@ -3564,7 +3564,7 @@ export default class KoniExtension extends Extension {
     await signAndSendExtrinsic({
       type: SignerType.PASSWORD,
       callback: callback,
-      apiProps: dotSamaApi,
+      substrateApi: dotSamaApi,
       address: address,
       txState: txState,
       extrinsic: extrinsic,
@@ -3612,7 +3612,7 @@ export default class KoniExtension extends Extension {
     await signAndSendExtrinsic({
       type: SignerType.PASSWORD,
       callback: callback,
-      apiProps: dotSamaApi,
+      substrateApi: dotSamaApi,
       address: address,
       txState: txState,
       extrinsic: extrinsic,

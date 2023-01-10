@@ -12,23 +12,23 @@ interface CancelCompoundExternalProps extends ExternalProps {
 }
 
 export const createCancelCompoundExternal = async ({ address,
-  apiProps,
   callback,
   id,
   setState,
   signerType,
+  substrateApi,
   taskId,
   updateState }: CancelCompoundExternalProps): Promise<void> => {
   const txState: BasicTxResponse = {};
 
-  const extrinsic = await getTuringCancelCompoundingExtrinsic(apiProps, taskId);
+  const extrinsic = await getTuringCancelCompoundingExtrinsic(substrateApi, taskId);
 
   await signAndSendExtrinsic({
     type: signerType,
     callback: callback,
     id: id,
     setState: setState,
-    apiProps: apiProps,
+    substrateApi: substrateApi,
     address: address,
     txState: txState,
     updateState: updateState,

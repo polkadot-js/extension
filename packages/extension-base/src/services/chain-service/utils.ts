@@ -169,5 +169,3 @@ export function _isTokenWasmSmartContract (tokenInfo: _ChainAsset) {
 
   return false;
 }
-
-

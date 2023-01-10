@@ -1,11 +1,13 @@
 // Copyright 2019-2022 @subwallet/extension-koni-base authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { ApiProps, NetworkJson, SubstrateNftTransaction } from '@subwallet/extension-base/background/KoniTypes';
+import { _ChainInfo } from '@subwallet/chain/types';
+import { SubstrateNftTransaction } from '@subwallet/extension-base/background/KoniTypes';
+import { _EvmApi, _SubstrateApi } from '@subwallet/extension-base/services/chain-service/types';
+import { _getChainNativeTokenInfo } from '@subwallet/extension-base/services/chain-service/utils';
 import { getFreeBalance } from '@subwallet/extension-koni-base/api/dotsama/balance';
 import { PSP22Contract, PSP34Contract } from '@subwallet/extension-koni-base/api/tokens/wasm/helper';
 import { parseNumberToDisplay } from '@subwallet/extension-koni-base/utils';
-import Web3 from 'web3';
 
 import { ApiPromise } from '@polkadot/api';
 import { ContractPromise } from '@polkadot/api-contract';
@@ -20,28 +22,29 @@ export function getPSP34ContractPromise (apiPromise: ApiPromise, contractAddress
 }
 
 export async function getPSP34Transaction (
-  web3ApiMap: Record<string, Web3>,
-  dotSamaApiMap: Record<string, ApiProps>,
-  networkJson: NetworkJson,
+  evmApiMap: Record<string, _EvmApi>,
+  substrateApiMap: Record<string, _SubstrateApi>,
+  chainInfo: _ChainInfo,
   networkKey: string,
   contractAddress: string,
   senderAddress: string,
   recipientAddress: string,
   onChainOption: Record<string, string>
 ) {
-  const apiPromise = dotSamaApiMap[networkKey].api;
+  const apiPromise = substrateApiMap[networkKey].api;
   const contractPromise = getPSP34ContractPromise(apiPromise, contractAddress);
+  const { decimals, symbol } = _getChainNativeTokenInfo(chainInfo);
 
   try {
     const [info, balance] = await Promise.all([
       contractPromise.tx['psp34::transfer']({ gasLimit: '10000' }, recipientAddress, onChainOption, {}).paymentInfo(senderAddress),
-      getFreeBalance(networkKey, senderAddress, dotSamaApiMap, web3ApiMap)
+      getFreeBalance(networkKey, senderAddress, substrateApiMap, evmApiMap)
     ]);
 
     const binaryBalance = new BN(balance);
     const balanceError = info.partialFee.gt(binaryBalance);
 
-    const feeString = parseNumberToDisplay(info.partialFee, networkJson.decimals) + ` ${networkJson.nativeToken ? networkJson.nativeToken : ''}`;
+    const feeString = parseNumberToDisplay(info.partialFee, decimals) + ` ${symbol}`;
 
     return {
       error: false,
@@ -54,7 +57,7 @@ export async function getPSP34Transaction (
     if (e.toString().includes('Error: createType(RuntimeDispatchInfo):: Struct: failed on weight: u64:: Assertion failed')) {
       return {
         error: false,
-        estimatedFee: `0.0000 ${networkJson.nativeToken as string}`,
+        estimatedFee: `0.0000 ${symbol}`,
         balanceError: false
       } as SubstrateNftTransaction;
     }
@@ -68,12 +71,12 @@ export async function getPSP34Transaction (
   }
 }
 
-export async function getPSP34TransferExtrinsic (networkKey: string, apiProp: ApiProps, senderAddress: string, recipientAddress: string, params: Record<string, any>) {
+export async function getPSP34TransferExtrinsic (networkKey: string, substrateApi: _SubstrateApi, senderAddress: string, recipientAddress: string, params: Record<string, any>) {
   const contractAddress = params.contractAddress as string;
   const onChainOption = params.onChainOption as Record<string, string>;
 
   try {
-    const contractPromise = getPSP34ContractPromise(apiProp.api, contractAddress);
+    const contractPromise = getPSP34ContractPromise(substrateApi.api, contractAddress);
     const transferQuery = await contractPromise.query['psp34::transfer'](senderAddress, { gasLimit: -1 }, recipientAddress, onChainOption, {});
 
     const gasLimit = transferQuery.gasRequired.toString();

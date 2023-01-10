@@ -13,26 +13,26 @@ interface TransferNFTExternalProps extends ExternalProps {
   senderAddress: string;
 }
 
-export async function makeNftTransferExternal ({ apiProps,
-  callback,
+export async function makeNftTransferExternal ({ callback,
+  chainInfo,
   id,
-  network,
   params,
   recipientAddress,
   senderAddress,
   setState,
   signerType,
+  substrateApi,
   updateState }: TransferNFTExternalProps): Promise<void> {
   const txState: BasicTxResponse = {};
-  const networkKey = network.key;
+  const networkKey = chainInfo.key;
   const isPSP34 = params.isPsp34 as boolean | undefined;
   const extrinsic = !isPSP34
-    ? getNftTransferExtrinsic(networkKey, apiProps, senderAddress, recipientAddress, params)
-    : await getPSP34TransferExtrinsic(networkKey, apiProps, senderAddress, recipientAddress, params);
+    ? getNftTransferExtrinsic(networkKey, substrateApi, senderAddress, recipientAddress, params)
+    : await getPSP34TransferExtrinsic(networkKey, substrateApi, senderAddress, recipientAddress, params);
 
   await signAndSendExtrinsic({
     address: senderAddress,
-    apiProps: apiProps,
+    substrateApi: substrateApi,
     callback: callback,
     errorMessage: 'error transferring nft',
     extrinsic: extrinsic,

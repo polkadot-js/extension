@@ -1,7 +1,8 @@
 // Copyright 2019-2022 @subwallet/extension-koni-base authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { ApiProps, BasicTxErrorCode, BasicTxResponse, ExternalRequestPromise, HandleBasicTx, PrepareExternalRequest } from '@subwallet/extension-base/background/KoniTypes';
+import { BasicTxErrorCode, BasicTxResponse, ExternalRequestPromise, HandleBasicTx, PrepareExternalRequest } from '@subwallet/extension-base/background/KoniTypes';
+import { _SubstrateApi } from '@subwallet/extension-base/services/chain-service/types';
 import { SignerExternal, SignerType } from '@subwallet/extension-base/signers/types';
 import { sendExtrinsic } from '@subwallet/extension-koni-base/api/dotsama/shared/sendExtrinsic';
 import { signExtrinsic } from '@subwallet/extension-koni-base/api/dotsama/shared/signExtrinsic';
@@ -16,7 +17,7 @@ interface AbstractSignAndSendExtrinsicProps extends Partial<PrepareExternalReque
   address: string;
   type: SignerType;
   errorMessage: string;
-  apiProps: ApiProps;
+  substrateApi: _SubstrateApi;
   updateResponseTxResult?: (response: BasicTxResponse, records: EventRecord[]) => void;
 }
 
@@ -34,12 +35,12 @@ interface ExternalSignAndSendExtrinsicProps extends AbstractSignAndSendExtrinsic
 type SignAndSendExtrinsicProps = ExternalSignAndSendExtrinsicProps | PasswordSignAndSendExtrinsicProps;
 
 export const signAndSendExtrinsic = async ({ address,
-  apiProps,
   callback,
   errorMessage,
   extrinsic,
   id,
   setState,
+  substrateApi,
   txState,
   type,
   updateResponseTxResult,
@@ -49,14 +50,14 @@ export const signAndSendExtrinsic = async ({ address,
       const passwordError = await signExtrinsic(type === SignerType.PASSWORD
         ? {
           address: address,
-          apiProps: apiProps,
+          substrateApi: substrateApi,
           callback: callback,
           extrinsic: extrinsic,
           type: type
         }
         : {
           address: address,
-          apiProps: apiProps,
+          substrateApi: substrateApi,
           callback: callback,
           extrinsic: extrinsic,
           id: id,
@@ -84,7 +85,7 @@ export const signAndSendExtrinsic = async ({ address,
 
     try {
       await sendExtrinsic({
-        apiProps: apiProps,
+        substrateApi: substrateApi,
         callback: callback,
         extrinsic: extrinsic,
         txState: txState,

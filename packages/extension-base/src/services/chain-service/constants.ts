@@ -34,7 +34,8 @@ export const _BALANCE_CHAIN_GROUP = {
 };
 
 export const _BALANCE_TOKEN_GROUP = {
-  crab: ['CKTON', 'PKTON']
+  crab: ['CKTON', 'PKTON'],
+  bitcountry: ['BIT']
 };
 
 export const _NFT_CHAIN_GROUP = {
@@ -178,5 +179,4 @@ export const _TRANSFER_CHAIN_GROUP = {
   crab: ['crab', 'pangolin'],
   bitcountry: ['pioneer', 'bitcountry'],
   statemine: ['statemint', 'statemine']
-}
-
+};

@@ -1,71 +1,67 @@
 // Copyright 2019-2022 @subwallet/extension-koni-base authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { ApiProps, NetworkJson, TokenInfo } from '@subwallet/extension-base/background/KoniTypes';
-import { SupportedCrossChainsMap } from '@subwallet/extension-koni-base/api/xcm/utils';
+import { _ChainAsset, _ChainInfo } from '@subwallet/chain/types';
+import { _SubstrateApi } from '@subwallet/extension-base/services/chain-service/types';
+import { _getChainNativeTokenInfo, _getSubstrateParaId, _getXcmAssetMultilocation, _isChainEvmCompatible, _isSubstrateRelayChain } from '@subwallet/extension-base/services/chain-service/utils';
 import { parseNumberToDisplay } from '@subwallet/extension-koni-base/utils';
 import { KeyringPair } from '@subwallet/keyring/types';
 
 import { ApiPromise } from '@polkadot/api';
 import { decodeAddress } from '@polkadot/util-crypto';
 
-const ASSET_TO_LOCATION_MAP: Record<string, Record<string, Record<string, any>>> = {
-  astar: {
-    '18446744073709551617': { // aUSD
-      parents: 1, interior: { X2: [{ Parachain: 2000 }, { GeneralKey: '0x0001' }] }
-    },
-    '340282366920938463463374607431768211455': { // DOT
-      parents: 1, interior: 'Here'
-    }
-  },
-  shiden: {
-    '18446744073709551616': { // aUSD
-      parents: 1, interior: { X2: [{ Parachain: 2000 }, { GeneralKey: '0x0081' }] }
-    },
-    '340282366920938463463374607431768211455': {
-      parents: 1, interior: 'Here'
-    }
-  }
-};
+// const ASSET_TO_LOCATION_MAP: Record<string, Record<string, Record<string, any>>> = {
+//   astar: {
+//     '18446744073709551617': { // aUSD
+//       parents: 1, interior: { X2: [{ Parachain: 2000 }, { GeneralKey: '0x0001' }] }
+//     },
+//     '340282366920938463463374607431768211455': { // DOT
+//       parents: 1, interior: 'Here'
+//     }
+//   },
+//   shiden: {
+//     '18446744073709551616': { // aUSD
+//       parents: 1, interior: { X2: [{ Parachain: 2000 }, { GeneralKey: '0x0081' }] }
+//     },
+//     '340282366920938463463374607431768211455': {
+//       parents: 1, interior: 'Here'
+//     }
+//   }
+// };
 
 export async function astarEstimateCrossChainFee (
   originNetworkKey: string,
   destinationNetworkKey: string,
-  to: string,
-  fromKeypair: KeyringPair,
-  value: string,
-  dotSamaApiMap: Record<string, ApiProps>,
-  tokenInfo: TokenInfo,
-  networkMap: Record<string, NetworkJson>
+  recipient: string,
+  sender: KeyringPair,
+  sendingValue: string,
+  substrateApiMap: Record<string, _SubstrateApi>,
+  originTokenInfo: _ChainAsset,
+  chainInfoMap: Record<string, _ChainInfo>
 ): Promise<[string, string | undefined]> {
-  const apiProps = await dotSamaApiMap[originNetworkKey].isReady;
+  const substrateApi = await substrateApiMap[originNetworkKey].isReady;
 
-  const originNetworkJson = networkMap[originNetworkKey];
-  const destinationNetworkJson = networkMap[destinationNetworkKey];
+  const originChainInfo = chainInfoMap[originNetworkKey];
+  const destinationChainInfo = chainInfoMap[destinationNetworkKey];
 
-  if (!tokenInfo.assetIndex) {
-    console.log('No assetId found for Astar token');
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+  const assetLocation = _getXcmAssetMultilocation(originTokenInfo);
 
-    return ['0', ''];
-  }
-
-  const assetLocation = ASSET_TO_LOCATION_MAP[originNetworkKey][tokenInfo.assetIndex];
-
-  let receiverLocation: Record<string, any> = { AccountId32: { network: 'Any', id: decodeAddress(to) } };
+  let receiverLocation: Record<string, any> = { AccountId32: { network: 'Any', id: decodeAddress(recipient) } };
   let destinationChainLocation: Record<string, any> = {
     V1: { // find the destination chain
       parents: 1,
       interior: {
-        X1: { Parachain: destinationNetworkJson.paraId }
+        X1: { Parachain: _getSubstrateParaId(destinationChainInfo) }
       }
     }
   };
 
-  if (networkMap[destinationNetworkKey].isEthereum) {
-    receiverLocation = { AccountKey20: { network: 'Any', id: to } };
+  if (_isChainEvmCompatible(destinationChainInfo)) {
+    receiverLocation = { AccountKey20: { network: 'Any', id: recipient } };
   }
 
-  if (SupportedCrossChainsMap[originNetworkKey].relationMap[destinationNetworkKey].type === 'r') {
+  if (_isSubstrateRelayChain(destinationChainInfo)) { // check if sending to relaychain
     destinationChainLocation = {
       V1: { // find the destination chain
         parents: 1,
@@ -74,7 +70,7 @@ export async function astarEstimateCrossChainFee (
     };
   }
 
-  const extrinsic = apiProps.api.tx.polkadotXcm.reserveWithdrawAssets(
+  const extrinsic = substrateApi.api.tx.polkadotXcm.reserveWithdrawAssets(
     destinationChainLocation,
     {
       V1: { // find the receiver
@@ -88,9 +84,10 @@ export async function astarEstimateCrossChainFee (
       V1: [ // find the asset
         {
           id: {
+            // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
             Concrete: assetLocation
           },
-          fun: { Fungible: value }
+          fun: { Fungible: sendingValue }
         }
       ]
     },
@@ -99,10 +96,12 @@ export async function astarEstimateCrossChainFee (
 
   console.log('astar xcm tx here', extrinsic.toHex());
 
-  const paymentInfo = await extrinsic.paymentInfo(fromKeypair);
+  const paymentInfo = await extrinsic.paymentInfo(sender);
+
+  const { decimals, symbol } = _getChainNativeTokenInfo(originChainInfo);
 
   const fee = paymentInfo.partialFee.toString();
-  const feeString = parseNumberToDisplay(paymentInfo.partialFee, originNetworkJson.decimals) + ` ${originNetworkJson.nativeToken ? originNetworkJson.nativeToken : ''}`;
+  const feeString = parseNumberToDisplay(paymentInfo.partialFee, decimals) + ` ${symbol}`;
 
   return [fee, feeString];
 }
@@ -110,31 +109,32 @@ export async function astarEstimateCrossChainFee (
 export function astarGetXcmExtrinsic (
   originNetworkKey: string,
   destinationNetworkKey: string,
-  to: string,
-  value: string,
+  recipient: string,
+  sendingValue: string,
   api: ApiPromise,
-  tokenInfo: TokenInfo,
-  networkMap: Record<string, NetworkJson>
+  originTokenInfo: _ChainAsset,
+  chainInfoMap: Record<string, _ChainInfo>
 ) {
-  const destinationNetworkJson = networkMap[destinationNetworkKey];
+  const destinationChainInfo = chainInfoMap[destinationNetworkKey];
 
-  const assetLocation = ASSET_TO_LOCATION_MAP[originNetworkKey][tokenInfo.assetIndex as string];
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+  const assetLocation = _getXcmAssetMultilocation(originTokenInfo);
 
-  let receiverLocation: Record<string, any> = { AccountId32: { network: 'Any', id: decodeAddress(to) } };
+  let receiverLocation: Record<string, any> = { AccountId32: { network: 'Any', id: decodeAddress(recipient) } };
   let destinationChainLocation: Record<string, any> = {
     V1: { // find the destination chain
       parents: 1,
       interior: {
-        X1: { Parachain: destinationNetworkJson.paraId }
+        X1: { Parachain: _getSubstrateParaId(destinationChainInfo) }
       }
     }
   };
 
-  if (networkMap[destinationNetworkKey].isEthereum) {
-    receiverLocation = { AccountKey20: { network: 'Any', id: to } };
+  if (_isChainEvmCompatible(destinationChainInfo)) {
+    receiverLocation = { AccountKey20: { network: 'Any', id: recipient } };
   }
 
-  if (SupportedCrossChainsMap[originNetworkKey].relationMap[destinationNetworkKey].type === 'r') {
+  if (_isSubstrateRelayChain(destinationChainInfo)) {
     destinationChainLocation = {
       V1: { // find the destination chain
         parents: 1,
@@ -157,9 +157,10 @@ export function astarGetXcmExtrinsic (
       V1: [ // find the asset
         {
           id: {
+            // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
             Concrete: assetLocation
           },
-          fun: { Fungible: value }
+          fun: { Fungible: sendingValue }
         }
       ]
     },

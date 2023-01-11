@@ -1,6 +1,7 @@
 // Copyright 2019-2022 @subwallet/extension-koni-base authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
+import { _SubstrateChainType } from '@subwallet/chain/types';
 import { SingleModeJson } from '@subwallet/extension-base/background/KoniTypes';
 
 export const API_AUTO_CONNECT_MS = 3000;
@@ -188,5 +189,14 @@ export const _XCM_CHAIN_GROUP = {
   bifrost: ['bifrost'],
   genshiro: ['genshiro_testnet', 'genshiro', 'equilibrium_parachain'],
   kintsugi: ['kintsugi', 'kintsugi_test', 'interlay'],
-  acala: ['karura', 'acala', 'acala_testnet']
+  acala: ['karura', 'acala', 'acala_testnet'],
+  astarEvm: ['astarEvm', 'shidenEvm']
+};
+
+export const _XCM_CHAIN_USE_LIMITED_WIGHT = ['acala', 'karura', 'statemint'];
+
+export const _XCM_TYPE = {
+  RP: `${_SubstrateChainType.RELAYCHAIN}-${_SubstrateChainType.PARACHAIN}`,
+  PP: `${_SubstrateChainType.PARACHAIN}-${_SubstrateChainType.PARACHAIN}`,
+  PR: `${_SubstrateChainType.PARACHAIN}-${_SubstrateChainType.RELAYCHAIN}`
 };

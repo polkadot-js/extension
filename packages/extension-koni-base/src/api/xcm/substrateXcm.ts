@@ -1,87 +1,92 @@
 // Copyright 2019-2022 @subwallet/extension-koni-base authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { ApiProps, NetworkJson, TokenInfo } from '@subwallet/extension-base/background/KoniTypes';
-import { FOUR_INSTRUCTIONS_WEIGHT, getMultiLocationFromParachain, getReceiverLocation, POLKADOT_UNLIMITED_WEIGHT, SupportedCrossChainsMap } from '@subwallet/extension-koni-base/api/xcm/utils';
+import { _ChainAsset, _ChainInfo } from '@subwallet/chain/types';
+import { _XCM_CHAIN_GROUP, _XCM_CHAIN_USE_LIMITED_WIGHT } from '@subwallet/extension-base/services/chain-service/constants';
+import { _SubstrateApi } from '@subwallet/extension-base/services/chain-service/types';
+import { _getChainNativeTokenInfo, _getSubstrateParaId, _getXcmAssetMultilocation, _isSubstrateParaChain } from '@subwallet/extension-base/services/chain-service/utils';
+import { FOUR_INSTRUCTIONS_WEIGHT, getMultiLocationFromParachain, getReceiverLocation, POLKADOT_UNLIMITED_WEIGHT } from '@subwallet/extension-koni-base/api/xcm/utils';
 import { parseNumberToDisplay } from '@subwallet/extension-koni-base/utils';
 import { KeyringPair } from '@subwallet/keyring/types';
 
 import { ApiPromise } from '@polkadot/api';
 
-const NETWORK_USE_UNLIMIT_WEIGHT: string[] = ['acala', 'karura', 'statemint'];
+const NETWORK_USE_UNLIMITED_WEIGHT: string[] = ['acala', 'karura', 'statemint'];
 
-function getTokenIdentity (originNetworkKey: string, tokenInfo: TokenInfo) {
-  // TODO: find a better way to handle kUSD on karura
-  const tokenSymbol = tokenInfo.symbol.toUpperCase() === 'AUSD' && originNetworkKey === 'karura' ? 'KUSD' : tokenInfo.symbol.toUpperCase();
-
-  if (originNetworkKey === 'bifrost') {
-    return tokenInfo.specialOption as Record<string, any>;
-  } else if (originNetworkKey === 'pioneer' && tokenSymbol.toUpperCase() === 'NEER') {
-    return {
-      NativeToken: 0
-    };
-  } else if (originNetworkKey === 'karura' && tokenSymbol.toUpperCase() === 'NEER') { // TODO: modify later with different assets on Karura
-    return tokenInfo.specialOption as Record<string, any>;
-  } else if (originNetworkKey === 'acala' && tokenSymbol.toUpperCase() === 'GLMR') { // TODO: modify later with different assets on Acala
-    return tokenInfo.specialOption as Record<string, any>;
-  }
-
-  return {
-    Token: tokenSymbol
-  };
-}
+// function getTokenIdentity (originNetworkKey: string, tokenInfo: TokenInfo) {
+//   // TODO: find a better way to handle kUSD on karura
+//   const tokenSymbol = tokenInfo.symbol.toUpperCase() === 'AUSD' && originNetworkKey === 'karura' ? 'KUSD' : tokenInfo.symbol.toUpperCase();
+//
+//   if (originNetworkKey === 'bifrost') {
+//     return tokenInfo.specialOption as Record<string, any>;
+//   } else if (originNetworkKey === 'pioneer' && tokenSymbol.toUpperCase() === 'NEER') {
+//     return {
+//       NativeToken: 0
+//     };
+//   } else if (originNetworkKey === 'karura' && tokenSymbol.toUpperCase() === 'NEER') { // TODO: modify later with different assets on Karura
+//     return tokenInfo.specialOption as Record<string, any>;
+//   } else if (originNetworkKey === 'acala' && tokenSymbol.toUpperCase() === 'GLMR') { // TODO: modify later with different assets on Acala
+//     return tokenInfo.specialOption as Record<string, any>;
+//   }
+//
+//   return {
+//     Token: tokenSymbol
+//   };
+// }
 
 export async function substrateEstimateCrossChainFee (
   originNetworkKey: string,
   destinationNetworkKey: string,
-  to: string,
-  fromKeypair: KeyringPair,
-  value: string,
-  dotSamaApiMap: Record<string, ApiProps>,
-  tokenInfo: TokenInfo,
-  networkMap: Record<string, NetworkJson>
+  recipient: string,
+  sender: KeyringPair,
+  sendingValue: string,
+  substrateApiMap: Record<string, _SubstrateApi>,
+  originTokenInfo: _ChainAsset,
+  chainInfoMap: Record<string, _ChainInfo>
 ): Promise<[string, string | undefined]> {
-  const apiProps = await dotSamaApiMap[originNetworkKey].isReady;
-  const api = apiProps.api;
+  const substrateApi = await substrateApiMap[originNetworkKey].isReady;
+  const api = substrateApi.api;
   let fee = '0';
   let feeString = '';
-  const originNetworkJson = networkMap[originNetworkKey];
-  const destinationNetworkJson = networkMap[destinationNetworkKey];
-  const tokenIdentity = getTokenIdentity(originNetworkKey, tokenInfo);
-  const weightParam = NETWORK_USE_UNLIMIT_WEIGHT.includes(originNetworkKey) ? POLKADOT_UNLIMITED_WEIGHT : FOUR_INSTRUCTIONS_WEIGHT;
+  const originChainInfo = chainInfoMap[originNetworkKey];
+  const destinationChainInfo = chainInfoMap[destinationNetworkKey];
+  const { decimals, symbol } = _getChainNativeTokenInfo(originChainInfo);
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+  const tokenIdentity = _getXcmAssetMultilocation(originTokenInfo);
+  const weightParam = _XCM_CHAIN_USE_LIMITED_WIGHT.includes(originNetworkKey) ? POLKADOT_UNLIMITED_WEIGHT : FOUR_INSTRUCTIONS_WEIGHT;
 
   try {
-    if (SupportedCrossChainsMap[originNetworkKey].type === 'p') {
+    if (_isSubstrateParaChain(originChainInfo)) {
       // Case ParaChain -> ParaChain && ParaChain -> RelayChain
       const extrinsic = api.tx.xTokens.transfer(
         tokenIdentity,
-        value,
-        getMultiLocationFromParachain(originNetworkKey, destinationNetworkKey, networkMap, to),
+        sendingValue,
+        getMultiLocationFromParachain(originNetworkKey, destinationNetworkKey, chainInfoMap, recipient),
         weightParam
       );
 
       try {
-        const paymentInfo = await extrinsic.paymentInfo(fromKeypair.address);
+        const paymentInfo = await extrinsic.paymentInfo(sender.address);
 
         fee = paymentInfo.partialFee.toString();
 
-        feeString = parseNumberToDisplay(paymentInfo.partialFee, originNetworkJson.decimals) + ` ${originNetworkJson.nativeToken ? originNetworkJson.nativeToken : ''}`;
+        feeString = parseNumberToDisplay(paymentInfo.partialFee, decimals) + ` ${symbol}`;
       } catch (e) {
-        feeString = `0.0000 ${originNetworkJson.nativeToken ? originNetworkJson.nativeToken : ''}`;
+        feeString = `0.0000 ${symbol}`;
       }
 
       console.log('substrate xcm tx p-p or p-r here', extrinsic.toHex());
     } else {
       // Case RelayChain -> ParaChain
-      const receiverLocation: Record<string, any> = getReceiverLocation(originNetworkKey, destinationNetworkKey, networkMap, to);
+      const receiverLocation: Record<string, any> = getReceiverLocation(originNetworkKey, destinationNetworkKey, chainInfoMap, recipient);
 
-      if (['statemint', 'statemine'].includes(destinationNetworkKey)) {
+      if (_XCM_CHAIN_GROUP.statemine.includes(destinationNetworkKey)) {
         const extrinsic = api.tx.xcmPallet.limitedTeleportAssets(
           {
             V1: {
               parents: 0,
               interior: {
-                X1: { Parachain: destinationNetworkJson.paraId }
+                X1: { Parachain: _getSubstrateParaId(destinationChainInfo) }
               }
             }
           },
@@ -97,7 +102,7 @@ export async function substrateEstimateCrossChainFee (
             V1: [
               {
                 id: { Concrete: { parents: 0, interior: 'Here' } },
-                fun: { Fungible: value }
+                fun: { Fungible: sendingValue }
               }
             ]
           },
@@ -105,10 +110,10 @@ export async function substrateEstimateCrossChainFee (
           POLKADOT_UNLIMITED_WEIGHT
         );
 
-        const paymentInfo = await extrinsic.paymentInfo(fromKeypair);
+        const paymentInfo = await extrinsic.paymentInfo(sender);
 
         fee = paymentInfo.partialFee.toString();
-        feeString = parseNumberToDisplay(paymentInfo.partialFee, originNetworkJson.decimals) + ` ${originNetworkJson.nativeToken ? originNetworkJson.nativeToken : ''}`;
+        feeString = parseNumberToDisplay(paymentInfo.partialFee, decimals) + ` ${symbol}`;
 
         console.log('substrate xcm teleport asset tx r-p here', extrinsic.toHex());
       } else {
@@ -117,7 +122,7 @@ export async function substrateEstimateCrossChainFee (
             V1: { // find the destination chain
               parents: 0,
               interior: {
-                X1: { Parachain: destinationNetworkJson.paraId as number }
+                X1: { Parachain: _getSubstrateParaId(destinationChainInfo) }
               }
             }
           },
@@ -135,17 +140,17 @@ export async function substrateEstimateCrossChainFee (
                 id: {
                   Concrete: { parents: 0, interior: 'Here' }
                 },
-                fun: { Fungible: value }
+                fun: { Fungible: sendingValue }
               }
             ]
           },
           0
         );
 
-        const paymentInfo = await extrinsic.paymentInfo(fromKeypair);
+        const paymentInfo = await extrinsic.paymentInfo(sender);
 
         fee = paymentInfo.partialFee.toString();
-        feeString = parseNumberToDisplay(paymentInfo.partialFee, originNetworkJson.decimals) + ` ${originNetworkJson.nativeToken ? originNetworkJson.nativeToken : ''}`;
+        feeString = parseNumberToDisplay(paymentInfo.partialFee, decimals) + ` ${symbol}`;
 
         console.log('substrate xcm reserve transfer tx r-p here', extrinsic.toHex());
       }
@@ -155,7 +160,7 @@ export async function substrateEstimateCrossChainFee (
   } catch (e) {
     console.error('error parsing xcm transaction', e);
 
-    feeString = `0.0000 ${originNetworkJson.nativeToken ? originNetworkJson.nativeToken : ''}`;
+    feeString = `0.0000 ${symbol}`;
 
     return [fee, feeString];
   }
@@ -164,36 +169,37 @@ export async function substrateEstimateCrossChainFee (
 export function substrateGetXcmExtrinsic (
   originNetworkKey: string,
   destinationNetworkKey: string,
-  to: string,
-  value: string,
+  recipient: string,
+  sendingValue: string,
   api: ApiPromise,
-  tokenInfo: TokenInfo,
-  networkMap: Record<string, NetworkJson>
+  originTokenInfo: _ChainAsset,
+  chainInfoMap: Record<string, _ChainInfo>
 ) {
   // Case ParaChain -> RelayChain && Parachain -> Parachain
-  if (SupportedCrossChainsMap[originNetworkKey].type === 'p') {
-    const tokenIdentity = getTokenIdentity(originNetworkKey, tokenInfo);
-    const weightParam = NETWORK_USE_UNLIMIT_WEIGHT.includes(originNetworkKey) ? POLKADOT_UNLIMITED_WEIGHT : FOUR_INSTRUCTIONS_WEIGHT;
+  if (_isSubstrateParaChain(chainInfoMap[originNetworkKey])) {
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+    const tokenIdentity = _getXcmAssetMultilocation(originTokenInfo);
+    const weightParam = NETWORK_USE_UNLIMITED_WEIGHT.includes(originNetworkKey) ? POLKADOT_UNLIMITED_WEIGHT : FOUR_INSTRUCTIONS_WEIGHT;
 
     return api.tx.xTokens.transfer(
       tokenIdentity,
-      value,
-      getMultiLocationFromParachain(originNetworkKey, destinationNetworkKey, networkMap, to),
+      sendingValue,
+      getMultiLocationFromParachain(originNetworkKey, destinationNetworkKey, chainInfoMap, recipient),
       weightParam
     );
   }
 
   // Case RelayChain -> Parachain
-  const destinationNetworkJson = networkMap[destinationNetworkKey];
-  const receiverLocation: Record<string, any> = getReceiverLocation(originNetworkKey, destinationNetworkKey, networkMap, to);
+  const destinationChainInfo = chainInfoMap[destinationNetworkKey];
+  const receiverLocation: Record<string, any> = getReceiverLocation(originNetworkKey, destinationNetworkKey, chainInfoMap, recipient);
 
-  if (['statemint', 'statemine'].includes(destinationNetworkKey)) {
+  if (_XCM_CHAIN_GROUP.statemine.includes(destinationNetworkKey)) {
     return api.tx.xcmPallet.limitedTeleportAssets(
       {
         V1: {
           parents: 0,
           interior: {
-            X1: { Parachain: destinationNetworkJson.paraId }
+            X1: { Parachain: _getSubstrateParaId(destinationChainInfo) }
           }
         }
       },
@@ -209,7 +215,7 @@ export function substrateGetXcmExtrinsic (
         V1: [
           {
             id: { Concrete: { parents: 0, interior: 'Here' } },
-            fun: { Fungible: value }
+            fun: { Fungible: sendingValue }
           }
         ]
       },
@@ -223,7 +229,7 @@ export function substrateGetXcmExtrinsic (
       V1: { // find the destination chain
         parents: 0,
         interior: {
-          X1: { Parachain: destinationNetworkJson.paraId as number }
+          X1: { Parachain: _getSubstrateParaId(destinationChainInfo) }
         }
       }
     },
@@ -241,7 +247,7 @@ export function substrateGetXcmExtrinsic (
           id: {
             Concrete: { parents: 0, interior: 'Here' }
           },
-          fun: { Fungible: value }
+          fun: { Fungible: sendingValue }
         }
       ]
     },

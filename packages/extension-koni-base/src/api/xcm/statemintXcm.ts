@@ -1,65 +1,62 @@
 // Copyright 2019-2022 @subwallet/extension-koni-base authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { ApiProps, NetworkJson, TokenInfo } from '@subwallet/extension-base/background/KoniTypes';
-import { getReceiverLocation, POLKADOT_UNLIMITED_WEIGHT, SupportedCrossChainsMap } from '@subwallet/extension-koni-base/api/xcm/utils';
+import { _ChainAsset, _ChainInfo } from '@subwallet/chain/types';
+import { _SubstrateApi } from '@subwallet/extension-base/services/chain-service/types';
+import { _getChainNativeTokenInfo, _getSubstrateParaId, _getXcmAssetMultilocation, _isSubstrateParaChain } from '@subwallet/extension-base/services/chain-service/utils';
+import { getReceiverLocation, POLKADOT_UNLIMITED_WEIGHT } from '@subwallet/extension-koni-base/api/xcm/utils';
 import { parseNumberToDisplay } from '@subwallet/extension-koni-base/utils';
 import { KeyringPair } from '@subwallet/keyring/types';
 
 import { ApiPromise } from '@polkadot/api';
 
-const ASSET_TO_LOCATION_MAP: Record<string, Record<string, any>> = {
-  statemint: {
-    1984: [ // USDt
-      {
-        PalletInstance: 50
-      },
-      {
-        GeneralIndex: 1984
-      }
-    ]
-  }
-};
+// const ASSET_TO_LOCATION_MAP: Record<string, Record<string, any>> = {
+//   statemint: {
+//     1984: [ // USDt
+//       {
+//         PalletInstance: 50
+//       },
+//       {
+//         GeneralIndex: 1984
+//       }
+//     ]
+//   }
+// };
 
 export async function statemintEstimateCrossChainFee (
   originNetworkKey: string,
   destinationNetworkKey: string,
-  to: string,
-  fromKeypair: KeyringPair,
-  value: string,
-  dotSamaApiMap: Record<string, ApiProps>,
-  tokenInfo: TokenInfo,
-  networkMap: Record<string, NetworkJson>
+  recipient: string,
+  sender: KeyringPair,
+  sendingValue: string,
+  substrateApiMap: Record<string, _SubstrateApi>,
+  originTokenInfo: _ChainAsset,
+  chainInfoMap: Record<string, _ChainInfo>
 ): Promise<[string, string | undefined]> {
-  const apiProps = await dotSamaApiMap[originNetworkKey].isReady;
+  const substrateApi = await substrateApiMap[originNetworkKey].isReady;
   let fee = '0';
   let feeString = '';
 
-  const originNetworkJson = networkMap[originNetworkKey];
-  const destinationNetworkJson = networkMap[destinationNetworkKey];
+  const originChainInfo = chainInfoMap[originNetworkKey];
+  const destinationChainInfo = chainInfoMap[destinationNetworkKey];
 
-  if (!tokenInfo.assetIndex && SupportedCrossChainsMap[originNetworkKey].relationMap[destinationNetworkKey].type === 'p') {
-    console.log('No assetId found for Statemint token');
-
-    return [fee, feeString];
-  }
-
-  const receiverLocation: Record<string, any> = getReceiverLocation(originNetworkKey, destinationNetworkKey, networkMap, to);
+  const receiverLocation: Record<string, any> = getReceiverLocation(originNetworkKey, destinationNetworkKey, chainInfoMap, recipient);
+  const { decimals, symbol } = _getChainNativeTokenInfo(originChainInfo);
 
   try {
-    if (SupportedCrossChainsMap[originNetworkKey].relationMap[destinationNetworkKey].type === 'p') {
+    if (_isSubstrateParaChain(destinationChainInfo)) {
       // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-      const assetLocation = ASSET_TO_LOCATION_MAP[originNetworkKey][tokenInfo.assetIndex as string];
+      const assetMultilocation = _getXcmAssetMultilocation(originTokenInfo);
       const destinationChainLocation: Record<string, any> = {
         V1: { // find the destination chain
           parents: 1,
           interior: {
-            X1: { Parachain: destinationNetworkJson.paraId }
+            X1: { Parachain: _getSubstrateParaId(destinationChainInfo) }
           }
         }
       };
 
-      const extrinsic = apiProps.api.tx.polkadotXcm.limitedReserveTransferAssets(
+      const extrinsic = substrateApi.api.tx.polkadotXcm.limitedReserveTransferAssets(
         destinationChainLocation, // dest
         {
           V1: { // beneficiary
@@ -77,11 +74,11 @@ export async function statemintEstimateCrossChainFee (
                   parents: 0,
                   interior: {
                     // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-                    X2: assetLocation
+                    X2: assetMultilocation
                   }
                 }
               },
-              fun: { Fungible: value }
+              fun: { Fungible: sendingValue }
             }
           ]
         },
@@ -91,12 +88,12 @@ export async function statemintEstimateCrossChainFee (
 
       console.log('statemint xcm tx to p here', extrinsic.toHex());
 
-      const paymentInfo = await extrinsic.paymentInfo(fromKeypair);
+      const paymentInfo = await extrinsic.paymentInfo(sender);
 
       fee = paymentInfo.partialFee.toString();
-      feeString = parseNumberToDisplay(paymentInfo.partialFee, originNetworkJson.decimals) + ` ${originNetworkJson.nativeToken ? originNetworkJson.nativeToken : ''}`;
+      feeString = parseNumberToDisplay(paymentInfo.partialFee, decimals) + ` ${symbol}`;
     } else {
-      const extrinsic = apiProps.api.tx.polkadotXcm.limitedTeleportAssets(
+      const extrinsic = substrateApi.api.tx.polkadotXcm.limitedTeleportAssets(
         {
           V1: {
             parents: 1,
@@ -120,7 +117,7 @@ export async function statemintEstimateCrossChainFee (
                   interior: 'Here' // Native token of relaychain
                 }
               },
-              fun: { Fungible: value }
+              fun: { Fungible: sendingValue }
             }
           ]
         },
@@ -130,17 +127,17 @@ export async function statemintEstimateCrossChainFee (
 
       console.log('statemint xcm tx to r here', extrinsic.toHex());
 
-      const paymentInfo = await extrinsic.paymentInfo(fromKeypair);
+      const paymentInfo = await extrinsic.paymentInfo(sender);
 
       fee = paymentInfo.partialFee.toString();
-      feeString = parseNumberToDisplay(paymentInfo.partialFee, originNetworkJson.decimals) + ` ${originNetworkJson.nativeToken ? originNetworkJson.nativeToken : ''}`;
+      feeString = parseNumberToDisplay(paymentInfo.partialFee, decimals) + ` ${symbol}`;
     }
 
     return [fee, feeString];
   } catch (e) {
     console.error('error parsing xcm transaction', e);
 
-    feeString = `0.0000 ${originNetworkJson.nativeToken ? originNetworkJson.nativeToken : ''}`;
+    feeString = `0.0000 ${symbol}`;
 
     return [fee, feeString];
   }
@@ -149,23 +146,23 @@ export async function statemintEstimateCrossChainFee (
 export function statemintGetXcmExtrinsic (
   originNetworkKey: string,
   destinationNetworkKey: string,
-  to: string,
-  value: string,
+  recipient: string,
+  sendingValue: string,
   api: ApiPromise,
-  tokenInfo: TokenInfo,
-  networkMap: Record<string, NetworkJson>
+  originTokenInfo: _ChainAsset,
+  chainInfoMap: Record<string, _ChainInfo>
 ) {
-  const destinationNetworkJson = networkMap[destinationNetworkKey];
-  const receiverLocation: Record<string, any> = getReceiverLocation(originNetworkKey, destinationNetworkKey, networkMap, to);
+  const destinationChainInfo = chainInfoMap[destinationNetworkKey];
+  const receiverLocation: Record<string, any> = getReceiverLocation(originNetworkKey, destinationNetworkKey, chainInfoMap, recipient);
 
-  if (SupportedCrossChainsMap[originNetworkKey].relationMap[destinationNetworkKey].type === 'p') {
+  if (_isSubstrateParaChain(destinationChainInfo)) {
     // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-    const assetLocation = ASSET_TO_LOCATION_MAP[originNetworkKey][tokenInfo.assetIndex as string];
+    const assetLocation = _getXcmAssetMultilocation(originTokenInfo);
     const destinationChainLocation: Record<string, any> = {
       V1: { // find the destination chain
         parents: 1,
         interior: {
-          X1: { Parachain: destinationNetworkJson.paraId }
+          X1: { Parachain: _getSubstrateParaId(destinationChainInfo) }
         }
       }
     };
@@ -192,7 +189,7 @@ export function statemintGetXcmExtrinsic (
                 }
               }
             },
-            fun: { Fungible: value }
+            fun: { Fungible: sendingValue }
           }
         ]
       },
@@ -224,7 +221,7 @@ export function statemintGetXcmExtrinsic (
                 interior: 'Here' // Native token of relaychain
               }
             },
-            fun: { Fungible: value }
+            fun: { Fungible: sendingValue }
           }
         ]
       },

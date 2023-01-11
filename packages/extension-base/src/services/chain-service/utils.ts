@@ -1,7 +1,7 @@
 // Copyright 2019-2022 @subwallet/extension-koni-base authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { _AssetRef, _AssetRefPath, _AssetType, _ChainAsset, _ChainInfo } from '@subwallet/chain/types';
+import { _AssetRef, _AssetRefPath, _AssetType, _ChainAsset, _ChainInfo, _SubstrateChainType } from '@subwallet/chain/types';
 import { _ChainState, _CUSTOM_PREFIX, _SMART_CONTRACT_STANDARDS } from '@subwallet/extension-base/services/chain-service/types';
 
 import { isEthereumAddress } from '@polkadot/util-crypto';
@@ -178,4 +178,29 @@ export function _isXcmPathSupported (originTokenSlug: string, destinationTokenSl
   }
 
   return (assetRef.path === _AssetRefPath.XCM);
+}
+
+export function _getXcmAssetType (tokenInfo: _ChainAsset) {
+  return tokenInfo.metadata?.assetType as string || '';
+}
+
+export function _getXcmAssetId (tokenInfo: _ChainAsset) {
+  return tokenInfo.metadata?.assetId as string || '-1';
+}
+
+export function _getXcmTransferType (originChainInfo: _ChainInfo, destinationChainInfo: _ChainInfo) {
+  return `${originChainInfo.substrateInfo?.chainType || ''}-${destinationChainInfo.substrateInfo?.chainType || ''}`;
+}
+
+export function _getXcmAssetMultilocation (tokenInfo: _ChainAsset) {
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-return
+  return tokenInfo.metadata?.xcmMultilocation || {};
+}
+
+export function _isSubstrateRelayChain (chainInfo: _ChainInfo) {
+  return chainInfo.substrateInfo?.chainType === _SubstrateChainType.RELAYCHAIN;
+}
+
+export function _isSubstrateParaChain (chainInfo: _ChainInfo) {
+  return chainInfo.substrateInfo?.chainType === _SubstrateChainType.PARACHAIN;
 }

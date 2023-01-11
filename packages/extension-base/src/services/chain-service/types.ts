@@ -3,7 +3,7 @@
 
 /* eslint @typescript-eslint/no-empty-interface: "off" */
 
-import { _AssetType, _ChainAsset, _ChainInfo } from '@subwallet/chain/types';
+import {_AssetRef, _AssetType, _ChainAsset, _ChainInfo} from '@subwallet/chain/types';
 import Web3 from 'web3';
 
 import { ApiPromise } from '@polkadot/api';
@@ -14,7 +14,8 @@ import { Registry } from '@polkadot/types/types';
 export interface _DataMap {
   chainInfoMap: Record<string, _ChainInfo>,
   chainStateMap: Record<string, _ChainState>,
-  assetRegistry: Record<string, _ChainAsset>
+  assetRegistry: Record<string, _ChainAsset>,
+  assetRefMap: Record<string, _AssetRef>
 }
 
 export enum _ChainConnectionStatus {

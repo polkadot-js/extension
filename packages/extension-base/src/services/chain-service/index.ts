@@ -1,8 +1,8 @@
 // Copyright 2019-2022 @subwallet/extension-base authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { _DEFAULT_CHAINS, ChainAssetMap, ChainInfoMap } from '@subwallet/chain';
-import { _AssetType, _ChainAsset, _ChainInfo, _EvmInfo, _SubstrateInfo } from '@subwallet/chain/types';
+import { _DEFAULT_CHAINS, AssetRefMap, ChainAssetMap, ChainInfoMap } from '@subwallet/chain';
+import { _AssetType, _ChainAsset, _ChainInfo, _EvmInfo, _SubstrateChainType, _SubstrateInfo } from '@subwallet/chain/types';
 import { EvmChainHandler } from '@subwallet/extension-base/services/chain-service/handler/EvmChainHandler';
 import { SubstrateChainHandler } from '@subwallet/extension-base/services/chain-service/handler/SubstrateChainHandler';
 import { _CHAIN_VALIDATION_ERROR } from '@subwallet/extension-base/services/chain-service/handler/types';
@@ -20,7 +20,8 @@ export class ChainService {
   private dataMap: _DataMap = {
     chainInfoMap: {},
     chainStateMap: {},
-    assetRegistry: {}
+    assetRegistry: {},
+    assetRefMap: {}
   };
 
   private dbService: DatabaseService; // to save chain, token settings from user
@@ -144,6 +145,10 @@ export class ChainService {
     }
 
     return nativeTokenInfo;
+  }
+
+  public getAssetRefMap () {
+    return this.dataMap.assetRefMap;
   }
 
   public getChainStateMap () {
@@ -342,6 +347,7 @@ export class ChainService {
 
   // Business logic
   public init (callback?: () => void) { // TODO: reconsider the flow of initiation
+    this.dataMap.assetRefMap = AssetRefMap;
     this.initChains().then(() => {
       this.chainInfoMapSubject.next(this.getChainInfoMap());
       this.chainStateMapSubject.next(this.getChainStateMap());
@@ -615,7 +621,7 @@ export class ChainService {
         substrateInfo = {
           addressPrefix: params.chainSpec.addressPrefix,
           blockExplorer: params.chainEditInfo.blockExplorer || null,
-          category: [],
+          chainType: params.chainSpec.paraId !== null ? _SubstrateChainType.PARACHAIN : _SubstrateChainType.RELAYCHAIN,
           crowdloanUrl: params.chainEditInfo.crowdloanUrl || null,
           decimals: params.chainSpec.decimals,
           existentialDeposit: params.chainSpec.existentialDeposit,

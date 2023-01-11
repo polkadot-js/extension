@@ -191,7 +191,7 @@ function SendFund ({ chainRegistryMap, className, defaultValue, networkMap }: Co
         from: senderId,
         to: recipientId,
         transferAll: canToggleAll && isAll,
-        token: selectedToken,
+        tokenSlug: selectedToken,
         value: valueToTransfer
       }).then((rs) => {
         if (isSync) {

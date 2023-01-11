@@ -8,6 +8,7 @@ import { _getChainSubstrateAddressPrefix, _getSubstrateParaId, _getXcmTransferTy
 
 import { decodeAddress, evmToAddress } from '@polkadot/util-crypto';
 
+// TODO: remove this
 export const SupportedCrossChainsMap: Record<string, CrossChainRelation> = {
   polkadot: {
     type: 'r',

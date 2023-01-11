@@ -139,7 +139,7 @@ function Donate ({ chainRegistryMap, className, defaultValue, networkMap }: Cont
         from: senderId,
         to: recipientId,
         transferAll: false,
-        token: selectedToken,
+        tokenSlug: selectedToken,
         value: valueToTransfer
       }).then((rs) => {
         if (isSync) {

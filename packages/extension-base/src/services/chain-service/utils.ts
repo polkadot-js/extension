@@ -83,6 +83,10 @@ export function _getTokenOnChainInfo (tokenInfo: _ChainAsset): Record<string, an
   return tokenInfo.metadata?.onChainInfo as Record<string, any>;
 }
 
+export function _getTokenMinAmount (tokenInfo: _ChainAsset) {
+  return tokenInfo.minAmount || '0';
+}
+
 export function _isChainEvmCompatible (chainInfo: _ChainInfo) {
   return chainInfo.evmInfo !== null;
 }
@@ -156,6 +160,14 @@ export function _getChainNativeTokenInfo (chainInfo: _ChainInfo) {
     symbol: '',
     decimals: -1
   };
+}
+
+export function _isTokenEvmSmartContract (tokenInfo: _ChainAsset) {
+  if ([_AssetType.ERC721, _AssetType.ERC20].includes(tokenInfo.assetType)) {
+    return true;
+  }
+
+  return false;
 }
 
 export function _isTokenWasmSmartContract (tokenInfo: _ChainAsset) {

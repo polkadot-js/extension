@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { _AssetRef, _ChainAsset, _ChainInfo } from '@subwallet/chain/types';
-import { BasicTxResponse, NetworkJson } from '@subwallet/extension-base/background/KoniTypes';
+import { BasicTxResponse } from '@subwallet/extension-base/background/KoniTypes';
 import { _XCM_CHAIN_GROUP } from '@subwallet/extension-base/services/chain-service/constants';
 import { _SubstrateApi } from '@subwallet/extension-base/services/chain-service/types';
 import { _isNativeToken, _isXcmPathSupported } from '@subwallet/extension-base/services/chain-service/utils';
@@ -13,25 +13,10 @@ import { astarEstimateCrossChainFee, astarGetXcmExtrinsic } from '@subwallet/ext
 import { moonbeamEstimateCrossChainFee, moonbeamGetXcmExtrinsic } from '@subwallet/extension-koni-base/api/xcm/moonbeamXcm';
 import { statemintEstimateCrossChainFee, statemintGetXcmExtrinsic } from '@subwallet/extension-koni-base/api/xcm/statemintXcm';
 import { substrateEstimateCrossChainFee, substrateGetXcmExtrinsic } from '@subwallet/extension-koni-base/api/xcm/substrateXcm';
-import { SupportedCrossChainsMap } from '@subwallet/extension-koni-base/api/xcm/utils';
 import { KeyringPair } from '@subwallet/keyring/types';
 
 import { SubmittableExtrinsic } from '@polkadot/api/types';
 import { EventRecord } from '@polkadot/types/interfaces';
-
-export function isNetworksPairSupportedTransferCrossChain (originNetworkKey: string, destinationNetworkKey: string, token: string, networkMap: Record<string, NetworkJson>): boolean {
-  if (!SupportedCrossChainsMap[originNetworkKey] ||
-    !SupportedCrossChainsMap[originNetworkKey].relationMap[destinationNetworkKey] ||
-    !SupportedCrossChainsMap[originNetworkKey].relationMap[destinationNetworkKey].supportedToken.includes(token)) {
-    return false;
-  }
-
-  if (SupportedCrossChainsMap[originNetworkKey].relationMap[destinationNetworkKey].type === 'p' && !(networkMap[destinationNetworkKey] && networkMap[destinationNetworkKey].paraId)) {
-    return false;
-  }
-
-  return true;
-}
 
 export async function estimateCrossChainFee (
   sender: KeyringPair,

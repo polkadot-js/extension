@@ -2,14 +2,17 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import Common from '@ethereumjs/common';
-import { ApiProps, BasicTxResponse, ExternalRequestPromise, ExternalRequestPromiseStatus, HandleBasicTx, NetworkJson, TransferErrorCode } from '@subwallet/extension-base/background/KoniTypes';
+import { _ChainInfo } from '@subwallet/chain/types';
+import { BasicTxResponse, ExternalRequestPromise, ExternalRequestPromiseStatus, HandleBasicTx, TransferErrorCode } from '@subwallet/extension-base/background/KoniTypes';
+import { _BALANCE_PARSING_CHAIN_GROUP } from '@subwallet/extension-base/services/chain-service/constants';
+import { _EvmApi, _SubstrateApi } from '@subwallet/extension-base/services/chain-service/types';
+import { _getChainNativeTokenInfo, _getEvmChainId } from '@subwallet/extension-base/services/chain-service/utils';
 import { getFreeBalance } from '@subwallet/extension-koni-base/api/dotsama/balance';
 import { ERC721Contract, getERC20Contract } from '@subwallet/extension-koni-base/api/tokens/evm/web3';
 import { keyring } from '@subwallet/ui-keyring';
 import BigN from 'bignumber.js';
 import BNEther from 'bn.js';
 import { Transaction } from 'ethereumjs-tx';
-import Web3 from 'web3';
 import { TransactionConfig, TransactionReceipt } from 'web3-core';
 
 import { BN, hexToBn } from '@polkadot/util';
@@ -32,7 +35,7 @@ export const handleTransferBalanceResult = ({ callback,
   response.status = true;
   let fee: string;
 
-  if (['bobabase', 'bobabeam'].indexOf(networkKey) > -1) {
+  if (_BALANCE_PARSING_CHAIN_GROUP.bobabeam.indexOf(networkKey) > -1) {
     // @ts-ignore
     // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
     fee = hexToBn(receipt.l1Fee || '0x0').add(hexToBn(receipt.l2BobaFee || '0x0')).toString();
@@ -52,9 +55,9 @@ interface HandleTransferProps {
   address: string;
   callback: (data: BasicTxResponse) => void;
   changeValue: string;
-  network: NetworkJson;
+  chainInfo: _ChainInfo;
   transactionObject: TransactionConfig;
-  web3ApiMap: Record<string, Web3 >;
+  evmApiMap: Record<string, _EvmApi>;
 }
 
 const convertValueToNumber = (value?: number | string | BNEther): number => {
@@ -71,18 +74,18 @@ const convertValueToNumber = (value?: number | string | BNEther): number => {
 
 export async function handleTransfer ({ address,
   callback,
+  chainInfo,
   changeValue,
-  network,
-  transactionObject,
-  web3ApiMap }: HandleTransferProps) {
-  const networkKey = network.key;
-  const web3Api = web3ApiMap[networkKey];
-  const nonce = await web3Api.eth.getTransactionCount(address);
+  evmApiMap,
+  transactionObject }: HandleTransferProps) {
+  const networkKey = chainInfo.slug;
+  const web3Api = evmApiMap[networkKey];
+  const nonce = await web3Api.api.eth.getTransactionCount(address);
 
   const common = Common.forCustomChain('mainnet', {
     name: networkKey,
-    networkId: network.evmChainId as number,
-    chainId: network.evmChainId as number
+    networkId: _getEvmChainId(chainInfo),
+    chainId: _getEvmChainId(chainInfo)
   }, 'petersburg');
   const txObject: TransactionConfig = {
     gasPrice: convertValueToNumber(transactionObject.gasPrice),
@@ -108,7 +111,7 @@ export async function handleTransfer ({ address,
   };
 
   try {
-    web3Api.eth.sendSignedTransaction(callHash)
+    web3Api.api.eth.sendSignedTransaction(callHash)
       .on('transactionHash', function (hash: string) {
         console.log('transactionHash', hash);
         response.extrinsicHash = hash;
@@ -144,20 +147,20 @@ export async function handleTransfer ({ address,
 }
 
 export async function getEVMTransactionObject (
-  network: NetworkJson,
+  chainInfo: _ChainInfo,
   to: string,
   value: string,
   transferAll: boolean,
-  web3ApiMap: Record<string, Web3>
+  evmApiMap: Record<string, _EvmApi>
 ): Promise<[TransactionConfig, string, string]> {
-  const networkKey = network.key;
-  const web3Api = web3ApiMap[networkKey];
-  const gasPrice = await web3Api.eth.getGasPrice();
+  const networkKey = chainInfo.slug;
+  const web3Api = evmApiMap[networkKey];
+  const gasPrice = await web3Api.api.eth.getGasPrice();
   const transactionObject = {
     gasPrice: gasPrice,
     to: to
   } as TransactionConfig;
-  const gasLimit = await web3Api.eth.estimateGas(transactionObject);
+  const gasLimit = await web3Api.api.eth.estimateGas(transactionObject);
 
   transactionObject.gas = gasLimit;
 
@@ -171,44 +174,44 @@ export async function getEVMTransactionObject (
 interface EVMTransferProps {
   from: string;
   callback: (data: BasicTxResponse) => void;
-  network: NetworkJson;
+  chainInfo: _ChainInfo;
   to: string;
   transferAll: boolean;
   value: string;
-  web3ApiMap: Record<string, Web3>;
+  evmApiMap: Record<string, _EvmApi>;
 }
 
 export async function makeEVMTransfer ({ callback,
+  chainInfo,
+  evmApiMap,
   from,
-  network,
   to,
   transferAll,
-  value,
-  web3ApiMap }: EVMTransferProps): Promise<void> {
-  const [transactionObject, changeValue] = await getEVMTransactionObject(network, to, value, transferAll, web3ApiMap);
+  value }: EVMTransferProps): Promise<void> {
+  const [transactionObject, changeValue] = await getEVMTransactionObject(chainInfo, to, value, transferAll, evmApiMap);
 
   await handleTransfer({
     address: from,
     callback: callback,
     changeValue: changeValue,
-    network: network,
-    web3ApiMap: web3ApiMap,
+    chainInfo: chainInfo,
+    evmApiMap: evmApiMap,
     transactionObject: transactionObject
   });
 }
 
 export async function getERC20TransactionObject (
   assetAddress: string,
-  network: NetworkJson,
+  chainInfo: _ChainInfo,
   from: string,
   to: string,
   value: string,
   transferAll: boolean,
-  web3ApiMap: Record<string, Web3>
+  evmApiMap: Record<string, _EvmApi>
 ): Promise<[TransactionConfig, string, string]> {
-  const networkKey = network.key;
-  const web3Api = web3ApiMap[networkKey];
-  const erc20Contract = getERC20Contract(networkKey, assetAddress, web3ApiMap);
+  const networkKey = chainInfo.slug;
+  const evmApi = evmApiMap[networkKey];
+  const erc20Contract = getERC20Contract(networkKey, assetAddress, evmApiMap);
 
   let freeAmount = new BN(0);
   let transferValue = value;
@@ -227,7 +230,7 @@ export async function getERC20TransactionObject (
   }
 
   const transferData = generateTransferData(to, transferValue);
-  const gasPrice = await web3Api.eth.getGasPrice();
+  const gasPrice = await evmApi.api.eth.getGasPrice();
   const transactionObject = {
     gasPrice: gasPrice,
     from,
@@ -235,7 +238,7 @@ export async function getERC20TransactionObject (
     data: transferData
   } as TransactionConfig;
 
-  const gasLimit = await web3Api.eth.estimateGas(transactionObject);
+  const gasLimit = await evmApi.api.eth.estimateGas(transactionObject);
 
   transactionObject.gas = gasLimit;
 
@@ -253,50 +256,50 @@ interface ERC20TransferProps {
   assetAddress: string;
   callback: (data: BasicTxResponse) => void;
   from: string;
-  network: NetworkJson;
+  chainInfo: _ChainInfo;
   to: string;
   transferAll: boolean;
   value: string;
-  web3ApiMap: Record<string, Web3>;
+  evmApiMap: Record<string, _EvmApi>;
 }
 
 export async function makeERC20Transfer ({ assetAddress,
   callback,
+  chainInfo,
+  evmApiMap,
   from,
-  network,
   to,
   transferAll,
-  value,
-  web3ApiMap }: ERC20TransferProps) {
-  const [transactionObject, changeValue] = await getERC20TransactionObject(assetAddress, network, from, to, value, transferAll, web3ApiMap);
+  value }: ERC20TransferProps) {
+  const [transactionObject, changeValue] = await getERC20TransactionObject(assetAddress, chainInfo, from, to, value, transferAll, evmApiMap);
 
   await handleTransfer({
     address: from,
     callback: callback,
     changeValue: changeValue,
-    network: network,
-    web3ApiMap: web3ApiMap,
+    chainInfo: chainInfo,
+    evmApiMap: evmApiMap,
     transactionObject: transactionObject
   });
 }
 
 export async function getERC721Transaction (
-  web3ApiMap: Record<string, Web3>,
-  dotSamaApiMap: Record<string, ApiProps>,
-  networkJson: NetworkJson,
+  evmApiMap: Record<string, _EvmApi>,
+  substrateApiMap: Record<string, _SubstrateApi>,
+  chainInfo: _ChainInfo,
   networkKey: string,
   contractAddress: string,
   senderAddress: string,
   recipientAddress: string,
   tokenId: string) {
-  const web3 = web3ApiMap[networkKey];
+  const web3 = evmApiMap[networkKey];
   // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
-  const contract = new web3.eth.Contract(ERC721Contract, contractAddress);
+  const contract = new web3.api.eth.Contract(ERC721Contract, contractAddress);
 
   const [fromAccountTxCount, gasPriceGwei, freeBalance] = await Promise.all([
-    web3.eth.getTransactionCount(senderAddress),
-    web3.eth.getGasPrice(),
-    getFreeBalance(networkKey, senderAddress, dotSamaApiMap, web3ApiMap)
+    web3.api.eth.getTransactionCount(senderAddress),
+    web3.api.eth.getGasPrice(),
+    getFreeBalance(networkKey, senderAddress, substrateApiMap, evmApiMap)
   ]);
 
   const binaryFreeBalance = new BN(freeBalance);
@@ -313,18 +316,18 @@ export async function getERC721Transaction (
   const rawTransaction = {
     nonce: '0x' + fromAccountTxCount.toString(16),
     from: senderAddress,
-    gasPrice: web3.utils.toHex(gasPriceGwei),
-    gasLimit: web3.utils.toHex(gasLimit as number),
+    gasPrice: web3.api.utils.toHex(gasPriceGwei),
+    gasLimit: web3.api.utils.toHex(gasLimit as number),
     to: contractAddress,
     value: '0x00',
     // eslint-disable-next-line @typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-member-access,@typescript-eslint/no-unsafe-assignment
     data: contract.methods.safeTransferFrom(senderAddress, recipientAddress, tokenId).encodeABI()
   };
+  const { decimals, symbol } = _getChainNativeTokenInfo(chainInfo);
   const rawFee = gasLimit * parseFloat(gasPriceGwei);
-  // @ts-ignore
-  const estimatedFee = rawFee / (10 ** networkJson.decimals);
+  const estimatedFee = rawFee / (10 ** decimals);
   // eslint-disable-next-line @typescript-eslint/restrict-plus-operands
-  const feeString = estimatedFee.toString() + ' ' + networkJson.nativeToken;
+  const feeString = estimatedFee.toString() + ' ' + symbol;
 
   const binaryFee = new BN(rawFee.toString());
   const balanceError = binaryFee.gt(binaryFreeBalance);

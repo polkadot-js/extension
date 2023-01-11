@@ -604,11 +604,11 @@ export function subscribeBalance (addresses: string[], chainInfoMap: Record<stri
   };
 }
 
-export async function getFreeBalance (networkKey: string, address: string, substrateApiMap: Record<string, _SubstrateApi>, evmApiMap: Record<string, _EvmApi>, token?: string): Promise<string> {
+export async function getFreeBalance (networkKey: string, address: string, substrateApiMap: Record<string, _SubstrateApi>, evmApiMap: Record<string, _EvmApi>, tokenSlug?: string): Promise<string> {
   const apiProps = await substrateApiMap[networkKey].isReady;
   const api = apiProps.api;
   const web3Api = evmApiMap[networkKey];
-  const tokenInfo = token ? state.getAssetBySlug(token) : state.getNativeTokenInfo(networkKey);
+  const tokenInfo = tokenSlug ? state.getAssetBySlug(tokenSlug) : state.getNativeTokenInfo(networkKey);
   const chainInfo = state.getChainInfoByKey(networkKey);
 
   // Only EVM Address use with EVM network
@@ -635,7 +635,7 @@ export async function getFreeBalance (networkKey: string, address: string, subst
       return free?.toString() || '0';
     }
   } else {
-    if (token) {
+    if (tokenSlug) {
       if (_isSmartContractToken(tokenInfo)) {
         if (_getContractAddressOfToken(tokenInfo).length > 0) {
           return '0';

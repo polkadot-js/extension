@@ -272,7 +272,7 @@ function XcmTransfer ({ chainRegistryMap, className, defaultValue, firstOriginCh
         destinationNetworkKey: selectedDestinationChain,
         from: senderId,
         to: recipientId,
-        token: selectedToken,
+        sendingTokenSlug: selectedToken,
         value: valueToTransfer
       }).then((value) => {
         if (isSync) {

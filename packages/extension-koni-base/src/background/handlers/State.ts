@@ -1159,6 +1159,10 @@ export default class KoniState extends State {
     return this.chainService.getChainStateMap();
   }
 
+  public getAssetRefMap () {
+    return this.chainService.getAssetRefMap();
+  }
+
   public getChainStateByKey (key: string) {
     return this.chainService.getChainStateByKey(key);
   }

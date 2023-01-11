@@ -1361,7 +1361,7 @@ export interface RequestCheckTransfer extends BaseRequestSign{
   to: string,
   value?: string,
   transferAll?: boolean
-  token?: string
+  tokenSlug: string
 }
 
 export interface ResponseCheckTransfer{
@@ -1382,7 +1382,7 @@ export interface RequestCheckCrossChainTransfer extends BaseRequestSign {
   to: string,
   transferAll?: boolean,
   value: string,
-  token: string
+  sendingTokenSlug: string
 }
 
 export type RequestCrossChainTransfer = InternalRequestSign<RequestCheckCrossChainTransfer>;

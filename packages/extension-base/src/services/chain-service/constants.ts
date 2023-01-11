@@ -182,6 +182,12 @@ export const _TRANSFER_CHAIN_GROUP = {
   statemine: ['statemint', 'statemine']
 };
 
+export const _BALANCE_PARSING_CHAIN_GROUP = {
+  bobabeam: ['bobabeam', 'bobabase']
+};
+
+// XCM------------------------------------------------------------------------------------------------------------------
+
 export const _XCM_CHAIN_GROUP = {
   moonbeam: ['moonbeam', 'moonriver', 'moonbase'],
   astar: ['astar', 'shiden'],

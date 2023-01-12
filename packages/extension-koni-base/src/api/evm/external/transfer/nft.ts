@@ -15,18 +15,18 @@ interface TransferNftExternalArg extends EvmExternalProps{
 
 export async function handleTransferNftQr ({ callback,
   chainId,
+  evmApiMap,
   from,
   id,
   network,
   rawTransaction,
   setState,
-  updateState,
-  web3ApiMap }: TransferNftExternalArg) {
-  const networkKey = network.key;
-  const web3 = web3ApiMap[networkKey];
+  updateState }: TransferNftExternalArg) {
+  const networkKey = network.slug;
+  const evmApi = evmApiMap[networkKey];
   const response: BasicTxResponse = {};
 
-  const nonce = await web3.eth.getTransactionCount(from);
+  const nonce = await evmApi.api.eth.getTransactionCount(from);
 
   const txObject: Web3Transaction = {
     nonce: nonce,
@@ -66,7 +66,7 @@ export async function handleTransferNftQr ({ callback,
   try {
     const signed = parseTxAndSignature(txObject, signature);
 
-    web3.eth.sendSignedTransaction(signed)
+    evmApi.api.eth.sendSignedTransaction(signed)
       .on('transactionHash', function (hash: string) {
         console.log('transactionHash', hash);
         response.callHash = signed;

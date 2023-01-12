@@ -1,18 +1,19 @@
 // Copyright 2019-2022 @subwallet/extension-koni-base authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { HandleBasicTx, NetworkJson, PrepareExternalRequest } from '@subwallet/extension-base/background/KoniTypes';
+import { _ChainInfo } from '@subwallet/chain/types';
+import { HandleBasicTx, PrepareExternalRequest } from '@subwallet/extension-base/background/KoniTypes';
+import { _EvmApi } from '@subwallet/extension-base/services/chain-service/types';
 import { Web3Transaction } from '@subwallet/extension-base/signers/types';
 import RLP, { Input } from 'rlp';
-import Web3 from 'web3';
 
 import { u8aToHex } from '@polkadot/util';
 
 export interface EvmExternalProps extends PrepareExternalRequest {
   from: string;
   chainId: number;
-  network: NetworkJson;
-  web3ApiMap: Record<string, Web3>;
+  network: _ChainInfo;
+  evmApiMap: Record<string, _EvmApi>;
   callback: HandleBasicTx;
 }
 

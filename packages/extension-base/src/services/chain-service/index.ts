@@ -2,12 +2,12 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { _DEFAULT_CHAINS, AssetRefMap, ChainAssetMap, ChainInfoMap } from '@subwallet/chain';
-import { _AssetType, _ChainAsset, _ChainInfo, _EvmInfo, _SubstrateChainType, _SubstrateInfo } from '@subwallet/chain/types';
+import { _AssetRefPath, _AssetType, _ChainAsset, _ChainInfo, _EvmInfo, _SubstrateChainType, _SubstrateInfo } from '@subwallet/chain/types';
 import { EvmChainHandler } from '@subwallet/extension-base/services/chain-service/handler/EvmChainHandler';
 import { SubstrateChainHandler } from '@subwallet/extension-base/services/chain-service/handler/SubstrateChainHandler';
 import { _CHAIN_VALIDATION_ERROR } from '@subwallet/extension-base/services/chain-service/handler/types';
 import { _ChainBaseApi, _ChainConnectionStatus, _ChainState, _CUSTOM_PREFIX, _DataMap, _EvmApi, _NetworkUpsertParams, _NFT_CONTRACT_STANDARDS, _SMART_CONTRACT_STANDARDS, _SmartContractTokenInfo, _SubstrateApi, _ValidateCustomTokenRequest, _ValidateCustomTokenResponse } from '@subwallet/extension-base/services/chain-service/types';
-import { _isChainEnabled, _isCustomAsset, _isEqualContractAddress, _isEqualSmartContractAsset } from '@subwallet/extension-base/services/chain-service/utils';
+import { _isChainEnabled, _isCustomAsset, _isEqualContractAddress, _isEqualSmartContractAsset, _parseAssetRefKey } from '@subwallet/extension-base/services/chain-service/utils';
 import { IChain } from '@subwallet/extension-base/services/storage-service/databases';
 import DatabaseService from '@subwallet/extension-base/services/storage-service/DatabaseService';
 import { Subject } from 'rxjs';
@@ -193,6 +193,24 @@ export class ChainService {
 
   public getAssetBySlug (slug: string) {
     return this.getAssetRegistry()[slug];
+  }
+
+  public getXcmEqualAssetByChain (destinationChainSlug: string, originTokenSlug: string) {
+    let destinationTokenInfo: _ChainAsset | undefined;
+
+    for (const asset of Object.values(this.getAssetRegistry())) {
+      if (asset.originChain === destinationChainSlug) { // check
+        const assetRefKey = _parseAssetRefKey(originTokenSlug, asset.slug);
+        const assetRef = this.getAssetRefMap()[assetRefKey];
+
+        if (assetRef && assetRef.path === _AssetRefPath.XCM) { // there's only 1 corresponding token on 1 chain
+          destinationTokenInfo = asset;
+          break;
+        }
+      }
+    }
+
+    return destinationTokenInfo;
   }
 
   public getAssetByChainAndType (chainSlug: string, assetTypes: _AssetType[]) {

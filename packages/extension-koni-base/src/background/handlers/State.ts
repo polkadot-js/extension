@@ -1179,8 +1179,8 @@ export default class KoniState extends State {
     return this.chainService.getAssetBySlug(slug);
   }
 
-  public getChainInfoByKey (key: string) {
-    return this.chainService.getChainInfoByKey(key);
+  public getXcmEqualAssetByChain (destinationChain: string, originTokenSlug: string) {
+    return this.chainService.getXcmEqualAssetByChain(destinationChain, originTokenSlug);
   }
 
   public subscribeChainInfoMap (): Subject<Record<string, _ChainInfo>> {
@@ -1288,7 +1288,7 @@ export default class KoniState extends State {
     return this.chainService.getSubstrateApiMap();
   }
 
-  public getDotSamaApi (networkKey: string) {
+  public getSubstrateApi (networkKey: string) {
     return this.chainService.getSubstrateApi(networkKey);
   }
 
@@ -1794,7 +1794,7 @@ export default class KoniState extends State {
 
             console.log(params);
 
-            const chainInfo = this.getChainInfoByKey(networkKey);
+            const chainInfo = this.getChainInfo(networkKey);
 
             const common = Common.forCustomChain('mainnet', {
               name: networkKey,
@@ -1831,7 +1831,7 @@ export default class KoniState extends State {
           }
         });
     } else {
-      const chainInfo = this.getChainInfoByKey(networkKey);
+      const chainInfo = this.getChainInfo(networkKey);
       const nonce = await web3.eth.getTransactionCount(fromAddress);
 
       const txObject: Web3Transaction = {

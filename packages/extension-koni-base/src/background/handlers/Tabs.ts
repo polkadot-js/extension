@@ -152,7 +152,7 @@ export default class KoniTabs extends Tabs {
       currentEvmNetworkKey = authInfo?.currentEvmNetworkKey;
     }
 
-    let currentEvmNetwork: _ChainInfo | undefined = currentEvmNetworkKey ? this.#koniState.getChainInfoByKey(currentEvmNetworkKey) : undefined;
+    let currentEvmNetwork: _ChainInfo | undefined = currentEvmNetworkKey ? this.#koniState.getChainInfo(currentEvmNetworkKey) : undefined;
 
     if (currentEvmNetworkKey && !this.#koniState.getChainStateByKey(currentEvmNetworkKey).active) {
       currentEvmNetwork = Object.values(this.#koniState.getChainInfoMap()).find((network) => {

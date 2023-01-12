@@ -178,12 +178,12 @@ export function _isTokenWasmSmartContract (tokenInfo: _ChainAsset) {
   return false;
 }
 
-export function _parseAssetRef (originTokenSlug: string, destinationTokenSlug: string) {
+export function _parseAssetRefKey (originTokenSlug: string, destinationTokenSlug: string) {
   return `${originTokenSlug}-${destinationTokenSlug}`;
 }
 
 export function _isXcmPathSupported (originTokenSlug: string, destinationTokenSlug: string, assetRefMap: Record<string, _AssetRef>) {
-  const assetRef = assetRefMap[_parseAssetRef(originTokenSlug, destinationTokenSlug)];
+  const assetRef = assetRefMap[_parseAssetRefKey(originTokenSlug, destinationTokenSlug)];
 
   if (!assetRef) {
     return false;
@@ -215,4 +215,8 @@ export function _isSubstrateRelayChain (chainInfo: _ChainInfo) {
 
 export function _isSubstrateParaChain (chainInfo: _ChainInfo) {
   return chainInfo.substrateInfo?.chainType === _SubstrateChainType.PARACHAIN;
+}
+
+export function _getEvmAbiExplorer (chainInfo: _ChainInfo) {
+  return chainInfo.evmInfo?.abiExplorer || '';
 }

@@ -995,12 +995,11 @@ export interface RequestTransferCheckReferenceCount {
 
 export interface RequestTransferCheckSupporting {
   networkKey: string,
-  token: string
+  tokenSlug: string
 }
 
 export interface RequestTransferExistentialDeposit {
-  networkKey: string,
-  token: string
+  tokenSlug: string
 }
 
 export interface RequestSaveRecentAccount {

@@ -1,15 +1,18 @@
 // Copyright 2019-2022 @subwallet/extension-koni authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { EVMTransactionArg, NestedArray, NetworkJson, ParseEVMTransactionData, ResponseParseEVMContractInput, ResponseQrParseRLP } from '@subwallet/extension-base/background/KoniTypes';
-import { ERC20Contract, ERC721Contract, initWeb3Api } from '@subwallet/extension-koni-base/api/tokens/evm/web3';
+import { _ChainInfo } from '@subwallet/chain/types';
+import { EVMTransactionArg, NestedArray, ParseEVMTransactionData, ResponseParseEVMContractInput, ResponseQrParseRLP } from '@subwallet/extension-base/background/KoniTypes';
+import { _ERC20_ABI, _ERC721_ABI } from '@subwallet/extension-base/services/chain-service/helper';
+import { _EvmApi } from '@subwallet/extension-base/services/chain-service/types';
+import { _getEvmAbiExplorer, _getEvmChainId, _isChainEvmCompatible } from '@subwallet/extension-base/services/chain-service/utils';
 import { createTransactionFromRLP, Transaction as QrTransaction } from '@subwallet/extension-koni-base/utils/eth';
 import { InputDataDecoder } from '@subwallet/extension-koni-base/utils/eth/parseTransactionData';
 import axios from 'axios';
 import BigN from 'bignumber.js';
 
 // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-const ABIs = [ERC20Contract.abi, ERC721Contract];
+const ABIs = [_ERC20_ABI, _ERC721_ABI];
 
 const genName = (name: NestedArray<string>): string => {
   if (typeof name === 'string') {
@@ -109,28 +112,25 @@ const parseResult = (type: string, input: NestedArray<any>, name: NestedArray<st
   }
 };
 
-const isContractAddress = async (address: string, network: NetworkJson): Promise<boolean> => {
-  const provider = network.currentProvider && network.providers[network.currentProvider];
-
-  if (!provider) {
+const isContractAddress = async (address: string, evmApi: _EvmApi): Promise<boolean> => {
+  if (!evmApi) {
     return false;
   } else {
-    const web3 = initWeb3Api(provider);
-    const code = await web3.eth.getCode(address);
+    const code = await evmApi.api.eth.getCode(address);
 
     return code !== '0x';
   }
 };
 
-export const parseContractInput = async (input: string, contractAddress: string, network: NetworkJson | null): Promise<ResponseParseEVMContractInput> => {
+export const parseContractInput = async (input: string, contractAddress: string, network: _ChainInfo | null): Promise<ResponseParseEVMContractInput> => {
   let result: ParseEVMTransactionData | string = input;
 
   // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
   const _ABIs: any[] = [...ABIs];
 
-  if (contractAddress) {
-    if (network?.abiExplorer) {
-      const res = await axios.get(network?.abiExplorer, {
+  if (contractAddress && network) {
+    if (_getEvmAbiExplorer(network)) {
+      const res = await axios.get(_getEvmAbiExplorer(network), {
         params: {
           address: contractAddress
         }
@@ -169,7 +169,7 @@ export const parseContractInput = async (input: string, contractAddress: string,
   };
 };
 
-const getNetworkJsonByChainId = (networkMap: Record<string, NetworkJson>, chainId: number): NetworkJson | null => {
+const getNetworkJsonByChainId = (networkMap: Record<string, _ChainInfo>, chainId: number): _ChainInfo | null => {
   if (!chainId) {
     for (const n in networkMap) {
       if (!Object.prototype.hasOwnProperty.call(networkMap, n)) {
@@ -178,7 +178,7 @@ const getNetworkJsonByChainId = (networkMap: Record<string, NetworkJson>, chainI
 
       const networkInfo = networkMap[n];
 
-      if (networkInfo.isEthereum) {
+      if (_isChainEvmCompatible(networkInfo)) {
         return networkInfo;
       }
     }
@@ -193,7 +193,7 @@ const getNetworkJsonByChainId = (networkMap: Record<string, NetworkJson>, chainI
 
     const networkInfo = networkMap[n];
 
-    if (networkInfo.evmChainId === chainId) {
+    if (_getEvmChainId(networkInfo) === chainId) {
       return networkInfo;
     }
   }
@@ -201,7 +201,7 @@ const getNetworkJsonByChainId = (networkMap: Record<string, NetworkJson>, chainI
   return null;
 };
 
-export const parseEvmRlp = async (data: string, networkMap: Record<string, NetworkJson>): Promise<ResponseQrParseRLP> => {
+export const parseEvmRlp = async (data: string, networkMap: Record<string, _ChainInfo>, evmApiMap: Record<string, _EvmApi>): Promise<ResponseQrParseRLP> => {
   const tx: QrTransaction | null = createTransactionFromRLP(data);
 
   if (!tx) {
@@ -218,15 +218,15 @@ export const parseEvmRlp = async (data: string, networkMap: Record<string, Netwo
     nonce: new BigN(tx.nonce).toNumber()
   };
 
-  const network: NetworkJson | null = getNetworkJsonByChainId(networkMap, parseInt(tx.ethereumChainId));
+  const network: _ChainInfo | null = getNetworkJsonByChainId(networkMap, parseInt(tx.ethereumChainId));
 
   // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
   const _ABIs: any[] = [...ABIs];
 
   if (tx.action && network) {
-    if (await isContractAddress(tx.action, network)) {
-      if (network?.abiExplorer) {
-        const res = await axios.get(network?.abiExplorer, {
+    if (await isContractAddress(tx.action, evmApiMap[network.slug])) {
+      if (_getEvmAbiExplorer(network) !== '') {
+        const res = await axios.get(_getEvmAbiExplorer(network), {
           params: {
             address: tx.action
           }

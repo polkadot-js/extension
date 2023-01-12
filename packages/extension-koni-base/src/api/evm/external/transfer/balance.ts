@@ -17,20 +17,20 @@ interface TransferQrArg extends EvmExternalProps {
 export async function handleTransferQr ({ callback,
   chainId,
   changeValue,
+  evmApiMap,
   from,
   id,
   network,
   setState,
   transactionObject,
-  updateState,
-  web3ApiMap }: TransferQrArg) {
-  const networkKey = network.key;
-  const web3Api = web3ApiMap[networkKey];
+  updateState }: TransferQrArg) {
+  const networkKey = network.slug;
+  const web3Api = evmApiMap[networkKey];
   const response: BasicTxResponse = {
     errors: []
   };
 
-  const nonce = await web3Api.eth.getTransactionCount(from);
+  const nonce = await web3Api.api.eth.getTransactionCount(from);
 
   const txObject: Web3Transaction = {
     nonce: nonce,
@@ -71,7 +71,7 @@ export async function handleTransferQr ({ callback,
   try {
     const signed = parseTxAndSignature(txObject, signature);
 
-    web3Api.eth.sendSignedTransaction(signed)
+    web3Api.api.eth.sendSignedTransaction(signed)
       .on('transactionHash', function (hash: string) {
         console.log('transactionHash', hash);
         response.extrinsicHash = hash;
@@ -116,6 +116,7 @@ type EVMTransferArg = TransferArg
 
 export async function makeEVMTransferQr ({ callback,
   chainId,
+  evmApiMap,
   from,
   id,
   network,
@@ -123,15 +124,14 @@ export async function makeEVMTransferQr ({ callback,
   to,
   transferAll,
   updateState,
-  value,
-  web3ApiMap }: EVMTransferArg): Promise<void> {
-  const [transactionObject, changeValue] = await getEVMTransactionObject(network, to, value, transferAll, web3ApiMap);
+  value }: EVMTransferArg): Promise<void> {
+  const [transactionObject, changeValue] = await getEVMTransactionObject(network, to, value, transferAll, evmApiMap);
 
   await handleTransferQr({
     transactionObject,
     changeValue,
     network,
-    web3ApiMap,
+    evmApiMap: evmApiMap,
     callback,
     id,
     setState,
@@ -148,6 +148,7 @@ interface ERC20TransferArg extends TransferArg{
 export async function makeERC20TransferQr ({ assetAddress,
   callback,
   chainId,
+  evmApiMap,
   from,
   id,
   network,
@@ -155,9 +156,8 @@ export async function makeERC20TransferQr ({ assetAddress,
   to,
   transferAll,
   updateState,
-  value,
-  web3ApiMap }: ERC20TransferArg) {
-  const [transactionObject, changeValue] = await getERC20TransactionObject(assetAddress, network, from, to, value, transferAll, web3ApiMap);
+  value }: ERC20TransferArg) {
+  const [transactionObject, changeValue] = await getERC20TransactionObject(assetAddress, network, from, to, value, transferAll, evmApiMap);
 
   await handleTransferQr({
     callback,
@@ -165,7 +165,7 @@ export async function makeERC20TransferQr ({ assetAddress,
     from,
     id,
     setState,
-    web3ApiMap,
+    evmApiMap: evmApiMap,
     changeValue,
     network,
     transactionObject,

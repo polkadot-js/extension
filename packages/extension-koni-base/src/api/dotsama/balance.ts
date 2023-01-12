@@ -609,7 +609,7 @@ export async function getFreeBalance (networkKey: string, address: string, subst
   const api = apiProps.api;
   const web3Api = evmApiMap[networkKey];
   const tokenInfo = tokenSlug ? state.getAssetBySlug(tokenSlug) : state.getNativeTokenInfo(networkKey);
-  const chainInfo = state.getChainInfoByKey(networkKey);
+  const chainInfo = state.getChainInfo(networkKey);
 
   // Only EVM Address use with EVM network
   if (Boolean(web3Api || _isChainEvmCompatible(chainInfo)) !== isEthereumAddress(address)) {
@@ -728,7 +728,7 @@ export async function subscribeFreeBalance (
   const api = apiProps.api;
   const web3Api = evmApiMap[networkKey];
   const tokenInfo = token ? state.getAssetBySlug(token) : state.getNativeTokenInfo(networkKey);
-  const chainInfo = state.getChainInfoByKey(networkKey);
+  const chainInfo = state.getChainInfo(networkKey);
   const isNativeToken = _isNativeToken(tokenInfo);
 
   // Only EVM Address use with EVM network

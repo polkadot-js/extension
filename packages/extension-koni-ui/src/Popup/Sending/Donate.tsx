@@ -170,7 +170,7 @@ function Donate ({ chainRegistryMap, className, defaultValue, networkMap }: Cont
   useEffect(() => {
     let isSync = true;
 
-    transferGetExistentialDeposit({ networkKey: selectedNetworkKey, token: selectedToken })
+    transferGetExistentialDeposit({ networkKey: selectedNetworkKey, tokenSlug: selectedToken })
       .then((rs) => {
         if (isSync) {
           setExistentialDeposit(rs);
@@ -219,7 +219,7 @@ function Donate ({ chainRegistryMap, className, defaultValue, networkMap }: Cont
   useEffect(() => {
     let isSync = true;
 
-    transferCheckSupporting({ networkKey: selectedNetworkKey, token: selectedToken }).then((res) => {
+    transferCheckSupporting({ networkKey: selectedNetworkKey, tokenSlug: selectedToken }).then((res) => {
       if (isSync) {
         setTransferSupport([res.supportTransfer, res.supportTransferAll]);
       }

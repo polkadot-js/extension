@@ -6,6 +6,6 @@ import BaseStore from './BaseStore';
 
 export default class BaseStoreWithChain<T extends DefaultDoc> extends BaseStore<T> {
   public convertToJsonObject (items: T[]): Record<string, T> {
-    return items.reduce((a, v) => ({ ...a, [v.chain]: v }), {});
+    return items.reduce((a, v) => ({ ...a, [v._chain]: v }), {});
   }
 }

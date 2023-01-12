@@ -25,7 +25,7 @@ export default class DatabaseService {
       nft: new NftStore(this._db.nfts),
       nftCollection: new NftCollectionStore(this._db.nftCollections),
       crowdloan: new CrowdloanStore(this._db.crowdloans),
-      staking: new StakingStore(this._db.stakingsV2),
+      staking: new StakingStore(this._db.stakings),
       transaction: new TransactionStore(this._db.transactions),
       migration: new MigrationStore(this._db.migrations),
       extraDelegationInfo: new ExtraDelegationInfoStore(this._db.extraDelegationInfo),
@@ -40,7 +40,7 @@ export default class DatabaseService {
     if (item.state === APIItemState.READY) {
       this.logger.log(`Updating balance for [${chain}]`);
 
-      return this.stores.balance.upsert({ chainHash, chain, address, ...item });
+      return this.stores.balance.upsert({ chainHash, _chain: chain, address, ...item });
     }
   }
 
@@ -53,7 +53,7 @@ export default class DatabaseService {
     if (item.state === APIItemState.READY && item.contribute !== '0') {
       this.logger.log(`Updating crowdloan for [${chain}]`);
 
-      return this.stores.crowdloan.upsert({ chainHash, chain, address, ...item });
+      return this.stores.crowdloan.upsert({ chainHash, _chain: chain, address, ...item });
     } else {
       this.logger.debug(`Removing crowdloan for [${chain}]`);
 
@@ -100,14 +100,14 @@ export default class DatabaseService {
   async addHistories (chain: string, chainHash: string, address: string, histories: TransactionHistoryItemType[]) {
     this.logger.log(`Updating transaction history for [${chain}]`);
 
-    return this.stores.transaction.bulkUpsert(histories.map((item) => ({ chainHash, chain, address, eventIdx: 0, ...item })));
+    return this.stores.transaction.bulkUpsert(histories.map((item) => ({ chainHash, _chain: chain, address, eventIdx: 0, ...item })));
   }
 
   // NFT Collection
   async addNftCollection (chain: string, chainHash: string, collection: NftCollection) {
     this.logger.log(`Updating NFT collection for [${chain}]`);
 
-    return this.stores.nftCollection.upsert({ chainHash, chain, ...collection });
+    return this.stores.nftCollection.upsert({ chainHash, _chain: chain, ...collection });
   }
 
   getAllNftCollection (chainHashes?: string[]) {
@@ -136,7 +136,7 @@ export default class DatabaseService {
   async addNft (chain: string, chainHash: string, address: string, nft: NftItem) {
     this.logger.log(`Updating NFT for [${chain}]`);
 
-    return this.stores.nft.upsert({ ...nft, chainHash, chain, address });
+    return this.stores.nft.upsert({ ...nft, chainHash, _chain: chain, address });
   }
 
   async deleteRemovedNftsFromCollection (chainHash: string, address: string, collectionId?: string, nftIds?: string[]) {

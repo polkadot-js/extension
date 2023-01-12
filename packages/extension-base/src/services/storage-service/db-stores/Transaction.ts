@@ -15,9 +15,9 @@ export default class TransactionStore extends BaseStoreWithAddress<ITransactionH
     return items.reduce((a, v) => {
       // @ts-ignore
       // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-      const value = Array.isArray(a[v.chain]) ? [...a[v.chain], v] : [v];
+      const value = Array.isArray(a[v._chain]) ? [...a[v._chain], v] : [v];
 
-      return { ...a, [v.chain]: value };
+      return { ...a, [v._chain]: value };
     }, {});
   }
 

@@ -3,10 +3,10 @@
 
 import { _ChainInfo } from '@subwallet/chain/types';
 import { SubstrateNftTransaction } from '@subwallet/extension-base/background/KoniTypes';
+import { _PSP22_ABI, _PSP34_ABI } from '@subwallet/extension-base/services/chain-service/helper';
 import { _EvmApi, _SubstrateApi } from '@subwallet/extension-base/services/chain-service/types';
 import { _getChainNativeTokenInfo } from '@subwallet/extension-base/services/chain-service/utils';
 import { getFreeBalance } from '@subwallet/extension-koni-base/api/dotsama/balance';
-import { PSP22Contract, PSP34Contract } from '@subwallet/extension-koni-base/api/tokens/wasm/helper';
 import { parseNumberToDisplay } from '@subwallet/extension-koni-base/utils';
 
 import { ApiPromise } from '@polkadot/api';
@@ -14,11 +14,11 @@ import { ContractPromise } from '@polkadot/api-contract';
 import { BN } from '@polkadot/util';
 
 export function getPSP22ContractPromise (apiPromise: ApiPromise, contractAddress: string) {
-  return new ContractPromise(apiPromise, PSP22Contract, contractAddress);
+  return new ContractPromise(apiPromise, _PSP22_ABI, contractAddress);
 }
 
 export function getPSP34ContractPromise (apiPromise: ApiPromise, contractAddress: string) {
-  return new ContractPromise(apiPromise, PSP34Contract, contractAddress);
+  return new ContractPromise(apiPromise, _PSP34_ABI, contractAddress);
 }
 
 export async function getPSP34Transaction (

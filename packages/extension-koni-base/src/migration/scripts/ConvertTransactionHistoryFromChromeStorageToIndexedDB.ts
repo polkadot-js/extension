@@ -2,6 +2,8 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { TransactionHistoryItemType } from '@subwallet/extension-base/background/KoniTypes';
+import { _CUSTOM_PREFIX } from '@subwallet/extension-base/services/chain-service/types';
+import { _getSubstrateGenesisHash } from '@subwallet/extension-base/services/chain-service/utils';
 import TransactionHistoryStore from '@subwallet/extension-base/stores/TransactionHistory';
 import TransactionHistoryStoreV2 from '@subwallet/extension-base/stores/TransactionHistoryV2';
 import TransactionHistoryStoreV3 from '@subwallet/extension-base/stores/TransactionHistoryV3';
@@ -25,14 +27,14 @@ export default class ConvertTransactionHistoryFromChromeStorageToIndexedDB exten
       const v2Data = await storeV2.asyncGet(address);
       const v3Data = await storeV3.asyncGet(address);
 
-      for (const networkJson of Object.values(this.state.getNetworkMap())) {
-        this.logger.log(`Converting transaction history for network [${networkJson.key}]`);
-        let v1Items = await storeV1.asyncGet(getOldKey(address, networkJson.key));
-        const hash = this.state.getNetworkGenesisHashByKey(networkJson.key);
+      for (const chainInfo of Object.values(this.state.getChainInfoMap())) {
+        this.logger.log(`Converting transaction history for network [${chainInfo.slug}]`);
+        let v1Items = await storeV1.asyncGet(getOldKey(address, chainInfo.slug));
+        const hash = this.state.getNetworkGenesisHashByKey(chainInfo.slug);
 
         // For custom network
-        if (!networkJson.key.includes('custom_')) {
-          const customStoreKey = `${address}_custom_${networkJson.genesisHash}`;
+        if (!chainInfo.slug.includes(_CUSTOM_PREFIX)) {
+          const customStoreKey = `${address}_custom_${_getSubstrateGenesisHash(chainInfo)}`;
           const customHistories = await storeV1.asyncGet(customStoreKey);
 
           if (Array.isArray(customHistories) && customHistories.length) {
@@ -54,7 +56,7 @@ export default class ConvertTransactionHistoryFromChromeStorageToIndexedDB exten
 
         allItems = this.mergeHistories(allItems, v2Items);
         allItems = this.mergeHistories(allItems, v1Items);
-        this.state.setHistory(address, networkJson.key, allItems);
+        this.state.setHistory(address, chainInfo.slug, allItems);
       }
 
       // TODO: remove old transaction data in next version

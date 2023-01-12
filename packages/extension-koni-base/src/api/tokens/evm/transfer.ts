@@ -5,10 +5,11 @@ import Common from '@ethereumjs/common';
 import { _ChainInfo } from '@subwallet/chain/types';
 import { BasicTxResponse, ExternalRequestPromise, ExternalRequestPromiseStatus, HandleBasicTx, TransferErrorCode } from '@subwallet/extension-base/background/KoniTypes';
 import { _BALANCE_PARSING_CHAIN_GROUP } from '@subwallet/extension-base/services/chain-service/constants';
+import { _ERC721_ABI } from '@subwallet/extension-base/services/chain-service/helper';
 import { _EvmApi, _SubstrateApi } from '@subwallet/extension-base/services/chain-service/types';
 import { _getChainNativeTokenInfo, _getEvmChainId } from '@subwallet/extension-base/services/chain-service/utils';
 import { getFreeBalance } from '@subwallet/extension-koni-base/api/dotsama/balance';
-import { ERC721Contract, getERC20Contract } from '@subwallet/extension-koni-base/api/tokens/evm/web3';
+import { getERC20Contract } from '@subwallet/extension-koni-base/api/tokens/evm/web3';
 import { keyring } from '@subwallet/ui-keyring';
 import BigN from 'bignumber.js';
 import BNEther from 'bn.js';
@@ -294,7 +295,7 @@ export async function getERC721Transaction (
   tokenId: string) {
   const web3 = evmApiMap[networkKey];
   // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
-  const contract = new web3.api.eth.Contract(ERC721Contract, contractAddress);
+  const contract = new web3.api.eth.Contract(_ERC721_ABI, contractAddress);
 
   const [fromAccountTxCount, gasPriceGwei, freeBalance] = await Promise.all([
     web3.api.eth.getTransactionCount(senderAddress),

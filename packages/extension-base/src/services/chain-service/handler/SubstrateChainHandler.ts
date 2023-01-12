@@ -4,12 +4,12 @@
 import { options as acalaOptions } from '@acala-network/api';
 import { rpc as oakRpc, types as oakTypes } from '@oak-foundation/types';
 import { _AssetType } from '@subwallet/chain/types';
+import { getSubstrateConnectProvider } from '@subwallet/extension-base/services/chain-service/handler/light-client';
 import { _SubstrateChainSpec } from '@subwallet/extension-base/services/chain-service/handler/types';
 import { _SmartContractTokenInfo, _SubstrateApi, _SubstrateChainMetadata } from '@subwallet/extension-base/services/chain-service/types';
 
 import { ApiPromise, WsProvider } from '@polkadot/api';
 import { ContractPromise } from '@polkadot/api-contract';
-import { ScProvider } from '@polkadot/rpc-provider/substrate-connect';
 import { TypeRegistry } from '@polkadot/types/create';
 import { Registry } from '@polkadot/types/types';
 import { formatBalance, isTestChain, objectSpread, stringify } from '@polkadot/util';
@@ -22,21 +22,6 @@ import { _PSP22_ABI, _PSP34_ABI } from '../helper';
 import { typesBundle, typesChain } from '../helper/api-helper';
 
 export const DEFAULT_AUX = ['Aux1', 'Aux2', 'Aux3', 'Aux4', 'Aux5', 'Aux6', 'Aux7', 'Aux8', 'Aux9'];
-
-function getSubstrateConnectChain (chain = 'polkadot'): string {
-  switch (chain) {
-    case 'kusama':
-      return ScProvider.WellKnownChain.ksmcc3;
-    case 'polkadot':
-      return ScProvider.WellKnownChain.polkadot;
-    case 'rococo':
-      return ScProvider.WellKnownChain.rococo_v2_2;
-    case 'westend':
-      return ScProvider.WellKnownChain.westend2;
-    default:
-      return chain;
-  }
-}
 
 export class SubstrateChainHandler {
   private substrateApiMap: Record<string, _SubstrateApi> = {};
@@ -195,7 +180,7 @@ export class SubstrateChainHandler {
     const registry = new TypeRegistry();
 
     const provider = apiUrl.startsWith('light://')
-      ? new ScProvider(getSubstrateConnectChain(apiUrl.replace('light://substrate-connect/', '')))
+      ? getSubstrateConnectProvider(apiUrl.replace('light://substrate-connect/', ''))
       : new WsProvider(apiUrl, API_AUTO_CONNECT_MS);
 
     const apiOption = { provider, typesBundle, typesChain: typesChain };

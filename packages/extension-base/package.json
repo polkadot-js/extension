@@ -22,6 +22,7 @@
   "dependencies": {
     "@babel/runtime": "^7.20.6",
     "@ethereumjs/common": "^2.6.5",
+    "@kiltprotocol/type-definitions": "^0.30.0",
     "@polkadot/api": "^9.10.3",
     "@polkadot/keyring": "^10.2.1",
     "@polkadot/networks": "^10.2.1",

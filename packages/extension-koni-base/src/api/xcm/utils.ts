@@ -52,3 +52,6 @@ export function getReceiverLocation (originChain: string, destinationChain: stri
 
   return { AccountId32: { network: 'Any', id: decodeAddress(toAddress) } };
 }
+
+// Todo: Remove it after upgrade new UI
+export const SupportedCrossChainsMap = {};

@@ -1,7 +1,9 @@
 // Copyright 2019-2022 @subwallet/extension-koni authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { ContractType, NetworkJson, NftItem } from '@subwallet/extension-base/background/KoniTypes';
+import { _ChainInfo } from '@subwallet/chain/types';
+import { NftItem } from '@subwallet/extension-base/background/KoniTypes';
+import { _isChainSupportEvmNft, _isChainSupportWasmNft } from '@subwallet/extension-base/services/chain-service/utils';
 
 // For rendering purposes only
 export interface _NftCollection {
@@ -59,12 +61,8 @@ export const SUPPORTED_TRANSFER_SUBSTRATE_CHAIN = [
   SUPPORTED_TRANSFER_CHAIN_NAME.pioneer as string
 ];
 
-export function isNftTransferSupported (networkKey: string, networkJson: NetworkJson) {
-  if (networkJson.isEthereum) {
-    return true;
-  }
-
-  if (!networkJson.isEthereum && networkJson.supportSmartContract && networkJson.supportSmartContract.includes(ContractType.wasm)) {
+export function isNftTransferSupported (networkKey: string, chainInfo: _ChainInfo) {
+  if (_isChainSupportEvmNft(chainInfo) || _isChainSupportWasmNft(chainInfo)) {
     return true;
   }
 

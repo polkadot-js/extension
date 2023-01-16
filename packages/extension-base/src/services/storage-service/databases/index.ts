@@ -21,7 +21,7 @@ export interface INftCollection extends Omit<NftCollection, 'chain'>, DefaultDoc
 export interface IBalance extends BalanceItem, DefaultAddressDoc {}
 export interface ICrowdloanItem extends CrowdloanItem, DefaultAddressDoc {}
 export interface IStakingItem extends StakingItem, DefaultAddressDoc {}
-export interface ITransactionHistoryItem extends TransactionHistoryItemType, DefaultAddressDoc { }
+export interface ITransactionHistoryItem extends TransactionHistoryItemType, DefaultAddressDoc {}
 export interface IExtraDelegationInfo extends ExtraDelegationInfo, DefaultAddressDoc {}
 export interface IChain extends _ChainInfo {
   active: boolean,

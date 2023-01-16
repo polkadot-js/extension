@@ -81,7 +81,7 @@ function NftItem ({ className, collectionId, collectionImage, data, onClickBack 
       return;
     }
 
-    if (!isNftTransferSupported(data.chain, networkJson)) {
+    if (!  isNftTransferSupported(data.chain, networkJson)) {
       show('Transfer is not supported for this network');
 
       return;

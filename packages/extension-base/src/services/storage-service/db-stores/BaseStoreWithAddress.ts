@@ -9,7 +9,7 @@ export default class BaseStoreWithAddress<T extends DefaultAddressDoc> extends B
     const conditions = { address } as T;
 
     if (chain) {
-      conditions._chain = chain;
+      conditions.chain = chain;
     }
 
     return this.table.where(conditions).delete();

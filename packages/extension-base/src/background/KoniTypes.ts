@@ -1,7 +1,7 @@
 // Copyright 2019-2022 @polkadot/extension-koni authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { _ChainAsset, _ChainInfo } from '@subwallet/chain/types';
+import {_AssetType, _ChainAsset, _ChainInfo} from '@subwallet/chain/types';
 import { AuthUrls, Resolver } from '@subwallet/extension-base/background/handlers/State';
 import { AccountAuthType, AccountJson, AuthorizeRequest, RequestAccountList, RequestAccountSubscribe, RequestAuthorizeCancel, RequestAuthorizeReject, RequestAuthorizeSubscribe, RequestAuthorizeTab, RequestCurrentAccountAddress, ResponseAuthorizeList, ResponseJsonGetAccountInfo, SeedLengths } from '@subwallet/extension-base/background/types';
 import { _ChainState, _EvmApi, _SubstrateApi } from '@subwallet/extension-base/services/chain-service/types';
@@ -206,7 +206,7 @@ export interface NftItem {
   description?: string;
   properties?: Record<any, any> | null;
   chain?: string;
-  type?: CustomTokenType.erc721 | CustomTokenType.psp34 | RMRK_VER; // for sending
+  type?: _AssetType.ERC721 | _AssetType.PSP34 | RMRK_VER; // for sending
   rmrk_ver?: RMRK_VER;
   owner?: string;
   onChainOption?: any; // for sending PSP-34 tokens, should be done better
@@ -230,10 +230,10 @@ export interface NftCollectionJson {
   nftCollectionList: Array<NftCollection>;
 }
 
-export interface NftStoreJson {
-  nftList: Array<NftItem>;
-  nftCollectionList: Array<NftCollection>;
-}
+// export interface NftStoreJson {
+//   nftList: Array<NftItem>;
+//   nftCollectionList: Array<NftCollection>;
+// }
 
 export interface TokenBalanceRaw {
   reserved: BN,
@@ -317,21 +317,6 @@ export interface ApiProps extends ApiState {
 }
 
 export type NetWorkGroup = 'RELAY_CHAIN' | 'POLKADOT_PARACHAIN' | 'KUSAMA_PARACHAIN' | 'MAIN_NET' | 'TEST_NET' | 'UNKNOWN';
-
-export interface NetWorkInfo {
-  chain: string;
-  genesisHash: string;
-  icon?: string;
-  ss58Format: number;
-  chainType?: 'substrate' | 'ethereum';
-  provider: string;
-  groups: NetWorkGroup[];
-  paraId?: number;
-  isEthereum?: boolean;
-  nativeToken?: string;
-  crowdloanUrl?: string;
-  decimals?: number;
-}
 
 export enum ContractType {
   wasm = 'wasm',

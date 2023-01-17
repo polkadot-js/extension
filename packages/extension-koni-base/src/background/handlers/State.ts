@@ -178,7 +178,7 @@ export default class KoniState extends State {
   public generateDefaultBalanceMap () {
     const balanceMap: Record<string, BalanceItem> = {};
 
-    Object.values(this.chainService.getActiveChainInfoMap()).forEach((chainInfo) => {
+    Object.values(ChainInfoMap).forEach((chainInfo) => {
       // TODO: refactor balanceMap
       balanceMap[chainInfo.slug] = {
         state: APIItemState.PENDING
@@ -192,6 +192,7 @@ export default class KoniState extends State {
     this.chainService.init(() => {
       this.onReady(); // TODO: do better than a callback
       this.updateServiceInfo();
+      console.log('done init state');
     });
   }
 

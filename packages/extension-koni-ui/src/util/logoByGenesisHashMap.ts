@@ -1,7 +1,6 @@
 // Copyright 2019-2022 @polkadot/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-// import { PREDEFINED_NETWORKS } from '@subwallet/extension-koni-base/api/predefinedNetworks';
 import LogosMap from '@subwallet/extension-koni-ui/assets/logo';
 
 function getLogoByGenesisHashMap (): Record<string, string> {

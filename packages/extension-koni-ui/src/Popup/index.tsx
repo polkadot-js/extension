@@ -359,7 +359,7 @@ export default function Popup (): React.ReactElement {
                                               <Route path='/account/select-bonding-network'>{wrapWithErrorBoundary(<BondingNetworkSelection />, 'bonding-network')}</Route>
                                               <Route path='/account/select-bonding-validator'>{wrapWithErrorBoundary(<BondingValidatorSelection />, 'bonding-validator')}</Route>
                                               <Route path='/account/bonding-auth'>{wrapWithErrorBoundary(<BondingSubmitTransaction />, 'bonding-auth')}</Route>
-                                              <Route path='/account/unbonding-auth'>{wrapWithErrorBoundary(<UnbondingSubmitTransaction />, 'unbonding-auth')}</Route>
+                                              <Route path='/account/unbonding-auth/'>{wrapWithErrorBoundary(<UnbondingSubmitTransaction />, 'unbonding-auth')}</Route>
                                               <Route path='/account/stake-compounding-auth'>{wrapWithErrorBoundary(<StakeCompoundSubmitTransaction />, 'stake-compounding-auth')}</Route>
                                               <Route path='/keyring/change'>{wrapWithErrorBoundary(<ChangeMasterPassword />, 'change-master-password')}</Route>
                                               <Route path='/keyring/migrate'>{wrapWithErrorBoundary(<MigrateMasterPassword />, 'migrate-password')}</Route>

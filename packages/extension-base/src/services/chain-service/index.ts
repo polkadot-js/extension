@@ -658,7 +658,8 @@ export class ChainService {
           decimals: params.chainSpec.decimals,
           evmChainId: params.chainSpec.evmChainId,
           existentialDeposit: params.chainSpec.existentialDeposit,
-          symbol: params.chainEditInfo.symbol
+          symbol: params.chainEditInfo.symbol,
+          abiExplorer: null
         };
       }
 

@@ -2,8 +2,16 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { _ChainAsset, _ChainInfo } from '@subwallet/chain-list/types';
-import { AddNetworkRequestExternal, NftItem, StakingRewardItem, TransactionHistoryItemType, ValidatorInfo } from '@subwallet/extension-base/background/KoniTypes';
+import {
+  AddNetworkRequestExternal,
+  NftItem,
+  StakingRewardItem,
+  TransactionHistoryItemType,
+  UiSettings,
+  ValidatorInfo
+} from '@subwallet/extension-base/background/KoniTypes';
 import { AccountJson } from '@subwallet/extension-base/background/types';
+import {SettingsStruct} from "@polkadot/ui-settings/types";
 
 export type CurrentAccountType = {
   account?: AccountJson | null;
@@ -51,10 +59,12 @@ export type StakeCompoundParams = {
 
 export type KeyringStateParams = {
   mode: 'create' | 'edit' | 'init',
-  data: NetworkJson;
+  data: _ChainInfo;
 }
 
 export type StakingRewardJson_ = {
   details: StakingRewardItem[],
   ready: boolean
 }
+
+export interface AppSettings extends UiSettings, SettingsStruct {}

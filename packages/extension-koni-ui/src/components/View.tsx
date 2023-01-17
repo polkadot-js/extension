@@ -3,7 +3,7 @@
 
 import type { ThemeProps } from '../types';
 
-import { ResponseSettingsType, ThemeTypes } from '@subwallet/extension-base/background/KoniTypes';
+import { UiSettings, ThemeTypes } from '@subwallet/extension-base/background/KoniTypes';
 import { AvailableThemes, chooseTheme, Main, themes, ThemeSwitchContext } from '@subwallet/extension-koni-ui/components';
 import { saveTheme, subscribeSettings } from '@subwallet/extension-koni-ui/messaging';
 import React, { useCallback, useEffect, useState } from 'react';
@@ -26,7 +26,7 @@ function View ({ children, className }: Props): React.ReactElement<Props> {
   );
 
   useEffect(() => {
-    const _switchTheme = (data: ResponseSettingsType) => {
+    const _switchTheme = (data: UiSettings) => {
       if (!data.theme) {
         const theme = localStorage.getItem('theme');
 

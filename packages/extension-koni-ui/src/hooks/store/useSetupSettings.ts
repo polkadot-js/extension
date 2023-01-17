@@ -1,12 +1,12 @@
 // Copyright 2019-2022 @polkadot/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { ResponseSettingsType } from '@subwallet/extension-base/background/KoniTypes';
+import { UiSettings } from '@subwallet/extension-base/background/KoniTypes';
 import { subscribeSettings } from '@subwallet/extension-koni-ui/messaging';
 import { store } from '@subwallet/extension-koni-ui/stores';
 import { useEffect } from 'react';
 
-function updateSettings (settings: ResponseSettingsType): void {
+function updateSettings (settings: UiSettings): void {
   store.dispatch({ type: 'settings/update', payload: settings });
 }
 

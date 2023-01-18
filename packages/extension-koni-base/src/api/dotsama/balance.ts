@@ -23,6 +23,12 @@ import { BN } from '@polkadot/util';
 import { isEthereumAddress } from '@polkadot/util-crypto';
 
 type EqBalanceItem = [number, { positive: number }];
+type EqBalanceV0 = {
+  v0: {
+    lock: number,
+    balance: EqBalanceItem[]
+  }
+}
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 // @ts-ignore
@@ -178,11 +184,12 @@ async function subscribeEquilibriumTokenBalance (addresses: string[], networkKey
 
   const unsub = await api.query.system.account.multi(addresses, (balances: Record<string, any>[]) => {
     // eslint-disable-next-line @typescript-eslint/no-unsafe-argument,@typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-member-access
-    const balancesData = JSON.parse(balances[0].data.toString()) as EqBalanceItem[];
+    const balancesData = JSON.parse(balances[0].data.toString()) as EqBalanceV0;
+    const balanceList = balancesData.v0.balance;
 
     tokenList.map(({ decimals, specialOption, symbol }) => {
       // @ts-ignore
-      const freeTokenBalance = balancesData.find((data: EqBalanceItem) => data[0] === specialOption?.assetId);
+      const freeTokenBalance = balanceList.find((data: EqBalanceItem) => data[0] === specialOption?.assetId);
       const tokenBalance = {
         reserved: '0',
         frozen: '0',
@@ -650,14 +657,15 @@ export async function getFreeBalance (networkKey: string, address: string, dotSa
         // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
         const balance = await api.query.system.account(address) as any;
         // eslint-disable-next-line @typescript-eslint/no-unsafe-argument,@typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-member-access
-        const balancesData = JSON.parse(balance.data.toString()) as EqBalanceItem[];
+        const balancesData = JSON.parse(balance.data.toString()) as EqBalanceV0;
+        const balanceList = balancesData.v0.balance;
         let freeTokenBalance: EqBalanceItem | undefined;
 
         if (tokenInfo && tokenInfo.specialOption) {
           // @ts-ignore
-          freeTokenBalance = balancesData.find((data: EqBalanceItem) => data[0] === tokenInfo.specialOption?.assetId);
+          freeTokenBalance = balanceList.find((data: EqBalanceItem) => data[0] === tokenInfo.specialOption?.assetId);
         } else {
-          freeTokenBalance = balancesData[0];
+          freeTokenBalance = balanceList[0];
         }
 
         return freeTokenBalance ? freeTokenBalance[1].positive.toString() : '0';
@@ -798,14 +806,15 @@ export async function subscribeFreeBalance (
         // @ts-ignore
         const unsub = await api.query.system.account(address, (balance) => {
         // eslint-disable-next-line @typescript-eslint/no-unsafe-argument,@typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-member-access
-          const balancesData = JSON.parse(balance.data.toString()) as EqBalanceItem[];
+          const balancesData = JSON.parse(balance.data.toString()) as EqBalanceV0;
+          const balanceList = balancesData.v0.balance;
           let freeTokenBalance: EqBalanceItem | undefined;
 
           if (tokenInfo && tokenInfo.specialOption) {
             // @ts-ignore
-            freeTokenBalance = balancesData.find((data: EqBalanceItem) => data[0] === tokenInfo.specialOption?.assetId);
+            freeTokenBalance = balanceList.find((data: EqBalanceItem) => data[0] === tokenInfo.specialOption?.assetId);
           } else {
-            freeTokenBalance = balancesData[0];
+            freeTokenBalance = balanceList[0];
           }
 
           update(freeTokenBalance ? freeTokenBalance[1].positive.toString() : '0');

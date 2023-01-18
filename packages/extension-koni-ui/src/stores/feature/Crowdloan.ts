@@ -2,20 +2,25 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { createSlice, PayloadAction } from '@reduxjs/toolkit/dist';
-import { CrowdloanJson } from '@subwallet/extension-base/background/KoniTypes';
+import { CrowdloanItem } from '@subwallet/extension-base/background/KoniTypes';
+import { CrowdloanStore, ReduxStatus } from '@subwallet/extension-koni-ui/stores/types';
 
-const initialState = {
-  details: {}
-} as CrowdloanJson;
+const initialState: CrowdloanStore = {
+  crowdloanMap: {},
+  reduxStatus: ReduxStatus.INIT
+};
 
 const crowdloanSlice = createSlice({
   initialState,
   name: 'crowdloan',
   reducers: {
-    update (state, action: PayloadAction<CrowdloanJson>) {
+    update (state, action: PayloadAction<Record<string, CrowdloanItem>>) {
       const payload = action.payload;
 
-      state.details = payload.reset ? payload.details : { ...state.details, ...payload.details };
+      return {
+        crowdloanMap: payload,
+        reduxStatus: ReduxStatus.READY
+      };
     }
   }
 });

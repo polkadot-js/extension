@@ -3,10 +3,23 @@
 
 import { _ChainAsset, _ChainInfo } from '@subwallet/chain-list/types';
 import { AuthUrlInfo } from '@subwallet/extension-base/background/handlers/State';
-import { AddNetworkRequestExternal, ConfirmationDefinitions, ConfirmationsQueue, ConfirmationType, KeyringState, NftItem, StakingRewardItem, TransactionHistoryItemType, UiSettings, ValidatorInfo } from '@subwallet/extension-base/background/KoniTypes';
+import {
+  AddNetworkRequestExternal,
+  BalanceItem,
+  ConfirmationDefinitions,
+  ConfirmationsQueue,
+  ConfirmationType, CrowdloanItem,
+  KeyringState,
+  NftItem,
+  StakingRewardItem,
+  TransactionHistoryItemType,
+  UiSettings,
+  ValidatorInfo
+} from '@subwallet/extension-base/background/KoniTypes';
 import { AccountJson, AccountsContext, AuthorizeRequest, MetadataRequest, SigningRequest } from '@subwallet/extension-base/background/types';
 
 import { SettingsStruct } from '@polkadot/ui-settings/types';
+import {_ChainState} from "@subwallet/extension-base/services/chain-service/types";
 
 export type CurrentAccountType = {
   account?: AccountJson | null;
@@ -68,27 +81,44 @@ export enum ReduxStatus {
   READY = 'ready'
 }
 
-export interface BaseReduxState {
+export interface BaseReduxStore {
   reduxStatus: ReduxStatus
 }
 
-export interface AppSettings extends UiSettings, SettingsStruct, BaseReduxState {
+export interface AppSettings extends UiSettings, SettingsStruct, BaseReduxStore {
   authUrls: Record<string, AuthUrlInfo>,
   mediaAllowed: boolean
 }
 
-export interface AccountState extends AccountsContext, KeyringState, BaseReduxState {
+export interface AccountState extends AccountsContext, KeyringState, BaseReduxStore {
   currentAccount: AccountJson | null
 }
 
-export interface RequestState extends BaseReduxState {
+export interface RequestState extends BaseReduxStore {
   authorizeRequest: AuthorizeRequest[],
   metadataRequest: MetadataRequest[],
   signingRequest: SigningRequest[],
   confirmationQueue: ConfirmationsQueue
 }
 
-export interface UpdateConfirmationsQueueRequest extends BaseReduxState {
+export interface UpdateConfirmationsQueueRequest extends BaseReduxStore {
   type: ConfirmationType,
   data: Record<string, ConfirmationDefinitions[ConfirmationType][0]>
+}
+
+export interface AssetRegistryStore extends BaseReduxStore {
+  assetRegistry: Record<string, _ChainAsset>;
+}
+
+export interface ChainStore extends BaseReduxStore {
+  chainInfoMap: Record<string, _ChainInfo>,
+  chainStateMap: Record<string, _ChainState>
+}
+
+export interface BalanceStore extends BaseReduxStore {
+  balanceMap: Record<string, BalanceItem>+
+}
+
+export interface CrowdloanStore extends BaseReduxStore {
+  crowdloanMap: Record<string, CrowdloanItem>
 }

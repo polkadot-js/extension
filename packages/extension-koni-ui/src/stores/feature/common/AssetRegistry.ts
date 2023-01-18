@@ -3,8 +3,12 @@
 
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 import { _ChainAsset } from '@subwallet/chain-list/types';
+import { AssetRegistryStore, ReduxStatus } from '@subwallet/extension-koni-ui/stores/types';
 
-const initialState: Record<string, _ChainAsset> = {};
+const initialState: AssetRegistryStore = {
+  assetRegistry: {},
+  reduxStatus: ReduxStatus.INIT
+};
 
 const assetRegistrySlice = createSlice({
   initialState,
@@ -13,7 +17,10 @@ const assetRegistrySlice = createSlice({
     update (state, action: PayloadAction<Record<string, _ChainAsset>>) {
       const { payload } = action;
 
-      Object.assign(state, payload);
+      return {
+        assetRegistry: payload,
+        reduxStatus: ReduxStatus.READY
+      };
     }
   }
 });

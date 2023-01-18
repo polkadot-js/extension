@@ -8,8 +8,7 @@ import RequestStateReducer from './base/RequestState';
 import SettingsReducer from './base/Settings';
 import BalanceReducer from './feature/Balance';
 import AssetRegistryReducer from './feature/common/AssetRegistry';
-import ChainInfoMapReducer from './feature/common/ChainInfoMap';
-import ChainStateMapReducer from './feature/common/ChainStateMap';
+import ChainStoreReducer from './feature/common/ChainStore';
 import CrowdloanReducer from './feature/Crowdloan';
 import NftReducer from './feature/Nft';
 import PriceReducer from './feature/Price';
@@ -26,8 +25,7 @@ const reducers = {
   balance: BalanceReducer,
 
   // common
-  chainInfoMap: ChainInfoMapReducer,
-  chainStateMap: ChainStateMapReducer,
+  chainInfoMap: ChainStoreReducer,
   assetRegistry: AssetRegistryReducer,
 
   // base

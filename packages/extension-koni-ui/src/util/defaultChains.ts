@@ -2,7 +2,6 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { NETWORK_STATUS, NetworkJson, NetWorkMetadataDef } from '@subwallet/extension-base/background/KoniTypes';
-// import { PREDEFINED_NETWORKS } from '@subwallet/extension-koni-base/api/predefinedNetworks';
 
 function getDefaultHashes (): NetWorkMetadataDef[] {
   const result: NetWorkMetadataDef[] = [];

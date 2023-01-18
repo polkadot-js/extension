@@ -1,7 +1,7 @@
 // Copyright 2019-2022 @polkadot/extension-koni authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import {_AssetType, _ChainAsset, _ChainInfo} from '@subwallet/chain-list/types';
+import { _AssetType, _ChainAsset, _ChainInfo } from '@subwallet/chain-list/types';
 import { AuthUrls, Resolver } from '@subwallet/extension-base/background/handlers/State';
 import { AccountAuthType, AccountJson, AuthorizeRequest, RequestAccountList, RequestAccountSubscribe, RequestAuthorizeCancel, RequestAuthorizeReject, RequestAuthorizeSubscribe, RequestAuthorizeTab, RequestCurrentAccountAddress, ResponseAuthorizeList, ResponseJsonGetAccountInfo, SeedLengths } from '@subwallet/extension-base/background/types';
 import { _ChainState, _EvmApi, _SubstrateApi } from '@subwallet/extension-base/services/chain-service/types';
@@ -450,7 +450,7 @@ export interface RequestSettingsType {
   theme: ThemeTypes;
 }
 
-export interface ResponseSettingsType {
+export interface UiSettings {
   isShowBalance: boolean;
   accountAllLogo: string;
   theme: ThemeTypes;
@@ -746,7 +746,11 @@ export type RequestSubscribeCrowdloan = null
 export type RequestSubscribeNft = null
 export type RequestSubscribeStaking = null
 export type RequestSubscribeStakingReward = null
-export type ThemeTypes = 'light' | 'dark' | 'subspace'
+export enum ThemeTypes {
+  LIGHT = 'light',
+  DARK = 'dark',
+  SUBSPACE = 'subspace'
+}
 export type RequestNftForceUpdate = {
   collectionId: string,
   nft: NftItem,
@@ -1731,10 +1735,10 @@ export interface KoniRequestSignatures {
   'pri(currentAccount.saveAddress)': [RequestCurrentAccountAddress, boolean, CurrentAccountInfo];
 
   // Settings
-  'pri(settings.changeBalancesVisibility)': [null, boolean, ResponseSettingsType];
-  'pri(settings.subscribe)': [null, ResponseSettingsType, ResponseSettingsType];
-  'pri(settings.saveAccountAllLogo)': [string, boolean, ResponseSettingsType];
-  'pri(settings.saveTheme)': [ThemeTypes, boolean, ResponseSettingsType];
+  'pri(settings.changeBalancesVisibility)': [null, boolean, UiSettings];
+  'pri(settings.subscribe)': [null, UiSettings, UiSettings];
+  'pri(settings.saveAccountAllLogo)': [string, boolean, UiSettings];
+  'pri(settings.saveTheme)': [ThemeTypes, boolean, UiSettings];
 
   // Subscription
   'pri(chainRegistry.getSubscription)': [null, Record<string, ChainRegistry>, Record<string, ChainRegistry>];

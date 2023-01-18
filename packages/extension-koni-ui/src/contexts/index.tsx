@@ -14,11 +14,11 @@ import settings from '@polkadot/ui-settings';
 const noop = (): void => undefined;
 
 const AccountContext = React.createContext<AccountsContext>({ accounts: [], hierarchy: [], master: undefined });
-const ActionContext = React.createContext<(to: string) => void>(noop);
-const AuthorizeReqContext = React.createContext<AuthorizeRequest[]>([]);
+const ActionContext = React.createContext<(to?: string) => void>(noop);
 const MediaContext = React.createContext<boolean>(false);
+
+const AuthorizeReqContext = React.createContext<AuthorizeRequest[]>([]);
 const MetadataReqContext = React.createContext<MetadataRequest[]>([]);
-const SettingsContext = React.createContext<SettingsStruct>(settings.get());
 const SigningReqContext = React.createContext<SigningRequest[]>([]);
 const ConfirmationsQueueContext = React.createContext<ConfirmationsQueue>({
   addNetworkRequest: {},
@@ -29,6 +29,9 @@ const ConfirmationsQueueContext = React.createContext<ConfirmationsQueue>({
   evmSendTransactionRequest: {},
   evmSendTransactionRequestExternal: {}
 });
+
+const SettingsContext = React.createContext<SettingsStruct>(settings.get());
+
 const ThemeSwitchContext = React.createContext<(theme: AvailableThemes) => void>(noop);
 const ToastContext = React.createContext<({show: (message: string, isError?: boolean) => void})>({ show: noop });
 // eslint-disable-next-line func-call-spacing

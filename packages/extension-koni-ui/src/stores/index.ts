@@ -3,80 +3,37 @@
 
 import { configureStore } from '@reduxjs/toolkit/dist';
 
-import AllAccountReducer from './AllAccount';
-import AssetRegistryReducer from './AssetRegistry';
-import AuthUrlReducer from './AuthUrl';
-import BalanceReducer from './Balance';
-import BondingParamsReducer from './BondingParams';
-import ChainInfoMapReducer from './ChainInfoMap';
-import ChainRegistryReducer from './ChainRegistry';
-import ChainStateMapReducer from './ChainStateMap';
-import CrowdloanReducer from './Crowdloan';
-import CurrentAccountReducer from './CurrentAccount';
-import CurrentNetworkReducer from './CurrentNetwork';
-import CustomTokenReducer from './CustomToken';
-import KeyringStateReducer from './KeyringState';
-import NetworkConfigParamsReducer from './NetworkConfigParams';
-import NetworkMapReducer from './NetworkMap';
-import NftReducer from './Nft';
-import NftCollectionReducer from './NftCollection';
-import PriceReducer from './Price';
-import SettingsReducer from './Settings';
-import stakeCompoundParamsReducer from './StakeCompound';
-import StakeUnlockingReducer from './StakeUnlockingInfo';
-import StakingReducer from './Staking';
-import StakingRewardReducer from './StakingReward';
-import TokenConfigReducer from './TokenConfigParams';
-import TransactionHistoryReducer from './TransactionHistory';
-import TransferNftExtraReducer from './TransferNftExtra';
-import TransferNftParamsReducer from './TransferNftParams';
-import UnbondingParamsReducer from './UnbondingParams';
+import AccountStateReducer from './base/AccountState';
+import RequestStateReducer from './base/RequestState';
+import SettingsReducer from './base/Settings';
+import BalanceReducer from './feature/Balance';
+import AssetRegistryReducer from './feature/common/AssetRegistry';
+import ChainInfoMapReducer from './feature/common/ChainInfoMap';
+import ChainStateMapReducer from './feature/common/ChainStateMap';
+import CrowdloanReducer from './feature/Crowdloan';
+import NftReducer from './feature/Nft';
+import PriceReducer from './feature/Price';
+import StakingReducer from './feature/Staking';
+import TransactionHistoryReducer from './feature/TransactionHistory';
 
 const reducers = {
-  // tx history
+  // feature
   transactionHistory: TransactionHistoryReducer,
-
-  // crowdloan
   crowdloan: CrowdloanReducer,
-
-  // nft
-  nftCollection: NftCollectionReducer,
   nft: NftReducer,
-  transferNftExtra: TransferNftExtraReducer,
-  transferNftParams: TransferNftParamsReducer,
-
-  // staking
-  stakingReward: StakingRewardReducer,
   staking: StakingReducer,
-  stakeCompoundParams: stakeCompoundParamsReducer,
-  stakeUnlockingInfo: StakeUnlockingReducer,
-  unbondingParams: UnbondingParamsReducer,
-  bondingParams: BondingParamsReducer,
-
-  // custom network, custom token
-  networkConfigParams: NetworkConfigParamsReducer,
-  tokenConfigParams: TokenConfigReducer,
-  customToken: CustomTokenReducer,
-
-  // balance
   price: PriceReducer,
   balance: BalanceReducer,
 
-  // deprecated
-  networkMap: NetworkMapReducer,
-  chainRegistry: ChainRegistryReducer,
-
-  // general stores
+  // common
   chainInfoMap: ChainInfoMapReducer,
   chainStateMap: ChainStateMapReducer,
   assetRegistry: AssetRegistryReducer,
 
-  currentAccount: CurrentAccountReducer,
-  currentNetwork: CurrentNetworkReducer,
-  allAccount: AllAccountReducer,
+  // base
+  requestState: RequestStateReducer,
   settings: SettingsReducer,
-  authUrl: AuthUrlReducer,
-  keyringState: KeyringStateReducer
+  accountState: AccountStateReducer
 };
 
 export const store = configureStore({

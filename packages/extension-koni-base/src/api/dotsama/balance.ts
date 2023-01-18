@@ -19,7 +19,7 @@ import { ApiPromise } from '@polkadot/api';
 import { ContractPromise } from '@polkadot/api-contract';
 import { DeriveBalancesAll } from '@polkadot/api-derive/types';
 import { AccountInfo, Balance } from '@polkadot/types/interfaces';
-import { BN } from '@polkadot/util';
+import { BN, BN_ZERO } from '@polkadot/util';
 import { isEthereumAddress } from '@polkadot/util-crypto';
 
 type EqBalanceItem = [number, { positive: number }];
@@ -183,30 +183,34 @@ async function subscribeEquilibriumTokenBalance (addresses: string[], networkKey
   }
 
   const unsub = await api.query.system.account.multi(addresses, (balances: Record<string, any>[]) => {
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-argument,@typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-member-access
-    const balancesData = JSON.parse(balances[0].data.toString()) as EqBalanceV0;
-    const balanceList = balancesData.v0.balance;
+    tokenList.forEach(({ decimals, specialOption, symbol }) => {
+      let tokenFreeBalance = BN_ZERO;
 
-    tokenList.map(({ decimals, specialOption, symbol }) => {
-      // @ts-ignore
-      const freeTokenBalance = balanceList.find((data: EqBalanceItem) => data[0] === specialOption?.assetId);
-      const tokenBalance = {
-        reserved: '0',
-        frozen: '0',
-        free: freeTokenBalance ? freeTokenBalance[1].positive.toString() : '0',
-        decimals
-      };
+      for (const balance of balances) {
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-argument,@typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-member-access
+        const balancesData = JSON.parse(balance.data.toString()) as EqBalanceV0;
+        const balanceList = balancesData.v0.balance;
+
+        // @ts-ignore
+        const freeTokenBalance = balanceList.find((data: EqBalanceItem) => data[0] === specialOption?.assetId);
+        const bnFreeTokenBalance = freeTokenBalance ? new BN(freeTokenBalance[1].positive.toString()) : BN_ZERO;
+
+        tokenFreeBalance = tokenFreeBalance.add(bnFreeTokenBalance);
+      }
 
       if (includeMainToken && tokenMap[symbol].isMainToken) {
         mainCallback({
           state: APIItemState.READY,
-          free: tokenBalance.free
+          free: tokenFreeBalance.toString()
         });
       } else {
-        subCallback({ [symbol]: tokenBalance });
+        subCallback({ [symbol]: {
+          reserved: '0',
+          frozen: '0',
+          free: tokenFreeBalance.toString(),
+          decimals
+        } });
       }
-
-      return undefined;
     });
   });
 

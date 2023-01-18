@@ -22,7 +22,7 @@ import { SigData } from '@subwallet/extension-koni-ui/types/accountExternalReque
 import { findAccountByAddress, getSignMode } from '@subwallet/extension-koni-ui/util/account';
 import React, { useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { useSelector } from 'react-redux';
-import { RouteComponentProps, withRouter } from 'react-router';
+import { RouteComponentProps } from 'react-router';
 import styled from 'styled-components';
 
 interface Props extends RouteComponentProps<{ address: string }>, ThemeProps {
@@ -31,12 +31,12 @@ interface Props extends RouteComponentProps<{ address: string }>, ThemeProps {
 
 const CAN_SIGN_MODE: SIGN_MODE[] = [SIGN_MODE.PASSWORD, SIGN_MODE.QR];
 
-function Confirmation ({ className, match: { params: { address } } }: Props): React.ReactElement<Props> {
+function Confirmation ({ className }: Props): React.ReactElement<Props> {
   const { t } = useTranslation();
   const confirmations = useContext(ConfirmationsQueueContext);
   const onAction = useContext(ActionContext);
   const { accounts } = useContext(AccountContext);
-  const { networkMap } = useSelector((state: RootState) => state);
+  const networkMap = useSelector((state: RootState) => state.networkMap);
   const [network, setNetwork] = useState<NetworkJson | undefined>(undefined);
   const [account, setAccount] = useState<AccountJson | undefined>(undefined);
   const [header, setHeader] = useState<string | undefined>(undefined);
@@ -321,7 +321,7 @@ function Confirmation ({ className, match: { params: { address } } }: Props): Re
   </>);
 }
 
-export default withRouter(styled(Confirmation)(({ theme }: Props) => `
+export default styled(Confirmation)(({ theme }: Props) => `
   display: flex;
   flex-direction: column;
   height: 100%;
@@ -385,4 +385,4 @@ export default withRouter(styled(Confirmation)(({ theme }: Props) => `
     margin-top: 10px;
     color: red;
   }
-`));
+`);

@@ -18,7 +18,9 @@ export const PREDEFINED_NETWORKS: Record<string, NetworkJson> = {
       'light client': 'light://substrate-connect/polkadot',
       RadiumBlock: 'wss://polkadot.public.curie.radiumblock.io/ws',
       '1RPC': 'wss://1rpc.io/dot',
-      Pinknode: 'wss://public-rpc.pinknode.io/polkadot' // https://github.com/polkadot-js/apps/issues/5721
+      Pinknode: 'wss://public-rpc.pinknode.io/polkadot', // https://github.com/polkadot-js/apps/issues/5721
+      Dotters: 'wss://rpc.dotters.network/polkadot',
+      'Dwellir Tunisia': 'wss://polkadot-rpc-tn.dwellir.com'
     },
     active: true,
     currentProvider: 'Parity',
@@ -44,7 +46,9 @@ export const PREDEFINED_NETWORKS: Record<string, NetworkJson> = {
       'light client': 'light://substrate-connect/kusama',
       Pinknode: 'wss://public-rpc.pinknode.io/kusama',
       RadiumBlock: 'wss://kusama.public.curie.radiumblock.xyz/ws',
-      '1RPC': 'wss://1rpc.io/ksm'
+      '1RPC': 'wss://1rpc.io/ksm',
+      DottersNet: 'wss://rpc.dotters.network/kusama',
+      'Dwellir Tunisia': 'wss://kusama-rpc-tn.dwellir.com'
     },
     active: true,
     currentProvider: 'Parity',
@@ -66,7 +70,9 @@ export const PREDEFINED_NETWORKS: Record<string, NetworkJson> = {
       Parity: 'wss://westend-rpc.polkadot.io',
       Pinknode: 'wss://rpc.pinknode.io/westend/explorer',
       Dwellir: 'wss://westend-rpc.dwellir.com',
-      'light client': 'light://substrate-connect/westend'
+      'light client': 'light://substrate-connect/westend',
+      DottersNet: 'wss://rpc.dotters.network/westend',
+      'Dwellir Tunisia': 'wss://westend-rpc-tn.dwellir.com'
     },
     active: false,
     currentProvider: 'Parity',
@@ -108,7 +114,8 @@ export const PREDEFINED_NETWORKS: Record<string, NetworkJson> = {
       OnFinality: 'wss://statemint.api.onfinality.io/public-ws',
       Dwellir: 'wss://statemint-rpc.dwellir.com',
       PinkNode: 'wss://public-rpc.pinknode.io/statemint',
-      RadiumBlock: 'wss://statemint.public.curie.radiumblock.xyz/ws'
+      RadiumBlock: 'wss://statemint.public.curie.radiumblock.xyz/ws',
+      'Dwellir Tunisia': 'wss://statemint-rpc-tn.dwellir.com'
     },
     active: false,
     currentProvider: 'Parity',
@@ -242,7 +249,8 @@ export const PREDEFINED_NETWORKS: Record<string, NetworkJson> = {
       Dwellir: 'wss://moonbeam-rpc.dwellir.com',
       '1rpc': 'wss://1rpc.io/glmr',
       PinkNode: 'wss://public-rpc.pinknode.io/moonbeam',
-      Blast: 'wss://moonbeam.public.blastapi.io'
+      Blast: 'wss://moonbeam.public.blastapi.io',
+      UnitedBloc: 'wss://moonbeam.unitedbloc.com:3001'
     },
     active: false,
     currentProviderMode: 'ws',
@@ -272,7 +280,8 @@ export const PREDEFINED_NETWORKS: Record<string, NetworkJson> = {
       PinkNode: 'wss://public-rpc.pinknode.io/astar',
       Blast: 'wss://astar.public.blastapi.io',
       '1rpc': 'wss://1rpc.io/astr',
-      'light client': 'light://substrate-connect/polkadot/astar'
+      'light client': 'light://substrate-connect/polkadot/astar',
+      RadiumBlock: 'wss://astar.public.curie.radiumblock.co/ws'
     },
     active: false,
     currentProviderMode: 'ws',
@@ -420,7 +429,8 @@ export const PREDEFINED_NETWORKS: Record<string, NetworkJson> = {
     ss58Format: 7,
     providers: {
       JelliedOwl: 'wss://edgeware.jelliedowl.net',
-      OnFinality: 'wss://edgeware.api.onfinality.io/public-ws'
+      'Commonwealth Labs': 'wss://mainnet2.edgewa.re',
+      Dwellir: 'wss://edgeware-rpc.dwellir.com'
     },
     active: false,
     currentProviderMode: 'ws',
@@ -436,7 +446,8 @@ export const PREDEFINED_NETWORKS: Record<string, NetworkJson> = {
     genesisHash: '0xb3db41421702df9a7fcac62b53ffeac85f7853cc4e689e0b93aeb3db18c09d82',
     ss58Format: 36,
     providers: {
-      Centrifuge: 'wss://fullnode.parachain.centrifuge.io'
+      Centrifuge: 'wss://fullnode.parachain.centrifuge.io',
+      OnFinality: 'wss://centrifuge-parachain.api.onfinality.io/public-ws'
     },
     active: false,
     currentProviderMode: 'ws',
@@ -473,7 +484,8 @@ export const PREDEFINED_NETWORKS: Record<string, NetworkJson> = {
     genesisHash: '0x89d3ec46d2fb43ef5a9713833373d5ea666b092fa8fd68fbc34596036571b907',
     ss58Format: 68,
     providers: {
-      Equilibrium: 'wss://node.pol.equilibrium.io'
+      Equilibrium: 'wss://node.pol.equilibrium.io',
+      Dwellir: 'wss://equilibrium-rpc.dwellir.com'
     },
     active: false,
     currentProviderMode: 'ws',
@@ -493,7 +505,8 @@ export const PREDEFINED_NETWORKS: Record<string, NetworkJson> = {
     ss58Format: 37,
     providers: {
       OnFinality: 'wss://nodle-parachain.api.onfinality.io/public-ws',
-      Dwellir: 'wss://eden-rpc.dwellir.com'
+      Dwellir: 'wss://eden-rpc.dwellir.com',
+      PinkNode: 'wss://public-rpc.pinknode.io/nodle'
     },
     active: false,
     currentProviderMode: 'ws',
@@ -652,7 +665,8 @@ export const PREDEFINED_NETWORKS: Record<string, NetworkJson> = {
     genesisHash: '0x05d5279c52c484cc80396535a316add7d47b1c5b9e0398dd1f584149341460c5',
     ss58Format: 42,
     providers: {
-      'Aleph Zero Foundation': 'wss://ws.test.azero.dev'
+      'Aleph Zero Foundation': 'wss://ws.test.azero.dev',
+      Dwellir: 'wss://aleph-zero-testnet-rpc.dwellir.com'
     },
     active: false,
     currentProviderMode: 'ws',
@@ -713,7 +727,8 @@ export const PREDEFINED_NETWORKS: Record<string, NetworkJson> = {
     genesisHash: '0x335369975fced3fc22e23498da306a712f4fd964c957364d53c49cea9db8bc2f',
     ss58Format: 1110,
     providers: {
-      Efinity: 'wss://rpc.efinity.io'
+      Efinity: 'wss://rpc.efinity.io',
+      Dwellir: 'wss://efinity-rpc.dwellir.com'
     },
     active: false,
     currentProviderMode: 'ws',
@@ -748,7 +763,8 @@ export const PREDEFINED_NETWORKS: Record<string, NetworkJson> = {
     genesisHash: '0x1bb969d85965e4bb5a651abbedf21a54b6b31a21f66b5401cc3f1e286268d736',
     ss58Format: 30,
     providers: {
-      Phala: 'wss://api.phala.network/ws'
+      Phala: 'wss://api.phala.network/ws',
+      OnFinality: 'wss://phala.api.onfinality.io/public-ws'
     },
     active: false,
     currentProviderMode: 'ws',
@@ -808,7 +824,8 @@ export const PREDEFINED_NETWORKS: Record<string, NetworkJson> = {
       OnFinality: 'wss://statemine.api.onfinality.io/public-ws',
       Dwellir: 'wss://statemine-rpc.dwellir.com',
       RadiumBlock: 'wss://statemine.public.curie.radiumblock.xyz/ws',
-      PinkNode: 'wss://public-rpc.pinknode.io/statemine'
+      PinkNode: 'wss://public-rpc.pinknode.io/statemine',
+      'Dwellir Tunisia': 'wss://statemine-rpc-tn.dwellir.com'
     },
     active: false,
     currentProviderMode: 'ws',
@@ -852,7 +869,8 @@ export const PREDEFINED_NETWORKS: Record<string, NetworkJson> = {
       OnFinality: 'wss://moonriver.api.onfinality.io/public-ws',
       Dwellir: 'wss://moonriver-rpc.dwellir.com',
       Blast: 'wss://moonriver.public.blastapi.io',
-      Pinknode: 'wss://public-rpc.pinknode.io/moonriver' // https://github.com/polkadot-js/apps/issues/7058
+      Pinknode: 'wss://public-rpc.pinknode.io/moonriver', // https://github.com/polkadot-js/apps/issues/7058
+      UnitedBloc: 'wss://moonriver.unitedbloc.com:2001'
     },
     active: false,
     currentProviderMode: 'ws',
@@ -920,7 +938,8 @@ export const PREDEFINED_NETWORKS: Record<string, NetworkJson> = {
     genesisHash: '0xddb89973361a170839f80f152d2e9e38a376a5a7eccefcade763f46a8e567019',
     ss58Format: 5,
     providers: {
-      Shibuya: 'wss://rpc.shibuya.astar.network/'
+      Shibuya: 'wss://rpc.shibuya.astar.network/',
+      Dwellir: 'wss://shibuya-rpc.dwellir.com'
     },
     isEthereum: false,
     active: false,
@@ -958,7 +977,9 @@ export const PREDEFINED_NETWORKS: Record<string, NetworkJson> = {
     ss58Format: 30,
     providers: {
       Phala: 'wss://khala-api.phala.network/ws',
-      OnFinality: 'wss://khala.api.onfinality.io/public-ws'
+      OnFinality: 'wss://khala.api.onfinality.io/public-ws',
+      Dwellir: 'wss://khala-rpc.dwellir.com',
+      PinkNode: 'wss://public-rpc.pinknode.io/khala'
     },
     active: false,
     currentProviderMode: 'ws',
@@ -976,8 +997,7 @@ export const PREDEFINED_NETWORKS: Record<string, NetworkJson> = {
     ss58Format: 6,
     providers: {
       'Liebi 0': 'wss://bifrost-rpc.liebi.com/ws',
-      'Liebi 1': 'wss://us.bifrost-rpc.liebi.com/ws',
-      'Liebi 2': 'wss://eu.bifrost-rpc.liebi.com/ws',
+      Dwellir: 'wss://bifrost-rpc.dwellir.com',
       OnFinality: 'wss://bifrost-parachain.api.onfinality.io/public-ws'
     },
     active: false,
@@ -999,7 +1019,8 @@ export const PREDEFINED_NETWORKS: Record<string, NetworkJson> = {
     genesisHash: '0x262e1b2ad728475fd6fe88e62d34c200abe6fd693931ddad144059b1eb884e5b',
     ss58Format: 6,
     providers: {
-      Liebi: 'wss://hk.p.bifrost-rpc.liebi.com/ws'
+      Liebi: 'wss://hk.p.bifrost-rpc.liebi.com/ws',
+      OnFinality: 'wss://bifrost-polkadot.api.onfinality.io/public-ws'
     },
     active: false,
     currentProviderMode: 'ws',
@@ -1168,7 +1189,7 @@ export const PREDEFINED_NETWORKS: Record<string, NetworkJson> = {
     genesisHash: '0x6811a339673c9daa897944dcdac99c6e2939cc88245ed21951a0a3c9a2be75bc',
     ss58Format: 49,
     providers: {
-      Composable: 'wss://picasso-rpc.composable.finance'
+      Composable: 'wss://rpc.composablenodes.tech'
     },
     active: false,
     currentProviderMode: 'ws',
@@ -1186,14 +1207,13 @@ export const PREDEFINED_NETWORKS: Record<string, NetworkJson> = {
     genesisHash: '0xcd4d732201ebe5d6b014edda071c4203e16867305332301dc8d092044b28e554',
     ss58Format: 255,
     providers: {
-      Unique: 'wss://quartz.unique.network',
-      OnFinality: 'wss://quartz.api.onfinality.io/public-ws',
       'Unique Europe': 'wss://eu-ws-quartz.unique.network',
-      'Unique US': 'wss://us-ws-quartz.unique.network'
+      'Unique US': 'wss://us-ws-quartz.unique.network',
+      'Unique Asia': 'wss://asia-ws-quartz.unique.network'
     },
     active: false,
     currentProviderMode: 'ws',
-    currentProvider: 'Unique',
+    currentProvider: 'Unique Europe',
     groups: ['KUSAMA_PARACHAIN'],
     paraId: 2095,
     nativeToken: 'QTZ',
@@ -1208,7 +1228,9 @@ export const PREDEFINED_NETWORKS: Record<string, NetworkJson> = {
     genesisHash: '0x84322d9cddbf35088f1e54e9a85c967a41a56a4f43445768125e61af166c7d31',
     ss58Format: 7391,
     providers: {
-      unique: 'wss://ws.unique.network/'
+      unique: 'wss://us-ws.unique.network/',
+      UniqueEu: 'wss://eu-ws.unique.network/',
+      UniqueAsia: 'wss://asia-ws.unique.network/'
     },
     currentProvider: 'unique',
     currentProviderMode: 'ws',
@@ -1257,7 +1279,7 @@ export const PREDEFINED_NETWORKS: Record<string, NetworkJson> = {
     genesisHash: '0x4a12be580bb959937a1c7a61d5cf24428ed67fa571974b4007645d1886e7c89f',
     ss58Format: 28,
     providers: {
-      subsocialx: 'wss://para.subsocial.network'
+      subsocialx: 'wss://para.f3joule.space'
     },
     currentProviderMode: 'ws',
     currentProvider: 'subsocialx',
@@ -1342,7 +1364,10 @@ export const PREDEFINED_NETWORKS: Record<string, NetworkJson> = {
     genesisHash: '0x631ccc82a078481584041656af292834e1ae6daab61d2875b4dd0c14bb9b17bc',
     ss58Format: 32,
     providers: {
-      Airalab: 'wss://kusama.rpc.robonomics.network/'
+      Airalab: 'wss://kusama.rpc.robonomics.network/',
+      Leemo: 'wss://robonomics.leemo.me',
+      OnFinality: 'wss://robonomics.api.onfinality.io/public-ws',
+      Samsara: 'wss://robonomics.0xsamsara.com'
     },
     active: false,
     currentProviderMode: 'ws',
@@ -1360,7 +1385,8 @@ export const PREDEFINED_NETWORKS: Record<string, NetworkJson> = {
     genesisHash: '0xf195ef30c646663a24a3164b307521174a86f437c586397a43183c736a8383c1',
     ss58Format: 13,
     providers: {
-      Integritee: 'wss://kusama.api.integritee.network'
+      Integritee: 'wss://kusama.api.integritee.network',
+      OnFinality: 'wss://integritee-kusama.api.onfinality.io/public-ws'
     },
     active: false,
     currentProviderMode: 'ws',
@@ -1605,9 +1631,9 @@ export const PREDEFINED_NETWORKS: Record<string, NetworkJson> = {
     genesisHash: '0x7dd99936c1e9e6d1ce7d90eb6f33bea8393b4bf87677d675aa63c9cb3e8c5b5b',
     ss58Format: 42,
     providers: {
-      OnFinality: 'wss://encointer.api.onfinality.io/public-ws'
+      'Encointer Association': 'wss://kusama.api.encointer.org'
     },
-    currentProvider: 'OnFinality',
+    currentProvider: 'Encointer Association',
     currentProviderMode: 'ws',
     active: false,
     key: 'encointer',
@@ -1638,7 +1664,8 @@ export const PREDEFINED_NETWORKS: Record<string, NetworkJson> = {
     genesisHash: '0x2fc8bb6ed7c0051bdcf4866c322ed32b6276572713607e3297ccf411b8f14aa9',
     ss58Format: 31,
     providers: {
-      Litentry: 'wss://rpc.litentry-parachain.litentry.io'
+      Litentry: 'wss://rpc.litentry-parachain.litentry.io',
+      Dwellir: 'wss://litentry-rpc.dwellir.com'
     },
     active: false,
     currentProviderMode: 'ws',
@@ -1657,11 +1684,12 @@ export const PREDEFINED_NETWORKS: Record<string, NetworkJson> = {
     ss58Format: 117,
     providers: {
       Invarch: 'wss://tinker.invarch.network',
-      'light client': 'light://substrate-connect/kusama/tinkernet'
+      'light client': 'light://substrate-connect/kusama/tinkernet',
+      OnFinality: 'wss://invarch-tinkernet.api.onfinality.io/public-ws'
     },
     active: false,
     currentProviderMode: 'ws',
-    currentProvider: 'Invarch',
+    currentProvider: 'OnFinality',
     groups: ['KUSAMA_PARACHAIN'],
     paraId: 2125,
     nativeToken: 'TNKR',
@@ -2320,7 +2348,8 @@ export const PREDEFINED_NETWORKS: Record<string, NetworkJson> = {
     genesisHash: '0xe358eb1d11b31255a286c12e44fe6780b7edb171d657905a97e39f71d9c6c3ee',
     ss58Format: 1328,
     providers: {
-      viaAjunaNetwork: 'wss://rpc-parachain.ajuna.network'
+      viaAjunaNetwork: 'wss://rpc-parachain.ajuna.network',
+      OnFinality: 'wss://ajuna.api.onfinality.io/public-ws'
     },
     paraId: 2028,
     active: false,

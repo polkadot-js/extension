@@ -1,5 +1,15 @@
 # CHANGELOG
 
+## 0.7.8 (Koni)
+Build date: Jan 19, 2022.
+
+Update:
+- Update Equilibrium balance structure (#975)
+- Update networks endpoint (#977)
+
+Bug fixes:
+- Fix bug getting multiple balances for Equilibrium (#981)
+
 ## 0.7.7 (Koni)
 Build date: Dec 28, 2022.
 

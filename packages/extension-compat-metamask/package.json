@@ -17,12 +17,12 @@
     "./detectPackage.cjs"
   ],
   "type": "module",
-  "version": "0.44.8",
+  "version": "0.44.9-0-x",
   "main": "index.js",
   "dependencies": {
     "@babel/runtime": "^7.20.7",
     "@metamask/detect-provider": "^1.2.0",
-    "@polkadot/extension-inject": "^0.44.8",
+    "@polkadot/extension-inject": "^0.44.9-0-x",
     "@polkadot/types": "^9.11.1",
     "@polkadot/util": "^10.2.3",
     "web3": "^1.8.1"

@@ -1,4 +1,4 @@
-     573	Jaco                          	0.44.8 (#1191)
+     574	Jaco                          	Add JSDOc comments on extension-dapp (#1193)
       89	Thibaut Sardan                	Allow QR signing and add error when the account has no genesis (#1155)
        7	Ivan Rukhavets                	Mention derivation in FAQ (#334)
        4	Amaury Martiny                	PostMessageProvider with on('connected' | 'disconnected') (#279)

@@ -18,7 +18,15 @@ const win = window as Window & InjectedWindow;
 // don't clobber the existing object, but ensure non-undefined
 win.injectedWeb3 = win.injectedWeb3 || {};
 
-// true when anything has been injected and is available
+// have we found a properly constructed window.injectedWeb3
+let isWeb3Injected = web3IsInjected();
+
+// we keep the last promise created around (for queries)
+let web3EnablePromise: Promise<InjectedExtension[]> | null = null;
+
+export { isWeb3Injected, web3EnablePromise };
+
+/** @internal true when anything has been injected and is available */
 function web3IsInjected (): boolean {
   return Object
     .values(win.injectedWeb3)
@@ -26,12 +34,12 @@ function web3IsInjected (): boolean {
     .length !== 0;
 }
 
-// helper to throw a consistent error when not enabled
+/** @internal throw a consistent error when not extensions have not been enabled */
 function throwError (method: string): never {
   throw new Error(`${method}: web3Enable(originName) needs to be called before ${method}`);
 }
 
-// internal helper to map from Array<InjectedAccount> -> Array<InjectedAccountWithMeta>
+/** @internal map from Array<InjectedAccount> to Array<InjectedAccountWithMeta> */
 function mapAccounts (source: string, list: InjectedAccount[], ss58Format?: number): InjectedAccountWithMeta[] {
   return list.map(({ address, genesisHash, name, type }): InjectedAccountWithMeta => ({
     address: address.length === 42
@@ -42,7 +50,7 @@ function mapAccounts (source: string, list: InjectedAccount[], ss58Format?: numb
   }));
 }
 
-// internal helper to filter accounts
+/** @internal filter accounts based on genesisHash and type of account */
 function filterAccounts (list: InjectedAccount[], genesisHash?: string | null, type?: string[]): InjectedAccount[] {
   return list.filter((a) =>
     (!a.type || !type || type.includes(a.type)) &&
@@ -50,14 +58,7 @@ function filterAccounts (list: InjectedAccount[], genesisHash?: string | null, t
   );
 }
 
-// have we found a properly constructed window.injectedWeb3
-let isWeb3Injected = web3IsInjected();
-
-// we keep the last promise created around (for queries)
-let web3EnablePromise: Promise<InjectedExtension[]> | null = null;
-
-export { isWeb3Injected, web3EnablePromise };
-
+/** @internal retrieves all the extensions available on the window */
 function getWindowExtensions (originName: string): Promise<InjectedExtension[]> {
   return Promise
     .all(
@@ -85,7 +86,26 @@ function getWindowExtensions (originName: string): Promise<InjectedExtension[]> 
     .then((exts) => exts.filter((e): e is InjectedExtension => !!e));
 }
 
-// enables all the providers found on the injected window interface
+/** @internal Ensure the enable promise is resolved and filter by extensions */
+async function filterEnable (caller: 'web3Accounts' | 'web3AccountsSubscribe', extensions?: string[]): Promise<InjectedExtension[]> {
+  if (!web3EnablePromise) {
+    return throwError(caller);
+  }
+
+  const sources = await web3EnablePromise;
+
+  return sources.filter(({ name }) =>
+    !extensions ||
+    extensions.includes(name)
+  );
+}
+
+/**
+ * @summary Enables all the providers found on the injected window interface
+ * @description
+ * Enables all injected extensions that has been found on the page. This
+ * should be called before making use of any other web3* functions.
+ */
 export function web3Enable (originName: string, compatInits: (() => Promise<boolean>)[] = []): Promise<InjectedExtension[]> {
   if (!originName) {
     throw new Error('You must pass a name for your app to the web3Enable function');
@@ -133,30 +153,28 @@ export function web3Enable (originName: string, compatInits: (() => Promise<bool
   return web3EnablePromise;
 }
 
-// retrieve all the accounts across all providers
+/**
+ * @summary Retrieves all the accounts across all providers
+ * @description
+ * This returns the full list of account available (accross all extensions) to
+ * the page. Filtereing options are available of a per-extension, per type and
+ * per-genesisHash basis. Optionally the accounts can be encoded with the provided
+ * ss58Format
+ */
 export async function web3Accounts ({ accountType, extensions, genesisHash, ss58Format }: Web3AccountsOptions = {}): Promise<InjectedAccountWithMeta[]> {
-  if (!web3EnablePromise) {
-    return throwError('web3Accounts');
-  }
-
   const accounts: InjectedAccountWithMeta[] = [];
-  const sources = await web3EnablePromise;
+  const sources = await filterEnable('web3Accounts', extensions);
   const retrieved = await Promise.all(
-    sources
-      .filter(({ name: source }) =>
-        !extensions ||
-        extensions.includes(source)
-      )
-      .map(async ({ accounts, name: source }): Promise<InjectedAccountWithMeta[]> => {
-        try {
-          const list = await accounts.get();
+    sources.map(async ({ accounts, name: source }): Promise<InjectedAccountWithMeta[]> => {
+      try {
+        const list = await accounts.get();
 
-          return mapAccounts(source, filterAccounts(list, genesisHash, accountType), ss58Format);
-        } catch (error) {
-          // cannot handle this one
-          return [];
-        }
-      })
+        return mapAccounts(source, filterAccounts(list, genesisHash, accountType), ss58Format);
+      } catch (error) {
+        // cannot handle this one
+        return [];
+      }
+    })
   );
 
   retrieved.forEach((result): void => {
@@ -168,11 +186,15 @@ export async function web3Accounts ({ accountType, extensions, genesisHash, ss58
   return accounts;
 }
 
+/**
+ * @summary Subscribes to all the accounts across all providers
+ * @description
+ * This is the subscription version of the web3Accounts interface with
+ * updates as to when new accounts do become available. The list of filtering
+ * options are the same as for the web3Accounts interface.
+ */
 export async function web3AccountsSubscribe (cb: (accounts: InjectedAccountWithMeta[]) => void | Promise<void>, { accountType, extensions, genesisHash, ss58Format }: Web3AccountsOptions = {}): Promise<Unsubcall> {
-  if (!web3EnablePromise) {
-    return throwError('web3AccountsSubscribe');
-  }
-
+  const sources = await filterEnable('web3AccountsSubscribe', extensions);
   const accounts: Record<string, InjectedAccount[]> = {};
 
   const triggerUpdate = (): void | Promise<void> =>
@@ -186,27 +208,21 @@ export async function web3AccountsSubscribe (cb: (accounts: InjectedAccountWithM
         }, [])
     );
 
-  const sources = await web3EnablePromise;
-  const unsubs = sources
-    .filter(({ name: source }) =>
-      !extensions ||
-      extensions.includes(source)
-    )
-    .map(({ accounts: { subscribe }, name: source }): Unsubcall =>
-      subscribe((result): void => {
-        accounts[source] = result;
+  const unsubs = sources.map(({ accounts: { subscribe }, name: source }): Unsubcall =>
+    subscribe((result): void => {
+      accounts[source] = result;
 
-        try {
-          const result = triggerUpdate();
+      try {
+        const result = triggerUpdate();
 
-          if (result && isPromise(result)) {
-            result.catch(console.error);
-          }
-        } catch (error) {
-          console.error(error);
+        if (result && isPromise(result)) {
+          result.catch(console.error);
         }
-      })
-    );
+      } catch (error) {
+        console.error(error);
+      }
+    })
+  );
 
   return (): void => {
     unsubs.forEach((unsub): void => {
@@ -215,7 +231,14 @@ export async function web3AccountsSubscribe (cb: (accounts: InjectedAccountWithM
   };
 }
 
-// find a specific provider based on the name
+/**
+ * @summary Finds a specific provider based on the name
+ * @description
+ * This retrieves a specific source (extension) based on the name. In most
+ * cases it should not be needed to call it directly (e.g. it is used internally
+ * by calls such as web3FromAddress) but would allow operation on a specific
+ * known extension.
+ */
 export async function web3FromSource (source: string): Promise<InjectedExtension> {
   if (!web3EnablePromise) {
     return throwError('web3FromSource');
@@ -231,7 +254,12 @@ export async function web3FromSource (source: string): Promise<InjectedExtension
   return found;
 }
 
-// find a specific provider based on an address
+/**
+ * @summary Find a specific provider that provides a specific address
+ * @description
+ * Based on an address, return the provider that has makes this address
+ * available to the page.
+ */
 export async function web3FromAddress (address: string): Promise<InjectedExtension> {
   if (!web3EnablePromise) {
     return throwError('web3FromAddress');
@@ -253,7 +281,12 @@ export async function web3FromAddress (address: string): Promise<InjectedExtensi
   return web3FromSource(found.meta.source);
 }
 
-// retrieve all providers exposed by one source
+/**
+ * @summary List all providers exposed by one source
+ * @description
+ * For extensions that supply RPC providers, this call would return the list
+ * of RPC providers that any extension may supply.
+ */
 export async function web3ListRpcProviders (source: string): Promise<ProviderList | null> {
   const { provider } = await web3FromSource(source);
 
@@ -266,7 +299,13 @@ export async function web3ListRpcProviders (source: string): Promise<ProviderLis
   return provider.listProviders();
 }
 
-// retrieve all providers exposed by one source
+/**
+ * @summary Start an RPC provider provider by a specific source
+ * @description
+ * For extensions that supply RPC providers, this call would return an
+ * enabled provider (initialized with the specific key) from the
+ * specified extension source.
+ */
 export async function web3UseRpcProvider (source: string, key: string): Promise<InjectedProviderWithMeta> {
   const { provider } = await web3FromSource(source);
 

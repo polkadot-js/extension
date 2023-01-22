@@ -20,11 +20,11 @@
   "version": "0.44.9-0-x",
   "main": "index.js",
   "dependencies": {
-    "@babel/runtime": "^7.20.7",
+    "@babel/runtime": "^7.20.13",
     "@polkadot/extension-inject": "^0.44.9-0-x",
-    "@polkadot/networks": "^10.2.3",
-    "@polkadot/util": "^10.2.3",
-    "@polkadot/util-crypto": "^10.2.3"
+    "@polkadot/networks": "^10.2.6",
+    "@polkadot/util": "^10.2.6",
+    "@polkadot/util-crypto": "^10.2.6"
   },
   "peerDependencies": {
     "@polkadot/api": "*",

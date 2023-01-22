@@ -31,7 +31,8 @@ function Accounts ({ className }: Props): React.ReactElement {
       filter
         ? hierarchy.filter((account) =>
           account.name?.toLowerCase().includes(filter) ||
-          (account.genesisHash && networkMap.get(account.genesisHash)?.toLowerCase().includes(filter))
+          (account.genesisHash && networkMap.get(account.genesisHash)?.toLowerCase().includes(filter)) ||
+          account.address.toLowerCase().includes(filter)
         )
         : hierarchy
     );

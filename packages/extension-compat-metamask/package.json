@@ -20,11 +20,11 @@
   "version": "0.44.9-0-x",
   "main": "index.js",
   "dependencies": {
-    "@babel/runtime": "^7.20.7",
+    "@babel/runtime": "^7.20.13",
     "@metamask/detect-provider": "^1.2.0",
     "@polkadot/extension-inject": "^0.44.9-0-x",
-    "@polkadot/types": "^9.11.1",
-    "@polkadot/util": "^10.2.3",
+    "@polkadot/types": "^9.11.3",
+    "@polkadot/util": "^10.2.6",
     "web3": "^1.8.1"
   },
   "peerDependencies": {

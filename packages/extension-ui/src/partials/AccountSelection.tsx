@@ -72,7 +72,7 @@ function AccounSelection ({ className, origin, showHidden = false, url, withWarn
         checked={areAllAccountsSelected}
         className='accountTree-checkbox'
         indeterminate={isIndeterminate}
-        label={t('Select all')}
+        label={t<string>('Select all')}
         onChange={_onSelectAllToggle}
       />
       <div className='accountList'>

@@ -59,7 +59,7 @@ export default function Signing (): React.ReactElement {
         </Header>
         <Request
           account={request.account}
-          buttonText={isTransaction ? t('Sign the transaction') : t('Sign the message')}
+          buttonText={isTransaction ? t<string>('Sign the transaction') : t<string>('Sign the message')}
           isFirst={requestIndex === 0}
           request={request.request}
           signId={request.id}

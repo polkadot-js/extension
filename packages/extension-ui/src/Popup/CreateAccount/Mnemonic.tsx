@@ -32,7 +32,7 @@ function Mnemonic ({ onNextStep, seed }: Props): React.ReactElement<Props> {
 
   const _onCopy = useCallback((): void => {
     onCopy();
-    show(t('Copied'));
+    show(t<string>('Copied'));
   }, [show, t]);
 
   return (

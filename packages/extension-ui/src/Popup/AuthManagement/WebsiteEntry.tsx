@@ -37,14 +37,14 @@ function WebsiteEntry ({ className = '', info: { authorizedAccounts, isAllowed }
         to={`/url/manage/${url}`}
       >{
           authorizedAccounts && authorizedAccounts.length
-            ? t('{{total}} accounts', {
+            ? t<string>('{{total}} accounts', {
               replace: {
                 total: authorizedAccounts.length
               }
             })
             : isAllowed
-              ? t('all accounts')
-              : t('no accounts')
+              ? t<string>('all accounts')
+              : t<string>('no accounts')
         }</Link>
     </div>
   );

@@ -50,7 +50,7 @@ function MenuAdd ({ className, reference }: Props): React.ReactElement<Props> {
       <MenuItem className='menuItem'>
         <Link to={'/account/create'}>
           <FontAwesomeIcon icon={faPlusCircle} />
-          <span>{ t('Create new account')}</span>
+          <span>{ t<string>('Create new account')}</span>
         </Link>
       </MenuItem>
       <MenuDivider />
@@ -59,7 +59,7 @@ function MenuAdd ({ className, reference }: Props): React.ReactElement<Props> {
           <MenuItem className='menuItem'>
             <Link to={`/account/derive/${master.address}`}>
               <FontAwesomeIcon icon={faCodeBranch} />
-              <span>{t('Derive from an account')}</span>
+              <span>{t<string>('Derive from an account')}</span>
             </Link>
           </MenuItem>
           <MenuDivider />

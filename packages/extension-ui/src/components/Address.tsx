@@ -157,7 +157,7 @@ function Address ({ actions, address, children, className, genesisHash, isExtern
   );
 
   const _onCopy = useCallback(
-    () => show(t('Copied')),
+    () => show(t<string>('Copied')),
     [show, t]
   );
 
@@ -170,7 +170,7 @@ function Address ({ actions, address, children, className, genesisHash, isExtern
 
   const Name = () => {
     const accountName = name || account?.name;
-    const displayName = accountName || t('<unknown>');
+    const displayName = accountName || t<string>('<unknown>');
 
     return (
       <>
@@ -181,14 +181,14 @@ function Address ({ actions, address, children, className, genesisHash, isExtern
                 className='hardwareIcon'
                 icon={faUsb}
                 rotation={270}
-                title={t('hardware wallet account')}
+                title={t<string>('hardware wallet account')}
               />
             )
             : (
               <FontAwesomeIcon
                 className='externalIcon'
                 icon={faQrcode}
-                title={t('external account')}
+                title={t<string>('external account')}
               />
             )
         )}
@@ -258,7 +258,7 @@ function Address ({ actions, address, children, className, genesisHash, isExtern
               className='fullAddress'
               data-field='address'
             >
-              {formatted || address || t('<unknown>')}
+              {formatted || address || t<string>('<unknown>')}
             </div>
             <CopyToClipboard text={(formatted && formatted) || ''}>
               <FontAwesomeIcon
@@ -266,7 +266,7 @@ function Address ({ actions, address, children, className, genesisHash, isExtern
                 icon={faCopy}
                 onClick={_onCopy}
                 size='sm'
-                title={t('copy address')}
+                title={t<string>('copy address')}
               />
             </CopyToClipboard>
             {(actions || showVisibilityAction) && (
@@ -275,7 +275,7 @@ function Address ({ actions, address, children, className, genesisHash, isExtern
                 icon={isHidden ? faEyeSlash : faEye}
                 onClick={_toggleVisibility}
                 size='sm'
-                title={t('account visibility')}
+                title={t<string>('account visibility')}
               />
             )}
           </div>

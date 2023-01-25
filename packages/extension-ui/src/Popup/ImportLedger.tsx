@@ -50,18 +50,18 @@ function ImportLedger ({ className }: Props): React.ReactElement {
   }, [address]);
 
   const accOps = useRef(AVAIL.map((value): AccOption => ({
-    text: t('Account type {{index}}', { replace: { index: value } }),
+    text: t<string>('Account type {{index}}', { replace: { index: value } }),
     value
   })));
 
   const addOps = useRef(AVAIL.map((value): AccOption => ({
-    text: t('Address index {{index}}', { replace: { index: value } }),
+    text: t<string>('Address index {{index}}', { replace: { index: value } }),
     value
   })));
 
   const networkOps = useRef(
     [{
-      text: t('Select network'),
+      text: t<string>('Select network'),
       value: ''
     },
     ...ledgerChains.map(({ displayName, genesisHash }): NetworkOption => ({

@@ -3,9 +3,10 @@
 
 import { PHISHING_PAGE_REDIRECT } from '@subwallet/extension-base/defaults';
 import { LoadingContainer } from '@subwallet/extension-koni-ui/components';
+import { DataContext } from '@subwallet/extension-koni-ui/contexts/DataContext';
 import PhishingDetected from '@subwallet/extension-koni-ui/Popup/PhishingDetected';
 import Root, { initRootPromise } from '@subwallet/extension-koni-ui/Popup/Root';
-import React from 'react';
+import React, { useContext } from 'react';
 import { Await, Outlet } from 'react-router';
 import { createHashRouter } from 'react-router-dom';
 
@@ -26,6 +27,14 @@ export function PageWrapper ({ children, resolve }: PageWrapperProps) {
   </React.Suspense>;
 }
 
+export function Crypto () {
+  const dataContext = useContext(DataContext);
+
+  return <PageWrapper resolve={dataContext.awaitData(['price'])}>
+    <div>Crypto</div>
+  </PageWrapper>;
+}
+
 // Todo: Create error page
 export const router = createHashRouter([{ path: '/',
   element: <Root />,
@@ -39,9 +48,7 @@ export const router = createHashRouter([{ path: '/',
     element: <Outlet />,
     children: [{
       path: 'crypto',
-      element: <PageWrapper>
-        <div>Crypto</div>
-      </PageWrapper>
+      element: <Crypto />
     },
     {
       path: 'nft',

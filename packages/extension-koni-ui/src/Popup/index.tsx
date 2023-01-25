@@ -1,6 +1,7 @@
 // Copyright 2019-2022 @polkadot/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
+import { DataContextProvider } from '@subwallet/extension-koni-ui/contexts/DataContext';
 import { store } from '@subwallet/extension-koni-ui/stores';
 import React from 'react';
 import { Provider } from 'react-redux';
@@ -12,10 +13,12 @@ import { router } from './router';
 export default function Popup (): React.ReactElement {
   return (
     <Provider store={store}>
-      <RouterProvider
-        fallbackElement={<LoadingContainer />}
-        router={router}
-      />
+      <DataContextProvider>
+        <RouterProvider
+          fallbackElement={<LoadingContainer />}
+          router={router}
+        />
+      </DataContextProvider>
     </Provider>
   );
 }

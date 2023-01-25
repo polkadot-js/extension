@@ -212,7 +212,7 @@ export default React.memo(styled(Header)(({ theme }: Props) => `
       justify-content: center;
       align-items: center;
       color: ${theme.labelColor};
-      font-family: ${theme.fontFamily};
+      font-family: ${theme.secondaryFontFamily};
       text-align: center;
       margin-left: 24px;
 
@@ -224,7 +224,7 @@ export default React.memo(styled(Header)(({ theme }: Props) => `
 
       .logoText {
         color: ${theme.textColor};
-        font-family: ${theme.fontFamily};
+        font-family: ${theme.secondaryFontFamily};
         font-size: 20px;
         line-height: 27px;
       }

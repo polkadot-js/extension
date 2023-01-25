@@ -17,7 +17,7 @@ const TextInput = css(({ theme, withError }: Props) => `
   box-sizing: border-box;
   color: ${withError ? theme.errorColor : theme.textColor};
   display: block;
-  font-family: ${theme.fontFamily};
+  font-family: ${theme.primaryFontFamily};
   font-size: ${theme.fontSize};
   height: 40px;
   outline: none;

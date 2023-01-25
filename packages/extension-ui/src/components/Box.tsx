@@ -26,7 +26,7 @@ export default styled(Box)(({ theme }: ThemeProps) => `
   border: 1px solid ${theme.inputBorderColor};
   border-radius: ${theme.borderRadius};
   color: ${theme.subTextColor};
-  font-family: ${theme.fontFamily};
+  font-family: ${theme.primaryFontFamily};
   font-size: ${theme.fontSize};
   margin: 0.75rem 24px;
   padding: ${theme.boxPadding};

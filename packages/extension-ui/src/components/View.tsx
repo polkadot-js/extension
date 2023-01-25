@@ -42,6 +42,7 @@ function View ({ children, className }: Props): React.ReactElement<Props> {
 const BodyTheme = createGlobalStyle<ThemeProps>`
   body {
     background-color: ${({ theme }: ThemeProps): string => theme.bodyColor};
+    font-family: ${({ theme }: ThemeProps): string => theme.primaryFontFamily};
   }
 
   html {

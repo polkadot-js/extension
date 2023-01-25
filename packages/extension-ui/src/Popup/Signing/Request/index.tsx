@@ -162,12 +162,12 @@ export default function Request ({ account: { accountIndex, addressOffset, genes
         <VerticalSpace />
         {isExternal && !isHardware && !genesisHash && (
           <>
-            <Warning isDanger>{t('"Allow use on any network" is not supported to show a QR code. You must associate this account with a network.')}</Warning>
+            <Warning isDanger>{t<string>('"Allow use on any network" is not supported to show a QR code. You must associate this account with a network.')}</Warning>
             <VerticalSpace />
           </>
         )}
         {isHardware && <>
-          <Warning>{t('Message signing is not supported for hardware wallets.')}</Warning>
+          <Warning>{t<string>('Message signing is not supported for hardware wallets.')}</Warning>
           <VerticalSpace />
         </>}
         <SignArea

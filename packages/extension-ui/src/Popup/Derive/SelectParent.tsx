@@ -48,11 +48,11 @@ export default function SelectParent ({ className, isLocked, onDerivationConfirm
   useEffect(() => {
     // forbid the use of password since Keyring ignores it
     if (suriPath?.includes('///')) {
-      setPathError(t('`///password` not supported for derivation'));
+      setPathError(t<string>('`///password` not supported for derivation'));
     }
 
     if (!allowSoftDerivation && suriPath && singleSlashRegex.test(suriPath)) {
-      setPathError(t('Soft derivation is only allowed for sr25519 accounts'));
+      setPathError(t<string>('Soft derivation is only allowed for sr25519 accounts'));
     }
   }, [allowSoftDerivation, suriPath, t]);
 
@@ -99,7 +99,7 @@ export default function SelectParent ({ className, isLocked, onDerivationConfirm
             onDerivationConfirmed({ account, parentPassword });
           } catch (error) {
             setIsBusy(false);
-            setPathError(t('Invalid derivation path'));
+            setPathError(t<string>('Invalid derivation path'));
             console.error(error);
           }
         } else {
@@ -154,7 +154,7 @@ export default function SelectParent ({ className, isLocked, onDerivationConfirm
               isBelowInput
               isDanger
             >
-              {t('Wrong password')}
+              {t<string>('Wrong password')}
             </Warning>
           )}
         </div>

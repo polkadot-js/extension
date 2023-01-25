@@ -67,7 +67,7 @@ function Request ({ className, metaId, request, url }: Props): React.ReactElemen
         </tr>
         <tr>
           <td className='label'>{t<string>('upgrade')}</td>
-          <td className='data'>{chain ? chain.specVersion : t('<unknown>')} -&gt; {request.specVersion}</td>
+          <td className='data'>{chain ? chain.specVersion : t<string>('<unknown>')} -&gt; {request.specVersion}</td>
         </tr>
       </Table>
       <div className='requestInfo'>

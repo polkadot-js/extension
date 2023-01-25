@@ -47,8 +47,8 @@ function DerivationPath ({ className, defaultPath, isError, onChange, withSoftPa
             isError={isError || !path}
             label={
               isDisabled
-                ? t('Derivation Path (unlock to edit)')
-                : t('Derivation Path')
+                ? t<string>('Derivation Path (unlock to edit)')
+                : t<string>('Derivation Path')
             }
             onChange={_onChange}
             placeholder={withSoftPath

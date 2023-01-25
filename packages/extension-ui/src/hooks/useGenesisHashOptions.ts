@@ -28,7 +28,7 @@ export default function (): Option[] {
 
   const hashes = useMemo(() => [
     {
-      text: t('Allow use on any chain'),
+      text: t<string>('Allow use on any chain'),
       value: ''
     },
     // put the relay chains at the top

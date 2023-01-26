@@ -19,12 +19,10 @@ const ButtonArea = function ({ children, className }: Props) {
   );
 };
 
-export default styled(ButtonArea)(({ theme }: ThemeProps) => `
+export default styled(ButtonArea)(() => `
   display: flex;
   flex-direction: row;
-  background: ${theme.highlightedAreaBackground};
-  border-top: 1px solid ${theme.inputBorderColor};
-  padding: 12px 24px;
+  padding-bottom: 16px;
   margin-left: 0;
   margin-right: 0;
 

@@ -94,10 +94,10 @@
   "Password for this account": "Mot de passe pour ce compte",
   "Welcome": "Bienvenue",
   "Before we start, just a couple of notes regarding use:": "Avant de commencer, quelques remarques concernant l'utilisation:",
-  "We do not send any clicks, pageviews or events to a central server": "Nous n'envoyons aucuns clics, pages vues ou événements à un serveur central",
-  "We do not use any trackers or analytics": "Nous n'utilisons aucun outil de suivi ou d'analyse",
-  "We don't collect keys, addresses or any information - your information never leaves this machine": "Nous ne collectons aucune clé, adresse ou aucune information - vos informations ne quittent jamais cette machine",
-  "... we are not in the information collection business (even anonymized).": "... nous ne sommes pas dans le secteur de la collecte d'informations (même anonymisées).",
+  "We do NOT send any clicks, pageviews or events to a central server": "Nous n'envoyons aucuns clics, pages vues ou événements à un serveur central",
+  "We do NOT use any trackers or analytics": "Nous n'utilisons aucun outil de suivi ou d'analyse",
+  "We do NOT collect keys, addresses or any information - your information never leaves this machine": "Nous ne collectons aucune clé, adresse ou aucune information - vos informations ne quittent jamais cette machine",
+  "We are NOT in the information collection business (even anonymized).": "... nous ne sommes pas dans le secteur de la collecte d'informations (même anonymisées).",
   "Understood, let me continue": "Compris, laissez-moi continuer",
   "An error occured": "Une erreur s'est produite",
   "Something went wrong with the query and rendering of this component. {{message}}": "Une erreur s'est produite lors de la requête et du rendu de ce composant. {{message}}",
@@ -153,5 +153,7 @@
   "Import Account": "Importer",
   "Sign on Ledger": "Signer sur Ledger",
   "Allow use on any chain": "Toutes les blockchains",
-  "Select network": "Sélectionner un réseau"
+  "Select network": "Sélectionner un réseau",
+  "Got it!": "",
+  "Your privacy is protected": ""
 }

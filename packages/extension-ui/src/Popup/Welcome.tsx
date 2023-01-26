@@ -6,9 +6,9 @@ import type { ThemeProps } from '../types';
 import React, { useCallback, useContext } from 'react';
 import styled from 'styled-components';
 
-import { ActionContext, Box, Button, ButtonArea, List, VerticalSpace } from '../components';
+import secureIMG from '../assets/secure.png';
+import { ActionContext, Button, ButtonArea, List } from '../components';
 import useTranslation from '../hooks/useTranslation';
-import { Header } from '../partials';
 
 interface Props extends ThemeProps {
   className?: string;
@@ -28,30 +28,41 @@ const Welcome = function ({ className }: Props): React.ReactElement<Props> {
 
   return (
     <>
-      <Header text={t<string>('Welcome')} />
       <div className={className}>
-        <p>{t<string>('Before we start, just a couple of notes regarding use:')}</p>
-        <Box>
-          <List>
-            <li>{t<string>('We do not send any clicks, pageviews or events to a central server')}</li>
-            <li>{t<string>('We do not use any trackers or analytics')}</li>
-            <li>{t<string>("We don't collect keys, addresses or any information - your information never leaves this machine")}</li>
-          </List>
-        </Box>
-        <p>{t<string>('... we are not in the information collection business (even anonymized).')}</p>
+        <img
+          className='centered'
+          src={secureIMG}
+        />
+        <p className='heading'>{t<string>('Your privacy is protected')}</p>
+        <List>
+          <li>{t<string>('We do NOT send any clicks, pageviews or events to a central server')}</li>
+          <li>{t<string>('We do NOT use any trackers or analytics')}</li>
+          <li>{t<string>('We do NOT collect keys, addresses or any information - your information never leaves this machine')}</li>
+          <li>{t<string>('We are NOT in the information collection business (even anonymized).')}</li>
+        </List>
+
       </div>
-      <VerticalSpace />
       <ButtonArea>
-        <Button onClick={_onClick}>{t<string>('Understood, let me continue')}</Button>
+        <Button onClick={_onClick}>{t<string>('Got it!')}</Button>
       </ButtonArea>
     </>
   );
 };
 
 export default styled(Welcome)(({ theme }: Props) => `
-  p {
-    color: ${theme.subTextColor};
-    margin-bottom: 6px;
-    margin-top: 0;
+  .centered {
+    justify-content: center;
+    display: flex;
+    margin: 24px auto;
+  }
+  
+  .heading {
+    font-family: ${theme.secondaryFontFamily};
+    font-weight: 700;
+    font-size: 20px;
+    line-height: 120%;
+    text-align: center;
+    letter-spacing: 0.035em;
+    color: ${theme.textColor};
   }
 `);

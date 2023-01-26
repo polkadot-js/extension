@@ -94,10 +94,10 @@
   "Password for this account": "",
   "Welcome": "",
   "Before we start, just a couple of notes regarding use:": "",
-  "We do not send any clicks, pageviews or events to a central server": "",
-  "We do not use any trackers or analytics": "",
-  "We don't collect keys, addresses or any information - your information never leaves this machine": "",
-  "... we are not in the information collection business (even anonymized).": "",
+  "We do NOT send any clicks, pageviews or events to a central server": "",
+  "We do NOT use any trackers or analytics": "",
+  "We do NOT collect keys, addresses or any information - your information never leaves this machine": "",
+  "We are NOT in the information collection business (even anonymized).": "",
   "Understood, let me continue": "",
   "An error occured": "",
   "Something went wrong with the query and rendering of this component. {{message}}": "",
@@ -172,5 +172,7 @@
   "all accounts": "",
   "Message signing is not supported for hardware wallets.": "",
   "\"Allow use on any network\" is not supported to show a QR code. You must associate this account with a network.": "",
-  "An error occurred": ""
+  "An error occurred": "",
+  "Got it!": "",
+  "Your privacy is protected": ""
 }

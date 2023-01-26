@@ -94,14 +94,15 @@
   "Password for this account": "此帐户密码",
   "Welcome": "欢迎",
   "Before we start, just a couple of notes regarding use:": "在我们开始之前，只是一些关于使用的注意事项:",
-  "We do not send any clicks, pageviews or events to a central server": "我们不发送任何点击量，页面浏览量或事件到中央服务器",
-  "We do not use any trackers or analytics": "我们不使用任何跟踪器或分析",
-  "We don't collect keys, addresses or any information - your information never leaves this machine": "我们不收集密钥，地址或任何信息 - 你的信息不会离开这台机器",
-  "... we are not in the information collection business (even anonymized).": "…我们不从事信息收集业务(甚至匿名)。",
+  "We do NOT send any clicks, pageviews or events to a central server": "我们不发送任何点击量，页面浏览量或事件到中央服务器",
+  "We do NOT use any trackers or analytics": "我们不使用任何跟踪器或分析",
+  "We do NOT collect keys, addresses or any information - your information never leaves this machine": "我们不收集密钥，地址或任何信息 - 你的信息不会离开这台机器",
+  "We are NOT in the information collection business (even anonymized).": "…我们不从事信息收集业务(甚至匿名)。",
   "Understood, let me continue": "明白了，让我继续",
   "You currently don't have any accounts. Create your first account to get started.": "您目前没有任何帐户。开始创建您的第一个帐户吧。",
   "Please write down your wallet's mnemonic seed and keep it in a safe place. The mnemonic can be used to restore your wallet. Keep it carefully to not lose your assets.": "请写下你的钱包助记词，放在安全的地方。这个助记词可以用来恢复你的钱包。小心保管，以免失去你的资产。",
   "You are exporting your account. Keep it safe and don't share it with anyone.": "您正在导出帐户。保管好它，不要与任何人分享。",
   "Manage Website Access": "管理网站访问",
-  "Notifications": "通知"
+  "Notifications": "通知",
+  "Your privacy is protected": ""
 }

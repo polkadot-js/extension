@@ -94,10 +94,10 @@
   "Password for this account": "รหัสผ่านของบัญชีนี้",
   "Welcome": "ยินดีต้อนรับ",
   "Before we start, just a couple of notes regarding use:": "ก่อนจะเริ่มใช้งาน มีข้อความเกี่ยวกับการใช้งานที่อยากจะแจ้งให้ทราบ",
-  "We do not send any clicks, pageviews or events to a central server": "โปรแกรมนี้ไม่มีการส่งข้อมูลการคลิก หน้าต่างที่เปิดดู หรือกิจกรรมต่างๆไปยังเซิร์ฟเวอร์กลาง",
-  "We do not use any trackers or analytics": "โปรแกรมนี้ไม่มีการแอบติดตามหรือดักฟังข้อมูลหรือนำข้อมูลไปใช้",
-  "We don't collect keys, addresses or any information - your information never leaves this machine": "โปรแกรมไม่มีการเก็บข้อมูลkey ที่อยู่แอดเดรส หรือข้อมูลอื่นๆ -ข้อมูลของคุณจะอยู่แค่ในเครื่องของคุณ",
-  "... we are not in the information collection business (even anonymized).": "...พวกเราไม่ได้เป็นธุรกิจที่มีจัดเก็บข้อมูล (ถึงแม้ว่าจะไม่ระบุตัวตน)",
+  "We do NOT send any clicks, pageviews or events to a central server": "โปรแกรมนี้ไม่มีการส่งข้อมูลการคลิก หน้าต่างที่เปิดดู หรือกิจกรรมต่างๆไปยังเซิร์ฟเวอร์กลาง",
+  "We do NOT use any trackers or analytics": "โปรแกรมนี้ไม่มีการแอบติดตามหรือดักฟังข้อมูลหรือนำข้อมูลไปใช้",
+  "We do NOT collect keys, addresses or any information - your information never leaves this machine": "โปรแกรมไม่มีการเก็บข้อมูลkey ที่อยู่แอดเดรส หรือข้อมูลอื่นๆ -ข้อมูลของคุณจะอยู่แค่ในเครื่องของคุณ",
+  "We are NOT in the information collection business (even anonymized).": "...พวกเราไม่ได้เป็นธุรกิจที่มีจัดเก็บข้อมูล (ถึงแม้ว่าจะไม่ระบุตัวตน)",
   "Understood, let me continue": "เข้าใจแล้ว ให้ฉันไปต่อ",
   "An error occured": "มีข้อผิดพลาดเกิดขึ้น",
   "Something went wrong with the query and rendering of this component. {{message}}": "มีบางอย่างผิดพลาดเกี่ยวกับquery และการเรนเดอร์ส่วนของหน้านี้ {{message}}",
@@ -158,5 +158,7 @@
   "Export all accounts": "ส่งออกทุกบัญชี",
   "All account": "ทุกบัญชี",
   "password for encrypting all accounts": "รหัสผ่านสำหรับการเข้ารหัสทุกบัญชี",
-  "I want to export all my accounts": "ฉันอยากจะนำออกทุกบัญชี"
+  "I want to export all my accounts": "ฉันอยากจะนำออกทุกบัญชี",
+  "Got it!": "",
+  "Your privacy is protected": ""
 }

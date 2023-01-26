@@ -94,10 +94,10 @@
     "Password for this account": "এই অ্যাকাউন্টের পাসওয়ার্",
     "Welcome": "স্বাগতম",
     "Before we start, just a couple of notes regarding use:": "আমরা শুরু করার আগে, ব্যবহার সংক্রান্ত কয়েকটি নোটঃ",
-    "We do not send any clicks, pageviews or events to a central server": "আমরা কেন্দ্রীয় সার্ভারে কোনো ক্লিক, পেজভিউ বা ইভেন্ট পাঠাই না",
-    "We do not use any trackers or analytics": "আমরা কোনো ট্র্যাকার বা বিশ্লেষণ ব্যবহার করি না",
-    "We don't collect keys, addresses or any information - your information never leaves this machine": "আমরা কী, ঠিকানা বা অন্য কোনো তথ্য সংগ্রহ করি না - আপনার তথ্য কখনোই এই মেশিনের বাইরে যাবে না",
-    "... we are not in the information collection business (even anonymized).": "...আমরা তথ্য সংগ্রহের ব্যবসাতে নেই (এমনকি বেনামীতেও)।",
+    "We do NOT send any clicks, pageviews or events to a central server": "আমরা কেন্দ্রীয় সার্ভারে কোনো ক্লিক, পেজভিউ বা ইভেন্ট পাঠাই না",
+    "We do NOT use any trackers or analytics": "আমরা কোনো ট্র্যাকার বা বিশ্লেষণ ব্যবহার করি না",
+    "We do NOT collect keys, addresses or any information - your information never leaves this machine": "আমরা কী, ঠিকানা বা অন্য কোনো তথ্য সংগ্রহ করি না - আপনার তথ্য কখনোই এই মেশিনের বাইরে যাবে না",
+    "We are NOT in the information collection business (even anonymized).": "...আমরা তথ্য সংগ্রহের ব্যবসাতে নেই (এমনকি বেনামীতেও)।",
     "Understood, let me continue": "বুঝেছি, আমাকে চালিয়ে যেতে দিন",
     "An error occured": "একটি সমস্যা হয়েছে",
     "Something went wrong with the query and rendering of this component. {{message}}": "এই উপাদানটির কুয়েরী এবং রেন্ডারিং নিয়ে কিছু সমস্যা হয়েছে। {{message}}",
@@ -158,5 +158,7 @@
     "Export all accounts": "সমস্ত অ্যাকাউন্ট এক্সপোর্ট করুন",
     "All account": "সমস্ত অ্যাকাউন্ট",
     "password for encrypting all accounts": "সকল অ্যাকাউন্ট এনক্রিপ্ট করার জন্য পাসওয়ার্ড",
-    "I want to export all my accounts": "আমি আমার সকল অ্যাকাউন্ট এক্সপোর্ট করতে চাই"
+    "I want to export all my accounts": "আমি আমার সকল অ্যাকাউন্ট এক্সপোর্ট করতে চাই",
+    "Got it!": "",
+    "Your privacy is protected": ""
 }

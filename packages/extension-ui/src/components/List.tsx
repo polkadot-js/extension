@@ -21,19 +21,21 @@ export default styled(List)(({ theme }: ThemeProps) => `
   list-style: none;
   padding-inline-start: 10px;
   padding-inline-end: 10px;
-  text-indent: -22px;
-  margin-left: 21px;
+  font-family: ${theme.primaryFontFamily};
+  font-weight: 300;
+  font-size: 14px;
+  line-height: 145%;
+  letter-spacing: 0.07em;
+  color: ${theme.subTextColor};
 
   li {
-    margin-bottom: 8px;
+    margin-bottom: 16px;
   }
 
   li::before {
     content: '\\2022';
-    color: ${theme.primaryColor};
-    font-size: 30px;
-    font-weight: bold;
+    color: ${theme.subTextColor};
+    font-size: 15px;
     margin-right: 10px;
-    vertical-align: -20%;
   }
 `);

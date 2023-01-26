@@ -94,10 +94,10 @@
     "Password for this account": "اساکاؤنٹکےلیےپاسورڈ",
     "Welcome": "خوشآمدید",
     "Before we start, just a couple of notes regarding use:": "اسسےپہلےکہہمشروعکریں،استعمالکےحوالےسےصرفچندنوٹ۔",
-    "We do not send any clicks, pageviews or events to a central server": "ہمکسیبھیکلکس،پیجویوزیاایونٹسکومرکزیسرورپرنہیںبھیجتے۔",
-    "We do not use any trackers or analytics": "ہمکوئیٹریکریاتجزیاتاستعمالنہیںکرتےہیں",
-    "We don't collect keys, addresses or any information - your information never leaves this machine": "ہمچابیاں،پتےیاکوئیمعلوماتجمعنہیںکرتے–آپکیمعلوماتاسمشینکوکبھینہیںچھوڑتی۔",
-    "... we are not in the information collection business (even anonymized).": "ہممعلوماتاکٹھاکرنےکےکاروبارمیںنہیںہیں (یہاںتککہگمنامبھی)۔",
+    "We do NOT send any clicks, pageviews or events to a central server": "ہمکسیبھیکلکس،پیجویوزیاایونٹسکومرکزیسرورپرنہیںبھیجتے۔",
+    "We do NOT use any trackers or analytics": "ہمکوئیٹریکریاتجزیاتاستعمالنہیںکرتےہیں",
+    "We do NOT collect keys, addresses or any information - your information never leaves this machine": "ہمچابیاں،پتےیاکوئیمعلوماتجمعنہیںکرتے–آپکیمعلوماتاسمشینکوکبھینہیںچھوڑتی۔",
+    "We are NOT in the information collection business (even anonymized).": "ہممعلوماتاکٹھاکرنےکےکاروبارمیںنہیںہیں (یہاںتککہگمنامبھی)۔",
     "Understood, let me continue": "سمجھگیا،مجھےجاریرکھنےدو۔",
     "An error occured": "ایکخرابیپیشآگئی۔",
     "Something went wrong with the query and rendering of this component. {{message}}": "اسجزوکےاستفساراورپیشکشمیںکچھغلطہوگیا۔  {{پیغام}}",
@@ -158,7 +158,9 @@
     "Export all accounts": "تماماکاؤنٹسبرآمدکریں۔",
     "All account": "تماماکاؤنٹ",
     "password for encrypting all accounts": "تماماکاؤنٹسکوخفیہکرنےکےلیےپاسورڈ۔",
-    "I want to export all my accounts": "میںاپنےتماماکاؤنٹسبرآمدکرناچاہتاہوں۔"
+    "I want to export all my accounts": "میںاپنےتماماکاؤنٹسبرآمدکرناچاہتاہوں۔",
+    "Got it!": "",
+    "Your privacy is protected": ""
 }
 
 

@@ -94,10 +94,10 @@
   "Password for this account": "Bu hesabın şifresi",
   "Welcome": "Hoşgeldiniz",
   "Before we start, just a couple of notes regarding use:": "Başlamadan önce, kullanımla ilgili birkaç not",
-  "We do not send any clicks, pageviews or events to a central server": "Merkezi bir sunucuya tıklama, sayfa görüntüleme vb etkinlik göndermeyiz",
-  "We do not use any trackers or analytics": "İzleyici veya analiz kullanmıyoruz",
-  "We don't collect keys, addresses or any information - your information never leaves this machine": "Anahtarları, adresleri veya herhangi bir bilgiyi toplamıyoruz - bilgileriniz bu makineden asla ayrılmaz",
-  "... we are not in the information collection business (even anonymized).": "... bilgi toplama işinde değiliz (anonim bile olsa)",
+  "We do NOT send any clicks, pageviews or events to a central server": "Merkezi bir sunucuya tıklama, sayfa görüntüleme vb etkinlik göndermeyiz",
+  "We do NOT use any trackers or analytics": "İzleyici veya analiz kullanmıyoruz",
+  "We do NOT collect keys, addresses or any information - your information never leaves this machine": "Anahtarları, adresleri veya herhangi bir bilgiyi toplamıyoruz - bilgileriniz bu makineden asla ayrılmaz",
+  "We are NOT in the information collection business (even anonymized).": "... bilgi toplama işinde değiliz (anonim bile olsa)",
   "Understood, let me continue": "Anlaşıldı ise devam ",
   "An error occured": "Bir hata oluştu",
   "Something went wrong with the query and rendering of this component. {{message}}": "Bu bileşenin sorgusunda ve oluşturulmasında bir sorun oluştu. {{Message}}",
@@ -158,5 +158,7 @@
   "Export all accounts": "Tüm hesapları dışa aktar",
   "All account": "Tüm hesaplar",
   "password for encrypting all accounts": "tüm hesapların şifrelenmiş şifresi",
-  "I want to export all my accounts": "Tüm hesaplarımı dışa aktarmak istiyorum"
+  "I want to export all my accounts": "Tüm hesaplarımı dışa aktarmak istiyorum",
+  "Got it!": "",
+  "Your privacy is protected": ""
 }

@@ -10,7 +10,7 @@ import type { Props as AddressComponentProps } from './Address';
 
 import Adapter from '@wojtekmaj/enzyme-adapter-react-17';
 import { configure, mount } from 'enzyme';
-import React from 'react';
+import React, { ReactNode } from 'react';
 import { act } from 'react-dom/test-utils';
 
 import * as messaging from '../messaging';
@@ -26,7 +26,7 @@ import { AccountContext, Address } from '.';
 configure({ adapter: new Adapter() });
 
 interface AccountTestJson extends AccountJson {
-  expectedIconTheme: IconTheme
+  expectedIconTheme: IconTheme;
 }
 
 interface AccountTestGenesisJson extends AccountTestJson {
@@ -47,14 +47,7 @@ const hardwareAccount = {
   type: 'sr25519'
 } as AccountJson;
 
-const accounts = [
-  { address: '5HSDXAC3qEMkSzZK377sTD1zJhjaPiX5tNWppHx2RQMYkjaJ', expectedIconTheme: 'polkadot', name: 'ECDSA Account', type: 'ecdsa' },
-  { address: '5FjgD3Ns2UpnHJPVeRViMhCttuemaRXEqaD8V5z4vxcsUByA', expectedIconTheme: 'polkadot', name: 'Ed Account', type: 'ed25519' },
-  { address: '5Ggap6soAPaP5UeNaiJsgqQwdVhhNnm6ez7Ba1w9jJ62LM2Q', expectedIconTheme: 'polkadot', name: 'Parent Sr Account', type: 'sr25519' },
-  { address: '0xd5D81CD4236a43F48A983fc5B895975c511f634D', expectedIconTheme: 'ethereum', name: 'Ethereum', type: 'ethereum' },
-  { ...externalAccount },
-  { ...hardwareAccount }
-] as AccountTestJson[];
+const accounts = [{ address: '5HSDXAC3qEMkSzZK377sTD1zJhjaPiX5tNWppHx2RQMYkjaJ', expectedIconTheme: 'polkadot', name: 'ECDSA Account', type: 'ecdsa' }, { address: '5FjgD3Ns2UpnHJPVeRViMhCttuemaRXEqaD8V5z4vxcsUByA', expectedIconTheme: 'polkadot', name: 'Ed Account', type: 'ed25519' }, { address: '5Ggap6soAPaP5UeNaiJsgqQwdVhhNnm6ez7Ba1w9jJ62LM2Q', expectedIconTheme: 'polkadot', name: 'Parent Sr Account', type: 'sr25519' }, { address: '0xd5D81CD4236a43F48A983fc5B895975c511f634D', expectedIconTheme: 'ethereum', name: 'Ethereum', type: 'ethereum' }, { ...externalAccount }, { ...hardwareAccount }] as AccountTestJson[];
 
 // With Westend genesis Hash
 // This account isn't part of the generic test because Westend isn't a built in network
@@ -99,7 +92,10 @@ const accountsWithGenesisHash = [
   }
 ] as AccountTestGenesisJson[];
 
-const mountComponent = async (addressComponentProps: AddressComponentProps, contextAccounts: AccountJson[]): Promise<{
+const mountComponent = async (
+  addressComponentProps: AddressComponentProps,
+  contextAccounts: AccountJson[]
+): Promise<{
   wrapper: ReactWrapper;
 }> => {
   const actionStub = jest.fn();
@@ -112,12 +108,7 @@ const mountComponent = async (addressComponentProps: AddressComponentProps, cont
         hierarchy: buildHierarchy(contextAccounts)
       }}
     >
-      <Address
-      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-      // @ts-ignore
-        actions={actions}
-        {...addressComponentProps}
-      />
+      <Address actions={actions as ReactNode} {...addressComponentProps} />
     </AccountContext.Provider>
   );
 
@@ -132,11 +123,7 @@ const getWrapper = async (account: AccountJson, contextAccounts: AccountJson[], 
   // in this case, the account's address (any encoding) should suffice
   // In case the account is not in the context, then more info are needed as props
   // to display accurately
-  const mountedComponent = withAccountsInContext
-  // only the address is passed as props, the full acount info are loaded in the context
-    ? await mountComponent({ address: account.address }, contextAccounts)
-  // the context is empty, all account's info are passed as props to the Address component
-    : await mountComponent(account, []);
+  const mountedComponent = withAccountsInContext ? await mountComponent({ address: account.address }, contextAccounts) : await mountComponent(account, []);
 
   return mountedComponent.wrapper;
 };
@@ -185,9 +172,7 @@ const genericTestSuite = (account: AccountTestJson, withAccountsInContext = true
     it('can show the account if hidden', async () => {
       const additionalProps = { isHidden: true };
 
-      const mountedHiddenComponent = withAccountsInContext
-        ? await mountComponent({ address, ...additionalProps }, accounts)
-        : await mountComponent({ ...account, ...additionalProps }, []);
+      const mountedHiddenComponent = withAccountsInContext ? await mountComponent({ address, ...additionalProps }, accounts) : await mountComponent({ ...account, ...additionalProps }, []);
 
       const wrapperHidden = mountedHiddenComponent.wrapper;
 
@@ -210,9 +195,7 @@ const genericTestSuite = (account: AccountTestJson, withAccountsInContext = true
     it('has no account hidding and settings button if no action is provided', async () => {
       const additionalProps = { actions: null };
 
-      const mountedComponentWithoutAction = withAccountsInContext
-        ? await mountComponent({ address, ...additionalProps }, accounts)
-        : await mountComponent({ ...account, ...additionalProps }, []);
+      const mountedComponentWithoutAction = withAccountsInContext ? await mountComponent({ address, ...additionalProps }, accounts) : await mountComponent({ ...account, ...additionalProps }, []);
 
       wrapper = mountedComponentWithoutAction.wrapper;
 
@@ -321,7 +304,7 @@ describe('Address', () => {
       wrapper = await getWrapper(childAccount, [], false);
     });
 
-    it('shows the child\'s account address and name', () => {
+    it("shows the child's account address and name", () => {
       expect(wrapper.find('[data-field="address"]').text()).toEqual(childAccount.address);
       expect(wrapper.find('Name span').text()).toEqual(childAccount.name);
     });

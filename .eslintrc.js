@@ -5,25 +5,19 @@ const base = require('@polkadot/dev/config/eslint.cjs');
 
 module.exports = {
   ...base,
-  ignorePatterns: [
-    ...base.ignorePatterns,
-    'jest/**/*',
-    'i18next-scanner.config.js'
-  ],
+  ignorePatterns: [...base.ignorePatterns, 'jest/**/*', 'i18next-scanner.config.js'],
   parserOptions: {
     ...base.parserOptions,
-    project: [
-      './tsconfig.eslint.json'
-    ]
+    project: ['./tsconfig.eslint.json']
   },
   rules: {
     ...base.rules,
-    'header/header': 'off',
+    'header/header': [0],
     // this seems very broken atm, false positives
     '@typescript-eslint/unbound-method': 'off',
-    '@typescript-eslint/indent': ["error", 2, {"ignoredNodes": ["JSXElement", "JSXElement *"]}],
+    '@typescript-eslint/indent': ['error', 2, { ignoredNodes: ['JSXElement', 'JSXElement *'] }],
     'react/jsx-closing-bracket-location': 0
   },
-  extends:[...base.extends, 'prettier'],
-  plugins:[...base.plugins, 'prettier']
+  extends: [...base.extends, 'prettier'],
+  plugins: [...base.plugins, 'prettier']
 };

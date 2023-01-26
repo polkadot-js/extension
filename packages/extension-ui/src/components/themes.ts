@@ -48,7 +48,11 @@ const darkTheme = {
   secondaryFontFamily: 'Gilroy, sans-serif',
   subTextColor: '#BCCBD6',
   textColor: '#FFFFFF',
-  textColorDanger: '#00CCAB'
+  textColorDanger: '#00CCAB',
+  tooltipBackground: '#111B24',
+  tooltipBorderColor: '#1B2B38',
+  tooltipBoxShadow: '0px 24px 38px rgba(12, 19, 26, 0.14), 0px 9px 46px rgba(12, 19, 26, 0.12), 0px 11px 15px rgba(12, 19, 26, 0.2);',
+  tooltipTextColor: '#BCCBD6'
 };
 
 export declare type Theme = typeof darkTheme;

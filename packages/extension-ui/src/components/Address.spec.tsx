@@ -113,6 +113,8 @@ const mountComponent = async (addressComponentProps: AddressComponentProps, cont
       }}
     >
       <Address
+      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+      // @ts-ignore
         actions={actions}
         {...addressComponentProps}
       />

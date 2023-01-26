@@ -22,62 +22,44 @@ interface Props {
   genesisHash: string;
   onSignature: ({ signature }: { signature: HexString }) => void;
   payload: ExtrinsicPayload | string;
-
 }
 
-function Qr ({ address, className, cmd, genesisHash, onSignature, payload }: Props): React.ReactElement<Props> {
+function Qr({ address, className, cmd, genesisHash, onSignature, payload }: Props): React.ReactElement<Props> {
   const { t } = useTranslation();
   const [isScanning, setIsScanning] = useState(false);
 
-  const payloadU8a = useMemo(
-    () => {
-      switch (cmd) {
-        case CMD_MORTAL:
-          return (payload as ExtrinsicPayload).toU8a();
-        case CMD_SIGN_MESSAGE:
-          return wrapBytes(payload as string);
-        default:
-          return null;
-      }
-    },
-    [cmd, payload]
-  );
+  const payloadU8a = useMemo(() => {
+    switch (cmd) {
+    case CMD_MORTAL:
+      return (payload as ExtrinsicPayload).toU8a();
+    case CMD_SIGN_MESSAGE:
+      return wrapBytes(payload as string);
+    default:
+      return null;
+    }
+  }, [cmd, payload]);
 
-  const _onShowQr = useCallback(
-    () => setIsScanning(true),
-    []
-  );
+  const _onShowQr = useCallback(() => setIsScanning(true), []);
 
   if (!payloadU8a) {
     return (
       <div className={className}>
-        <div className='qrContainer'>
-          Transaction command:{cmd} not supported.
-        </div>
+        <div className='qrContainer'>Transaction command:{cmd} not supported.</div>
       </div>
     );
   }
 
   return (
     <div className={className}>
-      <div className='qrContainer'>
-        {isScanning
-          ? <QrScanSignature onScan={onSignature} />
-          : (
-            <QrDisplayPayload
-              address={address}
-              cmd={cmd}
-              genesisHash={genesisHash}
-              payload={payloadU8a}
-            />
-          )
-        }
-      </div>
+      <div className='qrContainer'>{isScanning ? <QrScanSignature onScan={onSignature} /> : <QrDisplayPayload
+address={address}
+cmd={cmd}
+genesisHash={genesisHash}
+payload={payloadU8a} />}</div>
       {!isScanning && (
         <Button
-          className='scanButton'
-          onClick={_onShowQr}
-        >
+className='scanButton'
+onClick={_onShowQr}>
           {t<string>('Scan signature via camera')}
         </Button>
       )}

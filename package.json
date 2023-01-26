@@ -40,6 +40,8 @@
     "@babel/core": "^7.20.12",
     "@polkadot/dev": "^0.67.177",
     "@types/jest": "^29.2.5",
+    "eslint-config-prettier": "^8.6.0",
+    "eslint-plugin-prettier": "^4.2.1",
     "i18next-scanner": "^4.1.0",
     "sinon-chrome": "^3.0.1"
   },

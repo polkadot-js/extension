@@ -3,19 +3,25 @@
 
 import { ApiProps, NetworkJson, SubstrateNftTransaction } from '@subwallet/extension-base/background/KoniTypes';
 import { getFreeBalance } from '@subwallet/extension-koni-base/api/dotsama/balance';
-import { PSP22Contract, PSP34Contract } from '@subwallet/extension-koni-base/api/tokens/wasm/helper';
+import { PSP22Contract, PSP34Contract, ShidenPSP34Contract } from '@subwallet/extension-koni-base/api/tokens/wasm/helper';
 import { parseNumberToDisplay } from '@subwallet/extension-koni-base/utils';
 import Web3 from 'web3';
 
 import { ApiPromise } from '@polkadot/api';
-import { ContractPromise } from '@polkadot/api-contract';
+import { Abi, ContractPromise } from '@polkadot/api-contract';
 import { BN } from '@polkadot/util';
 
 export function getPSP22ContractPromise (apiPromise: ApiPromise, contractAddress: string) {
   return new ContractPromise(apiPromise, PSP22Contract, contractAddress);
 }
 
-export function getPSP34ContractPromise (apiPromise: ApiPromise, contractAddress: string) {
+export function getPSP34ContractPromise (apiPromise: ApiPromise, contractAddress: string, chain?: string) {
+  if (chain && ['shiden', 'astar', 'shibuya'].includes(chain)) {
+    const abi = new Abi(ShidenPSP34Contract, apiPromise.registry.getChainProperties());
+
+    return new ContractPromise(apiPromise, abi, contractAddress);
+  }
+
   return new ContractPromise(apiPromise, PSP34Contract, contractAddress);
 }
 

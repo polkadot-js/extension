@@ -903,7 +903,7 @@ export const PREDEFINED_NETWORKS: Record<string, NetworkJson> = {
     },
     active: false,
     currentProviderMode: 'ws',
-    currentProvider: 'StakeTechnologies',
+    currentProvider: 'OnFinality',
     groups: ['KUSAMA_PARACHAIN'],
     paraId: 2007,
     nativeToken: 'SDN',

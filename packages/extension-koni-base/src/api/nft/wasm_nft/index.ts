@@ -192,8 +192,6 @@ export class WasmNftApi extends BaseNftApi {
       let itemDetail: Record<string, any> | boolean = false;
       const tokenUri = _tokenUri.output.toString();
 
-      console.log('tokenUri', tokenUri);
-
       if (isFeatured) {
         const parsedTokenUri = this.parseFeaturedTokenUri(tokenUri);
 
@@ -206,16 +204,12 @@ export class WasmNftApi extends BaseNftApi {
         const parsedTokenUri = this.parseFeaturedTokenUri(tokenUri, this.chain);
         const detailUrl = this.parseUrl(parsedTokenUri as string);
 
-        console.log('detailUrl', detailUrl);
-
         if (detailUrl) {
           const resp = await fetch(detailUrl);
 
           itemDetail = (resp && resp.ok && await resp.json() as Record<string, any>);
         }
       }
-
-      console.log('itemDetail', itemDetail);
 
       if (!itemDetail) {
         console.warn(`Cannot fetch NFT metadata [${tokenId}] from PSP-34 contract.`);
@@ -273,7 +267,6 @@ export class WasmNftApi extends BaseNftApi {
       const balance = _balance.output ? _balance.output.toString() : '0';
 
       if (parseInt(balance) === 0) {
-        console.log('balance not found', address, smartContract);
         nftParams.updateNftIds(this.chain, address, smartContract, nftIds);
 
         return;
@@ -294,8 +287,6 @@ export class WasmNftApi extends BaseNftApi {
             const rawTokenId = _tokenByIndexResp.output.toHuman() as Record<string, any>;
             const tokenIdObj = rawTokenId.Ok as Record<string, string>;
             const tokenId = Object.values(tokenIdObj)[0];
-
-            console.log('tokenId', tokenId, smartContract);
 
             nftIds.push(tokenId);
 
@@ -369,14 +360,9 @@ export class WasmNftApi extends BaseNftApi {
     const apiPromise = this.dotSamaApi?.api as ApiPromise;
 
     await Promise.all(this.wasmContracts.map(async ({ name, smartContract }) => {
-      console.log('got here');
       const contractPromise = getPSP34ContractPromise(apiPromise, smartContract, this.chain);
 
-      console.log('fuck', contractPromise);
-
       const { attributeList, storedOnChain } = await this.getCollectionAttributes(contractPromise);
-
-      console.log('got here ok');
 
       return await this.getItemsByCollection(contractPromise, attributeList, storedOnChain, smartContract, name, params);
     }));

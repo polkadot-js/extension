@@ -93,15 +93,5 @@ export const themes = {
 export declare type AvailableThemes = keyof typeof themes;
 
 export function chooseTheme (): AvailableThemes {
-  const preferredTheme = localStorage.getItem('theme');
-
-  if (preferredTheme) {
-    return preferredTheme === 'dark'
-      ? 'dark'
-      : 'light';
-  }
-
-  return window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches
-    ? 'light'
-    : 'dark';
+  return 'dark';
 }

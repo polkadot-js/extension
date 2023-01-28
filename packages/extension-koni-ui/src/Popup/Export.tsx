@@ -17,7 +17,7 @@ import { KeyringPair$Json } from '@subwallet/keyring/types';
 import { saveAs } from 'file-saver';
 import React, { useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import QRCode from 'react-qr-code';
-import { RouteComponentProps, withRouter } from 'react-router';
+import { useParams } from 'react-router';
 import styled from 'styled-components';
 
 import { AccountContext, AccountInfoEl, ActionContext, Button, InputWithLabel, Warning } from '../components';
@@ -26,7 +26,7 @@ import { exportAccount, exportAccountPrivateKey, keyringExportMnemonic } from '.
 
 const MIN_LENGTH = 6;
 
-interface Props extends RouteComponentProps<{ address: string }>, ThemeProps {
+interface Props extends ThemeProps {
   className?: string;
 }
 
@@ -69,11 +69,12 @@ const copyToClipboard = (value: string) => {
   navigator.clipboard.writeText(value).then().catch(console.error);
 };
 
-function ExportAccount ({ className, match: { params: { address } } }: Props): React.ReactElement<Props> {
+function ExportAccount ({ className }: Props): React.ReactElement<Props> {
   const { t } = useTranslation();
 
   const onAction = useContext(ActionContext);
   const accounts = useContext(AccountContext);
+  const address = useParams<{address: string}>().address || '';
 
   const [isBusy, setIsBusy] = useState(false);
   const [pass, setPass] = useState('');
@@ -505,7 +506,7 @@ function ExportAccount ({ className, match: { params: { address } } }: Props): R
   );
 }
 
-export default withRouter(styled(ExportAccount)(({ theme }: Props) => `
+export default styled(ExportAccount)(({ theme }: Props) => `
   display: flex;
   flex-direction: column;
   position: relative;
@@ -601,4 +602,4 @@ export default withRouter(styled(ExportAccount)(({ theme }: Props) => `
       font-size: 16px;
       line-height: 26px;
   }
-`));
+`);

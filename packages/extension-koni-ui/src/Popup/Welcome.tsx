@@ -7,9 +7,9 @@ import Button from '@subwallet/extension-koni-ui/components/Button';
 import ButtonArea from '@subwallet/extension-koni-ui/components/ButtonArea';
 import Header from '@subwallet/extension-koni-ui/partials/Header';
 import React, { useCallback, useContext } from 'react';
+import { useNavigate } from 'react-router';
 import styled, { ThemeContext } from 'styled-components';
 
-import { ActionContext } from '../components';
 import useTranslation from '../hooks/useTranslation';
 import { Theme } from '../types';
 
@@ -19,15 +19,15 @@ interface Props extends ThemeProps {
 
 function Welcome ({ className }: Props): React.ReactElement<Props> {
   const { t } = useTranslation();
-  const onAction = useContext(ActionContext);
+  const navigate = useNavigate();
   const themeContext = useContext(ThemeContext as React.Context<Theme>);
 
   const _onClick = useCallback(
     (): void => {
       window.localStorage.setItem('welcome_read', 'ok');
-      onAction();
+      navigate('/account/create');
     },
-    [onAction]
+    [navigate]
   );
 
   return (

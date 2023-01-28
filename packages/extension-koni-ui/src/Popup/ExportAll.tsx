@@ -7,7 +7,6 @@ import { ALL_ACCOUNT_KEY } from '@subwallet/extension-koni-base/constants';
 import Header from '@subwallet/extension-koni-ui/partials/Header';
 import { saveAs } from 'file-saver';
 import React, { useCallback, useContext, useState } from 'react';
-import { RouteComponentProps, withRouter } from 'react-router';
 import styled from 'styled-components';
 
 import { AccountContext, ActionContext, Button, InputWithLabel, Warning } from '../components';
@@ -16,7 +15,7 @@ import { exportAccounts } from '../messaging';
 
 const MIN_LENGTH = 6;
 
-interface Props extends RouteComponentProps, ThemeProps {
+interface Props extends ThemeProps {
   className?: string;
 }
 
@@ -117,7 +116,7 @@ function ExportAll ({ className }: Props): React.ReactElement<Props> {
   );
 }
 
-export default withRouter(styled(ExportAll)(({ theme }: Props) => `
+export default styled(ExportAll)(({ theme }: Props) => `
   .action-area {
     padding: 25px 15px 10px 15px;
   }
@@ -153,4 +152,4 @@ export default withRouter(styled(ExportAll)(({ theme }: Props) => `
   .export-btn:last-child {
     margin-left: 8px;
   }
-`));
+`);

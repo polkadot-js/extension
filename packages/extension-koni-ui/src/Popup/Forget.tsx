@@ -4,11 +4,12 @@
 import type { ThemeProps } from '../types';
 
 import { AccountJson } from '@subwallet/extension-base/background/types';
+import { ALL_ACCOUNT_KEY } from '@subwallet/extension-koni-base/constants';
 import { RootState, store } from '@subwallet/extension-koni-ui/stores';
 import { isAccountAll } from '@subwallet/extension-koni-ui/util';
 import React, { useCallback, useContext, useState } from 'react';
 import { useSelector } from 'react-redux';
-import { RouteComponentProps, withRouter } from 'react-router';
+import { useParams } from 'react-router';
 import styled, { ThemeContext } from 'styled-components';
 
 import { AccountContext, AccountInfoEl, ActionBar, ActionContext, ActionText, Button, Warning } from '../components';
@@ -17,7 +18,7 @@ import { forgetAccount } from '../messaging';
 import { Header } from '../partials';
 import { Theme } from '../types';
 
-interface Props extends RouteComponentProps<{ address: string }>, ThemeProps {
+interface Props extends ThemeProps {
   className?: string;
 }
 
@@ -25,13 +26,14 @@ function updateCurrentAccount (currentAcc: AccountJson | null): void {
   store.dispatch({ type: 'currentAccount/update', payload: currentAcc });
 }
 
-function Forget ({ className, match: { params: { address } } }: Props): React.ReactElement<Props> {
+function Forget ({ className }: Props): React.ReactElement<Props> {
   const { t } = useTranslation();
   const onAction = useContext(ActionContext);
   const [isBusy, setIsBusy] = useState(false);
   const [buttonId, setButtonId] = useState('');
   const themeContext = useContext(ThemeContext as React.Context<Theme>);
   const { accounts } = useContext(AccountContext);
+  const address = useParams<{ address: string }>().address || ALL_ACCOUNT_KEY;
   const _isAllAccount = isAccountAll(address);
   const currentAccount = useSelector((state: RootState) => state.currentAccount);
 
@@ -131,7 +133,7 @@ function Forget ({ className, match: { params: { address } } }: Props): React.Re
   );
 }
 
-export default withRouter(styled(Forget)(({ theme }: Props) => `
+export default styled(Forget)(({ theme }: Props) => `
   padding: 25px 15px 0;
 
   .forget-account-wrapper {
@@ -174,4 +176,4 @@ export default withRouter(styled(Forget)(({ theme }: Props) => `
   .forget-account__cancel-btn-wrapper {
     margin-top: 12px;
   }
-`));
+`);

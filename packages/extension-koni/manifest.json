@@ -7,7 +7,8 @@
   "manifest_version": 2,
   "permissions": [
     "storage",
-    "tabs"
+    "activeTab",
+    "webRequest"
   ],
   "background": {
     "page": "background.html",

@@ -15,13 +15,9 @@ interface Props extends ThemeProps {
   className?: string;
 }
 
-interface WebsiteState {
-  website: string;
-}
-
 function PhishingDetected ({ className }: Props): React.ReactElement<Props> {
   const { t } = useTranslation();
-  const { website } = useParams<WebsiteState>();
+  const website = useParams<{ website: string }>().website || '';
   const decodedWebsite = decodeURIComponent(website);
 
   return (

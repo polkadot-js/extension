@@ -83,12 +83,9 @@ export default React.memo(styled(Tooltip)(({ theme }: Props) => `
     border-radius: 5px;
   }
 
-  &.__react_component_tooltip.place-top:before {
-    border-top: 8px solid #2D365C;
-  }
-
-  &.__react_component_tooltip.place-right:before {
-    border-right: 8px solid #2D365C;
+  &.__react_component_tooltip:after,
+  &.__react_component_tooltip:before {
+    border-color: #2D365C !important;
   }
 
   table {

@@ -15,7 +15,7 @@ const priceSlice = createSlice({
   initialState,
   name: 'price',
   reducers: {
-    update (state, action: PayloadAction<PriceJson>) {
+    updatePrice (state, action: PayloadAction<PriceJson>) {
       const payload = action.payload;
 
       state.currency = payload.currency;
@@ -26,5 +26,5 @@ const priceSlice = createSlice({
   }
 });
 
-export const { update } = priceSlice.actions;
+export const { updatePrice } = priceSlice.actions;
 export default priceSlice.reducer;

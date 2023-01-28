@@ -4,8 +4,7 @@
 import './i18n/i18n';
 
 import React, { Suspense } from 'react';
-import ReactDOM from 'react-dom';
-import { HashRouter } from 'react-router-dom';
+import ReactDOM from 'react-dom/client';
 
 import { View } from './components';
 
@@ -16,14 +15,15 @@ export default function createView (Entry: React.ComponentType, rootId = 'root')
     throw new Error(`Unable to find element with id '${rootId}'`);
   }
 
-  ReactDOM.render(
-    <Suspense fallback='...'>
+  const root = ReactDOM.createRoot(rootElement);
+
+  root.render(
+    <React.StrictMode>
       <View>
-        <HashRouter>
+        <Suspense>
           <Entry />
-        </HashRouter>
+        </Suspense>
       </View>
-    </Suspense>,
-    rootElement
+    </React.StrictMode>
   );
 }

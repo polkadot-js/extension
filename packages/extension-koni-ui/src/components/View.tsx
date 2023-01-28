@@ -3,7 +3,7 @@
 
 import type { ThemeProps } from '../types';
 
-import { UiSettings, ThemeTypes } from '@subwallet/extension-base/background/KoniTypes';
+import { ThemeTypes, UiSettings } from '@subwallet/extension-base/background/KoniTypes';
 import { AvailableThemes, chooseTheme, Main, themes, ThemeSwitchContext } from '@subwallet/extension-koni-ui/components';
 import { saveTheme, subscribeSettings } from '@subwallet/extension-koni-ui/messaging';
 import React, { useCallback, useEffect, useState } from 'react';

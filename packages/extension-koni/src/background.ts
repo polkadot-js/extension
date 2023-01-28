@@ -49,6 +49,7 @@ chrome.runtime.onConnect.addListener((port): void => {
     openCount += 1;
     koniState.wakeup().catch((err) => console.warn(err));
 
+    // TODO: wakeup happens every time popup opens, no matter if the background is asleep or not
     console.log('Wake up due to popup open ---------------------------------');
 
     if (waitingToStop) {

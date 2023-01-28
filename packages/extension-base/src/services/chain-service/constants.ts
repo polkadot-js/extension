@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { _SubstrateChainType } from '@subwallet/chain-list/types';
-import { SingleModeJson } from '@subwallet/extension-base/background/KoniTypes';
+import { SingleModeJson, ThemeTypes } from '@subwallet/extension-base/background/KoniTypes';
 
 export const API_AUTO_CONNECT_MS = 3000;
 export const API_MAX_RETRY = 2;
@@ -15,7 +15,7 @@ export const _API_OPTIONS_CHAIN_GROUP = {
 export const _PREDEFINED_SINGLE_MODES: Record<string, SingleModeJson> = {
   subspace: {
     networkKeys: ['subspace_gemini_2a', 'subspace_test', 'subspace_gemini_3a'],
-    theme: 'subspace',
+    theme: ThemeTypes.SUBSPACE,
     autoTriggerDomain: 'subspace.network'
   }
 };

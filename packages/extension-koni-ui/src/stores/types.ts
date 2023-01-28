@@ -3,23 +3,11 @@
 
 import { _ChainAsset, _ChainInfo } from '@subwallet/chain-list/types';
 import { AuthUrlInfo } from '@subwallet/extension-base/background/handlers/State';
-import {
-  AddNetworkRequestExternal,
-  BalanceItem,
-  ConfirmationDefinitions,
-  ConfirmationsQueue,
-  ConfirmationType, CrowdloanItem,
-  KeyringState,
-  NftItem,
-  StakingRewardItem,
-  TransactionHistoryItemType,
-  UiSettings,
-  ValidatorInfo
-} from '@subwallet/extension-base/background/KoniTypes';
+import { AddNetworkRequestExternal, BalanceItem, ConfirmationDefinitions, ConfirmationsQueue, ConfirmationType, CrowdloanItem, KeyringState, NftItem, StakingRewardItem, TransactionHistoryItemType, UiSettings, ValidatorInfo } from '@subwallet/extension-base/background/KoniTypes';
 import { AccountJson, AccountsContext, AuthorizeRequest, MetadataRequest, SigningRequest } from '@subwallet/extension-base/background/types';
+import { _ChainState } from '@subwallet/extension-base/services/chain-service/types';
 
 import { SettingsStruct } from '@polkadot/ui-settings/types';
-import {_ChainState} from "@subwallet/extension-base/services/chain-service/types";
 
 export type CurrentAccountType = {
   account?: AccountJson | null;
@@ -116,7 +104,7 @@ export interface ChainStore extends BaseReduxStore {
 }
 
 export interface BalanceStore extends BaseReduxStore {
-  balanceMap: Record<string, BalanceItem>+
+  balanceMap: Record<string, BalanceItem>
 }
 
 export interface CrowdloanStore extends BaseReduxStore {

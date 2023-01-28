@@ -1,11 +1,11 @@
 // Copyright 2019-2022 @subwallet/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
+import { PriceJson } from '@subwallet/extension-base/background/KoniTypes';
 import { lazySubscribeMessage } from '@subwallet/extension-koni-ui/messaging';
 import { store, StoreName } from '@subwallet/extension-koni-ui/stores';
 import React from 'react';
 import { Provider } from 'react-redux';
-import {PriceJson} from "@subwallet/extension-base/background/KoniTypes";
 
 interface DataContextProviderProps {
   children?: React.ReactElement;
@@ -121,7 +121,7 @@ const _DataContext: DataContextType = {
 export const DataContext = React.createContext(_DataContext);
 
 const updatePrice = (data: PriceJson) => {
-  store.dispatch({ type: 'price/update', payload: data });
+  store.dispatch({ type: 'price/updatePrice', payload: data });
 };
 
 const subscribePrice = lazySubscribeMessage('pri(price.getSubscription)', null, updatePrice, updatePrice);

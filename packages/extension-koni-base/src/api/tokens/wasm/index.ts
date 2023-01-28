@@ -4,6 +4,7 @@
 import { ApiProps, NetworkJson, SubstrateNftTransaction } from '@subwallet/extension-base/background/KoniTypes';
 import { getFreeBalance } from '@subwallet/extension-koni-base/api/dotsama/balance';
 import { PSP22Contract, PSP34Contract, ShidenPSP34Contract } from '@subwallet/extension-koni-base/api/tokens/wasm/helper';
+import { getWasmContractGasLimit } from '@subwallet/extension-koni-base/api/tokens/wasm/utils';
 import { parseNumberToDisplay } from '@subwallet/extension-koni-base/utils';
 import Web3 from 'web3';
 
@@ -40,7 +41,8 @@ export async function getPSP34Transaction (
 
   try {
     const [info, balance] = await Promise.all([
-      contractPromise.tx['psp34::transfer']({ gasLimit: '10000' }, recipientAddress, onChainOption, {}).paymentInfo(senderAddress),
+      // @ts-ignore
+      contractPromise.tx['psp34::transfer'](getWasmContractGasLimit(networkKey, apiPromise), recipientAddress, onChainOption, {}).paymentInfo(senderAddress),
       getFreeBalance(networkKey, senderAddress, dotSamaApiMap, web3ApiMap)
     ]);
 
@@ -80,11 +82,13 @@ export async function getPSP34TransferExtrinsic (networkKey: string, apiProp: Ap
 
   try {
     const contractPromise = getPSP34ContractPromise(apiProp.api, contractAddress);
-    const transferQuery = await contractPromise.query['psp34::transfer'](senderAddress, { gasLimit: -1 }, recipientAddress, onChainOption, {});
+    // @ts-ignore
+    const transferQuery = await contractPromise.query['psp34::transfer'](senderAddress, getWasmContractGasLimit(networkKey, apiProp.api), recipientAddress, onChainOption, {});
 
-    const gasLimit = transferQuery.gasRequired.toString();
+    const gasLimit = ['astar', 'shiden', 'shibuya'].includes(networkKey) ? getWasmContractGasLimit(networkKey, apiProp.api) : { gasLimit: transferQuery.gasRequired.toString() };
 
-    return contractPromise.tx['psp34::transfer']({ gasLimit }, recipientAddress, onChainOption, {});
+    // @ts-ignore
+    return contractPromise.tx['psp34::transfer'](gasLimit, recipientAddress, onChainOption, {});
   } catch (e) {
     console.error('Error getting WASM NFT transfer extrinsic', e);
 

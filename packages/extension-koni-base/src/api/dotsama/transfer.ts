@@ -62,7 +62,7 @@ export async function checkSupportTransfer (networkKey: string, token: string, d
     };
   }
 
-  if (['subspace_gemini_3a', 'kulupu', 'joystream', 'equilibrium_parachain', 'genshiro_testnet', 'genshiro'].includes(networkKey)) {
+  if (['subspace_gemini_3a', 'kulupu', 'joystream', 'genshiro_testnet', 'genshiro'].includes(networkKey)) {
     return {
       supportTransfer: false,
       supportTransferAll: false
@@ -544,6 +544,7 @@ export async function makeTransfer ({ callback,
     txState: txState,
     address: from,
     updateResponseTxResult: updateResponseTxResult,
-    errorMessage: 'error transfer'
+    errorMessage: 'error transfer',
+    nonce: ['equilibrium_parachain'].includes(networkKey) ? -1 : undefined
   });
 }

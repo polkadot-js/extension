@@ -20,6 +20,7 @@ interface AbstractSignAndSendExtrinsicProps extends Partial<PrepareExternalReque
   apiProps: ApiProps;
   password?: string;
   updateResponseTxResult?: (response: BasicTxResponse, records: EventRecord[]) => void;
+  nonce?: number;
 }
 
 interface PasswordSignAndSendExtrinsicProps extends AbstractSignAndSendExtrinsicProps {
@@ -41,6 +42,7 @@ export const signAndSendExtrinsic = async ({ address,
   errorMessage,
   extrinsic,
   id,
+  nonce,
   password,
   setState,
   txState,
@@ -56,7 +58,8 @@ export const signAndSendExtrinsic = async ({ address,
           callback: callback,
           extrinsic: extrinsic,
           password: password,
-          type: type
+          type: type,
+          nonce
         }
         : {
           address: address,
@@ -65,7 +68,8 @@ export const signAndSendExtrinsic = async ({ address,
           extrinsic: extrinsic,
           id: id,
           setState: setState,
-          type: type
+          type: type,
+          nonce
         });
 
       if (passwordError) {

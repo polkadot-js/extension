@@ -25,8 +25,8 @@ export interface DataHandler {
 }
 
 export interface DataContextType {
-  subscriptionMap: Record<string, DataHandler>,
-  storeSubscriptions: Partial<Record<StoreName, string[]>>,
+  handlerMap: Record<string, DataHandler>,
+  storeDependencies: Partial<Record<StoreName, string[]>>,
   readyStoreMap: DataMap
 
   addHandler: (item: DataHandler) => () => void,
@@ -35,8 +35,8 @@ export interface DataContextType {
 }
 
 const _DataContext: DataContextType = {
-  subscriptionMap: {},
-  storeSubscriptions: {},
+  handlerMap: {},
+  storeDependencies: {},
   readyStoreMap: Object.keys(store.getState()).reduce((map, key) => {
     map[key as StoreName] = false;
 
@@ -47,15 +47,15 @@ const _DataContext: DataContextType = {
 
     item.isSubscription = !!item.unsub;
 
-    if (!this.subscriptionMap[name]) {
-      this.subscriptionMap[name] = item;
+    if (!this.handlerMap[name]) {
+      this.handlerMap[name] = item;
 
       item.relatedStores.forEach((storeName) => {
-        if (!this.storeSubscriptions[storeName]) {
-          this.storeSubscriptions[storeName] = [];
+        if (!this.storeDependencies[storeName]) {
+          this.storeDependencies[storeName] = [];
         }
 
-        this.storeSubscriptions[storeName]?.push(name);
+        this.storeDependencies[storeName]?.push(name);
       });
 
       if (item.isStartImmediately) {
@@ -69,28 +69,28 @@ const _DataContext: DataContextType = {
     };
   },
   removeHandler: function (name: string) {
-    const item = this.subscriptionMap[name];
+    const item = this.handlerMap[name];
 
     if (!item) {
       return;
     }
 
     item.unsub && item.unsub();
-    Object.values(this.storeSubscriptions).forEach((subscriptions) => {
-      const removeIndex = subscriptions.indexOf(name);
+    Object.values(this.storeDependencies).forEach((handlers) => {
+      const removeIndex = handlers.indexOf(name);
 
       if (removeIndex >= 0) {
-        subscriptions.splice(removeIndex, 1);
+        handlers.splice(removeIndex, 1);
       }
     });
 
-    if (this.subscriptionMap[name]) {
-      delete this.subscriptionMap[name];
+    if (this.handlerMap[name]) {
+      delete this.handlerMap[name];
     }
   },
   awaitStores: async function (storeNames: StoreName[], renew = true) {
     const promiseList = storeNames.reduce((handlers, sName) => {
-      (this.storeSubscriptions[sName] || []).forEach((handlerName) => {
+      (this.storeDependencies[sName] || []).forEach((handlerName) => {
         if (!handlers.includes(handlerName)) {
           handlers.push(handlerName);
         }
@@ -98,7 +98,7 @@ const _DataContext: DataContextType = {
 
       return handlers;
     }, [] as string[]).map((siName) => {
-      const handler = this.subscriptionMap[siName];
+      const handler = this.handlerMap[siName];
 
       if (!handler.isStarted || (!handler.isSubscription && renew)) {
         handler.start();

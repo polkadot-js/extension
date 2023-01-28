@@ -30,7 +30,7 @@ export function PageWrapper ({ children, resolve }: PageWrapperProps) {
 export function Crypto () {
   const dataContext = useContext(DataContext);
 
-  return <PageWrapper resolve={dataContext.awaitData(['price'])}>
+  return <PageWrapper resolve={dataContext.awaitStores(['price'])}>
     <div>Crypto</div>
   </PageWrapper>;
 }

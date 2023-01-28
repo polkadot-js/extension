@@ -1,9 +1,11 @@
 // Copyright 2019-2022 @subwallet/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { subscribePrice } from '@subwallet/extension-koni-ui/messaging';
+import { lazySubscribeMessage } from '@subwallet/extension-koni-ui/messaging';
 import { store, StoreName } from '@subwallet/extension-koni-ui/stores';
 import React from 'react';
+import { Provider } from 'react-redux';
+import {PriceJson} from "@subwallet/extension-base/background/KoniTypes";
 
 interface DataContextProviderProps {
   children?: React.ReactElement;
@@ -11,21 +13,25 @@ interface DataContextProviderProps {
 
 export type DataMap = Record<StoreName, boolean>;
 
-export interface SubscriptionItem {
+export interface DataHandler {
   name: string,
-  subscription: () => Promise<void>,
-  promise?: Promise<void>,
+  unsub?: () => void,
+  isSubscription?: boolean,
+  start: () => void,
+  isStarted?: boolean,
+  isStartImmediately?: boolean,
+  promise?: Promise<any>,
   relatedStores: StoreName[]
 }
 
 export interface DataContextType {
-  subscriptionMap: Record<string, SubscriptionItem>,
+  subscriptionMap: Record<string, DataHandler>,
   storeSubscriptions: Partial<Record<StoreName, string[]>>,
   readyStoreMap: DataMap
 
-  addSubscription: (name: string, subscription: () => Promise<void>, relatedStores: StoreName[]) => void,
-  removeSubscription: (name: string) => void,
-  awaitData: (storeNames: StoreName[]) => Promise<boolean>
+  addHandler: (item: DataHandler) => () => void,
+  removeHandler: (name: string) => void,
+  awaitStores: (storeNames: StoreName[], renew?: boolean) => Promise<boolean>
 }
 
 const _DataContext: DataContextType = {
@@ -36,30 +42,40 @@ const _DataContext: DataContextType = {
 
     return map;
   }, {} as DataMap),
-  addSubscription: function (name: string, subscription: () => Promise<void>, relatedStores: StoreName[]) {
-    if (this.subscriptionMap[name]) {
+  addHandler: function (item: DataHandler) {
+    const { name } = item;
+
+    item.isSubscription = !!item.unsub;
+
+    if (!this.subscriptionMap[name]) {
+      this.subscriptionMap[name] = item;
+
+      item.relatedStores.forEach((storeName) => {
+        if (!this.storeSubscriptions[storeName]) {
+          this.storeSubscriptions[storeName] = [];
+        }
+
+        this.storeSubscriptions[storeName]?.push(name);
+      });
+
+      if (item.isStartImmediately) {
+        item.start();
+        item.isStarted = true;
+      }
+    }
+
+    return () => {
+      this.removeHandler(name);
+    };
+  },
+  removeHandler: function (name: string) {
+    const item = this.subscriptionMap[name];
+
+    if (!item) {
       return;
     }
 
-    this.subscriptionMap[name] = {
-      name,
-      subscription,
-      relatedStores
-    };
-
-    relatedStores.forEach((storeName) => {
-      if (!this.storeSubscriptions[storeName]) {
-        this.storeSubscriptions[storeName] = [];
-      }
-
-      this.storeSubscriptions[storeName]?.push(name);
-    });
-
-    return () => {
-      this.removeSubscription(name);
-    };
-  },
-  removeSubscription: function (name: string) {
+    item.unsub && item.unsub();
     Object.values(this.storeSubscriptions).forEach((subscriptions) => {
       const removeIndex = subscriptions.indexOf(name);
 
@@ -72,25 +88,24 @@ const _DataContext: DataContextType = {
       delete this.subscriptionMap[name];
     }
   },
-  awaitData: async function (storeNames: StoreName[]) {
-    const promiseList = storeNames.reduce((subList, sName) => {
-      (this.storeSubscriptions[sName] || []).forEach((siName) => {
-        if (!subList.includes(siName)) {
-          subList.push(siName);
+  awaitStores: async function (storeNames: StoreName[], renew = true) {
+    const promiseList = storeNames.reduce((handlers, sName) => {
+      (this.storeSubscriptions[sName] || []).forEach((handlerName) => {
+        if (!handlers.includes(handlerName)) {
+          handlers.push(handlerName);
         }
       });
 
-      return subList;
+      return handlers;
     }, [] as string[]).map((siName) => {
-      const subscriptionItem = this.subscriptionMap[siName];
+      const handler = this.subscriptionMap[siName];
 
-      if (!subscriptionItem.promise) {
-        subscriptionItem.promise = new Promise((resolve, reject) => {
-          subscriptionItem.subscription().then(resolve).catch(reject);
-        });
+      if (!handler.isStarted || (!handler.isSubscription && renew)) {
+        handler.start();
+        handler.isStarted = true;
       }
 
-      return subscriptionItem.promise;
+      return handler.promise;
     });
 
     storeNames.forEach((n) => {
@@ -105,17 +120,19 @@ const _DataContext: DataContextType = {
 
 export const DataContext = React.createContext(_DataContext);
 
+const updatePrice = (data: PriceJson) => {
+  store.dispatch({ type: 'price/update', payload: data });
+};
+
+const subscribePrice = lazySubscribeMessage('pri(price.getSubscription)', null, updatePrice, updatePrice);
+
 export const DataContextProvider = ({ children }: DataContextProviderProps) => {
   // Init subscription
-  _DataContext.addSubscription('price', async () => {
-    await subscribePrice(null, (data) => {
-      console.log(data);
-    }).then((data) => {
-      console.log(data);
-    }).catch(console.error);
-  }, ['price']);
+  _DataContext.addHandler({ ...subscribePrice, name: 'subscribePrice', relatedStores: ['price'] });
 
-  return <DataContext.Provider value={_DataContext}>
-    {children}
-  </DataContext.Provider>;
+  return <Provider store={store}>
+    <DataContext.Provider value={_DataContext}>
+      {children}
+    </DataContext.Provider>
+  </Provider>;
 };

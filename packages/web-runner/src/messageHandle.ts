@@ -14,8 +14,6 @@ export interface CustomResponse<T> {
 export type PageStatus = CustomResponse<{ status: 'init' | 'load' | 'crypto_ready' }>
 
 export function responseMessage (response: TransportResponseMessage<keyof RequestSignatures> | PageStatus) {
-  console.log(response);
-
   // @ts-ignore
   if (window.ReactNativeWebView) {
     // @ts-ignore
@@ -42,8 +40,6 @@ export function setupHandlers () {
     };
 
     if (data.id && data.message) {
-      console.log(data);
-
       if (data.message.startsWith('pri')) {
         port.name = PORT_EXTENSION;
       } else {

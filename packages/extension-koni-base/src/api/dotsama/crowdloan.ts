@@ -120,6 +120,9 @@ export async function subscribeCrowdloan (addresses: string[], dotSamaAPIMap: Re
       return registry.createType('AccountId', address).toHex();
     });
 
+    const polkadotParaIds: number[] = [];
+    const kusamaParaIds: number[] = [];
+
     Object.entries(networks).forEach(([networkKey, networkInfo]) => {
       const crowdloanCb = (rs: CrowdloanItem) => {
         callback(networkKey, rs);
@@ -133,10 +136,12 @@ export async function subscribeCrowdloan (addresses: string[], dotSamaAPIMap: Re
 
       if (networkKey === 'acala') {
         unsubMap.acala = subscribeAcalaContributeInterval(substrateAddresses.map((address) => reformatAddress(address, networkInfo.ss58Format, networkInfo.isEthereum)), polkadotFundsStatusMap[paraId], crowdloanCb);
-      } else if (networkInfo.groups.includes('POLKADOT_PARACHAIN') && networkInfo.paraId && polkadotFundsStatusMap[paraId]) {
+      } else if (networkInfo.groups.includes('POLKADOT_PARACHAIN') && networkInfo.paraId && polkadotFundsStatusMap[paraId] && !polkadotParaIds.includes(paraId)) {
         unsubMap[networkKey] = getRPCCrowdloan(polkadotAPI, paraId, hexAddresses, polkadotFundsStatusMap[paraId], crowdloanCb);
-      } else if (networkInfo.groups.includes('KUSAMA_PARACHAIN') && paraId && kusamaFundsStatusMap[paraId]) {
+        polkadotParaIds.push(paraId);
+      } else if (networkInfo.groups.includes('KUSAMA_PARACHAIN') && paraId && kusamaFundsStatusMap[paraId] && !kusamaParaIds.includes(paraId)) {
         unsubMap[networkKey] = getRPCCrowdloan(kusamaAPI, paraId, hexAddresses, kusamaFundsStatusMap[paraId], crowdloanCb);
+        kusamaParaIds.push(paraId);
       }
     });
   }

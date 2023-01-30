@@ -515,7 +515,9 @@ export const PREDEFINED_NETWORKS: Record<string, NetworkJson> = {
     paraId: 2026,
     nativeToken: 'NODL',
     crowdloanUrl: 'https://parachain.nodle.com/',
-    decimals: 11
+    decimals: 11,
+    coinGeckoKey: 'nodle-network',
+    abiExplorer: 'https://nodle.subscan.io'
   },
   darwinia: {
     key: 'darwinia',

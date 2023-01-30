@@ -26,6 +26,7 @@ import useToast from '../hooks/useToast';
 import useTranslation from '../hooks/useTranslation';
 import { showAccount } from '../messaging';
 import { DEFAULT_TYPE } from '../util/defaultType';
+import {ellipsisName}  from '../util/ellipsisName';
 import getParentNameSuri from '../util/getParentNameSuri';
 import { AccountContext, SettingsContext } from './contexts';
 import Identicon from './Identicon';
@@ -172,16 +173,7 @@ function Address({ actions, address, children, className, genesisHash, isExterna
 
   const parentNameSuri = getParentNameSuri(parentName, suri);
 
-  const _ellipsisName = useCallback((input: string | null | undefined): string | null => {
-    if (!input || input.length < 8) {
-      return null;
-    }
-
-    const firstHalf = input.slice(0, 4);
-    const secondHalf = input.slice(-4);
-
-    return firstHalf + '...' + secondHalf;
-  }, []);
+  const _ellipsisName = useCallback(ellipsisName, [ellipsisName]);
 
   return (
     <div className={className}>

@@ -1,4 +1,7 @@
-import React, { useState } from 'react';
+// Copyright 2019-2023 @polkadot/extension-ui authors & contributors
+// SPDX-License-Identifier: Apache-2.0
+
+import React from 'react';
 import styled from 'styled-components';
 
 import { ThemeProps } from '../types';

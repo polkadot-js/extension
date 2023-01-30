@@ -121,10 +121,12 @@ function Header({ children, className = '', onFilter, showAdd, showBackArrow, sh
             </Tooltip>
           )}
           {showSettings && (
-            <Tooltip text={t<string>('Settings')}>
+            <Tooltip 
+              text={t<string>('Settings')}>
               <Link to={'/account/settings'}>
               <img
                 className='popupToggle'
+                data-toggle-settings
                 onClick={_toggleSettings}
                 ref={setIconRef}
                 src={settingsIcon}

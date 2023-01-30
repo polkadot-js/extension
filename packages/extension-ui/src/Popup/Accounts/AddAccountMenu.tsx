@@ -33,7 +33,6 @@ function AddAccountMenu({ className }: Props): React.ReactElement<Props> {
         <div className='add-account-menu'>
           <MenuCard
             description='Generate a new public address'
-            preIcon={<img src={addIcon} />}
             title='Create a new account'
           />
         </div>

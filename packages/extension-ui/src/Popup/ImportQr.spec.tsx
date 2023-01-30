@@ -12,10 +12,12 @@ import { MemoryRouter } from 'react-router';
 import { Button } from '../components';
 import * as messaging from '../messaging';
 import { flushAllPromises } from '../testHelpers';
+import {ellipsisName}  from '../util/ellipsisName';
 import ImportQr from './ImportQr';
 
 const mockedAccount = {
   content: '12bxf6QJS5hMJgwbJMDjFot1sq93EvgQwyuPWENr9SzJfxtN',
+  contentEllipsis: ellipsisName('12bxf6QJS5hMJgwbJMDjFot1sq93EvgQwyuPWENr9SzJfxtN'),
   expectedBannerChain: 'Polkadot',
   genesisHash: '0x91b171bb158e2d3848fa23a9f1c25182fb8e20313b2c1eb49219da7a70ce90c3',
   isAddress: true,
@@ -25,6 +27,7 @@ const mockedAccount = {
 interface ScanType {
   isAddress: boolean;
   content: string;
+  contentEllipsis: string | null;
   genesisHash: string;
   name?: string;
 }
@@ -85,7 +88,7 @@ describe('ImportQr component', () => {
     });
 
     it('shows the correct address', () => {
-      expect(wrapper.find('[data-field="address"]').text()).toEqual(mockedAccount.content);
+      expect(wrapper.find('[data-field="address"]').text()).toEqual(mockedAccount.contentEllipsis);
     });
 
     it('shows the correct banner', () => {

@@ -16,6 +16,7 @@ import { ActionContext, Address, Button, Input, SigningReqContext, themes } from
 import * as messaging from '../../messaging';
 import * as MetadataCache from '../../MetadataCache';
 import { flushAllPromises } from '../../testHelpers';
+import {ellipsisName}  from '../../util/ellipsisName';
 import Extrinsic from './Extrinsic';
 import { westendMetadata } from './metadataMock';
 import Qr from './Qr';
@@ -28,6 +29,8 @@ import Signing from '.';
 
 // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment,@typescript-eslint/no-unsafe-call
 configure({ adapter: new Adapter() });
+
+
 
 describe('Signing requests', () => {
   let wrapper: ReactWrapper;
@@ -242,7 +245,7 @@ describe('Signing requests', () => {
 
   describe('Request rendering', () => {
     it('correctly displays request 1', () => {
-      expect(wrapper.find(Address).find('.fullAddress').text()).toBe(signRequests[0].account.address);
+      expect(wrapper.find(Address).find('.fullAddress').text()).toBe(ellipsisName(signRequests[0].account.address));
       expect(wrapper.find(Extrinsic).find('td.data').map((el): string => el.text())).toEqual([
         'https://polkadot.js.org/apps/?rpc=wss%3A%2F%2Fwestend-rpc.polkadot.io#/accounts',
         'Westend',
@@ -261,7 +264,7 @@ describe('Signing requests', () => {
       wrapper.find('FontAwesomeIcon.arrowRight').simulate('click');
       await act(flushAllPromises);
 
-      expect(wrapper.find(Address).find('.fullAddress').text()).toBe(signRequests[1].account.address);
+      expect(wrapper.find(Address).find('.fullAddress').text()).toBe(ellipsisName(signRequests[1].account.address));
       expect(wrapper.find(Extrinsic).find('td.data').map((el): string => el.text())).toEqual([
         'https://polkadot.js.org/apps',
         'Westend',

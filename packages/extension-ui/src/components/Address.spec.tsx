@@ -12,6 +12,7 @@ import Adapter from '@wojtekmaj/enzyme-adapter-react-17';
 import { configure, mount } from 'enzyme';
 import React, { ReactNode } from 'react';
 import { act } from 'react-dom/test-utils';
+import { BrowserRouter as Router } from "react-router-dom";
 
 import * as messaging from '../messaging';
 import * as MetadataCache from '../MetadataCache';
@@ -19,6 +20,7 @@ import { westendMetadata } from '../Popup/Signing/metadataMock';
 import { flushAllPromises } from '../testHelpers';
 import { buildHierarchy } from '../util/buildHierarchy';
 import { DEFAULT_TYPE } from '../util/defaultType';
+import { ellipsisName } from '../util/ellipsisName';
 import getParentNameSuri from '../util/getParentNameSuri';
 import { AccountContext, Address } from '.';
 
@@ -102,6 +104,7 @@ const mountComponent = async (
   const { actions = actionStub } = addressComponentProps;
 
   const wrapper = mount(
+    <Router>
     <AccountContext.Provider
       value={{
         accounts: contextAccounts,
@@ -110,6 +113,7 @@ const mountComponent = async (
     >
       <Address actions={actions as ReactNode} {...addressComponentProps} />
     </AccountContext.Provider>
+    </Router>
   );
 
   await act(flushAllPromises);
@@ -138,7 +142,7 @@ const genericTestSuite = (account: AccountTestJson, withAccountsInContext = true
     });
 
     it('shows the account address and name', () => {
-      expect(wrapper.find('[data-field="address"]').text()).toEqual(address);
+      expect(wrapper.find('[data-field="address"]').text()).toEqual(ellipsisName(address));
       expect(wrapper.find('Name span').text()).toEqual(name);
     });
 
@@ -146,47 +150,49 @@ const genericTestSuite = (account: AccountTestJson, withAccountsInContext = true
       expect(wrapper.find('Identicon').first().prop('iconTheme')).toEqual(expectedIconTheme);
     });
 
-    it('can copy its address', () => {
-      // the first CopyToClipboard is from the identicon, the second from the copy button
-      expect(wrapper.find('CopyToClipboard').at(0).prop('text')).toEqual(address);
-      expect(wrapper.find('CopyToClipboard').at(1).prop('text')).toEqual(address);
-    });
+    // TODO: fix when copy to clipboard is implemented on the designs
+    // it('can copy its address', () => {
+    //   // the first CopyToClipboard is from the identicon, the second from the copy button
+    //   expect(wrapper.find('CopyToClipboard').at(0).prop('text')).toEqual(address);
+    //   expect(wrapper.find('CopyToClipboard').at(1).prop('text')).toEqual(address);
+    // });
 
-    it('has the account visiblity icon', () => {
-      expect(wrapper.find('FontAwesomeIcon.visibleIcon')).toHaveLength(1);
-    });
+    // :TODO: fix this test when hiding account is added
+    // it('has the account visiblity icon', () => {
+    //   expect(wrapper.find('FontAwesomeIcon.visibleIcon')).toHaveLength(1);
+    // });
 
-    it('can hide the account', () => {
-      jest.spyOn(messaging, 'showAccount').mockResolvedValue(false);
+    // it('can hide the account', () => {
+    //   jest.spyOn(messaging, 'showAccount').mockResolvedValue(false);
 
-      const visibleIcon = wrapper.find('FontAwesomeIcon.visibleIcon');
-      const hiddenIcon = wrapper.find('FontAwesomeIcon.hiddenIcon');
+    //   const visibleIcon = wrapper.find('FontAwesomeIcon.visibleIcon');
+    //   const hiddenIcon = wrapper.find('FontAwesomeIcon.hiddenIcon');
 
-      expect(visibleIcon.exists()).toBe(true);
-      expect(hiddenIcon.exists()).toBe(false);
+    //   expect(visibleIcon.exists()).toBe(true);
+    //   expect(hiddenIcon.exists()).toBe(false);
 
-      visibleIcon.simulate('click');
-      expect(messaging.showAccount).toBeCalledWith(address, false);
-    });
+    //   visibleIcon.simulate('click');
+    //   expect(messaging.showAccount).toBeCalledWith(address, false);
+    // });
 
-    it('can show the account if hidden', async () => {
-      const additionalProps = { isHidden: true };
+    // it('can show the account if hidden', async () => {
+    //   const additionalProps = { isHidden: true };
 
-      const mountedHiddenComponent = withAccountsInContext ? await mountComponent({ address, ...additionalProps }, accounts) : await mountComponent({ ...account, ...additionalProps }, []);
+    //   const mountedHiddenComponent = withAccountsInContext ? await mountComponent({ address, ...additionalProps }, accounts) : await mountComponent({ ...account, ...additionalProps }, []);
 
-      const wrapperHidden = mountedHiddenComponent.wrapper;
+    //   const wrapperHidden = mountedHiddenComponent.wrapper;
 
-      jest.spyOn(messaging, 'showAccount').mockResolvedValue(true);
+    //   jest.spyOn(messaging, 'showAccount').mockResolvedValue(true);
 
-      const visibleIcon = wrapperHidden.find('FontAwesomeIcon.visibleIcon');
-      const hiddenIcon = wrapperHidden.find('FontAwesomeIcon.hiddenIcon');
+    //   const visibleIcon = wrapperHidden.find('FontAwesomeIcon.visibleIcon');
+    //   const hiddenIcon = wrapperHidden.find('FontAwesomeIcon.hiddenIcon');
 
-      expect(visibleIcon.exists()).toBe(false);
-      expect(hiddenIcon.exists()).toBe(true);
+    //   expect(visibleIcon.exists()).toBe(false);
+    //   expect(hiddenIcon.exists()).toBe(true);
 
-      hiddenIcon.simulate('click');
-      expect(messaging.showAccount).toBeCalledWith(address, true);
-    });
+    //   hiddenIcon.simulate('click');
+    //   expect(messaging.showAccount).toBeCalledWith(address, true);
+    // });
 
     it('has settings button', () => {
       expect(wrapper.find('.settings')).toHaveLength(1);
@@ -215,18 +221,19 @@ const genesisHashTestSuite = (account: AccountTestGenesisJson, withAccountsInCon
     });
 
     it('shows the account address correctly encoded', () => {
-      expect(wrapper.find('[data-field="address"]').text()).toEqual(expectedEncodedAddress);
+      expect(wrapper.find('[data-field="address"]').text()).toEqual(ellipsisName(expectedEncodedAddress));
     });
 
     it(`shows a ${expectedIconTheme} identicon`, () => {
       expect(wrapper.find('Identicon').first().prop('iconTheme')).toEqual(expectedIconTheme);
     });
 
-    it('Copy buttons contain the encoded address', () => {
-      // the first CopyToClipboard is from the identicon, the second from the copy button
-      expect(wrapper.find('CopyToClipboard').at(0).prop('text')).toEqual(expectedEncodedAddress);
-      expect(wrapper.find('CopyToClipboard').at(1).prop('text')).toEqual(expectedEncodedAddress);
-    });
+    // TODO: fix when copy to clipboard is implemented on the designs
+    // it('Copy buttons contain the encoded address', () => {
+    //   // the first CopyToClipboard is from the identicon, the second from the copy button
+    //   expect(wrapper.find('CopyToClipboard').at(0).prop('text')).toEqual(expectedEncodedAddress);
+    //   expect(wrapper.find('CopyToClipboard').at(1).prop('text')).toEqual(expectedEncodedAddress);
+    // });
 
     it('Network label shows the correct network', () => {
       expect(wrapper.find('[data-field="chain"]').text()).toEqual(expectedNetworkLabel);
@@ -286,7 +293,7 @@ describe('Address', () => {
     });
 
     it('shows the account correctly reencoded', () => {
-      expect(wrapper.find('[data-field="address"]').text()).toEqual(westEndAccount.expectedEncodedAddress);
+      expect(wrapper.find('[data-field="address"]').text()).toEqual(ellipsisName(westEndAccount.expectedEncodedAddress));
     });
   });
 
@@ -294,6 +301,7 @@ describe('Address', () => {
     let wrapper: ReactWrapper;
     const childAccount = {
       address: '5Ggap6soAPaP5UeNaiJsgqQwdVhhNnm6ez7Ba1w9jJ62LM2Q',
+      addressEllipsis: ellipsisName('5Ggap6soAPaP5UeNaiJsgqQwdVhhNnm6ez7Ba1w9jJ62LM2Q'),
       name: 'Luke',
       parentName: 'Dark Vador',
       suri: '//42',
@@ -305,7 +313,7 @@ describe('Address', () => {
     });
 
     it("shows the child's account address and name", () => {
-      expect(wrapper.find('[data-field="address"]').text()).toEqual(childAccount.address);
+      expect(wrapper.find('[data-field="address"]').text()).toEqual(ellipsisName(childAccount.address));
       expect(wrapper.find('Name span').text()).toEqual(childAccount.name);
     });
 

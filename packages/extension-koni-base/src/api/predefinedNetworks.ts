@@ -517,7 +517,7 @@ export const PREDEFINED_NETWORKS: Record<string, NetworkJson> = {
     crowdloanUrl: 'https://parachain.nodle.com/',
     decimals: 11,
     coinGeckoKey: 'nodle-network',
-    abiExplorer: 'https://nodle.subscan.io/'
+    abiExplorer: 'https://nodle.subscan.io'
   },
   darwinia: {
     key: 'darwinia',

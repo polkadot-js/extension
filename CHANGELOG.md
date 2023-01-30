@@ -1,5 +1,15 @@
 # CHANGELOG
 
+## 0.7.9 (Koni)
+Build date: Jan 30, 2022.
+
+Update:
+- Add the coingecko key for Nodle (#983)
+- Support Shiden base PSP-34 contract (#985)
+
+Bug fixes:
+- Fix bug getting multiple balances for Equilibrium (#981)
+
 ## 0.7.8 (Koni)
 Build date: Jan 19, 2022.
 

@@ -20,7 +20,9 @@ interface Props extends ThemeProps {
 function AddAccount({ className }: Props): React.ReactElement<Props> {
   const { t } = useTranslation();
   const onAction = useContext(ActionContext);
-  const _onClick = useCallback(() => onAction('/account/create'), [onAction]);
+  // TODO: PLACEHOLDER FOR NOW
+  // const _onClick = useCallback(() => onAction('/account/create'), [onAction]);
+  const _onClick = useCallback(() => onAction('/account/add-menu'), [onAction]);
 
   return (
     <>

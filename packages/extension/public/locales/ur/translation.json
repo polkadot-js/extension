@@ -165,7 +165,15 @@
     "Settings":"",
     "Edit Account": "",
     "Add your accounts and keep exploring the Aleph Zero ecosystem!": "",
-    "Hello!": ""
+    "Hello!": "",
+    "Create a new account": "",
+    "Generate a new public address": "",
+    "Accounts created in other wallets are also supported.": "",
+    "Import an existing account": "",
+    "Use your Ledger or Parity Signer wallet": "",
+    "Connect hardware wallet": "",
+    "via QR code": "",
+    "via USB": ""
 }
 
 

@@ -35,6 +35,7 @@ import {
   subscribeSigningRequests
 } from '../messaging';
 import { buildHierarchy } from '../util/buildHierarchy';
+import AddAccountMenu from './Accounts/AddAccountMenu';
 import CreateAccountMenu from './Accounts/CreateAccountMenu';
 import EditAccountMenu from './Accounts/EditAccountMenu';
 import AccountManagement from './AuthManagement/AccountManagement';
@@ -178,6 +179,9 @@ export default function Popup(): React.ReactElement {
                           <Route path='/auth-list'>{wrapWithErrorBoundary(<AuthList />, 'auth-list')}</Route>
                           <Route path='/help'>{wrapWithErrorBoundary(<Help />, 'help')}</Route>
                           <Route path='/account/settings'>{wrapWithErrorBoundary(<Settings />, 'settings')}</Route>
+                          <Route path='/account/add-menu'>
+                            {wrapWithErrorBoundary(<AddAccountMenu />, 'adding-account-menu')}
+                          </Route>
                           <Route path='/account/create-menu'>
                             {wrapWithErrorBoundary(<CreateAccountMenu />, 'account-creation-menu')}
                           </Route>

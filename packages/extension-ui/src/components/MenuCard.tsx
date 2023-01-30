@@ -8,41 +8,64 @@ import { ThemeProps } from '../types';
 
 interface Props extends ThemeProps {
   className?: string;
+  preIcon?: React.ReactNode;
   title: string;
   description: string;
   extra?: React.ReactNode;
+  onClick?: () => void;
 }
 
-function MenuCard({className, description, extra, title }: Props): React.ReactElement<Props> {
+function MenuCard({ className, description, extra, onClick, preIcon, title }: Props): React.ReactElement<Props> {
   return (
     <div className={className}>
-      <div className='flex-group'>
-      <div className='title'>{title}</div>
-      <div className='description'>{description}</div>
+      <div
+        className='flex-container'
+        onClick={onClick}
+      >
+        {preIcon && <div className='icon'>{preIcon}</div>}
+        <div className='flex-group'>
+          <div className='title'>{title}</div>
+          <div className='description'>{description}</div>
+        </div>
+        {extra && <div className='extra'>{extra}</div>}
       </div>
-      {extra && <div className='extra'>{extra}</div>}
     </div>
   );
 }
 
-export default styled(MenuCard)(({ theme }: Props) => `
+export default styled(MenuCard)(({ onClick,theme  }: Props) => `
   display: flex;
   justify-content: space-between;
   align-items: center;
   padding: 0px 16px;
-  height: 74px;
   background: ${theme.menuBackground};
   border-radius: 8px;
-  
+  padding: 16px 16px 16px 24px;
+  cursor: ${onClick ? 'pointer' : 'default'};
+
   .border {
     border: 1px solid red;
+  }
+
+  .flex-container {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 28px;
   }
 
   .flex-group {
     display: flex;
     flex-direction: column;
+    gap: 4px;
   }
 
+  .icon {
+    & img {
+      width: 24px;
+      height: 24px;
+    }
+  }
   .title {
     display: flex;
     font-family: ${theme.secondaryFontFamily};
@@ -57,6 +80,8 @@ export default styled(MenuCard)(({ theme }: Props) => `
     font-weight: 300;
     font-size: 14px;
     line-height: 145%;
+    max-width: 230px;
+    white-space: pre-line;
     color: ${theme.subTextColor};
   }
 
@@ -68,6 +93,10 @@ export default styled(MenuCard)(({ theme }: Props) => `
     &:hover {
       cursor: pointer
     };
+  }
+
+  .icon {
+    display: flex;
   }
 `
 );

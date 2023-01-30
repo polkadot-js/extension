@@ -163,6 +163,7 @@ export interface StakeUnlockingJson {
   details: UnlockingStakeInfo[]
 }
 
+// TODO: refactor this
 export interface PriceJson {
   ready?: boolean,
   currency: string,
@@ -230,11 +231,6 @@ export interface NftCollectionJson {
   nftCollectionList: Array<NftCollection>;
 }
 
-// export interface NftStoreJson {
-//   nftList: Array<NftItem>;
-//   nftCollectionList: Array<NftCollection>;
-// }
-
 export interface TokenBalanceRaw {
   reserved: BN,
   frozen: BN,
@@ -248,6 +244,7 @@ export interface BalanceChildItem {
   decimals: number
 }
 
+// TODO: refactor this
 export interface BalanceItem {
   state: APIItemState,
   free?: string,
@@ -469,7 +466,7 @@ export interface TransactionHistoryItemType {
   fee?: string;
   feeSymbol?: string;
   // if undefined => main token, sometime "fee" uses different token than "change"
-  // ex: sub token (DOT, AUSD, KSM, ...) of Acala, Karaura uses main token to pay fee
+  // ex: sub token (DOT, AUSD, KSM, ...) of Acala, Karura uses main token to pay fee
   isSuccess: boolean;
   action: 'send' | 'received';
   extrinsicHash: string;

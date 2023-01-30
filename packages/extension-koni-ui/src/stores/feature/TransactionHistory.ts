@@ -17,5 +17,5 @@ const transactionHistorySlice = createSlice({
   }
 });
 
-export const { update: updateTransactionHistory } = transactionHistorySlice.actions;
+export const { update } = transactionHistorySlice.actions;
 export default transactionHistorySlice.reducer;

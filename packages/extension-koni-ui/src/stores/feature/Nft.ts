@@ -2,25 +2,39 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
-import { NftJson } from '@subwallet/extension-base/background/KoniTypes';
+import { NftCollectionJson, NftJson } from '@subwallet/extension-base/background/KoniTypes';
+import { NftStore, ReduxStatus } from '@subwallet/extension-koni-ui/stores/types';
 
 const initialState = {
-  total: 0,
-  nftList: []
-} as NftJson;
+  nftItems: [],
+  nftCollections: [],
+  reduxStatus: ReduxStatus.INIT
+} as NftStore;
 
 const nftSlice = createSlice({
   initialState,
   name: 'nft',
   reducers: {
-    update (state, action: PayloadAction<NftJson>) {
+    updateNftItems (state, action: PayloadAction<NftJson>) {
       const payload = action.payload;
 
-      state.total = payload?.total || 0;
-      state.nftList = payload?.nftList || [];
+      return {
+        reduxStatus: ReduxStatus.READY,
+        nftItems: payload.nftList,
+        nftCollections: state.nftCollections
+      };
+    },
+    updateNftCollections (state, action: PayloadAction<NftCollectionJson>) {
+      const payload = action.payload;
+
+      return {
+        reduxStatus: ReduxStatus.READY,
+        nftItems: state.nftCollections,
+        nftCollections: payload.nftCollectionList
+      };
     }
   }
 });
 
-export const { update } = nftSlice.actions;
+export const { updateNftCollections, updateNftItems } = nftSlice.actions;
 export default nftSlice.reducer;

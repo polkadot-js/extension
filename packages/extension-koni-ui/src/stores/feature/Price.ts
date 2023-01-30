@@ -16,7 +16,6 @@ const priceSlice = createSlice({
   name: 'price',
   reducers: {
     updatePrice (state, action: PayloadAction<PriceJson>) {
-      console.log('updating price');
       const payload = action.payload;
 
       state.currency = payload.currency;

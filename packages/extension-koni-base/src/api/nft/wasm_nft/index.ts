@@ -5,6 +5,7 @@ import { ApiProps, CustomToken, CustomTokenType, NftCollection, NftItem } from '
 import { BaseNftApi, HandleNftParams } from '@subwallet/extension-koni-base/api/nft/nft';
 import { ART_ZERO_COLLECTION_API, ART_ZERO_CONTRACTS, ART_ZERO_EXTERNAL_URL, ART_ZERO_IMAGE_API, ART_ZERO_IPFS_API } from '@subwallet/extension-koni-base/api/nft/wasm_nft/utils';
 import { getPSP34ContractPromise } from '@subwallet/extension-koni-base/api/tokens/wasm';
+import { getWasmContractGasLimit } from '@subwallet/extension-koni-base/api/tokens/wasm/utils';
 import fetch from 'cross-fetch';
 
 import { ApiPromise } from '@polkadot/api';
@@ -27,7 +28,15 @@ export class WasmNftApi extends BaseNftApi {
     this.wasmContracts = wasmContracts;
   }
 
-  private parseFeaturedTokenUri (tokenUri: string) {
+  private parseFeaturedTokenUri (tokenUri: string, chain?: string): string | undefined {
+    if (chain && ['astar', 'shiden', 'shibuya'].includes(chain)) {
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+      const tokenUriObj = JSON.parse(tokenUri);
+
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access,@typescript-eslint/no-unsafe-return
+      return tokenUriObj.ok;
+    }
+
     if (!tokenUri || tokenUri.length === 0) {
       return undefined;
     }
@@ -82,7 +91,15 @@ export class WasmNftApi extends BaseNftApi {
   }
 
   private async getCollectionAttributes (contractPromise: ContractPromise): Promise<CollectionAttributes> {
-    const _onChainAttributeCount = await contractPromise.query['psp34Traits::getAttributeCount'](this.addresses[0], { gasLimit: -1 });
+    if (!contractPromise.query['psp34Traits::getAttributeCount']) {
+      return {
+        storedOnChain: false,
+        attributeList: []
+      };
+    }
+
+    // @ts-ignore
+    const _onChainAttributeCount = await contractPromise.query['psp34Traits::getAttributeCount'](this.addresses[0], getWasmContractGasLimit(this.chain, this.dotSamaApi?.api as ApiPromise));
     const onChainAttributeCount = _onChainAttributeCount.output ? _onChainAttributeCount.output.toString() : '0';
 
     if (parseInt(onChainAttributeCount) === 0) {
@@ -100,7 +117,8 @@ export class WasmNftApi extends BaseNftApi {
     }
 
     await Promise.all(attributeIndexes.map(async (i) => {
-      const _attributeByIndex = await contractPromise.query['psp34Traits::getAttributeName'](this.addresses[0], { gasLimit: -1 }, i);
+      // @ts-ignore
+      const _attributeByIndex = await contractPromise.query['psp34Traits::getAttributeName'](this.addresses[0], getWasmContractGasLimit(this.chain, this.dotSamaApi?.api as ApiPromise), i);
 
       if (_attributeByIndex.output) {
         const attributeName = _attributeByIndex.output.toString();
@@ -119,7 +137,8 @@ export class WasmNftApi extends BaseNftApi {
 
   private async processOnChainMetadata (contractPromise: ContractPromise, address: string, tokenIdObj: Record<string, string>, collectionAttributes: string[], isFeatured: boolean): Promise<NftItem> {
     const nftItem: NftItem = {};
-    const _attributeValues = await contractPromise.query['psp34Traits::getAttributes'](address, { gasLimit: -1 }, tokenIdObj, collectionAttributes);
+    // @ts-ignore
+    const _attributeValues = await contractPromise.query['psp34Traits::getAttributes'](address, getWasmContractGasLimit(this.chain, this.dotSamaApi?.api as ApiPromise), tokenIdObj, collectionAttributes);
 
     if (_attributeValues.output) {
       const attributeValues = _attributeValues.output.toHuman() as string[];
@@ -160,7 +179,14 @@ export class WasmNftApi extends BaseNftApi {
   private async processOffChainMetadata (contractPromise: ContractPromise, address: string, tokenId: string, isFeatured: boolean): Promise<NftItem> {
     const nftItem: NftItem = { name: tokenId };
 
-    const _tokenUri = await contractPromise.query['psp34Traits::tokenUri'](address, { gasLimit: -1 }, tokenId);
+    let targetTrait = 'psp34Traits::tokenUri';
+
+    if (['astar', 'shiden', 'shibuya'].includes(this.chain)) {
+      targetTrait = 'payableMint::tokenUri';
+    }
+
+    // @ts-ignore
+    const _tokenUri = await contractPromise.query[targetTrait](address, getWasmContractGasLimit(this.chain, this.dotSamaApi?.api as ApiPromise), tokenId);
 
     if (_tokenUri.output) {
       let itemDetail: Record<string, any> | boolean = false;
@@ -175,7 +201,8 @@ export class WasmNftApi extends BaseNftApi {
           itemDetail = (resp && resp.ok && await resp.json() as Record<string, any>);
         }
       } else {
-        const detailUrl = this.parseUrl(tokenUri);
+        const parsedTokenUri = this.parseFeaturedTokenUri(tokenUri, this.chain);
+        const detailUrl = this.parseUrl(parsedTokenUri as string);
 
         if (detailUrl) {
           const resp = await fetch(detailUrl);
@@ -234,7 +261,8 @@ export class WasmNftApi extends BaseNftApi {
 
       const nftIds: string[] = [];
 
-      const _balance = await contractPromise.query['psp34::balanceOf'](address, { gasLimit: -1 }, address);
+      // @ts-ignore
+      const _balance = await contractPromise.query['psp34::balanceOf'](address, getWasmContractGasLimit(this.chain, this.dotSamaApi?.api as ApiPromise), address);
 
       const balance = _balance.output ? _balance.output.toString() : '0';
 
@@ -252,7 +280,8 @@ export class WasmNftApi extends BaseNftApi {
 
       try {
         await Promise.all(itemIndexes.map(async (i) => {
-          const _tokenByIndexResp = await contractPromise.query['psp34Enumerable::ownersTokenByIndex'](address, { gasLimit: -1 }, address, i);
+          // @ts-ignore
+          const _tokenByIndexResp = await contractPromise.query['psp34Enumerable::ownersTokenByIndex'](address, getWasmContractGasLimit(this.chain, this.dotSamaApi?.api as ApiPromise), address, i);
 
           if (_tokenByIndexResp.output) {
             const rawTokenId = _tokenByIndexResp.output.toHuman() as Record<string, any>;
@@ -331,7 +360,7 @@ export class WasmNftApi extends BaseNftApi {
     const apiPromise = this.dotSamaApi?.api as ApiPromise;
 
     await Promise.all(this.wasmContracts.map(async ({ name, smartContract }) => {
-      const contractPromise = getPSP34ContractPromise(apiPromise, smartContract);
+      const contractPromise = getPSP34ContractPromise(apiPromise, smartContract, this.chain);
 
       const { attributeList, storedOnChain } = await this.getCollectionAttributes(contractPromise);
 

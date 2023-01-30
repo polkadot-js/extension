@@ -4,12 +4,28 @@
 import { CustomTokenJson, CustomTokenType, NetworkJson } from '@subwallet/extension-base/background/KoniTypes';
 import { isEqualContractAddress } from '@subwallet/extension-koni-base/api/tokens';
 import { DEFAULT_WASM_TOKENS } from '@subwallet/extension-koni-base/api/tokens/wasm/defaultWasmToken';
-import { PSP22Contract, PSP34Contract } from '@subwallet/extension-koni-base/api/tokens/wasm/helper';
+import { PSP22Contract, PSP34Contract, ShidenPSP34Contract } from '@subwallet/extension-koni-base/api/tokens/wasm/helper';
 
 import { ApiPromise } from '@polkadot/api';
-import { ContractPromise } from '@polkadot/api-contract';
+import { Abi, ContractPromise } from '@polkadot/api-contract';
 
-export async function validateWasmToken (contractAddress: string, tokenType: CustomTokenType.psp22 | CustomTokenType.psp34, apiPromise: ApiPromise, contractCaller?: string) {
+export const CHAINS_WITH_WEIGHT_V2 = ['shiden', 'astar', 'shibuya'];
+
+export function getWasmContractGasLimit (chain: string, apiPromise: ApiPromise) {
+  return { gasLimit: CHAINS_WITH_WEIGHT_V2.includes(chain) ? getWeightV2(apiPromise) : -1 };
+}
+
+export function getWeightV2 (apiPromise: ApiPromise) {
+  const proofSize = 3407872;
+  const refTime = 32490000000;
+
+  return apiPromise.registry.createType('WeightV2', {
+    refTime,
+    proofSize
+  });
+}
+
+export async function validateWasmToken (chain: string, contractAddress: string, tokenType: CustomTokenType.psp22 | CustomTokenType.psp34, apiPromise: ApiPromise, contractCaller?: string) {
   let tokenContract: ContractPromise;
   let name = '';
   let decimals: number | undefined = -1;
@@ -45,9 +61,16 @@ export async function validateWasmToken (contractAddress: string, tokenType: Cus
         }
       }
     } else {
-      tokenContract = new ContractPromise(apiPromise, PSP34Contract, contractAddress);
+      if (['astar', 'shiden', 'shibuya'].includes(chain)) {
+        const abi = new Abi(ShidenPSP34Contract, apiPromise.registry.getChainProperties());
 
-      const collectionIdResp = await tokenContract.query['psp34::collectionId'](contractCaller || contractAddress, { gasLimit: -1 }); // read-only operation so no gas limit
+        tokenContract = new ContractPromise(apiPromise, abi, contractAddress);
+      } else {
+        tokenContract = new ContractPromise(apiPromise, PSP34Contract, contractAddress);
+      }
+
+      // @ts-ignore
+      const collectionIdResp = await tokenContract.query['psp34::collectionId'](contractCaller || contractAddress, getWasmContractGasLimit(chain, apiPromise)); // read-only operation so no gas limit
 
       if (!collectionIdResp.result.isOk || !collectionIdResp.output) {
         console.error('Error response while validating WASM contract');

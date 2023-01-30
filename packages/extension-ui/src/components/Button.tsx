@@ -14,11 +14,12 @@ interface Props extends ThemeProps {
   isBusy?: boolean;
   isDanger?: boolean;
   isDisabled?: boolean;
+  isSuccess?: boolean;
   onClick?: () => void | Promise<void | boolean>;
   to?: string;
 }
 
-function Button ({ children, className = '', isBusy, isDisabled, onClick, to }: Props): React.ReactElement<Props> {
+function Button ({ children, className = '', isBusy,isDanger, isDisabled, isSuccess, onClick, to }: Props): React.ReactElement<Props> {
   const _onClick = useCallback(
     (): void => {
       if (isBusy || isDisabled) {
@@ -47,8 +48,8 @@ function Button ({ children, className = '', isBusy, isDisabled, onClick, to }: 
   );
 }
 
-export default styled(Button)(({ isDanger, theme }: Props) => `
-  background: ${isDanger ? theme.buttonBackgroundDanger : theme.buttonBackground};
+export default styled(Button)(({ isDanger,isSuccess, theme }: Props) => `
+  background: ${isDanger ? theme.buttonBackgroundDanger: isSuccess ? theme.buttonBackgroundSuccess : theme.buttonBackground};
   cursor: pointer;
   display: block;
   width: 100%;
@@ -65,22 +66,32 @@ export default styled(Button)(({ isDanger, theme }: Props) => `
   position: relative;
   text-align: center;
   letter-spacing: 0.05em;
+  transition: .4s ease-in-out;
 
   &:disabled {
     cursor: default;
+    background: ${theme.buttonBackgroundDisabled};
   }
 
-  &:not(:disabled):hover {
+  &:focus{
+    outline: none;
+    border: ${theme.buttonBorderFocused};
+  }
+
+  &:not(:disabled):hover, &:active {
     background: ${isDanger ? theme.buttonBackgroundDangerHover : theme.buttonBackgroundHover};
+    box-shadow: ${theme.buttonHoverBoxShadow};
+    
   }
 
   .busyOverlay,
   .disabledOverlay {
     visibility: hidden;
+    
   }
 
   .disabledOverlay {
-    background: rgba(96,96,96,0.75);
+    background: rgba(96,96,96,0.15);
     border-radius: ${theme.buttonBorderRadius};
     bottom: 0;
     left: 0;
@@ -99,6 +110,7 @@ export default styled(Button)(({ isDanger, theme }: Props) => `
     .children {
       font-family: ${theme.secondaryFontFamily};
       border: 1px solid ${theme.buttonTextColor};
+      color: ${theme.buttonTextColor};
     }
 
     .busyOverlay {

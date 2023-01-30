@@ -16,6 +16,8 @@ import { AccountContext, ActionContext, AuthorizeReqContext, MediaContext, Metad
 import ToastProvider from '../components/Toast/ToastProvider';
 import { subscribeAccounts, subscribeAuthorizeRequests, subscribeMetadataRequests, subscribeSigningRequests } from '../messaging';
 import { buildHierarchy } from '../util/buildHierarchy';
+import CreateAccountMenu from './Accounts/CreateAccountMenu';
+import EditAccountMenu from './Accounts/EditAccountMenu';
 import AccountManagement from './AuthManagement/AccountManagement';
 import Accounts from './Accounts';
 import AuthList from './AuthManagement';
@@ -25,12 +27,14 @@ import Derive from './Derive';
 import Export from './Export';
 import ExportAll from './ExportAll';
 import Forget from './Forget';
+import Help from './Help';
 import ImportLedger from './ImportLedger';
 import ImportQr from './ImportQr';
 import ImportSeed from './ImportSeed';
 import Metadata from './Metadata';
 import PhishingDetected from './PhishingDetected';
 import RestoreJson from './RestoreJson';
+import Settings from './Settings';
 import Signing from './Signing';
 import Welcome from './Welcome';
 
@@ -150,7 +154,11 @@ export default function Popup (): React.ReactElement {
                     <ToastProvider>
                       <Switch>
                         <Route path='/auth-list'>{wrapWithErrorBoundary(<AuthList />, 'auth-list')}</Route>
+                        <Route path='/help'>{wrapWithErrorBoundary(<Help />, 'help')}</Route>
+                        <Route path='/account/settings'>{wrapWithErrorBoundary(<Settings />, 'settings')}</Route>
+                        <Route path='/account/create-menu'>{wrapWithErrorBoundary(<CreateAccountMenu />, 'account-creation-menu')}</Route>
                         <Route path='/account/create'>{wrapWithErrorBoundary(<CreateAccount />, 'account-creation')}</Route>
+                        <Route path='/account/edit-menu'>{wrapWithErrorBoundary(<EditAccountMenu />, 'account-creation-menu')}</Route>
                         <Route path='/account/forget/:address'>{wrapWithErrorBoundary(<Forget />, 'forget-address')}</Route>
                         <Route path='/account/export/:address'>{wrapWithErrorBoundary(<Export />, 'export-address')}</Route>
                         <Route path='/account/export-all'>{wrapWithErrorBoundary(<ExportAll />, 'export-all-address')}</Route>

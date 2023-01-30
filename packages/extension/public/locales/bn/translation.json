@@ -160,5 +160,8 @@
     "password for encrypting all accounts": "সকল অ্যাকাউন্ট এনক্রিপ্ট করার জন্য পাসওয়ার্ড",
     "I want to export all my accounts": "আমি আমার সকল অ্যাকাউন্ট এক্সপোর্ট করতে চাই",
     "Got it!": "",
-    "Your privacy is protected": ""
+    "Your privacy is protected": "",
+    "Help": "",
+    "Settings":"",
+    "Edit Account": ""
 }

@@ -14,6 +14,7 @@ import { faCodeBranch, faQrcode } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import React, { useCallback, useContext, useEffect, useRef, useState } from 'react';
 import CopyToClipboard from 'react-copy-to-clipboard';
+import { Link } from 'react-router-dom';
 import styled from 'styled-components';
 
 import { decodeAddress, encodeAddress } from '@polkadot/util-crypto';
@@ -42,7 +43,7 @@ export interface Props {
   isHidden?: boolean;
   name?: string | null;
   parentName?: string | null;
-  showVisibilityAction?: boolean
+  showVisibilityAction?: boolean;
   suri?: string;
   toggleActions?: number;
   type?: KeypairType;
@@ -57,36 +58,30 @@ interface Recoded {
 }
 
 // find an account in our list
-function findSubstrateAccount (accounts: AccountJson[], publicKey: Uint8Array): AccountJson | null {
+function findSubstrateAccount(accounts: AccountJson[], publicKey: Uint8Array): AccountJson | null {
   const pkStr = publicKey.toString();
 
-  return accounts.find(({ address }): boolean =>
-    decodeAddress(address).toString() === pkStr
-  ) || null;
+  return accounts.find(({ address }): boolean => decodeAddress(address).toString() === pkStr) || null;
 }
 
 // find an account in our list
-function findAccountByAddress (accounts: AccountJson[], _address: string): AccountJson | null {
-  return accounts.find(({ address }): boolean =>
-    address === _address
-  ) || null;
+function findAccountByAddress(accounts: AccountJson[], _address: string): AccountJson | null {
+  return accounts.find(({ address }): boolean => address === _address) || null;
 }
 
 // recodes an supplied address using the prefix/genesisHash, include the actual saved account & chain
-function recodeAddress (address: string, accounts: AccountWithChildren[], chain: Chain | null, settings: SettingsStruct): Recoded {
+function recodeAddress(address: string, accounts: AccountWithChildren[], chain: Chain | null, settings: SettingsStruct): Recoded {
   // decode and create a shortcut for the encoded address
   const publicKey = decodeAddress(address);
 
   // find our account using the actual publicKey, and then find the associated chain
   const account = findSubstrateAccount(accounts, publicKey);
-  const prefix = chain ? chain.ss58Format : (settings.prefix === -1 ? 42 : settings.prefix);
+  const prefix = chain ? chain.ss58Format : settings.prefix === -1 ? 42 : settings.prefix;
 
   // always allow the actual settings to override the display
   return {
     account,
-    formatted: account?.type === 'ethereum'
-      ? address
-      : encodeAddress(publicKey, prefix),
+    formatted: account?.type === 'ethereum' ? address : encodeAddress(publicKey, prefix),
     genesisHash: account?.genesisHash,
     prefix,
     type: account?.type || DEFAULT_TYPE
@@ -96,7 +91,7 @@ function recodeAddress (address: string, accounts: AccountWithChildren[], chain:
 const ACCOUNTS_SCREEN_HEIGHT = 550;
 const defaultRecoded = { account: null, formatted: null, prefix: 42, type: DEFAULT_TYPE };
 
-function Address ({ actions, address, children, className, genesisHash, isExternal, isHardware, isHidden, name, parentName, showVisibilityAction = false, suri, toggleActions, type: givenType }: Props): React.ReactElement<Props> {
+function Address({ actions, address, children, className, genesisHash, isExternal, isHardware, isHidden, name, parentName, showVisibilityAction = false, suri, toggleActions, type: givenType }: Props): React.ReactElement<Props> {
   const { t } = useTranslation();
   const { accounts } = useContext(AccountContext);
   const settings = useContext(SettingsContext);
@@ -109,7 +104,7 @@ function Address ({ actions, address, children, className, genesisHash, isExtern
   const actMenuRef = useRef<HTMLDivElement>(null);
   const { show } = useToast();
 
-  useOutsideClick([actIconRef, actMenuRef], () => (showActionsMenu && setShowActionsMenu(!showActionsMenu)));
+  useOutsideClick([actIconRef, actMenuRef], () => showActionsMenu && setShowActionsMenu(!showActionsMenu));
 
   useEffect((): void => {
     if (!address) {
@@ -118,15 +113,7 @@ function Address ({ actions, address, children, className, genesisHash, isExtern
 
     const account = findAccountByAddress(accounts, address);
 
-    setRecoded(
-      (
-        chain?.definition.chainType === 'ethereum' ||
-        account?.type === 'ethereum' ||
-        (!account && givenType === 'ethereum')
-      )
-        ? { account, formatted: address, type: 'ethereum' }
-        : recodeAddress(address, accounts, chain, settings)
-    );
+    setRecoded(chain?.definition.chainType === 'ethereum' || account?.type === 'ethereum' || (!account && givenType === 'ethereum') ? { account, formatted: address, type: 'ethereum' } : recodeAddress(address, accounts, chain, settings));
   }, [accounts, address, chain, givenType, settings]);
 
   useEffect(() => {
@@ -145,28 +132,16 @@ function Address ({ actions, address, children, className, genesisHash, isExtern
     setShowActionsMenu(false);
   }, [toggleActions]);
 
-  const theme = (
-    type === 'ethereum'
-      ? 'ethereum'
-      : (chain?.icon || 'polkadot')
-  ) as IconTheme;
+  const theme = (type === 'ethereum' ? 'ethereum' : chain?.icon || 'polkadot') as IconTheme;
 
-  const _onClick = useCallback(
-    () => setShowActionsMenu(!showActionsMenu),
-    [showActionsMenu]
-  );
+  const _onClick = useCallback(() => setShowActionsMenu(!showActionsMenu), [showActionsMenu]);
 
-  const _onCopy = useCallback(
-    () => show(t('Copied')),
-    [show, t]
-  );
+  const _onCopy = useCallback(() => show(t('Copied')), [show, t]);
 
-  const _toggleVisibility = useCallback(
-    (): void => {
-      address && showAccount(address, isHidden || false).catch(console.error);
-    },
-    [address, isHidden]
-  );
+  // TODO: this will be reused
+  // const _toggleVisibility = useCallback((): void => {
+  //   address && showAccount(address, isHidden || false).catch(console.error);
+  // }, [address, isHidden]);
 
   const Name = () => {
     const accountName = name || account?.name;
@@ -174,29 +149,39 @@ function Address ({ actions, address, children, className, genesisHash, isExtern
 
     return (
       <>
-        {!!accountName && (account?.isExternal || isExternal) && (
-          (account?.isHardware || isHardware)
-            ? (
-              <FontAwesomeIcon
-                className='hardwareIcon'
-                icon={faUsb}
-                rotation={270}
-                title={t('hardware wallet account')}
-              />
-            )
-            : (
-              <FontAwesomeIcon
-                className='externalIcon'
-                icon={faQrcode}
-                title={t('external account')}
-              />
-            )
-        )}
+        {!!accountName &&
+          (account?.isExternal || isExternal) &&
+          (account?.isHardware || isHardware ? (
+            <FontAwesomeIcon
+              className='hardwareIcon'
+              icon={faUsb}
+              rotation={270}
+              title={t('hardware wallet account')}
+            />
+          ) : (
+            <FontAwesomeIcon
+              className='externalIcon'
+              icon={faQrcode}
+              title={t('external account')}
+            />
+          ))}
         <span title={displayName}>{displayName}</span>
-      </>);
+      </>
+    );
   };
 
   const parentNameSuri = getParentNameSuri(parentName, suri);
+
+  const _ellipsisName = useCallback((input: string | null | undefined): string | null => {
+    if (!input || input.length < 8) {
+      return null;
+    }
+
+    const firstHalf = input.slice(0, 4);
+    const secondHalf = input.slice(-4);
+
+    return firstHalf + '...' + secondHalf;
+  }, []);
 
   return (
     <div className={className}>
@@ -210,45 +195,38 @@ function Address ({ actions, address, children, className, genesisHash, isExtern
           value={formatted || address}
         />
         <div className='info'>
-          {parentName
-            ? (
-              <>
-                <div className='banner'>
-                  <FontAwesomeIcon
-                    className='deriveIcon'
-                    icon={faCodeBranch}
-                  />
-                  <div
-                    className='parentName'
-                    data-field='parent'
-                    title = {parentNameSuri}
-                  >
-                    {parentNameSuri}
-                  </div>
+          {parentName ? (
+            <>
+              <div className='banner'>
+                <FontAwesomeIcon
+                  className='deriveIcon'
+                  icon={faCodeBranch}
+                />
+                <div
+                  className='parentName'
+                  data-field='parent'
+                  title={parentNameSuri}
+                >
+                  {parentNameSuri}
                 </div>
-                <div className='name displaced'>
-                  <Name />
-                </div>
-              </>
-            )
-            : (
-              <div
-                className='name'
-                data-field='name'
-              >
+              </div>
+              <div className='name displaced'>
                 <Name />
               </div>
-            )
-          }
+            </>
+          ) : (
+            <div
+              className='name'
+              data-field='name'
+            >
+              <Name />
+            </div>
+          )}
           {chain?.genesisHash && (
             <div
               className='banner chain'
               data-field='chain'
-              style={
-                chain.definition.color
-                  ? { backgroundColor: chain.definition.color }
-                  : undefined
-              }
+              style={chain.definition.color ? { backgroundColor: chain.definition.color } : undefined}
             >
               {chain.name.replace(' Relay Chain', '')}
             </div>
@@ -258,9 +236,10 @@ function Address ({ actions, address, children, className, genesisHash, isExtern
               className='fullAddress'
               data-field='address'
             >
-              {formatted || address || t('<unknown>')}
+              {_ellipsisName(formatted) || _ellipsisName(address) || t('<unknown>')}
             </div>
-            <CopyToClipboard text={(formatted && formatted) || ''}>
+            {/* TODO: this logic will be reused */}
+            {/* <CopyToClipboard text={(formatted && formatted) || ''}>
               <FontAwesomeIcon
                 className='copyIcon'
                 icon={faCopy}
@@ -277,29 +256,31 @@ function Address ({ actions, address, children, className, genesisHash, isExtern
                 size='sm'
                 title={t('account visibility')}
               />
-            )}
+            )} */}
           </div>
         </div>
         {actions && (
           <>
-            <div
-              className='settings'
-              onClick={_onClick}
-              ref={actIconRef}
-            >
-              <Svg
-                className={`detailsIcon ${showActionsMenu ? 'active' : ''}`}
-                src={details}
-              />
-            </div>
-            {showActionsMenu && (
-              <Menu
-                className={`movableMenu ${moveMenuUp ? 'isMoved' : ''}`}
-                reference={actMenuRef}
+            <Link to='/account/edit-menu'>
+              <div
+                className='settings'
+                onClick={_onClick}
+                ref={actIconRef}
               >
-                {actions}
-              </Menu>
-            )}
+                <Svg
+                  className={`detailsIcon ${showActionsMenu ? 'active' : ''}`}
+                  src={details}
+                />
+              </div>
+              {showActionsMenu && (
+                <Menu
+                  className={`movableMenu ${moveMenuUp ? 'isMoved' : ''}`}
+                  reference={actMenuRef}
+                >
+                  {actions}
+                </Menu>
+              )}
+            </Link>
           </>
         )}
       </div>
@@ -312,10 +293,10 @@ export default styled(Address)(({ theme }: ThemeProps) => `
   background: ${theme.boxBackground};
   border: 1px solid ${theme.boxBorderColor};
   box-sizing: border-box;
-  border-radius: 4px;
+  border-radius: 8px;
   margin-bottom: 8px;
   position: relative;
-
+  
   .banner {
     font-size: 12px;
     line-height: 16px;
@@ -343,7 +324,6 @@ export default styled(Address)(({ theme }: ThemeProps) => `
       margin-right: 10px;
       color: ${theme.accountDotsIconColor};
       &:hover {
-        color: ${theme.labelColor};
         cursor: pointer;
       }
     }
@@ -379,7 +359,8 @@ export default styled(Address)(({ theme }: ThemeProps) => `
   }
 
   .info {
-    width: 100%;
+    max-width: 200px;
+    border-radius: 8px;
   }
 
   .infoRow {
@@ -387,8 +368,9 @@ export default styled(Address)(({ theme }: ThemeProps) => `
     flex-direction: row;
     justify-content: flex-start;
     align-items: center;
-    height: 72px;
-    border-radius: 4px;
+    height: 80px;
+    border-radius: 8px;
+
   }
 
   img {
@@ -425,6 +407,7 @@ export default styled(Address)(({ theme }: ThemeProps) => `
   .fullAddress {
     overflow: hidden;
     text-overflow: ellipsis;
+    max-width: 100px;
     color: ${theme.labelColor};
     font-size: 12px;
     line-height: 16px;
@@ -436,7 +419,7 @@ export default styled(Address)(({ theme }: ThemeProps) => `
     height: 19px;
 
     &.active {
-      background: ${theme.primaryColor};
+      background: ${theme.accountDotsIconColor};
     }
   }
 
@@ -467,19 +450,9 @@ export default styled(Address)(({ theme }: ThemeProps) => `
     height: 100%;
     width: 40px;
 
-    &:before {
-      content: '';
-      position: absolute;
-      left: 0;
-      top: 25%;
-      bottom: 25%;
-      width: 1px;
-      background: ${theme.boxBorderColor};
-    }
-
     &:hover {
       cursor: pointer;
-      background: ${theme.readonlyInputBackground};
     }
   }
-`);
+`
+);

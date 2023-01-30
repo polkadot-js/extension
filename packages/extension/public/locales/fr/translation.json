@@ -155,5 +155,8 @@
   "Allow use on any chain": "Toutes les blockchains",
   "Select network": "Sélectionner un réseau",
   "Got it!": "",
-  "Your privacy is protected": ""
+  "Your privacy is protected": "",
+  "Help": "",
+  "Settings":"",
+  "Edit Account": ""
 }

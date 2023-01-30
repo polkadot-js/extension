@@ -174,5 +174,8 @@
   "\"Allow use on any network\" is not supported to show a QR code. You must associate this account with a network.": "",
   "An error occurred": "",
   "Got it!": "",
-  "Your privacy is protected": ""
+  "Your privacy is protected": "",
+  "Help": "",
+  "Settings": "",
+  "Edit Account": ""
 }

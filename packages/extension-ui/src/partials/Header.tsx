@@ -3,20 +3,21 @@
 
 import type { ThemeProps } from '../types';
 
-import { faArrowLeft, faCog, faPlusCircle, faSearch } from '@fortawesome/free-solid-svg-icons';
+import { faArrowLeft } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import React, { useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
 import styled from 'styled-components';
 
-import logo from '../assets/pjs.svg';
-import { ActionContext } from '../components';
-import InputFilter from '../components/InputFilter';
-import Link from '../components/Link';
+import logo from '../assets/azeroLogo.svg';
+import helpIcon from '../assets/help.svg';
+import settingsIcon from '../assets/settings.svg';
+import { ActionContext, Link,Tooltip } from '../components';
 import useOutsideClick from '../hooks/useOutsideClick';
 import useTranslation from '../hooks/useTranslation';
 import { getConnectedTabsUrl } from '../messaging';
-import MenuAdd from './MenuAdd';
-import MenuSettings from './MenuSettings';
+// TODO: these will be reused in the future
+// import MenuAdd from './MenuAdd';
+// import MenuSettings from './MenuSettings';
 
 interface Props extends ThemeProps {
   children?: React.ReactNode;
@@ -25,13 +26,14 @@ interface Props extends ThemeProps {
   showAdd?: boolean;
   showBackArrow?: boolean;
   showConnectedAccounts?: boolean;
+  showHelp?: boolean;
   showSearch?: boolean;
   showSettings?: boolean;
   smallMargin?: boolean;
   text?: React.ReactNode;
 }
 
-function Header ({ children, className = '', onFilter, showAdd, showBackArrow, showConnectedAccounts, showSearch, showSettings, smallMargin = false, text }: Props): React.ReactElement<Props> {
+function Header({ children, className = '', onFilter, showAdd, showBackArrow, showConnectedAccounts, showHelp, showSearch, showSettings, smallMargin = false, text }: Props): React.ReactElement<Props> {
   const [isAddOpen, setShowAdd] = useState(false);
   const [isSettingsOpen, setShowSettings] = useState(false);
   const [isSearchOpen, setShowSearch] = useState(false);
@@ -42,8 +44,7 @@ function Header ({ children, className = '', onFilter, showAdd, showBackArrow, s
   const addMenuRef = useRef(null);
   const setIconRef = useRef(null);
   const setMenuRef = useRef(null);
-  const isConnected = useMemo(() => connectedTabsUrl.length >= 1
-    , [connectedTabsUrl]);
+  const isConnected = useMemo(() => connectedTabsUrl.length >= 1, [connectedTabsUrl]);
   const onAction = useContext(ActionContext);
 
   useEffect(() => {
@@ -64,15 +65,9 @@ function Header ({ children, className = '', onFilter, showAdd, showBackArrow, s
     isSettingsOpen && setShowSettings(!isSettingsOpen);
   });
 
-  const _toggleAdd = useCallback(
-    () => setShowAdd((isAddOpen) => !isAddOpen),
-    []
-  );
+  const _toggleAdd = useCallback(() => setShowAdd((isAddOpen) => !isAddOpen), []);
 
-  const _toggleSettings = useCallback(
-    () => setShowSettings((isSettingsOpen) => !isSettingsOpen),
-    []
-  );
+  const _toggleSettings = useCallback(() => setShowSettings((isSettingsOpen) => !isSettingsOpen), []);
 
   const _onChangeFilter = useCallback(
     (filter: string) => {
@@ -82,113 +77,72 @@ function Header ({ children, className = '', onFilter, showAdd, showBackArrow, s
     [onFilter]
   );
 
-  const _toggleSearch = useCallback(
-    (): void => {
-      if (isSearchOpen) {
-        _onChangeFilter('');
-      }
+  const _toggleSearch = useCallback((): void => {
+    if (isSearchOpen) {
+      _onChangeFilter('');
+    }
 
-      setShowSearch((isSearchOpen) => !isSearchOpen);
-    },
-    [_onChangeFilter, isSearchOpen]
-  );
+    setShowSearch((isSearchOpen) => !isSearchOpen);
+  }, [_onChangeFilter, isSearchOpen]);
 
-  const _onBackArrowClick = useCallback(
-    () => onAction('..')
-    , [onAction]);
+  const _onBackArrowClick = useCallback(() => onAction('..'), [onAction]);
 
   return (
     <div className={`${className} ${smallMargin ? 'smallMargin' : ''}`}>
       <div className='container'>
         <div className='branding'>
-          {showBackArrow
-            ? (
-              <FontAwesomeIcon
-                className='arrowLeftIcon'
-                icon={faArrowLeft}
-                onClick={_onBackArrowClick}
-              />
-            )
-            : (
+          {showBackArrow ? (
+            <FontAwesomeIcon
+              className='arrowLeftIcon'
+              icon={faArrowLeft}
+              onClick={_onBackArrowClick}
+            />
+          ) : (
+            <div className='flex'>
               <img
                 className='logo'
                 src={logo}
               />
-            )
-          }
+            </div>
+          )}
+        </div>
+        <div className='logoText-container'>
           <span className='logoText'>{text || 'polkadot{.js}'}</span>
         </div>
-        {showSearch && (
-          <div className={`searchBarWrapper ${isSearchOpen ? 'selected' : ''}`}>
-            {showConnectedAccounts && !!isConnected && !isSearchOpen && (
-              <div className='connectedAccountsWrapper'>
-                <Link
-                  className='connectedAccounts'
-                  to={connectedTabsUrl.length === 1 ? `/url/manage/${connectedTabsUrl[0]}` : '/auth-list'}
-                >
-                  <span className='greenDot'>•</span>Connected
-                </Link>
-              </div>
-            )}
-            {isSearchOpen && (
-              <InputFilter
-                className='inputFilter'
-                onChange={_onChangeFilter}
-                placeholder={t<string>('Search by name or network...')}
-                value={filter}
-                withReset
-              />
-            )}
-            <FontAwesomeIcon
-              className={`searchIcon ${isSearchOpen ? 'selected' : ''}`}
-              icon={faSearch}
-              onClick={_toggleSearch}
-              size='lg'
-            />
-          </div>
-        )}
         <div className='popupMenus'>
-          {showAdd && (
-            <div
-              className='popupToggle'
-              onClick={_toggleAdd}
-              ref={addIconRef}
-            >
-              <FontAwesomeIcon
-                className={`plusIcon ${isAddOpen ? 'selected' : ''}`}
-                icon={faPlusCircle}
-                size='lg'
+          {showHelp && (
+            <Tooltip text={t<string>('Help')}>
+              <Link to={'/help'}>
+              <img
+                className='popupToggle'
+                src={helpIcon}
               />
-            </div>
+              </Link>
+            </Tooltip>
           )}
           {showSettings && (
-            <div
-              className='popupToggle'
-              data-toggle-settings
-              onClick={_toggleSettings}
-              ref={setIconRef}
-            >
-              <FontAwesomeIcon
-                className={`cogIcon ${isSettingsOpen ? 'selected' : ''}`}
-                icon={faCog}
-                size='lg'
+            <Tooltip text={t<string>('Settings')}>
+              <Link to={'/account/settings'}>
+              <img
+                className='popupToggle'
+                onClick={_toggleSettings}
+                ref={setIconRef}
+                src={settingsIcon}
               />
-            </div>
+              </Link>
+            </Tooltip>
           )}
         </div>
-        {isAddOpen && (
-          <MenuAdd reference={addMenuRef} />
-        )}
-        {isSettingsOpen && (
-          <MenuSettings reference={setMenuRef} />
-        )}
+        {/* TODO: will be reused */}
+        {/* {isAddOpen && <MenuAdd reference={addMenuRef} />} */}
+        {/* {isSettingsOpen && <MenuSettings reference={setMenuRef} />} */}
         {children}
       </div>
     </div>
   );
 }
 
-export default React.memo(styled(Header)(({ theme }: Props) => `
+export default React.memo(styled(Header)(({ theme }: ThemeProps) => `
   max-width: 100%;
   box-sizing: border-box;
   font-weight: normal;
@@ -200,38 +154,58 @@ export default React.memo(styled(Header)(({ theme }: Props) => `
     padding: 0 0 0;
   }
 
+  .flex {
+    display: flex;
+  }
+
   > .container {
     display: flex;
+    align-items: center;
     justify-content: space-between;
     width: 100%;
-    border-bottom: 1px solid ${theme.inputBorderColor};
-    min-height: 70px;
+    height: 56px;
+    border-bottom: 1px solid ${theme.boxBorderColor};
+
+    > div {
+      flex: 1 0 0;
+    }
 
     .branding {
       display: flex;
-      justify-content: center;
       align-items: center;
       color: ${theme.labelColor};
       font-family: ${theme.secondaryFontFamily};
       text-align: center;
-      margin-left: 24px;
 
       .logo {
-        height: 28px;
-        width: 28px;
-        margin: 8px 12px 12px 0;
+        height: 24px;
+        width: 24px;
+        margin-left: 24px;
       }
+    }
+
+    .logoText-container {
+      display:flex;
+      align-items: center;
+      justify-content: center;
+      /* width: 100%; */
 
       .logoText {
         color: ${theme.textColor};
         font-family: ${theme.secondaryFontFamily};
-        font-size: 20px;
-        line-height: 27px;
+        font-weight: 500;
+        font-size: 14px;
+        line-height: 120%;
+        letter-spacing: 0.07em;
+
       }
     }
 
-    .popupMenus, .searchBarWrapper {
-      align-self: center;
+    .popupMenus {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 16px;
     }
 
     .connectedAccountsWrapper {
@@ -272,11 +246,7 @@ export default React.memo(styled(Header)(({ theme }: Props) => `
     .popupToggle {
       display: inline-block;
       vertical-align: middle;
-
-      &:last-child {
-        margin-right: 24px;
-      }
-
+      
       &:hover {
         cursor: pointer;
       }
@@ -287,7 +257,7 @@ export default React.memo(styled(Header)(({ theme }: Props) => `
     }
 
     .popupToggle+.popupToggle {
-      margin-left: 8px;
+      margin-left: 16px;
     }
   }
 
@@ -302,10 +272,13 @@ export default React.memo(styled(Header)(({ theme }: Props) => `
   .arrowLeftIcon {
     color: ${theme.labelColor};
     margin-right: 1rem;
+    margin-left: 24px;
     cursor: pointer;
   }
 
   &.smallMargin {
     margin-bottom: 15px;
   }
-`));
+`
+)
+);

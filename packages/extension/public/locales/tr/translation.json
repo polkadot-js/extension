@@ -160,5 +160,8 @@
   "password for encrypting all accounts": "tüm hesapların şifrelenmiş şifresi",
   "I want to export all my accounts": "Tüm hesaplarımı dışa aktarmak istiyorum",
   "Got it!": "",
-  "Your privacy is protected": ""
+  "Your privacy is protected": "",
+  "Help": "",
+  "Settings":"",
+  "Edit Account": ""
 }

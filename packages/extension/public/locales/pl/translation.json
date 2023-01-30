@@ -160,5 +160,8 @@
 	  "password for encrypting all accounts": "hasło do szyfrowania wszystkich kont",
 	  "I want to export all my accounts": "Chcę wyeksportować wszystkie moje konta",
 	  "Got it!": "",
-	  "Your privacy is protected": ""
+	  "Your privacy is protected": "",
+	  "Help": "Pomoc",
+	  "Settings":"Ustawienia",
+	  "Edit Account": ""
 	}

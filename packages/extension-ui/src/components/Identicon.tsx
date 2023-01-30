@@ -38,6 +38,7 @@ export default styled(Identicon)(({ theme }: ThemeProps) => `
   border-radius: 50%;
   display: flex;
   justify-content: center;
+  border: 1px solid ${theme.avatarBorderColor};
 
   .container:before {
     box-shadow: none;

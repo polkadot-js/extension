@@ -38,6 +38,9 @@ export { default as ValidatedInput } from './ValidatedInput';
 export { default as VerticalSpace } from './VerticalSpace';
 export { default as View } from './View';
 export { default as Warning } from './Warning';
+export { default as Tooltip } from './Tooltip';
+export { default as AddButton } from './AddButton';
+export { default as MenuCard } from './MenuCard';
 
 export { Input, TextArea } from './TextInputs';
 

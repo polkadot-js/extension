@@ -160,5 +160,8 @@
   "password for encrypting all accounts": "รหัสผ่านสำหรับการเข้ารหัสทุกบัญชี",
   "I want to export all my accounts": "ฉันอยากจะนำออกทุกบัญชี",
   "Got it!": "",
-  "Your privacy is protected": ""
+  "Your privacy is protected": "",
+  "Help": "",
+  "Settings":"",
+  "Edit Account": ""
 }

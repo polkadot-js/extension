@@ -1,9 +1,7 @@
 // Copyright 2019-2023 @polkadot/extension authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-/* eslint-disable react/jsx-no-bind */
-
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import styled from 'styled-components';
 
 import { ThemeProps } from '../types';
@@ -37,14 +35,14 @@ const Tooltip: React.FC<Props> = function ({ children, text }: Props) {
     }
   }
 
-  function _handleMouseEnter() {
+  const _handleMouseEnter = useCallback(() => {
     setIsVisible(true);
     _checkBoundaries();
-  }
+  }, []);
 
-  function _handleMouseLeave() {
+  const _handleMouseLeave = useCallback(() => {
     setIsVisible(false);
-  }
+  }, []);
 
   useEffect(() => {
     if (isVisible) {
@@ -53,14 +51,16 @@ const Tooltip: React.FC<Props> = function ({ children, text }: Props) {
   }, [isVisible]);
 
   return (
-    <StyledTooltipContainer 
-    onMouseEnter={_handleMouseEnter} 
-    onMouseLeave={_handleMouseLeave}>
+    <StyledTooltipContainer
+      onMouseEnter={_handleMouseEnter}
+      onMouseLeave={_handleMouseLeave}
+    >
       {children}
       {isVisible && (
-        <StyledTooltip 
-        className='tooltip' 
-        ref={tooltipRef}>
+        <StyledTooltip
+          className='tooltip'
+          ref={tooltipRef}
+        >
           <span>{text}</span>
         </StyledTooltip>
       )}

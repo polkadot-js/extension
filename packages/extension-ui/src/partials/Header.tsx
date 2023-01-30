@@ -150,6 +150,7 @@ export default React.memo(styled(Header)(({ theme }: ThemeProps) => `
   position: relative;
   margin-bottom: 25px;
 
+
   && {
     padding: 0 0 0;
   }

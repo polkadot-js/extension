@@ -56,6 +56,7 @@ const darkTheme = {
   primaryFontFamily: 'Karla, sans-serif',
   readonlyInputBackground: '#1A1B20',
   secondaryFontFamily: 'Gilroy, sans-serif',
+  skeletonBackground: '#14212A',
   subTextColor: '#BCCBD6',
   textColor: '#FFFFFF',
   textColorDanger: '#00CCAB',

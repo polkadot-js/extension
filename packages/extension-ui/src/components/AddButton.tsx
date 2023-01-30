@@ -42,7 +42,7 @@ export default styled(AddButton)(({ theme }: ThemeProps) => `
   border-radius: 50%;
   padding:0px;
   transition: 0.4s ease-in-out;
-
+  
   &:disabled {
     cursor: default;
     background: ${theme.addButtonBackground};

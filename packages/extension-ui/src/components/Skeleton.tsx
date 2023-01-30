@@ -11,14 +11,18 @@ interface Props extends ThemeProps {
   height?: number;
   type: 'avatar' | 'paragraph';
   width?: number;
-
 }
 
-const Skeleton: React.FC<Props> = ({ className, height, type, width,  }) => {
-  return <div className={className}>{type === 'avatar' ? <div className='skeleton-avatar' /> : <div className='skeleton-paragraph' />}</div>;
+const Skeleton: React.FC<Props> = ({ className, type }) => {
+  return (
+    <div className={className}>
+      {type === 'avatar' ? <div className='skeleton-avatar' /> : <div className='skeleton-paragraph' />}
+    </div>
+  );
 };
 
-export default styled(Skeleton)(({ height,theme, width }: Props) => `
+export default styled(Skeleton)(
+  ({ height, theme, width }: Props) => `
   .skeleton-avatar {
     border-radius: 50%;
     width: 48px;

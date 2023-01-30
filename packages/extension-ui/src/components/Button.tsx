@@ -19,25 +19,31 @@ interface Props extends ThemeProps {
   to?: string;
 }
 
-function Button ({ children, className = '', isBusy,isDanger, isDisabled, isSuccess, onClick, to }: Props): React.ReactElement<Props> {
-  const _onClick = useCallback(
-    (): void => {
-      if (isBusy || isDisabled) {
-        return;
-      }
+function Button({
+  children,
+  className = '',
+  isBusy,
+  // isDanger,
+  isDisabled,
+  // isSuccess,
+  onClick,
+  to
+}: Props): React.ReactElement<Props> {
+  const _onClick = useCallback((): void => {
+    if (isBusy || isDisabled) {
+      return;
+    }
 
-      onClick && onClick();
+    onClick && onClick();
 
-      if (to) {
-        window.location.hash = to;
-      }
-    },
-    [isBusy, isDisabled, onClick, to]
-  );
+    if (to) {
+      window.location.hash = to;
+    }
+  }, [isBusy, isDisabled, onClick, to]);
 
   return (
     <button
-      className={`${className}${(isDisabled || isBusy) ? ' isDisabled' : ''}${isBusy ? ' isBusy' : ''}`}
+      className={`${className}${isDisabled || isBusy ? ' isDisabled' : ''}${isBusy ? ' isBusy' : ''}`}
       disabled={isDisabled || isBusy}
       onClick={_onClick}
     >
@@ -48,8 +54,11 @@ function Button ({ children, className = '', isBusy,isDanger, isDisabled, isSucc
   );
 }
 
-export default styled(Button)(({ isDanger,isSuccess, theme }: Props) => `
-  background: ${isDanger ? theme.buttonBackgroundDanger: isSuccess ? theme.buttonBackgroundSuccess : theme.buttonBackground};
+export default styled(Button)(
+  ({ isDanger, isSuccess, theme }: Props) => `
+  background: ${
+    isDanger ? theme.buttonBackgroundDanger : isSuccess ? theme.buttonBackgroundSuccess : theme.buttonBackground
+  };
   cursor: pointer;
   display: block;
   width: 100%;
@@ -81,13 +90,13 @@ export default styled(Button)(({ isDanger,isSuccess, theme }: Props) => `
   &:not(:disabled):hover, &:active {
     background: ${isDanger ? theme.buttonBackgroundDangerHover : theme.buttonBackgroundHover};
     box-shadow: ${theme.buttonHoverBoxShadow};
-    
+
   }
 
   .busyOverlay,
   .disabledOverlay {
     visibility: hidden;
-    
+
   }
 
   .disabledOverlay {
@@ -121,4 +130,5 @@ export default styled(Button)(({ isDanger,isSuccess, theme }: Props) => `
   &.isDisabled .disabledOverlay {
     visibility: visible;
   }
-`);
+`
+);

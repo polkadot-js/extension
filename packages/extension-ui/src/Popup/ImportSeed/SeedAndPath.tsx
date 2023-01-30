@@ -13,7 +13,15 @@ import styled from 'styled-components';
 import { validateSeed } from '@polkadot/extension-ui/messaging';
 import { objectSpread } from '@polkadot/util';
 
-import { ButtonArea, Dropdown, InputWithLabel, NextStepButton, TextAreaWithLabel, VerticalSpace, Warning } from '../../components';
+import {
+  ButtonArea,
+  Dropdown,
+  InputWithLabel,
+  NextStepButton,
+  TextAreaWithLabel,
+  VerticalSpace,
+  Warning
+} from '../../components';
 import useGenesisHashOptions from '../../hooks/useGenesisHashOptions';
 import useTranslation from '../../hooks/useTranslation';
 
@@ -24,7 +32,7 @@ interface Props {
   type: KeypairType;
 }
 
-function SeedAndPath ({ className, onAccountChange, onNextStep, type }: Props): React.ReactElement {
+function SeedAndPath({ className, onAccountChange, onNextStep, type }: Props): React.ReactElement {
   const { t } = useTranslation();
   const genesisOptions = useGenesisHashOptions();
   const [address, setAddress] = useState('');
@@ -49,17 +57,12 @@ function SeedAndPath ({ className, onAccountChange, onNextStep, type }: Props): 
       .then((validatedAccount) => {
         setError('');
         setAddress(validatedAccount.address);
-        onAccountChange(
-          objectSpread<AccountInfo>({}, validatedAccount, { genesis, type })
-        );
+        onAccountChange(objectSpread<AccountInfo>({}, validatedAccount, { genesis, type }));
       })
       .catch(() => {
         setAddress('');
         onAccountChange(null);
-        setError(path
-          ? t<string>('Invalid mnemonic seed or derivation path')
-          : t<string>('Invalid mnemonic seed')
-        );
+        setError(path ? t<string>('Invalid mnemonic seed or derivation path') : t<string>('Invalid mnemonic seed'));
       });
   }, [t, genesis, seed, path, onAccountChange, type]);
 
@@ -102,7 +105,7 @@ function SeedAndPath ({ className, onAccountChange, onNextStep, type }: Props): 
           <FontAwesomeIcon icon={advanced ? faCaretDown : faCaretRight} />
           <span>{t<string>('advanced')}</span>
         </div>
-        { advanced && (
+        {advanced && (
           <InputWithLabel
             className='derivationPath'
             isError={!!path && !!error}
@@ -111,13 +114,7 @@ function SeedAndPath ({ className, onAccountChange, onNextStep, type }: Props): 
             value={path || ''}
           />
         )}
-        {!!error && !!seed && (
-          <Warning
-            isDanger
-          >
-            {error}
-          </Warning>
-        )}
+        {!!error && !!seed && <Warning isDanger>{error}</Warning>}
       </div>
       <VerticalSpace />
       <ButtonArea>
@@ -132,7 +129,8 @@ function SeedAndPath ({ className, onAccountChange, onNextStep, type }: Props): 
   );
 }
 
-export default styled(SeedAndPath)(({ theme }: ThemeProps) => `
+export default styled(SeedAndPath)(
+  ({ theme }: ThemeProps) => `
   .advancedToggle {
     color: ${theme.textColor};
     cursor: pointer;
@@ -162,4 +160,5 @@ export default styled(SeedAndPath)(({ theme }: ThemeProps) => `
   .seedError {
     margin-bottom: 1rem;
   }
-`);
+`
+);

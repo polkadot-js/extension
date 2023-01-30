@@ -9,7 +9,19 @@ import styled, { ThemeContext } from 'styled-components';
 
 import settings from '@polkadot/ui-settings';
 
-import { ActionContext, ActionText, Checkbox, Dropdown, Menu, MenuDivider, MenuItem, Svg, Switch, themes, ThemeSwitchContext } from '../components';
+import {
+  ActionContext,
+  ActionText,
+  Checkbox,
+  Dropdown,
+  Menu,
+  MenuDivider,
+  MenuItem,
+  Svg,
+  Switch,
+  themes,
+  ThemeSwitchContext
+} from '../components';
 import useIsPopup from '../hooks/useIsPopup';
 import useTranslation from '../hooks/useTranslation';
 import { setNotification, windowOpen } from '../messaging';
@@ -25,14 +37,13 @@ interface Props extends ThemeProps {
   reference: React.MutableRefObject<null>;
 }
 
-const notificationOptions = ['Extension', 'PopUp', 'Window']
-  .map((item) => ({ text: item, value: item.toLowerCase() }));
+const notificationOptions = ['Extension', 'PopUp', 'Window'].map((item) => ({ text: item, value: item.toLowerCase() }));
 
 const prefixOptions = settings.availablePrefixes
   .filter(({ value }) => value !== -1)
   .map(({ text, value }): Option => ({ text, value: `${value}` }));
 
-function MenuSettings ({ className, reference }: Props): React.ReactElement<Props> {
+function MenuSettings({ className, reference }: Props): React.ReactElement<Props> {
   const { t } = useTranslation();
   const [camera, setCamera] = useState(settings.camera === 'on');
   const [prefix, setPrefix] = useState(`${settings.prefix === -1 ? 42 : settings.prefix}`);
@@ -47,44 +58,31 @@ function MenuSettings ({ className, reference }: Props): React.ReactElement<Prop
     settings.set({ camera: camera ? 'on' : 'off' });
   }, [camera]);
 
-  const _onChangePrefix = useCallback(
-    (value: string): void => {
-      setPrefix(value);
-      settings.set({ prefix: parseInt(value, 10) });
-    }, []
-  );
+  const _onChangePrefix = useCallback((value: string): void => {
+    setPrefix(value);
+    settings.set({ prefix: parseInt(value, 10) });
+  }, []);
 
-  const _onChangeNotification = useCallback(
-    (value: string): void => {
-      setNotification(value).catch(console.error);
+  const _onChangeNotification = useCallback((value: string): void => {
+    setNotification(value).catch(console.error);
 
-      updateNotification(value);
-      settings.set({ notification: value });
-    }, []
-  );
+    updateNotification(value);
+    settings.set({ notification: value });
+  }, []);
 
-  const _onChangeTheme = useCallback(
-    (checked: boolean): void => setTheme(checked ? 'dark' : 'light'),
-    [setTheme]
-  );
+  const _onChangeTheme = useCallback((checked: boolean): void => setTheme(checked ? 'dark' : 'light'), [setTheme]);
 
-  const _onWindowOpen = useCallback(
-    (): void => {
-      windowOpen('/').catch(console.error);
-    }, []
-  );
+  const _onWindowOpen = useCallback((): void => {
+    windowOpen('/').catch(console.error);
+  }, []);
 
-  const _onChangeLang = useCallback(
-    (value: string): void => {
-      settings.set({ i18nLang: value });
-    }, []
-  );
+  const _onChangeLang = useCallback((value: string): void => {
+    settings.set({ i18nLang: value });
+  }, []);
 
-  const _goToAuthList = useCallback(
-    () => {
-      onAction('auth-list');
-    }, [onAction]
-  );
+  const _goToAuthList = useCallback(() => {
+    onAction('auth-list');
+  }, [onAction]);
 
   return (
     <Menu
@@ -172,7 +170,9 @@ function MenuSettings ({ className, reference }: Props): React.ReactElement<Prop
   );
 }
 
-export default React.memo(styled(MenuSettings)(({ theme }: Props) => `
+export default React.memo(
+  styled(MenuSettings)(
+    ({ theme }: Props) => `
   margin-top: 50px;
   right: 24px;
   user-select: none;
@@ -218,4 +218,6 @@ export default React.memo(styled(MenuSettings)(({ theme }: Props) => `
       width: 100%;
     }
   }
-`));
+`
+  )
+);

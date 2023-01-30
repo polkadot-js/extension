@@ -10,7 +10,15 @@ import styled from 'styled-components';
 
 import { u8aToString } from '@polkadot/util';
 
-import { AccountContext, ActionContext, Address, Button, InputFileWithLabel, InputWithLabel, Warning } from '../components';
+import {
+  AccountContext,
+  ActionContext,
+  Address,
+  Button,
+  InputFileWithLabel,
+  InputWithLabel,
+  Warning
+} from '../components';
 import useTranslation from '../hooks/useTranslation';
 import { batchRestore, jsonGetAccountInfo, jsonRestore } from '../messaging';
 import { Header } from '../partials';
@@ -23,7 +31,7 @@ interface Props {
   className?: string;
 }
 
-function Upload ({ className }: Props): React.ReactElement {
+function Upload({ className }: Props): React.ReactElement {
   const { t } = useTranslation();
   const { accounts } = useContext(AccountContext);
   const onAction = useContext(ActionContext);
@@ -41,76 +49,72 @@ function Upload ({ className }: Props): React.ReactElement {
     !accounts.length && onAction();
   }, [accounts, onAction]);
 
-  const _onChangePass = useCallback(
-    (pass: string): void => {
-      setPassword(pass);
-      setIsPasswordError(false);
-    }, []
-  );
+  const _onChangePass = useCallback((pass: string): void => {
+    setPassword(pass);
+    setIsPasswordError(false);
+  }, []);
 
-  const _onChangeFile = useCallback(
-    (file: Uint8Array): void => {
-      setAccountsInfo(() => []);
+  const _onChangeFile = useCallback((file: Uint8Array): void => {
+    setAccountsInfo(() => []);
 
-      let json: KeyringPair$Json | KeyringPairs$Json | undefined;
+    let json: KeyringPair$Json | KeyringPairs$Json | undefined;
 
-      try {
-        json = JSON.parse(u8aToString(file)) as KeyringPair$Json | KeyringPairs$Json;
-        setFile(json);
-      } catch (e) {
-        console.error(e);
-        setFileError(true);
-      }
+    try {
+      json = JSON.parse(u8aToString(file)) as KeyringPair$Json | KeyringPairs$Json;
+      setFile(json);
+    } catch (e) {
+      console.error(e);
+      setFileError(true);
+    }
 
-      if (json === undefined) {
-        return;
-      }
+    if (json === undefined) {
+      return;
+    }
 
-      if (isKeyringPairs$Json(json)) {
-        setRequirePassword(true);
-        json.accounts.forEach((account) => {
-          setAccountsInfo((old) => [...old, {
+    if (isKeyringPairs$Json(json)) {
+      setRequirePassword(true);
+      json.accounts.forEach((account) => {
+        setAccountsInfo((old) => [
+          ...old,
+          {
             address: account.address,
             genesisHash: account.meta.genesisHash,
             name: account.meta.name
-          } as ResponseJsonGetAccountInfo]);
-        });
-      } else {
-        setRequirePassword(true);
-        jsonGetAccountInfo(json)
-          .then((accountInfo) => setAccountsInfo((old) => [...old, accountInfo]))
-          .catch((e) => {
-            setFileError(true);
-            console.error(e);
-          });
-      }
-    }, []
-  );
-
-  const _onRestore = useCallback(
-    (): void => {
-      if (!file) {
-        return;
-      }
-
-      if (requirePassword && !password) {
-        return;
-      }
-
-      setIsBusy(true);
-
-      (isKeyringPairs$Json(file) ? batchRestore(file, password) : jsonRestore(file, password))
-        .then(() => {
-          onAction('/');
-        })
+          } as ResponseJsonGetAccountInfo
+        ]);
+      });
+    } else {
+      setRequirePassword(true);
+      jsonGetAccountInfo(json)
+        .then((accountInfo) => setAccountsInfo((old) => [...old, accountInfo]))
         .catch((e) => {
+          setFileError(true);
           console.error(e);
-          setIsBusy(false);
-          setIsPasswordError(true);
         });
-    },
-    [file, onAction, password, requirePassword]
-  );
+    }
+  }, []);
+
+  const _onRestore = useCallback((): void => {
+    if (!file) {
+      return;
+    }
+
+    if (requirePassword && !password) {
+      return;
+    }
+
+    setIsBusy(true);
+
+    (isKeyringPairs$Json(file) ? batchRestore(file, password) : jsonRestore(file, password))
+      .then(() => {
+        onAction('/');
+      })
+      .catch((e) => {
+        console.error(e);
+        setIsBusy(false);
+        setIsPasswordError(true);
+      });
+  }, [file, onAction, password, requirePassword]);
 
   return (
     <>
@@ -136,13 +140,7 @@ function Upload ({ className }: Props): React.ReactElement {
           onChange={_onChangeFile}
           withLabel
         />
-        {isFileError && (
-          <Warning
-            isDanger
-          >
-            {t<string>('Invalid Json file')}
-          </Warning>
-        )}
+        {isFileError && <Warning isDanger>{t<string>('Invalid Json file')}</Warning>}
         {requirePassword && (
           <div>
             <InputWithLabel

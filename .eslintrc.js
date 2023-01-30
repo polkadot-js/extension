@@ -12,12 +12,7 @@ module.exports = {
   },
   rules: {
     ...base.rules,
-    'header/header': [0],
     // this seems very broken atm, false positives
-    '@typescript-eslint/unbound-method': 'off',
-    '@typescript-eslint/indent': ['error', 2, { ignoredNodes: ['JSXElement', 'JSXElement *'] }],
-    'react/jsx-closing-bracket-location': 0
-  },
-  extends: [...base.extends, 'prettier'],
-  plugins: [...base.plugins, 'prettier']
+    '@typescript-eslint/unbound-method': 'off'
+  }
 };

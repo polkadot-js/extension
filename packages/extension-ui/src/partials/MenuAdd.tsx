@@ -4,7 +4,14 @@
 import type { ThemeProps } from '../types';
 
 import { faUsb } from '@fortawesome/free-brands-svg-icons';
-import { faCodeBranch, faFileExport, faFileUpload, faKey, faPlusCircle, faQrcode } from '@fortawesome/free-solid-svg-icons';
+import {
+  faCodeBranch,
+  faFileExport,
+  faFileUpload,
+  faKey,
+  faPlusCircle,
+  faQrcode
+} from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import React, { useCallback, useContext } from 'react';
 import styled from 'styled-components';
@@ -23,24 +30,20 @@ interface Props extends ThemeProps {
 const jsonPath = '/account/restore-json';
 const ledgerPath = '/account/import-ledger';
 
-function MenuAdd ({ className, reference }: Props): React.ReactElement<Props> {
+function MenuAdd({ className, reference }: Props): React.ReactElement<Props> {
   const { t } = useTranslation();
   const { master } = useContext(AccountContext);
   const mediaAllowed = useContext(MediaContext);
   const { isLedgerCapable, isLedgerEnabled } = useLedger();
   const isPopup = useIsPopup();
 
-  const _openJson = useCallback(
-    (): void => {
-      windowOpen(jsonPath).catch(console.error);
-    }, []
-  );
+  const _openJson = useCallback((): void => {
+    windowOpen(jsonPath).catch(console.error);
+  }, []);
 
-  const _onOpenLedgerConnect = useCallback(
-    (): void => {
-      windowOpen(ledgerPath).catch(console.error);
-    }, []
-  );
+  const _onOpenLedgerConnect = useCallback((): void => {
+    windowOpen(ledgerPath).catch(console.error);
+  }, []);
 
   return (
     <Menu
@@ -50,7 +53,7 @@ function MenuAdd ({ className, reference }: Props): React.ReactElement<Props> {
       <MenuItem className='menuItem'>
         <Link to={'/account/create'}>
           <FontAwesomeIcon icon={faPlusCircle} />
-          <span>{ t('Create new account')}</span>
+          <span>{t('Create new account')}</span>
         </Link>
       </MenuItem>
       <MenuDivider />
@@ -90,10 +93,7 @@ function MenuAdd ({ className, reference }: Props): React.ReactElement<Props> {
       <MenuItem className='menuItem'>
         <Link
           isDisabled={!mediaAllowed}
-          title={!mediaAllowed
-            ? t<string>('Camera access must be first enabled in the settings')
-            : ''
-          }
+          title={!mediaAllowed ? t<string>('Camera access must be first enabled in the settings') : ''}
           to='/account/import-qr'
         >
           <FontAwesomeIcon icon={faQrcode} />
@@ -101,36 +101,35 @@ function MenuAdd ({ className, reference }: Props): React.ReactElement<Props> {
         </Link>
       </MenuItem>
       <MenuItem className='menuItem ledger'>
-        {isLedgerEnabled
-          ? (
-            <Link
-              isDisabled={!isLedgerCapable}
-              title={ (!isLedgerCapable && t<string>('Ledger devices can only be connected with Chrome browser')) || ''}
-              to={ledgerPath}
-            >
-              <FontAwesomeIcon
-                icon={faUsb}
-                rotation={270}
-              />
-              <span>{ t<string>('Attach ledger account')}</span>
-            </Link>
-          )
-          : (
-            <Link onClick={_onOpenLedgerConnect}>
-              <FontAwesomeIcon
-                icon={faUsb}
-                rotation={270}
-              />
-              <span>{ t<string>('Connect Ledger device')}</span>
-            </Link>
-          )
-        }
+        {isLedgerEnabled ? (
+          <Link
+            isDisabled={!isLedgerCapable}
+            title={(!isLedgerCapable && t<string>('Ledger devices can only be connected with Chrome browser')) || ''}
+            to={ledgerPath}
+          >
+            <FontAwesomeIcon
+              icon={faUsb}
+              rotation={270}
+            />
+            <span>{t<string>('Attach ledger account')}</span>
+          </Link>
+        ) : (
+          <Link onClick={_onOpenLedgerConnect}>
+            <FontAwesomeIcon
+              icon={faUsb}
+              rotation={270}
+            />
+            <span>{t<string>('Connect Ledger device')}</span>
+          </Link>
+        )}
       </MenuItem>
     </Menu>
   );
 }
 
-export default React.memo(styled(MenuAdd)(({ theme }: Props) => `
+export default React.memo(
+  styled(MenuAdd)(
+    ({ theme }: Props) => `
   margin-top: 50px;
   right: 50px; // 24 + 18 + 8
   user-select: none;
@@ -153,4 +152,6 @@ export default React.memo(styled(MenuAdd)(({ theme }: Props) => `
       width: 0.875em;
     }
   }
-`));
+`
+  )
+);

@@ -33,7 +33,8 @@ const SkeletonCard: React.FC<Props> = ({ className }) => {
   );
 };
 
-export default styled(SkeletonCard)(({ theme }: Props) => `
+export default styled(SkeletonCard)(
+  ({ theme }: Props) => `
 
   border: 1px solid ${theme.boxBorderColor};
   box-sizing: border-box;

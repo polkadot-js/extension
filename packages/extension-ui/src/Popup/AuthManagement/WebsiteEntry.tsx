@@ -18,39 +18,36 @@ interface Props extends ThemeProps {
   url: string;
 }
 
-function WebsiteEntry ({ className = '', info: { authorizedAccounts, isAllowed }, removeAuth, url }: Props): React.ReactElement<Props> {
+function WebsiteEntry({
+  className = '',
+  info: { authorizedAccounts, isAllowed },
+  removeAuth,
+  url
+}: Props): React.ReactElement<Props> {
   const { t } = useTranslation();
 
-  const _removeAuth = useCallback(
-    () => removeAuth(url),
-    [removeAuth, url]
-  );
+  const _removeAuth = useCallback(() => removeAuth(url), [removeAuth, url]);
 
   return (
     <div className={className}>
       <RemoveAuth onRemove={_removeAuth} />
-      <div className='url'>
-        {url}
-      </div>
+      <div className='url'>{url}</div>
       <Link
         className='connectedAccounts'
         to={`/url/manage/${url}`}
-      >{
-          authorizedAccounts && authorizedAccounts.length
-            ? t('{{total}} accounts', {
-              replace: {
-                total: authorizedAccounts.length
-              }
-            })
-            : isAllowed
-              ? t('all accounts')
-              : t('no accounts')
-        }</Link>
+      >
+        {authorizedAccounts && authorizedAccounts.length
+          ? t('{{total}} accounts', { replace: { total: authorizedAccounts.length } })
+          : isAllowed
+          ? t('all accounts')
+          : t('no accounts')}
+      </Link>
     </div>
   );
 }
 
-export default styled(WebsiteEntry)(({ theme }: Props) => `
+export default styled(WebsiteEntry)(
+  ({ theme }: Props) => `
   display: flex;
   align-items: center;
   margin-top: .2rem;
@@ -68,4 +65,5 @@ export default styled(WebsiteEntry)(({ theme }: Props) => `
     border-radius: 4px;
     text-decoration: none;
   }
-`);
+`
+);

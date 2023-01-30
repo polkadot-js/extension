@@ -4,14 +4,13 @@
 import type { ThemeProps } from '../../types';
 
 import React, { useCallback, useContext, useEffect, useMemo, useState } from 'react';
-import { Link } from 'react-router-dom';
 import styled from 'styled-components';
 
 import { AccountWithChildren } from '@polkadot/extension-base/background/types';
 import getNetworkMap from '@polkadot/extension-ui/util/getNetworkMap';
 
 import ExternalLinkIcon from '../../assets/externalLink.svg';
-import { AccountContext, AddButton, MenuCard, MenuItem } from '../../components';
+import { AccountContext, AddButton, MenuCard } from '../../components';
 import useTranslation from '../../hooks/useTranslation';
 import { Header } from '../../partials';
 import AccountsTree from './AccountsTree';
@@ -29,7 +28,15 @@ function Accounts({ className }: Props): React.ReactElement {
   const networkMap = useMemo(() => getNetworkMap(), []);
 
   useEffect(() => {
-    setFilteredAccount(filter ? hierarchy.filter((account) => account.name?.toLowerCase().includes(filter) || (account.genesisHash && networkMap.get(account.genesisHash)?.toLowerCase().includes(filter))) : hierarchy);
+    setFilteredAccount(
+      filter
+        ? hierarchy.filter(
+            (account) =>
+              account.name?.toLowerCase().includes(filter) ||
+              (account.genesisHash && networkMap.get(account.genesisHash)?.toLowerCase().includes(filter))
+          )
+        : hierarchy
+    );
   }, [filter, hierarchy, networkMap]);
 
   const _onFilter = useCallback((filter: string) => {
@@ -86,13 +93,14 @@ function Accounts({ className }: Props): React.ReactElement {
   );
 }
 
-export default styled(Accounts)(({ theme }: Props) => `
+export default styled(Accounts)(
+  ({ theme }: Props) => `
   height: calc(100vh - 2px);
   overflow-y: scroll;
   margin-top: -25px;
   padding-top: 25px;
   scrollbar-width: none;
-  
+
   &::-webkit-scrollbar {
     display: none;
   }

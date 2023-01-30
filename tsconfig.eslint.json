@@ -7,7 +7,8 @@
   "include": [
     "packages/**/src/**/*",
     "packages/**/*.js",
-    "packages/**/*.cjs"
+    "packages/**/*.cjs",
+    "packages/extension-ui/.eslintrc.js"
   ],
   "exclude": [
     "**/node_modules/**/*"

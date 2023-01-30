@@ -5,7 +5,17 @@ import React, { useCallback, useContext, useEffect, useMemo, useRef, useState } 
 
 import { canDerive } from '@polkadot/extension-base/utils';
 
-import { AccountContext, ActionContext, Address, ButtonArea, InputWithLabel, Label, NextStepButton, VerticalSpace, Warning } from '../../components';
+import {
+  AccountContext,
+  ActionContext,
+  Address,
+  ButtonArea,
+  InputWithLabel,
+  Label,
+  NextStepButton,
+  VerticalSpace,
+  Warning
+} from '../../components';
 import useTranslation from '../../hooks/useTranslation';
 import { validateAccount, validateDerivationPath } from '../../messaging';
 import { nextDerivationPath } from '../../util/nextDerivationPath';
@@ -23,7 +33,13 @@ interface Props {
 // match any single slash
 const singleSlashRegex = /([^/]|^)\/([^/]|$)/;
 
-export default function SelectParent ({ className, isLocked, onDerivationConfirmed, parentAddress, parentGenesis }: Props): React.ReactElement<Props> {
+export default function SelectParent({
+  className,
+  isLocked,
+  onDerivationConfirmed,
+  parentAddress,
+  parentGenesis
+}: Props): React.ReactElement<Props> {
   const { t } = useTranslation();
   const onAction = useContext(ActionContext);
   const [isBusy, setIsBusy] = useState(false);
@@ -57,59 +73,48 @@ export default function SelectParent ({ className, isLocked, onDerivationConfirm
   }, [allowSoftDerivation, suriPath, t]);
 
   const allAddresses = useMemo(
-    () => hierarchy
-      .filter(({ isExternal }) => !isExternal)
-      .filter(({ type }) => canDerive(type))
-      .map(({ address, genesisHash }): [string, string | null] => [address, genesisHash || null]),
+    () =>
+      hierarchy
+        .filter(({ isExternal }) => !isExternal)
+        .filter(({ type }) => canDerive(type))
+        .map(({ address, genesisHash }): [string, string | null] => [address, genesisHash || null]),
     [hierarchy]
   );
 
-  const _onParentPasswordEnter = useCallback(
-    (parentPassword: string): void => {
-      setParentPassword(parentPassword);
-      setIsProperParentPassword(!!parentPassword);
-    },
-    []
-  );
+  const _onParentPasswordEnter = useCallback((parentPassword: string): void => {
+    setParentPassword(parentPassword);
+    setIsProperParentPassword(!!parentPassword);
+  }, []);
 
-  const _onSuriPathChange = useCallback(
-    (path: string): void => {
-      setSuriPath(path);
-      setPathError('');
-    },
-    []
-  );
+  const _onSuriPathChange = useCallback((path: string): void => {
+    setSuriPath(path);
+    setPathError('');
+  }, []);
 
-  const _onParentChange = useCallback(
-    (address: string) => onAction(`/account/derive/${address}`),
-    [onAction]
-  );
+  const _onParentChange = useCallback((address: string) => onAction(`/account/derive/${address}`), [onAction]);
 
-  const _onSubmit = useCallback(
-    async (): Promise<void> => {
-      if (suriPath && parentAddress && parentPassword) {
-        setIsBusy(true);
+  const _onSubmit = useCallback(async (): Promise<void> => {
+    if (suriPath && parentAddress && parentPassword) {
+      setIsBusy(true);
 
-        const isUnlockable = await validateAccount(parentAddress, parentPassword);
+      const isUnlockable = await validateAccount(parentAddress, parentPassword);
 
-        if (isUnlockable) {
-          try {
-            const account = await validateDerivationPath(parentAddress, suriPath, parentPassword);
+      if (isUnlockable) {
+        try {
+          const account = await validateDerivationPath(parentAddress, suriPath, parentPassword);
 
-            onDerivationConfirmed({ account, parentPassword });
-          } catch (error) {
-            setIsBusy(false);
-            setPathError(t('Invalid derivation path'));
-            console.error(error);
-          }
-        } else {
+          onDerivationConfirmed({ account, parentPassword });
+        } catch (error) {
           setIsBusy(false);
-          setIsProperParentPassword(false);
+          setPathError(t('Invalid derivation path'));
+          console.error(error);
         }
+      } else {
+        setIsBusy(false);
+        setIsProperParentPassword(false);
       }
-    },
-    [parentAddress, parentPassword, onDerivationConfirmed, suriPath, t]
-  );
+    }
+  }, [parentAddress, parentPassword, onDerivationConfirmed, suriPath, t]);
 
   useEffect(() => {
     setParentPassword('');
@@ -121,24 +126,21 @@ export default function SelectParent ({ className, isLocked, onDerivationConfirm
   return (
     <>
       <div className={className}>
-        {isLocked
-          ? (
-            <Address
-              address={parentAddress}
-              genesisHash={parentGenesis}
+        {isLocked ? (
+          <Address
+            address={parentAddress}
+            genesisHash={parentGenesis}
+          />
+        ) : (
+          <Label label={t<string>('Choose Parent Account:')}>
+            <AddressDropdown
+              allAddresses={allAddresses}
+              onSelect={_onParentChange}
+              selectedAddress={parentAddress}
+              selectedGenesis={parentGenesis}
             />
-          )
-          : (
-            <Label label={t<string>('Choose Parent Account:')}>
-              <AddressDropdown
-                allAddresses={allAddresses}
-                onSelect={_onParentChange}
-                selectedAddress={parentAddress}
-                selectedGenesis={parentGenesis}
-              />
-            </Label>
-          )
-        }
+          </Label>
+        )}
         <div ref={passwordInputRef}>
           <InputWithLabel
             data-input-password
@@ -168,7 +170,7 @@ export default function SelectParent ({ className, isLocked, onDerivationConfirm
               parentPassword={parentPassword}
               withSoftPath={allowSoftDerivation}
             />
-            {(!!pathError) && (
+            {!!pathError && (
               <Warning
                 isBelowInput
                 isDanger

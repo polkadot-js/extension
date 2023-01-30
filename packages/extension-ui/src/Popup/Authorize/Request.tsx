@@ -21,7 +21,7 @@ interface Props extends ThemeProps {
   url: string;
 }
 
-function Request ({ authId, className, isFirst, request: { origin }, url }: Props): React.ReactElement<Props> {
+function Request({ authId, className, isFirst, request: { origin }, url }: Props): React.ReactElement<Props> {
   const { accounts, selectedAccounts = [], setSelectedAccounts } = useContext(AccountContext);
   const { t } = useTranslation();
   const onAction = useContext(ActionContext);
@@ -34,23 +34,17 @@ function Request ({ authId, className, isFirst, request: { origin }, url }: Prop
     setSelectedAccounts && setSelectedAccounts(defaultAccountSelection);
   }, [accounts, setSelectedAccounts]);
 
-  const _onApprove = useCallback(
-    (): void => {
-      approveAuthRequest(authId, selectedAccounts)
-        .then(() => onAction())
-        .catch((error: Error) => console.error(error));
-    },
-    [authId, onAction, selectedAccounts]
-  );
+  const _onApprove = useCallback((): void => {
+    approveAuthRequest(authId, selectedAccounts)
+      .then(() => onAction())
+      .catch((error: Error) => console.error(error));
+  }, [authId, onAction, selectedAccounts]);
 
-  const _onClose = useCallback(
-    (): void => {
-      deleteAuthRequest(authId)
-        .then(() => onAction())
-        .catch((error: Error) => console.error(error));
-    },
-    [authId, onAction]
-  );
+  const _onClose = useCallback((): void => {
+    deleteAuthRequest(authId)
+      .then(() => onAction())
+      .catch((error: Error) => console.error(error));
+  }, [authId, onAction]);
 
   if (!accounts.length) {
     return <NoAccount authId={authId} />;
@@ -67,9 +61,7 @@ function Request ({ authId, className, isFirst, request: { origin }, url }: Prop
           className='acceptButton'
           onClick={_onApprove}
         >
-          {t<string>('Connect {{total}} account(s)', { replace: {
-            total: selectedAccounts.length
-          } })}
+          {t<string>('Connect {{total}} account(s)', { replace: { total: selectedAccounts.length } })}
         </Button>
       )}
       <ActionBar className='rejectionButton'>

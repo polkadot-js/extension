@@ -9,11 +9,9 @@ import type { KeypairType } from '@polkadot/util-crypto/types';
 import type { ThemeProps } from '../types';
 
 import { faUsb } from '@fortawesome/free-brands-svg-icons';
-import { faCopy, faEye, faEyeSlash } from '@fortawesome/free-regular-svg-icons';
 import { faCodeBranch, faQrcode } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import React, { useCallback, useContext, useEffect, useRef, useState } from 'react';
-import CopyToClipboard from 'react-copy-to-clipboard';
 import { Link } from 'react-router-dom';
 import styled from 'styled-components';
 
@@ -24,7 +22,6 @@ import useMetadata from '../hooks/useMetadata';
 import useOutsideClick from '../hooks/useOutsideClick';
 import useToast from '../hooks/useToast';
 import useTranslation from '../hooks/useTranslation';
-import { showAccount } from '../messaging';
 import { DEFAULT_TYPE } from '../util/defaultType';
 import {ellipsisName}  from '../util/ellipsisName';
 import getParentNameSuri from '../util/getParentNameSuri';
@@ -71,7 +68,12 @@ function findAccountByAddress(accounts: AccountJson[], _address: string): Accoun
 }
 
 // recodes an supplied address using the prefix/genesisHash, include the actual saved account & chain
-function recodeAddress(address: string, accounts: AccountWithChildren[], chain: Chain | null, settings: SettingsStruct): Recoded {
+function recodeAddress(
+  address: string,
+  accounts: AccountWithChildren[],
+  chain: Chain | null,
+  settings: SettingsStruct
+): Recoded {
   // decode and create a shortcut for the encoded address
   const publicKey = decodeAddress(address);
 
@@ -92,11 +94,27 @@ function recodeAddress(address: string, accounts: AccountWithChildren[], chain: 
 const ACCOUNTS_SCREEN_HEIGHT = 550;
 const defaultRecoded = { account: null, formatted: null, prefix: 42, type: DEFAULT_TYPE };
 
-function Address({ actions, address, children, className, genesisHash, isExternal, isHardware, isHidden, name, parentName, showVisibilityAction = false, suri, toggleActions, type: givenType }: Props): React.ReactElement<Props> {
+function Address({
+  actions,
+  address,
+  children,
+  className,
+  genesisHash,
+  isExternal,
+  isHardware,
+  // isHidden,
+  name,
+  parentName,
+  // showVisibilityAction = false,
+  suri,
+  toggleActions,
+  type: givenType
+}: Props): React.ReactElement<Props> {
   const { t } = useTranslation();
   const { accounts } = useContext(AccountContext);
   const settings = useContext(SettingsContext);
-  const [{ account, formatted, genesisHash: recodedGenesis, prefix, type }, setRecoded] = useState<Recoded>(defaultRecoded);
+  const [{ account, formatted, genesisHash: recodedGenesis, prefix, type }, setRecoded] =
+    useState<Recoded>(defaultRecoded);
   const chain = useMetadata(genesisHash || recodedGenesis, true);
 
   const [showActionsMenu, setShowActionsMenu] = useState(false);
@@ -114,7 +132,13 @@ function Address({ actions, address, children, className, genesisHash, isExterna
 
     const account = findAccountByAddress(accounts, address);
 
-    setRecoded(chain?.definition.chainType === 'ethereum' || account?.type === 'ethereum' || (!account && givenType === 'ethereum') ? { account, formatted: address, type: 'ethereum' } : recodeAddress(address, accounts, chain, settings));
+    setRecoded(
+      chain?.definition.chainType === 'ethereum' ||
+        account?.type === 'ethereum' ||
+        (!account && givenType === 'ethereum')
+        ? { account, formatted: address, type: 'ethereum' }
+        : recodeAddress(address, accounts, chain, settings)
+    );
   }, [accounts, address, chain, givenType, settings]);
 
   useEffect(() => {
@@ -281,14 +305,15 @@ function Address({ actions, address, children, className, genesisHash, isExterna
   );
 }
 
-export default styled(Address)(({ theme }: ThemeProps) => `
+export default styled(Address)(
+  ({ theme }: ThemeProps) => `
   background: ${theme.boxBackground};
   border: 1px solid ${theme.boxBorderColor};
   box-sizing: border-box;
   border-radius: 8px;
   margin-bottom: 8px;
   position: relative;
-  
+
   .banner {
     font-size: 12px;
     line-height: 16px;

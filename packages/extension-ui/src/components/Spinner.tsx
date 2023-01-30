@@ -13,7 +13,7 @@ interface Props extends ThemeProps {
   size?: 'normal';
 }
 
-function Spinner ({ className = '', size = 'normal' }: Props): React.ReactElement<Props> {
+function Spinner({ className = '', size = 'normal' }: Props): React.ReactElement<Props> {
   return (
     <img
       className={`${className} ${size}Size`}
@@ -29,5 +29,4 @@ export default React.memo(styled(Spinner)`
   margin-left: -1.5rem;
   position: absolute;
   width: 3rem;
-  z-index:
 `);

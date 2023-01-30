@@ -15,9 +15,7 @@ i18next
     backend: {},
     debug: false,
     fallbackLng: 'en',
-    interpolation: {
-      escapeValue: false
-    },
+    interpolation: { escapeValue: false },
     keySeparator: false,
     lng: uiSettings.i18nLang,
     load: 'languageOnly',
@@ -25,13 +23,10 @@ i18next
     returnEmptyString: false,
     returnNull: false
   })
-  .catch((error: Error): void =>
-    console.log('i18n: failure', error)
-  );
+  .catch((error: Error): void => console.log('i18n: failure', error));
 
 uiSettings.on('change', (settings): void => {
-  i18next.changeLanguage(settings.i18nLang
-  ).catch(console.error);
+  i18next.changeLanguage(settings.i18nLang).catch(console.error);
 });
 
 export default i18next;

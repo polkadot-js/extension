@@ -5,16 +5,16 @@ import type { ThemeProps } from '../types';
 
 import { faArrowLeft } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import React, { useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
+import React, { useCallback, useContext, useRef, useState } from 'react';
 import styled from 'styled-components';
 
 import logo from '../assets/azeroLogo.svg';
 import helpIcon from '../assets/help.svg';
 import settingsIcon from '../assets/settings.svg';
-import { ActionContext, Link,Tooltip } from '../components';
+import { ActionContext, Link, Tooltip } from '../components';
 import useOutsideClick from '../hooks/useOutsideClick';
 import useTranslation from '../hooks/useTranslation';
-import { getConnectedTabsUrl } from '../messaging';
+// import { getConnectedTabsUrl } from '../messaging';
 // TODO: these will be reused in the future
 // import MenuAdd from './MenuAdd';
 // import MenuSettings from './MenuSettings';
@@ -33,29 +33,42 @@ interface Props extends ThemeProps {
   text?: React.ReactNode;
 }
 
-function Header({ children, className = '', onFilter, showAdd, showBackArrow, showConnectedAccounts, showHelp, showSearch, showSettings, smallMargin = false, text }: Props): React.ReactElement<Props> {
+function Header({
+  children,
+  className = '',
+  // onFilter,
+  showBackArrow,
+  // showConnectedAccounts,
+  showHelp,
+  showSettings,
+  smallMargin = false,
+  text
+}: Props): React.ReactElement<Props> {
   const [isAddOpen, setShowAdd] = useState(false);
   const [isSettingsOpen, setShowSettings] = useState(false);
-  const [isSearchOpen, setShowSearch] = useState(false);
-  const [filter, setFilter] = useState('');
-  const [connectedTabsUrl, setConnectedTabsUrl] = useState<string[]>([]);
+  // todo: check if needed
+  // const [isSearchOpen, setShowSearch] = useState(false);
+  // const [filter, setFilter] = useState('');
+  // const [connectedTabsUrl, setConnectedTabsUrl] = useState<string[]>([]);
   const { t } = useTranslation();
   const addIconRef = useRef(null);
   const addMenuRef = useRef(null);
   const setIconRef = useRef(null);
   const setMenuRef = useRef(null);
-  const isConnected = useMemo(() => connectedTabsUrl.length >= 1, [connectedTabsUrl]);
+  // todo: check if needed
+  // const isConnected = useMemo(() => connectedTabsUrl.length >= 1, [connectedTabsUrl]);
   const onAction = useContext(ActionContext);
 
-  useEffect(() => {
-    if (!showConnectedAccounts) {
-      return;
-    }
+  // todo: check if needed
+  // useEffect(() => {
+  //   if (!showConnectedAccounts) {
+  //     return;
+  //   }
 
-    getConnectedTabsUrl()
-      .then((tabsUrl) => setConnectedTabsUrl(tabsUrl))
-      .catch(console.error);
-  }, [showConnectedAccounts]);
+  // getConnectedTabsUrl()
+  //   .then((tabsUrl) => setConnectedTabsUrl(tabsUrl))
+  //   .catch(console.error);
+  // }, [showConnectedAccounts]);
 
   useOutsideClick([addIconRef, addMenuRef], (): void => {
     isAddOpen && setShowAdd(!isAddOpen);
@@ -65,25 +78,26 @@ function Header({ children, className = '', onFilter, showAdd, showBackArrow, sh
     isSettingsOpen && setShowSettings(!isSettingsOpen);
   });
 
-  const _toggleAdd = useCallback(() => setShowAdd((isAddOpen) => !isAddOpen), []);
+  // const _toggleAdd = useCallback(() => setShowAdd((isAddOpen) => !isAddOpen), []);
 
   const _toggleSettings = useCallback(() => setShowSettings((isSettingsOpen) => !isSettingsOpen), []);
 
-  const _onChangeFilter = useCallback(
-    (filter: string) => {
-      setFilter(filter);
-      onFilter && onFilter(filter);
-    },
-    [onFilter]
-  );
-
-  const _toggleSearch = useCallback((): void => {
-    if (isSearchOpen) {
-      _onChangeFilter('');
-    }
-
-    setShowSearch((isSearchOpen) => !isSearchOpen);
-  }, [_onChangeFilter, isSearchOpen]);
+  // todo: check if needed
+  // const _onChangeFilter = useCallback(
+  //   (filter: string) => {
+  //     setFilter(filter);
+  //     onFilter && onFilter(filter);
+  //   },
+  //   [onFilter]
+  // );
+  //
+  // const _toggleSearch = useCallback((): void => {
+  //   if (isSearchOpen) {
+  //     _onChangeFilter('');
+  //   }
+  //
+  //   setShowSearch((isSearchOpen) => !isSearchOpen);
+  // }, [_onChangeFilter, isSearchOpen]);
 
   const _onBackArrowClick = useCallback(() => onAction('..'), [onAction]);
 
@@ -113,10 +127,10 @@ function Header({ children, className = '', onFilter, showAdd, showBackArrow, sh
           {showHelp && (
             <Tooltip text={t<string>('Help')}>
               <Link to={'/help'}>
-              <img
-                className='popupToggle'
-                src={helpIcon}
-              />
+                <img
+                  className='popupToggle'
+                  src={helpIcon}
+                />
               </Link>
             </Tooltip>
           )}
@@ -144,7 +158,9 @@ function Header({ children, className = '', onFilter, showAdd, showBackArrow, sh
   );
 }
 
-export default React.memo(styled(Header)(({ theme }: ThemeProps) => `
+export default React.memo(
+  styled(Header)(
+    ({ theme }: ThemeProps) => `
   max-width: 100%;
   box-sizing: border-box;
   font-weight: normal;
@@ -249,7 +265,7 @@ export default React.memo(styled(Header)(({ theme }: ThemeProps) => `
     .popupToggle {
       display: inline-block;
       vertical-align: middle;
-      
+
       &:hover {
         cursor: pointer;
       }
@@ -283,5 +299,5 @@ export default React.memo(styled(Header)(({ theme }: ThemeProps) => `
     margin-bottom: 15px;
   }
 `
-)
+  )
 );

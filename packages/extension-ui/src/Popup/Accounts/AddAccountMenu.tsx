@@ -8,12 +8,8 @@ import styled from 'styled-components';
 
 import { MenuCard } from '@polkadot/extension-ui/components';
 
-import addIcon from '../../assets/add.svg';
-import uploadIcon from '../../assets/upload.svg';
-import usbIcon from '../../assets/usb.svg';
 import useTranslation from '../../hooks/useTranslation';
 import Header from '../../partials/Header';
-
 
 interface Props extends ThemeProps {
   className?: string;
@@ -41,7 +37,9 @@ function AddAccountMenu({ className }: Props): React.ReactElement<Props> {
   );
 }
 
-export default React.memo(styled(AddAccountMenu)(({ theme }: Props) => `
+export default React.memo(
+  styled(AddAccountMenu)(
+    ({ theme }: Props) => `
   color: ${theme.textColor};
   height: 100%;
   height: calc(100vh - 2px);
@@ -51,5 +49,5 @@ export default React.memo(styled(AddAccountMenu)(({ theme }: Props) => `
     display: none;
   }
   `
-)
+  )
 );

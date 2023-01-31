@@ -167,8 +167,7 @@ export interface StakeUnlockingJson {
 export interface PriceJson {
   ready?: boolean,
   currency: string,
-  priceMap: Record<string, number>,
-  tokenPriceMap: Record<string, number>
+  priceMap: Record<string, number>
 }
 
 export enum APIItemState {
@@ -244,15 +243,24 @@ export interface BalanceChildItem {
   decimals: number
 }
 
-// TODO: refactor this
-export interface BalanceItem {
-  state: APIItemState,
-  free?: string,
+export interface SubstrateBalance {
   reserved?: string,
   miscFrozen?: string,
-  feeFrozen?: string,
-  children?: Record<string, BalanceChildItem>,
+  feeFrozen?: string
+}
+
+export interface BalanceItem {
+  // metadata
+  tokenSlug: string,
+  state: APIItemState,
   timestamp?: number
+
+  // must-have, total = free + locked
+  free: string,
+  locked: string,
+
+  // substrate fields
+  substrateInfo?: SubstrateBalance
 }
 
 export interface BalanceJson {

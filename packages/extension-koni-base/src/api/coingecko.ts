@@ -14,9 +14,6 @@ interface GeckoItem {
 export const getTokenPrice = async (chains: Array<string>, currency = 'usd'): Promise<PriceJson> => {
   try {
     const inverseMap: Record<string, string> = {};
-
-    // chains.push(...['ethereum', 'bitcoin', 'tether', 'usd-coin', 'binancecoin', 'binance-usd', 'xrp', 'solana', 'dai', 'acala-dollar', 'kolibri-usd', 'zenlink-network-token', 'darwinia-commitment-token', 'kintsugi-btc', 'moonbeam', 'interbtc']);
-
     const chainsStr = chains.join(',');
     const res = await axios.get(`https://api.coingecko.com/api/v3/coins/markets?vs_currency=${currency}&per_page=1000&ids=${chainsStr}`);
 
@@ -26,7 +23,6 @@ export const getTokenPrice = async (chains: Array<string>, currency = 'usd'): Pr
 
     const responseData = res.data as Array<GeckoItem>;
     const priceMap: Record<string, number> = {};
-    const tokenPriceMap: Record<string, number> = {};
 
     responseData.forEach((val) => {
       priceMap[val.id] = val.current_price !== null ? val.current_price : 0;
@@ -35,14 +31,11 @@ export const getTokenPrice = async (chains: Array<string>, currency = 'usd'): Pr
         // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
         priceMap[inverseMap[val.id]] = val.current_price !== null ? val.current_price : 0;
       }
-
-      tokenPriceMap[val.symbol] = val.current_price !== null ? val.current_price : 0;
     });
 
     return {
       currency,
-      priceMap,
-      tokenPriceMap
+      priceMap
     } as PriceJson;
   } catch (err) {
     console.error('Failed to get token price', err);

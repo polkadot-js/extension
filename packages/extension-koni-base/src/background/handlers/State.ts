@@ -12,7 +12,13 @@ import { AuthorizeRequest, RequestAuthorizeTab } from '@subwallet/extension-base
 import { ChainService } from '@subwallet/extension-base/services/chain-service';
 import { _PREDEFINED_SINGLE_MODES } from '@subwallet/extension-base/services/chain-service/constants';
 import { _ChainConnectionStatus, _ChainState, _ValidateCustomTokenRequest } from '@subwallet/extension-base/services/chain-service/types';
-import { _getEvmChainId, _getSubstrateGenesisHash, _isChainEnabled, _isChainEvmCompatible } from '@subwallet/extension-base/services/chain-service/utils';
+import {
+  _getChainNativeTokenInfo, _getChainNativeTokenSlug,
+  _getEvmChainId,
+  _getSubstrateGenesisHash,
+  _isChainEnabled,
+  _isChainEvmCompatible
+} from '@subwallet/extension-base/services/chain-service/utils';
 import DatabaseService from '@subwallet/extension-base/services/storage-service/DatabaseService';
 import { Web3Transaction } from '@subwallet/extension-base/signers/types';
 import { CurrentAccountStore, PriceStore } from '@subwallet/extension-base/stores';
@@ -124,6 +130,7 @@ export default class KoniState extends State {
 
   private serviceInfoSubject = new Subject<ServiceInfo>();
 
+  // TODO: refactor this
   private balanceMap: Record<string, BalanceItem> = this.generateDefaultBalanceMap();
   private balanceSubject = new Subject<BalanceJson>();
 
@@ -179,8 +186,12 @@ export default class KoniState extends State {
     const balanceMap: Record<string, BalanceItem> = {};
 
     Object.values(ChainInfoMap).forEach((chainInfo) => {
-      // TODO: refactor balanceMap
-      balanceMap[chainInfo.slug] = {
+      const nativeTokenSlug = _getChainNativeTokenSlug(chainInfo);
+
+      balanceMap[nativeTokenSlug] = {
+        tokenSlug: nativeTokenSlug,
+        free: '',
+        locked: '',
         state: APIItemState.PENDING
       };
     });

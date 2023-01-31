@@ -7,7 +7,6 @@ import { PriceJson } from '@subwallet/extension-base/background/KoniTypes';
 const initialState = {
   currency: 'usd',
   priceMap: {},
-  tokenPriceMap: {},
   ready: false
 } as PriceJson;
 
@@ -16,12 +15,7 @@ const priceSlice = createSlice({
   name: 'price',
   reducers: {
     updatePrice (state, action: PayloadAction<PriceJson>) {
-      const payload = action.payload;
-
-      state.currency = payload.currency;
-      state.priceMap = payload.priceMap;
-      state.tokenPriceMap = payload.tokenPriceMap;
-      state.ready = true;
+      return action.payload;
     }
   }
 });

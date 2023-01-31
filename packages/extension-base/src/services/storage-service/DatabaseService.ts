@@ -44,9 +44,9 @@ export default class DatabaseService {
     }
   }
 
-  public getBalanceObservable (address: string, cb: (result: BalanceJson) => void) {
-    return this.stores.balance.liveQueryBalance(address, cb);
-  }
+  // public getBalanceObservable (address: string, cb: (result: BalanceJson) => void) {
+  //   return this.stores.balance.liveQueryBalance(address, cb);
+  // }
 
   // Crowdloan
   async updateCrowdloanStore (chain: string, chainHash: string, address: string, item: CrowdloanItem) {

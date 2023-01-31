@@ -1,11 +1,11 @@
 // Copyright 2019-2022 @subwallet/extension-base authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { DefaultDoc } from '../databases';
+import { DefaultChainDoc } from '../databases';
 import BaseStore from './BaseStore';
 
-export default class BaseStoreWithChain<T extends DefaultDoc> extends BaseStore<T> {
+export default class BaseStoreWithChain<T extends DefaultChainDoc> extends BaseStore<T> {
   public convertToJsonObject (items: T[]): Record<string, T> {
-    return items.reduce((a, v) => ({ ...a, [v._chain]: v }), {});
+    return items.reduce((a, v) => ({ ...a, [v.chain]: v }), {});
   }
 }

@@ -162,6 +162,10 @@ export function _getChainNativeTokenInfo (chainInfo: _ChainInfo) {
   };
 }
 
+export function _getChainNativeTokenSlug (chainInfo: _ChainInfo) {
+  return `${chainInfo.slug}-${_AssetType.NATIVE}-${_getChainNativeTokenInfo(chainInfo).symbol}`;
+}
+
 export function _isTokenEvmSmartContract (tokenInfo: _ChainAsset) {
   if ([_AssetType.ERC721, _AssetType.ERC20].includes(tokenInfo.assetType)) {
     return true;

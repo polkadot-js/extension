@@ -25,7 +25,7 @@ const reducers = {
   balance: BalanceReducer,
 
   // common
-  chainInfoMap: ChainStoreReducer,
+  chainStore: ChainStoreReducer,
   assetRegistry: AssetRegistryReducer,
 
   // base

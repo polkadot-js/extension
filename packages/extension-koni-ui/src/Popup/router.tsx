@@ -31,13 +31,13 @@ export function PageWrapper ({ children, resolve }: PageWrapperProps) {
 
 export function Crypto () {
   const dataContext = useContext(DataContext);
-  const store = useSelector((state: RootState) => state.price);
+  const store = useSelector((state: RootState) => state);
+
   useEffect(() => {
-    console.log('price', store);
+    console.log('store', store);
   }, [store]);
 
-
-  return <PageWrapper resolve={dataContext.awaitStores(['price'])}>
+  return <PageWrapper resolve={dataContext.awaitStores(['price', 'chainStore', 'assetRegistry'])}>
     <div>Crypto</div>
   </PageWrapper>;
 }

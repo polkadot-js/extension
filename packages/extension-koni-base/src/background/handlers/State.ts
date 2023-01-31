@@ -192,7 +192,7 @@ export default class KoniState extends State {
     this.chainService.init(() => {
       this.onReady(); // TODO: do better than a callback
       this.updateServiceInfo();
-      console.log('done init state');
+      this.logger.log('Done init state');
     });
   }
 

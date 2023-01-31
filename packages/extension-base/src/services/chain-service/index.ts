@@ -433,19 +433,19 @@ export class ChainService {
   }
 
   private async initChains () {
-    const chainStoredSettings = await this.dbService.getAllChainStore();
+    const storedChainSettings = await this.dbService.getAllChainStore();
 
-    const chainStoredSettingMap: Record<string, IChain> = {};
+    const storedChainSettingMap: Record<string, IChain> = {};
 
-    chainStoredSettings.forEach((chainStoredSetting) => {
-      chainStoredSettingMap[chainStoredSetting.slug] = chainStoredSetting;
+    storedChainSettings.forEach((chainStoredSetting) => {
+      storedChainSettingMap[chainStoredSetting.slug] = chainStoredSetting;
     });
 
     const newStorageData: IChain[] = [];
     const deprecatedChains: string[] = [];
     const deprecatedChainMap: Record<string, string> = {};
 
-    if (chainStoredSettings.length === 0) {
+    if (storedChainSettings.length === 0) {
       this.dataMap.chainInfoMap = ChainInfoMap;
       Object.values(ChainInfoMap).forEach((chainInfo) => {
         this.dataMap.chainStateMap[chainInfo.slug] = {
@@ -465,7 +465,7 @@ export class ChainService {
     } else {
       const mergedChainInfoMap: Record<string, _ChainInfo> = ChainInfoMap;
 
-      for (const [storedSlug, storedChainInfo] of Object.entries(chainStoredSettingMap)) {
+      for (const [storedSlug, storedChainInfo] of Object.entries(storedChainSettingMap)) {
         if (storedSlug in ChainInfoMap) { // check predefined chains first, update providers, active and currentProvider
           mergedChainInfoMap[storedSlug].providers = { ...storedChainInfo.providers, ...mergedChainInfoMap[storedSlug].providers };
           this.dataMap.chainStateMap[storedSlug] = {
@@ -546,11 +546,10 @@ export class ChainService {
       });
 
       this.dataMap.chainInfoMap = mergedChainInfoMap;
-
-      await this.dbService.bulkUpdateChainStore(newStorageData);
-      await this.dbService.removeFromChainStore(deprecatedChains); // remove outdated records
     }
 
+    await this.dbService.bulkUpdateChainStore(newStorageData);
+    await this.dbService.removeFromChainStore(deprecatedChains); // remove outdated records
     await this.initAssetRegistry(deprecatedChainMap);
   }
 

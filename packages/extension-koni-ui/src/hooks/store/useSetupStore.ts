@@ -19,6 +19,7 @@ import useSetupStaking from '@subwallet/extension-koni-ui/hooks/store/useSetupSt
 import useSetupStakingReward from '@subwallet/extension-koni-ui/hooks/store/useSetupStakingReward';
 import useSetupTransactionHistory from '@subwallet/extension-koni-ui/hooks/store/useSetupTransactionHistory';
 
+// TODO: remove this
 export default function useSetupStore (): void {
   useSetupPrice();
   useSetupBalance();

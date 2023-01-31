@@ -51,7 +51,7 @@ export class SubstrateChainHandler {
   public disconnectAllApis () {
     return Promise.all(Object.values(this.getSubstrateApiMap()).map(async (substrateApi) => {
       if (substrateApi.api.isConnected) {
-        this.logger.log(`[Substrate] Stopping network [${substrateApi.specName}]`);
+        this.logger.log(`[Substrate] Stopping network [${substrateApi.chainSlug}]`);
         substrateApi.api?.disconnect && await substrateApi.api?.disconnect();
       }
     }));

@@ -2,7 +2,19 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { store, StoreName } from '@subwallet/extension-koni-ui/stores';
-import { subscribePrice } from '@subwallet/extension-koni-ui/stores/utils';
+import {
+  subscribeAssetRegistry,
+  subscribeBalance, subscribeChainInfoMap,
+  subscribeChainStateMap,
+  subscribeCrowdloan,
+  subscribeNftCollections,
+  subscribeNftItems,
+  subscribePrice,
+  subscribeStakeUnlockingInfo,
+  subscribeStaking,
+  subscribeStakingReward,
+  subscribeTxHistory
+} from '@subwallet/extension-koni-ui/stores/utils';
 import React from 'react';
 import { Provider } from 'react-redux';
 
@@ -121,7 +133,21 @@ export const DataContext = React.createContext(_DataContext);
 
 export const DataContextProvider = ({ children }: DataContextProviderProps) => {
   // Init subscription
+  // Common
+  _DataContext.addHandler({ ...subscribeChainStateMap, name: 'subscribeChainStateMap', relatedStores: ['chainStore'], isStartImmediately: true });
+  _DataContext.addHandler({ ...subscribeChainInfoMap, name: 'subscribeChainInfoMap', relatedStores: ['chainStore'], isStartImmediately: true });
+  _DataContext.addHandler({ ...subscribeAssetRegistry, name: 'subscribeAssetRegistry', relatedStores: ['assetRegistry'], isStartImmediately: true });
+
+  // Features
   _DataContext.addHandler({ ...subscribePrice, name: 'subscribePrice', relatedStores: ['price'] });
+  _DataContext.addHandler({ ...subscribeBalance, name: 'subscribeBalance', relatedStores: ['balance'] });
+  _DataContext.addHandler({ ...subscribeCrowdloan, name: 'subscribeCrowdloan', relatedStores: ['crowdloan'] });
+  _DataContext.addHandler({ ...subscribeNftItems, name: 'subscribeNftItems', relatedStores: ['nft'] });
+  _DataContext.addHandler({ ...subscribeNftCollections, name: 'subscribeNftCollections', relatedStores: ['nft'] });
+  _DataContext.addHandler({ ...subscribeStaking, name: 'subscribeStaking', relatedStores: ['staking'] });
+  _DataContext.addHandler({ ...subscribeStakingReward, name: 'subscribeStakingReward', relatedStores: ['staking'] });
+  _DataContext.addHandler({ ...subscribeStakeUnlockingInfo, name: 'subscribeStakeUnlockingInfo', relatedStores: ['staking'] });
+  _DataContext.addHandler({ ...subscribeTxHistory, name: 'subscribeTxHistory', relatedStores: ['transactionHistory'] });
 
   return <Provider store={store}>
     <DataContext.Provider value={_DataContext}>

@@ -236,12 +236,13 @@ export interface TokenBalanceRaw {
   free: BN
 }
 
-export interface BalanceChildItem {
-  reserved: string,
-  frozen: string,
-  free: string,
-  decimals: number
-}
+// deprecated
+// export interface BalanceChildItem {
+//   reserved: string,
+//   frozen: string,
+//   free: string,
+//   decimals: number
+// }
 
 export interface SubstrateBalance {
   reserved?: string,

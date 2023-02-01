@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { ApiProps, BasicTxInfo, ChainBondingBasics, NetworkJson, StakingType, UnlockingStakeInfo, ValidatorInfo } from '@subwallet/extension-base/background/KoniTypes';
-import { calculateChainStakedReturn, calculateInflation, calculateValidatorStakedReturn, ERA_LENGTH_MAP, getCommission, Unlocking, ValidatorExtraInfo } from '@subwallet/extension-koni-base/api/bonding/utils';
+import { calculateAlephZeroValidatorReturn, calculateChainStakedReturn, calculateInflation, calculateValidatorStakedReturn, ERA_LENGTH_MAP, getCommission, Unlocking, ValidatorExtraInfo } from '@subwallet/extension-koni-base/api/bonding/utils';
 import { getFreeBalance } from '@subwallet/extension-koni-base/api/dotsama/balance';
 import { parseNumberToDisplay, parseRawNumber } from '@subwallet/extension-koni-base/utils';
 import Web3 from 'web3';
@@ -193,7 +193,7 @@ export async function getRelayValidatorsInfo (networkKey: string, dotSamaApi: Ap
     const bnStakedReturn = stakedReturn >= Infinity ? BN_ZERO : new BN(stakedReturn); // stakedReturn might be Infinity due to testnet params
     const bnValidatorStake = totalStakeMap[validator.address].div(bnDecimals);
 
-    validator.expectedReturn = calculateValidatorStakedReturn(bnStakedReturn, bnValidatorStake, bnAvgStake, getCommission(commission));
+    validator.expectedReturn = ['aleph', 'alephTest'].includes(networkKey) ? calculateAlephZeroValidatorReturn(stakedReturn, getCommission(commission)) : calculateValidatorStakedReturn(bnStakedReturn, bnValidatorStake, bnAvgStake, getCommission(commission));
     validator.commission = parseFloat(commission.split('%')[0]);
     validator.blocked = extraInfoMap[validator.address].blocked;
     validator.identity = extraInfoMap[validator.address].identity;

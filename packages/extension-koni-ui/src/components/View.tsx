@@ -6,12 +6,42 @@ import type { ThemeProps } from '../types';
 import { ThemeTypes, UiSettings } from '@subwallet/extension-base/background/KoniTypes';
 import { AvailableThemes, chooseTheme, Main, themes, ThemeSwitchContext } from '@subwallet/extension-koni-ui/components';
 import { saveTheme, subscribeSettings } from '@subwallet/extension-koni-ui/messaging';
+import { ConfigProvider, theme } from '@subwallet/react-ui';
 import React, { useCallback, useEffect, useState } from 'react';
 import { createGlobalStyle, ThemeProvider } from 'styled-components';
+
+import { Theme } from '../types';
 
 interface Props {
   children: React.ReactNode;
   className?: string;
+}
+
+interface ThemeWrapperProps {
+  children: React.ReactNode;
+  theme: Theme;
+}
+
+const { useToken } = theme;
+
+const BodyTheme = createGlobalStyle<ThemeProps>`
+  html {
+    scrollbar-width: none;
+
+    &::-webkit-scrollbar {
+      display: none;
+    }
+  }
+`;
+
+function ThemeWrapper ({ children, theme }: ThemeWrapperProps): React.ReactElement<ThemeWrapperProps> {
+  const { token } = useToken();
+
+  return (
+    <ThemeProvider theme={{ ...theme, token }}>
+      {children}
+    </ThemeProvider>
+  );
 }
 
 function View ({ children, className }: Props): React.ReactElement<Props> {
@@ -49,28 +79,16 @@ function View ({ children, className }: Props): React.ReactElement<Props> {
 
   return (
     <ThemeSwitchContext.Provider value={switchTheme}>
-      <ThemeProvider theme={_theme}>
-        <BodyTheme theme={_theme} />
-        <Main className={className}>
-          {children}
-        </Main>
-      </ThemeProvider>
+      <ConfigProvider theme={{ token: _theme.token }}>
+        <ThemeWrapper theme={_theme}>
+          <BodyTheme theme={_theme} />
+          <Main className={className}>
+            {children}
+          </Main>
+        </ThemeWrapper>
+      </ConfigProvider>
     </ThemeSwitchContext.Provider>
   );
 }
-
-const BodyTheme = createGlobalStyle<ThemeProps>`
-  body {
-    background-color: ${({ theme }: ThemeProps): string => theme.bodyColor};
-  }
-
-  html {
-    scrollbar-width: none;
-
-    &::-webkit-scrollbar {
-      display: none;
-    }
-  }
-`;
 
 export default View;

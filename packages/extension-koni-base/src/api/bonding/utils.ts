@@ -150,11 +150,8 @@ export function calculateInflation (totalEraStake: BN, totalIssuance: BN, numAuc
   const inflationParams = getInflationParams(networkKey);
   const { auctionAdjust, auctionMax, falloff, maxInflation, minInflation, stakeTarget } = inflationParams;
   const idealStake = stakeTarget - (Math.min(auctionMax, numAuctions) * auctionAdjust);
-  console.log('idealStake', idealStake);
   const idealInterest = maxInflation / idealStake;
   const stakedFraction = totalEraStake.mul(BN_MILLION).div(totalIssuance).toNumber() / BN_MILLION.toNumber();
-
-  console.log('stakedFraction', stakedFraction);
 
   if (['aleph', 'alephTest'].includes(networkKey)) {
     if (inflationParams.yearlyInflationInTokens) {
@@ -174,7 +171,6 @@ export function calculateInflation (totalEraStake: BN, totalIssuance: BN, numAuc
 export function calculateChainStakedReturn (inflation: number, totalEraStake: BN, totalIssuance: BN, networkKey: string) {
   const stakedFraction = totalEraStake.mul(BN_MILLION).div(totalIssuance).toNumber() / BN_MILLION.toNumber();
 
-  console.log('stakedFraction', stakedFraction);
   let stakedReturn = inflation / stakedFraction;
 
   if (['aleph', 'alephTest'].includes(networkKey)) {

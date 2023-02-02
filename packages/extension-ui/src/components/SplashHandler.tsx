@@ -67,9 +67,17 @@ function SplashHandler({ children, className }: SplashHandlerProps): React.React
 }
 
 export default styled(SplashHandler)`
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+
+  > *:not(.splash) {
+    padding-left: 16px;
+    padding-right: 16px;
+  }
+
   .splash {
     position: absolute;
-    margin-left: -16px; // due to global container padding
     z-index: 100;
   }
   `;

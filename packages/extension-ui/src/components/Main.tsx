@@ -11,26 +11,17 @@ interface Props {
   className?: string;
 }
 
-function Main ({ children, className }: Props): React.ReactElement<Props> {
-  return (
-    <main className={className}>
-      {children}
-    </main>
-  );
+function Main({ children, className }: Props): React.ReactElement<Props> {
+  return <main className={className}>{children}</main>;
 }
 
-export default styled(Main)(({ theme }: ThemeProps) => `
-  display: flex;
-  flex-direction: column;
+export default styled(Main)(
+  ({ theme }: ThemeProps) => `
   background: ${theme.background};
   color: ${theme.textColor};
   font-size: ${theme.fontSize};
   line-height: ${theme.lineHeight};
   border: 1px solid ${theme.inputBorderColor};
   height: 100%;
-
-  > * {
-    padding-left: 16px;
-    padding-right: 16px;
-  }
-`);
+`
+);

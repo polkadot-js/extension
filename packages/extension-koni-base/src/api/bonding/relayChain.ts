@@ -190,10 +190,11 @@ export async function getRelayValidatorsInfo (networkKey: string, dotSamaApi: Ap
   for (const validator of result) {
     const commission = extraInfoMap[validator.address].commission;
 
-    const bnStakedReturn = stakedReturn >= Infinity ? BN_ZERO : new BN(stakedReturn); // stakedReturn might be Infinity due to testnet params
     const bnValidatorStake = totalStakeMap[validator.address].div(bnDecimals);
 
-    validator.expectedReturn = ['aleph', 'alephTest'].includes(networkKey) ? calculateAlephZeroValidatorReturn(stakedReturn, getCommission(commission)) : calculateValidatorStakedReturn(bnStakedReturn, bnValidatorStake, bnAvgStake, getCommission(commission));
+    validator.expectedReturn = ['aleph', 'alephTest'].includes(networkKey)
+      ? calculateAlephZeroValidatorReturn(stakedReturn, getCommission(commission))
+      : calculateValidatorStakedReturn(stakedReturn, bnValidatorStake, bnAvgStake, getCommission(commission));
     validator.commission = parseFloat(commission.split('%')[0]);
     validator.blocked = extraInfoMap[validator.address].blocked;
     validator.identity = extraInfoMap[validator.address].identity;

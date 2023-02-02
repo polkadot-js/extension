@@ -150,8 +150,11 @@ export function calculateInflation (totalEraStake: BN, totalIssuance: BN, numAuc
   const inflationParams = getInflationParams(networkKey);
   const { auctionAdjust, auctionMax, falloff, maxInflation, minInflation, stakeTarget } = inflationParams;
   const idealStake = stakeTarget - (Math.min(auctionMax, numAuctions) * auctionAdjust);
+  console.log('idealStake', idealStake);
   const idealInterest = maxInflation / idealStake;
-  const stakedFraction = totalEraStake.mul(BN_MILLION).div(totalIssuance).div(BN_MILLION).toNumber();
+  const stakedFraction = totalEraStake.mul(BN_MILLION).div(totalIssuance).toNumber() / BN_MILLION.toNumber();
+
+  console.log('stakedFraction', stakedFraction);
 
   if (['aleph', 'alephTest'].includes(networkKey)) {
     if (inflationParams.yearlyInflationInTokens) {
@@ -170,6 +173,8 @@ export function calculateInflation (totalEraStake: BN, totalIssuance: BN, numAuc
 
 export function calculateChainStakedReturn (inflation: number, totalEraStake: BN, totalIssuance: BN, networkKey: string) {
   const stakedFraction = totalEraStake.mul(BN_MILLION).div(totalIssuance).toNumber() / BN_MILLION.toNumber();
+
+  console.log('stakedFraction', stakedFraction);
   let stakedReturn = inflation / stakedFraction;
 
   if (['aleph', 'alephTest'].includes(networkKey)) {
@@ -183,9 +188,9 @@ export function calculateAlephZeroValidatorReturn (chainStakedReturn: number, co
   return chainStakedReturn * (100 - commission) / 100;
 }
 
-export function calculateValidatorStakedReturn (chainStakedReturn: BN, totalValidatorStake: BN, avgStake: BN, commission: number) {
-  const bnAdjusted = avgStake.mul(BN_HUNDRED).mul(chainStakedReturn).div(totalValidatorStake);
-  const adjusted = bnAdjusted.toNumber();
+export function calculateValidatorStakedReturn (chainStakedReturn: number, totalValidatorStake: BN, avgStake: BN, commission: number) {
+  const bnAdjusted = avgStake.mul(BN_HUNDRED).div(totalValidatorStake);
+  const adjusted = bnAdjusted.toNumber() * chainStakedReturn;
 
   const stakedReturn = (adjusted > Number.MAX_SAFE_INTEGER ? Number.MAX_SAFE_INTEGER : adjusted) / 100;
 

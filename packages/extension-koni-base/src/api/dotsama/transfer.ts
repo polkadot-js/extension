@@ -267,6 +267,10 @@ export function updateTransferResponseTxResult (
         record.event.method.toLowerCase() === 'transfer') {
         response.txResult.change = record.event.data[3]?.toString() || '0';
         response.txResult.changeSymbol = tokenInfo.symbol;
+      } else if (record.event.section === 'transactionPayment' &&
+        record.event.method.toLowerCase() === 'transactionfeepaid') {
+        response.txResult.fee = record.event.data[1]?.toString() || '0';
+        response.txResult.feeSymbol = tokenInfo.symbol;
       }
     } else if (['pioneer', 'bitcountry'].includes(networkKey) && tokenInfo && !tokenInfo.isMainToken) {
       if (record.event.section === 'tokens' &&

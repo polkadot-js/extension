@@ -492,7 +492,7 @@ export const PREDEFINED_NETWORKS: Record<string, NetworkJson> = {
     currentProvider: 'Equilibrium',
     groups: ['POLKADOT_PARACHAIN'],
     paraId: 2011,
-    nativeToken: 'TOKEN',
+    nativeToken: 'EQ',
     crowdloanUrl: 'https://equilibrium.io/en/crowdloan#bid',
     decimals: 10,
     blockExplorer: 'https://equilibrium.subscan.io',

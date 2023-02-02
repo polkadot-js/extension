@@ -5,7 +5,7 @@ import { _ChainInfo } from '@subwallet/chain-list/types';
 import { BasicTxInfo, ChainBondingBasics, StakingType, UnlockingStakeInfo, ValidatorInfo } from '@subwallet/extension-base/background/KoniTypes';
 import { _STAKING_ERA_LENGTH_MAP } from '@subwallet/extension-base/services/chain-service/constants';
 import { _EvmApi, _SubstrateApi } from '@subwallet/extension-base/services/chain-service/types';
-import { _getChainNativeTokenInfo } from '@subwallet/extension-base/services/chain-service/utils';
+import { _getChainNativeTokenBasicInfo } from '@subwallet/extension-base/services/chain-service/utils';
 import { calculateChainStakedReturn, calculateInflation, calculateValidatorStakedReturn, getCommission, Unlocking, ValidatorExtraInfo } from '@subwallet/extension-koni-base/api/bonding/utils';
 import { getFreeBalance } from '@subwallet/extension-koni-base/api/dotsama/balance';
 import { parseNumberToDisplay, parseRawNumber } from '@subwallet/extension-koni-base/utils';
@@ -232,7 +232,7 @@ export async function getRelayBondingTxInfo (substrateApi: _SubstrateApi, contro
 }
 
 export async function handleRelayBondingTxInfo (chainInfo: _ChainInfo, amount: number, targetValidators: string[], isBondedBefore: boolean, networkKey: string, nominatorAddress: string, substrateApiMap: Record<string, _SubstrateApi>, evmApiMap: Record<string, _EvmApi>) {
-  const { decimals, symbol } = _getChainNativeTokenInfo(chainInfo);
+  const { decimals, symbol } = _getChainNativeTokenBasicInfo(chainInfo);
 
   try {
     const parsedAmount = amount * (10 ** decimals);
@@ -264,7 +264,7 @@ export async function handleRelayBondingTxInfo (chainInfo: _ChainInfo, amount: n
 
 export async function getRelayBondingExtrinsic (substrateApi: _SubstrateApi, controllerId: string, amount: number, validators: string[], isBondedBefore: boolean, chainInfo: _ChainInfo, bondDest = 'Staked') {
   const chainApi = await substrateApi.isReady;
-  const { decimals } = _getChainNativeTokenInfo(chainInfo);
+  const { decimals } = _getChainNativeTokenBasicInfo(chainInfo);
   const parsedAmount = amount * (10 ** decimals);
   const binaryAmount = new BN(parsedAmount.toString());
 
@@ -305,7 +305,7 @@ export async function getRelayUnbondingTxInfo (substrateApi: _SubstrateApi, amou
 
 export async function getRelayUnbondingExtrinsic (substrateApi: _SubstrateApi, amount: number, chainInfo: _ChainInfo) {
   const chainApi = await substrateApi.isReady;
-  const { decimals } = _getChainNativeTokenInfo(chainInfo);
+  const { decimals } = _getChainNativeTokenBasicInfo(chainInfo);
   const parsedAmount = Math.floor(amount * (10 ** decimals));
   const binaryAmount = new BN(parsedAmount.toString());
 
@@ -316,7 +316,7 @@ export async function getRelayUnbondingExtrinsic (substrateApi: _SubstrateApi, a
 }
 
 export async function handleRelayUnbondingTxInfo (address: string, amount: number, networkKey: string, substrateApiMap: Record<string, _SubstrateApi>, evmApiMap: Record<string, _EvmApi>, chainInfo: _ChainInfo) {
-  const { decimals, symbol } = _getChainNativeTokenInfo(chainInfo);
+  const { decimals, symbol } = _getChainNativeTokenBasicInfo(chainInfo);
 
   try {
     const substrateApi = substrateApiMap[networkKey];
@@ -396,7 +396,7 @@ export async function getRelayUnlockingInfo (substrateApi: _SubstrateApi, addres
 export async function handleRelayUnlockingInfo (substrateApi: _SubstrateApi, chainInfo: _ChainInfo, networkKey: string, address: string, type: StakingType) {
   const { nextWithdrawal, nextWithdrawalAmount, redeemable } = await getRelayUnlockingInfo(substrateApi, address, networkKey);
 
-  const { decimals } = _getChainNativeTokenInfo(chainInfo);
+  const { decimals } = _getChainNativeTokenBasicInfo(chainInfo);
 
   const parsedRedeemable = redeemable ? parseFloat(redeemable.toString()) / (10 ** decimals) : 0;
   const parsedNextWithdrawalAmount = parseFloat(nextWithdrawalAmount.toString()) / (10 ** decimals);
@@ -429,7 +429,7 @@ export async function getRelayWithdrawalTxInfo (substrateApi: _SubstrateApi, add
 }
 
 export async function handleRelayWithdrawalTxInfo (address: string, networkKey: string, chainInfo: _ChainInfo, substrateApiMap: Record<string, _SubstrateApi>, evmApiMap: Record<string, _EvmApi>) {
-  const { decimals, symbol } = _getChainNativeTokenInfo(chainInfo);
+  const { decimals, symbol } = _getChainNativeTokenBasicInfo(chainInfo);
 
   try {
     const [txInfo, balance] = await Promise.all([
@@ -479,7 +479,7 @@ async function getPoolingClaimRewardTxInfo (substrateApi: _SubstrateApi, address
 }
 
 export async function handlePoolingClaimRewardTxInfo (address: string, networkKey: string, chainInfo: _ChainInfo, substrateApiMap: Record<string, _SubstrateApi>, evmApiMap: Record<string, _EvmApi>) {
-  const { decimals, symbol } = _getChainNativeTokenInfo(chainInfo);
+  const { decimals, symbol } = _getChainNativeTokenBasicInfo(chainInfo);
 
   try {
     const [txInfo, balance] = await Promise.all([

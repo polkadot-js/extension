@@ -5,7 +5,7 @@ import { _ChainInfo } from '@subwallet/chain-list/types';
 import { BasicTxInfo, DelegationItem, StakingType, UnlockingStakeInfo, ValidatorInfo } from '@subwallet/extension-base/background/KoniTypes';
 import { _STAKING_ERA_LENGTH_MAP } from '@subwallet/extension-base/services/chain-service/constants';
 import { _EvmApi, _SubstrateApi } from '@subwallet/extension-base/services/chain-service/types';
-import { _getChainNativeTokenInfo } from '@subwallet/extension-base/services/chain-service/utils';
+import { _getChainNativeTokenBasicInfo } from '@subwallet/extension-base/services/chain-service/utils';
 import { getFreeBalance } from '@subwallet/extension-koni-base/api/dotsama/balance';
 import { isUrl, parseNumberToDisplay, parseRawNumber } from '@subwallet/extension-koni-base/utils';
 import fetch from 'cross-fetch';
@@ -157,7 +157,7 @@ export async function getAstarDappsInfo (networkKey: string, substrateApi: _Subs
 
 export async function getAstarBondingTxInfo (chainInfo: _ChainInfo, substrateApi: _SubstrateApi, stakerAddress: string, amount: number, dappInfo: ValidatorInfo) {
   const apiPromise = await substrateApi.isReady;
-  const { decimals } = _getChainNativeTokenInfo(chainInfo);
+  const { decimals } = _getChainNativeTokenBasicInfo(chainInfo);
   const parsedAmount = amount * (10 ** decimals);
   const binaryAmount = new BN(parsedAmount.toString());
 
@@ -167,7 +167,7 @@ export async function getAstarBondingTxInfo (chainInfo: _ChainInfo, substrateApi
 }
 
 export async function handleAstarBondingTxInfo (chainInfo: _ChainInfo, amount: number, networkKey: string, stakerAddress: string, dappInfo: ValidatorInfo, substrateApiMap: Record<string, _SubstrateApi>, evmApiMap: Record<string, _EvmApi>) {
-  const { decimals, symbol } = _getChainNativeTokenInfo(chainInfo);
+  const { decimals, symbol } = _getChainNativeTokenBasicInfo(chainInfo);
 
   try {
     const [txInfo, balance] = await Promise.all([
@@ -197,7 +197,7 @@ export async function handleAstarBondingTxInfo (chainInfo: _ChainInfo, amount: n
 
 export async function getAstarBondingExtrinsic (substrateApi: _SubstrateApi, chainInfo: _ChainInfo, amount: number, networkKey: string, stakerAddress: string, dappInfo: ValidatorInfo) {
   const apiPromise = await substrateApi.isReady;
-  const { decimals } = _getChainNativeTokenInfo(chainInfo);
+  const { decimals } = _getChainNativeTokenBasicInfo(chainInfo);
   const parsedAmount = amount * (10 ** decimals);
   const binaryAmount = new BN(parsedAmount.toString());
 
@@ -206,7 +206,7 @@ export async function getAstarBondingExtrinsic (substrateApi: _SubstrateApi, cha
 
 export async function getAstarUnbondingTxInfo (chainInfo: _ChainInfo, substrateApi: _SubstrateApi, stakerAddress: string, amount: number, dappAddress: string) {
   const apiPromise = await substrateApi.isReady;
-  const { decimals } = _getChainNativeTokenInfo(chainInfo);
+  const { decimals } = _getChainNativeTokenBasicInfo(chainInfo);
   const parsedAmount = amount * (10 ** decimals);
   const binaryAmount = new BN(parsedAmount.toString());
 
@@ -216,7 +216,7 @@ export async function getAstarUnbondingTxInfo (chainInfo: _ChainInfo, substrateA
 }
 
 export async function handleAstarUnbondingTxInfo (chainInfo: _ChainInfo, amount: number, networkKey: string, stakerAddress: string, dappAddress: string, substrateApiMap: Record<string, _SubstrateApi>, evmApiMap: Record<string, _EvmApi>) {
-  const { decimals, symbol } = _getChainNativeTokenInfo(chainInfo);
+  const { decimals, symbol } = _getChainNativeTokenBasicInfo(chainInfo);
 
   try {
     const [txInfo, balance] = await Promise.all([
@@ -244,7 +244,7 @@ export async function handleAstarUnbondingTxInfo (chainInfo: _ChainInfo, amount:
 
 export async function getAstarUnbondingExtrinsic (substrateApi: _SubstrateApi, chainInfo: _ChainInfo, amount: number, networkKey: string, stakerAddress: string, dappAddress: string) {
   const apiPromise = await substrateApi.isReady;
-  const { decimals } = _getChainNativeTokenInfo(chainInfo);
+  const { decimals } = _getChainNativeTokenBasicInfo(chainInfo);
   const parsedAmount = amount * (10 ** decimals);
   const binaryAmount = new BN(parsedAmount.toString());
 
@@ -299,7 +299,7 @@ async function getAstarUnlockingInfo (substrateApi: _SubstrateApi, address: stri
 export async function handleAstarUnlockingInfo (substrateApi: _SubstrateApi, chainInfo: _ChainInfo, networkKey: string, address: string, type: StakingType) {
   const { nextWithdrawal, nextWithdrawalAmount, redeemable } = await getAstarUnlockingInfo(substrateApi, address, networkKey);
 
-  const { decimals } = _getChainNativeTokenInfo(chainInfo);
+  const { decimals } = _getChainNativeTokenBasicInfo(chainInfo);
 
   const parsedRedeemable = redeemable / (10 ** decimals);
   const parsedNextWithdrawalAmount = nextWithdrawalAmount / (10 ** decimals);
@@ -328,7 +328,7 @@ export async function handleAstarWithdrawalTxInfo (networkKey: string, chainInfo
     getFreeBalance(networkKey, address, substrateApiMap, evmApiMap)
   ]);
 
-  const { decimals, symbol } = _getChainNativeTokenInfo(chainInfo);
+  const { decimals, symbol } = _getChainNativeTokenBasicInfo(chainInfo);
 
   const feeString = parseNumberToDisplay(txInfo.partialFee, decimals) + ` ${symbol}`;
   const rawFee = parseRawNumber(txInfo.partialFee.toString());
@@ -400,7 +400,7 @@ export async function getAstarClaimRewardTxInfo (substrateApi: _SubstrateApi, ad
 }
 
 export async function handleAstarClaimRewardTxInfo (address: string, networkKey: string, chainInfo: _ChainInfo, substrateApiMap: Record<string, _SubstrateApi>, evmApiMap: Record<string, _EvmApi>) {
-  const { decimals, symbol } = _getChainNativeTokenInfo(chainInfo);
+  const { decimals, symbol } = _getChainNativeTokenBasicInfo(chainInfo);
 
   try {
     const [txInfo, balance] = await Promise.all([

@@ -13,7 +13,7 @@ import { ChainService } from '@subwallet/extension-base/services/chain-service';
 import { _PREDEFINED_SINGLE_MODES } from '@subwallet/extension-base/services/chain-service/constants';
 import { _ChainConnectionStatus, _ChainState, _ValidateCustomTokenRequest } from '@subwallet/extension-base/services/chain-service/types';
 import {
-  _getChainNativeTokenInfo, _getChainNativeTokenSlug,
+  _getChainNativeTokenBasicInfo, _getChainNativeTokenSlug,
   _getEvmChainId,
   _getSubstrateGenesisHash,
   _isChainEnabled,

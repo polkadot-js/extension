@@ -4,7 +4,7 @@
 import { _ChainInfo } from '@subwallet/chain-list/types';
 import { APIItemState, StakingItem, StakingRewardItem, StakingType } from '@subwallet/extension-base/background/KoniTypes';
 import { _SubstrateApi } from '@subwallet/extension-base/services/chain-service/types';
-import { _getChainNativeTokenInfo } from '@subwallet/extension-base/services/chain-service/utils';
+import { _getChainNativeTokenBasicInfo } from '@subwallet/extension-base/services/chain-service/utils';
 import { parseStakingBalance } from '@subwallet/extension-koni-base/api/staking/utils';
 import { reformatAddress, toUnit } from '@subwallet/extension-koni-base/utils';
 
@@ -21,7 +21,7 @@ interface LedgerData {
 }
 
 export function getRelayStakingOnChain (parentApi: _SubstrateApi, useAddresses: string[], networks: Record<string, _ChainInfo>, chain: string, callback: (networkKey: string, rs: StakingItem) => void) {
-  const { symbol } = _getChainNativeTokenInfo(networks[chain]);
+  const { symbol } = _getChainNativeTokenBasicInfo(networks[chain]);
 
   return parentApi.api.query.staking?.ledger.multi(useAddresses, (ledgers: Codec[]) => {
     let unit = '';
@@ -100,7 +100,7 @@ export function getRelayStakingOnChain (parentApi: _SubstrateApi, useAddresses: 
 }
 
 export function getRelayPoolingOnchain (parentApi: _SubstrateApi, useAddresses: string[], networks: Record<string, _ChainInfo>, chain: string, callback: (networkKey: string, rs: StakingItem) => void) {
-  const { symbol } = _getChainNativeTokenInfo(networks[chain]);
+  const { symbol } = _getChainNativeTokenBasicInfo(networks[chain]);
 
   return parentApi.api.query?.nominationPools?.poolMembers.multi(useAddresses, (ledgers: Codec[]) => {
     if (ledgers) {
@@ -194,7 +194,7 @@ export async function getNominationPoolReward (addresses: string[], chainInfoMap
 
         if (_unclaimedReward) {
           const unclaimedReward = _unclaimedReward.toString();
-          const { decimals } = _getChainNativeTokenInfo(chainInfoMap[networkKey]);
+          const { decimals } = _getChainNativeTokenBasicInfo(chainInfoMap[networkKey]);
           const parsedUnclaimedReward = toUnit(parseFloat(unclaimedReward), decimals);
 
           rewardList.push({

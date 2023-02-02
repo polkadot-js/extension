@@ -143,7 +143,7 @@ export function _isChainSupportWasmNft (chainInfo: _ChainInfo) {
   return chainInfo.substrateInfo?.supportSmartContract?.includes(_AssetType.PSP34) || false;
 }
 
-export function _getChainNativeTokenInfo (chainInfo: _ChainInfo) {
+export function _getChainNativeTokenBasicInfo (chainInfo: _ChainInfo) {
   if (chainInfo.substrateInfo !== null) { // substrate by default
     return {
       symbol: chainInfo.substrateInfo.symbol,
@@ -163,7 +163,7 @@ export function _getChainNativeTokenInfo (chainInfo: _ChainInfo) {
 }
 
 export function _getChainNativeTokenSlug (chainInfo: _ChainInfo) {
-  return `${chainInfo.slug}-${_AssetType.NATIVE}-${_getChainNativeTokenInfo(chainInfo).symbol}`;
+  return `${chainInfo.slug}-${_AssetType.NATIVE}-${_getChainNativeTokenBasicInfo(chainInfo).symbol}`;
 }
 
 export function _isTokenEvmSmartContract (tokenInfo: _ChainAsset) {

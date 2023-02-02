@@ -10,7 +10,7 @@ import { AccountExternalError, AccountExternalErrorCode, AccountsWithCurrentAddr
 import { AccountJson, AuthorizeRequest, MessageTypes, RequestAccountForget, RequestAccountTie, RequestAuthorizeCancel, RequestAuthorizeReject, RequestCurrentAccountAddress, RequestTypes, ResponseAuthorizeList, ResponseType } from '@subwallet/extension-base/background/types';
 import { _STAKING_CHAIN_GROUP } from '@subwallet/extension-base/services/chain-service/constants';
 import { _ChainState, _ValidateCustomTokenRequest, _ValidateCustomTokenResponse } from '@subwallet/extension-base/services/chain-service/types';
-import { _getChainNativeTokenInfo, _getContractAddressOfToken, _getEvmChainId, _getSubstrateGenesisHash, _getTokenMinAmount, _isChainEvmCompatible, _isNativeToken, _isTokenEvmSmartContract } from '@subwallet/extension-base/services/chain-service/utils';
+import { _getChainNativeTokenBasicInfo, _getContractAddressOfToken, _getEvmChainId, _getSubstrateGenesisHash, _getTokenMinAmount, _isChainEvmCompatible, _isNativeToken, _isTokenEvmSmartContract } from '@subwallet/extension-base/services/chain-service/utils';
 import { SignerExternal, SignerType } from '@subwallet/extension-base/signers/types';
 import { getId } from '@subwallet/extension-base/utils/getId';
 import { MetadataDef } from '@subwallet/extension-inject/types';
@@ -3259,7 +3259,7 @@ export default class KoniExtension extends Extension {
       }
     }
 
-    const { decimals } = _getChainNativeTokenInfo(chainInfo);
+    const { decimals } = _getChainNativeTokenBasicInfo(chainInfo);
 
     const { bondedValidators,
       era,
@@ -3470,7 +3470,7 @@ export default class KoniExtension extends Extension {
 
   private async getTuringStakeCompoundTxInfo ({ accountMinimum, address, bondedAmount, collatorAddress, networkKey }: TuringStakeCompoundParams) {
     const chainInfo = state.getChainInfo(networkKey);
-    const { decimals } = _getChainNativeTokenInfo(chainInfo);
+    const { decimals } = _getChainNativeTokenBasicInfo(chainInfo);
     const parsedAccountMinimum = parseFloat(accountMinimum) * 10 ** decimals;
 
     return await handleTuringCompoundTxInfo(networkKey, chainInfo, state.getSubstrateApiMap(), state.getEvmApiMap(), address, collatorAddress, parsedAccountMinimum.toString(), bondedAmount);
@@ -3488,7 +3488,7 @@ export default class KoniExtension extends Extension {
     const callback = createSubscription<'pri(staking.submitTuringCompound)'>(id, port);
     const dotSamaApi = state.getSubstrateApi(networkKey);
     const chainInfo = state.getChainInfo(networkKey);
-    const { decimals } = _getChainNativeTokenInfo(chainInfo);
+    const { decimals } = _getChainNativeTokenBasicInfo(chainInfo);
     const parsedAccountMinimum = parseFloat(accountMinimum) * 10 ** decimals;
     const extrinsic = await getTuringCompoundExtrinsic(dotSamaApi, address, collatorAddress, parsedAccountMinimum.toString(), bondedAmount);
 
@@ -3510,7 +3510,7 @@ export default class KoniExtension extends Extension {
     const chainInfo = state.getChainInfo(networkKey);
 
     const { accountMinimum, frequency, taskId } = await checkTuringStakeCompoundingTask(dotSamaApi, address, collatorAddress);
-    const { decimals } = _getChainNativeTokenInfo(chainInfo);
+    const { decimals } = _getChainNativeTokenBasicInfo(chainInfo);
     const parsedAccountMinimum = accountMinimum / (10 ** decimals);
 
     return {

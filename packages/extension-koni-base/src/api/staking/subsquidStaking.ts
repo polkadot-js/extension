@@ -3,7 +3,7 @@
 
 import { _ChainInfo } from '@subwallet/chain-list/types';
 import { APIItemState, StakingRewardItem, StakingType } from '@subwallet/extension-base/background/KoniTypes';
-import { _getChainNativeTokenInfo, _getChainSubstrateAddressPrefix, _isChainEvmCompatible } from '@subwallet/extension-base/services/chain-service/utils';
+import { _getChainNativeTokenBasicInfo, _getChainSubstrateAddressPrefix, _isChainEvmCompatible } from '@subwallet/extension-base/services/chain-service/utils';
 import { INDEXER_SUPPORTED_STAKING_CHAINS, SUBSQUID_ENDPOINTS } from '@subwallet/extension-koni-base/api/staking/config';
 import { reformatAddress, toUnit } from '@subwallet/extension-koni-base/utils';
 import axios from 'axios';
@@ -72,7 +72,7 @@ const getSubsquidStaking = async (accounts: string[], chain: string, chainInfoMa
           // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
           const respData = resp.data.data as Record<string, any>;
           const rewardItem = respData.stakerById as StakingResponseItem;
-          const { decimals } = _getChainNativeTokenInfo(chainInfoMap[chain]);
+          const { decimals } = _getChainNativeTokenBasicInfo(chainInfoMap[chain]);
 
           if (rewardItem) {
             const latestReward = rewardItem.rewards[0];

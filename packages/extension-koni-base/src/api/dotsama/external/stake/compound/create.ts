@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { BasicTxResponse } from '@subwallet/extension-base/background/KoniTypes';
-import { _getChainNativeTokenInfo } from '@subwallet/extension-base/services/chain-service/utils';
+import { _getChainNativeTokenBasicInfo } from '@subwallet/extension-base/services/chain-service/utils';
 import { getTuringCompoundExtrinsic } from '@subwallet/extension-koni-base/api/bonding/paraChain';
 import { ExternalProps } from '@subwallet/extension-koni-base/api/dotsama/external/shared';
 import { signAndSendExtrinsic } from '@subwallet/extension-koni-base/api/dotsama/shared/signAndSendExtrinsic';
@@ -26,7 +26,7 @@ export const createCreateCompoundExternal = async ({ accountMinimum,
   substrateApi,
   updateState }: CreateCompoundExternalProps): Promise<void> => {
   const txState: BasicTxResponse = {};
-  const { decimals } = _getChainNativeTokenInfo(chainInfo);
+  const { decimals } = _getChainNativeTokenBasicInfo(chainInfo);
   const parsedAccountMinimum = parseFloat(accountMinimum) * 10 ** decimals;
 
   const extrinsic = await getTuringCompoundExtrinsic(substrateApi, address, collatorAddress, parsedAccountMinimum.toString(), bondedAmount);

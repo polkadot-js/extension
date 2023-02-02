@@ -5,7 +5,7 @@ import { _ChainInfo } from '@subwallet/chain-list/types';
 import { APIItemState, StakingItem, StakingRewardItem, StakingType } from '@subwallet/extension-base/background/KoniTypes';
 import { _STAKING_CHAIN_GROUP } from '@subwallet/extension-base/services/chain-service/constants';
 import { _SubstrateApi } from '@subwallet/extension-base/services/chain-service/types';
-import { _getChainNativeTokenInfo } from '@subwallet/extension-base/services/chain-service/utils';
+import { _getChainNativeTokenBasicInfo } from '@subwallet/extension-base/services/chain-service/utils';
 import { parseStakingBalance } from '@subwallet/extension-koni-base/api/staking/utils';
 import { reformatAddress } from '@subwallet/extension-koni-base/utils';
 
@@ -49,7 +49,7 @@ function getSingleStakingAmplitude (parentApi: _SubstrateApi, address: string, n
     const parsedUnstakingBalance = parseStakingBalance(formattedUnstakingBalance, chain, networks);
     const parsedActiveBalance = parseStakingBalance(formattedActiveBalance, chain, networks);
 
-    const { symbol } = _getChainNativeTokenInfo(networks[chain]);
+    const { symbol } = _getChainNativeTokenBasicInfo(networks[chain]);
 
     const stakingItem = {
       name: networks[chain].name,
@@ -107,7 +107,7 @@ function getMultiStakingAmplitude (parentApi: _SubstrateApi, useAddresses: strin
         const parsedUnstakingBalance = parseStakingBalance(formattedUnstakingBalance, chain, networks);
         const parsedActiveBalance = parseStakingBalance(formattedActiveBalance, chain, networks);
 
-        const { symbol } = _getChainNativeTokenInfo(networks[chain]);
+        const { symbol } = _getChainNativeTokenBasicInfo(networks[chain]);
 
         const stakingItem = {
           name: networks[chain].name,
@@ -154,7 +154,7 @@ export async function getAmplitudeUnclaimedStakingReward (substrateApiMap: Recor
   await Promise.all(chains.map(async (chain) => {
     if (_STAKING_CHAIN_GROUP.amplitude.includes(chain) && !_STAKING_CHAIN_GROUP.kilt.includes(chain)) {
       const networkInfo = networks[chain];
-      const { decimals } = _getChainNativeTokenInfo(networkInfo);
+      const { decimals } = _getChainNativeTokenBasicInfo(networkInfo);
       const apiProps = await substrateApiMap[chain].isReady;
 
       await Promise.all(useAddresses.map(async (address) => {
@@ -183,7 +183,7 @@ export async function getAmplitudeUnclaimedStakingReward (substrateApiMap: Recor
 }
 
 export function getParaStakingOnChain (parentApi: _SubstrateApi, useAddresses: string[], networks: Record<string, _ChainInfo>, chain: string, callback: (networkKey: string, rs: StakingItem) => void) {
-  const { symbol } = _getChainNativeTokenInfo(networks[chain]);
+  const { symbol } = _getChainNativeTokenBasicInfo(networks[chain]);
 
   return parentApi.api.query.parachainStaking.delegatorState.multi(useAddresses, (ledgers: Codec[]) => {
     if (ledgers) {
@@ -247,7 +247,7 @@ export function getParaStakingOnChain (parentApi: _SubstrateApi, useAddresses: s
 }
 
 export function getAstarStakingOnChain (parentApi: _SubstrateApi, useAddresses: string[], networks: Record<string, _ChainInfo>, chain: string, callback: (networkKey: string, rs: StakingItem) => void) {
-  const { symbol } = _getChainNativeTokenInfo(networks[chain]);
+  const { symbol } = _getChainNativeTokenBasicInfo(networks[chain]);
 
   return parentApi.api.query.dappsStaking.ledger.multi(useAddresses, (ledgers: Codec[]) => {
     if (ledgers) {

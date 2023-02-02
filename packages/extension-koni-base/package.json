@@ -14,7 +14,7 @@
   },
   "sideEffects": false,
   "type": "module",
-  "version": "0.7.8-0",
+  "version": "0.7.9-0",
   "main": "index.js",
   "dependencies": {
     "@acala-network/api": "^4.1.8-2.3",
@@ -58,10 +58,10 @@
     "@sora-substrate/type-definitions": "^1.12.4",
     "@subsocial/types": "^0.6.8",
     "@substrate/connect": "^0.7.18",
-    "@subwallet/extension-base": "^0.7.8-0",
-    "@subwallet/extension-chains": "^0.7.8-0",
-    "@subwallet/extension-dapp": "^0.7.8-0",
-    "@subwallet/extension-inject": "^0.7.8-0",
+    "@subwallet/extension-base": "^0.7.9-0",
+    "@subwallet/extension-chains": "^0.7.9-0",
+    "@subwallet/extension-dapp": "^0.7.9-0",
+    "@subwallet/extension-inject": "^0.7.9-0",
     "@unique-nft/types": "^0.6.0-4",
     "@zeitgeistpm/type-defs": "^0.10.0",
     "@zeroio/type-definitions": "^0.0.14",
@@ -90,6 +90,6 @@
     "web3-utils": "^1.8.1"
   },
   "devDependencies": {
-    "@subwallet/extension-mocks": "^0.7.8-0"
+    "@subwallet/extension-mocks": "^0.7.9-0"
   }
 }

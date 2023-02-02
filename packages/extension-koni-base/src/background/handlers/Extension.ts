@@ -2110,7 +2110,7 @@ export default class KoniExtension extends Extension {
       };
     }
 
-    const { contractError, decimals, name, symbol } = await validateCustomToken(data.smartContract, data.type, state.getWeb3Api(data.chain), state.getDotSamaApi(data.chain), data.contractCaller);
+    const { contractError, decimals, name, symbol } = await validateCustomToken(data.chain, data.smartContract, data.type, state.getWeb3Api(data.chain), state.getDotSamaApi(data.chain), data.contractCaller);
 
     return {
       name,

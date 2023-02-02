@@ -17,7 +17,7 @@ import { PHISHING_PAGE_REDIRECT } from '@polkadot/extension-base/defaults';
 import { canDerive } from '@polkadot/extension-base/utils';
 import uiSettings from '@polkadot/ui-settings';
 
-import { ErrorBoundary, Loading } from '../components';
+import { ErrorBoundary, Loading, SplashHandler } from '../components';
 import {
   AccountContext,
   ActionContext,
@@ -175,60 +175,62 @@ export default function Popup(): React.ReactElement {
                   <MetadataReqContext.Provider value={metaRequests}>
                     <SigningReqContext.Provider value={signRequests}>
                       <ToastProvider>
-                        <Switch>
-                          <Route path='/auth-list'>{wrapWithErrorBoundary(<AuthList />, 'auth-list')}</Route>
-                          <Route path='/help'>{wrapWithErrorBoundary(<Help />, 'help')}</Route>
-                          <Route path='/account/settings'>{wrapWithErrorBoundary(<Settings />, 'settings')}</Route>
-                          <Route path='/account/add-menu'>
-                            {wrapWithErrorBoundary(<AddAccountMenu />, 'adding-account-menu')}
-                          </Route>
-                          <Route path='/account/create-menu'>
-                            {wrapWithErrorBoundary(<CreateAccountMenu />, 'account-creation-menu')}
-                          </Route>
-                          <Route path='/account/create'>
-                            {wrapWithErrorBoundary(<CreateAccount />, 'account-creation')}
-                          </Route>
-                          <Route path='/account/edit-menu'>
-                            {wrapWithErrorBoundary(<EditAccountMenu />, 'account-creation-menu')}
-                          </Route>
-                          <Route path='/account/forget/:address'>
-                            {wrapWithErrorBoundary(<Forget />, 'forget-address')}
-                          </Route>
-                          <Route path='/account/export/:address'>
-                            {wrapWithErrorBoundary(<Export />, 'export-address')}
-                          </Route>
-                          <Route path='/account/export-all'>
-                            {wrapWithErrorBoundary(<ExportAll />, 'export-all-address')}
-                          </Route>
-                          <Route path='/account/import-ledger'>
-                            {wrapWithErrorBoundary(<ImportLedger />, 'import-ledger')}
-                          </Route>
-                          <Route path='/account/import-qr'>{wrapWithErrorBoundary(<ImportQr />, 'import-qr')}</Route>
-                          <Route path='/account/import-seed'>
-                            {wrapWithErrorBoundary(<ImportSeed />, 'import-seed')}
-                          </Route>
-                          <Route path='/account/restore-json'>
-                            {wrapWithErrorBoundary(<RestoreJson />, 'restore-json')}
-                          </Route>
-                          <Route path='/account/derive/:address/locked'>
-                            {wrapWithErrorBoundary(<Derive isLocked />, 'derived-address-locked')}
-                          </Route>
-                          <Route path='/account/derive/:address'>
-                            {wrapWithErrorBoundary(<Derive />, 'derive-address')}
-                          </Route>
-                          <Route path='/url/manage/:url'>
-                            {wrapWithErrorBoundary(<AccountManagement />, 'manage-url')}
-                          </Route>
-                          <Route path={`${PHISHING_PAGE_REDIRECT}/:website`}>
-                            {wrapWithErrorBoundary(<PhishingDetected />, 'phishing-page-redirect')}
-                          </Route>
-                          <Route
-                            exact
-                            path='/'
-                          >
-                            {Root}
-                          </Route>
-                        </Switch>
+                        <SplashHandler>
+                          <Switch>
+                            <Route path='/auth-list'>{wrapWithErrorBoundary(<AuthList />, 'auth-list')}</Route>
+                            <Route path='/help'>{wrapWithErrorBoundary(<Help />, 'help')}</Route>
+                            <Route path='/account/settings'>{wrapWithErrorBoundary(<Settings />, 'settings')}</Route>
+                            <Route path='/account/add-menu'>
+                              {wrapWithErrorBoundary(<AddAccountMenu />, 'adding-account-menu')}
+                            </Route>
+                            <Route path='/account/create-menu'>
+                              {wrapWithErrorBoundary(<CreateAccountMenu />, 'account-creation-menu')}
+                            </Route>
+                            <Route path='/account/create'>
+                              {wrapWithErrorBoundary(<CreateAccount />, 'account-creation')}
+                            </Route>
+                            <Route path='/account/edit-menu'>
+                              {wrapWithErrorBoundary(<EditAccountMenu />, 'account-creation-menu')}
+                            </Route>
+                            <Route path='/account/forget/:address'>
+                              {wrapWithErrorBoundary(<Forget />, 'forget-address')}
+                            </Route>
+                            <Route path='/account/export/:address'>
+                              {wrapWithErrorBoundary(<Export />, 'export-address')}
+                            </Route>
+                            <Route path='/account/export-all'>
+                              {wrapWithErrorBoundary(<ExportAll />, 'export-all-address')}
+                            </Route>
+                            <Route path='/account/import-ledger'>
+                              {wrapWithErrorBoundary(<ImportLedger />, 'import-ledger')}
+                            </Route>
+                            <Route path='/account/import-qr'>{wrapWithErrorBoundary(<ImportQr />, 'import-qr')}</Route>
+                            <Route path='/account/import-seed'>
+                              {wrapWithErrorBoundary(<ImportSeed />, 'import-seed')}
+                            </Route>
+                            <Route path='/account/restore-json'>
+                              {wrapWithErrorBoundary(<RestoreJson />, 'restore-json')}
+                            </Route>
+                            <Route path='/account/derive/:address/locked'>
+                              {wrapWithErrorBoundary(<Derive isLocked />, 'derived-address-locked')}
+                            </Route>
+                            <Route path='/account/derive/:address'>
+                              {wrapWithErrorBoundary(<Derive />, 'derive-address')}
+                            </Route>
+                            <Route path='/url/manage/:url'>
+                              {wrapWithErrorBoundary(<AccountManagement />, 'manage-url')}
+                            </Route>
+                            <Route path={`${PHISHING_PAGE_REDIRECT}/:website`}>
+                              {wrapWithErrorBoundary(<PhishingDetected />, 'phishing-page-redirect')}
+                            </Route>
+                            <Route
+                              exact
+                              path='/'
+                            >
+                              {Root}
+                            </Route>
+                          </Switch>
+                        </SplashHandler>
                       </ToastProvider>
                     </SigningReqContext.Provider>
                   </MetadataReqContext.Provider>

@@ -4,7 +4,8 @@
 import { useContext } from 'react';
 
 import { ToastContext } from '../components/contexts';
+import { SnackbarTypes } from '../types';
 
-export default function useToast (): {show: (message: string) => void} {
+export default function useToast(): { show: (message: string, type?: SnackbarTypes) => void } {
   return useContext(ToastContext);
 }

@@ -1,19 +1,24 @@
 // Copyright 2019-2023 @polkadot/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
+/* eslint-disable @typescript-eslint/no-unsafe-return */
+
 import '@polkadot/extension-mocks/chrome';
 
 import Adapter from '@wojtekmaj/enzyme-adapter-react-17';
 import { configure, mount, ReactWrapper } from 'enzyme';
 import React from 'react';
 import { act } from 'react-dom/test-utils';
+import { BrowserRouter as Router } from 'react-router-dom';
 import { ThemeProvider } from 'styled-components';
 
-import { ActionContext, ActionText, Button, themes } from '../../components';
+import { AccountNamePasswordCreation, ActionContext, Button, themes } from '../../components';
 import * as messaging from '../../messaging';
-import { Header } from '../../partials';
+import HeaderWithSteps from '../../partials/HeaderWithSteps';
 import { flushAllPromises } from '../../testHelpers';
-import CreateAccount from '.';
+import CreateAccount from '../CreateAccount/index';
+import SafetyFirst from './SafetyFirst';
+import SaveMnemonic from './SaveMnemonic';
 
 // For this file, there are a lot of them
 /* eslint-disable @typescript-eslint/no-unsafe-argument */
@@ -24,92 +29,79 @@ configure({ adapter: new Adapter() });
 describe('Create Account', () => {
   let wrapper: ReactWrapper;
   let onActionStub: jest.Mock;
+
   const exampleAccount = {
     address: 'HjoBp62cvsWDA3vtNMWxz6c9q13ReEHi9UGHK7JbZweH5g5',
-    seed: 'horse battery staple correct'
+    seed: 'inspire super mention escape kid voice girl discover cheese funny inject obvious'
   };
   // eslint-disable-next-line @typescript-eslint/no-unsafe-return
-  const mountComponent = (): ReactWrapper => mount(
-    <ActionContext.Provider value={onActionStub}>
-      <ThemeProvider theme={themes.dark}>
-        <CreateAccount />
-      </ThemeProvider>
-    </ActionContext.Provider>
-  );
+  const mountComponent = (): ReactWrapper =>
+    mount(
+      <ActionContext.Provider value={onActionStub}>
+        <Router>
+          <ThemeProvider theme={themes.dark}>
+            <CreateAccount />
+          </ThemeProvider>
+        </Router>
+      </ActionContext.Provider>
+    );
 
-  const check = (input: ReactWrapper): unknown => input.simulate('change', { target: { checked: true } });
-
-  const type = async (input: ReactWrapper, value: string): Promise<void> => {
-    input.simulate('change', { target: { value } });
-    await act(flushAllPromises);
-    wrapper.update();
-  };
-
-  const enterName = (name: string): Promise<void> => type(wrapper.find('input').first(), name);
-  const password = (password: string) => (): Promise<void> => type(wrapper.find('input[type="password"]').first(), password);
-  const repeat = (password: string) => (): Promise<void> => type(wrapper.find('input[type="password"]').last(), password);
-
-  beforeEach(async () => {
-    onActionStub = jest.fn();
-    jest.spyOn(messaging, 'createSeed').mockResolvedValue(exampleAccount);
-    jest.spyOn(messaging, 'createAccountSuri').mockResolvedValue(true);
-    wrapper = mountComponent();
-    await act(flushAllPromises);
-    wrapper.update();
-  });
-
-  describe('Phase 1', () => {
-    it('shows seed phrase in textarea', () => {
-      expect(wrapper.find('textarea').text()).toBe(exampleAccount.seed);
-    });
-
-    it('next step button is disabled when checkbox is not checked', () => {
-      expect(wrapper.find(Button).prop('isDisabled')).toBe(true);
-    });
-
-    it('action text is "Cancel"', () => {
-      expect(wrapper.find(Header).find(ActionText).text()).toBe('Cancel');
-    });
-
-    it('clicking "Cancel" redirects to main screen', () => {
-      wrapper.find(Header).find(ActionText).simulate('click');
-      expect(onActionStub).toBeCalledWith('/');
-    });
-
-    it('checking the checkbox enables the Next button', () => {
-      check(wrapper.find('input[type="checkbox"]'));
-
-      expect(wrapper.find(Button).prop('isDisabled')).toBe(false);
-    });
-
-    it('clicking on Next activates phase 2', () => {
-      check(wrapper.find('input[type="checkbox"]'));
-      wrapper.find('button').simulate('click');
-      expect(wrapper.find(Header).text()).toBe('Create an account2/2Cancel');
-    });
-  });
-
-  describe('Phase 2', () => {
+  describe('CreateAccount component', () => {
     beforeEach(async () => {
-      check(wrapper.find('input[type="checkbox"]'));
-      wrapper.find('button').simulate('click');
+      onActionStub = jest.fn();
+      jest.spyOn(messaging, 'createSeed').mockResolvedValue(exampleAccount);
+      jest.spyOn(messaging, 'createAccountSuri').mockResolvedValue(true);
+      wrapper = mountComponent();
       await act(flushAllPromises);
       wrapper.update();
     });
+    it('renders', () => {
+      expect(wrapper.exists()).toBe(true);
+    });
+    it('renders header with steps component when isBusy state is false', () => {
+      wrapper.setState({ isBusy: false });
+      expect(wrapper.find(HeaderWithSteps).exists()).toBe(true);
+    });
 
-    it('saves account with provided network, name and password', async () => {
-      const kusamaGenesis = '0xb0a8d493285c2df73290dfb7e61f870f17b41801197a149ca93654499ea3dafe';
+    it('renders SafetyFirst component when step is 1', () => {
+      wrapper.setState({ step: 1 });
 
-      wrapper.find('select').simulate('change', { target: { value: kusamaGenesis } });
-      await act(flushAllPromises);
+      expect(wrapper.find(SafetyFirst).exists()).toBe(true);
+    });
+
+    it('renders SafetyFirst component after clicking back button on step 2', () => {
+      wrapper.find(Button).last().simulate('click');
+      wrapper.find(Button).at(1).simulate('click');
+      wrapper.find(Button).first().simulate('click');
+      wrapper.update();
+      console.log(wrapper.children().debug());
+      console.log(wrapper.find(Button));
+
+      expect(wrapper.find(SafetyFirst).exists()).toBe(true);
+    });
+
+    it('renders SaveMnemonic component after clicking next button on step 1', () => {
+      wrapper.find(Button).last().simulate('click');
       wrapper.update();
 
-      await enterName('abc').then(password('abcdef')).then(repeat('abcdef'));
-      wrapper.find('[data-button-action="add new root"] button').simulate('click');
-      await act(flushAllPromises);
+      expect(wrapper.find(SaveMnemonic).exists()).toBe(true);
+    });
 
-      expect(messaging.createAccountSuri).toBeCalledWith('abc', 'abcdef', exampleAccount.seed, 'sr25519', kusamaGenesis);
-      expect(onActionStub).toBeCalledWith('/');
+    it('renders SaveMnemonic component after clicking Back button on step 3', () => {
+      wrapper.find(Button).last().simulate('click');
+      wrapper.find(Button).last().simulate('click');
+      wrapper.find(Button).first().simulate('click');
+      wrapper.update();
+
+      expect(wrapper.find(SaveMnemonic).exists()).toBe(true);
+    });
+
+    it('renders AccountNamePasswordCreation component after clicking next button on step 2', () => {
+      wrapper.find(Button).last().simulate('click');
+      wrapper.find(Button).last().simulate('click');
+      wrapper.update();
+
+      expect(wrapper.find(AccountNamePasswordCreation).exists()).toBe(true);
     });
   });
 });

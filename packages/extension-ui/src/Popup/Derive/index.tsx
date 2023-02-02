@@ -27,7 +27,7 @@ interface ConfirmState {
   parentPassword: string;
 }
 
-function Derive ({ isLocked }: Props): React.ReactElement<Props> {
+function Derive({ isLocked }: Props): React.ReactElement<Props> {
   const { t } = useTranslation();
   const onAction = useContext(ActionContext);
   const { accounts } = useContext(AccountContext);
@@ -42,19 +42,22 @@ function Derive ({ isLocked }: Props): React.ReactElement<Props> {
     [accounts, parentAddress]
   );
 
-  const _onCreate = useCallback((name: string, password: string) => {
-    if (!account || !name || !password || !parentPassword) {
-      return;
-    }
+  const _onCreate = useCallback(
+    (name: string, password: string) => {
+      if (!account || !name || !password || !parentPassword) {
+        return;
+      }
 
-    setIsBusy(true);
-    deriveAccount(parentAddress, account.suri, parentPassword, name, password, parentGenesis)
-      .then(() => onAction('/'))
-      .catch((error): void => {
-        setIsBusy(false);
-        console.error(error);
-      });
-  }, [account, onAction, parentAddress, parentGenesis, parentPassword]);
+      setIsBusy(true);
+      deriveAccount(parentAddress, account.suri, parentPassword, name, password, parentGenesis)
+        .then(() => onAction('/'))
+        .catch((error): void => {
+          setIsBusy(false);
+          console.error(error);
+        });
+    },
+    [account, onAction, parentAddress, parentGenesis, parentPassword]
+  );
 
   const _onDerivationConfirmed = useCallback(({ account, parentPassword }: ConfirmState) => {
     setAccount(account);
@@ -70,6 +73,8 @@ function Derive ({ isLocked }: Props): React.ReactElement<Props> {
       <HeaderWithSteps
         step={account ? 2 : 1}
         text={t<string>('Add new account')}
+        // TODO: PLACEHOLDER
+        total={2}
       />
       {!account && (
         <SelectParent

@@ -173,7 +173,21 @@
     "Use your Ledger or Parity Signer wallet": "",
     "Connect hardware wallet": "",
     "via QR code": "",
-    "via USB": ""
+    "via USB": "",
+    "Safety first!": "",
+    "In the next step, you'll generate a secret phrase that allows you to access your account. Anyone who manages to access it will have a full control over your account, so read, save, and store it safely.": "",
+    "Why it is critical to store your secret phrase in a safe place?": "",
+    "Learn more": "",
+    "Save your secret phrase": "",
+    "Remember to save your secret phrase\nand": "",
+    " keep it safe!": "",
+    "Secret phrase copied to clipboard": "",
+    "Create": "",
+    "Name": "",
+    "Password": "",
+    "Confirm password": "",
+    "Add local details": "",
+    "It might help you keep track of what the account is for and additionally protect it.": ""
 }
 
 

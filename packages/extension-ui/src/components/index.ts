@@ -43,6 +43,7 @@ export { default as AddButton } from './AddButton';
 export { default as MenuCard } from './MenuCard';
 export { default as Skeleton } from './Skeleton';
 export { default as SkeletonCard } from './SkeletonCard';
+export { default as MnemonicPill } from './MnemonicPill';
 export { default as SplashHandler } from './SplashHandler';
 export { default as Video } from './Video';
 

@@ -3,64 +3,66 @@
 
 import type { ThemeProps } from '../types';
 
-import React, { useCallback, useContext } from 'react';
+import React from 'react';
 import styled from 'styled-components';
 
-import { ActionContext, ActionText } from '../components';
 import Header from './Header';
 
-interface Props extends ThemeProps {
+interface Props {
   className?: string;
   step: number;
   text: string;
+  total: number;
 }
 
-function HeaderWithSteps ({ className, step, text }: Props): React.ReactElement<Props> {
-  const onAction = useContext(ActionContext);
+interface StepProps extends ThemeProps {
+  current: boolean;
+  gap: number;
+  total: number;
+}
 
-  const _onCancel = useCallback(() => {
-    onAction('/');
-  }, [onAction]);
+const Step = styled.div<StepProps>`
+  background-color: ${({ current, theme }: StepProps) => (current ? theme.stepsActiveColor : theme.stepsInactiveColor)};
+  height: 2px;
+  width: ${({ total }) => `calc(100%/${total})`};
+  display: inline-block;
+`;
 
+const Steps = styled.div`
+  display: flex;
+  justify-content: center;
+  margin: 8px -16px 0;
+  gap: 8px;
+
+  :first-child {
+    margin-left: 0px;
+  }
+
+  :last-child {
+    margin-right: 0px;
+  }
+`;
+
+function HeaderWithSteps({ className, step, text, total }: Props): React.ReactElement<Props> {
   return (
-    <Header
-      className={className}
-      text={text}
-    >
-      <div className='steps'>
-        <div>
-          <span className='current'>{step}</span>
-          <span className='total'>/2</span>
-        </div>
-        <ActionText
-          onClick={_onCancel}
-          text='Cancel'
-        />
-      </div>
-    </Header>
+    <>
+      <Header
+        showHelp
+        text={text}
+        withStepper
+      ></Header>
+      <Steps>
+        {Array.from({ length: total }, (_, i) => (
+          <Step
+            current={step === i + 1}
+            gap={8}
+            key={i}
+            total={total}
+          />
+        ))}
+      </Steps>
+    </>
   );
 }
 
-export default React.memo(styled(HeaderWithSteps)(({ theme }: Props) => `
-  .current {
-    font-size: ${theme.labelFontSize};
-    line-height: ${theme.labelLineHeight};
-    color: ${theme.primaryColor};
-  }
-
-  .steps {
-    align-items: center;
-    display: flex;
-    justify-content: space-between;
-    flex-grow: 1;
-    padding-left: 1em;
-    padding-right: 24px;
-    margin-top: 3px;
-  }
-
-  .total {
-    font-size: ${theme.labelFontSize};
-    line-height: ${theme.labelLineHeight};
-    color: ${theme.textColor};
-  }
-`));
+export default React.memo(HeaderWithSteps);

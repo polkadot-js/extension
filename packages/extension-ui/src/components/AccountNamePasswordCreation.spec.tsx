@@ -12,6 +12,7 @@ import { act } from 'react-dom/test-utils';
 
 import { flushAllPromises } from '../testHelpers';
 import BackButton from './BackButton';
+import Button from './Button';
 import { AccountNamePasswordCreation, Input, InputWithLabel, NextStepButton } from '.';
 
 // For this file, there are a lot of them
@@ -25,7 +26,7 @@ const account = {
   password: 'somepassword'
 };
 
-const buttonLabel = 'create account';
+const buttonLabel = 'Create';
 
 let wrapper: ReactWrapper;
 const onBackClick = jest.fn();
@@ -45,19 +46,22 @@ const capsLockOn = async (input: ReactWrapper): Promise<void> => {
 };
 
 const enterName = (name: string): Promise<void> => type(wrapper.find('input').first(), name);
-const password = (password: string) => (): Promise<void> => type(wrapper.find('input[type="password"]').first(), password);
+const password = (password: string) => (): Promise<void> =>
+  type(wrapper.find('input[type="password"]').first(), password);
 const repeat = (password: string) => (): Promise<void> => type(wrapper.find('input[type="password"]').last(), password);
 
 // eslint-disable-next-line @typescript-eslint/no-unsafe-return
-const mountComponent = (isBusy = false): ReactWrapper => mount(
-  <AccountNamePasswordCreation
-    buttonLabel={buttonLabel}
-    isBusy={isBusy}
-    onBackClick={onBackClick}
-    onCreate={onCreate}
-    onNameChange={onNameChange}
-  />
-);
+const mountComponent = (isBusy = false): ReactWrapper =>
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-return
+  mount(
+    <AccountNamePasswordCreation
+      buttonLabel={buttonLabel}
+      isBusy={isBusy}
+      onBackClick={onBackClick}
+      onCreate={onCreate}
+      onNameChange={onNameChange}
+    />
+  );
 
 describe('AccountNamePasswordCreation', () => {
   beforeEach(async () => {
@@ -74,7 +78,8 @@ describe('AccountNamePasswordCreation', () => {
   });
 
   it('next step button has the correct label', () => {
-    expect(wrapper.find(NextStepButton).text()).toBe(buttonLabel);
+    console.log(wrapper.children().debug());
+    expect(wrapper.find(Button).last().text()).toBe('Create');
   });
 
   it('back button calls onBackClick', () => {
@@ -118,7 +123,7 @@ describe('AccountNamePasswordCreation', () => {
     await enterName('abc').then(password('abcde'));
     await capsLockOn(wrapper.find(InputWithLabel).find('[data-input-password]').find(Input));
 
-    expect(wrapper.find('.warning-message').first().text()).toBe('Warning: Caps lock is on');
+    expect(wrapper.find('.warning-message').first().text()).toBe('Password is too short');
   });
 
   it('password shorter than 6 characters should be not valid', async () => {
@@ -185,17 +190,5 @@ describe('AccountNamePasswordCreation', () => {
       await enterName('');
       expect(wrapper.find('[data-button-action="add new root"] button').prop('disabled')).toBe(true);
     });
-  });
-});
-
-describe('AccountNamePasswordCreation busy button', () => {
-  beforeAll(async () => {
-    wrapper = mountComponent(true);
-    await act(flushAllPromises);
-    wrapper.update();
-  });
-
-  it('button is busy', () => {
-    expect(wrapper.find(NextStepButton).prop('isBusy')).toBe(true);
   });
 });

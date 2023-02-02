@@ -14,16 +14,13 @@ interface Props {
   className?: string;
 }
 
-function View ({ children, className }: Props): React.ReactElement<Props> {
+function View({ children, className }: Props): React.ReactElement<Props> {
   const [theme, setTheme] = useState(chooseTheme());
 
-  const switchTheme = useCallback(
-    (theme: AvailableThemes): void => {
-      localStorage.setItem('theme', theme);
-      setTheme(theme);
-    },
-    []
-  );
+  const switchTheme = useCallback((theme: AvailableThemes): void => {
+    localStorage.setItem('theme', theme);
+    setTheme(theme);
+  }, []);
 
   const _theme = themes[theme];
 
@@ -31,9 +28,7 @@ function View ({ children, className }: Props): React.ReactElement<Props> {
     <ThemeSwitchContext.Provider value={switchTheme}>
       <ThemeProvider theme={_theme}>
         <BodyTheme theme={_theme} />
-        <Main className={className}>
-          {children}
-        </Main>
+        <Main className={className}>{children}</Main>
       </ThemeProvider>
     </ThemeSwitchContext.Provider>
   );
@@ -41,7 +36,7 @@ function View ({ children, className }: Props): React.ReactElement<Props> {
 
 const BodyTheme = createGlobalStyle<ThemeProps>`
   body {
-    background-color: ${({ theme }: ThemeProps): string => theme.bodyColor};
+    background-color: ${({ theme }: ThemeProps): string => theme.background};
     font-family: ${({ theme }: ThemeProps): string => theme.primaryFontFamily};
   }
 

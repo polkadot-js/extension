@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import React, { useEffect, useState } from 'react';
+import styled from 'styled-components';
 
 import useIsMounted from '../hooks/useIsMounted';
 import { Result, Validator } from '../util/validators';
@@ -19,9 +20,18 @@ type Props<T extends BasicProps> = T & {
   defaultValue?: string;
   onValidatedChange: (value: string | null) => void;
   validator: Validator<string>;
-}
+  showPasswordElement?: React.ReactNode;
+};
 
-function ValidatedInput<T extends Record<string, unknown>> ({ className, component: Input, defaultValue, onValidatedChange, validator, ...props }: Props<T>): React.ReactElement<Props<T>> {
+function ValidatedInput<T extends Record<string, unknown>>({
+  className,
+  component: Input,
+  defaultValue,
+  onValidatedChange,
+  showPasswordElement,
+  validator,
+  ...props
+}: Props<T>): React.ReactElement<Props<T>> {
   const [value, setValue] = useState(defaultValue || '');
   const [validationResult, setValidationResult] = useState<Result<string>>(Result.ok(''));
   const isMounted = useIsMounted();
@@ -51,11 +61,12 @@ function ValidatedInput<T extends Record<string, unknown>> ({ className, compone
   return (
     <div className={className}>
       <Input
-        {...props as unknown as T}
+        {...(props as unknown as T)}
         isError={Result.isError(validationResult)}
         onChange={setValue}
         value={value}
       />
+      {showPasswordElement && showPasswordElement}
       {Result.isError(validationResult) && (
         <Warning
           isBelowInput
@@ -68,4 +79,13 @@ function ValidatedInput<T extends Record<string, unknown>> ({ className, compone
   );
 }
 
-export default ValidatedInput;
+export default styled(ValidatedInput)`
+position: relative;
+
+.password-icon {
+  position: absolute;
+  top: 18px;
+  right: 36px;
+}
+
+`;

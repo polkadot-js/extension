@@ -4,7 +4,7 @@
 import React, { useCallback, useContext, useEffect, useState } from 'react';
 import styled from 'styled-components';
 
-import { ActionContext, Address, Dropdown, Loading } from '../../components';
+import { ActionContext, Loading } from '../../components';
 import AccountNamePasswordCreation from '../../components/AccountNamePasswordCreation';
 import useGenesisHashOptions from '../../hooks/useGenesisHashOptions';
 import useMetadata from '../../hooks/useMetadata';
@@ -12,13 +12,14 @@ import useTranslation from '../../hooks/useTranslation';
 import { createAccountSuri, createSeed, validateSeed } from '../../messaging';
 import { HeaderWithSteps } from '../../partials';
 import { DEFAULT_TYPE } from '../../util/defaultType';
-import Mnemonic from './Mnemonic';
+import SafetyFirst from './SafetyFirst';
+import SaveMnemonic from './SaveMnemonic';
 
 interface Props {
   className?: string;
 }
 
-function CreateAccount ({ className }: Props): React.ReactElement {
+function CreateAccount({ className }: Props): React.ReactElement {
   const { t } = useTranslation();
   const onAction = useContext(ActionContext);
   const [isBusy, setIsBusy] = useState(false);
@@ -38,14 +39,12 @@ function CreateAccount ({ className }: Props): React.ReactElement {
         setSeed(seed);
       })
       .catch(console.error);
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect((): void => {
     if (seed) {
-      const type = chain && chain.definition.chainType === 'ethereum'
-        ? 'ethereum'
-        : DEFAULT_TYPE;
+      const type = chain && chain.definition.chainType === 'ethereum' ? 'ethereum' : DEFAULT_TYPE;
 
       setType(type);
       validateSeed(seed, type)
@@ -71,61 +70,49 @@ function CreateAccount ({ className }: Props): React.ReactElement {
     [genesisHash, onAction, seed, type]
   );
 
-  const _onNextStep = useCallback(
-    () => setStep((step) => step + 1),
-    []
-  );
+  const _onNextStep = useCallback(() => setStep((step) => step + 1), []);
 
-  const _onPreviousStep = useCallback(
-    () => setStep((step) => step - 1),
-    []
-  );
+  const _onPreviousStep = useCallback(() => setStep((step) => step - 1), []);
 
-  const _onChangeNetwork = useCallback(
-    (newGenesisHash: string) => setGenesis(newGenesisHash),
-    []
-  );
+  // TODO: COMEBACK WHEN ITS DECIDED
+  const _onChangeNetwork = useCallback((newGenesisHash: string) => setGenesis(newGenesisHash), []);
 
   return (
     <>
       <HeaderWithSteps
         step={step}
         text={t<string>('Create an account')}
+        total={3}
       />
       <Loading>
-        <div>
-          <Address
-            address={address}
-            genesisHash={genesisHash}
-            name={name}
+        {step === 1 && (<SafetyFirst onNextStep={_onNextStep} />)}
+        {seed && step === 2 && (
+          <SaveMnemonic
+            onNextStep={_onNextStep}
+            onPreviousStep={_onPreviousStep}
+            seed={seed}
           />
-        </div>
-        {seed && (
-          step === 1
-            ? (
-              <Mnemonic
-                onNextStep={_onNextStep}
-                seed={seed}
-              />
-            )
-            : (
-              <>
-                <Dropdown
-                  className={className}
-                  label={t<string>('Network')}
-                  onChange={_onChangeNetwork}
-                  options={options}
-                  value={genesisHash}
-                />
-                <AccountNamePasswordCreation
-                  buttonLabel={t<string>('Add the account with the generated seed')}
-                  isBusy={isBusy}
-                  onBackClick={_onPreviousStep}
-                  onCreate={_onCreate}
-                  onNameChange={setName}
-                />
-              </>
-            )
+        )}
+        {seed && step === 3 && (
+          <>
+          {/* TODO: COMEBACK WHEN ITS DECIDED */}
+            {/* <Dropdown
+              className={className}
+              label={t<string>('Network')}
+              onChange={_onChangeNetwork}
+              options={options}
+              value={genesisHash}
+            /> */}
+            <AccountNamePasswordCreation
+              address={address}
+              buttonLabel={t<string>('Create')}
+              genesisHash={genesisHash}
+              isBusy={isBusy}
+              onBackClick={_onPreviousStep}
+              onCreate={_onCreate}
+              onNameChange={setName}
+            />
+          </>
         )}
       </Loading>
     </>

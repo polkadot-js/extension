@@ -12,21 +12,19 @@ interface Props extends ThemeProps {
 }
 
 const ButtonArea = function ({ children, className }: Props) {
-  return (
-    <div className={className}>
-      {children}
-    </div>
-  );
+  return <div className={className}>{children}</div>;
 };
 
-export default styled(ButtonArea)(() => `
+export default styled(ButtonArea)(
+  () => `
   display: flex;
   flex-direction: row;
-  padding-bottom: 16px;
+  margin-bottom: 16px;
   margin-left: 0;
   margin-right: 0;
 
   & > button:not(:last-of-type) {
     margin-right: 8px;
   }
-`);
+`
+);

@@ -1,0 +1,13 @@
+<svg class="svg-circle" width="100" height="100" xmlns="http://www.w3.org/2000/svg">
+    <g>
+        <circle id="grey-circle" r="14" cy="50" cx="50" stroke-width="1.5" stroke="#9E9E9E"
+            fill="none" />
+        <circle id="black-circle" class="circle_animation" r="14" cy="50" cx="50"
+            stroke-width="1.5" stroke="black" fill="none" />
+        <svg x="43" y="43" width="14" height="14" viewBox="0 0 14 14" fill="none">
+            <path fill-rule="evenodd" clip-rule="evenodd"
+                d="M7.00005 7.88394L12.8081 13.692L13.692 12.8081L7.88394 7.00005L13.692 1.192L12.8081 0.308115L7.00005 6.11617L1.19199 0.308105L0.308105 1.19199L6.11617 7.00005L0.308105 12.8081L1.19199 13.692L7.00005 7.88394Z"
+                fill="#111B24" />
+        </svg>
+    </g>
+</svg>

@@ -78,6 +78,6 @@ export default styled(SplashHandler)`
 
   .splash {
     position: absolute;
-    z-index: 100;
+    z-index: 101;
   }
   `;

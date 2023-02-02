@@ -8,3 +8,5 @@ export type { Theme };
 export interface ThemeProps {
   theme: Theme;
 }
+
+export type SnackbarTypes = 'info' | 'success' | 'warning' | 'critical';

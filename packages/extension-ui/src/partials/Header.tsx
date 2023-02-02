@@ -31,6 +31,7 @@ interface Props extends ThemeProps {
   showSettings?: boolean;
   smallMargin?: boolean;
   text?: React.ReactNode;
+  withStepper?: boolean;
 }
 
 function Header({
@@ -42,7 +43,8 @@ function Header({
   showHelp,
   showSettings,
   smallMargin = false,
-  text
+  text,
+  withStepper = false
 }: Props): React.ReactElement<Props> {
   const [isAddOpen, setShowAdd] = useState(false);
   const [isSettingsOpen, setShowSettings] = useState(false);
@@ -135,16 +137,15 @@ function Header({
             </Tooltip>
           )}
           {showSettings && (
-            <Tooltip 
-              text={t<string>('Settings')}>
+            <Tooltip text={t<string>('Settings')}>
               <Link to={'/account/settings'}>
-              <img
-                className='popupToggle'
-                data-toggle-settings
-                onClick={_toggleSettings}
-                ref={setIconRef}
-                src={settingsIcon}
-              />
+                <img
+                  className='popupToggle'
+                  data-toggle-settings
+                  onClick={_toggleSettings}
+                  ref={setIconRef}
+                  src={settingsIcon}
+                />
               </Link>
             </Tooltip>
           )}
@@ -160,14 +161,13 @@ function Header({
 
 export default React.memo(
   styled(Header)(
-    ({ theme }: ThemeProps) => `
+    ({ showSettings, theme, withStepper }: Props) => `
   max-width: 100%;
   box-sizing: border-box;
   font-weight: normal;
   margin: 0;
   position: relative;
-  margin-bottom: 25px;
-
+  margin-bottom: ${withStepper ? '0px' : '25px'};
 
   && {
     padding: 0 0 0;
@@ -183,11 +183,7 @@ export default React.memo(
     justify-content: space-between;
     width: 100%;
     height: 56px;
-    border-bottom: 1px solid ${theme.boxBorderColor};
-
-    > div {
-      flex: 1 0 0;
-    }
+    border-bottom: ${withStepper ? 'none' : `1px solid ${theme.boxBorderColor}`};
 
     .branding {
       display: flex;
@@ -207,7 +203,8 @@ export default React.memo(
       display:flex;
       align-items: center;
       justify-content: center;
-      /* width: 100%; */
+      margin-left: ${showSettings ? '16px' : '0px'};
+      width: 100%;
 
       .logoText {
         color: ${theme.textColor};
@@ -216,15 +213,17 @@ export default React.memo(
         font-size: 14px;
         line-height: 120%;
         letter-spacing: 0.07em;
-
       }
     }
 
     .popupMenus {
       display: flex;
-      justify-content: center;
-      align-items: center;
+      justify-content: flex-end;
       gap: 16px;
+
+      :last-child {
+        margin-right: 24px;
+      }
     }
 
     .connectedAccountsWrapper {
@@ -275,9 +274,6 @@ export default React.memo(
       width: 100%
     }
 
-    .popupToggle+.popupToggle {
-      margin-left: 16px;
-    }
   }
 
   .plusIcon, .cogIcon, .searchIcon {

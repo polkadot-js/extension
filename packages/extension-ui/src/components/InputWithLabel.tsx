@@ -26,7 +26,22 @@ interface Props {
   withoutMargin?: boolean;
 }
 
-function InputWithLabel ({ className, defaultValue, disabled, isError, isFocused, isReadOnly, label = '', onBlur, onChange, onEnter, placeholder, type = 'text', value, withoutMargin }: Props): React.ReactElement<Props> {
+function InputWithLabel({
+  className,
+  defaultValue,
+  disabled,
+  isError,
+  isFocused,
+  isReadOnly,
+  label = '',
+  onBlur,
+  onChange,
+  onEnter,
+  placeholder,
+  type = 'text',
+  value,
+  withoutMargin
+}: Props): React.ReactElement<Props> {
   const [isCapsLock, setIsCapsLock] = useState(false);
   const { t } = useTranslation();
 
@@ -73,9 +88,9 @@ function InputWithLabel ({ className, defaultValue, disabled, isError, isFocused
         value={value}
         withError={isError}
       />
-      { isCapsLock && (
+      {/* { isCapsLock && (
         <Warning isBelowInput>{t<string>('Warning: Caps lock is on')}</Warning>
-      )}
+      )} */}
     </Label>
   );
 }

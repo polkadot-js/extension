@@ -15,17 +15,19 @@ interface Props extends ThemeProps {
 
 const AddButton: React.FC<Props> = function ({ className }: Props) {
   return (
-    <Link to={'/account/create-menu'}>
+    <Link to={'/account/add-menu'}>
       <div className={className}>
-        <FontAwesomeIcon 
-        className='icon' 
-        icon={faPlus} />
+        <FontAwesomeIcon
+          className='icon'
+          icon={faPlus}
+        />
       </div>
     </Link>
   );
 };
 
-export default styled(AddButton)(({ theme }: ThemeProps) => `
+export default styled(AddButton)(
+  ({ theme }: ThemeProps) => `
   position: absolute;
   bottom:16px;
   display: flex;

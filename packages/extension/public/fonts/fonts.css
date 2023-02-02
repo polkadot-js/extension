@@ -1,36 +1,56 @@
 @font-face {
   font-family: 'Karla';
   src: local('Karla'), local('Karla-light'),
-      url('./Karla/Karla-Light.ttf') format('truetype');
-      font-weight: 300;
-      font-style: light;
+    url('./Karla/Karla-Light.ttf') format('truetype');
+  font-weight: 300;
+  font-style: light;
 }
 
 @font-face {
-  
+  font-family: 'Karla';
+  src: local('Karla'), local('Karla-light'),
+    url('./Karla/Karla-SemiBold.ttf') format('truetype');
+  font-weight: 600;
+  font-style: light;
+}
+
+@font-face {
+  font-family: 'Karla';
+  src: local('Karla'), local('Karla-light'),
+    url('./Karla/Karla-Bold.ttf') format('truetype');
+  font-weight: bold;
+  font-style: light;
+}
+
+@font-face {
+
   font-family: 'Gilroy';
   src: url('./Gilroy/GilroyRegular.woff') format('woff');
   font-weight: normal;
   font-style: normal;
 }
+
 @font-face {
   font-family: 'Gilroy';
   src: url('./Gilroy/GilroyLight.woff') format('woff');
   font-weight: 300;
   font-style: normal;
 }
+
 @font-face {
   font-family: 'Gilroy';
   src: url('./Gilroy/GilroyMedium.woff') format('woff');
   font-weight: 500;
   font-style: normal;
 }
+
 @font-face {
   font-family: 'Gilroy';
   src: url('./Gilroy/GilroyBold.woff') format('woff');
   font-weight: bold;
   font-style: normal;
 }
+
 @font-face {
   font-family: 'Gilroy';
   src: url('./Gilroy/GilroyExtraBold.woff') format('woff');

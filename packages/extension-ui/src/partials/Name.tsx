@@ -32,7 +32,7 @@ export default function Name ({ address, className, isFocused, label, onBlur, on
       data-input-name
       defaultValue={startValue}
       isFocused={isFocused}
-      label={label || t<string>('A descriptive name for your account')}
+      label={label || t<string>('Name')}
       onBlur={onBlur}
       onEnter={onBlur}
       onValidatedChange={onChange}

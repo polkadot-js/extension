@@ -1,10 +1,10 @@
 // Copyright 2019-2022 @polkadot/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import type { ThemeProps } from '../types';
-
 import React from 'react';
 import styled from 'styled-components';
+
+import { Theme } from '../types';
 
 interface Props {
   children: React.ReactNode;
@@ -19,28 +19,16 @@ function Main ({ children, className }: Props): React.ReactElement<Props> {
   );
 }
 
-export default styled(Main)(({ theme }: ThemeProps) => `
-  display: flex;
-  flex-direction: column;
-  height: 100%;
-  background: ${theme.background};
-  color: ${theme.textColor};
-  font-size: ${theme.fontSize};
-  line-height: ${theme.lineHeight};
-  border: 1px solid ${theme.extensionBorder};
+export default styled(Main)<Props>(({ theme }) => {
+  const { token } = theme as Theme;
 
-  * {
-    font-family: ${theme.fontFamily};
-    ::-webkit-scrollbar-thumb {
-      background: ${theme.scrollBarThumb};
-    }
+  return ({
+    display: 'flex',
+    flexDirection: 'column',
+    height: '100%',
 
-    ::-webkit-scrollbar-thumb:window-inactive {
-      background: ${theme.scrollBarThumbInactive};
+    '*': {
+      fontFamily: token.fontFamily
     }
-
-    ::-webkit-scrollbar-thumb:hover {
-      background: ${theme.scrollBarThumbHover};
-    }
-  }
-`);
+  });
+});

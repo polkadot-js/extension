@@ -22,11 +22,11 @@ export interface IChain extends _ChainInfo {
   active: boolean,
   currentProvider: string
 }
+export interface ICrowdloanItem extends CrowdloanItem, DefaultAddressDoc, DefaultChainDoc {}
 
 // TODO: refactor this
 export interface INft extends Omit<NftItem, 'chain'>, DefaultAddressDoc {}
 export interface INftCollection extends Omit<NftCollection, 'chain'>, DefaultChainDoc {}
-export interface ICrowdloanItem extends CrowdloanItem, DefaultAddressDoc {}
 export interface IStakingItem extends StakingItem, DefaultAddressDoc {}
 export interface ITransactionHistoryItem extends TransactionHistoryItemType, DefaultAddressDoc {}
 export interface IExtraDelegationInfo extends ExtraDelegationInfo, DefaultAddressDoc {}

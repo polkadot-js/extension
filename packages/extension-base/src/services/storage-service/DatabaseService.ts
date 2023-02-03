@@ -3,7 +3,7 @@
 
 import { _ChainAsset } from '@subwallet/chain-list/types';
 import { APIItemState, BalanceItem, CrowdloanItem, NftCollection, NftItem, StakingItem, TransactionHistoryItemType } from '@subwallet/extension-base/background/KoniTypes';
-import KoniDatabase, { IBalance, IChain, INft, IStakingItem } from '@subwallet/extension-base/services/storage-service/databases';
+import KoniDatabase, { IBalance, IChain, ICrowdloanItem, INft, IStakingItem } from '@subwallet/extension-base/services/storage-service/databases';
 import { AssetStore, BalanceStore, ChainStore, CrowdloanStore, ExtraDelegationInfoStore, MigrationStore, NftCollectionStore, NftStore, StakingStore, TransactionStore } from '@subwallet/extension-base/services/storage-service/db-stores';
 import { Subscription } from 'dexie';
 
@@ -45,15 +45,15 @@ export default class DatabaseService {
   }
 
   // Crowdloan
-  async updateCrowdloanStore (chain: string, chainHash: string, address: string, item: CrowdloanItem) {
+  async updateCrowdloanStore (chain: string, address: string, item: CrowdloanItem) {
     if (item.state === APIItemState.READY && item.contribute !== '0') {
       this.logger.log(`Updating crowdloan for [${chain}]`);
 
-      return this.stores.crowdloan.upsert({ chainHash, _chain: chain, address, ...item });
+      return this.stores.crowdloan.upsert({ chain, address, ...item } as ICrowdloanItem);
     } else {
       this.logger.debug(`Removing crowdloan for [${chain}]`);
 
-      return this.stores.crowdloan.deleteByChainAndAddress(chainHash, address);
+      return this.stores.crowdloan.deleteByChainAndAddress(chain, address);
     }
   }
 

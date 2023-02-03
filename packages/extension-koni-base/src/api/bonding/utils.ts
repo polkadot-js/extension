@@ -170,6 +170,7 @@ export function calculateInflation (totalEraStake: BN, totalIssuance: BN, numAuc
 
 export function calculateChainStakedReturn (inflation: number, totalEraStake: BN, totalIssuance: BN, networkKey: string) {
   const stakedFraction = totalEraStake.mul(BN_MILLION).div(totalIssuance).toNumber() / BN_MILLION.toNumber();
+
   let stakedReturn = inflation / stakedFraction;
 
   if (['aleph', 'alephTest'].includes(networkKey)) {
@@ -179,9 +180,13 @@ export function calculateChainStakedReturn (inflation: number, totalEraStake: BN
   return stakedReturn;
 }
 
-export function calculateValidatorStakedReturn (chainStakedReturn: BN, totalValidatorStake: BN, avgStake: BN, commission: number) {
-  const bnAdjusted = avgStake.mul(BN_HUNDRED).mul(chainStakedReturn).div(totalValidatorStake);
-  const adjusted = bnAdjusted.toNumber();
+export function calculateAlephZeroValidatorReturn (chainStakedReturn: number, commission: number) {
+  return chainStakedReturn * (100 - commission) / 100;
+}
+
+export function calculateValidatorStakedReturn (chainStakedReturn: number, totalValidatorStake: BN, avgStake: BN, commission: number) {
+  const bnAdjusted = avgStake.mul(BN_HUNDRED).div(totalValidatorStake);
+  const adjusted = bnAdjusted.toNumber() * chainStakedReturn;
 
   const stakedReturn = (adjusted > Number.MAX_SAFE_INTEGER ? Number.MAX_SAFE_INTEGER : adjusted) / 100;
 

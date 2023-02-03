@@ -61,6 +61,10 @@ export function _isPureEvmChain (chainInfo: _ChainInfo) {
   return (chainInfo.evmInfo !== null && chainInfo.substrateInfo === null);
 }
 
+export function _getOriginChainOfAsset (assetSlug: string) {
+  return assetSlug.split('-')[0];
+}
+
 export function _getContractAddressOfToken (tokenInfo: _ChainAsset) {
   return tokenInfo.metadata?.contractAddress as string || '';
 }

@@ -7,7 +7,7 @@ import { DataContext } from '@subwallet/extension-koni-ui/contexts/DataContext';
 import PhishingDetected from '@subwallet/extension-koni-ui/Popup/PhishingDetected';
 import Root, { initRootPromise } from '@subwallet/extension-koni-ui/Popup/Root';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
-import React, {useContext, useEffect} from 'react';
+import React, { useContext, useEffect } from 'react';
 import { useSelector } from 'react-redux';
 import { Await, Outlet } from 'react-router';
 import { createHashRouter } from 'react-router-dom';
@@ -37,7 +37,7 @@ export function Crypto () {
     console.log('store', store);
   }, [store]);
 
-  return <PageWrapper resolve={dataContext.awaitStores(['price', 'chainStore', 'assetRegistry'])}>
+  return <PageWrapper resolve={dataContext.awaitStores(['price', 'chainStore', 'assetRegistry', 'balance'])}>
     <div>Crypto</div>
   </PageWrapper>;
 }

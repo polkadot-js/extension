@@ -76,24 +76,24 @@ export class KoniSubscription {
 
   start () {
     this.logger.log('Starting subscription');
-    // this.state.getCurrentAccount((currentAccountInfo) => {
-    //   if (currentAccountInfo) {
-    //     const { address } = currentAccountInfo;
-    //
-    //     this.subscribeBalancesAndCrowdloans(address, this.state.getChainInfoMap(), this.state.getSubstrateApiMap(), this.state.getEvmApiMap());
-    //     this.subscribeStakingOnChain(address, this.state.getSubstrateApiMap());
-    //   }
-    // });
-    //
-    // !this.serviceSubscription &&
-    //   (this.serviceSubscription = this.state.subscribeServiceInfo().subscribe({
-    //     next: (serviceInfo) => {
-    //       const { address } = serviceInfo.currentAccountInfo;
-    //
-    //       this.subscribeBalancesAndCrowdloans(address, serviceInfo.chainInfoMap, serviceInfo.chainApiMap.substrate, serviceInfo.chainApiMap.evm);
-    //       this.subscribeStakingOnChain(address, serviceInfo.chainApiMap.substrate);
-    //     }
-    //   }));
+    this.state.getCurrentAccount((currentAccountInfo) => {
+      if (currentAccountInfo) {
+        const { address } = currentAccountInfo;
+
+        this.subscribeBalancesAndCrowdloans(address, this.state.getChainInfoMap(), this.state.getSubstrateApiMap(), this.state.getEvmApiMap());
+        // this.subscribeStakingOnChain(address, this.state.getSubstrateApiMap());
+      }
+    });
+
+    !this.serviceSubscription &&
+      (this.serviceSubscription = this.state.subscribeServiceInfo().subscribe({
+        next: (serviceInfo) => {
+          const { address } = serviceInfo.currentAccountInfo;
+
+          this.subscribeBalancesAndCrowdloans(address, serviceInfo.chainInfoMap, serviceInfo.chainApiMap.substrate, serviceInfo.chainApiMap.evm);
+          // this.subscribeStakingOnChain(address, serviceInfo.chainApiMap.substrate);
+        }
+      }));
   }
 
   stop () {
@@ -127,16 +127,6 @@ export class KoniSubscription {
       this.state.setAuthorize(migrateValue);
       localStorage.setItem('authUrls', '{}');
     });
-
-    this.state.getCurrentAccount((currentAccountInfo) => {
-      if (currentAccountInfo) {
-        const { address } = currentAccountInfo;
-
-        this.subscribeBalancesAndCrowdloans(address, this.state.getChainInfoMap(), this.state.getSubstrateApiMap(), this.state.getEvmApiMap(), true);
-        this.subscribeStakingOnChain(address, this.state.getSubstrateApiMap(), true);
-        // this.stopAllSubscription();
-      }
-    });
   }
 
   subscribeBalancesAndCrowdloans (address: string, chainInfoMap: Record<string, _ChainInfo>, substrateApiMap: Record<string, _SubstrateApi>, web3ApiMap: Record<string, _EvmApi>, onlyRunOnFirstTime?: boolean) {
@@ -147,7 +137,7 @@ export class KoniSubscription {
             return;
           }
 
-          this.updateSubscription('balance', this.initBalanceSubscription(address, addresses, chainInfoMap, substrateApiMap, web3ApiMap, onlyRunOnFirstTime));
+          this.updateSubscription('balance', this.initBalanceSubscription(addresses, chainInfoMap, substrateApiMap, web3ApiMap, onlyRunOnFirstTime));
           this.updateSubscription('crowdloan', this.initCrowdloanSubscription(addresses, substrateApiMap, onlyRunOnFirstTime));
         })
         .catch(this.logger.error);
@@ -184,9 +174,10 @@ export class KoniSubscription {
     };
   }
 
-  initBalanceSubscription (key: string, addresses: string[], chainInfoMap: Record<string, _ChainInfo>, substrateApiMap: Record<string, _SubstrateApi>, evmApiMap: Record<string, _EvmApi>, onlyRunOnFirstTime?: boolean) {
-    const unsub = subscribeBalance(addresses, chainInfoMap, substrateApiMap, evmApiMap, (networkKey, rs) => {
-      this.state.setBalanceItem(networkKey, rs);
+  initBalanceSubscription (addresses: string[], chainInfoMap: Record<string, _ChainInfo>, substrateApiMap: Record<string, _SubstrateApi>, evmApiMap: Record<string, _EvmApi>, onlyRunOnFirstTime?: boolean) {
+    const unsub = subscribeBalance(addresses, chainInfoMap, substrateApiMap, evmApiMap, (result) => {
+      console.log('callback balance', result);
+      this.state.setBalanceItem(result.tokenSlug, result);
     });
 
     if (onlyRunOnFirstTime) {

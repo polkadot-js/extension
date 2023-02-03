@@ -3,7 +3,7 @@
 
 import { _ChainAsset } from '@subwallet/chain-list/types';
 import { APIItemState, BalanceItem, CrowdloanItem, NftCollection, NftItem, StakingItem, TransactionHistoryItemType } from '@subwallet/extension-base/background/KoniTypes';
-import KoniDatabase, { IChain, INft, IStakingItem } from '@subwallet/extension-base/services/storage-service/databases';
+import KoniDatabase, { IBalance, IChain, INft, IStakingItem } from '@subwallet/extension-base/services/storage-service/databases';
 import { AssetStore, BalanceStore, ChainStore, CrowdloanStore, ExtraDelegationInfoStore, MigrationStore, NftCollectionStore, NftStore, StakingStore, TransactionStore } from '@subwallet/extension-base/services/storage-service/db-stores';
 import { Subscription } from 'dexie';
 
@@ -36,17 +36,13 @@ export default class DatabaseService {
   }
 
   // Balance
-  async updateBalanceStore (chain: string, chainHash: string, address: string, item: BalanceItem) {
+  async updateBalanceStore (address: string, item: BalanceItem) {
     if (item.state === APIItemState.READY) {
-      this.logger.log(`Updating balance for [${chain}]`);
+      this.logger.log(`Updating balance for [${item.tokenSlug}]`);
 
-      return this.stores.balance.upsert({ chainHash, _chain: chain, address, ...item });
+      return this.stores.balance.upsert({ address, ...item } as IBalance);
     }
   }
-
-  // public getBalanceObservable (address: string, cb: (result: BalanceJson) => void) {
-  //   return this.stores.balance.liveQueryBalance(address, cb);
-  // }
 
   // Crowdloan
   async updateCrowdloanStore (chain: string, chainHash: string, address: string, item: CrowdloanItem) {

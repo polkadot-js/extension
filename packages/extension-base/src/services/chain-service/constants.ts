@@ -1,6 +1,7 @@
 // Copyright 2019-2022 @subwallet/extension-koni-base authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
+import { _DEFAULT_CHAINS } from '@subwallet/chain-list';
 import { _SubstrateChainType } from '@subwallet/chain-list/types';
 import { SingleModeJson, ThemeTypes } from '@subwallet/extension-base/background/KoniTypes';
 
@@ -206,3 +207,10 @@ export const _XCM_TYPE = {
   PP: `${_SubstrateChainType.PARACHAIN}-${_SubstrateChainType.PARACHAIN}`,
   PR: `${_SubstrateChainType.PARACHAIN}-${_SubstrateChainType.RELAYCHAIN}`
 };
+
+export const _DEFAULT_ACTIVE_CHAINS = [
+  ..._DEFAULT_CHAINS,
+  'ethereum',
+  'acala',
+  'moonbeam'
+];

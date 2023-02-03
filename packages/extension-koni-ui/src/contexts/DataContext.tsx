@@ -2,19 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { store, StoreName } from '@subwallet/extension-koni-ui/stores';
-import {
-  subscribeAssetRegistry,
-  subscribeBalance, subscribeChainInfoMap,
-  subscribeChainStateMap,
-  subscribeCrowdloan,
-  subscribeNftCollections,
-  subscribeNftItems,
-  subscribePrice,
-  subscribeStakeUnlockingInfo,
-  subscribeStaking,
-  subscribeStakingReward,
-  subscribeTxHistory
-} from '@subwallet/extension-koni-ui/stores/utils';
+import { subscribeAssetRegistry, subscribeBalance, subscribeChainInfoMap, subscribeChainStateMap, subscribeCrowdloan, subscribeNftCollections, subscribeNftItems, subscribePrice, subscribeStakeUnlockingInfo, subscribeStaking, subscribeStakingReward, subscribeTxHistory } from '@subwallet/extension-koni-ui/stores/utils';
 import React from 'react';
 import { Provider } from 'react-redux';
 

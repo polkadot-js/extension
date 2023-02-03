@@ -12,13 +12,7 @@ import { AuthorizeRequest, RequestAuthorizeTab } from '@subwallet/extension-base
 import { ChainService } from '@subwallet/extension-base/services/chain-service';
 import { _PREDEFINED_SINGLE_MODES } from '@subwallet/extension-base/services/chain-service/constants';
 import { _ChainConnectionStatus, _ChainState, _ValidateCustomTokenRequest } from '@subwallet/extension-base/services/chain-service/types';
-import {
-  _getChainNativeTokenBasicInfo, _getChainNativeTokenSlug,
-  _getEvmChainId,
-  _getSubstrateGenesisHash,
-  _isChainEnabled,
-  _isChainEvmCompatible
-} from '@subwallet/extension-base/services/chain-service/utils';
+import { _getChainNativeTokenSlug, _getEvmChainId, _getOriginChainOfAsset, _getSubstrateGenesisHash, _isChainEnabled, _isChainEvmCompatible } from '@subwallet/extension-base/services/chain-service/utils';
 import DatabaseService from '@subwallet/extension-base/services/storage-service/DatabaseService';
 import { Web3Transaction } from '@subwallet/extension-base/signers/types';
 import { CurrentAccountStore, PriceStore } from '@subwallet/extension-base/stores';
@@ -959,8 +953,22 @@ export default class KoniState extends State {
     return Object.keys(accounts.subject.value);
   }
 
+  private removeInactiveChainBalances (balanceMap: Record<string, BalanceItem>) {
+    const activeBalanceMap: Record<string, BalanceItem> = {};
+
+    Object.entries(balanceMap).forEach(([tokenSlug, balanceItem]) => {
+      const networkKey = _getOriginChainOfAsset(tokenSlug);
+
+      if (this.getChainStateByKey(networkKey).active) {
+        activeBalanceMap[tokenSlug] = balanceItem;
+      }
+    });
+
+    return activeBalanceMap;
+  }
+
   public getBalance (reset?: boolean): BalanceJson {
-    const activeData = this.removeInactiveNetworkData(this.balanceMap);
+    const activeData = this.removeInactiveChainBalances(this.balanceMap);
 
     return { details: activeData, reset } as BalanceJson;
   }
@@ -982,11 +990,9 @@ export default class KoniState extends State {
     const defaultData = this.generateDefaultBalanceMap();
     let storedData = await this.getStoredBalance(newAddress);
 
-    storedData = this.removeInactiveNetworkData(storedData);
+    storedData = this.removeInactiveChainBalances(storedData);
 
-    const merge = { ...defaultData, ...storedData } as Record<string, BalanceItem>;
-
-    this.balanceMap = merge;
+    this.balanceMap = { ...defaultData, ...storedData } as Record<string, BalanceItem>;
     this.publishBalance(true);
   }
 
@@ -1017,25 +1023,18 @@ export default class KoniState extends State {
     });
   }
 
-  public setBalanceItem (networkKey: string, item: BalanceItem) {
-    // eslint-disable-next-line no-prototype-builtins
-    if (typeof item === 'object' && item.hasOwnProperty('children') && item.children === undefined) {
-      delete item.children;
-    }
+  public setBalanceItem (tokenSlug: string, item: BalanceItem) {
+    this.balanceMap[tokenSlug] = { timestamp: +new Date(), ...item };
+    this.updateBalanceStore(item);
 
-    const itemData = { timestamp: +new Date(), ...item };
-
-    this.balanceMap[networkKey] = { ...this.balanceMap[networkKey], ...itemData };
-    this.updateBalanceStore(networkKey, item);
-
-    this.lazyNext('setBalanceItem', () => {
-      this.publishBalance();
-    });
+    // this.lazyNext('setBalanceItem', () => {
+    //   this.publishBalance();
+    // });
   }
 
-  private updateBalanceStore (networkKey: string, item: BalanceItem) {
+  private updateBalanceStore (item: BalanceItem) {
     this.getCurrentAccount((currentAccountInfo) => {
-      this.dbService.updateBalanceStore(networkKey, this.getNetworkGenesisHashByKey(networkKey), currentAccountInfo.address, item).catch((e) => this.logger.warn(e));
+      this.dbService.updateBalanceStore(currentAccountInfo.address, item).catch((e) => this.logger.warn(e));
     });
   }
 
@@ -1121,7 +1120,7 @@ export default class KoniState extends State {
   }
 
   public getHistoryMap (): Record<string, TransactionHistoryItemType[]> {
-    return this.removeInactiveNetworkData(this.historyMap);
+    return this.removeInactiveDataByChain(this.historyMap);
   }
 
   public setPrice (priceData: PriceJson, callback?: (priceData: PriceJson) => void): void {
@@ -1468,7 +1467,7 @@ export default class KoniState extends State {
     this.historySubject.next(this.getHistoryMap());
   }
 
-  private removeInactiveNetworkData<T> (data: Record<string, T>) {
+  private removeInactiveDataByChain<T> (data: Record<string, T>) {
     const activeData: Record<string, T> = {};
 
     Object.entries(data).forEach(([networkKey, items]) => {

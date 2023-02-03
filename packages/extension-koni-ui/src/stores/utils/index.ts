@@ -1,12 +1,12 @@
 // Copyright 2019-2022 @subwallet/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
+import { _ChainAsset, _ChainInfo } from '@subwallet/chain-list/types';
 import { BalanceJson, CrowdloanJson, NftCollection, NftItem, PriceJson, StakeUnlockingJson, StakingJson, StakingRewardJson, TransactionHistoryItemType } from '@subwallet/extension-base/background/KoniTypes';
 import { AccountJson } from '@subwallet/extension-base/background/types';
+import { _ChainState } from '@subwallet/extension-base/services/chain-service/types';
 import { lazySubscribeMessage } from '@subwallet/extension-koni-ui/messaging';
 import { store } from '@subwallet/extension-koni-ui/stores';
-import {_ChainAsset, _ChainInfo} from "@subwallet/chain-list/types";
-import {_ChainState} from "@subwallet/extension-base/services/chain-service/types";
 
 // Setup redux stores
 
@@ -106,6 +106,7 @@ export const updatePrice = (data: PriceJson) => {
 export const subscribePrice = lazySubscribeMessage('pri(price.getSubscription)', null, updatePrice, updatePrice);
 
 export const updateBalance = (data: BalanceJson) => {
+  console.log('balanceMap', data);
   store.dispatch({ type: 'balance/update', payload: data.details });
 };
 

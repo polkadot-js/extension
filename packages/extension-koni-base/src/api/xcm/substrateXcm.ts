@@ -8,7 +8,7 @@ import { parseNumberToDisplay } from '@subwallet/extension-koni-base/utils';
 import { ApiPromise } from '@polkadot/api';
 import { KeyringPair } from '@polkadot/keyring/types';
 
-const NETWORK_USE_UNLIMIT_WEIGHT: string[] = ['acala', 'karura', 'statemint'];
+const NETWORK_USE_UNLIMIT_WEIGHT: string[] = ['acala', 'karura', 'statemint', 'bifrost'];
 
 function getTokenIdentity (originNetworkKey: string, tokenInfo: TokenInfo) {
   // TODO: find a better way to handle kUSD on karura

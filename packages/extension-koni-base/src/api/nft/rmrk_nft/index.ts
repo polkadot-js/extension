@@ -6,7 +6,7 @@ import { BaseNftApi, HandleNftParams } from '@subwallet/extension-koni-base/api/
 import { isUrl, reformatAddress } from '@subwallet/extension-koni-base/utils';
 import fetch from 'cross-fetch';
 
-import { getRandomIpfsGateway, KANARIA_ENDPOINT, KANARIA_EXTERNAL_SERVER, SINGULAR_V1_COLLECTION_ENDPOINT, SINGULAR_V1_ENDPOINT, SINGULAR_V1_EXTERNAL_SERVER, SINGULAR_V2_COLLECTION_ENDPOINT, SINGULAR_V2_ENDPOINT, SINGULAR_V2_EXTERNAL_SERVER } from '../config';
+import { getRandomIpfsGateway, SINGULAR_V1_COLLECTION_ENDPOINT, SINGULAR_V1_ENDPOINT, SINGULAR_V2_COLLECTION_ENDPOINT, SINGULAR_V2_ENDPOINT } from '../config';
 
 enum RMRK_SOURCE {
   BIRD_KANARIA = 'bird_kanaria',
@@ -14,6 +14,8 @@ enum RMRK_SOURCE {
   SINGULAR_V1 = 'singular_v1',
   SINGULAR_V2 = 'singular_v2'
 }
+
+const KANBIRD_KEYWORD = 'KANBIRD';
 
 interface NFTMetadata {
   animation_url?: string,
@@ -25,12 +27,20 @@ interface NFTMetadata {
   mediaUri?: string,
 }
 
-interface NFTResource {
-  id?: string,
-  slot_id?: any[],
-  src?: string,
-  thumb?: string,
-  metadata?: string
+interface RmrkNftResponse {
+  id: string,
+  collection?: {
+    name: string
+  }
+  collectionId: string,
+  metadata: string,
+  primaryResource?: {
+    id: string,
+    src: string,
+    thumb: string,
+    metadata: string | null
+  },
+  source?: RMRK_SOURCE
 }
 
 export class RmrkNftApi extends BaseNftApi {
@@ -73,22 +83,26 @@ export class RmrkNftApi extends BaseNftApi {
 
   private async getAllByAccount (account: string) {
     const fetchUrls = [
-      { url: KANARIA_ENDPOINT + 'account-birds/' + account, source: RMRK_SOURCE.BIRD_KANARIA },
-      { url: KANARIA_ENDPOINT + 'account-items/' + account, source: RMRK_SOURCE.KANARIA },
       { url: SINGULAR_V1_ENDPOINT + account, source: RMRK_SOURCE.SINGULAR_V1 },
       { url: SINGULAR_V2_ENDPOINT + account, source: RMRK_SOURCE.SINGULAR_V2 }
     ];
 
-    let data: Record<number | string, number | string | NFTResource>[] = [];
+    let data: RmrkNftResponse[] = [];
 
     await Promise.all(fetchUrls.map(async ({ source, url }) => {
       let _data = await fetch(url, {
         method: 'GET'
       })
-        .then((res) => res.json()) as Record<number | string, number | string | NFTResource>[];
+        .then((res) => res.json()) as RmrkNftResponse[];
 
       _data = _data.map((item) => {
-        return { ...item, source };
+        let nftSource = source;
+
+        if (item.collectionId.includes(KANBIRD_KEYWORD)) {
+          nftSource = RMRK_SOURCE.BIRD_KANARIA;
+        }
+
+        return { ...item, source: nftSource };
       });
 
       data = data.concat(_data);
@@ -96,56 +110,52 @@ export class RmrkNftApi extends BaseNftApi {
 
     const nfts: Record<string | number, any>[] = [];
 
-    await Promise.all(data.map(async (item: Record<number | string, number | string | NFTResource>) => {
-      const primaryResource = item.primaryResource ? item.primaryResource as NFTResource : null;
+    await Promise.all(data.map(async (item) => {
+      const primaryResource = item.primaryResource ? item.primaryResource : null;
       const metadataUri = primaryResource && primaryResource.metadata ? primaryResource.metadata : item.metadata;
-      const result = await this.getMetadata(metadataUri as string);
+      const nftMetadata = await this.getMetadata(metadataUri);
 
       if (item.source === RMRK_SOURCE.BIRD_KANARIA) {
         nfts.push({
           ...item,
-          metadata: result,
-          external_url: KANARIA_EXTERNAL_SERVER + item.id.toString(),
+          metadata: nftMetadata,
           owner: account
         });
       } else if (item.source === RMRK_SOURCE.KANARIA) {
         nfts.push({
           ...item,
           metadata: {
-            ...result,
-            image: this.parseUrl(result?.image as string)
+            ...nftMetadata,
+            image: this.parseUrl(nftMetadata?.image as string)
           },
-          external_url: KANARIA_EXTERNAL_SERVER + item.id.toString(),
           owner: account
         });
       } else if (item.source === RMRK_SOURCE.SINGULAR_V1) {
         nfts.push({
           ...item,
           metadata: {
-            description: result?.description,
-            name: result?.name,
-            attributes: result?.attributes,
-            animation_url: this.parseUrl(result?.animation_url as string),
-            image: this.parseUrl(result?.image as string)
+            description: nftMetadata?.description,
+            name: nftMetadata?.name,
+            attributes: nftMetadata?.attributes,
+            animation_url: this.parseUrl(nftMetadata?.animation_url as string),
+            image: this.parseUrl(nftMetadata?.image as string)
           },
-          external_url: SINGULAR_V1_EXTERNAL_SERVER + item.id.toString(),
           owner: account
         });
       } else if (item.source === RMRK_SOURCE.SINGULAR_V2) {
-        const id = item.id as string;
+        const id = item.id;
 
-        if (!id.toLowerCase().includes('kanbird')) { // excludes kanaria bird, already handled above
+        if (!id.toLowerCase().includes(KANBIRD_KEYWORD)) { // excludes kanaria bird, already handled above
           nfts.push({
             ...item,
             metadata: {
-              description: result?.description,
-              name: result?.name,
-              attributes: result?.attributes,
-              properties: result?.properties,
-              animation_url: this.parseUrl(result?.animation_url as string),
-              image: this.parseUrl(result?.mediaUri as string)
+              description: nftMetadata?.description,
+              name: nftMetadata?.name,
+              attributes: nftMetadata?.attributes,
+              properties: nftMetadata?.properties,
+              animation_url: this.parseUrl(nftMetadata?.animation_url as string),
+              image: this.parseUrl(nftMetadata?.mediaUri as string)
             },
-            external_url: SINGULAR_V2_EXTERNAL_SERVER + item.id.toString(),
             owner: account
           });
         }
@@ -197,6 +207,8 @@ export class RmrkNftApi extends BaseNftApi {
 
         // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
         params.updateItem(this.chain, parsedItem, address);
+
+        console.log('parsedItem rmrk', parsedItem);
 
         let url = '';
 

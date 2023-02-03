@@ -17,7 +17,7 @@ import { JsonRpcPayload, JsonRpcResponse } from 'web3-core-helpers';
 
 import { ApiPromise } from '@polkadot/api';
 import { SubmittableExtrinsicFunction } from '@polkadot/api/promise/types';
-import { Registry } from '@polkadot/types/types';
+import { Registry, SignerPayloadJSON } from '@polkadot/types/types';
 import { SignerResult } from '@polkadot/types/types/extrinsic';
 import { BN } from '@polkadot/util';
 import { KeypairType } from '@polkadot/util-crypto/types';
@@ -163,11 +163,11 @@ export interface StakeUnlockingJson {
   details: UnlockingStakeInfo[]
 }
 
-// TODO: refactor this
 export interface PriceJson {
   ready?: boolean,
   currency: string,
-  priceMap: Record<string, number>
+  priceMap: Record<string, number>,
+  tokenPriceMap: Record<string, number>
 }
 
 export enum APIItemState {
@@ -230,38 +230,32 @@ export interface NftCollectionJson {
   nftCollectionList: Array<NftCollection>;
 }
 
+// export interface NftStoreJson {
+//   nftList: Array<NftItem>;
+//   nftCollectionList: Array<NftCollection>;
+// }
+
 export interface TokenBalanceRaw {
   reserved: BN,
   frozen: BN,
   free: BN
 }
 
-// deprecated
-// export interface BalanceChildItem {
-//   reserved: string,
-//   frozen: string,
-//   free: string,
-//   decimals: number
-// }
-
-export interface SubstrateBalance {
-  reserved?: string,
-  miscFrozen?: string,
-  feeFrozen?: string
+export interface BalanceChildItem {
+  reserved: string,
+  frozen: string,
+  free: string,
+  decimals: number
 }
 
 export interface BalanceItem {
-  // metadata
-  tokenSlug: string,
   state: APIItemState,
+  free?: string,
+  reserved?: string,
+  miscFrozen?: string,
+  feeFrozen?: string,
+  children?: Record<string, BalanceChildItem>,
   timestamp?: number
-
-  // must-have, total = free + locked
-  free: string,
-  locked: string,
-
-  // substrate fields
-  substrateInfo?: SubstrateBalance
 }
 
 export interface BalanceJson {
@@ -475,7 +469,7 @@ export interface TransactionHistoryItemType {
   fee?: string;
   feeSymbol?: string;
   // if undefined => main token, sometime "fee" uses different token than "change"
-  // ex: sub token (DOT, AUSD, KSM, ...) of Acala, Karura uses main token to pay fee
+  // ex: sub token (DOT, AUSD, KSM, ...) of Acala, Karaura uses main token to pay fee
   isSuccess: boolean;
   action: 'send' | 'received';
   extrinsicHash: string;
@@ -687,6 +681,27 @@ export interface RequestAccountCreateWithSecretKey {
 export interface ResponseAccountCreateWithSecretKey {
   errors: AccountExternalError[];
   success: boolean;
+}
+
+/// Sign Transaction
+
+export enum KoniTransactionStatus {
+  PENDING = 'PENDING',
+  REJECTED = 'REJECTED',
+  FAILED = 'FAILED',
+  COMPLETED = 'COMPLETED'
+}
+
+export interface KoniTransaction {
+  id: string;
+  network: string;
+  address: string;
+  data: any;
+  payload: SignerPayloadJSON;
+  status: KoniTransactionStatus;
+  extrinsicHash: string;
+  sendRequest?: () => void;
+  doStart?: () => void;
 }
 
 /// Sign External Request

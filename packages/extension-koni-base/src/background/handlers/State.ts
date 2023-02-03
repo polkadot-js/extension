@@ -5,27 +5,22 @@ import Common from '@ethereumjs/common';
 import { ChainInfoMap } from '@subwallet/chain-list';
 import { _AssetType, _ChainAsset, _ChainInfo } from '@subwallet/chain-list/types';
 import { withErrorLog } from '@subwallet/extension-base/background/handlers/helpers';
-import State, { AuthUrls, Resolver } from '@subwallet/extension-base/background/handlers/State';
 import { isSubscriptionRunning, unsubscribe } from '@subwallet/extension-base/background/handlers/subscriptions';
 import { AccountRefMap, AddNetworkRequestExternal, AddTokenRequestExternal, APIItemState, ApiMap, AuthRequestV2, BalanceItem, BalanceJson, ChainRegistry, ConfirmationDefinitions, ConfirmationsQueue, ConfirmationsQueueItemOptions, ConfirmationType, CrowdloanItem, CrowdloanJson, CurrentAccountInfo, CustomToken, EvmSendTransactionParams, EvmSendTransactionRequestExternal, EvmSignatureRequestExternal, ExternalRequestPromise, ExternalRequestPromiseStatus, KeyringState, NftCollection, NftItem, NftJson, NftTransferExtra, PriceJson, RequestAccountExportPrivateKey, RequestCheckPublicAndSecretKey, RequestConfirmationComplete, RequestSettingsType, ResponseAccountExportPrivateKey, ResponseCheckPublicAndSecretKey, ResultResolver, ServiceInfo, SingleModeJson, StakeUnlockingJson, StakingItem, StakingJson, StakingRewardItem, StakingRewardJson, ThemeTypes, TransactionHistoryItemType, UiSettings } from '@subwallet/extension-base/background/KoniTypes';
-import { AuthorizeRequest, RequestAuthorizeTab } from '@subwallet/extension-base/background/types';
+import { AccountAuthType, AccountJson, AuthorizeRequest, MetadataRequest, RequestAuthorizeTab, RequestRpcSend, RequestRpcSubscribe, RequestRpcUnsubscribe, RequestSign, ResponseRpcListProviders, ResponseSigning, SigningRequest } from '@subwallet/extension-base/background/types';
 import { ChainService } from '@subwallet/extension-base/services/chain-service';
 import { _PREDEFINED_SINGLE_MODES } from '@subwallet/extension-base/services/chain-service/constants';
 import { _ChainConnectionStatus, _ChainState, _ValidateCustomTokenRequest } from '@subwallet/extension-base/services/chain-service/types';
-import {
-  _getChainNativeTokenInfo, _getChainNativeTokenSlug,
-  _getEvmChainId,
-  _getSubstrateGenesisHash,
-  _isChainEnabled,
-  _isChainEvmCompatible
-} from '@subwallet/extension-base/services/chain-service/utils';
+import { _getEvmChainId, _getSubstrateGenesisHash, _isChainEnabled, _isChainEvmCompatible } from '@subwallet/extension-base/services/chain-service/utils';
 import DatabaseService from '@subwallet/extension-base/services/storage-service/DatabaseService';
 import { Web3Transaction } from '@subwallet/extension-base/signers/types';
-import { CurrentAccountStore, PriceStore } from '@subwallet/extension-base/stores';
+import { CurrentAccountStore, MetadataStore, PriceStore } from '@subwallet/extension-base/stores';
 import AccountRefStore from '@subwallet/extension-base/stores/AccountRef';
 import AuthorizeStore from '@subwallet/extension-base/stores/Authorize';
 import SettingsStore from '@subwallet/extension-base/stores/Settings';
 import { getId } from '@subwallet/extension-base/utils/getId';
+import { addMetadata, knownMetadata } from '@subwallet/extension-chains';
+import { MetadataDef, ProviderMeta } from '@subwallet/extension-inject/types';
 import { getTokenPrice } from '@subwallet/extension-koni-base/api/coingecko';
 import { parseTxAndSignature } from '@subwallet/extension-koni-base/api/evm/external/shared';
 // eslint-disable-next-line camelcase
@@ -42,6 +37,9 @@ import RLP, { Input } from 'rlp';
 import { BehaviorSubject, Subject } from 'rxjs';
 import { TransactionConfig, TransactionReceipt } from 'web3-core';
 
+import { knownGenesis } from '@polkadot/networks/defaults';
+import { JsonRpcResponse, ProviderInterface, ProviderInterfaceCallback } from '@polkadot/rpc-provider/types';
+import settings from '@polkadot/ui-settings';
 import { assert, BN, hexStripPrefix, hexToU8a, isHex, logger as createLogger, u8aToHex } from '@polkadot/util';
 import { Logger } from '@polkadot/util/types';
 import { base64Decode, isEthereumAddress, keyExtractSuri } from '@polkadot/util-crypto';
@@ -52,13 +50,123 @@ import { KoniSubscription } from '../subscription';
 
 const ETH_DERIVE_DEFAULT = '/m/44\'/60\'/0\'/0/0';
 
-function getSuri (seed: string, type?: KeypairType): string {
+export interface Resolver<T> {
+  reject: (error: Error) => void;
+  resolve: (result: T) => void;
+}
+
+export interface AuthRequest extends Resolver<boolean> {
+  id: string;
+  idStr: string;
+  request: RequestAuthorizeTab;
+  url: string;
+}
+
+export type AuthUrls = Record<string, AuthUrlInfo>;
+
+export interface AuthUrlInfo {
+  count: number;
+  id: string;
+  isAllowed: boolean;
+  origin: string;
+  url: string;
+  accountAuthType?: AccountAuthType;
+  isAllowedMap: Record<string, boolean>;
+  currentEvmNetworkKey?: string;
+}
+
+interface MetaRequest extends Resolver<boolean> {
+  id: string;
+  request: MetadataDef;
+  url: string;
+}
+
+// List of providers passed into constructor. This is the list of providers
+// exposed by the extension.
+type Providers = Record<string, {
+  meta: ProviderMeta;
+  // The provider is not running at init, calling this will instantiate the
+  // provider.
+  start: () => ProviderInterface;
+}>
+
+export interface SignRequest extends Resolver<ResponseSigning> {
+  account: AccountJson;
+  id: string;
+  request: RequestSign;
+  url: string;
+  internalData?: any;
+}
+
+export interface InternalSignRequest extends SignRequest {
+  internalData: any;
+}
+
+const NOTIFICATION_URL = chrome.extension.getURL('notification.html');
+
+const POPUP_WINDOW_OPTS: chrome.windows.CreateData = {
+  focused: true,
+  height: 621,
+  type: 'popup',
+  url: NOTIFICATION_URL,
+  width: 460
+};
+
+const NORMAL_WINDOW_OPTS: chrome.windows.CreateData = {
+  focused: true,
+  type: 'normal',
+  url: NOTIFICATION_URL
+};
+
+export enum NotificationOptions {
+  None,
+  Normal,
+  PopUp,
+}
+
+const extractMetadata = (store: MetadataStore): void => {
+  store.allMap((map): void => {
+    const knownEntries = Object.entries(knownGenesis);
+    const defs: Record<string, { def: MetadataDef, index: number, key: string }> = {};
+    const removals: string[] = [];
+
+    Object
+      .entries(map)
+      .forEach(([key, def]): void => {
+        const entry = knownEntries.find(([, hashes]) => hashes.includes(def.genesisHash));
+
+        if (entry) {
+          const [name, hashes] = entry;
+          const index = hashes.indexOf(def.genesisHash);
+
+          // flatten the known metadata based on the genesis index
+          // (lower is better/newer)
+          if (!defs[name] || (defs[name].index > index)) {
+            if (defs[name]) {
+              // remove the old version of the metadata
+              removals.push(defs[name].key);
+            }
+
+            defs[name] = { def, index, key };
+          }
+        } else {
+          // this is not a known entry, so we will just apply it
+          defs[key] = { def, index: 0, key };
+        }
+      });
+
+    removals.forEach((key) => store.remove(key));
+    Object.values(defs).forEach(({ def }) => addMetadata(def));
+  });
+};
+
+const getSuri = (seed: string, type?: KeypairType): string => {
   return type === 'ethereum'
     ? `${seed}${ETH_DERIVE_DEFAULT}`
     : seed;
-}
+};
 
-function generateDefaultCrowdloanMap () {
+const generateDefaultCrowdloanMap = (): Record<string, CrowdloanItem> => {
   const crowdloanMap: Record<string, CrowdloanItem> = {};
 
   Object.keys(ChainInfoMap).forEach((networkKey) => {
@@ -69,7 +177,7 @@ function generateDefaultCrowdloanMap () {
   });
 
   return crowdloanMap;
-}
+};
 
 const createValidateConfirmationResponsePayload = <CT extends ConfirmationType>(fromAddress: string): (result: ConfirmationDefinitions[CT][1]) => Error | undefined => {
   return (result: ConfirmationDefinitions[CT][1]) => {
@@ -89,9 +197,18 @@ const createValidateConfirmationResponsePayload = <CT extends ConfirmationType>(
   };
 };
 
-export default class KoniState extends State {
+const AUTH_URLS_KEY = 'authUrls';
+
+export default class KoniState {
+  readonly #metaStore = new MetadataStore();
+  readonly #injectedProviders = new Map<chrome.runtime.Port, ProviderInterface>();
+  readonly #metaRequests: Record<string, MetaRequest> = {};
+  #notification = settings.notification;
+  #windows: number[] = [];
+  readonly #providers: Providers;
   private readonly unsubscriptionMap: Record<string, () => void> = {};
 
+  public readonly metaSubject: BehaviorSubject<MetadataRequest[]> = new BehaviorSubject<MetadataRequest[]>([]);
   public readonly authSubjectV2: BehaviorSubject<AuthorizeRequest[]> = new BehaviorSubject<AuthorizeRequest[]>([]);
 
   // private readonly networkMapStore = new NetworkMapStore(); // persist custom networkMap by user
@@ -116,6 +233,11 @@ export default class KoniState extends State {
     hasMasterPassword: false
   };
 
+  // Substrate Request
+  readonly #signRequests: Record<string, SignRequest> = {};
+  public readonly signSubject: BehaviorSubject<SigningRequest[]> = new BehaviorSubject<SigningRequest[]>([]);
+
+  // Evm Request
   private readonly confirmationsQueueSubject = new BehaviorSubject<ConfirmationsQueue>({
     addNetworkRequest: {},
     addTokenRequest: {},
@@ -130,7 +252,6 @@ export default class KoniState extends State {
 
   private serviceInfoSubject = new Subject<ServiceInfo>();
 
-  // TODO: refactor this
   private balanceMap: Record<string, BalanceItem> = this.generateDefaultBalanceMap();
   private balanceSubject = new Subject<BalanceJson>();
 
@@ -170,9 +291,12 @@ export default class KoniState extends State {
   private ready = false;
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  constructor (...args: any) {
+  constructor (providers: Providers = {}) {
     // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
-    super(args);
+    this.#providers = providers;
+
+    extractMetadata(this.#metaStore);
+
     this.dbService = new DatabaseService();
 
     this.chainService = new ChainService(this.dbService);
@@ -182,16 +306,253 @@ export default class KoniState extends State {
     this.init();
   }
 
+  // Clone from polkadot.js
+  public get knownMetadata (): MetadataDef[] {
+    return knownMetadata();
+  }
+
+  public get numAuthRequests (): number {
+    return Object.keys(this.#authRequestsV2).length;
+  }
+
+  public get numMetaRequests (): number {
+    return Object.keys(this.#metaRequests).length;
+  }
+
+  public get numSignRequests (): number {
+    return Object.keys(this.#signRequests).length;
+  }
+
+  public get allMetaRequests (): MetadataRequest[] {
+    return Object
+      .values(this.#metaRequests)
+      .map(({ id, request, url }): MetadataRequest => ({ id, request, url }));
+  }
+
+  public get allSignRequests (): SigningRequest[] {
+    return Object
+      .values(this.#signRequests)
+      .map(({ account, id, request, url }): SigningRequest => ({ account, id, request, url }));
+  }
+
+  protected getPopup () {
+    return this.#windows;
+  }
+
+  protected popupClose (): void {
+    this.#windows.forEach((id: number) =>
+      withErrorLog(() => chrome.windows.remove(id))
+    );
+    this.#windows = [];
+  }
+
+  protected popupOpen (): void {
+    if (this.#notification !== 'extension') {
+      if (this.#notification === 'window') {
+        chrome.windows.create(NORMAL_WINDOW_OPTS, (window): void => {
+          if (window) {
+            this.#windows.push(window.id || 0);
+          }
+        });
+      }
+
+      chrome.windows.getCurrent((win) => {
+        const popupOptions = { ...POPUP_WINDOW_OPTS };
+
+        if (win) {
+          popupOptions.left = (win.left || 0) + (win.width || 0) - (POPUP_WINDOW_OPTS.width || 0) - 20;
+          popupOptions.top = (win.top || 0) + 80;
+        }
+
+        chrome.windows.create(popupOptions
+          , (window): void => {
+            if (window) {
+              this.#windows.push(window.id || 0);
+            }
+          }
+        );
+      });
+    }
+  }
+
+  public stripUrl (url: string): string {
+    assert(url && (url.startsWith('http:') || url.startsWith('https:') || url.startsWith('ipfs:') || url.startsWith('ipns:')), `Invalid url ${url}, expected to start with http: or https: or ipfs: or ipns:`);
+
+    const parts = url.split('/');
+
+    return parts[2];
+  }
+
+  private updateIconMeta (shouldClose?: boolean): void {
+    this.metaSubject.next(this.allMetaRequests);
+    this.updateIconV2(shouldClose);
+  }
+
+  private metaComplete = (id: string, resolve: (result: boolean) => void, reject: (error: Error) => void): Resolver<boolean> => {
+    const complete = (): void => {
+      delete this.#metaRequests[id];
+      this.updateIconMeta(true);
+    };
+
+    return {
+      reject: (error: Error): void => {
+        complete();
+        reject(error);
+      },
+      resolve: (result: boolean): void => {
+        complete();
+        resolve(result);
+      }
+    };
+  };
+
+  private signComplete = (id: string, resolve: (result: ResponseSigning) => void, reject: (error: Error) => void): Resolver<ResponseSigning> => {
+    const complete = (): void => {
+      delete this.#signRequests[id];
+      this.updateIconV2(true);
+    };
+
+    return {
+      reject: (error: Error): void => {
+        complete();
+        reject(error);
+      },
+      resolve: (result: ResponseSigning): void => {
+        complete();
+        resolve(result);
+      }
+    };
+  };
+
+  public injectMetadata (url: string, request: MetadataDef): Promise<boolean> {
+    return new Promise((resolve, reject): void => {
+      const id = getId();
+
+      this.#metaRequests[id] = {
+        ...this.metaComplete(id, resolve, reject),
+        id,
+        request,
+        url
+      };
+
+      this.updateIconMeta();
+      this.popupOpen();
+    });
+  }
+
+  public getMetaRequest (id: string): MetaRequest {
+    return this.#metaRequests[id];
+  }
+
+  public getSignRequest (id: string): SignRequest {
+    return this.#signRequests[id];
+  }
+
+  // List all providers the extension is exposing
+  public rpcListProviders (): Promise<ResponseRpcListProviders> {
+    return Promise.resolve(Object.keys(this.#providers).reduce((acc, key) => {
+      acc[key] = this.#providers[key].meta;
+
+      return acc;
+    }, {} as ResponseRpcListProviders));
+  }
+
+  public rpcSend (request: RequestRpcSend, port: chrome.runtime.Port): Promise<JsonRpcResponse> {
+    const provider = this.#injectedProviders.get(port);
+
+    assert(provider, 'Cannot call pub(rpc.subscribe) before provider is set');
+
+    return provider.send(request.method, request.params);
+  }
+
+  // Start a provider, return its meta
+  public rpcStartProvider (key: string, port: chrome.runtime.Port): Promise<ProviderMeta> {
+    assert(Object.keys(this.#providers).includes(key), `Provider ${key} is not exposed by extension`);
+
+    if (this.#injectedProviders.get(port)) {
+      return Promise.resolve(this.#providers[key].meta);
+    }
+
+    // Instantiate the provider
+    this.#injectedProviders.set(port, this.#providers[key].start());
+
+    // Close provider connection when page is closed
+    port.onDisconnect.addListener((): void => {
+      const provider = this.#injectedProviders.get(port);
+
+      if (provider) {
+        withErrorLog(() => provider.disconnect());
+      }
+
+      this.#injectedProviders.delete(port);
+    });
+
+    return Promise.resolve(this.#providers[key].meta);
+  }
+
+  public rpcSubscribe ({ method, params, type }: RequestRpcSubscribe, cb: ProviderInterfaceCallback, port: chrome.runtime.Port): Promise<number | string> {
+    const provider = this.#injectedProviders.get(port);
+
+    assert(provider, 'Cannot call pub(rpc.subscribe) before provider is set');
+
+    return provider.subscribe(type, method, params, cb);
+  }
+
+  public rpcSubscribeConnected (_request: null, cb: ProviderInterfaceCallback, port: chrome.runtime.Port): void {
+    const provider = this.#injectedProviders.get(port);
+
+    assert(provider, 'Cannot call pub(rpc.subscribeConnected) before provider is set');
+
+    cb(null, provider.isConnected); // Immediately send back current isConnected
+    provider.on('connected', () => cb(null, true));
+    provider.on('disconnected', () => cb(null, false));
+  }
+
+  public rpcUnsubscribe (request: RequestRpcUnsubscribe, port: chrome.runtime.Port): Promise<boolean> {
+    const provider = this.#injectedProviders.get(port);
+
+    assert(provider, 'Cannot call pub(rpc.unsubscribe) before provider is set');
+
+    return provider.unsubscribe(request.type, request.method, request.subscriptionId);
+  }
+
+  public saveMetadata (meta: MetadataDef): void {
+    this.#metaStore.set(meta.genesisHash, meta);
+
+    addMetadata(meta);
+  }
+
+  public setNotification (notification: string): boolean {
+    this.#notification = notification;
+
+    return true;
+  }
+
+  public sign (url: string, request: RequestSign, account: AccountJson): Promise<ResponseSigning> {
+    const id = getId();
+
+    return new Promise((resolve, reject): void => {
+      this.#signRequests[id] = {
+        ...this.signComplete(id, resolve, reject),
+        account,
+        id,
+        request,
+        url
+      };
+
+      this.updateIconV2();
+      this.popupOpen();
+    });
+  }
+
+  ///
+
   public generateDefaultBalanceMap () {
     const balanceMap: Record<string, BalanceItem> = {};
 
     Object.values(ChainInfoMap).forEach((chainInfo) => {
-      const nativeTokenSlug = _getChainNativeTokenSlug(chainInfo);
-
-      balanceMap[nativeTokenSlug] = {
-        tokenSlug: nativeTokenSlug,
-        free: '',
-        locked: '',
+      // TODO: refactor balanceMap
+      balanceMap[chainInfo.slug] = {
         state: APIItemState.PENDING
       };
     });
@@ -203,7 +564,7 @@ export default class KoniState extends State {
     this.chainService.init(() => {
       this.onReady(); // TODO: do better than a callback
       this.updateServiceInfo();
-      this.logger.log('Done init state');
+      console.log('done init state');
     });
   }
 
@@ -263,7 +624,7 @@ export default class KoniState extends State {
   }
 
   public setAuthorize (data: AuthUrls, callback?: () => void): void {
-    this.authorizeStore.set('authUrls', data, () => {
+    this.authorizeStore.set(AUTH_URLS_KEY, data, () => {
       this.authorizeCached = data;
       this.evmChainSubject.next(this.authorizeCached);
       this.authorizeUrlSubject.next(this.authorizeCached);
@@ -294,10 +655,13 @@ export default class KoniState extends State {
   private updateIconV2 (shouldClose?: boolean): void {
     const authCount = this.numAuthRequestsV2;
     const confirmCount = this.countConfirmationNumber();
+    const metaCount = this.numMetaRequests;
     const text = (
       authCount
         ? 'Auth'
-        : confirmCount > 0 ? confirmCount.toString() : ''
+        : metaCount
+          ? 'Meta'
+          : confirmCount > 0 ? confirmCount.toString() : ''
     );
 
     withErrorLog(() => chrome.browserAction.setBadgeText({ text }));
@@ -893,7 +1257,7 @@ export default class KoniState extends State {
   public getSettings (update: (value: RequestSettingsType) => void): void {
     this.settingsStore.get('Settings', (value) => {
       if (!value) {
-        update({ isShowBalance: false, accountAllLogo: '', theme: ThemeTypes.DARK });
+        update({ isShowBalance: false, accountAllLogo: '', theme: 'dark' });
       } else {
         update(value);
       }
@@ -1920,10 +2284,7 @@ export default class KoniState extends State {
   public countConfirmationNumber () {
     let count = 0;
 
-    count += this.allAuthRequests.length;
-    count += this.allMetaRequests.length;
     count += this.allSignRequests.length;
-    count += this.allAuthRequestsV2.length;
     Object.values(this.confirmationsQueueSubject.getValue()).forEach((x) => {
       count += Object.keys(x).length;
     });

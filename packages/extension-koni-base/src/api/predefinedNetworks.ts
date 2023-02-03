@@ -312,7 +312,7 @@ export const PREDEFINED_NETWORKS: Record<string, NetworkJson> = {
     isEthereum: true,
     active: false,
     currentProviderMode: 'ws',
-    currentProvider: 'Astar',
+    currentProvider: 'Dwellir',
     groups: ['POLKADOT_PARACHAIN'],
     nativeToken: 'ASTR',
     crowdloanUrl: 'https://crowdloan.astar.network/#/',

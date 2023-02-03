@@ -62,7 +62,7 @@ export async function checkSupportTransfer (networkKey: string, token: string, d
     };
   }
 
-  if (['subspace_gemini_3a', 'kulupu', 'joystream', 'equilibrium_parachain', 'genshiro_testnet', 'genshiro'].includes(networkKey)) {
+  if (['subspace_gemini_3a', 'kulupu', 'joystream', 'genshiro_testnet', 'genshiro'].includes(networkKey)) {
     return {
       supportTransfer: false,
       supportTransferAll: false
@@ -267,6 +267,10 @@ export function updateTransferResponseTxResult (
         record.event.method.toLowerCase() === 'transfer') {
         response.txResult.change = record.event.data[3]?.toString() || '0';
         response.txResult.changeSymbol = tokenInfo.symbol;
+      } else if (record.event.section === 'transactionPayment' &&
+        record.event.method.toLowerCase() === 'transactionfeepaid') {
+        response.txResult.fee = record.event.data[1]?.toString() || '0';
+        response.txResult.feeSymbol = tokenInfo.symbol;
       }
     } else if (['pioneer', 'bitcountry'].includes(networkKey) && tokenInfo && !tokenInfo.isMainToken) {
       if (record.event.section === 'tokens' &&
@@ -544,6 +548,7 @@ export async function makeTransfer ({ callback,
     txState: txState,
     address: from,
     updateResponseTxResult: updateResponseTxResult,
-    errorMessage: 'error transfer'
+    errorMessage: 'error transfer',
+    nonce: ['equilibrium_parachain'].includes(networkKey) ? -1 : undefined
   });
 }

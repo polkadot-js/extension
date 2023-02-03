@@ -6,7 +6,7 @@ import type { ThemeProps } from '../types';
 import { ThemeTypes, UiSettings } from '@subwallet/extension-base/background/KoniTypes';
 import { AvailableThemes, chooseTheme, Main, themes, ThemeSwitchContext } from '@subwallet/extension-koni-ui/components';
 import { saveTheme, subscribeSettings } from '@subwallet/extension-koni-ui/messaging';
-import { ConfigProvider, theme } from '@subwallet/react-ui';
+import { ConfigProvider, theme as reactUiTheme } from '@subwallet/react-ui';
 import React, { useCallback, useEffect, useState } from 'react';
 import { createGlobalStyle, ThemeProvider } from 'styled-components';
 
@@ -22,7 +22,7 @@ interface ThemeWrapperProps {
   theme: Theme;
 }
 
-const { useToken } = theme;
+const { useToken } = reactUiTheme;
 
 const BodyTheme = createGlobalStyle<ThemeProps>(({ theme }) => {
   const { token } = theme as Theme;
@@ -31,7 +31,7 @@ const BodyTheme = createGlobalStyle<ThemeProps>(({ theme }) => {
 
   return ({
     body: {
-      backgroundColor: '#1A1A1A'
+      backgroundColor: token.colorBgSecondary
     },
 
     html: {
@@ -91,7 +91,7 @@ function View ({ children, className }: Props): React.ReactElement<Props> {
 
   return (
     <ThemeSwitchContext.Provider value={switchTheme}>
-      <ConfigProvider theme={{ token: _theme.token }}>
+      <ConfigProvider theme={{ algorithm: reactUiTheme.darkAlgorithm, token: _theme.token }}>
         <ThemeWrapper theme={_theme}>
           <Main className={className}>
             {children}

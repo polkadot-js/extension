@@ -24,21 +24,33 @@ interface ThemeWrapperProps {
 
 const { useToken } = theme;
 
-const BodyTheme = createGlobalStyle<ThemeProps>`
-  html {
-    scrollbar-width: none;
+const BodyTheme = createGlobalStyle<ThemeProps>(({ theme }) => {
+  const { token } = theme as Theme;
 
-    &::-webkit-scrollbar {
-      display: none;
+  console.log('token', token);
+
+  return ({
+    body: {
+      backgroundColor: '#1A1A1A'
+    },
+
+    html: {
+      scrollbarWidth: 'none',
+
+      '&::-webkit-scrollbar': {
+        display: 'none'
+      }
     }
-  }
-`;
+  });
+});
 
 function ThemeWrapper ({ children, theme }: ThemeWrapperProps): React.ReactElement<ThemeWrapperProps> {
   const { token } = useToken();
+  const mergeTheme = { ...theme, token };
 
   return (
-    <ThemeProvider theme={{ ...theme, token }}>
+    <ThemeProvider theme={mergeTheme}>
+      <BodyTheme theme={mergeTheme} />
       {children}
     </ThemeProvider>
   );
@@ -81,7 +93,6 @@ function View ({ children, className }: Props): React.ReactElement<Props> {
     <ThemeSwitchContext.Provider value={switchTheme}>
       <ConfigProvider theme={{ token: _theme.token }}>
         <ThemeWrapper theme={_theme}>
-          <BodyTheme theme={_theme} />
           <Main className={className}>
             {children}
           </Main>

@@ -10,7 +10,7 @@ interface Props {
   title?: string;
 }
 
-function Welcome ({ className, title = 'content' }: Props): React.ReactElement<Props> {
+function _Welcome ({ className, title = 'content' }: Props): React.ReactElement<Props> {
   return (
     <>
       <div className={className}>
@@ -22,7 +22,7 @@ function Welcome ({ className, title = 'content' }: Props): React.ReactElement<P
   );
 }
 
-export default styled(Welcome)<Props>(({ theme }) => {
+export const Welcome = styled(_Welcome)<Props>(({ theme }) => {
   const { token } = theme as Theme;
 
   return ({

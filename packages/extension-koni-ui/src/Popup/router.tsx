@@ -6,7 +6,7 @@ import { LoadingContainer } from '@subwallet/extension-koni-ui/components';
 import { DataContext } from '@subwallet/extension-koni-ui/contexts/DataContext';
 import PhishingDetected from '@subwallet/extension-koni-ui/Popup/PhishingDetected';
 import Root, { initRootPromise } from '@subwallet/extension-koni-ui/Popup/Root';
-import Welcome from '@subwallet/extension-koni-ui/Popup/Welcome';
+import { Welcome } from '@subwallet/extension-koni-ui/Popup/Welcome';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
 import React, { useContext, useEffect } from 'react';
 import { useSelector } from 'react-redux';

@@ -22,6 +22,8 @@ import { DEFAULT_TYPE } from '../util/defaultType';
 import getParentNameSuri from '../util/getParentNameSuri';
 import { AccountContext, Address } from '.';
 
+// NOTE Required for spyOn when using @swc/jest
+// https://github.com/swc-project/swc/issues/3843
 jest.mock('../messaging', (): Record<string, unknown> => ({
   __esModule: true,
   ...jest.requireActual('../messaging')

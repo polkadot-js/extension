@@ -15,6 +15,8 @@ import { Header } from '../../partials';
 import { flushAllPromises } from '../../testHelpers';
 import CreateAccount from '.';
 
+// NOTE Required for spyOn when using @swc/jest
+// https://github.com/swc-project/swc/issues/3843
 jest.mock('../../messaging', (): Record<string, unknown> => ({
   __esModule: true,
   ...jest.requireActual('../../messaging')

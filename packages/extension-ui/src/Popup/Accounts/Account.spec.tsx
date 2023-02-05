@@ -15,6 +15,8 @@ import * as messaging from '../../messaging';
 import { flushAllPromises } from '../../testHelpers';
 import Account from './Account';
 
+// NOTE Required for spyOn when using @swc/jest
+// https://github.com/swc-project/swc/issues/3843
 jest.mock('../../messaging', (): Record<string, unknown> => ({
   __esModule: true,
   ...jest.requireActual('../../messaging')

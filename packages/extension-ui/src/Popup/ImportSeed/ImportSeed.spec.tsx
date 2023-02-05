@@ -23,6 +23,11 @@ const account = {
   seed: 'upgrade multiply predict hip multiply march leg devote social outer oppose debris'
 };
 
+jest.mock('../../messaging', (): Record<string, unknown> => ({
+  __esModule: true,
+  ...jest.requireActual('../../messaging')
+}));
+
 // For this file, there are a lot of them
 /* eslint-disable @typescript-eslint/no-unsafe-argument */
 

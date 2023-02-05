@@ -37,6 +37,11 @@ interface QrScanAddressProps {
   style?: React.CSSProperties;
 }
 
+jest.mock('../messaging', (): Record<string, unknown> => ({
+  __esModule: true,
+  ...jest.requireActual('../messaging')
+}));
+
 // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment,@typescript-eslint/no-unsafe-call
 configure({ adapter: new Adapter() });
 

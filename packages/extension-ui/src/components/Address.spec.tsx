@@ -22,6 +22,16 @@ import { DEFAULT_TYPE } from '../util/defaultType';
 import getParentNameSuri from '../util/getParentNameSuri';
 import { AccountContext, Address } from '.';
 
+jest.mock('../messaging', (): Record<string, unknown> => ({
+  __esModule: true,
+  ...jest.requireActual('../messaging')
+}));
+
+jest.mock('../MetadataCache', (): Record<string, unknown> => ({
+  __esModule: true,
+  ...jest.requireActual('../MetadataCache')
+}));
+
 // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment,@typescript-eslint/no-unsafe-call
 configure({ adapter: new Adapter() });
 

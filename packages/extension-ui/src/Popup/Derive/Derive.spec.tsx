@@ -19,6 +19,11 @@ import { buildHierarchy } from '../../util/buildHierarchy';
 import AddressDropdown from './AddressDropdown';
 import Derive from '.';
 
+jest.mock('../../messaging', (): Record<string, unknown> => ({
+  __esModule: true,
+  ...jest.requireActual('../../messaging')
+}));
+
 // For this file, there are a lot of them
 /* eslint-disable @typescript-eslint/no-unsafe-argument */
 

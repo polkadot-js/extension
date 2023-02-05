@@ -15,6 +15,11 @@ import { Header } from '../../partials';
 import { flushAllPromises } from '../../testHelpers';
 import CreateAccount from '.';
 
+jest.mock('../../messaging', (): Record<string, unknown> => ({
+  __esModule: true,
+  ...jest.requireActual('../../messaging')
+}));
+
 // For this file, there are a lot of them
 /* eslint-disable @typescript-eslint/no-unsafe-argument */
 

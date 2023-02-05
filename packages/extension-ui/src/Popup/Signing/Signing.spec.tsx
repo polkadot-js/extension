@@ -23,6 +23,18 @@ import Request from './Request';
 import TransactionIndex from './TransactionIndex';
 import Signing from '.';
 
+// NOTE Required for spyOn when using @swc/jest
+// https://github.com/swc-project/swc/issues/3843
+jest.mock('../../messaging', (): Record<string, unknown> => ({
+  __esModule: true,
+  ...jest.requireActual('../../messaging')
+}));
+
+jest.mock('../../MetadataCache', (): Record<string, unknown> => ({
+  __esModule: true,
+  ...jest.requireActual('../../MetadataCache')
+}));
+
 // For this file, there are a lot of them
 /* eslint-disable @typescript-eslint/no-unsafe-argument */
 

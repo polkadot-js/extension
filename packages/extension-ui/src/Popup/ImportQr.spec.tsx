@@ -37,6 +37,13 @@ interface QrScanAddressProps {
   style?: React.CSSProperties;
 }
 
+// NOTE Required for spyOn when using @swc/jest
+// https://github.com/swc-project/swc/issues/3843
+jest.mock('../messaging', (): Record<string, unknown> => ({
+  __esModule: true,
+  ...jest.requireActual('../messaging')
+}));
+
 // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment,@typescript-eslint/no-unsafe-call
 configure({ adapter: new Adapter() });
 

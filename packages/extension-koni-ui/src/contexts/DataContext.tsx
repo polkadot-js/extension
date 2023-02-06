@@ -1,22 +1,11 @@
 // Copyright 2019-2022 @subwallet/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { store, StoreName } from '@subwallet/extension-koni-ui/stores';
-import {
-  subscribeAssetRegistry,
-  subscribeBalance, subscribeChainInfoMap,
-  subscribeChainStateMap,
-  subscribeCrowdloan,
-  subscribeNftCollections,
-  subscribeNftItems,
-  subscribePrice,
-  subscribeStakeUnlockingInfo,
-  subscribeStaking,
-  subscribeStakingReward,
-  subscribeTxHistory
-} from '@subwallet/extension-koni-ui/stores/utils';
+import { persistor, store, StoreName } from '@subwallet/extension-koni-ui/stores';
+import { subscribeAssetRegistry, subscribeBalance, subscribeChainInfoMap, subscribeChainStateMap, subscribeCrowdloan, subscribeNftCollections, subscribeNftItems, subscribePrice, subscribeStakeUnlockingInfo, subscribeStaking, subscribeStakingReward, subscribeTxHistory } from '@subwallet/extension-koni-ui/stores/utils';
 import React from 'react';
 import { Provider } from 'react-redux';
+import { PersistGate } from 'redux-persist/integration/react';
 
 interface DataContextProviderProps {
   children?: React.ReactElement;
@@ -150,8 +139,10 @@ export const DataContextProvider = ({ children }: DataContextProviderProps) => {
   _DataContext.addHandler({ ...subscribeTxHistory, name: 'subscribeTxHistory', relatedStores: ['transactionHistory'] });
 
   return <Provider store={store}>
-    <DataContext.Provider value={_DataContext}>
-      {children}
-    </DataContext.Provider>
+    <PersistGate persistor={persistor}>
+      <DataContext.Provider value={_DataContext}>
+        {children}
+      </DataContext.Provider>
+    </PersistGate>
   </Provider>;
 };

@@ -9,8 +9,7 @@ import styled from 'styled-components';
 import { AccountWithChildren } from '@polkadot/extension-base/background/types';
 import getNetworkMap from '@polkadot/extension-ui/util/getNetworkMap';
 
-import ExternalLinkIcon from '../../assets/externalLink.svg';
-import { AccountContext, AddButton, MenuCard } from '../../components';
+import { AccountContext, AddButton } from '../../components';
 import useTranslation from '../../hooks/useTranslation';
 import { Header } from '../../partials';
 import AccountsTree from './AccountsTree';
@@ -43,11 +42,6 @@ function Accounts({ className }: Props): React.ReactElement {
     setFilter(filter.toLowerCase());
   }, []);
 
-  const _handleMenuCardClick = useCallback(() => {
-    // TODO: temponary
-    console.log('clicked');
-  }, []);
-
   return (
     <>
       {hierarchy.length === 0 ? (
@@ -72,7 +66,8 @@ function Accounts({ className }: Props): React.ReactElement {
                 />
               )
             )}
-            <div className='bordered mt-20'>
+            {/* TODO: Out of scope */}
+            {/* <div className='bordered mt-20'>
               <MenuCard
                 description='Send, Stake and more...'
                 extra={
@@ -84,7 +79,7 @@ function Accounts({ className }: Props): React.ReactElement {
                 }
                 title='Go to Web Wallet'
               />
-            </div>
+            </div> */}
             <AddButton />
           </div>
         </>

@@ -65,12 +65,13 @@ function ImportSeed(): React.ReactElement {
 
   const _onPreviousStep = useCallback(() => setStep((step) => step - 1), []);
 
+  const _onChangeNetwork = useCallback((newGenesisHash: string) => setGenesis(newGenesisHash), []);
+
   return (
     <>
       <HeaderWithSteps
         step={step}
         text={t<string>('Import from secret phrase')}
-        // TODO: placeholder for now
         total={3}
       />
       {step === 1 && (
@@ -88,7 +89,7 @@ function ImportSeed(): React.ReactElement {
           <NetworkSelection
             address={account?.address}
             onAccountChange={setAccount}
-            onChange={setGenesis}
+            onChange={_onChangeNetwork}
             onNextStep={_onNextStep}
             onPreviousStep={_onPreviousStep}
             options={genesisOptions}

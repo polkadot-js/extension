@@ -66,16 +66,9 @@ export default styled(Toast)<{ visible: boolean }>`
 }
 
   .snackbar-content {
-    max-width: 200px;
+    min-width: 200px;
   }
 
-  .snackbar-close {
-    display: flex;
-    position: absolute;
-    /* due to padding */
-    right: -16px;
-  }
-  
   && {
     border-radius: 4px;
     background: ${({ theme, type }: Props): string =>

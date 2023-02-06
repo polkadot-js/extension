@@ -7,14 +7,14 @@ import React, { useCallback } from 'react';
 import styled from 'styled-components';
 
 interface Props {
-  checked: boolean;
+  checked: boolean | undefined;
   onChange: (checked: boolean) => void;
   uncheckedLabel: string;
   checkedLabel: string;
   className?: string;
 }
 
-function Switch ({ checked, checkedLabel, className, onChange, uncheckedLabel }: Props): React.ReactElement<Props> {
+function Switch({ checked, checkedLabel, className, onChange, uncheckedLabel }: Props): React.ReactElement<Props> {
   const _onChange = useCallback(
     (event: React.ChangeEvent<HTMLInputElement>) => onChange(event.target.checked),
     [onChange]
@@ -30,20 +30,20 @@ function Switch ({ checked, checkedLabel, className, onChange, uncheckedLabel }:
           onChange={_onChange}
           type='checkbox'
         />
-        <span className='slider' />
+        <span className={`slider ${checked ? 'checked' : 'unchecked'}`} />
       </label>
       <span>{checkedLabel}</span>
     </div>
   );
 }
 
-export default styled(Switch)(({ theme }: ThemeProps) => `
+export default styled(Switch)(
+  ({ theme }: ThemeProps) => `
   label {
     position: relative;
     display: inline-block;
     width: 48px;
-    height: 24px;
-    margin: 8px;
+    margin: 8px 0px;
   }
 
   .checkbox {
@@ -52,9 +52,17 @@ export default styled(Switch)(({ theme }: ThemeProps) => `
     height: 0;
 
     &:checked + .slider:before {
-      transform: translateX(24px);
+      transform: translateX(20px);
     }
   }
+
+.checked {
+  background-color: ${theme.primaryColor};
+}
+
+.unchecked {
+  background-color: ${theme.inputBackground};
+}
 
   .slider {
     position: absolute;
@@ -63,21 +71,24 @@ export default styled(Switch)(({ theme }: ThemeProps) => `
     left: 0;
     right: 0;
     bottom: 0;
-    background-color: ${theme.readonlyInputBackground};
-    transition: 0.2s;
-    border-radius: 100px;
-    border: 1px solid ${theme.inputBorderColor};
+    width: 40px;
+    height: 14px;
+    transition: background ease 0.3s;
+    border-radius: 16px;
+    border: 1px solid ${theme.boxBorderColor};
 
     &:before {
       position: absolute;
       content: '';
-      height: 16px;
-      width: 16px;
-      left: 4px;
-      bottom: 3px;
-      background-color: ${theme.primaryColor};
-      transition: 0.4s;
+      height: 20px;
+      width: 20px;
+      left: 0px;
+      bottom: -2px;
+      background-color: ${theme.textColor};
+      transition: ease 0.2s;
       border-radius: 50%;
+      box-shadow: 0px 1px 2px rgba(12, 19, 26, 0.5);
     }
   }
-`);
+`
+);

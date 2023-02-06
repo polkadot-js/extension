@@ -47,6 +47,7 @@ export { default as MnemonicPill } from './MnemonicPill';
 export { default as MnemonicInput } from './MnemonicInput';
 export { default as SplashHandler } from './SplashHandler';
 export { default as Video } from './Video';
+export { default as EditMenuCard } from './EditMenuCard';
 
 export { Input, TextArea } from './TextInputs';
 

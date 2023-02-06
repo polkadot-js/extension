@@ -12,9 +12,8 @@ import Adapter from '@wojtekmaj/enzyme-adapter-react-17';
 import { configure, mount } from 'enzyme';
 import React, { ReactNode } from 'react';
 import { act } from 'react-dom/test-utils';
-import { BrowserRouter as Router } from "react-router-dom";
+import { BrowserRouter as Router } from 'react-router-dom';
 
-import * as messaging from '../messaging';
 import * as MetadataCache from '../MetadataCache';
 import { westendMetadata } from '../Popup/Signing/metadataMock';
 import { flushAllPromises } from '../testHelpers';
@@ -22,6 +21,7 @@ import { buildHierarchy } from '../util/buildHierarchy';
 import { DEFAULT_TYPE } from '../util/defaultType';
 import { ellipsisName } from '../util/ellipsisName';
 import getParentNameSuri from '../util/getParentNameSuri';
+import { Theme, themes } from './themes';
 import { AccountContext, Address } from '.';
 
 // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment,@typescript-eslint/no-unsafe-call
@@ -29,15 +29,26 @@ configure({ adapter: new Adapter() });
 
 interface AccountTestJson extends AccountJson {
   expectedIconTheme: IconTheme;
+  theme: Theme;
 }
 
+interface ExtendedAccount extends AccountJson {
+  theme: Theme;
+}
 interface AccountTestGenesisJson extends AccountTestJson {
   expectedEncodedAddress: string;
   expectedNetworkLabel: string;
   genesisHash: string;
 }
 
-const externalAccount = { address: '5EeaoDj4VDk8V6yQngKBaCD5MpJUCHrhYjVhBjgMHXoYon1s', expectedIconTheme: 'polkadot', isExternal: true, name: 'External Account', type: 'sr25519' } as AccountJson;
+const externalAccount = {
+  address: '5EeaoDj4VDk8V6yQngKBaCD5MpJUCHrhYjVhBjgMHXoYon1s',
+  expectedIconTheme: 'polkadot',
+  isExternal: true,
+  name: 'External Account',
+  theme: themes.dark,
+  type: 'sr25519'
+} as ExtendedAccount;
 const hardwareAccount = {
   address: 'HDE6uFdw53SwUyfKSsjwZNmS2sziWMPuY6uJhGHcFzLYRaJ',
   expectedIconTheme: 'polkadot',
@@ -46,10 +57,42 @@ const hardwareAccount = {
   isExternal: true,
   isHardware: true,
   name: 'Hardware Account',
+  theme: themes.dark,
   type: 'sr25519'
-} as AccountJson;
+} as ExtendedAccount;
 
-const accounts = [{ address: '5HSDXAC3qEMkSzZK377sTD1zJhjaPiX5tNWppHx2RQMYkjaJ', expectedIconTheme: 'polkadot', name: 'ECDSA Account', type: 'ecdsa' }, { address: '5FjgD3Ns2UpnHJPVeRViMhCttuemaRXEqaD8V5z4vxcsUByA', expectedIconTheme: 'polkadot', name: 'Ed Account', type: 'ed25519' }, { address: '5Ggap6soAPaP5UeNaiJsgqQwdVhhNnm6ez7Ba1w9jJ62LM2Q', expectedIconTheme: 'polkadot', name: 'Parent Sr Account', type: 'sr25519' }, { address: '0xd5D81CD4236a43F48A983fc5B895975c511f634D', expectedIconTheme: 'ethereum', name: 'Ethereum', type: 'ethereum' }, { ...externalAccount }, { ...hardwareAccount }] as AccountTestJson[];
+const accounts = [
+  {
+    address: '5HSDXAC3qEMkSzZK377sTD1zJhjaPiX5tNWppHx2RQMYkjaJ',
+    expectedIconTheme: 'polkadot',
+    name: 'ECDSA Account',
+    theme: themes.dark,
+    type: 'ecdsa'
+  },
+  {
+    address: '5FjgD3Ns2UpnHJPVeRViMhCttuemaRXEqaD8V5z4vxcsUByA',
+    expectedIconTheme: 'polkadot',
+    name: 'Ed Account',
+    theme: themes.dark,
+    type: 'ed25519'
+  },
+  {
+    address: '5Ggap6soAPaP5UeNaiJsgqQwdVhhNnm6ez7Ba1w9jJ62LM2Q',
+    expectedIconTheme: 'polkadot',
+    name: 'Parent Sr Account',
+    theme: themes.dark,
+    type: 'sr25519'
+  },
+  {
+    address: '0xd5D81CD4236a43F48A983fc5B895975c511f634D',
+    expectedIconTheme: 'ethereum',
+    name: 'Ethereum',
+    theme: themes.dark,
+    type: 'ethereum'
+  },
+  { ...externalAccount },
+  { ...hardwareAccount }
+] as AccountTestJson[];
 
 // With Westend genesis Hash
 // This account isn't part of the generic test because Westend isn't a built in network
@@ -105,14 +148,17 @@ const mountComponent = async (
 
   const wrapper = mount(
     <Router>
-    <AccountContext.Provider
-      value={{
-        accounts: contextAccounts,
-        hierarchy: buildHierarchy(contextAccounts)
-      }}
-    >
-      <Address actions={actions as ReactNode} {...addressComponentProps} />
-    </AccountContext.Provider>
+      <AccountContext.Provider
+        value={{
+          accounts: contextAccounts,
+          hierarchy: buildHierarchy(contextAccounts)
+        }}
+      >
+        <Address
+          actions={actions as ReactNode}
+          {...addressComponentProps}
+        />
+      </AccountContext.Provider>
     </Router>
   );
 
@@ -122,12 +168,26 @@ const mountComponent = async (
   return { wrapper };
 };
 
-const getWrapper = async (account: AccountJson, contextAccounts: AccountJson[], withAccountsInContext: boolean) => {
+const getWrapper = async (
+  account: AccountJson & {
+    theme: Theme;
+  },
+  contextAccounts: AccountJson[],
+  withAccountsInContext: boolean
+) => {
   // the address component can query info about the account from the account context
   // in this case, the account's address (any encoding) should suffice
   // In case the account is not in the context, then more info are needed as props
   // to display accurately
-  const mountedComponent = withAccountsInContext ? await mountComponent({ address: account.address }, contextAccounts) : await mountComponent(account, []);
+  const mountedComponent = withAccountsInContext
+    ? await mountComponent(
+        {
+          address: account.address,
+          theme: themes.dark
+        },
+        contextAccounts
+      )
+    : await mountComponent(account, []);
 
   return mountedComponent.wrapper;
 };
@@ -199,9 +259,11 @@ const genericTestSuite = (account: AccountTestJson, withAccountsInContext = true
     });
 
     it('has no account hidding and settings button if no action is provided', async () => {
-      const additionalProps = { actions: null };
+      const additionalProps = { actions: null, theme: themes.dark };
 
-      const mountedComponentWithoutAction = withAccountsInContext ? await mountComponent({ address, ...additionalProps }, accounts) : await mountComponent({ ...account, ...additionalProps }, []);
+      const mountedComponentWithoutAction = withAccountsInContext
+        ? await mountComponent({ address, ...additionalProps }, accounts)
+        : await mountComponent({ ...account, ...additionalProps }, []);
 
       wrapper = mountedComponentWithoutAction.wrapper;
 
@@ -213,7 +275,9 @@ const genericTestSuite = (account: AccountTestJson, withAccountsInContext = true
 const genesisHashTestSuite = (account: AccountTestGenesisJson, withAccountsInContext = true) => {
   const { expectedEncodedAddress, expectedIconTheme, expectedNetworkLabel } = account;
 
-  describe(`Account ${withAccountsInContext ? 'in context from address' : 'from props'} with ${expectedNetworkLabel} genesiHash`, () => {
+  describe(`Account ${
+    withAccountsInContext ? 'in context from address' : 'from props'
+  } with ${expectedNetworkLabel} genesiHash`, () => {
     let wrapper: ReactWrapper;
 
     beforeAll(async () => {
@@ -293,7 +357,9 @@ describe('Address', () => {
     });
 
     it('shows the account correctly reencoded', () => {
-      expect(wrapper.find('[data-field="address"]').text()).toEqual(ellipsisName(westEndAccount.expectedEncodedAddress));
+      expect(wrapper.find('[data-field="address"]').text()).toEqual(
+        ellipsisName(westEndAccount.expectedEncodedAddress)
+      );
     });
   });
 
@@ -305,8 +371,9 @@ describe('Address', () => {
       name: 'Luke',
       parentName: 'Dark Vador',
       suri: '//42',
+      theme: themes.dark,
       type: 'sr25519'
-    } as AccountJson;
+    } as ExtendedAccount;
 
     beforeAll(async () => {
       wrapper = await getWrapper(childAccount, [], false);

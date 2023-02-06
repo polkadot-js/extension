@@ -10,8 +10,7 @@ import { Welcome } from '@subwallet/extension-koni-ui/Popup/Welcome';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
 import React, { useContext, useEffect } from 'react';
 import { useSelector } from 'react-redux';
-import { Await, Outlet } from 'react-router';
-import { createHashRouter } from 'react-router-dom';
+import { Await, createHashRouter, Outlet, useLocation, useRouteError } from 'react-router-dom';
 
 export interface PageWrapperProps {
   resolve?: PromiseLike<any>
@@ -38,8 +37,30 @@ export function Crypto () {
     console.log('store', store);
   }, [store]);
 
-  return <PageWrapper resolve={dataContext.awaitStores(['price', 'chainStore', 'assetRegistry'])}>
+  return <PageWrapper resolve={dataContext.awaitStores(['price', 'chainStore'])}>
     <div>Crypto</div>
+  </PageWrapper>;
+}
+
+const ErrorFallback = () => {
+  const error = useRouteError();
+
+  console.error(error);
+
+  return (
+    <div>
+      <h1>An Error Occured</h1>
+      <p>Sorry, something went wrong. Please try again later.</p>
+    </div>
+  );
+};
+
+// A Placeholder page
+export function Example () {
+  const location = useLocation();
+
+  return <PageWrapper>
+    <div style={{padding: 16}}>{location.pathname}</div>
   </PageWrapper>;
 }
 
@@ -47,6 +68,7 @@ export function Crypto () {
 export const router = createHashRouter([{ path: '/',
   element: <Root />,
   loader: initRootPromise,
+  errorElement: <ErrorFallback />,
   children: [{
     path: '/welcome',
     element: <Welcome title={'Welcome Content'} />
@@ -60,9 +82,110 @@ export const router = createHashRouter([{ path: '/',
     },
     {
       path: 'nft',
-      element: <PageWrapper>
-        <div>NFT</div>
-      </PageWrapper>
+      element: <Example />
+    },
+    {
+      path: 'crowdloan',
+      element: <Example />
+    },
+    {
+      path: 'staking',
+      element: <Example />
+    },
+    {
+      path: 'histories',
+      element: <Example />
+    }]
+  },
+  {
+    path: '/transaction',
+    element: <Outlet />,
+    children: [{
+      path: 'send-fund',
+      element: <Example />
+    }, {
+      path: 'send-nft',
+      element: <Example />
+    }, {
+      path: 'stake',
+      element: <Example />
+    }, {
+      path: 'unstake',
+      element: <Example />
+    }, {
+      path: 'withdraw',
+      element: <Example />
+    }, {
+      path: 'claim-reward',
+      element: <Example />
+    }, {
+      path: 'compound',
+      element: <Example />
+    }]
+  },
+  {
+    path: '/account',
+    element: <Outlet />,
+    children: [{
+      path: 'account-list',
+      element: <Example />
+    }, {
+      path: 'add-account',
+      element: <Example />,
+      children: [{
+        path: 'from-seed',
+        element: <Example />
+      }, {
+        path: 'derive',
+        element: <Example />
+      }, {
+        path: 'from-json',
+        element: <Example />
+      }, {
+        path: 'attach-readonly',
+        element: <Example />
+      }, {
+        path: 'attach-qr',
+        element: <Example />
+      }, {
+        path: 'attach-ledger',
+        element: <Example />
+      }]
+    }, {
+      path: 'account-detail/:accountId',
+      element: <Example />,
+      children: [{
+        path: 'export',
+        element: <Example />
+      }]
+    }]
+  }, {
+    path: '/setting',
+    element: <Outlet />,
+    children: [{
+      path: 'list',
+      element: <Example />
+    }, {
+      path: 'general',
+      element: <Example />
+    }, {
+      path: 'dapp-access',
+      element: <Example />
+    }, {
+      path: 'dapp-access-edit',
+      element: <Example />
+    }, {
+      path: 'network',
+      element: <Example />
+    }, {
+      path: 'network-edit',
+      element: <Example />
+    }, {
+      path: 'token',
+      element: <Example />
+    }, {
+      path: 'master-password',
+      element: <Example />
     }]
   }] },
 { path: `${PHISHING_PAGE_REDIRECT}/website`, element: <PhishingDetected /> }

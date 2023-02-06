@@ -4,11 +4,11 @@
 const darkTheme = {
   accountDotsIconColor: '#00CCAB',
   addAccountImageBackground: '#1A1B20',
-  addButtonBackground:'linear-gradient(0deg, rgba(0, 234, 199, 0.1), rgba(0, 234, 199, 0.1)), #111B24;',
-  addButtonDisabledBackground:'linear-gradient(0deg, rgba(0, 234, 199, 0.1), rgba(0, 234, 199, 0.1)), #111B24;',
-  addButtonFocusBorder:'1px dashed rgba(0, 234, 199, 0.3);',
-  addButtonHoverBackground:'linear-gradient(0deg, rgba(0, 234, 199, 0.2), rgba(0, 234, 199, 0.2)), #111B24;',
-  addButtonHoverBoxShadow:'0px 0px 16px rgba(0, 204, 171, 0.2);',
+  addButtonBackground: 'linear-gradient(0deg, rgba(0, 234, 199, 0.1), rgba(0, 234, 199, 0.1)), #111B24;',
+  addButtonDisabledBackground: 'linear-gradient(0deg, rgba(0, 234, 199, 0.1), rgba(0, 234, 199, 0.1)), #111B24;',
+  addButtonFocusBorder: '1px dashed rgba(0, 234, 199, 0.3);',
+  addButtonHoverBackground: 'linear-gradient(0deg, rgba(0, 234, 199, 0.2), rgba(0, 234, 199, 0.2)), #111B24;',
+  addButtonHoverBoxShadow: '0px 0px 16px rgba(0, 204, 171, 0.2);',
   avatarBorderColor: '#FFFFFF',
   backButtonBackground: '#3A3B41',
   backButtonBackgroundHover: '#3a3b41ad',
@@ -55,7 +55,7 @@ const darkTheme = {
   identiconBackground: '#F4F5F8',
   inputBackground: '#0F171F',
   inputBorderColor: '#16232E',
-  inputFocusBorderColor: "#00EAC7",
+  inputFocusBorderColor: '#00EAC7',
   inputLabelFontSize: '13px',
   labelColor: '#BCCBD6',
   labelFontSize: '13px',
@@ -74,8 +74,9 @@ const darkTheme = {
   stepsInactiveColor: '#415566',
   subTextColor: '#BCCBD6',
   textColor: '#FFFFFF',
-  textColorDanger: '#00CCAB',
-  toastBoxShadow: '0px 24px 38px rgba(12, 19, 26, 0.14), 0px 9px 46px rgba(12, 19, 26, 0.12), 0px 11px 15px rgba(12, 19, 26, 0.2);',
+  textColorDanger: '#FF5E5C',
+  toastBoxShadow:
+    '0px 24px 38px rgba(12, 19, 26, 0.14), 0px 9px 46px rgba(12, 19, 26, 0.12), 0px 11px 15px rgba(12, 19, 26, 0.2);',
   toastCriticalBackground: '#FF5E5C',
   toastInfoBackground: '#6D95E3',
   toastSuccessBackground: '#66D16F',
@@ -83,7 +84,8 @@ const darkTheme = {
   toastWarningBackground: '#FFD23F',
   tooltipBackground: '#111B24',
   tooltipBorderColor: '#1B2B38',
-  tooltipBoxShadow: '0px 24px 38px rgba(12, 19, 26, 0.14), 0px 9px 46px rgba(12, 19, 26, 0.12), 0px 11px 15px rgba(12, 19, 26, 0.2);',
+  tooltipBoxShadow:
+    '0px 24px 38px rgba(12, 19, 26, 0.14), 0px 9px 46px rgba(12, 19, 26, 0.12), 0px 11px 15px rgba(12, 19, 26, 0.2);',
   tooltipTextColor: '#BCCBD6',
   warningColor: '#FFD23F'
 };
@@ -125,6 +127,6 @@ export const themes = {
 
 export declare type AvailableThemes = keyof typeof themes;
 
-export function chooseTheme (): AvailableThemes {
+export function chooseTheme(): AvailableThemes {
   return 'dark';
 }

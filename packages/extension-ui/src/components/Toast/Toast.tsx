@@ -19,8 +19,6 @@ interface Props extends ThemeProps {
 function Toast({ className, content, type }: Props): React.ReactElement<Props> {
   const _getIconByType = useCallback((type: SnackbarTypes): string => icons?.[type] ?? icons.info, []);
 
-  console.log('type', type);
-
   return (
     <div className={className}>
       <div>
@@ -67,6 +65,17 @@ export default styled(Toast)<{ visible: boolean }>`
   }
 }
 
+  .snackbar-content {
+    max-width: 200px;
+  }
+
+  .snackbar-close {
+    display: flex;
+    position: absolute;
+    /* due to padding */
+    right: -16px;
+  }
+  
   && {
     border-radius: 4px;
     background: ${({ theme, type }: Props): string =>

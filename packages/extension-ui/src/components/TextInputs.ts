@@ -23,7 +23,7 @@ const TextInput = css(
   height: 56px;
   outline: none;
   padding-top: 8px;
-  padding-left: 16px;
+  padding-left: 12px;
   resize: none;
   width: 100%;
 

@@ -85,7 +85,7 @@ function CreateAccount({ className }: Props): React.ReactElement {
         total={3}
       />
       <Loading>
-        {step === 1 && (<SafetyFirst onNextStep={_onNextStep} />)}
+        {step === 1 && <SafetyFirst onNextStep={_onNextStep} />}
         {seed && step === 2 && (
           <SaveMnemonic
             onNextStep={_onNextStep}
@@ -95,7 +95,7 @@ function CreateAccount({ className }: Props): React.ReactElement {
         )}
         {seed && step === 3 && (
           <>
-          {/* TODO: COMEBACK WHEN ITS DECIDED */}
+            {/* TODO: COMEBACK WHEN ITS DECIDED */}
             {/* <Dropdown
               className={className}
               label={t<string>('Network')}

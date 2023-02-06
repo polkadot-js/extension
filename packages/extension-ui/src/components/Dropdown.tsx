@@ -6,7 +6,6 @@ import type { ThemeProps } from '../types';
 import React, { useCallback } from 'react';
 import styled from 'styled-components';
 
-import arrow from '../assets/arrow-down.svg';
 import Label from './Label';
 
 interface DropdownOption {
@@ -17,7 +16,7 @@ interface DropdownOption {
 interface Props extends ThemeProps {
   className?: string;
   defaultValue?: string | null;
-  isDisabled?: boolean
+  isDisabled?: boolean;
   isError?: boolean;
   isFocussed?: boolean;
   label: string;
@@ -27,16 +26,26 @@ interface Props extends ThemeProps {
   value?: string;
 }
 
-function Dropdown ({ className, defaultValue, isDisabled, isFocussed, label, onBlur, onChange, options, value }: Props): React.ReactElement<Props> {
+function Dropdown({
+  className,
+  defaultValue,
+  isDisabled,
+  isFocussed,
+  label,
+  onBlur,
+  onChange,
+  options,
+  value
+}: Props): React.ReactElement<Props> {
   const _onChange = useCallback(
-    ({ target: { value } }: React.ChangeEvent<HTMLSelectElement>) =>
-      onChange && onChange(value.trim()),
+    ({ target: { value } }: React.ChangeEvent<HTMLSelectElement>) => onChange && onChange(value.trim()),
     [onChange]
   );
 
   return (
     <>
       <Label
+        active
         className={className}
         label={label}
       >
@@ -48,28 +57,32 @@ function Dropdown ({ className, defaultValue, isDisabled, isFocussed, label, onB
           onChange={_onChange}
           value={value}
         >
-          {options.map(({ text, value }): React.ReactNode => (
-            <option
-              key={value}
-              value={value}
-            >
-              {text}
-            </option>
-          ))}
+          {options.map(
+            ({ text, value }): React.ReactNode => (
+              <option
+                key={value}
+                value={value}
+              >
+                {text}
+              </option>
+            )
+          )}
         </select>
       </Label>
     </>
   );
 }
 
-export default React.memo(styled(Dropdown)(({ isError, label, theme }: Props) => `
+export default React.memo(
+  styled(Dropdown)(
+    ({ isError, theme }: Props) => `
   position: relative;
-
+  
   select {
     -webkit-appearance: none;
     -moz-appearance: none;
     appearance: none;
-    background: ${theme.readonlyInputBackground};
+    background: ${theme.inputBackground};
     border-color: ${isError ? theme.errorBorderColor : theme.inputBorderColor};
     border-radius: ${theme.borderRadius};
     border-style: solid;
@@ -79,8 +92,10 @@ export default React.memo(styled(Dropdown)(({ isError, label, theme }: Props) =>
     display: block;
     font-family: ${theme.secondaryFontFamily};
     font-size: ${theme.fontSize};
-    padding: 0.5rem 0.75rem;
+    padding-top: 8px;
+    padding-left: 16px;
     width: 100%;
+    height: 56px;
     cursor: pointer;
 
     &:read-only {
@@ -88,16 +103,6 @@ export default React.memo(styled(Dropdown)(({ isError, label, theme }: Props) =>
       outline: none;
     }
   }
-
-  label::after {
-    content: '';
-    position: absolute;
-    top: ${label ? 'calc(50% + 14px)' : '50%'};
-    transform: translateY(-50%);
-    right: 12px;
-    width: 8px;
-    height: 6px;
-    background: url(${arrow}) center no-repeat;
-    pointer-events: none;
-  }
-`));
+`
+  )
+);

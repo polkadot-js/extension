@@ -40,7 +40,7 @@ function AccountNamePasswordCreation({
   const { show } = useToast();
 
   const _onCreate = useCallback(() => {
-    show(t('Account created successfully!'), 'success');
+    show(t('Import successful'), 'success');
 
     return name && password && onCreate(name, password);
   }, [show, t, name, password, onCreate]);

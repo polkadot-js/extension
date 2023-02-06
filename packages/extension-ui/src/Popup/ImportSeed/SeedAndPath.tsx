@@ -5,125 +5,67 @@ import type { KeypairType } from '@polkadot/util-crypto/types';
 import type { ThemeProps } from '../../types';
 import type { AccountInfo } from '.';
 
-import { faCaretDown, faCaretRight } from '@fortawesome/free-solid-svg-icons';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useContext, useState } from 'react';
 import styled from 'styled-components';
 
-import { validateSeed } from '@polkadot/extension-ui/messaging';
-import { objectSpread } from '@polkadot/util';
-
-import {
-  ButtonArea,
-  Dropdown,
-  InputWithLabel,
-  NextStepButton,
-  TextAreaWithLabel,
-  VerticalSpace,
-  Warning
-} from '../../components';
-import useGenesisHashOptions from '../../hooks/useGenesisHashOptions';
+import { ActionContext, Button, ButtonArea, MnemonicInput, VerticalSpace } from '../../components';
 import useTranslation from '../../hooks/useTranslation';
 
 interface Props {
   className?: string;
+  path: string | null;
+  seed: string | null;
+  setSeed: (seed: string) => void;
   onNextStep: () => void;
   onAccountChange: (account: AccountInfo | null) => void;
   type: KeypairType;
 }
 
-function SeedAndPath({ className, onAccountChange, onNextStep, type }: Props): React.ReactElement {
+function SeedAndPath({ className, onAccountChange, onNextStep, path, seed, setSeed, type }: Props): React.ReactElement {
   const { t } = useTranslation();
-  const genesisOptions = useGenesisHashOptions();
   const [address, setAddress] = useState('');
-  const [seed, setSeed] = useState<string | null>(null);
-  const [path, setPath] = useState<string | null>(null);
-  const [advanced, setAdvances] = useState(false);
   const [error, setError] = useState('');
   const [genesis, setGenesis] = useState('');
+  const onAction = useContext(ActionContext);
 
-  useEffect(() => {
-    // No need to validate an empty seed
-    // we have a dedicated error for this
-    if (!seed) {
-      onAccountChange(null);
-
-      return;
-    }
-
-    const suri = `${seed || ''}${path || ''}`;
-
-    validateSeed(suri, type)
-      .then((validatedAccount) => {
-        setError('');
-        setAddress(validatedAccount.address);
-        onAccountChange(objectSpread<AccountInfo>({}, validatedAccount, { genesis, type }));
-      })
-      .catch(() => {
-        setAddress('');
-        onAccountChange(null);
-        setError(path ? t<string>('Invalid mnemonic seed or derivation path') : t<string>('Invalid mnemonic seed'));
-      });
-  }, [t, genesis, seed, path, onAccountChange, type]);
-
-  const _onToggleAdvanced = useCallback(() => {
-    setAdvances(!advanced);
-  }, [advanced]);
+  const goTo = useCallback((path: string) => () => onAction(path), [onAction]);
 
   return (
     <>
       <div className={className}>
-        <TextAreaWithLabel
-          className='seedInput'
-          isError={!!error}
-          isFocused
-          label={t<string>('existing 12 or 24-word mnemonic seed')}
-          onChange={setSeed}
-          rowsCount={2}
-          value={seed || ''}
-        />
-        {!!error && !seed && (
-          <Warning
-            className='seedError'
-            isBelowInput
-            isDanger
-          >
-            {t<string>('Mnemonic needs to contain 12, 15, 18, 21, 24 words')}
-          </Warning>
-        )}
-        <Dropdown
-          className='genesisSelection'
-          label={t<string>('Network')}
-          onChange={setGenesis}
-          options={genesisOptions}
-          value={genesis}
-        />
-        <div
-          className='advancedToggle'
-          onClick={_onToggleAdvanced}
-        >
-          <FontAwesomeIcon icon={advanced ? faCaretDown : faCaretRight} />
-          <span>{t<string>('advanced')}</span>
+        <div className='text'>
+          <span className='heading'>{t<string>('Enter your secret phrase')}</span>
+          <span className='subtitle'>
+            {t<string>('Enter your 12-word secret phrase to access your account.')}
+            <span className='bold'>{t<string>(' You can paste it into any field.')}</span>
+          </span>
         </div>
-        {advanced && (
-          <InputWithLabel
-            className='derivationPath'
-            isError={!!path && !!error}
-            label={t<string>('derivation path')}
-            onChange={setPath}
-            value={path || ''}
-          />
-        )}
-        {!!error && !!seed && <Warning isDanger>{error}</Warning>}
+        <MnemonicInput
+          error={error}
+          genesis={genesis}
+          onAccountChange={onAccountChange}
+          onChange={setSeed}
+          path={path}
+          seed={seed}
+          setAddress={setAddress}
+          setError={setError}
+          type={type}
+        />
       </div>
       <VerticalSpace />
       <ButtonArea>
-        <NextStepButton
+        <Button
+          onClick={goTo('/')}
+          secondary
+        >
+          {t<string>('Cancel')}
+        </Button>
+        <Button
           isDisabled={!address || !!error}
           onClick={onNextStep}
         >
           {t<string>('Next')}
-        </NextStepButton>
+        </Button>
       </ButtonArea>
     </>
   );
@@ -131,6 +73,41 @@ function SeedAndPath({ className, onAccountChange, onNextStep, type }: Props): R
 
 export default styled(SeedAndPath)(
   ({ theme }: ThemeProps) => `
+  display: flex;
+  flex-direction: column;
+  .text {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    margin-top: 32px;
+    gap: 8px;
+    margin-bottom: 40px;
+
+    .heading {
+      font-family: ${theme.secondaryFontFamily};
+      color: ${theme.textColor};
+      font-weight: 500;
+      font-size: 16px;
+      line-height: 125%;
+      text-align: center;
+      letter-spacing: 0.06em;
+      }
+
+    .subtitle {
+      color: ${theme.subTextColor};
+      font-size: 14px;
+      line-height: 145%;
+      text-align: center;
+      letter-spacing: 0.07em;
+      white-space: pre-line;
+
+      & .bold {
+        font-weight: 600;
+      }
+    }
+}
+
   .advancedToggle {
     color: ${theme.textColor};
     cursor: pointer;

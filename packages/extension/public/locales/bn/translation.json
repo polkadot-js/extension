@@ -31,7 +31,7 @@
     "You currently don't have any accounts. Create your first account to get started.": "বর্তমানে আপনার কোন অ্যাকাউন্ট নেই। শুরু করার জন্য আপনার প্রথম অ্যাকাউন্ট তৈরি করুন।",
     "Accounts": "অ্যাকাউন্টসমূহ",
     "Authorize": "অনুমোদন করুন",
-    "Only approve this request if you trust the application. Approving gives the application access to the addresses of your accounts.":"অ্যাপ্লিকেশনটি যদি আপনার বিশ্বস্ত হলেই শুধু আবেদনটি অনুমোদন করবেন। অনুমোদিত হলে অ্যাপ্লিকেশনটি আপনার অ্যাকাউন্টের ঠিকানাগুলোতে প্রবেশাধিকার পাবে।",
+    "Only approve this request if you trust the application. Approving gives the application access to the addresses of your accounts.": "অ্যাপ্লিকেশনটি যদি আপনার বিশ্বস্ত হলেই শুধু আবেদনটি অনুমোদন করবেন। অনুমোদিত হলে অ্যাপ্লিকেশনটি আপনার অ্যাকাউন্টের ঠিকানাগুলোতে প্রবেশাধিকার পাবে।",
     "Yes, allow this application access": "হ্যাঁ, এই অ্যাপ্লিকেশনটিকে অনুমতি দিন",
     "Add the account with the generated seed": "উৎপন্ন সীডের সাথে অ্যাকাউন্টেটি যুক্ত করুন",
     "Create an account": "একটি অ্যাকাউন্ট তৈরি করুন",
@@ -162,7 +162,7 @@
     "Got it!": "",
     "Your privacy is protected": "",
     "Help": "",
-    "Settings":"",
+    "Settings": "",
     "Edit Account": "",
     "Add your accounts and keep exploring the Aleph Zero ecosystem!": "",
     "Hello!": "",
@@ -187,5 +187,13 @@
     "Password": "",
     "Confirm password": "",
     "Add local details": "",
-    "It might help you keep track of what the account is for and additionally protect it.": ""
+    "It might help you keep track of what the account is for and additionally protect it.": "",
+    "Import existing account": "",
+    "Enter your secret phrase": "",
+    "Enter your 12-word secret phrase to access your account.": "",
+    "You can paste it into any field.": "",
+    "Invalid secret phrase": "",
+    "Sub-account path": "",
+    "Import": "",
+    "Import successful": ""
 }

@@ -42,6 +42,7 @@ function SaveMnemonic({ className, onNextStep, onPreviousStep, seed }: Props): R
               className='mnemonic-pill'
               index={index + 1}
               key={index + 1}
+              name={`mnemonic-${index}`}
               word={word}
             />
           ))}

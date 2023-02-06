@@ -3,13 +3,16 @@
 
 import React, { useCallback, useContext, useEffect, useState } from 'react';
 
-import { AccountContext, ActionContext, Address } from '../../components';
+import useGenesisHashOptions from '@polkadot/extension-ui/hooks/useGenesisHashOptions';
+
+import { AccountContext, ActionContext } from '../../components';
 import AccountNamePasswordCreation from '../../components/AccountNamePasswordCreation';
 import useMetadata from '../../hooks/useMetadata';
 import useTranslation from '../../hooks/useTranslation';
 import { createAccountSuri } from '../../messaging';
 import { HeaderWithSteps } from '../../partials';
 import { DEFAULT_TYPE } from '../../util/defaultType';
+import NetworkSelection from './NetworkSelection';
 import SeedAndPath from './SeedAndPath';
 
 export interface AccountInfo {
@@ -25,9 +28,13 @@ function ImportSeed(): React.ReactElement {
   const [isBusy, setIsBusy] = useState(false);
   const [account, setAccount] = useState<AccountInfo | null>(null);
   const [name, setName] = useState<string | null>(null);
-  const [step1, setStep1] = useState(true);
+  const [step, setStep] = useState<number>(1);
   const [type, setType] = useState(DEFAULT_TYPE);
+  const [path, setPath] = useState<string | null>(null);
+  const [genesis, setGenesis] = useState('');
+  const [seed, setSeed] = useState<string | null>(null);
   const chain = useMetadata(account && account.genesis, true);
+  const genesisOptions = useGenesisHashOptions();
 
   useEffect((): void => {
     !accounts.length && onAction();
@@ -54,36 +61,52 @@ function ImportSeed(): React.ReactElement {
     [account, onAction, type]
   );
 
-  const _onNextStep = useCallback(() => setStep1(false), []);
+  const _onNextStep = useCallback(() => setStep((step) => step + 1), []);
 
-  const _onBackClick = useCallback(() => setStep1(true), []);
+  const _onPreviousStep = useCallback(() => setStep((step) => step - 1), []);
 
   return (
     <>
       <HeaderWithSteps
-        step={step1 ? 1 : 2}
-        text={t<string>('Import account')}
+        step={step}
+        text={t<string>('Import from secret phrase')}
         // TODO: placeholder for now
-        total={2}
+        total={3}
       />
-      <div>
-        <Address
-          address={account?.address}
-          genesisHash={account?.genesis}
-          name={name}
-        />
-      </div>
-      {step1 ? (
+      {step === 1 && (
         <SeedAndPath
           onAccountChange={setAccount}
           onNextStep={_onNextStep}
+          path={path}
+          seed={seed}
+          setSeed={setSeed}
           type={type}
         />
-      ) : (
+      )}
+      {step === 2 && (
+        <>
+          <NetworkSelection
+            address={account?.address}
+            onAccountChange={setAccount}
+            onChange={setGenesis}
+            onNextStep={_onNextStep}
+            onPreviousStep={_onPreviousStep}
+            options={genesisOptions}
+            path={path}
+            seed={seed}
+            setPath={setPath}
+            type={type}
+            value={genesis}
+          />
+        </>
+      )}
+      {step === 3 && (
         <AccountNamePasswordCreation
-          buttonLabel={t<string>('Add the account with the supplied seed')}
+          address={account?.address}
+          buttonLabel={t<string>('Import')}
+          genesisHash={genesis}
           isBusy={isBusy}
-          onBackClick={_onBackClick}
+          onBackClick={_onPreviousStep}
           onCreate={_onCreate}
           onNameChange={setName}
         />

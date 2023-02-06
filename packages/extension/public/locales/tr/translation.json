@@ -162,7 +162,7 @@
   "Got it!": "",
   "Your privacy is protected": "",
   "Help": "",
-  "Settings":"",
+  "Settings": "",
   "Edit Account": "",
   "Add your accounts and keep exploring the Aleph Zero ecosystem!": "",
   "Hello!": "",
@@ -187,5 +187,13 @@
   "Password": "",
   "Confirm password": "",
   "Add local details": "",
-  "It might help you keep track of what the account is for and additionally protect it.": ""
+  "It might help you keep track of what the account is for and additionally protect it.": "",
+  "Import existing account": "",
+  "Enter your secret phrase": "",
+  "Enter your 12-word secret phrase to access your account.": "",
+  "You can paste it into any field.": "",
+  "Invalid secret phrase": "",
+  "Sub-account path": "",
+  "Import": "",
+  "Import successful": ""
 }

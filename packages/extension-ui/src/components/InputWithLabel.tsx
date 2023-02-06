@@ -1,13 +1,11 @@
 // Copyright 2019-2023 @polkadot/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import React, { useCallback, useState } from 'react';
+import React, { useCallback } from 'react';
 import styled from 'styled-components';
 
-import useTranslation from '../hooks/useTranslation';
 import Label from './Label';
 import { Input } from './TextInputs';
-import Warning from './Warning';
 
 interface Props {
   className?: string;
@@ -42,24 +40,6 @@ function InputWithLabel({
   value,
   withoutMargin
 }: Props): React.ReactElement<Props> {
-  const [isCapsLock, setIsCapsLock] = useState(false);
-  const { t } = useTranslation();
-
-  const _checkKey = useCallback(
-    (event: React.KeyboardEvent<HTMLInputElement>): void => {
-      onEnter && event.key === 'Enter' && onEnter();
-
-      if (type === 'password') {
-        if (event.getModifierState('CapsLock')) {
-          setIsCapsLock(true);
-        } else {
-          setIsCapsLock(false);
-        }
-      }
-    },
-    [onEnter, type]
-  );
-
   const _onChange = useCallback(
     ({ target: { value } }: React.ChangeEvent<HTMLInputElement>): void => {
       onChange && onChange(value);
@@ -69,6 +49,7 @@ function InputWithLabel({
 
   return (
     <Label
+      active={value && value?.length > 0}
       className={`${className || ''} ${withoutMargin ? 'withoutMargin' : ''}`}
       label={label}
     >
@@ -80,7 +61,6 @@ function InputWithLabel({
         disabled={disabled}
         onBlur={onBlur}
         onChange={_onChange}
-        onKeyPress={_checkKey}
         placeholder={placeholder}
         readOnly={isReadOnly}
         spellCheck={false}
@@ -88,9 +68,6 @@ function InputWithLabel({
         value={value}
         withError={isError}
       />
-      {/* { isCapsLock && (
-        <Warning isBelowInput>{t<string>('Warning: Caps lock is on')}</Warning>
-      )} */}
     </Label>
   );
 }

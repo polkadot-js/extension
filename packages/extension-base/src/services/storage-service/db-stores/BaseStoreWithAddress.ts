@@ -12,11 +12,11 @@ export default class BaseStoreWithAddress<T extends DefaultAddressDoc> extends B
     return this.table.where(conditions).delete();
   }
 
-  async getDataByAddressAsObject (address: string) {
-    const data = await this.table.where('address').equals(address).toArray();
-
-    console.log('from store', data);
-
-    return {};
-  }
+  // async getDataByAddressAsObject (address: string) {
+  //   const data = await this.table.where('address').equals(address).toArray();
+  //
+  //   console.log('from store', data);
+  //
+  //   return {};
+  // }
 }

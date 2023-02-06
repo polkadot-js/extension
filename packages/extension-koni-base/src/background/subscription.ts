@@ -176,7 +176,6 @@ export class KoniSubscription {
 
   initBalanceSubscription (addresses: string[], chainInfoMap: Record<string, _ChainInfo>, substrateApiMap: Record<string, _SubstrateApi>, evmApiMap: Record<string, _EvmApi>, onlyRunOnFirstTime?: boolean) {
     const unsub = subscribeBalance(addresses, chainInfoMap, substrateApiMap, evmApiMap, (result) => {
-      console.log('callback balance', result);
       this.state.setBalanceItem(result.tokenSlug, result);
     });
 
@@ -193,6 +192,7 @@ export class KoniSubscription {
 
   initCrowdloanSubscription (addresses: string[], substrateApiMap: Record<string, _SubstrateApi>, onlyRunOnFirstTime?: boolean) {
     const subscriptionPromise = subscribeCrowdloan(addresses, substrateApiMap, (networkKey, rs) => {
+      console.log('crowdloan', addresses, networkKey, rs);
       this.state.setCrowdloanItem(networkKey, rs);
     }, this.state.getChainInfoMap());
 

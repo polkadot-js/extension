@@ -7,7 +7,7 @@ import { _AssetType, _ChainAsset, _ChainInfo } from '@subwallet/chain-list/types
 import { withErrorLog } from '@subwallet/extension-base/background/handlers/helpers';
 import State, { AuthUrls, Resolver } from '@subwallet/extension-base/background/handlers/State';
 import { isSubscriptionRunning, unsubscribe } from '@subwallet/extension-base/background/handlers/subscriptions';
-import { AccountRefMap, AddNetworkRequestExternal, AddTokenRequestExternal, APIItemState, ApiMap, AuthRequestV2, BalanceItem, BalanceJson, ConfirmationDefinitions, ConfirmationsQueue, ConfirmationsQueueItemOptions, ConfirmationType, CrowdloanItem, CrowdloanJson, CurrentAccountInfo, CustomToken, EvmSendTransactionParams, EvmSendTransactionRequestExternal, EvmSignatureRequestExternal, ExternalRequestPromise, ExternalRequestPromiseStatus, KeyringState, NftCollection, NftItem, NftJson, NftTransferExtra, PriceJson, RequestAccountExportPrivateKey, RequestCheckPublicAndSecretKey, RequestConfirmationComplete, RequestSettingsType, ResponseAccountExportPrivateKey, ResponseCheckPublicAndSecretKey, ResultResolver, ServiceInfo, SingleModeJson, StakeUnlockingJson, StakingItem, StakingJson, StakingRewardItem, StakingRewardJson, ThemeTypes, TransactionHistoryItemType, UiSettings } from '@subwallet/extension-base/background/KoniTypes';
+import { AccountRefMap, AddNetworkRequestExternal, AddTokenRequestExternal, APIItemState, ApiMap, AuthRequestV2, BalanceItem, BalanceJson, ConfirmationDefinitions, ConfirmationsQueue, ConfirmationsQueueItemOptions, ConfirmationType, CrowdloanItem, CrowdloanJson, CurrentAccountInfo, EvmSendTransactionParams, EvmSendTransactionRequestExternal, EvmSignatureRequestExternal, ExternalRequestPromise, ExternalRequestPromiseStatus, KeyringState, NftCollection, NftItem, NftJson, NftTransferExtra, PriceJson, RequestAccountExportPrivateKey, RequestCheckPublicAndSecretKey, RequestConfirmationComplete, RequestSettingsType, ResponseAccountExportPrivateKey, ResponseCheckPublicAndSecretKey, ResultResolver, ServiceInfo, SingleModeJson, StakeUnlockingJson, StakingItem, StakingJson, StakingRewardItem, StakingRewardJson, ThemeTypes, TransactionHistoryItemType, UiSettings } from '@subwallet/extension-base/background/KoniTypes';
 import { AuthorizeRequest, RequestAuthorizeTab } from '@subwallet/extension-base/background/types';
 import { ChainService } from '@subwallet/extension-base/services/chain-service';
 import { _PREDEFINED_SINGLE_MODES } from '@subwallet/extension-base/services/chain-service/constants';
@@ -969,7 +969,7 @@ export default class KoniState extends State {
   }
 
   public async getStoredBalance (address: string): Promise<Record<string, BalanceItem>> {
-    const items = await this.dbService.stores.balance.getDataByAddressAsObject(address);
+    const items = await this.dbService.stores.balance.getBalanceMapByAddress(address);
 
     return items || {};
   }
@@ -1020,11 +1020,13 @@ export default class KoniState extends State {
 
   public setBalanceItem (tokenSlug: string, item: BalanceItem) {
     this.balanceMap[tokenSlug] = { timestamp: +new Date(), ...item };
+
+    console.log('balanceMap', this.balanceMap);
     this.updateBalanceStore(item);
 
-    // this.lazyNext('setBalanceItem', () => {
-    //   this.publishBalance();
-    // });
+    this.lazyNext('setBalanceItem', () => {
+      this.publishBalance();
+    });
   }
 
   private updateBalanceStore (item: BalanceItem) {
@@ -1063,7 +1065,7 @@ export default class KoniState extends State {
 
   private updateCrowdloanStore (networkKey: string, item: CrowdloanItem) {
     this.getCurrentAccount((currentAccountInfo) => {
-      this.dbService.updateCrowdloanStore(networkKey, this.getNetworkGenesisHashByKey(networkKey), currentAccountInfo.address, item).catch((e) => this.logger.warn(e));
+      this.dbService.updateCrowdloanStore(networkKey, currentAccountInfo.address, item).catch((e) => this.logger.warn(e));
     });
   }
 

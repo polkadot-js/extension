@@ -15,6 +15,6 @@ export default <Record<string, typeof BaseMigrationJob>> {
   // '0.5.3-3-1': ConvertTransactionHistoryFromChromeStorageToIndexedDB, // Can run multiple times with different key
   '0.5.6-1': ClearOldStorage,
   '0.6.6-1': ChangeRouteToHome,
-  '0.7.2-1': RemoveWrongCrowdloan,
-  '0.7.5-0': ResetTransactionHistoryEventIdx
+  '0.7.5-0': ResetTransactionHistoryEventIdx,
+  '0.7.9-0': RemoveWrongCrowdloan
 };

@@ -274,6 +274,10 @@ export function updateTransferResponseTxResult (
         record.event.method.toLowerCase() === 'transfer') {
         response.txResult.change = record.event.data[3]?.toString() || '0';
         response.txResult.changeSymbol = tokenInfo.symbol;
+      } else if (record.event.section === 'transactionPayment' &&
+        record.event.method.toLowerCase() === 'transactionfeepaid') {
+        response.txResult.fee = record.event.data[1]?.toString() || '0';
+        response.txResult.feeSymbol = tokenInfo.symbol;
       }
     } else if (_TRANSFER_CHAIN_GROUP.bitcountry.includes(networkKey) && !_isNativeToken(tokenInfo)) {
       if (record.event.section === 'tokens' &&
@@ -549,6 +553,7 @@ export async function makeTransfer ({ callback,
     txState: txState,
     address: from,
     updateResponseTxResult: updateResponseTxResult,
-    errorMessage: 'error transfer'
+    errorMessage: 'error transfer',
+    nonce: _TRANSFER_CHAIN_GROUP.genshiro.includes(networkKey) ? -1 : undefined
   });
 }

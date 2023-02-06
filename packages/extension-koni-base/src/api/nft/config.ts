@@ -13,10 +13,6 @@ export const SINGULAR_V1_COLLECTION_ENDPOINT = 'https://singular.rmrk.app/api/rm
 
 export const SINGULAR_V2_COLLECTION_ENDPOINT = 'https://singular.app/api/rmrk2/collection/';
 
-export const SINGULAR_V1_EXTERNAL_SERVER = 'https://singular.rmrk.app/collectibles/';
-
-export const SINGULAR_V2_EXTERNAL_SERVER = 'https://singular.app/collectibles/';
-
 export const KANARIA_EXTERNAL_SERVER = 'https://kanaria.rmrk.app/catalogue/';
 
 export const CLOUDFLARE_PINATA_SERVER = 'https://cloudflare-ipfs.com/ipfs/';

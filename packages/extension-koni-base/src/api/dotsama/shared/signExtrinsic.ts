@@ -22,6 +22,7 @@ interface AbstractSignExtrinsicProps {
   password?: string;
   setState?: (promise: ExternalRequestPromise) => void;
   type: SignerType;
+  nonce?: number;
 }
 
 interface PasswordSignExtrinsicProps extends AbstractSignExtrinsicProps {
@@ -36,7 +37,7 @@ interface ExternalSignExtrinsicProps extends AbstractSignExtrinsicProps {
 
 type SignExtrinsicProps = PasswordSignExtrinsicProps | ExternalSignExtrinsicProps;
 
-export const signExtrinsic = async ({ address, callback, extrinsic, id, setState, substrateApi, type }: SignExtrinsicProps): Promise<string | null> => {
+export const signExtrinsic = async ({ address, callback, extrinsic, id, nonce, setState, substrateApi, type }: SignExtrinsicProps): Promise<string | null> => {
   if (type === SignerType.PASSWORD) {
     const passwordError: string | null = unlockAccount(address);
 
@@ -93,7 +94,7 @@ export const signExtrinsic = async ({ address, callback, extrinsic, id, setState
     signer = new KeyringSigner({ registry: registry, keyPair: pair });
   }
 
-  await extrinsic.signAsync(address, { signer: signer });
+  await extrinsic.signAsync(address, { signer: signer, nonce });
 
   return null;
 };

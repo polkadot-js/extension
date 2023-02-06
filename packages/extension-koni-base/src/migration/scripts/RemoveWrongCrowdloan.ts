@@ -8,17 +8,6 @@ export default class RemoveWrongCrowdloan extends BaseMigrationJob {
   public override async run (): Promise<void> {
     const db = new KoniDatabase();
 
-    const deleteKeys: Array<any> = [];
-
-    await db.crowdloans.each(({ chainHash }, { primaryKey }) => {
-      if (chainHash.endsWith('_evm')) {
-        deleteKeys.push(primaryKey);
-      }
-    });
-
-    deleteKeys.forEach((pKey) => {
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
-      db.crowdloans.delete(pKey).catch(console.debug);
-    });
+    await db.crowdloans.clear();
   }
 }

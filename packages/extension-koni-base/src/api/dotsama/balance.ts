@@ -331,7 +331,8 @@ async function subscribeEquilibriumTokenBalance (addresses: string[], chain: str
   const tokenMap = state.getAssetByChainAndAsset(chain, tokenTypes);
 
   const unsub = await api.query.system.account.multi(addresses, (balances: Record<string, any>[]) => {
-    tokenList.forEach(({ decimals, specialOption, symbol }) => {
+    Object.values(tokenMap).forEach((tokenInfo) => {
+      const assetId = _getTokenOnChainAssetId(tokenInfo);
       let tokenFreeBalance = BN_ZERO;
 
       for (const balance of balances) {
@@ -339,20 +340,21 @@ async function subscribeEquilibriumTokenBalance (addresses: string[], chain: str
         const balancesData = JSON.parse(balance.data.toString()) as EqBalanceV0;
         const balanceList = balancesData.v0.balance;
 
-    Object.values(tokenMap).map((tokenInfo) => {
-      const assetId = _getTokenOnChainAssetId(tokenInfo);
-      // @ts-ignore
-      const freeTokenBalance = balancesData.find((data: EqBalanceItem) => data[0] === assetId);
+        // @ts-ignore
+        const freeTokenBalance = balanceList.find((data: EqBalanceItem) => data[0] === assetId);
+        const bnFreeTokenBalance = freeTokenBalance ? new BN(freeTokenBalance[1].positive.toString()) : BN_ZERO;
+
+        tokenFreeBalance = tokenFreeBalance.add(bnFreeTokenBalance);
+      }
+
       const tokenBalance: BalanceItem = {
-        free: freeTokenBalance ? freeTokenBalance[1].positive.toString() : '0',
+        free: tokenFreeBalance.toString(),
         locked: '0', // Equilibrium doesn't show locked balance
         state: APIItemState.READY,
         tokenSlug: tokenInfo.slug
       };
 
       callBack(tokenBalance);
-
-      return undefined;
     });
   });
 

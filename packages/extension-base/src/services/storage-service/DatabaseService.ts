@@ -62,7 +62,7 @@ export default class DatabaseService {
     if (item.state === APIItemState.READY) {
       this.logger.log(`Updating staking for [${chain}]`);
 
-      return this.stores.staking.upsert({ chainHash, ...item });
+      return this.stores.staking.upsert({ chainHash, ...item } as IStakingItem);
     }
   }
 

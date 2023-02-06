@@ -652,13 +652,13 @@ export default class KoniExtension extends Extension {
   private subscribeCrowdloan (id: string, port: chrome.runtime.Port): CrowdloanJson {
     const cb = createSubscription<'pri(crowdloan.getSubscription)'>(id, port);
 
-    const balanceSubscription = state.subscribeCrowdloan().subscribe({
+    const crowdloanSubscription = state.subscribeCrowdloan().subscribe({
       next: (rs) => {
         cb(rs);
       }
     });
 
-    this.createUnsubscriptionHandle(id, balanceSubscription.unsubscribe);
+    this.createUnsubscriptionHandle(id, crowdloanSubscription.unsubscribe);
 
     port.onDisconnect.addListener((): void => {
       this.cancelSubscription(id);

@@ -106,13 +106,13 @@ export const updatePrice = (data: PriceJson) => {
 export const subscribePrice = lazySubscribeMessage('pri(price.getSubscription)', null, updatePrice, updatePrice);
 
 export const updateBalance = (data: BalanceJson) => {
-  console.log('balanceMap', data);
   store.dispatch({ type: 'balance/update', payload: data.details });
 };
 
 export const subscribeBalance = lazySubscribeMessage('pri(balance.getSubscription)', null, updateBalance, updateBalance);
 
 export const updateCrowdloan = (data: CrowdloanJson) => {
+  console.log('crowdloan', data);
   store.dispatch({ type: 'crowdloan/update', payload: data.details });
 };
 

@@ -12,7 +12,15 @@ import { AuthorizeRequest, RequestAuthorizeTab } from '@subwallet/extension-base
 import { ChainService } from '@subwallet/extension-base/services/chain-service';
 import { _PREDEFINED_SINGLE_MODES } from '@subwallet/extension-base/services/chain-service/constants';
 import { _ChainConnectionStatus, _ChainState, _ValidateCustomTokenRequest } from '@subwallet/extension-base/services/chain-service/types';
-import { _getChainNativeTokenSlug, _getEvmChainId, _getOriginChainOfAsset, _getSubstrateGenesisHash, _isChainEnabled, _isChainEvmCompatible } from '@subwallet/extension-base/services/chain-service/utils';
+import {
+  _getChainNativeTokenSlug,
+  _getEvmChainId,
+  _getOriginChainOfAsset,
+  _getSubstrateGenesisHash,
+  _isChainEnabled,
+  _isChainEvmCompatible,
+  _isSubstrateParachain
+} from '@subwallet/extension-base/services/chain-service/utils';
 import DatabaseService from '@subwallet/extension-base/services/storage-service/DatabaseService';
 import { Web3Transaction } from '@subwallet/extension-base/signers/types';
 import { CurrentAccountStore, PriceStore } from '@subwallet/extension-base/stores';
@@ -55,11 +63,13 @@ function getSuri (seed: string, type?: KeypairType): string {
 function generateDefaultCrowdloanMap () {
   const crowdloanMap: Record<string, CrowdloanItem> = {};
 
-  Object.keys(ChainInfoMap).forEach((networkKey) => {
-    crowdloanMap[networkKey] = {
-      state: APIItemState.PENDING,
-      contribute: '0'
-    };
+  Object.entries(ChainInfoMap).forEach(([networkKey, chainInfo]) => {
+    if (_isSubstrateParachain(chainInfo)) {
+      crowdloanMap[networkKey] = {
+        state: APIItemState.PENDING,
+        contribute: '0'
+      };
+    }
   });
 
   return crowdloanMap;
@@ -995,8 +1005,6 @@ export default class KoniState extends State {
     const defaultData = generateDefaultCrowdloanMap();
     const storedData = await this.getStoredCrowdloan(newAddress);
 
-    // storedData = this.removeInactiveNetworkData(storedData);
-
     this.crowdloanMap = { ...defaultData, ...storedData } as Record<string, CrowdloanItem>;
     this.publishCrowdloan(true);
   }
@@ -1020,8 +1028,6 @@ export default class KoniState extends State {
 
   public setBalanceItem (tokenSlug: string, item: BalanceItem) {
     this.balanceMap[tokenSlug] = { timestamp: +new Date(), ...item };
-
-    console.log('balanceMap', this.balanceMap);
     this.updateBalanceStore(item);
 
     this.lazyNext('setBalanceItem', () => {
@@ -1040,8 +1046,6 @@ export default class KoniState extends State {
   }
 
   public getCrowdloan (reset?: boolean): CrowdloanJson {
-    // const activeData = this.removeInactiveNetworkData(this.crowdloanMap);
-
     return { details: this.crowdloanMap, reset } as CrowdloanJson;
   }
 

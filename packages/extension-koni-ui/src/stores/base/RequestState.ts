@@ -2,7 +2,8 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
-import { AuthorizeRequest, MetadataRequest, SigningRequest } from '@subwallet/extension-base/background/types';
+import { SigningRequest } from '@subwallet/extension-base/services/request-service/types';
+import { AuthorizeRequest, MetadataRequest } from '@subwallet/extension-base/background/types';
 import { ReduxStatus, RequestState, UpdateConfirmationsQueueRequest } from '@subwallet/extension-koni-ui/stores/types';
 
 const initialState: RequestState = {

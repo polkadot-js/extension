@@ -3,7 +3,7 @@
 
 import { MessageTypes, TransportRequestMessage } from '@subwallet/extension-base/background/types';
 import { PORT_EXTENSION } from '@subwallet/extension-base/defaults';
-import { SubWalletProviderError } from '@subwallet/extension-base/errors/SubWalletProviderError';
+import { SubWalletProviderError } from '@subwallet/extension-base/background/errors/SubWalletProviderError';
 import { NftHandler } from '@subwallet/extension-koni-base/api/nft';
 import KoniExtension from '@subwallet/extension-koni-base/background/handlers/Extension';
 import KoniState from '@subwallet/extension-koni-base/background/handlers/State';

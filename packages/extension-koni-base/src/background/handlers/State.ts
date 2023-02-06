@@ -4,27 +4,26 @@
 import Common from '@ethereumjs/common';
 import { ChainInfoMap } from '@subwallet/chain-list';
 import { _AssetType, _ChainAsset, _ChainInfo } from '@subwallet/chain-list/types';
+// eslint-disable-next-line camelcase
+import { EvmRpcError } from '@subwallet/extension-base/background/errors/EvmRpcError';
 import { withErrorLog } from '@subwallet/extension-base/background/handlers/helpers';
 import { isSubscriptionRunning, unsubscribe } from '@subwallet/extension-base/background/handlers/subscriptions';
-import { AccountRefMap, AddNetworkRequestExternal, AddTokenRequestExternal, APIItemState, ApiMap, AuthRequestV2, BalanceItem, BalanceJson, ChainRegistry, ConfirmationDefinitions, ConfirmationsQueue, ConfirmationsQueueItemOptions, ConfirmationType, CrowdloanItem, CrowdloanJson, CurrentAccountInfo, CustomToken, EvmSendTransactionParams, EvmSendTransactionRequestExternal, EvmSignatureRequestExternal, ExternalRequestPromise, ExternalRequestPromiseStatus, KeyringState, NftCollection, NftItem, NftJson, NftTransferExtra, PriceJson, RequestAccountExportPrivateKey, RequestCheckPublicAndSecretKey, RequestConfirmationComplete, RequestSettingsType, ResponseAccountExportPrivateKey, ResponseCheckPublicAndSecretKey, ResultResolver, ServiceInfo, SingleModeJson, StakeUnlockingJson, StakingItem, StakingJson, StakingRewardItem, StakingRewardJson, ThemeTypes, TransactionHistoryItemType, UiSettings } from '@subwallet/extension-base/background/KoniTypes';
-import { AccountAuthType, AccountJson, AuthorizeRequest, MetadataRequest, RequestAuthorizeTab, RequestRpcSend, RequestRpcSubscribe, RequestRpcUnsubscribe, RequestSign, ResponseRpcListProviders, ResponseSigning, SigningRequest } from '@subwallet/extension-base/background/types';
+import { AccountRefMap, AddNetworkRequestExternal, AddTokenRequestExternal, APIItemState, ApiMap, AuthRequestV2, BalanceItem, BalanceJson, ChainRegistry, ConfirmationDefinitions, ConfirmationsQueue, ConfirmationsQueueItemOptions, ConfirmationType, CrowdloanItem, CrowdloanJson, CurrentAccountInfo, CustomToken, EvmSendTransactionParams, EvmSendTransactionRequestExternal, EvmSignatureRequestExternal, ExternalRequestPromise, ExternalRequestPromiseStatus, KeyringState, NftCollection, NftItem, NftJson, NftTransferExtra, PriceJson, RequestAccountExportPrivateKey, RequestCheckPublicAndSecretKey, RequestConfirmationComplete, RequestSettingsType, ResponseAccountExportPrivateKey, ResponseCheckPublicAndSecretKey, ServiceInfo, SingleModeJson, StakeUnlockingJson, StakingItem, StakingJson, StakingRewardItem, StakingRewardJson, ThemeTypes, TransactionHistoryItemType, UiSettings } from '@subwallet/extension-base/background/KoniTypes';
+import { AccountJson, RequestAuthorizeTab, RequestRpcSend, RequestRpcSubscribe, RequestRpcUnsubscribe, RequestSign, Resolver, ResponseRpcListProviders, ResponseSigning } from '@subwallet/extension-base/background/types';
 import { ChainService } from '@subwallet/extension-base/services/chain-service';
 import { _PREDEFINED_SINGLE_MODES } from '@subwallet/extension-base/services/chain-service/constants';
 import { _ChainConnectionStatus, _ChainState, _ValidateCustomTokenRequest } from '@subwallet/extension-base/services/chain-service/types';
-import { _getEvmChainId, _getSubstrateGenesisHash, _isChainEnabled, _isChainEvmCompatible } from '@subwallet/extension-base/services/chain-service/utils';
+import { _getEvmChainId, _getSubstrateGenesisHash, _isChainEnabled } from '@subwallet/extension-base/services/chain-service/utils';
+import RequestService from '@subwallet/extension-base/services/request-service';
+import { AuthUrls, MetaRequest, SignRequest } from '@subwallet/extension-base/services/request-service/types';
 import DatabaseService from '@subwallet/extension-base/services/storage-service/DatabaseService';
 import { Web3Transaction } from '@subwallet/extension-base/signers/types';
-import { CurrentAccountStore, MetadataStore, PriceStore } from '@subwallet/extension-base/stores';
+import { CurrentAccountStore, PriceStore } from '@subwallet/extension-base/stores';
 import AccountRefStore from '@subwallet/extension-base/stores/AccountRef';
-import AuthorizeStore from '@subwallet/extension-base/stores/Authorize';
 import SettingsStore from '@subwallet/extension-base/stores/Settings';
-import { getId } from '@subwallet/extension-base/utils/getId';
-import { addMetadata, knownMetadata } from '@subwallet/extension-chains';
 import { MetadataDef, ProviderMeta } from '@subwallet/extension-inject/types';
 import { getTokenPrice } from '@subwallet/extension-koni-base/api/coingecko';
 import { parseTxAndSignature } from '@subwallet/extension-koni-base/api/evm/external/shared';
-// eslint-disable-next-line camelcase
-import { EvmRpcError } from '@subwallet/extension-koni-base/background/errors/EvmRpcError';
 import { ALL_ACCOUNT_KEY, ALL_GENESIS_HASH } from '@subwallet/extension-koni-base/constants';
 import { anyNumberToBN } from '@subwallet/extension-koni-base/utils/eth';
 import { decodePair } from '@subwallet/keyring/pair/decode';
@@ -37,9 +36,7 @@ import RLP, { Input } from 'rlp';
 import { BehaviorSubject, Subject } from 'rxjs';
 import { TransactionConfig, TransactionReceipt } from 'web3-core';
 
-import { knownGenesis } from '@polkadot/networks/defaults';
 import { JsonRpcResponse, ProviderInterface, ProviderInterfaceCallback } from '@polkadot/rpc-provider/types';
-import settings from '@polkadot/ui-settings';
 import { assert, BN, hexStripPrefix, hexToU8a, isHex, logger as createLogger, u8aToHex } from '@polkadot/util';
 import { Logger } from '@polkadot/util/types';
 import { base64Decode, isEthereumAddress, keyExtractSuri } from '@polkadot/util-crypto';
@@ -50,34 +47,10 @@ import { KoniSubscription } from '../subscription';
 
 const ETH_DERIVE_DEFAULT = '/m/44\'/60\'/0\'/0/0';
 
-export interface Resolver<T> {
-  reject: (error: Error) => void;
-  resolve: (result: T) => void;
-}
-
 export interface AuthRequest extends Resolver<boolean> {
   id: string;
   idStr: string;
   request: RequestAuthorizeTab;
-  url: string;
-}
-
-export type AuthUrls = Record<string, AuthUrlInfo>;
-
-export interface AuthUrlInfo {
-  count: number;
-  id: string;
-  isAllowed: boolean;
-  origin: string;
-  url: string;
-  accountAuthType?: AccountAuthType;
-  isAllowedMap: Record<string, boolean>;
-  currentEvmNetworkKey?: string;
-}
-
-interface MetaRequest extends Resolver<boolean> {
-  id: string;
-  request: MetadataDef;
   url: string;
 }
 
@@ -89,76 +62,6 @@ type Providers = Record<string, {
   // provider.
   start: () => ProviderInterface;
 }>
-
-export interface SignRequest extends Resolver<ResponseSigning> {
-  account: AccountJson;
-  id: string;
-  request: RequestSign;
-  url: string;
-  internalData?: any;
-}
-
-export interface InternalSignRequest extends SignRequest {
-  internalData: any;
-}
-
-const NOTIFICATION_URL = chrome.extension.getURL('notification.html');
-
-const POPUP_WINDOW_OPTS: chrome.windows.CreateData = {
-  focused: true,
-  height: 621,
-  type: 'popup',
-  url: NOTIFICATION_URL,
-  width: 460
-};
-
-const NORMAL_WINDOW_OPTS: chrome.windows.CreateData = {
-  focused: true,
-  type: 'normal',
-  url: NOTIFICATION_URL
-};
-
-export enum NotificationOptions {
-  None,
-  Normal,
-  PopUp,
-}
-
-const extractMetadata = (store: MetadataStore): void => {
-  store.allMap((map): void => {
-    const knownEntries = Object.entries(knownGenesis);
-    const defs: Record<string, { def: MetadataDef, index: number, key: string }> = {};
-    const removals: string[] = [];
-
-    Object
-      .entries(map)
-      .forEach(([key, def]): void => {
-        const entry = knownEntries.find(([, hashes]) => hashes.includes(def.genesisHash));
-
-        if (entry) {
-          const [name, hashes] = entry;
-          const index = hashes.indexOf(def.genesisHash);
-
-          // flatten the known metadata based on the genesis index
-          // (lower is better/newer)
-          if (!defs[name] || (defs[name].index > index)) {
-            if (defs[name]) {
-              // remove the old version of the metadata
-              removals.push(defs[name].key);
-            }
-
-            defs[name] = { def, index, key };
-          }
-        } else {
-          // this is not a known entry, so we will just apply it
-          defs[key] = { def, index: 0, key };
-        }
-      });
-
-    removals.forEach((key) => store.remove(key));
-    Object.values(defs).forEach(({ def }) => addMetadata(def));
-  });
-};
 
 const getSuri = (seed: string, type?: KeypairType): string => {
   return type === 'ethereum'
@@ -197,19 +100,10 @@ const createValidateConfirmationResponsePayload = <CT extends ConfirmationType>(
   };
 };
 
-const AUTH_URLS_KEY = 'authUrls';
-
 export default class KoniState {
-  readonly #metaStore = new MetadataStore();
   readonly #injectedProviders = new Map<chrome.runtime.Port, ProviderInterface>();
-  readonly #metaRequests: Record<string, MetaRequest> = {};
-  #notification = settings.notification;
-  #windows: number[] = [];
   readonly #providers: Providers;
   private readonly unsubscriptionMap: Record<string, () => void> = {};
-
-  public readonly metaSubject: BehaviorSubject<MetadataRequest[]> = new BehaviorSubject<MetadataRequest[]>([]);
-  public readonly authSubjectV2: BehaviorSubject<AuthorizeRequest[]> = new BehaviorSubject<AuthorizeRequest[]>([]);
 
   // private readonly networkMapStore = new NetworkMapStore(); // persist custom networkMap by user
   // private readonly customTokenStore = new CustomTokenStore();
@@ -217,13 +111,7 @@ export default class KoniState {
   private readonly currentAccountStore = new CurrentAccountStore();
   private readonly settingsStore = new SettingsStore();
   private readonly accountRefStore = new AccountRefStore();
-  private readonly authorizeStore = new AuthorizeStore();
-  readonly #authRequestsV2: Record<string, AuthRequestV2> = {};
-  private readonly evmChainSubject = new Subject<AuthUrls>();
-  private readonly authorizeUrlSubject = new Subject<AuthUrls>();
   private readonly keyringStateSubject = new Subject<KeyringState>();
-  private authorizeCached: AuthUrls | undefined = undefined;
-
   private priceStoreReady = false;
   private externalRequest: Record<string, ExternalRequestPromise> = {};
 
@@ -232,23 +120,6 @@ export default class KoniState {
     isLocked: true,
     hasMasterPassword: false
   };
-
-  // Substrate Request
-  readonly #signRequests: Record<string, SignRequest> = {};
-  public readonly signSubject: BehaviorSubject<SigningRequest[]> = new BehaviorSubject<SigningRequest[]>([]);
-
-  // Evm Request
-  private readonly confirmationsQueueSubject = new BehaviorSubject<ConfirmationsQueue>({
-    addNetworkRequest: {},
-    addTokenRequest: {},
-    switchNetworkRequest: {},
-    evmSignatureRequest: {},
-    evmSignatureRequestExternal: {},
-    evmSendTransactionRequest: {},
-    evmSendTransactionRequestExternal: {}
-  });
-
-  private readonly confirmationsPromiseMap: Record<string, { resolver: Resolver<any>, validator?: (rs: any) => Error | undefined }> = {};
 
   private serviceInfoSubject = new Subject<ServiceInfo>();
 
@@ -289,17 +160,17 @@ export default class KoniState {
   private subscription: KoniSubscription;
   private logger: Logger;
   private ready = false;
+  public readonly requestService: RequestService;
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   constructor (providers: Providers = {}) {
     // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
     this.#providers = providers;
 
-    extractMetadata(this.#metaStore);
-
     this.dbService = new DatabaseService();
 
     this.chainService = new ChainService(this.dbService);
+    this.requestService = new RequestService(this.chainService);
     this.subscription = new KoniSubscription(this, this.dbService);
     this.cron = new KoniCron(this, this.subscription, this.dbService);
     this.logger = createLogger('State');
@@ -308,144 +179,19 @@ export default class KoniState {
 
   // Clone from polkadot.js
   public get knownMetadata (): MetadataDef[] {
-    return knownMetadata();
+    return this.requestService.knownMetadata;
   }
-
-  public get numAuthRequests (): number {
-    return Object.keys(this.#authRequestsV2).length;
-  }
-
-  public get numMetaRequests (): number {
-    return Object.keys(this.#metaRequests).length;
-  }
-
-  public get numSignRequests (): number {
-    return Object.keys(this.#signRequests).length;
-  }
-
-  public get allMetaRequests (): MetadataRequest[] {
-    return Object
-      .values(this.#metaRequests)
-      .map(({ id, request, url }): MetadataRequest => ({ id, request, url }));
-  }
-
-  public get allSignRequests (): SigningRequest[] {
-    return Object
-      .values(this.#signRequests)
-      .map(({ account, id, request, url }): SigningRequest => ({ account, id, request, url }));
-  }
-
-  protected getPopup () {
-    return this.#windows;
-  }
-
-  protected popupClose (): void {
-    this.#windows.forEach((id: number) =>
-      withErrorLog(() => chrome.windows.remove(id))
-    );
-    this.#windows = [];
-  }
-
-  protected popupOpen (): void {
-    if (this.#notification !== 'extension') {
-      if (this.#notification === 'window') {
-        chrome.windows.create(NORMAL_WINDOW_OPTS, (window): void => {
-          if (window) {
-            this.#windows.push(window.id || 0);
-          }
-        });
-      }
-
-      chrome.windows.getCurrent((win) => {
-        const popupOptions = { ...POPUP_WINDOW_OPTS };
-
-        if (win) {
-          popupOptions.left = (win.left || 0) + (win.width || 0) - (POPUP_WINDOW_OPTS.width || 0) - 20;
-          popupOptions.top = (win.top || 0) + 80;
-        }
-
-        chrome.windows.create(popupOptions
-          , (window): void => {
-            if (window) {
-              this.#windows.push(window.id || 0);
-            }
-          }
-        );
-      });
-    }
-  }
-
-  public stripUrl (url: string): string {
-    assert(url && (url.startsWith('http:') || url.startsWith('https:') || url.startsWith('ipfs:') || url.startsWith('ipns:')), `Invalid url ${url}, expected to start with http: or https: or ipfs: or ipns:`);
-
-    const parts = url.split('/');
-
-    return parts[2];
-  }
-
-  private updateIconMeta (shouldClose?: boolean): void {
-    this.metaSubject.next(this.allMetaRequests);
-    this.updateIconV2(shouldClose);
-  }
-
-  private metaComplete = (id: string, resolve: (result: boolean) => void, reject: (error: Error) => void): Resolver<boolean> => {
-    const complete = (): void => {
-      delete this.#metaRequests[id];
-      this.updateIconMeta(true);
-    };
-
-    return {
-      reject: (error: Error): void => {
-        complete();
-        reject(error);
-      },
-      resolve: (result: boolean): void => {
-        complete();
-        resolve(result);
-      }
-    };
-  };
-
-  private signComplete = (id: string, resolve: (result: ResponseSigning) => void, reject: (error: Error) => void): Resolver<ResponseSigning> => {
-    const complete = (): void => {
-      delete this.#signRequests[id];
-      this.updateIconV2(true);
-    };
-
-    return {
-      reject: (error: Error): void => {
-        complete();
-        reject(error);
-      },
-      resolve: (result: ResponseSigning): void => {
-        complete();
-        resolve(result);
-      }
-    };
-  };
 
   public injectMetadata (url: string, request: MetadataDef): Promise<boolean> {
-    return new Promise((resolve, reject): void => {
-      const id = getId();
-
-      this.#metaRequests[id] = {
-        ...this.metaComplete(id, resolve, reject),
-        id,
-        request,
-        url
-      };
-
-      this.updateIconMeta();
-      this.popupOpen();
-    });
+    return this.requestService.injectMetadata(url, request);
   }
 
   public getMetaRequest (id: string): MetaRequest {
-    return this.#metaRequests[id];
+    return this.requestService.getMetaRequest(id);
   }
 
   public getSignRequest (id: string): SignRequest {
-    return this.#signRequests[id];
+    return this.requestService.getSignRequest(id);
   }
 
   // List all providers the extension is exposing
@@ -517,32 +263,17 @@ export default class KoniState {
   }
 
   public saveMetadata (meta: MetadataDef): void {
-    this.#metaStore.set(meta.genesisHash, meta);
-
-    addMetadata(meta);
+    this.requestService.saveMetadata(meta);
   }
 
   public setNotification (notification: string): boolean {
-    this.#notification = notification;
+    this.requestService.setNotification(notification);
 
     return true;
   }
 
   public sign (url: string, request: RequestSign, account: AccountJson): Promise<ResponseSigning> {
-    const id = getId();
-
-    return new Promise((resolve, reject): void => {
-      this.#signRequests[id] = {
-        ...this.signComplete(id, resolve, reject),
-        account,
-        id,
-        request,
-        url
-      };
-
-      this.updateIconV2();
-      this.popupOpen();
-    });
+    return this.requestService.sign(url, request, account);
   }
 
   ///
@@ -610,73 +341,27 @@ export default class KoniState {
   };
 
   public getAuthRequestV2 (id: string): AuthRequestV2 {
-    return this.#authRequestsV2[id];
-  }
-
-  public get numAuthRequestsV2 (): number {
-    return Object.keys(this.#authRequestsV2).length;
-  }
-
-  public get allAuthRequestsV2 (): AuthorizeRequest[] {
-    return Object
-      .values(this.#authRequestsV2)
-      .map(({ id, request, url }): AuthorizeRequest => ({ id, request, url }));
+    return this.requestService.getAuthRequestV2(id);
   }
 
   public setAuthorize (data: AuthUrls, callback?: () => void): void {
-    this.authorizeStore.set(AUTH_URLS_KEY, data, () => {
-      this.authorizeCached = data;
-      this.evmChainSubject.next(this.authorizeCached);
-      this.authorizeUrlSubject.next(this.authorizeCached);
-      callback && callback();
-    });
+    this.requestService.setAuthorize(data, callback);
   }
 
   public getAuthorize (update: (value: AuthUrls) => void): void {
-    // This action can be use many by DApp interaction => caching it in memory
-    if (this.authorizeCached) {
-      update(this.authorizeCached);
-    } else {
-      this.authorizeStore.get('authUrls', (data) => {
-        this.authorizeCached = data;
-        update(this.authorizeCached);
-      });
-    }
+    this.requestService.getAuthorize(update);
   }
 
   public subscribeEvmChainChange (): Subject<AuthUrls> {
-    return this.evmChainSubject;
+    return this.requestService.subscribeEvmChainChange;
   }
 
   public subscribeAuthorizeUrlSubject (): Subject<AuthUrls> {
-    return this.authorizeUrlSubject;
-  }
-
-  private updateIconV2 (shouldClose?: boolean): void {
-    const authCount = this.numAuthRequestsV2;
-    const confirmCount = this.countConfirmationNumber();
-    const metaCount = this.numMetaRequests;
-    const text = (
-      authCount
-        ? 'Auth'
-        : metaCount
-          ? 'Meta'
-          : confirmCount > 0 ? confirmCount.toString() : ''
-    );
-
-    withErrorLog(() => chrome.browserAction.setBadgeText({ text }));
-
-    if (shouldClose && text === '') {
-      this.popupClose();
-    }
+    return this.requestService.subscribeAuthorizeUrlSubject;
   }
 
   public getAuthList (): Promise<AuthUrls> {
-    return new Promise<AuthUrls>((resolve, reject) => {
-      this.getAuthorize((rs: AuthUrls) => {
-        resolve(rs);
-      });
-    });
+    return this.requestService.getAuthList();
   }
 
   getAddressList (value = false): Record<string, boolean> {
@@ -685,181 +370,8 @@ export default class KoniState {
     return addressList.reduce((addressList, v) => ({ ...addressList, [v]: value }), {});
   }
 
-  private updateIconAuthV2 (shouldClose?: boolean): void {
-    this.authSubjectV2.next(this.allAuthRequestsV2);
-    this.updateIconV2(shouldClose);
-  }
-
-  private authCompleteV2 = (id: string, resolve: (result: boolean) => void, reject: (error: Error) => void): Resolver<ResultResolver> => {
-    const isAllowedMap = this.getAddressList();
-
-    const complete = (result: boolean | Error, cb: () => void, accounts?: string[]) => {
-      const isAllowed = result === true;
-      let isCancelled = false;
-
-      if (!isAllowed && typeof result === 'object' && result.message === 'Cancelled') {
-        isCancelled = true;
-      }
-
-      if (accounts && accounts.length) {
-        accounts.forEach((acc) => {
-          isAllowedMap[acc] = true;
-        });
-      } else {
-        // eslint-disable-next-line no-return-assign
-        Object.keys(isAllowedMap).forEach((address) => isAllowedMap[address] = false);
-      }
-
-      const { accountAuthType, idStr, request: { allowedAccounts, origin }, url } = this.#authRequestsV2[id];
-
-      if (accountAuthType !== 'both') {
-        const isEvmType = accountAuthType === 'evm';
-
-        const backupAllowed = [...(allowedAccounts || [])].filter((a) => {
-          const isEth = isEthereumAddress(a);
-
-          return isEvmType ? !isEth : isEth;
-        });
-
-        backupAllowed.forEach((acc) => {
-          isAllowedMap[acc] = true;
-        });
-      }
-
-      let defaultEvmNetworkKey: string | undefined;
-
-      if (accountAuthType === 'both' || accountAuthType === 'evm') {
-        const defaultChain = Object.values(this.chainService.getChainInfoMap()).find((chainInfo) => {
-          const chainState = this.chainService.getChainStateByKey(chainInfo.slug);
-
-          return _isChainEvmCompatible(chainInfo) && _isChainEnabled(chainState);
-        });
-
-        if (defaultChain) {
-          defaultEvmNetworkKey = defaultChain.slug;
-        }
-      }
-
-      this.getAuthorize((value) => {
-        let authorizeList = {} as AuthUrls;
-
-        if (value) {
-          authorizeList = value;
-        }
-
-        const existed = authorizeList[this.stripUrl(url)];
-
-        // On cancel don't save anything
-        if (isCancelled) {
-          delete this.#authRequestsV2[id];
-          this.updateIconAuthV2(true);
-          cb();
-
-          return;
-        }
-
-        authorizeList[this.stripUrl(url)] = {
-          count: 0,
-          id: idStr,
-          isAllowed,
-          isAllowedMap,
-          origin,
-          url,
-          accountAuthType: (existed && existed.accountAuthType !== accountAuthType) ? 'both' : accountAuthType,
-          currentEvmNetworkKey: existed ? existed.currentEvmNetworkKey : defaultEvmNetworkKey
-        };
-
-        this.setAuthorize(authorizeList, () => {
-          cb();
-          delete this.#authRequestsV2[id];
-          this.updateIconAuthV2(true);
-        });
-      });
-    };
-
-    return {
-      reject: (error: Error): void => {
-        complete(error, () => {
-          reject(error);
-        });
-      },
-      resolve: ({ accounts, result }: ResultResolver): void => {
-        complete(result, () => {
-          resolve(result);
-        }, accounts);
-      }
-    };
-  };
-
   public async authorizeUrlV2 (url: string, request: RequestAuthorizeTab): Promise<boolean> {
-    let authList = await this.getAuthList();
-    const accountAuthType = request.accountAuthType || 'substrate';
-
-    request.accountAuthType = accountAuthType;
-
-    if (!authList) {
-      authList = {};
-    }
-
-    const idStr = this.stripUrl(url);
-    // Do not enqueue duplicate authorization requests.
-    const isDuplicate = Object.values(this.#authRequestsV2)
-      .some((request) => request.idStr === idStr);
-
-    assert(!isDuplicate, `The source ${url} has a pending authorization request`);
-
-    const existedAuth = authList[idStr];
-    const existedAccountAuthType = existedAuth?.accountAuthType;
-    const confirmAnotherType = existedAccountAuthType !== 'both' && existedAccountAuthType !== request.accountAuthType;
-
-    if (request.reConfirm && existedAuth) {
-      request.origin = existedAuth.origin;
-    }
-
-    // Reconfirm if check auth for empty list
-    if (existedAuth) {
-      const inBlackList = existedAuth && !existedAuth.isAllowed;
-
-      if (inBlackList) {
-        throw new Error(`The source ${url} is not allowed to interact with this extension`);
-      }
-
-      request.allowedAccounts = Object.entries(existedAuth.isAllowedMap)
-        .map(([address, allowed]) => (allowed ? address : ''))
-        .filter((item) => (item !== ''));
-
-      let allowedListByRequestType = [...request.allowedAccounts];
-
-      if (accountAuthType === 'evm') {
-        allowedListByRequestType = allowedListByRequestType.filter((a) => isEthereumAddress(a));
-      } else if (accountAuthType === 'substrate') {
-        allowedListByRequestType = allowedListByRequestType.filter((a) => !isEthereumAddress(a));
-      }
-
-      if (!confirmAnotherType && !request.reConfirm && allowedListByRequestType.length !== 0) {
-        // Prevent appear confirmation popup
-        return false;
-      }
-    }
-
-    return new Promise((resolve, reject): void => {
-      const id = getId();
-
-      this.#authRequestsV2[id] = {
-        ...this.authCompleteV2(id, resolve, reject),
-        id,
-        idStr,
-        request,
-        url,
-        accountAuthType: accountAuthType
-      };
-
-      this.updateIconAuthV2();
-
-      if (Object.keys(this.#authRequestsV2).length < 2) {
-        this.popupOpen();
-      }
-    });
+    return this.requestService.authorizeUrlV2(url, request);
   }
 
   public getNativeTokenInfo (networkKey: string) {
@@ -911,30 +423,7 @@ export default class KoniState {
   }
 
   public ensureUrlAuthorizedV2 (url: string): Promise<boolean> {
-    const idStr = this.stripUrl(url);
-
-    return new Promise((resolve, reject) => {
-      this.getAuthorize((value) => {
-        if (!value) {
-          value = {};
-        }
-
-        const entry = Object.keys(value).includes(idStr);
-
-        if (!entry) {
-          reject(new Error(`The source ${url} has not been enabled yet`));
-        }
-
-        const isConnected = value[idStr] && Object.keys(value[idStr].isAllowedMap)
-          .some((address) => value[idStr].isAllowedMap[address]);
-
-        if (!isConnected) {
-          reject(new Error(`The source ${url} is not allowed to interact with this extension`));
-        }
-
-        resolve(true);
-      });
-    });
+    return this.requestService.ensureUrlAuthorizedV2(url);
   }
 
   public setStakingItem (networkKey: string, item: StakingItem): void {
@@ -2277,116 +1766,23 @@ export default class KoniState {
     }
   }
 
-  public getConfirmationsQueueSubject () {
-    return this.confirmationsQueueSubject;
+  public getConfirmationsQueueSubject (): BehaviorSubject<ConfirmationsQueue> {
+    return this.requestService.confirmationsQueueSubject;
   }
 
-  public countConfirmationNumber () {
-    let count = 0;
-
-    count += this.allSignRequests.length;
-    Object.values(this.confirmationsQueueSubject.getValue()).forEach((x) => {
-      count += Object.keys(x).length;
-    });
-
-    return count;
-  }
-
-  public addConfirmation<CT extends ConfirmationType> (id: string, url: string, type: CT, payload: ConfirmationDefinitions[CT][0]['payload'], options: ConfirmationsQueueItemOptions = {}, validator?: (input: ConfirmationDefinitions[CT][1]) => Error | undefined) {
-    const confirmations = this.confirmationsQueueSubject.getValue();
-    const confirmationType = confirmations[type] as Record<string, ConfirmationDefinitions[CT][0]>;
-    const payloadJson = JSON.stringify(payload);
-
-    // Check duplicate request
-    const duplicated = Object.values(confirmationType).find((c) => (c.url === url) && (c.payloadJson === payloadJson));
-
-    if (duplicated) {
-      throw new EvmRpcError('INVALID_PARAMS', 'Duplicate request information');
-    }
-
-    confirmationType[id] = {
-      id,
-      url,
-      payload,
-      payloadJson,
-      ...options
-    } as ConfirmationDefinitions[CT][0];
-
-    const promise = new Promise<ConfirmationDefinitions[CT][1]>((resolve, reject) => {
-      this.confirmationsPromiseMap[id] = {
-        validator: validator,
-        resolver: {
-          resolve: resolve,
-          reject: reject
-        }
-      };
-    });
-
-    this.confirmationsQueueSubject.next(confirmations);
-
-    // Not open new popup and use existed
-    const popupList = this.getPopup();
-
-    if (this.getPopup().length > 0) {
-      // eslint-disable-next-line no-void
-      void chrome.windows.update(popupList[0], { focused: true });
-    } else {
-      this.popupOpen();
-    }
-
-    this.updateIconV2();
-
-    return promise;
+  public addConfirmation<CT extends ConfirmationType> (
+    id: string,
+    url: string,
+    type: CT,
+    payload: ConfirmationDefinitions[CT][0]['payload'],
+    options: ConfirmationsQueueItemOptions = {},
+    validator?: (input: ConfirmationDefinitions[CT][1]) => Error | undefined
+  ): Promise<ConfirmationDefinitions[CT][1]> {
+    return this.requestService.addConfirmation(id, url, type, payload, options, validator);
   }
 
   public completeConfirmation (request: RequestConfirmationComplete) {
-    const confirmations = this.confirmationsQueueSubject.getValue();
-
-    const _completeConfirmation = <T extends ConfirmationType> (type: T, result: ConfirmationDefinitions[T][1]) => {
-      const { id } = result;
-      const { resolver, validator } = this.confirmationsPromiseMap[id];
-
-      if (!resolver || !(confirmations[type][id])) {
-        this.logger.error('Not found confirmation', type, id);
-        throw new Error('Not found promise for confirmation');
-      }
-
-      // Validate response from confirmation popup some info like password, response format....
-      const error = validator && validator(result);
-
-      if (error) {
-        resolver.reject(error);
-      }
-
-      // Delete confirmations from queue
-      delete this.confirmationsPromiseMap[id];
-      delete confirmations[type][id];
-      this.confirmationsQueueSubject.next(confirmations);
-
-      // Update icon, and close queue
-      this.updateIconV2(this.countConfirmationNumber() === 0);
-      resolver.resolve(result);
-    };
-
-    Object.entries(request).forEach(([type, result]) => {
-      if (type === 'addNetworkRequest') {
-        _completeConfirmation(type, result as ConfirmationDefinitions['addNetworkRequest'][1]);
-      } else if (type === 'addTokenRequest') {
-        _completeConfirmation(type, result as ConfirmationDefinitions['addTokenRequest'][1]);
-      } else if (type === 'switchNetworkRequest') {
-        _completeConfirmation(type, result as ConfirmationDefinitions['switchNetworkRequest'][1]);
-      } else if (type === 'evmSignatureRequest') {
-        _completeConfirmation(type, result as ConfirmationDefinitions['evmSignatureRequest'][1]);
-      } else if (type === 'evmSignatureRequestExternal') {
-        _completeConfirmation(type, result as ConfirmationDefinitions['evmSignatureRequestExternal'][1]);
-      } else if (type === 'evmSendTransactionRequest') {
-        _completeConfirmation(type, result as ConfirmationDefinitions['evmSendTransactionRequest'][1]);
-      } else if (type === 'evmSendTransactionRequestExternal') {
-        _completeConfirmation(type, result as ConfirmationDefinitions['evmSendTransactionRequestExternal'][1]);
-      }
-    });
-
-    return true;
+    return this.requestService.completeConfirmation(request);
   }
 
   public onInstall () {

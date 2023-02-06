@@ -3,17 +3,18 @@
 
 /* eslint-disable no-use-before-define */
 
+import type { JsonRpcResponse } from '@polkadot/rpc-provider/types';
+
+import { TypeRegistry } from '@polkadot/types';
+import type { SignerPayloadJSON, SignerPayloadRaw } from '@polkadot/types/types';
+import type { KeypairType } from '@polkadot/util-crypto/types';
+import type { HexString } from '@polkadot/util/types';
+
+import { CurrentNetworkInfo, KoniRequestSignatures, NetworkJson } from '@subwallet/extension-base/background/KoniTypes';
+import { SigningRequest } from '@subwallet/extension-base/services/request-service/types';
 import type { InjectedAccount, InjectedMetadataKnown, MetadataDef, ProviderList, ProviderMeta } from '@subwallet/extension-inject/types';
 import type { KeyringPair, KeyringPair$Json, KeyringPair$Meta } from '@subwallet/keyring/types';
 import type { KeyringPairs$Json } from '@subwallet/ui-keyring/types';
-import type { JsonRpcResponse } from '@polkadot/rpc-provider/types';
-import type { SignerPayloadJSON, SignerPayloadRaw } from '@polkadot/types/types';
-import type { HexString } from '@polkadot/util/types';
-import type { KeypairType } from '@polkadot/util-crypto/types';
-
-import { CurrentNetworkInfo, KoniRequestSignatures, NetworkJson } from '@subwallet/extension-base/background/KoniTypes';
-
-import { TypeRegistry } from '@polkadot/types';
 
 import { ALLOWED_PATH } from '../defaults';
 import { AuthUrls } from './handlers/State';
@@ -92,13 +93,6 @@ export interface AuthorizeRequest {
 export interface MetadataRequest {
   id: string;
   request: MetadataDef;
-  url: string;
-}
-
-export interface SigningRequest {
-  account: AccountJson;
-  id: string;
-  request: RequestSign;
   url: string;
 }
 
@@ -458,4 +452,9 @@ export interface ResponseJsonGetAccountInfo {
 
 export interface ResponseAuthorizeList {
   list: AuthUrls;
+}
+
+export interface Resolver<T> {
+  reject: (error: Error) => void;
+  resolve: (result: T) => void;
 }

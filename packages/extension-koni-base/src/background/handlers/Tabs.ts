@@ -14,7 +14,7 @@ import { AccountAuthType, MessageTypes, RequestAccountList, RequestAccountSubscr
 import { PHISHING_PAGE_REDIRECT } from '@subwallet/extension-base/defaults';
 import { canDerive } from '@subwallet/extension-base/utils';
 import { InjectedMetadataKnown, MetadataDef, ProviderMeta } from '@subwallet/extension-inject/types';
-import { EvmRpcError } from '@subwallet/extension-koni-base/background/errors/EvmRpcError';
+import { EvmRpcError } from '@subwallet/extension-base/background/errors/EvmRpcError';
 import KoniState from '@subwallet/extension-koni-base/background/handlers/State';
 import { ALL_ACCOUNT_KEY, CRON_GET_API_MAP_STATUS } from '@subwallet/extension-koni-base/constants';
 import { KeyringPair } from '@subwallet/keyring/types';

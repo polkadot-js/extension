@@ -1,7 +1,8 @@
 // Copyright 2019-2022 @polkadot/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import type { AccountsContext, AuthorizeRequest, MetadataRequest, SigningRequest } from '@subwallet/extension-base/background/types';
+import { SigningRequest } from '@subwallet/extension-base/services/request-service/types';
+import type { AccountsContext, AuthorizeRequest, MetadataRequest } from '@subwallet/extension-base/background/types';
 import type { SettingsStruct } from '@polkadot/ui-settings/types';
 import type { AvailableThemes } from '../components/themes';
 

@@ -4,7 +4,8 @@
 import { _ChainAsset, _ChainInfo } from '@subwallet/chain-list/types';
 import { AuthUrlInfo } from '@subwallet/extension-base/background/handlers/State';
 import { AddNetworkRequestExternal, BalanceItem, ConfirmationDefinitions, ConfirmationsQueue, ConfirmationType, CrowdloanItem, KeyringState, NftCollection, NftItem, StakingItem, StakingRewardItem, TransactionHistoryItemType, UiSettings, UnlockingStakeInfo, ValidatorInfo } from '@subwallet/extension-base/background/KoniTypes';
-import { AccountJson, AccountsContext, AuthorizeRequest, MetadataRequest, SigningRequest } from '@subwallet/extension-base/background/types';
+import { SigningRequest } from '@subwallet/extension-base/services/request-service/types';
+import { AccountJson, AccountsContext, AuthorizeRequest, MetadataRequest } from '@subwallet/extension-base/background/types';
 import { _ChainState } from '@subwallet/extension-base/services/chain-service/types';
 
 import { SettingsStruct } from '@polkadot/ui-settings/types';

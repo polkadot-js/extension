@@ -100,10 +100,10 @@ export default class DatabaseService {
   }
 
   // NFT Collection
-  async addNftCollection (chain: string, chainHash: string, collection: NftCollection) {
-    this.logger.log(`Updating NFT collection for [${chain}]`);
+  async addNftCollection (collection: NftCollection) {
+    this.logger.log(`Updating NFT collection for [${collection.chain}]`);
 
-    return this.stores.nftCollection.upsert({ chainHash, _chain: chain, ...collection });
+    return this.stores.nftCollection.upsert(collection);
   }
 
   getAllNftCollection (chainHashes?: string[]) {
@@ -129,10 +129,10 @@ export default class DatabaseService {
     return nfts;
   }
 
-  async addNft (chain: string, chainHash: string, address: string, nft: NftItem) {
+  async addNft (chain: string, address: string, nft: NftItem) {
     this.logger.log(`Updating NFT for [${chain}]`);
 
-    return this.stores.nft.upsert({ ...nft, chainHash, _chain: chain, address });
+    return this.stores.nft.upsert({ ...nft, address } as INft);
   }
 
   async deleteRemovedNftsFromCollection (chainHash: string, address: string, collectionId?: string, nftIds?: string[]) {

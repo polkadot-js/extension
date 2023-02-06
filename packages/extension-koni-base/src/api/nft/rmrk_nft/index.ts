@@ -58,10 +58,10 @@ export class RmrkNftApi extends BaseNftApi {
     }
 
     if (!input.includes('ipfs://ipfs/')) {
-      return input;
+      return getRandomIpfsGateway() + input;
     }
 
-    return input.split('ipfs://ipfs/')[1];
+    return getRandomIpfsGateway() + input.split('ipfs://ipfs/')[1];
   }
 
   private async getMetadata (metadataUrl: string): Promise<NFTMetadata | undefined> {
@@ -218,7 +218,7 @@ export class RmrkNftApi extends BaseNftApi {
 
         if (!collectionInfoUrl.includes(url)) {
           // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-          allCollections.push({ collectionId: item.collectionId });
+          allCollections.push({ chain: '', collectionId: item.collectionId });
           collectionInfoUrl.push(url.replace(' ', '%20'));
         }
       }

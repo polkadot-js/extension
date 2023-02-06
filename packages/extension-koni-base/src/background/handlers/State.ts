@@ -12,15 +12,7 @@ import { AuthorizeRequest, RequestAuthorizeTab } from '@subwallet/extension-base
 import { ChainService } from '@subwallet/extension-base/services/chain-service';
 import { _PREDEFINED_SINGLE_MODES } from '@subwallet/extension-base/services/chain-service/constants';
 import { _ChainConnectionStatus, _ChainState, _ValidateCustomTokenRequest } from '@subwallet/extension-base/services/chain-service/types';
-import {
-  _getChainNativeTokenSlug,
-  _getEvmChainId,
-  _getOriginChainOfAsset,
-  _getSubstrateGenesisHash,
-  _isChainEnabled,
-  _isChainEvmCompatible,
-  _isSubstrateParachain
-} from '@subwallet/extension-base/services/chain-service/utils';
+import { _getChainNativeTokenSlug, _getEvmChainId, _getOriginChainOfAsset, _getSubstrateGenesisHash, _isChainEnabled, _isChainEvmCompatible, _isSubstrateParachain } from '@subwallet/extension-base/services/chain-service/utils';
 import DatabaseService from '@subwallet/extension-base/services/storage-service/DatabaseService';
 import { Web3Transaction } from '@subwallet/extension-base/signers/types';
 import { CurrentAccountStore, PriceStore } from '@subwallet/extension-base/stores';
@@ -599,7 +591,7 @@ export default class KoniState extends State {
   }
 
   public setNftCollection (network: string, data: NftCollection, callback?: (data: NftCollection) => void): void {
-    this.dbService.addNftCollection(network, this.getNetworkGenesisHashByKey(network), data).catch((e) => this.logger.warn(e));
+    this.dbService.addNftCollection(data).catch((e) => this.logger.warn(e));
     callback && callback(data);
   }
 
@@ -625,7 +617,7 @@ export default class KoniState extends State {
   }
 
   public updateNftData (network: string, nftData: NftItem, address: string, callback?: (nftData: NftItem) => void): void {
-    this.dbService.addNft(network, this.getNetworkGenesisHashByKey(network), address, nftData).catch((e) => this.logger.warn(e));
+    this.dbService.addNft(network, address, nftData).catch((e) => this.logger.warn(e));
 
     callback && callback(nftData);
   }

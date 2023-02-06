@@ -1,19 +1,19 @@
 // Copyright 2019-2022 @subwallet/extension-base authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
+import BaseStoreWithAddressAndChain from '@subwallet/extension-base/services/storage-service/db-stores/BaseStoreWithAddressAndChain';
 import { liveQuery } from 'dexie';
 
 import { INft } from '../databases';
-import BaseStoreWithAddress from '../db-stores/BaseStoreWithAddress';
 
-export default class NftStore extends BaseStoreWithAddress<INft> {
-  getNft (addresses: string[], chainHashes: string[] = []) {
+export default class NftStore extends BaseStoreWithAddressAndChain<INft> {
+  getNft (addresses: string[], chainList: string[] = []) {
     if (addresses.length) {
-      return this.table.where('address').anyOfIgnoreCase(addresses).and((item) => !chainHashes.length || chainHashes.includes(item.chainHash)).toArray();
+      return this.table.where('address').anyOfIgnoreCase(addresses).and((item) => !chainList.length || chainList.includes(item.chain)).toArray();
     }
 
     // return this.table.filter((item) => !chainHashes.length || chainHashes.includes(item.chainHash)).toArray();
-    return this.table.filter((item) => !chainHashes.length || chainHashes.includes(item.chainHash)).toArray();
+    return this.table.filter((item) => !chainList.length || chainList.includes(item.chain)).toArray();
   }
 
   subscribeNft (addresses: string[], chainHashes: string[] = []) {

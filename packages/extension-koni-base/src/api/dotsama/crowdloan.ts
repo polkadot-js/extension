@@ -125,10 +125,7 @@ export async function subscribeCrowdloan (addresses: string[], substrateApiMap: 
       return registry.createType('AccountId', address).toHex();
     });
 
-    console.log('---------------------------------------');
-
     Object.entries(chainInfoMap).forEach(([networkKey, chainInfo]) => {
-      console.log('_isSubstrateParachain', networkKey, _isSubstrateParachain(chainInfo));
       if (_isSubstrateParachain(chainInfo)) {
         const parentChain = _getSubstrateRelayParent(chainInfo);
 

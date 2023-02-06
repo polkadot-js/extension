@@ -197,15 +197,17 @@ export interface NftTransferExtra {
 }
 
 export interface NftItem {
-  id?: string;
+  // must-have
+  id: string;
+  chain: string;
+  collectionId: string;
+
   name?: string;
   image?: string;
   external_url?: string;
   rarity?: string;
-  collectionId?: string;
   description?: string;
   properties?: Record<any, any> | null;
-  chain?: string;
   type?: _AssetType.ERC721 | _AssetType.PSP34 | RMRK_VER; // for sending
   rmrk_ver?: RMRK_VER;
   owner?: string;
@@ -213,10 +215,12 @@ export interface NftItem {
 }
 
 export interface NftCollection {
+  // must-have
   collectionId: string;
+  chain: string;
+
   collectionName?: string;
   image?: string;
-  chain?: string;
   itemCount?: number;
 }
 

@@ -46,10 +46,8 @@ export { default as Table } from './Table';
 export { default as TextAreaWithLabel } from './TextAreaWithLabel';
 export { default as ValidatedInput } from './ValidatedInput';
 export { default as VerticalSpace } from './VerticalSpace';
-export { default as View } from './View';
 export { default as Warning } from './Warning';
 
 export { Input, TextArea } from './TextInputs';
 
 export * from '../contexts';
-export * from './themes';

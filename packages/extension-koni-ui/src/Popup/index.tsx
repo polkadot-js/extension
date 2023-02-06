@@ -7,6 +7,7 @@ import { InternalRequestContextProvider } from '@subwallet/extension-koni-ui/con
 import { QRContextProvider } from '@subwallet/extension-koni-ui/contexts/QrSignerContext';
 import { ScannerContextProvider } from '@subwallet/extension-koni-ui/contexts/ScannerContext';
 import { SigningContextProvider } from '@subwallet/extension-koni-ui/contexts/SigningContext';
+import { ThemeProvider } from '@subwallet/extension-koni-ui/contexts/ThemeContext';
 import React from 'react';
 import { RouterProvider } from 'react-router';
 
@@ -16,20 +17,22 @@ import { router } from './router';
 export default function Popup (): React.ReactElement {
   return (
     <DataContextProvider>
-      <SigningContextProvider>
-        <InternalRequestContextProvider>
-          <ScannerContextProvider>
-            <QRContextProvider>
-              <ToastProvider>
-                <RouterProvider
-                  fallbackElement={<LoadingContainer />}
-                  router={router}
-                />
-              </ToastProvider>
-            </QRContextProvider>
-          </ScannerContextProvider>
-        </InternalRequestContextProvider>
-      </SigningContextProvider>
+      <ThemeProvider>
+        <SigningContextProvider>
+          <InternalRequestContextProvider>
+            <ScannerContextProvider>
+              <QRContextProvider>
+                <ToastProvider>
+                  <RouterProvider
+                    fallbackElement={<LoadingContainer />}
+                    router={router}
+                  />
+                </ToastProvider>
+              </QRContextProvider>
+            </ScannerContextProvider>
+          </InternalRequestContextProvider>
+        </SigningContextProvider>
+      </ThemeProvider>
     </DataContextProvider>
   );
 }

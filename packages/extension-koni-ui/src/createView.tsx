@@ -6,8 +6,6 @@ import './i18n/i18n';
 import React, { Suspense } from 'react';
 import ReactDOM from 'react-dom/client';
 
-import { View } from './components';
-
 export default function createView (Entry: React.ComponentType, rootId = 'root'): void {
   const rootElement = document.getElementById(rootId);
 
@@ -19,11 +17,9 @@ export default function createView (Entry: React.ComponentType, rootId = 'root')
 
   root.render(
     <React.StrictMode>
-      <View>
-        <Suspense>
-          <Entry />
-        </Suspense>
-      </View>
+      <Suspense>
+        <Entry />
+      </Suspense>
     </React.StrictMode>
   );
 }

@@ -1,9 +1,12 @@
 // Copyright 2019-2022 @polkadot/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { Theme } from '@subwallet/extension-koni-ui/components';
+import { ThemeTypes } from '@subwallet/extension-base/background/KoniTypes';
+import { updateTheme } from '@subwallet/extension-koni-ui/stores/updater';
+import { Button } from '@subwallet/react-ui';
 import React from 'react';
 import styled from 'styled-components';
+import { Theme } from '@subwallet/extension-koni-ui/themes';
 
 interface Props {
   className?: string;
@@ -11,11 +14,20 @@ interface Props {
 }
 
 function _Welcome ({ className, title = 'content' }: Props): React.ReactElement<Props> {
+  const changeTheme = (theme: ThemeTypes) => {
+    return () => {
+      updateTheme(theme);
+    };
+  };
+
   return (
     <>
       <div className={className}>
         <div className='content'>
           {title}
+
+          <Button onClick={changeTheme(ThemeTypes.DARK)} block>Theme Dark</Button>
+          <Button onClick={changeTheme(ThemeTypes.LIGHT)} block>Theme Light</Button>
         </div>
       </div>
     </>
@@ -26,7 +38,6 @@ export const Welcome = styled(_Welcome)<Props>(({ theme }) => {
   const { token } = theme as Theme;
 
   return ({
-    background: token.colorPrimary,
     paddingTop: 100,
     paddingRight: 50,
     paddingBottom: 100,

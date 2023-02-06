@@ -1,6 +1,7 @@
 // Copyright 2019-2022 @polkadot/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
+import { Main } from '@subwallet/extension-koni-ui/components';
 import Bowser from 'bowser';
 import React, { useEffect } from 'react';
 import { Outlet, useLocation } from 'react-router';
@@ -46,7 +47,7 @@ export default function Root (): React.ReactElement {
   }, []);
 
   return (
-    <>
+    <Main>
       <div>
         <div>Current path: {location.pathname} </div>
         <div>Current state: {JSON.stringify(location.state)} </div>
@@ -68,6 +69,6 @@ export default function Root (): React.ReactElement {
         >NFT</Link>
       </div>
       <Outlet />
-    </>
+    </Main>
   );
 }

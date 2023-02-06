@@ -2,7 +2,18 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { _ChainAsset, _ChainInfo } from '@subwallet/chain-list/types';
-import { BalanceJson, CrowdloanJson, NftCollection, NftItem, PriceJson, StakeUnlockingJson, StakingJson, StakingRewardJson, TransactionHistoryItemType } from '@subwallet/extension-base/background/KoniTypes';
+import {
+  BalanceJson,
+  CrowdloanJson,
+  NftCollection,
+  NftItem,
+  NftJson,
+  PriceJson,
+  StakeUnlockingJson,
+  StakingJson,
+  StakingRewardJson,
+  TransactionHistoryItemType
+} from '@subwallet/extension-base/background/KoniTypes';
 import { AccountJson } from '@subwallet/extension-base/background/types';
 import { _ChainState } from '@subwallet/extension-base/services/chain-service/types';
 import { lazySubscribeMessage } from '@subwallet/extension-koni-ui/messaging';
@@ -117,8 +128,8 @@ export const updateCrowdloan = (data: CrowdloanJson) => {
 
 export const subscribeCrowdloan = lazySubscribeMessage('pri(crowdloan.getSubscription)', null, updateCrowdloan, updateCrowdloan);
 
-export const updateNftItems = (data: NftItem[]) => {
-  store.dispatch({ type: 'nft/updateNftItems', payload: data });
+export const updateNftItems = (data: NftJson) => {
+  store.dispatch({ type: 'nft/updateNftItems', payload: data.nftList });
 };
 
 export const subscribeNftItems = lazySubscribeMessage('pri(nft.getSubscription)', null, updateNftItems, updateNftItems);

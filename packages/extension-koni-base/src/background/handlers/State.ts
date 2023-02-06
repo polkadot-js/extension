@@ -617,7 +617,7 @@ export default class KoniState extends State {
   }
 
   public updateNftData (network: string, nftData: NftItem, address: string, callback?: (nftData: NftItem) => void): void {
-    this.dbService.addNft(network, address, nftData).catch((e) => this.logger.warn(e));
+    this.dbService.addNft(address, nftData).catch((e) => this.logger.warn(e));
 
     callback && callback(nftData);
   }

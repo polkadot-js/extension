@@ -5656,14 +5656,14 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@subwallet/chain-list@npm:^0.0.2":
-  version: 0.0.2
-  resolution: "@subwallet/chain-list@npm:0.0.2"
+"@subwallet/chain-list@npm:^0.0.3":
+  version: 0.0.3
+  resolution: "@subwallet/chain-list@npm:0.0.3"
   dependencies:
     "@polkadot/dev": 0.67.167
     "@polkadot/util": ^10.2.1
     eventemitter3: ^4.0.7
-  checksum: a1415f6a66bb34ad685483fa02d7671f91cc54cdbc131d0e295d6120bf7564a62a9b3ed0931a7e6e391ac88c866b30a01448982182b237abaa12de88e4b288ff
+  checksum: 3484d3b807ced035278e6b94af47f6bc435c16741817b2c3e34c9fe3c1368335a70033abcd6dbc9c322e0bc8b1b4e9a180dced5580138023da818ac7a59ee2dd
   languageName: node
   linkType: hard
 
@@ -5684,7 +5684,7 @@ __metadata:
     "@polkadot/ui-settings": ^2.9.14
     "@polkadot/util": ^10.2.1
     "@polkadot/util-crypto": ^10.2.1
-    "@subwallet/chain-list": ^0.0.2
+    "@subwallet/chain-list": ^0.0.3
     "@subwallet/extension-chains": ^0.8.1
     "@subwallet/extension-dapp": ^0.8.1
     "@subwallet/extension-inject": ^0.8.1

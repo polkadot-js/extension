@@ -129,8 +129,8 @@ export default class DatabaseService {
     return nfts;
   }
 
-  async addNft (chain: string, address: string, nft: NftItem) {
-    this.logger.log(`Updating NFT for [${chain}]`);
+  async addNft (address: string, nft: NftItem) {
+    this.logger.log(`Updating NFT for [${nft.chain}]`);
 
     return this.stores.nft.upsert({ ...nft, address } as INft);
   }

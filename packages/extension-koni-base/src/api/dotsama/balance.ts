@@ -406,9 +406,10 @@ async function subscribeTokensBalance (addresses: string[], chain: string, api: 
   const unsubList = await Promise.all(Object.values(tokenMap).map(async (tokenInfo) => {
     try {
       const onChainInfo = _getTokenOnChainInfo(tokenInfo);
+
       // Get Token Balance
       // @ts-ignore
-      const unsub = await api.query.tokens.accounts.multi(addresses.map((address) => [address, onChainInfo]), (balances: TokenBalanceRaw[]) => {
+      return await api.query.tokens.accounts.multi(addresses.map((address) => [address, onChainInfo]), (balances: TokenBalanceRaw[]) => {
         const tokenBalance = {
           reserved: sumBN(balances.map((b) => (b.reserved || new BN(0)))),
           frozen: sumBN(balances.map((b) => (b.frozen || new BN(0)))),
@@ -431,8 +432,6 @@ async function subscribeTokensBalance (addresses: string[], chain: string, api: 
           }
         } as BalanceItem);
       });
-
-      return unsub;
     } catch (err) {
       console.warn(err);
     }
@@ -453,19 +452,20 @@ async function subscribeAssetsBalance (addresses: string[], chain: string, api: 
   const unsubList = await Promise.all(Object.values(tokenMap).map(async (tokenInfo) => {
     try {
       const assetIndex = _getTokenOnChainAssetId(tokenInfo);
+
       // Get Token Balance
-      const unsub = await api.query.assets.account.multi(addresses.map((address) => [assetIndex, address]), (balances) => {
+      return await api.query.assets.account.multi(addresses.map((address) => [assetIndex, address]), (balances) => {
         let total = new BN(0);
         let frozen = new BN(0);
 
         balances.forEach((b) => {
-        // @ts-ignore
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-assignment
+          // @ts-ignore
+          // eslint-disable-next-line @typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-assignment
           const bdata = b?.toJSON();
 
           if (bdata) {
-          // @ts-ignore
-          // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access,@typescript-eslint/no-unsafe-argument
+            // @ts-ignore
+            // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access,@typescript-eslint/no-unsafe-argument
             const addressBalance = new BN(String(bdata?.balance) || '0');
 
             // @ts-ignore
@@ -490,8 +490,6 @@ async function subscribeAssetsBalance (addresses: string[], chain: string, api: 
           }
         });
       });
-
-      return unsub;
     } catch (err) {
       console.warn(err);
     }

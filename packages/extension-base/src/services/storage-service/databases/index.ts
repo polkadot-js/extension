@@ -62,7 +62,7 @@ export default class KoniDatabase extends Dexie {
       chain: 'slug',
       asset: 'slug',
       balances: '[tokenSlug+address], tokenSlug, address',
-      nfts: '[chain+collectionId+id+address], [address+chain], chain, id, address, collectionId, name',
+      nfts: '[chain+address+collectionId+id], [address+chain], chain, id, address, collectionId, name',
       nftCollections: '[chain+collectionId], chain, collectionId, collectionName',
       crowdloans: '[chain+address], chain, address',
       stakings: '[chain+address+type], [chain+address], chainHash, chain, address, type',

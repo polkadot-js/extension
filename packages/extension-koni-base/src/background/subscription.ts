@@ -235,10 +235,12 @@ export class KoniSubscription {
         selectedNftCollection
       } as NftTransferExtra);
 
+      console.log('nft subscribe', chainInfoMap, substrateApiMap, evmApiMap);
+
       nftHandler.setChainInfoMap(chainInfoMap);
       nftHandler.setDotSamaApiMap(substrateApiMap);
       nftHandler.setWeb3ApiMap(evmApiMap);
-      nftHandler.setAddresses(addresses);
+      nftHandler.setAddresses(['5HbcGs2QXVAc6Q6eoTzLYNAJWpN17AkCFRLnWDaHCiGYXvNc']);
 
       nftHandler.handleNfts(
         smartContractNfts,

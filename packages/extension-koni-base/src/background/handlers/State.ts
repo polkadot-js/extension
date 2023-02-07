@@ -7,7 +7,7 @@ import { _AssetType, _ChainAsset, _ChainInfo } from '@subwallet/chain-list/types
 import { withErrorLog } from '@subwallet/extension-base/background/handlers/helpers';
 import State, { AuthUrls, Resolver } from '@subwallet/extension-base/background/handlers/State';
 import { isSubscriptionRunning, unsubscribe } from '@subwallet/extension-base/background/handlers/subscriptions';
-import { AccountRefMap, AddNetworkRequestExternal, AddTokenRequestExternal, APIItemState, ApiMap, AuthRequestV2, BalanceItem, BalanceJson, ConfirmationDefinitions, ConfirmationsQueue, ConfirmationsQueueItemOptions, ConfirmationType, CrowdloanItem, CrowdloanJson, CurrentAccountInfo, EvmSendTransactionParams, EvmSendTransactionRequestExternal, EvmSignatureRequestExternal, ExternalRequestPromise, ExternalRequestPromiseStatus, KeyringState, NftCollection, NftItem, NftJson, NftTransferExtra, PriceJson, RequestAccountExportPrivateKey, RequestCheckPublicAndSecretKey, RequestConfirmationComplete, RequestSettingsType, ResponseAccountExportPrivateKey, ResponseCheckPublicAndSecretKey, ResultResolver, ServiceInfo, SingleModeJson, StakeUnlockingJson, StakingItem, StakingJson, StakingRewardItem, StakingRewardJson, ThemeTypes, TransactionHistoryItemType, UiSettings } from '@subwallet/extension-base/background/KoniTypes';
+import { AccountRefMap, AddNetworkRequestExternal, AddTokenRequestExternal, APIItemState, ApiMap, AuthRequestV2, BalanceItem, BalanceJson, ConfirmationDefinitions, ConfirmationsQueue, ConfirmationsQueueItemOptions, ConfirmationType, CrowdloanItem, CrowdloanJson, CurrentAccountInfo, EvmSendTransactionParams, EvmSendTransactionRequestExternal, EvmSignatureRequestExternal, ExternalRequestPromise, ExternalRequestPromiseStatus, KeyringState, NftCollection, NftItem, NftJson, NftTransferExtra, PriceJson, RequestAccountExportPrivateKey, RequestCheckPublicAndSecretKey, RequestConfirmationComplete, RequestSettingsType, ResponseAccountExportPrivateKey, ResponseCheckPublicAndSecretKey, ResultResolver, ServiceInfo, SingleModeJson, StakeUnlockingJson, StakingItem, StakingJson, StakingRewardItem, StakingRewardJson, ThemeTypes, TxHistoryItem, TxHistoryType, UiSettings } from '@subwallet/extension-base/background/KoniTypes';
 import { AuthorizeRequest, RequestAuthorizeTab } from '@subwallet/extension-base/background/types';
 import { ChainService } from '@subwallet/extension-base/services/chain-service';
 import { _PREDEFINED_SINGLE_MODES } from '@subwallet/extension-base/services/chain-service/constants';
@@ -147,8 +147,8 @@ export default class KoniState extends State {
   private stakeUnlockingInfoSubject = new Subject<StakeUnlockingJson>();
   private stakeUnlockingInfo: StakeUnlockingJson = { timestamp: -1, details: [] };
 
-  private historyMap: Record<string, TransactionHistoryItemType[]> = {};
-  private historySubject = new Subject<Record<string, TransactionHistoryItemType[]>>();
+  private historyMap: TxHistoryItem[] = [];
+  private historySubject = new Subject<TxHistoryItem[]>();
 
   private lazyMap: Record<string, unknown> = {};
 
@@ -731,8 +731,8 @@ export default class KoniState extends State {
     return this.stakingRewardSubject;
   }
 
-  public setHistory (address: string, network: string, item: TransactionHistoryItemType | TransactionHistoryItemType[], callback?: (items: TransactionHistoryItemType[]) => void): void {
-    let items: TransactionHistoryItemType[];
+  public setHistory (address: string, network: string, item: TxHistoryItem | TxHistoryItem[], callback?: (items: TxHistoryItem[]) => void): void {
+    let items: TxHistoryItem[];
     const nativeTokenInfo = this.chainService.getNativeTokenInfo(network);
 
     if (!nativeTokenInfo) {
@@ -757,18 +757,18 @@ export default class KoniState extends State {
     if (items.length) {
       this.getAccountAddress().then((currentAddress) => {
         if (currentAddress === address) {
-          const oldItems = this.historyMap[network] || [];
+          const oldItems = this.historyMap || [];
 
-          this.historyMap[network] = this.combineHistories(oldItems, items);
-          this.saveHistoryToStorage(address, network, this.historyMap[network]);
-          callback && callback(this.historyMap[network]);
+          this.historyMap = this.combineHistories(oldItems, items);
+          this.saveHistoryToStorage(address, network, this.historyMap);
+          callback && callback(this.historyMap);
 
           this.lazyNext('setHistory', () => {
             this.publishHistory();
           });
         } else {
           this.saveHistoryToStorage(address, network, items);
-          callback && callback(this.historyMap[network]);
+          callback && callback(this.historyMap);
         }
       }).catch((e) => this.logger.warn(e));
     }
@@ -1069,22 +1069,34 @@ export default class KoniState extends State {
     return this.crowdloanSubject;
   }
 
-  public getTransactionHistory (address: string, networkKey: string, update: (items: TransactionHistoryItemType[]) => void): void {
-    const items = this.historyMap[networkKey];
-
-    if (!items) {
-      update([]);
-    } else {
-      update(items);
-    }
-  }
+  // public getTransactionHistory (address: string, networkKey: string, update: (items: TxHistoryItem[]) => void): void {
+  //   const items = this.historyMap;
+  //
+  //   if (!items) {
+  //     update([]);
+  //   } else {
+  //     update(items);
+  //   }
+  // }
 
   public subscribeHistory () {
     return this.historySubject;
   }
 
-  public getHistoryMap (): Record<string, TransactionHistoryItemType[]> {
-    return this.removeInactiveDataByChain(this.historyMap);
+  public getHistoryMap (): TxHistoryItem[] {
+    return this.removeInactiveTxHistoryByChain(this.historyMap);
+  }
+
+  private removeInactiveTxHistoryByChain (historyList: TxHistoryItem[]) {
+    const activeData: TxHistoryItem[] = [];
+
+    historyList.forEach((item) => {
+      if (this.chainService.getChainStateByKey(item.networkKey) && this.chainService.getChainStateByKey(item.networkKey).active) {
+        activeData.push(item);
+      }
+    });
+
+    return activeData;
   }
 
   public setPrice (priceData: PriceJson, callback?: (priceData: PriceJson) => void): void {
@@ -1360,7 +1372,7 @@ export default class KoniState extends State {
   }
 
   public async resetHistoryMap (newAddress: string): Promise<void> {
-    this.historyMap = {};
+    this.historyMap = [];
 
     const storedData = await this.getStoredHistories(newAddress);
 
@@ -1374,26 +1386,22 @@ export default class KoniState extends State {
   public async getStoredHistories (address: string) {
     const items = await this.dbService.stores.transaction.getHistoryByAddressAsObject(address);
 
-    return items || {};
+    return items || [];
   }
 
-  private saveHistoryToStorage (address: string, network: string, items: TransactionHistoryItemType[]) {
+  private saveHistoryToStorage (address: string, network: string, items: TxHistoryItem[]) {
     this.dbService.addHistories(network, address, items).catch((e) => this.logger.warn(e));
   }
 
-  private combineHistories (oldItems: TransactionHistoryItemType[], newItems: TransactionHistoryItemType[]): TransactionHistoryItemType[] {
+  private combineHistories (oldItems: TxHistoryItem[], newItems: TxHistoryItem[]): TxHistoryItem[] {
     const newHistories = newItems.filter((item) => !oldItems.some((old) => this.isSameHistory(old, item)));
 
-    return [...oldItems, ...newHistories].filter((his) => his.origin === 'app' || his.eventIdx);
+    return [...oldItems, ...newHistories].filter((his) => his.origin === 'app');
   }
 
-  public isSameHistory (oldItem: TransactionHistoryItemType, newItem: TransactionHistoryItemType): boolean {
+  public isSameHistory (oldItem: TxHistoryItem, newItem: TxHistoryItem): boolean {
     if (oldItem.extrinsicHash === newItem.extrinsicHash && oldItem.action === newItem.action) {
-      if (oldItem.origin === 'app') {
-        return true;
-      } else {
-        return !oldItem.eventIdx || !newItem.eventIdx || oldItem.eventIdx === newItem.eventIdx;
-      }
+      return oldItem.origin === 'app';
     }
 
     return false;
@@ -1419,17 +1427,17 @@ export default class KoniState extends State {
     this.historySubject.next(this.getHistoryMap());
   }
 
-  private removeInactiveDataByChain<T> (data: Record<string, T>) {
-    const activeData: Record<string, T> = {};
-
-    Object.entries(data).forEach(([networkKey, items]) => {
-      if (this.chainService.getChainStateByKey(networkKey).active) {
-        activeData[networkKey] = items;
-      }
-    });
-
-    return activeData;
-  }
+  // private removeInactiveDataByChain<T> (data: Record<string, T>) {
+  //   const activeData: Record<string, T> = {};
+  //
+  //   Object.entries(data).forEach(([networkKey, items]) => {
+  //     if (this.chainService.getChainStateByKey(networkKey).active) {
+  //       activeData[networkKey] = items;
+  //     }
+  //   });
+  //
+  //   return activeData;
+  // }
 
   findNetworkKeyByGenesisHash (genesisHash?: string | null): [string | undefined, _ChainInfo | undefined] {
     if (!genesisHash) {
@@ -1721,7 +1729,7 @@ export default class KoniState extends State {
         changeSymbol: undefined,
         fee: (receipt.gasUsed * receipt.effectiveGasPrice).toString(),
         feeSymbol: nativeTokenInfo.symbol,
-        action: 'send',
+        action: TxHistoryType.SEND,
         extrinsicHash: receipt.transactionHash
       });
     };
@@ -1737,7 +1745,7 @@ export default class KoniState extends State {
         changeSymbol: undefined,
         fee: undefined,
         feeSymbol: nativeTokenInfo.symbol,
-        action: 'send',
+        action: TxHistoryType.SEND,
         extrinsicHash: transactionHash
       });
     };

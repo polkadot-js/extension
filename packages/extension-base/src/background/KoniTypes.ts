@@ -471,24 +471,30 @@ export interface RandomTestRequest {
   end: number;
 }
 
-export interface TransactionHistoryItemType {
+// TODO: support more history types
+export enum TxHistoryType {
+  SEND = 'send',
+  RECEIVED = 'received'
+}
+
+export interface TxHistoryItem {
   time: number | string;
   networkKey: string;
-  change: string;
+  isSuccess: boolean;
+  action: TxHistoryType;
+  extrinsicHash: string;
+
+  change?: string;
   changeSymbol?: string; // if undefined => main token
   fee?: string;
   feeSymbol?: string;
   // if undefined => main token, sometime "fee" uses different token than "change"
   // ex: sub token (DOT, AUSD, KSM, ...) of Acala, Karura uses main token to pay fee
-  isSuccess: boolean;
-  action: 'send' | 'received';
-  extrinsicHash: string;
   origin?: 'app' | 'network';
-  eventIdx?: number | null;
 }
 
 export interface TransactionHistoryItemJson {
-  items: TransactionHistoryItemType[],
+  items: TxHistoryItem[],
   total: number
 }
 
@@ -505,7 +511,7 @@ export interface RequestTransactionHistoryGetByMultiNetworks {
 export interface RequestTransactionHistoryAdd {
   address: string;
   networkKey: string;
-  item: TransactionHistoryItemType;
+  item: TxHistoryItem;
 }
 
 export interface RequestApi {
@@ -1751,8 +1757,8 @@ export interface KoniRequestSignatures {
   'pri(settings.saveTheme)': [ThemeTypes, boolean, UiSettings];
 
   // Subscription
-  'pri(transaction.history.getSubscription)': [null, Record<string, TransactionHistoryItemType[]>, Record<string, TransactionHistoryItemType[]>];
-  'pri(transaction.history.add)': [RequestTransactionHistoryAdd, boolean, TransactionHistoryItemType[]];
+  'pri(transaction.history.getSubscription)': [null, TxHistoryItem[], TxHistoryItem[]];
+  'pri(transaction.history.add)': [RequestTransactionHistoryAdd, boolean, TxHistoryItem[]];
   'pri(transfer.checkReferenceCount)': [RequestTransferCheckReferenceCount, boolean];
   'pri(transfer.checkSupporting)': [RequestTransferCheckSupporting, SupportTransferResponse];
   'pri(transfer.getExistentialDeposit)': [RequestTransferExistentialDeposit, string];

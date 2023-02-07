@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { _ChainAsset, _ChainInfo } from '@subwallet/chain-list/types';
-import { BalanceJson, CrowdloanJson, NftCollection, NftJson, PriceJson, StakeUnlockingJson, StakingJson, StakingRewardJson, TransactionHistoryItemType } from '@subwallet/extension-base/background/KoniTypes';
+import { BalanceJson, CrowdloanJson, NftCollection, NftJson, PriceJson, StakeUnlockingJson, StakingJson, StakingRewardJson, TxHistoryItem } from '@subwallet/extension-base/background/KoniTypes';
 import { AccountJson } from '@subwallet/extension-base/background/types';
 import { _ChainState } from '@subwallet/extension-base/services/chain-service/types';
 import { lazySubscribeMessage } from '@subwallet/extension-koni-ui/messaging';
@@ -147,7 +147,7 @@ export const updateStakeUnlockingInfo = (data: StakeUnlockingJson) => {
 
 export const subscribeStakeUnlockingInfo = lazySubscribeMessage('pri(unbonding.subscribeUnlockingInfo)', null, updateStakeUnlockingInfo, updateStakeUnlockingInfo);
 
-export const updateTxHistory = (data: Record<string, TransactionHistoryItemType[]>) => {
+export const updateTxHistory = (data: TxHistoryItem[]) => {
   store.dispatch({ type: 'transactionHistory/update', payload: data });
 };
 

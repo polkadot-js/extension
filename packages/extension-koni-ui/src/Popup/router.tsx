@@ -37,7 +37,7 @@ export function Crypto () {
     console.log('store', store);
   }, [store]);
 
-  return <PageWrapper resolve={dataContext.awaitStores(['price', 'chainStore', 'assetRegistry', 'balance', 'crowdloan', 'staking', 'nft'])}>
+  return <PageWrapper resolve={dataContext.awaitStores(['price', 'chainStore', 'assetRegistry', 'transactionHistory'])}>
     <div>Crypto</div>
   </PageWrapper>;
 }

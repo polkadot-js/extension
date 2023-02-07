@@ -1,7 +1,7 @@
 // Copyright 2019-2022 @polkadot/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { ChainRegistry, TransactionHistoryItemType } from '@subwallet/extension-base/background/KoniTypes';
+import { ChainRegistry, TxHistoryItem } from '@subwallet/extension-base/background/KoniTypes';
 import useScanExplorerTxUrl from '@subwallet/extension-koni-ui/hooks/screen/home/useScanExplorerTxUrl';
 import useSupportScanExplorer from '@subwallet/extension-koni-ui/hooks/screen/home/useSupportScanExplorer';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
@@ -15,17 +15,17 @@ interface Props extends ThemeProps {
   className?: string;
   registryMap: Record<string, ChainRegistry>;
   networkKey: string;
-  historyMap: Record<string, TransactionHistoryItemType[]>;
+  historyMap: Record<string, TxHistoryItem[]>;
 }
 
 interface ContentProp {
   className?: string;
   registryMap: Record<string, ChainRegistry>;
-  items: TransactionHistoryItemType[];
+  items: TxHistoryItem[];
 }
 
 interface ItemWrapperProp {
-  item: TransactionHistoryItemType;
+  item: TxHistoryItem;
   registryMap: Record<string, ChainRegistry>;
 }
 
@@ -46,7 +46,7 @@ function getReadyNetwork (registryMap: Record<string, ChainRegistry>): string[] 
   return result;
 }
 
-function compareHistoryFn (a: TransactionHistoryItemType, b: TransactionHistoryItemType) {
+function compareHistoryFn (a: TxHistoryItem, b: TxHistoryItem) {
   try {
     const atime = typeof a.time === 'number' ? new Date(a.time).toISOString() : a.time;
     const btime = typeof b.time === 'number' ? new Date(b.time).toISOString() : b.time;
@@ -59,8 +59,8 @@ function compareHistoryFn (a: TransactionHistoryItemType, b: TransactionHistoryI
   }
 }
 
-function getItems (networkKey: string, historyMap: Record<string, TransactionHistoryItemType[]>): TransactionHistoryItemType[] {
-  const result: TransactionHistoryItemType[] = [];
+function getItems (networkKey: string, historyMap: Record<string, TxHistoryItem[]>): TxHistoryItem[] {
+  const result: TxHistoryItem[] = [];
 
   if (networkKey === 'all') {
     Object.values(historyMap).forEach((items) => {

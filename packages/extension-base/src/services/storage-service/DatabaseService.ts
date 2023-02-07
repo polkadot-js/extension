@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { _ChainAsset } from '@subwallet/chain-list/types';
-import { APIItemState, BalanceItem, CrowdloanItem, NftCollection, NftItem, StakingItem, TransactionHistoryItemType } from '@subwallet/extension-base/background/KoniTypes';
+import { APIItemState, BalanceItem, CrowdloanItem, NftCollection, NftItem, StakingItem, TxHistoryItem } from '@subwallet/extension-base/background/KoniTypes';
 import KoniDatabase, { IBalance, IChain, ICrowdloanItem, INft } from '@subwallet/extension-base/services/storage-service/databases';
 import { AssetStore, BalanceStore, ChainStore, CrowdloanStore, ExtraDelegationInfoStore, MigrationStore, NftCollectionStore, NftStore, StakingStore, TransactionStore } from '@subwallet/extension-base/services/storage-service/db-stores';
 import { Subscription } from 'dexie';
@@ -93,10 +93,10 @@ export default class DatabaseService {
   }
 
   // Transaction history
-  async addHistories (chain: string, address: string, histories: TransactionHistoryItemType[]) {
+  async addHistories (chain: string, address: string, histories: TxHistoryItem[]) {
     this.logger.log(`Updating transaction history for [${chain}]`);
 
-    return this.stores.transaction.bulkUpsert(histories.map((item) => ({ chain, address, eventIdx: 0, ...item })));
+    return this.stores.transaction.bulkUpsert(histories.map((item) => ({ chain, address, ...item })));
   }
 
   // NFT Collection

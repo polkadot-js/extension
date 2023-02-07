@@ -1,7 +1,7 @@
 // Copyright 2019-2022 @polkadot/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { ChainRegistry, TransactionHistoryItemType } from '@subwallet/extension-base/background/KoniTypes';
+import { ChainRegistry, TxHistoryItem } from '@subwallet/extension-base/background/KoniTypes';
 import arrowReceived from '@subwallet/extension-koni-ui/assets/arrow-received.svg';
 import arrowSend from '@subwallet/extension-koni-ui/assets/arrow-send.svg';
 import arrowSendError from '@subwallet/extension-koni-ui/assets/arrow-send-error.svg';
@@ -16,14 +16,14 @@ import styled from 'styled-components';
 
 interface Props extends ThemeProps {
   className?: string;
-  item: TransactionHistoryItemType;
+  item: TxHistoryItem;
   registry: ChainRegistry;
   isSupportScanExplorer: boolean;
 }
 
 let tooltipId = 0;
 
-function getContainerClassName (item: TransactionHistoryItemType, extraClass = '') {
+function getContainerClassName (item: TxHistoryItem, extraClass = '') {
   let className = `history-item ${extraClass}`;
 
   if (item.action === 'received') {
@@ -46,7 +46,7 @@ type DecimalsAndSymbolInfo = {
   feeSymbol: string;
 }
 
-function getDecimalsAndSymbolInfo (item: TransactionHistoryItemType, registry: ChainRegistry): DecimalsAndSymbolInfo {
+function getDecimalsAndSymbolInfo (item: TxHistoryItem, registry: ChainRegistry): DecimalsAndSymbolInfo {
   const result: DecimalsAndSymbolInfo = {} as DecimalsAndSymbolInfo;
 
   if (item.changeSymbol) {

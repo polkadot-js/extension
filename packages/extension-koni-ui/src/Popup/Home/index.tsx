@@ -1,7 +1,7 @@
 // Copyright 2019-2022 @polkadot/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { ChainRegistry, CurrentNetworkInfo, NftCollection as _NftCollection, NftItem as _NftItem, TransactionHistoryItemType } from '@subwallet/extension-base/background/KoniTypes';
+import { ChainRegistry, CurrentNetworkInfo, NftCollection as _NftCollection, NftItem as _NftItem, TxHistoryItem } from '@subwallet/extension-base/background/KoniTypes';
 import { AccountJson } from '@subwallet/extension-base/background/types';
 import { AccountContext, ConfirmationsQueueContext, Modal, SigningReqContext, WaitAtHomeContext } from '@subwallet/extension-koni-ui/components';
 import useAccountBalance from '@subwallet/extension-koni-ui/hooks/screen/home/useAccountBalance';
@@ -54,7 +54,7 @@ interface Props {
   currentAccount: AccountJson;
   network: CurrentNetworkInfo;
   chainRegistryMap: Record<string, ChainRegistry>;
-  historyMap: Record<string, TransactionHistoryItemType[]>;
+  historyMap: Record<string, TxHistoryItem[]>;
 }
 const HomeNavIconWrap = ({ children }: {children: JSX.Element[] | JSX.Element}) => (<svg
   fill='none'

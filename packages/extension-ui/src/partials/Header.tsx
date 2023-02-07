@@ -104,7 +104,7 @@ function Header({
   const _onBackArrowClick = useCallback(() => onAction('..'), [onAction]);
 
   return (
-    <div className={`${className} ${smallMargin ? 'smallMargin' : ''}`}>
+    <div className={`${className} ${smallMargin ? 'smallMargin' : ''} header`}>
       <div className='container'>
         <div className='branding'>
           {showBackArrow ? (
@@ -169,6 +169,7 @@ export default React.memo(
   position: relative;
   margin-bottom: ${withStepper ? '0px' : '25px'};
 
+
   && {
     padding: 0 0 0;
   }
@@ -191,11 +192,11 @@ export default React.memo(
       color: ${theme.labelColor};
       font-family: ${theme.secondaryFontFamily};
       text-align: center;
+      padding-left: 18px;
 
       .logo {
         height: 24px;
         width: 24px;
-        margin-left: 24px;
       }
     }
 
@@ -222,7 +223,7 @@ export default React.memo(
       gap: 16px;
 
       :last-child {
-        margin-right: 24px;
+        padding-right: 18px;
       }
     }
 
@@ -286,8 +287,6 @@ export default React.memo(
 
   .arrowLeftIcon {
     color: ${theme.labelColor};
-    margin-right: 1rem;
-    margin-left: 24px;
     cursor: pointer;
   }
 

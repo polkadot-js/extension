@@ -71,7 +71,7 @@ export default styled(SplashHandler)`
   flex-direction: column;
   height: 100%;
 
-  > *:not(.splash) {
+  > *:not(.splash):not(.header) {
     padding-left: 16px;
     padding-right: 16px;
   }

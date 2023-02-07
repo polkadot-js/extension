@@ -39,6 +39,7 @@ import AddAccountMenu from './Accounts/AddAccountMenu';
 import CreateAccountMenu from './Accounts/CreateAccountMenu';
 import EditAccountMenu from './Accounts/EditAccountMenu';
 import AccountManagement from './AuthManagement/AccountManagement';
+import Restore from './Help/Restore';
 import SafetyLink from './Help/SafetyLink';
 import Accounts from './Accounts';
 import AuthList from './AuthManagement';
@@ -181,6 +182,7 @@ export default function Popup(): React.ReactElement {
                             <Route path='/auth-list'>{wrapWithErrorBoundary(<AuthList />, 'auth-list')}</Route>
                             <Route path='/help'>{wrapWithErrorBoundary(<Help />, 'help')}</Route>
                             <Route path='/help-safety'>{wrapWithErrorBoundary(<SafetyLink />, 'help-safety')}</Route>
+                            <Route path='/help-restore'>{wrapWithErrorBoundary(<Restore />, 'help-restore')}</Route>
                             <Route path='/account/settings'>{wrapWithErrorBoundary(<Settings />, 'settings')}</Route>
                             <Route path='/account/add-menu'>
                               {wrapWithErrorBoundary(<AddAccountMenu />, 'adding-account-menu')}

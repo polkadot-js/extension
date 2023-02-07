@@ -48,6 +48,7 @@ export { default as MnemonicInput } from './MnemonicInput';
 export { default as SplashHandler } from './SplashHandler';
 export { default as Video } from './Video';
 export { default as EditMenuCard } from './EditMenuCard';
+export { default as HelperFooter } from './HelperFooter';
 
 export { Input, TextArea } from './TextInputs';
 

@@ -200,5 +200,6 @@
   "Create a sub-account": "",
   "Visibility for apps": "",
   "Address": "",
-  "Public address copied to your clipboard": ""
+  "Public address copied to your clipboard": "",
+  "Even though you can remove account from this wallet, you can restore it here or in another wallet with the secret phrase.": ""
 }

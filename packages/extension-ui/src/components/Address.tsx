@@ -18,6 +18,7 @@ import styled from 'styled-components';
 import { decodeAddress, encodeAddress } from '@polkadot/util-crypto';
 
 import details from '../assets/details.svg';
+import forgetIconSVG from '../assets/vanish.svg';
 import viewOff from '../assets/viewOff.svg';
 import useMetadata from '../hooks/useMetadata';
 import useOutsideClick from '../hooks/useOutsideClick';
@@ -47,6 +48,7 @@ export interface Props extends ThemeProps {
   suri?: string;
   toggleActions?: number;
   type?: KeypairType;
+  forgetIcon?: boolean;
 }
 
 interface Recoded {
@@ -101,6 +103,7 @@ function Address({
   address,
   children,
   className,
+  forgetIcon,
   genesisHash,
   isExternal,
   isHardware,
@@ -163,7 +166,7 @@ function Address({
 
   const _onClick = useCallback(() => setShowActionsMenu(!showActionsMenu), [showActionsMenu]);
 
-  const _onCopy = useCallback(() => show(t('Copied')), [show, t]);
+  const _onCopy = useCallback(() => show(t<string>('Public address copied to your clipboard'), 'success'), [show, t]);
 
   const _toggleVisibility = useCallback((): void => {
     if (address) {
@@ -264,6 +267,12 @@ function Address({
                 src={viewOff}
               />
             )}
+            {forgetIcon && (
+              <img
+                className='forgetIcon'
+                src={forgetIconSVG}
+              />
+            )}
           </div>
         </div>
         {actions && (
@@ -337,8 +346,16 @@ export default styled(Address)(
 
     .hiddenIcon, .visibleIcon {
       position: absolute;
-      right: 2px;
-      top: -12px;
+      right: 16px;
+      top: -8px;
+    }
+
+    .forgetIcon {
+      position: absolute;
+      right: -22px;
+      top: -16px;
+      width: 32px;
+      height: 32px;
     }
 
     .hiddenIcon {

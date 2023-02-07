@@ -54,11 +54,11 @@ function EditMenuCard({
   toggle
 }: Props): React.ReactElement<Props> {
   return (
-    <div className={className}>
-      <div
-        className='flex-container'
-        onClick={onClick}
-      >
+    <div
+      className={className}
+      onClick={onClick}
+    >
+      <div className='flex-container'>
         <div className='flex-group'>
           <div className={`title ${isDanger ? 'danger' : ''}`}>
             {preIcon && <div className='icon'>{preIcon}</div>}

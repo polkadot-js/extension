@@ -17,7 +17,7 @@ interface Props extends ThemeProps {
   isSuccess?: boolean;
   secondary?: boolean;
   tertiary?: boolean;
-  onClick?: () => void | "" | Promise<boolean | void> | null;
+  onClick?: () => void | Promise<void | boolean>;
   to?: string;
 }
 
@@ -47,11 +47,7 @@ function Button({
 
   return (
     <button
-      className={`${className}${isDisabled || isBusy ? ' isDisabled' : ''}${isBusy ? ' isBusy' : ''}${
-        secondary ? ' secondary' : ''
-      }${
-        tertiary ? ' tertiary' : ''
-      }`}
+      className={`${className}${isDisabled || isBusy ? ' isDisabled' : ''}${isBusy ? ' isBusy' : ''}`}
       disabled={isDisabled || isBusy}
       onClick={_onClick}
     >
@@ -62,27 +58,30 @@ function Button({
   );
 }
 
-export default styled(Button)(({ isDanger, isSuccess, secondary, tertiary, theme }: Props) => `
+export default styled(Button)(
+  ({ isDanger, isSuccess, secondary, tertiary, theme }: Props) => `
   background: ${
     isDanger
       ? theme.buttonBackgroundDanger
       : isSuccess
       ? theme.buttonBackgroundSuccess
       : secondary
-      ? theme.buttonSecondaryBackground 
-      : tertiary 
+      ? theme.buttonSecondaryBackground
+      : tertiary
       ? theme.buttonTertiaryBackground
       : theme.buttonBackground
   };
 
   cursor: pointer;
   display: block;
-  width: ${tertiary ? 'max-content': '100%'};
-  height: ${isDanger ? '40px' : tertiary ? 'unset' : '48px'};
+  width: ${tertiary ? 'max-content' : '100%'};
+  height: ${tertiary ? 'unset' : '48px'};
   box-sizing: border-box;
   border: none;
   border-radius: ${tertiary ? '2px' : theme.buttonBorderRadius};
-  color: ${secondary ? theme.buttonSecondaryTextColor : tertiary ? theme.buttonTertiaryTextColor : theme.buttonTextColor};
+  color: ${
+    secondary ? theme.buttonSecondaryTextColor : tertiary ? theme.buttonTertiaryTextColor : theme.buttonTextColor
+  };
   font-family: ${theme.secondaryFontFamily};
   font-weigth: 500;
   font-size: 16px;
@@ -95,13 +94,23 @@ export default styled(Button)(({ isDanger, isSuccess, secondary, tertiary, theme
 
   &:disabled {
     cursor: default;
-    background: ${secondary ? theme.buttonSecondaryBackgroundDisabled : tertiary ? theme.buttonTertiaryBackground : theme.buttonBackgroundDisabled};
+    background: ${
+      isDanger
+        ? theme.buttonBackgroundDangerDisabled
+        : secondary
+        ? theme.buttonSecondaryBackgroundDisabled
+        : tertiary
+        ? theme.buttonTertiaryBackground
+        : theme.buttonBackgroundDisabled
+    };
     opacity: ${secondary || tertiary ? theme.buttonTertiaryDisabledOpacity : 1};
   }
 
   &:focus{
     outline: none;
-    border: ${secondary ? theme.buttonSecondaryBorderFocused : tertiary ? theme.buttonTertiaryBorder : theme.buttonBorderFocused};
+    border: ${
+      secondary ? theme.buttonSecondaryBorderFocused : tertiary ? theme.buttonTertiaryBorder : theme.buttonBorderFocused
+    };
   }
 
   &:not(:disabled):hover, &:active {
@@ -114,8 +123,24 @@ export default styled(Button)(({ isDanger, isSuccess, secondary, tertiary, theme
         ? theme.buttonTertiaryBackground
         : theme.buttonBackgroundHover
     };
-    color: ${secondary ? theme.buttonSecondaryTextColor :tertiary ? theme.buttonTertiaryHoverTextColor : theme.buttonTextColor};
-    box-shadow: ${secondary ? theme.buttonSecondaryHoverBoxShadow : tertiary ? 'none' : theme.buttonHoverBoxShadow};
+    color: ${
+      isDanger
+        ? theme.buttonTextColor
+        : secondary
+        ? theme.buttonSecondaryTextColor
+        : tertiary
+        ? theme.buttonTertiaryHoverTextColor
+        : theme.buttonTextColor
+    };
+    box-shadow: ${
+      isDanger
+        ? theme.buttonDangerBoxShadow
+        : secondary
+        ? theme.buttonSecondaryHoverBoxShadow
+        : tertiary
+        ? 'none'
+        : theme.buttonHoverBoxShadow
+    };
   }
   
   
@@ -127,7 +152,7 @@ export default styled(Button)(({ isDanger, isSuccess, secondary, tertiary, theme
 
   .disabledOverlay {
     background: rgba(96,96,96,0.15);
-    border-radius: ${tertiary ? '2px': theme.buttonBorderRadius};
+    border-radius: ${tertiary ? '2px' : theme.buttonBorderRadius};
     bottom: 0;
     left: 0;
     position: absolute;

@@ -8,51 +8,13 @@ import styled from 'styled-components';
 
 import helpIcon from '../../assets/help.svg';
 import lockIcon from '../../assets/locked.svg';
-import { ActionContext, Button, ButtonArea, VerticalSpace } from '../../components';
+import { ActionContext, Button, ButtonArea, HelperFooter, VerticalSpace } from '../../components';
 import useTranslation from '../../hooks/useTranslation';
 
 interface Props extends ThemeProps {
   className?: string;
   onNextStep: () => void;
 }
-
-const Helper = styled.div`
-  display: flex;
-  flex-direction: row;
-  justify-content: center;
-  align-items: flex-start;
-  gap: 12px;
-  padding: 16px 0px;
-  margin-bottom: 24px;
-  margin-left: 16px;
-  margin-right: 16px;
-  border-top: 1px solid ${({ theme }: ThemeProps) => theme.boxBorderColor};
-
-
-  img.icon {
-    margin-left: 18px;
-    margin-top: -4px;
-    align-self: flex-start; 
-  }
-
-  span {
-    font-weight: 300;
-    font-size: 13px;
-    line-height: 130%;
-    letter-spacing: 0.06em;
-    color: ${({ theme }: ThemeProps) => theme.subTextColor};
-    align-self: flex-start;
-
-    .link {
-      color: ${({ theme }: ThemeProps) => theme.primaryColor};
-      cursor: pointer;
-
-      :hover {
-        text-decoration: underline;
-      }
-    }
-  }
-`;
 
 function SafetyFirst({ className, onNextStep }: Props): React.ReactElement<Props> {
   const { t } = useTranslation();
@@ -77,7 +39,7 @@ function SafetyFirst({ className, onNextStep }: Props): React.ReactElement<Props
         </div>
       </div>
       <VerticalSpace />
-      <Helper>
+      <HelperFooter>
         <img
           className='icon'
           src={helpIcon}
@@ -91,7 +53,7 @@ function SafetyFirst({ className, onNextStep }: Props): React.ReactElement<Props
             {` ${t<string>('Learn more')}`}
           </span>
         </span>
-      </Helper>
+      </HelperFooter>
       <ButtonArea>
         <Button
           onClick={goTo('/')}

@@ -13,10 +13,10 @@ import { EditMenuCard, Identicon } from '@polkadot/extension-ui/components';
 import useMetadata from '@polkadot/extension-ui/hooks/useMetadata';
 import { IconTheme } from '@polkadot/react-identicon/types';
 
-import forgetIcon from '../../assets/forget.svg';
 import subAccountIcon from '../../assets/subAccount.svg';
+import forgetIcon from '../../assets/vanish.svg';
 import { Switch } from '../../components';
-import { AccountContext, SettingsContext } from '../../components/contexts';
+import { AccountContext, ActionContext, SettingsContext } from '../../components/contexts';
 import useToast from '../../hooks/useToast';
 import useTranslation from '../../hooks/useTranslation';
 import { showAccount } from '../../messaging';
@@ -76,6 +76,10 @@ function EditAccountMenu({
         .catch(console.error);
     }
   }, [address, isHidden, account]);
+
+  const onAction = useContext(ActionContext);
+
+  const goTo = useCallback((path: string) => () => onAction(path), [onAction]);
 
   return (
     <>
@@ -140,6 +144,7 @@ function EditAccountMenu({
           description=''
           extra='chevron'
           isDanger
+          onClick={goTo(`/account/forget/${address}`)}
           position='both'
           preIcon={<img src={forgetIcon} />}
           title='Forget'

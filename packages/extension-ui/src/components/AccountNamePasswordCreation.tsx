@@ -39,10 +39,11 @@ function AccountNamePasswordCreation({
   const { t } = useTranslation();
   const { show } = useToast();
 
-  const _onCreate = useCallback(() => {
-    show(t('Import successful'), 'success');
-
-    return name && password && onCreate(name, password);
+  const _onCreate = useCallback(async () => {
+    if (name && password) {
+      show(t('Import successful'), 'success');
+      await onCreate(name, password);
+    }
   }, [show, t, name, password, onCreate]);
 
   const _onNameChange = useCallback(

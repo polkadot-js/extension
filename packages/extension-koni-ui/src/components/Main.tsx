@@ -4,8 +4,6 @@
 import React from 'react';
 import styled from 'styled-components';
 
-import { Theme } from '../types';
-
 interface Props {
   children: React.ReactNode;
   className?: string;
@@ -19,17 +17,10 @@ function Main ({ children, className }: Props): React.ReactElement<Props> {
   );
 }
 
-export default styled(Main)<Props>(({ theme }) => {
-  const { token } = theme as Theme;
-
+export default styled(Main)<Props>(() => {
   return ({
     display: 'flex',
     flexDirection: 'column',
-    height: '100%',
-
-    '*': {
-      fontFamily: token.fontFamily,
-      color: token.colorText
-    }
+    height: '100%'
   });
 });

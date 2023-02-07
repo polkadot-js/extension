@@ -48,6 +48,8 @@ export { default as ValidatedInput } from './ValidatedInput';
 export { default as VerticalSpace } from './VerticalSpace';
 export { default as Warning } from './Warning';
 
+export { default as Layout } from './Layout';
+
 export { Input, TextArea } from './TextInputs';
 
 export * from '../contexts';

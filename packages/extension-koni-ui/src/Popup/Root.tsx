@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { Main } from '@subwallet/extension-koni-ui/components';
+import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { Button } from '@subwallet/react-ui';
 import Bowser from 'bowser';
 import React, { useEffect, useState } from 'react';
@@ -106,7 +107,7 @@ const _Menu = ({ className }: MenuProps) => (
     </li>
   </ul>);
 
-const Menu = styled(_Menu)<MenuProps>(({isShow}) => {
+const Menu = styled(_Menu)<MenuProps>(({ isShow }) => {
   return {
     backgroundColor: '#333',
     paddingTop: '16px',
@@ -144,7 +145,7 @@ const TmpHeader = styled.div(() => ({
   }
 }));
 
-export default function Root (): React.ReactElement {
+function _Root ({ className }: ThemeProps): React.ReactElement {
   const location = useLocation();
 
   // Todo: Navigate to default page
@@ -165,25 +166,32 @@ export default function Root (): React.ReactElement {
   }, [location.pathname]);
 
   return (
-    <Main>
-      <div>
-        <TmpHeader>
-          <div className={'left-item'}>
-            <div><b>Current path:</b> {location.pathname} </div>
-            <div><b>Current state:</b> {JSON.stringify(location.state)}</div>
-          </div>
-          <div className={'right-item'}>
-            <Button
-              onClick={toggleMenu}
-              size={'sm'}
-            >Menu</Button>
-          </div>
-          <div className={'main-menu'}>
-            <Menu isShow={isShowMenu} />
-          </div>
-        </TmpHeader>
+    <Main className={className}>
+      <TmpHeader>
+        <div className={'left-item'}>
+          <div><b>Current path:</b> {location.pathname} </div>
+          <div><b>Current state:</b> {JSON.stringify(location.state)}</div>
+        </div>
+        <div className={'right-item'}>
+          <Button
+            onClick={toggleMenu}
+            size={'sm'}
+          >Menu</Button>
+        </div>
+        <div className={'main-menu'}>
+          <Menu isShow={isShowMenu} />
+        </div>
+      </TmpHeader>
+
+      <div className='main-layout'>
+        <Outlet />
       </div>
-      <Outlet />
     </Main>
   );
 }
+
+export const Root = styled(_Root)(() => ({
+  '.main-layout': {
+    flex: 1
+  }
+}));

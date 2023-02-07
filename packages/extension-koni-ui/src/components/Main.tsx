@@ -28,7 +28,8 @@ export default styled(Main)<Props>(({ theme }) => {
     height: '100%',
 
     '*': {
-      fontFamily: token.fontFamily
+      fontFamily: token.fontFamily,
+      color: token.colorText
     }
   });
 });

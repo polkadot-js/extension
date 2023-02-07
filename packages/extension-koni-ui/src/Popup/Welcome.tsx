@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { ThemeTypes } from '@subwallet/extension-base/background/KoniTypes';
-import { updateTheme } from '@subwallet/extension-koni-ui/stores/updater';
+import { updateTheme } from '@subwallet/extension-koni-ui/stores/utils';
 import { Theme } from '@subwallet/extension-koni-ui/themes';
 import { Button } from '@subwallet/react-ui';
 import React from 'react';

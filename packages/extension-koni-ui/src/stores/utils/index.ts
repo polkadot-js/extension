@@ -2,7 +2,19 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { _ChainAsset, _ChainInfo } from '@subwallet/chain-list/types';
-import { BalanceJson, CrowdloanJson, NftCollection, NftJson, PriceJson, StakeUnlockingJson, StakingJson, StakingRewardJson, TxHistoryItem } from '@subwallet/extension-base/background/KoniTypes';
+import {
+  AccountsWithCurrentAddress,
+  BalanceJson,
+  CrowdloanJson,
+  KeyringState,
+  NftCollection,
+  NftJson,
+  PriceJson,
+  StakeUnlockingJson,
+  StakingJson,
+  StakingRewardJson,
+  TxHistoryItem
+} from '@subwallet/extension-base/background/KoniTypes';
 import { AccountJson } from '@subwallet/extension-base/background/types';
 import { _ChainState } from '@subwallet/extension-base/services/chain-service/types';
 import { lazySubscribeMessage } from '@subwallet/extension-koni-ui/messaging';
@@ -12,17 +24,26 @@ import { store } from '@subwallet/extension-koni-ui/stores';
 
 // Base
 // AccountState store
-export const updateCurrentAccountState = (data: AccountJson) => {
-  store.dispatch({ type: 'accountState/updateCurrentAccount', payload: data });
+export const updateCurrentAccountState = (data: AccountsWithCurrentAddress | boolean) => {
+  if (typeof data !== 'boolean') {
+    let currentAccountJson: AccountJson = data.accounts[0];
+
+    data.accounts.forEach((accountJson) => {
+      if (accountJson.address === data.currentAddress) {
+        currentAccountJson = accountJson;
+      }
+    });
+    store.dispatch({ type: 'accountState/updateCurrentAccount', payload: currentAccountJson });
+  }
 };
 
 export const subscribeCurrentAccount = lazySubscribeMessage('pri(accounts.subscribeWithCurrentAddress)', {}, updateCurrentAccountState, updateCurrentAccountState);
 
-export const updateKeyringState = (data: AccountJson) => {
-  store.dispatch({ type: 'accountState/updateCurrentAccount', payload: data });
+export const updateKeyringState = (data: KeyringState) => {
+  store.dispatch({ type: 'accountState/updateKeyringState', payload: data });
 };
 
-export const subscribeKeyringState = lazySubscribeMessage('pri(accounts.subscribeWithCurrentAddress)', {}, updateCurrentAccountState, updateCurrentAccountState);
+export const subscribeKeyringState = lazySubscribeMessage('pri(keyring.subscribe)', null, updateKeyringState, updateKeyringState);
 
 export const updateAccountContext = (data: AccountJson) => {
   store.dispatch({ type: 'accountState/updateCurrentAccount', payload: data });

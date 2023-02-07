@@ -167,10 +167,11 @@ function _Root ({ className }: ThemeProps): React.ReactElement {
   }, [location.pathname]);
 
   useEffect(() => {
-    navigate('/home');
+    if (location.pathname === '/') {
+      navigate('/home/tokens');
+    }
   },
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  []
+  [location.pathname, navigate]
   );
 
   return (

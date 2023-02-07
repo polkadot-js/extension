@@ -6,7 +6,7 @@ import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { Button } from '@subwallet/react-ui';
 import Bowser from 'bowser';
 import React, { useEffect, useState } from 'react';
-import { Link, Outlet, useLocation } from 'react-router-dom';
+import { Link, Outlet, useLocation, useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 
 export function initRootPromise () {
@@ -138,7 +138,7 @@ const Menu = styled(_Menu)<MenuProps>(({ isShow }) => {
 
 const TmpHeader = styled.div(() => ({
   display: 'flex',
-  padding: 16,
+  padding: '8px 16px',
 
   '.left-item': {
     flex: '1 1 200px'
@@ -147,6 +147,7 @@ const TmpHeader = styled.div(() => ({
 
 function _Root ({ className }: ThemeProps): React.ReactElement {
   const location = useLocation();
+  const navigate = useNavigate();
 
   // Todo: Navigate to default page
   useEffect(() => {
@@ -165,6 +166,13 @@ function _Root ({ className }: ThemeProps): React.ReactElement {
     setIsShowMenu(false);
   }, [location.pathname]);
 
+  useEffect(() => {
+    navigate('/home');
+  },
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  []
+  );
+
   return (
     <Main className={className}>
       <TmpHeader>
@@ -175,7 +183,7 @@ function _Root ({ className }: ThemeProps): React.ReactElement {
         <div className={'right-item'}>
           <Button
             onClick={toggleMenu}
-            size={'sm'}
+            size={'xs'}
           >Menu</Button>
         </div>
         <div className={'main-menu'}>

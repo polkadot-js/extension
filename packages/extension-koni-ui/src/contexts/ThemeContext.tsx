@@ -19,11 +19,13 @@ interface Props {
 const { useToken } = reactUiTheme;
 
 const GlobalStyle = createGlobalStyle<ThemeProps>(({ theme }) => {
-  const { extendToken } = theme as Theme;
+  const { extendToken, token } = theme as Theme;
 
   return ({
     body: {
-      backgroundColor: extendToken.bodyBackgroundColor
+      backgroundColor: extendToken.bodyBackgroundColor,
+      fontFamily: token.fontFamily,
+      color: token.colorText
     },
 
     html: {

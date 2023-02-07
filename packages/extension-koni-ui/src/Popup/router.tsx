@@ -4,6 +4,12 @@
 import { PHISHING_PAGE_REDIRECT } from '@subwallet/extension-base/defaults';
 import { LoadingContainer } from '@subwallet/extension-koni-ui/components';
 import { DataContext } from '@subwallet/extension-koni-ui/contexts/DataContext';
+import { Home } from '@subwallet/extension-koni-ui/Popup/Home';
+import { Crowdloans } from '@subwallet/extension-koni-ui/Popup/Home/Crowdloans';
+import { History } from '@subwallet/extension-koni-ui/Popup/Home/History';
+import { Nfts } from '@subwallet/extension-koni-ui/Popup/Home/Nfts';
+import { Staking } from '@subwallet/extension-koni-ui/Popup/Home/Staking';
+import { Tokens } from '@subwallet/extension-koni-ui/Popup/Home/Tokens';
 import PhishingDetected from '@subwallet/extension-koni-ui/Popup/PhishingDetected';
 import { initRootPromise, Root } from '@subwallet/extension-koni-ui/Popup/Root';
 import { Welcome } from '@subwallet/extension-koni-ui/Popup/Welcome';
@@ -60,7 +66,7 @@ export function Example () {
   const location = useLocation();
 
   return <PageWrapper>
-    <div style={{padding: 16}}>{location.pathname}</div>
+    <div style={{ padding: 16 }}>{location.pathname}</div>
   </PageWrapper>;
 }
 
@@ -75,26 +81,26 @@ export const router = createHashRouter([{ path: '/',
   },
   {
     path: '/home',
-    element: <Outlet />,
+    element: <Home />,
     children: [{
-      path: 'crypto',
-      element: <Crypto />
+      path: 'tokens',
+      element: <Tokens />
     },
     {
-      path: 'nft',
-      element: <Example />
+      path: 'nfts',
+      element: <Nfts />
     },
     {
-      path: 'crowdloan',
-      element: <Example />
+      path: 'crowdloans',
+      element: <Crowdloans />
     },
     {
       path: 'staking',
-      element: <Example />
+      element: <Staking />
     },
     {
-      path: 'histories',
-      element: <Example />
+      path: 'history',
+      element: <History />
     }]
   },
   {

@@ -16,9 +16,9 @@ export default class NftStore extends BaseStoreWithAddressAndChain<INft> {
     return this.table.filter((item) => !chainList.length || chainList.includes(item.chain)).toArray();
   }
 
-  subscribeNft (addresses: string[], chainHashes: string[] = []) {
+  subscribeNft (addresses: string[], chainList: string[] = []) {
     return liveQuery(
-      () => this.getNft(addresses, chainHashes)
+      () => this.getNft(addresses, chainList)
     );
   }
 
@@ -36,23 +36,23 @@ export default class NftStore extends BaseStoreWithAddressAndChain<INft> {
     return this.table.where(conditions).and((item) => !nftIds.some((nft) => nft === item.id)).delete();
   }
 
-  deleteNftsFromRemovedCollection (chainHash: string, address: string, collectionIds: string[]) {
+  deleteNftsFromRemovedCollection (chain: string, address: string, collectionIds: string[]) {
     return this.table.where({
       address,
-      chainHash
-    }).and((collection) => !collectionIds.some((item) => item === collection.collectionId));
+      chain
+    }).and((nft) => !collectionIds.some((item) => item === nft.collectionId));
   }
 
-  deleteNftsByCollection (chainHash: string, collectionId: string) {
+  deleteNftsByCollection (chain: string, collectionId: string) {
     return this.table.where({
-      chainHash,
+      chain,
       collectionId
     }).delete();
   }
 
-  removeNfts (chainHash: string, address: string, collectionId: string, nftIds: string[]) {
+  removeNfts (chain: string, address: string, collectionId: string, nftIds: string[]) {
     return this.table.where({
-      chainHash,
+      chain,
       address,
       collectionId
     }).filter((item) => nftIds.includes(item.id || '')).delete();

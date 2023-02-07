@@ -565,7 +565,7 @@ export default class KoniState extends State {
   }
 
   public setStakingItem (networkKey: string, item: StakingItem): void {
-    this.dbService.updateStaking(networkKey, this.getNetworkGenesisHashByKey(networkKey), item.address, item).catch((e) => this.logger.warn(e));
+    this.dbService.updateStaking(networkKey, item.address, item).catch((e) => this.logger.warn(e));
   }
 
   public setNftTransfer (data: NftTransferExtra, callback?: (data: NftTransferExtra) => void): void {
@@ -623,15 +623,15 @@ export default class KoniState extends State {
   }
 
   public updateNftIds (chain: string, address: string, collectionId?: string, nftIds?: string[]): void {
-    this.dbService.deleteRemovedNftsFromCollection(this.getNetworkGenesisHashByKey(chain), address, collectionId, nftIds).catch((e) => this.logger.warn(e));
+    this.dbService.deleteRemovedNftsFromCollection(chain, address, collectionId, nftIds).catch((e) => this.logger.warn(e));
   }
 
   public removeNfts (chain: string, address: string, collectionId: string, nftIds: string[]) {
-    return this.dbService.removeNfts(this.getNetworkGenesisHashByKey(chain), address, collectionId, nftIds);
+    return this.dbService.removeNfts(chain, address, collectionId, nftIds);
   }
 
   public updateCollectionIds (chain: string, address: string, collectionIds: string[] = []): void {
-    this.dbService.deleteNftsFromRemovedCollection(this.getNetworkGenesisHashByKey(chain), address, collectionIds);
+    this.dbService.deleteNftsFromRemovedCollection(chain, address, collectionIds);
   }
 
   public async getNft (): Promise<NftJson | undefined> {
@@ -1359,18 +1359,6 @@ export default class KoniState extends State {
     }
   }
 
-  public getNetworkGenesisHashByKey (key: string) {
-    const chainInfo = this.chainService.getChainInfoByKey(key);
-
-    return _getSubstrateGenesisHash(chainInfo);
-  }
-
-  public getNetworkKeyByGenesisHash (hash: string) {
-    return Object.values(this.chainService.getChainInfoMap()).find((chainInfo) => {
-      return _getSubstrateGenesisHash(chainInfo) === hash;
-    })?.slug;
-  }
-
   public async resetHistoryMap (newAddress: string): Promise<void> {
     this.historyMap = {};
 
@@ -1390,7 +1378,7 @@ export default class KoniState extends State {
   }
 
   private saveHistoryToStorage (address: string, network: string, items: TransactionHistoryItemType[]) {
-    this.dbService.addHistories(network, this.getNetworkGenesisHashByKey(network), address, items).catch((e) => this.logger.warn(e));
+    this.dbService.addHistories(network, address, items).catch((e) => this.logger.warn(e));
   }
 
   private combineHistories (oldItems: TransactionHistoryItemType[], newItems: TransactionHistoryItemType[]): TransactionHistoryItemType[] {
@@ -2067,7 +2055,7 @@ export default class KoniState extends State {
   }
 
   public setExtraDelegationInfo (networkKey: string, address: string, collatorAddress: string): void {
-    this.dbService.updateExtraDelegationInfo(networkKey, this.getNetworkGenesisHashByKey(networkKey), address, collatorAddress).catch((e) => this.logger.warn(e));
+    this.dbService.updateExtraDelegationInfo(networkKey, address, collatorAddress).catch((e) => this.logger.warn(e));
   }
 
   public async getExtraDelegationInfo (networkKey: string, address: string) {

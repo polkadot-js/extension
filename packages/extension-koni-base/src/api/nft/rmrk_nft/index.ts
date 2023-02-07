@@ -174,8 +174,6 @@ export class RmrkNftApi extends BaseNftApi {
     try {
       const kusamaAddress = reformatAddress(address, 2);
 
-      console.log('got rmrk here', kusamaAddress);
-
       allNfts = await this.getAllByAccount(kusamaAddress);
 
       if (allNfts.length <= 0) {

@@ -23,12 +23,10 @@ export interface IChain extends _ChainInfo {
   currentProvider: string
 }
 export interface ICrowdloanItem extends CrowdloanItem, DefaultAddressDoc, DefaultChainDoc {}
+export interface INft extends NftItem, DefaultAddressDoc {}
 
 // TODO: refactor this
-export interface INft extends NftItem, DefaultAddressDoc {}
-export interface IStakingItem extends StakingItem, DefaultAddressDoc {}
 export interface ITransactionHistoryItem extends TransactionHistoryItemType, DefaultAddressDoc {}
-export interface IExtraDelegationInfo extends ExtraDelegationInfo, DefaultAddressDoc {}
 
 export interface IMigration {
   key: string,
@@ -42,10 +40,10 @@ export default class KoniDatabase extends Dexie {
   public nfts!: Table<INft, object>;
   public nftCollections!: Table<NftCollection, object>;
   public crowdloans!: Table<ICrowdloanItem, object>;
-  public stakings!: Table<IStakingItem, object>;
+  public stakings!: Table<StakingItem, object>;
   public transactions!: Table<ITransactionHistoryItem, object>;
   public migrations!: Table<IMigration, object>;
-  public extraDelegationInfo!: Table<IExtraDelegationInfo, object>;
+  public extraDelegationInfo!: Table<ExtraDelegationInfo, object>;
   public chain!: Table<IChain, object>;
   public asset!: Table<_ChainAsset, object>;
 

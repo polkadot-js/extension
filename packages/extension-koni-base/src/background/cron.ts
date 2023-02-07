@@ -101,7 +101,7 @@ export class KoniCron {
       return;
     }
 
-    this.logger.log('Stating cron jobs');
+    this.logger.log('Starting cron jobs');
     this.state.getCurrentAccount((currentAccountInfo) => {
       if (!currentAccountInfo?.address) {
         return;

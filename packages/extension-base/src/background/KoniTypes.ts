@@ -132,6 +132,7 @@ export interface StakingItem {
   name: string,
   chain: string,
   address: string,
+  type: StakingType,
 
   balance?: string,
   activeBalance?: string,
@@ -139,7 +140,6 @@ export interface StakingItem {
   nativeToken: string,
   unit?: string,
 
-  type: StakingType,
   state: APIItemState,
 
   unlockingInfo?: UnlockingStakeInfo,

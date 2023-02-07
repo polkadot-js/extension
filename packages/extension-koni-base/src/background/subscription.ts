@@ -81,7 +81,7 @@ export class KoniSubscription {
         const { address } = currentAccountInfo;
 
         this.subscribeBalancesAndCrowdloans(address, this.state.getChainInfoMap(), this.state.getSubstrateApiMap(), this.state.getEvmApiMap());
-        // this.subscribeStakingOnChain(address, this.state.getSubstrateApiMap());
+        this.subscribeStakingOnChain(address, this.state.getSubstrateApiMap());
       }
     });
 
@@ -91,7 +91,7 @@ export class KoniSubscription {
           const { address } = serviceInfo.currentAccountInfo;
 
           this.subscribeBalancesAndCrowdloans(address, serviceInfo.chainInfoMap, serviceInfo.chainApiMap.substrate, serviceInfo.chainApiMap.evm);
-          // this.subscribeStakingOnChain(address, serviceInfo.chainApiMap.substrate);
+          this.subscribeStakingOnChain(address, serviceInfo.chainApiMap.substrate);
         }
       }));
   }
@@ -235,12 +235,10 @@ export class KoniSubscription {
         selectedNftCollection
       } as NftTransferExtra);
 
-      console.log('nft subscribe', chainInfoMap, substrateApiMap, evmApiMap);
-
       nftHandler.setChainInfoMap(chainInfoMap);
       nftHandler.setDotSamaApiMap(substrateApiMap);
       nftHandler.setWeb3ApiMap(evmApiMap);
-      nftHandler.setAddresses(['5HbcGs2QXVAc6Q6eoTzLYNAJWpN17AkCFRLnWDaHCiGYXvNc']);
+      nftHandler.setAddresses(addresses);
 
       nftHandler.handleNfts(
         smartContractNfts,

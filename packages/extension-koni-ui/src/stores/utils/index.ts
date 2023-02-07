@@ -2,18 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { _ChainAsset, _ChainInfo } from '@subwallet/chain-list/types';
-import {
-  BalanceJson,
-  CrowdloanJson,
-  NftCollection,
-  NftItem,
-  NftJson,
-  PriceJson,
-  StakeUnlockingJson,
-  StakingJson,
-  StakingRewardJson,
-  TransactionHistoryItemType
-} from '@subwallet/extension-base/background/KoniTypes';
+import { BalanceJson, CrowdloanJson, NftCollection, NftJson, PriceJson, StakeUnlockingJson, StakingJson, StakingRewardJson, TransactionHistoryItemType } from '@subwallet/extension-base/background/KoniTypes';
 import { AccountJson } from '@subwallet/extension-base/background/types';
 import { _ChainState } from '@subwallet/extension-base/services/chain-service/types';
 import { lazySubscribeMessage } from '@subwallet/extension-koni-ui/messaging';

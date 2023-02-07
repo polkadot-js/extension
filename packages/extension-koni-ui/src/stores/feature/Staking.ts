@@ -8,8 +8,8 @@ import { ReduxStatus, StakingStore } from '@subwallet/extension-koni-ui/stores/t
 const initialState = {
   reduxStatus: ReduxStatus.INIT,
   stakingMap: {},
-  stakeUnlockingMap: {},
-  stakingRewardMap: {}
+  stakeUnlockingMap: [],
+  stakingRewardMap: []
 } as StakingStore;
 
 const stakingSlice = createSlice({
@@ -26,7 +26,7 @@ const stakingSlice = createSlice({
         reduxStatus: ReduxStatus.READY
       };
     },
-    updateStakingReward (state, action: PayloadAction<Record<string, StakingRewardItem>>) {
+    updateStakingReward (state, action: PayloadAction<StakingRewardItem[]>) {
       const payload = action.payload;
 
       return {
@@ -36,7 +36,7 @@ const stakingSlice = createSlice({
         reduxStatus: ReduxStatus.READY
       };
     },
-    updateStakeUnlockingInfo (state, action: PayloadAction<Record<string, UnlockingStakeInfo>>) {
+    updateStakeUnlockingInfo (state, action: PayloadAction<UnlockingStakeInfo[]>) {
       const payload = action.payload;
 
       return {

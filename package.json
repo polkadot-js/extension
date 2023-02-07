@@ -53,11 +53,11 @@
     "@babel/cli": "^7.19.3",
     "@babel/core": "^7.19.3",
     "@polkadot/dev": "^0.65.23",
-    "jest-environment-jsdom": "^29.4.1",
     "@types/jest": "^27.4.0",
     "axios": "^1.2.1",
     "discord-webhook-node": "^1.1.8",
     "i18next-scanner": "^4.0.0",
+    "jest-environment-jsdom": "^29.4.1",
     "patch-package": "^6.4.7",
     "postinstall-postinstall": "^2.1.0",
     "sinon-chrome": "^3.0.1"

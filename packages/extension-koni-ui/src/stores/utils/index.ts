@@ -136,13 +136,13 @@ export const updateStaking = (data: StakingJson) => {
 export const subscribeStaking = lazySubscribeMessage('pri(staking.getSubscription)', null, updateStaking, updateStaking);
 
 export const updateStakingReward = (data: StakingRewardJson) => {
-  store.dispatch({ type: 'staking/updateStakingReward', payload: [data.fastInterval, data.slowInterval] });
+  store.dispatch({ type: 'staking/updateStakingReward', payload: [...data.fastInterval, ...data.slowInterval] });
 };
 
 export const subscribeStakingReward = lazySubscribeMessage('pri(stakingReward.getSubscription)', null, updateStakingReward, updateStakingReward);
 
 export const updateStakeUnlockingInfo = (data: StakeUnlockingJson) => {
-  store.dispatch({ type: 'staking/updateStaking', payload: data.details });
+  store.dispatch({ type: 'staking/updateStakeUnlockingInfo', payload: data.details });
 };
 
 export const subscribeStakeUnlockingInfo = lazySubscribeMessage('pri(unbonding.subscribeUnlockingInfo)', null, updateStakeUnlockingInfo, updateStakeUnlockingInfo);

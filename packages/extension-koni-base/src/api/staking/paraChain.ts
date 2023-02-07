@@ -6,7 +6,6 @@ import { APIItemState, StakingItem, StakingRewardItem, StakingType } from '@subw
 import { _STAKING_CHAIN_GROUP } from '@subwallet/extension-base/services/chain-service/constants';
 import { _SubstrateApi } from '@subwallet/extension-base/services/chain-service/types';
 import { _getChainNativeTokenBasicInfo } from '@subwallet/extension-base/services/chain-service/utils';
-import { parseStakingBalance } from '@subwallet/extension-koni-base/api/staking/utils';
 import { reformatAddress } from '@subwallet/extension-koni-base/utils';
 
 import { Codec } from '@polkadot/types/types';
@@ -40,23 +39,14 @@ function getSingleStakingAmplitude (parentApi: _SubstrateApi, address: string, n
     }
 
     const totalBalance = activeBalance.add(unstakingBalance);
-
-    const formattedTotalBalance = parseFloat(totalBalance.toString());
-    const formattedActiveBalance = parseFloat(activeBalance.toString());
-    const formattedUnstakingBalance = parseFloat(unstakingBalance.toString());
-
-    const parsedTotalBalance = parseStakingBalance(formattedTotalBalance, chain, networks);
-    const parsedUnstakingBalance = parseStakingBalance(formattedUnstakingBalance, chain, networks);
-    const parsedActiveBalance = parseStakingBalance(formattedActiveBalance, chain, networks);
-
     const { symbol } = _getChainNativeTokenBasicInfo(networks[chain]);
 
     const stakingItem = {
       name: networks[chain].name,
       chain: chain,
-      balance: parsedTotalBalance.toString(),
-      activeBalance: parsedActiveBalance.toString(),
-      unlockingBalance: parsedUnstakingBalance.toString(),
+      balance: totalBalance.toString(),
+      activeBalance: activeBalance.toString(),
+      unlockingBalance: unstakingBalance.toString(),
       nativeToken: symbol,
       unit: symbol,
       state: APIItemState.READY,
@@ -98,23 +88,14 @@ function getMultiStakingAmplitude (parentApi: _SubstrateApi, useAddresses: strin
         }
 
         const totalBalance = activeBalance.add(unstakingBalance);
-
-        const formattedTotalBalance = parseFloat(totalBalance.toString());
-        const formattedActiveBalance = parseFloat(activeBalance.toString());
-        const formattedUnstakingBalance = parseFloat(unstakingBalance.toString());
-
-        const parsedTotalBalance = parseStakingBalance(formattedTotalBalance, chain, networks);
-        const parsedUnstakingBalance = parseStakingBalance(formattedUnstakingBalance, chain, networks);
-        const parsedActiveBalance = parseStakingBalance(formattedActiveBalance, chain, networks);
-
         const { symbol } = _getChainNativeTokenBasicInfo(networks[chain]);
 
         const stakingItem = {
           name: networks[chain].name,
           chain: chain,
-          balance: parsedTotalBalance.toString(),
-          activeBalance: parsedActiveBalance.toString(),
-          unlockingBalance: parsedUnstakingBalance.toString(),
+          balance: totalBalance.toString(),
+          activeBalance: activeBalance.toString(),
+          unlockingBalance: unstakingBalance.toString(),
           nativeToken: symbol,
           unit: symbol,
           state: APIItemState.READY,
@@ -154,7 +135,6 @@ export async function getAmplitudeUnclaimedStakingReward (substrateApiMap: Recor
   await Promise.all(chains.map(async (chain) => {
     if (_STAKING_CHAIN_GROUP.amplitude.includes(chain) && !_STAKING_CHAIN_GROUP.kilt.includes(chain)) {
       const networkInfo = networks[chain];
-      const { decimals } = _getChainNativeTokenBasicInfo(networkInfo);
       const apiProps = await substrateApiMap[chain].isReady;
 
       await Promise.all(useAddresses.map(async (address) => {
@@ -167,12 +147,9 @@ export async function getAmplitudeUnclaimedStakingReward (substrateApiMap: Recor
           name: networkInfo.name,
           state: APIItemState.READY,
           type: StakingType.NOMINATED,
-          address: reformatAddress(address, 42)
+          address: reformatAddress(address, 42),
+          unclaimedReward
         } as StakingRewardItem;
-
-        const parsedUnclaimedReward = parseFloat(unclaimedReward) / (10 ** decimals);
-
-        rewardItem.unclaimedReward = parsedUnclaimedReward.toString();
 
         unclaimedRewardList.push(rewardItem);
       }));
@@ -202,21 +179,14 @@ export function getParaStakingOnChain (parentApi: _SubstrateApi, useAddresses: s
 
           const totalBalance = new BN(_totalBalance);
           const unlockingBalance = new BN(_unlockingBalance);
-
-          const formattedTotalBalance = parseFloat(totalBalance.toString());
-          const formattedActiveBalance = parseFloat(totalBalance.sub(unlockingBalance).toString());
-          const formattedUnlockingBalance = parseFloat(unlockingBalance.toString());
-
-          const parsedTotalBalance = parseStakingBalance(formattedTotalBalance, chain, networks);
-          const parsedUnlockingBalance = parseStakingBalance(formattedUnlockingBalance, chain, networks);
-          const parsedActiveBalance = parseStakingBalance(formattedActiveBalance, chain, networks);
+          const activeBalance = totalBalance.sub(unlockingBalance);
 
           const stakingItem = {
             name: networks[chain].name,
             chain: chain,
-            balance: parsedTotalBalance.toString(),
-            activeBalance: parsedActiveBalance.toString(),
-            unlockingBalance: parsedUnlockingBalance.toString(),
+            balance: totalBalance.toString(),
+            activeBalance: activeBalance.toString(),
+            unlockingBalance: unlockingBalance.toString(),
             nativeToken: symbol,
             unit: symbol,
             state: APIItemState.READY,
@@ -252,7 +222,7 @@ export function getAstarStakingOnChain (parentApi: _SubstrateApi, useAddresses: 
   return parentApi.api.query.dappsStaking.ledger.multi(useAddresses, (ledgers: Codec[]) => {
     if (ledgers) {
       for (let i = 0; i < ledgers.length; i++) {
-        let unlockingBalance = BN_ZERO;
+        let bnUnlockingBalance = BN_ZERO;
         const owner = reformatAddress(useAddresses[i], 42);
 
         const ledger = ledgers[i];
@@ -264,25 +234,18 @@ export function getAstarStakingOnChain (parentApi: _SubstrateApi, useAddresses: 
         for (const chunk of unlockingChunks) {
           const bnChunk = new BN(chunk.amount.replaceAll(',', ''));
 
-          unlockingBalance = unlockingBalance.add(bnChunk);
+          bnUnlockingBalance = bnUnlockingBalance.add(bnChunk);
         }
 
         const bnTotalStake = new BN(_totalStake.replaceAll(',', ''));
-
-        const formattedTotalBalance = parseFloat(bnTotalStake.toString());
-        const formattedActiveBalance = parseFloat(bnTotalStake.sub(unlockingBalance).toString());
-        const formattedUnlockingBalance = parseFloat(unlockingBalance.toString());
-
-        const parsedTotalBalance = parseStakingBalance(formattedTotalBalance, chain, networks);
-        const parsedActiveBalance = parseStakingBalance(formattedActiveBalance, chain, networks);
-        const parsedUnlockingBalance = parseStakingBalance(formattedUnlockingBalance, chain, networks);
+        const bnActiveStake = bnTotalStake.sub(bnUnlockingBalance);
 
         const stakingItem = {
           name: networks[chain].name,
           chain: chain,
-          balance: parsedTotalBalance.toString(),
-          activeBalance: parsedActiveBalance.toString(),
-          unlockingBalance: parsedUnlockingBalance.toString(),
+          balance: bnTotalStake.toString(),
+          activeBalance: bnActiveStake.toString(),
+          unlockingBalance: bnUnlockingBalance.toString(),
           nativeToken: symbol,
           unit: symbol,
           state: APIItemState.READY,

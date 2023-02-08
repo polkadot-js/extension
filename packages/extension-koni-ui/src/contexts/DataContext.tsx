@@ -1,22 +1,11 @@
 // Copyright 2019-2022 @subwallet/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { store, StoreName } from '@subwallet/extension-koni-ui/stores';
-import {
-  subscribeAssetRegistry,
-  subscribeBalance, subscribeChainInfoMap,
-  subscribeChainStateMap,
-  subscribeCrowdloan,
-  subscribeNftCollections,
-  subscribeNftItems,
-  subscribePrice,
-  subscribeStakeUnlockingInfo,
-  subscribeStaking,
-  subscribeStakingReward,
-  subscribeTxHistory
-} from '@subwallet/extension-koni-ui/stores/utils';
+import { persistor, store, StoreName } from '@subwallet/extension-koni-ui/stores';
+import { subscribeAssetRegistry, subscribeBalance, subscribeChainInfoMap, subscribeChainStateMap, subscribeCrowdloan, subscribeNftCollections, subscribeNftItems, subscribePrice, subscribeStakeUnlockingInfo, subscribeStaking, subscribeStakingReward, subscribeTxHistory } from '@subwallet/extension-koni-ui/stores/utils';
 import React from 'react';
 import { Provider } from 'react-redux';
+import { PersistGate } from 'redux-persist/integration/react';
 
 interface DataContextProviderProps {
   children?: React.ReactElement;
@@ -46,47 +35,54 @@ export interface DataContextType {
 }
 
 const _DataContext: DataContextType = {
-  handlerMap: {},
-  storeDependencies: {},
+  handlerMap: {}, // Map to store data handlers
+  storeDependencies: {}, // Map to store dependencies of each store
   readyStoreMap: Object.keys(store.getState()).reduce((map, key) => {
-    map[key as StoreName] = false;
+    map[key as StoreName] = false; // Initialize each store to be not ready
 
     return map;
-  }, {} as DataMap),
-  addHandler: function (item: DataHandler) {
+  }, {} as DataMap), // Convert the result to DataMap type
+  addHandler: function (item: DataHandler) { // Add a new data handler
     const { name } = item;
 
-    item.isSubscription = !!item.unsub;
+    item.isSubscription = !!item.unsub; // Check if the handler has an unsubscribe function
 
+    // If the handler doesn't exist in the map yet
     if (!this.handlerMap[name]) {
-      this.handlerMap[name] = item;
-
+      this.handlerMap[name] = item; // Add the handler to the map
       item.relatedStores.forEach((storeName) => {
+        // If the store doesn't have any dependencies yet
         if (!this.storeDependencies[storeName]) {
-          this.storeDependencies[storeName] = [];
+          this.storeDependencies[storeName] = []; // Initialize an empty array for the store's dependencies
         }
 
+        // Add the handler to the store's dependencies
         this.storeDependencies[storeName]?.push(name);
       });
 
+      // If the handler is set to start immediately
       if (item.isStartImmediately) {
-        item.start();
-        item.isStarted = true;
+        item.start(); // Start the handler
+        item.isStarted = true; // Mark the handler as started
       }
     }
 
+    // Return a function to remove the handler
     return () => {
       this.removeHandler(name);
     };
   },
-  removeHandler: function (name: string) {
+  removeHandler: function (name: string) { // Remove a data handler
     const item = this.handlerMap[name];
 
+    // If the handler doesn't exist in the map
     if (!item) {
-      return;
+      return; // Return without doing anything
     }
 
+    // If the handler has an unsubscribe function, call it
     item.unsub && item.unsub();
+    // Remove the handler from all the store's dependencies
     Object.values(this.storeDependencies).forEach((handlers) => {
       const removeIndex = handlers.indexOf(name);
 
@@ -95,22 +91,27 @@ const _DataContext: DataContextType = {
       }
     });
 
+    // If the handler exists in the map, delete it
     if (this.handlerMap[name]) {
       delete this.handlerMap[name];
     }
   },
   awaitStores: async function (storeNames: StoreName[], renew = true) {
-    const promiseList = storeNames.reduce((handlers, sName) => {
+    const handlers = storeNames.reduce((acc, sName) => {
       (this.storeDependencies[sName] || []).forEach((handlerName) => {
-        if (!handlers.includes(handlerName)) {
-          handlers.push(handlerName);
+        if (!acc.includes(handlerName)) {
+          acc.push(handlerName);
         }
       });
 
-      return handlers;
-    }, [] as string[]).map((siName) => {
+      return acc;
+    }, [] as string[]);
+
+    // Create an array of promises from the handlers
+    const promiseList = handlers.map((siName) => {
       const handler = this.handlerMap[siName];
 
+      // Start the handler if it's not started or it's not a subscription and we want to renew
       if (!handler.isStarted || (!handler.isSubscription && renew)) {
         handler.start();
         handler.isStarted = true;
@@ -119,10 +120,12 @@ const _DataContext: DataContextType = {
       return handler.promise;
     });
 
+    // Mark the store names as ready
     storeNames.forEach((n) => {
       this.readyStoreMap[n] = true;
     });
 
+    // Wait for all handlers to finish
     await Promise.all(promiseList);
 
     return true;
@@ -150,8 +153,10 @@ export const DataContextProvider = ({ children }: DataContextProviderProps) => {
   _DataContext.addHandler({ ...subscribeTxHistory, name: 'subscribeTxHistory', relatedStores: ['transactionHistory'] });
 
   return <Provider store={store}>
-    <DataContext.Provider value={_DataContext}>
-      {children}
-    </DataContext.Provider>
+    <PersistGate persistor={persistor}>
+      <DataContext.Provider value={_DataContext}>
+        {children}
+      </DataContext.Provider>
+    </PersistGate>
   </Provider>;
 };

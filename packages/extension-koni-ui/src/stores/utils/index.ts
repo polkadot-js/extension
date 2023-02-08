@@ -1,12 +1,12 @@
 // Copyright 2019-2022 @subwallet/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { BalanceJson, CrowdloanJson, NftCollection, NftItem, PriceJson, StakeUnlockingJson, StakingJson, StakingRewardJson, TransactionHistoryItemType } from '@subwallet/extension-base/background/KoniTypes';
+import { _ChainAsset, _ChainInfo } from '@subwallet/chain-list/types';
+import { BalanceJson, CrowdloanJson, NftCollection, NftItem, PriceJson, StakeUnlockingJson, StakingJson, StakingRewardJson, ThemeTypes, TransactionHistoryItemType } from '@subwallet/extension-base/background/KoniTypes';
 import { AccountJson } from '@subwallet/extension-base/background/types';
+import { _ChainState } from '@subwallet/extension-base/services/chain-service/types';
 import { lazySubscribeMessage } from '@subwallet/extension-koni-ui/messaging';
 import { store } from '@subwallet/extension-koni-ui/stores';
-import {_ChainAsset, _ChainInfo} from "@subwallet/chain-list/types";
-import {_ChainState} from "@subwallet/extension-base/services/chain-service/types";
 
 // Setup redux stores
 
@@ -56,6 +56,10 @@ export const updateConfirmationQueue = (data: AccountJson) => {
 export const subscribeConfirmationQueue = lazySubscribeMessage('pri(accounts.subscribeWithCurrentAddress)', {}, updateCurrentAccountState, updateCurrentAccountState);
 
 // Settings Store
+export const updateTheme = (theme: ThemeTypes) => {
+  store.dispatch({ type: 'settings/updateTheme', payload: theme });
+};
+
 export const updateUiSettings = (data: AccountJson) => {
   store.dispatch({ type: 'accountState/updateCurrentAccount', payload: data });
 };

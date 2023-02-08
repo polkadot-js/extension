@@ -66,6 +66,14 @@ const settingsSlice = createSlice({
         mediaAllowed: payload,
         reduxStatus: ReduxStatus.READY
       };
+    },
+    updateTheme (state, action: PayloadAction<ThemeTypes>) {
+      const theme = action.payload;
+
+      return {
+        ...state,
+        theme
+      };
     }
   }
 });

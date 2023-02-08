@@ -3,12 +3,12 @@
 
 import './i18n/i18n';
 
+import applyPreloadStyle from '@subwallet/extension-koni-ui/preloadStyle';
 import React, { Suspense } from 'react';
 import ReactDOM from 'react-dom/client';
 
-import { View } from './components';
-
 export default function createView (Entry: React.ComponentType, rootId = 'root'): void {
+  applyPreloadStyle();
   const rootElement = document.getElementById(rootId);
 
   if (!rootElement) {
@@ -19,11 +19,9 @@ export default function createView (Entry: React.ComponentType, rootId = 'root')
 
   root.render(
     <React.StrictMode>
-      <View>
-        <Suspense>
-          <Entry />
-        </Suspense>
-      </View>
+      <Suspense>
+        <Entry />
+      </Suspense>
     </React.StrictMode>
   );
 }

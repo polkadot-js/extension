@@ -3,7 +3,7 @@
 
 import { AccountJson } from '@subwallet/extension-base/background/types';
 
-import { Theme } from '../components/themes';
+import { Theme } from '../themes';
 
 export { Theme };
 

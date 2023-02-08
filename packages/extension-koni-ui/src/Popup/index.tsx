@@ -8,6 +8,7 @@ import { QRContextProvider } from '@subwallet/extension-koni-ui/contexts/QrSigne
 import { ScannerContextProvider } from '@subwallet/extension-koni-ui/contexts/ScannerContext';
 import { SigningContextProvider } from '@subwallet/extension-koni-ui/contexts/SigningContext';
 import { ThemeProvider } from '@subwallet/extension-koni-ui/contexts/ThemeContext';
+import { ModalContextProvider } from '@subwallet/react-ui/es/sw-modal/provider';
 import React from 'react';
 import { RouterProvider } from 'react-router';
 
@@ -23,10 +24,12 @@ export default function Popup (): React.ReactElement {
             <ScannerContextProvider>
               <QRContextProvider>
                 <ToastProvider>
-                  <RouterProvider
-                    fallbackElement={<LoadingContainer />}
-                    router={router}
-                  />
+                  <ModalContextProvider>
+                    <RouterProvider
+                      fallbackElement={<LoadingContainer />}
+                      router={router}
+                    />
+                  </ModalContextProvider>
                 </ToastProvider>
               </QRContextProvider>
             </ScannerContextProvider>

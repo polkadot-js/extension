@@ -33,7 +33,6 @@ export const sendExtrinsic = async ({ callback, extrinsic, substrateApi, txState
         .filter(({ event: { section } }) => section === 'system')
         .forEach(({ event: { method, data: [error] } }): void => {
           txState.extrinsicHash = extrinsic.hash.toHex();
-          // callback(txState);
 
           if (method === 'ExtrinsicFailed') {
             txState.status = false;
@@ -53,11 +52,6 @@ export const sendExtrinsic = async ({ callback, extrinsic, substrateApi, txState
                 const errorMessage = docs.join(' ');
 
                 console.log(`${section}.${method}: ${errorMessage}`);
-                // response.data = {
-                //   section,
-                //   method,
-                //   message: errorMessage
-                // };
                 txState.errors?.push({
                   code: BasicTxErrorCode.UNKNOWN_ERROR,
                   message: errorMessage

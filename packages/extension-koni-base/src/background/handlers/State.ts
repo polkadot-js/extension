@@ -17,6 +17,8 @@ import { AuthUrls, MetaRequest, SignRequest } from '@subwallet/extension-base/se
 import { AccountRefMap, AddNetworkRequestExternal, AddTokenRequestExternal, APIItemState, ApiMap, AuthRequestV2, BalanceItem, BalanceJson, ConfirmationDefinitions, ConfirmationsQueue, ConfirmationsQueueItemOptions, ConfirmationType, CrowdloanItem, CrowdloanJson, CurrentAccountInfo, EvmSendTransactionParams, EvmSendTransactionRequestExternal, EvmSignatureRequestExternal, ExternalRequestPromise, ExternalRequestPromiseStatus, KeyringState, NftCollection, NftItem, NftJson, NftTransferExtra, PriceJson, RequestAccountExportPrivateKey, RequestCheckPublicAndSecretKey, RequestConfirmationComplete, RequestSettingsType, ResponseAccountExportPrivateKey, ResponseCheckPublicAndSecretKey, ServiceInfo, SingleModeJson, StakeUnlockingJson, StakingItem, StakingJson, StakingRewardItem, StakingRewardJson, ThemeTypes, TxHistoryItem, TxHistoryType, UiSettings } from '@subwallet/extension-base/background/KoniTypes';
 import { _getChainNativeTokenSlug, _getEvmChainId, _getOriginChainOfAsset, _getSubstrateGenesisHash, _isChainEnabled, _isChainEvmCompatible, _isSubstrateParachain } from '@subwallet/extension-base/services/chain-service/utils';
 import DatabaseService from '@subwallet/extension-base/services/storage-service/DatabaseService';
+import TransactionService from '@subwallet/extension-base/services/transaction-service';
+import { KoniTransaction } from '@subwallet/extension-base/services/transaction-service/types';
 import { Web3Transaction } from '@subwallet/extension-base/signers/types';
 import { CurrentAccountStore, PriceStore } from '@subwallet/extension-base/stores';
 import AccountRefStore from '@subwallet/extension-base/stores/AccountRef';
@@ -159,7 +161,8 @@ export default class KoniState {
   private subscription: KoniSubscription;
   private logger: Logger;
   private ready = false;
-  public readonly requestService: RequestService;
+  readonly #requestService: RequestService;
+  readonly #transactionService: TransactionService;
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   constructor (providers: Providers = {}) {
@@ -169,7 +172,8 @@ export default class KoniState {
     this.dbService = new DatabaseService();
 
     this.chainService = new ChainService(this.dbService);
-    this.requestService = new RequestService(this.chainService);
+    this.#requestService = new RequestService(this.chainService);
+    this.#transactionService = new TransactionService(this.dbService, this.#requestService);
     this.subscription = new KoniSubscription(this, this.dbService);
     this.cron = new KoniCron(this, this.subscription, this.dbService);
     this.logger = createLogger('State');
@@ -178,19 +182,19 @@ export default class KoniState {
 
   // Clone from polkadot.js
   public get knownMetadata (): MetadataDef[] {
-    return this.requestService.knownMetadata;
+    return this.#requestService.knownMetadata;
   }
 
   public injectMetadata (url: string, request: MetadataDef): Promise<boolean> {
-    return this.requestService.injectMetadata(url, request);
+    return this.#requestService.injectMetadata(url, request);
   }
 
   public getMetaRequest (id: string): MetaRequest {
-    return this.requestService.getMetaRequest(id);
+    return this.#requestService.getMetaRequest(id);
   }
 
   public getSignRequest (id: string): SignRequest {
-    return this.requestService.getSignRequest(id);
+    return this.#requestService.getSignRequest(id);
   }
 
   // List all providers the extension is exposing
@@ -262,20 +266,32 @@ export default class KoniState {
   }
 
   public saveMetadata (meta: MetadataDef): void {
-    this.requestService.saveMetadata(meta);
+    this.#requestService.saveMetadata(meta);
   }
 
   public setNotification (notification: string): boolean {
-    this.requestService.setNotification(notification);
+    this.#requestService.setNotification(notification);
 
     return true;
   }
 
   public sign (url: string, request: RequestSign, account: AccountJson): Promise<ResponseSigning> {
-    return this.requestService.sign(url, request, account);
+    return this.#requestService.sign(url, request, account);
   }
 
   ///
+
+  public get metaSubject () {
+    return this.#requestService.metaSubject;
+  }
+
+  public get authSubjectV2 () {
+    return this.#requestService.authSubjectV2;
+  }
+
+  public get signSubject () {
+    return this.#requestService.signSubject;
+  }
 
   public generateDefaultBalanceMap () {
     const balanceMap: Record<string, BalanceItem> = {};
@@ -340,27 +356,27 @@ export default class KoniState {
   };
 
   public getAuthRequestV2 (id: string): AuthRequestV2 {
-    return this.requestService.getAuthRequestV2(id);
+    return this.#requestService.getAuthRequestV2(id);
   }
 
   public setAuthorize (data: AuthUrls, callback?: () => void): void {
-    this.requestService.setAuthorize(data, callback);
+    this.#requestService.setAuthorize(data, callback);
   }
 
   public getAuthorize (update: (value: AuthUrls) => void): void {
-    this.requestService.getAuthorize(update);
+    this.#requestService.getAuthorize(update);
   }
 
   public subscribeEvmChainChange (): Subject<AuthUrls> {
-    return this.requestService.subscribeEvmChainChange;
+    return this.#requestService.subscribeEvmChainChange;
   }
 
   public subscribeAuthorizeUrlSubject (): Subject<AuthUrls> {
-    return this.requestService.subscribeAuthorizeUrlSubject;
+    return this.#requestService.subscribeAuthorizeUrlSubject;
   }
 
   public getAuthList (): Promise<AuthUrls> {
-    return this.requestService.getAuthList();
+    return this.#requestService.getAuthList();
   }
 
   getAddressList (value = false): Record<string, boolean> {
@@ -370,7 +386,7 @@ export default class KoniState {
   }
 
   public async authorizeUrlV2 (url: string, request: RequestAuthorizeTab): Promise<boolean> {
-    return this.requestService.authorizeUrlV2(url, request);
+    return this.#requestService.authorizeUrlV2(url, request);
   }
 
   public getNativeTokenInfo (networkKey: string) {
@@ -422,7 +438,7 @@ export default class KoniState {
   }
 
   public ensureUrlAuthorizedV2 (url: string): Promise<boolean> {
-    return this.requestService.ensureUrlAuthorizedV2(url);
+    return this.#requestService.ensureUrlAuthorizedV2(url);
   }
 
   public setStakingItem (networkKey: string, item: StakingItem): void {
@@ -1738,7 +1754,7 @@ export default class KoniState {
   }
 
   public getConfirmationsQueueSubject (): BehaviorSubject<ConfirmationsQueue> {
-    return this.requestService.confirmationsQueueSubject;
+    return this.#requestService.confirmationsQueueSubject;
   }
 
   public addConfirmation<CT extends ConfirmationType> (
@@ -1749,11 +1765,11 @@ export default class KoniState {
     options: ConfirmationsQueueItemOptions = {},
     validator?: (input: ConfirmationDefinitions[CT][1]) => Error | undefined
   ): Promise<ConfirmationDefinitions[CT][1]> {
-    return this.requestService.addConfirmation(id, url, type, payload, options, validator);
+    return this.#requestService.addConfirmation(id, url, type, payload, options, validator);
   }
 
   public completeConfirmation (request: RequestConfirmationComplete) {
-    return this.requestService.completeConfirmation(request);
+    return this.#requestService.completeConfirmation(request);
   }
 
   public onInstall () {
@@ -1837,5 +1853,14 @@ export default class KoniState {
 
   public async getExtraDelegationInfo (networkKey: string, address: string) {
     return await this.dbService.getExtraDelegationInfo(networkKey, address);
+  }
+
+  // New Transaction Handler
+  public addTransaction (transaction: KoniTransaction) {
+    this.#transactionService.addTransaction(transaction);
+  }
+
+  public sendTransactionRequest (id: string) {
+    this.#transactionService.sendTransactionRequest(id);
   }
 }

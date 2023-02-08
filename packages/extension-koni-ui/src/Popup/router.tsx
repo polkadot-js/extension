@@ -18,6 +18,7 @@ import { useSelector } from 'react-redux';
 import { createHashRouter, Outlet, useLocation, useRouteError } from 'react-router-dom';
 
 import PageWrapper from '../components/Layout/PageWrapper';
+import SendFund from './Transaction/SendFund';
 
 export function Crypto () {
   const dataContext = useContext(DataContext);
@@ -92,7 +93,7 @@ export const router = createHashRouter([{ path: '/',
     element: <Outlet />,
     children: [{
       path: 'send-fund',
-      element: <Example />
+      element: <SendFund />
     }, {
       path: 'send-nft',
       element: <Example />

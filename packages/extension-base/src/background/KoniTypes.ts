@@ -17,7 +17,7 @@ import { JsonRpcPayload, JsonRpcResponse } from 'web3-core-helpers';
 
 import { ApiPromise } from '@polkadot/api';
 import { SubmittableExtrinsicFunction } from '@polkadot/api/promise/types';
-import { Registry, SignerPayloadJSON } from '@polkadot/types/types';
+import { Registry } from '@polkadot/types/types';
 import { SignerResult } from '@polkadot/types/types/extrinsic';
 import { BN } from '@polkadot/util';
 import { KeypairType } from '@polkadot/util-crypto/types';
@@ -694,25 +694,6 @@ export interface ResponseAccountCreateWithSecretKey {
 }
 
 /// Sign Transaction
-
-export enum KoniTransactionStatus {
-  PENDING = 'PENDING',
-  REJECTED = 'REJECTED',
-  FAILED = 'FAILED',
-  COMPLETED = 'COMPLETED'
-}
-
-export interface KoniTransaction {
-  id: string;
-  network: string;
-  address: string;
-  data: any;
-  payload: SignerPayloadJSON;
-  status: KoniTransactionStatus;
-  extrinsicHash: string;
-  sendRequest?: () => void;
-  doStart?: () => void;
-}
 
 /// Sign External Request
 

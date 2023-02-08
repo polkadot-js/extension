@@ -6,7 +6,9 @@ import { BasicTxResponse, ExternalRequestPromise, ExternalRequestPromiseStatus, 
 import { _BALANCE_TOKEN_GROUP, _TRANSFER_CHAIN_GROUP, _TRANSFER_NOT_SUPPORTED_CHAINS } from '@subwallet/extension-base/services/chain-service/constants';
 import { _SubstrateApi } from '@subwallet/extension-base/services/chain-service/types';
 import { _getContractAddressOfToken, _getTokenOnChainAssetId, _getTokenOnChainInfo, _isChainEvmCompatible, _isNativeToken, _isTokenWasmSmartContract } from '@subwallet/extension-base/services/chain-service/utils';
+import { PrepareInternalRequest } from '@subwallet/extension-base/services/transaction-service/types';
 import { SignerType } from '@subwallet/extension-base/signers/types';
+import { convertToTransaction } from '@subwallet/extension-koni-base/api/dotsama/shared/convertToTransaction';
 import { signAndSendExtrinsic } from '@subwallet/extension-koni-base/api/dotsama/shared/signAndSendExtrinsic';
 import { getPSP22ContractPromise } from '@subwallet/extension-koni-base/api/tokens/wasm';
 import { KeyringPair } from '@subwallet/keyring/types';
@@ -547,6 +549,58 @@ export async function makeTransfer ({ callback,
 
   await signAndSendExtrinsic({
     type: SignerType.PASSWORD,
+    substrateApi: substrateApi,
+    callback: callback,
+    extrinsic: extrinsic,
+    txState: txState,
+    address: from,
+    updateResponseTxResult: updateResponseTxResult,
+    errorMessage: 'error transfer',
+    nonce: _TRANSFER_CHAIN_GROUP.genshiro.includes(networkKey) ? -1 : undefined
+  });
+}
+
+
+export async function makeTransferV2 ({ callback,
+  from,
+  networkKey,
+  substrateApiMap,
+  to,
+  tokenInfo,
+  transferAll,
+  id,
+  convertToRequest,
+  addTransaction,
+  value }: MakeTransferProps & PrepareInternalRequest): Promise<void> {
+  const txState: BasicTxResponse = {};
+  const substrateApi = await substrateApiMap[networkKey].isReady;
+
+  const [extrinsic, transferAmount] = await createTransferExtrinsic({
+    transferAll: transferAll,
+    value: value,
+    from: from,
+    networkKey: networkKey,
+    tokenInfo: tokenInfo,
+    to: to,
+    substrateApi
+  });
+
+  if (!extrinsic) {
+    callback(getUnsupportedResponse());
+
+    return;
+  }
+
+  const updateResponseTxResult = (response: BasicTxResponse, records: EventRecord[]) => {
+    updateTransferResponseTxResult(networkKey, tokenInfo, response, records, transferAmount);
+  };
+
+  await convertToTransaction({
+    addTransaction: addTransaction,
+    convertToRequest: convertToRequest,
+    data: undefined,
+    id: id,
+    network: networkKey,
     substrateApi: substrateApi,
     callback: callback,
     extrinsic: extrinsic,

@@ -2,9 +2,10 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { _ChainAsset, _ChainInfo } from '@subwallet/chain-list/types';
-import { AccountsWithCurrentAddress, BalanceJson, CrowdloanJson, KeyringState, NftCollection, NftJson, PriceJson, StakeUnlockingJson, StakingJson, StakingRewardJson, TxHistoryItem } from '@subwallet/extension-base/background/KoniTypes';
+import { AccountsWithCurrentAddress, BalanceJson, CrowdloanJson, KeyringState, NftCollection, NftJson, PriceJson, StakeUnlockingJson, StakingJson, StakingRewardJson, ThemeTypes, TxHistoryItem } from '@subwallet/extension-base/background/KoniTypes';
 import { AccountJson, AccountsContext } from '@subwallet/extension-base/background/types';
 import { _ChainState } from '@subwallet/extension-base/services/chain-service/types';
+import { SigningRequest } from '@subwallet/extension-base/services/request-service/types';
 import { canDerive } from '@subwallet/extension-base/utils';
 import { lazySubscribeMessage } from '@subwallet/extension-koni-ui/messaging';
 import { store } from '@subwallet/extension-koni-ui/stores';
@@ -66,12 +67,12 @@ export const subscribeKeyringState = lazySubscribeMessage('pri(keyring.subscribe
 //
 // export const subscribeMetadataRequest = lazySubscribeMessage('pri(accounts.subscribeWithCurrentAddress)', {}, updateCurrentAccountState, updateCurrentAccountState);
 //
-// export const updateSigningRequest = (data: AccountJson) => {
-//   store.dispatch({ type: 'accountState/updateCurrentAccount', payload: data });
-// };
-//
-// export const subscribeSigningRequest = lazySubscribeMessage('pri(accounts.subscribeWithCurrentAddress)', {}, updateCurrentAccountState, updateCurrentAccountState);
-//
+export const updateSigningRequest = (requests: SigningRequest[]) => {
+  store.dispatch({ type: 'requestState/updateSigningRequest', payload: requests });
+};
+
+export const subscribeSigningRequest = lazySubscribeMessage('pri(signing.requests)', null, console.log, updateSigningRequest);
+
 // export const updateConfirmationQueue = (data: AccountJson) => {
 //   store.dispatch({ type: 'accountState/updateCurrentAccount', payload: data });
 // };

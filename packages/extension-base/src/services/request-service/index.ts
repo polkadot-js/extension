@@ -10,6 +10,7 @@ import MetadataRequestHandler from '@subwallet/extension-base/services/request-s
 import PopupHandler from '@subwallet/extension-base/services/request-service/handler/PopupHandler';
 import SubstrateRequestHandler from '@subwallet/extension-base/services/request-service/handler/SubstrateRequestHandler';
 import { AuthUrls, MetaRequest, SigningRequest, SignRequest } from '@subwallet/extension-base/services/request-service/types';
+import { KoniTransaction } from '@subwallet/extension-base/services/transaction-service/types';
 import { MetadataDef } from '@subwallet/extension-inject/types';
 import { accounts } from '@subwallet/ui-keyring/observable/accounts';
 import { BehaviorSubject, Subject } from 'rxjs';
@@ -148,6 +149,10 @@ export default class RequestService {
 
   public getSignRequest (id: string): SignRequest {
     return this.#substrateRequestHandler.getSignRequest(id);
+  }
+
+  public addFromTransaction (transaction: KoniTransaction): void {
+    this.#substrateRequestHandler.addFromTransaction(transaction);
   }
 
   // Evm requests

@@ -212,5 +212,6 @@ export const _DEFAULT_ACTIVE_CHAINS = [
   ..._DEFAULT_CHAINS,
   'ethereum',
   'acala',
-  'moonbeam'
+  'moonbeam',
+  'alephZeroTest'
 ];

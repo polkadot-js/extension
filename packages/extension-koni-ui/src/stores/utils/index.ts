@@ -2,42 +2,50 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { _ChainAsset, _ChainInfo } from '@subwallet/chain-list/types';
-import {
-  AccountsWithCurrentAddress,
-  BalanceJson,
-  CrowdloanJson,
-  KeyringState,
-  NftCollection,
-  NftJson,
-  PriceJson,
-  StakeUnlockingJson,
-  StakingJson,
-  StakingRewardJson,
-  TxHistoryItem
-} from '@subwallet/extension-base/background/KoniTypes';
-import { AccountJson } from '@subwallet/extension-base/background/types';
+import { AccountsWithCurrentAddress, BalanceJson, CrowdloanJson, KeyringState, NftCollection, NftJson, PriceJson, StakeUnlockingJson, StakingJson, StakingRewardJson, TxHistoryItem } from '@subwallet/extension-base/background/KoniTypes';
+import { AccountJson, AccountsContext } from '@subwallet/extension-base/background/types';
 import { _ChainState } from '@subwallet/extension-base/services/chain-service/types';
+import { canDerive } from '@subwallet/extension-base/utils';
 import { lazySubscribeMessage } from '@subwallet/extension-koni-ui/messaging';
 import { store } from '@subwallet/extension-koni-ui/stores';
+import { buildHierarchy } from '@subwallet/extension-koni-ui/util/buildHierarchy';
 
 // Setup redux stores
 
 // Base
 // AccountState store
-export const updateCurrentAccountState = (data: AccountsWithCurrentAddress | boolean) => {
+export const updateAccountData = (data: AccountsWithCurrentAddress | boolean) => {
   if (typeof data !== 'boolean') {
     let currentAccountJson: AccountJson = data.accounts[0];
+    const accounts = data.accounts;
 
-    data.accounts.forEach((accountJson) => {
+    accounts.forEach((accountJson) => {
       if (accountJson.address === data.currentAddress) {
         currentAccountJson = accountJson;
       }
     });
-    store.dispatch({ type: 'accountState/updateCurrentAccount', payload: currentAccountJson });
+
+    const hierarchy = buildHierarchy(accounts);
+    const master = hierarchy.find(({ isExternal, type }) => !isExternal && canDerive(type));
+
+    updateCurrentAccountState(currentAccountJson);
+    updateAccountsContext({
+      accounts,
+      hierarchy,
+      master
+    } as AccountsContext);
   }
 };
 
-export const subscribeCurrentAccount = lazySubscribeMessage('pri(accounts.subscribeWithCurrentAddress)', {}, updateCurrentAccountState, updateCurrentAccountState);
+export const updateCurrentAccountState = (currentAccountJson: AccountJson) => {
+  store.dispatch({ type: 'accountState/updateCurrentAccount', payload: currentAccountJson });
+};
+
+export const updateAccountsContext = (data: AccountsContext) => {
+  store.dispatch({ type: 'accountState/updateAccountsContext', payload: data });
+};
+
+export const subscribeAccountsData = lazySubscribeMessage('pri(accounts.subscribeWithCurrentAddress)', {}, updateAccountData, updateAccountData);
 
 export const updateKeyringState = (data: KeyringState) => {
   store.dispatch({ type: 'accountState/updateKeyringState', payload: data });
@@ -45,61 +53,55 @@ export const updateKeyringState = (data: KeyringState) => {
 
 export const subscribeKeyringState = lazySubscribeMessage('pri(keyring.subscribe)', null, updateKeyringState, updateKeyringState);
 
-export const updateAccountContext = (data: AccountJson) => {
-  store.dispatch({ type: 'accountState/updateCurrentAccount', payload: data });
-};
-
-export const subscribeAccountContext = lazySubscribeMessage('pri(accounts.subscribeWithCurrentAddress)', {}, updateCurrentAccountState, updateCurrentAccountState);
-
-export const updateAuthorizeRequest = (data: AccountJson) => {
-  store.dispatch({ type: 'accountState/updateCurrentAccount', payload: data });
-};
-
 // RequestState store
-export const subscribeAuthorizeRequest = lazySubscribeMessage('pri(accounts.subscribeWithCurrentAddress)', {}, updateCurrentAccountState, updateCurrentAccountState);
-
-export const updateMetadataRequest = (data: AccountJson) => {
-  store.dispatch({ type: 'accountState/updateCurrentAccount', payload: data });
-};
-
-export const subscribeMetadataRequest = lazySubscribeMessage('pri(accounts.subscribeWithCurrentAddress)', {}, updateCurrentAccountState, updateCurrentAccountState);
-
-export const updateSigningRequest = (data: AccountJson) => {
-  store.dispatch({ type: 'accountState/updateCurrentAccount', payload: data });
-};
-
-export const subscribeSigningRequest = lazySubscribeMessage('pri(accounts.subscribeWithCurrentAddress)', {}, updateCurrentAccountState, updateCurrentAccountState);
-
-export const updateConfirmationQueue = (data: AccountJson) => {
-  store.dispatch({ type: 'accountState/updateCurrentAccount', payload: data });
-};
-
-export const subscribeConfirmationQueue = lazySubscribeMessage('pri(accounts.subscribeWithCurrentAddress)', {}, updateCurrentAccountState, updateCurrentAccountState);
+// export const updateAuthorizeRequest = (data: AccountJson) => {
+//   store.dispatch({ type: 'accountState/updateCurrentAccount', payload: data });
+// };
+//
+// export const subscribeAuthorizeRequest = lazySubscribeMessage('pri(accounts.subscribeWithCurrentAddress)', {}, updateCurrentAccountState, updateCurrentAccountState);
+//
+// export const updateMetadataRequest = (data: AccountJson) => {
+//   store.dispatch({ type: 'accountState/updateCurrentAccount', payload: data });
+// };
+//
+// export const subscribeMetadataRequest = lazySubscribeMessage('pri(accounts.subscribeWithCurrentAddress)', {}, updateCurrentAccountState, updateCurrentAccountState);
+//
+// export const updateSigningRequest = (data: AccountJson) => {
+//   store.dispatch({ type: 'accountState/updateCurrentAccount', payload: data });
+// };
+//
+// export const subscribeSigningRequest = lazySubscribeMessage('pri(accounts.subscribeWithCurrentAddress)', {}, updateCurrentAccountState, updateCurrentAccountState);
+//
+// export const updateConfirmationQueue = (data: AccountJson) => {
+//   store.dispatch({ type: 'accountState/updateCurrentAccount', payload: data });
+// };
+//
+// export const subscribeConfirmationQueue = lazySubscribeMessage('pri(accounts.subscribeWithCurrentAddress)', {}, updateCurrentAccountState, updateCurrentAccountState);
 
 // Settings Store
-export const updateUiSettings = (data: AccountJson) => {
-  store.dispatch({ type: 'accountState/updateCurrentAccount', payload: data });
-};
-
-export const subscribeUiSettings = lazySubscribeMessage('pri(accounts.subscribeWithCurrentAddress)', {}, updateCurrentAccountState, updateCurrentAccountState);
-
-export const updateAppSettings = (data: AccountJson) => {
-  store.dispatch({ type: 'accountState/updateCurrentAccount', payload: data });
-};
-
-export const subscribeAppSettings = lazySubscribeMessage('pri(accounts.subscribeWithCurrentAddress)', {}, updateCurrentAccountState, updateCurrentAccountState);
-
-export const updateAuthUrls = (data: AccountJson) => {
-  store.dispatch({ type: 'accountState/updateCurrentAccount', payload: data });
-};
-
-export const subscribeAuthUrls = lazySubscribeMessage('pri(accounts.subscribeWithCurrentAddress)', {}, updateCurrentAccountState, updateCurrentAccountState);
-
-export const updateMediaAllowance = (data: AccountJson) => {
-  store.dispatch({ type: 'accountState/updateCurrentAccount', payload: data });
-};
-
-export const subscribeMediaAllowance = lazySubscribeMessage('pri(accounts.subscribeWithCurrentAddress)', {}, updateCurrentAccountState, updateCurrentAccountState);
+// export const updateUiSettings = (data: AccountJson) => {
+//   store.dispatch({ type: 'accountState/updateCurrentAccount', payload: data });
+// };
+//
+// export const subscribeUiSettings = lazySubscribeMessage('pri(accounts.subscribeWithCurrentAddress)', {}, updateCurrentAccountState, updateCurrentAccountState);
+//
+// export const updateAppSettings = (data: AccountJson) => {
+//   store.dispatch({ type: 'accountState/updateCurrentAccount', payload: data });
+// };
+//
+// export const subscribeAppSettings = lazySubscribeMessage('pri(accounts.subscribeWithCurrentAddress)', {}, updateCurrentAccountState, updateCurrentAccountState);
+//
+// export const updateAuthUrls = (data: AccountJson) => {
+//   store.dispatch({ type: 'accountState/updateCurrentAccount', payload: data });
+// };
+//
+// export const subscribeAuthUrls = lazySubscribeMessage('pri(accounts.subscribeWithCurrentAddress)', {}, updateCurrentAccountState, updateCurrentAccountState);
+//
+// export const updateMediaAllowance = (data: AccountJson) => {
+//   store.dispatch({ type: 'accountState/updateCurrentAccount', payload: data });
+// };
+//
+// export const subscribeMediaAllowance = lazySubscribeMessage('pri(accounts.subscribeWithCurrentAddress)', {}, updateCurrentAccountState, updateCurrentAccountState);
 
 export const updateChainInfoMap = (data: Record<string, _ChainInfo>) => {
   store.dispatch({ type: 'chainStore/updateChainInfoMap', payload: data });

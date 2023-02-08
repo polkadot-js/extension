@@ -2,21 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { store, StoreName } from '@subwallet/extension-koni-ui/stores';
-import {
-  subscribeAssetRegistry,
-  subscribeBalance,
-  subscribeChainInfoMap,
-  subscribeChainStateMap,
-  subscribeCrowdloan,
-  subscribeCurrentAccount, subscribeKeyringState,
-  subscribeNftCollections,
-  subscribeNftItems,
-  subscribePrice,
-  subscribeStakeUnlockingInfo,
-  subscribeStaking,
-  subscribeStakingReward,
-  subscribeTxHistory
-} from '@subwallet/extension-koni-ui/stores/utils';
+import { subscribeAccountsData, subscribeAssetRegistry, subscribeBalance, subscribeChainInfoMap, subscribeChainStateMap, subscribeCrowdloan, subscribeKeyringState, subscribeNftCollections, subscribeNftItems, subscribePrice, subscribeStakeUnlockingInfo, subscribeStaking, subscribeStakingReward, subscribeTxHistory } from '@subwallet/extension-koni-ui/stores/utils';
 import React from 'react';
 import { Provider } from 'react-redux';
 
@@ -136,7 +122,7 @@ export const DataContext = React.createContext(_DataContext);
 export const DataContextProvider = ({ children }: DataContextProviderProps) => {
   // Init subscription
   // Common
-  _DataContext.addHandler({ ...subscribeCurrentAccount, name: 'subscribeCurrentAccount', relatedStores: ['accountState'], isStartImmediately: true });
+  _DataContext.addHandler({ ...subscribeAccountsData, name: 'subscribeCurrentAccount', relatedStores: ['accountState'], isStartImmediately: true });
   _DataContext.addHandler({ ...subscribeKeyringState, name: 'subscribeCurrentAccount', relatedStores: ['accountState'], isStartImmediately: true });
 
   _DataContext.addHandler({ ...subscribeChainStateMap, name: 'subscribeChainStateMap', relatedStores: ['chainStore'], isStartImmediately: true });

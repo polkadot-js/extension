@@ -4,14 +4,17 @@
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import React from 'react';
 import styled from 'styled-components';
+import PageWrapper from "@subwallet/extension-koni-ui/components/Layout/PageWrapper";
 
 type Props = ThemeProps
 
 function Component ({ className = '' }: Props): React.ReactElement<Props> {
   return (
-    <div className={`staking ${className}`}>
-      Staking
-    </div>
+        <PageWrapper className={`staking ${className}`}>
+      <>
+        Staking
+      </>
+    </PageWrapper>
   );
 }
 

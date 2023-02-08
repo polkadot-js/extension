@@ -2,7 +2,6 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { PHISHING_PAGE_REDIRECT } from '@subwallet/extension-base/defaults';
-import { LoadingContainer } from '@subwallet/extension-koni-ui/components';
 import { DataContext } from '@subwallet/extension-koni-ui/contexts/DataContext';
 import { Home } from '@subwallet/extension-koni-ui/Popup/Home';
 import { Crowdloans } from '@subwallet/extension-koni-ui/Popup/Home/Crowdloans';
@@ -16,24 +15,9 @@ import { Welcome } from '@subwallet/extension-koni-ui/Popup/Welcome';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
 import React, { useContext, useEffect } from 'react';
 import { useSelector } from 'react-redux';
-import { Await, createHashRouter, Outlet, useLocation, useRouteError } from 'react-router-dom';
+import { createHashRouter, Outlet, useLocation, useRouteError } from 'react-router-dom';
 
-export interface PageWrapperProps {
-  resolve?: PromiseLike<any>
-  children?: React.ReactElement;
-}
-
-const defaultResolver = Promise.resolve('');
-
-// Todo: Create data loader wrapper
-// Todo: Create loading effect
-export function PageWrapper ({ children, resolve }: PageWrapperProps) {
-  return <React.Suspense fallback={<LoadingContainer />}>
-    <Await resolve={resolve || defaultResolver}>
-      {children}
-    </Await>
-  </React.Suspense>;
-}
+import PageWrapper from '../components/Layout/PageWrapper';
 
 export function Crypto () {
   const dataContext = useContext(DataContext);

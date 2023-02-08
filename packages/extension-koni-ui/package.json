@@ -71,6 +71,7 @@
     "react-router-dom": "^6.6.1",
     "react-select": "^5.7.0",
     "react-tooltip": "4.5.1",
+    "react-transition-group": "^4.4.5",
     "redux": "^4.2.0",
     "redux-persist": "^6.0.0",
     "redux-toolkit": "^1.1.2",

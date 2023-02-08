@@ -6113,6 +6113,7 @@ __metadata:
     file-saver: ^2.0.5
     i18next: ^21.9.2
     moment: ^2.29.4
+    phosphor-react: ^1.4.1
     querystring: ^0.2.1
     react: ^18.2.0
     react-dom: ^18.2.0

@@ -19,22 +19,22 @@ export default function Popup (): React.ReactElement {
   return (
     <DataContextProvider>
       <ThemeProvider>
-        <SigningContextProvider>
-          <InternalRequestContextProvider>
-            <ScannerContextProvider>
-              <QRContextProvider>
-                <ToastProvider>
-                  <ModalContextProvider>
+        <ModalContextProvider>
+          <SigningContextProvider>
+            <InternalRequestContextProvider>
+              <ScannerContextProvider>
+                <QRContextProvider>
+                  <ToastProvider>
                     <RouterProvider
                       fallbackElement={<LoadingContainer />}
                       router={router}
                     />
-                  </ModalContextProvider>
-                </ToastProvider>
-              </QRContextProvider>
-            </ScannerContextProvider>
-          </InternalRequestContextProvider>
-        </SigningContextProvider>
+                  </ToastProvider>
+                </QRContextProvider>
+              </ScannerContextProvider>
+            </InternalRequestContextProvider>
+          </SigningContextProvider>
+        </ModalContextProvider>
       </ThemeProvider>
     </DataContextProvider>
   );

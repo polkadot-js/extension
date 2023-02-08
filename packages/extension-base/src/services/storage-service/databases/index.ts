@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { _ChainAsset, _ChainInfo } from '@subwallet/chain-list/types';
-import { BalanceItem, CrowdloanItem, ExtraDelegationInfo, NftCollection, NftItem, StakingItem, TransactionHistoryItemType } from '@subwallet/extension-base/background/KoniTypes';
+import { BalanceItem, CrowdloanItem, ExtraDelegationInfo, NftCollection, NftItem, StakingItem, TxHistoryItem } from '@subwallet/extension-base/background/KoniTypes';
 import Dexie, { Table, Transaction } from 'dexie';
 
 const DEFAULT_DATABASE = 'SubWalletDB_v2';
@@ -22,15 +22,11 @@ export interface IChain extends _ChainInfo {
   active: boolean,
   currentProvider: string
 }
+export interface ICrowdloanItem extends CrowdloanItem, DefaultAddressDoc, DefaultChainDoc {}
+export interface INft extends NftItem, DefaultAddressDoc {}
+export interface ITransactionHistoryItem extends TxHistoryItem, DefaultAddressDoc, DefaultChainDoc {}
 
 // TODO: refactor this
-export interface INft extends Omit<NftItem, 'chain'>, DefaultAddressDoc {}
-export interface INftCollection extends Omit<NftCollection, 'chain'>, DefaultChainDoc {}
-export interface ICrowdloanItem extends CrowdloanItem, DefaultAddressDoc {}
-export interface IStakingItem extends StakingItem, DefaultAddressDoc {}
-export interface ITransactionHistoryItem extends TransactionHistoryItemType, DefaultAddressDoc {}
-export interface IExtraDelegationInfo extends ExtraDelegationInfo, DefaultAddressDoc {}
-
 export interface IMigration {
   key: string,
   name: string,
@@ -41,12 +37,12 @@ export default class KoniDatabase extends Dexie {
   public balances!: Table<IBalance, object>;
 
   public nfts!: Table<INft, object>;
-  public nftCollections!: Table<INftCollection, object>;
+  public nftCollections!: Table<NftCollection, object>;
   public crowdloans!: Table<ICrowdloanItem, object>;
-  public stakings!: Table<IStakingItem, object>;
+  public stakings!: Table<StakingItem, object>;
   public transactions!: Table<ITransactionHistoryItem, object>;
   public migrations!: Table<IMigration, object>;
-  public extraDelegationInfo!: Table<IExtraDelegationInfo, object>;
+  public extraDelegationInfo!: Table<ExtraDelegationInfo, object>;
   public chain!: Table<IChain, object>;
   public asset!: Table<_ChainAsset, object>;
 
@@ -63,7 +59,7 @@ export default class KoniDatabase extends Dexie {
       chain: 'slug',
       asset: 'slug',
       balances: '[tokenSlug+address], tokenSlug, address',
-      nfts: '[chain+collectionId+id+address], [address+chain], chain, id, address, collectionId, name',
+      nfts: '[chain+address+collectionId+id], [address+chain], chain, id, address, collectionId, name',
       nftCollections: '[chain+collectionId], chain, collectionId, collectionName',
       crowdloans: '[chain+address], chain, address',
       stakings: '[chain+address+type], [chain+address], chainHash, chain, address, type',

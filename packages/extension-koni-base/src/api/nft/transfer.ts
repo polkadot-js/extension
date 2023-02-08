@@ -4,7 +4,7 @@
 import { _ChainInfo } from '@subwallet/chain-list/types';
 import { SubstrateNftTransaction } from '@subwallet/extension-base/background/KoniTypes';
 import { _EvmApi, _SubstrateApi } from '@subwallet/extension-base/services/chain-service/types';
-import { _getChainNativeTokenInfo } from '@subwallet/extension-base/services/chain-service/utils';
+import { _getChainNativeTokenBasicInfo } from '@subwallet/extension-base/services/chain-service/utils';
 import { getFreeBalance } from '@subwallet/extension-koni-base/api/dotsama/balance';
 import { SUPPORTED_TRANSFER_SUBSTRATE_CHAIN_NAME } from '@subwallet/extension-koni-base/api/nft/config';
 import { parseNumberToDisplay, reformatAddress } from '@subwallet/extension-koni-base/utils';
@@ -12,7 +12,7 @@ import { parseNumberToDisplay, reformatAddress } from '@subwallet/extension-koni
 import { BN } from '@polkadot/util';
 
 export async function acalaTransferHandler (networkKey: string, substrateApiMap: Record<string, _SubstrateApi>, evmApiMap: Record<string, _EvmApi>, senderAddress: string, recipientAddress: string, params: Record<string, any>, chainInfo: _ChainInfo) {
-  const { decimals, symbol } = _getChainNativeTokenInfo(chainInfo);
+  const { decimals, symbol } = _getChainNativeTokenBasicInfo(chainInfo);
 
   try {
     const apiProp = substrateApiMap[networkKey];
@@ -54,7 +54,7 @@ export async function acalaTransferHandler (networkKey: string, substrateApiMap:
 }
 
 export async function rmrkTransferHandler (networkKey: string, substrateApiMap: Record<string, _SubstrateApi>, evmApiMap: Record<string, _EvmApi>, senderAddress: string, recipientAddress: string, params: Record<string, any>, chainInfo: _ChainInfo) {
-  const { decimals, symbol } = _getChainNativeTokenInfo(chainInfo);
+  const { decimals, symbol } = _getChainNativeTokenBasicInfo(chainInfo);
 
   try {
     const apiProp = substrateApiMap[networkKey];
@@ -105,7 +105,7 @@ export async function rmrkTransferHandler (networkKey: string, substrateApiMap: 
 }
 
 export async function uniqueTransferHandler (networkKey: string, substrateApiMap: Record<string, _SubstrateApi>, evmApiMap: Record<string, _EvmApi>, senderAddress: string, recipientAddress: string, params: Record<string, any>, chainInfo: _ChainInfo) {
-  const { decimals, symbol } = _getChainNativeTokenInfo(chainInfo);
+  const { decimals, symbol } = _getChainNativeTokenBasicInfo(chainInfo);
 
   try {
     const apiProp = substrateApiMap[networkKey];
@@ -148,7 +148,7 @@ export async function uniqueTransferHandler (networkKey: string, substrateApiMap
 }
 
 export async function quartzTransferHandler (networkKey: string, substrateApiMap: Record<string, _SubstrateApi>, evmApiMap: Record<string, _EvmApi>, senderAddress: string, recipientAddress: string, params: Record<string, any>, chainInfo: _ChainInfo) {
-  const { decimals, symbol } = _getChainNativeTokenInfo(chainInfo);
+  const { decimals, symbol } = _getChainNativeTokenBasicInfo(chainInfo);
 
   try {
     const apiProp = substrateApiMap[networkKey];
@@ -191,7 +191,7 @@ export async function quartzTransferHandler (networkKey: string, substrateApiMap
 }
 
 export async function statemineTransferHandler (networkKey: string, substrateApiMap: Record<string, _SubstrateApi>, evmApiMap: Record<string, _EvmApi>, senderAddress: string, recipientAddress: string, params: Record<string, any>, chainInfo: _ChainInfo) {
-  const { decimals, symbol } = _getChainNativeTokenInfo(chainInfo);
+  const { decimals, symbol } = _getChainNativeTokenBasicInfo(chainInfo);
 
   try {
     const apiProp = substrateApiMap[networkKey];

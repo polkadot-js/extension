@@ -132,6 +132,7 @@ export interface StakingItem {
   name: string,
   chain: string,
   address: string,
+  type: StakingType,
 
   balance?: string,
   activeBalance?: string,
@@ -139,7 +140,6 @@ export interface StakingItem {
   nativeToken: string,
   unit?: string,
 
-  type: StakingType,
   state: APIItemState,
 
   unlockingInfo?: UnlockingStakeInfo,
@@ -197,15 +197,17 @@ export interface NftTransferExtra {
 }
 
 export interface NftItem {
-  id?: string;
+  // must-have
+  id: string;
+  chain: string;
+  collectionId: string;
+
   name?: string;
   image?: string;
   external_url?: string;
   rarity?: string;
-  collectionId?: string;
   description?: string;
   properties?: Record<any, any> | null;
-  chain?: string;
   type?: _AssetType.ERC721 | _AssetType.PSP34 | RMRK_VER; // for sending
   rmrk_ver?: RMRK_VER;
   owner?: string;
@@ -213,10 +215,12 @@ export interface NftItem {
 }
 
 export interface NftCollection {
+  // must-have
   collectionId: string;
+  chain: string;
+
   collectionName?: string;
   image?: string;
-  chain?: string;
   itemCount?: number;
 }
 
@@ -461,24 +465,30 @@ export interface RandomTestRequest {
   end: number;
 }
 
-export interface TransactionHistoryItemType {
+// TODO: support more history types
+export enum TxHistoryType {
+  SEND = 'send',
+  RECEIVED = 'received'
+}
+
+export interface TxHistoryItem {
   time: number | string;
   networkKey: string;
-  change: string;
+  isSuccess: boolean;
+  action: TxHistoryType;
+  extrinsicHash: string;
+
+  change?: string;
   changeSymbol?: string; // if undefined => main token
   fee?: string;
   feeSymbol?: string;
   // if undefined => main token, sometime "fee" uses different token than "change"
-  // ex: sub token (DOT, AUSD, KSM, ...) of Acala, Karaura uses main token to pay fee
-  isSuccess: boolean;
-  action: 'send' | 'received';
-  extrinsicHash: string;
+  // ex: sub token (DOT, AUSD, KSM, ...) of Acala, Karura uses main token to pay fee
   origin?: 'app' | 'network';
-  eventIdx?: number | null;
 }
 
 export interface TransactionHistoryItemJson {
-  items: TransactionHistoryItemType[],
+  items: TxHistoryItem[],
   total: number
 }
 
@@ -495,7 +505,7 @@ export interface RequestTransactionHistoryGetByMultiNetworks {
 export interface RequestTransactionHistoryAdd {
   address: string;
   networkKey: string;
-  item: TransactionHistoryItemType;
+  item: TxHistoryItem;
 }
 
 export interface RequestApi {
@@ -1762,9 +1772,8 @@ export interface KoniRequestSignatures {
   'pri(settings.saveTheme)': [ThemeTypes, boolean, UiSettings];
 
   // Subscription
-  'pri(chainRegistry.getSubscription)': [null, Record<string, ChainRegistry>, Record<string, ChainRegistry>];
-  'pri(transaction.history.getSubscription)': [null, Record<string, TransactionHistoryItemType[]>, Record<string, TransactionHistoryItemType[]>];
-  'pri(transaction.history.add)': [RequestTransactionHistoryAdd, boolean, TransactionHistoryItemType[]];
+  'pri(transaction.history.getSubscription)': [null, TxHistoryItem[], TxHistoryItem[]];
+  'pri(transaction.history.add)': [RequestTransactionHistoryAdd, boolean, TxHistoryItem[]];
   'pri(transfer.checkReferenceCount)': [RequestTransferCheckReferenceCount, boolean];
   'pri(transfer.checkSupporting)': [RequestTransferCheckSupporting, SupportTransferResponse];
   'pri(transfer.getExistentialDeposit)': [RequestTransferExistentialDeposit, string];

@@ -3,7 +3,7 @@
 
 import { _ChainAsset, _ChainInfo } from '@subwallet/chain-list/types';
 import { _SubstrateApi } from '@subwallet/extension-base/services/chain-service/types';
-import { _getChainNativeTokenInfo, _getSubstrateParaId, _getXcmAssetMultilocation, _isChainEvmCompatible, _isSubstrateRelayChain } from '@subwallet/extension-base/services/chain-service/utils';
+import { _getChainNativeTokenBasicInfo, _getSubstrateParaId, _getXcmAssetMultilocation, _isChainEvmCompatible, _isSubstrateRelayChain } from '@subwallet/extension-base/services/chain-service/utils';
 import { parseNumberToDisplay } from '@subwallet/extension-koni-base/utils';
 import { KeyringPair } from '@subwallet/keyring/types';
 
@@ -98,7 +98,7 @@ export async function astarEstimateCrossChainFee (
 
   const paymentInfo = await extrinsic.paymentInfo(sender);
 
-  const { decimals, symbol } = _getChainNativeTokenInfo(originChainInfo);
+  const { decimals, symbol } = _getChainNativeTokenBasicInfo(originChainInfo);
 
   const fee = paymentInfo.partialFee.toString();
   const feeString = parseNumberToDisplay(paymentInfo.partialFee, decimals) + ` ${symbol}`;

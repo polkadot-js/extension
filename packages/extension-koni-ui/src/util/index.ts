@@ -222,7 +222,8 @@ export const subscanByNetworkKey: Record<string, string> = {
   polymesh: 'https://polymesh.subscan.io',
   'sora-substrate': 'https://sora.subscan.io',
   kulupu: 'https://kulupu.subscan.io',
-  genshiro: 'https://genshiro.subscan.io'
+  genshiro: 'https://genshiro.subscan.io',
+  nodle: 'https://nodle.subscan.io'
 };
 
 const evmBlockExplorer: Record<string, string> = {

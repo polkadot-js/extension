@@ -1,5 +1,5 @@
-    1202	Nam Phạm                      	support aleph zero nomination pool
-     789	AnhMTV                        	Release version 0.7.7
+    1216	Nam Phạm                      	[Issue-963] update parsing RMRK NFTs
+     805	AnhMTV                        	Release version 0.8.1
      465	Jaco                          	0.42.5 (#969)
      363	S2kael                        	[Issue-945] [XCM] Add GMLR xcm from Acala to Moonbeam
      185	quangdo                       	
@@ -10,7 +10,7 @@
       81	Hieu Dao                      	[CI Skip] Update subspace block explorer
       55	leewong                       	#118: update balance logic for Kintsugi testnet
       53	Dominhquangdev                	update Bridge code
-      11	dominhquang                   	Fix bug transfer error with Genshiro and Genshiro Testnet
+      14	dominhquang                   	Update explorer url for Nodle network
       10	Trang Trịnh                   	api get karura and acala nfts
        9	Minh Le                       	
        9	minhld1029                    	[#115] [ForgetAccount] catch exception refList undefined

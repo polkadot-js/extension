@@ -1,7 +1,7 @@
 // Copyright 2019-2022 @subwallet/extension-base authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { TransactionHistoryItemType } from '@subwallet/extension-base/background/KoniTypes';
+import { TxHistoryItem } from '@subwallet/extension-base/background/KoniTypes';
 import { EXTENSION_PREFIX } from '@subwallet/extension-base/defaults';
 import SubscribableStore from '@subwallet/extension-base/stores/SubscribableStore';
 
@@ -13,18 +13,18 @@ const lastError = (type: string): void => {
   }
 };
 
-export default class TransactionHistoryStore extends SubscribableStore<TransactionHistoryItemType[]> {
+export default class TransactionHistoryStore extends SubscribableStore<TxHistoryItem[]> {
   constructor () {
     super(EXTENSION_PREFIX ? `${EXTENSION_PREFIX}transaction_history` : null);
   }
 
-  public getByMultiKeys (_keys: string[], update: (value: TransactionHistoryItemType[]) => void): void {
+  public getByMultiKeys (_keys: string[], update: (value: TxHistoryItem[]) => void): void {
     const keys: string[] = _keys.map((k) => `${this.getPrefix()}${k}`);
 
-    chrome.storage.local.get(keys, (result: Record<string, TransactionHistoryItemType[]>): void => {
+    chrome.storage.local.get(keys, (result: Record<string, TxHistoryItem[]>): void => {
       lastError('getByMultiKey');
 
-      const items: TransactionHistoryItemType[] = [];
+      const items: TxHistoryItem[] = [];
 
       keys.forEach((k) => {
         if (result[k]) {

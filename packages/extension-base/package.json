@@ -17,7 +17,7 @@
     "./detectPackage.cjs"
   ],
   "type": "module",
-  "version": "0.7.7-0",
+  "version": "0.8.1",
   "main": "index.js",
   "dependencies": {
     "@babel/runtime": "^7.20.6",
@@ -33,10 +33,10 @@
     "@polkadot/ui-settings": "^2.9.14",
     "@polkadot/util": "^10.2.1",
     "@polkadot/util-crypto": "^10.2.1",
-    "@subwallet/chain-list": "^0.0.2",
-    "@subwallet/extension-chains": "^0.7.7-0",
-    "@subwallet/extension-dapp": "^0.7.7-0",
-    "@subwallet/extension-inject": "^0.7.7-0",
+    "@subwallet/chain-list": "^0.0.4",
+    "@subwallet/extension-chains": "^0.8.1",
+    "@subwallet/extension-dapp": "^0.8.1",
+    "@subwallet/extension-inject": "^0.8.1",
     "@subwallet/keyring": "^0.0.3",
     "@subwallet/ui-keyring": "^0.0.3",
     "ethereumjs-tx": "^2.1.2",
@@ -48,6 +48,6 @@
     "web3-core-helpers": "^1.8.1"
   },
   "devDependencies": {
-    "@subwallet/extension-mocks": "^0.7.7-0"
+    "@subwallet/extension-mocks": "^0.8.1"
   }
 }

@@ -140,7 +140,9 @@ export async function subscribeCrowdloan (addresses: string[], substrateApiMap: 
         }
 
         if (networkKey === COMMON_CHAIN_SLUGS.ACALA) {
-          unsubMap.acala = subscribeAcalaContributeInterval(substrateAddresses.map((address) => reformatAddress(address, _getChainSubstrateAddressPrefix(chainInfo), _isChainEvmCompatible(chainInfo))), polkadotFundsStatusMap[paraId], crowdloanCb);
+          const acalaAddresses = substrateAddresses.map((address) => reformatAddress(address, _getChainSubstrateAddressPrefix(chainInfo), _isChainEvmCompatible(chainInfo)));
+
+          unsubMap.acala = subscribeAcalaContributeInterval(acalaAddresses, polkadotFundsStatusMap[paraId], crowdloanCb);
         } else if (parentChain === COMMON_CHAIN_SLUGS.POLKADOT && polkadotFundsStatusMap[paraId]) {
           unsubMap[networkKey] = getRPCCrowdloan(polkadotAPI, paraId, hexAddresses, polkadotFundsStatusMap[paraId], crowdloanCb);
         } else if (parentChain === COMMON_CHAIN_SLUGS.KUSAMA && kusamaFundsStatusMap[paraId]) {

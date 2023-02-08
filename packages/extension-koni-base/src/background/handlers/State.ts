@@ -8,14 +8,14 @@ import { _AssetType, _ChainAsset, _ChainInfo } from '@subwallet/chain-list/types
 import { EvmRpcError } from '@subwallet/extension-base/background/errors/EvmRpcError';
 import { withErrorLog } from '@subwallet/extension-base/background/handlers/helpers';
 import { isSubscriptionRunning, unsubscribe } from '@subwallet/extension-base/background/handlers/subscriptions';
-import { AccountRefMap, AddNetworkRequestExternal, AddTokenRequestExternal, APIItemState, ApiMap, AuthRequestV2, BalanceItem, BalanceJson, ChainRegistry, ConfirmationDefinitions, ConfirmationsQueue, ConfirmationsQueueItemOptions, ConfirmationType, CrowdloanItem, CrowdloanJson, CurrentAccountInfo, CustomToken, EvmSendTransactionParams, EvmSendTransactionRequestExternal, EvmSignatureRequestExternal, ExternalRequestPromise, ExternalRequestPromiseStatus, KeyringState, NftCollection, NftItem, NftJson, NftTransferExtra, PriceJson, RequestAccountExportPrivateKey, RequestCheckPublicAndSecretKey, RequestConfirmationComplete, RequestSettingsType, ResponseAccountExportPrivateKey, ResponseCheckPublicAndSecretKey, ServiceInfo, SingleModeJson, StakeUnlockingJson, StakingItem, StakingJson, StakingRewardItem, StakingRewardJson, ThemeTypes, TransactionHistoryItemType, UiSettings } from '@subwallet/extension-base/background/KoniTypes';
 import { AccountJson, RequestAuthorizeTab, RequestRpcSend, RequestRpcSubscribe, RequestRpcUnsubscribe, RequestSign, Resolver, ResponseRpcListProviders, ResponseSigning } from '@subwallet/extension-base/background/types';
 import { ChainService } from '@subwallet/extension-base/services/chain-service';
 import { _PREDEFINED_SINGLE_MODES } from '@subwallet/extension-base/services/chain-service/constants';
 import { _ChainConnectionStatus, _ChainState, _ValidateCustomTokenRequest } from '@subwallet/extension-base/services/chain-service/types';
-import { _getEvmChainId, _getSubstrateGenesisHash, _isChainEnabled } from '@subwallet/extension-base/services/chain-service/utils';
 import RequestService from '@subwallet/extension-base/services/request-service';
 import { AuthUrls, MetaRequest, SignRequest } from '@subwallet/extension-base/services/request-service/types';
+import { AccountRefMap, AddNetworkRequestExternal, AddTokenRequestExternal, APIItemState, ApiMap, AuthRequestV2, BalanceItem, BalanceJson, ConfirmationDefinitions, ConfirmationsQueue, ConfirmationsQueueItemOptions, ConfirmationType, CrowdloanItem, CrowdloanJson, CurrentAccountInfo, EvmSendTransactionParams, EvmSendTransactionRequestExternal, EvmSignatureRequestExternal, ExternalRequestPromise, ExternalRequestPromiseStatus, KeyringState, NftCollection, NftItem, NftJson, NftTransferExtra, PriceJson, RequestAccountExportPrivateKey, RequestCheckPublicAndSecretKey, RequestConfirmationComplete, RequestSettingsType, ResponseAccountExportPrivateKey, ResponseCheckPublicAndSecretKey, ServiceInfo, SingleModeJson, StakeUnlockingJson, StakingItem, StakingJson, StakingRewardItem, StakingRewardJson, ThemeTypes, TxHistoryItem, TxHistoryType, UiSettings } from '@subwallet/extension-base/background/KoniTypes';
+import { _getChainNativeTokenSlug, _getEvmChainId, _getOriginChainOfAsset, _getSubstrateGenesisHash, _isChainEnabled, _isChainEvmCompatible, _isSubstrateParachain } from '@subwallet/extension-base/services/chain-service/utils';
 import DatabaseService from '@subwallet/extension-base/services/storage-service/DatabaseService';
 import { Web3Transaction } from '@subwallet/extension-base/signers/types';
 import { CurrentAccountStore, PriceStore } from '@subwallet/extension-base/stores';
@@ -72,11 +72,13 @@ const getSuri = (seed: string, type?: KeypairType): string => {
 const generateDefaultCrowdloanMap = (): Record<string, CrowdloanItem> => {
   const crowdloanMap: Record<string, CrowdloanItem> = {};
 
-  Object.keys(ChainInfoMap).forEach((networkKey) => {
-    crowdloanMap[networkKey] = {
-      state: APIItemState.PENDING,
-      contribute: '0'
-    };
+  Object.entries(ChainInfoMap).forEach(([networkKey, chainInfo]) => {
+    if (_isSubstrateParachain(chainInfo)) {
+      crowdloanMap[networkKey] = {
+        state: APIItemState.PENDING,
+        contribute: '0'
+      };
+    }
   });
 
   return crowdloanMap;
@@ -145,11 +147,8 @@ export default class KoniState {
   private stakeUnlockingInfoSubject = new Subject<StakeUnlockingJson>();
   private stakeUnlockingInfo: StakeUnlockingJson = { timestamp: -1, details: [] };
 
-  private historyMap: Record<string, TransactionHistoryItemType[]> = {};
-  private historySubject = new Subject<Record<string, TransactionHistoryItemType[]>>();
-
-  private chainRegistryMap: Record<string, ChainRegistry> = {};
-  private chainRegistrySubject = new Subject<Record<string, ChainRegistry>>();
+  private historyMap: TxHistoryItem[] = [];
+  private historySubject = new Subject<TxHistoryItem[]>();
 
   private lazyMap: Record<string, unknown> = {};
 
@@ -427,7 +426,7 @@ export default class KoniState {
   }
 
   public setStakingItem (networkKey: string, item: StakingItem): void {
-    this.dbService.updateStaking(networkKey, this.getNetworkGenesisHashByKey(networkKey), item.address, item).catch((e) => this.logger.warn(e));
+    this.dbService.updateStaking(networkKey, item.address, item).catch((e) => this.logger.warn(e));
   }
 
   public setNftTransfer (data: NftTransferExtra, callback?: (data: NftTransferExtra) => void): void {
@@ -453,7 +452,7 @@ export default class KoniState {
   }
 
   public setNftCollection (network: string, data: NftCollection, callback?: (data: NftCollection) => void): void {
-    this.dbService.addNftCollection(network, this.getNetworkGenesisHashByKey(network), data).catch((e) => this.logger.warn(e));
+    this.dbService.addNftCollection(data).catch((e) => this.logger.warn(e));
     callback && callback(data);
   }
 
@@ -479,21 +478,21 @@ export default class KoniState {
   }
 
   public updateNftData (network: string, nftData: NftItem, address: string, callback?: (nftData: NftItem) => void): void {
-    this.dbService.addNft(network, this.getNetworkGenesisHashByKey(network), address, nftData).catch((e) => this.logger.warn(e));
+    this.dbService.addNft(address, nftData).catch((e) => this.logger.warn(e));
 
     callback && callback(nftData);
   }
 
   public updateNftIds (chain: string, address: string, collectionId?: string, nftIds?: string[]): void {
-    this.dbService.deleteRemovedNftsFromCollection(this.getNetworkGenesisHashByKey(chain), address, collectionId, nftIds).catch((e) => this.logger.warn(e));
+    this.dbService.deleteRemovedNftsFromCollection(chain, address, collectionId, nftIds).catch((e) => this.logger.warn(e));
   }
 
   public removeNfts (chain: string, address: string, collectionId: string, nftIds: string[]) {
-    return this.dbService.removeNfts(this.getNetworkGenesisHashByKey(chain), address, collectionId, nftIds);
+    return this.dbService.removeNfts(chain, address, collectionId, nftIds);
   }
 
   public updateCollectionIds (chain: string, address: string, collectionIds: string[] = []): void {
-    this.dbService.deleteNftsFromRemovedCollection(this.getNetworkGenesisHashByKey(chain), address, collectionIds);
+    this.dbService.deleteNftsFromRemovedCollection(chain, address, collectionIds);
   }
 
   public async getNft (): Promise<NftJson | undefined> {
@@ -593,8 +592,8 @@ export default class KoniState {
     return this.stakingRewardSubject;
   }
 
-  public setHistory (address: string, network: string, item: TransactionHistoryItemType | TransactionHistoryItemType[], callback?: (items: TransactionHistoryItemType[]) => void): void {
-    let items: TransactionHistoryItemType[];
+  public setHistory (address: string, network: string, item: TxHistoryItem | TxHistoryItem[], callback?: (items: TxHistoryItem[]) => void): void {
+    let items: TxHistoryItem[];
     const nativeTokenInfo = this.chainService.getNativeTokenInfo(network);
 
     if (!nativeTokenInfo) {
@@ -619,18 +618,18 @@ export default class KoniState {
     if (items.length) {
       this.getAccountAddress().then((currentAddress) => {
         if (currentAddress === address) {
-          const oldItems = this.historyMap[network] || [];
+          const oldItems = this.historyMap || [];
 
-          this.historyMap[network] = this.combineHistories(oldItems, items);
-          this.saveHistoryToStorage(address, network, this.historyMap[network]);
-          callback && callback(this.historyMap[network]);
+          this.historyMap = this.combineHistories(oldItems, items);
+          this.saveHistoryToStorage(address, network, this.historyMap);
+          callback && callback(this.historyMap);
 
           this.lazyNext('setHistory', () => {
             this.publishHistory();
           });
         } else {
           this.saveHistoryToStorage(address, network, items);
-          callback && callback(this.historyMap[network]);
+          callback && callback(this.historyMap);
         }
       }).catch((e) => this.logger.warn(e));
     }
@@ -812,14 +811,28 @@ export default class KoniState {
     return Object.keys(accounts.subject.value);
   }
 
+  private removeInactiveChainBalances (balanceMap: Record<string, BalanceItem>) {
+    const activeBalanceMap: Record<string, BalanceItem> = {};
+
+    Object.entries(balanceMap).forEach(([tokenSlug, balanceItem]) => {
+      const networkKey = _getOriginChainOfAsset(tokenSlug);
+
+      if (this.getChainStateByKey(networkKey).active) {
+        activeBalanceMap[tokenSlug] = balanceItem;
+      }
+    });
+
+    return activeBalanceMap;
+  }
+
   public getBalance (reset?: boolean): BalanceJson {
-    const activeData = this.removeInactiveNetworkData(this.balanceMap);
+    const activeData = this.removeInactiveChainBalances(this.balanceMap);
 
     return { details: activeData, reset } as BalanceJson;
   }
 
   public async getStoredBalance (address: string): Promise<Record<string, BalanceItem>> {
-    const items = await this.dbService.stores.balance.getDataByAddressAsObject(address);
+    const items = await this.dbService.stores.balance.getBalanceMapByAddress(address);
 
     return items || {};
   }
@@ -835,19 +848,15 @@ export default class KoniState {
     const defaultData = this.generateDefaultBalanceMap();
     let storedData = await this.getStoredBalance(newAddress);
 
-    storedData = this.removeInactiveNetworkData(storedData);
+    storedData = this.removeInactiveChainBalances(storedData);
 
-    const merge = { ...defaultData, ...storedData } as Record<string, BalanceItem>;
-
-    this.balanceMap = merge;
+    this.balanceMap = { ...defaultData, ...storedData } as Record<string, BalanceItem>;
     this.publishBalance(true);
   }
 
   public async resetCrowdloanMap (newAddress: string) {
     const defaultData = generateDefaultCrowdloanMap();
     const storedData = await this.getStoredCrowdloan(newAddress);
-
-    // storedData = this.removeInactiveNetworkData(storedData);
 
     this.crowdloanMap = { ...defaultData, ...storedData } as Record<string, CrowdloanItem>;
     this.publishCrowdloan(true);
@@ -870,25 +879,18 @@ export default class KoniState {
     });
   }
 
-  public setBalanceItem (networkKey: string, item: BalanceItem) {
-    // eslint-disable-next-line no-prototype-builtins
-    if (typeof item === 'object' && item.hasOwnProperty('children') && item.children === undefined) {
-      delete item.children;
-    }
-
-    const itemData = { timestamp: +new Date(), ...item };
-
-    this.balanceMap[networkKey] = { ...this.balanceMap[networkKey], ...itemData };
-    this.updateBalanceStore(networkKey, item);
+  public setBalanceItem (tokenSlug: string, item: BalanceItem) {
+    this.balanceMap[tokenSlug] = { timestamp: +new Date(), ...item };
+    this.updateBalanceStore(item);
 
     this.lazyNext('setBalanceItem', () => {
       this.publishBalance();
     });
   }
 
-  private updateBalanceStore (networkKey: string, item: BalanceItem) {
+  private updateBalanceStore (item: BalanceItem) {
     this.getCurrentAccount((currentAccountInfo) => {
-      this.dbService.updateBalanceStore(networkKey, this.getNetworkGenesisHashByKey(networkKey), currentAccountInfo.address, item).catch((e) => this.logger.warn(e));
+      this.dbService.updateBalanceStore(currentAccountInfo.address, item).catch((e) => this.logger.warn(e));
     });
   }
 
@@ -897,8 +899,6 @@ export default class KoniState {
   }
 
   public getCrowdloan (reset?: boolean): CrowdloanJson {
-    // const activeData = this.removeInactiveNetworkData(this.crowdloanMap);
-
     return { details: this.crowdloanMap, reset } as CrowdloanJson;
   }
 
@@ -922,7 +922,7 @@ export default class KoniState {
 
   private updateCrowdloanStore (networkKey: string, item: CrowdloanItem) {
     this.getCurrentAccount((currentAccountInfo) => {
-      this.dbService.updateCrowdloanStore(networkKey, this.getNetworkGenesisHashByKey(networkKey), currentAccountInfo.address, item).catch((e) => this.logger.warn(e));
+      this.dbService.updateCrowdloanStore(networkKey, currentAccountInfo.address, item).catch((e) => this.logger.warn(e));
     });
   }
 
@@ -930,51 +930,38 @@ export default class KoniState {
     return this.crowdloanSubject;
   }
 
-  public getChainRegistryMap (): Record<string, ChainRegistry> {
-    return this.chainRegistryMap;
-  }
-
-  public setChainRegistryItem (networkKey: string, registry: ChainRegistry) {
-    this.chainRegistryMap[networkKey] = registry;
-    this.lazyNext('setChainRegistry', () => {
-      this.chainRegistrySubject.next(this.getChainRegistryMap());
-    });
-  }
-
-  public checkTokenKey (tokenData: CustomToken): string {
-    const chainRegistry = this.chainRegistryMap[tokenData.chain];
-    let tokenKey = '';
-
-    for (const [key, token] of Object.entries(chainRegistry.tokenMap)) {
-      if (token.contractAddress === tokenData.contractAddress) {
-        tokenKey = key;
-        break;
-      }
-    }
-
-    return tokenKey;
-  }
-
-  public subscribeChainRegistryMap () {
-    return this.chainRegistrySubject;
-  }
-
-  public getTransactionHistory (address: string, networkKey: string, update: (items: TransactionHistoryItemType[]) => void): void {
-    const items = this.historyMap[networkKey];
-
-    if (!items) {
-      update([]);
-    } else {
-      update(items);
-    }
-  }
+  // public getTransactionHistory (address: string, networkKey: string, update: (items: TxHistoryItem[]) => void): void {
+  //   const items = this.historyMap;
+  //
+  //   if (!items) {
+  //     update([]);
+  //   } else {
+  //     update(items);
+  //   }
+  // }
 
   public subscribeHistory () {
     return this.historySubject;
   }
 
-  public getHistoryMap (): Record<string, TransactionHistoryItemType[]> {
-    return this.removeInactiveNetworkData(this.historyMap);
+  public getHistoryMap (): TxHistoryItem[] {
+    return this.removeInactiveTxHistoryByChain(this.historyMap);
+  }
+
+  private removeInactiveTxHistoryByChain (historyList: TxHistoryItem[]) {
+    const activeData: TxHistoryItem[] = [];
+
+    historyList.forEach((item) => {
+      if (this.chainService.getChainStateByKey(item.networkKey) && this.chainService.getChainStateByKey(item.networkKey).active) {
+        activeData.push(item);
+      }
+    });
+
+    return activeData;
+  }
+
+  public getAllPriceIds () {
+    return this.chainService.getAllPriceIds();
   }
 
   public setPrice (priceData: PriceJson, callback?: (priceData: PriceJson) => void): void {
@@ -991,7 +978,7 @@ export default class KoniState {
       if (this.priceStoreReady) {
         update(rs);
       } else {
-        const allPriceIds = this.chainService.getAllPriceIds();
+        const allPriceIds = this.getAllPriceIds();
 
         getTokenPrice(allPriceIds)
           .then((rs) => {
@@ -1249,20 +1236,8 @@ export default class KoniState {
     }
   }
 
-  public getNetworkGenesisHashByKey (key: string) {
-    const chainInfo = this.chainService.getChainInfoByKey(key);
-
-    return _getSubstrateGenesisHash(chainInfo);
-  }
-
-  public getNetworkKeyByGenesisHash (hash: string) {
-    return Object.values(this.chainService.getChainInfoMap()).find((chainInfo) => {
-      return _getSubstrateGenesisHash(chainInfo) === hash;
-    })?.slug;
-  }
-
   public async resetHistoryMap (newAddress: string): Promise<void> {
-    this.historyMap = {};
+    this.historyMap = [];
 
     const storedData = await this.getStoredHistories(newAddress);
 
@@ -1276,26 +1251,22 @@ export default class KoniState {
   public async getStoredHistories (address: string) {
     const items = await this.dbService.stores.transaction.getHistoryByAddressAsObject(address);
 
-    return items || {};
+    return items || [];
   }
 
-  private saveHistoryToStorage (address: string, network: string, items: TransactionHistoryItemType[]) {
-    this.dbService.addHistories(network, this.getNetworkGenesisHashByKey(network), address, items).catch((e) => this.logger.warn(e));
+  private saveHistoryToStorage (address: string, network: string, items: TxHistoryItem[]) {
+    this.dbService.addHistories(network, address, items).catch((e) => this.logger.warn(e));
   }
 
-  private combineHistories (oldItems: TransactionHistoryItemType[], newItems: TransactionHistoryItemType[]): TransactionHistoryItemType[] {
+  private combineHistories (oldItems: TxHistoryItem[], newItems: TxHistoryItem[]): TxHistoryItem[] {
     const newHistories = newItems.filter((item) => !oldItems.some((old) => this.isSameHistory(old, item)));
 
-    return [...oldItems, ...newHistories].filter((his) => his.origin === 'app' || his.eventIdx);
+    return [...oldItems, ...newHistories].filter((his) => his.origin === 'app');
   }
 
-  public isSameHistory (oldItem: TransactionHistoryItemType, newItem: TransactionHistoryItemType): boolean {
+  public isSameHistory (oldItem: TxHistoryItem, newItem: TxHistoryItem): boolean {
     if (oldItem.extrinsicHash === newItem.extrinsicHash && oldItem.action === newItem.action) {
-      if (oldItem.origin === 'app') {
-        return true;
-      } else {
-        return !oldItem.eventIdx || !newItem.eventIdx || oldItem.eventIdx === newItem.eventIdx;
-      }
+      return oldItem.origin === 'app';
     }
 
     return false;
@@ -1321,17 +1292,17 @@ export default class KoniState {
     this.historySubject.next(this.getHistoryMap());
   }
 
-  private removeInactiveNetworkData<T> (data: Record<string, T>) {
-    const activeData: Record<string, T> = {};
-
-    Object.entries(data).forEach(([networkKey, items]) => {
-      if (this.chainService.getChainStateByKey(networkKey).active) {
-        activeData[networkKey] = items;
-      }
-    });
-
-    return activeData;
-  }
+  // private removeInactiveDataByChain<T> (data: Record<string, T>) {
+  //   const activeData: Record<string, T> = {};
+  //
+  //   Object.entries(data).forEach(([networkKey, items]) => {
+  //     if (this.chainService.getChainStateByKey(networkKey).active) {
+  //       activeData[networkKey] = items;
+  //     }
+  //   });
+  //
+  //   return activeData;
+  // }
 
   findNetworkKeyByGenesisHash (genesisHash?: string | null): [string | undefined, _ChainInfo | undefined] {
     if (!genesisHash) {
@@ -1623,7 +1594,7 @@ export default class KoniState {
         changeSymbol: undefined,
         fee: (receipt.gasUsed * receipt.effectiveGasPrice).toString(),
         feeSymbol: nativeTokenInfo.symbol,
-        action: 'send',
+        action: TxHistoryType.SEND,
         extrinsicHash: receipt.transactionHash
       });
     };
@@ -1639,7 +1610,7 @@ export default class KoniState {
         changeSymbol: undefined,
         fee: undefined,
         feeSymbol: nativeTokenInfo.symbol,
-        action: 'send',
+        action: TxHistoryType.SEND,
         extrinsicHash: transactionHash
       });
     };
@@ -1861,7 +1832,7 @@ export default class KoniState {
   }
 
   public setExtraDelegationInfo (networkKey: string, address: string, collatorAddress: string): void {
-    this.dbService.updateExtraDelegationInfo(networkKey, this.getNetworkGenesisHashByKey(networkKey), address, collatorAddress).catch((e) => this.logger.warn(e));
+    this.dbService.updateExtraDelegationInfo(networkKey, address, collatorAddress).catch((e) => this.logger.warn(e));
   }
 
   public async getExtraDelegationInfo (networkKey: string, address: string) {

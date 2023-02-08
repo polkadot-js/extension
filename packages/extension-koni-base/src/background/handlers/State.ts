@@ -1099,6 +1099,10 @@ export default class KoniState extends State {
     return activeData;
   }
 
+  public getAllPriceIds () {
+    return this.chainService.getAllPriceIds();
+  }
+
   public setPrice (priceData: PriceJson, callback?: (priceData: PriceJson) => void): void {
     this.priceStore.set('PriceData', priceData, () => {
       if (callback) {
@@ -1113,7 +1117,7 @@ export default class KoniState extends State {
       if (this.priceStoreReady) {
         update(rs);
       } else {
-        const allPriceIds = this.chainService.getAllPriceIds();
+        const allPriceIds = this.getAllPriceIds();
 
         getTokenPrice(allPriceIds)
           .then((rs) => {

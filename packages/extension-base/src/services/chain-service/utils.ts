@@ -228,3 +228,7 @@ export function _isSubstrateParaChain (chainInfo: _ChainInfo) {
 export function _getEvmAbiExplorer (chainInfo: _ChainInfo) {
   return chainInfo.evmInfo?.abiExplorer || '';
 }
+
+export function _isAssetValuable (assetInfo: _ChainAsset) {
+  return assetInfo.hasValue;
+}

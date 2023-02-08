@@ -11,11 +11,11 @@ interface GeckoItem {
   symbol: string
 }
 
-export const getTokenPrice = async (chains: Array<string>, currency = 'usd'): Promise<PriceJson> => {
+export const getTokenPrice = async (priceIds: Array<string>, currency = 'usd'): Promise<PriceJson> => {
   try {
     const inverseMap: Record<string, string> = {};
-    const chainsStr = chains.join(',');
-    const res = await axios.get(`https://api.coingecko.com/api/v3/coins/markets?vs_currency=${currency}&per_page=1000&ids=${chainsStr}`);
+    const idStr = priceIds.join(',');
+    const res = await axios.get(`https://api.coingecko.com/api/v3/coins/markets?vs_currency=${currency}&per_page=1000&ids=${idStr}`);
 
     if (res.status !== 200) {
       console.warn('Failed to get token price');

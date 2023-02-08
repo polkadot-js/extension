@@ -135,7 +135,8 @@ export class ChainService {
       originChain: '',
       priceId: '',
       slug: '',
-      symbol: ''
+      symbol: '',
+      hasValue: true
     };
 
     for (const assetInfo of Object.values(this.getAssetRegistry())) {
@@ -647,7 +648,7 @@ export class ChainService {
           symbol: params.chainEditInfo.symbol,
           genesisHash: params.chainSpec.genesisHash,
           relaySlug: null,
-          supportNft: false,
+          hasNativeNft: false,
           supportStaking: params.chainSpec.paraId === null,
           supportSmartContract: null
         };
@@ -687,7 +688,8 @@ export class ChainService {
         originChain: newSlug,
         priceId: null,
         slug: '',
-        symbol: params.chainEditInfo.symbol
+        symbol: params.chainEditInfo.symbol,
+        hasValue: true
       });
 
       chainStateMap[newSlug] = {

@@ -242,11 +242,7 @@ export class KoniCron {
 
   refreshPrice = () => {
     // Update for tokens price
-    const coinGeckoKeys = Object.values(this.state.getAssetRegistry())
-      .map((chainAsset) => chainAsset.priceId)
-      .filter((priceId) => priceId !== null) as string[];
-
-    getTokenPrice(coinGeckoKeys)
+    getTokenPrice(this.state.getAllPriceIds())
       .then((rs) => {
         this.state.setPrice(rs, () => {
           this.logger.log('Get Token Price From CoinGecko');

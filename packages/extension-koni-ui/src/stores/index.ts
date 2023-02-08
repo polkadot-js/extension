@@ -1,7 +1,9 @@
 // Copyright 2019-2022 @polkadot/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { configureStore } from '@reduxjs/toolkit/dist';
+import { combineReducers, configureStore } from '@reduxjs/toolkit/dist';
+import { FLUSH, PAUSE, PERSIST, persistReducer, persistStore, PURGE, REGISTER, REHYDRATE } from 'redux-persist';
+import storage from 'redux-persist/lib/storage';
 
 import AccountStateReducer from './base/AccountState';
 import RequestStateReducer from './base/RequestState';
@@ -15,7 +17,16 @@ import PriceReducer from './feature/Price';
 import StakingReducer from './feature/Staking';
 import TransactionHistoryReducer from './feature/TransactionHistory';
 
-const reducers = {
+const persistConfig = {
+  key: 'root',
+  version: 1,
+  storage: storage,
+  whitelist: [
+    'settings'
+  ]
+};
+
+const rootReducers = combineReducers({
   // feature
   transactionHistory: TransactionHistoryReducer,
   crowdloan: CrowdloanReducer,
@@ -32,12 +43,22 @@ const reducers = {
   requestState: RequestStateReducer,
   settings: SettingsReducer,
   accountState: AccountStateReducer
-};
+});
+
+const persistedReducer = persistReducer(persistConfig, rootReducers);
 
 export const store = configureStore({
   devTools: process.env.NODE_ENV !== 'production',
-  reducer: reducers
+  reducer: persistedReducer,
+  middleware: (getDefaultMiddleware) =>
+    getDefaultMiddleware({
+      serializableCheck: {
+        ignoredActions: [FLUSH, REHYDRATE, PAUSE, PERSIST, PURGE, REGISTER]
+      }
+    })
 });
+
+export const persistor = persistStore(store);
 
 export type RootState = ReturnType<typeof store.getState>
 export type StoreName = keyof RootState

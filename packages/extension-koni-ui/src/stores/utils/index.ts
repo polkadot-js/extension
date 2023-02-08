@@ -79,6 +79,10 @@ export const subscribeKeyringState = lazySubscribeMessage('pri(keyring.subscribe
 // export const subscribeConfirmationQueue = lazySubscribeMessage('pri(accounts.subscribeWithCurrentAddress)', {}, updateCurrentAccountState, updateCurrentAccountState);
 
 // Settings Store
+export const updateTheme = (theme: ThemeTypes) => {
+  store.dispatch({ type: 'settings/updateTheme', payload: theme });
+};
+
 // export const updateUiSettings = (data: AccountJson) => {
 //   store.dispatch({ type: 'accountState/updateCurrentAccount', payload: data });
 // };

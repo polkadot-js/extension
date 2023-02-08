@@ -3,7 +3,6 @@
 
 import type { AccountsContext, AuthorizeRequest, MetadataRequest, SigningRequest } from '@subwallet/extension-base/background/types';
 import type { SettingsStruct } from '@polkadot/ui-settings/types';
-import type { AvailableThemes } from '../components/themes';
 
 import { ConfirmationsQueue } from '@subwallet/extension-base/background/KoniTypes';
 import React from 'react';
@@ -32,7 +31,6 @@ const ConfirmationsQueueContext = React.createContext<ConfirmationsQueue>({
 
 const SettingsContext = React.createContext<SettingsStruct>(settings.get());
 
-const ThemeSwitchContext = React.createContext<(theme: AvailableThemes) => void>(noop);
 const ToastContext = React.createContext<({show: (message: string, isError?: boolean) => void})>({ show: noop });
 // eslint-disable-next-line func-call-spacing
 const WaitAtHomeContext = React.createContext<{ wait: boolean, setWait: (val: boolean) => void }>({ setWait: noop, wait: false });
@@ -46,7 +44,6 @@ export {
   SettingsContext,
   SigningReqContext,
   ConfirmationsQueueContext,
-  ThemeSwitchContext,
   ToastContext,
   WaitAtHomeContext
 };

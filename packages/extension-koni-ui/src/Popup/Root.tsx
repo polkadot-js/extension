@@ -50,11 +50,11 @@ const _Menu = ({ className }: MenuProps) => (
     <li>
       <Link to='/home'>Home</Link>
       <ul>
-        <li><Link to='/home/crypto'>Crypto</Link></li>
-        <li><Link to='/home/nft'>NFT</Link></li>
-        <li><Link to='/home/crowdloan'>Crowdloan</Link></li>
+        <li><Link to='/home/tokens'>Tokens</Link></li>
+        <li><Link to='/home/nfts'>NFT</Link></li>
+        <li><Link to='/home/crowdloans'>Crowdloans</Link></li>
         <li><Link to='/home/staking'>Staking</Link></li>
-        <li><Link to='/home/histories'>Histories</Link></li>
+        <li><Link to='/home/history'>History</Link></li>
       </ul>
     </li>
     <li>
@@ -114,6 +114,7 @@ const Menu = styled(_Menu)<MenuProps>(({ isShow }) => {
     paddingBottom: '16px',
     paddingRight: '16px',
     position: 'fixed',
+    zIndex: 3333,
     top: 0,
     margin: 0,
     height: '100%',
@@ -149,11 +150,6 @@ function _Root ({ className }: ThemeProps): React.ReactElement {
   const location = useLocation();
   const navigate = useNavigate();
 
-  // Todo: Navigate to default page
-  useEffect(() => {
-    // Todo: Redirect to default page depend on condition
-  }, []);
-
   // Todo: Remove these code in the future
   const [isShowMenu, setIsShowMenu] = useState<boolean>(false);
 
@@ -162,12 +158,12 @@ function _Root ({ className }: ThemeProps): React.ReactElement {
   }
 
   useEffect(() => {
-    console.log(location.pathname);
     setIsShowMenu(false);
   }, [location.pathname]);
 
   useEffect(() => {
     if (location.pathname === '/') {
+      // Todo: check conditional an navigate to default page
       navigate('/home/tokens');
     }
   },

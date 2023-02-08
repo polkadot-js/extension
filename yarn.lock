@@ -6023,6 +6023,7 @@ __metadata:
     "@types/file-saver": ^2.0.5
     "@types/react-copy-to-clipboard": ^5.0.4
     "@types/react-dom": ^18.0.9
+    "@types/redux-persist": ^4.3.1
     "@types/sinon-chrome": ^2.2.11
     "@types/store": ^2.0.2
     "@types/styled-components": ^5.1.26
@@ -6054,7 +6055,9 @@ __metadata:
     react-router-dom: ^6.6.1
     react-select: ^5.7.0
     react-tooltip: 4.5.1
+    react-transition-group: ^4.4.5
     redux: ^4.2.0
+    redux-persist: ^6.0.0
     redux-toolkit: ^1.1.2
     rlp: ^3.0.0
     semantic-ui-react: ^2.1.4
@@ -6795,6 +6798,15 @@ __metadata:
     "@types/scheduler": "*"
     csstype: ^3.0.2
   checksum: 231d658c45abdef044a716b4502774f1585d8336d73b2f5bd68f181acbfc874b7a457686ecd29b415b43ed0922c309bab7e2cf96832d188a3f4f1b02f2af760a
+  languageName: node
+  linkType: hard
+
+"@types/redux-persist@npm:^4.3.1":
+  version: 4.3.1
+  resolution: "@types/redux-persist@npm:4.3.1"
+  dependencies:
+    redux-persist: "*"
+  checksum: 0b4518fd8a38ddf4538c7f7141323ea81f8b5918df1ce2ba35c609b71b0766a23c8d4ab1bcfb5021b8b3546f2365670b33ff5de870f40f72c65e8c45a47ef1b1
   languageName: node
   linkType: hard
 
@@ -22046,7 +22058,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"react-transition-group@npm:^4.3.0":
+"react-transition-group@npm:^4.3.0, react-transition-group@npm:^4.4.5":
   version: 4.4.5
   resolution: "react-transition-group@npm:4.4.5"
   dependencies:
@@ -22171,6 +22183,15 @@ __metadata:
   dependencies:
     esprima: ~4.0.0
   checksum: 39a1426e377727cfb47a0e24e95c1cf78d969fbc388dc1e0fa1e2ef8a8756450cefb8b0c2598f63b85f1a331986fca7604c0db798427a5775a1dbdb9c1291979
+  languageName: node
+  linkType: hard
+
+"redux-persist@npm:*, redux-persist@npm:^6.0.0":
+  version: 6.0.0
+  resolution: "redux-persist@npm:6.0.0"
+  peerDependencies:
+    redux: ">4.0.0"
+  checksum: edaf10dbf17351ce8058d0802357adae8665b3a1ff39371834e37838ddbe1a79cccbc717b8ba54acb5307651ccf51d0f7dc1cbc8dbae0726ff952d11ef61c6b8
   languageName: node
   linkType: hard
 

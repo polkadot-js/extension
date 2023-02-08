@@ -3,6 +3,7 @@
 
 import type { ThemeProps } from '../types';
 
+import applyPreloadStyle from '@subwallet/extension-koni-ui/preloadStyle';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { chooseTheme } from '@subwallet/extension-koni-ui/themes';
 import { ConfigProvider, theme as reactUiTheme } from '@subwallet/react-ui';
@@ -21,9 +22,10 @@ const { useToken } = reactUiTheme;
 const GlobalStyle = createGlobalStyle<ThemeProps>(({ theme }) => {
   const { extendToken, token } = theme as Theme;
 
+  applyPreloadStyle(extendToken.bodyBackgroundColor);
+
   return ({
     body: {
-      backgroundColor: extendToken.bodyBackgroundColor,
       fontFamily: token.fontFamily,
       color: token.colorText
     },
@@ -34,6 +36,31 @@ const GlobalStyle = createGlobalStyle<ThemeProps>(({ theme }) => {
       '&::-webkit-scrollbar': {
         display: 'none'
       }
+    },
+
+    '.page': {
+      position: 'absolute',
+      left: 0,
+      right: 0
+    },
+
+    '.page-enter': {
+      opacity: 0
+    },
+
+    '.page-enter-active': {
+      opacity: 1,
+      transition: 'opacity 300ms, transform 300ms'
+    },
+
+    '.page-exit': {
+      opacity: 1
+    },
+
+    '.page-exit-active': {
+      opacity: 0,
+      display: 'none',
+      transition: 'opacity 0ms, transform 300ms'
     }
   });
 });

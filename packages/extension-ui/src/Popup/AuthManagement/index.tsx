@@ -18,7 +18,7 @@ interface Props extends ThemeProps {
   className?: string;
 }
 
-function AuthManagement ({ className }: Props): React.ReactElement<Props> {
+function AuthManagement({ className }: Props): React.ReactElement<Props> {
   const { t } = useTranslation();
   const [authList, setAuthList] = useState<AuthUrls | null>(null);
   const [filter, setFilter] = useState('');
@@ -29,10 +29,7 @@ function AuthManagement ({ className }: Props): React.ReactElement<Props> {
       .catch((e) => console.error(e));
   }, []);
 
-  const hasAuthList = useMemo(
-    () => !!authList && !!Object.keys(authList).length,
-    [authList]
-  );
+  const hasAuthList = useMemo(() => !!authList && !!Object.keys(authList).length, [authList]);
 
   const _onChangeFilter = useCallback((filter: string) => {
     setFilter(filter);
@@ -47,7 +44,7 @@ function AuthManagement ({ className }: Props): React.ReactElement<Props> {
   return (
     <>
       <Header
-        showBackArrow
+        withBackArrow
         smallMargin
         text={t<string>('Manage Website Access')}
       />
@@ -59,27 +56,24 @@ function AuthManagement ({ className }: Props): React.ReactElement<Props> {
           value={filter}
           withReset
         />
-        {
-          !authList || !hasAuthList
-            ? <div className='empty-list'>{t<string>('No website request yet!')}</div>
-            : (
-              <>
-                <div className='website-list'>
-                  {Object
-                    .entries<AuthUrlInfo>(authList)
-                    .filter(([url]) => url.includes(filter))
-                    .map(([url, info]) =>
-                      <WebsiteEntry
-                        info={info}
-                        key={url}
-                        removeAuth={removeAuth}
-                        url={url}
-                      />
-                    )}
-                </div>
-              </>
-            )
-        }
+        {!authList || !hasAuthList ? (
+          <div className='empty-list'>{t<string>('No website request yet!')}</div>
+        ) : (
+          <>
+            <div className='website-list'>
+              {Object.entries<AuthUrlInfo>(authList)
+                .filter(([url]) => url.includes(filter))
+                .map(([url, info]) => (
+                  <WebsiteEntry
+                    info={info}
+                    key={url}
+                    removeAuth={removeAuth}
+                    url={url}
+                  />
+                ))}
+            </div>
+          </>
+        )}
       </div>
     </>
   );

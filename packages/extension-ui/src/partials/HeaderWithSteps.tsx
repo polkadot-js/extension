@@ -47,8 +47,8 @@ function HeaderWithSteps({ className, step, text, total }: Props): React.ReactEl
   return (
     <>
       <Header
-        showHelp
         text={text}
+        withHelp
         withStepper
       ></Header>
       <Steps>

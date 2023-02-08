@@ -12,7 +12,6 @@ import logo from '../assets/azeroLogo.svg';
 import helpIcon from '../assets/help.svg';
 import settingsIcon from '../assets/settings.svg';
 import { ActionContext, Link, Tooltip } from '../components';
-import useOutsideClick from '../hooks/useOutsideClick';
 import useTranslation from '../hooks/useTranslation';
 // import { getConnectedTabsUrl } from '../messaging';
 // TODO: these will be reused in the future
@@ -23,12 +22,10 @@ interface Props extends ThemeProps {
   children?: React.ReactNode;
   className?: string;
   onFilter?: (filter: string) => void;
-  showAdd?: boolean;
-  showBackArrow?: boolean;
+  withBackArrow?: boolean;
   showConnectedAccounts?: boolean;
-  showHelp?: boolean;
-  showSearch?: boolean;
-  showSettings?: boolean;
+  withHelp?: boolean;
+  withSettings?: boolean;
   smallMargin?: boolean;
   text?: React.ReactNode;
   withStepper?: boolean;
@@ -38,32 +35,26 @@ interface Props extends ThemeProps {
 function Header({
   children,
   className = '',
-  // onFilter,
-  showBackArrow,
-  // showConnectedAccounts,
-  showHelp,
-  showSettings,
+  onFilter,
+  showConnectedAccounts,
   smallMargin = false,
   text,
+  withBackArrow,
   withGoToRoot = false,
+  withHelp,
+  withSettings,
   withStepper = false
 }: Props): React.ReactElement<Props> {
-  const [isAddOpen, setShowAdd] = useState(false);
-  const [isSettingsOpen, setShowSettings] = useState(false);
-  // todo: check if needed
-  // const [isSearchOpen, setShowSearch] = useState(false);
-  // const [filter, setFilter] = useState('');
+  // TODO: check if needed
   // const [connectedTabsUrl, setConnectedTabsUrl] = useState<string[]>([]);
   const { t } = useTranslation();
-  const addIconRef = useRef(null);
-  const addMenuRef = useRef(null);
   const setIconRef = useRef(null);
-  const setMenuRef = useRef(null);
-  // todo: check if needed
+
+  // TODO: check if needed
   // const isConnected = useMemo(() => connectedTabsUrl.length >= 1, [connectedTabsUrl]);
   const onAction = useContext(ActionContext);
 
-  // todo: check if needed
+  // TODO: check if needed
   // useEffect(() => {
   //   if (!showConnectedAccounts) {
   //     return;
@@ -74,35 +65,6 @@ function Header({
   //   .catch(console.error);
   // }, [showConnectedAccounts]);
 
-  useOutsideClick([addIconRef, addMenuRef], (): void => {
-    isAddOpen && setShowAdd(!isAddOpen);
-  });
-
-  useOutsideClick([setIconRef, setMenuRef], (): void => {
-    isSettingsOpen && setShowSettings(!isSettingsOpen);
-  });
-
-  // const _toggleAdd = useCallback(() => setShowAdd((isAddOpen) => !isAddOpen), []);
-
-  const _toggleSettings = useCallback(() => setShowSettings((isSettingsOpen) => !isSettingsOpen), []);
-
-  // todo: check if needed
-  // const _onChangeFilter = useCallback(
-  //   (filter: string) => {
-  //     setFilter(filter);
-  //     onFilter && onFilter(filter);
-  //   },
-  //   [onFilter]
-  // );
-  //
-  // const _toggleSearch = useCallback((): void => {
-  //   if (isSearchOpen) {
-  //     _onChangeFilter('');
-  //   }
-  //
-  //   setShowSearch((isSearchOpen) => !isSearchOpen);
-  // }, [_onChangeFilter, isSearchOpen]);
-
   const _onBackArrowClick = useCallback(() => onAction('..'), [onAction]);
   const _goToRoot = useCallback(() => onAction('/'), [onAction]);
 
@@ -110,7 +72,7 @@ function Header({
     <div className={`${className} ${smallMargin ? 'smallMargin' : ''} header`}>
       <div className='container'>
         <div className='branding'>
-          {showBackArrow ? (
+          {withBackArrow ? (
             <FontAwesomeIcon
               className='arrowLeftIcon'
               icon={faArrowLeft}
@@ -129,7 +91,7 @@ function Header({
           <span className='logoText'>{text || 'polkadot{.js}'}</span>
         </div>
         <div className='popupMenus'>
-          {showHelp && (
+          {withHelp && (
             <Tooltip text={t<string>('Help')}>
               <Link to={'/help'}>
                 <img
@@ -139,13 +101,12 @@ function Header({
               </Link>
             </Tooltip>
           )}
-          {showSettings && (
+          {withSettings && (
             <Tooltip text={t<string>('Settings')}>
               <Link to={'/account/settings'}>
                 <img
                   className='popupToggle'
                   data-toggle-settings
-                  onClick={_toggleSettings}
                   ref={setIconRef}
                   src={settingsIcon}
                 />
@@ -154,7 +115,6 @@ function Header({
           )}
         </div>
         {/* TODO: will be reused */}
-        {/* {isAddOpen && <MenuAdd reference={addMenuRef} />} */}
         {/* {isSettingsOpen && <MenuSettings reference={setMenuRef} />} */}
         {children}
       </div>
@@ -164,14 +124,13 @@ function Header({
 
 export default React.memo(
   styled(Header)(
-    ({ showSettings, theme, withStepper }: Props) => `
+    ({ theme, withSettings, withStepper }: Props) => `
   max-width: 100%;
   box-sizing: border-box;
   font-weight: normal;
   margin: 0;
   position: relative;
   margin-bottom: ${withStepper ? '0px' : '25px'};
-
 
   && {
     padding: 0 0 0;
@@ -207,7 +166,7 @@ export default React.memo(
       display:flex;
       align-items: center;
       justify-content: center;
-      margin-left: ${showSettings ? '16px' : '0px'};
+      margin-left: ${withSettings ? '16px' : '0px'};
       width: 100%;
 
       .logoText {

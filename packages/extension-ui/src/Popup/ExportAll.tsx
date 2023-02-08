@@ -19,7 +19,7 @@ interface Props extends RouteComponentProps, ThemeProps {
   className?: string;
 }
 
-function ExportAll ({ className }: Props): React.ReactElement<Props> {
+function ExportAll({ className }: Props): React.ReactElement<Props> {
   const { t } = useTranslation();
   const { accounts } = useContext(AccountContext);
   const onAction = useContext(ActionContext);
@@ -27,44 +27,39 @@ function ExportAll ({ className }: Props): React.ReactElement<Props> {
   const [pass, setPass] = useState('');
   const [error, setError] = useState('');
 
-  const _goHome = useCallback(
-    () => onAction('/'),
-    [onAction]
-  );
+  const _goHome = useCallback(() => onAction('/'), [onAction]);
 
-  const onPassChange = useCallback(
-    (password: string) => {
-      setPass(password);
-      setError('');
-    }
-    , []);
+  const onPassChange = useCallback((password: string) => {
+    setPass(password);
+    setError('');
+  }, []);
 
-  const _onExportAllButtonClick = useCallback(
-    (): void => {
-      setIsBusy(true);
+  const _onExportAllButtonClick = useCallback((): void => {
+    setIsBusy(true);
 
-      exportAccounts(accounts.map((account) => account.address), pass)
-        .then(({ exportedJson }) => {
-          const blob = new Blob([JSON.stringify(exportedJson)], { type: 'application/json; charset=utf-8' });
+    exportAccounts(
+      accounts.map((account) => account.address),
+      pass
+    )
+      .then(({ exportedJson }) => {
+        const blob = new Blob([JSON.stringify(exportedJson)], { type: 'application/json; charset=utf-8' });
 
-          saveAs(blob, `batch_exported_account_${Date.now()}.json`);
+        saveAs(blob, `batch_exported_account_${Date.now()}.json`);
 
-          onAction('/');
-        })
-        .catch((error: Error) => {
-          console.error(error);
-          setError(error.message);
-          setIsBusy(false);
-        });
-    },
-    [accounts, onAction, pass]
-  );
+        onAction('/');
+      })
+      .catch((error: Error) => {
+        console.error(error);
+        setError(error.message);
+        setIsBusy(false);
+      });
+  }, [accounts, onAction, pass]);
 
   return (
     <>
       <Header
-        showBackArrow
         text={t<string>('All account')}
+        withBackArrow
       />
       <div className={className}>
         <div className='actionArea'>

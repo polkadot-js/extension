@@ -16,19 +16,22 @@ interface Props extends ThemeProps {
 function Help({ className }: Props): React.ReactElement<Props> {
   const { t } = useTranslation();
 
-  return <>
-          <Header
-            showBackArrow
-            showHelp
-            text={t<string>('Help')}
-        />
-          {/* TODO: */}
-        <div className={className}>PLACEHOLDER</div>
-
-  </>;
+  return (
+    <>
+      <Header
+        text={t<string>('Help')}
+        withBackArrow
+        withHelp
+      />
+      {/* TODO: */}
+      <div className={className}>PLACEHOLDER</div>
+    </>
+  );
 }
 
-export default React.memo(styled(Help)(({ theme }: Props) => `
+export default React.memo(
+  styled(Help)(
+    ({ theme }: Props) => `
   color: ${theme.textColor};
   height: 100%;
   height: calc(100vh - 2px);
@@ -39,5 +42,5 @@ export default React.memo(styled(Help)(({ theme }: Props) => `
     display: none;
   }
   `
-)
+  )
 );

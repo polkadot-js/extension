@@ -12,7 +12,6 @@ import { ActionContext, Button, SkeletonCard } from '../../components';
 import useTranslation from '../../hooks/useTranslation';
 import Header from '../../partials/Header';
 
-
 interface Props extends ThemeProps {
   className?: string;
 }
@@ -27,8 +26,8 @@ function AddAccount({ className }: Props): React.ReactElement<Props> {
   return (
     <>
       <Header
-        showHelp
-        showSettings
+        withHelp
+        withSettings
         text={t<string>('Accounts')}
       />
       <div className={className}>
@@ -46,23 +45,24 @@ function AddAccount({ className }: Props): React.ReactElement<Props> {
           <div className='no-accounts'>
             <p>{t<string>('Add your accounts and keep exploring the Aleph Zero ecosystem!')}</p>
           </div>
- 
         </div>
         <div className='button-container'>
-            <Button onClick={_onClick}>
-              <FontAwesomeIcon
+          <Button onClick={_onClick}>
+            <FontAwesomeIcon
               className='icon'
               icon={faPlus}
             />
-              {t<string>('Add account')}
-            </Button>
-          </div>
+            {t<string>('Add account')}
+          </Button>
+        </div>
       </div>
     </>
   );
 }
 
-export default React.memo(styled(AddAccount)(({ theme }: Props) => `
+export default React.memo(
+  styled(AddAccount)(
+    ({ theme }: Props) => `
   color: ${theme.textColor};
   height: 100%;
   z-index: 100;
@@ -145,5 +145,5 @@ export default React.memo(styled(AddAccount)(({ theme }: Props) => `
     color: ${theme.subTextColor};
   }
 `
-)
+  )
 );

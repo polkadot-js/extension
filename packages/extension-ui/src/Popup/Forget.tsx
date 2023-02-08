@@ -8,6 +8,7 @@ import { RouteComponentProps, withRouter } from 'react-router';
 import styled from 'styled-components';
 
 import helpIcon from '../assets/help.svg';
+import forgetIconSVG from '../assets/vanish.svg';
 import { ActionContext, Address, Button, ButtonArea, HelperFooter, VerticalSpace } from '../components';
 import useTranslation from '../hooks/useTranslation';
 import { forgetAccount } from '../messaging';
@@ -45,22 +46,29 @@ function Forget({
   return (
     <>
       <Header
-        showBackArrow
-        showHelp
         text={t<string>('Forget account')}
+        withBackArrow
+        withHelp
       />
       <div className={className}>
         <div className='text-container'>
+          <img
+            className='forgetIcon'
+            src={forgetIconSVG}
+          />
           <span className='heading'>{t<string>('Forget account')}</span>
           <span className='subtitle'>
             {t<string>(
-              'Even though you can remove account from this wallet, you can restore it here or in another wallet with the secret phrase.'
+              'Even though you can remove account from Aleph Zero Signer, you can restore it here or in another wallet with the secret phrase. '
             )}
+          </span>
+          <span className='subtitle'>
+            {t<string>('Not sure if you have it? You can export JSON file and use it as well.')}
           </span>
         </div>
         <Address
           address={address}
-          forgetIcon
+          withExport
         />
       </div>
       <VerticalSpace />
@@ -107,8 +115,8 @@ export default withRouter(
     flex-direction: column;
     justify-content: center;
     align-items: center;
-    margin-top: 90px;
-    margin-bottom: 40px;
+    margin-top: 16px;
+    margin-bottom: 16px;
     gap: 16px;
     
     .heading {
@@ -130,6 +138,11 @@ export default withRouter(
     }
   }
 
+  .forgetIcon {
+    margin: 0 auto;
+    width: 96px;
+    height: 96px;
+  }
 
 
 `

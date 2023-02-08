@@ -16,8 +16,8 @@ interface Props extends ThemeProps {
   className?: string;
 }
 
-function AccountManagement ({ className }: Props): React.ReactElement<Props> {
-  const { url } = useParams<{url: string}>();
+function AccountManagement({ className }: Props): React.ReactElement<Props> {
+  const { url } = useParams<{ url: string }>();
   const { selectedAccounts = [], setSelectedAccounts } = useContext(AccountContext);
   const { t } = useTranslation();
   const onAction = useContext(ActionContext);
@@ -34,19 +34,16 @@ function AccountManagement ({ className }: Props): React.ReactElement<Props> {
       .catch(console.error);
   }, [setSelectedAccounts, url]);
 
-  const _onApprove = useCallback(
-    (): void => {
-      updateAuthorization(selectedAccounts, url)
-        .then(() => onAction('..'))
-        .catch(console.error);
-    },
-    [onAction, selectedAccounts, url]
-  );
+  const _onApprove = useCallback((): void => {
+    updateAuthorization(selectedAccounts, url)
+      .then(() => onAction('..'))
+      .catch(console.error);
+  }, [onAction, selectedAccounts, url]);
 
   return (
     <>
       <Header
-        showBackArrow
+        withBackArrow
         smallMargin={true}
         text={t<string>('Accounts connected to {{url}}', { replace: { url } })}
       />
@@ -62,9 +59,11 @@ function AccountManagement ({ className }: Props): React.ReactElement<Props> {
           className='acceptButton'
           onClick={_onApprove}
         >
-          {t<string>('Connect {{total}} account(s)', { replace: {
-            total: selectedAccounts.length
-          } })}
+          {t<string>('Connect {{total}} account(s)', {
+            replace: {
+              total: selectedAccounts.length
+            }
+          })}
         </Button>
       </div>
     </>

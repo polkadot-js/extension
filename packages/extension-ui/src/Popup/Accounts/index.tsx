@@ -50,12 +50,10 @@ function Accounts({ className }: Props): React.ReactElement {
         <>
           <Header
             onFilter={_onFilter}
-            showAdd
             showConnectedAccounts
-            showHelp
-            showSearch
-            showSettings
             text={t<string>('Accounts')}
+            withHelp
+            withSettings
           />
           <div className={className}>
             {filteredAccount.map(

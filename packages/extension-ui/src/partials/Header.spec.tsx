@@ -17,19 +17,18 @@ configure({ adapter: new Adapter() });
 
 describe('Header component', () => {
   let wrapper: ReactWrapper;
-  // eslint-disable-next-line @typescript-eslint/no-unsafe-return
-  const mountHeader = (props: React.ComponentProps<typeof Header> = {}): ReactWrapper => mount(
-    <MemoryRouter>
-      <ThemeProvider theme={themes.dark}>
-        <Header {...props}>
-        </Header>
-      </ThemeProvider>
-    </MemoryRouter>);
+  const mountHeader = (props: React.ComponentProps<typeof Header> = {}): ReactWrapper =>
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-return
+    mount(
+      <MemoryRouter>
+        <ThemeProvider theme={themes.dark}>
+          <Header {...props}></Header>
+        </ThemeProvider>
+      </MemoryRouter>
+    );
 
-
-
-  it('settings icon exists when showSettings prop is true', () => {
-    wrapper = mountHeader({ showSettings: true });
+  it('settings icon exists when withSettings prop is true', () => {
+    wrapper = mountHeader({ withSettings: true });
     wrapper.find('img[data-toggle-settings]').simulate('click');
 
     expect(wrapper.exists()).toBe(true);

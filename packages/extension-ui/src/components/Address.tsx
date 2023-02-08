@@ -18,7 +18,7 @@ import styled from 'styled-components';
 import { decodeAddress, encodeAddress } from '@polkadot/util-crypto';
 
 import details from '../assets/details.svg';
-import forgetIconSVG from '../assets/vanish.svg';
+import exportIcon from '../assets/export.svg';
 import viewOff from '../assets/viewOff.svg';
 import useMetadata from '../hooks/useMetadata';
 import useOutsideClick from '../hooks/useOutsideClick';
@@ -28,7 +28,7 @@ import { showAccount } from '../messaging';
 import { DEFAULT_TYPE } from '../util/defaultType';
 import { ellipsisName } from '../util/ellipsisName';
 import getParentNameSuri from '../util/getParentNameSuri';
-import { AccountContext, SettingsContext } from './contexts';
+import { AccountContext, ActionContext, SettingsContext } from './contexts';
 import Identicon from './Identicon';
 import Menu from './Menu';
 import Svg from './Svg';
@@ -48,7 +48,7 @@ export interface Props extends ThemeProps {
   suri?: string;
   toggleActions?: number;
   type?: KeypairType;
-  forgetIcon?: boolean;
+  withExport?: boolean;
 }
 
 interface Recoded {
@@ -103,17 +103,17 @@ function Address({
   address,
   children,
   className,
-  forgetIcon,
   genesisHash,
   isExternal,
   isHardware,
   isHidden,
   name,
   parentName,
-  // showVisibilityAction = false,
   suri,
+  // showVisibilityAction = false,
   toggleActions,
-  type: givenType
+  type: givenType,
+  withExport
 }: Props): React.ReactElement<Props> {
   const { t } = useTranslation();
   const { accounts } = useContext(AccountContext);
@@ -127,6 +127,8 @@ function Address({
   const actIconRef = useRef<HTMLDivElement>(null);
   const actMenuRef = useRef<HTMLDivElement>(null);
   const { show } = useToast();
+  const onAction = useContext(ActionContext);
+  const _goTo = useCallback((path: string) => () => onAction(path), [onAction]);
 
   useOutsideClick([actIconRef, actMenuRef], () => showActionsMenu && setShowActionsMenu(!showActionsMenu));
 
@@ -267,14 +269,20 @@ function Address({
                 src={viewOff}
               />
             )}
-            {forgetIcon && (
-              <img
-                className='forgetIcon'
-                src={forgetIconSVG}
-              />
-            )}
           </div>
         </div>
+        {withExport && address && (
+          <div
+            className='export'
+            onClick={_goTo(`/account/export/${address}`)}
+          >
+            <img
+              className='exportIcon'
+              src={exportIcon}
+            />
+            {t<string>('Export')}
+          </div>
+        )}
         {actions && (
           <>
             <Link to={`/account/edit-menu/${address || ''}${isExternal ? '?isExternal=true' : '?isExternal=false'}`}>
@@ -349,15 +357,7 @@ export default styled(Address)(
       right: 16px;
       top: -8px;
     }
-
-    .forgetIcon {
-      position: absolute;
-      right: -22px;
-      top: -16px;
-      width: 32px;
-      height: 32px;
-    }
-
+   
     .hiddenIcon {
       color: ${theme.errorColor};
       &:hover {
@@ -397,6 +397,28 @@ export default styled(Address)(
     align-items: center;
     height: 80px;
     border-radius: 8px;
+
+    .export {
+      color: ${theme.primaryColor};
+      font-family: ${theme.secondaryFontFamily};
+      font-weight: 500;
+      font-size: 14px;
+      line-height: 135%;
+      letter-spacing: 0.06em;
+      gap: 8px;
+      position: absolute;
+      right: 28px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100%;
+      cursor: pointer;
+
+      .exportIcon {
+        width: 16px;
+        height: 16px;
+      } 
+    }
 
   }
 

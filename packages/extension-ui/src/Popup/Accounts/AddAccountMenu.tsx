@@ -27,8 +27,8 @@ function AddAccountMenu({ className }: Props): React.ReactElement<Props> {
   return (
     <>
       <Header
-        showBackArrow
-        showHelp
+        withBackArrow
+        withHelp
         text={t<string>('Add Account')}
       />
       <div className={className}>
@@ -59,7 +59,9 @@ function AddAccountMenu({ className }: Props): React.ReactElement<Props> {
   );
 }
 
-export default React.memo(styled(AddAccountMenu)(({ theme }: Props) => `
+export default React.memo(
+  styled(AddAccountMenu)(
+    ({ theme }: Props) => `
   color: ${theme.textColor};
   height: 100%;
   height: calc(100vh - 2px);

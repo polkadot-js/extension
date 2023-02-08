@@ -32,7 +32,7 @@ interface Props extends ThemeProps {
   className?: string;
 }
 
-function ImportLedger ({ className }: Props): React.ReactElement {
+function ImportLedger({ className }: Props): React.ReactElement {
   const { t } = useTranslation();
   const [accountIndex, setAccountIndex] = useState<number>(0);
   const [addressOffset, setAddressOffset] = useState<number>(0);
@@ -41,7 +41,14 @@ function ImportLedger ({ className }: Props): React.ReactElement {
   const [genesis, setGenesis] = useState<string | null>(null);
   const onAction = useContext(ActionContext);
   const [name, setName] = useState<string | null>(null);
-  const { address, error: ledgerError, isLoading: ledgerLoading, isLocked: ledgerLocked, refresh, warning: ledgerWarning } = useLedger(genesis, accountIndex, addressOffset);
+  const {
+    address,
+    error: ledgerError,
+    isLoading: ledgerLoading,
+    isLocked: ledgerLocked,
+    refresh,
+    warning: ledgerWarning
+  } = useLedger(genesis, accountIndex, addressOffset);
 
   useEffect(() => {
     if (address) {
@@ -49,44 +56,51 @@ function ImportLedger ({ className }: Props): React.ReactElement {
     }
   }, [address]);
 
-  const accOps = useRef(AVAIL.map((value): AccOption => ({
-    text: t('Account type {{index}}', { replace: { index: value } }),
-    value
-  })));
+  const accOps = useRef(
+    AVAIL.map(
+      (value): AccOption => ({
+        text: t('Account type {{index}}', { replace: { index: value } }),
+        value
+      })
+    )
+  );
 
-  const addOps = useRef(AVAIL.map((value): AccOption => ({
-    text: t('Address index {{index}}', { replace: { index: value } }),
-    value
-  })));
+  const addOps = useRef(
+    AVAIL.map(
+      (value): AccOption => ({
+        text: t('Address index {{index}}', { replace: { index: value } }),
+        value
+      })
+    )
+  );
 
-  const networkOps = useRef(
-    [{
+  const networkOps = useRef([
+    {
       text: t('Select network'),
       value: ''
     },
-    ...ledgerChains.map(({ displayName, genesisHash }): NetworkOption => ({
-      text: displayName,
-      value: genesisHash[0]
-    }))]
-  );
+    ...ledgerChains.map(
+      ({ displayName, genesisHash }): NetworkOption => ({
+        text: displayName,
+        value: genesisHash[0]
+      })
+    )
+  ]);
 
-  const _onSave = useCallback(
-    () => {
-      if (address && genesis && name) {
-        setIsBusy(true);
+  const _onSave = useCallback(() => {
+    if (address && genesis && name) {
+      setIsBusy(true);
 
-        createAccountHardware(address, 'ledger', accountIndex, addressOffset, name, genesis)
-          .then(() => onAction('/'))
-          .catch((error: Error) => {
-            console.error(error);
+      createAccountHardware(address, 'ledger', accountIndex, addressOffset, name, genesis)
+        .then(() => onAction('/'))
+        .catch((error: Error) => {
+          console.error(error);
 
-            setIsBusy(false);
-            setError(error.message);
-          });
-      }
-    },
-    [accountIndex, address, addressOffset, genesis, name, onAction]
-  );
+          setIsBusy(false);
+          setError(error.message);
+        });
+    }
+  }, [accountIndex, address, addressOffset, genesis, name, onAction]);
 
   // select element is returning a string
   const _onSetAccountIndex = useCallback((value: number) => setAccountIndex(Number(value)), []);
@@ -95,8 +109,8 @@ function ImportLedger ({ className }: Props): React.ReactElement {
   return (
     <>
       <Header
-        showBackArrow
         text={t<string>('Import Ledger Account')}
+        withBackArrow
       />
       <div className={className}>
         <Address
@@ -139,41 +153,28 @@ function ImportLedger ({ className }: Props): React.ReactElement {
             />
           </>
         )}
-        {!!ledgerWarning && (
-          <Warning>
-            {ledgerWarning}
-          </Warning>
-        )}
-        {(!!error || !!ledgerError) && (
-          <Warning
-            isDanger
-          >
-            {error || ledgerError}
-          </Warning>
-        )}
+        {!!ledgerWarning && <Warning>{ledgerWarning}</Warning>}
+        {(!!error || !!ledgerError) && <Warning isDanger>{error || ledgerError}</Warning>}
       </div>
       <VerticalSpace />
       <ButtonArea>
-        {ledgerLocked
-          ? (
-            <Button
-              isBusy={ledgerLoading || isBusy}
-              onClick={refresh}
-            >
-              <FontAwesomeIcon icon={faSync} />
-              {t<string>('Refresh')}
-            </Button>
-          )
-          : (
-            <Button
-              isBusy={ledgerLoading || isBusy}
-              isDisabled={!!error || !!ledgerError || !address || !genesis}
-              onClick={_onSave}
-            >
-              {t<string>('Import Account')}
-            </Button>
-          )
-        }
+        {ledgerLocked ? (
+          <Button
+            isBusy={ledgerLoading || isBusy}
+            onClick={refresh}
+          >
+            <FontAwesomeIcon icon={faSync} />
+            {t<string>('Refresh')}
+          </Button>
+        ) : (
+          <Button
+            isBusy={ledgerLoading || isBusy}
+            isDisabled={!!error || !!ledgerError || !address || !genesis}
+            onClick={_onSave}
+          >
+            {t<string>('Import Account')}
+          </Button>
+        )}
       </ButtonArea>
     </>
   );

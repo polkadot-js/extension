@@ -3,7 +3,7 @@
 
 import type { ThemeProps } from '../../types';
 
-import React, { useCallback, useContext, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useContext, useMemo, useState } from 'react';
 import CopyToClipboard from 'react-copy-to-clipboard';
 import { RouteComponentProps, withRouter } from 'react-router';
 import styled from 'styled-components';
@@ -71,10 +71,10 @@ function EditAccountMenu({
   return (
     <>
       <Header
-        showBackArrow
-        showHelp
         text={t<string>('Edit Account')}
+        withBackArrow
         withGoToRoot
+        withHelp
       />
       <div className={className}>
         <Identicon

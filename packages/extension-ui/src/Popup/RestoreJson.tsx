@@ -119,7 +119,7 @@ function Upload({ className }: Props): React.ReactElement {
   return (
     <>
       <Header
-        showBackArrow
+        withBackArrow
         smallMargin
         text={t<string>('Restore from JSON')}
       />

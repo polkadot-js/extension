@@ -16,19 +16,22 @@ interface Props extends ThemeProps {
 function CreateAccountMenu({ className }: Props): React.ReactElement<Props> {
   const { t } = useTranslation();
 
-  return <>
-          <Header
-            showBackArrow
-            showHelp
-            text={t<string>('Settings')}
-        />
-          {/* TODO: */}
-        <div className={className}>PLACEHOLDER</div>
-
-  </>;
+  return (
+    <>
+      <Header
+        withBackArrow
+        withHelp
+        text={t<string>('Settings')}
+      />
+      {/* TODO: */}
+      <div className={className}>PLACEHOLDER</div>
+    </>
+  );
 }
 
-export default React.memo(styled(CreateAccountMenu)(({ theme }: Props) => `
+export default React.memo(
+  styled(CreateAccountMenu)(
+    ({ theme }: Props) => `
   color: ${theme.textColor};
   height: 100%;
   height: calc(100vh - 2px);
@@ -39,5 +42,5 @@ export default React.memo(styled(CreateAccountMenu)(({ theme }: Props) => `
     display: none;
   }
   `
-)
+  )
 );

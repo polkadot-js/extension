@@ -15,55 +15,53 @@ import { Header } from '../partials';
 
 const MIN_LENGTH = 6;
 
-interface Props extends RouteComponentProps<{address: string}>, ThemeProps {
+interface Props extends RouteComponentProps<{ address: string }>, ThemeProps {
   className?: string;
 }
 
-function Export ({ className, match: { params: { address } } }: Props): React.ReactElement<Props> {
+function Export({
+  className,
+  match: {
+    params: { address }
+  }
+}: Props): React.ReactElement<Props> {
   const { t } = useTranslation();
   const onAction = useContext(ActionContext);
   const [isBusy, setIsBusy] = useState(false);
   const [pass, setPass] = useState('');
   const [error, setError] = useState('');
 
-  const _goHome = useCallback(
-    () => onAction('/'),
-    [onAction]
-  );
+  const _goHome = useCallback(() => onAction('/'), [onAction]);
 
-  const onPassChange = useCallback(
-    (password: string) => {
-      setPass(password);
-      setError('');
-    }
-    , []);
+  const onPassChange = useCallback((password: string) => {
+    setPass(password);
+    setError('');
+  }, []);
 
-  const _onExportButtonClick = useCallback(
-    (): void => {
-      setIsBusy(true);
+  const _onExportButtonClick = useCallback((): void => {
+    setIsBusy(true);
 
-      exportAccount(address, pass)
-        .then(({ exportedJson }) => {
-          const blob = new Blob([JSON.stringify(exportedJson)], { type: 'application/json; charset=utf-8' });
+    exportAccount(address, pass)
+      .then(({ exportedJson }) => {
+        const blob = new Blob([JSON.stringify(exportedJson)], { type: 'application/json; charset=utf-8' });
 
-          saveAs(blob, `${address}.json`);
+        saveAs(blob, `${address}.json`);
 
-          onAction('/');
-        })
-        .catch((error: Error) => {
-          console.error(error);
-          setError(error.message);
-          setIsBusy(false);
-        });
-    },
-    [address, onAction, pass]
-  );
+        onAction('/');
+      })
+      .catch((error: Error) => {
+        console.error(error);
+        setError(error.message);
+        setIsBusy(false);
+      });
+  }, [address, onAction, pass]);
 
   return (
     <>
       <Header
-        showBackArrow
         text={t<string>('Export account')}
+        withBackArrow
+        withHelp
       />
       <div className={className}>
         <Address address={address}>

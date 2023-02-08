@@ -49,9 +49,9 @@ function EditName({
   return (
     <>
       <Header
-        showBackArrow
-        showHelp
         text={t<string>('Account name')}
+        withBackArrow
+        withHelp
       />
       <div className={className}>
         <Address address={address} />

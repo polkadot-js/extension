@@ -1,11 +1,12 @@
 // Copyright 2019-2022 @subwallet/extension-koni authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { _ChainAsset } from '@subwallet/chain-list/types';
-import { CustomTokenType, NftCollection, NftItem } from '@subwallet/extension-base/background/KoniTypes';
+import { _AssetType, _ChainAsset } from '@subwallet/chain-list/types';
+import { NftCollection, NftItem } from '@subwallet/extension-base/background/KoniTypes';
 import { _ERC721_ABI } from '@subwallet/extension-base/services/chain-service/helper';
 import { _EvmApi } from '@subwallet/extension-base/services/chain-service/types';
 import { _getContractAddressOfToken } from '@subwallet/extension-base/services/chain-service/utils';
+import { getRandomIpfsGateway } from '@subwallet/extension-koni-base/api/nft/config';
 import { BaseNftApi, HandleNftParams } from '@subwallet/extension-koni-base/api/nft/nft';
 import { isUrl } from '@subwallet/extension-koni-base/utils';
 import fetch from 'cross-fetch';
@@ -36,10 +37,10 @@ export class EvmNftApi extends BaseNftApi {
     }
 
     if (input.includes('ipfs://')) {
-      return input.split('ipfs://')[1];
+      return getRandomIpfsGateway() + input.split('ipfs://')[1];
     }
 
-    return input.split('ipfs://ipfs/')[1];
+    return getRandomIpfsGateway() + input.split('ipfs://ipfs/')[1];
   }
 
   private parseMetadata (data: Record<string, any>): NftItem {
@@ -102,7 +103,6 @@ export class EvmNftApi extends BaseNftApi {
       if (Number(balance) === 0) {
         // nftParams.updateReady(true);
         nftParams.updateNftIds(this.chain, address, smartContract, nftIds);
-        console.log('no balance for ', address, smartContract);
 
         return;
       }
@@ -142,7 +142,7 @@ export class EvmNftApi extends BaseNftApi {
               parsedItem.collectionId = smartContract;
               parsedItem.id = nftId;
               parsedItem.owner = address;
-              parsedItem.type = CustomTokenType.erc721;
+              parsedItem.type = _AssetType.ERC721;
 
               if (parsedItem) {
                 if (parsedItem.image) {

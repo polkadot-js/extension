@@ -19,6 +19,7 @@ interface AbstractSignAndSendExtrinsicProps extends Partial<PrepareExternalReque
   errorMessage: string;
   substrateApi: _SubstrateApi;
   updateResponseTxResult?: (response: BasicTxResponse, records: EventRecord[]) => void;
+  nonce?: number;
 }
 
 interface PasswordSignAndSendExtrinsicProps extends AbstractSignAndSendExtrinsicProps {
@@ -39,6 +40,7 @@ export const signAndSendExtrinsic = async ({ address,
   errorMessage,
   extrinsic,
   id,
+  nonce,
   setState,
   substrateApi,
   txState,
@@ -53,7 +55,8 @@ export const signAndSendExtrinsic = async ({ address,
           substrateApi: substrateApi,
           callback: callback,
           extrinsic: extrinsic,
-          type: type
+          type: type,
+          nonce
         }
         : {
           address: address,
@@ -62,7 +65,8 @@ export const signAndSendExtrinsic = async ({ address,
           extrinsic: extrinsic,
           id: id,
           setState: setState,
-          type: type
+          type: type,
+          nonce
         });
 
       if (passwordError) {

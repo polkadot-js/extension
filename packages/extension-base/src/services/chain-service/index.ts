@@ -1,8 +1,9 @@
 // Copyright 2019-2022 @subwallet/extension-base authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { _DEFAULT_CHAINS, AssetRefMap, ChainAssetMap, ChainInfoMap } from '@subwallet/chain-list';
+import { AssetRefMap, ChainAssetMap, ChainInfoMap } from '@subwallet/chain-list';
 import { _AssetRefPath, _AssetType, _ChainAsset, _ChainInfo, _EvmInfo, _SubstrateChainType, _SubstrateInfo } from '@subwallet/chain-list/types';
+import { _DEFAULT_ACTIVE_CHAINS } from '@subwallet/extension-base/services/chain-service/constants';
 import { EvmChainHandler } from '@subwallet/extension-base/services/chain-service/handler/EvmChainHandler';
 import { SubstrateChainHandler } from '@subwallet/extension-base/services/chain-service/handler/SubstrateChainHandler';
 import { _CHAIN_VALIDATION_ERROR } from '@subwallet/extension-base/services/chain-service/handler/types';
@@ -134,7 +135,8 @@ export class ChainService {
       originChain: '',
       priceId: '',
       slug: '',
-      symbol: ''
+      symbol: '',
+      hasValue: true
     };
 
     for (const assetInfo of Object.values(this.getAssetRegistry())) {
@@ -305,7 +307,7 @@ export class ChainService {
     const chainStateMap = this.getChainStateMap();
 
     for (const [slug, chainState] of Object.entries(chainStateMap)) {
-      if (!_DEFAULT_CHAINS.includes(slug) && !excludedChains?.includes(slug)) {
+      if (!_DEFAULT_ACTIVE_CHAINS.includes(slug) && !excludedChains?.includes(slug)) {
         chainState.active = false;
       }
     }
@@ -452,13 +454,13 @@ export class ChainService {
           currentProvider: Object.keys(chainInfo.providers)[0],
           slug: chainInfo.slug,
           connectionStatus: _ChainConnectionStatus.DISCONNECTED,
-          active: _DEFAULT_CHAINS.includes(chainInfo.slug)
+          active: _DEFAULT_ACTIVE_CHAINS.includes(chainInfo.slug)
         };
 
         // create data for storage
         newStorageData.push({
           ...chainInfo,
-          active: _DEFAULT_CHAINS.includes(chainInfo.slug),
+          active: _DEFAULT_ACTIVE_CHAINS.includes(chainInfo.slug),
           currentProvider: Object.keys(chainInfo.providers)[0]
         });
       });
@@ -472,12 +474,12 @@ export class ChainService {
             currentProvider: storedChainInfo.currentProvider,
             slug: storedSlug,
             connectionStatus: _ChainConnectionStatus.DISCONNECTED,
-            active: _DEFAULT_CHAINS.includes(storedSlug) || storedChainInfo.active
+            active: _DEFAULT_ACTIVE_CHAINS.includes(storedSlug) || storedChainInfo.active
           };
 
           newStorageData.push({
             ...mergedChainInfoMap[storedSlug],
-            active: _DEFAULT_CHAINS.includes(storedSlug),
+            active: _DEFAULT_ACTIVE_CHAINS.includes(storedSlug),
             currentProvider: storedChainInfo.currentProvider
           });
         } else { // only custom chains are left
@@ -490,12 +492,12 @@ export class ChainService {
               currentProvider: storedChainInfo.currentProvider,
               slug: duplicatedDefaultSlug,
               connectionStatus: _ChainConnectionStatus.DISCONNECTED,
-              active: _DEFAULT_CHAINS.includes(duplicatedDefaultSlug) || storedChainInfo.active
+              active: _DEFAULT_ACTIVE_CHAINS.includes(duplicatedDefaultSlug) || storedChainInfo.active
             };
 
             newStorageData.push({
               ...mergedChainInfoMap[duplicatedDefaultSlug],
-              active: _DEFAULT_CHAINS.includes(duplicatedDefaultSlug) || storedChainInfo.active,
+              active: _DEFAULT_ACTIVE_CHAINS.includes(duplicatedDefaultSlug) || storedChainInfo.active,
               currentProvider: storedChainInfo.currentProvider
             });
 
@@ -515,12 +517,12 @@ export class ChainService {
               currentProvider: storedChainInfo.currentProvider,
               slug: storedSlug,
               connectionStatus: _ChainConnectionStatus.DISCONNECTED,
-              active: _DEFAULT_CHAINS.includes(storedSlug) || storedChainInfo.active
+              active: _DEFAULT_ACTIVE_CHAINS.includes(storedSlug) || storedChainInfo.active
             };
 
             newStorageData.push({
               ...mergedChainInfoMap[storedSlug],
-              active: _DEFAULT_CHAINS.includes(storedSlug) || storedChainInfo.active,
+              active: _DEFAULT_ACTIVE_CHAINS.includes(storedSlug) || storedChainInfo.active,
               currentProvider: storedChainInfo.currentProvider
             });
           }
@@ -534,12 +536,12 @@ export class ChainService {
             currentProvider: Object.keys(chainInfo.providers)[0],
             slug,
             connectionStatus: _ChainConnectionStatus.DISCONNECTED,
-            active: _DEFAULT_CHAINS.includes(slug)
+            active: _DEFAULT_ACTIVE_CHAINS.includes(slug)
           };
 
           newStorageData.push({
             ...mergedChainInfoMap[slug],
-            active: _DEFAULT_CHAINS.includes(slug),
+            active: _DEFAULT_ACTIVE_CHAINS.includes(slug),
             currentProvider: Object.keys(chainInfo.providers)[0]
           });
         }
@@ -646,7 +648,7 @@ export class ChainService {
           symbol: params.chainEditInfo.symbol,
           genesisHash: params.chainSpec.genesisHash,
           relaySlug: null,
-          supportNft: false,
+          hasNativeNft: false,
           supportStaking: params.chainSpec.paraId === null,
           supportSmartContract: null
         };
@@ -686,7 +688,8 @@ export class ChainService {
         originChain: newSlug,
         priceId: null,
         slug: '',
-        symbol: params.chainEditInfo.symbol
+        symbol: params.chainEditInfo.symbol,
+        hasValue: true
       });
 
       chainStateMap[newSlug] = {

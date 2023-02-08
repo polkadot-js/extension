@@ -4,7 +4,7 @@
 import { NftCollection, NftItem } from '@subwallet/extension-base/background/KoniTypes';
 import { _SubstrateApi } from '@subwallet/extension-base/services/chain-service/types';
 import { BaseNftApi, HandleNftParams } from '@subwallet/extension-koni-base/api/nft/nft';
-import { hexToStr, hexToUTF16, parseIpfsLink, utf16ToString } from '@subwallet/extension-koni-base/utils';
+import { hexToStr, hexToUTF16, utf16ToString } from '@subwallet/extension-koni-base/utils';
 
 import { deserializeNft } from './protobuf';
 
@@ -193,7 +193,7 @@ export default class UniqueNftApi extends BaseNftApi {
             const parsedItem = {
               id: tokenId,
               name: tokenData.prefix + '#' + tokenId,
-              image: parseIpfsLink(imageUrl),
+              image: this.parseUrl(imageUrl),
               external_url: `https://unqnft.io/#/market/token-details?collectionId=${collectionId}&tokenId=${tokenId}`,
               collectionId: collectionIdStr,
               properties: tokenData.properties,
@@ -204,7 +204,7 @@ export default class UniqueNftApi extends BaseNftApi {
 
             if (!parsedCollection.collectionName) {
               parsedCollection.collectionName = tokenData.collectionName;
-              parsedCollection.image = parseIpfsLink(tokenData.image);
+              parsedCollection.image = this.parseUrl(tokenData.image);
             }
 
             params.updateItem(this.chain, parsedItem, address);

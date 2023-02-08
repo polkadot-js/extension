@@ -1,8 +1,8 @@
 // Copyright 2019-2022 @subwallet/extension-koni authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { _ChainAsset } from '@subwallet/chain-list/types';
-import { CustomTokenType, NftCollection, NftItem } from '@subwallet/extension-base/background/KoniTypes';
+import { _AssetType, _ChainAsset } from '@subwallet/chain-list/types';
+import { NftCollection, NftItem } from '@subwallet/extension-base/background/KoniTypes';
 import { _SubstrateApi } from '@subwallet/extension-base/services/chain-service/types';
 import { _getContractAddressOfToken } from '@subwallet/extension-base/services/chain-service/utils';
 import { BaseNftApi, HandleNftParams } from '@subwallet/extension-koni-base/api/nft/nft';
@@ -121,7 +121,7 @@ export class WasmNftApi extends BaseNftApi {
   }
 
   private async processOnChainMetadata (contractPromise: ContractPromise, address: string, tokenIdObj: Record<string, string>, collectionAttributes: string[], isFeatured: boolean): Promise<NftItem> {
-    const nftItem: NftItem = {};
+    const nftItem: NftItem = { chain: '', collectionId: '', id: '' };
     const _attributeValues = await contractPromise.query['psp34Traits::getAttributes'](address, { gasLimit: -1 }, tokenIdObj, collectionAttributes);
 
     if (_attributeValues.output) {
@@ -161,7 +161,7 @@ export class WasmNftApi extends BaseNftApi {
   }
 
   private async processOffChainMetadata (contractPromise: ContractPromise, address: string, tokenId: string, isFeatured: boolean): Promise<NftItem> {
-    const nftItem: NftItem = { name: tokenId };
+    const nftItem: NftItem = { chain: '', collectionId: '', id: '', name: tokenId };
 
     const _tokenUri = await contractPromise.query['psp34Traits::tokenUri'](address, { gasLimit: -1 }, tokenId);
 
@@ -274,7 +274,7 @@ export class WasmNftApi extends BaseNftApi {
 
             nftItem.collectionId = smartContract;
             nftItem.chain = this.chain;
-            nftItem.type = CustomTokenType.psp34;
+            nftItem.type = _AssetType.PSP34;
             nftItem.id = tokenId;
             nftItem.owner = address;
             nftItem.onChainOption = tokenIdObj;

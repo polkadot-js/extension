@@ -3,7 +3,7 @@
 
 import { _ChainAsset, _ChainInfo } from '@subwallet/chain-list/types';
 import { AuthUrlInfo } from '@subwallet/extension-base/background/handlers/State';
-import { AddNetworkRequestExternal, BalanceItem, ConfirmationDefinitions, ConfirmationsQueue, ConfirmationType, CrowdloanItem, KeyringState, NftCollection, NftItem, StakingItem, StakingRewardItem, TransactionHistoryItemType, UiSettings, UnlockingStakeInfo, ValidatorInfo } from '@subwallet/extension-base/background/KoniTypes';
+import { AddNetworkRequestExternal, BalanceItem, ConfirmationDefinitions, ConfirmationsQueue, ConfirmationType, CrowdloanItem, KeyringState, NftCollection, NftItem, StakingItem, StakingRewardItem, TxHistoryItem, UiSettings, UnlockingStakeInfo, ValidatorInfo } from '@subwallet/extension-base/background/KoniTypes';
 import { AccountJson, AccountsContext, AuthorizeRequest, MetadataRequest, SigningRequest } from '@subwallet/extension-base/background/types';
 import { _ChainState } from '@subwallet/extension-base/services/chain-service/types';
 
@@ -14,7 +14,7 @@ export type CurrentAccountType = {
 }
 
 export type TransactionHistoryReducerType = {
-  historyMap: Record<string, TransactionHistoryItemType[]>
+  historyList: TxHistoryItem[]
 }
 
 export type TransferNftParams = {
@@ -118,6 +118,6 @@ export interface NftStore extends BaseReduxStore {
 
 export interface StakingStore extends BaseReduxStore {
   stakingMap: Record<string, StakingItem>,
-  stakingRewardMap: Record<string, StakingRewardItem>,
-  stakeUnlockingMap: Record<string, UnlockingStakeInfo>
+  stakingRewardMap: StakingRewardItem[],
+  stakeUnlockingMap: UnlockingStakeInfo[]
 }

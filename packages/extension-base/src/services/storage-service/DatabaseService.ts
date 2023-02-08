@@ -2,8 +2,8 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { _ChainAsset } from '@subwallet/chain-list/types';
-import { APIItemState, BalanceItem, CrowdloanItem, NftCollection, NftItem, StakingItem, TransactionHistoryItemType } from '@subwallet/extension-base/background/KoniTypes';
-import KoniDatabase, { IChain, INft, IStakingItem } from '@subwallet/extension-base/services/storage-service/databases';
+import { APIItemState, BalanceItem, CrowdloanItem, NftCollection, NftItem, StakingItem, TxHistoryItem } from '@subwallet/extension-base/background/KoniTypes';
+import KoniDatabase, { IBalance, IChain, ICrowdloanItem, INft } from '@subwallet/extension-base/services/storage-service/databases';
 import { AssetStore, BalanceStore, ChainStore, CrowdloanStore, ExtraDelegationInfoStore, MigrationStore, NftCollectionStore, NftStore, StakingStore, TransactionStore } from '@subwallet/extension-base/services/storage-service/db-stores';
 import { Subscription } from 'dexie';
 
@@ -36,37 +36,33 @@ export default class DatabaseService {
   }
 
   // Balance
-  async updateBalanceStore (chain: string, chainHash: string, address: string, item: BalanceItem) {
+  async updateBalanceStore (address: string, item: BalanceItem) {
     if (item.state === APIItemState.READY) {
-      this.logger.log(`Updating balance for [${chain}]`);
+      this.logger.log(`Updating balance for [${item.tokenSlug}]`);
 
-      return this.stores.balance.upsert({ chainHash, _chain: chain, address, ...item });
+      return this.stores.balance.upsert({ address, ...item } as IBalance);
     }
   }
 
-  // public getBalanceObservable (address: string, cb: (result: BalanceJson) => void) {
-  //   return this.stores.balance.liveQueryBalance(address, cb);
-  // }
-
   // Crowdloan
-  async updateCrowdloanStore (chain: string, chainHash: string, address: string, item: CrowdloanItem) {
+  async updateCrowdloanStore (chain: string, address: string, item: CrowdloanItem) {
     if (item.state === APIItemState.READY && item.contribute !== '0') {
       this.logger.log(`Updating crowdloan for [${chain}]`);
 
-      return this.stores.crowdloan.upsert({ chainHash, _chain: chain, address, ...item });
+      return this.stores.crowdloan.upsert({ chain, address, ...item } as ICrowdloanItem);
     } else {
       this.logger.debug(`Removing crowdloan for [${chain}]`);
 
-      return this.stores.crowdloan.deleteByChainAndAddress(chainHash, address);
+      return this.stores.crowdloan.deleteByChainAndAddress(chain, address);
     }
   }
 
   // Staking
-  async updateStaking (chain: string, chainHash: string, address: string, item: StakingItem) {
+  async updateStaking (chain: string, address: string, item: StakingItem) {
     if (item.state === APIItemState.READY) {
       this.logger.log(`Updating staking for [${chain}]`);
 
-      return this.stores.staking.upsert({ chainHash, ...item });
+      return this.stores.staking.upsert(item);
     }
   }
 
@@ -86,10 +82,10 @@ export default class DatabaseService {
     return stakings;
   }
 
-  subscribeStaking (addresses: string[], chainHashes?: string[], callback?: (stakingItems: IStakingItem[]) => void) {
+  subscribeStaking (addresses: string[], chainList?: string[], callback?: (stakingItems: StakingItem[]) => void) {
     this.stakingSubscription && this.stakingSubscription.unsubscribe();
 
-    this.stakingSubscription = this.stores.staking.subscribeStaking(addresses, chainHashes).subscribe({
+    this.stakingSubscription = this.stores.staking.subscribeStaking(addresses, chainList).subscribe({
       next: (stakings) => callback && callback(stakings)
     });
 
@@ -97,17 +93,17 @@ export default class DatabaseService {
   }
 
   // Transaction history
-  async addHistories (chain: string, chainHash: string, address: string, histories: TransactionHistoryItemType[]) {
+  async addHistories (chain: string, address: string, histories: TxHistoryItem[]) {
     this.logger.log(`Updating transaction history for [${chain}]`);
 
-    return this.stores.transaction.bulkUpsert(histories.map((item) => ({ chainHash, _chain: chain, address, eventIdx: 0, ...item })));
+    return this.stores.transaction.bulkUpsert(histories.map((item) => ({ chain, address, ...item })));
   }
 
   // NFT Collection
-  async addNftCollection (chain: string, chainHash: string, collection: NftCollection) {
-    this.logger.log(`Updating NFT collection for [${chain}]`);
+  async addNftCollection (collection: NftCollection) {
+    this.logger.log(`Updating NFT collection for [${collection.chain}]`);
 
-    return this.stores.nftCollection.upsert({ chainHash, _chain: chain, ...collection });
+    return this.stores.nftCollection.upsert(collection);
   }
 
   getAllNftCollection (chainHashes?: string[]) {
@@ -133,10 +129,10 @@ export default class DatabaseService {
     return nfts;
   }
 
-  async addNft (chain: string, chainHash: string, address: string, nft: NftItem) {
-    this.logger.log(`Updating NFT for [${chain}]`);
+  async addNft (address: string, nft: NftItem) {
+    this.logger.log(`Updating NFT for [${nft.chain}]`);
 
-    return this.stores.nft.upsert({ ...nft, chainHash, _chain: chain, address });
+    return this.stores.nft.upsert({ ...nft, address } as INft);
   }
 
   async deleteRemovedNftsFromCollection (chainHash: string, address: string, collectionId?: string, nftIds?: string[]) {
@@ -151,15 +147,15 @@ export default class DatabaseService {
     return this.stores.nft.deleteNftsByCollection(chainHash, tokenId);
   }
 
-  removeNfts (chainHash: string, address: string, collectionId: string, nftIds: string[]) {
+  removeNfts (chain: string, address: string, collectionId: string, nftIds: string[]) {
     this.logger.log(`Remove NFTs [${nftIds.join(', ')}]`);
 
-    return this.stores.nft.removeNfts(chainHash, address, collectionId, nftIds);
+    return this.stores.nft.removeNfts(chain, address, collectionId, nftIds);
   }
 
   // Delegation info
-  async updateExtraDelegationInfo (chain: string, chainHash: string, address: string, collatorAddress: string) {
-    return this.stores.extraDelegationInfo.upsert({ chain, chainHash, address, collatorAddress });
+  async updateExtraDelegationInfo (chain: string, address: string, collatorAddress: string) {
+    return this.stores.extraDelegationInfo.upsert({ chain, address, collatorAddress });
   }
 
   async getExtraDelegationInfo (chain: string, address: string) {

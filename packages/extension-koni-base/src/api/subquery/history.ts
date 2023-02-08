@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { gql } from '@apollo/client';
-import { NetworkJson, TransactionHistoryItemType } from '@subwallet/extension-base/background/KoniTypes';
+import { NetworkJson, TxHistoryItem } from '@subwallet/extension-base/background/KoniTypes';
 // eslint-disable-next-line camelcase
 import { DotSamaHistory, DotSamaHistory_transfers, DotSamaHistoryVariables } from '@subwallet/extension-koni-base/api/subquery/__generated__/DotSamaHistory';
 import { newApolloClient } from '@subwallet/extension-koni-base/api/subquery/subquery';
@@ -100,7 +100,7 @@ function getHistoryAction (address: string, addressFrom: string): 'send' | 'rece
   return address === addressFrom ? 'send' : 'received';
 }
 
-export const fetchDotSamaHistory = (address: string, networkMap: Record<string, NetworkJson>, callBack: (network: string, items: TransactionHistoryItemType[]) => void) => {
+export const fetchDotSamaHistory = (address: string, networkMap: Record<string, NetworkJson>, callBack: (network: string, items: TxHistoryItem[]) => void) => {
   if (isAccountAll(address)) {
     return;
   }
@@ -122,7 +122,7 @@ export const fetchDotSamaHistory = (address: string, networkMap: Record<string, 
           return;
         }
 
-        const items: TransactionHistoryItemType[] = [];
+        const items: TxHistoryItem[] = [];
 
         rs?.data?.historyElements?.nodes.filter((n) => !!n).forEach((n) => {
           // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
@@ -172,7 +172,7 @@ export const fetchDotSamaHistory = (address: string, networkMap: Record<string, 
           return;
         }
 
-        const items: TransactionHistoryItemType[] = [];
+        const items: TxHistoryItem[] = [];
 
         rs?.data?.transfers?.filter((n) => !!n).forEach((n) => {
           // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access

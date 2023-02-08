@@ -4,7 +4,7 @@
 import { _ChainAsset, _ChainInfo } from '@subwallet/chain-list/types';
 import { _XCM_CHAIN_GROUP, _XCM_CHAIN_USE_LIMITED_WIGHT } from '@subwallet/extension-base/services/chain-service/constants';
 import { _SubstrateApi } from '@subwallet/extension-base/services/chain-service/types';
-import { _getChainNativeTokenInfo, _getSubstrateParaId, _getXcmAssetMultilocation, _isSubstrateParaChain } from '@subwallet/extension-base/services/chain-service/utils';
+import { _getChainNativeTokenBasicInfo, _getSubstrateParaId, _getXcmAssetMultilocation, _isSubstrateParaChain } from '@subwallet/extension-base/services/chain-service/utils';
 import { FOUR_INSTRUCTIONS_WEIGHT, getMultiLocationFromParachain, getReceiverLocation, POLKADOT_UNLIMITED_WEIGHT } from '@subwallet/extension-koni-base/api/xcm/utils';
 import { parseNumberToDisplay } from '@subwallet/extension-koni-base/utils';
 import { KeyringPair } from '@subwallet/keyring/types';
@@ -50,7 +50,7 @@ export async function substrateEstimateCrossChainFee (
   let feeString = '';
   const originChainInfo = chainInfoMap[originNetworkKey];
   const destinationChainInfo = chainInfoMap[destinationNetworkKey];
-  const { decimals, symbol } = _getChainNativeTokenInfo(originChainInfo);
+  const { decimals, symbol } = _getChainNativeTokenBasicInfo(originChainInfo);
   // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
   const tokenIdentity = _getXcmAssetMultilocation(originTokenInfo);
   const weightParam = _XCM_CHAIN_USE_LIMITED_WIGHT.includes(originNetworkKey) ? POLKADOT_UNLIMITED_WEIGHT : FOUR_INSTRUCTIONS_WEIGHT;

@@ -5,7 +5,7 @@ import { _ChainInfo } from '@subwallet/chain-list/types';
 import { BasicTxInfo, ChainBondingBasics, DelegationItem, StakingType, TuringStakeCompoundResp, UnlockingStakeInfo, ValidatorInfo } from '@subwallet/extension-base/background/KoniTypes';
 import { _PARACHAIN_INFLATION_DISTRIBUTION, _STAKING_CHAIN_GROUP, _STAKING_ERA_LENGTH_MAP } from '@subwallet/extension-base/services/chain-service/constants';
 import { _EvmApi, _SubstrateApi } from '@subwallet/extension-base/services/chain-service/types';
-import { _getChainNativeTokenInfo } from '@subwallet/extension-base/services/chain-service/utils';
+import { _getChainNativeTokenBasicInfo } from '@subwallet/extension-base/services/chain-service/utils';
 import { BOND_LESS_ACTION, calculateChainStakedReturn, getParaCurrentInflation, InflationConfig, REVOKE_ACTION, TuringOptimalCompoundFormat } from '@subwallet/extension-koni-base/api/bonding/utils';
 import { getFreeBalance } from '@subwallet/extension-koni-base/api/dotsama/balance';
 import { parseNumberToDisplay, parseRawNumber, reformatAddress } from '@subwallet/extension-koni-base/utils';
@@ -271,7 +271,7 @@ export async function getParaCollatorsInfo (networkKey: string, substrateApi: _S
 
 export async function getParaBondingTxInfo (chainInfo: _ChainInfo, substrateApi: _SubstrateApi, delegatorAddress: string, amount: number, collatorInfo: ValidatorInfo, currentNominationCount: number) {
   const apiPromise = await substrateApi.isReady;
-  const { decimals } = _getChainNativeTokenInfo(chainInfo);
+  const { decimals } = _getChainNativeTokenBasicInfo(chainInfo);
   const parsedAmount = amount * (10 ** decimals);
   const binaryAmount = new BN(parsedAmount.toString());
   const rawDelegatorState = (await apiPromise.api.query.parachainStaking.delegatorState(delegatorAddress)).toHuman() as Record<string, any> | null;
@@ -298,7 +298,7 @@ export async function getParaBondingTxInfo (chainInfo: _ChainInfo, substrateApi:
 }
 
 export async function handleParaBondingTxInfo (chainInfo: _ChainInfo, amount: number, networkKey: string, nominatorAddress: string, validatorInfo: ValidatorInfo, substrateApiMap: Record<string, _SubstrateApi>, evmApiMap: Record<string, _EvmApi>, currentNominationCount: number) {
-  const { decimals, symbol } = _getChainNativeTokenInfo(chainInfo);
+  const { decimals, symbol } = _getChainNativeTokenBasicInfo(chainInfo);
 
   try {
     const [txInfo, balance] = await Promise.all([
@@ -328,7 +328,7 @@ export async function handleParaBondingTxInfo (chainInfo: _ChainInfo, amount: nu
 
 export async function getParaUnbondingTxInfo (chainInfo: _ChainInfo, substrateApi: _SubstrateApi, address: string, amount: number, collatorAddress: string, unstakeAll: boolean) {
   const apiPromise = await substrateApi.isReady;
-  const { decimals } = _getChainNativeTokenInfo(chainInfo);
+  const { decimals } = _getChainNativeTokenBasicInfo(chainInfo);
   const parsedAmount = amount * (10 ** decimals);
   const binaryAmount = new BN(parsedAmount.toString());
 
@@ -344,7 +344,7 @@ export async function getParaUnbondingTxInfo (chainInfo: _ChainInfo, substrateAp
 }
 
 export async function handleParaUnbondingTxInfo (address: string, amount: number, networkKey: string, substrateApiMap: Record<string, _SubstrateApi>, evmApiMap: Record<string, _EvmApi>, chainInfo: _ChainInfo, collatorAddress: string, unstakeAll: boolean) {
-  const { decimals, symbol } = _getChainNativeTokenInfo(chainInfo);
+  const { decimals, symbol } = _getChainNativeTokenBasicInfo(chainInfo);
 
   try {
     const [txInfo, balance] = await Promise.all([
@@ -373,7 +373,7 @@ export async function handleParaUnbondingTxInfo (address: string, amount: number
 
 export async function getParaBondingExtrinsic (delegatorAddress: string, chainInfo: _ChainInfo, substrateApi: _SubstrateApi, amount: number, collatorInfo: ValidatorInfo, currentNominationCount: number) {
   const apiPromise = await substrateApi.isReady;
-  const { decimals } = _getChainNativeTokenInfo(chainInfo);
+  const { decimals } = _getChainNativeTokenBasicInfo(chainInfo);
   const parsedAmount = amount * (10 ** decimals);
   const binaryAmount = new BN(parsedAmount.toString());
   const rawDelegatorState = (await apiPromise.api.query.parachainStaking.delegatorState(delegatorAddress)).toHuman() as Record<string, any> | null;
@@ -397,7 +397,7 @@ export async function getParaBondingExtrinsic (delegatorAddress: string, chainIn
 
 export async function getParaUnbondingExtrinsic (substrateApi: _SubstrateApi, amount: number, chainInfo: _ChainInfo, collatorAddress: string, unstakeAll: boolean) {
   const apiPromise = await substrateApi.isReady;
-  const { decimals } = _getChainNativeTokenInfo(chainInfo);
+  const { decimals } = _getChainNativeTokenBasicInfo(chainInfo);
   const parsedAmount = amount * (10 ** decimals);
   const binaryAmount = new BN(parsedAmount.toString());
 
@@ -492,7 +492,7 @@ export async function handleParaUnlockingInfo (substrateApi: _SubstrateApi, chai
   }
 
   const { nextWithdrawal, nextWithdrawalAction, nextWithdrawalAmount, redeemable, validatorAddress } = await getParaUnlockingInfo(substrateApi, address, networkKey);
-  const { decimals } = _getChainNativeTokenInfo(chainInfo);
+  const { decimals } = _getChainNativeTokenBasicInfo(chainInfo);
 
   const parsedRedeemable = redeemable / (10 ** decimals);
   const parsedNextWithdrawalAmount = nextWithdrawalAmount / (10 ** decimals);
@@ -520,7 +520,7 @@ export async function getParaWithdrawalTxInfo (substrateApi: _SubstrateApi, addr
 }
 
 export async function handleParaWithdrawalTxInfo (networkKey: string, chainInfo: _ChainInfo, substrateApiMap: Record<string, _SubstrateApi>, evmApiMap: Record<string, _EvmApi>, address: string, collatorAddress: string, action: string) {
-  const { decimals, symbol } = _getChainNativeTokenInfo(chainInfo);
+  const { decimals, symbol } = _getChainNativeTokenBasicInfo(chainInfo);
 
   try {
     const [txInfo, balance] = await Promise.all([
@@ -791,7 +791,7 @@ async function handleBifrostUnlockingInfo (substrateApi: _SubstrateApi, chainInf
   const currentRound = parseRawNumber(currentRoundInfo.current);
   const nextWithdrawal = (nextWithdrawalRound - currentRound) * _STAKING_ERA_LENGTH_MAP[networkKey];
 
-  const { decimals } = _getChainNativeTokenInfo(chainInfo);
+  const { decimals } = _getChainNativeTokenBasicInfo(chainInfo);
 
   const redeemable = nextWithdrawal <= 0 ? nextWithdrawalAmount : 0;
   const parsedRedeemable = redeemable / (10 ** decimals);
@@ -809,7 +809,7 @@ async function handleBifrostUnlockingInfo (substrateApi: _SubstrateApi, chainInf
 async function getTuringCompoundTxInfo (substrateApi: _SubstrateApi, address: string, collatorAddress: string, accountMinimum: string, bondedAmount: string, chainInfo: _ChainInfo) {
   const apiPromise = await substrateApi.isReady;
 
-  const { decimals, symbol } = _getChainNativeTokenInfo(chainInfo);
+  const { decimals, symbol } = _getChainNativeTokenBasicInfo(chainInfo);
 
   // @ts-ignore
   // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment,@typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-member-access
@@ -858,7 +858,7 @@ export async function handleTuringCompoundTxInfo (networkKey: string, chainInfo:
     getFreeBalance(networkKey, address, substrateApiMap, evmApiMap)
   ]);
 
-  const { decimals, symbol } = _getChainNativeTokenInfo(chainInfo);
+  const { decimals, symbol } = _getChainNativeTokenBasicInfo(chainInfo);
 
   const feeString = parseNumberToDisplay(txInfo.paymentInfo.partialFee, decimals) + ` ${symbol}`;
   const rawFee = parseRawNumber(txInfo.paymentInfo.toString());
@@ -948,7 +948,7 @@ export async function handleTuringCancelCompoundTxInfo (substrateApiMap: Record<
     getFreeBalance(networkKey, address, substrateApiMap, evmApiMap)
   ]);
 
-  const { decimals, symbol } = _getChainNativeTokenInfo(chainInfo);
+  const { decimals, symbol } = _getChainNativeTokenBasicInfo(chainInfo);
 
   const feeString = parseNumberToDisplay(paymentInfo.partialFee, decimals) + ` ${symbol}`;
   const rawFee = parseRawNumber(paymentInfo.partialFee.toString());

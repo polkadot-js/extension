@@ -4,6 +4,7 @@
 import { NftCollection, NftItem } from '@subwallet/extension-base/background/KoniTypes';
 import { _EvmApi, _SubstrateApi } from '@subwallet/extension-base/services/chain-service/types';
 import { isUrl } from '@subwallet/extension-koni-base/utils';
+import {getRandomIpfsGateway} from "@subwallet/extension-koni-base/api/nft/config";
 
 export interface HandleNftParams {
   updateItem: (chain: string, data: NftItem, owner: string) => void,
@@ -95,18 +96,18 @@ export abstract class BaseNftApi {
     }
 
     if (input.startsWith('/ipfs/')) {
-      return input.split('/ipfs/')[1];
+      return getRandomIpfsGateway() + input.split('/ipfs/')[1];
     }
 
     if (!input.includes('ipfs://') && !input.includes('ipfs://ipfs/')) { // just the IPFS hash
-      return input;
+      return getRandomIpfsGateway() + input;
     }
 
     if (input.includes('ipfs://') && !input.includes('ipfs://ipfs/')) { // starts with ipfs://
-      return input.split('ipfs://')[1];
+      return getRandomIpfsGateway() + input.split('ipfs://')[1];
     }
 
-    return input.split('ipfs://ipfs/')[1]; // starts with ipfs://ipfs/
+    return getRandomIpfsGateway() + input.split('ipfs://ipfs/')[1]; // starts with ipfs://ipfs/
   }
 
   // Subclass implements this function to parse data into prop result

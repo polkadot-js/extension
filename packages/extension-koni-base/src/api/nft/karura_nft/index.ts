@@ -45,10 +45,10 @@ export class KaruraNftApi extends BaseNftApi {
     }
 
     if (!input.includes('ipfs://')) {
-      return input;
+      return getRandomIpfsGateway() + input;
     }
 
-    return input.split('ipfs://')[1];
+    return getRandomIpfsGateway() + input.split('ipfs://')[1];
   }
 
   /**

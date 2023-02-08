@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { ApolloClient, createHttpLink, gql, InMemoryCache } from '@apollo/client';
-import { TransactionHistoryItemType } from '@subwallet/extension-base/background/KoniTypes';
+import { TxHistoryItem, TxHistoryType } from '@subwallet/extension-base/background/KoniTypes';
 import fetch from 'cross-fetch';
 
 const client = new ApolloClient({
@@ -72,10 +72,10 @@ const query = gql`query transactionQuery($addresses: [String!], $limit: Float = 
 export async function fetchMultiChainHistories (addresses: string[], limit = 500) {
   const response = await client.query<TransactionByAddress, QueryInput>({ query, variables: { addresses, limit } });
   const responseData = response.data.transactionsByAddress;
-  const histories = {} as Record<string, TransactionHistoryItemType[]>;
+  const histories = {} as Record<string, TxHistoryItem[]>;
 
   addresses.forEach((address) => {
-    const addressData: TransactionHistoryItemType[] = [];
+    const addressData: TxHistoryItem[] = [];
 
     responseData.forEach(({ _data, args, blockNumber, chainId, name, relatedAddresses, signer, timestamp }) => {
       if ((address === signer || relatedAddresses.indexOf(address) > -1) && name === 'Balances.Transfer') {
@@ -88,15 +88,14 @@ export async function fetchMultiChainHistories (addresses: string[], limit = 500
           change: amount,
           fee,
           isSuccess: success,
-          action: address === signer ? 'send' : 'received',
+          action: address === signer ? TxHistoryType.SEND : TxHistoryType.RECEIVED,
           extrinsicHash: hash,
-          origin: 'network',
-          eventIdx: 0
+          origin: 'network'
         });
       }
     });
     histories[address] = addressData;
-  }, {} as Record<string, TransactionHistoryItemType[]>);
+  }, {} as Record<string, TxHistoryItem[]>);
 
   return histories;
 }

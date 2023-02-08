@@ -5,7 +5,7 @@ import { _ChainInfo } from '@subwallet/chain-list/types';
 import { SubstrateNftTransaction } from '@subwallet/extension-base/background/KoniTypes';
 import { _PSP22_ABI, _PSP34_ABI } from '@subwallet/extension-base/services/chain-service/helper';
 import { _EvmApi, _SubstrateApi } from '@subwallet/extension-base/services/chain-service/types';
-import { _getChainNativeTokenInfo } from '@subwallet/extension-base/services/chain-service/utils';
+import { _getChainNativeTokenBasicInfo } from '@subwallet/extension-base/services/chain-service/utils';
 import { getFreeBalance } from '@subwallet/extension-koni-base/api/dotsama/balance';
 import { parseNumberToDisplay } from '@subwallet/extension-koni-base/utils';
 
@@ -33,7 +33,7 @@ export async function getPSP34Transaction (
 ) {
   const apiPromise = substrateApiMap[networkKey].api;
   const contractPromise = getPSP34ContractPromise(apiPromise, contractAddress);
-  const { decimals, symbol } = _getChainNativeTokenInfo(chainInfo);
+  const { decimals, symbol } = _getChainNativeTokenBasicInfo(chainInfo);
 
   try {
     const [info, balance] = await Promise.all([

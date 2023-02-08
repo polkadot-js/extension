@@ -61,6 +61,10 @@ export function _isPureEvmChain (chainInfo: _ChainInfo) {
   return (chainInfo.evmInfo !== null && chainInfo.substrateInfo === null);
 }
 
+export function _getOriginChainOfAsset (assetSlug: string) {
+  return assetSlug.split('-')[0];
+}
+
 export function _getContractAddressOfToken (tokenInfo: _ChainAsset) {
   return tokenInfo.metadata?.contractAddress as string || '';
 }
@@ -88,7 +92,7 @@ export function _getTokenMinAmount (tokenInfo: _ChainAsset) {
 }
 
 export function _isChainEvmCompatible (chainInfo: _ChainInfo) {
-  return chainInfo.evmInfo !== null;
+  return chainInfo.evmInfo !== undefined && chainInfo.evmInfo !== null;
 }
 
 export function _isNativeToken (tokenInfo: _ChainAsset) {
@@ -132,18 +136,18 @@ export function _getChainSubstrateAddressPrefix (chainInfo: _ChainInfo) {
 }
 
 export function _isChainSupportNativeNft (chainInfo: _ChainInfo) {
-  return chainInfo.substrateInfo?.supportNft || false;
+  return chainInfo.substrateInfo?.hasNativeNft || false;
 }
 
 export function _isChainSupportEvmNft (chainInfo: _ChainInfo) {
-  return chainInfo.substrateInfo?.supportSmartContract?.includes(_AssetType.ERC721) || false;
+  return chainInfo.evmInfo?.supportSmartContract?.includes(_AssetType.ERC721) || false;
 }
 
 export function _isChainSupportWasmNft (chainInfo: _ChainInfo) {
   return chainInfo.substrateInfo?.supportSmartContract?.includes(_AssetType.PSP34) || false;
 }
 
-export function _getChainNativeTokenInfo (chainInfo: _ChainInfo) {
+export function _getChainNativeTokenBasicInfo (chainInfo: _ChainInfo) {
   if (chainInfo.substrateInfo !== null) { // substrate by default
     return {
       symbol: chainInfo.substrateInfo.symbol,
@@ -163,7 +167,7 @@ export function _getChainNativeTokenInfo (chainInfo: _ChainInfo) {
 }
 
 export function _getChainNativeTokenSlug (chainInfo: _ChainInfo) {
-  return `${chainInfo.slug}-${_AssetType.NATIVE}-${_getChainNativeTokenInfo(chainInfo).symbol}`;
+  return `${chainInfo.slug}-${_AssetType.NATIVE}-${_getChainNativeTokenBasicInfo(chainInfo).symbol}`;
 }
 
 export function _isTokenEvmSmartContract (tokenInfo: _ChainAsset) {
@@ -223,4 +227,8 @@ export function _isSubstrateParaChain (chainInfo: _ChainInfo) {
 
 export function _getEvmAbiExplorer (chainInfo: _ChainInfo) {
   return chainInfo.evmInfo?.abiExplorer || '';
+}
+
+export function _isAssetValuable (assetInfo: _ChainAsset) {
+  return assetInfo.hasValue;
 }

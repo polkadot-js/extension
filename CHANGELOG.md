@@ -1,5 +1,37 @@
 # CHANGELOG
 
+## 0.8.1 (Koni)
+Build date: Feb 03, 2022.
+
+Update:
+- Update RMRK NFT endpoints (#963)
+- Add support send EQ token (#984)
+
+Bug fixes:
+- Fix duplicate crowdloan problems (#991)
+- Fix the staking validator's expected return for relaychain (#997)
+- Fix bug can not connect to AstarEVM (#1001)
+
+## 0.7.9 (Koni)
+Build date: Jan 30, 2022.
+
+Update:
+- Add the coingecko key for Nodle (#983)
+- Support Shiden base PSP-34 contract (#985)
+
+Bug fixes:
+- Fix bug getting multiple balances for Equilibrium (#981)
+
+## 0.7.8 (Koni)
+Build date: Jan 19, 2022.
+
+Update:
+- Update Equilibrium balance structure (#975)
+- Update networks endpoint (#977)
+
+Bug fixes:
+- Fix bug getting multiple balances for Equilibrium (#981)
+
 ## 0.7.7 (Koni)
 Build date: Dec 28, 2022.
 

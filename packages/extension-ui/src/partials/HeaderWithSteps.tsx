@@ -31,7 +31,7 @@ const Step = styled.div<StepProps>`
 const Steps = styled.div`
   display: flex;
   justify-content: center;
-  margin: 8px -16px 0;
+  margin: 0px -16px 0;
   gap: 8px;
 
   :first-child {

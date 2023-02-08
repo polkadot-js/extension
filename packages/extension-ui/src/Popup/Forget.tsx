@@ -8,7 +8,7 @@ import { RouteComponentProps, withRouter } from 'react-router';
 import styled from 'styled-components';
 
 import helpIcon from '../assets/help.svg';
-import { ActionContext, Address, Button, ButtonArea, VerticalSpace } from '../components';
+import { ActionContext, Address, Button, ButtonArea, HelperFooter, VerticalSpace } from '../components';
 import useTranslation from '../hooks/useTranslation';
 import { forgetAccount } from '../messaging';
 import { Header } from '../partials';
@@ -42,48 +42,6 @@ function Forget({
       });
   }, [address, onAction]);
 
-  const Helper = styled.div`
-  display: flex;
-  position: relative;
-  flex-direction: row;
-  justify-content: center;
-  align-items: flex-start;
-  gap: 12px;
-  padding-top: 0px;
-  margin-bottom: 16px;
-
-  &:before {
-  position: absolute;
-  content: '';
-  width: calc(100% - 32px);
-  border-top: 1px solid ${({ theme }: ThemeProps) => theme.boxBorderColor};
-  top: -16px;
- }
-
-  img.icon {
-    margin-top: -4px;
-    align-self: flex-start; 
-  }
-
-  span {
-    font-weight: 300;
-    font-size: 13px;
-    line-height: 130%;
-    letter-spacing: 0.06em;
-    color: ${({ theme }: ThemeProps) => theme.subTextColor};
-    align-self: flex-start;
-
-    .link {
-      color: ${({ theme }: ThemeProps) => theme.primaryColor};
-      cursor: pointer;
-
-      :hover {
-        text-decoration: underline;
-      }
-    }
-  }
-`;
-
   return (
     <>
       <Header
@@ -106,7 +64,7 @@ function Forget({
         />
       </div>
       <VerticalSpace />
-      <Helper>
+      <HelperFooter>
         <img
           className='icon'
           src={helpIcon}
@@ -120,7 +78,7 @@ function Forget({
             {` ${t<string>('Learn more')}`}
           </span>
         </span>
-      </Helper>
+      </HelperFooter>
       <ButtonArea>
         <Button
           isDisabled={isBusy}
@@ -143,9 +101,6 @@ function Forget({
 export default withRouter(
   styled(Forget)(
     ({ theme }: Props) => `
-  .actionArea {
-    padding: 10px 24px;
-  }
 
   .text-container {
     display: flex;
@@ -175,17 +130,8 @@ export default withRouter(
     }
   }
 
-  .center {
-    margin: auto;
-  }
 
-  .movedWarning {
-    margin-top: 8px;
-  }
 
-  .withMarginTop {
-    margin-top: 4px;
-  }
 `
   )
 );

@@ -417,7 +417,7 @@ export default styled(Address)(
     text-overflow: ellipsis;
     width: 300px;
     white-space: nowrap;
-    color: ${isHidden ? theme.textColor : theme.subTextColor};
+    color: ${isHidden ? theme.subTextColor : theme.textColor};
     opacity: ${isHidden ? 0.6 : 1};
   } 
 

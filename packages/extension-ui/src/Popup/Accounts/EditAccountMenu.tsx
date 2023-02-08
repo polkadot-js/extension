@@ -3,12 +3,11 @@
 
 import type { ThemeProps } from '../../types';
 
-import React, { useCallback, useContext, useState } from 'react';
+import React, { useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import CopyToClipboard from 'react-copy-to-clipboard';
 import { RouteComponentProps, withRouter } from 'react-router';
 import styled from 'styled-components';
 
-import { AccountJson } from '@polkadot/extension-base/background/types';
 import { EditMenuCard, Identicon } from '@polkadot/extension-ui/components';
 import useMetadata from '@polkadot/extension-ui/hooks/useMetadata';
 import { IconTheme } from '@polkadot/react-identicon/types';
@@ -36,19 +35,14 @@ function EditAccountMenu({
   }
 }: Props): React.ReactElement<Props> {
   const { t } = useTranslation();
-  const { accounts, hierarchy } = useContext(AccountContext);
+  const { accounts } = useContext(AccountContext);
+  const onAction = useContext(ActionContext);
   const { show } = useToast();
 
   const searchParams = new URLSearchParams(search);
   const isExternal = searchParams.get('isExternal');
 
-  function findAccountInHierarchy(accounts: AccountJson[], _address: string) {
-    return hierarchy.find(({ address }): boolean => address === _address) || null;
-  }
-
-  const _onCopy = useCallback(() => show(t<string>('Public address copied to your clipboard'), 'success'), [show, t]);
-
-  const [account, setAccount] = useState(findAccountInHierarchy(accounts, address));
+  const account = useMemo(() => accounts.find((account) => account.address === address), [accounts, address]);
 
   const [isHidden, setIsHidden] = useState(account?.isHidden);
 
@@ -60,24 +54,17 @@ function EditAccountMenu({
 
   const theme = (account && account.type === 'ethereum' ? 'ethereum' : chain?.icon || 'polkadot') as IconTheme;
 
+  const _onCopy = useCallback(() => show(t<string>('Public address copied to your clipboard'), 'success'), [show, t]);
+
   const _toggleVisibility = useCallback((): void => {
     if (address) {
       showAccount(address, isHidden || false)
-        .then((data) => {
-          if (account) {
-            setAccount({
-              ...account,
-              isHidden: !account.isHidden
-            });
-          }
-
-          setIsHidden(data);
+        .then(() => {
+          setIsHidden(!isHidden);
         })
         .catch(console.error);
     }
-  }, [address, isHidden, account]);
-
-  const onAction = useContext(ActionContext);
+  }, [address, isHidden]);
 
   const goTo = useCallback((path: string) => () => onAction(path), [onAction]);
 
@@ -87,6 +74,7 @@ function EditAccountMenu({
         showBackArrow
         showHelp
         text={t<string>('Edit Account')}
+        withGoToRoot
       />
       <div className={className}>
         <Identicon
@@ -100,8 +88,9 @@ function EditAccountMenu({
         <EditMenuCard
           description={account?.name || ''}
           extra='chevron'
+          onClick={goTo(`/account/edit-name/${address}`)}
           position='top'
-          title='Name'
+          title={t<string>('Name')}
         />
         <CopyToClipboard text={(address && address) || ''}>
           <EditMenuCard
@@ -109,14 +98,14 @@ function EditAccountMenu({
             extra='copy'
             onClick={_onCopy}
             position='middle'
-            title='Address'
+            title={t<string>('Address')}
           />
         </CopyToClipboard>
         <EditMenuCard
           description={chain?.genesisHash ? 'testnet' : 'Mainnet'}
           extra='chevron'
           position='middle'
-          title='Network'
+          title={t<string>('Network')}
         />
         <EditMenuCard
           description=''
@@ -125,7 +114,7 @@ function EditAccountMenu({
           toggle={
             <>
               <Switch
-                checked={!account?.isHidden || false}
+                checked={!account?.isHidden}
                 checkedLabel=''
                 onChange={_toggleVisibility}
                 uncheckedLabel=''
@@ -138,7 +127,7 @@ function EditAccountMenu({
           extra='chevron'
           position='both'
           preIcon={<img src={subAccountIcon} />}
-          title='Create a sub-account'
+          title={t<string>('Create a sub-account')}
         />
         <EditMenuCard
           description=''
@@ -147,7 +136,7 @@ function EditAccountMenu({
           onClick={goTo(`/account/forget/${address}`)}
           position='both'
           preIcon={<img src={forgetIcon} />}
-          title='Forget'
+          title={t<string>('Forget')}
         />
       </div>
     </>
@@ -180,6 +169,15 @@ export default React.memo(
 
   &::-webkit-scrollbar {
     display: none;
+  }
+
+  // TODO: PLACEHOLDER UNTIL ITS DECIDED
+  [class*="EditMenuCard"]:last-of-type {
+    position: absolute;
+    bottom: 0px;
+    right: 0px;
+    left: 0px;
+    margin: 16px;
   }
   `
     )

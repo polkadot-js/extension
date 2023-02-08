@@ -22,7 +22,6 @@ const TextInput = css(
   font-size: ${theme.fontSize};
   height: 56px;
   outline: none;
-  padding-top: 8px;
   padding-left: 12px;
   resize: none;
   width: 100%;

@@ -38,6 +38,7 @@ import { buildHierarchy } from '../util/buildHierarchy';
 import AddAccountMenu from './Accounts/AddAccountMenu';
 import CreateAccountMenu from './Accounts/CreateAccountMenu';
 import EditAccountMenu from './Accounts/EditAccountMenu';
+import EditName from './Accounts/EditName';
 import AccountManagement from './AuthManagement/AccountManagement';
 import Restore from './Help/Restore';
 import SafetyLink from './Help/SafetyLink';
@@ -195,6 +196,9 @@ export default function Popup(): React.ReactElement {
                             </Route>
                             <Route path='/account/edit-menu/:address'>
                               {wrapWithErrorBoundary(<EditAccountMenu />, 'edit-menu')}
+                            </Route>
+                            <Route path='/account/edit-name/:address'>
+                              {wrapWithErrorBoundary(<EditName />, 'edit-name')}
                             </Route>
                             <Route path='/account/forget/:address'>
                               {wrapWithErrorBoundary(<Forget />, 'forget-address')}

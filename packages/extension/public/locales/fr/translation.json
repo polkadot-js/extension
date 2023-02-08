@@ -196,5 +196,9 @@
   "Visibility for apps": "",
   "Address": "",
   "Public address copied to your clipboard": "",
-  "Even though you can remove account from this wallet, you can restore it here or in another wallet with the secret phrase.": ""
+  "Even though you can remove account from this wallet, you can restore it here or in another wallet with the secret phrase.": "",
+  "Account name": "",
+  "Save": "",
+  "This name is visible only on this device": "",
+  "Account name changed successfully": ""
 }

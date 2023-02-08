@@ -71,7 +71,7 @@ export default styled(Button)(
       ? theme.buttonTertiaryBackground
       : theme.buttonBackground
   };
-
+  
   cursor: pointer;
   display: block;
   width: ${tertiary ? 'max-content' : '100%'};
@@ -90,10 +90,11 @@ export default styled(Button)(
   position: relative;
   text-align: center;
   letter-spacing: 0.05em;
-  transition: .4s ease-in-out;
+  transition: .2s ease-in-out;
 
   &:disabled {
     cursor: default;
+    pointer-events: none;
     background: ${
       isDanger
         ? theme.buttonBackgroundDangerDisabled
@@ -106,7 +107,7 @@ export default styled(Button)(
     opacity: ${secondary || tertiary ? theme.buttonTertiaryDisabledOpacity : 1};
   }
 
-  &:focus{
+  &:focus {
     outline: none;
     border: ${
       secondary ? theme.buttonSecondaryBorderFocused : tertiary ? theme.buttonTertiaryBorder : theme.buttonBorderFocused

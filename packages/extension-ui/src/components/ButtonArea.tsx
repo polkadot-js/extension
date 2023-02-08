@@ -24,7 +24,7 @@ export default styled(ButtonArea)(
   margin-right: 0;
 
   & > button:not(:last-of-type) {
-    margin-right: 8px;
+    margin-right: 16px;
   }
 `
 );

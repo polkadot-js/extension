@@ -89,6 +89,7 @@ export default styled(EditMenuCard)(
   border-radius: 8px;
   height: 48px;
   margin-bottom: ${position === 'top' || position === 'middle' ? ' 2px' : '16px'};
+  margin-top: ${position === 'both' ? '16px' : '0px'}
   border-radius: ${
     position === 'top'
       ? '8px 8px 2px 2px'

@@ -14,6 +14,7 @@ interface Props extends ThemeProps {
   content: React.ReactNode;
   className?: string;
   type: SnackbarTypes;
+  visible: boolean;
 }
 
 function Toast({ className, content, type }: Props): React.ReactElement<Props> {
@@ -35,9 +36,10 @@ function Toast({ className, content, type }: Props): React.ReactElement<Props> {
   );
 }
 
-export default styled(Toast)<{ visible: boolean }>`
+export default styled(Toast)(
+  ({ theme, type, visible }: Props) => `
   position: fixed;
-  display: ${({ visible }): string => (visible ? 'flex' : 'none')};
+  display: ${visible ? 'flex' : 'none'};
   height: 72px;
   bottom: 8px;
   left: 8px;
@@ -45,15 +47,15 @@ export default styled(Toast)<{ visible: boolean }>`
   flex-direction: row;
   align-items: center;
   border-radius: 4px;
-  box-shadow: ${({ theme }: Props): string => theme.toastBoxShadow};;
+  box-shadow: ${theme.toastBoxShadow};;
   gap: 14px;
-  color : ${({ theme }: Props): string => theme.toastTextColor};
+  color : ${theme.toastTextColor};
   isolation: isolate;
   width: 344px;
   padding: 16px;
   box-sizing: border-box;
   animation: toast 0.2s, toast  0.2s linear 1.4s reverse;
-
+  
   @keyframes toast {
   from {
     opacity: 0;
@@ -67,18 +69,25 @@ export default styled(Toast)<{ visible: boolean }>`
 
   .snackbar-content {
     min-width: 200px;
+    font-family:  ${theme.secondaryFontFamily};
+    font-weight: 500;
+    font-size: 14px;
+    line-height: 120%;
+    letter-spacing: 0.07em;
   }
 
   && {
     border-radius: 4px;
-    background: ${({ theme, type }: Props): string =>
+    background: ${
       type === 'success'
         ? theme.toastSuccessBackground
         : type === 'warning'
         ? theme.toastWarningBackground
         : type === 'critical'
         ? theme.toastCriticalBackground
-        : theme.toastInfoBackground};
+        : theme.toastInfoBackground
+    };
   }
-  
-`;
+
+`
+);

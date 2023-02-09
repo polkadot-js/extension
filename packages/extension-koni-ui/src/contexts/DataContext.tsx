@@ -137,7 +137,7 @@ export const DataContext = React.createContext(_DataContext);
 export const DataContextProvider = ({ children }: DataContextProviderProps) => {
   // Init subscription
   // Common
-  _DataContext.addHandler({ ...subscribeAccountsData, name: 'subscribeCurrentAccount', relatedStores: ['accountState'], isStartImmediately: true });
+  _DataContext.addHandler({ ...subscribeAccountsData, name: 'subscribeAccountsData', relatedStores: ['accountState'], isStartImmediately: true });
   _DataContext.addHandler({ ...subscribeKeyringState, name: 'subscribeCurrentAccount', relatedStores: ['accountState'], isStartImmediately: true });
 
   _DataContext.addHandler({ ...subscribeChainStateMap, name: 'subscribeChainStateMap', relatedStores: ['chainStore'], isStartImmediately: true });

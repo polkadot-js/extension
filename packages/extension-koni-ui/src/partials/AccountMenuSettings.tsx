@@ -11,7 +11,7 @@ import Link from '@subwallet/extension-koni-ui/components/Link';
 import Menu from '@subwallet/extension-koni-ui/components/Menu';
 import useTranslation from '@subwallet/extension-koni-ui/hooks/useTranslation';
 import { keyringLock } from '@subwallet/extension-koni-ui/messaging';
-import AccountsTree from '@subwallet/extension-koni-ui/Popup/Accounts/AccountsTree';
+import AccountsTree from '@subwallet/extension-koni-ui/Popup/Accounts_old/AccountsTree';
 import { noop } from '@subwallet/extension-koni-ui/util/function';
 import React, { useCallback, useContext, useState } from 'react';
 import styled, { ThemeContext } from 'styled-components';

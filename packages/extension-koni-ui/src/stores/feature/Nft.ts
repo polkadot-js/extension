@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
-import {NftCollection, NftItem} from '@subwallet/extension-base/background/KoniTypes';
+import { NftCollection, NftItem } from '@subwallet/extension-base/background/KoniTypes';
 import { NftStore, ReduxStatus } from '@subwallet/extension-koni-ui/stores/types';
 
 const initialState = {
@@ -29,7 +29,7 @@ const nftSlice = createSlice({
 
       return {
         reduxStatus: ReduxStatus.READY,
-        nftItems: state.nftCollections,
+        nftItems: state.nftItems,
         nftCollections: payload
       };
     }

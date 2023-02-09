@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { ThemeTypes } from '@subwallet/extension-base/background/KoniTypes';
+import subWalletLogo from '@subwallet/extension-koni-ui/assets/sub-wallet-logo.svg';
 import { GlobalToken } from '@subwallet/react-ui/es/theme/interface';
 
 export declare type Theme = {
@@ -12,6 +13,7 @@ export declare type Theme = {
   // todo: add extend token later
   extendToken: {
     bodyBackgroundColor: string,
+    logo: string
   };
 };
 
@@ -21,7 +23,8 @@ export function chooseTheme (theme: ThemeTypes, token: GlobalToken): Theme {
     name: 'Dark',
     token: { ...token },
     extendToken: {
-      bodyBackgroundColor: token.colorBgSecondary
+      bodyBackgroundColor: token.colorBgSecondary,
+      logo: subWalletLogo
     }
   };
 
@@ -31,7 +34,8 @@ export function chooseTheme (theme: ThemeTypes, token: GlobalToken): Theme {
       id: 'light',
       name: 'Light',
       extendToken: {
-        bodyBackgroundColor: '#fff'
+        bodyBackgroundColor: '#fff',
+        logo: subWalletLogo
       }
     };
   }

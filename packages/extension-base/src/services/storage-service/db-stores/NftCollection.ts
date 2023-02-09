@@ -7,8 +7,8 @@ import { liveQuery } from 'dexie';
 import BaseStoreWithChain from './BaseStoreWithChain';
 
 export default class NftCollectionStore extends BaseStoreWithChain<NftCollection> {
-  subscribeNftCollection (chainHashes?: string[]) {
-    return liveQuery(() => this.getNftCollection(chainHashes));
+  subscribeNftCollection (chains?: string[]) {
+    return liveQuery(() => this.getNftCollection(chains));
   }
 
   getNftCollection (chainList?: string[]) {

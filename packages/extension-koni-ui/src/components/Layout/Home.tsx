@@ -2,14 +2,16 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { SelectedAccount } from '@subwallet/extension-koni-ui/components/Layout/parts/SelectedAccount';
+import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { SwScreenLayout } from '@subwallet/react-ui';
 import Icon from '@subwallet/react-ui/es/icon';
 import { SwTabBarItem } from '@subwallet/react-ui/es/sw-tab-bar';
 import { Aperture, Database, Globe, List, MagnifyingGlass, Rocket, Wallet } from 'phosphor-react';
 import React, { useCallback, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import styled from 'styled-components';
 
-type Props = {
+type Props = ThemeProps & {
   children?: React.ReactNode;
 };
 
@@ -73,7 +75,7 @@ const headerIcons = [
   }
 ];
 
-const Home = ({ children }: Props) => {
+const Component = ({ children, className }: Props) => {
   const [selectedTab, setSelectedTab] = useState('tokens');
   const navigate = useNavigate();
 
@@ -87,6 +89,7 @@ const Home = ({ children }: Props) => {
 
   return (
     <SwScreenLayout
+      className={className}
       headerContent={<SelectedAccount />}
       headerIcons={headerIcons}
       headerLeft={
@@ -111,5 +114,12 @@ const Home = ({ children }: Props) => {
     </SwScreenLayout>
   );
 };
+
+const Home = styled(Component)<Props>(() => ({
+  '.ant-sw-screen-layout-body': {
+    padding: 0,
+    margin: 0
+  }
+}));
 
 export { Home };

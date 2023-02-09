@@ -47,7 +47,7 @@ function _Root ({ className }: ThemeProps): React.ReactElement {
   useEffect(() => {
     if (location.pathname === '/') {
       // Todo: check conditional an navigate to default page
-      navigate('/home/tokens');
+      navigate('/home/nfts');
     }
   },
   [location.pathname, navigate]
@@ -66,6 +66,7 @@ function _Root ({ className }: ThemeProps): React.ReactElement {
 
 export const Root = styled(_Root)(() => ({
   '.main-layout': {
-    flex: 1
+    flex: 1,
+    overflow: 'hidden'
   }
 }));

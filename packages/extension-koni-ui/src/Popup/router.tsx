@@ -16,8 +16,9 @@ import { RootState } from '@subwallet/extension-koni-ui/stores';
 import React, { useContext, useEffect } from 'react';
 import { useSelector } from 'react-redux';
 import { createHashRouter, Outlet, useLocation, useRouteError } from 'react-router-dom';
-
+import { AddAccount } from '@subwallet/extension-koni-ui/Popup/Accounts/AddAccount';
 import PageWrapper from '../components/Layout/PageWrapper';
+import { AccountList } from '@subwallet/extension-koni-ui/Popup/Accounts/AccountList';
 
 export function Crypto () {
   const dataContext = useContext(DataContext);
@@ -118,10 +119,10 @@ export const router = createHashRouter([{ path: '/',
     element: <Outlet />,
     children: [{
       path: 'account-list',
-      element: <Example />
+      element: <AccountList />
     }, {
       path: 'add-account',
-      element: <Example />,
+      element: <AddAccount />,
       children: [{
         path: 'from-seed',
         element: <Example />

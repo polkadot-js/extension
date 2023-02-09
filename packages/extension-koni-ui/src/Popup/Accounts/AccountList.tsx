@@ -3,19 +3,21 @@
 
 import useTranslation from '@subwallet/extension-koni-ui/hooks/useTranslation';
 import { Theme } from '@subwallet/extension-koni-ui/themes';
-import { SelectModal } from '@subwallet/react-ui';
+import { Button, SelectModal } from '@subwallet/react-ui';
 import React, { useCallback, useState } from 'react';
 import styled from 'styled-components';
 import { useSelector } from 'react-redux';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { AccountJson } from '@subwallet/extension-base/background/types';
-import AccountItemWithName from '@subwallet/extension-koni-ui/components/Account/AccountItemWithName';
+import AccountCardSelection from '@subwallet/extension-koni-ui/components/Account/AccountCardSelection';
+import Icon from '@subwallet/react-ui/es/icon';
+import { PlusCircle, FileArrowDown, Swatches } from 'phosphor-react';
 
 interface Props {
   className?: string;
 }
 
-function _SelectAccount ({ className }: Props): React.ReactElement<Props> {
+function _AccountList ({ className }: Props): React.ReactElement<Props> {
   const [selected, setSelected] = useState<string>('');
   const { t } = useTranslation();
   const { accounts } = useSelector((state: RootState) => state.accountState);
@@ -26,7 +28,7 @@ function _SelectAccount ({ className }: Props): React.ReactElement<Props> {
 
   const renderItem = (item: AccountJson, _selected: boolean) => {
     return (
-      <AccountItemWithName accountName={item.name} avatarSize={24} address={item.address} genesisHash={item.genesisHash} isSelected={_selected} />
+      <AccountCardSelection className={className} accountName={item.name} address={item.address} genesisHash={item.genesisHash} isSelected={_selected} />
     );
   };
 
@@ -35,46 +37,46 @@ function _SelectAccount ({ className }: Props): React.ReactElement<Props> {
       {/* @ts-ignore */}
       <SelectModal
         className={className}
-        id='select-account-modal'
+        id='account-list-modal'
         itemKey='address'
         items={accounts}
         onSelect={_onSelect}
         renderItem={renderItem}
         selected={selected}
         title={t('Select account')}
+        footer={
+          <div style={{ display: 'flex' }}>
+            <Button schema='secondary' icon={<Icon phosphorIcon={PlusCircle} weight={'fill'}/>} block={true} >
+              {t('Create new account')}
+            </Button>
+            <Button schema='secondary' icon={<Icon phosphorIcon={FileArrowDown} weight={'fill'}/>} />
+            <Button schema='secondary' icon={<Icon phosphorIcon={Swatches} weight={'fill'}/>} />
+          </div>
+        }
       />
     </>
   );
 }
 
-export const SelectAccount = styled(_SelectAccount)<Props>(({ theme }) => {
+export const AccountList = styled(_AccountList)<Props>(({ theme }) => {
   const { token } = theme as Theme;
 
   return ({
     '&.ant-sw-modal': {
-      '.ant-web3-block': {
-        padding: `${token.padding || 16 - 2}px ${token.paddingSM}px`,
-        height: 52
+      '.ant-account-card': {
+        padding: token.paddingSM,
       },
-      '.ant-account-item-address': {
+
+      '.ant-web3-block .ant-web3-block-middle-item': {
         textAlign: 'initial',
-        color: token.colorTextLight4
-      },
-      '.account-item-content-wrapper': {
-        display: 'flex'
       },
 
-      '.account-item-name, .account-item-address-wrapper, .ant-account-item .ant-account-item-address': {
-        fontSize: token.fontSize,
-        lineHeight: token.lineHeight,
-        fontWeight: 600,
+      '.ant-account-card-name': {
+        textOverflow: 'ellipsis',
+        overflow: 'hidden',
+        whiteSpace: 'nowrap',
+        maxWidth: 120
       },
-
-      '.account-item-address-wrapper': {
-        paddingLeft: 2,
-        display: 'flex',
-        color: token.colorTextLight4,
-      }
     }
   });
 });

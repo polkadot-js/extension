@@ -94,6 +94,7 @@ export const Debugger = styled(Component)<Props>(({ theme }: ThemeProps) => {
     textAlign: 'left',
     '.debugger-button': {
       position: 'fixed',
+      zIndex: 999,
       bottom: 90,
       right: token.sizeMD
     },

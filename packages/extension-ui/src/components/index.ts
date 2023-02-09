@@ -49,6 +49,8 @@ export { default as SplashHandler } from './SplashHandler';
 export { default as Video } from './Video';
 export { default as EditMenuCard } from './EditMenuCard';
 export { default as HelperFooter } from './HelperFooter';
+export { default as ScrollWrapper } from './ScrollWrapper';
+export { default as BottomWrapper } from './BottomWrapper';
 
 export { Input, TextArea } from './TextInputs';
 

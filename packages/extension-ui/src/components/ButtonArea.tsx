@@ -6,25 +6,45 @@ import type { ThemeProps } from '../types';
 import React from 'react';
 import styled from 'styled-components';
 
+import BottomWrapper from './BottomWrapper';
+
 interface Props extends ThemeProps {
   className?: string;
   children: React.ReactNode;
+  footer?: React.ReactNode;
 }
 
-const ButtonArea = function ({ children, className }: Props) {
-  return <div className={className}>{children}</div>;
+const ButtonArea = function ({ children, className, footer }: Props) {
+  return (
+    <BottomWrapper>
+      <div className={className}>
+        <div className='footer'>{footer}</div>
+        <div className='children'>{children}</div>
+      </div>
+    </BottomWrapper>
+  );
 };
 
 export default styled(ButtonArea)(
   () => `
   display: flex;
-  flex-direction: row;
+  flex-direction: column;
   margin-bottom: 16px;
-  margin-left: 0;
-  margin-right: 0;
 
-  & > button:not(:last-of-type) {
-    margin-right: 16px;
+  padding-left: 16px;
+  padding-right: 16px;
+
+  .footer{
+    display: flex;
+  }
+  .children {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    
+    & > button:not(:last-of-type) {
+      margin-right: 16px;
+    }
   }
 `
 );

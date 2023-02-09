@@ -8,10 +8,10 @@ interface Props {
   className?: string;
 }
 
-function VerticalSpace ({ className }: Props): React.ReactElement<Props> {
+function VerticalSpace({ className }: Props): React.ReactElement<Props> {
   return <div className={className} />;
 }
 
 export default styled(VerticalSpace)`
-  height: 100%;
+  margin-top: auto;
 `;

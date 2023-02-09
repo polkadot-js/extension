@@ -27,11 +27,11 @@ export default styled(HelperFooter)(
     margin-bottom: 16px;
   
     &:before {
-    position: absolute;
-    content: '';
-    width: calc(100% - 32px);
-    border-top: 1px solid ${theme.boxBorderColor};
-    top: -16px;
+      position: absolute;
+      content: '';
+      width: calc(100% - 32px);
+      border-top: 1px solid ${theme.boxBorderColor};
+      top: -8px;
    }
   
     img.icon {

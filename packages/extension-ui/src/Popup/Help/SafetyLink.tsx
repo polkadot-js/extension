@@ -19,9 +19,9 @@ function SafetyLink({ className }: Props): React.ReactElement<Props> {
   return (
     <>
       <Header
+        text={t<string>('SafetyLink')}
         withBackArrow
         withHelp
-        text={t<string>('SafetyLink')}
       />
       {/* TODO: */}
       <div className={className}>PLACEHOLDER</div>

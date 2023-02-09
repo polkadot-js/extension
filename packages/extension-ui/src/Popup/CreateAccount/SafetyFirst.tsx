@@ -22,6 +22,24 @@ function SafetyFirst({ className, onNextStep }: Props): React.ReactElement<Props
 
   const goTo = useCallback((path: string) => () => onAction(path), [onAction]);
 
+  const footer = (
+    <HelperFooter>
+      <img
+        className='icon'
+        src={helpIcon}
+      />
+      <span>
+        {t<string>('Why it is critical to store your secret phrase in a safe place?')}&nbsp;
+        <span
+          className='link'
+          onClick={goTo('/help-safety')}
+        >
+          {t<string>('Learn more')}
+        </span>
+      </span>
+    </HelperFooter>
+  );
+
   return (
     <>
       <div className={className}>
@@ -39,22 +57,7 @@ function SafetyFirst({ className, onNextStep }: Props): React.ReactElement<Props
         </div>
       </div>
       <VerticalSpace />
-      <HelperFooter>
-        <img
-          className='icon'
-          src={helpIcon}
-        />
-        <span>
-          {t<string>('Why it is critical to store your secret phrase in a safe place?')}
-          <span
-            className='link'
-            onClick={goTo('/help-safety')}
-          >
-            {` ${t<string>('Learn more')}`}
-          </span>
-        </span>
-      </HelperFooter>
-      <ButtonArea>
+      <ButtonArea footer={footer}>
         <Button
           onClick={goTo('/')}
           secondary
@@ -82,7 +85,7 @@ export default React.memo(
         
       .icon {
         margin: 0 auto;
-        }
+      }
 
       .heading {
         font-family: ${theme.secondaryFontFamily};

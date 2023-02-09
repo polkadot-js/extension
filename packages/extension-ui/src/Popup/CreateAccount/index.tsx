@@ -4,7 +4,7 @@
 import React, { useCallback, useContext, useEffect, useState } from 'react';
 import styled from 'styled-components';
 
-import { ActionContext, Loading } from '../../components';
+import { ActionContext, Loading, ScrollWrapper } from '../../components';
 import AccountNamePasswordCreation from '../../components/AccountNamePasswordCreation';
 import useGenesisHashOptions from '../../hooks/useGenesisHashOptions';
 import useMetadata from '../../hooks/useMetadata';
@@ -83,37 +83,39 @@ function CreateAccount({ className }: Props): React.ReactElement {
         text={t<string>('Create an account')}
         total={3}
       />
-      <Loading>
-        {step === 1 && <SafetyFirst onNextStep={_onNextStep} />}
-        {seed && step === 2 && (
-          <SaveMnemonic
-            onNextStep={_onNextStep}
-            onPreviousStep={_onPreviousStep}
-            seed={seed}
-          />
-        )}
-        {seed && step === 3 && (
-          <>
-            {/* TODO: COMEBACK WHEN ITS DECIDED */}
-            {/* <Dropdown
+      <ScrollWrapper>
+        <Loading>
+          {step === 1 && <SafetyFirst onNextStep={_onNextStep} />}
+          {seed && step === 2 && (
+            <SaveMnemonic
+              onNextStep={_onNextStep}
+              onPreviousStep={_onPreviousStep}
+              seed={seed}
+            />
+          )}
+          {seed && step === 3 && (
+            <>
+              {/* TODO: COMEBACK WHEN ITS DECIDED */}
+              {/* <Dropdown
               className={className}
               label={t<string>('Network')}
               onChange={_onChangeNetwork}
               options={options}
               value={genesisHash}
             /> */}
-            <AccountNamePasswordCreation
-              address={address}
-              buttonLabel={t<string>('Create')}
-              genesisHash={genesisHash}
-              isBusy={isBusy}
-              onBackClick={_onPreviousStep}
-              onCreate={_onCreate}
-              onNameChange={setName}
-            />
-          </>
-        )}
-      </Loading>
+              <AccountNamePasswordCreation
+                address={address}
+                buttonLabel={t<string>('Create')}
+                genesisHash={genesisHash}
+                isBusy={isBusy}
+                onBackClick={_onPreviousStep}
+                onCreate={_onCreate}
+                onNameChange={setName}
+              />
+            </>
+          )}
+        </Loading>
+      </ScrollWrapper>
     </>
   );
 }

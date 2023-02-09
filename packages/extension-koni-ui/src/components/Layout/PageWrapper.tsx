@@ -15,8 +15,6 @@ export interface PageWrapperProps extends ThemeProps{
 
 const defaultResolver = Promise.resolve(true);
 
-// Todo: Create data loader wrapper
-// Todo: Create loading effect
 function Component ({ children, className, resolve }: PageWrapperProps) {
   const nodeRef = React.useRef(null);
   const location = useLocation();

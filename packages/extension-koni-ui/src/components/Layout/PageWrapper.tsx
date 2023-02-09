@@ -1,22 +1,21 @@
 // Copyright 2019-2022 @polkadot/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import React, {useEffect, useState} from "react";
-import {Await, useLocation} from "react-router-dom";
-import {LoadingContainer} from "@subwallet/extension-koni-ui/components";
-import {CSSTransition} from "react-transition-group";
+import { LoadingContainer } from '@subwallet/extension-koni-ui/components';
+import { ThemeProps } from '@subwallet/extension-koni-ui/types';
+import React, { useEffect, useState } from 'react';
+import { Await, useLocation } from 'react-router-dom';
+import { CSSTransition } from 'react-transition-group';
+import styled from 'styled-components';
 
-export interface PageWrapperProps {
-  className?: string;
+export interface PageWrapperProps extends ThemeProps{
   resolve?: Promise<any>;
   children?: React.ReactElement;
 }
 
 const defaultResolver = Promise.resolve(true);
 
-// Todo: Create data loader wrapper
-// Todo: Create loading effect
-export default function PageWrapper ({ children, resolve, className }: PageWrapperProps) {
+function Component ({ children, className, resolve }: PageWrapperProps) {
   const nodeRef = React.useRef(null);
   const location = useLocation();
   const [pathName, setPathName] = useState('');
@@ -43,3 +42,9 @@ export default function PageWrapper ({ children, resolve, className }: PageWrapp
     </React.Suspense>
   </div>;
 }
+
+const PageWrapper = styled(Component)<PageWrapperProps>(({ theme }) => ({
+  height: '100%'
+}));
+
+export default PageWrapper;

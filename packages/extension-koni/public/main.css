@@ -34,6 +34,10 @@ a {
   text-decoration: none;
 }
 
+textarea {
+  color: inherit;
+}
+
 .kn-sui-dropdown-base .menu {
   display: none;
   user-select: none;

@@ -1,7 +1,7 @@
 // Copyright 2019-2022 @subwallet/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { persistor,store, StoreName } from '@subwallet/extension-koni-ui/stores';
+import { persistor, store, StoreName } from '@subwallet/extension-koni-ui/stores';
 import { subscribeAccountsData, subscribeAssetRegistry, subscribeBalance, subscribeChainInfoMap, subscribeChainStateMap, subscribeCrowdloan, subscribeKeyringState, subscribeNftCollections, subscribeNftItems, subscribePrice, subscribeStakeUnlockingInfo, subscribeStaking, subscribeStakingReward, subscribeTxHistory } from '@subwallet/extension-koni-ui/stores/utils';
 import React from 'react';
 import { Provider } from 'react-redux';
@@ -31,12 +31,14 @@ export interface DataContextType {
 
   addHandler: (item: DataHandler) => () => void,
   removeHandler: (name: string) => void,
+  awaitRequestsCache: Record<string, Promise<boolean>>,
   awaitStores: (storeNames: StoreName[], renew?: boolean) => Promise<boolean>
 }
 
 const _DataContext: DataContextType = {
   handlerMap: {}, // Map to store data handlers
   storeDependencies: {}, // Map to store dependencies of each store
+  awaitRequestsCache: {}, // Cache request promise to avoid rerender
   readyStoreMap: Object.keys(store.getState()).reduce((map, key) => {
     map[key as StoreName] = false; // Initialize each store to be not ready
 
@@ -96,39 +98,44 @@ const _DataContext: DataContextType = {
       delete this.handlerMap[name];
     }
   },
-  awaitStores: async function (storeNames: StoreName[], renew = true) {
-    const handlers = storeNames.reduce((acc, sName) => {
-      (this.storeDependencies[sName] || []).forEach((handlerName) => {
-        if (!acc.includes(handlerName)) {
-          acc.push(handlerName);
+  awaitStores: function (storeNames: StoreName[], renew = false) {
+    const key = storeNames.join('-');
+
+    // Todo: use lazy to avoid renew too many times
+    if (!Object.hasOwnProperty.call(this.awaitRequestsCache, key) || renew) {
+      const handlers = storeNames.reduce((acc, sName) => {
+        (this.storeDependencies[sName] || []).forEach((handlerName) => {
+          if (!acc.includes(handlerName)) {
+            acc.push(handlerName);
+          }
+        });
+
+        return acc;
+      }, [] as string[]);
+
+      // Create an array of promises from the handlers
+      const promiseList = handlers.map((siName) => {
+        const handler = this.handlerMap[siName];
+
+        // Start the handler if it's not started or it's not a subscription and we want to renew
+        if (!handler.isStarted || (!handler.isSubscription && renew)) {
+          handler.start();
+          handler.isStarted = true;
         }
+
+        return handler.promise;
       });
 
-      return acc;
-    }, [] as string[]);
+      // Mark the store names as ready
+      storeNames.forEach((n) => {
+        this.readyStoreMap[n] = true;
+      });
 
-    // Create an array of promises from the handlers
-    const promiseList = handlers.map((siName) => {
-      const handler = this.handlerMap[siName];
-
-      // Start the handler if it's not started or it's not a subscription and we want to renew
-      if (!handler.isStarted || (!handler.isSubscription && renew)) {
-        handler.start();
-        handler.isStarted = true;
-      }
-
-      return handler.promise;
-    });
-
-    // Mark the store names as ready
-    storeNames.forEach((n) => {
-      this.readyStoreMap[n] = true;
-    });
+      this.awaitRequestsCache[key] = Promise.all(promiseList).then(() => true);
+    }
 
     // Wait for all handlers to finish
-    await Promise.all(promiseList);
-
-    return true;
+    return this.awaitRequestsCache[key];
   }
 };
 

@@ -3,7 +3,7 @@
 
 import { createSlice, PayloadAction } from '@reduxjs/toolkit/dist';
 import { AuthUrlInfo } from '@subwallet/extension-base/background/handlers/State';
-import { ThemeTypes, UiSettings } from '@subwallet/extension-base/background/KoniTypes';
+import { ThemeNames, UiSettings } from '@subwallet/extension-base/background/KoniTypes';
 import { AppSettings, ReduxStatus } from '@subwallet/extension-koni-ui/stores/types';
 
 import settings from '@polkadot/ui-settings';
@@ -13,7 +13,7 @@ const initialState = {
   // UI settings
   isShowBalance: false,
   accountAllLogo: '',
-  theme: ThemeTypes.DARK,
+  theme: ThemeNames.DARK,
 
   // Polkadot settings
   ...settings.get(),
@@ -67,7 +67,7 @@ const settingsSlice = createSlice({
         reduxStatus: ReduxStatus.READY
       };
     },
-    updateTheme (state, action: PayloadAction<ThemeTypes>) {
+    updateTheme (state, action: PayloadAction<ThemeNames>) {
       const theme = action.payload;
 
       return {

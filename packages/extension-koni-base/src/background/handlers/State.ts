@@ -7,7 +7,7 @@ import { _AssetType, _ChainAsset, _ChainInfo } from '@subwallet/chain-list/types
 import { withErrorLog } from '@subwallet/extension-base/background/handlers/helpers';
 import State, { AuthUrls, Resolver } from '@subwallet/extension-base/background/handlers/State';
 import { isSubscriptionRunning, unsubscribe } from '@subwallet/extension-base/background/handlers/subscriptions';
-import { AccountRefMap, AddNetworkRequestExternal, AddTokenRequestExternal, APIItemState, ApiMap, AuthRequestV2, BalanceItem, BalanceJson, ConfirmationDefinitions, ConfirmationsQueue, ConfirmationsQueueItemOptions, ConfirmationType, CrowdloanItem, CrowdloanJson, CurrentAccountInfo, EvmSendTransactionParams, EvmSendTransactionRequestExternal, EvmSignatureRequestExternal, ExternalRequestPromise, ExternalRequestPromiseStatus, KeyringState, NftCollection, NftItem, NftJson, NftTransferExtra, PriceJson, RequestAccountExportPrivateKey, RequestCheckPublicAndSecretKey, RequestConfirmationComplete, RequestSettingsType, ResponseAccountExportPrivateKey, ResponseCheckPublicAndSecretKey, ResultResolver, ServiceInfo, SingleModeJson, StakeUnlockingJson, StakingItem, StakingJson, StakingRewardItem, StakingRewardJson, ThemeTypes, TxHistoryItem, TxHistoryType, UiSettings } from '@subwallet/extension-base/background/KoniTypes';
+import { AccountRefMap, AddNetworkRequestExternal, AddTokenRequestExternal, APIItemState, ApiMap, AuthRequestV2, BalanceItem, BalanceJson, ConfirmationDefinitions, ConfirmationsQueue, ConfirmationsQueueItemOptions, ConfirmationType, CrowdloanItem, CrowdloanJson, CurrentAccountInfo, EvmSendTransactionParams, EvmSendTransactionRequestExternal, EvmSignatureRequestExternal, ExternalRequestPromise, ExternalRequestPromiseStatus, KeyringState, NftCollection, NftItem, NftJson, NftTransferExtra, PriceJson, RequestAccountExportPrivateKey, RequestCheckPublicAndSecretKey, RequestConfirmationComplete, RequestSettingsType, ResponseAccountExportPrivateKey, ResponseCheckPublicAndSecretKey, ResultResolver, ServiceInfo, SingleModeJson, StakeUnlockingJson, StakingItem, StakingJson, StakingRewardItem, StakingRewardJson, ThemeNames, TxHistoryItem, TxHistoryType, UiSettings } from '@subwallet/extension-base/background/KoniTypes';
 import { AuthorizeRequest, RequestAuthorizeTab } from '@subwallet/extension-base/background/types';
 import { ChainService } from '@subwallet/extension-base/services/chain-service';
 import { _PREDEFINED_SINGLE_MODES } from '@subwallet/extension-base/services/chain-service/constants';
@@ -884,7 +884,7 @@ export default class KoniState extends State {
   public getSettings (update: (value: RequestSettingsType) => void): void {
     this.settingsStore.get('Settings', (value) => {
       if (!value) {
-        update({ isShowBalance: false, accountAllLogo: '', theme: ThemeTypes.DARK });
+        update({ isShowBalance: false, accountAllLogo: '', theme: ThemeNames.DARK });
       } else {
         update(value);
       }
@@ -895,7 +895,7 @@ export default class KoniState extends State {
     this.settingsStore.set('Settings', data, callback);
   }
 
-  public setTheme (theme: ThemeTypes, callback?: (settingData: UiSettings) => void): void {
+  public setTheme (theme: ThemeNames, callback?: (settingData: UiSettings) => void): void {
     this.getSettings((settings) => {
       const newSettings = {
         ...settings,

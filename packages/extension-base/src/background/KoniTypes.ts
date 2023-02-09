@@ -457,13 +457,13 @@ export interface CurrentAccountInfo {
 export interface RequestSettingsType {
   isShowBalance: boolean;
   accountAllLogo: string;
-  theme: ThemeTypes;
+  theme: ThemeNames;
 }
 
 export interface UiSettings {
   isShowBalance: boolean;
   accountAllLogo: string;
-  theme: ThemeTypes;
+  theme: ThemeNames;
 }
 
 export interface RandomTestRequest {
@@ -762,11 +762,12 @@ export type RequestSubscribeCrowdloan = null
 export type RequestSubscribeNft = null
 export type RequestSubscribeStaking = null
 export type RequestSubscribeStakingReward = null
-export enum ThemeTypes {
+export enum ThemeNames {
   LIGHT = 'light',
   DARK = 'dark',
   SUBSPACE = 'subspace'
 }
+
 export type RequestNftForceUpdate = {
   collectionId: string,
   nft: NftItem,
@@ -1222,7 +1223,7 @@ export interface BondingOptionParams {
 
 export interface SingleModeJson {
   networkKeys: string[],
-  theme: ThemeTypes,
+  theme: ThemeNames,
   autoTriggerDomain: string // Regex for auto trigger single mode
 }
 
@@ -1754,7 +1755,7 @@ export interface KoniRequestSignatures {
   'pri(settings.changeBalancesVisibility)': [null, boolean, UiSettings];
   'pri(settings.subscribe)': [null, UiSettings, UiSettings];
   'pri(settings.saveAccountAllLogo)': [string, boolean, UiSettings];
-  'pri(settings.saveTheme)': [ThemeTypes, boolean, UiSettings];
+  'pri(settings.saveTheme)': [ThemeNames, boolean, UiSettings];
 
   // Subscription
   'pri(transaction.history.getSubscription)': [null, TxHistoryItem[], TxHistoryItem[]];

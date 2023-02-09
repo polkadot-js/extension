@@ -3,7 +3,7 @@
 
 import type { ThemeProps } from '../../types';
 
-import { ThemeTypes } from '@subwallet/extension-base/background/KoniTypes';
+import { ThemeNames } from '@subwallet/extension-base/background/KoniTypes';
 import { saveTheme, setNotification } from '@subwallet/extension-koni-ui/messaging';
 import Header from '@subwallet/extension-koni-ui/partials/Header';
 import getLanguageOptions from '@subwallet/extension-koni-ui/util/getLanguageOptions';
@@ -44,7 +44,7 @@ function GeneralSetting ({ className }: Props): React.ReactElement {
 
   const _onChangeTheme = useCallback(
     (theme: string): void => {
-      saveTheme(theme as ThemeTypes, () => {
+      saveTheme(theme as ThemeNames, () => {
         setTheme(theme);
       }).catch((e) => console.log('There is problem when saveTheme', e));
     },

@@ -3,7 +3,7 @@
 
 import { _DEFAULT_CHAINS } from '@subwallet/chain-list';
 import { _SubstrateChainType } from '@subwallet/chain-list/types';
-import { SingleModeJson, ThemeTypes } from '@subwallet/extension-base/background/KoniTypes';
+import { SingleModeJson, ThemeNames } from '@subwallet/extension-base/background/KoniTypes';
 
 export const API_AUTO_CONNECT_MS = 3000;
 export const API_MAX_RETRY = 2;
@@ -16,7 +16,7 @@ export const _API_OPTIONS_CHAIN_GROUP = {
 export const _PREDEFINED_SINGLE_MODES: Record<string, SingleModeJson> = {
   subspace: {
     networkKeys: ['subspace_gemini_2a', 'subspace_test', 'subspace_gemini_3a'],
-    theme: ThemeTypes.SUBSPACE,
+    theme: ThemeNames.SUBSPACE,
     autoTriggerDomain: 'subspace.network'
   }
 };

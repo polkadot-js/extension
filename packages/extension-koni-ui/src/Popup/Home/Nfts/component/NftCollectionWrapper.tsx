@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { NftCollection, NftItem } from '@subwallet/extension-base/background/KoniTypes';
+import { INftCollectionDetail } from '@subwallet/extension-koni-ui/Popup/Home/Nfts/types';
 import { Theme, ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { NftCollection as NftCollection_ } from '@subwallet/react-ui';
 import React, { useCallback, useState } from 'react';
@@ -9,7 +10,6 @@ import React, { useCallback, useState } from 'react';
 import LazyLoad from 'react-lazyload';
 import { useNavigate } from 'react-router-dom';
 import styled, { useTheme } from 'styled-components';
-import {INftCollectionDetail} from "@subwallet/extension-koni-ui/Popup/Home/Nfts/types";
 
 interface Props extends ThemeProps {
   collectionInfo: NftCollection,

@@ -11,13 +11,11 @@ type Props = ThemeProps
 
 function Component ({ className = '' }: Props): React.ReactElement<Props> {
   const location = useLocation();
-  const locationState = location.state as INftCollectionDetail;
-
-  console.log(locationState);
+  const {collectionInfo, nftList} = location.state as INftCollectionDetail;
 
   return (
     <div className={className}>
-      got in here
+      {collectionInfo.collectionName}
     </div>
   );
 }

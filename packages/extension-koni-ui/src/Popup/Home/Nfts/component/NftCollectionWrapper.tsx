@@ -7,7 +7,9 @@ import { NftCollection as NftCollection_ } from '@subwallet/react-ui';
 import React, { useCallback, useState } from 'react';
 // @ts-ignore
 import LazyLoad from 'react-lazyload';
+import { useNavigate } from 'react-router-dom';
 import styled, { useTheme } from 'styled-components';
+import {INftCollectionDetail} from "@subwallet/extension-koni-ui/Popup/Home/Nfts/types";
 
 interface Props extends ThemeProps {
   collectionInfo: NftCollection,
@@ -15,19 +17,21 @@ interface Props extends ThemeProps {
 }
 
 function Component ({ className = '', collectionInfo, nftList }: Props): React.ReactElement<Props> {
+  const { extendToken } = useTheme() as Theme;
+  const navigate = useNavigate();
+
   const [loading, setLoading] = useState(true);
   const [showImage, setShowImage] = useState(true);
   const [showVideo, setShowVideo] = useState(false);
   const [showCollectionImage, setShowCollectionImage] = useState(false);
-  const { extendToken } = useTheme() as Theme;
 
   const handleOnLoad = useCallback(() => {
     setLoading(false);
   }, []);
 
   const handleOnClick = useCallback(() => {
-    console.log('on click');
-  }, []);
+    navigate('/home/nfts/collection-detail', { state: { collectionInfo, nftList } as INftCollectionDetail });
+  }, [collectionInfo, navigate, nftList]);
 
   const handleImageError = useCallback(() => {
     setLoading(false);

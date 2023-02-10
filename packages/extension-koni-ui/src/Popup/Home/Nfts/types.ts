@@ -1,0 +1,9 @@
+// Copyright 2019-2022 @subwallet/extension-koni-ui authors & contributors
+// SPDX-License-Identifier: Apache-2.0
+
+import { NftCollection, NftItem } from '@subwallet/extension-base/background/KoniTypes';
+
+export interface INftCollectionDetail {
+  collectionInfo: NftCollection,
+  nftList: NftItem[]
+}

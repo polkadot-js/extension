@@ -6,7 +6,7 @@ import { DataContext } from '@subwallet/extension-koni-ui/contexts/DataContext';
 import { Home } from '@subwallet/extension-koni-ui/Popup/Home';
 import { Crowdloans } from '@subwallet/extension-koni-ui/Popup/Home/Crowdloans';
 import { History } from '@subwallet/extension-koni-ui/Popup/Home/History';
-import { Nfts } from '@subwallet/extension-koni-ui/Popup/Home/Nfts';
+import { NftCollections } from '@subwallet/extension-koni-ui/Popup/Home/Nfts';
 import { Staking } from '@subwallet/extension-koni-ui/Popup/Home/Staking';
 import { Tokens } from '@subwallet/extension-koni-ui/Popup/Home/Tokens';
 import PhishingDetected from '@subwallet/extension-koni-ui/Popup/PhishingDetected';
@@ -18,6 +18,7 @@ import { useSelector } from 'react-redux';
 import { createHashRouter, Outlet, useLocation, useRouteError } from 'react-router-dom';
 
 import PageWrapper from '../components/Layout/PageWrapper';
+import {NftCollectionDetail} from "@subwallet/extension-koni-ui/Popup/Home/Nfts/NftCollectionDetail";
 
 export function Crypto () {
   const dataContext = useContext(DataContext);
@@ -72,7 +73,21 @@ export const router = createHashRouter([{ path: '/',
     },
     {
       path: 'nfts',
-      element: <Nfts />
+      element: <Outlet />,
+      children: [
+        {
+          path: 'collections',
+          element: <NftCollections />
+        },
+        {
+          path: 'collection-detail',
+          element: <NftCollectionDetail />
+        },
+        {
+          path: 'item-detail',
+          element: <Example />
+        }
+      ]
     },
     {
       path: 'crowdloans',
@@ -172,7 +187,17 @@ export const router = createHashRouter([{ path: '/',
       element: <Example />
     }, {
       path: 'token',
-      element: <Example />
+      element: <Outlet />,
+      children: [
+        {
+          path: 'list',
+          element: <Example />
+        },
+        {
+          path: 'import',
+          element: <Example />
+        }
+      ]
     }, {
       path: 'master-password',
       element: <Example />

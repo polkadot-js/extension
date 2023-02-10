@@ -4,7 +4,8 @@
 import { NftCollection, NftItem } from '@subwallet/extension-base/background/KoniTypes';
 import PageWrapper from '@subwallet/extension-koni-ui/components/Layout/PageWrapper';
 import { DataContext } from '@subwallet/extension-koni-ui/contexts/DataContext';
-import { NftCollectionWrapper } from '@subwallet/extension-koni-ui/Popup/Home/Nfts/NftCollectionWrapper';
+import useTranslation from '@subwallet/extension-koni-ui/hooks/useTranslation';
+import { NftCollectionWrapper } from '@subwallet/extension-koni-ui/Popup/Home/Nfts/component/NftCollectionWrapper';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { Theme, ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { ButtonProps, SwList, SwSubHeader } from '@subwallet/react-ui';
@@ -13,6 +14,7 @@ import { getAlphaColor } from '@subwallet/react-ui/lib/theme/themes/default/colo
 import { Image, Plus } from 'phosphor-react';
 import React, { useCallback, useContext, useEffect, useState } from 'react';
 import { useSelector } from 'react-redux';
+import { useNavigate } from 'react-router-dom';
 import styled, { useTheme } from 'styled-components';
 
 type Props = ThemeProps
@@ -23,24 +25,27 @@ const rightIcon = <Icon
   type='phosphor'
 />;
 
-const subHeaderButton: ButtonProps[] = [
-  {
-    icon: rightIcon,
-    onClick: () => {
-      console.log('click right button');
-    }
-  }
-];
-
 // might set perPage based on screen height
 const perPage = 4;
 
 function Component ({ className = '' }: Props): React.ReactElement<Props> {
+  const { t } = useTranslation();
+  const navigate = useNavigate();
   const dataContext = useContext(DataContext);
   const { token } = useTheme() as Theme;
+
   const { nftCollections, nftItems } = useSelector((state: RootState) => state.nft);
   const [page, setPage] = useState(1);
   const [nftCollections_, setNftCollections_] = useState<NftCollection[]>([]);
+
+  const subHeaderButton: ButtonProps[] = [
+    {
+      icon: rightIcon,
+      onClick: () => {
+        navigate('/setting/token/import', { state: { isExternalRequest: false } });
+      }
+    }
+  ];
 
   useEffect(() => {
     // init NftCollections_
@@ -94,23 +99,27 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
         </div>
 
         <div className={'nft_empty__text__container'}>
-          <div className={'nft_empty__title'}>No NFT collectible</div>
-          <div className={'nft_empty__subtitle'}>Your NFT collectible will appear here!</div>
+          <div className={'nft_empty__title'}>{t<string>('No NFT collectible')}</div>
+          <div className={'nft_empty__subtitle'}>{t<string>('Your NFT collectible will appear here!')}</div>
         </div>
       </div>
     );
-  }, [token]);
+  }, [t, token]);
 
   const loadMoreCollections = useCallback(() => {
-    const nextPage = page + 1;
-    const from = (nextPage - 1) * perPage;
-    const to = from + perPage > nftCollections.length ? nftCollections.length : (from + perPage);
+    setTimeout(() => { // delayed to avoid lagging on scroll
+      if (nftCollections.length > nftCollections_.length) {
+        const nextPage = page + 1;
+        const from = (nextPage - 1) * perPage;
+        const to = from + perPage > nftCollections.length ? nftCollections.length : (from + perPage);
 
-    setNftCollections_([
-      ...nftCollections_,
-      ...nftCollections.slice(from, to)
-    ]);
-    setPage(nextPage);
+        setNftCollections_([
+          ...nftCollections_,
+          ...nftCollections.slice(from, to)
+        ]);
+        setPage(nextPage);
+      }
+    }, 100);
   }, [nftCollections, nftCollections_, page]);
 
   return (
@@ -141,14 +150,14 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
           renderOnScroll={false}
           renderWhenEmpty={emptyNft}
           searchFunction={searchCollection}
-          searchPlaceholder={'Search collection name'}
+          searchPlaceholder={t<string>('Search collection name')}
         />
       </>
     </PageWrapper>
   );
 }
 
-export const Nfts = styled(Component)<Props>(({ theme: { token } }: Props) => {
+export const NftCollections = styled(Component)<Props>(({ theme: { token } }: Props) => {
   return ({
     color: token.colorTextLight1,
     fontSize: token.fontSizeLG,

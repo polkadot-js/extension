@@ -44,7 +44,7 @@
     "@subwallet/extension-inject": "^0.8.1",
     "@subwallet/extension-koni-base": "^0.8.1",
     "@subwallet/keyring": "^0.0.3",
-    "@subwallet/react-ui": "^5.1.2-b2",
+    "@subwallet/react-ui": "^5.1.2-b3",
     "@subwallet/ui-keyring": "^0.0.3",
     "boring-avatars": "^1.7.0",
     "bowser": "^2.11.0",

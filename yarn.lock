@@ -6089,7 +6089,7 @@ __metadata:
     "@subwallet/extension-koni-base": ^0.8.1
     "@subwallet/extension-mocks": ^0.8.1
     "@subwallet/keyring": ^0.0.3
-    "@subwallet/react-ui": ^5.1.2-b2
+    "@subwallet/react-ui": ^5.1.2-b3
     "@subwallet/ui-keyring": ^0.0.3
     "@types/bn.js": ^5.1.1
     "@types/enzyme": ^3.10.12
@@ -6200,9 +6200,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@subwallet/react-ui@npm:^5.1.2-b2":
-  version: 5.1.2-b2
-  resolution: "@subwallet/react-ui@npm:5.1.2-b2"
+"@subwallet/react-ui@npm:^5.1.2-b3":
+  version: 5.1.2-b3
+  resolution: "@subwallet/react-ui@npm:5.1.2-b3"
   dependencies:
     "@ant-design/colors": ^6.0.0
     "@ant-design/cssinjs": ^1.5.6
@@ -6269,7 +6269,7 @@ __metadata:
   peerDependencies:
     react: ">=16.9.0"
     react-dom: ">=16.9.0"
-  checksum: 0b68aff93eeb6077d69c544b165e69c5c57fb398bd88a95cea23939035a8818ffeb6f951a94e78963df05699d2243fb792b24fd65d43af50e4f917b8e8decc9e
+  checksum: 9342487a654fdc050572ac311deaefc3b32191191dd0c438b7868a3ce547e923ca2bb71f059ed075e84127c29c3f34b26049845d8b81bd4f5a1f76deb2e87596
   languageName: node
   linkType: hard
 

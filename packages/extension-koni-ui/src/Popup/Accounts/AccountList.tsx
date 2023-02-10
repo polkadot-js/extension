@@ -32,6 +32,11 @@ function _AccountList ({ className }: Props): React.ReactElement<Props> {
     );
   };
 
+  const searchFunction = (item: AccountJson, searchText: string): boolean => {
+    return item.address.includes(searchText) || (item.name || '').includes(searchText);
+  }
+
+  //TODO: delete style inline when upgrade @subwallet/react-ui
   return (
     <>
       {/* @ts-ignore */}
@@ -44,13 +49,15 @@ function _AccountList ({ className }: Props): React.ReactElement<Props> {
         renderItem={renderItem}
         selected={selected}
         title={t('Select account')}
+        searchFunction={searchFunction}
+        searchPlaceholder={t('Account name')}
         footer={
           <div style={{ display: 'flex' }}>
-            <Button schema='secondary' icon={<Icon phosphorIcon={PlusCircle} weight={'fill'}/>} block={true} >
+            <Button schema='secondary' icon={<Icon phosphorIcon={PlusCircle} weight={'fill'}/>} block={true}>
               {t('Create new account')}
             </Button>
-            <Button schema='secondary' icon={<Icon phosphorIcon={FileArrowDown} weight={'fill'}/>} />
-            <Button schema='secondary' icon={<Icon phosphorIcon={Swatches} weight={'fill'}/>} />
+            <Button style={{ minWidth: 52  }} schema='secondary' icon={<Icon phosphorIcon={FileArrowDown} weight={'fill'}/>} />
+            <Button style={{ minWidth: 52 }} schema='secondary' icon={<Icon phosphorIcon={Swatches} weight={'fill'}/>} />
           </div>
         }
       />
@@ -63,6 +70,10 @@ export const AccountList = styled(_AccountList)<Props>(({ theme }) => {
 
   return ({
     '&.ant-sw-modal': {
+      '.ant-sw-modal-body': {
+        maxHeight: '66vh'
+      },
+
       '.ant-account-card': {
         padding: token.paddingSM,
       },
@@ -77,6 +88,11 @@ export const AccountList = styled(_AccountList)<Props>(({ theme }) => {
         whiteSpace: 'nowrap',
         maxWidth: 120
       },
-    }
+
+      '.ant-input-container .ant-input': {
+        color: token.colorTextLight1
+      },
+    },
+
   });
 });

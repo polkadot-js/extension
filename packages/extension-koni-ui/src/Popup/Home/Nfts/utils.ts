@@ -7,3 +7,6 @@ export interface INftCollectionDetail {
   collectionInfo: NftCollection,
   nftList: NftItem[]
 }
+
+// might set perPage based on screen height
+export const nftPerPage = 4;

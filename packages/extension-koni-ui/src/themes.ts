@@ -2,10 +2,10 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { ThemeNames } from '@subwallet/extension-base/background/KoniTypes';
+import subWalletLogo from '@subwallet/extension-koni-ui/assets/sub-wallet-logo.svg';
 import { theme as SwReactUI } from '@subwallet/react-ui';
 import { ThemeConfig } from '@subwallet/react-ui/es/config-provider/context';
 import { AliasToken, GlobalToken } from '@subwallet/react-ui/es/theme/interface';
-import subWalletLogo from '@subwallet/extension-koni-ui/assets/sub-wallet-logo.svg';
 
 export interface ExtraToken {
   bodyBackgroundColor: string,

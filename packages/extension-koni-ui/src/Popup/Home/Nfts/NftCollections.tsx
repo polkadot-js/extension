@@ -5,7 +5,8 @@ import { NftCollection, NftItem } from '@subwallet/extension-base/background/Kon
 import PageWrapper from '@subwallet/extension-koni-ui/components/Layout/PageWrapper';
 import { DataContext } from '@subwallet/extension-koni-ui/contexts/DataContext';
 import useTranslation from '@subwallet/extension-koni-ui/hooks/useTranslation';
-import { NftCollectionWrapper } from '@subwallet/extension-koni-ui/Popup/Home/Nfts/component/NftCollectionWrapper';
+import { NftGalleryWrapper } from '@subwallet/extension-koni-ui/Popup/Home/Nfts/component/NftGalleryWrapper';
+import { INftCollectionDetail, nftPerPage } from '@subwallet/extension-koni-ui/Popup/Home/Nfts/utils';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { Theme, ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { ButtonProps, SwList, SwSubHeader } from '@subwallet/react-ui';
@@ -24,9 +25,6 @@ const rightIcon = <Icon
   size='sm'
   type='phosphor'
 />;
-
-// might set perPage based on screen height
-const perPage = 4;
 
 function Component ({ className = '' }: Props): React.ReactElement<Props> {
   const { t } = useTranslation();
@@ -49,7 +47,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
 
   useEffect(() => {
     // init NftCollections_
-    setNftCollections_(nftCollections.slice(0, perPage));
+    setNftCollections_(nftCollections.slice(0, nftPerPage));
   }, [nftCollections]);
 
   const searchCollection = useCallback((collection: NftCollection, searchText: string) => {
@@ -73,15 +71,34 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
     return nftList;
   }, [nftItems]);
 
+  const handleOnClickCollection = useCallback((state: INftCollectionDetail) => {
+    navigate('/home/nfts/collection-detail', { state });
+  }, [navigate]);
+
   const renderNftCollection = useCallback((nftCollection: NftCollection) => {
     const nftList = getNftsByCollection(nftCollection);
 
-    return (<NftCollectionWrapper
-      collectionInfo={nftCollection}
+    let fallbackImage: string | undefined;
+
+    for (const nft of nftList) { // fallback to any nft image
+      if (nft.image) {
+        fallbackImage = nft.image;
+        break;
+      }
+    }
+
+    const state: INftCollectionDetail = { collectionInfo: nftCollection, nftList };
+
+    return (<NftGalleryWrapper
+      fallbackImage={fallbackImage}
+      handleOnClick={handleOnClickCollection}
+      image={nftCollection.image}
+      itemCount={nftList.length}
       key={`${nftCollection.collectionId}_${nftCollection.chain}`}
-      nftList={nftList}
+      routingParams={state}
+      title={nftCollection.collectionName || nftCollection.collectionId}
     />);
-  }, [getNftsByCollection]);
+  }, [getNftsByCollection, handleOnClickCollection]);
 
   const emptyNft = useCallback(() => {
     return (
@@ -110,8 +127,8 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
     setTimeout(() => { // delayed to avoid lagging on scroll
       if (nftCollections.length > nftCollections_.length) {
         const nextPage = page + 1;
-        const from = (nextPage - 1) * perPage;
-        const to = from + perPage > nftCollections.length ? nftCollections.length : (from + perPage);
+        const from = (nextPage - 1) * nftPerPage;
+        const to = from + nftPerPage > nftCollections.length ? nftCollections.length : (from + nftPerPage);
 
         setNftCollections_([
           ...nftCollections_,

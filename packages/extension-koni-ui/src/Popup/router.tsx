@@ -6,7 +6,8 @@ import { DataContext } from '@subwallet/extension-koni-ui/contexts/DataContext';
 import { Home } from '@subwallet/extension-koni-ui/Popup/Home';
 import { Crowdloans } from '@subwallet/extension-koni-ui/Popup/Home/Crowdloans';
 import { History } from '@subwallet/extension-koni-ui/Popup/Home/History';
-import { NftCollections } from '@subwallet/extension-koni-ui/Popup/Home/Nfts';
+import { NftCollectionDetail } from '@subwallet/extension-koni-ui/Popup/Home/Nfts/NftCollectionDetail';
+import { NftCollections } from '@subwallet/extension-koni-ui/Popup/Home/Nfts/NftCollections';
 import { Staking } from '@subwallet/extension-koni-ui/Popup/Home/Staking';
 import { Tokens } from '@subwallet/extension-koni-ui/Popup/Home/Tokens';
 import PhishingDetected from '@subwallet/extension-koni-ui/Popup/PhishingDetected';
@@ -18,7 +19,6 @@ import { useSelector } from 'react-redux';
 import { createHashRouter, Outlet, useLocation, useRouteError } from 'react-router-dom';
 
 import PageWrapper from '../components/Layout/PageWrapper';
-import {NftCollectionDetail} from "@subwallet/extension-koni-ui/Popup/Home/Nfts/NftCollectionDetail";
 
 export function Crypto () {
   const dataContext = useContext(DataContext);

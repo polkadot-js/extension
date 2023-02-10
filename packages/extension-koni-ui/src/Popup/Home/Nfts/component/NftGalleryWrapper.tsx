@@ -1,37 +1,38 @@
 // Copyright 2019-2022 @subwallet/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { NftCollection, NftItem } from '@subwallet/extension-base/background/KoniTypes';
-import { INftCollectionDetail } from '@subwallet/extension-koni-ui/Popup/Home/Nfts/types';
 import { Theme, ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { NftCollection as NftCollection_ } from '@subwallet/react-ui';
 import React, { useCallback, useState } from 'react';
 // @ts-ignore
 import LazyLoad from 'react-lazyload';
-import { useNavigate } from 'react-router-dom';
 import styled, { useTheme } from 'styled-components';
 
 interface Props extends ThemeProps {
-  collectionInfo: NftCollection,
-  nftList: NftItem[]
+  title: string,
+  image: string | undefined,
+  fallbackImage: string | undefined,
+  itemCount?: number
+
+  handleOnClick: (params?: any) => void,
+  routingParams?: any,
 }
 
-function Component ({ className = '', collectionInfo, nftList }: Props): React.ReactElement<Props> {
+function Component ({ className = '', fallbackImage, handleOnClick, image, itemCount, routingParams, title }: Props): React.ReactElement<Props> {
   const { extendToken } = useTheme() as Theme;
-  const navigate = useNavigate();
 
   const [loading, setLoading] = useState(true);
   const [showImage, setShowImage] = useState(true);
   const [showVideo, setShowVideo] = useState(false);
   const [showCollectionImage, setShowCollectionImage] = useState(false);
 
+  const onClick = useCallback(() => {
+    handleOnClick(routingParams);
+  }, [handleOnClick, routingParams]);
+
   const handleOnLoad = useCallback(() => {
     setLoading(false);
   }, []);
-
-  const handleOnClick = useCallback(() => {
-    navigate('/home/nfts/collection-detail', { state: { collectionInfo, nftList } as INftCollectionDetail });
-  }, [collectionInfo, navigate, nftList]);
 
   const handleImageError = useCallback(() => {
     setLoading(false);
@@ -46,18 +47,14 @@ function Component ({ className = '', collectionInfo, nftList }: Props): React.R
   }, []);
 
   const getCollectionImage = useCallback(() => {
-    if (collectionInfo.image) {
-      return collectionInfo.image;
-    } else {
-      for (const nft of nftList) { // fallback to any nft image
-        if (nft.image) {
-          return nft.image;
-        }
-      }
+    if (image) {
+      return image;
+    } else if (fallbackImage) {
+      return fallbackImage;
     }
 
     return extendToken.logo;
-  }, [collectionInfo.image, extendToken.logo, nftList]);
+  }, [extendToken.logo, fallbackImage, image]);
 
   const getCollectionImageNode = useCallback(() => {
     if (showImage) {
@@ -103,7 +100,7 @@ function Component ({ className = '', collectionInfo, nftList }: Props): React.R
             className={'collection_thumbnail'}
             onError={handleImageError}
             onLoad={handleOnLoad}
-            src={collectionInfo.image}
+            src={image}
           />
         </LazyLoad>
       );
@@ -116,21 +113,20 @@ function Component ({ className = '', collectionInfo, nftList }: Props): React.R
         src={extendToken.logo}
       />
     );
-  }, [collectionInfo.image, extendToken.logo, getCollectionImage, handleImageError, handleOnLoad, handleVideoError, loading, showCollectionImage, showImage, showVideo]);
+  }, [image, extendToken.logo, getCollectionImage, handleImageError, handleOnLoad, handleVideoError, loading, showCollectionImage, showImage, showVideo]);
 
   return (
     <NftCollection_
       className={`nft_collection ${className}`}
-      count={nftList.length}
+      count={itemCount || 0}
       customImageNode={getCollectionImageNode()}
-      key={`${collectionInfo.collectionId}_${collectionInfo.chain}`}
-      onClick={handleOnClick}
-      title={collectionInfo.collectionName || collectionInfo.collectionId}
+      onClick={onClick}
+      title={title}
     />
   );
 }
 
-export const NftCollectionWrapper = styled(Component)<Props>(({ theme: { token } }: Props) => {
+export const NftGalleryWrapper = styled(Component)<Props>(({ theme: { token } }: Props) => {
   return ({
     color: token.colorTextLight1,
     fontSize: token.fontSizeLG,

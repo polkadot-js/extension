@@ -47,11 +47,6 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
     setNftCollections_(nftCollections.slice(0, perPage));
   }, [nftCollections]);
 
-  console.log('nftCollections', nftCollections);
-  console.log('page', page);
-  console.log('nftCollections_', nftCollections_);
-  console.log('hasMore', nftCollections.length > nftCollections_.length);
-
   const searchCollection = useCallback((collection: NftCollection, searchText: string) => {
     const searchTextLowerCase = searchText.toLowerCase();
 
@@ -107,15 +102,15 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
   }, [token]);
 
   const loadMoreCollections = useCallback(() => {
-    console.log('loading more');
-    const from = (page - 1) * perPage;
-    const to = from + perPage;
+    const nextPage = page + 1;
+    const from = (nextPage - 1) * perPage;
+    const to = from + perPage > nftCollections.length ? nftCollections.length : (from + perPage);
 
     setNftCollections_([
       ...nftCollections_,
       ...nftCollections.slice(from, to)
     ]);
-    setPage(page + 1);
+    setPage(nextPage);
   }, [nftCollections, nftCollections_, page]);
 
   return (
@@ -131,25 +126,23 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
           rightButtons={subHeaderButton}
           title={'Collectibles'}
         />
-        <div className={'nft_collection_list__container'}>
-          <SwList.Section
-            className={'nft_collection_list'}
-            displayGrid={true}
-            enableSearchInput={true}
-            gridGap={'14px'}
-            list={nftCollections_}
-            minColumnWidth={'172px'}
-            pagination={{
-              hasMore: false,
-              loadMore: loadMoreCollections
-            }}
-            renderOnScroll={false}
-            renderItem={renderNftCollection}
-            renderWhenEmpty={emptyNft}
-            searchFunction={searchCollection}
-            searchPlaceholder={'Search collection name'}
-          />
-        </div>
+        <SwList.Section
+          className={'nft_collection_list__container'}
+          displayGrid={true}
+          enableSearchInput={true}
+          gridGap={'14px'}
+          list={nftCollections_}
+          minColumnWidth={'172px'}
+          pagination={{
+            hasMore: nftCollections.length > nftCollections_.length,
+            loadMore: loadMoreCollections
+          }}
+          renderItem={renderNftCollection}
+          renderOnScroll={false}
+          renderWhenEmpty={emptyNft}
+          searchFunction={searchCollection}
+          searchPlaceholder={'Search collection name'}
+        />
       </>
     </PageWrapper>
   );
@@ -161,12 +154,15 @@ export const Nfts = styled(Component)<Props>(({ theme: { token } }: Props) => {
     fontSize: token.fontSizeLG,
     paddingBottom: '6px',
 
-    '.nft_collection_list__container': {
-      overflow: 'auto'
+    '&__inner': {
+      display: 'flex',
+      flexDirection: 'column',
+      overflow: 'hidden'
     },
 
-    '.nft_collection_list': {
-      marginTop: '14px'
+    '.nft_collection_list__container': {
+      paddingTop: 14,
+      flex: 1
     },
 
     '.nft_empty__container': {

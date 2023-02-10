@@ -10,12 +10,12 @@ import styled from 'styled-components';
 
 export interface PageWrapperProps extends ThemeProps{
   resolve?: Promise<any>;
-  children?: React.ReactElement;
+  children?: React.ReactNode;
 }
 
 const defaultResolver = Promise.resolve(true);
 
-function Component ({ children, className, resolve }: PageWrapperProps) {
+function Component ({ children, className = '', resolve }: PageWrapperProps) {
   const nodeRef = React.useRef(null);
   const location = useLocation();
   const [pathName, setPathName] = useState('');
@@ -34,7 +34,10 @@ function Component ({ children, className, resolve }: PageWrapperProps) {
           timeout={300}
           unmountOnExit
         >
-          <div ref={nodeRef}>
+          <div
+            className={`${className}__inner`}
+            ref={nodeRef}
+          >
             {children}
           </div>
         </CSSTransition>
@@ -44,7 +47,11 @@ function Component ({ children, className, resolve }: PageWrapperProps) {
 }
 
 const PageWrapper = styled(Component)<PageWrapperProps>(({ theme }) => ({
-  height: '100%'
+  height: '100%',
+
+  '&__inner': {
+    height: '100%'
+  }
 }));
 
 export default PageWrapper;

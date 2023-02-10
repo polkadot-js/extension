@@ -1,7 +1,7 @@
 // Copyright 2019-2022 @subwallet/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { _ChainAsset, _ChainInfo } from '@subwallet/chain-list/types';
+import {_ChainAsset, _ChainInfo, _MultiChainAsset} from '@subwallet/chain-list/types';
 import { AccountsWithCurrentAddress, BalanceJson, CrowdloanJson, KeyringState, NftCollection, NftJson, PriceJson, StakeUnlockingJson, StakingJson, StakingRewardJson, TxHistoryItem } from '@subwallet/extension-base/background/KoniTypes';
 import { AccountJson, AccountsContext } from '@subwallet/extension-base/background/types';
 import { _ChainState } from '@subwallet/extension-base/services/chain-service/types';
@@ -120,10 +120,16 @@ export const updateChainStateMap = (data: Record<string, _ChainState>) => {
 export const subscribeChainStateMap = lazySubscribeMessage('pri(chainService.subscribeChainStateMap)', null, updateChainStateMap, updateChainStateMap);
 
 export const updateAssetRegistry = (data: Record<string, _ChainAsset>) => {
-  store.dispatch({ type: 'assetRegistry/update', payload: data });
+  store.dispatch({ type: 'assetRegistry/updateAssetRegistry', payload: data });
 };
 
 export const subscribeAssetRegistry = lazySubscribeMessage('pri(chainService.subscribeAssetRegistry)', null, updateAssetRegistry, updateAssetRegistry);
+
+export const updateMultiChainAssetRegistry = (data: Record<string, _MultiChainAsset>) => {
+  store.dispatch({ type: 'assetRegistry/updateMultiChainAssetMap', payload: data });
+};
+
+export const subscribeMultiChainAssetMap = lazySubscribeMessage('pri(chainService.subscribeMultiChainAssetMap)', null, updateMultiChainAssetRegistry, updateMultiChainAssetRegistry);
 
 // Features
 export const updatePrice = (data: PriceJson) => {

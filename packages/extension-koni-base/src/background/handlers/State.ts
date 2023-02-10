@@ -3,7 +3,7 @@
 
 import Common from '@ethereumjs/common';
 import { ChainInfoMap } from '@subwallet/chain-list';
-import { _AssetType, _ChainAsset, _ChainInfo } from '@subwallet/chain-list/types';
+import { _AssetType, _ChainAsset, _ChainInfo, _MultiChainAsset } from '@subwallet/chain-list/types';
 import { withErrorLog } from '@subwallet/extension-base/background/handlers/helpers';
 import State, { AuthUrls, Resolver } from '@subwallet/extension-base/background/handlers/State';
 import { isSubscriptionRunning, unsubscribe } from '@subwallet/extension-base/background/handlers/subscriptions';
@@ -1162,6 +1162,10 @@ export default class KoniState extends State {
     return this.chainService.getAssetRegistry();
   }
 
+  public getMultiChainAssetMap () {
+    return this.chainService.getMultiChainAssetMap();
+  }
+
   public getAssetByChainAndAsset (chain: string, assetTypes: _AssetType[]) {
     return this.chainService.getAssetByChainAndType(chain, assetTypes);
   }
@@ -1184,6 +1188,10 @@ export default class KoniState extends State {
 
   public subscribeAssetRegistry (): Subject<Record<string, _ChainAsset>> {
     return this.chainService.subscribeAssetRegistry();
+  }
+
+  public subscribeMultiChainAssetMap (): Subject<Record<string, _MultiChainAsset>> {
+    return this.chainService.subscribeMultiChainAssetMap();
   }
 
   public upsertCustomToken (data: _ChainAsset) {

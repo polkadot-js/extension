@@ -1675,6 +1675,7 @@ export interface KoniRequestSignatures {
   'pri(chainService.subscribeChainInfoMap)': [null, Record<string, any>, Record<string, any>];
   'pri(chainService.subscribeChainStateMap)': [null, Record<string, any>, Record<string, any>];
   'pri(chainService.subscribeAssetRegistry)': [null, Record<string, any>, Record<string, any>];
+  'pri(chainService.subscribeMultiChainAssetMap)': [null, Record<string, any>, Record<string, any>];
   'pri(chainService.upsertCustomChain)': [Record<string, any>, boolean];
   'pri(chainService.enableChains)': [string[], boolean];
   'pri(chainService.disableChains)': [string[], boolean];

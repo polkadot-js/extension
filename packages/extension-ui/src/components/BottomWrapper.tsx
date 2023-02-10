@@ -21,4 +21,5 @@ export default styled(BottomWrapper)`
   flex-direction: column;
   position: sticky;
   bottom: 0;
+  z-index: 100;
 `;

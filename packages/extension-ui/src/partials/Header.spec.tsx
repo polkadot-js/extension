@@ -29,7 +29,7 @@ describe('Header component', () => {
 
   it('settings icon exists when withSettings prop is true', () => {
     wrapper = mountHeader({ withSettings: true });
-    wrapper.find('img[data-toggle-settings]').simulate('click');
+    wrapper.find('Svg[data-toggle-settings]').first().simulate('click');
 
     expect(wrapper.exists()).toBe(true);
   });

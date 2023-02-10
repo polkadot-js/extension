@@ -49,6 +49,7 @@ const darkTheme = {
   errorBorderColor: '#7E3530',
   errorColor: '#E42F2F',
   fontSize: '16px',
+  headerIconBackgroundHover: '#7ceedd',
   highlightedAreaBackground: '#212226',
   iconDangerColor: '#FF5E5C',
   iconNeutralColor: '#8E8E8E',

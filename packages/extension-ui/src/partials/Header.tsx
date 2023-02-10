@@ -5,13 +5,13 @@ import type { ThemeProps } from '../types';
 
 import { faArrowLeft } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import React, { useCallback, useContext, useRef } from 'react';
+import React, { useCallback, useContext } from 'react';
 import styled from 'styled-components';
 
 import logo from '../assets/azeroLogo.svg';
 import helpIcon from '../assets/help.svg';
 import settingsIcon from '../assets/settings.svg';
-import { ActionContext, Link, Tooltip } from '../components';
+import { ActionContext, Link, Svg, Tooltip } from '../components';
 import useTranslation from '../hooks/useTranslation';
 // import { getConnectedTabsUrl } from '../messaging';
 // TODO: these will be reused in the future
@@ -48,7 +48,6 @@ function Header({
   // TODO: check if needed
   // const [connectedTabsUrl, setConnectedTabsUrl] = useState<string[]>([]);
   const { t } = useTranslation();
-  const setIconRef = useRef(null);
 
   // TODO: check if needed
   // const isConnected = useMemo(() => connectedTabsUrl.length >= 1, [connectedTabsUrl]);
@@ -94,7 +93,7 @@ function Header({
           {withHelp && (
             <Tooltip text={t<string>('Help')}>
               <Link to={'/help'}>
-                <img
+                <Svg
                   className='popupToggle'
                   src={helpIcon}
                 />
@@ -104,10 +103,9 @@ function Header({
           {withSettings && (
             <Tooltip text={t<string>('Settings')}>
               <Link to={'/account/settings'}>
-                <img
+                <Svg
                   className='popupToggle'
                   data-toggle-settings
-                  ref={setIconRef}
                   src={settingsIcon}
                 />
               </Link>
@@ -227,9 +225,12 @@ export default React.memo(
     .popupToggle {
       display: inline-block;
       vertical-align: middle;
+      width: 20px;
+      height: 24px;
 
       &:hover {
         cursor: pointer;
+        background: ${theme.headerIconBackgroundHover};
       }
     }
 
@@ -249,7 +250,12 @@ export default React.memo(
   .arrowLeftIcon {
     color: ${theme.labelColor};
     cursor: pointer;
-  }
+
+    :hover {
+      path {
+        fill: ${theme.headerIconBackgroundHover};
+    }
+}
 
   &.smallMargin {
     margin-bottom: 15px;

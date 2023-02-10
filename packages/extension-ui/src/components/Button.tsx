@@ -144,11 +144,9 @@ export default styled(Button)(
     };
   }
   
-  
   .busyOverlay,
   .disabledOverlay {
     visibility: hidden;
-
   }
 
   .disabledOverlay {
@@ -165,14 +163,16 @@ export default styled(Button)(
     margin-right: 0.3rem;
   }
 
+  .children {
+    display:flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    font-family: ${theme.secondaryFontFamily};
+  }
+
   &.isBusy {
     background: rgba(96,96,96,0.15);
-
-    .children {
-      font-family: ${theme.secondaryFontFamily};
-      border: 1px solid ${theme.buttonTextColor};
-      color: ${theme.buttonTextColor};
-    }
 
     .busyOverlay {
       visibility: visible;

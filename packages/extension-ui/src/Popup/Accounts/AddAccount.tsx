@@ -3,12 +3,12 @@
 
 import type { ThemeProps } from '../../types';
 
-import { faPlus } from '@fortawesome/free-solid-svg-icons';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import React, { useCallback, useContext } from 'react';
 import styled from 'styled-components';
 
-import { ActionContext, Button, SkeletonCard } from '../../components';
+import add from '../../assets/add.svg';
+import helpIcon from '../../assets/help.svg';
+import { ActionContext, Button, ButtonArea, HelperFooter, SkeletonCard, Svg } from '../../components';
 import useTranslation from '../../hooks/useTranslation';
 import Header from '../../partials/Header';
 
@@ -16,19 +16,33 @@ interface Props extends ThemeProps {
   className?: string;
 }
 
+const FooterWithoutMargin = styled(HelperFooter)`
+padding: 0 16px;
+margin-bottom: 0px;
+`;
+
 function AddAccount({ className }: Props): React.ReactElement<Props> {
   const { t } = useTranslation();
   const onAction = useContext(ActionContext);
-  // TODO: PLACEHOLDER FOR NOW
-  // const _onClick = useCallback(() => onAction('/account/create'), [onAction]);
+
   const _onClick = useCallback(() => onAction('/account/add-menu'), [onAction]);
+
+  const footer = (
+    <FooterWithoutMargin>
+      <img
+        className='icon'
+        src={helpIcon}
+      />
+      <span>{t<string>('Need help? Look for tooltips such as this one!')}</span>
+    </FooterWithoutMargin>
+  );
 
   return (
     <>
       <Header
+        text={t<string>('Accounts')}
         withHelp
         withSettings
-        text={t<string>('Accounts')}
       />
       <div className={className}>
         <div className='background'>
@@ -48,14 +62,15 @@ function AddAccount({ className }: Props): React.ReactElement<Props> {
         </div>
         <div className='button-container'>
           <Button onClick={_onClick}>
-            <FontAwesomeIcon
+            <Svg
               className='icon'
-              icon={faPlus}
+              src={add}
             />
             {t<string>('Add account')}
           </Button>
         </div>
       </div>
+      <ButtonArea footer={footer} />
     </>
   );
 }
@@ -79,6 +94,13 @@ export default React.memo(
     z-index: -100;
     margin-left: 16px;
     margin-right: 16px;
+    opacity: 0.5;
+  }
+
+  .icon {
+    background: ${theme.buttonTextColor};
+    width: 20px;
+    height: 20px;
   }
 
   .content {
@@ -92,14 +114,14 @@ export default React.memo(
   }
 
   .button-container{
+    display: flex;
     margin: 0 auto;
-    margin-top: 24px;
+    margin-top: 40px;
     width: 180px;
     padding: 16px;
     height: 80px;
     gap: 16px;
   }
-
 
   .heading {
     display: flex;
@@ -114,7 +136,6 @@ export default React.memo(
       font-size: 34px;
       line-height: 116%;
     }
-
 }
 
   h3 {
@@ -131,11 +152,11 @@ export default React.memo(
     justify-content: center;
   }
 
-    .no-accounts {
-      max-height: 48px;
-  }
+  .no-accounts {
+    max-height: 48px;
+}
 
-   .no-accounts p {
+  .no-accounts p {
     text-align: center;
     font-weight: 300;
     font-size: 16px;

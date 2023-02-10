@@ -24,14 +24,14 @@ export default styled(HelperFooter)(
     align-items: flex-start;
     gap: 12px;
     padding-top: 0px;
-    margin-bottom: 16px;
+    margin-bottom: '16px';
   
     &:before {
       position: absolute;
       content: '';
       width: calc(100% - 32px);
       border-top: 1px solid ${theme.boxBorderColor};
-      top: -8px;
+      top: -16px;
    }
   
     img.icon {

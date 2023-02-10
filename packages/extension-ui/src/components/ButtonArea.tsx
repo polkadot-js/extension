@@ -10,7 +10,7 @@ import BottomWrapper from './BottomWrapper';
 
 interface Props extends ThemeProps {
   className?: string;
-  children: React.ReactNode;
+  children?: React.ReactNode;
   footer?: React.ReactNode;
 }
 
@@ -37,6 +37,7 @@ export default styled(ButtonArea)(
   .footer{
     display: flex;
   }
+  
   .children {
     display: flex;
     justify-content: center;

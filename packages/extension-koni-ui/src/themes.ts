@@ -1,52 +1,67 @@
 // Copyright 2019-2022 @polkadot/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { ThemeTypes } from '@subwallet/extension-base/background/KoniTypes';
+import { ThemeNames } from '@subwallet/extension-base/background/KoniTypes';
+import { theme as SwReactUI } from '@subwallet/react-ui';
+import { ThemeConfig } from '@subwallet/react-ui/es/config-provider/context';
+import { AliasToken, GlobalToken } from '@subwallet/react-ui/es/theme/interface';
 import subWalletLogo from '@subwallet/extension-koni-ui/assets/sub-wallet-logo.svg';
-import { GlobalToken } from '@subwallet/react-ui/es/theme/interface';
+
+export interface ExtraToken {
+  bodyBackgroundColor: string,
+  logo: string
+}
 
 export declare type Theme = {
-  id: string;
+  id: ThemeNames;
   name: string;
   token: Partial<GlobalToken>;
 
   // todo: add extend token later
-  extendToken: {
-    bodyBackgroundColor: string,
-    logo: string
-  };
+  extendToken: ExtraToken
 };
 
-export function chooseTheme (theme: ThemeTypes, token: GlobalToken): Theme {
-  const defaultTheme: Theme = {
-    id: 'dark',
+export interface SwThemeConfig extends ThemeConfig {
+  id: ThemeNames,
+  name: string;
+
+  generateExtraTokens: (token: AliasToken) => ExtraToken;
+
+  customTokens: (token: AliasToken) => AliasToken;
+}
+
+// Todo: i18n for theme name
+// Implement theme from @subwallet/react-ui
+export const SW_THEME_CONFIGS: Record<ThemeNames, SwThemeConfig> = {
+  [ThemeNames.DARK]: {
+    id: ThemeNames.DARK,
     name: 'Dark',
-    token: { ...token },
-    extendToken: {
-      bodyBackgroundColor: token.colorBgSecondary,
-      logo: subWalletLogo
+    algorithm: SwReactUI.darkAlgorithm,
+    customTokens: (token) => (token),
+    generateExtraTokens: (token) => {
+      return { bodyBackgroundColor: token.colorBgSecondary, logo: subWalletLogo };
     }
-  };
+  },
+  [ThemeNames.LIGHT]: {
+    id: ThemeNames.LIGHT,
+    name: 'Light',
+    algorithm: SwReactUI.defaultAlgorithm,
+    customTokens: (token) => (token),
+    generateExtraTokens: (token) => {
+      return { bodyBackgroundColor: token.colorBgSecondary, logo: subWalletLogo };
+    }
+  },
+  [ThemeNames.SUBSPACE]: {} as SwThemeConfig
+};
 
-  if (theme.valueOf() === ThemeTypes.LIGHT) {
-    return {
-      ...defaultTheme,
-      id: 'light',
-      name: 'Light',
-      extendToken: {
-        bodyBackgroundColor: '#fff',
-        logo: subWalletLogo
-      }
-    };
-  }
+// Todo: Replace tokens with Subspace color schema
+SW_THEME_CONFIGS[ThemeNames.SUBSPACE] = { ...SW_THEME_CONFIGS[ThemeNames.LIGHT] };
 
-  if (theme.valueOf() === ThemeTypes.SUBSPACE) {
-    return {
-      ...defaultTheme,
-      id: 'subspace',
-      name: 'Subspace'
-    };
-  }
-
-  return defaultTheme;
+export function generateTheme ({ customTokens, generateExtraTokens, id, name }: SwThemeConfig, token: GlobalToken): Theme {
+  return {
+    id,
+    name,
+    token: customTokens(token),
+    extendToken: generateExtraTokens(token)
+  } as Theme;
 }

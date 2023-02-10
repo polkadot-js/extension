@@ -1,7 +1,7 @@
 // Copyright 2019-2022 @polkadot/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { ThemeTypes } from '@subwallet/extension-base/background/KoniTypes';
+import { ThemeNames } from '@subwallet/extension-base/background/KoniTypes';
 import { updateTheme } from '@subwallet/extension-koni-ui/stores/utils';
 import { Theme } from '@subwallet/extension-koni-ui/themes';
 import { Button } from '@subwallet/react-ui';
@@ -14,7 +14,7 @@ interface Props {
 }
 
 function _Welcome ({ className, title = 'content' }: Props): React.ReactElement<Props> {
-  const changeTheme = (theme: ThemeTypes) => {
+  const changeTheme = (theme: ThemeNames) => {
     return () => {
       updateTheme(theme);
     };
@@ -26,8 +26,8 @@ function _Welcome ({ className, title = 'content' }: Props): React.ReactElement<
         <div className='content'>
           {title}
 
-          <Button onClick={changeTheme(ThemeTypes.DARK)} block>Theme Dark</Button>
-          <Button onClick={changeTheme(ThemeTypes.LIGHT)} block>Theme Light</Button>
+          <Button onClick={changeTheme(ThemeNames.DARK)} block>Theme Dark</Button>
+          <Button onClick={changeTheme(ThemeNames.LIGHT)} block>Theme Light</Button>
         </div>
       </div>
     </>

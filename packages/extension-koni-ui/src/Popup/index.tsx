@@ -8,7 +8,7 @@ import { QRContextProvider } from '@subwallet/extension-koni-ui/contexts/QrSigne
 import { ScannerContextProvider } from '@subwallet/extension-koni-ui/contexts/ScannerContext';
 import { SigningContextProvider } from '@subwallet/extension-koni-ui/contexts/SigningContext';
 import { ThemeProvider } from '@subwallet/extension-koni-ui/contexts/ThemeContext';
-import { ModalContextProvider } from '@subwallet/react-ui/es/sw-modal/provider';
+import { ModalContextProvider } from '@subwallet/react-ui/es/sw-modal';
 import React from 'react';
 import { RouterProvider } from 'react-router';
 

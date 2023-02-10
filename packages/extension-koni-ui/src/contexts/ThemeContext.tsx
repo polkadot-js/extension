@@ -5,7 +5,7 @@ import type { ThemeProps } from '../types';
 
 import applyPreloadStyle from '@subwallet/extension-koni-ui/preloadStyle';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
-import {generateTheme, SW_THEME_CONFIGS, SwThemeConfig} from '@subwallet/extension-koni-ui/themes';
+import { generateTheme, SW_THEME_CONFIGS, SwThemeConfig } from '@subwallet/extension-koni-ui/themes';
 import { ConfigProvider, theme as reactUiTheme } from '@subwallet/react-ui';
 import React, { useMemo } from 'react';
 import { useSelector } from 'react-redux';
@@ -82,7 +82,11 @@ function ThemeGenerator ({ children, themeConfig }: Props): React.ReactElement<P
   );
 }
 
-export function ThemeProvider ({ children }: Props): React.ReactElement<Props> {
+export interface ThemeProviderProps {
+  children: React.ReactNode;
+}
+
+export function ThemeProvider ({ children }: ThemeProviderProps): React.ReactElement<ThemeProviderProps> {
   const themeName = useSelector((state: RootState) => state.settings.theme);
   const themeConfig = SW_THEME_CONFIGS[themeName];
 

@@ -62,7 +62,15 @@ const GlobalStyle = createGlobalStyle<ThemeProps>(({ theme }) => {
       opacity: 0,
       display: 'none',
       transition: 'opacity 0ms, transform 300ms'
-    }
+    },
+
+    'input, button, select, optgroup, textarea': {
+      margin: 0,
+      color: 'inherit',
+      fontSize: 'inherit',
+      fontFamily: 'inherit',
+      lineHeight: 'inherit',
+    },
   });
 });
 

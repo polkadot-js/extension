@@ -24,6 +24,10 @@ const MENU_DATA: MenuItem[] = [
         name: 'welcome'
       },
       {
+        url: '/login',
+        name: 'Login'
+      },
+      {
         url: '/home',
         name: 'home',
         subItems: [

@@ -89,7 +89,7 @@ export const updateSigningRequests = (data: SigningRequest[]) => {
 export const subscribeSigningRequests = lazySubscribeMessage('pri(signing.requests)', null, console.debug, updateSigningRequests);
 
 export const updateConfirmationRequests = (data: ConfirmationsQueue) => {
-  store.dispatch({ type: 'requestState/updateMetadataRequests', payload: data });
+  store.dispatch({ type: 'requestState/updateConfirmationRequests', payload: data });
 };
 
 export const subscribeConfirmationRequests = lazySubscribeMessage('pri(confirmations.subscribe)', null, updateConfirmationRequests, updateConfirmationRequests);

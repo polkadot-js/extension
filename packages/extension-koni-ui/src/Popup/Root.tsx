@@ -41,10 +41,6 @@ export function initRootPromise () {
     window.localStorage.setItem('osInfo', browser.getOS().name as string);
   }
 
-  // Todo: Fetching data and setup store here
-  // Todo: Loading all basic data for root with promise.all()
-  // Todo: Settings data
-  // Todo: Accounts data
   return true;
 }
 
@@ -53,7 +49,7 @@ function _Root ({ className }: ThemeProps): React.ReactElement {
   const navigate = useNavigate();
   const openPModal = usePredefinedModal();
   const dataContext = useContext(DataContext);
-  const hasConfirmations = useSelector((state: RootState) => state.requestState);
+  const { hasConfirmations } = useSelector((state: RootState) => state.requestState);
 
   useEffect(() => {
     if (location.pathname === '/') {

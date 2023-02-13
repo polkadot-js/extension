@@ -71,7 +71,15 @@ const GlobalStyle = createGlobalStyle<ThemeProps>(({ theme }) => {
         borderRadius: 0,
         height: '100%'
       }
-    }
+    },
+
+    'input, button, select, optgroup, textarea': {
+      margin: 0,
+      color: 'inherit',
+      fontSize: 'inherit',
+      fontFamily: 'inherit',
+      lineHeight: 'inherit',
+    },
   });
 });
 

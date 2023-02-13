@@ -13,7 +13,7 @@ export interface ExtraToken {
 export declare type Theme = {
   id: ThemeNames;
   name: string;
-  token: Partial<GlobalToken>;
+  token: GlobalToken;
 
   // todo: add extend token later
   extendToken: ExtraToken

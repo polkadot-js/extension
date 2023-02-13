@@ -78,8 +78,8 @@ const GlobalStyle = createGlobalStyle<ThemeProps>(({ theme }) => {
       color: 'inherit',
       fontSize: 'inherit',
       fontFamily: 'inherit',
-      lineHeight: 'inherit',
-    },
+      lineHeight: 'inherit'
+    }
   });
 });
 

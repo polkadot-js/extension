@@ -2,8 +2,8 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { Main } from '@subwallet/extension-koni-ui/components';
-import Logo2D from '@subwallet/extension-koni-ui/components/Logo/Logo2D';
 import PageWrapper from '@subwallet/extension-koni-ui/components/Layout/PageWrapper';
+import Logo2D from '@subwallet/extension-koni-ui/components/Logo/Logo2D';
 import { DataContext } from '@subwallet/extension-koni-ui/contexts/DataContext';
 import { usePredefinedModal, WalletModalContext } from '@subwallet/extension-koni-ui/contexts/WalletModalContext';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
@@ -18,7 +18,9 @@ import styled from 'styled-components';
 export function initRootPromise () {
   // Init Application with some default data if not existed
   const VARIANTS = ['beam', 'marble', 'pixel', 'sunset', 'bauhaus', 'ring'];
+
   changeHeaderLogo(<Logo2D />);
+
   function getRandomVariant (): string {
     const random = Math.floor(Math.random() * 6);
 

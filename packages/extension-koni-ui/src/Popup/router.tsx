@@ -58,12 +58,12 @@ export function Example () {
 // Todo: Create error page
 export const router = createHashRouter([{
   path: '/',
-  element: <Root/>,
-  errorElement: <ErrorFallback/>,
+  element: <Root />,
+  errorElement: <ErrorFallback />,
   children: [
     {
       path: '/welcome',
-      element: <Welcome title={'Welcome Content'}/>
+      element: <Welcome title={'Welcome Content'} />
     },
     {
       path: '/login',
@@ -71,121 +71,121 @@ export const router = createHashRouter([{
     },
     {
       path: '/home',
-      element: <Home/>,
+      element: <Home />,
       children: [{
         path: 'tokens',
-        element: <Tokens/>
+        element: <Tokens />
       },
-        {
-          path: 'nfts',
-          element: <Nfts/>
-        },
-        {
-          path: 'crowdloans',
-          element: <Crowdloans/>
-        },
-        {
-          path: 'staking',
-          element: <Staking/>
-        },
-        {
-          path: 'history',
-          element: <History/>
-        }]
+      {
+        path: 'nfts',
+        element: <Nfts />
+      },
+      {
+        path: 'crowdloans',
+        element: <Crowdloans />
+      },
+      {
+        path: 'staking',
+        element: <Staking />
+      },
+      {
+        path: 'history',
+        element: <History />
+      }]
     },
     {
       path: '/transaction',
-      element: <Outlet/>,
+      element: <Outlet />,
       children: [{
         path: 'send-fund',
-        element: <Example/>
+        element: <Example />
       }, {
         path: 'send-nft',
-        element: <Example/>
+        element: <Example />
       }, {
         path: 'stake',
-        element: <Example/>
+        element: <Example />
       }, {
         path: 'unstake',
-        element: <Example/>
+        element: <Example />
       }, {
         path: 'withdraw',
-        element: <Example/>
+        element: <Example />
       }, {
         path: 'claim-reward',
-        element: <Example/>
+        element: <Example />
       }, {
         path: 'compound',
-        element: <Example/>
+        element: <Example />
       }]
     },
     {
       path: '/account',
-      element: <Outlet/>,
+      element: <Outlet />,
       children: [{
         path: 'account-list',
-        element: <Example/>
+        element: <Example />
       }, {
         path: 'add-account',
-        element: <Example/>,
+        element: <Example />,
         children: [{
           path: 'from-seed',
-          element: <Example/>
+          element: <Example />
         }, {
           path: 'derive',
-          element: <Example/>
+          element: <Example />
         }, {
           path: 'from-json',
-          element: <Example/>
+          element: <Example />
         }, {
           path: 'attach-readonly',
-          element: <Example/>
+          element: <Example />
         }, {
           path: 'attach-qr',
-          element: <Example/>
+          element: <Example />
         }, {
           path: 'attach-ledger',
-          element: <Example/>
+          element: <Example />
         }]
       }, {
         path: 'account-detail/:accountId',
-        element: <Example/>,
+        element: <Example />,
         children: [{
           path: 'export',
-          element: <Example/>
+          element: <Example />
         }]
       }]
     }, {
       path: '/setting',
-      element: <Outlet/>,
+      element: <Outlet />,
       children: [{
         path: 'list',
-        element: <Example/>
+        element: <Example />
       }, {
         path: 'general',
-        element: <Example/>
+        element: <Example />
       }, {
         path: 'dapp-access',
-        element: <Example/>
+        element: <Example />
       }, {
         path: 'dapp-access-edit',
-        element: <Example/>
+        element: <Example />
       }, {
         path: 'network',
-        element: <Example/>
+        element: <Example />
       }, {
         path: 'network-edit',
-        element: <Example/>
+        element: <Example />
       }, {
         path: 'token',
-        element: <Example/>
+        element: <Example />
       }, {
         path: 'master-password',
-        element: <Example/>
+        element: <Example />
       }]
     }]
 },
-  { path: `${PHISHING_PAGE_REDIRECT}/website`, element: <PhishingDetected/> }
+{ path: `${PHISHING_PAGE_REDIRECT}/website`, element: <PhishingDetected /> }
 ]);
 
 // const Home = React.lazy(() => import('@subwallet/extension-koni-ui/Popup/Home'));

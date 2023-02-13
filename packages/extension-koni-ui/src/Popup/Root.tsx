@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { Main } from '@subwallet/extension-koni-ui/components';
-import { Debugger } from '@subwallet/extension-koni-ui/Popup/Debugger';
+import { WalletModalContext } from '@subwallet/extension-koni-ui/contexts/WalletModalContext';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import Bowser from 'bowser';
 import React, { useEffect } from 'react';
@@ -53,15 +53,12 @@ function _Root ({ className }: ThemeProps): React.ReactElement {
   [location.pathname, navigate]
   );
 
-  return (
-    <Main className={className}>
-      <Debugger />
-
-      <div className='main-layout'>
+  // Implement WalletModalContext in Root component to make it available for all children and can use react-router-dom and ModalContextProvider
+  return <WalletModalContext>
+      <Main className={className}>
         <Outlet />
-      </div>
-    </Main>
-  );
+      </Main>
+    </WalletModalContext>;
 }
 
 export const Root = styled(_Root)(() => ({

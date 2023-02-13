@@ -12,6 +12,11 @@ import reformatAddress from '@subwallet/extension-koni-ui/util/reformatAddress';
 
 import { decodeAddress, isEthereumAddress } from '@polkadot/util-crypto';
 import { KeypairType } from '@polkadot/util-crypto/types';
+import { _ChainInfo } from '@subwallet/chain-list/types';
+import {
+  _getChainSubstrateAddressPrefix,
+  _isChainEvmCompatible
+} from '@subwallet/extension-base/services/chain-service/utils';
 
 export * from './common';
 export * from './chainBalancesApi';
@@ -45,11 +50,11 @@ export function getEthereumChains (networkMap: Record<string, NetworkJson>): str
   return result;
 }
 
-export function recodeAddress (address: string, accounts: AccountWithChildren[], networkInfo: NetworkJson | null, type?: KeypairType): Recoded {
+export function recodeAddress (address: string, accounts: AccountWithChildren[], networkInfo: _ChainInfo | null, type?: KeypairType): Recoded {
   const publicKey = decodeAddress(address);
   const account = findAccountByAddress(accounts, address) || findSubstrateAccount(accounts, publicKey);
-  const prefix = networkInfo ? networkInfo.ss58Format : 42;
-  const isEthereum = type === 'ethereum' || !!(networkInfo?.isEthereum);
+  const prefix = networkInfo && _getChainSubstrateAddressPrefix(networkInfo) !== -1 ? _getChainSubstrateAddressPrefix(networkInfo) : 42;
+  const isEthereum = type === 'ethereum' || !!networkInfo && _isChainEvmCompatible(networkInfo);
 
   return {
     account,

@@ -1,7 +1,7 @@
 // Copyright 2019-2022 @polkadot/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { ModalContext } from '@subwallet/react-ui/es/sw-modal/provider';
+import { ModalContext } from '@subwallet/react-ui';
 import { SwModalFuncProps } from '@subwallet/react-ui/es/sw-modal/SwModal';
 import { useCallback, useContext } from 'react';
 

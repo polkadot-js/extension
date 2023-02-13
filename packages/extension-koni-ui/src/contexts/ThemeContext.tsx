@@ -62,6 +62,23 @@ const GlobalStyle = createGlobalStyle<ThemeProps>(({ theme }) => {
       opacity: 0,
       display: 'none',
       transition: 'opacity 0ms, transform 300ms'
+    },
+
+    '.modal-full': {
+      height: '100%',
+
+      '& .ant-sw-modal-content': {
+        borderRadius: 0,
+        height: '100%'
+      }
+    },
+
+    'input, button, select, optgroup, textarea': {
+      margin: 0,
+      color: 'inherit',
+      fontSize: 'inherit',
+      fontFamily: 'inherit',
+      lineHeight: 'inherit'
     }
   });
 });

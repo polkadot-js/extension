@@ -1,19 +1,23 @@
 // Copyright 2019-2022 @polkadot/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
+import Footer from '@subwallet/extension-koni-ui/components/Layout/parts/Footer';
 import { SelectedAccount } from '@subwallet/extension-koni-ui/components/Layout/parts/SelectedAccount';
-import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { SwScreenLayout } from '@subwallet/react-ui';
+import type { SwScreenLayoutProps } from '@subwallet/react-ui';
 import Icon from '@subwallet/react-ui/es/icon';
 import { SwTabBarItem } from '@subwallet/react-ui/es/sw-tab-bar';
-import { Aperture, Database, Globe, List, MagnifyingGlass, Rocket, Wallet } from 'phosphor-react';
-import React, { useCallback, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import styled from 'styled-components';
+import { Aperture, Database, Globe, MagnifyingGlass, Rocket, Wallet } from 'phosphor-react';
+import React, { useCallback, useMemo } from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
 
-type Props = ThemeProps & {
-  children?: React.ReactNode;
-};
+interface Props extends Omit<
+  SwScreenLayoutProps,
+  'tabBarItems' | 'footer' | 'headerContent' | 'selectedTabBarItem'
+> {
+  children: React.ReactNode | React.ReactNode[];
+  showFooter?: boolean;
+}
 
 const TabBarItems: Array<Omit<SwTabBarItem, 'onClick'>> = [
   {
@@ -75,13 +79,25 @@ const headerIcons = [
   }
 ];
 
-const Component = ({ children, className }: Props) => {
-  const [selectedTab, setSelectedTab] = useState('tokens');
+const Base = ({ children, showFooter, ...props }: Props) => {
   const navigate = useNavigate();
+  const { pathname } = useLocation();
+
+  const selectedTab = useMemo((): string => {
+    const isHomePath = pathname.includes('/home');
+    if (isHomePath) {
+      const pathExcludeHome = pathname.split('/home')[1];
+      const currentTab = pathExcludeHome.split('/')[1];
+      return currentTab || '';
+    } else {
+      return '';
+    }
+
+    return ''
+  }, [pathname]);
 
   const onSelectTab = useCallback(
     (key: string) => () => {
-      setSelectedTab(key);
       navigate(`/home/${key}`, { relative: 'route' });
     },
     [navigate]
@@ -89,38 +105,19 @@ const Component = ({ children, className }: Props) => {
 
   return (
     <SwScreenLayout
-      className={className}
-      headerCenter={true}
+      {...props}
       headerContent={<SelectedAccount />}
       headerIcons={headerIcons}
-      headerLeft={
-        <Icon
-          phosphorIcon={List}
-          size='sm'
-          type='phosphor'
-        />
-      }
-      headerPaddingVertical
       selectedTabBarItem={selectedTab}
-      showHeader
-      showLeftButton
-      showTabBar
       tabBarItems={TabBarItems.map((item) => ({
         ...item,
         onClick: onSelectTab(item.key)
       }))}
-      withDivider={false}
+      footer={showFooter && <Footer />}
     >
       {children}
     </SwScreenLayout>
   );
 };
 
-const Home = styled(Component)<Props>(() => ({
-  '.ant-sw-screen-layout-body': {
-    padding: 0,
-    margin: 0
-  }
-}));
-
-export { Home };
+export default Base;

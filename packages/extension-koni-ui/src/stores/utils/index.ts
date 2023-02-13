@@ -1,9 +1,9 @@
 // Copyright 2019-2022 @subwallet/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import {_ChainAsset, _ChainInfo, _MultiChainAsset} from '@subwallet/chain-list/types';
-import { AccountsWithCurrentAddress, BalanceJson, CrowdloanJson, KeyringState, NftCollection, NftJson, PriceJson, StakeUnlockingJson, StakingJson, StakingRewardJson, TxHistoryItem } from '@subwallet/extension-base/background/KoniTypes';
-import { AccountJson, AccountsContext } from '@subwallet/extension-base/background/types';
+import { _ChainAsset, _ChainInfo, _MultiChainAsset } from '@subwallet/chain-list/types';
+import { AccountsWithCurrentAddress, BalanceJson, ConfirmationsQueue, CrowdloanJson, KeyringState, NftCollection, NftJson, PriceJson, StakeUnlockingJson, StakingJson, StakingRewardJson, ThemeNames, TxHistoryItem } from '@subwallet/extension-base/background/KoniTypes';
+import { AccountJson, AccountsContext, AuthorizeRequest, ConfirmationRequestBase, MetadataRequest, SigningRequest } from '@subwallet/extension-base/background/types';
 import { _ChainState } from '@subwallet/extension-base/services/chain-service/types';
 import { canDerive } from '@subwallet/extension-base/utils';
 import { lazySubscribeMessage } from '@subwallet/extension-koni-ui/messaging';
@@ -53,33 +53,49 @@ export const updateKeyringState = (data: KeyringState) => {
 
 export const subscribeKeyringState = lazySubscribeMessage('pri(keyring.subscribe)', null, updateKeyringState, updateKeyringState);
 
-// RequestState store
-// export const updateAuthorizeRequest = (data: AccountJson) => {
-//   store.dispatch({ type: 'accountState/updateCurrentAccount', payload: data });
-// };
-//
-// export const subscribeAuthorizeRequest = lazySubscribeMessage('pri(accounts.subscribeWithCurrentAddress)', {}, updateCurrentAccountState, updateCurrentAccountState);
-//
-// export const updateMetadataRequest = (data: AccountJson) => {
-//   store.dispatch({ type: 'accountState/updateCurrentAccount', payload: data });
-// };
-//
-// export const subscribeMetadataRequest = lazySubscribeMessage('pri(accounts.subscribeWithCurrentAddress)', {}, updateCurrentAccountState, updateCurrentAccountState);
-//
-// export const updateSigningRequest = (data: AccountJson) => {
-//   store.dispatch({ type: 'accountState/updateCurrentAccount', payload: data });
-// };
-//
-// export const subscribeSigningRequest = lazySubscribeMessage('pri(accounts.subscribeWithCurrentAddress)', {}, updateCurrentAccountState, updateCurrentAccountState);
-//
-// export const updateConfirmationQueue = (data: AccountJson) => {
-//   store.dispatch({ type: 'accountState/updateCurrentAccount', payload: data });
-// };
-//
-// export const subscribeConfirmationQueue = lazySubscribeMessage('pri(accounts.subscribeWithCurrentAddress)', {}, updateCurrentAccountState, updateCurrentAccountState);
+function convertConfirmationToMap (data: ConfirmationRequestBase[]) {
+  return data.reduce((prev, request) => {
+    prev[request.id] = request;
+
+    return prev;
+  }, {} as Record<string, ConfirmationRequestBase>);
+}
+
+export const updateAuthorizeRequests = (data: AuthorizeRequest[]) => {
+  // Convert data to object with key as id
+  const requests = convertConfirmationToMap(data);
+
+  store.dispatch({ type: 'requestState/updateAuthorizeRequests', payload: requests });
+};
+
+export const subscribeAuthorizeRequests = lazySubscribeMessage('pri(authorize.requestsV2)', null, console.debug, updateAuthorizeRequests);
+
+export const updateMetadataRequests = (data: MetadataRequest[]) => {
+  // Convert data to object with key as id
+  const requests = convertConfirmationToMap(data);
+
+  store.dispatch({ type: 'requestState/updateMetadataRequests', payload: requests });
+};
+
+export const subscribeMetadataRequests = lazySubscribeMessage('pri(metadata.requests)', null, console.debug, updateMetadataRequests);
+
+export const updateSigningRequests = (data: SigningRequest[]) => {
+  // Convert data to object with key as id
+  const requests = convertConfirmationToMap(data);
+
+  store.dispatch({ type: 'requestState/updateSigningRequests', payload: requests });
+};
+
+export const subscribeSigningRequests = lazySubscribeMessage('pri(signing.requests)', null, console.debug, updateSigningRequests);
+
+export const updateConfirmationRequests = (data: ConfirmationsQueue) => {
+  store.dispatch({ type: 'requestState/updateMetadataRequests', payload: data });
+};
+
+export const subscribeConfirmationRequests = lazySubscribeMessage('pri(confirmations.subscribe)', null, updateConfirmationRequests, updateConfirmationRequests);
 
 // Settings Store
-export const updateTheme = (theme: ThemeTypes) => {
+export const updateTheme = (theme: ThemeNames) => {
   store.dispatch({ type: 'settings/updateTheme', payload: theme });
 };
 

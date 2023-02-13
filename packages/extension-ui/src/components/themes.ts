@@ -53,7 +53,7 @@ const darkTheme = {
   highlightedAreaBackground: '#212226',
   iconDangerColor: '#FF5E5C',
   iconNeutralColor: '#8E8E8E',
-  iconWarningColor: '#00CCAB',
+  iconWarningColor: '#FFD23F',
   id: 'dark',
   identiconBackground: '#F4F5F8',
   inputBackground: '#0F171F',
@@ -90,6 +90,7 @@ const darkTheme = {
   tooltipBoxShadow:
     '0px 24px 38px rgba(12, 19, 26, 0.14), 0px 9px 46px rgba(12, 19, 26, 0.12), 0px 11px 15px rgba(12, 19, 26, 0.2);',
   tooltipTextColor: '#BCCBD6',
+  warningBoxBackground: 'linear-gradient(0deg, rgba(255, 210, 63, 0.05), rgba(255, 210, 63, 0.05)), #14202A;',
   warningColor: '#FFD23F'
 };
 

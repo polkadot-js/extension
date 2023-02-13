@@ -8,7 +8,19 @@ import React, { useCallback, useContext, useState } from 'react';
 import { RouteComponentProps, withRouter } from 'react-router';
 import styled from 'styled-components';
 
-import { ActionBar, ActionContext, ActionText, Address, Button, InputWithLabel, Warning } from '../components';
+import viewOff from '../assets/viewOff.svg';
+import viewOn from '../assets/viewOn.svg';
+import {
+  ActionContext,
+  Address,
+  Button,
+  ButtonArea,
+  InputWithLabel,
+  VerticalSpace,
+  Warning,
+  WarningBox
+} from '../components';
+import useToast from '../hooks/useToast';
 import useTranslation from '../hooks/useTranslation';
 import { exportAccount } from '../messaging';
 import { Header } from '../partials';
@@ -27,11 +39,13 @@ function Export({
 }: Props): React.ReactElement<Props> {
   const { t } = useTranslation();
   const onAction = useContext(ActionContext);
+  const { show } = useToast();
   const [isBusy, setIsBusy] = useState(false);
   const [pass, setPass] = useState('');
   const [error, setError] = useState('');
+  const [isPasswordVisible, setIsPasswordVisible] = useState(false);
 
-  const _goHome = useCallback(() => onAction('/'), [onAction]);
+  const _goTo = (path: string) => () => onAction(path);
 
   const onPassChange = useCallback((password: string) => {
     setPass(password);
@@ -45,16 +59,18 @@ function Export({
       .then(({ exportedJson }) => {
         const blob = new Blob([JSON.stringify(exportedJson)], { type: 'application/json; charset=utf-8' });
 
-        saveAs(blob, `${address}.json`);
-
-        onAction('/');
+        saveAs(blob, `AlephZeroSigner_${address}.json`);
+        show(t<string>('Export successful'), 'success');
+        onAction('..');
       })
       .catch((error: Error) => {
         console.error(error);
         setError(error.message);
         setIsBusy(false);
       });
-  }, [address, onAction, pass]);
+  }, [address, onAction, pass, show, t]);
+
+  const _handleInputTypeChange = useCallback(() => setIsPasswordVisible((isPasswordVisible) => !isPasswordVisible), []);
 
   return (
     <>
@@ -64,54 +80,74 @@ function Export({
         withHelp
       />
       <div className={className}>
-        <Address address={address}>
-          <Warning className='movedWarning'>
-            {t<string>("You are exporting your account. Keep it safe and don't share it with anyone.")}
-          </Warning>
-          <div className='actionArea'>
-            <InputWithLabel
-              data-export-password
-              disabled={isBusy}
-              isError={pass.length < MIN_LENGTH || !!error}
-              label={t<string>('password for this account')}
-              onChange={onPassChange}
-              type='password'
+        <WarningBox
+          description={t<string>('If someone has your JSON file they will have full control of your accounts.')}
+          title={t<string>('Do not share your JSON file!')}
+        />
+        <Address address={address} />
+        <div className='password-container'>
+          <InputWithLabel
+            data-export-password
+            disabled={isBusy}
+            isError={pass.length < MIN_LENGTH || !!error}
+            label={t<string>('Password')}
+            onChange={onPassChange}
+            type={isPasswordVisible ? 'text' : 'password'}
+            value={pass}
+          />
+          <div className='password-icon'>
+            <img
+              onClick={_handleInputTypeChange}
+              src={isPasswordVisible ? viewOn : viewOff}
             />
-            {error && (
-              <Warning
-                isBelowInput
-                isDanger
-              >
-                {error}
-              </Warning>
-            )}
-            <Button
-              className='export-button'
-              data-export-button
-              isBusy={isBusy}
-              isDanger
-              isDisabled={pass.length === 0 || !!error}
-              onClick={_onExportButtonClick}
-            >
-              {t<string>('I want to export this account')}
-            </Button>
-            <ActionBar className='withMarginTop'>
-              <ActionText
-                className='center'
-                onClick={_goHome}
-                text={t<string>('Cancel')}
-              />
-            </ActionBar>
           </div>
-        </Address>
+          {pass.length < MIN_LENGTH && pass !== '' && (
+            <Warning
+              isBelowInput
+              isDanger
+            >
+              {t<string>('Password is too short')}
+            </Warning>
+          )}
+          {error && <Warning isDanger>{error}</Warning>}
+        </div>
       </div>
+      <VerticalSpace />
+      <ButtonArea>
+        <Button
+          onClick={_goTo(`..`)}
+          secondary
+        >
+          {t<string>('Cancel')}
+        </Button>
+        <Button
+          className='export-button'
+          data-export-button
+          isBusy={isBusy}
+          isDanger
+          isDisabled={pass.length < MIN_LENGTH || pass === '' || !!error}
+          onClick={_onExportButtonClick}
+        >
+          {t<string>('Export')}
+        </Button>
+      </ButtonArea>
     </>
   );
 }
 
 export default withRouter(styled(Export)`
-  .actionArea {
-    padding: 10px 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+
+  .password-container {
+    position: relative;
+  }
+  .password-icon {
+    position: absolute;
+    top: 18px;
+    right: 36px;
+    cursor: pointer;
   }
 
   .center {

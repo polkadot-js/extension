@@ -12,9 +12,10 @@ import { EditMenuCard, Identicon } from '@polkadot/extension-ui/components';
 import useMetadata from '@polkadot/extension-ui/hooks/useMetadata';
 import { IconTheme } from '@polkadot/react-identicon/types';
 
+import exportAccountIcon from '../../assets/export.svg';
 import subAccountIcon from '../../assets/subAccount.svg';
 import forgetIcon from '../../assets/vanish.svg';
-import { Switch } from '../../components';
+import { Svg, Switch } from '../../components';
 import { AccountContext, ActionContext, SettingsContext } from '../../components/contexts';
 import useToast from '../../hooks/useToast';
 import useTranslation from '../../hooks/useTranslation';
@@ -126,8 +127,26 @@ function EditAccountMenu({
           description=''
           extra='chevron'
           position='both'
-          preIcon={<img src={subAccountIcon} />}
+          preIcon={
+            <Svg
+              className='icon'
+              src={subAccountIcon}
+            />
+          }
           title={t<string>('Create a sub-account')}
+        />
+        <EditMenuCard
+          description=''
+          extra='chevron'
+          onClick={goTo(`/account/export/${address}`)}
+          position='both'
+          preIcon={
+            <Svg
+              className='icon'
+              src={exportAccountIcon}
+            />
+          }
+          title={t<string>('Export account')}
         />
         <EditMenuCard
           description=''
@@ -135,7 +154,12 @@ function EditAccountMenu({
           isDanger
           onClick={goTo(`/account/forget/${address}`)}
           position='both'
-          preIcon={<img src={forgetIcon} />}
+          preIcon={
+            <Svg
+              className='forgetIcon'
+              src={forgetIcon}
+            />
+          }
           title={t<string>('Forget')}
         />
       </div>
@@ -171,14 +195,6 @@ export default React.memo(
     display: none;
   }
 
-  // TODO: PLACEHOLDER UNTIL ITS DECIDED
-  [class*="EditMenuCard"]:last-of-type {
-    position: absolute;
-    bottom: 0px;
-    right: 0px;
-    left: 0px;
-    margin: 16px;
-  }
   `
     )
   )

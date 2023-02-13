@@ -35,15 +35,13 @@ interface Props extends ThemeProps {
 function Header({
   children,
   className = '',
-  onFilter,
-  showConnectedAccounts,
+
   smallMargin = false,
   text,
   withBackArrow,
   withGoToRoot = false,
   withHelp,
-  withSettings,
-  withStepper = false
+  withSettings
 }: Props): React.ReactElement<Props> {
   // TODO: check if needed
   // const [connectedTabsUrl, setConnectedTabsUrl] = useState<string[]>([]);

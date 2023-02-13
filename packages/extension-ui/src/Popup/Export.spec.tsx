@@ -12,7 +12,7 @@ import { act } from 'react-dom/test-utils';
 import { MemoryRouter, Route } from 'react-router';
 import { ThemeProvider } from 'styled-components';
 
-import { Button, themes } from '../components';
+import { Button, themes, WarningBox } from '../components';
 import * as messaging from '../messaging';
 import { flushAllPromises } from '../testHelpers';
 import Export from './Export';
@@ -29,13 +29,17 @@ describe('Export component', () => {
   };
 
   beforeEach(() => {
-    jest.spyOn(messaging, 'exportAccount').mockResolvedValue({ exportedJson: { meta: { name: 'account_name' } } as unknown as KeyringPair$Json });
+    jest
+      .spyOn(messaging, 'exportAccount')
+      .mockResolvedValue({ exportedJson: { meta: { name: 'account_name' } } as unknown as KeyringPair$Json });
 
     // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
     wrapper = mount(
-      <MemoryRouter initialEntries={ [`/account/export/${VALID_ADDRESS}`] }>
+      <MemoryRouter initialEntries={[`/account/export/${VALID_ADDRESS}`]}>
         <ThemeProvider theme={themes.dark}>
-          <Route path='/account/export/:address'><Export /></Route>
+          <Route path='/account/export/:address'>
+            <Export />
+          </Route>
         </ThemeProvider>
       </MemoryRouter>
     );
@@ -50,7 +54,7 @@ describe('Export component', () => {
   });
 
   it('button is disabled before any password is typed', () => {
-    expect(wrapper.find(Button).prop('isDisabled')).toBe(true);
+    expect(wrapper.find(Button).last().prop('isDisabled')).toBe(true);
   });
 
   it('shows an error if the password is wrong', async () => {
@@ -65,9 +69,8 @@ describe('Export component', () => {
     await act(flushAllPromises);
     wrapper.update();
 
-    // the first message is "You are exporting your account. Keep it safe and don't share it with anyone."
-    expect(wrapper.find('.warning-message').at(1).text()).toBe('Unable to decode using the supplied passphrase');
-    expect(wrapper.find(Button).prop('isDisabled')).toBe(true);
+    expect(wrapper.find('.warning-message').text()).toBe('Unable to decode using the supplied passphrase');
+    expect(wrapper.find(Button).last().prop('isDisabled')).toBe(true);
     expect(wrapper.find('InputWithLabel').first().prop('isError')).toBe(true);
   });
 
@@ -84,9 +87,8 @@ describe('Export component', () => {
     wrapper.update();
     enterPassword();
 
-    // the first message is "You are exporting your account. Keep it safe and don't share it with anyone."
-    expect(wrapper.find('.warning-message')).toHaveLength(1);
-    expect(wrapper.find(Button).prop('isDisabled')).toBe(false);
+    expect(wrapper.find(WarningBox)).toHaveLength(1);
+    expect(wrapper.find(Button).last().prop('isDisabled')).toBe(false);
     expect(wrapper.find('InputWithLabel').first().prop('isError')).toBe(false);
   });
 
@@ -94,6 +96,6 @@ describe('Export component', () => {
     enterPassword();
     await act(flushAllPromises);
 
-    expect(wrapper.find(Button).prop('isDisabled')).toBe(false);
+    expect(wrapper.find(Button).last().prop('isDisabled')).toBe(false);
   });
 });

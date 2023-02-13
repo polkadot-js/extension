@@ -48,7 +48,6 @@ function EditMenuCard({
   extra,
   isDanger = false,
   onClick,
-  position = 'middle',
   preIcon,
   title,
   toggle
@@ -61,7 +60,7 @@ function EditMenuCard({
       <div className='flex-container'>
         <div className='flex-group'>
           <div className={`title ${isDanger ? 'danger' : ''}`}>
-            {preIcon && <div className='icon'>{preIcon}</div>}
+            {preIcon}
             {title}
           </div>
           <div className='description'>
@@ -119,14 +118,7 @@ export default styled(EditMenuCard)(
     width: 100%;
   }
 
-  .icon {
-    & img {
-      width: 20px;
-      height: 20px;
-    }
-  }
-
-  .danger{
+  .danger {
     color: ${theme.textColorDanger};
   }
 
@@ -151,11 +143,25 @@ export default styled(EditMenuCard)(
     color: ${theme.subTextColor};
   }
 
+  .icon, .forgetIcon {
+    width: 20px;
+    height: 20px;
+  }
+
+  .icon {
+    background: ${theme.primaryColor};
+  }
+
+  .forgetIcon {
+    background: ${theme.iconDangerColor};
+  }
+
   & svg {
     fill: ${theme.primaryColor};
   }
 
   .extra {
+
     &:hover {
       cursor: pointer
     };

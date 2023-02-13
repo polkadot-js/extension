@@ -206,5 +206,7 @@
     "This name is visible only on this device.": "",
     "Account name changed successfully": "",
     "Even though you can remove account from Aleph Zero Signer, you can restore it here or in another wallet with the secret phrase.": "",
-    "Need help? Look for tooltips such as this one!": ""
+    "Need help? Look for tooltips such as this one!": "",
+    "Export": "",
+    "Export successful": ""
 }

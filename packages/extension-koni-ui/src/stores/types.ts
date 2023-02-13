@@ -82,11 +82,12 @@ export interface AccountState extends AccountsContext, KeyringState, BaseReduxSt
   currentAccount: AccountJson | null
 }
 
-export interface RequestState extends BaseReduxStore {
-  authorizeRequest: AuthorizeRequest[],
-  metadataRequest: MetadataRequest[],
-  signingRequest: SigningRequest[],
-  confirmationQueue: ConfirmationsQueue
+export interface RequestState extends ConfirmationsQueue, BaseReduxStore {
+  authorizeRequest: Record<string, AuthorizeRequest>,
+  metadataRequest: Record<string, MetadataRequest>,
+  signingRequest: Record<string, SigningRequest>
+  hasConfirmations: boolean
+  numberOfConfirmations: number
 }
 
 export interface UpdateConfirmationsQueueRequest extends BaseReduxStore {

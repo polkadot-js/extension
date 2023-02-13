@@ -2,75 +2,91 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
+import { ConfirmationsQueue } from '@subwallet/extension-base/background/KoniTypes';
 import { AuthorizeRequest, MetadataRequest, SigningRequest } from '@subwallet/extension-base/background/types';
-import { ReduxStatus, RequestState, UpdateConfirmationsQueueRequest } from '@subwallet/extension-koni-ui/stores/types';
+import { ReduxStatus, RequestState } from '@subwallet/extension-koni-ui/stores/types';
 
 const initialState: RequestState = {
-  authorizeRequest: [],
-  metadataRequest: [],
-  signingRequest: [],
+  authorizeRequest: {},
+  metadataRequest: {},
+  signingRequest: {},
 
-  confirmationQueue: {
-    addNetworkRequest: {},
-    addTokenRequest: {},
-    switchNetworkRequest: {},
-    evmSignatureRequest: {},
-    evmSignatureRequestExternal: {},
-    evmSendTransactionRequest: {},
-    evmSendTransactionRequestExternal: {}
-  },
+  // Type of confirmation requets
+  addNetworkRequest: {},
+  addTokenRequest: {},
+  switchNetworkRequest: {},
+  evmSignatureRequest: {},
+  evmSignatureRequestExternal: {},
+  evmSendTransactionRequest: {},
+  evmSendTransactionRequestExternal: {},
 
-  reduxStatus: ReduxStatus.INIT
+  // Summary Info
+  reduxStatus: ReduxStatus.INIT,
+  hasConfirmations: false,
+  numberOfConfirmations: 0
 };
+
+const CONFIRMATIONS_FIELDS: Array<keyof RequestState> = [
+  'authorizeRequest',
+  'metadataRequest',
+  'signingRequest',
+  'addNetworkRequest',
+  'addTokenRequest',
+  'switchNetworkRequest',
+  'evmSignatureRequest',
+  'evmSignatureRequestExternal',
+  'evmSendTransactionRequest',
+  'evmSendTransactionRequestExternal'
+];
+
+const readyMap = {
+  updateAuthorizeRequests: false,
+  updateMetadataRequests: false,
+  updateSigningRequests: false,
+  updateConfirmationRequests: false
+};
+
+function computeStateSummary (state: RequestState) {
+  const numberOfConfirmations = CONFIRMATIONS_FIELDS.reduce((prev: number, field) => {
+    prev += Object.keys(state[field]).length;
+
+    return prev;
+  }, 0);
+
+  state.numberOfConfirmations = numberOfConfirmations;
+  state.hasConfirmations = numberOfConfirmations > 0;
+
+  if (Object.values(readyMap).every((v) => v)) {
+    state.reduxStatus = ReduxStatus.READY;
+  }
+}
 
 const requestStateSlice = createSlice({
   initialState,
   name: 'requestState',
   reducers: {
-    updateAuthorizeRequest (state, action: PayloadAction<AuthorizeRequest>) {
-      const { payload } = action;
-
-      return {
-        ...state,
-        authorizeRequest: [...state.authorizeRequest, payload],
-        reduxStatus: ReduxStatus.READY
-      };
+    updateAuthorizeRequests (state, { payload }: PayloadAction<Record<string, AuthorizeRequest>>) {
+      state.authorizeRequest = payload;
+      readyMap.updateAuthorizeRequests = true;
+      computeStateSummary(state);
     },
-    updateMetadataRequest (state, action: PayloadAction<MetadataRequest[]>) {
-      const { payload } = action;
-
-      return {
-        ...state,
-        metadataRequest: [...state.metadataRequest, ...payload],
-        reduxStatus: ReduxStatus.READY
-      };
+    updateMetadataRequests (state, { payload }: PayloadAction<Record<string, MetadataRequest>>) {
+      state.metadataRequest = payload;
+      readyMap.updateMetadataRequests = true;
+      computeStateSummary(state);
     },
-    updateSigningRequest (state, action: PayloadAction<SigningRequest[]>) {
-      const { payload } = action;
-
-      return {
-        ...state,
-        signingRequest: [...state.signingRequest, ...payload],
-        reduxStatus: ReduxStatus.READY
-      };
+    updateSigningRequests (state, { payload }: PayloadAction<Record<string, SigningRequest>>) {
+      state.signingRequest = payload;
+      readyMap.updateSigningRequests = true;
+      computeStateSummary(state);
     },
-    updateConfirmationQueue (state, action: PayloadAction<UpdateConfirmationsQueueRequest>) {
-      const { payload } = action;
-
-      return {
-        ...state,
-        confirmationQueue: {
-          ...state.confirmationQueue,
-          [payload.type]: {
-            ...state.confirmationQueue[payload.type],
-            ...payload.data
-          }
-        },
-        reduxStatus: ReduxStatus.READY
-      };
+    updateConfirmationRequests (state, action: PayloadAction<Partial<ConfirmationsQueue>>) {
+      Object.assign(state, action.payload);
+      readyMap.updateConfirmationRequests = true;
+      computeStateSummary(state);
     }
   }
 });
 
-export const { updateAuthorizeRequest, updateConfirmationQueue, updateMetadataRequest, updateSigningRequest } = requestStateSlice.actions;
+export const { updateAuthorizeRequests, updateConfirmationRequests, updateMetadataRequests, updateSigningRequests } = requestStateSlice.actions;
 export default requestStateSlice.reducer;

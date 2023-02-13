@@ -2,23 +2,8 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { persistor, store, StoreName } from '@subwallet/extension-koni-ui/stores';
-import {
-  subscribeAccountsData,
-  subscribeAssetRegistry,
-  subscribeBalance,
-  subscribeChainInfoMap,
-  subscribeChainStateMap,
-  subscribeCrowdloan,
-  subscribeKeyringState,
-  subscribeMultiChainAssetMap,
-  subscribeNftCollections,
-  subscribeNftItems,
-  subscribePrice,
-  subscribeStakeUnlockingInfo,
-  subscribeStaking,
-  subscribeStakingReward,
-  subscribeTxHistory
-} from '@subwallet/extension-koni-ui/stores/utils';
+import { subscribeAccountsData, subscribeAssetRegistry, subscribeAuthorizeRequests, subscribeBalance, subscribeChainInfoMap, subscribeChainStateMap, subscribeConfirmationRequests, subscribeCrowdloan, subscribeKeyringState, subscribeMetadataRequests, subscribeMultiChainAssetMap, subscribeNftCollections, subscribeNftItems, subscribePrice, subscribeSigningRequests, subscribeStakeUnlockingInfo, subscribeStaking, subscribeStakingReward, subscribeTxHistory } from '@subwallet/extension-koni-ui/stores/utils';
+import Bowser from 'bowser';
 import React from 'react';
 import { Provider } from 'react-redux';
 import { PersistGate } from 'redux-persist/integration/react';
@@ -155,9 +140,39 @@ const _DataContext: DataContextType = {
   }
 };
 
+export function initBasicData () {
+  // Init Application with some default data if not existed
+  const VARIANTS = ['beam', 'marble', 'pixel', 'sunset', 'bauhaus', 'ring'];
+
+  function getRandomVariant (): string {
+    const random = Math.floor(Math.random() * 6);
+
+    return VARIANTS[random];
+  }
+
+  const browser = Bowser.getParser(window.navigator.userAgent);
+
+  if (!window.localStorage.getItem('randomVariant') || !window.localStorage.getItem('randomNameForLogo')) {
+    const randomVariant = getRandomVariant();
+
+    window.localStorage.setItem('randomVariant', randomVariant);
+    window.localStorage.setItem('randomNameForLogo', `${Date.now()}`);
+  }
+
+  if (!!browser.getBrowser() && !!browser.getBrowser().name && !!browser.getOS().name) {
+    window.localStorage.setItem('browserInfo', browser.getBrowser().name as string);
+    window.localStorage.setItem('osInfo', browser.getOS().name as string);
+  }
+
+  return true;
+}
+
 export const DataContext = React.createContext(_DataContext);
 
 export const DataContextProvider = ({ children }: DataContextProviderProps) => {
+  // Init basic data
+  initBasicData();
+
   // Init subscription
   // Common
   _DataContext.addHandler({ ...subscribeAccountsData, name: 'subscribeCurrentAccount', relatedStores: ['accountState'], isStartImmediately: true });
@@ -167,6 +182,12 @@ export const DataContextProvider = ({ children }: DataContextProviderProps) => {
   _DataContext.addHandler({ ...subscribeChainInfoMap, name: 'subscribeChainInfoMap', relatedStores: ['chainStore'], isStartImmediately: true });
   _DataContext.addHandler({ ...subscribeAssetRegistry, name: 'subscribeAssetRegistry', relatedStores: ['assetRegistry'], isStartImmediately: true });
   _DataContext.addHandler({ ...subscribeMultiChainAssetMap, name: 'subscribeMultiChainAssetMap', relatedStores: ['assetRegistry'], isStartImmediately: true });
+
+  // Confirmations
+  _DataContext.addHandler({ ...subscribeAuthorizeRequests, name: 'subscribeAuthorizeRequests', relatedStores: ['requestState'], isStartImmediately: true });
+  _DataContext.addHandler({ ...subscribeMetadataRequests, name: 'subscribeMetadataRequests', relatedStores: ['requestState'], isStartImmediately: true });
+  _DataContext.addHandler({ ...subscribeSigningRequests, name: 'subscribeSigningRequests', relatedStores: ['requestState'], isStartImmediately: true });
+  _DataContext.addHandler({ ...subscribeConfirmationRequests, name: 'subscribeConfirmationRequests', relatedStores: ['requestState'], isStartImmediately: true });
 
   // Features
   _DataContext.addHandler({ ...subscribePrice, name: 'subscribePrice', relatedStores: ['price'] });

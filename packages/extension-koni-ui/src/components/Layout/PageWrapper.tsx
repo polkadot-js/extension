@@ -11,36 +11,44 @@ import styled from 'styled-components';
 export interface PageWrapperProps extends ThemeProps{
   resolve?: Promise<any>;
   children?: React.ReactElement;
+  animateOnce?: boolean;
 }
 
 const defaultResolver = Promise.resolve(true);
 
-function Component ({ children, className, resolve }: PageWrapperProps) {
+function Component ({ animateOnce, children, className, resolve }: PageWrapperProps) {
   const nodeRef = React.useRef(null);
   const location = useLocation();
-  const [pathName, setPathName] = useState('');
+  const [pathName, setPathName] = useState<string | undefined>();
 
   useEffect(() => {
-    setPathName(location.pathname);
-  }, [location.pathname]);
+    setPathName((prevPathName) => {
+      if (animateOnce && prevPathName) {
+        return prevPathName;
+      }
 
-  return <div className={className}>
-    <React.Suspense fallback={<LoadingContainer />}>
-      <Await resolve={resolve || defaultResolver}>
-        <CSSTransition
-          classNames={'page'}
-          in={pathName === location.pathname}
-          nodeRef={nodeRef}
-          timeout={300}
-          unmountOnExit
+      return location.pathname;
+    });
+  }, [animateOnce, location.pathname]);
+
+  return <React.Suspense fallback={<LoadingContainer />}>
+    <Await resolve={resolve || defaultResolver}>
+      <CSSTransition
+        classNames={'page'}
+        in={!!(animateOnce && pathName) || pathName === location.pathname}
+        nodeRef={nodeRef}
+        timeout={300}
+        unmountOnExit
+      >
+        <div
+          className={className}
+          ref={nodeRef}
         >
-          <div ref={nodeRef}>
-            {children}
-          </div>
-        </CSSTransition>
-      </Await>
-    </React.Suspense>
-  </div>;
+          {children}
+        </div>
+      </CSSTransition>
+    </Await>
+  </React.Suspense>;
 }
 
 const PageWrapper = styled(Component)<PageWrapperProps>(({ theme }) => ({

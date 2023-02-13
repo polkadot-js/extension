@@ -1,6 +1,7 @@
 // Copyright 2019-2022 @polkadot/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
+import Confirmations from '@subwallet/extension-koni-ui/Popup/Confirmations';
 import { Debugger } from '@subwallet/extension-koni-ui/Popup/Debugger';
 import { Button } from '@subwallet/react-ui';
 import Icon from '@subwallet/react-ui/es/icon';
@@ -15,21 +16,19 @@ interface Props {
   children: React.ReactNode;
 }
 
-export const PREDEFINED_MODAL_NAMES = ['debugger', 'transaction', 'confirmation'];
+export const PREDEFINED_MODAL_NAMES = ['debugger', 'transaction', 'confirmations'];
 type PredefinedModalName = typeof PREDEFINED_MODAL_NAMES[number];
 
 export const usePredefinedModal = () => {
   const [, setSearchParams] = useSearchParams();
 
-  return {
-    openModal: (name: PredefinedModalName) => {
-      setSearchParams((prev) => {
-        prev.set('popup', name);
+  return useCallback((name: PredefinedModalName) => {
+    setSearchParams((prev) => {
+      prev.set('popup', name);
 
-        return prev;
-      });
-    }
-  };
+      return prev;
+    });
+  }, [setSearchParams]);
 };
 
 const DebugIcon = <Icon
@@ -44,20 +43,20 @@ const DebugTrigger = styled.div(({ theme }) => ({
 }));
 
 export const WalletModalContext = ({ children }: Props) => {
-  const modalContext = useContext(ModalContext);
+  const { activeModal, inactiveModals } = useContext(ModalContext);
   const [searchParams, setSearchParams] = useSearchParams();
-  const openModal = usePredefinedModal().openModal;
+  const openPModal = usePredefinedModal();
 
   useEffect(() => {
     const confirmID = searchParams.get('popup');
 
     // Auto open confirm modal with method modalContext.activeModal else auto close all modal
     if (confirmID) {
-      PREDEFINED_MODAL_NAMES.includes(confirmID) && modalContext.activeModal(confirmID);
+      PREDEFINED_MODAL_NAMES.includes(confirmID) && activeModal(confirmID);
     } else {
-      modalContext.inactiveModals(PREDEFINED_MODAL_NAMES);
+      inactiveModals(PREDEFINED_MODAL_NAMES);
     }
-  }, [searchParams]);
+  }, [activeModal, inactiveModals, searchParams]);
 
   const onCloseModal = useCallback(() => {
     setSearchParams((prev) => {
@@ -68,8 +67,8 @@ export const WalletModalContext = ({ children }: Props) => {
   }, [setSearchParams]);
 
   const openDebugger = useCallback(() => {
-    openModal('debugger');
-  }, [setSearchParams]);
+    openPModal('debugger');
+  }, [openPModal]);
 
   return <>
     {children}
@@ -87,6 +86,15 @@ export const WalletModalContext = ({ children }: Props) => {
       title={'Debugger'}
     >
       <Debugger />
+    </SwModal>
+    <SwModal
+      transitionName={'fade'}
+      className={'modal-full'}
+      closable={false}
+      id={'confirmations'}
+      onCancel={onCloseModal}
+    >
+      <Confirmations />
     </SwModal>
   </>;
 };

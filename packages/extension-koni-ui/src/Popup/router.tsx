@@ -10,7 +10,7 @@ import { Nfts } from '@subwallet/extension-koni-ui/Popup/Home/Nfts';
 import { Staking } from '@subwallet/extension-koni-ui/Popup/Home/Staking';
 import { Tokens } from '@subwallet/extension-koni-ui/Popup/Home/Tokens';
 import PhishingDetected from '@subwallet/extension-koni-ui/Popup/PhishingDetected';
-import { initRootPromise, Root } from '@subwallet/extension-koni-ui/Popup/Root';
+import { Root } from '@subwallet/extension-koni-ui/Popup/Root';
 import { Welcome } from '@subwallet/extension-koni-ui/Popup/Welcome';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
 import React, { useContext, useEffect } from 'react';
@@ -57,7 +57,6 @@ export function Example () {
 // Todo: Create error page
 export const router = createHashRouter([{ path: '/',
   element: <Root />,
-  loader: initRootPromise,
   errorElement: <ErrorFallback />,
   children: [{
     path: '/welcome',

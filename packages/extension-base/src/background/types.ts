@@ -83,23 +83,22 @@ export type AccNetworkContext = {
   setNetwork: (network: CurrentNetworkInfo) => void;
 }
 
-export interface AuthorizeRequest {
+export interface ConfirmationRequestBase {
   id: string;
+  url: string;
+}
+
+export interface AuthorizeRequest extends ConfirmationRequestBase{
   request: RequestAuthorizeTab;
-  url: string;
 }
 
-export interface MetadataRequest {
-  id: string;
+export interface MetadataRequest extends ConfirmationRequestBase{
   request: MetadataDef;
-  url: string;
 }
 
-export interface SigningRequest {
+export interface SigningRequest extends ConfirmationRequestBase{
   account: AccountJson;
-  id: string;
   request: RequestSign;
-  url: string;
 }
 
 // [MessageType]: [RequestType, ResponseType, SubscriptionMessageType?]

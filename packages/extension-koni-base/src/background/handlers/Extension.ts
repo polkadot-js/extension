@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import Common from '@ethereumjs/common';
-import { _ChainAsset, _ChainInfo } from '@subwallet/chain-list/types';
+import { _ChainAsset, _ChainInfo, _MultiChainAsset } from '@subwallet/chain-list/types';
 import Extension, { isJsonPayload, SEED_DEFAULT_LENGTH, SEED_LENGTHS } from '@subwallet/extension-base/background/handlers/Extension';
 import { AuthUrls } from '@subwallet/extension-base/background/handlers/State';
 import { createSubscription } from '@subwallet/extension-base/background/handlers/subscriptions';
@@ -3896,6 +3896,23 @@ export default class KoniExtension extends Extension {
     return state.getAssetRegistry();
   }
 
+  private subscribeMultiChainAssetMap (id: string, port: chrome.runtime.Port): Record<string, _MultiChainAsset> {
+    const cb = createSubscription<'pri(chainService.subscribeMultiChainAssetMap)'>(id, port);
+    const multiChainAssetSubscription = state.subscribeMultiChainAssetMap().subscribe({
+      next: (rs) => {
+        cb(rs);
+      }
+    });
+
+    this.createUnsubscriptionHandle(id, multiChainAssetSubscription.unsubscribe);
+
+    port.onDisconnect.addListener((): void => {
+      this.cancelSubscription(id);
+    });
+
+    return state.getMultiChainAssetMap();
+  }
+
   private getSupportedSmartContractTypes () {
     return state.getSupportedSmartContractTypes();
   }
@@ -4040,6 +4057,8 @@ export default class KoniExtension extends Extension {
         return this.disableChains(request as string[]);
       case 'pri(chainService.subscribeAssetRegistry)':
         return this.subscribeAssetRegistry(id, port);
+      case 'pri(chainService.subscribeMultiChainAssetMap)':
+        return this.subscribeMultiChainAssetMap(id, port);
       case 'pri(chainService.upsertCustomToken)':
         return this.upsertCustomToken(request as _ChainAsset);
       case 'pri(chainService.deleteCustomTokens)':

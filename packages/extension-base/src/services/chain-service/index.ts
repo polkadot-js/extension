@@ -1,8 +1,17 @@
 // Copyright 2019-2022 @subwallet/extension-base authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { AssetRefMap, ChainAssetMap, ChainInfoMap } from '@subwallet/chain-list';
-import { _AssetRefPath, _AssetType, _ChainAsset, _ChainInfo, _EvmInfo, _SubstrateChainType, _SubstrateInfo } from '@subwallet/chain-list/types';
+import {AssetRefMap, ChainAssetMap, ChainInfoMap, MultiChainAssetMap} from '@subwallet/chain-list';
+import {
+  _AssetRefPath,
+  _AssetType,
+  _ChainAsset,
+  _ChainInfo,
+  _EvmInfo,
+  _MultiChainAsset,
+  _SubstrateChainType,
+  _SubstrateInfo
+} from '@subwallet/chain-list/types';
 import { _DEFAULT_ACTIVE_CHAINS } from '@subwallet/extension-base/services/chain-service/constants';
 import { EvmChainHandler } from '@subwallet/extension-base/services/chain-service/handler/EvmChainHandler';
 import { SubstrateChainHandler } from '@subwallet/extension-base/services/chain-service/handler/SubstrateChainHandler';
@@ -36,6 +45,7 @@ export class ChainService {
   private chainInfoMapSubject = new Subject<Record<string, _ChainInfo>>();
   private chainStateMapSubject = new Subject<Record<string, _ChainState>>();
   private assetRegistrySubject = new Subject<Record<string, _ChainAsset>>();
+  private multiChainAssetMapSubject = new Subject<Record<string, _MultiChainAsset>>();
 
   private logger: Logger;
 
@@ -48,6 +58,7 @@ export class ChainService {
     this.chainInfoMapSubject.next(this.dataMap.chainInfoMap);
     this.chainStateMapSubject.next(this.dataMap.chainStateMap);
     this.assetRegistrySubject.next(this.dataMap.assetRegistry);
+    this.multiChainAssetMapSubject.next(MultiChainAssetMap);
 
     this.logger = createLogger('chain-service');
   }
@@ -88,12 +99,20 @@ export class ChainService {
     return this.assetRegistrySubject;
   }
 
+  public subscribeMultiChainAssetMap () {
+    return this.multiChainAssetMapSubject;
+  }
+
   public subscribeChainStateMap () {
     return this.chainStateMapSubject;
   }
 
   public getAssetRegistry () {
     return this.dataMap.assetRegistry;
+  }
+
+  public getMultiChainAssetMap () {
+    return MultiChainAssetMap;
   }
 
   public getSmartContractTokens () {

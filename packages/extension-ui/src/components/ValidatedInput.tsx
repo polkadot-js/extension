@@ -86,6 +86,7 @@ position: relative;
   position: absolute;
   top: 18px;
   right: 36px;
+  cursor: pointer;
 }
 
 `;

@@ -50,15 +50,15 @@ export default function Password({ isFocussed, onChange }: Props): React.ReactEl
         component={InputWithLabel}
         data-input-password
         isFocused={isFocussed}
-        label={t<string>('Password')}
+        label={t<string>('Set password')}
         onValidatedChange={setPass1}
         showPasswordElement={
           <div className='password-icon'>
-          <img
-            onClick={_handleFistInputTypeChange}
-            src={isFirstPasswordVisible ? viewOn : viewOff}
-          />
-        </div>
+            <img
+              onClick={_handleFistInputTypeChange}
+              src={isFirstPasswordVisible ? viewOn : viewOff}
+            />
+          </div>
         }
         type={isFirstPasswordVisible ? 'text' : 'password'}
         validator={isFirstPasswordValid}
@@ -72,16 +72,15 @@ export default function Password({ isFocussed, onChange }: Props): React.ReactEl
             onValidatedChange={setPass2}
             showPasswordElement={
               <div className='password-icon'>
-              <img
-                onClick={_handleSecondInputTypeChange}
-                src={isSecondPasswordVisible ? viewOff : viewOn}
-              />
-            </div>
+                <img
+                  onClick={_handleSecondInputTypeChange}
+                  src={isSecondPasswordVisible ? viewOff : viewOn}
+                />
+              </div>
             }
             type={isSecondPasswordVisible ? 'text' : 'password'}
             validator={isSecondPasswordValid(pass1)}
           />
-
         </>
       )}
     </>

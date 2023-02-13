@@ -328,9 +328,9 @@ export default styled(Address)(
     top: 0;
 
     &.chain {
-      background: ${theme.primaryColor};
-      border-radius: 0 0 0 10px;
-      color: white;
+      background: ${theme.boxBorderColor};
+      border-radius: 0px 8px;
+      color: ${theme.subTextColor};
       padding: 0.1rem 0.5rem 0.1rem 0.75rem;
       right: 0;
       z-index: 1;

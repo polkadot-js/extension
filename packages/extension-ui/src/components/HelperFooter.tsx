@@ -25,6 +25,7 @@ export default styled(HelperFooter)(
     gap: 12px;
     padding-top: 0px;
     margin-bottom: 16px;
+    margin-top: 30px;
   
     &:before {
       position: absolute;

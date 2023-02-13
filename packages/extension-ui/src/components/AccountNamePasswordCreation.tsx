@@ -4,7 +4,9 @@
 import React, { useCallback, useState } from 'react';
 import styled from 'styled-components';
 
-import { Address, Button } from '../components';
+import helpIcon from '../assets/help.svg';
+import { Address, Button, Dropdown, HelperFooter, ScrollWrapper } from '../components';
+import useGenesisHashOptions from '../hooks/useGenesisHashOptions';
 import useToast from '../hooks/useToast';
 import useTranslation from '../hooks/useTranslation';
 import { Name, Password } from '../partials';
@@ -16,6 +18,7 @@ interface Props {
   buttonLabel?: string;
   className?: string;
   genesisHash: string;
+  setGenesis: (newGenesisHash: string) => void;
   isBusy: boolean;
   onBackClick?: () => void;
   onCreate: (name: string, password: string) => void | Promise<void | boolean>;
@@ -32,12 +35,14 @@ function AccountNamePasswordCreation({
   onBackClick,
   onCreate,
   onNameChange,
-  onPasswordChange
+  onPasswordChange,
+  setGenesis
 }: Props): React.ReactElement<Props> {
   const [name, setName] = useState<string | null>(null);
   const [password, setPassword] = useState<string | null>(null);
   const { t } = useTranslation();
   const { show } = useToast();
+  const options = useGenesisHashOptions();
 
   const _onCreate = useCallback(async () => {
     if (name && password) {
@@ -68,30 +73,54 @@ function AccountNamePasswordCreation({
     onBackClick && onBackClick();
   }, [_onNameChange, onBackClick]);
 
+  const _onChangeNetwork = useCallback((newGenesisHash: string) => setGenesis(newGenesisHash), [setGenesis]);
+
+  const footer = (
+    <HelperFooter>
+      <img
+        className='icon'
+        src={helpIcon}
+      />
+      <span>
+        {t<string>('When should you choose the network?')}&nbsp;
+        <br />
+        <span className='link'>{t<string>('Learn more')}</span>
+      </span>
+    </HelperFooter>
+  );
+
   return (
     <>
-      <div className={className}>
-        <div className='text'>
-          <span className='heading'>{t<string>('Add local details')}</span>
-          <span className='subtitle'>
-            {t<string>('It might help you keep track of what the account is for and additionally protect it.')}
-          </span>
+      <ScrollWrapper>
+        <div className={className}>
+          <div className='text'>
+            <span className='heading'>{t<string>('Visibility & security')}</span>
+            <span className='subtitle'>
+              {t<string>('Choose how your new account is displayed and protected it in Aleph Zero Signer.')}
+            </span>
+          </div>
+          <Address
+            address={address}
+            genesisHash={genesisHash}
+            name={name}
+          />
+          <Name
+            isFocused
+            onChange={_onNameChange}
+          />
+          <Password onChange={_onPasswordChange} />
+          <Dropdown
+            className={className}
+            label={t<string>('Show on network')}
+            onChange={_onChangeNetwork}
+            options={options}
+            value={genesisHash}
+          />
         </div>
-        <Address
-          address={address}
-          genesisHash={genesisHash}
-          name={name}
-        />
-        <div className='spacer'></div>
-        <Name
-          isFocused
-          onChange={_onNameChange}
-        />
-        <Password onChange={_onPasswordChange} />
-      </div>
+      </ScrollWrapper>
       <VerticalSpace />
       {onBackClick && buttonLabel && (
-        <ButtonArea>
+        <ButtonArea footer={footer}>
           <BackButton onClick={_onBackClick} />
           <Button
             data-button-action='add new root'
@@ -109,9 +138,9 @@ function AccountNamePasswordCreation({
 
 export default React.memo(styled(AccountNamePasswordCreation)`
 
-.spacer {
-  height: 16px;
-}
+  .spacer {
+    height: 16px;
+  }
 
 .text {
   display: flex;

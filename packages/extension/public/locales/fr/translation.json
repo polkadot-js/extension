@@ -180,8 +180,8 @@
   "Name": "",
   "Password": "",
   "Confirm password": "",
-  "Add local details": "",
-  "It might help you keep track of what the account is for and additionally protect it.": "",
+  "Visibility & security": "",
+  "Choose how your new account is displayed and protected it in Aleph Zero Signer.": "",
   "Import existing account": "",
   "Enter your secret phrase": "",
   "Enter your 12-word secret phrase to access your account.": "",
@@ -203,5 +203,9 @@
   "Even though you can remove account from Aleph Zero Signer, you can restore it here or in another wallet with the secret phrase.": "",
   "Need help? Look for tooltips such as this one!": "",
   "Export": "",
-  "Export successful": ""
+  "Export successful": "",
+  "Set password": "",
+  "Show on network": "",
+  "Unlock to edit": "",
+  "When should you choose the network?": ""
 }

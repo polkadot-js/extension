@@ -29,8 +29,6 @@ function Button({
   isDisabled,
   // isSuccess,
   onClick,
-  secondary,
-  tertiary,
   to
 }: Props): React.ReactElement<Props> {
   const _onClick = useCallback((): void => {

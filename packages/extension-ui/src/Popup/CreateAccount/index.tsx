@@ -4,9 +4,8 @@
 import React, { useCallback, useContext, useEffect, useState } from 'react';
 import styled from 'styled-components';
 
-import { ActionContext, Loading, ScrollWrapper } from '../../components';
+import { ActionContext, Loading } from '../../components';
 import AccountNamePasswordCreation from '../../components/AccountNamePasswordCreation';
-import useGenesisHashOptions from '../../hooks/useGenesisHashOptions';
 import useMetadata from '../../hooks/useMetadata';
 import useTranslation from '../../hooks/useTranslation';
 import { createAccountSuri, createSeed, validateSeed } from '../../messaging';
@@ -15,11 +14,7 @@ import { DEFAULT_TYPE } from '../../util/defaultType';
 import SafetyFirst from './SafetyFirst';
 import SaveMnemonic from './SaveMnemonic';
 
-interface Props {
-  className?: string;
-}
-
-function CreateAccount({ className }: Props): React.ReactElement {
+function CreateAccount(): React.ReactElement {
   const { t } = useTranslation();
   const onAction = useContext(ActionContext);
   const [isBusy, setIsBusy] = useState(false);
@@ -28,7 +23,6 @@ function CreateAccount({ className }: Props): React.ReactElement {
   const [seed, setSeed] = useState<null | string>(null);
   const [type, setType] = useState(DEFAULT_TYPE);
   const [name, setName] = useState('');
-  const options = useGenesisHashOptions();
   const [genesisHash, setGenesis] = useState('');
   const chain = useMetadata(genesisHash, true);
 
@@ -73,9 +67,6 @@ function CreateAccount({ className }: Props): React.ReactElement {
 
   const _onPreviousStep = useCallback(() => setStep((step) => step - 1), []);
 
-  // TODO: COMEBACK WHEN ITS DECIDED
-  const _onChangeNetwork = useCallback((newGenesisHash: string) => setGenesis(newGenesisHash), []);
-
   return (
     <>
       <HeaderWithSteps
@@ -83,45 +74,33 @@ function CreateAccount({ className }: Props): React.ReactElement {
         text={t<string>('Create an account')}
         total={3}
       />
-      <ScrollWrapper>
-        <Loading>
-          {step === 1 && <SafetyFirst onNextStep={_onNextStep} />}
-          {seed && step === 2 && (
-            <SaveMnemonic
-              onNextStep={_onNextStep}
-              onPreviousStep={_onPreviousStep}
-              seed={seed}
-            />
-          )}
-          {seed && step === 3 && (
-            <>
-              {/* TODO: COMEBACK WHEN ITS DECIDED */}
-              {/* <Dropdown
-              className={className}
-              label={t<string>('Network')}
-              onChange={_onChangeNetwork}
-              options={options}
-              value={genesisHash}
-            /> */}
-              <AccountNamePasswordCreation
-                address={address}
-                buttonLabel={t<string>('Create')}
-                genesisHash={genesisHash}
-                isBusy={isBusy}
-                onBackClick={_onPreviousStep}
-                onCreate={_onCreate}
-                onNameChange={setName}
-              />
-            </>
-          )}
-        </Loading>
-      </ScrollWrapper>
+      <Loading>
+        {step === 1 && <SafetyFirst onNextStep={_onNextStep} />}
+        {seed && step === 2 && (
+          <SaveMnemonic
+            onNextStep={_onNextStep}
+            onPreviousStep={_onPreviousStep}
+            seed={seed}
+          />
+        )}
+        {seed && step === 3 && (
+          <AccountNamePasswordCreation
+            address={address}
+            buttonLabel={t<string>('Create')}
+            genesisHash={genesisHash}
+            isBusy={isBusy}
+            onBackClick={_onPreviousStep}
+            onCreate={_onCreate}
+            onNameChange={setName}
+            setGenesis={setGenesis}
+          />
+        )}
+      </Loading>
     </>
   );
 }
 
 export default styled(CreateAccount)`
-  margin-bottom: 16px;
 
   label::after {
     right: 36px;

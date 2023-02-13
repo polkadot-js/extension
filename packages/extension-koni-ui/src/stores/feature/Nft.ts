@@ -2,14 +2,14 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
-import {NftCollection, NftItem} from '@subwallet/extension-base/background/KoniTypes';
+import { NftCollection, NftItem } from '@subwallet/extension-base/background/KoniTypes';
 import { NftStore, ReduxStatus } from '@subwallet/extension-koni-ui/stores/types';
 
-const initialState = {
+const initialState: NftStore = {
   nftItems: [],
   nftCollections: [],
   reduxStatus: ReduxStatus.INIT
-} as NftStore;
+};
 
 const nftSlice = createSlice({
   initialState,
@@ -24,17 +24,18 @@ const nftSlice = createSlice({
         nftCollections: state.nftCollections
       };
     },
+
     updateNftCollections (state, action: PayloadAction<NftCollection[]>) {
       const payload = action.payload;
 
       return {
         reduxStatus: ReduxStatus.READY,
-        nftItems: state.nftCollections,
+        nftItems: state.nftItems,
         nftCollections: payload
       };
     }
   }
 });
 
-export const { updateNftCollections, updateNftItems } = nftSlice.actions;
+export const { updateNftItems } = nftSlice.actions;
 export default nftSlice.reducer;

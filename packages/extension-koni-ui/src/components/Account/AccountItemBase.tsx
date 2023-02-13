@@ -1,15 +1,16 @@
 // Copyright 2019-2022 @polkadot/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
+import { _ChainInfo } from '@subwallet/chain-list/types';
+import { _getSubstrateGenesisHash } from '@subwallet/extension-base/services/chain-service/utils';
+import { isAccountAll } from '@subwallet/extension-koni-base/utils';
+import { RootState } from '@subwallet/extension-koni-ui/stores';
+import { Recoded } from '@subwallet/extension-koni-ui/types';
+import { accountAllRecoded, defaultRecoded, recodeAddress } from '@subwallet/extension-koni-ui/util';
+import AccountItem, { AccountItemProps } from '@subwallet/react-ui/es/web3-block/account-item';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useSelector } from 'react-redux';
-import { RootState } from '@subwallet/extension-koni-ui/stores';
-import { _getSubstrateGenesisHash } from '@subwallet/extension-base/services/chain-service/utils';
-import { _ChainInfo } from '@subwallet/chain-list/types';
-import { accountAllRecoded, defaultRecoded, recodeAddress } from '@subwallet/extension-koni-ui/util';
-import { Recoded } from '@subwallet/extension-koni-ui/types';
-import { isAccountAll } from '@subwallet/extension-koni-base/utils';
-import AccountItem, { AccountItemProps } from '@subwallet/react-ui/es/web3-block/account-item';
+
 import { isEthereumAddress } from '@polkadot/util-crypto';
 import { KeypairType } from '@polkadot/util-crypto/types';
 
@@ -72,16 +73,16 @@ function AccountItemBase (props: Partial<_AccountItemProps>): React.ReactElement
     }
 
     setRecoded(recodeAddress(address, accounts, networkInfo, givenType));
-    //TODO: change recoded
+    // TODO: change recoded
   }, [accounts, _isAccountAll, address, networkInfo, givenType]);
 
   return (
     <AccountItem
       {...props}
       address={address || ''}
-      className={props.className}
       avatarIdentPrefix={prefix || 42}
       avatarTheme={iconTheme}
+      className={props.className}
     />
   );
 }

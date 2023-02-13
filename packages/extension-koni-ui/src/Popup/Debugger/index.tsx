@@ -45,7 +45,7 @@ function Component ({ className }: Props): React.ReactElement<Props> {
   );
 }
 
-export const Debugger = styled(Component)<Props>(({ theme: {token} }: ThemeProps) => {
+export const Debugger = styled(Component)<Props>(({ theme: { token } }: ThemeProps) => {
   return ({
     textAlign: 'left',
     '.select-mode button': {

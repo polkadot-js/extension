@@ -1,25 +1,20 @@
 // Copyright 2019-2022 @polkadot/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
+import { _ChainInfo } from '@subwallet/chain-list/types';
 import { NetworkJson } from '@subwallet/extension-base/background/KoniTypes';
 import { AccountJson, AccountWithChildren } from '@subwallet/extension-base/background/types';
+import { _getChainSubstrateAddressPrefix, _isChainEvmCompatible } from '@subwallet/extension-base/services/chain-service/utils';
 import { ALL_ACCOUNT_KEY } from '@subwallet/extension-koni-base/constants';
 import LogosMap from '@subwallet/extension-koni-ui/assets/logo';
-import { NetworkSelectOption } from '@subwallet/extension-koni-ui/hooks/useGenesisHashOptions';
 import { Recoded } from '@subwallet/extension-koni-ui/types';
 import { isAccountAll } from '@subwallet/extension-koni-ui/util/accountAll';
 import reformatAddress from '@subwallet/extension-koni-ui/util/reformatAddress';
 
-import { decodeAddress, isEthereumAddress } from '@polkadot/util-crypto';
+import { decodeAddress } from '@polkadot/util-crypto';
 import { KeypairType } from '@polkadot/util-crypto/types';
-import { _ChainInfo } from '@subwallet/chain-list/types';
-import {
-  _getChainSubstrateAddressPrefix,
-  _isChainEvmCompatible
-} from '@subwallet/extension-base/services/chain-service/utils';
 
 export * from './common';
-export * from './chainBalancesApi';
 export * from './accountAll';
 
 // todo: Refactor this file
@@ -54,7 +49,7 @@ export function recodeAddress (address: string, accounts: AccountWithChildren[],
   const publicKey = decodeAddress(address);
   const account = findAccountByAddress(accounts, address) || findSubstrateAccount(accounts, publicKey);
   const prefix = networkInfo && _getChainSubstrateAddressPrefix(networkInfo) !== -1 ? _getChainSubstrateAddressPrefix(networkInfo) : 42;
-  const isEthereum = type === 'ethereum' || !!networkInfo && _isChainEvmCompatible(networkInfo);
+  const isEthereum = type === 'ethereum' || (!!networkInfo && _isChainEvmCompatible(networkInfo));
 
   return {
     account,
@@ -64,74 +59,6 @@ export function recodeAddress (address: string, accounts: AccountWithChildren[],
     prefix,
     isEthereum
   };
-}
-
-function analysisAccounts (accounts: AccountJson[]): [boolean, boolean] {
-  let substrateCounter = 0;
-  let etherumCounter = 0;
-
-  if (!accounts.length) {
-    return [false, false];
-  }
-
-  accounts.forEach((a) => {
-    if (isAccountAll(a.address)) {
-      return;
-    }
-
-    if (isEthereumAddress(a.address)) {
-      etherumCounter++;
-    } else {
-      substrateCounter++;
-    }
-  });
-
-  return [
-    etherumCounter === 0 && substrateCounter > 0,
-    etherumCounter > 0 && substrateCounter === 0
-  ];
-}
-
-export function getGenesisOptionsByAddressType (address: string | null | undefined, accounts: AccountJson[], genesisOptions: NetworkSelectOption[]): NetworkSelectOption[] {
-  if (!address || !accounts.length) {
-    return genesisOptions.filter((o) => !o.isEthereum);
-  }
-
-  const result: NetworkSelectOption[] = [];
-
-  if (isAccountAll(address)) {
-    const [isContainOnlySubstrate, isContainOnlyEtherum] = analysisAccounts(accounts);
-
-    if (isContainOnlySubstrate) {
-      genesisOptions.forEach((o) => {
-        if (!o.isEthereum) {
-          result.push(o);
-        }
-      });
-    } else if (isContainOnlyEtherum) {
-      genesisOptions.forEach((o) => {
-        if (o.isEthereum || o.networkKey === 'all') {
-          result.push(o);
-        }
-      });
-    } else {
-      return genesisOptions;
-    }
-  } else if (isEthereumAddress(address)) {
-    genesisOptions.forEach((o) => {
-      if (o.isEthereum || o.networkKey === 'all') {
-        result.push(o);
-      }
-    });
-  } else {
-    genesisOptions.forEach((o) => {
-      if (!o.isEthereum) {
-        result.push(o);
-      }
-    });
-  }
-
-  return result;
 }
 
 export const defaultRecoded: Recoded = { account: null, formatted: null, prefix: 42, isEthereum: false };

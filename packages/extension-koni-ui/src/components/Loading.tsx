@@ -10,7 +10,8 @@ interface Props extends ThemeProps {
 }
 
 function Loading ({ className = '' }: Props): React.ReactElement<Props> {
-  const themeContext = useContext(ThemeContext as React.Context<Theme>);
+  const token = useContext(ThemeContext as React.Context<Theme>).token;
+  const fillColor = token.colorTextSecondary || '#888';
 
   return (
     <div className={`${className} loading-layer`}>
@@ -21,7 +22,7 @@ function Loading ({ className = '' }: Props): React.ReactElement<Props> {
         >
           <g transform='rotate(0 50 50)'>
             <rect
-              fill={`${themeContext?.textColor2 || '#888'}`}
+              fill={`${fillColor}`}
               height='16'
               rx='4'
               ry='4'
@@ -40,7 +41,7 @@ function Loading ({ className = '' }: Props): React.ReactElement<Props> {
             </rect>
           </g><g transform='rotate(45 50 50)'>
             <rect
-              fill={`${themeContext?.textColor2 || '#888'}`}
+              fill={`${fillColor}`}
               height='16'
               rx='4'
               ry='4'
@@ -59,7 +60,7 @@ function Loading ({ className = '' }: Props): React.ReactElement<Props> {
             </rect>
           </g><g transform='rotate(90 50 50)'>
             <rect
-              fill={`${themeContext?.textColor2 || '#888'}`}
+              fill={`${fillColor}`}
               height='16'
               rx='4'
               ry='4'
@@ -78,7 +79,7 @@ function Loading ({ className = '' }: Props): React.ReactElement<Props> {
             </rect>
           </g><g transform='rotate(135 50 50)'>
             <rect
-              fill={`${themeContext?.textColor2 || '#888'}`}
+              fill={`${fillColor}`}
               height='16'
               rx='4'
               ry='4'
@@ -97,7 +98,7 @@ function Loading ({ className = '' }: Props): React.ReactElement<Props> {
             </rect>
           </g><g transform='rotate(180 50 50)'>
             <rect
-              fill={`${themeContext?.textColor2 || '#888'}`}
+              fill={`${fillColor}`}
               height='16'
               rx='4'
               ry='4'
@@ -116,7 +117,7 @@ function Loading ({ className = '' }: Props): React.ReactElement<Props> {
             </rect>
           </g><g transform='rotate(225 50 50)'>
             <rect
-              fill={`${themeContext?.textColor2 || '#888'}`}
+              fill={`${fillColor}`}
               height='16'
               rx='4'
               ry='4'
@@ -135,7 +136,7 @@ function Loading ({ className = '' }: Props): React.ReactElement<Props> {
             </rect>
           </g><g transform='rotate(270 50 50)'>
             <rect
-              fill={`${themeContext?.textColor2 || '#888'}`}
+              fill={`${fillColor}`}
               height='16'
               rx='4'
               ry='4'
@@ -154,7 +155,7 @@ function Loading ({ className = '' }: Props): React.ReactElement<Props> {
             </rect>
           </g><g transform='rotate(315 50 50)'>
             <rect
-              fill={`${themeContext?.textColor2 || '#888'}`}
+              fill={`${fillColor}`}
               height='16'
               rx='4'
               ry='4'

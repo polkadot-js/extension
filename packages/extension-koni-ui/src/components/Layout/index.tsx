@@ -1,8 +1,8 @@
 // Copyright 2019-2022 @polkadot/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { Home } from './base/Home';
 import Base from './base/Base';
+import { Home } from './base/Home';
 
 type CompoundedComponent = {
   Home: typeof Home;

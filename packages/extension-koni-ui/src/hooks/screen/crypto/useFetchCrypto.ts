@@ -2,15 +2,15 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { BalanceItem } from '@subwallet/extension-base/background/KoniTypes';
+import { _isAssetValuable } from '@subwallet/extension-base/services/chain-service/utils';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { useSelector } from 'react-redux';
-import {_isAssetValuable} from "@subwallet/extension-base/services/chain-service/utils";
 
 export default function useFetchCrypto () {
-  const chainStore = useSelector((state: RootState) => state.chainStore);
+  // const chainStore = useSelector((state: RootState) => state.chainStore);
   const assetRegistry = useSelector((state: RootState) => state.assetRegistry.assetRegistry);
   const balanceStore = useSelector((state: RootState) => state.balance.balanceMap);
-  const priceStore = useSelector((state: RootState) => state.price);
+  // const priceStore = useSelector((state: RootState) => state.price);
 
   console.log('balanceStore', balanceStore);
   console.log('assetRegistry', assetRegistry);

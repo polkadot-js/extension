@@ -1,8 +1,10 @@
 // Copyright 2019-2022 @polkadot/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { NetworkJson } from '@subwallet/extension-base/background/KoniTypes';
+import { _ChainInfo } from '@subwallet/chain-list/types';
 import { AccountJson } from '@subwallet/extension-base/background/types';
+import { _ChainState } from '@subwallet/extension-base/services/chain-service/types';
+import { _isChainEnabled, _isEvmChain } from '@subwallet/extension-base/services/chain-service/utils';
 import { createTransactionFromRLP } from '@subwallet/extension-koni-base/utils/eth';
 import { EthereumParsedData, ParsedData, SubstrateCompletedParsedData, SubstrateMultiParsedData } from '@subwallet/extension-koni-ui/types/scanner';
 import { findAccountByAddress } from '@subwallet/extension-koni-ui/util/account';
@@ -76,7 +78,7 @@ export const rawDataToU8A = (rawData: string): Uint8Array | null => {
   return bytes;
 };
 
-export const constructDataFromBytes = (bytes: Uint8Array, multipartComplete = false, networkMap: Record<string, NetworkJson>, accounts: AccountJson[]): ParsedData => {
+export const constructDataFromBytes = (bytes: Uint8Array, multipartComplete = false, networkMap: Record<string, _ChainInfo>, networkStateMap: Record<string, _ChainState>, accounts: AccountJson[]): ParsedData => {
   const frameInfo = hexStripPrefix(u8aToHex(bytes.slice(0, 5)));
   const frameCount = parseInt(frameInfo.substr(2, 4), 16);
   const isMultipart = frameCount > 1; // for simplicity, even single frame payloads are marked as multipart.
@@ -138,8 +140,8 @@ export const constructDataFromBytes = (bytes: Uint8Array, multipartComplete = fa
             throw new Error('Signing Error: network could not be found.');
           }
 
-          if (!senderNetwork.active) {
-            throw new Error(`Inactive network. Please activate ${senderNetwork.chain?.replace(' Relay Chain', '')} on this device and try again.`);
+          if (!_isChainEnabled(networkStateMap[senderNetwork.slug])) {
+            throw new Error(`Inactive network. Please activate ${senderNetwork.name?.replace(' Relay Chain', '')} on this device and try again.`);
           }
 
           if (!sender) {
@@ -195,9 +197,9 @@ export const constructDataFromBytes = (bytes: Uint8Array, multipartComplete = fa
             throw new Error(strings.ERROR_NO_NETWORK);
           }
 
-          if (network && !network.active) {
-            console.error(strings.ERROR_NETWORK_INACTIVE.replace('(network name)', network.chain));
-            throw new Error(strings.ERROR_NETWORK_INACTIVE.replace('(network name)', network.chain));
+          if (network && !_isChainEnabled(networkStateMap[network.slug])) {
+            console.error(strings.ERROR_NETWORK_INACTIVE.replace('(network name)', network.name));
+            throw new Error(strings.ERROR_NETWORK_INACTIVE.replace('(network name)', network.name));
           }
 
           if (!account) {
@@ -303,12 +305,12 @@ export const isAddressString = (str: string): boolean => {
 };
 
 const findNetworkAndAccountByGenesisHash = (
-  networkMap: Record<string, NetworkJson>,
+  networkMap: Record<string, _ChainInfo>,
   accounts: AccountJson[],
   genesisHash: string,
   pubKeyHex: string
-): { network: NetworkJson | null; account: AccountJson | null; addressLength: number } => {
-  let network: null | NetworkJson = null;
+): { network: _ChainInfo | null; account: AccountJson | null; addressLength: number } => {
+  let network: null | _ChainInfo = null;
   let account: AccountJson | null = null;
 
   for (const forceEthereum of [false, true]) {
@@ -318,7 +320,7 @@ const findNetworkAndAccountByGenesisHash = (
       continue;
     }
 
-    const addressLength = !network.isEthereum ? 64 : 40;
+    const addressLength = !_isEvmChain(network) ? 64 : 40;
     const address = pubKeyHex.substring(0, addressLength);
 
     account = findAccountByAddress(accounts, '0x' + address);

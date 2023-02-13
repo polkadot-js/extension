@@ -1,12 +1,12 @@
 // Copyright 2019-2022 @polkadot/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import React from 'react';
+import { Theme } from '@subwallet/extension-koni-ui/themes';
 import { SettingItem } from '@subwallet/react-ui';
 import Icon from '@subwallet/react-ui/es/icon';
 import { CheckCircle } from 'phosphor-react';
+import React from 'react';
 import styled, { useTheme } from 'styled-components';
-import { Theme } from '@subwallet/extension-koni-ui/themes';
 
 interface SettingItemSelectionProps {
   label: string;
@@ -16,7 +16,7 @@ interface SettingItemSelectionProps {
 }
 
 function _SettingItemSelection (props: SettingItemSelectionProps): React.ReactElement<SettingItemSelectionProps> {
-  const { leftItemIcon, label, isSelected, className } = props;
+  const { className, isSelected, label, leftItemIcon } = props;
   const { token } = useTheme() as Theme;
 
   return (
@@ -24,7 +24,13 @@ function _SettingItemSelection (props: SettingItemSelectionProps): React.ReactEl
       className={className}
       leftItemIcon={leftItemIcon}
       name={label}
-      rightItem={isSelected && <Icon iconColor={token.colorSecondary} phosphorIcon={CheckCircle} weight='fill' size='sm' className={'__selected-icon'} />}
+      rightItem={isSelected && <Icon
+        className={'__selected-icon'}
+        iconColor={token.colorSecondary}
+        phosphorIcon={CheckCircle}
+        size='sm'
+        weight='fill'
+      />}
     />
   );
 }
@@ -38,7 +44,7 @@ export const SettingItemSelection = styled(_SettingItemSelection)<SettingItemSel
     },
 
     '.ant-setting-item-content': {
-      padding: `${token.padding? token.padding -2 : 14}px ${token.paddingSM}px`
+      padding: `${token.padding ? token.padding - 2 : 14}px ${token.paddingSM}px`
     },
 
     '.add-account-modal-right-icon': {
@@ -51,4 +57,4 @@ export const SettingItemSelection = styled(_SettingItemSelection)<SettingItemSel
       paddingRight: 8
     }
   });
-})
+});

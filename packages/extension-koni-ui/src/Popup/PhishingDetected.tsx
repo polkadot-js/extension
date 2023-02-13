@@ -9,7 +9,6 @@ import { useParams } from 'react-router';
 import styled from 'styled-components';
 
 import useTranslation from '../hooks/useTranslation';
-import { Header } from '../partials';
 
 interface Props extends ThemeProps {
   className?: string;
@@ -22,7 +21,6 @@ function PhishingDetected ({ className }: Props): React.ReactElement<Props> {
 
   return (
     <>
-      <Header text={t<string>('Phishing detected')} />
       <div className={className}>
         <p>
           {t<string>('You have been redirected because the Polkadot{.js} extension believes that this website could compromise the security of your accounts and your tokens.')}
@@ -42,12 +40,12 @@ function PhishingDetected ({ className }: Props): React.ReactElement<Props> {
 
 export default styled(PhishingDetected)(({ theme }: Props) => `
   p {
-    color: ${theme.subTextColor};
+    color: ${theme.token.colorText};
     margin-bottom: 1rem;
     margin-top: 0;
 
     a {
-      color: ${theme.subTextColor};
+      color: ${theme.token.colorText};
     }
 
     &.website-address {

@@ -3,6 +3,8 @@
 
 import { PHISHING_PAGE_REDIRECT } from '@subwallet/extension-base/defaults';
 import { DataContext } from '@subwallet/extension-koni-ui/contexts/DataContext';
+import { AccountList } from '@subwallet/extension-koni-ui/Popup/Accounts/AccountList';
+import { AddAccount } from '@subwallet/extension-koni-ui/Popup/Accounts/AddAccount';
 import { Home } from '@subwallet/extension-koni-ui/Popup/Home';
 import { Crowdloans } from '@subwallet/extension-koni-ui/Popup/Home/Crowdloans';
 import { History } from '@subwallet/extension-koni-ui/Popup/Home/History';
@@ -17,9 +19,8 @@ import { RootState } from '@subwallet/extension-koni-ui/stores';
 import React, { useContext, useEffect } from 'react';
 import { useSelector } from 'react-redux';
 import { createHashRouter, Outlet, useLocation, useRouteError } from 'react-router-dom';
-import { AddAccount } from '@subwallet/extension-koni-ui/Popup/Accounts/AddAccount';
+
 import PageWrapper from '../components/Layout/PageWrapper';
-import { AccountList } from '@subwallet/extension-koni-ui/Popup/Accounts/AccountList';
 
 export function Crypto () {
   const dataContext = useContext(DataContext);

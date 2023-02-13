@@ -7,8 +7,8 @@ import React from 'react';
 import styled from 'styled-components';
 
 type Props = ThemeProps;
-const _Footer: React.FC<Props> = ({ className }: Props) => {
 
+const _Footer: React.FC<Props> = ({ className }: Props) => {
   return (
     <div className={className}>
       <div>By continuing, you agree to our</div>
@@ -17,8 +17,8 @@ const _Footer: React.FC<Props> = ({ className }: Props) => {
         <span className={CN('footer-link')}>Privacy Policy</span>
       </div>
     </div>
-  )
-}
+  );
+};
 
 const Footer = styled(_Footer)<Props>(({ theme }: Props) => {
   const { token } = theme;
@@ -31,9 +31,9 @@ const Footer = styled(_Footer)<Props>(({ theme }: Props) => {
     padding: `${token.padding - 2}px 0`,
 
     '.footer-link': {
-      color: token.colorText,
-    },
-  }
+      color: token.colorText
+    }
+  };
 });
 
 export default Footer;

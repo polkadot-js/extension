@@ -1,15 +1,15 @@
 // Copyright 2019-2022 @polkadot/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
+import { SettingItemSelection } from '@subwallet/extension-koni-ui/components/Setting/SettingItemSelection';
 import useTranslation from '@subwallet/extension-koni-ui/hooks/useTranslation';
 import { Theme } from '@subwallet/extension-koni-ui/themes';
 import { BackgroundIcon, Button, SelectModal } from '@subwallet/react-ui';
 import Icon from '@subwallet/react-ui/es/icon';
 import { GlobalToken } from '@subwallet/react-ui/es/theme/interface';
-import { Info,Leaf, ShareNetwork } from 'phosphor-react';
+import { Info, Leaf, ShareNetwork } from 'phosphor-react';
 import React, { useCallback, useState } from 'react';
 import styled, { useTheme } from 'styled-components';
-import { SettingItemSelection } from '@subwallet/extension-koni-ui/components/Setting/SettingItemSelection';
 
 interface Item {
   icon: React.ReactNode;
@@ -56,16 +56,16 @@ function _AddAccount ({ className }: Props): React.ReactElement<Props> {
     setSelected(value);
   }, []);
 
-  const renderItem = (item: Item, _selected: boolean) => {
+  const renderItem = useCallback((item: Item, _selected: boolean) => {
     return (
       <SettingItemSelection
         className={'add-account-item-wrapper'}
-        leftItemIcon={item.icon}
-        label={item.label}
         isSelected={_selected}
+        label={item.label}
+        leftItemIcon={item.icon}
       />
     );
-  };
+  }, []);
 
   return (
     <>
@@ -81,7 +81,16 @@ function _AddAccount ({ className }: Props): React.ReactElement<Props> {
         title={
           <div>
             <div>{t('Create new account')}</div>
-            <Button className={'add-account-modal-right-icon'} size='xs' type='ghost' shape='circle' icon={<Icon phosphorIcon={Info} size='sm' />} />
+            <Button
+              className={'add-account-modal-right-icon'}
+              icon={<Icon
+                phosphorIcon={Info}
+                size='sm'
+              />}
+              shape='circle'
+              size='xs'
+              type='ghost'
+            />
           </div>
         }
       />
@@ -96,7 +105,7 @@ export const AddAccount = styled(_AddAccount)<Props>(() => {
         position: 'absolute',
         insetInlineEnd: 8,
         top: 10
-      },
+      }
     }
   });
 });

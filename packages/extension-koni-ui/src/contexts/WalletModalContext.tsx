@@ -88,11 +88,11 @@ export const WalletModalContext = ({ children }: Props) => {
       <Debugger />
     </SwModal>
     <SwModal
-      transitionName={'fade'}
       className={'modal-full'}
       closable={false}
       id={'confirmations'}
       onCancel={onCloseModal}
+      transitionName={'fade'}
     >
       <Confirmations />
     </SwModal>

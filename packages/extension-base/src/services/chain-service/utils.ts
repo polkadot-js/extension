@@ -103,6 +103,10 @@ export function _isSmartContractToken (tokenInfo: _ChainAsset) {
   return _SMART_CONTRACT_STANDARDS.includes(tokenInfo.assetType);
 }
 
+export function _isEvmChain (chainInfo: _ChainInfo) {
+  return !!chainInfo.evmInfo; // fallback to Ethereum
+}
+
 export function _getEvmChainId (chainInfo: _ChainInfo) {
   return chainInfo.evmInfo?.evmChainId || 1; // fallback to Ethereum
 }

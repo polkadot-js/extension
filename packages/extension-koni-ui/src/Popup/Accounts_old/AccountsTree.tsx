@@ -3,7 +3,7 @@
 
 import type { AccountWithChildren } from '@subwallet/extension-base/background/types';
 
-import Account from '@subwallet/extension-koni-ui/Popup/Accounts/Account';
+import Account from '@subwallet/extension-koni-ui/Popup/Accounts_old/Account';
 import React from 'react';
 
 interface Props extends AccountWithChildren {

@@ -36,6 +36,8 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
   const [page, setPage] = useState(1);
   const [nftCollections_, setNftCollections_] = useState<NftCollection[]>([]);
 
+  console.log(nftCollections_, page);
+
   const subHeaderButton: ButtonProps[] = [
     {
       icon: rightIcon,
@@ -136,7 +138,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
         ]);
         setPage(nextPage);
       }
-    }, 100);
+    }, 50);
   }, [nftCollections, nftCollections_, page]);
 
   return (
@@ -174,7 +176,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
   );
 }
 
-export const NftCollections = styled(Component)<Props>(({ theme: { token } }: Props) => {
+const NftCollections = styled(Component)<Props>(({ theme: { token } }: Props) => {
   return ({
     color: token.colorTextLight1,
     fontSize: token.fontSizeLG,
@@ -234,3 +236,5 @@ export const NftCollections = styled(Component)<Props>(({ theme: { token } }: Pr
     }
   });
 });
+
+export default NftCollections;

@@ -27,9 +27,11 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
   );
 }
 
-export const Tokens = styled(Component)<Props>(({ theme: { token } }: Props) => {
+const Tokens = styled(Component)<Props>(({ theme: { token } }: Props) => {
   return ({
     color: token.colorTextLight1,
     fontSize: token.fontSizeLG
   });
 });
+
+export default Tokens;

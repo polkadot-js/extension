@@ -11,10 +11,10 @@ import styled, { useTheme } from 'styled-components';
 interface Props extends ThemeProps {
   title: string,
   image: string | undefined,
-  fallbackImage: string | undefined,
+  fallbackImage?: string | undefined,
   itemCount?: number
 
-  handleOnClick: (params?: any) => void,
+  handleOnClick?: (params?: any) => void,
   routingParams?: any,
 }
 
@@ -27,7 +27,7 @@ function Component ({ className = '', fallbackImage, handleOnClick, image, itemC
   const [showCollectionImage, setShowCollectionImage] = useState(false);
 
   const onClick = useCallback(() => {
-    handleOnClick(routingParams);
+    handleOnClick && handleOnClick(routingParams);
   }, [handleOnClick, routingParams]);
 
   const handleOnLoad = useCallback(() => {

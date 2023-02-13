@@ -32,7 +32,7 @@ const TabBarItems: Array<Omit<SwTabBarItem, 'onClick'>> = [
       weight: 'fill'
     },
     label: 'NFTs',
-    key: 'nfts'
+    key: 'nfts/collections'
   },
   {
     icon: {
@@ -90,6 +90,7 @@ const Component = ({ children, className }: Props) => {
   return (
     <SwScreenLayout
       className={className}
+      headerCenter={true}
       headerContent={<SelectedAccount />}
       headerIcons={headerIcons}
       headerLeft={

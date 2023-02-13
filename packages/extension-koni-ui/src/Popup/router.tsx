@@ -3,22 +3,23 @@
 
 import { PHISHING_PAGE_REDIRECT } from '@subwallet/extension-base/defaults';
 import { DataContext } from '@subwallet/extension-koni-ui/contexts/DataContext';
-import { Home } from '@subwallet/extension-koni-ui/Popup/Home';
-import { Crowdloans } from '@subwallet/extension-koni-ui/Popup/Home/Crowdloans';
-import { History } from '@subwallet/extension-koni-ui/Popup/Home/History';
-import { NftCollectionDetail } from '@subwallet/extension-koni-ui/Popup/Home/Nfts/NftCollectionDetail';
-import { NftCollections } from '@subwallet/extension-koni-ui/Popup/Home/Nfts/NftCollections';
-import { Staking } from '@subwallet/extension-koni-ui/Popup/Home/Staking';
-import { Tokens } from '@subwallet/extension-koni-ui/Popup/Home/Tokens';
-import PhishingDetected from '@subwallet/extension-koni-ui/Popup/PhishingDetected';
 import { initRootPromise, Root } from '@subwallet/extension-koni-ui/Popup/Root';
-import { Welcome } from '@subwallet/extension-koni-ui/Popup/Welcome';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
 import React, { useContext, useEffect } from 'react';
 import { useSelector } from 'react-redux';
 import { createHashRouter, Outlet, useLocation, useRouteError } from 'react-router-dom';
 
-import PageWrapper from '../components/Layout/PageWrapper';
+const PhishingDetected = React.lazy(() => import('@subwallet/extension-koni-ui/Popup/PhishingDetected'));
+const PageWrapper = React.lazy(() => import('../components/Layout/PageWrapper'));
+const Welcome = React.lazy(() => import('@subwallet/extension-koni-ui/Popup/Welcome'));
+const Tokens = React.lazy(() => import('@subwallet/extension-koni-ui/Popup/Home/Tokens'));
+const Staking = React.lazy(() => import('@subwallet/extension-koni-ui/Popup/Home/Staking'));
+const NftItemDetail = React.lazy(() => import('@subwallet/extension-koni-ui/Popup/Home/Nfts/NftItemDetail'));
+const NftCollections = React.lazy(() => import('@subwallet/extension-koni-ui/Popup/Home/Nfts/NftCollections'));
+const NftCollectionDetail = React.lazy(() => import('@subwallet/extension-koni-ui/Popup/Home/Nfts/NftCollectionDetail'));
+const History = React.lazy(() => import('@subwallet/extension-koni-ui/Popup/Home/History'));
+const Crowdloans = React.lazy(() => import('@subwallet/extension-koni-ui/Popup/Home/Crowdloans'));
+const Home = React.lazy(() => import('@subwallet/extension-koni-ui/Popup/Home'));
 
 export function Crypto () {
   const dataContext = useContext(DataContext);
@@ -85,7 +86,7 @@ export const router = createHashRouter([{ path: '/',
         },
         {
           path: 'item-detail',
-          element: <Example />
+          element: <NftItemDetail />
         }
       ]
     },

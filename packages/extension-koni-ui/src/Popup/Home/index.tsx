@@ -19,8 +19,10 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
   );
 }
 
-export const Home = styled(Component)<Props>(({ theme: { token } }: Props) => {
+const Home = styled(Component)<Props>(({ theme: { token } }: Props) => {
   return ({
     height: '100%'
   });
 });
+
+export default Home;

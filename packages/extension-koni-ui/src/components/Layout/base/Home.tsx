@@ -25,7 +25,7 @@ const headerIcons = [
 const Home = ({ children }: Props) => {
   return (
     <Layout.Base
-      headerCenter={true}
+      headerCenter={false}
       headerIcons={headerIcons}
       headerLeft={'default'}
       headerPaddingVertical={true}

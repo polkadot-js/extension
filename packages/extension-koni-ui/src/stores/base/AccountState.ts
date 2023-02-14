@@ -50,7 +50,7 @@ const accountStateSlice = createSlice({
 
       return {
         ...state,
-        ...payload,
+        currentAccount: payload,
         reduxStatus: ReduxStatus.READY
       };
     }

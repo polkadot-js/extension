@@ -7,7 +7,6 @@ import useTranslation from '@subwallet/extension-koni-ui/hooks/useTranslation';
 import React, { useCallback } from 'react';
 
 function AccountCardSelection (props: Partial<_AccountCardProps>): React.ReactElement<Partial<_AccountCardProps>> {
-  const { address, className, renderRightItem } = props;
   const t = useTranslation().t;
   const notify = useNotification();
 
@@ -19,12 +18,9 @@ function AccountCardSelection (props: Partial<_AccountCardProps>): React.ReactEl
   return (
     <AccountCardBase
       {...props}
-      address={address}
       addressPreLength={9}
       addressSufLength={9}
-      className={className}
       onPressCopyBtn={_onCopy}
-      renderRightItem={renderRightItem}
       showCopyBtn
       showMoreBtn
     />

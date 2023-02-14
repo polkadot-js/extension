@@ -1,17 +1,8 @@
 // Copyright 2019-2022 @subwallet/extension-base authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import {AssetRefMap, ChainAssetMap, ChainInfoMap, MultiChainAssetMap} from '@subwallet/chain-list';
-import {
-  _AssetRefPath,
-  _AssetType,
-  _ChainAsset,
-  _ChainInfo,
-  _EvmInfo,
-  _MultiChainAsset,
-  _SubstrateChainType,
-  _SubstrateInfo
-} from '@subwallet/chain-list/types';
+import { AssetRefMap, ChainAssetMap, ChainInfoMap, MultiChainAssetMap } from '@subwallet/chain-list';
+import { _AssetRefPath, _AssetType, _ChainAsset, _ChainInfo, _EvmInfo, _MultiChainAsset, _SubstrateChainType, _SubstrateInfo } from '@subwallet/chain-list/types';
 import { _DEFAULT_ACTIVE_CHAINS } from '@subwallet/extension-base/services/chain-service/constants';
 import { EvmChainHandler } from '@subwallet/extension-base/services/chain-service/handler/EvmChainHandler';
 import { SubstrateChainHandler } from '@subwallet/extension-base/services/chain-service/handler/SubstrateChainHandler';

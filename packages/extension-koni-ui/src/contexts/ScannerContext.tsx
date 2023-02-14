@@ -2,9 +2,9 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { ResponseParseTransactionSubstrate, ResponseQrParseRLP, SignerDataType } from '@subwallet/extension-base/background/KoniTypes';
+import { _isChainEnabled } from '@subwallet/extension-base/services/chain-service/utils';
 import { createTransactionFromRLP, Transaction } from '@subwallet/extension-koni-base/utils/eth';
 import { SCANNER_QR_STEP } from '@subwallet/extension-koni-ui/constants/qr';
-import { AccountContext } from '@subwallet/extension-koni-ui/contexts/index';
 import { parseEVMTransaction, parseSubstrateTransaction, qrSignEvm, qrSignSubstrate } from '@subwallet/extension-koni-ui/messaging';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { CompletedParsedData, EthereumParsedData, MessageQRInfo, MultiFramesInfo, QrInfo, SubstrateCompletedParsedData, SubstrateMessageParsedData, SubstrateTransactionParsedData, TxQRInfo } from '@subwallet/extension-koni-ui/types/scanner';
@@ -13,7 +13,7 @@ import { getNetworkJsonByInfo } from '@subwallet/extension-koni-ui/util/getNetwo
 import { constructDataFromBytes, encodeNumber } from '@subwallet/extension-koni-ui/util/scanner/decoders';
 import { isEthereumCompletedParsedData, isSubstrateMessageParsedData } from '@subwallet/extension-koni-ui/util/scanner/sign';
 import BigN from 'bignumber.js';
-import React, { useCallback, useContext, useReducer } from 'react';
+import React, { useCallback, useReducer } from 'react';
 import { useSelector } from 'react-redux';
 
 import { GenericExtrinsicPayload } from '@polkadot/types';
@@ -101,8 +101,8 @@ const reducer = (state: ScannerStoreState,
 };
 
 export function ScannerContextProvider ({ children }: ScannerContextProviderProps): React.ReactElement {
-  const { accounts } = useContext(AccountContext);
-  const { networkMap } = useSelector((state: RootState) => state);
+  const accounts = useSelector((state: RootState) => state.accountState.accounts);
+  const { chainInfoMap, chainStateMap } = useSelector((state: RootState) => state.chainStore);
 
   const [state, setState] = useReducer(reducer, initialState);
 
@@ -137,8 +137,8 @@ export function ScannerContextProvider ({ children }: ScannerContextProviderProp
 
     concatMultipartData = u8aConcat(frameInfo, concatMultipartData);
 
-    return (constructDataFromBytes(concatMultipartData, true, networkMap, accounts)) as SubstrateCompletedParsedData;
-  }, [networkMap, accounts]);
+    return (constructDataFromBytes(concatMultipartData, true, chainInfoMap, chainStateMap, accounts)) as SubstrateCompletedParsedData;
+  }, [chainInfoMap, chainStateMap, accounts]);
 
   const setPartData = useCallback((currentFrame: number, frameCount: number, partData: string): MultiFramesInfo | SubstrateCompletedParsedData => {
     const newArray = Array.from({ length: frameCount }, () => null);
@@ -349,14 +349,15 @@ export function ScannerContextProvider ({ children }: ScannerContextProviderProp
     const { dataToSign, evmChainId, genesisHash, isEthereumStructure, isHash, rawPayload, senderAddress, type } = state;
     const sender = !!senderAddress && findAccountByAddress(accounts, senderAddress);
     const info: undefined | number | string = isEthereumStructure ? evmChainId : genesisHash;
-    const senderNetwork = getNetworkJsonByInfo(networkMap, isEthereumAddress(senderAddress || ''), isEthereumStructure, info);
+    const senderNetwork = getNetworkJsonByInfo(chainInfoMap, isEthereumAddress(senderAddress || ''), isEthereumStructure, info);
+    const senderNetworkState = chainStateMap[senderNetwork?.slug || ''];
 
     if (!senderNetwork) {
       throw new Error('Signing Error: network could not be found.');
     }
 
-    if (!senderNetwork.active) {
-      throw new Error(`Inactive network. Please activate ${senderNetwork.chain?.replace(' Relay Chain', '')} on this device and try again.`);
+    if (!_isChainEnabled(senderNetworkState)) {
+      throw new Error(`Inactive network. Please activate ${senderNetwork.name?.replace(' Relay Chain', '')} on this device and try again.`);
     }
 
     if (!sender) {
@@ -408,7 +409,7 @@ export function ScannerContextProvider ({ children }: ScannerContextProviderProp
           const { signature } = await qrSignSubstrate({
             address: senderAddress,
             data: signable,
-            networkKey: senderNetwork.key
+            networkKey: senderNetwork.slug
           });
 
           if (type === 'message') {
@@ -431,7 +432,7 @@ export function ScannerContextProvider ({ children }: ScannerContextProviderProp
           if (genesisHash && rawPayload) {
             const _rawPayload = isString(rawPayload) ? rawPayload : u8aToHex(rawPayload);
 
-            return parseSubstrateTransaction({ data: _rawPayload, networkKey: senderNetwork.key });
+            return parseSubstrateTransaction({ data: _rawPayload, networkKey: senderNetwork.slug });
           } else {
             return null;
           }
@@ -450,7 +451,7 @@ export function ScannerContextProvider ({ children }: ScannerContextProviderProp
     const [signedData, parsedTx] = await Promise.all([signData(), parseTransaction()]);
 
     setState({ signedData, parsedTx, step: SCANNER_QR_STEP.FINAL_STEP });
-  }, [accounts, networkMap, state]);
+  }, [accounts, chainInfoMap, chainStateMap, state]);
 
   const clearMultipartProgress = useCallback((): void => {
     setState({

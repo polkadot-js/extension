@@ -26,8 +26,14 @@ function _Welcome ({ className, title = 'content' }: Props): React.ReactElement<
         <div className='content'>
           {title}
 
-          <Button onClick={changeTheme(ThemeNames.DARK)} block>Theme Dark</Button>
-          <Button onClick={changeTheme(ThemeNames.LIGHT)} block>Theme Light</Button>
+          <Button
+            block
+            onClick={changeTheme(ThemeNames.DARK)}
+          >Theme Dark</Button>
+          <Button
+            block
+            onClick={changeTheme(ThemeNames.LIGHT)}
+          >Theme Light</Button>
         </div>
       </div>
     </>

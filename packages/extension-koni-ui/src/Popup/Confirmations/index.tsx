@@ -3,23 +3,23 @@
 
 import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
-import React, { useState } from 'react';
+import React from 'react';
 import { useSelector } from 'react-redux';
 import styled from 'styled-components';
 
 type Props = ThemeProps
 
 const Component = function ({ className }: Props) {
-  const [currentIndex, setCurrentIndex] = useState(0);
-  const confirmations = useSelector((state: RootState) => (state.requestState));
+  const { numberOfConfirmations } = useSelector((state: RootState) => (state.requestState));
+  // const [currentIndex, setCurrentIndex] = useState(0);
 
   return <div className={className}>
-    {currentIndex + 1}
+    {numberOfConfirmations}
   </div>;
 };
 
 const Confirmations = styled(Component)(({ theme }) => ({
-  backgroundColor: 'indianred'
+  backgroundColor: 'gray'
 }));
 
 export default Confirmations;

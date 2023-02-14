@@ -56,7 +56,7 @@ function _AddAccount ({ className }: Props): React.ReactElement<Props> {
     setSelected(value);
   }, []);
 
-  const renderItem = (item: Item, _selected: boolean) => {
+  const renderItem = useCallback((item: Item, _selected: boolean) => {
     return (
       <SettingItemSelection
         className={'add-account-item-wrapper'}
@@ -65,7 +65,7 @@ function _AddAccount ({ className }: Props): React.ReactElement<Props> {
         leftItemIcon={item.icon}
       />
     );
-  };
+  }, []);
 
   return (
     <>
@@ -86,7 +86,7 @@ function _AddAccount ({ className }: Props): React.ReactElement<Props> {
               icon={<Icon
                 phosphorIcon={Info}
                 size='sm'
-                    />}
+              />}
               shape='circle'
               size='xs'
               type='ghost'

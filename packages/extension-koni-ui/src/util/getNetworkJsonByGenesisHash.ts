@@ -1,7 +1,9 @@
 // Copyright 2019-2022 @subwallet/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
+import { _ChainInfo } from '@subwallet/chain-list/types';
 import { NetworkJson } from '@subwallet/extension-base/background/KoniTypes';
+import { _getEvmChainId, _getSubstrateGenesisHash, _isEvmChain } from '@subwallet/extension-base/services/chain-service/utils';
 
 export const getNetworkJsonByGenesisHash = (networkMap: Record<string, NetworkJson>, hash?: string | null): NetworkJson | null => {
   if (!hash) {
@@ -24,22 +26,22 @@ export const getNetworkJsonByGenesisHash = (networkMap: Record<string, NetworkJs
 };
 
 export const findNetworkJsonByGenesisHash = (
-  networkMap: Record<string, NetworkJson>,
+  networkMap: Record<string, _ChainInfo>,
   hash?: string | null,
   forceEthereum?: boolean
-): NetworkJson | null => {
+): _ChainInfo | null => {
   if (!hash) {
     return null;
   }
 
   const networks = Object.values(networkMap);
 
-  const filtered = networks.filter((network) => network.genesisHash.toLowerCase().includes(hash.toLowerCase()));
+  const filtered = networks.filter((network) => _getSubstrateGenesisHash(network).toLowerCase().includes(hash.toLowerCase()));
 
   if (filtered.length === 1) {
     return filtered[0];
   } else if (filtered.length > 1) {
-    return filtered.find((network) => !!network.isEthereum === !!forceEthereum) || null;
+    return filtered.find((network) => _isEvmChain(network) === !!forceEthereum) || null;
   }
 
   return null;
@@ -65,27 +67,27 @@ export const getNetworkKeyByGenesisHash = (networkMap: Record<string, NetworkJso
   return null;
 };
 
-export const getNetworkJsonByInfo = (networkMap: Record<string, NetworkJson>, isEthereumAddress: boolean, isEthereumNetwork: boolean, info?: string | null | number): NetworkJson | null => {
+export const getNetworkJsonByInfo = (chainMap: Record<string, _ChainInfo>, isEthereumAddress: boolean, isEthereumNetwork: boolean, info?: string | null | number): _ChainInfo | null => {
   if (!info) {
     if (isEthereumNetwork) {
-      const networks = Object.values(networkMap).filter((network) => network.isEthereum);
+      const networks = Object.values(chainMap).filter(_isEvmChain);
 
-      return networks.find((network) => network.active) || networks[0];
+      return networks[0];
     }
 
     return null;
   }
 
-  const networks = Object.values(networkMap);
+  const networks = Object.values(chainMap);
 
-  for (const network of networks) {
+  for (const chain of networks) {
     if (isEthereumNetwork) {
-      if (network.evmChainId === info) {
-        return network;
+      if (_getEvmChainId(chain) === info) {
+        return chain;
       }
     } else {
-      if (network.genesisHash.includes(info as string) && !!network.isEthereum === isEthereumAddress) {
-        return network;
+      if (_getSubstrateGenesisHash(chain) && !_isEvmChain(chain)) {
+        return chain;
       }
     }
   }

@@ -23,12 +23,11 @@ const headerIcons = [
 ];
 
 const Home = ({ children }: Props) => {
-
   return (
     <Layout.Base
-      headerLeft={'default'}
-      headerIcons={headerIcons}
       headerCenter={true}
+      headerIcons={headerIcons}
+      headerLeft={'default'}
       headerPaddingVertical={true}
       showHeader={true}
       showLeftButton={true}

@@ -15,23 +15,23 @@ const DEFAULT_LENGTH_VALIDATOR: PasswordLengthValidator = {
   minLength: 6,
   errorText: 'Password is too short',
   tooltip: 'Password required at least $min character'
-}
+};
+
 export const passwordValidateLength = (validator?: PasswordLengthValidator): ((value: string) => null | ValidateState) => {
-  const {
-    status = 'warning',
+  const { errorText = 'Password is too short',
     minLength = 6,
-    errorText = 'Password is too short',
-    tooltip = 'Password required at least $min character'
-  } = Object.assign({}, DEFAULT_LENGTH_VALIDATOR, validator);
+    status = 'warning',
+    tooltip = 'Password required at least $min character' } = Object.assign({}, DEFAULT_LENGTH_VALIDATOR, validator);
+
   return (value: string) => {
     if (value.length < minLength) {
       return {
         status: status,
         message: errorText,
-        tooltip: tooltip.replace('$min', minLength.toString()),
-      }
+        tooltip: tooltip.replace('$min', minLength.toString())
+      };
     } else {
       return null;
     }
-  }
-}
+  };
+};

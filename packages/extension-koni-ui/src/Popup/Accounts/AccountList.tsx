@@ -65,7 +65,7 @@ function _AccountList ({ className }: Props): React.ReactElement<Props> {
   );
 }
 
-export const AccountList = styled(_AccountList)<Props>(({ theme }) => {
+const AccountList = styled(_AccountList)<Props>(({ theme }) => {
   const { token } = theme as Theme;
 
   return ({
@@ -96,3 +96,5 @@ export const AccountList = styled(_AccountList)<Props>(({ theme }) => {
 
   });
 });
+
+export default AccountList;

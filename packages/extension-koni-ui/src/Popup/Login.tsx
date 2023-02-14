@@ -11,12 +11,10 @@ import { FormInstance } from '@subwallet/react-ui/es/form/hooks/useForm';
 import CN from 'classnames';
 import { Question } from 'phosphor-react';
 import { Callbacks } from 'rc-field-form/lib/interface';
-import React, { useCallback, useRef, useState, ChangeEventHandler } from 'react';
+import React, { ChangeEventHandler, useCallback, useRef, useState } from 'react';
 import styled from 'styled-components';
 
-interface Props extends ThemeProps {
-
-}
+type Props = ThemeProps
 
 enum FormFieldName {
   PASSWORD = 'password'
@@ -28,7 +26,7 @@ interface LoginFormState {
 
 const Component: React.FC<Props> = ({ className }: Props) => {
   const formRef = useRef<FormInstance<LoginFormState>>(null);
-  const [passwordValidateState, setPasswordValidateState] = useState<ValidateState | null>(null)
+  const [passwordValidateState, setPasswordValidateState] = useState<ValidateState | null>(null);
   const [loading, setLoading] = useState(false);
 
   const onSubmit: Callbacks<LoginFormState>['onFinish'] = useCallback((values: LoginFormState) => {
@@ -38,62 +36,73 @@ const Component: React.FC<Props> = ({ className }: Props) => {
     })
       .then((data) => {
         console.log(data);
+
         if (data.status) {
           console.log('Success');
         } else {
           setPasswordValidateState({
-            status: 'error',
-          })
+            status: 'error'
+          });
         }
       })
       .catch((e: Error) => {
         setPasswordValidateState({
           status: 'error'
-        })
+        });
       })
       .finally(() => {
         setLoading(false);
-      })
+      });
   }, []);
 
   const onPasswordChange: ChangeEventHandler<HTMLInputElement> = useCallback((event) => {
     setPasswordValidateState(null);
-  }, [])
+  }, []);
 
   return (
     <Layout.Base
       className={CN(className)}
       showSubHeader={true}
-      subHeaderBackground="transparent"
+      subHeaderBackground='transparent'
       subHeaderCenter={false}
-      subHeaderIcons={[{ icon: <Icon type="phosphor" phosphorIcon={Question} /> }]}
+      subHeaderIcons={[{ icon: <Icon
+        phosphorIcon={Question}
+        type='phosphor'
+      /> }]}
       subHeaderPaddingVertical={true}
-      title="SubWallet.App"
+      title='SubWallet.App'
       withDivider={true}
     >
-      <div className="body-container">
-        <div className="logo-container">
+      <div className='body-container'>
+        <div className='logo-container'>
           <Logo3D />
         </div>
-        <div className="title">
+        <div className='title'>
           Welcome back!
         </div>
-        <div className="sub-title">
+        <div className='sub-title'>
           Enter your password to unlock account
         </div>
-        <Form ref={formRef} initialValues={{ [FormFieldName.PASSWORD]: '' }} onFinish={onSubmit} >
-          <Form.Item name={FormFieldName.PASSWORD} validateStatus={passwordValidateState?.status}>
+        <Form
+          initialValues={{ [FormFieldName.PASSWORD]: '' }}
+          onFinish={onSubmit}
+          ref={formRef}
+        >
+          <Form.Item
+            name={FormFieldName.PASSWORD}
+            validateStatus={passwordValidateState?.status}
+          >
             <Input.Password
-              containerClassName="password-input"
+              containerClassName='password-input'
               onChange={onPasswordChange}
             />
           </Form.Item>
           <Form.Item>
             <Button
-              htmlType='submit'
-              loading={loading}
               block={true}
               disabled={!!passwordValidateState}
+              htmlType='submit'
+              loading={loading}
             >
               Unlock
             </Button>
@@ -106,8 +115,8 @@ const Component: React.FC<Props> = ({ className }: Props) => {
         </Form>
       </div>
     </Layout.Base>
-  )
-}
+  );
+};
 
 const Login = styled(Component)<Props>(({ theme }: Props) => {
   const { token } = theme;
@@ -119,7 +128,7 @@ const Login = styled(Component)<Props>(({ theme }: Props) => {
 
       '.logo-container': {
         paddingTop: token.paddingXL * 2,
-        color: token.colorTextBase,
+        color: token.colorTextBase
       },
 
       '.title': {
@@ -127,28 +136,28 @@ const Login = styled(Component)<Props>(({ theme }: Props) => {
         fontWeight: token.fontWeightStrong,
         fontSize: token.fontSizeHeading3,
         lineHeight: token.lineHeightHeading3,
-        color: token.colorTextLight2,
+        color: token.colorTextLight2
       },
 
       '.sub-title': {
         marginTop: token.marginXS,
         fontSize: token.fontSizeHeading5,
         lineHeight: token.lineHeightHeading5,
-        color: token.colorTextLight3,
+        color: token.colorTextLight3
       },
 
       '.password-input': {
-        marginTop: token.marginLG * 3,
+        marginTop: token.marginLG * 3
       },
 
       '.forgot-password': {
         cursor: 'pointer',
         fontSize: token.fontSizeHeading5,
         lineHeight: token.lineHeightHeading5,
-        color: token.colorTextLight4,
+        color: token.colorTextLight4
       }
     }
-  }
-})
+  };
+});
 
 export default Login;

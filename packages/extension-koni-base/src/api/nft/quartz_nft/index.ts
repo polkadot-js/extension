@@ -199,7 +199,7 @@ export default class QuartzNftApi extends BaseNftApi {
             id: tokenId.toString(),
             name: nftData.prefix + '#' + tokenId.toString(),
             image: this.parseUrl(nftData.image),
-            external_url: `https://scan-quartz.unique.network/QUARTZ/tokens/${collectionId}/${tokenId}`,
+            externalUrl: `https://scan-quartz.unique.network/QUARTZ/tokens/${collectionId}/${tokenId}`,
             collectionId: collectionId.toString(),
             properties: nftData.properties,
             rarity: '',

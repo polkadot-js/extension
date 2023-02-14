@@ -3,12 +3,15 @@
 
 import { PHISHING_PAGE_REDIRECT } from '@subwallet/extension-base/defaults';
 import { DataContext } from '@subwallet/extension-koni-ui/contexts/DataContext';
-import { initRootPromise, Root } from '@subwallet/extension-koni-ui/Popup/Root';
+import { Root } from '@subwallet/extension-koni-ui/Popup/Root';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
 import React, { useContext, useEffect } from 'react';
 import { useSelector } from 'react-redux';
 import { createHashRouter, Outlet, useLocation, useRouteError } from 'react-router-dom';
 
+const AccountList = React.lazy(() => import('./Accounts/AccountList'));
+const AddAccount = React.lazy(() => import('./Accounts/AddAccount'));
+const Login = React.lazy(() => import('./Login'));
 const PhishingDetected = React.lazy(() => import('@subwallet/extension-koni-ui/Popup/PhishingDetected'));
 const PageWrapper = React.lazy(() => import('../components/Layout/PageWrapper'));
 const Welcome = React.lazy(() => import('@subwallet/extension-koni-ui/Popup/Welcome'));
@@ -77,24 +80,24 @@ export const router = createHashRouter([{
         path: 'tokens',
         element: <Tokens />
       },
-        {
-          path: 'nfts',
-          element: <Outlet />,
-          children: [
-            {
-              path: 'collections',
-              element: <NftCollections />
-            },
-            {
-              path: 'collection-detail',
-              element: <NftCollectionDetail />
-            },
-            {
-              path: 'item-detail',
-              element: <NftItemDetail />
-            }
-          ]
-        },
+      {
+        path: 'nfts',
+        element: <Outlet />,
+        children: [
+          {
+            path: 'collections',
+            element: <NftCollections />
+          },
+          {
+            path: 'collection-detail',
+            element: <NftCollectionDetail />
+          },
+          {
+            path: 'item-detail',
+            element: <NftItemDetail />
+          }
+        ]
+      },
       {
         path: 'crowdloans',
         element: <Crowdloans />

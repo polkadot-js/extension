@@ -232,3 +232,11 @@ export function _getEvmAbiExplorer (chainInfo: _ChainInfo) {
 export function _isAssetValuable (assetInfo: _ChainAsset) {
   return assetInfo.hasValue;
 }
+
+export function _getBlockExplorerFromChain (chainInfo: _ChainInfo): string {
+  if (_isPureEvmChain(chainInfo)) {
+    return chainInfo?.evmInfo?.blockExplorer || '';
+  }
+
+  return chainInfo?.substrateInfo?.blockExplorer || '';
+}

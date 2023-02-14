@@ -113,9 +113,9 @@ function NftItem ({ className, collectionId, collectionImage, data, onClickBack 
 
   const handleOnClick = useCallback(() => {
     try {
-      if (data.external_url) {
+      if (data.externalUrl) {
         // eslint-disable-next-line no-void
-        void chrome.tabs.create({ url: data?.external_url, active: true }).then(() => console.log('redirecting'));
+        void chrome.tabs.create({ url: data?.externalUrl, active: true }).then(() => console.log('redirecting'));
       } else if (!loading) {
         // eslint-disable-next-line no-void
         void chrome.tabs.create({ url: data?.image || collectionImage, active: true }).then(() => console.log('redirecting'));
@@ -123,7 +123,7 @@ function NftItem ({ className, collectionId, collectionImage, data, onClickBack 
     } catch (e) {
       console.log('redirecting to a new tab');
     }
-  }, [collectionImage, data.external_url, data?.image, loading]);
+  }, [collectionImage, data.externalUrl, data?.image, loading]);
 
   const getItemImage = useCallback(() => {
     if (data.image) {

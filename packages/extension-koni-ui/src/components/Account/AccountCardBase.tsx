@@ -4,14 +4,14 @@
 import { _ChainInfo } from '@subwallet/chain-list/types';
 import { _getSubstrateGenesisHash } from '@subwallet/extension-base/services/chain-service/utils';
 import { SIGN_MODE } from '@subwallet/extension-koni-ui/constants/signing';
+import useAccountAvatarTheme from '@subwallet/extension-koni-ui/hooks/account/useAccountAvatarTheme';
+import useAccountRecoded from '@subwallet/extension-koni-ui/hooks/account/useAccountRecoded';
 import useGetAccountSignModeByAddress from '@subwallet/extension-koni-ui/hooks/useGetAccountSignModeByAddress';
 import { Button, SwIconProps } from '@subwallet/react-ui';
 import Icon from '@subwallet/react-ui/es/icon';
 import AccountCard, { AccountCardProps } from '@subwallet/react-ui/es/web3-block/account-card';
 import { DotsThree, Eye, QrCode, Swatches } from 'phosphor-react';
 import React, { useCallback, useMemo } from 'react';
-import useAccountAvatarTheme from '@subwallet/extension-koni-ui/hooks/account/useAccountAvatarTheme';
-import useAccountRecoded from '@subwallet/extension-koni-ui/hooks/account/useAccountRecoded';
 
 import { KeypairType } from '@polkadot/util-crypto/types';
 

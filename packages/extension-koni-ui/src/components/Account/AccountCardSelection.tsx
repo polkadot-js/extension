@@ -5,7 +5,6 @@ import AccountCardBase, { _AccountCardProps } from '@subwallet/extension-koni-ui
 import React from 'react';
 
 function AccountCardSelection (props: Partial<_AccountCardProps>): React.ReactElement<Partial<_AccountCardProps>> {
-
   return (
     <AccountCardBase
       {...props}

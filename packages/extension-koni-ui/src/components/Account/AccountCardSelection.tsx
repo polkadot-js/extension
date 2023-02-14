@@ -5,16 +5,12 @@ import AccountCardBase, { _AccountCardProps } from '@subwallet/extension-koni-ui
 import React from 'react';
 
 function AccountCardSelection (props: Partial<_AccountCardProps>): React.ReactElement<Partial<_AccountCardProps>> {
-  const { address, className, renderRightItem } = props;
 
   return (
     <AccountCardBase
       {...props}
-      address={address}
       addressPreLength={9}
       addressSufLength={9}
-      className={className}
-      renderRightItem={renderRightItem}
       showMoreBtn
     />
   );

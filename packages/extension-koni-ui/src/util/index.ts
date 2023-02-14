@@ -45,7 +45,24 @@ export function getEthereumChains (networkMap: Record<string, NetworkJson>): str
   return result;
 }
 
-export function recodeAddress (address: string, accounts: AccountWithChildren[], networkInfo: _ChainInfo | null, type?: KeypairType): Recoded {
+export const defaultRecoded: Recoded = { account: null, formatted: null, prefix: 42, isEthereum: false };
+
+export const accountAllRecoded: Recoded = {
+  account: {
+    address: ALL_ACCOUNT_KEY
+  },
+  formatted: ALL_ACCOUNT_KEY,
+  prefix: 42,
+  isEthereum: false
+};
+
+export function recodeAddress (address: string | undefined, accounts: AccountWithChildren[], networkInfo: _ChainInfo | null, type?: KeypairType): Recoded {
+  if (!address) {
+    return defaultRecoded;
+  } else if (isAccountAll(address)) {
+    return accountAllRecoded;
+  }
+
   const publicKey = decodeAddress(address);
   const account = findAccountByAddress(accounts, address) || findSubstrateAccount(accounts, publicKey);
   const prefix = networkInfo && _getChainSubstrateAddressPrefix(networkInfo) !== -1 ? _getChainSubstrateAddressPrefix(networkInfo) : 42;
@@ -61,8 +78,6 @@ export function recodeAddress (address: string, accounts: AccountWithChildren[],
   };
 }
 
-export const defaultRecoded: Recoded = { account: null, formatted: null, prefix: 42, isEthereum: false };
-
 export const NFT_DEFAULT_GRID_SIZE = 6;
 
 export const NFT_PREVIEW_HEIGHT = 184;
@@ -72,15 +87,6 @@ export const NFT_GRID_HEIGHT_THRESHOLD = 600;
 export const NFT_HEADER_HEIGHT = 202;
 
 export const NFT_PER_ROW = 3;
-
-export const accountAllRecoded: Recoded = {
-  account: {
-    address: ALL_ACCOUNT_KEY
-  },
-  formatted: ALL_ACCOUNT_KEY,
-  prefix: 42,
-  isEthereum: false
-};
 
 export function getLogoByNetworkKey (networkKey: string, defaultLogo = 'default'): string {
   return LogosMap[networkKey] || LogosMap[defaultLogo] || LogosMap.default;

@@ -6,13 +6,15 @@ import type { ThemeProps } from '../types';
 import React from 'react';
 import styled from 'styled-components';
 
+import { Z_INDEX } from '../zindex';
+
 interface Props {
   children: React.ReactNode;
   className?: string;
   reference: React.RefObject<HTMLDivElement>;
 }
 
-function Menu ({ children, className, reference }: Props): React.ReactElement<Props> {
+function Menu({ children, className, reference }: Props): React.ReactElement<Props> {
   return (
     <div
       className={className}
@@ -23,7 +25,8 @@ function Menu ({ children, className, reference }: Props): React.ReactElement<Pr
   );
 }
 
-export default styled(Menu)(({ theme }: ThemeProps) => `
+export default styled(Menu)(
+  ({ theme }: ThemeProps) => `
   background: ${theme.popupBackground};
   border-radius: 4px;
   border: 1px solid ${theme.boxBorderColor};
@@ -33,5 +36,6 @@ export default styled(Menu)(({ theme }: ThemeProps) => `
   padding: 16px 0;
   position: absolute;
   right: 0;
-  z-index: 2;
-`);
+  z-index: ${Z_INDEX.MENU};
+`
+);

@@ -10,6 +10,7 @@ import styled, { CSSProperties } from 'styled-components';
 
 import { Video } from '@polkadot/extension-ui/components/index';
 
+import { Z_INDEX } from '../zindex';
 import BottomWrapper from './BottomWrapper';
 
 interface SplashHandlerProps extends ThemeProps {
@@ -85,6 +86,6 @@ export default styled(SplashHandler)`
 
   .splash {
     position: absolute;
-    z-index: 101;
+    z-index: ${Z_INDEX.SPLASH_HEADER};
   }
   `;

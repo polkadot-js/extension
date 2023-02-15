@@ -34,7 +34,7 @@ export default React.memo(
   flex-direction: row;
   justify-content: center;
   padding-left: 18px;
-  color: ${theme.subTextColor};
+  color: ${theme.textColorDanger};
   margin-right: 20px;
   margin-top: 6px;
 

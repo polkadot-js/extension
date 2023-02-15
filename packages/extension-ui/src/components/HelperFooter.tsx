@@ -6,38 +6,38 @@ import type { ThemeProps } from '../types';
 import React from 'react';
 import styled from 'styled-components';
 
+import Svg from './Svg';
+
 interface Props extends ThemeProps {
   className?: string;
   children: React.ReactNode;
 }
 
-function HelperFooter({ children, className }: Props): React.ReactElement<Props> {
-  return <div className={className}>{children}</div>;
-}
-
-export default styled(HelperFooter)(
-  ({ theme }: Props) => `
+export default React.memo(
+  styled.div(
+    ({ theme }: Props) => `
     display: flex;
     position: relative;
     flex-direction: row;
     justify-content: center;
-    align-items: flex-start;
-    gap: 12px;
-    padding-top: 0px;
+    width: 100%;
     margin-bottom: 16px;
-    margin-top: 30px;
+    margin-top: 24px;
+    gap: 4px;
+    padding: 0 16px;
   
     &:before {
       position: absolute;
       content: '';
-      width: calc(100% - 32px);
+      width: calc(100%);
       border-top: 1px solid ${theme.boxBorderColor};
       top: -16px;
    }
   
-    img.icon {
-      margin-top: -4px;
-      align-self: flex-start; 
+    ${Svg} {
+      background: ${theme.iconNeutralColor};      
+      width: 16px;
+      height: 16px;
     }
   
     span {
@@ -46,8 +46,9 @@ export default styled(HelperFooter)(
       line-height: 130%;
       letter-spacing: 0.06em;
       color: ${theme.subTextColor};
-      align-self: flex-start;
-  
+      align-self: center;
+      white-space: pre-line;
+      
       .link {
         color: ${theme.primaryColor};
         cursor: pointer;
@@ -58,4 +59,5 @@ export default styled(HelperFooter)(
       }
     }
 `
+  )
 );

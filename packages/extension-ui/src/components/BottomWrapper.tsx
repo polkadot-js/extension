@@ -5,6 +5,7 @@ import React from 'react';
 import styled from 'styled-components';
 
 import { ThemeProps } from '../types';
+import { Z_INDEX } from '../zindex';
 
 interface Props extends ThemeProps {
   className?: string;
@@ -21,5 +22,5 @@ export default styled(BottomWrapper)`
   flex-direction: column;
   position: sticky;
   bottom: 0;
-  z-index: 100;
+  z-index: ${Z_INDEX.BOTTOM_WRAPPER};
 `;

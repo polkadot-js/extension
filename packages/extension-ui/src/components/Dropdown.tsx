@@ -8,11 +8,9 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import React, { useCallback, useState } from 'react';
 import styled from 'styled-components';
 
-import lockedIcon from '../assets/locked.svg';
-import unlockedIcon from '../assets/unlocked.svg';
 import useTranslation from '../hooks/useTranslation';
+import InputLock from './InputLock';
 import Label from './Label';
-import Svg from './Svg';
 
 interface DropdownOption {
   text: string;
@@ -31,36 +29,6 @@ interface Props extends ThemeProps {
   options: DropdownOption[];
   value?: string;
 }
-
-interface DropdownLockProps {
-  isLocked: boolean;
-  onClick: (isLocked: boolean) => void;
-}
-
-const DropdownLock: React.FC<DropdownLockProps> = ({ isLocked, onClick }) => {
-  const handleClick = useCallback(() => {
-    onClick(!isLocked);
-  }, [isLocked, onClick]);
-
-  return (
-    <div
-      className='locked-container'
-      onClick={handleClick}
-    >
-      {isLocked ? (
-        <Svg
-          className='lock-icon'
-          src={lockedIcon}
-        />
-      ) : (
-        <Svg
-          className='lock-icon'
-          src={unlockedIcon}
-        />
-      )}
-    </div>
-  );
-};
 
 function Dropdown({
   className,
@@ -115,7 +83,7 @@ function Dropdown({
           className={`icon ${isLocked ? 'disabled-icon' : ''}`}
           icon={faChevronDown}
         />
-        <DropdownLock
+        <InputLock
           isLocked={isLocked}
           onClick={_toggleLocked}
         />
@@ -131,6 +99,7 @@ export default React.memo(
 
   display: flex;
   flex-direction: column;
+  height: 74px;
 
   .label {
     position: relative;
@@ -163,6 +132,7 @@ export default React.memo(
 
     &:disabled {
       opacity: 0.65;
+      color: ${theme.disabledTextColor}
     }
 
     &:read-only {
@@ -182,17 +152,9 @@ export default React.memo(
     opacity: 0.65;
   }
   
-
-  .lock-icon {
-    background: ${theme.subTextColor};
-    width: 24px;
-    height: 24px;
-    cursor: pointer;
-  }
-
   .unlock-text {
     padding-left: 16px;
-    color: ${theme.subTextColor};
+    color: ${theme.disabledTextColor};
     opacity: 0.65;
     font-weight: 300;
     font-size: 13px;
@@ -200,13 +162,7 @@ export default React.memo(
     letter-spacing: 0.06em;
   }
 
-  .locked-container {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 36px;
-    height: 56px;
-  }
+
 `
   )
 );

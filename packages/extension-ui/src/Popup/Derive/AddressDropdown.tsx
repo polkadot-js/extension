@@ -9,6 +9,7 @@ import styled from 'styled-components';
 import arrow from '../../assets/arrow-down.svg';
 import { Address } from '../../components';
 import useOutsideClick from '../../hooks/useOutsideClick';
+import { Z_INDEX } from '../../zindex';
 
 interface Props {
   allAddresses: [string, string | null][];
@@ -18,7 +19,13 @@ interface Props {
   selectedGenesis: string | null;
 }
 
-function AddressDropdown ({ allAddresses, className, onSelect, selectedAddress, selectedGenesis }: Props): React.ReactElement<Props> {
+function AddressDropdown({
+  allAddresses,
+  className,
+  onSelect,
+  selectedAddress,
+  selectedGenesis
+}: Props): React.ReactElement<Props> {
   const [isDropdownVisible, setDropdownVisible] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
 
@@ -59,7 +66,8 @@ function AddressDropdown ({ allAddresses, className, onSelect, selectedAddress, 
   );
 }
 
-export default styled(AddressDropdown)(({ theme }: ThemeProps) => `
+export default styled(AddressDropdown)(
+  ({ theme }: ThemeProps) => `
   margin-bottom: 16px;
   cursor: pointer;
 
@@ -86,7 +94,7 @@ export default styled(AddressDropdown)(({ theme }: ThemeProps) => `
     position: absolute;
     visibility: hidden;
     width: 510px;
-    z-index: 100;
+    z-index: ${Z_INDEX.DROPDOWN};
     background: ${theme.bodyColor};
     max-height: 0;
     overflow: auto;
@@ -105,4 +113,5 @@ export default styled(AddressDropdown)(({ theme }: ThemeProps) => `
       cursor: pointer;
     }
   }
-`);
+`
+);

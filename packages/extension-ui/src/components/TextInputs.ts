@@ -36,6 +36,10 @@ const TextInput = css(
     border-color: ${withError ? theme.iconDangerColor : theme.inputFocusBorderColor};
     caret-color: ${withError ? theme.iconDangerColor : theme.inputFocusBorderColor};
   }
+
+  &:disabled {
+      background: ${theme.inputBackground};
+  }
 `
 );
 

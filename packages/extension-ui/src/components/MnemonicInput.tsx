@@ -10,7 +10,6 @@ import { validateSeed } from '@polkadot/extension-ui/messaging';
 import { objectSpread } from '@polkadot/util';
 import { KeypairType } from '@polkadot/util-crypto/types';
 
-import { Warning } from '../components';
 import useTranslation from '../hooks/useTranslation';
 import { AccountInfo } from '../Popup/ImportSeed';
 import MnemonicPill from './MnemonicPill';
@@ -133,7 +132,7 @@ const MnemonicInput = ({
       .catch(() => {
         setAddress('');
         onAccountChange(null);
-        setError(path ? t<string>('Invalid mnemonic seed or derivation path') : t<string>('Invalid secret phrase'));
+        setError(path ? t<string>('Invalid secret phrase or path') : t<string>('Invalid secret phrase'));
       });
   }, [t, genesis, seed, path, onAccountChange, type, setError, setAddress]);
 
@@ -156,7 +155,6 @@ const MnemonicInput = ({
           />
         ))}
       </div>
-      {isValid && <Warning isDanger>{error}</Warning>}
     </div>
   );
 };
@@ -171,6 +169,7 @@ export default styled(MnemonicInput)(
     justify-content: space-between;
     width: 100%;
     user-select: all;
+
   }
 
   .mnemonic-pill {

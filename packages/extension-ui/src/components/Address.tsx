@@ -1,10 +1,8 @@
 // Copyright 2019-2023 @polkadot/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import type { AccountJson, AccountWithChildren } from '@polkadot/extension-base/background/types';
-import type { Chain } from '@polkadot/extension-chains/types';
+import type { AccountJson } from '@polkadot/extension-base/background/types';
 import type { IconTheme } from '@polkadot/react-identicon/types';
-import type { SettingsStruct } from '@polkadot/ui-settings/types';
 import type { KeypairType } from '@polkadot/util-crypto/types';
 import type { ThemeProps } from '../types';
 
@@ -14,8 +12,6 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import React, { useCallback, useContext, useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import styled from 'styled-components';
-
-import { decodeAddress, encodeAddress } from '@polkadot/util-crypto';
 
 import details from '../assets/details.svg';
 import exportIcon from '../assets/export.svg';
@@ -28,6 +24,8 @@ import { showAccount } from '../messaging';
 import { DEFAULT_TYPE } from '../util/defaultType';
 import { ellipsisName } from '../util/ellipsisName';
 import getParentNameSuri from '../util/getParentNameSuri';
+import { recodeAddress, Recoded } from '../util/recodeAddress';
+import { Z_INDEX } from '../zindex';
 import { AccountContext, ActionContext, SettingsContext } from './contexts';
 import Identicon from './Identicon';
 import Menu from './Menu';
@@ -44,55 +42,15 @@ export interface Props extends ThemeProps {
   isHidden?: boolean;
   name?: string | null;
   parentName?: string | null;
-  showVisibilityAction?: boolean;
   suri?: string;
   toggleActions?: number;
   type?: KeypairType;
   withExport?: boolean;
 }
 
-interface Recoded {
-  account: AccountJson | null;
-  formatted: string | null;
-  genesisHash?: string | null;
-  prefix?: number;
-  type: KeypairType;
-}
-
-// find an account in our list
-function findSubstrateAccount(accounts: AccountJson[], publicKey: Uint8Array): AccountJson | null {
-  const pkStr = publicKey.toString();
-
-  return accounts.find(({ address }): boolean => decodeAddress(address).toString() === pkStr) || null;
-}
-
 // find an account in our list
 function findAccountByAddress(accounts: AccountJson[], _address: string): AccountJson | null {
   return accounts.find(({ address }): boolean => address === _address) || null;
-}
-
-// recodes an supplied address using the prefix/genesisHash, include the actual saved account & chain
-function recodeAddress(
-  address: string,
-  accounts: AccountWithChildren[],
-  chain: Chain | null,
-  settings: SettingsStruct
-): Recoded {
-  // decode and create a shortcut for the encoded address
-  const publicKey = decodeAddress(address);
-
-  // find our account using the actual publicKey, and then find the associated chain
-  const account = findSubstrateAccount(accounts, publicKey);
-  const prefix = chain ? chain.ss58Format : settings.prefix === -1 ? 42 : settings.prefix;
-
-  // always allow the actual settings to override the display
-  return {
-    account,
-    formatted: account?.type === 'ethereum' ? address : encodeAddress(publicKey, prefix),
-    genesisHash: account?.genesisHash,
-    prefix,
-    type: account?.type || DEFAULT_TYPE
-  };
 }
 
 const ACCOUNTS_SCREEN_HEIGHT = 550;
@@ -110,7 +68,6 @@ function Address({
   name,
   parentName,
   suri,
-  // showVisibilityAction = false,
   toggleActions,
   type: givenType,
   withExport
@@ -260,7 +217,7 @@ function Address({
               className='fullAddress'
               data-field='address'
             >
-              {_ellipsisName(formatted) || _ellipsisName(address) || t('<unknown>')}
+              {_ellipsisName(formatted || address) || t('<unknown>')}
             </div>
             {isHidden && (
               <img
@@ -333,7 +290,7 @@ export default styled(Address)(
       color: ${theme.subTextColor};
       padding: 0.1rem 0.5rem 0.1rem 0.75rem;
       right: 0;
-      z-index: 1;
+      z-index: ${Z_INDEX.ADDRESS};
     }
   }
 

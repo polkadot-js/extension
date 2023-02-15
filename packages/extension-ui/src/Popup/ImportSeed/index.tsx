@@ -3,8 +3,6 @@
 
 import React, { useCallback, useContext, useEffect, useState } from 'react';
 
-import useGenesisHashOptions from '@polkadot/extension-ui/hooks/useGenesisHashOptions';
-
 import { AccountContext, ActionContext } from '../../components';
 import AccountNamePasswordCreation from '../../components/AccountNamePasswordCreation';
 import useMetadata from '../../hooks/useMetadata';
@@ -12,7 +10,6 @@ import useTranslation from '../../hooks/useTranslation';
 import { createAccountSuri } from '../../messaging';
 import { HeaderWithSteps } from '../../partials';
 import { DEFAULT_TYPE } from '../../util/defaultType';
-import NetworkSelection from './NetworkSelection';
 import SeedAndPath from './SeedAndPath';
 
 export interface AccountInfo {
@@ -34,7 +31,6 @@ function ImportSeed(): React.ReactElement {
   const [genesis, setGenesis] = useState('');
   const [seed, setSeed] = useState<string | null>(null);
   const chain = useMetadata(account && account.genesis, true);
-  const genesisOptions = useGenesisHashOptions();
 
   useEffect((): void => {
     !accounts.length && onAction();
@@ -71,37 +67,22 @@ function ImportSeed(): React.ReactElement {
     <>
       <HeaderWithSteps
         step={step}
-        text={t<string>('Import from secret phrase')}
-        total={3}
+        text={t<string>('Import existing account')}
+        total={2}
       />
       {step === 1 && (
         <SeedAndPath
+          genesis={genesis}
           onAccountChange={setAccount}
           onNextStep={_onNextStep}
           path={path}
           seed={seed}
+          setPath={setPath}
           setSeed={setSeed}
           type={type}
         />
       )}
       {step === 2 && (
-        <>
-          <NetworkSelection
-            address={account?.address}
-            onAccountChange={setAccount}
-            onChange={_onChangeNetwork}
-            onNextStep={_onNextStep}
-            onPreviousStep={_onPreviousStep}
-            options={genesisOptions}
-            path={path}
-            seed={seed}
-            setPath={setPath}
-            type={type}
-            value={genesis}
-          />
-        </>
-      )}
-      {step === 3 && (
         <AccountNamePasswordCreation
           address={account?.address}
           buttonLabel={t<string>('Import')}
@@ -110,6 +91,8 @@ function ImportSeed(): React.ReactElement {
           onBackClick={_onPreviousStep}
           onCreate={_onCreate}
           onNameChange={setName}
+          seed={seed}
+          setGenesis={_onChangeNetwork}
         />
       )}
     </>

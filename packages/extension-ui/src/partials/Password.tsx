@@ -74,7 +74,7 @@ export default function Password({ isFocussed, onChange }: Props): React.ReactEl
               <div className='password-icon'>
                 <img
                   onClick={_handleSecondInputTypeChange}
-                  src={isSecondPasswordVisible ? viewOff : viewOn}
+                  src={isSecondPasswordVisible ? viewOn : viewOff}
                 />
               </div>
             }

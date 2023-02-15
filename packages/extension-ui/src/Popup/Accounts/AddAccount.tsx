@@ -8,17 +8,26 @@ import styled from 'styled-components';
 
 import add from '../../assets/add.svg';
 import helpIcon from '../../assets/help.svg';
-import { ActionContext, Button, ButtonArea, HelperFooter, SkeletonCard, Svg } from '../../components';
+import { ActionContext, Button, ButtonArea, SkeletonCard, Svg } from '../../components';
+import HelperFooter from '../../components/HelperFooter';
 import useTranslation from '../../hooks/useTranslation';
 import Header from '../../partials/Header';
+import { Z_INDEX } from '../../zindex';
 
 interface Props extends ThemeProps {
   className?: string;
 }
 
 const FooterWithoutMargin = styled(HelperFooter)`
-padding: 0 16px;
-margin-bottom: 0px;
+  padding: 0 16px;
+  margin-bottom: 0px;
+  display: flex;
+  gap: 8px;
+  flex-direction: row;
+
+  .icon-container {
+    margin-top: 4px;
+  }
 `;
 
 function AddAccount({ className }: Props): React.ReactElement<Props> {
@@ -29,11 +38,15 @@ function AddAccount({ className }: Props): React.ReactElement<Props> {
 
   const footer = (
     <FooterWithoutMargin>
-      <img
-        className='icon'
-        src={helpIcon}
-      />
-      <span>{t<string>('Need help? Look for tooltips such as this one!')}</span>
+      <div className='icon-container'>
+        <Svg
+          className='icon'
+          src={helpIcon}
+        />
+      </div>
+      <div className='text-container'>
+        <span>{t<string>('Need help? Look for tooltips such as this one!')}</span>
+      </div>
     </FooterWithoutMargin>
   );
 
@@ -80,7 +93,7 @@ export default React.memo(
     ({ theme }: Props) => `
   color: ${theme.textColor};
   height: 100%;
-  z-index: 100;
+  z-index: ${Z_INDEX.ADD_ACCOUNT_FOREGROUND};
 
   .background {
     display: flex;
@@ -91,7 +104,7 @@ export default React.memo(
     bottom: 0;
     left: 0;
     right: 0;
-    z-index: -100;
+    z-index: ${Z_INDEX.ADD_ACCOUNT_BACKGROUND};
     margin-left: 16px;
     margin-right: 16px;
     opacity: 0.5;

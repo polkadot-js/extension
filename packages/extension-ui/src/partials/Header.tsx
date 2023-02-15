@@ -224,7 +224,7 @@ export default React.memo(
       display: inline-block;
       vertical-align: middle;
       width: 20px;
-      height: 24px;
+      height: 20px;
 
       &:hover {
         cursor: pointer;

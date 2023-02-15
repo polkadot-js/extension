@@ -18,9 +18,8 @@ import { Name } from '../../partials';
 interface Props extends AccountJson {
   className?: string;
   parentName?: string;
-  showVisibilityAction?: boolean;
   withCheckbox?: boolean;
-  withMenu?: boolean
+  withMenu?: boolean;
 }
 
 interface EditState {
@@ -28,7 +27,20 @@ interface EditState {
   toggleActions: number;
 }
 
-function Account ({ address, className, genesisHash, isExternal, isHardware, isHidden, name, parentName, showVisibilityAction, suri, type, withCheckbox = false, withMenu = true }: Props): React.ReactElement<Props> {
+function Account({
+  address,
+  className,
+  genesisHash,
+  isExternal,
+  isHardware,
+  isHidden,
+  name,
+  parentName,
+  suri,
+  type,
+  withCheckbox = false,
+  withMenu = true
+}: Props): React.ReactElement<Props> {
   const { t } = useTranslation();
   const [{ isEditing, toggleActions }, setEditing] = useState<EditState>({ isEditing: false, toggleActions: 0 });
   const [editedName, setName] = useState<string | undefined | null>(name);
@@ -51,8 +63,7 @@ function Account ({ address, className, genesisHash, isExternal, isHardware, isH
 
   const _onChangeGenesis = useCallback(
     (genesisHash?: string | null): void => {
-      tieAccount(address, genesisHash || null)
-        .catch(console.error);
+      tieAccount(address, genesisHash || null).catch(console.error);
     },
     [address]
   );
@@ -62,66 +73,64 @@ function Account ({ address, className, genesisHash, isExternal, isHardware, isH
     [isEditing]
   );
 
-  const _saveChanges = useCallback(
-    (): void => {
-      editedName &&
-        editAccount(address, editedName)
-          .catch(console.error);
+  const _saveChanges = useCallback((): void => {
+    editedName && editAccount(address, editedName).catch(console.error);
 
-      _toggleEdit();
-    },
-    [editedName, address, _toggleEdit]
-  );
+    _toggleEdit();
+  }, [editedName, address, _toggleEdit]);
 
-  const _actions = useMemo(() => (
-    <>
-      <Link
-        className='menuItem'
-        onClick={_toggleEdit}
-      >
-        {t<string>('Rename')}
-      </Link>
-      {!isExternal && canDerive(type) && (
+  const _actions = useMemo(
+    () => (
+      <>
         <Link
           className='menuItem'
-          to={`/account/derive/${address}/locked`}
+          onClick={_toggleEdit}
         >
-          {t<string>('Derive New Account')}
+          {t<string>('Rename')}
         </Link>
-      )}
-      <MenuDivider />
-      {!isExternal && (
+        {!isExternal && canDerive(type) && (
+          <Link
+            className='menuItem'
+            to={`/account/derive/${address}/locked`}
+          >
+            {t<string>('Derive New Account')}
+          </Link>
+        )}
+        <MenuDivider />
+        {!isExternal && (
+          <Link
+            className='menuItem'
+            isDanger
+            to={`/account/export/${address}`}
+          >
+            {t<string>('Export Account')}
+          </Link>
+        )}
         <Link
           className='menuItem'
           isDanger
-          to={`/account/export/${address}`}
+          to={`/account/forget/${address}`}
         >
-          {t<string>('Export Account')}
+          {t<string>('Forget Account')}
         </Link>
-      )}
-      <Link
-        className='menuItem'
-        isDanger
-        to={`/account/forget/${address}`}
-      >
-        {t<string>('Forget Account')}
-      </Link>
-      {!isHardware && (
-        <>
-          <MenuDivider />
-          <div className='menuItem'>
-            <Dropdown
-              className='genesisSelection'
-              label=''
-              onChange={_onChangeGenesis}
-              options={genesisOptions}
-              value={genesisHash || ''}
-            />
-          </div>
-        </>
-      )}
-    </>
-  ), [_onChangeGenesis, _toggleEdit, address, genesisHash, genesisOptions, isExternal, isHardware, t, type]);
+        {!isHardware && (
+          <>
+            <MenuDivider />
+            <div className='menuItem'>
+              <Dropdown
+                className='genesisSelection'
+                label=''
+                onChange={_onChangeGenesis}
+                options={genesisOptions}
+                value={genesisHash || ''}
+              />
+            </div>
+          </>
+        )}
+      </>
+    ),
+    [_onChangeGenesis, _toggleEdit, address, genesisHash, genesisOptions, isExternal, isHardware, t, type]
+  );
 
   return (
     <div className={className}>
@@ -142,7 +151,6 @@ function Account ({ address, className, genesisHash, isExternal, isHardware, isH
         isHidden={isHidden}
         name={editedName}
         parentName={parentName}
-        showVisibilityAction={showVisibilityAction}
         suri={suri}
         toggleActions={toggleActions}
       >
@@ -161,7 +169,8 @@ function Account ({ address, className, genesisHash, isExternal, isHardware, isH
   );
 }
 
-export default styled(Account)(({ theme }: ThemeProps) => `
+export default styled(Account)(
+  ({ theme }: ThemeProps) => `
   .address {
     margin-bottom: 8px;
   }
@@ -202,4 +211,5 @@ export default styled(Account)(({ theme }: ThemeProps) => `
       margin: 0;
     }
   }
-`);
+`
+);

@@ -22,6 +22,7 @@ import useTranslation from '../../hooks/useTranslation';
 import { showAccount } from '../../messaging';
 import Header from '../../partials/Header';
 import { ellipsisName } from '../../util/ellipsisName';
+import { recodeAddress } from '../../util/recodeAddress';
 
 interface Props extends RouteComponentProps<{ address: string }>, ThemeProps {
   className?: string;
@@ -69,6 +70,11 @@ function EditAccountMenu({
 
   const goTo = useCallback((path: string) => () => onAction(path), [onAction]);
 
+  const { account: recodedAccount, formatted } = useMemo(
+    () => recodeAddress(address, accounts, chain, settings),
+    [accounts, address, chain, settings]
+  );
+
   return (
     <>
       <Header
@@ -84,7 +90,7 @@ function EditAccountMenu({
           isExternal={isExternal === 'true'}
           onCopy={_onCopy}
           prefix={prefix}
-          value={address}
+          value={formatted || recodedAccount?.address}
         />
         <EditMenuCard
           description={account?.name || ''}
@@ -95,7 +101,7 @@ function EditAccountMenu({
         />
         <CopyToClipboard text={(address && address) || ''}>
           <EditMenuCard
-            description={ellipsisName(address) || ''}
+            description={ellipsisName(formatted || address) || t('<unknown>')}
             extra='copy'
             onClick={_onCopy}
             position='middle'

@@ -5,13 +5,13 @@ import React, { useCallback, useState } from 'react';
 import styled from 'styled-components';
 
 import helpIcon from '../assets/help.svg';
-import { Address, Button, Dropdown, HelperFooter, ScrollWrapper } from '../components';
+import { Address, BackButton, Button, ButtonArea, Dropdown, ScrollWrapper, Svg, VerticalSpace } from '../components';
 import useGenesisHashOptions from '../hooks/useGenesisHashOptions';
 import useToast from '../hooks/useToast';
 import useTranslation from '../hooks/useTranslation';
 import { Name, Password } from '../partials';
 import { ThemeProps } from '../types';
-import { BackButton, ButtonArea, VerticalSpace } from '.';
+import HelperFooter from './HelperFooter';
 
 interface Props {
   address: string | null;
@@ -25,6 +25,20 @@ interface Props {
   onNameChange: (name: string) => void;
   onPasswordChange?: (password: string) => void;
 }
+
+const CustomFooter = styled(HelperFooter)`
+flex-direction: row;
+display: flex;
+gap: 8px;
+
+.icon-container {
+  margin-top: 4px;
+}
+.text-container {
+  display: flex;
+  gap: 4px;
+}
+`;
 
 function AccountNamePasswordCreation({
   address,
@@ -76,17 +90,21 @@ function AccountNamePasswordCreation({
   const _onChangeNetwork = useCallback((newGenesisHash: string) => setGenesis(newGenesisHash), [setGenesis]);
 
   const footer = (
-    <HelperFooter>
-      <img
-        className='icon'
-        src={helpIcon}
-      />
-      <span>
-        {t<string>('When should you choose the network?')}&nbsp;
-        <br />
-        <span className='link'>{t<string>('Learn more')}</span>
-      </span>
-    </HelperFooter>
+    <CustomFooter>
+      <div className='icon-container'>
+        <Svg
+          className='icon'
+          src={helpIcon}
+        />
+      </div>
+      <div className='text-container'>
+        <span>
+          {t<string>('When should you choose the network?')}&nbsp;
+          <br />
+          <span className='link'>{t<string>('Learn more')}</span>
+        </span>
+      </div>
+    </CustomFooter>
   );
 
   return (

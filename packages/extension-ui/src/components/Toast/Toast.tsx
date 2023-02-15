@@ -6,6 +6,7 @@ import type { SnackbarTypes, ThemeProps } from '../../types';
 import React, { useCallback } from 'react';
 import styled from 'styled-components';
 
+import { Z_INDEX } from '../../zindex';
 import * as icons from './iconsList';
 import ToastCloseIcon from './ToastCloseIcon';
 import { TOAST_TIMEOUT } from './ToastProvider';
@@ -55,7 +56,8 @@ export default styled(Toast)(
   padding: 16px;
   box-sizing: border-box;
   animation: toast 0.2s, toast  0.2s linear 1.4s reverse;
-  
+  z-index: ${Z_INDEX.TOAST}};
+
   @keyframes toast {
   from {
     opacity: 0;

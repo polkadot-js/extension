@@ -9,22 +9,29 @@ import styled from 'styled-components';
 import Account from './Account';
 
 interface Props extends AccountWithChildren {
-  className?: string
+  className?: string;
   parentName?: string;
-  withCheckbox?: boolean
-  withMenu?: boolean
-  showHidden?: boolean
+  withCheckbox?: boolean;
+  withMenu?: boolean;
+  showHidden?: boolean;
 }
 
-function AccountsTree ({ className, parentName, showHidden = true, suri, withCheckbox = false, withMenu = true, ...account }: Props): React.ReactElement<Props> {
+function AccountsTree({
+  className,
+  parentName,
+  showHidden = true,
+  suri,
+  withCheckbox = false,
+  withMenu = true,
+  ...account
+}: Props): React.ReactElement<Props> {
   return (
     <div className={className}>
-      { (showHidden || !account.isHidden) && (
+      {(showHidden || !account.isHidden) && (
         <Account
           {...account}
           className={withCheckbox ? 'accountWichCheckbox' : ''}
           parentName={parentName}
-          showVisibilityAction={showHidden}
           suri={suri}
           withCheckbox={withCheckbox}
           withMenu={withMenu}

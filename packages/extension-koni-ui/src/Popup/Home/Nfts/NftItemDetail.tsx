@@ -42,7 +42,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
   const dataContext = useContext(DataContext);
   const location = useLocation();
   const navigate = useNavigate();
-  const {token } = useTheme() as Theme;
+  const { token } = useTheme() as Theme;
   const { activeModal, inactiveModal } = useContext(ModalContext);
 
   const { collectionInfo, nftItem } = location.state as INftItemDetail;

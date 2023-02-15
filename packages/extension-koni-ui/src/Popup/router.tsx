@@ -2,7 +2,6 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { PHISHING_PAGE_REDIRECT } from '@subwallet/extension-base/defaults';
-import SelectAccount from '@subwallet/extension-koni-ui/components/Layout/parts/SelectAccount';
 import { DataContext } from '@subwallet/extension-koni-ui/contexts/DataContext';
 import { Root } from '@subwallet/extension-koni-ui/Popup/Root';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
@@ -10,7 +9,7 @@ import React, { useContext, useEffect } from 'react';
 import { useSelector } from 'react-redux';
 import { createHashRouter, Outlet, useLocation, useRouteError } from 'react-router-dom';
 
-const AccountList = React.lazy(() => import('./Accounts/AccountList'));
+const SelectAccount = React.lazy(() => import('@subwallet/extension-koni-ui/components/Layout/parts/SelectAccount'));
 const AddAccount = React.lazy(() => import('./Accounts/AddAccount'));
 const Login = React.lazy(() => import('./Login'));
 const PhishingDetected = React.lazy(() => import('@subwallet/extension-koni-ui/Popup/PhishingDetected'));
@@ -45,7 +44,7 @@ const ErrorFallback = () => {
 
   return (
     <div>
-      <h1>An Error Occured</h1>
+      <h1>An Error Occurred</h1>
       <p>Sorry, something went wrong. Please try again later.</p>
     </div>
   );

@@ -4,7 +4,7 @@
 import type { SwScreenLayoutProps } from '@subwallet/react-ui';
 
 import Footer from '@subwallet/extension-koni-ui/components/Layout/parts/Footer';
-import { SelectedAccount } from '@subwallet/extension-koni-ui/components/Layout/parts/SelectedAccount';
+import SelectAccount from '@subwallet/extension-koni-ui/components/Layout/parts/SelectAccount';
 import { SwScreenLayout } from '@subwallet/react-ui';
 import Icon from '@subwallet/react-ui/es/icon';
 import { SwTabBarItem } from '@subwallet/react-ui/es/sw-tab-bar';
@@ -115,7 +115,7 @@ const Base = ({ children, showFooter, ...props }: Props) => {
     <SwScreenLayout
       {...props}
       footer={showFooter && <Footer />}
-      headerContent={<SelectedAccount />}
+      headerContent={<SelectAccount />}
       headerIcons={headerIcons}
       selectedTabBarItem={selectedTab}
       tabBarItems={TabBarItems.map((item) => ({

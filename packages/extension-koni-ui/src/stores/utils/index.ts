@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { _ChainAsset, _ChainInfo, _MultiChainAsset } from '@subwallet/chain-list/types';
+import { AuthUrls } from '@subwallet/extension-base/background/handlers/State';
 import { AccountsWithCurrentAddress, BalanceJson, ConfirmationsQueue, CrowdloanJson, KeyringState, NftCollection, NftJson, PriceJson, StakeUnlockingJson, StakingJson, StakingRewardJson, ThemeNames, TxHistoryItem } from '@subwallet/extension-base/background/KoniTypes';
 import { AccountJson, AccountsContext, AuthorizeRequest, ConfirmationRequestBase, MetadataRequest, SigningRequest } from '@subwallet/extension-base/background/types';
 import { _ChainState } from '@subwallet/extension-base/services/chain-service/types';
@@ -111,12 +112,12 @@ export const updateTheme = (theme: ThemeNames) => {
 //
 // export const subscribeAppSettings = lazySubscribeMessage('pri(accounts.subscribeWithCurrentAddress)', {}, updateCurrentAccountState, updateCurrentAccountState);
 //
-// export const updateAuthUrls = (data: AccountJson) => {
-//   store.dispatch({ type: 'accountState/updateCurrentAccount', payload: data });
-// };
-//
-// export const subscribeAuthUrls = lazySubscribeMessage('pri(accounts.subscribeWithCurrentAddress)', {}, updateCurrentAccountState, updateCurrentAccountState);
-//
+export const updateAuthUrls = (data: AuthUrls) => {
+  store.dispatch({ type: 'settings/updateAuthUrls', payload: data });
+};
+
+export const subscribeAuthUrls = lazySubscribeMessage('pri(authorize.subscribe)', null, updateAuthUrls, updateAuthUrls);
+
 // export const updateMediaAllowance = (data: AccountJson) => {
 //   store.dispatch({ type: 'accountState/updateCurrentAccount', payload: data });
 // };

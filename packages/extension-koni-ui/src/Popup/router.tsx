@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { PHISHING_PAGE_REDIRECT } from '@subwallet/extension-base/defaults';
+import SelectAccount from '@subwallet/extension-koni-ui/components/Layout/parts/SelectAccount';
 import { DataContext } from '@subwallet/extension-koni-ui/contexts/DataContext';
 import { Root } from '@subwallet/extension-koni-ui/Popup/Root';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
@@ -142,7 +143,7 @@ export const router = createHashRouter([{
       element: <Outlet />,
       children: [{
         path: 'account-list',
-        element: <AccountList />
+        element: <SelectAccount />
       }, {
         path: 'add-account',
         element: <AddAccount />,

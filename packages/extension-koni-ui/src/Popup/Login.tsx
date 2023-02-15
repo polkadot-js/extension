@@ -3,6 +3,7 @@
 
 import { Layout } from '@subwallet/extension-koni-ui/components';
 import Logo3D from '@subwallet/extension-koni-ui/components/Logo/Logo3D';
+import useTranslation from '@subwallet/extension-koni-ui/hooks/useTranslation';
 import { keyringUnlock } from '@subwallet/extension-koni-ui/messaging';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { ValidateState } from '@subwallet/extension-koni-ui/types/validator';
@@ -25,6 +26,8 @@ interface LoginFormState {
 }
 
 const Component: React.FC<Props> = ({ className }: Props) => {
+  const { t } = useTranslation();
+
   const formRef = useRef<FormInstance<LoginFormState>>(null);
   const [passwordValidateState, setPasswordValidateState] = useState<ValidateState | null>(null);
   const [loading, setLoading] = useState(false);
@@ -35,8 +38,6 @@ const Component: React.FC<Props> = ({ className }: Props) => {
       password: values[FormFieldName.PASSWORD]
     })
       .then((data) => {
-        console.log(data);
-
         if (data.status) {
           console.log('Success');
         } else {
@@ -70,7 +71,7 @@ const Component: React.FC<Props> = ({ className }: Props) => {
         type='phosphor'
       /> }]}
       subHeaderPaddingVertical={true}
-      title='SubWallet.App'
+      title={t('SubWallet.App')}
       withDivider={true}
     >
       <div className='body-container'>
@@ -78,10 +79,10 @@ const Component: React.FC<Props> = ({ className }: Props) => {
           <Logo3D />
         </div>
         <div className='title'>
-          Welcome back!
+          {t('Welcome back!')}
         </div>
         <div className='sub-title'>
-          Enter your password to unlock account
+          {t('Enter your password to unlock account')}
         </div>
         <Form
           initialValues={{ [FormFieldName.PASSWORD]: '' }}
@@ -104,12 +105,12 @@ const Component: React.FC<Props> = ({ className }: Props) => {
               htmlType='submit'
               loading={loading}
             >
-              Unlock
+              {t('Unlock')}
             </Button>
           </Form.Item>
           <Form.Item>
             <div className='forgot-password'>
-              Forgot password
+              {t('Forgot password')}
             </div>
           </Form.Item>
         </Form>

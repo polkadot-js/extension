@@ -1,14 +1,17 @@
 // Copyright 2019-2022 @subwallet/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
+import { _ChainInfo } from '@subwallet/chain-list/types';
+import { _getSubstrateGenesisHash } from '@subwallet/extension-base/services/chain-service/utils';
+import { SIGN_MODE } from '@subwallet/extension-koni-ui/constants/signing';
 import useAccountAvatarTheme from '@subwallet/extension-koni-ui/hooks/account/useAccountAvatarTheme';
 import useAccountRecoded from '@subwallet/extension-koni-ui/hooks/account/useAccountRecoded';
-import { Button } from '@subwallet/react-ui';
+import useGetAccountSignModeByAddress from '@subwallet/extension-koni-ui/hooks/useGetAccountSignModeByAddress';
+import { Button, SwIconProps } from '@subwallet/react-ui';
 import Icon from '@subwallet/react-ui/es/icon';
 import AccountCard, { AccountCardProps } from '@subwallet/react-ui/es/web3-block/account-card';
-import { Copy, DotsThree } from 'phosphor-react';
-import React, { useCallback } from 'react';
-import CopyToClipboard from 'react-copy-to-clipboard';
+import { DotsThree, Eye, QrCode, Swatches } from 'phosphor-react';
+import React, { useCallback, useMemo } from 'react';
 
 import { KeypairType } from '@polkadot/util-crypto/types';
 
@@ -16,21 +19,38 @@ export interface _AccountCardProps extends AccountCardProps {
   className?: string;
   genesisHash?: string | null;
   type?: KeypairType;
-  showCopyBtn?: boolean;
   showMoreBtn?: boolean;
-  onPressCopyBtn?: () => void;
   onPressMoreBtn?: () => void;
 }
 
 function AccountCardBase (props: Partial<_AccountCardProps>): React.ReactElement<Partial<_AccountCardProps>> {
-  const { accountName, address, className, genesisHash, onPressCopyBtn, onPressMoreBtn, showCopyBtn, showMoreBtn, type: givenType } = props;
-  const { formatted, prefix } = useAccountRecoded(address || '', genesisHash, givenType);
+  const { accountName, address, className, genesisHash, onPressMoreBtn, showMoreBtn, type: givenType } = props;
+  const { prefix } = useAccountRecoded(address || '', genesisHash, givenType);
   const avatarTheme = useAccountAvatarTheme(address || '');
 
-  const _onCopy: React.MouseEventHandler<HTMLAnchorElement | HTMLButtonElement> = useCallback((event) => {
-    event.stopPropagation();
-    onPressCopyBtn && onPressCopyBtn();
-  }, [onPressCopyBtn]);
+  const signMode = useGetAccountSignModeByAddress(address);
+
+  const iconProps: SwIconProps | undefined = useMemo((): SwIconProps | undefined => {
+    switch (signMode) {
+      case SIGN_MODE.LEDGER:
+        return {
+          type: 'phosphor',
+          phosphorIcon: Swatches
+        };
+      case SIGN_MODE.QR:
+        return {
+          type: 'phosphor',
+          phosphorIcon: QrCode
+        };
+      case SIGN_MODE.READ_ONLY:
+        return {
+          type: 'phosphor',
+          phosphorIcon: Eye
+        };
+    }
+
+    return undefined;
+  }, [signMode]);
 
   const _onClickMore: React.MouseEventHandler<HTMLAnchorElement | HTMLButtonElement> = useCallback((event) => {
     event.stopPropagation();
@@ -46,25 +66,22 @@ function AccountCardBase (props: Partial<_AccountCardProps>): React.ReactElement
       avatarTheme={avatarTheme}
       className={className}
       rightItem={<>
-        {showCopyBtn && <CopyToClipboard text={formatted || ''}>
+        {iconProps && (
           <Button
             icon={
               <Icon
-                iconColor='rgba(255, 255, 255, 0.45)'
-                phosphorIcon={Copy}
+                { ...iconProps}
                 size='sm'
               />
             }
-            onClick={_onCopy}
             size='xs'
             type='ghost'
           />
-        </CopyToClipboard>}
+        )}
 
         {showMoreBtn && <Button
           icon={
             <Icon
-              iconColor='rgba(255, 255, 255, 0.45)'
               phosphorIcon={DotsThree}
               size='sm'
             />

@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { persistor, store, StoreName } from '@subwallet/extension-koni-ui/stores';
-import { subscribeAccountsData, subscribeAssetRegistry, subscribeAuthorizeRequests, subscribeBalance, subscribeChainInfoMap, subscribeChainStateMap, subscribeConfirmationRequests, subscribeCrowdloan, subscribeKeyringState, subscribeMetadataRequests, subscribeMultiChainAssetMap, subscribeNftCollections, subscribeNftItems, subscribePrice, subscribeSigningRequests, subscribeStakeUnlockingInfo, subscribeStaking, subscribeStakingReward, subscribeTxHistory } from '@subwallet/extension-koni-ui/stores/utils';
+import { subscribeAccountsData, subscribeAssetRegistry, subscribeAuthorizeRequests, subscribeAuthUrls, subscribeBalance, subscribeChainInfoMap, subscribeChainStateMap, subscribeConfirmationRequests, subscribeCrowdloan, subscribeKeyringState, subscribeMetadataRequests, subscribeMultiChainAssetMap, subscribeNftCollections, subscribeNftItems, subscribePrice, subscribeSigningRequests, subscribeStakeUnlockingInfo, subscribeStaking, subscribeStakingReward, subscribeTxHistory } from '@subwallet/extension-koni-ui/stores/utils';
 import Bowser from 'bowser';
 import React from 'react';
 import { Provider } from 'react-redux';
@@ -177,6 +177,7 @@ export const DataContextProvider = ({ children }: DataContextProviderProps) => {
   // Common
   _DataContext.addHandler({ ...subscribeAccountsData, name: 'subscribeAccountsData', relatedStores: ['accountState'], isStartImmediately: true });
   _DataContext.addHandler({ ...subscribeKeyringState, name: 'subscribeCurrentAccount', relatedStores: ['accountState'], isStartImmediately: true });
+  _DataContext.addHandler({ ...subscribeAuthUrls, name: 'subscribeAuthUrls', relatedStores: ['settings'], isStartImmediately: true });
 
   _DataContext.addHandler({ ...subscribeChainStateMap, name: 'subscribeChainStateMap', relatedStores: ['chainStore'], isStartImmediately: true });
   _DataContext.addHandler({ ...subscribeChainInfoMap, name: 'subscribeChainInfoMap', relatedStores: ['chainStore'], isStartImmediately: true });

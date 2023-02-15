@@ -3,10 +3,9 @@
 
 import Confirmations from '@subwallet/extension-koni-ui/Popup/Confirmations';
 import { Debugger } from '@subwallet/extension-koni-ui/Popup/Debugger';
-import { Button } from '@subwallet/react-ui';
+import { Button, ModalContext } from '@subwallet/react-ui';
 import Icon from '@subwallet/react-ui/es/icon';
 import SwModal from '@subwallet/react-ui/es/sw-modal';
-import { ModalContext } from '@subwallet/react-ui/es/sw-modal/provider';
 import { Bug } from 'phosphor-react';
 import React, { useCallback, useContext, useEffect } from 'react';
 import { useSearchParams } from 'react-router-dom';

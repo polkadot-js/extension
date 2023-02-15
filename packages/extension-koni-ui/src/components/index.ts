@@ -3,7 +3,6 @@
 
 export { default as Loading } from './Loading';
 export { default as LoadingContainer } from './LoadingContainer';
-export { default as Main } from './Main';
 export { default as Layout } from './Layout';
 
 export * from '../contexts';

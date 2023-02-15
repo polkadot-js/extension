@@ -1,7 +1,6 @@
 // Copyright 2019-2022 @polkadot/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { Main } from '@subwallet/extension-koni-ui/components';
 import PageWrapper from '@subwallet/extension-koni-ui/components/Layout/PageWrapper';
 import Logo2D from '@subwallet/extension-koni-ui/components/Logo/Logo2D';
 import { DataContext } from '@subwallet/extension-koni-ui/contexts/DataContext';
@@ -44,12 +43,11 @@ export function initRootPromise () {
   return true;
 }
 
-function _Root ({ className }: ThemeProps): React.ReactElement {
+function DefaultRoute ({ children }: {children: React.ReactNode}): React.ReactElement {
   const location = useLocation();
   const navigate = useNavigate();
   const openPModal = usePredefinedModal();
-  const dataContext = useContext(DataContext);
-  const { hasConfirmations } = useSelector((state: RootState) => state.requestState);
+  const hasConfirmations = useSelector((state: RootState) => state.requestState.hasConfirmations);
 
   useEffect(() => {
     if (location.pathname === '/') {
@@ -64,15 +62,29 @@ function _Root ({ className }: ThemeProps): React.ReactElement {
   [hasConfirmations, location.pathname, navigate, openPModal]
   );
 
+  return <>{children}</>;
+}
+
+const Main = styled.main`
+  display: flex;
+  height: 100%;
+  flex-direction: column
+`;
+
+function _Root ({ className }: ThemeProps): React.ReactElement {
+  const dataContext = useContext(DataContext);
+
   // Implement WalletModalContext in Root component to make it available for all children and can use react-router-dom and ModalContextProvider
   return <WalletModalContext>
     <PageWrapper
       animateOnce={true}
       resolve={dataContext.awaitStores(['accountState', 'chainStore', 'assetRegistry', 'requestState'])}
     >
-      <Main className={className}>
-        <Outlet />
-      </Main>
+      <DefaultRoute>
+        <Main className={className}>
+          <Outlet />
+        </Main>
+      </DefaultRoute>
     </PageWrapper>
   </WalletModalContext>;
 }

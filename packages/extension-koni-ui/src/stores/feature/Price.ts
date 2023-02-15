@@ -3,19 +3,27 @@
 
 import { createSlice, PayloadAction } from '@reduxjs/toolkit/dist';
 import { PriceJson } from '@subwallet/extension-base/background/KoniTypes';
+import { PriceStore } from '@subwallet/extension-koni-ui/stores/types';
 
 const initialState = {
   currency: 'usd',
   priceMap: {},
+  pastPriceMap: {},
   ready: false
-} as PriceJson;
+} as PriceStore;
 
 const priceSlice = createSlice({
   initialState,
   name: 'price',
   reducers: {
     updatePrice (state, action: PayloadAction<PriceJson>) {
-      return action.payload;
+      return {
+        ...action.payload,
+        // todo: Update this later
+        pastPriceMap: {
+          ...action.payload.priceMap
+        }
+      };
     }
   }
 });

@@ -77,9 +77,4 @@ function _Root ({ className }: ThemeProps): React.ReactElement {
   </WalletModalContext>;
 }
 
-export const Root = styled(_Root)(() => ({
-  '.main-layout': {
-    flex: 1,
-    overflow: 'hidden'
-  }
-}));
+export const Root = styled(_Root)(() => ({}));

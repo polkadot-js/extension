@@ -1,7 +1,7 @@
 // Copyright 2019-2022 @subwallet/extension-koni-base authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { _AssetRef, _AssetRefPath, _AssetType, _ChainAsset, _ChainInfo, _SubstrateChainType } from '@subwallet/chain-list/types';
+import { _AssetRef, _AssetRefPath, _AssetType, _ChainAsset, _ChainInfo, _MultiChainAsset, _SubstrateChainType } from '@subwallet/chain-list/types';
 import { _ChainState, _CUSTOM_PREFIX, _SMART_CONTRACT_STANDARDS } from '@subwallet/extension-base/services/chain-service/types';
 
 import { isEthereumAddress } from '@polkadot/util-crypto';
@@ -235,6 +235,38 @@ export function _getEvmAbiExplorer (chainInfo: _ChainInfo) {
 
 export function _isAssetValuable (assetInfo: _ChainAsset) {
   return assetInfo.hasValue;
+}
+
+export function _getMultiChainAsset (assetInfo: _ChainAsset) {
+  return assetInfo.multiChainAsset || '';
+}
+
+export function _getAssetPriceId (assetInfo: _ChainAsset) {
+  return assetInfo.priceId || '';
+}
+
+export function _getMultiChainAssetPriceId (multiChainAsset: _MultiChainAsset) {
+  return multiChainAsset.priceId || '';
+}
+
+export function _getAssetSymbol (assetInfo: _ChainAsset) {
+  return assetInfo.symbol;
+}
+
+export function _getMultiChainAssetSymbol (multiChainAsset: _MultiChainAsset) {
+  return multiChainAsset.symbol;
+}
+
+export function _getAssetOriginChain (assetInfo: _ChainAsset) {
+  return assetInfo.originChain;
+}
+
+export function _getChainName (chainInfo: _ChainInfo) {
+  return chainInfo.name;
+}
+
+export function _getAssetDecimals (assetInfo: _ChainAsset): number {
+  return assetInfo.decimals || 0;
 }
 
 export function _getBlockExplorerFromChain (chainInfo: _ChainInfo): string {

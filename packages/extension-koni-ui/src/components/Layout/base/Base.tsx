@@ -6,9 +6,8 @@ import type { SwScreenLayoutProps } from '@subwallet/react-ui';
 import Footer from '@subwallet/extension-koni-ui/components/Layout/parts/Footer';
 import SelectAccount from '@subwallet/extension-koni-ui/components/Layout/parts/SelectAccount';
 import { SwScreenLayout } from '@subwallet/react-ui';
-import Icon from '@subwallet/react-ui/es/icon';
 import { SwTabBarItem } from '@subwallet/react-ui/es/sw-tab-bar';
-import { Aperture, Database, Globe, MagnifyingGlass, Rocket, Wallet } from 'phosphor-react';
+import { Aperture, Database, Globe, Rocket, Wallet } from 'phosphor-react';
 import React, { useCallback, useMemo } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 
@@ -73,19 +72,7 @@ const TabBarItems: Array<Omit<SwTabBarItem, 'onClick'> & { url: string }> = [
   }
 ];
 
-const headerIcons = [
-  {
-    icon: (
-      <Icon
-        phosphorIcon={MagnifyingGlass}
-        size='sm'
-        type='phosphor'
-      />
-    )
-  }
-];
-
-const Base = ({ children, showFooter, ...props }: Props) => {
+const Base = ({ children, headerIcons, showFooter, ...props }: Props) => {
   const navigate = useNavigate();
   const { pathname } = useLocation();
 
@@ -97,8 +84,6 @@ const Base = ({ children, showFooter, ...props }: Props) => {
       const currentTab = pathExcludeHome.split('/')[1];
 
       return currentTab || '';
-    } else {
-      return '';
     }
 
     return '';

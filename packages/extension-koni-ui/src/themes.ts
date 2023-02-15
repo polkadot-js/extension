@@ -3,15 +3,20 @@
 
 import { ThemeNames } from '@subwallet/extension-base/background/KoniTypes';
 import defaultImagePlaceholder from '@subwallet/extension-koni-ui/assets/default-image-placeholder.png';
+import LogosMap from '@subwallet/extension-koni-ui/assets/logo';
 import subWalletLogo from '@subwallet/extension-koni-ui/assets/sub-wallet-logo.svg';
 import { theme as SwReactUI } from '@subwallet/react-ui';
-import { ThemeConfig } from '@subwallet/react-ui/es/config-provider/context';
+import { ThemeConfig, Web3LogoMap } from '@subwallet/react-ui/es/config-provider/context';
 import { AliasToken, GlobalToken } from '@subwallet/react-ui/es/theme/interface';
+import logoMap from '@subwallet/react-ui/es/theme/themes/logoMap';
 
 export interface ExtraToken {
   bodyBackgroundColor: string,
   logo: string,
   defaultImagePlaceholder: string
+  tokensScreenSuccessBackgroundColor: string,
+  tokensScreenDangerBackgroundColor: string,
+  tokensScreenInfoBackgroundColor: string,
 }
 
 export declare type Theme = {
@@ -30,7 +35,27 @@ export interface SwThemeConfig extends ThemeConfig {
   generateExtraTokens: (token: AliasToken) => ExtraToken;
 
   customTokens: (token: AliasToken) => AliasToken;
+  logoMap: Web3LogoMap
 }
+
+function genDefaultExtraTokens (token: AliasToken): ExtraToken {
+  return {
+    bodyBackgroundColor: token.colorBgSecondary,
+    logo: subWalletLogo,
+    defaultImagePlaceholder,
+    tokensScreenSuccessBackgroundColor: 'linear-gradient(180deg, rgba(76, 234, 172, 0.1) 16.47%, rgba(217, 217, 217, 0) 94.17%)',
+    tokensScreenDangerBackgroundColor: 'linear-gradient(180deg, rgba(234, 76, 76, 0.1) 16.47%, rgba(217, 217, 217, 0) 94.17%)',
+    tokensScreenInfoBackgroundColor: 'linear-gradient(180deg, rgba(0, 75, 255, 0.1) 16.47%, rgba(217, 217, 217, 0) 94.17%)'
+  };
+}
+
+// todo: will standardized logoMap later
+const defaultLogoMap: Web3LogoMap = {
+  ...logoMap,
+  symbol: {
+    ...LogosMap
+  }
+};
 
 // Todo: i18n for theme name
 // Implement theme from @subwallet/react-ui
@@ -41,8 +66,9 @@ export const SW_THEME_CONFIGS: Record<ThemeNames, SwThemeConfig> = {
     algorithm: SwReactUI.darkAlgorithm,
     customTokens: (token) => (token),
     generateExtraTokens: (token) => {
-      return { bodyBackgroundColor: token.colorBgSecondary, logo: subWalletLogo, defaultImagePlaceholder };
-    }
+      return { ...genDefaultExtraTokens(token) };
+    },
+    logoMap: defaultLogoMap
   },
   [ThemeNames.LIGHT]: {
     id: ThemeNames.LIGHT,
@@ -50,8 +76,9 @@ export const SW_THEME_CONFIGS: Record<ThemeNames, SwThemeConfig> = {
     algorithm: SwReactUI.defaultAlgorithm,
     customTokens: (token) => (token),
     generateExtraTokens: (token) => {
-      return { bodyBackgroundColor: token.colorBgSecondary, logo: subWalletLogo, defaultImagePlaceholder };
-    }
+      return { ...genDefaultExtraTokens(token) };
+    },
+    logoMap: defaultLogoMap
   },
   [ThemeNames.SUBSPACE]: {} as SwThemeConfig
 };
@@ -59,7 +86,10 @@ export const SW_THEME_CONFIGS: Record<ThemeNames, SwThemeConfig> = {
 // Todo: Replace tokens with Subspace color schema
 SW_THEME_CONFIGS[ThemeNames.SUBSPACE] = { ...SW_THEME_CONFIGS[ThemeNames.LIGHT] };
 
-export function generateTheme ({ customTokens, generateExtraTokens, id, name }: SwThemeConfig, token: GlobalToken): Theme {
+export function generateTheme ({ customTokens,
+  generateExtraTokens,
+  id,
+  name }: SwThemeConfig, token: GlobalToken): Theme {
   return {
     id,
     name,

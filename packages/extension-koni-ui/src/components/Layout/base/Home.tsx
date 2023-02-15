@@ -2,27 +2,43 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { Layout } from '@subwallet/extension-koni-ui/components';
+import { ButtonProps } from '@subwallet/react-ui/es/button';
 import Icon from '@subwallet/react-ui/es/icon';
-import { MagnifyingGlass } from 'phosphor-react';
-import React from 'react';
+import { FadersHorizontal, MagnifyingGlass } from 'phosphor-react';
+import React, { useMemo } from 'react';
 
 type Props = {
   children?: React.ReactNode;
+  onClickFilterIcon?: () => void;
+  onClickSearchIcon?: () => void;
 };
 
-const headerIcons = [
-  {
-    icon: (
-      <Icon
-        phosphorIcon={MagnifyingGlass}
-        size='sm'
-        type='phosphor'
-      />
-    )
-  }
-];
+const Home = ({ children, onClickFilterIcon, onClickSearchIcon }: Props) => {
+  const headerIcons = useMemo<ButtonProps[]>(() => {
+    return [
+      {
+        icon: (
+          <Icon
+            phosphorIcon={FadersHorizontal}
+            size='sm'
+            type='phosphor'
+          />
+        ),
+        onClick: onClickFilterIcon
+      },
+      {
+        icon: (
+          <Icon
+            phosphorIcon={MagnifyingGlass}
+            size='sm'
+            type='phosphor'
+          />
+        ),
+        onClick: onClickSearchIcon
+      }
+    ];
+  }, [onClickFilterIcon, onClickSearchIcon]);
 
-const Home = ({ children }: Props) => {
   return (
     <Layout.Base
       headerCenter={false}

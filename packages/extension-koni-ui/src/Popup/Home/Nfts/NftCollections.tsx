@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { NftCollection, NftItem } from '@subwallet/extension-base/background/KoniTypes';
+import Layout from '@subwallet/extension-koni-ui/components/Layout';
 import PageWrapper from '@subwallet/extension-koni-ui/components/Layout/PageWrapper';
 import { DataContext } from '@subwallet/extension-koni-ui/contexts/DataContext';
 import useTranslation from '@subwallet/extension-koni-ui/hooks/useTranslation';
@@ -9,7 +10,7 @@ import { NftGalleryWrapper } from '@subwallet/extension-koni-ui/Popup/Home/Nfts/
 import { INftCollectionDetail, nftPerPage } from '@subwallet/extension-koni-ui/Popup/Home/Nfts/utils';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { Theme, ThemeProps } from '@subwallet/extension-koni-ui/types';
-import { ButtonProps, SwList, SwSubHeader } from '@subwallet/react-ui';
+import { ButtonProps, SwList } from '@subwallet/react-ui';
 import Icon from '@subwallet/react-ui/es/icon';
 import { getAlphaColor } from '@subwallet/react-ui/lib/theme/themes/default/colorAlgorithm';
 import { Image, Plus } from 'phosphor-react';
@@ -35,8 +36,6 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
   const { nftCollections, nftItems } = useSelector((state: RootState) => state.nft);
   const [page, setPage] = useState(1);
   const [nftCollections_, setNftCollections_] = useState<NftCollection[]>([]);
-
-  console.log(nftCollections_, page);
 
   const subHeaderButton: ButtonProps[] = [
     {
@@ -146,14 +145,14 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
       className={`nft_container ${className}`}
       resolve={dataContext.awaitStores(['nft'])}
     >
-      <>
-        <SwSubHeader
-          background={'transparent'}
-          center={false}
-          paddingVertical={true}
-          rightButtons={subHeaderButton}
-          title={'Collectibles'}
-        />
+      <Layout.Base
+        showSubHeader={true}
+        subHeaderBackground={'transparent'}
+        subHeaderCenter={false}
+        subHeaderIcons={subHeaderButton}
+        subHeaderPaddingVertical={true}
+        title={'Collectibles'}
+      >
         <SwList.Section
           className={'nft_collection_list__container'}
           displayGrid={true}
@@ -171,7 +170,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
           searchFunction={searchCollection}
           searchPlaceholder={t<string>('Search collection name')}
         />
-      </>
+      </Layout.Base>
     </PageWrapper>
   );
 }
@@ -180,7 +179,6 @@ const NftCollections = styled(Component)<Props>(({ theme: { token } }: Props) =>
   return ({
     color: token.colorTextLight1,
     fontSize: token.fontSizeLG,
-    paddingBottom: '6px',
 
     '&__inner': {
       display: 'flex',
@@ -194,10 +192,10 @@ const NftCollections = styled(Component)<Props>(({ theme: { token } }: Props) =>
     },
 
     '.nft_empty__container': {
-      marginTop: '44px',
+      marginTop: 44,
       display: 'flex',
       flexWrap: 'wrap',
-      gap: '16px',
+      gap: token.padding,
       flexDirection: 'column',
       alignContent: 'center'
     },
@@ -208,10 +206,10 @@ const NftCollections = styled(Component)<Props>(({ theme: { token } }: Props) =>
     },
 
     '.nft_empty__icon__container': {
-      padding: '24px',
+      padding: token.paddingLG,
       borderRadius: '50%',
       width: '112px',
-      backgroundColor: getAlphaColor(token['gray-3'] as string, 0.1)
+      backgroundColor: getAlphaColor(token['gray-3'], 0.1)
     },
 
     '.nft_empty__text__container': {
@@ -223,14 +221,14 @@ const NftCollections = styled(Component)<Props>(({ theme: { token } }: Props) =>
     },
 
     '.nft_empty__title': {
-      fontWeight: 600,
+      fontWeight: token.headingFontWeight,
       textAlign: 'center',
-      fontSize: '16px',
+      fontSize: token.fontSizeLG,
       color: token.colorText
     },
 
     '.nft_empty__subtitle': {
-      marginTop: '6px',
+      marginTop: 6,
       textAlign: 'center',
       color: token.colorTextTertiary
     }

@@ -10,10 +10,14 @@ import useScanExplorerAddressUrl from '@subwallet/extension-koni-ui/hooks/screen
 import useTranslation from '@subwallet/extension-koni-ui/hooks/useTranslation';
 import { INftItemDetail } from '@subwallet/extension-koni-ui/Popup/Home/Nfts/utils';
 import { Theme, ThemeProps } from '@subwallet/extension-koni-ui/types';
-import { Button, ButtonProps, Field, Image } from '@subwallet/react-ui';
+import { BackgroundIcon, Button, ButtonProps, Field, Image } from '@subwallet/react-ui';
 import Icon from '@subwallet/react-ui/es/icon';
 import SwAvatar from '@subwallet/react-ui/es/sw-avatar';
-import { Info, PaperPlaneTilt } from 'phosphor-react';
+import SwModal from '@subwallet/react-ui/es/sw-modal';
+import { ModalContext } from '@subwallet/react-ui/es/sw-modal/provider';
+import { getAlphaColor } from '@subwallet/react-ui/lib/theme/themes/default/colorAlgorithm';
+import CN from 'classnames';
+import { CaretLeft, Info, PaperPlaneTilt } from 'phosphor-react';
 import React, { useCallback, useContext } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import styled, { useTheme } from 'styled-components';
@@ -26,12 +30,20 @@ type Props = ThemeProps
 
 const NFT_DESCRIPTION_MAX_LENGTH = 70;
 
+const modalCloseButton = <Icon
+  customSize={'24px'}
+  phosphorIcon={CaretLeft}
+  type='phosphor'
+  weight={'light'}
+/>;
+
 function Component ({ className = '' }: Props): React.ReactElement<Props> {
   const { t } = useTranslation();
   const dataContext = useContext(DataContext);
   const location = useLocation();
   const navigate = useNavigate();
-  const { extendToken, token } = useTheme() as Theme;
+  const {token } = useTheme() as Theme;
+  const { activeModal, inactiveModal } = useContext(ModalContext);
 
   const { collectionInfo, nftItem } = location.state as INftItemDetail;
   const originChainInfo = useGetChainInfo(nftItem.chain);
@@ -57,7 +69,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
 
   const ownerPrefix = useCallback(() => {
     if (nftItem.owner) {
-      const theme = isEthereumAddress(nftItem.owner) ? 'ethereum' : 'substrate';
+      const theme = isEthereumAddress(nftItem.owner) ? 'ethereum' : 'polkadot';
 
       return (
         <SwAvatar
@@ -123,6 +135,20 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
     );
   }, [handleClickExternalAccountInfo, handleClickExternalCollectionInfo]);
 
+  const handleShowNftDescription = useCallback(() => {
+    if (nftItem?.description && nftItem.description.length > NFT_DESCRIPTION_MAX_LENGTH) {
+      activeModal('nftItemDescription');
+    }
+  }, [activeModal, nftItem.description]);
+
+  const onCloseNftDescriptionModal = useCallback(() => {
+    inactiveModal('nftItemDescription');
+  }, [inactiveModal]);
+
+  const onError = useCallback(() => {
+    console.log('error', nftItem.image);
+  }, [nftItem.image]);
+
   return (
     <PageWrapper
       className={`${className}`}
@@ -139,10 +165,13 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
         title={nftItem.name || nftItem.id}
       >
         <div className={'nft_item_detail__container'}>
-          <Image
-            height={358}
-            src={nftItem.image || extendToken.logo}
-          />
+          <div className={'nft_item_detail__nft_image'}>
+            <Image
+              height={358}
+              onError={onError}
+              src={nftItem.image}
+            />
+          </div>
 
           <div className={'nft_item_detail__info_container'}>
             <div className={'nft_item_detail__section_title'}>{t<string>('NFT information')}</div>
@@ -150,6 +179,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
               nftItem.description && (
                 <div
                   className={'nft_item_detail__description_container'}
+                  onClick={handleShowNftDescription}
                   style={{ cursor: nftItem.description.length > NFT_DESCRIPTION_MAX_LENGTH ? 'pointer' : 'auto' }}
                 >
                   <div className={'nft_item_detail__description_content'}>
@@ -200,9 +230,10 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
 
                       return (
                         <Field
-                          content={attValue}
+                          content={attValue.toString()}
                           key={index}
                           label={attName}
+                          width={'fit-content'}
                         />
                       );
                     })
@@ -225,6 +256,33 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
             <span className={'nft_item_detail__send_text'}>Send</span>
           </Button>
         </div>
+
+        <SwModal
+          className={CN('nft_item_detail__description_modal')}
+          closeIcon={modalCloseButton}
+          id={'nftItemDescription'}
+          onCancel={onCloseNftDescriptionModal}
+          title={t<string>('Description')}
+          wrapClassName={className}
+        >
+          <div className={'nft_item_detail__description_modal_content'}>
+            <div className={'nft_item_detail__description_modal_left_icon'}>
+              <BackgroundIcon
+                backgroundColor={getAlphaColor(token.colorLink, 0.1)}
+                iconColor={token.colorLink}
+                phosphorIcon={Info}
+                size={'lg'}
+                type='phosphor'
+                weight={'fill'}
+              />
+            </div>
+            <div>
+              <div className={'nft_item_detail__description_modal_title'}>{nftItem.name || nftItem.id}</div>
+              <div className={'nft_item_detail__description_modal_detail'}>{nftItem.description}</div>
+            </div>
+
+          </div>
+        </SwModal>
       </Layout.Base>
     </PageWrapper>
   );
@@ -300,6 +358,40 @@ const NftItemDetail = styled(Component)<Props>(({ theme: { token } }: Props) => 
       fontSize: token.fontSize,
       fontWeight: token.headingFontWeight,
       lineHeight: token.lineHeight
+    },
+
+    '.nft_item_detail__description_modal_content': {
+      display: 'flex',
+      gap: token.marginXS,
+      padding: token.paddingSM,
+      backgroundColor: token.colorBgSecondary,
+      borderRadius: token.borderRadiusLG
+    },
+
+    '.nft_item_detail__description_modal_left_icon': {
+      display: 'flex',
+      alignItems: 'center'
+    },
+
+    '.nft_item_detail__description_modal_title': {
+      textAlign: 'left',
+      fontSize: token.fontSizeLG,
+      lineHeight: token.lineHeightLG,
+      fontWeight: token.bodyFontWeight,
+      color: token.colorTextLight1
+    },
+
+    '.nft_item_detail__description_modal_detail': {
+      textAlign: 'justify',
+      fontWeight: token.bodyFontWeight,
+      fontSize: token.fontSizeHeading6,
+      color: token.colorTextTertiary
+    },
+
+    '.nft_item_detail__nft_image': {
+      display: 'flex',
+      justifyContent: 'center',
+      width: '100%'
     }
   });
 });

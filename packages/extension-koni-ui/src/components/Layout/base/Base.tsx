@@ -20,7 +20,7 @@ SwScreenLayoutProps,
   showFooter?: boolean;
 }
 
-const TabBarItems: Array<Omit<SwTabBarItem, 'onClick'>> = [
+const TabBarItems: Array<Omit<SwTabBarItem, 'onClick'> & { url: string }> = [
   {
     icon: {
       type: 'phosphor',
@@ -28,7 +28,8 @@ const TabBarItems: Array<Omit<SwTabBarItem, 'onClick'>> = [
       weight: 'fill'
     },
     label: 'Tokens',
-    key: 'tokens'
+    key: 'tokens',
+    url: '/home/tokens'
   },
   {
     icon: {
@@ -37,7 +38,8 @@ const TabBarItems: Array<Omit<SwTabBarItem, 'onClick'>> = [
       weight: 'fill'
     },
     label: 'NFTs',
-    key: 'nfts/collections'
+    key: 'nfts',
+    url: '/home/nfts/collections'
   },
   {
     icon: {
@@ -46,7 +48,8 @@ const TabBarItems: Array<Omit<SwTabBarItem, 'onClick'>> = [
       weight: 'fill'
     },
     label: 'Crowdloans',
-    key: 'crowdloans'
+    key: 'crowdloans',
+    url: '/home/crowdloans'
   },
   {
     icon: {
@@ -55,7 +58,8 @@ const TabBarItems: Array<Omit<SwTabBarItem, 'onClick'>> = [
       weight: 'fill'
     },
     label: 'Staking',
-    key: 'staking'
+    key: 'staking',
+    url: '/home/staking'
   },
   {
     icon: {
@@ -64,7 +68,8 @@ const TabBarItems: Array<Omit<SwTabBarItem, 'onClick'>> = [
       weight: 'fill'
     },
     label: 'History',
-    key: 'history'
+    key: 'history',
+    url: '/home/history'
   }
 ];
 
@@ -100,8 +105,8 @@ const Base = ({ children, showFooter, ...props }: Props) => {
   }, [pathname]);
 
   const onSelectTab = useCallback(
-    (key: string) => () => {
-      navigate(`/home/${key}`, { relative: 'route' });
+    (url: string) => () => {
+      navigate(url);
     },
     [navigate]
   );
@@ -115,7 +120,7 @@ const Base = ({ children, showFooter, ...props }: Props) => {
       selectedTabBarItem={selectedTab}
       tabBarItems={TabBarItems.map((item) => ({
         ...item,
-        onClick: onSelectTab(item.key)
+        onClick: onSelectTab(item.url)
       }))}
     >
       {children}

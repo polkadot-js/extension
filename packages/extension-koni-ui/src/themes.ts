@@ -2,6 +2,8 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { ThemeNames } from '@subwallet/extension-base/background/KoniTypes';
+import defaultImagePlaceholder from '@subwallet/extension-koni-ui/assets/default-image-placeholder.png';
+import defaultLoadingImage from '@subwallet/extension-koni-ui/assets/default-loading-image.png';
 import subWalletLogo from '@subwallet/extension-koni-ui/assets/sub-wallet-logo.svg';
 import { theme as SwReactUI } from '@subwallet/react-ui';
 import { ThemeConfig } from '@subwallet/react-ui/es/config-provider/context';
@@ -9,7 +11,9 @@ import { AliasToken, GlobalToken } from '@subwallet/react-ui/es/theme/interface'
 
 export interface ExtraToken {
   bodyBackgroundColor: string,
-  logo: string
+  logo: string,
+  defaultLoadingImage: string,
+  defaultImagePlaceholder: string
 }
 
 export declare type Theme = {
@@ -39,7 +43,7 @@ export const SW_THEME_CONFIGS: Record<ThemeNames, SwThemeConfig> = {
     algorithm: SwReactUI.darkAlgorithm,
     customTokens: (token) => (token),
     generateExtraTokens: (token) => {
-      return { bodyBackgroundColor: token.colorBgSecondary, logo: subWalletLogo };
+      return { bodyBackgroundColor: token.colorBgSecondary, logo: subWalletLogo, defaultLoadingImage, defaultImagePlaceholder };
     }
   },
   [ThemeNames.LIGHT]: {
@@ -48,7 +52,7 @@ export const SW_THEME_CONFIGS: Record<ThemeNames, SwThemeConfig> = {
     algorithm: SwReactUI.defaultAlgorithm,
     customTokens: (token) => (token),
     generateExtraTokens: (token) => {
-      return { bodyBackgroundColor: token.colorBgSecondary, logo: subWalletLogo };
+      return { bodyBackgroundColor: token.colorBgSecondary, logo: subWalletLogo, defaultLoadingImage, defaultImagePlaceholder };
     }
   },
   [ThemeNames.SUBSPACE]: {} as SwThemeConfig

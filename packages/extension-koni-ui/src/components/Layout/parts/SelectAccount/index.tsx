@@ -4,6 +4,8 @@
 import { AccountJson, CurrentAccountInfo } from '@subwallet/extension-base/background/types';
 import AccountCardSelection from '@subwallet/extension-koni-ui/components/Account/AccountCardSelection';
 import AccountItemBriefInfo from '@subwallet/extension-koni-ui/components/Account/AccountItemBriefInfo';
+import SelectAccountEmpty from '@subwallet/extension-koni-ui/components/Layout/parts/SelectAccount/Empty';
+import SelectAccountFooter from '@subwallet/extension-koni-ui/components/Layout/parts/SelectAccount/Footer';
 import { useGetCurrentAuth } from '@subwallet/extension-koni-ui/hooks/useGetCurrentAuth';
 import useTranslation from '@subwallet/extension-koni-ui/hooks/useTranslation';
 import { saveCurrentAccountAddress, triggerAccountsSubscription } from '@subwallet/extension-koni-ui/messaging';
@@ -11,10 +13,10 @@ import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { Theme } from '@subwallet/extension-koni-ui/themes';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { findAccountByAddress, isAccountAll } from '@subwallet/extension-koni-ui/util';
-import { BackgroundIcon, Button, SelectModal } from '@subwallet/react-ui';
+import { BackgroundIcon, SelectModal } from '@subwallet/react-ui';
 import Icon from '@subwallet/react-ui/es/icon';
 import CN from 'classnames';
-import { CheckCircle, FileArrowDown, PlugsConnected, PlusCircle, Swatches } from 'phosphor-react';
+import { CheckCircle, PlugsConnected } from 'phosphor-react';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useSelector } from 'react-redux';
 import styled from 'styled-components';
@@ -23,41 +25,6 @@ import { isEthereumAddress } from '@polkadot/util-crypto';
 
 type Props = ThemeProps
 
-const AccountListFooter = () => {
-  const { t } = useTranslation();
-
-  return (
-    <div style={{ display: 'flex' }}>
-      <Button
-        block={true}
-        icon={<Icon
-          phosphorIcon={PlusCircle}
-          weight={'fill'}
-        />}
-        schema='secondary'
-      >
-        {t('Create new account')}
-      </Button>
-      <Button
-        icon={<Icon
-          phosphorIcon={FileArrowDown}
-          weight={'fill'}
-        />}
-        schema='secondary'
-        style={{ minWidth: 52 }}
-      />
-      <Button
-        icon={<Icon
-          phosphorIcon={Swatches}
-          weight={'fill'}
-        />}
-        schema='secondary'
-        style={{ minWidth: 52 }}
-      />
-    </div>
-  );
-};
-
 enum ConnectionStatement {
   NOT_CONNECTED='not-connected',
   CONNECTED='connected',
@@ -65,6 +32,8 @@ enum ConnectionStatement {
   DISCONNECTED='disconnected',
   BLOCKED='blocked'
 }
+
+const renderEmpty = () => <SelectAccountEmpty />;
 
 function Component ({ className }: Props): React.ReactElement<Props> {
   const { t } = useTranslation();
@@ -222,7 +191,7 @@ function Component ({ className }: Props): React.ReactElement<Props> {
       <SelectModal
         background={'default'}
         className={className}
-        footer={<AccountListFooter />}
+        footer={<SelectAccountFooter />}
         id='account-list-modal'
         inputWidth={'100%'}
         itemKey='address'
@@ -230,6 +199,7 @@ function Component ({ className }: Props): React.ReactElement<Props> {
         onSelect={_onSelect}
         renderItem={renderItem}
         renderSelected={renderSelectedItem}
+        renderWhenEmpty={renderEmpty}
         searchFunction={searchFunction}
         searchPlaceholder={t('Account name')}
         searchableMinCharactersCount={2}

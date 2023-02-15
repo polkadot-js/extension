@@ -15,7 +15,7 @@ export type AccountBalanceHookType = {
   tokenGroupBalanceMap: Record<string, TokenBalanceItemType>,
   totalBalanceInfo: {
     convertedValue: BigN,
-    pastConvertedValue: BigN,
+    converted24hValue: BigN,
     change: {
       value: BigN,
       status?: PriceChangeStatus,

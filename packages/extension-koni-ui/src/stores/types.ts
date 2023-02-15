@@ -112,10 +112,7 @@ export interface BalanceStore extends BaseReduxStore {
   balanceMap: Record<string, BalanceItem>
 }
 
-// todo: Move pastPriceMap to PriceJson
-export interface PriceStore extends PriceJson {
-  pastPriceMap: Record<string, number>
-}
+export type PriceStore = PriceJson
 
 export interface CrowdloanStore extends BaseReduxStore {
   crowdloanMap: Record<string, CrowdloanItem>

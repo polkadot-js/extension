@@ -19,7 +19,7 @@ export type TokenBalanceItemType = {
   chainDisplayName?: string,
   isTestnet: boolean,
   priceValue: number,
-  pastPriceValue: number,
+  price24hValue: number,
   priceChangeStatus?: PriceChangeStatus,
   free: BalanceValueInfo,
   locked: BalanceValueInfo,

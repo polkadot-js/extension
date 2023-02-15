@@ -11,7 +11,7 @@ export const HomeContext = React.createContext<HomeContextType>({
     tokenGroupBalanceMap: {},
     totalBalanceInfo: {
       convertedValue: new BigN(0),
-      pastConvertedValue: new BigN(0),
+      converted24hValue: new BigN(0),
       change: {
         value: new BigN(0),
         percent: new BigN(0)

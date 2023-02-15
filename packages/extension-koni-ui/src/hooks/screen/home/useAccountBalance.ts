@@ -46,7 +46,7 @@ function getDefaultBalanceItem (
     },
     isReady: false,
     isTestnet: false,
-    pastPriceValue: 0,
+    price24hValue: 0,
     priceValue: 0,
     logoKey,
     slug,
@@ -84,7 +84,7 @@ function getAccountBalance (
   tokenGroupMap: Record<string, string[]>,
   balanceMap: BalanceStore['balanceMap'],
   priceMap: PriceStore['priceMap'],
-  pastPriceMap: PriceStore['pastPriceMap'],
+  price24hMap: PriceStore['price24hMap'],
   assetRegistryMap: AssetRegistryStore['assetRegistry'],
   multiChainAssetMap: AssetRegistryStore['multiChainAssetMap'],
   chainInfoMap: ChainStore['chainInfoMap'],
@@ -92,7 +92,7 @@ function getAccountBalance (
 ): AccountBalanceHookType {
   const totalBalanceInfo: AccountBalanceHookType['totalBalanceInfo'] = {
     convertedValue: new BigN(0),
-    pastConvertedValue: new BigN(0),
+    converted24hValue: new BigN(0),
     change: {
       value: new BigN(0),
       percent: new BigN(0)
@@ -148,14 +148,14 @@ function getAccountBalance (
       // convert token value to real life currency value
       if (priceId && !tokenBalance.isTestnet) {
         const priceValue = priceMap[priceId] || 0;
-        const pastPriceValue = pastPriceMap[priceId] || 0;
+        const price24hValue = price24hMap[priceId] || 0;
 
         tokenBalance.priceValue = priceValue;
-        tokenBalance.pastPriceValue = pastPriceValue;
+        tokenBalance.price24hValue = price24hValue;
 
-        if (priceValue > pastPriceValue) {
+        if (priceValue > price24hValue) {
           tokenBalance.priceChangeStatus = 'increase';
-        } else if (priceValue < pastPriceValue) {
+        } else if (priceValue < price24hValue) {
           tokenBalance.priceChangeStatus = 'decrease';
         }
 
@@ -165,7 +165,7 @@ function getAccountBalance (
           );
           tokenGroupBalance.free.convertedValue = tokenGroupBalance.free.convertedValue.plus(tokenBalance.free.convertedValue);
           tokenBalance.free.pastConvertedValue = tokenBalance.free.pastConvertedValue.plus(
-            getConvertedBalanceValue(tokenBalance.free.value, pastPriceValue)
+            getConvertedBalanceValue(tokenBalance.free.value, price24hValue)
           );
           tokenGroupBalance.free.pastConvertedValue = tokenGroupBalance.free.pastConvertedValue.plus(tokenBalance.free.pastConvertedValue);
 
@@ -174,7 +174,7 @@ function getAccountBalance (
           );
           tokenGroupBalance.locked.convertedValue = tokenGroupBalance.locked.convertedValue.plus(tokenBalance.locked.convertedValue);
           tokenBalance.locked.pastConvertedValue = tokenBalance.locked.pastConvertedValue.plus(
-            getConvertedBalanceValue(tokenBalance.locked.value, pastPriceValue)
+            getConvertedBalanceValue(tokenBalance.locked.value, price24hValue)
           );
           tokenGroupBalance.locked.pastConvertedValue = tokenGroupBalance.locked.pastConvertedValue.plus(tokenBalance.locked.pastConvertedValue);
 
@@ -185,10 +185,10 @@ function getAccountBalance (
           totalBalanceInfo.convertedValue = totalBalanceInfo.convertedValue.plus(tokenGroupBalance.total.convertedValue);
 
           tokenBalance.total.pastConvertedValue = tokenBalance.total.pastConvertedValue.plus(
-            getConvertedBalanceValue(tokenBalance.total.value, pastPriceValue)
+            getConvertedBalanceValue(tokenBalance.total.value, price24hValue)
           );
           tokenGroupBalance.total.pastConvertedValue = tokenGroupBalance.total.pastConvertedValue.plus(tokenBalance.total.pastConvertedValue);
-          totalBalanceInfo.pastConvertedValue = totalBalanceInfo.pastConvertedValue.plus(tokenGroupBalance.total.pastConvertedValue);
+          totalBalanceInfo.converted24hValue = totalBalanceInfo.converted24hValue.plus(tokenGroupBalance.total.pastConvertedValue);
         }
       }
 
@@ -205,14 +205,14 @@ function getAccountBalance (
 
     if (tokenGroupPriceId) {
       const priceValue = priceMap[tokenGroupPriceId] || 0;
-      const pastPriceValue = pastPriceMap[tokenGroupPriceId] || 0;
+      const price24hValue = price24hMap[tokenGroupPriceId] || 0;
 
       tokenGroupBalance.priceValue = priceValue;
-      tokenGroupBalance.pastPriceValue = pastPriceValue;
+      tokenGroupBalance.price24hValue = price24hValue;
 
-      if (priceValue > pastPriceValue) {
+      if (priceValue > price24hValue) {
         tokenGroupBalance.priceChangeStatus = 'increase';
-      } else if (priceValue < pastPriceValue) {
+      } else if (priceValue < price24hValue) {
         tokenGroupBalance.priceChangeStatus = 'decrease';
       }
     } else if (tokenGroupMap[tokenGroupKey].length === 1) {
@@ -222,22 +222,23 @@ function getAccountBalance (
       const tokenBalance = tokenBalanceMap[tokenGroupMap[tokenGroupKey][0]];
 
       tokenGroupBalance.priceValue = tokenBalance.priceValue;
-      tokenGroupBalance.pastPriceValue = tokenBalance.pastPriceValue;
+      tokenGroupBalance.price24hValue = tokenBalance.price24hValue;
       tokenGroupBalance.priceChangeStatus = tokenBalance.priceChangeStatus;
     }
 
     tokenGroupBalanceMap[tokenGroupKey] = tokenGroupBalance;
   });
 
-  if (totalBalanceInfo.convertedValue.gt(totalBalanceInfo.pastConvertedValue)) {
-    totalBalanceInfo.change.value = totalBalanceInfo.convertedValue.minus(totalBalanceInfo.pastConvertedValue);
-    totalBalanceInfo.change.percent = totalBalanceInfo.change.value.multipliedBy(BN_100).dividedBy(totalBalanceInfo.change.value);
+  // Compute total balance change
+  if (totalBalanceInfo.convertedValue.gt(totalBalanceInfo.converted24hValue)) {
+    totalBalanceInfo.change.value = totalBalanceInfo.convertedValue.minus(totalBalanceInfo.converted24hValue);
     totalBalanceInfo.change.status = 'increase';
-  } else if (totalBalanceInfo.convertedValue.lt(totalBalanceInfo.pastConvertedValue)) {
-    totalBalanceInfo.change.value = totalBalanceInfo.pastConvertedValue.minus(totalBalanceInfo.convertedValue);
-    totalBalanceInfo.change.percent = totalBalanceInfo.change.value.multipliedBy(BN_100).dividedBy(totalBalanceInfo.change.value);
+  } else if (totalBalanceInfo.convertedValue.lt(totalBalanceInfo.converted24hValue)) {
+    totalBalanceInfo.change.value = totalBalanceInfo.converted24hValue.minus(totalBalanceInfo.convertedValue);
     totalBalanceInfo.change.status = 'decrease';
   }
+
+  totalBalanceInfo.change.percent = totalBalanceInfo.change.value.multipliedBy(BN_100).dividedBy(totalBalanceInfo.converted24hValue);
 
   return {
     tokenBalanceMap,
@@ -250,7 +251,7 @@ export default function useAccountBalance (tokenGroupMap: Record<string, string[
   const balanceMap = useSelector((state: RootState) => state.balance.balanceMap);
   const chainInfoMap = useSelector((state: RootState) => state.chainStore.chainInfoMap);
   const priceMap = useSelector((state: RootState) => state.price.priceMap);
-  const pastPriceMap = useSelector((state: RootState) => state.price.pastPriceMap);
+  const price24hMap = useSelector((state: RootState) => state.price.price24hMap);
   const assetRegistryMap = useSelector((state: RootState) => state.assetRegistry.assetRegistry);
   const multiChainAssetMap = useSelector((state: RootState) => state.assetRegistry.multiChainAssetMap);
   const isShowZeroBalance = useSelector((state: RootState) => state.settings.isShowZeroBalance);
@@ -259,7 +260,7 @@ export default function useAccountBalance (tokenGroupMap: Record<string, string[
     tokenGroupMap,
     balanceMap,
     priceMap,
-    pastPriceMap,
+    price24hMap,
     assetRegistryMap,
     multiChainAssetMap,
     chainInfoMap,

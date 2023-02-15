@@ -167,7 +167,8 @@ export interface StakeUnlockingJson {
 export interface PriceJson {
   ready?: boolean,
   currency: string,
-  priceMap: Record<string, number>
+  priceMap: Record<string, number>,
+  price24hMap: Record<string, number>
 }
 
 export enum APIItemState {

@@ -8,7 +8,7 @@ import { PriceStore } from '@subwallet/extension-koni-ui/stores/types';
 const initialState = {
   currency: 'usd',
   priceMap: {},
-  pastPriceMap: {},
+  price24hMap: {},
   ready: false
 } as PriceStore;
 
@@ -18,11 +18,7 @@ const priceSlice = createSlice({
   reducers: {
     updatePrice (state, action: PayloadAction<PriceJson>) {
       return {
-        ...action.payload,
-        // todo: Update this later
-        pastPriceMap: {
-          ...action.payload.priceMap
-        }
+        ...action.payload
       };
     }
   }

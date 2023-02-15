@@ -8,12 +8,13 @@ interface GeckoItem {
   id: string,
   name: string,
   current_price: number,
+  price_change_24h: number,
   symbol: string
 }
 
 export const getTokenPrice = async (priceIds: Array<string>, currency = 'usd'): Promise<PriceJson> => {
   try {
-    const inverseMap: Record<string, string> = {};
+    // const inverseMap: Record<string, string> = {};
     const idStr = priceIds.join(',');
     const res = await axios.get(`https://api.coingecko.com/api/v3/coins/markets?vs_currency=${currency}&per_page=1000&ids=${idStr}`);
 
@@ -23,19 +24,25 @@ export const getTokenPrice = async (priceIds: Array<string>, currency = 'usd'): 
 
     const responseData = res.data as Array<GeckoItem>;
     const priceMap: Record<string, number> = {};
+    const price24hMap: Record<string, number> = {};
 
     responseData.forEach((val) => {
-      priceMap[val.id] = val.current_price !== null ? val.current_price : 0;
+      const currentPrice = val.current_price || 0;
+      const price24h = currentPrice - (val.price_change_24h || 0);
 
-      if (inverseMap[val.id]) {
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-        priceMap[inverseMap[val.id]] = val.current_price !== null ? val.current_price : 0;
-      }
+      priceMap[val.id] = price24h;
+      price24hMap[val.id] = currentPrice;
+
+      // if (inverseMap[val.id]) {
+      //   priceMap[inverseMap[val.id]] = currentPrice;
+      //   price24hMap[inverseMap[val.id]] = price24h;
+      // }
     });
 
     return {
       currency,
-      priceMap
+      priceMap,
+      price24hMap
     } as PriceJson;
   } catch (err) {
     console.error('Failed to get token price', err);

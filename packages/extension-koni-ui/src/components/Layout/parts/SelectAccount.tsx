@@ -15,7 +15,7 @@ import { BackgroundIcon, Button, SelectModal } from '@subwallet/react-ui';
 import Icon from '@subwallet/react-ui/es/icon';
 import CN from 'classnames';
 import { CheckCircle, FileArrowDown, PlugsConnected, PlusCircle, Swatches } from 'phosphor-react';
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { useSelector } from 'react-redux';
 import styled from 'styled-components';
 
@@ -68,11 +68,10 @@ enum ConnectionStatement {
 
 function Component ({ className }: Props): React.ReactElement<Props> {
   const { t } = useTranslation();
-  const { accounts, currentAccount } = useSelector((state: RootState) => state.accountState);
+  const { accounts, currentAccount, isAllAccount } = useSelector((state: RootState) => state.accountState);
   const [connectionState, setConnectionState] = useState<ConnectionStatement>(ConnectionStatement.NOT_CONNECTED);
 
   const currentAuth = useGetCurrentAuth();
-  const isAllAccount = useMemo((): boolean => isAccountAll(currentAccount?.address || ''), [currentAccount?.address]);
 
   const _onSelect = useCallback((address: string) => {
     if (address) {

@@ -80,11 +80,13 @@ export interface AppSettings extends UiSettings, SettingsStruct, BaseReduxStore 
 
 export interface AccountState extends AccountsContext, KeyringState, BaseReduxStore {
   currentAccount: AccountJson | null
+
+  isAllAccount: boolean
 }
 
 export interface RequestState extends ConfirmationsQueue, BaseReduxStore {
-  authorizeRequest: Record<string, AuthorizeRequest>,
-  metadataRequest: Record<string, MetadataRequest>,
+  authorizeRequest: Record<string, AuthorizeRequest>
+  metadataRequest: Record<string, MetadataRequest>
   signingRequest: Record<string, SigningRequest>
   hasConfirmations: boolean
   numberOfConfirmations: number

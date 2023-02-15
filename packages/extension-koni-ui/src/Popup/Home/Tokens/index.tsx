@@ -35,7 +35,7 @@ function Component (): React.ReactElement {
     totalBalanceInfo }, tokenGroupStructure: { sortedTokenGroups } } = useContext(HomeContext);
 
   const handleScroll = useCallback((event: React.UIEvent<HTMLElement>) => {
-    if (event.currentTarget.scrollTop > 100) {
+    if (event.currentTarget.scrollTop > 80) {
       setIsShrink(true);
     } else {
       setIsShrink(false);
@@ -109,11 +109,12 @@ const Tokens = styled(WrapperComponent)<ThemeProps>(({ theme: { extendToken, tok
     position: 'relative',
     display: 'flex',
     flexDirection: 'column',
+    paddingTop: 112,
 
     '.__scroll-container': {
       flex: 1,
       overflow: 'auto',
-      paddingTop: 218,
+      paddingTop: 106,
       paddingLeft: token.size,
       paddingRight: token.size
     },

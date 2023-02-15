@@ -55,12 +55,14 @@ function Component (
             <>
               <div className={'ant-balance-item-balance-info-wrapper'}>
                 <Number
+                  className={'__converted-value'}
                   decimal={0}
                   decimalOpacity={0.45}
                   prefix='$'
                   value={total.convertedValue}
                 />
                 <Number
+                  className={'__value'}
                   decimal={0}
                   decimalOpacity={0.45}
                   intOpacity={0.45}
@@ -99,7 +101,36 @@ function Component (
 
 export const TokenBalanceSelectionItem = styled(Component)<Props>(({ theme: { token } }: Props) => {
   return ({
+    '.ant-web3-block': {
+      padding: 12
+    },
+
+    '.ant-number .ant-typography': {
+      fontSize: 'inherit !important',
+      lineHeight: 'inherit'
+    },
+
+    '.__converted-value': {
+      lineHeight: token.lineHeightLG,
+      fontSize: token.fontSizeLG
+    },
+
+    '.__value': {
+      lineHeight: token.lineHeightSM,
+      fontSize: token.fontSizeSM
+    },
+
+    '.ant-web3-block-middle-item': {
+      '.ant-number': {
+        fontSize: token.fontSizeSM,
+        lineHeight: token.lineHeightSM
+      }
+    },
+
     '&.-price-decrease .ant-web3-block-middle-item': {
+      '.ant-number': {
+        lineHeight: token.lineHeightSM
+      },
       '.ant-number .ant-typography': {
         color: `${token.colorError} !important`
       }

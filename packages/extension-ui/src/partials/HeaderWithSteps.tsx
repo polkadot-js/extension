@@ -9,10 +9,10 @@ import styled from 'styled-components';
 import Header from './Header';
 
 interface Props {
-  className?: string;
   step: number;
   text: string;
   total: number;
+  withBackArrow?: boolean;
 }
 
 interface StepProps extends ThemeProps {
@@ -43,11 +43,12 @@ const Steps = styled.div`
   }
 `;
 
-function HeaderWithSteps({ className, step, text, total }: Props): React.ReactElement<Props> {
+function HeaderWithSteps({ step, text, total, withBackArrow = false }: Props): React.ReactElement<Props> {
   return (
     <>
       <Header
         text={text}
+        withBackArrow={withBackArrow}
         withHelp
         withStepper
       ></Header>

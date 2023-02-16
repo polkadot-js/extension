@@ -213,5 +213,9 @@
 	"Show on network": "",
 	"Unlock to edit": "",
 	"When should you choose the network?": "",
-	"Invalid secret phrase or path": ""
+	"Invalid secret phrase or path": "",
+	"Import from JSON file": "",
+	"Drag & drop JSON file here or": "",
+	"browse": "",
+	"How to restore your account?": ""
 }

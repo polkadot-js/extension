@@ -39,12 +39,7 @@ function SafetyFirst({ className, onNextStep }: Props): React.ReactElement<Props
         />
         <span>
           {t<string>('Why it is critical to store your secret\nphrase in a safe place?')}&nbsp;
-          <span
-            className='link'
-            onClick={goTo('/help-safety')}
-          >
-            {t<string>('Learn more')}
-          </span>
+          <span className='link'>{t<string>('Learn more')}</span>
         </span>
       </WrapperRow>
     </HelperFooter>

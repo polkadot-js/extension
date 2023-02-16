@@ -21,7 +21,8 @@ module.exports = {
     '@typescript-eslint/unbound-method': 'off',
     'import-newlines/enforce': ['error', { 'max-len': 120, items: Infinity }], // we break only if line too long
     '@typescript-eslint/indent': [0],
-    'react/jsx-closing-bracket-location': 0
+    'react/jsx-closing-bracket-location': 0,
+    'react/jsx-newline': ['warn', { prevent: true, allowMultilines: false }]
   },
   plugins: [...base.plugins, 'prettier'],
   extends: [...base.extends, 'prettier']

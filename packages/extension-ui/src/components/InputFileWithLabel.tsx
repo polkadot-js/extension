@@ -9,13 +9,13 @@ import styled from 'styled-components';
 
 import { formatNumber, hexToU8a, isHex, u8aToString } from '@polkadot/util';
 
+import uploadIcon from '../assets/upload.svg';
 import useTranslation from '../hooks/useTranslation';
 import Label from './Label';
+import Svg from './Svg';
 
-function classes (...classNames: (boolean | null | string | undefined)[]): string {
-  return classNames
-    .filter((className): boolean => !!className)
-    .join(' ');
+function classes(...classNames: (boolean | null | string | undefined)[]): string {
+  return classNames.filter((className): boolean => !!className).join(' ');
 }
 
 export interface InputFileProps {
@@ -33,6 +33,7 @@ export interface InputFileProps {
   placeholder?: React.ReactNode | null;
   withEllipsis?: boolean;
   withLabel?: boolean;
+  setFileName: (name: string) => void;
 }
 
 interface FileState {
@@ -44,7 +45,7 @@ const BYTE_STR_0 = '0'.charCodeAt(0);
 const BYTE_STR_X = 'x'.charCodeAt(0);
 const NOOP = (): void => undefined;
 
-function convertResult (result: ArrayBuffer, convertHex?: boolean): Uint8Array {
+function convertResult(result: ArrayBuffer, convertHex?: boolean): Uint8Array {
   const data = new Uint8Array(result);
 
   // this converts the input (if detected as hex), vai the hex conversion route
@@ -59,7 +60,18 @@ function convertResult (result: ArrayBuffer, convertHex?: boolean): Uint8Array {
   return data;
 }
 
-function InputFile ({ accept, className = '', clearContent, convertHex, isDisabled, isError = false, label, onChange, placeholder }: InputFileProps): React.ReactElement<InputFileProps> {
+function InputFile({
+  accept,
+  className = '',
+  clearContent,
+  convertHex,
+  isDisabled,
+  isError = false,
+  label,
+  onChange,
+  placeholder,
+  setFileName
+}: InputFileProps): React.ReactElement<InputFileProps> {
   const { t } = useTranslation();
   const dropRef = createRef<DropzoneRef>();
   const [file, setFile] = useState<FileState | undefined>();
@@ -78,17 +90,22 @@ function InputFile ({ accept, className = '', clearContent, convertHex, isDisabl
             const data = convertResult(target.result as ArrayBuffer, convertHex);
 
             onChange && onChange(data, name);
-            dropRef && setFile({
-              name,
-              size: data.length
-            });
+
+            if (dropRef) {
+              setFile({
+                name,
+                size: data.length
+              });
+
+              setFileName(name);
+            }
           }
         };
 
         reader.readAsArrayBuffer(file);
       });
     },
-    [convertHex, dropRef, onChange]
+    [convertHex, dropRef, onChange, setFileName]
   );
 
   const dropZone = (
@@ -102,45 +119,90 @@ function InputFile ({ accept, className = '', clearContent, convertHex, isDisabl
       {({ getInputProps, getRootProps }): JSX.Element => (
         <div {...getRootProps({ className: classes('ui--InputFile', isError ? 'error' : '', className) })}>
           <input {...getInputProps()} />
-          <em className='label'>
-            {
-              !file || clearContent
-                ? placeholder || t('click to select or drag and drop the file here')
-                : placeholder || t('{{name}} ({{size}} bytes)', {
-                  replace: {
-                    name: file.name,
-                    size: formatNumber(file.size)
-                  }
-                })
-            }
-          </em>
+          <div className='container'>
+            <Svg
+              className='upload-icon'
+              src={uploadIcon}
+            />
+            <em className='label'>
+              {!file || clearContent
+                ? placeholder || (
+                    <span>
+                      {t('Drag & drop JSON file here\nor')}&nbsp;<span className='link'>{t('browse')}.</span>
+                    </span>
+                  )
+                : placeholder ||
+                  t('{{name}} ({{size}} bytes)', {
+                    replace: {
+                      name: file.name,
+                      size: formatNumber(file.size)
+                    }
+                  })}
+            </em>
+          </div>
         </div>
       )}
     </Dropzone>
   );
 
-  return label
-    ? (
-      <Label
-        label={label}
-      >
-        {dropZone}
-      </Label>
-    )
-    : dropZone;
+  return label ? <Label label={label}>{dropZone}</Label> : dropZone;
 }
 
-export default React.memo(styled(InputFile)(({ isError, theme }: InputFileProps & ThemeProps) => `
-  border: 1px solid ${isError ? theme.errorBorderColor : theme.inputBorderColor};
-  background: ${theme.inputBackground};
-  border-radius: ${theme.borderRadius};
-  color: ${isError ? theme.errorBorderColor : theme.textColor};
-  font-size: 1rem;
-  margin: 0.25rem 0;
+export default React.memo(
+  styled(InputFile)(
+    ({ isError, theme }: InputFileProps & ThemeProps) => `
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  border: 1px dashed ${isError ? theme.errorBorderColor : theme.inputFileBorderColor};
+  border-radius: 2px;
+  color: ${isError ? theme.errorBorderColor : theme.subTextColor};
   overflow-wrap: anywhere;
   padding: 0.5rem 0.75rem;
+  margin-top: 72px;
+  height: 328px;
+
 
   &:hover {
     cursor: pointer;
   }
-`));
+
+  .upload-icon {
+    width: 20px;
+    height: 20px;
+    background: ${theme.iconNeutralColor}
+  }
+
+  .link {
+    color: ${theme.primaryColor};
+    cursor: pointer;
+
+    :hover {
+      text-decoration: underline;
+    }
+  }
+
+  span {
+    font-style: normal;
+    font-weight: 300;
+    font-size: 16px;
+    line-height: 150%;
+    letter-spacing: 0.04em;
+    white-space: pre-line;
+    text-align: center;
+  }
+
+  .container{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .label {
+    text-align: center;
+  }
+`
+  )
+);

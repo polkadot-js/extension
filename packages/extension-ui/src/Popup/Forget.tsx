@@ -51,13 +51,8 @@ function Forget({
         src={helpIcon}
       />
       <span>
-        {t<string>('How to restore your account? ')}
-        <span
-          className='link'
-          onClick={_goTo('/help-restore')}
-        >
-          {` ${t<string>('Learn more')}`}
-        </span>
+        {t<string>('How to restore your account?')}&nbsp;
+        <span className='link'>{` ${t<string>('Learn more')}`}</span>
       </span>
     </HelperFooter>
   );

@@ -73,6 +73,7 @@ function CreateAccount(): React.ReactElement {
         step={step}
         text={t<string>('Create an account')}
         total={3}
+        withBackArrow
       />
       <Loading>
         {step === 1 && <SafetyFirst onNextStep={_onNextStep} />}

@@ -75,6 +75,7 @@ function Derive({ isLocked }: Props): React.ReactElement<Props> {
         text={t<string>('Add new account')}
         // TODO: PLACEHOLDER
         total={2}
+        withBackArrow
       />
       {!account && (
         <SelectParent

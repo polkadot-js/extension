@@ -26,11 +26,11 @@ const ButtonArea = function ({ children, className, footer }: Props) {
 };
 
 export default styled(ButtonArea)(
-  () => `
+  ({ footer }: Props) => `
   display: flex;
   flex-direction: column;
   margin-bottom: 16px;
-
+  padding-top: ${footer ? '0' : '16px'};
   padding-left: 16px;
   padding-right: 16px;
 

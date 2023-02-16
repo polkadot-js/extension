@@ -54,6 +54,7 @@ export { default as ScrollWrapper } from './ScrollWrapper';
 export { default as BottomWrapper } from './BottomWrapper';
 export { default as WarningBox } from './WarningBox';
 export { default as InputLock } from './InputLock';
+export { default as FileNameDisplay } from './FileNameDisplay';
 
 export { Input, TextArea } from './TextInputs';
 

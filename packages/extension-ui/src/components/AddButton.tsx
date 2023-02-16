@@ -43,12 +43,12 @@ export default styled(AddButton)(
   background:${theme.addButtonBackground};
   border-radius: 50%;
   padding:0px;
-  transition: 0.4s ease-in-out;
+  transition: 0.2s ease;
   
   &:disabled {
     cursor: default;
     background: ${theme.addButtonBackground};
-    opacity:0.3
+    opacity: 0.3
   }
 
   &:focus{

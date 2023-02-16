@@ -40,8 +40,7 @@ import CreateAccountMenu from './Accounts/CreateAccountMenu';
 import EditAccountMenu from './Accounts/EditAccountMenu';
 import EditName from './Accounts/EditName';
 import AccountManagement from './AuthManagement/AccountManagement';
-import Restore from './Help/Restore';
-import SafetyLink from './Help/SafetyLink';
+import RestoreJson from './Restore/RestoreJson';
 import Accounts from './Accounts';
 import AuthList from './AuthManagement';
 import Authorize from './Authorize';
@@ -56,7 +55,6 @@ import ImportQr from './ImportQr';
 import ImportSeed from './ImportSeed';
 import Metadata from './Metadata';
 import PhishingDetected from './PhishingDetected';
-import RestoreJson from './RestoreJson';
 import Settings from './Settings';
 import Signing from './Signing';
 import Welcome from './Welcome';
@@ -182,8 +180,6 @@ export default function Popup(): React.ReactElement {
                           <Switch>
                             <Route path='/auth-list'>{wrapWithErrorBoundary(<AuthList />, 'auth-list')}</Route>
                             <Route path='/help'>{wrapWithErrorBoundary(<Help />, 'help')}</Route>
-                            <Route path='/help-safety'>{wrapWithErrorBoundary(<SafetyLink />, 'help-safety')}</Route>
-                            <Route path='/help-restore'>{wrapWithErrorBoundary(<Restore />, 'help-restore')}</Route>
                             <Route path='/account/settings'>{wrapWithErrorBoundary(<Settings />, 'settings')}</Route>
                             <Route path='/account/add-menu'>
                               {wrapWithErrorBoundary(<AddAccountMenu />, 'adding-account-menu')}

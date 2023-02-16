@@ -2,9 +2,9 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { SettingItemSelection } from '@subwallet/extension-koni-ui/components/Setting/SettingItemSelection';
-import { CREATE_ACCOUNT_MODAL } from '@subwallet/extension-koni-ui/constants/modal';
+import { CREATE_ACCOUNT_MODAL, NEW_ACCOUNT_MODAL } from '@subwallet/extension-koni-ui/constants/modal';
 import useTranslation from '@subwallet/extension-koni-ui/hooks/useTranslation';
-import { GlobalToken, Theme } from '@subwallet/extension-koni-ui/themes';
+import { Theme } from '@subwallet/extension-koni-ui/themes';
 import { PhosphorIcon, ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { BackgroundIcon, ModalContext, SwModal } from '@subwallet/react-ui';
 import Icon from '@subwallet/react-ui/es/icon';
@@ -20,24 +20,8 @@ interface CreateAccountItem {
   modalId: string;
   icon: PhosphorIcon;
   backgroundColor: string;
+  onClick: () => void;
 }
-
-const renderItems = (token: GlobalToken): CreateAccountItem[] => {
-  return [
-    {
-      backgroundColor: token['green-7'],
-      icon: Leaf,
-      modalId: '1',
-      label: 'Create with new Seed Phrase'
-    },
-    {
-      backgroundColor: token['magenta-7'],
-      icon: ShareNetwork,
-      modalId: '2',
-      label: 'Create with existing Seed Phrase'
-    }
-  ];
-};
 
 const modalId = CREATE_ACCOUNT_MODAL;
 
@@ -50,7 +34,6 @@ const Component: React.FC<Props> = ({ className }: Props) => {
     inactiveModal(modalId);
   }, [inactiveModal]);
 
-  const items = useMemo((): CreateAccountItem[] => renderItems(token), [token]);
   const renderIcon = useCallback((item: CreateAccountItem) => {
     return (
       <BackgroundIcon
@@ -61,14 +44,27 @@ const Component: React.FC<Props> = ({ className }: Props) => {
         weight='fill'
       />
     );
-  }, []);
+  }, [token.colorText]);
 
-  const onClickItem = useCallback((item: CreateAccountItem): (() => void) => {
-    return () => {
-      inactiveModal(modalId);
-      activeModal(item.modalId);
-    };
-  }, [activeModal, inactiveModal]);
+  const items = useMemo((): CreateAccountItem[] => ([
+    {
+      backgroundColor: token['green-7'],
+      icon: Leaf,
+      modalId: '1',
+      label: 'Create with new Seed Phrase',
+      onClick: () => {
+        inactiveModal(modalId);
+        activeModal(NEW_ACCOUNT_MODAL);
+      }
+    },
+    {
+      backgroundColor: token['magenta-7'],
+      icon: ShareNetwork,
+      modalId: '2',
+      label: 'Create with existing Seed Phrase',
+      onClick: () => { /* Empty */ }
+    }
+  ]), [activeModal, inactiveModal, token]);
 
   return (
     <SwModal
@@ -90,10 +86,9 @@ const Component: React.FC<Props> = ({ className }: Props) => {
           return (
             <div
               key={item.modalId}
-              onClick={onClickItem(item)}
+              onClick={item.onClick}
             >
               <SettingItemSelection
-                className={'add-account-item-wrapper'}
                 label={t<string>(item.label)}
                 leftItemIcon={renderIcon(item)}
               />
@@ -105,7 +100,7 @@ const Component: React.FC<Props> = ({ className }: Props) => {
   );
 };
 
-const CreateNewAccountModal = styled(Component)<Props>(({ theme: { token } }: Props) => {
+const CreateAccountModal = styled(Component)<Props>(({ theme: { token } }: Props) => {
   return {
     '.items-container': {
       display: 'flex',
@@ -115,4 +110,4 @@ const CreateNewAccountModal = styled(Component)<Props>(({ theme: { token } }: Pr
   };
 });
 
-export default CreateNewAccountModal;
+export default CreateAccountModal;

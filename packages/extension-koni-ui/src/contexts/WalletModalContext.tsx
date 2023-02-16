@@ -2,8 +2,9 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import AttachAccountModal from '@subwallet/extension-koni-ui/components/Modal/AttachAccountModal';
-import CreateNewAccountModal from '@subwallet/extension-koni-ui/components/Modal/CreateNewAccountModal';
+import CreateAccountModal from '@subwallet/extension-koni-ui/components/Modal/CreateAccountModal';
 import ImportAccountModal from '@subwallet/extension-koni-ui/components/Modal/ImportAccountModal';
+import NewAccountModal from '@subwallet/extension-koni-ui/components/Modal/NewAccountModal';
 import Confirmations from '@subwallet/extension-koni-ui/Popup/Confirmations';
 import { Debugger } from '@subwallet/extension-koni-ui/Popup/Debugger';
 import { Button, ModalContext } from '@subwallet/react-ui';
@@ -98,8 +99,9 @@ export const WalletModalContext = ({ children }: Props) => {
     >
       <Confirmations />
     </SwModal>
-    <CreateNewAccountModal />
+    <CreateAccountModal />
     <ImportAccountModal />
     <AttachAccountModal />
+    <NewAccountModal />
   </>;
 };

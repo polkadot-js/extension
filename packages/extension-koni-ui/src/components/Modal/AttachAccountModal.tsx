@@ -96,7 +96,6 @@ const Component: React.FC<Props> = ({ className }: Props) => {
               onClick={onClickItem(item)}
             >
               <SettingItemSelection
-                className={'add-account-item-wrapper'}
                 label={t<string>(item.label)}
                 leftItemIcon={renderIcon(item)}
               />

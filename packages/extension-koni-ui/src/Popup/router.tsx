@@ -23,6 +23,7 @@ const NftCollectionDetail = React.lazy(() => import('@subwallet/extension-koni-u
 const History = React.lazy(() => import('@subwallet/extension-koni-ui/Popup/Home/History'));
 const Crowdloans = React.lazy(() => import('@subwallet/extension-koni-ui/Popup/Home/Crowdloans'));
 const Home = React.lazy(() => import('@subwallet/extension-koni-ui/Popup/Home'));
+const Settings = React.lazy(() => import('@subwallet/extension-koni-ui/Popup/Settings'));
 
 export function Crypto () {
   const dataContext = useContext(DataContext);
@@ -174,11 +175,11 @@ export const router = createHashRouter([{
         }]
       }]
     }, {
-      path: '/setting',
+      path: '/settings',
       element: <Outlet />,
       children: [{
         path: 'list',
-        element: <Example />
+        element: <Settings />
       }, {
         path: 'general',
         element: <Example />

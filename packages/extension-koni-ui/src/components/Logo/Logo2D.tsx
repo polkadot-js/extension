@@ -8,7 +8,7 @@ interface Props {
   height?: number;
 }
 
-const Logo2D: React.FC<Props> = ({ height = 16, width = 24 }: Props) => {
+const Logo2D: React.FC<Props> = ({ height = 24, width = 16 }: Props) => {
   return (
     <svg
       fill='none'

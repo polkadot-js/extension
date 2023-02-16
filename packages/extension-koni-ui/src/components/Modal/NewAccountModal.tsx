@@ -30,7 +30,7 @@ const Component: React.FC<Props> = ({ className }: Props) => {
   const { inactiveModal } = useContext(ModalContext);
   const navigate = useNavigate();
 
-  const [selectedItems, setSelectedItems] = useState<KeypairType[]>([]);
+  const [selectedItems, setSelectedItems] = useState<KeypairType[]>([SUBSTRATE_ACCOUNT_TYPE, EVM_ACCOUNT_TYPE]);
 
   const onCancel = useCallback(() => {
     inactiveModal(modalId);

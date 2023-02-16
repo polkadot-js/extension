@@ -6089,7 +6089,7 @@ __metadata:
     "@subwallet/extension-koni-base": ^0.8.1
     "@subwallet/extension-mocks": ^0.8.1
     "@subwallet/keyring": ^0.0.3
-    "@subwallet/react-ui": ^5.1.2-b9
+    "@subwallet/react-ui": 5.1.2-b9
     "@subwallet/ui-keyring": ^0.0.3
     "@types/bn.js": ^5.1.1
     "@types/enzyme": ^3.10.12
@@ -6201,7 +6201,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@subwallet/react-ui@npm:^5.1.2-b9":
+"@subwallet/react-ui@npm:5.1.2-b9":
   version: 5.1.2-b9
   resolution: "@subwallet/react-ui@npm:5.1.2-b9"
   dependencies:

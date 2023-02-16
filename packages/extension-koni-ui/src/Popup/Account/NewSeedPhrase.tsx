@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { Layout } from '@subwallet/extension-koni-ui/components';
+import Loading from '@subwallet/extension-koni-ui/components/Loading';
 import { EVM_ACCOUNT_TYPE, SUBSTRATE_ACCOUNT_TYPE } from '@subwallet/extension-koni-ui/constants/account';
 import useGetDefaultAccountName from '@subwallet/extension-koni-ui/hooks/account/useGetDefaultAccountName';
 import useNotification from '@subwallet/extension-koni-ui/hooks/useNotification';
@@ -15,6 +16,8 @@ import { CheckCircle, CopySimple, Info } from 'phosphor-react';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
+
+import { KeypairType } from '@polkadot/util-crypto/types';
 
 type Props = ThemeProps;
 
@@ -37,10 +40,12 @@ const Component: React.FC<Props> = ({ className }: Props) => {
   const location = useLocation();
   const notify = useNotification();
   const navigate = useNavigate();
-  const { accountTypes } = location.state as NewSeedPhraseState;
+  const [accountTypes] = useState<KeypairType[]>((location.state as NewSeedPhraseState)?.accountTypes || []);
+
+  const accountName = useGetDefaultAccountName();
 
   const [seedPhrase, setSeedPhrase] = useState('');
-  const accountName = useGetDefaultAccountName();
+  const [loading, setLoading] = useState(false);
 
   const words: Array<Array<WordItem>> = useMemo(() => {
     const raw = seedPhrase.split(' ');
@@ -70,21 +75,33 @@ const Component: React.FC<Props> = ({ className }: Props) => {
   }, [seedPhrase, notify]);
 
   const _onCreate = useCallback((): void => {
+    if (!seedPhrase) {
+      return;
+    }
+
+    setLoading(true);
+
     createAccountSuriV2({
       name: accountName,
       suri: seedPhrase,
       types: accountTypes,
       isAllowed: true
     })
-      .then((response) => {
+      .then(() => {
         // window.localStorage.setItem('popupNavigation', '/');
         navigate('/home');
       })
       .catch((error: Error): void => {
         // setIsBusy(false);
-        console.error(error);
+        notify({
+          message: error.message,
+          type: 'error'
+        });
+      })
+      .finally(() => {
+        setLoading(false);
       });
-  }, [accountName, seedPhrase, accountTypes, navigate]);
+  }, [accountName, seedPhrase, accountTypes, navigate, notify]);
 
   useEffect((): void => {
     createSeedV2(undefined, undefined, [SUBSTRATE_ACCOUNT_TYPE, EVM_ACCOUNT_TYPE])
@@ -101,7 +118,9 @@ const Component: React.FC<Props> = ({ className }: Props) => {
       footerButton={{
         children: t('I have saved it somewhere safe'),
         icon: FooterIcon,
-        onClick: _onCreate
+        onClick: _onCreate,
+        disabled: !seedPhrase,
+        loading: loading
       }}
       showBackButton={true}
       showSubHeader={true}
@@ -118,44 +137,47 @@ const Component: React.FC<Props> = ({ className }: Props) => {
       subHeaderPaddingVertical={true}
       title={t<string>('Your recovery phrase')}
     >
-      <div className={className}>
-        <div className='description'>
-          {t('Keep your recovery phrase in a safe place, and never disclose it. Anyone with this phrase can take control of your assets.')}
+      {seedPhrase && (
+        <div className={className}>
+          <div className='description'>
+            {t('Keep your recovery phrase in a safe place, and never disclose it. Anyone with this phrase can take control of your assets.')}
+          </div>
+          <div className='word-container'>
+            {words.map((arr, _index) => {
+              return (
+                <div
+                  className='word-row'
+                  key={_index}
+                >
+                  {
+                    arr.map((item) => {
+                      return (
+                        <div
+                          className='word-item'
+                          key={item.label}
+                        >
+                          <div className='word-index'>{item.index}</div>
+                          <div className='word-content'>{item.label}</div>
+                        </div>
+                      );
+                    })
+                  }
+                </div>
+              );
+            })}
+          </div>
+          <Button
+            icon={(
+              <Icon phosphorIcon={CopySimple} />
+            )}
+            onClick={onCopy}
+            type='ghost'
+          >
+            {t('Copy to clipboard')}
+          </Button>
         </div>
-        <div className='word-container'>
-          {words.map((arr, _index) => {
-            return (
-              <div
-                className='word-row'
-                key={_index}
-              >
-                {
-                  arr.map((item) => {
-                    return (
-                      <div
-                        className='word-item'
-                        key={item.label}
-                      >
-                        <div className='word-index'>{item.index}</div>
-                        <div className='word-content'>{item.label}</div>
-                      </div>
-                    );
-                  })
-                }
-              </div>
-            );
-          })}
-        </div>
-        <Button
-          icon={(
-            <Icon phosphorIcon={CopySimple} />
-          )}
-          onClick={onCopy}
-          type='ghost'
-        >
-          {t('Copy to clipboard')}
-        </Button>
-      </div>
+      )}
+      {!seedPhrase && (<Loading />)}
     </Layout.Base>
   );
 };

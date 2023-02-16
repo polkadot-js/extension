@@ -1,6 +1,7 @@
 // Copyright 2019-2022 @polkadot/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
+import PageWrapper from '@subwallet/extension-koni-ui/components/Layout/PageWrapper';
 import { EXTENSION_VERSION } from '@subwallet/extension-koni-ui/constants/commont';
 import { Theme, ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { BackgroundIcon, Button, Icon, SettingItem, SwHeader, SwIconProps } from '@subwallet/react-ui';
@@ -191,63 +192,65 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
   }, [navigate]);
 
   return (
-    <div className={`settings ${className}`}>
-      <SwHeader
-        left='logo'
-        rightButtons={headerIcons}
-        showLeftButton={true}
-      >
-        {/*  // todo: i18n Settings */}
+    <PageWrapper className={`settings ${className}`}>
+      <>
+        <SwHeader
+          left='logo'
+          rightButtons={headerIcons}
+          showLeftButton={true}
+        >
+          {/*  // todo: i18n Settings */}
         Settings
-      </SwHeader>
+        </SwHeader>
 
-      <div className={'__scroll-container'}>
-        {
-          SettingGroupItemType.map((group) => {
-            return (
-              <div
-                className={'__group-container'}
-                key={group.key}
-              >
-                {!!group.label && (<div className='__group-label'>{group.label}</div>)}
+        <div className={'__scroll-container'}>
+          {
+            SettingGroupItemType.map((group) => {
+              return (
+                <div
+                  className={'__group-container'}
+                  key={group.key}
+                >
+                  {!!group.label && (<div className='__group-label'>{group.label}</div>)}
 
-                <div className={'__group-content'}>
-                  {group.items.map((item) => (
-                    <SettingItem
-                      className={'__setting-item'}
-                      key={item.key}
-                      leftItemIcon={generateLeftIcon(item.leftIconBgColor, item.leftIcon)}
-                      name={item.title}
-                      rightItem={generateRightIcon(item.rightIcon)}
-                    />
-                  ))}
+                  <div className={'__group-content'}>
+                    {group.items.map((item) => (
+                      <SettingItem
+                        className={'__setting-item'}
+                        key={item.key}
+                        leftItemIcon={generateLeftIcon(item.leftIconBgColor, item.leftIcon)}
+                        name={item.title}
+                        rightItem={generateRightIcon(item.rightIcon)}
+                      />
+                    ))}
+                  </div>
                 </div>
-              </div>
-            );
-          })
-        }
-
-        {/* // todo: i18n Lock */}
-        <Button
-          block
-          icon={
-            <Icon
-              customSize={'28px'}
-              phosphorIcon={Lock}
-              type='phosphor'
-              weight={'fill'}
-            />
+              );
+            })
           }
-          schema={'secondary'}
-        >Lock</Button>
 
-        <div className={'__version'}>
+          {/* // todo: i18n Lock */}
+          <Button
+            block
+            icon={
+              <Icon
+                customSize={'28px'}
+                phosphorIcon={Lock}
+                type='phosphor'
+                weight={'fill'}
+              />
+            }
+            schema={'secondary'}
+          >Lock</Button>
+
+          <div className={'__version'}>
           SubWallet v {EXTENSION_VERSION}
+          </div>
         </div>
-      </div>
 
-      <Outlet />
-    </div>
+        <Outlet />
+      </>
+    </PageWrapper>
   );
 }
 

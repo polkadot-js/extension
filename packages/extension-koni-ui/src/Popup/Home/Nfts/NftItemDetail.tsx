@@ -87,8 +87,10 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
   const originChainLogo = useCallback(() => {
     return (
       <Image
+        height={token.fontSizeXL}
         src={LogosMap[nftItem.chain]}
         width={token.fontSizeXL}
+        shape={'circle'}
       />
     );
   }, [nftItem.chain, token.fontSizeXL]);

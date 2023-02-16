@@ -41,7 +41,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
     {
       icon: rightIcon,
       onClick: () => {
-        navigate('/setting/token/import', { state: { isExternalRequest: false } });
+        navigate('/home/nfts/import-collection', { state: { isExternalRequest: false } });
       }
     }
   ];
@@ -151,7 +151,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
         subHeaderCenter={false}
         subHeaderIcons={subHeaderButton}
         subHeaderPaddingVertical={true}
-        title={'Collectibles'}
+        title={t<string>('Collectibles')}
       >
         <SwList.Section
           className={'nft_collection_list__container'}

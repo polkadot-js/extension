@@ -9,6 +9,7 @@ import { DataContext } from '@subwallet/extension-koni-ui/contexts/DataContext';
 import useGetContractSupportedChains from '@subwallet/extension-koni-ui/hooks/screen/nft/useGetContractSupportedChains';
 import useGetNftTypeSupported, { NftTypeOption } from '@subwallet/extension-koni-ui/hooks/screen/nft/useGetNftTypeSupported';
 import useTranslation from '@subwallet/extension-koni-ui/hooks/useTranslation';
+import { validateCustomToken } from '@subwallet/extension-koni-ui/messaging';
 import { Theme, ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { ValidateStatus } from '@subwallet/extension-koni-ui/types/validator';
 import { Button, Form, Icon, Image, Input, NetworkItem, SelectModal } from '@subwallet/react-ui';
@@ -16,7 +17,7 @@ import { FormInstance } from '@subwallet/react-ui/es/form/hooks/useForm';
 import SwAvatar from '@subwallet/react-ui/es/sw-avatar';
 import { CheckCircle, QrCode } from 'phosphor-react';
 import { RuleObject } from 'rc-field-form/lib/interface';
-import React, { ChangeEventHandler, useCallback, useContext, useRef, useState } from 'react';
+import React, { useCallback, useContext, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import styled, { useTheme } from 'styled-components';
 
@@ -33,18 +34,22 @@ interface NftImportFormType {
   type: _AssetType
 }
 
+interface ValidationInfo {
+  status: ValidateStatus,
+  message?: string
+}
+
 function Component ({ className = '' }: Props): React.ReactElement<Props> {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const dataContext = useContext(DataContext);
   const { token } = useTheme() as Theme;
-  const [, update] = useState({});
 
   const formRef = useRef<FormInstance<NftImportFormType>>(null);
   const chainInfoMap = useGetContractSupportedChains();
   const [selectedChain, setSelectedChain] = useState<string>('');
   const [selectedNftType, setSelectedNftType] = useState<string>('');
-  const [contractValidation, setContractValidation] = useState<ValidateStatus>('');
+  const [contractValidation, setContractValidation] = useState<ValidationInfo>({ status: '' });
   const [loading, setLoading] = useState(false);
 
   const nftTypeOptions = useGetNftTypeSupported(chainInfoMap[selectedChain]);
@@ -56,12 +61,9 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
   const onSubmit = useCallback(() => {
     const formValues = formRef.current?.getFieldsValue();
 
-    console.log('onFinish', formValues);
-  }, []);
+    setLoading(true);
 
-  const onChangeContractAddress: ChangeEventHandler<HTMLInputElement> = useCallback((event) => {
-    update({});
-    setContractValidation('');
+    console.log('onFinish', formValues);
   }, []);
 
   const onChangeChain = useCallback((value: string) => {
@@ -169,21 +171,58 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
 
   const contractAddressValidator = useCallback((rule: RuleObject, contractAddress: string): Promise<void> => {
     return new Promise((resolve, reject) => {
-      if ([_AssetType.ERC721].includes(selectedNftType as _AssetType) && isEthereumAddress(contractAddress)) {
-        resolve();
-      }
+      const isValidEvmContract = [_AssetType.ERC721].includes(selectedNftType as _AssetType) && isEthereumAddress(contractAddress);
+      const isValidWasmContract = [_AssetType.PSP34].includes(selectedNftType as _AssetType) && isValidSubstrateAddress(contractAddress);
 
-      if ([_AssetType.PSP34].includes(selectedNftType as _AssetType) && isValidSubstrateAddress(contractAddress)) {
-        resolve();
-      }
+      if (isValidEvmContract || isValidWasmContract) {
+        validateCustomToken({
+          contractAddress,
+          originChain: selectedChain,
+          type: selectedNftType as _AssetType
+        })
+          .then((result) => {
+            if (result.isExist) {
+              console.log('existed contract');
+              setContractValidation({
+                status: 'error',
+                message: t('Existed contract address')
+              });
+              resolve();
+            }
 
-      reject(t('Invalid contract address'));
+            if (result.contractError) {
+              console.log('contract error');
+              setContractValidation({
+                status: 'error',
+                message: t('Invalid contract address')
+              });
+              resolve();
+            }
+
+            if (!result.isExist && !result.contractError) {
+              console.log('validation passed', result);
+              setContractValidation({
+                status: 'success'
+              });
+              resolve();
+            }
+          })
+          .catch(() => reject(t('Invalid contract address')));
+      } else {
+        reject(t('Invalid contract address'));
+      }
     });
-  }, [selectedNftType, t]);
+  }, [selectedChain, selectedNftType, t]);
 
   const isCollectionNameDisabled = useCallback(() => {
+    if (contractValidation.status === '' || contractValidation.status === 'error') {
+      return true;
+    }
 
-  }, []);
+    return selectedNftType === '' || selectedChain === '';
+  }, [contractValidation, selectedChain, selectedNftType]);
+
+  console.log('contractValidation', contractValidation);
 
   return (
     <PageWrapper
@@ -219,7 +258,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
                 items={Object.values(chainInfoMap)}
                 label={t<string>('Chain')}
                 onSelect={onChangeChain}
-                placeholder={t('Choose the origin chain of the NFT')}
+                placeholder={t('Select a chain')}
                 prefix={selectedChain !== '' && originChainLogo()}
                 renderItem={renderChainOption}
                 renderSelected={renderChainSelected}
@@ -248,12 +287,10 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
             <Form.Item
               name='contractAddress'
               rules={[{ validator: contractAddressValidator }]}
-              validateStatus={contractValidation}
             >
               <Input
                 disabled={selectedNftType === ''}
                 label={t<string>('NFT contract address')}
-                onChange={onChangeContractAddress}
                 prefix={contractAddressIcon()}
                 suffix={contractAddressQrIcon()}
               />
@@ -264,15 +301,16 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
               rules={[{ validator: collectionNameValidator }]}
             >
               <Input
+                disabled={isCollectionNameDisabled()}
                 label={t<string>('NFT collection name')}
-                disabled={contractValidation === '' || contractValidation === 'error' || }
               />
             </Form.Item>
+
+            <Form.Item validateStatus={contractValidation.status} help={contractValidation.message} />
 
             <Form.Item>
               <Button
                 block={true}
-                disabled={!!contractValidation}
                 htmlType='submit'
                 icon={<Icon
                   customSize={'28px'}
@@ -307,6 +345,10 @@ const NftImport = styled(Component)<Props>(({ theme: { token } }: Props) => {
     },
 
     '.ant-web3-block-right-item': {
+      marginRight: 0
+    },
+
+    '.ant-input-suffix': {
       marginRight: 0
     },
 

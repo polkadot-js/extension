@@ -31,6 +31,11 @@ const GlobalStyle = createGlobalStyle<ThemeProps>(({ theme }) => {
       color: token.colorText
     },
 
+    pre: {
+      fontFamily: 'inherit',
+      whiteSpace: 'pre-wrap'
+    },
+
     html: {
       scrollbarWidth: 'none',
 

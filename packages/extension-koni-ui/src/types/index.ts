@@ -6,6 +6,7 @@ import { AccountJson } from '@subwallet/extension-base/background/types';
 import { Theme } from '../themes';
 
 export { Theme };
+export { Icon as PhosphorIcon } from 'phosphor-react';
 
 export interface ThemeProps {
   theme: Theme;

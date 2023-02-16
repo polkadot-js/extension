@@ -6,6 +6,7 @@ import AccountCardSelection from '@subwallet/extension-koni-ui/components/Accoun
 import AccountItemBriefInfo from '@subwallet/extension-koni-ui/components/Account/AccountItemBriefInfo';
 import SelectAccountEmpty from '@subwallet/extension-koni-ui/components/Layout/parts/SelectAccount/Empty';
 import SelectAccountFooter from '@subwallet/extension-koni-ui/components/Layout/parts/SelectAccount/Footer';
+import { SELECT_ACCOUNT_MODAL } from '@subwallet/extension-koni-ui/constants/modal';
 import { useGetCurrentAuth } from '@subwallet/extension-koni-ui/hooks/useGetCurrentAuth';
 import useTranslation from '@subwallet/extension-koni-ui/hooks/useTranslation';
 import { saveCurrentAccountAddress, triggerAccountsSubscription } from '@subwallet/extension-koni-ui/messaging';
@@ -16,7 +17,7 @@ import { findAccountByAddress, isAccountAll } from '@subwallet/extension-koni-ui
 import { BackgroundIcon, SelectModal } from '@subwallet/react-ui';
 import Icon from '@subwallet/react-ui/es/icon';
 import CN from 'classnames';
-import { CheckCircle, PlugsConnected } from 'phosphor-react';
+import { CheckCircle, Icon as PhosphorIcon, Plug, Plugs, PlugsConnected } from 'phosphor-react';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useSelector } from 'react-redux';
 import styled from 'styled-components';
@@ -31,6 +32,11 @@ enum ConnectionStatement {
   PARTIAL_CONNECTED='partial-connected',
   DISCONNECTED='disconnected',
   BLOCKED='blocked'
+}
+
+interface ConnectIconProps {
+  className: ConnectionStatement;
+  icon: PhosphorIcon;
 }
 
 const renderEmpty = () => <SelectAccountEmpty />;
@@ -96,13 +102,32 @@ function Component ({ className }: Props): React.ReactElement<Props> {
     );
   }, [className]);
 
+  const connectIcon: ConnectIconProps = useMemo((): ConnectIconProps => {
+    const result: ConnectIconProps = {
+      icon: PlugsConnected,
+      className: connectionState
+    };
+
+    switch (connectionState) {
+      case ConnectionStatement.DISCONNECTED:
+      case ConnectionStatement.BLOCKED:
+        result.icon = Plugs;
+        break;
+      case ConnectionStatement.NOT_CONNECTED:
+        result.icon = Plug;
+        break;
+    }
+
+    return result;
+  }, [connectionState]);
+
   const renderSelectedItem = useCallback((item: AccountJson): React.ReactNode => {
     return (
       <div className='selected-account'>
-        <div className={CN('connect-icon', connectionState)}>
+        <div className={CN('connect-icon', connectIcon.className)}>
           <BackgroundIcon
             backgroundColor='var(--bg-color)'
-            phosphorIcon={PlugsConnected}
+            phosphorIcon={connectIcon.icon}
             shape='circle'
             size='sm'
             type='phosphor'
@@ -111,7 +136,7 @@ function Component ({ className }: Props): React.ReactElement<Props> {
         <AccountItemBriefInfo account={item} />
       </div>
     );
-  }, [connectionState]);
+  }, [connectIcon]);
 
   const searchFunction = useCallback((item: AccountJson, searchText: string): boolean => {
     return item.address.toLowerCase().includes(searchText.toLowerCase()) || (item.name || '').toLowerCase().includes(searchText.toLowerCase());
@@ -192,7 +217,7 @@ function Component ({ className }: Props): React.ReactElement<Props> {
         background={'default'}
         className={className}
         footer={<SelectAccountFooter />}
-        id='account-list-modal'
+        id={SELECT_ACCOUNT_MODAL}
         inputWidth={'100%'}
         itemKey='address'
         items={accounts}
@@ -274,7 +299,7 @@ const SelectAccount = styled(Component)<Props>(({ theme }) => {
         color: token.colorTextBase,
 
         [`&.${ConnectionStatement.DISCONNECTED}`]: {
-          '--bg-color': token.colorError
+          '--bg-color': token['gray-3']
         },
 
         [`&.${ConnectionStatement.BLOCKED}`]: {

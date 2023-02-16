@@ -1,18 +1,37 @@
 // Copyright 2019-2022 @subwallet/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
+import { ATTACH_ACCOUNT_MODAL, CREATE_ACCOUNT_MODAL, IMPORT_ACCOUNT_MODAL, SELECT_ACCOUNT_MODAL } from '@subwallet/extension-koni-ui/constants/modal';
 import useTranslation from '@subwallet/extension-koni-ui/hooks/useTranslation';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
-import { Button } from '@subwallet/react-ui';
+import { Button, ModalContext } from '@subwallet/react-ui';
 import Icon from '@subwallet/react-ui/es/icon';
 import { FileArrowDown, PlusCircle, Swatches } from 'phosphor-react';
-import React from 'react';
+import React, { useCallback, useContext } from 'react';
 import styled from 'styled-components';
 
 type Props = ThemeProps;
 
 const Component: React.FC<Props> = ({ className }: Props) => {
   const { t } = useTranslation();
+  const { activeModal, inactiveModal } = useContext(ModalContext);
+
+  const openModal = useCallback((id: string) => {
+    inactiveModal(SELECT_ACCOUNT_MODAL);
+    activeModal(id);
+  }, [activeModal, inactiveModal]);
+
+  const openCreateAccount = useCallback(() => {
+    openModal(CREATE_ACCOUNT_MODAL);
+  }, [openModal]);
+
+  const openImportAccount = useCallback(() => {
+    openModal(IMPORT_ACCOUNT_MODAL);
+  }, [openModal]);
+
+  const openAttachAccount = useCallback(() => {
+    openModal(ATTACH_ACCOUNT_MODAL);
+  }, [openModal]);
 
   return (
     <div className={className}>
@@ -24,6 +43,7 @@ const Component: React.FC<Props> = ({ className }: Props) => {
             weight={'fill'}
           />
         )}
+        onClick={openCreateAccount}
         schema='secondary'
       >
         {t('Create new account')}
@@ -36,6 +56,7 @@ const Component: React.FC<Props> = ({ className }: Props) => {
             weight={'fill'}
           />
         )}
+        onClick={openImportAccount}
         schema='secondary'
       />
       <Button
@@ -46,6 +67,7 @@ const Component: React.FC<Props> = ({ className }: Props) => {
             weight={'fill'}
           />
         )}
+        onClick={openAttachAccount}
         schema='secondary'
       />
     </div>

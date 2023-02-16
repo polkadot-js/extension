@@ -57,15 +57,10 @@ function AccountCardBase (props: Partial<_AccountCardProps>): React.ReactElement
     onPressMoreBtn && onPressMoreBtn();
   }, [onPressMoreBtn]);
 
-  return (
-    <AccountCard
-      {...props}
-      accountName={accountName || ''}
-      address={address || ''}
-      avatarIdentPrefix={prefix || 42}
-      avatarTheme={avatarTheme}
-      className={className}
-      rightItem={<>
+  const renderRightItem = useCallback((x: React.ReactNode): React.ReactNode => {
+    return (
+      <>
+        {x}
         {iconProps && (
           <Button
             icon={
@@ -90,7 +85,19 @@ function AccountCardBase (props: Partial<_AccountCardProps>): React.ReactElement
           size='xs'
           type='ghost'
         />}
-      </>}
+      </>
+    );
+  }, [_onClickMore, iconProps, showMoreBtn]);
+
+  return (
+    <AccountCard
+      {...props}
+      accountName={accountName || ''}
+      address={address || ''}
+      avatarIdentPrefix={prefix || 42}
+      avatarTheme={avatarTheme}
+      className={className}
+      renderRightItem={renderRightItem}
     />
   );
 }

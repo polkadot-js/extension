@@ -2,8 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { Layout } from '@subwallet/extension-koni-ui/components';
-import { ButtonProps } from '@subwallet/react-ui/es/button';
-import Icon from '@subwallet/react-ui/es/icon';
+import { ButtonProps, Icon } from '@subwallet/react-ui';
 import { FadersHorizontal, MagnifyingGlass } from 'phosphor-react';
 import React, { useMemo } from 'react';
 

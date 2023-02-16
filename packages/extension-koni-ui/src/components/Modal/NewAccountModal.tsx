@@ -5,11 +5,11 @@ import { EVM_ACCOUNT_TYPE, SUBSTRATE_ACCOUNT_TYPE } from '@subwallet/extension-k
 import { NEW_ACCOUNT_MODAL } from '@subwallet/extension-koni-ui/constants/modal';
 import useTranslation from '@subwallet/extension-koni-ui/hooks/useTranslation';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
-import { Button, Logo, ModalContext, SettingItem, SwModal } from '@subwallet/react-ui';
-import Icon from '@subwallet/react-ui/es/icon';
+import { Button, Icon, Logo, ModalContext, SettingItem, SwModal } from '@subwallet/react-ui';
 import CN from 'classnames';
 import { CheckCircle } from 'phosphor-react';
 import React, { useCallback, useContext, useMemo, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 
 import { KeypairType } from '@polkadot/util-crypto/types';
@@ -28,6 +28,7 @@ const modalId = NEW_ACCOUNT_MODAL;
 const Component: React.FC<Props> = ({ className }: Props) => {
   const { t } = useTranslation();
   const { inactiveModal } = useContext(ModalContext);
+  const navigate = useNavigate();
 
   const [selectedItems, setSelectedItems] = useState<KeypairType[]>([]);
 
@@ -68,8 +69,9 @@ const Component: React.FC<Props> = ({ className }: Props) => {
   ]), [onClickItem]);
 
   const onSubmit = useCallback(() => {
-    console.log(selectedItems);
-  }, [selectedItems]);
+    navigate('/accounts/new-seed-phrase', { state: { accountTypes: selectedItems } });
+    inactiveModal(modalId);
+  }, [navigate, selectedItems, inactiveModal]);
 
   return (
     <SwModal

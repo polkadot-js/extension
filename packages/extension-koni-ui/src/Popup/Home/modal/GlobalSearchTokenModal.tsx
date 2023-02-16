@@ -5,8 +5,7 @@ import { TokenBalanceSelectionItem } from '@subwallet/extension-koni-ui/componen
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { TokenBalanceItemType } from '@subwallet/extension-koni-ui/types/balance';
 import { AccountBalanceHookType, TokenGroupHookType } from '@subwallet/extension-koni-ui/types/hook';
-import { SwList } from '@subwallet/react-ui';
-import SwModal from '@subwallet/react-ui/es/sw-modal';
+import { SwList, SwModal } from '@subwallet/react-ui';
 import React, { useCallback, useMemo } from 'react';
 import styled from 'styled-components';
 

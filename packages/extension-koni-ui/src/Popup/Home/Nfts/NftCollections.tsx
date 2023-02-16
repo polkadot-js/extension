@@ -10,8 +10,7 @@ import { NftGalleryWrapper } from '@subwallet/extension-koni-ui/Popup/Home/Nfts/
 import { INftCollectionDetail, nftPerPage } from '@subwallet/extension-koni-ui/Popup/Home/Nfts/utils';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { Theme, ThemeProps } from '@subwallet/extension-koni-ui/types';
-import { ButtonProps, SwList } from '@subwallet/react-ui';
-import Icon from '@subwallet/react-ui/es/icon';
+import { ButtonProps, Icon, SwList } from '@subwallet/react-ui';
 import { getAlphaColor } from '@subwallet/react-ui/lib/theme/themes/default/colorAlgorithm';
 import { Image, Plus } from 'phosphor-react';
 import React, { useCallback, useContext, useEffect, useState } from 'react';

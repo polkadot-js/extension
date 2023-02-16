@@ -6,8 +6,7 @@ import { CREATE_ACCOUNT_MODAL, NEW_ACCOUNT_MODAL } from '@subwallet/extension-ko
 import useTranslation from '@subwallet/extension-koni-ui/hooks/useTranslation';
 import { Theme } from '@subwallet/extension-koni-ui/themes';
 import { PhosphorIcon, ThemeProps } from '@subwallet/extension-koni-ui/types';
-import { BackgroundIcon, ModalContext, SwModal } from '@subwallet/react-ui';
-import Icon from '@subwallet/react-ui/es/icon';
+import { BackgroundIcon, Icon, ModalContext, SwModal } from '@subwallet/react-ui';
 import CN from 'classnames';
 import { Info, Leaf, ShareNetwork } from 'phosphor-react';
 import React, { useCallback, useContext, useMemo } from 'react';
@@ -17,7 +16,7 @@ type Props = ThemeProps;
 
 interface CreateAccountItem {
   label: string;
-  modalId: string;
+  key: string;
   icon: PhosphorIcon;
   backgroundColor: string;
   onClick: () => void;
@@ -50,7 +49,7 @@ const Component: React.FC<Props> = ({ className }: Props) => {
     {
       backgroundColor: token['green-7'],
       icon: Leaf,
-      modalId: '1',
+      key: 'new-seed-phrase',
       label: 'Create with new Seed Phrase',
       onClick: () => {
         inactiveModal(modalId);
@@ -60,7 +59,7 @@ const Component: React.FC<Props> = ({ className }: Props) => {
     {
       backgroundColor: token['magenta-7'],
       icon: ShareNetwork,
-      modalId: '2',
+      key: 'derive-account',
       label: 'Create with existing Seed Phrase',
       onClick: () => { /* Empty */ }
     }
@@ -85,7 +84,7 @@ const Component: React.FC<Props> = ({ className }: Props) => {
         {items.map((item) => {
           return (
             <div
-              key={item.modalId}
+              key={item.key}
               onClick={item.onClick}
             >
               <SettingItemSelection

@@ -21,6 +21,7 @@ const NftCollectionDetail = React.lazy(() => import('@subwallet/extension-koni-u
 const History = React.lazy(() => import('@subwallet/extension-koni-ui/Popup/Home/History'));
 const Crowdloans = React.lazy(() => import('@subwallet/extension-koni-ui/Popup/Home/Crowdloans'));
 const Home = React.lazy(() => import('@subwallet/extension-koni-ui/Popup/Home'));
+const NewSeedPhrase = React.lazy(() => import('@subwallet/extension-koni-ui/Popup/Account/NewSeedPhrase'));
 
 export function Crypto () {
   const dataContext = useContext(DataContext);
@@ -74,40 +75,42 @@ export const router = createHashRouter([{
     {
       path: '/home',
       element: <Home />,
-      children: [{
-        path: 'tokens',
-        element: <Tokens />
-      },
-      {
-        path: 'nfts',
-        element: <Outlet />,
-        children: [
-          {
-            path: 'collections',
-            element: <NftCollections />
-          },
-          {
-            path: 'collection-detail',
-            element: <NftCollectionDetail />
-          },
-          {
-            path: 'item-detail',
-            element: <NftItemDetail />
-          }
-        ]
-      },
-      {
-        path: 'crowdloans',
-        element: <Crowdloans />
-      },
-      {
-        path: 'staking',
-        element: <Staking />
-      },
-      {
-        path: 'history',
-        element: <History />
-      }]
+      children: [
+        {
+          path: 'tokens',
+          element: <Tokens />
+        },
+        {
+          path: 'nfts',
+          element: <Outlet />,
+          children: [
+            {
+              path: 'collections',
+              element: <NftCollections />
+            },
+            {
+              path: 'collection-detail',
+              element: <NftCollectionDetail />
+            },
+            {
+              path: 'item-detail',
+              element: <NftItemDetail />
+            }
+          ]
+        },
+        {
+          path: 'crowdloans',
+          element: <Crowdloans />
+        },
+        {
+          path: 'staking',
+          element: <Staking />
+        },
+        {
+          path: 'history',
+          element: <History />
+        }
+      ]
     },
     {
       path: '/transaction',
@@ -178,6 +181,16 @@ export const router = createHashRouter([{
         {
           path: 'master-password',
           element: <Example />
+        }
+      ]
+    },
+    {
+      path: 'accounts',
+      element: <Outlet />,
+      children: [
+        {
+          path: 'new-seed-phrase',
+          element: <NewSeedPhrase />
         }
       ]
     }

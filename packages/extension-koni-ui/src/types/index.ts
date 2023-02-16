@@ -8,6 +8,8 @@ import { Theme } from '../themes';
 export { Theme };
 export { Icon as PhosphorIcon } from 'phosphor-react';
 
+export type AccountType = 'ALL' | 'ETHEREUM' | 'SUBSTRATE';
+
 export interface ThemeProps {
   theme: Theme;
   className?: string;

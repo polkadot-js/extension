@@ -74,7 +74,7 @@ export class EvmNftApi extends BaseNftApi {
       image: data.image_url ? this.parseUrl(data.image_url as string) : this.parseUrl(data.image as string),
       description: data.description as string | undefined,
       properties: propertiesMap,
-      external_url: data.external_url as string | undefined,
+      externalUrl: data.external_url as string | undefined,
       chain: this.chain
     } as NftItem;
   }

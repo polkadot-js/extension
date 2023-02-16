@@ -12,6 +12,7 @@ import { SettingsStruct } from '@polkadot/ui-settings/types';
 const initialState = {
   // UI settings
   isShowBalance: false,
+  isShowZeroBalance: true,
   accountAllLogo: '',
   theme: ThemeNames.DARK,
 
@@ -73,6 +74,14 @@ const settingsSlice = createSlice({
       return {
         ...state,
         theme
+      };
+    },
+    updateShowZeroBalanceState (state, action: PayloadAction<boolean>) {
+      const isShowZeroBalance = action.payload;
+
+      return {
+        ...state,
+        isShowZeroBalance
       };
     }
   }

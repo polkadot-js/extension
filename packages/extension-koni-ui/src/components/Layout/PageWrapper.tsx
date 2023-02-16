@@ -52,7 +52,11 @@ function Component ({ animateOnce, children, className, resolve }: PageWrapperPr
 }
 
 const PageWrapper = styled(Component)<PageWrapperProps>(({ theme }) => ({
-  height: '100%'
+  height: '100%',
+
+  '&__inner': {
+    height: '100%'
+  }
 }));
 
 export default PageWrapper;

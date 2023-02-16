@@ -6,9 +6,8 @@ import type { SwScreenLayoutProps } from '@subwallet/react-ui';
 import Footer from '@subwallet/extension-koni-ui/components/Layout/parts/Footer';
 import SelectAccount from '@subwallet/extension-koni-ui/components/Layout/parts/SelectAccount';
 import { SwScreenLayout } from '@subwallet/react-ui';
-import Icon from '@subwallet/react-ui/es/icon';
 import { SwTabBarItem } from '@subwallet/react-ui/es/sw-tab-bar';
-import { Aperture, Database, Globe, MagnifyingGlass, Rocket, Wallet } from 'phosphor-react';
+import { Aperture, Database, Globe, Rocket, Wallet } from 'phosphor-react';
 import React, { useCallback, useMemo } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 
@@ -20,7 +19,7 @@ SwScreenLayoutProps,
   showFooter?: boolean;
 }
 
-const TabBarItems: Array<Omit<SwTabBarItem, 'onClick'>> = [
+const TabBarItems: Array<Omit<SwTabBarItem, 'onClick'> & { url: string }> = [
   {
     icon: {
       type: 'phosphor',
@@ -28,7 +27,8 @@ const TabBarItems: Array<Omit<SwTabBarItem, 'onClick'>> = [
       weight: 'fill'
     },
     label: 'Tokens',
-    key: 'tokens'
+    key: 'tokens',
+    url: '/home/tokens'
   },
   {
     icon: {
@@ -37,7 +37,8 @@ const TabBarItems: Array<Omit<SwTabBarItem, 'onClick'>> = [
       weight: 'fill'
     },
     label: 'NFTs',
-    key: 'nfts'
+    key: 'nfts',
+    url: '/home/nfts/collections'
   },
   {
     icon: {
@@ -46,7 +47,8 @@ const TabBarItems: Array<Omit<SwTabBarItem, 'onClick'>> = [
       weight: 'fill'
     },
     label: 'Crowdloans',
-    key: 'crowdloans'
+    key: 'crowdloans',
+    url: '/home/crowdloans'
   },
   {
     icon: {
@@ -55,7 +57,8 @@ const TabBarItems: Array<Omit<SwTabBarItem, 'onClick'>> = [
       weight: 'fill'
     },
     label: 'Staking',
-    key: 'staking'
+    key: 'staking',
+    url: '/home/staking'
   },
   {
     icon: {
@@ -64,23 +67,12 @@ const TabBarItems: Array<Omit<SwTabBarItem, 'onClick'>> = [
       weight: 'fill'
     },
     label: 'History',
-    key: 'history'
+    key: 'history',
+    url: '/home/history'
   }
 ];
 
-const headerIcons = [
-  {
-    icon: (
-      <Icon
-        phosphorIcon={MagnifyingGlass}
-        size='sm'
-        type='phosphor'
-      />
-    )
-  }
-];
-
-const Base = ({ children, showFooter, ...props }: Props) => {
+const Base = ({ children, headerIcons, showFooter, ...props }: Props) => {
   const navigate = useNavigate();
   const { pathname } = useLocation();
 
@@ -92,16 +84,14 @@ const Base = ({ children, showFooter, ...props }: Props) => {
       const currentTab = pathExcludeHome.split('/')[1];
 
       return currentTab || '';
-    } else {
-      return '';
     }
 
     return '';
   }, [pathname]);
 
   const onSelectTab = useCallback(
-    (key: string) => () => {
-      navigate(`/home/${key}`, { relative: 'route' });
+    (url: string) => () => {
+      navigate(url);
     },
     [navigate]
   );
@@ -115,7 +105,7 @@ const Base = ({ children, showFooter, ...props }: Props) => {
       selectedTabBarItem={selectedTab}
       tabBarItems={TabBarItems.map((item) => ({
         ...item,
-        onClick: onSelectTab(item.key)
+        onClick: onSelectTab(item.url)
       }))}
     >
       {children}

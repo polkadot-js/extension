@@ -43,11 +43,10 @@ const renderEmpty = () => <SelectAccountEmpty />;
 
 function Component ({ className }: Props): React.ReactElement<Props> {
   const { t } = useTranslation();
-  const { accounts, currentAccount } = useSelector((state: RootState) => state.accountState);
+  const { accounts, currentAccount, isAllAccount } = useSelector((state: RootState) => state.accountState);
   const [connectionState, setConnectionState] = useState<ConnectionStatement>(ConnectionStatement.NOT_CONNECTED);
 
   const currentAuth = useGetCurrentAuth();
-  const isAllAccount = useMemo((): boolean => isAccountAll(currentAccount?.address || ''), [currentAccount?.address]);
 
   const _onSelect = useCallback((address: string) => {
     if (address) {

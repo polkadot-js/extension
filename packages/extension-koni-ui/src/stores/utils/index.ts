@@ -100,6 +100,10 @@ export const updateTheme = (theme: ThemeNames) => {
   store.dispatch({ type: 'settings/updateTheme', payload: theme });
 };
 
+export const updateShowZeroBalanceState = (isShow: boolean) => {
+  store.dispatch({ type: 'settings/updateShowZeroBalanceState', payload: isShow });
+};
+
 // export const updateUiSettings = (data: AccountJson) => {
 //   store.dispatch({ type: 'accountState/updateCurrentAccount', payload: data });
 // };

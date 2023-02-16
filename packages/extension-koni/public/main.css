@@ -3,6 +3,14 @@
   box-sizing: inherit
 }
 
+input, button, select, optgroup, textarea {
+  margin: 0;
+  color: inherit;
+  font-size: inherit;
+  font-family: inherit;
+  line-height: inherit;
+}
+
 body ::-webkit-scrollbar {
   -webkit-appearance: none;
   width: 6px;

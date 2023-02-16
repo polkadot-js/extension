@@ -18,9 +18,11 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
   );
 }
 
-export const History = styled(Component)<Props>(({ theme: { token } }: Props) => {
+const History = styled(Component)<Props>(({ theme: { token } }: Props) => {
   return ({
     color: token.colorTextLight1,
     fontSize: token.fontSizeLG
   });
 });
+
+export default History;

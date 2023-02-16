@@ -24,3 +24,5 @@ export const Staking = styled(Component)<Props>(({ theme: { token } }: Props) =>
     fontSize: token.fontSizeLG
   });
 });
+
+export default Staking;

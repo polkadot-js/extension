@@ -167,7 +167,8 @@ export interface StakeUnlockingJson {
 export interface PriceJson {
   ready?: boolean,
   currency: string,
-  priceMap: Record<string, number>
+  priceMap: Record<string, number>,
+  price24hMap: Record<string, number>
 }
 
 export enum APIItemState {
@@ -204,13 +205,13 @@ export interface NftItem {
 
   name?: string;
   image?: string;
-  external_url?: string;
+  externalUrl?: string;
   rarity?: string;
   description?: string;
   properties?: Record<any, any> | null;
   type?: _AssetType.ERC721 | _AssetType.PSP34 | RMRK_VER; // for sending
   rmrk_ver?: RMRK_VER;
-  owner?: string;
+  owner: string;
   onChainOption?: any; // for sending PSP-34 tokens, should be done better
 }
 
@@ -222,6 +223,7 @@ export interface NftCollection {
   collectionName?: string;
   image?: string;
   itemCount?: number;
+  externalUrl?: string;
 }
 
 export interface NftJson {

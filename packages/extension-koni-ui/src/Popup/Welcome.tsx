@@ -40,7 +40,7 @@ function _Welcome ({ className, title = 'content' }: Props): React.ReactElement<
   );
 }
 
-export const Welcome = styled(_Welcome)<Props>(({ theme }) => {
+const Welcome = styled(_Welcome)<Props>(({ theme }) => {
   const { token } = theme as Theme;
 
   return ({
@@ -55,3 +55,5 @@ export const Welcome = styled(_Welcome)<Props>(({ theme }) => {
     }
   });
 });
+
+export default Welcome;

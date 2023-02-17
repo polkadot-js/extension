@@ -14,11 +14,11 @@ import { useSelector } from 'react-redux';
 import { Outlet, useLocation, useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 
+changeHeaderLogo(<Logo2D />);
+
 export function initRootPromise () {
   // Init Application with some default data if not existed
   const VARIANTS = ['beam', 'marble', 'pixel', 'sunset', 'bauhaus', 'ring'];
-
-  changeHeaderLogo(<Logo2D />);
 
   function getRandomVariant (): string {
     const random = Math.floor(Math.random() * 6);

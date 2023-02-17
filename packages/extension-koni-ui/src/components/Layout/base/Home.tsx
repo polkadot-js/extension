@@ -4,7 +4,8 @@
 import { Layout } from '@subwallet/extension-koni-ui/components';
 import { ButtonProps, Icon } from '@subwallet/react-ui';
 import { FadersHorizontal, MagnifyingGlass } from 'phosphor-react';
-import React, { useMemo } from 'react';
+import React, { useCallback, useMemo } from 'react';
+import { useNavigate } from 'react-router-dom';
 
 type Props = {
   children?: React.ReactNode;
@@ -13,6 +14,8 @@ type Props = {
 };
 
 const Home = ({ children, onClickFilterIcon, onClickSearchIcon }: Props) => {
+  const navigate = useNavigate();
+
   const headerIcons = useMemo<ButtonProps[]>(() => {
     return [
       {
@@ -38,11 +41,16 @@ const Home = ({ children, onClickFilterIcon, onClickSearchIcon }: Props) => {
     ];
   }, [onClickFilterIcon, onClickSearchIcon]);
 
+  const onClickListIcon = useCallback(() => {
+    navigate('/settings/list');
+  }, [navigate]);
+
   return (
     <Layout.Base
       headerCenter={false}
       headerIcons={headerIcons}
       headerLeft={'default'}
+      headerOnClickLeft={onClickListIcon}
       headerPaddingVertical={true}
       showHeader={true}
       showLeftButton={true}

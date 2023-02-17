@@ -21,6 +21,7 @@ const NftCollectionDetail = React.lazy(() => import('@subwallet/extension-koni-u
 const History = React.lazy(() => import('@subwallet/extension-koni-ui/Popup/Home/History'));
 const Crowdloans = React.lazy(() => import('@subwallet/extension-koni-ui/Popup/Home/Crowdloans'));
 const Home = React.lazy(() => import('@subwallet/extension-koni-ui/Popup/Home'));
+const Settings = React.lazy(() => import('@subwallet/extension-koni-ui/Popup/Settings'));
 const NewSeedPhrase = React.lazy(() => import('@subwallet/extension-koni-ui/Popup/Account/NewSeedPhrase'));
 const ImportSeedPhrase = React.lazy(() => import('@subwallet/extension-koni-ui/Popup/Account/ImportSeedPhrase'));
 
@@ -153,33 +154,26 @@ export const router = createHashRouter([{
       children: [
         {
           path: 'list',
-          element: <Example />
-        },
-        {
+          element: <Settings />
+        }, {
           path: 'general',
           element: <Example />
-        },
-        {
+        }, {
           path: 'dapp-access',
           element: <Example />
-        },
-        {
+        }, {
           path: 'dapp-access-edit',
           element: <Example />
-        },
-        {
+        }, {
           path: 'network',
           element: <Example />
-        },
-        {
+        }, {
           path: 'network-edit',
           element: <Example />
-        },
-        {
+        }, {
           path: 'token',
           element: <Example />
-        },
-        {
+        }, {
           path: 'master-password',
           element: <Example />
         }

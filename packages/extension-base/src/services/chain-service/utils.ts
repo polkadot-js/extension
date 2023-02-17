@@ -298,3 +298,13 @@ export function _getBlockExplorerFromChain (chainInfo: _ChainInfo): string {
 
   return chainInfo?.substrateInfo?.blockExplorer || '';
 }
+
+export function _parseMetadataForSmartContractAsset (contractAddress: string): Record<string, string> {
+  return {
+    contractAddress
+  };
+}
+
+export function _isChainTestNet (chainInfo: _ChainInfo): boolean {
+  return chainInfo.isTestnet || false;
+}

@@ -469,9 +469,11 @@ export type LanguageOptionType = {
   value: LanguageType;
 }
 
+export type BrowserConfirmationType = 'extension'|'popup'|'window';
+
 export interface UiSettings {
   language: LanguageType,
-  browserConfirmationType: 'extension'|'popup'|'window',
+  browserConfirmationType: BrowserConfirmationType,
   isShowZeroBalance: boolean,
   isShowBalance: boolean;
   accountAllLogo: string;
@@ -1769,6 +1771,7 @@ export interface KoniRequestSignatures {
   'pri(settings.subscribe)': [null, UiSettings, UiSettings];
   'pri(settings.saveAccountAllLogo)': [string, boolean, UiSettings];
   'pri(settings.saveTheme)': [ThemeNames, boolean, UiSettings];
+  'pri(settings.saveBrowserConfirmationType)': [BrowserConfirmationType, boolean, UiSettings];
 
   // Subscription
   'pri(transaction.history.getSubscription)': [null, TxHistoryItem[], TxHistoryItem[]];

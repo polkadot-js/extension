@@ -1,8 +1,6 @@
 // Copyright 2019-2022 @subwallet/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { _ChainInfo } from '@subwallet/chain-list/types';
-import { _getSubstrateGenesisHash } from '@subwallet/extension-base/services/chain-service/utils';
 import { SIGN_MODE } from '@subwallet/extension-koni-ui/constants/signing';
 import useAccountAvatarTheme from '@subwallet/extension-koni-ui/hooks/account/useAccountAvatarTheme';
 import useAccountRecoded from '@subwallet/extension-koni-ui/hooks/account/useAccountRecoded';

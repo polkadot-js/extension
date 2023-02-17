@@ -78,7 +78,7 @@ function _Root ({ className }: ThemeProps): React.ReactElement {
   return <WalletModalContext>
     <PageWrapper
       animateOnce={true}
-      resolve={dataContext.awaitStores(['accountState', 'chainStore', 'assetRegistry', 'requestState'])}
+      resolve={dataContext.awaitStores(['accountState', 'chainStore', 'assetRegistry', 'requestState', 'settings'])}
     >
       <DefaultRoute>
         <Main className={className}>

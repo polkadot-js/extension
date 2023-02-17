@@ -22,6 +22,7 @@ const History = React.lazy(() => import('@subwallet/extension-koni-ui/Popup/Home
 const Crowdloans = React.lazy(() => import('@subwallet/extension-koni-ui/Popup/Home/Crowdloans'));
 const Home = React.lazy(() => import('@subwallet/extension-koni-ui/Popup/Home'));
 const NewSeedPhrase = React.lazy(() => import('@subwallet/extension-koni-ui/Popup/Account/NewSeedPhrase'));
+const ImportSeedPhrase = React.lazy(() => import('@subwallet/extension-koni-ui/Popup/Account/ImportSeedPhrase'));
 
 export function Crypto () {
   const dataContext = useContext(DataContext);
@@ -191,6 +192,10 @@ export const router = createHashRouter([{
         {
           path: 'new-seed-phrase',
           element: <NewSeedPhrase />
+        },
+        {
+          path: 'import-seed-phrase',
+          element: <ImportSeedPhrase />
         }
       ]
     }

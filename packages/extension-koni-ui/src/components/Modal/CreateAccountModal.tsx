@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { SettingItemSelection } from '@subwallet/extension-koni-ui/components/Setting/SettingItemSelection';
-import { CREATE_ACCOUNT_MODAL, NEW_ACCOUNT_MODAL } from '@subwallet/extension-koni-ui/constants/modal';
+import { CREATE_ACCOUNT_MODAL, DERIVE_ACCOUNT_MODAL, NEW_ACCOUNT_MODAL } from '@subwallet/extension-koni-ui/constants/modal';
 import useTranslation from '@subwallet/extension-koni-ui/hooks/useTranslation';
 import { Theme } from '@subwallet/extension-koni-ui/themes';
 import { PhosphorIcon, ThemeProps } from '@subwallet/extension-koni-ui/types';
@@ -61,7 +61,10 @@ const Component: React.FC<Props> = ({ className }: Props) => {
       icon: ShareNetwork,
       key: 'derive-account',
       label: 'Create with existing Seed Phrase',
-      onClick: () => { /* Empty */ }
+      onClick: () => {
+        inactiveModal(modalId);
+        activeModal(DERIVE_ACCOUNT_MODAL);
+      }
     }
   ]), [activeModal, inactiveModal, token]);
 

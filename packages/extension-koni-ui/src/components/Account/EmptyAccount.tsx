@@ -30,7 +30,7 @@ const Component: React.FC<Props> = ({ className }: Props) => {
   );
 };
 
-const SelectAccountEmpty = styled(Component)<Props>(({ theme: { token } }: Props) => {
+const EmptyAccount = styled(Component)<Props>(({ theme: { token } }: Props) => {
   return {
     '--icon-color': token['gray-4'],
     paddingTop: token.padding,
@@ -54,4 +54,4 @@ const SelectAccountEmpty = styled(Component)<Props>(({ theme: { token } }: Props
   };
 });
 
-export default SelectAccountEmpty;
+export default EmptyAccount;

@@ -1,8 +1,7 @@
 // Copyright 2019-2022 @subwallet/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { Layout } from '@subwallet/extension-koni-ui/components';
-import Loading from '@subwallet/extension-koni-ui/components/Loading';
+import { Layout, LoadingContainer } from '@subwallet/extension-koni-ui/components';
 import { EVM_ACCOUNT_TYPE, SUBSTRATE_ACCOUNT_TYPE } from '@subwallet/extension-koni-ui/constants/account';
 import useGetDefaultAccountName from '@subwallet/extension-koni-ui/hooks/account/useGetDefaultAccountName';
 import useNotification from '@subwallet/extension-koni-ui/hooks/useNotification';
@@ -177,7 +176,7 @@ const Component: React.FC<Props> = ({ className }: Props) => {
           </Button>
         </div>
       )}
-      {!seedPhrase && (<Loading />)}
+      {!seedPhrase && (<LoadingContainer />)}
     </Layout.Base>
   );
 };

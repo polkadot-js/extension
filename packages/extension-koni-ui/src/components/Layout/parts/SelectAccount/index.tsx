@@ -2,9 +2,9 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { AccountJson, CurrentAccountInfo } from '@subwallet/extension-base/background/types';
-import AccountCardSelection from '@subwallet/extension-koni-ui/components/Account/AccountCardSelection';
-import AccountItemBriefInfo from '@subwallet/extension-koni-ui/components/Account/AccountItemBriefInfo';
-import SelectAccountEmpty from '@subwallet/extension-koni-ui/components/Layout/parts/SelectAccount/Empty';
+import AccountCardSelection from '@subwallet/extension-koni-ui/components/Account/Card/AccountCardSelection';
+import AccountBriefInfo from '@subwallet/extension-koni-ui/components/Account/Info/AccountBriefInfo';
+import EmptyAccount from '@subwallet/extension-koni-ui/components/Account/EmptyAccount';
 import SelectAccountFooter from '@subwallet/extension-koni-ui/components/Layout/parts/SelectAccount/Footer';
 import { SELECT_ACCOUNT_MODAL } from '@subwallet/extension-koni-ui/constants/modal';
 import { useGetCurrentAuth } from '@subwallet/extension-koni-ui/hooks/useGetCurrentAuth';
@@ -14,6 +14,7 @@ import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { Theme } from '@subwallet/extension-koni-ui/themes';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { findAccountByAddress, isAccountAll } from '@subwallet/extension-koni-ui/util';
+import { searchAccountFunction } from '@subwallet/extension-koni-ui/util/account';
 import { BackgroundIcon, Icon, SelectModal } from '@subwallet/react-ui';
 import CN from 'classnames';
 import { CheckCircle, Icon as PhosphorIcon, Plug, Plugs, PlugsConnected } from 'phosphor-react';
@@ -38,7 +39,7 @@ interface ConnectIconProps {
   icon: PhosphorIcon;
 }
 
-const renderEmpty = () => <SelectAccountEmpty />;
+const renderEmpty = () => <EmptyAccount />;
 
 function Component ({ className }: Props): React.ReactElement<Props> {
   const { t } = useTranslation();
@@ -75,7 +76,7 @@ function Component ({ className }: Props): React.ReactElement<Props> {
     if (isAllAccount) {
       return (
         <div className='all-account-item'>
-          <AccountItemBriefInfo account={item} />
+          <AccountBriefInfo account={item} />
           {_selected && (
             <Icon
               className='selected'
@@ -131,14 +132,10 @@ function Component ({ className }: Props): React.ReactElement<Props> {
             type='phosphor'
           />
         </div>
-        <AccountItemBriefInfo account={item} />
+        <AccountBriefInfo account={item} />
       </div>
     );
   }, [connectIcon]);
-
-  const searchFunction = useCallback((item: AccountJson, searchText: string): boolean => {
-    return item.address.toLowerCase().includes(searchText.toLowerCase()) || (item.name || '').toLowerCase().includes(searchText.toLowerCase());
-  }, []);
 
   useEffect(() => {
     if (currentAuth) {
@@ -223,7 +220,7 @@ function Component ({ className }: Props): React.ReactElement<Props> {
         renderItem={renderItem}
         renderSelected={renderSelectedItem}
         renderWhenEmpty={renderEmpty}
-        searchFunction={searchFunction}
+        searchFunction={searchAccountFunction}
         searchPlaceholder={t('Account name')}
         searchableMinCharactersCount={2}
         selected={currentAccount?.address || ''}

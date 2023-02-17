@@ -1,10 +1,7 @@
 // Copyright 2019-2022 @polkadot/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import AttachAccountModal from '@subwallet/extension-koni-ui/components/Modal/AttachAccountModal';
-import CreateAccountModal from '@subwallet/extension-koni-ui/components/Modal/CreateAccountModal';
-import ImportAccountModal from '@subwallet/extension-koni-ui/components/Modal/ImportAccountModal';
-import NewAccountModal from '@subwallet/extension-koni-ui/components/Modal/NewAccountModal';
+import { AttachAccountModal, CreateAccountModal, DeriveAccountModal, ImportAccountModal, NewAccountModal } from '@subwallet/extension-koni-ui/components/Modal';
 import Confirmations from '@subwallet/extension-koni-ui/Popup/Confirmations';
 import { Debugger } from '@subwallet/extension-koni-ui/Popup/Debugger';
 import { Button, Icon, ModalContext, SwModal } from '@subwallet/react-ui';
@@ -101,5 +98,6 @@ export const WalletModalContext = ({ children }: Props) => {
     <ImportAccountModal />
     <AttachAccountModal />
     <NewAccountModal />
+    <DeriveAccountModal />
   </>;
 };

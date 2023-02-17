@@ -1,6 +1,7 @@
 // Copyright 2019-2022 @polkadot/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
+import { TokenBalanceSelectionItem } from '@subwallet/extension-koni-ui/components/TokenItem/TokenBalanceSelectionItem';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { updateShowZeroBalanceState } from '@subwallet/extension-koni-ui/stores/utils';
 import { Theme, ThemeProps } from '@subwallet/extension-koni-ui/types';
@@ -11,7 +12,6 @@ import { Wallet } from 'phosphor-react';
 import React, { useCallback } from 'react';
 import { useSelector } from 'react-redux';
 import styled, { useTheme } from 'styled-components';
-import { TokenBalanceSelectionItem } from '@subwallet/extension-koni-ui/components/TokenItem/TokenBalanceSelectionItem';
 
 type Props = ThemeProps & {
   id: string,

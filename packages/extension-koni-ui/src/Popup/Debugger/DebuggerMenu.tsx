@@ -122,32 +122,32 @@ const MENU_DATA: MenuItem[] = [
           }]
       },
       {
-        name: 'setting',
-        url: '/setting',
+        name: 'Settings',
+        url: '/settings',
         subItems: [{
           name: 'list',
-          url: '/setting/list'
+          url: '/settings/list'
         }, {
           name: 'general',
-          url: '/setting/general'
+          url: '/settings/general'
         }, {
           name: 'dapp-access',
-          url: '/setting/dapp-access'
+          url: '/settings/dapp-access'
         }, {
           name: 'dapp-access-edit',
-          url: '/setting/dapp-access-edit'
+          url: '/settings/dapp-access-edit'
         }, {
           name: 'network',
-          url: '/setting/network'
+          url: '/settings/network'
         }, {
           name: 'network-edit',
-          url: '/setting/network-edit'
+          url: '/settings/network-edit'
         }, {
           name: 'token',
-          url: '/setting/token'
+          url: '/settings/token'
         }, {
           name: 'master-password',
-          url: '/setting/master-password'
+          url: '/settings/master-password'
         }]
       }
     ]

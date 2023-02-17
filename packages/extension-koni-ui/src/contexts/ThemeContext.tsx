@@ -28,7 +28,8 @@ const GlobalStyle = createGlobalStyle<ThemeProps>(({ theme }) => {
   return ({
     body: {
       fontFamily: token.fontFamily,
-      color: token.colorText
+      color: token.colorText,
+      fontWeight: token.bodyFontWeight
     },
 
     pre: {

@@ -3,12 +3,13 @@
 
 import PageWrapper from '@subwallet/extension-koni-ui/components/Layout/PageWrapper';
 import { EXTENSION_VERSION } from '@subwallet/extension-koni-ui/constants/commont';
+import useIsPopup from '@subwallet/extension-koni-ui/hooks/useIsPopup';
 import { windowOpen } from '@subwallet/extension-koni-ui/messaging';
 import { Theme, ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { BackgroundIcon, Button, Icon, SettingItem, SwHeader, SwIconProps } from '@subwallet/react-ui';
 import { ButtonProps } from '@subwallet/react-ui/es/button';
 import { ArrowsOut, ArrowSquareOut, Book, BookBookmark, BookOpen, CaretRight, Coin, DiscordLogo, FrameCorners, GlobeHemisphereEast, Lock, ShareNetwork, ShieldCheck, TelegramLogo, TwitterLogo, X } from 'phosphor-react';
-import React, { useCallback, useMemo } from 'react';
+import React, { useMemo } from 'react';
 import { Outlet, useNavigate } from 'react-router-dom';
 import styled, { useTheme } from 'styled-components';
 
@@ -21,6 +22,7 @@ type SettingItemType = {
   rightIcon: SwIconProps['phosphorIcon'],
   title: string,
   onClick?: () => void,
+  isHidden?: boolean,
 };
 
 type SettingGroupItemType = {
@@ -55,13 +57,7 @@ function generateRightIcon (icon: SwIconProps['phosphorIcon']): React.ReactNode 
 function Component ({ className = '' }: Props): React.ReactElement<Props> {
   const navigate = useNavigate();
   const { token } = useTheme() as Theme;
-
-  const onWindowOpen = useCallback(
-    () => {
-      windowOpen('/').catch(console.error);
-    },
-    []
-  );
+  const isPopup = useIsPopup();
 
   // todo: i18n all titles, labels below
   const SettingGroupItemType: SettingGroupItemType[] = [
@@ -74,14 +70,20 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
           leftIconBgColor: token.colorPrimary,
           rightIcon: ArrowsOut,
           title: 'Expand view',
-          onClick: onWindowOpen
+          onClick: () => {
+            windowOpen('/').catch(console.error);
+          },
+          isHidden: !isPopup
         },
         {
           key: 'general-settings',
           leftIcon: GlobeHemisphereEast,
           leftIconBgColor: token['magenta-6'],
           rightIcon: CaretRight,
-          title: 'General settings'
+          title: 'General settings',
+          onClick: () => {
+            navigate('/settings/general');
+          }
         },
         {
           key: 'security-settings',
@@ -223,16 +225,18 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
                   {!!group.label && (<div className='__group-label'>{group.label}</div>)}
 
                   <div className={'__group-content'}>
-                    {group.items.map((item) => (
-                      <SettingItem
-                        className={'__setting-item'}
-                        key={item.key}
-                        leftItemIcon={generateLeftIcon(item.leftIconBgColor, item.leftIcon)}
-                        name={item.title}
-                        onPressItem={item.onClick}
-                        rightItem={generateRightIcon(item.rightIcon)}
-                      />
-                    ))}
+                    {group.items.map((item) => item.isHidden
+                      ? null
+                      : (
+                        <SettingItem
+                          className={'__setting-item'}
+                          key={item.key}
+                          leftItemIcon={generateLeftIcon(item.leftIconBgColor, item.leftIcon)}
+                          name={item.title}
+                          onPressItem={item.onClick}
+                          rightItem={generateRightIcon(item.rightIcon)}
+                        />
+                      ))}
                   </div>
                 </div>
               );

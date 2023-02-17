@@ -14,4 +14,4 @@ export interface INftItemDetail {
 }
 
 // might set perPage based on screen height
-export const nftPerPage = 4;
+export const NFT_PER_PAGE = 4;

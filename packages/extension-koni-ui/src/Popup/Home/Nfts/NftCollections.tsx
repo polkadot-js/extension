@@ -7,7 +7,7 @@ import PageWrapper from '@subwallet/extension-koni-ui/components/Layout/PageWrap
 import { DataContext } from '@subwallet/extension-koni-ui/contexts/DataContext';
 import useTranslation from '@subwallet/extension-koni-ui/hooks/useTranslation';
 import { NftGalleryWrapper } from '@subwallet/extension-koni-ui/Popup/Home/Nfts/component/NftGalleryWrapper';
-import { INftCollectionDetail, nftPerPage } from '@subwallet/extension-koni-ui/Popup/Home/Nfts/utils';
+import { INftCollectionDetail, NFT_PER_PAGE } from '@subwallet/extension-koni-ui/Popup/Home/Nfts/utils';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { Theme, ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { ButtonProps, SwList } from '@subwallet/react-ui';
@@ -48,8 +48,9 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
 
   useEffect(() => {
     // init NftCollections_
-    setNftCollections_(nftCollections.slice(0, nftPerPage));
-  }, [nftCollections]);
+    setNftCollections_(nftCollections.slice(0, NFT_PER_PAGE));
+    // eslint-disable-next-line
+  }, []);
 
   const searchCollection = useCallback((collection: NftCollection, searchText: string) => {
     const searchTextLowerCase = searchText.toLowerCase();
@@ -128,8 +129,8 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
     setTimeout(() => { // delayed to avoid lagging on scroll
       if (nftCollections.length > nftCollections_.length) {
         const nextPage = page + 1;
-        const from = (nextPage - 1) * nftPerPage;
-        const to = from + nftPerPage > nftCollections.length ? nftCollections.length : (from + nftPerPage);
+        const from = (nextPage - 1) * NFT_PER_PAGE;
+        const to = from + NFT_PER_PAGE > nftCollections.length ? nftCollections.length : (from + NFT_PER_PAGE);
 
         setNftCollections_([
           ...nftCollections_,

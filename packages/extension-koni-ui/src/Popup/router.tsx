@@ -23,7 +23,10 @@ const NftImport = React.lazy(() => import('@subwallet/extension-koni-ui/Popup/Ho
 const History = React.lazy(() => import('@subwallet/extension-koni-ui/Popup/Home/History'));
 const Crowdloans = React.lazy(() => import('@subwallet/extension-koni-ui/Popup/Home/Crowdloans'));
 const Home = React.lazy(() => import('@subwallet/extension-koni-ui/Popup/Home'));
+
 const Settings = React.lazy(() => import('@subwallet/extension-koni-ui/Popup/Settings'));
+const ManageTokens = React.lazy(() => import('@subwallet/extension-koni-ui/Popup/Settings/Tokens/ManageTokens'));
+const FungibleTokenImport = React.lazy(() => import('@subwallet/extension-koni-ui/Popup/Settings/Tokens/FungibleTokenImport'));
 
 const ErrorFallback = () => {
   const error = useRouteError();
@@ -165,7 +168,8 @@ export const router = createHashRouter([{
           element: <Example />
         }]
       }]
-    }, {
+    },
+    {
       path: '/settings',
       element: <Outlet />,
       children: [{
@@ -187,8 +191,14 @@ export const router = createHashRouter([{
         path: 'network-edit',
         element: <Example />
       }, {
-        path: 'token',
-        element: <Example />
+        path: 'tokens',
+        element: <ManageTokens />,
+        children: [
+          {
+            path: 'import',
+            element: <FungibleTokenImport />
+          }
+        ]
       }, {
         path: 'master-password',
         element: <Example />

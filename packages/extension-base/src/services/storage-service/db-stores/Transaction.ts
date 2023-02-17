@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import BaseStoreWithAddressAndChain from '@subwallet/extension-base/services/storage-service/db-stores/BaseStoreWithAddressAndChain';
+
 import { ITransactionHistoryItem } from '../databases';
 
 export default class TransactionStore extends BaseStoreWithAddressAndChain<ITransactionHistoryItem> {

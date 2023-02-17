@@ -1,16 +1,12 @@
 // Copyright 2019-2022 @subwallet/extension-koni authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import {gql} from '@apollo/client';
-import {NetworkJson, TxHistoryItem, TxHistoryType} from '@subwallet/extension-base/background/KoniTypes';
+import { gql } from '@apollo/client';
+import { NetworkJson, TxHistoryItem, TxHistoryType } from '@subwallet/extension-base/background/KoniTypes';
 // eslint-disable-next-line camelcase
-import {
-  DotSamaHistory,
-  DotSamaHistory_transfers,
-  DotSamaHistoryVariables
-} from '@subwallet/extension-koni-base/api/subquery/__generated__/DotSamaHistory';
-import {newApolloClient} from '@subwallet/extension-koni-base/api/subquery/subquery';
-import {isAccountAll, reformatAddress} from '@subwallet/extension-koni-base/utils';
+import { DotSamaHistory, DotSamaHistory_transfers, DotSamaHistoryVariables } from '@subwallet/extension-koni-base/api/subquery/__generated__/DotSamaHistory';
+import { newApolloClient } from '@subwallet/extension-koni-base/api/subquery/subquery';
+import { isAccountAll, reformatAddress } from '@subwallet/extension-koni-base/utils';
 
 export const HistoryApiMapSubsquid: Record<string, string> = {
   // polkadot: 'https://squid.subsquid.io/polkadot-explorer/graphql',

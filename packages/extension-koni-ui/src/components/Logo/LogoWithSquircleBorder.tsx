@@ -22,7 +22,7 @@ const Component = ({ children, className }: Props) => {
   );
 };
 
-const LogoWithSquircleBorder = styled(Component)<Props>(({ innerSize=56, size=120 }) => ({
+const LogoWithSquircleBorder = styled(Component)<Props>(({ innerSize = 56, size = 120 }) => ({
   display: 'block',
   width: size,
   height: size,

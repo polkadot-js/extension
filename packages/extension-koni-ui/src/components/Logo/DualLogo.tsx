@@ -45,6 +45,8 @@ const DualLogo = styled(Component)<Props>(({ theme }: ThemeProps) => ({
   alignItems: 'center',
   width: 'max-content',
   margin: '0 auto',
+  padding: theme.token.paddingXS,
+  marginBottom: theme.token.marginXS,
 
   '.link-icon': {
     backgroundColor: theme.token['gray-1'],

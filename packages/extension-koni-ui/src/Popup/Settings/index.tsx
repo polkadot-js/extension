@@ -3,11 +3,12 @@
 
 import PageWrapper from '@subwallet/extension-koni-ui/components/Layout/PageWrapper';
 import { EXTENSION_VERSION } from '@subwallet/extension-koni-ui/constants/commont';
+import { windowOpen } from '@subwallet/extension-koni-ui/messaging';
 import { Theme, ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { BackgroundIcon, Button, Icon, SettingItem, SwHeader, SwIconProps } from '@subwallet/react-ui';
 import { ButtonProps } from '@subwallet/react-ui/es/button';
 import { ArrowsOut, ArrowSquareOut, Book, BookBookmark, BookOpen, CaretRight, Coin, DiscordLogo, FrameCorners, GlobeHemisphereEast, Lock, ShareNetwork, ShieldCheck, TelegramLogo, TwitterLogo, X } from 'phosphor-react';
-import React, { useMemo } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import { Outlet, useNavigate } from 'react-router-dom';
 import styled, { useTheme } from 'styled-components';
 
@@ -55,6 +56,13 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
   const navigate = useNavigate();
   const { token } = useTheme() as Theme;
 
+  const onWindowOpen = useCallback(
+    () => {
+      windowOpen('/').catch(console.error);
+    },
+    []
+  );
+
   // todo: i18n all titles, labels below
   const SettingGroupItemType: SettingGroupItemType[] = [
     {
@@ -65,7 +73,8 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
           leftIcon: FrameCorners,
           leftIconBgColor: token.colorPrimary,
           rightIcon: ArrowsOut,
-          title: 'Expand view'
+          title: 'Expand view',
+          onClick: onWindowOpen
         },
         {
           key: 'general-settings',
@@ -220,6 +229,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
                         key={item.key}
                         leftItemIcon={generateLeftIcon(item.leftIconBgColor, item.leftIcon)}
                         name={item.title}
+                        onPressItem={item.onClick}
                         rightItem={generateRightIcon(item.rightIcon)}
                       />
                     ))}

@@ -30,8 +30,8 @@ export const getTokenPrice = async (priceIds: Array<string>, currency = 'usd'): 
       const currentPrice = val.current_price || 0;
       const price24h = currentPrice - (val.price_change_24h || 0);
 
-      priceMap[val.id] = price24h;
-      price24hMap[val.id] = currentPrice;
+      priceMap[val.id] = currentPrice;
+      price24hMap[val.id] = price24h;
 
       // if (inverseMap[val.id]) {
       //   priceMap[inverseMap[val.id]] = currentPrice;

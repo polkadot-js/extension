@@ -318,7 +318,7 @@ export const Settings = styled(Component)<Props>(({ theme: { token } }: Props) =
       display: 'flex',
       justifyContent: 'center',
       alignItems: 'center',
-      marginRight: -token.marginSM,
+      marginRight: -token.marginXS,
       color: token.colorTextLight4
     },
 

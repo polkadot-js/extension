@@ -9,6 +9,8 @@ import { _ChainState } from '@subwallet/extension-base/services/chain-service/ty
 
 import { SettingsStruct } from '@polkadot/ui-settings/types';
 
+// todo: move this file to extension-koni-ui/src/types/
+
 export type CurrentAccountType = {
   account?: AccountJson | null;
 }
@@ -74,7 +76,6 @@ export interface BaseReduxStore {
 }
 
 export interface AppSettings extends UiSettings, SettingsStruct, BaseReduxStore {
-  isShowZeroBalance: boolean, // todo: may move this field to UiSettings
   authUrls: Record<string, AuthUrlInfo>,
   mediaAllowed: boolean
 }

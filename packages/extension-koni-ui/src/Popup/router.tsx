@@ -24,6 +24,7 @@ const History = React.lazy(() => import('@subwallet/extension-koni-ui/Popup/Home
 const Crowdloans = React.lazy(() => import('@subwallet/extension-koni-ui/Popup/Home/Crowdloans'));
 const Home = React.lazy(() => import('@subwallet/extension-koni-ui/Popup/Home'));
 const Settings = React.lazy(() => import('@subwallet/extension-koni-ui/Popup/Settings'));
+const GeneralSetting = React.lazy(() => import('@subwallet/extension-koni-ui/Popup/Settings/GeneralSetting'));
 
 export function Crypto () {
   const dataContext = useContext(DataContext);
@@ -182,7 +183,7 @@ export const router = createHashRouter([{
         element: <Settings />
       }, {
         path: 'general',
-        element: <Example />
+        element: <GeneralSetting />
       }, {
         path: 'dapp-access',
         element: <Example />

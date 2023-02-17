@@ -456,17 +456,29 @@ export interface CurrentAccountInfo {
   allGenesisHash?: string;
 }
 
-export interface RequestSettingsType {
+export type LanguageType = 'en'
+|'zh'
+|'fr'
+|'tr'
+|'pl'
+|'th'
+|'ur';
+
+export type LanguageOptionType = {
+  text: string;
+  value: LanguageType;
+}
+
+export interface UiSettings {
+  language: LanguageType,
+  browserConfirmationType: 'extension'|'popup'|'window',
+  isShowZeroBalance: boolean,
   isShowBalance: boolean;
   accountAllLogo: string;
   theme: ThemeNames;
 }
 
-export interface UiSettings {
-  isShowBalance: boolean;
-  accountAllLogo: string;
-  theme: ThemeNames;
-}
+export type RequestSettingsType = UiSettings;
 
 export interface RandomTestRequest {
   start: number;

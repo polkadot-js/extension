@@ -9,6 +9,7 @@ import { theme as SwReactUI } from '@subwallet/react-ui';
 import { ThemeConfig, Web3LogoMap } from '@subwallet/react-ui/es/config-provider/context';
 import { AliasToken, GlobalToken } from '@subwallet/react-ui/es/theme/interface';
 import logoMap from '@subwallet/react-ui/es/theme/themes/logoMap';
+import SwLogosMap from "@subwallet/extension-koni-ui/assets/subwallet";
 
 export interface ExtraToken {
   bodyBackgroundColor: string,
@@ -52,7 +53,12 @@ function genDefaultExtraTokens (token: AliasToken): ExtraToken {
 // todo: will standardized logoMap later
 const defaultLogoMap: Web3LogoMap = {
   ...logoMap,
+  network: {
+    ...SwLogosMap,
+    ...LogosMap
+  },
   symbol: {
+    ...SwLogosMap,
     ...LogosMap
   }
 };

@@ -774,7 +774,7 @@ export default class KoniState extends State {
     }
   }
 
-  public getCurrentAccount (update: (value: CurrentAccountInfo) => void): void {
+  public  getCurrentAccount (update: (value: CurrentAccountInfo) => void): void {
     this.currentAccountStore.get('CurrentAccountInfo', update);
   }
 

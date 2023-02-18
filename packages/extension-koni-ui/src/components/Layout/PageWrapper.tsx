@@ -10,7 +10,7 @@ import styled from 'styled-components';
 
 export interface PageWrapperProps extends ThemeProps{
   resolve?: Promise<any>;
-  children?: React.ReactElement;
+  children?: React.ReactNode;
   animateOnce?: boolean;
 }
 

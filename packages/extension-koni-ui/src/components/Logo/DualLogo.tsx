@@ -15,6 +15,7 @@ interface Props extends ThemeProps {
   rightLogo?: React.ReactNode;
 
   linkIcon?: React.ReactNode;
+  linkIconBg?: string;
 }
 
 const defaultLinkIcon = <Icon
@@ -39,7 +40,7 @@ const Component = ({ className, leftLogo = defaultLogo, rightLogo = defaultLogo,
   );
 };
 
-const DualLogo = styled(Component)<Props>(({ theme }: ThemeProps) => ({
+const DualLogo = styled(Component)<Props>(({ linkIconBg, theme }: Props) => ({
   display: 'flex',
   flexWrap: 'wrap',
   alignItems: 'center',
@@ -49,7 +50,7 @@ const DualLogo = styled(Component)<Props>(({ theme }: ThemeProps) => ({
   marginBottom: theme.token.marginXS,
 
   '.link-icon': {
-    backgroundColor: theme.token['gray-1'],
+    backgroundColor: linkIconBg || theme.token['gray-1'],
     zIndex: 10,
     textAlign: 'center',
     width: 40,

@@ -40,7 +40,7 @@ export const filterAuthorizeAccounts = (accounts: AccountJson[], accountAuthType
   rs = rs.filter((acc) => acc.isReadOnly !== true);
 
   if (accountAuthType === 'evm') {
-    rs = rs.filter((acc) => (false));
+    rs = rs.filter((acc) => (isAccountAll(acc.address) || acc.type === 'ethereum'));
   } else {
     rs = rs.filter((acc) => (isAccountAll(acc.address) || acc.type !== 'ethereum'));
   }

@@ -37,7 +37,7 @@ const GlobalStyle = createGlobalStyle<ThemeProps>(({ theme }) => {
 
     '.text-tertiary': {
       color: token.colorTextTertiary
-    },
+    }
   });
 });
 

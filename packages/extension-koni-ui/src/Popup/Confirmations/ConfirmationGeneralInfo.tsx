@@ -4,7 +4,7 @@
 import { ConfirmationRequestBase } from '@subwallet/extension-base/background/types';
 import DualLogo from '@subwallet/extension-koni-ui/components/Logo/DualLogo';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
-import {Image, Logo, Typography} from '@subwallet/react-ui';
+import { Image, Logo, Typography } from '@subwallet/react-ui';
 import React from 'react';
 import styled from 'styled-components';
 
@@ -26,7 +26,12 @@ function Component ({ className, request }: Props) {
   return (
     <div className={className}>
       <DualLogo
-        leftLogo={<Image src={leftLogoUrl} shape='squircle' width={56} height={56} />}
+        leftLogo={<Image
+          height={56}
+          shape='squircle'
+          src={leftLogoUrl}
+          width={56}
+        />}
         rightLogo={<Logo
           network={'subwallet'}
           shape='squircle'

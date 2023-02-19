@@ -10,7 +10,7 @@
     "url": "https://github.com/polkadot-js/extension.git"
   },
   "sideEffects": false,
-  "version": "0.44.9-9-x",
+  "version": "0.44.9",
   "versions": {
     "git": "0.44.9-9-x",
     "npm": "0.44.8"
@@ -32,25 +32,25 @@
     "lint": "polkadot-dev-run-lint",
     "postinstall": "polkadot-dev-yarn-only",
     "start": "yarn watch",
-    "test": "EXTENSION_PREFIX='test' polkadot-dev-run-test --detectOpenHandles",
-    "test:one": "EXTENSION_PREFIX='test' polkadot-dev-run-test --detectOpenHandles",
+    "test": "EXTENSION_PREFIX='test' polkadot-dev-run-test --env jest -- --detectOpenHandles",
+    "test:one": "EXTENSION_PREFIX='test' polkadot-dev-run-test --env jest -- --detectOpenHandles",
     "watch": "cd packages/extension && yarn polkadot-exec-webpack --config webpack.watch.cjs --mode development --watch"
   },
   "devDependencies": {
     "@babel/core": "^7.20.12",
-    "@polkadot/dev": "^0.68.6",
+    "@polkadot/dev": "^0.68.38",
     "@types/jest": "^29.4.0",
     "i18next-scanner": "^4.1.1",
     "sinon-chrome": "^3.0.1"
   },
   "resolutions": {
-    "@polkadot/api": "^9.13.6",
-    "@polkadot/keyring": "^10.3.1",
-    "@polkadot/networks": "^10.3.1",
-    "@polkadot/types": "^9.13.6",
-    "@polkadot/util": "^10.3.1",
-    "@polkadot/util-crypto": "^10.3.1",
-    "@polkadot/x-fetch": "^10.3.1",
+    "@polkadot/api": "^9.14.2",
+    "@polkadot/keyring": "^10.4.2",
+    "@polkadot/networks": "^10.4.2",
+    "@polkadot/types": "^9.14.2",
+    "@polkadot/util": "^10.4.2",
+    "@polkadot/util-crypto": "^10.4.2",
+    "@polkadot/x-fetch": "^10.4.2",
     "babel-core": "^7.0.0-bridge.0",
     "safe-buffer": "^5.2.1",
     "typescript": "^4.9.5"

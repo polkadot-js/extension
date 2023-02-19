@@ -25,7 +25,7 @@
     "@polkadot/x-global": "^10.4.2"
   },
   "devDependencies": {
-    "@types/chrome": "^0.0.211",
+    "@types/chrome": "^0.0.216",
     "@types/firefox-webext-browser": "^109.0.0"
   },
   "peerDependencies": {

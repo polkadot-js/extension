@@ -25,7 +25,7 @@ function Button ({ children, className = '', isBusy, isDisabled, onClick, to }: 
         return;
       }
 
-      onClick && onClick();
+      onClick && Promise.resolve(onClick()).catch(console.error);
 
       if (to) {
         window.location.hash = to;

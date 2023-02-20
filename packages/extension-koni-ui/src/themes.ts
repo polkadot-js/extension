@@ -5,6 +5,7 @@ import { ThemeNames } from '@subwallet/extension-base/background/KoniTypes';
 import defaultImagePlaceholder from '@subwallet/extension-koni-ui/assets/default-image-placeholder.png';
 import LogosMap from '@subwallet/extension-koni-ui/assets/logo';
 import subWalletLogo from '@subwallet/extension-koni-ui/assets/sub-wallet-logo.svg';
+import SwLogosMap from '@subwallet/extension-koni-ui/assets/subwallet';
 import { theme as SwReactUI } from '@subwallet/react-ui';
 import { ThemeConfig as _ThemeConfig, Web3LogoMap } from '@subwallet/react-ui/es/config-provider/context';
 import { AliasToken as _AliasToken, GlobalToken as _GlobalToken } from '@subwallet/react-ui/es/theme/interface';
@@ -56,7 +57,12 @@ function genDefaultExtraTokens (token: AliasToken): ExtraToken {
 // todo: will standardized logoMap later
 const defaultLogoMap: Web3LogoMap = {
   ...logoMap,
+  network: {
+    ...SwLogosMap,
+    ...LogosMap
+  },
   symbol: {
+    ...SwLogosMap,
     ...LogosMap
   }
 };

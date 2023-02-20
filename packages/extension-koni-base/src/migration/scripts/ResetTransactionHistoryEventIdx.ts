@@ -10,10 +10,6 @@ export default class ResetTransactionHistoryEventIdx extends BaseMigrationJob {
 
     const oldData = await db.transactions.toArray();
 
-    oldData.forEach((transaction) => {
-      transaction.eventIdx = 0;
-    });
-
     await db.transactions.clear();
     await db.transactions.bulkAdd(oldData);
   }

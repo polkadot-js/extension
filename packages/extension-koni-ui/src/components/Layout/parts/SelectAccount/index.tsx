@@ -7,6 +7,7 @@ import AccountBriefInfo from '@subwallet/extension-koni-ui/components/Account/In
 import EmptyAccount from '@subwallet/extension-koni-ui/components/Account/EmptyAccount';
 import SelectAccountFooter from '@subwallet/extension-koni-ui/components/Layout/parts/SelectAccount/Footer';
 import { SELECT_ACCOUNT_MODAL } from '@subwallet/extension-koni-ui/constants/modal';
+import AccountItemWithName from '@subwallet/extension-koni-ui/components/Account/Item/AccountItemWithName';
 import { useGetCurrentAuth } from '@subwallet/extension-koni-ui/hooks/useGetCurrentAuth';
 import useTranslation from '@subwallet/extension-koni-ui/hooks/useTranslation';
 import { saveCurrentAccountAddress, triggerAccountsSubscription } from '@subwallet/extension-koni-ui/messaging';
@@ -71,22 +72,14 @@ function Component ({ className }: Props): React.ReactElement<Props> {
   }, [accounts]);
 
   const renderItem = useCallback((item: AccountJson, _selected: boolean) => {
-    const isAllAccount = isAccountAll(item.address);
+    const currentAccountIsAll = isAccountAll(item.address);
 
-    if (isAllAccount) {
+    if (currentAccountIsAll) {
       return (
-        <div className='all-account-item'>
-          <AccountBriefInfo account={item} />
-          {_selected && (
-            <Icon
-              className='selected'
-              phosphorIcon={CheckCircle}
-              size='sm'
-              type='phosphor'
-              weight='fill'
-            />
-          )}
-        </div>
+        <AccountItemWithName
+          address={item.address}
+          isSelected={_selected}
+        />
       );
     }
 

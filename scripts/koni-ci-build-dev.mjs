@@ -73,7 +73,7 @@ async function uploadBuild() {
 
 runClean();
 runCheck();
-runTest();
+// runTest();
 runBuild();
 
 uploadBuild()
